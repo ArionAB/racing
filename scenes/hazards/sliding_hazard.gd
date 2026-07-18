@@ -1,12 +1,11 @@
 class_name SlidingHazard
 extends AnimatableBody3D
-## Obstacol mobil care traverseaza soseaua dintr-o parte in alta — omagiu
-## trenului/barierelor din Ignition. AnimatableBody3D = corp "static" pe
-## care il misti tu din cod, iar fizica ii calculeaza corect viteza pentru
-## corpurile care il ating.
+## Obstacol mobil care traverseaza soseaua — omagiu barierelor din Ignition.
+## AnimatableBody3D = corp "static" pe care il misti tu din cod, iar fizica
+## ii calculeaza corect viteza pentru corpurile care il ating.
 
 var center: Vector3
-var travel: Vector3 # amplitudinea (vector lateral, jumatate de cursa)
+var travel: Vector3 # vector lateral, jumatate de cursa
 var period: float = 3.2
 
 var _time: float = 0.0

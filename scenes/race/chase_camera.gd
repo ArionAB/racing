@@ -1,15 +1,15 @@
 class_name ChaseCamera
 extends Node3D
-## Chase cam a la Ignition: sta in spatele si putin deasupra masinii, o
-## urmareste cu intarziere lina (lag-ul e ceea ce face virajele sa "se simta")
-## si mareste FOV-ul cu viteza — trucul clasic de senzatie de viteza.
+## Chase cam: sta in spatele si putin deasupra masinii, o urmareste cu
+## intarziere lina (lag-ul face virajele sa "se simta") si mareste FOV-ul
+## cu viteza — trucul clasic de senzatie de viteza.
 
 @export var distance: float = 7.5
 @export var height: float = 3.2
 @export var follow_speed: float = 5.0
 @export var base_fov: float = 68.0
 
-var target: SpikeCar
+var target: Car
 
 var _cam: Camera3D
 
@@ -25,9 +25,7 @@ func _physics_process(delta: float) -> void:
 	fwd.y = 0.0
 	fwd = fwd.normalized()
 	var desired := target.global_position - fwd * distance + Vector3.UP * height
-	# exp(-k*dt): urmarire lina independenta de framerate (acelasi truc ca
-	# la grip-ul din fizica).
-	var t := 1.0 - exp(-follow_speed * delta)
+	var t := 1.0 - exp(-follow_speed * delta) # urmarire independenta de fps
 	global_position = global_position.lerp(desired, t)
 	look_at(target.global_position + Vector3.UP * 1.2 + fwd * 3.0, Vector3.UP)
 	var speed_frac := clampf(target.horizontal_speed() / target.max_speed, 0.0, 1.0)

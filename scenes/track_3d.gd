@@ -7,6 +7,11 @@ extends Node3D
 
 const HALF_WIDTH: float = 7.0
 const WALL_HEIGHT: float = 1.3
+## Grosimea "digului" de sosea. Un mesh fara grosime (foaie de hartie) lasa
+## masina sa treaca prin el la viteza: cand cutia de coliziune patrunde putin
+## prin suprafata, depenetrarea o poate impinge pe partea GRESITA (sub drum).
+## Cu volum solid, cea mai apropiata iesire e mereu inapoi in sus.
+const ROAD_THICKNESS: float = 3.0
 
 ## Punctele de control: (x, inaltime, z). Modifica-le si vezi pe viu cat
 ## costa design-ul de pista 3D — asta e una din intrebarile spike-ului.
@@ -60,11 +65,15 @@ func _side_at(i: int) -> Vector3:
 	var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 	return dir.cross(Vector3.UP).normalized()
 
-## Panglica de asfalt: doua triunghiuri per segment, intre marginile
-## stanga/dreapta. SurfaceTool e "modul manual" de a construi mesh-uri.
+## Soseaua ca volum solid ("dig"): asfaltul deasupra, plus flancuri si talpa
+## coborate cu ROAD_THICKNESS. SurfaceTool e "modul manual" de a construi
+## mesh-uri, triunghi cu triunghi.
 func _build_road() -> void:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var top := SurfaceTool.new()
+	top.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var sides := SurfaceTool.new()
+	sides.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
 	for i in n:
 		var j := (i + 1) % n
@@ -72,11 +81,22 @@ func _build_road() -> void:
 		var r0 := baked[i] + _side_at(i) * HALF_WIDTH
 		var l1 := baked[j] - _side_at(j) * HALF_WIDTH
 		var r1 := baked[j] + _side_at(j) * HALF_WIDTH
-		st.add_vertex(l0); st.add_vertex(r0); st.add_vertex(l1)
-		st.add_vertex(r0); st.add_vertex(r1); st.add_vertex(l1)
-	st.generate_normals()
-	var mesh := st.commit()
-	_add_mesh_with_collision(mesh, Color(0.24, 0.24, 0.28))
+		# asfaltul
+		top.add_vertex(l0); top.add_vertex(r0); top.add_vertex(l1)
+		top.add_vertex(r0); top.add_vertex(r1); top.add_vertex(l1)
+		# flancul stang
+		sides.add_vertex(l0); sides.add_vertex(l1); sides.add_vertex(l0 + down)
+		sides.add_vertex(l0 + down); sides.add_vertex(l1); sides.add_vertex(l1 + down)
+		# flancul drept
+		sides.add_vertex(r0); sides.add_vertex(r0 + down); sides.add_vertex(r1)
+		sides.add_vertex(r0 + down); sides.add_vertex(r1 + down); sides.add_vertex(r1)
+		# talpa
+		sides.add_vertex(l0 + down); sides.add_vertex(l1 + down); sides.add_vertex(r0 + down)
+		sides.add_vertex(r0 + down); sides.add_vertex(l1 + down); sides.add_vertex(r1 + down)
+	top.generate_normals()
+	sides.generate_normals()
+	_add_mesh_with_collision(top.commit(), Color(0.24, 0.24, 0.28))
+	_add_mesh_with_collision(sides.commit(), Color(0.5, 0.45, 0.4)) # beton
 
 func _build_walls() -> void:
 	for side_sign: float in [-1.0, 1.0]:
@@ -106,7 +126,12 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color) -> void:
 	add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
-	shape.shape = mesh.create_trimesh_shape()
+	var tri := mesh.create_trimesh_shape() as ConcavePolygonShape3D
+	# Coliziunile trimesh sunt implicit UNILATERALE (doar pe fata data de
+	# ordinea varfurilor). Triunghiurile noastre au winding arbitrar, deci
+	# fara asta masina cade prin asfalt ca printr-o plasa.
+	tri.backface_collision = true
+	shape.shape = tri
 	body.add_child(shape)
 	add_child(body)
 

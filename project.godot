@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Ignition Spike"
+config/name="Toy Racer"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7")
 
@@ -18,6 +18,9 @@ config/features=PackedStringArray("4.7")
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
 
 [input]
 
@@ -64,3 +67,4 @@ reset={
 
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

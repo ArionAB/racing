@@ -24,6 +24,8 @@ var hud: RaceHUD
 
 var _progress: Array[Dictionary] = []
 var _countdown_left: float = 3.6
+var _last_beep: int = -1
+var _skid_parent: Node3D
 var _drift_hold: Dictionary = {} # Car -> secunde de drift tinut la start
 var _lap_start_ms: int = -1
 var _best_lap_ms: int = -1
@@ -35,6 +37,9 @@ func _ready() -> void:
 	_build_environment()
 	track = TRACK_SCENE.instantiate() as Track
 	add_child(track)
+	_skid_parent = Node3D.new()
+	_skid_parent.name = "SkidMarks"
+	add_child(_skid_parent)
 	_spawn_cars()
 	camera = ChaseCamera.new()
 	add_child(camera)
@@ -42,7 +47,18 @@ func _ready() -> void:
 	camera.snap_behind()
 	hud = RaceHUD.new()
 	add_child(hud)
+	hud.restart_requested.connect(GameState.start_race)
+	hud.menu_requested.connect(GameState.go_to_menu)
 	hud.show_countdown("READY?")
+	# Juice: camera reactioneaza la evenimentele jucatorului.
+	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
+		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5)))
+	player.landed.connect(func(_c: Car, fall: float) -> void:
+		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
+	player.boost_started.connect(func(_c: Car, level: int) -> void:
+		camera.add_trauma(0.08 * float(level)))
+	player.backfired.connect(func(_c: Car) -> void:
+		camera.add_trauma(0.35))
 
 func _spawn_cars() -> void:
 	var count := GameState.ai_count + 1
@@ -54,6 +70,7 @@ func _spawn_cars() -> void:
 		car.global_transform = spawns[i]
 		car.start_transform = spawns[i]
 		car.road_index = track.closest_index_global(car.global_position)
+		car.skid_parent = _skid_parent
 		if i == 0:
 			player = car
 			car.is_player = true
@@ -95,13 +112,18 @@ func _tick_countdown(delta: float) -> void:
 	if _countdown_left > 3.0:
 		return
 	if _countdown_left > 0.0:
-		hud.show_countdown(str(ceili(_countdown_left)))
+		var number := ceili(_countdown_left)
+		hud.show_countdown(str(number))
+		if number != _last_beep:
+			_last_beep = number
+			AudioManager.play_sfx(&"count_beep")
 		return
 	_go()
 
 func _go() -> void:
 	state = State.RUNNING
 	hud.show_countdown("GO!")
+	AudioManager.play_sfx(&"go_beep")
 	get_tree().create_timer(0.7, false).timeout.connect(
 		func() -> void: hud.show_countdown(""))
 	_lap_start_ms = Time.get_ticks_msec()

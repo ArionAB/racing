@@ -8,7 +8,8 @@ func get_steer() -> float:
 	if absf(GameState.touch_steer) > 0.0:
 		# Pe ecran -1 inseamna stanga; in fizica stanga e +1 — inversam.
 		steer = -GameState.touch_steer
-	return clampf(steer, -1.0, 1.0)
+	# Sensibilitatea imblanzeste raspunsul "totul sau nimic" de pe touch.
+	return clampf(steer * GameState.steer_sensitivity, -1.0, 1.0)
 
 func get_throttle() -> float:
 	# Auto-accelerate: masina merge singura, franezi doar explicit.

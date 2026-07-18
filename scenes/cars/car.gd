@@ -14,6 +14,8 @@ extends CharacterBody3D
 
 signal boost_started(car: Car, level: int)
 signal backfired(car: Car)
+signal wall_hit(car: Car, impact: float)
+signal landed(car: Car, fall_speed: float)
 
 const DRIFT_COLORS: Array[Color] = [
 	Color(0.6, 0.6, 0.6),   # nivel 0: gri
@@ -71,11 +73,28 @@ var drift_charge: float = 0.0
 var boost_time: float = 0.0
 var boost_level: int = 0
 
+## Nodul (din Race) sub care se depun urmele de cauciuc.
+var skid_parent: Node3D
+
 var _visual: Node3D
+var _drift_particles: CPUParticles3D
+var _boost_particles: CPUParticles3D
+var _engine_audio: AudioStreamPlayer3D
+var _last_drift_level: int = 0
+var _was_on_floor: bool = true
+var _prev_velocity: Vector3 = Vector3.ZERO
+var _wall_cooldown: float = 0.0
+var _bump_cooldown: float = 0.0
+var _skid_accum: float = 0.0
+
+# Resurse partajate intre toate urmele de cauciuc (ieftin la instantiere).
+static var _skid_mesh: PlaneMesh
+static var _skid_mat: StandardMaterial3D
 
 func _ready() -> void:
 	floor_snap_length = 2.0 # tine masina lipita de asfalt peste creste
 	_build_visual()
+	_build_effects()
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(2.2, 1.0, 3.8)
@@ -157,9 +176,14 @@ func _physics_process(delta: float) -> void:
 
 	velocity.x = hvel.x
 	velocity.z = hvel.z
+	_prev_velocity = velocity
 	move_and_slide()
 	_handle_bumping()
+	_detect_landing()
 	_update_visual_tilt(delta, steer, fwd_speed)
+	_update_effects(delta)
+	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
+	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de boost.
 ## Boost-ul se aplica SI pe iarba — scurtatura cu boost e o alegere valida.
@@ -179,6 +203,8 @@ func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float, delta: f
 			is_drifting = true
 			drift_dir = signf(steer)
 			drift_charge = 0.0
+			if is_player:
+				AudioManager.play_sfx(&"drift_start")
 		return
 	drift_charge += delta
 	var too_slow := fwd_speed < drift_min_speed * 0.55
@@ -207,7 +233,10 @@ func _backfire() -> void:
 	boost_time = 0.0
 	boost_level = 0
 	velocity *= 0.6
+	_punch_scale(Vector3(0.85, 1.2, 0.85))
 	backfired.emit(self)
+	if is_player:
+		AudioManager.play_sfx(&"backfire")
 
 ## Chaining: boost-urile succesive se aduna (pana la boost_max_bank).
 func apply_boost(duration: float, level: int) -> void:
@@ -215,7 +244,10 @@ func apply_boost(duration: float, level: int) -> void:
 	boost_level = maxi(boost_level, level)
 	var forward := -global_transform.basis.z
 	velocity += Vector3(forward.x, 0.0, forward.z).normalized() * 3.5 * float(level)
+	_punch_scale(Vector3(0.85, 0.9, 1.2))
 	boost_started.emit(self, level)
+	if is_player:
+		AudioManager.play_sfx(&"boost")
 
 # ------------------------------------------------------------- imbranceli
 
@@ -223,12 +255,31 @@ func _handle_bumping() -> void:
 	for i in get_slide_collision_count():
 		var col := get_slide_collision(i)
 		var other := col.get_collider() as Car
-		if other == null:
-			continue
-		var n := col.get_normal() # dinspre celalalt spre noi
-		n.y = 0.0
-		other.velocity += -n * 4.5 * (mass_factor / other.mass_factor)
-		velocity += n * 4.5 * (other.mass_factor / mass_factor)
+		var n := col.get_normal() # dinspre obstacol spre noi
+		if other != null:
+			n.y = 0.0
+			other.velocity += -n * 4.5 * (mass_factor / other.mass_factor)
+			velocity += n * 4.5 * (other.mass_factor / mass_factor)
+			if _bump_cooldown <= 0.0 and is_player:
+				_bump_cooldown = 0.25
+				AudioManager.play_sfx(&"bump")
+		elif absf(n.y) < 0.5:
+			# Obstacol vertical (perete/bariera): impact = viteza "in" perete.
+			var impact := maxf(0.0, Vector3(
+				_prev_velocity.x, 0.0, _prev_velocity.z).dot(-n))
+			if impact > 8.0 and _wall_cooldown <= 0.0:
+				_wall_cooldown = 0.35
+				wall_hit.emit(self, impact)
+				if is_player:
+					AudioManager.play_sfx(&"wall_hit")
+
+func _detect_landing() -> void:
+	if is_on_floor() and not _was_on_floor and _prev_velocity.y < -6.0:
+		landed.emit(self, -_prev_velocity.y)
+		_punch_scale(Vector3(1.15, 0.8, 1.15))
+		if is_player:
+			AudioManager.play_sfx(&"land")
+	_was_on_floor = is_on_floor()
 
 # ------------------------------------------------------------------ restul
 
@@ -242,6 +293,120 @@ func reset() -> void:
 
 func horizontal_speed() -> float:
 	return Vector3(velocity.x, 0.0, velocity.z).length()
+
+## Squash & stretch: deformare scurta a caroseriei care "vinde" evenimentul.
+func _punch_scale(target: Vector3) -> void:
+	if _visual == null:
+		return
+	_visual.scale = target
+	var tw := create_tween()
+	tw.tween_property(_visual, "scale", Vector3.ONE, 0.25) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _update_effects(delta: float) -> void:
+	if is_drifting:
+		var lvl := drift_level()
+		_drift_particles.emitting = true
+		_drift_particles.color = DRIFT_COLORS[lvl]
+		# Ding la fiecare nivel atins — timing-ul CTR se face dupa ureche.
+		if lvl > _last_drift_level and is_player:
+			AudioManager.play_sfx(&"drift_level", 1.0 + 0.2 * float(lvl - 1))
+		_last_drift_level = lvl
+		_drop_skid_marks(delta)
+	else:
+		_drift_particles.emitting = false
+		_last_drift_level = 0
+	_boost_particles.emitting = boost_time > 0.0
+	# Pitch de motor variabil: turatia urca cu viteza + salt la boost.
+	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
+	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
+		+ (0.25 if boost_time > 0.0 else 0.0)
+
+## Urme de cauciuc: placute plate depuse sub rotile din spate in drift.
+func _drop_skid_marks(delta: float) -> void:
+	if skid_parent == null or not is_on_floor():
+		return
+	_skid_accum += horizontal_speed() * delta
+	if _skid_accum < 1.1:
+		return
+	_skid_accum = 0.0
+	if _skid_mesh == null:
+		_skid_mesh = PlaneMesh.new()
+		_skid_mesh.size = Vector2(0.4, 1.0)
+		_skid_mat = StandardMaterial3D.new()
+		_skid_mat.albedo_color = Color(0.05, 0.05, 0.05, 0.4)
+		_skid_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_skid_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_skid_mesh.material = _skid_mat
+	for side in [-0.85, 0.85]:
+		var mark := MeshInstance3D.new()
+		mark.mesh = _skid_mesh
+		skid_parent.add_child(mark)
+		mark.global_position = global_position \
+			+ global_transform.basis.x * side \
+			+ global_transform.basis.z * 1.3 + Vector3.UP * 0.06
+		mark.rotation.y = rotation.y
+		var tw := mark.create_tween()
+		tw.tween_interval(3.0)
+		tw.tween_property(mark, "transparency", 1.0, 1.5)
+		tw.tween_callback(mark.queue_free)
+	# Limita de "juice": stergem urmele cele mai vechi.
+	while skid_parent.get_child_count() > 160:
+		skid_parent.get_child(0).free()
+
+func _build_effects() -> void:
+	# Fum de drift, colorat dupa nivelul de boost incarcat.
+	_drift_particles = CPUParticles3D.new()
+	_drift_particles.position = Vector3(0, 0.4, 1.9) # spatele masinii (+Z)
+	_drift_particles.emitting = false
+	_drift_particles.amount = 24
+	_drift_particles.lifetime = 0.5
+	_drift_particles.direction = Vector3(0, 0.4, 1)
+	_drift_particles.spread = 30.0
+	_drift_particles.initial_velocity_min = 3.0
+	_drift_particles.initial_velocity_max = 6.0
+	_drift_particles.gravity = Vector3(0, 1.5, 0)
+	_drift_particles.scale_amount_min = 0.6
+	_drift_particles.scale_amount_max = 1.4
+	var smoke := BoxMesh.new()
+	smoke.size = Vector3(0.22, 0.22, 0.22)
+	var smoke_mat := StandardMaterial3D.new()
+	smoke_mat.vertex_color_use_as_albedo = true # ia culoarea din particula
+	smoke_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	smoke.material = smoke_mat
+	_drift_particles.mesh = smoke
+	add_child(_drift_particles)
+
+	# Flacara de boost.
+	_boost_particles = CPUParticles3D.new()
+	_boost_particles.position = Vector3(0, 0.6, 2.0)
+	_boost_particles.emitting = false
+	_boost_particles.amount = 30
+	_boost_particles.lifetime = 0.25
+	_boost_particles.direction = Vector3(0, 0, 1)
+	_boost_particles.spread = 10.0
+	_boost_particles.initial_velocity_min = 10.0
+	_boost_particles.initial_velocity_max = 16.0
+	_boost_particles.scale_amount_min = 0.4
+	_boost_particles.scale_amount_max = 0.9
+	_boost_particles.color = Color(1.0, 0.55, 0.1)
+	var flame := BoxMesh.new()
+	flame.size = Vector3(0.18, 0.18, 0.18)
+	var flame_mat := StandardMaterial3D.new()
+	flame_mat.vertex_color_use_as_albedo = true
+	flame_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flame.material = flame_mat
+	_boost_particles.mesh = flame
+	add_child(_boost_particles)
+
+	# Motor pozitional: al tau se aude mereu, adversarii cand sunt aproape.
+	_engine_audio = AudioStreamPlayer3D.new()
+	_engine_audio.stream = AudioManager.ENGINE_LOOP
+	_engine_audio.bus = &"Engine"
+	_engine_audio.volume_db = -14.0
+	_engine_audio.max_distance = 60.0
+	add_child(_engine_audio)
+	_engine_audio.play()
 
 func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)

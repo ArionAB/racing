@@ -63,6 +63,7 @@ var is_player: bool = false
 var speed_scale: float = 1.0 # variatia onesta a AI (0.88..0.97), 1.0 la player
 
 var car_name: String = "?"
+var pilot_name: String = "?" # numele "pilotului", stabil intre curse
 var controller: CarController
 var track: Track
 var road_index: int = 0

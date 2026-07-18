@@ -1,7 +1,10 @@
 extends Track
-## Pista 1: dreapta de start cu rampa, urcare pe deal, coborare in viraj,
-## chicane la ses, al doilea deal abrupt. Gimmick: bariera mobila inainte
-## de al doilea deal.
+## Pista 1 — "Colinele": dreapta de start cu rampa, urcare pe deal, coborare
+## in viraj, chicane la ses, al doilea deal abrupt. Gimmick: bariera mobila
+## inainte de al doilea deal.
+
+func _init() -> void:
+	track_name = "Colinele"
 
 func _points() -> Array[Vector3]:
 	return [

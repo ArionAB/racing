@@ -1,17 +1,16 @@
 class_name Race
 extends Node3D
-## Orchestreaza o cursa: mediu, pista, masini (player + AI), countdown cu
-## rocket start, progres/tururi/pozitii, HUD. Portat din racing 2D.
+## Orchestreaza o cursa: mediu, pista (aleasa din GameState), masini
+## (jucatorul cu masina din garaj + lineup AI stabil), countdown cu rocket
+## start, progres/pozitii, rezultate si avansarea campionatului.
 
-const TRACK_SCENE: PackedScene = preload("res://scenes/tracks/Track01.tscn")
 const CAR_SCENE: PackedScene = preload("res://scenes/cars/Car.tscn")
-const CAR_DATA: Array[Resource] = [
-	preload("res://scenes/cars/data/vipera.tres"),
-	preload("res://scenes/cars/data/buldog.tres"),
-	preload("res://scenes/cars/data/purice.tres"),
-]
+## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
+const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna"]
+## Lineup-ul AI: masina (index in GameState.CAR_DATA) + culoarea per slot.
+const AI_CARS: Array[int] = [1, 2, 0] # Buldog, Purice, Vipera
 const AI_COLORS: Array[Color] = [
-	Color(0.3, 0.8, 0.4), Color(0.8, 0.4, 0.9), Color(0.9, 0.6, 0.3)]
+	Color(0.3, 0.8, 0.4), Color(0.8, 0.4, 0.9), Color(0.55, 0.75, 0.95)]
 
 enum State { COUNTDOWN, RUNNING, FINISHED }
 
@@ -26,16 +25,19 @@ var _progress: Array[Dictionary] = []
 var _countdown_left: float = 3.6
 var _last_beep: int = -1
 var _skid_parent: Node3D
-var _drift_hold: Dictionary = {} # Car -> secunde de drift tinut la start
+var _drift_hold: Dictionary = {}
 var _lap_start_ms: int = -1
 var _best_lap_ms: int = -1
-var _finish_text: String = ""
+var _final_order: Array = [] # sloturi in ordinea sosirii
+var _champion_shown: bool = false
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
 	_build_environment()
-	track = TRACK_SCENE.instantiate() as Track
+	var track_scene := load(
+		GameState.TRACK_SCENES[GameState.selected_track]) as PackedScene
+	track = track_scene.instantiate() as Track
 	add_child(track)
 	_skid_parent = Node3D.new()
 	_skid_parent.name = "SkidMarks"
@@ -49,8 +51,8 @@ func _ready() -> void:
 	add_child(hud)
 	hud.restart_requested.connect(GameState.start_race)
 	hud.menu_requested.connect(GameState.go_to_menu)
+	hud.results_primary.connect(_on_results_primary)
 	hud.show_countdown("READY?")
-	# Juice: camera reactioneaza la evenimentele jucatorului.
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
 		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5)))
 	player.landed.connect(func(_c: Car, fall: float) -> void:
@@ -69,18 +71,19 @@ func _spawn_cars() -> void:
 		car.start_transform = spawns[i]
 		car.road_index = track.closest_index_global(car.global_position)
 		car.skid_parent = _skid_parent
+		car.pilot_name = PILOTS[i % PILOTS.size()]
 		if i == 0:
 			player = car
 			car.is_player = true
-			car.apply_data(CAR_DATA[0] as CarData)
+			car.apply_data(GameState.CAR_DATA[GameState.selected_car] as CarData)
 			car.set_controller(PlayerController.new())
 		else:
-			car.apply_data(CAR_DATA[i % CAR_DATA.size()] as CarData,
+			var data_idx: int = AI_CARS[(i - 1) % AI_CARS.size()]
+			car.apply_data(GameState.CAR_DATA[data_idx] as CarData,
 				AI_COLORS[(i - 1) % AI_COLORS.size()])
 			var ai := AIController.new()
 			car.set_controller(ai)
 			ai.configure(track, _rng)
-			# Variatie onesta, nu viteza trisata.
 			car.speed_scale = _rng.randf_range(0.88, 0.97)
 		cars.append(car)
 		var frac := track.frac_at(car.road_index)
@@ -170,10 +173,81 @@ func _on_player_lap(laps: int) -> void:
 		if _best_lap_ms < 0 or lap_ms < _best_lap_ms:
 			_best_lap_ms = lap_ms
 	_lap_start_ms = now
-	if laps >= GameState.total_laps and _finish_text == "":
-		state = State.FINISHED
-		_finish_text = "FINISH — locul %d!" % player.race_position
-		hud.flash_message(_finish_text)
+	if laps >= GameState.total_laps and state != State.FINISHED:
+		_finish_race()
+
+func _finish_race() -> void:
+	state = State.FINISHED
+	_update_positions()
+	# Ordinea finala = pozitiile din clipa sosirii jucatorului (AI-ul din
+	# spate isi pastreaza locul relativ; cursa e a jucatorului).
+	var order := range(cars.size())
+	order.sort_custom(func(a: int, b: int) -> bool:
+		return cars[a].race_position < cars[b].race_position)
+	_final_order = order
+	if GameState.champ_active:
+		GameState.record_results(_final_order)
+	hud.flash_message("FINISH — locul %d!" % player.race_position)
+	get_tree().create_timer(1.5, false).timeout.connect(_show_results)
+
+func _show_results() -> void:
+	var rows: Array[Dictionary] = []
+	for rank in _final_order.size():
+		var slot: int = _final_order[rank]
+		var car := cars[slot]
+		var right := ""
+		if GameState.champ_active:
+			right = "+%d p  (total %d)" % [
+				GameState.CHAMP_POINTS[rank], GameState.champ_points[slot]]
+		rows.append({
+			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
+			"color": car.body_color,
+			"right": right,
+			"is_player": car.is_player,
+		})
+	var title := "REZULTATE — " + track.track_name
+	var primary := "RESTART"
+	if GameState.champ_active:
+		title = "CURSA %d/%d — %s" % [GameState.champ_round + 1,
+			GameState.TRACK_SCENES.size(), track.track_name]
+		primary = "CLASAMENT FINAL" if GameState.champ_is_last_round() \
+			else "URMATOAREA CURSA"
+	hud.show_results(title, rows, primary)
+
+func _on_results_primary() -> void:
+	if not GameState.champ_active:
+		GameState.start_race()
+		return
+	if _champion_shown:
+		GameState.start_championship()
+		return
+	if GameState.champ_is_last_round():
+		_show_champion()
+	else:
+		GameState.champ_next_race()
+
+## Clasamentul final al campionatului, sortat dupa puncte.
+func _show_champion() -> void:
+	_champion_shown = true
+	var slots := range(cars.size())
+	slots.sort_custom(func(a: int, b: int) -> bool:
+		return GameState.champ_points[a] > GameState.champ_points[b])
+	var rows: Array[Dictionary] = []
+	for rank in slots.size():
+		var slot: int = slots[rank]
+		var car := cars[slot]
+		rows.append({
+			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
+			"color": car.body_color,
+			"right": "%d puncte" % GameState.champ_points[slot],
+			"is_player": car.is_player,
+		})
+	var champion := cars[slots[0]]
+	var title := "CAMPION: %s!" % champion.pilot_name
+	AudioManager.play_sfx(&"go_beep", 1.3)
+	hud.show_results(title, rows, "CAMPIONAT NOU")
+
+# -------------------------------------------------------------------- HUD
 
 func _update_positions() -> void:
 	var order := range(cars.size())
@@ -182,16 +256,15 @@ func _update_positions() -> void:
 	for rank in cars.size():
 		cars[order[rank]].race_position = rank + 1
 
-# -------------------------------------------------------------------- HUD
-
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
 	match key.physical_keycode:
-		KEY_1: player.apply_data(CAR_DATA[0] as CarData)
-		KEY_2: player.apply_data(CAR_DATA[1] as CarData)
-		KEY_3: player.apply_data(CAR_DATA[2] as CarData)
+		KEY_1: player.apply_data(GameState.CAR_DATA[0] as CarData)
+		KEY_2: player.apply_data(GameState.CAR_DATA[1] as CarData)
+		KEY_3: player.apply_data(GameState.CAR_DATA[2] as CarData)
+		KEY_4: player.apply_data(GameState.CAR_DATA[3] as CarData)
 
 func _update_hud() -> void:
 	var lap_text := "--:--.-"
@@ -199,11 +272,14 @@ func _update_hud() -> void:
 		lap_text = _fmt_ms(Time.get_ticks_msec() - _lap_start_ms)
 	var best_text := _fmt_ms(_best_lap_ms) if _best_lap_ms >= 0 else "--:--.-"
 	var lap_no := clampi(int(_progress[0].laps) + 1, 1, GameState.total_laps)
-	var info := "%3.0f km/h   loc %d/%d   tur %d/%d\ntur:  %s\nbest: %s\n%s   [SPACE] turbo  [SHIFT] drift  [1/2/3] masina  [R] reset" % [
+	var champ_line := ""
+	if GameState.champ_active:
+		champ_line = "   cursa %d/%d" % [
+			GameState.champ_round + 1, GameState.TRACK_SCENES.size()]
+	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s\nbest: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift" % [
 		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
-		lap_no, GameState.total_laps, lap_text, best_text, player.car_name]
-	if _finish_text != "":
-		info = _finish_text + "\n" + info
+		lap_no, GameState.total_laps, champ_line, lap_text, best_text,
+		player.car_name, track.track_name]
 	hud.set_info(info)
 	hud.set_turbo(player.turbo_charge, player.is_boosting)
 

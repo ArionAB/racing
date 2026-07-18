@@ -6,6 +6,7 @@ extends CanvasLayer
 
 signal restart_requested
 signal menu_requested
+signal results_primary # butonul principal din panoul de rezultate
 
 var _info: Label
 var _countdown: Label
@@ -16,6 +17,8 @@ var _touch: TouchControls
 var _pause_button: Button
 var _pause_panel: PanelContainer
 var _settings: SettingsPanel
+var _results_panel: PanelContainer
+var _results_box: VBoxContainer
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -40,6 +43,7 @@ func _ready() -> void:
 	root.add_child(_pause_button)
 
 	_build_pause_panel(root)
+	_build_results_panel(root)
 	_settings = SettingsPanel.new()
 	_settings.visible = false
 	_settings.back_pressed.connect(func() -> void:
@@ -130,7 +134,66 @@ func _make_button(text: String) -> Button:
 	button.add_theme_font_size_override("font_size", 24)
 	return button
 
+func _build_results_panel(root: Control) -> void:
+	_results_panel = PanelContainer.new()
+	_results_panel.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	_results_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_results_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_results_panel.visible = false
+	root.add_child(_results_panel)
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 26)
+	_results_panel.add_child(margin)
+	_results_box = VBoxContainer.new()
+	_results_box.add_theme_constant_override("separation", 10)
+	margin.add_child(_results_box)
+
+## rows: {name, color, right, is_player} in ordinea afisarii.
+func show_results(title: String, rows: Array[Dictionary], primary_label: String) -> void:
+	for child in _results_box.get_children():
+		child.free()
+	var title_label := _make_label(34)
+	title_label.text = title
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_results_box.add_child(title_label)
+	for row in rows:
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 12)
+		var swatch := ColorRect.new()
+		swatch.custom_minimum_size = Vector2(24, 24)
+		swatch.color = row.color
+		line.add_child(swatch)
+		var name_label := _make_label(24)
+		name_label.text = str(row.name)
+		if bool(row.is_player):
+			name_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+		name_label.custom_minimum_size = Vector2(260, 0)
+		line.add_child(name_label)
+		var right_label := _make_label(24)
+		right_label.text = str(row.right)
+		line.add_child(right_label)
+		_results_box.add_child(line)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 16)
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	_results_box.add_child(buttons)
+	var primary := _make_button(primary_label)
+	primary.pressed.connect(func() -> void:
+		_results_panel.visible = false
+		results_primary.emit())
+	buttons.add_child(primary)
+	var menu := _make_button("MENIU")
+	menu.pressed.connect(func() -> void: menu_requested.emit())
+	buttons.add_child(menu)
+	_results_panel.visible = true
+	_pause_button.visible = false
+	_touch.visible = false
+
 func _open_pause() -> void:
+	if _results_panel.visible:
+		return
 	get_tree().paused = true
 	GameState.reset_touch() # altfel virajul "ramane apasat" peste pauza
 	_touch.visible = false
@@ -149,7 +212,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if _pause_panel.visible or _settings.visible:
 			_close_pause()
-		else:
+		elif not _results_panel.visible:
 			_open_pause()
 
 func _make_label(font_size: int) -> Label:

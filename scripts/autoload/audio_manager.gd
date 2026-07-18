@@ -17,6 +17,7 @@ const SFX: Dictionary = {
 }
 
 const ENGINE_LOOP: AudioStream = preload("res://assets/audio/engine_loop.wav")
+const SKID_LOOP: AudioStream = preload("res://assets/audio/skid_loop.wav")
 const POOL_SIZE: int = 10
 
 var _pool: Array[AudioStreamPlayer] = []
@@ -26,11 +27,12 @@ func _ready() -> void:
 	_create_bus(&"SFX")
 	_create_bus(&"Engine")
 	apply_volumes()
-	var engine_wav := ENGINE_LOOP as AudioStreamWAV
-	if engine_wav != null:
-		engine_wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
-		@warning_ignore("integer_division")
-		engine_wav.loop_end = engine_wav.data.size() / 2 # frames (16-bit mono)
+	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP]:
+		var wav := loop_stream as AudioStreamWAV
+		if wav != null:
+			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			@warning_ignore("integer_division")
+			wav.loop_end = wav.data.size() / 2 # frames (16-bit mono)
 	for i in POOL_SIZE:
 		var player := AudioStreamPlayer.new()
 		player.bus = &"SFX"

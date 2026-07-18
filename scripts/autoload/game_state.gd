@@ -5,6 +5,7 @@ extends Node
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const MENU_SCENE: String = "res://scenes/main_menu/MainMenu.tscn"
 const SETTINGS_PATH: String = "user://settings.cfg"
+const RECORDS_PATH: String = "user://records.cfg"
 
 ## Garajul: toate masinile jucabile. O masina noua = un .tres nou aici.
 const CAR_DATA: Array[Resource] = [
@@ -48,8 +49,39 @@ var touch_steer: float = 0.0
 var touch_drift: bool = false
 var touch_turbo: bool = false
 
+# Best lap per pista (index pista -> milisecunde), persistat.
+var records: Dictionary = {}
+
 func _ready() -> void:
 	load_settings()
+	load_records()
+
+## Returneaza true daca timpul e record nou pe pista respectiva.
+func try_record(track_index: int, lap_ms: int) -> bool:
+	var best := int(records.get(track_index, 0))
+	if best > 0 and lap_ms >= best:
+		return false
+	records[track_index] = lap_ms
+	save_records()
+	return true
+
+func best_lap(track_index: int) -> int:
+	return int(records.get(track_index, 0)) # 0 = niciun record inca
+
+func load_records() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(RECORDS_PATH) != OK:
+		return
+	for i in TRACK_SCENES.size():
+		var ms := int(cfg.get_value("records", str(i), 0))
+		if ms > 0:
+			records[i] = ms
+
+func save_records() -> void:
+	var cfg := ConfigFile.new()
+	for track_index in records:
+		cfg.set_value("records", str(track_index), records[track_index])
+	cfg.save(RECORDS_PATH)
 
 # ------------------------------------------------------------------ flux
 

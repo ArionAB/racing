@@ -109,12 +109,17 @@ legitimă; assets, nume sau trade dress copiate nu sunt.
 
 - **M0 ✔ (spike):** fizică validată, pistă cu dealuri, AI, bumping, iarbă
   lentă, rampă, barieră mobilă, 3 mașini, poziții/tururi
-- **M1:** restructurare pe arhitectura de mai sus + drift CTR portat + touch
-  controls. Testul: un tur satisfăcător, cu drift și săritură, pe telefon
-- **M2:** juice complet (particule, urme, shake, audio portat) + HUD mobil,
-  meniu, pauză, setări (port din 2D)
-- **M3:** 2-3 piste cu gimmick propriu + garaj 3-4 mașini + mini-campionat
-- **M4:** build Android, profilare 60fps, iterare de feel pe device
+- **M1 ✔:** restructurare pe arhitectură + touch controls + countdown
+- **M2 ✔:** juice complet (particule, urme, shake, audio) + meniu/pauză/setări
+- **M2.5 ✔:** turbo model Ignition (înlocuiește drift-boost-ul CTR, decizia
+  dezvoltatorului după playtest) + fix echilibru drag
+- **M3 ✔:** 3 piste cu gimmick propriu + garaj 4 mașini + mini-campionat
+- **M3.5 ✔:** identitate vizuală (linie start șah, kerbs, decor procedural cu
+  coliziune) + recorduri best-lap persistate + scrâșnet de drift
+- **M4 (amânat — dezvoltatorul nu are device Android):** build Android,
+  profilare 60fps pe telefon. Până atunci: dezvoltare pe desktop, cu
+  constrângerile mobile respectate în continuare (poly buget, particule
+  limitate, UI touch-first)
 
 ## Definiția lui "fun" pentru verificare
 

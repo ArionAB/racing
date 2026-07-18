@@ -76,7 +76,13 @@ func _build_track_panel() -> Control:
 	box.add_child(title)
 	for i in GameState.TRACK_NAMES.size():
 		var track_index := i
-		var button := _make_button(GameState.TRACK_NAMES[i])
+		var record_ms := GameState.best_lap(i)
+		var label := GameState.TRACK_NAMES[i]
+		if record_ms > 0:
+			@warning_ignore("integer_division")
+			label += "   (rec %d:%02d.%d)" % [record_ms / 60000,
+				(record_ms % 60000) / 1000, (record_ms % 1000) / 100]
+		var button := _make_button(label)
 		button.pressed.connect(func() -> void:
 			GameState.start_quick_race(track_index))
 		box.add_child(button)

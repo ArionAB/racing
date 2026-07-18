@@ -172,6 +172,9 @@ func _on_player_lap(laps: int) -> void:
 		var lap_ms := now - _lap_start_ms
 		if _best_lap_ms < 0 or lap_ms < _best_lap_ms:
 			_best_lap_ms = lap_ms
+		if GameState.try_record(GameState.selected_track, lap_ms):
+			hud.flash_message("RECORD NOU! " + _fmt_ms(lap_ms))
+			AudioManager.play_sfx(&"drift_level", 1.5)
 	_lap_start_ms = now
 	if laps >= GameState.total_laps and state != State.FINISHED:
 		_finish_race()
@@ -276,10 +279,12 @@ func _update_hud() -> void:
 	if GameState.champ_active:
 		champ_line = "   cursa %d/%d" % [
 			GameState.champ_round + 1, GameState.TRACK_SCENES.size()]
-	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s\nbest: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift" % [
+	var record_ms := GameState.best_lap(GameState.selected_track)
+	var record_text := _fmt_ms(record_ms) if record_ms > 0 else "--:--.-"
+	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s\nbest: %s   rec: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift" % [
 		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
 		lap_no, GameState.total_laps, champ_line, lap_text, best_text,
-		player.car_name, track.track_name]
+		record_text, player.car_name, track.track_name]
 	hud.set_info(info)
 	hud.set_turbo(player.turbo_charge, player.is_boosting)
 

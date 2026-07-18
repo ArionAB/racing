@@ -83,6 +83,7 @@ var _visual: Node3D
 var _drift_particles: CPUParticles3D
 var _boost_particles: CPUParticles3D
 var _engine_audio: AudioStreamPlayer3D
+var _skid_audio: AudioStreamPlayer3D
 var _turbo_full_latch: bool = false
 var _was_on_floor: bool = true
 var _prev_velocity: Vector3 = Vector3.ZERO
@@ -309,8 +310,12 @@ func _update_effects(delta: float) -> void:
 	if is_drifting:
 		_drift_particles.emitting = true
 		_drop_skid_marks(delta)
+		if not _skid_audio.playing:
+			_skid_audio.play()
 	else:
 		_drift_particles.emitting = false
+		if _skid_audio.playing:
+			_skid_audio.stop()
 	# Ding cand bara de turbo ajunge plina — stii fara sa te uiti in jos.
 	if turbo_charge >= 1.0 and not _turbo_full_latch and is_player:
 		_turbo_full_latch = true
@@ -409,6 +414,14 @@ func _build_effects() -> void:
 	_engine_audio.max_distance = 60.0
 	add_child(_engine_audio)
 	_engine_audio.play()
+
+	# Scrasnet de cauciuc cat tine drift-ul.
+	_skid_audio = AudioStreamPlayer3D.new()
+	_skid_audio.stream = AudioManager.SKID_LOOP
+	_skid_audio.bus = &"SFX"
+	_skid_audio.volume_db = -10.0
+	_skid_audio.max_distance = 45.0
+	add_child(_skid_audio)
 
 func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)

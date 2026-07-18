@@ -22,6 +22,7 @@ func _init() -> void:
 	_save("land", _land())
 	_save("count_beep", _tone(0.1, 440.0, 10.0))
 	_save("go_beep", _tone(0.3, 880.0, 6.0))
+	_save("skid_loop", _skid_loop())
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -100,6 +101,20 @@ func _land() -> PackedFloat32Array:
 		lp = lp * 0.8 + (rng.randf() * 2.0 - 1.0) * 0.2
 		dust[i] = lp * (1.0 - t) * 0.4
 	out.append_array(dust)
+	return out
+
+## Scrasnet de cauciuc in bucla: zgomot filtrat cu un "vaiet" tonal slab.
+## Zgomotul nu are faza, deci bucla se inchide fara click.
+func _skid_loop() -> PackedFloat32Array:
+	var n := int(RATE * 0.4)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		lp = lp * 0.6 + (rng.randf() * 2.0 - 1.0) * 0.4
+		var whine := sin(TAU * 900.0 * t) * 0.12 # 900*0.4=360 cicluri intregi
+		out[i] = (lp * 0.5 + whine) * 0.55
 	return out
 
 func _tone(dur: float, freq: float, decay: float) -> PackedFloat32Array:

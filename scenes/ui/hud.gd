@@ -67,8 +67,8 @@ func _ready() -> void:
 	_message.modulate.a = 0.0
 	root.add_child(_message)
 
-	# Bara de drift: se umple cat tii drift-ul; culoarea = nivelul de boost;
-	# rosu = backfire iminent. Feedback-ul care face timing-ul CTR jucabil.
+	# Bara de TURBO (model Ignition): mereu vizibila, se umple din mers
+	# (mai repede in drift); o arzi cand vrei tu cu butonul de turbo.
 	_charge_bg = ColorRect.new()
 	_charge_bg.custom_minimum_size = Vector2(260, 20)
 	_charge_bg.color = Color(0, 0, 0, 0.45)
@@ -76,7 +76,6 @@ func _ready() -> void:
 		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 44)
 	_charge_bg.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_charge_bg.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_charge_bg.visible = false
 	root.add_child(_charge_bg)
 	_charge_fill = ColorRect.new()
 	_charge_fill.position = Vector2(3, 3)
@@ -174,12 +173,11 @@ func flash_message(text: String) -> void:
 	tw.tween_interval(1.2)
 	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
 
-func set_charge(frac: float, level: int, drifting: bool) -> void:
-	_charge_bg.visible = drifting
-	if not drifting:
-		return
-	_charge_fill.size.x = 254.0 * clampf(frac, 0.0, 1.0)
-	if frac > 0.88:
-		_charge_fill.color = Color(1.0, 0.15, 0.1)
+func set_turbo(charge: float, boosting: bool) -> void:
+	_charge_fill.size.x = 254.0 * clampf(charge, 0.0, 1.0)
+	if boosting:
+		_charge_fill.color = Color(1.0, 0.55, 0.1) # arde
+	elif charge >= 1.0:
+		_charge_fill.color = Color(1.0, 0.9, 0.2)  # plina, gata de foc
 	else:
-		_charge_fill.color = Car.DRIFT_COLORS[clampi(level, 0, 3)]
+		_charge_fill.color = Color(0.3, 0.8, 0.9)  # se incarca

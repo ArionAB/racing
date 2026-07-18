@@ -38,7 +38,7 @@ func _physics_process(delta: float) -> void:
 
 	# FOV: viteza + kick suplimentar cat tine boost-ul.
 	var speed_frac := clampf(target.horizontal_speed() / target.max_speed, 0.0, 1.0)
-	var boost_kick := 6.0 if target.boost_time > 0.0 else 0.0
+	var boost_kick := 6.0 if target.is_boosting else 0.0
 	_cam.fov = lerpf(_cam.fov, base_fov + 14.0 * speed_frac + boost_kick, 3.0 * delta)
 
 	# Shake in spatiul ecranului (h/v offset pe camera, nu pe rig).

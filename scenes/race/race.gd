@@ -55,10 +55,8 @@ func _ready() -> void:
 		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5)))
 	player.landed.connect(func(_c: Car, fall: float) -> void:
 		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
-	player.boost_started.connect(func(_c: Car, level: int) -> void:
-		camera.add_trauma(0.08 * float(level)))
-	player.backfired.connect(func(_c: Car) -> void:
-		camera.add_trauma(0.35))
+	player.boost_started.connect(func(_c: Car) -> void:
+		camera.add_trauma(0.18))
 
 func _spawn_cars() -> void:
 	var count := GameState.ai_count + 1
@@ -103,9 +101,9 @@ func _physics_process(delta: float) -> void:
 
 func _tick_countdown(delta: float) -> void:
 	_countdown_left -= delta
-	# Rocket start: masuram cat tine fiecare "creier" drift-ul apasat.
+	# Rocket start: masuram cat tine fiecare "creier" TURBO apasat.
 	for car in cars:
-		if car.controller != null and car.controller.is_drift_pressed():
+		if car.controller != null and car.controller.is_turbo_pressed():
 			_drift_hold[car] = float(_drift_hold.get(car, 0.0)) + delta
 		else:
 			_drift_hold[car] = 0.0
@@ -132,12 +130,12 @@ func _go() -> void:
 		var hold := float(_drift_hold.get(car, 0.0))
 		if car == player:
 			if hold > 0.05 and hold <= 1.05:
-				car.apply_boost(1.0, 2)
+				car.force_boost(1.2)
 				hud.flash_message("ROCKET START!")
 			elif hold > 1.05:
 				hud.flash_message("Prea devreme...")
 		elif _rng.randf() < 0.45:
-			car.apply_boost(0.8, 1)
+			car.force_boost(0.8)
 
 # ------------------------------------------------------------------ cursa
 
@@ -201,14 +199,13 @@ func _update_hud() -> void:
 		lap_text = _fmt_ms(Time.get_ticks_msec() - _lap_start_ms)
 	var best_text := _fmt_ms(_best_lap_ms) if _best_lap_ms >= 0 else "--:--.-"
 	var lap_no := clampi(int(_progress[0].laps) + 1, 1, GameState.total_laps)
-	var info := "%3.0f km/h   loc %d/%d   tur %d/%d\ntur:  %s\nbest: %s\n%s   [1/2/3] masina   [R] reset" % [
+	var info := "%3.0f km/h   loc %d/%d   tur %d/%d\ntur:  %s\nbest: %s\n%s   [SPACE] turbo  [SHIFT] drift  [1/2/3] masina  [R] reset" % [
 		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
 		lap_no, GameState.total_laps, lap_text, best_text, player.car_name]
 	if _finish_text != "":
 		info = _finish_text + "\n" + info
 	hud.set_info(info)
-	var charge := player.drift_charge / player.backfire_time if player.is_drifting else 0.0
-	hud.set_charge(charge, player.drift_level(), player.is_drifting)
+	hud.set_turbo(player.turbo_charge, player.is_boosting)
 
 func _fmt_ms(ms: int) -> String:
 	@warning_ignore("integer_division")

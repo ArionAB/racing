@@ -19,3 +19,6 @@ func get_throttle() -> float:
 
 func is_drift_pressed() -> bool:
 	return Input.is_action_pressed("drift") or GameState.touch_drift
+
+func is_turbo_pressed() -> bool:
+	return Input.is_action_pressed("turbo") or GameState.touch_turbo

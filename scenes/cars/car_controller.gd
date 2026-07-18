@@ -22,3 +22,6 @@ func get_throttle() -> float:
 
 func is_drift_pressed() -> bool:
 	return false
+
+func is_turbo_pressed() -> bool:
+	return false

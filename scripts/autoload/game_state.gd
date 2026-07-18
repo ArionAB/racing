@@ -19,6 +19,7 @@ var engine_volume: float = 1.0
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
 var touch_drift: bool = false
+var touch_turbo: bool = false
 
 func _ready() -> void:
 	load_settings()
@@ -34,6 +35,7 @@ func go_to_menu() -> void:
 func reset_touch() -> void:
 	touch_steer = 0.0
 	touch_drift = false
+	touch_turbo = false
 
 func load_settings() -> void:
 	var cfg := ConfigFile.new()

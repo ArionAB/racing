@@ -14,6 +14,7 @@ var line_offset: float = 0.0
 var _steer: float = 0.0
 var _throttle: float = 1.0
 var _drift: bool = false
+var _turbo: bool = false
 var _stuck_time: float = 0.0
 var _reverse_time: float = 0.0
 
@@ -59,16 +60,20 @@ func update(delta: float) -> void:
 	if absf(a_far) > 0.9 and speed > car.max_speed * 0.5:
 		_throttle = 0.2
 
-	# Drift CTR: intra pe viraje sustinute, elibereaza cand virajul s-a
-	# terminat SAU cand se apropie de backfire (banca nivelul atins).
+	# Drift (handbrake) pe viraje sustinute — si umple bara de turbo.
 	if not _drift:
 		if absf(a_far) > 0.55 and speed > car.drift_min_speed * 1.2:
 			_drift = true
-	else:
-		var turn_done := absf(a_far) < 0.18
-		var near_backfire := car.drift_charge > car.drift_level_times[1] + 0.4
-		if turn_done or near_backfire or speed < car.drift_min_speed * 0.7:
-			_drift = false
+	elif absf(a_far) < 0.18 or speed < car.drift_min_speed * 0.7:
+		_drift = false
+
+	# Turbo pe portiuni drepte, cand bara e destul de plina; il tine pana
+	# goleste bara sau vine un viraj.
+	if not _turbo:
+		if car.turbo_charge > 0.6 and absf(a_far) < 0.25:
+			_turbo = true
+	elif car.turbo_charge < 0.05 or absf(a_far) > 0.6:
+		_turbo = false
 
 func get_steer() -> float:
 	return _steer
@@ -78,3 +83,6 @@ func get_throttle() -> float:
 
 func is_drift_pressed() -> bool:
 	return _drift
+
+func is_turbo_pressed() -> bool:
+	return _turbo

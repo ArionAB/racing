@@ -7,22 +7,14 @@ extends CharacterBody3D
 ## masinii; grip-ul amortizeaza lateralul, drift-ul il lasa sa alunece.
 ## Gravitatia si pantele raman in grija lui move_and_slide().
 ##
-## Drift model CTR (portat din racing 2D): cat timp tii drift-ul se incarca
-## un boost in 3 niveluri; il banchezi cand dai drumul — cu cat mai tarziu,
-## cu atat mai puternic. Prea tarziu = backfire (pierzi tot). Boost-urile se
-## pot inlantui (chaining).
+## Turbo model Ignition: o bara care se incarca in timp (mai repede in
+## drift) si pe care o arzi CAND VREI TU tinand butonul de turbo — skill de
+## decizie (pe ce dreapta, inaintea carei sarituri), nu de timing la viraj.
+## Drift-ul e handbrake pur: unealta de viraj care hraneste bara mai repede.
 
-signal boost_started(car: Car, level: int)
-signal backfired(car: Car)
+signal boost_started(car: Car)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
-
-const DRIFT_COLORS: Array[Color] = [
-	Color(0.6, 0.6, 0.6),   # nivel 0: gri
-	Color(0.3, 0.7, 1.0),   # nivel 1: albastru
-	Color(1.0, 0.6, 0.15),  # nivel 2: portocaliu
-	Color(0.8, 0.3, 1.0),   # nivel 3: violet
-]
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -30,22 +22,32 @@ const DRIFT_COLORS: Array[Color] = [
 @export var acceleration: float = 16.0
 @export var brake_force: float = 30.0
 @export var reverse_speed: float = 10.0
-@export var drag: float = 0.5
+## Atentie la echilibru: viteza maxima reala = min(max_speed, acceleration/drag).
+## Drag-ul trebuie tinut destul de mic incat plafonul max_speed sa conduca.
+@export var drag: float = 0.35
 
 @export_group("Directie")
 @export var steer_speed: float = 1.9
 @export var grip: float = 8.0
 
-@export_group("Drift & Boost (model CTR)")
+@export_group("Drift (handbrake)")
 @export var drift_grip: float = 2.0
 @export var drift_steer_bonus: float = 1.5
 @export var drift_bias: float = 0.4
 @export var drift_min_speed: float = 9.0
-@export var drift_level_times: Array[float] = [0.7, 1.5, 2.4]
-@export var backfire_time: float = 3.3
-@export var boost_durations: Array[float] = [0.55, 0.95, 1.5]
-@export var boost_speed_bonus: float = 10.0 # m/s peste plafon la nivel 3
-@export var boost_max_bank: float = 3.0
+
+@export_group("Turbo (model Ignition)")
+## Secunde pana la umplerea barii doar din mers.
+@export var turbo_fill_time: float = 10.0
+## In drift bara se umple de atatea ori mai repede — driftul ramane rasplatit.
+@export var turbo_drift_multiplier: float = 2.5
+## Secunde de ardere continua de la bara plina.
+@export var turbo_burn_time: float = 2.2
+## Sub pragul asta nu poti porni turbo (previne "sputter"-ul din taste scurte).
+@export var turbo_min_to_fire: float = 0.15
+@export var turbo_speed_bonus: float = 11.0 # m/s peste plafon cat arde
+## Impins suplimentar cat arde turbo — fara el, drag-ul ar anula boost-ul.
+@export var turbo_accel_bonus: float = 10.0
 
 @export_group("Diverse")
 @export var gravity: float = 28.0
@@ -66,12 +68,12 @@ var track: Track
 var road_index: int = 0
 var start_transform: Transform3D
 
-# --- Drift/boost ---
+# --- Drift/turbo ---
 var is_drifting: bool = false
 var drift_dir: float = 0.0
-var drift_charge: float = 0.0
-var boost_time: float = 0.0
-var boost_level: int = 0
+var turbo_charge: float = 0.0 # 0..1, bara din UI
+var is_boosting: bool = false
+var _forced_boost: float = 0.0 # rocket start: ardere gratuita, nu goleste bara
 
 ## Nodul (din Race) sub care se depun urmele de cauciuc.
 var skid_parent: Node3D
@@ -80,7 +82,7 @@ var _visual: Node3D
 var _drift_particles: CPUParticles3D
 var _boost_particles: CPUParticles3D
 var _engine_audio: AudioStreamPlayer3D
-var _last_drift_level: int = 0
+var _turbo_full_latch: bool = false
 var _was_on_floor: bool = true
 var _prev_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
@@ -120,20 +122,19 @@ func apply_data(data: CarData, color_override: Color = Color(0, 0, 0, 0)) -> voi
 	_build_visual()
 
 func _physics_process(delta: float) -> void:
-	boost_time = maxf(boost_time - delta, 0.0)
-	if boost_time <= 0.0:
-		boost_level = 0
 	if track != null:
 		road_index = track.closest_index(road_index, global_position)
 
 	var steer := 0.0
 	var throttle := 0.0
 	var drift_pressed := false
+	var turbo_pressed := false
 	if controller != null and race_active and not finished:
 		controller.update(delta)
 		steer = clampf(controller.get_steer(), -1.0, 1.0)
 		throttle = clampf(controller.get_throttle(), -1.0, 1.0)
 		drift_pressed = controller.is_drift_pressed()
+		turbo_pressed = controller.is_turbo_pressed()
 
 	velocity.y -= gravity * delta
 
@@ -142,12 +143,16 @@ func _physics_process(delta: float) -> void:
 	var hvel := Vector3(velocity.x, 0.0, velocity.z)
 	var fwd_speed := hvel.dot(fwd_h)
 
-	_update_drift(drift_pressed, steer, fwd_speed, delta)
+	_update_drift(drift_pressed, steer, fwd_speed)
+	_update_turbo(turbo_pressed, delta)
 
 	# --- Motor / frana ---
 	var vmax := _current_max_speed()
 	if throttle > 0.0 and fwd_speed < vmax:
-		hvel += fwd_h * acceleration * throttle * delta
+		var accel := acceleration
+		if is_boosting:
+			accel += turbo_accel_bonus
+		hvel += fwd_h * accel * throttle * delta
 	elif throttle < 0.0:
 		if fwd_speed > 2.0:
 			hvel += fwd_h * brake_force * throttle * delta
@@ -185,69 +190,64 @@ func _physics_process(delta: float) -> void:
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 
-## Plafonul de viteza al momentului: taiat de iarba, ridicat de boost.
-## Boost-ul se aplica SI pe iarba — scurtatura cu boost e o alegere valida.
+## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.
+## Turbo-ul merge SI pe iarba — scurtatura cu turbo e o alegere valida.
 func _current_max_speed() -> float:
 	var vmax := max_speed * speed_scale
 	if track != null and not track.is_on_road(road_index, global_position):
 		vmax *= offroad_speed_factor
-	if boost_time > 0.0:
-		vmax += boost_speed_bonus * (0.5 + 0.5 * float(boost_level) / 3.0)
+	if is_boosting:
+		vmax += turbo_speed_bonus
 	return vmax
 
 # ------------------------------------------------------------------- drift
 
-func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float, delta: float) -> void:
+## Handbrake pur: alunecare controlata pentru viraje, fara boost la iesire.
+func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float) -> void:
 	if not is_drifting:
 		if drift_pressed and fwd_speed > drift_min_speed and absf(steer) > 0.25:
 			is_drifting = true
 			drift_dir = signf(steer)
-			drift_charge = 0.0
 			if is_player:
 				AudioManager.play_sfx(&"drift_start")
-		return
-	drift_charge += delta
-	var too_slow := fwd_speed < drift_min_speed * 0.55
-	if drift_charge >= backfire_time:
-		_backfire()
-	elif not drift_pressed or too_slow:
-		_release_drift(not too_slow)
+	elif not drift_pressed or fwd_speed < drift_min_speed * 0.55:
+		is_drifting = false
 
-func drift_level() -> int:
-	var level := 0
-	for t in drift_level_times:
-		if drift_charge >= t:
-			level += 1
-	return level
+# ------------------------------------------------------------------- turbo
 
-func _release_drift(give_boost: bool) -> void:
-	is_drifting = false
-	var level := drift_level()
-	drift_charge = 0.0
-	if give_boost and level > 0:
-		apply_boost(boost_durations[level - 1], level)
+func _update_turbo(turbo_pressed: bool, delta: float) -> void:
+	_forced_boost = maxf(_forced_boost - delta, 0.0)
+	# Poti PORNI turbo doar cu bara peste prag; odata pornit, arzi pana la 0.
+	var can_fire := turbo_charge > (0.02 if is_boosting else turbo_min_to_fire)
+	if turbo_pressed and can_fire:
+		if not is_boosting:
+			_start_boost()
+		turbo_charge = maxf(turbo_charge - delta / turbo_burn_time, 0.0)
+		is_boosting = true
+	else:
+		is_boosting = _forced_boost > 0.0
+		# Bara se umple din mers; drift-ul o hraneste mult mai repede.
+		var fill := delta / turbo_fill_time
+		if is_drifting:
+			fill *= turbo_drift_multiplier
+		turbo_charge = minf(turbo_charge + fill, 1.0)
 
-func _backfire() -> void:
-	is_drifting = false
-	drift_charge = 0.0
-	boost_time = 0.0
-	boost_level = 0
-	velocity *= 0.6
-	_punch_scale(Vector3(0.85, 1.2, 0.85))
-	backfired.emit(self)
-	if is_player:
-		AudioManager.play_sfx(&"backfire")
-
-## Chaining: boost-urile succesive se aduna (pana la boost_max_bank).
-func apply_boost(duration: float, level: int) -> void:
-	boost_time = minf(boost_time + duration, boost_max_bank)
-	boost_level = maxi(boost_level, level)
+func _start_boost() -> void:
 	var forward := -global_transform.basis.z
-	velocity += Vector3(forward.x, 0.0, forward.z).normalized() * 3.5 * float(level)
+	velocity += Vector3(forward.x, 0.0, forward.z).normalized() * 4.0
 	_punch_scale(Vector3(0.85, 0.9, 1.2))
-	boost_started.emit(self, level)
+	boost_started.emit(self)
 	if is_player:
 		AudioManager.play_sfx(&"boost")
+
+func grant_turbo(amount: float) -> void:
+	turbo_charge = clampf(turbo_charge + amount, 0.0, 1.0)
+
+## Ardere gratuita (rocket start): boost fara sa goleasca bara.
+func force_boost(seconds: float) -> void:
+	_forced_boost = seconds
+	is_boosting = true
+	_start_boost()
 
 # ------------------------------------------------------------- imbranceli
 
@@ -287,7 +287,8 @@ func reset() -> void:
 	global_transform = start_transform
 	velocity = Vector3.ZERO
 	is_drifting = false
-	drift_charge = 0.0
+	is_boosting = false
+	_forced_boost = 0.0
 	if track != null:
 		road_index = track.closest_index_global(global_position)
 
@@ -305,22 +306,21 @@ func _punch_scale(target: Vector3) -> void:
 
 func _update_effects(delta: float) -> void:
 	if is_drifting:
-		var lvl := drift_level()
 		_drift_particles.emitting = true
-		_drift_particles.color = DRIFT_COLORS[lvl]
-		# Ding la fiecare nivel atins — timing-ul CTR se face dupa ureche.
-		if lvl > _last_drift_level and is_player:
-			AudioManager.play_sfx(&"drift_level", 1.0 + 0.2 * float(lvl - 1))
-		_last_drift_level = lvl
 		_drop_skid_marks(delta)
 	else:
 		_drift_particles.emitting = false
-		_last_drift_level = 0
-	_boost_particles.emitting = boost_time > 0.0
-	# Pitch de motor variabil: turatia urca cu viteza + salt la boost.
+	# Ding cand bara de turbo ajunge plina — stii fara sa te uiti in jos.
+	if turbo_charge >= 1.0 and not _turbo_full_latch and is_player:
+		_turbo_full_latch = true
+		AudioManager.play_sfx(&"drift_level", 1.3)
+	elif turbo_charge < 0.95:
+		_turbo_full_latch = false
+	_boost_particles.emitting = is_boosting
+	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
 	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
 	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
-		+ (0.25 if boost_time > 0.0 else 0.0)
+		+ (0.25 if is_boosting else 0.0)
 
 ## Urme de cauciuc: placute plate depuse sub rotile din spate in drift.
 func _drop_skid_marks(delta: float) -> void:
@@ -368,6 +368,7 @@ func _build_effects() -> void:
 	_drift_particles.gravity = Vector3(0, 1.5, 0)
 	_drift_particles.scale_amount_min = 0.6
 	_drift_particles.scale_amount_max = 1.4
+	_drift_particles.color = Color(0.78, 0.78, 0.8) # fum de cauciuc
 	var smoke := BoxMesh.new()
 	smoke.size = Vector3(0.22, 0.22, 0.22)
 	var smoke_mat := StandardMaterial3D.new()

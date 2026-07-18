@@ -22,9 +22,12 @@ pur plus haosul fizic, nu proiectilele.
 1. **Fun-ul vine din fizică + pistă, nu din items.** Bumping cu masă (mașina
    grea împinge, cea ușoară zboară), sărituri cu airtime, hazarde mobile,
    scurtături prin off-road lent. Contactul între mașini e mecanică, nu bug.
-2. **Drift-ul CTR e nucleul de skill** (port din 2D): 3 niveluri de boost
-   încărcate cu timpul, eliberare cu timing, backfire dacă ții prea mult,
-   chaining. Floor jos, ceiling înalt.
+2. **Turbo-ul e resursă, tu decizi când** (modelul Ignition, ales explicit
+   de dezvoltator după playtest în locul drift-boost-ului CTR): o bară care
+   se încarcă din mers (mult mai repede în drift) și pe care o arzi când
+   vrei ținând TURBO. Skill de decizie (pe ce dreaptă, înaintea cărei
+   sărituri, la ce depășire), nu de timing la viraj. Drift-ul e handbrake
+   pur — unealtă de viraj care hrănește bara.
 3. **Piste scurte cu personalitate.** Fiecare pistă are un "gimmick" memorabil
    (barieră mobilă, tren, pod). Alternanță drepte/viraje, elevație folosită
    agresiv (creste care te aruncă în aer), scurtături risc/recompensă.
@@ -46,10 +49,11 @@ pur plus haosul fizic, nu proiectilele.
 - Hazarde mobile (`SlidingHazard`) ✔ (de transformat în familie de scene)
 - 3 AI cu waypoints, drift, anti-blocaj ✔ (de rafinat)
 - Presetări de mașini ✔ (de mutat în resurse `CarData`)
-- Drift CTR complet: niveluri + backfire + chaining — **de portat din 2D**
-- Countdown + rocket start, poziții live, rezultate — **de portat din 2D**
-- Touch controls: viraj pe jumătăți de ecran + auto-accelerate + buton drift
-  (modelul din 2D, adaptat la chase cam) — **de validat pe device fizic**
+- Turbo Ignition: bară care se încarcă din mers (accelerat de drift), arsă
+  la cerere cu butonul TURBO ✔
+- Countdown + rocket start (ține TURBO în ultima secundă), poziții live ✔
+- Touch controls: viraj pe jumătăți de ecran + auto-accelerate + butoane
+  DRIFT/TURBO ✔ — **de validat pe device fizic**
 
 ## Post-MVP (nu implementa fără să fie cerut)
 

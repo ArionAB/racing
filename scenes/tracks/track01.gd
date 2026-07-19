@@ -37,3 +37,10 @@ func _hazard_fracs() -> Array[float]:
 
 func _hose_fracs() -> Array[float]:
 	return [0.3] # pe urcarea din dreapta, inainte de hairpin
+
+func _excavator_fracs() -> Array[float]:
+	return [0.8] # pe sectiunea de sus, inainte de coborare
+
+func _dino_spots() -> Array[Vector2]:
+	# (fractie, parte): unul vegheaza hairpinul, unul strajuieste startul
+	return [Vector2(0.13, 1.0), Vector2(0.52, -1.0)]

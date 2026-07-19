@@ -70,6 +70,14 @@ func _hazard_fracs() -> Array[float]:
 func _hose_fracs() -> Array[float]:
 	return []
 
+## Excavatoare suplimentare, explicite (pe langa hazardul tematic).
+func _excavator_fracs() -> Array[float]:
+	return []
+
+## Dinozauri-landmark: (fractie, parte) — plasati cu intentie, nu aleator.
+func _dino_spots() -> Array[Vector2]:
+	return []
+
 func _ready() -> void:
 	rebuild()
 
@@ -87,6 +95,10 @@ func rebuild() -> void:
 		_build_ramp(frac)
 	for frac in _hazard_fracs():
 		_build_hazard(frac)
+	for frac in _excavator_fracs():
+		_build_excavator(frac)
+	for spot in _dino_spots():
+		_build_dino(spot.x, spot.y)
 	for frac in _hose_fracs():
 		_build_hose(frac)
 	_build_pins()
@@ -95,6 +107,7 @@ func rebuild() -> void:
 	_build_center_line()
 	_build_kerbs()
 	_build_decor()
+	_build_sandbox_border()
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.
@@ -441,13 +454,7 @@ func _build_hazard(frac: float) -> void:
 		ball.travel = side * half_width * 0.9
 		ball.global_position = p
 	elif ResourceLoader.exists("res://assets/models/toy_excavator.glb"):
-		var excavator := ExcavatorHazard.new()
-		excavator.model_scene = load("res://assets/models/toy_excavator.glb")
-		add_child(excavator)
-		# Corpul sta PE marginea soselei (blocheaza banda exterioara),
-		# bratul coboara spre centru — lasa o strecuratoare pe interior.
-		var park := p + side * (half_width * 0.8)
-		excavator.look_at_from_position(park, p, Vector3.UP) # bratul spre drum
+		_build_excavator(frac)
 	else:
 		var box := SlidingHazard.new()
 		add_child(box)
@@ -570,18 +577,22 @@ func _build_decor() -> void:
 		placed += 1
 		if theme_decor == "desert":
 			var roll := rng.randf()
-			if roll < 0.32:
+			if roll < 0.28:
 				_add_cactus(pos, rng)
-			elif roll < 0.5:
+			elif roll < 0.45:
 				_add_sandcastle(pos, rng)
-			elif roll < 0.65:
+			elif roll < 0.59:
 				_add_bucket(pos, rng)
-			elif roll < 0.8:
+			elif roll < 0.72:
+				_add_glb_rock(pos, rng)
+			elif roll < 0.85:
 				_add_mesa(pos, rng)
 			else:
 				_add_dry_bush(pos, rng)
-		elif rng.randf() < 0.75:
+		elif rng.randf() < 0.7:
 			_add_tree(pos, rng)
+		elif rng.randf() < 0.5:
+			_add_glb_rock(pos, rng)
 		else:
 			_add_rock(pos, rng)
 
@@ -642,6 +653,47 @@ func _add_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	shape.shape = col_box
 	shape.position = Vector3.UP * size * 0.3
 	rock.add_child(shape)
+
+func _build_excavator(frac: float) -> void:
+	if not ResourceLoader.exists("res://assets/models/toy_excavator.glb"):
+		return
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	var dir := (baked[(idx + 1) % n] - p).normalized()
+	var side := dir.cross(Vector3.UP).normalized()
+	var excavator := ExcavatorHazard.new()
+	excavator.model_scene = load("res://assets/models/toy_excavator.glb")
+	add_child(excavator)
+	# Corpul sta PE marginea soselei (blocheaza banda exterioara),
+	# bratul coboara spre centru — lasa o strecuratoare pe interior.
+	var park := p + side * (half_width * 0.8)
+	excavator.look_at_from_position(park, p, Vector3.UP) # bratul spre drum
+
+## Dinozaurul de plastic: landmark care "priveste" cursa de pe margine.
+func _build_dino(frac: float, side_sign: float) -> void:
+	if not ResourceLoader.exists("res://assets/models/toy_dino.glb"):
+		return
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	var side := _side_at(idx) * side_sign
+	var dino := StaticBody3D.new()
+	dino.add_to_group("dinos")
+	var model := (load("res://assets/models/toy_dino.glb") as PackedScene) \
+		.instantiate() as Node3D
+	dino.add_child(model)
+	var shape := CollisionShape3D.new()
+	var cyl := CylinderShape3D.new()
+	cyl.radius = 1.3
+	cyl.height = 5.5
+	shape.shape = cyl
+	shape.position = Vector3.UP * 2.75
+	dino.add_child(shape)
+	add_child(dino)
+	var stand := p + side * (half_width + 6.0)
+	stand.y = maxf(p.y - 0.3, -0.3) # la nivelul solului de langa drum
+	dino.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 
 func _build_hose(frac: float) -> void:
 	if not ResourceLoader.exists("res://assets/models/garden_hose.glb"):
@@ -749,6 +801,83 @@ func _add_mesa(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	shape.shape = col
 	shape.position = Vector3.UP * base * 0.4
 	mesa.add_child(shape)
+
+## Bolovan de acvariu (Blender): rocks.glb are 3 mesh-uri separate,
+## alegem una la intamplare si anulam offsetul ei din fisier.
+func _add_glb_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	if not ResourceLoader.exists("res://assets/models/rocks.glb"):
+		_add_rock(pos, rng)
+		return
+	var container := (load("res://assets/models/rocks.glb") as PackedScene) \
+		.instantiate() as Node3D
+	var picks: Array[String] = ["rock_small", "rock_medium", "rock_large"]
+	var keep_name: String = picks[rng.randi_range(0, 2)]
+	var kept: Node3D = null
+	for child in container.get_children():
+		if child.name == keep_name:
+			kept = child
+		else:
+			child.queue_free()
+	if kept == null:
+		container.queue_free()
+		_add_rock(pos, rng)
+		return
+	var body := StaticBody3D.new()
+	add_child(body)
+	var s := rng.randf_range(0.55, 0.85)
+	container.scale = Vector3.ONE * s
+	container.position = -kept.position * s # anuleaza asezarea "una langa alta"
+	body.add_child(container)
+	var heights := {"rock_small": 2.0, "rock_medium": 3.5, "rock_large": 5.0}
+	var h: float = heights[keep_name] * s
+	var shape := CollisionShape3D.new()
+	var sphere := SphereShape3D.new()
+	sphere.radius = h * 0.45
+	shape.shape = sphere
+	shape.position = Vector3.UP * h * 0.4
+	body.add_child(shape)
+	body.rotation.y = rng.randf_range(0.0, TAU)
+	body.global_position = pos + Vector3.UP * -0.3
+
+## Zidul sandbox-ului: patrat de scanduri de lemn in jurul lumii (desert).
+## Marginea gropii de nisip vazuta la scara masinutelor.
+func _build_sandbox_border() -> void:
+	if theme_decor != "desert":
+		return
+	if not ResourceLoader.exists("res://assets/models/sandbox_border.glb"):
+		return
+	var border_scene := load("res://assets/models/sandbox_border.glb") as PackedScene
+	var centroid := _centroid()
+	var half_extent := 380.0
+	var seg_scale := 2.5 # 20m -> 50m pe segment, 13m inaltime
+	var seg_len := 20.0 * seg_scale
+	var per_side := int(ceil(half_extent * 2.0 / seg_len))
+	for side_idx in 4:
+		var wall := StaticBody3D.new()
+		wall.add_to_group("sandbox_wall")
+		add_child(wall)
+		# fiecare latura: directia de-a lungul zidului + normala spre interior
+		var along := [Vector3(1, 0, 0), Vector3(0, 0, 1),
+			Vector3(1, 0, 0), Vector3(0, 0, 1)][side_idx] as Vector3
+		var outward := [Vector3(0, 0, -1), Vector3(1, 0, 0),
+			Vector3(0, 0, 1), Vector3(-1, 0, 0)][side_idx] as Vector3
+		var wall_center := Vector3(centroid.x, 0, centroid.z) \
+			+ outward * half_extent + Vector3.UP * -0.3
+		for i in per_side:
+			var seg := border_scene.instantiate() as Node3D
+			seg.scale = Vector3.ONE * seg_scale
+			var offset := (float(i) - float(per_side - 1) * 0.5) * seg_len
+			seg.position = wall_center + along * offset
+			seg.basis = Basis.looking_at(outward, Vector3.UP) \
+				.scaled(Vector3.ONE * seg_scale)
+			wall.add_child(seg)
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = Vector3(half_extent * 2.0 + seg_len, 14.0, 1.5) \
+			if along.x > 0.5 else Vector3(1.5, 14.0, half_extent * 2.0 + seg_len)
+		shape.shape = box
+		shape.position = wall_center + Vector3.UP * 7.0
+		wall.add_child(shape)
 
 ## Galeata de plastic (Blender): unele in picioare, unele rasturnate.
 func _add_bucket(pos: Vector3, rng: RandomNumberGenerator) -> void:

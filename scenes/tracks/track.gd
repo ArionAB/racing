@@ -21,8 +21,7 @@ var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
 
 ## Tema vizuala: fiecare pista isi defineste LUMEA (teren, cer, decor).
 var theme_decor: String = "forest" # "forest" sau "desert"
-var theme_ground_texture: String = "res://assets/textures/grass.png"
-var theme_ground_tint := Color(0.75, 0.85, 0.7)
+var theme_ground_tint := Color(0.45, 0.72, 0.33)
 var theme_sky_top := Color(0.30, 0.50, 0.80)
 var theme_sky_horizon := Color(0.72, 0.84, 0.95)
 var theme_fog := Color(0.75, 0.85, 0.95)
@@ -30,24 +29,24 @@ var theme_hill_color := Color(0.25, 0.45, 0.22)
 var theme_sun_color := Color(1.0, 0.97, 0.9)
 
 ## Paleta completa a unei teme, dintr-un singur apel.
+## Stil: FLAT-COLOR saturat (stilul masinilor RgsDev, extins la lume) —
+## fara texturi de zgomot; culoarea si lumina fac treaba.
 func apply_theme(theme: String) -> void:
 	theme_decor = theme
 	if theme == "desert":
-		theme_ground_texture = "res://assets/textures/sand.png"
-		theme_ground_tint = Color(1.0, 0.95, 0.82)
-		theme_sky_top = Color(0.45, 0.62, 0.85)
-		theme_sky_horizon = Color(0.95, 0.85, 0.68)
-		theme_fog = Color(0.93, 0.85, 0.7)
-		theme_hill_color = Color(0.8, 0.65, 0.42)
-		theme_sun_color = Color(1.0, 0.93, 0.8)
+		theme_ground_tint = Color(0.93, 0.76, 0.47)
+		theme_sky_top = Color(0.25, 0.52, 0.92)   # albastru adanc, contrast cu nisipul
+		theme_sky_horizon = Color(1.0, 0.86, 0.6)
+		theme_fog = Color(0.98, 0.87, 0.68)
+		theme_hill_color = Color(0.88, 0.62, 0.36)
+		theme_sun_color = Color(1.0, 0.92, 0.78)
 	else:
-		theme_ground_texture = "res://assets/textures/grass.png"
-		theme_ground_tint = Color(0.75, 0.85, 0.7)
-		theme_sky_top = Color(0.30, 0.50, 0.80)
-		theme_sky_horizon = Color(0.72, 0.84, 0.95)
-		theme_fog = Color(0.75, 0.85, 0.95)
-		theme_hill_color = Color(0.25, 0.45, 0.22)
-		theme_sun_color = Color(1.0, 0.97, 0.9)
+		theme_ground_tint = Color(0.45, 0.72, 0.33) # verde viu, nu pastel
+		theme_sky_top = Color(0.22, 0.48, 0.9)
+		theme_sky_horizon = Color(0.72, 0.87, 1.0)
+		theme_fog = Color(0.78, 0.88, 0.98)
+		theme_hill_color = Color(0.3, 0.56, 0.27)
+		theme_sun_color = Color(1.0, 0.97, 0.88)
 
 var curve: Curve3D
 var baked: PackedVector3Array
@@ -86,8 +85,35 @@ func rebuild() -> void:
 		_build_hazard(frac)
 	_build_start_gate()
 	_build_start_line()
+	_build_center_line()
 	_build_kerbs()
 	_build_decor()
+
+## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
+## la fiecare 6.5m de-a lungul curbei.
+func _build_center_line() -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var n := baked.size()
+	var total := _dists[n]
+	var lift := Vector3.UP * 0.045
+	var d := 4.0
+	var idx := 0
+	while d < total - 5.0:
+		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
+			idx += 1
+		var i := idx % n
+		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
+		var side := _side_at(i)
+		var a := baked[i] + dir * (d - _dists[i]) + lift
+		var b := a + dir * 2.8
+		st.add_vertex(a - side * 0.18); st.add_vertex(a + side * 0.18)
+		st.add_vertex(b - side * 0.18)
+		st.add_vertex(a + side * 0.18); st.add_vertex(b + side * 0.18)
+		st.add_vertex(b - side * 0.18)
+		d += 6.5
+	st.generate_normals()
+	_add_visual_mesh(st.commit(), Color(0.92, 0.9, 0.78))
 
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
 func _build_environment() -> void:
@@ -102,9 +128,15 @@ func _build_environment() -> void:
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_sky_contribution = 1.0
 	env.fog_enabled = true
 	env.fog_light_color = theme_fog
-	env.fog_density = 0.004
+	env.fog_density = 0.0035
+	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 1.18
+	env.adjustment_contrast = 1.05
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env
 	add_child(world_env)
@@ -113,22 +145,11 @@ func _build_environment() -> void:
 	sun.rotation_degrees = Vector3(-48, -30, 0)
 	sun.shadow_enabled = false # masinile au umbre blob (ieftin, mobil)
 	sun.light_color = theme_sun_color
+	sun.light_energy = 1.25
 	add_child(sun)
 
+	_build_terrain()
 	var centroid := _centroid()
-	var ground := MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	plane.size = Vector2(2000, 2000)
-	ground.mesh = plane
-	ground.position = centroid + Vector3.DOWN * 0.3
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = theme_ground_tint
-	if ResourceLoader.exists(theme_ground_texture):
-		mat.albedo_texture = load(theme_ground_texture)
-		mat.uv1_triplanar = true
-		mat.uv1_scale = Vector3(0.15, 0.15, 0.15)
-	ground.material_override = mat
-	add_child(ground)
 	var ground_body := StaticBody3D.new()
 	var ground_shape := CollisionShape3D.new()
 	var ground_box := BoxShape3D.new()
@@ -162,6 +183,71 @@ func _centroid() -> Vector3:
 	for p in baked:
 		sum += p
 	return sum / float(baked.size())
+
+## Terenul: NU un plan infinit de biliard, ci o panza cu valuri blande,
+## APLATIZATA in coridorul pistei (fizica ramane plata acolo unde se
+## conduce; relieful e scenografie). Variatie de culoare per varf — adanc
+## = mai inchis — fara nicio textura.
+func _build_terrain() -> void:
+	var centroid := _centroid()
+	var size := 1500.0
+	var cells := 56
+	var step := size / float(cells)
+	var origin := centroid - Vector3(size * 0.5, 0, size * 0.5)
+	var rng_phase := float(track_name.hash() % 1000) * 0.01
+	# strida 3 peste punctele pistei: destul pentru distanta aproximativa
+	var road_pts: Array[Vector3] = []
+	for i in range(0, baked.size(), 3):
+		road_pts.append(baked[i])
+	var heights: Array[float] = []
+	heights.resize((cells + 1) * (cells + 1))
+	for gz in cells + 1:
+		for gx in cells + 1:
+			var wx := origin.x + float(gx) * step
+			var wz := origin.z + float(gz) * step
+			var h := sin(wx * 0.012 + rng_phase) * 2.2 \
+				+ cos(wz * 0.014 + rng_phase * 2.0) * 2.0 \
+				+ sin(wx * 0.031) * sin(wz * 0.027) * 1.3
+			var nearest := 1e12
+			for p in road_pts:
+				var dx := p.x - wx
+				var dz := p.z - wz
+				nearest = minf(nearest, dx * dx + dz * dz)
+			var dist := sqrt(nearest)
+			# < 45m de sosea: perfect plat (unde se conduce); apoi blend.
+			var t := clampf((dist - 45.0) / 70.0, 0.0, 1.0)
+			heights[gz * (cells + 1) + gx] = maxf(h, -1.0) * t * t
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for gz in cells:
+		for gx in cells:
+			var idx00 := gz * (cells + 1) + gx
+			var corners := [
+				Vector3(origin.x + float(gx) * step, -0.3 + heights[idx00],
+					origin.z + float(gz) * step),
+				Vector3(origin.x + float(gx + 1) * step, -0.3 + heights[idx00 + 1],
+					origin.z + float(gz) * step),
+				Vector3(origin.x + float(gx) * step,
+					-0.3 + heights[idx00 + cells + 1],
+					origin.z + float(gz + 1) * step),
+				Vector3(origin.x + float(gx + 1) * step,
+					-0.3 + heights[idx00 + cells + 2],
+					origin.z + float(gz + 1) * step),
+			]
+			for tri in [[0, 1, 2], [1, 3, 2]]:
+				for corner_idx: int in tri:
+					var v: Vector3 = corners[corner_idx]
+					var shade := clampf(1.0 + v.y * 0.03, 0.82, 1.12)
+					st.set_color(theme_ground_tint * shade)
+					st.add_vertex(v)
+	st.generate_normals()
+	var inst := MeshInstance3D.new()
+	inst.mesh = st.commit()
+	var mat := StandardMaterial3D.new()
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_color = Color.WHITE
+	inst.material_override = mat
+	add_child(inst)
 
 ## Textura incarcata doar daca exista (inainte de prima generare lipsesc).
 func _tex(path: String) -> Texture2D:
@@ -251,10 +337,10 @@ func _build_road() -> void:
 		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
 	top.generate_normals()
 	sides.generate_normals()
-	_add_mesh_with_collision(top.commit(), Color.WHITE,
-		_tex("res://assets/textures/asphalt.png"))
-	_add_mesh_with_collision(sides.commit(), Color.WHITE,
-		_tex("res://assets/textures/concrete.png"))
+	# Flat-color curat, in stilul masinilor: asfaltul racoros-inchis face
+	# masinile saturate sa "sara" din ecran; flancurile in tonul temei.
+	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3))
+	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
 func _build_walls() -> void:
 	var loop_poly := PackedVector2Array()

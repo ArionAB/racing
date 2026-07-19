@@ -1,10 +1,12 @@
 extends Track
-## Pista 1 — "Colinele": dreapta de start cu rampa, urcare pe deal, coborare
-## in viraj, chicane la ses, al doilea deal abrupt. Gimmick: bariera mobila
-## inainte de al doilea deal.
+## Pista 1 — "Dunele": desert. Dreapta de start cu rampa, urcare pe deal,
+## coborare in viraj, chicane la ses, al doilea deal abrupt. Gimmick:
+## bariera mobila inainte de al doilea deal. Decor: cactusi, mese de
+## piatra rosie, dune la orizont.
 
 func _init() -> void:
-	track_name = "Colinele"
+	track_name = "Dunele"
+	apply_theme("desert")
 
 func _points() -> Array[Vector3]:
 	return [

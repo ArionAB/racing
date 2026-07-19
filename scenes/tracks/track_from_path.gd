@@ -13,6 +13,7 @@ extends Track
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 
 @export var custom_name: String = "Atelier"
+@export_enum("forest", "desert") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
 @export var custom_ramp_fracs: Array[float] = []
 @export var custom_hazard_fracs: Array[float] = []
@@ -33,6 +34,7 @@ func _ready() -> void:
 func _apply_custom() -> void:
 	track_name = custom_name
 	half_width = custom_half_width
+	apply_theme(custom_theme)
 
 func _points() -> Array[Vector3]:
 	var path := get_node_or_null("Path") as Path3D

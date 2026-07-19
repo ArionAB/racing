@@ -19,6 +19,36 @@ const ROAD_THICKNESS: float = 3.0
 var track_name: String = "Pista"
 var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
 
+## Tema vizuala: fiecare pista isi defineste LUMEA (teren, cer, decor).
+var theme_decor: String = "forest" # "forest" sau "desert"
+var theme_ground_texture: String = "res://assets/textures/grass.png"
+var theme_ground_tint := Color(0.75, 0.85, 0.7)
+var theme_sky_top := Color(0.30, 0.50, 0.80)
+var theme_sky_horizon := Color(0.72, 0.84, 0.95)
+var theme_fog := Color(0.75, 0.85, 0.95)
+var theme_hill_color := Color(0.25, 0.45, 0.22)
+var theme_sun_color := Color(1.0, 0.97, 0.9)
+
+## Paleta completa a unei teme, dintr-un singur apel.
+func apply_theme(theme: String) -> void:
+	theme_decor = theme
+	if theme == "desert":
+		theme_ground_texture = "res://assets/textures/sand.png"
+		theme_ground_tint = Color(1.0, 0.95, 0.82)
+		theme_sky_top = Color(0.45, 0.62, 0.85)
+		theme_sky_horizon = Color(0.95, 0.85, 0.68)
+		theme_fog = Color(0.93, 0.85, 0.7)
+		theme_hill_color = Color(0.8, 0.65, 0.42)
+		theme_sun_color = Color(1.0, 0.93, 0.8)
+	else:
+		theme_ground_texture = "res://assets/textures/grass.png"
+		theme_ground_tint = Color(0.75, 0.85, 0.7)
+		theme_sky_top = Color(0.30, 0.50, 0.80)
+		theme_sky_horizon = Color(0.72, 0.84, 0.95)
+		theme_fog = Color(0.75, 0.85, 0.95)
+		theme_hill_color = Color(0.25, 0.45, 0.22)
+		theme_sun_color = Color(1.0, 0.97, 0.9)
+
 var curve: Curve3D
 var baked: PackedVector3Array
 var _dists: PackedFloat32Array # distanta cumulata pana la fiecare punct copt
@@ -47,6 +77,7 @@ func rebuild() -> void:
 			continue # curba editabila a pistelor custom ramane
 		child.free()
 	_build_curve()
+	_build_environment()
 	_build_road()
 	_build_walls()
 	for frac in _ramp_fracs():
@@ -57,6 +88,80 @@ func rebuild() -> void:
 	_build_start_line()
 	_build_kerbs()
 	_build_decor()
+
+## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
+func _build_environment() -> void:
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = theme_sky_top
+	sky_mat.sky_horizon_color = theme_sky_horizon
+	sky_mat.ground_bottom_color = theme_fog.darkened(0.4)
+	sky_mat.ground_horizon_color = theme_sky_horizon
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	var env := Environment.new()
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.fog_enabled = true
+	env.fog_light_color = theme_fog
+	env.fog_density = 0.004
+	var world_env := WorldEnvironment.new()
+	world_env.environment = env
+	add_child(world_env)
+
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-48, -30, 0)
+	sun.shadow_enabled = false # masinile au umbre blob (ieftin, mobil)
+	sun.light_color = theme_sun_color
+	add_child(sun)
+
+	var centroid := _centroid()
+	var ground := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(2000, 2000)
+	ground.mesh = plane
+	ground.position = centroid + Vector3.DOWN * 0.3
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = theme_ground_tint
+	if ResourceLoader.exists(theme_ground_texture):
+		mat.albedo_texture = load(theme_ground_texture)
+		mat.uv1_triplanar = true
+		mat.uv1_scale = Vector3(0.15, 0.15, 0.15)
+	ground.material_override = mat
+	add_child(ground)
+	var ground_body := StaticBody3D.new()
+	var ground_shape := CollisionShape3D.new()
+	var ground_box := BoxShape3D.new()
+	ground_box.size = Vector3(2000, 1, 2000)
+	ground_shape.shape = ground_box
+	ground_shape.position = centroid + Vector3.DOWN * 0.8
+	ground_body.add_child(ground_shape)
+	add_child(ground_body)
+
+	# Dealuri/dune la orizont: adancime vizuala aproape gratis.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = track_name.hash() + 1
+	for i in 12:
+		var angle := TAU * float(i) / 12.0 + rng.randf_range(-0.2, 0.2)
+		var dist := rng.randf_range(280.0, 420.0)
+		var hill := MeshInstance3D.new()
+		var sphere := SphereMesh.new()
+		var radius := rng.randf_range(60.0, 140.0)
+		sphere.radius = radius
+		sphere.height = radius * 0.5
+		hill.mesh = sphere
+		hill.position = centroid + Vector3(cos(angle), 0, sin(angle)) * dist \
+			+ Vector3.DOWN * 6.0
+		var hill_mat := StandardMaterial3D.new()
+		hill_mat.albedo_color = theme_hill_color.lightened(rng.randf_range(0.0, 0.15))
+		hill.material_override = hill_mat
+		add_child(hill)
+
+func _centroid() -> Vector3:
+	var sum := Vector3.ZERO
+	for p in baked:
+		sum += p
+	return sum / float(baked.size())
 
 ## Textura incarcata doar daca exista (inainte de prima generare lipsesc).
 func _tex(path: String) -> Texture2D:
@@ -333,7 +438,15 @@ func _build_decor() -> void:
 		if nearest < half_width + 8.0 or nearest > 90.0:
 			continue
 		placed += 1
-		if rng.randf() < 0.75:
+		if theme_decor == "desert":
+			var roll := rng.randf()
+			if roll < 0.45:
+				_add_cactus(pos, rng)
+			elif roll < 0.7:
+				_add_mesa(pos, rng)
+			else:
+				_add_dry_bush(pos, rng)
+		elif rng.randf() < 0.75:
 			_add_tree(pos, rng)
 		else:
 			_add_rock(pos, rng)
@@ -395,6 +508,87 @@ func _add_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	shape.shape = col_box
 	shape.position = Vector3.UP * size * 0.3
 	rock.add_child(shape)
+
+## Cactus saguaro: trunchi + doua brate, cu coliziune pe trunchi.
+func _add_cactus(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	var cactus := StaticBody3D.new()
+	add_child(cactus)
+	cactus.global_position = pos + Vector3.UP * -0.3
+	cactus.rotation.y = rng.randf_range(0.0, TAU)
+	var s := rng.randf_range(0.8, 1.4)
+	var green := Color(0.24, rng.randf_range(0.45, 0.58), 0.28)
+	var trunk := MeshInstance3D.new()
+	var trunk_mesh := CylinderMesh.new()
+	trunk_mesh.top_radius = 0.3
+	trunk_mesh.bottom_radius = 0.34
+	trunk_mesh.height = 2.6 * s
+	trunk.mesh = trunk_mesh
+	trunk.position = Vector3.UP * 1.3 * s
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = green
+	trunk.material_override = mat
+	cactus.add_child(trunk)
+	for side in [-1.0, 1.0]:
+		var arm := MeshInstance3D.new()
+		var arm_mesh := CylinderMesh.new()
+		arm_mesh.top_radius = 0.18
+		arm_mesh.bottom_radius = 0.18
+		arm_mesh.height = 1.0 * s
+		arm.mesh = arm_mesh
+		arm.position = Vector3(side * 0.55, rng.randf_range(1.1, 1.7) * s, 0)
+		arm.rotation.z = side * 0.9 # bratul iese oblic in sus
+		arm.material_override = mat
+		cactus.add_child(arm)
+	var shape := CollisionShape3D.new()
+	var cyl := CylinderShape3D.new()
+	cyl.radius = 0.4
+	cyl.height = 2.6 * s
+	shape.shape = cyl
+	shape.position = Vector3.UP * 1.3 * s
+	cactus.add_child(shape)
+
+## Mesa: lespezi de piatra rosiatica suprapuse, cu coliziune.
+func _add_mesa(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	var mesa := StaticBody3D.new()
+	add_child(mesa)
+	mesa.global_position = pos + Vector3.UP * -0.2
+	mesa.rotation.y = rng.randf_range(0.0, TAU)
+	var base := rng.randf_range(1.6, 3.6)
+	var levels := 2 + (1 if rng.randf() < 0.4 else 0)
+	var y := 0.0
+	for level in levels:
+		var frac := 1.0 - float(level) * 0.28
+		var slab := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(base * frac, base * 0.4, base * 0.85 * frac)
+		slab.mesh = box
+		y += base * 0.2
+		slab.position = Vector3.UP * y
+		y += base * 0.2
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.72, 0.42, 0.28).lightened(float(level) * 0.08)
+		slab.material_override = mat
+		mesa.add_child(slab)
+	var shape := CollisionShape3D.new()
+	var col := BoxShape3D.new()
+	col.size = Vector3(base, base * 0.8, base * 0.85)
+	shape.shape = col
+	shape.position = Vector3.UP * base * 0.4
+	mesa.add_child(shape)
+
+## Tufa uscata: doar vizual, treci prin ea.
+func _add_dry_bush(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	var bush := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	var r := rng.randf_range(0.4, 0.8)
+	sphere.radius = r
+	sphere.height = r
+	bush.mesh = sphere
+	bush.position = pos + Vector3.UP * (r * 0.3 - 0.3)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.55, 0.45, 0.25).lightened(rng.randf_range(0.0, 0.2))
+	bush.material_override = mat
+	add_child(bush)
 
 ## Mesh doar vizual (fara coliziune) — pentru linii de start, borduri etc.
 func _add_visual_mesh(mesh: ArrayMesh, color: Color) -> void:

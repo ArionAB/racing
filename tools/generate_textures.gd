@@ -14,6 +14,7 @@ func _init() -> void:
 	_asphalt()
 	_grass()
 	_concrete()
+	_sand()
 	print("Texturi generate in res://assets/textures/")
 	quit()
 
@@ -50,6 +51,22 @@ func _grass() -> void:
 			img.set_pixel(cx + off.x, cy + off.y, p * shade)
 	img.save_png("res://assets/textures/grass.png")
 	print("  grass.png")
+
+## Nisip: bej cald cu granulatie si valuri subtile (dune la scara mica).
+func _sand() -> void:
+	var img := Image.create(SIZE, SIZE, false, Image.FORMAT_RGB8)
+	for y in SIZE:
+		for x in SIZE:
+			var ripple := 0.03 * sin(float(y) * TAU * 3.0 / float(SIZE) \
+				+ float(x) * 0.015)
+			var v := 0.72 + rng.randf() * 0.07 + ripple
+			img.set_pixel(x, y, Color(v, v * 0.87, v * 0.6))
+	for i in 200: # granule mai inchise
+		var cx := rng.randi_range(0, SIZE - 1)
+		var cy := rng.randi_range(0, SIZE - 1)
+		img.set_pixel(cx, cy, img.get_pixel(cx, cy) * 0.82)
+	img.save_png("res://assets/textures/sand.png")
+	print("  sand.png")
 
 func _concrete() -> void:
 	var img := Image.create(SIZE, SIZE, false, Image.FORMAT_RGB8)

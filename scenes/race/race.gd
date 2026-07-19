@@ -34,7 +34,7 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
-	_build_environment()
+	# Mediul (cer, soare, teren) e construit de pista — fiecare are tema ei.
 	var track_scene := load(
 		GameState.TRACK_SCENES[GameState.selected_track]) as PackedScene
 	track = track_scene.instantiate() as Track
@@ -305,49 +305,3 @@ func _fmt_ms(ms: int) -> String:
 	@warning_ignore("integer_division")
 	return "%d:%02d.%d" % [ms / 60000, (ms % 60000) / 1000, (ms % 1000) / 100]
 
-# ------------------------------------------------------------------- mediu
-
-func _build_environment() -> void:
-	var env := Environment.new()
-	var sky := Sky.new()
-	sky.sky_material = ProceduralSkyMaterial.new()
-	env.background_mode = Environment.BG_SKY
-	env.sky = sky
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.fog_enabled = true
-	env.fog_light_color = Color(0.75, 0.85, 0.95)
-	env.fog_density = 0.004
-	var world_env := WorldEnvironment.new()
-	world_env.environment = env
-	add_child(world_env)
-
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-48, -30, 0)
-	# Fara umbre reale: masinile au umbre blob (ieftine, stil jucarie) —
-	# si exact asta ne tine in bugetul de performanta mobil.
-	sun.shadow_enabled = false
-	add_child(sun)
-
-	var ground := MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	plane.size = Vector2(2000, 2000)
-	ground.mesh = plane
-	ground.position = Vector3(60, -0.3, -100)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.75, 0.85, 0.7)
-	# Triplanar: textura se proiecteaza dupa pozitia in lume — nu ne
-	# trebuie UV-uri pe plan, si dala de ~7m nu se vede repetitiva.
-	if ResourceLoader.exists("res://assets/textures/grass.png"):
-		mat.albedo_texture = load("res://assets/textures/grass.png")
-		mat.uv1_triplanar = true
-		mat.uv1_scale = Vector3(0.15, 0.15, 0.15)
-	ground.material_override = mat
-	add_child(ground)
-	var ground_body := StaticBody3D.new()
-	var ground_shape := CollisionShape3D.new()
-	var ground_box := BoxShape3D.new()
-	ground_box.size = Vector3(2000, 1, 2000)
-	ground_shape.shape = ground_box
-	ground_shape.position = Vector3(60, -0.8, -100)
-	ground_body.add_child(ground_shape)
-	add_child(ground_body)

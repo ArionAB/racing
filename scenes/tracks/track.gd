@@ -129,7 +129,9 @@ func _build_environment() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.ambient_light_sky_contribution = 1.0
-	env.fog_enabled = true
+	# Ceata doar IN JOC: camera editorului sta la kilometri deasupra scenei
+	# in vederile ortogonale, iar ceata ar acoperi totul intr-o pata uniforma.
+	env.fog_enabled = not Engine.is_editor_hint()
 	env.fog_light_color = theme_fog
 	env.fog_density = 0.0035
 	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.

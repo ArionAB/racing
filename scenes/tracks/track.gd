@@ -444,7 +444,9 @@ func _build_hazard(frac: float) -> void:
 		var excavator := ExcavatorHazard.new()
 		excavator.model_scene = load("res://assets/models/toy_excavator.glb")
 		add_child(excavator)
-		var park := p + side * (half_width + 1.5)
+		# Corpul sta PE marginea soselei (blocheaza banda exterioara),
+		# bratul coboara spre centru — lasa o strecuratoare pe interior.
+		var park := p + side * (half_width * 0.8)
 		excavator.look_at_from_position(park, p, Vector3.UP) # bratul spre drum
 	else:
 		var box := SlidingHazard.new()

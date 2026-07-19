@@ -1,3 +1,4 @@
+@tool # vizibil si in preview-ul din editor
 class_name WaterHose
 extends Node3D
 ## Furtun de gradina la marginea soselei: pulseaza apa peste drum in cicluri.

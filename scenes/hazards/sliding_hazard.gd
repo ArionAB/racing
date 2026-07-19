@@ -1,3 +1,4 @@
+@tool # vizibil si in preview-ul din editor
 class_name SlidingHazard
 extends AnimatableBody3D
 ## Obstacol mobil care traverseaza soseaua dintr-o parte in alta.

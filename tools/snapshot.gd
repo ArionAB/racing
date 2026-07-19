@@ -6,9 +6,15 @@ extends Node
 
 func _ready() -> void:
 	var track_index := 0
+	var zoom_frac := -1.0 # >= 0: prim-plan la fractia respectiva din traseu
+	var zoom_size := 60.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
+		elif arg.begins_with("--frac="):
+			zoom_frac = float(arg.trim_prefix("--frac="))
+		elif arg.begins_with("--size="):
+			zoom_size = float(arg.trim_prefix("--size="))
 	track_index = clampi(track_index, 0, GameState.TRACK_SCENES.size() - 1)
 
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
@@ -33,10 +39,18 @@ func _ready() -> void:
 	var cam := Camera3D.new()
 	add_child(cam)
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	# `size` e extinderea VERTICALA; orizontala = size * aspect.
-	cam.size = maxf(extent_z, extent_x / aspect)
-	cam.position = center + Vector3.UP * 250.0
-	cam.rotation_degrees = Vector3(-90, 0, 0)
+	if zoom_frac >= 0.0:
+		# Prim-plan inclinat la un punct de pe traseu (vezi si inaltimile).
+		var idx := int(zoom_frac * float(track.baked.size())) % track.baked.size()
+		var focus: Vector3 = track.baked[idx]
+		cam.size = zoom_size
+		cam.position = focus + Vector3(0, zoom_size * 0.9, zoom_size * 0.6)
+		cam.look_at(focus, Vector3.UP)
+	else:
+		# `size` e extinderea VERTICALA; orizontala = size * aspect.
+		cam.size = maxf(extent_z, extent_x / aspect)
+		cam.position = center + Vector3.UP * 250.0
+		cam.rotation_degrees = Vector3(-90, 0, 0)
 	cam.far = 1000.0
 	cam.current = true
 

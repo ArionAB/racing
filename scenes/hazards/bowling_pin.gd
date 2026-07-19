@@ -1,3 +1,4 @@
+@tool # vizibil si in preview-ul din editor (fara simulare fizica acolo)
 class_name BowlingPin
 extends RigidBody3D
 ## Popica de jucarie — delimitator de pista FIZIC: sta cuminte (adormita)

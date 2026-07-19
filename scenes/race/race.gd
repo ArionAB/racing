@@ -323,7 +323,9 @@ func _build_environment() -> void:
 
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-48, -30, 0)
-	sun.shadow_enabled = true
+	# Fara umbre reale: masinile au umbre blob (ieftine, stil jucarie) —
+	# si exact asta ne tine in bugetul de performanta mobil.
+	sun.shadow_enabled = false
 	add_child(sun)
 
 	var ground := MeshInstance3D.new()

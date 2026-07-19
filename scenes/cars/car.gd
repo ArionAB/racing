@@ -86,6 +86,17 @@ var _boost_particles: CPUParticles3D
 var _engine_audio: AudioStreamPlayer3D
 var _skid_audio: AudioStreamPlayer3D
 var _turbo_full_latch: bool = false
+
+# Rotile modelului (noduri separate in FBX-urile RgsDev).
+var _wheels_all: Array[Node3D] = []
+var _wheels_front: Array[Node3D] = []
+var _wheel_radius: float = 0.35
+var _wheel_spin: float = 0.0
+var _wheel_steer: float = 0.0
+
+# Umbra blob: ieftina, mereu pe sol — arata locul aterizarii la sarituri.
+var _shadow: MeshInstance3D
+var _shadow_mat: StandardMaterial3D
 var _was_on_floor: bool = true
 var _prev_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
@@ -133,6 +144,8 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	if _drift_particles != null:
 		_drift_particles.position.z = data.body_length * 0.5
 		_boost_particles.position.z = data.body_length * 0.5 + 0.1
+	if _shadow != null:
+		_shadow.scale = Vector3(data.body_width * 0.62, 1.0, data.body_length * 0.5)
 
 func _physics_process(delta: float) -> void:
 	if track != null:
@@ -199,6 +212,8 @@ func _physics_process(delta: float) -> void:
 	_handle_bumping()
 	_detect_landing()
 	_update_visual_tilt(delta, steer, fwd_speed)
+	_update_wheels(delta, steer, fwd_speed)
+	_update_shadow()
 	_update_effects(delta)
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
@@ -355,13 +370,15 @@ func _drop_skid_marks(delta: float) -> void:
 		_skid_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_skid_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		_skid_mesh.material = _skid_mat
-	for side in [-0.85, 0.85]:
+	var half_track_w := data.body_width * 0.38 if data != null else 0.85
+	var rear_z := data.body_length * 0.34 if data != null else 1.3
+	for side in [-1.0, 1.0]:
 		var mark := MeshInstance3D.new()
 		mark.mesh = _skid_mesh
 		skid_parent.add_child(mark)
 		mark.global_position = global_position \
-			+ global_transform.basis.x * side \
-			+ global_transform.basis.z * 1.3 + Vector3.UP * 0.06
+			+ global_transform.basis.x * half_track_w * side \
+			+ global_transform.basis.z * rear_z + Vector3.UP * 0.06
 		mark.rotation.y = rotation.y
 		var tw := mark.create_tween()
 		tw.tween_interval(3.0)
@@ -434,6 +451,56 @@ func _build_effects() -> void:
 	_skid_audio.max_distance = 45.0
 	add_child(_skid_audio)
 
+	# Umbra blob: disc intunecat, pozitionat pe sol la fiecare tick.
+	# top_level = nu mosteneste transformarea masinii (o setam noi global).
+	_shadow = MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius = 1.0
+	disc.bottom_radius = 1.0
+	disc.height = 0.02
+	_shadow.mesh = disc
+	_shadow_mat = StandardMaterial3D.new()
+	_shadow_mat.albedo_color = Color(0.0, 0.0, 0.0, 0.38)
+	_shadow_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_shadow_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_shadow.material_override = _shadow_mat
+	_shadow.scale = Vector3(1.3, 1.0, 2.0)
+	add_child(_shadow)
+	_shadow.top_level = true
+
+## Rotile se invart cu viteza reala (unghi = viteza / raza) si cele din
+## fata se intorc vizual spre directia de viraj.
+func _update_wheels(delta: float, steer: float, fwd_speed: float) -> void:
+	if _wheels_all.is_empty():
+		return
+	_wheel_spin = fposmod(_wheel_spin + fwd_speed / _wheel_radius * delta, TAU)
+	_wheel_steer = lerpf(_wheel_steer, steer * 0.42, 10.0 * delta)
+	var spin_basis := Basis(Vector3.RIGHT, _wheel_spin)
+	for wheel in _wheels_all:
+		if wheel in _wheels_front:
+			wheel.basis = Basis(Vector3.UP, _wheel_steer) * spin_basis
+		else:
+			wheel.basis = spin_basis
+
+## Umbra blob: raycast in jos, discul sta pe sol indiferent unde e masina.
+## Cu cat sari mai sus, cu atat umbra palste — dar iti arata aterizarea.
+func _update_shadow() -> void:
+	if _shadow == null:
+		return
+	var space := get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(
+		global_position + Vector3.UP * 0.6, global_position + Vector3.DOWN * 30.0)
+	query.exclude = [get_rid()]
+	var hit := space.intersect_ray(query)
+	if hit.is_empty():
+		_shadow.visible = false
+		return
+	_shadow.visible = true
+	_shadow.global_position = (hit.position as Vector3) + Vector3.UP * 0.06
+	_shadow.rotation = Vector3(0.0, rotation.y, 0.0)
+	var height := global_position.y - (hit.position as Vector3).y
+	_shadow_mat.albedo_color.a = clampf(0.38 - height * 0.03, 0.08, 0.38)
+
 func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)
 	var target_roll := -steer * 0.09 * speed_frac * (1.6 if is_drifting else 1.0)
@@ -450,6 +517,19 @@ func _build_visual() -> void:
 		model.scale = Vector3.ONE * data.model_scale
 		model.rotation.y = deg_to_rad(data.model_rotation_deg)
 		_visual.add_child(model)
+		# Gasim rotile dupa nume, ca sa le animam (spin + viraj vizual).
+		_wheels_all.clear()
+		_wheels_front.clear()
+		for child in model.get_children():
+			var child_name := String(child.name).to_lower()
+			if child is Node3D and "wheel" in child_name:
+				_wheels_all.append(child)
+				if "front" in child_name:
+					_wheels_front.append(child)
+		if not _wheels_all.is_empty():
+			# Raza reala = inaltimea centrului rotii (sta pe sol) x scala.
+			_wheel_radius = maxf(0.15,
+				_wheels_all[0].position.y * data.model_scale)
 		return
 	_add_box(Vector3(2.2, 0.7, 3.6), Vector3(0, 0.55, 0), body_color)
 	_add_box(Vector3(1.6, 0.55, 1.7), Vector3(0, 1.1, 0.2), body_color.darkened(0.5))

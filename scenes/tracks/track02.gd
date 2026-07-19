@@ -1,3 +1,4 @@
+@tool
 extends Track
 ## Pista 2 — "Serpentina": ingusta si tehnica, aproape plata, un sir de
 ## S-uri stranse. Gimmick: DOUA bariere mobile pe sectoarele rapide —

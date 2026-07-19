@@ -1,3 +1,4 @@
+@tool
 extends Track
 ## Pista 3 — "Muntele": lata si rapida, cu o urcare uriasa (18m) si o
 ## coborare care te arunca in aer peste creste. Gimmick: doua rampe si

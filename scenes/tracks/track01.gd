@@ -1,3 +1,4 @@
+@tool # @tool NU se mosteneste — fiecare pista il declara ca sa apara in editor
 extends Track
 ## Pista 1 — "Dunele": desert. Dreapta de start cu rampa, urcare pe deal,
 ## coborare in viraj, chicane la ses, al doilea deal abrupt. Gimmick:

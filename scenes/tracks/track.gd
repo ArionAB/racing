@@ -1,7 +1,10 @@
-﻿class_name Track
+﻿@tool
+class_name Track
 extends Node3D
 ## Generator de pista 3D din puncte de control. O pista noua = o subclasa
 ## care da alte puncte + fractiile pentru rampe/hazarde — atat.
+## @tool: pista se construieste si IN EDITOR (preview la deschiderea
+## scenei); nodurile generate nu se salveaza (nu primesc owner).
 ##
 ## Filosofia peretilor (stil Ignition): pe EXTERIORUL circuitului gard peste
 ## tot; pe INTERIOR doar unde soseaua e inaltata. La nivelul solului
@@ -18,6 +21,7 @@ var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
 
 var curve: Curve3D
 var baked: PackedVector3Array
+var _dists: PackedFloat32Array # distanta cumulata pana la fiecare punct copt
 
 # --- API pentru subclase ---
 
@@ -34,6 +38,14 @@ func _hazard_fracs() -> Array[float]:
 	return []
 
 func _ready() -> void:
+	rebuild()
+
+## Reconstruieste toata pista (folosit si de editor, la Regenerate).
+func rebuild() -> void:
+	for child in get_children():
+		if child is Path3D:
+			continue # curba editabila a pistelor custom ramane
+		child.free()
 	_build_curve()
 	_build_road()
 	_build_walls()
@@ -45,6 +57,12 @@ func _ready() -> void:
 	_build_start_line()
 	_build_kerbs()
 	_build_decor()
+
+## Textura incarcata doar daca exista (inainte de prima generare lipsesc).
+func _tex(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		return load(path) as Texture2D
+	return null
 
 func start_point() -> Vector3:
 	return baked[0]
@@ -68,6 +86,13 @@ func _build_curve() -> void:
 	baked = curve.get_baked_points()
 	if baked.size() > 1 and baked[0].distance_to(baked[baked.size() - 1]) < 0.5:
 		baked.remove_at(baked.size() - 1)
+	# Distante cumulate — pentru coordonate UV continue de-a lungul soselei.
+	_dists = PackedFloat32Array()
+	_dists.resize(baked.size() + 1)
+	_dists[0] = 0.0
+	for i in baked.size():
+		var j := (i + 1) % baked.size()
+		_dists[i + 1] = _dists[i] + baked[i].distance_to(baked[j])
 
 func _side_at(i: int) -> Vector3:
 	var n := baked.size()
@@ -81,24 +106,50 @@ func _build_road() -> void:
 	sides.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
+	# UV-uri: U de-a latul soselei (0..1, banda din textura cade pe centru),
+	# V de-a lungul, in "dale" de 14m — textura curge continuu cu drumul.
+	var tile := 14.0
+	var side_tile := 8.0
 	for i in n:
 		var j := (i + 1) % n
 		var l0 := baked[i] - _side_at(i) * half_width
 		var r0 := baked[i] + _side_at(i) * half_width
 		var l1 := baked[j] - _side_at(j) * half_width
 		var r1 := baked[j] + _side_at(j) * half_width
-		top.add_vertex(l0); top.add_vertex(r0); top.add_vertex(l1)
-		top.add_vertex(r0); top.add_vertex(r1); top.add_vertex(l1)
-		sides.add_vertex(l0); sides.add_vertex(l1); sides.add_vertex(l0 + down)
-		sides.add_vertex(l0 + down); sides.add_vertex(l1); sides.add_vertex(l1 + down)
-		sides.add_vertex(r0); sides.add_vertex(r0 + down); sides.add_vertex(r1)
-		sides.add_vertex(r0 + down); sides.add_vertex(r1 + down); sides.add_vertex(r1)
-		sides.add_vertex(l0 + down); sides.add_vertex(l1 + down); sides.add_vertex(r0 + down)
-		sides.add_vertex(r0 + down); sides.add_vertex(l1 + down); sides.add_vertex(r1 + down)
+		var v0 := _dists[i] / tile
+		var v1 := _dists[i + 1] / tile
+		top.set_uv(Vector2(0, v0)); top.add_vertex(l0)
+		top.set_uv(Vector2(1, v0)); top.add_vertex(r0)
+		top.set_uv(Vector2(0, v1)); top.add_vertex(l1)
+		top.set_uv(Vector2(1, v0)); top.add_vertex(r0)
+		top.set_uv(Vector2(1, v1)); top.add_vertex(r1)
+		top.set_uv(Vector2(0, v1)); top.add_vertex(l1)
+		var u0 := _dists[i] / side_tile
+		var u1 := _dists[i + 1] / side_tile
+		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0)
+		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1)
+		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(l0 + down)
+		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(l0 + down)
+		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1)
+		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(l1 + down)
+		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(r0)
+		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
+		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(r1)
+		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
+		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
+		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(r1)
+		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0 + down)
+		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1 + down)
+		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
+		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
+		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1 + down)
+		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
 	top.generate_normals()
 	sides.generate_normals()
-	_add_mesh_with_collision(top.commit(), Color(0.24, 0.24, 0.28))
-	_add_mesh_with_collision(sides.commit(), Color(0.5, 0.45, 0.4))
+	_add_mesh_with_collision(top.commit(), Color.WHITE,
+		_tex("res://assets/textures/asphalt.png"))
+	_add_mesh_with_collision(sides.commit(), Color.WHITE,
+		_tex("res://assets/textures/concrete.png"))
 
 func _build_walls() -> void:
 	var loop_poly := PackedVector2Array()
@@ -169,11 +220,14 @@ func _build_hazard(frac: float) -> void:
 	hazard.travel = side * half_width * 0.9
 	hazard.global_position = p
 
-func _add_mesh_with_collision(mesh: ArrayMesh, color: Color) -> void:
+func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
+		texture: Texture2D = null) -> void:
 	var inst := MeshInstance3D.new()
 	inst.mesh = mesh
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
+	if texture != null:
+		mat.albedo_texture = texture
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	inst.material_override = mat
 	add_child(inst)

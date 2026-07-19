@@ -17,13 +17,16 @@ const CAR_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/firetruck.tres"),
 ]
 
-## Pistele, in ordinea campionatului.
+## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in
+## cursa rapida (Atelier = pista custom, editabila in editor).
 const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
 	"res://scenes/tracks/Track02.tscn",
 	"res://scenes/tracks/Track03.tscn",
+	"res://scenes/tracks/Track04.tscn",
 ]
-const TRACK_NAMES: Array[String] = ["Colinele", "Serpentina", "Muntele"]
+const TRACK_NAMES: Array[String] = ["Colinele", "Serpentina", "Muntele", "Atelier"]
+const CHAMP_ROUNDS: int = 3
 
 ## Puncte pe pozitie (locul 1..4).
 const CHAMP_POINTS: Array[int] = [10, 7, 4, 2]
@@ -105,7 +108,7 @@ func record_results(order_slots: Array) -> void:
 		champ_points[int(order_slots[rank])] += CHAMP_POINTS[rank]
 
 func champ_is_last_round() -> bool:
-	return champ_round >= TRACK_SCENES.size() - 1
+	return champ_round >= CHAMP_ROUNDS - 1
 
 func champ_next_race() -> void:
 	champ_round += 1

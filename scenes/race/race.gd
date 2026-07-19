@@ -213,7 +213,7 @@ func _show_results() -> void:
 	var primary := "RESTART"
 	if GameState.champ_active:
 		title = "CURSA %d/%d — %s" % [GameState.champ_round + 1,
-			GameState.TRACK_SCENES.size(), track.track_name]
+			GameState.CHAMP_ROUNDS, track.track_name]
 		primary = "CLASAMENT FINAL" if GameState.champ_is_last_round() \
 			else "URMATOAREA CURSA"
 	hud.show_results(title, rows, primary)
@@ -291,7 +291,7 @@ func _update_hud() -> void:
 	var champ_line := ""
 	if GameState.champ_active:
 		champ_line = "   cursa %d/%d" % [
-			GameState.champ_round + 1, GameState.TRACK_SCENES.size()]
+			GameState.champ_round + 1, GameState.CHAMP_ROUNDS]
 	var record_ms := GameState.best_lap(GameState.selected_track)
 	var record_text := _fmt_ms(record_ms) if record_ms > 0 else "--:--.-"
 	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s\nbest: %s   rec: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift" % [
@@ -334,7 +334,13 @@ func _build_environment() -> void:
 	ground.mesh = plane
 	ground.position = Vector3(60, -0.3, -100)
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.3, 0.55, 0.27)
+	mat.albedo_color = Color(0.75, 0.85, 0.7)
+	# Triplanar: textura se proiecteaza dupa pozitia in lume — nu ne
+	# trebuie UV-uri pe plan, si dala de ~7m nu se vede repetitiva.
+	if ResourceLoader.exists("res://assets/textures/grass.png"):
+		mat.albedo_texture = load("res://assets/textures/grass.png")
+		mat.uv1_triplanar = true
+		mat.uv1_scale = Vector3(0.15, 0.15, 0.15)
 	ground.material_override = mat
 	add_child(ground)
 	var ground_body := StaticBody3D.new()

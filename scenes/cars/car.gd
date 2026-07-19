@@ -90,6 +90,9 @@ var _turbo_full_latch: bool = false
 # Rotile modelului (noduri separate in FBX-urile RgsDev).
 var _wheels_all: Array[Node3D] = []
 var _wheels_front: Array[Node3D] = []
+## Transformarea originala a fiecarei roti (FBX-urile au scala "coapta" in
+## nod — daca o suprascriem cu o rotatie pura, rotile devin microscopice).
+var _wheel_orig: Array[Basis] = []
 var _wheel_radius: float = 0.35
 var _wheel_spin: float = 0.0
 var _wheel_steer: float = 0.0
@@ -476,11 +479,13 @@ func _update_wheels(delta: float, steer: float, fwd_speed: float) -> void:
 	_wheel_spin = fposmod(_wheel_spin + fwd_speed / _wheel_radius * delta, TAU)
 	_wheel_steer = lerpf(_wheel_steer, steer * 0.42, 10.0 * delta)
 	var spin_basis := Basis(Vector3.RIGHT, _wheel_spin)
-	for wheel in _wheels_all:
+	for idx in _wheels_all.size():
+		var wheel := _wheels_all[idx]
+		var anim := spin_basis
 		if wheel in _wheels_front:
-			wheel.basis = Basis(Vector3.UP, _wheel_steer) * spin_basis
-		else:
-			wheel.basis = spin_basis
+			anim = Basis(Vector3.UP, _wheel_steer) * spin_basis
+		# Compunem PESTE transformarea originala, nu in locul ei.
+		wheel.basis = anim * _wheel_orig[idx]
 
 ## Umbra blob: raycast in jos, discul sta pe sol indiferent unde e masina.
 ## Cu cat sari mai sus, cu atat umbra palste — dar iti arata aterizarea.
@@ -520,10 +525,12 @@ func _build_visual() -> void:
 		# Gasim rotile dupa nume, ca sa le animam (spin + viraj vizual).
 		_wheels_all.clear()
 		_wheels_front.clear()
+		_wheel_orig.clear()
 		for child in model.get_children():
 			var child_name := String(child.name).to_lower()
 			if child is Node3D and "wheel" in child_name:
 				_wheels_all.append(child)
+				_wheel_orig.append((child as Node3D).basis)
 				if "front" in child_name:
 					_wheels_front.append(child)
 		if not _wheels_all.is_empty():

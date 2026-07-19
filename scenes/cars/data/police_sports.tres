@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CarData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/cars/car_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/police_sports.fbx" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Politia"
+color = Color(0.25, 0.45, 0.95, 1)
+max_speed = 36.0
+acceleration = 17.0
+grip = 10.0
+mass_factor = 1.0
+model = ExtResource("2")
+model_scale = 0.873
+model_rotation_deg = 180.0
+body_length = 5.0
+body_width = 2.3

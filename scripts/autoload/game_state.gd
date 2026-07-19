@@ -8,11 +8,13 @@ const SETTINGS_PATH: String = "user://settings.cfg"
 const RECORDS_PATH: String = "user://records.cfg"
 
 ## Garajul: toate masinile jucabile. O masina noua = un .tres nou aici.
+## Modele: Free Low Poly Vehicles Pack de RgsDev (CC0).
 const CAR_DATA: Array[Resource] = [
-	preload("res://scenes/cars/data/vipera.tres"),
-	preload("res://scenes/cars/data/buldog.tres"),
-	preload("res://scenes/cars/data/purice.tres"),
-	preload("res://scenes/cars/data/motan.tres"),
+	preload("res://scenes/cars/data/muscle.tres"),
+	preload("res://scenes/cars/data/police_sports.tres"),
+	preload("res://scenes/cars/data/taxi.tres"),
+	preload("res://scenes/cars/data/bus.tres"),
+	preload("res://scenes/cars/data/firetruck.tres"),
 ]
 
 ## Pistele, in ordinea campionatului.

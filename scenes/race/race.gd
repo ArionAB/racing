@@ -8,7 +8,7 @@ const CAR_SCENE: PackedScene = preload("res://scenes/cars/Car.tscn")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
 const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna"]
 ## Lineup-ul AI: masina (index in GameState.CAR_DATA) + culoarea per slot.
-const AI_CARS: Array[int] = [1, 2, 0] # Buldog, Purice, Vipera
+const AI_CARS: Array[int] = [3, 1, 4] # Autobuzul, Politia, Pompierii
 const AI_COLORS: Array[Color] = [
 	Color(0.3, 0.8, 0.4), Color(0.8, 0.4, 0.9), Color(0.55, 0.75, 0.95)]
 
@@ -46,6 +46,7 @@ func _ready() -> void:
 	camera = ChaseCamera.new()
 	add_child(camera)
 	camera.target = player
+	_fit_camera_to_player()
 	camera.snap_behind()
 	hud = RaceHUD.new()
 	add_child(hud)
@@ -264,10 +265,22 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if key == null or not key.pressed or key.echo:
 		return
 	match key.physical_keycode:
-		KEY_1: player.apply_data(GameState.CAR_DATA[0] as CarData)
-		KEY_2: player.apply_data(GameState.CAR_DATA[1] as CarData)
-		KEY_3: player.apply_data(GameState.CAR_DATA[2] as CarData)
-		KEY_4: player.apply_data(GameState.CAR_DATA[3] as CarData)
+		KEY_1: _swap_player_car(0)
+		KEY_2: _swap_player_car(1)
+		KEY_3: _swap_player_car(2)
+		KEY_4: _swap_player_car(3)
+		KEY_5: _swap_player_car(4)
+
+func _swap_player_car(index: int) -> void:
+	player.apply_data(GameState.CAR_DATA[index] as CarData)
+	_fit_camera_to_player()
+
+## Camera se retrage proportional cu lungimea vehiculului (autobuzul ar
+## umple ecranul la distanta potrivita pentru muscle car).
+func _fit_camera_to_player() -> void:
+	if player.data != null:
+		camera.distance = 5.0 + player.data.body_length * 0.7
+		camera.height = 2.6 + player.data.body_length * 0.18
 
 func _update_hud() -> void:
 	var lap_text := "--:--.-"

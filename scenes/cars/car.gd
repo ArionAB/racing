@@ -64,6 +64,7 @@ var speed_scale: float = 1.0 # variatia onesta a AI (0.88..0.97), 1.0 la player
 
 var car_name: String = "?"
 var pilot_name: String = "?" # numele "pilotului", stabil intre curse
+var data: CarData
 var controller: CarController
 var track: Track
 var road_index: int = 0
@@ -95,16 +96,18 @@ var _skid_accum: float = 0.0
 static var _skid_mesh: PlaneMesh
 static var _skid_mat: StandardMaterial3D
 
+var _collision_shape: CollisionShape3D
+
 func _ready() -> void:
 	floor_snap_length = 2.0 # tine masina lipita de asfalt peste creste
 	_build_visual()
 	_build_effects()
-	var shape := CollisionShape3D.new()
+	_collision_shape = CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(2.2, 1.0, 3.8)
-	shape.shape = box
-	shape.position = Vector3(0, 0.6, 0)
-	add_child(shape)
+	_collision_shape.shape = box
+	_collision_shape.position = Vector3(0, 0.6, 0)
+	add_child(_collision_shape)
 	start_transform = global_transform
 
 func set_controller(new_controller: CarController) -> void:
@@ -112,7 +115,8 @@ func set_controller(new_controller: CarController) -> void:
 	add_child(new_controller)
 	new_controller.setup(self)
 
-func apply_data(data: CarData, color_override: Color = Color(0, 0, 0, 0)) -> void:
+func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) -> void:
+	data = new_data
 	car_name = data.display_name
 	max_speed = data.max_speed
 	acceleration = data.acceleration
@@ -122,6 +126,13 @@ func apply_data(data: CarData, color_override: Color = Color(0, 0, 0, 0)) -> voi
 	if _visual != null:
 		_visual.queue_free()
 	_build_visual()
+	# Colizerul si efectele urmeaza dimensiunile vehiculului.
+	if _collision_shape != null:
+		var box := _collision_shape.shape as BoxShape3D
+		box.size = Vector3(data.body_width * 0.9, 1.0, data.body_length * 0.85)
+	if _drift_particles != null:
+		_drift_particles.position.z = data.body_length * 0.5
+		_boost_particles.position.z = data.body_length * 0.5 + 0.1
 
 func _physics_process(delta: float) -> void:
 	if track != null:
@@ -433,6 +444,13 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
+	# Model 3D real daca exista in CarData; altfel placeholder din cuburi.
+	if data != null and data.model != null:
+		var model := data.model.instantiate() as Node3D
+		model.scale = Vector3.ONE * data.model_scale
+		model.rotation.y = deg_to_rad(data.model_rotation_deg)
+		_visual.add_child(model)
+		return
 	_add_box(Vector3(2.2, 0.7, 3.6), Vector3(0, 0.55, 0), body_color)
 	_add_box(Vector3(1.6, 0.55, 1.7), Vector3(0, 1.1, 0.2), body_color.darkened(0.5))
 	_add_box(Vector3(2.3, 0.18, 0.7), Vector3(0, 0.9, 1.85), body_color.darkened(0.25))

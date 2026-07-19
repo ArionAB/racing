@@ -75,6 +75,7 @@ var is_drifting: bool = false
 var drift_dir: float = 0.0
 var turbo_charge: float = 0.0 # 0..1, bara din UI
 var is_boosting: bool = false
+var slip_time: float = 0.0 # aquaplanare (setat de WaterHose)
 var _forced_boost: float = 0.0 # rocket start: ardere gratuita, nu goleste bara
 
 ## Nodul (din Race) sub care se depun urmele de cauciuc.
@@ -203,11 +204,15 @@ func _physics_process(delta: float) -> void:
 	fwd_h = Vector3(forward.x, 0.0, forward.z).normalized()
 	fwd_speed = hvel.dot(fwd_h)
 	var lateral := hvel - fwd_h * fwd_speed
-	lateral *= exp(-(drift_grip if is_drifting else grip) * delta)
+	var grip_now := drift_grip if is_drifting else grip
+	if slip_time > 0.0:
+		grip_now = 0.8 # aquaplanare: aproape zero aderenta laterala
+	lateral *= exp(-grip_now * delta)
 	if fwd_speed > vmax:
 		fwd_speed = move_toward(fwd_speed, vmax, 12.0 * delta)
 	hvel = fwd_h * fwd_speed + lateral
 
+	slip_time = maxf(slip_time - delta, 0.0)
 	velocity.x = hvel.x
 	velocity.z = hvel.z
 	_prev_velocity = velocity
@@ -282,11 +287,21 @@ func force_boost(seconds: float) -> void:
 
 # ------------------------------------------------------------- imbranceli
 
+## Refresh-uit de WaterHose cat timp esti in banda uda activa.
+func apply_slip() -> void:
+	slip_time = 0.25
+
 func _handle_bumping() -> void:
 	for i in get_slide_collision_count():
 		var col := get_slide_collision(i)
 		var other := col.get_collider() as Car
 		var n := col.get_normal() # dinspre obstacol spre noi
+		var rigid := col.get_collider() as RigidBody3D
+		if rigid != null:
+			# Popice & co: le imprastiem cu un impuls — juice fizic ieftin.
+			rigid.apply_central_impulse(
+				-n * clampf(horizontal_speed() * 0.5, 1.0, 12.0) + Vector3.UP * 1.5)
+			continue
 		if other != null:
 			n.y = 0.0
 			other.velocity += -n * 4.5 * (mass_factor / other.mass_factor)

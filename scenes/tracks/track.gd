@@ -66,6 +66,10 @@ func _ramp_fracs() -> Array[float]:
 func _hazard_fracs() -> Array[float]:
 	return []
 
+## Fractii unde furtunul de gradina pulseaza apa peste drum.
+func _hose_fracs() -> Array[float]:
+	return []
+
 func _ready() -> void:
 	rebuild()
 
@@ -83,6 +87,9 @@ func rebuild() -> void:
 		_build_ramp(frac)
 	for frac in _hazard_fracs():
 		_build_hazard(frac)
+	for frac in _hose_fracs():
+		_build_hose(frac)
+	_build_pins()
 	_build_start_gate()
 	_build_start_line()
 	_build_center_line()
@@ -421,18 +428,30 @@ func _build_hazard(frac: float) -> void:
 	var p := baked[idx]
 	var dir := (baked[(idx + 1) % n] - p).normalized()
 	var side := dir.cross(Vector3.UP).normalized()
-	var hazard := SlidingHazard.new()
-	# Hazard tematic: in desert (sandbox de jucarie), mingea de plaja
-	# facuta in Blender se rostogoleste peste sosea.
+	# Hazard tematic: in desert, mingea de plaja se rostogoleste peste
+	# sosea; in rest, excavatorul de jucarie coboara bratul peste o banda.
 	if theme_decor == "desert" and ResourceLoader.exists(
 			"res://assets/models/beach_ball.glb"):
-		hazard.model_scene = load("res://assets/models/beach_ball.glb")
-		hazard.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
-		hazard.roll_radius = 1.3
-	add_child(hazard)
-	hazard.center = p
-	hazard.travel = side * half_width * 0.9
-	hazard.global_position = p
+		var ball := SlidingHazard.new()
+		ball.model_scene = load("res://assets/models/beach_ball.glb")
+		ball.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
+		ball.roll_radius = 1.3
+		add_child(ball)
+		ball.center = p
+		ball.travel = side * half_width * 0.9
+		ball.global_position = p
+	elif ResourceLoader.exists("res://assets/models/toy_excavator.glb"):
+		var excavator := ExcavatorHazard.new()
+		excavator.model_scene = load("res://assets/models/toy_excavator.glb")
+		add_child(excavator)
+		var park := p + side * (half_width + 1.5)
+		excavator.look_at_from_position(park, p, Vector3.UP) # bratul spre drum
+	else:
+		var box := SlidingHazard.new()
+		add_child(box)
+		box.center = p
+		box.travel = side * half_width * 0.9
+		box.global_position = p
 
 func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		texture: Texture2D = null) -> void:
@@ -617,6 +636,46 @@ func _add_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	shape.shape = col_box
 	shape.position = Vector3.UP * size * 0.3
 	rock.add_child(shape)
+
+func _build_hose(frac: float) -> void:
+	if not ResourceLoader.exists("res://assets/models/garden_hose.glb"):
+		return
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+	var hose := WaterHose.new()
+	hose.model_scene = load("res://assets/models/garden_hose.glb")
+	hose.road_width = half_width * 2.0
+	add_child(hose)
+	hose.global_position = baked[idx]
+	hose.global_basis = Basis.looking_at(dir, Vector3.UP) # +X = marginea din dreapta
+
+## Popice pe marginile DESCHISE ale pistei (interior la nivelul solului,
+## unde nu sunt pereti): delimitatoare fizice — stau cuminti pana le lovesti.
+func _build_pins() -> void:
+	if not ResourceLoader.exists("res://assets/models/bowling_pin.glb"):
+		return
+	var pin_scene := load("res://assets/models/bowling_pin.glb") as PackedScene
+	var loop_poly := PackedVector2Array()
+	for p in _points():
+		loop_poly.append(Vector2(p.x, p.z))
+	var n := baked.size()
+	var placed := 0
+	for i in range(0, n, 4): # o popica la ~12m de margine deschisa
+		if placed >= 110:
+			break
+		for side_sign: float in [-1.0, 1.0]:
+			var edge := baked[i] + _side_at(i) * half_width * side_sign
+			var exterior := not Geometry2D.is_point_in_polygon(
+				Vector2(edge.x, edge.z), loop_poly)
+			if exterior or edge.y > 1.0:
+				continue # acolo sunt pereti; popicele marcheaza doar golurile
+			var pin := BowlingPin.new()
+			pin.model_scene = pin_scene
+			add_child(pin)
+			pin.global_position = edge + _side_at(i) * side_sign * 1.7 \
+				+ Vector3.UP * 0.2
+			placed += 1
 
 ## Cactus saguaro: trunchi + doua brate, cu coliziune pe trunchi.
 func _add_cactus(pos: Vector3, rng: RandomNumberGenerator) -> void:

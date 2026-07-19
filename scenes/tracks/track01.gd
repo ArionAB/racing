@@ -34,3 +34,6 @@ func _ramp_fracs() -> Array[float]:
 
 func _hazard_fracs() -> Array[float]:
 	return [0.58]
+
+func _hose_fracs() -> Array[float]:
+	return [0.3] # pe urcarea din dreapta, inainte de hairpin

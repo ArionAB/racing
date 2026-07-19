@@ -1,35 +1,32 @@
 extends SceneTree
-## Unealta temporara: masoara AABB-ul modelelor de vehicule importate,
-## ca sa calibram scala si orientarea in CarData.
+## Unealta: masoara modelele GLB (dimensiuni + structura + originea).
 
 const MODELS: Array[String] = [
-	"res://assets/models/muscle.fbx",
-	"res://assets/models/police_sports.fbx",
-	"res://assets/models/taxi.fbx",
-	"res://assets/models/bus.fbx",
-	"res://assets/models/firetruck.fbx",
+	"res://assets/models/toy_excavator.glb",
+	"res://assets/models/garden_hose.glb",
+	"res://assets/models/bowling_pin.glb",
 ]
 
 func _init() -> void:
 	for path in MODELS:
 		var scene := load(path) as PackedScene
 		if scene == null:
-			print(path, ": NU SE INCARCA")
+			print(path.get_file(), ": NU SE INCARCA")
 			continue
 		var inst := scene.instantiate()
 		var aabb := _merged_aabb(inst)
-		print("%s\n  size=(%.2f, %.2f, %.2f) pos=(%.2f, %.2f, %.2f) copii=%d" % [
+		print("%s  size=(%.2f, %.2f, %.2f) pos=(%.2f, %.2f, %.2f)" % [
 			path.get_file(), aabb.size.x, aabb.size.y, aabb.size.z,
-			aabb.position.x, aabb.position.y, aabb.position.z,
-			inst.get_child_count()])
-		for child in inst.get_children():
-			var pos_text := ""
-			if child is Node3D and "wheel" in String(child.name).to_lower():
-				var p := (child as Node3D).position
-				pos_text = "  pos=(%.2f, %.2f, %.2f)" % [p.x, p.y, p.z]
-			print("    - ", child.name, pos_text)
+			aabb.position.x, aabb.position.y, aabb.position.z])
+		_print_tree(inst, "  ")
 		inst.free()
 	quit()
+
+func _print_tree(node: Node, indent: String) -> void:
+	for child in node.get_children():
+		print(indent, "- ", child.name, " (", child.get_class(), ")")
+		if indent.length() < 8:
+			_print_tree(child, indent + "  ")
 
 func _merged_aabb(node: Node) -> AABB:
 	var result := AABB()

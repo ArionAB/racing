@@ -570,9 +570,13 @@ func _build_decor() -> void:
 		placed += 1
 		if theme_decor == "desert":
 			var roll := rng.randf()
-			if roll < 0.45:
+			if roll < 0.32:
 				_add_cactus(pos, rng)
-			elif roll < 0.7:
+			elif roll < 0.5:
+				_add_sandcastle(pos, rng)
+			elif roll < 0.65:
+				_add_bucket(pos, rng)
+			elif roll < 0.8:
 				_add_mesa(pos, rng)
 			else:
 				_add_dry_bush(pos, rng)
@@ -746,6 +750,57 @@ func _add_mesa(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	shape.position = Vector3.UP * base * 0.4
 	mesa.add_child(shape)
 
+## Galeata de plastic (Blender): unele in picioare, unele rasturnate.
+func _add_bucket(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	if not ResourceLoader.exists("res://assets/models/bucket.glb"):
+		_add_mesa(pos, rng)
+		return
+	var body := StaticBody3D.new()
+	body.add_to_group("props_blender")
+	add_child(body)
+	var s := rng.randf_range(0.38, 0.5)
+	var model := (load("res://assets/models/bucket.glb") as PackedScene) \
+		.instantiate() as Node3D
+	model.scale = Vector3.ONE * s
+	body.add_child(model)
+	var shape := CollisionShape3D.new()
+	var cyl := CylinderShape3D.new()
+	cyl.radius = 3.1 * s
+	cyl.height = 9.9 * s
+	shape.shape = cyl
+	shape.position = Vector3.UP * 4.95 * s
+	body.add_child(shape)
+	body.rotation.y = rng.randf_range(0.0, TAU)
+	if rng.randf() < 0.5:
+		# rasturnata pe o parte (coliziunea se roteste cu tot corpul)
+		body.rotation.x = PI / 2.0
+		body.global_position = pos + Vector3.UP * (3.1 * s - 0.3)
+	else:
+		body.global_position = pos + Vector3.UP * -0.3
+
+## Castel de nisip (Blender) — piesa mare de decor de sandbox.
+func _add_sandcastle(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	if not ResourceLoader.exists("res://assets/models/sandcastle.glb"):
+		_add_mesa(pos, rng)
+		return
+	var body := StaticBody3D.new()
+	body.add_to_group("props_blender")
+	add_child(body)
+	body.global_position = pos + Vector3.UP * -0.3
+	body.rotation.y = rng.randf_range(0.0, TAU)
+	var s := rng.randf_range(0.5, 0.7)
+	var model := (load("res://assets/models/sandcastle.glb") as PackedScene) \
+		.instantiate() as Node3D
+	model.scale = Vector3.ONE * s
+	body.add_child(model)
+	var shape := CollisionShape3D.new()
+	var cyl := CylinderShape3D.new()
+	cyl.radius = 3.2 * s
+	cyl.height = 8.5 * s
+	shape.shape = cyl
+	shape.position = Vector3.UP * 4.25 * s
+	body.add_child(shape)
+
 ## Tufa uscata: doar vizual, treci prin ea.
 func _add_dry_bush(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	var bush := MeshInstance3D.new()
@@ -771,6 +826,29 @@ func _add_visual_mesh(mesh: ArrayMesh, color: Color) -> void:
 	add_child(inst)
 
 func _build_start_gate() -> void:
+	# Arcada de start din Blender, scalata pe latimea pistei; picioarele
+	# au coliziune. Fallback pe stalpii procedurali daca lipseste modelul.
+	if ResourceLoader.exists("res://assets/models/start_arch.glb"):
+		var target_width := (half_width + 1.2) * 2.0
+		var s := target_width / 22.8 # latimea masurata a modelului
+		var gate := StaticBody3D.new()
+		gate.add_to_group("start_arch")
+		var model := (load("res://assets/models/start_arch.glb") as PackedScene) \
+			.instantiate() as Node3D
+		model.scale = Vector3.ONE * s
+		gate.add_child(model)
+		for sx: float in [-1.0, 1.0]:
+			var pillar := CollisionShape3D.new()
+			var box := BoxShape3D.new()
+			box.size = Vector3(1.4, 8.7 * s, 1.6)
+			pillar.shape = box
+			pillar.position = Vector3(sx * (target_width * 0.5 - 0.9),
+				8.7 * s * 0.5, 0)
+			gate.add_child(pillar)
+		add_child(gate)
+		gate.global_position = baked[0]
+		gate.global_basis = Basis.looking_at(start_direction(), Vector3.UP)
+		return
 	var side := _side_at(0)
 	for s in [-1.0, 1.0]:
 		var pillar := MeshInstance3D.new()

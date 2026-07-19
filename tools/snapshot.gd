@@ -48,8 +48,9 @@ func _ready() -> void:
 		cam.look_at(focus, Vector3.UP)
 	else:
 		# `size` e extinderea VERTICALA; orizontala = size * aspect.
-		cam.size = maxf(extent_z, extent_x / aspect)
-		cam.position = center + Vector3.UP * 250.0
+		# Cu --size fortezi cadrul (ex. 950 ca sa vezi si zidul lumii).
+		cam.size = zoom_size if zoom_size > 100.0 else maxf(extent_z, extent_x / aspect)
+		cam.position = center + Vector3.UP * 400.0
 		cam.rotation_degrees = Vector3(-90, 0, 0)
 	cam.far = 1000.0
 	cam.current = true

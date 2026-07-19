@@ -192,9 +192,12 @@ func _build_environment() -> void:
 	while placed < 12 and attempts < 80:
 		attempts += 1
 		var angle := rng.randf_range(0.0, TAU)
-		var dist := rng.randf_range(300.0, 480.0)
-		var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
 		var radius := rng.randf_range(60.0, 140.0)
+		# In desert, dunele raman INAUNTRUL zidului de sandbox (la ~380m);
+		# in padure nu exista zid, dealurile pot fi oricat de departe.
+		var max_dist := (365.0 - radius) if theme_decor == "desert" else 480.0
+		var dist := rng.randf_range(240.0, maxf(250.0, max_dist))
+		var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
 		var nearest := 1e12
 		for i in range(0, baked.size(), 4):
 			var dx := baked[i].x - pos.x

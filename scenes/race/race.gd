@@ -53,6 +53,7 @@ func _ready() -> void:
 	hud.restart_requested.connect(GameState.start_race)
 	hud.menu_requested.connect(GameState.go_to_menu)
 	hud.results_primary.connect(_on_results_primary)
+	hud.setup_minimap(track, cars)
 	hud.show_countdown("READY?")
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
 		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5)))

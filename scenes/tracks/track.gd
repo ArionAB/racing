@@ -161,20 +161,32 @@ func _build_environment() -> void:
 	ground_body.add_child(ground_shape)
 	add_child(ground_body)
 
-	# Dealuri/dune la orizont: adancime vizuala aproape gratis.
+	# Dealuri/dune la orizont: adancime vizuala aproape gratis. Verificam
+	# distanta REALA fata de sosea — centroidul nu ajunge, pista nu e rotunda.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = track_name.hash() + 1
-	for i in 12:
-		var angle := TAU * float(i) / 12.0 + rng.randf_range(-0.2, 0.2)
-		var dist := rng.randf_range(280.0, 420.0)
+	var placed := 0
+	var attempts := 0
+	while placed < 12 and attempts < 80:
+		attempts += 1
+		var angle := rng.randf_range(0.0, TAU)
+		var dist := rng.randf_range(300.0, 480.0)
+		var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
+		var radius := rng.randf_range(60.0, 140.0)
+		var nearest := 1e12
+		for i in range(0, baked.size(), 4):
+			var dx := baked[i].x - pos.x
+			var dz := baked[i].z - pos.z
+			nearest = minf(nearest, dx * dx + dz * dz)
+		if sqrt(nearest) < radius + 60.0:
+			continue # ar intra peste sosea — cautam alt loc
+		placed += 1
 		var hill := MeshInstance3D.new()
 		var sphere := SphereMesh.new()
-		var radius := rng.randf_range(60.0, 140.0)
 		sphere.radius = radius
 		sphere.height = radius * 0.5
 		hill.mesh = sphere
-		hill.position = centroid + Vector3(cos(angle), 0, sin(angle)) * dist \
-			+ Vector3.DOWN * 6.0
+		hill.position = pos + Vector3.DOWN * 6.0
 		var hill_mat := StandardMaterial3D.new()
 		hill_mat.albedo_color = theme_hill_color.lightened(rng.randf_range(0.0, 0.15))
 		hill.material_override = hill_mat
@@ -408,6 +420,13 @@ func _build_hazard(frac: float) -> void:
 	var dir := (baked[(idx + 1) % n] - p).normalized()
 	var side := dir.cross(Vector3.UP).normalized()
 	var hazard := SlidingHazard.new()
+	# Hazard tematic: in desert (sandbox de jucarie), mingea de plaja
+	# facuta in Blender se rostogoleste peste sosea.
+	if theme_decor == "desert" and ResourceLoader.exists(
+			"res://assets/models/beach_ball.glb"):
+		hazard.model_scene = load("res://assets/models/beach_ball.glb")
+		hazard.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
+		hazard.roll_radius = 1.3
 	add_child(hazard)
 	hazard.center = p
 	hazard.travel = side * half_width * 0.9

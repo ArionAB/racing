@@ -19,6 +19,7 @@ var _pause_panel: PanelContainer
 var _settings: SettingsPanel
 var _results_panel: PanelContainer
 var _results_box: VBoxContainer
+var _minimap: Minimap
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -54,6 +55,14 @@ func _ready() -> void:
 	_info = _make_label(24)
 	_info.position = Vector2(20, 14)
 	root.add_child(_info)
+
+	# Minimapa sub butonul de pauza (dreapta-sus); populata de Race.
+	_minimap = Minimap.new()
+	_minimap.set_anchors_and_offsets_preset(
+		Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
+	_minimap.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_minimap.position += Vector2(0, 76)
+	root.add_child(_minimap)
 
 	_countdown = _make_label(110)
 	_countdown.set_anchors_and_offsets_preset(
@@ -221,6 +230,9 @@ func _make_label(font_size: int) -> Label:
 	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	label.add_theme_constant_override("outline_size", 7)
 	return label
+
+func setup_minimap(track: Track, cars: Array[Car]) -> void:
+	_minimap.setup(track, cars)
 
 func set_info(text: String) -> void:
 	_info.text = text

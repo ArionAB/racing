@@ -157,7 +157,9 @@ func _build_environment() -> void:
 	var ground_box := BoxShape3D.new()
 	ground_box.size = Vector3(2000, 1, 2000)
 	ground_shape.shape = ground_box
-	ground_shape.position = centroid + Vector3.DOWN * 0.8
+	# ATENTIE: doar XZ din centroid — centroid.y include media dealurilor
+	# si ar ridica podeaua de coliziune deasupra soselei (perete invizibil).
+	ground_shape.position = Vector3(centroid.x, -0.8, centroid.z)
 	ground_body.add_child(ground_shape)
 	add_child(ground_body)
 
@@ -186,7 +188,7 @@ func _build_environment() -> void:
 		sphere.radius = radius
 		sphere.height = radius * 0.5
 		hill.mesh = sphere
-		hill.position = pos + Vector3.DOWN * 6.0
+		hill.position = Vector3(pos.x, -6.0, pos.z) # y absolut, nu din centroid
 		var hill_mat := StandardMaterial3D.new()
 		hill_mat.albedo_color = theme_hill_color.lightened(rng.randf_range(0.0, 0.15))
 		hill.material_override = hill_mat

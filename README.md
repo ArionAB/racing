@@ -6,7 +6,8 @@ drift-boost stil CTR. Mobile-first, fără arme.
 
 Proiectul a pornit ca spike de evaluare (de aceea folderul se numește
 `ignition-spike`) și a fost promovat la proiect real. Viziunea completă,
-arhitectura și roadmap-ul sunt în [CLAUDE.md](CLAUDE.md).
+arhitectura și roadmap-ul sunt în [CLAUDE.md](CLAUDE.md). Ești nou în echipă?
+Începe cu [ONBOARDING.md](ONBOARDING.md).
 
 ## Rulare
 

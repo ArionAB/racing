@@ -1,0 +1,16 @@
+# Cross-platform line endings: echipa lucreaza pe Windows, dar scripturile
+# ruleaza pe Linux (CI) si Git Bash. CRLF ar rupe `set -euo pipefail`.
+* text=auto
+
+*.sh   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# Godot / binare — nu normaliza.
+*.gd    text eol=lf
+*.png   binary
+*.glb   binary
+*.fbx   binary
+*.blend binary
+*.ogg   binary
+*.wav   binary

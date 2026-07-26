@@ -1,6 +1,23 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
-[ext_resource type="Script" path="res://scenes/tracks/track01.gd" id="1_track01"]
+[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_2wkjx"]
 
-[node name="Track01" type="Node3D"]
-script = ExtResource("1_track01")
+[sub_resource type="Curve3D" id="Curve3D_rpgo3"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 0, 3, 0, 0, 0, 0, 0, 0, 130, 2, -8, 0, 0, 0, 0, 0, 0, 190, 7, -40, 0, 0, 0, 0, 0, 0, 222, 14, -92, 0, 0, 0, 0, 0, 0, 232, 19, -150, 0, 0, 0, 0, 0, 0, 205, 12, -200, 0, 0, 0, 0, 0, 0, 150, 6, -222, 0, 0, 0, 0, 0, 0, 98, 4, -195, 0, 0, 0, 0, 0, 0, 78, 3, -140, 0, 0, 0, 0, 0, 0, 110, 2, -98, 0, 0, 0, 0, 0, 0, 62, 2, -58, 0, 0, 0, 0, 0, 0, -12, 6, -58, 0, 0, 0, 0, 0, 0, -82, 11, -92, 0, 0, 0, 0, 0, 0, -120, 9, -158, 0, 0, 0, 0, 0, 0, -108, 4, -108, 0, 0, 0, 0, 0, 0, -62, 1, -48, 0, 0, 0, 0, 0, 0, -22, 0, -6),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 18
+
+[node name="Track01" type="Node3D" unique_id=1385677875]
+script = ExtResource("1_2wkjx")
+custom_name = "Dunele"
+custom_theme = "desert"
+custom_half_width = 7.0
+custom_ramp_fracs = Array[float]([0.07, 0.88])
+custom_hazard_fracs = Array[float]([0.63])
+custom_hose_fracs = Array[float]([0.5])
+regenerate = false
+
+[node name="Path" type="Path3D" parent="." unique_id=47815459]
+curve = SubResource("Curve3D_rpgo3")

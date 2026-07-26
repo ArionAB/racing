@@ -6,7 +6,9 @@
       "args": [
         "blender-mcp"
       ],
-      "env": {}
+      "env": {
+        "DISABLE_TELEMETRY": "1"
+      }
     }
   }
 }

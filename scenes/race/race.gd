@@ -30,6 +30,8 @@ var _lap_start_ms: int = -1
 var _best_lap_ms: int = -1
 var _final_order: Array = [] # sloturi in ordinea sosirii
 var _champion_shown: bool = false
+## Cat sta fiecare masina impotmolita in afara soselei (secunde).
+var _stalled: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -61,6 +63,12 @@ func _ready() -> void:
 		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
 	player.boost_started.connect(func(_c: Car) -> void:
 		camera.add_trauma(0.18))
+	# Repunerea teleporteaza masina: camera trebuie sa sara cu ea, altfel
+	# urmareste cateva cadre un punct de la 100m.
+	player.respawned.connect(func(_c: Car) -> void:
+		camera.snap_behind()
+		camera.add_trauma(0.22)
+		hud.flash_message("RATAT — repus pe pista"))
 
 func _spawn_cars() -> void:
 	var count := GameState.ai_count + 1
@@ -70,8 +78,8 @@ func _spawn_cars() -> void:
 		car.track = track
 		add_child(car)
 		car.global_transform = spawns[i]
-		car.start_transform = spawns[i]
 		car.road_index = track.closest_index_global(car.global_position)
+		car.last_safe_index = car.road_index
 		car.skid_parent = _skid_parent
 		car.pilot_name = PILOTS[i % PILOTS.size()]
 		if i == 0:
@@ -99,7 +107,7 @@ func _physics_process(delta: float) -> void:
 	if state == State.COUNTDOWN:
 		_tick_countdown(delta)
 	else:
-		_tick_race()
+		_tick_race(delta)
 	_update_hud()
 
 # -------------------------------------------------------------- countdown
@@ -144,11 +152,10 @@ func _go() -> void:
 
 # ------------------------------------------------------------------ cursa
 
-func _tick_race() -> void:
+func _tick_race(delta: float) -> void:
 	for i in cars.size():
 		var car := cars[i]
-		if car.global_position.y < -12.0:
-			car.reset()
+		_watch_recovery(car, delta)
 		var st := _progress[i]
 		var frac := track.frac_at(car.road_index)
 		var d := frac - float(st.frac)
@@ -167,6 +174,25 @@ func _tick_race() -> void:
 			if laps >= GameState.total_laps and not car.finished:
 				car.finished = true
 	_update_positions()
+
+## Plasa de siguranta a cursei: nimeni nu ramane blocat. Zonele de fly-off au
+## RespawnZone-ul lor, dar mai exista doua feluri de a te pierde — sa cazi din
+## lume si sa te impotmolesti in nisip fara sa mai poti iesi. Amandoua se
+## termina cu repunerea pe ultimul checkpoint valid.
+func _watch_recovery(car: Car, delta: float) -> void:
+	if car.finished:
+		return
+	if car.global_position.y < -12.0:
+		car.respawn()
+		return
+	var off_road := not track.is_on_road(car.road_index, car.global_position)
+	if off_road and car.horizontal_speed() < 2.5:
+		_stalled[car] = float(_stalled.get(car, 0.0)) + delta
+		if float(_stalled[car]) > 5.0:
+			_stalled[car] = 0.0
+			car.respawn()
+	else:
+		_stalled[car] = 0.0
 
 func _on_player_lap(laps: int) -> void:
 	var now := Time.get_ticks_msec()

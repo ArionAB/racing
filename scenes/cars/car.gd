@@ -15,6 +15,7 @@ extends CharacterBody3D
 signal boost_started(car: Car)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
+signal respawned(car: Car)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -68,7 +69,9 @@ var data: CarData
 var controller: CarController
 var track: Track
 var road_index: int = 0
-var start_transform: Transform3D
+## Ultimul punct de pe traseu unde masina era cu roatele pe asfalt — de aici
+## repornim daca ratam o aterizare sau ajungem in nisip.
+var last_safe_index: int = 0
 
 # --- Drift/turbo ---
 var is_drifting: bool = false
@@ -106,6 +109,7 @@ var _prev_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
 var _bump_cooldown: float = 0.0
 var _skid_accum: float = 0.0
+var _respawn_cooldown: float = 0.0
 
 # Resurse partajate intre toate urmele de cauciuc (ieftin la instantiere).
 static var _skid_mesh: PlaneMesh
@@ -123,7 +127,6 @@ func _ready() -> void:
 	_collision_shape.shape = box
 	_collision_shape.position = Vector3(0, 0.6, 0)
 	add_child(_collision_shape)
-	start_transform = global_transform
 
 func set_controller(new_controller: CarController) -> void:
 	controller = new_controller
@@ -225,6 +228,12 @@ func _physics_process(delta: float) -> void:
 	_update_effects(delta)
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
+	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
+	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta. Dupa
+	# move_and_slide, ca is_on_floor() sa fie al cadrului curent.
+	if track != null and is_on_floor() \
+			and track.is_on_road(road_index, global_position):
+		last_safe_index = road_index
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.
 ## Turbo-ul merge SI pe iarba — scurtatura cu turbo e o alegere valida.
@@ -291,6 +300,20 @@ func force_boost(seconds: float) -> void:
 func apply_slip() -> void:
 	slip_time = 0.25
 
+## Ghiont de la un obstacol care iti schimba traiectoria: caruselul te matura
+## pe tangenta, deviatorul te trimite pe cealalta banda. Impactul in sine
+## (shake + sunet) vine din coliziunea solida, prin _handle_bumping.
+func apply_sweep(push: Vector3) -> void:
+	velocity += push
+
+## Aruncat in aer de o creasta de fly-off. SETAM velocity.y, nu adunam: pe sol
+## el e mereu readus la ~0 de move_and_slide, deci o adunare s-ar pierde.
+func launch(up_speed: float) -> void:
+	if velocity.y >= up_speed:
+		return
+	velocity.y = up_speed
+	_punch_scale(Vector3(0.9, 1.18, 0.92)) # intinsa pe verticala la desprindere
+
 func _handle_bumping() -> void:
 	for i in get_slide_collision_count():
 		var col := get_slide_collision(i)
@@ -329,14 +352,26 @@ func _detect_landing() -> void:
 
 # ------------------------------------------------------------------ restul
 
-func reset() -> void:
-	global_transform = start_transform
-	velocity = Vector3.ZERO
+## Repunere pe pista dupa o aterizare ratata (sau orice iesire din lume): pe
+## ultimul checkpoint valid, retrasa cu `backoff_m` metri ca sa aiba spatiu de
+## elan. Nu pe grila de start — repornirea cursei de la zero ar fi o pedeapsa
+## absurda pentru o saritura ratata.
+func respawn(backoff_m: float = 14.0) -> void:
+	if track == null or _respawn_cooldown > 0.0:
+		return
+	_respawn_cooldown = 1.5
+	global_transform = track.recovery_transform(last_safe_index, backoff_m)
+	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei
+	# curse e mai frustranta decat saritura ratata.
+	velocity = -global_transform.basis.z * 9.0
 	is_drifting = false
 	is_boosting = false
 	_forced_boost = 0.0
-	if track != null:
-		road_index = track.closest_index_global(global_position)
+	slip_time = 0.0
+	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
+	road_index = track.closest_index_global(global_position)
+	last_safe_index = road_index
+	respawned.emit(self)
 
 func horizontal_speed() -> float:
 	return Vector3(velocity.x, 0.0, velocity.z).length()

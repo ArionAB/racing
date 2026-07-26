@@ -19,6 +19,12 @@ extends Track
 @export var custom_hazard_fracs: Array[float] = []
 ## Furtunul de gradina care pulseaza apa peste drum (fractii 0..1).
 @export var custom_hose_fracs: Array[float] = []
+## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
+@export var custom_carousel_fracs: Array[float] = []
+## Deviatorul: bariera oblica care iti schimba traiectoria (gimmick de linie).
+@export var custom_deflector_fracs: Array[float] = []
+## Creasta de fly-off: te arunca in aer, cu plasa de respawn dedesubt.
+@export var custom_flyoff_fracs: Array[float] = []
 ## Bifeaza ca sa reconstruiesti pista din curba (doar in editor).
 @export var regenerate: bool = false:
 	set(_value):
@@ -54,6 +60,15 @@ func _hazard_fracs() -> Array[float]:
 
 func _hose_fracs() -> Array[float]:
 	return custom_hose_fracs
+
+func _carousel_fracs() -> Array[float]:
+	return custom_carousel_fracs
+
+func _deflector_fracs() -> Array[float]:
+	return custom_deflector_fracs
+
+func _flyoff_fracs() -> Array[float]:
+	return custom_flyoff_fracs
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

@@ -17,6 +17,8 @@ extends Track
 @export var custom_half_width: float = 7.0
 @export var custom_ramp_fracs: Array[float] = []
 @export var custom_hazard_fracs: Array[float] = []
+## Furtunul de gradina care pulseaza apa peste drum (fractii 0..1).
+@export var custom_hose_fracs: Array[float] = []
 ## Bifeaza ca sa reconstruiesti pista din curba (doar in editor).
 @export var regenerate: bool = false:
 	set(_value):
@@ -49,6 +51,9 @@ func _ramp_fracs() -> Array[float]:
 
 func _hazard_fracs() -> Array[float]:
 	return custom_hazard_fracs
+
+func _hose_fracs() -> Array[float]:
+	return custom_hose_fracs
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

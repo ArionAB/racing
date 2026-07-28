@@ -15,6 +15,13 @@ const WALL_HEIGHT: float = 1.3
 ## prin el la viteza (depenetrarea o poate impinge pe partea gresita).
 const ROAD_THICKNESS: float = 3.0
 
+## Creasta de fly-off: urcare cu panta CRESCATOARE care se termina intr-o
+## muchie (nu un cocoas lin — vezi FlyoffKicker pentru de ce).
+const FLYOFF_RISE_LEN: float = 12.0
+const FLYOFF_HEIGHT: float = 2.8
+## Latura amprentei in care se cauta masini care au ratat aterizarea.
+const FLYOFF_NET_EXTENT: float = 130.0
+
 ## Personalitatea pistei — suprascrise de subclase.
 var track_name: String = "Pista"
 var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
@@ -78,6 +85,19 @@ func _excavator_fracs() -> Array[float]:
 func _dino_spots() -> Array[Vector2]:
 	return []
 
+## Carusele: moristi uriase cu vane care MATURA soseaua (gimmick de timing).
+func _carousel_fracs() -> Array[float]:
+	return []
+
+## Deviatoare: bariere oblice care iti schimba traiectoria (gimmick de linie).
+func _deflector_fracs() -> Array[float]:
+	return []
+
+## Creste de fly-off: te arunca in aer inaintea unui viraj; ratezi aterizarea
+## si ajungi in nisipul de sub sosea, de unde te repune un RespawnZone.
+func _flyoff_fracs() -> Array[float]:
+	return []
+
 func _ready() -> void:
 	rebuild()
 
@@ -101,6 +121,12 @@ func rebuild() -> void:
 		_build_dino(spot.x, spot.y)
 	for frac in _hose_fracs():
 		_build_hose(frac)
+	for frac in _flyoff_fracs():
+		_build_flyoff(frac)
+	for frac in _deflector_fracs():
+		_build_deflector(frac)
+	for frac in _carousel_fracs():
+		_build_carousel(frac)
 	_build_pins()
 	_build_start_gate()
 	_build_start_line()
@@ -464,6 +490,123 @@ func _build_hazard(frac: float) -> void:
 		box.center = p
 		box.travel = side * half_width * 0.9
 		box.global_position = p
+
+## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
+## latimea. Vanele stau sub half_width ca sa nu treaca prin pereti.
+##
+## ATENTIE la ordine: transformarea se pune INAINTE de add_child. Rotorul e un
+## AnimatableBody3D cu sync_to_physics, deci transformarea lui o tine serverul
+## de fizica — plasat dupa intrarea in arbore, ramane un pas fizic in origine,
+## adica exact peste grila de start, si matura tot plutonul la countdown.
+func _build_carousel(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var carousel := CarouselHazard.new()
+	carousel.arm_reach = half_width - 0.2
+	carousel.position = baked[idx]
+	add_child(carousel)
+
+## Deviatorul: bariera oblica ancorata pe o margine, care taie drumul in
+## diagonala si te trimite pe cealalta banda.
+func _build_deflector(frac: float, side_sign: float = 1.0) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+	var deflector := DeflectorHazard.new()
+	deflector.road_half_width = half_width
+	deflector.side_sign = side_sign
+	# looking_at: -Z pe sensul cursei, deci +X = marginea din dreapta.
+	deflector.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), baked[idx])
+	add_child(deflector)
+
+## Zona de fly-off: o CREASTA peste toata latimea soselei, pusa inaintea unui
+## viraj. Nu are linie sigura — aici sare toata pista, alegerea e cat de tare
+## intri: prea incet si doar treci peste, prea tare si zbori pe langa viraj,
+## in nisipul de dedesubt (de unde te repune plasa de siguranta).
+func _build_flyoff(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var spacing := _dists[n] / float(n)
+	var steps := maxi(2, int(FLYOFF_RISE_LEN / spacing))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for k in steps:
+		var i := (idx + k) % n
+		var j := (idx + k + 1) % n
+		# exponent > 1 = panta creste spre buza (rampa de trambulina, nu cocoas)
+		var h0 := FLYOFF_HEIGHT * pow(float(k) / float(steps), 1.35)
+		var h1 := FLYOFF_HEIGHT * pow(float(k + 1) / float(steps), 1.35)
+		var s0 := _side_at(i) * half_width
+		var s1 := _side_at(j) * half_width
+		var l0 := baked[i] - s0 + Vector3.UP * h0
+		var r0 := baked[i] + s0 + Vector3.UP * h0
+		var l1 := baked[j] - s1 + Vector3.UP * h1
+		var r1 := baked[j] + s1 + Vector3.UP * h1
+		# fata de rulare
+		st.add_vertex(l0); st.add_vertex(r0); st.add_vertex(l1)
+		st.add_vertex(r0); st.add_vertex(r1); st.add_vertex(l1)
+		# flancurile, coborate pe asfalt — altfel creasta se vede pe dedesubt
+		for pair: Array in [[l0, l1, -s0, -s1], [r0, r1, s0, s1]]:
+			var b0: Vector3 = baked[i] + (pair[2] as Vector3)
+			var b1: Vector3 = baked[j] + (pair[3] as Vector3)
+			st.add_vertex(pair[0]); st.add_vertex(b0); st.add_vertex(pair[1])
+			st.add_vertex(b0); st.add_vertex(b1); st.add_vertex(pair[1])
+	# Buza: cadere VERTICALA pana la asfalt, ca la rampele pistei. Cu o
+	# coborare lina masina ar ramane lipita de panta (floor snap) si creasta ar
+	# fi doar o denivelare — desprinderea trebuie sa fie o muchie.
+	var last := (idx + steps) % n
+	var sl := _side_at(last) * half_width
+	var lip_l := baked[last] - sl
+	var lip_r := baked[last] + sl
+	var top_l := lip_l + Vector3.UP * FLYOFF_HEIGHT
+	var top_r := lip_r + Vector3.UP * FLYOFF_HEIGHT
+	st.add_vertex(top_l); st.add_vertex(top_r); st.add_vertex(lip_l)
+	st.add_vertex(top_r); st.add_vertex(lip_r); st.add_vertex(lip_l)
+	st.generate_normals()
+	# Portocaliul rampelor: jucatorul stie deja ca portocaliu = sari.
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+	_build_flyoff_kicker(last)
+	_build_flyoff_net(idx)
+
+## Cutia de pe buza crestei care da viteza verticala (vezi FlyoffKicker: panta
+## singura nu ridica un CharacterBody3D).
+func _build_flyoff_kicker(idx: int) -> void:
+	var n := baked.size()
+	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+	var kicker := FlyoffKicker.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(half_width * 2.0, 2.6, 3.0)
+	shape.shape = box
+	kicker.add_child(shape)
+	kicker.transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
+		baked[idx] - dir * 1.2 + Vector3.UP * (FLYOFF_HEIGHT + 0.9))
+	add_child(kicker)
+
+## Plasa de siguranta a unei creste: un volum plat de nisip, mult SUB sosea,
+## in jurul zonei de aterizare. Plafonul se calculeaza din cea mai joasa
+## bucata de sosea aflata in amprenta, minus o marja — asa nu poate prinde pe
+## cineva care conduce normal, indiferent de forma pistei.
+func _build_flyoff_net(idx: int) -> void:
+	var n := baked.size()
+	var spacing := _dists[n] / float(n)
+	var center := baked[(idx + int(40.0 / spacing)) % n]
+	var half_extent := FLYOFF_NET_EXTENT * 0.5
+	var lowest_road := 1e9
+	for i in n:
+		if absf(baked[i].x - center.x) <= half_extent \
+				and absf(baked[i].z - center.z) <= half_extent:
+			lowest_road = minf(lowest_road, baked[i].y)
+	var top := lowest_road - 5.0
+	var bottom := -25.0
+	var zone := RespawnZone.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(FLYOFF_NET_EXTENT, top - bottom, FLYOFF_NET_EXTENT)
+	shape.shape = box
+	zone.add_child(shape)
+	zone.position = Vector3(center.x, (top + bottom) * 0.5, center.z)
+	add_child(zone)
 
 func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		texture: Texture2D = null) -> void:
@@ -1029,6 +1172,18 @@ func closest_index_global(pos: Vector3) -> int:
 
 func frac_at(index: int) -> float:
 	return float(index) / float(baked.size())
+
+## Punctul de repunere pe pista: centrul soselei cu `backoff_m` metri INAINTE
+## de checkpoint-ul dat, orientat in sensul cursei. Retragerea da spatiu de
+## elan — repus exact pe buza crestei, ai cadea din nou, iar bucla aia ar
+## bloca cursa (exact ce nu vrem).
+func recovery_transform(index: int, backoff_m: float) -> Transform3D:
+	var n := baked.size()
+	var spacing := _dists[n] / float(n)
+	var idx := ((index - int(backoff_m / spacing)) % n + n) % n
+	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+	return Transform3D(Basis.looking_at(dir, Vector3.UP),
+		baked[idx] + Vector3.UP * 1.2)
 
 func lateral_distance(index: int, pos: Vector3) -> float:
 	var p := baked[index]

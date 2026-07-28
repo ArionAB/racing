@@ -723,16 +723,22 @@ func _build_decor() -> void:
 		placed += 1
 		if theme_decor == "desert":
 			var roll := rng.randf()
-			if roll < 0.28:
+			if roll < 0.24:
 				_add_cactus(pos, rng)
-			elif roll < 0.45:
+			elif roll < 0.38:
 				_add_sandcastle(pos, rng)
-			elif roll < 0.59:
+			elif roll < 0.50:
 				_add_bucket(pos, rng)
-			elif roll < 0.72:
+			elif roll < 0.61:
 				_add_glb_rock(pos, rng)
-			elif roll < 0.85:
+			elif roll < 0.72:
 				_add_mesa(pos, rng)
+			elif roll < 0.79:
+				_add_barrel(pos, rng)
+			elif roll < 0.85:
+				_add_crate(pos, rng)
+			elif roll < 0.90:
+				_add_tire(pos, rng)
 			else:
 				_add_dry_bush(pos, rng)
 		elif rng.randf() < 0.7:
@@ -1075,6 +1081,27 @@ func _add_sandcastle(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	shape.shape = cyl
 	shape.position = Vector3.UP * 4.25 * s
 	body.add_child(shape)
+
+## Bidon de tabla — RigidBody bump-abil (vezi scenes/props/barrel.gd).
+func _add_barrel(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	var barrel := Barrel.new()
+	add_child(barrel)
+	barrel.rotation.y = rng.randf_range(0.0, TAU)
+	barrel.global_position = pos + Vector3.UP * -0.3
+
+## Lada de lemn — RigidBody bump-abil, mai greu decat bidonul/cauciucul.
+func _add_crate(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	var crate := Crate.new()
+	add_child(crate)
+	crate.rotation.y = rng.randf_range(0.0, TAU)
+	crate.global_position = pos + Vector3.UP * -0.3
+
+## Cauciuc — RigidBody bump-abil, cel mai usor dintre cele trei.
+func _add_tire(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	var tire := Tire.new()
+	add_child(tire)
+	tire.rotation.y = rng.randf_range(0.0, TAU)
+	tire.global_position = pos + Vector3.UP * -0.3
 
 ## Tufa uscata: doar vizual, treci prin ea.
 func _add_dry_bush(pos: Vector3, rng: RandomNumberGenerator) -> void:

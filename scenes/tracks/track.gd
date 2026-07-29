@@ -59,6 +59,13 @@ var curve: Curve3D
 var baked: PackedVector3Array
 var _dists: PackedFloat32Array # distanta cumulata pana la fiecare punct copt
 
+## Materiale flat, refolosite pe culoare. Fara cache-ul asta fiecare mesh
+## procedural isi facea propriul StandardMaterial3D — masurat cu
+## tools/probe_decor.gd pe Dunele: 76 mesh-uri -> 72 materiale, adica tot atatea
+## draw call-uri, exact ce nu ne permitem pe mobil (CLAUDE.md, constrangeri 3D).
+## Se goleste la fiecare rebuild(), ca schimbarea de tema sa nu lase gunoi.
+var _mat_cache: Dictionary = {}
+
 # --- API pentru subclase ---
 
 func _points() -> Array[Vector3]:
@@ -103,6 +110,7 @@ func _ready() -> void:
 
 ## Reconstruieste toata pista (folosit si de editor, la Regenerate).
 func rebuild() -> void:
+	_mat_cache.clear() # altfel raman materialele temei precedente
 	for child in get_children():
 		if child is Path3D:
 			continue # curba editabila a pistelor custom ramane
@@ -238,9 +246,9 @@ func _build_environment() -> void:
 		sphere.height = radius * 0.5
 		hill.mesh = sphere
 		hill.position = Vector3(pos.x, -6.0, pos.z) # y absolut, nu din centroid
-		var hill_mat := StandardMaterial3D.new()
-		hill_mat.albedo_color = theme_hill_color.lightened(rng.randf_range(0.0, 0.15))
-		hill.material_override = hill_mat
+		# nuanta in 4 trepte, nu continua: dealurile de fundal impart 4 materiale
+		var tint := float(rng.randi_range(0, 3)) / 3.0 * 0.15
+		hill.material_override = _flat_material(theme_hill_color.lightened(tint))
 		add_child(hill)
 
 func _centroid() -> Vector3:
@@ -608,16 +616,29 @@ func _build_flyoff_net(idx: int) -> void:
 	zone.position = Vector3(center.x, (top + bottom) * 0.5, center.z)
 	add_child(zone)
 
-func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
-		texture: Texture2D = null) -> void:
-	var inst := MeshInstance3D.new()
-	inst.mesh = mesh
+## Materialul flat pentru o culoare (si optional o textura), refolosit intre
+## apeluri. Doua mesh-uri de aceeasi culoare = acelasi material = un draw call
+## in loc de doua. De aceea variatiile aleatoare de nuanta sunt CUANTIFICATE in
+## cateva trepte peste tot: o nuanta continua per instanta ar face cache-ul inutil.
+func _flat_material(color: Color, texture: Texture2D = null) -> StandardMaterial3D:
+	var key := "%s|%s" % [color.to_html(true),
+		texture.resource_path if texture != null else ""]
+	if _mat_cache.has(key):
+		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	if texture != null:
 		mat.albedo_texture = texture
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	inst.material_override = mat
+	_mat_cache[key] = mat
+	return mat
+
+
+func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
+		texture: Texture2D = null) -> void:
+	var inst := MeshInstance3D.new()
+	inst.mesh = mesh
+	inst.material_override = _flat_material(color, texture)
 	add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
@@ -754,9 +775,7 @@ func _add_tree(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	trunk_mesh.height = 1.4 * scale_factor
 	trunk.mesh = trunk_mesh
 	trunk.position = Vector3.UP * 0.7 * scale_factor
-	var trunk_mat := StandardMaterial3D.new()
-	trunk_mat.albedo_color = Color(0.45, 0.3, 0.18)
-	trunk.material_override = trunk_mat
+	trunk.material_override = _flat_material(Color(0.45, 0.3, 0.18))
 	tree.add_child(trunk)
 	var crown := MeshInstance3D.new()
 	var crown_mesh := CylinderMesh.new()
@@ -765,9 +784,9 @@ func _add_tree(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	crown_mesh.height = 3.2 * scale_factor
 	crown.mesh = crown_mesh
 	crown.position = Vector3.UP * (1.4 * scale_factor + 1.6 * scale_factor)
-	var crown_mat := StandardMaterial3D.new()
-	crown_mat.albedo_color = Color(0.2, rng.randf_range(0.45, 0.65), 0.22)
-	crown.material_override = crown_mat
+	# verde in 4 trepte: padurea are 4 materiale de coroana, nu unul per copac
+	var green := 0.45 + float(rng.randi_range(0, 3)) / 3.0 * 0.20
+	crown.material_override = _flat_material(Color(0.2, green, 0.22))
 	tree.add_child(crown)
 	var shape := CollisionShape3D.new()
 	var cyl := CylinderShape3D.new()
@@ -789,9 +808,7 @@ func _add_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	mesh_inst.mesh = box
 	mesh_inst.position = Vector3.UP * size * 0.3
 	mesh_inst.rotation.z = rng.randf_range(-0.2, 0.2)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.55, 0.55, 0.58)
-	mesh_inst.material_override = mat
+	mesh_inst.material_override = _flat_material(Color(0.55, 0.55, 0.58))
 	rock.add_child(mesh_inst)
 	var shape := CollisionShape3D.new()
 	var col_box := BoxShape3D.new()
@@ -881,43 +898,61 @@ func _build_pins() -> void:
 				+ Vector3.UP * 0.2
 			placed += 1
 
-## Cactus saguaro: trunchi + doua brate, cu coliziune pe trunchi.
+## Cactus saguaro din cactus.glb (Blender): trei siluete distincte — fara brate,
+## un brat, doua brate — cu coliziune pe trunchi. Modelul aduce UV-uri catre
+## slotul de paleta si AO copt in vertex colors; ii inlocuim materialul cu cel
+## UNIC al lumii, deci cactusii se grupeaza cu restul decorului in foarte putine
+## draw call-uri (vezi docs/blender_export.md).
+##
+## Variatia NU mai vine din culoare: paleta are un singur verde, prin constructie
+## — asta e chiar scopul atlasului. Vine din silueta, rotatie si o scalare mica.
+## Inaltimile din model (2.85 / 3.50 / 4.40 m) sunt deja in intervalul cerut de
+## style_bible §2, asa ca nu le scalam agresiv — altfel ies din interval.
 func _add_cactus(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	var cactus := StaticBody3D.new()
-	add_child(cactus)
-	cactus.global_position = pos + Vector3.UP * -0.3
-	cactus.rotation.y = rng.randf_range(0.0, TAU)
-	var s := rng.randf_range(0.8, 1.4)
-	var green := Color(0.24, rng.randf_range(0.45, 0.58), 0.28)
-	var trunk := MeshInstance3D.new()
-	var trunk_mesh := CylinderMesh.new()
-	trunk_mesh.top_radius = 0.3
-	trunk_mesh.bottom_radius = 0.34
-	trunk_mesh.height = 2.6 * s
-	trunk.mesh = trunk_mesh
-	trunk.position = Vector3.UP * 1.3 * s
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = green
-	trunk.material_override = mat
-	cactus.add_child(trunk)
-	for side in [-1.0, 1.0]:
-		var arm := MeshInstance3D.new()
-		var arm_mesh := CylinderMesh.new()
-		arm_mesh.top_radius = 0.18
-		arm_mesh.bottom_radius = 0.18
-		arm_mesh.height = 1.0 * s
-		arm.mesh = arm_mesh
-		arm.position = Vector3(side * 0.55, rng.randf_range(1.1, 1.7) * s, 0)
-		arm.rotation.z = side * 0.9 # bratul iese oblic in sus
-		arm.material_override = mat
-		cactus.add_child(arm)
+	if not ResourceLoader.exists("res://assets/models/cactus.glb"):
+		_add_dry_bush(pos, rng)
+		return
+	var container := (load("res://assets/models/cactus.glb") as PackedScene) \
+		.instantiate() as Node3D
+	var picks: Array[String] = ["Cactus_A", "Cactus_B", "Cactus_C"]
+	var keep_name: String = picks[rng.randi_range(0, picks.size() - 1)]
+	var kept: Node3D = null
+	for child in container.get_children():
+		if child.name == keep_name:
+			kept = child
+		else:
+			child.queue_free()
+	if kept == null:
+		container.queue_free()
+		_add_dry_bush(pos, rng)
+		return
+	var body := StaticBody3D.new()
+	add_child(body)
+	# Banda e ingusta intentionat: variantele acopera deja 2.85-4.40 m, iar
+	# style_bible §2 cere 2.8-4.5. O scalare mai generoasa scoate exemplarele
+	# extreme din interval — masurat cu tools/probe_decor.gd: 0.92 -> 2.63 m,
+	# 0.98 -> 2.79 m (sub prag), 1.03 -> 4.53 m (peste prag).
+	# Variatia vine din silueta si rotatie, nu din scara.
+	var s := rng.randf_range(0.99, 1.02)
+	container.scale = Vector3.ONE * s
+	container.position = -kept.position * s # variantele sunt exportate in origine
+	body.add_child(container)
+	Palette.apply_world_material(container)
+	# Inaltimea se citeste din model: regenerezi GLB-ul cu alte cote si coliziunea
+	# o urmeaza singura, fara tabel de inaltimi hardcodat.
+	var h := 3.2
+	var mi := kept as MeshInstance3D
+	if mi != null and mi.mesh != null:
+		h = mi.mesh.get_aabb().size.y * s
 	var shape := CollisionShape3D.new()
 	var cyl := CylinderShape3D.new()
-	cyl.radius = 0.4
-	cyl.height = 2.6 * s
+	cyl.radius = 0.34
+	cyl.height = h
 	shape.shape = cyl
-	shape.position = Vector3.UP * 1.3 * s
-	cactus.add_child(shape)
+	shape.position = Vector3.UP * h * 0.5
+	body.add_child(shape)
+	body.rotation.y = rng.randf_range(0.0, TAU)
+	body.global_position = pos + Vector3.UP * -0.3
 
 ## Mesa: lespezi de piatra rosiatica suprapuse, cu coliziune.
 func _add_mesa(pos: Vector3, rng: RandomNumberGenerator) -> void:
@@ -937,9 +972,11 @@ func _add_mesa(pos: Vector3, rng: RandomNumberGenerator) -> void:
 		y += base * 0.2
 		slab.position = Vector3.UP * y
 		y += base * 0.2
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.72, 0.42, 0.28).lightened(float(level) * 0.08)
-		slab.material_override = mat
+		# Culoare din paleta (rock_light), nu inventata: mesa e decor de desert,
+		# deci intra sub aceleasi sloturi ca prop-urile din Blender. Lespezile de
+		# sus sunt mai deschise — straturi de stanca, style_bible §3.
+		slab.material_override = _flat_material(
+			Palette.color(Palette.ROCK_LIGHT).lightened(float(level) * 0.08))
 		mesa.add_child(slab)
 	var shape := CollisionShape3D.new()
 	var col := BoxShape3D.new()
@@ -1085,19 +1122,18 @@ func _add_dry_bush(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	sphere.height = r
 	bush.mesh = sphere
 	bush.position = pos + Vector3.UP * (r * 0.3 - 0.3)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.55, 0.45, 0.25).lightened(rng.randf_range(0.0, 0.2))
-	bush.material_override = mat
+	# Slotul de vegetatie uscata din paleta, in 3 trepte de nuanta (nu continuu,
+	# altfel fiecare tufa ar cere material propriu).
+	var tint := float(rng.randi_range(0, 2)) / 2.0 * 0.18
+	bush.material_override = _flat_material(
+		Palette.color(Palette.DRY_VEGETATION).lightened(tint))
 	add_child(bush)
 
 ## Mesh doar vizual (fara coliziune) — pentru linii de start, borduri etc.
 func _add_visual_mesh(mesh: ArrayMesh, color: Color) -> void:
 	var inst := MeshInstance3D.new()
 	inst.mesh = mesh
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	inst.material_override = mat
+	inst.material_override = _flat_material(color)
 	add_child(inst)
 
 func _build_start_gate() -> void:
@@ -1131,9 +1167,7 @@ func _build_start_gate() -> void:
 		box.size = Vector3(0.8, 6.0, 0.8)
 		pillar.mesh = box
 		pillar.position = baked[0] + side * (half_width + 0.8) * s + Vector3.UP * 3.0
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.9, 0.9, 0.95)
-		pillar.material_override = mat
+		pillar.material_override = _flat_material(Color(0.9, 0.9, 0.95))
 		add_child(pillar)
 	var bar := MeshInstance3D.new()
 	var bar_box := BoxMesh.new()
@@ -1141,9 +1175,7 @@ func _build_start_gate() -> void:
 	bar.mesh = bar_box
 	bar.position = baked[0] + Vector3.UP * 6.0
 	bar.basis = Basis.looking_at(start_direction(), Vector3.UP)
-	var bar_mat := StandardMaterial3D.new()
-	bar_mat.albedo_color = Color(0.95, 0.55, 0.1)
-	bar.material_override = bar_mat
+	bar.material_override = _flat_material(Color(0.95, 0.55, 0.1))
 	add_child(bar)
 
 # ---------------------------------------------- interogari (AI + progres)

@@ -65,3 +65,24 @@ jobs:
             exit 1
           fi
           echo "OK — niciun error de script/parse/load."
+
+      # Un material = (cel putin) un draw call, iar draw call-urile sunt
+      # constrangerea pentru 60fps pe mid-range. Garda prinde regresia clasica:
+      # StandardMaterial3D.new() intr-o bucla de decor, care da un material per
+      # instanta. Vezi tools/probe_decor.gd pentru prag si cifrele de referinta.
+      - name: Draw-call guard (materiale per pista)
+        run: |
+          set -uo pipefail
+          ~/godot-bin/godot --headless --script res://tools/probe_decor.gd 2>&1 | tee probe.log
+          STATUS=${PIPESTATUS[0]}
+          # Verificam si verdictul, nu doar codul: daca sonda moare inainte sa
+          # termine pistele, absenta verdictului e ea insasi un esec.
+          if ! grep -q 'VERDICT:' probe.log; then
+            echo "::error::Garda nu a rulat pana la capat (niciun verdict in log)."
+            exit 1
+          fi
+          if [ "$STATUS" -ne 0 ] || grep -q 'VERDICT: PROBLEMA' probe.log; then
+            echo "::error::Prea multe materiale distincte pe cel putin o pista — vezi tabelul de mai sus."
+            exit 1
+          fi
+          echo "OK — garda de draw call-uri a trecut."

@@ -25,6 +25,9 @@ extends Track
 @export var custom_deflector_fracs: Array[float] = []
 ## Creasta de fly-off: te arunca in aer, cu plasa de respawn dedesubt.
 @export var custom_flyoff_fracs: Array[float] = []
+## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
+## _LANDMARKS: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66).
+@export var custom_landmarks: Array[Vector3] = []
 ## Bifeaza ca sa reconstruiesti pista din curba (doar in editor).
 @export var regenerate: bool = false:
 	set(_value):
@@ -69,6 +72,9 @@ func _deflector_fracs() -> Array[float]:
 
 func _flyoff_fracs() -> Array[float]:
 	return custom_flyoff_fracs
+
+func _landmark_spots() -> Array[Vector3]:
+	return custom_landmarks
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

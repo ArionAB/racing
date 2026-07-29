@@ -92,6 +92,11 @@ func _excavator_fracs() -> Array[float]:
 func _dino_spots() -> Array[Vector2]:
 	return []
 
+## Landmark-uri hero (turn de apa, benzinarie, moara, semn): fiecare
+## (fractie, parte ±1, id-model din _LANDMARKS) — plasate cu intentie.
+func _landmark_spots() -> Array[Vector3]:
+	return []
+
 ## Carusele: moristi uriase cu vane care MATURA soseaua (gimmick de timing).
 func _carousel_fracs() -> Array[float]:
 	return []
@@ -127,6 +132,8 @@ func rebuild() -> void:
 		_build_excavator(frac)
 	for spot in _dino_spots():
 		_build_dino(spot.x, spot.y)
+	for spot in _landmark_spots():
+		_build_landmark(spot.x, spot.y, int(spot.z))
 	for frac in _hose_fracs():
 		_build_hose(frac)
 	for frac in _flyoff_fracs():
@@ -857,6 +864,69 @@ func _build_dino(frac: float, side_sign: float) -> void:
 	var stand := p + side * (half_width + 6.0)
 	stand.y = maxf(p.y - 0.3, -0.3) # la nivelul solului de langa drum
 	dino.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
+
+## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
+##   gap    = cat de departe de marginea soselei sta (m)
+##   col    = forma de coliziune ("cyl" / "box" / "none")
+##   spin   = primeste scriptul windmill.gd (roata "Blades" care se invarte)
+## Dimensiunile vin din docs/asset_briefs/ (origine la baza, scara 1:1 m).
+const _LANDMARKS := {
+	0: {"path": "res://assets/models/water_tower.glb",
+		"gap": 10.0, "col": "cyl", "radius": 2.4, "height": 9.5, "spin": false},
+	1: {"path": "res://assets/models/gas_station.glb",
+		"gap": 9.0, "col": "box", "size": Vector3(8.0, 5.0, 6.0), "spin": false},
+	2: {"path": "res://assets/models/windmill.glb",
+		"gap": 11.0, "col": "cyl", "radius": 1.6, "height": 9.0, "spin": true},
+	3: {"path": "res://assets/models/route66_sign.glb",
+		"gap": 3.5, "col": "none", "spin": false},
+}
+
+## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual
+## (style_bible §7: landmark dominant la cateva secunde; NICIODATA inalt in
+## apexul virajului). Turnul de apa/moara stau retrase, cu coliziune; semnul
+## e doar vizual. Moara primeste windmill.gd ca sa i se invarta roata.
+func _build_landmark(frac: float, side_sign: float, id: int) -> void:
+	if not _LANDMARKS.has(id):
+		return
+	var info: Dictionary = _LANDMARKS[id]
+	var path: String = info["path"]
+	if not ResourceLoader.exists(path):
+		return
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	var side := _side_at(idx) * side_sign
+	var model := (load(path) as PackedScene).instantiate() as Node3D
+	if info["spin"]:
+		model.set_script(load("res://scenes/props/windmill.gd"))
+	var root: Node3D
+	if info["col"] == "none":
+		root = Node3D.new()
+	else:
+		var body := StaticBody3D.new()
+		var shape := CollisionShape3D.new()
+		if info["col"] == "box":
+			var box := BoxShape3D.new()
+			box.size = info["size"]
+			shape.shape = box
+			shape.position = Vector3.UP * (info["size"].y * 0.5)
+		else: # "cyl"
+			var cyl := CylinderShape3D.new()
+			cyl.radius = info["radius"]
+			cyl.height = info["height"]
+			shape.shape = cyl
+			shape.position = Vector3.UP * (info["height"] * 0.5)
+		body.add_child(shape)
+		root = body
+	root.add_to_group("landmarks")
+	root.add_child(model)
+	add_child(root)
+	# Atlasul comun pe tot subarborele (fara el, GLB-ul iese alb). Moara si-l
+	# aplica singura in _ready, dar celelalte prop-uri il primesc aici.
+	Palette.apply_world_material(root)
+	var stand := p + side * (half_width + float(info["gap"]))
+	stand.y = maxf(p.y - 0.3, -0.3) # la nivelul solului de langa drum
+	root.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 
 func _build_hose(frac: float) -> void:
 	if not ResourceLoader.exists("res://assets/models/garden_hose.glb"):

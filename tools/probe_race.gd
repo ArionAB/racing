@@ -1,0 +1,419 @@
+extends Node
+## Sonda de TUNARE: masoara ce simti pe pista, dar in cifre. Doua moduri, ambele
+## headless, ca sa poti compara "inainte / dupa" la fiecare schimbare de fizica
+## sau de AI (CLAUDE.md: verificare cu sonde inainte de commit).
+##
+##   race  — o cursa cu 4 AI pe o pista: tururi, timp in afara soselei, timp
+##           mers incet, marsarier de anti-blocaj, repuneri, izbituri in pereti,
+##           imbranceli si lovituri de la obstacolele mobile.
+##   bump  — matricea de imbranceli intre masini: cine pe cine arunca si cu cat.
+##           Aici se vede daca "grea impinge, usoara zboara" e adevarat.
+##
+## Rulare (ca SCENA, nu ca --script: avem nevoie de autoload-urile GameState /
+## AudioManager, iar acelea nu exista in modul --script):
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn
+##   ... -- --mode=bump
+##   ... -- --mode=race --track=0 --seconds=150
+
+const RACE_SCENE: String = "res://scenes/race/Race.tscn"
+const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
+## Seed fix: doua rulari ale aceleiasi versiuni trebuie sa dea aceleasi cifre,
+## altfel comparatia "inainte / dupa" nu inseamna nimic.
+const SEED: int = 20260729
+## Suprascris cu --seed=N: acelasi cod, seed-uri diferite = mai multe curse
+## independente. Un blocaj care apare la 1 din 5 seed-uri e tot un blocaj.
+var _seed: int = SEED
+## Viteza de sosire a atacatorului in modul bump (m/s).
+const BUMP_ENTRY_SPEED: float = 26.0
+
+var _mode: String = "race"
+var _track_index: int = 0
+var _seconds: float = 150.0
+
+var _race: Node = null
+var _elapsed: float = 0.0
+var _stats: Array[Dictionary] = []
+var _done: bool = false
+
+## Pista taiata in felii egale, ca sa vezi UNDE se scurge viteza.
+const BUCKETS: int = 20
+var _bucket_speed: PackedFloat32Array = PackedFloat32Array()
+var _bucket_samples: PackedInt32Array = PackedInt32Array()
+var _bucket_slow: PackedInt32Array = PackedInt32Array()
+var _bucket_walls: PackedInt32Array = PackedInt32Array()
+
+# --- mod bump ---
+var _bump_cases: Array[Dictionary] = []
+var _bump_case: int = -1
+var _bump_frames: int = 0
+var _bump_attacker: Car = null
+var _bump_victim: Car = null
+var _bump_rows: Array[Dictionary] = []
+var _bump_peak: float = 0.0
+var _bump_attacker_loss: float = 0.0
+var _bump_impulses_att: int = 0
+var _bump_impulses_vic: int = 0
+var _bump_impulse_peak_att: float = 0.0
+var _bump_impulse_peak_vic: float = 0.0
+
+## Controller de laborator: comenzi fixe, fara "creier".
+class ScriptedController extends CarController:
+	var throttle: float = 1.0
+	var steer: float = 0.0
+
+	func get_throttle() -> float:
+		return throttle
+
+	func get_steer() -> float:
+		return steer
+
+
+func _ready() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--mode="):
+			_mode = arg.trim_prefix("--mode=")
+		elif arg.begins_with("--track="):
+			_track_index = int(arg.trim_prefix("--track="))
+		elif arg.begins_with("--seconds="):
+			_seconds = float(arg.trim_prefix("--seconds="))
+		elif arg.begins_with("--seed="):
+			_seed = int(arg.trim_prefix("--seed="))
+	match _mode:
+		"race":
+			_start_race()
+		"bump":
+			_start_bump()
+		_:
+			push_error("probe_race: mod necunoscut '%s'" % _mode)
+			get_tree().quit(1)
+
+
+func _physics_process(delta: float) -> void:
+	if _done:
+		return
+	if _mode == "bump":
+		_tick_bump()
+	else:
+		_tick_race(delta)
+
+
+func _finish() -> void:
+	_done = true
+	get_tree().quit(0)
+
+
+# --------------------------------------------------------------- mod cursa
+
+func _start_race() -> void:
+	GameState.selected_track = _track_index
+	GameState.champ_active = false
+	GameState.total_laps = 99 # cursa nu se termina singura; o oprim pe timp
+	_bucket_speed.resize(BUCKETS)
+	_bucket_samples.resize(BUCKETS)
+	_bucket_slow.resize(BUCKETS)
+	_bucket_walls.resize(BUCKETS)
+	_race = (load(RACE_SCENE) as PackedScene).instantiate()
+	add_child(_race)
+	# Si rocket start-ul AI-ului trage la zaruri; fara seed fix, doua rulari ale
+	# ACELUIASI cod pornesc diferit si "inainte / dupa" nu mai compara nimic.
+	(_race._rng as RandomNumberGenerator).seed = _seed
+	# Jucatorul primeste tot un creier AI: masuram pista, nu reflexele mele.
+	var player: Car = _race.player
+	var old: CarController = player.controller
+	player.remove_child(old)
+	old.free()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _seed
+	var cars: Array[Car] = _race.cars
+	for i in cars.size():
+		var car := cars[i]
+		if car == player:
+			var ai := AIController.new()
+			car.set_controller(ai)
+			ai.configure(_race.track, rng)
+		else:
+			(car.controller as AIController).line_offset = rng.randf_range(-0.35, 0.35)
+		# Variatie onesta, dar determinista — altfel cifrele danseaza intre rulari.
+		car.speed_scale = 1.0 if car == player else rng.randf_range(0.88, 0.97)
+		_stats.append({
+			"name": "%s (%s)" % [car.pilot_name, car.car_name],
+			"offroad_s": 0.0, "slow_s": 0.0, "reverse_s": 0.0,
+			"respawns": 0, "walls": 0, "wall_impact": 0.0,
+			"bumps": 0, "bump_peak": 0.0,
+			"slide_hits": 0, "carousel_hits": 0, "deflector_hits": 0,
+			"speed_sum": 0.0, "samples": 0,
+			"stuck_t": 0.0, "stuck_reports": 0,
+		})
+		car.respawned.connect(_on_respawn.bind(i))
+		car.wall_hit.connect(_on_wall.bind(i))
+		# Delta-v-ul REAL al imbrancelii, direct din model. Masurat ca diferenta
+		# de viteza intre cadre ar aduna si gravitatia, aterizarile si turbo.
+		# Conditionat: pe versiunile de dinaintea modelului de masa semnalul nu
+		# exista, iar sonda trebuie sa poata masura si acele rulari (coloana
+		# "bump/dv" ramane goala acolo, restul cifrelor sunt comparabile).
+		if car.has_signal(&"bumped"):
+			car.bumped.connect(_on_bumped.bind(i))
+
+
+func _tick_race(delta: float) -> void:
+	_elapsed += delta
+	var cars: Array[Car] = _race.cars
+	for i in cars.size():
+		var car := cars[i]
+		var st := _stats[i]
+		var speed := car.horizontal_speed()
+		st.speed_sum = float(st.speed_sum) + speed
+		st.samples = int(st.samples) + 1
+		if not _race.track.is_on_road(car.road_index, car.global_position):
+			st.offroad_s = float(st.offroad_s) + delta
+		if speed < 4.0:
+			st.slow_s = float(st.slow_s) + delta
+		if car.controller != null and car.controller.get_throttle() < -0.5:
+			st.reverse_s = float(st.reverse_s) + delta
+		# Contactele ultimului move_and_slide sunt inca valide in acest tick.
+		for c in car.get_slide_collision_count():
+			var hit := car.get_slide_collision(c).get_collider()
+			if hit is SlidingHazard:
+				st.slide_hits = int(st.slide_hits) + 1
+			elif _is_under(hit as Node, "CarouselHazard"):
+				# Rotorul caruselului e COPIL al hazardului, deci colizionerul
+				# nu e niciodata hazardul insusi.
+				st.carousel_hits = int(st.carousel_hits) + 1
+			elif _is_under(hit as Node, "DeflectorHazard"):
+				st.deflector_hits = int(st.deflector_hits) + 1
+		# Harta pistei: unde anume se scurge viteza. Fara ea nu stii daca AI-ul
+		# pierde in acelasi viraj de fiecare data sau imprastiat peste tot.
+		var b := clampi(int(_race.track.frac_at(car.road_index) * float(BUCKETS)),
+			0, BUCKETS - 1)
+		_bucket_speed[b] += speed
+		_bucket_samples[b] += 1
+		if speed < 4.0:
+			_bucket_slow[b] += 1
+		_watch_stuck(car, st, speed, delta)
+	if _elapsed >= _seconds:
+		_report_race()
+
+
+func _is_under(node: Node, type_name: String) -> bool:
+	var walker := node
+	while walker != null:
+		if walker.is_class(type_name) or (walker.get_script() != null
+				and (walker.get_script() as Script).get_global_name() == type_name):
+			return true
+		walker = walker.get_parent()
+	return false
+
+
+## Un blocaj adevarat nu e "o clipa de incetinire", e o masina care nu mai
+## progreseaza. Il raportam cu loc si vinovat — altfel tunezi in orb.
+func _watch_stuck(car: Car, st: Dictionary, speed: float, delta: float) -> void:
+	if _race.state != Race.State.RUNNING or speed > 6.0:
+		st.stuck_t = 0.0
+		return
+	st.stuck_t = float(st.stuck_t) + delta
+	if float(st.stuck_t) < 3.0 or int(st.stuck_reports) >= 6:
+		return
+	st.stuck_t = 0.0
+	st.stuck_reports = int(st.stuck_reports) + 1
+	var touching: Array[String] = []
+	for c in car.get_slide_collision_count():
+		var hit := car.get_slide_collision(c).get_collider() as Node3D
+		if hit != null:
+			touching.append("%s@(%.0f,%.0f,%.0f)" % [_describe(hit),
+				hit.global_position.x, hit.global_position.y, hit.global_position.z])
+	print("[blocaj] t=%5.1fs  %-18s frac=%.3f  v=%4.1f  lat=%4.1f  poz=(%.0f,%.0f,%.0f)  atinge: %s" % [
+		_elapsed, st.name, _race.track.frac_at(car.road_index), speed,
+		_race.track.lateral_distance(car.road_index, car.global_position),
+		car.global_position.x, car.global_position.y, car.global_position.z,
+		", ".join(touching) if not touching.is_empty() else "-"])
+
+
+## Numele unui corp generat procedural nu spune nimic (@StaticBody3D@31);
+## mesh-ul copil si culoarea lui spun exact ce bucata de pista e.
+func _describe(body: Node3D) -> String:
+	if not body.name.begins_with("@"):
+		return String(body.name)
+	for child in body.get_children():
+		var mi := child as MeshInstance3D
+		if mi == null:
+			continue
+		var mat := mi.material_override as StandardMaterial3D
+		var tint := "?" if mat == null else "#%s" % mat.albedo_color.to_html(false)
+		return "%s[%s]" % [body.get_class(), tint]
+	return String(body.name)
+
+
+func _on_bumped(_car: Car, _other: Car, delta_v: float, index: int) -> void:
+	_stats[index].bumps = int(_stats[index].bumps) + 1
+	_stats[index].bump_peak = maxf(float(_stats[index].bump_peak), delta_v)
+
+
+func _on_respawn(_car: Car, index: int) -> void:
+	_stats[index].respawns = int(_stats[index].respawns) + 1
+
+
+func _on_wall(car: Car, impact: float, index: int) -> void:
+	_stats[index].walls = int(_stats[index].walls) + 1
+	_stats[index].wall_impact = maxf(float(_stats[index].wall_impact), impact)
+	var b := clampi(int(_race.track.frac_at(car.road_index) * float(BUCKETS)),
+		0, BUCKETS - 1)
+	_bucket_walls[b] += 1
+
+
+func _report_race() -> void:
+	var track: Track = _race.track
+	var cars: Array[Car] = _race.cars
+	print("\n=== CURSA: %s — %.0fs, %d masini ===" % [
+		track.track_name, _elapsed, cars.size()])
+	print("%-20s %6s %6s %8s %7s %7s %5s %6s %9s %6s %6s %6s" % [
+		"masina", "tururi", "v_med", "offroad", "lent", "invers",
+		"resp", "pereti", "bump/dv", "minge", "carus", "deviat"])
+	var worst_offroad := 0.0
+	var total_respawns := 0
+	var laps: Array[float] = []
+	for i in cars.size():
+		var st := _stats[i]
+		var done := float(_race._progress[i].total)
+		laps.append(done)
+		var avg := float(st.speed_sum) / maxf(float(st.samples), 1.0)
+		var off_pct := float(st.offroad_s) / _elapsed * 100.0
+		worst_offroad = maxf(worst_offroad, off_pct)
+		total_respawns += int(st.respawns)
+		print("%-20s %6.2f %6.1f %7.1f%% %6.1fs %6.1fs %5d %6d %4d/%4.1f %6d %6d %6d" % [
+			st.name, done, avg, off_pct, float(st.slow_s), float(st.reverse_s),
+			int(st.respawns), int(st.walls), int(st.bumps), float(st.bump_peak),
+			int(st.slide_hits), int(st.carousel_hits), int(st.deflector_hits)])
+	laps.sort()
+	print("--- ritm: cel mai rapid %.2f tururi, cel mai lent %.2f (ecart %.2f)" % [
+		laps[laps.size() - 1], laps[0], laps[laps.size() - 1] - laps[0]])
+	print("--- repuneri totale: %d · cel mai mult in afara soselei: %.1f%%" % [
+		total_respawns, worst_offroad])
+	print("\n--- unde se scurge viteza (felie de pista -> v_med, %% lent, pereti)")
+	for b in BUCKETS:
+		var samples := maxi(_bucket_samples[b], 1)
+		var avg := _bucket_speed[b] / float(samples)
+		var slow_pct := float(_bucket_slow[b]) / float(samples) * 100.0
+		var bar := "#".repeat(int(avg / 2.0))
+		print("  %.2f-%.2f  %5.1f m/s %5.1f%% lent %3d pereti  %s" % [
+			float(b) / float(BUCKETS), float(b + 1) / float(BUCKETS),
+			avg, slow_pct, _bucket_walls[b], bar])
+	_finish()
+
+
+# ---------------------------------------------------------------- mod bump
+
+## Fiecare caz: atacatorul intra din spate in victima oprita, la aceeasi viteza.
+## Daca modelul de masa e corect, dv-ul victimei creste cu raportul de mase, iar
+## atacatorul greu isi pierde mult mai putina viteza decat cel usor.
+func _start_bump() -> void:
+	var ground := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(400, 2, 400)
+	shape.shape = box
+	shape.position = Vector3(0, -1, 0)
+	ground.add_child(shape)
+	add_child(ground)
+	var garage := GameState.CAR_DATA
+	# (atacator, victima) — perechile care conteaza pentru principiul de design.
+	for pair: Array in [[3, 0], [0, 3], [0, 1], [1, 0], [4, 2], [2, 4], [0, 0]]:
+		_bump_cases.append({
+			"attacker": garage[pair[0]] as CarData,
+			"victim": garage[pair[1]] as CarData,
+		})
+	_next_bump_case()
+
+
+func _next_bump_case() -> void:
+	if _bump_attacker != null:
+		_bump_attacker.queue_free()
+		_bump_victim.queue_free()
+		_bump_attacker = null
+	_bump_case += 1
+	if _bump_case >= _bump_cases.size():
+		_report_bump()
+		return
+	var c := _bump_cases[_bump_case]
+	# Distanta de pornire: lungimea celor doua caroserii + spatiu de contact.
+	var gap: float = ((c.attacker as CarData).body_length
+		+ (c.victim as CarData).body_length) * 0.5 + 4.0
+	# Amandoua in liber: masuram O SINGURA izbitura, nu un impins continuu.
+	_bump_attacker = _spawn_bump_car(c.attacker as CarData, Vector3(0, 0.6, gap), 0.0)
+	_bump_victim = _spawn_bump_car(c.victim as CarData, Vector3(0, 0.6, 0), 0.0)
+	# Atacatorul soseste deja lansat: masuram impactul, nu accelerarea.
+	_bump_attacker.velocity = Vector3(0, 0, -BUMP_ENTRY_SPEED)
+	_bump_frames = 0
+	_bump_peak = 0.0
+	_bump_attacker_loss = 0.0
+	_bump_impulses_att = 0
+	_bump_impulses_vic = 0
+	_bump_impulse_peak_att = 0.0
+	_bump_impulse_peak_vic = 0.0
+
+
+func _spawn_bump_car(data: CarData, pos: Vector3, throttle: float) -> Car:
+	var car := (load(CAR_SCENE) as PackedScene).instantiate() as Car
+	add_child(car)
+	car.apply_data(data)
+	car.global_position = pos
+	car.race_active = true
+	var ctrl := ScriptedController.new()
+	ctrl.throttle = throttle
+	car.set_controller(ctrl)
+	car.bumped.connect(_on_bump_impulse)
+	return car
+
+
+## Numaram impulsurile REALE emise de Car._resolve_bump: daca dv-ul masurat e
+## zero dar impulsurile curg, inseamna ca move_and_slide le anuleaza (masina e
+## intrepatrunsa), nu ca modelul de imbranceala tace.
+func _on_bump_impulse(car: Car, _other: Car, delta_v: float) -> void:
+	if car == _bump_attacker:
+		_bump_impulses_att += 1
+		_bump_impulse_peak_att = maxf(_bump_impulse_peak_att, delta_v)
+	else:
+		_bump_impulses_vic += 1
+		_bump_impulse_peak_vic = maxf(_bump_impulse_peak_vic, delta_v)
+
+
+func _tick_bump() -> void:
+	if _bump_attacker == null:
+		return
+	_bump_frames += 1
+	if _bump_frames > 3: # dupa ce au coborat pe sol
+		_bump_peak = maxf(_bump_peak, _bump_victim.horizontal_speed())
+		_bump_attacker_loss = maxf(_bump_attacker_loss,
+			BUMP_ENTRY_SPEED - _bump_attacker.horizontal_speed())
+	if _bump_frames < 90:
+		return
+	var c := _bump_cases[_bump_case]
+	var att := c.attacker as CarData
+	var vic := c.victim as CarData
+	# Distanta dintre centre la final vs. suma semi-lungimilor: sub 1.0 inseamna
+	# ca atacatorul a "inghitit" victima si o cara in el, nu a imbrancit-o.
+	var touching := (att.body_length + vic.body_length) * 0.5
+	var separation := absf(_bump_attacker.global_position.z
+		- _bump_victim.global_position.z) / touching
+	_bump_rows.append({
+		"attacker": att.display_name, "victim": vic.display_name,
+		"ratio": att.mass_factor / vic.mass_factor,
+		"victim_dv": _bump_peak, "attacker_loss": _bump_attacker_loss,
+		"pushed": absf(_bump_victim.global_position.z), "sep": separation,
+		"impulses": _bump_impulses_att + _bump_impulses_vic,
+		"impulse_peak": maxf(_bump_impulse_peak_att, _bump_impulse_peak_vic),
+	})
+	_next_bump_case()
+
+
+func _report_bump() -> void:
+	print("\n=== IMBRANCELI (atac din spate la %.0f m/s in masina oprita) ===" % [
+		BUMP_ENTRY_SPEED])
+	print("%-12s %-12s %8s %11s %11s %8s %7s %6s %8s" % [
+		"atacator", "victima", "m_a/m_v", "dv victima", "frana atac",
+		"impinsa", "separ", "impuls", "dv_max"])
+	for row in _bump_rows:
+		print("%-12s %-12s %8.2f %10.1f %10.1f %8.1f %7.2f %6d %8.1f" % [
+			row.attacker, row.victim, row.ratio,
+			row.victim_dv, row.attacker_loss, row.pushed, row.sep,
+			row.impulses, row.impulse_peak])
+	_finish()

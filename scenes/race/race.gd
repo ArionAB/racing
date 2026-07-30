@@ -63,6 +63,10 @@ func _ready() -> void:
 		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
 	player.boost_started.connect(func(_c: Car) -> void:
 		camera.add_trauma(0.18))
+	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
+	# din spate zguduie ecranul, o atingere lateral aproape deloc.
+	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:
+		camera.add_trauma(clampf(delta_v / 40.0, 0.05, 0.35)))
 	# Repunerea teleporteaza masina: camera trebuie sa sara cu ea, altfel
 	# urmareste cateva cadre un punct de la 100m.
 	player.respawned.connect(func(_c: Car) -> void:

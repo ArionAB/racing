@@ -16,6 +16,9 @@ signal boost_started(car: Car)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
 signal respawned(car: Car)
+## Izbitura cu o alta masina, cu delta-v-ul incasat de NOI — cu cat mai mare,
+## cu atat mai violent contactul (shake, sunet).
+signal bumped(car: Car, other: Car, delta_v: float)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -53,8 +56,30 @@ signal respawned(car: Car)
 @export_group("Diverse")
 @export var gravity: float = 28.0
 @export var body_color: Color = Color(0.95, 0.45, 0.1)
+## MASA, nu un "factor": intra ca 1/m in impulsul de coliziune (_resolve_bump).
 @export var mass_factor: float = 1.0
 @export var offroad_speed_factor: float = 0.45
+
+@export_group("Imbranceli")
+## Cat de "saltarea" e izbitura. 0 = perfect plastica (se lipesc), 1 = bile de
+## biliard. Sub 1 = arcade: se simte lovitura, dar nu ricoseaza absurd.
+@export var bump_restitution: float = 0.35
+## Plafon pe IMPULS, nu pe delta-v-ul fiecarei masini. Diferenta conteaza: taiat
+## pe masina, plafonul le egalizeaza (si autobuzul, si sportiva primesc fix
+## maximul, adica exact identitatea pe care o vrem), taiat pe impuls, raportul de
+## mase se pastreaza intact — doar violenta scade. Calibrat ca cea mai usoara
+## masina din garaj (0.9) sa incaseze cel mult ~15 m/s.
+@export var bump_max_impulse: float = 14.0
+## Sub viteza asta de apropiere, contactul e frecare, nu izbitura: masinile care
+## se ating mergand alaturi nu trebuie sa-si dea ghionturi.
+@export var bump_min_closing: float = 2.5
+## Cat nu mai poate genera un al doilea impuls ACEEASI pereche de masini.
+## Fara asta, contactul sustinut aduna un impuls la fiecare cadru de fizica —
+## de acolo veneau catapultarile de 50 m/s masurate cu tools/probe_race.gd.
+@export var bump_pair_cooldown: float = 0.12
+## Cat de tare se resping masinile intrepatrunse, per metru de patrundere.
+## Fara asta o masina grea poate "inghiti" una usoara si o cara in ea.
+@export var bump_separation: float = 8.0
 
 # --- Stare de cursa (scrisa de Race) ---
 var race_active: bool = false
@@ -108,6 +133,8 @@ var _was_on_floor: bool = true
 var _prev_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
 var _bump_cooldown: float = 0.0
+## instance_id-ul celeilalte masini -> secunde pana la urmatorul impuls admis.
+var _bump_pairs: Dictionary = {}
 var _skid_accum: float = 0.0
 var _respawn_cooldown: float = 0.0
 
@@ -229,6 +256,12 @@ func _physics_process(delta: float) -> void:
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
+	for key: int in _bump_pairs.keys():
+		var left := float(_bump_pairs[key]) - delta
+		if left <= 0.0:
+			_bump_pairs.erase(key)
+		else:
+			_bump_pairs[key] = left
 	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta. Dupa
 	# move_and_slide, ca is_on_floor() sa fie al cadrului curent.
 	if track != null and is_on_floor() \
@@ -322,16 +355,12 @@ func _handle_bumping() -> void:
 		var rigid := col.get_collider() as RigidBody3D
 		if rigid != null:
 			# Popice & co: le imprastiem cu un impuls — juice fizic ieftin.
-			rigid.apply_central_impulse(
-				-n * clampf(horizontal_speed() * 0.5, 1.0, 12.0) + Vector3.UP * 1.5)
+			# Scalat cu masa: autobuzul le trimite mai departe decat un sport.
+			rigid.apply_central_impulse(-n * clampf(
+				horizontal_speed() * 0.5 * mass_factor, 1.0, 16.0) + Vector3.UP * 1.5)
 			continue
 		if other != null:
-			n.y = 0.0
-			other.velocity += -n * 4.5 * (mass_factor / other.mass_factor)
-			velocity += n * 4.5 * (other.mass_factor / mass_factor)
-			if _bump_cooldown <= 0.0 and is_player:
-				_bump_cooldown = 0.25
-				AudioManager.play_sfx(&"bump")
+			_resolve_bump(other, col)
 		elif absf(n.y) < 0.5:
 			# Obstacol vertical (perete/bariera): impact = viteza "in" perete.
 			var impact := maxf(0.0, Vector3(
@@ -341,6 +370,66 @@ func _handle_bumping() -> void:
 				wall_hit.emit(self, impact)
 				if is_player:
 					AudioManager.play_sfx(&"wall_hit")
+
+## Izbitura dintre doua masini, cu MASA in ecuatie — principiul de design nr. 1
+## ("grea impinge, usoara zboara") nu ca un caz special, ci ca fizica: acelasi
+## impuls pentru amandoua, impartit la masa fiecareia. Autobuzul (2.6) intrat in
+## Politie (0.9) o trimite de ~3 ori mai tare decat se opreste el.
+##
+## Trei lucruri il fac sa NU fie pinball:
+##  1. impulsul creste cu viteza de APROPIERE, nu e o constanta — frecarea
+##     alaturi de cineva nu mai da ghionturi;
+##  2. o pereche de masini nu poate genera un al doilea impuls mai devreme de
+##     `bump_pair_cooldown` (contactul dura zeci de cadre si aduna la infinit);
+##  3. impulsul e plafonat, deci nimeni nu e catapultat de pe pista — si fiind
+##     plafonat pe IMPULS, nu pe masina, raportul de mase supravietuieste taierii.
+func _resolve_bump(other: Car, col: KinematicCollision3D) -> void:
+	var key := other.get_instance_id()
+	if float(_bump_pairs.get(key, 0.0)) > 0.0:
+		return
+	var n := col.get_normal() # dinspre cealalta masina spre noi
+	n.y = 0.0 # imbrancelile sunt orizontale; saltul il face suspensia, nu contactul
+	if n.length_squared() < 0.01:
+		# Normala aproape verticala = o masina s-a URCAT pe cealalta. Se intampla
+		# cu vehiculele lungi (autobuzul calca sportiva si o cara in el 20m, cu
+		# zero imbranceala — masurat inainte de fix). Atunci directia de respingere
+		# o luam din pozitiile relative, ca sa se desprinda oricum.
+		n = global_position - other.global_position
+		n.y = 0.0
+		if n.length_squared() < 0.01:
+			return
+	n = n.normalized()
+	# Cat de repede ne apropiem, masurat pe normala contactului — din vitezele
+	# DINAINTEA lui move_and_slide. Cele de acum au deja componenta spre coliziune
+	# stearsa de alunecare (de-aia se simtea ca un zid: te opreai sec si primeai
+	# in schimb un ghiont fix, fara legatura cu forta izbiturii).
+	var closing := (_prev_velocity - other._prev_velocity).dot(-n)
+	# Depenetrare: cat de mult ne-am intrepatruns deja. Fara ea, o masina grea
+	# poate ingloba una usoara si o cara in ea zeci de metri.
+	var separation := col.get_depth() * bump_separation
+	if closing < bump_min_closing and separation < 0.5:
+		return
+	_bump_pairs[key] = bump_pair_cooldown
+	other._bump_pairs[get_instance_id()] = bump_pair_cooldown
+	var inv_self := 1.0 / maxf(mass_factor, 0.05)
+	var inv_other := 1.0 / maxf(other.mass_factor, 0.05)
+	var reduced_mass := 1.0 / (inv_self + inv_other)
+	# Un singur impuls pentru pereche (izbitura + desprindere), impartit apoi la
+	# masa fiecareia. Asa "cine pe cine arunca" iese din raportul de mase, nu
+	# dintr-un caz special scris de mana.
+	var impulse := (1.0 + bump_restitution) * maxf(closing, 0.0) * reduced_mass
+	impulse += separation * reduced_mass
+	impulse = minf(impulse, bump_max_impulse)
+	var dv_self := impulse * inv_self
+	var dv_other := impulse * inv_other
+	velocity += n * dv_self
+	other.velocity += -n * dv_other
+	bumped.emit(self, other, dv_self)
+	other.bumped.emit(other, self, dv_other)
+	if _bump_cooldown <= 0.0 and (is_player or other.is_player):
+		_bump_cooldown = 0.25
+		other._bump_cooldown = 0.25
+		AudioManager.play_sfx(&"bump")
 
 func _detect_landing() -> void:
 	if is_on_floor() and not _was_on_floor and _prev_velocity.y < -6.0:
@@ -368,6 +457,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	is_boosting = false
 	_forced_boost = 0.0
 	slip_time = 0.0
+	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
 	road_index = track.closest_index_global(global_position)
 	last_safe_index = road_index

@@ -1,79 +1,222 @@
 class_name AIController
 extends CarController
-## Creier AI: urmareste centrul soselei cu doua puncte de tintire (aproape =
-## directie, departe = anticiparea virajului), cu linie laterala proprie.
-## Foloseste ACELASI sistem de drift CTR ca jucatorul — elibereaza inainte
-## de backfire (banca de obicei nivelul 2; jucatorii buni il bat cu 3).
+## Creier AI: urmareste soseaua cu doua puncte de tintire (aproape = directie,
+## departe = anticiparea virajului) si isi alege linia pe interiorul virajului.
+## Foloseste ACELEASI comenzi ca jucatorul — fara viteza trisata, fara teleport
+## (principiul de design nr. 5, "AI onest"): tot ce are in plus e ca nu greseste
+## pedala.
+##
+## Doua lucruri il tin pe pista, ambele masurate cu tools/probe_race.gd:
+##  · franeaza PROPORTIONAL cu cat de stramt e virajul care vine, nu binar in
+##    ultima clipa (inainte: 4-13 izbituri de perete per masina per cursa);
+##  · cand nu mai PROGRESEAZA, iese in marsarier VIRAT, nu drept inapoi in
+##    obstacolul care l-a oprit, si dupa cateva incercari cere repunerea pe
+##    pista. Fara asta o masina proptita in butucul caruselului statea acolo
+##    pana la finalul cursei — marsarierul drept o punea la loc in acelasi
+##    stalp, iar plasa de siguranta din race.gd nu o vedea (e proptita PE
+##    sosea, iar aceea prinde doar impotmolirile din afara ei).
 
-const LOOKAHEAD_NEAR: float = 24.0
-const LOOKAHEAD_FAR: float = 55.0
+## Cat de departe se uita, ca fractie din viteza. Fix, cum era inainte, e gresit
+## in ambele sensuri: la 30 m/s intri in viraj fara sa-l fi vazut, la 8 m/s
+## tintesti dincolo de el si tai coltul.
+const LOOKAHEAD_NEAR_FACTOR: float = 0.62
+const LOOKAHEAD_NEAR_MIN: float = 9.0
+const LOOKAHEAD_NEAR_MAX: float = 22.0
+const LOOKAHEAD_FAR_FACTOR: float = 1.7
+const LOOKAHEAD_FAR_MIN: float = 26.0
+const LOOKAHEAD_FAR_MAX: float = 62.0
+
+## Sub unghiul asta drumul e "drept" si se merge cu tot; peste el, viraj plin.
+const CORNER_SOFT: float = 0.25
+const CORNER_HARD: float = 1.10
+## Cat de mult din viteza maxima ramane intr-un viraj plin.
+const CORNER_SPEED_FLOOR: float = 0.44
+## Cat de mult trage spre interiorul virajului (in half_width).
+const INSIDE_BIAS: float = 0.55
+const LINE_MAX: float = 0.8
+
+## Anti-blocaj. Blocajul se masoara in PROGRES pe traseu, nu in viteza: o masina
+## care se freaca de un obstacol cu 5 m/s nu e "in miscare", e blocata.
+const PROGRESS_WINDOW: float = 2.0
+const PROGRESS_MIN_M: float = 12.0
+## Plasa rapida, pentru izbitura frontala care opreste masina pe loc.
+const STALL_SPEED: float = 1.5
+const STALL_TIME: float = 0.9
+const REVERSE_TIME: float = 0.9
+const RECOVER_TIME: float = 0.7
+## Dupa atatea manevre esuate, cerem repunerea pe pista: mai bine 2 secunde
+## pierdute decat o masina scoasa din cursa pentru totdeauna.
+const MAX_ATTEMPTS: int = 3
 
 var track: Track
+## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
+## portiunile drepte. Peste ea se adauga tragerea spre interiorul virajului.
 var line_offset: float = 0.0
 
 var _steer: float = 0.0
 var _throttle: float = 1.0
 var _drift: bool = false
 var _turbo: bool = false
-var _stuck_time: float = 0.0
-var _reverse_time: float = 0.0
+
+var _stall_time: float = 0.0
+var _last_index: int = -1
+var _progress_m: float = 0.0
+var _progress_timer: float = 0.0
+var _unstick_timer: float = 0.0
+var _unstick_reversing: bool = false
+var _unstick_steer: float = 0.0
+var _attempts: int = 0
 
 func configure(race_track: Track, rng: RandomNumberGenerator) -> void:
 	track = race_track
-	line_offset = rng.randf_range(-0.35, 0.35)
+	line_offset = rng.randf_range(-0.28, 0.28)
 
 func update(delta: float) -> void:
 	if track == null or car == null:
 		return
 	var speed := car.horizontal_speed()
-
-	# Anti-blocaj: mars inapoi scurt daca stam pe loc.
-	if _reverse_time > 0.0:
-		_reverse_time -= delta
-		_throttle = -1.0
-		_steer = 0.0
-		_drift = false
+	_watch_progress(delta, speed)
+	if _unstick_timer > 0.0:
+		_drive_unstick(delta)
 		return
-	if speed < 2.0:
-		_stuck_time += delta
-		if _stuck_time > 1.2:
-			_reverse_time = 0.9
-			_stuck_time = 0.0
-	else:
-		_stuck_time = 0.0
 
-	var near := track.lookahead_point(car.road_index, LOOKAHEAD_NEAR, line_offset)
-	var far := track.lookahead_point(car.road_index, LOOKAHEAD_FAR, line_offset)
+	# --- unde merge drumul ---
+	var idx := car.road_index
+	var far := track.lookahead_point(idx, _lookahead_far(speed), 0.0)
 	var fwd := -car.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()
-	var to_near := near - car.global_position
-	to_near.y = 0.0
-	var to_far := far - car.global_position
-	to_far.y = 0.0
 	# unghi cu semn fata de UP: pozitiv = tinta e la stanga = steer pozitiv
-	var a_near := fwd.signed_angle_to(to_near.normalized(), Vector3.UP)
-	var a_far := fwd.signed_angle_to(to_far.normalized(), Vector3.UP)
+	var a_far := _angle_to(fwd, far)
+	# 0 pe drept, 1 in virajul cel mai stramt.
+	var severity := clampf(
+		(absf(a_far) - CORNER_SOFT) / (CORNER_HARD - CORNER_SOFT), 0.0, 1.0)
 
-	_steer = clampf(a_near * 2.0, -1.0, 1.0)
-	_throttle = 1.0
-	if absf(a_far) > 0.9 and speed > car.max_speed * 0.5:
-		_throttle = 0.2
+	# --- linia: pe interiorul virajului care vine ---
+	# _side_at (deci si lateral_frac) e pozitiv spre DREAPTA soselei, iar un
+	# a_far pozitiv inseamna viraj la stanga: interiorul e in sens invers.
+	var line := clampf(line_offset - signf(a_far) * severity * INSIDE_BIAS,
+		-LINE_MAX, LINE_MAX)
+	var near := track.lookahead_point(idx, _lookahead_near(speed), line)
+	_steer = clampf(_angle_to(fwd, near) * 2.2, -1.0, 1.0)
 
-	# Drift (handbrake) pe viraje sustinute — si umple bara de turbo.
+	# --- pedale: viteza-tinta din cat de stramt e ce urmeaza ---
+	var target := car.max_speed * lerpf(1.0, CORNER_SPEED_FLOOR, severity)
+	if speed > target * 1.06:
+		# Franare proportionala cu depasirea, nu o smucitura fixa.
+		_throttle = clampf(-(speed - target) / 6.0, -1.0, -0.15)
+	else:
+		_throttle = 1.0
+
+	# --- drift (handbrake) pe viraje sustinute: si vireaza, si umple bara ---
 	if not _drift:
-		if absf(a_far) > 0.55 and speed > car.drift_min_speed * 1.2:
+		if severity > 0.34 and speed > car.drift_min_speed * 1.2:
 			_drift = true
-	elif absf(a_far) < 0.18 or speed < car.drift_min_speed * 0.7:
+	elif severity < 0.12 or speed < car.drift_min_speed * 0.7:
 		_drift = false
 
-	# Turbo pe portiuni drepte, cand bara e destul de plina; il tine pana
-	# goleste bara sau vine un viraj.
+	# --- turbo: pe drept, si oprit inainte de viraj, ca sa nu-l irosim in perete
 	if not _turbo:
-		if car.turbo_charge > 0.6 and absf(a_far) < 0.25:
+		if car.turbo_charge > 0.6 and severity <= 0.0 and _throttle > 0.0:
 			_turbo = true
-	elif car.turbo_charge < 0.05 or absf(a_far) > 0.6:
+	elif car.turbo_charge < 0.05 or severity > 0.25:
 		_turbo = false
+
+func _lookahead_near(speed: float) -> float:
+	return clampf(speed * LOOKAHEAD_NEAR_FACTOR,
+		LOOKAHEAD_NEAR_MIN, LOOKAHEAD_NEAR_MAX)
+
+func _lookahead_far(speed: float) -> float:
+	return clampf(speed * LOOKAHEAD_FAR_FACTOR,
+		LOOKAHEAD_FAR_MIN, LOOKAHEAD_FAR_MAX)
+
+func _angle_to(fwd: Vector3, point: Vector3) -> float:
+	var to_point := point - car.global_position
+	to_point.y = 0.0
+	if to_point.length_squared() < 0.001:
+		return 0.0
+	return fwd.signed_angle_to(to_point.normalized(), Vector3.UP)
+
+# ------------------------------------------------------------- anti-blocaj
+
+## Progresul se masoara pe TRASEU (indexul de pe curba), nu in metri parcursi:
+## o masina care se invarte pe loc sau se freaca de un perete macina metri fara
+## sa avanseze in cursa.
+func _watch_progress(delta: float, speed: float) -> void:
+	if _unstick_timer > 0.0:
+		return
+	# Plasa rapida: izbitura frontala care opreste masina pe loc.
+	if speed < STALL_SPEED:
+		_stall_time += delta
+		if _stall_time > STALL_TIME:
+			_begin_unstick()
+			return
+	else:
+		_stall_time = 0.0
+
+	var n := track.baked.size()
+	if _last_index < 0:
+		_last_index = car.road_index
+	var d := car.road_index - _last_index
+	if d > n / 2:
+		d -= n
+	elif d < -n / 2:
+		d += n
+	_last_index = car.road_index
+	_progress_m += float(d) * track.curve.bake_interval
+	_progress_timer += delta
+	if _progress_timer < PROGRESS_WINDOW:
+		return
+	if _progress_m < PROGRESS_MIN_M:
+		_begin_unstick()
+	else:
+		_attempts = 0 # merge cursa; uitam incercarile vechi
+	_reset_progress()
+
+func _reset_progress() -> void:
+	_progress_timer = 0.0
+	_progress_m = 0.0
+	_stall_time = 0.0
+	_last_index = car.road_index if car != null else -1
+
+func _begin_unstick() -> void:
+	_reset_progress()
+	_attempts += 1
+	if _attempts > MAX_ATTEMPTS:
+		# Am incercat cinstit si tot suntem infipti — cerem repunerea.
+		_attempts = 0
+		_unstick_timer = 0.0
+		car.respawn()
+		return
+	# Directia in care trebuie sa ajunga botul: spre centrul soselei, in fata.
+	var fwd := -car.global_transform.basis.z
+	fwd.y = 0.0
+	var to_center := _angle_to(fwd.normalized(),
+		track.lookahead_point(car.road_index, 8.0, 0.0))
+	# Semnul de virare cand mergem INAINTE. Zero (perfect aliniati) tot trebuie
+	# sa devina o alegere, altfel manevra iese in linie dreapta inapoi in acelasi
+	# obstacol — exact bucla pe care o reparam.
+	_unstick_steer = signf(to_center) if absf(to_center) > 0.05 else 1.0
+	_unstick_reversing = true
+	_unstick_timer = REVERSE_TIME
+
+func _drive_unstick(delta: float) -> void:
+	_unstick_timer -= delta
+	_drift = false
+	_turbo = false
+	if _unstick_reversing:
+		_throttle = -1.0
+		# In marsarier, Car inverseaza efectul virajului (reverse_sign), deci
+		# semnul se inverseaza si aici ca botul sa plece TOT spre centru.
+		_steer = -_unstick_steer
+		if _unstick_timer <= 0.0:
+			_unstick_reversing = false
+			_unstick_timer = RECOVER_TIME
+	else:
+		_throttle = 1.0
+		_steer = _unstick_steer
+		if _unstick_timer <= 0.0:
+			_reset_progress()
 
 func get_steer() -> float:
 	return _steer

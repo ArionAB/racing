@@ -493,6 +493,10 @@ func _build_hazard(frac: float) -> void:
 		ball.model_scene = load("res://assets/models/beach_ball.glb")
 		ball.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
 		ball.roll_radius = 1.3
+		# Noi ii cerem maturarea maxima; el isi taie cursa cat sa nu iasa din
+		# sosea pe latimea ASTA de drum (vezi SlidingHazard._clamp_travel).
+		ball.road_half_width = half_width
+		ball.phase = fposmod(frac * 3.7, 1.0) # doua obstacole nu bat la unison
 		add_child(ball)
 		ball.center = p
 		ball.travel = side * half_width * 0.9
@@ -501,6 +505,8 @@ func _build_hazard(frac: float) -> void:
 		_build_excavator(frac)
 	else:
 		var box := SlidingHazard.new()
+		box.road_half_width = half_width
+		box.phase = fposmod(frac * 3.7, 1.0)
 		add_child(box)
 		box.center = p
 		box.travel = side * half_width * 0.9

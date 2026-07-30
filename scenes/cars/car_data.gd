@@ -11,7 +11,15 @@ extends Resource
 @export var max_speed: float = 34.0     # m/s
 @export var acceleration: float = 16.0
 @export var grip: float = 8.0
-## Cine impinge pe cine la contact: grea = stabila, usoara = zboara.
+## MASA masinii — cine impinge pe cine la contact. Intra ca 1/m in impulsul de
+## coliziune (Car._resolve_bump), deci ce conteaza e RAPORTUL dintre doua masini:
+## la contact, delta-v-ul fiecareia e invers proportional cu masa ei. Autobuzul
+## (2.6) intrat in Politie (0.9) o trimite de ~3 ori mai tare decat se opreste el.
+##
+## Nu inghesui valorile: doua masini cu 1.0 si 1.1 se ciocnesc identic, iar
+## "identitatea prin masa" dispare. Scara folosita in garaj: 0.9 (sport usor) ..
+## 2.6 (autobuz). Verifica orice retunare cu:
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=bump
 @export var mass_factor: float = 1.0
 
 @export_group("Model 3D")

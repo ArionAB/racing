@@ -148,7 +148,7 @@ func rebuild() -> void:
 	_build_center_line()
 	_build_kerbs()
 	_build_decor()
-	_build_sandbox_border()
+	_build_world_bounds()
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.
@@ -234,10 +234,9 @@ func _build_environment() -> void:
 		attempts += 1
 		var angle := rng.randf_range(0.0, TAU)
 		var radius := rng.randf_range(60.0, 140.0)
-		# In desert, dunele raman INAUNTRUL zidului de sandbox (la ~380m);
-		# in padure nu exista zid, dealurile pot fi oricat de departe.
-		var max_dist := (365.0 - radius) if theme_decor == "desert" else 480.0
-		var dist := rng.randf_range(240.0, maxf(250.0, max_dist))
+		# Rama de scanduri de la 380m a disparut odata cu tema de lada de nisip,
+		# deci dealurile nu mai sunt stranse intr-un patrat inexistent.
+		var dist := rng.randf_range(240.0, 480.0)
 		var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
 		var nearest := 1e12
 		for i in range(0, baked.size(), 4):
@@ -756,16 +755,15 @@ func _build_decor() -> void:
 			continue
 		placed += 1
 		if theme_decor == "desert":
+			# Provizoriu: castelul de nisip si galeata au iesit odata cu tema de
+			# lada de nisip, iar cotele lor s-au redistribuit la piatra si mesa.
+			# TrackDecor (benzi paralele cu drumul) inlocuieste tot blocul asta.
 			var roll := rng.randf()
-			if roll < 0.28:
+			if roll < 0.34:
 				_add_cactus(pos, rng)
-			elif roll < 0.45:
-				_add_sandcastle(pos, rng)
-			elif roll < 0.59:
-				_add_bucket(pos, rng)
-			elif roll < 0.72:
+			elif roll < 0.60:
 				_add_glb_rock(pos, rng)
-			elif roll < 0.85:
+			elif roll < 0.82:
 				_add_mesa(pos, rng)
 			else:
 				_add_dry_bush(pos, rng)
@@ -1098,96 +1096,30 @@ func _add_glb_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
 	body.rotation.y = rng.randf_range(0.0, TAU)
 	body.global_position = pos + Vector3.UP * -0.3
 
-## Zidul sandbox-ului: patrat de scanduri de lemn in jurul lumii (desert).
-## Marginea gropii de nisip vazuta la scara masinutelor.
-func _build_sandbox_border() -> void:
-	if theme_decor != "desert":
-		return
-	if not ResourceLoader.exists("res://assets/models/sandbox_border.glb"):
-		return
-	var border_scene := load("res://assets/models/sandbox_border.glb") as PackedScene
+## Marginea LUMII: patru pereti INVIZIBILI care opresc masina sa iasa din
+## harta. Inainte era rama de scanduri a unei lazi de nisip (tema "jucarii in
+## sandbox"); tema desert a devenit canion, iar o rama de placaj la 380m
+## contrazicea direct citirea. Coliziunea ramane — doar decorul dispare.
+## Bariera sta DINCOLO de silueta de la orizont, ca sa nu se loveasca de ea
+## nimeni in mod normal: e plasa de siguranta, nu element de pista.
+func _build_world_bounds() -> void:
 	var centroid := _centroid()
-	var half_extent := 380.0
-	var seg_scale := 2.5 # 20m -> 50m pe segment, 13m inaltime
-	var seg_len := 20.0 * seg_scale
-	var per_side := int(ceil(half_extent * 2.0 / seg_len))
+	var half_extent := 420.0
 	for side_idx in 4:
-		var wall := StaticBody3D.new()
-		wall.add_to_group("sandbox_wall")
-		add_child(wall)
-		# fiecare latura: directia de-a lungul zidului + normala spre interior
-		var along := [Vector3(1, 0, 0), Vector3(0, 0, 1),
-			Vector3(1, 0, 0), Vector3(0, 0, 1)][side_idx] as Vector3
 		var outward := [Vector3(0, 0, -1), Vector3(1, 0, 0),
 			Vector3(0, 0, 1), Vector3(-1, 0, 0)][side_idx] as Vector3
-		var wall_center := Vector3(centroid.x, 0, centroid.z) \
-			+ outward * half_extent + Vector3.UP * -0.3
-		for i in per_side:
-			var seg := border_scene.instantiate() as Node3D
-			seg.scale = Vector3.ONE * seg_scale
-			var offset := (float(i) - float(per_side - 1) * 0.5) * seg_len
-			seg.position = wall_center + along * offset
-			seg.basis = Basis.looking_at(outward, Vector3.UP) \
-				.scaled(Vector3.ONE * seg_scale)
-			wall.add_child(seg)
+		var wall := StaticBody3D.new()
+		wall.add_to_group("world_bounds")
+		add_child(wall)
 		var shape := CollisionShape3D.new()
 		var box := BoxShape3D.new()
-		box.size = Vector3(half_extent * 2.0 + seg_len, 14.0, 1.5) \
-			if along.x > 0.5 else Vector3(1.5, 14.0, half_extent * 2.0 + seg_len)
+		var span := half_extent * 2.0 + 40.0
+		box.size = Vector3(span, 30.0, 2.0) if absf(outward.z) > 0.5 \
+			else Vector3(2.0, 30.0, span)
 		shape.shape = box
-		shape.position = wall_center + Vector3.UP * 7.0
+		shape.position = Vector3(centroid.x, 14.0, centroid.z) \
+			+ outward * half_extent
 		wall.add_child(shape)
-
-## Galeata de plastic (Blender): unele in picioare, unele rasturnate.
-func _add_bucket(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	if not ResourceLoader.exists("res://assets/models/bucket.glb"):
-		_add_mesa(pos, rng)
-		return
-	var body := StaticBody3D.new()
-	body.add_to_group("props_blender")
-	add_child(body)
-	var s := rng.randf_range(0.38, 0.5)
-	var model := (load("res://assets/models/bucket.glb") as PackedScene) \
-		.instantiate() as Node3D
-	model.scale = Vector3.ONE * s
-	body.add_child(model)
-	var shape := CollisionShape3D.new()
-	var cyl := CylinderShape3D.new()
-	cyl.radius = 3.1 * s
-	cyl.height = 9.9 * s
-	shape.shape = cyl
-	shape.position = Vector3.UP * 4.95 * s
-	body.add_child(shape)
-	body.rotation.y = rng.randf_range(0.0, TAU)
-	if rng.randf() < 0.5:
-		# rasturnata pe o parte (coliziunea se roteste cu tot corpul)
-		body.rotation.x = PI / 2.0
-		body.global_position = pos + Vector3.UP * (3.1 * s - 0.3)
-	else:
-		body.global_position = pos + Vector3.UP * -0.3
-
-## Castel de nisip (Blender) — piesa mare de decor de sandbox.
-func _add_sandcastle(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	if not ResourceLoader.exists("res://assets/models/sandcastle.glb"):
-		_add_mesa(pos, rng)
-		return
-	var body := StaticBody3D.new()
-	body.add_to_group("props_blender")
-	add_child(body)
-	body.global_position = pos + Vector3.UP * -0.3
-	body.rotation.y = rng.randf_range(0.0, TAU)
-	var s := rng.randf_range(0.5, 0.7)
-	var model := (load("res://assets/models/sandcastle.glb") as PackedScene) \
-		.instantiate() as Node3D
-	model.scale = Vector3.ONE * s
-	body.add_child(model)
-	var shape := CollisionShape3D.new()
-	var cyl := CylinderShape3D.new()
-	cyl.radius = 3.2 * s
-	cyl.height = 8.5 * s
-	shape.shape = cyl
-	shape.position = Vector3.UP * 4.25 * s
-	body.add_child(shape)
 
 ## Tufa uscata: doar vizual, treci prin ea.
 func _add_dry_bush(pos: Vector3, rng: RandomNumberGenerator) -> void:

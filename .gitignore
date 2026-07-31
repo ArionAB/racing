@@ -1,3 +1,9 @@
 # Godot 4+
 .godot/
 snapshots/
+
+# Setari de editor personale (fiecare are alta configuratie).
+.vscode/
+
+# NU ignoram addons/ intentionat: daca cineva instaleaza un plugin, vrem sa
+# vedem asta in `git status`, nu sa dispara in tacere.

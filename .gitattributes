@@ -8,6 +8,16 @@
 
 # Godot / binare — nu normaliza.
 *.gd    text eol=lf
+
+# Fisiere pe care Godot le rescrie singur la reimport. Fara eol explicit,
+# Godot le scrie cu LF, Git le vrea CRLF pe Windows, si raman vesnic
+# "modificate" in `git status` cu diff gol — zgomot in fiecare PR.
+*.import  text eol=lf
+*.uid     text eol=lf
+*.tscn    text eol=lf
+*.tres    text eol=lf
+*.godot   text eol=lf
+project.godot text eol=lf
 *.png   binary
 *.glb   binary
 *.fbx   binary

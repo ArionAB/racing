@@ -58,6 +58,9 @@ func apply_theme(theme: String) -> void:
 var curve: Curve3D
 var baked: PackedVector3Array
 var _dists: PackedFloat32Array # distanta cumulata pana la fiecare punct copt
+## Sursa unica de sloturi pentru tot ce se aseaza langa drum (faleze, decor).
+## Se reconstruieste la fiecare rebuild(), dupa ce curba e coapta.
+var _sampler: TrackSideSampler
 
 ## Materiale flat, refolosite pe culoare. Fara cache-ul asta fiecare mesh
 ## procedural isi facea propriul StandardMaterial3D — masurat cu
@@ -121,6 +124,9 @@ func rebuild() -> void:
 			continue # curba editabila a pistelor custom ramane
 		child.free()
 	_build_curve()
+	# Dupa coacerea curbei, inainte de orice generator care aseaza ceva langa
+	# drum: toti citesc sloturi de aici.
+	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width)
 	_build_environment()
 	_build_road()
 	_build_walls()
@@ -147,8 +153,8 @@ func rebuild() -> void:
 	_build_start_line()
 	_build_center_line()
 	_build_kerbs()
-	_build_decor()
-	_build_sandbox_border()
+	_build_world_decor()
+	_build_world_bounds()
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.
@@ -234,10 +240,9 @@ func _build_environment() -> void:
 		attempts += 1
 		var angle := rng.randf_range(0.0, TAU)
 		var radius := rng.randf_range(60.0, 140.0)
-		# In desert, dunele raman INAUNTRUL zidului de sandbox (la ~380m);
-		# in padure nu exista zid, dealurile pot fi oricat de departe.
-		var max_dist := (365.0 - radius) if theme_decor == "desert" else 480.0
-		var dist := rng.randf_range(240.0, maxf(250.0, max_dist))
+		# Rama de scanduri de la 380m a disparut odata cu tema de lada de nisip,
+		# deci dealurile nu mai sunt stranse intr-un patrat inexistent.
+		var dist := rng.randf_range(240.0, 480.0)
 		var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
 		var nearest := 1e12
 		for i in range(0, baked.size(), 4):
@@ -727,108 +732,17 @@ func _build_kerbs() -> void:
 		white.generate_normals()
 		_add_visual_mesh(white.commit(), Color(0.92, 0.92, 0.92))
 
-## Decor de "lume de jucarie": copaci si pietre presarate procedural in
-## afara soselei, deterministe per pista (acelasi seed -> acelasi peisaj).
-## Trunchiurile au coliziune: un copac lovit in scurtatura e vina ta.
-func _build_decor() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = track_name.hash()
-	var bounds_min := baked[0]
-	var bounds_max := baked[0]
-	for p in baked:
-		bounds_min = bounds_min.min(p)
-		bounds_max = bounds_max.max(p)
-	var placed := 0
-	var attempts := 0
-	while placed < 80 and attempts < 400:
-		attempts += 1
-		var pos := Vector3(
-			rng.randf_range(bounds_min.x - 50.0, bounds_max.x + 50.0),
-			0.0,
-			rng.randf_range(bounds_min.z - 50.0, bounds_max.z + 50.0))
-		# distanta minima (in plan) fata de sosea
-		var nearest := 1e9
-		for p in baked:
-			nearest = minf(nearest,
-				Vector2(p.x - pos.x, p.z - pos.z).length_squared())
-		nearest = sqrt(nearest)
-		if nearest < half_width + 8.0 or nearest > 90.0:
-			continue
-		placed += 1
-		if theme_decor == "desert":
-			var roll := rng.randf()
-			if roll < 0.28:
-				_add_cactus(pos, rng)
-			elif roll < 0.45:
-				_add_sandcastle(pos, rng)
-			elif roll < 0.59:
-				_add_bucket(pos, rng)
-			elif roll < 0.72:
-				_add_glb_rock(pos, rng)
-			elif roll < 0.85:
-				_add_mesa(pos, rng)
-			else:
-				_add_dry_bush(pos, rng)
-		elif rng.randf() < 0.7:
-			_add_tree(pos, rng)
-		elif rng.randf() < 0.5:
-			_add_glb_rock(pos, rng)
-		else:
-			_add_rock(pos, rng)
-
-func _add_tree(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	var tree := StaticBody3D.new()
-	add_child(tree)
-	tree.global_position = pos + Vector3.UP * -0.3 # din iarba
-	var scale_factor := rng.randf_range(0.8, 1.5)
-	var trunk := MeshInstance3D.new()
-	var trunk_mesh := CylinderMesh.new()
-	trunk_mesh.top_radius = 0.25
-	trunk_mesh.bottom_radius = 0.35
-	trunk_mesh.height = 1.4 * scale_factor
-	trunk.mesh = trunk_mesh
-	trunk.position = Vector3.UP * 0.7 * scale_factor
-	trunk.material_override = _flat_material(Color(0.45, 0.3, 0.18))
-	tree.add_child(trunk)
-	var crown := MeshInstance3D.new()
-	var crown_mesh := CylinderMesh.new()
-	crown_mesh.top_radius = 0.0 # con
-	crown_mesh.bottom_radius = 1.6 * scale_factor
-	crown_mesh.height = 3.2 * scale_factor
-	crown.mesh = crown_mesh
-	crown.position = Vector3.UP * (1.4 * scale_factor + 1.6 * scale_factor)
-	# verde in 4 trepte: padurea are 4 materiale de coroana, nu unul per copac
-	var green := 0.45 + float(rng.randi_range(0, 3)) / 3.0 * 0.20
-	crown.material_override = _flat_material(Color(0.2, green, 0.22))
-	tree.add_child(crown)
-	var shape := CollisionShape3D.new()
-	var cyl := CylinderShape3D.new()
-	cyl.radius = 0.4
-	cyl.height = 2.5
-	shape.shape = cyl
-	shape.position = Vector3.UP * 1.25
-	tree.add_child(shape)
-
-func _add_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	var rock := StaticBody3D.new()
-	add_child(rock)
-	rock.global_position = pos + Vector3.UP * -0.2
-	rock.rotation.y = rng.randf_range(0.0, TAU)
-	var size := rng.randf_range(0.8, 2.2)
-	var mesh_inst := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(size, size * 0.7, size * 0.8)
-	mesh_inst.mesh = box
-	mesh_inst.position = Vector3.UP * size * 0.3
-	mesh_inst.rotation.z = rng.randf_range(-0.2, 0.2)
-	mesh_inst.material_override = _flat_material(Color(0.55, 0.55, 0.58))
-	rock.add_child(mesh_inst)
-	var shape := CollisionShape3D.new()
-	var col_box := BoxShape3D.new()
-	col_box.size = Vector3(size, size, size * 0.8)
-	shape.shape = col_box
-	shape.position = Vector3.UP * size * 0.3
-	rock.add_child(shape)
+## Lumea din jurul soselei: peretii de canion si decorul imprastiat.
+##
+## Amandoua traiesc in fisiere separate ([TrackCliffs], [TrackDecor]) si cer
+## sloturi de la [member _sampler]. Motivul e la fel de mult organizatoric cat
+## tehnic: track.gd e fisierul pe care il atinge toata lumea, iar decorul e
+## partea care se itereaza cel mai des.
+func _build_world_decor() -> void:
+	add_child(TrackCliffs.build(_sampler, theme_decor, track_name.hash(),
+		_landmark_spots()))
+	add_child(TrackDecor.build(_sampler, theme_decor, track_name.hash(),
+		Callable(self, "_flat_material")))
 
 func _build_excavator(frac: float) -> void:
 	if not ResourceLoader.exists("res://assets/models/toy_excavator.glb"):
@@ -974,236 +888,30 @@ func _build_pins() -> void:
 				+ Vector3.UP * 0.2
 			placed += 1
 
-## Cactus saguaro din cactus.glb (Blender): trei siluete distincte — fara brate,
-## un brat, doua brate — cu coliziune pe trunchi. Modelul aduce UV-uri catre
-## slotul de paleta si AO copt in vertex colors; ii inlocuim materialul cu cel
-## UNIC al lumii, deci cactusii se grupeaza cu restul decorului in foarte putine
-## draw call-uri (vezi docs/blender_export.md).
-##
-## Variatia NU mai vine din culoare: paleta are un singur verde, prin constructie
-## — asta e chiar scopul atlasului. Vine din silueta, rotatie si o scalare mica.
-## Inaltimile din model (2.85 / 3.50 / 4.40 m) sunt deja in intervalul cerut de
-## style_bible §2, asa ca nu le scalam agresiv — altfel ies din interval.
-func _add_cactus(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	if not ResourceLoader.exists("res://assets/models/cactus.glb"):
-		_add_dry_bush(pos, rng)
-		return
-	var container := (load("res://assets/models/cactus.glb") as PackedScene) \
-		.instantiate() as Node3D
-	var picks: Array[String] = ["Cactus_A", "Cactus_B", "Cactus_C"]
-	var keep_name: String = picks[rng.randi_range(0, picks.size() - 1)]
-	var kept: Node3D = null
-	for child in container.get_children():
-		if child.name == keep_name:
-			kept = child
-		else:
-			child.queue_free()
-	if kept == null:
-		container.queue_free()
-		_add_dry_bush(pos, rng)
-		return
-	var body := StaticBody3D.new()
-	add_child(body)
-	# Banda e ingusta intentionat: variantele acopera deja 2.85-4.40 m, iar
-	# style_bible §2 cere 2.8-4.5. O scalare mai generoasa scoate exemplarele
-	# extreme din interval — masurat cu tools/probe_decor.gd: 0.92 -> 2.63 m,
-	# 0.98 -> 2.79 m (sub prag), 1.03 -> 4.53 m (peste prag).
-	# Variatia vine din silueta si rotatie, nu din scara.
-	var s := rng.randf_range(0.99, 1.02)
-	container.scale = Vector3.ONE * s
-	container.position = -kept.position * s # variantele sunt exportate in origine
-	body.add_child(container)
-	Palette.apply_world_material(container)
-	# Inaltimea se citeste din model: regenerezi GLB-ul cu alte cote si coliziunea
-	# o urmeaza singura, fara tabel de inaltimi hardcodat.
-	var h := 3.2
-	var mi := kept as MeshInstance3D
-	if mi != null and mi.mesh != null:
-		h = mi.mesh.get_aabb().size.y * s
-	var shape := CollisionShape3D.new()
-	var cyl := CylinderShape3D.new()
-	cyl.radius = 0.34
-	cyl.height = h
-	shape.shape = cyl
-	shape.position = Vector3.UP * h * 0.5
-	body.add_child(shape)
-	body.rotation.y = rng.randf_range(0.0, TAU)
-	body.global_position = pos + Vector3.UP * -0.3
-
-## Mesa: lespezi de piatra rosiatica suprapuse, cu coliziune.
-func _add_mesa(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	var mesa := StaticBody3D.new()
-	add_child(mesa)
-	mesa.global_position = pos + Vector3.UP * -0.2
-	mesa.rotation.y = rng.randf_range(0.0, TAU)
-	var base := rng.randf_range(1.6, 3.6)
-	var levels := 2 + (1 if rng.randf() < 0.4 else 0)
-	var y := 0.0
-	for level in levels:
-		var frac := 1.0 - float(level) * 0.28
-		var slab := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(base * frac, base * 0.4, base * 0.85 * frac)
-		slab.mesh = box
-		y += base * 0.2
-		slab.position = Vector3.UP * y
-		y += base * 0.2
-		# Culoare din paleta (rock_light), nu inventata: mesa e decor de desert,
-		# deci intra sub aceleasi sloturi ca prop-urile din Blender. Lespezile de
-		# sus sunt mai deschise — straturi de stanca, style_bible §3.
-		slab.material_override = _flat_material(
-			Palette.color(Palette.ROCK_LIGHT).lightened(float(level) * 0.08))
-		mesa.add_child(slab)
-	var shape := CollisionShape3D.new()
-	var col := BoxShape3D.new()
-	col.size = Vector3(base, base * 0.8, base * 0.85)
-	shape.shape = col
-	shape.position = Vector3.UP * base * 0.4
-	mesa.add_child(shape)
-
-## Bolovan de acvariu (Blender): rocks.glb are 3 mesh-uri separate,
-## alegem una la intamplare si anulam offsetul ei din fisier.
-func _add_glb_rock(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	if not ResourceLoader.exists("res://assets/models/rocks.glb"):
-		_add_rock(pos, rng)
-		return
-	var container := (load("res://assets/models/rocks.glb") as PackedScene) \
-		.instantiate() as Node3D
-	var picks: Array[String] = ["rock_small", "rock_medium", "rock_large"]
-	var keep_name: String = picks[rng.randi_range(0, 2)]
-	var kept: Node3D = null
-	for child in container.get_children():
-		if child.name == keep_name:
-			kept = child
-		else:
-			child.queue_free()
-	if kept == null:
-		container.queue_free()
-		_add_rock(pos, rng)
-		return
-	var body := StaticBody3D.new()
-	add_child(body)
-	var s := rng.randf_range(0.55, 0.85)
-	container.scale = Vector3.ONE * s
-	container.position = -kept.position * s # anuleaza asezarea "una langa alta"
-	body.add_child(container)
-	var heights := {"rock_small": 2.0, "rock_medium": 3.5, "rock_large": 5.0}
-	var h: float = heights[keep_name] * s
-	var shape := CollisionShape3D.new()
-	var sphere := SphereShape3D.new()
-	sphere.radius = h * 0.45
-	shape.shape = sphere
-	shape.position = Vector3.UP * h * 0.4
-	body.add_child(shape)
-	body.rotation.y = rng.randf_range(0.0, TAU)
-	body.global_position = pos + Vector3.UP * -0.3
-
-## Zidul sandbox-ului: patrat de scanduri de lemn in jurul lumii (desert).
-## Marginea gropii de nisip vazuta la scara masinutelor.
-func _build_sandbox_border() -> void:
-	if theme_decor != "desert":
-		return
-	if not ResourceLoader.exists("res://assets/models/sandbox_border.glb"):
-		return
-	var border_scene := load("res://assets/models/sandbox_border.glb") as PackedScene
+## Marginea LUMII: patru pereti INVIZIBILI care opresc masina sa iasa din
+## harta. Inainte era rama de scanduri a unei lazi de nisip (tema "jucarii in
+## sandbox"); tema desert a devenit canion, iar o rama de placaj la 380m
+## contrazicea direct citirea. Coliziunea ramane — doar decorul dispare.
+## Bariera sta DINCOLO de silueta de la orizont, ca sa nu se loveasca de ea
+## nimeni in mod normal: e plasa de siguranta, nu element de pista.
+func _build_world_bounds() -> void:
 	var centroid := _centroid()
-	var half_extent := 380.0
-	var seg_scale := 2.5 # 20m -> 50m pe segment, 13m inaltime
-	var seg_len := 20.0 * seg_scale
-	var per_side := int(ceil(half_extent * 2.0 / seg_len))
+	var half_extent := 420.0
 	for side_idx in 4:
-		var wall := StaticBody3D.new()
-		wall.add_to_group("sandbox_wall")
-		add_child(wall)
-		# fiecare latura: directia de-a lungul zidului + normala spre interior
-		var along := [Vector3(1, 0, 0), Vector3(0, 0, 1),
-			Vector3(1, 0, 0), Vector3(0, 0, 1)][side_idx] as Vector3
 		var outward := [Vector3(0, 0, -1), Vector3(1, 0, 0),
 			Vector3(0, 0, 1), Vector3(-1, 0, 0)][side_idx] as Vector3
-		var wall_center := Vector3(centroid.x, 0, centroid.z) \
-			+ outward * half_extent + Vector3.UP * -0.3
-		for i in per_side:
-			var seg := border_scene.instantiate() as Node3D
-			seg.scale = Vector3.ONE * seg_scale
-			var offset := (float(i) - float(per_side - 1) * 0.5) * seg_len
-			seg.position = wall_center + along * offset
-			seg.basis = Basis.looking_at(outward, Vector3.UP) \
-				.scaled(Vector3.ONE * seg_scale)
-			wall.add_child(seg)
+		var wall := StaticBody3D.new()
+		wall.add_to_group("world_bounds")
+		add_child(wall)
 		var shape := CollisionShape3D.new()
 		var box := BoxShape3D.new()
-		box.size = Vector3(half_extent * 2.0 + seg_len, 14.0, 1.5) \
-			if along.x > 0.5 else Vector3(1.5, 14.0, half_extent * 2.0 + seg_len)
+		var span := half_extent * 2.0 + 40.0
+		box.size = Vector3(span, 30.0, 2.0) if absf(outward.z) > 0.5 \
+			else Vector3(2.0, 30.0, span)
 		shape.shape = box
-		shape.position = wall_center + Vector3.UP * 7.0
+		shape.position = Vector3(centroid.x, 14.0, centroid.z) \
+			+ outward * half_extent
 		wall.add_child(shape)
-
-## Galeata de plastic (Blender): unele in picioare, unele rasturnate.
-func _add_bucket(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	if not ResourceLoader.exists("res://assets/models/bucket.glb"):
-		_add_mesa(pos, rng)
-		return
-	var body := StaticBody3D.new()
-	body.add_to_group("props_blender")
-	add_child(body)
-	var s := rng.randf_range(0.38, 0.5)
-	var model := (load("res://assets/models/bucket.glb") as PackedScene) \
-		.instantiate() as Node3D
-	model.scale = Vector3.ONE * s
-	body.add_child(model)
-	var shape := CollisionShape3D.new()
-	var cyl := CylinderShape3D.new()
-	cyl.radius = 3.1 * s
-	cyl.height = 9.9 * s
-	shape.shape = cyl
-	shape.position = Vector3.UP * 4.95 * s
-	body.add_child(shape)
-	body.rotation.y = rng.randf_range(0.0, TAU)
-	if rng.randf() < 0.5:
-		# rasturnata pe o parte (coliziunea se roteste cu tot corpul)
-		body.rotation.x = PI / 2.0
-		body.global_position = pos + Vector3.UP * (3.1 * s - 0.3)
-	else:
-		body.global_position = pos + Vector3.UP * -0.3
-
-## Castel de nisip (Blender) — piesa mare de decor de sandbox.
-func _add_sandcastle(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	if not ResourceLoader.exists("res://assets/models/sandcastle.glb"):
-		_add_mesa(pos, rng)
-		return
-	var body := StaticBody3D.new()
-	body.add_to_group("props_blender")
-	add_child(body)
-	body.global_position = pos + Vector3.UP * -0.3
-	body.rotation.y = rng.randf_range(0.0, TAU)
-	var s := rng.randf_range(0.5, 0.7)
-	var model := (load("res://assets/models/sandcastle.glb") as PackedScene) \
-		.instantiate() as Node3D
-	model.scale = Vector3.ONE * s
-	body.add_child(model)
-	var shape := CollisionShape3D.new()
-	var cyl := CylinderShape3D.new()
-	cyl.radius = 3.2 * s
-	cyl.height = 8.5 * s
-	shape.shape = cyl
-	shape.position = Vector3.UP * 4.25 * s
-	body.add_child(shape)
-
-## Tufa uscata: doar vizual, treci prin ea.
-func _add_dry_bush(pos: Vector3, rng: RandomNumberGenerator) -> void:
-	var bush := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	var r := rng.randf_range(0.4, 0.8)
-	sphere.radius = r
-	sphere.height = r
-	bush.mesh = sphere
-	bush.position = pos + Vector3.UP * (r * 0.3 - 0.3)
-	# Slotul de vegetatie uscata din paleta, in 3 trepte de nuanta (nu continuu,
-	# altfel fiecare tufa ar cere material propriu).
-	var tint := float(rng.randi_range(0, 2)) / 2.0 * 0.18
-	bush.material_override = _flat_material(
-		Palette.color(Palette.DRY_VEGETATION).lightened(tint))
-	add_child(bush)
 
 ## Mesh doar vizual (fara coliziune) — pentru linii de start, borduri etc.
 func _add_visual_mesh(mesh: ArrayMesh, color: Color) -> void:

@@ -178,6 +178,9 @@ func rebuild() -> void:
 	_build_center_line()
 	_build_kerbs()
 	_build_world_decor()
+	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
+	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
+	_build_terrain()
 	_build_world_bounds()
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
@@ -242,7 +245,18 @@ func _build_environment() -> void:
 	# in vederile ortogonale, iar ceata ar acoperi totul intr-o pata uniforma.
 	env.fog_enabled = not Engine.is_editor_hint()
 	env.fog_light_color = theme_fog
-	env.fog_density = 0.0035
+	if theme_decor == "desert":
+		# FOG_MODE_DEPTH, cu inceput si sfarsit explicite (style_bible §6: 90 ->
+		# 250m), in loc de exponential. Doua motive: se stie EXACT unde dispare
+		# geometria, deci camera poate taia fix acolo (vezi ChaseCamera.far); si
+		# prim-planul ramane complet limpede, in loc sa capete un val subtire de
+		# ceata pe tot ce e la 20-50m.
+		env.fog_mode = Environment.FOG_MODE_DEPTH
+		env.fog_depth_begin = 90.0
+		env.fog_depth_end = 250.0
+		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
+	else:
+		env.fog_density = 0.0035
 	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	# Expunerea: SINGURA parghie globala de luminozitate a scenei.
@@ -270,7 +284,9 @@ func _build_environment() -> void:
 	sun.light_energy = theme_sun_energy
 	add_child(sun)
 
-	_build_terrain()
+	# _build_terrain() NU se cheama de aici: are nevoie de pozitiile falezelor ca
+	# sa coaca AO la baza lor, iar alea exista abia dupa _build_world_decor().
+	# Vezi ordinea din rebuild().
 	var centroid := _centroid()
 	var ground_body := StaticBody3D.new()
 	var ground_shape := CollisionShape3D.new()
@@ -333,8 +349,12 @@ func _centroid() -> Vector3:
 ## = mai inchis — fara nicio textura.
 func _build_terrain() -> void:
 	var centroid := _centroid()
-	var size := 1500.0
-	var cells := 56
+	# 1500m si 56 de celule insemnau ~6200 de triunghiuri intinse pe o suprafata
+	# din care jumatate nu se vede niciodata: ceata inghite totul la 250m, iar
+	# siluetele de la orizont acopera fundalul. La 900m/36 raman ~2600, si nimeni
+	# nu observa diferenta din masina.
+	var size := 900.0
+	var cells := 36
 	var step := size / float(cells)
 	var origin := centroid - Vector3(size * 0.5, 0, size * 0.5)
 	var rng_phase := float(track_name.hash() % 1000) * 0.01
@@ -360,6 +380,8 @@ func _build_terrain() -> void:
 			# < 45m de sosea: perfect plat (unde se conduce); apoi blend.
 			var t := clampf((dist - 45.0) / 70.0, 0.0, 1.0)
 			heights[gz * (cells + 1) + gx] = maxf(h, -1.0) * t * t
+	# Pozitiile falezelor, pentru umbra coapta de la baza lor.
+	var cliff_xz := _cliff_positions()
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for gz in cells:
@@ -381,6 +403,7 @@ func _build_terrain() -> void:
 				for corner_idx: int in tri:
 					var v: Vector3 = corners[corner_idx]
 					var shade := clampf(1.0 + v.y * 0.03, 0.82, 1.12)
+					shade *= _cliff_shadow(v, cliff_xz)
 					st.set_color(theme_ground_tint * shade)
 					# UV din coordonate de LUME, nu din indexul celulei: asa
 					# textura curge continuu peste toata suprafata, fara sa se
@@ -405,6 +428,53 @@ func _build_terrain() -> void:
 		# satureaza, si granulatia dispare exact unde trebuia sa se vada.
 	inst.material_override = mat
 	add_child(inst)
+
+## Cat de dens se testeaza terenul fata de faleze. Peste raza asta o faleza nu
+## mai intuneca nimic.
+const CLIFF_AO_RADIUS: float = 14.0
+## Cat de intunecat e nisipul lipit de baza unei faleze.
+const CLIFF_AO_STRENGTH: float = 0.45
+
+
+## Pozitiile (doar XZ) ale falezelor deja construite.
+##
+## Se citesc din arbore, nu se recalculeaza: TrackCliffs are propriile filtre
+## (ferestre libere, gol in jurul landmark-urilor, sloturi respinse), iar o a doua
+## implementare a acelorasi reguli ar diverge la prima ajustare.
+func _cliff_positions() -> PackedVector2Array:
+	var out := PackedVector2Array()
+	var cliffs := get_node_or_null("Cliffs")
+	if cliffs == null:
+		return out
+	for child in cliffs.get_children():
+		if child is StaticBody3D:
+			continue # corpul de coliziune, nu un nod vizual
+		var n := child as Node3D
+		if n != null:
+			out.append(Vector2(n.position.x, n.position.z))
+	return out
+
+
+## Umbra coapta la baza falezelor, ca factor multiplicativ (1.0 = neatins).
+##
+## Astea NU sunt umbre dinamice — jocul are shadow_enabled=false, decizie de buget
+## mobil (BBR, referinta, foloseste tot lumina coapta). Fara contactul asta cu
+## solul, o stanca de 10m arata ca un decal lipit peste nisip. E cea mai ieftina
+## sursa de volum din toata scena: cateva inmultiri la generare, zero la runtime.
+func _cliff_shadow(v: Vector3, cliff_xz: PackedVector2Array) -> float:
+	if cliff_xz.is_empty():
+		return 1.0
+	var p := Vector2(v.x, v.z)
+	var nearest_sq := INF
+	for c in cliff_xz:
+		nearest_sq = minf(nearest_sq, p.distance_squared_to(c))
+	var d := sqrt(nearest_sq)
+	if d >= CLIFF_AO_RADIUS:
+		return 1.0
+	# Cadere patratica: umbra e concentrata langa piatra, nu o pata larga.
+	var t := d / CLIFF_AO_RADIUS
+	return 1.0 - CLIFF_AO_STRENGTH * (1.0 - t) * (1.0 - t)
+
 
 ## Textura incarcata doar daca exista (inainte de prima generare lipsesc).
 func _tex(path: String) -> Texture2D:

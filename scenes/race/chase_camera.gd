@@ -12,6 +12,14 @@ extends Node3D
 
 const MAX_SHAKE: float = 0.35 # metri de offset la trauma maxima
 
+## Cat de departe deseneaza camera.
+##
+## Implicitul Godot e 4000m — desenam de zece ori mai departe decat se vede.
+## Ceata inghite totul la 250m (Track._build_environment), iar cele mai
+## indepartate siluete de la orizont stau la ~350m. La 380m nu se pierde nimic
+## vizibil, dar frustumul nu mai plimba geometrie prin pipeline degeaba.
+const FAR_PLANE: float = 380.0
+
 var target: Car
 var trauma: float = 0.0
 
@@ -19,6 +27,7 @@ var _cam: Camera3D
 
 func _ready() -> void:
 	_cam = Camera3D.new()
+	_cam.far = FAR_PLANE
 	add_child(_cam)
 	_cam.current = true
 

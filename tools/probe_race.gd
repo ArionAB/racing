@@ -8,12 +8,17 @@ extends Node
 ##           imbranceli si lovituri de la obstacolele mobile.
 ##   bump  — matricea de imbranceli intre masini: cine pe cine arunca si cu cat.
 ##           Aici se vede daca "grea impinge, usoara zboara" e adevarat.
+##   cliff — arunca masini in unghi in peretii de canion, in mai multe puncte de
+##           pe traseu, si raporteaza daca vreuna ramane intepenita. Peretii sunt
+##           ~130 de forme convexe puse cap la cap; imbinarile dintre ele sunt
+##           exact locul unde o masina se poate agata.
 ##
 ## Rulare (ca SCENA, nu ca --script: avem nevoie de autoload-urile GameState /
 ## AudioManager, iar acelea nu exista in modul --script):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn
 ##   ... -- --mode=bump
 ##   ... -- --mode=race --track=0 --seconds=150
+##   ... -- --mode=cliff --track=0
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
@@ -25,6 +30,25 @@ const SEED: int = 20260729
 var _seed: int = SEED
 ## Viteza de sosire a atacatorului in modul bump (m/s).
 const BUMP_ENTRY_SPEED: float = 26.0
+
+# --- modul cliff ---
+## Cu ce viteza se arunca masina in perete.
+const CLIFF_ENTRY_SPEED: float = 20.0
+## Unghiul fata de directia drumului: 0 = paralel, 90 = perpendicular pe perete.
+## 35° e cazul rau realist — o iesire larga din viraj, nu un impact frontal.
+const CLIFF_ANGLE_DEG: float = 35.0
+## Cat timp se urmareste fiecare caz. Generos: AI-ul are anti-blocaj cu marsarier,
+## si vrem sa-i dam sansa sa-l foloseasca inainte sa-l declaram blocat.
+const CLIFF_CASE_SECONDS: float = 8.0
+## Sub viteza asta masina e considerata "oprita".
+const CLIFF_STUCK_SPEED: float = 2.0
+## Cat timp trebuie sa stea oprita ca sa fie declarata INTEPENITA. Peste durata
+## manevrei de desprindere (frana + marsarier + reluare), ca sa nu confundam o
+## recuperare reusita cu un blocaj.
+const CLIFF_STUCK_SECONDS: float = 3.5
+## Fractiile de traseu testate. Alese sa acopere: doua drepte, doua viraje, si
+## doua zone unde sectiunile de faleza se imbina in unghi.
+const CLIFF_FRACS: Array[float] = [0.12, 0.31, 0.44, 0.58, 0.73, 0.91]
 
 var _mode: String = "race"
 var _track_index: int = 0
@@ -41,6 +65,15 @@ var _bucket_speed: PackedFloat32Array = PackedFloat32Array()
 var _bucket_samples: PackedInt32Array = PackedInt32Array()
 var _bucket_slow: PackedInt32Array = PackedInt32Array()
 var _bucket_walls: PackedInt32Array = PackedInt32Array()
+
+# --- mod cliff ---
+var _cliff_cases: Array[Dictionary] = []
+var _cliff_case: int = -1
+var _cliff_car: Car = null
+var _cliff_track: Track = null
+var _cliff_time: float = 0.0
+var _cliff_slow_time: float = 0.0
+var _cliff_rows: Array[Dictionary] = []
 
 # --- mod bump ---
 var _bump_cases: Array[Dictionary] = []
@@ -83,6 +116,8 @@ func _ready() -> void:
 			_start_race()
 		"bump":
 			_start_bump()
+		"cliff":
+			_start_cliff()
 		_:
 			push_error("probe_race: mod necunoscut '%s'" % _mode)
 			get_tree().quit(1)
@@ -91,10 +126,13 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _done:
 		return
-	if _mode == "bump":
-		_tick_bump()
-	else:
-		_tick_race(delta)
+	match _mode:
+		"bump":
+			_tick_bump()
+		"cliff":
+			_tick_cliff(delta)
+		_:
+			_tick_race(delta)
 
 
 func _finish() -> void:
@@ -349,6 +387,122 @@ func _next_bump_case() -> void:
 	_bump_impulses_vic = 0
 	_bump_impulse_peak_att = 0.0
 	_bump_impulse_peak_vic = 0.0
+
+
+# ----------------------------------------------------- mod cliff (anti-blocaj)
+
+## Peretii de canion sunt ~130 de forme convexe puse cap la cap, cu suprapunere
+## de 1m. Suprapunerea exista tocmai ca sa nu ramana fisuri intre ele — dar
+## "fara fisuri" e o afirmatie care trebuie verificata, nu presupusa: o masina
+## intepenita intr-o imbinare inseamna cursa terminata pentru jucator.
+##
+## Testul: arunca masina in unghi in perete, la viteza, in mai multe puncte de pe
+## traseu, si urmareste daca ramane oprita. Deliberat FARA repunere automata —
+## plasa de siguranta din race.gd ar ascunde exact problema pe care o cautam.
+func _start_cliff() -> void:
+	GameState.selected_track = _track_index
+	_cliff_track = (load(GameState.TRACK_SCENES[_track_index]) as PackedScene) \
+		.instantiate() as Track
+	add_child(_cliff_track)
+	var n := _cliff_track.baked.size()
+	for frac in CLIFF_FRACS:
+		var idx := int(frac * float(n)) % n
+		# Ambele laturi: peretele interior si cel exterior au offseturi diferite,
+		# deci si imbinari diferite.
+		for side: float in [-1.0, 1.0]:
+			_cliff_cases.append({"idx": idx, "side": side, "frac": frac})
+	_next_cliff_case()
+
+
+func _next_cliff_case() -> void:
+	if _cliff_car != null:
+		_cliff_car.queue_free()
+		_cliff_car = null
+	_cliff_case += 1
+	if _cliff_case >= _cliff_cases.size():
+		_report_cliff()
+		return
+	var c := _cliff_cases[_cliff_case]
+	var idx: int = c["idx"]
+	var side: float = c["side"]
+	var n := _cliff_track.baked.size()
+	var p: Vector3 = _cliff_track.baked[idx]
+	var fwd: Vector3 = (_cliff_track.baked[(idx + 1) % n] - p).normalized()
+	var lat := fwd.cross(Vector3.UP).normalized() * side
+
+	# Pornim de pe banda dinspre perete, indreptati spre el sub CLIFF_ANGLE_DEG.
+	var start := p + lat * (_cliff_track.half_width * 0.5) + Vector3.UP * 0.6
+	var dir := fwd.rotated(Vector3.UP, deg_to_rad(CLIFF_ANGLE_DEG) * -side) \
+		.normalized()
+
+	_cliff_car = (load(CAR_SCENE) as PackedScene).instantiate() as Car
+	add_child(_cliff_car)
+	_cliff_car.apply_data(GameState.CAR_DATA[0] as CarData)
+	_cliff_car.global_position = start
+	_cliff_car.look_at(start + dir, Vector3.UP)
+	_cliff_car.race_active = true
+	# Un AI adevarat la volan, nu comenzi fixe.
+	#
+	# Prima versiune folosea ScriptedController cu volanul drept: masina intra in
+	# perete si impingea in el la infinit, deci iesea "intepenita" oriunde —
+	# inclusiv pe forest, care n-are faleze, doar gardul rosu de dinainte (3 din
+	# 12, apoi 9 din 12 cand am adaugat un viraj fix). Masura lipsa de reactie, nu
+	# geometria.
+	#
+	# AIController stie sa dea marsarier si sa reia linia, adica exact ce ar face
+	# un jucator. Daca NICI EL nu scapa, atunci chiar e o capcana de geometrie.
+	var ai := AIController.new()
+	_cliff_car.set_controller(ai)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _seed + _cliff_case
+	ai.configure(_cliff_track, rng)
+	_cliff_car.velocity = dir * CLIFF_ENTRY_SPEED
+	_cliff_time = 0.0
+	_cliff_slow_time = 0.0
+
+
+func _tick_cliff(delta: float) -> void:
+	if _cliff_car == null:
+		return
+	_cliff_time += delta
+	var speed := Vector2(_cliff_car.velocity.x, _cliff_car.velocity.z).length()
+	# Primele 0.4s sunt zborul pana la perete; nu conteaza pentru "intepenit".
+	if _cliff_time > 0.4 and speed < CLIFF_STUCK_SPEED:
+		_cliff_slow_time += delta
+	else:
+		_cliff_slow_time = 0.0
+	if _cliff_time >= CLIFF_CASE_SECONDS \
+			or _cliff_slow_time >= CLIFF_STUCK_SECONDS:
+		var c := _cliff_cases[_cliff_case]
+		_cliff_rows.append({
+			"frac": c["frac"],
+			"side": c["side"],
+			"stuck": _cliff_slow_time >= CLIFF_STUCK_SECONDS,
+			"exit_speed": speed,
+			"stuck_time": _cliff_slow_time,
+		})
+		_next_cliff_case()
+
+
+func _report_cliff() -> void:
+	print("\n=== ANTI-BLOCAJ IN PERETII DE CANION (%s) ==="
+		% GameState.TRACK_NAMES[_track_index])
+	print("intrare %.0f m/s la %.0f°, intepenit = sub %.1f m/s mai mult de %.1fs"
+		% [CLIFF_ENTRY_SPEED, CLIFF_ANGLE_DEG, CLIFF_STUCK_SPEED,
+			CLIFF_STUCK_SECONDS])
+	print("%8s %6s %12s %10s" % ["fractie", "parte", "viteza iesire", "stare"])
+	print("-".repeat(40))
+	var stuck := 0
+	for row in _cliff_rows:
+		if row["stuck"]:
+			stuck += 1
+		print("%8.2f %6s %9.1f m/s %10s" % [
+			row["frac"], "st" if float(row["side"]) < 0.0 else "dr",
+			row["exit_speed"], "INTEPENIT" if row["stuck"] else "ok"])
+	print("\n%d cazuri, %d intepenite" % [_cliff_rows.size(), stuck])
+	print("VERDICT: %s" % ("PROBLEMA" if stuck > 0 else "OK"))
+	_done = true
+	get_tree().quit(1 if stuck > 0 else 0)
 
 
 func _spawn_bump_car(data: CarData, pos: Vector3, throttle: float) -> Car:

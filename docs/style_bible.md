@@ -241,3 +241,29 @@ de îngustime **vizual**: prop-uri aproape de bandă, faleze care strâng cadrul
 din `track.gd` (`CANYON_HEIGHT`). Rezolvare: terenul rămâne domol (±3.5 m), iar
 canionul devine **geometrie de faleză** (assets de 6–12 m) așezată pe margine —
 mai aproape și de spec-ul de inventar (35 secțiuni de faleză).
+
+> **Implementat** (august 2026) în [track_cliffs.gd](../scenes/tracks/track_cliffs.gd):
+> 6 variante de secțiune (6.5–11 m), lățime 15 m, pas de 14 m cu suprapunere de
+> 1 m, ~130 de secțiuni pe Dunele. Fiecare își aduce propria coliziune convexă
+> (nodurile `Cliff_X_col` din GLB), toate sub un `StaticBody3D` per latură.
+> Gardul roșu de 1.3 m a dispărut complet de pe tema desert.
+
+---
+
+## 13. Ce am învățat construind canionul
+
+Lucruri care nu se deduc din spec și care au costat iterații:
+
+1. **Deciziile de compoziție se iau din vederea șoferului**, nu din snapshot-uri
+   ortografice de sus — acelea turtesc tot ce e vertical și mint despre
+   densitate. `Snapshot.tscn -- --frac=0.35 --driver`.
+2. **Bevel-ul se scalează cu obiectul.** Cei 0.15 m din §3 sunt pentru bolovani
+   mari; pe o pietricică de 40 cm o bandă de 15 cm e o treime din obiect și
+   dublează triunghiurile. Grupurile mici au primit bevel zero.
+3. **Densitatea din §7 (18–25 prop-uri/100 m) e o densitate liniară pe traseu**,
+   împărțită pe benzi și pe două laturi. Nu produce singură senzația de canion —
+   banda lipită de drum are nevoie de pas mult mai mic decât sugerează cifra.
+4. **Un elipsoid dă o movilă, nu un perete.** Falezele au nevoie de o față
+   verticală explicită (`taper` mic + `wall_axis`), altfel ies conice.
+5. **Piesele mărunte trebuie supradimensionate 40–110%.** La scara reală, o tufă
+   de 60 cm pur și simplu nu se vede de la înălțimea camerei.

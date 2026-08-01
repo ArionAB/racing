@@ -91,9 +91,19 @@ res://
 
 ## Constrângeri mobile 3D
 
-- 60fps pe mid-range: low-poly (buget ~50k triunghiuri pe scenă), o singură
-  lumină direcțională, umbre ieftine sau blob shadows sub mașini, fără
-  post-procesare scumpă (fog simplu e ok)
+- 60fps pe mid-range: low-poly, o singură lumină direcțională, umbre ieftine sau
+  blob shadows sub mașini, fără post-procesare scumpă (fog simplu e ok)
+- **Triunghiuri: măsurate, nu presupuse.** Versiunea inițială a acestui document
+  scria „~50k pe scenă" fără nicio măsurătoare în spate. Prima numărătoare reală
+  (august 2026) a găsit pistele la 147–163k, din care ~110k veneau din primitive
+  Godot lăsate la rezoluția implicită — un `SphereMesh` are 64×32 = **4.224 de
+  triunghiuri**, deci fiecare tufă de 40 cm avea geometria unei planete.
+  **Când creezi o primitivă în cod, setează-i `radial_segments`/`rings`.**
+  După reparație și după canion: Dunele ~65k, celelalte 21–32k. Plafonul din
+  `tools/probe_decor.gd` e acum 80k = măsurătoarea + 20% marjă, verificat la
+  fiecare build. Rămâne un prag de alarmă: constrângerea reală pe mobil e
+  **draw calls / overdraw / fill rate**, de aceea testul principal al gărzii e
+  numărătoarea de materiale. Validarea finală e primul test pe device.
 - Texturi comprimate ETC2/ASTC, materiale simple (albedo, fără PBR complex)
 - Particule cu limită de count; test pe device fizic de la primul build (M4,
   dar mai devreme dacă apar dubii de feel pe touch)

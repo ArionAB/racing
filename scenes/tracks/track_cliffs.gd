@@ -97,6 +97,8 @@ static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
 				continue
 			if _near_landmark(d, total, clear_at):
 				continue
+			if _skip_slot(spec):
+				continue
 			_place(root, body, scene, spec, rng)
 	return root
 
@@ -132,15 +134,17 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# 3m PESTE asfalt. Se citeste din AABB, nu dintr-un tabel: regenerezi GLB-ul
 	# cu alte cote si asezarea le urmeaza singura.
 	var half_depth := _half_depth(model) * scale_factor
+	# Cat de departe sta peretele. Retragerea se aplica DOAR unde se depaseste —
+	# aplicata peste tot (prima incercare), lasa un camp gol de nisip intre drum
+	# si stanca pe portiunile drepte, si canionul se pierde. Vazut in vederea
+	# soferului la frac=0.20; la frac=0.55, in viraj, retragerea e exact potrivita.
 	var extra := 0.0
 	if not spec.is_exterior:
 		extra = OFFSET_INNER - OFFSET_OUTER
 	elif spec.is_apex or spec.is_braking:
-		# Viraj strans sau zona de franare: cel mai mult loc (style_bible §7 cere
-		# 8m liberi la franare).
+		# Viraj strans sau zona de franare: aici chiar se depaseste, deci cel mai
+		# mult loc (style_bible §7 cere 8m liberi la franare).
 		extra = OFFSET_CORNER + 2.0 - OFFSET_OUTER
-	else:
-		extra = OFFSET_CORNER - OFFSET_OUTER
 	var pos := spec.position + spec.normal_out * (extra + half_depth)
 	pos.y -= SINK
 
@@ -163,17 +167,31 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	_add_collision(body, pick["node"], scene, xform)
 
 
-## Inaltimea dorita la fractia asta: un "val" lent peste tot traseul, plus o
-## variatie in trepte. Canionul respira in loc sa fie un tunel uniform.
+## Inaltimea dorita la fractia asta: doua valuri suprapuse, plus o variatie in
+## trepte. Canionul respira in loc sa fie un tunel uniform.
+##
+## Doua frecvente, nu una: cu un singur sinus lent, pereti vecini ies aproape la
+## fel de inalti si peisajul citeste ca un zid continuu — verificat din vederea
+## soferului. Al doilea val, mai rapid, rupe linia de sus.
 static func _wanted_height(spec: TrackDecorSpec,
 		rng: RandomNumberGenerator) -> float:
-	var wave := sin(spec.frac * TAU * 3.7) * 2.5
+	var slow := sin(spec.frac * TAU * 3.7) * 2.2
+	var fast := sin(spec.frac * TAU * 11.3) * 1.4
 	var step := float(rng.randi_range(0, 2)) * 0.9
-	var h := 8.0 + wave + step
+	var h := 8.0 + slow + fast + step
 	# In apexul unui viraj, peretele scade: altfel nu vezi iesirea din curba.
 	if spec.is_apex:
 		h = minf(h, 7.0)
 	return clampf(h, 6.5, 11.5)
+
+
+## Se sare complet peste slotul asta? Un perete neintrerupt de 1200m obose ochiul
+## si ascunde reperele de la orizont. Golurile lasa sa se vada butte-urile si dau
+## senzatia ca soseaua IESE din canion si intra iar in el.
+static func _skip_slot(spec: TrackDecorSpec) -> bool:
+	# ~18% din traseu ramane deschis, in ferestre lungi (nu gauri izolate, care
+	# ar arata ca sectiuni lipsa).
+	return sin(spec.frac * TAU * 5.1 + spec.side_sign * 1.7) > 0.72
 
 
 static func _best_variant(height: float) -> Dictionary:

@@ -216,6 +216,82 @@ class Builder:
 
         return self._tag(new_verts, slot)
 
+    def rock(self, center, size, slot, seed=0, segments=7, rings=4,
+             flat_top=False, squash=1.0, taper=0.35, wall_axis=None):
+        """Bolovan: elipsoid din inele orizontale, cu raza perturbata determinist.
+
+        Baza intregii familii de stanci (bolovani, faleze, butte). Perturbatia e
+        pseudo-aleatoare DAR reproductibila din `seed` — acelasi seed da mereu
+        aceeasi silueta, deci build-urile nu se schimba intre rulari.
+
+        style_bible §3 cere stanci rotunjite (70%) sau fatetate (30%), NICIODATA
+        zimtate, cu straturi orizontale la 0.4-0.8 m. De aici alegerile:
+          - `segments` mic (7) -> fatete late, nu detaliu de frecventa inalta
+          - perturbatia variaza mai mult PE INEL decat intre inele vecine, ca sa
+            iasa straturi orizontale in loc de zgomot izotrop
+          - `flat_top` taie varful: silueta de mesa, semnatura peisajului de canion
+
+        size: (lungime_x, latime_y, inaltime_z).
+        taper: cat se ingusteaza spre varf. 0 = pereti verticali (faleza),
+               1 = varf ascutit (bolovan). Un elipsoid pur (taper mare) da o
+               MOVILA, nu un perete — pentru faleze trebuie 0.10-0.20.
+        wall_axis: 'y' inseamna "fata dinspre -Y ramane VERTICALA, doar spatele
+               cade in trepte". Asa iese perete de canion vazut din masina, si
+               tot economisesti triunghiuri pe partea nevazuta.
+        squash < 1 turteste inelele de sus.
+        """
+        sx, sy, sz = size
+        cx, cy, cz = center
+        rings_v = []
+        # Un LCG mic: nu vrem random-ul global al Python, care ar face build-ul
+        # dependent de ordinea apelurilor.
+        state = (seed * 1103515245 + 12345) & 0x7FFFFFFF
+
+        def rand():
+            nonlocal state
+            state = (state * 1103515245 + 12345) & 0x7FFFFFFF
+            return state / 0x7FFFFFFF
+
+        # o deviatie per inel (stratul) si una per coloana (verticala), combinate:
+        # asa fetele raman continue pe verticala, ca la roca sedimentara
+        col_dev = [0.88 + rand() * 0.24 for _ in range(segments)]
+        top_frac = 0.82 if flat_top else 1.0
+
+        for k in range(rings + 1):
+            t = k / rings
+            z = cz + (t * top_frac) * sz
+            # Profilul: 1.0 la baza -> (1 - taper) la varf. Cu taper mic raman
+            # pereti aproape verticali; cu taper mare iese bolovan.
+            radius_scale = 1.0 - taper * (t ** 1.35)
+            if flat_top and t > 0.9:
+                radius_scale = max(radius_scale, 1.0 - taper * 0.85)
+            ring_dev = 0.94 + rand() * 0.12
+            vert_squash = 1.0 - t * (1.0 - squash)
+            ring = []
+            for i in range(segments):
+                a = 2.0 * math.pi * i / segments
+                ca, sa = math.cos(a), math.sin(a)
+                r = radius_scale * ring_dev * col_dev[i] * vert_squash
+                # Peretele de faleza: jumatatea dinspre -Y nu se retrage cu
+                # inaltimea. Fara asta silueta se ingusteaza in toate directiile
+                # si obtii o movila conica in loc de perete.
+                if wall_axis == "y" and sa < 0.0:
+                    r = ring_dev * col_dev[i]
+                ring.append(self.bm.verts.new(
+                    (cx + ca * r * sx * 0.5,
+                     cy + sa * r * sy * 0.5,
+                     z)))
+            rings_v.append(ring)
+
+        new_verts = [v for ring in rings_v for v in ring]
+        for lo, hi in zip(rings_v, rings_v[1:]):
+            for i in range(segments):
+                j = (i + 1) % segments
+                self.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
+        self.bm.faces.new(tuple(reversed(rings_v[0])))   # baza
+        self.bm.faces.new(tuple(rings_v[-1]))            # varf
+        return self._tag(new_verts, slot)
+
     def prism(self, outline, thickness, slot, center=(0, 0, 0)):
         """Prisma dintr-un contur 2D in planul XZ, extrudata pe Y.
 

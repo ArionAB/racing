@@ -100,15 +100,40 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
 - Commit-uri mici, descriptive (uită-te la `git log` pentru stil).
 - Pentru schimbări de fizică/gameplay: verificare headless
   (`--headless --fixed-fps 60`) înainte de commit — convenție din CLAUDE.md.
-- **CI are o gardă de draw call-uri.** Dacă pică pasul „Draw-call guard", ai
-  adăugat probabil un `StandardMaterial3D.new()` într-o buclă de decor: fiecare
-  instanță își primește materialul ei, iar asta se plătește direct în fps pe
-  mid-range. Folosește `_flat_material()` din `track.gd` (cache pe culoare) și
-  cuantifică variațiile de nuanță în câteva trepte, nu continuu. Rulezi local cu:
+- **CI are o gardă de scenă**, cu două metrici.
+
+  **Materiale (testul principal).** Dacă pică cu `MAT`, ai adăugat probabil un
+  `StandardMaterial3D.new()` într-o buclă de decor: fiecare instanță își primește
+  materialul ei, iar asta se plătește direct în fps pe mid-range. Folosește
+  `_flat_material()` din `track.gd` (cache pe culoare) și cuantifică variațiile
+  de nuanță în câteva trepte, nu continuu.
+
+  **Triunghiuri (instrumentare).** Raportate la fiecare rulare, cu prag de alarmă
+  larg — `MAX_TRIS_PER_TRACK = 100000`. **Ăsta nu e bugetul de artă.** CLAUDE.md
+  vorbește de ~50k/scenă, dar cifra aia n-a fost niciodată măsurată sau testată
+  pe device, iar până acum garda nici nu număra triunghiuri. Pragul larg prinde
+  exploziile accidentale (o buclă care instanțiază la nesfârșit), nu politica de
+  densitate; se coboară la o cifră justificată după ce măsurăm Dunele cu canionul
+  complet. Dacă pică cu `TRIS`, ceva a scăpat de sub control — uită-te la tabelul
+  pe surse, care arată exact de unde vin.
+
+  > Prima măsurătoare a găsit **147k tris pe Dunele**, din care ~110k veneau din
+  > primitive Godot lăsate la rezoluția implicită: un `SphereMesh` are 64×32 =
+  > 4.224 triunghiuri, deci fiecare tufă de 40 cm avea geometria unei planete.
+  > Cu `radial_segments`/`rings` setate, aceeași scenă a coborât la **36k**, fără
+  > nicio diferență vizibilă. **Când creezi o primitivă în cod, setează-i
+  > segmentele** — implicitul e gândit pentru randare offline, nu pentru mobil.
+
+  Rulezi local cu:
   ```
   godot --headless --path . --script res://tools/probe_decor.gd
   ```
   Aceeași comandă cu `-- --track=2` raportează o singură pistă.
+
+  **Adaugi un GLB nou în lume?** Trebuie trecut în lista `KNOWN` din
+  `tools/probe_decor.gd`. Altfel mesh-urile lui sunt puse la socoteală drept
+  „procedurale", raportul sare la valori absurde și garda trece orice — devine
+  decorativă exact când ai cea mai mare nevoie de ea.
 
 ## 5. Context ca să nu te pierzi (stare curentă, iulie 2026)
 

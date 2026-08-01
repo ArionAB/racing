@@ -86,6 +86,10 @@ static func _add_tree(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator,
 	trunk_mesh.top_radius = 0.25
 	trunk_mesh.bottom_radius = 0.35
 	trunk_mesh.height = 1.4 * scale_factor
+	# CylinderMesh implicit are 64 de laturi si 4 inele. Un trunchi de copac
+	# low-poly n-are nevoie de mai mult de 8 laturi si un inel.
+	trunk_mesh.radial_segments = 8
+	trunk_mesh.rings = 1
 	trunk.mesh = trunk_mesh
 	trunk.position = Vector3.UP * 0.7 * scale_factor
 	trunk.material_override = mat.call(Color(0.45, 0.3, 0.18))
@@ -95,6 +99,8 @@ static func _add_tree(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator,
 	crown_mesh.top_radius = 0.0 # con
 	crown_mesh.bottom_radius = 1.6 * scale_factor
 	crown_mesh.height = 3.2 * scale_factor
+	crown_mesh.radial_segments = 9 # numar impar: silueta nu iese simetrica
+	crown_mesh.rings = 1
 	crown.mesh = crown_mesh
 	crown.position = Vector3.UP * (1.4 * scale_factor + 1.6 * scale_factor)
 	# verde in 4 trepte: padurea are 4 materiale de coroana, nu unul per copac
@@ -271,6 +277,11 @@ static func _add_dry_bush(parent: Node3D, pos: Vector3,
 	var r := rng.randf_range(0.4, 0.8)
 	sphere.radius = r
 	sphere.height = r
+	# Implicit SphereMesh e 64x32 = 4224 triunghiuri — pentru o tufa de 40cm,
+	# adica geometria unei planete pe ceva cat o roata. La 8x4 ramane rotunda
+	# la orice viteza de trecere si costa 64.
+	sphere.radial_segments = 8
+	sphere.rings = 4
 	bush.mesh = sphere
 	bush.position = pos + Vector3.UP * (r * 0.3 - 0.3)
 	# Slotul de vegetatie uscata din paleta, in 3 trepte de nuanta (nu continuu,

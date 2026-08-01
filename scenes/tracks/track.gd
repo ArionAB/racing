@@ -256,6 +256,11 @@ func _build_environment() -> void:
 		var sphere := SphereMesh.new()
 		sphere.radius = radius
 		sphere.height = radius * 0.5
+		# Implicit SphereMesh e 64x32 = 4224 triunghiuri. Pentru o movila vazuta
+		# de la 240m+ e absurd: 12 dealuri costau 50k tris, cat toata pista.
+		# La distanta aia silueta e tot ce se vede.
+		sphere.radial_segments = 12
+		sphere.rings = 5
 		hill.mesh = sphere
 		hill.position = Vector3(pos.x, -6.0, pos.z) # y absolut, nu din centroid
 		# nuanta in 4 trepte, nu continua: dealurile de fundal impart 4 materiale

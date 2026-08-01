@@ -1,23 +1,66 @@
 class_name TrackDecor
 extends RefCounted
-## Decorul imprastiat in jurul soselei: pietre, cactusi, mese, copaci.
+## Decorul din jurul soselei: pietre, cactusi, tufe, mese, copaci.
 ##
-## Extras din [code]track.gd[/code] ca sa se poata lucra in paralel pe decor si
-## pe restul pistei fara conflicte in acelasi fisier. Comportamentul e deocamdata
-## IDENTIC cu cel dinainte (aceeasi esantionare prin respingere, acelasi seed,
-## aceleasi cote) — rescrierea pe benzi paralele cu drumul vine separat.
+## DOUA STRATEGII, dupa tema:
+##
+## [b]desert[/b] — BENZI paralele cu drumul, esantionate in arc-length. Fiecare
+## banda are propriul offset, pas si continut, iar prop-urile se aseaza in
+## grupuri cu goluri intre ele. Asa se obtine senzatia de canion: decorul
+## URMEAZA drumul si il strange, in loc sa fie presarat prin peisaj.
+##
+## [b]forest[/b] — esantionare prin respingere intr-un dreptunghi, codul vechi.
+## Padurea nu are nevoie sa stranga drumul, iar schimbarea ar fi rescris doua
+## piste care arata bine.
+##
+## De ce s-a schimbat: metoda veche respingea orice pozitie mai apropiata de 15m
+## de axa, deci nu PUTEA produce "lipit de drum" — de asta decorul parea rar desi
+## erau 80 de prop-uri.
 ##
 ## Materialele NU se creeaza aici: `mat_provider` e cache-ul de culoare din
 ## [code]track.gd[/code] ([code]_flat_material[/code]). Daca decorul si-ar face
 ## materiale proprii, garda de draw call-uri din [code]tools/probe_decor.gd[/code]
 ## ar deveni oarba exact acolo unde conteaza cel mai mult.
 
-## Cate prop-uri se incearca si cate se accepta.
+## --- Tema forest: esantionare prin respingere (cod vechi) ---
 const MAX_PLACED: int = 80
 const MAX_ATTEMPTS: int = 400
-## Banda in care se accepta un prop, ca distanta fata de axa soselei.
 const NEAR_MARGIN: float = 8.0
 const FAR_LIMIT: float = 90.0
+
+## --- Tema desert: benzi paralele cu drumul ---
+##
+## Tinta e 18-25 prop-uri / 100 m (style_bible §7), adica ~210-290 pe un tur de
+## Dunele (1175 m) — fata de 80 cat producea metoda veche pe toata suprafata.
+##
+## ATENTIE la pas: numarul final NU e lungimea / pas. Fiecare slot se produce pe
+## AMBELE laturi, gruparea adauga 2-5 sateliti, iar jitterul longitudinal mai
+## strecoara sloturi. Prima incercare (pas 9/7/14) a scos 882 de prop-uri, de
+## patru ori peste tinta, si a spart pragul de triunghiuri din garda. Pasii de
+## mai jos sunt calibrati pe numaratoarea reala, nu pe calculul naiv.
+##
+## `off_min`/`off_max` sunt distante fata de MARGINEA asfaltului, nu fata de axa.
+## `collide` fals inseamna mesh fara corp fizic: treci prin el.
+const BANDS := [
+	# Lipita de drum. Da ingustimea canionului, dar NU exista fizic — style_bible
+	# §2 cere prop-uri la 2-4m, iar la distanta aia coliziunea ar face cursa
+	# nejucabila (is_on_road taie viteza deja de la 7.5m de axa).
+	{"name": "hug", "off_min": 1.5, "off_max": 4.0, "spacing": 9.0,
+		"collide": false, "cluster": 0.30},
+	# Prima banda cu coliziune. La 4m de margine, primul contact posibil e la 11m
+	# de axa — adica 3.5m DUPA ce ai incasat deja penalizarea de offroad.
+	{"name": "mid", "off_min": 4.0, "off_max": 11.0, "spacing": 25.0,
+		"collide": true, "cluster": 0.45},
+	# Fundal apropiat: piese mari, rare.
+	{"name": "back", "off_min": 11.0, "off_max": 26.0, "spacing": 42.0,
+		"collide": true, "cluster": 0.35},
+]
+## Cati sateliti primeste un prop cand pica zarul de grupare, si in ce raza.
+const CLUSTER_MIN: int = 2
+const CLUSTER_MAX: int = 5
+const CLUSTER_RADIUS: float = 3.5
+## In zonele de franare banda lipita se goleste si cea de mijloc se retrage.
+const BRAKING_MIN_OFFSET: float = 8.0
 
 
 ## Construieste tot decorul si il intoarce sub un singur nod.
@@ -27,12 +70,118 @@ static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
 		mat_provider: Callable) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Decor"
+	if sampler.point_count() == 0:
+		return root
+	if theme == "desert":
+		_build_bands(root, sampler, seed_value, mat_provider)
+	else:
+		_build_scattered(root, sampler, theme, seed_value, mat_provider)
+	return root
+
+
+## Tema desert: benzi paralele cu drumul.
+static func _build_bands(root: Node3D, sampler: TrackSideSampler,
+		seed_value: int, mat_provider: Callable) -> void:
+	for band in BANDS:
+		# Un rng PER BANDA: asa poti itera pe densitatea benzii de mijloc fara sa
+		# se mute si pietricelele de langa drum.
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_value + hash(band["name"])
+
+		var container := Node3D.new()
+		container.name = "Band_%s" % band["name"]
+		root.add_child(container)
+
+		var skip := 0
+		for spec in sampler.sample_band(band["spacing"], band["off_min"],
+				band["off_max"], rng):
+			# Golurile sunt la fel de importante ca prop-urile: fara ele iese un
+			# covor uniform, nu ritmul "ingramadit / gol" din referinta.
+			if skip > 0:
+				skip -= 1
+				continue
+			if not _allowed(spec, band):
+				continue
+			_place_band_prop(container, spec, band, rng, mat_provider)
+			if rng.randf() < float(band["cluster"]):
+				_place_satellites(container, spec, band, rng, mat_provider)
+				skip = 2
+
+
+## Regulile de siguranta, citite din steagurile pe care le-a calculat samplerul.
+static func _allowed(spec: TrackDecorSpec, band: Dictionary) -> bool:
+	if spec.is_braking:
+		# 8m liberi in zonele de franare (style_bible §7).
+		if band["name"] == "hug":
+			return false
+		if spec.offset < BRAKING_MIN_OFFSET:
+			return false
+	# Nimic inalt in apex pe partea interioara: acolo se citeste iesirea din viraj.
+	if spec.is_apex and not spec.is_exterior and band["name"] != "hug":
+		return false
+	return true
+
+
+static func _place_satellites(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator,
+		mat_provider: Callable) -> void:
+	var count := rng.randi_range(CLUSTER_MIN, CLUSTER_MAX)
+	for i in count:
+		var sat := TrackDecorSpec.new()
+		var angle := rng.randf_range(0.0, TAU)
+		var dist := rng.randf_range(1.0, CLUSTER_RADIUS)
+		sat.position = spec.position + Vector3(cos(angle), 0.0, sin(angle)) * dist
+		sat.normal_out = spec.normal_out
+		sat.along = spec.along
+		sat.index = spec.index
+		sat.frac = spec.frac
+		sat.side_sign = spec.side_sign
+		sat.offset = spec.offset + dist * 0.5
+		sat.is_exterior = spec.is_exterior
+		sat.is_elevated = spec.is_elevated
+		sat.is_apex = spec.is_apex
+		sat.is_braking = spec.is_braking
+		_place_band_prop(parent, sat, band, rng, mat_provider, true)
+
+
+## Ce se aseaza intr-o banda. Sateliti = piese mai mici decat propul principal.
+static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator, mat_provider: Callable,
+		satellite: bool = false) -> void:
+	var pos := spec.position
+	match band["name"]:
+		"hug":
+			_add_scatter(parent, pos, rng, mat_provider)
+		"mid":
+			var roll := rng.randf()
+			if satellite or roll < 0.30:
+				_add_cluster(parent, pos, rng, ["Cluster_S1", "Cluster_S2"],
+					false, mat_provider)
+			elif roll < 0.68:
+				_add_cactus(parent, pos, rng, mat_provider)
+			else:
+				_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+					true, mat_provider)
+		_:
+			var roll2 := rng.randf()
+			if satellite or roll2 < 0.35:
+				_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+					true, mat_provider)
+			elif roll2 < 0.62:
+				_add_cluster(parent, pos, rng, ["Cluster_L1"], true, mat_provider)
+			elif roll2 < 0.85:
+				_add_mesa(parent, pos, rng, mat_provider)
+			else:
+				_add_cactus(parent, pos, rng, mat_provider)
+
+
+## Tema forest: esantionare prin respingere in dreptunghi (codul dinainte).
+static func _build_scattered(root: Node3D, sampler: TrackSideSampler,
+		theme: String, seed_value: int, mat_provider: Callable) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 
 	var n := sampler.point_count()
-	if n == 0:
-		return root
 	var bounds_min := sampler.baked_point(0)
 	var bounds_max := bounds_min
 	for i in n:
@@ -52,28 +201,112 @@ static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
 		if nearest < sampler.half_width() + NEAR_MARGIN or nearest > FAR_LIMIT:
 			continue
 		placed += 1
-		if theme == "desert":
-			# Provizoriu: castelul de nisip si galeata au iesit odata cu tema de
-			# lada de nisip, iar cotele lor s-au redistribuit la piatra si mesa.
-			var roll := rng.randf()
-			if roll < 0.34:
-				_add_cactus(root, pos, rng, mat_provider)
-			elif roll < 0.60:
-				_add_glb_rock(root, pos, rng, mat_provider)
-			elif roll < 0.82:
-				_add_mesa(root, pos, rng, mat_provider)
-			else:
-				_add_dry_bush(root, pos, rng, mat_provider)
-		elif rng.randf() < 0.7:
+		if rng.randf() < 0.7:
 			_add_tree(root, pos, rng, mat_provider)
 		elif rng.randf() < 0.5:
 			_add_glb_rock(root, pos, rng, mat_provider)
 		else:
 			_add_rock(root, pos, rng, mat_provider)
-	return root
 
 
 # ------------------------------------------------------------ prop-uri
+
+## O piesa marunta din desert_scatter.glb, FARA coliziune.
+##
+## Astea sunt cele mai numeroase de pe pista (peste 100), asa ca nu primesc corp
+## fizic: sunt un MeshInstance3D pus direct sub container. Vizual strang drumul,
+## fizic nu exista — vezi comentariul de la banda "hug".
+static func _add_scatter(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, mat: Callable) -> void:
+	const PICKS := ["Bush_A", "Bush_B", "Pebbles_A", "Pebbles_B", "Grass_Tuft"]
+	var kept := _pick_from_glb("res://assets/models/desert_scatter.glb",
+		PICKS[rng.randi_range(0, PICKS.size() - 1)])
+	if kept == null:
+		_add_dry_bush(parent, pos, rng, mat)
+		return
+	parent.add_child(kept)
+	kept.position = pos + Vector3.UP * -0.15
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	# Supradimensionate cu ~70%: la scara reala (tufa de 60cm, pietricica de 30cm)
+	# pur si simplu nu se vad de la inaltimea camerei, si banda lipita de drum
+	# ramane goala. style_bible §2 cere oricum obiectele cu 10-20% peste scara —
+	# aici mergem mai departe pentru ca astea sunt piesele care STRANG cadrul.
+	kept.scale = Vector3.ONE * rng.randf_range(1.4, 2.1)
+	Palette.apply_world_material(kept)
+
+
+## Un grup de bolovani din rock_cluster.glb.
+##
+## Coliziunea, cand exista, e o SINGURA sfera pe grup — nu una per piatra.
+## Falezele aduc deja ~130 de forme; aici nu mai cheltuim.
+static func _add_cluster(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, picks: Array, collide: bool,
+		mat: Callable) -> void:
+	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
+	var kept := _pick_from_glb("res://assets/models/rock_cluster.glb", name_pick)
+	if kept == null:
+		_add_glb_rock(parent, pos, rng, mat)
+		return
+	var s := rng.randf_range(0.9, 1.3)
+	if not collide:
+		parent.add_child(kept)
+		kept.position = pos + Vector3.UP * -0.2
+		kept.rotation.y = rng.randf_range(0.0, TAU)
+		kept.scale = Vector3.ONE * s
+		Palette.apply_world_material(kept)
+		return
+	var body := StaticBody3D.new()
+	parent.add_child(body)
+	body.add_child(kept)
+	kept.scale = Vector3.ONE * s
+	Palette.apply_world_material(kept)
+	# Raza din AABB-ul real, nu dintr-un tabel: regenerezi GLB-ul cu alte cote si
+	# coliziunea le urmeaza singura.
+	var mi := _first_mesh(kept)
+	var radius := 1.2 * s
+	var height := 2.0 * s
+	if mi != null and mi.mesh != null:
+		var aabb := mi.mesh.get_aabb()
+		radius = maxf(aabb.size.x, aabb.size.z) * 0.38 * s
+		height = aabb.size.y * s
+	var shape := CollisionShape3D.new()
+	var sphere := SphereShape3D.new()
+	sphere.radius = maxf(radius, 0.4)
+	shape.shape = sphere
+	shape.position = Vector3.UP * height * 0.42
+	body.add_child(shape)
+	body.rotation.y = rng.randf_range(0.0, TAU)
+	body.position = pos + Vector3.UP * -0.2
+
+
+## Instantiaza un GLB, pastreaza un singur nod si anuleaza offsetul lui din
+## fisier (variantele sunt exportate una langa alta pentru vizualizare).
+static func _pick_from_glb(path: String, node_name: String) -> Node3D:
+	if not ResourceLoader.exists(path):
+		return null
+	var container := (load(path) as PackedScene).instantiate() as Node3D
+	var kept: Node3D = null
+	for child in container.get_children():
+		if child.name == node_name:
+			kept = child
+		else:
+			child.queue_free()
+	if kept == null:
+		container.queue_free()
+		return null
+	container.position = -kept.position
+	return container
+
+
+static func _first_mesh(node: Node) -> MeshInstance3D:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		return node as MeshInstance3D
+	for c in node.get_children():
+		var found := _first_mesh(c)
+		if found != null:
+			return found
+	return null
+
 
 static func _add_tree(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator,
 		mat: Callable) -> void:

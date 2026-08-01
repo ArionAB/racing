@@ -11,7 +11,9 @@ Referință de ton: *Art of Rally* / machetă de masă — **nu** miniatură fot
 ## 1. Paletă
 
 O singură textură pentru toată lumea: `assets/textures/palette_atlas.png`
-(32 sloturi × 16px). Indici și helper: [scripts/palette.gd](../scripts/palette.gd).
+(**512×512**: 32 de sloturi a câte 16px lățime). Indici și helper:
+[scripts/palette.gd](../scripts/palette.gd). Fiecare slot e un patch texturat,
+nu un pătrat de culoare uniformă — vezi §4.
 
 | slot | rol | hex | folosit la |
 |---|---|---|---|
@@ -86,8 +88,31 @@ stâncă mare 250 · turn de apă 900 · moară 1200 · benzinărie 1800
 
 ## 4. Suprafață și uzură
 
-Fără texturi de murdărie, fără decals. Totul din **paletă + AO copt în vertex
-colors + gradienți de vertex color**.
+**Texturi de suprafață DA, texturi unice per asset NU.**
+
+> Revizuit după comparația cu *Reckless Racing 3* și *Beach Buggy Racing* — jocuri
+> de mobil care arată mai bine decât noi cu hardware mai slab (BBR rula pe iPhone
+> 7). Diferența principală nu e poligonajul, sunt **culorile plate**: la viteză, o
+> suprafață de sute de m² fără nicio variație citește ca plastic. Versiunea
+> anterioară a acestui paragraf interzicea orice textură; regula era prea strictă
+> și ne costa exact lucrul pe care îl invidiam la referințe.
+
+Ce e permis:
+- **Atlasul de paletă** (`palette_atlas.png`, 512×512) — fiecare slot e un *patch
+  texturat*: nisip cu granulație, rocă cu straturi orizontale, lemn cu fibră.
+  Generat de [tools/generate_palette_atlas.gd](../tools/generate_palette_atlas.gd).
+  UV-urile rămân colapsate pe centrul slotului, deci **assets-urile existente nu
+  se refac** și materialul rămâne unul singur.
+- **Texturi tileabile gri** pentru suprafețele mari (teren, asfalt):
+  `surface_sand.png`, `surface_asphalt.png`. Se înmulțesc peste albedo, deci nu
+  aduc culori noi. Centrul lor e **alb**, nu gri mediu — o textură centrată pe 0.5
+  ar întuneca totul cu 50% și ar spăla culoarea.
+
+Ce rămâne interzis: texturi unice per asset, texturi de murdărie pictate manual,
+decals. Umbrirea proprie vine în continuare din **AO copt în vertex colors**.
+
+Plafon: atlasul **nu depășește 512×512**. Peste atât se pierde avantajul de VRAM
+fără câștig vizibil la viteza de joc.
 
 | material | roughness | uzură |
 |---|---|---|
@@ -115,6 +140,23 @@ colors + gradienți de vertex color**.
 
 Godot: `rotation_degrees = Vector3(-42, 135, 0)` pentru soare (elevație 42°,
 azimut 315°).
+
+**Expunerea se calibrează prin măsurare, nu din ochi.** Cerul de deșert e albastru
+intens; luat ca sursă de ambient, își lasă nuanța pe tot ce e deschis la culoare —
+măsurat, nisipul ieșea `#EAD8CD` (gri-roz) în loc de `#D8A86A`, cu canalul albastru
+urcat de la `0x6A` la `0xCD`. Nu era o problemă de luminozitate (roșul și verdele
+erau corecte), deci nici expunerea, nici energia soarelui n-o puteau repara: alea
+scad toate cele trei canale deodată.
+
+Soluția pe temă de deșert: ambient dintr-o **culoare caldă** (`#E2B77A`, bounce-ul
+de nisip din tabelul de mai sus), nu din cer. Plus soare `0.8` și
+`tonemap_exposure 0.75` — valori găsite măsurând pixelii dintr-un snapshot față de
+ținta din §1, care au coborât eroarea de la 198 la 10 (din 255).
+
+Procedura, dacă trebuie refăcută:
+1. `godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40`
+2. media pe o zonă de nisip, departe de drum
+3. comparată cu `#D8A86A`
 
 ---
 

@@ -11,6 +11,10 @@ extends Node3D
 ## interiorul e deschis -> scurtaturi prin iarba lenta = risc/recompensa.
 
 const WALL_HEIGHT: float = 1.3
+## Cate repetitii de textura de suprafata intra intr-un metru de lume.
+## 0.08 = o dala la 12.5m — destul de mare cat sa nu se vada tiparul repetandu-se,
+## destul de mica cat granulatia sa fie vizibila la nivelul soselei.
+const SURFACE_TILING: float = 0.08
 ## Soseaua e un "dig" solid: un mesh fara grosime lasa masina sa treaca
 ## prin el la viteza (depenetrarea o poate impinge pe partea gresita).
 const ROAD_THICKNESS: float = 3.0
@@ -34,6 +38,16 @@ var theme_sky_horizon := Color(0.72, 0.84, 0.95)
 var theme_fog := Color(0.75, 0.85, 0.95)
 var theme_hill_color := Color(0.25, 0.45, 0.22)
 var theme_sun_color := Color(1.0, 0.97, 0.9)
+## Expunerea si taria soarelui.
+##
+## Se calibreaza IMPREUNA, masurand pixelii dintr-un snapshot fata de culoarea
+## din style_bible — nu din ochi. Procedura, daca trebuie refacuta:
+##   1. randezi `Snapshot.tscn -- --track=0 --frac=0.2 --size=40`
+##   2. citesti media pe o zona de nisip departe de drum
+##   3. o compari cu #D8A86A (sand_mid)
+## Pe desert, combinatia de mai jos a coborat eroarea de la 198 la 10 (din 255).
+var theme_exposure: float = 1.0
+var theme_sun_energy: float = 1.25
 
 ## Paleta completa a unei teme, dintr-un singur apel.
 ## Stil: FLAT-COLOR saturat (stilul masinilor RgsDev, extins la lume) —
@@ -41,12 +55,20 @@ var theme_sun_color := Color(1.0, 0.97, 0.9)
 func apply_theme(theme: String) -> void:
 	theme_decor = theme
 	if theme == "desert":
-		theme_ground_tint = Color(0.93, 0.76, 0.47)
+		# sand_mid din paleta (style_bible §1). Era #EDC177, mai deschis decat
+		# spec-ul; cu textura peste, valoarea aia impingea canalul rosu in
+		# saturatie si stergea granulatia.
+		theme_ground_tint = Palette.color(Palette.SAND_MID)
 		theme_sky_top = Color(0.25, 0.52, 0.92)   # albastru adanc, contrast cu nisipul
 		theme_sky_horizon = Color(1.0, 0.86, 0.6)
 		theme_fog = Color(0.98, 0.87, 0.68)
 		theme_hill_color = Color(0.88, 0.62, 0.36)
 		theme_sun_color = Color(1.0, 0.92, 0.78)
+		# Calibrate prin masurare (vezi theme_exposure): la valorile vechi
+		# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
+		# supraexpus, si granulatia de suprafata disparea in saturatie.
+		theme_sun_energy = 0.8
+		theme_exposure = 0.75
 	else:
 		theme_ground_tint = Color(0.45, 0.72, 0.33) # verde viu, nu pastel
 		theme_sky_top = Color(0.22, 0.48, 0.9)
@@ -54,6 +76,8 @@ func apply_theme(theme: String) -> void:
 		theme_fog = Color(0.78, 0.88, 0.98)
 		theme_hill_color = Color(0.3, 0.56, 0.27)
 		theme_sun_color = Color(1.0, 0.97, 0.88)
+		theme_sun_energy = 1.25
+		theme_exposure = 1.0
 
 var curve: Curve3D
 var baked: PackedVector3Array
@@ -194,8 +218,26 @@ func _build_environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_sky_contribution = 1.0
+	# Ambientul: NU direct din cer pe tema de desert.
+	#
+	# Cerul e albastru intens (#4085EB) si, luat ca ambient, isi lasa nuanta pe
+	# tot ce e deschis la culoare. Masurat pe nisip: canalul albastru urca de la
+	# 0x6A la 0xCD, deci #D8A86A (cald) ajungea #EAD8CD (gri-roz). Nu era o
+	# problema de luminozitate — rosul si verdele erau corecte — deci nici
+	# expunerea, nici energia soarelui nu o puteau repara: alea scad toate cele
+	# trei canale deodata.
+	#
+	# In realitate lumina indirecta de pe o intindere de nisip vine in cea mai
+	# mare parte DE LA NISIP, nu de la cer. Folosim culoarea de bounce din
+	# style_bible §5 (#E2B77A) ca sursa de ambient, si umbrele ies calde in loc
+	# de albastre.
+	if theme_decor == "desert":
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.ambient_light_color = Color.html("E2B77A")
+		env.ambient_light_energy = 0.22
+	else:
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+		env.ambient_light_sky_contribution = 1.0
 	# Ceata doar IN JOC: camera editorului sta la kilometri deasupra scenei
 	# in vederile ortogonale, iar ceata ar acoperi totul intr-o pata uniforma.
 	env.fog_enabled = not Engine.is_editor_hint()
@@ -203,6 +245,17 @@ func _build_environment() -> void:
 	env.fog_density = 0.0035
 	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	# Expunerea: SINGURA parghie globala de luminozitate a scenei.
+	#
+	# Cerul de desert e albastru intens si foarte luminos; cu ambient din cer la
+	# contributie plina, nisipul iesea #EAD8CD (gri-roz spalat) in loc de #D8A86A,
+	# iar granulatia de suprafata disparea complet in saturatie.
+	#
+	# Se regleaza AICI, nu din energia soarelui sau din contributia cerului:
+	# ambele schimba si raportul dintre lumina directa si umbra, deci "repara"
+	# nisipul stricand altceva. Valoarea e calibrata masurand pixelii din
+	# snapshot, nu din ochi — vezi comentariul de la theme_exposure.
+	env.tonemap_exposure = theme_exposure
 	env.adjustment_enabled = true
 	env.adjustment_saturation = 1.18
 	env.adjustment_contrast = 1.05
@@ -214,7 +267,7 @@ func _build_environment() -> void:
 	sun.rotation_degrees = Vector3(-48, -30, 0)
 	sun.shadow_enabled = false # masinile au umbre blob (ieftin, mobil)
 	sun.light_color = theme_sun_color
-	sun.light_energy = 1.25
+	sun.light_energy = theme_sun_energy
 	add_child(sun)
 
 	_build_terrain()
@@ -329,6 +382,10 @@ func _build_terrain() -> void:
 					var v: Vector3 = corners[corner_idx]
 					var shade := clampf(1.0 + v.y * 0.03, 0.82, 1.12)
 					st.set_color(theme_ground_tint * shade)
+					# UV din coordonate de LUME, nu din indexul celulei: asa
+					# textura curge continuu peste toata suprafata, fara sa se
+					# vada grila de 32x32 in tiparul ei.
+					st.set_uv(Vector2(v.x, v.z) * SURFACE_TILING)
 					st.add_vertex(v)
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
@@ -336,6 +393,16 @@ func _build_terrain() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
 	mat.albedo_color = Color.WHITE
+	# Granulatie de nisip peste culoarea din vertex colors. Textura e gri si se
+	# inmulteste, deci nu aduce culori noi — doar rupe pata uniforma care facea
+	# terenul sa arate ca plastic turnat.
+	var sand_tex := _tex("res://assets/textures/surface_sand.png")
+	if sand_tex != null:
+		mat.albedo_texture = sand_tex
+		mat.uv1_scale = Vector3.ONE
+		# albedo_color ramane ALB: culoarea vine din vertex colors, iar textura o
+		# moduleaza. Orice ridicare aici impinge canalul rosu peste 1.0, se
+		# satureaza, si granulatia dispare exact unde trebuia sa se vada.
 	inst.material_override = mat
 	add_child(inst)
 
@@ -427,9 +494,13 @@ func _build_road() -> void:
 		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
 	top.generate_normals()
 	sides.generate_normals()
-	# Flat-color curat, in stilul masinilor: asfaltul racoros-inchis face
-	# masinile saturate sa "sara" din ecran; flancurile in tonul temei.
-	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3))
+	# Asfaltul racoros-inchis face masinile saturate sa "sara" din ecran, iar
+	# granulatia de pietris il scoate din senzatia de plastic turnat. Textura e
+	# gri si se inmulteste peste culoare, deci nu schimba paleta.
+	# UV-urile soselei sunt deja in dale de 14m (vezi mai sus), asa ca textura
+	# curge cu drumul fara sa se intinda in viraje.
+	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3),
+		_tex("res://assets/textures/surface_asphalt.png"))
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
 func _build_walls() -> void:

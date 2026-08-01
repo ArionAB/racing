@@ -299,8 +299,82 @@ func _build_environment() -> void:
 	ground_body.add_child(ground_shape)
 	add_child(ground_body)
 
-	# Dealuri/dune la orizont: adancime vizuala aproape gratis. Verificam
-	# distanta REALA fata de sosea — centroidul nu ajunge, pista nu e rotunda.
+	_build_horizon(centroid)
+
+## Inelele de siluete de la orizont: (distanta_min, distanta_max, cate, variante).
+##
+## Cele apropiate sunt JOASE, cele departate INALTE. Invers decat pare intuitiv,
+## dar asa apare perspectiva: o formatiune de 60m la 320m se inalta pe cer peste
+## una de 25m la 170m, exact ca intr-un peisaj real de canion.
+const HORIZON_RINGS := [
+	{"near": 150.0, "far": 200.0, "count": 5, "scale": 1.2,
+		"picks": ["Butte_A", "Mesa_A"]},
+	{"near": 200.0, "far": 255.0, "count": 6, "scale": 1.7,
+		"picks": ["Butte_B", "Mesa_A", "Mesa_B"]},
+	{"near": 255.0, "far": 320.0, "count": 5, "scale": 2.4,
+		"picks": ["Butte_C", "Butte_B", "Mesa_B"]},
+]
+## Cat trebuie sa stea o silueta departe de sosea. Generos, pentru ca siluetele
+## sunt scalate agresiv (vezi "scale" in inele) si o mesa de 78m devine, la
+## scara 2.6, o formatiune de peste 200m latime.
+const HORIZON_CLEARANCE: float = 120.0
+
+
+## Siluetele de la orizont: butte-uri si mese reale, in inele concentrice.
+##
+## Inlocuiesc cele 12 sfere turtite de dinainte. Alea costau ~9000 de triunghiuri
+## (chiar si dupa ce le-am coborat rezolutia) si aratau ca un sir de movile
+## identice — nu-ti spuneau NIMIC despre unde esti pe pista.
+##
+## Astea sunt reperele de orientare (style_bible §7: landmark dominant la 4-6
+## secunde). Fiecare inel are alta gama de siluete, deci "sunt langa turnul
+## ingust" devine o informatie reala.
+func _build_horizon(centroid: Vector3) -> void:
+	if theme_decor != "desert" \
+			or not ResourceLoader.exists("res://assets/models/butte.glb"):
+		_build_horizon_fallback(centroid)
+		return
+	var scene := load("res://assets/models/butte.glb") as PackedScene
+	var rng := RandomNumberGenerator.new()
+	rng.seed = track_name.hash() + 1
+	for ring in HORIZON_RINGS:
+		var placed := 0
+		var attempts := 0
+		while placed < int(ring["count"]) and attempts < 60:
+			attempts += 1
+			var angle := rng.randf_range(0.0, TAU)
+			var dist := rng.randf_range(ring["near"], ring["far"])
+			var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
+			# Distanta REALA fata de sosea, nu fata de centroid: pista nu e rotunda,
+			# iar un butte de 60m aterizat pe drum ar fi o surpriza neplacuta.
+			var nearest := 1e12
+			for i in range(0, baked.size(), 4):
+				var dx := baked[i].x - pos.x
+				var dz := baked[i].z - pos.z
+				nearest = minf(nearest, dx * dx + dz * dz)
+			if sqrt(nearest) < HORIZON_CLEARANCE + 40.0:
+				continue
+			placed += 1
+			var picks: Array = ring["picks"]
+			var model := _extract_glb_node(scene,
+				picks[rng.randi_range(0, picks.size() - 1)])
+			if model == null:
+				continue
+			add_child(model)
+			# Ingropate 4m: taie muchia de la baza si le aseaza in peisaj.
+			model.position = Vector3(pos.x, -4.0, pos.z)
+			model.rotation.y = rng.randf_range(0.0, TAU)
+			# Scara creste cu inelul. La marimea nominala (25-60m) siluetele se
+			# pierdeau sub linia cetii in loc sa se ridice pe cer — verificat in
+			# vederea soferului. Sunt fundal pur, deci exagerarea nu costa nimic:
+			# zero coliziune, sub 180 tris fiecare.
+			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
+			model.scale = Vector3.ONE * s
+			Palette.apply_world_material(model)
+
+
+## Fara butte.glb (sau pe forest): dealurile rotunde de dinainte.
+func _build_horizon_fallback(centroid: Vector3) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = track_name.hash() + 1
 	var placed := 0
@@ -309,8 +383,6 @@ func _build_environment() -> void:
 		attempts += 1
 		var angle := rng.randf_range(0.0, TAU)
 		var radius := rng.randf_range(60.0, 140.0)
-		# Rama de scanduri de la 380m a disparut odata cu tema de lada de nisip,
-		# deci dealurile nu mai sunt stranse intr-un patrat inexistent.
 		var dist := rng.randf_range(240.0, 480.0)
 		var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
 		var nearest := 1e12
@@ -319,15 +391,14 @@ func _build_environment() -> void:
 			var dz := baked[i].z - pos.z
 			nearest = minf(nearest, dx * dx + dz * dz)
 		if sqrt(nearest) < radius + 60.0:
-			continue # ar intra peste sosea — cautam alt loc
+			continue
 		placed += 1
 		var hill := MeshInstance3D.new()
 		var sphere := SphereMesh.new()
 		sphere.radius = radius
 		sphere.height = radius * 0.5
 		# Implicit SphereMesh e 64x32 = 4224 triunghiuri. Pentru o movila vazuta
-		# de la 240m+ e absurd: 12 dealuri costau 50k tris, cat toata pista.
-		# La distanta aia silueta e tot ce se vede.
+		# de la 240m+ e absurd. La distanta aia silueta e tot ce se vede.
 		sphere.radial_segments = 12
 		sphere.rings = 5
 		hill.mesh = sphere
@@ -336,6 +407,23 @@ func _build_environment() -> void:
 		var tint := float(rng.randi_range(0, 3)) / 3.0 * 0.15
 		hill.material_override = _flat_material(theme_hill_color.lightened(tint))
 		add_child(hill)
+
+
+## Instantiaza un GLB si pastreaza un singur nod, anuland offsetul lui din fisier.
+func _extract_glb_node(scene: PackedScene, node_name: String) -> Node3D:
+	var container := scene.instantiate() as Node3D
+	var kept: Node3D = null
+	for child in container.get_children():
+		if child.name == node_name:
+			kept = child
+		else:
+			child.queue_free()
+	if kept == null:
+		container.queue_free()
+		return null
+	container.position = -kept.position
+	return container
+
 
 func _centroid() -> Vector3:
 	var sum := Vector3.ZERO

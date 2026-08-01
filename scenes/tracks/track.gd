@@ -503,7 +503,19 @@ func _build_road() -> void:
 		_tex("res://assets/textures/surface_asphalt.png"))
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
+## Gardul rosu de pe marginea soselei.
+##
+## Pe DESERT nu se mai emite deloc: peretii de canion din [TrackCliffs] preiau si
+## rolul vizual, si coliziunea. Un gard rosu de 1.3m langa o faleza de 10m arata
+## ca o bariera de santier lipita peste peisaj — exact senzatia de "margine
+## artificiala" pe care canionul o inlocuieste.
+##
+## Regula de asezare (exterior mereu, interior doar unde e inaltat) NU dispare —
+## s-a mutat in TrackSideSampler.wall_segments(), de unde o citesc si falezele, si
+## popicele. O singura definitie, deci nu se pot contrazice.
 func _build_walls() -> void:
+	if theme_decor == "desert":
+		return
 	var loop_poly := PackedVector2Array()
 	for p in _points():
 		loop_poly.append(Vector2(p.x, p.z))

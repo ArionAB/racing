@@ -13,8 +13,15 @@ extends RefCounted
 ##
 ## Nimeni nu modifica starea de aici — samplerul e read-only dupa constructie.
 
-## Peste pragul asta de curbura normalizata, slotul e "apex": nimic inalt.
-const APEX_CURVATURE: float = 0.55
+## Peste pragul asta de curbura normalizata, slotul e "apex": nimic inalt, si
+## falezele se retrag ca sa ramana loc de depasire.
+##
+## Calibrat pe Dunele, nu ales din burta: curbura acolo e p50=0.04, p90=0.11,
+## p99=0.29, max=0.43. Prima valoare incercata (0.55) era peste maximul pistei,
+## deci NICIUN slot nu se marca vreodata ca apex — regula exista in cod dar nu
+## se aplica nicaieri. La 0.18 prinde ultimele ~5% dintre puncte, adica exact
+## virajele stranse.
+const APEX_CURVATURE: float = 0.18
 ## Cat de departe in fata se cauta un viraj ca sa marchezi zona de franare.
 const BRAKING_LOOKAHEAD_M: float = 25.0
 ## Cat de dese sunt punctele testate cand se cauta cea mai apropiata bucla de

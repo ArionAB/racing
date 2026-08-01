@@ -135,6 +135,21 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   „procedurale", raportul sare la valori absurde și garda trece orice — devine
   decorativă exact când ai cea mai mare nevoie de ea.
 
+- **CI verifică și anti-blocajul în pereții de canion.** Aruncă mașini în unghi
+  în faleze, în 12 puncte de pe traseu, și pică dacă vreuna rămâne înțepenită.
+  ```
+  godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=cliff --track=0
+  ```
+
+- **Pentru decizii vizuale, folosește vederea șoferului:**
+  ```
+  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.35 --driver
+  ```
+  Snapshot-urile ortografice de sus turtesc tot ce e vertical și **mint despre
+  densitatea decorului** — ceva ce de sus pare presărat poate strânge cadrul
+  perfect din mașină. Alege fracții neutre: `0.20` pe Dunele cade exact pe un
+  landmark, unde există un gol intenționat de ±25 m.
+
 ## 5. Context ca să nu te pierzi (stare curentă, iulie 2026)
 
 - Proiectul a crescut haotic o vreme (un membru a adăugat conținut direct pe
@@ -145,14 +160,18 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   porni piste noi. Layout țintă ~6-7 momente distincte, un gimmick semnătură
   (fly-off + respawn ca plasă de siguranță, plus carusel SAU deviator ca
   element memorabil), props curate prin Blender MCP.
-- **Stil vizual**: am decis să mergem peste flat-color pur, spre "stylized"
-  (texturi pictate, umbrire coaptă) — testăm pe PC/editor Godot deocamdată,
-  nu pe telefon. Checkpoint obligatoriu: primul test pe device real imediat
-  după ce Dunele e "done", înainte de piste suplimentare la aceeași
-  fidelitate (riscul e să nu încapă în bugetul mobil — vezi "Constrângeri
-  mobile 3D" din CLAUDE.md).
-- `style.md`/`style_bible.md` — ghidul de stil vizual (paletă, referințe) —
-  întreabă echipa de status/locație curentă, nu există încă commis în repo.
+- **Stil vizual**: am trecut de la flat-color pur la "stylized". Reperul e
+  **Reckless Racing 3 / Beach Buggy Racing** — jocuri de mobil care arată mai
+  bine decât noi cu hardware mai slab (BBR rula pe iPhone 7). Diagnosticul:
+  problema nu era poligonajul, erau **culorile plate** și lipsa de contact cu
+  solul. Concret: atlas texturat 512×512 (fiecare slot e un patch, nu un pătrat
+  de culoare), texturi tileabile pe teren și asfalt, AO copt la baza falezelor.
+  **Fără umbre dinamice** — BBR n-are nici el, folosește lumină coaptă.
+  Checkpoint obligatoriu: primul test pe device real după ce Dunele e "done".
+- **Tema desert e acum canion** (august 2026): pereți de stâncă în loc de gardul
+  roșu, decor pe benzi paralele cu drumul, siluete de butte la orizont. Vezi
+  `docs/style_bible.md` §12–13 pentru ce s-a implementat și ce am învățat.
+- `docs/style_bible.md` — ghidul de stil vizual, **commis în repo**.
 - Build mobil (Android/iOS, export presets, CI) — neatins încă, e treabă de
   mai târziu, după ce Dunele e gata.
 

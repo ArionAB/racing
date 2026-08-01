@@ -29,24 +29,29 @@ const MIN_MESHES_PER_MATERIAL: float = 2.5
 ## Cate mesh-uri procedurale sunt necesare ca raportul sa fie semnificativ.
 const MIN_SAMPLE: int = 20
 
-## Prag de ALARMA pentru triunghiuri, nu buget de arta.
+## Plafon de triunghiuri per pista, DERIVAT DIN MASURATOARE.
 ##
-## CLAUDE.md scrie "~50k triunghiuri pe scena", dar cifra aia n-are masuratoare
-## in spate: fara sursa, fara test pe device (M4 e amanat, nu exista telefon
-## Android in echipa), iar pana acum garda nici macar nu numara triunghiuri —
-## deci nimeni nu stia daca o pista e la 30k sau la 80k.
+## Istoric, pentru ca cifra sa nu para inventata a doua oara:
 ##
-## Cifra era rezonabila pentru mobile de prin 2014-2016. Un iPhone 7 (pe care
-## rula Beach Buggy Racing) duce sute de mii de triunghiuri pe cadru. Pe mobil
-## modern constrangerea reala e draw calls / overdraw / fill rate — de asta
-## garda asta a inceput ca numaratoare de MATERIALE, si ala ramane testul
-## principal.
+## CLAUDE.md scria "~50k triunghiuri pe scena", dar cifra aia n-avea nimic in
+## spate — fara sursa, fara test pe device, iar garda nici macar nu numara
+## triunghiuri. Cand am inceput sa le numaram, pistele erau la 147-163k, din care
+## ~110k veniti din primitive Godot lasate la rezolutia implicita (un SphereMesh
+## are 64x32 = 4224 de triunghiuri; fiecare tufa de 40cm avea geometria unei
+## planete). Dupa reparatie: 24-36k.
 ##
-## Pragul de aici e larg intentionat: prinde exploziile accidentale (o bucla de
-## decor care instantiaza la nesfarsit), nu politica de densitate. Se coboara la
-## o cifra justificata dupa ce masuram Dunele cu canionul complet — vezi
-## issue-ul de validare integrata.
-const MAX_TRIS_PER_TRACK: int = 100000
+## Pragul a stat apoi la 100k, larg intentionat, cat timp se construia canionul —
+## ca sa prinda exploziile accidentale fara sa blocheze munca pe o presupunere.
+## A prins una reala: prima versiune a decorului pe benzi a sarit la 117k.
+##
+## Acum, cu canionul complet, Dunele (cea mai incarcata pista) e la ~65k. Pragul
+## e masuratoarea aia plus ~20% marja. Peste pista mai intra ~4k de masini si
+## particulele, deci 80k lasa loc si pentru ele.
+##
+## Ramane un prag de ALARMA, nu un buget de arta: constrangerea reala pe mobil e
+## draw calls / overdraw / fill rate, de asta testul principal al garzii ramane
+## numaratoarea de MATERIALE. Validarea finala e primul test pe device.
+const MAX_TRIS_PER_TRACK: int = 80000
 
 var _paths: Array[String] = []
 var _index: int = 0

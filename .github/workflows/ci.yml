@@ -86,3 +86,23 @@ jobs:
             exit 1
           fi
           echo "OK — garda de draw call-uri a trecut."
+
+      # Peretii de canion sunt ~130 de forme convexe puse cap la cap. Imbinarile
+      # dintre ele sunt exact locul unde o masina se poate agata, iar un blocaj
+      # inseamna cursa terminata pentru jucator. Proba arunca masini in unghi in
+      # perete si verifica daca AI-ul (care are anti-blocaj cu marsarier) scapa.
+      - name: Anti-blocaj in peretii de canion
+        run: |
+          set -uo pipefail
+          ~/godot-bin/godot --headless --fixed-fps 60 \
+            res://tools/ProbeRace.tscn -- --mode=cliff --track=0 2>&1 | tee cliff.log
+          STATUS=${PIPESTATUS[0]}
+          if ! grep -q 'VERDICT:' cliff.log; then
+            echo "::error::Proba de anti-blocaj nu a rulat pana la capat."
+            exit 1
+          fi
+          if [ "$STATUS" -ne 0 ] || grep -q 'VERDICT: PROBLEMA' cliff.log; then
+            echo "::error::Masini intepenite in peretii de canion — vezi tabelul de mai sus."
+            exit 1
+          fi
+          echo "OK — nicio masina intepenita."

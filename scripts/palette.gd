@@ -3,8 +3,11 @@ extends RefCounted
 ## Paleta UNICA a lumii (directia "diorama stilizata").
 ##
 ## Toate prop-urile impart o singura textura — [b]assets/textures/palette_atlas.png[/b]
-## (32 sloturi x 16px). Un obiect nu are textura proprie: UV-urile lui arata spre
-## centrul slotului cu culoarea dorita. Consecinte:
+## (512x512: 32 de sloturi a cate 16px latime). Un obiect nu are textura proprie:
+## UV-urile lui arata spre centrul slotului cu materialul dorit. Fiecare slot e
+## un patch texturat (nisip granulat, roca stratificata, lemn cu fibra), nu un
+## patrat de culoare uniforma — vezi [code]tools/generate_palette_atlas.gd[/code].
+## Consecinte:
 ##   - un singur material pentru toata lumea -> foarte putine draw call-uri (mobil)
 ##   - coerenta de paleta garantata prin constructie
 ##   - umbrele proprii vin din ambient occlusion copt in VERTEX COLORS, nu din texturi
@@ -55,13 +58,24 @@ static func uv(slot: int) -> Vector2:
 ## draw call-uri: toate prop-urile arata spre acelasi material).
 static var _shared: StandardMaterial3D
 
-## Materialul comun al lumii. Filtru NEAREST + fara mipmap-uri = culori curate,
-## fara amestec intre sloturi. Vertex color = AO copt, inmultit peste atlas.
+## Materialul comun al lumii. Vertex color = AO copt, inmultit peste atlas.
+##
+## Filtrarea: LINEAR cu mipmap-uri, nu NEAREST. Cat timp sloturile erau patrate
+## de culoare uniforma, NEAREST era alegerea corecta — garanta zero amestec intre
+## culori vecine. De cand sloturile au textura reala, NEAREST ar face granulatia
+## sa scanteieze urat la distanta (aliasing), fix efectul pe care texturile ar
+## trebui sa-l elimine.
+##
+## Riscul filtrarii liniare e bleeding-ul intre sloturi vecine. Il tine in frau
+## generatorul de atlas: fiecare slot are 2px de margine cu culoarea lui curata
+## (vezi PAD in tools/generate_palette_atlas.gd), deci chiar daca filtrarea trage
+## din vecin, trage dintr-o zona care arata corect.
 static func world_material() -> StandardMaterial3D:
 	if _shared == null:
 		_shared = StandardMaterial3D.new()
 		_shared.albedo_texture = load(ATLAS_PATH)
-		_shared.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		_shared.texture_filter = \
+			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		_shared.vertex_color_use_as_albedo = true # AO copt in vertex colors
 		_shared.roughness = 0.9
 		_shared.specular_mode = BaseMaterial3D.SPECULAR_DISABLED

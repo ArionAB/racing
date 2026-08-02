@@ -102,11 +102,25 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   (`--headless --fixed-fps 60`) înainte de commit — convenție din CLAUDE.md.
 - **CI are o gardă de scenă**, cu două metrici.
 
-  **Materiale (testul principal).** Dacă pică cu `MAT`, ai adăugat probabil un
+  **Materiale (testul principal).** Prag: **maxim 34 pe pistă**, măsurat acum la
+  26/23/24/23. Dacă pică cu `MAT`, ai adăugat probabil un
   `StandardMaterial3D.new()` într-o buclă de decor: fiecare instanță își primește
   materialul ei, iar asta se plătește direct în fps pe mid-range. Folosește
   `_flat_material()` din `track.gd` (cache pe culoare) și cuantifică variațiile
   de nuanță în câteva trepte, nu continuu.
+
+  > Testul a fost multă vreme un **raport** mesh-uri procedurale / material, și
+  > nu măsura ce credea. Atribuirea pe surse mergea pe numele nodului-părinte,
+  > presupunând că rădăcina unui GLB instanțiat se cheamă ca fișierul. Măsurat,
+  > se cheamă `@Node3D@571`. Pe Dunele, **372 de prop-uri de pe atlas se numărau
+  > ca „procedurale"**, raportul ieșea 16.76 în loc de 1.96, și garda trecea
+  > orice. Atribuirea merge acum pe **numele variantei** (`Bush_A`, `Cliff_C`),
+  > care e oricum un contract impus în briefuri și în `verify_glb.py`.
+  >
+  > Chiar reparat, raportul penaliza direcția dorită: cu cât muți mai mult decor
+  > pe atlas, cu atât `proc_meshes` scade și raportul cade. Numărul care contează
+  > e câte materiale distincte randează o pistă, fiindcă ăla e numărul de draw
+  > calls.
 
   **Triunghiuri.** Raportate la fiecare rulare, prag `MAX_TRIS_PER_TRACK = 150000`.
   **Nu e o limită de hardware** — un telefon mid-range duce câteva sute de mii de

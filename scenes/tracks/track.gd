@@ -447,12 +447,15 @@ func _build_environment() -> void:
 ## Cele apropiate sunt JOASE, cele departate INALTE. Invers decat pare intuitiv,
 ## dar asa apare perspectiva: o formatiune de 60m la 320m se inalta pe cer peste
 ## una de 25m la 170m, exact ca intr-un peisaj real de canion.
+## `clear` = cat de departe de sosea trebuie sa stea silueta. E PER INEL, nu o
+## singura cifra: inelul apropiat are siluete mici (scara 1.2) si cel mai putin
+## loc, iar o degajare comuna de 160 m il facea practic imposibil de populat.
 const HORIZON_RINGS := [
-	{"near": 150.0, "far": 200.0, "count": 5, "scale": 1.2,
+	{"near": 150.0, "far": 200.0, "count": 5, "scale": 1.2, "clear": 95.0,
 		"picks": ["Butte_A", "Mesa_A"]},
-	{"near": 200.0, "far": 255.0, "count": 6, "scale": 1.7,
+	{"near": 200.0, "far": 255.0, "count": 6, "scale": 1.7, "clear": 130.0,
 		"picks": ["Butte_B", "Mesa_A", "Mesa_B"]},
-	{"near": 255.0, "far": 320.0, "count": 5, "scale": 2.4,
+	{"near": 255.0, "far": 320.0, "count": 5, "scale": 2.4, "clear": 160.0,
 		"picks": ["Butte_C", "Butte_B", "Mesa_B"]},
 ]
 ## Cat trebuie sa stea o silueta departe de sosea. Generos, pentru ca siluetele
@@ -478,24 +481,51 @@ func _build_horizon(centroid: Vector3) -> void:
 	var scene := load("res://assets/models/butte.glb") as PackedScene
 	var rng := RandomNumberGenerator.new()
 	rng.seed = track_name.hash() + 1
+	# Unghiuri ECHIDISTANTE cu jitter, nu complet aleatoare.
+	#
+	# Varianta veche trag ea la zar unghi SI raza, si renunta dupa 60 de
+	# incercari. Masurat pe Dunele: plasa 6 din 16 siluete cerute, si nu spunea
+	# nimic. Pe o pista care se auto-intersecteaza si ocupa ~380x220 m, cele mai
+	# multe directii cad in banda de degajare, deci zarul le nimerea rar.
+	#
+	# Acum fiecare silueta primeste propriul SECTOR de cerc si cauta pe raza in
+	# el. Unghiul e garantat, deci acoperirea orizontului ramane uniforma chiar
+	# daca o directie e stramta — si un sector care chiar n-are loc se
+	# RAPORTEAZA, nu dispare in tacere.
+	var missed := 0
+	var placed := 0
 	for ring in HORIZON_RINGS:
-		var placed := 0
-		var attempts := 0
-		while placed < int(ring["count"]) and attempts < 60:
-			attempts += 1
-			var angle := rng.randf_range(0.0, TAU)
-			var dist := rng.randf_range(ring["near"], ring["far"])
-			var pos := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
-			# Distanta REALA fata de sosea, nu fata de centroid: pista nu e rotunda,
-			# iar un butte de 60m aterizat pe drum ar fi o surpriza neplacuta.
-			var nearest := 1e12
-			for i in range(0, baked.size(), 4):
-				var dx := baked[i].x - pos.x
-				var dz := baked[i].z - pos.z
-				nearest = minf(nearest, dx * dx + dz * dz)
-			if sqrt(nearest) < HORIZON_CLEARANCE + 40.0:
+		var count := int(ring["count"])
+		var arc := TAU / float(count)
+		var clear: float = float(ring["clear"])
+		for slot in count:
+			var angle := float(slot) * arc \
+				+ rng.randf_range(-arc * 0.35, arc * 0.35)
+			var pos := Vector3.ZERO
+			var found := false
+			# Distanta e REZULTAT, nu intrare. Raza se masoara din centroid, dar
+			# degajarea din SOSEA — pe o pista de 380x220 m care se
+			# auto-intersecteaza, cele doua nu se pot satisface simultan intr-un
+			# interval fix, si de-aia inelul apropiat ramanea gol.
+			#
+			# Acum pornim de la marginea interioara a inelului si impingem spre
+			# exterior pana intalnim degajarea. Inelul ramane sa dea SCARA si
+			# ordinea de citire; distanta se aseaza singura.
+			# Plafonul e legat de grila de teren (centroid ±380 m), nu de inel:
+			# o silueta impinsa dincolo de ea ar sta peste cutia plata de rezerva,
+			# nu peste nisipul vizibil.
+			var limit: float = minf(float(ring["far"]) + 90.0, 355.0)
+			var dist: float = float(ring["near"])
+			while dist <= limit:
+				var cand := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
+				if _road_distance_xz(cand) >= clear:
+					pos = cand
+					found = true
+					break
+				dist += 6.0
+			if not found:
+				missed += 1
 				continue
-			placed += 1
 			var picks: Array = ring["picks"]
 			var model := _extract_glb_node(scene,
 				picks[rng.randi_range(0, picks.size() - 1)])
@@ -515,6 +545,26 @@ func _build_horizon(centroid: Vector3) -> void:
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
 			model.scale = Vector3.ONE * s
 			Palette.apply_world_material(model)
+			placed += 1
+	print("%s: %d/%d siluete de orizont" % [track_name, placed,
+		placed + missed])
+	if missed > 0:
+		# Fara linia asta, un orizont pe jumatate gol arata ca o alegere de
+		# design. E exact bug-ul pe care l-a avut versiunea anterioara.
+		push_warning("%s: %d siluete de orizont n-au incaput (degajare fata de sosea)"
+			% [track_name, missed])
+
+
+## Distanta pe orizontala pana la cel mai apropiat punct de sosea.
+## Fata de SOSEA, nu fata de centroid: pista nu e rotunda, iar o mesa de 200 m
+## latime aterizata pe drum ar fi o surpriza neplacuta.
+func _road_distance_xz(pos: Vector3) -> float:
+	var nearest := 1e12
+	for i in range(0, baked.size(), 4):
+		var dx := baked[i].x - pos.x
+		var dz := baked[i].z - pos.z
+		nearest = minf(nearest, dx * dx + dz * dz)
+	return sqrt(nearest)
 
 
 ## Fara butte.glb (sau pe forest): dealurile rotunde de dinainte.

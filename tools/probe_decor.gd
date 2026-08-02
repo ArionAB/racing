@@ -26,6 +26,26 @@ extends SceneTree
 ## vezi docs/blender_export.md.
 const MIN_MESHES_PER_MATERIAL: float = 2.5
 
+## Cate materiale are voie o pista in total. ASTA e testul principal acum.
+##
+## Raportul mesh-uri/material a fost metrica principala si a incetat sa mai
+## masoare ce trebuie, din doua motive care s-au compus:
+##
+## 1. Atribuirea era rupta (vezi VARIANT_SOURCE): 372 de prop-uri de pe atlas se
+##    numarau ca "procedurale" pe Dunele, deci `proc_meshes` era umflat si
+##    raportul iesea 16.76 in loc de 1.96. Garda trecea orice.
+## 2. Chiar reparata, metrica PENALIZEAZA exact directia dorita. Pe masura ce
+##    decorul migreaza din procedural in GLB-uri pe atlas, `proc_meshes` scade
+##    (Dunele: 47) dar `proc_mats` ramane (drum, borduri, linii, pereti au nevoie
+##    de culorile lor), deci raportul cade. Track02, cu decor procedural
+##    ne-migrat, are 150/20 = 7.5 si "trece" desi are aceleasi ~20 de materiale.
+##
+## Numarul care conteaza de fapt e cat de multe materiale distincte randeaza o
+## pista, fiindca ala e numarul de draw call-uri. Masurat acum: 26/23/24/23.
+## Pragul e la 34 — prinde regresia clasica (un `StandardMaterial3D.new()` intr-o
+## bucla de decor sare la sute), fara sa pedepseasca munca legitima.
+const MAX_MATERIALS_PER_TRACK: int = 34
+
 ## Cate mesh-uri procedurale sunt necesare ca raportul sa fie semnificativ.
 const MIN_SAMPLE: int = 20
 
@@ -158,7 +178,9 @@ func _measure(path: String, track: Node) -> Dictionary:
 	var proc_meshes: int = proc.meshes
 	var proc_mats: int = proc.mats.size()
 	var ratio := float(proc_meshes) / float(maxi(proc_mats, 1))
-	var ratio_ok := proc_meshes < MIN_SAMPLE or ratio >= MIN_MESHES_PER_MATERIAL
+	# Raportul ramane RAPORTAT, dar nu mai da verdictul — vezi
+	# MAX_MATERIALS_PER_TRACK pentru de ce a incetat sa masoare ce trebuie.
+	var ratio_ok := all_mats.size() <= MAX_MATERIALS_PER_TRACK
 	return {
 		"path": path.get_file().get_basename(),
 		"meshes": mesh_count,
@@ -185,8 +207,8 @@ func _tris_of(mesh: Mesh) -> int:
 
 func _report() -> bool:
 	var failed := false
-	print("=== GARDA DE SCENA (materiale: prag %.1f mesh-uri proc./material · triunghiuri: alarma la %s) ==="
-		% [MIN_MESHES_PER_MATERIAL, _thousands(MAX_TRIS_PER_TRACK)])
+	print("=== GARDA DE SCENA (materiale: maxim %d / pista · triunghiuri: alarma la %s) ==="
+		% [MAX_MATERIALS_PER_TRACK, _thousands(MAX_TRIS_PER_TRACK)])
 	print("%-10s %7s %6s %6s %11s %7s %9s %7s %7s"
 		% ["pista", "mesh-uri", "mat.", "atlas", "procedural", "raport",
 			"triunghi", "unice", "stare"])
@@ -242,6 +264,37 @@ func _thousands(n: int) -> String:
 ## de faleze si cateva sute de prop-uri clasificate gresit, raportul
 ## mesh-uri/material sare la valori absurde si garda **trece orice** — devine
 ## decorativa exact cand ai cea mai mare nevoie de ea.
+## Nume de VARIANTA -> GLB-ul din care vine.
+##
+## Atribuirea mergea pe numele nodurilor-parinte, presupunand ca radacina unui
+## GLB instantiat se cheama ca fisierul. Masurat, nu se cheama: iese
+## `@Node3D@571`. Lantul real e `Bush_A < @Node3D@571 < Band_hug < Decor`, deci
+## nimic nu se potrivea si mesh-urile cadeau in "procedural (track.gd)".
+##
+## Efectul e exact modul de esec descris la MIN_MESHES_PER_MATERIAL: `proc_meshes`
+## se umfla cu prop-uri care de fapt IMPART materialul de atlas, raportul sare la
+## valori absurde si garda trece orice. Masurat pe Dunele: desert_scatter
+## raportat cu 1 mesh in loc de ~143.
+##
+## Numele de varianta sunt un contract pe care il impunem oricum — in briefuri,
+## in `verify_glb.py` si in registrele din `track.gd` — deci sunt cheia stabila.
+const VARIANT_SOURCE := {
+	"bush_": "desert_scatter", "pebbles_": "desert_scatter",
+	"grass_tuft": "desert_scatter",
+	"butte_": "butte", "mesa_": "butte",
+	"cluster_": "rock_cluster", "cactus_": "cactus", "cliff_": "cliff_wall",
+	"marker_": "marker_post",
+	"bone_": "dino_bones", "dino_skeleton": "dino_bones",
+	"arch_": "rock_arch",
+	"portal": "mine_portal", "minerail": "mine_portal", "minecart": "mine_portal",
+	"pipe_": "pipe_leak", "boulder": "boulder_roller",
+	"gasstation": "gas_station", "route66sign": "route66",
+	"driveinscreen": "drive_in_screen", "gaspolesign": "gas_pole_sign",
+	"startgate": "start_gate", "windmill": "windmill", "blades": "windmill",
+	"water_tower": "water_tower",
+}
+
+
 func _source_of(mi: MeshInstance3D, track: Node) -> String:
 	const KNOWN := ["cactus", "rocks", "bucket", "sandcastle", "start_arch", "beach_ball",
 		"toy_excavator", "toy_dino", "garden_hose", "bowling_pin", "sandbox_border",
@@ -251,6 +304,13 @@ func _source_of(mi: MeshInstance3D, track: Node) -> String:
 		"water_tower", "windmill", "gas_station", "route66",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "desert_scatter", "butte", "wood_fence"]
+	# Intai numele PROPRIU al mesh-ului: variantele sunt cheia stabila.
+	var own := String(mi.name).to_lower()
+	for prefix: String in VARIANT_SOURCE:
+		if own.begins_with(prefix):
+			return "GLB: " + String(VARIANT_SOURCE[prefix])
+	# Apoi lantul de parinti, pentru GLB-urile vechi cu un singur nod, unde
+	# containerul chiar poarta numele fisierului.
 	var n: Node = mi
 	while n != null and n != track:
 		var lower := String(n.name).to_lower()

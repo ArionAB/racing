@@ -438,6 +438,17 @@ func _next_cliff_case() -> void:
 	_cliff_car = (load(CAR_SCENE) as PackedScene).instantiate() as Car
 	add_child(_cliff_car)
 	_cliff_car.apply_data(GameState.CAR_DATA[0] as CarData)
+	# FARA linia asta sonda masoara cu totul altceva decat crede.
+	#
+	# Car._physics_process sare peste actualizarea lui road_index cand track e
+	# null, deci indexul ramane 0 pe veci; AIController vireaza atunci spre
+	# lookahead_point(0, ...), adica spre LINIA DE START, indiferent unde e
+	# masina; iar supapa lui de scapare, car.respawn(), iese imediat pentru ca
+	# respawn() cere track != null. Rezultatul: masuram "tine manevra de
+	# marsarier a AI-ului peste 2 m/s", nu "te prinde geometria falezei".
+	_cliff_car.track = _cliff_track
+	_cliff_car.road_index = _cliff_track.closest_index_global(start)
+	_cliff_car.last_safe_index = _cliff_car.road_index
 	_cliff_car.global_position = start
 	_cliff_car.look_at(start + dir, Vector3.UP)
 	_cliff_car.race_active = true

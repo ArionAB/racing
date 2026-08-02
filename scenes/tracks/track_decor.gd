@@ -104,12 +104,16 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 				continue
 			_place_band_prop(container, spec, band, rng, mat_provider)
 			if rng.randf() < float(band["cluster"]):
-				_place_satellites(container, spec, band, rng, mat_provider)
+				_place_satellites(container, sampler, spec, band, rng, mat_provider)
 				skip = 2
 
 
 ## Regulile de siguranta, citite din steagurile pe care le-a calculat samplerul.
 static func _allowed(spec: TrackDecorSpec, band: Dictionary) -> bool:
+	# Rapa declarata: acolo terenul e sapat intentionat, ca sa existe unde sa cazi.
+	# Un cactus plutind peste prapastie ar strica exact efectul.
+	if spec.is_ravine:
+		return false
 	if spec.is_braking:
 		# 8m liberi in zonele de franare (style_bible §7).
 		if band["name"] == "hug":
@@ -122,8 +126,8 @@ static func _allowed(spec: TrackDecorSpec, band: Dictionary) -> bool:
 	return true
 
 
-static func _place_satellites(parent: Node3D, spec: TrackDecorSpec,
-		band: Dictionary, rng: RandomNumberGenerator,
+static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
+		spec: TrackDecorSpec, band: Dictionary, rng: RandomNumberGenerator,
 		mat_provider: Callable) -> void:
 	var count := rng.randi_range(CLUSTER_MIN, CLUSTER_MAX)
 	for i in count:
@@ -131,6 +135,9 @@ static func _place_satellites(parent: Node3D, spec: TrackDecorSpec,
 		var angle := rng.randf_range(0.0, TAU)
 		var dist := rng.randf_range(1.0, CLUSTER_RADIUS)
 		sat.position = spec.position + Vector3(cos(angle), 0.0, sin(angle)) * dist
+		# Satelitul s-a imprastiat pana la CLUSTER_RADIUS fata de propul principal,
+		# deci cota lui nu mai e cea masurata acolo.
+		sat.position.y = sampler.ground_y(sat.position.x, sat.position.z)
 		sat.normal_out = spec.normal_out
 		sat.along = spec.along
 		sat.index = spec.index
@@ -197,6 +204,10 @@ static func _build_scattered(root: Node3D, sampler: TrackSideSampler,
 			rng.randf_range(bounds_min.x - 50.0, bounds_max.x + 50.0),
 			0.0,
 			rng.randf_range(bounds_min.z - 50.0, bounds_max.z + 50.0))
+		# Bug latent, nereclamat: cota era hardcodata 0.0, in timp ce terenul de
+		# padure statea la -0.3 plus dune de ±5 m. Copacii de pe Serpentina si
+		# Muntele pluteau sau erau ingropati de cand exista pistele alea.
+		pos.y = sampler.ground_y(pos.x, pos.z)
 		var nearest := sampler.clearance_at(pos)
 		if nearest < sampler.half_width() + NEAR_MARGIN or nearest > FAR_LIMIT:
 			continue

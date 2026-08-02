@@ -186,7 +186,11 @@ func _tick_race(delta: float) -> void:
 func _watch_recovery(car: Car, delta: float) -> void:
 	if car.finished:
 		return
-	if car.global_position.y < -12.0:
+	# Prag RELATIV la sosea, nu absolut. De cand terenul urmareste drumul, cota
+	# zero nu mai inseamna nimic: fundul unei rape sapate pe o portiune joasa e
+	# la -14, deci un prag fix de -12 ar repune masina inainte sa atinga fundul,
+	# iar pe creasta (drum la 19 m) n-ar prinde niciodata o cadere reala.
+	if car.global_position.y < track.baked[car.road_index].y - 25.0:
 		car.respawn()
 		return
 	var off_road := not track.is_on_road(car.road_index, car.global_position)

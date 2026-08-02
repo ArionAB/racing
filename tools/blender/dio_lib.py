@@ -831,6 +831,22 @@ def snapshot_slots(obj):
 
 
 def apply_bevel(obj, width, segments=1, angle_deg=30.0):
+    """Bevel pe muchii, limitat pe unghi.
+
+    Costul NU depinde de `width` — `segments=1` adauga mereu aceeasi topologie,
+    deci un bevel de 1 cm costa exact cat unul de 10 cm. Un cub de 12 triunghiuri
+    iese cu 6 fete (12) + 12 quad-uri de muchie (24) + 8 triunghiuri de colt = 44,
+    adica **3.67x**, si asta e cifra masurata pe toata geometria de cutii din
+    proiect (plansa de ajutoare #46, cei cinci piloni din #B3).
+
+    `angle_deg` E singura parghie de cost, si conteaza doar pe geometrie
+    curbata. Pe cutii toate muchiile sunt de 90°, deci pragul nu sare peste
+    nimic. Pe un tub cu 8 laturi, fetele laterale vecine se intalnesc la 45°:
+    masurat pe conducta din #B5, aceeasi geometrie de 222 de triunghiuri brute
+    da 708 la 30°, 536 la 50° si 464 la 70°. Cand un asset cilindric depaseste
+    bugetul, ridicarea pragului se incearca INAINTE de a taia geometrie —
+    rotunjimea tubului o da poligonul, nu tesitura.
+    """
     if width <= 0:
         return
     mod = obj.modifiers.new("Bevel", "BEVEL")

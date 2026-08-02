@@ -119,3 +119,69 @@ culoare în engine:**
 - **Checklist la primire:** trei noduri cu numele exacte, copii direcți ai
   rădăcinii; bugetele per nod; gura lui `Pipe_Broken` verificată pe direcția
   corectă; UV pe centre; `COLOR_0`; origini la bază, toate la (0,0,0).
+
+## Livrat (#B5, prima parte)
+
+![furtunul de grădină și conducta](img/pipe_leak_vs_furtun.png)
+
+Stânga: `garden_hose.glb` la `model_scale = 0.45`, cum arată azi pe Dunele.
+Dreapta: cele trei piese noi. Furtunul e randat cu material neutru — n-are UV pe
+sloturi, deci cu materialul comun ar ieși negru.
+
+### Cote
+
+| nod | tris | buget | dimensiuni (Godot X × Y × Z) |
+|---|---|---|---|
+| `Pipe_Broken` | **222** | 300 | 1.70 × 1.51 × 4.68 m |
+| `Pipe_Elbow` | **84** | 160 | 1.20 × 2.00 × 1.90 m |
+| `Pipe_Segment` | **56** | 100 | 1.20 × 1.20 × 2.20 m |
+
+### Ce trebuie schimbat în cod
+
+`garden_hose.glb` măsoară 6.14 × 14.54 × 6.85 m și se scalează cu **0.45**, deci
+ocupă ~6.5 m. Conducta e construită la scara lumii, deci:
+
+- `water_hose.gd:23` → **`model_scale = 1.0`** (era 0.45)
+- `water_hose.gd:57`, emitătorul de particule: duza e la **1.260 m de origine pe
+  −Z** și la **0.850 m înălțime**. Azi emitătorul e la offset 1.2 și înălțime
+  1.6, calibrat pe furtun.
+
+Atenție la o capcană: **marginea bbox-ului nu e duza.** Pietrele desprinse stau
+în fața rupturii, deci `max` pe axă e o piatră, la 2.340 m. Scriptul calculează
+poziția reală a gurii din cota de construcție plus deplasarea făcută de
+`finish(origin="base")`, și o tipărește la fiecare build.
+
+### Abateri de la brief
+
+- **Bevel 0, nu 0.03.** Măsurat pe aceeași geometrie de 222 de triunghiuri brute:
+  708 la pragul implicit de 30°, **536 la 50°**, **464 la 70°**, 222 fără bevel.
+  Pragul de unghi chiar e o pârghie aici — pe geometrie curbată, spre deosebire
+  de cutii, unde toate muchiile sunt de 90° — fiindcă fețele vecine ale unui tub
+  cu 8 laturi se întâlnesc la 45°. Dar nici la 70° nu încape. Descoperirea a
+  urcat în docstring-ul lui `apply_bevel`: când un asset cilindric depășește
+  bugetul, se încearcă pragul **înainte** de a tăia geometrie.
+  Bevel 0 pe toate trei, nu doar pe cea care depășea: trei țevi din același
+  fișier care se așază cap la cap în decor nu pot avea muchii diferite.
+- **Capete închise cu disc întunecat, deși brieful cere „capete deschise".**
+  Asta e reparația unei greșeli din brief, nu o abatere de comoditate:
+  `Palette.world_material()` (`scripts/palette.gd:79`) nu atinge `cull_mode`,
+  deci rămâne `CULL_BACK`. Un tub chiar deschis nu se vede ca țeavă, se vede ca
+  **gaură** — peretele din spate e format din fețe întoarse, care se taie, și
+  privești direct prin obiect în fundal. Discul în `sand_shadow` dă exact
+  citirea cerută („se vede în țeavă") și costă 6 triunghiuri.
+- **Gura e tăiată și oblic, nu doar zimțată.** Brieful cere „tăiată oblic și
+  neregulată"; zimții singuri dau doar neregularitatea, iar o gură perpendiculară
+  pe axă se citește ca tăietură de fierăstrău. Partea de sus iese cu 22 cm în
+  fața celei de jos. Zero triunghiuri.
+- **`torus()` nu s-a folosit pentru coliere.** La 8 segmente majore și 5 minore
+  costă 80 de triunghiuri — mai mult decât tot corpul conductei. Un inel scurt de
+  țeavă cu capace costă 28 și se citește identic la scara asta.
+- **Pietrele desprinse au crescut** de la 0.19–0.30 m la 0.34–0.52 m, cu `taper`
+  de la 0.5 la 0.28. La prima captură ieșeau conuri mici și întunecate, ca niște
+  conuri de șantier.
+
+### Excavatorul rămâne
+
+Issue-ul #53 cere două assets și spune explicit că se sparg în două PR-uri dacă
+unul iese mai lung. `rusted_digger.glb` are contractul nodului `arm` plus
+colizoare potrivite manual pe rigul vechi — merită PR-ul lui.

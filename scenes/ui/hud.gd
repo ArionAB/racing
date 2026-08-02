@@ -5,6 +5,9 @@ extends CanvasLayer
 ## in cod (placeholder pana la un design real, ca in racing 2D).
 
 signal restart_requested
+## Repunerea pe pista, cerut de jucator. Repornirea cursei e alt semnal:
+## RESTART arunca tot turul, asta doar te scoate din nisip.
+signal respawn_requested
 signal menu_requested
 signal results_primary # butonul principal din panoul de rezultate
 
@@ -15,6 +18,7 @@ var _charge_bg: ColorRect
 var _charge_fill: ColorRect
 var _touch: TouchControls
 var _pause_button: Button
+var _respawn_button: Button
 var _pause_panel: PanelContainer
 var _settings: SettingsPanel
 var _results_panel: PanelContainer
@@ -63,6 +67,24 @@ func _ready() -> void:
 	_minimap.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_minimap.position += Vector2(0, 76)
 	root.add_child(_minimap)
+
+	# Sub minimapa. Marginea din dreapta e singura zona libera: colturile de jos
+	# sunt zonele de DRIFT si TURBO (raza de atingere 84 si 92 px), stanga-sus e
+	# eticheta de informatii, iar centrul-jos e bara de turbo. Butonul se termina
+	# la y=306, iar zona TURBO incepe la 498 — 192 px de margine.
+	#
+	# Un Button real cu mouse_filter STOP consuma evenimentul inaintea lui
+	# TouchControls, deci nu mai vireaza in acelasi timp. Butonul de pauza
+	# demonstreaza deja ca merge.
+	_respawn_button = _make_button("REPUNE")
+	_respawn_button.custom_minimum_size = Vector2(Minimap.MAP_SIZE, 52)
+	_respawn_button.add_theme_font_size_override("font_size", 20)
+	_respawn_button.set_anchors_and_offsets_preset(
+		Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
+	_respawn_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_respawn_button.position += Vector2(0, 76.0 + Minimap.MAP_SIZE + 12.0)
+	_respawn_button.pressed.connect(func() -> void: respawn_requested.emit())
+	root.add_child(_respawn_button)
 
 	_countdown = _make_label(110)
 	_countdown.set_anchors_and_offsets_preset(
@@ -198,6 +220,7 @@ func show_results(title: String, rows: Array[Dictionary], primary_label: String)
 	buttons.add_child(menu)
 	_results_panel.visible = true
 	_pause_button.visible = false
+	_respawn_button.visible = false
 	_touch.visible = false
 
 func _open_pause() -> void:
@@ -207,12 +230,14 @@ func _open_pause() -> void:
 	GameState.reset_touch() # altfel virajul "ramane apasat" peste pauza
 	_touch.visible = false
 	_pause_button.visible = false
+	_respawn_button.visible = false
 	_pause_panel.visible = true
 
 func _close_pause() -> void:
 	get_tree().paused = false
 	_touch.visible = true
 	_pause_button.visible = true
+	_respawn_button.visible = true
 	_pause_panel.visible = false
 	_settings.visible = false
 
@@ -240,6 +265,12 @@ func set_info(text: String) -> void:
 func show_countdown(text: String) -> void:
 	_countdown.text = text
 	_countdown.visible = text != ""
+
+## Dezactiveaza butonul cat timp repunerea n-ar avea efect (cooldown, countdown,
+## cursa terminata). Fara asta, apesi si nu se intampla nimic, fara explicatie.
+func set_respawn_enabled(enabled: bool) -> void:
+	_respawn_button.disabled = not enabled
+
 
 func flash_message(text: String) -> void:
 	_message.text = text

@@ -53,6 +53,7 @@ func _ready() -> void:
 	hud = RaceHUD.new()
 	add_child(hud)
 	hud.restart_requested.connect(GameState.start_race)
+	hud.respawn_requested.connect(_on_respawn_requested)
 	hud.menu_requested.connect(GameState.go_to_menu)
 	hud.results_primary.connect(_on_results_primary)
 	hud.setup_minimap(track, cars)
@@ -299,6 +300,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
+	# Actiunea "reset" (tasta R) exista in project.godot de la inceput dar nu era
+	# citita de nicaieri — cod mort. Legata prin ACTIUNE, nu prin KEY_R, ca sa
+	# ramana remapabila din setari.
+	if key.is_action_pressed("reset"):
+		_on_respawn_requested()
+		get_viewport().set_input_as_handled()
+		return
 	match key.physical_keycode:
 		KEY_1: _swap_player_car(0)
 		KEY_2: _swap_player_car(1)
@@ -313,16 +321,26 @@ func _swap_player_car(index: int) -> void:
 ## Camera se retrage proportional cu lungimea vehiculului (autobuzul ar
 ## umple ecranul la distanta potrivita pentru muscle car).
 ##
-## Coeficientii au coborat odata cu trecerea la unghiul Ignition: pentru Muscle
-## dau acum 6.8m / 2.55m in loc de 8.5m / 3.5m, adica ~7° in jos in loc de ~11°.
-## Panta pe body_length a scazut si ea (0.70 -> 0.52), altfel autobuzul ar fi
-## ramas cu unghiul vechi in timp ce masinile mici capatau unul nou.
+## Formula traieste in ChaseCamera, nu aici. Cat timp existau doua seturi de
+## literale, editarea constantelor din chase_camera.gd nu schimba nimic in joc:
+## valorile de acolo erau suprascrise la runtime chiar de functia asta.
+## Repunere ceruta de jucator, din buton sau de la tasta R.
+##
+## Tot ce urmeaza dupa e deja legat: `respawned` trage camera in spate, adauga
+## trauma si scrie mesajul pe ecran.
+func _on_respawn_requested() -> void:
+	if state != State.RUNNING or player.finished:
+		return
+	player.respawn()
+
+
 func _fit_camera_to_player() -> void:
 	if player.data != null:
-		camera.distance = 4.2 + player.data.body_length * 0.52
-		camera.height = 1.70 + player.data.body_length * 0.17
+		camera.distance = ChaseCamera.distance_for(player.data.body_length)
+		camera.height = ChaseCamera.height_for(player.data.body_length)
 
 func _update_hud() -> void:
+	hud.set_respawn_enabled(state == State.RUNNING and player.can_respawn())
 	var lap_text := "--:--.-"
 	if _lap_start_ms >= 0 and state != State.COUNTDOWN:
 		lap_text = _fmt_ms(Time.get_ticks_msec() - _lap_start_ms)

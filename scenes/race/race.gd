@@ -308,10 +308,15 @@ func _swap_player_car(index: int) -> void:
 
 ## Camera se retrage proportional cu lungimea vehiculului (autobuzul ar
 ## umple ecranul la distanta potrivita pentru muscle car).
+##
+## Coeficientii au coborat odata cu trecerea la unghiul Ignition: pentru Muscle
+## dau acum 6.8m / 2.55m in loc de 8.5m / 3.5m, adica ~7° in jos in loc de ~11°.
+## Panta pe body_length a scazut si ea (0.70 -> 0.52), altfel autobuzul ar fi
+## ramas cu unghiul vechi in timp ce masinile mici capatau unul nou.
 func _fit_camera_to_player() -> void:
 	if player.data != null:
-		camera.distance = 5.0 + player.data.body_length * 0.7
-		camera.height = 2.6 + player.data.body_length * 0.18
+		camera.distance = 4.2 + player.data.body_length * 0.52
+		camera.height = 1.70 + player.data.body_length * 0.17
 
 func _update_hud() -> void:
 	var lap_text := "--:--.-"

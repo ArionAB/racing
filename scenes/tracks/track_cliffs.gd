@@ -87,6 +87,10 @@ static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
 		var body := StaticBody3D.new()
 		body.name = "CliffBody%s" % ("L" if side_sign < 0.0 else "R")
 		body.add_to_group("cliffs")
+		# Layer 8: "ce n-are voie sa stea intre camera si masina". Camera face
+		# raycast DOAR pe layer-ul asta — pe layer-ul implicit ar lovi popice,
+		# mingea si celelalte masini, si fiecare depasire ar smuci cadrul.
+		body.collision_layer |= Track.CAMERA_BLOCKER_LAYER
 		root.add_child(body)
 
 		for spec in sampler.sample_edge(SPACING, OFFSET_OUTER):

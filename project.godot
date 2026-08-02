@@ -73,6 +73,10 @@ reset={
 
 pointing/emulate_touch_from_mouse=true
 
+[layer_names]
+
+3d_physics/layer_8="camera_blockers"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

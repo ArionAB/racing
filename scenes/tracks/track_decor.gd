@@ -501,8 +501,14 @@ static func _add_glb_rock(parent: Node3D, pos: Vector3,
 	container.scale = Vector3.ONE * s
 	container.position = -kept.position * s # anuleaza asezarea "una langa alta"
 	body.add_child(container)
-	var heights := {"rock_small": 2.0, "rock_medium": 3.5, "rock_large": 5.0}
-	var h: float = heights[keep_name] * s
+	# Inaltimea din AABB, nu dintr-un tabel. Cele trei cifre scrise de mana
+	# (2.0 / 3.5 / 5.0) se nimereau exacte, dar rocks.glb e un asset vechi fara
+	# UV pe sloturi si urmeaza sa fie scos — cand se intampla, coliziunea nu
+	# trebuie sa ramana potrivita pe geometria care a plecat.
+	var h: float = 3.5 * s
+	var mi_rock := _first_mesh(kept)
+	if mi_rock != null and mi_rock.mesh != null:
+		h = mi_rock.mesh.get_aabb().size.y * s
 	var shape := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()
 	sphere.radius = h * 0.45

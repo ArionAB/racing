@@ -56,39 +56,89 @@ func _process(_delta: float) -> bool:
 	return false
 
 
+## Grupurile care poarta un model GLB si o coliziune derivata din el.
+const TAGS := {
+	"landmarks": "landmark", "start_arch": "poarta", "dinos": "dino",
+	"pins": "popica", "hazards": "hazard", "hoses": "furtun",
+}
+
+
 func _dump(track: Node) -> void:
+	# Agregam: sunt pana la 110 popice identice pe o pista, nu vrem 110 linii.
+	var seen: Dictionary = {}
+	var order: Array[String] = []
 	for node in _walk(track):
-		var body := node as StaticBody3D
+		var body := node as PhysicsBody3D
 		if body == null:
 			continue
 		var tag := ""
-		if body.is_in_group("landmarks"):
-			tag = "landmark"
-		elif body.is_in_group("start_arch"):
-			tag = "poarta"
-		elif body.is_in_group("dinos"):
-			tag = "dino"
+		for g: String in TAGS:
+			if body.is_in_group(g):
+				tag = TAGS[g]
+				break
+		if tag == "":
+			# Nu tot ce poarta un model e intr-un grup — SlidingHazard, de
+			# exemplu, nu se inregistreaza nicaieri. Cadem pe numele clasei ca
+			# sa nu scape nimic din raport doar fiindca cineva a uitat un grup.
+			tag = _class_tag(body)
 		if tag == "":
 			continue
-		var model_name := "?"
-		for c in body.get_children():
-			if c is Node3D and not (c is CollisionShape3D):
-				model_name = String(c.name)
-				break
+		var model_name := _model_name(body)
 		for c in body.get_children():
 			var cs := c as CollisionShape3D
 			if cs == null:
 				continue
-			var desc := "?"
-			var box := cs.shape as BoxShape3D
-			var cyl := cs.shape as CylinderShape3D
-			if box != null:
-				desc = "box %5.2f x %5.2f x %5.2f" % [box.size.x, box.size.y,
-					box.size.z]
-			elif cyl != null:
-				desc = "cyl r=%.2f h=%5.2f" % [cyl.radius, cyl.height]
-			print("  %-9s %-14s %-28s centru y=%5.2f" % [tag, model_name, desc,
-				cs.position.y])
+			var key := "%s|%s|%s|%.2f" % [tag, model_name, _describe(cs.shape),
+				cs.position.y]
+			if seen.has(key):
+				seen[key] += 1
+			else:
+				seen[key] = 1
+				order.append(key)
+	for key in order:
+		var parts := key.split("|")
+		var count: int = seen[key]
+		var mult := "" if count == 1 else "  x%d" % count
+		print("  %-9s %-14s %-28s centru y=%5.2f%s" % [parts[0], parts[1],
+			parts[2], float(parts[3]), mult])
+
+
+## Numele clasei din script, taiat la latimea coloanei. Doar pentru corpurile
+## care chiar poarta un model — un StaticBody procedural n-are ce cauta aici.
+func _class_tag(body: Node) -> String:
+	var script := body.get_script() as Script
+	if script == null:
+		return ""
+	var name := script.get_global_name()
+	if name == "":
+		return ""
+	if _model_name(body) == "?":
+		return ""
+	return String(name).to_lower().substr(0, 9)
+
+
+func _model_name(body: Node) -> String:
+	for c in body.get_children():
+		if c is Node3D and not (c is CollisionShape3D):
+			# Radacina GLB-ului poate fi invelita intr-un pivot (mingea).
+			if c.get_child_count() == 1 and c.get_child(0) is Node3D \
+					and not (c.get_child(0) is MeshInstance3D):
+				return String(c.get_child(0).name)
+			return String(c.name)
+	return "?"
+
+
+func _describe(shape: Shape3D) -> String:
+	var box := shape as BoxShape3D
+	var cyl := shape as CylinderShape3D
+	var sph := shape as SphereShape3D
+	if box != null:
+		return "box %5.2f x %5.2f x %5.2f" % [box.size.x, box.size.y, box.size.z]
+	if cyl != null:
+		return "cyl r=%.2f h=%5.2f" % [cyl.radius, cyl.height]
+	if sph != null:
+		return "sfera r=%.2f" % sph.radius
+	return str(shape)
 
 
 func _walk(node: Node) -> Array[Node]:

@@ -101,13 +101,23 @@ func _readable_period() -> float:
 	return maxf(TAU * amp / max_sweep_speed, 1.5)
 
 func _build_model() -> void:
+	var model := model_scene.instantiate() as Node3D
+	model.scale = Vector3.ONE * model_scale
+	# `roll_radius` primit de la apelant e o INTENTIE ("obiectul asta se
+	# rostogoleste"), nu o masuratoare. Raza efectiva se ia din model, ca un GLB
+	# regenerat la alt diametru sa nu ramana cu o sfera de coliziune de alta
+	# marime decat ce se vede. Apelantul o calcula de mana din diametrul de 5 m
+	# al mingii — exact numarul care se schimba la inlocuirea cu un bolovan.
+	if roll_radius > 0.0:
+		var measured := Track.model_aabb(model)
+		var d := maxf(measured.size.x, measured.size.z)
+		if d > 0.02:
+			roll_radius = d * 0.5
 	# Pivotul sta la inaltimea centrului sferei; modelul (origine in centru)
 	# se aseaza in pivot, iar rostogolirea roteste pivotul.
 	_pivot = Node3D.new()
 	_pivot.position = Vector3.UP * roll_radius
 	add_child(_pivot)
-	var model := model_scene.instantiate() as Node3D
-	model.scale = Vector3.ONE * model_scale
 	_pivot.add_child(model)
 	var shape := CollisionShape3D.new()
 	if roll_radius > 0.0:

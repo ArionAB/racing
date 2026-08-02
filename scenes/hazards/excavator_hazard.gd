@@ -18,6 +18,10 @@ var _time: float = 0.0
 
 func _ready() -> void:
 	add_to_group("hazards")
+	# Sasiul se MASOARA; bratul NU. Vezi de ce mai jos — sunt doua cazuri
+	# diferite, si al doilea e cazul in care masuratoarea iese mai prost decat
+	# valoarea potrivita de mana.
+	var body_aabb := AABB(Vector3(-1.7, 0.0, -0.7), Vector3(3.4, 3.4, 3.4))
 	if model_scene != null:
 		var model := model_scene.instantiate() as Node3D
 		model.scale = Vector3.ONE * model_scale
@@ -25,20 +29,37 @@ func _ready() -> void:
 		_arm = model.find_child("arm", true, false) as Node3D
 		if _arm != null:
 			_arm_base_rot = _arm.rotation.x
+		var body_node := model.find_child("body", true, false) as Node3D
+		if body_node != null:
+			# `arm` e COPIL al lui `body` in GLB, deci fara skip iese o cutie de
+			# 10 m pe adancime care ar bloca soseaua permanent. Sasiul e o masa
+			# compacta, deci AABB-ul lui e o aproximare buna.
+			body_aabb = model.transform * Track.model_aabb(body_node, _arm)
 	# Corpul excavatorului (mereu solid).
 	var body_shape := CollisionShape3D.new()
 	var body_box := BoxShape3D.new()
-	body_box.size = Vector3(3.4, 3.4, 3.4)
+	body_box.size = body_aabb.size
 	body_shape.shape = body_box
-	body_shape.position = Vector3(0, 1.7, 1.0)
+	body_shape.position = body_aabb.position + body_aabb.size * 0.5
 	add_child(body_shape)
 	# Bratul intins peste drum (solid doar cand e coborat) — dimensionat
 	# sa se opreasca unde se opreste si vizualul, nu mai departe.
+	#
+	# Cutia asta ramane potrivita de mana, INTENTIONAT. Bratul e o grinda
+	# diagonala, iar AABB-ul unei diagonale supra-acopera grosolan: masurat, dau
+	# 3.60 m inaltime pentru un brat de vreo 1 m grosime, ridicat cu un metru
+	# fata de unde e de fapt. O cutie stransa pe axa bratului e mai aproape de
+	# adevar decat una aliniata pe axe.
+	#
+	# Cotele se scaleaza cu modelul, deci un digger mai mare/mai mic ramane
+	# coerent; ce NU se ia singur dupa model e forma. Cand se schimba rigul,
+	# re-potriveste-le cu `probe_dims.gd` (vezi ONBOARDING).
+	var k := model_scale / 0.75 # 0.75 = scara la care au fost potrivite
 	_arm_shape = CollisionShape3D.new()
 	var arm_box := BoxShape3D.new()
-	arm_box.size = Vector3(1.6, 2.0, 4.6)
+	arm_box.size = Vector3(1.6, 2.0, 4.6) * k
 	_arm_shape.shape = arm_box
-	_arm_shape.position = Vector3(0, 1.1, -2.9)
+	_arm_shape.position = Vector3(0, 1.1, -2.9) * k
 	add_child(_arm_shape)
 
 func _physics_process(delta: float) -> void:

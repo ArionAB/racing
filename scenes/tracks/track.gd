@@ -548,9 +548,12 @@ func _extract_glb_node(scene: PackedScene, node_name: String) -> Node3D:
 ## GLB-urile din pipeline au mai multe noduri (moara are 2, arcada de stanca va
 ## avea 4), iar un singur nod da o cutie prea mica in tacere. Transformul local
 ## conteaza — palele morii au pivot propriu.
-static func model_aabb(root: Node3D) -> AABB:
+## `skip` taie un subarbore din masuratoare. Necesar fiindca ierarhia unui GLB
+## nu e mereu plata: la toy_excavator, `arm` e COPIL al lui `body`, deci
+## masurand `body` iese o cutie de 10 m care ar bloca soseaua permanent.
+static func model_aabb(root: Node3D, skip: Node = null) -> AABB:
 	var boxes: Array[AABB] = []
-	_collect_aabbs(root, Transform3D.IDENTITY, boxes)
+	_collect_aabbs(root, Transform3D.IDENTITY, boxes, skip)
 	if boxes.is_empty():
 		return AABB()
 	var out: AABB = boxes[0]
@@ -560,7 +563,9 @@ static func model_aabb(root: Node3D) -> AABB:
 
 
 static func _collect_aabbs(node: Node, xform: Transform3D,
-		out: Array[AABB]) -> void:
+		out: Array[AABB], skip: Node = null) -> void:
+	if node == skip:
+		return
 	var local := xform
 	var spatial := node as Node3D
 	if spatial != null:
@@ -569,7 +574,7 @@ static func _collect_aabbs(node: Node, xform: Transform3D,
 	if mi != null and mi.mesh != null:
 		out.append(local * mi.mesh.get_aabb())
 	for c in node.get_children():
-		_collect_aabbs(c, local, out)
+		_collect_aabbs(c, local, out, skip)
 
 
 func _centroid() -> Vector3:

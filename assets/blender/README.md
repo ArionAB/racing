@@ -16,9 +16,21 @@ proportiile, editeaza scriptul si regenereaza — asa raman reproductibile si
 verificabile.
 
 ```
-# in Blender, cu addon-ul BlenderMCP pornit (vezi ONBOARDING.md §3):
+# in consola Python din Blender (namespace comun, deci merg doua exec separate):
 exec(open(r"d:/GameDev/ignition-spike/tools/blender/dio_lib.py").read())
 exec(open(r"d:/GameDev/ignition-spike/tools/blender/build_windmill.py").read())
+```
+
+Prin **Blender MCP** (`execute_blender_code`) namespace-ul nu e comun, deci cele
+doua fisiere trebuie sa imparta explicit acelasi dictionar de globale. Si
+`__file__` trebuie pus de mana: `exec(open(...).read())` nu-l defineste, iar
+`dio_lib` il foloseste ca sa afle radacina repo-ului.
+
+```python
+g = {"__name__": "__main__",
+     "__file__": r"d:/GameDev/ignition-spike/tools/blender/dio_lib.py"}
+exec(open(r"d:/GameDev/ignition-spike/tools/blender/dio_lib.py").read(), g)
+exec(open(r"d:/GameDev/ignition-spike/tools/blender/build_windmill.py").read(), g)
 ```
 
 Verificarea GLB-ului rezultat, fara Blender si fara Godot:

@@ -28,15 +28,9 @@ CANOPY_W, CANOPY_D = 4.50, 2.80
 CANOPY_Z = 3.60
 
 
-def star_outline(radius, inner=0.42, points=5):
-    """Stea simpla pentru accentul de langa panou. Contur 2D in planul XZ."""
-    pts = []
-    for i in range(points * 2):
-        a = math.radians(-90.0 + i * (360.0 / (points * 2)))
-        r = radius if i % 2 == 0 else radius * inner
-        pts.append((r * math.cos(a), r * math.sin(a)))
-    return pts
-
+# `star_outline` traia aici; a urcat in dio_lib fiindca #C4 (gas_pole_sign) il
+# refoloseste. Valorile implicite sunt neschimbate, deci benzinaria se
+# regenereaza identic.
 
 clear_built("GasStation")
 b = Builder()

@@ -91,3 +91,42 @@ culoare în engine:**
   5. instanțiere cu `Palette.apply_world_material(glb)` → un singur material
 - Text "GAS STATION" real: **nu** se modelează. Dacă îl vrem lizibil mai târziu,
   se adaugă un slot de decal separat în atlas — decizie ulterioară.
+
+## Livrat (#D1)
+
+![benzinăria înainte și după, la 40 m și la 18 m](img/gas_station_inainte_dupa.png)
+
+Sus 40 m (cum cere issue-ul), jos 18 m. Stânga înainte, dreapta după, **ambele cu
+același material comun** — prima încercare ieșise înșelătoare, fiindcă modelul
+importat își aduce atributul de culoare cu numele `Color` iar materialul citește
+`AO`, deci vechiul apărea negru.
+
+| | înainte | după |
+|---|---|---|
+| triunghiuri | 1148 | **4864** |
+| bbox Godot | 8.10 × 4.93 × 6.58 | 8.10 × 4.93 × 6.59 |
+
+Buget ignorat la cerere; issue-ul ținea 1700. Descompunerea, ca dial-back-ul să
+fie ușor: teancul de cauciucuri plus cercurile butoaielor (toate `torus`) ~1800,
+cele patru ferestre ~1050, tabla ondulată ~310. `torus` cu `minor_seg=3` în loc
+de 5 taie singur ~700 fără să se vadă la 40 m.
+
+### Garda de gabarit
+
+Scriptul compară bbox-ul cu cel dinaintea îmbogățirii la fiecare rulare. A prins
+imediat o creștere de **5 cm pe Z**: nervurile tablei ondulate ieșeau în fața
+vechii fascii — genul de creștere invizibilă într-un render, care scoate
+geometrie prin colizorul hardcodat din `track.gd:1359`. Corectat prin retragerea
+centrului cu exact `depth`.
+
+Ce rămâne e **+7 mm, simetric pe ambele capete ale axei** — semnătura zgomotului
+de bevel, nu geometrie nouă. De aici toleranța de 1 cm, argumentată în cod.
+
+### Ce s-a adăugat
+
+Ușă și trei ferestre cu `window()` (erau plăci lipite la 2 cm de perete, adică
+vopsea), vitrină pe peretele lateral cu `window(rotation=)`, fascia copertinei
+devenită tablă ondulată, două aerisiri plus un turbinat și un coș care rup linia
+dreaptă a acoperișului, două butoaie cu cercuri, o ladă, un teanc de cauciucuri,
+și `retag` pe fețele de sus ale dalei — praf deschis pe orizontale, zero
+triunghiuri.

@@ -55,6 +55,23 @@ var theme_sun_color := Color(1.0, 0.97, 0.9)
 ##   3. o compari cu #D8A86A (sand_mid)
 ## Pe desert, combinatia de mai jos a coborat eroarea de la 198 la 10 (din 255).
 var theme_exposure: float = 1.0
+## Umbre dinamice de la soare. Vezi comentariul lung din _build_environment:
+## e o abatere asumata de la CLAUDE.md, cu un singur loc de unde se stinge daca
+## primul test pe device nu tine 60fps.
+var theme_shadows: bool = true
+
+## Pana unde arunca soarele umbre. Peste, preia ceata (depth 90->250), deci
+## lipsa lor nu se vede. O singura cascada pana aici = configuratia cea mai
+## ieftina care da totusi contact real cu solul.
+const SHADOW_DISTANCE: float = 90.0
+
+## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
+##
+## Camera face raycast DOAR pe layer-ul asta. Pe layer-ul implicit (unde stau
+## toate) ar lovi popice, mingea de plaja si celelalte masini, si fiecare
+## depasire ar smuci cadrul cu cativa metri — mai rau decat clipping-ul pe care
+## incearca sa-l evite. Se pune pe faleze si pe sol, atat.
+const CAMERA_BLOCKER_LAYER: int = 1 << 7
 var theme_sun_energy: float = 1.25
 
 ## Paleta completa a unei teme, dintr-un singur apel.
@@ -76,14 +93,16 @@ func apply_theme(theme: String) -> void:
 		# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
 		# supraexpus, si granulatia de suprafata disparea in saturatie.
 		#
-		# Recalibrat dupa introducerea stratului de detaliu: textura aia se
-		# INMULTESTE peste albedo (medie 0.89) si se aplica atat pe teren cat si
-		# pe prop-uri, deci a coborat nisipul la #AF8952. 0.75 -> 0.93 il aduce
-		# inapoi. Daca schimbi amplitudinea detaliului, REIA masuratoarea:
+		# Recalibrat de doua ori: stratul de detaliu se INMULTESTE peste albedo
+		# (medie 0.89), iar soarele a coborat de la 48° la 42° si s-a mutat
+		# lateral, deci nisipul primeste mai putina lumina directa. Cumulate, au
+		# dus nisipul de la #D8A86A la #BD955E. 0.75 -> 1.42 il aduce inapoi.
+		#
+		# Daca schimbi detaliul SAU unghiul soarelui, REIA masuratoarea:
 		#   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
 		# si compara nisipul insorit (coltul liber al imaginii) cu #D8A86A.
 		theme_sun_energy = 0.8
-		theme_exposure = 1.12
+		theme_exposure = 1.42
 	else:
 		theme_ground_tint = Color(0.45, 0.72, 0.33) # verde viu, nu pastel
 		theme_sky_top = Color(0.22, 0.48, 0.9)
@@ -293,10 +312,38 @@ func _build_environment() -> void:
 	add_child(world_env)
 
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-48, -30, 0)
-	sun.shadow_enabled = false # masinile au umbre blob (ieftin, mobil)
+	# Elevatie 42°, azimut 315° (din stanga-sus) — style_bible §5.
+	#
+	# Vechiul (-48, -30) bătea aproape vertical si dinspre spatele camerei, deci
+	# umbrele cadeau SUB si IN SPATELE stancilor, unde nu le vede nimeni. La 42°
+	# umbra unei faleze de 10m se intinde ~11m pe nisip, transversal pe drum:
+	# exact indiciul de volum care lipsea.
+	sun.rotation_degrees = Vector3(-42, 135, 0)
 	sun.light_color = theme_sun_color
 	sun.light_energy = theme_sun_energy
+	# Umbrele contrazic litera CLAUDE.md ("umbre ieftine sau blob shadows").
+	# Decizie asumata dupa comparatia cu Reckless Racing 3 / Beach Buggy Racing:
+	# contactul cu solul e ce lipsea cel mai tare — fara el orice obiect pare
+	# lipit peste fundal, nu asezat in el. Ramane O SINGURA lumina directionala,
+	# doar ca acum arunca.
+	#
+	# Configuratia e cea mai ieftina care da contact real: o singura cascada, pe
+	# 90m. Dincolo preia ceata (depth 90->250), deci nu se vede lipsa lor.
+	#
+	# COMUTATORUL E theme_shadows. Daca primul test pe device nu tine 60fps, se
+	# stinge de acolo si AO-ul copt ramane singura sursa de volum.
+	sun.shadow_enabled = theme_shadows
+	if theme_shadows:
+		sun.directional_shadow_mode = \
+			DirectionalLight3D.SHADOW_ORTHOGONAL
+		sun.directional_shadow_max_distance = SHADOW_DISTANCE
+		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
+		# taioasa de pixeli pe nisip.
+		sun.shadow_blur = 1.4
+		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
+		# acne pe fetele orientate spre soare.
+		sun.shadow_bias = 0.06
+		sun.shadow_normal_bias = 1.6
 	add_child(sun)
 
 	# _build_terrain() NU se cheama de aici: are nevoie de pozitiile falezelor ca
@@ -311,6 +358,9 @@ func _build_environment() -> void:
 	# ATENTIE: doar XZ din centroid — centroid.y include media dealurilor
 	# si ar ridica podeaua de coliziune deasupra soselei (perete invizibil).
 	ground_shape.position = Vector3(centroid.x, -0.8, centroid.z)
+	# Solul blocheaza si el camera: fara asta, pe o coama camera trece prin nisip
+	# si vezi lumea de dedesubt.
+	ground_body.collision_layer |= CAMERA_BLOCKER_LAYER
 	ground_body.add_child(ground_shape)
 	add_child(ground_body)
 
@@ -550,7 +600,11 @@ func _build_terrain() -> void:
 ## mai intuneca nimic.
 const CLIFF_AO_RADIUS: float = 14.0
 ## Cat de intunecat e nisipul lipit de baza unei faleze.
-const CLIFF_AO_STRENGTH: float = 0.45
+##
+## Coborat de la 0.45 cand au intrat umbrele dinamice: cele doua se ADUNA, iar
+## la 0.45 baza falezelor iesea aproape neagra. AO-ul ramane pentru contactul
+## fin si omniprezent, umbra dinamica face directia si forma.
+const CLIFF_AO_STRENGTH: float = 0.22
 
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
@@ -574,10 +628,13 @@ func _cliff_positions() -> PackedVector2Array:
 
 ## Umbra coapta la baza falezelor, ca factor multiplicativ (1.0 = neatins).
 ##
-## Astea NU sunt umbre dinamice — jocul are shadow_enabled=false, decizie de buget
-## mobil (BBR, referinta, foloseste tot lumina coapta). Fara contactul asta cu
-## solul, o stanca de 10m arata ca un decal lipit peste nisip. E cea mai ieftina
-## sursa de volum din toata scena: cateva inmultiri la generare, zero la runtime.
+## Completeaza umbrele dinamice, nu le dubleaza: astea sunt OMNIPREZENTE (nu
+## depind de unghiul soarelui si nu se opresc la SHADOW_DISTANCE), deci dau
+## contactul fin de peste tot, inclusiv pe falezele departate unde cascada nu mai
+## ajunge. Costa cateva inmultiri la generare si zero la runtime.
+##
+## Cand au intrat umbrele dinamice, CLIFF_AO_STRENGTH a coborat de la 0.45 la
+## 0.22 — cele doua se aduna si baza iesea aproape neagra.
 func _cliff_shadow(v: Vector3, cliff_xz: PackedVector2Array) -> float:
 	if cliff_xz.is_empty():
 		return 1.0

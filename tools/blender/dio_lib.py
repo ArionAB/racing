@@ -228,6 +228,220 @@ class Builder:
                               size=(w, d, h), slot=slot, rotation=rot)
         return faces
 
+    def railing(self, p1, p2, height, post_step, post_t, rail_t, slot, rails=2):
+        """Balustrada: stalpi la pas regulat + lise orizontale intre ei.
+
+        p1/p2 sunt punctele de BAZA ale capetelor; balustrada creste pe +Z.
+        `rails` = cate lise: 1 doar sus, 2 sus+mijloc, 3 sus + doua treimi.
+
+        style_bible §3 interzice "balustradele subtiri", si nu degeaba: la 60 km/h
+        o lisa de 4 cm dispare, iar silueta capata zgomot in loc de detaliu. De
+        aceea ajutorul asta impune o grosime minima — vezi MIN_T mai jos. Daca
+        ai nevoie de o balustrada mai fina decat atat, ce vrei de fapt e sa n-o
+        pui deloc.
+
+        Buget: 12 triunghiuri per stalp + 12 per lisa, inainte de bevel. O
+        pasarela de 6 m cu pas de 1.5 m si 2 lise: 5 stalpi + 2 lise = 84.
+        """
+        span = (Vector(p2) - Vector(p1)).length
+        # Sub 6 cm nu mai e balustrada, e sarma. Pragul e relativ la deschidere:
+        # o lisa de 8 cm pe 2 m citeste, aceeasi lisa pe 12 m nu.
+        MIN_T = max(0.06, span * 0.012)
+        post_t = max(post_t, MIN_T)
+        rail_t = max(rail_t, MIN_T)
+
+        faces = self.pickets(p1, p2, float(post_step), (post_t, post_t, height), slot)
+
+        levels = {1: (1.0,), 2: (1.0, 0.55), 3: (1.0, 0.67, 0.34)}[rails]
+        a, b = Vector(p1), Vector(p2)
+        for frac in levels:
+            z = height * frac - rail_t * 0.5
+            faces |= self.beam(a + Vector((0, 0, z)), b + Vector((0, 0, z)),
+                               rail_t, slot)
+        return faces
+
+    def ladder(self, base, top, width, rung_step, rail_t, rung_r, slot, side=None):
+        """Scara: doua montante + trepte la pas regulat, intre doua puncte.
+
+        Exista fiindca lipsa ei se vede in brief-uri: `water_tower.md:27-29` face
+        scara OPTIONALA ("doar daca ramane chunky... Daca iese subtire, omite-o")
+        tocmai fiindca geometria subtire scrisa de mana iesea urat. Ajutorul asta
+        **impune** grosimile minime, deci raspunsul devine "da".
+
+        `side` e directia laterala (perpendiculara pe scara). Daca lipseste, se
+        deduce — pentru o scara verticala iese pe -X.
+
+        Buget: 12 triunghiuri per montant + 12 per treapta. O scara de 5 m cu pas
+        de 0.4 m: 2 + 13 piese = 180.
+        """
+        a, b = Vector(base), Vector(top)
+        d = b - a
+        if d.length < 1e-6:
+            return set()
+        if side is None:
+            side = d.cross(Vector((0, 1, 0)))
+            if side.length < 1e-6:
+                side = d.cross(Vector((1, 0, 0)))
+        side = Vector(side).normalized()
+
+        # Pragurile care fac diferenta dintre "scara" si "zgarietura pe silueta".
+        # Sunt relative la latimea scarii, nu absolute: o scara de 0.5 m si una
+        # de 1.2 m nu au nevoie de aceeasi treapta.
+        rail_t = max(rail_t, width * 0.14)
+        rung_r = max(rung_r, width * 0.09)
+
+        faces = set()
+        for s in (-0.5, 0.5):
+            off = side * (width * s)
+            faces |= self.beam(a + off, b + off, rail_t, slot)
+
+        # treptele stau INTRE montante, retrase cu jumatate de montant la fiecare
+        # capat, ca sa nu iasa colturi din silueta
+        inner = width * 0.5 - rail_t * 0.5
+        for p in _span_points(a, b, float(rung_step), endpoints=False):
+            faces |= self.beam(p - side * inner, p + side * inner, rung_r, slot)
+        return faces
+
+    def torus(self, center, major_r, minor_r, slot, major_seg=8, minor_seg=6,
+              axis="Z"):
+        """Inel inchis. Cercuri de rezervor, colier de teava, cauciucuri, jante.
+
+        Nicio primitiva existenta nu producea un inel: `revolve` se invarte in
+        jurul axei dar porneste de pe ea, deci da forme pline, nu gauri.
+
+        Buget: 2 * major_seg * minor_seg triunghiuri. Cu 8x6: 96 — scump pentru
+        cat de mic e de obicei in cadru, deci tine major_seg jos. Pentru cercurile
+        de pe un rezervor, un `torus` de 8x4 (64) sau chiar o banda dreptunghiulara
+        din `revolve` sunt alegeri mai bune decat 12x8 (192).
+        """
+        cx, cy, cz = center
+        basis = {
+            "Z": (Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))),
+            "Y": (Vector((1, 0, 0)), Vector((0, 0, 1)), Vector((0, 1, 0))),
+            "X": (Vector((0, 1, 0)), Vector((0, 0, 1)), Vector((1, 0, 0))),
+        }[axis]
+        e1, e2, up = basis
+
+        rings = []
+        for i in range(major_seg):
+            a = 2.0 * math.pi * i / major_seg
+            radial = e1 * math.cos(a) + e2 * math.sin(a)
+            hub = Vector((cx, cy, cz)) + radial * major_r
+            ring = []
+            for k in range(minor_seg):
+                t = 2.0 * math.pi * k / minor_seg
+                p = hub + radial * (minor_r * math.cos(t)) + up * (minor_r * math.sin(t))
+                ring.append(self.bm.verts.new(p))
+            rings.append(ring)
+
+        for i in range(major_seg):
+            lo, hi = rings[i], rings[(i + 1) % major_seg]
+            for k in range(minor_seg):
+                j = (k + 1) % minor_seg
+                self.bm.faces.new((lo[k], lo[j], hi[j], hi[k]))
+        return self._tag([v for r in rings for v in r], slot)
+
+    def corrugate(self, center, size, slot, ribs=5, depth=0.06):
+        """Panou de tabla ondulata: nervuri verticale pe fata dinspre +Y.
+
+        Cel mai bun raport detaliu/triunghi pentru o diorama de desert — soproane,
+        rezervoare, baraci, garduri improvizate. Fara boolean si fara o bucla de
+        nervuri scrisa de mana era imposibil.
+
+        Se construieste ca UN SINGUR solid cu profil de unda dreptunghiulara, nu
+        ca placa + sipci lipite deasupra: cutiile suprapuse ar lasa fete interne
+        care nu se vad niciodata dar intra in numaratoare si strica AO-ul.
+
+        size = (latime pe X, grosime pe Y, inaltime pe Z). Nervurile ies spre +Y.
+
+        ATENTIE la pas: sub ~0.4 m intre nervuri devine detaliu de frecventa
+        inalta si style_bible §3 il interzice — la viteza se transforma in moar,
+        nu in tabla. Cu 5 nervuri pe 4 m iese un pas de 0.4 m: exact la limita.
+
+        Buget: 4*ribs + 2 varfuri -> ~(6*ribs + 2) triunghiuri inainte de bevel.
+        Cu ribs=5: 84.
+        """
+        w, t, h = size
+        cx, cy, cz = center
+        y_back = cy - t * 0.5
+        y_front = cy + t * 0.5
+        cells = 2 * ribs                      # alterneaza iesit / intrat
+        step = w / cells
+
+        # Profilul in plan (XY), parcurs pe fata dinspre +Y de la stanga la dreapta
+        outline = []
+        for c in range(cells):
+            x0 = cx - w * 0.5 + step * c
+            x1 = x0 + step
+            y = y_front + (depth if c % 2 == 0 else 0.0)
+            outline.append((x0, y))
+            outline.append((x1, y))
+        # ...si inapoi pe spatele plat
+        outline.append((cx + w * 0.5, y_back))
+        outline.append((cx - w * 0.5, y_back))
+
+        bot, top = [], []
+        for x, y in outline:
+            bot.append(self.bm.verts.new((x, y, cz - h * 0.5)))
+            top.append(self.bm.verts.new((x, y, cz + h * 0.5)))
+        n = len(outline)
+        self.bm.faces.new(tuple(top))
+        self.bm.faces.new(tuple(reversed(bot)))
+        for i in range(n):
+            j = (i + 1) % n
+            self.bm.faces.new((bot[i], bot[j], top[j], top[i]))
+        return self._tag(bot + top, slot)
+
+    def window(self, center, w, h, frame_t, depth, glass_slot, frame_slot,
+               mullions=(0, 0), rotation=None):
+        """Fereastra: cadru din patru grinzi + placa intunecata retrasa in gol.
+
+        E diferenta dintre "cutie cu o pata" si "cladire". Azi benzinaria are trei
+        placi lipite 2 cm peste perete (`build_gas_station.py:61-63`) fiindca
+        n-avea alt mod: fara cadru, ochiul citeste o vopsea, nu o deschidere.
+
+        Cadrul iese `depth/2` in fata (spre +Y), geamul sta retras `depth/2` in
+        spate — retragerea e cea care produce umbra proprie, deci senzatia de gol.
+        `mullions=(verticale, orizontale)` adauga montanti in interior.
+
+        `rotation` roteste tot ansamblul in jurul lui `center`, pentru pereti
+        care nu privesc spre +Y.
+
+        Buget: 5 cutii = 60 de triunghiuri inainte de bevel, plus 12 per montant.
+        """
+        cx, cy, cz = center
+
+        def place(local, size, slot):
+            lx, ly, lz = local
+            p = Vector((lx, ly, lz))
+            if rotation is not None:
+                rot = rotation.to_matrix() if hasattr(rotation, "to_matrix") else rotation
+                p = rot @ p
+            return self.box(center=(cx + p.x, cy + p.y, cz + p.z), size=size,
+                            slot=slot, rotation=rotation)
+
+        faces = set()
+        # geamul: slotul cel mai inchis din lume citeste ca gol, nu ca sticla
+        faces |= place((0.0, -depth * 0.5, 0.0),
+                       (w - 2 * frame_t, frame_t * 0.6, h - 2 * frame_t), glass_slot)
+        # cadru: sus, jos, stanga, dreapta
+        faces |= place((0.0, depth * 0.5, (h - frame_t) * 0.5), (w, depth, frame_t), frame_slot)
+        faces |= place((0.0, depth * 0.5, -(h - frame_t) * 0.5), (w, depth, frame_t), frame_slot)
+        faces |= place((-(w - frame_t) * 0.5, depth * 0.5, 0.0), (frame_t, depth, h), frame_slot)
+        faces |= place(((w - frame_t) * 0.5, depth * 0.5, 0.0), (frame_t, depth, h), frame_slot)
+
+        mv, mh = mullions
+        inner_w, inner_h = w - 2 * frame_t, h - 2 * frame_t
+        for i in range(mv):
+            x = -inner_w * 0.5 + inner_w * (i + 1) / (mv + 1)
+            faces |= place((x, depth * 0.35, 0.0),
+                           (frame_t * 0.8, depth * 0.6, inner_h), frame_slot)
+        for i in range(mh):
+            z = -inner_h * 0.5 + inner_h * (i + 1) / (mh + 1)
+            faces |= place((0.0, depth * 0.35, z),
+                           (inner_w, depth * 0.6, frame_t * 0.8), frame_slot)
+        return faces
+
     def retag(self, faces, slot, where=None):
         """Re-eticheteaza slotul unui set de fete. Costa ZERO triunghiuri.
 
@@ -711,18 +925,23 @@ def atlas_material():
     return mat
 
 
-def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base"):
+def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
+           bevel_segments=1):
     """Lantul standard: bevel -> UV pe sloturi -> origine -> AO copt.
 
     origin="base"      centreaza si XY pe bounding box
     origin="base_axis" coboara doar pe Z, pastrand XY asa cum a fost construit
                        (cand piesa e asimetrica: un semn al carui scut iese in
                        fata, dar a carui origine trebuie sa stea pe axa stalpului)
+    bevel_segments     `apply_bevel` il accepta de la inceput, dar `finish` il
+                       fixa la 1 si nu-l expunea. 2 segmente inseamna un colt
+                       vizibil rotund in loc de tesit — merita doar pe piese care
+                       stau langa camera, fiindca dubleaza banda de bevel.
     Ordinea conteaza: originea se muta INAINTE de bake, ca gradientul vertical
     de AO sa se calculeze de la baza reala (z=0).
     """
     snap = snapshot_slots(obj)
-    apply_bevel(obj, bevel, angle_deg=bevel_angle)
+    apply_bevel(obj, bevel, segments=bevel_segments, angle_deg=bevel_angle)
     assign_uvs(obj, snap)
     if origin == "base":
         set_origin_base(obj, center_xy=True)

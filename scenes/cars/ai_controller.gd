@@ -34,6 +34,16 @@ const CORNER_SPEED_FLOOR: float = 0.44
 ## Cat de mult trage spre interiorul virajului (in half_width).
 const INSIDE_BIAS: float = 0.55
 const LINE_MAX: float = 0.8
+## Cati dintre AI iau scurtatura, cand pista are una.
+##
+## Nici 0%, nici 100%. La zero, bifurcatia n-ar exista pentru jucator ca decizie
+## — n-ar avea cu cine sa se compare. La suta la suta, plutonul ar merge tot pe
+## acolo si linia principala ar ramane goala. Cu ~40%, la fiecare tur vezi
+## masini alegand diferit, ceea ce e chiar informatia de care ai nevoie ca sa
+## decizi tu.
+const SHORTCUT_CHANCE: float = 0.4
+## Cat de mult incetineste AI-ul pe o banda uda.
+const WET_SPEED_FACTOR: float = 0.78
 
 ## Anti-blocaj. Blocajul se masoara in PROGRES pe traseu, nu in viteza: o masina
 ## care se freaca de un obstacol cu 5 m/s nu e "in miscare", e blocata.
@@ -60,6 +70,15 @@ var _turbo: bool = false
 
 var _stall_time: float = 0.0
 var _last_index: int = -1
+## Ruta pe care se stia masina la ultima masuratoare de progres.
+var _last_route: int = 0
+## Ia sau nu scurtatura, decis o data pe cursa.
+##
+## Nu toti o iau, si asta e chiar poanta: principiul 5 din CLAUDE.md cere AI
+## ONEST — variatie prin LINII diferite, nu prin viteza trisata. O bifurcatie
+## pe care jumatate din pluton o alege altfel produce depasiri reale, fara sa
+## dea nimanui un avantaj artificial.
+var prefers_shortcut: bool = false
 var _progress_m: float = 0.0
 var _progress_timer: float = 0.0
 var _unstick_timer: float = 0.0
@@ -70,6 +89,7 @@ var _attempts: int = 0
 func configure(race_track: Track, rng: RandomNumberGenerator) -> void:
 	track = race_track
 	line_offset = rng.randf_range(-0.28, 0.28)
+	prefers_shortcut = rng.randf() < SHORTCUT_CHANCE
 
 func update(delta: float) -> void:
 	if track == null or car == null:
@@ -82,7 +102,7 @@ func update(delta: float) -> void:
 
 	# --- unde merge drumul ---
 	var idx := car.road_index
-	var far := track.lookahead_point(idx, _lookahead_far(speed), 0.0)
+	var far := track.lookahead_point(idx, _lookahead_far(speed), 0.0, car.route)
 	var fwd := -car.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()
@@ -97,11 +117,26 @@ func update(delta: float) -> void:
 	# a_far pozitiv inseamna viraj la stanga: interiorul e in sens invers.
 	var line := clampf(line_offset - signf(a_far) * severity * INSIDE_BIAS,
 		-LINE_MAX, LINE_MAX)
-	var near := track.lookahead_point(idx, _lookahead_near(speed), line)
+	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
+	# Bifurcatia: cine a decis ca o ia, tinteste banda cealalta cat timp cele
+	# doua sunt inca lipite. Comutarea propriu-zisa de ruta o face Car, pe
+	# proximitate laterala — aici doar ne mutam acolo la timp.
+	if prefers_shortcut and car.route == 0:
+		var lure := track.branch_lure(car.global_position, _lookahead_near(speed))
+		if lure != Vector3.INF:
+			near = lure
 	_steer = clampf(_angle_to(fwd, near) * 2.2, -1.0, 1.0)
 
 	# --- pedale: viteza-tinta din cat de stramt e ce urmeaza ---
 	var target := car.max_speed * lerpf(1.0, CORNER_SPEED_FLOOR, severity)
+	# Pe banda uda ridica piciorul, ca un sofer.
+	#
+	# Fara asta AI-ul intra pe bancul de nisip cu viteza de asfalt, aluneca si
+	# iese in apa: masurat, 27% din timp in afara soselei si tururile scadeau de
+	# la 2.5 la 1.6. Nu era o problema de fizica — grip-ul taiat isi facea exact
+	# treaba — ci de sofer care nu se uita la suprafata.
+	if track.route_is_wet(car.route):
+		target *= WET_SPEED_FACTOR
 	if speed > target * 1.06:
 		# Franare proportionala cu depasirea, nu o smucitura fixa.
 		_throttle = clampf(-(speed - target) / 6.0, -1.0, -0.15)
@@ -157,6 +192,18 @@ func _watch_progress(delta: float, speed: float) -> void:
 	var n := track.baked.size()
 	if _last_index < 0:
 		_last_index = car.road_index
+		_last_route = car.route
+	# Schimbarea de ruta reindexeaza masina complet: indexul de pe scurtatura
+	# n-are nicio relatie cu cel de pe bucla principala. Fara resetarea asta,
+	# saltul s-ar citi ca "n-a avansat deloc" (sau ca mers inapoi), iar AI-ul
+	# ar intra in manevra de deblocare exact in clipa in care tocmai a intrat
+	# pe scurtatura — apoi, dupa trei incercari, s-ar repune singur.
+	if car.route != _last_route:
+		_last_route = car.route
+		_last_index = car.road_index
+		_progress_timer = 0.0
+		_progress_m = 0.0
+		return
 	var d := car.road_index - _last_index
 	if d > n / 2:
 		d -= n
@@ -192,7 +239,7 @@ func _begin_unstick() -> void:
 	var fwd := -car.global_transform.basis.z
 	fwd.y = 0.0
 	var to_center := _angle_to(fwd.normalized(),
-		track.lookahead_point(car.road_index, 8.0, 0.0))
+		track.lookahead_point(car.road_index, 8.0, 0.0, car.route))
 	# Semnul de virare cand mergem INAINTE. Zero (perfect aliniati) tot trebuie
 	# sa devina o alegere, altfel manevra iese in linie dreapta inapoi in acelasi
 	# obstacol — exact bucla pe care o reparam.

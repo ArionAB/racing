@@ -61,11 +61,15 @@ const VARIANT_TOLERANCE: float = 0.22
 ##
 ## `landmarks` are formatul din [code]Track._landmark_spots()[/code]:
 ## (fractie 0..1, parte ±1, id-model).
-static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
+## `enabled` vine din tema pistei (Track.themes(), cheia "cliffs"). Inainte era
+## `theme != "desert"` — adica falezele de canion erau legate de numele unei
+## piste, nu de o proprietate a lumii. Insula are promontoriu de zid gusuku, nu
+## canion, deci ii trebuia un "nu" care sa nu insemne "nu sunt desert".
+static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 		landmarks: Array[Vector3]) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Cliffs"
-	if theme != "desert" or not ResourceLoader.exists(MODEL_PATH):
+	if not enabled or not ResourceLoader.exists(MODEL_PATH):
 		return root
 
 	var scene := load(MODEL_PATH) as PackedScene

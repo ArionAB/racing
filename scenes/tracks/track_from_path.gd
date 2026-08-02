@@ -13,8 +13,11 @@ extends Track
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 
 @export var custom_name: String = "Atelier"
-@export_enum("forest", "desert") var custom_theme: String = "forest"
+@export_enum("forest", "desert", "island") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
+## Cota marii, RELATIV la media cotelor soselei (doar tema "island").
+## Vezi Track.sea_level_offset — nu e o cota absoluta in lume.
+@export var custom_sea_level_offset: float = -7.0
 @export var custom_ramp_fracs: Array[float] = []
 @export var custom_hazard_fracs: Array[float] = []
 ## Conducta sparta care pulseaza apa peste drum (fractii 0..1).
@@ -32,7 +35,8 @@ extends Track
 ## Creasta de fly-off: te arunca in aer, cu plasa de respawn dedesubt.
 @export var custom_flyoff_fracs: Array[float] = []
 ## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
-## _LANDMARKS: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66).
+## _LANDMARKS: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
+## 4=ecran drive-in, 5=stalp GAS).
 @export var custom_landmarks: Array[Vector3] = []
 ## Rapele: (frac_start, frac_end, adancime_m, latura ±1 sau 0 = ambele).
 ## Terenul urmareste soseaua peste tot; aici il sapam inapoi, ca sa existe unde
@@ -59,6 +63,7 @@ func _ready() -> void:
 func _apply_custom() -> void:
 	track_name = custom_name
 	half_width = custom_half_width
+	sea_level_offset = custom_sea_level_offset
 	apply_theme(custom_theme)
 
 func _points() -> Array[Vector3]:

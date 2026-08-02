@@ -43,7 +43,7 @@ var track_name: String = "Pista"
 var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
 
 ## Tema vizuala: fiecare pista isi defineste LUMEA (teren, cer, decor).
-var theme_decor: String = "forest" # "forest" sau "desert"
+var theme_decor: String = "forest" # cheie in Track.themes()
 var theme_ground_tint := Color(0.45, 0.72, 0.33)
 var theme_sky_top := Color(0.30, 0.50, 0.80)
 var theme_sky_horizon := Color(0.72, 0.84, 0.95)
@@ -78,48 +78,192 @@ const SHADOW_DISTANCE: float = 90.0
 const CAMERA_BLOCKER_LAYER: int = 1 << 7
 var theme_sun_energy: float = 1.25
 
+## Tema curenta ca DATE, nu ca sir de caractere. Vezi _THEMES.
+var _theme: Dictionary = {}
+
+## Toate temele, intr-un singur loc.
+##
+## Pana la Okinawa, tema era un `if theme == "desert" / else` in apply_theme si
+## inca OPT intrebari `theme_decor == "desert"` imprastiate prin cod (ambient,
+## ceata, siluete de orizont, pereti, hazard tematic, praf pe umeri, faleze,
+## decor). A treia tema ar fi insemnat noua conditii triple, fiecare cu sansa
+## ei de a fi uitata — si exact asa apar temele "aproape gata", care arata bine
+## intr-un loc si ca desertul in altul.
+##
+## Acum tema e un dictionar de date, iar codul intreaba flag-uri. Ca sa adaugi
+## o tema noua scrii o intrare aici si nimic altundeva; ca sa vezi ce face o
+## tema, citesti o singura intrare in loc sa cauti noua `if`-uri.
+##
+## Nu e `const` fiindca valorile vin din Palette (apel de functie). E incarcat
+## o data si partajat.
+static var _themes_cache: Dictionary
+
+static func themes() -> Dictionary:
+	if not _themes_cache.is_empty():
+		return _themes_cache
+	_themes_cache = {
+		"desert": {
+			# sand_mid din paleta (style_bible §1). Era #EDC177, mai deschis decat
+			# spec-ul; cu textura peste, valoarea aia impingea canalul rosu in
+			# saturatie si stergea granulatia.
+			"ground_tint": Palette.color(Palette.SAND_MID),
+			"sky_top": Color(0.25, 0.52, 0.92), # albastru adanc, contrast cu nisipul
+			"sky_horizon": Color(1.0, 0.86, 0.6),
+			"fog": Color(0.98, 0.87, 0.68),
+			"hill_color": Color(0.88, 0.62, 0.36),
+			"sun_color": Color(1.0, 0.92, 0.78),
+			# Calibrate prin masurare (vezi theme_exposure): la valorile vechi
+			# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
+			# supraexpus, si granulatia de suprafata disparea in saturatie.
+			#
+			# Recalibrat de doua ori: stratul de detaliu se INMULTESTE peste albedo
+			# (medie 0.89), iar soarele a coborat de la 48° la 42° si s-a mutat
+			# lateral, deci nisipul primeste mai putina lumina directa. Cumulate, au
+			# dus nisipul de la #D8A86A la #BD955E. 0.75 -> 1.42 il aduce inapoi.
+			#
+			# Daca schimbi detaliul SAU unghiul soarelui, REIA masuratoarea:
+			#   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
+			# si compara nisipul insorit (coltul liber al imaginii) cu #D8A86A.
+			"sun_energy": 0.8,
+			"exposure": 1.42,
+			# Ambient din CULOARE, nu din cer — vezi _build_environment.
+			"ambient_color": Color.html("E2B77A"),
+			"ambient_energy": 0.22,
+			"fog_depth": true, # 90 -> 250 m, style_bible §6
+			"horizon_model": "res://assets/models/butte.glb",
+			"walls": false,   # rolul lor il preiau falezele de canion
+			"cliffs": true,
+			"decor": "bands",
+			"props": "desert",
+			"hazard_model": "res://assets/models/boulder_roller.glb",
+			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			"water": false,
+		},
+		"forest": {
+			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
+			"sky_top": Color(0.22, 0.48, 0.9),
+			"sky_horizon": Color(0.72, 0.87, 1.0),
+			"fog": Color(0.78, 0.88, 0.98),
+			"hill_color": Color(0.3, 0.56, 0.27),
+			"sun_color": Color(1.0, 0.97, 0.88),
+			"sun_energy": 1.25,
+			"exposure": 1.0,
+			"ambient_color": null, # null = ambient din cer
+			"fog_depth": false,
+			"fog_density": 0.0035,
+			"horizon_model": "", # "" = siluete de rezerva (sfere turtite)
+			"walls": true,
+			"cliffs": false,
+			"decor": "scatter",
+			"props": "forest",
+			"hazard_model": "", # "" = excavator
+			"dust_color": null, # null = derivat din ground_tint
+			"water": false,
+		},
+		# --- Insula de recif (pista Okinawa) ---
+		#
+		# Culorile sunt sloturile insulare din paleta (17-23), ca sa nu existe
+		# doua adevaruri despre "ce inseamna turcoaz".
+		#
+		# sun_energy e CALIBRAT prin masurare, ca la desert: la 1.10 nisipul iesea
+		# #CDC3AF fata de tinta #E9DCC0 (rosu cu 28/255 sub), la 1.50 iese #DED5C1
+		# — eroare maxima 11/255, sub pragul de 12 din style_bible §5.
+		#
+		# S-a folosit sun_energy, NU exposure, si asta conteaza: expunerea ar fi
+		# ridicat si apa, care era deja pe tinta. Soarele atinge doar suprafetele
+		# iluminate, iar apa e unshaded — deci e singura parghie care misca
+		# nisipul fara sa strice marea.
+		#
+		# Daca se schimba ambientul sau unghiul soarelui, REIA masuratoarea:
+		#   godot --path . res://tools/Snapshot.tscn -- --track=4 --size=300
+		# si compara nisipul cu #E9DCC0.
+		"island": {
+			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			"sky_top": Color(0.20, 0.50, 0.88),
+			"sky_horizon": Color(0.80, 0.92, 0.95), # palid marin, nu auriu ca desertul
+			"fog": Color(0.82, 0.91, 0.93),
+			"hill_color": Palette.color(Palette.TROPICAL_GREEN),
+			"sun_color": Color(1.0, 0.97, 0.92),
+			"sun_energy": 1.50,
+			"exposure": 1.0,
+			# Ambient din CULOARE, nu din cer — desi rationamentul initial spunea
+			# invers.
+			#
+			# Prima versiune folosea ambient din cer, pe motiv ca pe o insula
+			# lumina indirecta chiar vine din cer si din apa. Plauzibil, si gresit:
+			# masurat pe prima randare, nisipul coraligen iesea #C0C8D9 in loc de
+			# #E9DCC0 — albastru-cenusiu, cu rosul cu 41/255 sub tinta si albastrul
+			# cu 25 peste. Exact esecul documentat la desert (vezi
+			# _build_environment), doar ca acolo fusese prins din masuratoare, iar
+			# aici l-am reintrodus din rationament.
+			#
+			# Culoarea e bounce-ul de pe nisip coraligen: mai deschis si mai putin
+			# auriu decat cel de desert (#E2B77A), fiindca si nisipul e mai alb.
+			"ambient_color": Color.html("EADFC8"),
+			"ambient_energy": 0.30,
+			# Ceata de adancime, ca la desert: marea se pierde in orizont la o
+			# distanta cunoscuta, iar camera poate taia fix acolo.
+			"fog_depth": true,
+			"horizon_model": "", # deocamdata rezerva; insulele de fundal vin la etapa 5
+			"walls": true,       # doar pe sectiunile inaltate — regula din sampler
+			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
+			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
+			"props": "island",   # ...dar palmieri si bazalt, nu cactusi
+			"water": true,       # singura tema cu mare (vezi _build_water)
+			# Cat de adanc cade terenul dincolo de coridorul pistei. Trebuie sa
+			# duca adancimea DECIS peste SEA_NEAR_DEPTH, altfel grila fina de tarm
+			# se emite pe toata marea. Vezi TrackSideSampler.ground_y.
+			"seabed_drop": 26.0,
+			"hazard_model": "",  # wave_surge se ataseaza separat, pe fractii
+			"dust_color": null,
+		},
+	}
+	return _themes_cache
+
+
+## Citeste un camp din tema curenta, cu valoare implicita daca lipseste.
+##
+## Initializarea e LENESA si intentionat NU trece prin apply_theme. Track02 si
+## Track03 nu apeleaza apply_theme niciodata: ele raman pe valorile implicite
+## ale variabilelor theme_*, care NU sunt identice cu ramura "forest"
+## (cerul implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)).
+## Un apply_theme("forest") fortat aici le-ar schimba in tacere aspectul.
+## Asa iau doar FLAG-urile de comportament, iar culorile raman ale lor.
+func theme_flag(key: String, fallback: Variant = null) -> Variant:
+	if _theme.is_empty():
+		var all := themes()
+		_theme = all.get(theme_decor, all["forest"])
+	return _theme.get(key, fallback)
+
+
 ## Paleta completa a unei teme, dintr-un singur apel.
 ## Stil: FLAT-COLOR saturat (stilul masinilor RgsDev, extins la lume) —
 ## fara texturi de zgomot; culoarea si lumina fac treaba.
 func apply_theme(theme: String) -> void:
+	var all := themes()
+	if not all.has(theme):
+		push_error("Track: tema necunoscuta '%s' (am %s)"
+			% [theme, ", ".join(all.keys())])
+		theme = "forest"
 	theme_decor = theme
-	if theme == "desert":
-		# sand_mid din paleta (style_bible §1). Era #EDC177, mai deschis decat
-		# spec-ul; cu textura peste, valoarea aia impingea canalul rosu in
-		# saturatie si stergea granulatia.
-		theme_ground_tint = Palette.color(Palette.SAND_MID)
-		theme_sky_top = Color(0.25, 0.52, 0.92)   # albastru adanc, contrast cu nisipul
-		theme_sky_horizon = Color(1.0, 0.86, 0.6)
-		theme_fog = Color(0.98, 0.87, 0.68)
-		theme_hill_color = Color(0.88, 0.62, 0.36)
-		theme_sun_color = Color(1.0, 0.92, 0.78)
-		# Calibrate prin masurare (vezi theme_exposure): la valorile vechi
-		# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
-		# supraexpus, si granulatia de suprafata disparea in saturatie.
-		#
-		# Recalibrat de doua ori: stratul de detaliu se INMULTESTE peste albedo
-		# (medie 0.89), iar soarele a coborat de la 48° la 42° si s-a mutat
-		# lateral, deci nisipul primeste mai putina lumina directa. Cumulate, au
-		# dus nisipul de la #D8A86A la #BD955E. 0.75 -> 1.42 il aduce inapoi.
-		#
-		# Daca schimbi detaliul SAU unghiul soarelui, REIA masuratoarea:
-		#   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
-		# si compara nisipul insorit (coltul liber al imaginii) cu #D8A86A.
-		theme_sun_energy = 0.8
-		theme_exposure = 1.42
-	else:
-		theme_ground_tint = Color(0.45, 0.72, 0.33) # verde viu, nu pastel
-		theme_sky_top = Color(0.22, 0.48, 0.9)
-		theme_sky_horizon = Color(0.72, 0.87, 1.0)
-		theme_fog = Color(0.78, 0.88, 0.98)
-		theme_hill_color = Color(0.3, 0.56, 0.27)
-		theme_sun_color = Color(1.0, 0.97, 0.88)
-		theme_sun_energy = 1.25
-		theme_exposure = 1.0
+	_theme = all[theme]
+	theme_ground_tint = _theme["ground_tint"]
+	theme_sky_top = _theme["sky_top"]
+	theme_sky_horizon = _theme["sky_horizon"]
+	theme_fog = _theme["fog"]
+	theme_hill_color = _theme["hill_color"]
+	theme_sun_color = _theme["sun_color"]
+	theme_sun_energy = _theme["sun_energy"]
+	theme_exposure = _theme["exposure"]
 
 var curve: Curve3D
 var baked: PackedVector3Array
 var _dists: PackedFloat32Array # distanta cumulata pana la fiecare punct copt
+
+## Toate benzile pe care se poate conduce. [code]routes[0][/code] e bucla
+## principala si oglindeste exact [member baked] / [member _dists]; 1+ sunt
+## scurtaturi. Vezi [TrackRoute] pentru de ce e nevoie de abstractia asta.
+var routes: Array[TrackRoute] = []
 ## Sursa unica de sloturi pentru tot ce se aseaza langa drum (faleze, decor).
 ## Se reconstruieste la fiecare rebuild(), dupa ce curba e coapta.
 var _sampler: TrackSideSampler
@@ -209,6 +353,24 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Scurtaturi: benzi care se desprind din traseu si revin mai tarziu.
+##
+## Fiecare intrare e un dictionar:
+##   entry      fractia (0..1) de pe bucla principala unde se despica
+##   exit       fractia unde revine
+##   points     punctele intermediare, in coordonate de LUME. Capetele NU se dau
+##              — se citesc de pe bucla principala, ca sa nu ramana in urma la
+##              prima ajustare de traseu.
+##   half_width jumatatea latimii benzii (implicit cat pista)
+##   wet        banda uda: grip lateral taiat cat timp esti pe ea
+##   label      nume pentru sonde
+##
+## Scurtatura da TIMP, nu progres: o masina de la jumatatea ei raporteaza
+## aceeasi fractie de tur ca una de la jumatatea portiunii ocolite. Vezi
+## [TrackRoute.frac_at] — acolo se decide ca nu se poate trisa un tur pe aici.
+func _branch_specs() -> Array[Dictionary]:
+	return []
+
 ## Bolovani care cad de pe faleza (fractii 0..1).
 func _rockfall_fracs() -> Array[float]:
 	return []
@@ -228,12 +390,14 @@ func rebuild() -> void:
 			continue # curba editabila a pistelor custom ramane
 		child.free()
 	_build_curve()
-	# Dupa coacerea curbei, inainte de orice generator care aseaza ceva langa
-	# drum: toti citesc sloturi SI cota terenului de aici.
+	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
+	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
-		float(track_name.hash() % 1000) * 0.01, _ravines())
+		float(track_name.hash() % 1000) * 0.01, _ravines(),
+		theme_flag("seabed_drop", 0.0), _branch_corridor_points())
 	_build_environment()
 	_build_road()
+	_build_branch_surfaces()
 	_build_walls()
 	for frac in _ramp_fracs():
 		_build_ramp(frac)
@@ -271,6 +435,8 @@ func rebuild() -> void:
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
+	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
+	_build_water()
 	_build_world_bounds()
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
@@ -335,10 +501,11 @@ func _build_environment() -> void:
 	# mare parte DE LA NISIP, nu de la cer. Folosim culoarea de bounce din
 	# style_bible §5 (#E2B77A) ca sursa de ambient, si umbrele ies calde in loc
 	# de albastre.
-	if theme_decor == "desert":
+	var ambient: Variant = theme_flag("ambient_color")
+	if ambient != null:
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		env.ambient_light_color = Color.html("E2B77A")
-		env.ambient_light_energy = 0.22
+		env.ambient_light_color = ambient
+		env.ambient_light_energy = theme_flag("ambient_energy", 0.22)
 	else:
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 		env.ambient_light_sky_contribution = 1.0
@@ -346,7 +513,7 @@ func _build_environment() -> void:
 	# in vederile ortogonale, iar ceata ar acoperi totul intr-o pata uniforma.
 	env.fog_enabled = not Engine.is_editor_hint()
 	env.fog_light_color = theme_fog
-	if theme_decor == "desert":
+	if theme_flag("fog_depth", false):
 		# FOG_MODE_DEPTH, cu inceput si sfarsit explicite (style_bible §6: 90 ->
 		# 250m), in loc de exponential. Doua motive: se stie EXACT unde dispare
 		# geometria, deci camera poate taia fix acolo (vezi ChaseCamera.far); si
@@ -357,7 +524,7 @@ func _build_environment() -> void:
 		env.fog_depth_end = 250.0
 		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
 	else:
-		env.fog_density = 0.0035
+		env.fog_density = theme_flag("fog_density", 0.0035)
 	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	# Expunerea: SINGURA parghie globala de luminozitate a scenei.
@@ -474,11 +641,11 @@ const HORIZON_CLEARANCE: float = 120.0
 ## secunde). Fiecare inel are alta gama de siluete, deci "sunt langa turnul
 ## ingust" devine o informatie reala.
 func _build_horizon(centroid: Vector3) -> void:
-	if theme_decor != "desert" \
-			or not ResourceLoader.exists("res://assets/models/butte.glb"):
+	var horizon_model: String = theme_flag("horizon_model", "")
+	if horizon_model.is_empty() or not ResourceLoader.exists(horizon_model):
 		_build_horizon_fallback(centroid)
 		return
-	var scene := load("res://assets/models/butte.glb") as PackedScene
+	var scene := load(horizon_model) as PackedScene
 	var rng := RandomNumberGenerator.new()
 	rng.seed = track_name.hash() + 1
 	# Unghiuri ECHIDISTANTE cu jitter, nu complet aleatoare.
@@ -673,6 +840,37 @@ func _centroid() -> Vector3:
 ## APLATIZATA in coridorul pistei (fizica ramane plata acolo unde se
 ## conduce; relieful e scenografie). Variatie de culoare per varf — adanc
 ## = mai inchis — fara nicio textura.
+## Cat de mare e panza de teren, in metri.
+##
+## Era 760 fix, ceea ce mergea cat timp cea mai lunga pista avea 1175 m si
+## incapea comod. Okinawa are ~1800 m si o anvergura de peste 600 m: la 760,
+## marginea grilei ar fi cazut in interiorul zonei de blend a terenului
+## (GROUND_FLAT_RADIUS 45 + GROUND_BLEND_LEN 70 = 115 m dincolo de asfalt), deci
+## pista s-ar fi terminat cu o faleza verticala in loc de tarm.
+##
+## Plafonul de jos e chiar 760: asa pistele existente primesc exact panza pe
+## care o aveau, iar masuratorile lor raman comparabile. Cel de sus tine
+## numarul de triunghiuri in frau — pasul de celula ramane constant, deci o
+## panza de doua ori mai lata costa de patru ori mai mult.
+const TERRAIN_MIN_SIZE: float = 760.0
+const TERRAIN_MAX_SIZE: float = 1400.0
+## Pasul grilei de teren, in metri. Constant indiferent de intindere.
+const TERRAIN_CELL: float = 760.0 / 48.0
+
+func _world_extent() -> float:
+	if baked.is_empty():
+		return TERRAIN_MIN_SIZE
+	var lo := baked[0]
+	var hi := baked[0]
+	for p in baked:
+		lo = lo.min(p)
+		hi = hi.max(p)
+	var span := maxf(hi.x - lo.x, hi.z - lo.z)
+	var margin := 2.0 * (TrackSideSampler.GROUND_FLAT_RADIUS
+		+ TrackSideSampler.GROUND_BLEND_LEN)
+	return clampf(span + margin, TERRAIN_MIN_SIZE, TERRAIN_MAX_SIZE)
+
+
 func _build_terrain() -> void:
 	var centroid := _centroid()
 	# 1500m si 56 de celule insemnau ~6200 de triunghiuri intinse pe o suprafata
@@ -682,8 +880,8 @@ func _build_terrain() -> void:
 	# Grila s-a indesit de la 36 la 48 de celule odata cu terenul care urmareste
 	# soseaua: pasul de 25 m lasa o cusatura de pana la 3 m la marginea drumului
 	# pe pantele de 12%. La 15.8 m cusatura scade sub 1 m, si asta se vede.
-	var size := 760.0
-	var cells := 48
+	var size := _world_extent()
+	var cells := int(round(size / TERRAIN_CELL))
 	var step := size / float(cells)
 	var origin := centroid - Vector3(size * 0.5, 0, size * 0.5)
 	var heights: Array[float] = []
@@ -786,6 +984,279 @@ func _build_terrain() -> void:
 	body.add_child(inst)
 	add_child(body)
 
+
+# ------------------------------------------------------------------- apa
+
+## Cota marii, RELATIV la media cotelor soselei — nu la y = 0.
+##
+## Asta e capcana: terenul departat nu oscileaza in jurul originii lumii, ci in
+## jurul lui TrackSideSampler.mean_road_y() (vezi ground_y). Pe Dunele media e
+## pe la +6-7 m, pe Muntele si mai sus. Un plan de apa la y = 0 ar fi, pe unele
+## piste, complet ingropat — si nimeni n-ar sti de ce, fiindca "nivelul marii e
+## zero" e o presupunere pe care n-o pui la indoiala.
+@export var sea_level_offset: float = -7.0
+
+## Cat de departe de tarm mai are rost geometrie fina. Dincolo, culoarea e
+## oricum sea_deep uniform, deci preia cvadrilaterul de larg.
+const SEA_NEAR_DEPTH: float = 14.0
+## Sub atat de multa apa, un varf e "larg"; peste, e recif.
+const SEA_REEF_DEPTH: float = 5.0
+## Banda de spuma: cati metri de apa peste tarm mai citesc ca sparger de val.
+const SEA_FOAM_DEPTH: float = 0.6
+## Pasul grilei fine de langa tarm: 9.5 m, de doua ori mai des decat terenul
+## (15.8 m), fiindca linia tarmului e ce se vede. Constant, ca si al terenului —
+## o pista mai mare primeste mai multe celule, nu celule mai mari.
+const SEA_CELL: float = 9.5
+## Cat de mult depaseste cvadrilaterul de larg grila fina. Trebuie sa ajunga
+## dincolo de ceata (250 m) ca marea sa nu aiba margine vizibila.
+const SEA_FAR_EXTENT: float = 2400.0
+## Cu cat sta mai jos cvadrilaterul de larg fata de grila fina.
+##
+## Sunt doua suprafete la aceeasi cota, deci ar face z-fighting pe toata zona de
+## suprapunere. 4 cm le separa fara sa se vada: la nivelul marii, din masina,
+## treapta e sub un pixel.
+const SEA_FAR_DROP: float = 0.04
+
+
+## Marea: o grila fina langa tarm plus un cvadrilater urias pentru larg.
+##
+## De ce doua mesh-uri si nu unul singur: linia tarmului are nevoie de rezolutie
+## (banda de spuma, tranzitia recif->larg), largul n-are nevoie de niciuna. O
+## grila uniforma destul de deasa pentru tarm ar fi costat, pe toata suprafata,
+## de trei ori bugetul de triunghiuri al intregii piste. Asa geometria sta acolo
+## unde se uita jucatorul.
+func _build_water() -> void:
+	if not theme_flag("water", false):
+		return
+	if _sampler == null or baked.is_empty():
+		return
+	var sea_y := _sampler.mean_road_y() + sea_level_offset
+	var root := Node3D.new()
+	root.name = "Sea"
+	add_child(root)
+	_build_sea_far(root, sea_y)
+	_build_sea_near(root, sea_y)
+	_build_sea_respawn(sea_y)
+
+
+## Largul: doua triunghiuri. Nu are nevoie de mai mult.
+func _build_sea_far(root: Node3D, sea_y: float) -> void:
+	var c := _centroid()
+	var h := SEA_FAR_EXTENT * 0.5
+	var y := sea_y - SEA_FAR_DROP
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var deep := water_tint(Palette.SEA_DEEP)
+	var corners := [
+		Vector3(c.x - h, y, c.z - h), Vector3(c.x + h, y, c.z - h),
+		Vector3(c.x - h, y, c.z + h), Vector3(c.x + h, y, c.z + h),
+	]
+	for tri: Array in [[0, 1, 2], [1, 3, 2]]:
+		for ci: int in tri:
+			st.set_color(deep)
+			st.set_normal(Vector3.UP)
+			st.add_vertex(corners[ci])
+	var inst := MeshInstance3D.new()
+	inst.name = "SeaFar"
+	inst.mesh = st.commit()
+	inst.material_override = _water_material()
+	root.add_child(inst)
+
+
+## Zona de tarm: doar celulele care chiar au apa deasupra lor.
+##
+## Celulele complet uscate se SAR, din doua motive care conteaza amandoua:
+## triunghiuri economisite, si — mai important — fara ele n-ar exista z-fighting
+## intre apa si nisip pe toata suprafata insulei.
+func _build_sea_near(root: Node3D, sea_y: float) -> void:
+	var c := _centroid()
+	# Aceeasi intindere ca terenul: dincolo preia cvadrilaterul de larg.
+	var size := _world_extent()
+	var cells := int(round(size / SEA_CELL))
+	var step := size / float(cells)
+	var origin := c - Vector3(size * 0.5, 0, size * 0.5)
+
+	# Adancimea in fiecare nod al grilei, calculata O SINGURA DATA: ground_y e
+	# o interpolare Shepard peste toate punctele coapte, adica departe de
+	# gratuita. Cu 81x81 = 6561 de apeluri in loc de 4 per celula.
+	var depth: Array[float] = []
+	depth.resize((cells + 1) * (cells + 1))
+	for gz in cells + 1:
+		for gx in cells + 1:
+			var wx := origin.x + float(gx) * step
+			var wz := origin.z + float(gz) * step
+			depth[gz * (cells + 1) + gx] = sea_y - _sampler.ground_y(wx, wz)
+
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var emitted := 0
+	for gz in cells:
+		for gx in cells:
+			var i00 := gz * (cells + 1) + gx
+			var idx := [i00, i00 + 1, i00 + cells + 1, i00 + cells + 2]
+			var d_max := -INF
+			var d_min := INF
+			for k: int in idx:
+				d_max = maxf(d_max, depth[k])
+				d_min = minf(d_min, depth[k])
+			if d_max <= 0.0:
+				continue # uscat pe tot patratul
+			if d_min > SEA_NEAR_DEPTH:
+				continue # larg curat — il acopera cvadrilaterul de dedesubt
+			var pos := [
+				Vector3(origin.x + float(gx) * step, sea_y,
+					origin.z + float(gz) * step),
+				Vector3(origin.x + float(gx + 1) * step, sea_y,
+					origin.z + float(gz) * step),
+				Vector3(origin.x + float(gx) * step, sea_y,
+					origin.z + float(gz + 1) * step),
+				Vector3(origin.x + float(gx + 1) * step, sea_y,
+					origin.z + float(gz + 1) * step),
+			]
+			for tri: Array in [[0, 1, 2], [1, 3, 2]]:
+				for k: int in tri:
+					st.set_color(_sea_color(depth[idx[k]]))
+					st.set_normal(Vector3.UP)
+					st.add_vertex(pos[k])
+			emitted += 1
+	if emitted == 0:
+		return
+	var inst := MeshInstance3D.new()
+	inst.name = "SeaNear"
+	inst.mesh = st.commit()
+	inst.material_override = _water_material()
+	root.add_child(inst)
+
+
+## Cat de saturata iese apa fata de cat a fost autorata.
+##
+## Environment.adjustment_saturation e 1.18 pe TOATA imaginea. Suprafetele
+## aproape nesaturate abia se misca sub el — de-asta nisipul si asfaltul n-au
+## avut niciodata problema asta. Apa e insa cea mai saturata suprafata mare din
+## cadru, deci acolo se vede: masurat pe recif, #54BFB8 autorat iesea #4DD4CE,
+## adica verdele si albastrul cu +21 si +22 peste tinta, in timp ce rosul era la
+## -7. Nu e o eroare de luminozitate (aia s-ar fi vazut pe toate trei canalele),
+## e chiar saturatia.
+const WATER_SATURATION_FIX: float = 1.18
+
+## Pasul de iluminare pe care shaderul unshaded il SARE.
+##
+## Orice alta suprafata din lume isi inmulteste albedo-ul cu lumina inainte de
+## tonemap. Apa nu (vezi water.gdshader: unshaded, deliberat). Diferenta se
+## masoara: dupa corectia de saturatie, reciful si largul ieseau amandoua cu
+## ~+19/255 UNIFORM pe toate trei canalele — adica exact luminozitate in plus,
+## nu nuanta gresita.
+##
+## Valoarea vine din masuratoare, nu din formula: 0.87 e raportul dintre tinta
+## si masurat pe cele doua zone. Daca se schimba tonemap-ul, expunerea sau
+## ripple_strength din shader, se REIA masuratoarea:
+##   godot --path . res://tools/Snapshot.tscn -- --track=4 --size=300
+## si se compara largul cu #2E5F6B, reciful cu #54BFB8.
+const WATER_GAIN: float = 0.87
+
+
+## Culoarea unei ape, pregatita pentru vertex colors.
+##
+## Doua corectii, amandoua din masuratoare:
+##
+## 1. DESATURARE cu WATER_SATURATION_FIX — compenseaza exact multiplicatorul
+##    global din Environment, ca pixelul final sa cada pe culoarea din paleta.
+##
+## 2. srgb_to_linear — obligatorie fiindca shaderul apei e unshaded. Un vertex
+##    color e citit ca LINIAR; restul lumii scapa fara conversie doar pentru ca
+##    e ILUMINATA, iar inmultirea cu lumina readuce valorile in interval. Apa nu
+##    are pasul ala. Masurat fara conversie: largul iesea #86C2CB in loc de
+##    #2E5F6B, cu 95/255 peste tinta pe fiecare canal — turcoaz palid in loc de
+##    mare adanca.
+##
+## S-a incercat si varianta "apa iluminata, fara conversie", ca sa fie o singura
+## conventie in proiect. Nu merge: culorile INCHISE hranite ca liniare se umfla
+## prea tare, iar lumina de aici (soare 1.5 + ambient) nu le mai coboara —
+## marea iesea palida. Terenul nu are culori inchise, de-asta n-a semnalat
+## nimeni pana acum.
+## Desaturarea se face in jurul LUMINANTEI, nu in HSV.
+##
+## Prima incercare a fost `Color.from_hsv(h, s / 1.18, v)`. Nu e inversa
+## operatiei: HSV pastreaza V, deci reducerea saturatiei urca doar canalele mici
+## spre cel mare si INALBESTE culoarea. Masurat, eroarea reciful a crescut de la
+## (-7, +21, +22) la (+21, +22, +24) — adica exact ce nu voiam.
+## adjustment_saturation lucreaza in jurul luminantei, deci si compensarea
+## trebuie sa faca la fel.
+func water_tint(slot: int) -> Color:
+	var c := Palette.color(slot)
+	var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
+	var k := 1.0 / WATER_SATURATION_FIX
+	return Color(
+		(lum + (c.r - lum) * k) * WATER_GAIN,
+		(lum + (c.g - lum) * k) * WATER_GAIN,
+		(lum + (c.b - lum) * k) * WATER_GAIN).srgb_to_linear()
+
+
+## Culoarea unui varf dupa cata apa are sub el.
+##
+## Spuma e GEOMETRIE, nu depth fade: banda de varfuri unde apa abia acopera
+## tarmul primeste foam_white. Un depth fade ar fi cerut DEPTH_TEXTURE, adica
+## un pas de citire a adancimii pe fiecare pixel de apa — pe mobil, exact
+## genul de cost pe care nu-l vede nicio garda din proiect.
+func _sea_color(d: float) -> Color:
+	var reef := water_tint(Palette.REEF_SHALLOW)
+	var deep := water_tint(Palette.SEA_DEEP)
+	# Spuma NU e alb curat, ci alb spart cu recif.
+	#
+	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
+	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
+	# spuma si isi intind culoarea peste toata celula prin interpolare.
+	var foam := water_tint(Palette.FOAM_WHITE).lerp(reef, 0.35)
+	if d <= 0.0:
+		return foam # varf uscat al unei celule de mal
+	if d < SEA_FOAM_DEPTH:
+		return foam.lerp(reef, d / SEA_FOAM_DEPTH)
+	if d < SEA_REEF_DEPTH:
+		return reef
+	return reef.lerp(deep, clampf(
+		(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+
+
+## Materialul apei — UNUL SINGUR pentru ambele mesh-uri.
+##
+## Cache-ul nu e cosmetic: un ShaderMaterial per petec de apa ar strica
+## raportul mesh-uri/materiale din tools/probe_decor.gd, adica exact garda de
+## draw call-uri. Doua mesh-uri, un material, un draw call in plus fata de
+## lumea de pe atlas.
+var _water_mat: ShaderMaterial
+
+func _water_material() -> ShaderMaterial:
+	if _water_mat != null:
+		return _water_mat
+	_water_mat = ShaderMaterial.new()
+	_water_mat.shader = load("res://assets/shaders/water.gdshader") as Shader
+	# Aceeasi textura pe care o foloseste deja stratul de detaliu al lumii —
+	# zero VRAM in plus.
+	_water_mat.set_shader_parameter("ripple_tex", load(Palette.DETAIL_PATH))
+	return _water_mat
+
+
+## Iesitul in mare = repunere pe traseu.
+##
+## Acelasi tipar ca plasa de sub creasta de fly-off (_build_flyoff_net): un
+## Area3D care prinde ce a cazut si cheama RespawnZone. Volumul incepe SUB
+## suprafata, ca stropul de la intrare sa apuce sa se vada.
+func _build_sea_respawn(sea_y: float) -> void:
+	var c := _centroid()
+	var zone := RespawnZone.new()
+	zone.name = "SeaRespawn"
+	zone.backoff_m = 16.0
+	add_child(zone)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	var top := sea_y - 1.2
+	var bottom := sea_y - 60.0
+	box.size = Vector3(SEA_FAR_EXTENT, top - bottom, SEA_FAR_EXTENT)
+	shape.shape = box
+	zone.add_child(shape)
+	zone.global_position = Vector3(c.x, (top + bottom) * 0.5, c.z)
+
+
 ## Cat de dens se testeaza terenul fata de faleze. Peste raza asta o faleza nu
 ## mai intuneca nimic.
 const CLIFF_AO_RADIUS: float = 14.0
@@ -875,6 +1346,106 @@ func _build_curve() -> void:
 	for i in baked.size():
 		var j := (i + 1) % baked.size()
 		_dists[i + 1] = _dists[i] + baked[i].distance_to(baked[j])
+	_build_routes()
+
+
+## Ruta 0 = bucla principala; 1+ = scurtaturi.
+##
+## `baked` / `_dists` / `curve` raman EXACT ce erau — sunt ruta 0 privita direct.
+## Asa tot codul care le citeste (teren, decor, faleze, hazarde, popici, sonde)
+## functioneaza neschimbat, iar rutele sunt o adaugire, nu o rescriere.
+func _build_routes() -> void:
+	routes.clear()
+	var main := TrackRoute.new()
+	main.baked = baked
+	main.dists = _dists
+	main.half_width = half_width
+	main.closed = true
+	main.label = "principal"
+	routes.append(main)
+	for spec in _branch_specs():
+		var branch := _make_branch(spec)
+		if branch != null:
+			routes.append(branch)
+
+
+## Toate punctele coapte ale benzilor SECUNDARE, intr-o singura lista.
+##
+## Le primeste [TrackSideSampler] ca sa stie ca si acolo e drum: terenul le
+## urmareste cota, iar decorul le ocoleste.
+func _branch_corridor_points() -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for i in range(1, routes.size()):
+		out.append_array(routes[i].baked)
+	return out
+
+
+## Suprafata benzilor secundare.
+##
+## NU refoloseste _build_road(): scurtatura din Okinawa e un banc de nisip
+## submers, nu sosea. Fara borduri, fara linie de mijloc, fara umeri, fara
+## pereti — si cu nisip coraligen in loc de asfalt. Asta e si diferenta pe care
+## trebuie s-o citesti din mers ca sa stii ca intri pe alta banda.
+func _build_branch_surfaces() -> void:
+	for bi in range(1, routes.size()):
+		var r := routes[bi]
+		var n := r.count()
+		if n < 2:
+			continue
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var tile := 3.5
+		var u_half := r.half_width / tile
+		# Banda submersa sta putin SUB cota capetelor: asa se vede de departe ca
+		# intri in apa, si asa nu se bate cu asfaltul in punctele de racord.
+		for i in n - 1:
+			var j := i + 1
+			var l0 := r.baked[i] - r.side_at(i) * r.half_width
+			var r0 := r.baked[i] + r.side_at(i) * r.half_width
+			var l1 := r.baked[j] - r.side_at(j) * r.half_width
+			var r1 := r.baked[j] + r.side_at(j) * r.half_width
+			var v0 := r.dists[i] / tile
+			var v1 := r.dists[j] / tile
+			st.set_uv(Vector2(-u_half, v0)); st.add_vertex(l0)
+			st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
+			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
+			st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
+			st.set_uv(Vector2(u_half, v1)); st.add_vertex(r1)
+			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
+		st.generate_normals()
+		# Nisip umed: coral_sand intunecat. Nu e asfalt si nu trebuie sa para.
+		_add_mesh_with_collision(st.commit(),
+			Palette.color(Palette.CORAL_SAND).darkened(0.22),
+			_tex("res://assets/textures/surface_sand.png"))
+
+
+## Construieste o scurtatura dintr-o specificatie.
+##
+## Capetele NU se dau de mana: se citesc de pe bucla principala, la fractiile
+## cerute. Asa scurtatura pleaca si revine garantat DE PE asfalt, oricat s-ar
+## muta punctele de control ale pistei — un capat scris manual ar fi ramas in
+## urma la prima ajustare de traseu si ar fi lasat o treapta in aer.
+func _make_branch(spec: Dictionary) -> TrackRoute:
+	var mid: Array[Vector3] = []
+	mid.assign(spec.get("points", []))
+	if mid.is_empty():
+		push_error("Track: scurtatura fara puncte intermediare")
+		return null
+	var entry := fposmod(float(spec.get("entry", 0.0)), 1.0)
+	var exit_f := fposmod(float(spec.get("exit", 0.0)), 1.0)
+	var n := baked.size()
+	var i_entry := int(entry * float(n)) % n
+	var i_exit := int(exit_f * float(n)) % n
+	var pts: Array[Vector3] = [baked[i_entry]]
+	pts.append_array(mid)
+	pts.append(baked[i_exit])
+	var route := TrackRoute.from_points(pts, false, curve.bake_interval)
+	route.half_width = float(spec.get("half_width", half_width))
+	route.entry_frac = frac_at(i_entry)
+	route.exit_frac = frac_at(i_exit)
+	route.wet = bool(spec.get("wet", false))
+	route.label = String(spec.get("label", "scurtatura"))
+	return route
 
 func _side_at(i: int) -> Vector3:
 	var n := baked.size()
@@ -941,6 +1512,44 @@ func _build_road() -> void:
 		_tex("res://assets/textures/surface_asphalt.png"))
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
+## Cati metri de sosea raman FARA perete de o parte si de alta a unei
+## bifurcatii.
+##
+## Numarul asta a costat o cursa intreaga. Prima varianta n-avea degajare deloc,
+## iar peretele de pe marginea soselei trecea drept peste gura scurtaturii: cele
+## doua masini care alesesera s-o ia au ramas infipte in el la fractia 0.71, cu
+## 29 de izbituri si 4.7 m/s medie pe felia aia, in timp ce masinile care NU o
+## luau terminau 2.14 tururi curat. Sonda de cursa a aratat-o imediat; un
+## playtest ar fi zis doar "se blocheaza acolo".
+##
+## 26 m acopera si intrarea, si iesirea, si lasa loc de o linie de apropiere.
+const JUNCTION_CLEARANCE_M: float = 26.0
+
+## Indicii de pe bucla principala unde se leaga scurtaturile (intrari + iesiri).
+func _junction_indices() -> PackedInt32Array:
+	var out := PackedInt32Array()
+	var n := baked.size()
+	if n == 0:
+		return out
+	for bi in range(1, routes.size()):
+		out.append(int(routes[bi].entry_frac * float(n)) % n)
+		out.append(int(routes[bi].exit_frac * float(n)) % n)
+	return out
+
+
+func _near_junction(i: int, junctions: PackedInt32Array, n: int) -> bool:
+	if junctions.is_empty():
+		return false
+	var spacing := _dists[n] / float(n)
+	var span := int(JUNCTION_CLEARANCE_M / maxf(spacing, 0.001))
+	for j in junctions:
+		var d := absi(i - j)
+		d = mini(d, n - d) # bucla: si peste linia de start
+		if d <= span:
+			return true
+	return false
+
+
 ## Gardul rosu de pe marginea soselei.
 ##
 ## Pe DESERT nu se mai emite deloc: peretii de canion din [TrackCliffs] preiau si
@@ -952,18 +1561,21 @@ func _build_road() -> void:
 ## s-a mutat in TrackSideSampler.wall_segments(), de unde o citesc si falezele, si
 ## popicele. O singura definitie, deci nu se pot contrazice.
 func _build_walls() -> void:
-	if theme_decor == "desert":
+	if not theme_flag("walls", true):
 		return
 	var loop_poly := PackedVector2Array()
 	for p in _points():
 		loop_poly.append(Vector2(p.x, p.z))
 	var n := baked.size()
+	var junctions := _junction_indices()
 	for side_sign: float in [-1.0, 1.0]:
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 		var emitted := false
 		for i in n:
 			var j := (i + 1) % n
+			if _near_junction(i, junctions, n):
+				continue
 			var b0 := baked[i] + _side_at(i) * half_width * side_sign
 			var b1 := baked[j] + _side_at(j) * half_width * side_sign
 			var mid := (b0 + b1) * 0.5
@@ -1021,10 +1633,10 @@ func _build_hazard(frac: float) -> void:
 	#
 	# Pana acum era o MINGE DE PLAJA — ramasita din tema abandonata "jucarii in
 	# lada de nisip", intr-un canion de desert.
-	if theme_decor == "desert" and ResourceLoader.exists(
-			"res://assets/models/boulder_roller.glb"):
+	var hazard_model: String = theme_flag("hazard_model", "")
+	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
 		var ball := SlidingHazard.new()
-		ball.model_scene = load("res://assets/models/boulder_roller.glb")
+		ball.model_scene = load(hazard_model)
 		ball.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
 		# Doar intentia "se rostogoleste"; raza reala o ia din model.
 		ball.roll_radius = 1.0
@@ -1377,8 +1989,9 @@ func _build_shoulders() -> void:
 	st.generate_normals()
 	# Praf: intre asfalt si nisip ca valoare, ca sa faca tranzitia, nu un al
 	# treilea ton care sa sara in ochi.
-	var dust := Palette.color(Palette.SAND_SHADOW) \
-		if theme_decor == "desert" else theme_ground_tint.darkened(0.25)
+	var dust_override: Variant = theme_flag("dust_color")
+	var dust: Color = dust_override if dust_override != null \
+		else theme_ground_tint.darkened(0.25)
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
 	inst.material_override = _flat_material(dust,
@@ -1427,10 +2040,11 @@ func _build_kerbs() -> void:
 ## tehnic: track.gd e fisierul pe care il atinge toata lumea, iar decorul e
 ## partea care se itereaza cel mai des.
 func _build_world_decor() -> void:
-	add_child(TrackCliffs.build(_sampler, theme_decor, track_name.hash(),
-		_cliff_clearings()))
-	add_child(TrackDecor.build(_sampler, theme_decor, track_name.hash(),
-		Callable(self, "_flat_material")))
+	add_child(TrackCliffs.build(_sampler, theme_flag("cliffs", false),
+		track_name.hash(), _cliff_clearings()))
+	add_child(TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
+		track_name.hash(), Callable(self, "_flat_material"),
+		theme_flag("props", "desert")))
 
 func _build_excavator(frac: float) -> void:
 	const PATH := "res://assets/models/rusted_digger.glb"
@@ -1876,55 +2490,146 @@ func _build_start_gate() -> void:
 
 # ---------------------------------------------- interogari (AI + progres)
 
-func closest_index(from_index: int, pos: Vector3) -> int:
-	var n := baked.size()
-	var best := ((from_index % n) + n) % n
-	var best_d := pos.distance_squared_to(baked[best])
-	for off in range(-8, 25):
-		var idx := ((from_index + off) % n + n) % n
-		var d := pos.distance_squared_to(baked[idx])
-		if d < best_d:
-			best_d = d
-			best = idx
-	return best
+# Toate interogarile primesc `route` ca ULTIM parametru, cu 0 implicit.
+#
+# Nu e o preferinta de stil: asa fiecare apel existent din joc — car.gd,
+# race.gd, ai_controller.gd, hazardele, sondele — continua sa insemne exact ce
+# insemna, iar rutele devin o adaugire in loc de o rescriere. Un parametru pus
+# primul ar fi cerut atins fiecare apel, adica exact felul in care se strecoara
+# regresiile intr-un sistem de progres.
 
-func closest_index_global(pos: Vector3) -> int:
-	var best := 0
-	var best_d := pos.distance_squared_to(baked[0])
-	for i in baked.size():
-		var d := pos.distance_squared_to(baked[i])
-		if d < best_d:
-			best_d = d
-			best = i
-	return best
+## Ruta cu indexul dat, sau bucla principala daca indexul e in afara.
+func route_at(route: int) -> TrackRoute:
+	if route >= 0 and route < routes.size():
+		return routes[route]
+	return routes[0] if not routes.is_empty() else null
 
-func frac_at(index: int) -> float:
-	return float(index) / float(baked.size())
+## Banda asta e uda? Cat timp masina e pe ea, grip-ul lateral scade.
+func route_is_wet(route: int) -> bool:
+	var r := route_at(route)
+	return r != null and r.wet
+
+
+## Punctul de pe axa benzii. Inlocuieste accesul direct la `baked[i]` din codul
+## de cursa — pe o scurtatura, indexul inseamna alt vector.
+func point_at(index: int, route: int = 0) -> Vector3:
+	var r := route_at(route)
+	if r == null or r.count() == 0:
+		return Vector3.ZERO
+	return r.baked[r.wrap_index(index)]
+
+func closest_index(from_index: int, pos: Vector3, route: int = 0) -> int:
+	var r := route_at(route)
+	return r.closest_index(from_index, pos) if r != null else 0
+
+func closest_index_global(pos: Vector3, route: int = 0) -> int:
+	var r := route_at(route)
+	return r.closest_index_global(pos) if r != null else 0
+
+func frac_at(index: int, route: int = 0) -> float:
+	var r := route_at(route)
+	return r.frac_at(index) if r != null else 0.0
 
 ## Punctul de repunere pe pista: centrul soselei cu `backoff_m` metri INAINTE
 ## de checkpoint-ul dat, orientat in sensul cursei. Retragerea da spatiu de
 ## elan — repus exact pe buza crestei, ai cadea din nou, iar bucla aia ar
 ## bloca cursa (exact ce nu vrem).
-func recovery_transform(index: int, backoff_m: float) -> Transform3D:
-	var n := baked.size()
-	var spacing := _dists[n] / float(n)
-	var idx := ((index - int(backoff_m / spacing)) % n + n) % n
-	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
-	return Transform3D(Basis.looking_at(dir, Vector3.UP),
-		baked[idx] + Vector3.UP * 1.2)
+func recovery_transform(index: int, backoff_m: float,
+		route: int = 0) -> Transform3D:
+	var r := route_at(route)
+	return r.recovery_transform(index, backoff_m) if r != null \
+		else Transform3D.IDENTITY
 
-func lateral_distance(index: int, pos: Vector3) -> float:
-	var p := baked[index]
-	return Vector2(pos.x - p.x, pos.z - p.z).length()
+func lateral_distance(index: int, pos: Vector3, route: int = 0) -> float:
+	var r := route_at(route)
+	return r.lateral_distance(index, pos) if r != null else 1e9
 
-func is_on_road(index: int, pos: Vector3) -> bool:
-	return lateral_distance(index, pos) <= half_width + 0.5
+func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
+	var r := route_at(route)
+	return r.is_on_road(index, pos) if r != null else false
 
-func lookahead_point(index: int, ahead_m: float, lateral_frac: float) -> Vector3:
-	var n := baked.size()
-	var steps := int(ahead_m / curve.bake_interval)
-	var idx := ((index + steps) % n + n) % n
-	return baked[idx] + _side_at(idx) * lateral_frac * half_width
+func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
+		route: int = 0) -> Vector3:
+	var r := route_at(route)
+	if r == null:
+		return Vector3.ZERO
+	return r.lookahead_point(index, ahead_m, lateral_frac, curve.bake_interval)
+
+
+## Cat de aproape de capetele unei scurtaturi se mai poate comuta pe ea.
+##
+## La intrare, scurtatura si soseaua principala pornesc din ACELASI punct si se
+## departeaza treptat, deci nu exista o linie peste care sa treci. Fereastra e
+## zona in care intrebarea "pe care dintre ele esti?" are sens.
+const BRANCH_SNAP_RANGE: float = 45.0
+## Cat de clar trebuie sa fii mai aproape de cealalta banda ca sa comuti.
+## Fara histereza, o masina exact la mijloc ar oscila intre rute la 60 Hz.
+const BRANCH_HYSTERESIS: float = 1.5
+
+
+## De la ce distanta incepe un AI hotarat sa tinteasca spre scurtatura.
+##
+## Mai mare decat BRANCH_SNAP_RANGE cu intentie: comutarea de ruta se face pe
+## proximitate laterala, deci masina trebuie sa apuce sa se MUTE pe banda
+## cealalta inainte ca despicatura sa se termine. Cu o raza egala, AI-ul ar
+## incepe sa vireze exact cand ar fi trebuit sa fie deja acolo.
+const BRANCH_LURE_RANGE: float = 70.0
+
+## Punct-tinta care duce spre intrarea unei scurtaturi.
+##
+## Intoarce [code]Vector3.INF[/code] daca nu e nicio bifurcatie in fata — asa
+## apelantul stie sa-si pastreze tinta obisnuita, fara sa mai intrebe nimic.
+func branch_lure(pos: Vector3, ahead_m: float) -> Vector3:
+	for bi in range(1, routes.size()):
+		var b := routes[bi]
+		if pos.distance_to(b.baked[0]) > BRANCH_LURE_RANGE:
+			continue
+		var bidx := b.closest_index_global(pos)
+		return b.lookahead_point(bidx, ahead_m, 0.0, curve.bake_interval)
+	return Vector3.INF
+
+
+## Pe ce ruta si la ce index e masina acum. Intoarce (ruta, index).
+##
+## Se cheama in fiecare cadru din [code]Car[/code], deci calea obisnuita —
+## nicio scurtatura in apropiere — trebuie sa fie ieftina: o iesire imediata.
+##
+## Comutarea recalculeaza indexul cu o scanare completa pe ruta noua, si asta e
+## si motivul pentru care scurtatura poate taia ORICAT. Cautarea locala
+## obisnuita are o fereastra de ~72 m in lungul traseului; o revenire care sare
+## mai mult de-atat ar lasa indexul agatat in urma, iar fractia de tur ar
+## ingheta. Scanarea se face o singura data per comutare, nu per cadru.
+func resolve_route(route: int, index: int, pos: Vector3) -> Vector2i:
+	if routes.size() < 2:
+		return Vector2i(route, index)
+	if route == 0:
+		for bi in range(1, routes.size()):
+			var b := routes[bi]
+			if pos.distance_to(b.baked[0]) > BRANCH_SNAP_RANGE:
+				continue
+			var bidx := b.closest_index_global(pos)
+			if bidx == 0:
+				continue # inca inainte de despicare
+			if b.lateral_distance(bidx, pos) + BRANCH_HYSTERESIS \
+					< routes[0].lateral_distance(index, pos):
+				return Vector2i(bi, bidx)
+		return Vector2i(0, index)
+	var cur := route_at(route)
+	if cur == null:
+		return Vector2i(0, index)
+	var last := cur.count() - 1
+	var near_end := index >= last - 1 \
+		or pos.distance_to(cur.baked[last]) < BRANCH_SNAP_RANGE * 0.5
+	if near_end:
+		return Vector2i(0, routes[0].closest_index_global(pos))
+	# Iesire de siguranta: ai parasit banda si esti clar mai aproape de sosea.
+	# Fara ea, o masina impinsa de pe banc ar ramane legata de o ruta pe care
+	# nu mai e, cu tot ce inseamna asta pentru checkpoint si pozitie.
+	if cur.lateral_distance(index, pos) > cur.half_width * 2.5:
+		var mi := routes[0].closest_index_global(pos)
+		if routes[0].lateral_distance(mi, pos) < cur.lateral_distance(index, pos):
+			return Vector2i(0, mi)
+	return Vector2i(route, index)
 
 func spawn_transforms(count: int) -> Array[Transform3D]:
 	var result: Array[Transform3D] = []

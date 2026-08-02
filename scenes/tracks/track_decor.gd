@@ -65,9 +65,21 @@ const BRAKING_MIN_OFFSET: float = 8.0
 
 ## Construieste tot decorul si il intoarce sub un singur nod.
 ##
+## `mode` vine din tema pistei (Track.themes(), cheia "decor"), nu din numele
+## temei. Inainte era chiar numele — `if theme == "desert"` — ceea ce lega
+## strategia de asezare de o pista anume: o tema noua care voia benzi trebuia
+## sa se prefaca ca e desert sau sa adauge inca un `or`.
+##   "bands"   — benzi paralele cu drumul, densitatea din style_bible §7
+##   "scatter" — esantionare prin respingere in dreptunghi (metoda veche)
+##
 ## `mat_provider` = Callable(Color) -> StandardMaterial3D.
-static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
-		mat_provider: Callable) -> Node3D:
+## `props` alege CE se aseaza; `mode` alege UNDE. Sunt doua decizii separate,
+## si trebuiau sa fie: insula foloseste aceeasi strategie de benzi ca desertul
+## (densitatea din style_bible §7 e cea corecta), dar cu palmieri in loc de
+## cactusi. Cat timp ambele veneau din acelasi sir "desert", nu se putea una
+## fara cealalta.
+static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
+		mat_provider: Callable, props: String = "desert") -> Node3D:
 	var root := Node3D.new()
 	root.name = "Decor"
 	# Un singur nod misca toata vegetatia. Se pune primul, ca _add_scatter sa-l
@@ -77,16 +89,16 @@ static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
 	root.add_child(sway)
 	if sampler.point_count() == 0:
 		return root
-	if theme == "desert":
-		_build_bands(root, sampler, seed_value, mat_provider)
+	if mode == "bands":
+		_build_bands(root, sampler, seed_value, mat_provider, props)
 	else:
-		_build_scattered(root, sampler, theme, seed_value, mat_provider)
+		_build_scattered(root, sampler, seed_value, mat_provider)
 	return root
 
 
-## Tema desert: benzi paralele cu drumul.
+## Benzi paralele cu drumul. Continutul lor vine din `props`, nu de aici.
 static func _build_bands(root: Node3D, sampler: TrackSideSampler,
-		seed_value: int, mat_provider: Callable) -> void:
+		seed_value: int, mat_provider: Callable, props: String) -> void:
 	for band in BANDS:
 		# Un rng PER BANDA: asa poti itera pe densitatea benzii de mijloc fara sa
 		# se mute si pietricelele de langa drum.
@@ -107,9 +119,10 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 				continue
 			if not _allowed(spec, band):
 				continue
-			_place_band_prop(container, spec, band, rng, mat_provider)
+			_place_band_prop(container, spec, band, rng, mat_provider, props)
 			if rng.randf() < float(band["cluster"]):
-				_place_satellites(container, sampler, spec, band, rng, mat_provider)
+				_place_satellites(container, sampler, spec, band, rng, mat_provider,
+					props)
 				skip = 2
 
 
@@ -133,7 +146,7 @@ static func _allowed(spec: TrackDecorSpec, band: Dictionary) -> bool:
 
 static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
 		spec: TrackDecorSpec, band: Dictionary, rng: RandomNumberGenerator,
-		mat_provider: Callable) -> void:
+		mat_provider: Callable, props: String) -> void:
 	var count := rng.randi_range(CLUSTER_MIN, CLUSTER_MAX)
 	for i in count:
 		var sat := TrackDecorSpec.new()
@@ -153,13 +166,17 @@ static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
 		sat.is_elevated = spec.is_elevated
 		sat.is_apex = spec.is_apex
 		sat.is_braking = spec.is_braking
-		_place_band_prop(parent, sat, band, rng, mat_provider, true)
+		_place_band_prop(parent, sat, band, rng, mat_provider, props, true)
 
 
 ## Ce se aseaza intr-o banda. Sateliti = piese mai mici decat propul principal.
 static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat_provider: Callable,
-		satellite: bool = false) -> void:
+		props: String, satellite: bool = false) -> void:
+	if props == "island":
+		_place_island_prop(parent, spec.position, band, rng, mat_provider,
+			satellite)
+		return
 	var pos := spec.position
 	match band["name"]:
 		"hug":
@@ -187,9 +204,178 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 				_add_cactus(parent, pos, rng, mat_provider)
 
 
+## --- Set de prop-uri: insula de recif ---------------------------------------
+##
+## Aceleasi trei benzi, alt continut. Cat timp island_scatter.glb si
+## coral_rock.glb nu exista (etapa de assets), fiecare piesa cade pe o primitiva
+## colorata din sloturile insulare — NU pe cele de desert. Un cactus pe un recif
+## e mai rau decat o tufa provizorie, si ar fi trecut nesanctionat de orice
+## sonda: garda numara triunghiuri, nu bunul-simt botanic.
+##
+## Cand GLB-urile apar, _pick_from_glb le gaseste singur si primitivele dispar.
+const ISLAND_SCATTER: String = "res://assets/models/island_scatter.glb"
+const ISLAND_ROCKS: String = "res://assets/models/coral_rock.glb"
+
+static func _place_island_prop(parent: Node3D, pos: Vector3, band: Dictionary,
+		rng: RandomNumberGenerator, mat: Callable, satellite: bool) -> void:
+	match band["name"]:
+		"hug":
+			# Lipit de drum: iarba de plaja, lemn adus de apa, pietre de corali.
+			_add_island_scatter(parent, pos, rng, mat)
+		"mid":
+			var roll := rng.randf()
+			if satellite or roll < 0.34:
+				_add_island_scatter(parent, pos, rng, mat)
+			elif roll < 0.70:
+				_add_palm(parent, pos, rng, mat)
+			else:
+				_add_coral_rock(parent, pos, rng, mat, true)
+		_:
+			var roll2 := rng.randf()
+			if satellite or roll2 < 0.40:
+				_add_coral_rock(parent, pos, rng, mat, true)
+			elif roll2 < 0.80:
+				_add_palm(parent, pos, rng, mat)
+			else:
+				_add_coral_rock(parent, pos, rng, mat, true)
+
+
+## Maruntisuri de plaja, fara coliziune.
+static func _add_island_scatter(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, mat: Callable) -> void:
+	const PICKS := ["Beach_Grass", "Driftwood", "Coral_Pebbles", "Hibiscus"]
+	var kept := _pick_from_glb(ISLAND_SCATTER,
+		PICKS[rng.randi_range(0, PICKS.size() - 1)])
+	if kept == null:
+		_add_tropical_bush(parent, pos, rng, mat)
+		return
+	parent.add_child(kept)
+	kept.position = pos + Vector3.UP * -0.15
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(1.4, 2.1)
+	Palette.apply_world_material(kept)
+
+
+## Tufa subtropicala provizorie: doar vizual, treci prin ea.
+## Geamana lui _add_dry_bush, cu slotul de vegetatie tropicala.
+static func _add_tropical_bush(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, mat: Callable) -> void:
+	var bush := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	var r := rng.randf_range(0.5, 0.95)
+	sphere.radius = r
+	sphere.height = r * 1.3 # mai inalta decat lata: tufa de plaja, nu bolovan
+	# Rezolutia se seteaza EXPLICIT. Implicit SphereMesh e 64x32 = 4224 de
+	# triunghiuri pentru o tufa de 60 cm (CLAUDE.md, constrangeri mobile).
+	#
+	# 6x2 = ~24 de triunghiuri, nu 8x4 = ~80. Diferenta pare marunta pana o
+	# inmultesti cu 461, cati intra pe banda lipita de drum la 1944 m: masurat,
+	# 36 880 de triunghiuri, adica 42% din TOATA pista, pentru niste bile care
+	# oricum dispar la prima transa de assets. Un placeholder n-are voie sa
+	# consume bugetul lucrului pe care il inlocuieste.
+	sphere.radial_segments = 6
+	sphere.rings = 2
+	bush.mesh = sphere
+	bush.position = pos + Vector3.UP * (r * 0.35 - 0.3)
+	var tint := float(rng.randi_range(0, 2)) / 2.0 * 0.16
+	bush.material_override = mat.call(
+		Palette.color(Palette.TROPICAL_GREEN).lightened(tint))
+	parent.add_child(bush)
+
+
+## Palmier provizoriu: trunchi inclinat + coroana. Inlocuit de island_scatter.glb.
+##
+## Inclinarea nu e cosmetica — palmierii de coasta cresc spre lumina, deci un
+## pluton de trunchiuri perfect verticale citeste imediat ca geometrie generata.
+static func _add_palm(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, mat: Callable) -> void:
+	var kept := _pick_from_glb(ISLAND_SCATTER,
+		"Palm_A" if rng.randf() < 0.6 else "Palm_B")
+	if kept != null:
+		parent.add_child(kept)
+		kept.position = pos
+		kept.rotation.y = rng.randf_range(0.0, TAU)
+		kept.scale = Vector3.ONE * rng.randf_range(0.9, 1.25)
+		Palette.apply_world_material(kept)
+		return
+	var h := rng.randf_range(4.5, 7.0) # style_bible §2: palmieri 4-7 m
+	var holder := Node3D.new()
+	parent.add_child(holder)
+	holder.position = pos
+	holder.rotation.y = rng.randf_range(0.0, TAU)
+
+	var trunk := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.16
+	cyl.bottom_radius = 0.28
+	cyl.height = h
+	cyl.radial_segments = 5
+	cyl.rings = 0
+	trunk.mesh = cyl
+	trunk.position = Vector3(0, h * 0.5, 0)
+	trunk.rotation.z = rng.randf_range(-0.22, 0.22)
+	trunk.material_override = mat.call(Palette.color(Palette.WOOD_WEATHERED))
+	holder.add_child(trunk)
+
+	var crown := MeshInstance3D.new()
+	var crown_mesh := SphereMesh.new()
+	crown_mesh.radius = rng.randf_range(1.3, 1.9)
+	crown_mesh.height = crown_mesh.radius * 1.1
+	crown_mesh.radial_segments = 7
+	crown_mesh.rings = 2
+	crown.mesh = crown_mesh
+	# Urmeaza varful trunchiului inclinat, altfel coroana pluteste langa el.
+	crown.position = Vector3(sin(trunk.rotation.z) * -h, h, 0)
+	crown.material_override = mat.call(Palette.color(Palette.TROPICAL_GREEN))
+	holder.add_child(crown)
+
+
+## Stanca de corali / bazalt. Placi joase si late, nu bolovani.
+static func _add_coral_rock(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, mat: Callable, collide: bool) -> void:
+	var kept := _pick_from_glb(ISLAND_ROCKS,
+		"Coral_Rock_%02d" % rng.randi_range(1, 8))
+	var h := rng.randf_range(0.8, 2.6)
+	var node: Node3D
+	if kept != null:
+		node = kept
+		Palette.apply_world_material(kept)
+		var mi_glb := _first_mesh(kept)
+		if mi_glb != null and mi_glb.mesh != null:
+			h = mi_glb.mesh.get_aabb().size.y
+	else:
+		var mi := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		# Late si turtite: raftul de bazalt sapat de mare, nu o piatra rotunda.
+		box.size = Vector3(rng.randf_range(1.8, 4.2), h,
+			rng.randf_range(1.6, 3.8))
+		mi.mesh = box
+		mi.position = Vector3.UP * h * 0.5
+		mi.material_override = mat.call(
+			Palette.color(Palette.VOLCANIC_BLACK).lightened(
+				float(rng.randi_range(0, 2)) / 2.0 * 0.14))
+		node = mi
+	if not collide:
+		parent.add_child(node)
+		node.position = pos + Vector3.UP * -0.2
+		node.rotation.y = rng.randf_range(0.0, TAU)
+		return
+	var body := StaticBody3D.new()
+	parent.add_child(body)
+	body.add_child(node)
+	var shape := CollisionShape3D.new()
+	var sphere := SphereShape3D.new()
+	sphere.radius = maxf(h * 0.6, 0.7)
+	shape.shape = sphere
+	shape.position = Vector3.UP * h * 0.4
+	body.add_child(shape)
+	body.rotation.y = rng.randf_range(0.0, TAU)
+	body.position = pos + Vector3.UP * -0.2
+
+
 ## Tema forest: esantionare prin respingere in dreptunghi (codul dinainte).
 static func _build_scattered(root: Node3D, sampler: TrackSideSampler,
-		theme: String, seed_value: int, mat_provider: Callable) -> void:
+		seed_value: int, mat_provider: Callable) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 

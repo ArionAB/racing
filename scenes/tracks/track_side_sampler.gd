@@ -67,16 +67,27 @@ var _dune_phase: float = 0.0
 var _mean_y: float = 0.0
 ## Rapele declarate: (frac_start, frac_end, adancime, latura).
 var _ravines: Array[Vector4] = []
+## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
+## padure); > 0 = fund de mare (insula). Vezi ground_y.
+var _far_drop: float = 0.0
+## Puncte de pe benzile SECUNDARE (scurtaturi). Terenul le urmeaza cota ca pe a
+## soselei, iar decorul le ocoleste — altfel scurtatura ar pluti peste fundul de
+## mare si i-ar rasari palmieri prin mijloc.
+var _extra: PackedVector3Array = PackedVector3Array()
 
 
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		control_points: Array[Vector3], half_width: float,
-		dune_phase: float = 0.0, ravines: Array[Vector4] = []) -> void:
+		dune_phase: float = 0.0, ravines: Array[Vector4] = [],
+		far_drop: float = 0.0,
+		extra_corridors: PackedVector3Array = PackedVector3Array()) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
 	_dune_phase = dune_phase
 	_ravines = ravines
+	_far_drop = far_drop
+	_extra = extra_corridors
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -156,8 +167,75 @@ func ground_y(wx: float, wz: float) -> float:
 	# media, desertul ondulează IMPREUNA cu traseul — creasta citeste ca mesa,
 	# portiunile joase ca vai.
 	var far_level := _mean_y + maxf(_dunes(wx, wz), -1.0)
+	# INTERIORUL buclei ramane uscat, oricat de departe de sosea ar fi.
+	#
+	# Fara conditia asta, o insula iesea ca o panglica de nisip lata de 230 m
+	# care urmareste drumul, cu mare in mijlocul circuitului — la propriu, un
+	# atol. Se vede imediat dintr-o captura de sus si deloc din masina, motiv
+	# pentru care merita spus: singurul lucru care o prinde e sa te uiti.
+	#
+	# Poligonul e cel al punctelor de control, deja folosit de _build_walls ca sa
+	# decida ce margine e exterioara. O singura definitie pentru "inauntru".
+	var inside := _loop_poly.size() >= 3 \
+		and Geometry2D.is_point_in_polygon(Vector2(wx, wz), _loop_poly)
+	if _far_drop > 0.0 and not inside:
+		# Insula: dincolo de coridorul pistei, terenul devine FUND DE MARE.
+		#
+		# Fara asta o pista de insula e imposibila, si nu dintr-un motiv estetic:
+		# campul departat se ancoreaza la media cotelor soselei, deci nu coboara
+		# niciodata sub ea. Un plan de apa peste el e ori complet ingropat (cota
+		# mica), ori inunda si soseaua (cota mare) — nu exista pozitie din care
+		# sa iasa o insula.
+		#
+		# Relieful de fund pastreaza doar un sfert din amplitudinea dunelor. Nu e
+		# cosmetica: adancimea trebuie sa treaca DECIS de pragul dincolo de care
+		# apa nu-si mai schimba culoarea (Track.SEA_NEAR_DEPTH). Cu dune la
+		# amplitudine plina, adancimea oscila peste si sub prag, iar grila fina de
+		# tarm se emitea pe toata suprafata marii — masurat: 12 800 de triunghiuri
+		# in loc de ~2 000.
+		far_level = _mean_y - _far_drop + maxf(_dunes(wx, wz), -1.0) * 0.25
 	var y := lerpf(road_level, far_level, t * t)
+	y = _lift_branches(y, wx, wz)
 	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+
+
+## Cat de departe de axa unei benzi secundare terenul mai sta la cota ei.
+##
+## MULT mai stramt decat pentru sosea (45 m + 70 m blend), si asta e chiar
+## ideea. Prima versiune baga punctele scurtaturii in acelasi camp Shepard ca
+## soseaua: bancul de nisip ridica atunci o limba de teren lata de 230 m, care
+## umplea golful pe care tocmai il taia. Ceea ce trebuia sa fie o fasie de nisip
+## in apa iesea un istm, iar scurtatura nu se mai citea ca alegere.
+const BRANCH_FLAT_RADIUS: float = 11.0
+const BRANCH_BLEND_LEN: float = 16.0
+
+
+## Ridica terenul la cota benzilor secundare, dar doar chiar langa ele.
+func _lift_branches(y: float, wx: float, wz: float) -> float:
+	var m := _extra.size()
+	if m == 0:
+		return y
+	var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
+	var reach_sq := reach * reach
+	var near_sq := INF
+	var level := 0.0
+	var k := 0
+	while k < m:
+		var q := _extra[k]
+		var dx := q.x - wx
+		var dz := q.z - wz
+		var d_sq := dx * dx + dz * dz
+		if d_sq < near_sq:
+			near_sq = d_sq
+			level = q.y
+		k += GROUND_STRIDE
+	if near_sq > reach_sq:
+		return y
+	var d := sqrt(near_sq)
+	var t := clampf((d - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0)
+	# maxf, nu lerp pur: banda nu SAPA niciodata terenul, doar il ridica. Acolo
+	# unde trece peste uscat mai inalt (racordurile cu soseaua), ramane uscatul.
+	return maxf(y, lerpf(level, y, t * t))
 
 
 ## Suntem intr-o rapa declarata la fractia si latura date?
@@ -269,6 +347,15 @@ func clearance_at(pos: Vector3) -> float:
 		var dz := _baked[i].z - pos.z
 		nearest_sq = minf(nearest_sq, dx * dx + dz * dz)
 		i += CLEARANCE_STRIDE
+	# Si benzile secundare: un palmier plantat in mijlocul scurtaturii ar fi un
+	# zid invizibil pe singura linie alternativa din pista.
+	var m := _extra.size()
+	var k := 0
+	while k < m:
+		var ex := _extra[k].x - pos.x
+		var ez := _extra[k].z - pos.z
+		nearest_sq = minf(nearest_sq, ex * ex + ez * ez)
+		k += CLEARANCE_STRIDE
 	return sqrt(nearest_sq)
 
 

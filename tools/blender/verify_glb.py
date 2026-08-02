@@ -36,21 +36,28 @@ SLOT_NAMES = [
     "asphalt", "asphalt_edge", "kerb_red", "concrete", "wood_weathered",
     "rust_metal", "painted_metal", "cactus_green", "dry_vegetation",
     "car_red", "car_blue", "car_yellow",
+    "reef_shallow", "sea_deep", "coral_sand", "volcanic_black",
+    "tropical_green", "foam_white", "tile_terracotta",
 ]
 
 # Sloturile pe care le poate folosi un asset de decor.
 #
 # 14-16 sunt accentele de masina (scripts/palette.gd:43 le declara explicit
 # interzise in decor: masinile trebuie sa ramana singurele suprafete saturate
-# din cadru, style_bible §1). 17-31 nu sunt definite — atlasul le lasa
-# INTENTIONAT magenta (tools/generate_palette_atlas.gd:273-278), ca o greseala
-# de UV sa sara in ochi.
+# din cadru, style_bible §1). 24-31 nu sunt definite — atlasul le lasa
+# INTENTIONAT magenta (tools/generate_palette_atlas.gd, _base_color), ca o
+# greseala de UV sa sara in ochi.
 #
 # Pana la garda asta, un asset care cauta o culoare pe care paleta n-o are
 # (sticla, metal inchis) nimerea slotul 17, trecea verificarea cu OK si ajungea
 # magenta in joc. Nimic nu-l prindea inainte de primul screenshot.
-LEGAL_SLOTS = range(0, 14)
-CAR_SLOTS = range(14, 17)
+#
+# Intervalul legal e discontinuu de cand mediul insular (17-23) a ocupat din
+# rezerva: 0-13 desert, GAURA la 14-16 pentru masini, 17-23 insula. De-asta e
+# frozenset, nu range — un `range(0, 24)` ar fi legalizat in tacere accentele
+# de masina in decor.
+LEGAL_SLOTS = frozenset(list(range(0, 14)) + list(range(17, 24)))
+CAR_SLOTS = frozenset(range(14, 17))
 
 COMPONENT = {5120: ("b", 1), 5121: ("B", 1), 5122: ("h", 2),
              5123: ("H", 2), 5125: ("I", 4), 5126: ("f", 4)}

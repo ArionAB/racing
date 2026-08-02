@@ -117,3 +117,95 @@ culoare în engine:**
   la nivelul mașinii.
 - **Checklist la primire:** un nod `StartGate`; ≤ 950 tris; bbox exact; degajare
   ≥ 5.3 m sub panou; UV pe centre; `COLOR_0` prezent; origine la bază centrată XZ.
+
+## Livrat (#B3)
+
+![arcada de jucărie și poarta nouă, ambele din unghi de șofer](img/start_gate_inainte_dupa.png)
+
+Ambele din **unghi de șofer** — ochiul la 1.20 m, pe banda din dreapta, la 34 m
+de poartă, obiectiv 26 mm. Arcada veche e randată cu material neutru: n-are UV pe
+sloturi, deci cu materialul comun ar ieși neagră. Asta e chiar problema.
+
+### Cote
+
+| | valoare |
+|---|---|
+| triunghiuri | **924** (buget 950) |
+| bbox X | −11.4000 .. **+11.4000** → lățime **22.8000 m** |
+| bbox Y (Godot, sus) | 0.000 .. **8.7000 m** |
+| bbox Z (Godot, adâncime) | −1.200 .. +1.200 |
+| degajare sub panou | 5.300 m (minimul din brief) |
+| degajare sub traversă | 7.200 m |
+| AO | 0.30 .. 1.00 |
+| sloturi | `rust_metal`, `sand_light`, `kerb_red`, `concrete` |
+
+`start_arch.glb` măsoară **exact 22.800 × 8.700** — confirmat prin import, nu
+presupus. Cele patru numere hardcodate din `track.gd:1499-1511` rămân valabile
+cuvânt cu cuvânt.
+
+### Cotele sunt exacte prin construcție, nu prin constantă ajustată
+
+Bevel-ul cu `miter_outer = MITER_ARC` umflă vârfurile cu câțiva milimetri peste
+fața plană: construcția la 8.700 iese **8.7177**. Turnul de apă rezolvă asta cu
+două constante ajustate de mână (`FINIAL_TOP = 9.486`), și e fragil — epsilonul
+depinde de lățimea bevel-ului, de unghi și de geometria din jur, deci se strică
+tăcut la prima retușare.
+
+Aici cotele sunt contract, deci se **măsoară și se corectează**: `snap_bbox()`
+scalează pe X și Z pe cotele exacte după bevel. Corecția reală a fost X ×1.00000
+(nimic) și Z ×0.99797 — 0.2%, sub grosimea unui bevel.
+
+### Nota de buget: brieful e cu 90% peste
+
+Măsurat, la bevel 0.05, cu multiplicatorul **3.67× constant**:
+
+| variantă de pilon | brut | după bevel |
+|---|---|---|
+| brief integral: 4 stâlpi + 2 inele + 4 diagonale | 492 | **1804** |
+| 2 inele, 2 diagonale | 444 | 1628 |
+| 1 inel, 2 diagonale | 348 | 1276 |
+| 1 inel, 0 diagonale | 300 | **1100** |
+| 0 inele, 0 diagonale | 204 | 748 |
+
+**Nici măcar un singur inel nu încape.** Bugetul brut util e 950 / 3.67 = 258 de
+triunghiuri, adică vreo 21 de cutii pentru toată poarta. Repartiția finală (252
+brut):
+
+```
+2 piloni × (4 montanți + 2 diagonale + pastilă + capac)   192
+traversă                                                   12
+panou central + bandă                                      24
+2 panouri laterale                                         24
+```
+
+Multiplicatorul 3.67 nu e o coincidență: un cub de 12 triunghiuri beveluit pe
+toate muchiile dă 6 fețe (12) + 12 quad-uri de muchie (24) + 8 triunghiuri de
+colț = **44**.
+
+### Abateri de la brief
+
+- **Fără inele orizontale.** Vezi tabelul. Ce s-a păstrat din zăbrele: montanții
+  de colț și **două diagonale per pilon**, pe fețele dinspre ±Y. Diagonalele au
+  fost preferate inelelor pentru că inelele sunt orizontale, deci paralele cu
+  traversa și cu panoul — nu adaugă nicio direcție nouă în siluetă. Diagonala e
+  singura linie înclinată din tot obiectul.
+- **Capac peste fiecare turn, în locul finialului.** Prima captură din unghi de
+  șofer a arătat problema pe care tăierea inelelor o crease: fără nimic care să-i
+  lege, cei patru montanți se citeau ca **patru bețe separate**, iar vârfurile
+  rămâneau cioturi peste traversă. Capacul rezolvă cu o singură cutie ce un inel
+  (96 de triunghiuri brute) n-ar fi încăput să facă. Plata: panourile laterale au
+  coborât de la două casete la una.
+- **Montanți de 0.32 m, nu 0.20.** Tot din prima captură: la 34 m ieșeau tije, iar
+  turnul citea a schelă, nu a structură care ține o traversă de 20 m. Grosimea nu
+  costă **niciun** triunghi — o cutie are 12 fețe indiferent cât e de groasă.
+- **Fără tablă de șah 4×3.** 24 de casete = 288 brut = 1057 după bevel, adică mai
+  mult decât toată poarta. `corrugate` părea ieșirea ieftină și nu e: un panou
+  costă 52 brut, fiindcă cele două ngon-uri de capac costă cât toată suprafața
+  utilă (nota de buget din `dio_lib` scria greșit `~6*ribs+2`; e `16*ribs+4`, și
+  am corectat-o). Rămâne ritmul de culoare pe tot ansamblul: **roșu |
+  deschis-cu-bandă-roșie | roșu**. Un șah de 4×3 pe 2.5 m înseamnă oricum pătrate
+  de 0.6 m, exact detaliul de frecvență înaltă interzis de `style_bible` §3.
+- **Bandă din geometrie, nu din `retag`.** Un `retag` ar fi costat zero, dar fața
+  din față a panoului e **un singur quad** — n-are ce să fie re-etichetat pe
+  jumătate. Ieșirea de 8 cm își plătește triunghiurile: face umbră proprie, deci
+  banda se citește și când soarele bate din spatele porții.

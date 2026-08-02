@@ -80,3 +80,47 @@ culoare:**
   5. instanțiere cu `Palette.apply_world_material(glb)` → un singur material
 - Din aceeași bază se derivă ușor și **semnul "GAS" cu stea** din referință
   (schimbi silueta plăcii + sloturile kerb_red/beton) dacă îl vrem ca prop distinct.
+
+## Livrat (#D4)
+
+![semnul înainte și după la 30 m, plus prim-plan](img/route66_sign_30m.png)
+
+De la stânga: înainte (scut gol), după — ambele de la **30 m, de la nivelul
+drumului**, cum cere issue-ul — și un prim-plan pentru verificarea formei.
+Ambele randate cu același material comun.
+
+| | înainte | după |
+|---|---|---|
+| triunghiuri | 220 | **932** |
+| înălțime | 2.90 m | 2.91 m |
+
+### Răspunsul cinstit la testul din issue
+
+Issue-ul întreabă: *„se citește «66»?"* La 30 m, **nu** — se citesc două semne
+întunecate cu structură, nu două cifre. Ce s-a rezolvat e problema reală
+descrisă în issue: scutul nu mai e **gol**. De la ~10 m cifrele se citesc.
+
+Nu cred că se poate mai bine fără să crească scutul: la 30 m cifra ocupă vreo 6
+pixeli pe verticală, iar acolo nicio formă nu mai e o cifră.
+
+### Cum e făcută cifra
+
+Cinci bare, în tiparul afișajului cu 7 segmente, **nu** după forma tipografică —
+`style_bible` §3 și issue-ul cer exact asta. Bara de sus, muchia stângă pe toată
+înălțimea, traversa din mijloc, bara de jos și muchia dreaptă **doar pe jumătatea
+de jos**: ultima e cea care distinge un 6 de un 5.
+
+Prima versiune avea bara la 0.075 pe o cifră de 0.30 — un sfert din lățime — și
+golurile rămase ieșeau două dreptunghiuri egale: cifra se citea a domino. La
+0.052 pe 0.27 se citește.
+
+### Abateri de la brief
+
+- **Urmele de gloanțe nu pot fi `retag`.** Brieful le cere la zero triunghiuri,
+  dar placa-față e un `prism`: fața ei din față e **un singur ngon**, deci n-are
+  ce să fie re-etichetat pe bucăți. Sunt discuri cu 5 laturi, 15 triunghiuri
+  fiecare. Și sunt discuri, nu cutii, dintr-un motiv concret: prima versiune
+  folosea cutii, iar una a căzut chiar deasupra cifrelor și se citea ca un „+".
+- **Buget ignorat, la cerere.** Issue-ul ținea ~260; au ieșit 932. Cel mai scump
+  post sunt cele zece bare de cifră (~600 după bevel).
+- Abaterea documentată la `:36-38` (stâlpul e `RUST`, nu `PAINTED`) e păstrată.

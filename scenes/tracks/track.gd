@@ -968,7 +968,7 @@ func _build_hazard(frac: float) -> void:
 		ball.center = p
 		ball.travel = side * half_width * 0.9
 		ball.global_position = p
-	elif ResourceLoader.exists("res://assets/models/toy_excavator.glb"):
+	elif ResourceLoader.exists("res://assets/models/rusted_digger.glb"):
 		_build_excavator(frac)
 	else:
 		var box := SlidingHazard.new()

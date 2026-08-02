@@ -137,6 +137,7 @@ static func themes() -> Dictionary:
 			"props": "desert",
 			"hazard_model": "res://assets/models/boulder_roller.glb",
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			"water": false,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -157,15 +158,25 @@ static func themes() -> Dictionary:
 			"props": "forest",
 			"hazard_model": "", # "" = excavator
 			"dust_color": null, # null = derivat din ground_tint
+			"water": false,
 		},
 		# --- Insula de recif (pista Okinawa) ---
 		#
 		# Culorile sunt sloturile insulare din paleta (17-23), ca sa nu existe
 		# doua adevaruri despre "ce inseamna turcoaz".
 		#
-		# sun_energy/exposure sunt PROVIZORII: se calibreaza prin masurare, la
-		# fel ca desertul, cand pista exista. Procedura e in comentariul de la
-		# theme_exposure — se compara nisipul cu coral_sand (#E9DCC0).
+		# sun_energy e CALIBRAT prin masurare, ca la desert: la 1.10 nisipul iesea
+		# #CDC3AF fata de tinta #E9DCC0 (rosu cu 28/255 sub), la 1.50 iese #DED5C1
+		# — eroare maxima 11/255, sub pragul de 12 din style_bible §5.
+		#
+		# S-a folosit sun_energy, NU exposure, si asta conteaza: expunerea ar fi
+		# ridicat si apa, care era deja pe tinta. Soarele atinge doar suprafetele
+		# iluminate, iar apa e unshaded — deci e singura parghie care misca
+		# nisipul fara sa strice marea.
+		#
+		# Daca se schimba ambientul sau unghiul soarelui, REIA masuratoarea:
+		#   godot --path . res://tools/Snapshot.tscn -- --track=4 --size=300
+		# si compara nisipul cu #E9DCC0.
 		"island": {
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
 			"sky_top": Color(0.20, 0.50, 0.88),
@@ -173,12 +184,23 @@ static func themes() -> Dictionary:
 			"fog": Color(0.82, 0.91, 0.93),
 			"hill_color": Palette.color(Palette.TROPICAL_GREEN),
 			"sun_color": Color(1.0, 0.97, 0.92),
-			"sun_energy": 1.1,
+			"sun_energy": 1.50,
 			"exposure": 1.0,
-			# Ambient din cer, ca la padure: pe o insula lumina indirecta chiar
-			# VINE din cer si din apa, nu de la o intindere de nisip cald. Exact
-			# rationamentul desertului, cu concluzia inversa.
-			"ambient_color": null,
+			# Ambient din CULOARE, nu din cer — desi rationamentul initial spunea
+			# invers.
+			#
+			# Prima versiune folosea ambient din cer, pe motiv ca pe o insula
+			# lumina indirecta chiar vine din cer si din apa. Plauzibil, si gresit:
+			# masurat pe prima randare, nisipul coraligen iesea #C0C8D9 in loc de
+			# #E9DCC0 — albastru-cenusiu, cu rosul cu 41/255 sub tinta si albastrul
+			# cu 25 peste. Exact esecul documentat la desert (vezi
+			# _build_environment), doar ca acolo fusese prins din masuratoare, iar
+			# aici l-am reintrodus din rationament.
+			#
+			# Culoarea e bounce-ul de pe nisip coraligen: mai deschis si mai putin
+			# auriu decat cel de desert (#E2B77A), fiindca si nisipul e mai alb.
+			"ambient_color": Color.html("EADFC8"),
+			"ambient_energy": 0.30,
 			# Ceata de adancime, ca la desert: marea se pierde in orizont la o
 			# distanta cunoscuta, iar camera poate taia fix acolo.
 			"fog_depth": true,
@@ -187,6 +209,11 @@ static func themes() -> Dictionary:
 			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
 			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
 			"props": "island",   # ...dar palmieri si bazalt, nu cactusi
+			"water": true,       # singura tema cu mare (vezi _build_water)
+			# Cat de adanc cade terenul dincolo de coridorul pistei. Trebuie sa
+			# duca adancimea DECIS peste SEA_NEAR_DEPTH, altfel grila fina de tarm
+			# se emite pe toata marea. Vezi TrackSideSampler.ground_y.
+			"seabed_drop": 26.0,
 			"hazard_model": "",  # wave_surge se ataseaza separat, pe fractii
 			"dust_color": null,
 		},
@@ -329,7 +356,8 @@ func rebuild() -> void:
 	# Dupa coacerea curbei, inainte de orice generator care aseaza ceva langa
 	# drum: toti citesc sloturi SI cota terenului de aici.
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
-		float(track_name.hash() % 1000) * 0.01, _ravines())
+		float(track_name.hash() % 1000) * 0.01, _ravines(),
+		theme_flag("seabed_drop", 0.0))
 	_build_environment()
 	_build_road()
 	_build_walls()
@@ -365,6 +393,8 @@ func rebuild() -> void:
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
+	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
+	_build_water()
 	_build_world_bounds()
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
@@ -830,6 +860,276 @@ func _build_terrain() -> void:
 	body.add_child(shape)
 	body.add_child(inst)
 	add_child(body)
+
+
+# ------------------------------------------------------------------- apa
+
+## Cota marii, RELATIV la media cotelor soselei — nu la y = 0.
+##
+## Asta e capcana: terenul departat nu oscileaza in jurul originii lumii, ci in
+## jurul lui TrackSideSampler.mean_road_y() (vezi ground_y). Pe Dunele media e
+## pe la +6-7 m, pe Muntele si mai sus. Un plan de apa la y = 0 ar fi, pe unele
+## piste, complet ingropat — si nimeni n-ar sti de ce, fiindca "nivelul marii e
+## zero" e o presupunere pe care n-o pui la indoiala.
+@export var sea_level_offset: float = -7.0
+
+## Cat de departe de tarm mai are rost geometrie fina. Dincolo, culoarea e
+## oricum sea_deep uniform, deci preia cvadrilaterul de larg.
+const SEA_NEAR_DEPTH: float = 14.0
+## Sub atat de multa apa, un varf e "larg"; peste, e recif.
+const SEA_REEF_DEPTH: float = 5.0
+## Banda de spuma: cati metri de apa peste tarm mai citesc ca sparger de val.
+const SEA_FOAM_DEPTH: float = 0.6
+## Grila fina de langa tarm. 760 m / 80 = 9.5 m pe celula — de doua ori mai
+## deasa decat terenul (15.8 m), fiindca linia tarmului e ce se vede.
+const SEA_CELLS: int = 80
+## Cat de mult depaseste cvadrilaterul de larg grila fina. Trebuie sa ajunga
+## dincolo de ceata (250 m) ca marea sa nu aiba margine vizibila.
+const SEA_FAR_EXTENT: float = 2400.0
+## Cu cat sta mai jos cvadrilaterul de larg fata de grila fina.
+##
+## Sunt doua suprafete la aceeasi cota, deci ar face z-fighting pe toata zona de
+## suprapunere. 4 cm le separa fara sa se vada: la nivelul marii, din masina,
+## treapta e sub un pixel.
+const SEA_FAR_DROP: float = 0.04
+
+
+## Marea: o grila fina langa tarm plus un cvadrilater urias pentru larg.
+##
+## De ce doua mesh-uri si nu unul singur: linia tarmului are nevoie de rezolutie
+## (banda de spuma, tranzitia recif->larg), largul n-are nevoie de niciuna. O
+## grila uniforma destul de deasa pentru tarm ar fi costat, pe toata suprafata,
+## de trei ori bugetul de triunghiuri al intregii piste. Asa geometria sta acolo
+## unde se uita jucatorul.
+func _build_water() -> void:
+	if not theme_flag("water", false):
+		return
+	if _sampler == null or baked.is_empty():
+		return
+	var sea_y := _sampler.mean_road_y() + sea_level_offset
+	var root := Node3D.new()
+	root.name = "Sea"
+	add_child(root)
+	_build_sea_far(root, sea_y)
+	_build_sea_near(root, sea_y)
+	_build_sea_respawn(sea_y)
+
+
+## Largul: doua triunghiuri. Nu are nevoie de mai mult.
+func _build_sea_far(root: Node3D, sea_y: float) -> void:
+	var c := _centroid()
+	var h := SEA_FAR_EXTENT * 0.5
+	var y := sea_y - SEA_FAR_DROP
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var deep := water_tint(Palette.SEA_DEEP)
+	var corners := [
+		Vector3(c.x - h, y, c.z - h), Vector3(c.x + h, y, c.z - h),
+		Vector3(c.x - h, y, c.z + h), Vector3(c.x + h, y, c.z + h),
+	]
+	for tri: Array in [[0, 1, 2], [1, 3, 2]]:
+		for ci: int in tri:
+			st.set_color(deep)
+			st.set_normal(Vector3.UP)
+			st.add_vertex(corners[ci])
+	var inst := MeshInstance3D.new()
+	inst.name = "SeaFar"
+	inst.mesh = st.commit()
+	inst.material_override = _water_material()
+	root.add_child(inst)
+
+
+## Zona de tarm: doar celulele care chiar au apa deasupra lor.
+##
+## Celulele complet uscate se SAR, din doua motive care conteaza amandoua:
+## triunghiuri economisite, si — mai important — fara ele n-ar exista z-fighting
+## intre apa si nisip pe toata suprafata insulei.
+func _build_sea_near(root: Node3D, sea_y: float) -> void:
+	var c := _centroid()
+	var size := 760.0 # aceeasi intindere ca terenul: dincolo preia largul
+	var step := size / float(SEA_CELLS)
+	var origin := c - Vector3(size * 0.5, 0, size * 0.5)
+
+	# Adancimea in fiecare nod al grilei, calculata O SINGURA DATA: ground_y e
+	# o interpolare Shepard peste toate punctele coapte, adica departe de
+	# gratuita. Cu 81x81 = 6561 de apeluri in loc de 4 per celula.
+	var depth: Array[float] = []
+	depth.resize((SEA_CELLS + 1) * (SEA_CELLS + 1))
+	for gz in SEA_CELLS + 1:
+		for gx in SEA_CELLS + 1:
+			var wx := origin.x + float(gx) * step
+			var wz := origin.z + float(gz) * step
+			depth[gz * (SEA_CELLS + 1) + gx] = sea_y - _sampler.ground_y(wx, wz)
+
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var emitted := 0
+	for gz in SEA_CELLS:
+		for gx in SEA_CELLS:
+			var i00 := gz * (SEA_CELLS + 1) + gx
+			var idx := [i00, i00 + 1, i00 + SEA_CELLS + 1, i00 + SEA_CELLS + 2]
+			var d_max := -INF
+			var d_min := INF
+			for k: int in idx:
+				d_max = maxf(d_max, depth[k])
+				d_min = minf(d_min, depth[k])
+			if d_max <= 0.0:
+				continue # uscat pe tot patratul
+			if d_min > SEA_NEAR_DEPTH:
+				continue # larg curat — il acopera cvadrilaterul de dedesubt
+			var pos := [
+				Vector3(origin.x + float(gx) * step, sea_y,
+					origin.z + float(gz) * step),
+				Vector3(origin.x + float(gx + 1) * step, sea_y,
+					origin.z + float(gz) * step),
+				Vector3(origin.x + float(gx) * step, sea_y,
+					origin.z + float(gz + 1) * step),
+				Vector3(origin.x + float(gx + 1) * step, sea_y,
+					origin.z + float(gz + 1) * step),
+			]
+			for tri: Array in [[0, 1, 2], [1, 3, 2]]:
+				for k: int in tri:
+					st.set_color(_sea_color(depth[idx[k]]))
+					st.set_normal(Vector3.UP)
+					st.add_vertex(pos[k])
+			emitted += 1
+	if emitted == 0:
+		return
+	var inst := MeshInstance3D.new()
+	inst.name = "SeaNear"
+	inst.mesh = st.commit()
+	inst.material_override = _water_material()
+	root.add_child(inst)
+
+
+## Cat de saturata iese apa fata de cat a fost autorata.
+##
+## Environment.adjustment_saturation e 1.18 pe TOATA imaginea. Suprafetele
+## aproape nesaturate abia se misca sub el — de-asta nisipul si asfaltul n-au
+## avut niciodata problema asta. Apa e insa cea mai saturata suprafata mare din
+## cadru, deci acolo se vede: masurat pe recif, #54BFB8 autorat iesea #4DD4CE,
+## adica verdele si albastrul cu +21 si +22 peste tinta, in timp ce rosul era la
+## -7. Nu e o eroare de luminozitate (aia s-ar fi vazut pe toate trei canalele),
+## e chiar saturatia.
+const WATER_SATURATION_FIX: float = 1.18
+
+## Pasul de iluminare pe care shaderul unshaded il SARE.
+##
+## Orice alta suprafata din lume isi inmulteste albedo-ul cu lumina inainte de
+## tonemap. Apa nu (vezi water.gdshader: unshaded, deliberat). Diferenta se
+## masoara: dupa corectia de saturatie, reciful si largul ieseau amandoua cu
+## ~+19/255 UNIFORM pe toate trei canalele — adica exact luminozitate in plus,
+## nu nuanta gresita.
+##
+## Valoarea vine din masuratoare, nu din formula: 0.87 e raportul dintre tinta
+## si masurat pe cele doua zone. Daca se schimba tonemap-ul, expunerea sau
+## ripple_strength din shader, se REIA masuratoarea:
+##   godot --path . res://tools/Snapshot.tscn -- --track=4 --size=300
+## si se compara largul cu #2E5F6B, reciful cu #54BFB8.
+const WATER_GAIN: float = 0.87
+
+
+## Culoarea unei ape, pregatita pentru vertex colors.
+##
+## Doua corectii, amandoua din masuratoare:
+##
+## 1. DESATURARE cu WATER_SATURATION_FIX — compenseaza exact multiplicatorul
+##    global din Environment, ca pixelul final sa cada pe culoarea din paleta.
+##
+## 2. srgb_to_linear — obligatorie fiindca shaderul apei e unshaded. Un vertex
+##    color e citit ca LINIAR; restul lumii scapa fara conversie doar pentru ca
+##    e ILUMINATA, iar inmultirea cu lumina readuce valorile in interval. Apa nu
+##    are pasul ala. Masurat fara conversie: largul iesea #86C2CB in loc de
+##    #2E5F6B, cu 95/255 peste tinta pe fiecare canal — turcoaz palid in loc de
+##    mare adanca.
+##
+## S-a incercat si varianta "apa iluminata, fara conversie", ca sa fie o singura
+## conventie in proiect. Nu merge: culorile INCHISE hranite ca liniare se umfla
+## prea tare, iar lumina de aici (soare 1.5 + ambient) nu le mai coboara —
+## marea iesea palida. Terenul nu are culori inchise, de-asta n-a semnalat
+## nimeni pana acum.
+## Desaturarea se face in jurul LUMINANTEI, nu in HSV.
+##
+## Prima incercare a fost `Color.from_hsv(h, s / 1.18, v)`. Nu e inversa
+## operatiei: HSV pastreaza V, deci reducerea saturatiei urca doar canalele mici
+## spre cel mare si INALBESTE culoarea. Masurat, eroarea reciful a crescut de la
+## (-7, +21, +22) la (+21, +22, +24) — adica exact ce nu voiam.
+## adjustment_saturation lucreaza in jurul luminantei, deci si compensarea
+## trebuie sa faca la fel.
+func water_tint(slot: int) -> Color:
+	var c := Palette.color(slot)
+	var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
+	var k := 1.0 / WATER_SATURATION_FIX
+	return Color(
+		(lum + (c.r - lum) * k) * WATER_GAIN,
+		(lum + (c.g - lum) * k) * WATER_GAIN,
+		(lum + (c.b - lum) * k) * WATER_GAIN).srgb_to_linear()
+
+
+## Culoarea unui varf dupa cata apa are sub el.
+##
+## Spuma e GEOMETRIE, nu depth fade: banda de varfuri unde apa abia acopera
+## tarmul primeste foam_white. Un depth fade ar fi cerut DEPTH_TEXTURE, adica
+## un pas de citire a adancimii pe fiecare pixel de apa — pe mobil, exact
+## genul de cost pe care nu-l vede nicio garda din proiect.
+func _sea_color(d: float) -> Color:
+	var reef := water_tint(Palette.REEF_SHALLOW)
+	var deep := water_tint(Palette.SEA_DEEP)
+	# Spuma NU e alb curat, ci alb spart cu recif.
+	#
+	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
+	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
+	# spuma si isi intind culoarea peste toata celula prin interpolare.
+	var foam := water_tint(Palette.FOAM_WHITE).lerp(reef, 0.35)
+	if d <= 0.0:
+		return foam # varf uscat al unei celule de mal
+	if d < SEA_FOAM_DEPTH:
+		return foam.lerp(reef, d / SEA_FOAM_DEPTH)
+	if d < SEA_REEF_DEPTH:
+		return reef
+	return reef.lerp(deep, clampf(
+		(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+
+
+## Materialul apei — UNUL SINGUR pentru ambele mesh-uri.
+##
+## Cache-ul nu e cosmetic: un ShaderMaterial per petec de apa ar strica
+## raportul mesh-uri/materiale din tools/probe_decor.gd, adica exact garda de
+## draw call-uri. Doua mesh-uri, un material, un draw call in plus fata de
+## lumea de pe atlas.
+var _water_mat: ShaderMaterial
+
+func _water_material() -> ShaderMaterial:
+	if _water_mat != null:
+		return _water_mat
+	_water_mat = ShaderMaterial.new()
+	_water_mat.shader = load("res://assets/shaders/water.gdshader") as Shader
+	# Aceeasi textura pe care o foloseste deja stratul de detaliu al lumii —
+	# zero VRAM in plus.
+	_water_mat.set_shader_parameter("ripple_tex", load(Palette.DETAIL_PATH))
+	return _water_mat
+
+
+## Iesitul in mare = repunere pe traseu.
+##
+## Acelasi tipar ca plasa de sub creasta de fly-off (_build_flyoff_net): un
+## Area3D care prinde ce a cazut si cheama RespawnZone. Volumul incepe SUB
+## suprafata, ca stropul de la intrare sa apuce sa se vada.
+func _build_sea_respawn(sea_y: float) -> void:
+	var c := _centroid()
+	var zone := RespawnZone.new()
+	zone.name = "SeaRespawn"
+	zone.backoff_m = 16.0
+	add_child(zone)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	var top := sea_y - 1.2
+	var bottom := sea_y - 60.0
+	box.size = Vector3(SEA_FAR_EXTENT, top - bottom, SEA_FAR_EXTENT)
+	shape.shape = box
+	zone.add_child(shape)
+	zone.global_position = Vector3(c.x, (top + bottom) * 0.5, c.z)
+
 
 ## Cat de dens se testeaza terenul fata de faleze. Peste raza asta o faleza nu
 ## mai intuneca nimic.

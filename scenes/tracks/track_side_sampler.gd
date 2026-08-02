@@ -67,16 +67,21 @@ var _dune_phase: float = 0.0
 var _mean_y: float = 0.0
 ## Rapele declarate: (frac_start, frac_end, adancime, latura).
 var _ravines: Array[Vector4] = []
+## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
+## padure); > 0 = fund de mare (insula). Vezi ground_y.
+var _far_drop: float = 0.0
 
 
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		control_points: Array[Vector3], half_width: float,
-		dune_phase: float = 0.0, ravines: Array[Vector4] = []) -> void:
+		dune_phase: float = 0.0, ravines: Array[Vector4] = [],
+		far_drop: float = 0.0) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
 	_dune_phase = dune_phase
 	_ravines = ravines
+	_far_drop = far_drop
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -156,6 +161,22 @@ func ground_y(wx: float, wz: float) -> float:
 	# media, desertul ondulează IMPREUNA cu traseul — creasta citeste ca mesa,
 	# portiunile joase ca vai.
 	var far_level := _mean_y + maxf(_dunes(wx, wz), -1.0)
+	if _far_drop > 0.0:
+		# Insula: dincolo de coridorul pistei, terenul devine FUND DE MARE.
+		#
+		# Fara asta o pista de insula e imposibila, si nu dintr-un motiv estetic:
+		# campul departat se ancoreaza la media cotelor soselei, deci nu coboara
+		# niciodata sub ea. Un plan de apa peste el e ori complet ingropat (cota
+		# mica), ori inunda si soseaua (cota mare) — nu exista pozitie din care
+		# sa iasa o insula.
+		#
+		# Relieful de fund pastreaza doar un sfert din amplitudinea dunelor. Nu e
+		# cosmetica: adancimea trebuie sa treaca DECIS de pragul dincolo de care
+		# apa nu-si mai schimba culoarea (Track.SEA_NEAR_DEPTH). Cu dune la
+		# amplitudine plina, adancimea oscila peste si sub prag, iar grila fina de
+		# tarm se emitea pe toata suprafata marii — masurat: 12 800 de triunghiuri
+		# in loc de ~2 000.
+		far_level = _mean_y - _far_drop + maxf(_dunes(wx, wz), -1.0) * 0.25
 	var y := lerpf(road_level, far_level, t * t)
 	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
 

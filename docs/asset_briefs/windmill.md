@@ -116,3 +116,49 @@ culoare:**
   3. UV-uri pe centrele sloturilor; AO pe roată arată bine în orice unghi
   4. origine la baza turnului, XZ centrat; stă pe sol la Y=0
   5. instanțiere cu `Palette.apply_world_material(glb)` + script de rotație → animat
+
+## Livrat (#D3)
+
+![moara înainte și după la 50 m, plus prim-plan](img/windmill_d3.png)
+
+De la stânga: înainte, după la 50 m, și un prim-plan. Ambele randate cu același
+material comun.
+
+| | înainte | după |
+|---|---|---|
+| `Windmill` | 836 | **2608** |
+| `Blades` | 172 | **172** (neatins) |
+| înălțime | 10.95 m | **10.95 m** |
+| pivot `Blades` | (0, 0.450, 9.650) | **identic** |
+
+Buget ignorat la cerere.
+
+### Ce s-a adăugat
+
+- **Al treilea rând de inele.** Comentariul din script spunea „două (brief: 2–3),
+  trei ar depăși bugetul după bevel" — al treilea e chiar ce cere issue-ul, și e
+  cea mai ieftină îmbunătățire: turnul devine mai dens spre bază, ceea ce e și
+  corect structural, fiindcă acolo sunt forțele.
+- **Rezervor la bază**, cu capac și două cercuri. O moară de apă fără rezervor
+  n-are ce pompa — ăsta e detaliul care leagă obiectul de funcția lui.
+- **Jgheab** de la rezervor, cu apa sugerată prin `retag` pe fețele de sus
+  (`SAND_SHADOW`, zero triunghiuri).
+- **Scară** pe un picior, până sub cap, cu `ladder()`.
+
+### Abaterea asumată: amprenta crește cu 1.07 m
+
+Issue-ul cere două lucruri care nu încap împreună: **„rezervor la bază"** și
+**„bbox-ul nu crește"**. Un rezervor la bază nu poate sta *înăuntrul* turnului.
+
+Am minimizat creșterea — rezervorul a scăzut de la R=1.05 la 0.85 și s-a
+apropiat, jgheabul a fost mutat pe +Y unde coada morii iese oricum cu 2.35 m —
+dar rămâne +1.07 m pe X. Raza maximă față de axă urcă de la 1.84 la **2.44 m**.
+
+Contextul care face abaterea acceptabilă: `_LANDMARKS` are deja `radius: 1.6`,
+iar turnul singur avea 1.84 la colțuri. Colizorul sub-acoperea și înainte, și
+issue-ul spune explicit că instanța de gameplay repară intrarea aia la
+integrare. Numărul nou de care are nevoie e **2.44**.
+
+Ce **nu** s-a schimbat, fiindcă alea sunt contractele tari: înălțimea și pivotul
+lui `Blades` (`scenes/props/windmill.gd:16` îl caută după nume și îi animează
+rotația; redenumit sau mutat înseamnă roată statică cu `push_warning`).

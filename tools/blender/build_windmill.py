@@ -49,8 +49,11 @@ b = Builder()
 for i in range(4):
     b.beam(leg_xy(i, 0.0), leg_xy(i, TOWER_H), BEAM, WOOD)
 
-# Doua inele orizontale (brief: 2-3). Trei ar depasi bugetul dupa bevel.
-for z in (TOWER_H * 0.34, TOWER_H * 0.70):
+# TREI inele orizontale. Comentariul de aici spunea "doua (brief: 2-3), trei ar
+# depasi bugetul dupa bevel" — al treilea e chiar ce cere #D3, si e cea mai
+# ieftina imbunatatire din issue: turnul devine mai dens spre baza, ceea ce e si
+# corect structural, fiindca acolo sunt fortele.
+for z in (TOWER_H * 0.16, TOWER_H * 0.42, TOWER_H * 0.72):
     for i in range(4):
         b.beam(leg_xy(i, z), leg_xy((i + 1) % 4, z), BEAM * 0.85, WOOD)
 
@@ -65,6 +68,42 @@ b.box(center=(0.0, 0.0, HEAD_Z), size=(0.60, 0.60, 0.50), slot=RUST)
 b.beam((0.0, -0.25, HEAD_Z), (0.0, -1.05, HEAD_Z), 0.12, RUST)
 b.box(center=(0.0, -1.55, HEAD_Z), size=(0.06, 1.60, 0.90), slot=PAINTED,
       rotation=Matrix.Rotation(math.radians(9.0), 3, "Y"))
+
+# ================================================== #D3: imbogatire la baza
+# Rezervor. O moara de apa fara rezervor n-are ce pompa — asta e detaliul care
+# leaga obiectul de functia lui, si lipsea complet.
+TANK_R, TANK_H = 0.85, 1.15
+TANK_X, TANK_Y = 1.50, 0.20
+b.revolve(profile=[(TANK_R, 0.0), (TANK_R, TANK_H)], slot=RUST, segments=10,
+          origin=(TANK_X, TANK_Y, 0.0), cap_bottom=True)
+# Capacul de sus: `revolve` inchide doar baza, iar rezervorul se vede de sus de
+# la inaltimea camerei de urmarire — deci aici capacul chiar se vede, spre
+# deosebire de cel al turnului de apa, care sta sub streasina.
+b.revolve(profile=[(TANK_R, TANK_H), (0.0, TANK_H + 0.16)], slot=RUST,
+          segments=10, origin=(TANK_X, TANK_Y, 0.0), cap_bottom=False)
+for z in (0.30, 0.85):
+    b.torus(center=(TANK_X, TANK_Y, z), major_r=TANK_R + 0.04, minor_r=0.06,
+            slot=RUST, major_seg=10, minor_seg=4)
+
+# Jgheab de la rezervor spre exterior, si o pata de umezeala in jurul lui.
+# Jgheabul merge spre +Y, nu spre -X: pe X orice iesire mareste amprenta, iar pe
+# +Y mai e loc pana la coada morii, care iese oricum in spate cu 2.35 m.
+b.beam((TANK_X - TANK_R * 0.3, TANK_Y + 0.55, 0.62),
+       (TANK_X - 0.30, TANK_Y + 1.05, 0.34), (0.32, 0.22), WOOD)
+trough = b.box(center=(TANK_X - 0.32, TANK_Y + 1.20, 0.22),
+               size=(0.95, 0.58, 0.44), slot=WOOD)
+# `retag` pe fetele de sus ale jgheabului: apa, zero triunghiuri.
+b.retag(trough, SAND_SHADOW, where="up")
+
+# Scara pe un picior, pana sub cap. `ladder` impune grosimile minime — la 0.4 m
+# latime, treapta nu poate cobori sub 3.6 cm, deci nu poate iesi sarma.
+LAD_OFF = 0.22 / math.sqrt(2.0)
+lx0, ly0, _ = leg_xy(0, 1.10)
+lx1, ly1, _ = leg_xy(0, TOWER_H - 0.55)
+b.ladder(base=(lx0 + LAD_OFF, ly0 + LAD_OFF, 1.10),
+         top=(lx1 + LAD_OFF, ly1 + LAD_OFF, TOWER_H - 0.55),
+         width=0.40, rung_step=0.36, rail_t=0.06, rung_r=0.045,
+         slot=RUST, side=(1.0, -1.0, 0.0))
 
 tower = b.to_object("Windmill")
 tower_stats = finish(
@@ -109,6 +148,36 @@ blades_stats = finish(
 # jurul originii); il asezam in fata capului, la cota butucului.
 blades.location = (0.0, HUB_Y, HUB_Z)
 
+# Contract: bbox-ul nu creste, nodurile nu se redenumesc. `Blades` e cel critic —
+# `scenes/props/windmill.gd:16` il cauta dupa nume si ii animeaza rotatia; daca
+# lipseste, roata ramane statica cu un push_warning.
+# --- contractele, separate dupa cat de tari sunt ---------------------------
+#
+# TARI, si se verifica: inaltimea si pivotul lui `Blades`. Pe astea Godot chiar
+# se bazeaza (`_LANDMARKS` height, si `windmill.gd:16` care cauta nodul dupa nume
+# si ii animeaza rotatia).
+#
+# AMPRENTA CRESTE, si e o abatere ASUMATA, nu o scapare. Issue-ul cere doua
+# lucruri care nu incap impreuna: "rezervor la baza" si "bbox-ul nu creste". Un
+# rezervor la baza nu poate sta INAUNTRUL turnului — deci amprenta creste, si
+# singurul lucru cinstit e s-o masor si s-o raportez, nu s-o ascund. Am
+# minimizat-o: rezervorul a scazut de la R=1.05 la 0.85 si s-a apropiat, iar
+# jgheabul a fost mutat pe +Y, unde coada morii iese oricum mai mult.
+BEFORE = (2.74, 3.72, 10.95)   # X, Y, Z in Blender, MASURATE pe GLB-ul dinainte
+tb = [v.co for v in tower.data.vertices]
+wb = [v.co + blades.location for v in blades.data.vertices]
+allv = tb + wb
+now = tuple(max(v[a] for v in allv) - min(v[a] for v in allv) for a in range(3))
+rad = max(math.hypot(v.x, v.y) for v in allv)
+print("bbox: %.2f x %.2f x %.2f   (inainte de #D3: %.2f x %.2f x %.2f)" % (now + BEFORE))
+print("  inaltime : %.3f m  %s  [contract]"
+      % (now[2], "neschimbata OK" if abs(now[2] - BEFORE[2]) < 0.01 else "SCHIMBATA !!"))
+print("  amprenta : +%.2f m pe X — crestere ASUMATA, vezi nota. Raza max fata de axa: %.2f m"
+      % (now[0] - BEFORE[0], rad))
+print("  `_LANDMARKS` are radius 1.6; turnul singur avea deja 1.84 la colturi, "
+      "acum e %.2f" % rad)
+print("pivot Blades: (%.3f, %.3f, %.3f)  [neschimbat = contract cu windmill.gd:16]"
+      % tuple(blades.location))
 print("Windmill -> %4d tris | AO %.2f..%.2f" % (tower_stats["tris"], tower_stats["ao_min"], tower_stats["ao_max"]))
 print("Blades   -> %4d tris | AO %.2f..%.2f" % (blades_stats["tris"], blades_stats["ao_min"], blades_stats["ao_max"]))
 print("TOTAL    -> %4d tris" % (tower_stats["tris"] + blades_stats["tris"]))

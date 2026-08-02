@@ -232,7 +232,7 @@ func rebuild() -> void:
 		_build_rockfall(frac)
 	for frac in _train_fracs():
 		_build_train(frac)
-	_build_pins()
+	_build_markers()
 	_build_start_gate()
 	_build_start_line()
 	_build_center_line()
@@ -525,6 +525,12 @@ func _build_horizon_fallback(centroid: Vector3) -> void:
 
 
 ## Instantiaza un GLB si pastreaza un singur nod, anuland offsetul lui din fisier.
+##
+## `remove_child` INAINTE de `queue_free`, nu doar `queue_free`: eliberarea e
+## amanata pana la sfarsitul cadrului, deci cine masoara containerul imediat
+## (Track.model_aabb, _first_mesh) vede si variantele care tocmai au fost
+## "sterse". Stalpii de marcaj au iesit toti cu aceeasi coliziune din cauza
+## asta — inaltimea variantei drepte si latimea celei inclinate, amestecate.
 func _extract_glb_node(scene: PackedScene, node_name: String) -> Node3D:
 	var container := scene.instantiate() as Node3D
 	var kept: Node3D = null
@@ -532,6 +538,7 @@ func _extract_glb_node(scene: PackedScene, node_name: String) -> Node3D:
 		if child.name == node_name:
 			kept = child
 		else:
+			container.remove_child(child)
 			child.queue_free()
 	if kept == null:
 		container.queue_free()
@@ -1417,6 +1424,15 @@ const _LANDMARKS := {
 		"gap": 11.0, "col": "cyl", "radius": 1.6, "spin": true},
 	3: {"path": "res://assets/models/route66_sign.glb",
 		"gap": 3.5, "col": "none", "spin": false},
+	# Ecran de drive-in: 20.6 m lat si 10.8 m inalt, cel mai lat lucru construit
+	# de pe pista. Sta departe de sosea nu ca sa nu-l lovesti, ci ca sa incapa in
+	# cadru — de la 9 m ai doar tabla in fata.
+	4: {"path": "res://assets/models/drive_in_screen.glb",
+		"gap": 15.0, "col": "box", "spin": false},
+	# Stalpul GAS: 13.7 m, cel mai INALT. Raza mica intentionat — vrem sa lovesti
+	# stalpul, nu un cilindru de 1.9 m in jurul unui obiect subtire.
+	5: {"path": "res://assets/models/gas_pole_sign.glb",
+		"gap": 5.0, "col": "cyl", "radius": 0.55, "spin": false},
 }
 
 ## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual
@@ -1490,16 +1506,28 @@ func _build_hose(frac: float) -> void:
 
 ## Popice pe marginile DESCHISE ale pistei (interior la nivelul solului,
 ## unde nu sunt pereti): delimitatoare fizice — stau cuminti pana le lovesti.
-func _build_pins() -> void:
-	if not ResourceLoader.exists("res://assets/models/bowling_pin.glb"):
+## Cele trei siluete din marker_post.glb si cat de des apare fiecare.
+## Cel rupt e rar intentionat: daca fiecare al treilea stalp e frant, marginea
+## drumului nu mai citeste ca marcaj, ci ca ruina.
+const _MARKER_PICKS := [
+	{"node": "Marker_A", "weight": 0.55}, # drept
+	{"node": "Marker_B", "weight": 0.32}, # inclinat, lovit de o masina
+	{"node": "Marker_C", "weight": 0.13}, # rupt la jumatate
+]
+
+
+func _build_markers() -> void:
+	if not ResourceLoader.exists("res://assets/models/marker_post.glb"):
 		return
-	var pin_scene := load("res://assets/models/bowling_pin.glb") as PackedScene
+	var scene := load("res://assets/models/marker_post.glb") as PackedScene
+	var rng := RandomNumberGenerator.new()
+	rng.seed = track_name.hash() + 7 # alt sir decat decorul si orizontul
 	var loop_poly := PackedVector2Array()
 	for p in _points():
 		loop_poly.append(Vector2(p.x, p.z))
 	var n := baked.size()
 	var placed := 0
-	for i in range(0, n, 4): # o popica la ~12m de margine deschisa
+	for i in range(0, n, 4): # un stalp la ~12m de margine deschisa
 		if placed >= 110:
 			break
 		for side_sign: float in [-1.0, 1.0]:
@@ -1507,17 +1535,40 @@ func _build_pins() -> void:
 			var exterior := not Geometry2D.is_point_in_polygon(
 				Vector2(edge.x, edge.z), loop_poly)
 			if exterior or edge.y > 1.0:
-				continue # acolo sunt pereti; popicele marcheaza doar golurile
-			var pin := BowlingPin.new()
-			pin.model_scene = pin_scene
-			add_child(pin)
+				continue # acolo sunt pereti; stalpii marcheaza doar golurile
+			var model := _extract_glb_node(scene, _marker_variant(rng))
+			if model == null:
+				continue
+			# Materialul comun PE MODEL, nu pe pista. `apply_world_material` pune
+			# material_override pe tot subarborele primit — dat pe `self`, ar
+			# rescrie asfaltul, bordurile si liniile cu UV-uri de atlas pe care
+			# ele nu le au. Tiparul e cel din track_decor: cate un apel per
+			# instanta, materialul fiind oricum partajat.
+			Palette.apply_world_material(model)
+			var marker := RoadMarker.new()
+			marker.model = model
+			add_child(marker)
+			# Rotire pe verticala: banda reflectorizanta se intoarce spre drum.
+			# Fara asta, jumatate din stalpi si-ar arata spatele.
+			marker.rotation.y = atan2(-_side_at(i).x * side_sign,
+				-_side_at(i).z * side_sign)
 			var spot := edge + _side_at(i) * side_sign * 1.7
-			# Popicele scapasera de bug-ul plutirii doar din NOROC: linia de mai
+			# Stalpii scapasera de bug-ul plutirii doar din NOROC: linia de mai
 			# sus sare peste sloturile inaltate, care erau exact cele afectate.
 			# Acum stau pe sol prin constructie, nu prin coincidenta.
 			spot.y = _sampler.ground_y(spot.x, spot.z) + 0.2
-			pin.global_position = spot
+			marker.global_position = spot
 			placed += 1
+
+
+func _marker_variant(rng: RandomNumberGenerator) -> String:
+	var roll := rng.randf()
+	var acc := 0.0
+	for pick: Dictionary in _MARKER_PICKS:
+		acc += float(pick["weight"])
+		if roll < acc:
+			return String(pick["node"])
+	return String(_MARKER_PICKS[0]["node"])
 
 ## Marginea LUMII: patru pereti INVIZIBILI care opresc masina sa iasa din
 ## harta. Inainte era rama de scanduri a unei lazi de nisip (tema "jucarii in

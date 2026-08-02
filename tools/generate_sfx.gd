@@ -23,6 +23,15 @@ func _init() -> void:
 	_save("count_beep", _tone(0.1, 440.0, 10.0))
 	_save("go_beep", _tone(0.3, 880.0, 6.0))
 	_save("skid_loop", _skid_loop())
+	# --- hazarde. Niciun hazard nu scotea sunet pana acum. ---
+	# Huruit lung si jos, ca avertisment inainte sa cada bolovanul.
+	_save("rock_warn", _thud(0.55, 60.0, 42.0, 0.5))
+	# Impactul: mai lung si mai puternic decat wall_hit, cu cadere de frecventa
+	# mai mare — o piatra de doua tone, nu tabla.
+	_save("rock_impact", _thud(0.35, 130.0, 40.0, 0.95))
+	_save("train_horn", _train_horn())
+	# Clopotul de trecere la nivel: ascutit, ca sa taie prin motor.
+	_save("crossing_bell", _tone(0.18, 1050.0, 14.0))
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -88,6 +97,18 @@ func _thud(dur: float, f0: float, f1: float, amp: float) -> PackedFloat32Array:
 		var click := (rng.randf() * 2.0 - 1.0) * exp(-t * 90.0) * 0.5
 		out[i] = (thud * 0.8 + click) * amp
 	return out
+
+## Cornul trenului: doua tonuri deodata, la o cvinta. Un singur ton suna a
+## claxon de masina; intervalul e ce face sunetul sa citeasca drept "tren".
+func _train_horn() -> PackedFloat32Array:
+	var low := _tone(1.2, 165.0, 1.6)
+	var high := _tone(1.2, 220.0, 1.6)
+	var out := PackedFloat32Array()
+	out.resize(low.size())
+	for i in low.size():
+		out[i] = clampf((low[i] * 0.6 + high[i] * 0.45), -1.0, 1.0)
+	return out
+
 
 ## Aterizare: bufnitura joasa + praf (zgomot filtrat scurt).
 func _land() -> PackedFloat32Array:

@@ -184,6 +184,14 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Bolovani care cad de pe faleza (fractii 0..1).
+func _rockfall_fracs() -> Array[float]:
+	return []
+
+## Treceri de cale ferata cu tren (fractii 0..1).
+func _train_fracs() -> Array[float]:
+	return []
+
 func _ready() -> void:
 	rebuild()
 
@@ -220,6 +228,10 @@ func rebuild() -> void:
 		_build_deflector(frac)
 	for frac in _carousel_fracs():
 		_build_carousel(frac)
+	for frac in _rockfall_fracs():
+		_build_rockfall(frac)
+	for frac in _train_fracs():
+		_build_train(frac)
 	_build_pins()
 	_build_start_gate()
 	_build_start_line()
@@ -922,6 +934,97 @@ func _build_carousel(frac: float) -> void:
 	carousel.arm_reach = half_width - 0.2
 	carousel.position = baked[idx]
 	add_child(carousel)
+
+## Bolovan care cade de pe faleza pe o banda a soselei.
+##
+## Ocupa jumatatea dinspre o margine, nu tot drumul: blocarea completa e treaba
+## caruselului, iar aici trebuie sa ramana mereu o linie curata ca sa fie alegere.
+## Latura alterneaza determinist cu fractia, ca doua bolovanuri consecutive sa nu
+## cada pe aceeasi banda.
+func _build_rockfall(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	var side := _side_at(idx) * signf(sin(frac * 17.0))
+	var rock := RockfallHazard.new()
+	# Defazare din fractie, ca la SlidingHazard: doua bolovanuri nu cad la unison.
+	rock.phase = fposmod(frac * 3.7, 1.0)
+	add_child(rock)
+	# Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
+	rock.global_position = p + side * (half_width * 0.45)
+
+
+## Trecere de cale ferata cu tren.
+##
+## Doua lucruri se corecteaza singure in loc sa fie scrise de mana in scena, ca
+## sa nu se strice la prima modificare de traseu:
+##   - trecerea se muta din apexul unui viraj (style_bible §7 cere sa nu pui
+##     nimic care blocheaza citirea in apex);
+##   - sina se opreste inainte de alta bucla a pistei, altfel un tren de ~33 m
+##     intra pe soseaua vecina pe o pista care se auto-intersecteaza.
+func _build_train(frac: float) -> void:
+	var n := baked.size()
+	var idx := _calm_index_near(int(frac * float(n)) % n, 40.0)
+	var p := baked[idx]
+	var dir := (baked[(idx + 1) % n] - p).normalized()
+	var rail := dir.cross(Vector3.UP).normalized()
+	var train := TrainHazard.new()
+	train.road_half_width = half_width
+	train.half_rail = _rail_reach(p, rail, 90.0, 25.0)
+	# ATENTIE la ordine: transformarea INAINTE de add_child. Trenul e un
+	# AnimatableBody3D cu sync_to_physics, deci transformarea o tine serverul de
+	# fizica; pus dupa intrarea in arbore, ramane un pas fizic in origine — adica
+	# exact peste grila de start, si matura tot plutonul la countdown.
+	# Conventia de orientare din tot proiectul: looking_at(dir) da -Z pe directia
+	# de mers si +X pe marginea din dreapta. Sina se construieste de-a lungul lui
+	# X local, deci baza se face din DIRECTIA DRUMULUI, ca X sa iasa perpendicular
+	# pe el.
+	#
+	# Prima versiune folosea looking_at(-rail) si punea X pe directia drumului —
+	# adica sina mergea PARALEL cu soseaua. Nu se vedea imediat, pentru ca o
+	# tangenta la o curba pare ca o traverseaza de doua ori.
+	train.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
+	add_child(train)
+
+
+## Cel mai apropiat index cu curbura mica, in raza data. Daca nu exista, il
+## intoarce pe cel primit — mai bine o trecere intr-un viraj decat niciuna.
+func _calm_index_near(idx: int, radius_m: float) -> int:
+	var n := baked.size()
+	var spacing := _dists[n] / float(n)
+	var steps := int(radius_m / spacing)
+	for offset in range(0, steps):
+		for sign_i: int in [1, -1]:
+			var i := ((idx + offset * sign_i) % n + n) % n
+			if _sampler.curvature_at(i) < TrackSideSampler.APEX_CURVATURE:
+				return i
+	return idx
+
+
+## Cat de lunga poate fi sina inainte sa dea peste alta bucla a pistei.
+##
+## Doua praguri, nu unul. Prima versiune lua minimul peste AMBELE directii si
+## iesea o sina de 25 m — pe interiorul unei curbe soseaua revine repede, iar
+## restrictia de acolo taia si capatul dinspre desertul gol. Acum interiorul e
+## limitat separat, iar exteriorul isi ia lungimea intreaga.
+##
+## MIN_RAIL nu e arbitrar: garnitura are ~33 m, deci sub atat trenul n-ar avea de
+## unde sa intre in cadru. Sina e doar geometrie, fara coliziune — daca trece pe
+## langa alta bucla a pistei nu strica nimic, doar arata ciudat.
+func _rail_reach(origin: Vector3, dir: Vector3, max_len: float,
+		clearance: float) -> float:
+	const MIN_RAIL := 46.0
+	var reach := max_len
+	var step := 6.0
+	var d := clearance
+	while d < max_len:
+		for sign_f: float in [1.0, -1.0]:
+			var probe := origin + dir * d * sign_f
+			if _sampler.clearance_at(probe) < clearance:
+				reach = minf(reach, d - step)
+		d += step
+	return maxf(reach, MIN_RAIL)
+
 
 ## Deviatorul: bariera oblica ancorata pe o margine, care taie drumul in
 ## diagonala si te trimite pe cealalta banda.

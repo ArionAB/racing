@@ -32,6 +32,10 @@ extends Track
 ## Terenul urmareste soseaua peste tot; aici il sapam inapoi, ca sa existe unde
 ## sa cazi. Fara o rapa sub un fly-off, zbori si aterizezi linistit pe nisip.
 @export var custom_ravines: Array[Vector4] = []
+## Bolovani care cad de pe faleza.
+@export var custom_rockfall_fracs: Array[float] = []
+## Treceri de cale ferata. Trenul ucide la contact si te repune.
+@export var custom_train_fracs: Array[float] = []
 ## Bifeaza ca sa reconstruiesti pista din curba (doar in editor).
 @export var regenerate: bool = false:
 	set(_value):
@@ -82,6 +86,12 @@ func _landmark_spots() -> Array[Vector3]:
 
 func _ravines() -> Array[Vector4]:
 	return custom_ravines
+
+func _rockfall_fracs() -> Array[float]:
+	return custom_rockfall_fracs
+
+func _train_fracs() -> Array[float]:
+	return custom_train_fracs
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

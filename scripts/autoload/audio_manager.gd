@@ -14,7 +14,22 @@ const SFX: Dictionary = {
 	&"land": preload("res://assets/audio/land.wav"),
 	&"count_beep": preload("res://assets/audio/count_beep.wav"),
 	&"go_beep": preload("res://assets/audio/go_beep.wav"),
+	# Hazarde. Astea se redau POZITIONAL (AudioStreamPlayer3D pe nodul de hazard),
+	# nu prin play_sfx() care e 2D — un tren trebuie sa se auda dinspre tren.
+	&"rock_warn": preload("res://assets/audio/rock_warn.wav"),
+	&"rock_impact": preload("res://assets/audio/rock_impact.wav"),
+	&"train_horn": preload("res://assets/audio/train_horn.wav"),
+	&"crossing_bell": preload("res://assets/audio/crossing_bell.wav"),
 }
+
+## Fluxul brut al unui sunet, pentru cine si-l reda singur.
+##
+## play_sfx() e 2D: bun pentru feedback-ul jucatorului (boost, impact), inutil
+## pentru un hazard care trebuie localizat in lume. Hazardele isi pun stream-ul
+## pe un AudioStreamPlayer3D propriu.
+static func stream(sfx_name: StringName) -> AudioStream:
+	return SFX.get(sfx_name)
+
 
 const ENGINE_LOOP: AudioStream = preload("res://assets/audio/engine_loop.wav")
 const SKID_LOOP: AudioStream = preload("res://assets/audio/skid_loop.wav")

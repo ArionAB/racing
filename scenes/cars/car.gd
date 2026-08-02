@@ -19,6 +19,8 @@ signal respawned(car: Car)
 ## Izbitura cu o alta masina, cu delta-v-ul incasat de NOI — cu cat mai mare,
 ## cu atat mai violent contactul (shake, sunet).
 signal bumped(car: Car, other: Car, delta_v: float)
+## Strivit de un hazard. `severity` in 0..1, pentru shake proportional.
+signal crushed(car: Car, severity: float)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -104,6 +106,14 @@ var drift_dir: float = 0.0
 var turbo_charge: float = 0.0 # 0..1, bara din UI
 var is_boosting: bool = false
 var slip_time: float = 0.0 # aquaplanare (setat de WaterHose)
+## Strivit: cat mai tine penalizarea, si cat de tare taie din viteza.
+##
+## Oglindeste slip_time in loc sa inventeze un al doilea mecanism. NU exista
+## stare de "distrus" si nici nu vrem una: pedeapsa in jocul asta e mereu TIMP
+## PIERDUT, ca la repunere. Bolovanul te turteste si te incetineste; trenul face
+## acelasi lucru dus la extrem, plus repunere.
+var crush_time: float = 0.0
+var crush_factor: float = 1.0
 var _forced_boost: float = 0.0 # rocket start: ardere gratuita, nu goleste bara
 
 ## Nodul (din Race) sub care se depun urmele de cauciuc.
@@ -243,6 +253,9 @@ func _physics_process(delta: float) -> void:
 	hvel = fwd_h * fwd_speed + lateral
 
 	slip_time = maxf(slip_time - delta, 0.0)
+	crush_time = maxf(crush_time - delta, 0.0)
+	if crush_time <= 0.0:
+		crush_factor = 1.0
 	velocity.x = hvel.x
 	velocity.z = hvel.z
 	_prev_velocity = velocity
@@ -276,7 +289,9 @@ func _current_max_speed() -> float:
 		vmax *= offroad_speed_factor
 	if is_boosting:
 		vmax += turbo_speed_bonus
-	return vmax
+	# Strivirea taie plafonul, nu viteza curenta: pierzi timp reaccelerand, exact
+	# ca la offroad. Se aplica DUPA turbo, ca sa nu poti sterge pedeapsa cu boost.
+	return vmax * crush_factor
 
 # ------------------------------------------------------------------- drift
 
@@ -336,6 +351,22 @@ func apply_slip() -> void:
 ## Ghiont de la un obstacol care iti schimba traiectoria: caruselul te matura
 ## pe tangenta, deviatorul te trimite pe cealalta banda. Impactul in sine
 ## (shake + sunet) vine din coliziunea solida, prin _handle_bumping.
+## Strivit de un hazard: turtit, incetinit, si scos din boost.
+##
+## `factor` inmulteste plafonul de viteza (0.55 = 55%), `keep_speed` cat din
+## viteza orizontala ramane pe loc, iar `squash` e forma de turtire.
+func crush(seconds: float, factor: float, squash: Vector3,
+		keep_speed: float) -> void:
+	crush_time = maxf(crush_time, seconds)
+	crush_factor = minf(crush_factor, factor)
+	velocity.x *= keep_speed
+	velocity.z *= keep_speed
+	is_boosting = false
+	_forced_boost = 0.0
+	_punch_scale(squash)
+	crushed.emit(self, 1.0 - factor)
+
+
 func apply_sweep(push: Vector3) -> void:
 	velocity += push
 
@@ -465,6 +496,8 @@ func respawn(backoff_m: float = 14.0) -> void:
 	is_boosting = false
 	_forced_boost = 0.0
 	slip_time = 0.0
+	crush_time = 0.0
+	crush_factor = 1.0
 	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
 	road_index = track.closest_index_global(global_position)

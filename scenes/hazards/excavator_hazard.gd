@@ -7,7 +7,8 @@ extends StaticBody3D
 ## Cronometraj — ca barierele din Ignition, dar cu personalitate de sandbox.
 
 var model_scene: PackedScene
-var model_scale: float = 0.75
+## Rusted_digger e construit la scara lumii; cel de plastic cerea 0.75.
+var model_scale: float = 1.0
 var period: float = 7.0 # jos 2.5s + urca 1s + sus 2.5s + coboara 1s
 var raise_angle: float = 0.55
 
@@ -29,6 +30,9 @@ func _ready() -> void:
 		_arm = model.find_child("arm", true, false) as Node3D
 		if _arm != null:
 			_arm_base_rot = _arm.rotation.x
+		# Atlasul comun: modelul de plastic isi aducea materialul lui, cel nou
+		# are UV-uri spre sloturi si un material fara imagine.
+		Palette.apply_world_material(model)
 		var body_node := model.find_child("body", true, false) as Node3D
 		if body_node != null:
 			# `arm` e COPIL al lui `body` in GLB, deci fara skip iese o cutie de
@@ -46,20 +50,25 @@ func _ready() -> void:
 	# sa se opreasca unde se opreste si vizualul, nu mai departe.
 	#
 	# Cutia asta ramane potrivita de mana, INTENTIONAT. Bratul e o grinda
-	# diagonala, iar AABB-ul unei diagonale supra-acopera grosolan: masurat, dau
-	# 3.60 m inaltime pentru un brat de vreo 1 m grosime, ridicat cu un metru
-	# fata de unde e de fapt. O cutie stransa pe axa bratului e mai aproape de
-	# adevar decat una aliniata pe axe.
+	# diagonala, iar AABB-ul unei diagonale supra-acopera grosolan: pe rigul
+	# vechi masuratoarea dadea 3.60 m inaltime pentru un brat de vreo 1 m
+	# grosime, ridicat cu un metru fata de unde e de fapt.
+	#
+	# Re-potrivita pe rigul rusted_digger (masurat cu probe_dims): bratul
+	# ocupa X 0.09..1.01, Y 0.92..3.76, Z -5.70..-0.32 in spatiul modelului.
+	# Cutia coboara pana la sol desi bratul incepe la 0.92 m: colizorul masinii
+	# sta la 0.1..1.1, deci o cutie care porneste de la 0.9 ar lasa doar 20 cm
+	# de suprapunere si o masina rapida ar putea trece prin ea.
 	#
 	# Cotele se scaleaza cu modelul, deci un digger mai mare/mai mic ramane
 	# coerent; ce NU se ia singur dupa model e forma. Cand se schimba rigul,
 	# re-potriveste-le cu `probe_dims.gd` (vezi ONBOARDING).
-	var k := model_scale / 0.75 # 0.75 = scara la care au fost potrivite
+	var k := model_scale / 1.0 # 1.0 = scara la care au fost potrivite
 	_arm_shape = CollisionShape3D.new()
 	var arm_box := BoxShape3D.new()
-	arm_box.size = Vector3(1.6, 2.0, 4.6) * k
+	arm_box.size = Vector3(1.2, 2.6, 5.4) * k
 	_arm_shape.shape = arm_box
-	_arm_shape.position = Vector3(0, 1.1, -2.9) * k
+	_arm_shape.position = Vector3(0.55, 1.3, -3.0) * k
 	add_child(_arm_shape)
 
 func _physics_process(delta: float) -> void:

@@ -6,8 +6,11 @@ extends Node3D
 ## sau tine-te tare de volan. Radacina sta PE CENTRUL soselei, orientata pe
 ## directia de mers; furtunul e decalat lateral, cu duza spre drum.
 
-var model_scene: PackedScene
-var model_scale: float = 0.45
+## Nodul vizual, pregatit de apelant (o singura varianta scoasa din GLB).
+## Se pune INAINTE de add_child, ca la RoadMarker.
+var model: Node3D
+## Conducta noua e construita la scara lumii; furtunul vechi cerea 0.45.
+var model_scale: float = 1.0
 var road_width: float = 14.0
 var period: float = 6.0
 var on_time: float = 2.6
@@ -19,12 +22,12 @@ var _time: float = 0.0
 
 func _ready() -> void:
 	add_to_group("hoses")
-	if model_scene != null:
-		var model := model_scene.instantiate() as Node3D
+	if model != null:
 		model.scale = Vector3.ONE * model_scale
 		model.position = Vector3(road_width * 0.5 + 2.5, 0, 0)
 		model.rotation.y = PI / 2.0 # duza modelului (-Z) se intoarce spre drum
 		add_child(model)
+		Palette.apply_world_material(model)
 
 	_zone = Area3D.new()
 	var shape := CollisionShape3D.new()

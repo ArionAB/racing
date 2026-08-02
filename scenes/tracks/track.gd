@@ -157,6 +157,17 @@ func _excavator_fracs() -> Array[float]:
 func _dino_spots() -> Array[Vector2]:
 	return []
 
+## Unde TrackCliffs NU ridica pereti. Landmark-urile hero au avut mereu
+## degajarea asta; situl cu schelet o cere la fel de tare, si din acelasi motiv:
+## e asezat la 19 m de axa, adica FIX in spatele liniei de faleze, iar fara
+## degajare silueta lui nu se vede deloc de pe sosea. Sondele nu prind asta —
+## doar o captura din vederea de joc o prinde.
+func _cliff_clearings() -> Array[Vector3]:
+	var out: Array[Vector3] = _landmark_spots().duplicate()
+	for spot in _dino_spots():
+		out.append(Vector3(spot.x, spot.y, -1.0)) # id -1: nu e din _LANDMARKS
+	return out
+
 ## Landmark-uri hero (turn de apa, benzinarie, moara, semn): fiecare
 ## (fractie, parte ±1, id-model din _LANDMARKS) — plasate cu intentie.
 func _landmark_spots() -> Array[Vector3]:
@@ -1349,12 +1360,13 @@ func _build_kerbs() -> void:
 ## partea care se itereaza cel mai des.
 func _build_world_decor() -> void:
 	add_child(TrackCliffs.build(_sampler, theme_decor, track_name.hash(),
-		_landmark_spots()))
+		_cliff_clearings()))
 	add_child(TrackDecor.build(_sampler, theme_decor, track_name.hash(),
 		Callable(self, "_flat_material")))
 
 func _build_excavator(frac: float) -> void:
-	if not ResourceLoader.exists("res://assets/models/toy_excavator.glb"):
+	const PATH := "res://assets/models/rusted_digger.glb"
+	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
@@ -1362,7 +1374,11 @@ func _build_excavator(frac: float) -> void:
 	var dir := (baked[(idx + 1) % n] - p).normalized()
 	var side := dir.cross(Vector3.UP).normalized()
 	var excavator := ExcavatorHazard.new()
-	excavator.model_scene = load("res://assets/models/toy_excavator.glb")
+	# Era un excavator de PLASTIC din tema "lada de nisip". Cel nou e construit
+	# la scara lumii — corpul lui de 3.73 m e practic cat cel vechi inmultit cu
+	# 0.75, deci scara devine 1.0 si colizoarele se recalibreaza in hazard.
+	excavator.model_scene = load(PATH)
+	excavator.model_scale = 1.0
 	add_child(excavator)
 	# Corpul sta PE marginea soselei (blocheaza banda exterioara),
 	# bratul coboara spre centru — lasa o strecuratoare pe interior.
@@ -1371,7 +1387,8 @@ func _build_excavator(frac: float) -> void:
 
 ## Dinozaurul de plastic: landmark care "priveste" cursa de pe margine.
 func _build_dino(frac: float, side_sign: float) -> void:
-	if not ResourceLoader.exists("res://assets/models/toy_dino.glb"):
+	const PATH := "res://assets/models/dino_bones.glb"
+	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
@@ -1379,10 +1396,16 @@ func _build_dino(frac: float, side_sign: float) -> void:
 	var side := _side_at(idx) * side_sign
 	var dino := StaticBody3D.new()
 	dino.add_to_group("dinos")
-	var model := (load("res://assets/models/toy_dino.glb") as PackedScene) \
-		.instantiate() as Node3D
+	# Era un dinozaur de PLASTIC din tema "lada de nisip". Acum e un schelet
+	# fosilizat partial dezgropat — acelasi rol de reper, dar unul dintre cele
+	# mai puternice clisee vizuale ale desertului american.
+	var scene := load(PATH) as PackedScene
+	var model := _extract_glb_node(scene, "Dino_Skeleton")
+	if model == null:
+		return
 	var aabb := model_aabb(model)
 	dino.add_child(model)
+	Palette.apply_world_material(model)
 	var shape := CollisionShape3D.new()
 	var cyl := CylinderShape3D.new()
 	# Inaltimea masurata; raza din amprenta pe X, NU din diagonala — silueta are
@@ -1394,12 +1417,39 @@ func _build_dino(frac: float, side_sign: float) -> void:
 	shape.position = Vector3.UP * (aabb.position.y + aabb.size.y * 0.5)
 	dino.add_child(shape)
 	add_child(dino)
-	var stand := p + side * (half_width + 6.0)
+	# 12 m de la marginea asfaltului, nu 6: la 6 statea in banda in care
+	# TrackCliffs ridica peretii (OFFSET_OUTER 1.2 .. CORNER 5.0) si silueta
+	# s-ar fi pierdut in stanca. Un sit de sapaturi nu sta oricum pe acostament.
+	var stand := p + side * (half_width + 12.0)
 	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
 	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in
 	# lume, deci pe portiunile inaltate landmark-ul ramanea suspendat in aer.
 	stand.y = _sampler.ground_y(stand.x, stand.z)
 	dino.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
+	_scatter_bones(scene, stand, frac)
+
+
+## Oase razlete in jurul scheletului. Fara ele, un schelet singur pe nisip
+## citeste ca o statuie; cu ele, locul citeste ca un SIT — si asta e diferenta
+## dintre un obiect si un moment de pe tur. Costa 24-36 de triunghiuri bucata.
+func _scatter_bones(scene: PackedScene, center: Vector3, frac: float) -> void:
+	const PICKS := ["Bone_A", "Bone_B", "Bone_C"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = track_name.hash() + int(frac * 1000.0)
+	for i in range(7):
+		var bone := _extract_glb_node(scene, PICKS[rng.randi_range(0, 2)])
+		if bone == null:
+			continue
+		# Inel in jurul scheletului, nu peste el: sub 6 m ar intra in coaste.
+		var ang := rng.randf_range(0.0, TAU)
+		var dist := rng.randf_range(6.0, 16.0)
+		var spot := center + Vector3(cos(ang), 0.0, sin(ang)) * dist
+		spot.y = _sampler.ground_y(spot.x, spot.z) - 0.08 # putin ingropate
+		add_child(bone)
+		Palette.apply_world_material(bone)
+		bone.global_position = spot
+		bone.rotation = Vector3(rng.randf_range(-0.25, 0.25), rng.randf_range(0.0,
+			TAU), rng.randf_range(-0.25, 0.25))
 
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
 ##   gap    = cat de departe de marginea soselei sta (m)
@@ -1496,13 +1546,17 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 	root.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 
 func _build_hose(frac: float) -> void:
-	if not ResourceLoader.exists("res://assets/models/garden_hose.glb"):
+	const PATH := "res://assets/models/pipe_leak.glb"
+	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
 	var hose := WaterHose.new()
-	hose.model_scene = load("res://assets/models/garden_hose.glb")
+	# Era un FURTUN DE GRADINA care traversa soseaua intr-un canion de desert.
+	# Conducta sparta face acelasi lucru mecanic — banda uda, grip aproape zero —
+	# dar apartine peisajului.
+	hose.model = _extract_glb_node(load(PATH) as PackedScene, "Pipe_Broken")
 	hose.road_width = half_width * 2.0
 	add_child(hose)
 	hose.global_position = baked[idx]

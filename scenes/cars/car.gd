@@ -445,6 +445,14 @@ func _detect_landing() -> void:
 ## ultimul checkpoint valid, retrasa cu `backoff_m` metri ca sa aiba spatiu de
 ## elan. Nu pe grila de start — repornirea cursei de la zero ar fi o pedeapsa
 ## absurda pentru o saritura ratata.
+## Are rost sa apesi butonul de repunere acum?
+##
+## respawn() iese in tacere cand nu poate (fara pista, in cooldown, dupa
+## terminare). Butonul trebuie sa arate asta, nu sa para stricat.
+func can_respawn() -> bool:
+	return track != null and _respawn_cooldown <= 0.0 and not finished
+
+
 func respawn(backoff_m: float = 14.0) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
@@ -507,7 +515,8 @@ func _drop_skid_marks(delta: float) -> void:
 	_skid_accum = 0.0
 	if _skid_mesh == null:
 		_skid_mesh = PlaneMesh.new()
-		_skid_mesh.size = Vector2(0.4, 1.0)
+		# Scalat cu masinile (factor 0.84): urma trebuie sa aiba latimea anvelopei.
+		_skid_mesh.size = Vector2(0.34, 0.85)
 		_skid_mat = StandardMaterial3D.new()
 		_skid_mat.albedo_color = Color(0.05, 0.05, 0.05, 0.4)
 		_skid_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA

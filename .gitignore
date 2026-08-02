@@ -5,5 +5,9 @@ snapshots/
 # Setari de editor personale (fiecare are alta configuratie).
 .vscode/
 
+# Bytecode Python din scripturile de Blender.
+__pycache__/
+*.pyc
+
 # NU ignoram addons/ intentionat: daca cineva instaleaza un plugin, vrem sa
 # vedem asta in `git status`, nu sa dispara in tacere.

@@ -1,32 +1,63 @@
 class_name ChaseCamera
 extends Node3D
-## Chase cam in stilul Ignition: JOASA, APROAPE si aproape ORIZONTALA.
+## Chase cam in stilul Ignition: DE SUS, cu masina mica in cadru.
 ##
-## Camera de dinainte statea la 8.5m in spate si 3.5m inaltime, cu ~11° in jos si
-## complet static — vedeai mult capota si putin drum, iar cadrul nu reactiona la
-## nimic. Acum unghiul e ~7°, iar camera priveste spre unde MERGE masina, nu spre
-## unde e intoarsa: intr-un drift vezi iesirea din viraj, nu peretele spre care
-## esti cu botul.
+## Doua incercari pana aici, si prima a fost in directia gresita. Camera
+## originala statea la 8.5 m / 3.5 m, cu 11° in jos si complet static. Am
+## coborat-o la 6.8 / 2.55 (7°) crezand ca "Ignition" inseamna mai aproape de
+## asfalt — dar aia e vederea din Need for Speed Underground: masina creste la
+## 13% din latimea ecranului si umple cadrul.
+##
+## Ignition e invers: camera SUS, masina mica, vezi pista deschizandu-se. Acum
+## 8.4 / 4.61, 19° in jos, masina la ~8.5%. Si 19° pe TOT garajul, nu doar pe
+## muscle car — vezi formula distance_for/height_for.
+##
+## Camera priveste spre unde MERGE masina, nu spre unde e intoarsa: intr-un drift
+## vezi iesirea din viraj, nu peretele spre care esti cu botul.
 ##
 ## Netezire: pozitia are intarziere exponentiala (lag-ul face virajele sa "se
 ## simta"), directia privirii are propria netezire. FOV creste cu viteza si sare
 ## la boost. Screen shake pe modelul "trauma" (shake = trauma^2, se stinge
 ## singur — impacturile mici abia se simt, cele mari zguduie serios).
 
+## Lungimea masinii de referinta. style_bible §2 cere 4 m; garajul e la 4.2 dupa
+## rescalare, iar formula de mai jos e calibrata pe valoarea asta.
+const REFERENCE_LENGTH: float = 4.20
+
+## Formula de incadrare, MUTATA AICI din race.gd.
+##
+## Inainte, race.gd avea propriile literale si suprascria distance/height la
+## runtime, deci editarea constantelor de mai jos NU SCHIMBA NIMIC IN JOC — capcana
+## in care am cazut o data deja, tunand o camera care nu rula. Acum exista o
+## singura sursa, plus un assert in _ready care prinde divergenta.
+const DISTANCE_BASE: float = 5.80
+const DISTANCE_PER_M: float = 0.62
+const HEIGHT_BASE: float = 3.72
+const HEIGHT_PER_M: float = 0.213
+
+static func distance_for(body_length: float) -> float:
+	return DISTANCE_BASE + body_length * DISTANCE_PER_M
+
+static func height_for(body_length: float) -> float:
+	return HEIGHT_BASE + body_length * HEIGHT_PER_M
+
 ## Valorile de referinta ale camerei, citite si de tools/snapshot.gd --gamecam
 ## ca sa poata reproduce vederea de joc fara sa le duplice.
 ##
 ## ATENTIE: nu confunda astea cu MEASURE_* din snapshot.gd. Alea sunt inghetate
 ## pentru masuratori; astea se schimba cand tunam feel-ul camerei.
-const DEFAULT_DISTANCE: float = 6.8
-const DEFAULT_HEIGHT: float = 2.6
+const DEFAULT_DISTANCE: float = 8.404  # = distance_for(REFERENCE_LENGTH)
+const DEFAULT_HEIGHT: float = 4.6146   # = height_for(REFERENCE_LENGTH)
 const BASE_FOV: float = 70.0
 ## Cat de departe in fata priveste camera, si la ce inaltime pe masina.
 ##
-## Lead-ul lung e cel care APLATIZEAZA unghiul: cu 5.5m in fata si 1.0m inaltime,
-## unghiul cade la ~7° fata de ~11° cat era cu 3.0m si 1.2m.
-const LOOK_AHEAD: float = 5.5
-const LOOK_HEIGHT: float = 1.0
+## Lead-ul e cea mai puternica parghie de UNGHI, nu inaltimea. Sesiunea trecuta
+## l-am dus la 5.5 m si am aplatizat cadrul la 7° — vedere de NFS Underground, nu
+## de Ignition. Cu 3.4 m si tinta coborata la nivelul butucului (0.55, nu 1.0 —
+## o camera de sus priveste SOLUL, nu plafonul) unghiul urca la 19°, si asta e
+## tot pe garaj, nu doar pe muscle car.
+const LOOK_AHEAD: float = 3.40
+const LOOK_HEIGHT: float = 0.55
 
 @export var distance: float = DEFAULT_DISTANCE
 @export var height: float = DEFAULT_HEIGHT
@@ -59,9 +90,6 @@ const AIM_MIN_SPEED: float = 2.0
 # --- reactie la viteza ---
 ## Cat se retrage camera la viteza maxima (fractie din distanta).
 const SPEED_PULLBACK: float = 0.18
-## Cat urca la viteza maxima. Proportional cu retragerea, ca unghiul sa RAMANA
-## plat pe toata gama — altfel cadrul ar tangaja cu acceleratia.
-const SPEED_LIFT: float = 0.10
 ## Inclinarea maxima in viraje. Ignition avea aproape deloc; peste 3° citeste ca
 ## simulator de zbor.
 const ROLL_MAX_DEG: float = 2.5
@@ -79,6 +107,13 @@ var _aim_dir: Vector3 = Vector3.FORWARD
 
 
 func _ready() -> void:
+	# Prinde exact divergenta de care am suferit: cine schimba coeficientii fara
+	# sa actualizeze si constantele DEFAULT_* tuneaza o camera pe care jocul n-o
+	# foloseste, iar snapshot-ul --gamecam ar minti.
+	assert(is_equal_approx(DEFAULT_DISTANCE, distance_for(REFERENCE_LENGTH)),
+		"DEFAULT_DISTANCE nu mai e distance_for(REFERENCE_LENGTH)")
+	assert(is_equal_approx(DEFAULT_HEIGHT, height_for(REFERENCE_LENGTH)),
+		"DEFAULT_HEIGHT nu mai e height_for(REFERENCE_LENGTH)")
 	_cam = Camera3D.new()
 	_cam.far = FAR_PLANE
 	add_child(_cam)
@@ -110,7 +145,13 @@ func _physics_process(delta: float) -> void:
 	var speed_frac := clampf(target.horizontal_speed() / target.max_speed,
 		0.0, 1.0)
 	var d := distance * (1.0 + SPEED_PULLBACK * speed_frac)
-	var h := height * (1.0 + SPEED_LIFT * speed_frac)
+	# Ridicarea NU e un numar liber: e exact cat trebuie ca UNGHIUL sa ramana
+	# constant cand camera se retrage. Derivata din pozitia de repaus, nu ghicita
+	# — de asta vechea pereche (0.18 / 0.10) aplatiza cadrul cu 0.6° la viteza
+	# maxima, exact invers decat pretindea comentariul de langa ea. Asa nu mai
+	# poate putrezi: schimbi SPEED_PULLBACK si unghiul ramane.
+	var pitch_tan := (height - LOOK_HEIGHT) / (distance + LOOK_AHEAD)
+	var h := LOOK_HEIGHT + (d + LOOK_AHEAD) * pitch_tan
 
 	var desired := target.global_position - anchor * d + Vector3.UP * h
 	var t := 1.0 - exp(-follow_speed * delta) # urmarire independenta de fps

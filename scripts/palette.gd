@@ -112,15 +112,38 @@ static func world_material() -> StandardMaterial3D:
 		_shared.uv2_scale = Vector3(DETAIL_SCALE, DETAIL_SCALE, DETAIL_SCALE)
 	return _shared
 
+## Geamanul OGLINDIT al materialului lumii.
+##
+## Un prop cu scale.x = -1 are winding inversat, deci rasterizatorul ii vede
+## fetele din spate ca fete din fata si obiectul iese pe dos. CULL_FRONT taie
+## exact ce trebuie. Normalele sunt deja corecte — Godot le transforma cu inversa
+## transpusa, care se ocupa singura de oglindire.
+##
+## De ce un material geaman si nu CULL_DISABLED pe cel comun: dezactivarea
+## culling-ului ar dubla triunghiurile rasterizate pe TOATA lumea, iar fill
+## rate-ul e exact constrangerea pe care o tinem sub control. Asa costa un
+## material in plus si zero pixeli.
+static var _shared_mirrored: StandardMaterial3D
+
+static func world_material_mirrored() -> StandardMaterial3D:
+	if _shared_mirrored == null:
+		_shared_mirrored = world_material().duplicate() as StandardMaterial3D
+		_shared_mirrored.cull_mode = BaseMaterial3D.CULL_FRONT
+	return _shared_mirrored
+
+
 ## Pune materialul comun pe toate mesh-urile dintr-un subarbore. Pentru GLB-uri
 ## importate din Blender: modelul aduce UV-urile catre sloturile atlasului si
 ## vertex color-ul de AO; noi ii inlocuim materialul cu cel partajat. Asa un
 ## prop facut in Blender se grupeaza cu restul lumii intr-un singur draw call.
-static func apply_world_material(root: Node) -> void:
+##
+## `mirrored` doar pentru subarbori cu scara negativa pe o axa.
+static func apply_world_material(root: Node, mirrored: bool = false) -> void:
+	var mat := world_material_mirrored() if mirrored else world_material()
 	for node in _walk(root):
 		if node is MeshInstance3D:
 			var mi := node as MeshInstance3D
-			mi.material_override = world_material()
+			mi.material_override = mat
 
 static func _walk(node: Node) -> Array[Node]:
 	var out: Array[Node] = [node]

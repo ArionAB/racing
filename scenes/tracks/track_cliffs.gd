@@ -53,6 +53,8 @@ const VARIANTS := [
 ]
 ## Peste atat se vede intinderea straturilor de roca.
 const SCALE_LIMIT: float = 0.18
+## Cat de departe de inaltimea ceruta mai intra o varianta in bazinul de alegere.
+const VARIANT_TOLERANCE: float = 0.22
 
 
 ## Construieste falezele si le intoarce sub un singur nod.
@@ -128,16 +130,17 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		sampler: TrackSideSampler,
 		spec: TrackDecorSpec, rng: RandomNumberGenerator) -> void:
 	var wanted := _wanted_height(spec, rng)
-	var pick := _best_variant(wanted)
+	var pick := _variant_for(wanted, rng)
 	var model := _extract(scene, pick["node"])
 	if model == null:
 		return
 
+	# Scara CONTINUA. Cuantizarea de dinainte se justifica prin "altfel fiecare
+	# sectiune ar fi un mesh unic", ceea ce e fals: scara uniforma a unui nod nu
+	# duplica niciodata o resursa Mesh. Gruparea in draw call-uri vine din
+	# materialul partajat, nu din scara. Deci trepte in plus, gratis.
 	var scale_factor: float = clampf(wanted / float(pick["height"]),
 		1.0 - SCALE_LIMIT, 1.0 + SCALE_LIMIT)
-	# Scara in 4 trepte, nu continua: altfel fiecare sectiune ar fi un mesh unic
-	# si s-ar pierde gruparea in putine draw call-uri.
-	scale_factor = snappedf(scale_factor, 2.0 * SCALE_LIMIT / 3.0)
 
 	# Originea modelului e centrata pe adancime, deci jumatate din faleza sta in
 	# fata originii. Fara corectia asta, o sectiune adanca de 6m aterizeaza cu
@@ -170,12 +173,26 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	root.add_child(holder)
 	holder.transform = xform
 	holder.add_child(model)
+	# Oglindirea dubleaza numarul de siluete distincte cu 6 variante de GLB si
+	# zero triunghiuri in plus. Cere materialul geaman cu CULL_FRONT, altfel
+	# stanca se randeaza pe dos. Coliziunea NU se oglindeste: e o cutie aproape
+	# simetrica, iar oglindirea ei poate doar sa creeze pene intre sectiuni.
+	var mirror := rng.randf() < 0.5
+	if mirror:
+		model.scale = Vector3(-1.0, 1.0, 1.0)
 	# Inclinarea de "asezat de mana" sta DOAR pe model, nu pe holder: un corp de
 	# coliziune inclinat creeaza o pana intre sectiuni vecine, exact felul de colt
 	# in care se intepeneste o masina.
+	#
+	# Yaw-ul era hardcodat ZERO, deci fiecare faleza prezenta soferului exact
+	# aceeasi fata. Plafon dur la ±0.10 rad: o sectiune de 15 m isi deplaseaza
+	# capatul cu 0.75 m la unghiul asta, iar suprapunerea dintre sectiuni e de
+	# doar 1 m. Mai mult deschide fisuri — exact ce prinde sonda --mode=cliff.
 	model.rotation = Vector3(
-		rng.randf_range(-0.10, 0.10), 0.0, rng.randf_range(-0.10, 0.10))
-	Palette.apply_world_material(holder)
+		rng.randf_range(-0.07, 0.07),
+		rng.randf_range(-0.10, 0.10),
+		rng.randf_range(-0.07, 0.07))
+	Palette.apply_world_material(holder, mirror)
 
 	_add_collision(body, pick["node"], scene, xform)
 
@@ -188,13 +205,22 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 ## soferului. Al doilea val, mai rapid, rupe linia de sus.
 static func _wanted_height(spec: TrackDecorSpec,
 		rng: RandomNumberGenerator) -> float:
-	var slow := sin(spec.frac * TAU * 3.7) * 2.2
-	var fast := sin(spec.frac * TAU * 11.3) * 1.4
-	var step := float(rng.randi_range(0, 2)) * 0.9
-	var h := 8.0 + slow + fast + step
+	# Frecventele erau 3.7 si 11.3, cu raportul 3.05 — aproape intreg, deci se
+	# sincronizau si aceeasi succesiune de siluete revenea de ~3.7 ori pe tur.
+	# 2.3 si 7.9 dau raportul 3.43, care nu se inchide intr-un tur.
+	var slow := sin(spec.frac * TAU * 2.3) * 2.2
+	var fast := sin(spec.frac * TAU * 7.9) * 1.4
+	# Termen defazat PER LATURA: fara el, cei doi pereti respirau la unison.
+	var lean := sin(spec.frac * TAU * 1.3 + spec.side_sign * 2.1) * 1.6
+	var step := float(rng.randi_range(0, 3)) * 0.75
+	var h := 8.0 + slow + fast + lean + step
 	# In apexul unui viraj, peretele scade: altfel nu vezi iesirea din curba.
+	#
+	# Plafonul era fix 7.0, exact la mijloc intre Cliff_A (6.5) si Cliff_E (7.5).
+	# Cum alegerea variantei folosea `<` strict, A castiga MEREU — fiecare apex de
+	# pe pista primea identic aceeasi stanca.
 	if spec.is_apex:
-		h = minf(h, 7.0)
+		h = minf(h, rng.randf_range(6.6, 7.9))
 	return clampf(h, 6.5, 11.5)
 
 
@@ -204,18 +230,36 @@ static func _wanted_height(spec: TrackDecorSpec,
 static func _skip_slot(spec: TrackDecorSpec) -> bool:
 	# ~18% din traseu ramane deschis, in ferestre lungi (nu gauri izolate, care
 	# ar arata ca sectiuni lipsa).
-	return sin(spec.frac * TAU * 5.1 + spec.side_sign * 1.7) > 0.72
+	# side_sign era doar o defazare a ACELEIASI sinusoide, deci ambele laturi se
+	# deschideau in acelasi loc. Frecvente diferite per latura: tiparul nu se mai
+	# repeta intr-un tur.
+	var f := 5.1 if spec.side_sign < 0.0 else 3.9
+	var ph := 1.7 if spec.side_sign < 0.0 else 4.4
+	return sin(spec.frac * TAU * f + ph) > 0.72
 
 
-static func _best_variant(height: float) -> Dictionary:
-	var best: Dictionary = VARIANTS[0]
-	var best_delta := INF
+## Alege o varianta din bazinul celor care incap in inaltimea ceruta.
+##
+## Era argmin pur: pentru fiecare inaltime iesea MEREU aceeasi stanca, deci cele
+## 6 variante se roteau dupa un tipar previzibil. Cu un bazin de toleranta ies
+## de obicei 2-4 candidate, si zarul decide — aceeasi silueta de perete, alta
+## piatra de fiecare data.
+static func _variant_for(height: float, rng: RandomNumberGenerator) -> Dictionary:
+	var pool: Array = []
 	for v in VARIANTS:
-		var delta: float = absf(float(v["height"]) - height)
-		if delta < best_delta:
-			best_delta = delta
-			best = v
-	return best
+		if absf(float(v["height"]) - height) <= height * VARIANT_TOLERANCE:
+			pool.append(v)
+	if pool.is_empty():
+		# Nimic in toleranta (inaltimi extreme): cade inapoi pe cel mai apropiat.
+		var best: Dictionary = VARIANTS[0]
+		var best_delta := INF
+		for v in VARIANTS:
+			var delta: float = absf(float(v["height"]) - height)
+			if delta < best_delta:
+				best_delta = delta
+				best = v
+		return best
+	return pool[rng.randi_range(0, pool.size() - 1)]
 
 
 ## Scoate o singura varianta din GLB si anuleaza offsetul ei din fisier

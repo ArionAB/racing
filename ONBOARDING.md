@@ -141,10 +141,18 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   modelului. Dacă regenerezi un GLB cu alte dimensiuni și cifra de aici **nu**
   se schimbă, ai găsit un număr hardcodat care trebuie scos.
 
-  > Cotele astea stăteau într-un tabel scris de mână și **două din ele erau deja
+  > Cotele astea stăteau într-un tabel scris de mână și **trei din ele erau deja
   > greșite** față de geometrie: benzinăria declarată 6.0 pe Z când modelul are
   > 6.58 (jumătate de metru de clădire prin care treceai), moara 9.0 când turnul
-  > are 10.95. Nimic nu compară un număr dintr-un dicționar cu un mesh.
+  > are 10.95, șasiul excavatorului 3.4 când are 5.32. Nimic nu compară un număr
+  > dintr-un dicționar cu un mesh.
+
+  **AABB-ul nu e răspunsul peste tot.** Pentru mase compacte (clădiri, turnuri,
+  porți, șasiuri) e o aproximare bună. Pentru o piesă **diagonală sau în L** e
+  mai rău decât o cutie potrivită de mână: brațul excavatorului măsurat dă 3.60 m
+  înălțime pentru un braț de vreo 1 m grosime, fiindcă AABB-ul unei diagonale
+  cuprinde tot dreptunghiul din jurul ei. Acolo cutia rămâne scrisă explicit, dar
+  **scalată cu modelul**, și se re-potrivește cu sonda când se schimbă rigul.
 
 - **CI verifică și anti-blocajul în pereții de canion.** Aruncă mașini în unghi
   în faleze, în 12 puncte de pe traseu, și pică dacă vreuna rămâne înțepenită.

@@ -43,7 +43,7 @@ var track_name: String = "Pista"
 var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
 
 ## Tema vizuala: fiecare pista isi defineste LUMEA (teren, cer, decor).
-var theme_decor: String = "forest" # "forest" sau "desert"
+var theme_decor: String = "forest" # cheie in Track.themes()
 var theme_ground_tint := Color(0.45, 0.72, 0.33)
 var theme_sky_top := Color(0.30, 0.50, 0.80)
 var theme_sky_horizon := Color(0.72, 0.84, 0.95)
@@ -78,44 +78,156 @@ const SHADOW_DISTANCE: float = 90.0
 const CAMERA_BLOCKER_LAYER: int = 1 << 7
 var theme_sun_energy: float = 1.25
 
+## Tema curenta ca DATE, nu ca sir de caractere. Vezi _THEMES.
+var _theme: Dictionary = {}
+
+## Toate temele, intr-un singur loc.
+##
+## Pana la Okinawa, tema era un `if theme == "desert" / else` in apply_theme si
+## inca OPT intrebari `theme_decor == "desert"` imprastiate prin cod (ambient,
+## ceata, siluete de orizont, pereti, hazard tematic, praf pe umeri, faleze,
+## decor). A treia tema ar fi insemnat noua conditii triple, fiecare cu sansa
+## ei de a fi uitata — si exact asa apar temele "aproape gata", care arata bine
+## intr-un loc si ca desertul in altul.
+##
+## Acum tema e un dictionar de date, iar codul intreaba flag-uri. Ca sa adaugi
+## o tema noua scrii o intrare aici si nimic altundeva; ca sa vezi ce face o
+## tema, citesti o singura intrare in loc sa cauti noua `if`-uri.
+##
+## Nu e `const` fiindca valorile vin din Palette (apel de functie). E incarcat
+## o data si partajat.
+static var _themes_cache: Dictionary
+
+static func themes() -> Dictionary:
+	if not _themes_cache.is_empty():
+		return _themes_cache
+	_themes_cache = {
+		"desert": {
+			# sand_mid din paleta (style_bible §1). Era #EDC177, mai deschis decat
+			# spec-ul; cu textura peste, valoarea aia impingea canalul rosu in
+			# saturatie si stergea granulatia.
+			"ground_tint": Palette.color(Palette.SAND_MID),
+			"sky_top": Color(0.25, 0.52, 0.92), # albastru adanc, contrast cu nisipul
+			"sky_horizon": Color(1.0, 0.86, 0.6),
+			"fog": Color(0.98, 0.87, 0.68),
+			"hill_color": Color(0.88, 0.62, 0.36),
+			"sun_color": Color(1.0, 0.92, 0.78),
+			# Calibrate prin masurare (vezi theme_exposure): la valorile vechi
+			# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
+			# supraexpus, si granulatia de suprafata disparea in saturatie.
+			#
+			# Recalibrat de doua ori: stratul de detaliu se INMULTESTE peste albedo
+			# (medie 0.89), iar soarele a coborat de la 48° la 42° si s-a mutat
+			# lateral, deci nisipul primeste mai putina lumina directa. Cumulate, au
+			# dus nisipul de la #D8A86A la #BD955E. 0.75 -> 1.42 il aduce inapoi.
+			#
+			# Daca schimbi detaliul SAU unghiul soarelui, REIA masuratoarea:
+			#   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
+			# si compara nisipul insorit (coltul liber al imaginii) cu #D8A86A.
+			"sun_energy": 0.8,
+			"exposure": 1.42,
+			# Ambient din CULOARE, nu din cer — vezi _build_environment.
+			"ambient_color": Color.html("E2B77A"),
+			"ambient_energy": 0.22,
+			"fog_depth": true, # 90 -> 250 m, style_bible §6
+			"horizon_model": "res://assets/models/butte.glb",
+			"walls": false,   # rolul lor il preiau falezele de canion
+			"cliffs": true,
+			"decor": "bands",
+			"props": "desert",
+			"hazard_model": "res://assets/models/boulder_roller.glb",
+			"dust_color": Palette.color(Palette.SAND_SHADOW),
+		},
+		"forest": {
+			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
+			"sky_top": Color(0.22, 0.48, 0.9),
+			"sky_horizon": Color(0.72, 0.87, 1.0),
+			"fog": Color(0.78, 0.88, 0.98),
+			"hill_color": Color(0.3, 0.56, 0.27),
+			"sun_color": Color(1.0, 0.97, 0.88),
+			"sun_energy": 1.25,
+			"exposure": 1.0,
+			"ambient_color": null, # null = ambient din cer
+			"fog_depth": false,
+			"fog_density": 0.0035,
+			"horizon_model": "", # "" = siluete de rezerva (sfere turtite)
+			"walls": true,
+			"cliffs": false,
+			"decor": "scatter",
+			"props": "forest",
+			"hazard_model": "", # "" = excavator
+			"dust_color": null, # null = derivat din ground_tint
+		},
+		# --- Insula de recif (pista Okinawa) ---
+		#
+		# Culorile sunt sloturile insulare din paleta (17-23), ca sa nu existe
+		# doua adevaruri despre "ce inseamna turcoaz".
+		#
+		# sun_energy/exposure sunt PROVIZORII: se calibreaza prin masurare, la
+		# fel ca desertul, cand pista exista. Procedura e in comentariul de la
+		# theme_exposure — se compara nisipul cu coral_sand (#E9DCC0).
+		"island": {
+			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			"sky_top": Color(0.20, 0.50, 0.88),
+			"sky_horizon": Color(0.80, 0.92, 0.95), # palid marin, nu auriu ca desertul
+			"fog": Color(0.82, 0.91, 0.93),
+			"hill_color": Palette.color(Palette.TROPICAL_GREEN),
+			"sun_color": Color(1.0, 0.97, 0.92),
+			"sun_energy": 1.1,
+			"exposure": 1.0,
+			# Ambient din cer, ca la padure: pe o insula lumina indirecta chiar
+			# VINE din cer si din apa, nu de la o intindere de nisip cald. Exact
+			# rationamentul desertului, cu concluzia inversa.
+			"ambient_color": null,
+			# Ceata de adancime, ca la desert: marea se pierde in orizont la o
+			# distanta cunoscuta, iar camera poate taia fix acolo.
+			"fog_depth": true,
+			"horizon_model": "", # deocamdata rezerva; insulele de fundal vin la etapa 5
+			"walls": true,       # doar pe sectiunile inaltate — regula din sampler
+			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
+			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
+			"props": "island",   # ...dar palmieri si bazalt, nu cactusi
+			"hazard_model": "",  # wave_surge se ataseaza separat, pe fractii
+			"dust_color": null,
+		},
+	}
+	return _themes_cache
+
+
+## Citeste un camp din tema curenta, cu valoare implicita daca lipseste.
+##
+## Initializarea e LENESA si intentionat NU trece prin apply_theme. Track02 si
+## Track03 nu apeleaza apply_theme niciodata: ele raman pe valorile implicite
+## ale variabilelor theme_*, care NU sunt identice cu ramura "forest"
+## (cerul implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)).
+## Un apply_theme("forest") fortat aici le-ar schimba in tacere aspectul.
+## Asa iau doar FLAG-urile de comportament, iar culorile raman ale lor.
+func theme_flag(key: String, fallback: Variant = null) -> Variant:
+	if _theme.is_empty():
+		var all := themes()
+		_theme = all.get(theme_decor, all["forest"])
+	return _theme.get(key, fallback)
+
+
 ## Paleta completa a unei teme, dintr-un singur apel.
 ## Stil: FLAT-COLOR saturat (stilul masinilor RgsDev, extins la lume) —
 ## fara texturi de zgomot; culoarea si lumina fac treaba.
 func apply_theme(theme: String) -> void:
+	var all := themes()
+	if not all.has(theme):
+		push_error("Track: tema necunoscuta '%s' (am %s)"
+			% [theme, ", ".join(all.keys())])
+		theme = "forest"
 	theme_decor = theme
-	if theme == "desert":
-		# sand_mid din paleta (style_bible §1). Era #EDC177, mai deschis decat
-		# spec-ul; cu textura peste, valoarea aia impingea canalul rosu in
-		# saturatie si stergea granulatia.
-		theme_ground_tint = Palette.color(Palette.SAND_MID)
-		theme_sky_top = Color(0.25, 0.52, 0.92)   # albastru adanc, contrast cu nisipul
-		theme_sky_horizon = Color(1.0, 0.86, 0.6)
-		theme_fog = Color(0.98, 0.87, 0.68)
-		theme_hill_color = Color(0.88, 0.62, 0.36)
-		theme_sun_color = Color(1.0, 0.92, 0.78)
-		# Calibrate prin masurare (vezi theme_exposure): la valorile vechi
-		# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
-		# supraexpus, si granulatia de suprafata disparea in saturatie.
-		#
-		# Recalibrat de doua ori: stratul de detaliu se INMULTESTE peste albedo
-		# (medie 0.89), iar soarele a coborat de la 48° la 42° si s-a mutat
-		# lateral, deci nisipul primeste mai putina lumina directa. Cumulate, au
-		# dus nisipul de la #D8A86A la #BD955E. 0.75 -> 1.42 il aduce inapoi.
-		#
-		# Daca schimbi detaliul SAU unghiul soarelui, REIA masuratoarea:
-		#   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
-		# si compara nisipul insorit (coltul liber al imaginii) cu #D8A86A.
-		theme_sun_energy = 0.8
-		theme_exposure = 1.42
-	else:
-		theme_ground_tint = Color(0.45, 0.72, 0.33) # verde viu, nu pastel
-		theme_sky_top = Color(0.22, 0.48, 0.9)
-		theme_sky_horizon = Color(0.72, 0.87, 1.0)
-		theme_fog = Color(0.78, 0.88, 0.98)
-		theme_hill_color = Color(0.3, 0.56, 0.27)
-		theme_sun_color = Color(1.0, 0.97, 0.88)
-		theme_sun_energy = 1.25
-		theme_exposure = 1.0
+	_theme = all[theme]
+	theme_ground_tint = _theme["ground_tint"]
+	theme_sky_top = _theme["sky_top"]
+	theme_sky_horizon = _theme["sky_horizon"]
+	theme_fog = _theme["fog"]
+	theme_hill_color = _theme["hill_color"]
+	theme_sun_color = _theme["sun_color"]
+	theme_sun_energy = _theme["sun_energy"]
+	theme_exposure = _theme["exposure"]
 
 var curve: Curve3D
 var baked: PackedVector3Array
@@ -317,10 +429,11 @@ func _build_environment() -> void:
 	# mare parte DE LA NISIP, nu de la cer. Folosim culoarea de bounce din
 	# style_bible §5 (#E2B77A) ca sursa de ambient, si umbrele ies calde in loc
 	# de albastre.
-	if theme_decor == "desert":
+	var ambient: Variant = theme_flag("ambient_color")
+	if ambient != null:
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		env.ambient_light_color = Color.html("E2B77A")
-		env.ambient_light_energy = 0.22
+		env.ambient_light_color = ambient
+		env.ambient_light_energy = theme_flag("ambient_energy", 0.22)
 	else:
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 		env.ambient_light_sky_contribution = 1.0
@@ -328,7 +441,7 @@ func _build_environment() -> void:
 	# in vederile ortogonale, iar ceata ar acoperi totul intr-o pata uniforma.
 	env.fog_enabled = not Engine.is_editor_hint()
 	env.fog_light_color = theme_fog
-	if theme_decor == "desert":
+	if theme_flag("fog_depth", false):
 		# FOG_MODE_DEPTH, cu inceput si sfarsit explicite (style_bible §6: 90 ->
 		# 250m), in loc de exponential. Doua motive: se stie EXACT unde dispare
 		# geometria, deci camera poate taia fix acolo (vezi ChaseCamera.far); si
@@ -339,7 +452,7 @@ func _build_environment() -> void:
 		env.fog_depth_end = 250.0
 		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
 	else:
-		env.fog_density = 0.0035
+		env.fog_density = theme_flag("fog_density", 0.0035)
 	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	# Expunerea: SINGURA parghie globala de luminozitate a scenei.
@@ -453,11 +566,11 @@ const HORIZON_CLEARANCE: float = 120.0
 ## secunde). Fiecare inel are alta gama de siluete, deci "sunt langa turnul
 ## ingust" devine o informatie reala.
 func _build_horizon(centroid: Vector3) -> void:
-	if theme_decor != "desert" \
-			or not ResourceLoader.exists("res://assets/models/butte.glb"):
+	var horizon_model: String = theme_flag("horizon_model", "")
+	if horizon_model.is_empty() or not ResourceLoader.exists(horizon_model):
 		_build_horizon_fallback(centroid)
 		return
-	var scene := load("res://assets/models/butte.glb") as PackedScene
+	var scene := load(horizon_model) as PackedScene
 	var rng := RandomNumberGenerator.new()
 	rng.seed = track_name.hash() + 1
 	for ring in HORIZON_RINGS:
@@ -884,7 +997,7 @@ func _build_road() -> void:
 ## s-a mutat in TrackSideSampler.wall_segments(), de unde o citesc si falezele, si
 ## popicele. O singura definitie, deci nu se pot contrazice.
 func _build_walls() -> void:
-	if theme_decor == "desert":
+	if not theme_flag("walls", true):
 		return
 	var loop_poly := PackedVector2Array()
 	for p in _points():
@@ -953,10 +1066,10 @@ func _build_hazard(frac: float) -> void:
 	#
 	# Pana acum era o MINGE DE PLAJA — ramasita din tema abandonata "jucarii in
 	# lada de nisip", intr-un canion de desert.
-	if theme_decor == "desert" and ResourceLoader.exists(
-			"res://assets/models/boulder_roller.glb"):
+	var hazard_model: String = theme_flag("hazard_model", "")
+	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
 		var ball := SlidingHazard.new()
-		ball.model_scene = load("res://assets/models/boulder_roller.glb")
+		ball.model_scene = load(hazard_model)
 		ball.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
 		# Doar intentia "se rostogoleste"; raza reala o ia din model.
 		ball.roll_radius = 1.0
@@ -1309,8 +1422,9 @@ func _build_shoulders() -> void:
 	st.generate_normals()
 	# Praf: intre asfalt si nisip ca valoare, ca sa faca tranzitia, nu un al
 	# treilea ton care sa sara in ochi.
-	var dust := Palette.color(Palette.SAND_SHADOW) \
-		if theme_decor == "desert" else theme_ground_tint.darkened(0.25)
+	var dust_override: Variant = theme_flag("dust_color")
+	var dust: Color = dust_override if dust_override != null \
+		else theme_ground_tint.darkened(0.25)
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
 	inst.material_override = _flat_material(dust,
@@ -1359,10 +1473,11 @@ func _build_kerbs() -> void:
 ## tehnic: track.gd e fisierul pe care il atinge toata lumea, iar decorul e
 ## partea care se itereaza cel mai des.
 func _build_world_decor() -> void:
-	add_child(TrackCliffs.build(_sampler, theme_decor, track_name.hash(),
-		_cliff_clearings()))
-	add_child(TrackDecor.build(_sampler, theme_decor, track_name.hash(),
-		Callable(self, "_flat_material")))
+	add_child(TrackCliffs.build(_sampler, theme_flag("cliffs", false),
+		track_name.hash(), _cliff_clearings()))
+	add_child(TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
+		track_name.hash(), Callable(self, "_flat_material"),
+		theme_flag("props", "desert")))
 
 func _build_excavator(frac: float) -> void:
 	const PATH := "res://assets/models/rusted_digger.glb"

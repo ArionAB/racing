@@ -133,6 +133,19 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   „procedurale", raportul sare la valori absurde și garda trece orice — devine
   decorativă exact când ai cea mai mare nevoie de ea.
 
+- **Integrezi un asset nou? Verifică ce formă a ieșit coliziunea:**
+  ```
+  godot --headless --path . --script res://tools/probe_dims.gd
+  ```
+  Tipărește cotele de coliziune ale prop-urilor mari, citite din AABB-ul
+  modelului. Dacă regenerezi un GLB cu alte dimensiuni și cifra de aici **nu**
+  se schimbă, ai găsit un număr hardcodat care trebuie scos.
+
+  > Cotele astea stăteau într-un tabel scris de mână și **două din ele erau deja
+  > greșite** față de geometrie: benzinăria declarată 6.0 pe Z când modelul are
+  > 6.58 (jumătate de metru de clădire prin care treceai), moara 9.0 când turnul
+  > are 10.95. Nimic nu compară un număr dintr-un dicționar cu un mesh.
+
 - **CI verifică și anti-blocajul în pereții de canion.** Aruncă mașini în unghi
   în faleze, în 12 puncte de pe traseu, și pică dacă vreuna rămâne înțepenită.
   ```

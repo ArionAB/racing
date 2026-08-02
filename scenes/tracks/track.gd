@@ -540,6 +540,38 @@ func _extract_glb_node(scene: PackedScene, node_name: String) -> Node3D:
 	return container
 
 
+## AABB-ul combinat al tuturor mesh-urilor dintr-un subarbore, in spatiul
+## modelului. Baza pentru coliziunile de landmark si pentru scalarea portii de
+## start: cotele se masoara, nu se scriu de mana.
+##
+## De ce nu ajunge primul mesh, cum face track_decor._first_mesh(): jumatate din
+## GLB-urile din pipeline au mai multe noduri (moara are 2, arcada de stanca va
+## avea 4), iar un singur nod da o cutie prea mica in tacere. Transformul local
+## conteaza — palele morii au pivot propriu.
+static func model_aabb(root: Node3D) -> AABB:
+	var boxes: Array[AABB] = []
+	_collect_aabbs(root, Transform3D.IDENTITY, boxes)
+	if boxes.is_empty():
+		return AABB()
+	var out: AABB = boxes[0]
+	for i in range(1, boxes.size()):
+		out = out.merge(boxes[i])
+	return out
+
+
+static func _collect_aabbs(node: Node, xform: Transform3D,
+		out: Array[AABB]) -> void:
+	var local := xform
+	var spatial := node as Node3D
+	if spatial != null:
+		local = xform * spatial.transform
+	var mi := node as MeshInstance3D
+	if mi != null and mi.mesh != null:
+		out.append(local * mi.mesh.get_aabb())
+	for c in node.get_children():
+		_collect_aabbs(c, local, out)
+
+
 func _centroid() -> Vector3:
 	var sum := Vector3.ZERO
 	for p in baked:
@@ -1333,13 +1365,17 @@ func _build_dino(frac: float, side_sign: float) -> void:
 	dino.add_to_group("dinos")
 	var model := (load("res://assets/models/toy_dino.glb") as PackedScene) \
 		.instantiate() as Node3D
+	var aabb := model_aabb(model)
 	dino.add_child(model)
 	var shape := CollisionShape3D.new()
 	var cyl := CylinderShape3D.new()
-	cyl.radius = 1.3
-	cyl.height = 5.5
+	# Inaltimea masurata; raza din amprenta pe X, NU din diagonala — silueta are
+	# coada lunga (9 m pe Z la modelul actual), iar un cilindru care s-o acopere
+	# ar fi un gard invizibil de 4.5 m raza langa sosea.
+	cyl.radius = maxf(aabb.size.x * 0.5, 0.5)
+	cyl.height = maxf(aabb.size.y, 0.5)
 	shape.shape = cyl
-	shape.position = Vector3.UP * 2.75
+	shape.position = Vector3.UP * (aabb.position.y + aabb.size.y * 0.5)
 	dino.add_child(shape)
 	add_child(dino)
 	var stand := p + side * (half_width + 6.0)
@@ -1352,15 +1388,28 @@ func _build_dino(frac: float, side_sign: float) -> void:
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
 ##   gap    = cat de departe de marginea soselei sta (m)
 ##   col    = forma de coliziune ("cyl" / "box" / "none")
+##   radius = raza cilindrului, DOAR pentru "cyl" (vezi mai jos de ce ramane)
 ##   spin   = primeste scriptul windmill.gd (roata "Blades" care se invarte)
-## Dimensiunile vin din docs/asset_briefs/ (origine la baza, scara 1:1 m).
+##
+## Ce NU mai sta aici: inaltimea si latimea. Se citesc din AABB-ul modelului, ca
+## la clustere si cactusi (vezi comentariul din track_decor._add_cluster) —
+## regenerezi GLB-ul cu alte cote si coliziunea le urmeaza singura.
+##
+## Tabelul avea cotele scrise de mana si DOUA din ele erau deja gresite:
+## benzinaria era declarata 6.0 pe Z cand modelul are 6.58 (0.58 m de cladire
+## prin care treceai), iar moara 9.0 cand turnul are 10.10. Nimic nu le verifica,
+## fiindca nimic nu compara un numar dintr-un dictionar cu geometria.
+##
+## Raza ramane in tabel pentru ca NU e o masuratoare, e o decizie: un turn pe
+## patru picioare are amprenta de ~4.6 m, dar vrem sa lovesti picioarele, nu un
+## cilindru gras care inghite spatiul dintre ele.
 const _LANDMARKS := {
 	0: {"path": "res://assets/models/water_tower.glb",
-		"gap": 10.0, "col": "cyl", "radius": 2.4, "height": 9.5, "spin": false},
+		"gap": 10.0, "col": "cyl", "radius": 2.4, "spin": false},
 	1: {"path": "res://assets/models/gas_station.glb",
-		"gap": 9.0, "col": "box", "size": Vector3(8.0, 5.0, 6.0), "spin": false},
+		"gap": 9.0, "col": "box", "spin": false},
 	2: {"path": "res://assets/models/windmill.glb",
-		"gap": 11.0, "col": "cyl", "radius": 1.6, "height": 9.0, "spin": true},
+		"gap": 11.0, "col": "cyl", "radius": 1.6, "spin": true},
 	3: {"path": "res://assets/models/route66_sign.glb",
 		"gap": 3.5, "col": "none", "spin": false},
 }
@@ -1381,6 +1430,10 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 	var p := baked[idx]
 	var side := _side_at(idx) * side_sign
 	var model := (load(path) as PackedScene).instantiate() as Node3D
+	# Masurat INAINTE de set_script si de orice scalare — pe urma nodul "Blades"
+	# al morii ajunge sa fie rotit de windmill.gd si AABB-ul n-ar mai fi al
+	# pozitiei de repaus.
+	var aabb := model_aabb(model)
 	if info["spin"]:
 		model.set_script(load("res://scenes/props/windmill.gd"))
 	var root: Node3D
@@ -1391,15 +1444,17 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 		var shape := CollisionShape3D.new()
 		if info["col"] == "box":
 			var box := BoxShape3D.new()
-			box.size = info["size"]
+			box.size = aabb.size
 			shape.shape = box
-			shape.position = Vector3.UP * (info["size"].y * 0.5)
+			# Centrat pe AABB-ul real, nu presupus simetric fata de origine:
+			# benzinaria e decalata pe Z fata de pivotul ei.
+			shape.position = aabb.position + aabb.size * 0.5
 		else: # "cyl"
 			var cyl := CylinderShape3D.new()
 			cyl.radius = info["radius"]
-			cyl.height = info["height"]
+			cyl.height = aabb.size.y
 			shape.shape = cyl
-			shape.position = Vector3.UP * (info["height"] * 0.5)
+			shape.position = Vector3.UP * (aabb.position.y + aabb.size.y * 0.5)
 		body.add_child(shape)
 		root = body
 	root.add_to_group("landmarks")
@@ -1496,20 +1551,28 @@ func _build_start_gate() -> void:
 	# au coliziune. Fallback pe stalpii procedurali daca lipseste modelul.
 	if ResourceLoader.exists("res://assets/models/start_arch.glb"):
 		var target_width := (half_width + 1.2) * 2.0
-		var s := target_width / 22.8 # latimea masurata a modelului
 		var gate := StaticBody3D.new()
 		gate.add_to_group("start_arch")
 		var model := (load("res://assets/models/start_arch.glb") as PackedScene) \
 			.instantiate() as Node3D
+		# Latimea si inaltimea se MASOARA. Aici erau trei literale (22.8 si 8.7
+		# de doua ori) copiate din bbox-ul modelului de atunci; un GLB de alta
+		# marime se scala gresit si ramanea cu coliziunea in aer, fara eroare.
+		var aabb := model_aabb(model)
+		var model_w := maxf(aabb.size.x, 0.001)
+		var s := target_width / model_w
+		var gate_h := aabb.size.y * s
 		model.scale = Vector3.ONE * s
 		gate.add_child(model)
 		for sx: float in [-1.0, 1.0]:
 			var pillar := CollisionShape3D.new()
 			var box := BoxShape3D.new()
-			box.size = Vector3(1.4, 8.7 * s, 1.6)
+			box.size = Vector3(1.4, gate_h, 1.6)
 			pillar.shape = box
+			# 0.9 = jumatate din grosimea cutiei (0.7) plus 0.2 marja, ca stalpul
+			# de coliziune sa stea in interiorul siluetei, nu peste ea.
 			pillar.position = Vector3(sx * (target_width * 0.5 - 0.9),
-				8.7 * s * 0.5, 0)
+				gate_h * 0.5, 0)
 			gate.add_child(pillar)
 		add_child(gate)
 		gate.global_position = baked[0]

@@ -12,7 +12,9 @@ Verifica:
   5. COLOR_0 prezent (AO copt) + intervalul de valori
   6. bounding box: originea la baza (min Y ~ 0), centrata in XZ. Cu
      --origin=center se cere in schimb bbox centrat pe Y (obiecte care se
-     rostogolesc — exceptia declarata din #45)
+     rostogolesc — exceptia declarata din #45). Cu --origin=assembly se verifica
+     doar ca ANSAMBLUL atinge solul: piesele unui obiect compus (arcada din #C1)
+     isi pastreaza pozitiile relative, deci traversa chiar pluteste la 9 m
   7. orientarea: pe ce parte sta masa geometriei (avertisment; cu --front=-Z
      devine aserttiune dura)
 
@@ -20,6 +22,7 @@ Rulare:
     python tools/blender/verify_glb.py assets/models/cactus.glb [buget_tris]
     python tools/blender/verify_glb.py assets/models/route66_sign.glb 260 --front=-Z
     python tools/blender/verify_glb.py assets/models/boulder_roller.glb 220 --origin=center
+    python tools/blender/verify_glb.py assets/models/rock_arch.glb 1000 --origin=assembly
 """
 
 import json
@@ -107,6 +110,7 @@ def verify(path, budget=None, front=None, origin="base"):
 
     grand_total = 0
     ok = True
+    assembly_lo = 1e9   # cel mai jos punct din TOT fisierul (pentru origin=assembly)
 
     for node in nodes:
         if "mesh" not in node:
@@ -215,14 +219,25 @@ def verify(path, budget=None, front=None, origin="base"):
                 ok = False
             else:
                 print("    origine   : centru confirmat (bbox Y %+.3f, cerut ~0)" % off)
+        elif origin == "assembly":
+            # Ansamblu cu ORIGINE COMUNA: mai multe noduri care formeaza un
+            # singur obiect si trebuie sa-si pastreze pozitiile relative (arcada
+            # din #C1: doua picioare, o traversa, doua proxy-uri de coliziune).
+            # Regula "baza la Y=0" per nod ar fi gresita — traversa chiar
+            # pluteste la 9 m, ala e tot rostul ei. Ce se verifica in schimb e ca
+            # ANSAMBLUL atinge solul, la final.
+            assembly_lo = min(assembly_lo, min(ys))
         elif abs(min(ys)) > 0.01:
             print("    !! baza nu e la Y=0 (min Y = %.3f)" % min(ys))
             ok = False
 
         # Centrarea in XZ: se printa de la inceput, dar nu se verifica niciodata.
         # Ramane AVERTISMENT, nu eroare: `finish(origin="base_axis")` decentreaza
-        # intentionat (un semn a carui origine trebuie sa stea pe axa stalpului).
+        # intentionat (un semn a carui origine trebuie sa stea pe axa stalpului),
+        # iar la un ansamblu piesele individuale sunt decentrate prin definitie.
         for axis, vals in (("X", xs), ("Z", zs)):
+            if origin == "assembly":
+                break
             span = max(vals) - min(vals)
             center = (min(vals) + max(vals)) / 2
             if span > 1e-6 and abs(center) > max(0.05, span * 0.05):
@@ -264,6 +279,18 @@ def verify(path, budget=None, front=None, origin="base"):
                           "spate; suspect altfel."
                           % (front, opposite, area[front], area[opposite]))
 
+    if origin == "assembly":
+        if assembly_lo > 1e8:
+            print("\n!! origin=assembly, dar niciun nod cu mesh")
+            ok = False
+        elif abs(assembly_lo) > 0.01:
+            print("\n!! ansamblul nu atinge solul: cel mai jos punct e la Y=%.3f "
+                  "— exportat plutind sau ingropat?" % assembly_lo)
+            ok = False
+        else:
+            print("\nansamblu : baza confirmata (cel mai jos punct Y=%.3f), "
+                  "piesele isi pastreaza pozitiile relative" % assembly_lo)
+
     print("\nTOTAL: %d tris" % grand_total)
     print("VERDICT: %s" % ("OK" if ok else "PROBLEME — vezi mai sus"))
     return ok
@@ -282,8 +309,8 @@ if __name__ == "__main__":
                 sys.exit("--front asteapta +X, -X, +Z sau -Z (Y e sus)")
         elif f.startswith("--origin="):
             origin = f.split("=", 1)[1].strip().lower()
-            if origin not in ("base", "center"):
-                sys.exit("--origin asteapta base (implicit) sau center")
+            if origin not in ("base", "center", "assembly"):
+                sys.exit("--origin asteapta base (implicit), center sau assembly")
         else:
             sys.exit("optiune necunoscuta: %s" % f)
 

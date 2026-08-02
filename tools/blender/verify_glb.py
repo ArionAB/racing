@@ -7,12 +7,16 @@ Verifica:
   1. numele nodurilor (Godot cauta noduri dupa nume, ex. "Blades")
   2. numarul de triunghiuri fata de buget
   3. UV-urile: toate colapsate pe centre de slot din atlas -> ce sloturi foloseste
-  4. COLOR_0 prezent (AO copt) + intervalul de valori
-  5. bounding box: originea la baza (min Y ~ 0), centrata in XZ
-  6. orientarea: pe ce parte sta masa geometriei (fata trebuie sa fie spre -Z)
+  4. sloturile sunt LEGALE (0-13). 14-16 sunt accente de masina, 17-31 se
+     randeaza magenta in joc — vezi LEGAL_SLOTS mai jos
+  5. COLOR_0 prezent (AO copt) + intervalul de valori
+  6. bounding box: originea la baza (min Y ~ 0), centrata in XZ
+  7. orientarea: pe ce parte sta masa geometriei (avertisment; cu --front=-Z
+     devine aserttiune dura)
 
 Rulare:
     python tools/blender/verify_glb.py assets/models/cactus.glb [buget_tris]
+    python tools/blender/verify_glb.py assets/models/route66_sign.glb 260 --front=-Z
 """
 
 import json
@@ -27,6 +31,20 @@ SLOT_NAMES = [
     "rust_metal", "painted_metal", "cactus_green", "dry_vegetation",
     "car_red", "car_blue", "car_yellow",
 ]
+
+# Sloturile pe care le poate folosi un asset de decor.
+#
+# 14-16 sunt accentele de masina (scripts/palette.gd:43 le declara explicit
+# interzise in decor: masinile trebuie sa ramana singurele suprafete saturate
+# din cadru, style_bible §1). 17-31 nu sunt definite — atlasul le lasa
+# INTENTIONAT magenta (tools/generate_palette_atlas.gd:273-278), ca o greseala
+# de UV sa sara in ochi.
+#
+# Pana la garda asta, un asset care cauta o culoare pe care paleta n-o are
+# (sticla, metal inchis) nimerea slotul 17, trecea verificarea cu OK si ajungea
+# magenta in joc. Nimic nu-l prindea inainte de primul screenshot.
+LEGAL_SLOTS = range(0, 14)
+CAR_SLOTS = range(14, 17)
 
 COMPONENT = {5120: ("b", 1), 5121: ("B", 1), 5122: ("h", 2),
              5123: ("H", 2), 5125: ("I", 4), 5126: ("f", 4)}
@@ -66,7 +84,16 @@ def read_accessor(gltf, blob, index):
     return out
 
 
-def verify(path, budget=None):
+def slot_problem(slot):
+    """Motivul pentru care un slot e ilegal, sau None daca e in regula."""
+    if slot in LEGAL_SLOTS:
+        return None
+    if slot in CAR_SLOTS:
+        return "REZERVAT MASINILOR"
+    return "NEDEFINIT -> MAGENTA IN JOC"
+
+
+def verify(path, budget=None, front=None):
     gltf, blob, total, version = load_glb(path)
     print("=" * 74)
     print("%s  —  %d B, glTF v%d" % (os.path.basename(path), total, version))
@@ -89,15 +116,36 @@ def verify(path, budget=None):
         has_color = False
         xs, ys, zs = [], [], []
 
+        area = {"+X": 0.0, "-X": 0.0, "+Y": 0.0, "-Y": 0.0, "+Z": 0.0, "-Z": 0.0}
+
         for prim in mesh["primitives"]:
             attrs = prim["attributes"]
+            pos = read_accessor(gltf, blob, attrs["POSITION"])
             if "indices" in prim:
-                tris += len(read_accessor(gltf, blob, prim["indices"])) // 3
+                idx = [i[0] for i in read_accessor(gltf, blob, prim["indices"])]
             else:
-                tris += len(read_accessor(gltf, blob, attrs["POSITION"])) // 3
+                idx = list(range(len(pos)))
+            tris += len(idx) // 3
 
-            for p in read_accessor(gltf, blob, attrs["POSITION"]):
+            for p in pos:
                 xs.append(p[0]); ys.append(p[1]); zs.append(p[2])
+
+            # Aria proiectata pe fiecare semiaxa. Produsul vectorial e deja
+            # scalat cu aria (|a x b| = 2*aria), deci componentele lui insumate
+            # dau exact proiectia — fara normalizari si fara atributul NORMAL,
+            # care poate lipsi din GLB.
+            for t in range(0, len(idx) - 2, 3):
+                a, b, c = pos[idx[t]], pos[idx[t + 1]], pos[idx[t + 2]]
+                u1 = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+                v1 = (c[0] - a[0], c[1] - a[1], c[2] - a[2])
+                n = (u1[1] * v1[2] - u1[2] * v1[1],
+                     u1[2] * v1[0] - u1[0] * v1[2],
+                     u1[0] * v1[1] - u1[1] * v1[0])
+                for k, axis in enumerate("XYZ"):
+                    if n[k] >= 0.0:
+                        area["+" + axis] += n[k] * 0.5
+                    else:
+                        area["-" + axis] -= n[k] * 0.5
 
             if "TEXCOORD_0" in attrs:
                 for u, v in read_accessor(gltf, blob, attrs["TEXCOORD_0"]):
@@ -120,13 +168,20 @@ def verify(path, budget=None):
         print("\n  %s: %d tris%s" % (name, tris, flag))
 
         names = []
+        illegal = []
         for slot, exact in sorted(slots_used):
             label = SLOT_NAMES[slot] if 0 <= slot < len(SLOT_NAMES) else "slot%d" % slot
             names.append(label if exact else "%s(NECENTRAT!)" % label)
             if not exact:
                 ok = False
+            why = slot_problem(slot)
+            if why:
+                illegal.append((slot, label, why))
         print("    sloturi UV : %s" % (", ".join(names) or "FARA UV!"))
         if not slots_used:
+            ok = False
+        for slot, label, why in illegal:
+            print("    !! slot %d (%s) ILEGAL in decor: %s" % (slot, label, why))
             ok = False
 
         if has_color:
@@ -148,12 +203,69 @@ def verify(path, budget=None):
             print("    !! baza nu e la Y=0 (min Y = %.3f)" % min(ys))
             ok = False
 
+        # Centrarea in XZ: se printa de la inceput, dar nu se verifica niciodata.
+        # Ramane AVERTISMENT, nu eroare: `finish(origin="base_axis")` decentreaza
+        # intentionat (un semn a carui origine trebuie sa stea pe axa stalpului).
+        for axis, vals in (("X", xs), ("Z", zs)):
+            span = max(vals) - min(vals)
+            center = (min(vals) + max(vals)) / 2
+            if span > 1e-6 and abs(center) > max(0.05, span * 0.05):
+                print("    ~  necentrat pe %s: centru %+.3f din %.2f m deschidere"
+                      % (axis, center, span))
+
+        # Orientarea.
+        axis_area = {"X": area["+X"] + area["-X"], "Z": area["+Z"] + area["-Z"]}
+        dominant = "X" if axis_area["X"] > axis_area["Z"] else "Z"
+        lateral = (axis_area["X"] + axis_area["Z"]) or 1.0
+        print("    orientare  : plan dominant %s (%.0f%%) | +X %.1f -X %.1f  +Z %.1f -Z %.1f"
+              % (dominant, 100.0 * axis_area[dominant] / lateral,
+                 area["+X"], area["-X"], area["+Z"], area["-Z"]))
+
+        if front is not None:
+            axis = front[1]
+            opposite = {"+": "-", "-": "+"}[front[0]] + axis
+            # Aserttiunea DURA e doar pe AXA, si asta e o limitare reala, nu o
+            # scurtatura. Semnul nu se poate deduce din geometrie: la ecranul de
+            # drive-in scheletul sta in SPATE, deci spatele are mai multa arie
+            # decat fata; la benzinarie pompele stau in FATA, deci exact invers.
+            # Aceeasi masuratoare ar da verdicte opuse pe doua assets corecte.
+            #
+            # Ce se poate prinde, si e greseala care chiar se face, e confuzia de
+            # AXA — un semn exportat privind pe X in loc de Z, adica rotit 90°.
+            # Semnul ramane avertisment.
+            if dominant != axis:
+                print("    !! fata ceruta %s, dar planul dominant e %s "
+                      "(%.1f pe %s vs %.1f pe %s) — model rotit 90°?"
+                      % (front, dominant, axis_area[dominant], dominant,
+                         axis_area[axis], axis))
+                ok = False
+            else:
+                print("    fata %s     : axa confirmata (%.0f%% din aria laterala)"
+                      % (front, 100.0 * axis_area[axis] / lateral))
+                if area[front] < area[opposite] * 0.75:
+                    print("    ~  atentie: %s are mult mai putina arie decat %s "
+                          "(%.1f vs %.1f). Normal daca structura de sprijin e in "
+                          "spate; suspect altfel."
+                          % (front, opposite, area[front], area[opposite]))
+
     print("\nTOTAL: %d tris" % grand_total)
     print("VERDICT: %s" % ("OK" if ok else "PROBLEME — vezi mai sus"))
     return ok
 
 
 if __name__ == "__main__":
-    target = sys.argv[1]
-    budget = int(sys.argv[2]) if len(sys.argv) > 2 else None
-    sys.exit(0 if verify(target, budget) else 1)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = [a for a in sys.argv[1:] if a.startswith("--")]
+
+    front = None
+    for f in flags:
+        if f.startswith("--front="):
+            front = f.split("=", 1)[1].strip().upper()
+            if front not in ("+X", "-X", "+Z", "-Z"):
+                sys.exit("--front asteapta +X, -X, +Z sau -Z (Y e sus)")
+        else:
+            sys.exit("optiune necunoscuta: %s" % f)
+
+    target = args[0]
+    budget = int(args[1]) if len(args) > 1 else None
+    sys.exit(0 if verify(target, budget, front) else 1)

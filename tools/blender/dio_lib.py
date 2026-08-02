@@ -43,6 +43,64 @@ def slot_u(slot):
     return (slot + 0.5) / SLOTS
 
 
+def _lcg(seed):
+    """Generator determinist minimal. Nu folosim `random`: build-ul trebuie sa
+    dea acelasi rezultat la fiecare rulare, indiferent de ordinea apelurilor.
+    Acelasi LCG ca in Builder.rock()."""
+    state = (seed * 1103515245 + 12345) & 0x7FFFFFFF
+
+    def rand():
+        nonlocal state
+        state = (state * 1103515245 + 12345) & 0x7FFFFFFF
+        return state / 0x7FFFFFFF
+
+    return rand
+
+
+def _span_points(p1, p2, count_or_step, endpoints=True):
+    """Puncte echidistante pe segmentul p1->p2 — nucleul de repetitie comun
+    pentru pickets/railing/ladder (vezi #A1).
+
+    count_or_step: int = numar de puncte, float = pas in metri (rotunjit ca sa
+    cada fix pe capete). endpoints=False decaleaza cu jumatate de pas, pentru
+    sipci care nu trebuie sa se suprapuna peste stalpii de colt.
+    """
+    a, b = Vector(p1), Vector(p2)
+    d = b - a
+    if isinstance(count_or_step, bool):  # bool e subclasa de int, ar trece tacut
+        raise TypeError("count_or_step trebuie int (numar) sau float (pas)")
+    if isinstance(count_or_step, int):
+        n = max(count_or_step, 1)
+    else:
+        n = max(int(round(d.length / max(count_or_step, 1e-6))) + 1, 2)
+    if n == 1:
+        return [(a + b) * 0.5]
+    if endpoints:
+        return [a + d * (i / (n - 1)) for i in range(n)]
+    return [a + d * ((i + 0.5) / n) for i in range(n)]
+
+
+# --- Contururi 2D reutilizabile (pentru Builder.prism) ------------------------
+
+def star_outline(radius, inner=0.42, points=5, rotation=-90.0):
+    """Contur de stea in planul XZ, pentru `Builder.prism`.
+
+    Conturul e concav; bmesh il accepta ca ngon si exportatorul il trianguleaza.
+    `rotation` e unghiul primului varf: implicit -90°, adica un varf in JOS —
+    asa varful de jos intra in stalp si ascunde imbinarea.
+
+    Traia local in build_gas_station.py:31-38; #C4 il refoloseste, deci a urcat
+    aici (nota 32 din auditul de pipeline). Valorile implicite sunt cele vechi,
+    ca benzinaria sa se regenereze identic.
+    """
+    pts = []
+    for i in range(points * 2):
+        a = math.radians(rotation + i * (360.0 / (points * 2)))
+        r = radius if i % 2 == 0 else radius * inner
+        pts.append((r * math.cos(a), r * math.sin(a)))
+    return pts
+
+
 # --- Constructie de geometrie -------------------------------------------------
 
 class Builder:
@@ -109,6 +167,109 @@ class Builder:
                 self.bm, cap_ends=True, cap_tris=False, segments=segments,
                 diameter1=radius, diameter2=radius, depth=depth, matrix=mat)
         return self._tag(res["verts"], slot)
+
+    def frustum(self, center, r_bottom, r_top, depth, slot, segments=8, axis="Z"):
+        """Trunchi de con, cu AMBELE capace. Stalpi conici, palnii, cosuri.
+
+        Exista fiindca celelalte doua primitive nu acopera cazul: `cylinder` are
+        raza constanta, iar `revolve` inchide doar baza — varful ii ramane
+        deschis, deci un stalp care se subtiaza cerea un capac scris de mana.
+
+        r_top=0 da un con cu varf ascutit. Un stalp care se subtiaza spre varf
+        citeste mult mai bine decat un cilindru drept: silueta capata directie.
+
+        Buget: 3*segments triunghiuri (segments quad-uri laterale + 2 capace),
+        inainte de bevel. Cu segments=8: 24.
+        """
+        rot = {
+            "Z": Matrix.Identity(4),
+            "X": Matrix.Rotation(math.radians(90), 4, "Y"),
+            "Y": Matrix.Rotation(math.radians(-90), 4, "X"),
+        }[axis]
+        mat = Matrix.Translation(Vector(center)) @ rot
+        try:
+            res = bmesh.ops.create_cone(
+                self.bm, cap_ends=True, cap_tris=False, segments=segments,
+                radius1=r_bottom, radius2=r_top, depth=depth, matrix=mat)
+        except TypeError:  # Blender < 3.0 folosea diameter1/diameter2
+            res = bmesh.ops.create_cone(
+                self.bm, cap_ends=True, cap_tris=False, segments=segments,
+                diameter1=r_bottom, diameter2=r_top, depth=depth, matrix=mat)
+        return self._tag(res["verts"], slot)
+
+    def pickets(self, p1, p2, count_or_step, size, slot, tilt_jitter=0.0,
+                seed=0, endpoints=True):
+        """Rand de sipci/montanti identici de-a lungul segmentului p1->p2.
+
+        p1 si p2 sunt puncte de BAZA: fiecare sipca creste pe +Z cu size[2].
+        count_or_step: int = cate bucati, float = pasul in metri.
+
+        tilt_jitter (grade) le inclina in jurul directiei randului, DETERMINIST
+        din `seed` — un rand perfect aliniat citeste ca plastic injectat, iar
+        style_bible §4 cere uzura. Zero inseamna aliniat perfect (montanti de
+        panou, unde stramb ar arata a greseala, nu a vechime).
+
+        Gard, montanti, jaluzele, gratare, coaste de rigidizare pe spatele unui
+        panou. Buget: 12 triunghiuri per sipca, inainte de bevel.
+        """
+        w, d, h = size
+        pts = _span_points(p1, p2, count_or_step, endpoints)
+        run = Vector(p2) - Vector(p1)
+        axis = run.normalized() if run.length > 1e-6 else Vector((1.0, 0.0, 0.0))
+        rand = _lcg(seed)
+        faces = set()
+        for p in pts:
+            rot = None
+            if tilt_jitter > 0.0:
+                # inclinare in jurul directiei randului = sipci care cad in
+                # lateral, exact cum imbatraneste un gard
+                rot = Matrix.Rotation(math.radians((rand() * 2.0 - 1.0) * tilt_jitter), 3, axis)
+            faces |= self.box(center=(p.x, p.y, p.z + h * 0.5),
+                              size=(w, d, h), slot=slot, rotation=rot)
+        return faces
+
+    def retag(self, faces, slot, where=None):
+        """Re-eticheteaza slotul unui set de fete. Costa ZERO triunghiuri.
+
+        `where` filtreaza:
+          None                      toate fetele
+          "up" / "down" / "side"    dupa normala
+          callable(centru, normala) filtru propriu — inaltime, pozitie, orice
+                                    (ex. `lambda c, n: n.y > 0.5` = doar fata)
+
+        Mecanismul exista de la inceput (stratul `slot` e public si primitivele
+        intorc `set[BMFace]`), dar singurul care il folosea era
+        `rock(strata_slots=)`, inchis in primitiva si doar pentru stanci. Aici e
+        general: o cutie construita cu un slot poate primi alta culoare doar pe
+        fata, doar pe fetele de sus (style_bible §4: "fetele de sus decolorate
+        +10% valoare"), sau pe un panou din cinci ca sa nu iasa suprafata
+        uniforma. Variatie de valoare fara niciun triunghi in plus.
+
+        Intoarce doar fetele efectiv re-etichetate, ca sa se poata inlantui.
+        """
+        faces = [f for f in faces if f.is_valid]
+        if faces:
+            # normalele bmesh sunt lene; fara asta filtrul dupa directie
+            # citeste vectori nuli pe fetele proaspat create
+            bmesh.ops.recalc_face_normals(self.bm, faces=faces)
+        out = set()
+        for f in faces:
+            f.normal_update()
+            n = f.normal
+            if where is None:
+                keep = True
+            elif where == "up":
+                keep = n.z > 0.5
+            elif where == "down":
+                keep = n.z < -0.5
+            elif where == "side":
+                keep = abs(n.z) <= 0.5
+            else:
+                keep = where(f.calc_center_median(), n)
+            if keep:
+                f[self.slot] = slot
+                out.add(f)
+        return out
 
     def revolve(self, profile, slot, segments=8, origin=(0, 0, 0), cap_bottom=True):
         """Suprafata de revolutie in jurul axei Z locale.

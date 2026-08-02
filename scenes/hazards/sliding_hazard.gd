@@ -119,6 +119,10 @@ func _build_model() -> void:
 	_pivot.position = Vector3.UP * roll_radius
 	add_child(_pivot)
 	_pivot.add_child(model)
+	# Atlasul comun. Modelele vechi (mingea de plaja) isi aduceau materialul lor
+	# si mergeau fara asta; cele care respecta contractul de paleta au UV-uri
+	# spre sloturi si un material fara imagine — fara apel, ies gresit.
+	Palette.apply_world_material(model)
 	var shape := CollisionShape3D.new()
 	if roll_radius > 0.0:
 		var sphere := SphereShape3D.new()

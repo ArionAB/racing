@@ -937,14 +937,18 @@ func _build_hazard(frac: float) -> void:
 	var p := baked[idx]
 	var dir := (baked[(idx + 1) % n] - p).normalized()
 	var side := dir.cross(Vector3.UP).normalized()
-	# Hazard tematic: in desert, mingea de plaja se rostogoleste peste
-	# sosea; in rest, excavatorul de jucarie coboara bratul peste o banda.
+	# Hazard tematic: in desert, un bolovan desprins din faleza se rostogoleste
+	# peste sosea; in rest, excavatorul coboara bratul peste o banda.
+	#
+	# Pana acum era o MINGE DE PLAJA — ramasita din tema abandonata "jucarii in
+	# lada de nisip", intr-un canion de desert.
 	if theme_decor == "desert" and ResourceLoader.exists(
-			"res://assets/models/beach_ball.glb"):
+			"res://assets/models/boulder_roller.glb"):
 		var ball := SlidingHazard.new()
-		ball.model_scene = load("res://assets/models/beach_ball.glb")
+		ball.model_scene = load("res://assets/models/boulder_roller.glb")
 		ball.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
-		ball.roll_radius = 1.3
+		# Doar intentia "se rostogoleste"; raza reala o ia din model.
+		ball.roll_radius = 1.0
 		# Noi ii cerem maturarea maxima; el isi taie cursa cat sa nu iasa din
 		# sosea pe latimea ASTA de drum (vezi SlidingHazard._clamp_travel).
 		ball.road_half_width = half_width
@@ -1603,13 +1607,16 @@ func _add_visual_mesh(mesh: ArrayMesh, color: Color) -> void:
 	add_child(inst)
 
 func _build_start_gate() -> void:
-	# Arcada de start din Blender, scalata pe latimea pistei; picioarele
+	# Poarta de start din Blender, scalata pe latimea pistei; picioarele
 	# au coliziune. Fallback pe stalpii procedurali daca lipseste modelul.
-	if ResourceLoader.exists("res://assets/models/start_arch.glb"):
+	#
+	# Era o arcada de jucarie din tema abandonata "lada de nisip", pe TOATE
+	# pistele, si primul lucru pe care il vezi la countdown.
+	if ResourceLoader.exists("res://assets/models/start_gate.glb"):
 		var target_width := (half_width + 1.2) * 2.0
 		var gate := StaticBody3D.new()
-		gate.add_to_group("start_arch")
-		var model := (load("res://assets/models/start_arch.glb") as PackedScene) \
+		gate.add_to_group("start_gate")
+		var model := (load("res://assets/models/start_gate.glb") as PackedScene) \
 			.instantiate() as Node3D
 		# Latimea si inaltimea se MASOARA. Aici erau trei literale (22.8 si 8.7
 		# de doua ori) copiate din bbox-ul modelului de atunci; un GLB de alta
@@ -1620,6 +1627,9 @@ func _build_start_gate() -> void:
 		var gate_h := aabb.size.y * s
 		model.scale = Vector3.ONE * s
 		gate.add_child(model)
+		# Atlasul comun. Arcada veche isi aducea materialul ei, deci mergea fara
+		# apelul asta; poarta noua are UV-uri spre sloturi si iese gresit fara el.
+		Palette.apply_world_material(model)
 		for sx: float in [-1.0, 1.0]:
 			var pillar := CollisionShape3D.new()
 			var box := BoxShape3D.new()

@@ -82,11 +82,19 @@ culoare în engine:**
 - **Ce înlocuiește:** `beach_ball.glb` — o minge de plajă care se rostogolește
   peste șosea în canionul de deșert. Rămășiță din tema abandonată „jucării în
   ladă de nisip"; comentariul din `scenes/tracks/track.gd:896` o spune pe față.
-- **Verificatorul va da eroare, și e corect.** `verify_glb.py` testează „baza la
-  Y=0"; asset-ul ăsta e centrat pe origine intenționat. Abaterea se notează în
-  PR cu referire la `scenes/hazards/sliding_hazard.gd:106-107`
-  (`_pivot.position = Vector3.UP * roll_radius`). Restul verificărilor (UV,
-  `COLOR_0`, buget) trebuie să treacă curat.
+- **Verificatorul cere `--origin=center`.** Nota inițială spunea că
+  `verify_glb.py` *va da eroare și e corect*, fiindcă testează „baza la Y=0".
+  Asta ar fi lăsat singurul asset cu excepție declarată cu verdict roșu
+  permanent — adică fără gardă, fiindcă data viitoare când pică din alt motiv
+  nu se mai uită nimeni. Steagul `--origin=center` mută aserțiunea pe ce chiar
+  trebuie verificat: **bbox-ul centrat pe Y**. Un export făcut din greșeală cu
+  originea la bază pică în continuare, cu motivul scris. Referința rămâne
+  `scenes/hazards/sliding_hazard.gd:106-107`
+  (`_pivot.position = Vector3.UP * roll_radius`).
+
+  ```
+  python tools/blender/verify_glb.py assets/models/boulder_roller.glb 220 --origin=center
+  ```
 - **Nu-l face să semene cu `Cluster_L1`** din `rock_cluster.glb` — ăla e
   bolovanul static din decor *și* cel care cade în `RockfallHazard`. Ăsta trebuie
   să se distingă în mișcare.
@@ -98,3 +106,68 @@ culoare în engine:**
 - **Fișier nou. NU se atinge `beach_ball.glb`.**
 - **Checklist la primire:** un nod `Boulder`; ≤ 220 tris; UV pe centre de slot;
   bbox Y de la −2.5 la +2.5; `COLOR_0` prezent.
+
+## Livrat (#B2)
+
+![mingea de plajă și bolovanul în trei faze de rostogolire](img/boulder_roller_vs_minge.png)
+
+În stânga, mingea de plajă pe care o înlocuiește; în dreapta, bolovanul rotit cu
+0°, 55° și 110°, toate la scara din joc (2.6 m). Cele trei rotații sunt acolo ca
+să se vadă că nu există unghi din care să apară o față plată cât obiectul.
+
+### Cote reale, pentru colizor
+
+| | valoare |
+|---|---|
+| triunghiuri | **90** (buget 220) |
+| bbox X / Y / Z | **5.000 × 5.000 × 5.000 m**, centrul la (0, 0, 0) |
+| rază pe orizontală | **2.500 m** → la `model_scale = 0.52`: **1.300 m** |
+| AO (`COLOR_0`) | 0.58 .. 1.00 |
+| sloturi | `rock_dark` (4) dominant, `rock_light` (3) pe fețele sparte |
+
+`roll_radius` iese **exact 1.300**, adică fix numărul hardcodat azi în
+`track.gd:940`. `sliding_hazard.gd:103-110` îl măsoară oricum din model, deci
+integrarea e o singură linie schimbată — calea — și zero numere.
+
+### Convexitatea, măsurată
+
+Brieful cere „fără concavități" pentru că o adâncitură face rostogolirea să pară
+că se poticnește. Era o afirmație verificată din ochi, pe un render, dintr-un
+unghi. Acum e un număr tipărit la fiecare build (`max_concavity`, testul de
+manual: niciun vârf nu trece dincolo de planul vreunei fețe):
+
+| | concavitate max, ca fracțiune din rază |
+|---|---|
+| `boulder()` singur, deviație 0.00 → 0.26 | **0.0000** — strict convex prin construcție |
+| după cele trei tăieturi plane | **0.041** = 10 cm pe modelul de 5 m, **5.2 cm în joc** |
+
+Toată concavitatea vine din tăieturi: proiectarea vârfurilor pe planul de tăiere
+lasă o creastă minusculă la margine. Baleiajul pe deviație (0.10 → 0.26, două
+seed-uri) arată pragul constant la ~0.040 până la 0.22 și un salt la 0.067 la
+0.26 — de aceea valoarea aleasă e **0.18**, care dă 27% variație de rază.
+
+### Abateri de la brief
+
+- **Bevel 0, nu 0.10.** E aritmetică, nu gust. Planșa de probă a ajutoarelor a
+  măsurat multiplicatorul bevel-ului la ~3.7×, constant. Cele 90 de triunghiuri
+  brute ar fi devenit ~333 — peste bugetul de 220 — și singura reparație ar fi
+  fost coborârea la 3 benzi de latitudine, adică un zar de 5 m. `style_bible` §3
+  cere stânci rotunjite (70%) **sau fațetate (30%)**, iar un bolovan proaspăt
+  spart din perete e chiar cazul fațetat: muchiile dure sunt argument aici, nu
+  economie.
+- **AO sferic, nu radial.** Brieful cerea „gradient RADIAL, nu vertical", și
+  raționamentul era corect — obiectul se rotește — dar `bake_ao(gradient=
+  "radial")` măsoară distanța față de **axa Z**, care e la fel de dependentă de
+  orientare ca cea verticală când rostogolirea se face în jurul unei axe
+  orizontale. `gradient="none"` e corect și inutil: pe un corp convex ocluzia
+  geometrică e nulă, iar prima rulare a ieșit exact așa, **AO 1.00..1.00** —
+  bolovanul ar fi fost singurul obiect din cadru fără nicio variație tonală.
+  Singurul gradient invariant la o rotație oarecare e distanța față de **centru**
+  (`gradient="spherical"`, adăugat în `dio_lib`).
+- **Primitivă nouă: `Builder.boulder()`.** `rock()` construiește inele de la bază
+  în sus și închide cu două capace plate — o movilă, perfectă pentru orice stă pe
+  sol și exact greșită pentru ceva care se rotește, fiindcă acel capac de la bază
+  devine o fațetă cât tot obiectul. `boulder()` construiește în jurul centrului,
+  între doi poli.
+- **Fără satelit și fără pietricele** — brieful le interzicea deja; le confirm
+  aici doar ca să nu revină la o citire ulterioară.

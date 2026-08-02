@@ -14,7 +14,15 @@ const WALL_HEIGHT: float = 1.3
 ## Cate repetitii de textura de suprafata intra intr-un metru de lume.
 ## 0.08 = o dala la 12.5m — destul de mare cat sa nu se vada tiparul repetandu-se,
 ## destul de mica cat granulatia sa fie vizibila la nivelul soselei.
-const SURFACE_TILING: float = 0.08
+## Cate repetitii de textura pe metru, pe teren.
+##
+## Era 0.08 = o repetitie la 12.5 m. La viteza, granulatia devenea sub-pixel si
+## nisipul citea ca o pata uniforma — masurat, deviatia de luminanta era 1.48,
+## adica sub un nivel. 0.32 = o repetitie la 3.1 m, unde granulatia se vede.
+const SURFACE_TILING: float = 0.32
+## A doua scara, mult mai lenta: rupe tiparul de repetitie al primei. Fara ea, o
+## textura deasa arata ca o tapiterie pe suprafetele mari.
+const SURFACE_TILING_MACRO: float = 0.022
 ## Soseaua e un "dig" solid: un mesh fara grosime lasa masina sa treaca
 ## prin el la viteza (depenetrarea o poate impinge pe partea gresita).
 const ROAD_THICKNESS: float = 3.0
@@ -67,8 +75,15 @@ func apply_theme(theme: String) -> void:
 		# Calibrate prin masurare (vezi theme_exposure): la valorile vechi
 		# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
 		# supraexpus, si granulatia de suprafata disparea in saturatie.
+		#
+		# Recalibrat dupa introducerea stratului de detaliu: textura aia se
+		# INMULTESTE peste albedo (medie 0.89) si se aplica atat pe teren cat si
+		# pe prop-uri, deci a coborat nisipul la #AF8952. 0.75 -> 0.93 il aduce
+		# inapoi. Daca schimbi amplitudinea detaliului, REIA masuratoarea:
+		#   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
+		# si compara nisipul insorit (coltul liber al imaginii) cu #D8A86A.
 		theme_sun_energy = 0.8
-		theme_exposure = 0.75
+		theme_exposure = 1.12
 	else:
 		theme_ground_tint = Color(0.45, 0.72, 0.33) # verde viu, nu pastel
 		theme_sky_top = Color(0.22, 0.48, 0.9)
@@ -497,6 +512,10 @@ func _build_terrain() -> void:
 					# textura curge continuu peste toata suprafata, fara sa se
 					# vada grila de 32x32 in tiparul ei.
 					st.set_uv(Vector2(v.x, v.z) * SURFACE_TILING)
+					# A doua scara, pentru stratul de detaliu: aceeasi textura,
+					# de 15 ori mai lenta. Suprapuse, cele doua rup tiparul de
+					# repetitie pe care ochiul il prinde imediat pe suprafete mari.
+					st.set_uv2(Vector2(v.x, v.z) * SURFACE_TILING_MACRO)
 					st.add_vertex(v)
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
@@ -514,6 +533,16 @@ func _build_terrain() -> void:
 		# albedo_color ramane ALB: culoarea vine din vertex colors, iar textura o
 		# moduleaza. Orice ridicare aici impinge canalul rosu peste 1.0, se
 		# satureaza, si granulatia dispare exact unde trebuia sa se vada.
+		#
+		# A doua trecere cu ACEEASI textura, pe UV2 (scara macro): granulatia
+		# deasa da suprafata, petele lente rup repetitia. Terenul are UV2 real
+		# (emis mai sus), deci NU are nevoie de triplanar ca prop-urile.
+		mat.detail_enabled = true
+		mat.detail_albedo = sand_tex
+		mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
+	mat.roughness = 0.95 # style_bible §4: nisip
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	inst.material_override = mat
 	add_child(inst)
 
@@ -612,10 +641,14 @@ func _build_road() -> void:
 	sides.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
-	# UV-uri: U de-a latul soselei (0..1, banda din textura cade pe centru),
-	# V de-a lungul, in "dale" de 14m — textura curge continuu cu drumul.
-	var tile := 14.0
+	# UV-uri PATRATE: acelasi numar de metri pe ambele axe.
+	#
+	# Inainte U mergea 0..1 de-a latul soselei, adica o repetitie peste toata
+	# latimea de 14 m, in timp ce V se repeta la 14 m — textura iesea intinsa
+	# 14:1 lateral, deci granulatia aparea ca dungi longitudinale, nu ca pietris.
+	var tile := 3.5
 	var side_tile := 8.0
+	var u_half := half_width / tile
 	for i in n:
 		var j := (i + 1) % n
 		var l0 := baked[i] - _side_at(i) * half_width
@@ -624,12 +657,12 @@ func _build_road() -> void:
 		var r1 := baked[j] + _side_at(j) * half_width
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
-		top.set_uv(Vector2(0, v0)); top.add_vertex(l0)
-		top.set_uv(Vector2(1, v0)); top.add_vertex(r0)
-		top.set_uv(Vector2(0, v1)); top.add_vertex(l1)
-		top.set_uv(Vector2(1, v0)); top.add_vertex(r0)
-		top.set_uv(Vector2(1, v1)); top.add_vertex(r1)
-		top.set_uv(Vector2(0, v1)); top.add_vertex(l1)
+		top.set_uv(Vector2(-u_half, v0)); top.add_vertex(l0)
+		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
+		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
+		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
+		top.set_uv(Vector2(u_half, v1)); top.add_vertex(r1)
+		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
 		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0)
@@ -655,8 +688,8 @@ func _build_road() -> void:
 	# Asfaltul racoros-inchis face masinile saturate sa "sara" din ecran, iar
 	# granulatia de pietris il scoate din senzatia de plastic turnat. Textura e
 	# gri si se inmulteste peste culoare, deci nu schimba paleta.
-	# UV-urile soselei sunt deja in dale de 14m (vezi mai sus), asa ca textura
-	# curge cu drumul fara sa se intinda in viraje.
+	# UV-urile soselei sunt patrate (3.5 m pe ambele axe), asa ca pietrisul arata
+	# a pietris si nu a dungi intinse.
 	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3),
 		_tex("res://assets/textures/surface_asphalt.png"))
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))

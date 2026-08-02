@@ -16,10 +16,25 @@ extends SceneTree
 ##   godot --headless --path . --script res://tools/measure_surface.gd -- \
 ##       --image=snapshots/dunele_sofer.png
 ##
-## Zone numite (fractii 0..1 din latime/inaltime, x0,y0,x1,y1):
-##   ... -- --patch=faleza:0.70,0.10,0.99,0.45 --patch=nisip:0.02,0.60,0.25,0.78
+## Fara alte argumente masoara zonele standard de pe Dunele la frac 0.20 (vezi
+## PATCHES_DUNELE). Alege singur zone cu --patch, in fractii 0..1:
+##   ... -- --patch=faleza:0.28,0.36,0.40,0.46
+##
+## ATENTIE la alegerea zonei: un dreptunghi care prinde si cer, si nisip, si
+## stanca masoara media dintre ele, nu textura niciuneia. Prima versiune a
+## zonei "faleza" includea cerul de deasupra si dadea 3.5, in timp ce stanca
+## propriu-zisa era la 8.4.
 ##
 ## Cu --min=N iese cu cod 1 daca medianul global e sub prag (util in CI).
+
+## Zonele standard de pe poza inghetata a Dunelor (--track=0 --frac=0.20).
+## Coordonate in fractii din latime/inaltime: x0, y0, x1, y1.
+const PATCHES_DUNELE := {
+	"faleza_aproape": [0.28, 0.36, 0.40, 0.46],
+	"faleza_departe": [0.05, 0.50, 0.20, 0.56],
+	"nisip": [0.02, 0.60, 0.30, 0.80],
+	"asfalt": [0.40, 0.75, 0.62, 0.95],
+}
 
 ## Latura dalei, in pixeli. 8 masoara granulatie, 16 masoara pete mai mari.
 const DEFAULT_TILE: int = 8
@@ -92,6 +107,16 @@ func _initialize() -> void:
 	var global_sigmas := _tile_sigmas(lum, warm, w, h, tile,
 		Rect2(0.0, 0.0, 1.0, 1.0), true)
 	_report("CADRU (doar dale calde)", global_sigmas)
+
+	# Fara --patch explicit, masoara zonele standard: altfel fiecare rulare ar
+	# alege alt dreptunghi si cifrele n-ar mai fi comparabile intre build-uri.
+	if patches.is_empty():
+		for name: String in PATCHES_DUNELE:
+			var r: Array = PATCHES_DUNELE[name]
+			patches.append({
+				"name": name,
+				"rect": Rect2(r[0], r[1], r[2] - r[0], r[3] - r[1]),
+			})
 
 	for p in patches:
 		var s := _tile_sigmas(lum, warm, w, h, tile, p["rect"], false)

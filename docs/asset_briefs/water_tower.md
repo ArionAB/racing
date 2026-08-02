@@ -106,3 +106,51 @@ consumatori în Godot:
 fiindcă geometria subțire scrisă de mână ieșea urât; `dio_lib.ladder()` (#A1)
 rezolvă asta impunând grosimi minime. Scara, pasarela și cercurile de rezervor
 sunt scopul lui **#D2**, nu al acestei rescrieri.
+
+## Livrat (#D2)
+
+![turnul înainte și după la 60 m, plus prim-plan](img/water_tower_d2.png)
+
+De la stânga: înainte, după — ambele de la **60 m, de la nivelul drumului** — și
+un prim-plan. Ambele randate cu același material comun.
+
+| | înainte | după |
+|---|---|---|
+| triunghiuri | 882 | **4490** |
+| bbox | 4.783 × 4.785 × 9.500 | **identic** |
+
+Buget ignorat la cerere. Issue-ul ținea 880, pornind de la un titlu care spunea
+„732 → 880" — dar turnul măsura deja 882, deci incrementul era consumat înainte
+să adaug ceva. Am semnalat asta pe issue înainte de a construi.
+
+### Ce s-a adăugat, în ordinea de prioritate din issue
+
+**Cercuri pe rezervor** (cel mai ieftin, cel mai vizibil). Lipseau complet, și nu
+din neglijență: până la `torus()` nimic din `dio_lib` nu producea un inel —
+`revolve` se învârte în jurul axei dar pornește **de pe** ea, deci dă forme
+pline, nu găuri. `major_seg` egal cu al rezervorului nu e cosmetică: la alt număr
+de laturi, muchiile inelului nu s-ar mai alinia și ar apărea o dantelare.
+
+**Scara**, cu `ladder()`. Brieful o făcea opțională — *„doar dacă rămâne
+chunky... dacă iese subțire, omite-o"* — și a fost omisă. Motivul real nu era
+estetic: nu exista ajutorul, iar o scară scrisă de mână din grinzi subțiri arată
+prost. `ladder()` impune grosimile minime, deci răspunsul devine „da".
+
+**Pasarelă cu balustradă**, 7 din 10 laturi. Brieful cere explicit să nu fie
+completă; capătul deschis e chiar locul pe unde urci de pe scară.
+
+**Conductă de coborâre** cu două coliere.
+
+### Două lucruri prinse de gărzi, nu de ochi
+
+**Scara plutea.** Prima versiune o punea verticală la o poziție fixă. Piciorul e
+evazat, deci sus rămânea la 0.66 m de el. Acum urmează piciorul prin `leg_xy`,
+cu un decalaj de 0.20 m pe diagonală.
+
+**Gabaritul creștea pe toate trei axele**, inclusiv **+16 mm pe înălțime** — o
+cotă care e contract cu `_LANDMARKS` (`height: 9.5`). Cauza nu e geometrie care
+iese, ci banda de bevel, care se schimbă chiar acolo unde geometria n-a fost
+atinsă. Compensarea printr-o constantă ajustată de mână (cum era
+`FINIAL_TOP = 9.486`) ține până la următoarea retușare și apoi se strică tăcut;
+măsurarea nu se strică. `snap_bbox()` corectează după bevel, cu ×0.9965 / ×0.9960
+/ ×0.9983 — sub trei miimi.

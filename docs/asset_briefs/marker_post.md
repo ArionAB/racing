@@ -5,6 +5,8 @@ acces la restul repo-ului — tot contractul e aici. Sursele din care e derivat:
 [style_bible.md](../style_bible.md) (estetică) + [blender_export.md](../blender_export.md)
 (pipeline) + [scripts/palette.gd](../../scripts/palette.gd) (indici de sloturi).
 
+Sursa reproductibilă: [tools/blender/build_marker_post.py](../../tools/blender/build_marker_post.py).
+
 Referință vizuală: `assets/dunele_inspiration/sheet_wave1_props.png`, panoul
 **ROAD MARKER POSTS** (stânga sus). Ia din el **silueta și inventarul de
 variante**, nu finisajul.
@@ -107,3 +109,48 @@ culoare în engine:**
   3. UV-urile nimeresc centrele sloturilor
   4. origine la bază, centrată XZ, fiecare la (0,0,0)
   5. există strat de vertex color (AO)
+
+## Livrat (#B1)
+
+![popic vs cele trei variante](img/marker_post_vs_popic.png)
+
+De la stânga: `Marker_C` (rupt), `Marker_B` (înclinat), `Marker_A` (drept),
+și popicul de bowling pe care îl înlocuiesc. Popicul e randat cu material neutru
+— el nu respectă contractul (fără UV pe slot, fără `COLOR_0`), deci cu materialul
+comun ar ieși negru.
+
+### Cote reale, pentru colizor
+
+| variantă | tris | înălțime | jumătate de lățime |
+|---|---|---|---|
+| `Marker_A` | **76** | 1.222 m | 0.070 m |
+| `Marker_B` | **76** | 1.204 m | **0.183 m** (amprenta înclinată) |
+| `Marker_C` | **52** | 0.558 m | 0.084 m |
+
+Modelele sunt construite **la scara lumii**: nu au nevoie de `model_scale`, spre
+deosebire de popic (0.53).
+
+### Economia
+
+110 × 196 = 21.560 → 110 × 76 = 8.360. **−13.200 de triunghiuri**, cu ~1.500 mai
+mult decât estimarea din issue, fiindcă am ajuns la 76 în loc de 90. Plus un
+draw call, fiindcă popicul își aducea propriul material.
+
+### Abateri de la brief
+
+- **Fără pastilă de beton la bază.** Măsurat: pastila costă 44 de triunghiuri
+  după bevel — jumătate din bugetul de 90 — pentru un obiect de 0.30 m îngropat
+  pe jumătate, adică 6 cm deasupra nisipului. La 110 instanțe ar fi însemnat
+  **4.840 de triunghiuri** pentru ceva ce nu se vede de la nicio distanță de
+  joc. Cu pastilă, stâlpul întreg ieșea 132 — peste buget. Contactul cu solul îl
+  dă AO-ul copt, care întunecă baza.
+- **Stâlpul e un singur solid din `revolve` cu 4 laturi, nu cutii stivuite.**
+  Două cutii suprapuse costau 88, solidul costă 76 și n-are fețe interne.
+  `revolve` cu 4 laturi pune vârfurile pe axe, deci geometria se rotește cu 45°
+  ca banda să privească drept spre drum.
+- **`Marker_B` e înclinat pe două axe**, nu pe una. Cu o singură axă, jumătate
+  din unghiurile de cameră îl prind exact din direcția înclinării și stâlpul
+  pare drept — la 110 instanțe varietatea dispare tocmai când ai nevoie de ea.
+- **Vârful e piramidal, nu teșit.** Apexul lui `revolve` închide vârful cu 4
+  triunghiuri; un vârf teșit ar fi cerut încă un inel plus un capac, adică ~30
+  de triunghiuri pentru o diferență de 8 cm.

@@ -128,3 +128,71 @@ culoare în engine:**
 - **Checklist la primire:** trei noduri cu numele exacte, copii direcți ai
   rădăcinii; ≤ 1000 tris total; spatele portalului plat; gura pe direcția
   corectă; UV pe centre; `COLOR_0`; origini la bază, toate la (0,0,0).
+
+## Livrat (#C2)
+
+![portalul de la 50 m și de aproape, cu șina și vagonetul](img/mine_portal_drum.png)
+
+Stânga e captura cerută de issue: **de la nivelul drumului, la ~50 m**, cu o
+mașină de 4.2 m pentru scară. Dreapta, aceeași scenă de la 20 m. Șina și
+vagonetul sunt așezate manual pentru poză — sunt obiecte separate tocmai ca
+instanța de gameplay să le poată pune unde vrea.
+
+### Cote
+
+| nod | tris | dimensiuni |
+|---|---|---|
+| `Portal` | **652** | 11.61 × 7.15 × 7.14 m |
+| `MineRail` | **192** | 1.40 × 0.50 × 10.10 m |
+| `MineCart` | **136** | 2.01 × 1.96 × 1.47 m |
+| **total** | **980** / 1000 | |
+
+- deschiderea: **4.00 × 3.80 m**, gura retrasă cu 1.40 m
+- spatele plat la **Y = −3.57** față de origine; fața (gura) spre **+Y în
+  Blender = −Z în Godot**
+- capătul șinei dinspre gură e la **Y = −5.05** față de originea lui `MineRail`
+
+### Golul trebuie să fie spațiu ÎNTRE mase
+
+Brieful cere să nu se taie gol — corect, n-avem booleene — și spune să pui „un
+panou plat retras cu 1.4 m în interiorul deschiderii". Prima versiune a făcut
+exact asta și **nu se vedea nimic**: movila e un solid, deci panoul stătea în
+interiorul ei și îl ascundea propria față din față.
+
+Un gol care nu se taie trebuie să fie **spațiu între mase** — același principiu
+ca la arcada din #C1. Movila e acum trei mase: doi umeri de 2.5 m și un capac
+peste deschidere. Umerii ies înguști fiindcă o deschidere de 4 m într-o movilă de
+9 m nu lasă mai mult.
+
+Tot din prima rulare: cadrul de grinzi era la `FRONT_Y = 2.10`, iar fața movilei
+ajunge la ~4.35 la înălțimea deschiderii — deci și cadrul era îngropat. Cotele de
+suprafață ale unui `rock()` nu se pot presupune, se măsoară.
+
+### Abateri de la brief
+
+- **Gura e `asphalt` (5), nu `sand_shadow` (2).** Același motiv ca la cabina
+  excavatorului din #77: `sand_shadow` e `#A97A4A`, un maro mediu, iar la render
+  gura ieșea o pată maronie, nu o gaură. Argumentul e din docstring-ul lui
+  `window()`: *„slotul cel mai închis din lume citește ca gol, nu ca sticlă"*.
+  Adâncimea falsă e tot efectul obiectului, deci merită slotul cel mai închis.
+- **Bevel 0 pe `MineRail` și `MineCart`.** Brieful cere 0.06. Măsurat: șina are
+  192 de triunghiuri brute (× 3.67 = **705**, la un buget de 250), vagonetul 136
+  (× 3.67 = **499**, la un buget de 150). Nu există tăiere care să le salveze —
+  12 traverse *sunt* șina, patru roți *sunt* un vagonet. Și, spre deosebire de
+  portal, aici bevel-ul nici nu se vede: o teșitură de 6 cm pe o traversă de
+  0.20 m înseamnă 30% din piesă, adică lemn umflat, nu lemn cioplit. Clasele de
+  bevel din `style_bible` §3 sunt proporționale cu obiectul.
+- **`Portal` iese 652, peste cei 600 din brief.** Totalul rămâne **980 din 1000**,
+  iar 1000 e constrângerea din issue; împărțirea 600/250/150 era un plan, nu un
+  contract. Cele 52 în plus au plătit trecerea de la o masă la trei, adică exact
+  ce face gura să se citească.
+- **Cota movilei se scrie compensat.** `rock(flat_top=True)` retează vârful la
+  82% din înălțimea dată, deci pentru o movilă de 6.5 m se scrie 7.93.
+
+### Originea per piesă e corectă aici
+
+Spre deosebire de arcada din #C1, unde cele cinci noduri formează un singur
+obiect și trebuie să-și păstreze pozițiile relative, cele trei piese de aici sunt
+independente prin design: brieful cere explicit ca instanța de gameplay să poată
+așeza șina și vagonetul departe de portal, sau lângă calea ferată existentă. Deci
+`finish(origin="base")` per obiect, și toate exportate la (0,0,0).

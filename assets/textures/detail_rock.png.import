@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crqjtv3xgbuan"
-path.bptc="res://.godot/imported/surface_sand.png-27a12dad7179162a71c3fd7344af64d4.bptc.ctex"
-path.astc="res://.godot/imported/surface_sand.png-27a12dad7179162a71c3fd7344af64d4.astc.ctex"
+uid="uid://n563uilwqthx"
+path.bptc="res://.godot/imported/detail_rock.png-9fcf270b8a44feb7c247a758d675a033.bptc.ctex"
+path.astc="res://.godot/imported/detail_rock.png-9fcf270b8a44feb7c247a758d675a033.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/surface_sand.png"
-dest_files=["res://.godot/imported/surface_sand.png-27a12dad7179162a71c3fd7344af64d4.bptc.ctex", "res://.godot/imported/surface_sand.png-27a12dad7179162a71c3fd7344af64d4.astc.ctex"]
+source_file="res://assets/textures/detail_rock.png"
+dest_files=["res://.godot/imported/detail_rock.png-9fcf270b8a44feb7c247a758d675a033.bptc.ctex", "res://.godot/imported/detail_rock.png-9fcf270b8a44feb7c247a758d675a033.astc.ctex"]
 
 [params]
 
@@ -39,4 +39,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

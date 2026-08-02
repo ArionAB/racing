@@ -16,6 +16,12 @@ extends RefCounted
 ## pe [code]Palette.uv(slot)[/code], aici se citeste aceeasi valoare.
 
 const ATLAS_PATH: String = "res://assets/textures/palette_atlas.png"
+## Stratul de detaliu de suprafata, aplicat triplanar peste toata lumea.
+const DETAIL_PATH: String = "res://assets/textures/detail_rock.png"
+## Cat de tare bate detaliul pe fiecare slot (alfa per slot, 32x1).
+const DETAIL_MASK_PATH: String = "res://assets/textures/detail_mask.png"
+## Scara detaliului: 1 / 0.35 = o repetitie la 2.86 m.
+const DETAIL_SCALE: float = 0.35
 const SLOTS: int = 32
 
 # --- Mediu (0..13) ---
@@ -79,6 +85,31 @@ static func world_material() -> StandardMaterial3D:
 		_shared.vertex_color_use_as_albedo = true # AO copt in vertex colors
 		_shared.roughness = 0.9
 		_shared.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+		# --- Stratul de detaliu: aici se repara "totul arata plat" ---
+		#
+		# UV-urile prop-urilor sunt colapsate pe un punct (dio_lib.assign_uvs), ca
+		# fiecare fata sa ia exact culoarea slotului ei. Efect secundar: derivata
+		# UV e zero, deci fiecare fata citeste UN texel si tot detaliul din atlas
+		# e invizibil. Masurat pe fata de faleza: deviatie de luminanta 0.76 fata
+		# de ~40 in imaginile de referinta.
+		#
+		# uv2_triplanar calculeaza coordonatele din VERTEX si NORMAL in vertex
+		# shader — ATRIBUTUL UV2 NU E CITIT NICIODATA. Deci toate prop-urile
+		# capata detaliu de suprafata fara unwrap, fara re-export si, esential,
+		# FARA MATERIAL NOU: garda de draw call-uri nu se misca.
+		#
+		# Masca (32x1 RGBA, alfa per slot) se esantioneaza pe UV1, adica pe
+		# centrul slotului — asa slotul din paleta devine si canal de intensitate:
+		# roca primeste tot, masinile nimic.
+		_shared.detail_enabled = true
+		_shared.detail_albedo = load(DETAIL_PATH)
+		_shared.detail_mask = load(DETAIL_MASK_PATH)
+		_shared.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+		_shared.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
+		_shared.uv2_triplanar = true
+		# 1 / 0.35 = o repetitie la 2.86 m. Cele 4 benzi de strat din textura cad
+		# atunci la ~0.71 m, in intervalul cerut de style_bible §3.
+		_shared.uv2_scale = Vector3(DETAIL_SCALE, DETAIL_SCALE, DETAIL_SCALE)
 	return _shared
 
 ## Pune materialul comun pe toate mesh-urile dintr-un subarbore. Pentru GLB-uri

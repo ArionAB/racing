@@ -54,9 +54,110 @@ func _init() -> void:
 	print("Atlas scris: %s  (%dx%d, %d sloturi)"
 		% [OUT_PATH, img.get_width(), img.get_height(), Palette.SLOTS])
 	_surface_textures()
-	print("Reimporta in Godot, apoi verifica bleeding-ul cu:")
-	print("  godot --path . res://tools/Snapshot.tscn -- --track=0 --size=40")
+	_detail_textures()
+	print("Reimporta in Godot, apoi masoara:")
+	print("  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.20 --driver")
+	print("  godot --headless --path . --script res://tools/measure_surface.gd \\")
+	print("      -- --image=snapshots/dunele_sofer.png")
 	quit()
+
+
+## Stratul de DETALIU al lumii — cel care repara "totul arata plat".
+##
+## Problema pe care o rezolva: UV-urile prop-urilor din Blender sunt colapsate pe
+## UN SINGUR punct (dio_lib.assign_uvs), ca fiecare fata sa ia exact culoarea
+## slotului ei din atlas. Consecinta neintentionata e ca derivata UV e zero, deci
+## fiecare fata citeste UN texel — tot detaliul din _texture_for() de mai jos e,
+## la runtime, invizibil pe props. Masurat: fata de faleza avea deviatie de
+## luminanta 0.76, referinta ~40.
+##
+## Reparatia NU e sa desfasuram UV-uri (ar sparge strategia de un-singur-material
+## si ar inmulti draw call-urile). E stratul de detaliu al lui Godot cu
+## uv2_triplanar: coordonatele se calculeaza din pozitia si normala varfului, deci
+## ATRIBUTUL UV2 NU E CITIT NICIODATA. Toate cele ~500 de obiecte capata detaliu
+## fara re-export si fara material nou. Vezi Palette.world_material().
+func _detail_textures() -> void:
+	# Trei scari intr-o singura textura, ca sa acopere si banda de strat, si
+	# granulatia. La uv2_scale 0.35 o repetitie = 2.86 m, deci cele 4 benzi cad
+	# la ~0.71 m — exact intervalul cerut de style_bible §3 pentru strata.
+	_write_tileable_n("res://assets/textures/detail_rock.png", 256,
+		func(x: int, y: int) -> float:
+			var fx := float(x) / 256.0
+			var fy := float(y) / 256.0
+			# Strate orizontale de DOUA grosimi, nu una: 7 benzi late (~0.4 m la
+			# scara de joc) peste care se suprapun 17 fine. O singura frecventa
+			# arata ca un cod de bare — verificat in vederea soferului.
+			# Linia de separatie ondula pe X, altfel toate stancile au aceleasi
+			# dungi drepte la aceeasi inaltime.
+			var warp := sin(fx * TAU * 2.0) * 0.35 + sin(fx * TAU * 5.0) * 0.12
+			var band := smoothstep(-0.25, 0.25,
+				sin(fy * TAU * 7.0 + warp)) * -0.22
+			var fine := smoothstep(-0.5, 0.5,
+				sin(fy * TAU * 17.0 + warp * 1.7)) * -0.09
+			# Pete lente: rup repetitia tiling-ului, care altfel se vede ca un
+			# tipar regulat pe suprafetele mari.
+			var macro := sin(float(x) * 0.021) * cos(float(y) * 0.017) * 0.07
+			# Granulatie: detaliul de aproape, cel care se pierde primul daca e
+			# prea slab. Nu cobori sub 0.14 — sub atat, compresia il mananca.
+			var grain := -rng.randf() * 0.16
+			return band + fine + macro + grain + 0.14)
+
+	# Masca per slot: cat de tare bate detaliul pe fiecare rol din paleta.
+	# Slotul devine astfel canal de autorat — nisipul si roca primesc tot, iar
+	# accentele de masina NIMIC (style_bible §1: masinile raman cele mai curate
+	# suprafete din cadru, ca sa se desprinda de fundal).
+	_write_detail_mask("res://assets/textures/detail_mask.png")
+
+
+## Masca de intensitate a detaliului, 32x1 RGBA. Alfa per slot; culoarea e alba
+## peste tot (conteaza doar canalul alfa).
+##
+## Se importa FARA compresie si FARA mipmap-uri: BC1 are alfa pe un bit si ar
+## distruge treptele, iar mipmap-urile ar amesteca sloturile vecine.
+func _write_detail_mask(path: String) -> void:
+	const STRENGTH := {
+		0: 1.00, 1: 1.00, 2: 1.00,   # nisip
+		3: 1.00, 4: 1.00,            # roca — aici conteaza cel mai mult
+		5: 0.55, 6: 0.55,            # asfalt: uzura, dar sa ramana lizibil
+		7: 0.35,                     # bordura: marcaj, nu suprafata naturala
+		8: 0.75,                     # beton
+		9: 0.85,                     # lemn: fibra
+		10: 0.70,                    # metal ruginit
+		11: 0.30,                    # metal vopsit: aproape curat
+		12: 0.45, 13: 0.45,          # vegetatie
+		14: 0.0, 15: 0.0, 16: 0.0,   # ACCENTE MASINI — raman imaculate
+	}
+	var img := Image.create(Palette.SLOTS, 1, false, Image.FORMAT_RGBA8)
+	for slot in Palette.SLOTS:
+		var a: float = STRENGTH.get(slot, 1.0)
+		img.set_pixel(slot, 0, Color(1.0, 1.0, 1.0, a))
+	if img.save_png(path) != OK:
+		push_error("Nu am putut scrie " + path)
+		return
+	print("  %s  (%dx1, alfa per slot)" % [path.get_file(), Palette.SLOTS])
+
+
+## Ca _write_tileable, dar cu latura configurabila si cu statistici tiparite.
+##
+## Media conteaza: textura se INMULTESTE peste albedo, deci o medie de 0.86
+## intuneca toata lumea cu 14% si cere recalibrarea expunerii (style_bible §5).
+func _write_tileable_n(path: String, n: int, noise: Callable) -> void:
+	var img := Image.create(n, n, true, Image.FORMAT_RGB8)
+	var lo := 1.0
+	var hi := 0.0
+	var sum := 0.0
+	for y in n:
+		for x in n:
+			var v := clampf(1.0 + float(noise.call(x, y)), 0.0, 1.0)
+			lo = minf(lo, v)
+			hi = maxf(hi, v)
+			sum += v
+			img.set_pixel(x, y, Color(v, v, v))
+	if img.save_png(path) != OK:
+		push_error("Nu am putut scrie " + path)
+		return
+	print("  %s  (%dx%d, min %.2f  max %.2f  medie %.2f)"
+		% [path.get_file(), n, n, lo, hi, sum / float(n * n)])
 
 
 ## Texturi TILEABILE pentru suprafetele mari (teren, asfalt).
@@ -70,21 +171,27 @@ func _init() -> void:
 ## material per suprafata, deci zero draw call-uri in plus.
 func _surface_textures() -> void:
 	# Deviatiile sunt NEGATIVE (centrul e alb, vezi _write_tileable): textura
-	# adauga umbra, nu lumina. Amplitudini mici — la 60 km/h o variatie mai mare
-	# devine zgomot vizual si strica citirea liniei de curs.
+	# adauga umbra, nu lumina.
+	#
+	# Amplitudinile au fost initial foarte mici (0.09 / 0.13), din teama de zgomot
+	# vizual la viteza. Masurat pe poza de sofer, contributia lor era practic
+	# nula: nisipul dadea deviatie 1.48, adica sub un nivel de luminanta. Doua
+	# cauze care se adunau — amplitudine mica SI compresie BC1 care turteste
+	# blocurile de 4x4 (reparata in .import cu high_quality). Dublate acum, cu
+	# masuratoarea ca arbitru, nu impresia.
 	_write_tileable("res://assets/textures/surface_sand.png",
 		func(x: int, y: int) -> float:
 			# granulatie fina + dune foarte lente
-			var grain := -rng.randf() * 0.09
+			var grain := -rng.randf() * 0.20
 			var dune := (sin(float(x) * 0.049
-				+ sin(float(y) * 0.024) * 2.0) - 1.0) * 0.035
+				+ sin(float(y) * 0.024) * 2.0) - 1.0) * 0.06
 			return grain + dune)
 	_write_tileable("res://assets/textures/surface_asphalt.png",
 		func(x: int, y: int) -> float:
 			# pietris: granulatie grosiera, cu pietre rare mai inchise
-			var grain := -rng.randf() * 0.13
-			if rng.randf() < 0.01:
-				grain -= 0.12
+			var grain := -rng.randf() * 0.26
+			if rng.randf() < 0.02:
+				grain -= 0.16
 			return grain)
 
 

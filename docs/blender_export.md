@@ -6,9 +6,26 @@ Vezi paleta și dimensiunile în [style_bible.md](style_bible.md).
 
 ## Ce trebuie să conțină GLB-ul
 
-1. **UV → sloturi de paletă, nu texturi proprii.**
-   Nu se pictează texturi. Fiecare față primește un UV care nimerește **centrul**
-   slotului de culoare din atlas (`assets/textures/palette_atlas.png`, 32 sloturi).
+1. **UV1 → sloturi de paletă. Assets-urile nu aduc texturi proprii.**
+   Nu se pictează texturi per asset. Fiecare față primește un UV care nimerește
+   **centrul** slotului de culoare din atlas
+   (`assets/textures/palette_atlas.png`, 32 sloturi).
+
+   > **Detaliul de suprafață NU vine de aici.** Un UV colapsat are derivată zero,
+   > deci fața citește un singur texel — oricât de texturat ar fi slotul. Asta a
+   > fost multă vreme cauza (măsurată) a aspectului plat: fața de faleză avea
+   > deviație de luminanță 0.76, referința ~40.
+   >
+   > Detaliul vine la runtime dintr-un **strat triplanar partajat**
+   > (`Palette.world_material()`, `detail_albedo` + `uv2_triplanar`), care își
+   > calculează coordonatele din poziția și normala vârfului — **nu citește
+   > niciun atribut UV2**. Deci regula de aici rămâne valabilă exact așa cum e
+   > scrisă, iar assets-urile nu trebuie modificate.
+   >
+   > **De ce nu unwrap real:** ar cere texturi per asset sau un al doilea atlas,
+   > deci mai multe materiale — exact ce evită tot contractul ăsta. Garda din
+   > `tools/probe_decor.gd` numără materiale tocmai pentru că draw call-urile,
+   > nu triunghiurile, sunt constrângerea pe mobil.
    UV-ul slotului `i` este:
    ```
    u = (i + 0.5) / 32     v = 0.5

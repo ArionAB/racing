@@ -210,6 +210,7 @@ func rebuild() -> void:
 	_build_start_gate()
 	_build_start_line()
 	_build_center_line()
+	_build_shoulders()
 	_build_kerbs()
 	_build_world_decor()
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
@@ -250,6 +251,17 @@ func _build_environment() -> void:
 	sky_mat.sky_horizon_color = theme_sky_horizon
 	sky_mat.ground_bottom_color = theme_fog.darkened(0.4)
 	sky_mat.ground_horizon_color = theme_sky_horizon
+	# Nori. Camera Ignition e mai plata (7° in loc de 11°), deci orizontul coboara
+	# si cerul creste la ~48% din cadru — fara nimic in el, camera mai buna face
+	# imaginea mai GOALA. sky_cover se inmulteste peste gradient, zero draw calls.
+	#
+	# sky_cover se ADUNA peste gradient, nu se inmulteste — cu modulate alb si
+	# textura gri deschis, cerul iesea complet alb. Modulate-ul e deci foarte
+	# scazut: norii trebuie doar sugerati, nu sa acopere albastrul.
+	var clouds := _tex("res://assets/textures/sky_cover.png")
+	if clouds != null:
+		sky_mat.sky_cover = clouds
+		sky_mat.sky_cover_modulate = Color(1.0, 0.97, 0.92, 0.35)
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 	var env := Environment.new()
@@ -1034,6 +1046,64 @@ func _build_start_line() -> void:
 	_add_visual_mesh(black.commit(), Color(0.08, 0.08, 0.08))
 
 ## Borduri rosu-alb pe marginile virajelor stranse — citesti pista de departe.
+## Latimea benzii de praf dintre asfalt si nisip.
+const SHOULDER_WIDTH: float = 1.3
+
+
+## Umarul soselei: o banda de praf de o parte si de alta a asfaltului.
+##
+## In imaginile de referinta asfaltul nu atinge NICIODATA nisipul direct — exista
+## mereu o fasie de praf batatorit intre ele. Fara ea, marginea drumului e o
+## taietura brusca intre doua culori, si citeste ca decupaj de hartie, nu ca drum
+## construit de cineva prin desert.
+##
+## Doua mesh-uri (unul per latura ar fi fost inutil — culoarea e aceeasi), asezate
+## sub nivelul asfaltului cu 2cm ca sa nu produca z-fighting.
+func _build_shoulders() -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var n := baked.size()
+	var drop := Vector3.UP * -0.02
+	var tile := 3.5
+	for i in n:
+		var j := (i + 1) % n
+		var s0 := _side_at(i)
+		var s1 := _side_at(j)
+		var v0 := _dists[i] / tile
+		var v1 := _dists[i + 1] / tile
+		for side_sign: float in [-1.0, 1.0]:
+			var inner0 := baked[i] + s0 * half_width * side_sign + drop
+			var inner1 := baked[j] + s1 * half_width * side_sign + drop
+			var outer0 := inner0 + s0 * SHOULDER_WIDTH * side_sign
+			var outer1 := inner1 + s1 * SHOULDER_WIDTH * side_sign
+			# Winding-ul se inverseaza cu latura, altfel una din benzi iese cu
+			# fata in jos si dispare la cull.
+			if side_sign < 0.0:
+				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
+				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+			else:
+				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
+	st.generate_normals()
+	# Praf: intre asfalt si nisip ca valoare, ca sa faca tranzitia, nu un al
+	# treilea ton care sa sara in ochi.
+	var dust := Palette.color(Palette.SAND_SHADOW) \
+		if theme_decor == "desert" else theme_ground_tint.darkened(0.25)
+	var inst := MeshInstance3D.new()
+	inst.mesh = st.commit()
+	inst.material_override = _flat_material(dust,
+		_tex("res://assets/textures/surface_sand.png"))
+	add_child(inst)
+
+
 func _build_kerbs() -> void:
 	var red := SurfaceTool.new()
 	red.begin(Mesh.PRIMITIVE_TRIANGLES)

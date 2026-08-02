@@ -162,6 +162,16 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   rulări ale **aceluiași cod** dădeau 3.96 și 3.57 tururi și arătau ca o regresie
   de la assets. Dacă vrei alt punct de vedere, `--car=3` rulează pe autobuz.
 
+- **Praf și legănat de vegetație** (#29) au sondă proprie, fiindcă nicio altă
+  verificare nu le atinge:
+  ```
+  godot --headless --fixed-fps 60 --path . res://tools/ProbeLife.tscn
+  ```
+  `--mode=race` raportează `offroad 0.0%` — AI-ul stă pe asfalt tot turul, deci
+  praful nu se aprinde niciodată acolo. Iar o captură statică nu poate arăta o
+  mișcare. Sonda împinge o mașină în afara șoselei și verifică amplitudinea reală
+  a legănatului pe o tufă înregistrată.
+
 - **CI verifică și anti-blocajul în pereții de canion.** Aruncă mașini în unghi
   în faleze, în 12 puncte de pe traseu, și pică dacă vreuna rămâne înțepenită.
   ```

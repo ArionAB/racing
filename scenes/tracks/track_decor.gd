@@ -70,6 +70,11 @@ static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
 		mat_provider: Callable) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Decor"
+	# Un singur nod misca toata vegetatia. Se pune primul, ca _add_scatter sa-l
+	# gaseasca dupa nume fara sa-l caram prin sase semnaturi de functie.
+	var sway := SwayDriver.new()
+	sway.name = "Sway"
+	root.add_child(sway)
 	if sampler.point_count() == 0:
 		return root
 	if theme == "desert":
@@ -230,8 +235,8 @@ static func _build_scattered(root: Node3D, sampler: TrackSideSampler,
 static func _add_scatter(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
 	const PICKS := ["Bush_A", "Bush_B", "Pebbles_A", "Pebbles_B", "Grass_Tuft"]
-	var kept := _pick_from_glb("res://assets/models/desert_scatter.glb",
-		PICKS[rng.randi_range(0, PICKS.size() - 1)])
+	var name_pick: String = PICKS[rng.randi_range(0, PICKS.size() - 1)]
+	var kept := _pick_from_glb("res://assets/models/desert_scatter.glb", name_pick)
 	if kept == null:
 		_add_dry_bush(parent, pos, rng, mat)
 		return
@@ -244,6 +249,14 @@ static func _add_scatter(parent: Node3D, pos: Vector3,
 	# aici mergem mai departe pentru ca astea sunt piesele care STRANG cadrul.
 	kept.scale = Vector3.ONE * rng.randf_range(1.4, 2.1)
 	Palette.apply_world_material(kept)
+	# Doar ce are frunze se leagana. O pietricica scuturata de vant ar fi exact
+	# genul de detaliu care strica iluzia in loc s-o construiasca.
+	if name_pick.begins_with("Bush") or name_pick == "Grass_Tuft":
+		var sway := parent.get_node_or_null(^"Sway") as SwayDriver
+		if sway == null:
+			sway = parent.get_parent().get_node_or_null(^"Sway") as SwayDriver
+		if sway != null:
+			sway.add_item(kept)
 
 
 ## Un grup de bolovani din rock_cluster.glb.

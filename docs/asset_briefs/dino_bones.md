@@ -112,3 +112,60 @@ culoare în engine:**
 - **Checklist la primire:** patru noduri cu numele exacte, copii direcți ai
   rădăcinii; bugetele respectate per nod; UV pe centre; `COLOR_0`; origini la
   bază, toate la (0,0,0).
+
+## Livrat (#B4)
+
+![situl de la 80 m și de aproape](img/dino_bones_80m.png)
+
+Stânga e **testul de acceptanță din issue**: 80 m, de la nivelul solului,
+obiectiv 26 mm. Silueta se citește — cap ridicat, spinare arcuită, coadă care
+coboară în nisip — dar e mică, și e cinstit spus așa: la 80 m scheletul ocupă
+vreo 40 de pixeli pe verticală. Dreapta e același sit de la 21 m, cu cele trei
+oase izolate împrăștiate.
+
+### Cote
+
+| nod | tris | buget | dimensiuni (Godot X × Y × Z) |
+|---|---|---|---|
+| `Dino_Skeleton` | **552** | 600 | 2.25 × 5.15 × 10.39 m |
+| `Bone_A` (femur) | **36** | 40 | 0.28 × 1.39 × 0.37 m |
+| `Bone_B` (3 coaste) | **36** | 40 | 0.75 × 0.63 × 0.50 m |
+| `Bone_C` (vertebră) | **24** | 40 | 0.30 × 0.52 × 0.34 m |
+
+Toate patru sunt copii direcți ai rădăcinii, la (0,0,0), cu baza la Y=0.
+`toy_dino.glb` măsoară 3.05 × 5.95 × 9.11 — același ordin de mărime.
+
+### Abateri de la brief
+
+- **Bevel 0, nu 0.04.** Multiplicatorul e 3.67× și **nu depinde de lățimea
+  bevel-ului** — `segments=1` adaugă mereu aceeași topologie. Cu bevel, bugetul
+  brut util ar fi fost 600 / 3.67 = **163 de triunghiuri**, adică 13 cutii;
+  brieful cere peste 30 de piese, deci coloana singură ar fi depășit tot bugetul.
+  Fără bevel încape tot brieful, cu coaste în două segmente, și mai rămân 48 de
+  triunghiuri. Schimbul nu e același ca la poarta de start: acolo bevel-ul
+  rotunjea grinzi văzute de la 30 m, aici testul din issue e o captură de la
+  80–100 m, unde o teșitură de 4 cm e sub-pixel. Un os fosilizat citește bine
+  fațetat.
+- **Cinci perechi de coaste, nu patru.** Bugetul permitea, iar cu patru cușca
+  rămânea rară. 48 de triunghiuri, cea mai ieftină îmbunătățire de siluetă din
+  tot fișierul.
+- **Fără movilă de nisip la bază.** Ar fi însemnat o pată de `sand_mid` peste un
+  teren procedural a cărui culoare variază — adică un contur vizibil. Contactul
+  cu solul îl dă AO-ul copt.
+
+### Două lucruri pe care le-au arătat capturile, nu calculul
+
+**Coastele arcuiau doar în plan lateral.** Din profil — singurul unghi din care
+se citește orice terapod — un arc în planul X–Z se proiectează într-o linie
+dreaptă: ieșeau patru stâlpi verticali sub coloană, ca picioarele unei mese.
+Coastele reale cad **și spre spate**; înclinarea spre −Y le desface în evantai
+exact pe silueta pe care o vezi din mașină.
+
+**Coada ieșea linie punctată.** Vertebrele la 0.30 din pasul de 0.8 m lăsau goluri
+cât osul. La 0.38 rămân distincte, dar golul scade sub jumătate și se citește șir
+de oase, nu urmă.
+
+Și, a treia oară în lotul ăsta după stâlpii porții: **grosimea nu costă niciun
+triunghi.** La primul test de 80 m silueta era la limită, iar issue-ul spune
+explicit ce se face atunci — „îngroașă oasele și scoate detalii, nu invers".
+Vertebre 0.28 → 0.34, coaste 0.14 → 0.18, craniu cu ~12% mai mare. Zero cost.

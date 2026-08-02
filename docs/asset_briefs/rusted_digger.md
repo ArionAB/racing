@@ -113,6 +113,87 @@ culoare în engine:**
 - **Sloturi folosite:** `painted` = 11 (u = 0.359375), `rust_metal` = 10
   (u = 0.328125), `sand_shadow` = 2 (u = 0.078125).
 - **Fișier nou. NU se atinge `toy_excavator.glb`.**
-- **Checklist la primire:** două noduri, `body` și `arm`, copii direcți ai
-  rădăcinii; **`arm` scris cu litere mici**; ≤ 900 tris total; pivotul lui `arm`
-  la articulație; UV pe centre; `COLOR_0`.
+- **Checklist la primire:** două noduri, `body` la rădăcină și **`arm` copil al
+  lui `body`** (vezi corectura de mai jos); **`arm` scris cu litere mici**;
+  ≤ 900 tris total; pivotul lui `arm` la articulație; UV pe centre; `COLOR_0`.
+
+## Livrat (#B5, partea a doua)
+
+![excavatorul de plastic, apoi cel nou cu brațul jos și ridicat](img/rusted_digger_rig.png)
+
+De la stânga: `toy_excavator.glb` la `model_scale = 0.75`, cum arată azi; apoi
+modelul nou cu brațul **coborât** (poziția care blochează banda) și **ridicat**
+la cele 0.55 rad pe care le animă hazardul. Excavatorul vechi e randat cu
+material neutru — n-are UV pe sloturi.
+
+### Corectura de ierarhie — `arm` NU e copil al rădăcinii
+
+Versiunea inițială a acestui brief cerea două noduri „copii direcți ai
+rădăcinii". E greșit, și greșit exact în direcția periculoasă. Codul spune
+altceva:
+
+```gdscript
+_arm = model.find_child("arm", true, false)              # excavator_hazard.gd:30
+var body_node := model.find_child("body", true, false)   # :34
+body_aabb = model.transform * Track.model_aabb(body_node, _arm)   # :39
+```
+
+Al doilea argument al lui `model_aabb` e un nod de **sărit**, iar comentariul de
+la `:36-38` spune de ce: *„`arm` e COPIL al lui `body` în GLB, deci fără skip
+iese o cutie de 10 m pe adâncime care ar bloca șoseaua permanent"*. Deci ierarhia
+e contract, nu preferință. Structura livrată, citită din containerul glTF:
+
+```
+rădăcina scenei: ['body']
+  nod body   copii=['arm']   translation=None
+  nod arm    copii=-         translation=[0.550, 1.950, -0.419]   rotation=None
+```
+
+`rotation` lipsește intenționat: `_arm_base_rot` se citește din nod (`:31`), iar
+brațul e modelat direct în poziția coborâtă.
+
+### Cote, pentru colizoare
+
+| | valoare |
+|---|---|
+| `body` | **420** tris, 3.90 × 3.73 × 4.93 m (Godot X × Y × Z), bază la 0 |
+| `arm` | **440** tris |
+| total | **860** / 900 |
+| pivot `arm` (Godot) | **(0.550, 1.950, −0.419)** |
+| braț coborât, cutie strânsă | size **(0.92, 2.84, 5.38)** la position **(0.55, 2.34, −3.01)** |
+
+`toy_excavator.glb` are șasiul de 5.10 × 4.90 × 7.10 m și se încarcă la
+`model_scale = 0.75`, deci ocupă 3.83 × 3.68 × 5.33. Modelul nou e construit la
+scara lumii și măsoară 3.90 × 3.73 × 4.93 — practic aceeași masă în cadru — deci
+**`model_scale` devine 1.0**.
+
+Cutia brațului din `excavator_hazard.gd:60-62` e potrivită de mână pe rigul vechi
+(`size (1.6, 2.0, 4.6) * k`, `position (0, 1.1, −2.9) * k`) și **trebuie
+re-potrivită**: brațul nou e mai îngust (0.92 față de 1.6), stă mai sus (centru
+la 2.34 față de 1.1) și e ceva mai lung. Cotele de mai sus sunt măsurate pe
+geometria efectivă, în poziția coborâtă, și scriptul le tipărește la fiecare
+build.
+
+### Abateri de la brief
+
+- **Fără roți de capăt la șenile.** Brieful cere câte un prismatic cu 8 laturi la
+  fiecare capăt: 4 × 28 = **112 triunghiuri brute**, aproape jumătate din bugetul
+  brut de 245. O rampă înclinată în față dă aceeași siluetă cu 12 — profilul
+  trapezoidal e ce recunoști de la 40 m, nu roțile.
+- **Bandă continuă de geam, nu `window()`.** Ajutorul costă 60 de triunghiuri
+  brute pentru **o** fereastră, adică un sfert din tot bugetul brut pentru trei.
+  Banda continuă e și mai aproape de adevăr: excavatoarele au cabina vitrată pe
+  tot conturul.
+- **Geamul e `asphalt` (5), nu `sand_shadow` (2).** La prima captură banda ieșea
+  bej — `sand_shadow` e `#A97A4A`, un maro mediu — și se citea ca o dungă de
+  vopsea, nu ca geam. Argumentul e chiar cel din docstring-ul lui `window()`:
+  *„slotul cel mai închis din lume citește ca gol, nu ca sticlă"*. Cel mai închis
+  slot legal e `asphalt`, `#4B4B4D`.
+- **Cupa din două cutii, nu trei.** Al treilea perete n-ar fi adăugat siluetă —
+  cupa se vede din lateral, unde conturul în „L" e tot.
+- **Cilindrii hidraulici sunt `beam`, nu prismatice cu 6 laturi.** 12 triunghiuri
+  în loc de 18 fiecare, iar la 40 m nimeni nu vede că pistonul e pătrat.
+- **AO cu gradient slab pe `arm`** (`low = 0.86` față de 0.52 pe șasiu), cum cere
+  brieful: obiectul se rotește. Același raționament ca la bolovanul din #B2, doar
+  că aici rotația e limitată la 0.55 rad, deci gradientul se reduce, nu se
+  elimină.

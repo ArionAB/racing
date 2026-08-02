@@ -108,11 +108,13 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   `_flat_material()` din `track.gd` (cache pe culoare) și cuantifică variațiile
   de nuanță în câteva trepte, nu continuu.
 
-  **Triunghiuri.** Raportate la fiecare rulare, prag `MAX_TRIS_PER_TRACK = 80000`
-  — **derivat din măsurătoare**: Dunele, cea mai încărcată pistă, e la ~67k cu
-  canionul complet, plus ~20% marjă. Rămâne un prag de *alarmă*, nu un buget de
-  artă: constrângerea reală pe mobil e draw calls, de aceea testul principal e
-  numărătoarea de materiale. Dacă pică cu `TRIS`, uită-te la tabelul pe surse,
+  **Triunghiuri.** Raportate la fiecare rulare, prag `MAX_TRIS_PER_TRACK = 150000`.
+  **Nu e o limită de hardware** — un telefon mid-range duce câteva sute de mii de
+  triunghiuri pe cadru, iar cifra de aici e pe toată pista, din care ceața taie
+  tot ce e peste 250 m. E un prag de *alarmă*, calibrat să prindă clasa de
+  accident (primitive lăsate la rezoluția implicită, care sar cu zeci de mii
+  dintr-un foc), nu un buget de artă. Constrângerea reală pe mobil e draw calls,
+  de aceea testul principal e numărătoarea de materiale. Dacă pică cu `TRIS`, uită-te la tabelul pe surse,
   care arată exact de unde vin.
 
   > Prima măsurătoare a găsit **147k tris pe Dunele**, din care ~110k veneau din

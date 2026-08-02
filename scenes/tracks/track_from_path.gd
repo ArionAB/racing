@@ -21,6 +21,10 @@ extends Track
 @export var custom_hose_fracs: Array[float] = []
 ## Situl cu schelet de dinozaur: fiecare Vector2 = (fractie, parte ±1).
 @export var custom_dino_spots: Array[Vector2] = []
+## Arcade de stanca prin care trece soseaua (fractii 0..1).
+@export var custom_arch_fracs: Array[float] = []
+## Intrari de mina lipite de perete: fiecare Vector2 = (fractie, parte ±1).
+@export var custom_mine_spots: Array[Vector2] = []
 ## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
 @export var custom_carousel_fracs: Array[float] = []
 ## Deviatorul: bariera oblica care iti schimba traiectoria (gimmick de linie).
@@ -76,6 +80,12 @@ func _hose_fracs() -> Array[float]:
 
 func _dino_spots() -> Array[Vector2]:
 	return custom_dino_spots
+
+func _arch_fracs() -> Array[float]:
+	return custom_arch_fracs
+
+func _mine_spots() -> Array[Vector2]:
+	return custom_mine_spots
 
 func _carousel_fracs() -> Array[float]:
 	return custom_carousel_fracs

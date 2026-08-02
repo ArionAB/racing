@@ -157,6 +157,14 @@ func _excavator_fracs() -> Array[float]:
 func _dino_spots() -> Array[Vector2]:
 	return []
 
+## Arcade de stanca prin care trece soseaua (fractii 0..1).
+func _arch_fracs() -> Array[float]:
+	return []
+
+## Intrari de mina lipite de perete: (fractie, parte ±1).
+func _mine_spots() -> Array[Vector2]:
+	return []
+
 ## Unde TrackCliffs NU ridica pereti. Landmark-urile hero au avut mereu
 ## degajarea asta; situl cu schelet o cere la fel de tare, si din acelasi motiv:
 ## e asezat la 19 m de axa, adica FIX in spatele liniei de faleze, iar fara
@@ -166,6 +174,12 @@ func _cliff_clearings() -> Array[Vector3]:
 	var out: Array[Vector3] = _landmark_spots().duplicate()
 	for spot in _dino_spots():
 		out.append(Vector3(spot.x, spot.y, -1.0)) # id -1: nu e din _LANDMARKS
+	for spot in _mine_spots():
+		out.append(Vector3(spot.x, spot.y, -1.0))
+	# Arcada straddleaza soseaua, deci cere degajare pe AMANDOUA laturile.
+	for frac in _arch_fracs():
+		out.append(Vector3(frac, 1.0, -1.0))
+		out.append(Vector3(frac, -1.0, -1.0))
 	return out
 
 ## Landmark-uri hero (turn de apa, benzinarie, moara, semn): fiecare
@@ -229,6 +243,10 @@ func rebuild() -> void:
 		_build_excavator(frac)
 	for spot in _dino_spots():
 		_build_dino(spot.x, spot.y)
+	for frac in _arch_fracs():
+		_build_arch(frac)
+	for spot in _mine_spots():
+		_build_mine(spot.x, spot.y)
 	for spot in _landmark_spots():
 		_build_landmark(spot.x, spot.y, int(spot.z))
 	for frac in _hose_fracs():
@@ -1450,6 +1468,96 @@ func _scatter_bones(scene: PackedScene, center: Vector3, frac: float) -> void:
 		bone.global_position = spot
 		bone.rotation = Vector3(rng.randf_range(-0.25, 0.25), rng.randf_range(0.0,
 			TAU), rng.randf_range(-0.25, 0.25))
+
+## Arcada de stanca peste sosea — singurul landmark prin care TRECI, nu pe
+## langa care treci.
+##
+## Nu poate merge prin _LANDMARKS din doua motive: alea se aseaza lateral, la
+## `half_width + gap`, iar asta straddleaza drumul; si coliziunea nu poate veni
+## din AABB, fiindca AABB-ul unei arcade include golul si ar zidi soseaua.
+## Proxy-urile `Arch_L_col` / `Arch_R_col` din GLB sunt raspunsul — aceeasi
+## conventie ca la cliff_wall. Traversa NU primeste coliziune: nicio masina
+## n-ar trebui s-o atinga, iar o forma concava acolo e o capcana.
+func _build_arch(frac: float) -> void:
+	const PATH := "res://assets/models/rock_arch.glb"
+	if not ResourceLoader.exists(PATH):
+		return
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	var dir := (baked[(idx + 1) % n] - p).normalized()
+	var body := StaticBody3D.new()
+	body.add_to_group("arches")
+	var model := (load(PATH) as PackedScene).instantiate() as Node3D
+	# Proxy-urile de coliziune ies din arborele vizual si devin cutii.
+	for child in model.get_children():
+		var nm := String(child.name)
+		if not nm.ends_with("_col"):
+			continue
+		var mi := child as MeshInstance3D
+		model.remove_child(child)
+		if mi != null and mi.mesh != null:
+			var aabb := mi.mesh.get_aabb()
+			var shape := CollisionShape3D.new()
+			var box := BoxShape3D.new()
+			box.size = aabb.size
+			shape.shape = box
+			shape.position = mi.position + aabb.position + aabb.size * 0.5
+			body.add_child(shape)
+		child.queue_free()
+	body.add_child(model)
+	add_child(body)
+	Palette.apply_world_material(model)
+	var stand := p
+	stand.y = _sampler.ground_y(p.x, p.z)
+	body.global_position = stand
+	# Deschiderea arcadei e pe X-ul modelului, deci privirea se aliniaza cu
+	# directia de mers: soseaua trece prin gol, nu pe langa un picior.
+	body.global_basis = Basis.looking_at(dir, Vector3.UP)
+
+
+## Intrare de mina lipita de peretele de faleza, cu sina si vagonet asezate
+## separat — de aia sunt trei noduri in GLB si nu unul.
+func _build_mine(frac: float, side_sign: float) -> void:
+	const PATH := "res://assets/models/mine_portal.glb"
+	if not ResourceLoader.exists(PATH):
+		return
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	var side := _side_at(idx) * side_sign
+	var scene := load(PATH) as PackedScene
+	var portal := _extract_glb_node(scene, "Portal")
+	if portal == null:
+		return
+	var body := StaticBody3D.new()
+	body.add_to_group("mines")
+	var aabb := model_aabb(portal)
+	body.add_child(portal)
+	# Cutie pe amprenta portalului: e o masa compacta, deci AABB-ul e corect
+	# aici (spre deosebire de bratul excavatorului, vezi ONBOARDING).
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = aabb.size
+	shape.shape = box
+	shape.position = aabb.position + aabb.size * 0.5
+	body.add_child(shape)
+	add_child(body)
+	Palette.apply_world_material(portal)
+	var stand := p + side * (half_width + 16.0)
+	stand.y = _sampler.ground_y(stand.x, stand.z)
+	body.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
+	# Sina iese din gura minei spre drum; vagonetul rasturnat langa ea.
+	for pair: Array in [["MineRail", 7.0, 0.0], ["MineCart", 5.0, 3.2]]:
+		var piece := _extract_glb_node(scene, String(pair[0]))
+		if piece == null:
+			continue
+		var spot := stand - side * float(pair[1]) \
+			+ side.cross(Vector3.UP).normalized() * float(pair[2])
+		spot.y = _sampler.ground_y(spot.x, spot.z)
+		add_child(piece)
+		Palette.apply_world_material(piece)
+		piece.look_at_from_position(spot, Vector3(p.x, spot.y, p.z), Vector3.UP)
 
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
 ##   gap    = cat de departe de marginea soselei sta (m)

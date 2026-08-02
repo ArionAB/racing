@@ -78,8 +78,21 @@ prop-uri 0.04 m · clădiri 0.08 m · stânci 0.15 m
 **Stânci:** 70% rotunjite / 30% fațetate; straturi orizontale la 0.4–0.8 m;
 **niciodată colțuroase**. **Acoperișuri:** pantă 18°. Nimic perfect cubic.
 
-**Buget de triunghiuri:** ladă 80 · gard 60 · butoi 120 · cactus 180 ·
-stâncă mare 250 · turn de apă 900 · moară 1200 · benzinărie 1800
+**Buget de triunghiuri — scalat cu numărul de INSTANȚE, nu cu importanța.**
+Ce se repetă de 100+ ori pe pistă e scump; ce apare o dată e aproape gratis.
+
+- **Umplutură** (zeci–sute de instanțe): stâlp de marcaj 90 · gard 60 · ladă 80 ·
+  butoi 120 · cactus 180 · stâncă mare 250 · secțiune de faleză 200
+- **Landmark hero** (o instanță pe pistă): **1000–5000**, cât cere silueta
+
+Cifrele de hero au fost 900/1200/1800 și **erau derivate greșit** — din cât de
+sărac era jocul în ziua în care le-am scris, nu din vreo constrângere. Prima
+benzinărie cu ferestre reale a ieșit 4864 și e perfect în regulă: o instanță,
+material comun, zero draw call-uri în plus. Plafonul de pistă din
+`probe_decor.gd` (150k) e garda reală, iar el are loc berechet.
+
+**Ce rămâne strâmt e repetiția.** Un triunghi în plus pe stâlpul de marcaj costă
+×24 pe Dunele și ×62 pe Track02. Acolo numără fiecare.
 
 **DA:** siluete mari și lizibile, grinzi groase, colțuri rotunjite, spațiu negativ
 **NU:** șuruburi mici, balustrade subțiri, stânci zimțate, detaliu de frecvență înaltă

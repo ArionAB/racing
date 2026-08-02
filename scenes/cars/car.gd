@@ -38,6 +38,12 @@ signal crushed(car: Car, severity: float)
 
 @export_group("Drift (handbrake)")
 @export var drift_grip: float = 2.0
+## Aderenta laterala intr-o balta de furtun: aproape zero, treci prin ea in
+## sub o secunda.
+const SLIP_GRIP_PUDDLE: float = 0.8
+## Aderenta pe o suprafata uda pe care se CONDUCE, nu prin care se trece.
+## Intre drift (2.0) si asfalt (7-10): simti ca aluneca, dar poti tine linia.
+const SLIP_GRIP_WET: float = 3.6
 @export var drift_steer_bonus: float = 1.5
 @export var drift_bias: float = 0.4
 @export var drift_min_speed: float = 9.0
@@ -96,16 +102,32 @@ var data: CarData
 var controller: CarController
 var track: Track
 var road_index: int = 0
+## Pe ce banda e masina: 0 = bucla principala, 1+ = scurtatura. Indexul de mai
+## sus se refera MEREU la ruta asta, nu la traseul principal — vezi [TrackRoute].
+var route: int = 0
 ## Ultimul punct de pe traseu unde masina era cu roatele pe asfalt — de aici
 ## repornim daca ratam o aterizare sau ajungem in nisip.
+##
+## Se retine si RUTA, nu doar indexul. Fara ea, o repunere de pe scurtatura
+## te-ar fi asezat la indexul cu acelasi numar de pe bucla principala, adica
+## intr-un punct fara nicio legatura cu locul unde ai gresit.
 var last_safe_index: int = 0
+var last_safe_route: int = 0
 
 # --- Drift/turbo ---
 var is_drifting: bool = false
 var drift_dir: float = 0.0
 var turbo_charge: float = 0.0 # 0..1, bara din UI
 var is_boosting: bool = false
-var slip_time: float = 0.0 # aquaplanare (setat de WaterHose)
+var slip_time: float = 0.0 # aquaplanare (setata de WaterHose sau de o banda uda)
+## Ce aderenta laterala are masina cat timp aluneca.
+##
+## Era o constanta de 0.8 in mijlocul fizicii — corect pentru o balta de furtun
+## pe care o traversezi in jumatate de secunda, catastrofal pentru o suprafata
+## uda de 200 m. Prima incercare de banc de nisip a folosit chiar 0.8 si a taiat
+## AI-ul de la 2.5 la 1.6 tururi, cu 27% din timp in apa. Acum intensitatea vine
+## de la cel care cere alunecarea.
+var slip_grip: float = SLIP_GRIP_PUDDLE
 ## Strivit: cat mai tine penalizarea, si cat de tare taie din viteza.
 ##
 ## Oglindeste slip_time in loc sa inventeze un al doilea mecanism. NU exista
@@ -193,7 +215,21 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 
 func _physics_process(delta: float) -> void:
 	if track != null:
-		road_index = track.closest_index(road_index, global_position)
+		# Intai PE CE banda suntem, abia apoi unde pe ea. Ordinea conteaza:
+		# cautarea de index e locala (fereastra de ~72 m), deci pe ruta gresita
+		# ar ramane agatata in urma si fractia de tur ar ingheta.
+		var resolved := track.resolve_route(route, road_index, global_position)
+		if resolved.x != route:
+			route = resolved.x
+			road_index = resolved.y
+		else:
+			road_index = track.closest_index(road_index, global_position, route)
+		# Banda uda: se reinnoieste in fiecare cadru, deci efectul tine exact cat
+		# stai pe ea. Refoloseste acelasi slip_time ca WaterHose — un al doilea
+		# mecanism de aquaplanare ar fi insemnat doua feluri de a pierde grip-ul,
+		# care s-ar fi tunat separat si ar fi divergat.
+		if track.route_is_wet(route):
+			apply_slip(SLIP_GRIP_WET)
 
 	var steer := 0.0
 	var throttle := 0.0
@@ -246,7 +282,7 @@ func _physics_process(delta: float) -> void:
 	var lateral := hvel - fwd_h * fwd_speed
 	var grip_now := drift_grip if is_drifting else grip
 	if slip_time > 0.0:
-		grip_now = 0.8 # aquaplanare: aproape zero aderenta laterala
+		grip_now = slip_grip
 	lateral *= exp(-grip_now * delta)
 	if fwd_speed > vmax:
 		fwd_speed = move_toward(fwd_speed, vmax, 12.0 * delta)
@@ -278,14 +314,15 @@ func _physics_process(delta: float) -> void:
 	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta. Dupa
 	# move_and_slide, ca is_on_floor() sa fie al cadrului curent.
 	if track != null and is_on_floor() \
-			and track.is_on_road(road_index, global_position):
+			and track.is_on_road(road_index, global_position, route):
 		last_safe_index = road_index
+		last_safe_route = route
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.
 ## Turbo-ul merge SI pe iarba — scurtatura cu turbo e o alegere valida.
 func _current_max_speed() -> float:
 	var vmax := max_speed * speed_scale
-	if track != null and not track.is_on_road(road_index, global_position):
+	if track != null and not track.is_on_road(road_index, global_position, route):
 		vmax *= offroad_speed_factor
 	if is_boosting:
 		vmax += turbo_speed_bonus
@@ -345,8 +382,14 @@ func force_boost(seconds: float) -> void:
 # ------------------------------------------------------------- imbranceli
 
 ## Refresh-uit de WaterHose cat timp esti in banda uda activa.
-func apply_slip() -> void:
+## Cere alunecare pentru urmatoarea fractiune de secunda.
+##
+## `grip_value` e aderenta laterala cat timp tine: SLIP_GRIP_PUDDLE pentru o
+## balta (practic zero directie), SLIP_GRIP_WET pentru o suprafata uda pe care
+## se poate totusi conduce. Reper: asfalt 7-10, drift 2.0.
+func apply_slip(grip_value: float = SLIP_GRIP_PUDDLE) -> void:
 	slip_time = 0.25
+	slip_grip = grip_value
 
 ## Ghiont de la un obstacol care iti schimba traiectoria: caruselul te matura
 ## pe tangenta, deviatorul te trimite pe cealalta banda. Impactul in sine
@@ -488,7 +531,8 @@ func respawn(backoff_m: float = 14.0) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
 	_respawn_cooldown = 1.5
-	global_transform = track.recovery_transform(last_safe_index, backoff_m)
+	global_transform = track.recovery_transform(last_safe_index, backoff_m,
+		last_safe_route)
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei
 	# curse e mai frustranta decat saritura ratata.
 	velocity = -global_transform.basis.z * 9.0
@@ -500,7 +544,8 @@ func respawn(backoff_m: float = 14.0) -> void:
 	crush_factor = 1.0
 	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
-	road_index = track.closest_index_global(global_position)
+	route = last_safe_route
+	road_index = track.closest_index_global(global_position, route)
 	last_safe_index = road_index
 	respawned.emit(self)
 

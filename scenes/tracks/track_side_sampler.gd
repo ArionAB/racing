@@ -70,18 +70,24 @@ var _ravines: Array[Vector4] = []
 ## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
 ## padure); > 0 = fund de mare (insula). Vezi ground_y.
 var _far_drop: float = 0.0
+## Puncte de pe benzile SECUNDARE (scurtaturi). Terenul le urmeaza cota ca pe a
+## soselei, iar decorul le ocoleste — altfel scurtatura ar pluti peste fundul de
+## mare si i-ar rasari palmieri prin mijloc.
+var _extra: PackedVector3Array = PackedVector3Array()
 
 
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		control_points: Array[Vector3], half_width: float,
 		dune_phase: float = 0.0, ravines: Array[Vector4] = [],
-		far_drop: float = 0.0) -> void:
+		far_drop: float = 0.0,
+		extra_corridors: PackedVector3Array = PackedVector3Array()) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
 	_dune_phase = dune_phase
 	_ravines = ravines
 	_far_drop = far_drop
+	_extra = extra_corridors
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -153,6 +159,24 @@ func ground_y(wx: float, wz: float) -> float:
 			num += w * p.y
 			den += w
 		i += GROUND_STRIDE
+	# Benzile secundare intra in ACELASI camp de inaltime, cu aceleasi ponderi.
+	# Fara asta o scurtatura peste fundul de mare ar avea 20 m de gol dedesubt,
+	# iar masina care iese lateral de pe ea ar cadea prin nimic.
+	var m := _extra.size()
+	var k := 0
+	while k < m:
+		var q := _extra[k]
+		var qdx := q.x - wx
+		var qdz := q.z - wz
+		var q_sq := qdx * qdx + qdz * qdz
+		if q_sq < near_sq:
+			near_sq = q_sq
+		if q_sq < r_sq:
+			var u2 := 1.0 - sqrt(q_sq) / GROUND_ROAD_RADIUS
+			var w2 := (u2 * u2) * (u2 * u2) / (q_sq + soft_sq)
+			num += w2 * q.y
+			den += w2
+		k += GROUND_STRIDE
 	var road_level := (num / den) if den > 0.0 else _mean_y
 	var dist := sqrt(near_sq)
 	var t := clampf((dist - GROUND_FLAT_RADIUS) / GROUND_BLEND_LEN, 0.0, 1.0)
@@ -290,6 +314,15 @@ func clearance_at(pos: Vector3) -> float:
 		var dz := _baked[i].z - pos.z
 		nearest_sq = minf(nearest_sq, dx * dx + dz * dz)
 		i += CLEARANCE_STRIDE
+	# Si benzile secundare: un palmier plantat in mijlocul scurtaturii ar fi un
+	# zid invizibil pe singura linie alternativa din pista.
+	var m := _extra.size()
+	var k := 0
+	while k < m:
+		var ex := _extra[k].x - pos.x
+		var ez := _extra[k].z - pos.z
+		nearest_sq = minf(nearest_sq, ex * ex + ez * ez)
+		k += CLEARANCE_STRIDE
 	return sqrt(nearest_sq)
 
 

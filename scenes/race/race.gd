@@ -83,8 +83,10 @@ func _spawn_cars() -> void:
 		car.track = track
 		add_child(car)
 		car.global_transform = spawns[i]
+		car.route = 0
 		car.road_index = track.closest_index_global(car.global_position)
 		car.last_safe_index = car.road_index
+		car.last_safe_route = 0
 		car.skid_parent = _skid_parent
 		car.pilot_name = PILOTS[i % PILOTS.size()]
 		if i == 0:
@@ -101,7 +103,7 @@ func _spawn_cars() -> void:
 			ai.configure(track, _rng)
 			car.speed_scale = _rng.randf_range(0.88, 0.97)
 		cars.append(car)
-		var frac := track.frac_at(car.road_index)
+		var frac := track.frac_at(car.road_index, car.route)
 		_progress.append({
 			"frac": frac,
 			"total": frac - 1.0 if frac > 0.5 else frac,
@@ -162,7 +164,7 @@ func _tick_race(delta: float) -> void:
 		var car := cars[i]
 		_watch_recovery(car, delta)
 		var st := _progress[i]
-		var frac := track.frac_at(car.road_index)
+		var frac := track.frac_at(car.road_index, car.route)
 		var d := frac - float(st.frac)
 		if d < -0.5:
 			d += 1.0
@@ -191,10 +193,12 @@ func _watch_recovery(car: Car, delta: float) -> void:
 	# zero nu mai inseamna nimic: fundul unei rape sapate pe o portiune joasa e
 	# la -14, deci un prag fix de -12 ar repune masina inainte sa atinga fundul,
 	# iar pe creasta (drum la 19 m) n-ar prinde niciodata o cadere reala.
-	if car.global_position.y < track.baked[car.road_index].y - 25.0:
+	if car.global_position.y \
+			< track.point_at(car.road_index, car.route).y - 25.0:
 		car.respawn()
 		return
-	var off_road := not track.is_on_road(car.road_index, car.global_position)
+	var off_road := not track.is_on_road(car.road_index, car.global_position,
+		car.route)
 	if off_road and car.horizontal_speed() < 2.5:
 		_stalled[car] = float(_stalled.get(car, 0.0)) + delta
 		if float(_stalled[car]) > 5.0:

@@ -202,7 +202,8 @@ func _tick_race(delta: float) -> void:
 		var speed := car.horizontal_speed()
 		st.speed_sum = float(st.speed_sum) + speed
 		st.samples = int(st.samples) + 1
-		if not _race.track.is_on_road(car.road_index, car.global_position):
+		if not _race.track.is_on_road(car.road_index, car.global_position,
+				car.route):
 			st.offroad_s = float(st.offroad_s) + delta
 		if speed < 4.0:
 			st.slow_s = float(st.slow_s) + delta
@@ -221,7 +222,8 @@ func _tick_race(delta: float) -> void:
 				st.deflector_hits = int(st.deflector_hits) + 1
 		# Harta pistei: unde anume se scurge viteza. Fara ea nu stii daca AI-ul
 		# pierde in acelasi viraj de fiecare data sau imprastiat peste tot.
-		var b := clampi(int(_race.track.frac_at(car.road_index) * float(BUCKETS)),
+		var b := clampi(int(_race.track.frac_at(car.road_index, car.route)
+			* float(BUCKETS)),
 			0, BUCKETS - 1)
 		_bucket_speed[b] += speed
 		_bucket_samples[b] += 1
@@ -260,8 +262,9 @@ func _watch_stuck(car: Car, st: Dictionary, speed: float, delta: float) -> void:
 			touching.append("%s@(%.0f,%.0f,%.0f)" % [_describe(hit),
 				hit.global_position.x, hit.global_position.y, hit.global_position.z])
 	print("[blocaj] t=%5.1fs  %-18s frac=%.3f  v=%4.1f  lat=%4.1f  poz=(%.0f,%.0f,%.0f)  atinge: %s" % [
-		_elapsed, st.name, _race.track.frac_at(car.road_index), speed,
-		_race.track.lateral_distance(car.road_index, car.global_position),
+		_elapsed, st.name, _race.track.frac_at(car.road_index, car.route), speed,
+		_race.track.lateral_distance(car.road_index, car.global_position,
+			car.route),
 		car.global_position.x, car.global_position.y, car.global_position.z,
 		", ".join(touching) if not touching.is_empty() else "-"])
 
@@ -293,7 +296,8 @@ func _on_respawn(_car: Car, index: int) -> void:
 func _on_wall(car: Car, impact: float, index: int) -> void:
 	_stats[index].walls = int(_stats[index].walls) + 1
 	_stats[index].wall_impact = maxf(float(_stats[index].wall_impact), impact)
-	var b := clampi(int(_race.track.frac_at(car.road_index) * float(BUCKETS)),
+	var b := clampi(int(_race.track.frac_at(car.road_index, car.route)
+			* float(BUCKETS)),
 		0, BUCKETS - 1)
 	_bucket_walls[b] += 1
 

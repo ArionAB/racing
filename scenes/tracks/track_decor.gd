@@ -262,8 +262,14 @@ static func _add_tropical_bush(parent: Node3D, pos: Vector3,
 	sphere.height = r * 1.3 # mai inalta decat lata: tufa de plaja, nu bolovan
 	# Rezolutia se seteaza EXPLICIT. Implicit SphereMesh e 64x32 = 4224 de
 	# triunghiuri pentru o tufa de 60 cm (CLAUDE.md, constrangeri mobile).
-	sphere.radial_segments = 8
-	sphere.rings = 4
+	#
+	# 6x2 = ~24 de triunghiuri, nu 8x4 = ~80. Diferenta pare marunta pana o
+	# inmultesti cu 461, cati intra pe banda lipita de drum la 1944 m: masurat,
+	# 36 880 de triunghiuri, adica 42% din TOATA pista, pentru niste bile care
+	# oricum dispar la prima transa de assets. Un placeholder n-are voie sa
+	# consume bugetul lucrului pe care il inlocuieste.
+	sphere.radial_segments = 6
+	sphere.rings = 2
 	bush.mesh = sphere
 	bush.position = pos + Vector3.UP * (r * 0.35 - 0.3)
 	var tint := float(rng.randi_range(0, 2)) / 2.0 * 0.16
@@ -298,8 +304,8 @@ static func _add_palm(parent: Node3D, pos: Vector3,
 	cyl.top_radius = 0.16
 	cyl.bottom_radius = 0.28
 	cyl.height = h
-	cyl.radial_segments = 6
-	cyl.rings = 1
+	cyl.radial_segments = 5
+	cyl.rings = 0
 	trunk.mesh = cyl
 	trunk.position = Vector3(0, h * 0.5, 0)
 	trunk.rotation.z = rng.randf_range(-0.22, 0.22)
@@ -310,8 +316,8 @@ static func _add_palm(parent: Node3D, pos: Vector3,
 	var crown_mesh := SphereMesh.new()
 	crown_mesh.radius = rng.randf_range(1.3, 1.9)
 	crown_mesh.height = crown_mesh.radius * 1.1
-	crown_mesh.radial_segments = 8
-	crown_mesh.rings = 3
+	crown_mesh.radial_segments = 7
+	crown_mesh.rings = 2
 	crown.mesh = crown_mesh
 	# Urmeaza varful trunchiului inclinat, altfel coroana pluteste langa el.
 	crown.position = Vector3(sin(trunk.rotation.z) * -h, h, 0)

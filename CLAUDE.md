@@ -91,8 +91,18 @@ res://
 
 ## Constrângeri mobile 3D
 
-- 60fps pe mid-range: low-poly, o singură lumină direcțională, umbre ieftine sau
-  blob shadows sub mașini, fără post-procesare scumpă (fog simplu e ok)
+- 60fps pe mid-range: low-poly, **o singură lumină direcțională**, fără
+  post-procesare scumpă (fog simplu e ok)
+- **Umbre: abatere asumată.** Regula inițială cerea blob shadows. Rulăm acum umbre
+  dinamice reale — o singură cascadă pe 90 m — după comparația cu Reckless Racing
+  3 / Beach Buggy Racing: fără contact cu solul, orice obiect pare lipit peste
+  fundal. Rămâne tot o singură lumină, doar că aruncă. Comutatorul e
+  `Track.theme_shadows`; **e prima setare de stins dacă testul pe device nu ține
+  60fps.**
+- **Texturi: un singur material pentru toată lumea.** Culoarea vine dintr-un atlas
+  de paletă, detaliul de suprafață dintr-un strat triplanar partajat
+  (`Palette.world_material()`). Assets-urile nu aduc texturi proprii — asta e ce
+  ține draw call-urile jos. Vezi `docs/style_bible.md` §4.
 - **Triunghiuri: măsurate, nu presupuse.** Versiunea inițială a acestui document
   scria „~50k pe scenă" fără nicio măsurătoare în spate. Prima numărătoare reală
   (august 2026) a găsit pistele la 147–163k, din care ~110k veneau din primitive

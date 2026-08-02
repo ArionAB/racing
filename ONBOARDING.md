@@ -108,14 +108,12 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   `_flat_material()` din `track.gd` (cache pe culoare) și cuantifică variațiile
   de nuanță în câteva trepte, nu continuu.
 
-  **Triunghiuri (instrumentare).** Raportate la fiecare rulare, cu prag de alarmă
-  larg — `MAX_TRIS_PER_TRACK = 100000`. **Ăsta nu e bugetul de artă.** CLAUDE.md
-  vorbește de ~50k/scenă, dar cifra aia n-a fost niciodată măsurată sau testată
-  pe device, iar până acum garda nici nu număra triunghiuri. Pragul larg prinde
-  exploziile accidentale (o buclă care instanțiază la nesfârșit), nu politica de
-  densitate; se coboară la o cifră justificată după ce măsurăm Dunele cu canionul
-  complet. Dacă pică cu `TRIS`, ceva a scăpat de sub control — uită-te la tabelul
-  pe surse, care arată exact de unde vin.
+  **Triunghiuri.** Raportate la fiecare rulare, prag `MAX_TRIS_PER_TRACK = 80000`
+  — **derivat din măsurătoare**: Dunele, cea mai încărcată pistă, e la ~67k cu
+  canionul complet, plus ~20% marjă. Rămâne un prag de *alarmă*, nu un buget de
+  artă: constrângerea reală pe mobil e draw calls, de aceea testul principal e
+  numărătoarea de materiale. Dacă pică cu `TRIS`, uită-te la tabelul pe surse,
+  care arată exact de unde vin.
 
   > Prima măsurătoare a găsit **147k tris pe Dunele**, din care ~110k veneau din
   > primitive Godot lăsate la rezoluția implicită: un `SphereMesh` are 64×32 =
@@ -141,14 +139,28 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=cliff --track=0
   ```
 
-- **Pentru decizii vizuale, folosește vederea șoferului:**
+- **Pentru decizii de compoziție, folosește vederea de joc:**
   ```
-  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.35 --driver
+  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.35 --gamecam
   ```
   Snapshot-urile ortografice de sus turtesc tot ce e vertical și **mint despre
   densitatea decorului** — ceva ce de sus pare presărat poate strânge cadrul
-  perfect din mașină. Alege fracții neutre: `0.20` pe Dunele cade exact pe un
-  landmark, unde există un gol intenționat de ±25 m.
+  perfect din mașină.
+
+- **Pentru „arată plat?", nu te baza pe ochi — măsoară:**
+  ```
+  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.20 --driver
+  godot --headless --path . --script res://tools/measure_surface.gd \
+      -- --image=snapshots/dunele_sofer.png
+  ```
+  Sonda dă deviația de luminanță pe dale mici, adică **textura de suprafață**, nu
+  contrastul dintre obiecte. Cifrele curente și țintele sunt în
+  `docs/style_bible.md` §14.
+
+  > ⚠️ `--driver` e **instrument de măsură**, cu parametri înghețați
+  > (`MEASURE_*` în `snapshot.gd`). Nu-l sincroniza cu camera când aceasta se
+  > schimbă — altfel toate cifrele din istoricul de PR-uri devin incomparabile.
+  > Pentru compoziție e `--gamecam`, care citește camera reală.
 
 ## 5. Context ca să nu te pierzi (stare curentă, iulie 2026)
 

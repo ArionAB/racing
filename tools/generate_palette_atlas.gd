@@ -102,11 +102,53 @@ func _detail_textures() -> void:
 			var grain := -rng.randf() * 0.16
 			return band + fine + macro + grain + 0.14)
 
+	_sky_cover()
 	# Masca per slot: cat de tare bate detaliul pe fiecare rol din paleta.
 	# Slotul devine astfel canal de autorat — nisipul si roca primesc tot, iar
 	# accentele de masina NIMIC (style_bible §1: masinile raman cele mai curate
 	# suprafete din cadru, ca sa se desprinda de fundal).
 	_write_detail_mask("res://assets/textures/detail_mask.png")
+
+
+## Nori pentru ProceduralSkyMaterial.sky_cover — o panorama gri, 512x256.
+##
+## Camera Ignition e mai plata decat cea veche (7° in loc de 11°), deci orizontul
+## coboara in cadru si cerul creste de la ~40% la ~48% din imagine. Fara nimic in
+## el, camera mai buna face cadrul mai GOL, nu mai imersiv.
+##
+## sky_cover se inmulteste peste gradientul procedural si costa zero draw
+## call-uri — cerul e oricum desenat.
+##
+## Norii stau doar in jumatatea de sus (v < 0.5 e cerul; sub orizont nu are rost),
+## se rarefiaza spre orizont si sunt intentionat difuzi: la 70° FOV si la viteza,
+## nori cu contur clar ar atrage privirea de pe drum.
+func _sky_cover() -> void:
+	const W := 512
+	const H := 256
+	var img := Image.create(W, H, false, Image.FORMAT_RGB8)
+	for y in H:
+		var fy := float(y) / float(H)
+		# 0 la orizont -> 1 la zenit. Norii se aduna sus.
+		var alt := clampf(1.0 - fy * 2.0, 0.0, 1.0)
+		for x in W:
+			var fx := float(x) / float(W)
+			# Trei valuri suprapuse cu perioade neintregi = tipar care nu se
+			# repeta vizibil pe circumferinta.
+			var n := sin(fx * TAU * 3.0 + fy * 7.0) * 0.5 \
+				+ sin(fx * TAU * 7.0 - fy * 11.0) * 0.3 \
+				+ sin(fx * TAU * 13.0 + fy * 5.0) * 0.2
+			# smoothstep larg: margini moi, ca de nor de desert, nu contur taiat.
+			#
+			# ATENTIE la sens: sky_cover se ADUNA peste gradientul cerului, deci
+			# textura trebuie sa fie NEAGRA acolo unde nu-s nori. Cu fond alb,
+			# cerul iese complet spalat (verificat).
+			var cloud := smoothstep(0.35, 0.90, n * 0.5 + 0.5) * alt
+			img.set_pixel(x, y, Color(cloud, cloud, cloud))
+	var path := "res://assets/textures/sky_cover.png"
+	if img.save_png(path) != OK:
+		push_error("Nu am putut scrie " + path)
+		return
+	print("  sky_cover.png  (%dx%d, nori pentru cer)" % [W, H])
 
 
 ## Masca de intensitate a detaliului, 32x1 RGBA. Alfa per slot; culoarea e alba

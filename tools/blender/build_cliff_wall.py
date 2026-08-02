@@ -50,7 +50,13 @@ def cliff_body(b, height, depth, seed):
            # taper mic + perete vertical pe -Y: fata dinspre drum sta dreapta
            # (75-85°, ca in brief), spatele se retrage. Cu taper mare iesea o
            # movila conica, nu un perete de canion.
-           taper=0.16, squash=0.88, wall_axis="y")
+           taper=0.16, squash=0.88, wall_axis="y",
+           # Strate sedimentare pe inele: variatia de VALOARE la scara de ~2 m,
+           # pe care stratul de detaliu triplanar (fin, ~0.7 m) n-o poate da.
+           # Cele doua lucreaza impreuna — banda mare din geometrie, textura
+           # fina din material. Ordinea urca de la inchis la deschis: roca
+           # veche jos, expusa sus.
+           strata_slots=(ROCK_DARK, ROCK_LIGHT, SAND_SHADOW, ROCK_LIGHT))
 
 
 def cliff_cap(b, height, depth, seed):

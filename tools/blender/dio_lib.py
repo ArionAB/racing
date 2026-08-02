@@ -217,7 +217,8 @@ class Builder:
         return self._tag(new_verts, slot)
 
     def rock(self, center, size, slot, seed=0, segments=7, rings=4,
-             flat_top=False, squash=1.0, taper=0.35, wall_axis=None):
+             flat_top=False, squash=1.0, taper=0.35, wall_axis=None,
+             strata_slots=None):
         """Bolovan: elipsoid din inele orizontale, cu raza perturbata determinist.
 
         Baza intregii familii de stanci (bolovani, faleze, butte). Perturbatia e
@@ -239,6 +240,16 @@ class Builder:
                cade in trepte". Asa iese perete de canion vazut din masina, si
                tot economisesti triunghiuri pe partea nevazuta.
         squash < 1 turteste inelele de sus.
+        strata_slots: lista de sloturi ciclata PE INEL, in loc de un slot unic.
+               Cu (ROCK_LIGHT, ROCK_DARK, ROCK_LIGHT, SAND_SHADOW) iese roca
+               sedimentara reala: benzi orizontale de valoare diferita, blocate
+               de geometrie, la scara de ~2 m. E variatia de bloc pe care
+               stratul de detaliu (fin, ~0.7 m) n-o poate da.
+
+               Costa ZERO triunghiuri si ZERO materiale — sunt aceleasi sloturi
+               din acelasi atlas, doar repartizate altfel. Bevel-ul de la granita
+               dintre inele se lipeste de o parte, deci apare o treapta neta la
+               fiecare strat: exact aspectul din imaginile de referinta.
         """
         sx, sy, sz = size
         cx, cy, cz = center
@@ -284,13 +295,29 @@ class Builder:
             rings_v.append(ring)
 
         new_verts = [v for ring in rings_v for v in ring]
-        for lo, hi in zip(rings_v, rings_v[1:]):
+        band_faces = []
+        for k, (lo, hi) in enumerate(zip(rings_v, rings_v[1:])):
             for i in range(segments):
                 j = (i + 1) % segments
-                self.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
-        self.bm.faces.new(tuple(reversed(rings_v[0])))   # baza
-        self.bm.faces.new(tuple(rings_v[-1]))            # varf
-        return self._tag(new_verts, slot)
+                band_faces.append((k, self.bm.faces.new(
+                    (lo[i], lo[j], hi[j], hi[i]))))
+        base_face = self.bm.faces.new(tuple(reversed(rings_v[0])))
+        top_face = self.bm.faces.new(tuple(rings_v[-1]))
+
+        if not strata_slots:
+            return self._tag(new_verts, slot)
+
+        # Strate: fiecare banda de inel ia alt slot, ciclic. Baza primeste cel
+        # mai inchis slot din lista (sta in umbra oricum), varful pe cel dat —
+        # la mesa, capacul plat e fata cea mai insorita.
+        for k, f in band_faces:
+            f[self.slot] = strata_slots[k % len(strata_slots)]
+        base_face[self.slot] = strata_slots[0]
+        top_face[self.slot] = slot
+        out = set(f for _, f in band_faces)
+        out.add(base_face)
+        out.add(top_face)
+        return out
 
     def prism(self, outline, thickness, slot, center=(0, 0, 0)):
         """Prisma dintr-un contur 2D in planul XZ, extrudata pe Y.

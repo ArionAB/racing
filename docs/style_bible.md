@@ -98,18 +98,44 @@ stâncă mare 250 · turn de apă 900 · moară 1200 · benzinărie 1800
 > și ne costa exact lucrul pe care îl invidiam la referințe.
 
 Ce e permis:
-- **Atlasul de paletă** (`palette_atlas.png`, 512×512) — fiecare slot e un *patch
-  texturat*: nisip cu granulație, rocă cu straturi orizontale, lemn cu fibră.
-  Generat de [tools/generate_palette_atlas.gd](../tools/generate_palette_atlas.gd).
-  UV-urile rămân colapsate pe centrul slotului, deci **assets-urile existente nu
-  se refac** și materialul rămâne unul singur.
-- **Texturi tileabile gri** pentru suprafețele mari (teren, asfalt):
-  `surface_sand.png`, `surface_asphalt.png`. Se înmulțesc peste albedo, deci nu
-  aduc culori noi. Centrul lor e **alb**, nu gri mediu — o textură centrată pe 0.5
-  ar întuneca totul cu 50% și ar spăla culoarea.
+- **Atlasul de paletă** (`palette_atlas.png`, 512×512) — dă **culoarea**, câte un
+  slot per rol. Generat de
+  [tools/generate_palette_atlas.gd](../tools/generate_palette_atlas.gd).
 
-Ce rămâne interzis: texturi unice per asset, texturi de murdărie pictate manual,
-decals. Umbrirea proprie vine în continuare din **AO copt în vertex colors**.
+  > ⚠️ Patch-urile texturate din atlas **nu se văd pe prop-uri**. UV-urile lor
+  > sunt colapsate pe un punct, deci derivata e zero și fața citește un singur
+  > texel. Măsurat: faleza avea deviație **0.76** cu atlas texturat cu tot.
+  > Detaliul vine din stratul de mai jos, nu de aici.
+
+- **Stratul de detaliu triplanar** — sursa reală a texturii de suprafață.
+  `detail_albedo` + `uv2_triplanar` în `Palette.world_material()`. Triplanarul își
+  calculează coordonatele din poziția și normala vârfului, deci **nu citește
+  niciun UV**: assets-urile rămân neatinse și materialul rămâne unul singur.
+  `uv2_scale = 0.35` → o repetiție la **2.86 m**.
+
+  **Masca per slot** (`detail_mask.png`, 32×1 RGBA) face din slot un canal de
+  autorat: nisip/rocă 1.00 · lemn 0.85 · beton 0.75 · rugină 0.70 · asfalt 0.55 ·
+  vegetație 0.45 · bordură 0.35 · metal vopsit 0.30 · **accente mașini 0.00**
+  (§1 — mașinile rămân cele mai curate suprafețe din cadru).
+
+- **Texturi tileabile gri** pentru suprafețele mari (teren, asfalt):
+  `surface_sand.png`, `surface_asphalt.png`. Astea au UV-uri reale, deci folosesc
+  același strat **fără** triplanar, pe două scări suprapuse (3.1 m și 45 m) care
+  rup tiparul de repetiție. Se înmulțesc peste albedo, deci nu aduc culori noi.
+  Centrul lor e **alb**, nu gri mediu — o textură centrată pe 0.5 ar întuneca
+  totul cu 50% și ar spăla culoarea.
+
+**Cele patru scări de detaliu**, fiecare cu sursa ei — dacă una lipsește, se vede:
+
+| scară | ce dă | de unde vine |
+|---|---|---|
+| siluetă | forma pe cer | geometrie |
+| blocuri 2–4 m | benzi de valoare | `strata_slots` în `Builder.rock()` (sloturi diferite per inel) |
+| strate ~0.7 m | linii de rocă | `detail_rock.png`, triplanar |
+| granulație ~5 cm | suprafață | aceeași textură, aceeași trecere |
+
+Ce rămâne interzis: **texturi unice per asset**, texturi de murdărie pictate
+manual, decals.
 
 Plafon: atlasul **nu depășește 512×512**. Peste atât se pierde avantajul de VRAM
 fără câștig vizibil la viteza de joc.
@@ -140,6 +166,27 @@ fără câștig vizibil la viteza de joc.
 
 Godot: `rotation_degrees = Vector3(-42, 135, 0)` pentru soare (elevație 42°,
 azimut 315°).
+
+**Unghiul ăsta nu e decorativ.** Codul a stat multă vreme pe `(-48, -30)`: soarele
+bătea aproape vertical *și dinspre spatele camerei*, deci umbrele cădeau sub și în
+spatele stâncilor, unde nu le vede nimeni. La 42° din stânga, umbra unei faleze de
+10 m se întinde ~11 m pe nisip, transversal pe drum — indiciul de volum pe care îl
+căutam. Schimbarea unghiului **invalidează calibrarea de expunere**: soarele mai
+jos dă mai puțină lumină directă (a fost nevoie de 1.12 → 1.42).
+
+### Umbre dinamice — abatere asumată de la CLAUDE.md
+
+CLAUDE.md cere „umbre ieftine sau blob shadows". Rulăm totuși **umbre reale**, o
+singură cascadă ortogonală pe 90 m, decis după comparația cu RR3/BBR: fără contact
+cu solul, orice obiect pare lipit peste fundal. Rămâne o singură lumină
+direcțională — doar că acum aruncă. Dincolo de 90 m preia ceața, deci lipsa lor nu
+se vede.
+
+Comutatorul e **`Track.theme_shadows`**. Dacă primul test pe device nu ține 60 fps,
+se stinge de acolo și AO-ul copt rămâne singura sursă de volum.
+
+`CLIFF_AO_STRENGTH` a coborât 0.45 → 0.22 odată cu ele: AO-ul radial și umbra
+dinamică **se adună**, iar la 0.45 baza falezelor ieșea aproape neagră.
 
 **Expunerea se calibrează prin măsurare, nu din ochi.** Cerul de deșert e albastru
 intens; luat ca sursă de ambient, își lasă nuanța pe tot ce e deschis la culoare —
@@ -223,7 +270,8 @@ Dincolo de ramă: doar cer în cursă. Rama întreagă se vede în meniuri / pho
    păstrează senzația de așezat de mână.
 3. **Teren: variație max ±3.5 m pe orice 50 m.** Relieful mare se face din
    *assets de faleză* (6–12 m), nu din heightmap. Vezi §12.
-4. **Vertex colors pentru AO** pe absolut fiecare asset; zero texturi unice.
+4. **Vertex colors pentru AO** pe absolut fiecare asset; zero texturi unice per
+   asset. (Textura de suprafață vine din stratul partajat — §4.)
 5. **Asfaltul rămâne cea mai închisă suprafață continuă.**
 
 ---
@@ -267,3 +315,56 @@ Lucruri care nu se deduc din spec și care au costat iterații:
    verticală explicită (`taper` mic + `wall_axis`), altfel ies conice.
 5. **Piesele mărunte trebuie supradimensionate 40–110%.** La scara reală, o tufă
    de 60 cm pur și simplu nu se vede de la înălțimea camerei.
+6. **Un UV colapsat nu vede nicio textură.** Am construit un atlas de 512×512 cu
+   granulație și straturi, l-am pus în joc, și n-a schimbat absolut nimic — pentru
+   că derivata UV era zero. Trei luni de „hai să facem atlasul mai bun" n-ar fi
+   reparat asta; o linie de `uv2_triplanar` a reparat-o.
+7. **Sensul unei texturi contează cât conținutul.** `sky_cover` se *adună* peste
+   cer, nu se înmulțește: cu norii scriși ca gri-închis pe alb, cerul a ieșit
+   complet alb. Verifică întotdeauna dacă textura e aditivă sau multiplicativă
+   înainte să-i alegi fondul.
+
+---
+
+## 14. Cum se măsoară
+
+„Arată plat" e o părere. Deviația de luminanță e un număr pe care oricine îl poate
+reproduce, și singurul mod onest de a ști dacă o schimbare a ajutat.
+
+```
+godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.20 --driver
+godot --headless --path . --script res://tools/measure_surface.gd \
+    -- --image=snapshots/dunele_sofer.png
+```
+
+Sonda taie imaginea în dale de 8 px și măsoară deviația **înăuntrul** fiecărei
+dale — deci textura de suprafață, nu contrastul dintre obiecte. Dalele reci
+(cerul) se ignoră.
+
+| zonă | înainte de stratul de detaliu | acum |
+|---|---|---|
+| faleză aproape | **0.76** | **~6** |
+| faleză departe | 0.76 | **~9.4** |
+| nisip | 1.48 | ~2.7 |
+| asfalt | 0.93 | ~3.1 |
+| cadru întreg | 1.12 | ~2.7 |
+
+Referință (imaginile din `assets/dunele_inspiration/`): nisip ~36, stâncă ~40.
+**Nu țintim acolo** — aceea e o randare statică de prezentare, iar prea multă
+variație la 60 km/h devine zgomot și strică citirea liniei de curs.
+
+> ⚠️ **`--driver` e instrument de măsură, nu captură de ecran.** Parametrii lui
+> sunt înghețați în `MEASURE_*` din `snapshot.gd`. Dacă cineva îi „sincronizează"
+> cu camera când aceasta se schimbă, toate cifrele σ din istoricul de PR-uri devin
+> incomparabile. Pentru compoziție există `--gamecam`.
+
+**Expunerea se verifică separat**, comparând nisipul însorit cu `#D8A86A`:
+
+```
+godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
+```
+
+Prag: eroare ≤ 12/255 per canal. Se reia **de fiecare dată** când se schimbă
+stratul de detaliu, unghiul soarelui sau energia luminii — toate trei mișcă
+rezultatul, iar valoarea greșită se propagă tăcut în toate deciziile ulterioare de
+culoare.

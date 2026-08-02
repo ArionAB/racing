@@ -34,13 +34,30 @@ const PAD: int = 2
 
 const OUT_PATH: String = "res://assets/textures/palette_atlas.png"
 
+## Seminte SEPARATE per artefact generat.
+##
+## Initial exista una singura si `rng` curgea secvential prin toata rularea:
+## bucla de sloturi consuma din el, iar texturile de suprafata continuau din
+## starea ramasa. Efectul secundar a aparut la adaugarea mediului insular —
+## sloturile 17..23 au inceput sa consume cateva mii de extrageri, iar
+## detail_rock.png, surface_sand.png si surface_asphalt.png au iesit diferite
+## desi nimeni nu le atinsese. Adica o culoare noua in paleta regenera exact
+## texturile pe care sunt calibrate masuratorile din style_bible §14, pentru
+## toate pistele.
+##
+## Cu seminte separate, fiecare artefact e reproductibil independent: poti
+## adauga sau scoate sloturi fara sa clatini nimic in aval.
+const SEED_SLOTS: int = 20260801
+const SEED_SURFACE: int = 20260802
+const SEED_DETAIL: int = 20260803
+
 var rng := RandomNumberGenerator.new()
 
 
 func _init() -> void:
 	# Seed fix: acelasi atlas la fiecare rulare. Altfel fiecare regenerare ar
 	# produce un PNG diferit binar si ar murdari git-ul fara motiv.
-	rng.seed = 20260801
+	rng.seed = SEED_SLOTS
 	var img := Image.create(SLOT_W * Palette.SLOTS, HEIGHT, true,
 		Image.FORMAT_RGB8)
 	for slot in Palette.SLOTS:
@@ -53,7 +70,10 @@ func _init() -> void:
 		return
 	print("Atlas scris: %s  (%dx%d, %d sloturi)"
 		% [OUT_PATH, img.get_width(), img.get_height(), Palette.SLOTS])
+	# Re-semanare inainte de fiecare artefact — vezi SEED_* de mai sus.
+	rng.seed = SEED_SURFACE
 	_surface_textures()
+	rng.seed = SEED_DETAIL
 	_detail_textures()
 	print("Reimporta in Godot, apoi masoara:")
 	print("  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.20 --driver")
@@ -168,6 +188,13 @@ func _write_detail_mask(path: String) -> void:
 		11: 0.30,                    # metal vopsit: aproape curat
 		12: 0.45, 13: 0.45,          # vegetatie
 		14: 0.0, 15: 0.0, 16: 0.0,   # ACCENTE MASINI — raman imaculate
+		# --- Mediu insular (17..23) ---
+		17: 0.30, 18: 0.25,          # apa: detaliul de roca ar face-o sa arate ca noroi
+		19: 1.00,                    # nisip coraligen
+		20: 1.00,                    # bazalt — la fel ca roca, aici conteaza
+		21: 0.45,                    # vegetatie tropicala, ca 12/13
+		22: 0.20,                    # spuma: cea mai curata suprafata din decor
+		23: 0.55,                    # olane: manufacturate, dar cu uzura
 	}
 	var img := Image.create(Palette.SLOTS, 1, false, Image.FORMAT_RGBA8)
 	for slot in Palette.SLOTS:
@@ -270,8 +297,9 @@ func _fill_slot(img: Image, slot: int) -> void:
 			img.set_pixel(x, y, c)
 
 
-## Culoarea de baza a slotului. Sloturile fara culoare definita (17..31, rezerva)
-## raman magenta, ca o greseala de UV sa sara in ochi imediat.
+## Culoarea de baza a slotului. Sloturile fara culoare definita (24..31, rezerva)
+## raman magenta, ca o greseala de UV sa sara in ochi imediat. Garda s-a ingustat
+## de la 17..31 cand mediul insular a ocupat 17..23 — dar exista in continuare.
 func _base_color(slot: int) -> Color:
 	if slot < Palette.HEX.size():
 		return Palette.color(slot)
@@ -297,8 +325,16 @@ func _texture_for(slot: int, base: Color, x: int, y: int) -> Color:
 			return _rust(base, x, y)
 		Palette.PAINTED_METAL:
 			return _painted(base, x, y)
-		Palette.CACTUS_GREEN, Palette.DRY_VEGETATION:
+		Palette.CACTUS_GREEN, Palette.DRY_VEGETATION, Palette.TROPICAL_GREEN:
 			return _vegetation(base, x, y)
+		Palette.CORAL_SAND:
+			return _sand(base, x, y)
+		Palette.REEF_SHALLOW, Palette.SEA_DEEP, Palette.FOAM_WHITE:
+			return _water(base, x, y)
+		Palette.VOLCANIC_BLACK:
+			return _volcanic(base, x, y)
+		Palette.TILE_TERRACOTTA:
+			return _tile(base, x, y)
 		_:
 			# Accentele de masina (14-16) raman plate: masinile trebuie sa fie
 			# cele mai saturate si mai curate suprafete din cadru (style_bible §1).
@@ -372,6 +408,68 @@ func _vegetation(base: Color, x: int, y: int) -> Color:
 	var speckle := (rng.randf() - 0.5) * 0.09
 	var vertical := (float(y) / float(HEIGHT) - 0.5) * -0.06
 	return _shade(base, speckle + vertical)
+
+
+## Zgomot determinist din POZITIE, nu din rng — folosit doar de sloturile
+## insulare (17..23).
+##
+## Motivul nu e estetic, e de reproductibilitate. `rng` e un flux secvential
+## partajat: _fill_slot il consuma pentru sloturile 0..31, iar DUPA bucla,
+## _surface_textures() si _detail_textures() continua din starea ramasa. Prima
+## versiune a sloturilor insulare chema rng.randf() si a deplasat fluxul cu
+## cateva mii de extrageri — consecinta a fost ca detail_rock.png,
+## surface_sand.png si surface_asphalt.png au iesit DIFERITE, desi nimeni nu le
+## atinsese. Adica: adaugarea unei culori regenera texturile pe care sunt
+## calibrate masuratorile din style_bible §14, pentru toate cele 4 piste.
+##
+## Cu hash pozitional, un slot nou nu mai poate perturba nimic din afara lui.
+func _hash01(x: int, y: int, salt: int) -> float:
+	var h := (x * 374761393) ^ (y * 668265263) ^ (salt * 2147483647)
+	h = (h ^ (h >> 13)) * 1274126177
+	return float((h ^ (h >> 16)) & 0xFFFFFF) / float(0x1000000)
+
+
+## Apa si spuma: unde vals lente, FARA granulatie.
+##
+## Granulatia (care e semnatura nisipului si a rocii) face apa sa arate ca noroi
+## — de-asta nu reciclam _sand aici. Doua sinusuri necomensurabile pe verticala
+## dau ondulatie fara perioada vizibila. Amplitudine mica: suprafata mare de apa
+## e fundal, nu subiect.
+func _water(base: Color, x: int, _y: int) -> Color:
+	var swell := sin(float(x) * 0.55) * 0.5 + sin(float(x) * 0.23) * 0.5
+	return _shade(base, swell * 0.030)
+
+
+## Bazalt: ciupituri, NU straturi orizontale.
+##
+## _rock() face stanca sedimentara — semnatura falezelor de canion, corecta
+## pentru gresie. Bazaltul de recif e vezicular: gaurit de bule de gaz, fara
+## nicio stratificatie. Reciclarea lui _rock ar face insula sa arate ca desertul
+## vopsit in gri. Abatere de la style_bible §3 ("roca stratificata, niciodata
+## zimtata") asumata: regula acopera roca sedimentara, nu lava.
+func _volcanic(base: Color, x: int, y: int) -> Color:
+	var pit := 0.0
+	if _hash01(x, y, 1) < 0.06:
+		pit = -0.10
+	# Pete lente: bazaltul se decoloreaza in placi, nu uniform.
+	var mottle := sin(float(y) * 0.033 + float(x) * 1.1) \
+		* cos(float(y) * 0.019) * 0.045
+	var grain := (_hash01(x, y, 2) - 0.5) * 0.05
+	return _shade(base, pit + mottle + grain)
+
+
+## Olane: nervuri VERTICALE (de-a lungul pantei acoperisului), regulate.
+##
+## Spre deosebire de lemn, unde fibra e neregulata, olanele sunt manufacturate:
+## nervura e curata si periodica. Asta le si diferentiaza citirea de la distanta.
+func _tile(base: Color, x: int, y: int) -> Color:
+	var rib := sin(float(x) * 1.6) * 0.045
+	# Rosturile de mortar, orizontale si rare.
+	var joint := 0.0
+	if fposmod(float(y), 42.0) < 2.0:
+		joint = -0.05
+	var grain := (_hash01(x, y, 3) - 0.5) * 0.025
+	return _shade(base, rib + joint + grain)
 
 
 ## Aplica o deviatie de luminozitate pastrand nuanta. Lucreaza in HSV ca sa nu

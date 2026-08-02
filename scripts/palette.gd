@@ -45,11 +45,38 @@ const CAR_RED: int = 14
 const CAR_BLUE: int = 15
 const CAR_YELLOW: int = 16
 
+# --- Mediu insular (17..23), pentru pista Okinawa ---
+#
+# Sloturile 0..13 sunt acordate pe desert si nu acopera o insula de recif. Le
+# lasam neatinse (orice GLB deja construit le foloseste) si ocupam din rezerva.
+# Nu se lateste atlasul: 32 de sloturi erau deja alocate, doar 17 folosite.
+#
+# Ce NU a primit slot nou, ca sa nu risipim rezerva: calcarul Ryukyu foloseste
+# CONCRETE (8), barcile sabani si stalpii de debarcader folosesc WOOD_WEATHERED
+# (9), bordurile raman KERB_RED (7).
+const REEF_SHALLOW: int = 17    # apa peste recif, turcoaz
+const SEA_DEEP: int = 18        # larg
+const CORAL_SAND: int = 19      # nisip coraligen alb-crem (SAND_LIGHT e prea galben)
+const VOLCANIC_BLACK: int = 20  # bazalt (ROCK_DARK e maro, nu negru)
+const TROPICAL_GREEN: int = 21  # vegetatie subtropicala (CACTUS_GREEN e oliv sters)
+const FOAM_WHITE: int = 22      # creste de val, spuma la tarm
+const TILE_TERRACOTTA: int = 23 # olane rosii
+
 ## Culorile, in ordinea sloturilor (identice cu atlasul generat).
+##
+## Doua dintre culorile insulare au fost mutate fata de prima propunere, ca sa
+## respecte regulile din style_bible §1:
+##   - VOLCANIC_BLACK e #55535A (V 0.35), nu un negru real: asfaltul (#4B4B4D,
+##     V 0.30) trebuie sa ramana cea mai inchisa suprafata din scena, altfel
+##     linia de curs nu se mai citeste la viteza.
+##   - TILE_TERRACOTTA e la saturatie 0.60, nu 0.69: acoperisurile sunt o
+##     suprafata MARE, iar un rosu saturat ar concura cu CAR_RED. Asa ramane
+##     distinct si de KERB_RED (nuanta 21° fata de 8°).
 const HEX: Array[String] = [
 	"E8C88B", "D8A86A", "A97A4A", "C79664", "7E5B3A", "4B4B4D", "696765",
 	"B74A3A", "C8BEAC", "8A6947", "915535", "7E96A8", "617A43", "AFA25E",
 	"E54839", "2C82E8", "F2D03C",
+	"54BFB8", "2E5F6B", "E9DCC0", "55535A", "3F7A3C", "E9F2F0", "C4784F",
 ]
 
 ## Culoarea unui slot.

@@ -31,6 +31,11 @@ ROCK_LIGHT, ROCK_DARK = 3, 4
 ASPHALT, ASPHALT_EDGE, KERB_RED = 5, 6, 7
 CONCRETE, WOOD, RUST, PAINTED = 8, 9, 10, 11
 CACTUS_GREEN, DRY_VEGETATION = 12, 13
+# 14-16 sunt accentele de masina si NU se folosesc in decor (style_bible §1).
+# Mediul insular (pista Okinawa) ocupa din rezerva, incepand de la 17:
+REEF_SHALLOW, SEA_DEEP = 17, 18
+CORAL_SAND, VOLCANIC_BLACK = 19, 20
+TROPICAL_GREEN, FOAM_WHITE, TILE_TERRACOTTA = 21, 22, 23
 
 PROJECT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ATLAS = os.path.join(PROJECT, "assets", "textures", "palette_atlas.png")

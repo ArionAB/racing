@@ -1,8 +1,14 @@
-# Style Bible — "Diorámă stilizată de deșert"
+# Style Bible — "Diorámă stilizată"
 
 Direcția vizuală a jocului, cu valori numerice. **Orice asset nou se generează
 împotriva acestui document.** Sursa: spec derivat din imaginea de referință
 (diorámă miniaturală de deșert), adaptat la constrângerile de mobil.
+
+Documentul a fost scris pentru deșert și rămâne calibrat pe el: toate
+măsurătorile din §5, §6 și §14 sunt luate pe Dunele. De la pista Okinawa
+încoace acoperă și un mediu **insular** — regulile de formă, scară, material și
+compoziție sunt aceleași, doar familia de culori diferă (§1) și atmosfera se
+recalibrează per temă (§5).
 
 Referință de ton: *Art of Rally* / machetă de masă — **nu** miniatură fotorealistă.
 
@@ -32,12 +38,31 @@ nu un pătrat de culoare uniformă — vezi §4.
 | 12 | cactus_green | `#617A43` | cactuși, tufe |
 | 13 | dry_vegetation | `#AFA25E` | smocuri de iarbă |
 | 14-16 | **accente mașini** | `#E54839` `#2C82E8` `#F2D03C` | **doar mașini**, niciodată decor |
+| 17 | reef_shallow | `#54BFB8` | apă peste recif |
+| 18 | sea_deep | `#2E5F6B` | larg |
+| 19 | coral_sand | `#E9DCC0` | nisip coraligen |
+| 20 | volcanic_black | `#55535A` | bazalt de țărm |
+| 21 | tropical_green | `#3F7A3C` | vegetație subtropicală |
+| 22 | foam_white | `#E9F2F0` | creste de val, spumă |
+| 23 | tile_terracotta | `#C4784F` | olane roșii |
+| 24-31 | **rezervă** | magenta | negenerate intenționat — o greșeală de UV sare în ochi |
+
+Sloturile 0-13 sunt mediul de **deșert**, 17-23 mediul **insular** (pista
+Okinawa). Un asset folosește o familie sau alta, nu le amestecă. Ce n-a primit
+slot propriu, fiindcă exista deja ceva potrivit: calcarul Ryukyu ia `concrete`
+(8), bărcile sabani și stâlpii de debarcader iau `wood_weathered` (9), bordurile
+rămân `kerb_red` (7).
 
 **Regulă de saturație:** mediul stă la 0.45–0.60; mașinile la 0.85–1.00. Așa
 mașinile se desprind mereu de fundal.
+*Consecință măsurată la adăugarea insulei:* `tile_terracotta` a fost coborât de
+la 0.69 la 0.60 saturație. Acoperișurile sunt o suprafață mare, iar un roșu
+saturat le-ar fi pus în competiție cu `car_red`.
 
 **Regulă de citire:** asfaltul (slot 5) trebuie să rămână **cea mai închisă
 suprafață continuă** din scenă — linia de curs se citește la viteză.
+*Consecință măsurată:* `volcanic_black` e `#55535A` (V 0.35), nu un negru real —
+bazaltul de recif ar fi coborât sub asfalt (V 0.30) și ar fi mâncat linia de curs.
 
 ---
 
@@ -114,9 +139,12 @@ Ce e permis:
   `uv2_scale = 0.35` → o repetiție la **2.86 m**.
 
   **Masca per slot** (`detail_mask.png`, 32×1 RGBA) face din slot un canal de
-  autorat: nisip/rocă 1.00 · lemn 0.85 · beton 0.75 · rugină 0.70 · asfalt 0.55 ·
-  vegetație 0.45 · bordură 0.35 · metal vopsit 0.30 · **accente mașini 0.00**
+  autorat: nisip/rocă/bazalt 1.00 · lemn 0.85 · beton 0.75 · rugină 0.70 ·
+  asfalt 0.55 · olane 0.55 · vegetație 0.45 · bordură 0.35 · metal vopsit 0.30 ·
+  apă 0.25–0.30 · spumă 0.20 · **accente mașini 0.00**
   (§1 — mașinile rămân cele mai curate suprafețe din cadru).
+  Apa și spuma stau jos deliberat: stratul de detaliu e o textură de *rocă*, iar
+  la intensitate mare face marea să arate ca noroi.
 
 - **Texturi tileabile gri** pentru suprafețele mari (teren, asfalt):
   `surface_sand.png`, `surface_asphalt.png`. Astea au UV-uri reale, deci folosesc

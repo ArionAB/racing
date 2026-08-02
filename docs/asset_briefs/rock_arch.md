@@ -135,5 +135,104 @@ culoare în engine:**
 - **De raportat în PR:** bbox-ul printat (dovadă pentru deschidere și degajare) și
   o captură **de la nivelul drumului, din față, la ~60 m**. Vederea de sus minte
   despre cum se citește o arcadă.
-- **Checklist la primire:** patru noduri cu numele exacte; deschidere ≥ 20 m;
-  degajare ≥ 9 m pe toată lățimea; ≤ 1000 tris vizibile; UV pe centre; `COLOR_0`.
+- **Checklist la primire:** **cinci** noduri (vezi corectura de nume mai jos);
+  deschidere ≥ 20 m; degajare ≥ 9 m pe toată lățimea; ≤ 1000 tris vizibile;
+  UV pe centre; `COLOR_0`.
+
+## Livrat (#C1)
+
+![arcada de la nivelul drumului, din față la 60 m, și din trei sferturi](img/rock_arch_60m.png)
+
+Stânga e captura cerută de issue: **de la nivelul drumului, din față, la 60 m**,
+cu 14 m de asfalt și o mașină de 4.2 m pentru scară.
+
+### Cote — toate măsurate, nu deduse
+
+| | valoare | cerut |
+|---|---|---|
+| deschidere liberă | **22.59 m** (între x=−11.28 și x=+11.31) | ≥ 20 |
+| degajare verticală | **9.64 m** (cel mai jos punct al traversei) | ≥ 9 |
+| gabarit | 42.38 × 15.66 × 9.09 m | înălțime 14–18 |
+| triunghiuri vizibile | **966** | ≤ 1000 |
+| coliziune | **24** (2 × 12) | ≤ 24 |
+
+Cotele astea nu se pot deduce din constantele de construcție, fiindcă `rock()`
+perturbă razele: amprenta reală nu e cea cerută. Scriptul le **măsoară pe
+geometria finală** și le tipărește la fiecare build — deschiderea ca cel mai
+îngust gol între picioare sub plafonul de degajare, degajarea ca cel mai jos
+punct al traversei pe deschidere.
+
+Garda și-a plătit imediat scrierea: prima versiune a ieșit cu **18.51 m**
+deschidere, sub minim, și ar fi trecut nevăzută.
+
+### Trei corecturi față de brief
+
+**Numele de coliziune: `Arch_L_col` / `Arch_R_col`, nu `Arch_col`.** Brieful cere
+un singur obiect cu două cutii; issue-ul cere perechile. Codul decide, și e de
+partea issue-ului: `scenes/tracks/track_cliffs.gd:291` face
+`_extract(scene, node_name + "_col")`, deci convenția e `X` ↔ `X_col`, per nod
+vizual. Un `Arch_col` unic ar fi cerut cod nou pentru un caz special. Sunt deci
+**cinci** noduri, nu patru.
+
+**Originea e comună, nu per piesă.** Brieful spune „originea la bază, centrată în
+XZ, pentru fiecare din cele patru" *și* „centrul XZ = mijlocul deschiderii".
+A doua e cea corectă: dacă fiecare piesă s-ar recentra pe bbox-ul ei, cele trei
+mase s-ar suprapune în același punct la instanțiere și arcada s-ar prăbuși
+într-un morman.
+
+**Centrarea pe X se face pe deschidere, nu pe gabarit.** Cu picioare asimetrice —
+și asimetria e cerută de brief — cele două sunt lucruri diferite. Prima versiune
+centra pe gabarit, iar golul ieșea decalat cu 2 m față de origine: drumul ar fi
+trecut lipit de piciorul din dreapta.
+
+### `verify_glb.py --origin=assembly`
+
+Regula „baza la Y=0" e per nod, iar aici traversa chiar plutește la 8.76 m — ăla
+e tot rostul ei. Verificatorul dădea deci `PROBLEME` pe un asset corect. Steagul
+nou mută aserțiunea pe ce trebuie: **ansamblul** atinge solul, iar piesele își
+păstrează pozițiile relative. Testat că mușcă — traversa exportată singură pică
+cu „ansamblul nu atinge solul: cel mai jos punct e la Y=8.756".
+
+### Ce a ieșit din măsurat
+
+Multiplicatorul bevel-ului pe geometrie de stâncă e **2.25**, nu 3.67 ca pe
+cutii: `rock()` are multe muchii superficiale între inele, pe care pragul
+implicit de 30° le sare deja. Măsurat pe 438 de triunghiuri brute, la bevel 0.15:
+
+| prag | rezultat | ×  |
+|---|---|---|
+| 30° (implicit) | 984 | 2.25 |
+| 45° | 790 | 1.80 |
+| 55° | 676 | 1.54 |
+| 65° | 630 | 1.44 |
+| 75° | 628 | 1.43 |
+
+Și varianta cea mai generoasă ar fi încăput — dar 984 din 1000 nu e o marjă, e o
+coincidență care se strică la prima retușare de perturbație. La 45° silueta e
+aceeași, fiindcă muchiile sărite în plus sunt tot cele dintre benzile de strat,
+care trebuie să rămână nete oricum.
+
+### Ce au arătat capturile
+
+Traversa a trecut prin **trei** forme până a citit ca arcadă, și niciuna dintre
+greșeli nu se vedea în cifre:
+
+1. **Un elipsoid întins pe 36 m** — a ieșit o lentilă cu vârfuri ascuțite la
+   capete, adică o farfurie zburătoare așezată pe două cutii de conservă.
+2. **Trei mase, dar cu suprapunere mică** — s-au despărțit la perturbație și au
+   ieșit trei bolovani care plutesc separat.
+3. **Trei mase cu suprapunere mare** — asta citește: o grindă neregulată cu
+   capetele îngropate în picioare, mai groasă la nașteri decât la cheie, cum
+   cere briefu.
+
+Picioarele au trecut și ele prin „ciupercă": masa a doua era decalată cu 0.30 din
+amprentă spre exterior și ieșea în consolă peste trunchiul care se îngustase.
+0.17 și o masă mai strânsă rezolvă.
+
+### Slăbiciunea cunoscută
+
+Picioarele se citesc încă mai degrabă a **coloane vărgate** decât a stâncă
+erodată: ciclul de strate e regulat, iar la 5 inele pe 11.6 m benzile ies de
+~2.3 m, peste cele 0.4–0.8 m pe care le cere `style_bible` §3. Benzi mai subțiri
+ar însemna mai multe inele, iar la 8 laturi × 2 picioare bugetul nu le ține.
+Dacă arcada e păstrată ca landmark, aici merită următorul pas — nu în siluetă.

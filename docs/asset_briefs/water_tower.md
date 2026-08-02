@@ -1,7 +1,8 @@
 # Brief asset — Turn de apă (`water_tower.glb`)
 
 Brief auto-conținut pentru un agent Blender (ex. Blender MCP). Nu presupune
-acces la restul repo-ului — tot contractul e aici. Sursele din care e derivat:
+acces la restul repo-ului — tot contractul e aici. Sursa reproductibilă: [tools/blender/build_water_tower.py](../../tools/blender/build_water_tower.py).
+Sursele din care e derivat:
 [style_bible.md](../style_bible.md) (estetică) + [blender_export.md](../blender_export.md)
 (pipeline) + [scripts/palette.gd](../../scripts/palette.gd) (indici de sloturi).
 
@@ -75,3 +76,33 @@ culoare în engine:**
 - Șablonul a fost extras ca fișier: [_TEMPLATE.md](_TEMPLATE.md). Pagina asta
   rămâne exemplul funcțional din care a ieșit, dar briefurile noi pornesc de
   acolo — are și tabelul de `u` pre-calculat pentru toate cele 14 sloturi legale.
+
+### Nu mai e „produs de un agent extern" (#A3)
+
+Turnul a fost multă vreme **singurul hero fără `build_*.py` și fără `.blend`** —
+un agent Blender extern l-a produs direct din brieful de mai sus, iar GLB-ul a
+fost comis fără sursă. Ironia era că exact pagina care se autodeclară șablon
+pentru toate celelalte era singura care încălca regula din
+[assets/blender/README.md](../../assets/blender/README.md): *„sursa reală e
+scriptul, nu `.blend`-ul"*. Practic nimeni nu-l putea modifica, iar #D2 era
+blocat.
+
+Acum e reproductibil: [build_water_tower.py](../../tools/blender/build_water_tower.py).
+
+![stanga vechi (732 tris), dreapta nou (882)](img/water_tower_inainte_dupa.png)
+
+**Măsurat după rescriere:** 882 de triunghiuri din 900 (înainte 732), bbox
+4.78 × 4.78 × **9.500** m, verdict `verify_glb.py`: **OK**.
+
+Cele două cote se compensează explicit pentru bevel, fiindcă amândouă au
+consumatori în Godot:
+- `FINIAL_TOP = 9.486` → bbox 9.500. Bevel-ul adaugă 1.4 cm peste vârf, iar
+  contractul e pe bbox-ul **măsurat**, nu pe cota din cod.
+- `FOOT_HALF = 2.28` → rază 2.391, sub colizorul cilindric de 2.4 din
+  `_LANDMARKS` (`track.gd`). Modelul vechi ieșea 3.9 cm în afara colizorului
+  și era și decentrat cu 7 cm pe X.
+
+**Scara rămâne omisă** — dar nu din motivul vechi. §Formă o făcea opțională
+fiindcă geometria subțire scrisă de mână ieșea urât; `dio_lib.ladder()` (#A1)
+rezolvă asta impunând grosimi minime. Scara, pasarela și cercurile de rezervor
+sunt scopul lui **#D2**, nu al acestei rescrieri.

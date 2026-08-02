@@ -17,8 +17,10 @@ extends Track
 @export var custom_half_width: float = 7.0
 @export var custom_ramp_fracs: Array[float] = []
 @export var custom_hazard_fracs: Array[float] = []
-## Furtunul de gradina care pulseaza apa peste drum (fractii 0..1).
+## Conducta sparta care pulseaza apa peste drum (fractii 0..1).
 @export var custom_hose_fracs: Array[float] = []
+## Situl cu schelet de dinozaur: fiecare Vector2 = (fractie, parte ±1).
+@export var custom_dino_spots: Array[Vector2] = []
 ## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
 @export var custom_carousel_fracs: Array[float] = []
 ## Deviatorul: bariera oblica care iti schimba traiectoria (gimmick de linie).
@@ -71,6 +73,9 @@ func _hazard_fracs() -> Array[float]:
 
 func _hose_fracs() -> Array[float]:
 	return custom_hose_fracs
+
+func _dino_spots() -> Array[Vector2]:
+	return custom_dino_spots
 
 func _carousel_fracs() -> Array[float]:
 	return custom_carousel_fracs

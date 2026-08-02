@@ -232,7 +232,7 @@ func _source_of(mi: MeshInstance3D, track: Node) -> String:
 	const KNOWN := ["cactus", "rocks", "bucket", "sandcastle", "start_arch", "beach_ball",
 		"toy_excavator", "toy_dino", "garden_hose", "bowling_pin", "sandbox_border",
 	"marker_post", "drive_in_screen", "gas_pole_sign", "start_gate",
-	"boulder_roller",
+	"boulder_roller", "dino_bones", "pipe_leak", "rusted_digger",
 		"water_tower", "windmill", "gas_station", "route66",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "desert_scatter", "butte", "wood_fence"]

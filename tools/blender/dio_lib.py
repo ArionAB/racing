@@ -358,8 +358,15 @@ class Builder:
         inalta si style_bible §3 il interzice — la viteza se transforma in moar,
         nu in tabla. Cu 5 nervuri pe 4 m iese un pas de 0.4 m: exact la limita.
 
-        Buget: 4*ribs + 2 varfuri -> ~(6*ribs + 2) triunghiuri inainte de bevel.
-        Cu ribs=5: 84.
+        Buget: conturul are 4*ribs + 2 puncte, deci ies doua ngon-uri (capacul de
+        sus si cel de jos, cate 4*ribs triunghiuri fiecare) plus 4*ribs + 2 fete
+        laterale: **16*ribs + 4** triunghiuri inainte de bevel. Cu ribs=5: 84.
+
+        Cifra asta era scrisa gresit aici ca "~(6*ribs + 2)" si a costat o
+        iteratie la #B3: doua panouri de sah estimate la 40 de triunghiuri au
+        iesit 104, adica poarta de start a depasit bugetul cu 27%. E scumpa —
+        capacele de sus si de jos costa cat toata suprafata utila. Pentru un
+        panou mic, doua cutii alaturate re-etichetate diferit sunt mai ieftine.
         """
         w, t, h = size
         cx, cy, cz = center

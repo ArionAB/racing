@@ -29,6 +29,31 @@ const BRAKING_LOOKAHEAD_M: float = 25.0
 ## dar apelurile sunt cateva sute la generare, o singura data.
 const CLEARANCE_STRIDE: int = 1
 
+# --- campul de inaltime al terenului ---
+## Cat de departe de sosea terenul mai sta exact la cota drumului.
+const GROUND_FLAT_RADIUS: float = 45.0
+## Peste cati metri se trece de la cota drumului la dunele libere.
+const GROUND_BLEND_LEN: float = 70.0
+## Raza in care o bucata de sosea mai conteaza pentru inaltimea terenului.
+## Trebuie sa acopere TOATA zona de blend (45+70=115), altfel raman puncte fara
+## nicio pondere si ar trebui inventata o cota pentru ele.
+const GROUND_ROAD_RADIUS: float = 130.0
+## Latimea "varfului" ponderii. Sub ea domina punctul cel mai apropiat; peste,
+## intra si vecinii. Tinuta >= pasul de esantionare (~6 m), altfel terenul
+## capata margele: un cocoas mic in dreptul fiecarui punct copt.
+const GROUND_WEIGHT_SOFT: float = 7.0
+## Din 2 in 2 puncte coapte = ~6 m.
+const GROUND_STRIDE: int = 2
+## Cat sta nisipul sub cota asfaltului (buza umarului).
+const GROUND_DROP: float = 0.30
+
+## Rapa: de la cati metri dincolo de marginea asfaltului incepe saparea.
+const RAVINE_INNER: float = 4.0
+## Peste cati metri se coboara pana la fundul rapei.
+const RAVINE_RIM: float = 16.0
+## Margini line pe traseu, in fractii de tur.
+const RAVINE_FADE_FRAC: float = 0.02
+
 var _baked: PackedVector3Array
 var _dists: PackedFloat32Array
 var _loop_poly: PackedVector2Array
@@ -36,17 +61,30 @@ var _half_width: float
 var _total_len: float
 ## Curbura precalculata per index — se cere de multe ori, se calculeaza o data.
 var _curvature: PackedFloat32Array
+## Faza zgomotului de dune, ca terenul sa difere de la o pista la alta.
+var _dune_phase: float = 0.0
+## Cota medie a drumului — ancora campului DEPARTAT (vezi ground_y).
+var _mean_y: float = 0.0
+## Rapele declarate: (frac_start, frac_end, adancime, latura).
+var _ravines: Array[Vector4] = []
 
 
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
-		control_points: Array[Vector3], half_width: float) -> void:
+		control_points: Array[Vector3], half_width: float,
+		dune_phase: float = 0.0, ravines: Array[Vector4] = []) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
+	_dune_phase = dune_phase
+	_ravines = ravines
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
 		_loop_poly.append(Vector2(p.x, p.z))
+	var sum_y := 0.0
+	for p in baked:
+		sum_y += p.y
+	_mean_y = sum_y / float(maxi(baked.size(), 1))
 	_bake_curvature()
 
 
@@ -64,6 +102,135 @@ func total_length() -> float:
 ## unii consumatori au nevoie si de distanta pana la axa.
 func half_width() -> float:
 	return _half_width
+
+
+## Cota terenului la o pozitie din lume. SURSA UNICA pentru tot ce se aseaza pe sol.
+##
+## Inainte, terenul era aplatizat la o cota CONSTANTA IN LUME (-0.3) in timp ce
+## tot restul se aseza la cota drumului. Pe Dunele, unde 71% din traseu e peste
+## 3 m si varful e la 19 m, asta insemna ca benzinaria, turnul si moara pluteau
+## in aer — iar sub asfalt erau 16 m de gol la creasta, ascunsi doar partial de
+## fusta de 3 m. Nu plutea decorul, plutea lumea.
+##
+## Acum terenul URMAREste drumul: exact la cota lui in primii 45 m, apoi se
+## pierde in dune peste urmatorii 70.
+##
+## Ponderare cu SUPORT COMPACT, nu Shepard clasic:
+##   - (1 - d/R)^4 taie orice munca peste 130 m;
+##   - 1/(d^2 + soft^2) face ca ramura CEA MAI APROPIATA sa domine in loc sa fie
+##     mediata cu una departata.
+## Conteaza pe pistele care se auto-intersecteaza: pe Dunele, punctul (-82,11,-92)
+## are la ~31 m lateral ramura de intoarcere, cu 8.6 m mai jos. Cu ponderile astea
+## ramura departata trage in jos ~0.5 m (sub umar, invizibil); cu "cel mai apropiat
+## punct" simplu ar fi iesit o muchie de cutit de 8.6 m.
+func ground_y(wx: float, wz: float) -> float:
+	var num := 0.0
+	var den := 0.0
+	var near_sq := INF
+	var near_i := 0
+	var r_sq := GROUND_ROAD_RADIUS * GROUND_ROAD_RADIUS
+	var soft_sq := GROUND_WEIGHT_SOFT * GROUND_WEIGHT_SOFT
+	var n := _baked.size()
+	if n == 0:
+		return -GROUND_DROP
+	var i := 0
+	while i < n:
+		var p := _baked[i]
+		var dx := p.x - wx
+		var dz := p.z - wz
+		var d_sq := dx * dx + dz * dz
+		if d_sq < near_sq:
+			near_sq = d_sq
+			near_i = i
+		if d_sq < r_sq:
+			var u := 1.0 - sqrt(d_sq) / GROUND_ROAD_RADIUS
+			var w := (u * u) * (u * u) / (d_sq + soft_sq)
+			num += w * p.y
+			den += w
+		i += GROUND_STRIDE
+	var road_level := (num / den) if den > 0.0 else _mean_y
+	var dist := sqrt(near_sq)
+	var t := clampf((dist - GROUND_FLAT_RADIUS) / GROUND_BLEND_LEN, 0.0, 1.0)
+	# Campul departat se ancoreaza la media cotelor drumului, NU la zero: altfel
+	# toata pista ar sta pe un platou cu o faleza de 19 m la 115 m distanta. Cu
+	# media, desertul ondulează IMPREUNA cu traseul — creasta citeste ca mesa,
+	# portiunile joase ca vai.
+	var far_level := _mean_y + maxf(_dunes(wx, wz), -1.0)
+	var y := lerpf(road_level, far_level, t * t)
+	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+
+
+## Suntem intr-o rapa declarata la fractia si latura date?
+##
+## Publica pentru ca sonda de anti-blocaj trebuie sa sara sloturile de rapa —
+## altfel ar testa "cad intr-o groapa" in loc de "ma prinde o imbinare de faleza".
+func ravine_at(frac: float, side_sign: float) -> bool:
+	for r in _ravines:
+		if not is_zero_approx(r.w) and signf(r.w) != signf(side_sign):
+			continue
+		if _ring_window(frac, r.x, r.y, RAVINE_FADE_FRAC) > 0.0:
+			return true
+	return false
+
+
+## Cota medie a drumului — reper pentru nuantarea terenului dupa inaltimea
+## RELATIVA. Cea absoluta functiona doar cat timp terenul statea in jurul lui zero.
+func mean_road_y() -> float:
+	return _mean_y
+
+
+## Adancimea maxima declarata, ca podeaua lumii sa fie pusa sub ea.
+func max_ravine_depth() -> float:
+	var d := 0.0
+	for r in _ravines:
+		d = maxf(d, r.z)
+	return d
+
+
+## Sapa rapele declarate in campul de inaltime.
+##
+## Fara ele, terenul care urmareste soseaua umple exact golul in care era gandita
+## drama fly-off-ului: zbori de pe creasta si aterizezi linistit pe nisip.
+func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
+		wx: float, wz: float) -> float:
+	if _ravines.is_empty():
+		return y
+	var f := _dists[near_i] / _total_len if _total_len > 0.0 else 0.0
+	for r in _ravines:
+		if not is_zero_approx(r.w) and signf(r.w) != _side_sign_at(near_i, wx, wz):
+			continue
+		var along := _ring_window(f, r.x, r.y, RAVINE_FADE_FRAC)
+		if along <= 0.0:
+			continue
+		var lat := smoothstep(0.0, 1.0,
+			clampf((dist - _half_width - RAVINE_INNER) / RAVINE_RIM, 0.0, 1.0))
+		# minf: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
+		# construi un dig in loc de o groapa.
+		y = minf(y, road_level - r.z * along * lat)
+	return y
+
+
+## Pe ce parte a drumului cade un punct, fata de indexul dat.
+func _side_sign_at(idx: int, wx: float, wz: float) -> float:
+	var s := side_at(idx)
+	var p := _baked[idx]
+	return signf(Vector2(s.x, s.z).dot(Vector2(wx - p.x, wz - p.z)))
+
+
+## Fereastra circulara [f0,f1] cu margini line. f1 < f0 = trece peste linia de start.
+static func _ring_window(f: float, f0: float, f1: float, fade: float) -> float:
+	var span := fposmod(f1 - f0, 1.0)
+	var into := fposmod(f - f0, 1.0)
+	if into > span:
+		return 0.0
+	return clampf(minf(into, span - into) / maxf(fade, 0.0001), 0.0, 1.0)
+
+
+## Dunele campului departat. Identica cu ce era in track.gd inainte.
+func _dunes(wx: float, wz: float) -> float:
+	return sin(wx * 0.012 + _dune_phase) * 2.2 \
+		+ cos(wz * 0.014 + _dune_phase * 2.0) * 2.0 \
+		+ sin(wx * 0.031) * sin(wz * 0.027) * 1.3
 
 
 ## Un punct copt al axei pistei (pentru limite, iteratii proprii).
@@ -189,7 +356,10 @@ func _make_spec(d: float, side_sign: float, offset: float) -> TrackDecorSpec:
 	var along := (_baked[(idx + 1) % n] - base).normalized()
 	var side := along.cross(Vector3.UP).normalized() * side_sign
 	var pos := base + side * (_half_width + offset)
-	pos.y = base.y
+	# PUNCTUL UNIC prin care trec toate falezele si tot decorul. Era `base.y`,
+	# adica exact cota drumului — de aici plutea tot ce se aseza langa o portiune
+	# inaltata. Vezi ground_y() pentru diagnosticul complet.
+	pos.y = ground_y(pos.x, pos.z)
 
 	# Respins daca ar cadea peste alta bucla a pistei. Marja de 1m: vrem sa
 	# permitem slotul propriu (care e la exact half_width + offset), dar nu unul
@@ -210,6 +380,7 @@ func _make_spec(d: float, side_sign: float, offset: float) -> TrackDecorSpec:
 	spec.is_elevated = base.y > 1.0
 	spec.is_apex = curvature_at(idx) > APEX_CURVATURE
 	spec.is_braking = _braking_ahead(d)
+	spec.is_ravine = ravine_at(spec.frac, side_sign)
 	return spec
 
 

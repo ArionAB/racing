@@ -101,9 +101,14 @@ static func build(sampler: TrackSideSampler, theme: String, seed_value: int,
 				continue
 			if _near_landmark(d, total, clear_at):
 				continue
+			# O rapa cu un zid in fata nu se vede, deci nu e nici drama, nici
+			# avertisment — e doar o groapa in care cazi fara sa intelegi de ce.
+			# Aici peretele se deschide si prapastia devine lizibila de departe.
+			if spec.is_ravine:
+				continue
 			if _skip_slot(spec):
 				continue
-			_place(root, body, scene, spec, rng)
+			_place(root, body, scene, sampler, spec, rng)
 	return root
 
 
@@ -120,6 +125,7 @@ static func _near_landmark(d: float, total: float,
 
 
 static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
+		sampler: TrackSideSampler,
 		spec: TrackDecorSpec, rng: RandomNumberGenerator) -> void:
 	var wanted := _wanted_height(spec, rng)
 	var pick := _best_variant(wanted)
@@ -150,7 +156,10 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		# mult loc (style_bible §7 cere 8m liberi la franare).
 		extra = OFFSET_CORNER + 2.0 - OFFSET_OUTER
 	var pos := spec.position + spec.normal_out * (extra + half_depth)
-	pos.y -= SINK
+	# Re-esantionam cota: slotul s-a mutat lateral pana la ~7 m fata de unde a
+	# fost masurat, iar pe o panta de 12% asta inseamna aproape un metru de
+	# diferenta — destul cat sa se vada baza falezei plutind sau ingropata.
+	pos.y = sampler.ground_y(pos.x, pos.z) - SINK
 
 	# Orientarea se calculeaza o data si se aplica AMANDURORA: nodului vizual si
 	# formei de coliziune. Asa nu pot ajunge sa se contrazica.

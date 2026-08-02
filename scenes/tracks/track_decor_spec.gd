@@ -30,3 +30,7 @@ var is_elevated: bool
 var is_apex: bool
 ## Zona de franare inaintea unui viraj: se lasa liber (style_bible §7).
 var is_braking: bool
+## Slotul cade intr-o rapa declarata. Nici faleza, nici decor — o rapa cu un zid
+## in fata nu se vede, deci nu e nici drama, nici avertisment: e doar o groapa
+## in care cazi fara sa intelegi de ce.
+var is_ravine: bool

@@ -33,6 +33,10 @@ const FLYOFF_RISE_LEN: float = 12.0
 const FLYOFF_HEIGHT: float = 2.8
 ## Latura amprentei in care se cauta masini care au ratat aterizarea.
 const FLYOFF_NET_EXTENT: float = 130.0
+## Plafonul plasei, sub cea mai joasa sosea din amprenta.
+const FLYOFF_NET_CEILING_DROP: float = 6.0
+## Podeaua plasei, tot relativ la sosea.
+const FLYOFF_NET_FLOOR_DROP: float = 45.0
 
 ## Personalitatea pistei — suprascrise de subclase.
 var track_name: String = "Pista"
@@ -171,6 +175,15 @@ func _deflector_fracs() -> Array[float]:
 func _flyoff_fracs() -> Array[float]:
 	return []
 
+## Rapele declarate: (frac_start, frac_end, adancime, latura ±1 sau 0 = ambele).
+##
+## Terenul urmareste soseaua peste tot — altfel plutea tot ce se aseza langa o
+## portiune inaltata. Dar asta umple exact golul in care era gandita drama
+## fly-off-ului: ai zbura de pe creasta si ai ateriza linistit pe nisip. Rapa
+## declarata taie inapoi terenul acolo unde vrem sa existe chiar o prapastie.
+func _ravines() -> Array[Vector4]:
+	return []
+
 func _ready() -> void:
 	rebuild()
 
@@ -183,8 +196,9 @@ func rebuild() -> void:
 		child.free()
 	_build_curve()
 	# Dupa coacerea curbei, inainte de orice generator care aseaza ceva langa
-	# drum: toti citesc sloturi de aici.
-	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width)
+	# drum: toti citesc sloturi SI cota terenului de aici.
+	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
+		float(track_name.hash() % 1000) * 0.01, _ravines())
 	_build_environment()
 	_build_road()
 	_build_walls()
@@ -369,7 +383,16 @@ func _build_environment() -> void:
 	ground_shape.shape = ground_box
 	# ATENTIE: doar XZ din centroid — centroid.y include media dealurilor
 	# si ar ridica podeaua de coliziune deasupra soselei (perete invizibil).
-	ground_shape.position = Vector3(centroid.x, -0.8, centroid.z)
+	#
+	# Cutia asta NU mai e podeaua pe care se conduce: de cand terenul are
+	# coliziune proprie (vezi _build_terrain), ea e doar ultima plasa, pentru
+	# cazul in care cineva iese complet din harta. De aceea coboara SUB cel mai
+	# jos punct posibil — altfel ar astupa fundul rapelor declarate.
+	var lowest := INF
+	for p in baked:
+		lowest = minf(lowest, p.y)
+	ground_shape.position = Vector3(centroid.x,
+		lowest - _sampler.max_ravine_depth() - 10.0, centroid.z)
 	# Solul blocheaza si el camera: fara asta, pe o coama camera trece prin nisip
 	# si vezi lumea de dedesubt.
 	ground_body.collision_layer |= CAMERA_BLOCKER_LAYER
@@ -439,7 +462,10 @@ func _build_horizon(centroid: Vector3) -> void:
 				continue
 			add_child(model)
 			# Ingropate 4m: taie muchia de la baza si le aseaza in peisaj.
-			model.position = Vector3(pos.x, -4.0, pos.z)
+			# Ingropate 4 m SUB nisipul de acolo, nu sub cota zero: la 150-320 m
+			# terenul e deja dune in jurul mediei pistei, nu o podea plata.
+			model.position = Vector3(pos.x,
+				_sampler.ground_y(pos.x, pos.z) - 4.0, pos.z)
 			model.rotation.y = rng.randf_range(0.0, TAU)
 			# Scara creste cu inelul. La marimea nominala (25-60m) siluetele se
 			# pierdeau sub linia cetii in loc sa se ridice pe cer — verificat in
@@ -479,7 +505,7 @@ func _build_horizon_fallback(centroid: Vector3) -> void:
 		sphere.radial_segments = 12
 		sphere.rings = 5
 		hill.mesh = sphere
-		hill.position = Vector3(pos.x, -6.0, pos.z) # y absolut, nu din centroid
+		hill.position = Vector3(pos.x, _sampler.ground_y(pos.x, pos.z) - 6.0, pos.z)
 		# nuanta in 4 trepte, nu continua: dealurile de fundal impart 4 materiale
 		var tint := float(rng.randi_range(0, 3)) / 3.0 * 0.15
 		hill.material_override = _flat_material(theme_hill_color.lightened(tint))
@@ -518,33 +544,22 @@ func _build_terrain() -> void:
 	# din care jumatate nu se vede niciodata: ceata inghite totul la 250m, iar
 	# siluetele de la orizont acopera fundalul. La 900m/36 raman ~2600, si nimeni
 	# nu observa diferenta din masina.
-	var size := 900.0
-	var cells := 36
+	# Grila s-a indesit de la 36 la 48 de celule odata cu terenul care urmareste
+	# soseaua: pasul de 25 m lasa o cusatura de pana la 3 m la marginea drumului
+	# pe pantele de 12%. La 15.8 m cusatura scade sub 1 m, si asta se vede.
+	var size := 760.0
+	var cells := 48
 	var step := size / float(cells)
 	var origin := centroid - Vector3(size * 0.5, 0, size * 0.5)
-	var rng_phase := float(track_name.hash() % 1000) * 0.01
-	# strida 3 peste punctele pistei: destul pentru distanta aproximativa
-	var road_pts: Array[Vector3] = []
-	for i in range(0, baked.size(), 3):
-		road_pts.append(baked[i])
 	var heights: Array[float] = []
 	heights.resize((cells + 1) * (cells + 1))
 	for gz in cells + 1:
 		for gx in cells + 1:
-			var wx := origin.x + float(gx) * step
-			var wz := origin.z + float(gz) * step
-			var h := sin(wx * 0.012 + rng_phase) * 2.2 \
-				+ cos(wz * 0.014 + rng_phase * 2.0) * 2.0 \
-				+ sin(wx * 0.031) * sin(wz * 0.027) * 1.3
-			var nearest := 1e12
-			for p in road_pts:
-				var dx := p.x - wx
-				var dz := p.z - wz
-				nearest = minf(nearest, dx * dx + dz * dz)
-			var dist := sqrt(nearest)
-			# < 45m de sosea: perfect plat (unde se conduce); apoi blend.
-			var t := clampf((dist - 45.0) / 70.0, 0.0, 1.0)
-			heights[gz * (cells + 1) + gx] = maxf(h, -1.0) * t * t
+			# Toata matematica de inaltime traieste in sampler acum — aici doar
+			# o citim. Asa terenul, falezele, decorul si landmark-urile nu pot
+			# diverge: e literalmente aceeasi functie.
+			heights[gz * (cells + 1) + gx] = _sampler.ground_y(
+				origin.x + float(gx) * step, origin.z + float(gz) * step)
 	# Pozitiile falezelor, pentru umbra coapta de la baza lor.
 	var cliff_xz := _cliff_positions()
 	var st := SurfaceTool.new()
@@ -552,22 +567,28 @@ func _build_terrain() -> void:
 	for gz in cells:
 		for gx in cells:
 			var idx00 := gz * (cells + 1) + gx
+			# ground_y include deja coborarea de 0.30 sub buza asfaltului.
 			var corners := [
-				Vector3(origin.x + float(gx) * step, -0.3 + heights[idx00],
+				Vector3(origin.x + float(gx) * step, heights[idx00],
 					origin.z + float(gz) * step),
-				Vector3(origin.x + float(gx + 1) * step, -0.3 + heights[idx00 + 1],
+				Vector3(origin.x + float(gx + 1) * step, heights[idx00 + 1],
 					origin.z + float(gz) * step),
 				Vector3(origin.x + float(gx) * step,
-					-0.3 + heights[idx00 + cells + 1],
+					heights[idx00 + cells + 1],
 					origin.z + float(gz + 1) * step),
 				Vector3(origin.x + float(gx + 1) * step,
-					-0.3 + heights[idx00 + cells + 2],
+					heights[idx00 + cells + 2],
 					origin.z + float(gz + 1) * step),
 			]
 			for tri in [[0, 1, 2], [1, 3, 2]]:
 				for corner_idx: int in tri:
 					var v: Vector3 = corners[corner_idx]
-					var shade := clampf(1.0 + v.y * 0.03, 0.82, 1.12)
+					# Nuanta dupa inaltimea RELATIVA la media pistei, nu absoluta.
+					# Absoluta functiona doar cat timp terenul statea in jurul lui
+					# zero; acum, cu terenul care urca la 19 m, ar fi spalat tot
+					# varful pistei in alb.
+					var rel := v.y - _sampler.mean_road_y()
+					var shade := clampf(1.0 + rel * 0.012, 0.86, 1.10)
 					shade *= _cliff_shadow(v, cliff_xz)
 					st.set_color(theme_ground_tint * shade)
 					# UV din coordonate de LUME, nu din indexul celulei: asa
@@ -606,7 +627,29 @@ func _build_terrain() -> void:
 	mat.roughness = 0.95 # style_bible §4: nisip
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	inst.material_override = mat
-	add_child(inst)
+
+	# COLIZIUNE PE TEREN — obligatorie de cand nisipul urmareste soseaua.
+	#
+	# Inainte, singura podea fizica in afara drumului era o cutie plata cu fata la
+	# -0.3, care se NIMEREA sa coincida cu nisipul vizibil. In clipa in care
+	# nisipul urca la 19 m pe creasta, o masina care iese de pe drum ar cadea prin
+	# nisipul pe care il vede. Fara asta, tot task-ul ar fi fost o poza mai
+	# frumoasa peste o lume stricata.
+	#
+	# Intra si pe layer-ul de blocare a camerei: camera noua, mai inalta, chiar
+	# are nevoie de sol acolo, altfel intra sub nisip pe creste.
+	var body := StaticBody3D.new()
+	body.name = "TerrainBody"
+	body.collision_layer |= CAMERA_BLOCKER_LAYER
+	var shape := CollisionShape3D.new()
+	var tri := inst.mesh.create_trimesh_shape() as ConcavePolygonShape3D
+	# Ca la sosea: winding-ul nostru e arbitrar, iar trimesh-urile sunt implicit
+	# unilaterale.
+	tri.backface_collision = true
+	shape.shape = tri
+	body.add_child(shape)
+	body.add_child(inst)
+	add_child(body)
 
 ## Cat de dens se testeaza terenul fata de faleze. Peste raza asta o faleza nu
 ## mai intuneca nimic.
@@ -971,8 +1014,17 @@ func _build_flyoff_net(idx: int) -> void:
 		if absf(baked[i].x - center.x) <= half_extent \
 				and absf(baked[i].z - center.z) <= half_extent:
 			lowest_road = minf(lowest_road, baked[i].y)
-	var top := lowest_road - 5.0
-	var bottom := -25.0
+	# Relativ la sosea, nu absolut. Cu terenul care urmareste drumul, o podea la
+	# -25 fix nu mai inseamna nimic: pe o portiune inaltata plasa ar ramane
+	# ingropata sub nisip, iar pe una joasa ar inghiti masini care conduc normal.
+	var top := lowest_road - FLYOFF_NET_CEILING_DROP
+	var bottom := lowest_road - FLYOFF_NET_FLOOR_DROP
+	# Garda de build: un fly-off fara rapa sub el arunca masina pe nisip, iar
+	# plasa nu se declanseaza niciodata. Prinde Track04 si orice pista viitoare
+	# unde cineva adauga un fly-off si uita rapa.
+	if _sampler.max_ravine_depth() <= FLYOFF_NET_CEILING_DROP + 4.0:
+		push_warning(("Fly-off la indexul %d fara rapa suficienta: " +
+			"plasa de respawn ramane ingropata. Vezi _ravines().") % idx)
 	var zone := RespawnZone.new()
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
@@ -1188,7 +1240,10 @@ func _build_dino(frac: float, side_sign: float) -> void:
 	dino.add_child(shape)
 	add_child(dino)
 	var stand := p + side * (half_width + 6.0)
-	stand.y = maxf(p.y - 0.3, -0.3) # la nivelul solului de langa drum
+	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
+	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in
+	# lume, deci pe portiunile inaltate landmark-ul ramanea suspendat in aer.
+	stand.y = _sampler.ground_y(stand.x, stand.z)
 	dino.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
@@ -1251,7 +1306,10 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 	# aplica singura in _ready, dar celelalte prop-uri il primesc aici.
 	Palette.apply_world_material(root)
 	var stand := p + side * (half_width + float(info["gap"]))
-	stand.y = maxf(p.y - 0.3, -0.3) # la nivelul solului de langa drum
+	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
+	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in
+	# lume, deci pe portiunile inaltate landmark-ul ramanea suspendat in aer.
+	stand.y = _sampler.ground_y(stand.x, stand.z)
 	root.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 
 func _build_hose(frac: float) -> void:
@@ -1290,8 +1348,12 @@ func _build_pins() -> void:
 			var pin := BowlingPin.new()
 			pin.model_scene = pin_scene
 			add_child(pin)
-			pin.global_position = edge + _side_at(i) * side_sign * 1.7 \
-				+ Vector3.UP * 0.2
+			var spot := edge + _side_at(i) * side_sign * 1.7
+			# Popicele scapasera de bug-ul plutirii doar din NOROC: linia de mai
+			# sus sare peste sloturile inaltate, care erau exact cele afectate.
+			# Acum stau pe sol prin constructie, nu prin coincidenta.
+			spot.y = _sampler.ground_y(spot.x, spot.z) + 0.2
+			pin.global_position = spot
 			placed += 1
 
 ## Marginea LUMII: patru pereti INVIZIBILI care opresc masina sa iasa din

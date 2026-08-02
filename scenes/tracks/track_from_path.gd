@@ -28,6 +28,10 @@ extends Track
 ## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
 ## _LANDMARKS: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66).
 @export var custom_landmarks: Array[Vector3] = []
+## Rapele: (frac_start, frac_end, adancime_m, latura ±1 sau 0 = ambele).
+## Terenul urmareste soseaua peste tot; aici il sapam inapoi, ca sa existe unde
+## sa cazi. Fara o rapa sub un fly-off, zbori si aterizezi linistit pe nisip.
+@export var custom_ravines: Array[Vector4] = []
 ## Bifeaza ca sa reconstruiesti pista din curba (doar in editor).
 @export var regenerate: bool = false:
 	set(_value):
@@ -75,6 +79,9 @@ func _flyoff_fracs() -> Array[float]:
 
 func _landmark_spots() -> Array[Vector3]:
 	return custom_landmarks
+
+func _ravines() -> Array[Vector4]:
+	return custom_ravines
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

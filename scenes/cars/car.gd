@@ -122,6 +122,9 @@ var skid_parent: Node3D
 var _visual: Node3D
 var _drift_particles: CPUParticles3D
 var _boost_particles: CPUParticles3D
+## Praf de sub roti cand esti pe nisip. Separat de fumul de drift: fumul iese
+## din cauciuc si e gri, praful e ridicat din SOL si ia culoarea temei.
+var _dust_particles: CPUParticles3D
 var _engine_audio: AudioStreamPlayer3D
 var _skid_audio: AudioStreamPlayer3D
 var _turbo_full_latch: bool = false
@@ -533,6 +536,7 @@ func _update_effects(delta: float) -> void:
 	elif turbo_charge < 0.95:
 		_turbo_full_latch = false
 	_boost_particles.emitting = is_boosting
+	_update_dust()
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
 	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
 	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
@@ -573,6 +577,32 @@ func _drop_skid_marks(delta: float) -> void:
 	while skid_parent.get_child_count() > 160:
 		skid_parent.get_child(0).free()
 
+## Praful se ridica doar cand chiar zgarii solul: roti pe pamant, in afara
+## asfaltului, si cu viteza. Fara pragul de viteza, o masina oprita pe nisip ar
+## fumega la nesfarsit — si aia e fix imaginea care strica iluzia in loc s-o
+## construiasca.
+const DUST_MIN_SPEED: float = 6.0
+
+## Praful ia culoarea solului temei, o data, cand masina afla pe ce pista e.
+var _dust_tinted: bool = false
+
+func _update_dust() -> void:
+	if _dust_particles == null:
+		return
+	if not _dust_tinted and track != null:
+		_dust_tinted = true
+		_dust_particles.color = track.theme_ground_tint.lightened(0.22)
+	var live := track != null and is_on_floor() \
+		and not track.is_on_road(road_index, global_position) \
+		and horizontal_speed() > DUST_MIN_SPEED
+	_dust_particles.emitting = live
+	if not live:
+		return
+	# Norul creste cu viteza: la 6 m/s e o adiere, la plafon e o dara adevarata.
+	var k := clampf(horizontal_speed() / maxf(max_speed, 1.0), 0.0, 1.0)
+	_dust_particles.initial_velocity_max = lerpf(2.5, 6.5, k)
+	_dust_particles.lifetime = lerpf(0.55, 1.05, k)
+
 func _build_effects() -> void:
 	# Fum de drift, colorat dupa nivelul de boost incarcat.
 	_drift_particles = CPUParticles3D.new()
@@ -596,6 +626,50 @@ func _build_effects() -> void:
 	smoke.material = smoke_mat
 	_drift_particles.mesh = smoke
 	add_child(_drift_particles)
+
+	# Praf ridicat de sub roti pe off-road. Emite din SPATELE masinii, la nivelul
+	# solului — sursa e contactul rotii cu nisipul, nu evacuarea.
+	#
+	# Buget: 18 particule per masina, deci 90 pe o cursa de 5. Sub fumul de drift
+	# (24) intentionat, fiindca praful sta aprins mult mai mult timp: driftul e in
+	# rafale de o secunda, off-road-ul poate tine un viraj intreg.
+	_dust_particles = CPUParticles3D.new()
+	_dust_particles.position = Vector3(0, 0.12, 1.7)
+	_dust_particles.emitting = false
+	_dust_particles.amount = 18
+	_dust_particles.lifetime = 0.85
+	_dust_particles.direction = Vector3(0, 1, 0.6)
+	_dust_particles.spread = 45.0
+	_dust_particles.initial_velocity_min = 1.5
+	_dust_particles.initial_velocity_max = 4.0
+	# Gravitatie usor negativa: praful se ridica si se lasa, nu tasneste ca fumul.
+	_dust_particles.gravity = Vector3(0, -1.2, 0)
+	_dust_particles.damping_min = 1.5
+	_dust_particles.damping_max = 3.0
+	_dust_particles.scale_amount_min = 0.8
+	_dust_particles.scale_amount_max = 2.2
+	# Se stinge in transparenta pe durata vietii; fara asta, norul dispare brusc.
+	# CPUParticles3D vrea un Gradient direct, nu un GradientTexture1D — ala e
+	# pentru varianta GPU.
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 0.55))
+	fade.set_color(1, Color(1, 1, 1, 0.0))
+	_dust_particles.color_ramp = fade
+	# Culoare provizorie; cea reala vine din tema, in _update_dust, de indata ce
+	# masina stie pe ce pista e. Praf nisipiu pe iarba ar fi exact genul de
+	# detaliu care se observa fara sa stii de ce te deranjeaza.
+	_dust_particles.color = Palette.color(Palette.SAND_MID).lightened(0.15)
+	var puff := BoxMesh.new()
+	puff.size = Vector3(0.3, 0.3, 0.3)
+	var puff_mat := StandardMaterial3D.new()
+	puff_mat.vertex_color_use_as_albedo = true
+	puff_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	puff_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	# Fara scriere in depth: norii se suprapun fara sa se taie unul pe altul.
+	puff_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	puff.material = puff_mat
+	_dust_particles.mesh = puff
+	add_child(_dust_particles)
 
 	# Flacara de boost.
 	_boost_particles = CPUParticles3D.new()

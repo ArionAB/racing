@@ -10,13 +10,16 @@ Verifica:
   4. sloturile sunt LEGALE (0-13). 14-16 sunt accente de masina, 17-31 se
      randeaza magenta in joc — vezi LEGAL_SLOTS mai jos
   5. COLOR_0 prezent (AO copt) + intervalul de valori
-  6. bounding box: originea la baza (min Y ~ 0), centrata in XZ
+  6. bounding box: originea la baza (min Y ~ 0), centrata in XZ. Cu
+     --origin=center se cere in schimb bbox centrat pe Y (obiecte care se
+     rostogolesc — exceptia declarata din #45)
   7. orientarea: pe ce parte sta masa geometriei (avertisment; cu --front=-Z
      devine aserttiune dura)
 
 Rulare:
     python tools/blender/verify_glb.py assets/models/cactus.glb [buget_tris]
     python tools/blender/verify_glb.py assets/models/route66_sign.glb 260 --front=-Z
+    python tools/blender/verify_glb.py assets/models/boulder_roller.glb 220 --origin=center
 """
 
 import json
@@ -93,7 +96,7 @@ def slot_problem(slot):
     return "NEDEFINIT -> MAGENTA IN JOC"
 
 
-def verify(path, budget=None, front=None):
+def verify(path, budget=None, front=None, origin="base"):
     gltf, blob, total, version = load_glb(path)
     print("=" * 74)
     print("%s  —  %d B, glTF v%d" % (os.path.basename(path), total, version))
@@ -199,6 +202,19 @@ def verify(path, budget=None, front=None):
             # relative la pivot, deci regula "baza la Y=0" nu i se aplica
             print("    pivot      : (%.3f, %.3f, %.3f)  -> in lume Y %.3f .. %.3f"
                   % (tr[0], tr[1], tr[2], min(ys) + tr[1], max(ys) + tr[1]))
+        elif origin == "center":
+            # Exceptia declarata din #45: obiectul care se rostogoleste. Verificam
+            # ce trebuie chiar verificat — bbox-ul centrat pe Y — in loc sa lasam
+            # asset-ul cu verdict rosu permanent. O garda despre care stim
+            # dinainte ca pica nu mai e o garda: data viitoare cand pica din alt
+            # motiv, nimeni nu se uita.
+            off = (min(ys) + max(ys)) / 2
+            if abs(off) > max(0.01, (max(ys) - min(ys)) * 0.02):
+                print("    !! origine ceruta in centru, dar bbox Y e decentrat "
+                      "cu %+.3f — exportat cu originea la baza?" % off)
+                ok = False
+            else:
+                print("    origine   : centru confirmat (bbox Y %+.3f, cerut ~0)" % off)
         elif abs(min(ys)) > 0.01:
             print("    !! baza nu e la Y=0 (min Y = %.3f)" % min(ys))
             ok = False
@@ -258,14 +274,19 @@ if __name__ == "__main__":
     flags = [a for a in sys.argv[1:] if a.startswith("--")]
 
     front = None
+    origin = "base"
     for f in flags:
         if f.startswith("--front="):
             front = f.split("=", 1)[1].strip().upper()
             if front not in ("+X", "-X", "+Z", "-Z"):
                 sys.exit("--front asteapta +X, -X, +Z sau -Z (Y e sus)")
+        elif f.startswith("--origin="):
+            origin = f.split("=", 1)[1].strip().lower()
+            if origin not in ("base", "center"):
+                sys.exit("--origin asteapta base (implicit) sau center")
         else:
             sys.exit("optiune necunoscuta: %s" % f)
 
     target = args[0]
     budget = int(args[1]) if len(args) > 1 else None
-    sys.exit(0 if verify(target, budget, front) else 1)
+    sys.exit(0 if verify(target, budget, front, origin) else 1)

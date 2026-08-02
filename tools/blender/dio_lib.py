@@ -694,6 +694,87 @@ class Builder:
         out.add(top_face)
         return out
 
+    def boulder(self, center, size, slot, seed=0, segments=9, rings=5,
+                deviation=0.12, strata_slots=None):
+        """Elipsoid INCHIS, perturbat determinist. Bolovan care se rostogoleste.
+
+        `rock()` nu poate face asta si nu e o scapare: el construieste inele de
+        la baza in sus (`z = cz + t * sz`) si inchide cu doua capace plate. Iese
+        o movila — exact ce vrei pentru orice sta pe sol, si exact ce nu vrei
+        pentru ceva care se roteste, fiindca acel capac plat de la baza devine o
+        fateta cat tot obiectul care il face sa se POTICNEASCA vizibil la
+        fiecare rotatie.
+
+        Aici geometria se construieste in jurul CENTRULUI: inele de latitudine
+        intre doi poli, deci silueta e inchisa in orice orientare.
+
+        `deviation` e amplitudinea perturbatiei de raza (fractiune din 1.0). Se
+        tine mica DELIBERAT: style_bible §3 cere stanci rotunjite sau fatetate,
+        niciodata zimtate, iar un obiect care se rostogoleste are o a doua
+        constrangere — o adancitura il face sa para ca se impiedica. Peste ~0.20
+        apar concavitati reale.
+
+        Perturbatia se compune la fel ca la `rock()`: o deviatie per meridian
+        (continua pe verticala) inmultita cu una per inel (banda orizontala).
+        Acelasi `seed` da mereu aceeasi silueta.
+
+        Buget: 2 * segments * rings triunghiuri. Cu 9x5: 90.
+        """
+        sx, sy, sz = size
+        cx, cy, cz = center
+        rand = _lcg(seed)
+
+        col_dev = [1.0 + (rand() * 2.0 - 1.0) * deviation for _ in range(segments)]
+        ring_dev = [1.0 + (rand() * 2.0 - 1.0) * deviation * 0.6 for _ in range(rings)]
+
+        rings_v = []
+        for k in range(rings):
+            # latitudinile sar peste poli: k+1 din rings+1 intervale
+            lat = -math.pi * 0.5 + math.pi * (k + 1) / (rings + 1)
+            z = math.sin(lat) * ring_dev[k]
+            r = math.cos(lat)
+            ring = []
+            for i in range(segments):
+                a = 2.0 * math.pi * i / segments
+                d = ring_dev[k] * col_dev[i]
+                ring.append(self.bm.verts.new(
+                    (cx + math.cos(a) * r * d * sx * 0.5,
+                     cy + math.sin(a) * r * d * sy * 0.5,
+                     cz + z * sz * 0.5)))
+            rings_v.append(ring)
+
+        # Polii primesc si ei o abatere laterala: un pol fix pe axa se citeste ca
+        # varf de titirez cand obiectul se roteste, adica exact silueta pe care
+        # un bolovan n-o are.
+        def pole(sign):
+            return self.bm.verts.new(
+                (cx + (rand() * 2.0 - 1.0) * deviation * sx * 0.25,
+                 cy + (rand() * 2.0 - 1.0) * deviation * sy * 0.25,
+                 cz + sign * (1.0 - deviation * 0.5 * rand()) * sz * 0.5))
+
+        bot, top = pole(-1.0), pole(1.0)
+
+        band_faces = []
+        for k, (lo, hi) in enumerate(zip(rings_v, rings_v[1:])):
+            for i in range(segments):
+                j = (i + 1) % segments
+                band_faces.append((k + 1, self.bm.faces.new(
+                    (lo[i], lo[j], hi[j], hi[i]))))
+        for i in range(segments):
+            j = (i + 1) % segments
+            band_faces.append((0, self.bm.faces.new(
+                (rings_v[0][j], rings_v[0][i], bot))))
+            band_faces.append((rings, self.bm.faces.new(
+                (rings_v[-1][i], rings_v[-1][j], top))))
+
+        new_verts = [v for ring in rings_v for v in ring] + [bot, top]
+        if not strata_slots:
+            return self._tag(new_verts, slot)
+
+        for k, f in band_faces:
+            f[self.slot] = strata_slots[k % len(strata_slots)]
+        return set(f for _, f in band_faces)
+
     def prism(self, outline, thickness, slot, center=(0, 0, 0)):
         """Prisma dintr-un contur 2D in planul XZ, extrudata pe Y.
 
@@ -791,10 +872,18 @@ def bake_ao(obj, samples=32, dist=2.5, gradient="vertical",
             radial_axis="Z"):
     """AO real prin raycast in emisfera + gradient, scris in vertex colors.
 
-    gradient='vertical' -> jos mai inchis (cladiri, turnuri, cactusi)
-    gradient='radial'   -> centru mai inchis (roata morii: trebuie sa arate bine
-                           in ORICE rotatie, deci fara gradient directional)
-    gradient='none'     -> doar ocluzia geometrica
+    gradient='vertical'  -> jos mai inchis (cladiri, turnuri, cactusi)
+    gradient='radial'    -> centru mai inchis (roata morii: trebuie sa arate bine
+                            in ORICE rotatie in jurul axei ei)
+    gradient='spherical' -> scobiturile mai inchise, masurat ca distanta fata de
+                            ORIGINE. Singurul gradient invariant la o rotatie
+                            oarecare, deci singurul corect pentru un obiect care
+                            se rostogoleste. 'vertical' i-ar coace o umbra la
+                            baza care ajunge in varf dupa o jumatate de rotatie;
+                            'none' e corect dar inutil, fiindca pe un corp convex
+                            ocluzia geometrica e nula si AO-ul iese constant 1.0.
+                            Cere originea in centru (finish(origin="center")).
+    gradient='none'      -> doar ocluzia geometrica
     """
     me = obj.data
     me.calc_loop_triangles()
@@ -812,6 +901,9 @@ def bake_ao(obj, samples=32, dist=2.5, gradient="vertical",
     else:
         radii = [math.hypot(v.co.x, v.co.y) for v in me.vertices]
     r_max = max(max(radii), 1e-6)
+    dists = [v.co.length for v in me.vertices]
+    d_lo, d_hi = min(dists), max(dists)
+    d_span = max(d_hi - d_lo, 1e-6)
 
     values = []
     for i, v in enumerate(me.vertices):
@@ -834,6 +926,12 @@ def bake_ao(obj, samples=32, dist=2.5, gradient="vertical",
             g = low + (high - low) * (t ** power)
         elif gradient == "radial":
             t = radii[i] / r_max
+            g = low + (high - low) * (t ** power)
+        elif gradient == "spherical":
+            # normalizat pe intervalul REAL de raze, nu pe raza maxima: pe un
+            # bolovan razele stau intre 0.88 si 1.12 din medie, deci t = r/r_max
+            # ar da 0.79..1.0 si tot gradientul s-ar strange in ultima cincime.
+            t = (dists[i] - d_lo) / d_span
             g = low + (high - low) * (t ** power)
         else:
             g = 1.0
@@ -865,6 +963,41 @@ def set_origin_base(obj, center_xy=True, to_z=0.0):
         v.co.y += dy
         v.co.z += dz
     return Vector((dx, dy, dz))
+
+
+def set_origin_center(obj, size=None):
+    """Muta geometria ca originea sa cada in CENTRUL bounding box-ului.
+
+    Regula generala e originea la baza (`set_origin_base`) fiindca Godot aseaza
+    propurile cu `global_position` direct pe sol. Exceptia declarata e obiectul
+    care se rostogoleste: `scenes/hazards/sliding_hazard.gd:106` compenseaza cu
+    `_pivot.position = Vector3.UP * roll_radius` si roteste pivotul. Cu originea
+    la baza, rotatia s-ar face in jurul unui punct de pe sol — adica bolovanul
+    ar sari, nu s-ar rostogoli.
+
+    `size` (optional) scaleaza geometria ca bbox-ul sa iasa exact pe cotele
+    date. Nu e cosmetica: diametrul e cota din care Godot deriva `roll_radius`
+    (`sliding_hazard.gd:103-110` il masoara din model), deci trebuie sa fie un
+    numar pe care il putem scrie in brief, nu ce a iesit din perturbatie.
+    """
+    me = obj.data
+    ext = []
+    for axis in range(3):
+        vals = [v.co[axis] for v in me.vertices]
+        ext.append((min(vals), max(vals)))
+    if size is not None:
+        for axis in range(3):
+            span = ext[axis][1] - ext[axis][0]
+            if span > 1e-6 and size[axis]:
+                s = size[axis] / span
+                for v in me.vertices:
+                    v.co[axis] *= s
+                ext[axis] = (ext[axis][0] * s, ext[axis][1] * s)
+    for axis in range(3):
+        d = -(ext[axis][0] + ext[axis][1]) * 0.5
+        for v in me.vertices:
+            v.co[axis] += d
+    return Vector([ext[a][1] - ext[a][0] for a in range(3)])
 
 
 def set_origin_at(obj, point):
@@ -926,13 +1059,16 @@ def atlas_material():
 
 
 def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
-           bevel_segments=1):
+           bevel_segments=1, origin_size=None):
     """Lantul standard: bevel -> UV pe sloturi -> origine -> AO copt.
 
     origin="base"      centreaza si XY pe bounding box
     origin="base_axis" coboara doar pe Z, pastrand XY asa cum a fost construit
                        (cand piesa e asimetrica: un semn al carui scut iese in
                        fata, dar a carui origine trebuie sa stea pe axa stalpului)
+    origin="center"    originea in centrul bbox-ului. Singurul consumator de azi
+                       e bolovanul rostogolitor — vezi set_origin_center.
+                       `origin_size` scaleaza bbox-ul pe cotele cerute.
     bevel_segments     `apply_bevel` il accepta de la inceput, dar `finish` il
                        fixa la 1 si nu-l expunea. 2 segmente inseamna un colt
                        vizibil rotund in loc de tesit — merita doar pe piese care
@@ -947,6 +1083,8 @@ def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
         set_origin_base(obj, center_xy=True)
     elif origin == "base_axis":
         set_origin_base(obj, center_xy=False)
+    elif origin == "center":
+        set_origin_center(obj, size=origin_size)
     obj.data.materials.clear()
     obj.data.materials.append(atlas_material())
     rng = bake_ao(obj, **(ao or {}))

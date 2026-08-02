@@ -44,14 +44,28 @@ const MIN_SAMPLE: int = 20
 ## ca sa prinda exploziile accidentale fara sa blocheze munca pe o presupunere.
 ## A prins una reala: prima versiune a decorului pe benzi a sarit la 117k.
 ##
-## Acum, cu canionul complet, Dunele (cea mai incarcata pista) e la ~65k. Pragul
-## e masuratoarea aia plus ~20% marja. Peste pista mai intra ~4k de masini si
-## particulele, deci 80k lasa loc si pentru ele.
+## Pragul a stat apoi la 80k: masuratoarea de atunci (~65k pe Dunele) plus ~20%.
+##
+## Cifra aia era prea stransa, si din motivul gresit. "Masuratoare + 20%" e o
+## regula buna pentru un prag care prinde REGRESII, dar prost aplicata devine un
+## plafon care blocheaza munca legitima: la prima benzinarie cu ferestre reale
+## (1148 -> 4864 de triunghiuri, o singura instanta pe pista) am fi respins un
+## asset corect fiindca depasea un numar derivat din cat de sarac era jocul in
+## ziua in care l-am scris.
+##
+## Un telefon mid-range randeaza cateva SUTE de mii de triunghiuri pe cadru
+## confortabil, iar cifra de aici e pe toata PISTA — un tur de ~1.1 km, din care
+## ceata taie tot ce e peste 250 m. Deci 80k n-a fost niciodata o limita de
+## hardware.
+##
+## 150k pastreaza rostul real al garzii — clasa de accident pe care a prins-o
+## deja de doua ori (primitive lasate la rezolutia implicita, decor pe benzi
+## explodat) sare cu zeci de mii dintr-un foc, deci tot se prinde.
 ##
 ## Ramane un prag de ALARMA, nu un buget de arta: constrangerea reala pe mobil e
 ## draw calls / overdraw / fill rate, de asta testul principal al garzii ramane
 ## numaratoarea de MATERIALE. Validarea finala e primul test pe device.
-const MAX_TRIS_PER_TRACK: int = 80000
+const MAX_TRIS_PER_TRACK: int = 150000
 
 var _paths: Array[String] = []
 var _index: int = 0
@@ -233,6 +247,7 @@ func _source_of(mi: MeshInstance3D, track: Node) -> String:
 		"toy_excavator", "toy_dino", "garden_hose", "bowling_pin", "sandbox_border",
 	"marker_post", "drive_in_screen", "gas_pole_sign", "start_gate",
 	"boulder_roller", "dino_bones", "pipe_leak", "rusted_digger",
+	"rock_arch", "mine_portal",
 		"water_tower", "windmill", "gas_station", "route66",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "desert_scatter", "butte", "wood_fence"]

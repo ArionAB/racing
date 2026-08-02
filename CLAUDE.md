@@ -110,8 +110,16 @@ res://
   triunghiuri**, deci fiecare tufă de 40 cm avea geometria unei planete.
   **Când creezi o primitivă în cod, setează-i `radial_segments`/`rings`.**
   După reparație și după canion: Dunele ~65k, celelalte 21–32k. Plafonul din
-  `tools/probe_decor.gd` e acum 80k = măsurătoarea + 20% marjă, verificat la
-  fiecare build. Rămâne un prag de alarmă: constrângerea reală pe mobil e
+  `tools/probe_decor.gd` a stat un timp la 80k („măsurătoarea + 20%") și **era
+  prea strâmt, din motivul greșit**: un telefon mid-range randează câteva *sute*
+  de mii de triunghiuri pe cadru, iar cifra e pe toată pista, din care ceața taie
+  tot ce e peste 250 m. Regula „măsurătoare + marjă" e bună pentru un prag care
+  prinde regresii, dar aplicată prost devine un plafon care respinge muncă
+  legitimă — prima benzinărie cu ferestre reale (1148 → 4864 de triunghiuri, o
+  singură instanță) ar fi picat pe un număr derivat din cât de sărac era jocul în
+  ziua în care l-am scris. Pragul e acum **150k**, destul cât să prindă în
+  continuare clasa de accident (primitive la rezoluția implicită sar cu zeci de
+  mii dintr-un foc). Rămâne un prag de alarmă: constrângerea reală pe mobil e
   **draw calls / overdraw / fill rate**, de aceea testul principal al gărzii e
   numărătoarea de materiale. Validarea finală e primul test pe device.
 - Texturi comprimate ETC2/ASTC, materiale simple (albedo, fără PBR complex)

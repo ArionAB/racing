@@ -72,5 +72,6 @@ culoare în engine:**
   3. origine la bază, centrată XZ; stă pe sol la Y=0
   4. există un strat de vertex color (AO), nu doar geometrie plată
   5. instanțiere cu `Palette.apply_world_material(glb)` → un singur material
-- Dacă turnul trece, ăsta e șablonul; următoarele hero-uri (moară, benzinărie,
-  container, semne, pod) se derivă schimbând doar §Formă și §Sloturi.
+- Șablonul a fost extras ca fișier: [_TEMPLATE.md](_TEMPLATE.md). Pagina asta
+  rămâne exemplul funcțional din care a ieșit, dar briefurile noi pornesc de
+  acolo — are și tabelul de `u` pre-calculat pentru toate cele 14 sloturi legale.

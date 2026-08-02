@@ -52,6 +52,61 @@ Vezi paleta și dimensiunile în [style_bible.md](style_bible.md).
 5. **Bevel consistent** (prop 0.04 / clădiri 0.08 / stânci 0.15 m) — semnătura
    care ține totul în aceeași familie.
 
+## GLB-uri cu variante (mai multe obiecte intr-un fisier)
+
+Conventia asta exista doar in `cliff_wall.md` si in GDScript. Scrisa aici, o data.
+
+**Nume:** familie PascalCase + `_` + eticheta.
+
+| tipar | cand | exemplu real |
+|---|---|---|
+| litera | frati puri, aceeasi clasa | `Cactus_A/B/C`, `Cliff_A..F` |
+| clasa de marime + index | cand marimea conteaza in gameplay | `Cluster_S1/S2/M1/M2/L1` |
+| doua familii intr-un fisier | acelasi rol, alta silueta | `Butte_A/B/C` + `Mesa_A/B` in `butte.glb` |
+
+**Sufixul `_col`** = proxy de coliziune pentru nodul vizual cu aceeasi tulpina:
+`Cliff_A` <-> `Cliff_A_col`.
+
+Trei reguli care se sparg in tacere daca le incalci:
+
+1. **Variantele se exporta la origine.** Scripturile le decaleaza pe X ca sa fie
+   lizibile in viewport, apoi le pun la zero inainte de `export_glb` si le
+   redecaleaza dupa — vezi [build_cactus.py:80-87](../tools/blender/build_cactus.py).
+   Godot anuleaza oricum offsetul (`track.gd:537`), dar un GLB cu variante
+   decalate produce coliziuni asezate gresit.
+
+2. **Variantele trebuie sa fie copii DIRECTI ai radacinii GLB.** Godot le alege
+   cu `child.name == node_name`, scanand **doar copiii directi**, in patru locuri
+   independente: [track.gd:532](../scenes/tracks/track.gd),
+   [track_cliffs.gd:272](../scenes/tracks/track_cliffs.gd),
+   [track_decor.gd:301](../scenes/tracks/track_decor.gd) si
+   [rockfall_hazard.gd:128](../scenes/hazards/rockfall_hazard.gd).
+   Un parinte gol le sparge pe toate patru simultan — si fiecare punct de
+   incarcare are fallback procedural, deci **nu crapa nimic**: porneste in tacere
+   geometria de rezerva, testele raman verzi, iar diferenta se vede abia la
+   urmatorul screenshot.
+
+3. **Numele trebuie sa fie stabile intre rebuild-uri.** De-aia fiecare script
+   incepe cu `clear_built(prefix)`: fara el mesh-urile orfane raman in fisier,
+   Blender adauga `.001` la nume (`Cactus_A` -> `Cactus_A.001`) si cautarile din
+   Godot esueaza — tot in tacere, tot cu fallback.
+
+## Verificare
+
+```
+python tools/blender/verify_glb.py assets/models/<nume>.glb <buget>
+```
+
+Verifica UV-urile pe centre de slot, **legalitatea sloturilor** (doar 0-13:
+14-16 sunt accente de masina, 17-31 se randeaza magenta in joc), `COLOR_0`,
+baza la Y=0 si centrarea in XZ. Cu `--front=-Z` verifica in plus ca planul
+dominant al modelului e cel cerut — prinde modelul rotit 90°.
+
+Semnul (fata vs spate) ramane avertisment, nu eroare, si asta e o limitare
+reala: la ecranul de drive-in scheletul sta in spate, deci spatele are mai multa
+arie decat fata; la benzinarie pompele stau in fata, deci exact invers. Aceeasi
+masuratoare ar da verdicte opuse pe doua assets corecte.
+
 ## Export GLB (setări)
 
 - Format: **glTF Binary (.glb)**, un fișier.

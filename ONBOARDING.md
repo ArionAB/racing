@@ -156,6 +156,12 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   cuprinde tot dreptunghiul din jurul ei. Acolo cutia rămâne scrisă explicit, dar
   **scalată cu modelul**, și se re-potrivește cu sonda când se schimbă rigul.
 
+- **Sonda de cursă fixează mașina jucătorului** (`--car=0`, Muscle, implicit).
+  `GameState.selected_car` se salvează în `user://settings.cfg`, deci înainte
+  sonda rula pe orice mașină ai ales ultima dată când ai deschis jocul. Două
+  rulări ale **aceluiași cod** dădeau 3.96 și 3.57 tururi și arătau ca o regresie
+  de la assets. Dacă vrei alt punct de vedere, `--car=3` rulează pe autobuz.
+
 - **CI verifică și anti-blocajul în pereții de canion.** Aruncă mașini în unghi
   în faleze, în 12 puncte de pe traseu, și pică dacă vreuna rămâne înțepenită.
   ```

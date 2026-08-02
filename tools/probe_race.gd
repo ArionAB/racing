@@ -17,7 +17,7 @@ extends Node
 ## AudioManager, iar acelea nu exista in modul --script):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn
 ##   ... -- --mode=bump
-##   ... -- --mode=race --track=0 --seconds=150
+##   ... -- --mode=race --track=0 --seconds=150 [--car=0]
 ##   ... -- --mode=cliff --track=0
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
@@ -28,6 +28,9 @@ const SEED: int = 20260729
 ## Suprascris cu --seed=N: acelasi cod, seed-uri diferite = mai multe curse
 ## independente. Un blocaj care apare la 1 din 5 seed-uri e tot un blocaj.
 var _seed: int = SEED
+## Masina jucatorului, index in GameState.CAR_DATA. Suprascris cu --car=N.
+## 0 = Muscle, masina de referinta a proiectului.
+var _player_car: int = 0
 ## Viteza de sosire a atacatorului in modul bump (m/s).
 const BUMP_ENTRY_SPEED: float = 26.0
 
@@ -111,6 +114,16 @@ func _ready() -> void:
 			_seconds = float(arg.trim_prefix("--seconds="))
 		elif arg.begins_with("--seed="):
 			_seed = int(arg.trim_prefix("--seed="))
+		elif arg.begins_with("--car="):
+			_player_car = int(arg.trim_prefix("--car="))
+	# Masina jucatorului se FIXEAZA, nu se mosteneste.
+	#
+	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
+	# rula pe orice masina ai ales ultima data cand ai deschis jocul. Doua rulari
+	# ale aceluiasi cod dadeau 3.96 si 3.57 tururi si arata ca o regresie de la
+	# assets — de fapt se schimbase masina sub noi. Aceeasi capcana ca la
+	# --mode=cliff, care nu-si seta `car.track` si masura altceva decat credea.
+	GameState.selected_car = clampi(_player_car, 0, GameState.CAR_DATA.size() - 1)
 	match _mode:
 		"race":
 			_start_race()

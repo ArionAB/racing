@@ -118,17 +118,28 @@ func _detail_textures() -> void:
 			# ele erau jumatate din efectul de cod de bare.
 			var warp := sin(fx * TAU * 2.0) * 0.35 + sin(fx * TAU * 5.0) * 0.12
 			var wobble := sin(fy * TAU * 1.7 + fx * TAU) * 0.9
+			# Amplitudini RIDICATE in august 2026 (upgrade-ul grafic, val 4a):
+			# sigma masurat pe faleza era ~6-9 fata de ~36-40 in referintele
+			# BBR2/RR3 — suprafetele noastre erau de ~5x mai uniforme. Media
+			# texturii ramane ~0.93 (offset-ul de la final compenseaza), ca sa nu
+			# se clatine nici expunerea calibrata, nici WATER_GAIN (apa
+			# esantioneaza aceeasi textura pentru ondulatie).
 			var band := smoothstep(-0.35, 0.35,
-				sin(fy * TAU * 6.0 + warp + wobble)) * -0.20
+				sin(fy * TAU * 6.0 + warp + wobble)) * -0.32
 			var fine := smoothstep(-0.6, 0.6,
-				sin(fy * TAU * 13.0 + warp * 1.7 + wobble * 1.9)) * -0.055
+				sin(fy * TAU * 13.0 + warp * 1.7 + wobble * 1.9)) * -0.10
 			# Pete lente: rup repetitia tiling-ului, care altfel se vede ca un
 			# tipar regulat pe suprafetele mari.
-			var macro := sin(float(x) * 0.021) * cos(float(y) * 0.017) * 0.07
+			var macro := sin(float(x) * 0.021) * cos(float(y) * 0.017) * 0.10
+			# Crapaturi verticale rare: taie benzile orizontale din loc in loc,
+			# ca roca sa citeasca a blocuri individuale, nu a tapet cu dungi —
+			# trucul "fiecare piatra e citibila" din BBR2, la scara noastra.
+			var crack := -0.30 * pow(maxf(0.0,
+				sin(fx * TAU * 9.0 + sin(fy * TAU * 2.3) * 1.4)), 24.0)
 			# Granulatie: detaliul de aproape, cel care se pierde primul daca e
 			# prea slab. Nu cobori sub 0.14 — sub atat, compresia il mananca.
-			var grain := -rng.randf() * 0.16
-			return band + fine + macro + grain + 0.14)
+			var grain := -rng.randf() * 0.20
+			return band + fine + macro + crack + grain + 0.305)
 
 	_sky_cover()
 	# Masca per slot: cat de tare bate detaliul pe fiecare rol din paleta.

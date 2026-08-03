@@ -107,14 +107,17 @@ prop-uri 0.04 m · clădiri 0.08 m · stânci 0.15 m
 Ce se repetă de 100+ ori pe pistă e scump; ce apare o dată e aproape gratis.
 
 - **Umplutură** (zeci–sute de instanțe): stâlp de marcaj 90 · gard 60 · ladă 80 ·
-  butoi 120 · cactus 180 · stâncă mare 250 · secțiune de faleză 200
+  butoi 120 · cactus 180 · stâncă mare 250 · secțiune de faleză 350
 - **Landmark hero** (o instanță pe pistă): **1000–5000**, cât cere silueta
 
 Cifrele de hero au fost 900/1200/1800 și **erau derivate greșit** — din cât de
 sărac era jocul în ziua în care le-am scris, nu din vreo constrângere. Prima
 benzinărie cu ferestre reale a ieșit 4864 și e perfect în regulă: o instanță,
 material comun, zero draw call-uri în plus. Plafonul de pistă din
-`probe_decor.gd` (150k) e garda reală, iar el are loc berechet.
+`probe_decor.gd` (300k din august 2026, upgrade-ul grafic) e garda reală, iar
+el are loc berechet. Faleza a urcat de la 200 la 350/secțiune odată cu trecerea
+la 12 variante cu siluete distincte — ×130 de instanțe pe Dunele înseamnă ~45k,
+acoperit de plafonul nou.
 
 **Ce rămâne strâmt e repetiția.** Un triunghi în plus pe stâlpul de marcaj costă
 ×24 pe Dunele și ×62 pe Track02. Acolo numără fiecare.
@@ -270,8 +273,15 @@ La distanță: saturație −15%, contrast −20%, luminozitate +8%.
 
 ## 8. Post-procesare
 
-Contrast +8% · saturație −6% · warmth +5% · bloom doar threshold 0.04 ·
-vignette 0.10 · sharpen 0.08
+**Implementat (august 2026):** MSAA 2x (`project.godot`, aproape gratis pe
+GPU-urile mobile tile-based — se rezolvă în tile memory) și bloom subtil
+(`_build_environment`: intensity 0.25, bloom 0.04, threshold 1.1 — peste alb,
+deci doar vârfurile reale de lumină înfloresc; nivelurile 2–3 active).
+Comutatorul de device e `Track.theme_glow`, a doua setare de stins după
+`theme_shadows` dacă testul pe device nu ține 60fps.
+
+Rămase specificate, neimplementate: vignette 0.10 · sharpen 0.08 (candidate de
+tăiere — cost fix de fill rate pe tot ecranul, efect vizibil doar în capturi).
 
 **Interzis pe mobil:** SSAO, SSR, volumetrice scumpe, reflexii complexe.
 (AO vine copt în vertex colors, nu din ecran.)
@@ -311,8 +321,13 @@ Dincolo de ramă: doar cer în cursă. Rama întreagă se vede în meniuri / pho
    păstrează senzația de așezat de mână.
 3. **Teren: variație max ±3.5 m pe orice 50 m.** Relieful mare se face din
    *assets de faleză* (6–12 m), nu din heightmap. Vezi §12.
-4. **Vertex colors pentru AO** pe absolut fiecare asset; zero texturi unice per
-   asset. (Textura de suprafață vine din stratul partajat — §4.)
+4. **Vertex colors pentru AO** pe absolut fiecare asset; zero texturi unice
+   *per asset*. Texturi partajate *per clasă* sunt permise dacă sunt decise
+   explicit (august 2026, modelul BBR2): `trim_rock.png` e albedo-ul întregii
+   clase de rocă (faleze, butte, arcadă, bolovani), aplicat triplanar în
+   spațiul lumii prin `Palette.rock_material()` — pietre individuale cu mortar
+   și bevel fals pictate, un singur material nou pentru toată clasa. (Restul
+   texturii de suprafață vine din stratul partajat — §4.)
 5. **Asfaltul rămâne cea mai închisă suprafață continuă.**
 
 ---

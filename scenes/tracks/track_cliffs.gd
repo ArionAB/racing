@@ -43,6 +43,11 @@ const LANDMARK_CLEAR: float = 25.0
 
 ## Variantele din GLB, cu inaltimea lor nominala. Godot alege varianta cea mai
 ## apropiata de inaltimea ceruta si scaleaza cel mult ±SCALE_LIMIT.
+##
+## 12 din august 2026 (upgrade-ul grafic): 6 mesa clasice + 6 siluete distincte
+## (sa, treapta dubla, surplomba, varf tesit, crestatura, coama dubla joasa).
+## Cu oglindirea de mai jos ies 24 de siluete — repetitia era sursa #1 a
+## aspectului "pătrățos" pe Dunele (~130 de instante din 6 mesh-uri).
 const VARIANTS := [
 	{"node": "Cliff_A", "height": 6.5},
 	{"node": "Cliff_B", "height": 8.0},
@@ -50,11 +55,19 @@ const VARIANTS := [
 	{"node": "Cliff_D", "height": 11.0},
 	{"node": "Cliff_E", "height": 7.5},
 	{"node": "Cliff_F", "height": 10.0},
+	{"node": "Cliff_G", "height": 9.0},
+	{"node": "Cliff_H", "height": 12.5},
+	{"node": "Cliff_I", "height": 7.0},
+	{"node": "Cliff_J", "height": 10.5},
+	{"node": "Cliff_K", "height": 8.5},
+	{"node": "Cliff_L", "height": 6.0},
 ]
 ## Peste atat se vede intinderea straturilor de roca.
 const SCALE_LIMIT: float = 0.18
 ## Cat de departe de inaltimea ceruta mai intra o varianta in bazinul de alegere.
-const VARIANT_TOLERANCE: float = 0.22
+## 0.22 -> 0.18: bazinul e oricum de doua ori mai bogat cu 12 variante, deci
+## putem fi mai stricti cu intinderea si tot pastram varietatea.
+const VARIANT_TOLERANCE: float = 0.18
 
 
 ## Construieste falezele si le intoarce sub un singur nod.
@@ -246,9 +259,50 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		rng.randf_range(-0.07, 0.07),
 		rng.randf_range(-0.10, 0.10),
 		rng.randf_range(-0.07, 0.07))
-	Palette.apply_world_material(holder, mirror)
+	# Materialul de CLASA al rocii (trim sheet triplanar), nu cel de atlas:
+	# falezele sunt suprafata de roca dominanta din cadru — vezi
+	# Palette.rock_material() pentru de ce si de ce nu prin UV unwrap.
+	Palette.apply_rock_material(holder, mirror)
 
 	_add_collision(body, pick["node"], scene, xform)
+	_dress_base(root, sampler, spec, rng, extra)
+
+
+## Banda de contact: pietricele si smocuri la baza falezei (val 4c).
+##
+## Trucul #1 de sol al BBR2: cusatura dintre un obiect si teren nu se vede
+## NICIODATA — mereu e mascata de murdarie sau vegetatie. La noi linia
+## faleza/nisip era o intersectie geometrica curata, si SINK + AO-ul de teren
+## o atenuau doar partial. Cateva prop-uri marunte din desert_scatter (care
+## exista deja, partajeaza atlasul, zero materiale noi) o rup de tot.
+##
+## Zero coliziune: sunt sub 40 cm, style_bible-ul le trateaza ca decor pur.
+const SCATTER_PATH: String = "res://assets/models/desert_scatter.glb"
+const BASE_PROPS := ["Pebbles_A", "Pebbles_B", "Bush_A", "Grass_Tuft"]
+
+static func _dress_base(root: Node3D, sampler: TrackSideSampler,
+		spec: TrackDecorSpec, rng: RandomNumberGenerator,
+		extra: float) -> void:
+	if rng.randf() > 0.55:
+		return
+	var count := rng.randi_range(1, 2)
+	for k in count:
+		var pick: String = BASE_PROPS[rng.randi_range(0, BASE_PROPS.size() - 1)]
+		var prop := TrackDecor._pick_from_glb(SCATTER_PATH, pick)
+		if prop == null:
+			return
+		# Intre marginea asfaltului si fata peretelui, imprastiat in lungul
+		# sectiunii — la baza, unde ochiul cauta cusatura.
+		var along := (rng.randf() - 0.5) * SPACING * 0.8
+		var out := extra * 0.4 + rng.randf_range(0.3, 1.4)
+		var tangent := spec.normal_out.cross(Vector3.UP)
+		var pos := spec.position + spec.normal_out * out + tangent * along
+		pos.y = sampler.ground_y(pos.x, pos.z)
+		root.add_child(prop)
+		prop.position = pos
+		prop.rotation.y = rng.randf_range(0.0, TAU)
+		prop.scale = Vector3.ONE * rng.randf_range(0.8, 1.25)
+		Palette.apply_world_material(prop)
 
 
 ## Inaltimea dorita la fractia asta: doua valuri suprapuse, plus o variatie in

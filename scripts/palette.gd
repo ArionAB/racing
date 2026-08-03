@@ -22,6 +22,11 @@ const DETAIL_PATH: String = "res://assets/textures/detail_rock.png"
 const DETAIL_MASK_PATH: String = "res://assets/textures/detail_mask.png"
 ## Scara detaliului: 1 / 0.35 = o repetitie la 2.86 m.
 const DETAIL_SCALE: float = 0.35
+## Trim sheet-ul COLOR al clasei de roca (vezi rock_material()).
+const TRIM_ROCK_PATH: String = "res://assets/textures/trim_rock.png"
+## O repetitie la 5 m: cele 7 benzi din textura cad la ~0.71 m — intervalul de
+## strat cerut de style_bible §3.
+const TRIM_ROCK_SCALE: float = 0.2
 const SLOTS: int = 32
 
 # --- Mediu (0..13) ---
@@ -127,7 +132,14 @@ static func world_material() -> StandardMaterial3D:
 			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		_shared.vertex_color_use_as_albedo = true # AO copt in vertex colors
 		_shared.roughness = 0.9
-		_shared.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+		# Specular SLAB, nu zero. Cu SPECULAR_DISABLED (valoarea veche) absolut
+		# nimic din scena nu avea vreun reflex — totul citea ca hartie mata, iar
+		# fetele orientate spre soare si cele din umbra difereau doar prin
+		# intensitatea difuza. 0.15 la roughness 0.9 e un "kiss of light" abia
+		# vizibil pe fetele spre soare, care separa planurile fara plastic.
+		# Daca nisipul incepe sa luceasca pe device, aici se intoarce la
+		# SPECULAR_DISABLED si sheen-ul ramane doar pe asfalt si masini.
+		_shared.metallic_specular = 0.15
 		# --- Stratul de detaliu: aici se repara "totul arata plat" ---
 		#
 		# UV-urile prop-urilor sunt colapsate pe un punct (dio_lib.assign_uvs), ca
@@ -173,6 +185,57 @@ static func world_material_mirrored() -> StandardMaterial3D:
 		_shared_mirrored = world_material().duplicate() as StandardMaterial3D
 		_shared_mirrored.cull_mode = BaseMaterial3D.CULL_FRONT
 	return _shared_mirrored
+
+
+## Materialul CLASEI de roca (faleze, butte, arcada, bolovani) — prima abatere
+## deliberata de la "un singur material pentru toata lumea" (august 2026,
+## upgrade grafic val 4b; regula actualizata in CLAUDE.md: materiale de CLASA,
+## nu per asset).
+##
+## Albedo-ul e trim_rock.png — sedimentare cu pietre individuale, mortar si
+## bevel fals PICTATE (diagnosticul BBR2: acolo statea diferenta, nu in
+## poligoane). Se aplica TRIPLANAR IN SPATIUL LUMII, nu prin UV unwrap:
+##   - contractul de UV-uri colapsate din dio_lib ramane intact (zero
+##     re-exporturi de GLB);
+##   - benzile curg CONTINUU peste sectiunile vecine de faleza — fara cusaturi
+##     la fiecare 14 m;
+##   - scalarea instantelor (±18%) nu mai intinde straturile.
+## Vertex color = AO copt, ca peste tot. Fara stratul de detaliu pe UV2:
+## masca lui se esantioneaza pe UV1, care sub triplanar nu mai inseamna slot —
+## si trim-ul isi aduce oricum granulatia proprie.
+static var _rock: StandardMaterial3D
+static var _rock_mirrored: StandardMaterial3D
+
+static func rock_material() -> StandardMaterial3D:
+	if _rock == null:
+		_rock = StandardMaterial3D.new()
+		_rock.albedo_texture = load(TRIM_ROCK_PATH)
+		_rock.texture_filter = \
+			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		_rock.vertex_color_use_as_albedo = true
+		_rock.roughness = 0.9
+		_rock.metallic_specular = 0.15
+		_rock.uv1_triplanar = true
+		_rock.uv1_world_triplanar = true
+		_rock.uv1_scale = Vector3(TRIM_ROCK_SCALE, TRIM_ROCK_SCALE,
+			TRIM_ROCK_SCALE)
+	return _rock
+
+static func rock_material_mirrored() -> StandardMaterial3D:
+	if _rock_mirrored == null:
+		_rock_mirrored = rock_material().duplicate() as StandardMaterial3D
+		_rock_mirrored.cull_mode = BaseMaterial3D.CULL_FRONT
+	return _rock_mirrored
+
+## Pune materialul de roca pe un subarbore — aceeasi mecanica precum
+## apply_world_material, alt material. Doar pentru assets-uri INTEGRAL din
+## roca: un GLB cu parti de lemn/metal (mine_portal) ar primi piatra pe grinzi.
+static func apply_rock_material(root: Node, mirrored: bool = false) -> void:
+	var mat := rock_material_mirrored() if mirrored else rock_material()
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			var mi := node as MeshInstance3D
+			mi.material_override = mat
 
 
 ## Pune materialul comun pe toate mesh-urile dintr-un subarbore. Pentru GLB-uri

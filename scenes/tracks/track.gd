@@ -64,10 +64,23 @@ var theme_exposure: float = 1.0
 ## primul test pe device nu tine 60fps.
 var theme_shadows: bool = true
 
+## Bloom subtil (style_bible §8). Singurul efect fullscreen din joc — un lant de
+## downsample pe cadru, deci cel mai scump item de fill rate pe care il rulam.
+## Acelasi contract ca theme_shadows: daca device-ul nu tine 60fps, asta e a
+## doua setare de stins (dupa umbre).
+var theme_glow: bool = true
+
 ## Pana unde arunca soarele umbre. Peste, preia ceata (depth 90->250), deci
 ## lipsa lor nu se vede. O singura cascada pana aici = configuratia cea mai
 ## ieftina care da totusi contact real cu solul.
-const SHADOW_DISTANCE: float = 90.0
+##
+## 90 -> 110 (august 2026, upgrade-ul grafic): la 90, falezele dintre 90 si
+## ~110 m — exact banda in care chase cam-ul le vede cel mai des — nu aruncau
+## nimic si pareau lipite pe fundal, iar ceata abia incepe acolo (~20% la
+## 110 m). Rezolutia pe metru scade cu ~18%; shadow_blur-ul de mai jos o
+## acopera. NU se adauga a doua cascada: ar dubla draw call-urile de umbra
+## ale intregii scene.
+const SHADOW_DISTANCE: float = 110.0
 
 ## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
 ##
@@ -440,6 +453,7 @@ func rebuild() -> void:
 	_build_center_line()
 	_build_shoulders()
 	_build_kerbs()
+	_build_tire_marks()
 	_build_world_decor()
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
@@ -550,6 +564,18 @@ func _build_environment() -> void:
 	env.adjustment_enabled = true
 	env.adjustment_saturation = 1.18
 	env.adjustment_contrast = 1.05
+	# Bloom-ul din style_bible §8, pana acum doar specificat. Threshold-ul sta
+	# PESTE alb (1.1): dupa FILMIC aproape nimic nu-l depaseste in mod normal,
+	# deci efectul apare doar pe varfurile reale de lumina — soarele pe caroserii,
+	# spuma, cerul la orizont — nu ca un val lăptos pe toata scena. Doar
+	# nivelurile 2-3 (mip-uri mici) sunt active: halo strans, cost minim.
+	if theme_glow:
+		env.glow_enabled = true
+		env.glow_intensity = 0.25
+		env.glow_bloom = 0.04
+		env.glow_hdr_threshold = 1.1
+		for level in range(1, 8):
+			env.set_glow_level(level, 1.0 if level in [2, 3] else 0.0)
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env
 	add_child(world_env)
@@ -720,7 +746,9 @@ func _build_horizon(centroid: Vector3) -> void:
 			# zero coliziune, sub 180 tris fiecare.
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
 			model.scale = Vector3.ONE * s
-			Palette.apply_world_material(model)
+			# Roca de clasa: triplanar-ul in spatiul lumii tine straturile la
+			# scara reala si pe butte-urile scalate 25-60x.
+			Palette.apply_rock_material(model)
 			placed += 1
 	print("%s: %d/%d siluete de orizont" % [track_name, placed,
 		placed + missed])
@@ -864,7 +892,12 @@ func _centroid() -> Vector3:
 const TERRAIN_MIN_SIZE: float = 760.0
 const TERRAIN_MAX_SIZE: float = 1400.0
 ## Pasul grilei de teren, in metri. Constant indiferent de intindere.
-const TERRAIN_CELL: float = 760.0 / 48.0
+## 48 -> 96 de celule (august 2026, upgrade-ul grafic): la ~7.9 m/celula,
+## dunele mici din sampler (_detail_dunes, ~11 m lungime de unda) devin forme
+## cu lumina proprie — la 15.8 m erau sub rezolutia grilei si dispareau.
+## Costul: teren ~4.6k -> ~18.5k tris si trimesh de coliziune 4x, ambele
+## acoperite (garda la 300k; Jolt duce trimesh static de ordinul asta lejer).
+const TERRAIN_CELL: float = 760.0 / 96.0
 
 func _world_extent() -> float:
 	if baked.is_empty():
@@ -942,6 +975,10 @@ func _build_terrain() -> void:
 					# repetitie pe care ochiul il prinde imediat pe suprafete mari.
 					st.set_uv2(Vector2(v.x, v.z) * SURFACE_TILING_MACRO)
 					st.add_vertex(v)
+	# Indexarea uneste colturile de celula partajate (pozitie+culoare+UV
+	# identice), deci normalele se mediaza REAL intre celule vecine: dunele
+	# prind lumina continuu, fara fatete aleatorii pe grila.
+	st.index()
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
@@ -1056,6 +1093,9 @@ func _build_sea_far(root: Node3D, sea_y: float) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var deep := water_tint(Palette.SEA_DEEP)
+	# Alpha 0 = fara valuri de vertecsi (vezi _sea_color): largul are 4 varfuri
+	# pe 2.4 km — deplasati, ar legana toata placa marii.
+	deep.a = 0.0
 	var corners := [
 		Vector3(c.x - h, y, c.z - h), Vector3(c.x + h, y, c.z - h),
 		Vector3(c.x - h, y, c.z + h), Vector3(c.x + h, y, c.z + h),
@@ -1216,14 +1256,25 @@ func _sea_color(d: float) -> Color:
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
 	var foam := water_tint(Palette.FOAM_WHITE).lerp(reef, 0.35)
+	var out: Color
 	if d <= 0.0:
-		return foam # varf uscat al unei celule de mal
-	if d < SEA_FOAM_DEPTH:
-		return foam.lerp(reef, d / SEA_FOAM_DEPTH)
-	if d < SEA_REEF_DEPTH:
-		return reef
-	return reef.lerp(deep, clampf(
-		(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+		out = foam # varf uscat al unei celule de mal
+	elif d < SEA_FOAM_DEPTH:
+		out = foam.lerp(reef, d / SEA_FOAM_DEPTH)
+	elif d < SEA_REEF_DEPTH:
+		out = reef
+	else:
+		out = reef.lerp(deep, clampf(
+			(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+	# ALPHA = amplitudinea valurilor de vertecsi (water.gdshader, vertex()).
+	# Zero la tarm (spuma atinge nisipul — un val acolo ar deschide o fisura cu
+	# terenul) si zero spre larg (SeaNear se invecineaza cu planul SeaFar, care
+	# sta fix; un val la granita l-ar strapunge). Varful amplitudinii cade pe
+	# recif — exact banda pe care o vezi de pe causeway.
+	out.a = clampf(d / SEA_REEF_DEPTH, 0.0, 1.0) \
+		* clampf((SEA_NEAR_DEPTH - d) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH),
+			0.0, 1.0)
+	return out
 
 
 ## Materialul apei — UNUL SINGUR pentru ambele mesh-uri.
@@ -1421,6 +1472,7 @@ func _build_branch_surfaces() -> void:
 			st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
 			st.set_uv(Vector2(u_half, v1)); st.add_vertex(r1)
 			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
+		st.index()
 		st.generate_normals()
 		# Nisip umed: coral_sand intunecat. Nu e asfalt si nu trebuie sa para.
 		_add_mesh_with_collision(st.commit(),
@@ -1461,11 +1513,28 @@ func _side_at(i: int) -> Vector3:
 	var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 	return dir.cross(Vector3.UP).normalized()
 
+## Inaltimea coroanei soselei (bombarea din centru spre margini).
+##
+## Plafonul e dat de marcaje: linia de mijloc sta la lift 0.045 si linia de
+## start la 0.05 peste cota soselei — o coroana mai inalta de 0.03 le-ar
+## strapunge. Daca vrei coroana mai mare, ridica intai lift-urile alea.
+const ROAD_CROWN: float = 0.03
+
+## Profilul transversal al soselei, in fractii din half_width.
+## 5 pozitii = 4 fasii: destul ca coroana sa prinda lumina continuu si ca
+## marginile sa poata purta un gradient de uzura, fara sa umfle geometria.
+const ROAD_PROFILE: Array[float] = [-1.0, -0.55, 0.0, 0.55, 1.0]
+
 func _build_road() -> void:
 	var top := SurfaceTool.new()
 	top.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var sides := SurfaceTool.new()
 	sides.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Coliziunea NU vine din mesh-ul cambrat: fizica ramane pe fasia plata
+	# veche (2 vertecsi transversal), ca feel-ul sa nu se miste deloc.
+	# Coroana de 3 cm e vizuala; rotile ruleaza pe planul de dinainte.
+	var col := SurfaceTool.new()
+	col.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
 	# UV-uri PATRATE: acelasi numar de metri pe ambele axe.
@@ -1476,20 +1545,45 @@ func _build_road() -> void:
 	var tile := 3.5
 	var side_tile := 8.0
 	var u_half := half_width / tile
+	# Nuanta per pozitie de profil: alb pe banda de rulare, usor inchis spre
+	# margini — uzura/praful se aduna la margine, si gradientul face soseaua
+	# sa citeasca a suprafata cu latime, nu a panglica uniforma.
+	var edge_shade := Color(0.84, 0.84, 0.86)
 	for i in n:
 		var j := (i + 1) % n
-		var l0 := baked[i] - _side_at(i) * half_width
-		var r0 := baked[i] + _side_at(i) * half_width
-		var l1 := baked[j] - _side_at(j) * half_width
-		var r1 := baked[j] + _side_at(j) * half_width
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
-		top.set_uv(Vector2(-u_half, v0)); top.add_vertex(l0)
-		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
-		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
-		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
-		top.set_uv(Vector2(u_half, v1)); top.add_vertex(r1)
-		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
+		var s0v := _side_at(i)
+		var s1v := _side_at(j)
+		# Inelele profilului la capetele segmentului.
+		var ring0: Array[Vector3] = []
+		var ring1: Array[Vector3] = []
+		for t in ROAD_PROFILE:
+			var crown := Vector3.UP * (ROAD_CROWN * (1.0 - t * t))
+			ring0.append(baked[i] + s0v * half_width * t + crown)
+			ring1.append(baked[j] + s1v * half_width * t + crown)
+		for k in ROAD_PROFILE.size() - 1:
+			var ta: float = ROAD_PROFILE[k]
+			var tb: float = ROAD_PROFILE[k + 1]
+			var ca := edge_shade if absf(ta) > 0.99 else Color.WHITE
+			var cb := edge_shade if absf(tb) > 0.99 else Color.WHITE
+			var ua := ta * u_half
+			var ub := tb * u_half
+			# Ordinea l0,l1,r0: fata triunghiului iese IN SUS (vezi istoricul
+			# winding-ului — cu ordinea inversa normalele ieseau in jos).
+			top.set_color(ca); top.set_uv(Vector2(ua, v0)); top.add_vertex(ring0[k])
+			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.add_vertex(ring1[k])
+			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.add_vertex(ring0[k + 1])
+			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.add_vertex(ring0[k + 1])
+			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.add_vertex(ring1[k])
+			top.set_color(cb); top.set_uv(Vector2(ub, v1)); top.add_vertex(ring1[k + 1])
+		# Fasia plata de coliziune (geometria veche, 2 vertecsi transversal).
+		var l0 := baked[i] - s0v * half_width
+		var r0 := baked[i] + s0v * half_width
+		var l1 := baked[j] - s1v * half_width
+		var r1 := baked[j] + s1v * half_width
+		col.add_vertex(l0); col.add_vertex(l1); col.add_vertex(r0)
+		col.add_vertex(r0); col.add_vertex(l1); col.add_vertex(r1)
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
 		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0)
@@ -1510,15 +1604,28 @@ func _build_road() -> void:
 		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
 		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1 + down)
 		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
+	# index() inainte de generate_normals(): fara el, fiecare triunghi isi tine
+	# vertecsii lui si normalele se mediaza doar in grupul implicit de netezire;
+	# indexat, inelele vecine IMPART vertecsii si lumina curge continuu in lungul
+	# soselei in loc sa se rupa in fasii la fiecare 3 m.
+	top.index()
 	top.generate_normals()
+	sides.index()
 	sides.generate_normals()
 	# Asfaltul racoros-inchis face masinile saturate sa "sara" din ecran, iar
 	# granulatia de pietris il scoate din senzatia de plastic turnat. Textura e
 	# gri si se inmulteste peste culoare, deci nu schimba paleta.
 	# UV-urile soselei sunt patrate (3.5 m pe ambele axe), asa ca pietrisul arata
 	# a pietris si nu a dungi intinse.
+	#
+	# Roughness 0.82 + specular 0.3 (style_bible §4): singura suprafata din lume
+	# cu un sheen vizibil — o banda discreta de lumina pe asfalt spre soare,
+	# ca in Art of Rally. Restul lumii ramane mat (0.15 pe world_material).
+	# CULL_BACK: fata soselei e garantat in sus (winding-ul e emis consistent
+	# aici), deci nu platim fiecare pixel de doua ori.
 	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3),
-		_tex("res://assets/textures/surface_asphalt.png"))
+		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
+		BaseMaterial3D.CULL_BACK, col.commit())
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
 ## Cati metri de sosea raman FARA perete de o parte si de alta a unei
@@ -1889,29 +1996,50 @@ func _build_flyoff_net(idx: int) -> void:
 ## apeluri. Doua mesh-uri de aceeasi culoare = acelasi material = un draw call
 ## in loc de doua. De aceea variatiile aleatoare de nuanta sunt CUANTIFICATE in
 ## cateva trepte peste tot: o nuanta continua per instanta ar face cache-ul inutil.
-func _flat_material(color: Color, texture: Texture2D = null) -> StandardMaterial3D:
-	var key := "%s|%s" % [color.to_html(true),
-		texture.resource_path if texture != null else ""]
+func _flat_material(color: Color, texture: Texture2D = null,
+		roughness: float = 1.0, specular: float = 0.5,
+		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED
+		) -> StandardMaterial3D:
+	var key := "%s|%s|%.2f|%.2f|%d" % [color.to_html(true),
+		texture.resource_path if texture != null else "", roughness, specular,
+		cull]
 	if _mat_cache.has(key):
 		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	if texture != null:
 		mat.albedo_texture = texture
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.roughness = roughness
+	mat.metallic_specular = specular
+	# Vertex color = AO/gradient copt de builder. Mesh-urile care nu emit COLOR
+	# raman pe alb (1,1,1), deci inmultirea e identitate — zero regresie pe
+	# apelantii care nu stiu de el.
+	mat.vertex_color_use_as_albedo = true
+	# CULL_DISABLED ramane default-ul (winding arbitrar pe multe mesh-uri
+	# procedurale), dar suprafetele mari cu winding cunoscut (sosea, umeri)
+	# cer CULL_BACK: fiecare pixel rasterizat o singura data, nu de doua ori —
+	# fill rate-ul e constrangerea reala pe mobil.
+	mat.cull_mode = cull
 	_mat_cache[key] = mat
 	return mat
 
 
 func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
-		texture: Texture2D = null) -> void:
+		texture: Texture2D = null, roughness: float = 1.0,
+		specular: float = 0.5,
+		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
+		collision_mesh: ArrayMesh = null) -> void:
 	var inst := MeshInstance3D.new()
 	inst.mesh = mesh
-	inst.material_override = _flat_material(color, texture)
+	inst.material_override = _flat_material(color, texture, roughness, specular,
+		cull)
 	add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
-	var tri := mesh.create_trimesh_shape() as ConcavePolygonShape3D
+	# collision_mesh separat cand vizualul nu trebuie sa fie si fizica: soseaua
+	# cambrata ruleaza pe fasia plata veche, ca feel-ul sa ramana identic.
+	var col_source := collision_mesh if collision_mesh != null else mesh
+	var tri := col_source.create_trimesh_shape() as ConcavePolygonShape3D
 	# Trimesh-urile sunt implicit UNILATERALE; fara asta masina cade prin
 	# asfalt ca printr-o plasa (winding-ul nostru e arbitrar).
 	tri.backface_collision = true
@@ -1979,22 +2107,36 @@ func _build_shoulders() -> void:
 			var inner1 := baked[j] + s1 * half_width * side_sign + drop
 			var outer0 := inner0 + s0 * SHOULDER_WIDTH * side_sign
 			var outer1 := inner1 + s1 * SHOULDER_WIDTH * side_sign
+			# Gradient de vertex color: mai INCHIS la contactul cu asfaltul
+			# (praful batatorit de lansat rotile), plin spre nisip. Face umarul
+			# sa citeasca a tranzitie de material, nu a banda decupata.
+			const INNER_SHADE := Color(0.82, 0.82, 0.84)
 			# Winding-ul se inverseaza cu latura, altfel una din benzi iese cu
 			# fata in jos si dispare la cull.
 			if side_sign < 0.0:
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
 				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
 			else:
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
+	st.index()
 	st.generate_normals()
 	# Praf: intre asfalt si nisip ca valoare, ca sa faca tranzitia, nu un al
 	# treilea ton care sa sara in ochi.
@@ -2003,9 +2145,116 @@ func _build_shoulders() -> void:
 		else theme_ground_tint.darkened(0.25)
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
+	# Winding-ul e tinut corect pe ambele laturi (vezi mai sus), deci umerii
+	# suporta CULL_BACK — banda care margineste toata pista nu se mai
+	# rasterizeaza pe ambele fete.
 	inst.material_override = _flat_material(dust,
-		_tex("res://assets/textures/surface_sand.png"))
+		_tex("res://assets/textures/surface_sand.png"), 1.0, 0.5,
+		BaseMaterial3D.CULL_BACK)
 	add_child(inst)
+
+
+## Urme de cauciucuri pe linia de curse — decal-uri de geometrie (val 4c).
+##
+## Trucul de sol al BBR2: urmele pictate pe traseu spun "pe aici se merge" si
+## rup uniformitatea asfaltului exact unde se uita jucatorul. Fasiile stau la
+## +0.025 m peste asfalt (sub linia de mijloc, 0.045) si folosesc SINGURA
+## textura cu alpha real din lume (decal_tracks.png) — suprafata acoperita e
+## deliberat mica: doua fasii de 0.34 m pe zonele de viraj + franare, nu covor.
+##
+## Urmele se aseaza pe INTERIORUL virajului (linia de apex), decalate spre
+## inainte ca sa acopere si franarea. Alpha-ul creste/scade la capetele
+## fiecarei serii prin vertex color — urmele apar si dispar gradual, nu taiat.
+func _build_tire_marks() -> void:
+	var n := baked.size()
+	if n < 20:
+		return
+	# 1. Ce indecsi primesc urme: virajele reale + 10 pasi de franare inainte.
+	var strength: Array[float] = []
+	strength.resize(n)
+	var offset_sign: Array[float] = []
+	offset_sign.resize(n)
+	for i in n:
+		var before := (baked[i] - baked[(i - 3 + n) % n]).normalized()
+		var after := (baked[(i + 3) % n] - baked[i]).normalized()
+		if before.angle_to(after) < 0.10:
+			continue
+		var turn := signf(before.cross(after).y)
+		for k in range(-10, 5):
+			var idx := (i + k + n) % n
+			strength[idx] = 1.0
+			offset_sign[idx] = turn
+	# 2. Rampa de alpha la capete: 4 pasi de aparitie/disparitie.
+	var alpha: Array[float] = []
+	alpha.resize(n)
+	for i in n:
+		if strength[i] <= 0.0:
+			continue
+		var run_in := 0
+		while run_in < 4 and strength[(i - run_in - 1 + n) % n] > 0.0:
+			run_in += 1
+		var run_out := 0
+		while run_out < 4 and strength[(i + run_out + 1) % n] > 0.0:
+			run_out += 1
+		alpha[i] = minf(float(mini(run_in, run_out) + 1) / 4.0, 1.0)
+	# 3. Geometria: doua fasii (ecartamentul rotilor) pe linia de apex.
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var lift := Vector3.UP * 0.025
+	var emitted := false
+	for i in n:
+		var j := (i + 1) % n
+		if alpha[i] <= 0.0 and alpha[j] <= 0.0:
+			continue
+		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
+		var lane0 := -offset_sign[i] * half_width * 0.35
+		var lane1 := -offset_sign[j] * half_width * 0.35
+		var v0 := _dists[i] / 1.4
+		var v1 := _dists[i + 1] / 1.4
+		for wheel: float in [-0.85, 0.85]:
+			var c0 := baked[i] + _side_at(i) * (lane0 + wheel) + lift
+			var c1 := baked[j] + _side_at(j) * (lane1 + wheel) + lift
+			var half := _side_at(i) * 0.17
+			var col0 := Color(1, 1, 1, alpha[i])
+			var col1 := Color(1, 1, 1, alpha[j])
+			st.set_color(col0)
+			st.set_uv(Vector2(0.0, v0)); st.add_vertex(c0 - half)
+			st.set_color(col1)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(c1 - half)
+			st.set_color(col0)
+			st.set_uv(Vector2(1.0, v0)); st.add_vertex(c0 + half)
+			st.set_color(col0)
+			st.set_uv(Vector2(1.0, v0)); st.add_vertex(c0 + half)
+			st.set_color(col1)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(c1 - half)
+			st.set_color(col1)
+			st.set_uv(Vector2(1.0, v1)); st.add_vertex(c1 + half)
+			emitted = true
+	if not emitted:
+		return
+	var inst := MeshInstance3D.new()
+	inst.name = "TireMarks"
+	inst.mesh = st.commit()
+	inst.material_override = _decal_material()
+	add_child(inst)
+
+
+## Materialul decal-urilor — UNUL singur, cache-uit. Transparenta alpha e
+## costul pe care garda nu-l masoara (vezi water.gdshader), deci sta izolata
+## aici, pe o suprafata totala de cativa zeci de m².
+var _decal_mat: StandardMaterial3D
+
+func _decal_material() -> StandardMaterial3D:
+	if _decal_mat != null:
+		return _decal_mat
+	_decal_mat = StandardMaterial3D.new()
+	_decal_mat.albedo_texture = _tex("res://assets/textures/decal_tracks.png")
+	_decal_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_decal_mat.vertex_color_use_as_albedo = true # rampa de alpha la capete
+	_decal_mat.roughness = 1.0
+	_decal_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	_decal_mat.cull_mode = BaseMaterial3D.CULL_BACK
+	return _decal_mat
 
 
 func _build_kerbs() -> void:
@@ -2029,8 +2278,18 @@ func _build_kerbs() -> void:
 			var in0 := e0 - _side_at(i) * 0.9 * side_sign
 			var in1 := e1 - _side_at((i + 2) % n) * 0.9 * side_sign
 			var st := red if (i / 2) % 2 == 0 else white
-			st.add_vertex(e0); st.add_vertex(e1); st.add_vertex(in0)
-			st.add_vertex(in0); st.add_vertex(e1); st.add_vertex(in1)
+			# AO discret pe muchia dinspre exterior: bordura citeste a beton
+			# turnat cu grosime, nu a banda de plastic lipita pe asfalt.
+			const EDGE_SHADE := Color(0.86, 0.86, 0.86)
+			st.set_color(EDGE_SHADE)
+			st.add_vertex(e0); st.add_vertex(e1)
+			st.set_color(Color.WHITE)
+			st.add_vertex(in0)
+			st.add_vertex(in0)
+			st.set_color(EDGE_SHADE)
+			st.add_vertex(e1)
+			st.set_color(Color.WHITE)
+			st.add_vertex(in1)
 			if (i / 2) % 2 == 0:
 				emitted_red = true
 			else:
@@ -2180,7 +2439,8 @@ func _build_arch(frac: float) -> void:
 		child.queue_free()
 	body.add_child(model)
 	add_child(body)
-	Palette.apply_world_material(model)
+	# Arcada e integral roca — primeste trim sheet-ul de clasa.
+	Palette.apply_rock_material(model)
 	var stand := p
 	stand.y = _sampler.ground_y(p.x, p.z)
 	body.global_position = stand

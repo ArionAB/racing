@@ -50,6 +50,8 @@ const OUT_PATH: String = "res://assets/textures/palette_atlas.png"
 const SEED_SLOTS: int = 20260801
 const SEED_SURFACE: int = 20260802
 const SEED_DETAIL: int = 20260803
+const SEED_TRIM: int = 20260804
+const SEED_DECAL: int = 20260805
 
 var rng := RandomNumberGenerator.new()
 
@@ -75,6 +77,10 @@ func _init() -> void:
 	_surface_textures()
 	rng.seed = SEED_DETAIL
 	_detail_textures()
+	rng.seed = SEED_TRIM
+	_trim_rock()
+	rng.seed = SEED_DECAL
+	_decal_tracks()
 	print("Reimporta in Godot, apoi masoara:")
 	print("  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.20 --driver")
 	print("  godot --headless --path . --script res://tools/measure_surface.gd \\")
@@ -118,17 +124,28 @@ func _detail_textures() -> void:
 			# ele erau jumatate din efectul de cod de bare.
 			var warp := sin(fx * TAU * 2.0) * 0.35 + sin(fx * TAU * 5.0) * 0.12
 			var wobble := sin(fy * TAU * 1.7 + fx * TAU) * 0.9
+			# Amplitudini RIDICATE in august 2026 (upgrade-ul grafic, val 4a):
+			# sigma masurat pe faleza era ~6-9 fata de ~36-40 in referintele
+			# BBR2/RR3 — suprafetele noastre erau de ~5x mai uniforme. Media
+			# texturii ramane ~0.93 (offset-ul de la final compenseaza), ca sa nu
+			# se clatine nici expunerea calibrata, nici WATER_GAIN (apa
+			# esantioneaza aceeasi textura pentru ondulatie).
 			var band := smoothstep(-0.35, 0.35,
-				sin(fy * TAU * 6.0 + warp + wobble)) * -0.20
+				sin(fy * TAU * 6.0 + warp + wobble)) * -0.32
 			var fine := smoothstep(-0.6, 0.6,
-				sin(fy * TAU * 13.0 + warp * 1.7 + wobble * 1.9)) * -0.055
+				sin(fy * TAU * 13.0 + warp * 1.7 + wobble * 1.9)) * -0.10
 			# Pete lente: rup repetitia tiling-ului, care altfel se vede ca un
 			# tipar regulat pe suprafetele mari.
-			var macro := sin(float(x) * 0.021) * cos(float(y) * 0.017) * 0.07
+			var macro := sin(float(x) * 0.021) * cos(float(y) * 0.017) * 0.10
+			# Crapaturi verticale rare: taie benzile orizontale din loc in loc,
+			# ca roca sa citeasca a blocuri individuale, nu a tapet cu dungi —
+			# trucul "fiecare piatra e citibila" din BBR2, la scara noastra.
+			var crack := -0.30 * pow(maxf(0.0,
+				sin(fx * TAU * 9.0 + sin(fy * TAU * 2.3) * 1.4)), 24.0)
 			# Granulatie: detaliul de aproape, cel care se pierde primul daca e
 			# prea slab. Nu cobori sub 0.14 — sub atat, compresia il mananca.
-			var grain := -rng.randf() * 0.16
-			return band + fine + macro + grain + 0.14)
+			var grain := -rng.randf() * 0.20
+			return band + fine + macro + crack + grain + 0.305)
 
 	_sky_cover()
 	# Masca per slot: cat de tare bate detaliul pe fiecare rol din paleta.
@@ -136,6 +153,128 @@ func _detail_textures() -> void:
 	# accentele de masina NIMIC (style_bible §1: masinile raman cele mai curate
 	# suprafete din cadru, ca sa se desprinda de fundal).
 	_write_detail_mask("res://assets/textures/detail_mask.png")
+
+
+## Trim sheet-ul de ROCA — prima textura COLOR de clasa (upgrade grafic, val 4b).
+##
+## Diagnosticul BBR2: in referinte fiecare piatra e citibila individual — are
+## nuanta ei, mortar intunecat in jur si un highlight pe muchia de sus (bevel
+## FALS, pictat). Atlasul de paleta nu poate da asta: sloturile sunt patch-uri
+## de 16px esantionate intr-un punct.
+##
+## Textura e TILEABILA si se aplica TRIPLANAR pe clasa de roca (faleze, butte,
+## arcada, bolovani) prin Palette.rock_material() — NU prin UV unwrap per
+## asset. Motivul: unwrap-ul ar sparge contractul de UV-uri colapsate din
+## dio_lib si ar cere re-exportul tuturor GLB-urilor; triplanar-ul in spatiul
+## lumii da acelasi rezultat vizual, tine benzile CONTINUE peste sectiunile
+## vecine de faleza si nu se intinde cu scalarea instantelor (±18%).
+##
+## Culorile vin din paleta (ROCK_LIGHT/ROCK_DARK/SAND_SHADOW) — nu introduce
+## nuante noi, doar le distribuie ca sedimentare cu variatie per bloc.
+func _trim_rock() -> void:
+	const N := 512
+	const BANDS := 7
+	var rock_light := Palette.color(Palette.ROCK_LIGHT)
+	var rock_dark := Palette.color(Palette.ROCK_DARK)
+	var sand_shadow := Palette.color(Palette.SAND_SHADOW)
+	var img := Image.create(N, N, true, Image.FORMAT_RGB8)
+	for y in N:
+		var fy := float(y) / float(N)
+		for x in N:
+			var fx := float(x) / float(N)
+			# Granita benzilor, ondulata periodic (tileabil pe ambele axe).
+			var warp := sin(fx * TAU * 2.0) * 0.16 + sin(fx * TAU * 5.0) * 0.05
+			var band_pos := fy * float(BANDS) + warp
+			var band := wrapi(int(floorf(band_pos)), 0, BANDS)
+			var in_band := band_pos - floorf(band_pos)
+			# Valori deterministe per banda (LCG mic, ca in dio_lib.rock).
+			var h := (band * 1103515245 + 12345) & 0x7FFFFFFF
+			var mix_v := float(h % 1000) / 999.0
+			h = (h * 1103515245 + 12345) & 0x7FFFFFFF
+			var joints := 4 + h % 4 # blocuri per banda: 4..7 (intreg => tileabil)
+			h = (h * 1103515245 + 12345) & 0x7FFFFFFF
+			var joint_off := float(h % 1000) / 999.0
+			# Baza benzii: intre rock_dark si rock_light, cu media impinsa spre
+			# deschis — fetele de stanca stau in plin soare, iar intunericul real
+			# il aduc AO-ul din vertex colors si mortarul, nu baza. O banda din
+			# ~4 trage spre sand_shadow (nisip prins intre strate) si una spre
+			# aproape-rock_light plin: contrastul dintre benzi vinde sedimentarea
+			# de la distanta, unde mortarul nu se mai vede.
+			var base := rock_dark.lerp(rock_light, 0.45 + 0.55 * mix_v)
+			if band % 4 == 2:
+				base = base.lerp(sand_shadow, 0.55)
+			elif band % 4 == 0:
+				base = base.lerp(rock_light, 0.5)
+			# Blocuri: nuanta per PIATRA — asta e diferenta fata de un gradient.
+			var block_pos := fx * float(joints) + joint_off
+			var block := int(floorf(block_pos))
+			var in_block := block_pos - floorf(block_pos)
+			var bh := ((band * 31 + block) * 1103515245 + 12345) & 0x7FFFFFFF
+			var stone_v := 0.90 + (float(bh % 1000) / 999.0) * 0.18
+			bh = (bh * 1103515245 + 12345) & 0x7FFFFFFF
+			var stone_warm := 0.97 + (float(bh % 1000) / 999.0) * 0.06
+			var c := Color(base.r * stone_v * stone_warm, base.g * stone_v,
+				base.b * stone_v / stone_warm)
+			# Rosturi verticale: mortar intunecat + muchie luminata (bevel fals).
+			var jw := 0.030
+			if in_block < jw:
+				c *= 0.58
+			elif in_block < jw * 2.2:
+				c *= 1.10
+			# Granita orizontala dintre benzi: mortar sus, highlight sub el —
+			# muchia de sus a fiecarui strat "prinde soarele".
+			if in_band < 0.055:
+				c *= 0.55
+			elif in_band < 0.14:
+				c *= 1.14
+			# Granulatie fina, ca sa nu fie suprafete perfect netede intre rosturi.
+			var grain := 1.0 - rng.randf() * 0.10
+			c *= grain
+			img.set_pixel(x, y, Color(clampf(c.r, 0.0, 1.0),
+				clampf(c.g, 0.0, 1.0), clampf(c.b, 0.0, 1.0)))
+	var path := "res://assets/textures/trim_rock.png"
+	if img.save_png(path) != OK:
+		push_error("Nu am putut scrie " + path)
+		return
+	print("  trim_rock.png  (%dx%d, %d benzi, color)" % [N, N, BANDS])
+
+
+## Urma de cauciuc — decal-ul liniei de curse (upgrade grafic, val 4c).
+##
+## O SINGURA urma de roata, tileabila pe V (in lungul drumului): banda de
+## cauciuc intunecat cu alpha care se stinge spre margini, rupta de goluri de
+## profil (tread) si de uzura neregulata. Fasiile de geometrie din
+## Track._build_tire_marks() o intind pe zonele de viraj+franare — trucul de
+## nisip pictat din BBR2, aplicat pe asfaltul nostru.
+##
+## E SINGURA textura cu alpha real din lume (transparenta = costul pe care
+## garda nu-l vede, vezi antetul din water.gdshader) — de-asta suprafata
+## acoperita e mica si controlata: fasii de 0.34 m pe viraje, nu covor.
+func _decal_tracks() -> void:
+	const W := 64
+	const H := 256
+	var img := Image.create(W, H, true, Image.FORMAT_RGBA8)
+	for y in H:
+		var fy := float(y) / float(H)
+		for x in W:
+			var fx := float(x) / float(W)
+			# Clopot pe latime: plin in centru, stins la margini.
+			var across := sin(fx * PI)
+			across *= across
+			# Profilul cauciucului: dungi longitudinale.
+			var tread := 0.72 + 0.28 * sin(fx * TAU * 5.0)
+			# Uzura pe lungime: pete care intrerup urma (tileabil pe V).
+			var wear := 0.55 + 0.45 * sin(fy * TAU * 3.0 + sin(fx * TAU) * 1.2)
+			wear = clampf(wear + rng.randf() * 0.25 - 0.12, 0.0, 1.0)
+			var alpha := clampf(across * tread * wear, 0.0, 1.0) * 0.55
+			# Cauciuc: aproape negru, usor cald — se inmulteste vizual peste
+			# asfaltul racoros si citeste ca urma arsa, nu ca banda gri.
+			img.set_pixel(x, y, Color(0.07, 0.06, 0.055, alpha))
+	var path := "res://assets/textures/decal_tracks.png"
+	if img.save_png(path) != OK:
+		push_error("Nu am putut scrie " + path)
+		return
+	print("  decal_tracks.png  (%dx%d, RGBA, urma de cauciuc)" % [W, H])
 
 
 ## Nori pentru ProceduralSkyMaterial.sky_cover — o panorama gri, 512x256.

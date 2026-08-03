@@ -99,10 +99,17 @@ res://
   fundal. Rămâne tot o singură lumină, doar că aruncă. Comutatorul e
   `Track.theme_shadows`; **e prima setare de stins dacă testul pe device nu ține
   60fps.**
-- **Texturi: un singur material pentru toată lumea.** Culoarea vine dintr-un atlas
+- **Texturi: materiale de clasă, nu per asset.** Culoarea vine dintr-un atlas
   de paletă, detaliul de suprafață dintr-un strat triplanar partajat
-  (`Palette.world_material()`). Assets-urile nu aduc texturi proprii — asta e ce
-  ține draw call-urile jos. Vezi `docs/style_bible.md` §4.
+  (`Palette.world_material()`). Un asset nu aduce NICIODATĂ texturi proprii —
+  dar o *clasă* de assets poate primi un material partajat deliberat (trim
+  sheet de rocă, decal-uri de urme), decis explicit, nu strecurat. Asta e ce
+  ține draw call-urile jos: garda numără totalul de materiale per pistă.
+  Vezi `docs/style_bible.md` §4. Regula s-a relaxat în august 2026 după
+  comparația cu Beach Buggy Racing 2: diferența vizuală față de referință nu
+  era poligonajul, ci detaliul pictat în texturi (deviație de luminanță ~2.7
+  la noi vs ~36–40 la ei), iar texturile comprimate sunt aproape gratis pe
+  GPU-urile mobile.
 - **Triunghiuri: măsurate, nu presupuse.** Versiunea inițială a acestui document
   scria „~50k pe scenă" fără nicio măsurătoare în spate. Prima numărătoare reală
   (august 2026) a găsit pistele la 147–163k, din care ~110k veneau din primitive
@@ -117,9 +124,13 @@ res://
   prinde regresii, dar aplicată prost devine un plafon care respinge muncă
   legitimă — prima benzinărie cu ferestre reale (1148 → 4864 de triunghiuri, o
   singură instanță) ar fi picat pe un număr derivat din cât de sărac era jocul în
-  ziua în care l-am scris. Pragul e acum **150k**, destul cât să prindă în
+  ziua în care l-am scris. Pragul a stat apoi la 150k. În august 2026
+  dezvoltatorul a decis explicit să ridice bugetele vizuale (un telefon
+  post-2020 duce 300–500k de triunghiuri pe cadru) și să folosească marja
+  pentru upgrade-ul grafic — pragul e acum **300k**, tot prag de alarmă cu ~2x
+  headroom față de pistele post-upgrade (~140–165k), destul cât să prindă în
   continuare clasa de accident (primitive la rezoluția implicită sar cu zeci de
-  mii dintr-un foc). Rămâne un prag de alarmă: constrângerea reală pe mobil e
+  mii dintr-un foc). Constrângerea reală pe mobil rămâne
   **draw calls / overdraw / fill rate**, de aceea testul principal al gărzii e
   numărătoarea de materiale. Validarea finală e primul test pe device.
 - Texturi comprimate ETC2/ASTC, materiale simple (albedo, fără PBR complex)

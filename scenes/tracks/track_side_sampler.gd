@@ -47,6 +47,15 @@ const GROUND_STRIDE: int = 2
 ## Cat sta nisipul sub cota asfaltului (buza umarului).
 const GROUND_DROP: float = 0.30
 
+# --- tarmul insulei (doar cand _far_drop > 0) ---
+## Cat de departe INAUNTRUL poligonului de control se intinde plaja. Banda e
+## asimetrica intentionat: partea uscata e scurta, ca interiorul buclei sa
+## ramana ferm uscat (anti-atol, vezi ground_y), iar cea dinspre larg e lunga,
+## ca panta pana la -26 m sa citeasca a recif, nu a zid scufundat.
+const SHORE_BAND_IN: float = 30.0
+## Cat de departe in larg se termina coborarea spre fundul marii.
+const SHORE_BAND_OUT: float = 60.0
+
 # --- racorduri netede intre campuri de inaltime ---
 ## Min/max-urile dure dintre campuri (rapa vs. teren, banda secundara vs. fund
 ## de mare, dune vs. podeaua vailor) lasau cute C0: discontinuitati de panta
@@ -200,9 +209,7 @@ func ground_y(wx: float, wz: float) -> float:
 	#
 	# Poligonul e cel al punctelor de control, deja folosit de _build_walls ca sa
 	# decida ce margine e exterioara. O singura definitie pentru "inauntru".
-	var inside := _loop_poly.size() >= 3 \
-		and Geometry2D.is_point_in_polygon(Vector2(wx, wz), _loop_poly)
-	if _far_drop > 0.0 and not inside:
+	if _far_drop > 0.0:
 		# Insula: dincolo de coridorul pistei, terenul devine FUND DE MARE.
 		#
 		# Fara asta o pista de insula e imposibila, si nu dintr-un motiv estetic:
@@ -211,14 +218,24 @@ func ground_y(wx: float, wz: float) -> float:
 		# mica), ori inunda si soseaua (cota mare) — nu exista pozitie din care
 		# sa iasa o insula.
 		#
+		# Trecerea uscat -> fund de mare a fost booleana (is_point_in_polygon):
+		# 26 m de treapta verticala, instant, de-a lungul COARDELOR dintre
+		# punctele de control — un prag poligonal drept prin nisip, vizibil in
+		# orice captura de sus (issue #98). Acum e o plaja: distanta semnata
+		# fata de poligon, netezita pe o banda asimetrica — SHORE_BAND_IN spre
+		# uscat (interiorul ramane uscat, anti-atol), SHORE_BAND_OUT spre larg.
+		#
 		# Relieful de fund pastreaza doar un sfert din amplitudinea dunelor. Nu e
 		# cosmetica: adancimea trebuie sa treaca DECIS de pragul dincolo de care
 		# apa nu-si mai schimba culoarea (Track.SEA_NEAR_DEPTH). Cu dune la
 		# amplitudine plina, adancimea oscila peste si sub prag, iar grila fina de
 		# tarm se emitea pe toata suprafata marii — masurat: 12 800 de triunghiuri
 		# in loc de ~2 000.
-		far_level = _mean_y - _far_drop \
-			+ _smax(_dunes(wx, wz), -1.0, SMOOTH_FLOOR_K) * 0.25
+		var shore := _shore_mix(wx, wz)
+		if shore > 0.0:
+			var seabed := _mean_y - _far_drop \
+				+ _smax(_dunes(wx, wz), -1.0, SMOOTH_FLOOR_K) * 0.25
+			far_level = lerpf(far_level, seabed, shore)
 	var y := lerpf(road_level, far_level, t * t)
 	y = _lift_branches(y, wx, wz)
 	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
@@ -320,6 +337,26 @@ func _side_sign_at(idx: int, wx: float, wz: float) -> float:
 	var s := side_at(idx)
 	var p := _baked[idx]
 	return signf(Vector2(s.x, s.z).dot(Vector2(wx - p.x, wz - p.z)))
+
+
+## 0 = uscat, 1 = fund de mare, cu smoothstep pe banda [-IN, +OUT] in jurul
+## poligonului de control. Distanta semnata: minimul pe cele 24 de segmente,
+## semnul din is_point_in_polygon (negativ inauntru). ~24 segmente x zeci de
+## mii de apeluri la generare = neglijabil, si numai pe pistele cu apa.
+func _shore_mix(wx: float, wz: float) -> float:
+	if _loop_poly.size() < 3:
+		return 1.0
+	var p := Vector2(wx, wz)
+	var d_sq := INF
+	var n := _loop_poly.size()
+	for i in n:
+		var q := Geometry2D.get_closest_point_to_segment(
+			p, _loop_poly[i], _loop_poly[(i + 1) % n])
+		d_sq = minf(d_sq, p.distance_squared_to(q))
+	var sd := sqrt(d_sq)
+	if Geometry2D.is_point_in_polygon(p, _loop_poly):
+		sd = -sd
+	return smoothstep(-SHORE_BAND_IN, SHORE_BAND_OUT, sd)
 
 
 ## Minim neted polinomial: coincide cu minf departe de intersectie, rotunjeste

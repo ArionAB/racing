@@ -41,10 +41,15 @@ const MIN_MESHES_PER_MATERIAL: float = 2.5
 ##    ne-migrat, are 150/20 = 7.5 si "trece" desi are aceleasi ~20 de materiale.
 ##
 ## Numarul care conteaza de fapt e cat de multe materiale distincte randeaza o
-## pista, fiindca ala e numarul de draw call-uri. Masurat acum: 26/23/24/23.
-## Pragul e la 34 — prinde regresia clasica (un `StandardMaterial3D.new()` intr-o
-## bucla de decor sare la sute), fara sa pedepseasca munca legitima.
-const MAX_MATERIALS_PER_TRACK: int = 34
+## pista, fiindca ala e numarul de draw call-uri. Masurat la introducere:
+## 26/23/24/23. Pragul prinde regresia clasica (un `StandardMaterial3D.new()`
+## intr-o bucla de decor sare la sute), fara sa pedepseasca munca legitima.
+##
+## 34 -> 38 (august 2026, upgrade-ul grafic): planul de imbunatatire vizuala
+## adauga cateva materiale de CLASA, deliberate si partajate — specular pe
+## asfalt, trim sheet pentru roca, decal-uri de urme. Fiecare e o decizie, nu o
+## scapare, iar clasa de accident pe care o vanam sare oricum la sute.
+const MAX_MATERIALS_PER_TRACK: int = 38
 
 ## Cate mesh-uri procedurale sunt necesare ca raportul sa fie semnificativ.
 const MIN_SAMPLE: int = 20
@@ -78,14 +83,21 @@ const MIN_SAMPLE: int = 20
 ## ceata taie tot ce e peste 250 m. Deci 80k n-a fost niciodata o limita de
 ## hardware.
 ##
-## 150k pastreaza rostul real al garzii — clasa de accident pe care a prins-o
-## deja de doua ori (primitive lasate la rezolutia implicita, decor pe benzi
-## explodat) sare cu zeci de mii dintr-un foc, deci tot se prinde.
+## Pragul a stat apoi la 150k — destul cat sa prinda clasa de accident (primitive
+## lasate la rezolutia implicita sar cu zeci de mii dintr-un foc).
+##
+## 150k -> 300k (august 2026): decizia explicita a dezvoltatorului de a ridica
+## bugetele vizuale. Un telefon post-2020 duce confortabil 300-500k de
+## triunghiuri PE CADRU; cifra de aici e pe toata pista, din care ceata taie tot
+## ce e peste 250 m. Planul de upgrade grafic (sosea cambrata, teren 2x mai
+## dens, 12 variante de faleza, decal-uri) duce Dunele spre ~140-165k, deci
+## 300k ramane un prag de alarma cu ~2x headroom — si tot prinde clasa istorica
+## de accident, care sare cu zeci de mii dintr-un foc.
 ##
 ## Ramane un prag de ALARMA, nu un buget de arta: constrangerea reala pe mobil e
 ## draw calls / overdraw / fill rate, de asta testul principal al garzii ramane
 ## numaratoarea de MATERIALE. Validarea finala e primul test pe device.
-const MAX_TRIS_PER_TRACK: int = 150000
+const MAX_TRIS_PER_TRACK: int = 300000
 
 var _paths: Array[String] = []
 var _index: int = 0

@@ -859,7 +859,14 @@ func _centroid() -> Vector3:
 const TERRAIN_MIN_SIZE: float = 760.0
 const TERRAIN_MAX_SIZE: float = 1400.0
 ## Pasul grilei de teren, in metri. Constant indiferent de intindere.
-const TERRAIN_CELL: float = 760.0 / 48.0
+##
+## 96 de celule pe panza minima = 7.9 m (era 48 = 15.8 m). La 15.8 m toata
+## tranzitia drum -> dune (GROUND_FLAT_RADIUS 45 + GROUND_BLEND_LEN 70) avea
+## ~7 celule, iar cu ease-in-ul t*t aproape toata variatia se strangea in
+## ultimele 2-3 — silueta reliefului citea poligonal indiferent cat de neted
+## era campul de inaltime (issue #95). Costul: terenul ~4.6k -> ~18k tris pe
+## panza minima, tot marunt fata de alarma de 150k a intregii piste.
+const TERRAIN_CELL: float = 760.0 / 96.0
 
 func _world_extent() -> float:
 	if baked.is_empty():
@@ -917,7 +924,12 @@ func _build_terrain() -> void:
 					heights[idx00 + cells + 2],
 					origin.z + float(gz + 1) * step),
 			]
-			for tri in [[0, 1, 2], [1, 3, 2]]:
+			# Diagonala alterneaza in sah: cu o singura orientare, pantele
+			# capata dungi la 45° pe directia diagonalei — artefact directional
+			# pe care ochiul il prinde imediat pe suprafete mari (issue #95).
+			var tris := [[0, 1, 2], [1, 3, 2]] if (gx + gz) % 2 == 0 \
+				else [[0, 1, 3], [0, 3, 2]]
+			for tri: Array in tris:
 				for corner_idx: int in tri:
 					var v: Vector3 = corners[corner_idx]
 					# Nuanta dupa inaltimea RELATIVA la media pistei, nu absoluta.

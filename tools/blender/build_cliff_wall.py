@@ -85,7 +85,7 @@ def build_visual(name, height, depth, seed):
         # buget mobil), deci tot volumul vine de aici. Fara AO agresiv arata ca
         # un decal plat lipit langa drum.
         ao=dict(samples=28, dist=3.2, gradient="vertical",
-                low=0.42, high=1.0, power=0.75, floor=0.28),
+                low=0.42, high=1.0, power=0.75, floor=0.12),
         origin="base",
     )
     return obj, stats

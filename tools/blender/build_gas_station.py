@@ -174,7 +174,7 @@ stats = finish(
     obj,
     bevel=0.08, bevel_angle=30.0,
     ao=dict(samples=32, dist=3.5, gradient="vertical",
-            low=0.55, high=1.00, power=1.0, floor=0.30),
+            low=0.55, high=1.00, power=1.0, floor=0.13),
 )
 
 me = obj.data

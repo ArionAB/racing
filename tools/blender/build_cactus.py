@@ -55,7 +55,7 @@ def build(name, height, arms):
         bevel=0.0,
         # tranzitie agresiva in treimea de jos: power < 1 urca repede
         ao=dict(samples=24, dist=1.6, gradient="vertical",
-                low=0.50, high=0.95, power=0.6, floor=0.32),
+                low=0.50, high=0.95, power=0.6, floor=0.15),
     )
     return obj, stats
 

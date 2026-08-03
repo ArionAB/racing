@@ -27,7 +27,7 @@ def bush(name, w, h, seed, slot=None):
         # Jumatatea de jos net mai inchisa (style_bible §4, vegetatie): fara
         # gradientul asta tufele par lipite pe nisip, nu crescute din el.
         ao=dict(samples=16, dist=1.0, gradient="vertical",
-                low=0.45, high=1.0, power=0.6, floor=0.30),
+                low=0.45, high=1.0, power=0.6, floor=0.15),
     )
     return obj, stats
 
@@ -44,7 +44,7 @@ def pebbles(name, pieces, seed_base):
     stats = finish(
         obj, bevel=0.0,
         ao=dict(samples=12, dist=0.6, gradient="vertical",
-                low=0.55, high=1.0, power=0.8, floor=0.35),
+                low=0.55, high=1.0, power=0.8, floor=0.18),
     )
     return obj, stats
 
@@ -65,7 +65,7 @@ def grass_tuft(name, seed):
     stats = finish(
         obj, bevel=0.0,
         ao=dict(samples=12, dist=0.8, gradient="vertical",
-                low=0.40, high=1.0, power=0.5, floor=0.28),
+                low=0.40, high=1.0, power=0.5, floor=0.15),
     )
     return obj, stats
 

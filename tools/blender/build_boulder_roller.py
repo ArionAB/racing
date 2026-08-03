@@ -132,7 +132,7 @@ stats = finish(
     # ar fi singurul obiect din cadru fara nicio variatie tonala. Ramane
     # distanta fata de centru, singurul gradient invariant la rotatie.
     ao=dict(samples=32, dist=2.0, gradient="spherical",
-            low=0.58, high=1.00, power=1.0, floor=0.30),
+            low=0.58, high=1.00, power=1.0, floor=0.15),
     origin="center",
     origin_size=(DIAMETER, DIAMETER, DIAMETER),
 )

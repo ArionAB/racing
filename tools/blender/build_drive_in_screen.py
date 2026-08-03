@@ -129,7 +129,7 @@ stats = finish(
     # ce sa-si ocluzeze la baza, iar cu gradient tare fata inceta sa mai fie cea
     # mai deschisa suprafata din cadru — adica exact rostul obiectului.
     ao=dict(samples=64, dist=4.0, gradient="vertical",
-            low=0.72, high=1.00, power=1.0, floor=0.40),
+            low=0.72, high=1.00, power=1.0, floor=0.18),
 )
 
 print("DriveInScreen -> %d tris | AO %.2f..%.2f" % (stats["tris"], stats["ao_min"], stats["ao_max"]))

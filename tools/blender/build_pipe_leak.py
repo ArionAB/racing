@@ -200,7 +200,7 @@ for name, fn, budget in PIECES:
         obj,
         bevel=BEVEL, bevel_angle=BEVEL_ANGLE,
         ao=dict(samples=28, dist=2.0, gradient="vertical",
-                low=0.50, high=1.00, power=0.9, floor=0.30),
+                low=0.50, high=1.00, power=0.9, floor=0.14),
     )
     me = obj.data
     ext = [(min(v.co[a] for v in me.vertices), max(v.co[a] for v in me.vertices))

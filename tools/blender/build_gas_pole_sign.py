@@ -104,7 +104,7 @@ stats = finish(
     # fundatia cu ~23 cm fata de punctul in care o aseaza Godot.
     origin="base_axis",
     ao=dict(samples=48, dist=3.0, gradient="vertical",
-            low=0.62, high=1.00, power=1.0, floor=0.34),
+            low=0.62, high=1.00, power=1.0, floor=0.15),
 )
 
 print("GasPoleSign -> %d tris | AO %.2f..%.2f" % (stats["tris"], stats["ao_min"], stats["ao_max"]))

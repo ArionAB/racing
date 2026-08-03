@@ -40,7 +40,7 @@ def butte(name, w, d, h, seed, tiers=2, taper=0.30):
         # AO puternic jos: intuneca baza si sugereaza distanta (perspectiva
         # atmosferica), fara ceata suplimentara si fara cost de runtime.
         ao=dict(samples=20, dist=6.0, gradient="vertical",
-                low=0.38, high=1.0, power=0.85, floor=0.26),
+                low=0.38, high=1.0, power=0.85, floor=0.14),
     )
     return obj, stats
 

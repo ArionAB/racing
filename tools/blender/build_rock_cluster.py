@@ -39,7 +39,7 @@ def cluster(name, pieces, seg=6, rings=3, bevel=0.15):
         obj,
         bevel=bevel,
         ao=dict(samples=24, dist=2.0, gradient="vertical",
-                low=0.45, high=1.0, power=0.8, floor=0.30),
+                low=0.45, high=1.0, power=0.8, floor=0.14),
     )
     return obj, stats
 

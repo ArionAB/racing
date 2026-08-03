@@ -30,9 +30,11 @@ func _ready() -> void:
 		_arm = model.find_child("arm", true, false) as Node3D
 		if _arm != null:
 			_arm_base_rot = _arm.rotation.x
-		# Atlasul comun: modelul de plastic isi aducea materialul lui, cel nou
-		# are UV-uri spre sloturi si un material fara imagine.
-		Palette.apply_world_material(model)
+		# Clasa rust_metal (triplanar): excavatorul e integral metal ruginit.
+		# Static — nu se misca din loc — deci triplanarul de lume nu "inoata";
+		# bratul se leagana, dar amplitudinea e mica si textura de rugina e
+		# aperiodica, deci nu se citeste.
+		Palette.apply_triplanar_class(model, "rust_metal")
 		var body_node := model.find_child("body", true, false) as Node3D
 		if body_node != null:
 			# `arm` e COPIL al lui `body` in GLB, deci fara skip iese o cutie de

@@ -37,6 +37,18 @@ static func classes() -> Dictionary:
 			"anchor": Palette.color(Palette.CONCRETE)},
 		"stone_wall": {"src": "stone_wall_src.jpg",
 			"anchor": Palette.color(Palette.CORAL_SAND)},
+		# Familia de roca a Dunelor (faleze/butte/arcada/bolovani): inlocuieste
+		# continutul procedural al trim-ului, prin acelasi rock_material
+		# triplanar — conversia intregului canion fara niciun re-export.
+		# Gain-ul intinde contrastul: fotografia originala e plata fata de
+		# trim-ul pictat, iar la distanta (mipmap) se topea in noroi — masurat,
+		# sigma pe faleza cadea de la 10.3 la 8.4 fara corectie.
+		"rock": {"src": "rock_src.jpg",
+			"anchor": Palette.color(Palette.ROCK_LIGHT), "gain": 1.35,
+			"lift": 0.06},
+		# Metal ruginit: turn de apa, excavator, conducta.
+		"rust_metal": {"src": "rust_metal_src.jpg",
+			"anchor": Palette.color(Palette.RUST_METAL), "gain": 1.15},
 	}
 
 
@@ -50,7 +62,8 @@ func _initialize() -> void:
 			push_error("Nu am putut citi %s (eroare %d)" % [src_path, err])
 			continue
 		img.resize(OUT_SIZE, OUT_SIZE, Image.INTERPOLATE_LANCZOS)
-		_grade(img, spec[cls]["anchor"])
+		_grade(img, spec[cls]["anchor"], float(spec[cls].get("gain", 1.0)),
+			float(spec[cls].get("lift", 0.0)))
 		var out: String = OUT_DIR + cls + ".png"
 		DirAccess.make_dir_recursive_absolute(OUT_DIR)
 		if img.save_png(out) != OK:
@@ -65,11 +78,27 @@ func _initialize() -> void:
 ##  1. desaturare partiala (DESAT) — taie varfurile de culoare ale fotografiei;
 ##  2. amestec spre "ancora scalata la luminanta pixelului" (GRADE) — nuanta
 ##     converge spre paleta, dar detaliul (variatia de luminanta) ramane intact.
-func _grade(img: Image, anchor: Color) -> void:
+## `gain` intinde contrastul in jurul mediei de luminanta (1.0 = neatins);
+## `lift` ridica uniform luminozitatea DUPA gain. Ambele per clasa: o
+## fotografie plata are nevoie de punch ca sa supravietuiasca mipmap-urilor,
+## una contrastata nu.
+func _grade(img: Image, anchor: Color, gain: float = 1.0,
+		lift: float = 0.0) -> void:
 	var anchor_lum := anchor.r * 0.2126 + anchor.g * 0.7152 + anchor.b * 0.0722
+	# media de luminanta a imaginii — pivotul in jurul caruia se intinde
+	var mean := 0.0
 	for y in img.get_height():
 		for x in img.get_width():
 			var c := img.get_pixel(x, y)
+			mean += c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
+	mean /= float(img.get_width() * img.get_height())
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			c = Color(
+				clampf(mean + (c.r - mean) * gain + lift, 0.0, 1.0),
+				clampf(mean + (c.g - mean) * gain + lift, 0.0, 1.0),
+				clampf(mean + (c.b - mean) * gain + lift, 0.0, 1.0))
 			var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
 			var desat := Color(
 				lerpf(c.r, lum, DESAT),

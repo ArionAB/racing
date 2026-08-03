@@ -203,23 +203,14 @@ static func world_material_mirrored() -> StandardMaterial3D:
 ## Vertex color = AO copt, ca peste tot. Fara stratul de detaliu pe UV2:
 ## masca lui se esantioneaza pe UV1, care sub triplanar nu mai inseamna slot —
 ## si trim-ul isi aduce oricum granulatia proprie.
-static var _rock: StandardMaterial3D
 static var _rock_mirrored: StandardMaterial3D
 
+## Din august 2026 (conversia Dunelor) albedo-ul rocii vine din
+## assets/textures/classes/rock.png — sursa externa gradata prin
+## process_class_textures — nu din trim-ul procedural. trim_rock.png ramane
+## in repo ca fallback istoric si etalon al pipeline-ului procedural.
 static func rock_material() -> StandardMaterial3D:
-	if _rock == null:
-		_rock = StandardMaterial3D.new()
-		_rock.albedo_texture = load(TRIM_ROCK_PATH)
-		_rock.texture_filter = \
-			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		_rock.vertex_color_use_as_albedo = true
-		_rock.roughness = 0.9
-		_rock.metallic_specular = 0.15
-		_rock.uv1_triplanar = true
-		_rock.uv1_world_triplanar = true
-		_rock.uv1_scale = Vector3(TRIM_ROCK_SCALE, TRIM_ROCK_SCALE,
-			TRIM_ROCK_SCALE)
-	return _rock
+	return triplanar_class_material("rock")
 
 static func rock_material_mirrored() -> StandardMaterial3D:
 	if _rock_mirrored == null:
@@ -253,7 +244,50 @@ const CLASS_TEXTURES := {
 	"roof_tiles": "res://assets/textures/classes/roof_tiles.png",
 	"plaster": "res://assets/textures/classes/plaster.png",
 	"stone_wall": "res://assets/textures/classes/stone_wall.png",
+	"rock": "res://assets/textures/classes/rock.png",
+	"rust_metal": "res://assets/textures/classes/rust_metal.png",
 }
+
+## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
+## colapsate — zero re-export (mecanica validata de rock_material). Scara e
+## per clasa: rugina se repeta mai des decat straturile de roca.
+const CLASS_TRIPLANAR_SCALE := {
+	# 0.2 -> 0.14 la trecerea pe fotografie: striatiile lui cliff_side sunt
+	# mai fine decat benzile trim-ului pictat, iar la 5 m/repetitie se topeau
+	# in mipmap. La ~7 m, un strat citeste cat un strat.
+	"rock": 0.14,
+	"rust_metal": 0.45, # o repetitie la ~2.2 m — panouri, nu strate
+}
+
+static var _tri_mats: Dictionary = {}
+
+static func triplanar_class_material(cls: String) -> StandardMaterial3D:
+	if _tri_mats.has(cls):
+		return _tri_mats[cls]
+	assert(CLASS_TRIPLANAR_SCALE.has(cls),
+		"clasa triplanara necunoscuta: " + cls)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = load(CLASS_TEXTURES[cls])
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.vertex_color_use_as_albedo = true
+	mat.roughness = 0.9
+	mat.metallic_specular = 0.15
+	mat.uv1_triplanar = true
+	mat.uv1_world_triplanar = true
+	var s: float = CLASS_TRIPLANAR_SCALE[cls]
+	mat.uv1_scale = Vector3(s, s, s)
+	_tri_mats[cls] = mat
+	return mat
+
+## Aplica o clasa triplanara pe TOT subarborele — doar pentru assets-uri
+## dintr-un singur material dominant (turnul de apa e integral ruginit).
+## ATENTIE: triplanar in spatiul LUMII = textura "inoata" pe obiecte care se
+## MISCA. Bolovanul rostogolitor ramane pe atlas exact din motivul asta.
+static func apply_triplanar_class(root: Node, cls: String) -> void:
+	var mat := triplanar_class_material(cls)
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			(node as MeshInstance3D).material_override = mat
 
 static var _class_mats: Dictionary = {}
 

@@ -104,16 +104,24 @@ func _detail_textures() -> void:
 		func(x: int, y: int) -> float:
 			var fx := float(x) / 256.0
 			var fy := float(y) / 256.0
-			# Strate orizontale de DOUA grosimi, nu una: 7 benzi late (~0.4 m la
-			# scara de joc) peste care se suprapun 17 fine. O singura frecventa
+			# Strate orizontale de DOUA grosimi, nu una: benzi late (~0.4 m la
+			# scara de joc) peste care se suprapun unele fine. O singura frecventa
 			# arata ca un cod de bare — verificat in vederea soferului.
-			# Linia de separatie ondula pe X, altfel toate stancile au aceleasi
-			# dungi drepte la aceeasi inaltime.
+			#
+			# GROSIME NEREGULATA, nu doar linie ondulata. Versiunea anterioara
+			# avea 7+17 dungi perfect periodice pe Y, doar deplasate pe X — de la
+			# camera de joc citea ca biome-ul Badlands din Minecraft, dungi egale
+			# la nesfarsit ("parca am facut racing in Minecraft", feedback
+			# direct). Faza pe Y e acum modulata de un al doilea sinus
+			# necomensurabil: benzile isi schimba grosimea de-a lungul peretelui,
+			# ca sedimentarea reala. Amplitudinea dungilor fine scade si ea —
+			# ele erau jumatate din efectul de cod de bare.
 			var warp := sin(fx * TAU * 2.0) * 0.35 + sin(fx * TAU * 5.0) * 0.12
-			var band := smoothstep(-0.25, 0.25,
-				sin(fy * TAU * 7.0 + warp)) * -0.22
-			var fine := smoothstep(-0.5, 0.5,
-				sin(fy * TAU * 17.0 + warp * 1.7)) * -0.09
+			var wobble := sin(fy * TAU * 1.7 + fx * TAU) * 0.9
+			var band := smoothstep(-0.35, 0.35,
+				sin(fy * TAU * 6.0 + warp + wobble)) * -0.20
+			var fine := smoothstep(-0.6, 0.6,
+				sin(fy * TAU * 13.0 + warp * 1.7 + wobble * 1.9)) * -0.055
 			# Pete lente: rup repetitia tiling-ului, care altfel se vede ca un
 			# tipar regulat pe suprafetele mari.
 			var macro := sin(float(x) * 0.021) * cos(float(y) * 0.017) * 0.07

@@ -672,8 +672,14 @@ func _build_effects() -> void:
 	_drift_particles.scale_amount_min = 0.6
 	_drift_particles.scale_amount_max = 1.4
 	_drift_particles.color = Color(0.78, 0.78, 0.8) # fum de cauciuc
-	var smoke := BoxMesh.new()
-	smoke.size = Vector3(0.22, 0.22, 0.22)
+	# Sfera cu putine laturi, nu cub: particulele-cuburi erau una din cele trei
+	# cauze ale lui "parca am facut racing in Minecraft" (feedback direct).
+	# 24 de triunghiuri bucata, cu segmentele setate — vezi regula din CLAUDE.md.
+	var smoke := SphereMesh.new()
+	smoke.radius = 0.14
+	smoke.height = 0.28
+	smoke.radial_segments = 6
+	smoke.rings = 3
 	var smoke_mat := StandardMaterial3D.new()
 	smoke_mat.vertex_color_use_as_albedo = true # ia culoarea din particula
 	smoke_mat.vertex_color_is_srgb = true # altfel gri 0.78 citit liniar = alb
@@ -714,8 +720,11 @@ func _build_effects() -> void:
 	# masina stie pe ce pista e. Praf nisipiu pe iarba ar fi exact genul de
 	# detaliu care se observa fara sa stii de ce te deranjeaza.
 	_dust_particles.color = Palette.color(Palette.SAND_MID).darkened(0.12)
-	var puff := BoxMesh.new()
-	puff.size = Vector3(0.45, 0.45, 0.45)
+	var puff := SphereMesh.new()
+	puff.radius = 0.26
+	puff.height = 0.52
+	puff.radial_segments = 6
+	puff.rings = 3
 	var puff_mat := StandardMaterial3D.new()
 	puff_mat.vertex_color_use_as_albedo = true
 	# Culorile noastre sunt autorate ca sRGB (Color.html, Palette). Fara steagul
@@ -744,8 +753,11 @@ func _build_effects() -> void:
 	_boost_particles.scale_amount_min = 0.4
 	_boost_particles.scale_amount_max = 0.9
 	_boost_particles.color = Color(1.0, 0.55, 0.1)
-	var flame := BoxMesh.new()
-	flame.size = Vector3(0.18, 0.18, 0.18)
+	var flame := SphereMesh.new()
+	flame.radius = 0.11
+	flame.height = 0.22
+	flame.radial_segments = 6
+	flame.rings = 3
 	var flame_mat := StandardMaterial3D.new()
 	flame_mat.vertex_color_use_as_albedo = true
 	flame_mat.vertex_color_is_srgb = true

@@ -1535,8 +1535,12 @@ func _build_road() -> void:
 	# gri si se inmulteste peste culoare, deci nu schimba paleta.
 	# UV-urile soselei sunt patrate (3.5 m pe ambele axe), asa ca pietrisul arata
 	# a pietris si nu a dungi intinse.
+	#
+	# Roughness 0.82 + specular 0.3 (style_bible §4): singura suprafata din lume
+	# cu un sheen vizibil — o banda discreta de lumina pe asfalt spre soare,
+	# ca in Art of Rally. Restul lumii ramane mat (0.15 pe world_material).
 	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3),
-		_tex("res://assets/textures/surface_asphalt.png"))
+		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3)
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
 ## Cati metri de sosea raman FARA perete de o parte si de alta a unei
@@ -1907,25 +1911,29 @@ func _build_flyoff_net(idx: int) -> void:
 ## apeluri. Doua mesh-uri de aceeasi culoare = acelasi material = un draw call
 ## in loc de doua. De aceea variatiile aleatoare de nuanta sunt CUANTIFICATE in
 ## cateva trepte peste tot: o nuanta continua per instanta ar face cache-ul inutil.
-func _flat_material(color: Color, texture: Texture2D = null) -> StandardMaterial3D:
-	var key := "%s|%s" % [color.to_html(true),
-		texture.resource_path if texture != null else ""]
+func _flat_material(color: Color, texture: Texture2D = null,
+		roughness: float = 1.0, specular: float = 0.5) -> StandardMaterial3D:
+	var key := "%s|%s|%.2f|%.2f" % [color.to_html(true),
+		texture.resource_path if texture != null else "", roughness, specular]
 	if _mat_cache.has(key):
 		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	if texture != null:
 		mat.albedo_texture = texture
+	mat.roughness = roughness
+	mat.metallic_specular = specular
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_mat_cache[key] = mat
 	return mat
 
 
 func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
-		texture: Texture2D = null) -> void:
+		texture: Texture2D = null, roughness: float = 1.0,
+		specular: float = 0.5) -> void:
 	var inst := MeshInstance3D.new()
 	inst.mesh = mesh
-	inst.material_override = _flat_material(color, texture)
+	inst.material_override = _flat_material(color, texture, roughness, specular)
 	add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()

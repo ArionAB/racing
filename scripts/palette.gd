@@ -127,7 +127,14 @@ static func world_material() -> StandardMaterial3D:
 			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		_shared.vertex_color_use_as_albedo = true # AO copt in vertex colors
 		_shared.roughness = 0.9
-		_shared.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+		# Specular SLAB, nu zero. Cu SPECULAR_DISABLED (valoarea veche) absolut
+		# nimic din scena nu avea vreun reflex — totul citea ca hartie mata, iar
+		# fetele orientate spre soare si cele din umbra difereau doar prin
+		# intensitatea difuza. 0.15 la roughness 0.9 e un "kiss of light" abia
+		# vizibil pe fetele spre soare, care separa planurile fara plastic.
+		# Daca nisipul incepe sa luceasca pe device, aici se intoarce la
+		# SPECULAR_DISABLED si sheen-ul ramane doar pe asfalt si masini.
+		_shared.metallic_specular = 0.15
 		# --- Stratul de detaliu: aici se repara "totul arata plat" ---
 		#
 		# UV-urile prop-urilor sunt colapsate pe un punct (dio_lib.assign_uvs), ca

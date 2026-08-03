@@ -3,7 +3,7 @@
 Peretii de canion care inlocuiesc zidul rosu de pe marginea soselei. Se aseaza
 cap la cap, la pas de 14 m, cu suprapunere de 1 m.
 
-Buget: <= 200 triunghiuri per sectiune vizuala.
+Buget: <= 550 triunghiuri per sectiune vizuala (10x6 smooth, issue #94).
 Sloturi: rock_light (corp), rock_dark (baza/crapaturi), sand_light (coama).
 
 DOUA obiecte per varianta:
@@ -24,10 +24,15 @@ import bpy
 WIDTH = 15.0
 # Fatete late, nu detaliu de frecventa inalta (style_bible §3). Cifrele sunt
 # strans legate de buget: bevel-ul de stanca (0.15) adauga o banda de geometrie
-# la FIECARE muchie, deci corpul principal se plateste de doua ori. La 6 laturi
-# si 4 straturi iese ~195 tris/sectiune; la 7x5 sarea la 310.
-SIDES = 6
-STRATA = 4          # inele orizontale = straturi de roca sedimentara
+# la FIECARE muchie, deci corpul principal se plateste de doua ori.
+#
+# Istoric: 6x4 (~195 tris/sectiune) pe vremea plafonului de 80k — o prisma
+# hexagonala flat-shaded, sursa principala a aspectului "coltoros" reclamat la
+# toate pistele. La 10x6 + shade smooth silueta ramane low-poly dar lumina
+# curge continuu (issue #94); bugetul real e alarma de 150k din probe_decor,
+# iar pistele stau la 21-65k.
+SIDES = 10
+STRATA = 6          # inele orizontale = straturi de roca sedimentara
 
 
 def cliff_body(b, height, depth, seed):
@@ -55,8 +60,10 @@ def cliff_body(b, height, depth, seed):
            # pe care stratul de detaliu triplanar (fin, ~0.7 m) n-o poate da.
            # Cele doua lucreaza impreuna — banda mare din geometrie, textura
            # fina din material. Ordinea urca de la inchis la deschis: roca
-           # veche jos, expusa sus.
-           strata_slots=(ROCK_DARK, ROCK_LIGHT, SAND_SHADOW, ROCK_LIGHT))
+           # veche jos, expusa sus. Sase intrari pentru sase inele, ca
+           # progresia sa nu se reia de la capat la mijlocul peretelui.
+           strata_slots=(ROCK_DARK, ROCK_DARK, ROCK_LIGHT, SAND_SHADOW,
+                         ROCK_LIGHT, ROCK_LIGHT))
 
 
 def cliff_cap(b, height, depth, seed):
@@ -81,6 +88,10 @@ def build_visual(name, height, depth, seed):
     stats = finish(
         obj,
         bevel=0.15,           # style_bible §3: bevel de stanca
+        # 62°: la 10 laturi fatetele se intalnesc la 36°, dar treptele spatelui
+        # si racordul cu lespedea urca peste 40° — pragul de roca le topeste pe
+        # toate si lasa sharp doar buza de mesa (~90°).
+        smooth_angle=62.0,
         # AO puternic la baza: falezele n-au umbre dinamice in joc (decizie de
         # buget mobil), deci tot volumul vine de aici. Fara AO agresiv arata ca
         # un decal plat lipit langa drum.
@@ -133,7 +144,7 @@ for i, (name, h, d, seed) in enumerate(CLIFFS):
           % (name, h, stats["tris"], tri_count(col),
              stats["ao_min"], stats["ao_max"]))
 
-print("TOTAL vizual: %d tris (buget 6 x 200 = 1200)" % total_vis)
+print("TOTAL vizual: %d tris (10x6 smooth; era 1170 la 6x4 flat)" % total_vis)
 
 # La export toate pleaca din origine: Godot le instantiaza individual.
 for o in built:

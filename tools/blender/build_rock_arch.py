@@ -178,6 +178,9 @@ for name, b in VISUALS:
     obj = b.to_object(name)
     stats = finish(
         obj, bevel=BEVEL, bevel_angle=BEVEL_ANGLE, origin="none",
+        # Pragul familiei de roca: fatetele de 45° ale picioarelor (8 laturi)
+        # se topesc, buza de mesa ramane.
+        smooth_angle=62.0,
         ao=dict(samples=28, dist=6.0, gradient="vertical",
                 low=0.45, high=1.00, power=0.8, floor=0.30))
     print("%-10s %4d tris | AO %.2f..%.2f" % (name, stats["tris"],

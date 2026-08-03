@@ -5,7 +5,7 @@ Piesele astea se aseaza la 1.5-4 m de asfalt, FARA coliziune: treci prin ele.
 Rolul lor e sa dea senzatia de ingustime a canionului, nu sa te opreasca.
 
 CEL MAI IMPORTANT BUGET DIN TOT PLANUL: ~115 instante pe pista, deci fiecare
-triunghi in plus se inmulteste cu 115. Buget <= 40 tris fiecare, <= 200 total.
+triunghi in plus se inmulteste cu 115. Buget <= 52 tris fiecare, <= 260 total (smooth, issue #94).
 Zero bevel peste tot — la marimea asta nu se vede, dar s-ar plati de 115 ori.
 
 Sloturi: dry_vegetation (tufe, smocuri), rock_light / sand_shadow (pietricele).
@@ -20,10 +20,14 @@ def bush(name, w, h, seed, slot=None):
     b = Builder()
     b.rock((0.0, 0.0, 0.0), (w, w * 0.85, h),
            DRY_VEGETATION if slot is None else slot,
-           seed=seed, segments=5, rings=2, taper=0.55, squash=0.7)
+           seed=seed, segments=7, rings=2, taper=0.55, squash=0.7)
     obj = b.to_object(name)
     stats = finish(
         obj, bevel=0.0,
+        # 7 laturi (in loc de 5) + pragul de roca: la 72° intre fatete smooth-ul
+        # n-avea ce media; la 51° tufa devine o masa moale (issue #94). Cele
+        # ~12 tris in plus se platesc de 115 ori, dar tot inseamna sub 1.5k.
+        smooth_angle=62.0,
         # Jumatatea de jos net mai inchisa (style_bible §4, vegetatie): fara
         # gradientul asta tufele par lipite pe nisip, nu crescute din el.
         ao=dict(samples=16, dist=1.0, gradient="vertical",

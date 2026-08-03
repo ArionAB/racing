@@ -124,6 +124,9 @@ obj = b.to_object("Boulder")
 stats = finish(
     obj,
     bevel=0.0,
+    # Singurul opt-out din familia de roca: fatetarea de mai sus e designul
+    # (bolovan proaspat spart), nu un artefact de rezolutie — vezi issue #94.
+    smooth=False,
     # AO sferic. Toate celelalte assets folosesc gradient='vertical' (jos mai
     # inchis), dar aici ar fi o eroare de acelasi tip cu roata morii: obiectul
     # se ROTESTE, deci o umbra coapta la baza ajunge in varf dupa o jumatate de

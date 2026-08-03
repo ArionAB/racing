@@ -1,7 +1,7 @@
 """butte.glb — 5 siluete pentru orizont. Brief: docs/asset_briefs/butte.md
 
 Inlocuiesc cele 12 sfere turtite care tineau loc de dealuri de fundal. Se vad de
-la 150-350 m, deci conteaza DOAR silueta: zero detaliu, buget <= 180 tris.
+la 150-350 m, deci conteaza DOAR silueta: zero detaliu, buget <= 420 tris (10x3 smooth, issue #94).
 
 Sunt reperele care te orienteaza pe pista (style_bible §7: landmark dominant la
 4-6 secunde), asa ca fiecare are o forma distincta — trebuie sa poti spune "sunt
@@ -23,20 +23,23 @@ def butte(name, w, d, h, seed, tiers=2, taper=0.30):
     b = Builder()
     # baza, in roca inchisa
     b.rock((0.0, 0.0, 0.0), (w, d, h * 0.62), ROCK_DARK,
-           seed=seed, segments=6, rings=2, flat_top=True, taper=taper)
+           seed=seed, segments=10, rings=3, flat_top=True, taper=taper)
     # corpul, in roca deschisa, retras putin
     b.rock((0.0, 0.0, h * 0.50), (w * 0.82, d * 0.80, h * 0.42), ROCK_LIGHT,
-           seed=seed + 101, segments=6, rings=2, flat_top=True, taper=taper * 0.7)
+           seed=seed + 101, segments=10, rings=3, flat_top=True, taper=taper * 0.7)
     if tiers > 1:
         # coama de nisip pe varf: linia care se citeste pe cer
         b.rock((0.0, 0.0, h * 0.86), (w * 0.60, d * 0.58, h * 0.18), SAND_LIGHT,
-               seed=seed + 211, segments=5, rings=1, flat_top=True, taper=0.2)
+               seed=seed + 211, segments=7, rings=1, flat_top=True, taper=0.2)
     obj = b.to_object(name)
     stats = finish(
         obj,
         # Bevel zero: la 150 m+ o banda de 15 cm e sub un pixel, dar ar adauga
         # geometrie la fiecare muchie a unei piese care exista DOAR ca silueta.
         bevel=0.0,
+        # 62°: pragul familiei de roca (vezi apply_smooth) — topeste fatetele
+        # late, pastreaza buza de mesa. Silueta pe cer ramane low-poly.
+        smooth_angle=62.0,
         # AO puternic jos: intuneca baza si sugereaza distanta (perspectiva
         # atmosferica), fara ceata suplimentara si fara cost de runtime.
         ao=dict(samples=20, dist=6.0, gradient="vertical",
@@ -66,7 +69,7 @@ for i, (name, w, d, h, seed, tiers, tp) in enumerate(BUTTES):
     print("%-9s %5.1f x %5.1f x %5.1f m -> %3d tris | AO %.2f..%.2f"
           % (name, w, d, h, stats["tris"], stats["ao_min"], stats["ao_max"]))
 
-print("TOTAL: %d tris (buget 5 x 180 = 900)" % sum(tri_count(o) for o in built))
+print("TOTAL: %d tris (10x3 smooth; era ~900 la 6x2 flat)" % sum(tri_count(o) for o in built))
 
 for o in built:
     o.location = (0.0, 0.0, 0.0)

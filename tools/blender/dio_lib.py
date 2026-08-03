@@ -869,6 +869,41 @@ def apply_bevel(obj, width, segments=1, angle_deg=30.0):
     bpy.ops.object.modifier_apply(modifier=mod.name)
 
 
+def apply_smooth(obj, angle_deg=40.0):
+    """Shade smooth cu prag de unghi, scris direct in flag-urile de mesh.
+
+    Fara asta fiecare stanca e un poliedru flat-shaded: la `segments=6` fetele
+    laterale se intalnesc la 60° si fiecare fateta isi tine culoarea ei — exact
+    aspectul "coltoros" pe care style_bible §3 il interzice. Cu fetele smooth si
+    muchiile peste prag marcate sharp, silueta ramane low-poly dar lumina curge
+    continuu peste corp si citeste ca o masa rotunjita.
+
+    Pragul e singura decizie: trebuie sa fie PESTE unghiul dintre fatetele pe
+    care vrei sa le topesti (360/segments pe un corp de revolutie: 36° la 10
+    laturi, 60° la 6) si SUB muchiile care tin forma (buza unei mese, coltul
+    unei cutii — 90°). Cutiile trec neatinse prin pragul implicit, deci smooth
+    e sigur ca default pe tot pipeline-ul.
+
+    Implementat prin bmesh (face.smooth + edge.smooth), nu prin operatorii de
+    versiune (`use_auto_smooth` a disparut in 4.1, `set_sharp_from_angle` a
+    aparut atunci) — flag-urile exista identic in 4.x si 5.x, iar exportatorul
+    glTF le coace in normale (export_normals=True e deja setat).
+    """
+    me = obj.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    thr = math.radians(angle_deg)
+    for f in bm.faces:
+        f.smooth = True
+    for e in bm.edges:
+        if len(e.link_faces) == 2:
+            e.smooth = e.calc_face_angle() <= thr
+        else:
+            e.smooth = False  # margini deschise: nu media cu nimic
+    bm.to_mesh(me)
+    bm.free()
+
+
 def assign_uvs(obj, snap):
     """Colapseaza UV-urile fiecarei fete pe centrul slotului ei."""
     me = obj.data
@@ -1087,8 +1122,8 @@ def atlas_material():
 
 
 def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
-           bevel_segments=1, origin_size=None):
-    """Lantul standard: bevel -> UV pe sloturi -> origine -> AO copt.
+           bevel_segments=1, origin_size=None, smooth=True, smooth_angle=40.0):
+    """Lantul standard: bevel -> smooth -> UV pe sloturi -> origine -> AO copt.
 
     origin="base"      centreaza si XY pe bounding box
     origin="base_axis" coboara doar pe Z, pastrand XY asa cum a fost construit
@@ -1101,11 +1136,19 @@ def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
                        fixa la 1 si nu-l expunea. 2 segmente inseamna un colt
                        vizibil rotund in loc de tesit — merita doar pe piese care
                        stau langa camera, fiindca dubleaza banda de bevel.
+    smooth             shade smooth cu prag (vezi apply_smooth). Default ON:
+                       cutiile au muchii de 90° si trec neatinse. `smooth=False`
+                       doar pentru piesele a caror fatetare E designul.
+    smooth_angle       pe corpuri de revolutie cu segmente putine, ridica pragul
+                       peste 360/segments (ex. 62° topeste si fatete de 60°).
     Ordinea conteaza: originea se muta INAINTE de bake, ca gradientul vertical
-    de AO sa se calculeze de la baza reala (z=0).
+    de AO sa se calculeze de la baza reala (z=0); smooth vine DUPA bevel, ca sa
+    judece si muchiile pe care bevel-ul tocmai le-a creat.
     """
     snap = snapshot_slots(obj)
     apply_bevel(obj, bevel, segments=bevel_segments, angle_deg=bevel_angle)
+    if smooth:
+        apply_smooth(obj, smooth_angle)
     assign_uvs(obj, snap)
     if origin == "base":
         set_origin_base(obj, center_xy=True)

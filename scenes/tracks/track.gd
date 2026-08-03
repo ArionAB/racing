@@ -73,7 +73,14 @@ var theme_glow: bool = true
 ## Pana unde arunca soarele umbre. Peste, preia ceata (depth 90->250), deci
 ## lipsa lor nu se vede. O singura cascada pana aici = configuratia cea mai
 ## ieftina care da totusi contact real cu solul.
-const SHADOW_DISTANCE: float = 90.0
+##
+## 90 -> 110 (august 2026, upgrade-ul grafic): la 90, falezele dintre 90 si
+## ~110 m — exact banda in care chase cam-ul le vede cel mai des — nu aruncau
+## nimic si pareau lipite pe fundal, iar ceata abia incepe acolo (~20% la
+## 110 m). Rezolutia pe metru scade cu ~18%; shadow_blur-ul de mai jos o
+## acopera. NU se adauga a doua cascada: ar dubla draw call-urile de umbra
+## ale intregii scene.
+const SHADOW_DISTANCE: float = 110.0
 
 ## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
 ##
@@ -1083,6 +1090,9 @@ func _build_sea_far(root: Node3D, sea_y: float) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var deep := water_tint(Palette.SEA_DEEP)
+	# Alpha 0 = fara valuri de vertecsi (vezi _sea_color): largul are 4 varfuri
+	# pe 2.4 km — deplasati, ar legana toata placa marii.
+	deep.a = 0.0
 	var corners := [
 		Vector3(c.x - h, y, c.z - h), Vector3(c.x + h, y, c.z - h),
 		Vector3(c.x - h, y, c.z + h), Vector3(c.x + h, y, c.z + h),
@@ -1243,14 +1253,25 @@ func _sea_color(d: float) -> Color:
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
 	var foam := water_tint(Palette.FOAM_WHITE).lerp(reef, 0.35)
+	var out: Color
 	if d <= 0.0:
-		return foam # varf uscat al unei celule de mal
-	if d < SEA_FOAM_DEPTH:
-		return foam.lerp(reef, d / SEA_FOAM_DEPTH)
-	if d < SEA_REEF_DEPTH:
-		return reef
-	return reef.lerp(deep, clampf(
-		(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+		out = foam # varf uscat al unei celule de mal
+	elif d < SEA_FOAM_DEPTH:
+		out = foam.lerp(reef, d / SEA_FOAM_DEPTH)
+	elif d < SEA_REEF_DEPTH:
+		out = reef
+	else:
+		out = reef.lerp(deep, clampf(
+			(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+	# ALPHA = amplitudinea valurilor de vertecsi (water.gdshader, vertex()).
+	# Zero la tarm (spuma atinge nisipul — un val acolo ar deschide o fisura cu
+	# terenul) si zero spre larg (SeaNear se invecineaza cu planul SeaFar, care
+	# sta fix; un val la granita l-ar strapunge). Varful amplitudinii cade pe
+	# recif — exact banda pe care o vezi de pe causeway.
+	out.a = clampf(d / SEA_REEF_DEPTH, 0.0, 1.0) \
+		* clampf((SEA_NEAR_DEPTH - d) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH),
+			0.0, 1.0)
+	return out
 
 
 ## Materialul apei — UNUL SINGUR pentru ambele mesh-uri.

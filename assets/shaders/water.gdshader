@@ -55,10 +55,21 @@ uniform vec2 drift_far = vec2(-0.28, 0.44);
 // Cat de tare bate ondulatia. 0 = culoare plata din vertex colors.
 uniform float ripple_strength : hint_range(0.0, 1.0) = 0.35;
 
+// Valuri de VERTECSI (nu de pixeli): doua sinusoide in coordonate de lume, cu
+// frecvente necomensurabile. Amplitudinea finala e wave_amp * COLOR.a, iar
+// masca din alpha e coapta la generare (Track._sea_color): 0 la tarm (fisura
+// cu terenul), varf pe recif, 0 spre larg (granita cu SeaFar, care sta fix).
+// Grila fina de 9.5 m exista deja langa tarm — valurile au vertecsi exact
+// unde se vad. Cost: vertex-only, zero fill rate, zero texturi.
+uniform float wave_amp : hint_range(0.0, 0.5) = 0.12;
+
 varying vec3 world_pos;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float swell = sin(world_pos.x * 0.55 + TIME * 1.05) * 0.6
+		+ cos(world_pos.z * 0.47 - TIME * 0.85) * 0.4;
+	VERTEX.y += swell * wave_amp * COLOR.a;
 }
 
 void fragment() {
@@ -75,6 +86,15 @@ void fragment() {
 	float a = texture(ripple_tex, uv_near).r;
 	float b = texture(ripple_tex, uv_far).r;
 	float ripple = mix(1.0, a * b, ripple_strength);
+	// Pulsul spumei: banda de tarm (alpha aproape 0, dar cu spuma copta in
+	// culoare) respira usor in timp — sugereaza valul care se sparge, fara
+	// geometrie sau textura noua. Amplitudine mica (±6%), altfel clipeste.
+	// A doua conditie (luminanta) exclude LARGUL, care are tot alpha 0 dar e
+	// intunecat — fara ea, toata placa SeaFar ar pulsa.
+	float foam_zone = (1.0 - smoothstep(0.0, 0.18, COLOR.a))
+		* smoothstep(0.20, 0.45, dot(COLOR.rgb, vec3(0.3333)));
+	ripple *= 1.0 + foam_zone
+		* sin(TIME * 1.7 + world_pos.x * 0.21 + world_pos.z * 0.17) * 0.06;
 	// COLOR = culoarea coapta in mesh: sea_deep / reef_shallow / foam_white,
 	// interpolate dupa adancime, si deja corectate de Track.water_tint().
 	// Aici doar o modulam — nicio corectie de culoare in shader, ca sa existe

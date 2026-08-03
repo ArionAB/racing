@@ -63,6 +63,9 @@ var _total_len: float
 var _curvature: PackedFloat32Array
 ## Faza zgomotului de dune, ca terenul sa difere de la o pista la alta.
 var _dune_phase: float = 0.0
+## Campul de dune: FBM de simplex, instantiat O DATA — ground_y se apeleaza de
+## zeci de mii de ori la generare si nu are voie sa construiasca obiecte.
+var _noise: FastNoiseLite
 ## Cota medie a drumului — ancora campului DEPARTAT (vezi ground_y).
 var _mean_y: float = 0.0
 ## Rapele declarate: (frac_start, frac_end, adancime, latura).
@@ -96,6 +99,16 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	for p in baked:
 		sum_y += p.y
 	_mean_y = sum_y / float(maxi(baked.size(), 1))
+	_noise = FastNoiseLite.new()
+	_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	# Octava de baza ~200 m (dealuri), inca doua pana la ~50 m (ondulatii).
+	# Sub 50 m nu coboram: grila de teren e la 7.9 m si ar aparea aliasing.
+	_noise.frequency = 0.005
+	_noise.fractal_octaves = 3
+	# Seed derivat din faza veche: pistele raman diferite intre ele, iar 0
+	# ramane 0 (Dunele isi pastreaza samanta implicita).
+	_noise.seed = int(roundf(dune_phase * 1000.0))
 	_bake_curvature()
 
 
@@ -304,11 +317,20 @@ static func _ring_window(f: float, f0: float, f1: float, fade: float) -> float:
 	return clampf(minf(into, span - into) / maxf(fade, 0.0001), 0.0, 1.0)
 
 
-## Dunele campului departat. Identica cu ce era in track.gd inainte.
+## Dunele campului departat.
+##
+## A fost suma a trei sinusoide (2.2/2.0/1.3, lungimi de unda 200-520 m) —
+## un cofraj de oua cu perioada vizibila, care citea procedural indiferent
+## cat de fin era esantionat (issue #96). FBM-ul de simplex da forme
+## neregulate, ca relieful modelat de mana.
+##
+## Amplitudinea 7.0 e calibrata prin masurare (tools/probe_noise_amp.gd, grile
+## de 200x200 pe 3 seed-uri): fractalul are varfuri la ~±0.8 si rms ~0.27.
+## La 7.0 varfurile ies ~5.5 m — anvelopa vechilor sinusoide — iar rms-ul
+## ~1.9 m fata de 2.3 m inainte; vaile adanci le reteaza oricum clamp-ul
+## de -1 m din ground_y.
 func _dunes(wx: float, wz: float) -> float:
-	return sin(wx * 0.012 + _dune_phase) * 2.2 \
-		+ cos(wz * 0.014 + _dune_phase * 2.0) * 2.0 \
-		+ sin(wx * 0.031) * sin(wz * 0.027) * 1.3
+	return _noise.get_noise_2d(wx, wz) * 7.0
 
 
 ## Un punct copt al axei pistei (pentru limite, iteratii proprii).

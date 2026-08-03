@@ -238,6 +238,57 @@ static func apply_rock_material(root: Node, mirrored: bool = false) -> void:
 			mi.material_override = mat
 
 
+## --- Materiale de clasa cu UV-uri REALE (pilotul de texturare, august 2026) ---
+##
+## Spre deosebire de rock_material (triplanar, pentru mesh-uri cu UV-uri
+## colapsate), astea se aplica pe assets exportate cu UV-uri reale (proiectie
+## cubica in dio_lib). Texturile vin din assets/textures/classes/ — surse
+## externe (PolyHaven azi, ComfyUI maine) trecute OBLIGATORIU prin
+## tools/process_class_textures.gd, care le gradeaza spre paleta. O textura
+## nefiltrata pusa direct aici e exact reteta de "asset soup".
+##
+## Un material per CLASA de suprafata, cache-uit: oricate cladiri impart
+## acoperisul de olane, toate costa UN singur material in garda.
+const CLASS_TEXTURES := {
+	"roof_tiles": "res://assets/textures/classes/roof_tiles.png",
+	"plaster": "res://assets/textures/classes/plaster.png",
+	"stone_wall": "res://assets/textures/classes/stone_wall.png",
+}
+
+static var _class_mats: Dictionary = {}
+
+static func class_material(cls: String) -> StandardMaterial3D:
+	if _class_mats.has(cls):
+		return _class_mats[cls]
+	assert(CLASS_TEXTURES.has(cls), "clasa de material necunoscuta: " + cls)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = load(CLASS_TEXTURES[cls])
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.vertex_color_use_as_albedo = true # AO copt, ca peste tot
+	mat.roughness = 0.9
+	mat.metallic_specular = 0.15
+	_class_mats[cls] = mat
+	return mat
+
+
+## Aplica materiale pe un GLB cu parti numite: cheia din `mapping` e un
+## prefix de nume de nod, valoarea e clasa. Nodurile nemapate raman pe
+## materialul lumii (atlas + AO) — lemnaria si nisipul unui asset mixt.
+static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
+	for node in _walk(root):
+		if not (node is MeshInstance3D):
+			continue
+		var mi := node as MeshInstance3D
+		var assigned := false
+		for prefix: String in mapping:
+			if String(mi.name).begins_with(prefix):
+				mi.material_override = class_material(mapping[prefix])
+				assigned = true
+				break
+		if not assigned:
+			mi.material_override = world_material()
+
+
 ## Pune materialul comun pe toate mesh-urile dintr-un subarbore. Pentru GLB-uri
 ## importate din Blender: modelul aduce UV-urile catre sloturile atlasului si
 ## vertex color-ul de AO; noi ii inlocuim materialul cu cel partajat. Asa un

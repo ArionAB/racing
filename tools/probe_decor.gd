@@ -304,6 +304,7 @@ const VARIANT_SOURCE := {
 	"driveinscreen": "drive_in_screen", "gaspolesign": "gas_pole_sign",
 	"startgate": "start_gate", "windmill": "windmill", "blades": "windmill",
 	"water_tower": "water_tower",
+	"house_": "village_house",
 }
 
 

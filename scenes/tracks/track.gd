@@ -2528,6 +2528,15 @@ const _LANDMARKS := {
 	# stalpul, nu un cilindru de 1.9 m in jurul unui obiect subtire.
 	5: {"path": "res://assets/models/gas_pole_sign.glb",
 		"gap": 5.0, "col": "cyl", "radius": 0.55, "spin": false},
+	# Casa de sat (Okinawa) — PILOTUL texturilor de clasa: partile House_Roof/
+	# House_Plaster/House_Stone au UV-uri reale si primesc texturile din
+	# assets/textures/classes/ prin cheia "classes"; lemnaria si nisipul raman
+	# pe atlas. Raza de coliziune acopera cladirea, nu limba de nisip — poti
+	# rula peste marginea curtii, dar nu prin casa.
+	6: {"path": "res://assets/models/village_house.glb",
+		"gap": 10.0, "col": "cyl", "radius": 2.6, "spin": false,
+		"classes": {"House_Roof": "roof_tiles", "House_Plaster": "plaster",
+			"House_Stone": "stone_wall"}},
 }
 
 ## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual
@@ -2578,7 +2587,12 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 	add_child(root)
 	# Atlasul comun pe tot subarborele (fara el, GLB-ul iese alb). Moara si-l
 	# aplica singura in _ready, dar celelalte prop-uri il primesc aici.
-	Palette.apply_world_material(root)
+	# Landmark-urile cu "classes" isi mapeaza partile pe texturile de clasa;
+	# nodurile nemapate cad tot pe atlas (vezi Palette.apply_class_materials).
+	if info.has("classes"):
+		Palette.apply_class_materials(root, info["classes"])
+	else:
+		Palette.apply_world_material(root)
 	var stand := p + side * (half_width + float(info["gap"]))
 	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
 	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in

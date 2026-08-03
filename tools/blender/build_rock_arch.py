@@ -179,7 +179,7 @@ for name, b in VISUALS:
     stats = finish(
         obj, bevel=BEVEL, bevel_angle=BEVEL_ANGLE, origin="none",
         ao=dict(samples=28, dist=6.0, gradient="vertical",
-                low=0.45, high=1.00, power=0.8, floor=0.30))
+                low=0.45, high=1.00, power=0.8, floor=0.13))
     print("%-10s %4d tris | AO %.2f..%.2f" % (name, stats["tris"],
                                               stats["ao_min"], stats["ao_max"]))
     objs.append(obj)

@@ -129,7 +129,7 @@ for obj in objs:
     stats = finish(
         obj, bevel=BEVEL, bevel_angle=BEVEL_ANGLE, origin="base",
         ao=dict(samples=24, dist=1.2, gradient="vertical",
-                low=0.52, high=1.00, power=1.0, floor=0.30))
+                low=0.52, high=1.00, power=1.0, floor=0.14))
     me = obj.data
     ext = [(min(v.co[a] for v in me.vertices), max(v.co[a] for v in me.vertices))
            for a in range(3)]

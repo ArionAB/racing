@@ -120,7 +120,7 @@ stats = finish(
     obj,
     bevel=0.04, bevel_angle=55.0,   # 55° = prinde muchiile drepte, sare peste conturul scutului
     ao=dict(samples=24, dist=1.0, gradient="vertical",
-            low=0.60, high=1.00, power=1.0, floor=0.35),
+            low=0.60, high=1.00, power=1.0, floor=0.16),
     # originea pe axa stalpului, nu pe centrul bbox-ului (scutul iese in fata pe Y)
     origin="base_axis",
 )

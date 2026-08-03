@@ -210,7 +210,7 @@ stats = finish(
     obj,
     bevel=0.08, bevel_angle=30.0,   # clasa "cladiri" din style_bible §3
     ao=dict(samples=48, dist=3.5, gradient="vertical",
-            low=0.55, high=1.00, power=1.0, floor=0.30),
+            low=0.55, high=1.00, power=1.0, floor=0.13),
 )
 
 print("water_tower -> %d tris | AO %.2f..%.2f" % (stats["tris"], stats["ao_min"], stats["ao_max"]))

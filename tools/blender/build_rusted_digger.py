@@ -133,7 +133,7 @@ arm = ab.to_object("arm")
 body_stats = finish(
     body, bevel=BEVEL, origin="none",
     ao=dict(samples=28, dist=3.0, gradient="vertical",
-            low=0.52, high=1.00, power=0.9, floor=0.30))
+            low=0.52, high=1.00, power=0.9, floor=0.14))
 # Gradient SLAB pe brat: obiectul se roteste, deci un gradient vertical puternic
 # ar arata gresit cand bratul e ridicat. Acelasi rationament ca la bolovanul din
 # #B2, doar ca aici rotatia e limitata la 0.55 rad, deci nu trebuie eliminat de

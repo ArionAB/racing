@@ -177,13 +177,13 @@ clear_built("Mine")
 PIECES = [
     ("Portal", build_portal, 600, BEVEL_PORTAL,
      dict(samples=28, dist=4.0, gradient="vertical", low=0.42, high=1.00,
-          power=0.85, floor=0.22)),
+          power=0.85, floor=0.10)),
     ("MineRail", build_rail, 250, BEVEL_SMALL,
      dict(samples=20, dist=1.5, gradient="vertical", low=0.55, high=1.00,
-          power=1.0, floor=0.32)),
+          power=1.0, floor=0.14)),
     ("MineCart", build_cart, 150, BEVEL_SMALL,
      dict(samples=20, dist=1.5, gradient="vertical", low=0.55, high=1.00,
-          power=1.0, floor=0.32)),
+          power=1.0, floor=0.14)),
 ]
 
 objs = []

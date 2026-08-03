@@ -174,7 +174,7 @@ stats = finish(
     obj,
     bevel=BEVEL, bevel_angle=30.0,
     ao=dict(samples=28, dist=3.0, gradient="vertical",
-            low=0.52, high=1.00, power=0.9, floor=0.30),
+            low=0.52, high=1.00, power=0.9, floor=0.14),
 )
 
 corr = snap_bbox(obj, 2.0 * HALF_WIDTH, TOTAL_H)

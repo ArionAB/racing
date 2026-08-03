@@ -110,7 +110,7 @@ tower_stats = finish(
     tower,
     bevel=0.08, bevel_angle=30.0,
     ao=dict(samples=28, dist=3.0, gradient="vertical",
-            low=0.55, high=1.00, power=1.0, floor=0.32),
+            low=0.55, high=1.00, power=1.0, floor=0.14),
     # pe axa turnului, nu pe centrul bbox-ului: coada iese mult in spate si ar
     # trage originea de sub moara
     origin="base_axis",

@@ -896,7 +896,7 @@ def _hemisphere_dirs(n):
 
 
 def bake_ao(obj, samples=32, dist=2.5, gradient="vertical",
-            low=0.55, high=1.0, power=1.0, floor=0.30, strength=1.0,
+            low=0.40, high=1.0, power=1.0, floor=0.12, strength=1.0,
             radial_axis="Z"):
     """AO real prin raycast in emisfera + gradient, scris in vertex colors.
 
@@ -1086,8 +1086,39 @@ def atlas_material():
     return mat
 
 
+def apply_smooth(obj, angle_deg=55.0):
+    """Shade smooth cu muchii ascutite peste un prag de unghi.
+
+    Lipsa ASTA era cauza nr. 1 a aspectului "Minecraft" (#113): nimic din
+    pipeline nu facea shade_smooth, deci fiecare fateta era o placa uniforma
+    de lumina. Nu poligonajul desparte low-poly-ul Art of Rally de low-poly-ul
+    Minecraft, ci daca lumina CURGE peste suprafata sau sare in trepte.
+
+    Pragul face triajul singur: fetele care se intalnesc sub `angle_deg` se
+    netezesc (curburi organice, fatete de stanca), muchiile adevarate raman
+    crisp (colturi de cladire, canturi de grinzi, prisma stalpului de marcaj).
+    Deci cuburile raman cuburi, dar stancile devin mase.
+
+    Dovada A/B, inainte sa scrii cod aici: ruleaza Snapshot.tscn cu si fara
+    --smooth (echivalentul la runtime) pe acelasi cadru.
+    """
+    if angle_deg is None:
+        return
+    me = obj.data
+    for poly in me.polygons:
+        poly.use_smooth = True
+    ang = math.radians(angle_deg)
+    if hasattr(me, "set_sharp_from_angle"):
+        # Blender 4.1+: muchiile peste prag primesc atributul "sharp".
+        me.set_sharp_from_angle(angle=ang)
+    elif hasattr(me, "use_auto_smooth"):
+        # Blender <= 4.0: vechiul auto smooth.
+        me.use_auto_smooth = True
+        me.auto_smooth_angle = ang
+
+
 def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
-           bevel_segments=1, origin_size=None):
+           bevel_segments=1, origin_size=None, smooth_angle=55.0):
     """Lantul standard: bevel -> UV pe sloturi -> origine -> AO copt.
 
     origin="base"      centreaza si XY pe bounding box
@@ -1106,6 +1137,9 @@ def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
     """
     snap = snapshot_slots(obj)
     apply_bevel(obj, bevel, segments=bevel_segments, angle_deg=bevel_angle)
+    # Dupa bevel (care creeaza muchiile finale), inainte de orice masuratoare.
+    # smooth_angle=None dezactiveaza, pentru piesele care chiar vor fatete.
+    apply_smooth(obj, smooth_angle)
     assign_uvs(obj, snap)
     if origin == "base":
         set_origin_base(obj, center_xy=True)

@@ -72,9 +72,25 @@ const TILE_TERRACOTTA: int = 23 # olane rosii
 ##   - TILE_TERRACOTTA e la saturatie 0.60, nu 0.69: acoperisurile sunt o
 ##     suprafata MARE, iar un rosu saturat ar concura cu CAR_RED. Asa ramane
 ##     distinct si de KERB_RED (nuanta 21° fata de 8°).
+## Valorile de mediu (0..13) au fost recalibrate DUPA MASURATOARE, nu dupa ochi
+## (august 2026). Cadrul de joc avea saturatie mediana 0.52 pe familia
+## nisip/stanca; foile de referinta din assets/dunele_inspiration/ stau la
+## 0.59-0.71. Plangerea "lumea e fada" era, in cifre, un deficit de ~25% de
+## saturatie plus lipsa oricarui intuneric real (p5 de luminanta 0.20 la noi,
+## 0.08-0.12 in referinte).
+##
+## Ce s-a schimbat: saturatie ×1.1..1.3 pe tot mediul; sand_shadow si rock_dark
+## coborate si in valoare (×0.86 / ×0.82) ca AO-ul si crapaturile sa aiba unde
+## sa se aseze. Asfaltul si betonul raman neutre INTENTIONAT — soseaua e cea mai
+## inchisa suprafata continua si trebuie citita, nu colorata. Accentele de
+## masini (14..16) si sloturile Okinawa (17+) neatinse.
+##
+## Multiplicatorii exacti per slot sunt in istoricul PR-ului; regula de reluat:
+## masoara (tools de mai jos in style_bible §14), schimba HEX, regenereaza
+## atlasul, recalibreaza theme_exposure. Nimic altceva nu se atinge.
 const HEX: Array[String] = [
-	"E8C88B", "D8A86A", "A97A4A", "C79664", "7E5B3A", "4B4B4D", "696765",
-	"B74A3A", "C8BEAC", "8A6947", "915535", "7E96A8", "617A43", "AFA25E",
+	"E8C074", "D4994D", "915D27", "C18446", "67421F", "4B4B4D", "696765",
+	"BB3522", "C8BDA9", "835C34", "91461E", "7692A8", "5B7C34", "AF9F4E",
 	"E54839", "2C82E8", "F2D03C",
 	"54BFB8", "2E5F6B", "E9DCC0", "55535A", "3F7A3C", "E9F2F0", "C4784F",
 ]

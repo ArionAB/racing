@@ -116,16 +116,20 @@ static func themes() -> Dictionary:
 			# (soare 1.25, expunere 1.0) nisipul iesea #FCDB99 in loc de #D8A86A —
 			# supraexpus, si granulatia de suprafata disparea in saturatie.
 			#
-			# Recalibrat de doua ori: stratul de detaliu se INMULTESTE peste albedo
-			# (medie 0.89), iar soarele a coborat de la 48° la 42° si s-a mutat
-			# lateral, deci nisipul primeste mai putina lumina directa. Cumulate, au
-			# dus nisipul de la #D8A86A la #BD955E. 0.75 -> 1.42 il aduce inapoi.
+			# Recalibrat de TREI ori. Intai stratul de detaliu (se inmulteste peste
+			# albedo, medie 0.89) si coborarea soarelui la 42° au dus nisipul la
+			# #BD955E si au cerut 0.75 -> 1.42. Apoi paleta adanca (sand_mid
+			# #D8A86A -> #D4994D) a cerut 1.42 -> 1.30: cu vechea expunere,
+			# tonemapper-ul FILMIC impingea nisipul in zona de rolloff si ii SPALA
+			# saturatia — cadrul masura 0.53 desi paleta primise +25%. Masurat la
+			# 1.30: eroare -8/+5/+11 pe canale, sub pragul de 12.
 			#
-			# Daca schimbi detaliul SAU unghiul soarelui, REIA masuratoarea:
+			# Daca schimbi detaliul, unghiul soarelui SAU paleta, REIA masuratoarea:
 			#   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40
-			# si compara nisipul insorit (coltul liber al imaginii) cu #D8A86A.
+			# si compara nisipul insorit (coltul liber al imaginii) cu
+			# Palette.HEX[Palette.SAND_MID].
 			"sun_energy": 0.8,
-			"exposure": 1.42,
+			"exposure": 1.30,
 			# Ambient din CULOARE, nu din cer — vezi _build_environment.
 			"ambient_color": Color.html("E2B77A"),
 			"ambient_energy": 0.22,

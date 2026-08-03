@@ -43,6 +43,11 @@ const LANDMARK_CLEAR: float = 25.0
 
 ## Variantele din GLB, cu inaltimea lor nominala. Godot alege varianta cea mai
 ## apropiata de inaltimea ceruta si scaleaza cel mult ±SCALE_LIMIT.
+##
+## 12 din august 2026 (upgrade-ul grafic): 6 mesa clasice + 6 siluete distincte
+## (sa, treapta dubla, surplomba, varf tesit, crestatura, coama dubla joasa).
+## Cu oglindirea de mai jos ies 24 de siluete — repetitia era sursa #1 a
+## aspectului "pătrățos" pe Dunele (~130 de instante din 6 mesh-uri).
 const VARIANTS := [
 	{"node": "Cliff_A", "height": 6.5},
 	{"node": "Cliff_B", "height": 8.0},
@@ -50,11 +55,19 @@ const VARIANTS := [
 	{"node": "Cliff_D", "height": 11.0},
 	{"node": "Cliff_E", "height": 7.5},
 	{"node": "Cliff_F", "height": 10.0},
+	{"node": "Cliff_G", "height": 9.0},
+	{"node": "Cliff_H", "height": 12.5},
+	{"node": "Cliff_I", "height": 7.0},
+	{"node": "Cliff_J", "height": 10.5},
+	{"node": "Cliff_K", "height": 8.5},
+	{"node": "Cliff_L", "height": 6.0},
 ]
 ## Peste atat se vede intinderea straturilor de roca.
 const SCALE_LIMIT: float = 0.18
 ## Cat de departe de inaltimea ceruta mai intra o varianta in bazinul de alegere.
-const VARIANT_TOLERANCE: float = 0.22
+## 0.22 -> 0.18: bazinul e oricum de doua ori mai bogat cu 12 variante, deci
+## putem fi mai stricti cu intinderea si tot pastram varietatea.
+const VARIANT_TOLERANCE: float = 0.18
 
 
 ## Construieste falezele si le intoarce sub un singur nod.

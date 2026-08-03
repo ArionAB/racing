@@ -60,6 +60,8 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
+	if "--smooth" in OS.get_cmdline_user_args():
+		_smooth_organics(track)
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:
@@ -144,3 +146,67 @@ func _ready() -> void:
 	img.save_png(out)
 	print("SNAPSHOT: ", out)
 	get_tree().quit()
+
+
+## EXPERIMENT (--smooth): normale netede pe geometria organica, pentru A/B.
+##
+## Ipoteza "arata ca Minecraft" are o cauza precisa de verificat: NIMIC din
+## pipeline nu face shade_smooth, deci fiecare fateta e o placa uniforma de
+## lumina. Aici rebuild-uim normalele prin mediere pe pozitie — echivalentul
+## la runtime al lui shade_smooth din Blender — DOAR ca sa comparam capturi.
+## Reparatia reala, daca ipoteza tine, e in exportul Blender, nu aici.
+func _smooth_organics(root: Node) -> void:
+	const PREFIXES := ["cliff", "butte", "mesa", "cluster", "arch", "boulder",
+		"rock", "pebbles", "bush", "portal", "dino", "bone"]
+	var count := 0
+	for node in _walk_meshes(root):
+		var nm := String(node.name).to_lower()
+		var hit := false
+		for p in PREFIXES:
+			if nm.begins_with(p):
+				hit = true
+				break
+		if not hit or node.mesh == null:
+			continue
+		node.mesh = _smoothed(node.mesh)
+		count += 1
+	print("--smooth: %d mesh-uri organice cu normale netede" % count)
+
+
+func _walk_meshes(node: Node) -> Array[MeshInstance3D]:
+	var out: Array[MeshInstance3D] = []
+	var mi := node as MeshInstance3D
+	if mi != null:
+		out.append(mi)
+	for c in node.get_children():
+		out.append_array(_walk_meshes(c))
+	return out
+
+
+## Normale medii pe pozitie cuantizata: toate fetele care impart un varf isi
+## amesteca normalele, deci suprafata curge in loc sa fie placi.
+func _smoothed(mesh: Mesh) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for si in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(si)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		var acc := {}
+		var tri_count := idx.size() / 3 if idx.size() > 0 else verts.size() / 3
+		for t in tri_count:
+			var i0: int = idx[t * 3] if idx.size() > 0 else t * 3
+			var i1: int = idx[t * 3 + 1] if idx.size() > 0 else t * 3 + 1
+			var i2: int = idx[t * 3 + 2] if idx.size() > 0 else t * 3 + 2
+			var fn := (verts[i1] - verts[i0]).cross(verts[i2] - verts[i0])
+			for i in [i0, i1, i2]:
+				var key := (verts[i] * 200.0).round()
+				acc[key] = acc.get(key, Vector3.ZERO) + fn
+		var normals := PackedVector3Array()
+		normals.resize(verts.size())
+		for i in verts.size():
+			var key := (verts[i] * 200.0).round()
+			normals[i] = (acc[key] as Vector3).normalized()
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return out
+

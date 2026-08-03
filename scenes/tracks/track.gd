@@ -960,6 +960,10 @@ func _build_terrain() -> void:
 					# repetitie pe care ochiul il prinde imediat pe suprafete mari.
 					st.set_uv2(Vector2(v.x, v.z) * SURFACE_TILING_MACRO)
 					st.add_vertex(v)
+	# Indexarea uneste colturile de celula partajate (pozitie+culoare+UV
+	# identice), deci normalele se mediaza REAL intre celule vecine: dunele
+	# prind lumina continuu, fara fatete aleatorii pe grila.
+	st.index()
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
@@ -1439,6 +1443,7 @@ func _build_branch_surfaces() -> void:
 			st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
 			st.set_uv(Vector2(u_half, v1)); st.add_vertex(r1)
 			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
+		st.index()
 		st.generate_normals()
 		# Nisip umed: coral_sand intunecat. Nu e asfalt si nu trebuie sa para.
 		_add_mesh_with_collision(st.commit(),
@@ -1502,12 +1507,15 @@ func _build_road() -> void:
 		var r1 := baked[j] + _side_at(j) * half_width
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
+		# Ordinea l0,l1,r0 (nu l0,r0,l1): fata triunghiului iese IN SUS. Cu
+		# ordinea veche, generate_normals() dadea normale in jos — soseaua era
+		# luminata doar de ambient, iar CULL_BACK o facea invizibila de sus.
 		top.set_uv(Vector2(-u_half, v0)); top.add_vertex(l0)
-		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
 		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
 		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
+		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
+		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
 		top.set_uv(Vector2(u_half, v1)); top.add_vertex(r1)
-		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
 		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0)
@@ -1528,7 +1536,13 @@ func _build_road() -> void:
 		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
 		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1 + down)
 		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
+	# index() inainte de generate_normals(): fara el, fiecare triunghi isi tine
+	# vertecsii lui si normalele se mediaza doar in grupul implicit de netezire;
+	# indexat, inelele vecine IMPART vertecsii si lumina curge continuu in lungul
+	# soselei in loc sa se rupa in fasii la fiecare 3 m.
+	top.index()
 	top.generate_normals()
+	sides.index()
 	sides.generate_normals()
 	# Asfaltul racoros-inchis face masinile saturate sa "sara" din ecran, iar
 	# granulatia de pietris il scoate din senzatia de plastic turnat. Textura e
@@ -1539,8 +1553,11 @@ func _build_road() -> void:
 	# Roughness 0.82 + specular 0.3 (style_bible §4): singura suprafata din lume
 	# cu un sheen vizibil — o banda discreta de lumina pe asfalt spre soare,
 	# ca in Art of Rally. Restul lumii ramane mat (0.15 pe world_material).
+	# CULL_BACK: fata soselei e garantat in sus (winding-ul e emis consistent
+	# aici), deci nu platim fiecare pixel de doua ori.
 	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3),
-		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3)
+		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
+		BaseMaterial3D.CULL_BACK)
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
 ## Cati metri de sosea raman FARA perete de o parte si de alta a unei
@@ -1912,9 +1929,12 @@ func _build_flyoff_net(idx: int) -> void:
 ## in loc de doua. De aceea variatiile aleatoare de nuanta sunt CUANTIFICATE in
 ## cateva trepte peste tot: o nuanta continua per instanta ar face cache-ul inutil.
 func _flat_material(color: Color, texture: Texture2D = null,
-		roughness: float = 1.0, specular: float = 0.5) -> StandardMaterial3D:
-	var key := "%s|%s|%.2f|%.2f" % [color.to_html(true),
-		texture.resource_path if texture != null else "", roughness, specular]
+		roughness: float = 1.0, specular: float = 0.5,
+		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED
+		) -> StandardMaterial3D:
+	var key := "%s|%s|%.2f|%.2f|%d" % [color.to_html(true),
+		texture.resource_path if texture != null else "", roughness, specular,
+		cull]
 	if _mat_cache.has(key):
 		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
@@ -1923,17 +1943,27 @@ func _flat_material(color: Color, texture: Texture2D = null,
 		mat.albedo_texture = texture
 	mat.roughness = roughness
 	mat.metallic_specular = specular
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	# Vertex color = AO/gradient copt de builder. Mesh-urile care nu emit COLOR
+	# raman pe alb (1,1,1), deci inmultirea e identitate — zero regresie pe
+	# apelantii care nu stiu de el.
+	mat.vertex_color_use_as_albedo = true
+	# CULL_DISABLED ramane default-ul (winding arbitrar pe multe mesh-uri
+	# procedurale), dar suprafetele mari cu winding cunoscut (sosea, umeri)
+	# cer CULL_BACK: fiecare pixel rasterizat o singura data, nu de doua ori —
+	# fill rate-ul e constrangerea reala pe mobil.
+	mat.cull_mode = cull
 	_mat_cache[key] = mat
 	return mat
 
 
 func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		texture: Texture2D = null, roughness: float = 1.0,
-		specular: float = 0.5) -> void:
+		specular: float = 0.5,
+		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED) -> void:
 	var inst := MeshInstance3D.new()
 	inst.mesh = mesh
-	inst.material_override = _flat_material(color, texture, roughness, specular)
+	inst.material_override = _flat_material(color, texture, roughness, specular,
+		cull)
 	add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
@@ -2005,22 +2035,36 @@ func _build_shoulders() -> void:
 			var inner1 := baked[j] + s1 * half_width * side_sign + drop
 			var outer0 := inner0 + s0 * SHOULDER_WIDTH * side_sign
 			var outer1 := inner1 + s1 * SHOULDER_WIDTH * side_sign
+			# Gradient de vertex color: mai INCHIS la contactul cu asfaltul
+			# (praful batatorit de lansat rotile), plin spre nisip. Face umarul
+			# sa citeasca a tranzitie de material, nu a banda decupata.
+			const INNER_SHADE := Color(0.82, 0.82, 0.84)
 			# Winding-ul se inverseaza cu latura, altfel una din benzi iese cu
 			# fata in jos si dispare la cull.
 			if side_sign < 0.0:
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
 				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
 			else:
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
 				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
+				st.set_color(INNER_SHADE)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				st.set_color(Color.WHITE)
 				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
+	st.index()
 	st.generate_normals()
 	# Praf: intre asfalt si nisip ca valoare, ca sa faca tranzitia, nu un al
 	# treilea ton care sa sara in ochi.
@@ -2029,8 +2073,12 @@ func _build_shoulders() -> void:
 		else theme_ground_tint.darkened(0.25)
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
+	# Winding-ul e tinut corect pe ambele laturi (vezi mai sus), deci umerii
+	# suporta CULL_BACK — banda care margineste toata pista nu se mai
+	# rasterizeaza pe ambele fete.
 	inst.material_override = _flat_material(dust,
-		_tex("res://assets/textures/surface_sand.png"))
+		_tex("res://assets/textures/surface_sand.png"), 1.0, 0.5,
+		BaseMaterial3D.CULL_BACK)
 	add_child(inst)
 
 
@@ -2055,8 +2103,18 @@ func _build_kerbs() -> void:
 			var in0 := e0 - _side_at(i) * 0.9 * side_sign
 			var in1 := e1 - _side_at((i + 2) % n) * 0.9 * side_sign
 			var st := red if (i / 2) % 2 == 0 else white
-			st.add_vertex(e0); st.add_vertex(e1); st.add_vertex(in0)
-			st.add_vertex(in0); st.add_vertex(e1); st.add_vertex(in1)
+			# AO discret pe muchia dinspre exterior: bordura citeste a beton
+			# turnat cu grosime, nu a banda de plastic lipita pe asfalt.
+			const EDGE_SHADE := Color(0.86, 0.86, 0.86)
+			st.set_color(EDGE_SHADE)
+			st.add_vertex(e0); st.add_vertex(e1)
+			st.set_color(Color.WHITE)
+			st.add_vertex(in0)
+			st.add_vertex(in0)
+			st.set_color(EDGE_SHADE)
+			st.add_vertex(e1)
+			st.set_color(Color.WHITE)
+			st.add_vertex(in1)
 			if (i / 2) % 2 == 0:
 				emitted_red = true
 			else:

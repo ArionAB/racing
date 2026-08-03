@@ -47,6 +47,15 @@ const GROUND_STRIDE: int = 2
 ## Cat sta nisipul sub cota asfaltului (buza umarului).
 const GROUND_DROP: float = 0.30
 
+# --- racorduri netede intre campuri de inaltime ---
+## Min/max-urile dure dintre campuri (rapa vs. teren, banda secundara vs. fund
+## de mare, dune vs. podeaua vailor) lasau cute C0: discontinuitati de panta
+## care, la un pas de grila de ~8 m, se citesc ca muchii drepte trase cu rigla
+## (issue #97). k = latimea racordului, in metri.
+const SMOOTH_RAVINE_K: float = 3.0
+const SMOOTH_BRANCH_K: float = 2.0
+const SMOOTH_FLOOR_K: float = 0.8
+
 ## Rapa: de la cati metri dincolo de marginea asfaltului incepe saparea.
 const RAVINE_INNER: float = 4.0
 ## Peste cati metri se coboara pana la fundul rapei.
@@ -179,7 +188,9 @@ func ground_y(wx: float, wz: float) -> float:
 	# toata pista ar sta pe un platou cu o faleza de 19 m la 115 m distanta. Cu
 	# media, desertul ondulează IMPREUNA cu traseul — creasta citeste ca mesa,
 	# portiunile joase ca vai.
-	var far_level := _mean_y + maxf(_dunes(wx, wz), -1.0)
+	# Clamp NETED la podeaua vailor: cel dur lasa lacuri perfect plate cu
+	# margine de rigla acolo unde dunele coboara sub -1 m (issue #97).
+	var far_level := _mean_y + _smax(_dunes(wx, wz), -1.0, SMOOTH_FLOOR_K)
 	# INTERIORUL buclei ramane uscat, oricat de departe de sosea ar fi.
 	#
 	# Fara conditia asta, o insula iesea ca o panglica de nisip lata de 230 m
@@ -206,7 +217,8 @@ func ground_y(wx: float, wz: float) -> float:
 		# amplitudine plina, adancimea oscila peste si sub prag, iar grila fina de
 		# tarm se emitea pe toata suprafata marii — masurat: 12 800 de triunghiuri
 		# in loc de ~2 000.
-		far_level = _mean_y - _far_drop + maxf(_dunes(wx, wz), -1.0) * 0.25
+		far_level = _mean_y - _far_drop \
+			+ _smax(_dunes(wx, wz), -1.0, SMOOTH_FLOOR_K) * 0.25
 	var y := lerpf(road_level, far_level, t * t)
 	y = _lift_branches(y, wx, wz)
 	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
@@ -246,9 +258,10 @@ func _lift_branches(y: float, wx: float, wz: float) -> float:
 		return y
 	var d := sqrt(near_sq)
 	var t := clampf((d - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0)
-	# maxf, nu lerp pur: banda nu SAPA niciodata terenul, doar il ridica. Acolo
+	# max, nu lerp pur: banda nu SAPA niciodata terenul, doar il ridica. Acolo
 	# unde trece peste uscat mai inalt (racordurile cu soseaua), ramane uscatul.
-	return maxf(y, lerpf(level, y, t * t))
+	# Neted, ca racordul banc-de-nisip -> fund de mare sa nu aiba muchie.
+	return _smax(y, lerpf(level, y, t * t), SMOOTH_BRANCH_K)
 
 
 ## Suntem intr-o rapa declarata la fractia si latura date?
@@ -295,9 +308,10 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 			continue
 		var lat := smoothstep(0.0, 1.0,
 			clampf((dist - _half_width - RAVINE_INNER) / RAVINE_RIM, 0.0, 1.0))
-		# minf: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
-		# construi un dig in loc de o groapa.
-		y = minf(y, road_level - r.z * along * lat)
+		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
+		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
+		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).
+		y = _smin(y, road_level - r.z * along * lat, SMOOTH_RAVINE_K)
 	return y
 
 
@@ -306,6 +320,19 @@ func _side_sign_at(idx: int, wx: float, wz: float) -> float:
 	var s := side_at(idx)
 	var p := _baked[idx]
 	return signf(Vector2(s.x, s.z).dot(Vector2(wx - p.x, wz - p.z)))
+
+
+## Minim neted polinomial: coincide cu minf departe de intersectie, rotunjeste
+## muchia pe o banda de ~k metri. Rezultatul e <= minf(a, b), deci "sapa, nu
+## ridica" ramane adevarat oriunde se foloseste in loc de minf.
+static func _smin(a: float, b: float, k: float) -> float:
+	var h := clampf(0.5 + 0.5 * (b - a) / k, 0.0, 1.0)
+	return lerpf(b, a, h) - k * h * (1.0 - h)
+
+
+## Maxim neted — oglinda lui _smin; rezultatul e >= maxf(a, b).
+static func _smax(a: float, b: float, k: float) -> float:
+	return -_smin(-a, -b, k)
 
 
 ## Fereastra circulara [f0,f1] cu margini line. f1 < f0 = trece peste linia de start.

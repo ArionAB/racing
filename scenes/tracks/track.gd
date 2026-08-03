@@ -309,6 +309,11 @@ func _dino_spots() -> Array[Vector2]:
 func _arch_fracs() -> Array[float]:
 	return []
 
+## Defilee: intervale (frac_start, frac_end) in care falezele strang drumul de
+## AMBELE parti, inalte si apropiate. Momentul-semnatura al unei piste (#28).
+func _gorge_ranges() -> Array[Vector2]:
+	return []
+
 ## Intrari de mina lipite de perete: (fractie, parte ±1).
 func _mine_spots() -> Array[Vector2]:
 	return []
@@ -2045,7 +2050,7 @@ func _build_kerbs() -> void:
 ## partea care se itereaza cel mai des.
 func _build_world_decor() -> void:
 	add_child(TrackCliffs.build(_sampler, theme_flag("cliffs", false),
-		track_name.hash(), _cliff_clearings()))
+		track_name.hash(), _cliff_clearings(), _gorge_ranges()))
 	add_child(TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		track_name.hash(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert")))

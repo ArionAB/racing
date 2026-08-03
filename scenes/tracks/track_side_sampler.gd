@@ -195,6 +195,10 @@ func ground_y(wx: float, wz: float) -> float:
 		# in loc de ~2 000.
 		far_level = _mean_y - _far_drop + maxf(_dunes(wx, wz), -1.0) * 0.25
 	var y := lerpf(road_level, far_level, t * t)
+	# Detaliul foloseste ACEEASI masca de coridor ca amestecul mare: zero pe
+	# banda plata a soselei, plin dincolo de blend. Inainte de _lift_branches,
+	# ca bancurile scurtaturilor sa ramana netede.
+	y += _detail_dunes(wx, wz) * (t * t)
 	y = _lift_branches(y, wx, wz)
 	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
 
@@ -309,6 +313,25 @@ func _dunes(wx: float, wz: float) -> float:
 	return sin(wx * 0.012 + _dune_phase) * 2.2 \
 		+ cos(wz * 0.014 + _dune_phase * 2.0) * 2.0 \
 		+ sin(wx * 0.031) * sin(wz * 0.027) * 1.3
+
+
+## Dune MICI: zgomot de detaliu la ~11 m lungime de unda, ±0.35 m amplitudine.
+##
+## _dunes() da forma mare (sute de metri); asta da textura de relief pe care o
+## vezi din masina — la pasul de teren de ~8 m, valurile astea devin FORME cu
+## lumina si umbra proprie, nu doar nuante. Frecvente necomensurabile, ca sa nu
+## apara tipar de grila; faza pistei intra in ambele, ca terenul sa difere
+## intre piste.
+##
+## Traieste in SAMPLER, nu in _build_terrain: tot ce citeste ground_y (teren,
+## coliziune, faleze, decor, landmark-uri) vede acelasi relief — nimic nu
+## pluteste peste valuri si nimic nu se ingroapa in ele.
+## Amplitudinea (±0.35 m) e departe de pragul de ±3.5 m/50 m din style_bible
+## §11.3, deci masinile care ies de pe drum nu sar.
+func _detail_dunes(wx: float, wz: float) -> float:
+	return sin(wx * 0.57 + _dune_phase * 3.0) \
+		* cos(wz * 0.61 - _dune_phase) * 0.22 \
+		+ sin((wx + wz) * 0.43 + _dune_phase * 5.0) * 0.13
 
 
 ## Un punct copt al axei pistei (pentru limite, iteratii proprii).

@@ -882,7 +882,12 @@ func _centroid() -> Vector3:
 const TERRAIN_MIN_SIZE: float = 760.0
 const TERRAIN_MAX_SIZE: float = 1400.0
 ## Pasul grilei de teren, in metri. Constant indiferent de intindere.
-const TERRAIN_CELL: float = 760.0 / 48.0
+## 48 -> 96 de celule (august 2026, upgrade-ul grafic): la ~7.9 m/celula,
+## dunele mici din sampler (_detail_dunes, ~11 m lungime de unda) devin forme
+## cu lumina proprie — la 15.8 m erau sub rezolutia grilei si dispareau.
+## Costul: teren ~4.6k -> ~18.5k tris si trimesh de coliziune 4x, ambele
+## acoperite (garda la 300k; Jolt duce trimesh static de ordinul asta lejer).
+const TERRAIN_CELL: float = 760.0 / 96.0
 
 func _world_extent() -> float:
 	if baked.is_empty():

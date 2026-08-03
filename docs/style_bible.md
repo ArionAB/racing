@@ -23,20 +23,20 @@ nu un pătrat de culoare uniformă — vezi §4.
 
 | slot | rol | hex | folosit la |
 |---|---|---|---|
-| 0 | sand_light | `#E8C88B` | nisip în soare, vârfuri de faleză |
-| 1 | sand_mid | `#D8A86A` | majoritatea terenului |
-| 2 | sand_shadow | `#A97A4A` | nisip umbrit, tentă de AO |
-| 3 | rock_light | `#C79664` | fețe de stâncă |
-| 4 | rock_dark | `#7E5B3A` | interior de faleză, crăpături |
+| 0 | sand_light | `#E8C074` | nisip în soare, vârfuri de faleză |
+| 1 | sand_mid | `#D4994D` | majoritatea terenului |
+| 2 | sand_shadow | `#915D27` | nisip umbrit, tentă de AO |
+| 3 | rock_light | `#C18446` | fețe de stâncă |
+| 4 | rock_dark | `#67421F` | interior de faleză, crăpături |
 | 5 | asphalt | `#4B4B4D` | șosea |
 | 6 | asphalt_edge | `#696765` | margini tocite |
-| 7 | kerb_red | `#B74A3A` | borduri, marcaje |
-| 8 | concrete | `#C8BEAC` | pod, fundații |
-| 9 | wood_weathered | `#8A6947` | scânduri, garduri |
-| 10 | rust_metal | `#915535` | butoaie, moară, turn de apă |
-| 11 | painted_metal | `#7E96A8` | containere, ornamente |
-| 12 | cactus_green | `#617A43` | cactuși, tufe |
-| 13 | dry_vegetation | `#AFA25E` | smocuri de iarbă |
+| 7 | kerb_red | `#BB3522` | borduri, marcaje |
+| 8 | concrete | `#C8BDA9` | pod, fundații |
+| 9 | wood_weathered | `#835C34` | scânduri, garduri |
+| 10 | rust_metal | `#91461E` | butoaie, moară, turn de apă |
+| 11 | painted_metal | `#7692A8` | containere, ornamente |
+| 12 | cactus_green | `#5B7C34` | cactuși, tufe |
+| 13 | dry_vegetation | `#AF9F4E` | smocuri de iarbă |
 | 14-16 | **accente mașini** | `#E54839` `#2C82E8` `#F2D03C` | **doar mașini**, niciodată decor |
 | 17 | reef_shallow | `#54BFB8` | apă peste recif |
 | 18 | sea_deep | `#2E5F6B` | larg |
@@ -399,7 +399,7 @@ variație la 60 km/h devine zgomot și strică citirea liniei de curs.
 > cu camera când aceasta se schimbă, toate cifrele σ din istoricul de PR-uri devin
 > incomparabile. Pentru compoziție există `--gamecam`.
 
-**Expunerea se verifică separat**, comparând nisipul însorit cu `#D8A86A`:
+**Expunerea se verifică separat**, comparând nisipul însorit cu `#D4994D`:
 
 ```
 godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.2 --size=40

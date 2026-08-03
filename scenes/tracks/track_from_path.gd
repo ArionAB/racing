@@ -26,6 +26,9 @@ extends Track
 @export var custom_dino_spots: Array[Vector2] = []
 ## Arcade de stanca prin care trece soseaua (fractii 0..1).
 @export var custom_arch_fracs: Array[float] = []
+## Defilee: intervale (frac_start, frac_end) unde falezele strang drumul de
+## ambele parti — inalte, apropiate, fara ferestre. Momentul-semnatura (#28).
+@export var custom_gorge_ranges: Array[Vector2] = []
 ## Intrari de mina lipite de perete: fiecare Vector2 = (fractie, parte ±1).
 @export var custom_mine_spots: Array[Vector2] = []
 ## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
@@ -88,6 +91,9 @@ func _dino_spots() -> Array[Vector2]:
 
 func _arch_fracs() -> Array[float]:
 	return custom_arch_fracs
+
+func _gorge_ranges() -> Array[Vector2]:
+	return custom_gorge_ranges
 
 func _mine_spots() -> Array[Vector2]:
 	return custom_mine_spots

@@ -65,8 +65,12 @@ const VARIANT_TOLERANCE: float = 0.22
 ## `theme != "desert"` — adica falezele de canion erau legate de numele unei
 ## piste, nu de o proprietate a lumii. Insula are promontoriu de zid gusuku, nu
 ## canion, deci ii trebuia un "nu" care sa nu insemne "nu sunt desert".
+## `gorges` = intervale (frac_start, frac_end) de defileu: acolo peretii apar pe
+## AMBELE laturi (si pe interior neinaltat, unde altfel nu se pun), inalti si
+## traşi aproape de asfalt, fara ferestrele de "respiro". Momentul-semnatura al
+## pistei (#28) — 80-120 m in care lumea se inchide peste tine.
 static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
-		landmarks: Array[Vector3]) -> Node3D:
+		landmarks: Array[Vector3], gorges: Array[Vector2] = []) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Cliffs"
 	if not enabled or not ResourceLoader.exists(MODEL_PATH):
@@ -103,7 +107,12 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 			if spec.side_sign != side_sign:
 				continue
 			var d := spec.frac * total
-			if not TrackSideSampler.in_segments(d, segments):
+			var gorge := _gorge_blend(spec.frac, gorges)
+			# In defileu, regula "perete doar unde marginea e inchisa" se
+			# suspenda: strangerea cere zid pe AMBELE laturi, inclusiv pe
+			# interiorul neinaltat. Restul filtrelor raman — un defileu peste o
+			# rapa sau peste degajarea unui landmark ar strica amandoua.
+			if gorge <= 0.0 and not TrackSideSampler.in_segments(d, segments):
 				continue
 			if _near_landmark(d, total, clear_at):
 				continue
@@ -112,10 +121,36 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 			# Aici peretele se deschide si prapastia devine lizibila de departe.
 			if spec.is_ravine:
 				continue
-			if _skip_slot(spec):
+			# Ferestrele de respiro nu au ce cauta in defileu: o gaura in zid
+			# exact unde lumea trebuie sa se inchida i-ar rupe tot efectul.
+			if gorge <= 0.0 and _skip_slot(spec):
 				continue
-			_place(root, body, scene, sampler, spec, rng)
+			_place(root, body, scene, sampler, spec, rng, gorge)
 	return root
+
+
+## Cat de "in defileu" e fractia asta: 0 in afara, 1 in miez, cu rampe line de
+## intrare/iesire pe ~18% din lungimea intervalului la fiecare capat. Fara
+## rampe, primul perete de 12 m ar aparea de nicaieri langa unul de 7 —
+## defileul trebuie sa se STRANGA in jurul tau, nu sa te teleporteze in el.
+## Aritmetica e circulara: un interval poate trece peste linia de start.
+static func _gorge_blend(frac: float, gorges: Array[Vector2]) -> float:
+	var best := 0.0
+	for g in gorges:
+		var span := fposmod(g.y - g.x, 1.0)
+		if span <= 0.001:
+			continue
+		var t := fposmod(frac - g.x, 1.0)
+		if t > span:
+			continue
+		var edge := span * 0.18
+		var blend := 1.0
+		if t < edge:
+			blend = t / edge
+		elif t > span - edge:
+			blend = (span - t) / edge
+		best = maxf(best, blend)
+	return best
 
 
 ## Distanta `d` cade prea aproape de un landmark? Comparatia e circulara: un
@@ -132,8 +167,16 @@ static func _near_landmark(d: float, total: float,
 
 static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		sampler: TrackSideSampler,
-		spec: TrackDecorSpec, rng: RandomNumberGenerator) -> void:
+		spec: TrackDecorSpec, rng: RandomNumberGenerator,
+		gorge: float = 0.0) -> void:
 	var wanted := _wanted_height(spec, rng)
+	# Defileul forteaza inaltimea spre 12 m, PESTE plafonul de apex din
+	# _wanted_height: acolo plafonul exista ca sa vezi iesirea din viraj, dar
+	# intr-un defileu tocmai ca NU vezi iesirea e tot efectul. Lerp-ul cu
+	# blend-ul de intrare face trecerea de la un perete normal la unul de 12 m
+	# in 2-3 sectiuni, nu dintr-un foc.
+	if gorge > 0.0:
+		wanted = lerpf(wanted, 12.2, gorge)
 	var pick := _variant_for(wanted, rng)
 	var model := _extract(scene, pick["node"])
 	if model == null:
@@ -162,6 +205,13 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		# Viraj strans sau zona de franare: aici chiar se depaseste, deci cel mai
 		# mult loc (style_bible §7 cere 8m liberi la franare).
 		extra = OFFSET_CORNER + 2.0 - OFFSET_OUTER
+	# In defileu peretele vine la 0.8 m de asfalt, peste TOATE retragerile de
+	# mai sus — inclusiv cea de depasire. E un risc asumat si masurat: retragerea
+	# de pe exterioare exista fiindca 1.2 m PESTE TOT omora depasirile (ecartul
+	# cadea la 0.03 tururi); aici sunt ~110 m din ~1140, iar sonda de cursa
+	# verifica ecartul dupa. Daca scade, se scurteaza defileul, nu se largeste.
+	if gorge > 0.0:
+		extra = lerpf(extra, 0.8 - OFFSET_OUTER, gorge)
 	var pos := spec.position + spec.normal_out * (extra + half_depth)
 	# Re-esantionam cota: slotul s-a mutat lateral pana la ~7 m fata de unde a
 	# fost masurat, iar pe o panta de 12% asta inseamna aproape un metru de

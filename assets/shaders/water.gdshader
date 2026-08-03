@@ -36,8 +36,16 @@ shader_type spatial;
 //    face din ce avem.
 //
 // Ce NU face, intentionat: reflexii (SSR e interzis pe mobil, style_bible §8),
-// refractie, spuma din depth fade. Spuma e GEOMETRIE — banda de varfuri unde
-// apa atinge tarmul, colorata la generare.
+// refractie, citire de DEPTH_TEXTURE. "Adancimea" per pixel e COLOR.a, copta
+// in vertex colors la generare (canalul era liber — materialul e opac, alfa
+// e pur canal de date) si interpolata gratis de rasterizator.
+//
+// v2 (issue #99): gradient de adancime PER PIXEL (rampa era interpolata pe
+// varfuri la 9.5 m si iesea in benzi), spuma animata la tarm, sun glint.
+// Toate efectele noi au un uniform de intensitate cu 0 = comportamentul v1 —
+// kill-switch pentru profilarea pe device (M4): daca 60fps nu tine, se sting
+// pe rand de pe CPU, fara shader nou. Buget static: tot 2 esantioane de
+// textura per pixel, plus ~30 de operatii ALU.
 render_mode unshaded, cull_back, depth_draw_opaque;
 
 // detail_rock.png: gri, centrata pe ALB (medie masurata 0.89), tileabila.
@@ -54,6 +62,23 @@ uniform vec2 drift_near = vec2(0.55, 0.30);
 uniform vec2 drift_far = vec2(-0.28, 0.44);
 // Cat de tare bate ondulatia. 0 = culoare plata din vertex colors.
 uniform float ripple_strength : hint_range(0.0, 1.0) = 0.35;
+
+// --- v2. Toate culorile vin de pe CPU, din Track.water_tint(): un singur loc
+// de calibrare, promisiunea din comentariul lui _sea_color ramane adevarata.
+// Rampa de adancime, per pixel. 0 = doar vertex colors (v1).
+uniform float ramp_strength : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 shore_col; // nisip ud, chiar la linia apei
+uniform vec3 shallow_col; // laguna turcoaz
+uniform vec3 deep_col; // largul
+// Spuma animata la tarm. 0 = doar spuma-geometrie din banda de varfuri.
+uniform float foam_strength : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 foam_col;
+// Pana la ce adancime normalizata urca spuma pe plaja.
+uniform float foam_reach : hint_range(0.01, 0.5) = 0.10;
+uniform float foam_speed = 1.1;
+// Scanteierea soarelui pe ondulatie. 0 = stinsa.
+uniform float glint_strength : hint_range(0.0, 2.0) = 0.0;
+uniform vec3 sun_dir = vec3(0.0, 1.0, 0.0); // SPRE soare, normalizat
 
 varying vec3 world_pos;
 
@@ -75,9 +100,36 @@ void fragment() {
 	float a = texture(ripple_tex, uv_near).r;
 	float b = texture(ripple_tex, uv_far).r;
 	float ripple = mix(1.0, a * b, ripple_strength);
-	// COLOR = culoarea coapta in mesh: sea_deep / reef_shallow / foam_white,
-	// interpolate dupa adancime, si deja corectate de Track.water_tint().
-	// Aici doar o modulam — nicio corectie de culoare in shader, ca sa existe
-	// un singur loc unde se calibreaza.
-	ALBEDO = COLOR.rgb * ripple;
+
+	// COLOR.rgb = culoarea coapta in mesh (v1), COLOR.a = adancimea
+	// normalizata (0 = linia apei, 1 = SEA_NEAR_DEPTH sau mai adanc).
+	float depth01 = COLOR.a;
+	// sqrt intinde partea de mica adancime: laguna turcoaz ocupa mai mult
+	// din banda vizibila, exact ca in imaginile de referinta.
+	float t = sqrt(depth01);
+	vec3 ramp = mix(shore_col, shallow_col, smoothstep(0.0, 0.40, t));
+	ramp = mix(ramp, deep_col, smoothstep(0.40, 1.0, t));
+	vec3 base = mix(COLOR.rgb, ramp, ramp_strength);
+
+	// Spuma: o banda care "linge" plaja. Pulsul curge SPRE mal (faza scade cu
+	// adancimea), iar pragul pe ondulatia deja esantionata ii rupe marginea —
+	// fara el iesea o dunga paralela cu tarmul, trasa cu rigla.
+	float band = 1.0 - smoothstep(0.0, foam_reach, depth01);
+	float pulse = 0.55 + 0.45 * sin(TIME * foam_speed - depth01 * 42.0);
+	float ragged = smoothstep(0.72, 0.95, a * b + band * 0.25);
+	float foam = clamp(band * pulse * ragged * 2.2, 0.0, 1.0) * foam_strength;
+	base = mix(base, foam_col, foam);
+
+	base *= ripple;
+
+	// Sun glint: NU e specular din pasul de lumina (ramane unshaded — vezi
+	// contractul #2), e o scanteiere geometrica din aceleasi doua esantioane.
+	// Normala perturbata ieftin din ondulatie; exponentul mic tine pata larga,
+	// masca de ripple o sparge in scantei.
+	vec3 n = normalize(vec3((a - 0.89) * 0.9, 1.0, (b - 0.89) * 0.9));
+	vec3 view = normalize(CAMERA_POSITION_WORLD - world_pos);
+	float glint = pow(max(dot(reflect(-sun_dir, n), view), 0.0), 48.0);
+	base += glint * smoothstep(0.55, 0.9, a * b) * glint_strength;
+
+	ALBEDO = base;
 }

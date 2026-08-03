@@ -69,6 +69,11 @@ var theme_shadows: bool = true
 ## ieftina care da totusi contact real cu solul.
 const SHADOW_DISTANCE: float = 90.0
 
+## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
+## nu inline: o citesc si lumina din _build_environment, si glint-ul apei din
+## _water_material — scanteierea trebuie sa cada din acelasi soare.
+const SUN_ROTATION_DEG: Vector3 = Vector3(-42, 135, 0)
+
 ## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
 ##
 ## Camera face raycast DOAR pe layer-ul asta. Pe layer-ul implicit (unde stau
@@ -550,13 +555,15 @@ func _build_environment() -> void:
 	add_child(world_env)
 
 	var sun := DirectionalLight3D.new()
-	# Elevatie 42°, azimut 315° (din stanga-sus) — style_bible §5.
+	# Elevatie 42°, azimut 315° (din stanga-sus) — style_bible §5. Constanta e
+	# impartita cu _water_material(): glint-ul apei trebuie sa cada din acelasi
+	# soare care lumineaza lumea.
 	#
 	# Vechiul (-48, -30) bătea aproape vertical si dinspre spatele camerei, deci
 	# umbrele cadeau SUB si IN SPATELE stancilor, unde nu le vede nimeni. La 42°
 	# umbra unei faleze de 10m se intinde ~11m pe nisip, transversal pe drum:
 	# exact indiciul de volum care lipsea.
-	sun.rotation_degrees = Vector3(-42, 135, 0)
+	sun.rotation_degrees = SUN_ROTATION_DEG
 	sun.light_color = theme_sun_color
 	sun.light_energy = theme_sun_energy
 	# Umbrele contrazic litera CLAUDE.md ("umbre ieftine sau blob shadows").
@@ -1223,14 +1230,21 @@ func _sea_color(d: float) -> Color:
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
 	var foam := water_tint(Palette.FOAM_WHITE).lerp(reef, 0.35)
+	var c: Color
 	if d <= 0.0:
-		return foam # varf uscat al unei celule de mal
-	if d < SEA_FOAM_DEPTH:
-		return foam.lerp(reef, d / SEA_FOAM_DEPTH)
-	if d < SEA_REEF_DEPTH:
-		return reef
-	return reef.lerp(deep, clampf(
-		(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+		c = foam # varf uscat al unei celule de mal
+	elif d < SEA_FOAM_DEPTH:
+		c = foam.lerp(reef, d / SEA_FOAM_DEPTH)
+	elif d < SEA_REEF_DEPTH:
+		c = reef
+	else:
+		c = reef.lerp(deep, clampf(
+			(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
+	# Alfa = adancimea normalizata, NU transparenta: materialul e opac, iar
+	# shaderul v2 citeste COLOR.a ca sa evalueze rampa de culoare PER PIXEL —
+	# interpolata pe varfuri la 9.5 m, rampa iesea in benzi (issue #99).
+	c.a = clampf(d / SEA_NEAR_DEPTH, 0.0, 1.0)
+	return c
 
 
 ## Materialul apei — UNUL SINGUR pentru ambele mesh-uri.
@@ -1249,6 +1263,30 @@ func _water_material() -> ShaderMaterial:
 	# Aceeasi textura pe care o foloseste deja stratul de detaliu al lumii —
 	# zero VRAM in plus.
 	_water_mat.set_shader_parameter("ripple_tex", load(Palette.DETAIL_PATH))
+	# v2 (issue #99): rampa de adancime per pixel, spuma animata, glint.
+	# Culorile trec toate prin water_tint() — calibrarea ramane pe CPU, intr-un
+	# singur loc. Intensitatile sunt kill-switch-uri: 0 = comportamentul v1,
+	# de stins pe rand la profilarea pe device (M4).
+	var shallow := water_tint(Palette.REEF_SHALLOW)
+	var deep := water_tint(Palette.SEA_DEEP)
+	# Nisipul ud de la linia apei: nisipul de coral, intunecat putin — apa
+	# uda nisipul inainte sa-l acopere.
+	var shore := water_tint(Palette.CORAL_SAND).darkened(0.12)
+	var foam := water_tint(Palette.FOAM_WHITE).lerp(shallow, 0.35)
+	_water_mat.set_shader_parameter("ramp_strength", 1.0)
+	_water_mat.set_shader_parameter("shore_col", Vector3(shore.r, shore.g, shore.b))
+	_water_mat.set_shader_parameter("shallow_col",
+		Vector3(shallow.r, shallow.g, shallow.b))
+	_water_mat.set_shader_parameter("deep_col", Vector3(deep.r, deep.g, deep.b))
+	_water_mat.set_shader_parameter("foam_strength", 0.75)
+	_water_mat.set_shader_parameter("foam_col", Vector3(foam.r, foam.g, foam.b))
+	_water_mat.set_shader_parameter("glint_strength", 0.55)
+	# SPRE soare: inversul directiei in care bat razele. Din aceeasi rotatie
+	# ca lumina reala (SUN_ROTATION_DEG), ca scanteierea sa cada corect.
+	var to_sun := -(Basis.from_euler(Vector3(
+		deg_to_rad(SUN_ROTATION_DEG.x), deg_to_rad(SUN_ROTATION_DEG.y),
+		deg_to_rad(SUN_ROTATION_DEG.z))) * Vector3.FORWARD)
+	_water_mat.set_shader_parameter("sun_dir", to_sun)
 	return _water_mat
 
 

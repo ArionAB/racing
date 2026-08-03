@@ -1484,11 +1484,28 @@ func _side_at(i: int) -> Vector3:
 	var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 	return dir.cross(Vector3.UP).normalized()
 
+## Inaltimea coroanei soselei (bombarea din centru spre margini).
+##
+## Plafonul e dat de marcaje: linia de mijloc sta la lift 0.045 si linia de
+## start la 0.05 peste cota soselei — o coroana mai inalta de 0.03 le-ar
+## strapunge. Daca vrei coroana mai mare, ridica intai lift-urile alea.
+const ROAD_CROWN: float = 0.03
+
+## Profilul transversal al soselei, in fractii din half_width.
+## 5 pozitii = 4 fasii: destul ca coroana sa prinda lumina continuu si ca
+## marginile sa poata purta un gradient de uzura, fara sa umfle geometria.
+const ROAD_PROFILE: Array[float] = [-1.0, -0.55, 0.0, 0.55, 1.0]
+
 func _build_road() -> void:
 	var top := SurfaceTool.new()
 	top.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var sides := SurfaceTool.new()
 	sides.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Coliziunea NU vine din mesh-ul cambrat: fizica ramane pe fasia plata
+	# veche (2 vertecsi transversal), ca feel-ul sa nu se miste deloc.
+	# Coroana de 3 cm e vizuala; rotile ruleaza pe planul de dinainte.
+	var col := SurfaceTool.new()
+	col.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
 	# UV-uri PATRATE: acelasi numar de metri pe ambele axe.
@@ -1499,23 +1516,45 @@ func _build_road() -> void:
 	var tile := 3.5
 	var side_tile := 8.0
 	var u_half := half_width / tile
+	# Nuanta per pozitie de profil: alb pe banda de rulare, usor inchis spre
+	# margini — uzura/praful se aduna la margine, si gradientul face soseaua
+	# sa citeasca a suprafata cu latime, nu a panglica uniforma.
+	var edge_shade := Color(0.84, 0.84, 0.86)
 	for i in n:
 		var j := (i + 1) % n
-		var l0 := baked[i] - _side_at(i) * half_width
-		var r0 := baked[i] + _side_at(i) * half_width
-		var l1 := baked[j] - _side_at(j) * half_width
-		var r1 := baked[j] + _side_at(j) * half_width
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
-		# Ordinea l0,l1,r0 (nu l0,r0,l1): fata triunghiului iese IN SUS. Cu
-		# ordinea veche, generate_normals() dadea normale in jos — soseaua era
-		# luminata doar de ambient, iar CULL_BACK o facea invizibila de sus.
-		top.set_uv(Vector2(-u_half, v0)); top.add_vertex(l0)
-		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
-		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
-		top.set_uv(Vector2(u_half, v0)); top.add_vertex(r0)
-		top.set_uv(Vector2(-u_half, v1)); top.add_vertex(l1)
-		top.set_uv(Vector2(u_half, v1)); top.add_vertex(r1)
+		var s0v := _side_at(i)
+		var s1v := _side_at(j)
+		# Inelele profilului la capetele segmentului.
+		var ring0: Array[Vector3] = []
+		var ring1: Array[Vector3] = []
+		for t in ROAD_PROFILE:
+			var crown := Vector3.UP * (ROAD_CROWN * (1.0 - t * t))
+			ring0.append(baked[i] + s0v * half_width * t + crown)
+			ring1.append(baked[j] + s1v * half_width * t + crown)
+		for k in ROAD_PROFILE.size() - 1:
+			var ta: float = ROAD_PROFILE[k]
+			var tb: float = ROAD_PROFILE[k + 1]
+			var ca := edge_shade if absf(ta) > 0.99 else Color.WHITE
+			var cb := edge_shade if absf(tb) > 0.99 else Color.WHITE
+			var ua := ta * u_half
+			var ub := tb * u_half
+			# Ordinea l0,l1,r0: fata triunghiului iese IN SUS (vezi istoricul
+			# winding-ului — cu ordinea inversa normalele ieseau in jos).
+			top.set_color(ca); top.set_uv(Vector2(ua, v0)); top.add_vertex(ring0[k])
+			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.add_vertex(ring1[k])
+			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.add_vertex(ring0[k + 1])
+			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.add_vertex(ring0[k + 1])
+			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.add_vertex(ring1[k])
+			top.set_color(cb); top.set_uv(Vector2(ub, v1)); top.add_vertex(ring1[k + 1])
+		# Fasia plata de coliziune (geometria veche, 2 vertecsi transversal).
+		var l0 := baked[i] - s0v * half_width
+		var r0 := baked[i] + s0v * half_width
+		var l1 := baked[j] - s1v * half_width
+		var r1 := baked[j] + s1v * half_width
+		col.add_vertex(l0); col.add_vertex(l1); col.add_vertex(r0)
+		col.add_vertex(r0); col.add_vertex(l1); col.add_vertex(r1)
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
 		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0)
@@ -1557,7 +1596,7 @@ func _build_road() -> void:
 	# aici), deci nu platim fiecare pixel de doua ori.
 	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3),
 		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
-		BaseMaterial3D.CULL_BACK)
+		BaseMaterial3D.CULL_BACK, col.commit())
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
 ## Cati metri de sosea raman FARA perete de o parte si de alta a unei
@@ -1959,7 +1998,8 @@ func _flat_material(color: Color, texture: Texture2D = null,
 func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		texture: Texture2D = null, roughness: float = 1.0,
 		specular: float = 0.5,
-		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED) -> void:
+		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
+		collision_mesh: ArrayMesh = null) -> void:
 	var inst := MeshInstance3D.new()
 	inst.mesh = mesh
 	inst.material_override = _flat_material(color, texture, roughness, specular,
@@ -1967,7 +2007,10 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 	add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
-	var tri := mesh.create_trimesh_shape() as ConcavePolygonShape3D
+	# collision_mesh separat cand vizualul nu trebuie sa fie si fizica: soseaua
+	# cambrata ruleaza pe fasia plata veche, ca feel-ul sa ramana identic.
+	var col_source := collision_mesh if collision_mesh != null else mesh
+	var tri := col_source.create_trimesh_shape() as ConcavePolygonShape3D
 	# Trimesh-urile sunt implicit UNILATERALE; fara asta masina cade prin
 	# asfalt ca printr-o plasa (winding-ul nostru e arbitrar).
 	tri.backface_collision = true

@@ -259,7 +259,10 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		rng.randf_range(-0.07, 0.07),
 		rng.randf_range(-0.10, 0.10),
 		rng.randf_range(-0.07, 0.07))
-	Palette.apply_world_material(holder, mirror)
+	# Materialul de CLASA al rocii (trim sheet triplanar), nu cel de atlas:
+	# falezele sunt suprafata de roca dominanta din cadru — vezi
+	# Palette.rock_material() pentru de ce si de ce nu prin UV unwrap.
+	Palette.apply_rock_material(holder, mirror)
 
 	_add_collision(body, pick["node"], scene, xform)
 

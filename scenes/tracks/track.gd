@@ -745,7 +745,9 @@ func _build_horizon(centroid: Vector3) -> void:
 			# zero coliziune, sub 180 tris fiecare.
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
 			model.scale = Vector3.ONE * s
-			Palette.apply_world_material(model)
+			# Roca de clasa: triplanar-ul in spatiul lumii tine straturile la
+			# scara reala si pe butte-urile scalate 25-60x.
+			Palette.apply_rock_material(model)
 			placed += 1
 	print("%s: %d/%d siluete de orizont" % [track_name, placed,
 		placed + missed])
@@ -2333,7 +2335,8 @@ func _build_arch(frac: float) -> void:
 		child.queue_free()
 	body.add_child(model)
 	add_child(body)
-	Palette.apply_world_material(model)
+	# Arcada e integral roca — primeste trim sheet-ul de clasa.
+	Palette.apply_rock_material(model)
 	var stand := p
 	stand.y = _sampler.ground_y(p.x, p.z)
 	body.global_position = stand

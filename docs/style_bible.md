@@ -321,8 +321,13 @@ Dincolo de ramă: doar cer în cursă. Rama întreagă se vede în meniuri / pho
    păstrează senzația de așezat de mână.
 3. **Teren: variație max ±3.5 m pe orice 50 m.** Relieful mare se face din
    *assets de faleză* (6–12 m), nu din heightmap. Vezi §12.
-4. **Vertex colors pentru AO** pe absolut fiecare asset; zero texturi unice per
-   asset. (Textura de suprafață vine din stratul partajat — §4.)
+4. **Vertex colors pentru AO** pe absolut fiecare asset; zero texturi unice
+   *per asset*. Texturi partajate *per clasă* sunt permise dacă sunt decise
+   explicit (august 2026, modelul BBR2): `trim_rock.png` e albedo-ul întregii
+   clase de rocă (faleze, butte, arcadă, bolovani), aplicat triplanar în
+   spațiul lumii prin `Palette.rock_material()` — pietre individuale cu mortar
+   și bevel fals pictate, un singur material nou pentru toată clasa. (Restul
+   texturii de suprafață vine din stratul partajat — §4.)
 5. **Asfaltul rămâne cea mai închisă suprafață continuă.**
 
 ---

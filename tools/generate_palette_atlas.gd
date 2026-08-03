@@ -50,6 +50,7 @@ const OUT_PATH: String = "res://assets/textures/palette_atlas.png"
 const SEED_SLOTS: int = 20260801
 const SEED_SURFACE: int = 20260802
 const SEED_DETAIL: int = 20260803
+const SEED_TRIM: int = 20260804
 
 var rng := RandomNumberGenerator.new()
 
@@ -75,6 +76,8 @@ func _init() -> void:
 	_surface_textures()
 	rng.seed = SEED_DETAIL
 	_detail_textures()
+	rng.seed = SEED_TRIM
+	_trim_rock()
 	print("Reimporta in Godot, apoi masoara:")
 	print("  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.20 --driver")
 	print("  godot --headless --path . --script res://tools/measure_surface.gd \\")
@@ -147,6 +150,90 @@ func _detail_textures() -> void:
 	# accentele de masina NIMIC (style_bible §1: masinile raman cele mai curate
 	# suprafete din cadru, ca sa se desprinda de fundal).
 	_write_detail_mask("res://assets/textures/detail_mask.png")
+
+
+## Trim sheet-ul de ROCA — prima textura COLOR de clasa (upgrade grafic, val 4b).
+##
+## Diagnosticul BBR2: in referinte fiecare piatra e citibila individual — are
+## nuanta ei, mortar intunecat in jur si un highlight pe muchia de sus (bevel
+## FALS, pictat). Atlasul de paleta nu poate da asta: sloturile sunt patch-uri
+## de 16px esantionate intr-un punct.
+##
+## Textura e TILEABILA si se aplica TRIPLANAR pe clasa de roca (faleze, butte,
+## arcada, bolovani) prin Palette.rock_material() — NU prin UV unwrap per
+## asset. Motivul: unwrap-ul ar sparge contractul de UV-uri colapsate din
+## dio_lib si ar cere re-exportul tuturor GLB-urilor; triplanar-ul in spatiul
+## lumii da acelasi rezultat vizual, tine benzile CONTINUE peste sectiunile
+## vecine de faleza si nu se intinde cu scalarea instantelor (±18%).
+##
+## Culorile vin din paleta (ROCK_LIGHT/ROCK_DARK/SAND_SHADOW) — nu introduce
+## nuante noi, doar le distribuie ca sedimentare cu variatie per bloc.
+func _trim_rock() -> void:
+	const N := 512
+	const BANDS := 7
+	var rock_light := Palette.color(Palette.ROCK_LIGHT)
+	var rock_dark := Palette.color(Palette.ROCK_DARK)
+	var sand_shadow := Palette.color(Palette.SAND_SHADOW)
+	var img := Image.create(N, N, true, Image.FORMAT_RGB8)
+	for y in N:
+		var fy := float(y) / float(N)
+		for x in N:
+			var fx := float(x) / float(N)
+			# Granita benzilor, ondulata periodic (tileabil pe ambele axe).
+			var warp := sin(fx * TAU * 2.0) * 0.16 + sin(fx * TAU * 5.0) * 0.05
+			var band_pos := fy * float(BANDS) + warp
+			var band := wrapi(int(floorf(band_pos)), 0, BANDS)
+			var in_band := band_pos - floorf(band_pos)
+			# Valori deterministe per banda (LCG mic, ca in dio_lib.rock).
+			var h := (band * 1103515245 + 12345) & 0x7FFFFFFF
+			var mix_v := float(h % 1000) / 999.0
+			h = (h * 1103515245 + 12345) & 0x7FFFFFFF
+			var joints := 4 + h % 4 # blocuri per banda: 4..7 (intreg => tileabil)
+			h = (h * 1103515245 + 12345) & 0x7FFFFFFF
+			var joint_off := float(h % 1000) / 999.0
+			# Baza benzii: intre rock_dark si rock_light, cu media impinsa spre
+			# deschis — fetele de stanca stau in plin soare, iar intunericul real
+			# il aduc AO-ul din vertex colors si mortarul, nu baza. O banda din
+			# ~4 trage spre sand_shadow (nisip prins intre strate) si una spre
+			# aproape-rock_light plin: contrastul dintre benzi vinde sedimentarea
+			# de la distanta, unde mortarul nu se mai vede.
+			var base := rock_dark.lerp(rock_light, 0.45 + 0.55 * mix_v)
+			if band % 4 == 2:
+				base = base.lerp(sand_shadow, 0.55)
+			elif band % 4 == 0:
+				base = base.lerp(rock_light, 0.5)
+			# Blocuri: nuanta per PIATRA — asta e diferenta fata de un gradient.
+			var block_pos := fx * float(joints) + joint_off
+			var block := int(floorf(block_pos))
+			var in_block := block_pos - floorf(block_pos)
+			var bh := ((band * 31 + block) * 1103515245 + 12345) & 0x7FFFFFFF
+			var stone_v := 0.90 + (float(bh % 1000) / 999.0) * 0.18
+			bh = (bh * 1103515245 + 12345) & 0x7FFFFFFF
+			var stone_warm := 0.97 + (float(bh % 1000) / 999.0) * 0.06
+			var c := Color(base.r * stone_v * stone_warm, base.g * stone_v,
+				base.b * stone_v / stone_warm)
+			# Rosturi verticale: mortar intunecat + muchie luminata (bevel fals).
+			var jw := 0.030
+			if in_block < jw:
+				c *= 0.58
+			elif in_block < jw * 2.2:
+				c *= 1.10
+			# Granita orizontala dintre benzi: mortar sus, highlight sub el —
+			# muchia de sus a fiecarui strat "prinde soarele".
+			if in_band < 0.055:
+				c *= 0.55
+			elif in_band < 0.14:
+				c *= 1.14
+			# Granulatie fina, ca sa nu fie suprafete perfect netede intre rosturi.
+			var grain := 1.0 - rng.randf() * 0.10
+			c *= grain
+			img.set_pixel(x, y, Color(clampf(c.r, 0.0, 1.0),
+				clampf(c.g, 0.0, 1.0), clampf(c.b, 0.0, 1.0)))
+	var path := "res://assets/textures/trim_rock.png"
+	if img.save_png(path) != OK:
+		push_error("Nu am putut scrie " + path)
+		return
+	print("  trim_rock.png  (%dx%d, %d benzi, color)" % [N, N, BANDS])
 
 
 ## Nori pentru ProceduralSkyMaterial.sky_cover — o panorama gri, 512x256.

@@ -463,13 +463,13 @@ static func _add_cluster(parent: Node3D, pos: Vector3,
 		kept.position = pos + Vector3.UP * -0.2
 		kept.rotation.y = rng.randf_range(0.0, TAU)
 		kept.scale = Vector3.ONE * s
-		Palette.apply_world_material(kept)
+		Palette.apply_rock_material(kept)
 		return
 	var body := StaticBody3D.new()
 	parent.add_child(body)
 	body.add_child(kept)
 	kept.scale = Vector3.ONE * s
-	Palette.apply_world_material(kept)
+	Palette.apply_rock_material(kept)
 	# Raza din AABB-ul real, nu dintr-un tabel: regenerezi GLB-ul cu alte cote si
 	# coliziunea le urmeaza singura.
 	var mi := _first_mesh(kept)

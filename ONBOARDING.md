@@ -186,6 +186,18 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   mișcare. Sonda împinge o mașină în afara șoselei și verifică amplitudinea reală
   a legănatului pe o tufă înregistrată.
 
+  **ProbeLife spune că emitorul pornește; nu spune că se și VEDE ceva.** Pentru
+  asta există sonda vizuală, care rulează cursa reală și salvează capturi din
+  camera de joc:
+  ```
+  godot --rendering-driver vulkan --path . res://tools/ProbeFx.tscn
+  ```
+  A prins două bug-uri pe care `emitting == true` nu le putea prinde: praful
+  colorat mai deschis decât nisipul (invizibil pe fundal luminos) și
+  `vertex_color_is_srgb` lipsă pe materialele de particule — culorile sRGB
+  citite ca liniare ieșeau cu ~1.5 trepte mai deschise, deci TOATE particulele
+  din joc randau spălăcit.
+
 - **CI verifică și anti-blocajul în pereții de canion.** Aruncă mașini în unghi
   în faleze, în 12 puncte de pe traseu, și pică dacă vreuna rămâne înțepenită.
   ```

@@ -64,7 +64,8 @@ func _physics_process(delta: float) -> void:
 func _sway_sample() -> float:
 	if _sway._items.is_empty():
 		return 0.0
-	return (_sway._items[0] as Node3D).rotation.y
+	# Leganarea e INCLINARE (X/Z), nu rotatie pe Y — vezi SwayDriver.
+	return (_sway._items[0] as Node3D).rotation.x
 
 
 func _find_dust(node: Node) -> CPUParticles3D:
@@ -80,7 +81,7 @@ func _report() -> void:
 	print("=== #29 praf si miscare ===")
 	print("  praf off-road emis        : %s" % ("DA" if _seen_dust else "NU"))
 	var span := _sway_last - _sway_first
-	print("  vegetatie, amplitudine yaw: %.4f rad (%.2f grade)"
+	print("  vegetatie, amplitudine tilt: %.4f rad (%.2f grade)"
 		% [span, rad_to_deg(span)])
 	print("  tufe inregistrate         : %d" % (_sway._items.size()
 		if _sway != null else -1))

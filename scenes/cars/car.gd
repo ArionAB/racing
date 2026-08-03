@@ -600,7 +600,9 @@ func _drop_skid_marks(delta: float) -> void:
 		# Scalat cu masinile (factor 0.84): urma trebuie sa aiba latimea anvelopei.
 		_skid_mesh.size = Vector2(0.34, 0.85)
 		_skid_mat = StandardMaterial3D.new()
-		_skid_mat.albedo_color = Color(0.05, 0.05, 0.05, 0.4)
+		# 0.4 alpha pe asfaltul nostru inchis abia se vedea (ProbeFx). 0.6 se
+		# citeste clar si de la camera de joc, si dupa ce iesi din viraj.
+		_skid_mat.albedo_color = Color(0.05, 0.05, 0.05, 0.6)
 		_skid_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_skid_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		_skid_mesh.material = _skid_mat
@@ -615,8 +617,11 @@ func _drop_skid_marks(delta: float) -> void:
 			+ global_transform.basis.z * rear_z + Vector3.UP * 0.06
 		mark.rotation.y = rotation.y
 		var tw := mark.create_tween()
-		tw.tween_interval(3.0)
-		tw.tween_property(mark, "transparency", 1.0, 1.5)
+		# Urma traieste destul cat sa o REVEZI: la un tur de ~55 s, 8 s inseamna
+		# ca inca vezi urmele virajului cand privesti in urma, dar turul urmator
+		# gaseste asfalt curat.
+		tw.tween_interval(6.5)
+		tw.tween_property(mark, "transparency", 1.0, 2.0)
 		tw.tween_callback(mark.queue_free)
 	# Limita de "juice": stergem urmele cele mai vechi.
 	while skid_parent.get_child_count() > 160:
@@ -636,7 +641,11 @@ func _update_dust() -> void:
 		return
 	if not _dust_tinted and track != null:
 		_dust_tinted = true
-		_dust_particles.color = track.theme_ground_tint.lightened(0.22)
+		# Mai INCHIS decat solul, nu mai deschis. Prima versiune folosea
+		# lightened(0.22) si ProbeFx a aratat rezultatul: alb pal pe nisip
+		# luminat = invizibil. Contrastul care se citeste ca praf e cel al unei
+		# umbre usoare.
+		_dust_particles.color = track.theme_ground_tint.darkened(0.12)
 	var live := track != null and is_on_floor() \
 		and not track.is_on_road(road_index, global_position) \
 		and horizontal_speed() > DUST_MIN_SPEED
@@ -645,8 +654,8 @@ func _update_dust() -> void:
 		return
 	# Norul creste cu viteza: la 6 m/s e o adiere, la plafon e o dara adevarata.
 	var k := clampf(horizontal_speed() / maxf(max_speed, 1.0), 0.0, 1.0)
-	_dust_particles.initial_velocity_max = lerpf(2.5, 6.5, k)
-	_dust_particles.lifetime = lerpf(0.55, 1.05, k)
+	_dust_particles.initial_velocity_max = lerpf(2.5, 7.0, k)
+	_dust_particles.lifetime = lerpf(0.75, 1.35, k)
 
 func _build_effects() -> void:
 	# Fum de drift, colorat dupa nivelul de boost incarcat.
@@ -667,6 +676,7 @@ func _build_effects() -> void:
 	smoke.size = Vector3(0.22, 0.22, 0.22)
 	var smoke_mat := StandardMaterial3D.new()
 	smoke_mat.vertex_color_use_as_albedo = true # ia culoarea din particula
+	smoke_mat.vertex_color_is_srgb = true # altfel gri 0.78 citit liniar = alb
 	smoke_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	smoke.material = smoke_mat
 	_drift_particles.mesh = smoke
@@ -675,14 +685,14 @@ func _build_effects() -> void:
 	# Praf ridicat de sub roti pe off-road. Emite din SPATELE masinii, la nivelul
 	# solului — sursa e contactul rotii cu nisipul, nu evacuarea.
 	#
-	# Buget: 18 particule per masina, deci 90 pe o cursa de 5. Sub fumul de drift
-	# (24) intentionat, fiindca praful sta aprins mult mai mult timp: driftul e in
-	# rafale de o secunda, off-road-ul poate tine un viraj intreg.
+	# Buget: 26 de particule per masina, 130 pe o cursa de 5. Prima versiune avea
+	# 18 mici si palide si sonda vizuala (ProbeFx) a aratat de ce nu le vedea
+	# nimeni: o dara punctata de cuburi, nu un nor.
 	_dust_particles = CPUParticles3D.new()
 	_dust_particles.position = Vector3(0, 0.12, 1.7)
 	_dust_particles.emitting = false
-	_dust_particles.amount = 18
-	_dust_particles.lifetime = 0.85
+	_dust_particles.amount = 26
+	_dust_particles.lifetime = 1.15
 	_dust_particles.direction = Vector3(0, 1, 0.6)
 	_dust_particles.spread = 45.0
 	_dust_particles.initial_velocity_min = 1.5
@@ -691,23 +701,28 @@ func _build_effects() -> void:
 	_dust_particles.gravity = Vector3(0, -1.2, 0)
 	_dust_particles.damping_min = 1.5
 	_dust_particles.damping_max = 3.0
-	_dust_particles.scale_amount_min = 0.8
-	_dust_particles.scale_amount_max = 2.2
+	_dust_particles.scale_amount_min = 1.2
+	_dust_particles.scale_amount_max = 3.0
 	# Se stinge in transparenta pe durata vietii; fara asta, norul dispare brusc.
 	# CPUParticles3D vrea un Gradient direct, nu un GradientTexture1D — ala e
 	# pentru varianta GPU.
 	var fade := Gradient.new()
-	fade.set_color(0, Color(1, 1, 1, 0.55))
+	fade.set_color(0, Color(1, 1, 1, 0.72))
 	fade.set_color(1, Color(1, 1, 1, 0.0))
 	_dust_particles.color_ramp = fade
 	# Culoare provizorie; cea reala vine din tema, in _update_dust, de indata ce
 	# masina stie pe ce pista e. Praf nisipiu pe iarba ar fi exact genul de
 	# detaliu care se observa fara sa stii de ce te deranjeaza.
-	_dust_particles.color = Palette.color(Palette.SAND_MID).lightened(0.15)
+	_dust_particles.color = Palette.color(Palette.SAND_MID).darkened(0.12)
 	var puff := BoxMesh.new()
-	puff.size = Vector3(0.3, 0.3, 0.3)
+	puff.size = Vector3(0.45, 0.45, 0.45)
 	var puff_mat := StandardMaterial3D.new()
 	puff_mat.vertex_color_use_as_albedo = true
+	# Culorile noastre sunt autorate ca sRGB (Color.html, Palette). Fara steagul
+	# asta, Godot le citeste ca LINIARE si le scoate cu ~1.5 trepte mai deschise:
+	# #BB8744 randa (241,218,177) — crem pal, masurat cu ProbeFx. De-aia praful
+	# parea alb oricat il inchideam la sursa.
+	puff_mat.vertex_color_is_srgb = true
 	puff_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	puff_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	# Fara scriere in depth: norii se suprapun fara sa se taie unul pe altul.
@@ -733,6 +748,7 @@ func _build_effects() -> void:
 	flame.size = Vector3(0.18, 0.18, 0.18)
 	var flame_mat := StandardMaterial3D.new()
 	flame_mat.vertex_color_use_as_albedo = true
+	flame_mat.vertex_color_is_srgb = true
 	flame_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	flame.material = flame_mat
 	_boost_particles.mesh = flame

@@ -64,6 +64,12 @@ var theme_exposure: float = 1.0
 ## primul test pe device nu tine 60fps.
 var theme_shadows: bool = true
 
+## Bloom subtil (style_bible §8). Singurul efect fullscreen din joc — un lant de
+## downsample pe cadru, deci cel mai scump item de fill rate pe care il rulam.
+## Acelasi contract ca theme_shadows: daca device-ul nu tine 60fps, asta e a
+## doua setare de stins (dupa umbre).
+var theme_glow: bool = true
+
 ## Pana unde arunca soarele umbre. Peste, preia ceata (depth 90->250), deci
 ## lipsa lor nu se vede. O singura cascada pana aici = configuratia cea mai
 ## ieftina care da totusi contact real cu solul.
@@ -550,6 +556,18 @@ func _build_environment() -> void:
 	env.adjustment_enabled = true
 	env.adjustment_saturation = 1.18
 	env.adjustment_contrast = 1.05
+	# Bloom-ul din style_bible §8, pana acum doar specificat. Threshold-ul sta
+	# PESTE alb (1.1): dupa FILMIC aproape nimic nu-l depaseste in mod normal,
+	# deci efectul apare doar pe varfurile reale de lumina — soarele pe caroserii,
+	# spuma, cerul la orizont — nu ca un val lăptos pe toata scena. Doar
+	# nivelurile 2-3 (mip-uri mici) sunt active: halo strans, cost minim.
+	if theme_glow:
+		env.glow_enabled = true
+		env.glow_intensity = 0.25
+		env.glow_bloom = 0.04
+		env.glow_hdr_threshold = 1.1
+		for level in range(1, 8):
+			env.set_glow_level(level, 1.0 if level in [2, 3] else 0.0)
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env
 	add_child(world_env)

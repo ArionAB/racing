@@ -273,8 +273,15 @@ La distanță: saturație −15%, contrast −20%, luminozitate +8%.
 
 ## 8. Post-procesare
 
-Contrast +8% · saturație −6% · warmth +5% · bloom doar threshold 0.04 ·
-vignette 0.10 · sharpen 0.08
+**Implementat (august 2026):** MSAA 2x (`project.godot`, aproape gratis pe
+GPU-urile mobile tile-based — se rezolvă în tile memory) și bloom subtil
+(`_build_environment`: intensity 0.25, bloom 0.04, threshold 1.1 — peste alb,
+deci doar vârfurile reale de lumină înfloresc; nivelurile 2–3 active).
+Comutatorul de device e `Track.theme_glow`, a doua setare de stins după
+`theme_shadows` dacă testul pe device nu ține 60fps.
+
+Rămase specificate, neimplementate: vignette 0.10 · sharpen 0.08 (candidate de
+tăiere — cost fix de fill rate pe tot ecranul, efect vizibil doar în capturi).
 
 **Interzis pe mobil:** SSAO, SSR, volumetrice scumpe, reflexii complexe.
 (AO vine copt în vertex colors, nu din ecran.)

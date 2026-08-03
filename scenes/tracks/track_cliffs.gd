@@ -265,6 +265,44 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	Palette.apply_rock_material(holder, mirror)
 
 	_add_collision(body, pick["node"], scene, xform)
+	_dress_base(root, sampler, spec, rng, extra)
+
+
+## Banda de contact: pietricele si smocuri la baza falezei (val 4c).
+##
+## Trucul #1 de sol al BBR2: cusatura dintre un obiect si teren nu se vede
+## NICIODATA — mereu e mascata de murdarie sau vegetatie. La noi linia
+## faleza/nisip era o intersectie geometrica curata, si SINK + AO-ul de teren
+## o atenuau doar partial. Cateva prop-uri marunte din desert_scatter (care
+## exista deja, partajeaza atlasul, zero materiale noi) o rup de tot.
+##
+## Zero coliziune: sunt sub 40 cm, style_bible-ul le trateaza ca decor pur.
+const SCATTER_PATH: String = "res://assets/models/desert_scatter.glb"
+const BASE_PROPS := ["Pebbles_A", "Pebbles_B", "Bush_A", "Grass_Tuft"]
+
+static func _dress_base(root: Node3D, sampler: TrackSideSampler,
+		spec: TrackDecorSpec, rng: RandomNumberGenerator,
+		extra: float) -> void:
+	if rng.randf() > 0.55:
+		return
+	var count := rng.randi_range(1, 2)
+	for k in count:
+		var pick: String = BASE_PROPS[rng.randi_range(0, BASE_PROPS.size() - 1)]
+		var prop := TrackDecor._pick_from_glb(SCATTER_PATH, pick)
+		if prop == null:
+			return
+		# Intre marginea asfaltului si fata peretelui, imprastiat in lungul
+		# sectiunii — la baza, unde ochiul cauta cusatura.
+		var along := (rng.randf() - 0.5) * SPACING * 0.8
+		var out := extra * 0.4 + rng.randf_range(0.3, 1.4)
+		var tangent := spec.normal_out.cross(Vector3.UP)
+		var pos := spec.position + spec.normal_out * out + tangent * along
+		pos.y = sampler.ground_y(pos.x, pos.z)
+		root.add_child(prop)
+		prop.position = pos
+		prop.rotation.y = rng.randf_range(0.0, TAU)
+		prop.scale = Vector3.ONE * rng.randf_range(0.8, 1.25)
+		Palette.apply_world_material(prop)
 
 
 ## Inaltimea dorita la fractia asta: doua valuri suprapuse, plus o variatie in

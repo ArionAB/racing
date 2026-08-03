@@ -51,6 +51,7 @@ const SEED_SLOTS: int = 20260801
 const SEED_SURFACE: int = 20260802
 const SEED_DETAIL: int = 20260803
 const SEED_TRIM: int = 20260804
+const SEED_DECAL: int = 20260805
 
 var rng := RandomNumberGenerator.new()
 
@@ -78,6 +79,8 @@ func _init() -> void:
 	_detail_textures()
 	rng.seed = SEED_TRIM
 	_trim_rock()
+	rng.seed = SEED_DECAL
+	_decal_tracks()
 	print("Reimporta in Godot, apoi masoara:")
 	print("  godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.20 --driver")
 	print("  godot --headless --path . --script res://tools/measure_surface.gd \\")
@@ -234,6 +237,44 @@ func _trim_rock() -> void:
 		push_error("Nu am putut scrie " + path)
 		return
 	print("  trim_rock.png  (%dx%d, %d benzi, color)" % [N, N, BANDS])
+
+
+## Urma de cauciuc — decal-ul liniei de curse (upgrade grafic, val 4c).
+##
+## O SINGURA urma de roata, tileabila pe V (in lungul drumului): banda de
+## cauciuc intunecat cu alpha care se stinge spre margini, rupta de goluri de
+## profil (tread) si de uzura neregulata. Fasiile de geometrie din
+## Track._build_tire_marks() o intind pe zonele de viraj+franare — trucul de
+## nisip pictat din BBR2, aplicat pe asfaltul nostru.
+##
+## E SINGURA textura cu alpha real din lume (transparenta = costul pe care
+## garda nu-l vede, vezi antetul din water.gdshader) — de-asta suprafata
+## acoperita e mica si controlata: fasii de 0.34 m pe viraje, nu covor.
+func _decal_tracks() -> void:
+	const W := 64
+	const H := 256
+	var img := Image.create(W, H, true, Image.FORMAT_RGBA8)
+	for y in H:
+		var fy := float(y) / float(H)
+		for x in W:
+			var fx := float(x) / float(W)
+			# Clopot pe latime: plin in centru, stins la margini.
+			var across := sin(fx * PI)
+			across *= across
+			# Profilul cauciucului: dungi longitudinale.
+			var tread := 0.72 + 0.28 * sin(fx * TAU * 5.0)
+			# Uzura pe lungime: pete care intrerup urma (tileabil pe V).
+			var wear := 0.55 + 0.45 * sin(fy * TAU * 3.0 + sin(fx * TAU) * 1.2)
+			wear = clampf(wear + rng.randf() * 0.25 - 0.12, 0.0, 1.0)
+			var alpha := clampf(across * tread * wear, 0.0, 1.0) * 0.55
+			# Cauciuc: aproape negru, usor cald — se inmulteste vizual peste
+			# asfaltul racoros si citeste ca urma arsa, nu ca banda gri.
+			img.set_pixel(x, y, Color(0.07, 0.06, 0.055, alpha))
+	var path := "res://assets/textures/decal_tracks.png"
+	if img.save_png(path) != OK:
+		push_error("Nu am putut scrie " + path)
+		return
+	print("  decal_tracks.png  (%dx%d, RGBA, urma de cauciuc)" % [W, H])
 
 
 ## Nori pentru ProceduralSkyMaterial.sky_cover — o panorama gri, 512x256.

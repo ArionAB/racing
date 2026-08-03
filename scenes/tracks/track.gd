@@ -453,6 +453,7 @@ func rebuild() -> void:
 	_build_center_line()
 	_build_shoulders()
 	_build_kerbs()
+	_build_tire_marks()
 	_build_world_decor()
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
@@ -2151,6 +2152,109 @@ func _build_shoulders() -> void:
 		_tex("res://assets/textures/surface_sand.png"), 1.0, 0.5,
 		BaseMaterial3D.CULL_BACK)
 	add_child(inst)
+
+
+## Urme de cauciucuri pe linia de curse — decal-uri de geometrie (val 4c).
+##
+## Trucul de sol al BBR2: urmele pictate pe traseu spun "pe aici se merge" si
+## rup uniformitatea asfaltului exact unde se uita jucatorul. Fasiile stau la
+## +0.025 m peste asfalt (sub linia de mijloc, 0.045) si folosesc SINGURA
+## textura cu alpha real din lume (decal_tracks.png) — suprafata acoperita e
+## deliberat mica: doua fasii de 0.34 m pe zonele de viraj + franare, nu covor.
+##
+## Urmele se aseaza pe INTERIORUL virajului (linia de apex), decalate spre
+## inainte ca sa acopere si franarea. Alpha-ul creste/scade la capetele
+## fiecarei serii prin vertex color — urmele apar si dispar gradual, nu taiat.
+func _build_tire_marks() -> void:
+	var n := baked.size()
+	if n < 20:
+		return
+	# 1. Ce indecsi primesc urme: virajele reale + 10 pasi de franare inainte.
+	var strength: Array[float] = []
+	strength.resize(n)
+	var offset_sign: Array[float] = []
+	offset_sign.resize(n)
+	for i in n:
+		var before := (baked[i] - baked[(i - 3 + n) % n]).normalized()
+		var after := (baked[(i + 3) % n] - baked[i]).normalized()
+		if before.angle_to(after) < 0.10:
+			continue
+		var turn := signf(before.cross(after).y)
+		for k in range(-10, 5):
+			var idx := (i + k + n) % n
+			strength[idx] = 1.0
+			offset_sign[idx] = turn
+	# 2. Rampa de alpha la capete: 4 pasi de aparitie/disparitie.
+	var alpha: Array[float] = []
+	alpha.resize(n)
+	for i in n:
+		if strength[i] <= 0.0:
+			continue
+		var run_in := 0
+		while run_in < 4 and strength[(i - run_in - 1 + n) % n] > 0.0:
+			run_in += 1
+		var run_out := 0
+		while run_out < 4 and strength[(i + run_out + 1) % n] > 0.0:
+			run_out += 1
+		alpha[i] = minf(float(mini(run_in, run_out) + 1) / 4.0, 1.0)
+	# 3. Geometria: doua fasii (ecartamentul rotilor) pe linia de apex.
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var lift := Vector3.UP * 0.025
+	var emitted := false
+	for i in n:
+		var j := (i + 1) % n
+		if alpha[i] <= 0.0 and alpha[j] <= 0.0:
+			continue
+		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
+		var lane0 := -offset_sign[i] * half_width * 0.35
+		var lane1 := -offset_sign[j] * half_width * 0.35
+		var v0 := _dists[i] / 1.4
+		var v1 := _dists[i + 1] / 1.4
+		for wheel: float in [-0.85, 0.85]:
+			var c0 := baked[i] + _side_at(i) * (lane0 + wheel) + lift
+			var c1 := baked[j] + _side_at(j) * (lane1 + wheel) + lift
+			var half := _side_at(i) * 0.17
+			var col0 := Color(1, 1, 1, alpha[i])
+			var col1 := Color(1, 1, 1, alpha[j])
+			st.set_color(col0)
+			st.set_uv(Vector2(0.0, v0)); st.add_vertex(c0 - half)
+			st.set_color(col1)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(c1 - half)
+			st.set_color(col0)
+			st.set_uv(Vector2(1.0, v0)); st.add_vertex(c0 + half)
+			st.set_color(col0)
+			st.set_uv(Vector2(1.0, v0)); st.add_vertex(c0 + half)
+			st.set_color(col1)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(c1 - half)
+			st.set_color(col1)
+			st.set_uv(Vector2(1.0, v1)); st.add_vertex(c1 + half)
+			emitted = true
+	if not emitted:
+		return
+	var inst := MeshInstance3D.new()
+	inst.name = "TireMarks"
+	inst.mesh = st.commit()
+	inst.material_override = _decal_material()
+	add_child(inst)
+
+
+## Materialul decal-urilor — UNUL singur, cache-uit. Transparenta alpha e
+## costul pe care garda nu-l masoara (vezi water.gdshader), deci sta izolata
+## aici, pe o suprafata totala de cativa zeci de m².
+var _decal_mat: StandardMaterial3D
+
+func _decal_material() -> StandardMaterial3D:
+	if _decal_mat != null:
+		return _decal_mat
+	_decal_mat = StandardMaterial3D.new()
+	_decal_mat.albedo_texture = _tex("res://assets/textures/decal_tracks.png")
+	_decal_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_decal_mat.vertex_color_use_as_albedo = true # rampa de alpha la capete
+	_decal_mat.roughness = 1.0
+	_decal_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	_decal_mat.cull_mode = BaseMaterial3D.CULL_BACK
+	return _decal_mat
 
 
 func _build_kerbs() -> void:

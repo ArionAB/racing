@@ -208,6 +208,15 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   Presetările stau în `tools/probe_cam.gd`; `--preset=actuala` fotografiază exact
   camera din joc, deci e coloana de referință a oricărei comparații.
 
+  **Pozele arată încadrarea; lenea camerei se judecă doar conducând.** Pentru
+  asta există reglajul din volan, în build-urile de debug: `F2` deschide
+  suprapunerea, `J/L` distanța, `K/I` înălțimea, `U/O` FOV-ul, `N/M` urmărirea,
+  `F4` reset. Ultimele două rânduri ale suprapunerii sunt **valorile gata de
+  scris în `chase_camera.gd`** — așa o sesiune de reglaj se termină cu cifre, nu
+  cu „parcă era mai bine". Aceleași patru reglaje sunt și în meniul de setări
+  (slidere, deci merg și pe touch), salvate în `user://settings.cfg` ca **factori**
+  peste valorile din cod: dacă tunăm camera de bază, preferința ta rămâne validă.
+
   > Camera a fost tunată de două ori „din amintire" și a rămas de fiecare dată o
   > cameră de NFS. A treia oară, patru variante puse una lângă alta au arătat în
   > zece secunde ce nu se vedea în discuții: în acul de păr cu stânca din mijloc

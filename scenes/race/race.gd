@@ -50,6 +50,12 @@ func _ready() -> void:
 	camera.target = player
 	_fit_camera_to_player()
 	camera.snap_behind()
+	# Reglajul de camera din volan: doar in build de debug. E unealta de
+	# dezvoltare, iar pe telefon nu exista tastatura pe care sa-l tii apasat.
+	if OS.is_debug_build():
+		var tuner := CameraTuner.new()
+		tuner.camera = camera
+		add_child(tuner)
 	hud = RaceHUD.new()
 	add_child(hud)
 	hud.restart_requested.connect(GameState.start_race)
@@ -340,8 +346,7 @@ func _on_respawn_requested() -> void:
 
 func _fit_camera_to_player() -> void:
 	if player.data != null:
-		camera.distance = ChaseCamera.distance_for(player.data.body_length)
-		camera.height = ChaseCamera.height_for(player.data.body_length)
+		camera.apply_settings_for(player.data.body_length)
 
 func _update_hud() -> void:
 	hud.set_respawn_enabled(state == State.RUNNING and player.can_respawn())
@@ -356,10 +361,13 @@ func _update_hud() -> void:
 			GameState.champ_round + 1, GameState.CHAMP_ROUNDS]
 	var record_ms := GameState.best_lap(GameState.selected_track)
 	var record_text := _fmt_ms(record_ms) if record_ms > 0 else "--:--.-"
-	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s\nbest: %s   rec: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift" % [
+	# Indiciul de camera apare doar unde exista si reglajul (build de debug),
+	# altfel ar promite jucatorului o tasta care nu face nimic.
+	var cam_hint := "  [F2] camera" if OS.is_debug_build() else ""
+	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s\nbest: %s   rec: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift%s" % [
 		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
 		lap_no, GameState.total_laps, champ_line, lap_text, best_text,
-		record_text, player.car_name, track.track_name]
+		record_text, player.car_name, track.track_name, cam_hint]
 	hud.set_info(info)
 	hud.set_turbo(player.turbo_charge, player.is_boosting)
 

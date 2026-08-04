@@ -1029,11 +1029,18 @@ func _build_terrain() -> void:
 		# moduleaza. Orice ridicare aici impinge canalul rosu peste 1.0, se
 		# satureaza, si granulatia dispare exact unde trebuia sa se vada.
 		#
-		# A doua trecere cu ACEEASI textura, pe UV2 (scara macro): granulatia
-		# deasa da suprafata, petele lente rup repetitia. Terenul are UV2 real
-		# (emis mai sus), deci NU are nevoie de triplanar ca prop-urile.
+		# A doua trecere pe UV2 (scara macro): granulatia deasa da suprafata,
+		# petele lente rup repetitia. Terenul are UV2 real (emis mai sus), deci
+		# NU are nevoie de triplanar ca prop-urile.
+		#
+		# ALTA textura pe trecerea macro, nu aceeasi ca inainte. Fotografia
+		# aeriana de 20 m arata pete si urme late — la 45 m/repetitie iese
+		# aproape la scara ei reala, in timp ce pe UV1 (3.1 m) era stransa de sase
+		# ori si se topea in mipmap. Granula fina o aduce acum sursa micro, care
+		# chiar e o scanare de 2.5 m. Mediile amandurora raman 0.850, deci
+		# produsul — si expunerea terenului — sunt neatinse.
 		mat.detail_enabled = true
-		mat.detail_albedo = sand_tex
+		mat.detail_albedo = _tex("res://assets/textures/surface_sand_macro.png")
 		mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
 	mat.roughness = 0.95 # style_bible §4: nisip
@@ -1603,6 +1610,14 @@ const ROAD_CROWN: float = 0.03
 ## marginile sa poata purta un gradient de uzura, fara sa umfle geometria.
 const ROAD_PROFILE: Array[float] = [-1.0, -0.55, 0.0, 0.55, 1.0]
 
+## Culoarea asfaltului, INAINTE de compensarea trecerii macro. Racoroasa-inchisa
+## ca masinile saturate sa "sara" din ecran (style_bible §1: asfaltul e cea mai
+## inchisa suprafata continua).
+const ROAD_COLOR: Color = Color(0.23, 0.24, 0.3)
+## Media texturii macro de asfalt (process_class_textures.surfaces()). Culoarea
+## se imparte la ea, ca a doua inmultire sa nu intunece soseaua.
+const ASPHALT_MACRO_MEAN: float = 0.900
+
 func _build_road() -> void:
 	var top := SurfaceTool.new()
 	top.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -1647,14 +1662,32 @@ func _build_road() -> void:
 			var cb := edge_shade if absf(tb) > 0.99 else Color.WHITE
 			var ua := ta * u_half
 			var ub := tb * u_half
+			# UV2 din coordonate de LUME, ca la teren: a doua trecere trebuie sa
+			# fie CONTINUA cu nisipul de langa ea, nu sa urmareasca panglica.
+			# Daca ar merge pe distanta parcursa, peticele s-ar aseza in dungi
+			# transversale perfect regulate — exact tiparul pe care il repara.
+			var w0 := ring0[k]
+			var w1 := ring1[k]
+			var w0b := ring0[k + 1]
+			var w1b := ring1[k + 1]
+			var m0 := Vector2(w0.x, w0.z) * SURFACE_TILING_MACRO
+			var m1 := Vector2(w1.x, w1.z) * SURFACE_TILING_MACRO
+			var m0b := Vector2(w0b.x, w0b.z) * SURFACE_TILING_MACRO
+			var m1b := Vector2(w1b.x, w1b.z) * SURFACE_TILING_MACRO
 			# Ordinea l0,l1,r0: fata triunghiului iese IN SUS (vezi istoricul
 			# winding-ului — cu ordinea inversa normalele ieseau in jos).
-			top.set_color(ca); top.set_uv(Vector2(ua, v0)); top.add_vertex(ring0[k])
-			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.add_vertex(ring1[k])
-			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.add_vertex(ring0[k + 1])
-			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.add_vertex(ring0[k + 1])
-			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.add_vertex(ring1[k])
-			top.set_color(cb); top.set_uv(Vector2(ub, v1)); top.add_vertex(ring1[k + 1])
+			top.set_color(ca); top.set_uv(Vector2(ua, v0)); top.set_uv2(m0)
+			top.add_vertex(w0)
+			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
+			top.add_vertex(w1)
+			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
+			top.add_vertex(w0b)
+			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
+			top.add_vertex(w0b)
+			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
+			top.add_vertex(w1)
+			top.set_color(cb); top.set_uv(Vector2(ub, v1)); top.set_uv2(m1b)
+			top.add_vertex(w1b)
 		# Fasia plata de coliziune (geometria veche, 2 vertecsi transversal).
 		var l0 := baked[i] - s0v * half_width
 		var r0 := baked[i] + s0v * half_width
@@ -1696,14 +1729,33 @@ func _build_road() -> void:
 	# UV-urile soselei sunt patrate (3.5 m pe ambele axe), asa ca pietrisul arata
 	# a pietris si nu a dungi intinse.
 	#
+	# DOUA texturi, doua scari (vezi process_class_textures.surfaces()): agregatul
+	# pe UV1 la 3.5 m, peticele si arcele de cauciuc pe UV2 la 45 m. Pana acum
+	# soseaua avea o singura trecere, si aia cu o fotografie AERIANA de 30 m
+	# stransa la 3.5 m — de aceea masura p25..p75 de 2.76..3.60, adica o panglica
+	# aproape fara variatie.
+	#
+	# Culoarea e IMPARTITA la media trecerii macro (0.900), altfel a doua
+	# inmultire ar intuneca soseaua cu 10%. Compensarea sta aici, si nu in media
+	# texturii, pentru ca acolo n-ar fi incaput granulatia — vezi nota din
+	# surfaces(). Randat, asfaltul iese identic cu inainte; se schimba doar cat
+	# de uniform e.
+	#
 	# Roughness 0.82 + specular 0.3 (style_bible §4): singura suprafata din lume
 	# cu un sheen vizibil — o banda discreta de lumina pe asfalt spre soare,
 	# ca in Art of Rally. Restul lumii ramane mat (0.15 pe world_material).
 	# CULL_BACK: fata soselei e garantat in sus (winding-ul e emis consistent
 	# aici), deci nu platim fiecare pixel de doua ori.
-	_add_mesh_with_collision(top.commit(), Color(0.23, 0.24, 0.3),
+	# Impartirea e pe canale, nu pe Color intreg: `Color / float` ar imparti si
+	# alfa, si ar iesi 1.11 pe un material opac.
+	var road_color := Color(
+		ROAD_COLOR.r / ASPHALT_MACRO_MEAN,
+		ROAD_COLOR.g / ASPHALT_MACRO_MEAN,
+		ROAD_COLOR.b / ASPHALT_MACRO_MEAN)
+	_add_mesh_with_collision(top.commit(), road_color,
 		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
-		BaseMaterial3D.CULL_BACK, col.commit())
+		BaseMaterial3D.CULL_BACK, col.commit(),
+		_tex("res://assets/textures/surface_asphalt_macro.png"))
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 
 ## Cati metri de sosea raman FARA perete de o parte si de alta a unei
@@ -2077,17 +2129,28 @@ func _build_flyoff_net(idx: int) -> void:
 ## cateva trepte peste tot: o nuanta continua per instanta ar face cache-ul inutil.
 func _flat_material(color: Color, texture: Texture2D = null,
 		roughness: float = 1.0, specular: float = 0.5,
-		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED
-		) -> StandardMaterial3D:
-	var key := "%s|%s|%.2f|%.2f|%d" % [color.to_html(true),
+		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
+		macro_texture: Texture2D = null) -> StandardMaterial3D:
+	var key := "%s|%s|%.2f|%.2f|%d|%s" % [color.to_html(true),
 		texture.resource_path if texture != null else "", roughness, specular,
-		cull]
+		cull, macro_texture.resource_path if macro_texture != null else ""]
 	if _mat_cache.has(key):
 		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	if texture != null:
 		mat.albedo_texture = texture
+	# A DOUA SCARA, pe UV2 — mecanica pe care terenul o avea de la inceput, iar
+	# soseaua nu. O suprafata mare are nevoie de amandoua: granulatia (UV1, o
+	# repetitie la ~3.5 m) da materialul sub roti, petele lente (UV2, ~45 m) rup
+	# tiparul de repetitie pe care ochiul il prinde imediat pe sute de m².
+	# Cele doua se INMULTESC, deci mediile lor se inmultesc si ele — vezi nota
+	# despre pastrarea produsului din process_class_textures.surfaces().
+	if macro_texture != null:
+		mat.detail_enabled = true
+		mat.detail_albedo = macro_texture
+		mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
 	mat.roughness = roughness
 	mat.metallic_specular = specular
 	# Vertex color = AO/gradient copt de builder. Mesh-urile care nu emit COLOR
@@ -2107,11 +2170,12 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		texture: Texture2D = null, roughness: float = 1.0,
 		specular: float = 0.5,
 		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
-		collision_mesh: ArrayMesh = null) -> void:
+		collision_mesh: ArrayMesh = null,
+		macro_texture: Texture2D = null) -> void:
 	var inst := MeshInstance3D.new()
 	inst.mesh = mesh
 	inst.material_override = _flat_material(color, texture, roughness, specular,
-		cull)
+		cull, macro_texture)
 	add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
@@ -2160,6 +2224,34 @@ func _build_start_line() -> void:
 const SHOULDER_WIDTH: float = 1.3
 
 
+## Cati metri de sosea acopera o repetitie a texturii de umar.
+##
+## 5 m, si numarul asta e o LECTIE DE MIPMAP, nu o preferinta. Prima varianta a
+## pus 1.8 m — cat scanarea reala a sursei, deci pietrele la marimea lor
+## adevarata. Randat, banda a iesit perfect PLATA, desi sonda de materiale
+## confirma si UV-uri corecte (u 0..0.72, v pana la 653) si textura legata.
+##
+## Cauza: umarul are 1.3 m latime si ocupa ~25 px pe ecran chiar in prim-plan.
+## La o repetitie de 1.8 m ii revin ~15 texeli pe pixel, iar GPU-ul alege atunci
+## un nivel de mipmap de 32x32 — adica media texturii, adica o culoare plata.
+## Soseaua, cu aceleasi UV-uri patrate, se vede pentru ca e de zece ori mai
+## lata pe ecran, deci ii revin ~2 texeli pe pixel.
+##
+## Regula generala de retinut: pe o suprafata INGUSTA, granulatia fina nu ajunge
+## niciodata pe ecran, oricat de corecta ar fi textura. Ce supravietuieste e
+## variatia de frecventa JOASA — de aia banda primeste si pete pe vertex color
+## (SHOULDER_PATCH_*), care nu trec prin mipmap deloc.
+const SHOULDER_TILE: float = 5.0
+
+## Cate trepte de nuanta au petele de praf si cat de tare bat.
+## Cuantificate, ca sa nu inmulteasca materialele si ca sa citeasca a pete, nu a
+## zgomot: doua bucati vecine cad des in aceeasi treapta si formeaza o pata lata.
+const SHOULDER_PATCH_STEPS: int = 4
+const SHOULDER_PATCH_DEPTH: float = 0.22
+## Cati metri tine o pata. 7 m: destul cat sa se citeasca din mers ca petic de
+## praf, prea putin cat sa devina o dunga lunga pe toata pista.
+const SHOULDER_PATCH_LENGTH: float = 7.0
+
 ## Umarul soselei: o banda de praf de o parte si de alta a asfaltului.
 ##
 ## In imaginile de referinta asfaltul nu atinge NICIODATA nisipul direct — exista
@@ -2174,7 +2266,11 @@ func _build_shoulders() -> void:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := baked.size()
 	var drop := Vector3.UP * -0.02
-	var tile := 3.5
+	var tile := SHOULDER_TILE
+	# UV-uri PATRATE, aceeasi lectie ca la sosea. U mergea 0..1 de-a latul benzii
+	# de 1.3 m in timp ce V se repeta la 3.5 m — textura iesea intinsa 2.7:1
+	# transversal, deci orice granulatie citea ca dungi in lungul drumului.
+	var u_shoulder := SHOULDER_WIDTH / tile
 	for i in n:
 		var j := (i + 1) % n
 		var s0 := _side_at(i)
@@ -2190,31 +2286,46 @@ func _build_shoulders() -> void:
 			# (praful batatorit de lansat rotile), plin spre nisip. Face umarul
 			# sa citeasca a tranzitie de material, nu a banda decupata.
 			const INNER_SHADE := Color(0.82, 0.82, 0.84)
+			# Peste gradient, petele de praf: singura variatie a umarului care
+			# ajunge sigur pe ecran, fiindca nu trece prin mipmap (vezi nota de
+			# la SHOULDER_TILE). Se calculeaza din distanta parcursa, deci
+			# capatul unui segment si inceputul urmatorului dau aceeasi valoare
+			# si banda nu se rupe.
+			var p0 := _shoulder_patch(i, side_sign)
+			var p1 := _shoulder_patch(j, side_sign)
+			var in_c0 := INNER_SHADE * p0
+			var in_c1 := INNER_SHADE * p1
+			var out_c0 := Color(p0, p0, p0)
+			var out_c1 := Color(p1, p1, p1)
 			# Winding-ul se inverseaza cu latura, altfel una din benzi iese cu
 			# fata in jos si dispare la cull.
+			var uo := u_shoulder
 			if side_sign < 0.0:
-				st.set_color(INNER_SHADE)
+				st.set_color(in_c0)
 				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
-				st.set_color(Color.WHITE)
-				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
-				st.set_color(INNER_SHADE)
+				st.set_color(out_c0)
+				st.set_uv(Vector2(uo, v0)); st.add_vertex(outer0)
+				st.set_color(in_c1)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
-				st.set_color(Color.WHITE)
-				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
-				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
-				st.set_color(INNER_SHADE)
+				st.set_color(out_c0)
+				st.set_uv(Vector2(uo, v0)); st.add_vertex(outer0)
+				st.set_color(out_c1)
+				st.set_uv(Vector2(uo, v1)); st.add_vertex(outer1)
+				st.set_color(in_c1)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
 			else:
-				st.set_color(INNER_SHADE)
+				st.set_color(in_c0)
 				st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+				st.set_color(in_c1)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
-				st.set_color(Color.WHITE)
-				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
-				st.set_uv(Vector2(1, v0)); st.add_vertex(outer0)
-				st.set_color(INNER_SHADE)
+				st.set_color(out_c0)
+				st.set_uv(Vector2(uo, v0)); st.add_vertex(outer0)
+				st.set_color(out_c0)
+				st.set_uv(Vector2(uo, v0)); st.add_vertex(outer0)
+				st.set_color(in_c1)
 				st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
-				st.set_color(Color.WHITE)
-				st.set_uv(Vector2(1, v1)); st.add_vertex(outer1)
+				st.set_color(out_c1)
+				st.set_uv(Vector2(uo, v1)); st.add_vertex(outer1)
 	st.index()
 	st.generate_normals()
 	# Praf: intre asfalt si nisip ca valoare, ca sa faca tranzitia, nu un al
@@ -2227,10 +2338,46 @@ func _build_shoulders() -> void:
 	# Winding-ul e tinut corect pe ambele laturi (vezi mai sus), deci umerii
 	# suporta CULL_BACK — banda care margineste toata pista nu se mai
 	# rasterizeaza pe ambele fete.
+	# PIETRIS, nu nisip. Umarul are alt material decat terenul de langa el —
+	# praf batatorit cu pietre iesite din el, cum se vede in orice fotografie de
+	# drum de desert. Cat timp imprumuta textura nisipului, singura lui
+	# diferenta fata de teren era culoarea, si banda citea ca vopsea.
 	inst.material_override = _flat_material(dust,
-		_tex("res://assets/textures/surface_sand.png"), 1.0, 0.5,
+		_tex("res://assets/textures/surface_gravel.png"), 1.0, 0.5,
 		BaseMaterial3D.CULL_BACK)
 	add_child(inst)
+
+
+## Nuanta petei de praf la un indice de pe traseu, ca factor in jurul lui 1.0.
+##
+## CENTRATA pe 1.0 (de aici `- 0.5`), nu doar intunecatoare: o pata care numai
+## scade ar cobori luminozitatea medie a benzii cu jumatate din amplitudine si
+## ar strica expunerea umarului fara ca nimeni sa observe de ce.
+##
+## Numarul de pete se calculeaza din lungimea REALA a pistei si se foloseste
+## modulo, ca pata de la kilometrul zero sa fie aceeasi cu cea de dinaintea
+## liniei de start. Fara asta, bucla ar avea o cusatura vizibila intr-un singur
+## loc — genul de artefact care se vede o data la trei tururi si nu se explica.
+func _shoulder_patch(idx: int, side_sign: float) -> float:
+	var total: float = _dists[_dists.size() - 1]
+	var buckets := maxi(1, int(round(total / SHOULDER_PATCH_LENGTH)))
+	var t := _dists[idx] / total * float(buckets)
+	var b := floori(t)
+	var f := smoothstep(0.0, 1.0, t - float(b))
+	var a := _patch_step(b % buckets, side_sign)
+	var c := _patch_step((b + 1) % buckets, side_sign)
+	return 1.0 + SHOULDER_PATCH_DEPTH * (lerpf(a, c, f) - 0.5)
+
+
+## Treapta de nuanta a unei pete — hash determinist din indice, nu rng.
+## Un artefact nu are voie sa se schimbe fiindca altul de langa el a consumat
+## extrageri (aceeasi regula ca in generate_palette_atlas).
+func _patch_step(bucket: int, side_sign: float) -> float:
+	var h := (bucket * 374761393) ^ (int(side_sign + 2.0) * 668265263)
+	h = (h ^ (h >> 13)) * 1274126177
+	var v := float((h ^ (h >> 16)) & 0xFFFF) / 65535.0
+	return floorf(v * float(SHOULDER_PATCH_STEPS)) \
+		/ float(SHOULDER_PATCH_STEPS - 1)
 
 
 ## Urme de cauciucuri pe linia de curse — decal-uri de geometrie (val 4c).
@@ -2336,49 +2483,90 @@ func _decal_material() -> StandardMaterial3D:
 	return _decal_mat
 
 
+## Latimea benzii de bordura, in metri.
+const KERB_WIDTH: float = 0.9
+## O repetitie de textura la 3.5 m. Nu 1.2 (scara reala a petelor din beton):
+## bordura e o banda de 0.9 m, deci si mai ingusta pe ecran decat umarul, si
+## cade in aceeasi capcana de mipmap — vezi nota de la SHOULDER_TILE. La 3.5 m
+## pata de beton e mai mare decat adevarul, dar se VEDE, si asta e tot rostul ei.
+const KERB_TILE: float = 3.5
+
+## Cat de tare variaza uzura de la o bucata de bordura la alta (factor in jurul
+## lui 1.0). Bordurile sunt turnate si vopsite bucata cu bucata, deci decolorarea
+## e per bucata, nu continua — variatia asta e geometrica, deci supravietuieste
+## mipmap-ului acolo unde textura nu.
+const KERB_WEAR_DEPTH: float = 0.14
+
+## AO discret pe muchia dinspre exterior: bordura citeste a beton turnat cu
+## grosime, nu a banda de plastic lipita pe asfalt.
+const KERB_EDGE_SHADE: Color = Color(0.86, 0.86, 0.86)
+
+## Culorile bordurii, IMPARTITE la media texturii de uzura (0.940, vezi
+## process_class_textures.surfaces()). Textura se inmulteste peste ele, deci fara
+## corectia asta benzile ar iesi cu 6% mai inchise si si-ar pierde din rolul de
+## "citesti virajul de departe". Asa se schimba doar uniformitatea lor.
+const KERB_RED: Color = Color(0.904, 0.160, 0.106)
+const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
+
+## Bordurile rosu-alb de pe marginile virajelor stranse.
+##
+## UN SINGUR mesh pentru amandoua culorile, nu doua: culoarea vine acum din
+## vertex color, iar materialul e comun. Inainte erau doua materiale (rosu plat
+## si alb plat) fara nicio textura pe ele — singurele suprafete mari din cadru
+## ramase pe culoare pura, si se vedea. Acum sunt un material texturat, deci si
+## garda de draw call-uri scade cu unu.
+##
+## Amplasarea NU s-a schimbat: bordurile stau tot doar pe virajele reale
+## (curbura peste 0.08 rad). Nu sunt decor, sunt SEMNAL — daca ar margini toata
+## pista, n-ar mai spune nimic despre unde se franeaza.
 func _build_kerbs() -> void:
-	var red := SurfaceTool.new()
-	red.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var white := SurfaceTool.new()
-	white.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := baked.size()
 	var lift := Vector3.UP * 0.04
-	var emitted_red := false
-	var emitted_white := false
+	var u_in := KERB_WIDTH / KERB_TILE
+	var emitted := false
 	for i in range(0, n, 2):
 		# curbura locala: unghiul dintre directia dinainte si cea de dupa
 		var before := (baked[i] - baked[(i - 3 + n) % n]).normalized()
 		var after := (baked[(i + 3) % n] - baked[i]).normalized()
 		if before.angle_to(after) < 0.08:
 			continue
+		var j := (i + 2) % n
+		var v0 := _dists[i] / KERB_TILE
+		var v1 := _dists[mini(i + 2, n)] / KERB_TILE
+		var block := i / 2
+		var wear := 1.0 + KERB_WEAR_DEPTH * (_patch_step(block, 1.0) - 0.5)
+		var tint := (KERB_RED if block % 2 == 0 else KERB_WHITE) * wear
+		var edge := tint * KERB_EDGE_SHADE
 		for side_sign: float in [-1.0, 1.0]:
 			var e0 := baked[i] + _side_at(i) * half_width * side_sign + lift
-			var e1 := baked[(i + 2) % n] + _side_at((i + 2) % n) * half_width * side_sign + lift
-			var in0 := e0 - _side_at(i) * 0.9 * side_sign
-			var in1 := e1 - _side_at((i + 2) % n) * 0.9 * side_sign
-			var st := red if (i / 2) % 2 == 0 else white
-			# AO discret pe muchia dinspre exterior: bordura citeste a beton
-			# turnat cu grosime, nu a banda de plastic lipita pe asfalt.
-			const EDGE_SHADE := Color(0.86, 0.86, 0.86)
-			st.set_color(EDGE_SHADE)
-			st.add_vertex(e0); st.add_vertex(e1)
-			st.set_color(Color.WHITE)
-			st.add_vertex(in0)
-			st.add_vertex(in0)
-			st.set_color(EDGE_SHADE)
-			st.add_vertex(e1)
-			st.set_color(Color.WHITE)
-			st.add_vertex(in1)
-			if (i / 2) % 2 == 0:
-				emitted_red = true
-			else:
-				emitted_white = true
-	if emitted_red:
-		red.generate_normals()
-		_add_visual_mesh(red.commit(), Color(0.85, 0.15, 0.1))
-	if emitted_white:
-		white.generate_normals()
-		_add_visual_mesh(white.commit(), Color(0.92, 0.92, 0.92))
+			var e1 := baked[j] + _side_at(j) * half_width * side_sign + lift
+			var in0 := e0 - _side_at(i) * KERB_WIDTH * side_sign
+			var in1 := e1 - _side_at(j) * KERB_WIDTH * side_sign
+			st.set_color(edge)
+			st.set_uv(Vector2(0.0, v0)); st.add_vertex(e0)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(e1)
+			st.set_color(tint)
+			st.set_uv(Vector2(u_in, v0)); st.add_vertex(in0)
+			st.set_uv(Vector2(u_in, v0)); st.add_vertex(in0)
+			st.set_color(edge)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(e1)
+			st.set_color(tint)
+			st.set_uv(Vector2(u_in, v1)); st.add_vertex(in1)
+			emitted = true
+	if not emitted:
+		return
+	st.generate_normals()
+	var inst := MeshInstance3D.new()
+	inst.name = "Kerbs"
+	inst.mesh = st.commit()
+	# albedo ALB: culoarea vine din vertex color, textura o moduleaza. Aceeasi
+	# mecanica ca la teren si din acelasi motiv — orice culoare pusa aici s-ar
+	# inmulti peste rosu si l-ar impinge in saturatie, unde uzura dispare.
+	inst.material_override = _flat_material(Color.WHITE,
+		_tex("res://assets/textures/surface_kerb.png"), 0.9, 0.3)
+	add_child(inst)
 
 ## Lumea din jurul soselei: peretii de canion si decorul imprastiat.
 ##

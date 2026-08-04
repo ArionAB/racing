@@ -119,26 +119,141 @@ static func classes() -> Dictionary:
 ##             La 512 fara blocuri, granula ar cadea la 6 mm in lume si ar fi
 ##             mancata de mipmap inainte sa ajunga pe ecran.
 ##
-## Sursele sunt AERIENE deliberat: la o repetitie de 3.1 m, un prim-plan de
-## nisip ar mari granula de trei ori si ar citi ca pietris.
+## O SURSA SE ALEGE SI DUPA SCARA EI REALA, nu doar dupa cum arata.
+##
+## Versiunea din #132 folosea fotografii AERIENE pentru amandoua suprafetele, cu
+## motivatia ca un prim-plan la o repetitie de 3.1 m ar mari granula si ar citi
+## ca pietris. Rationamentul e corect — dar sursele alese erau scanari de 20 m
+## (nisip) si 30 m (asfalt), afisate la 3.1 si 3.5 m. Adica invers: granulatia
+## reala iesea de ~8 ori PREA MICA, sub un texel, si o manca mipmap-ul complet.
+## Se vedea in cifre — asfaltul masura p25..p75 de 2.76..3.60, adica aproape
+## nicio variatie, desi fotografia sursa avea deviatie in-dala 8.84.
+##
+## Reparatia nu e "alta poza", e SEPARAREA CELOR DOUA ROLURI. Fiecare suprafata
+## are acum doua texturi, fiecare cu sursa la scara ei:
+##
+##   micro (UV1, o repetitie la 3.1-3.5 m)  <- scanare de 2-3 m: granula de
+##       nisip, agregatul din asfalt, crapaturile. Asta se vede sub roti.
+##   macro (UV2, o repetitie la ~45 m)      <- aeriana de 20-30 m: pete, urme
+##       de reparatii, arce de cauciuc. Asta rupe tiparul de repetitie pe
+##       suprafetele mari.
+##
+## Sursele aeriene de dinainte NU s-au aruncat — au fost mutate in rolul lor
+## corect (surface_*_macro_src.jpg), unde scara le e potrivita.
+##
+## EXPUNEREA SE TINE PE LOC, dar nu mereu prin acelasi mecanism. Cele doua
+## treceri se INMULTESC, deci contributia lor la luminozitate e
+## mean_micro * mean_macro:
+##   - la NISIP produsul se pastreaza direct: erau deja doua treceri cu aceeasi
+##     textura (0.850² = 0.7225), deci amandoua raman la 0.850 si nimic nu se
+##     misca;
+##   - la ASFALT nu se putea. Soseaua avea o singura trecere (0.865); ca a doua
+##     sa nu o intunece, perechea ar fi trebuit sa aiba mediile foarte sus (0.92
+##     si 0.94), iar acolo `grain` nu mai INCAPE — media plus jumatatea
+##     amplitudinii trece de 1.0, varfurile se retează si media reala scade sub
+##     tinta oricum (masurat: 0.920 ceruta, 0.9086 obtinuta). Asa ca acolo
+##     compensarea s-a mutat unde are loc: culoarea asfaltului din
+##     `Track._build_road` e impartita la media trecerii macro. Rezultatul randat
+##     e acelasi, dar amandoua texturile au headroom.
+##
+## `grain` NU e optional si nu e un rest istoric, si asta e a doua oara cand se
+## invata: prima versiune a acestei restructurari l-a taiat (0.26 -> 0.14 pe
+## asfalt) pe motiv ca fotografia la scara corecta aduce ea granulatia. Masurat
+## pe poza de sofer, a iesit REGRESIE — asfaltul a cazut de la σ 3.12 la 1.96,
+## sub valoarea de dinaintea intregii schimbari. Deviatia in-dala a texturii
+## finale spune de ce: 18.27 inainte, 16.32 dupa. Fotografia da structura la
+## frecvente MEDII (crapaturi, petice); zgomotul pe blocuri de 4 texeli e
+## singurul lucru care traieste la scara unui texel, si exact aia masoara sonda
+## din §14 — pentru ca exact aia se vede la 60 km/h.
 const GRAIN_BLOCK := 4
 
 static func surfaces() -> Dictionary:
 	return {
-		# grain 0.20 = exact amplitudinea uniforma a texturii procedurale
-		# (deviatie 0.20/sqrt(12) = 0.058), sigma 0.045 = structura adaugata.
+		# --- NISIP ---
 		#
-		# `mean` 0.838 -> 0.850, si NU e un numar rotunjit: la 0.838 (media
-		# exacta a texturii procedurale) nisipul randat a iesit cu 3% mai
+		# Sursa micro: gravelly_sand (PolyHaven CC0, scanare de 2.48 m — deci
+		# aproape 1:1 la repetitia de 3.125 m a terenului). Aleasa prin
+		# masuratoare dintre sase candidati, pe criteriul care conteaza la o
+		# textura MULTIPLICATIVA: nu media (aia se renormalizeaza oricum), ci
+		# cata deviatie ramane INAUNTRUL dalei fata de cea globala. gravelly_sand
+		# retine 0.88 (10.32 din 11.7); aeriana dinainte retinea 0.735. Uniformitate
+		# 0.5%/1.2% — sub pragul de 5% peste care repetitia da benzi.
+		# Vezi tools/measure_texture_src.gd, ritualul din style_bible §4.
+		#
+		# `mean` 0.850 e MOSTENIT, nu recalculat: la 0.838 (media exacta a
+		# texturii procedurale de dinainte) nisipul randat iesea cu 3% mai
 		# intunecat, adica eroare 14/255 pe rosu fata de #D4994D, peste pragul
-		# de 12 din style_bible §14. Cauza e ca a doua trecere (UV2, o repetitie
-		# la 45 m) acopera cam cat tot cadrul, deci contributia ei nu mai e
-		# media texturii, ci media BUCATII de fotografie care nimereste acolo.
-		# Cu 0.850, nisipul randat revine la 203,156,87 — identic cu inainte.
+		# de 12 din style_bible §14.
+		#
+		# sigma 0.045 -> 0.075: cu sursa la scara corecta, normalizarea la 0.045
+		# ZDROBEA fotografia (deviatia sursei 11.7 taiata la 11.5, pe o sursa
+		# care acum chiar are structura de citit). `grain` URCA 0.20 -> 0.22 —
+		# vezi nota de mai sus despre incercarea de a-l taia.
 		"surface_sand": {"src": "surface_sand_src.jpg",
-			"mean": 0.850, "sigma": 0.045, "grain": 0.20},
+			"mean": 0.850, "sigma": 0.075, "grain": 0.22},
+		# Sursa macro: aeriana de 20 m de dinainte, in rolul ei corect. Pete si
+		# urme late la o repetitie de 45 m — exact ce a fost fotografiat.
+		#
+		# Are grain, desi intuitia zice ca la 45 m/repetitie un texel acopera
+		# 9 cm si zgomotul ar fi mancat de mipmap. Intuitia e gresita in PRIM-PLAN:
+		# la 10 m de camera un pixel de ecran acopera ~1.3 cm, deci un texel macro
+		# se intinde pe ~7 pixeli si e perfect vizibil. Trecerea macro nu e doar
+		# "pete lente", e si o a doua sursa de granulatie MARITA — de aia taierea
+		# ei a costat jumatate din regresia masurata.
+		"surface_sand_macro": {"src": "surface_sand_macro_src.jpg",
+			"mean": 0.850, "sigma": 0.075, "grain": 0.12},
+
+		# --- ASFALT ---
+		#
+		# Sursa micro: asphalt_02 (PolyHaven CC0, scanare de 3.0 m — practic 1:1
+		# la repetitia de 3.5 m a soselei). Deviatie in-dala 14.97 fata de 8.84 a
+		# aerianei, cu retentie 0.89, si dezechilibru de lumina 0.5%/1.2% fata de
+		# 0.2%/5.4%. Aduce agregatul si crapaturile — ce lipsea complet.
+		#
+		# `mean` ramane 0.865, exact cat avea trecerea unica de dinainte: asa
+		# incape `grain` 0.26 (0.865 + 0.13 = 0.995, fara retezare). Compensarea
+		# celei de-a doua treceri e in culoarea din _build_road, nu aici.
 		"surface_asphalt": {"src": "surface_asphalt_src.jpg",
-			"mean": 0.865, "sigma": 0.050, "grain": 0.26},
+			"mean": 0.865, "sigma": 0.085, "grain": 0.26},
+		# Sursa macro: aeriana de 30 m de dinainte. La 45 m/repetitie arcele de
+		# cauciuc si peticele de reparatii ies aproape la scara lor reala, si fac
+		# soseaua sa citeasca a drum intretinut, nu a panglica turnata.
+		"surface_asphalt_macro": {"src": "surface_asphalt_macro_src.jpg",
+			"mean": 0.900, "sigma": 0.065, "grain": 0.12},
+
+		# --- PIETRIS (umarul soselei) ---
+		#
+		# Sursa: rocky_gravel (PolyHaven CC0, scanare de 1.81 m, o repetitie la
+		# 1.8 m in joc — 1:1). Cea mai contrastata sursa masurata: deviatie
+		# in-dala 21.65 cu retentie 0.86. Pe o banda de 1.3 m latime care trece
+		# la 2 m de camera, pietrele individuale sunt exact detaliul cerut.
+		#
+		# O SINGURA trecere, fara macro: banda e ingusta si privita in unghi
+		# razant, deci repetitia nu se citeste; iar a doua trecere ar fi cerut
+		# recalibrarea culorii de praf. mean 0.850 = cel al nisipului pe care il
+		# inlocuieste, deci umarul isi pastreaza expunerea.
+		"surface_gravel": {"src": "surface_gravel_src.jpg",
+			"mean": 0.850, "sigma": 0.090, "grain": 0.20},
+
+		# --- BORDURA ---
+		#
+		# Sursa: concrete_src, REFOLOSITA (concrete_floor_02, PolyHaven CC0) —
+		# bordurile sunt beton vopsit, deci e chiar materialul potrivit, si o
+		# clasa noua ar fi insemnat inca o sursa in repo fara castig.
+		# Deviatie in-dala 17.43: pete, ciobituri si granulatie de beton, adica
+		# fix uzura care lipsea de pe benzile rosu-alb.
+		#
+		# mean 0.940, si NU 0.850: bordurile sunt cea mai SATURATA suprafata mare
+		# din cadru (rosu 0.85), iar o textura care le-ar intuneca cu 15% le-ar
+		# scoate din rolul de "citesti virajul de departe". Culorile de baza din
+		# _build_kerbs sunt impartite la 0.940, deci luminozitatea lor ramane
+		# exact cea dinainte si se schimba doar uniformitatea.
+		# grain doar 0.10: media e sus, deci amplitudinea nu incape (0.940 + 0.05
+		# = 0.99 e deja la limita). Bordura isi permite — spre deosebire de
+		# nisip si asfalt, ea nu e o suprafata pe care sta camera, ci o banda de
+		# 0.9 m vazuta in trecere.
+		"surface_kerb": {"src": "concrete_src.jpg",
+			"mean": 0.940, "sigma": 0.075, "grain": 0.10},
 	}
 
 

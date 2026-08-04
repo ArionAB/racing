@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bnccmti6jpmdj"
-path="res://.godot/imported/surface_sand_src.jpg-feabbcfeac23eb3fe72a290657fc8513.ctex"
+uid="uid://bt3whc5fc7eak"
+path="res://.godot/imported/surface_asphalt_macro_src.jpg-62c790088ac9ee0ffe7f031a4e2c54c5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/classes/src/surface_sand_src.jpg"
-dest_files=["res://.godot/imported/surface_sand_src.jpg-feabbcfeac23eb3fe72a290657fc8513.ctex"]
+source_file="res://assets/textures/classes/src/surface_asphalt_macro_src.jpg"
+dest_files=["res://.godot/imported/surface_asphalt_macro_src.jpg-62c790088ac9ee0ffe7f031a4e2c54c5.ctex"]
 
 [params]
 

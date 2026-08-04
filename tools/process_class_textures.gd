@@ -49,6 +49,24 @@ static func classes() -> Dictionary:
 		# Metal ruginit: turn de apa, excavator, conducta.
 		"rust_metal": {"src": "rust_metal_src.jpg",
 			"anchor": Palette.color(Palette.RUST_METAL), "gain": 1.15},
+		# Lemn imbatranit: turnul morii, grinzile portalului de mina, lazile.
+		# Sursa: planks_brown_10 (PolyHaven CC0), ALEASA PRIN MASURATOARE dintre
+		# cinci candidati, pe doua criterii care s-au dovedit amandoua decisive:
+		#
+		#   1. media aproape de luminanta ANCOREI (102.9 fata de 97.5). Prima
+		#      incercare (weathered_planks) avea media 69 — cu 30% sub ancora —
+		#      si turnul morii a iesit o silueta neagra in cadru. Gradarea
+		#      pastreaza luminanta sursei prin constructie, deci o fotografie
+		#      subexpusa ramane subexpusa oricat de bine ar fi gradata.
+		#   2. lumina UNIFORMA pe dala. weathered_planks avea jumatatea dreapta
+		#      vizibil mai inchisa decat stanga; pe o suprafata care se repeta,
+		#      dezechilibrul ala devine benzi. Masurat aici: 0.4 diferenta
+		#      stanga/dreapta.
+		#
+		# Fara gain: sursa are deja sigma 23.7, cea mai contrastata din toate
+		# clasele. Ce lipsea nu era punch, era expunerea.
+		"wood": {"src": "wood_src.jpg",
+			"anchor": Palette.color(Palette.WOOD_WEATHERED)},
 	}
 
 

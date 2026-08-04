@@ -2525,8 +2525,15 @@ const _LANDMARKS := {
 		"tri_class": "rust_metal"},
 	1: {"path": "res://assets/models/gas_station.glb",
 		"gap": 9.0, "col": "box", "spin": false},
+	# Moara: lemn SI metal, deci nu poate lua o clasa "pe tot subarborele" ca
+	# turnul. Piesele Mill_Wood/Mill_Metal/Blades au UV-uri reale (proiectie
+	# cubica); Mill_Trim ramane pe atlas — vana albastra e singurul accent de
+	# culoare al morii, iar apa din jgheab e un slot, nu o textura.
+	# ATENTIE: `Blades` se roteste, deci UV-uri reale, NU triplanar de lume.
 	2: {"path": "res://assets/models/windmill.glb",
-		"gap": 11.0, "col": "cyl", "radius": 1.6, "spin": true},
+		"gap": 11.0, "col": "cyl", "radius": 1.6, "spin": true,
+		"classes": {"Mill_Wood": "wood", "Mill_Metal": "rust_metal",
+			"Blades": "rust_metal"}},
 	3: {"path": "res://assets/models/route66_sign.glb",
 		"gap": 3.5, "col": "none", "spin": false},
 	# Ecran de drive-in: 20.6 m lat si 10.8 m inalt, cel mai lat lucru construit
@@ -2593,6 +2600,9 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 		body.add_child(shape)
 		root = body
 	root.add_to_group("landmarks")
+	# Ce landmark e — ca sondele sa poata cere unul anume, fara sa ghiceasca
+	# fractia la care il prind in cadru (tools/snapshot.gd --landmark=).
+	root.set_meta("landmark_id", id)
 	root.add_child(model)
 	add_child(root)
 	# Atlasul comun pe tot subarborele (fara el, GLB-ul iese alb). Moara si-l

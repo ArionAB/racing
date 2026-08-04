@@ -246,6 +246,7 @@ const CLASS_TEXTURES := {
 	"stone_wall": "res://assets/textures/classes/stone_wall.png",
 	"rock": "res://assets/textures/classes/rock.png",
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
+	"wood": "res://assets/textures/classes/wood.png",
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri

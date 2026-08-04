@@ -216,23 +216,8 @@ def plaster_body(b):
     b.box((0.0, 0.15 - HOUSE_D / 2 - 0.35, 0.09), (1.3, 0.6, 0.18), CONCRETE)
 
 
-def cube_uvs(obj, size):
-    """UV-uri prin proiectie cubica — pentru partile cu texturi de CLASA.
-
-    Abaterea de la contractul de UV-uri colapsate e deliberata si limitata:
-    partile astea NU folosesc atlasul de paleta, ci texturile din
-    assets/textures/classes/ (Palette.class_material). Partile pe atlas
-    (lemnaria, nisipul) trec tot prin finish()/assign_uvs, ca pana acum.
-    """
-    for o in bpy.context.view_layer.objects:
-        o.select_set(False)
-    obj.select_set(True)
-    bpy.context.view_layer.objects.active = obj
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.cube_project(cube_size=size, correct_aspect=True)
-    bpy.ops.object.mode_set(mode="OBJECT")
-
+# `cube_uvs` a fost definit aici cat timp pilotul era singurul consumator; de la
+# al doilea asset pe clase (moara, #129) sta in dio_lib, langa assign_uvs.
 
 AO_SPEC = dict(samples=28, dist=2.2, gradient="vertical",
                low=0.45, high=1.0, power=0.8, floor=0.15)

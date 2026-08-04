@@ -196,8 +196,24 @@ Ce e permis:
   Gradarea spre ancoră NU e opțională: fotografii din surse diferite au
   fiecare lumina și saturația lor, iar nefiltrate dau „asset soup". Gradate,
   devin o extensie a paletei. Clase active: `rock` (faleze/butte/arcadă/
-  bolovani, triplanar), `rust_metal` (turn de apă/excavator/conductă,
-  triplanar), `roof_tiles`/`plaster`/`stone_wall` (village_house, UV cubic).
+  bolovani, triplanar), `rust_metal` (turn de apă/excavator/conductă
+  triplanar; moară pe UV cubic), `wood` (turnul morii),
+  `roof_tiles`/`plaster`/`stone_wall` (village_house, UV cubic).
+
+  > ⚠️ **Sursa se alege prin măsurătoare, pe două criterii, nu din miniatură.**
+  > Gradarea păstrează luminanța sursei prin construcție — deci nu poate
+  > repara o fotografie subexpusă. Prima sursă de lemn (`weathered_planks`)
+  > avea media 69/255 față de 97.5 a ancorei, iar turnul morii a ieșit o
+  > siluetă neagră în cadru. A doua (`planks_brown_10`, media 102.9) a ieșit
+  > din prima. Al doilea criteriu e **uniformitatea luminii pe dală**: prima
+  > sursă avea jumătatea dreaptă vizibil mai închisă, iar pe o suprafață care
+  > se repetă dezechilibrul ăla devine benzi.
+
+  **Aceeași clasă poate costa două materiale.** `rust_metal` are azi două
+  instanțe pe Dunele: una triplanară (turn de apă, pe UV-uri colapsate) și una
+  pe UV-uri reale (moara). Nu e risipă și nu se poate evita — sunt două
+  mecanisme de proiecție diferite — dar garda le numără pe amândouă, deci se
+  ține minte când se calculează bugetul de 38.
 
   **Ce rămâne DELIBERAT pe paletă, fără texturi**: mașinile și accentele lor
   (§1), semnele cu text/branding (route66, gas_pole, start_gate — textul e

@@ -882,6 +882,34 @@ def assign_uvs(obj, snap):
             uv.data[li].uv = (u, 0.5)
 
 
+def cube_uvs(obj, size):
+    """UV-uri REALE prin proiectie cubica — pentru piesele cu textura de CLASA.
+
+    Abaterea de la contractul de UV-uri colapsate (assign_uvs) e deliberata si
+    limitata: piesele astea nu mai citesc atlasul de paleta, ci o textura din
+    assets/textures/classes/ prin Palette.class_material(). Se aplica DUPA
+    finish(), care a pus deja UV-urile pe sloturi — proiectia le suprascrie.
+
+    `size` e latura cubului de proiectie in metri, adica **metri per repetitie
+    a texturii**. Se alege pe clasa, nu pe piesa, altfel aceeasi clasa arata cu
+    doua granulatii diferite pe doua obiecte vecine.
+
+    Piesele care raman pe atlas nu primesc apelul asta si trec neatinse.
+
+    Alternativa — triplanarul de lume (Palette.triplanar_class_material) — nu
+    cere UV-uri deloc, dar merge doar pe ce sta pe loc: pe o piesa care se
+    roteste (roata morii) textura ar inota. Vezi style_bible §4.
+    """
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.cube_project(cube_size=size, correct_aspect=True)
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
 def _hemisphere_dirs(n):
     """Directii distribuite uniform in emisfera (spirala Fibonacci) — determinist,
     deci build-uri reproductibile."""

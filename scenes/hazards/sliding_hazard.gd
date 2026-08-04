@@ -50,6 +50,10 @@ var phase: float = 0.0
 var model_scene: PackedScene
 var model_scale: float = 1.0
 var roll_radius: float = 0.0 # >0 = sfera care se rostogoleste
+## Clasa de textura a modelului ("" = atlasul comun). Se aplica TRIPLANAR IN
+## SPATIUL OBIECTULUI, nu al lumii: obstacolul se misca, iar proiectia de lume
+## i-ar face textura sa "inoate" pe suprafata (style_bible §4).
+var model_tri_class: String = ""
 
 var _time: float = 0.0
 var _pivot: Node3D
@@ -122,7 +126,14 @@ func _build_model() -> void:
 	# Atlasul comun. Modelele vechi (mingea de plaja) isi aduceau materialul lor
 	# si mergeau fara asta; cele care respecta contractul de paleta au UV-uri
 	# spre sloturi si un material fara imagine — fara apel, ies gresit.
-	Palette.apply_world_material(model)
+	# Cu o clasa ceruta (bolovanul din desert = "rock"), textura de clasa ia
+	# locul atlasului — dar in spatiul OBIECTULUI, ca sa se rostogoleasca odata
+	# cu el. `model_scale` intra in socoteala ca pietrele pictate sa masoare in
+	# lume cat cele de pe falezele din care s-a desprins.
+	if model_tri_class.is_empty():
+		Palette.apply_world_material(model)
+	else:
+		Palette.apply_object_triplanar_class(model, model_tri_class, model_scale)
 	var shape := CollisionShape3D.new()
 	if roll_radius > 0.0:
 		var sphere := SphereShape3D.new()

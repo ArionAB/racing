@@ -153,6 +153,10 @@ static func themes() -> Dictionary:
 			"decor": "bands",
 			"props": "desert",
 			"hazard_model": "res://assets/models/boulder_roller.glb",
+			# Bolovanul e din aceeasi roca cu falezele — aceeasi clasa de
+			# textura, doar proiectata in spatiul obiectului (vezi
+			# SlidingHazard.model_tri_class).
+			"hazard_class": "rock",
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
 			"water": false,
 		},
@@ -1754,6 +1758,7 @@ func _build_hazard(frac: float) -> void:
 		var ball := SlidingHazard.new()
 		ball.model_scene = load(hazard_model)
 		ball.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
+		ball.model_tri_class = theme_flag("hazard_class", "")
 		# Doar intentia "se rostogoleste"; raza reala o ia din model.
 		ball.roll_radius = 1.0
 		# Noi ii cerem maturarea maxima; el isi taie cursa cat sa nu iasa din

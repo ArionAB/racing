@@ -201,10 +201,20 @@ Ce e permis:
 
   **Ce rămâne DELIBERAT pe paletă, fără texturi**: mașinile și accentele lor
   (§1), semnele cu text/branding (route66, gas_pole, start_gate — textul e
-  pictat prin sloturi și o textură l-ar distruge), prop-urile mărunte
-  (marker_post, scatter, cactus, dino_bones — sub 1 m, textura nu se citește)
-  și **obiectele care se mișcă** pe triplanar de lume (boulder_roller —
-  textura ar „înota" pe suprafață la rostogolire).
+  pictat prin sloturi și o textură l-ar distruge) și prop-urile mărunte
+  (marker_post, scatter, cactus, dino_bones — sub 1 m, textura nu se citește).
+
+  **Ce se mișcă nu primește triplanar de LUME.** Proiecția de lume își ia
+  coordonatele din poziția vertexului în scenă: pe un obiect fix e exact ce
+  vrem (benzile curg continuu peste secțiuni vecine), pe unul care se mișcă
+  textura „înoată" pe suprafață. Varianta corectă e proiecția în spațiul
+  **obiectului** (`Palette.object_triplanar_class_material`,
+  `uv1_world_triplanar = false`): textura se rotește odată cu mesh-ul.
+  Așa merge boulder_roller-ul, pe clasa `rock` a falezelor din care se
+  desprinde. Scara se înmulțește cu factorul de scalare al nodului — proiecția
+  citește vertecșii *dinainte* de transformare, deci fără corecție un model
+  desenat la 5 m și pus în joc la 0.52 ar arăta straturi de două ori mai mari
+  decât faleza de lângă el.
 
 Ce rămâne interzis: **texturi unice per asset** (doar per clasă), texturi de
 murdărie pictate manual per asset, surse externe nefiltrate prin gradare.

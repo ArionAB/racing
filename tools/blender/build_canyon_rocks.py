@@ -118,6 +118,10 @@ for (name, size, tiers, seg, lip, lean, rubble, bevel, taper, seed) in ROCKS:
              stats["ao_min"], stats["ao_max"]))
 
 print()
+# Garda de fante: o stiva de lespezi e exact geometria in care o cota gresita
+# lasa aer intre trepte, iar prin aer se vede in interiorul stancii.
+report_slits(built, "canyon_rocks")
+print()
 for cls in "LMS":
     n, t = per_class[cls]
     print("  clasa %s: %2d variante, %5d tris (medie %d)" % (cls, n, t, t / n))

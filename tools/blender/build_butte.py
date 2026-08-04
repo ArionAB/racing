@@ -21,15 +21,25 @@ def butte(name, w, d, h, seed, tiers=2, taper=0.30):
     treapta e mai ingusta si mai deschisa la culoare — de sus bate soarele.
     """
     b = Builder()
+    # Cotele se calculeaza din capacul REAL al piesei de dedesubt, nu dintr-o
+    # fractie ghicita din h: `flat_top` reteaza varful la 82%, iar coama asezata
+    # pe 0.86 * h plutea cu pana la un metru peste corp. Fanta se vedea de pe
+    # sosea ca o crapatura prin care se zareste in interiorul siluetei.
+    OVERLAP = 0.06        # fractie din h; ingropat, deci gratis
+
     # baza, in roca inchisa
-    b.rock((0.0, 0.0, 0.0), (w, d, h * 0.62), ROCK_DARK,
+    base_h = h * 0.62
+    b.rock((0.0, 0.0, 0.0), (w, d, base_h), ROCK_DARK,
            seed=seed, segments=6, rings=2, flat_top=True, taper=taper)
     # corpul, in roca deschisa, retras putin
-    b.rock((0.0, 0.0, h * 0.50), (w * 0.82, d * 0.80, h * 0.42), ROCK_LIGHT,
+    body_z = Builder.flat_top_z(0.0, base_h) - h * OVERLAP
+    body_h = h * 0.42
+    b.rock((0.0, 0.0, body_z), (w * 0.82, d * 0.80, body_h), ROCK_LIGHT,
            seed=seed + 101, segments=6, rings=2, flat_top=True, taper=taper * 0.7)
     if tiers > 1:
         # coama de nisip pe varf: linia care se citeste pe cer
-        b.rock((0.0, 0.0, h * 0.86), (w * 0.60, d * 0.58, h * 0.18), SAND_LIGHT,
+        b.rock((0.0, 0.0, Builder.flat_top_z(body_z, body_h) - h * OVERLAP),
+               (w * 0.60, d * 0.58, h * 0.18), SAND_LIGHT,
                seed=seed + 211, segments=5, rings=1, flat_top=True, taper=0.2)
     obj = b.to_object(name)
     stats = finish(
@@ -67,6 +77,9 @@ for i, (name, w, d, h, seed, tiers, tp) in enumerate(BUTTES):
           % (name, w, d, h, stats["tris"], stats["ao_min"], stats["ao_max"]))
 
 print("TOTAL: %d tris (buget 5 x 180 = 900)" % sum(tri_count(o) for o in built))
+# Butte-urile stau la 150-350 m, deci o fanta se vede pe CER: coama plutea
+# separat de corp si silueta se rupea in doua.
+report_slits(built, "butte")
 
 for o in built:
     o.location = (0.0, 0.0, 0.0)

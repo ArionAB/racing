@@ -136,6 +136,19 @@ peste teren.
 > o treaptă joasă, verticală, cu 5 laturi și fără bevel *chiar e* o cutie.
 > Clasa mică merge la 0.30–0.40, adică bolovan rotunjit cu capac plat.
 
+> ⚠️ **Când stivuiești volume, calculează cota din capacul REAL al piesei de
+> dedesubt** — `Builder.flat_top_z()`, niciodată o fracție ghicită din înălțime.
+> `flat_top=True` retează vârful, deci o piesă cerută de 2 m are capacul la
+> 1.64 m (`Builder.FLAT_TOP_FRAC`). Piesa de deasupra ajunge în aer, iar prin
+> fantă vezi **spatele peretelui din față** — care e backface și e tăiat de
+> culling, deci gaura arată ca o crăpătură spre interiorul stâncii. Nu e o
+> greșeală teoretică: în august 2026 aveau fante **18 din 35** de piese de rocă
+> din joc (14 stânci de canion, toate cele 3 butte-uri, Cliff_H), până la 91 cm.
+> Suprapunerea îngropată e gratis — triunghiurile ascunse există oricum.
+> Garda e `check_slits()` / `report_slits()` din dio_lib, apelată din build-urile
+> familiei de rocă. NU o rula pe structuri (case, turnuri pe picioare): acolo
+> golurile pe verticală sunt intenționate.
+
 **DA:** siluete mari și lizibile, grinzi groase, colțuri rotunjite, spațiu negativ
 **NU:** șuruburi mici, balustrade subțiri, stânci zimțate, detaliu de frecvență înaltă
 

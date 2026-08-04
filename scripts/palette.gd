@@ -248,6 +248,9 @@ const CLASS_TEXTURES := {
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
 	"wood": "res://assets/textures/classes/wood.png",
 	"concrete": "res://assets/textures/classes/concrete.png",
+	# Insula (Okinawa): calcar coraligen si scoarta tropicala.
+	"coral_rock": "res://assets/textures/classes/coral_rock.png",
+	"bark": "res://assets/textures/classes/bark.png",
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -259,6 +262,10 @@ const CLASS_TRIPLANAR_SCALE := {
 	# in mipmap. La ~7 m, un strat citeste cat un strat.
 	"rock": 0.14,
 	"rust_metal": 0.45, # o repetitie la ~2.2 m — panouri, nu strate
+	# Sursa e o scanare de 1.1 m; la 1.18 m/repetitie scobiturile de calcar cad
+	# aproape la scara reala, iar o stanca de recif de 1.6-4 m prinde 1.5-3.5
+	# repetitii — destul cat tiparul sa nu se citeasca ca tapet.
+	"coral_rock": 0.85,
 }
 
 static var _tri_mats: Dictionary = {}

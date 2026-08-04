@@ -8,7 +8,12 @@ Verifica:
   2. numarul de triunghiuri fata de buget
   3. UV-urile: toate colapsate pe centre de slot din atlas -> ce sloturi foloseste
   4. sloturile sunt LEGALE (0-13). 14-16 sunt accente de masina, 17-31 se
-     randeaza magenta in joc — vezi LEGAL_SLOTS mai jos
+     randeaza magenta in joc — vezi LEGAL_SLOTS mai jos.
+     Piesele declarate cu --class-parts= poarta o textura de CLASA
+     (assets/textures/classes/), deci au UV-uri REALE si nu li se aplica
+     regula slotului. Pe ele verificarea se inverseaza: UV-urile trebuie sa
+     ACOPERE o suprafata. Colapsate, ar citi un singur texel si textura ar fi
+     invizibila — vezi style_bible §13.6, bug-ul care a costat trei luni.
   5. COLOR_0 prezent (AO copt) + intervalul de valori
   6. bounding box: originea la baza (min Y ~ 0), centrata in XZ. Cu
      --origin=center se cere in schimb bbox centrat pe Y (obiecte care se
@@ -23,6 +28,8 @@ Rulare:
     python tools/blender/verify_glb.py assets/models/route66_sign.glb 260 --front=-Z
     python tools/blender/verify_glb.py assets/models/boulder_roller.glb 220 --origin=center
     python tools/blender/verify_glb.py assets/models/rock_arch.glb 1000 --origin=assembly
+    python tools/blender/verify_glb.py assets/models/windmill.glb 3000 \
+        --class-parts=Mill_Wood,Mill_Metal,Blades
 """
 
 import json
@@ -106,7 +113,12 @@ def slot_problem(slot):
     return "NEDEFINIT -> MAGENTA IN JOC"
 
 
-def verify(path, budget=None, front=None, origin="base"):
+def is_class_part(name, class_parts):
+    """Piesa e declarata ca purtatoare de textura de CLASA (UV-uri reale)?"""
+    return any(name.startswith(p) for p in class_parts)
+
+
+def verify(path, budget=None, front=None, origin="base", class_parts=()):
     gltf, blob, total, version = load_glb(path)
     print("=" * 74)
     print("%s  —  %d B, glTF v%d" % (os.path.basename(path), total, version))
@@ -126,6 +138,7 @@ def verify(path, budget=None, front=None, origin="base"):
         name = node.get("name", mesh.get("name", "?"))
         tris = 0
         slots_used = set()
+        uv_lo, uv_hi = [1e9, 1e9], [-1e9, -1e9]
         col_lo, col_hi = 1e9, -1e9
         has_color = False
         xs, ys, zs = [], [], []
@@ -166,6 +179,8 @@ def verify(path, budget=None, front=None, origin="base"):
                     slot = round(u * SLOTS - 0.5)
                     exact = abs((slot + 0.5) / SLOTS - u) < 1e-4
                     slots_used.add((slot, exact))
+                    uv_lo[0] = min(uv_lo[0], u); uv_hi[0] = max(uv_hi[0], u)
+                    uv_lo[1] = min(uv_lo[1], v); uv_hi[1] = max(uv_hi[1], v)
 
             if "COLOR_0" in attrs:
                 has_color = True
@@ -181,22 +196,44 @@ def verify(path, budget=None, front=None, origin="base"):
                 ok = False
         print("\n  %s: %d tris%s" % (name, tris, flag))
 
-        names = []
-        illegal = []
-        for slot, exact in sorted(slots_used):
-            label = SLOT_NAMES[slot] if 0 <= slot < len(SLOT_NAMES) else "slot%d" % slot
-            names.append(label if exact else "%s(NECENTRAT!)" % label)
-            if not exact:
+        # Piesele cu textura de CLASA au UV-uri REALE (proiectie cubica), deci
+        # "u pe centrul unui slot" nu li se aplica — pe ele verificarea se
+        # inverseaza: UV-urile trebuie sa ACOPERE o suprafata, nu sa fie
+        # colapsate. Un UV colapsat pe o piesa texturata e exact bug-ul din
+        # style_bible §13.6: derivata zero, un singur texel citit, textura
+        # invizibila. Fara modul asta, garda ar urla la fiecare asset pe clase
+        # si oamenii ar invata s-o ignore — ceea ce e mai rau decat sa n-o ai.
+        if is_class_part(name, class_parts):
+            span_u, span_v = uv_hi[0] - uv_lo[0], uv_hi[1] - uv_lo[1]
+            if not slots_used:
+                print("    UV clasa   : FARA UV!")
                 ok = False
-            why = slot_problem(slot)
-            if why:
-                illegal.append((slot, label, why))
-        print("    sloturi UV : %s" % (", ".join(names) or "FARA UV!"))
-        if not slots_used:
-            ok = False
-        for slot, label, why in illegal:
-            print("    !! slot %d (%s) ILEGAL in decor: %s" % (slot, label, why))
-            ok = False
+            elif min(span_u, span_v) < 0.02:
+                print("    UV clasa   : COLAPSATE (u %.4f, v %.4f) -> textura "
+                      "de clasa ar citi UN texel" % (span_u, span_v))
+                ok = False
+            else:
+                print("    UV clasa   : reale, u %.2f..%.2f  v %.2f..%.2f"
+                      % (uv_lo[0], uv_hi[0], uv_lo[1], uv_hi[1]))
+        else:
+            names = []
+            illegal = []
+            for slot, exact in sorted(slots_used):
+                label = (SLOT_NAMES[slot] if 0 <= slot < len(SLOT_NAMES)
+                         else "slot%d" % slot)
+                names.append(label if exact else "%s(NECENTRAT!)" % label)
+                if not exact:
+                    ok = False
+                why = slot_problem(slot)
+                if why:
+                    illegal.append((slot, label, why))
+            print("    sloturi UV : %s" % (", ".join(names) or "FARA UV!"))
+            if not slots_used:
+                ok = False
+            for slot, label, why in illegal:
+                print("    !! slot %d (%s) ILEGAL in decor: %s"
+                      % (slot, label, why))
+                ok = False
 
         if has_color:
             print("    COLOR_0    : da, AO %.3f .. %.3f" % (col_lo, col_hi))
@@ -309,8 +346,13 @@ if __name__ == "__main__":
 
     front = None
     origin = "base"
+    class_parts = ()
     for f in flags:
-        if f.startswith("--front="):
+        if f.startswith("--class-parts="):
+            class_parts = tuple(p.strip()
+                                for p in f.split("=", 1)[1].split(",")
+                                if p.strip())
+        elif f.startswith("--front="):
             front = f.split("=", 1)[1].strip().upper()
             if front not in ("+X", "-X", "+Z", "-Z"):
                 sys.exit("--front asteapta +X, -X, +Z sau -Z (Y e sus)")
@@ -323,4 +365,4 @@ if __name__ == "__main__":
 
     target = args[0]
     budget = int(args[1]) if len(args) > 1 else None
-    sys.exit(0 if verify(target, budget, front, origin) else 1)
+    sys.exit(0 if verify(target, budget, front, origin, class_parts) else 1)

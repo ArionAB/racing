@@ -246,6 +246,8 @@ const CLASS_TEXTURES := {
 	"stone_wall": "res://assets/textures/classes/stone_wall.png",
 	"rock": "res://assets/textures/classes/rock.png",
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
+	"wood": "res://assets/textures/classes/wood.png",
+	"concrete": "res://assets/textures/classes/concrete.png",
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -282,9 +284,48 @@ static func triplanar_class_material(cls: String) -> StandardMaterial3D:
 ## Aplica o clasa triplanara pe TOT subarborele — doar pentru assets-uri
 ## dintr-un singur material dominant (turnul de apa e integral ruginit).
 ## ATENTIE: triplanar in spatiul LUMII = textura "inoata" pe obiecte care se
-## MISCA. Bolovanul rostogolitor ramane pe atlas exact din motivul asta.
+## MISCA. Pentru alea exista varianta din spatiul OBIECTULUI, mai jos.
 static func apply_triplanar_class(root: Node, cls: String) -> void:
 	var mat := triplanar_class_material(cls)
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			(node as MeshInstance3D).material_override = mat
+
+
+## --- Varianta din spatiul OBIECTULUI, pentru ce se misca ---
+##
+## Triplanarul de LUME isi ia coordonatele din pozitia vertexului in scena. Pe
+## un obiect fix e exact ce vrem (benzile curg continuu peste sectiuni vecine,
+## fara cusaturi). Pe unul care se MISCA e o eroare vizibila: lumea sta pe loc,
+## obiectul aluneca prin ea, deci textura "inoata" pe suprafata. La bolovanul
+## rostogolitor e cel mai rau caz cu putinta — se si roteste, deci pietrele
+## pictate ar curge peste el ca apa, si tocmai rostogolirea e ce trebuie citita.
+##
+## `uv1_world_triplanar = false` muta proiectia in spatiul MODELULUI: textura se
+## roteste odata cu mesh-ul si sta lipita de piatra.
+##
+## `world_scale` compenseaza scalarea nodului. Proiectia citeste coordonatele
+## vertexului DINAINTE de transformare, deci un model desenat la 5 m si pus in
+## joc la 0.52 ar arata straturile de 2x mai mari decat pe falezele de langa el.
+## Inmultind scara cu factorul de scalare, un strat de roca masoara la fel in
+## lume indiferent pe ce obiect cade — asta tine clasa sa arate ca o clasa.
+static var _tri_obj_mats: Dictionary = {}
+
+static func object_triplanar_class_material(cls: String,
+		world_scale: float = 1.0) -> StandardMaterial3D:
+	var key := "%s@%.3f" % [cls, world_scale]
+	if _tri_obj_mats.has(key):
+		return _tri_obj_mats[key]
+	var mat := triplanar_class_material(cls).duplicate() as StandardMaterial3D
+	mat.uv1_world_triplanar = false
+	var s: float = CLASS_TRIPLANAR_SCALE[cls] * world_scale
+	mat.uv1_scale = Vector3(s, s, s)
+	_tri_obj_mats[key] = mat
+	return mat
+
+static func apply_object_triplanar_class(root: Node, cls: String,
+		world_scale: float = 1.0) -> void:
+	var mat := object_triplanar_class_material(cls, world_scale)
 	for node in _walk(root):
 		if node is MeshInstance3D:
 			(node as MeshInstance3D).material_override = mat
@@ -308,6 +349,15 @@ static func class_material(cls: String) -> StandardMaterial3D:
 ## Aplica materiale pe un GLB cu parti numite: cheia din `mapping` e un
 ## prefix de nume de nod, valoarea e clasa. Nodurile nemapate raman pe
 ## materialul lumii (atlas + AO) — lemnaria si nisipul unui asset mixt.
+##
+## Valoarea poate fi prefixata cu "tri:" pentru clasele proiectate TRIPLANAR in
+## spatiul lumii, in loc de UV-uri reale. Nu e un detaliu de implementare, e o
+## alegere de aspect: pe roca, proiectia de lume face straturile sa curga
+## CONTINUU dintr-o piesa in vecina ei, deci movila portalului de mina se leaga
+## de faleza de care se sprijina in loc sa aiba propriul ei tipar. Merge doar pe
+## piese care stau pe loc (style_bible §4).
+const TRI_PREFIX := "tri:"
+
 static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 	for node in _walk(root):
 		if not (node is MeshInstance3D):
@@ -315,10 +365,16 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 		var mi := node as MeshInstance3D
 		var assigned := false
 		for prefix: String in mapping:
-			if String(mi.name).begins_with(prefix):
-				mi.material_override = class_material(mapping[prefix])
-				assigned = true
-				break
+			if not String(mi.name).begins_with(prefix):
+				continue
+			var cls: String = mapping[prefix]
+			if cls.begins_with(TRI_PREFIX):
+				mi.material_override = triplanar_class_material(
+					cls.trim_prefix(TRI_PREFIX))
+			else:
+				mi.material_override = class_material(cls)
+			assigned = true
+			break
 		if not assigned:
 			mi.material_override = world_material()
 

@@ -882,6 +882,34 @@ def assign_uvs(obj, snap):
             uv.data[li].uv = (u, 0.5)
 
 
+def cube_uvs(obj, size):
+    """UV-uri REALE prin proiectie cubica — pentru piesele cu textura de CLASA.
+
+    Abaterea de la contractul de UV-uri colapsate (assign_uvs) e deliberata si
+    limitata: piesele astea nu mai citesc atlasul de paleta, ci o textura din
+    assets/textures/classes/ prin Palette.class_material(). Se aplica DUPA
+    finish(), care a pus deja UV-urile pe sloturi — proiectia le suprascrie.
+
+    `size` e latura cubului de proiectie in metri, adica **metri per repetitie
+    a texturii**. Se alege pe clasa, nu pe piesa, altfel aceeasi clasa arata cu
+    doua granulatii diferite pe doua obiecte vecine.
+
+    Piesele care raman pe atlas nu primesc apelul asta si trec neatinse.
+
+    Alternativa — triplanarul de lume (Palette.triplanar_class_material) — nu
+    cere UV-uri deloc, dar merge doar pe ce sta pe loc: pe o piesa care se
+    roteste (roata morii) textura ar inota. Vezi style_bible §4.
+    """
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.cube_project(cube_size=size, correct_aspect=True)
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
 def _hemisphere_dirs(n):
     """Directii distribuite uniform in emisfera (spirala Fibonacci) — determinist,
     deci build-uri reproductibile."""
@@ -897,7 +925,7 @@ def _hemisphere_dirs(n):
 
 def bake_ao(obj, samples=32, dist=2.5, gradient="vertical",
             low=0.40, high=1.0, power=1.0, floor=0.12, strength=1.0,
-            radial_axis="Z"):
+            radial_axis="Z", z_range=None):
     """AO real prin raycast in emisfera + gradient, scris in vertex colors.
 
     gradient='vertical'  -> jos mai inchis (cladiri, turnuri, cactusi)
@@ -912,6 +940,15 @@ def bake_ao(obj, samples=32, dist=2.5, gradient="vertical",
                             ocluzia geometrica e nula si AO-ul iese constant 1.0.
                             Cere originea in centru (finish(origin="center")).
     gradient='none'      -> doar ocluzia geometrica
+
+    z_range=(lo, hi)     intervalul pe care se intinde gradientul vertical,
+                         in locul celui al mesh-ului. Necesar cand un obiect e
+                         SPART pe clase de material: fiecare piesa are alt
+                         interval de z, deci fiecare si-ar coace un gradient
+                         complet 'jos-inchis -> sus-deschis' pe portiunea ei,
+                         si cadrul de lemn al unui portal ar iesi la fel de
+                         umbrit la baza ca movila de 8 m in care e infipt.
+                         Dat intervalul ANSAMBLULUI, piesele raman coerente.
     """
     me = obj.data
     me.calc_loop_triangles()
@@ -920,8 +957,11 @@ def bake_ao(obj, samples=32, dist=2.5, gradient="vertical",
                                all_triangles=True)
     dirs = _hemisphere_dirs(samples)
 
-    zs = [v.co.z for v in me.vertices]
-    z_lo, z_hi = min(zs), max(zs)
+    if z_range is None:
+        zs = [v.co.z for v in me.vertices]
+        z_lo, z_hi = min(zs), max(zs)
+    else:
+        z_lo, z_hi = z_range
     span = max(z_hi - z_lo, 1e-6)
     # roata morii e construita in planul XZ, deci raza ei se masoara fata de axa Y
     if radial_axis == "Y":

@@ -9,6 +9,15 @@ extends Node
 ##   --track=0 --frac=0.2 --gamecam
 ##                             vederea reala de JOC, cu parametrii curenti ai
 ##                             camerei de urmarire
+##   --track=0 --landmark=2 [--dist=30]
+##                             LANDMARK-ul cu id-ul cerut (`_LANDMARKS` din
+##                             track.gd), vazut DE PE SOSEA, de la inaltimea
+##                             camerei de urmarire. Fara el, singurul mod de a
+##                             prinde un prop anume in cadru era sa ghicesti
+##                             fractia, iar landmark-urile stau la 10-15 m
+##                             lateral, deci ies din cadru la cea mai mica
+##                             eroare. Poza asta e pentru VERIFICAREA unui
+##                             asset, nu pentru compozitia pistei.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -41,6 +50,8 @@ func _ready() -> void:
 	var zoom_size := 60.0
 	var driver_view := false
 	var game_cam := false
+	var landmark_id := -1
+	var landmark_dist := 30.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -48,6 +59,10 @@ func _ready() -> void:
 			zoom_frac = float(arg.trim_prefix("--frac="))
 		elif arg.begins_with("--size="):
 			zoom_size = float(arg.trim_prefix("--size="))
+		elif arg.begins_with("--landmark="):
+			landmark_id = int(arg.trim_prefix("--landmark="))
+		elif arg.begins_with("--dist="):
+			landmark_dist = float(arg.trim_prefix("--dist="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -80,6 +95,9 @@ func _ready() -> void:
 	var aspect := viewport_size.x / viewport_size.y
 	var cam := Camera3D.new()
 	add_child(cam)
+	if landmark_id >= 0:
+		await _shoot_landmark(track, cam, track_index, landmark_id, landmark_dist)
+		return
 	if driver_view:
 		# Perspectiva de la inaltimea camerei de urmarire. Doua variante:
 		#   --driver  = poza INGHETATA de masurare (MEASURE_*, vezi antetul)
@@ -144,6 +162,57 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var out := "%s/%s.png" % [dir, GameState.TRACK_NAMES[track_index].to_lower()]
 	img.save_png(out)
+	print("SNAPSHOT: ", out)
+	get_tree().quit()
+
+
+## Un landmark anume, vazut de pe sosea (--landmark=, vezi antetul).
+##
+## Camera sta pe axa drumului, la inaltimea camerei de urmarire, cu `dist`
+## metri inainte de dreptul propului — adica exact de unde il vezi conducand,
+## nu de sus si nu din lateral.
+func _shoot_landmark(track: Track, cam: Camera3D, track_index: int,
+		id: int, dist: float) -> void:
+	# Cautare pe eticheta `shot_id`, nu pe grup: prop-urile hero care nu sunt in
+	# `_LANDMARKS` (portalul de mina) trebuie sa poata fi cerute la fel.
+	var target: Node3D = null
+	for node in track.get_children():
+		if node is Node3D and node.get_meta("shot_id", -1) == id:
+			target = node as Node3D
+			break
+	if target == null:
+		push_error("Snapshot: pista %d n-are prop cu shot_id %d" % [track_index, id])
+		get_tree().quit(1)
+		return
+	# Ceata ramane STINSA (o taie apelantul mai sus) — la 30 m n-ar face nimic,
+	# dar la un prop mai indepartat ar spala tocmai suprafata de verificat.
+	var aabb := Track.model_aabb(target)
+	var focus := aabb.position + aabb.size * 0.5
+	# Punctul de pe traseu cel mai apropiat de prop, si directia de mers acolo.
+	var best := 0
+	var best_d := INF
+	for i in track.baked.size():
+		var d: float = track.baked[i].distance_squared_to(focus)
+		if d < best_d:
+			best_d = d
+			best = i
+	var n := track.baked.size()
+	var here: Vector3 = track.baked[best]
+	var dir := (track.baked[(best + 6) % n] - here).normalized()
+	cam.projection = Camera3D.PROJECTION_PERSPECTIVE
+	cam.fov = ChaseCamera.BASE_FOV
+	cam.far = 400.0
+	cam.position = here - dir * dist + Vector3.UP * ChaseCamera.DEFAULT_HEIGHT
+	cam.look_at(focus, Vector3.UP)
+	cam.current = true
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var dir_out := ProjectSettings.globalize_path("res://snapshots")
+	DirAccess.make_dir_recursive_absolute(dir_out)
+	var out := "%s/%s_landmark%d.png" % [dir_out,
+		GameState.TRACK_NAMES[track_index].to_lower(), id]
+	get_viewport().get_texture().get_image().save_png(out)
 	print("SNAPSHOT: ", out)
 	get_tree().quit()
 

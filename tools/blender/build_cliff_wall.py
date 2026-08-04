@@ -146,13 +146,27 @@ def build_saddle(b, height, depth, seed):
 
 def build_stacked(b, height, depth, seed):
     """H: treapta dubla — mesa pe mesa, cea mai inalta silueta din familie."""
-    _mass(b, 0.0, 1.0, height * 0.58, depth, seed)
+    # Singura silueta din familie care stivuieste doua etaje, si singura care
+    # avea fante: cotele erau fractii ghicite din `height`, iar `flat_top` taie
+    # varful la 82%, deci etajul de sus incepea la 38 cm PESTE capacul celui de
+    # jos, si coama la inca 25 cm peste al lui. Prin fanta se vede spatele
+    # peretelui din fata, care e backface si deci culled — arata ca o crapatura
+    # spre interiorul falezei. Acum fiecare piesa pleaca din capacul REAL al
+    # celei de sub ea, cu o suprapunere ingropata.
+    OVERLAP = 0.05        # fractie din height
+
+    body_h = height * 0.58
+    _mass(b, 0.0, 1.0, body_h, depth, seed)
+    # `_mass` aseaza la z = -0.4 si cere inaltimea + 0.4 (vezi corpul lui).
+    upper_z = Builder.flat_top_z(-0.4, body_h + 0.4) - height * OVERLAP
+    upper_h = height * 0.50
     # etajul de sus: mai ingust, retras spre spate (+Y), cu propriile strate
-    b.rock((WIDTH * 0.08, depth * 0.16, height * 0.50),
-           (WIDTH * 0.55, depth * 0.62, height * 0.50), ROCK_LIGHT,
+    b.rock((WIDTH * 0.08, depth * 0.16, upper_z),
+           (WIDTH * 0.55, depth * 0.62, upper_h), ROCK_LIGHT,
            seed=seed + 13, segments=SIDES, rings=3, flat_top=True,
            taper=0.18, squash=0.9, wall_axis="y", strata_slots=STRATA_STD)
-    b.rock((WIDTH * 0.08, depth * 0.13, height * 0.93),
+    b.rock((WIDTH * 0.08, depth * 0.13,
+            Builder.flat_top_z(upper_z, upper_h) - height * OVERLAP),
            (WIDTH * 0.38, depth * 0.42, height * 0.10),
            SAND_LIGHT, seed=seed + 313, segments=4, rings=1,
            flat_top=True, taper=0.25)
@@ -249,6 +263,9 @@ for i, (name, h, d, seed, kind) in enumerate(CLIFFS):
              stats["ao_min"], stats["ao_max"]))
 
 print("TOTAL vizual: %d tris (buget 12 x 350 = 4200)" % total_vis)
+# Doar mesh-urile vizuale: cutiile de coliziune sunt un singur box, n-au ce fante
+# sa aiba, si oricum nu se vad.
+report_slits([o for o in built if not o.name.endswith("_col")], "cliff_wall")
 if over_budget:
     print("PESTE BUGET: %s" % over_budget)
 

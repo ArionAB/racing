@@ -603,6 +603,28 @@ class Builder:
 
         return self._tag(new_verts, slot)
 
+    # Cat din inaltimea CERUTA ocupa efectiv corpul cand `flat_top=True`.
+    #
+    # Nu e o cifra de tuning, e un CONTRACT, si a fost cauza unui bug vizibil in
+    # joc: `flat_top` reteaza varful, deci o piesa ceruta de 2 m are capacul la
+    # 1.64 m. Orice cod care stivuieste piese asezandu-le pe o grila derivata din
+    # inaltimea *ceruta* lasa o fanta de 18% intre ele — iar printr-o fanta vezi
+    # spatele peretelui din fata, care e backface si deci CULLED: gaura arata ca
+    # o crapatura prin care se vede in interiorul stancii. Vezi `flat_top_z()`.
+    FLAT_TOP_FRAC = 0.82
+
+    @classmethod
+    def flat_top_z(cls, base_z, size_z):
+        """Cota REALA a capacului unei piese `rock(..., flat_top=True)`.
+
+        Foloseste-o ori de cate ori asezi ceva PESTE o astfel de piesa, in loc
+        sa ghicesti o fractie din inaltimea nominala. Scade din rezultat o
+        suprapunere mica: doua volume care doar se ating pe o muchie se despart
+        vizual dupa bevel, iar la stanci suprapunerea nu costa nimic — partea
+        ingropata nu se vede.
+        """
+        return base_z + size_z * cls.FLAT_TOP_FRAC
+
     def rock(self, center, size, slot, seed=0, segments=7, rings=4,
              flat_top=False, squash=1.0, taper=0.35, wall_axis=None,
              strata_slots=None):
@@ -653,7 +675,7 @@ class Builder:
         # o deviatie per inel (stratul) si una per coloana (verticala), combinate:
         # asa fetele raman continue pe verticala, ca la roca sedimentara
         col_dev = [0.88 + rand() * 0.24 for _ in range(segments)]
-        top_frac = 0.82 if flat_top else 1.0
+        top_frac = self.FLAT_TOP_FRAC if flat_top else 1.0
 
         for k in range(rings + 1):
             t = k / rings
@@ -748,7 +770,17 @@ class Builder:
 
         faces = set()
         tier_h = sz / float(tiers)
+        # Cat intra fiecare treapta in cea de sub ea. NU e cosmetic: fara el
+        # stiva are fante prin care se vede in interiorul stancii (vezi
+        # `FLAT_TOP_FRAC`). Partea ingropata nu se vede si nu costa nimic —
+        # triunghiurile ei exista oricum.
+        overlap = tier_h * 0.22
+        # Suprapunerea manaca inaltime, deci treptele se cer putin mai groase:
+        # altfel o stanca de 4 trepte iese cu 3 x 22% dintr-o treapta mai scunda
+        # decat cere tabelul de dimensiuni, si tabelul ala e tunat pe silueta.
+        tier_h_eff = (sz + (tiers - 1) * overlap) / float(tiers)
         ox, oy = 0.0, 0.0
+        top = cz
         for k in range(tiers):
             shrink = 1.0 - lip * k
             # Treapta e joasa si lata: rings=1, deci un singur inel de fete
@@ -757,12 +789,16 @@ class Builder:
             #
             # Inaltimea variaza ±18% intre trepte: lespezi egale citesc ca un
             # tort, iar sedimentarea reala are straturi de grosimi diferite.
-            h = tier_h * (0.82 + rand() * 0.36)
-            self.rock((cx + ox, cy + oy, cz + k * tier_h),
-                      (sx * shrink, sy * shrink, h), slot,
+            h = tier_h_eff * (0.82 + rand() * 0.36)
+            base = cz if k == 0 else top - min(overlap, h * 0.45)
+            # `h` e inaltimea VIZIBILA dorita; `rock` cu flat_top reteaza varful,
+            # deci i se cere cu atat mai mult cat taie.
+            self.rock((cx + ox, cy + oy, base),
+                      (sx * shrink, sy * shrink, h / self.FLAT_TOP_FRAC), slot,
                       seed=seed + k * 17, segments=segments, rings=1,
                       taper=taper, squash=0.96, flat_top=True,
                       strata_slots=strata_slots)
+            top = base + h
             # Decalajul se ACUMULEAZA, deci stiva se apleaca intr-o directie in
             # loc sa serpuiasca — asa citeste ca erodata dintr-o parte (vantul
             # bate mereu din aceeasi directie), nu ca stivuita gresit.
@@ -1162,6 +1198,79 @@ def set_origin_at(obj, point):
 
 def tri_count(obj):
     return sum(len(p.vertices) - 2 for p in obj.data.polygons)
+
+
+def check_slits(obj, steps=200, y_samples=5):
+    """Cauta felii de inaltime GOALE prinse intre felii pline. Lista de
+    (cota, grosime) in metri; goala = obiect solid pe verticala.
+
+    De ce exista: assets-urile de stanca se construiesc din volume care se
+    INTERSECTEAZA (nu exista boolean in pipeline), iar cotele de asezare se
+    scriau ca fractii din inaltimea nominala. Cu `flat_top=True` inaltimea
+    reala e 82% din cea ceruta (`Builder.FLAT_TOP_FRAC`), deci piesa de sus
+    ateriza in aer. Rezultatul nu e o fanta discreta: prin ea vezi spatele
+    peretelui din fata, care e backface si e taiat de culling, deci gaura
+    arata ca o crapatura spre interiorul stancii. Se vedea in joc pe 18 din
+    35 de piese de roca, cu fante de pana la 91 cm.
+
+    Ochiul liber nu prinde asta in Blender (te uiti la un obiect deodata, de
+    aproape, si fanta e in umbra); o raza da un numar. De aceea garda sta in
+    build, nu in review.
+
+    Trage raze orizontale prin obiect la inaltimi succesive: o felie fara
+    nicio lovitura, prinsa intre felii pline, e o fanta. NU o rula pe
+    structuri (case, turnuri pe picioare, schele) — acolo golurile pe
+    verticala sunt intentionate si ar iesi fals pozitive.
+    """
+    bb = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
+    zs = [v.z for v in bb]
+    xs = [v.x for v in bb]
+    ys = [v.y for v in bb]
+    z0, z1 = min(zs), max(zs)
+    x0, x1 = min(xs), max(xs)
+    y0, y1 = min(ys), max(ys)
+    inv = obj.matrix_world.inverted()
+    filled = []
+    for i in range(steps + 1):
+        z = z0 + (z1 - z0) * i / steps
+        hit = False
+        for j in range(y_samples):
+            y = y0 + (y1 - y0) * (j + 0.5) / y_samples
+            ok = obj.ray_cast(inv @ Vector((x0 - 1.0, y, z)),
+                              Vector((1.0, 0.0, 0.0)),
+                              distance=(x1 - x0) + 2.0)[0]
+            if ok:
+                hit = True
+                break
+        filled.append(hit)
+    if True not in filled:
+        return []
+    # Capetele goale sunt aerul de deasupra varfului, nu fante.
+    lo = filled.index(True)
+    hi = len(filled) - 1 - filled[::-1].index(True)
+    out, run = [], 0
+    dz = (z1 - z0) / steps
+    for i in range(lo, hi + 1):
+        if not filled[i]:
+            run += 1
+        elif run:
+            out.append((z0 + (i - run) * dz, run * dz))
+            run = 0
+    return out
+
+
+def report_slits(objects, label):
+    """Ruleaza `check_slits` pe o familie de assets si tipareste verdictul.
+
+    Intoarce numarul de obiecte cu fante, ca build-ul sa poata iesi cu eroare.
+    """
+    bad = [(o.name, check_slits(o)) for o in objects]
+    bad = [(n, s) for n, s in bad if s]
+    print("FANTE %s: %d/%d obiecte" % (label, len(bad), len(objects)))
+    for name, s in bad:
+        print("   !! %-14s %s" % (name, ", ".join(
+            "z=%.2f gros=%.2f m" % g for g in s)))
+    return len(bad)
 
 
 # --- Material de preview + export --------------------------------------------

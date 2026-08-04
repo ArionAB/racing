@@ -2511,8 +2511,13 @@ func _build_mine(frac: float, side_sign: float) -> void:
 ## patru picioare are amprenta de ~4.6 m, dar vrem sa lovesti picioarele, nu un
 ## cilindru gras care inghite spatiul dintre ele.
 const _LANDMARKS := {
+	# "tri_class": tot subarborele primeste clasa triplanara respectiva —
+	# doar pentru assets dintr-un singur material dominant (turnul e integral
+	# metal ruginit). Cele cu mai multe materiale trec prin "classes" + parti
+	# numite, ca village_house.
 	0: {"path": "res://assets/models/water_tower.glb",
-		"gap": 10.0, "col": "cyl", "radius": 2.4, "spin": false},
+		"gap": 10.0, "col": "cyl", "radius": 2.4, "spin": false,
+		"tri_class": "rust_metal"},
 	1: {"path": "res://assets/models/gas_station.glb",
 		"gap": 9.0, "col": "box", "spin": false},
 	2: {"path": "res://assets/models/windmill.glb",
@@ -2528,6 +2533,15 @@ const _LANDMARKS := {
 	# stalpul, nu un cilindru de 1.9 m in jurul unui obiect subtire.
 	5: {"path": "res://assets/models/gas_pole_sign.glb",
 		"gap": 5.0, "col": "cyl", "radius": 0.55, "spin": false},
+	# Casa de sat (Okinawa) — PILOTUL texturilor de clasa: partile House_Roof/
+	# House_Plaster/House_Stone au UV-uri reale si primesc texturile din
+	# assets/textures/classes/ prin cheia "classes"; lemnaria si nisipul raman
+	# pe atlas. Raza de coliziune acopera cladirea, nu limba de nisip — poti
+	# rula peste marginea curtii, dar nu prin casa.
+	6: {"path": "res://assets/models/village_house.glb",
+		"gap": 10.0, "col": "cyl", "radius": 2.6, "spin": false,
+		"classes": {"House_Roof": "roof_tiles", "House_Plaster": "plaster",
+			"House_Stone": "stone_wall"}},
 }
 
 ## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual
@@ -2578,7 +2592,15 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 	add_child(root)
 	# Atlasul comun pe tot subarborele (fara el, GLB-ul iese alb). Moara si-l
 	# aplica singura in _ready, dar celelalte prop-uri il primesc aici.
-	Palette.apply_world_material(root)
+	# Landmark-urile cu "classes" isi mapeaza partile pe texturile de clasa;
+	# "tri_class" imbraca tot subarborele intr-o clasa triplanara (assets
+	# dintr-un singur material); nodurile nemapate cad pe atlas.
+	if info.has("classes"):
+		Palette.apply_class_materials(root, info["classes"])
+	elif info.has("tri_class"):
+		Palette.apply_triplanar_class(root, info["tri_class"])
+	else:
+		Palette.apply_world_material(root)
 	var stand := p + side * (half_width + float(info["gap"]))
 	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
 	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in

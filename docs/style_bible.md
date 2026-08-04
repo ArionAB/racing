@@ -178,11 +178,39 @@ Ce e permis:
 | strate ~0.7 m | linii de rocă | `detail_rock.png`, triplanar |
 | granulație ~5 cm | suprafață | aceeași textură, aceeași trecere |
 
-Ce rămâne interzis: **texturi unice per asset**, texturi de murdărie pictate
-manual, decals.
+- **Texturi de CLASĂ** (august 2026 — direcția nouă, validată de pilotul
+  village_house + conversia Dunelor). O clasă de suprafață = un material cu
+  textură reală, partajat de toate assets-urile din clasa aia. Pipeline-ul
+  complet, obligatoriu pentru orice textură externă:
 
-Plafon: atlasul **nu depășește 512×512**. Peste atât se pierde avantajul de VRAM
-fără câștig vizibil la viteza de joc.
+  ```
+  sursă externă (PolyHaven CC0 / ComfyUI / pachet cumpărat)
+    → assets/textures/classes/src/
+    → tools/process_class_textures.gd   (512², desaturare + gradare spre
+                                          ANCORA de paletă, gain/lift per clasă)
+    → Palette.class_material(cls)        (UV-uri reale, ex. proiecție cubică)
+      sau Palette.triplanar_class_material(cls)  (UV-uri colapsate, zero
+                                          re-export — rocă, metal ruginit)
+  ```
+
+  Gradarea spre ancoră NU e opțională: fotografii din surse diferite au
+  fiecare lumina și saturația lor, iar nefiltrate dau „asset soup". Gradate,
+  devin o extensie a paletei. Clase active: `rock` (faleze/butte/arcadă/
+  bolovani, triplanar), `rust_metal` (turn de apă/excavator/conductă,
+  triplanar), `roof_tiles`/`plaster`/`stone_wall` (village_house, UV cubic).
+
+  **Ce rămâne DELIBERAT pe paletă, fără texturi**: mașinile și accentele lor
+  (§1), semnele cu text/branding (route66, gas_pole, start_gate — textul e
+  pictat prin sloturi și o textură l-ar distruge), prop-urile mărunte
+  (marker_post, scatter, cactus, dino_bones — sub 1 m, textura nu se citește)
+  și **obiectele care se mișcă** pe triplanar de lume (boulder_roller —
+  textura ar „înota" pe suprafață la rostogolire).
+
+Ce rămâne interzis: **texturi unice per asset** (doar per clasă), texturi de
+murdărie pictate manual per asset, surse externe nefiltrate prin gradare.
+
+Plafon: atlasul **nu depășește 512×512**; texturile de clasă la fel. Peste
+atât se pierde avantajul de VRAM fără câștig vizibil la viteza de joc.
 
 | material | roughness | uzură |
 |---|---|---|

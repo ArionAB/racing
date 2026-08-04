@@ -73,6 +73,19 @@ func _points() -> Array[Vector3]:
 	]
 
 
+## Casele de sat din sectorul "Satul" (punctele 4-6, frac ~0.18-0.26): doua
+## viraje medii printre case cu olane — pana acum sectorul isi purta numele
+## degeaba, nu exista nicio casa. Pilotul texturilor de clasa (id 6 in
+## Track._LANDMARKS): olane/tencuiala/piatra din assets/textures/classes/.
+## Alternate pe laturi, ca drumul sa treaca PRINTRE ele, nu pe langa un rand.
+func _landmark_spots() -> Array[Vector3]:
+	return [
+		Vector3(0.185, 1.0, 6),
+		Vector3(0.215, -1.0, 6),
+		Vector3(0.245, 1.0, 6),
+	]
+
+
 ## Scurtatura: bancul de nisip care taie golful de vest.
 ##
 ## Coarda peste apa, in timp ce soseaua ocoleste golful pe uscat. Capetele cad

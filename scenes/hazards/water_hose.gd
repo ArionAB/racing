@@ -27,7 +27,8 @@ func _ready() -> void:
 		model.position = Vector3(road_width * 0.5 + 2.5, 0, 0)
 		model.rotation.y = PI / 2.0 # duza modelului (-Z) se intoarce spre drum
 		add_child(model)
-		Palette.apply_world_material(model)
+		# Conducta sparta: metal ruginit, un singur material dominant.
+		Palette.apply_triplanar_class(model, "rust_metal")
 
 	_zone = Area3D.new()
 	var shape := CollisionShape3D.new()

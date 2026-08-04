@@ -82,6 +82,11 @@ var theme_glow: bool = true
 ## ale intregii scene.
 const SHADOW_DISTANCE: float = 110.0
 
+## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
+## nu inline: o citesc si lumina din _build_environment, si glint-ul apei din
+## _water_material — scanteierea trebuie sa cada din acelasi soare.
+const SUN_ROTATION_DEG: Vector3 = Vector3(-42, 135, 0)
+
 ## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
 ##
 ## Camera face raycast DOAR pe layer-ul asta. Pe layer-ul implicit (unde stau
@@ -585,13 +590,15 @@ func _build_environment() -> void:
 	add_child(world_env)
 
 	var sun := DirectionalLight3D.new()
-	# Elevatie 42°, azimut 315° (din stanga-sus) — style_bible §5.
+	# Elevatie 42°, azimut 315° (din stanga-sus) — style_bible §5. Constanta e
+	# impartita cu _water_material(): glint-ul apei trebuie sa cada din acelasi
+	# soare care lumineaza lumea.
 	#
 	# Vechiul (-48, -30) bătea aproape vertical si dinspre spatele camerei, deci
 	# umbrele cadeau SUB si IN SPATELE stancilor, unde nu le vede nimeni. La 42°
 	# umbra unei faleze de 10m se intinde ~11m pe nisip, transversal pe drum:
 	# exact indiciul de volum care lipsea.
-	sun.rotation_degrees = Vector3(-42, 135, 0)
+	sun.rotation_degrees = SUN_ROTATION_DEG
 	sun.light_color = theme_sun_color
 	sun.light_energy = theme_sun_energy
 	# Umbrele contrazic litera CLAUDE.md ("umbre ieftine sau blob shadows").
@@ -1119,9 +1126,19 @@ func _build_sea_far(root: Node3D, sea_y: float) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var deep := water_tint(Palette.SEA_DEEP)
-	# Alpha 0 = fara valuri de vertecsi (vezi _sea_color): largul are 4 varfuri
-	# pe 2.4 km — deplasati, ar legana toata placa marii.
-	deep.a = 0.0
+	# Alfa 1.0 = ADANCIMEA maxima (vezi _sea_color), nu opacitate. Placa asta e
+	# largul, deci sta la capatul rampei de culoare.
+	#
+	# Aici a fost o capcana care merita scrisa. Cat timp alfa purta amplitudinea
+	# valurilor, linia asta era `deep.a = 0.0`, cu motivul "largul are 4 varfuri
+	# pe 2.4 km, deplasati ar legana toata placa marii". Corect atunci — dar sub
+	# semantica noua, 0 inseamna ADANCIME ZERO, adica linia apei: toata marea
+	# deschisa se randa cu culoarea de nisip ud si acoperita de spuma. Nimic
+	# n-ar fi semnalat-o, fiindca linia se compileaza si merge.
+	#
+	# Cu anvelopa reconstituita din adancime, intentia veche se pastreaza
+	# singura: la adancime 1.0 anvelopa e zero, deci largul tot nu se leagana.
+	deep.a = 1.0
 	var corners := [
 		Vector3(c.x - h, y, c.z - h), Vector3(c.x + h, y, c.z - h),
 		Vector3(c.x - h, y, c.z + h), Vector3(c.x + h, y, c.z + h),
@@ -1282,25 +1299,31 @@ func _sea_color(d: float) -> Color:
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
 	var foam := water_tint(Palette.FOAM_WHITE).lerp(reef, 0.35)
-	var out: Color
+	var c: Color
 	if d <= 0.0:
-		out = foam # varf uscat al unei celule de mal
+		c = foam # varf uscat al unei celule de mal
 	elif d < SEA_FOAM_DEPTH:
-		out = foam.lerp(reef, d / SEA_FOAM_DEPTH)
+		c = foam.lerp(reef, d / SEA_FOAM_DEPTH)
 	elif d < SEA_REEF_DEPTH:
-		out = reef
+		c = reef
 	else:
-		out = reef.lerp(deep, clampf(
+		c = reef.lerp(deep, clampf(
 			(d - SEA_REEF_DEPTH) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH), 0.0, 1.0))
-	# ALPHA = amplitudinea valurilor de vertecsi (water.gdshader, vertex()).
-	# Zero la tarm (spuma atinge nisipul — un val acolo ar deschide o fisura cu
-	# terenul) si zero spre larg (SeaNear se invecineaza cu planul SeaFar, care
-	# sta fix; un val la granita l-ar strapunge). Varful amplitudinii cade pe
-	# recif — exact banda pe care o vezi de pe causeway.
-	out.a = clampf(d / SEA_REEF_DEPTH, 0.0, 1.0) \
-		* clampf((SEA_NEAR_DEPTH - d) / (SEA_NEAR_DEPTH - SEA_REEF_DEPTH),
-			0.0, 1.0)
-	return out
+	# Alfa = ADANCIMEA normalizata, NU transparenta: materialul e opac, iar
+	# shaderul v2 citeste COLOR.a ca sa evalueze rampa de culoare PER PIXEL —
+	# interpolata pe varfuri la 9.5 m, rampa iesea in benzi (issue #99).
+	#
+	# Aici s-au ciocnit doua implementari paralele, si merita spus de ce a
+	# castigat asta. Valurile de vertecsi (#122) foloseau tot COLOR.a, dar
+	# pentru AMPLITUDINEA lor: zero la tarm (un val acolo deschide o fisura cu
+	# terenul), zero spre larg (granita cu planul fix SeaFar), varf pe recif.
+	# Adancimea e insa strict mai informativa — anvelopa aia e ea insasi o
+	# functie de adancime, deci se poate reconstitui in shader din alfa plus un
+	# singur prag (`wave_reef` = SEA_REEF_DEPTH / SEA_NEAR_DEPTH), pe cand
+	# drumul invers nu exista: din amplitudine nu poti afla adancimea, fiindca
+	# anvelopa urca si coboara, deci doua adancimi diferite dau acelasi numar.
+	c.a = clampf(d / SEA_NEAR_DEPTH, 0.0, 1.0)
+	return c
 
 
 ## Materialul apei — UNUL SINGUR pentru ambele mesh-uri.
@@ -1319,6 +1342,35 @@ func _water_material() -> ShaderMaterial:
 	# Aceeasi textura pe care o foloseste deja stratul de detaliu al lumii —
 	# zero VRAM in plus.
 	_water_mat.set_shader_parameter("ripple_tex", load(Palette.DETAIL_PATH))
+	# v2 (issue #99): rampa de adancime per pixel, spuma animata, glint.
+	# Culorile trec toate prin water_tint() — calibrarea ramane pe CPU, intr-un
+	# singur loc. Intensitatile sunt kill-switch-uri: 0 = comportamentul v1,
+	# de stins pe rand la profilarea pe device (M4).
+	var shallow := water_tint(Palette.REEF_SHALLOW)
+	var deep := water_tint(Palette.SEA_DEEP)
+	# Nisipul ud de la linia apei: nisipul de coral, intunecat putin — apa
+	# uda nisipul inainte sa-l acopere.
+	var shore := water_tint(Palette.CORAL_SAND).darkened(0.12)
+	var foam := water_tint(Palette.FOAM_WHITE).lerp(shallow, 0.35)
+	_water_mat.set_shader_parameter("ramp_strength", 1.0)
+	_water_mat.set_shader_parameter("shore_col", Vector3(shore.r, shore.g, shore.b))
+	_water_mat.set_shader_parameter("shallow_col",
+		Vector3(shallow.r, shallow.g, shallow.b))
+	_water_mat.set_shader_parameter("deep_col", Vector3(deep.r, deep.g, deep.b))
+	_water_mat.set_shader_parameter("foam_strength", 0.75)
+	_water_mat.set_shader_parameter("foam_col", Vector3(foam.r, foam.g, foam.b))
+	_water_mat.set_shader_parameter("glint_strength", 0.55)
+	# SPRE soare: inversul directiei in care bat razele. Din aceeasi rotatie
+	# ca lumina reala (SUN_ROTATION_DEG), ca scanteierea sa cada corect.
+	var to_sun := -(Basis.from_euler(Vector3(
+		deg_to_rad(SUN_ROTATION_DEG.x), deg_to_rad(SUN_ROTATION_DEG.y),
+		deg_to_rad(SUN_ROTATION_DEG.z))) * Vector3.FORWARD)
+	_water_mat.set_shader_parameter("sun_dir", to_sun)
+	# Varful anvelopei de valuri, in adancime normalizata. Din constantele de
+	# aici, nu scris de mana in shader: reciful e o cota de gameplay, iar doua
+	# copii ale ei s-ar desincroniza tacut la prima retusare a lagunei.
+	_water_mat.set_shader_parameter("wave_reef",
+		SEA_REEF_DEPTH / SEA_NEAR_DEPTH)
 	return _water_mat
 
 

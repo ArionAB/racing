@@ -47,6 +47,24 @@ const GROUND_STRIDE: int = 2
 ## Cat sta nisipul sub cota asfaltului (buza umarului).
 const GROUND_DROP: float = 0.30
 
+# --- tarmul insulei (doar cand _far_drop > 0) ---
+## Cat de departe INAUNTRUL poligonului de control se intinde plaja. Banda e
+## asimetrica intentionat: partea uscata e scurta, ca interiorul buclei sa
+## ramana ferm uscat (anti-atol, vezi ground_y), iar cea dinspre larg e lunga,
+## ca panta pana la -26 m sa citeasca a recif, nu a zid scufundat.
+const SHORE_BAND_IN: float = 30.0
+## Cat de departe in larg se termina coborarea spre fundul marii.
+const SHORE_BAND_OUT: float = 60.0
+
+# --- racorduri netede intre campuri de inaltime ---
+## Min/max-urile dure dintre campuri (rapa vs. teren, banda secundara vs. fund
+## de mare, dune vs. podeaua vailor) lasau cute C0: discontinuitati de panta
+## care, la un pas de grila de ~8 m, se citesc ca muchii drepte trase cu rigla
+## (issue #97). k = latimea racordului, in metri.
+const SMOOTH_RAVINE_K: float = 3.0
+const SMOOTH_BRANCH_K: float = 2.0
+const SMOOTH_FLOOR_K: float = 0.8
+
 ## Rapa: de la cati metri dincolo de marginea asfaltului incepe saparea.
 const RAVINE_INNER: float = 4.0
 ## Peste cati metri se coboara pana la fundul rapei.
@@ -63,6 +81,9 @@ var _total_len: float
 var _curvature: PackedFloat32Array
 ## Faza zgomotului de dune, ca terenul sa difere de la o pista la alta.
 var _dune_phase: float = 0.0
+## Campul de dune: FBM de simplex, instantiat O DATA — ground_y se apeleaza de
+## zeci de mii de ori la generare si nu are voie sa construiasca obiecte.
+var _noise: FastNoiseLite
 ## Cota medie a drumului — ancora campului DEPARTAT (vezi ground_y).
 var _mean_y: float = 0.0
 ## Rapele declarate: (frac_start, frac_end, adancime, latura).
@@ -96,6 +117,16 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	for p in baked:
 		sum_y += p.y
 	_mean_y = sum_y / float(maxi(baked.size(), 1))
+	_noise = FastNoiseLite.new()
+	_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	# Octava de baza ~200 m (dealuri), inca doua pana la ~50 m (ondulatii).
+	# Sub 50 m nu coboram: grila de teren e la 7.9 m si ar aparea aliasing.
+	_noise.frequency = 0.005
+	_noise.fractal_octaves = 3
+	# Seed derivat din faza veche: pistele raman diferite intre ele, iar 0
+	# ramane 0 (Dunele isi pastreaza samanta implicita).
+	_noise.seed = int(roundf(dune_phase * 1000.0))
 	_bake_curvature()
 
 
@@ -166,7 +197,9 @@ func ground_y(wx: float, wz: float) -> float:
 	# toata pista ar sta pe un platou cu o faleza de 19 m la 115 m distanta. Cu
 	# media, desertul ondulează IMPREUNA cu traseul — creasta citeste ca mesa,
 	# portiunile joase ca vai.
-	var far_level := _mean_y + maxf(_dunes(wx, wz), -1.0)
+	# Clamp NETED la podeaua vailor: cel dur lasa lacuri perfect plate cu
+	# margine de rigla acolo unde dunele coboara sub -1 m (issue #97).
+	var far_level := _mean_y + _smax(_dunes(wx, wz), -1.0, SMOOTH_FLOOR_K)
 	# INTERIORUL buclei ramane uscat, oricat de departe de sosea ar fi.
 	#
 	# Fara conditia asta, o insula iesea ca o panglica de nisip lata de 230 m
@@ -176,9 +209,7 @@ func ground_y(wx: float, wz: float) -> float:
 	#
 	# Poligonul e cel al punctelor de control, deja folosit de _build_walls ca sa
 	# decida ce margine e exterioara. O singura definitie pentru "inauntru".
-	var inside := _loop_poly.size() >= 3 \
-		and Geometry2D.is_point_in_polygon(Vector2(wx, wz), _loop_poly)
-	if _far_drop > 0.0 and not inside:
+	if _far_drop > 0.0:
 		# Insula: dincolo de coridorul pistei, terenul devine FUND DE MARE.
 		#
 		# Fara asta o pista de insula e imposibila, si nu dintr-un motiv estetic:
@@ -187,13 +218,24 @@ func ground_y(wx: float, wz: float) -> float:
 		# mica), ori inunda si soseaua (cota mare) — nu exista pozitie din care
 		# sa iasa o insula.
 		#
+		# Trecerea uscat -> fund de mare a fost booleana (is_point_in_polygon):
+		# 26 m de treapta verticala, instant, de-a lungul COARDELOR dintre
+		# punctele de control — un prag poligonal drept prin nisip, vizibil in
+		# orice captura de sus (issue #98). Acum e o plaja: distanta semnata
+		# fata de poligon, netezita pe o banda asimetrica — SHORE_BAND_IN spre
+		# uscat (interiorul ramane uscat, anti-atol), SHORE_BAND_OUT spre larg.
+		#
 		# Relieful de fund pastreaza doar un sfert din amplitudinea dunelor. Nu e
 		# cosmetica: adancimea trebuie sa treaca DECIS de pragul dincolo de care
 		# apa nu-si mai schimba culoarea (Track.SEA_NEAR_DEPTH). Cu dune la
 		# amplitudine plina, adancimea oscila peste si sub prag, iar grila fina de
 		# tarm se emitea pe toata suprafata marii — masurat: 12 800 de triunghiuri
 		# in loc de ~2 000.
-		far_level = _mean_y - _far_drop + maxf(_dunes(wx, wz), -1.0) * 0.25
+		var shore := _shore_mix(wx, wz)
+		if shore > 0.0:
+			var seabed := _mean_y - _far_drop \
+				+ _smax(_dunes(wx, wz), -1.0, SMOOTH_FLOOR_K) * 0.25
+			far_level = lerpf(far_level, seabed, shore)
 	var y := lerpf(road_level, far_level, t * t)
 	# Detaliul foloseste ACEEASI masca de coridor ca amestecul mare: zero pe
 	# banda plata a soselei, plin dincolo de blend. Inainte de _lift_branches,
@@ -237,9 +279,10 @@ func _lift_branches(y: float, wx: float, wz: float) -> float:
 		return y
 	var d := sqrt(near_sq)
 	var t := clampf((d - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0)
-	# maxf, nu lerp pur: banda nu SAPA niciodata terenul, doar il ridica. Acolo
+	# max, nu lerp pur: banda nu SAPA niciodata terenul, doar il ridica. Acolo
 	# unde trece peste uscat mai inalt (racordurile cu soseaua), ramane uscatul.
-	return maxf(y, lerpf(level, y, t * t))
+	# Neted, ca racordul banc-de-nisip -> fund de mare sa nu aiba muchie.
+	return _smax(y, lerpf(level, y, t * t), SMOOTH_BRANCH_K)
 
 
 ## Suntem intr-o rapa declarata la fractia si latura date?
@@ -286,9 +329,10 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 			continue
 		var lat := smoothstep(0.0, 1.0,
 			clampf((dist - _half_width - RAVINE_INNER) / RAVINE_RIM, 0.0, 1.0))
-		# minf: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
-		# construi un dig in loc de o groapa.
-		y = minf(y, road_level - r.z * along * lat)
+		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
+		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
+		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).
+		y = _smin(y, road_level - r.z * along * lat, SMOOTH_RAVINE_K)
 	return y
 
 
@@ -297,6 +341,39 @@ func _side_sign_at(idx: int, wx: float, wz: float) -> float:
 	var s := side_at(idx)
 	var p := _baked[idx]
 	return signf(Vector2(s.x, s.z).dot(Vector2(wx - p.x, wz - p.z)))
+
+
+## 0 = uscat, 1 = fund de mare, cu smoothstep pe banda [-IN, +OUT] in jurul
+## poligonului de control. Distanta semnata: minimul pe cele 24 de segmente,
+## semnul din is_point_in_polygon (negativ inauntru). ~24 segmente x zeci de
+## mii de apeluri la generare = neglijabil, si numai pe pistele cu apa.
+func _shore_mix(wx: float, wz: float) -> float:
+	if _loop_poly.size() < 3:
+		return 1.0
+	var p := Vector2(wx, wz)
+	var d_sq := INF
+	var n := _loop_poly.size()
+	for i in n:
+		var q := Geometry2D.get_closest_point_to_segment(
+			p, _loop_poly[i], _loop_poly[(i + 1) % n])
+		d_sq = minf(d_sq, p.distance_squared_to(q))
+	var sd := sqrt(d_sq)
+	if Geometry2D.is_point_in_polygon(p, _loop_poly):
+		sd = -sd
+	return smoothstep(-SHORE_BAND_IN, SHORE_BAND_OUT, sd)
+
+
+## Minim neted polinomial: coincide cu minf departe de intersectie, rotunjeste
+## muchia pe o banda de ~k metri. Rezultatul e <= minf(a, b), deci "sapa, nu
+## ridica" ramane adevarat oriunde se foloseste in loc de minf.
+static func _smin(a: float, b: float, k: float) -> float:
+	var h := clampf(0.5 + 0.5 * (b - a) / k, 0.0, 1.0)
+	return lerpf(b, a, h) - k * h * (1.0 - h)
+
+
+## Maxim neted — oglinda lui _smin; rezultatul e >= maxf(a, b).
+static func _smax(a: float, b: float, k: float) -> float:
+	return -_smin(-a, -b, k)
 
 
 ## Fereastra circulara [f0,f1] cu margini line. f1 < f0 = trece peste linia de start.
@@ -308,11 +385,20 @@ static func _ring_window(f: float, f0: float, f1: float, fade: float) -> float:
 	return clampf(minf(into, span - into) / maxf(fade, 0.0001), 0.0, 1.0)
 
 
-## Dunele campului departat. Identica cu ce era in track.gd inainte.
+## Dunele campului departat.
+##
+## A fost suma a trei sinusoide (2.2/2.0/1.3, lungimi de unda 200-520 m) —
+## un cofraj de oua cu perioada vizibila, care citea procedural indiferent
+## cat de fin era esantionat (issue #96). FBM-ul de simplex da forme
+## neregulate, ca relieful modelat de mana.
+##
+## Amplitudinea 7.0 e calibrata prin masurare (tools/probe_noise_amp.gd, grile
+## de 200x200 pe 3 seed-uri): fractalul are varfuri la ~±0.8 si rms ~0.27.
+## La 7.0 varfurile ies ~5.5 m — anvelopa vechilor sinusoide — iar rms-ul
+## ~1.9 m fata de 2.3 m inainte; vaile adanci le reteaza oricum clamp-ul
+## de -1 m din ground_y.
 func _dunes(wx: float, wz: float) -> float:
-	return sin(wx * 0.012 + _dune_phase) * 2.2 \
-		+ cos(wz * 0.014 + _dune_phase * 2.0) * 2.0 \
-		+ sin(wx * 0.031) * sin(wz * 0.027) * 1.3
+	return _noise.get_noise_2d(wx, wz) * 7.0
 
 
 ## Dune MICI: zgomot de detaliu la ~11 m lungime de unda, ±0.35 m amplitudine.

@@ -37,7 +37,10 @@ func _ready() -> void:
 
 
 func _dump(idx: int, track: Track) -> void:
-	print("=== Track%02d  %s  tema=%s ===" % [idx + 1, track.track_name,
+	# Numele scenei, nu idx + 1 — vezi probe_layout.gd: indexul nu mai e numarul
+	# din fisier.
+	print("=== %s  %s  tema=%s ===" % [
+		GameState.TRACK_SCENES[idx].get_file().get_basename(), track.track_name,
 		track.theme_decor])
 	print("  ground_tint  %s" % track.theme_ground_tint.to_html(false))
 	print("  sky_top      %s" % track.theme_sky_top.to_html(false))

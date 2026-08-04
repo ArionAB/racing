@@ -56,6 +56,14 @@ const SHORE_BAND_IN: float = 30.0
 ## Cat de departe in larg se termina coborarea spre fundul marii.
 const SHORE_BAND_OUT: float = 60.0
 
+# --- laguna dinauntrul buclei (doar cand _lagoon_depth > 0) ---
+## Banda de tarm a lagunei, oglinda lui SHORE_BAND_*: IN = spre apa, OUT = spre
+## uscat. Mai stramta decat a tarmului exterior fiindca panta e mai scurta —
+## laguna e mica si putin adanca, deci trecerea plaja -> apa se face pe zeci de
+## metri, nu pe o suta.
+const LAGOON_BAND_IN: float = 25.0
+const LAGOON_BAND_OUT: float = 45.0
+
 # --- racorduri netede intre campuri de inaltime ---
 ## Min/max-urile dure dintre campuri (rapa vs. teren, banda secundara vs. fund
 ## de mare, dune vs. podeaua vailor) lasau cute C0: discontinuitati de panta
@@ -95,13 +103,19 @@ var _far_drop: float = 0.0
 ## soselei, iar decorul le ocoleste — altfel scurtatura ar pluti peste fundul de
 ## mare si i-ar rasari palmieri prin mijloc.
 var _extra: PackedVector3Array = PackedVector3Array()
+## Conturul lagunei din INTERIORUL buclei, in plan XZ. Gol = pista n-are laguna.
+var _lagoon_poly: PackedVector2Array = PackedVector2Array()
+## Cat de adanc sapa laguna sub media soselei. Vezi ground_y.
+var _lagoon_depth: float = 0.0
 
 
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		control_points: Array[Vector3], half_width: float,
 		dune_phase: float = 0.0, ravines: Array[Vector4] = [],
 		far_drop: float = 0.0,
-		extra_corridors: PackedVector3Array = PackedVector3Array()) -> void:
+		extra_corridors: PackedVector3Array = PackedVector3Array(),
+		lagoon_poly: PackedVector2Array = PackedVector2Array(),
+		lagoon_depth: float = 0.0) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
@@ -109,6 +123,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_ravines = ravines
 	_far_drop = far_drop
 	_extra = extra_corridors
+	_lagoon_poly = lagoon_poly
+	_lagoon_depth = lagoon_depth
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -241,7 +257,8 @@ func ground_y(wx: float, wz: float) -> float:
 	# banda plata a soselei, plin dincolo de blend. Inainte de _lift_branches,
 	# ca bancurile scurtaturilor sa ramana netede.
 	y += _detail_dunes(wx, wz) * (t * t)
-	y = _lift_branches(y, wx, wz)
+	y = _lift_branches(y, wx, wz, road_level, dist)
+	y = _carve_lagoon(y, dist, wx, wz)
 	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
 
 
@@ -256,8 +273,23 @@ const BRANCH_FLAT_RADIUS: float = 11.0
 const BRANCH_BLEND_LEN: float = 16.0
 
 
+## Cat de departe de marginea soselei principale poate ridicatura unei benzi
+## secundare sa treaca PESTE cota drumului. Sub atat, e plafonata la ea.
+##
+## Nu e o cifra de stil, e o reparatie. Pe Okinawa v2 scurtatura se desprinde
+## chiar din varful crestei, deci pe primii ~30 m banda si soseaua sunt vecine
+## SI la cote diferite (banda ramane pe creasta, soseaua incepe sa coboare).
+## Ridicatura benzii lua atunci si asfaltul principal cu ea: o pana de nisip
+## crestea din mijlocul drumului chiar la despicatura, si sonda de cursa gasea
+## AI intepenit acolo la fiecare tur, atingand TerrainBody. Cat timp toate
+## scurtaturile au fost sub cota soselei (bancul de nisip din Okinawa, la
+## nivelul marii), bug-ul n-avea cum sa apara.
+const BRANCH_LIFT_CLEAR: float = 12.0
+
+
 ## Ridica terenul la cota benzilor secundare, dar doar chiar langa ele.
-func _lift_branches(y: float, wx: float, wz: float) -> float:
+func _lift_branches(y: float, wx: float, wz: float,
+		road_level: float, road_dist: float) -> float:
 	var m := _extra.size()
 	if m == 0:
 		return y
@@ -282,7 +314,54 @@ func _lift_branches(y: float, wx: float, wz: float) -> float:
 	# max, nu lerp pur: banda nu SAPA niciodata terenul, doar il ridica. Acolo
 	# unde trece peste uscat mai inalt (racordurile cu soseaua), ramane uscatul.
 	# Neted, ca racordul banc-de-nisip -> fund de mare sa nu aiba muchie.
-	return _smax(y, lerpf(level, y, t * t), SMOOTH_BRANCH_K)
+	var lifted := _smax(y, lerpf(level, y, t * t), SMOOTH_BRANCH_K)
+	# ...dar niciodata peste soseaua principala cand suntem chiar pe ea. Vezi
+	# BRANCH_LIFT_CLEAR: plafonul se ridica de la cota drumului la ridicatura
+	# libera pe primii metri de dincolo de asfalt, deci nu apare nicio treapta
+	# la marginea lui.
+	var room := clampf((road_dist - _half_width) / BRANCH_LIFT_CLEAR, 0.0, 1.0)
+	return minf(lifted, lerpf(road_level, lifted, room))
+
+
+## De la cati metri dincolo de marginea asfaltului incepe malul lagunei, si pe
+## cati metri coboara pana la fund. Aceleasi doua roluri ca RAVINE_INNER /
+## RAVINE_RIM, si nu din simetrie: laguna TREBUIE sa poata veni pana langa drum.
+##
+## Prima versiune o aplica pe campul departat, adica in spatele coridorului
+## soselei (45 m plat + 70 m de racord). Sigur, dar inutil: coridorul manca
+## 115 m din fiecare margine a unui interior de ~350x300 m, deci din laguna
+## ramanea o balta in mijloc, iar insula citea ca o plaja uriasa cu o baltoaca.
+## Ca RAPA, apa urca pana la 15 m de axa drumului si insula redevine un inel.
+const LAGOON_INNER: float = 8.0
+const LAGOON_RIM: float = 30.0
+
+
+## Sapa laguna din interiorul buclei.
+##
+## Regula anti-atol din ground_y exista fiindca o insula careia ii apare mare in
+## mijloc din GRESEALA e imposibil de vazut din masina. Dar o insula INELARA in
+## jurul unei lagune e o lume in sine, si atunci golul din mijloc e chiar
+## subiectul pistei. Diferenta e ca aici e cerut explicit, cu un contur.
+##
+## `lerpf` simplu, nu `_smin`: tinta e prin constructie sub y, iar amestecul e
+## produsul a doua smoothstep-uri, deci racordul e deja C1. Un _smin ar mai fi
+## scazut k/4 = 0.75 m uniform pe toata suprafata lagunei, degeaba.
+func _carve_lagoon(y: float, road_dist: float, wx: float, wz: float) -> float:
+	if _lagoon_depth <= 0.0 or _lagoon_poly.size() < 3:
+		return y
+	var lat := smoothstep(0.0, 1.0,
+		clampf((road_dist - _half_width - LAGOON_INNER) / LAGOON_RIM, 0.0, 1.0))
+	if lat <= 0.0:
+		return y
+	var lag := _lagoon_mix(wx, wz)
+	if lag <= 0.0:
+		return y
+	# Un sfert din amplitudinea dunelor, ca la fundul de mare: adancimea trebuie
+	# sa ramana DECIS sub Track.SEA_NEAR_DEPTH ca laguna sa fie turcoaz de mic
+	# adanc pe toata suprafata, nu albastru de larg pe petice.
+	var bed := _mean_y - _lagoon_depth \
+		+ _smax(_dunes(wx, wz), -1.0, SMOOTH_FLOOR_K) * 0.25
+	return lerpf(y, bed, lag * lat)
 
 
 ## Suntem intr-o rapa declarata la fractia si latura date?
@@ -305,8 +384,13 @@ func mean_road_y() -> float:
 
 
 ## Adancimea maxima declarata, ca podeaua lumii sa fie pusa sub ea.
+##
+## Include si laguna, desi nu e o rapa: consumatorul (podeaua de coliziune din
+## _build_environment) intreaba de fapt "cat de jos poate cobori terenul sub
+## sosea", iar o laguna sapata sub media soselei e exact asta. Fara ea, podeaua
+## ar putea taia prin fundul lagunei.
 func max_ravine_depth() -> float:
-	var d := 0.0
+	var d := _lagoon_depth
 	for r in _ravines:
 		d = maxf(d, r.z)
 	return d
@@ -361,6 +445,24 @@ func _shore_mix(wx: float, wz: float) -> float:
 	if Geometry2D.is_point_in_polygon(p, _loop_poly):
 		sd = -sd
 	return smoothstep(-SHORE_BAND_IN, SHORE_BAND_OUT, sd)
+
+
+## 0 = uscat, 1 = fundul lagunei. Oglinda lui _shore_mix, cu semnul invers:
+## acolo "inauntrul buclei" inseamna uscat, aici "inauntrul conturului" inseamna
+## apa. Poligonul are ~16 laturi, deci costul e de acelasi ordin, si numai pe
+## pistele care chiar declara o laguna.
+func _lagoon_mix(wx: float, wz: float) -> float:
+	var p := Vector2(wx, wz)
+	var d_sq := INF
+	var n := _lagoon_poly.size()
+	for i in n:
+		var q := Geometry2D.get_closest_point_to_segment(
+			p, _lagoon_poly[i], _lagoon_poly[(i + 1) % n])
+		d_sq = minf(d_sq, p.distance_squared_to(q))
+	var sd := sqrt(d_sq)
+	if not Geometry2D.is_point_in_polygon(p, _lagoon_poly):
+		sd = -sd
+	return smoothstep(-LAGOON_BAND_OUT, LAGOON_BAND_IN, sd)
 
 
 ## Minim neted polinomial: coincide cu minf departe de intersectie, rotunjeste

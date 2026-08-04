@@ -9,8 +9,7 @@ extends Track
 ## puncte cu cote care conteaza (urcarea pe promontoriu, creasta de fly-off,
 ## coborarea la nivelul marii) plus o ramificatie ale carei capete trebuie sa
 ## cada pe fractii anume. Intr-o scena, toate astea sunt un vector binar pe care
-## nu-l poti citi intr-un diff si nu-l poti comenta. Track02 si Track03 au deja
-## precedentul.
+## nu-l poti citi intr-un diff si nu-l poti comenta. Stramtoarea e scrisa la fel.
 ##
 ## GEOMETRIA NU E NEGOCIABILA (memoria proiectului, pilonul de la Dunele):
 ## raza fiecarui viraj > half_width, iar doua ramuri paralele la >= 2*half_width.

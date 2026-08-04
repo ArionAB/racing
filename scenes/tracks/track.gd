@@ -249,12 +249,12 @@ static func themes() -> Dictionary:
 
 ## Citeste un camp din tema curenta, cu valoare implicita daca lipseste.
 ##
-## Initializarea e LENESA si intentionat NU trece prin apply_theme. Track02 si
-## Track03 nu apeleaza apply_theme niciodata: ele raman pe valorile implicite
-## ale variabilelor theme_*, care NU sunt identice cu ramura "forest"
-## (cerul implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)).
-## Un apply_theme("forest") fortat aici le-ar schimba in tacere aspectul.
-## Asa iau doar FLAG-urile de comportament, iar culorile raman ale lor.
+## Initializarea e LENESA si intentionat NU trece prin apply_theme: o pista are
+## voie sa nu apeleze apply_theme deloc si sa ramana pe valorile implicite ale
+## variabilelor theme_*, care NU sunt identice cu ramura "forest" (cerul
+## implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)). Un
+## apply_theme("forest") fortat aici i-ar schimba in tacere aspectul.
+## Asa iau doar FLAG-urile de comportament, iar culorile raman ale ei.
 func theme_flag(key: String, fallback: Variant = null) -> Variant:
 	if _theme.is_empty():
 		var all := themes()
@@ -384,6 +384,17 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Laguna: conturul apei din INTERIORUL buclei, ca poligon in plan XZ.
+##
+## Regula implicita a temei cu apa e ca interiorul circuitului ramane USCAT
+## (vezi TrackSideSampler.ground_y — un atol aparut din greseala nu se vede
+## decat de sus). Hook-ul asta e exceptia declarata: o insula inelara in jurul
+## unei lagune, unde golul din mijloc E subiectul pistei.
+##
+## Gol = fara laguna. Adancimea vine din [member lagoon_depth].
+func _lagoon_points() -> Array[Vector2]:
+	return []
+
 ## Scurtaturi: benzi care se desprind din traseu si revin mai tarziu.
 ##
 ## Fiecare intrare e un dictionar:
@@ -414,18 +425,26 @@ func _ready() -> void:
 	rebuild()
 
 ## Reconstruieste toata pista (folosit si de editor, la Regenerate).
+##
+## Sterge doar ce a generat codul. Un nod pe care l-ai asezat DE MANA in editor
+## si l-ai salvat in .tscn are `owner` setat (radacina scenei), pe cand tot ce
+## adaugam noi cu add_child() are owner null — deci decorul asezat manual
+## supravietuieste si la Regenerate, si la runtime. Vezi docs/decor_manual.md.
 func rebuild() -> void:
 	_mat_cache.clear() # altfel raman materialele temei precedente
 	for child in get_children():
 		if child is Path3D:
 			continue # curba editabila a pistelor custom ramane
+		if child.owner != null:
+			continue # asezat de mana in editor, salvat in scena
 		child.free()
 	_build_curve()
 	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
 	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(track_name.hash() % 1000) * 0.01, _ravines(),
-		theme_flag("seabed_drop", 0.0), _branch_corridor_points())
+		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
+		_lagoon_poly(), lagoon_depth)
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -1082,6 +1101,12 @@ func _build_terrain() -> void:
 ## zero" e o presupunere pe care n-o pui la indoiala.
 @export var sea_level_offset: float = -7.0
 
+## Cat de adanc sapa laguna sub media soselei, cand [method _lagoon_points] da un
+## contur. Se citeste IMPREUNA cu sea_level_offset: diferenta dintre ele e
+## adancimea apei din laguna, iar ea trebuie sa ramana sub SEA_NEAR_DEPTH ca
+## laguna sa fie turcoaz de mic adanc pe toata suprafata, nu albastru de larg.
+@export var lagoon_depth: float = 20.0
+
 ## Cat de departe de tarm mai are rost geometrie fina. Dincolo, culoarea e
 ## oricum sea_deep uniform, deci preia cvadrilaterul de larg.
 const SEA_NEAR_DEPTH: float = 14.0
@@ -1522,6 +1547,14 @@ func _branch_corridor_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for i in range(1, routes.size()):
 		out.append_array(routes[i].baked)
+	return out
+
+
+## Conturul lagunei in forma pe care o vrea samplerul.
+func _lagoon_poly() -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for p in _lagoon_points():
+		out.append(p)
 	return out
 
 
@@ -2111,8 +2144,8 @@ func _build_flyoff_net(idx: int) -> void:
 	var top := lowest_road - FLYOFF_NET_CEILING_DROP
 	var bottom := lowest_road - FLYOFF_NET_FLOOR_DROP
 	# Garda de build: un fly-off fara rapa sub el arunca masina pe nisip, iar
-	# plasa nu se declanseaza niciodata. Prinde Track04 si orice pista viitoare
-	# unde cineva adauga un fly-off si uita rapa.
+	# plasa nu se declanseaza niciodata. Prinde orice pista unde cineva adauga
+	# un fly-off si uita rapa.
 	if _sampler.max_ravine_depth() <= FLYOFF_NET_CEILING_DROP + 4.0:
 		push_warning(("Fly-off la indexul %d fara rapa suficienta: " +
 			"plasa de respawn ramane ingropata. Vezi _ravines().") % idx)

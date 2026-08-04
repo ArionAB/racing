@@ -198,6 +198,23 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   citite ca liniare ieșeau cu ~1.5 trepte mai deschise, deci TOATE particulele
   din joc randau spălăcit.
 
+- **Schimbi camera? Fotografiază, nu descrie.** Sonda de cameră rulează aceeași
+  bucată de cursă (AI cu sămânță fixă, fără adversari) și salvează capturi din
+  aceleași puncte, cu setări diferite de cameră:
+  ```
+  godot --rendering-driver vulkan --fixed-fps 60 --path . res://tools/ProbeCam.tscn \
+      -- --preset=ignition [--track=0]
+  ```
+  Presetările stau în `tools/probe_cam.gd`; `--preset=actuala` fotografiază exact
+  camera din joc, deci e coloana de referință a oricărei comparații.
+
+  > Camera a fost tunată de două ori „din amintire" și a rămas de fiecare dată o
+  > cameră de NFS. A treia oară, patru variante puse una lângă alta au arătat în
+  > zece secunde ce nu se vedea în discuții: în acul de păr cu stânca din mijloc
+  > de pe Dunele, la 19° stânca **acoperă ieșirea din viraj**. Tot acolo s-a
+  > văzut și că FOV-ul strâmt (52°) omoară senzația de viteză exact cât câștigă
+  > înălțimea — de aia camera e sus **și** largă (28.7°, FOV 68).
+
 - **CI verifică și anti-blocajul în pereții de canion.** Aruncă mașini în unghi
   în faleze, în 12 puncte de pe traseu, și pică dacă vreuna rămâne înțepenită.
   ```

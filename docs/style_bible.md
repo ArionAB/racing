@@ -176,24 +176,65 @@ Ce e permis:
   Apa și spuma stau jos deliberat: stratul de detaliu e o textură de *rocă*, iar
   la intensitate mare face marea să arate ca noroi.
 
-- **Texturi tileabile gri** pentru suprafețele mari (teren, asfalt):
-  `surface_sand.png`, `surface_asphalt.png`. Astea au UV-uri reale, deci folosesc
-  același strat **fără** triplanar, pe două scări suprapuse (3.1 m și 45 m) care
-  rup tiparul de repetiție. Se înmulțesc peste albedo, deci nu aduc culori noi.
-  Centrul lor e **alb**, nu gri mediu — o textură centrată pe 0.5 ar întuneca
-  totul cu 50% și ar spăla culoarea.
+- **Texturi tileabile gri** pentru suprafețele mari (teren, șosea, umeri,
+  borduri). Astea au UV-uri reale, deci folosesc același strat **fără**
+  triplanar. Se înmulțesc peste albedo, deci nu aduc culori noi. Centrul lor e
+  **alb**, nu gri mediu — o textură centrată pe 0.5 ar întuneca totul cu 50% și
+  ar spăla culoarea.
 
-  Din august 2026 vin din **fotografii aeriene** trecute prin modul GRI al lui
-  `process_class_textures.gd`, nu din zgomot procedural. Au **două** componente,
-  și asta e o lecție măsurată: prima încercare a folosit doar fotografia, cu
-  media și deviația globală normalizate la cele ale texturii procedurale — pe
-  hârtie o înlocuire neutră. Măsurat, a ieșit o **regresie** (asfalt σ 2.91 →
-  1.69). Energia unei fotografii stă la frecvențe joase, iar sonda din §14
-  măsoară deviația *înăuntrul* unei dale de 8 px: aceeași deviație globală,
-  mutată acolo unde nu se vede la viteză. Fotografia aduce structura (pete,
-  crăpături, urme de reparații), granulația procedurală rămâne pentru
-  frecvența înaltă — la scară de bloc de 4 texeli, adică exact rezoluția de 128
-  pe care o înlocuiește.
+  Vin din fotografii trecute prin modul GRI al lui
+  `process_class_textures.gd`, nu din zgomot procedural. Au **două**
+  componente, și asta e o lecție măsurată: prima încercare a folosit doar
+  fotografia, cu media și deviația globală normalizate la cele ale texturii
+  procedurale — pe hârtie o înlocuire neutră. Măsurat, a ieșit o **regresie**
+  (asfalt σ 2.91 → 1.69). Energia unei fotografii stă la frecvențe joase, iar
+  sonda din §14 măsoară deviația *înăuntrul* unei dale de 8 px: aceeași deviație
+  globală, mutată acolo unde nu se vede la viteză. Fotografia aduce structura
+  (pete, crăpături, urme de reparații), granulația procedurală (`grain`) rămâne
+  pentru frecvența înaltă — la scară de bloc de 4 texeli.
+
+  > ⚠️ `grain` **nu e un rest istoric**, și s-a demonstrat de două ori. A doua
+  > oară a fost în august 2026: la trecerea pe surse la scara corectă părea
+  > logic că fotografia aduce ea granulația, așa că a fost tăiat 0.26 → 0.14 pe
+  > asfalt. Rezultat măsurat: σ **3.12 → 1.96**, sub valoarea de dinaintea
+  > întregii schimbări. Deviația in-dală a texturii finale spune de ce: 18.27
+  > înainte, 16.32 după.
+
+  **Fiecare scară își cere propria sursă, la scara ei reală.** Versiunea din
+  #132 folosea aceeași fotografie **aeriană** pe ambele treceri. Sursele erau
+  scanări de 20 m (nisip) și 30 m (asfalt), afișate la 3.1 și 3.5 m: granulația
+  ieșea de ~8 ori prea mică, sub un texel, și o mânca mipmap-ul. Se vedea în
+  cifre — asfaltul măsura p25..p75 de 2.76..3.60, adică o panglică fără
+  variație. Azi fiecare suprafață are două texturi:
+
+  | trecere | repetiție | sursă | ce dă |
+  |---|---|---|---|
+  | micro (UV1) | 3.1–3.5 m | scanare de 2–3 m | granulă, agregat, crăpături |
+  | macro (UV2) | ~45 m | aeriană de 20–30 m | pete, petice, arce de cauciuc |
+
+  Trecerea macro **nu e doar „pete lente"**: la 10 m de cameră un pixel acoperă
+  ~1.3 cm, deci un texel macro se întinde pe ~7 pixeli. E și o a doua sursă de
+  granulație, mărită — de aceea are și ea `grain`.
+
+  **Expunerea se ține prin PRODUSUL mediilor**, fiindcă cele două treceri se
+  înmulțesc. La nisip produsul se păstrează direct (ambele la 0.850). La asfalt
+  nu se putea: ca a doua trecere să nu întunece șoseaua, mediile ar fi trebuit
+  la 0.92/0.94, iar acolo `grain` nu mai încape (media plus jumătatea
+  amplitudinii trece de 1.0 și vârfurile se retează). Compensarea s-a mutat
+  atunci în **culoarea** din `Track._build_road`, împărțită la media macro.
+
+  > ⚠️ **Pe o bandă îngustă, granulația fină nu ajunge niciodată pe ecran.**
+  > Umărul șoselei (1.3 m) a primit textură de pietriș la 1.8 m/repetiție — exact
+  > scara reală a scanării — și a ieșit perfect **plat**, deși sonda de materiale
+  > confirma UV-uri corecte și textura legată. Banda ocupă ~25 px pe ecran chiar
+  > în prim-plan, deci îi revin ~15 texeli pe pixel și GPU-ul alege un mip de
+  > 32×32, adică media texturii. Șoseaua, cu aceleași UV-uri pătrate, se vede
+  > pentru că e de zece ori mai lată. Reparația are două părți: **scară mai mare**
+  > (5 m la umeri, 3.5 m la borduri — mai mare decât adevărul, dar vizibilă) și
+  > **variație pe vertex color**, care nu trece prin mipmap deloc (petele de praf
+  > din `SHOULDER_PATCH_*`, uzura per bucată de bordură din `KERB_WEAR_DEPTH`).
+  > Variația pe vertecși e centrată pe 1.0, nu doar întunecătoare — altfel ar
+  > coborî luminozitatea medie a benzii și ar strica expunerea în tăcere.
 
 **Cele patru scări de detaliu**, fiecare cu sursa ei — dacă una lipsește, se vede:
 
@@ -234,6 +275,20 @@ Ce e permis:
   > din prima. Al doilea criteriu e **uniformitatea luminii pe dală**: prima
   > sursă avea jumătatea dreaptă vizibil mai închisă, iar pe o suprafață care
   > se repetă dezechilibrul ăla devine benzi.
+  >
+  > Ritualul e o unealtă, nu un snippet rescris de fiecare dată:
+  > ```
+  > godot --headless --path . --script res://tools/measure_texture_src.gd \
+  >     -- --dir=<folder cu candidați> --anchor=D4994D
+  > ```
+  > Scoate media (cu raportul față de ancoră), deviația globală, deviația
+  > **in-dală** și dezechilibrul stânga/dreapta și sus/jos. Pentru o textură
+  > **multiplicativă** (suprafețe) media nu contează — se renormalizează oricum;
+  > criteriul e cât din deviație stă în-dală, fiindcă normalizarea scalează
+  > toate frecvențele cu același factor. Așa a fost aleasă `gravelly_sand`
+  > (reține 0.88) în locul aerianei de dinainte (0.735).
+  > **Verifică și scara reală a sursei** (`api.polyhaven.com/info/<asset>` →
+  > `dimensions`): trebuie să fie apropiată de repetiția din joc.
 
   **Aceeași clasă poate costa două materiale.** `rust_metal` are azi două
   instanțe pe Dunele: una triplanară (turn de apă, pe UV-uri colapsate) și una
@@ -477,12 +532,25 @@ Sonda taie imaginea în dale de 8 px și măsoară deviația **înăuntrul** fie
 dale — deci textura de suprafață, nu contrastul dintre obiecte. Dalele reci
 (cerul) se ignoră.
 
-| zonă | înainte de stratul de detaliu | după texturi de clasă (aug. 2026) |
-|---|---|---|
-| faleză | **0.76** | **0.66** |
-| nisip | 1.48 | **2.82** |
-| asfalt | 0.93 | **3.27** |
-| cadru întreg | 1.12 | **3.39** |
+| zonă | înainte de stratul de detaliu | după texturi de clasă (aug. 2026) | după surse pe scări (aug. 2026) |
+|---|---|---|---|
+| faleză | **0.76** | **0.66** | 6.14 ¹ |
+| nisip | 1.48 | **2.82** | **4.02** |
+| asfalt | 0.93 | **3.27** | **3.42** |
+| umăr | — | 2.23 | **4.00** |
+| cadru întreg | 1.12 | **3.39** | **3.44** |
+
+¹ Coloana a treia e măsurată A/B față de ramura de bază, pe **aceleași
+patch-uri**, la `--frac=0.18` — deci comparabilă doar pe orizontală, în
+interiorul ei. Falezei nu i s-a schimbat nimic în lucrarea asta; cifra ei diferă
+de coloana vecină doar pentru că patch-ul standard e altul.
+
+> ⚠️ Patch-ul `umar` din `PATCHES_DUNELE` **nu există** — banda e prea îngustă
+> pentru un dreptunghi standard. Cifrele de mai sus vin de la
+> `--patch=umar:0.0203,0.7444,0.0898,0.7750`, verificat prin eșantionarea culorii
+> medii (166,105,59 = praf, nu nisip). Prima variantă a patch-ului cădea de fapt
+> pe **nisip** (203,156,87) și „măsura" umărul la 7.96 — un număr care spunea că
+> banda plată de plastic e cea mai texturată suprafață din cadru.
 
 > ⚠️ Coloana din dreapta e **remăsurată** pe patch-urile de mai jos, nu copiată
 > din PR-uri vechi. Valorile de faleză care circulau înainte (~6 și ~9.4) au fost

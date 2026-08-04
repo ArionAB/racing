@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bnccmti6jpmdj"
-path="res://.godot/imported/surface_sand_src.jpg-feabbcfeac23eb3fe72a290657fc8513.ctex"
+uid="uid://cattqbkrmomyp"
+path="res://.godot/imported/surface_sand_macro_src.jpg-73b729650e9357c56e10b5981e55a52f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/classes/src/surface_sand_src.jpg"
-dest_files=["res://.godot/imported/surface_sand_src.jpg-feabbcfeac23eb3fe72a290657fc8513.ctex"]
+source_file="res://assets/textures/classes/src/surface_sand_macro_src.jpg"
+dest_files=["res://.godot/imported/surface_sand_macro_src.jpg-73b729650e9357c56e10b5981e55a52f.ctex"]
 
 [params]
 

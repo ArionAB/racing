@@ -18,6 +18,9 @@ extends Node
 ##                             lateral, deci ies din cadru la cea mai mica
 ##                             eroare. Poza asta e pentru VERIFICAREA unui
 ##                             asset, nu pentru compozitia pistei.
+##   --train-at=0.55           muta ceasul trecerii de cale ferata la fractia
+##                             ceruta din ciclu, ca trenul sa fie IN cadru la
+##                             momentul capturii (implicit e parcat, invizibil)
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -52,6 +55,7 @@ func _ready() -> void:
 	var game_cam := false
 	var landmark_id := -1
 	var landmark_dist := 30.0
+	var train_at := -1.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -63,6 +67,8 @@ func _ready() -> void:
 			landmark_id = int(arg.trim_prefix("--landmark="))
 		elif arg.begins_with("--dist="):
 			landmark_dist = float(arg.trim_prefix("--dist="))
+		elif arg.begins_with("--train-at="):
+			train_at = float(arg.trim_prefix("--train-at="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -77,6 +83,8 @@ func _ready() -> void:
 	add_child(track)
 	if "--smooth" in OS.get_cmdline_user_args():
 		_smooth_organics(track)
+	if train_at >= 0.0:
+		_set_train_phase(track, train_at)
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:
@@ -224,6 +232,26 @@ func _shoot_landmark(track: Track, cam: Camera3D, track_index: int,
 ## lumina. Aici rebuild-uim normalele prin mediere pe pozitie — echivalentul
 ## la runtime al lui shade_smooth din Blender — DOAR ca sa comparam capturi.
 ## Reparatia reala, daca ipoteza tine, e in exportul Blender, nu aici.
+## Muta ceasul trenului la o fractie din ciclul lui, ca sa apuce sa fie IN cadru
+## cand se face poza.
+##
+## Fara asta trenul e nefotografiabil: la pornire ciclul e la 0 (avertizare), iar
+## captura are loc dupa doua cadre — deci in orice snapshot garnitura e parcata
+## in afara hartii si invizibila. 0.55 il prinde pe la mijlocul traversarii.
+func _set_train_phase(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.get_children():
+		var train := node as TrainHazard
+		if train == null:
+			continue
+		# `_time` e privat prin conventie, nu prin limbaj; sonda are voie, exact
+		# ca sa nu adaugam un export doar de dragul unei poze.
+		train.set("_time", train.period * clampf(at, 0.0, 0.999))
+		train._physics_process(0.0)
+		found += 1
+	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+
+
 func _smooth_organics(root: Node) -> void:
 	const PREFIXES := ["cliff", "butte", "mesa", "cluster", "arch", "boulder",
 		"rock", "pebbles", "bush", "portal", "dino", "bone"]

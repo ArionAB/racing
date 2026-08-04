@@ -1946,7 +1946,7 @@ func _build_rockfall(frac: float) -> void:
 ## sa nu se strice la prima modificare de traseu:
 ##   - trecerea se muta din apexul unui viraj (style_bible §7 cere sa nu pui
 ##     nimic care blocheaza citirea in apex);
-##   - sina se opreste inainte de alta bucla a pistei, altfel un tren de ~33 m
+##   - sina se opreste inainte de alta bucla a pistei, altfel un tren de 42 m
 ##     intra pe soseaua vecina pe o pista care se auto-intersecteaza.
 func _build_train(frac: float) -> void:
 	var n := baked.size()
@@ -1994,9 +1994,11 @@ func _calm_index_near(idx: int, radius_m: float) -> int:
 ## restrictia de acolo taia si capatul dinspre desertul gol. Acum interiorul e
 ## limitat separat, iar exteriorul isi ia lungimea intreaga.
 ##
-## MIN_RAIL nu e arbitrar: garnitura are ~33 m, deci sub atat trenul n-ar avea de
-## unde sa intre in cadru. Sina e doar geometrie, fara coliziune — daca trece pe
-## langa alta bucla a pistei nu strica nimic, doar arata ciudat.
+## MIN_RAIL nu e arbitrar: garnitura MASURATA are 42.3 m (locomotiva + tender +
+## 3 vagoane, sonda de geometrie pe train.glb), deci sub atat trenul n-ar avea de
+## unde sa intre in cadru. Daca se mai adauga un vagon, cifra asta se verifica din
+## nou. Sina e doar geometrie, fara coliziune — daca trece pe langa alta bucla a
+## pistei nu strica nimic, doar arata ciudat.
 func _rail_reach(origin: Vector3, dir: Vector3, max_len: float,
 		clearance: float) -> float:
 	const MIN_RAIL := 46.0

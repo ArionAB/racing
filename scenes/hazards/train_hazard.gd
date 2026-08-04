@@ -13,6 +13,12 @@ extends Node3D
 ## te turteste complet, iti taie comenzile cat te arunca fizic, apoi te repune.
 ## Corpul solid face aruncarea — aia E explozia vizuala — iar repunerea
 ## temporizata garanteaza ca nimeni nu ramane blocat sub tren.
+##
+## Garnitura e un MODEL (`assets/models/train.glb`: locomotiva cu abur, tender,
+## vagoane de lemn), nu cutiile din spike. Conteaza pentru gimmick, nu doar
+## pentru poza: avertizarea vizuala e silueta care intra in cadru, iar o cutie
+## nu spune de la 100 m nici incotro merge, nici cat mai are de trecut. Cotele
+## si coliziunile ies din AABB-ul modelului — vezi `_build_model_consist`.
 
 ## Cat dureaza un ciclu complet.
 const DEFAULT_PERIOD: float = 26.0
@@ -27,14 +33,32 @@ const BELL_INTERVAL: float = 0.6
 ## Cand suna cornul, masurat de la inceputul ciclului.
 const HORN_AT: float = 0.4
 
-## Un vagon: lungime, latime, inaltime.
+## Garnitura: locomotiva cu abur + tender + vagoane de marfa.
+## Trei noduri in GLB, vezi tools/blender/build_train.py.
+const MODEL_PATH := "res://assets/models/train.glb"
+const LOCO_NODE := "Train_Loco"
+const TENDER_NODE := "Train_Tender"
+const WAGON_NODE := "Train_Wagon"
+
+## Cutiile de rezerva, cand modelul lipseste: lungime, latime, inaltime.
 const WAGON_LEN: float = 7.0
 const WAGON_WIDTH: float = 3.0
 const WAGON_HEIGHT: float = 3.4
 ## Cate vagoane trage locomotiva.
 const WAGON_COUNT: int = 3
-## Spatiul dintre vagoane.
+## Spatiul dintre piese, masurat intre capete.
 const WAGON_GAP: float = 1.2
+
+## Ecartamentul: distanta de la axa sinei la firul de sina. NU e o alegere, e o
+## masuratoare pe model — rotile stau la |z| = 0.45 (build_train.py). Terasamentul
+## avea 0.75, adica trenul ar fi mers cu rotile intre sine, in aer.
+const GAUGE_HALF: float = 0.45
+## Cota superioara a sinei. Pe ea sta baza modelului (originea lui e la roti).
+const RAIL_TOP: float = 0.28
+## Lungimea traversei si pasul dintre ele. Traversa iese ~0.3 m de fiecare parte
+## a firului de sina, ca la orice cale ferata de macheta.
+const SLEEPER_LEN: float = 1.5
+const SLEEPER_STEP: float = 1.8
 
 ## Cat sta o masina imuna dupa ce a fost lovita — mai lung decat la bolovan,
 ## fiindca urmeaza o repunere si n-are rost sa fie lovita de doua ori.
@@ -72,7 +96,6 @@ static var _light_mat: StandardMaterial3D
 
 
 func _ready() -> void:
-	_train_len = float(WAGON_COUNT + 1) * (WAGON_LEN + WAGON_GAP)
 	_build()
 
 
@@ -91,12 +114,12 @@ func _build() -> void:
 func _build_bed() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var sleepers := int(half_rail * 2.0 / 2.4)
+	var sleepers := int(half_rail * 2.0 / SLEEPER_STEP)
 	for i in sleepers:
-		var x := -half_rail + float(i) * 2.4
-		_box(st, Vector3(x, 0.06, 0.0), Vector3(1.0, 0.12, 2.9))
+		var x := -half_rail + float(i) * SLEEPER_STEP
+		_box(st, Vector3(x, 0.06, 0.0), Vector3(0.8, 0.12, SLEEPER_LEN))
 	for side: float in [-1.0, 1.0]:
-		_box(st, Vector3(0.0, 0.20, side * 0.75),
+		_box(st, Vector3(0.0, RAIL_TOP - 0.08, side * GAUGE_HALF),
 			Vector3(half_rail * 2.0, 0.16, 0.16))
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
@@ -147,16 +170,119 @@ static func _structure_material() -> StandardMaterial3D:
 	return _struct_mat
 
 
+## Garnitura se construieste dinspre COADA (x = 0) spre bot: vagoanele intai,
+## locomotiva ultima, la x maxim. Ordinea nu e cosmetica — trenul inainteaza
+## spre +X local, deci piesa cu x maxim e cea care intra prima in cadru. Pe
+## cutii identice nu se vedea; cu o locomotiva adevarata, inversul inseamna un
+## tren care traverseaza cu spatele.
 func _build_train() -> void:
 	_train = AnimatableBody3D.new()
 	_train.sync_to_physics = true
 	add_child(_train)
+	var gabarit := _build_model_consist()
+	if gabarit == Vector2.ZERO:
+		gabarit = _build_box_consist()
 
+	_hit = Area3D.new()
+	var hit_shape := CollisionShape3D.new()
+	var hit_box := BoxShape3D.new()
+	# Cu un metru mai gras decat vagoanele: lovitura se simte cand trenul te
+	# atinge, nu cand a intrat deja jumatate in tine.
+	hit_box.size = Vector3(_train_len, gabarit.x + 1.0, gabarit.y + 1.0)
+	hit_shape.shape = hit_box
+	hit_shape.position = Vector3(_train_len * 0.5, gabarit.x * 0.5, 0.0)
+	_hit.add_child(hit_shape)
+	_train.add_child(_hit)
+
+
+## Asaza modelul, piesa cu piesa. Intoarce (inaltime, latime) maxime ale
+## garniturii, sau Vector2.ZERO daca modelul lipseste.
+##
+## Cotele NU se scriu de mana nicaieri: lungimea fiecarei piese, coliziunea ei si
+## gabaritul zonei de lovire ies din AABB-ul masurat pe mesh (ca la landmark-uri,
+## track.gd:_LANDMARKS). Regenerezi GLB-ul cu alte proportii si totul urmeaza.
+func _build_model_consist() -> Vector2:
+	if not ResourceLoader.exists(MODEL_PATH):
+		return Vector2.ZERO
+	var scene := load(MODEL_PATH) as PackedScene
+	var order: Array[String] = []
+	for i in WAGON_COUNT:
+		order.append(WAGON_NODE)
+	order.append(TENDER_NODE)
+	order.append(LOCO_NODE)
+
+	var x := 0.0
+	var gabarit := Vector2.ZERO
+	for part in order:
+		var piece := _extract(scene, part)
+		if piece == null:
+			# Un GLB incomplet nu se acopera pe jumatate: mai bine cade tot pe
+			# cutii decat sa iasa o garnitura cu goluri in ea.
+			for child in _train.get_children():
+				_train.remove_child(child)
+				child.queue_free()
+			return Vector2.ZERO
+		# AABB-ul se ia pe piesa asa cum vine din GLB (cu offsetul ei intern deja
+		# anulat), iar asezarea se face pe un nod-suport: daca am scrie direct in
+		# `piece.position` am sterge exact corectia pe care `_extract` a facut-o.
+		var box := Track.model_aabb(piece)
+		var holder := Node3D.new()
+		holder.add_child(piece)
+		# Capatul din coada al piesei ajunge fix la x; originea modelului e in
+		# centrul lui pe orizontala, deci offsetul se scade din AABB, nu se
+		# presupune.
+		holder.position = Vector3(x - box.position.x, RAIL_TOP, 0.0)
+		_train.add_child(holder)
+		Palette.apply_world_material(piece)
+
+		var shape := CollisionShape3D.new()
+		var col := BoxShape3D.new()
+		col.size = box.size
+		shape.shape = col
+		shape.position = holder.position + box.position + box.size * 0.5
+		_train.add_child(shape)
+
+		x += box.size.x + WAGON_GAP
+		gabarit = Vector2(maxf(gabarit.x, RAIL_TOP + box.size.y),
+			maxf(gabarit.y, box.size.z))
+	_train_len = x - WAGON_GAP
+	return gabarit
+
+
+## Instantiaza GLB-ul si pastreaza un singur nod, anuland offsetul lui din
+## fisier. Acelasi tipar ca `Track._extract_glb_node`, copiat fiindca acolo e
+## metoda de instanta a pistei; `Track.model_aabb` e static, deci ala se
+## refoloseste (ca in sliding_hazard).
+##
+## `remove_child` INAINTE de `queue_free`: eliberarea e amanata pana la finalul
+## cadrului, iar `model_aabb` masoara imediat dupa — altfel piesele "sterse" ar
+## intra in masuratoare si fiecare vagon ar primi cutia intregii garnituri.
+func _extract(scene: PackedScene, node_name: String) -> Node3D:
+	var container := scene.instantiate() as Node3D
+	var kept: Node3D = null
+	for child in container.get_children():
+		if String(child.name) == node_name:
+			kept = child as Node3D
+		else:
+			container.remove_child(child)
+			child.queue_free()
+	if kept == null:
+		container.queue_free()
+		return null
+	container.position = -kept.position
+	return container
+
+
+## Rezerva pe cutii, pentru cand assets-ul lipseste (clona proaspata, inainte de
+## primul import). Pista nu ramane fara gimmick din cauza unui fisier.
+func _build_box_consist() -> Vector2:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in WAGON_COUNT + 1:
-		var x := float(i) * (WAGON_LEN + WAGON_GAP)
-		var h := WAGON_HEIGHT if i > 0 else WAGON_HEIGHT + 0.7 # locomotiva
+		# Centrul cutiei, cu coada primei piese fix la x = 0 — aceeasi conventie
+		# ca pe model, ca zona de lovire sa cada la fel pe amandoua drumurile.
+		var x := float(i) * (WAGON_LEN + WAGON_GAP) + WAGON_LEN * 0.5
+		var h := WAGON_HEIGHT if i < WAGON_COUNT else WAGON_HEIGHT + 0.7
 		_box(st, Vector3(x, h * 0.5 + 0.5, 0.0),
 			Vector3(WAGON_LEN, h, WAGON_WIDTH))
 		var shape := CollisionShape3D.new()
@@ -174,18 +300,9 @@ func _build_train() -> void:
 		_body_mat.roughness = 0.8
 	inst.material_override = _body_mat
 	_train.add_child(inst)
-
-	_hit = Area3D.new()
-	var hit_shape := CollisionShape3D.new()
-	var hit_box := BoxShape3D.new()
-	# Cu un metru mai gras decat vagoanele: lovitura se simte cand trenul te
-	# atinge, nu cand a intrat deja jumatate in tine.
-	hit_box.size = Vector3(_train_len, WAGON_HEIGHT + 1.0, WAGON_WIDTH + 1.0)
-	hit_shape.shape = hit_box
-	hit_shape.position = Vector3(_train_len * 0.5 - WAGON_LEN * 0.5,
-		WAGON_HEIGHT * 0.5 + 0.5, 0.0)
-	_hit.add_child(hit_shape)
-	_train.add_child(_hit)
+	_train_len = float(WAGON_COUNT + 1) * WAGON_LEN \
+		+ float(WAGON_COUNT) * WAGON_GAP
+	return Vector2(WAGON_HEIGHT + 0.7 + 0.5, WAGON_WIDTH)
 
 
 ## O cutie in SurfaceTool. Doua triunghiuri per fata, fara indexare.

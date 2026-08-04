@@ -306,6 +306,7 @@ const VARIANT_SOURCE := {
 	"startgate": "start_gate", "windmill": "windmill", "blades": "windmill",
 	"water_tower": "water_tower",
 	"house_": "village_house",
+	"train_": "train",
 }
 
 
@@ -318,7 +319,7 @@ func _source_of(mi: MeshInstance3D, track: Node) -> String:
 		"water_tower", "windmill", "gas_station", "route66",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "canyon_rocks", "desert_scatter", "butte",
-		"wood_fence"]
+		"wood_fence", "train"]
 	# Intai numele PROPRIU al mesh-ului: variantele sunt cheia stabila.
 	var own := String(mi.name).to_lower()
 	for prefix: String in VARIANT_SOURCE:

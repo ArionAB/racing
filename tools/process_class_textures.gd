@@ -67,6 +67,24 @@ static func classes() -> Dictionary:
 		# clasele. Ce lipsea nu era punch, era expunerea.
 		"wood": {"src": "wood_src.jpg",
 			"anchor": Palette.color(Palette.WOOD_WEATHERED)},
+		# Beton de exterior: dala benzinariei, insula pompelor, cosul.
+		# Sursa: concrete_floor_02 (PolyHaven CC0).
+		#
+		# `lift` mare, si e cazul in care parametrul chiar isi merita existenta:
+		# ancora CONCRETE (#C8BDA9) are luminanta 190, iar NICIO fotografie de
+		# beton nu trece de ~111 — betonul real e gri mediu, slotul din paleta e
+		# ales deschis fiindca tine si coamele albe ale casei de sat, si fata
+		# ecranului de drive-in. Fara ridicare, dala ar cobori la 0.58 din
+		# ancora, cel mai intunecat raport din toate clasele, si s-ar apropia
+		# periculos de asfalt — care trebuie sa ramana cea mai inchisa suprafata
+		# continua (style_bible §1).
+		#
+		# Dezechilibrul de lumina al sursei e 5.2 pe o medie de 110 (4.7%), cel
+		# mai prost din clasele de azi. Acceptat deliberat: alternativele erau
+		# uniforme dar plate (sigma 6-9), iar petele si crapaturile sunt exact
+		# detaliul pentru care exista clasa.
+		"concrete": {"src": "concrete_src.jpg",
+			"anchor": Palette.color(Palette.CONCRETE), "lift": 0.20},
 	}
 
 

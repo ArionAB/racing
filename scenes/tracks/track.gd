@@ -2579,8 +2579,14 @@ const _LANDMARKS := {
 	0: {"path": "res://assets/models/water_tower.glb",
 		"gap": 10.0, "col": "cyl", "radius": 2.4, "spin": false,
 		"tri_class": "rust_metal"},
+	# Benzinaria: patru clase de suprafata. Ce ramane pe atlas (Gas_Trim) ramane
+	# din motive — geamurile isi iau adancimea falsa din slotul cel mai inchis,
+	# iar panoul, fascia rosie si steaua sunt accente de culoare pe care o
+	# textura le-ar sterge.
 	1: {"path": "res://assets/models/gas_station.glb",
-		"gap": 9.0, "col": "box", "spin": false},
+		"gap": 9.0, "col": "box", "spin": false,
+		"classes": {"Gas_Wood": "wood", "Gas_Rust": "rust_metal",
+			"Gas_Concrete": "concrete"}},
 	# Moara: lemn SI metal, deci nu poate lua o clasa "pe tot subarborele" ca
 	# turnul. Piesele Mill_Wood/Mill_Metal/Blades au UV-uri reale (proiectie
 	# cubica); Mill_Trim ramane pe atlas — vana albastra e singurul accent de

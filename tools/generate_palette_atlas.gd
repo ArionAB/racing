@@ -47,8 +47,11 @@ const OUT_PATH: String = "res://assets/textures/palette_atlas.png"
 ##
 ## Cu seminte separate, fiecare artefact e reproductibil independent: poti
 ## adauga sau scoate sloturi fara sa clatini nimic in aval.
+## 20260802 a fost SEED_SURFACE, retras odata cu #132 (suprafetele vin acum din
+## fotografii). Numarul NU se refoloseste pentru alt artefact: semintele sunt
+## identitatea unui rezultat reproductibil, iar reciclarea unuia ar face un
+## artefact viitor sa depinda tacit de istoria altuia.
 const SEED_SLOTS: int = 20260801
-const SEED_SURFACE: int = 20260802
 const SEED_DETAIL: int = 20260803
 const SEED_TRIM: int = 20260804
 const SEED_DECAL: int = 20260805
@@ -73,8 +76,14 @@ func _init() -> void:
 	print("Atlas scris: %s  (%dx%d, %d sloturi)"
 		% [OUT_PATH, img.get_width(), img.get_height(), Palette.SLOTS])
 	# Re-semanare inainte de fiecare artefact — vezi SEED_* de mai sus.
-	rng.seed = SEED_SURFACE
-	_surface_textures()
+	#
+	# surface_sand.png si surface_asphalt.png nu se mai genereaza aici: din #132
+	# vin din fotografii, prin tools/process_class_textures.gd (modul GRI).
+	# Scoaterea lor NU misca nimic altceva, si asta e tocmai meritul re-semanarii
+	# per artefact introduse dupa accidentul din nota lui `_hash01`: fara ea,
+	# fiecare artefact ar fi continuat din starea lasata de precedentul, iar
+	# stergerea unui pas ar fi regenerat detail_rock.png si trim_rock.png —
+	# adica exact texturile pe care sunt calibrate cifrele din style_bible §14.
 	rng.seed = SEED_DETAIL
 	_detail_textures()
 	rng.seed = SEED_TRIM
@@ -376,58 +385,25 @@ func _write_tileable_n(path: String, n: int, noise: Callable) -> void:
 		% [path.get_file(), n, n, lo, hi, sum / float(n * n)])
 
 
-## Texturi TILEABILE pentru suprafetele mari (teren, asfalt).
+## Texturile TILEABILE ale suprafetelor mari (teren, sosea) au plecat de aici.
 ##
-## Atlasul rezolva prop-urile, dar nu si terenul: o suprafata de sute de m² care
-## esantioneaza un singur punct din atlas ramane o pata plata, oricat de texturat
-## ar fi punctul ala. Suprafetele mari au nevoie de tiling real.
+## Pana la #132 erau generate procedural in acest fisier: zgomot alb plus o
+## sinusoida lenta, 128x128, gri, inmultite peste albedo. Din #132 vin din
+## fotografii aeriene trecute prin tools/process_class_textures.gd (modul GRI),
+## la 512x512, cu media SI deviatia normalizate exact la valorile de aici —
+## fiindca media lor e o piesa din calibrarea de expunere (style_bible §14).
 ##
-## Sunt gri-scale si se inmultesc peste albedo-ul din _flat_material, deci NU
-## aduc culori noi si nu strica paleta — doar rup uniformitatea. Un singur
-## material per suprafata, deci zero draw call-uri in plus.
-func _surface_textures() -> void:
-	# Deviatiile sunt NEGATIVE (centrul e alb, vezi _write_tileable): textura
-	# adauga umbra, nu lumina.
-	#
-	# Amplitudinile au fost initial foarte mici (0.09 / 0.13), din teama de zgomot
-	# vizual la viteza. Masurat pe poza de sofer, contributia lor era practic
-	# nula: nisipul dadea deviatie 1.48, adica sub un nivel de luminanta. Doua
-	# cauze care se adunau — amplitudine mica SI compresie BC1 care turteste
-	# blocurile de 4x4 (reparata in .import cu high_quality). Dublate acum, cu
-	# masuratoarea ca arbitru, nu impresia.
-	_write_tileable("res://assets/textures/surface_sand.png",
-		func(x: int, y: int) -> float:
-			# granulatie fina + dune foarte lente
-			var grain := -rng.randf() * 0.20
-			var dune := (sin(float(x) * 0.049
-				+ sin(float(y) * 0.024) * 2.0) - 1.0) * 0.06
-			return grain + dune)
-	_write_tileable("res://assets/textures/surface_asphalt.png",
-		func(x: int, y: int) -> float:
-			# pietris: granulatie grosiera, cu pietre rare mai inchise
-			var grain := -rng.randf() * 0.26
-			if rng.randf() < 0.02:
-				grain -= 0.16
-			return grain)
-
-
-## Scrie o textura gri de 128x128 in care `noise` da deviatia fata de ALB.
+## Ce ramane valabil din rationamentul vechi, si de aia ramane scris: atlasul
+## rezolva prop-urile, dar nu si terenul (o suprafata de sute de m² care
+## esantioneaza un singur punct din atlas ramane o pata plata, oricat de
+## texturat ar fi punctul ala), si texturile TREBUIE sa fie gri-scale, ca sa se
+## inmulteasca peste albedo fara sa aduca vreo culoare noua.
 ##
-## Centrul e 1.0, nu 0.5: textura se INMULTESTE peste albedo, deci un gri mediu
-## ar intuneca totul cu 50% si ar spala culoarea (nisipul cald #D8A86A ar vira
-## spre gri-maroniu). Cu centrul in alb, textura doar moduleaza — culoarea din
-## paleta ramane cea din style_bible.
-func _write_tileable(path: String, noise: Callable) -> void:
-	const N := 128
-	var img := Image.create(N, N, true, Image.FORMAT_RGB8)
-	for y in N:
-		for x in N:
-			var v := clampf(1.0 + float(noise.call(x, y)), 0.0, 1.0)
-			img.set_pixel(x, y, Color(v, v, v))
-	if img.save_png(path) != OK:
-		push_error("Nu am putut scrie " + path)
-		return
-	print("  %s  (%dx%d, gri, tileabila)" % [path.get_file(), N, N])
+## Amplitudinile procedurale au fost initial foarte mici (0.09 / 0.13), din
+## teama de zgomot vizual la viteza, si masuratoarea le-a dat pe fata: nisipul
+## dadea deviatie 1.48, sub un nivel de luminanta. Dublarea lor (la mediile
+## 0.838 / 0.865 si sigma 0.072 / 0.078) e cifra pe care o mosteneste acum
+## pipeline-ul de fotografii.
 
 
 ## Umple un slot cu textura potrivita rolului lui.

@@ -169,6 +169,18 @@ Ce e permis:
   Centrul lor e **alb**, nu gri mediu — o textură centrată pe 0.5 ar întuneca
   totul cu 50% și ar spăla culoarea.
 
+  Din august 2026 vin din **fotografii aeriene** trecute prin modul GRI al lui
+  `process_class_textures.gd`, nu din zgomot procedural. Au **două** componente,
+  și asta e o lecție măsurată: prima încercare a folosit doar fotografia, cu
+  media și deviația globală normalizate la cele ale texturii procedurale — pe
+  hârtie o înlocuire neutră. Măsurat, a ieșit o **regresie** (asfalt σ 2.91 →
+  1.69). Energia unei fotografii stă la frecvențe joase, iar sonda din §14
+  măsoară deviația *înăuntrul* unei dale de 8 px: aceeași deviație globală,
+  mutată acolo unde nu se vede la viteză. Fotografia aduce structura (pete,
+  crăpături, urme de reparații), granulația procedurală rămâne pentru
+  frecvența înaltă — la scară de bloc de 4 texeli, adică exact rezoluția de 128
+  pe care o înlocuiește.
+
 **Cele patru scări de detaliu**, fiecare cu sursa ei — dacă una lipsește, se vede:
 
 | scară | ce dă | de unde vine |
@@ -451,13 +463,25 @@ Sonda taie imaginea în dale de 8 px și măsoară deviația **înăuntrul** fie
 dale — deci textura de suprafață, nu contrastul dintre obiecte. Dalele reci
 (cerul) se ignoră.
 
-| zonă | înainte de stratul de detaliu | acum |
+| zonă | înainte de stratul de detaliu | după texturi de clasă (aug. 2026) |
 |---|---|---|
-| faleză aproape | **0.76** | **~6** |
-| faleză departe | 0.76 | **~9.4** |
-| nisip | 1.48 | ~2.7 |
-| asfalt | 0.93 | ~3.1 |
-| cadru întreg | 1.12 | ~2.7 |
+| faleză | **0.76** | **0.66** |
+| nisip | 1.48 | **2.82** |
+| asfalt | 0.93 | **3.27** |
+| cadru întreg | 1.12 | **3.39** |
+
+> ⚠️ Coloana din dreapta e **remăsurată** pe patch-urile de mai jos, nu copiată
+> din PR-uri vechi. Valorile de faleză care circulau înainte (~6 și ~9.4) au fost
+> luate pe alte regiuni, la altă fracție de traseu — nu sunt comparabile cu ce
+> dă comanda din acest paragraf, iar cifra reală pe patch-ul standard e **0.66**,
+> aceeași înainte și după conversia rocii la textură de clasă. Când reiei
+> măsurătoarea, compară cu ramura de bază pe **aceleași patch-uri**, nu cu
+> tabelul: un număr fără regiunea lui nu înseamnă nimic.
+
+```
+--patch=faleza:0.19,0.28,0.42,0.46 --patch=nisip:0.02,0.60,0.30,0.80 \
+--patch=asfalt:0.40,0.75,0.62,0.95
+```
 
 Referință (imaginile din `assets/dunele_inspiration/`): nisip ~36, stâncă ~40.
 **Nu țintim acolo** — aceea e o randare statică de prezentare, iar prea multă

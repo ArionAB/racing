@@ -249,12 +249,12 @@ static func themes() -> Dictionary:
 
 ## Citeste un camp din tema curenta, cu valoare implicita daca lipseste.
 ##
-## Initializarea e LENESA si intentionat NU trece prin apply_theme. Track02 si
-## Track03 nu apeleaza apply_theme niciodata: ele raman pe valorile implicite
-## ale variabilelor theme_*, care NU sunt identice cu ramura "forest"
-## (cerul implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)).
-## Un apply_theme("forest") fortat aici le-ar schimba in tacere aspectul.
-## Asa iau doar FLAG-urile de comportament, iar culorile raman ale lor.
+## Initializarea e LENESA si intentionat NU trece prin apply_theme: o pista are
+## voie sa nu apeleze apply_theme deloc si sa ramana pe valorile implicite ale
+## variabilelor theme_*, care NU sunt identice cu ramura "forest" (cerul
+## implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)). Un
+## apply_theme("forest") fortat aici i-ar schimba in tacere aspectul.
+## Asa iau doar FLAG-urile de comportament, iar culorile raman ale ei.
 func theme_flag(key: String, fallback: Variant = null) -> Variant:
 	if _theme.is_empty():
 		var all := themes()
@@ -2111,8 +2111,8 @@ func _build_flyoff_net(idx: int) -> void:
 	var top := lowest_road - FLYOFF_NET_CEILING_DROP
 	var bottom := lowest_road - FLYOFF_NET_FLOOR_DROP
 	# Garda de build: un fly-off fara rapa sub el arunca masina pe nisip, iar
-	# plasa nu se declanseaza niciodata. Prinde Track04 si orice pista viitoare
-	# unde cineva adauga un fly-off si uita rapa.
+	# plasa nu se declanseaza niciodata. Prinde orice pista unde cineva adauga
+	# un fly-off si uita rapa.
 	if _sampler.max_ravine_depth() <= FLYOFF_NET_CEILING_DROP + 4.0:
 		push_warning(("Fly-off la indexul %d fara rapa suficienta: " +
 			"plasa de respawn ramane ingropata. Vezi _ravines().") % idx)

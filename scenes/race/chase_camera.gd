@@ -65,6 +65,8 @@ static func height_for(body_length: float) -> float:
 const DEFAULT_DISTANCE: float = 12.5   # = distance_for(REFERENCE_LENGTH)
 const DEFAULT_HEIGHT: float = 10.0     # = height_for(REFERENCE_LENGTH)
 const BASE_FOV: float = 68.0
+## Valoarea de referinta a urmaririi, peste care se aplica factorul din setari.
+const DEFAULT_FOLLOW_SPEED: float = 3.6
 ## Cat de departe in fata priveste camera, si la ce inaltime pe masina.
 ##
 ## Lead-ul e a doua parghie de unghi dupa inaltime, si lucreaza INVERS: cu cat
@@ -80,7 +82,7 @@ const LOOK_HEIGHT: float = 0.40
 ## Cat de repede ajunge rig-ul din urma masina. 3.6, nu 5.0: lenea e jumatate
 ## din caracterul camerei (vezi antetul), iar de la inaltimea asta o urmarire
 ## rapida arata ca un drone shot lipit de bara din spate.
-@export var follow_speed: float = 3.6
+@export var follow_speed: float = DEFAULT_FOLLOW_SPEED
 @export var base_fov: float = BASE_FOV
 
 const MAX_SHAKE: float = 0.35 # metri de offset la trauma maxima
@@ -149,11 +151,19 @@ const CLIP_MARGIN: float = 0.45
 @export var roll_max_deg: float = ROLL_MAX_DEG
 @export var fov_speed_kick: float = FOV_SPEED_KICK
 
+## Grupul prin care panoul de setari si reglajul din cursa ajung la camera vie,
+## fara sa tina o referinta la ea (panoul e folosit si din meniu, unde nu exista
+## nicio cursa).
+const GROUP := &"chase_camera"
+
 var target: Car
 var trauma: float = 0.0
 
 var _cam: Camera3D
 var _aim_dir: Vector3 = Vector3.FORWARD
+## Lungimea vehiculului curent, retinuta ca `refresh_from_settings` sa poata
+## recalcula incadrarea fara sa mai intrebe cine e la volan.
+var _body_length: float = REFERENCE_LENGTH
 
 
 func _ready() -> void:
@@ -168,6 +178,29 @@ func _ready() -> void:
 	_cam.far = FAR_PLANE
 	add_child(_cam)
 	_cam.current = true
+	add_to_group(GROUP)
+
+
+## Incadrarea pentru un vehicul, cu factorii jucatorului aplicati peste.
+##
+## Aici se intalnesc cele doua lucruri care regleaza camera si care pana acum
+## erau amestecate: FORMULA (autobuzul sta mai departe decat muscle car-ul) si
+## PREFERINTA (jucatorul o vrea mai sus). Prima e cod, a doua e setare, si se
+## inmultesc — deci nici tunarea camerei in cod nu calca peste reglajul lui,
+## nici invers.
+func apply_settings_for(body_length: float) -> void:
+	_body_length = body_length
+	distance = distance_for(body_length) * GameState.cam_distance_scale
+	height = height_for(body_length) * GameState.cam_height_scale
+	base_fov = BASE_FOV * GameState.cam_fov_scale
+	follow_speed = DEFAULT_FOLLOW_SPEED * GameState.cam_follow_scale
+
+
+## Reia setarile pe vehiculul curent. Chemata prin grup, din panoul de setari si
+## din reglajul de la taste, ca schimbarea sa se vada IN TIMP CE misti sliderul —
+## o camera care se schimba abia la urmatoarea cursa nu se poate regla.
+func refresh_from_settings() -> void:
+	apply_settings_for(_body_length)
 
 
 func add_trauma(amount: float) -> void:

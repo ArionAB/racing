@@ -51,6 +51,18 @@ var steer_sensitivity: float = 1.0
 var sfx_volume: float = 1.0
 var engine_volume: float = 1.0
 
+# Camera: FACTORI peste valorile din ChaseCamera, nu cote absolute.
+#
+# Asa reglajul jucatorului supravietuieste unei schimbari a camerei de baza (si
+# invers: cand tunam camera in cod, nu calcam peste preferinta lui), iar
+# scalarea per vehicul — autobuzul sta mai departe decat muscle car-ul — ramane
+# intacta: se inmulteste, nu se inlocuieste.
+var cam_distance_scale: float = 1.0
+var cam_height_scale: float = 1.0
+var cam_fov_scale: float = 1.0
+## Cat de repede se aseaza camera in spatele masinii. Sub 1.0 = mai lenesa.
+var cam_follow_scale: float = 1.0
+
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
 var touch_drift: bool = false
@@ -142,6 +154,16 @@ func load_settings() -> void:
 	engine_volume = float(cfg.get_value("audio", "engine_volume", 1.0))
 	selected_car = clampi(int(cfg.get_value("game", "selected_car", 0)),
 		0, CAR_DATA.size() - 1)
+	# Limitele sunt cele ale sliderelor din SettingsPanel: un fisier de setari
+	# stricat de mana n-are voie sa scoata camera in alta galaxie.
+	cam_distance_scale = clampf(
+		float(cfg.get_value("camera", "distance_scale", 1.0)), 0.5, 2.0)
+	cam_height_scale = clampf(
+		float(cfg.get_value("camera", "height_scale", 1.0)), 0.4, 2.0)
+	cam_fov_scale = clampf(
+		float(cfg.get_value("camera", "fov_scale", 1.0)), 0.7, 1.3)
+	cam_follow_scale = clampf(
+		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -149,4 +171,19 @@ func save_settings() -> void:
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
 	cfg.set_value("audio", "engine_volume", engine_volume)
 	cfg.set_value("game", "selected_car", selected_car)
+	cfg.set_value("camera", "distance_scale", cam_distance_scale)
+	cfg.set_value("camera", "height_scale", cam_height_scale)
+	cfg.set_value("camera", "fov_scale", cam_fov_scale)
+	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.save(SETTINGS_PATH)
+
+
+## Readuce camera la valorile din cod (ChaseCamera), fara sa atinga restul
+## setarilor. Exista ca sa se poata iesi dintr-un reglaj gresit fara stergerea
+## fisierului de setari.
+func reset_camera_settings() -> void:
+	cam_distance_scale = 1.0
+	cam_height_scale = 1.0
+	cam_fov_scale = 1.0
+	cam_follow_scale = 1.0
+	save_settings()

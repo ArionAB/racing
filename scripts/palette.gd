@@ -348,6 +348,15 @@ static func class_material(cls: String) -> StandardMaterial3D:
 ## Aplica materiale pe un GLB cu parti numite: cheia din `mapping` e un
 ## prefix de nume de nod, valoarea e clasa. Nodurile nemapate raman pe
 ## materialul lumii (atlas + AO) — lemnaria si nisipul unui asset mixt.
+##
+## Valoarea poate fi prefixata cu "tri:" pentru clasele proiectate TRIPLANAR in
+## spatiul lumii, in loc de UV-uri reale. Nu e un detaliu de implementare, e o
+## alegere de aspect: pe roca, proiectia de lume face straturile sa curga
+## CONTINUU dintr-o piesa in vecina ei, deci movila portalului de mina se leaga
+## de faleza de care se sprijina in loc sa aiba propriul ei tipar. Merge doar pe
+## piese care stau pe loc (style_bible §4).
+const TRI_PREFIX := "tri:"
+
 static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 	for node in _walk(root):
 		if not (node is MeshInstance3D):
@@ -355,10 +364,16 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 		var mi := node as MeshInstance3D
 		var assigned := false
 		for prefix: String in mapping:
-			if String(mi.name).begins_with(prefix):
-				mi.material_override = class_material(mapping[prefix])
-				assigned = true
-				break
+			if not String(mi.name).begins_with(prefix):
+				continue
+			var cls: String = mapping[prefix]
+			if cls.begins_with(TRI_PREFIX):
+				mi.material_override = triplanar_class_material(
+					cls.trim_prefix(TRI_PREFIX))
+			else:
+				mi.material_override = class_material(cls)
+			assigned = true
+			break
 		if not assigned:
 			mi.material_override = world_material()
 

@@ -834,6 +834,28 @@ func _extract_glb_node(scene: PackedScene, node_name: String) -> Node3D:
 	return container
 
 
+## Ca `_extract_glb_node`, dar pastreaza TOATE nodurile al caror nume incepe cu
+## prefixul — un obiect spart pe clase de material (#130) e mai multe noduri
+## care formeaza un ansamblu ("Portal_Rock", "Portal_Wood", "Portal_Trim").
+##
+## Spre deosebire de varianta pe un singur nod, containerul NU se recentreaza:
+## piesele unui ansamblu isi impart originea, si mutarea ei dupa prima piesa
+## gasita le-ar deplasa pe toate celelalte.
+func _extract_glb_group(scene: PackedScene, prefix: String) -> Node3D:
+	var container := scene.instantiate() as Node3D
+	var kept := 0
+	for child in container.get_children():
+		if String(child.name).begins_with(prefix):
+			kept += 1
+		else:
+			container.remove_child(child)
+			child.queue_free()
+	if kept == 0:
+		container.queue_free()
+		return null
+	return container
+
+
 ## AABB-ul combinat al tuturor mesh-urilor dintr-un subarbore, in spatiul
 ## modelului. Baza pentru coliziunile de landmark si pentru scalarea portii de
 ## start: cotele se masoara, nu se scriu de mana.
@@ -2454,8 +2476,25 @@ func _build_arch(frac: float) -> void:
 	body.global_basis = Basis.looking_at(dir, Vector3.UP)
 
 
+## Clasele de suprafata ale portalului de mina (#130). Prefixele sunt numele
+## pieselor din GLB; "tri:" = proiectie triplanara in spatiul lumii, ca movila
+## sa-si continue straturile in faleza de care se sprijina.
+## Ce nu apare aici (Portal_Trim, MineCart_Trim) cade pe atlas: gura minei
+## traieste din intuneric plat, iar minereul din culoarea de material desfacut.
+## Id-uri de sonda pentru prop-urile hero care NU sunt in `_LANDMARKS`. Stau
+## peste intervalul tabelului ca sa nu se ciocneasca de el.
+const SHOT_MINE: int = 20
+
+const _MINE_CLASSES := {
+	"Portal_Rock": "tri:rock",
+	"Portal_Wood": "wood",
+	"MineRail_Wood": "wood", "MineRail_Metal": "rust_metal",
+	"MineCart_Wood": "wood", "MineCart_Metal": "rust_metal",
+}
+
 ## Intrare de mina lipita de peretele de faleza, cu sina si vagonet asezate
-## separat — de aia sunt trei noduri in GLB si nu unul.
+## separat — de aia sunt trei GRUPURI in GLB si nu unul. Din #130 fiecare grup
+## e la randul lui spart pe clase de material, deci se extrag dupa PREFIX.
 func _build_mine(frac: float, side_sign: float) -> void:
 	const PATH := "res://assets/models/mine_portal.glb"
 	if not ResourceLoader.exists(PATH):
@@ -2465,11 +2504,14 @@ func _build_mine(frac: float, side_sign: float) -> void:
 	var p := baked[idx]
 	var side := _side_at(idx) * side_sign
 	var scene := load(PATH) as PackedScene
-	var portal := _extract_glb_node(scene, "Portal")
+	var portal := _extract_glb_group(scene, "Portal")
 	if portal == null:
 		return
 	var body := StaticBody3D.new()
 	body.add_to_group("mines")
+	# Portalul nu e un `_LANDMARKS`, dar e tot un prop hero care merita verificat
+	# in cadru. Id de sonda peste intervalul tabelului (vezi `shot_id`).
+	body.set_meta("shot_id", SHOT_MINE)
 	var aabb := model_aabb(portal)
 	body.add_child(portal)
 	# Cutie pe amprenta portalului: e o masa compacta, deci AABB-ul e corect
@@ -2481,20 +2523,20 @@ func _build_mine(frac: float, side_sign: float) -> void:
 	shape.position = aabb.position + aabb.size * 0.5
 	body.add_child(shape)
 	add_child(body)
-	Palette.apply_world_material(portal)
+	Palette.apply_class_materials(portal, _MINE_CLASSES)
 	var stand := p + side * (half_width + 16.0)
 	stand.y = _sampler.ground_y(stand.x, stand.z)
 	body.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 	# Sina iese din gura minei spre drum; vagonetul rasturnat langa ea.
 	for pair: Array in [["MineRail", 7.0, 0.0], ["MineCart", 5.0, 3.2]]:
-		var piece := _extract_glb_node(scene, String(pair[0]))
+		var piece := _extract_glb_group(scene, String(pair[0]))
 		if piece == null:
 			continue
 		var spot := stand - side * float(pair[1]) \
 			+ side.cross(Vector3.UP).normalized() * float(pair[2])
 		spot.y = _sampler.ground_y(spot.x, spot.z)
 		add_child(piece)
-		Palette.apply_world_material(piece)
+		Palette.apply_class_materials(piece, _MINE_CLASSES)
 		piece.look_at_from_position(spot, Vector3(p.x, spot.y, p.z), Vector3.UP)
 
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
@@ -2600,9 +2642,10 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 		body.add_child(shape)
 		root = body
 	root.add_to_group("landmarks")
-	# Ce landmark e — ca sondele sa poata cere unul anume, fara sa ghiceasca
-	# fractia la care il prind in cadru (tools/snapshot.gd --landmark=).
-	root.set_meta("landmark_id", id)
+	# Eticheta pentru sonde: ca `snapshot.gd --landmark=` sa poata cere un prop
+	# anume in loc sa ghiceasca fractia la care il prinde in cadru. Nu are
+	# niciun rol de gameplay.
+	root.set_meta("shot_id", id)
 	root.add_child(model)
 	add_child(root)
 	# Atlasul comun pe tot subarborele (fara el, GLB-ul iese alb). Moara si-l

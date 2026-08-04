@@ -173,13 +173,15 @@ func _ready() -> void:
 ## nu de sus si nu din lateral.
 func _shoot_landmark(track: Track, cam: Camera3D, track_index: int,
 		id: int, dist: float) -> void:
+	# Cautare pe eticheta `shot_id`, nu pe grup: prop-urile hero care nu sunt in
+	# `_LANDMARKS` (portalul de mina) trebuie sa poata fi cerute la fel.
 	var target: Node3D = null
-	for node in track.get_tree().get_nodes_in_group("landmarks"):
-		if node.get_meta("landmark_id", -1) == id:
+	for node in track.get_children():
+		if node is Node3D and node.get_meta("shot_id", -1) == id:
 			target = node as Node3D
 			break
 	if target == null:
-		push_error("Snapshot: pista %d n-are landmark cu id %d" % [track_index, id])
+		push_error("Snapshot: pista %d n-are prop cu shot_id %d" % [track_index, id])
 		get_tree().quit(1)
 		return
 	# Ceata ramane STINSA (o taie apelantul mai sus) — la 30 m n-ar face nimic,

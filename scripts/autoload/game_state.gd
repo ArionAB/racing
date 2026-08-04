@@ -23,8 +23,11 @@ const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
 	"res://scenes/tracks/Track05.tscn",
 	"res://scenes/tracks/Track06.tscn",
+	"res://scenes/tracks/Track07.tscn",
 ]
-const TRACK_NAMES: Array[String] = ["Dunele", "Okinawa", "Stramtoarea"]
+const TRACK_NAMES: Array[String] = [
+	"Dunele", "Okinawa", "Stramtoarea", "Okinawa v2",
+]
 const CHAMP_ROUNDS: int = 3
 
 ## Puncte pe pozitie (locul 1..4).

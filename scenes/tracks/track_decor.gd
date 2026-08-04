@@ -180,26 +180,49 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 	var pos := spec.position
 	match band["name"]:
 		"hug":
+			# Banda lipita de drum avea DOAR scatter — tufe si pietricele de sub
+			# 1 m, care la 30 m in fata masinii dispar in nisip. O treime din ea
+			# primeste acum stanci mici de canion: singurele obiecte de langa
+			# asfalt care au silueta peste linia orizontului si strang cadrul.
+			# Fara coliziune, ca toata banda (vezi nota de la BANDS).
+			if rng.randf() < 0.34 and _add_canyon_rock(
+					parent, pos, rng, CANYON_S, false, 0.75, 1.35):
+				return
 			_add_scatter(parent, pos, rng, mat_provider)
 		"mid":
 			var roll := rng.randf()
 			if satellite or roll < 0.30:
-				_add_cluster(parent, pos, rng, ["Cluster_S1", "Cluster_S2"],
-					false, mat_provider)
-			elif roll < 0.68:
+				if not _add_canyon_rock(parent, pos, rng, CANYON_S, false):
+					_add_cluster(parent, pos, rng, ["Cluster_S1", "Cluster_S2"],
+						false, mat_provider)
+			elif roll < 0.60:
 				_add_cactus(parent, pos, rng, mat_provider)
+			elif roll < 0.82:
+				if not _add_canyon_rock(parent, pos, rng, CANYON_M, true):
+					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+						true, mat_provider)
 			else:
+				# Bolovanii netezi raman in amestec, in minoritate: doua limbaje
+				# de forma pe aceeasi pista citesc ca geologie, unul singur ca
+				# tipar.
 				_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 					true, mat_provider)
 		_:
 			var roll2 := rng.randf()
-			if satellite or roll2 < 0.35:
-				_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
-					true, mat_provider)
-			elif roll2 < 0.62:
+			if satellite or roll2 < 0.30:
+				if not _add_canyon_rock(parent, pos, rng, CANYON_M, true):
+					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+						true, mat_provider)
+			elif roll2 < 0.72:
+				# Aici statea mesa procedurala din cutii. Stancile mari de
+				# canion ii iau locul cu aceeasi intentie (silueta dominanta in
+				# fundalul apropiat), dar pe textura de roca si cu trepte reale.
+				if not _add_canyon_rock(parent, pos, rng, CANYON_L, true,
+						0.85, 1.25):
+					_add_cluster(parent, pos, rng, ["Cluster_L1"], true,
+						mat_provider)
+			elif roll2 < 0.86:
 				_add_cluster(parent, pos, rng, ["Cluster_L1"], true, mat_provider)
-			elif roll2 < 0.85:
-				_add_mesa(parent, pos, rng, mat_provider)
 			else:
 				_add_cactus(parent, pos, rng, mat_provider)
 
@@ -412,6 +435,68 @@ static func _build_scattered(root: Node3D, sampler: TrackSideSampler,
 
 
 # ------------------------------------------------------------ prop-uri
+
+## Biblioteca de stanci de canion (canyon_rocks.glb), pe trei clase de marime.
+##
+## Inlocuieste doua surse care faceau tot desertul sa arate la fel: cei cinci
+## elipsoizi netezi din rock_cluster.glb si mesa procedurala de mai jos, care
+## era trei cutii suprapuse pe materialul de paleta — fara textura de roca si
+## cu muchii perfect drepte. Stancile astea au TREPTE cu buza vizibila si moloz
+## la baza; buza e ce se citeste de la 100 m, cand granulatia texturii s-a topit
+## in mipmap.
+const CANYON_PATH: String = "res://assets/models/canyon_rocks.glb"
+const CANYON_S: Array[String] = ["Canyon_S1", "Canyon_S2", "Canyon_S3",
+	"Canyon_S4", "Canyon_S5", "Canyon_S6", "Canyon_S7", "Canyon_S8"]
+const CANYON_M: Array[String] = ["Canyon_M1", "Canyon_M2", "Canyon_M3",
+	"Canyon_M4", "Canyon_M5", "Canyon_M6"]
+const CANYON_L: Array[String] = ["Canyon_L1", "Canyon_L2", "Canyon_L3",
+	"Canyon_L4"]
+
+## O stanca de canion. Intoarce `false` daca biblioteca lipseste, ca apelantul
+## sa cada pe vechiul prop in loc sa lase un gol.
+##
+## Inaltimea se scaleaza SEPARAT de amprenta (`h`), si asta e ce da varietate
+## reala: aceeasi silueta la 0.8 si la 1.35 pe verticala citeste ca doua stanci
+## diferite, gratis. Textura NU se intinde odata cu ea — clasa de roca e
+## triplanara in spatiul LUMII, deci straturile raman la scara lumii indiferent
+## cum e scalata instanta. Fara asta, o stanca turtita ar avea straturi turtite
+## si s-ar vedea imediat ca e aceeasi piesa reciclata.
+static func _add_canyon_rock(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, picks: Array[String], collide: bool,
+		h_min: float = 0.80, h_max: float = 1.30) -> bool:
+	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
+	var kept := _pick_from_glb(CANYON_PATH, name_pick)
+	if kept == null:
+		return false
+	var s := rng.randf_range(0.85, 1.25)
+	var h := rng.randf_range(h_min, h_max)
+	var holder: Node3D
+	if collide:
+		holder = StaticBody3D.new()
+	else:
+		holder = Node3D.new()
+	parent.add_child(holder)
+	holder.add_child(kept)
+	kept.scale = Vector3(s, s * h, s)
+	Palette.apply_rock_material(kept)
+	if collide:
+		# Cilindru, nu sfera: o stiva in trepte e mai inalta decat lata, iar o
+		# sfera pe amprenta ei ar lasa varful fara coliziune sau ar umfla baza
+		# cu metri de aer. Cotele din AABB-ul real, ca la restul decorului.
+		var aabb := Track.model_aabb(kept)
+		var cyl := CylinderShape3D.new()
+		cyl.radius = maxf(maxf(aabb.size.x, aabb.size.z) * 0.40, 0.4)
+		cyl.height = maxf(aabb.size.y, 0.5)
+		var shape := CollisionShape3D.new()
+		shape.shape = cyl
+		shape.position = Vector3.UP * (aabb.position.y + aabb.size.y * 0.5)
+		holder.add_child(shape)
+	holder.rotation.y = rng.randf_range(0.0, TAU)
+	# Infipta putin in nisip: fusta de moloz din model ascunde linia de contact
+	# doar daca stanca chiar intra in teren.
+	holder.position = pos + Vector3.UP * -0.25
+	return true
+
 
 ## O piesa marunta din desert_scatter.glb, FARA coliziune.
 ##
@@ -640,41 +725,6 @@ static func _add_cactus(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator
 	body.position = pos + Vector3.UP * -0.3
 
 
-## Mesa: lespezi de piatra rosiatica suprapuse, cu coliziune.
-static func _add_mesa(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator,
-		mat: Callable) -> void:
-	var mesa := StaticBody3D.new()
-	parent.add_child(mesa)
-	mesa.position = pos + Vector3.UP * -0.2
-	mesa.rotation.y = rng.randf_range(0.0, TAU)
-	var base := rng.randf_range(1.6, 3.6)
-	var levels := 2 + (1 if rng.randf() < 0.4 else 0)
-	var y := 0.0
-	for level in levels:
-		var frac := 1.0 - float(level) * 0.28
-		var slab := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(base * frac, base * 0.4, base * 0.85 * frac)
-		slab.mesh = box
-		y += base * 0.2
-		slab.position = Vector3.UP * y
-		y += base * 0.2
-		# Culoare din paleta (rock_light), nu inventata: mesa e decor de desert,
-		# deci intra sub aceleasi sloturi ca prop-urile din Blender. Lespezile de
-		# sus sunt mai deschise — straturi de stanca, style_bible §3.
-		slab.material_override = mat.call(
-			Palette.color(Palette.ROCK_LIGHT).lightened(float(level) * 0.08))
-		mesa.add_child(slab)
-	var shape := CollisionShape3D.new()
-	var col := BoxShape3D.new()
-	col.size = Vector3(base, base * 0.8, base * 0.85)
-	shape.shape = col
-	shape.position = Vector3.UP * base * 0.4
-	mesa.add_child(shape)
-
-
-## Bolovan de acvariu (Blender): rocks.glb are 3 mesh-uri separate,
-## alegem una la intamplare si anulam offsetul ei din fisier.
 static func _add_glb_rock(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
 	if not ResourceLoader.exists("res://assets/models/rocks.glb"):

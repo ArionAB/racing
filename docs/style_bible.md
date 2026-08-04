@@ -122,6 +122,20 @@ acoperit de plafonul nou.
 **Ce rămâne strâmt e repetiția.** Un triunghi în plus pe stâlpul de marcaj costă
 ×24 pe Dunele și ×62 pe Track02. Acolo numără fiecare.
 
+**Stâncile de canion se construiesc în TREPTE** (august 2026, după foaia de
+referință a canionului). Lespezi suprapuse, fiecare mai îngustă decât cea de
+dedesubt, cu **buză vizibilă** între ele și **fustă de moloz** la bază —
+`Builder.mesa()` în dio_lib. Buza e ce se citește de la 100 m, când granulația
+texturii s-a topit deja în mipmap; fără ea o stâncă de 8 m și una de 1 m arată
+identic, doar la scări diferite. Molozul nu e decor: ascunde linia unde stânca
+intră în nisip, care altfel e o elipsă perfectă și trădează obiectul ca lipit
+peste teren.
+
+> ⚠️ **`taper` se alege pe clasă de mărime, nu o dată pentru toate.** Pereții
+> aproape verticali (0.06) sunt corecți pentru mesa, dar sub ~2 m dau o cutie:
+> o treaptă joasă, verticală, cu 5 laturi și fără bevel *chiar e* o cutie.
+> Clasa mică merge la 0.30–0.40, adică bolovan rotunjit cu capac plat.
+
 **DA:** siluete mari și lizibile, grinzi groase, colțuri rotunjite, spațiu negativ
 **NU:** șuruburi mici, balustrade subțiri, stânci zimțate, detaliu de frecvență înaltă
 

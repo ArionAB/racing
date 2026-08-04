@@ -706,6 +706,88 @@ class Builder:
         out.add(top_face)
         return out
 
+    def mesa(self, center, size, slot, seed=0, tiers=3, segments=7,
+             lip=0.16, lean=0.10, rubble=6, rubble_slot=None,
+             strata_slots=None, rubble_ring=1.02, taper=0.06):
+        """Stanca de canion in TREPTE: mai multe lespezi suprapuse, fiecare mai
+        ingusta decat cea de dedesubt, plus o fusta de moloz la baza.
+
+        De ce nu ajunge `rock()`: acela da UN corp continuu, deci silueta lui e
+        o movila neteda. Foile de referinta ale canionului arata altceva —
+        stive de lespezi cu BUZA vizibila intre ele, ca sedimentarea reala
+        erodata in trepte. Buza e ce citeste de la 100 m, cand granulatia
+        texturii s-a topit deja in mipmap; fara ea, o stanca mare si una mica
+        arata la fel, doar la scari diferite.
+
+        `lip` — cat se retrage fiecare treapta fata de cea de sub ea (fractie
+                din raza). Sub 0.10 treptele se pierd, peste 0.25 iese piramida.
+        `lean` — cat se decaleaza treptele pe orizontala, ca stiva sa nu fie un
+                turn simetric. Aici sta jumatate din caracterul siluetei.
+        `rubble` — cate pietre mici se aseaza in jurul bazei. Astea nu sunt
+                decor: ele ascund linia unde stanca intra in nisip, care altfel
+                e o elipsa perfecta si tradeaza obiectul ca fiind lipit peste
+                teren. Sunt si cele mai ieftine triunghiuri din tot asset-ul.
+        `taper` — cat se ingusteaza fiecare treapta IN EA INSASI. 0.06 (pereti
+                aproape verticali) e valoarea de mesa si e gresita sub ~2 m: o
+                treapta joasa, verticala, cu 5 laturi si fara bevel E o cutie,
+                si asa arata in joc — pietrele mici de langa drum citeau ca
+                niste lazi de carton. Peste 0.25 devin bolovani rotunjiti, ceea
+                ce clasa mica si vrea sa fie.
+
+        Toate perturbatiile vin dintr-un LCG semanat din `seed`, ca la `rock()`:
+        acelasi seed da mereu aceeasi stanca.
+        """
+        sx, sy, sz = size
+        cx, cy, cz = center
+        state = (seed * 1103515245 + 12345) & 0x7FFFFFFF
+
+        def rand():
+            nonlocal state
+            state = (state * 1103515245 + 12345) & 0x7FFFFFFF
+            return state / 0x7FFFFFFF
+
+        faces = set()
+        tier_h = sz / float(tiers)
+        ox, oy = 0.0, 0.0
+        for k in range(tiers):
+            shrink = 1.0 - lip * k
+            # Treapta e joasa si lata: rings=1, deci un singur inel de fete
+            # laterale. Doua inele pe o lespede de 1 m ar da o curbura pe care
+            # bevel-ul o inghite oricum.
+            #
+            # Inaltimea variaza ±18% intre trepte: lespezi egale citesc ca un
+            # tort, iar sedimentarea reala are straturi de grosimi diferite.
+            h = tier_h * (0.82 + rand() * 0.36)
+            self.rock((cx + ox, cy + oy, cz + k * tier_h),
+                      (sx * shrink, sy * shrink, h), slot,
+                      seed=seed + k * 17, segments=segments, rings=1,
+                      taper=taper, squash=0.96, flat_top=True,
+                      strata_slots=strata_slots)
+            # Decalajul se ACUMULEAZA, deci stiva se apleaca intr-o directie in
+            # loc sa serpuiasca — asa citeste ca erodata dintr-o parte (vantul
+            # bate mereu din aceeasi directie), nu ca stivuita gresit.
+            ox += (rand() - 0.5) * sx * lean
+            oy += (rand() - 0.5) * sy * lean
+
+        if rubble <= 0:
+            return faces
+        rs = rubble_slot if rubble_slot is not None else slot
+        for i in range(rubble):
+            a = 2.0 * math.pi * (i + rand() * 0.6) / rubble
+            # Pe conturul bazei, nu in jurul ei: pietrele trebuie sa ATINGA
+            # stanca, altfel par imprastiate langa ea.
+            rr = rubble_ring + rand() * 0.18
+            r = 0.10 + rand() * 0.09
+            # Ingropate pe jumatate: o piatra asezata pe nisip se vede ca
+            # asezata, una infipta se vede ca desprinsa din stanca.
+            self.rock((cx + math.cos(a) * sx * 0.5 * rr,
+                       cy + math.sin(a) * sy * 0.5 * rr,
+                       cz - sz * r * 0.35),
+                      (sx * r, sy * r, sz * r * 0.8), rs,
+                      seed=seed + 101 + i * 7, segments=4, rings=1,
+                      taper=0.35, squash=0.85)
+        return faces
+
     def boulder(self, center, size, slot, seed=0, segments=9, rings=5,
                 deviation=0.12, strata_slots=None):
         """Elipsoid INCHIS, perturbat determinist. Bolovan care se rostogoleste.

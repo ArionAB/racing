@@ -38,3 +38,22 @@ Verificarea GLB-ului rezultat, fara Blender si fara Godot:
 ```
 python tools/blender/verify_glb.py assets/models/windmill.glb 1200
 ```
+
+## Geometrie din afara: `vendor/`
+
+Un asset poate porni de la un pachet extern in loc de `Builder` — trenul
+(`build_train.py`) vine din **Train Pack** de [@Quaternius](https://quaternius.com)
+(CC0). Regula de mai sus nu se schimba: **sursa ramane scriptul**, doar ca el
+importa un OBJ in loc sa construiasca din primitive, si mai departe face acelasi
+lucru cu orice alt asset — mapeaza materialele pachetului pe sloturi de paleta,
+colapseaza UV-urile pe centrul slotului si coace AO in vertex colors.
+
+Doua conditii, ca sa nu devina o portita:
+
+1. **Sursa se vendorizeaza in repo** (`assets/blender/vendor/<pachet>/`), cu tot
+   cu licenta. Un script care citeste dintr-un folder de pe discul cuiva nu e
+   reproductibil, e o amintire.
+2. **Nu vine cu texturile lui.** Pachetele externe aduc materiale proprii; daca
+   ar intra asa in joc, fiecare ar adauga draw call-uri si si-ar aduce propria
+   familie de culori — exact „asset soup"-ul de care paleta ne apara
+   (CLAUDE.md, style_bible §4).

@@ -2485,6 +2485,20 @@ func _build_arch(frac: float) -> void:
 ## peste intervalul tabelului ca sa nu se ciocneasca de el.
 const SHOT_MINE: int = 20
 
+## Clasele de suprafata ale lui props_junk.glb (butoaie, lazi, cauciucuri).
+##
+## Constanta exista INAINTE de consumatorul ei, si intentionat: din #131
+## butoaiele si lazile au UV-uri REALE (se misca — sunt bump-abile — deci
+## triplanarul de lume le-ar face textura sa inoate). Cine le pune pe pista
+## (issue #7) TREBUIE sa treaca prin `Palette.apply_class_materials` cu maparea
+## asta. Cu `apply_world_material`, atlasul citit pe UV-uri reale ar matura
+## toata paleta si un butoi ar iesi in dungi, inclusiv prin sloturile magenta.
+## Cauciucurile lipsesc din tabel deliberat: negrul curat E cauciucul.
+const PROPS_JUNK_CLASSES := {
+	"Barrel_": "rust_metal",
+	"Crate_": "wood",
+}
+
 const _MINE_CLASSES := {
 	"Portal_Rock": "tri:rock",
 	"Portal_Wood": "wood",
@@ -2581,8 +2595,12 @@ const _LANDMARKS := {
 	# Ecran de drive-in: 20.6 m lat si 10.8 m inalt, cel mai lat lucru construit
 	# de pe pista. Sta departe de sosea nu ca sa nu-l lovesti, ci ca sa incapa in
 	# cadru — de la 9 m ai doar tabla in fata.
+	# Doar scheletul primeste textura. Fata ecranului RAMANE pe atlas: e cea mai
+	# deschisa si cea mai curata suprafata din cadru, si asta e tot rostul
+	# obiectului — o textura de metal peste ea ar face-o inca un perete ruginit.
 	4: {"path": "res://assets/models/drive_in_screen.glb",
-		"gap": 15.0, "col": "box", "spin": false},
+		"gap": 15.0, "col": "box", "spin": false,
+		"classes": {"DriveIn_Metal": "rust_metal"}},
 	# Stalpul GAS: 13.7 m, cel mai INALT. Raza mica intentionat — vrem sa lovesti
 	# stalpul, nu un cilindru de 1.9 m in jurul unui obiect subtire.
 	5: {"path": "res://assets/models/gas_pole_sign.glb",

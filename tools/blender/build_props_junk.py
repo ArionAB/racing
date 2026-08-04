@@ -26,6 +26,29 @@ Toate sase: origine la baza, centrate in XZ, exportate la (0,0,0).
 
 Buget: astea se REPETA, iar repetitia e ce costa — lectia din #B1, unde popicele
 faceau 31% din toata pista. De aia sunt tinute lean, spre deosebire de valul 3.
+
+
+Texturi de clasa (#131) — si un cui pe care il las la vedere
+------------------------------------------------------------
+Butoaiele si lazile ies acum cu UV-uri REALE (proiectie cubica), fiindca
+prop-urile astea sunt BUMP-ABILE: se misca, deci triplanarul de lume le-ar face
+textura sa inoate pe suprafata (style_bible §4). Cauciucurile raman pe atlas —
+negrul curat E cauciucul, iar o textura de rugina l-ar transforma in fier.
+
+  Barrel_A, Barrel_B  -> clasa `rust_metal`
+  Crate_A, Crate_B    -> clasa `wood`
+  TyreStack, Tyre     -> atlas
+
+>>> ATENTIE la integrare (issue #7, inca neinceput): GLB-ul asta nu e instantiat
+>>> de nimeni azi. Cine il pune pe pista TREBUIE sa foloseasca
+>>> `Palette.apply_class_materials(node, Track.PROPS_JUNK_CLASSES)`, NU
+>>> `apply_world_material`. Cu atlasul peste UV-uri reale, un butoi ar matura
+>>> toata paleta si ar iesi in dungi, inclusiv prin sloturile magenta 24-31.
+>>> Constanta exista deja in track.gd exact ca sa nu fie nevoie de ghicit.
+
+Pierdere asumata: `retag` pe capacul butoiului (SAND_SHADOW) si pe fata de sus a
+lazii (SAND_MID) nu se mai vad — sunt schimbari de SLOT, iar piesele astea nu
+mai citesc atlasul. Rugina si lemnul isi aduc propria variatie in schimb.
 """
 
 import math
@@ -45,6 +68,13 @@ BEVEL = 0.02
 # laterale vecine se intalnesc la 36° (10 laturi), deci un prag de 55° le sare
 # si beveleaza doar muchiile de 90° — buzele butoiului, colturile lazii.
 BEVEL_ANGLE = 55.0
+
+# Metri per repetitie, PE CLASA — aceleasi cifre ca la moara, portal si ecran.
+UV_WOOD = 1.2
+UV_RUST = 2.2
+# Nod -> marimea cubului de proiectie, sau lipsa = ramane pe atlas.
+UV_BY_NODE = {"Barrel_A": UV_RUST, "Barrel_B": UV_RUST,
+              "Crate_A": UV_WOOD, "Crate_B": UV_WOOD}
 
 
 def barrel(name, r=BARREL_R, h=BARREL_H, dents=()):
@@ -130,6 +160,10 @@ for obj in objs:
         obj, bevel=BEVEL, bevel_angle=BEVEL_ANGLE, origin="base",
         ao=dict(samples=24, dist=1.2, gradient="vertical",
                 low=0.52, high=1.00, power=1.0, floor=0.14))
+    # Fiecare prop e un obiect de sine statator (nu un ansamblu), deci originea
+    # ramane "base" si UV-ul cubic se pune peste, ca la celelalte assets.
+    if obj.name in UV_BY_NODE:
+        cube_uvs(obj, UV_BY_NODE[obj.name])
     me = obj.data
     ext = [(min(v.co[a] for v in me.vertices), max(v.co[a] for v in me.vertices))
            for a in range(3)]
@@ -138,9 +172,12 @@ for obj in objs:
     # colizoarele, iar `road_marker.gd:38-40` face exact asta — raza din
     # amprenta, inaltimea din AABB.
     w, dpt, hgt = ext[0][1] - ext[0][0], ext[1][1] - ext[1][0], ext[2][1] - ext[2][0]
-    print("%-10s %3d tris | AABB Godot %.3f x %.3f x %.3f m | raza cilindru %.3f | AO %.2f..%.2f"
+    print("%-10s %3d tris | AABB Godot %.3f x %.3f x %.3f m | raza cilindru %.3f "
+          "| AO %.2f..%.2f | uv=%s"
           % (obj.name, stats["tris"], w, hgt, dpt, max(w, dpt) * 0.5,
-             stats["ao_min"], stats["ao_max"]))
+             stats["ao_min"], stats["ao_max"],
+             "cub %.1f m" % UV_BY_NODE[obj.name]
+             if obj.name in UV_BY_NODE else "atlas"))
 
 print("TOTAL: %d tris pe sase noduri" % total)
 

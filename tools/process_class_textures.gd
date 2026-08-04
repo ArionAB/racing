@@ -91,6 +91,52 @@ static func classes() -> Dictionary:
 		# detaliul pentru care exista clasa.
 		"concrete": {"src": "concrete_src.jpg",
 			"anchor": Palette.color(Palette.CONCRETE), "lift": 0.20},
+		# --- Clasele insulei (Okinawa) ---
+		#
+		# Calcar coraligen (Ryukyu): stancile de recif si soclurile de piatra.
+		# Sursa: coral_fort_wall_03 (PolyHaven CC0) — chiar zidaria de calcar
+		# coraligen a castelelor din Okinawa, deci scobiturile si incluziunile
+		# albe de corali sunt exact tiparul cerut, nu o aproximare.
+		#
+		# Ales prin masuratoare dintre sase candidati (ancora VOLCANIC_BLACK,
+		# luminanta 83.9):
+		#   coral_fort_wall_03  ratie 1.22  in-dala 15.57  dez 3.5/3.4  <- ales
+		#   coral_ground_02     ratie 1.48  in-dala 21.86  dez 3.0/6.3
+		#   gray_rocks          ratie 1.35  in-dala 14.19  dez 0.8/0.2
+		#   dark_rock           ratie 0.34  in-dala  2.72  dez 0.1/0.9
+		# `dark_rock` era cel mai aproape de ancora la CULOARE si complet PLAT —
+		# exact capcana descrisa in style_bible §4. coral_ground_02 avea cea mai
+		# buna structura, dar 6.3% dezechilibru pe verticala, peste pragul de 5%
+		# de la care repetitia da benzi. gray_rocks era cel mai uniform, dar e o
+		# dala de PIETRIS: pe un bolovan de 2 m ar citi ca prundis lipit.
+		#
+		# `lift` NEGATIV, primul din pipeline: sursa e cu 22% peste ancora, iar
+		# stancile de recif trebuie sa ramana partea inchisa a paletei insulare
+		# (bazaltul e contrastul fata de nisipul coraligen). Fara el, plaja si
+		# stanca ies la aceeasi valoare si silueta se pierde.
+		"coral_rock": {"src": "coral_rock_src.jpg",
+			"anchor": Palette.color(Palette.VOLCANIC_BLACK), "gain": 1.10,
+			"lift": -0.05},
+		# Scoarta tropicala: trunchiuri de palmier, tulpini de pandanus,
+		# radacinile aeriene ale banyanului. Sursa: palm_tree_bark (PolyHaven
+		# CC0), o scanare de 1.3 m de trunchi — deci inelele de cicatrici cad la
+		# scara reala pe o proiectie cubica de 1.3 m.
+		#
+		# Masurat (ancora WOOD_WEATHERED, luminanta 97.4):
+		#   palm_tree_bark        ratie 1.49  in-dala 17.74  dez 2.7/4.6  <- ales
+		#   bark_brown_02         ratie 0.88  in-dala 19.09  dez 5.3/3.3
+		#   japanese_camphor_bark ratie 1.42  in-dala 15.61  dez 1.7/1.2
+		#   palm_bark             ratie 0.81  in-dala  5.22  dez 7.7/0.3
+		# `palm_bark`, cel cu numele potrivit, pica pe amandoua criteriile: sub
+		# 0.85 din ancora (silueta intunecata, cazul turnului de moara) si 7.7%
+		# dezechilibru pe orizontala. Miniatura nu spunea nimic din toate astea.
+		#
+		# Ratia 1.49 NU se corecteaza in jos: trunchiul de cocotier chiar e
+		# palid-cenusiu, iar gradarea spre WOOD_WEATHERED il aduce oricum in
+		# familia de maro a paletei. Dez.y 4.6% e sub prag, dar la limita — daca
+		# apar benzi pe trunchiurile lungi, aici se cauta.
+		"bark": {"src": "bark_src.jpg",
+			"anchor": Palette.color(Palette.WOOD_WEATHERED)},
 	}
 
 

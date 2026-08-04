@@ -603,6 +603,144 @@ class Builder:
 
         return self._tag(new_verts, slot)
 
+    def _frames(self, pts, up=None):
+        """Tangenta + o pereche de axe transversale, transportate paralel de-a
+        lungul unei polilinii. Extras din `sweep` fiindca de la vegetatie
+        incoace il folosesc trei metode (`sweep`, `taper_sweep`, `blade`).
+
+        `up` fixeaza orientarea transversala in loc s-o lase transportata: la
+        o frunza conteaza IN CE PLAN sta lamela, nu doar unde merge nervura.
+        """
+        tangents = []
+        for i, p in enumerate(pts):
+            if i == 0:
+                t = pts[1] - pts[0]
+            elif i == len(pts) - 1:
+                t = pts[-1] - pts[-2]
+            else:
+                t = pts[i + 1] - pts[i - 1]
+            tangents.append(t.normalized())
+
+        frames = []
+        if up is not None:
+            ref = Vector(up).normalized()
+            for t in tangents:
+                x = ref.cross(t)
+                if x.length < 1e-6:  # nervura paralela cu `up`
+                    x = Vector((1, 0, 0)).cross(t)
+                x.normalize()
+                frames.append((t, x, t.cross(x)))
+        else:
+            ref = Vector((0, 1, 0)) if abs(tangents[0].y) < 0.9 else Vector((1, 0, 0))
+            x = ref.cross(tangents[0]).normalized()
+            for t in tangents:
+                x = x - t * x.dot(t)
+                if x.length < 1e-6:
+                    x = Vector((0, 0, 1)).cross(t)
+                x.normalize()
+                frames.append((t, x, t.cross(x)))
+        return frames
+
+    def taper_sweep(self, path, radii, slot, segments=8, cap_start=True,
+                    cap_end=True):
+        """Tub cu raza VARIABILA pe traseu — trunchiuri, radacini, picioare.
+
+        `sweep` are raza constanta si un dom la capat, ceea ce e corect pentru
+        bratul de cactus. Un trunchi de palmier insa se subtiaza de la baza spre
+        coroana, iar un picior de tetrapod e un trunchi de con: fara variatie de
+        raza ies tuburi de plastic. `radii` are cate o valoare per punct din
+        `path` (sau una singura, si atunci e echivalent cu `sweep` fara dom).
+
+        O raza 0 la capat colapseaza inelul intr-un VARF (radacina aeriana care
+        intra in pamant, frunza ascutita). Nu e cosmetic: un inel de raza mica
+        dar nenula lasa un capac poligonal care straluceste in soare.
+        """
+        pts = [Vector(p) for p in path]
+        if len(pts) < 2:
+            return set()
+        if not isinstance(radii, (list, tuple)):
+            radii = [radii] * len(pts)
+
+        frames = self._frames(pts)
+        rings, new_verts = [], []
+        for p, (_t, x, y), r in zip(pts, frames, radii):
+            if r <= 1e-5:
+                v = self.bm.verts.new(p)
+                rings.append([v])
+                new_verts.append(v)
+                continue
+            ring = []
+            for k in range(segments):
+                a = 2.0 * math.pi * k / segments
+                ring.append(self.bm.verts.new(
+                    p + x * (r * math.cos(a)) + y * (r * math.sin(a))))
+            rings.append(ring)
+            new_verts.extend(ring)
+
+        for lo, hi in zip(rings, rings[1:]):
+            if len(lo) == 1:            # varf -> inel: evantai de triunghiuri
+                for i in range(segments):
+                    self.bm.faces.new((lo[0], hi[(i + 1) % segments], hi[i]))
+            elif len(hi) == 1:
+                for i in range(segments):
+                    self.bm.faces.new((lo[i], lo[(i + 1) % segments], hi[0]))
+            else:
+                for i in range(segments):
+                    j = (i + 1) % segments
+                    self.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
+
+        if cap_start and len(rings[0]) > 1:
+            self.bm.faces.new(tuple(reversed(rings[0])))
+        if cap_end and len(rings[-1]) > 1:
+            self.bm.faces.new(tuple(rings[-1]))
+        return self._tag(new_verts, slot)
+
+    def blade(self, path, widths, thickness, slot, up=(0, 0, 1), side_bias=0.0):
+        """Lamela plata cu GROSIME — frunza de palmier, sabie de pandanus.
+
+        De ce nu un simplu plan: Godot face backface culling, deci o frunza
+        dintr-un singur strat de fete DISPARE cand treci pe sub ea. Un volum
+        turtit (sectiune de patru varfuri) costa doar de doua ori mai mult si se
+        vede din orice unghi — aceeasi alegere ca la frunzele casei de sat, doar
+        ca aici lamela se poate INCOVOIA pe traseu, nu doar sa fie o bara dreapta.
+
+        `up` e normala planului in care sta lamela: latimea creste perpendicular
+        pe (up, tangenta), deci o frunza care cade se roteste natural odata cu
+        traseul. `side_bias` in [-1, 1] muta latimea pe o parte a nervurii —
+        cu +1 si -1 se construiesc cele doua jumatati ale unei frunze de palmier
+        PLIATE in V, semnatura care se citeste de la distanta.
+
+        Ultima latime poate fi 0: varful ramane o muchie-cutit (0.5% din
+        latimea maxima), destul cat bevel-ul sa nu produca fete degenerate.
+        """
+        pts = [Vector(p) for p in path]
+        if len(pts) < 2:
+            return set()
+        if not isinstance(widths, (list, tuple)):
+            widths = [widths] * len(pts)
+        w_min = max(max(widths) * 0.005, 1e-4)
+
+        frames = self._frames(pts, up=up)
+        rings, new_verts = [], []
+        for p, (_t, x, y), w in zip(pts, frames, widths):
+            w = max(w, w_min)
+            lo_w = w * (0.5 - side_bias * 0.5)
+            hi_w = w * (0.5 + side_bias * 0.5)
+            h = y * (thickness * 0.5)
+            ring = [p - x * lo_w - h, p + x * hi_w - h,
+                    p + x * hi_w + h, p - x * lo_w + h]
+            ring = [self.bm.verts.new(v) for v in ring]
+            rings.append(ring)
+            new_verts.extend(ring)
+
+        for lo, hi in zip(rings, rings[1:]):
+            for i in range(4):
+                j = (i + 1) % 4
+                self.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
+        self.bm.faces.new(tuple(reversed(rings[0])))
+        self.bm.faces.new(tuple(rings[-1]))
+        return self._tag(new_verts, slot)
+
     # Cat din inaltimea CERUTA ocupa efectiv corpul cand `flat_top=True`.
     #
     # Nu e o cifra de tuning, e un CONTRACT, si a fost cauza unui bug vizibil in

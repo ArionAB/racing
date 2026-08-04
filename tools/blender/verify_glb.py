@@ -245,6 +245,18 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
         print("    bbox X     : %.3f .. %.3f  (centru %+.3f)" % (min(xs), max(xs), (min(xs) + max(xs)) / 2))
         print("    bbox Y     : %.3f .. %.3f  (inaltime %.2f m)" % (min(ys), max(ys), max(ys) - min(ys)))
         print("    bbox Z     : %.3f .. %.3f  (centru %+.3f)" % (min(zs), max(zs), (min(zs) + max(zs)) / 2))
+        # Ansamblul se masoara in LUME (bbox + pivot) si INAINTE de lantul de
+        # mai jos, nu ca ramura a lui.
+        #
+        # Era ascuns intr-un `elif` dupa "nodul are pivot propriu", deci un
+        # ansamblu ale carui piese au TOATE pivot — exact ce produce
+        # `finish(origin="base_axis")` urmat de `obj.location.z = min_z`, adica
+        # tiparul folosit de casa de sat incoace — nu ajungea niciodata la
+        # verificare si iesea cu "niciun nod cu mesh". O garda care raporteaza
+        # ca n-are ce masura, in loc sa masoare, e mai rea decat lipsa ei:
+        # arata rosu din alt motiv decat cel adevarat.
+        if origin == "assembly":
+            assembly_lo = min(assembly_lo, min(ys) + tr[1])
         if any(abs(c) > 1e-6 for c in tr):
             # nod cu pivot propriu (ex. roata morii): coordonatele de mai sus sunt
             # relative la pivot, deci regula "baza la Y=0" nu i se aplica
@@ -269,8 +281,8 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
             # din #C1: doua picioare, o traversa, doua proxy-uri de coliziune).
             # Regula "baza la Y=0" per nod ar fi gresita — traversa chiar
             # pluteste la 9 m, ala e tot rostul ei. Ce se verifica in schimb e ca
-            # ANSAMBLUL atinge solul, la final.
-            assembly_lo = min(assembly_lo, min(ys))
+            # ANSAMBLUL atinge solul (acumulat mai sus, in lume).
+            pass
         elif abs(min(ys)) > 0.01:
             print("    !! baza nu e la Y=0 (min Y = %.3f)" % min(ys))
             ok = False

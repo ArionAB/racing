@@ -8,9 +8,11 @@ extends Node3D
 ## asfalt — dar aia e vederea din Need for Speed Underground: masina creste la
 ## 13% din latimea ecranului si umple cadrul.
 ##
-## Ignition e invers: camera SUS, masina mica, vezi pista deschizandu-se. Acum
-## 8.4 / 4.61, 19° in jos, masina la ~8.5%. Si 19° pe TOT garajul, nu doar pe
-## muscle car — vezi formula distance_for/height_for.
+## Directia s-a schimbat dupa mai multe runde de joc: nu "Ignition cu pista
+## deschizandu-se la orizont", ci DRONA — camera aproape de masina si privind
+## abrupt in jos (~42°). Pasii de feedback: 19° "prea din spate si prea jos" →
+## 24° → 28° "vad prea mult in fata, vreau de sus ca o drona" → 4.5 / 6.6 /
+## lead 2.2. Acelasi unghi pe TOT garajul — vezi distance_for/height_for.
 ##
 ## Camera priveste spre unde MERGE masina, nu spre unde e intoarsa: intr-un drift
 ## vezi iesirea din viraj, nu peretele spre care esti cu botul.
@@ -30,10 +32,10 @@ const REFERENCE_LENGTH: float = 4.20
 ## runtime, deci editarea constantelor de mai jos NU SCHIMBA NIMIC IN JOC — capcana
 ## in care am cazut o data deja, tunand o camera care nu rula. Acum exista o
 ## singura sursa, plus un assert in _ready care prinde divergenta.
-const DISTANCE_BASE: float = 5.80
-const DISTANCE_PER_M: float = 0.62
-const HEIGHT_BASE: float = 3.72
-const HEIGHT_PER_M: float = 0.213
+const DISTANCE_BASE: float = 3.24
+const DISTANCE_PER_M: float = 0.30
+const HEIGHT_BASE: float = 4.92
+const HEIGHT_PER_M: float = 0.40
 
 static func distance_for(body_length: float) -> float:
 	return DISTANCE_BASE + body_length * DISTANCE_PER_M
@@ -46,17 +48,17 @@ static func height_for(body_length: float) -> float:
 ##
 ## ATENTIE: nu confunda astea cu MEASURE_* din snapshot.gd. Alea sunt inghetate
 ## pentru masuratori; astea se schimba cand tunam feel-ul camerei.
-const DEFAULT_DISTANCE: float = 8.404  # = distance_for(REFERENCE_LENGTH)
-const DEFAULT_HEIGHT: float = 4.6146   # = height_for(REFERENCE_LENGTH)
+const DEFAULT_DISTANCE: float = 4.50   # = distance_for(REFERENCE_LENGTH)
+const DEFAULT_HEIGHT: float = 6.60     # = height_for(REFERENCE_LENGTH)
 const BASE_FOV: float = 70.0
 ## Cat de departe in fata priveste camera, si la ce inaltime pe masina.
 ##
-## Lead-ul e cea mai puternica parghie de UNGHI, nu inaltimea. Sesiunea trecuta
-## l-am dus la 5.5 m si am aplatizat cadrul la 7° — vedere de NFS Underground, nu
-## de Ignition. Cu 3.4 m si tinta coborata la nivelul butucului (0.55, nu 1.0 —
-## o camera de sus priveste SOLUL, nu plafonul) unghiul urca la 19°, si asta e
-## tot pe garaj, nu doar pe muscle car.
-const LOOK_AHEAD: float = 3.40
+## Lead-ul e cea mai puternica parghie de UNGHI, nu inaltimea. La 5.5 m cadrul
+## se aplatiza la 7° (vedere de NFS Underground); la 3.4 m dadea 28° si tot
+## "vedeai prea mult in fata" pentru vederea de drona ceruta. Cu 2.2 m si tinta
+## la nivelul butucului (0.55, nu 1.0 — o camera de sus priveste SOLUL, nu
+## plafonul) unghiul urca la ~42°, si asta e tot pe garaj, nu doar pe muscle car.
+const LOOK_AHEAD: float = 2.20
 const LOOK_HEIGHT: float = 0.55
 
 @export var distance: float = DEFAULT_DISTANCE

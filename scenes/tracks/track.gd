@@ -2877,15 +2877,26 @@ func _build_mine(frac: float, side_sign: float) -> void:
 ## ca vagonetul, ca gramada sa se stranga in jurul lui). `yaw` e rotatia in
 ## grade fata de directia „cu fata la drum" — la un butoi conteaza doar ca
 ## piesele vecine sa nu iasa aliniate ca la raft.
+## Cele doua ACCENTE de culoare (#149) stau amandoua aici, si asta e regula, nu
+## intamplarea: style_bible §1 lasa masinilor monopolul suprafetelor saturate,
+## deci o pata de rosu sau de albastru in decor e o resursa care se cheltuie pe
+## un set, ca sa-i tragi ochiul acolo. Imprastiate pe margine ar concura chiar
+## lucrul pe care trebuie sa-l urmaresti — masina din fata.
+##
+## Containerul e lipit de peretele minei dinadins: `painted_metal` se citeste
+## RECE pe nisip, deci are nevoie de o structura langa el. Singur pe dune ar
+## arata a greseala de paleta.
 const _MINE_CAMP := [
 	# Punctul de descarcare, langa vagonet: doua butoaie si o lada.
 	{"node": "Barrel_A", "toward": 4.3, "along": 4.5, "yaw": 15.0},
 	{"node": "Barrel_B", "toward": 3.5, "along": 5.4, "yaw": -40.0},
 	{"node": "Crate_A", "toward": 5.4, "along": 5.1, "yaw": 24.0},
+	{"node": "Tarp_A", "toward": 4.9, "along": 6.3, "yaw": -8.0},
 	# Depozitul, lipit de peretele minei, pe partea cealalta a sinei.
 	{"node": "TyreStack", "toward": 7.6, "along": -3.4, "yaw": 0.0},
 	{"node": "Crate_B", "toward": 9.2, "along": -2.6, "yaw": -18.0},
 	{"node": "Tyre", "toward": 6.0, "along": -4.5, "yaw": 0.0},
+	{"node": "Container_A", "toward": 8.4, "along": -4.6, "yaw": 8.0},
 ]
 
 

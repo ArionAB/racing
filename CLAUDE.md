@@ -138,6 +138,13 @@ res://
   doare. Constrângerea reală rămâne **draw calls / overdraw / fill rate**, de
   aceea testul principal al gărzii e numărătoarea de materiale. Validarea
   finală e primul test pe device — și se începe cu Okinawa, fiind cea mai grea.
+  Din august 2026 pragul e **per pistă**, nu global (`TRIS_OVERRIDE` în
+  `tools/probe_decor.gd`): ridicat de patru ori la rând pentru o singură pistă,
+  un prag global ajunsese să lase Dunele (~65k) să-și dubleze geometria de două
+  ori fără ca garda să clipească. Okinawa v2 / Okinawa manual au 1M — au
+  scenografia după referință (524 de piese: dig de tetrapozi, chei, sat, ziduri
+  de cetate, lan, perdele de palmieri), măsurate la 896k, cu **materialele
+  neschimbate, 22 din 38**. Restul pistelor rămân la 400k.
 - Texturi comprimate ETC2/ASTC, materiale simple (albedo, fără PBR complex)
 - Particule cu limită de count; test pe device fizic de la primul build (M4,
   dar mai devreme dacă apar dubii de feel pe touch)

@@ -259,6 +259,18 @@ static func themes() -> Dictionary:
 				["Island_Peak", "Island_Ridge"],
 			],
 			"horizon_class": "coral_rock",
+			# Insula nu e o plaja pana in varf. Referinta (okinawa_v2.png) are
+			# nisip doar pe fasia batuta de valuri; tot ce urca dincolo de ea e
+			# verde — sat, terase, creasta. Fara asta, cadrul din masina arata o
+			# campie de nisip cu cateva prop-uri pe ea, si nicio densitate de
+			# palmieri n-o repara: pata de fundal e a TERENULUI, nu a decorului.
+			#
+			# Costa zero triunghiuri (e vertex color pe grila care exista deja) si
+			# se aplica dupa INALTIMEA FATA DE MARE, nu dupa distanta pana la apa:
+			# plaja e, prin definitie, fasia joasa. Digul de start ramane nisip
+			# fiindca e la +1.6 m, creasta iese verde fiindca e la +29.
+			"inland_tint": Palette.color(Palette.TROPICAL_GREEN),
+			"inland_strength": 0.85,
 			"walls": true,       # doar pe sectiunile inaltate — regula din sampler
 			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
 			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
@@ -466,6 +478,15 @@ func _rockfall_fracs() -> Array[float]:
 
 ## Treceri de cale ferata cu tren (fractii 0..1).
 func _train_fracs() -> Array[float]:
+	return []
+
+## Scenografia pistei: decorul asezat DUPA O REFERINTA, sector cu sector.
+##
+## Gol pe majoritatea pistelor — decorul lor vine din benzile statistice ale lui
+## [TrackDecor]. O pista care are o referinta desenata (Okinawa v2) declara aici
+## ce sta unde: digul cu tetrapozi, portul, satul, zidurile de cetate, lanul.
+## Formatul fiecarei intrari e documentat in [TrackScenography].
+func _scenography() -> Array[Dictionary]:
 	return []
 
 func _ready() -> void:
@@ -1034,6 +1055,12 @@ func _world_extent() -> float:
 	return clampf(span + margin, TERRAIN_MIN_SIZE, TERRAIN_MAX_SIZE)
 
 
+## Cat de sus fata de nivelul marii tine plaja, si pe cati metri se pierde in
+## vegetatie. Vezi "inland_tint" din themes().
+const BEACH_SAND_TOP: float = 1.4
+const BEACH_FADE: float = 3.5
+
+
 func _build_terrain() -> void:
 	var centroid := _centroid()
 	# 1500m si 56 de celule insemnau ~6200 de triunghiuri intinse pe o suprafata
@@ -1058,6 +1085,11 @@ func _build_terrain() -> void:
 				origin.x + float(gx) * step, origin.z + float(gz) * step)
 	# Pozitiile falezelor, pentru umbra coapta de la baza lor.
 	var cliff_xz := _cliff_positions()
+	# Vegetatia de uscat: vezi "inland_tint" in themes(). Null pe pistele fara
+	# tema de insula, deci restul lumii nu se schimba cu un pixel.
+	var inland: Variant = theme_flag("inland_tint", null)
+	var inland_mix := float(theme_flag("inland_strength", 0.0))
+	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for gz in cells:
@@ -1086,7 +1118,15 @@ func _build_terrain() -> void:
 					var rel := v.y - _sampler.mean_road_y()
 					var shade := clampf(1.0 + rel * 0.012, 0.86, 1.10)
 					shade *= _cliff_shadow(v, cliff_xz)
-					st.set_color(theme_ground_tint * shade)
+					var tint := theme_ground_tint
+					if inland != null:
+						# Banda de trecere e larga (3.5 m de cota) tocmai ca sa
+						# nu se vada o linie de nivel: dunele o strambă singure,
+						# iar marginea iese neregulata, ca o plaja.
+						var t := clampf((v.y - sea_y - BEACH_SAND_TOP)
+							/ BEACH_FADE, 0.0, 1.0)
+						tint = tint.lerp(inland as Color, t * inland_mix)
+					st.set_color(tint * shade)
 					# UV din coordonate de LUME, nu din indexul celulei: asa
 					# textura curge continuu peste toata suprafata, fara sa se
 					# vada grila de 32x32 in tiparul ei.
@@ -2700,6 +2740,13 @@ func _build_world_decor() -> void:
 		theme_flag("props", "desert"))
 	add_child(decor)
 	_decor_roots.append(decor)
+	# Scenografia DUPA benzile statistice, si tot in `_decor_roots`: semnele
+	# chevron si gardurile isi cauta loc liber printre obstacolele de acolo, iar
+	# un tetrapod sau un zid de cetate e cel putin la fel de solid ca o stanca.
+	var scen := TrackScenography.build(_sampler, _scenography(), _world_seed(),
+		_sampler.mean_road_y() + sea_level_offset)
+	add_child(scen)
+	_decor_roots.append(scen)
 
 func _build_excavator(frac: float) -> void:
 	const PATH := "res://assets/models/rusted_digger.glb"

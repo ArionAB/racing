@@ -54,16 +54,14 @@ func _report() -> bool:
 	if manual == null:
 		print("nicio pista nu are DecorManual — nimic de verificat")
 		return true
-	print("DecorManual.visible = %s, %d obiecte" % [manual.visible,
-		manual.get_child_count()])
+	var props := _props(manual, "")
+	print("DecorManual.visible = %s, %d obiecte" % [manual.visible, props.size()])
 	var baked: PackedVector3Array = t.baked
 	var bad := 0
-	print("%-16s %9s %9s %8s   %11s   %s" % ["obiect", "y_obiect", "y_teren",
+	print("%-40s %9s %9s %8s   %11s   %s" % ["obiect", "y_obiect", "y_teren",
 		"delta", "dist. la ax", "verdict"])
-	for c in manual.get_children():
-		var n3 := c as Node3D
-		if n3 == null:
-			continue
+	for entry in props:
+		var n3: Node3D = entry["node"]
 		var p := n3.global_position
 		var ground: float = t._sampler.ground_y(p.x, p.z)
 		var near := 1e9
@@ -78,11 +76,36 @@ func _report() -> bool:
 			verdict += " / IN DRUM"
 		if verdict != "ok":
 			bad += 1
-		print("%-16s %9.2f %9.2f %8.2f   %9.1f m   %s" % [c.name, p.y, ground,
-			p.y - ground, near, verdict])
+		print("%-40s %9.2f %9.2f %8.2f   %9.1f m   %s" % [entry["path"], p.y,
+			ground, p.y - ground, near, verdict])
 	if bad > 0:
 		print("VERDICT: %d obiecte de reparat (Snap Object to Floor sau mutare)"
 			% bad)
 		return false
 	print("VERDICT: OK")
 	return true
+
+
+## Prop-urile din subarborele lui DecorManual, cu calea relativa pentru raport.
+##
+## Recursiv, si NU din exces de zel: decorul e grupat pe zone (`Zone02_Harbour`
+## etc.), deci o bucla peste copiii directi ar masura containerele — care stau la
+## originea scenei, adica departe de pista, deci ar raporta „PLUTESTE" pentru
+## niste noduri goale si zero pentru prop-urile reale. Varianta pe un nivel rata
+## si prop-urile agatate de alt prop: pe Track08 erau 30 nevazute.
+##
+## Un prop = un nod cu `scene_file_path` (radacina unei instante de GLB). Nodurile
+## de grupare adaugate in editor n-au, iar mesh-urile din interiorul unui GLB
+## apar ca parte a instantei, nu ca instante separate — deci exact granularitatea
+## la care ai tras obiectul in scena.
+func _props(node: Node, prefix: String) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for c in node.get_children():
+		var n3 := c as Node3D
+		if n3 == null:
+			continue
+		var path := prefix + String(c.name)
+		if not n3.scene_file_path.is_empty():
+			out.append({"node": n3, "path": path})
+		out.append_array(_props(n3, path + "/"))
+	return out

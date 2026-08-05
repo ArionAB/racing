@@ -259,6 +259,18 @@ static func themes() -> Dictionary:
 				["Island_Peak", "Island_Ridge"],
 			],
 			"horizon_class": "coral_rock",
+			# Insula nu e o plaja pana in varf. Referinta (okinawa_v2.png) are
+			# nisip doar pe fasia batuta de valuri; tot ce urca dincolo de ea e
+			# verde — sat, terase, creasta. Fara asta, cadrul din masina arata o
+			# campie de nisip cu cateva prop-uri pe ea, si nicio densitate de
+			# palmieri n-o repara: pata de fundal e a TERENULUI, nu a decorului.
+			#
+			# Costa zero triunghiuri (e vertex color pe grila care exista deja) si
+			# se aplica dupa INALTIMEA FATA DE MARE, nu dupa distanta pana la apa:
+			# plaja e, prin definitie, fasia joasa. Digul de start ramane nisip
+			# fiindca e la +1.6 m, creasta iese verde fiindca e la +29.
+			"inland_tint": Palette.color(Palette.TROPICAL_GREEN),
+			"inland_strength": 0.85,
 			"walls": true,       # doar pe sectiunile inaltate — regula din sampler
 			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
 			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
@@ -402,6 +414,14 @@ func _cliff_clearings() -> Array[Vector3]:
 	for frac in _arch_fracs():
 		out.append(Vector3(frac, 1.0, -1.0))
 		out.append(Vector3(frac, -1.0, -1.0))
+	# La fel calea ferata, si din acelasi motiv geometric: taie perpendicular pe
+	# drum si iese 90 m in fiecare parte, deci intra direct in peretele de canion.
+	# Se vedea de la prima captura cu trenul in cadru — locomotiva iesea din
+	# stanca — dar nu se vedea in nicio sonda, fiindca nimic nu masoara
+	# intersectia dintre doua sisteme care nu se cunosc intre ele.
+	for frac in _train_fracs():
+		out.append(Vector3(frac, 1.0, -1.0))
+		out.append(Vector3(frac, -1.0, -1.0))
 	return out
 
 ## Landmark-uri hero (turn de apa, benzinarie, moara, semn): fiecare
@@ -466,6 +486,15 @@ func _rockfall_fracs() -> Array[float]:
 
 ## Treceri de cale ferata cu tren (fractii 0..1).
 func _train_fracs() -> Array[float]:
+	return []
+
+## Scenografia pistei: decorul asezat DUPA O REFERINTA, sector cu sector.
+##
+## Gol pe majoritatea pistelor — decorul lor vine din benzile statistice ale lui
+## [TrackDecor]. O pista care are o referinta desenata (Okinawa v2) declara aici
+## ce sta unde: digul cu tetrapozi, portul, satul, zidurile de cetate, lanul.
+## Formatul fiecarei intrari e documentat in [TrackScenography].
+func _scenography() -> Array[Dictionary]:
 	return []
 
 func _ready() -> void:
@@ -1034,6 +1063,12 @@ func _world_extent() -> float:
 	return clampf(span + margin, TERRAIN_MIN_SIZE, TERRAIN_MAX_SIZE)
 
 
+## Cat de sus fata de nivelul marii tine plaja, si pe cati metri se pierde in
+## vegetatie. Vezi "inland_tint" din themes().
+const BEACH_SAND_TOP: float = 1.4
+const BEACH_FADE: float = 3.5
+
+
 func _build_terrain() -> void:
 	var centroid := _centroid()
 	# 1500m si 56 de celule insemnau ~6200 de triunghiuri intinse pe o suprafata
@@ -1058,6 +1093,11 @@ func _build_terrain() -> void:
 				origin.x + float(gx) * step, origin.z + float(gz) * step)
 	# Pozitiile falezelor, pentru umbra coapta de la baza lor.
 	var cliff_xz := _cliff_positions()
+	# Vegetatia de uscat: vezi "inland_tint" in themes(). Null pe pistele fara
+	# tema de insula, deci restul lumii nu se schimba cu un pixel.
+	var inland: Variant = theme_flag("inland_tint", null)
+	var inland_mix := float(theme_flag("inland_strength", 0.0))
+	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for gz in cells:
@@ -1086,7 +1126,15 @@ func _build_terrain() -> void:
 					var rel := v.y - _sampler.mean_road_y()
 					var shade := clampf(1.0 + rel * 0.012, 0.86, 1.10)
 					shade *= _cliff_shadow(v, cliff_xz)
-					st.set_color(theme_ground_tint * shade)
+					var tint := theme_ground_tint
+					if inland != null:
+						# Banda de trecere e larga (3.5 m de cota) tocmai ca sa
+						# nu se vada o linie de nivel: dunele o strambă singure,
+						# iar marginea iese neregulata, ca o plaja.
+						var t := clampf((v.y - sea_y - BEACH_SAND_TOP)
+							/ BEACH_FADE, 0.0, 1.0)
+						tint = tint.lerp(inland as Color, t * inland_mix)
+					st.set_color(tint * shade)
 					# UV din coordonate de LUME, nu din indexul celulei: asa
 					# textura curge continuu peste toata suprafata, fara sa se
 					# vada grila de 32x32 in tiparul ei.
@@ -2055,7 +2103,11 @@ func _build_rockfall(frac: float) -> void:
 ##   - trecerea se muta din apexul unui viraj (style_bible §7 cere sa nu pui
 ##     nimic care blocheaza citirea in apex);
 ##   - sina se opreste inainte de alta bucla a pistei, altfel un tren de 42 m
-##     intra pe soseaua vecina pe o pista care se auto-intersecteaza.
+##     intra pe soseaua vecina pe o pista care se auto-intersecteaza;
+##   - linia ramane ORIZONTALA, la cota drumului, si primeste estacada acolo unde
+##     terenul fuge de sub ea (#152). Pana aici era plata prin presupunere, nu
+##     prin decizie: mergea cat timp trecerile stateau pe camp, dar peste o rapa
+##     de 17 m producea o panglica de traverse plutind in aer.
 func _build_train(frac: float) -> void:
 	var n := baked.size()
 	var idx := _calm_index_near(int(frac * float(n)) % n, 40.0)
@@ -2065,6 +2117,7 @@ func _build_train(frac: float) -> void:
 	var train := TrainHazard.new()
 	train.road_half_width = half_width
 	train.half_rail = _rail_reach(p, rail, 90.0, 25.0)
+	train.ground_drop = _rail_ground_drop(p, rail, train.half_rail)
 	# ATENTIE la ordine: transformarea INAINTE de add_child. Trenul e un
 	# AnimatableBody3D cu sync_to_physics, deci transformarea o tine serverul de
 	# fizica; pus dupa intrarea in arbore, ramane un pas fizic in origine — adica
@@ -2079,6 +2132,29 @@ func _build_train(frac: float) -> void:
 	# tangenta la o curba pare ca o traverseaza de doua ori.
 	train.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
 	add_child(train)
+
+
+## Cat de jos e terenul sub linia ferata, pala cu pala.
+##
+## Esantionat AICI, nu in hazard: `ground_y` e sursa unica pentru tot ce se
+## aseaza pe sol si sta in sampler, iar TrainHazard e o scena de sine statatoare
+## care n-are (si n-ar trebui sa aiba) acces la traseu. Aceeasi separare ca la
+## `half_rail`, care se calculeaza tot aici.
+##
+## Pasul e cel al palelor, nu al traverselor: o pala la 7.2 m se sprijina oricum
+## pe cota masurata sub ea, iar un profil de 100 de esantioane ar fi 100 de
+## apeluri `ground_y` (fiecare o suma ponderata peste traseu) pentru o structura
+## de 25 de palei.
+func _rail_ground_drop(origin: Vector3, dir: Vector3,
+		half_rail_m: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var step := TrainHazard.TRESTLE_BENT_STEP
+	var d := -half_rail_m
+	while d <= half_rail_m + 0.001:
+		var q := origin + dir * d
+		out.append(origin.y - _sampler.ground_y(q.x, q.z))
+		d += step
+	return out
 
 
 ## Cel mai apropiat index cu curbura mica, in raza data. Daca nu exista, il
@@ -2700,6 +2776,13 @@ func _build_world_decor() -> void:
 		theme_flag("props", "desert"))
 	add_child(decor)
 	_decor_roots.append(decor)
+	# Scenografia DUPA benzile statistice, si tot in `_decor_roots`: semnele
+	# chevron si gardurile isi cauta loc liber printre obstacolele de acolo, iar
+	# un tetrapod sau un zid de cetate e cel putin la fel de solid ca o stanca.
+	var scen := TrackScenography.build(_sampler, _scenography(), _world_seed(),
+		_sampler.mean_road_y() + sea_level_offset)
+	add_child(scen)
+	_decor_roots.append(scen)
 
 func _build_excavator(frac: float) -> void:
 	const PATH := "res://assets/models/rusted_digger.glb"

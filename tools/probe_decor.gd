@@ -110,6 +110,57 @@ const MIN_SAMPLE: int = 20
 ## Okinawa e pista pe care trebuie inceput, fiind cea mai grea.
 const MAX_TRIS_PER_TRACK: int = 400000
 
+## Praguri PER PISTA, pentru abaterile decise cu cifrele in fata.
+##
+## Pragul global a crescut de patru ori (80k -> 150k -> 300k -> 400k) fiindca o
+## singura pista avea nevoie de aer, si de fiecare data l-a primit toata lumea.
+## Efectul secundar nu e vizibil pana nu se intampla: Dunele masoara ~65k, deci
+## si-ar putea DUBLA geometria de doua ori la rand fara ca garda sa clipeasca.
+## Un prag pe pista tine alarma stransa acolo unde nu s-a schimbat nimic.
+##
+## Okinawa v2 (si Okinawa manual, care mosteneste aceeasi lume) au scenografia
+## dupa referinta: 524 de piese asezate — dig de tetrapozi, chei, sat, ziduri de
+## cetate, lan de trestie, perdele de palmieri — masurate la 896k pe pista.
+##
+## De ce e acceptabil, in cifrele care conteaza pe mobil:
+##   - MATERIALELE raman 22 din 38. Scenografia nu aduce niciunul nou: totul
+##     trece prin atlasul comun si prin cele 8 clase de textura existente.
+##   - Cifra e pe TOATA pista (1.8 km). Camera de joc sta la 11 m in spate cu
+##     FOV 47.6, iar ceata taie la 250 m — deci ce se randeaza pe cadru e o
+##     fractiune, si fiecare piesa e un nod separat, adica frustum-culled.
+##   - Decizia e explicita a dezvoltatorului ("nu-ti fie frica de draw calls si
+##     triunghiuri"), luata dupa ce a fixat parametrii camerei.
+## Ce NU stim inca: cat trage asta pe un telefon real. De aia ramane un prag de
+## ALARMA, si de aia primul test pe device se face pe Okinawa.
+##
+## Track08 sta mai sus decat Track07 desi impart aceeasi lume, si nu din
+## neglijenta: cele 896k de mai sus s-au masurat pe Track08 cand scena lui era
+## un ciot de sase linii, cu cele 87 de prop-uri asezate de mana inca necomise.
+## Dar Okinawa manual E, prin definitie, lumea comuna PLUS decor pus cu mouse-ul
+## (vezi antetul lui track08.gd) — deci un prag care nu-l cuprinde masoara o
+## pista care nu exista. Decorul manual aduce 341 026 de triunghiuri peste
+## Track07, si pista iese la 1 237 328.
+##
+## E fix capcana descrisa in CLAUDE.md: "masuratoare + marja" e buna pentru un
+## prag care prinde regresii, dar aplicata pe o masuratoare luata inaintea
+## muncii devine un plafon care respinge munca legitima — ca prima benzinarie cu
+## ferestre reale, respinsa de un numar derivat din cat de sarac era jocul in
+## ziua aia. Materialele, axa care chiar doare pe mobil, raman 22 din 38.
+##
+## 1.3M lasa ~5% aer peste masuratoarea de acum: strans intentionat, cat sa
+## prinda urmatoarea sesiune de asezat decor. Ce ar trebui sa scada cifra fara
+## sa taie din compozitie: un tetrapod are 5 104 de triunghiuri pentru un bloc
+## de beton de 4.2 m, iar digul are 41.
+const TRIS_OVERRIDE := {
+	"Track07": 1000000,
+	"Track08": 1300000,
+}
+
+
+static func tris_limit(path: String) -> int:
+	return int(TRIS_OVERRIDE.get(path.get_file().get_basename(),
+		MAX_TRIS_PER_TRACK))
+
 var _paths: Array[String] = []
 var _index: int = 0
 var _frames: int = 0
@@ -212,8 +263,8 @@ func _measure(path: String, track: Node) -> Dictionary:
 		"tris": tris,
 		"unique_meshes": unique_meshes.size(),
 		"ratio_ok": ratio_ok,
-		"tris_ok": tris <= MAX_TRIS_PER_TRACK,
-		"ok": ratio_ok and tris <= MAX_TRIS_PER_TRACK,
+		"tris_ok": tris <= tris_limit(path),
+		"ok": ratio_ok and tris <= tris_limit(path),
 		"sources": by_source,
 	}
 
@@ -229,6 +280,11 @@ func _report() -> bool:
 	var failed := false
 	print("=== GARDA DE SCENA (materiale: maxim %d / pista · triunghiuri: alarma la %s) ==="
 		% [MAX_MATERIALS_PER_TRACK, _thousands(MAX_TRIS_PER_TRACK)])
+	if not TRIS_OVERRIDE.is_empty():
+		var notes: PackedStringArray = []
+		for key: String in TRIS_OVERRIDE:
+			notes.append("%s %s" % [key, _thousands(int(TRIS_OVERRIDE[key]))])
+		print("praguri proprii de triunghiuri: %s" % ", ".join(notes))
 	print("%-10s %7s %6s %6s %11s %7s %9s %7s %7s"
 		% ["pista", "mesh-uri", "mat.", "atlas", "procedural", "raport",
 			"triunghi", "unice", "stare"])

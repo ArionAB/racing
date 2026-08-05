@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b22n85gekdeip"
-path="res://.godot/imported/shisa.glb-22e23147f8cb36ad49a10850737bfe27.scn"
+uid="uid://bqjycdy2aq6rg"
+path="res://.godot/imported/horizon_island.glb-001e26fd9357561a89c49a3530bdc0de.scn"
 
 [deps]
 
-source_file="res://assets/models/shisa.glb"
-dest_files=["res://.godot/imported/shisa.glb-22e23147f8cb36ad49a10850737bfe27.scn"]
+source_file="res://assets/models/horizon_island.glb"
+dest_files=["res://.godot/imported/horizon_island.glb-001e26fd9357561a89c49a3530bdc0de.scn"]
 
 [params]
 

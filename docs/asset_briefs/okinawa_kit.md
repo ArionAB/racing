@@ -1,4 +1,4 @@
-# Kit Okinawa — 11 assets din foaia de referinta
+# Kit Okinawa — assets din foaia de referinta (issue #101, #102, #104, #105)
 
 Sursa formelor: `assets/okinawa_inspiration/ChatGPT Image Aug 2, 2026, 07_38_24 PM.png`
 (foaia cu TETRAPODS / SHISA GUARDIANS / PALMS AND TREES / CORAL ROCKS / ROADSIDE).
@@ -14,52 +14,62 @@ gresit nu crapa nimic — se vede abia la urmatorul screenshot).
 
 ## Ce contine
 
-| fisier | noduri | cota | tris | referinta |
+Nouasprezece fisiere, acoperind issue-urile #101 (wave-0), #102 (wave-1 hero),
+#104 (wave-2 vegetatie) si #105 (wave-3). Cotele sunt MASURATE pe GLB, nu
+declarate.
+
+| fisier | noduri | cota | tris | issue |
 |---|---|---|---|---|
-| `tetrapod.glb` | `Tetrapod_04` | 3.45 m | 788 | TETRAPOD_04 (3.5 m) |
-| `coral_rock.glb` | `CoralRock_04`, `CoralRock_06` | 1.61 / 2.65 m | 1680 | CORAL_ROCK_04/06 |
-| `coconut_palm.glb` | `Palm_Bark`, `Palm_Fronds` | 6.70 m | 1742 | COCONUT_PALM_01 (7.0 m) |
-| `beach_palm_bent.glb` | `BentPalm_Bark`, `BentPalm_Fronds` | 2.80 m | 1406 | BEACH_PALM_BENT (3.0 m) |
-| `pandanus.glb` | `Pandanus_Bark`, `Pandanus_Leaves` | 2.40 m | 2068 | PANDANUS_ADAN (2.5 m) |
-| `banyan.glb` | `Banyan_Bark`, `Banyan_Canopy` | 5.56 m | 4852 | BANYAN_GAJUMARU (6.0 m) |
-| `hibiscus_bush.glb` | `Hibiscus` | 0.86 m | 788 | HIBISCUS_BUSH (1.0 m) |
-| `stone_gate_torii.glb` | `Torii_Stone`, `Torii_Roof` | 4.39 m | 942 | STONE_GATE_TORII (4.5 m) |
-| `lighthouse.glb` | `Lighthouse_Stone/White/Red/Metal` | 9.11 m | 2654 | LIGHTHOUSE (9.0 m) |
-| `shisa.glb` | `Shisa_Base`, `Shisa_Stone`, `Shisa_Detail` | 1.81 m | 4640 | SHISA_OPEN_MOUTH (1.8 m) |
+| `tetrapod.glb` | `Tetrapod_01`, `Tetrapod_04`, `Tetrapod_Stack_01` | 1.77 / 3.45 / 3.29 m | 5104 | #101 |
+| `coral_rock.glb` | `Coral_Rock_01..08` | 0.40 – 3.77 m | 4174 | #101 |
+| `island_scatter.glb` | `Beach_Grass`, `Driftwood`, `Coral_Pebbles`, `Hibiscus` | 0.14 – 0.54 m | 930 | #101 |
+| `sea_wall_segment.glb` | `Sea_Wall_A/B/C` | 1.20 / 1.62 m | 700 | #101 |
+| `coconut_palm.glb` | `Palm_Bark`, `Palm_Fronds` | 6.70 m | 1742 | #104 |
+| `beach_palm_bent.glb` | `BentPalm_*` | 2.80 m | 1406 | #104 |
+| `pandanus.glb` | `Pandanus_*` | 2.40 m | 2068 | #104 |
+| `banyan.glb` | `Banyan_*` | 5.56 m | 4852 | #104 |
+| `hibiscus_bush.glb` | `Hibiscus` | 0.86 m | 788 | #104 |
+| `sugar_cane_clump.glb` | `Cane_Clump_A/B/C` | 2.80 – 3.58 m | 8870 | #104 |
+| `stone_gate_torii.glb` | `Torii_Stone`, `Torii_Roof` | 4.39 m | 942 | #102 |
+| `lighthouse.glb` | `Lighthouse_Stone/White/Red/Metal` | 9.11 m | 2654 | #102 |
+| `shisa_statue.glb` | `Shisa_Base/Stone/Detail` | 1.80 m | 4640 | #102 |
+| `shisa_statue_closed.glb` | `Shisa_Base/Stone/Detail` | 1.66 m | 4552 | #102 |
+| `gusuku_wall.glb` | `Gusuku_Wall_A/B/C` | 2.77 – 4.48 m | 6952 | #102 |
+| `sabani_boat.glb` | `Sabani_Hull`, `Sabani_Trim` | 5.00 m lungime | 1300 | #105 |
+| `beach_clutter.glb` | `Fishing_Crate`, `Net_Floats`, `Awamori_Pot`, `Bamboo_Rack`, `Driftwood_Log` | 0.19 – 1.37 m | 3594 | #105 |
+| `horizon_island.glb` | `Island_Low`, `Island_Peak`, `Island_Ridge` | 6.6 – 26.0 m | 750 | #105 |
+| `wave_surge.glb` | `Wave`, `Wave_Foam` | 1.80 m | 502 | #105 |
 
-Total lot: **21.560 de triunghiuri** pentru cate o instanta din fiecare — sub 8%
-din pragul de 300k al unei piste (`tools/probe_decor.gd`).
+Total lot: **56.520 de triunghiuri** pentru cate o instanta din TOATE variantele
+— dar nicio pista nu le pune pe toate deodata. Ce conteaza e costul per
+instanta: scatter-ul sub 400 tris, stancile 300-870, hero-urile 900-4900.
 
-Cotele sunt masurate pe GLB, nu declarate. Unde difera de referinta cu peste 5%
-(banyan 5.56 fata de 6.0) e pentru ca inaltimea vine din pozitia bulgarilor de
-coroana, iar a o forta ar fi insemnat o coroana subtire pe un trunchi lung.
+> ⚠️ **NUMELE NODURILOR SUNT CONTRACT, si se verifica in GDScript, nu din
+> memorie.** Prima versiune a acestui lot exporta `CoralRock_04`; Godot cauta
+> `Coral_Rock_%02d` (`track_decor.gd:359`), nu gasea nimic si cadea tacut pe
+> cutii colorate — cu testele verzi. Trei liste de nume sunt hardcodate azi:
+> `_add_island_scatter` (Beach_Grass/Driftwood/Coral_Pebbles/Hibiscus),
+> `_add_coral_rock` (Coral_Rock_01..08) si `HORIZON_RINGS["picks"]`.
 
 ## Mapare de materiale (asta se scrie in Godot)
 
-```gdscript
-Palette.apply_class_materials(glb, {
-    # tetrapod.glb
-    "Tetrapod_04":      "concrete",
-    # coral_rock.glb — TRIPLANAR de lume: placile vecine isi continua tiparul
-    "CoralRock":        Palette.TRI_PREFIX + "coral_rock",
-    # vegetatie: scoarta texturata, frunzisul pe atlas (nemapat = atlas)
-    "Palm_Bark":        "bark",
-    "BentPalm_Bark":    "bark",
-    "Pandanus_Bark":    "bark",
-    "Banyan_Bark":      "bark",
-    # piatra
-    "Torii_Stone":      "stone_wall",
-    "Torii_Roof":       "roof_tiles",
-    "Lighthouse_Stone": "stone_wall",
-    "Lighthouse_White": "plaster",
-    "Shisa_Base":       "stone_wall",
-    "Shisa_Stone":      "concrete",
-})
-```
+| nod | clasa | proiectie |
+|---|---|---|
+| `Tetrapod_*` | `concrete` | UV cubic |
+| `Coral_Rock_*` | `coral_rock` | **triplanar de lume**, scara 0.85 |
+| `Sea_Wall_*` | `concrete` | UV cubic 1.5 m |
+| `Palm_Bark`, `BentPalm_Bark`, `Pandanus_Bark`, `Banyan_Bark` | `bark` | UV cubic 1.3 m |
+| `Torii_Stone`, `Lighthouse_Stone`, `Shisa_Base`, `Gusuku_Wall_*` | `stone_wall` | UV cubic 1.4–1.6 m |
+| `Torii_Roof` | `roof_tiles` | UV cubic 1.0 m |
+| `Lighthouse_White` | `plaster` | UV cubic 1.6 m |
+| `Shisa_Stone` | `concrete` | UV cubic 1.0 m |
+| `Sabani_Hull` | `wood` | UV cubic 1.2 m |
 
-Nodurile nemapate (`*_Fronds`, `*_Leaves`, `Banyan_Canopy`, `Hibiscus`,
-`Lighthouse_Red`, `Lighthouse_Metal`, `Shisa_Detail`) raman pe materialul lumii
-— au UV-uri colapsate pe sloturi de paleta si sunt corecte asa.
+Tot restul ramane pe materialul lumii (atlasul de paleta): frunzisul
+(`*_Fronds`, `*_Leaves`, `Banyan_Canopy`, `Cane_Clump_*`, `Hibiscus`),
+scatter-ul, `beach_clutter`, `horizon_island`, `wave_surge`, si accentele
+(`Lighthouse_Red/Metal`, `Shisa_Detail`, `Sabani_Trim`). Au UV-uri colapsate pe
+sloturi si sunt corecte asa.
 
 **Doua clase noi**, generate de `tools/process_class_textures.gd` din surse
 PolyHaven CC0 (`assets/textures/classes/src/`):
@@ -118,9 +128,12 @@ Blender deschis cu addon-ul MCP pornit, apoi:
 P = r"d:/GameDev/ignition-spike/tools/blender"
 g = {"__name__": "__main__", "__file__": P + "/dio_lib.py"}
 exec(open(P + "/dio_lib.py").read(), g)
-for f in ("build_tetrapod.py", "build_coral_rock.py", "build_palms.py",
-          "build_pandanus.py", "build_banyan.py", "build_hibiscus.py",
-          "build_torii.py", "build_lighthouse.py", "build_shisa.py"):
+for f in ("build_tetrapod.py", "build_coral_rock.py", "build_island_scatter.py",
+          "build_sea_wall.py", "build_palms.py", "build_pandanus.py",
+          "build_banyan.py", "build_hibiscus.py", "build_sugar_cane.py",
+          "build_torii.py", "build_lighthouse.py", "build_shisa.py",
+          "build_gusuku_wall.py", "build_sabani.py", "build_beach_clutter.py",
+          "build_horizon_island.py", "build_wave_surge.py"):
     exec(open(P + "/" + f).read(), g)
 ```
 
@@ -133,7 +146,7 @@ apply_class(bpy.data.objects["Shisa_Stone"], "concrete")   # textura reala, nu a
 shot([bpy.data.objects["Shisa_Stone"]], "d:/tmp/shisa.png", azimuth=90.0)
 ```
 
-## Trei lucruri invatate aici (ca sa nu se reinvete)
+## Lucruri invatate aici (ca sa nu se reinvete)
 
 1. **`Builder.rock` face CONURI daca il folosesti pentru frunzis.** Construieste
    inele de la baza in sus si inchide cu capac plat — corect pentru ce sta pe

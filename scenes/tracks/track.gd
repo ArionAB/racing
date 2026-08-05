@@ -414,6 +414,14 @@ func _cliff_clearings() -> Array[Vector3]:
 	for frac in _arch_fracs():
 		out.append(Vector3(frac, 1.0, -1.0))
 		out.append(Vector3(frac, -1.0, -1.0))
+	# La fel calea ferata, si din acelasi motiv geometric: taie perpendicular pe
+	# drum si iese 90 m in fiecare parte, deci intra direct in peretele de canion.
+	# Se vedea de la prima captura cu trenul in cadru — locomotiva iesea din
+	# stanca — dar nu se vedea in nicio sonda, fiindca nimic nu masoara
+	# intersectia dintre doua sisteme care nu se cunosc intre ele.
+	for frac in _train_fracs():
+		out.append(Vector3(frac, 1.0, -1.0))
+		out.append(Vector3(frac, -1.0, -1.0))
 	return out
 
 ## Landmark-uri hero (turn de apa, benzinarie, moara, semn): fiecare
@@ -2095,7 +2103,11 @@ func _build_rockfall(frac: float) -> void:
 ##   - trecerea se muta din apexul unui viraj (style_bible §7 cere sa nu pui
 ##     nimic care blocheaza citirea in apex);
 ##   - sina se opreste inainte de alta bucla a pistei, altfel un tren de 42 m
-##     intra pe soseaua vecina pe o pista care se auto-intersecteaza.
+##     intra pe soseaua vecina pe o pista care se auto-intersecteaza;
+##   - linia ramane ORIZONTALA, la cota drumului, si primeste estacada acolo unde
+##     terenul fuge de sub ea (#152). Pana aici era plata prin presupunere, nu
+##     prin decizie: mergea cat timp trecerile stateau pe camp, dar peste o rapa
+##     de 17 m producea o panglica de traverse plutind in aer.
 func _build_train(frac: float) -> void:
 	var n := baked.size()
 	var idx := _calm_index_near(int(frac * float(n)) % n, 40.0)
@@ -2105,6 +2117,7 @@ func _build_train(frac: float) -> void:
 	var train := TrainHazard.new()
 	train.road_half_width = half_width
 	train.half_rail = _rail_reach(p, rail, 90.0, 25.0)
+	train.ground_drop = _rail_ground_drop(p, rail, train.half_rail)
 	# ATENTIE la ordine: transformarea INAINTE de add_child. Trenul e un
 	# AnimatableBody3D cu sync_to_physics, deci transformarea o tine serverul de
 	# fizica; pus dupa intrarea in arbore, ramane un pas fizic in origine — adica
@@ -2119,6 +2132,29 @@ func _build_train(frac: float) -> void:
 	# tangenta la o curba pare ca o traverseaza de doua ori.
 	train.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
 	add_child(train)
+
+
+## Cat de jos e terenul sub linia ferata, pala cu pala.
+##
+## Esantionat AICI, nu in hazard: `ground_y` e sursa unica pentru tot ce se
+## aseaza pe sol si sta in sampler, iar TrainHazard e o scena de sine statatoare
+## care n-are (si n-ar trebui sa aiba) acces la traseu. Aceeasi separare ca la
+## `half_rail`, care se calculeaza tot aici.
+##
+## Pasul e cel al palelor, nu al traverselor: o pala la 7.2 m se sprijina oricum
+## pe cota masurata sub ea, iar un profil de 100 de esantioane ar fi 100 de
+## apeluri `ground_y` (fiecare o suma ponderata peste traseu) pentru o structura
+## de 25 de palei.
+func _rail_ground_drop(origin: Vector3, dir: Vector3,
+		half_rail_m: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var step := TrainHazard.TRESTLE_BENT_STEP
+	var d := -half_rail_m
+	while d <= half_rail_m + 0.001:
+		var q := origin + dir * d
+		out.append(origin.y - _sampler.ground_y(q.x, q.z))
+		d += step
+	return out
 
 
 ## Cel mai apropiat index cu curbura mica, in raza data. Daca nu exista, il

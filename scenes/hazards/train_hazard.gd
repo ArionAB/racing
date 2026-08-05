@@ -60,6 +60,42 @@ const RAIL_TOP: float = 0.28
 const SLEEPER_LEN: float = 1.5
 const SLEEPER_STEP: float = 1.8
 
+# --------------------------------------------------------------- estacada
+#
+# Calea ferata era PLATA, la cota drumului, oriunde ar fi fost pusa. Pe Dunele
+# asta insemna ca linia trece la 17 m deasupra fundului rapei fara nimic
+# dedesubt: o panglica de traverse plutind in aer. Momentul-semnatura al pistei
+# din conceptul „Canyon Circuit" (#152) e exact opusul — trenul traverseaza
+# prapastia pe un POD DE LEMN, si il vezi de jos in sus cand ratezi aterizarea.
+#
+# Structura e procedurala, in acelasi SurfaceTool si cu acelasi material ca
+# terasamentul, DELIBERAT si nu din comoditate. Issue-ul propunea un GLB nou
+# (`train_trestle.glb`), dar sina pe care se sprijina e deja procedurala aici:
+# un asset separat ar fi insemnat doua definitii ale aceleiasi geometrii care
+# pot diverge la prima schimbare de ecartament, plus inca un material intr-o
+# garda unde Dunele e cazul strans. Palei de lemn sunt cutii — nu e clasa de
+# geometrie care sa ceara Blender.
+
+## Sub atat, linia sta pur si simplu pe pamant: nu se ridica nimic.
+const TRESTLE_MIN_DROP: float = 1.6
+## Pasul dintre palei. Multiplu de SLEEPER_STEP ca sa cada mereu sub o traversa.
+const TRESTLE_BENT_STEP: float = SLEEPER_STEP * 4.0
+## Deschiderea palei la varf si cat se departeaza picioarele la fiecare metru de
+## inaltime. Bataia (batter-ul) nu e ornament: o pala inalta cu picioare
+## verticale citeste ca doi tepusi, una evazata citeste ca structura care duce
+## greutate.
+const TRESTLE_TOP_HALF: float = 0.85
+const TRESTLE_BATTER: float = 0.13
+## Grosimea grinzilor. Style_bible §3 cere minime — sub ~14 cm, la 60 km/h si pe
+## un ecran de telefon, o grinda dispare si structura pare desenata cu creionul.
+const TRESTLE_LEG: float = 0.26
+const TRESTLE_BRACE: float = 0.17
+## Cat de des se pune o cruce de contravantuire pe inaltime.
+const TRESTLE_BRACE_SPAN: float = 4.5
+## Cat de adanc intra piciorul in pamant, ca sa nu se vada talpa plutind pe o
+## panta esantionata mai rar decat geometria.
+const TRESTLE_FOOT_SINK: float = 0.5
+
 ## Cat sta o masina imuna dupa ce a fost lovita — mai lung decat la bolovan,
 ## fiindca urmeaza o repunere si n-are rost sa fie lovita de doua ori.
 const HIT_COOLDOWN: float = 2.0
@@ -75,6 +111,15 @@ const RESPAWN_BACKOFF: float = 20.0
 @export var half_rail: float = 90.0
 ## Latimea soselei in punctul de trecere, pentru bariere.
 @export var road_half_width: float = 7.0
+## Cota terenului sub sina, in coordonate LOCALE (0 = nivelul traverselor),
+## esantionata din TRESTLE_BENT_STEP in TRESTLE_BENT_STEP de la -half_rail la
+## +half_rail. Goala = teren plat, deci fara estacada.
+##
+## Vine de la Track, nu se citeste de aici: hazardul e o scena de sine
+## statatoare si n-are cum sa cunoasca samplerul pistei. Track are deja singura
+## sursa de adevar pentru cotele terenului (TrackSideSampler.ground_y) si o
+## esantioneaza in Track._build_train.
+@export var ground_drop: PackedFloat32Array = PackedFloat32Array()
 
 var _train: AnimatableBody3D
 var _hit: Area3D
@@ -121,6 +166,7 @@ func _build_bed() -> void:
 	for side: float in [-1.0, 1.0]:
 		_box(st, Vector3(0.0, RAIL_TOP - 0.08, side * GAUGE_HALF),
 			Vector3(half_rail * 2.0, 0.16, 0.16))
+	_build_trestle(st)
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
@@ -128,6 +174,109 @@ func _build_bed() -> void:
 	# raportul mesh-uri/material din garda, iar Dunele e cazul strans.
 	inst.material_override = _structure_material()
 	add_child(inst)
+
+
+## Estacada: palei de lemn acolo unde terenul fuge de sub linie.
+##
+## O pala ("bent", in vocabularul podurilor de lemn) = doua picioare evazate, o
+## grinda de cap peste ele si cruci de contravantuire la fiecare
+## TRESTLE_BRACE_SPAN de inaltime. Peste deschideri se pune si o LONJERONA
+## continua sub traverse: fara ea traversele plutesc una langa alta si podul
+## citeste ca o scara suspendata, nu ca un pod.
+func _build_trestle(st: SurfaceTool) -> void:
+	if ground_drop.size() < 2:
+		return
+	var bents := ground_drop.size()
+	# Lonjeronele se pun pe intervalele DINTRE doua palei ridicate, deci se
+	# acumuleaza pe parcurs si se emit cand seria se intrerupe.
+	var run_start := INF
+	var run_end := -INF
+	for i in bents:
+		var x := -half_rail + float(i) * TRESTLE_BENT_STEP
+		var drop := ground_drop[i]
+		if drop < TRESTLE_MIN_DROP:
+			if run_start < run_end:
+				_trestle_stringers(st, run_start, run_end)
+			run_start = INF
+			run_end = -INF
+			continue
+		_trestle_bent(st, x, drop)
+		run_start = minf(run_start, x)
+		run_end = maxf(run_end, x)
+	if run_start < run_end:
+		_trestle_stringers(st, run_start, run_end)
+
+
+## O pala, cu varful sub traverse si talpa pe teren.
+func _trestle_bent(st: SurfaceTool, x: float, drop: float) -> void:
+	var top := -0.02
+	var foot := -drop - TRESTLE_FOOT_SINK
+	var bottom_half := TRESTLE_TOP_HALF + drop * TRESTLE_BATTER
+	# Grinda de cap: sta SUB traverse si peste amandoua picioarele, deci trebuie
+	# sa fie mai lata decat deschiderea de la varf.
+	_box(st, Vector3(x, top - 0.13, 0.0),
+		Vector3(0.5, 0.26, TRESTLE_TOP_HALF * 2.0 + TRESTLE_LEG))
+	for side: float in [-1.0, 1.0]:
+		_beam(st,
+			Vector3(x, top - 0.26, side * TRESTLE_TOP_HALF),
+			Vector3(x, foot, side * bottom_half),
+			TRESTLE_LEG)
+	# Crucile: pe fiecare palier, doua diagonale intre picioarele evazate.
+	# Interpolarea le tine LIPITE de picioare pe toata inaltimea — calculate pe
+	# deschiderea de la varf, ar iesi in aer la baza si structura ar arata rupta.
+	var levels := maxi(1, int(drop / TRESTLE_BRACE_SPAN))
+	for k in levels:
+		var t0 := float(k) / float(levels)
+		var t1 := float(k + 1) / float(levels)
+		var y0 := lerpf(top - 0.26, foot, t0)
+		var y1 := lerpf(top - 0.26, foot, t1)
+		var h0 := lerpf(TRESTLE_TOP_HALF, bottom_half, t0)
+		var h1 := lerpf(TRESTLE_TOP_HALF, bottom_half, t1)
+		_beam(st, Vector3(x, y0, -h0), Vector3(x, y1, h1), TRESTLE_BRACE)
+		_beam(st, Vector3(x, y0, h0), Vector3(x, y1, -h1), TRESTLE_BRACE)
+		# Traversa orizontala la fiecare palier: leaga crucile si da podului
+		# liniile orizontale repetate care il fac citibil de departe.
+		if k > 0:
+			_box(st, Vector3(x, y0, 0.0), Vector3(0.2, TRESTLE_BRACE, h0 * 2.0))
+
+
+## Lonjeronele continue de sub traverse, pe o deschidere.
+func _trestle_stringers(st: SurfaceTool, from_x: float, to_x: float) -> void:
+	var span := to_x - from_x + TRESTLE_BENT_STEP
+	var mid := (from_x + to_x) * 0.5
+	for side: float in [-1.0, 1.0]:
+		_box(st, Vector3(mid, -0.16, side * GAUGE_HALF),
+			Vector3(span, 0.3, 0.24))
+
+
+## Cutie orientata intre doua puncte — grinda inclinata, cu secventa patrata.
+##
+## `_box` face doar cutii aliniate pe axe, si ala e chiar rostul lui (traverse,
+## sine). O estacada n-are nicio grinda aliniata: picioarele sunt evazate si
+## contravantuirile sunt diagonale prin definitie. Fara asta ar fi trebuit ori
+## picioare verticale (care citesc ca tepuse, nu ca structura), ori un GLB.
+func _beam(st: SurfaceTool, from: Vector3, to: Vector3, thick: float) -> void:
+	var axis := to - from
+	var len_sq := axis.length_squared()
+	if len_sq < 1e-6:
+		return
+	var dir := axis / sqrt(len_sq)
+	# Referinta pentru primul perpendicular: axa cea mai putin paralela cu grinda,
+	# ca produsul vectorial sa nu degenereze pe o grinda verticala.
+	var ref := Vector3.RIGHT if absf(dir.dot(Vector3.UP)) > 0.9 else Vector3.UP
+	var u := dir.cross(ref).normalized() * (thick * 0.5)
+	var v := dir.cross(u).normalized() * (thick * 0.5)
+	var c := [
+		from - u - v, from + u - v, from + u + v, from - u + v,
+		to - u - v, to + u - v, to + u + v, to - u + v,
+	]
+	const FACES := [
+		[4, 5, 6, 7], [1, 0, 3, 2], [0, 1, 5, 4],
+		[2, 3, 7, 6], [3, 0, 4, 7], [1, 2, 6, 5],
+	]
+	for f: Array in FACES:
+		st.add_vertex(c[f[0]]); st.add_vertex(c[f[1]]); st.add_vertex(c[f[2]])
+		st.add_vertex(c[f[0]]); st.add_vertex(c[f[2]]); st.add_vertex(c[f[3]])
 
 
 ## Barierele de trecere la nivel, de o parte si de alta a soselei. Lumina lor

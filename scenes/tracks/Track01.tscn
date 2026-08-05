@@ -2,13 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_2wkjx"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="2_1xt1w"]
-[ext_resource type="PackedScene" uid="uid://m2677wwg2b0v" path="res://assets/models/rock_arch.glb" id="3_0kgta"]
 [ext_resource type="PackedScene" uid="uid://bu1lgxcqt0lwn" path="res://assets/models/rock_cluster.glb" id="4_jfmch"]
-[ext_resource type="PackedScene" uid="uid://cwxq73qpvk45u" path="res://assets/models/cactus.glb" id="5_047ul"]
-[ext_resource type="PackedScene" uid="uid://cu2amlsr3pwtg" path="res://assets/models/boulder_roller.glb" id="6_0kgta"]
-[ext_resource type="PackedScene" uid="uid://bts7sxibxuasd" path="res://assets/models/rocks.glb" id="6_f51a1"]
-[ext_resource type="PackedScene" uid="uid://76xqtiyfk6vn" path="res://assets/models/dino_bones.glb" id="7_1bufk"]
-[ext_resource type="PackedScene" uid="uid://b6ues2hqaby2j" path="res://assets/models/cliff_wall.glb" id="9_047ul"]
 [ext_resource type="PackedScene" uid="uid://golsaeo2gcmr" path="res://assets/models/butte.glb" id="10_f51a1"]
 
 [sub_resource type="Curve3D" id="Curve3D_rpgo3"]
@@ -41,32 +35,13 @@ custom_train_fracs = Array[float]([0.37])
 curve = SubResource("Curve3D_rpgo3")
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=456835267]
-visible = false
 script = ExtResource("2_1xt1w")
 
-[node name="rock_arch" parent="DecorManual" unique_id=1638664848 instance=ExtResource("3_0kgta")]
-transform = Transform3D(0.2736436, 6.320991e-05, 0.9618311, -0.09118052, 0.9954982, 0.025875662, -0.95749944, -0.094780974, 0.27241743, 58.807617, -1.4470071, 5.2138977)
-
 [node name="rock_cluster" parent="DecorManual" unique_id=1810421892 instance=ExtResource("4_jfmch")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.067749, 26.51477, -35.867615)
-
-[node name="cactus" parent="DecorManual" unique_id=41485375 instance=ExtResource("5_047ul")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.550049, 10.841064, -2.407318)
-
-[node name="boulder_roller" parent="DecorManual" unique_id=534999377 instance=ExtResource("6_0kgta")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.136597, 2.4059849, -4.4140625)
-
-[node name="rocks" parent="DecorManual" unique_id=1665712117 instance=ExtResource("6_f51a1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176.59485, 132.00146, 0)
-
-[node name="dino_bones" parent="DecorManual" unique_id=1162338716 instance=ExtResource("7_1bufk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.1346436, 7.3536377, -5.155609)
-
-[node name="cliff_wall" parent="DecorManual" unique_id=1908329087 instance=ExtResource("9_047ul")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.871826, -0.33440018, -5.712433)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.067749, 3.23, -35.867615)
 
 [node name="butte" parent="DecorManual" unique_id=155351630 instance=ExtResource("10_f51a1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.335571, 0.805542, 25.67331)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.335571, -0.39, 25.67331)
 
 [node name="butte2" parent="DecorManual" unique_id=1797167542 instance=ExtResource("10_f51a1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2875977, 4.039816, -76.3696)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2875977, 5.15, -76.3696)

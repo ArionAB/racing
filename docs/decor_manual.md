@@ -70,3 +70,21 @@ array `custom_*` în Inspector.
 - **Bugetul rămâne bugetul.** După o sesiune de așezat, rulează garda:
   `godot --headless --path . --script res://tools/probe_decor.gd -- --track=1`.
   Contează mai ales numărul de materiale, nu triunghiurile.
+
+## Verifică ce ai așezat
+
+Primele două limite de mai sus nu se văd din editor, așa că au și o sondă:
+
+```
+godot --headless --path . --script res://tools/probe_manual.gd -- --track=1
+```
+
+Pentru fiecare obiect din `DecorManual` scrie cota lui, cota terenului de sub
+el și distanța până la axul șoselei, apoi dă `VERDICT: OK` sau numără câte sunt
+de reparat. Prima rulare (#151) a găsit, din nouă obiecte: unul la **128 m în
+aer**, patru care pluteau, și patru așezate **pe carosabil** — o arcadă la 2.2 m
+de axul drumului. Nimic nu se vedea, fiindcă nodul stătea pe `visible = false`.
+
+**Coliziunea nu vine de la sine.** Un obiect mare așezat manual lângă șosea, dar
+fără `StaticBody3D`, arată ca un perete prin care treci — mai rău decât lipsa
+lui. Ori îi pui coliziune, ori îl ții destul de departe cât să nu-l atingi.

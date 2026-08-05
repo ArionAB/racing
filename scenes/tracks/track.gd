@@ -42,6 +42,23 @@ const FLYOFF_NET_FLOOR_DROP: float = 45.0
 var track_name: String = "Pista"
 var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
 
+## Sursa semintei pentru tot ce e procedural-aleator in lume: faza dunelor,
+## imprastierea decorului, falezele, siluetele de orizont, stalpii.
+##
+## Gol = numele pistei, deci o pista noua primeste automat alta lume — exact ce
+## vrei in mod normal. Se completeaza cand doua piste trebuie sa aiba EXACT
+## aceeasi lume si difera doar prin nume, adica in cazul unei VARIANTE: Okinawa
+## manual e copia lui Okinawa v2 pe care se aseaza decor de mana, iar daca faza
+## dunelor ar diferi, terenul de sub obiectele asezate pe una n-ar mai fi cel
+## de pe cealalta.
+var world_seed_name: String = ""
+
+
+## Samanta lumii. Vezi [member world_seed_name].
+func _world_seed() -> int:
+	var src := world_seed_name if not world_seed_name.is_empty() else track_name
+	return src.hash()
+
 ## Tema vizuala: fiecare pista isi defineste LUMEA (teren, cer, decor).
 var theme_decor: String = "forest" # cheie in Track.themes()
 var theme_ground_tint := Color(0.45, 0.72, 0.33)
@@ -272,12 +289,12 @@ static func themes() -> Dictionary:
 
 ## Citeste un camp din tema curenta, cu valoare implicita daca lipseste.
 ##
-## Initializarea e LENESA si intentionat NU trece prin apply_theme. Track02 si
-## Track03 nu apeleaza apply_theme niciodata: ele raman pe valorile implicite
-## ale variabilelor theme_*, care NU sunt identice cu ramura "forest"
-## (cerul implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)).
-## Un apply_theme("forest") fortat aici le-ar schimba in tacere aspectul.
-## Asa iau doar FLAG-urile de comportament, iar culorile raman ale lor.
+## Initializarea e LENESA si intentionat NU trece prin apply_theme: o pista are
+## voie sa nu apeleze apply_theme deloc si sa ramana pe valorile implicite ale
+## variabilelor theme_*, care NU sunt identice cu ramura "forest" (cerul
+## implicit e (0.30,0.50,0.80), cel din tema e (0.22,0.48,0.9)). Un
+## apply_theme("forest") fortat aici i-ar schimba in tacere aspectul.
+## Asa iau doar FLAG-urile de comportament, iar culorile raman ale ei.
 func theme_flag(key: String, fallback: Variant = null) -> Variant:
 	if _theme.is_empty():
 		var all := themes()
@@ -414,6 +431,17 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Laguna: conturul apei din INTERIORUL buclei, ca poligon in plan XZ.
+##
+## Regula implicita a temei cu apa e ca interiorul circuitului ramane USCAT
+## (vezi TrackSideSampler.ground_y — un atol aparut din greseala nu se vede
+## decat de sus). Hook-ul asta e exceptia declarata: o insula inelara in jurul
+## unei lagune, unde golul din mijloc E subiectul pistei.
+##
+## Gol = fara laguna. Adancimea vine din [member lagoon_depth].
+func _lagoon_points() -> Array[Vector2]:
+	return []
+
 ## Scurtaturi: benzi care se desprind din traseu si revin mai tarziu.
 ##
 ## Fiecare intrare e un dictionar:
@@ -444,18 +472,26 @@ func _ready() -> void:
 	rebuild()
 
 ## Reconstruieste toata pista (folosit si de editor, la Regenerate).
+##
+## Sterge doar ce a generat codul. Un nod pe care l-ai asezat DE MANA in editor
+## si l-ai salvat in .tscn are `owner` setat (radacina scenei), pe cand tot ce
+## adaugam noi cu add_child() are owner null — deci decorul asezat manual
+## supravietuieste si la Regenerate, si la runtime. Vezi docs/decor_manual.md.
 func rebuild() -> void:
 	_mat_cache.clear() # altfel raman materialele temei precedente
 	for child in get_children():
 		if child is Path3D:
 			continue # curba editabila a pistelor custom ramane
+		if child.owner != null:
+			continue # asezat de mana in editor, salvat in scena
 		child.free()
 	_build_curve()
 	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
 	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
-		float(track_name.hash() % 1000) * 0.01, _ravines(),
-		theme_flag("seabed_drop", 0.0), _branch_corridor_points())
+		float(_world_seed() % 1000) * 0.01, _ravines(),
+		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
+		_lagoon_poly(), lagoon_depth)
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -496,6 +532,13 @@ func rebuild() -> void:
 	_build_kerbs()
 	_build_tire_marks()
 	_build_world_decor()
+	# Chevron-urile DUPA decor, nu inaintea lui: canionul si stancile de margine
+	# se aseaza exact pe exteriorul virajelor, adica fix unde stau si semnele.
+	# Puse inainte, primul semn de pe Dunele a iesit INGROPAT intr-o faleza.
+	# Acum semnul isi cauta singur un loc liber (vezi _place_chevron).
+	_build_chevrons()
+	# Gardul, tot dupa decor si din acelasi motiv: isi alege dreptele libere.
+	_build_fences()
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
@@ -725,7 +768,7 @@ func _build_horizon(centroid: Vector3) -> void:
 		return
 	var scene := load(horizon_model) as PackedScene
 	var rng := RandomNumberGenerator.new()
-	rng.seed = track_name.hash() + 1
+	rng.seed = _world_seed() + 1
 	# Unghiuri ECHIDISTANTE cu jitter, nu complet aleatoare.
 	#
 	# Varianta veche trag ea la zar unghi SI raza, si renunta dupa 60 de
@@ -830,7 +873,7 @@ func _road_distance_xz(pos: Vector3) -> float:
 ## Fara butte.glb (sau pe forest): dealurile rotunde de dinainte.
 func _build_horizon_fallback(centroid: Vector3) -> void:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = track_name.hash() + 1
+	rng.seed = _world_seed() + 1
 	var placed := 0
 	var attempts := 0
 	while placed < 12 and attempts < 80:
@@ -1126,6 +1169,12 @@ func _build_terrain() -> void:
 ## piste, complet ingropat — si nimeni n-ar sti de ce, fiindca "nivelul marii e
 ## zero" e o presupunere pe care n-o pui la indoiala.
 @export var sea_level_offset: float = -7.0
+
+## Cat de adanc sapa laguna sub media soselei, cand [method _lagoon_points] da un
+## contur. Se citeste IMPREUNA cu sea_level_offset: diferenta dintre ele e
+## adancimea apei din laguna, iar ea trebuie sa ramana sub SEA_NEAR_DEPTH ca
+## laguna sa fie turcoaz de mic adanc pe toata suprafata, nu albastru de larg.
+@export var lagoon_depth: float = 20.0
 
 ## Cat de departe de tarm mai are rost geometrie fina. Dincolo, culoarea e
 ## oricum sea_deep uniform, deci preia cvadrilaterul de larg.
@@ -1567,6 +1616,14 @@ func _branch_corridor_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for i in range(1, routes.size()):
 		out.append_array(routes[i].baked)
+	return out
+
+
+## Conturul lagunei in forma pe care o vrea samplerul.
+func _lagoon_poly() -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for p in _lagoon_points():
+		out.append(p)
 	return out
 
 
@@ -2162,8 +2219,8 @@ func _build_flyoff_net(idx: int) -> void:
 	var top := lowest_road - FLYOFF_NET_CEILING_DROP
 	var bottom := lowest_road - FLYOFF_NET_FLOOR_DROP
 	# Garda de build: un fly-off fara rapa sub el arunca masina pe nisip, iar
-	# plasa nu se declanseaza niciodata. Prinde Track04 si orice pista viitoare
-	# unde cineva adauga un fly-off si uita rapa.
+	# plasa nu se declanseaza niciodata. Prinde orice pista unde cineva adauga
+	# un fly-off si uita rapa.
 	if _sampler.max_ravine_depth() <= FLYOFF_NET_CEILING_DROP + 4.0:
 		push_warning(("Fly-off la indexul %d fara rapa suficienta: " +
 			"plasa de respawn ramane ingropata. Vezi _ravines().") % idx)
@@ -2627,12 +2684,22 @@ func _build_kerbs() -> void:
 ## sloturi de la [member _sampler]. Motivul e la fel de mult organizatoric cat
 ## tehnic: track.gd e fisierul pe care il atinge toata lumea, iar decorul e
 ## partea care se itereaza cel mai des.
+## Radacinile decorului generat (faleze + scatter), tinute minte ca chevron-urile
+## sa poata intreba "e ceva mare aici?" fara sa scaneze toata scena.
+var _decor_roots: Array[Node3D] = []
+
+
 func _build_world_decor() -> void:
-	add_child(TrackCliffs.build(_sampler, theme_flag("cliffs", false),
-		track_name.hash(), _cliff_clearings(), _gorge_ranges()))
-	add_child(TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
-		track_name.hash(), Callable(self, "_flat_material"),
-		theme_flag("props", "desert")))
+	_decor_roots.clear()
+	var cliffs := TrackCliffs.build(_sampler, theme_flag("cliffs", false),
+		_world_seed(), _cliff_clearings(), _gorge_ranges())
+	add_child(cliffs)
+	_decor_roots.append(cliffs)
+	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
+		_world_seed(), Callable(self, "_flat_material"),
+		theme_flag("props", "desert"))
+	add_child(decor)
+	_decor_roots.append(decor)
 
 func _build_excavator(frac: float) -> void:
 	const PATH := "res://assets/models/rusted_digger.glb"
@@ -2705,7 +2772,7 @@ func _build_dino(frac: float, side_sign: float) -> void:
 func _scatter_bones(scene: PackedScene, center: Vector3, frac: float) -> void:
 	const PICKS := ["Bone_A", "Bone_B", "Bone_C"]
 	var rng := RandomNumberGenerator.new()
-	rng.seed = track_name.hash() + int(frac * 1000.0)
+	rng.seed = _world_seed() + int(frac * 1000.0)
 	for i in range(7):
 		var bone := _extract_glb_node(scene, PICKS[rng.randi_range(0, 2)])
 		if bone == null:
@@ -2845,6 +2912,70 @@ func _build_mine(frac: float, side_sign: float) -> void:
 		add_child(piece)
 		Palette.apply_class_materials(piece, _MINE_CLASSES)
 		piece.look_at_from_position(spot, Vector3(p.x, spot.y, p.z), Vector3.UP)
+	_build_mine_camp(stand, side)
+
+
+## Gramada de unelte din jurul gurii de mina: butoaie, lazi, cauciucuri.
+##
+## Pozitiile sunt SCRISE, nu trase la sorti — asta e toata diferenta dintre un
+## set si scatter. Decorul procedural imprastie deja obiecte pe toata pista;
+## ce nu avea pista era un loc unde obiectele stau IMPREUNA si spun ceva
+## ("aici s-a descarcat vagonetul"). Un cluster citit corect valoreaza cat
+## douazeci de butoaie presarate, si costa de douazeci de ori mai putin.
+##
+## Sistemul de coordonate e cel al sinei de deasupra: `toward` = metri spre
+## sosea fata de gura minei, `along` = metri lateral (pozitiv in aceeasi parte
+## ca vagonetul, ca gramada sa se stranga in jurul lui). `yaw` e rotatia in
+## grade fata de directia „cu fata la drum" — la un butoi conteaza doar ca
+## piesele vecine sa nu iasa aliniate ca la raft.
+## Cele doua ACCENTE de culoare (#149) stau amandoua aici, si asta e regula, nu
+## intamplarea: style_bible §1 lasa masinilor monopolul suprafetelor saturate,
+## deci o pata de rosu sau de albastru in decor e o resursa care se cheltuie pe
+## un set, ca sa-i tragi ochiul acolo. Imprastiate pe margine ar concura chiar
+## lucrul pe care trebuie sa-l urmaresti — masina din fata.
+##
+## Containerul e lipit de peretele minei dinadins: `painted_metal` se citeste
+## RECE pe nisip, deci are nevoie de o structura langa el. Singur pe dune ar
+## arata a greseala de paleta.
+const _MINE_CAMP := [
+	# Punctul de descarcare, langa vagonet: doua butoaie si o lada.
+	{"node": "Barrel_A", "toward": 4.3, "along": 4.5, "yaw": 15.0},
+	{"node": "Barrel_B", "toward": 3.5, "along": 5.4, "yaw": -40.0},
+	{"node": "Crate_A", "toward": 5.4, "along": 5.1, "yaw": 24.0},
+	{"node": "Tarp_A", "toward": 4.9, "along": 6.3, "yaw": -8.0},
+	# Depozitul, lipit de peretele minei, pe partea cealalta a sinei.
+	{"node": "TyreStack", "toward": 7.6, "along": -3.4, "yaw": 0.0},
+	{"node": "Crate_B", "toward": 9.2, "along": -2.6, "yaw": -18.0},
+	{"node": "Tyre", "toward": 6.0, "along": -4.5, "yaw": 0.0},
+	{"node": "Container_A", "toward": 8.4, "along": -4.6, "yaw": 8.0},
+]
+
+
+func _build_mine_camp(stand: Vector3, side: Vector3) -> void:
+	const PATH := "res://assets/models/props_junk.glb"
+	if not ResourceLoader.exists(PATH):
+		return
+	var scene := load(PATH) as PackedScene
+	var along := side.cross(Vector3.UP).normalized()
+	# Cu fata la drum, adica invers decat `side` (care arata dinspre sosea spre
+	# mina). Butoaiele n-au fata, dar lazile au muchii, si un rand de cutii
+	# paralele cu drumul citeste altfel decat unul pieziș.
+	var base_yaw := atan2(-side.x, -side.z)
+	for item: Dictionary in _MINE_CAMP:
+		var piece := _extract_glb_node(scene, String(item["node"]))
+		if piece == null:
+			continue
+		# Clasele, NU atlasul: butoaiele si lazile au UV-uri reale din #131, iar
+		# `apply_world_material` ar citi atlasul pe ele si le-ar face dungi prin
+		# toata paleta. Cauciucurile nu sunt in tabel si cad pe atlas — negrul
+		# curat E cauciucul (vezi PROPS_JUNK_CLASSES).
+		Palette.apply_class_materials(piece, PROPS_JUNK_CLASSES)
+		add_child(piece)
+		var spot := stand - side * float(item["toward"]) \
+			+ along * float(item["along"])
+		spot.y = _sampler.ground_y(spot.x, spot.z)
+		piece.global_position = spot
+		piece.rotation.y = base_yaw + deg_to_rad(float(item["yaw"]))
 
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
 ##   gap    = cat de departe de marginea soselei sta (m)
@@ -2944,6 +3075,23 @@ const _LANDMARKS := {
 	11: {"path": "res://assets/models/gusuku_wall.glb",
 		"gap": 4.5, "col": "box", "spin": false,
 		"classes": {"Gusuku_Wall": "stone_wall"}},
+	# --- Desert -----------------------------------------------------------
+	#
+	# Baraca minerului. Casa de sat (id 6) e tot o cladire mica, dar e Okinawa —
+	# tigla, tencuiala, piatra de gusuku — deci nu se refoloseste pe desert.
+	# `Shack_Trim` (usa, geamul, pragul) NU e mapat si cade pe atlas, dinadins:
+	# usa si geamul sunt cele mai inchise suprafete din obiect, iar contrastul
+	# lor cu lemnul spalat de soare e ce face silueta sa se citeasca de la 60 m.
+	# O textura de lemn peste ele le-ar aduce la valoarea peretelui.
+	#
+	# Id 12, nu 7: baraca s-a nascut pe id 7 (#150) in acelasi timp in care
+	# farul insulei si-l lua tot pe 7 (#103), pe alta ramura. Insula a pastrat
+	# 7-11 fiindca `Track05._landmark_spots` le referea deja din COD; baraca era
+	# referita doar din datele lui Track01, deci ea s-a mutat. Cand adaugi un
+	# landmark nou, ia urmatorul id LIBER si verifica intai ramurile deschise.
+	12: {"path": "res://assets/models/miner_shack.glb",
+		"gap": 12.0, "col": "box", "spin": false,
+		"classes": {"Shack_Wood": "wood", "Shack_Roof": "rust_metal"}},
 }
 
 ## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual
@@ -3070,7 +3218,7 @@ func _build_markers() -> void:
 		return
 	var scene := load("res://assets/models/marker_post.glb") as PackedScene
 	var rng := RandomNumberGenerator.new()
-	rng.seed = track_name.hash() + 7 # alt sir decat decorul si orizontul
+	rng.seed = _world_seed() + 7 # alt sir decat decorul si orizontul
 	var loop_poly := PackedVector2Array()
 	for p in _points():
 		loop_poly.append(Vector2(p.x, p.z))
@@ -3118,6 +3266,332 @@ func _marker_variant(rng: RandomNumberGenerator) -> String:
 		if roll < acc:
 			return String(pick["node"])
 	return String(_MARKER_PICKS[0]["node"])
+
+
+## Semne chevron inaintea virajelor stranse: comunicare de gameplay, nu decor.
+## De la 60-80 m, din chase cam, directia virajului trebuie citita inainte sa
+## se vada virajul (brieful din docs/asset_briefs/chevron_sign.md).
+const CHEVRON_PATH := "res://assets/models/chevron_sign.glb"
+## Sub pragul asta de rotatie cumulata pe fereastra de ~30 m nu e "viraj
+## strans", e curgere — un semn acolo ar fi zgomot (style_bible §3).
+const CHEVRON_TURN_MIN: float = 0.8    # rad (~46°)
+## De aici in sus virajul primeste panoul triplu, nu pe cel simplu.
+## 1.0, nu 1.3: la 1.3 niciun viraj de pe Dunele nu lua panoul mare, iar din
+## chase cam, la 27 m, panoul simplu abia se anunta. Virajele de ~60° pe
+## fereastra de 30 m sunt exact cele in care intri prea repede.
+const CHEVRON_TURN_TRIPLE: float = 1.0 # rad (~57°)
+## Semnul sta INAINTEA intrarii in viraj: la ~30 m/s, o secunda de reactie.
+const CHEVRON_LEAD: float = 28.0
+const CHEVRON_GAP: float = 2.6         # m de la marginea asfaltului
+const CHEVRON_MAX: int = 12
+## Cat poate aluneca semnul de-a lungul drumului ca sa iasa dintre stanci.
+## Rulat DUPA decor tocmai ca sa poata face asta: prima versiune se construia
+## inaintea decorului si primul semn de pe Dunele a iesit ingropat in faleza.
+const CHEVRON_SLIDE: Array[float] = [0.0, -3.0, 3.0, -6.0, 6.0, -9.0, -12.0,
+	-15.0] # metri fata de avansul nominal; negativ = si mai devreme
+## Cat de departe de marginea oricarei piese de decor trebuie sa stea STALPUL
+## semnului. Doar anti-suprapunere — vizibilitatea o dau liniile de vedere.
+const CHEVRON_CLEAR: float = 0.6
+## Punctele de pe traseu (metri in urma semnului) din care semnul trebuie sa
+## se vada neacoperit. 15 = "il citesti cand ridici piciorul de pe acceleratie",
+## 30 = "il vezi din zona de franare".
+const CHEVRON_EYES: Array[float] = [15.0, 30.0]
+
+
+## Cotitura SEMNATA a fiecarui pas de pe traseu, in radiani: + stanga, - dreapta.
+##
+## Insumata pe o fereastra da „cat de tare intoarce drumul aici", si din ea ies
+## amandoua deciziile de amplasare care se uita la forma soselei: semnele de
+## chevron cauta maximele (viraje), gardul cauta minimele (drepte).
+func _turn_angles() -> PackedFloat32Array:
+	var n := baked.size()
+	var ang := PackedFloat32Array()
+	ang.resize(n)
+	for i in n:
+		var d0 := baked[i] - baked[(i - 1 + n) % n]
+		var d1 := baked[(i + 1) % n] - baked[i]
+		d0.y = 0.0
+		d1.y = 0.0
+		if d0.length_squared() < 1e-8 or d1.length_squared() < 1e-8:
+			ang[i] = 0.0
+			continue
+		ang[i] = asin(clampf(d0.normalized().cross(d1.normalized()).y, -1.0, 1.0))
+	return ang
+
+
+func _build_chevrons() -> void:
+	if not ResourceLoader.exists(CHEVRON_PATH):
+		return
+	var scene := load(CHEVRON_PATH) as PackedScene
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _world_seed() + 11 # alt sir decat stalpii si decorul
+	var n := baked.size()
+	if n < 8 or _dists.size() <= n:
+		return
+	# Piesele de decor destul de mari cat sa ascunda un semn de 1.6 m, ca
+	# amprente convexe in XZ. Se strang O DATA, nu per candidat.
+	var obstacles: Array[PackedVector2Array] = []
+	for decor_root in _decor_roots:
+		_collect_obstacles(decor_root, obstacles)
+	var spacing := _dists[n] / float(n)
+	var ang := _turn_angles()
+	var look := maxi(1, int(30.0 / spacing))
+	var lead := maxi(1, int(CHEVRON_LEAD / spacing))
+	var placed := 0
+	var i := lead # nu incepe inainte de linia de start: semnul ar intra in poarta
+	while i < n and placed < CHEVRON_MAX:
+		var total := 0.0
+		for k in look:
+			total += ang[(i + k) % n]
+		if absf(total) < CHEVRON_TURN_MIN:
+			i += 1
+			continue
+		if _place_chevron(scene, rng, (i - lead + n) % n, total, obstacles):
+			placed += 1
+		# Sari peste viraj plus un respiro — altfel un S lung ar insira
+		# cate un semn la fiecare 3 m si semnalul ar redeveni zgomot.
+		i += look + int(40.0 / spacing)
+
+
+## Aduna piesele de decor ca amprente convexe in plan XZ: colturile AABB-ului
+## LOCAL trecute prin transformarea globala, apoi convex hull. Amprenta
+## ORIENTATA, nu AABB global: sectiunile de faleza stau diagonal in viraje —
+## exact unde stau si semnele — iar cutia lor axata se umfla peste tot
+## coridorul drumului si "suprapune" semne care stau de fapt la metri de
+## fata zidului (asa au murit toate candidatele la a doua incercare; prima
+## murise de cercuri). Doar piesele care pot acoperi PANOUL (0.8-1.6 m):
+## scatterul marunt ascunde cel mult stalpii.
+func _collect_obstacles(node: Node, out: Array[PackedVector2Array]) -> void:
+	for c in node.get_children():
+		if c.is_queued_for_deletion():
+			continue # variante de GLB "sterse" in cadrul curent, inca in arbore
+		if c is MeshInstance3D:
+			var mi := c as MeshInstance3D
+			var aabb := mi.get_aabb()
+			var world := mi.global_transform * aabb
+			if world.size.y >= 1.2:
+				var pts := PackedVector2Array()
+				for cx in 2:
+					for cy in 2:
+						for cz in 2:
+							var corner := aabb.position + Vector3(
+								aabb.size.x * cx, aabb.size.y * cy,
+								aabb.size.z * cz)
+							var g := mi.global_transform * corner
+							pts.append(Vector2(g.x, g.z))
+				out.append(Geometry2D.convex_hull(pts))
+		_collect_obstacles(c, out)
+
+
+## Un semn pentru virajul care incepe la `at0 + lead`. `turn` semnat: + stanga,
+## - dreapta. Semnul prefera pozitia nominala, dar decorul nu stie de el
+## (generatorul e orb la ce vine dupa el — docs/decor_manual.md), asa ca
+## CANDIDEAZA de-a lungul drumului si, daca tot exteriorul e zidit, trece pe
+## interiorul virajului — un semn pe interior tot comunica directia; unul
+## ingropat in stanca nu comunica nimic.
+## Modelul e desenat spre STANGA (varful pe +X, adica stanga soferului care ii
+## vede fata); virajele la dreapta il oglindesc cu scale.x = -1 — Godot
+## intoarce backface culling dupa determinantul transformarii, deci oglindirea
+## e legala pentru geometrie statica.
+func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
+		at0: int, turn: float, obstacles: Array[PackedVector2Array]) -> bool:
+	var n := baked.size()
+	var spacing := _dists[n] / float(n)
+	var out_sign := 1.0 if turn > 0.0 else -1.0
+	for side_mult: float in [1.0, -1.0]: # intai exteriorul, apoi interiorul
+		for slide in CHEVRON_SLIDE:
+			var i := (at0 + int(slide / spacing) + n) % n
+			var stand := baked[i] + _side_at(i) \
+				* (half_width + CHEVRON_GAP) * out_sign * side_mult
+			var ground := _sampler.ground_y(stand.x, stand.z)
+			if absf(ground - baked[i].y) > 2.0:
+				continue # sectiune inaltata: ar pluti sau ar cadea sub drum
+			if not _chevron_spot_clear(stand, i, obstacles):
+				continue
+			var variant := "Chevron_A"
+			if absf(turn) < CHEVRON_TURN_TRIPLE:
+				# Acelasi motiv ca la stalpi: unul din vreo sase e lovit, ca
+				# marginea sa citeasca a loc trait, nu a ruina.
+				variant = "Chevron_C" if rng.randf() < 0.18 else "Chevron_B"
+			var model := _extract_glb_node(scene, variant)
+			if model == null:
+				return false
+			Palette.apply_world_material(model)
+			if turn < 0.0:
+				model.scale.x = -1.0
+			var root := Node3D.new()
+			root.add_child(model)
+			add_child(root)
+			stand.y = ground
+			# -Z al semnului (fata cu chevronele) se intoarce IMPOTRIVA sensului
+			# de mers: semnul vorbeste cu cine vine spre el, nu cu cine a trecut.
+			var dir := (baked[(i + 1) % n] - baked[i]).normalized()
+			root.look_at_from_position(stand, stand - dir, Vector3.UP)
+			return true
+	return false
+
+
+## Gard de ranch pe portiunile DREPTE: textura de margine, nu reper.
+##
+## Oglinda semnelor de chevron — aceeasi fereastra de curbura din
+## `_turn_angles`, dar cautand minimele in loc de maxime. Gardul are nevoie de
+## o dreapta ca sa citeasca drept: pe un viraj, module rigide de 4 m ar taia
+## coarda si ar iesi un poligon, nu o curba.
+const FENCE_PATH := "res://assets/models/fence_ranch.glb"
+## Peste atata cotitura cumulata pe fereastra nu mai e dreapta.
+const FENCE_STRAIGHT_MAX: float = 0.22   # rad (~13°)
+## Cat de lunga trebuie sa fie dreapta ca sa incapa un rand care se citeste.
+const FENCE_RUN_MIN: float = 26.0
+const FENCE_GAP: float = 5.2             # m de la marginea asfaltului
+const FENCE_PITCH: float = 3.94          # lungimea modulului (masurata din GLB)
+const FENCE_ROWS_MAX: int = 7
+const FENCE_MODULES_MIN: int = 3
+const FENCE_MODULES_MAX: int = 6
+## Cat trebuie sa stea un modul departe de orice piesa de decor.
+const FENCE_CLEAR: float = 1.0
+## Cat de mult poate urca/cobori terenul sub un modul fata de cota soselei
+## inainte sa renuntam: un gard care intra in deal arata mai rau decat lipsa lui.
+const FENCE_STEP_MAX: float = 1.6
+## Variantele si cat de des apar. Cel rupt e rar din acelasi motiv ca la stalpii
+## de marcaj: daca fiecare al treilea modul e frant, nu mai citesti un gard, ci
+## o ruina.
+const _FENCE_PICKS := [
+	{"node": "Fence_A", "weight": 0.58},
+	{"node": "Fence_B", "weight": 0.30},
+	{"node": "Fence_C", "weight": 0.12},
+]
+
+
+func _build_fences() -> void:
+	if not ResourceLoader.exists(FENCE_PATH):
+		return
+	var scene := load(FENCE_PATH) as PackedScene
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _world_seed() + 23 # alt sir decat stalpii, decorul si semnele
+	var n := baked.size()
+	if n < 8 or _dists.size() <= n:
+		return
+	var obstacles: Array[PackedVector2Array] = []
+	for decor_root in _decor_roots:
+		_collect_obstacles(decor_root, obstacles)
+	var spacing := _dists[n] / float(n)
+	var ang := _turn_angles()
+	var look := maxi(1, int(24.0 / spacing))
+	var need := maxi(2, int(FENCE_RUN_MIN / spacing))
+	var rows := 0
+	var i := 0
+	while i < n and rows < FENCE_ROWS_MAX:
+		# Cat tine dreapta care incepe aici?
+		var run := 0
+		while run < n:
+			var total := 0.0
+			for k in look:
+				total += ang[(i + run + k) % n]
+			if absf(total) > FENCE_STRAIGHT_MAX:
+				break
+			run += 1
+		if run < need:
+			i += maxi(1, run + 1)
+			continue
+		# Randul sta in mijlocul dreptei, ca sa nu se lipeasca de viraje.
+		var count := rng.randi_range(FENCE_MODULES_MIN, FENCE_MODULES_MAX)
+		var span := int(float(count) * FENCE_PITCH / spacing)
+		var start := i + maxi(0, (run - span) / 2)
+		# Alternam latura intre randuri: un gard mereu pe aceeasi parte citeste
+		# ca o imprejmuire de pista, nu ca peisaj locuit.
+		var first := 1.0 if rows % 2 == 0 else -1.0
+		if _place_fence_row(scene, rng, start, count, first, obstacles) \
+				or _place_fence_row(scene, rng, start, count, -first, obstacles):
+			rows += 1
+		i += run + 1
+	if rows == 0 and n > 0:
+		# Tacerea ar fi arata ca o alegere de design (lectia din _build_horizon).
+		print("%s: niciun rand de gard (fara drepte destul de lungi sau libere)"
+			% track_name)
+
+
+## Un rand de module. Intoarce false daca nu incape — apelantul incearca cealalta
+## latura. Randul e totul sau nimic: un gard din care lipsesc bucati la mijloc
+## citeste ca eroare, nu ca uzura (pentru uzura exista `Fence_C`).
+func _place_fence_row(scene: PackedScene, rng: RandomNumberGenerator,
+		start: int, count: int, side_sign: float,
+		obstacles: Array[PackedVector2Array]) -> bool:
+	var n := baked.size()
+	var spacing := _dists[n] / float(n)
+	var step := maxi(1, int(FENCE_PITCH / spacing))
+	var spots: Array[Vector3] = []
+	var yaws: Array[float] = []
+	for m in count:
+		var idx := (start + m * step) % n
+		var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+		var spot := baked[idx] + _side_at(idx) * (half_width + FENCE_GAP) * side_sign
+		var ground := _sampler.ground_y(spot.x, spot.z)
+		if absf(ground - baked[idx].y) > FENCE_STEP_MAX:
+			return false
+		if not _spot_free(Vector2(spot.x, spot.z), obstacles, FENCE_CLEAR):
+			return false
+		spot.y = ground
+		spots.append(spot)
+		# Modulul se intinde pe X-ul lui local, deci X-ul trebuie sa cada pe
+		# directia drumului. Pentru rotation.y = t, basis.x = (cos t, 0, -sin t).
+		yaws.append(atan2(-dir.z, dir.x))
+	for m in count:
+		var model := _extract_glb_node(scene, _fence_variant(rng))
+		if model == null:
+			return false
+		Palette.apply_world_material(model)
+		var root := Node3D.new()
+		root.add_child(model)
+		add_child(root)
+		root.global_position = spots[m]
+		root.rotation.y = yaws[m]
+	return true
+
+
+func _fence_variant(rng: RandomNumberGenerator) -> String:
+	var roll := rng.randf()
+	var acc := 0.0
+	for pick: Dictionary in _FENCE_PICKS:
+		acc += float(pick["weight"])
+		if roll < acc:
+			return String(pick["node"])
+	return String(_FENCE_PICKS[0]["node"])
+
+
+## Punctul e destul de departe de toate amprentele de decor?
+static func _spot_free(p: Vector2, obstacles: Array[PackedVector2Array],
+		clearance: float) -> bool:
+	for hull in obstacles:
+		if Geometry2D.is_point_in_polygon(p, hull):
+			return false
+		for e in hull.size():
+			var closest := Geometry2D.get_closest_point_to_segment(
+				p, hull[e], hull[(e + 1) % hull.size()])
+			if closest.distance_to(p) < clearance:
+				return false
+	return true
+
+
+## Locul e bun daca semnul (1) nu se suprapune cu nicio piesa de decor si
+## (2) SE VEDE din pozitiile de apropiere — liniile de vedere de la sofer la
+## semn nu taie nicio amprenta de decor. O stanca LANGA sau IN SPATELE
+## semnului e in regula (e chiar fundal bun); doar una intre sofer si semn
+## il face inutil. Asta e diferenta fata de testul radial initial, care pe
+## Dunele respingea aproape tot: banda "hug" captuseste drumul cu stanci.
+func _chevron_spot_clear(stand: Vector3, at: int,
+		obstacles: Array[PackedVector2Array]) -> bool:
+	var p := Vector2(stand.x, stand.z)
+	if not _spot_free(p, obstacles, CHEVRON_CLEAR):
+		return false
+	var n := baked.size()
+	var spacing := _dists[n] / float(n)
+	for back_m: float in CHEVRON_EYES:
+		var k := (at - int(back_m / spacing) + n) % n
+		var line := PackedVector2Array([Vector2(baked[k].x, baked[k].z), p])
+		for hull in obstacles:
+			if not Geometry2D.intersect_polyline_with_polygon(line, hull).is_empty():
+				return false
+	return true
 
 ## Marginea LUMII: patru pereti INVIZIBILI care opresc masina sa iasa din
 ## harta. Inainte era rama de scanduri a unei lazi de nisip (tema "jucarii in

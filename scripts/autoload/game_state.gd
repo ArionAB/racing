@@ -18,17 +18,16 @@ const CAR_DATA: Array[Resource] = [
 ]
 
 ## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in
-## cursa rapida (Atelier = pista custom, editabila in editor).
+## cursa rapida.
 const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
-	"res://scenes/tracks/Track02.tscn",
-	"res://scenes/tracks/Track03.tscn",
-	"res://scenes/tracks/Track04.tscn",
 	"res://scenes/tracks/Track05.tscn",
 	"res://scenes/tracks/Track06.tscn",
+	"res://scenes/tracks/Track07.tscn",
 ]
-const TRACK_NAMES: Array[String] = ["Dunele", "Serpentina", "Muntele", "Atelier",
-	"Okinawa", "Stramtoarea"]
+const TRACK_NAMES: Array[String] = [
+	"Dunele", "Okinawa", "Stramtoarea", "Okinawa v2",
+]
 const CHAMP_ROUNDS: int = 3
 
 ## Puncte pe pozitie (locul 1..4).
@@ -69,7 +68,9 @@ var touch_steer: float = 0.0
 var touch_drift: bool = false
 var touch_turbo: bool = false
 
-# Best lap per pista (index pista -> milisecunde), persistat.
+# Best lap per pista (nume pista -> milisecunde), persistat. Cheia e numele,
+# nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
+# mostenit de alta pista si-i afisa recordul altcuiva.
 var records: Dictionary = {}
 
 func _ready() -> void:
@@ -78,29 +79,30 @@ func _ready() -> void:
 
 ## Returneaza true daca timpul e record nou pe pista respectiva.
 func try_record(track_index: int, lap_ms: int) -> bool:
-	var best := int(records.get(track_index, 0))
+	var key := TRACK_NAMES[track_index]
+	var best := int(records.get(key, 0))
 	if best > 0 and lap_ms >= best:
 		return false
-	records[track_index] = lap_ms
+	records[key] = lap_ms
 	save_records()
 	return true
 
 func best_lap(track_index: int) -> int:
-	return int(records.get(track_index, 0)) # 0 = niciun record inca
+	return int(records.get(TRACK_NAMES[track_index], 0)) # 0 = niciun record inca
 
 func load_records() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(RECORDS_PATH) != OK:
 		return
-	for i in TRACK_SCENES.size():
-		var ms := int(cfg.get_value("records", str(i), 0))
+	for track_name in TRACK_NAMES:
+		var ms := int(cfg.get_value("records", track_name, 0))
 		if ms > 0:
-			records[i] = ms
+			records[track_name] = ms
 
 func save_records() -> void:
 	var cfg := ConfigFile.new()
-	for track_index in records:
-		cfg.set_value("records", str(track_index), records[track_index])
+	for track_name in records:
+		cfg.set_value("records", track_name, records[track_name])
 	cfg.save(RECORDS_PATH)
 
 # ------------------------------------------------------------------ flux

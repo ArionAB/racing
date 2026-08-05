@@ -2,7 +2,7 @@
 class_name TrackFromPath
 extends Track
 ## Pista custom editabila VIZUAL in editorul Godot:
-##  1. deschide scena (ex. Track04.tscn)
+##  1. deschide scena (ex. Track01.tscn)
 ##  2. selecteaza nodul copil "Path" — apar gizmo-urile curbei in viewport
 ##  3. trage punctele / adauga puncte noi (toolbar-ul Path3D de sus)
 ##  4. bifeaza "Regenerate" in Inspector pe nodul radacina -> pista se
@@ -12,7 +12,7 @@ extends Track
 ## Nota: generatorul isi face propriile tangente netede (Catmull-Rom) din
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 
-@export var custom_name: String = "Atelier"
+@export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
 ## Cota marii, RELATIV la media cotelor soselei (doar tema "island").
@@ -38,8 +38,10 @@ extends Track
 ## Creasta de fly-off: te arunca in aer, cu plasa de respawn dedesubt.
 @export var custom_flyoff_fracs: Array[float] = []
 ## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
-## _LANDMARKS: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
-## 4=ecran drive-in, 5=stalp GAS).
+## _LANDMARKS). Desert: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
+## 4=ecran drive-in, 5=stalp GAS, 12=baraca minerului.
+## Okinawa: 6=casa de sat, 7=far, 8=poarta torii, 9/10=shisa (gura deschisa /
+## inchisa), 11=zid gusuku.
 @export var custom_landmarks: Array[Vector3] = []
 ## Rapele: (frac_start, frac_end, adancime_m, latura ±1 sau 0 = ambele).
 ## Terenul urmareste soseaua peste tot; aici il sapam inapoi, ca sa existe unde

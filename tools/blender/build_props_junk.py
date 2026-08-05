@@ -35,9 +35,10 @@ prop-urile astea sunt BUMP-ABILE: se misca, deci triplanarul de lume le-ar face
 textura sa inoate pe suprafata (style_bible §4). Cauciucurile raman pe atlas —
 negrul curat E cauciucul, iar o textura de rugina l-ar transforma in fier.
 
-  Barrel_A, Barrel_B  -> clasa `rust_metal`
-  Crate_A, Crate_B    -> clasa `wood`
-  TyreStack, Tyre     -> atlas
+  Barrel_A, Barrel_B     -> clasa `rust_metal`
+  Crate_A, Crate_B       -> clasa `wood`
+  TyreStack, Tyre        -> atlas
+  Tarp_A, Container_A    -> atlas (accente de culoare, #149 — vezi mai jos)
 
 >>> ATENTIE la integrare (issue #7, inca neinceput): GLB-ul asta nu e instantiat
 >>> de nimeni azi. Cine il pune pe pista TREBUIE sa foloseasca
@@ -117,6 +118,50 @@ def crate(name, w, d, h, band=True):
     return b.to_object(name)
 
 
+def crate_tarp(name, w, d, h, over=0.10):
+    """Lada acoperita cu o musama rosie — ACCENT DE CULOARE (#149).
+
+    Ramane pe ATLAS, nu pe o clasa de textura, si asta e tot rostul ei: paleta
+    calda de desert e din pamanturi, iar accentul trebuie sa fie o pata plata si
+    curata de culoare. O textura de panza peste ea ar sparge-o in nuante si ar
+    face-o inca un obiect maro.
+
+    Musamaua e un capac usor mai mare decat lada, cu colturile lasate: un
+    paralelipiped drept ar citi ca al doilea capac de lemn, nu ca panza.
+    """
+    b = Builder()
+    b.box(center=(0.0, 0.0, h * 0.5), size=(w, d, h), slot=WOOD)
+    faces = b.box(center=(0.0, 0.0, h + 0.05),
+                  size=(w + over, d + over, 0.11), slot=KERB_RED)
+    # Colturile de jos ale musamalei trase in jos si spre exterior: panza atarna.
+    for f in faces:
+        for v in f.verts:
+            if v.co.z < h + 0.02:
+                v.co.z -= 0.06
+                v.co.x *= 1.06
+                v.co.y *= 1.06
+    return b.to_object(name)
+
+
+def container(name, w=1.30, d=0.78, h=0.86):
+    """Container mic de santier — al doilea ACCENT (#149), albastru-metal.
+
+    `painted_metal` (slot 11) se citeste RECE pe nisip (nota din sablonul de
+    brief), deci piesa asta e facuta sa stea LANGA structuri — gura de mina,
+    benzinaria — nu singura pe dune, unde ar arata ca o greseala de paleta.
+
+    Nervurile sunt `retag` pe fetele laterale, nu geometrie: la 0.9 m inaltime
+    si de la 15 m, coastele reale ar fi zgomot platit cu triunghiuri.
+    """
+    b = Builder()
+    body = b.box(center=(0.0, 0.0, h * 0.5), size=(w, d, h), slot=PAINTED)
+    # Rama de jos si capacul, mai inchise: da citire de „cutie metalica" fara
+    # nicio piesa in plus.
+    b.retag(body, ASPHALT_EDGE, where="up")
+    b.box(center=(0.0, 0.0, 0.055), size=(w + 0.04, d + 0.04, 0.11), slot=RUST)
+    return b.to_object(name)
+
+
 def tyre_ring(b, z, rot_deg=0.0):
     faces = b.torus(center=(0.0, 0.0, z), major_r=TYRE_MAJOR, minor_r=TYRE_MINOR,
                     slot=ASPHALT, major_seg=TYRE_SEG[0], minor_seg=TYRE_SEG[1])
@@ -130,6 +175,8 @@ def tyre_ring(b, z, rot_deg=0.0):
 clear_built("Barrel")
 clear_built("Crate")
 clear_built("Tyre")
+clear_built("Tarp")
+clear_built("Container")
 
 objs = []
 
@@ -141,6 +188,14 @@ objs.append(barrel("Barrel_B", r=0.29, h=0.86,
 
 objs.append(crate("Crate_A", 0.90, 0.70, 0.65))
 objs.append(crate("Crate_B", 0.62, 0.55, 0.48, band=False))
+
+# Accentele de culoare (#149). Doua piese, si raman DOUA intentionat:
+# style_bible §1 lasa masinilor monopolul suprafetelor saturate, deci accentul
+# de decor e o resursa care se cheltuie pe seturi, nu se presara pe pista.
+# Amandoua stau pe atlas — o textura de clasa peste ele le-ar sparge culoarea
+# in nuante si le-ar transforma inapoi in obiecte maro.
+objs.append(crate_tarp("Tarp_A", 0.86, 0.66, 0.56))
+objs.append(container("Container_A"))
 
 # Teanc de trei, rotite intre ele: un teanc perfect aliniat arata turnat, nu
 # aruncat. Rotatia costa zero triunghiuri.
@@ -179,7 +234,7 @@ for obj in objs:
              "cub %.1f m" % UV_BY_NODE[obj.name]
              if obj.name in UV_BY_NODE else "atlas"))
 
-print("TOTAL: %d tris pe sase noduri" % total)
+print("TOTAL: %d tris pe %d noduri" % (total, len(objs)))
 
 for o in objs:
     o.location = (0.0, 0.0, 0.0)

@@ -14,8 +14,8 @@ extends Node
 ## numara triunghiuri, probe_race conduce. Regula e simpla si a fost platita
 ## scump: RAZA > half_width, iar doua ramuri paralele la >= 2*half_width.
 ##
-## Numerele NU sunt praguri de esec pentru pistele vechi: Serpentina si Muntele
-## au fost desenate inainte de regula si trec pe langa ea in cateva locuri. De
+## Numerele NU sunt praguri de esec pentru toate pistele: unele au fost desenate
+## inainte de regula si trec pe langa ea in cateva locuri fara sa deranjeze. De
 ## aceea verdictul e "PROBLEMA" doar pentru pista ceruta explicit cu --track.
 
 ## Sub atat, asfaltul incepe sa se plieze. Exprimat ca multiplu de half_width.
@@ -55,7 +55,10 @@ func _check(idx: int) -> bool:
 	await get_tree().process_frame
 
 	print("")
-	print("=== Track%02d — %s (half_width %.1f) ===" % [idx + 1,
+	# Numele scenei, nu idx + 1: indexul in TRACK_SCENES nu mai coincide cu
+	# numarul din fisier de cand s-au sters piste din mijlocul listei.
+	print("=== %s — %s (half_width %.1f) ===" % [
+		GameState.TRACK_SCENES[idx].get_file().get_basename(),
 		track.track_name, track.half_width])
 	var problems := 0
 	for ri in track.routes.size():

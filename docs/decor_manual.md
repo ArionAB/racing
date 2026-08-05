@@ -71,6 +71,26 @@ array `custom_*` în Inspector.
   `godot --headless --path . --script res://tools/probe_decor.gd -- --track=1`.
   Contează mai ales numărul de materiale, nu triunghiurile.
 
+## Grupare pe zone
+
+La câteva zeci de obiecte, o listă plată sub `DecorManual` nu se mai poate citi.
+De aceea decorul se pune în `Node3D`-uri de zonă, numite după secțiunile
+traseului din scriptul pistei (`Zone01_StartCauseway`, `Zone02_Harbour`, …). Așa
+poți ascunde toate zonele în afară de cea la care lucrezi — bifa `visible` pe
+nodul de zonă stinge tot subarborele.
+
+Nodurile de zonă **rămân la transformarea identitate**: poziție `(0,0,0)`, fără
+rotație, scală `1,1,1`. Motivul e că altfel toate cifrele de dedesubt devin
+relative la ele: nu mai poți citi o poziție fără s-o compui în cap, iar un diff
+în `.tscn` nu mai spune unde e obiectul. Cu zona la identitate, transformarea
+fiecărui prop **este** poziția lui în lume.
+
+Corolarul: **nu agăța un prop de alt prop.** E ușor de făcut accidental (tragi
+GLB-ul peste nodul greșit din arbore) și arată la fel în viewport, dar scala
+părintelui se propagă la copii, iar mutarea părintelui târăște după ea obiecte
+pe care nu voiai să le atingi. Pe Track08 ajunseseră 30 de prop-uri agățate de
+trei stânci, unele pe trei niveluri (`coral_rock2/coconut_palm7/sabani_boat`).
+
 ## Verifică ce ai așezat
 
 Primele două limite de mai sus nu se văd din editor, așa că au și o sondă:

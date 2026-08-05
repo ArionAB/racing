@@ -1,6 +1,296 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://cvjm5lmtdib07"]
 
-[ext_resource type="Script" path="res://scenes/tracks/track08.gd" id="1_track08"]
+[ext_resource type="Script" uid="uid://1m5dssfih8wn" path="res://scenes/tracks/track08.gd" id="1_track08"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="2_207ve"]
+[ext_resource type="PackedScene" uid="uid://bs1ngjk4aqm1" path="res://assets/models/tetrapod.glb" id="3_qd4rt"]
+[ext_resource type="PackedScene" uid="uid://dlcj8g6oj7s50" path="res://assets/models/village_house.glb" id="4_7180v"]
+[ext_resource type="PackedScene" uid="uid://tkaxqac1lv" path="res://assets/models/coral_rock.glb" id="4_wrrxe"]
+[ext_resource type="PackedScene" uid="uid://ct0kpsqxmrhe6" path="res://assets/models/banyan.glb" id="5_7180v"]
+[ext_resource type="PackedScene" uid="uid://b6kl5j0iue4iw" path="res://assets/models/coconut_palm.glb" id="6_jtx8o"]
+[ext_resource type="PackedScene" uid="uid://g21s8bu3nxg" path="res://assets/models/sabani_boat.glb" id="7_dydiq"]
+[ext_resource type="PackedScene" uid="uid://d23jdbp6g1jf8" path="res://assets/models/beach_palm_bent.glb" id="8_dledb"]
 
-[node name="Track08" type="Node3D"]
+[node name="Track08" type="Node3D" unique_id=598581151]
 script = ExtResource("1_track08")
+sea_level_offset = -11.0
+lagoon_depth = 15.0
+
+[node name="DecorManual" type="Node3D" parent="." unique_id=692727795]
+script = ExtResource("2_207ve")
+
+[node name="Zone01_StartCauseway" type="Node3D" parent="DecorManual" unique_id=900000001]
+
+[node name="tetrapod" parent="DecorManual/Zone01_StartCauseway" unique_id=1555393576 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 87.2042, -0.45014048, 246.02814)
+
+[node name="tetrapod2" parent="DecorManual/Zone01_StartCauseway" unique_id=1333939195 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 83.695114, -0.45014048, 245.48878)
+
+[node name="tetrapod3" parent="DecorManual/Zone01_StartCauseway" unique_id=1491994129 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 78.48622, 0.11005592, 244.4676)
+
+[node name="tetrapod4" parent="DecorManual/Zone01_StartCauseway" unique_id=1491806589 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 73.36118, 0.12583637, 243.0767)
+
+[node name="tetrapod5" parent="DecorManual/Zone01_StartCauseway" unique_id=294048184 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 68.90229, 0.6427736, 242.21619)
+
+[node name="tetrapod6" parent="DecorManual/Zone01_StartCauseway" unique_id=42245089 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 65.20104, 0.22179127, 240.60226)
+
+[node name="tetrapod7" parent="DecorManual/Zone01_StartCauseway" unique_id=1262501998 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 60.640842, -0.032266617, 238.20985)
+
+[node name="tetrapod8" parent="DecorManual/Zone01_StartCauseway" unique_id=862082269 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 54.558575, -0.20163727, 236.11826)
+
+[node name="tetrapod9" parent="DecorManual/Zone01_StartCauseway" unique_id=297051307 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 50.249313, 0.3184061, 235.17801)
+
+[node name="tetrapod10" parent="DecorManual/Zone01_StartCauseway" unique_id=196209380 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 46.82581, 0.516809, 234.67877)
+
+[node name="tetrapod11" parent="DecorManual/Zone01_StartCauseway" unique_id=1886785785 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 42.580048, 0.516809, 232.51604)
+
+[node name="tetrapod12" parent="DecorManual/Zone01_StartCauseway" unique_id=253232286 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 39.098103, 0.516809, 230.63513)
+
+[node name="tetrapod13" parent="DecorManual/Zone01_StartCauseway" unique_id=1849783502 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 34.069233, 0.516809, 228.92738)
+
+[node name="tetrapod14" parent="DecorManual/Zone01_StartCauseway" unique_id=1744508866 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 30.309778, 0.96508837, 228.0629)
+
+[node name="tetrapod15" parent="DecorManual/Zone01_StartCauseway" unique_id=1456169734 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 26.585201, 0.9650893, 225.89919)
+
+[node name="tetrapod17" parent="DecorManual/Zone01_StartCauseway" unique_id=1735572664 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 22.366793, -0.14136267, 223.2458)
+
+[node name="tetrapod18" parent="DecorManual/Zone01_StartCauseway" unique_id=1955274187 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 18.98139, 1.0514512, 223.2458)
+
+[node name="tetrapod19" parent="DecorManual/Zone01_StartCauseway" unique_id=1375363761 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 17.082096, -0.4993434, 221.68141)
+
+[node name="tetrapod20" parent="DecorManual/Zone01_StartCauseway" unique_id=1618038993 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 13.800523, 0.04539442, 220.26125)
+
+[node name="tetrapod21" parent="DecorManual/Zone01_StartCauseway" unique_id=149689943 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 9.467538, 0.045393467, 215.88332)
+
+[node name="tetrapod22" parent="DecorManual/Zone01_StartCauseway" unique_id=2125088623 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 5.5225368, 1.4566188, 215.88332)
+
+[node name="tetrapod23" parent="DecorManual/Zone01_StartCauseway" unique_id=284774178 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 16.476841, 0.18955135, 198.47076)
+
+[node name="tetrapod24" parent="DecorManual/Zone01_StartCauseway" unique_id=1525098496 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 18.39804, -1.0323582, 200.84232)
+
+[node name="tetrapod25" parent="DecorManual/Zone01_StartCauseway" unique_id=1273328659 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 20.785051, -0.84381866, 203.52875)
+
+[node name="tetrapod26" parent="DecorManual/Zone01_StartCauseway" unique_id=1868232117 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 25.425064, 0.55270386, 204.58733)
+
+[node name="tetrapod27" parent="DecorManual/Zone01_StartCauseway" unique_id=1841773304 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 27.50467, -0.50097466, 207.0812)
+
+[node name="tetrapod28" parent="DecorManual/Zone01_StartCauseway" unique_id=1576003104 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 31.069387, -0.06747532, 208.61658)
+
+[node name="tetrapod29" parent="DecorManual/Zone01_StartCauseway" unique_id=2036947152 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 36.26458, 1.1662607, 208.61658)
+
+[node name="tetrapod30" parent="DecorManual/Zone01_StartCauseway" unique_id=753641055 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 40.303825, -0.20975542, 211.44162)
+
+[node name="tetrapod31" parent="DecorManual/Zone01_StartCauseway" unique_id=464772540 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 43.467796, -0.42925692, 214.62091)
+
+[node name="tetrapod32" parent="DecorManual/Zone01_StartCauseway" unique_id=1981011388 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 47.431942, -0.22530222, 214.18945)
+
+[node name="tetrapod33" parent="DecorManual/Zone01_StartCauseway" unique_id=296363606 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 51.292816, -0.22530222, 216.2345)
+
+[node name="tetrapod34" parent="DecorManual/Zone01_StartCauseway" unique_id=1617567316 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 55.081905, -0.6483979, 219.35582)
+
+[node name="tetrapod35" parent="DecorManual/Zone01_StartCauseway" unique_id=1584110027 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 58.542454, -0.6483979, 219.35582)
+
+[node name="tetrapod36" parent="DecorManual/Zone01_StartCauseway" unique_id=860610825 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 63.213688, -0.6483979, 220.6734)
+
+[node name="tetrapod37" parent="DecorManual/Zone01_StartCauseway" unique_id=1458430129 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 67.33356, -0.4577508, 223.01021)
+
+[node name="tetrapod38" parent="DecorManual/Zone01_StartCauseway" unique_id=884984782 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 71.81673, -0.4577508, 223.01021)
+
+[node name="tetrapod39" parent="DecorManual/Zone01_StartCauseway" unique_id=1665402430 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 75.81955, -1.1406007, 225.12973)
+
+[node name="tetrapod40" parent="DecorManual/Zone01_StartCauseway" unique_id=1468501014 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 80.055305, -1.6090989, 226.85931)
+
+[node name="tetrapod41" parent="DecorManual/Zone01_StartCauseway" unique_id=5442455 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 88.579956, -1.8415017, 228.77594)
+
+[node name="tetrapod42" parent="DecorManual/Zone01_StartCauseway" unique_id=1129932317 instance=ExtResource("3_qd4rt")]
+transform = Transform3D(-0.097414196, 0.97110075, 0.21788585, 0.8846851, -0.015793249, 0.46592134, 0.4558976, 0.23814759, -0.85757947, 93.14832, -1.8414998, 230.19812)
+
+[node name="Zone02_Harbour" type="Node3D" parent="DecorManual" unique_id=900000002]
+
+[node name="coral_rock14" parent="DecorManual/Zone02_Harbour" unique_id=1598916392 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -107, 0.06250095, 196)
+
+[node name="coral_rock15" parent="DecorManual/Zone02_Harbour" unique_id=1007986948 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -114, 0.06250095, 190)
+
+[node name="coral_rock16" parent="DecorManual/Zone02_Harbour" unique_id=548048643 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.97132, 0.46202564, 204.57156)
+
+[node name="coral_rock17" parent="DecorManual/Zone02_Harbour" unique_id=808284638 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -97.79802, -0.41248417, 197.89394)
+
+[node name="coral_rock18" parent="DecorManual/Zone02_Harbour" unique_id=765441697 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -97.79802, -0.41248417, 208.34299)
+
+[node name="village_house" parent="DecorManual/Zone02_Harbour" unique_id=748167775 instance=ExtResource("4_7180v")]
+transform = Transform3D(1.1122786, 0, 1.697056, 0, 2.3799996, 0, -1.1122787, 0, 1.6970559, -121, 0.06250095, 178)
+
+[node name="beach_palm_bent" parent="DecorManual/Zone02_Harbour" unique_id=1549308432 instance=ExtResource("8_dledb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -114, 0.06250095, 190)
+
+[node name="coconut_palm" parent="DecorManual/Zone02_Harbour" unique_id=2004993520 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -113, -1.93749905, 186)
+
+[node name="coconut_palm2" parent="DecorManual/Zone02_Harbour" unique_id=638354697 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -121.854103, 0.19630313, 193.26472)
+
+[node name="coconut_palm3" parent="DecorManual/Zone02_Harbour" unique_id=269394544 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140.854095, 0.19630313, 164.26472)
+
+[node name="coconut_palm4" parent="DecorManual/Zone02_Harbour" unique_id=300952955 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -127.854095, 0.19630313, 164.26472)
+
+[node name="coconut_palm5" parent="DecorManual/Zone02_Harbour" unique_id=2077249532 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -127.854095, 0.19630313, 180.26472)
+
+[node name="Zone03_WestCape" type="Node3D" parent="DecorManual" unique_id=900000003]
+
+[node name="Zone04_WestCoast" type="Node3D" parent="DecorManual" unique_id=900000004]
+
+[node name="Zone05_CoastalClimb" type="Node3D" parent="DecorManual" unique_id=900000005]
+
+[node name="Zone06_Crest" type="Node3D" parent="DecorManual" unique_id=900000006]
+
+[node name="Zone07_EastDescent" type="Node3D" parent="DecorManual" unique_id=900000007]
+
+[node name="Zone08_SoutheastReturn" type="Node3D" parent="DecorManual" unique_id=900000008]
+
+[node name="coral_rock2" parent="DecorManual/Zone08_SoutheastReturn" unique_id=411339686 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121.92636, -1.9005909, 249.7276)
+
+[node name="coral_rock3" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1313760334 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 131.92636, 0.80753064, 226.7276)
+
+[node name="coral_rock4" parent="DecorManual/Zone08_SoutheastReturn" unique_id=349213468 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 131.92636, 0.80753064, 221.7276)
+
+[node name="coral_rock5" parent="DecorManual/Zone08_SoutheastReturn" unique_id=738365371 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124.92636, -0.66999793, 221.7276)
+
+[node name="coral_rock6" parent="DecorManual/Zone08_SoutheastReturn" unique_id=2126188603 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124.92636, -1.6699979, 214.7276)
+
+[node name="coral_rock7" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1198113585 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124.92636, -1.6699979, 201.7276)
+
+[node name="coral_rock8" parent="DecorManual/Zone08_SoutheastReturn" unique_id=171891379 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 127.92636, 2.8075306, 221.7276)
+
+[node name="coral_rock9" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1233168094 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(-0.9659258, 0, -0.25881907, 0, 1, 0, 0.25881907, 0, -0.9659258, 123.92636, 2.8075306, 221.7276)
+
+[node name="coral_rock10" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1177116281 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124.92636, 0.33000207, 189.7276)
+
+[node name="coral_rock11" parent="DecorManual/Zone08_SoutheastReturn" unique_id=207418518 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 116.92636, 0.33000207, 171.7276)
+
+[node name="coral_rock12" parent="DecorManual/Zone08_SoutheastReturn" unique_id=333886184 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 116.92636, 3.330002, 160.7276)
+
+[node name="coral_rock13" parent="DecorManual/Zone08_SoutheastReturn" unique_id=402240143 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110.92636, 3.330002, 152.7276)
+
+[node name="coral_rock19" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1651099219 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 151.92636, 1.0994091, 244.7276)
+
+[node name="coral_rock20" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1681025032 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1.8, 0, 0, 0, 1.7, 0, 0, 0, 1, 158.92636, 1.0994091, 244.7276)
+
+[node name="coral_rock21" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1919651695 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1.289311, 0, -0.7879123, 0, 2.2031999, 0, 1.289311, 0, 0.7879123, 166.92636, 1.0994091, 241.7276)
+
+[node name="coral_rock22" parent="DecorManual/Zone08_SoutheastReturn" unique_id=783835368 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(-0.47192073, 0, -1.0763083, 0, 2.2031999, 0, 1.7612317, 0, -0.288396, 175.92636, 1.0994091, 241.7276)
+
+[node name="coral_rock23" parent="DecorManual/Zone08_SoutheastReturn" unique_id=2000664149 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(0.4719205, 0, -1.0763083, 0, 2.2031999, 0, 1.7612315, 0, 0.28839582, 175.92636, 2.0994091, 251.7276)
+
+[node name="coral_rock24" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1895124247 instance=ExtResource("4_wrrxe")]
+transform = Transform3D(0.4719205, 0, -1.0763083, 0, 2.2031999, 0, 1.7612315, 0, 0.28839582, 183.92636, 1.5532146, 261.7276)
+
+[node name="banyan" parent="DecorManual/Zone08_SoutheastReturn" unique_id=144292094 instance=ExtResource("5_7180v")]
+transform = Transform3D(1.4, 0, 0, 0, 2.2, 0, 0, 0, 1, 182.92636, 1.692842, 249.7276)
+
+[node name="banyan2" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1166313477 instance=ExtResource("5_7180v")]
+transform = Transform3D(1.4, 0, 0, 0, 2.2, 0, 0, 0, 1, 182.92636, 1.692842, 235.7276)
+
+[node name="banyan3" parent="DecorManual/Zone08_SoutheastReturn" unique_id=2119596428 instance=ExtResource("5_7180v")]
+transform = Transform3D(1.4, 0, 0, 0, 2.2, 0, 0, 0, 1, 186.92636, 2.692842, 241.7276)
+
+[node name="coconut_palm" parent="DecorManual/Zone08_SoutheastReturn" unique_id=2044697654 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.92636, 3.0994091, 202.7276)
+
+[node name="coconut_palm2" parent="DecorManual/Zone08_SoutheastReturn" unique_id=696653201 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1.3, -7.5851325e-08, 1.9948581e-07, -4.6185276e-15, 1.6190349, 0.30571014, -2.2729922e-07, -0.43381906, 1.1409259, 151.92636, 2.4455986, 192.7276)
+
+[node name="coconut_palm3" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1666147284 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 159.92636, 2.6019764, 191.7276)
+
+[node name="coconut_palm4" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1283904134 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 164.92636, 2.6019764, 183.7276)
+
+[node name="coconut_palm5" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1419822890 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 171.92636, 2.6019764, 172.7276)
+
+[node name="coconut_palm6" parent="DecorManual/Zone08_SoutheastReturn" unique_id=823659787 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 177.92636, 2.6019764, 164.7276)
+
+[node name="coconut_palm7" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1053654246 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 184.92636, 2.6019764, 154.7276)
+
+[node name="coconut_palm8" parent="DecorManual/Zone08_SoutheastReturn" unique_id=533771183 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1.6, 0, 0, 0, 1, 183.92636, 2.3562036, 202.7276)
+
+[node name="coconut_palm9" parent="DecorManual/Zone08_SoutheastReturn" unique_id=447687088 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1.6, 0, 0, 0, 1.1, 178.92636, 2.3562036, 218.7276)
+
+[node name="coconut_palm10" parent="DecorManual/Zone08_SoutheastReturn" unique_id=381196953 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1.6, 0, 0, 0, 1.1, 194.92636, 2.3562036, 184.7276)
+
+[node name="coconut_palm11" parent="DecorManual/Zone08_SoutheastReturn" unique_id=403432118 instance=ExtResource("6_jtx8o")]
+transform = Transform3D(1, 0, 0, 0, 1.6, 0, 0, 0, 1.1, 202.92636, 2.3562036, 171.7276)
+
+[node name="beach_palm_bent" parent="DecorManual/Zone08_SoutheastReturn" unique_id=822937606 instance=ExtResource("8_dledb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 144.92636, 3.0994091, 199.7276)
+
+[node name="sabani_boat" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1223948693 instance=ExtResource("7_dydiq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 216.92636, 3.5283747, 154.7276)

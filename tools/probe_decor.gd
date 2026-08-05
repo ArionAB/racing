@@ -132,9 +132,28 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ##     triunghiuri"), luata dupa ce a fixat parametrii camerei.
 ## Ce NU stim inca: cat trage asta pe un telefon real. De aia ramane un prag de
 ## ALARMA, si de aia primul test pe device se face pe Okinawa.
+##
+## Track08 sta mai sus decat Track07 desi impart aceeasi lume, si nu din
+## neglijenta: cele 896k de mai sus s-au masurat pe Track08 cand scena lui era
+## un ciot de sase linii, cu cele 87 de prop-uri asezate de mana inca necomise.
+## Dar Okinawa manual E, prin definitie, lumea comuna PLUS decor pus cu mouse-ul
+## (vezi antetul lui track08.gd) — deci un prag care nu-l cuprinde masoara o
+## pista care nu exista. Decorul manual aduce 341 026 de triunghiuri peste
+## Track07, si pista iese la 1 237 328.
+##
+## E fix capcana descrisa in CLAUDE.md: "masuratoare + marja" e buna pentru un
+## prag care prinde regresii, dar aplicata pe o masuratoare luata inaintea
+## muncii devine un plafon care respinge munca legitima — ca prima benzinarie cu
+## ferestre reale, respinsa de un numar derivat din cat de sarac era jocul in
+## ziua aia. Materialele, axa care chiar doare pe mobil, raman 22 din 38.
+##
+## 1.3M lasa ~5% aer peste masuratoarea de acum: strans intentionat, cat sa
+## prinda urmatoarea sesiune de asezat decor. Ce ar trebui sa scada cifra fara
+## sa taie din compozitie: un tetrapod are 5 104 de triunghiuri pentru un bloc
+## de beton de 4.2 m, iar digul are 41.
 const TRIS_OVERRIDE := {
 	"Track07": 1000000,
-	"Track08": 1000000,
+	"Track08": 1300000,
 }
 
 

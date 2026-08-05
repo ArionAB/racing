@@ -505,6 +505,8 @@ func rebuild() -> void:
 	# Puse inainte, primul semn de pe Dunele a iesit INGROPAT intr-o faleza.
 	# Acum semnul isi cauta singur un loc liber (vezi _place_chevron).
 	_build_chevrons()
+	# Gardul, tot dupa decor si din acelasi motiv: isi alege dreptele libere.
+	_build_fences()
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
@@ -3164,6 +3166,27 @@ const CHEVRON_CLEAR: float = 0.6
 const CHEVRON_EYES: Array[float] = [15.0, 30.0]
 
 
+## Cotitura SEMNATA a fiecarui pas de pe traseu, in radiani: + stanga, - dreapta.
+##
+## Insumata pe o fereastra da „cat de tare intoarce drumul aici", si din ea ies
+## amandoua deciziile de amplasare care se uita la forma soselei: semnele de
+## chevron cauta maximele (viraje), gardul cauta minimele (drepte).
+func _turn_angles() -> PackedFloat32Array:
+	var n := baked.size()
+	var ang := PackedFloat32Array()
+	ang.resize(n)
+	for i in n:
+		var d0 := baked[i] - baked[(i - 1 + n) % n]
+		var d1 := baked[(i + 1) % n] - baked[i]
+		d0.y = 0.0
+		d1.y = 0.0
+		if d0.length_squared() < 1e-8 or d1.length_squared() < 1e-8:
+			ang[i] = 0.0
+			continue
+		ang[i] = asin(clampf(d0.normalized().cross(d1.normalized()).y, -1.0, 1.0))
+	return ang
+
+
 func _build_chevrons() -> void:
 	if not ResourceLoader.exists(CHEVRON_PATH):
 		return
@@ -3179,18 +3202,7 @@ func _build_chevrons() -> void:
 	for decor_root in _decor_roots:
 		_collect_obstacles(decor_root, obstacles)
 	var spacing := _dists[n] / float(n)
-	# Unghiul semnat al fiecarui pas: cross.y cu UP da +stanga / -dreapta.
-	var ang := PackedFloat32Array()
-	ang.resize(n)
-	for i in n:
-		var d0 := baked[i] - baked[(i - 1 + n) % n]
-		var d1 := baked[(i + 1) % n] - baked[i]
-		d0.y = 0.0
-		d1.y = 0.0
-		if d0.length_squared() < 1e-8 or d1.length_squared() < 1e-8:
-			ang[i] = 0.0
-			continue
-		ang[i] = asin(clampf(d0.normalized().cross(d1.normalized()).y, -1.0, 1.0))
+	var ang := _turn_angles()
 	var look := maxi(1, int(30.0 / spacing))
 	var lead := maxi(1, int(CHEVRON_LEAD / spacing))
 	var placed := 0
@@ -3287,6 +3299,147 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 	return false
 
 
+## Gard de ranch pe portiunile DREPTE: textura de margine, nu reper.
+##
+## Oglinda semnelor de chevron — aceeasi fereastra de curbura din
+## `_turn_angles`, dar cautand minimele in loc de maxime. Gardul are nevoie de
+## o dreapta ca sa citeasca drept: pe un viraj, module rigide de 4 m ar taia
+## coarda si ar iesi un poligon, nu o curba.
+const FENCE_PATH := "res://assets/models/fence_ranch.glb"
+## Peste atata cotitura cumulata pe fereastra nu mai e dreapta.
+const FENCE_STRAIGHT_MAX: float = 0.22   # rad (~13°)
+## Cat de lunga trebuie sa fie dreapta ca sa incapa un rand care se citeste.
+const FENCE_RUN_MIN: float = 26.0
+const FENCE_GAP: float = 5.2             # m de la marginea asfaltului
+const FENCE_PITCH: float = 3.94          # lungimea modulului (masurata din GLB)
+const FENCE_ROWS_MAX: int = 7
+const FENCE_MODULES_MIN: int = 3
+const FENCE_MODULES_MAX: int = 6
+## Cat trebuie sa stea un modul departe de orice piesa de decor.
+const FENCE_CLEAR: float = 1.0
+## Cat de mult poate urca/cobori terenul sub un modul fata de cota soselei
+## inainte sa renuntam: un gard care intra in deal arata mai rau decat lipsa lui.
+const FENCE_STEP_MAX: float = 1.6
+## Variantele si cat de des apar. Cel rupt e rar din acelasi motiv ca la stalpii
+## de marcaj: daca fiecare al treilea modul e frant, nu mai citesti un gard, ci
+## o ruina.
+const _FENCE_PICKS := [
+	{"node": "Fence_A", "weight": 0.58},
+	{"node": "Fence_B", "weight": 0.30},
+	{"node": "Fence_C", "weight": 0.12},
+]
+
+
+func _build_fences() -> void:
+	if not ResourceLoader.exists(FENCE_PATH):
+		return
+	var scene := load(FENCE_PATH) as PackedScene
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _world_seed() + 23 # alt sir decat stalpii, decorul si semnele
+	var n := baked.size()
+	if n < 8 or _dists.size() <= n:
+		return
+	var obstacles: Array[PackedVector2Array] = []
+	for decor_root in _decor_roots:
+		_collect_obstacles(decor_root, obstacles)
+	var spacing := _dists[n] / float(n)
+	var ang := _turn_angles()
+	var look := maxi(1, int(24.0 / spacing))
+	var need := maxi(2, int(FENCE_RUN_MIN / spacing))
+	var rows := 0
+	var i := 0
+	while i < n and rows < FENCE_ROWS_MAX:
+		# Cat tine dreapta care incepe aici?
+		var run := 0
+		while run < n:
+			var total := 0.0
+			for k in look:
+				total += ang[(i + run + k) % n]
+			if absf(total) > FENCE_STRAIGHT_MAX:
+				break
+			run += 1
+		if run < need:
+			i += maxi(1, run + 1)
+			continue
+		# Randul sta in mijlocul dreptei, ca sa nu se lipeasca de viraje.
+		var count := rng.randi_range(FENCE_MODULES_MIN, FENCE_MODULES_MAX)
+		var span := int(float(count) * FENCE_PITCH / spacing)
+		var start := i + maxi(0, (run - span) / 2)
+		# Alternam latura intre randuri: un gard mereu pe aceeasi parte citeste
+		# ca o imprejmuire de pista, nu ca peisaj locuit.
+		var first := 1.0 if rows % 2 == 0 else -1.0
+		if _place_fence_row(scene, rng, start, count, first, obstacles) \
+				or _place_fence_row(scene, rng, start, count, -first, obstacles):
+			rows += 1
+		i += run + 1
+	if rows == 0 and n > 0:
+		# Tacerea ar fi arata ca o alegere de design (lectia din _build_horizon).
+		print("%s: niciun rand de gard (fara drepte destul de lungi sau libere)"
+			% track_name)
+
+
+## Un rand de module. Intoarce false daca nu incape — apelantul incearca cealalta
+## latura. Randul e totul sau nimic: un gard din care lipsesc bucati la mijloc
+## citeste ca eroare, nu ca uzura (pentru uzura exista `Fence_C`).
+func _place_fence_row(scene: PackedScene, rng: RandomNumberGenerator,
+		start: int, count: int, side_sign: float,
+		obstacles: Array[PackedVector2Array]) -> bool:
+	var n := baked.size()
+	var spacing := _dists[n] / float(n)
+	var step := maxi(1, int(FENCE_PITCH / spacing))
+	var spots: Array[Vector3] = []
+	var yaws: Array[float] = []
+	for m in count:
+		var idx := (start + m * step) % n
+		var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+		var spot := baked[idx] + _side_at(idx) * (half_width + FENCE_GAP) * side_sign
+		var ground := _sampler.ground_y(spot.x, spot.z)
+		if absf(ground - baked[idx].y) > FENCE_STEP_MAX:
+			return false
+		if not _spot_free(Vector2(spot.x, spot.z), obstacles, FENCE_CLEAR):
+			return false
+		spot.y = ground
+		spots.append(spot)
+		# Modulul se intinde pe X-ul lui local, deci X-ul trebuie sa cada pe
+		# directia drumului. Pentru rotation.y = t, basis.x = (cos t, 0, -sin t).
+		yaws.append(atan2(-dir.z, dir.x))
+	for m in count:
+		var model := _extract_glb_node(scene, _fence_variant(rng))
+		if model == null:
+			return false
+		Palette.apply_world_material(model)
+		var root := Node3D.new()
+		root.add_child(model)
+		add_child(root)
+		root.global_position = spots[m]
+		root.rotation.y = yaws[m]
+	return true
+
+
+func _fence_variant(rng: RandomNumberGenerator) -> String:
+	var roll := rng.randf()
+	var acc := 0.0
+	for pick: Dictionary in _FENCE_PICKS:
+		acc += float(pick["weight"])
+		if roll < acc:
+			return String(pick["node"])
+	return String(_FENCE_PICKS[0]["node"])
+
+
+## Punctul e destul de departe de toate amprentele de decor?
+static func _spot_free(p: Vector2, obstacles: Array[PackedVector2Array],
+		clearance: float) -> bool:
+	for hull in obstacles:
+		if Geometry2D.is_point_in_polygon(p, hull):
+			return false
+		for e in hull.size():
+			var closest := Geometry2D.get_closest_point_to_segment(
+				p, hull[e], hull[(e + 1) % hull.size()])
+			if closest.distance_to(p) < clearance:
+				return false
+	return true
+
+
 ## Locul e bun daca semnul (1) nu se suprapune cu nicio piesa de decor si
 ## (2) SE VEDE din pozitiile de apropiere — liniile de vedere de la sofer la
 ## semn nu taie nicio amprenta de decor. O stanca LANGA sau IN SPATELE
@@ -3296,14 +3449,8 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 func _chevron_spot_clear(stand: Vector3, at: int,
 		obstacles: Array[PackedVector2Array]) -> bool:
 	var p := Vector2(stand.x, stand.z)
-	for hull in obstacles:
-		if Geometry2D.is_point_in_polygon(p, hull):
-			return false
-		for e in hull.size():
-			var closest := Geometry2D.get_closest_point_to_segment(
-				p, hull[e], hull[(e + 1) % hull.size()])
-			if closest.distance_to(p) < CHEVRON_CLEAR:
-				return false
+	if not _spot_free(p, obstacles, CHEVRON_CLEAR):
+		return false
 	var n := baked.size()
 	var spacing := _dists[n] / float(n)
 	for back_m: float in CHEVRON_EYES:

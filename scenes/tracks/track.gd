@@ -2993,6 +2993,15 @@ const _LANDMARKS := {
 		"gap": 10.0, "col": "cyl", "radius": 2.6, "spin": false,
 		"classes": {"House_Roof": "roof_tiles", "House_Plaster": "plaster",
 			"House_Stone": "stone_wall"}},
+	# Baraca minerului. Casa de sat (id 6) e tot o cladire mica, dar e Okinawa —
+	# tigla, tencuiala, piatra de gusuku — deci nu se refoloseste pe desert.
+	# `Shack_Trim` (usa, geamul, pragul) NU e mapat si cade pe atlas, dinadins:
+	# usa si geamul sunt cele mai inchise suprafete din obiect, iar contrastul
+	# lor cu lemnul spalat de soare e ce face silueta sa se citeasca de la 60 m.
+	# O textura de lemn peste ele le-ar aduce la valoarea peretelui.
+	7: {"path": "res://assets/models/miner_shack.glb",
+		"gap": 12.0, "col": "box", "spin": false,
+		"classes": {"Shack_Wood": "wood", "Shack_Roof": "rust_metal"}},
 }
 
 ## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual

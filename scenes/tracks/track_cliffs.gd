@@ -241,9 +241,13 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	holder.transform = xform
 	holder.add_child(model)
 	# Oglindirea dubleaza numarul de siluete distincte cu 6 variante de GLB si
-	# zero triunghiuri in plus. Cere materialul geaman cu CULL_FRONT, altfel
-	# stanca se randeaza pe dos. Coliziunea NU se oglindeste: e o cutie aproape
-	# simetrica, iar oglindirea ei poate doar sa creeze pene intre sectiuni.
+	# zero triunghiuri in plus. NU cere niciun material special: Godot inverseaza
+	# singur winding-ul dupa determinantul transformarii (verificat pe 4.7 cu
+	# tools/MirrorTest.tscn). Versiunea veche punea peste el materialul geaman cu
+	# CULL_FRONT — al DOILEA flip — si fetele dinspre camera erau taiate: jumatate
+	# din faleze se vedeau pe dinauntru, ca niste coji. De aici bugul "stancile
+	# mari sunt goale". Coliziunea NU se oglindeste: e o cutie aproape simetrica,
+	# iar oglindirea ei poate doar sa creeze pene intre sectiuni.
 	var mirror := rng.randf() < 0.5
 	if mirror:
 		model.scale = Vector3(-1.0, 1.0, 1.0)
@@ -262,7 +266,7 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# Materialul de CLASA al rocii (trim sheet triplanar), nu cel de atlas:
 	# falezele sunt suprafata de roca dominanta din cadru — vezi
 	# Palette.rock_material() pentru de ce si de ce nu prin UV unwrap.
-	Palette.apply_rock_material(holder, mirror)
+	Palette.apply_rock_material(holder)
 
 	_add_collision(body, pick["node"], scene, xform)
 	_dress_base(root, sampler, spec, rng, extra)

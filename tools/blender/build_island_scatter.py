@@ -14,11 +14,17 @@ SCARA E DICTATA DE APELANT, si asta e neintuitiv: piesele sunt instantiate cu
 iasa la 0.5-1.1 m. Modelate la marimea "corecta" ar fi iesit tufe de doi metri
 pe banda lipita de drum.
 
-Buget: banda lipita de drum pune ~460 de bucati pe un tur de 1944 m, deci
-fiecare piesa trebuie sa coste ca un prop marunt, nu ca un hero. Tinta: sub
-200 tris bucata. De-aia niciuna nu are bevel — sunt suprafete de revolutie si
-lamele, unde bevel-ul tripleaza costul fara castig (aceeasi decizie ca la
-cactus si la coroanele de palmier).
+BUGETUL E CEL CARE DICTEAZA FORMA AICI, si a fost masurat, nu presupus. Benzile
+de decor pun ~560 de piese de scatter pe un tur de Okinawa. Prima versiune avea
+Beach_Grass la 392 de triunghiuri si Hibiscus la 264: doar scatter-ul ajungea la
+134 000, adica jumatate din bugetul pistei, pentru obiecte de sub un metru
+vazute la 100 km/h. Tinta e acum **sub 130 tris bucata** (~70 000 pe tur), si de
+aia iarba are 6 fire in loc de 14 si pietrele 4 in loc de 7.
+
+Aceeasi lectie ca la tufele-sfera pe care le inlocuiesc — comentariul din
+`_add_tropical_bush` o spune pentru placeholder-e; se aplica identic pentru
+assets adevarate. Niciuna n-are bevel: sunt suprafete de revolutie si lamele,
+unde bevel-ul tripleaza costul fara castig (ca la cactus).
 
 Materiale: tot pe atlasul de paleta. Sub 1 m textura nu se citeste
 (style_bible §4, regula pentru marker_post / scatter / prop-uri marunte).
@@ -39,18 +45,17 @@ def beach_grass(b):
     citeste ca un smoc care a crescut.
     """
     rnd = _lcg(37)
-    for k in range(14):
+    for k in range(6):
         a = rnd() * math.tau
         base_r = rnd() * 0.07
         lean = 0.22 + rnd() * 0.30      # cat se apleaca varful in afara
         h = 0.34 + rnd() * 0.20
         d = Vector((math.cos(a), math.sin(a), 0.0))
         path = [d * base_r,
-                d * (base_r + lean * 0.30) + Vector((0, 0, h * 0.55)),
-                d * (base_r + lean * 0.75) + Vector((0, 0, h * 0.90)),
+                d * (base_r + lean * 0.45) + Vector((0, 0, h * 0.70)),
                 d * (base_r + lean) + Vector((0, 0, h * 0.98))]
         slot = TROPICAL_GREEN if k % 3 else DRY_VEGETATION
-        b.blade(path, [0.032, 0.026, 0.018, 0.0], 0.012, slot, up=(0, 0, 1))
+        b.blade(path, [0.036, 0.026, 0.0], 0.012, slot, up=(0, 0, 1))
 
 
 def driftwood(b):
@@ -72,7 +77,7 @@ def driftwood(b):
 def coral_pebbles(b):
     """Gramajoara de pietre de corali. Trei marimi, ca sa nu citeasca a grila."""
     rnd = _lcg(53)
-    for k in range(7):
+    for k in range(4):
         a = rnd() * math.tau
         r = rnd() * 0.20
         s = 0.07 + rnd() * 0.09
@@ -87,20 +92,23 @@ def hibiscus_small(b):
     in loc de 0.86 — ca sa supravietuiasca scalarii de 1.4-2.1 a apelantului
     fara sa devina un tufis de doi metri langa asfalt."""
     rnd = _lcg(29)
-    for k in range(4):
+    for k in range(3):
         a = rnd() * math.tau
         r = 0.0 if k == 0 else 0.10 * (0.6 + rnd() * 0.7)
         s = 0.30 - r * 0.25 + rnd() * 0.08
         b.boulder((math.cos(a) * r, math.sin(a) * r, 0.16 + rnd() * 0.07),
                   (s, s * 0.94, s * 0.80),
                   TROPICAL_GREEN if k % 2 else CACTUS_GREEN,
-                  seed=29 + k * 11, segments=6, rings=3, deviation=0.16)
-    for k in range(4):
+                  seed=29 + k * 11, segments=5, rings=3, deviation=0.16)
+    # Trei flori, nu patru: la scara asta (0.10 m inainte de scalarea de 1.4-2.1
+    # a apelantului) o floare e trei pixeli, iar a patra nu adauga culoare, doar
+    # cost.
+    for k in range(3):
         a = rnd() * math.tau + 0.7
         r = 0.17 * (0.85 + rnd() * 0.25)
         b.boulder((math.cos(a) * r, math.sin(a) * r, 0.16 + rnd() * 0.14),
                   (0.10, 0.10, 0.05), KERB_RED, seed=71 + k * 13,
-                  segments=5, rings=3, deviation=0.10)
+                  segments=4, rings=2, deviation=0.10)
 
 
 PARTS = [

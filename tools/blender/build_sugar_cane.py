@@ -11,9 +11,15 @@ frunzele inguste; un zid verde compact ar fi ascuns traseul si ar fi facut
 sectorul un tunel.
 
 Trei smocuri, ca banda sa nu se citeasca repetata:
-  Cane_Clump_A  14 tulpini, 3.0 m — smocul standard
-  Cane_Clump_B  10 tulpini, 2.5 m — mai rar, pentru marginea benzii
-  Cane_Clump_C  17 tulpini, 3.2 m — dens, pentru spatele benzii
+  Cane_Clump_A  10 tulpini, 3.0 m — smocul standard
+  Cane_Clump_B   7 tulpini, 2.5 m — mai rar, pentru marginea benzii
+  Cane_Clump_C  12 tulpini, 3.2 m — dens, pentru spatele benzii
+
+Numarul de tulpini a coborat cu ~30% dupa masuratoare: la 14/10/17, lanul
+punea 115 000 de triunghiuri pe un tur, adica mai mult decat toti arborii
+insulei la un loc, pentru un decor prin care treci. Perdeaua se citeste la fel
+de bine cu tulpini mai rare — ce conteaza e inaltimea si transparenta, nu
+densitatea.
 
 Ramane pe atlasul de paleta (CACTUS_GREEN pentru tulpini — verdele-oliv sters
 e exact culoarea trestiei coapte, TROPICAL_GREEN pentru frunze). Fara bevel:
@@ -24,7 +30,7 @@ import math
 from mathutils import Vector
 
 STALK_R = 0.030
-LEAVES_PER_STALK = 4
+LEAVES_PER_STALK = 3
 
 
 def stalk(b, x, y, height, lean_a, lean_r, seed):
@@ -39,12 +45,12 @@ def stalk(b, x, y, height, lean_a, lean_r, seed):
     top = base + d * lean_r + Vector((0, 0, height))
     # Statii dese ca sa iasa noduri: raza alterneaza subtire/ingrosat.
     stations, radii = [], []
-    n = max(int(height / 0.40), 4)
+    n = max(int(height / 0.62), 3)
     for i in range(n + 1):
         t = i / float(n)
         stations.append(base.lerp(top, t) + Vector((0, 0, 0.0)))
         radii.append(STALK_R * (1.22 if i % 2 else 0.98) * (1.0 - t * 0.28))
-    b.taper_sweep(stations, radii, CACTUS_GREEN, segments=5)
+    b.taper_sweep(stations, radii, CACTUS_GREEN, segments=4)
 
     # Frunzele: pleaca de sub varf, urca putin si cad in arc.
     for k in range(LEAVES_PER_STALK):
@@ -53,11 +59,11 @@ def stalk(b, x, y, height, lean_a, lean_r, seed):
         length = 0.85 + rnd() * 0.55
         start = base.lerp(top, 0.72 + 0.09 * k / LEAVES_PER_STALK)
         path, widths = [], []
-        for i in range(5):
-            t = i / 4.0
+        for i in range(4):
+            t = i / 3.0
             dz = 0.34 * math.sin(t * 1.6) - 1.05 * t ** 2.3
             path.append(start + ld * (length * t) + Vector((0, 0, dz)))
-            widths.append(0.0 if i == 4 else max(0.026, 0.070 * math.sin(math.pi * t ** 0.6)))
+            widths.append(0.0 if i == 3 else max(0.026, 0.070 * math.sin(math.pi * t ** 0.6)))
         b.blade(path, widths, 0.018, TROPICAL_GREEN, up=(0, 0, 1))
 
 
@@ -77,9 +83,9 @@ AO_SPEC = dict(samples=20, dist=1.8, gradient="vertical",
                low=0.50, high=1.0, power=0.9, floor=0.20)
 
 CLUMPS = [
-    ("Cane_Clump_A", 14, 3.00, 23),
-    ("Cane_Clump_B", 10, 2.50, 37),
-    ("Cane_Clump_C", 17, 3.20, 53),
+    ("Cane_Clump_A", 10, 3.00, 23),
+    ("Cane_Clump_B", 7, 2.50, 37),
+    ("Cane_Clump_C", 12, 3.20, 53),
 ]
 
 clear_built("Cane_Clump_")

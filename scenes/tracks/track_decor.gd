@@ -49,11 +49,11 @@ const BANDS := [
 		"collide": false, "cluster": 0.30},
 	# Prima banda cu coliziune. La 4m de margine, primul contact posibil e la 11m
 	# de axa — adica 3.5m DUPA ce ai incasat deja penalizarea de offroad.
-	{"name": "mid", "off_min": 4.0, "off_max": 11.0, "spacing": 25.0,
+	{"name": "mid", "off_min": 4.0, "off_max": 11.0, "spacing": 17.0,
+		"collide": true, "cluster": 0.50},
+	# Fundal apropiat: piese mari, dese.
+	{"name": "back", "off_min": 11.0, "off_max": 26.0, "spacing": 24.0,
 		"collide": true, "cluster": 0.45},
-	# Fundal apropiat: piese mari, rare.
-	{"name": "back", "off_min": 11.0, "off_max": 26.0, "spacing": 42.0,
-		"collide": true, "cluster": 0.35},
 	# Fundal DEPARTAT — stratul care lipsea (#147).
 	#
 	# Masurat in vederea soferului: benzile se opreau la 26 m, iar siluetele de
@@ -70,9 +70,33 @@ const BANDS := [
 	#
 	# `props_only`: pe insula banda asta ar cadea in MARE. Poarta e pe setul de
 	# prop-uri, nu pe numele temei — aceeasi separare "ce" / "unde" ca la `build`.
-	{"name": "far", "off_min": 26.0, "off_max": 58.0, "spacing": 52.0,
-		"collide": false, "cluster": 0.25, "props_only": "desert"},
+	#
+	# Pas 52 -> 32 si grupare 0.25 -> 0.40: la 52 iesea o piesa la ~30 m de
+	# traseu, adica exact cat sa se vada ca sunt puse cu pipeta. Referinta are
+	# formatiuni CONTINUE, nu jaloane — drumul trebuie sa arate sapat intr-un
+	# masiv, nu pus pe o campie cu pietre presarate.
+	{"name": "far", "off_min": 26.0, "off_max": 58.0, "spacing": 32.0,
+		"collide": false, "cluster": 0.40, "props_only": "desert"},
 ]
+## Pasii din `BANDS` sunt calibrati pe DESERT, unde tinta e masa continua de
+## canion: drumul trebuie sa arate sapat intr-un masiv, nu pus pe o campie cu
+## pietre presarate. Alte seturi de prop-uri cer alta densitate si o declara aici.
+##
+## Insula ramane la pasii dinaintea indesirii, din doua motive care nu tin de
+## estetica: un palmier costa de cateva ori cat o stanca de canion (banyan 4852
+## de triunghiuri fata de ~230), iar Okinawa e deja pista cea mai grea din
+## proiect. Aceeasi densitate ca pe desert ar duce-o direct in plafon.
+## Cheile suprascrise sunt aceleasi ca in `BANDS` (`spacing`, `cluster`).
+## Gruparea conteaza la fel de mult ca pasul: prima incercare suprascria doar
+## pasul si Okinawa tot a crescut cu 26.000 de triunghiuri, fiindca `cluster`
+## ramasese cel de desert si fiecare prop principal trage dupa el 2-5 sateliti.
+const BAND_OVERRIDES := {
+	"island": {
+		"mid": {"spacing": 25.0, "cluster": 0.45},
+		"back": {"spacing": 42.0, "cluster": 0.35},
+	},
+}
+
 ## Cati sateliti primeste un prop cand pica zarul de grupare, si in ce raza.
 const CLUSTER_MIN: int = 2
 const CLUSTER_MAX: int = 5
@@ -131,8 +155,16 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 		container.name = "Band_%s" % band["name"]
 		root.add_child(container)
 
+		var step: float = float(band["spacing"])
+		var clump: float = float(band["cluster"])
+		var over: Dictionary = BAND_OVERRIDES.get(props, {})
+		if over.has(band["name"]):
+			var b: Dictionary = over[band["name"]]
+			step = float(b.get("spacing", step))
+			clump = float(b.get("cluster", clump))
+
 		var skip := 0
-		for spec in sampler.sample_band(band["spacing"], band["off_min"],
+		for spec in sampler.sample_band(step, band["off_min"],
 				band["off_max"], rng):
 			# Golurile sunt la fel de importante ca prop-urile: fara ele iese un
 			# covor uniform, nu ritmul "ingramadit / gol" din referinta.
@@ -142,7 +174,7 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 			if not _allowed(spec, band):
 				continue
 			_place_band_prop(container, spec, band, rng, mat_provider, props)
-			if rng.randf() < float(band["cluster"]):
+			if rng.randf() < clump:
 				_place_satellites(container, sampler, spec, band, rng, mat_provider,
 					props)
 				skip = 2

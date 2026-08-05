@@ -37,9 +37,74 @@ const OFFSET_INNER: float = 4.5
 ## Cat se ingroapa fiecare sectiune in nisip. Fara asta se vede linia de contact
 ## si se rupe iluzia de stanca iesita din sol.
 const SINK: float = 0.6
-## Raza libera in jurul unui landmark hero (style_bible §7: teren gol in fata
-## landmark-urilor majore). Turnul de apa de 9.5m langa o faleza de 11m dispare.
-const LANDMARK_CLEAR: float = 25.0
+## Degajarea in jurul unui landmark hero. Style_bible §7 cere teren gol IN FATA
+## landmark-urilor majore, iar „in fata" e o directie, nu o raza: silueta se
+## vede de catre soferul care SE APROPIE. Ce sta dupa el, in oglinda, nu ascunde
+## nimic.
+##
+## Pana la #164 degajarea era o raza simetrica de 25 m aplicata pe AMANDOUA
+## laturile. Amandoua greselile trageau in aceeasi directie — gauri in canion
+## unde nu foloseau nimanui (44 de sloturi din 168 pe Dunele) — dar se anulau
+## partial: turnul de apa de la fractia 0.2 era vizibil doar fiindca landmark-ul
+## VECIN, de pe latura cealalta, stergea din intamplare peretele de pe axa lui de
+## vizare. Corectata doar latura, turnul isi pierdea picioarele.
+const LANDMARK_CLEAR_AHEAD: float = 22.0
+const LANDMARK_CLEAR_BEHIND: float = 22.0
+## Culoarul de APROPIERE, dincolo de degajarea stricta: aici peretele nu se
+## sterge, ci COBOARA la clasa de creasta. Un perete de pana la 11.5 m lipit de
+## asfalt chiar taie picioarele unui turn de 9.5 m asezat la 19 m lateral; o
+## creasta de 4 m ramane sub linia siluetei si tot tine masa in cadru.
+##
+## Prima incercare a fost sa se STEARGA si culoarul (degajare de 55 m in fata).
+## Turnul iesea corect, dar sonda de compozitie a aratat pretul imediat: felia
+## 0.800 pica de la acoperire plina la 26% pe dreapta, adica exact campia de
+## nisip pe care issue-ul o reclama, reintrodusa ca sa protejam o silueta.
+## Nu trebuia ales intre ele.
+const LANDMARK_LOW_AHEAD: float = 65.0
+
+## Cele trei clase de faleza. `MAIN` e peretele de canion dintotdeauna; celelalte
+## doua sunt raspunsul la #164 — „drumul sapat intr-un masiv", nu asezat pe o
+## campie cu stanci pe langa.
+##
+## FILL: creasta JOASA pe portiunile de margine pe care regula
+## „exterior / interior inaltat" le lasa descoperite prin constructie. Rupe linia
+## orizontului fara sa inchida drumul.
+##
+## TERRACE: al doilea rand, retras in banda `far` (26-34 m). Panoul DEPTH AND
+## LAYERS din referinta are TREI planuri; noi aveam doua (marginea si siluetele
+## de orizont de la 150 m). Asta e planul din mijloc, si e cel care face
+## diferenta intre „stanci pe langa drum" si „trepte de canion".
+enum Kind { MAIN, FILL, TERRACE }
+
+## Creasta de umplere: destul cat sa rupa orizontul, nu cat sa faca al doilea
+## perete. Se obtine turtind pe Y o sectiune normala, NU alegand o varianta mai
+## mica: amprenta la sol trebuie sa ramana de 15 m, altfel sectiunile nu se mai
+## ating si iese exact ce reclama issue-ul — piese discrete cu nisip intre ele.
+const FILL_HEIGHT_MIN: float = 3.2
+const FILL_HEIGHT_MAX: float = 5.2
+## Cat de retrasa sta creasta de umplere. Mai mult decat OFFSET_INNER: aici
+## marginea era complet libera pana acum, deci orice zid ingusteaza o linie care
+## exista. 6 m pastreaza scurtatura si tot da masa in cadru.
+const OFFSET_FILL: float = 6.0
+
+## Al doilea plan: pas mai mare (sectiunile pot respira, sunt la 30 m) si
+## inaltime peste randul de la drum, ca sa se citeasca drept TREAPTA urmatoare,
+## nu drept al doilea gard paralel.
+const TERRACE_SPACING: float = 22.0
+const TERRACE_OFFSET_MIN: float = 26.0
+const TERRACE_OFFSET_MAX: float = 34.0
+const TERRACE_HEIGHT_MIN: float = 9.5
+const TERRACE_HEIGHT_MAX: float = 14.5
+## Cat de aproape de sosea (ORICE bucla a ei) mai are voie sa cada o treapta.
+## Dunele se auto-intersecteaza la ~40 m, deci un rand la 30 m de o bucla poate
+## ateriza fix pe cealalta — singurul lucru care prinde cazul e clearance_at.
+const TERRACE_MIN_CLEARANCE: float = 9.0
+## Degajarea treptei, mai lunga decat a peretelui de la drum. Treapta sta la
+## 30 m lateral, adica taman pe cerul pe care se decupeaza silueta unui landmark
+## asezat la 10-19 m — deci intra in cadru de mai departe decat un perete lipit
+## de asfalt, care ramane sub linia lui.
+const TERRACE_CLEAR_AHEAD: float = 60.0
+const TERRACE_CLEAR_BEHIND: float = 25.0
 
 ## Variantele din GLB, cu inaltimea lor nominala. Godot alege varianta cea mai
 ## apropiata de inaltimea ceruta si scaleaza cel mult ±SCALE_LIMIT.
@@ -96,15 +161,19 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 	if total <= 0.0:
 		return root
 
-	# Distantele (in metri pe traseu) in jurul carora nu se pun faleze.
-	var clear_at: Array[float] = []
+	# Degajarile, ca (distanta pe traseu, latura). Latura se PASTREAZA — pana la
+	# #164 se citea doar `lm.x` si degajarea se aplica pe amandoua laturile, deci
+	# un turn de apa asezat pe stanga stergea 50 m de faleza si pe DREAPTA, unde
+	# nu ascundea nimic. Pe Dunele asta taia 44 de sloturi din 168; jumatate erau
+	# pe latura opusa, adica gauri fara motiv. Ca dovada ca intentia fusese
+	# mereu per-latura: `Track._cliff_clearings` adauga arcada de DOUA ori, o data
+	# pentru fiecare parte — ceva ce n-are sens daca latura oricum se ignora.
+	var clear_at: Array[Vector2] = []
 	for lm in landmarks:
-		clear_at.append(lm.x * total)
+		clear_at.append(Vector2(lm.x * total, lm.y))
 
 	for side_sign: float in [-1.0, 1.0]:
 		var segments := sampler.wall_segments(side_sign)
-		if segments.is_empty():
-			continue
 		# UN singur corp static per latura, cu multe forme copil. Jolt trateaza
 		# asta mult mai bine decat ~70 de corpuri separate.
 		var body := StaticBody3D.new()
@@ -121,24 +190,53 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 				continue
 			var d := spec.frac * total
 			var gorge := _gorge_blend(spec.frac, gorges)
-			# In defileu, regula "perete doar unde marginea e inchisa" se
-			# suspenda: strangerea cere zid pe AMBELE laturi, inclusiv pe
-			# interiorul neinaltat. Restul filtrelor raman — un defileu peste o
-			# rapa sau peste degajarea unui landmark ar strica amandoua.
-			if gorge <= 0.0 and not TrackSideSampler.in_segments(d, segments):
+			if _near_landmark(d, side_sign, total, clear_at):
 				continue
-			if _near_landmark(d, total, clear_at):
-				continue
+			# Culoarul de apropiere: perete, dar jos. Defileul bate regula —
+			# acolo inaltimea E efectul, iar un landmark in defileu ar fi oricum
+			# o contradictie de compozitie.
+			var low := gorge <= 0.0 and _near_landmark(
+				d, side_sign, total, clear_at, LANDMARK_LOW_AHEAD, 0.0)
 			# O rapa cu un zid in fata nu se vede, deci nu e nici drama, nici
 			# avertisment — e doar o groapa in care cazi fara sa intelegi de ce.
 			# Aici peretele se deschide si prapastia devine lizibila de departe.
 			if spec.is_ravine:
 				continue
-			# Ferestrele de respiro nu au ce cauta in defileu: o gaura in zid
-			# exact unde lumea trebuie sa se inchida i-ar rupe tot efectul.
-			if gorge <= 0.0 and _skip_slot(spec):
+			# In defileu, regula "perete doar unde marginea e inchisa" se
+			# suspenda: strangerea cere zid pe AMBELE laturi, inclusiv pe
+			# interiorul neinaltat.
+			if gorge > 0.0 or TrackSideSampler.in_segments(d, segments):
+				# Ferestrele de respiro nu au ce cauta in defileu: o gaura in zid
+				# exact unde lumea trebuie sa se inchida i-ar rupe tot efectul.
+				if gorge <= 0.0 and _skip_slot(spec):
+					continue
+				_place(root, body, scene, sampler, spec, rng, gorge,
+					Kind.FILL if low else Kind.MAIN)
+			elif not _skip_fill(spec):
+				# Marginea descoperita prin constructie (interior neinaltat).
+				# Pana acum nu se punea NIMIC aici; de-aia banda cea mai densa de
+				# decor tot citea ca „pietre presarate" — piesele mari lipseau de
+				# pe portiuni intregi.
+				_place(root, body, scene, sampler, spec, rng, 0.0, Kind.FILL)
+
+		# Al doilea plan, retras. Se sampleaza separat: are pas propriu si nu
+		# imparte niciun filtru cu randul de la drum in afara degajarilor.
+		for spec in sampler.sample_edge(TERRACE_SPACING, OFFSET_OUTER):
+			if spec.side_sign != side_sign:
 				continue
-			_place(root, body, scene, sampler, spec, rng, gorge)
+			var d := spec.frac * total
+			if _near_landmark(d, side_sign, total, clear_at,
+					TERRACE_CLEAR_AHEAD, TERRACE_CLEAR_BEHIND):
+				continue
+			if spec.is_ravine:
+				continue
+			# Fereastra de respiro din randul de la drum e exact locul unde al
+			# doilea plan trebuie sa EXISTE: altfel gaura merge pana la orizont
+			# si prin ea se vede campia goala, adica fix ce nega canionul.
+			# Golul se muta cu 30 m in spate, nu dispare.
+			if not _skip_slot(spec) and _skip_terrace(spec):
+				continue
+			_place(root, null, scene, sampler, spec, rng, 0.0, Kind.TERRACE)
 	return root
 
 
@@ -166,14 +264,28 @@ static func _gorge_blend(frac: float, gorges: Array[Vector2]) -> float:
 	return best
 
 
-## Distanta `d` cade prea aproape de un landmark? Comparatia e circulara: un
-## landmark la fractia 0.02 trebuie sa protejeze si sfarsitul turului.
-static func _near_landmark(d: float, total: float,
-		clear_at: Array[float]) -> bool:
+## Distanta `d` cade in degajarea unui landmark de pe ACEEASI latura?
+##
+## Doua asimetrii, amandoua din acelasi motiv — degajarea serveste o PRIVIRE, nu
+## un obiect:
+##   - latura: peretele de vizavi nu sta niciodata intre sofer si landmark;
+##   - sensul: `ahead` acopera portiunea DINAINTEA landmark-ului, de unde te
+##     apropii si de unde se citeste silueta; `behind` e scurt, fiindca ce ramane
+##     in urma nu mai ascunde nimic.
+##
+## Aritmetica e circulara: un landmark la fractia 0.02 trebuie sa-si protejeze
+## si sfarsitul turului.
+static func _near_landmark(d: float, side_sign: float, total: float,
+		clear_at: Array[Vector2], ahead: float = LANDMARK_CLEAR_AHEAD,
+		behind: float = LANDMARK_CLEAR_BEHIND) -> bool:
 	for c in clear_at:
-		var delta := absf(d - c)
-		delta = minf(delta, total - delta)
-		if delta < LANDMARK_CLEAR:
+		if not is_equal_approx(c.y, side_sign):
+			continue
+		# Negativ = slotul e INAINTEA landmark-ului pe sensul de mers.
+		var delta := fposmod(d - c.x + total * 0.5, total) - total * 0.5
+		if delta <= 0.0 and -delta < ahead:
+			return true
+		if delta > 0.0 and delta < behind:
 			return true
 	return false
 
@@ -181,8 +293,10 @@ static func _near_landmark(d: float, total: float,
 static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		sampler: TrackSideSampler,
 		spec: TrackDecorSpec, rng: RandomNumberGenerator,
-		gorge: float = 0.0) -> void:
+		gorge: float = 0.0, kind: Kind = Kind.MAIN) -> void:
 	var wanted := _wanted_height(spec, rng)
+	if kind == Kind.TERRACE:
+		wanted = _terrace_height(spec, rng)
 	# Defileul forteaza inaltimea spre 12 m, PESTE plafonul de apex din
 	# _wanted_height: acolo plafonul exista ca sa vezi iesirea din viraj, dar
 	# intr-un defileu tocmai ca NU vezi iesirea e tot efectul. Lerp-ul cu
@@ -225,16 +339,52 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# verifica ecartul dupa. Daca scade, se scurteaza defileul, nu se largeste.
 	if gorge > 0.0:
 		extra = lerpf(extra, 0.8 - OFFSET_OUTER, gorge)
+	# Clasele noi isi impun propria retragere, peste toata logica de mai sus:
+	# creasta de umplere sta pe o margine care pana acum era complet libera, iar
+	# treapta e prin definitie al doilea plan.
+	var sink := SINK
+	if kind == Kind.FILL:
+		# maxf, nu atribuire: pe exteriorul unui viraj regula de depasire cere
+		# 7 m, iar o creasta pusa la 6 m ar STRANGE o linie pe care alta decizie,
+		# masurata pe ecartul din cursa, o largise deliberat.
+		extra = maxf(extra, OFFSET_FILL - OFFSET_OUTER)
+	elif kind == Kind.TERRACE:
+		extra = rng.randf_range(TERRACE_OFFSET_MIN, TERRACE_OFFSET_MAX) \
+			- OFFSET_OUTER
+		# Mai ingropata: la 30 m se vede doar creasta, iar baza trebuie sa iasa
+		# din duna, nu sa stea pe ea.
+		sink = SINK * 2.2
 	var pos := spec.position + spec.normal_out * (extra + half_depth)
+	# Dunele se auto-intersecteaza la ~40 m, deci orice piesa impinsa lateral
+	# poate ateriza pe cealalta bucla a soselei. Slotul a fost verificat la 1.2 m
+	# de margine; dupa retragere e alt punct, deci se verifica din nou. Fara asta,
+	# treapta de 12 m de la 30 m distanta cade uneori PE drum.
+	if kind != Kind.MAIN \
+			and sampler.clearance_at(pos) < sampler.half_width() + TERRACE_MIN_CLEARANCE:
+		model.queue_free()
+		return
 	# Re-esantionam cota: slotul s-a mutat lateral pana la ~7 m fata de unde a
 	# fost masurat, iar pe o panta de 12% asta inseamna aproape un metru de
 	# diferenta — destul cat sa se vada baza falezei plutind sau ingropata.
-	pos.y = sampler.ground_y(pos.x, pos.z) - SINK
+	pos.y = sampler.ground_y(pos.x, pos.z) - sink
+
+	# Creasta de umplere se obtine TURTIND pe Y, nu alegand o varianta mai mica:
+	# amprenta la sol ramane de 15 m, deci sectiunile vecine se ating in
+	# continuare si linia iese continua. O varianta mica scalata uniform ar avea
+	# si amprenta mica, adica exact „piese discrete cu nisip intre ele".
+	# Materialul de roca e triplanar (proiectie in spatiul lumii), deci turtirea
+	# NU intinde textura — straturile raman la scara lor.
+	var squash := 1.0
+	if kind == Kind.FILL:
+		var crest := rng.randf_range(FILL_HEIGHT_MIN, FILL_HEIGHT_MAX)
+		squash = clampf(crest / maxf(wanted * scale_factor, 0.01), 0.25, 0.7)
 
 	# Orientarea se calculeaza o data si se aplica AMANDURORA: nodului vizual si
 	# formei de coliziune. Asa nu pot ajunge sa se contrazica.
 	var basis := Basis.looking_at(-spec.normal_out, Vector3.UP)
-	var xform := Transform3D(basis.scaled(Vector3.ONE * scale_factor), pos)
+	var xform := Transform3D(
+		basis.scaled(Vector3(scale_factor, scale_factor * squash, scale_factor)),
+		pos)
 
 	var holder := Node3D.new()
 	root.add_child(holder)
@@ -255,17 +405,29 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# aceeasi fata. Plafon dur la ±0.10 rad: o sectiune de 15 m isi deplaseaza
 	# capatul cu 0.75 m la unghiul asta, iar suprapunerea dintre sectiuni e de
 	# doar 1 m. Mai mult deschide fisuri — exact ce prinde sonda --mode=cliff.
+	# Pe creasta turtita, inclinarea de pe X/Z ar deveni forfecare (rotatie sub un
+	# parinte scalat neuniform), deci ramane doar yaw-ul, care e in axa scalarii.
+	var tilt := 0.0 if kind == Kind.FILL else 0.07
 	model.rotation = Vector3(
-		rng.randf_range(-0.07, 0.07),
+		rng.randf_range(-tilt, tilt),
 		rng.randf_range(-0.10, 0.10),
-		rng.randf_range(-0.07, 0.07))
+		rng.randf_range(-tilt, tilt))
 	# Materialul de CLASA al rocii (trim sheet triplanar), nu cel de atlas:
 	# falezele sunt suprafata de roca dominanta din cadru — vezi
 	# Palette.rock_material() pentru de ce si de ce nu prin UV unwrap.
 	Palette.apply_rock_material(holder, mirror)
 
-	_add_collision(body, pick["node"], scene, xform)
-	_dress_base(root, sampler, spec, rng, extra)
+	# Treapta a doua NU primeste coliziune, din acelasi motiv pentru care banda
+	# `far` din TrackDecor n-are: la 26-34 m de margine esti demult in afara
+	# soselei, iar un colizor acolo nu e gameplay, e o capcana in care te opresti
+	# dupa un fly-off ratat. Creasta de umplere primeste, fiindca e la 6 m si
+	# acolo exista deja stanci cu corp fizic din banda `mid`.
+	if body != null:
+		_add_collision(body, pick["node"], scene, xform)
+	# Banda de contact are rost doar unde ochiul chiar ajunge la baza. La 30 m,
+	# doua pietricele de 30 cm sunt triunghiuri platite degeaba.
+	if kind != Kind.TERRACE:
+		_dress_base(root, sampler, spec, rng, extra)
 
 
 ## Banda de contact: pietricele si smocuri la baza falezei (val 4c).
@@ -330,6 +492,35 @@ static func _wanted_height(spec: TrackDecorSpec,
 	if spec.is_apex:
 		h = minf(h, rng.randf_range(6.6, 7.9))
 	return clampf(h, 6.5, 11.5)
+
+
+## Inaltimea celui de-al doilea plan. PESTE randul de la drum (6.5-11.5 m), ca
+## sa se citeasca drept treapta urmatoare a masivului: daca ar fi la fel de inalt
+## si retras cu 30 m, ar arata ca un al doilea gard paralel, nu ca relief.
+##
+## Frecventa lenta (1.1) si defazata per latura: peretii apropiati respira deja
+## pe 2.3 / 7.9 / 1.3, iar o a patra frecventa apropiata de ele ar bate cu ele si
+## ar produce, la anumite fractii, un singur bloc masiv de 26 m adancime.
+static func _terrace_height(spec: TrackDecorSpec,
+		rng: RandomNumberGenerator) -> float:
+	var slow := sin(spec.frac * TAU * 1.1 + spec.side_sign * 0.9) * 2.4
+	var step := float(rng.randi_range(0, 3)) * 0.9
+	return clampf(11.4 + slow + step, TERRACE_HEIGHT_MIN, TERRACE_HEIGHT_MAX)
+
+
+## Ferestrele crestei de umplere. Mai rare decat cele ale peretelui principal
+## (~10% fata de ~18%): creasta e joasa si retrasa, deci un gol in ea nu
+## odihneste ochiul, doar reintroduce campia.
+static func _skip_fill(spec: TrackDecorSpec) -> bool:
+	var f := 4.3 if spec.side_sign < 0.0 else 6.7
+	return sin(spec.frac * TAU * f + 2.6) > 0.85
+
+
+## Ferestrele treptei a doua. Nu se aplica acolo unde randul de la drum e deja
+## deschis — vezi apelul din `build`.
+static func _skip_terrace(spec: TrackDecorSpec) -> bool:
+	var f := 2.9 if spec.side_sign < 0.0 else 4.7
+	return sin(spec.frac * TAU * f + 0.8) > 0.55
 
 
 ## Se sare complet peste slotul asta? Un perete neintrerupt de 1200m obose ochiul

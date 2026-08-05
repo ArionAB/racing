@@ -585,6 +585,12 @@ static func _pick_from_glb(path: String, node_name: String) -> Node3D:
 		if child.name == node_name:
 			kept = child
 		else:
+			# remove_child INAINTE de queue_free (tiparul din
+			# Track._extract_glb_node): eliberarea e amanata pana la sfarsitul
+			# cadrului, iar cine masoara scena in acelasi cadru — cum face
+			# Track._collect_obstacles pentru chevron-uri — vedea ~5.000 de
+			# variante-fantoma suprapuse peste fiecare piesa plasata.
+			container.remove_child(child)
 			child.queue_free()
 	if kept == null:
 		container.queue_free()

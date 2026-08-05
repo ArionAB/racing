@@ -2859,6 +2859,59 @@ func _build_mine(frac: float, side_sign: float) -> void:
 		add_child(piece)
 		Palette.apply_class_materials(piece, _MINE_CLASSES)
 		piece.look_at_from_position(spot, Vector3(p.x, spot.y, p.z), Vector3.UP)
+	_build_mine_camp(stand, side)
+
+
+## Gramada de unelte din jurul gurii de mina: butoaie, lazi, cauciucuri.
+##
+## Pozitiile sunt SCRISE, nu trase la sorti — asta e toata diferenta dintre un
+## set si scatter. Decorul procedural imprastie deja obiecte pe toata pista;
+## ce nu avea pista era un loc unde obiectele stau IMPREUNA si spun ceva
+## ("aici s-a descarcat vagonetul"). Un cluster citit corect valoreaza cat
+## douazeci de butoaie presarate, si costa de douazeci de ori mai putin.
+##
+## Sistemul de coordonate e cel al sinei de deasupra: `toward` = metri spre
+## sosea fata de gura minei, `along` = metri lateral (pozitiv in aceeasi parte
+## ca vagonetul, ca gramada sa se stranga in jurul lui). `yaw` e rotatia in
+## grade fata de directia „cu fata la drum" — la un butoi conteaza doar ca
+## piesele vecine sa nu iasa aliniate ca la raft.
+const _MINE_CAMP := [
+	# Punctul de descarcare, langa vagonet: doua butoaie si o lada.
+	{"node": "Barrel_A", "toward": 4.3, "along": 4.5, "yaw": 15.0},
+	{"node": "Barrel_B", "toward": 3.5, "along": 5.4, "yaw": -40.0},
+	{"node": "Crate_A", "toward": 5.4, "along": 5.1, "yaw": 24.0},
+	# Depozitul, lipit de peretele minei, pe partea cealalta a sinei.
+	{"node": "TyreStack", "toward": 7.6, "along": -3.4, "yaw": 0.0},
+	{"node": "Crate_B", "toward": 9.2, "along": -2.6, "yaw": -18.0},
+	{"node": "Tyre", "toward": 6.0, "along": -4.5, "yaw": 0.0},
+]
+
+
+func _build_mine_camp(stand: Vector3, side: Vector3) -> void:
+	const PATH := "res://assets/models/props_junk.glb"
+	if not ResourceLoader.exists(PATH):
+		return
+	var scene := load(PATH) as PackedScene
+	var along := side.cross(Vector3.UP).normalized()
+	# Cu fata la drum, adica invers decat `side` (care arata dinspre sosea spre
+	# mina). Butoaiele n-au fata, dar lazile au muchii, si un rand de cutii
+	# paralele cu drumul citeste altfel decat unul pieziș.
+	var base_yaw := atan2(-side.x, -side.z)
+	for item: Dictionary in _MINE_CAMP:
+		var piece := _extract_glb_node(scene, String(item["node"]))
+		if piece == null:
+			continue
+		# Clasele, NU atlasul: butoaiele si lazile au UV-uri reale din #131, iar
+		# `apply_world_material` ar citi atlasul pe ele si le-ar face dungi prin
+		# toata paleta. Cauciucurile nu sunt in tabel si cad pe atlas — negrul
+		# curat E cauciucul (vezi PROPS_JUNK_CLASSES).
+		Palette.apply_class_materials(piece, PROPS_JUNK_CLASSES)
+		add_child(piece)
+		var spot := stand - side * float(item["toward"]) \
+			+ along * float(item["along"])
+		spot.y = _sampler.ground_y(spot.x, spot.z)
+		piece.global_position = spot
+		piece.rotation.y = base_yaw + deg_to_rad(float(item["yaw"]))
 
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
 ##   gap    = cat de departe de marginea soselei sta (m)

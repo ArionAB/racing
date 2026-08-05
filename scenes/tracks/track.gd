@@ -3439,12 +3439,16 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 ## coarda si ar iesi un poligon, nu o curba.
 const FENCE_PATH := "res://assets/models/fence_ranch.glb"
 ## Peste atata cotitura cumulata pe fereastra nu mai e dreapta.
-const FENCE_STRAIGHT_MAX: float = 0.22   # rad (~13°)
+## 0.22 -> 0.40: Dunele n-are aproape nicio dreapta adevarata, e un circuit din
+## curbe inlantuite. La pragul strict incapeau 7 randuri pe tot turul, adica
+## gardul se citea ca un accident, nu ca un element al lumii. Un gard pe o
+## curba lunga si lina se descurca: modulele de 4 m taie coarda cu centimetri.
+const FENCE_STRAIGHT_MAX: float = 0.40   # rad (~23°)
 ## Cat de lunga trebuie sa fie dreapta ca sa incapa un rand care se citeste.
-const FENCE_RUN_MIN: float = 26.0
+const FENCE_RUN_MIN: float = 18.0
 const FENCE_GAP: float = 5.2             # m de la marginea asfaltului
 const FENCE_PITCH: float = 3.94          # lungimea modulului (masurata din GLB)
-const FENCE_ROWS_MAX: int = 7
+const FENCE_ROWS_MAX: int = 16
 const FENCE_MODULES_MIN: int = 3
 const FENCE_MODULES_MAX: int = 6
 ## Cat trebuie sa stea un modul departe de orice piesa de decor.
@@ -3463,6 +3467,12 @@ const _FENCE_PICKS := [
 
 
 func _build_fences() -> void:
+	# Gard de RANCH, deci doar pe temele de desert. Fara poarta asta ajungea si
+	# pe Okinawa — lemn de ferma texana pe o insula tropicala, chiar langa un
+	# torii de piatra. Legat de setul de prop-uri, nu de numele pistei, ca la
+	# banda `far` din track_decor.
+	if theme_flag("props", "desert") != "desert":
+		return
 	if not ResourceLoader.exists(FENCE_PATH):
 		return
 	var scene := load(FENCE_PATH) as PackedScene
@@ -3476,34 +3486,39 @@ func _build_fences() -> void:
 		_collect_obstacles(decor_root, obstacles)
 	var spacing := _dists[n] / float(n)
 	var ang := _turn_angles()
-	var look := maxi(1, int(24.0 / spacing))
 	var need := maxi(2, int(FENCE_RUN_MIN / spacing))
 	var rows := 0
 	var i := 0
+	# Se merge din pas in pas si se pune un rand ORIUNDE incape, nu unul per
+	# portiune dreapta.
+	#
+	# Varianta initiala cauta portiuni drepte si aseza un singur rand in
+	# mijlocul fiecareia, apoi sarea peste toata portiunea. Consecinta perversa:
+	# cand pragul de „drept" s-a relaxat ca sa incapa mai mult gard, portiunile
+	# au devenit mai LUNGI si mai PUTINE, deci gardul a scazut de la 31 de
+	# module la 3. Un criteriu mai permisiv trebuie sa dea mai mult, nu mai
+	# putin — daca da mai putin, bucla masoara altceva decat crezi.
 	while i < n and rows < FENCE_ROWS_MAX:
-		# Cat tine dreapta care incepe aici?
-		var run := 0
-		while run < n:
-			var total := 0.0
-			for k in look:
-				total += ang[(i + run + k) % n]
-			if absf(total) > FENCE_STRAIGHT_MAX:
-				break
-			run += 1
-		if run < need:
-			i += maxi(1, run + 1)
-			continue
-		# Randul sta in mijlocul dreptei, ca sa nu se lipeasca de viraje.
 		var count := rng.randi_range(FENCE_MODULES_MIN, FENCE_MODULES_MAX)
-		var span := int(float(count) * FENCE_PITCH / spacing)
-		var start := i + maxi(0, (run - span) / 2)
+		var span := maxi(need, int(float(count) * FENCE_PITCH / spacing))
+		# E destul de drept pe toata lungimea randului?
+		var total := 0.0
+		for k in span:
+			total += ang[(i + k) % n]
+		if absf(total) > FENCE_STRAIGHT_MAX:
+			i += 1
+			continue
 		# Alternam latura intre randuri: un gard mereu pe aceeasi parte citeste
 		# ca o imprejmuire de pista, nu ca peisaj locuit.
 		var first := 1.0 if rows % 2 == 0 else -1.0
-		if _place_fence_row(scene, rng, start, count, first, obstacles) \
-				or _place_fence_row(scene, rng, start, count, -first, obstacles):
+		if _place_fence_row(scene, rng, i, count, first, obstacles) \
+				or _place_fence_row(scene, rng, i, count, -first, obstacles):
 			rows += 1
-		i += run + 1
+			# Respiro dupa un rand asezat: garduri cap la cap pe tot turul ar
+			# citi ca imprejmuire, nu ca ferma.
+			i += span + int(22.0 / spacing)
+		else:
+			i += 1
 	if rows == 0 and n > 0:
 		# Tacerea ar fi arata ca o alegere de design (lectia din _build_horizon).
 		print("%s: niciun rand de gard (fara drepte destul de lungi sau libere)"

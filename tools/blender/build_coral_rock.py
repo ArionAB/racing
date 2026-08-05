@@ -21,10 +21,13 @@ cea corecta (style_bible §4).
 import math
 from mathutils import Matrix
 
-# Placile alterneaza intre bazalt si roca inchisa. Sub clasa triplanara culoarea
-# vine din textura, dar sloturile raman corecte pentru fallback-ul procedural si
-# pentru garda de sloturi din verify_glb.
-STRATA = (VOLCANIC_BLACK, ROCK_DARK, VOLCANIC_BLACK)
+# Placile alterneaza intre bazalt si un gri de asfalt. Sub clasa triplanara
+# culoarea vine din textura, dar sloturile TOT conteaza — si aici s-a vazut de
+# ce: prima versiune folosea `ROCK_DARK` (#67421F, gresia canionului) ca strat
+# de mijloc, iar cand `track_decor` a pus din greseala materialul lumii in loc
+# de clasa, stancile de recif au iesit cu peretii PORTOCALII. Cu ASPHALT_EDGE
+# (#696765) chiar si esecul arata a piatra de coasta.
+STRATA = (VOLCANIC_BLACK, ASPHALT_EDGE, VOLCANIC_BLACK)
 
 
 def slab(b, center, size, seed, yaw=0.0):
@@ -33,7 +36,10 @@ def slab(b, center, size, seed, yaw=0.0):
     `taper` 0.05 in loc de 0.35: la valoarea implicita iese o movila, si tocmai
     muchia dreapta de sub capac face umbra care vinde streasina.
     """
-    faces = b.rock(center, size, VOLCANIC_BLACK, seed=seed, segments=9,
+    # 7 segmente, nu 9: pe 97 de stanci pe tur, cele doua fatete in plus
+    # costau 11 000 de triunghiuri si nu se vad — style_bible §3 cere oricum
+    # fatete LATE, nu detaliu de frecventa inalta.
+    faces = b.rock(center, size, VOLCANIC_BLACK, seed=seed, segments=7,
                    rings=3, flat_top=True, taper=0.05, squash=0.98,
                    strata_slots=STRATA)
     if yaw:

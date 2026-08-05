@@ -63,8 +63,11 @@ def aerial_roots(b, tips, slot, seed=41):
     """Radacinile care atarna din ramuri pana in pamant (si cateva scurte, care
     inca nu au ajuns — alea vand ca arborele CRESTE)."""
     rnd = _lcg(seed)
+    # Cinci radacini per ramura, nu sase: a sasea costa 2000 de triunghiuri pe
+    # tur (patru banyani) si nu schimba silueta — ce vinde gajumaru e ca sunt
+    # MULTE si de lungimi diferite, nu numarul exact.
     for tip in tips:
-        for _k in range(6):
+        for _k in range(5):
             a = rnd() * 2.0 * math.pi
             r = 0.35 + rnd() * 1.35
             x = tip.x * 0.75 + math.cos(a) * r

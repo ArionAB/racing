@@ -300,7 +300,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 ## e mai rau decat o tufa provizorie, si ar fi trecut nesanctionat de orice
 ## sonda: garda numara triunghiuri, nu bunul-simt botanic.
 ##
-## Cand GLB-urile apar, _pick_from_glb le gaseste singur si primitivele dispar.
+## Cand GLB-urile apar, pick_from_glb le gaseste singur si primitivele dispar.
 const ISLAND_SCATTER: String = "res://assets/models/island_scatter.glb"
 const ISLAND_ROCKS: String = "res://assets/models/coral_rock.glb"
 const ISLAND_CLUTTER: String = "res://assets/models/beach_clutter.glb"
@@ -417,7 +417,7 @@ static func _add_island_scatter(parent: Node3D, pos: Vector3,
 	# mult lemn adus de apa decat tufe.
 	const PICKS := ["Driftwood", "Driftwood", "Beach_Grass", "Coral_Pebbles",
 		"Hibiscus"]
-	var kept := _pick_from_glb(ISLAND_SCATTER,
+	var kept := pick_from_glb(ISLAND_SCATTER,
 		PICKS[rng.randi_range(0, PICKS.size() - 1)])
 	if kept == null:
 		_add_tropical_bush(parent, pos, rng, mat)
@@ -474,7 +474,7 @@ static func _add_tropical_bush(parent: Node3D, pos: Vector3,
 static func _add_sugar_cane(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator) -> bool:
 	const PICKS := ["Cane_Clump_A", "Cane_Clump_B", "Cane_Clump_C"]
-	var kept := _pick_from_glb(ISLAND_CANE,
+	var kept := pick_from_glb(ISLAND_CANE,
 		PICKS[rng.randi_range(0, PICKS.size() - 1)])
 	if kept == null:
 		return false
@@ -496,7 +496,7 @@ static func _add_beach_clutter(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator) -> bool:
 	const PICKS := ["Fishing_Crate", "Net_Floats", "Awamori_Pot",
 		"Bamboo_Rack", "Driftwood_Log"]
-	var kept := _pick_from_glb(ISLAND_CLUTTER,
+	var kept := pick_from_glb(ISLAND_CLUTTER,
 		PICKS[rng.randi_range(0, PICKS.size() - 1)])
 	if kept == null:
 		return false
@@ -511,7 +511,7 @@ static func _add_beach_clutter(parent: Node3D, pos: Vector3,
 ## Arborii insulei: cocotier, palmier aplecat, pandanus, banyan.
 ##
 ## Inlocuieste palmierul provizoriu din cilindru + sfera. Fata de scatter,
-## arborii se instantiaza INTREGI (nu prin `_pick_from_glb`): fiecare fisier e
+## arborii se instantiaza INTREGI (nu prin `pick_from_glb`): fiecare fisier e
 ## un ansamblu de doua piese — scoarta pe clasa `bark` si frunzisul pe atlas —
 ## iar a pastra doar un nod ar fi lasat un trunchi fara coroana.
 ##
@@ -602,7 +602,7 @@ static func _add_palm_placeholder(parent: Node3D, pos: Vector3,
 ## Stanca de corali / bazalt. Placi joase si late, nu bolovani.
 static func _add_coral_rock(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable, collide: bool) -> void:
-	var kept := _pick_from_glb(ISLAND_ROCKS,
+	var kept := pick_from_glb(ISLAND_ROCKS,
 		"Coral_Rock_%02d" % rng.randi_range(1, 8))
 	var h := rng.randf_range(0.8, 2.6)
 	var node: Node3D
@@ -718,7 +718,7 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 		h_min: float = 0.80, h_max: float = 1.30,
 		s_min: float = 0.85, s_max: float = 1.25) -> bool:
 	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
-	var kept := _pick_from_glb(CANYON_PATH, name_pick)
+	var kept := pick_from_glb(CANYON_PATH, name_pick)
 	if kept == null:
 		return false
 	var s := rng.randf_range(s_min, s_max)
@@ -760,7 +760,7 @@ static func _add_scatter(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
 	const PICKS := ["Bush_A", "Bush_B", "Pebbles_A", "Pebbles_B", "Grass_Tuft"]
 	var name_pick: String = PICKS[rng.randi_range(0, PICKS.size() - 1)]
-	var kept := _pick_from_glb("res://assets/models/desert_scatter.glb", name_pick)
+	var kept := pick_from_glb("res://assets/models/desert_scatter.glb", name_pick)
 	if kept == null:
 		_add_dry_bush(parent, pos, rng, mat)
 		return
@@ -791,7 +791,7 @@ static func _add_cluster(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, picks: Array, collide: bool,
 		mat: Callable) -> void:
 	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
-	var kept := _pick_from_glb("res://assets/models/rock_cluster.glb", name_pick)
+	var kept := pick_from_glb("res://assets/models/rock_cluster.glb", name_pick)
 	if kept == null:
 		_add_glb_rock(parent, pos, rng, mat)
 		return
@@ -829,7 +829,11 @@ static func _add_cluster(parent: Node3D, pos: Vector3,
 
 ## Instantiaza un GLB, pastreaza un singur nod si anuleaza offsetul lui din
 ## fisier (variantele sunt exportate una langa alta pentru vizualizare).
-static func _pick_from_glb(path: String, node_name: String) -> Node3D:
+##
+## PUBLIC dinadins: il folosesc si TrackCliffs, si TrackScenography. A stat cu
+## underscore in timp ce doua clase din afara il chemau oricum — adica era deja
+## interfata, doar ca nu scria nicaieri.
+static func pick_from_glb(path: String, node_name: String) -> Node3D:
 	if not ResourceLoader.exists(path):
 		return null
 	var container := (load(path) as PackedScene).instantiate() as Node3D

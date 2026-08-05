@@ -288,7 +288,7 @@ static func _dress_base(root: Node3D, sampler: TrackSideSampler,
 	var count := rng.randi_range(1, 2)
 	for k in count:
 		var pick: String = BASE_PROPS[rng.randi_range(0, BASE_PROPS.size() - 1)]
-		var prop := TrackDecor._pick_from_glb(SCATTER_PATH, pick)
+		var prop := TrackDecor.pick_from_glb(SCATTER_PATH, pick)
 		if prop == null:
 			return
 		# Intre marginea asfaltului si fata peretelui, imprastiat in lungul

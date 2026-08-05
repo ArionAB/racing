@@ -54,6 +54,24 @@ const BANDS := [
 	# Fundal apropiat: piese mari, rare.
 	{"name": "back", "off_min": 11.0, "off_max": 26.0, "spacing": 42.0,
 		"collide": true, "cluster": 0.35},
+	# Fundal DEPARTAT — stratul care lipsea (#147).
+	#
+	# Masurat in vederea soferului: benzile se opreau la 26 m, iar siluetele de
+	# orizont incep la 150 m de centroid cu 95 m degajare fata de sosea. Intre
+	# ele nu era NIMIC, si banda aia goala umple jumatate din cadru pe portiunile
+	# unde falezele stau doar pe o parte (dreapta pistei Dunele: 85% acoperire
+	# fata de 97% pe stanga, cu felii intregi sub 30%). Exact diferenta dintre
+	# panourile BEFORE si AFTER din conceptul de referinta: nu lipseau obiecte
+	# langa drum, lipsea un PLAN INTERMEDIAR.
+	#
+	# Rara si fara coliziune intentionat: la 26-58 m esti demult in afara
+	# soselei, iar un colizor acolo nu e gameplay, e o capcana in care te
+	# opresti dupa un fly-off ratat.
+	#
+	# `props_only`: pe insula banda asta ar cadea in MARE. Poarta e pe setul de
+	# prop-uri, nu pe numele temei — aceeasi separare "ce" / "unde" ca la `build`.
+	{"name": "far", "off_min": 26.0, "off_max": 58.0, "spacing": 52.0,
+		"collide": false, "cluster": 0.25, "props_only": "desert"},
 ]
 ## Cati sateliti primeste un prop cand pica zarul de grupare, si in ce raza.
 const CLUSTER_MIN: int = 2
@@ -100,6 +118,10 @@ static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
 static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 		seed_value: int, mat_provider: Callable, props: String) -> void:
 	for band in BANDS:
+		# Benzile cerute de un anumit set de prop-uri (vezi `far`) nu apar pe
+		# celelalte teme.
+		if band.has("props_only") and String(band["props_only"]) != props:
+			continue
 		# Un rng PER BANDA: asa poti itera pe densitatea benzii de mijloc fara sa
 		# se mute si pietricelele de langa drum.
 		var rng := RandomNumberGenerator.new()
@@ -207,6 +229,15 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 				# tipar.
 				_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 					true, mat_provider)
+		"far":
+			# Plan intermediar: mase MARI si rare, nimic marunt. Un cactus sau o
+			# pietricica la 40 m nu se vede — ar fi triunghiuri platite degeaba.
+			# Amprenta si inaltimea urca amandoua: la distanta aia o stanca de
+			# marimea celor de langa drum citeste ca o pietricica, si tocmai
+			# scara e ce da adancimea (formatiunile stratificate din referinta).
+			if not _add_canyon_rock(parent, pos, rng, CANYON_L, false,
+					1.05, 1.85, 1.35, 2.10):
+				_add_cluster(parent, pos, rng, ["Cluster_L1"], false, mat_provider)
 		_:
 			var roll2 := rng.randf()
 			if satellite or roll2 < 0.30:
@@ -463,12 +494,13 @@ const CANYON_L: Array[String] = ["Canyon_L1", "Canyon_L2", "Canyon_L3",
 ## si s-ar vedea imediat ca e aceeasi piesa reciclata.
 static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, picks: Array[String], collide: bool,
-		h_min: float = 0.80, h_max: float = 1.30) -> bool:
+		h_min: float = 0.80, h_max: float = 1.30,
+		s_min: float = 0.85, s_max: float = 1.25) -> bool:
 	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
 	var kept := _pick_from_glb(CANYON_PATH, name_pick)
 	if kept == null:
 		return false
-	var s := rng.randf_range(0.85, 1.25)
+	var s := rng.randf_range(s_min, s_max)
 	var h := rng.randf_range(h_min, h_max)
 	var holder: Node3D
 	if collide:

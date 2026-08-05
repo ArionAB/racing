@@ -247,7 +247,18 @@ static func themes() -> Dictionary:
 			# Ceata de adancime, ca la desert: marea se pierde in orizont la o
 			# distanta cunoscuta, iar camera poate taia fix acolo.
 			"fog_depth": true,
-			"horizon_model": "", # deocamdata rezerva; insulele de fundal vin la etapa 5
+			# Insulele de fundal (#107). Trei siluete DELIBERAT diferite ca
+			# forma, nu trei marimi ale aceleiasi movile: rolul lor e orientarea
+			# (style_bible §7), deci "sunt langa insula cu doua varfuri" trebuie
+			# sa fie o informatie reala. Inelul apropiat primeste insula joasa,
+			# cel departat conul — silueta cea mai citibila sta cel mai departe.
+			"horizon_model": "res://assets/models/horizon_island.glb",
+			"horizon_picks": [
+				["Island_Low", "Island_Ridge"],
+				["Island_Ridge", "Island_Peak"],
+				["Island_Peak", "Island_Ridge"],
+			],
+			"horizon_class": "coral_rock",
 			"walls": true,       # doar pe sectiunile inaltate — regula din sampler
 			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
 			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
@@ -257,7 +268,19 @@ static func themes() -> Dictionary:
 			# duca adancimea DECIS peste SEA_NEAR_DEPTH, altfel grila fina de tarm
 			# se emite pe toata marea. Vezi TrackSideSampler.ground_y.
 			"seabed_drop": 26.0,
-			"hazard_model": "",  # wave_surge se ataseaza separat, pe fractii
+			# Hazardul de la frac 0.33: o sabani targita peste drum, in loc de
+			# excavatorul de santier din desert (#107).
+			#
+			# `hazard_roll: false` NU e cosmetic. `SlidingHazard` roteste modelul
+			# proportional cu deplasarea daca `roll_radius > 0` — corect pentru
+			# bolovanul din canion, absurd pentru o barca. Fara steag, sabani
+			# s-ar fi rostogolit ca un butoi.
+			"hazard_model": "res://assets/models/sabani_boat.glb",
+			"hazard_roll": false,
+			"hazard_scale": 1.0,
+			"hazard_classes": {"Sabani_Hull": "wood"},
+			# Banda uda de pe causeway vine din mare, nu dintr-o teava sparta.
+			"hose_model": "",
 			"dust_color": null,
 		},
 	}
@@ -334,6 +357,13 @@ func _hazard_fracs() -> Array[float]:
 
 ## Fractii unde furtunul de gradina pulseaza apa peste drum.
 func _hose_fracs() -> Array[float]:
+	return []
+
+## Valuri care matura soseaua (Okinawa, sectorul causeway). Separate de
+## `_hose_fracs` desi amandoua uda drumul: furtunul e o SURSA permanenta, valul
+## e un CEAS. Pe aceeasi fractie, banda uda taie grip-ul non-stop, iar valul
+## spune cand — vezi scenes/props/wave_surge.gd.
+func _wave_fracs() -> Array[float]:
 	return []
 
 ## Excavatoare suplimentare, explicite (pe langa hazardul tematic).
@@ -482,6 +512,8 @@ func rebuild() -> void:
 		_build_landmark(spot.x, spot.y, int(spot.z))
 	for frac in _hose_fracs():
 		_build_hose(frac)
+	for frac in _wave_fracs():
+		_build_wave_surge(frac)
 	for frac in _flyoff_fracs():
 		_build_flyoff(frac)
 	for frac in _deflector_fracs():
@@ -782,7 +814,17 @@ func _build_horizon(centroid: Vector3) -> void:
 			if not found:
 				missed += 1
 				continue
+			# Numele siluetelor sunt per TEMA, nu globale. `HORIZON_RINGS` le
+			# tinea hardcodate (Butte_A, Mesa_B...), ceea ce mergea cat timp
+			# exista un singur set de orizont; o insula numita `Butte_A` doar ca
+			# sa treaca de o lista ar fi fost o minciuna in fisier. Cu steagul de
+			# tema, fiecare tema isi aduce numele ei, iar cea fara steag pastreaza
+			# lista din inel.
 			var picks: Array = ring["picks"]
+			var theme_picks: Array = theme_flag("horizon_picks", [])
+			if not theme_picks.is_empty():
+				picks = theme_picks[mini(HORIZON_RINGS.find(ring),
+					theme_picks.size() - 1)]
 			var model := _extract_glb_node(scene,
 				picks[rng.randi_range(0, picks.size() - 1)])
 			if model == null:
@@ -800,9 +842,12 @@ func _build_horizon(centroid: Vector3) -> void:
 			# zero coliziune, sub 180 tris fiecare.
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
 			model.scale = Vector3.ONE * s
-			# Roca de clasa: triplanar-ul in spatiul lumii tine straturile la
-			# scara reala si pe butte-urile scalate 25-60x.
-			Palette.apply_rock_material(model)
+			# Clasa triplanara a temei: proiectia in spatiul lumii tine
+			# straturile la scara reala si pe siluetele scalate 25-60x.
+			# Era `apply_rock_material` fix, adica gresia rosiatica a canionului
+			# si pe insulele de recif.
+			Palette.apply_triplanar_class(model,
+				String(theme_flag("horizon_class", "rock")))
 			placed += 1
 	print("%s: %d/%d siluete de orizont" % [track_name, placed,
 		placed + missed])
@@ -1940,10 +1985,16 @@ func _build_hazard(frac: float) -> void:
 	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
 		var ball := SlidingHazard.new()
 		ball.model_scene = load(hazard_model)
-		ball.model_scale = 0.52 # diametru 5m in model -> 2.6m in joc
+		# 0.52 vine din bolovanul de 5 m diametru -> 2.6 m in joc. O barca de
+		# 5 m lungime insa TREBUIE sa ramana de 5 m: la 0.52 ar fi fost o
+		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
+		ball.model_scale = float(theme_flag("hazard_scale", 0.52))
 		ball.model_tri_class = theme_flag("hazard_class", "")
-		# Doar intentia "se rostogoleste"; raza reala o ia din model.
-		ball.roll_radius = 1.0
+		ball.model_classes = theme_flag("hazard_classes", {})
+		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
+		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
+		# causeway nu se da peste cap.
+		ball.roll_radius = 1.0 if bool(theme_flag("hazard_roll", true)) else 0.0
 		# Noi ii cerem maturarea maxima; el isi taie cursa cat sa nu iasa din
 		# sosea pe latimea ASTA de drum (vezi SlidingHazard._clamp_travel).
 		ball.road_half_width = half_width
@@ -2993,13 +3044,52 @@ const _LANDMARKS := {
 		"gap": 10.0, "col": "cyl", "radius": 2.6, "spin": false,
 		"classes": {"House_Roof": "roof_tiles", "House_Plaster": "plaster",
 			"House_Stone": "stone_wall"}},
+	# --- Okinawa (#102 / #103) ------------------------------------------------
+	#
+	# Farul: 9.1 m, cel mai inalt reper al insulei. Raza 1.1 acopera TURNUL, nu
+	# soclul de piatra de 1.6 — poti calca treapta soclului, dar nu treci prin
+	# turn. Sta departe (12 m) fiindca rolul lui e sa se vada de pe jumatate de
+	# tur; de la 5 m nu mai vezi decat benzi rosii.
+	7: {"path": "res://assets/models/lighthouse.glb",
+		"gap": 12.0, "col": "cyl", "radius": 1.1, "spin": false,
+		"classes": {"Lighthouse_Stone": "stone_wall",
+			"Lighthouse_White": "plaster"}},
+	# Poarta de piatra: singurul landmark peste care se TRECE, deci "none".
+	# O cutie de coliziune pusa pe deschiderea ei ar fi zidit drumul, iar
+	# stalpii stau oricum dincolo de marginea asfaltului prin `gap`.
+	8: {"path": "res://assets/models/stone_gate_torii.glb",
+		"gap": 1.2, "col": "none", "spin": false,
+		"classes": {"Torii_Stone": "stone_wall", "Torii_Roof": "roof_tiles"}},
+	# Perechea de shisa: DOUA id-uri, nu unul cu doua modele. `_build_landmark`
+	# aseaza tot ce e intr-un GLB la o singura pozitie, deci perechea se face
+	# din doua intrari puse pe laturi opuse la aceeasi fractie (vezi
+	# `Track05._landmark_spots`). Traditia: gura deschisa in dreapta.
+	9: {"path": "res://assets/models/shisa_statue.glb",
+		"gap": 2.2, "col": "box", "spin": false,
+		"classes": {"Shisa_Base": "stone_wall", "Shisa_Stone": "concrete"}},
+	10: {"path": "res://assets/models/shisa_statue_closed.glb",
+		"gap": 2.2, "col": "box", "spin": false,
+		"classes": {"Shisa_Base": "stone_wall", "Shisa_Stone": "concrete"}},
+	# Zidul gusuku: cutie de coliziune, nu cilindru — un zid de 8 m e lung, iar
+	# un cilindru in jurul lui ar fi inghitit jumatate de sosea.
+	11: {"path": "res://assets/models/gusuku_wall.glb",
+		"gap": 4.5, "col": "box", "spin": false,
+		"classes": {"Gusuku_Wall": "stone_wall"}},
+	# --- Desert -----------------------------------------------------------
+	#
 	# Baraca minerului. Casa de sat (id 6) e tot o cladire mica, dar e Okinawa —
 	# tigla, tencuiala, piatra de gusuku — deci nu se refoloseste pe desert.
 	# `Shack_Trim` (usa, geamul, pragul) NU e mapat si cade pe atlas, dinadins:
 	# usa si geamul sunt cele mai inchise suprafete din obiect, iar contrastul
 	# lor cu lemnul spalat de soare e ce face silueta sa se citeasca de la 60 m.
 	# O textura de lemn peste ele le-ar aduce la valoarea peretelui.
-	7: {"path": "res://assets/models/miner_shack.glb",
+	#
+	# Id 12, nu 7: baraca s-a nascut pe id 7 (#150) in acelasi timp in care
+	# farul insulei si-l lua tot pe 7 (#103), pe alta ramura. Insula a pastrat
+	# 7-11 fiindca `Track05._landmark_spots` le referea deja din COD; baraca era
+	# referita doar din datele lui Track01, deci ea s-a mutat. Cand adaugi un
+	# landmark nou, ia urmatorul id LIBER si verifica intai ramurile deschise.
+	12: {"path": "res://assets/models/miner_shack.glb",
 		"gap": 12.0, "col": "box", "spin": false,
 		"classes": {"Shack_Wood": "wood", "Shack_Roof": "rust_metal"}},
 }
@@ -3073,9 +3163,12 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 	root.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 
 func _build_hose(frac: float) -> void:
-	const PATH := "res://assets/models/pipe_leak.glb"
-	if not ResourceLoader.exists(PATH):
-		return
+	# Modelul sursei e TEMATIC, si poate lipsi cu totul. Pe Okinawa banda uda
+	# vine din mare, deci o conducta de santier langa ea ar fi fost o piesa
+	# importata din alta pista — `WaterHose` accepta `model == null` si ramane
+	# doar cu balta si zona de grip taiat.
+	var path: String = theme_flag("hose_model",
+		"res://assets/models/pipe_leak.glb")
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
@@ -3083,11 +3176,30 @@ func _build_hose(frac: float) -> void:
 	# Era un FURTUN DE GRADINA care traversa soseaua intr-un canion de desert.
 	# Conducta sparta face acelasi lucru mecanic — banda uda, grip aproape zero —
 	# dar apartine peisajului.
-	hose.model = _extract_glb_node(load(PATH) as PackedScene, "Pipe_Broken")
+	if not path.is_empty() and ResourceLoader.exists(path):
+		hose.model = _extract_glb_node(load(path) as PackedScene, "Pipe_Broken")
 	hose.road_width = half_width * 2.0
 	add_child(hose)
 	hose.global_position = baked[idx]
 	hose.global_basis = Basis.looking_at(dir, Vector3.UP) # +X = marginea din dreapta
+
+
+## Valul care matura causeway-ul (#106). Banda uda ramane a furtunului; asta e
+## doar ceasul vizual peste ea.
+func _build_wave_surge(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var wave := WaveSurge.new()
+	# Directia de mers: perpendicular pe sosea, dinspre larg spre uscat. Nu se
+	# alege la zar — pe un causeway marea vine de pe o parte anume, iar un val
+	# care porneste din interiorul insulei ar fi absurd.
+	wave.travel_dir = _side_at(idx)
+	wave.sweep = half_width * 3.2
+	# Defazaj derivat din fractie, ca doua valuri pe aceeasi pista sa nu bata la
+	# unison — acelasi truc ca la SlidingHazard.
+	wave.phase = fposmod(frac * 2.3, 1.0)
+	add_child(wave)
+	wave.global_position = baked[idx]
 
 ## Popice pe marginile DESCHISE ale pistei (interior la nivelul solului,
 ## unde nu sunt pereti): delimitatoare fizice — stau cuminti pana le lovesti.

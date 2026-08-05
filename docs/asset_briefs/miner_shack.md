@@ -91,7 +91,7 @@ glTF Binary, `miner_shack.glb`, trei noduri: `Shack_Wood`, `Shack_Roof`,
 **Măsurat:** `Shack_Wood` 264 + `Shack_Roof` 220 + `Shack_Trim` 220 = **704
 de triunghiuri** din 1500. bbox ≈ 4.6 × 3.6 m, înălțime 3.1 m cu coșul.
 
-Integrat ca `_LANDMARKS[7]` (gap 12 m, coliziune box din AABB) și plasat pe
+Integrat ca `_LANDMARKS[12]` (gap 12 m, coliziune box din AABB) și plasat pe
 Dunele la fracția **0.178**, aceeași latură ca gura de mină (0.155) — cele două
 se citesc ca o singură poveste.
 

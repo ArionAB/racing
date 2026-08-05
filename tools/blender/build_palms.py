@@ -51,7 +51,11 @@ def trunk(b, path, radii, slot):
                   [radii[0] * 1.55, radii[0] * 1.02], slot, segments=8)
 
 
-STATIONS = 9             # cate sectiuni are o jumatate de frunza
+# 7 sectiuni, nu 9. Zimtarea are nevoie de cel putin 3 perechi ca sa citeasca
+# a frunza penata, si atat da 7; a patra pereche costa 22% din coroana pe
+# fiecare din cei ~38 de palmieri de pe tur, adica 10 000 de triunghiuri
+# pentru dinti pe care nu-i numara nimeni la 100 km/h.
+STATIONS = 7             # cate sectiuni are o jumatate de frunza
 W_MAX = 0.30             # latimea unei jumatati la cel mai lat punct
 ZIGZAG = 0.66            # cat se stramteaza sectiunile pare (vezi mai jos)
 

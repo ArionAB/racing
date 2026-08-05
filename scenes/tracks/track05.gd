@@ -72,16 +72,38 @@ func _points() -> Array[Vector3]:
 	]
 
 
-## Casele de sat din sectorul "Satul" (punctele 4-6, frac ~0.18-0.26): doua
-## viraje medii printre case cu olane — pana acum sectorul isi purta numele
-## degeaba, nu exista nicio casa. Pilotul texturilor de clasa (id 6 in
-## Track._LANDMARKS): olane/tencuiala/piatra din assets/textures/classes/.
-## Alternate pe laturi, ca drumul sa treaca PRINTRE ele, nu pe langa un rand.
+## Reperele hero, sector cu sector. (fractie, latura ±1, id din
+## `Track._LANDMARKS`).
+##
+## Fractiile respecta regula din style_bible §7: un reper dominant la 120-180 m,
+## deci ~10-13 pe un tur de 1800 m, si NICIODATA unul inalt in apexul virajului
+## — acolo ar acoperi exact linia pe care trebuie s-o citesti.
+##
+## Fiecare sector isi capata identitatea din reperul lui: fara asta, "Farul" si
+## "Urcarea gusuku" erau doua nume de sectoare cu acelasi nisip.
 func _landmark_spots() -> Array[Vector3]:
 	return [
+		# --- 2. Satul: case cu olane, alternate pe laturi ca drumul sa treaca
+		# PRINTRE ele, nu pe langa un rand.
 		Vector3(0.185, 1.0, 6),
 		Vector3(0.215, -1.0, 6),
 		Vector3(0.245, 1.0, 6),
+		# --- 3. Poarta shisa: poarta straddle peste drum, cu perechea de lei
+		# de o parte si de alta, la aceeasi fractie. Gura deschisa in dreapta
+		# (id 9), cea inchisa in stanga (id 10) — conventia de la porti.
+		Vector3(0.300, 1.0, 8),
+		Vector3(0.306, 1.0, 9),
+		Vector3(0.306, -1.0, 10),
+		# --- 4. Urcarea gusuku: trei segmente de zid pe INTERIORUL acului de
+		# par. Pe exterior ar fi fost un perete in fata iesirii din viraj; pe
+		# interior, il vezi tot urcusul si nu-ti ascunde apexul.
+		Vector3(0.355, -1.0, 11),
+		Vector3(0.378, -1.0, 11),
+		Vector3(0.401, -1.0, 11),
+		# --- 5. Farul: pe EXTERIORUL sweeper-ului de promontoriu, unde curba il
+		# tine in cadru tot lungul virajului. Fractia 0.50, adica exact la
+		# jumatatea turului: reperul care iti spune ca esti la jumate.
+		Vector3(0.500, 1.0, 7),
 	]
 
 
@@ -138,8 +160,23 @@ func _ramp_fracs() -> Array[float]:
 	return [0.20]
 
 
-## Furtunul refolosit ca val care spala causeway-ul: banda uda taie grip-ul.
+## Banda uda de pe causeway: marea spala asfaltul, grip-ul cade.
+##
+## `_hose_fracs` ramane sursa TAIERII de grip (zona umeda si baltile), dar
+## conducta sparta nu se mai vede — pe o insula, o teava de santier era exact
+## genul de piesa importata din alta pista care rupe tema. `hose_model: ""` in
+## tema `island` o stinge, iar valul de mai jos ii ia locul vizual.
 func _hose_fracs() -> Array[float]:
+	return [0.91]
+
+
+## Valul care matura causeway-ul (#106), pe aceeasi fractie cu banda uda.
+##
+## Gimmick-ul sectorului 8: udatura e permanenta, dar valul spune CAND. Faza 2
+## din issue — sincronizarea ferestrei de grip taiat cu ciclul valului — ramane
+## o decizie de playtest, nu una de scris aici: mai intai trebuie simtit daca un
+## drum permanent alunecos plus un ceas vizual e destul.
+func _wave_fracs() -> Array[float]:
 	return [0.91]
 
 

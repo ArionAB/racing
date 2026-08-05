@@ -54,6 +54,11 @@ var roll_radius: float = 0.0 # >0 = sfera care se rostogoleste
 ## SPATIUL OBIECTULUI, nu al lumii: obstacolul se misca, iar proiectia de lume
 ## i-ar face textura sa "inoate" pe suprafata (style_bible §4).
 var model_tri_class: String = ""
+## Clase pe PIESE numite, pentru modelele care nu sunt dintr-un material unic.
+## Bolovanul e integral roca si ii ajunge `model_tri_class`; barca sabani are
+## coca de lemn si o dunga vopsita, deci ii trebuie maparea per nod — aceeasi
+## impartire ca la landmark-uri ("tri_class" vs "classes").
+var model_classes: Dictionary = {}
 
 var _time: float = 0.0
 var _pivot: Node3D
@@ -130,7 +135,9 @@ func _build_model() -> void:
 	# locul atlasului — dar in spatiul OBIECTULUI, ca sa se rostogoleasca odata
 	# cu el. `model_scale` intra in socoteala ca pietrele pictate sa masoare in
 	# lume cat cele de pe falezele din care s-a desprins.
-	if model_tri_class.is_empty():
+	if not model_classes.is_empty():
+		Palette.apply_class_materials(model, model_classes)
+	elif model_tri_class.is_empty():
 		Palette.apply_world_material(model)
 	else:
 		Palette.apply_object_triplanar_class(model, model_tri_class, model_scale)
@@ -142,11 +149,24 @@ func _build_model() -> void:
 		shape.position = Vector3.UP * roll_radius
 		_half_extent = roll_radius
 	else:
+		# Cutia se MASOARA pe model cand exista unul, in loc sa ramana pe cotele
+		# excavatorului. O sabani de 5 m intr-o cutie de 4.5 x 2.6 ar fi fost
+		# lovita cu jumatate de metru inainte s-o atingi — si invers pe un model
+		# mai mic, ai fi trecut prin ea.
 		var box := BoxShape3D.new()
-		box.size = Vector3(4.5, 2.2, 2.6)
-		shape.position = Vector3.UP * 1.1
+		# `model_aabb` porneste din transformul RADACINII, deci `model_scale` e
+		# deja inauntru — inmultirea cu el ar dubla cutia. (Acelasi motiv pentru
+		# care ramura cu `roll_radius` de mai sus foloseste masuratoarea direct.)
+		var measured := Track.model_aabb(model)
+		if measured.size.length() > 0.5:
+			box.size = measured.size
+			shape.position = Vector3.UP * (box.size.y * 0.5)
+			_half_extent = maxf(box.size.x, box.size.z) * 0.5
+		else:
+			box.size = Vector3(4.5, 2.2, 2.6)
+			shape.position = Vector3.UP * 1.1
+			_half_extent = 2.25
 		shape.shape = box
-		_half_extent = 2.25
 	add_child(shape)
 
 func _build_placeholder_box() -> void:

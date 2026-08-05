@@ -196,8 +196,10 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat_provider: Callable,
 		props: String, satellite: bool = false) -> void:
 	if props == "island":
+		# Fractia se transmite fiindca UN prop insular depinde de sector
+		# (trestia de zahar). Restul o ignora — vezi CANE_FRAC_MIN.
 		_place_island_prop(parent, spec.position, band, rng, mat_provider,
-			satellite)
+			satellite, spec.frac)
 		return
 	var pos := spec.position
 	match band["name"]:
@@ -269,27 +271,105 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 ## Cand GLB-urile apar, _pick_from_glb le gaseste singur si primitivele dispar.
 const ISLAND_SCATTER: String = "res://assets/models/island_scatter.glb"
 const ISLAND_ROCKS: String = "res://assets/models/coral_rock.glb"
+const ISLAND_CLUTTER: String = "res://assets/models/beach_clutter.glb"
+const ISLAND_CANE: String = "res://assets/models/sugar_cane_clump.glb"
+
+## Arborii insulei.
+##
+## Densitatea (ferestrele de probabilitate din `_place_island_prop`) e reglata pe
+## BUGET, nu pe cat de plina arata banda. Un arbore real costa 1400-4900 de
+## triunghiuri fata de ~60 cat costa cilindrul + sfera pe care le inlocuieste,
+## deci trecerea la assets adevarate a urcat pista de la 270k la 474k — peste
+## pragul de alarma din `probe_decor`. Coborata la 24%/34%, banda arata la fel de
+## locuita si intra in buget. Cifra se re-verifica la orice model nou de arbore.
+##
+## Ponderile dintre specii NU sunt egale: cocotierul e silueta implicita a
+## coastei, banyanul e rar tocmai ca sa ramana un reper ("langa copacul mare"),
+## iar pandanusul si palmierul aplecat dau varietatea de la nivelul ochiului.
+##
+## `collide` = raza cilindrului de coliziune in jurul trunchiului, 0.0 pentru
+## piesele prin care treci. Pandanusul e o tufa, deci n-are; banyanul e singurul
+## destul de gros cat sa opreasca o masina fara sa para nedrept.
+const ISLAND_TREES := [
+	{"path": "res://assets/models/coconut_palm.glb", "weight": 0.42,
+		"scale_min": 0.85, "scale_max": 1.15, "collide": 0.45},
+	{"path": "res://assets/models/beach_palm_bent.glb", "weight": 0.22,
+		"scale_min": 0.90, "scale_max": 1.25, "collide": 0.40},
+	{"path": "res://assets/models/pandanus.glb", "weight": 0.26,
+		"scale_min": 0.85, "scale_max": 1.30, "collide": 0.0},
+	{"path": "res://assets/models/banyan.glb", "weight": 0.10,
+		"scale_min": 0.90, "scale_max": 1.20, "collide": 1.10},
+]
+
+## Maparea de clase pentru TOT decorul insular, intr-un singur loc.
+##
+## `apply_class_materials` potriveste pe PREFIX de nume, deci "Coral_Rock"
+## acopera toate cele opt variante si "Tetrapod" pe toate trei. Ce nu e aici
+## (frunzis, scatter, accente) cade pe materialul lumii, si asa trebuie: are
+## UV-uri colapsate pe sloturi de paleta.
+const ISLAND_CLASSES := {
+	"Palm_Bark": "bark",
+	"BentPalm_Bark": "bark",
+	"Pandanus_Bark": "bark",
+	"Banyan_Bark": "bark",
+	"Coral_Rock": Palette.TRI_PREFIX + "coral_rock",
+	"Tetrapod": "concrete",
+	"Sea_Wall": "concrete",
+	"Sabani_Hull": "wood",
+}
+
+## Fractiile pe care creste trestia de zahar (sectorul 7, `Track05.SECTORS`).
+##
+## Ratele de aparitie (0.32/0.38/0.34 pe cele trei benzi) sunt reglate pe
+## BUGETUL de triunghiuri, nu pe cat de des arata bine: la 0.45/0.55/0.50 lanul
+## punea 39 de smocuri, adica 46 000 de triunghiuri pentru un decor prin care
+## treci. Cu ~27 de smocuri sectorul citeste la fel si costa cu o treime mai
+## putin.
+##
+## Trestia e singurul prop legat de un SECTOR anume, nu imprastiat pe tot turul:
+## un lan care apare si langa far, si in port, nu mai spune nimic despre unde
+## esti — adica pierde exact rolul pentru care exista sectorul. De-aia
+## `_place_island_prop` primeste fractia; restul prop-urilor o ignora.
+const CANE_FRAC_MIN: float = 0.68
+const CANE_FRAC_MAX: float = 0.88
 
 static func _place_island_prop(parent: Node3D, pos: Vector3, band: Dictionary,
-		rng: RandomNumberGenerator, mat: Callable, satellite: bool) -> void:
+		rng: RandomNumberGenerator, mat: Callable, satellite: bool,
+		frac: float = -1.0) -> void:
+	var in_cane := frac >= CANE_FRAC_MIN and frac <= CANE_FRAC_MAX
 	match band["name"]:
 		"hug":
 			# Lipit de drum: iarba de plaja, lemn adus de apa, pietre de corali.
+			# In sectorul trestiei, marginea drumului e chiar lanul.
+			if in_cane and not satellite and rng.randf() < 0.32 \
+					and _add_sugar_cane(parent, pos, rng):
+				return
 			_add_island_scatter(parent, pos, rng, mat)
 		"mid":
 			var roll := rng.randf()
-			if satellite or roll < 0.34:
+			if in_cane and not satellite and roll < 0.38 \
+					and _add_sugar_cane(parent, pos, rng):
+				return
+			if satellite or roll < 0.30:
 				_add_island_scatter(parent, pos, rng, mat)
-			elif roll < 0.70:
-				_add_palm(parent, pos, rng, mat)
+			elif roll < 0.42:
+				# Viata de plaja: lazi, plute, oale. Rara si doar pe banda din
+				# mijloc — langa asfalt ar fi citit ca gunoi aruncat pe sosea.
+				if not _add_beach_clutter(parent, pos, rng):
+					_add_island_scatter(parent, pos, rng, mat)
+			elif roll < 0.66:
+				_add_island_tree(parent, pos, rng, mat)
 			else:
 				_add_coral_rock(parent, pos, rng, mat, true)
 		_:
 			var roll2 := rng.randf()
-			if satellite or roll2 < 0.40:
+			if in_cane and not satellite and roll2 < 0.34 \
+					and _add_sugar_cane(parent, pos, rng):
+				return
+			if satellite or roll2 < 0.38:
 				_add_coral_rock(parent, pos, rng, mat, true)
-			elif roll2 < 0.80:
-				_add_palm(parent, pos, rng, mat)
+			elif roll2 < 0.72:
+				_add_island_tree(parent, pos, rng, mat)
 			else:
 				_add_coral_rock(parent, pos, rng, mat, true)
 
@@ -297,7 +377,14 @@ static func _place_island_prop(parent: Node3D, pos: Vector3, band: Dictionary,
 ## Maruntisuri de plaja, fara coliziune.
 static func _add_island_scatter(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
-	const PICKS := ["Beach_Grass", "Driftwood", "Coral_Pebbles", "Hibiscus"]
+	# Alegere PONDERATA, nu uniforma, si motivul e bugetul: banda lipita de drum
+	# pune ~460 de piese pe tur, iar busteanul costa 50 de triunghiuri fata de
+	# 120-160 cat costa celelalte. Cu 40% busteni media coboara de la 127 la
+	# ~105, adica 12 000 de triunghiuri pe tur — exact marja care tinea pista
+	# peste pragul de alarma. Vizual nu se pierde nimic: pe o plaja chiar e mai
+	# mult lemn adus de apa decat tufe.
+	const PICKS := ["Driftwood", "Driftwood", "Beach_Grass", "Coral_Pebbles",
+		"Hibiscus"]
 	var kept := _pick_from_glb(ISLAND_SCATTER,
 		PICKS[rng.randi_range(0, PICKS.size() - 1)])
 	if kept == null:
@@ -310,10 +397,23 @@ static func _add_island_scatter(parent: Node3D, pos: Vector3,
 	Palette.apply_world_material(kept)
 
 
-## Tufa subtropicala provizorie: doar vizual, treci prin ea.
-## Geamana lui _add_dry_bush, cu slotul de vegetatie tropicala.
+## Tufa subtropicala: hibiscusul cu flori rosii, sau — daca GLB-ul lipseste —
+## sfera provizorie de dinainte.
+##
+## Hibiscusul e singurul rosu NATURAL din decorul insulei, deci merita sa fie
+## tufa implicita si nu doar o piesa de scatter printre altele: pata de culoare
+## e ce citeste ochiul la 30 m, nu forma frunzei.
 static func _add_tropical_bush(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
+	const HIBISCUS := "res://assets/models/hibiscus_bush.glb"
+	if ResourceLoader.exists(HIBISCUS):
+		var model := (load(HIBISCUS) as PackedScene).instantiate() as Node3D
+		parent.add_child(model)
+		model.position = pos + Vector3.UP * -0.12
+		model.rotation.y = rng.randf_range(0.0, TAU)
+		model.scale = Vector3.ONE * rng.randf_range(0.75, 1.15)
+		Palette.apply_world_material(model)
+		return
 	var bush := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
 	var r := rng.randf_range(0.5, 0.95)
@@ -337,21 +437,104 @@ static func _add_tropical_bush(parent: Node3D, pos: Vector3,
 	parent.add_child(bush)
 
 
-## Palmier provizoriu: trunchi inclinat + coroana. Inlocuit de island_scatter.glb.
+## Trestia de zahar. Intoarce false daca GLB-ul lipseste, ca apelantul sa poata
+## pune altceva in loc — un lan cu goluri e mai rau decat unul mai rar.
+static func _add_sugar_cane(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator) -> bool:
+	const PICKS := ["Cane_Clump_A", "Cane_Clump_B", "Cane_Clump_C"]
+	var kept := _pick_from_glb(ISLAND_CANE,
+		PICKS[rng.randi_range(0, PICKS.size() - 1)])
+	if kept == null:
+		return false
+	parent.add_child(kept)
+	# Ingropat 20 cm: tulpinile pornesc dintr-un punct, iar la cota exacta a
+	# solului se vede rozeta de la baza si smocul pare pus pe jos.
+	kept.position = pos + Vector3.UP * -0.20
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(0.85, 1.20)
+	# Fara coliziune, deliberat: treci PRIN lan. Trestia e o perdea vizuala, si
+	# un zid invizibil la marginea drumului ar transforma un decor intr-o
+	# pedeapsa.
+	Palette.apply_world_material(kept)
+	return true
+
+
+## Viata de plaja: lazi, plute de plasa, oale de awamori, rastele, busteni.
+static func _add_beach_clutter(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator) -> bool:
+	const PICKS := ["Fishing_Crate", "Net_Floats", "Awamori_Pot",
+		"Bamboo_Rack", "Driftwood_Log"]
+	var kept := _pick_from_glb(ISLAND_CLUTTER,
+		PICKS[rng.randi_range(0, PICKS.size() - 1)])
+	if kept == null:
+		return false
+	parent.add_child(kept)
+	kept.position = pos + Vector3.UP * -0.06
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(0.95, 1.25)
+	Palette.apply_world_material(kept)
+	return true
+
+
+## Arborii insulei: cocotier, palmier aplecat, pandanus, banyan.
+##
+## Inlocuieste palmierul provizoriu din cilindru + sfera. Fata de scatter,
+## arborii se instantiaza INTREGI (nu prin `_pick_from_glb`): fiecare fisier e
+## un ansamblu de doua piese — scoarta pe clasa `bark` si frunzisul pe atlas —
+## iar a pastra doar un nod ar fi lasat un trunchi fara coroana.
+##
+## Alegerea e ponderata (vezi ISLAND_TREES), nu uniforma: patru specii in
+## proportii egale citesc ca o gradina botanica, nu ca o coasta.
+static func _add_island_tree(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, mat: Callable) -> void:
+	var roll := rng.randf()
+	var acc := 0.0
+	var spec: Dictionary = ISLAND_TREES[0]
+	for entry: Dictionary in ISLAND_TREES:
+		acc += float(entry["weight"])
+		if roll <= acc:
+			spec = entry
+			break
+	var path: String = spec["path"]
+	if ResourceLoader.exists(path):
+		var model := (load(path) as PackedScene).instantiate() as Node3D
+		var s := rng.randf_range(float(spec["scale_min"]),
+			float(spec["scale_max"]))
+		var radius := float(spec["collide"]) * s
+		var holder: Node3D
+		if radius > 0.0:
+			# Coliziune doar pe TRUNCHI, nu pe coroana: altfel treci prin
+			# frunzele care atarna peste drum si te opresti in aer.
+			var body := StaticBody3D.new()
+			var shape := CollisionShape3D.new()
+			var cyl := CylinderShape3D.new()
+			var aabb := Track.model_aabb(model)
+			cyl.radius = radius
+			cyl.height = maxf(aabb.size.y * 0.55, 1.0) * s
+			shape.shape = cyl
+			shape.position = Vector3.UP * (cyl.height * 0.5)
+			body.add_child(shape)
+			holder = body
+		else:
+			holder = Node3D.new()
+		parent.add_child(holder)
+		holder.add_child(model)
+		holder.position = pos + Vector3.UP * -0.10
+		holder.rotation.y = rng.randf_range(0.0, TAU)
+		holder.scale = Vector3.ONE * s
+		Palette.apply_class_materials(model, ISLAND_CLASSES)
+		return
+	_add_palm_placeholder(parent, pos, rng, mat)
+
+
+## Palmier provizoriu: trunchi inclinat + coroana. Rezerva pentru cand
+## coconut_palm.glb & co lipsesc — nu se sterge, e plasa de siguranta care tine
+## pista jucabila pe un checkout fara assets.
 ##
 ## Inclinarea nu e cosmetica — palmierii de coasta cresc spre lumina, deci un
 ## pluton de trunchiuri perfect verticale citeste imediat ca geometrie generata.
-static func _add_palm(parent: Node3D, pos: Vector3,
+static func _add_palm_placeholder(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
-	var kept := _pick_from_glb(ISLAND_SCATTER,
-		"Palm_A" if rng.randf() < 0.6 else "Palm_B")
-	if kept != null:
-		parent.add_child(kept)
-		kept.position = pos
-		kept.rotation.y = rng.randf_range(0.0, TAU)
-		kept.scale = Vector3.ONE * rng.randf_range(0.9, 1.25)
-		Palette.apply_world_material(kept)
-		return
 	var h := rng.randf_range(4.5, 7.0) # style_bible §2: palmieri 4-7 m
 	var holder := Node3D.new()
 	parent.add_child(holder)
@@ -393,7 +576,13 @@ static func _add_coral_rock(parent: Node3D, pos: Vector3,
 	var node: Node3D
 	if kept != null:
 		node = kept
-		Palette.apply_world_material(kept)
+		# Clasa `coral_rock` (triplanar), NU materialul lumii. Cu atlasul,
+		# stancile ieseau cu capacele negre si peretii PORTOCALII: `strata_slots`
+		# alterneaza sloturi pe inele, iar cel din mijloc era `rock_dark`
+		# (#67421F) — gresia canionului, adica exact culoarea de care fugim pe o
+		# insula. Prins pe snapshot de joc, nu in Blender: acolo previzualizarea
+		# aplica textura de clasa, deci arata corect.
+		Palette.apply_class_materials(kept, ISLAND_CLASSES)
 		var mi_glb := _first_mesh(kept)
 		if mi_glb != null and mi_glb.mesh != null:
 			h = mi_glb.mesh.get_aabb().size.y

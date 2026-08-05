@@ -1,9 +1,20 @@
-"""shisa.glb — leul-caine shisa cu gura DESCHISA (SHISA_OPEN_MOUTH, 1.8 m).
+"""shisa_statue.glb + shisa_statue_closed.glb — perechea de lei-caini.
 
-Referinta: assets/okinawa_inspiration/, randul SHISA GUARDIANS. Shisa stau in
-perechi la poarta: cel cu gura deschisa alunga raul, cel cu gura inchisa tine
-norocul inauntru. Asta e primul din pereche — de aici numele fisierului si de
-aia gura e o cavitate REALA, cu falca de jos separata, nu o crestatura pictata.
+Referinta: assets/okinawa_inspiration/, randul SHISA GUARDIANS
+(SHISA_OPEN_MOUTH 1.8 m, SHISA_CLOSED_MOUTH 1.6 m). Shisa stau in perechi la
+poarta: cel cu gura deschisa alunga raul, cel cu gura inchisa tine norocul
+inauntru. La gura deschisa cavitatea e REALA, cu falca de jos coborata si un
+gol intre falci — nu o crestatura pictata.
+
+DOUA FISIERE, nu doua variante intr-unul, si asta e impus de cum incarca Godot
+landmark-urile: `Track._build_landmark` instantiaza TOT ce e in GLB la o
+singura pozitie, deci doi shisa in acelasi fisier ar sta unul in altul. Ca
+pereche adevarata, fiecare primeste un id in `_LANDMARKS` si `_landmark_spots()`
+ii aseaza pe aceeasi fractie, pe laturi opuse.
+
+Numele pieselor sunt IDENTICE in ambele fisiere (`Shisa_Base` / `Shisa_Stone` /
+`Shisa_Detail`): sunt scene separate, deci nu se ciocnesc, iar cele doua intrari
+din `_LANDMARKS` pot folosi acelasi dictionar de clase.
 
 Cum se citeste un shisa de la 20 m, in ordinea importantei: (1) coama de bucle
 in jurul capului, (2) postura asezata cu picioarele din fata drepte, (3) gura
@@ -26,7 +37,11 @@ import math
 from mathutils import Vector
 
 PED_TOP = 0.55          # cota capacului soclului
-S = 0.86                # scara corpului, calibrata pe inaltimea ceruta de 1.8 m
+# Scara corpului. 0.86 a fost calibrat pe cei 1.8 m ai variantei cu gura
+# deschisa; celei inchise (1.6 m) i se deriva proportional, ca sa nu ajungem cu
+# doua seturi de cote scrise de mana care diverg la prima corectie de forma.
+S_REF, H_REF = 0.86, 1.81
+S = S_REF
 
 
 def P(x, y, z):
@@ -46,7 +61,7 @@ def pedestal(b):
     b.box((0.0, 0.0, PED_TOP - 0.05), (1.04, 0.94, 0.14), CORAL_SAND)
 
 
-def body(b, slot):
+def body(b, slot, open_mouth=True):
     """Postura asezata, in trei etaje distincte: crupa jos si in spate, piept
     INALT si ingust, cap deasupra umerilor cu un gat vizibil intre ele.
 
@@ -79,9 +94,11 @@ def body(b, slot):
                   [0.175 * S, 0.155 * S], slot, segments=7)
     b.boulder(P(0, 0.26, 1.22), D(0.44, 0.44, 0.40), slot, seed=23,
               segments=8, rings=4, deviation=0.09)
-    # Botul: falca de sus si cea de jos, cu un GOL intre ele. Golul e asset-ul.
+    # Botul: falca de sus si cea de jos. La varianta deschisa raman un gol de
+    # 8 cm intre ele — golul E asset-ul. La cea inchisa falca urca si se lipeste,
+    # deci botul citeste ca un bloc, exact diferenta dintre cei doi shisa.
     b.box(P(0, 0.46, 1.19), D(0.32, 0.26, 0.15), slot)
-    b.box(P(0, 0.43, 1.04), D(0.27, 0.23, 0.11), slot)
+    b.box(P(0, 0.43, 1.04 if open_mouth else 1.115), D(0.27, 0.23, 0.11), slot)
     # Nasul si arcadele.
     b.boulder(P(0, 0.56, 1.24), D(0.15, 0.11, 0.11), slot, seed=29,
               segments=6, rings=3, deviation=0.08)
@@ -139,7 +156,7 @@ def tail(b, slot, seed=67):
                   segments=6, rings=3, deviation=0.15)
 
 
-def detail(b):
+def detail(b, open_mouth=True):
     """Ochii, cavitatea gurii si coltii — pe atlas, nu pe clasa de piatra.
 
     Cavitatea e o cutie INTUNECATA impinsa intre falci: fara ea, prin gura
@@ -147,48 +164,63 @@ def detail(b):
     o gaura prin care se vede peisajul. Aceeasi capcana ca fantele dintre
     stancile stivuite.
     """
-    b.box(P(0, 0.42, 1.115), D(0.25, 0.21, 0.12), VOLCANIC_BLACK)
+    if open_mouth:
+        b.box(P(0, 0.42, 1.115), D(0.25, 0.21, 0.12), VOLCANIC_BLACK)
+    else:
+        # Gura inchisa: doar linia dintre falci, o lama subtire intunecata.
+        b.box(P(0, 0.47, 1.113), D(0.28, 0.18, 0.022), VOLCANIC_BLACK)
     for sx in (-1.0, 1.0):
         b.boulder(P(sx * 0.128, 0.455, 1.300), D(0.115, 0.095, 0.11),
                   VOLCANIC_BLACK, seed=41 + int(sx), segments=6, rings=3,
                   deviation=0.06)
-        # Coltii: doi sus, doi jos, in colturile gurii.
-        b.box(P(sx * 0.095, 0.49, 1.125), D(0.05, 0.065, 0.08), CORAL_SAND)
-        b.box(P(sx * 0.085, 0.46, 1.075), D(0.045, 0.055, 0.07), CORAL_SAND)
+        # Coltii: doi sus, doi jos, in colturile gurii. Cel cu gura inchisa
+        # ii arata doar pe cei de sus, si mai scurti — restul sunt inghititi.
+        b.box(P(sx * 0.095, 0.49, 1.125 if open_mouth else 1.098),
+              D(0.05, 0.065, 0.08 if open_mouth else 0.045), CORAL_SAND)
+        if open_mouth:
+            b.box(P(sx * 0.085, 0.46, 1.075), D(0.045, 0.055, 0.07), CORAL_SAND)
 
 
 AO_SPEC = dict(samples=30, dist=1.8, gradient="vertical",
                low=0.46, high=1.0, power=0.8, floor=0.15)
 
-PARTS = [
-    ("Shisa_Base", lambda b: pedestal(b), 0.04, 1.4),
-    ("Shisa_Stone", lambda b: (body(b, CONCRETE), mane(b, CONCRETE),
-                               tail(b, CONCRETE)), 0.02, 1.0),
-    ("Shisa_Detail", detail, 0.02, None),
+# (fisier, gura deschisa, inaltime ceruta)
+VARIANTS = [
+    ("shisa_statue.glb", True, 1.80),
+    ("shisa_statue_closed.glb", False, 1.60),
 ]
 
-clear_built("Shisa_")
-built = []
-for name, fill, bevel, uv_size in PARTS:
-    b = Builder()
-    fill(b)
-    obj = b.to_object(name)
-    min_z = min(v[2] for v in obj.bound_box)
-    stats = finish(obj, bevel=bevel, origin="base_axis",
-                   ao=dict(AO_SPEC, z_range=(0.0, 1.8)))
-    obj.location.z = min_z
-    if uv_size is not None:
-        cube_uvs(obj, uv_size)
-    built.append((obj, stats))
-    print("  %-14s %4d tris  AO %.2f..%.2f  uv=%s"
-          % (name, stats["tris"], stats["ao_min"], stats["ao_max"],
-             ("cub %.1f m" % uv_size) if uv_size else "atlas"))
+for filename, open_mouth, height in VARIANTS:
+    S = S_REF * height / H_REF
+    PARTS = [
+        ("Shisa_Base", lambda b: pedestal(b), 0.04, 1.4),
+        ("Shisa_Stone", lambda b, om=open_mouth: (body(b, CONCRETE, om),
+                                                  mane(b, CONCRETE),
+                                                  tail(b, CONCRETE)), 0.02, 1.0),
+        ("Shisa_Detail", lambda b, om=open_mouth: detail(b, om), 0.02, None),
+    ]
+    clear_built("Shisa_")
+    built = []
+    for name, fill, bevel, uv_size in PARTS:
+        b = Builder()
+        fill(b)
+        obj = b.to_object(name)
+        min_z = min(v[2] for v in obj.bound_box)
+        stats = finish(obj, bevel=bevel, origin="base_axis",
+                       ao=dict(AO_SPEC, z_range=(0.0, height)))
+        obj.location.z = min_z
+        if uv_size is not None:
+            cube_uvs(obj, uv_size)
+        built.append((obj, stats))
+        print("  %-14s %4d tris  AO %.2f..%.2f  uv=%s"
+              % (name, stats["tris"], stats["ao_min"], stats["ao_max"],
+                 ("cub %.1f m" % uv_size) if uv_size else "atlas"))
 
-objs = [o for o, _s in built]
-bpy.context.view_layer.update()
-lo = min(min((o.matrix_world @ Vector(c)).z for c in o.bound_box) for o in objs)
-hi = max(max((o.matrix_world @ Vector(c)).z for c in o.bound_box) for o in objs)
-print("shisa.glb  TOTAL %d tris  inaltime %.2f m"
-      % (sum(s["tris"] for _o, s in built), hi - lo))
-print("GLB:  %s (%d B)" % export_glb(objs, "shisa.glb"))
-print("BLEND: %s (%d B)" % save_blend(objs, "shisa.blend"))
+    objs = [o for o, _s in built]
+    bpy.context.view_layer.update()
+    lo = min(min((o.matrix_world @ Vector(c)).z for c in o.bound_box) for o in objs)
+    hi = max(max((o.matrix_world @ Vector(c)).z for c in o.bound_box) for o in objs)
+    print("%s  TOTAL %d tris  inaltime %.2f m (cerut %.1f)"
+          % (filename, sum(s["tris"] for _o, s in built), hi - lo, height))
+    print("GLB:  %s (%d B)" % export_glb(objs, filename))
+    print("BLEND: %s (%d B)" % save_blend(objs, filename.replace(".glb", ".blend")))

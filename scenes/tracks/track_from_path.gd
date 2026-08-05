@@ -38,9 +38,10 @@ extends Track
 ## Creasta de fly-off: te arunca in aer, cu plasa de respawn dedesubt.
 @export var custom_flyoff_fracs: Array[float] = []
 ## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
-## _LANDMARKS: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
-## 4=ecran drive-in, 5=stalp GAS, 6=casa de sat (Okinawa),
-## 7=baraca minerului).
+## _LANDMARKS). Desert: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
+## 4=ecran drive-in, 5=stalp GAS, 12=baraca minerului.
+## Okinawa: 6=casa de sat, 7=far, 8=poarta torii, 9/10=shisa (gura deschisa /
+## inchisa), 11=zid gusuku.
 @export var custom_landmarks: Array[Vector3] = []
 ## Rapele: (frac_start, frac_end, adancime_m, latura ±1 sau 0 = ambele).
 ## Terenul urmareste soseaua peste tot; aici il sapam inapoi, ca sa existe unde

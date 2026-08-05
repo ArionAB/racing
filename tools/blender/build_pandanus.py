@@ -16,9 +16,12 @@ import math
 from mathutils import Vector
 
 TRUNK_H = 1.05
-LEAVES = 24
+# 15, nu 24: la 22 de exemplare pe tur, fiecare frunza in plus costa 1400 de
+# triunghiuri pe pista. Rozeta se citeste la fel — ce o vinde e ARCUL sabiei
+# si golul dintre frunze, nu numarul lor.
+LEAVES = 15
 LEAF_LEN = 1.70
-LEAF_STATIONS = 7
+LEAF_STATIONS = 6
 ROOTS = 7
 # Cat urca varful frunzei inainte sa se aplece. Cifra e derivata din COTA
 # CERUTA (2.5 m), nu aleasa din ochi: maximul lui `rise*sin(1.45t) - fall*t³`

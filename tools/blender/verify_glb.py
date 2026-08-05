@@ -9,11 +9,13 @@ Verifica:
   3. UV-urile: toate colapsate pe centre de slot din atlas -> ce sloturi foloseste
   4. sloturile sunt LEGALE (0-13). 14-16 sunt accente de masina, 17-31 se
      randeaza magenta in joc — vezi LEGAL_SLOTS mai jos.
-     Piesele declarate cu --class-parts= poarta o textura de CLASA
-     (assets/textures/classes/), deci au UV-uri REALE si nu li se aplica
-     regula slotului. Pe ele verificarea se inverseaza: UV-urile trebuie sa
-     ACOPERE o suprafata. Colapsate, ar citi un singur texel si textura ar fi
-     invizibila — vezi style_bible §13.6, bug-ul care a costat trei luni.
+     Piesele care poarta o textura de CLASA (assets/textures/classes/) au
+     UV-uri REALE si nu li se aplica regula slotului; sonda le RECUNOASTE
+     SINGURA din forma UV-urilor (vezi uv_kind). Pe ele verificarea se
+     inverseaza: UV-urile trebuie sa ACOPERE o suprafata. Colapsate, ar citi un
+     singur texel si textura ar fi invizibila — vezi style_bible §13.6, bug-ul
+     care a costat trei luni. --class-parts= forteaza modul de clasa pe piesele
+     numite, pentru cazurile in care vrei sa-l AFIRMI, nu sa-l lasi dedus.
   5. COLOR_0 prezent (AO copt) + intervalul de valori
   6. bounding box: originea la baza (min Y ~ 0), centrata in XZ. Cu
      --origin=center se cere in schimb bbox centrat pe Y (obiecte care se
@@ -31,6 +33,8 @@ Rulare:
     python tools/blender/verify_glb.py assets/models/windmill.glb 3000 \
         --class-parts=Mill_Wood,Mill_Metal,Blades
 """
+# `--class-parts=` a ramas optional: piesele pe clase se recunosc singure. Se
+# trece explicit doar cand vrei ca sonda sa PICE daca piesa ajunge pe atlas.
 
 import json
 import struct
@@ -118,6 +122,34 @@ def is_class_part(name, class_parts):
     return any(name.startswith(p) for p in class_parts)
 
 
+# Cat din UV-urile unui nod poate sa cada intamplator pe un centru de slot fara
+# ca nodul sa fie pe atlas. Toleranta e 1e-4 in u, 32 de sloturi -> sansa
+# per vertex e ~0.6%; masurat pe assets-urile pe clase iese 0-1% (House_Stone
+# 1.0%, Banyan_Bark 0.4%). 10% lasa marja larga fara sa atinga banda MIXTA.
+CLASS_EXACT_MAX = 0.10
+
+
+def uv_kind(uv_count, exact_count):
+    """Clasifica UV-urile unui nod: "atlas", "class" sau "mixed".
+
+    Un nod pe atlas are TOATE UV-urile colapsate exact pe centre de slot — asa
+    le pune `dio_lib`. Un nod cu textura de clasa are proiectie cubica, deci
+    UV-uri continue care nimeresc un centru doar din intamplare.
+
+    Banda din mijloc nu e o zona gri pe care s-o alegem cum ne convine: acolo
+    stau greselile adevarate (un unwrap ramas peste UV-urile de atlas, un nod
+    snapuit pe jumatate). De-aia are verdict propriu si pica — daca ar cadea in
+    "class", euristica ar inghiti exact clasa de bug pentru care exista sonda.
+    """
+    if uv_count == 0:
+        return "none"
+    if exact_count == uv_count:
+        return "atlas"
+    if exact_count <= uv_count * CLASS_EXACT_MAX:
+        return "class"
+    return "mixed"
+
+
 def verify(path, budget=None, front=None, origin="base", class_parts=()):
     gltf, blob, total, version = load_glb(path)
     print("=" * 74)
@@ -138,6 +170,7 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
         name = node.get("name", mesh.get("name", "?"))
         tris = 0
         slots_used = set()
+        uv_count, exact_count = 0, 0
         uv_lo, uv_hi = [1e9, 1e9], [-1e9, -1e9]
         col_lo, col_hi = 1e9, -1e9
         has_color = False
@@ -179,6 +212,8 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
                     slot = round(u * SLOTS - 0.5)
                     exact = abs((slot + 0.5) / SLOTS - u) < 1e-4
                     slots_used.add((slot, exact))
+                    uv_count += 1
+                    exact_count += 1 if exact else 0
                     uv_lo[0] = min(uv_lo[0], u); uv_hi[0] = max(uv_hi[0], u)
                     uv_lo[1] = min(uv_lo[1], v); uv_hi[1] = max(uv_hi[1], v)
 
@@ -201,9 +236,18 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
         # inverseaza: UV-urile trebuie sa ACOPERE o suprafata, nu sa fie
         # colapsate. Un UV colapsat pe o piesa texturata e exact bug-ul din
         # style_bible §13.6: derivata zero, un singur texel citit, textura
-        # invizibila. Fara modul asta, garda ar urla la fiecare asset pe clase
-        # si oamenii ar invata s-o ignore — ceea ce e mai rau decat sa n-o ai.
-        if is_class_part(name, class_parts):
+        # invizibila.
+        #
+        # Modul se DEDUCE, nu se declara. Cat timp depindea de --class-parts,
+        # orice apel care uita flagul citea proiectia cubica drept indici de
+        # slot si scotea zeci de linii ILEGAL false pe assets corecte in joc
+        # (village_house 199 de linii, #160). Garda devenise zgomot exact pe
+        # clasa de assets care a crescut cel mai mult — iar o garda pe care
+        # inveti s-o ignori nu mai prinde nici greselile adevarate.
+        kind = "class" if is_class_part(name, class_parts) \
+            else uv_kind(uv_count, exact_count)
+
+        if kind == "class":
             span_u, span_v = uv_hi[0] - uv_lo[0], uv_hi[1] - uv_lo[1]
             if not slots_used:
                 print("    UV clasa   : FARA UV!")
@@ -213,17 +257,28 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
                       "de clasa ar citi UN texel" % (span_u, span_v))
                 ok = False
             else:
-                print("    UV clasa   : reale, u %.2f..%.2f  v %.2f..%.2f"
+                print("    UV clasa   : uv=cub, reale, u %.2f..%.2f  v %.2f..%.2f"
                       % (uv_lo[0], uv_hi[0], uv_lo[1], uv_hi[1]))
+        elif kind == "mixed":
+            # Nici pe atlas, nici proiectie cubica: cele doua unwrap-uri s-au
+            # amestecat pe acelasi nod. Sloturile necentrate de mai jos sunt
+            # fix vertecsii care au scapat.
+            off = sorted(slot for slot, exact in slots_used if not exact)
+            print("    sloturi UV : MIXTE — %d din %d UV-uri pe centre de slot "
+                  "(%.0f%%), restul continue"
+                  % (exact_count, uv_count, 100.0 * exact_count / uv_count))
+            print("    !! nici atlas (ar fi 100%%), nici textura de clasa "
+                  "(ar fi ~0%%). Sloturi necentrate: %s"
+                  % (", ".join("%d" % s for s in off) or "-"))
+            ok = False
         else:
+            # kind e "atlas" (toate UV-urile pe centre) sau "none" (fara UV).
             names = []
             illegal = []
-            for slot, exact in sorted(slots_used):
+            for slot, _exact in sorted(slots_used):
                 label = (SLOT_NAMES[slot] if 0 <= slot < len(SLOT_NAMES)
                          else "slot%d" % slot)
-                names.append(label if exact else "%s(NECENTRAT!)" % label)
-                if not exact:
-                    ok = False
+                names.append(label)
                 why = slot_problem(slot)
                 if why:
                     illegal.append((slot, label, why))

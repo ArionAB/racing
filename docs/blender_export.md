@@ -102,6 +102,20 @@ Verifica UV-urile pe centre de slot, **legalitatea sloturilor** (doar 0-13:
 baza la Y=0 si centrarea in XZ. Cu `--front=-Z` verifica in plus ca planul
 dominant al modelului e cel cerut — prinde modelul rotit 90°.
 
+**Piesele cu textura de clasa se recunosc singure.** Un nod pe atlas are TOATE
+UV-urile colapsate exact pe centre de slot; un nod cu textura de clasa are
+proiectie cubica, deci UV-uri continue care nimeresc un centru doar din
+intamplare (masurat: 0-1%). Sonda decide din raportul asta si raporteaza
+`uv=cub` in loc de lista de sloturi — pe ele verificarea se inverseaza (UV-urile
+trebuie sa ACOPERE o suprafata, altfel textura citeste un texel, style_bible
+§13.6). `--class-parts=Nod1,Nod2` ramane, dar acum e o **afirmatie**: piesele
+numite sunt obligate sa fie pe clasa, si sonda pica daca ajung pe atlas.
+
+Un nod care iese intre cele doua tipare — parte pe centre, parte continue — nu e
+clasificat in niciunul: primeste verdict `MIXTE` si pica. Acolo stau greselile
+adevarate (un unwrap ramas peste UV-urile de atlas), si o euristica ce le-ar
+inghiti ca „textura de clasa" ar goli sonda de rost.
+
 Semnul (fata vs spate) ramane avertisment, nu eroare, si asta e o limitare
 reala: la ecranul de drive-in scheletul sta in spate, deci spatele are mai multa
 arie decat fata; la benzinarie pompele stau in fata, deci exact invers. Aceeasi

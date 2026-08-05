@@ -237,9 +237,391 @@ func _hazard_fracs() -> Array[float]:
 ## piatra). Pozitiile vin din referinta: casele cu acoperis portocaliu stau pe
 ## malul de nord al soselei, intre dig si capul de vest. Alternate pe laturi, ca
 ## drumul sa treaca PRINTRE ele.
+##
+## Restul satului, poarta shisa si farul sunt in `_scenography()`. Aici raman
+## doar reperele care erau deja aici plus cele doua pe care le cer SONDELE:
+## `snapshot.gd --landmark=` cere un id din tabelul din track.gd, deci un far
+## asezat ca prop de scenografie n-ar mai fi putut fi fotografiat pe nume.
 func _landmark_spots() -> Array[Vector3]:
 	return [
 		Vector3(0.115, 1.0, 6),
 		Vector3(0.145, -1.0, 6),
 		Vector3(0.175, 1.0, 6),
+		# Poarta shisa de la intrarea in sat (referinta, panoul "SHISA GATE"):
+		# torii peste drum si perechea de lei, gura deschisa in dreapta.
+		Vector3(0.203, 1.0, 8),
+		Vector3(0.203, 1.0, 9),
+		Vector3(0.203, -1.0, 10),
+		# Farul: pe platoul de la creasta, pe latura dinspre larg — singura
+		# parte care ramane la cota drumului acolo (masurat cu probe_shore:
+		# la frac 0.62, latura -1 sta la 27 m pe toti primii 50 m, iar +1
+		# cade la 19 m si apoi in laguna).
+		Vector3(0.620, -1.0, 7),
+	]
+
+
+## ############################################################################
+## SCENOGRAFIA: referinta, sector cu sector.
+##
+## Sursa e `assets/okinawa_v2/okinawa_v2.png` — acelasi poster din care au iesit
+## traseul, cotele si laguna. Ce se putea MASURA din el s-a masurat (pozitiile
+## caselor de sat vin din masca de acoperisuri portocalii a hartii de tur,
+## trecuta prin transformarea harta->lume, 2.83 m/px); ce tine de densitate si
+## de specie s-a citit din randarea izometrica, unde se vede piesa cu piesa.
+##
+## Distantele fata de sosea NU sunt cele din desen, si asta e important: terenul
+## din motor are propria linie a apei (laguna sapata, rapa digului, banda de
+## tarm). Toate cifrele de mai jos sunt verificate cu `tools/probe_shore.gd`,
+## care tipareste unde e malul la fiecare fractie. Doua exemple din prima
+## rulare: pe dig apa vine pana la 14 m de axa in AMBELE parti (deci tetrapozii
+## chiar stau langa asfalt, ca in poza), iar pe creasta interiorul buclei cade la
+## 19 m — platoul cu cetatea e pe latura dinspre larg, nu invers cum arata
+## unghiul izometric al posterului.
+##
+## Ce NU e aici, desi e in poza: podul cu arcade de sub creasta (n-avem asset de
+## viaduct) si templul cu streasina intoarsa (casa de sat scalata ar fi fost o
+## minciuna, nu un stand-in). Se adauga cand apar modelele.
+func _scenography() -> Array[Dictionary]:
+	const M := "res://assets/models/"
+	return [
+		# --- 1. DIGUL DE START -------------------------------------------
+		#
+		# Imaginea care defineste pista: un sir dublu de tetrapozi pe toata
+		# dreapta de start, spalati de valuri. Nu sunt presarati — e o lucrare
+		# de aparare, deci merg cap la cap, cu randul doi in golurile primului.
+		# `max_shore` opreste sirul acolo unde tarmul se desprinde de sosea:
+		# dincolo de capetele digului, coasta primeste pietre, nu beton.
+		{"kind": "revetment", "label": "Dig_tetrapozi", "side": -1.0,
+			"from": 0.926, "to": 0.052, "rows": 2, "spacing": 4.5,
+			"row_gap": 4.2, "first_row": -1.0, "jitter": 0.9,
+			"max_shore": 26.0, "path": M + "tetrapod.glb",
+			"picks": ["Tetrapod_01", "Tetrapod_04", "Tetrapod_04",
+				"Tetrapod_01", "Tetrapod_Stack_01", "Tetrapod_04"],
+			"scale": [0.7, 1.0], "face": "random", "tilt": 0.13,
+			"sink": 0.35},
+		# Parapetul dinspre laguna: pe partea protejata a digului marea nu bate,
+		# deci acolo referinta are un zid jos cu stalpi, nu tetrapozi.
+		{"kind": "edge", "label": "Dig_parapet", "side": 1.0,
+			"from": 0.930, "to": 0.048, "off": 3.6, "spacing": 3.7,
+			"jitter": 0.0, "min_ground": -0.4,
+			"path": M + "sea_wall_segment.glb",
+			"picks": ["Sea_Wall_A", "Sea_Wall_B", "Sea_Wall_C"],
+			"scale": [1.0, 1.0], "face": "along", "sink": 0.1},
+		# Bolovanii din spuma, pe ambele laturi. In referinta digul nu iese din
+		# apa curata: intre tetrapozi si sub parapet sunt stanci negre.
+		{"kind": "revetment", "label": "Dig_stanci", "side": -1.0,
+			"from": 0.920, "to": 0.060, "rows": 2, "spacing": 9.0,
+			"row_gap": 5.0, "first_row": 2.5, "jitter": 2.2,
+			"max_shore": 30.0, "path": M + "coral_rock.glb",
+			"picks": ["Coral_Rock_03", "Coral_Rock_04", "Coral_Rock_05",
+				"Coral_Rock_06"],
+			"scale": [0.8, 1.5], "face": "random", "sink": 0.5},
+		{"kind": "revetment", "label": "Dig_stanci", "side": 1.0,
+			"from": 0.930, "to": 0.050, "rows": 1, "spacing": 11.0,
+			"first_row": 3.0, "jitter": 2.5, "max_shore": 30.0,
+			"path": M + "coral_rock.glb",
+			"picks": ["Coral_Rock_02", "Coral_Rock_03", "Coral_Rock_04"],
+			"scale": [0.7, 1.3], "face": "random", "sink": 0.45},
+
+		# --- 2. PORTUL DE PESCARI ----------------------------------------
+		#
+		# Cheiul se aseaza pe LINIA APEI, nu la o distanta fixa: laguna intra
+		# pana la ~45 m de axa in golful asta si la 62 m imediat dupa.
+		{"kind": "edge", "label": "Port_chei", "side": 1.0,
+			"from": 0.060, "to": 0.106, "off": 36.0, "spacing": 6.9,
+			"jitter": 0.0, "min_ground": -1.0,
+			"path": M + "gusuku_wall.glb",
+			"picks": ["Gusuku_Wall_A", "Gusuku_Wall_B"],
+			"scale": [0.85, 0.85], "face": "along", "sink": 0.6},
+		# Barcile sabani, acostate paralel cu cheiul. `on_water` le pune la
+		# nivelul marii, nu pe fundul lagunei.
+		{"kind": "spot", "label": "Port_barci", "frac": 0.070, "side": 1.0,
+			"off": 44.0, "on_water": true, "path": M + "sabani_boat.glb",
+			"face": "along", "yaw": 8.0, "sink": 0.15},
+		{"kind": "spot", "label": "Port_barci", "frac": 0.078, "side": 1.0,
+			"off": 47.0, "on_water": true, "path": M + "sabani_boat.glb",
+			"face": "along", "yaw": -6.0, "sink": 0.15},
+		{"kind": "spot", "label": "Port_barci", "frac": 0.084, "side": 1.0,
+			"off": 43.0, "on_water": true, "path": M + "sabani_boat.glb",
+			"face": "along", "yaw": 14.0, "sink": 0.15},
+		{"kind": "spot", "label": "Port_barci", "frac": 0.092, "side": 1.0,
+			"off": 48.0, "on_water": true, "path": M + "sabani_boat.glb",
+			"face": "along", "yaw": -11.0, "sink": 0.15},
+		{"kind": "spot", "label": "Port_barci", "frac": 0.099, "side": 1.0,
+			"off": 45.0, "on_water": true, "path": M + "sabani_boat.glb",
+			"face": "along", "yaw": 5.0, "sink": 0.15},
+		# Viata de pe chei: lazi, plute, oale de awamori.
+		{"kind": "grove", "label": "Port_marfa", "side": 1.0,
+			"from": 0.064, "to": 0.104, "spacing": 7.0, "off": [26.0, 36.0],
+			"species": [
+				{"path": M + "beach_clutter.glb", "weight": 1.0,
+					"picks": ["Fishing_Crate", "Net_Floats", "Awamori_Pot",
+						"Bamboo_Rack"], "scale": [1.0, 1.6],
+					"face": "random"},
+			]},
+
+		# Coasta dinspre larg, in dreptul portului si al satului. Fara ea,
+		# jumatatea din stanga a cadrului e nisip gol pe 60 m: tarmul e departe
+		# acolo (masurat 65-76 m), deci nici digul, nici benzile statistice
+		# (care se opresc la 26 m) nu ajung pana la el.
+		{"kind": "grove", "label": "Coasta_vest", "side": -1.0, "from": 0.030,
+			"to": 0.150, "spacing": 10.0, "off": [16.0, 46.0], "species": [
+				{"path": M + "beach_palm_bent.glb", "weight": 0.34,
+					"scale": [0.9, 1.25], "face": "random"},
+				{"path": M + "coral_rock.glb", "weight": 0.30,
+					"picks": ["Coral_Rock_04", "Coral_Rock_05",
+						"Coral_Rock_06"],
+					"scale": [0.8, 1.4], "face": "random"},
+				{"path": M + "pandanus.glb", "weight": 0.22,
+					"scale": [0.9, 1.3], "face": "random"},
+				{"path": M + "island_scatter.glb", "weight": 0.14,
+					"picks": ["Beach_Grass", "Driftwood"], "scale": [1.4, 2.4],
+					"face": "random"},
+			]},
+
+		# --- 3. SATUL ----------------------------------------------------
+		#
+		# Randul din spate: cele trei curti masurate in harta de tur. Fiecare
+		# pata de acoperis portocaliu are 500-750 m2, adica un grup de case, nu
+		# una — de aia sunt cate doua pe pozitie, decalate pe directia drumului.
+		# Coordonatele raman cele MASURATE; daca pica in laguna (conturul ei e
+		# simplificat la 16 laturi), casa se trage singura pe uscat.
+		{"kind": "spot", "label": "Sat_curti", "world": Vector2(-103, 95),
+			"path": M + "village_house.glb", "face": "road", "yaw_jitter": 12.0,
+			"scale": [0.95, 1.1], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_curti", "world": Vector2(-115, 85),
+			"path": M + "village_house.glb", "face": "road", "yaw_jitter": 12.0,
+			"scale": [0.95, 1.1], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_curti", "world": Vector2(-149, 70),
+			"path": M + "village_house.glb", "face": "road", "yaw_jitter": 12.0,
+			"scale": [0.95, 1.1], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_curti", "world": Vector2(-165, 66),
+			"path": M + "village_house.glb", "face": "road", "yaw_jitter": 12.0,
+			"scale": [0.95, 1.1], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_curti", "world": Vector2(-199, 60),
+			"path": M + "village_house.glb", "face": "road", "yaw_jitter": 12.0,
+			"scale": [0.95, 1.1], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_curti", "world": Vector2(-215, 58),
+			"path": M + "village_house.glb", "face": "road", "yaw_jitter": 12.0,
+			"scale": [0.95, 1.1], "collide": 2.6},
+		# Randul de la drum, intercalat cu cele trei landmark-uri de mai sus
+		# (0.115 / 0.145 / 0.175), ca soseaua sa treaca PRINTRE case.
+		{"kind": "spot", "label": "Sat_case", "frac": 0.105, "side": 1.0,
+			"off": 11.0, "path": M + "village_house.glb", "face": "road",
+			"scale": [0.95, 1.05], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_case", "frac": 0.128, "side": -1.0,
+			"off": 12.0, "path": M + "village_house.glb", "face": "road",
+			"scale": [0.95, 1.05], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_case", "frac": 0.158, "side": 1.0,
+			"off": 11.0, "path": M + "village_house.glb", "face": "road",
+			"scale": [0.95, 1.05], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_case", "frac": 0.166, "side": -1.0,
+			"off": 13.0, "path": M + "village_house.glb", "face": "road",
+			"scale": [0.95, 1.05], "collide": 2.6},
+		{"kind": "spot", "label": "Sat_case", "frac": 0.190, "side": 1.0,
+			"off": 12.0, "path": M + "village_house.glb", "face": "road",
+			"scale": [0.95, 1.05], "collide": 2.6},
+		# Zidurile de curte: doua bucati scurte de gusuku, la scara de gard.
+		# Nu pe tot satul — un panou de zid costa 2 300 de triunghiuri, deci se
+		# pun acolo unde chiar marginesc o curte, nu ca sa umple metri.
+		{"kind": "edge", "label": "Sat_ziduri", "side": 1.0, "from": 0.100,
+			"to": 0.114, "off": 7.0, "spacing": 4.8,
+			"path": M + "gusuku_wall.glb", "picks": ["Gusuku_Wall_A"],
+			"scale": [0.60, 0.60], "face": "along", "sink": 0.15,
+			"min_ground": 0.5},
+		{"kind": "edge", "label": "Sat_ziduri", "side": -1.0, "from": 0.162,
+			"to": 0.176, "off": 7.0, "spacing": 4.8,
+			"path": M + "gusuku_wall.glb", "picks": ["Gusuku_Wall_A"],
+			"scale": [0.60, 0.60], "face": "along", "sink": 0.15,
+			"min_ground": 0.5},
+		# Gradinile: hibiscus si palmieri mici intre case, ca in poza.
+		{"kind": "grove", "label": "Sat_gradini", "side": 1.0, "both_sides":
+			true, "from": 0.100, "to": 0.200, "spacing": 9.0,
+			"off": [9.0, 26.0], "species": [
+				{"path": M + "hibiscus_bush.glb", "weight": 0.40,
+					"scale": [1.0, 1.8], "face": "random"},
+				{"path": M + "coconut_palm.glb", "weight": 0.34,
+					"scale": [0.8, 1.05], "face": "random", "collide": 0.45},
+				{"path": M + "banyan.glb", "weight": 0.16,
+					"scale": [0.8, 1.0], "face": "random", "collide": 1.1},
+				{"path": M + "island_scatter.glb", "weight": 0.10,
+					"picks": ["Beach_Grass", "Hibiscus"], "scale": [1.2, 2.0],
+					"face": "random"},
+			]},
+
+		# --- 4. CAPUL DE VEST ---------------------------------------------
+		#
+		# Panoul "HAIRPIN" din referinta: palmieri pe exteriorul virajului,
+		# stanca joasa pe interior, nimic inalt in apex (style_bible §7).
+		{"kind": "grove", "label": "Cap_vest", "side": -1.0, "from": 0.205,
+			"to": 0.268, "spacing": 8.0, "off": [10.0, 30.0], "species": [
+				{"path": M + "coconut_palm.glb", "weight": 0.46,
+					"scale": [0.9, 1.2], "face": "random", "collide": 0.45},
+				{"path": M + "beach_palm_bent.glb", "weight": 0.28,
+					"scale": [0.9, 1.25], "face": "random", "collide": 0.4},
+				{"path": M + "pandanus.glb", "weight": 0.26,
+					"scale": [0.9, 1.3], "face": "random"},
+			]},
+		{"kind": "grove", "label": "Cap_vest_roci", "side": 1.0, "from": 0.212,
+			"to": 0.262, "spacing": 11.0, "off": [9.0, 20.0], "species": [
+				{"path": M + "rock_cluster.glb", "weight": 0.6,
+					"picks": ["Cluster_M1", "Cluster_M2", "Cluster_S1"],
+					"scale": [0.9, 1.4], "face": "random"},
+				{"path": M + "coral_rock.glb", "weight": 0.4,
+					"picks": ["Coral_Rock_04", "Coral_Rock_05"],
+					"scale": [0.8, 1.2], "face": "random"},
+			]},
+
+		# --- 6. URCAREA DE COASTA: terasele de gusuku ---------------------
+		#
+		# Zidul de cetate incepe pe urcare, pe latura dinspre uscat (-1), si
+		# insoteste drumul pana sub creasta. In referinta e piesa care da scara
+		# intregului sector: 6 m de piatra langa un drum de 14.
+		{"kind": "edge", "label": "Cetate_terase", "side": -1.0, "from": 0.452,
+			"to": 0.498, "off": 6.0, "spacing": 7.9,
+			"path": M + "gusuku_wall.glb",
+			"picks": ["Gusuku_Wall_B", "Gusuku_Wall_C"],
+			"scale": [1.0, 1.0], "face": "along", "sink": 0.3,
+			"min_ground": 1.0},
+		{"kind": "grove", "label": "Urcare_vegetatie", "side": 1.0,
+			"both_sides": true, "from": 0.400, "to": 0.500, "spacing": 12.0,
+			"off": [9.0, 24.0], "species": [
+				{"path": M + "pandanus.glb", "weight": 0.40,
+					"scale": [0.9, 1.3], "face": "random"},
+				{"path": M + "coconut_palm.glb", "weight": 0.36,
+					"scale": [0.9, 1.15], "face": "random", "collide": 0.45},
+				{"path": M + "hibiscus_bush.glb", "weight": 0.24,
+					"scale": [1.2, 2.0], "face": "random"},
+			]},
+
+		# --- 7. CREASTA: cetatea ------------------------------------------
+		#
+		# Platoul e pe latura dinspre larg (masurat, vezi antetul). Zidul merge
+		# cap la cap pe buza lui, iar farul (landmark id 7) sta in spatele lui.
+		{"kind": "edge", "label": "Cetate_creasta", "side": -1.0, "from": 0.588,
+			"to": 0.652, "off": 7.0, "spacing": 9.5,
+			"path": M + "gusuku_wall.glb",
+			"picks": ["Gusuku_Wall_C", "Gusuku_Wall_B", "Gusuku_Wall_C"],
+			"scale": [1.2, 1.2], "face": "along", "sink": 0.3,
+			"min_ground": 1.0},
+		{"kind": "grove", "label": "Creasta_palmieri", "side": -1.0,
+			"from": 0.585, "to": 0.660, "spacing": 13.0, "off": [22.0, 40.0],
+			"species": [
+				{"path": M + "coconut_palm.glb", "weight": 0.55,
+					"scale": [0.95, 1.2], "face": "random"},
+				{"path": M + "banyan.glb", "weight": 0.25,
+					"scale": [0.9, 1.15], "face": "random"},
+				{"path": M + "pandanus.glb", "weight": 0.20,
+					"scale": [0.9, 1.2], "face": "random"},
+			]},
+		# Stalpii de pe pragul de corali (panoul "TIDAL SANDBAR SHORTCUT"):
+		# doua siruri care marcheaza banda uda peste laguna. Pozitiile sunt
+		# calculate pe polilinia scurtaturii din `_branch_specs`, la 6.5 m de
+		# axa ei — adica exact pe margine, unde se vad din masina.
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(164, -247),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(177, -248),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(167, -217),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(180, -218),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(170, -187),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(183, -188),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(174, -156),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(187, -160),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(179, -142),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+		{"kind": "spot", "label": "Prag_stalpi", "world": Vector2(192, -146),
+			"path": M + "marker_post.glb", "picks": ["Marker_A"],
+			"face": "road", "scale": [1.4, 1.4]},
+
+		# --- 8. COBORAREA DE EST: lanul si palmierii ----------------------
+		#
+		# In referinta interiorul sweeper-ului e un lan de trestie, marginit de
+		# cocotieri, cu stanci mari pe malul dinspre laguna. Benzile statistice
+		# pun deja trestie pe 0.68-0.88 (TrackDecor.CANE_FRAC_MIN); aici se
+		# adauga PATA densa din poza, nu inca un strat pe tot sectorul.
+		{"kind": "grove", "label": "Lan_trestie", "side": 1.0, "from": 0.690,
+			"to": 0.766, "spacing": 3.6, "off": [4.0, 17.0], "species": [
+				{"path": M + "sugar_cane_clump.glb", "weight": 1.0,
+					"picks": ["Cane_Clump_A", "Cane_Clump_B", "Cane_Clump_C"],
+					"scale": [0.9, 1.25], "face": "random", "sink": 0.2},
+			]},
+		{"kind": "grove", "label": "Est_palmieri", "side": 1.0,
+			"both_sides": true, "from": 0.672, "to": 0.800, "spacing": 8.0,
+			"off": [9.0, 28.0], "species": [
+				{"path": M + "coconut_palm.glb", "weight": 0.50,
+					"scale": [0.9, 1.25], "face": "random", "collide": 0.45},
+				{"path": M + "beach_palm_bent.glb", "weight": 0.22,
+					"scale": [0.9, 1.2], "face": "random", "collide": 0.4},
+				{"path": M + "pandanus.glb", "weight": 0.18,
+					"scale": [0.9, 1.3], "face": "random"},
+				{"path": M + "banyan.glb", "weight": 0.10,
+					"scale": [0.9, 1.2], "face": "random", "collide": 1.1},
+			]},
+		# Malul lagunei, acolo unde apa vine la 18-27 m de sosea (0.79-0.83):
+		# bolovani mari in apa, ca in coltul din dreapta jos al posterului.
+		{"kind": "revetment", "label": "Est_bolovani", "side": 1.0,
+			"from": 0.782, "to": 0.840, "rows": 2, "spacing": 8.0,
+			"row_gap": 5.5, "first_row": 1.0, "jitter": 2.0,
+			"max_shore": 34.0, "path": M + "coral_rock.glb",
+			"picks": ["Coral_Rock_05", "Coral_Rock_06", "Coral_Rock_07",
+				"Coral_Rock_08"],
+			"scale": [0.9, 1.5], "face": "random", "sink": 0.4},
+
+		# Perdeaua de la marginea drumului. In referinta palmierii nu incep la
+		# 16 m, cresc pana in bordura — asta e ce face sectorul de est sa citeasca
+		# a jungla si nu a camp cu copaci. FARA coliziune, ca banda "hug" din
+		# TrackDecor: la 3-6 m de asfalt un colizor nu e decor, e pedeapsa.
+		{"kind": "grove", "label": "Perdea_est", "side": 1.0,
+			"both_sides": true, "from": 0.676, "to": 0.800, "spacing": 13.0,
+			"off": [2.5, 6.5], "clear": 2.0, "species": [
+				{"path": M + "coconut_palm.glb", "weight": 0.44,
+					"scale": [0.85, 1.1], "face": "random"},
+				{"path": M + "pandanus.glb", "weight": 0.34,
+					"scale": [0.9, 1.25], "face": "random"},
+				{"path": M + "hibiscus_bush.glb", "weight": 0.22,
+					"scale": [1.3, 2.0], "face": "random"},
+			]},
+		{"kind": "grove", "label": "Perdea_cap_vest", "side": -1.0,
+			"from": 0.206, "to": 0.266, "spacing": 12.0, "off": [2.5, 6.5],
+			"clear": 2.0, "species": [
+				{"path": M + "beach_palm_bent.glb", "weight": 0.46,
+					"scale": [0.85, 1.15], "face": "random"},
+				{"path": M + "pandanus.glb", "weight": 0.34,
+					"scale": [0.9, 1.25], "face": "random"},
+				{"path": M + "hibiscus_bush.glb", "weight": 0.20,
+					"scale": [1.3, 2.0], "face": "random"},
+			]},
+
+		# --- 9. RETURUL DE SUD-EST ----------------------------------------
+		#
+		# Plaja dinaintea digului: palmieri aplecati spre apa, lemn adus de
+		# valuri, pietre marunte. E ultima respiratie inainte de dreapta de
+		# start, deci ramane rara — nimic care sa ascunda linia de cursa.
+		{"kind": "grove", "label": "Plaja_sud", "side": 1.0, "both_sides": true,
+			"from": 0.845, "to": 0.925, "spacing": 12.0, "off": [10.0, 30.0],
+			"species": [
+				{"path": M + "beach_palm_bent.glb", "weight": 0.44,
+					"scale": [0.9, 1.25], "face": "random", "collide": 0.4},
+				{"path": M + "coconut_palm.glb", "weight": 0.30,
+					"scale": [0.9, 1.15], "face": "random", "collide": 0.45},
+				{"path": M + "island_scatter.glb", "weight": 0.26,
+					"picks": ["Driftwood", "Beach_Grass", "Coral_Pebbles"],
+					"scale": [1.3, 2.2], "face": "random"},
+			]},
 	]

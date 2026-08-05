@@ -94,10 +94,21 @@ const MIN_SAMPLE: int = 20
 ## 300k ramane un prag de alarma cu ~2x headroom — si tot prinde clasa istorica
 ## de accident, care sare cu zeci de mii dintr-un foc.
 ##
+## 300k -> 400k (august 2026, la integrarea kitului Okinawa): tot decizia
+## explicita a dezvoltatorului, luata cu cifrele in fata. Okinawa a ajuns la
+## 302k, din care `Decor` singur face 184k — palmieri, pandanus, banyan si
+## coral pe assets reale, in locul primitivelor provizorii.
+##
+## Ce a inclinat decizia: in acelasi timp numarul de MATERIALE a SCAZUT, 29 ->
+## 22. Adica pista s-a ingreunat exact pe axa care nu doare pe mobil si s-a
+## usurat pe cea care doare. Un prag care ar fi respins asta ar fi fost fix
+## capcana descrisa mai sus — un plafon derivat din cat de sarac era jocul.
+##
 ## Ramane un prag de ALARMA, nu un buget de arta: constrangerea reala pe mobil e
 ## draw calls / overdraw / fill rate, de asta testul principal al garzii ramane
-## numaratoarea de MATERIALE. Validarea finala e primul test pe device.
-const MAX_TRIS_PER_TRACK: int = 300000
+## numaratoarea de MATERIALE. Validarea finala e primul test pe device — si
+## Okinawa e pista pe care trebuie inceput, fiind cea mai grea.
+const MAX_TRIS_PER_TRACK: int = 400000
 
 var _paths: Array[String] = []
 var _index: int = 0

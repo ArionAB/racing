@@ -127,12 +127,17 @@ res://
   ziua în care l-am scris. Pragul a stat apoi la 150k. În august 2026
   dezvoltatorul a decis explicit să ridice bugetele vizuale (un telefon
   post-2020 duce 300–500k de triunghiuri pe cadru) și să folosească marja
-  pentru upgrade-ul grafic — pragul e acum **300k**, tot prag de alarmă cu ~2x
-  headroom față de pistele post-upgrade (~140–165k), destul cât să prindă în
+  pentru upgrade-ul grafic — pragul a urcat la 300k, prag de alarmă cu ~2x
+  headroom față de pistele de atunci (~140–165k), destul cât să prindă în
   continuare clasa de accident (primitive la rezoluția implicită sar cu zeci de
-  mii dintr-un foc). Constrângerea reală pe mobil rămâne
-  **draw calls / overdraw / fill rate**, de aceea testul principal al gărzii e
-  numărătoarea de materiale. Validarea finală e primul test pe device.
+  mii dintr-un foc). Ridicat din nou la **400k** în august 2026, la integrarea
+  kitului Okinawa: pista aia a ajuns la 302k, din care decorul singur face 184k
+  (palmieri, pandanus, banyan, coral pe assets reale în locul primitivelor
+  provizorii) — dar în aceeași mișcare **materialele au scăzut, 29 → 22**.
+  Adică s-a îngreunat exact axa care nu doare pe mobil și s-a ușurat cea care
+  doare. Constrângerea reală rămâne **draw calls / overdraw / fill rate**, de
+  aceea testul principal al gărzii e numărătoarea de materiale. Validarea
+  finală e primul test pe device — și se începe cu Okinawa, fiind cea mai grea.
 - Texturi comprimate ETC2/ASTC, materiale simple (albedo, fără PBR complex)
 - Particule cu limită de count; test pe device fizic de la primul build (M4,
   dar mai devreme dacă apar dubii de feel pe touch)

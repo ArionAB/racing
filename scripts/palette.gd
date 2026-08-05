@@ -167,24 +167,24 @@ static func world_material() -> StandardMaterial3D:
 		_shared.uv2_scale = Vector3(DETAIL_SCALE, DETAIL_SCALE, DETAIL_SCALE)
 	return _shared
 
-## Geamanul OGLINDIT al materialului lumii.
+## ############################################################################
+## OGLINDIREA NU CERE MATERIAL SEPARAT.
 ##
-## Un prop cu scale.x = -1 are winding inversat, deci rasterizatorul ii vede
-## fetele din spate ca fete din fata si obiectul iese pe dos. CULL_FRONT taie
-## exact ce trebuie. Normalele sunt deja corecte — Godot le transforma cu inversa
-## transpusa, care se ocupa singura de oglindire.
+## Aici a stat pana in august 2026 o pereche de "materiale geamane" cu
+## CULL_FRONT, pentru prop-urile puse cu scale.x = -1. Premisa era ca un
+## determinant negativ inverseaza winding-ul si obiectul iese pe dos.
 ##
-## De ce un material geaman si nu CULL_DISABLED pe cel comun: dezactivarea
-## culling-ului ar dubla triunghiurile rasterizate pe TOATA lumea, iar fill
-## rate-ul e exact constrangerea pe care o tinem sub control. Asa costa un
-## material in plus si zero pixeli.
-static var _shared_mirrored: StandardMaterial3D
-
-static func world_material_mirrored() -> StandardMaterial3D:
-	if _shared_mirrored == null:
-		_shared_mirrored = world_material().duplicate() as StandardMaterial3D
-		_shared_mirrored.cull_mode = BaseMaterial3D.CULL_FRONT
-	return _shared_mirrored
+## Premisa e FALSA pe Godot 4: rasterizatorul intoarce singur sensul fetei dupa
+## determinantul transformarii instantei. Masurat pe 4.7 (tools/MirrorTest.tscn):
+## un quad CULL_BACK oglindit pe X ramane perfect vizibil. Materialul geaman era
+## deci un AL DOILEA flip, care taia exact fetele dinspre camera — de aici
+## bugul "stancile mari sunt goale pe dinauntru": jumatate din sectiunile de
+## faleza de pe Dunele (`track_cliffs.gd` oglindeste 50% din ele) se randau ca
+## niste coji prin care se vedea nisipul din spate.
+##
+## Daca vreodata pare din nou ca un prop oglindit e "pe dos", cauza e in mesh
+## (normale inversate la export), nu in cull mode. Nu reintroduce geamanul.
+## ############################################################################
 
 
 ## Materialul CLASEI de roca (faleze, butte, arcada, bolovani) — prima abatere
@@ -203,8 +203,6 @@ static func world_material_mirrored() -> StandardMaterial3D:
 ## Vertex color = AO copt, ca peste tot. Fara stratul de detaliu pe UV2:
 ## masca lui se esantioneaza pe UV1, care sub triplanar nu mai inseamna slot —
 ## si trim-ul isi aduce oricum granulatia proprie.
-static var _rock_mirrored: StandardMaterial3D
-
 ## Din august 2026 (conversia Dunelor) albedo-ul rocii vine din
 ## assets/textures/classes/rock.png — sursa externa gradata prin
 ## process_class_textures — nu din trim-ul procedural. trim_rock.png ramane
@@ -212,17 +210,11 @@ static var _rock_mirrored: StandardMaterial3D
 static func rock_material() -> StandardMaterial3D:
 	return triplanar_class_material("rock")
 
-static func rock_material_mirrored() -> StandardMaterial3D:
-	if _rock_mirrored == null:
-		_rock_mirrored = rock_material().duplicate() as StandardMaterial3D
-		_rock_mirrored.cull_mode = BaseMaterial3D.CULL_FRONT
-	return _rock_mirrored
-
 ## Pune materialul de roca pe un subarbore — aceeasi mecanica precum
 ## apply_world_material, alt material. Doar pentru assets-uri INTEGRAL din
 ## roca: un GLB cu parti de lemn/metal (mine_portal) ar primi piatra pe grinzi.
-static func apply_rock_material(root: Node, mirrored: bool = false) -> void:
-	var mat := rock_material_mirrored() if mirrored else rock_material()
+static func apply_rock_material(root: Node) -> void:
+	var mat := rock_material()
 	for node in _walk(root):
 		if node is MeshInstance3D:
 			var mi := node as MeshInstance3D
@@ -391,9 +383,10 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 ## vertex color-ul de AO; noi ii inlocuim materialul cu cel partajat. Asa un
 ## prop facut in Blender se grupeaza cu restul lumii intr-un singur draw call.
 ##
-## `mirrored` doar pentru subarbori cu scara negativa pe o axa.
-static func apply_world_material(root: Node, mirrored: bool = false) -> void:
-	var mat := world_material_mirrored() if mirrored else world_material()
+## Merge la fel pe subarborii oglinditi (scale negativa pe o axa) — vezi nota
+## despre oglindire de mai sus.
+static func apply_world_material(root: Node) -> void:
+	var mat := world_material()
 	for node in _walk(root):
 		if node is MeshInstance3D:
 			var mi := node as MeshInstance3D

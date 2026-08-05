@@ -207,9 +207,6 @@ func _process(_delta: float) -> bool:
 
 func _measure(path: String, track: Node) -> Dictionary:
 	var world_mat := Palette.world_material()
-	# Falezele oglindite folosesc geamanul cu CULL_FRONT. Fara linia asta,
-	# jumatate din ele n-ar mai fi numarate ca fiind pe atlas.
-	var world_mat_mirror := Palette.world_material_mirrored()
 	var by_source := {}
 	var all_mats := {}
 	var unique_meshes := {}
@@ -229,7 +226,7 @@ func _measure(path: String, track: Node) -> Dictionary:
 		var mat: Material = mi.material_override
 		if mat == null and mi.mesh != null and mi.mesh.get_surface_count() > 0:
 			mat = mi.mesh.surface_get_material(0)
-		if mat == world_mat or mat == world_mat_mirror:
+		if mat == world_mat:
 			on_atlas += 1
 		var key := mat.get_instance_id() if mat != null else 0
 		all_mats[key] = true

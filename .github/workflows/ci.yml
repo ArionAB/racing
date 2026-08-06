@@ -107,6 +107,27 @@ jobs:
           fi
           echo "OK — nicio masina intepenita."
 
+      # O stanca de pe marginea drumului trebuie sa se opuna acolo unde SE VEDE
+      # ca e piatra. Colizorul era un cilindru pe 40% din amprenta — mai mic
+      # decat cercul inscris, pe o forma care nici nu e rotunda — deci masina
+      # intra pana la 0.73 m in stanca inainte sa fie oprita. Sonda trage raze
+      # care taie si mesh-ul, si colizorul, si compara punctele de intrare.
+      - name: Coliziunea stancilor urmareste silueta
+        run: |
+          set -uo pipefail
+          ~/godot-bin/godot --headless --fixed-fps 60 \
+            --script res://tools/probe_rock_fit.gd 2>&1 | tee rockfit.log
+          STATUS=${PIPESTATUS[0]}
+          if ! grep -q 'VERDICT:' rockfit.log; then
+            echo "::error::Sonda de coliziune pe stanci nu a rulat pana la capat."
+            exit 1
+          fi
+          if [ "$STATUS" -ne 0 ] || grep -q 'VERDICT: PROBLEMA' rockfit.log; then
+            echo "::error::Stanci in care masina intra fara sa fie oprita — vezi tabelul de mai sus."
+            exit 1
+          fi
+          echo "OK — colizoarele acopera siluetele."
+
       # Soseaua e un platou cu fuste verticale de 3 m, iar terenul de langa ea
       # sta mai jos — deci marginea drumului poate deveni un prag pe care un
       # CharacterBody3D (fara step-up in Godot) nu-l mai urca. S-a intamplat: pe

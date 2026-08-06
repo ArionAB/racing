@@ -145,6 +145,9 @@ static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
 ## Benzi paralele cu drumul. Continutul lor vine din `props`, nu de aici.
 static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 		seed_value: int, mat_provider: Callable, props: String) -> void:
+	# Evidenta stancilor SOLIDE deja asezate (x, z, raza siluetei). Traverseaza
+	# toate benzile fiindca un buzunar se poate forma si intre benzi.
+	var solids: Array[Vector3] = []
 	for band in BANDS:
 		# Benzile cerute de un anumit set de prop-uri (vezi `far`) nu apar pe
 		# celelalte teme.
@@ -177,11 +180,40 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 				continue
 			if not _allowed(spec, band):
 				continue
-			_place_band_prop(container, spec, band, rng, mat_provider, props)
+			_place_band_prop(container, spec, band, rng, mat_provider, props,
+				false, sampler, solids)
 			if rng.randf() < clump:
 				_place_satellites(container, sampler, spec, band, rng, mat_provider,
-					props)
+					props, solids)
 				skip = 2
+
+
+## Cati metri liberi trebuie sa ramana intre marginea asfaltului si silueta unei
+## stanci solide din banda lipita de drum.
+##
+## 2 m, si cifra vine din penalizarea de offroad, nu din estetica: `is_on_road`
+## taie viteza de la 7.5 m de axa, adica la 0.5 m dupa marginea asfaltului. Cu
+## umarul asta, prima piatra pe care o poti atinge sta la 2 m dincolo de linia
+## unde ai incasat deja penalizarea — destul cat sa scoti o roata pe nisip si sa
+## te intorci, cum a fost mereu intentia benzii.
+const HUG_SHOULDER: float = 2.0
+## Marja peste prag la impingere, si toleranta la verificarea de dupa.
+const SHOULDER_EPS: float = 0.05
+
+## Cat spatiu liber trebuie sa ramana intre siluetele a doua stanci SOLIDE.
+## Masina are 1.8 m latime; 2.6 m ii lasa loc sa treaca printre ele fara sa se
+## infiga. Sub pragul asta, a doua stanca ramane fantoma — vezi _claim().
+const SOLID_GAP: float = 2.6
+
+
+## Argumentul `shoulder` pentru _add_canyon_rock: unde e drumul si incotro e
+## afara. Gol daca n-avem sampler (apelanti vechi) — atunci regula nu se aplica.
+static func _shoulder(sampler: TrackSideSampler, spec: TrackDecorSpec,
+		solids: Array[Vector3]) -> Dictionary:
+	if sampler == null:
+		return {}
+	return {"sampler": sampler, "out": spec.normal_out, "gap": HUG_SHOULDER,
+		"solids": solids}
 
 
 ## Regulile de siguranta, citite din steagurile pe care le-a calculat samplerul.
@@ -202,15 +234,49 @@ static func _allowed(spec: TrackDecorSpec, band: Dictionary) -> bool:
 	return true
 
 
+## Piesele marunte din jurul unui prop principal.
+##
+## O GRUPARE ARE CEL MULT O PIESA SOLIDA — cea principala. Satelitii se pun cu
+## `satellite = true`, iar stancile se uita la steagul asta si raman fantoma.
+##
+## Nu e o scutire de dragul performantei, e regula care tine umarul jucabil: o
+## grupare imprastie 2-5 sateliti intr-o raza de 3.5 m, si trei bolovani solizi
+## atat de aproape incadreaza un buzunar in care masina se infige. Ce lovesti
+## ramane piatra cea mai mare din grup; prin cele mici din jurul ei treci fara
+## sa observi ca n-au fizica, fiindca tocmai te-a oprit sora lor.
 static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
 		spec: TrackDecorSpec, band: Dictionary, rng: RandomNumberGenerator,
-		mat_provider: Callable, props: String) -> void:
+		mat_provider: Callable, props: String,
+		solids: Array[Vector3] = []) -> void:
 	var count := rng.randi_range(CLUSTER_MIN, CLUSTER_MAX)
+	# Marginea benzii, in distanta fata de AXA drumului. Un satelit nu are voie
+	# sa treaca de ea, oricat de norocos ar fi unghiul lui.
+	var floor_dist := sampler.half_width() + float(band["off_min"])
 	for i in count:
 		var sat := TrackDecorSpec.new()
 		var angle := rng.randf_range(0.0, TAU)
 		var dist := rng.randf_range(1.0, CLUSTER_RADIUS)
 		sat.position = spec.position + Vector3(cos(angle), 0.0, sin(angle)) * dist
+		# Imprastierea alege un unghi LIBER in jurul propului principal, deci
+		# jumatate din unghiuri trag satelitul SPRE sosea — pana la 3.5 m, dintr-o
+		# banda care incepe la 1.5 m de asfalt. Rezultatul se vedea in joc: pe
+		# Dunele, cinci stanci aveau silueta peste asfalt (pana la 0.80 m in
+		# banda de rulare), si toate erau sateliti. Bookkeeping-ul de mai jos
+		# (`sat.offset`) nici nu observa — el aduna o medie, nu masoara unde a
+		# ajuns piesa.
+		#
+		# Aici se masoara distanta REALA pana la cea mai apropiata bucla de sosea
+		# (inclusiv scurtaturi si portiunea care trece pe langa ea insasi), iar
+		# satelitul prea apropiat se impinge inapoi pe raza lui, in loc sa fie
+		# aruncat: un gol in grupare s-ar vedea, o piesa mutata cu 40 cm nu.
+		var slack := sampler.clearance_at(sat.position) - floor_dist
+		if slack < 0.0:
+			var out_dir := (sat.position - spec.position)
+			out_dir.y = 0.0
+			if out_dir.length() > 0.001:
+				sat.position -= out_dir.normalized() * (dist * 2.0)
+			if sampler.clearance_at(sat.position) < floor_dist:
+				continue
 		# Satelitul s-a imprastiat pana la CLUSTER_RADIUS fata de propul principal,
 		# deci cota lui nu mai e cea masurata acolo.
 		sat.position.y = sampler.ground_y(sat.position.x, sat.position.z)
@@ -224,13 +290,16 @@ static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
 		sat.is_elevated = spec.is_elevated
 		sat.is_apex = spec.is_apex
 		sat.is_braking = spec.is_braking
-		_place_band_prop(parent, sat, band, rng, mat_provider, props, true)
+		_place_band_prop(parent, sat, band, rng, mat_provider, props, true,
+			sampler, solids)
 
 
 ## Ce se aseaza intr-o banda. Sateliti = piese mai mici decat propul principal.
 static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat_provider: Callable,
-		props: String, satellite: bool = false) -> void:
+		props: String, satellite: bool = false,
+		sampler: TrackSideSampler = null,
+		solids: Array[Vector3] = []) -> void:
 	if props == "island":
 		# Fractia se transmite fiindca UN prop insular depinde de sector
 		# (trestia de zahar). Restul o ignora — vezi CANE_FRAC_MIN.
@@ -244,9 +313,24 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 			# 1 m, care la 30 m in fata masinii dispar in nisip. O treime din ea
 			# primeste acum stanci mici de canion: singurele obiecte de langa
 			# asfalt care au silueta peste linia orizontului si strang cadrul.
-			# Fara coliziune, ca toata banda (vezi nota de la BANDS).
+			#
+			# Astea SUNT solide, spre deosebire de restul benzii. Regula "banda
+			# lipita n-are fizica" s-a scris cand in ea intrau doar pietricele sub
+			# 60 cm, unde a trece prin ele nu se vede. Stancile mici au ajuns aici
+			# mai tarziu si sunt alt obiect: masurate pe Dunele, 80 din 131 au raza
+			# siluetei peste 0.80 m, adica bolovani de 1.6-3 m latime prin care
+			# masina trecea ca prin aer.
+			#
+			# Ce ramane din regula veche e motivul ei adevarat — UMARUL. O stanca
+			# solida lipita de asfalt transforma o roata scoasa pe nisip in oprire,
+			# si aia chiar ar fi nejucabila. De asta stancile primesc fizica dar
+			# cer HUG_SHOULDER metri liberi de la marginea asfaltului pana la
+			# silueta lor, iar cine nu-i are se impinge in afara pana ii are (vezi
+			# `shoulder` in _add_canyon_rock). Restul benzii — scatter si frunzis —
+			# ramane fantoma, ca inainte.
 			if rng.randf() < 0.34 and _add_canyon_rock(
-					parent, pos, rng, "S", false, 0.75, 1.35):
+					parent, pos, rng, "S", not satellite, 0.75, 1.35, 0.85, 1.25,
+					_shoulder(sampler, spec, solids)):
 				return
 			# Jumatate din rest primeste frunzis din kit in locul scatter-ului,
 			# din exact acelasi motiv pentru care s-au adaugat stancile mici:
@@ -261,6 +345,18 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		"mid":
 			var roll := rng.randf()
 			if satellite or roll < 0.30:
+				# FANTOMA, spre deosebire de stancile din banda lipita de drum, si
+				# spre deosebire de surorile lor M/L din aceeasi banda. Nu din
+				# obisnuinta: le-am facut solide si sonda de reintrare a picat.
+				#
+				# Banda asta e coridorul prin care te intorci pe sosea dupa ce ai
+				# iesit pe nisip, si e si cea mai deasa. Solide, stancile mici se
+				# aduna: la fractia 0.83 pe Dunele iesisera TREI intr-un cerc de
+				# 2.8 m, exact peste linia de reintrare, si masina nu mai urca
+				# inapoi in 8 secunde (tools/ProbeReentry.tscn, singurul caz picat
+				# dintr-o pista care trecea integral). Piesele M si L din aceeasi
+				# banda sunt rare si raman solide, deci ce lovesti aici e tot o
+				# piatra adevarata — doar ca una mare, nu un pluton de pietre mici.
 				if not _add_canyon_rock(parent, pos, rng, "S", false):
 					_add_cluster(parent, pos, rng, ["Cluster_S1", "Cluster_S2"],
 						false, mat_provider)
@@ -275,7 +371,8 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 						0.90, 1.35):
 					_add_cactus(parent, pos, rng, mat_provider)
 			elif roll < 0.80:
-				if not _add_canyon_rock(parent, pos, rng, "M", true):
+				if not _add_canyon_rock(parent, pos, rng, "M", true,
+						0.80, 1.30, 0.85, 1.25, _shoulder(sampler, spec, solids)):
 					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 						true, mat_provider)
 			elif roll < 0.836:
@@ -315,7 +412,8 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		_:
 			var roll2 := rng.randf()
 			if satellite or roll2 < 0.30:
-				if not _add_canyon_rock(parent, pos, rng, "M", true):
+				if not _add_canyon_rock(parent, pos, rng, "M", not satellite,
+						0.80, 1.30, 0.85, 1.25, _shoulder(sampler, spec, solids)):
 					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 						true, mat_provider)
 			elif roll2 < 0.72:
@@ -323,7 +421,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 				# canion ii iau locul cu aceeasi intentie (silueta dominanta in
 				# fundalul apropiat), dar pe textura de roca si cu trepte reale.
 				if not _add_canyon_rock(parent, pos, rng, "L", true,
-						0.85, 1.25):
+						0.85, 1.25, 0.85, 1.25, _shoulder(sampler, spec, solids)):
 					_add_cluster(parent, pos, rng, ["Cluster_L1"], true,
 						mat_provider)
 			elif roll2 < 0.86:
@@ -803,7 +901,8 @@ static func _rock_source(cls: String, kit: bool) -> Array:
 static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, cls: String, collide: bool,
 		h_min: float = 0.80, h_max: float = 1.30,
-		s_min: float = 0.85, s_max: float = 1.25) -> bool:
+		s_min: float = 0.85, s_max: float = 1.25,
+		shoulder: Dictionary = {}) -> bool:
 	# UN SINGUR numar pentru AMBELE decizii (ce biblioteca, ce varianta), si
 	# asta nu e microoptimizare — e conditia ca masuratoarea sa insemne ceva.
 	#
@@ -827,6 +926,13 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 		return false
 	var s := rng.randf_range(s_min, s_max)
 	var h := rng.randf_range(h_min, h_max)
+	# Scalarea se aplica INAINTE de orice masuratoare: raza siluetei depinde de
+	# ea, si de raza depinde daca stanca incape cu umarul cerut.
+	kept.scale = Vector3(s, s * h, s)
+	if not shoulder.is_empty():
+		var fit := _fit_shoulder(kept, pos, shoulder)
+		pos = fit[0]
+		collide = fit[1]
 	var holder: Node3D
 	if collide:
 		holder = StaticBody3D.new()
@@ -834,25 +940,163 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 		holder = Node3D.new()
 	parent.add_child(holder)
 	holder.add_child(kept)
-	kept.scale = Vector3(s, s * h, s)
 	Palette.apply_rock_material(kept)
 	if collide:
-		# Cilindru, nu sfera: o stiva in trepte e mai inalta decat lata, iar o
-		# sfera pe amprenta ei ar lasa varful fara coliziune sau ar umfla baza
-		# cu metri de aer. Cotele din AABB-ul real, ca la restul decorului.
-		var aabb := Track.model_aabb(kept)
-		var cyl := CylinderShape3D.new()
-		cyl.radius = maxf(maxf(aabb.size.x, aabb.size.z) * 0.40, 0.4)
-		cyl.height = maxf(aabb.size.y, 0.5)
-		var shape := CollisionShape3D.new()
-		shape.shape = cyl
-		shape.position = Vector3.UP * (aabb.position.y + aabb.size.y * 0.5)
-		holder.add_child(shape)
+		add_hull_collision(holder as StaticBody3D, kept)
 	holder.rotation.y = rng.randf_range(0.0, TAU)
 	# Infipta putin in nisip: fusta de moloz din model ascunde linia de contact
 	# doar daca stanca chiar intra in teren.
 	holder.position = pos + Vector3.UP * -0.25
 	return true
+
+
+## Impinge stanca in afara pana cand intre marginea asfaltului si silueta ei
+## raman `gap` metri liberi. Intoarce [pozitie, poate_fi_solida].
+##
+## Raza se ia din colturile AABB-ului, nu din latimea lui: holderul primeste
+## dupa aceea o rotatie libera pe Y, deci singura marime care nu minte e cea mai
+## departata distanta orizontala fata de origine.
+##
+## Cand nici dupa impingere nu incape (traseul trece pe langa el insusi, si
+## impingerea intr-o parte apropie de cealalta bucla), stanca ramane FANTOMA in
+## loc sa fie stearsa: un gol in banda se vede, o stanca prin care treci intr-un
+## loc anume nu — si e exact compromisul de dinainte, doar ca acum e exceptia,
+## nu regula.
+static func _fit_shoulder(model: Node3D, pos: Vector3,
+		shoulder: Dictionary) -> Array:
+	var sampler: TrackSideSampler = shoulder["sampler"]
+	var aabb := Track.model_aabb(model)
+	var far_x := maxf(absf(aabb.position.x), absf(aabb.end.x))
+	var far_z := maxf(absf(aabb.position.z), absf(aabb.end.z))
+	var radius := sqrt(far_x * far_x + far_z * far_z)
+	var need := sampler.half_width() + float(shoulder["gap"]) + radius
+	var have := sampler.clearance_at(pos)
+	var solids: Array[Vector3] = shoulder["solids"]
+	if have >= need:
+		return _claim(pos, radius, solids)
+	var out: Vector3 = shoulder["out"]
+	out.y = 0.0
+	if out.length() < 0.001:
+		return [pos, false]
+	# Impinsa cu o palma peste prag, si verificata cu aceeasi palma de toleranta.
+	# Fara ea impingerea aterizeaza EXACT pe prag, iar verificarea de dupa pica pe
+	# ultimul bit al virgulei mobile: 33 de stanci din 98 ramaneau fantoma desi
+	# incapusera.
+	var moved := pos + out.normalized() * (need - have + SHOULDER_EPS)
+	moved.y = sampler.ground_y(moved.x, moved.z)
+	if sampler.clearance_at(moved) < need - SHOULDER_EPS:
+		return [pos, false]
+	return _claim(moved, radius, solids)
+
+
+## Stanca devine solida doar daca lasa loc de trecere fata de toate stancile
+## solide de pana acum. Altfel ramane fantoma, pe pozitia ei.
+##
+## Regula asta n-a fost o precautie, a fost un diagnostic. Impingerea de mai sus
+## muta stancile "in afara", ceea ce PE INTERIORUL unui viraj strans le apropie
+## intre ele: razele converg spre centrul curbei. La fractia 0.83 pe Dunele au
+## iesit asa trei stanci de banda lipita adunate intr-un cerc de 2.8 m, fix peste
+## linia pe care sonda de reintrare aduce masina inapoi pe sosea — si masina n-a
+## mai iesit de acolo in 8 secunde.
+##
+## Cine ramane fantoma nu e o pierdere vizuala: e a doua sau a treia piatra
+## dintr-un pachet a carui prima piatra e solida. Lovesti pachetul, doar ca nu te
+## poti infige in el.
+static func _claim(pos: Vector3, radius: float,
+		solids: Array[Vector3]) -> Array:
+	for s in solids:
+		var d := Vector2(s.x - pos.x, s.y - pos.z).length()
+		if d - radius - s.z < SOLID_GAP:
+			return [pos, false]
+	solids.append(Vector3(pos.x, pos.z, radius))
+	return [pos, true]
+
+
+## Coliziune pe SILUETA modelului: un singur poliedru convex per mesh, calculat
+## din geometria lui reala.
+##
+## Ce inlocuieste: un cilindru cu raza `max(amprenta) * 0.40`. Cifra aia e mai
+## mica decat cercul inscris in amprenta (0.50), si o stanca de canion nici nu e
+## rotunda — e o lespede in trepte, mai lata pe o axa decat pe cealalta. Cele
+## doua erori se adunau: masurat cu raze prin fizica, pe Dunele TOATE stancile
+## cu corp aveau silueta neacoperita, in medie cu 0.60 m si pana la 0.93 m.
+## Adica exact ce se vede in joc — botul masinii intra in piatra si se opreste
+## abia acolo, ca si cum stanca ar fi pe jumatate fantoma.
+##
+## De ce hull convex si nu o cutie pe AABB: cutia ar avea problema simetrica, ar
+## umfla siluetele rotunjite din kit cu pana la 40% in colturi, adica ziduri
+## invizibile. Hull-ul urmareste forma reala in ambele familii.
+##
+## De ce nu trimesh (`create_trimesh_shape`): o stiva in trepte ar da zeci de
+## colturi concave in care masina se agata, si e forma cea mai scumpa la contact.
+## Convexul umple crestaturile dintre trepte — la nivelul solului asta chiar e
+## ce vrei, masina atinge treapta cea mai iesita si aluneca pe langa ea.
+## Acelasi rationament ca la falezele din `TrackCliffs._add_collision`.
+##
+## Punctele se aduc in spatiul CORPULUI cu transformarile din arbore, nu prin
+## `global_transform`: decorul se construieste detasat de scena, unde
+## transformarile globale inca nu inseamna nimic. Scalarea instantei (inclusiv
+## cea neuniforma, pe inaltime) intra astfel direct in puncte — nu ramane pe
+## nodul de coliziune, unde formele convexe scalate sunt teren alunecos.
+static func add_hull_collision(body: StaticBody3D, model: Node3D) -> bool:
+	if body == null or model == null:
+		return false
+	var added := false
+	for entry in _hull_meshes(model, model.transform):
+		var mi: MeshInstance3D = entry[0]
+		var xform: Transform3D = entry[1]
+		var src := _hull_points(mi.mesh)
+		if src.is_empty():
+			continue
+		var pts := PackedVector3Array()
+		pts.resize(src.size())
+		for i in src.size():
+			pts[i] = xform * src[i]
+		var hull := ConvexPolygonShape3D.new()
+		hull.points = pts
+		var shape := CollisionShape3D.new()
+		shape.shape = hull
+		body.add_child(shape)
+		added = true
+	return added
+
+
+## Cache pe RESURSA de mesh, nu pe instanta: cele 34 de variante din cele doua
+## biblioteci se repeta de sute de ori pe o pista, iar calculul hull-ului e
+## singura parte scumpa. Scalarea difera de la o instanta la alta, dar ea se
+## aplica pe punctele deja calculate (vezi add_hull_collision), deci nu strica
+## refolosirea.
+static var _hull_cache: Dictionary = {}
+
+static func _hull_points(mesh: Mesh) -> PackedVector3Array:
+	if mesh == null:
+		return PackedVector3Array()
+	var key := mesh.get_rid()
+	if _hull_cache.has(key):
+		return _hull_cache[key]
+	# `simplify=false`, adica hull-ul EXACT peste varfurile mesh-ului, nu
+	# aproximarea VHACD. Simplificarea e tentanta (mai putine plane = contact mai
+	# ieftin) si pe stancile M/L n-a schimbat nimic masurabil, dar pe cele mici
+	# taie din forma: masurat, doua stanci S ramaneau cu 0.70 si 0.85 m de silueta
+	# in afara colizorului — exact bug-ul pe care il reparam aici. Hull-ul exact
+	# peste 70-750 de triunghiuri e oricum o forma mica.
+	var src := mesh.create_convex_shape(true, false) as ConvexPolygonShape3D
+	var pts := PackedVector3Array() if src == null else src.points
+	_hull_cache[key] = pts
+	return pts
+
+
+## Mesh-urile din model, fiecare cu transformarea lui pana la radacina data.
+static func _hull_meshes(node: Node, xform: Transform3D,
+		out: Array = []) -> Array:
+	var mi := node as MeshInstance3D
+	if mi != null and mi.mesh != null:
+		out.append([mi, xform])
+	for c in node.get_children():
+		var spatial := c as Node3D
+		_hull_meshes(c, xform * spatial.transform if spatial != null else xform,
+			out)
+	return out
 
 
 ## Varianta se alege din CIFRELE DE SUS ale aceluiasi numar din care s-a ales

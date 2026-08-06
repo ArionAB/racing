@@ -85,6 +85,8 @@ var _air_time: float = 0.0
 var _launch_at: Vector3 = Vector3.ZERO
 ## Cat de aproape de axa trombei a trecut masina in trecerea curenta.
 var _closest: float = 1e9
+## Cel mai adanc a ajuns talpa palniei sub terenul de sub ea, pe toata proba.
+var _foot_gap: float = 1e9
 var _rows: Array[Dictionary] = []
 var _fail: int = 0
 
@@ -456,6 +458,17 @@ func _physics_process(delta: float) -> void:
 	_closest = minf(_closest, Vector2(
 		_car.global_position.x - _typhoon.global_position.x,
 		_car.global_position.z - _typhoon.global_position.z).length())
+	# Talpa palniei fata de terenul de sub ea, in fiecare cadru.
+	#
+	# Verificarea asta a fost adaugata dupa ce tromba n-a aparut pe pista: cauza
+	# principala era ca depozitul nu fusese tras, dar dedesubt statea un defect
+	# real — o raza ratata muta talpa pe cota MARII in loc s-o lase pe loc, adica
+	# ingropa 18 m de palnie cu cinci metri sub asfalt. Un raport de asezare din
+	# `_ready` nu l-ar fi prins niciodata: acolo pozitia e inca ancora, iar
+	# defectul apare abia la primul cadru de fizica.
+	var ground := _ground_at(_typhoon.global_position)
+	if ground < 1e5:
+		_foot_gap = minf(_foot_gap, _typhoon.global_position.y - ground)
 	var y := _car.global_position.y
 	if not _airborne and not _car.is_on_floor() and _car.velocity.y > 4.0:
 		_airborne = true
@@ -505,6 +518,13 @@ func _land() -> void:
 
 
 func _finish() -> void:
+	# Un prag, nu zero: terenul are triunghiuri mari, deci raza si talpa nu cad
+	# exact pe acelasi punct pe o panta. O jumatate de metru e sub orice se vede;
+	# defectul pe care il cauta era de peste cinci.
+	print("\n  talpa palniei fata de teren: cel mai adanc %.2f m %s"
+		% [_foot_gap, "OK" if _foot_gap > -0.5 else "— PROBLEMA, e ingropata"])
+	if _foot_gap <= -0.5:
+		_fail += 1
 	print("\n%s (%d treceri, %d probleme)"
 		% ["TOTUL E BINE" if _fail == 0 else "SUNT PROBLEME",
 			_rows.size(), _fail])

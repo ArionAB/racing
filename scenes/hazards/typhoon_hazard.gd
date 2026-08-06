@@ -158,6 +158,10 @@ var _time: float = 0.0
 ## sectorul cu val e aproape de origine. Tromba nu-si permite: e pe Okinawa, la
 ## jumatate de tur de origine, si are 18 m.
 var _anchor: Vector3 = Vector3.ZERO
+## Ultima cota buna a talpii. Punctul de plecare e cota la care a fost asezata
+## tromba — adica soseaua — deci pana la prima raza reusita sta pe drum, care e
+## si locul in care o pune pista. Vezi `_ground_y`.
+var _foot_y: float = 0.0
 ## Masinile aflate sub curent, si de cat timp. Cheia e masina, ca la pod.
 var _lofted: Dictionary = {}
 var _cooldown: Dictionary = {}
@@ -169,6 +173,7 @@ static var _dust_mat: StandardMaterial3D
 
 func _ready() -> void:
 	_anchor = position
+	_foot_y = position.y
 	_build_model()
 	_build_eye()
 	_build_particles()
@@ -392,19 +397,36 @@ func _apply_cycle(delta: float) -> void:
 ## (tot local).
 ##
 ## O raza in jos, in fiecare cadru: terenul de sub tromba se schimba tot timpul,
-## fiindca tromba se plimba. Peste apa raza nu gaseste nimic — luciul marii e
-## vizual, n-are colizor — si atunci talpa ramane pe `water_y`, adica exact ce
-## trebuie sa se intample: deasupra marii e trâmbă de apa si sta pe luciu.
+## fiindca tromba se plimba. Peste mare talpa se opreste la `water_y` — acolo e
+## trâmbă de apa si sta pe luciu, nu pe fundul marii.
 ##
 ## Masca e cea a camerei (`CAMERA_BLOCKER_LAYER`), nu layer-ul implicit, si din
 ## acelasi motiv pentru care o foloseste camera: pe layer-ul implicit stau si
 ## masinile, si popicele. O raza care nimereste o masina care trece pe sub tromba
 ## ar ridica talpa cu un metru pentru un cadru — un tremur din senin, imposibil de
 ## legat de cauza.
+##
+## ############################################################################
+## O RAZA RATATA PASTREAZA COTA VECHE. NU inseamna „suntem deasupra apei".
+##
+## Prima versiune intorcea `water_y` cand raza nu gasea nimic, pe presupunerea ca
+## un ratat inseamna mare. Presupunerea e falsa, si stiam de ce inca de la
+## `--scan`: terenul pistei CONTINUA sub mare (fundul e sapat, nu lipseste), deci
+## raza gaseste mereu ceva, iar apa se recunoaste comparand cota, nu prin absenta
+## unui contact. Un ratat e prin urmare o anomalie — spatiul de fizica n-a facut
+## inca niciun pas, scena se construieste, interogarile sunt blocate — si raspunsul
+## corect la o anomalie e sa nu MISTI nimic.
+##
+## Ce facea varianta veche: la prima interogare fara raspuns, o tromba de 18 m
+## sarea pe cota marii. Pe Okinawa, unde soseaua e la +4 si apa la −1.4, asta o
+## ingroapa cu peste cinci metri — deci in editor, unde spatiul de fizica nu
+## raspunde de fiecare data unui script `@tool`, palnia apare infipta in asfalt in
+## loc sa stea pe el. In joc ar fi fost un singur cadru de pocnitura la start.
+## ############################################################################
 func _ground_y(at: Vector3) -> float:
 	var space := get_world_3d().direct_space_state
 	if space == null:
-		return water_y
+		return _foot_y
 	var parent := get_parent_node_3d()
 	var to_world := parent.global_transform if parent != null else Transform3D.IDENTITY
 	var from := to_world * Vector3(at.x, water_y + 70.0, at.z)
@@ -413,9 +435,10 @@ func _ground_y(at: Vector3) -> float:
 	query.collision_mask = Track.CAMERA_BLOCKER_LAYER
 	var hit := space.intersect_ray(query)
 	if hit.is_empty():
-		return water_y
+		return _foot_y
 	var local: Vector3 = to_world.affine_inverse() * (hit.position as Vector3)
-	return maxf(local.y, water_y)
+	_foot_y = maxf(local.y, water_y)
+	return _foot_y
 
 
 ## Nisipul se opreste peste apa. Restul merg tot timpul.

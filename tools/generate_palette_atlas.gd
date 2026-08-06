@@ -487,8 +487,9 @@ func _rock(base: Color, x: int, y: int) -> Color:
 	return _shade(base, band + grain + crack)
 
 
-## Asfalt: granulatie grosiera. Ramane cea mai INCHISA suprafata continua din
-## scena (style_bible §1), deci variatia trage mai mult in jos decat in sus.
+## Asfalt: granulatie grosiera. E cea mai inchisa suprafata pe care se conduce,
+## deci variatia trage mai mult in jos decat in sus — asa ramane inchis si dupa
+## ce zgomotul il pateaza.
 func _asphalt(base: Color, x: int, y: int) -> Color:
 	var grain := (rng.randf() - 0.62) * 0.10
 	# pete rare de uzura, mai deschise

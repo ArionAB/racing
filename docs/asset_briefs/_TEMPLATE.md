@@ -69,7 +69,7 @@ greseala de UV sa sara in ochi. `verify_glb.py` pica pe oricare dintre ele.
 | 2 | `sand_shadow` | **0.078125** | `#A97A4A` | nisip umbrit, tenta de AO |
 | 3 | `rock_light` | **0.109375** | `#C79664` | fete de stanca |
 | 4 | `rock_dark` | **0.140625** | `#7E5B3A` | interior de faleza, crapaturi |
-| 5 | `asphalt` | **0.171875** | `#4B4B4D` | sosea; cea mai inchisa suprafata din lume |
+| 5 | `asphalt` | **0.171875** | `#4B4B4D` | sosea asfaltata (drumurile nepavate iau nisipul) |
 | 6 | `asphalt_edge` | **0.203125** | `#696765` | margini tocite |
 | 7 | `kerb_red` | **0.234375** | `#B74A3A` | borduri, marcaje, accente rosii |
 | 8 | `concrete` | **0.265625** | `#C8BEAC` | pod, fundatii; cel mai deschis NEUTRU |

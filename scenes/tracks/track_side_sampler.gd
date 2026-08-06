@@ -122,6 +122,9 @@ var _extra: PackedVector3Array = PackedVector3Array()
 var _lagoon_poly: PackedVector2Array = PackedVector2Array()
 ## Cat de adanc sapa laguna sub media soselei. Vezi ground_y.
 var _lagoon_depth: float = 0.0
+## Canalele navigabile care TAIE soseaua. Rezolvate de Track — vezi
+## [method Track._resolve_channels] pentru forma dictionarului.
+var _channels: Array[Dictionary] = []
 
 
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
@@ -130,7 +133,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		far_drop: float = 0.0,
 		extra_corridors: PackedVector3Array = PackedVector3Array(),
 		lagoon_poly: PackedVector2Array = PackedVector2Array(),
-		lagoon_depth: float = 0.0) -> void:
+		lagoon_depth: float = 0.0,
+		channels: Array[Dictionary] = []) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
@@ -140,6 +144,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_extra = extra_corridors
 	_lagoon_poly = lagoon_poly
 	_lagoon_depth = lagoon_depth
+	_channels = channels
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -283,7 +288,9 @@ func ground_y(wx: float, wz: float) -> float:
 	y += _detail_dunes(wx, wz) * (t * t)
 	y = _lift_branches(y, wx, wz, road_level, dist)
 	y = _carve_lagoon(y, dist, wx, wz)
-	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+	# ULTIMA taietura, si singura care nu ocoleste asfaltul. Vezi _carve_channel.
+	return _carve_channel(y, wx, wz)
 
 
 ## Distanta perpendiculara pana la axa soselei si cota drumului acolo, ca
@@ -418,6 +425,69 @@ func _carve_lagoon(y: float, road_dist: float, wx: float, wz: float) -> float:
 	return lerpf(y, bed, lag * lat)
 
 
+## Sapa canalele navigabile care taie soseaua.
+##
+## E SINGURA taietura de teren care nu ocoleste asfaltul, si asta e chiar rostul
+## ei. Rapa (`_carve_ravines`) incepe la RAVINE_INNER metri dincolo de marginea
+## drumului, laguna la LAGOON_INNER — amandoua ca sa nu apara o groapa sub roti.
+## Un canal insa TREBUIE sa treaca pe dedesubt: soseaua il sare pe un pod, iar
+## golul de sub pod e continutul gimmick-ului, nu un accident.
+##
+## Consecinta pe care o plateste apelantul: portiunea de sosea de deasupra apei
+## nu mai are teren sub ea. Cine cere un canal cere si structura care sustine
+## drumul acolo — vezi [method Track._build_lift_bridge].
+##
+## Fundul e PLAT (cota drumului minus `depth`), nu ondulat ca fundul de mare:
+## un senal navigabil e dragat. In plus, un fund plat garanteaza acelasi pescaj
+## pe toata lungimea, deci vaporul nu iese din apa la un capat.
+func _carve_channel(y: float, wx: float, wz: float) -> float:
+	for ch in _channels:
+		var o: Vector3 = ch["origin"]
+		var along: Vector2 = ch["along2"]
+		var across: Vector2 = ch["across2"]
+		var d := Vector2(wx - o.x, wz - o.z)
+		# `t` = cat de departe pe canal, `s` = cat de departe de axa lui (adica
+		# masurat IN LUNGUL soselei, fiindca cele doua sunt perpendiculare).
+		var t := absf(d.dot(along))
+		var reach: float = ch["reach"]
+		if t > reach:
+			continue
+		var s := absf(d.dot(across))
+		var water_half: float = ch["water_half"]
+		var lat := 1.0 - smoothstep(water_half, water_half + float(ch["bank"]), s)
+		if lat <= 0.0:
+			continue
+		# Capetele se sting in terenul din jur. Fara stingere, canalul s-ar
+		# termina cu un perete drept in mijlocul marii — se vede din elicopter si
+		# deloc din masina, exact clasa de artefact pe care o descrie ground_y
+		# despre atolii aparuti din greseala.
+		var run := 1.0 - smoothstep(reach - float(ch["fade"]), reach, t)
+		if run <= 0.0:
+			continue
+		y = _smin(y, o.y - float(ch["depth"]) * lat * run, SMOOTH_RAVINE_K)
+	return y
+
+
+## Cat de „in canal" e un punct, in 0..1. Peste ~0.3 nu se mai planteaza nimic:
+## un palmier semanat de benzile statistice ale lui [TrackDecor] ar rasari din
+## apa, fiindca imprastierea nu stie nimic despre taieturile de teren.
+func channel_mix(wx: float, wz: float) -> float:
+	var best := 0.0
+	for ch in _channels:
+		var o: Vector3 = ch["origin"]
+		var d := Vector2(wx - o.x, wz - o.z)
+		var t := absf(d.dot(ch["along2"] as Vector2))
+		var reach: float = ch["reach"]
+		if t > reach:
+			continue
+		var s := absf(d.dot(ch["across2"] as Vector2))
+		var water_half: float = ch["water_half"]
+		var lat := 1.0 - smoothstep(water_half, water_half + float(ch["bank"]), s)
+		var run := 1.0 - smoothstep(reach - float(ch["fade"]), reach, t)
+		best = maxf(best, lat * run)
+	return best
+
+
 ## Suntem intr-o rapa declarata la fractia si latura date?
 ##
 ## Publica pentru ca sonda de anti-blocaj trebuie sa sara sloturile de rapa —
@@ -447,6 +517,12 @@ func max_ravine_depth() -> float:
 	var d := _lagoon_depth
 	for r in _ravines:
 		d = maxf(d, r.z)
+	# Canalul se masoara de la cota DRUMULUI de acolo, nu de la media pistei, iar
+	# consumatorul vrea „cat de jos poate cobori terenul sub sosea". Pe o portiune
+	# de drum care sta peste medie, diferenta chiar conteaza.
+	for ch in _channels:
+		var o: Vector3 = ch["origin"]
+		d = maxf(d, float(ch["depth"]) + (o.y - _mean_y))
 	return d
 
 
@@ -717,6 +793,11 @@ func _make_spec(d: float, side_sign: float, offset: float) -> TrackDecorSpec:
 	# permitem slotul propriu (care e la exact half_width + offset), dar nu unul
 	# care s-a apropiat de o sosea vecina.
 	if clearance_at(pos) < _half_width + offset - 1.0:
+		return null
+	# ...si daca ar cadea in canal. Slotul isi ia cota din ground_y, deci un
+	# palmier de acolo n-ar pluti: ar creste de pe fundul senalului, cu coroana
+	# sub linia apei.
+	if channel_mix(pos.x, pos.z) > 0.3:
 		return null
 
 	var spec := TrackDecorSpec.new()

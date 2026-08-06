@@ -21,6 +21,10 @@ extends Node
 ##   --train-at=0.55           muta ceasul trecerii de cale ferata la fractia
 ##                             ceruta din ciclu, ca trenul sa fie IN cadru la
 ##                             momentul capturii (implicit e parcat, invizibil)
+##   --bridge-at=0.24          la fel, pentru podul mobil: 0 = inchis, ~0.24 =
+##                             travee sus cu corabia in gol. Fara el, captura
+##                             prinde podul la inceputul ciclului, adica exact
+##                             starea in care gimmick-ul nu se vede.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -56,6 +60,7 @@ func _ready() -> void:
 	var landmark_id := -1
 	var landmark_dist := 30.0
 	var train_at := -1.0
+	var bridge_at := -1.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -69,6 +74,8 @@ func _ready() -> void:
 			landmark_dist = float(arg.trim_prefix("--dist="))
 		elif arg.begins_with("--train-at="):
 			train_at = float(arg.trim_prefix("--train-at="))
+		elif arg.begins_with("--bridge-at="):
+			bridge_at = float(arg.trim_prefix("--bridge-at="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -85,6 +92,8 @@ func _ready() -> void:
 		_smooth_organics(track)
 	if train_at >= 0.0:
 		_set_train_phase(track, train_at)
+	if bridge_at >= 0.0:
+		_set_bridge_phase(track, bridge_at)
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:
@@ -250,6 +259,25 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train._physics_process(0.0)
 		found += 1
 	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+
+
+## Muta podul mobil intr-un moment ales din ciclul lui.
+##
+## Ceasul podului merge pe bucla CORABIILOR (de doua ori mai lunga decat a
+## traveei, vezi LiftBridgeHazard.SHIP_PERIOD), fiindca doar asa se stie care
+## dintre cele doua corabii e in dreptul golului. Fractia ceruta e din bucla aia:
+## 0.24 pune traveea sus cu prima corabie in gol, 0.74 la fel cu a doua.
+func _set_bridge_phase(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.get_children():
+		var bridge := node as LiftBridgeHazard
+		if bridge == null:
+			continue
+		var t := LiftBridgeHazard.SHIP_PERIOD * clampf(at, 0.0, 0.999)
+		bridge.set("_time", t)
+		bridge.call("_apply_cycle", fposmod(t, LiftBridgeHazard.PERIOD))
+		found += 1
+	print("--bridge-at=%.2f: %d poduri mobile mutate in ciclu" % [at, found])
 
 
 func _smooth_organics(root: Node) -> void:

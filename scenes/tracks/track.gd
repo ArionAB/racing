@@ -2902,9 +2902,12 @@ func _build_world_decor() -> void:
 		_world_seed(), _cliff_clearings(), _gorge_ranges())
 	add_child(cliffs)
 	_decor_roots.append(cliffs)
+	# Decorul primeste amprentele falezelor deja asezate. De asta ordinea celor
+	# doua apeluri nu mai e doar o conventie: falezele TREBUIE construite intai.
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
-		theme_flag("props", "desert"))
+		theme_flag("props", "desert"),
+		cliffs.get_meta(TrackCliffs.FOOTPRINT_META, []) as Array)
 	add_child(decor)
 	_decor_roots.append(decor)
 	# Scenografia DUPA benzile statistice, si tot in `_decor_roots`: semnele

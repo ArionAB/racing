@@ -115,8 +115,13 @@ jobs:
       - name: Coliziunea stancilor urmareste silueta
         run: |
           set -uo pipefail
+          # --no-batch: dupa coacerea in MultiMesh, transformarile stau in
+          # serverul de randare, iar in --headless acela e cel mut si le
+          # intoarce pe toate identitate. Sonda ar raporta "0 stanci langa drum"
+          # si ar trece verde fara sa masoare nimic. Coacerea nu misca nimic
+          # (vezi TrackDecorBatch), deci scena necoapta e aceeasi masuratoare.
           ~/godot-bin/godot --headless --fixed-fps 60 \
-            --script res://tools/probe_rock_fit.gd 2>&1 | tee rockfit.log
+            --script res://tools/probe_rock_fit.gd -- --no-batch 2>&1 | tee rockfit.log
           STATUS=${PIPESTATUS[0]}
           if ! grep -q 'VERDICT:' rockfit.log; then
             echo "::error::Sonda de coliziune pe stanci nu a rulat pana la capat."
@@ -127,6 +132,25 @@ jobs:
             exit 1
           fi
           echo "OK — colizoarele acopera siluetele."
+
+      # Decorul si falezele se genereaza independent, deci nimic nu le opreste
+      # sa se aseze una peste alta sau peste sosea. S-a intamplat: sectiuni de
+      # perete intrau pana la 2.49 m peste asfalt, si prin ele se trecea.
+      - name: Decorul nu intra peste asfalt
+        run: |
+          set -uo pipefail
+          ~/godot-bin/godot --headless --fixed-fps 60 \
+            --script res://tools/probe_decor_overlap.gd -- --no-batch 2>&1 | tee overlap.log
+          STATUS=${PIPESTATUS[0]}
+          if ! grep -q 'VERDICT:' overlap.log; then
+            echo "::error::Sonda de suprapuneri nu a rulat pana la capat."
+            exit 1
+          fi
+          if [ "$STATUS" -ne 0 ] || grep -q 'VERDICT: PROBLEMA' overlap.log; then
+            echo "::error::Geometrie de decor peste sosea — vezi tabelul de mai sus."
+            exit 1
+          fi
+          echo "OK — nimic peste asfalt."
 
       # Soseaua e un platou cu fuste verticale de 3 m, iar terenul de langa ea
       # sta mai jos — deci marginea drumului poate deveni un prag pe care un

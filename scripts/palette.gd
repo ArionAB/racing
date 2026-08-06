@@ -220,6 +220,13 @@ static func apply_foliage_material(root: Node) -> void:
 ##
 ## Daca vreodata pare din nou ca un prop oglindit e "pe dos", cauza e in mesh
 ## (normale inversate la export), nu in cull mode. Nu reintroduce geamanul.
+##
+## VALABIL DOAR PENTRU NODURI. Compensarea o face rasterizatorul dupa
+## determinantul INSTANTEI, iar o instanta de MultiMesh n-are nod: transformarea
+## ei sta in buffer si nu ajunge la logica aia. Dupa ce decorul a intrat in
+## multimesh, exact acelasi bug s-a intors pe alt drum — vezi nota lunga si
+## `_flipped_mesh` din `TrackDecorBatch`, plus etalonul tools/MultiMeshTest.tscn.
+## Reparatia sta acolo, in coacere, si tot NU e materialul geaman.
 ## ############################################################################
 
 

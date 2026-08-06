@@ -37,6 +37,7 @@ Rulare (Blender, namespace comun cu dio_lib):
     exec(open(r"<repo>/tools/blender/build_megakit_rocks.py").read(), g)
 """
 
+import bmesh
 import bpy
 import math
 import os
@@ -73,9 +74,56 @@ def _load_sources(names):
         # fatetele plate exact acolo unde vrem sa curga lumina.
         if hasattr(obj.data, "free_normals_split"):
             obj.data.free_normals_split()
+        _weld(obj.data)
         obj.hide_set(True)
         out.append(obj)
     return out
+
+
+def _weld(me, dist=1e-4):
+    """Sudeaza vertecsii coincidenti ai unui mesh IMPORTAT.
+
+    De ce e obligatoriu inainte de `_decimated`, si de ce lipsa lui a fost
+    bugul „stancile sunt goale pe dinauntru":
+
+    glTF nu stocheaza vertecsi, stocheaza VARFURI DE FATA. Un mesh cu fatete
+    plate isi despica fiecare vertex pe cate normale au fetele care se
+    intalnesc acolo, deci ce ajunge in Blender arata geometric inchis, dar
+    TOPOLOGIC e o gramada de petice separate: Rock_Medium_1 are 316 muchii de
+    contur din 671, desi obiectul e etans.
+
+    Colapsul lucreaza pe topologie. Pe petice separate muta independent doi
+    vertecsi care pana atunci coincideau, si acolo unde inainte era o muchie
+    comuna ramane o CRAPATURA reala. Masurat pe biblioteca livrata: 17% muchii
+    de contur pe clasa L (colaps 0.70), 25-35% pe M (0.55), 61% pe S (0.32) —
+    cu cat colapsam mai tare, cu atat mai rupt. Prin crapaturi se vede spatele
+    peretelui din fata, care e backface si deci taiat de culling: gaura citeste
+    ca un interior gol de stanca.
+
+    Cu sudura, aceleasi surse trec prin acelasi colaps si raman etanse
+    (0 muchii de contur), la acelasi buget de triunghiuri (108 in loc de 109 pe
+    clasa S) — deci reparatia nu costa nimic din ce a fost calibrat in
+    `_decimated`.
+
+    NU e acelasi lucru cu fantele dintre trepte pe care le prinde
+    `report_slits` (piese stivuite care ateriza in aer): alea sunt goluri intre
+    volume, astea sunt gauri IN suprafata unui singur volum. De-aia garda de
+    fante a trecut verde peste toata biblioteca asta.
+    """
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=dist)
+    # Ce ramane deschis dupa sudura e gaura ADEVARATA din sursa, nu artefact de
+    # export: `Pebble_Square_6` din kit vine cu un triunghi lipsa. Trei muchii
+    # intr-o pietricica de 20 cm nu se vad in joc, dar se inchid pe gratis si
+    # asa garda de etanseitate poate cere zero in loc de „aproape zero" — un
+    # prag de tolerat e un prag pe care nimeni nu-l mai citeste.
+    holes = [e for e in bm.edges if len(e.link_faces) == 1]
+    if holes:
+        bmesh.ops.holes_fill(bm, edges=holes)
+        bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 3])
+    bm.to_mesh(me)
+    bm.free()
 
 
 def _decimated(src, ratio):

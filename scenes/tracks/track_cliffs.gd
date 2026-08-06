@@ -477,6 +477,13 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# din faleze se vedeau pe dinauntru, ca niste coji. De aici bugul "stancile
 	# mari sunt goale". Coliziunea NU se oglindeste: e o cutie aproape simetrica,
 	# iar oglindirea ei poate doar sa creeze pene intre sectiuni.
+	#
+	# Compensarea aia e insa a NODULUI, si sectiunile astea nu raman noduri:
+	# `Track` le coace in multimesh, unde transformarea nu mai trece prin ea. Tot
+	# bugul s-a intors asa, pe jumatate din peretii fiecarei piste — reparatia sta
+	# in `TrackDecorBatch._flipped_mesh`, adica in coacere. Aici nu e nimic de
+	# schimbat, dar cine muta oglindirea de aici trebuie sa stie ca ea depinde de
+	# ce se intampla dupa.
 	var mirror := rng.randf() < 0.5
 	if mirror:
 		model.scale = Vector3(-1.0, 1.0, 1.0)

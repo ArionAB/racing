@@ -242,19 +242,48 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 			# asfalt care au silueta peste linia orizontului si strang cadrul.
 			# Fara coliziune, ca toata banda (vezi nota de la BANDS).
 			if rng.randf() < 0.34 and _add_canyon_rock(
-					parent, pos, rng, CANYON_S, false, 0.75, 1.35):
+					parent, pos, rng, "S", false, 0.75, 1.35):
+				return
+			# Jumatate din rest primeste frunzis din kit in locul scatter-ului,
+			# din exact acelasi motiv pentru care s-au adaugat stancile mici:
+			# piesele din desert_scatter stau sub 60 cm si nu urca peste linia
+			# solului. Un smoc de 1 m o rupe. Scatter-ul ramane in amestec —
+			# e de zece ori mai ieftin si tine media de triunghiuri jos pe
+			# banda cea mai numeroasa de pe pista.
+			if rng.randf() < 0.40 and _add_kit_plant(
+					parent, pos, rng, KIT_SMALL_PLANTS, 0.70, 1.10):
 				return
 			_add_scatter(parent, pos, rng, mat_provider)
 		"mid":
 			var roll := rng.randf()
 			if satellite or roll < 0.30:
-				if not _add_canyon_rock(parent, pos, rng, CANYON_S, false):
+				if not _add_canyon_rock(parent, pos, rng, "S", false):
 					_add_cluster(parent, pos, rng, ["Cluster_S1", "Cluster_S2"],
 						false, mat_provider)
-			elif roll < 0.60:
+			elif roll < 0.44:
 				_add_cactus(parent, pos, rng, mat_provider)
-			elif roll < 0.82:
-				if not _add_canyon_rock(parent, pos, rng, CANYON_M, true):
+			elif roll < 0.58:
+				# Vegetatia din kit imparte cu cactusul felia care era numai a
+				# lui. Cactusul ramane semnatura pistei, dar un desert in care
+				# SINGURA planta e saguaro citeste ca desen animat: foaia de
+				# referinta are tufe si evantaie intre ei.
+				if not _add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS,
+						0.90, 1.35):
+					_add_cactus(parent, pos, rng, mat_provider)
+			elif roll < 0.80:
+				if not _add_canyon_rock(parent, pos, rng, "M", true):
+					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+						true, mat_provider)
+			elif roll < 0.836:
+				# Accentul vertical. Cifrele astea (3.6% aici, 5.5% pe banda
+				# indepartata) sunt CALIBRATE PE NUMARATOARE, nu alese din ochi:
+				# la 6%/12% ieseau 10 copaci pe Dunele si 12 pe Stramtoarea,
+				# adica ~35% din tot bugetul de vegetatie pentru piesa cea mai
+				# scumpa din biblioteca (3.278 si 2.851 de triunghiuri, fata de
+				# ~260 media unei plante). Sase-sapte pe tur raman un reper;
+				# zece incep sa fie tapet, si tapetul asta costa cat 130 de
+				# smocuri de iarba.
+				if not _add_dead_tree(parent, pos, rng):
 					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 						true, mat_provider)
 			else:
@@ -269,27 +298,38 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 			# Amprenta si inaltimea urca amandoua: la distanta aia o stanca de
 			# marimea celor de langa drum citeste ca o pietricica, si tocmai
 			# scara e ce da adancimea (formatiunile stratificate din referinta).
-			if not _add_canyon_rock(parent, pos, rng, CANYON_L, false,
+			#
+			# Exceptia de la "nimic marunt": copacul mort. La 26-58 m nu e
+			# marunt — 8 m de silueta neagra pe cer, exact ce sparge sirul de
+			# mase orizontale din foaia de referinta. Fara coliziune, ca toata
+			# banda.
+			if rng.randf() < 0.055 and _add_dead_tree(parent, pos, rng, false):
+				return
+			if not _add_canyon_rock(parent, pos, rng, "L", false,
 					1.05, 1.85, 1.35, 2.10):
 				_add_cluster(parent, pos, rng, ["Cluster_L1"], false, mat_provider)
 		_:
 			var roll2 := rng.randf()
 			if satellite or roll2 < 0.30:
-				if not _add_canyon_rock(parent, pos, rng, CANYON_M, true):
+				if not _add_canyon_rock(parent, pos, rng, "M", true):
 					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 						true, mat_provider)
 			elif roll2 < 0.72:
 				# Aici statea mesa procedurala din cutii. Stancile mari de
 				# canion ii iau locul cu aceeasi intentie (silueta dominanta in
 				# fundalul apropiat), dar pe textura de roca si cu trepte reale.
-				if not _add_canyon_rock(parent, pos, rng, CANYON_L, true,
+				if not _add_canyon_rock(parent, pos, rng, "L", true,
 						0.85, 1.25):
 					_add_cluster(parent, pos, rng, ["Cluster_L1"], true,
 						mat_provider)
 			elif roll2 < 0.86:
 				_add_cluster(parent, pos, rng, ["Cluster_L1"], true, mat_provider)
-			else:
+			elif roll2 < 0.94:
 				_add_cactus(parent, pos, rng, mat_provider)
+			else:
+				if not _add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS,
+						1.00, 1.45):
+					_add_cactus(parent, pos, rng, mat_provider)
 
 
 ## --- Set de prop-uri: insula de recif ---------------------------------------
@@ -704,21 +744,81 @@ const CANYON_M: Array[String] = ["Canyon_M1", "Canyon_M2", "Canyon_M3",
 const CANYON_L: Array[String] = ["Canyon_L1", "Canyon_L2", "Canyon_L3",
 	"Canyon_L4"]
 
-## O stanca de canion. Intoarce `false` daca biblioteca lipseste, ca apelantul
-## sa cada pe vechiul prop in loc sa lase un gol.
+## A DOUA biblioteca de stanci, pe aceleasi trei clase de marime: formatiuni
+## ROTUNJITE compuse din Stylized Nature MegaKit (vezi
+## tools/blender/build_megakit_rocks.py).
+##
+## De ce doua si nu una mai mare: `canyon_rocks.glb` are un singur limbaj de
+## forma — lespezi suprapuse cu buza, sedimentar erodat in trepte. Optsprezece
+## variante ale aceluiasi limbaj tot ca UN tipar citesc de la 60 km/h, fiindca
+## ochiul recunoaste GRAMATICA formei inainte sa numere piesele. Masele de
+## gresie rotunjite sunt cealalta gramatica din acelasi peisaj; alternanta lor
+## e ce transforma "un mesh reciclat" in geologie.
+const KIT_ROCK_PATH: String = "res://assets/models/megakit_rocks.glb"
+const KIT_S: Array[String] = ["Kit_S1", "Kit_S2", "Kit_S3", "Kit_S4",
+	"Kit_S5", "Kit_S6"]
+const KIT_M: Array[String] = ["Kit_M1", "Kit_M2", "Kit_M3", "Kit_M4",
+	"Kit_M5", "Kit_M6"]
+const KIT_L: Array[String] = ["Kit_L1", "Kit_L2", "Kit_L3", "Kit_L4"]
+
+## Cat din stanci vin din kit. O treime, si cifra are doua justificari care
+## trag in aceeasi directie:
+##   - estetic: treapta cu buza a canyon_rocks e silueta care se citeste de la
+##     100 m, cand granulatia texturii s-a topit in mipmap. Ea ramane familia
+##     dominanta; masele rotunjite sunt contrapunctul, nu inlocuitorul.
+##   - buget: chiar si dupa colaps, o formatiune din kit costa ~30% peste
+##     echivalentul ei de canion (98/601/970 fata de 70/449/748 tris pe clasele
+##     S/M/L). Pe Stramtoarea, unde intra ~200 de stanci, fiecare punct de cota
+##     in plus se vede in garda.
+const KIT_ROCK_SHARE: float = 0.35
+
+## Din ce biblioteca vine o stanca din clasa `cls` ("S", "M" sau "L").
+## Intoarce [cale, variante].
+static func _rock_source(cls: String, kit: bool) -> Array:
+	match cls:
+		"S":
+			return [KIT_ROCK_PATH, KIT_S] if kit else [CANYON_PATH, CANYON_S]
+		"M":
+			return [KIT_ROCK_PATH, KIT_M] if kit else [CANYON_PATH, CANYON_M]
+		_:
+			return [KIT_ROCK_PATH, KIT_L] if kit else [CANYON_PATH, CANYON_L]
+
+
+## O stanca de canion din clasa de marime `cls` ("S", "M", "L"). Intoarce
+## `false` daca AMBELE biblioteci lipsesc, ca apelantul sa cada pe vechiul prop
+## in loc sa lase un gol.
 ##
 ## Inaltimea se scaleaza SEPARAT de amprenta (`h`), si asta e ce da varietate
 ## reala: aceeasi silueta la 0.8 si la 1.35 pe verticala citeste ca doua stanci
 ## diferite, gratis. Textura NU se intinde odata cu ea — clasa de roca e
 ## triplanara in spatiul LUMII, deci straturile raman la scara lumii indiferent
 ## cum e scalata instanta. Fara asta, o stanca turtita ar avea straturi turtite
-## si s-ar vedea imediat ca e aceeasi piesa reciclata.
+## si s-ar vedea imediat ca e aceeasi piesa reciclata. Din acelasi motiv cele
+## doua biblioteci se pot amesteca fara sa se vada cusatura: ambele iau aceeasi
+## roca, proiectata in aceeasi lume.
 static func _add_canyon_rock(parent: Node3D, pos: Vector3,
-		rng: RandomNumberGenerator, picks: Array[String], collide: bool,
+		rng: RandomNumberGenerator, cls: String, collide: bool,
 		h_min: float = 0.80, h_max: float = 1.30,
 		s_min: float = 0.85, s_max: float = 1.25) -> bool:
-	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
-	var kept := pick_from_glb(CANYON_PATH, name_pick)
+	# UN SINGUR numar pentru AMBELE decizii (ce biblioteca, ce varianta), si
+	# asta nu e microoptimizare — e conditia ca masuratoarea sa insemne ceva.
+	#
+	# Prima incercare punea un `rng.randf() < KIT_ROCK_SHARE` inaintea alegerii
+	# variantei. Sirul rng al benzii decide insa si cand pica gruparea
+	# (`_build_bands`), iar fiecare grupare trage dupa ea 2-5 sateliti. Un
+	# singur numar consumat in plus a deplasat tot sirul: Dunele a sarit de la
+	# 230 la 398 de stanci fara ca nimic din densitatea CERUTA sa se schimbe, si
+	# cifra din garda a devenit imposibil de citit (cat e decor nou, cat e sir
+	# deplasat?). Cu un `randi()` in locul vechiului `randi_range()` — amandoua
+	# scot exact un numar din generator — asezarea ramane bit-identica fata de
+	# inainte, deci diferenta raportata e strict ce am adaugat.
+	var draw := rng.randi()
+	var kit := float(draw % 1000) / 1000.0 < KIT_ROCK_SHARE
+	var kept := _pick_rock(cls, kit, draw)
+	if kept == null:
+		# O biblioteca lipsa nu trebuie sa lase gol slotul cat timp cealalta e
+		# acolo: fallback pe familia opusa inainte de a raporta esec.
+		kept = _pick_rock(cls, not kit, draw)
 	if kept == null:
 		return false
 	var s := rng.randf_range(s_min, s_max)
@@ -747,6 +847,103 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 	holder.rotation.y = rng.randf_range(0.0, TAU)
 	# Infipta putin in nisip: fusta de moloz din model ascunde linia de contact
 	# doar daca stanca chiar intra in teren.
+	holder.position = pos + Vector3.UP * -0.25
+	return true
+
+
+## Varianta se alege din CIFRELE DE SUS ale aceluiasi numar din care s-a ales
+## biblioteca (cifrele de jos) — vezi nota de la _add_canyon_rock.
+static func _pick_rock(cls: String, kit: bool, draw: int) -> Node3D:
+	var src := _rock_source(cls, kit)
+	var picks: Array = src[1]
+	return pick_from_glb(String(src[0]),
+		String(picks[(draw / 1000) % picks.size()]))
+
+
+## --- Vegetatie din Stylized Nature MegaKit -----------------------------------
+##
+## Ce rezolva: desert_scatter.glb are cinci piese sub 40 de triunghiuri, toate
+## sub 60 cm. Sunt corecte ca filler si costa aproape nimic, dar n-au SILUETA —
+## la 30 m in fata masinii dispar in nisip, si banda lipita de drum ramane
+## optic goala desi are peste o suta de obiecte in ea. Smocurile din kit au
+## 0.85-1.45 m: rup linia solului, adica fac exact treaba pentru care banda
+## exista.
+##
+## Toate se instantiaza cu `Palette.foliage_material()` — acelasi atlas, doar
+## fara backface culling, fiindca geometria kitului e din foi deschise. Vezi
+## nota de la foliage_material() pentru de ce nu s-a mers pe Solidify.
+const KIT_PLANT_PATH: String = "res://assets/models/megakit_plants.glb"
+## Langa asfalt: nimic peste ~1 m inaltime reala dupa scalare. Un obiect mai
+## inalt la 1.5 m de drum ar acoperi apexul urmator.
+const KIT_SMALL_PLANTS: Array[String] = ["Tuft_A", "Tuft_B", "Tuft_C",
+	"Tuft_D", "Fan_A", "Fan_C", "Rosette_A"]
+## Banda de mijloc si mai departe: mase care se vad de la 20 m.
+const KIT_BIG_PLANTS: Array[String] = ["Scrub_A", "Fan_B", "Tuft_B", "Tuft_D"]
+## Singurul accent VERTICAL din vegetatie. Rar prin constructie (vezi
+## _place_band_prop): un copac mort e memorabil la a treia aparitie pe tur si
+## tapet la a douazecea, si costa 3.100-3.600 de triunghiuri bucata.
+const KIT_DEAD_TREES: Array[String] = ["Dead_A", "Dead_B"]
+
+
+## O planta din kit, FARA coliziune (ca tot frunzisul: treci prin ea).
+## Intoarce `false` daca biblioteca lipseste, ca apelantul sa cada pe vechiul
+## prop.
+static func _add_kit_plant(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, picks: Array[String],
+		s_min: float = 0.85, s_max: float = 1.20) -> bool:
+	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
+	var kept := pick_from_glb(KIT_PLANT_PATH, name_pick)
+	if kept == null:
+		return false
+	parent.add_child(kept)
+	# Infipta 10 cm: modelele au baza plata, iar pe un teren cu panta o baza
+	# plata asezata exact pe cota lasa o muchie de aer pe partea din vale.
+	kept.position = pos + Vector3.UP * -0.10
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
+	Palette.apply_foliage_material(kept)
+	var sway := parent.get_node_or_null(^"Sway") as SwayDriver
+	if sway == null:
+		sway = parent.get_parent().get_node_or_null(^"Sway") as SwayDriver
+	if sway != null:
+		sway.add_item(kept)
+	return true
+
+
+## Copac mort: accentul vertical al peisajului de desert.
+##
+## Spre deosebire de restul vegetatiei, asta e un corp INCHIS (3% muchii de
+## contur, doar varfurile de creanga), deci merge pe materialul obisnuit al
+## lumii si NU se leagana — un trunchi uscat de 8 m care se indoaie in vant ar
+## fi exact detaliul care strica iluzia in loc s-o construiasca.
+##
+## Primeste coliziune pe trunchi: la 8 m inaltime si langa drum, un copac prin
+## care treci citeste ca bug, nu ca decor.
+static func _add_dead_tree(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, collide: bool = true) -> bool:
+	var name_pick: String = KIT_DEAD_TREES[
+		rng.randi_range(0, KIT_DEAD_TREES.size() - 1)]
+	var kept := pick_from_glb(KIT_PLANT_PATH, name_pick)
+	if kept == null:
+		return false
+	var s := rng.randf_range(0.72, 1.05)
+	var holder: Node3D = StaticBody3D.new() if collide else Node3D.new()
+	parent.add_child(holder)
+	holder.add_child(kept)
+	kept.scale = Vector3.ONE * s
+	Palette.apply_world_material(kept)
+	if collide:
+		# Doar trunchiul, nu si coroana de crengi: un cilindru pe amprenta
+		# crengilor ar fi un zid invizibil de 7 m latime in jurul copacului.
+		var aabb := Track.model_aabb(kept)
+		var cyl := CylinderShape3D.new()
+		cyl.radius = 0.38 * s
+		cyl.height = maxf(aabb.size.y, 1.0)
+		var shape := CollisionShape3D.new()
+		shape.shape = cyl
+		shape.position = Vector3.UP * (aabb.position.y + aabb.size.y * 0.5)
+		holder.add_child(shape)
+	holder.rotation.y = rng.randf_range(0.0, TAU)
 	holder.position = pos + Vector3.UP * -0.25
 	return true
 

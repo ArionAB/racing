@@ -167,6 +167,42 @@ static func world_material() -> StandardMaterial3D:
 		_shared.uv2_scale = Vector3(DETAIL_SCALE, DETAIL_SCALE, DETAIL_SCALE)
 	return _shared
 
+## Materialul FRUNZISULUI: acelasi atlas, aceleasi sloturi, doar fara backface
+## culling.
+##
+## A doua abatere deliberata de la "un singur material pentru toata lumea", si
+## din alt motiv decat rock_material: acolo era vorba de textura, aici de
+## GEOMETRIE. Vegetatia din Stylized Nature MegaKit e construita din foi
+## DESCHISE — masurat dupa sudura vertexilor, 32-80% muchii de contur. O frunza
+## dintr-un singur strat de fete are spate, iar spatele e cules: treci pe langa
+## tufa si jumatate din ea dispare.
+##
+## Alternativa era Solidify in Blender (grosime de 2 cm pe fiecare foaie).
+## Costa DUBLU in triunghiuri, si exact pe piesele cele mai numeroase de pe
+## pista — smocurile din banda lipita de drum se instantiaza de peste o suta de
+## ori. Un material in plus pe toata lumea e mai ieftin decat 60.000 de
+## triunghiuri, iar garda din tools/probe_decor.gd numara tocmai materialele
+## fiindca ELE sunt constrangerea pe mobil.
+##
+## Nu se aplica pe orice are frunze: cactusii si copacii morti sunt corpuri
+## inchise (3% contur) si raman pe materialul obisnuit al lumii.
+static var _foliage: StandardMaterial3D
+
+static func foliage_material() -> StandardMaterial3D:
+	if _foliage == null:
+		# duplicate() fara subresurse: textura, masca si detaliul raman ACELEASI
+		# obiecte, deci nu se dubleaza nimic in memoria GPU.
+		_foliage = world_material().duplicate() as StandardMaterial3D
+		_foliage.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return _foliage
+
+static func apply_foliage_material(root: Node) -> void:
+	var mat := foliage_material()
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			(node as MeshInstance3D).material_override = mat
+
+
 ## ############################################################################
 ## OGLINDIREA NU CERE MATERIAL SEPARAT.
 ##

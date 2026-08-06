@@ -360,6 +360,13 @@ const VARIANT_SOURCE := {
 	"butte_": "butte", "mesa_": "butte",
 	"cluster_": "rock_cluster", "cactus_": "cactus", "cliff_": "cliff_wall",
 	"canyon_": "canyon_rocks",
+	# Bibliotecile din Stylized Nature MegaKit. `bush_` era deja luat de
+	# desert_scatter, de aceea tufa de acolo se cheama `Scrub_A` — vezi nota din
+	# tools/blender/build_megakit_plants.py.
+	"kit_": "megakit_rocks",
+	"tuft_": "megakit_plants", "scrub_": "megakit_plants",
+	"fan_": "megakit_plants", "rosette_": "megakit_plants",
+	"dead_": "megakit_plants",
 	"marker_": "marker_post",
 	"bone_": "dino_bones", "dino_skeleton": "dino_bones",
 	"arch_": "rock_arch",

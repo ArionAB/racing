@@ -38,6 +38,19 @@ func _init() -> void:
 	track_name = "Okinawa manual"
 	# Numele s-a schimbat, lumea nu.
 	world_seed_name = "Okinawa v2"
+	# DRUM DE PAMANT, nu asfalt. A doua abatere a acestei piste de la Okinawa v2
+	# (dupa Stramtoarea Kaiun) si prima care schimba SUPRAFATA pe care se conduce.
+	#
+	# Traseul, cotele si latimea raman neatinse — deci si scenografia, si tot ce
+	# se aseaza de mana. Se schimba doar din ce e facut drumul, iar de acolo curg,
+	# automat: laterita rosie in loc de asfalt racoros, zero marcaje pictate,
+	# poteca batatorita pe tot turul in loc de urme doar in viraje, si masini care
+	# scot praf si lasa urme cat timp ruleaza, nu doar cand derapeaza.
+	#
+	# De ce merita: pe o insula de nisip coraligen, panglica de asfalt era
+	# singurul lucru din cadru care venea din alta lume. Vezi Track.road_surface
+	# pentru ce anume atarna de linia asta.
+	road_surface = "dirt"
 
 
 ## ############################################################################

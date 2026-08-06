@@ -135,6 +135,10 @@ static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
 		_build_bands(root, sampler, seed_value, mat_provider, props)
 	else:
 		_build_scattered(root, sampler, seed_value, mat_provider)
+	# Decorul iese de aici cate un nod per prop, cum a fost mereu. Cine il coace
+	# in MultiMesh e Track._build_world_decor, dupa ce l-a primit — vezi
+	# TrackDecorBatch pentru de ce coacerea e o trecere separata si nu se emite
+	# direct in buffere.
 	return root
 
 
@@ -902,11 +906,7 @@ static func _add_kit_plant(parent: Node3D, pos: Vector3,
 	kept.rotation.y = rng.randf_range(0.0, TAU)
 	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
 	Palette.apply_foliage_material(kept)
-	var sway := parent.get_node_or_null(^"Sway") as SwayDriver
-	if sway == null:
-		sway = parent.get_parent().get_node_or_null(^"Sway") as SwayDriver
-	if sway != null:
-		sway.add_item(kept)
+	kept.set_meta(TrackDecorBatch.SWAY_META, true)
 	return true
 
 
@@ -972,12 +972,12 @@ static func _add_scatter(parent: Node3D, pos: Vector3,
 	Palette.apply_world_material(kept)
 	# Doar ce are frunze se leagana. O pietricica scuturata de vant ar fi exact
 	# genul de detaliu care strica iluzia in loc s-o construiasca.
+	#
+	# Se pune un SEMN, nu se inregistreaza direct la SwayDriver: pana la
+	# coacere nu se stie in ce buffer si la ce index va ajunge tufa asta, iar
+	# dupa coacere nodul nu mai exista ca sa fie intrebat. Vezi TrackDecorBatch.
 	if name_pick.begins_with("Bush") or name_pick == "Grass_Tuft":
-		var sway := parent.get_node_or_null(^"Sway") as SwayDriver
-		if sway == null:
-			sway = parent.get_parent().get_node_or_null(^"Sway") as SwayDriver
-		if sway != null:
-			sway.add_item(kept)
+		kept.set_meta(TrackDecorBatch.SWAY_META, true)
 
 
 ## Un grup de bolovani din rock_cluster.glb.

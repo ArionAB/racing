@@ -218,31 +218,56 @@ func _measure(path: String, track: Node) -> Dictionary:
 	# fiecare din ele o copie a intregii geometrii.
 	var tris_cache := {}
 
+	# `draws` numara APELURILE de desenare, `mesh_count` numara PROP-URILE.
+	# Pana la decorul copt erau acelasi lucru; de cand un MultiMeshInstance3D
+	# desenează sute de instante intr-un apel, nu mai sunt, si tocmai distanta
+	# dintre ele e castigul pe care garda trebuie sa-l arate.
+	var draws := 0
+
 	for node in _walk(track):
-		if not (node is MeshInstance3D):
+		var mesh: Mesh = null
+		var mat: Material = null
+		var count := 1
+		var named: Node = node
+		if node is MeshInstance3D:
+			var mi := node as MeshInstance3D
+			mesh = mi.mesh
+			mat = mi.material_override
+		elif node is MultiMeshInstance3D:
+			# Decorul copt de TrackDecorBatch. Fara ramura asta garda ar raporta
+			# ca Dunele si-a pierdut 700 de prop-uri peste noapte — adica ar
+			# TRECE, si ar trece tocmai fiindca n-a mai vazut nimic.
+			var mmi := node as MultiMeshInstance3D
+			if mmi.multimesh == null:
+				continue
+			mesh = mmi.multimesh.mesh
+			mat = mmi.material_override
+			count = mmi.multimesh.instance_count
+		else:
 			continue
-		var mi := node as MeshInstance3D
-		mesh_count += 1
-		var mat: Material = mi.material_override
-		if mat == null and mi.mesh != null and mi.mesh.get_surface_count() > 0:
-			mat = mi.mesh.surface_get_material(0)
+		if mat == null and mesh != null and mesh.get_surface_count() > 0:
+			mat = mesh.surface_get_material(0)
+		mesh_count += count
+		draws += 1
 		if mat == world_mat:
-			on_atlas += 1
+			on_atlas += count
 		var key := mat.get_instance_id() if mat != null else 0
 		all_mats[key] = true
-		if mi.mesh != null:
-			var mesh_key := mi.mesh.get_instance_id()
+		var mesh_tris := 0
+		if mesh != null:
+			var mesh_key := mesh.get_instance_id()
 			unique_meshes[mesh_key] = true
 			if not tris_cache.has(mesh_key):
-				tris_cache[mesh_key] = _tris_of(mi.mesh)
-			tris += tris_cache[mesh_key]
-		var src := _source_of(mi, track)
+				tris_cache[mesh_key] = _tris_of(mesh)
+			mesh_tris = tris_cache[mesh_key] * count
+			tris += mesh_tris
+		var src := _source_of(named, track)
 		if not by_source.has(src):
-			by_source[src] = {"mats": {}, "meshes": 0, "tris": 0}
+			by_source[src] = {"mats": {}, "meshes": 0, "tris": 0, "draws": 0}
 		by_source[src].mats[key] = true
-		by_source[src].meshes += 1
-		if mi.mesh != null:
-			by_source[src].tris += tris_cache[mi.mesh.get_instance_id()]
+		by_source[src].meshes += count
+		by_source[src].draws += 1
+		by_source[src].tris += mesh_tris
 
 	var proc: Dictionary = by_source.get("procedural (track.gd)",
 		{"mats": {}, "meshes": 0, "tris": 0})
@@ -255,6 +280,7 @@ func _measure(path: String, track: Node) -> Dictionary:
 	return {
 		"path": path.get_file().get_basename(),
 		"meshes": mesh_count,
+		"draws": draws,
 		"materials": all_mats.size(),
 		"on_atlas": on_atlas,
 		"proc_meshes": proc_meshes,
@@ -285,10 +311,10 @@ func _report() -> bool:
 		for key: String in TRIS_OVERRIDE:
 			notes.append("%s %s" % [key, _thousands(int(TRIS_OVERRIDE[key]))])
 		print("praguri proprii de triunghiuri: %s" % ", ".join(notes))
-	print("%-10s %7s %6s %6s %11s %7s %9s %7s %7s"
-		% ["pista", "mesh-uri", "mat.", "atlas", "procedural", "raport",
-			"triunghi", "unice", "stare"])
-	print("-".repeat(82))
+	print("%-10s %7s %7s %5s %6s %11s %7s %9s %6s %6s"
+		% ["pista", "prop-uri", "desene", "mat.", "atlas", "procedural",
+			"raport", "triunghi", "unice", "stare"])
+	print("-".repeat(88))
 	for row in _rows:
 		if not row.ok:
 			failed = true
@@ -299,8 +325,8 @@ func _report() -> bool:
 			state = "MAT"
 		elif not row.tris_ok:
 			state = "TRIS"
-		print("%-10s %7d %6d %6d %5d/%-5d %7.2f %9s %7d %7s" % [
-			row.path, row.meshes, row.materials, row.on_atlas,
+		print("%-10s %7d %7d %5d %6d %5d/%-5d %7.2f %9s %6d %6s" % [
+			row.path, row.meshes, row.draws, row.materials, row.on_atlas,
 			row.proc_meshes, row.proc_materials, row.ratio,
 			_thousands(row.tris), row.unique_meshes, state])
 
@@ -309,8 +335,9 @@ func _report() -> bool:
 		var keys: Array = row.sources.keys()
 		keys.sort_custom(func(a, b): return row.sources[a].tris > row.sources[b].tris)
 		for src in keys:
-			print("  %-26s %4d mesh-uri  %3d materiale  %8s tris"
-				% [src, row.sources[src].meshes, row.sources[src].mats.size(),
+			print("  %-26s %4d prop-uri  %4d desene  %3d materiale  %8s tris"
+				% [src, row.sources[src].meshes, row.sources[src].draws,
+					row.sources[src].mats.size(),
 					_thousands(row.sources[src].tris)])
 
 	print("\nVERDICT: %s" % ("PROBLEMA" if failed else "OK"))
@@ -378,10 +405,29 @@ const VARIANT_SOURCE := {
 	"water_tower": "water_tower",
 	"house_": "village_house",
 	"train_": "train",
+	# --- Insula (Okinawa) ---
+	#
+	# Lipseau de la inceput, dar nu se vedea: mesh-urile lor cadeau in bucata
+	# "procedural (track.gd)", care pe Okinawa arata oricum umflata din alte
+	# motive. Coacerea in MultiMesh le-a scos la iveala, fiindca buffer-ele
+	# neatribuite au acum galeata lor — 776 de prop-uri raportate ca venind de
+	# niciunde. Cifrele nu se schimba; se muta in dreptul fisierului corect.
+	"palm_": "coconut_palm", "bentpalm_": "beach_palm_bent",
+	"pandanus_": "pandanus", "banyan_": "banyan",
+	"coral_rock_": "coral_rock", "cane_clump_": "sugar_cane_clump",
+	"hibiscus": "hibiscus_bush",
+	"beach_grass": "island_scatter", "coral_pebbles": "island_scatter",
+	"driftwood": "island_scatter",
+	"awamori_": "beach_clutter", "bamboo_": "beach_clutter",
+	"fishing_": "beach_clutter", "net_": "beach_clutter",
+	"tetrapod_": "tetrapod", "island_": "horizon_island",
 }
 
 
-func _source_of(mi: MeshInstance3D, track: Node) -> String:
+## `mi` e orice vizual — [MeshInstance3D] sau [MultiMeshInstance3D]. Atribuirea
+## merge pe NUME, iar TrackDecorBatch pastreaza intentionat numele variantei in
+## numele buffer-ului tocmai ca sonda asta sa continue sa functioneze.
+func _source_of(mi: Node, track: Node) -> String:
 	const KNOWN := ["cactus", "rocks", "bucket", "sandcastle", "start_arch", "beach_ball",
 		"toy_excavator", "toy_dino", "garden_hose", "bowling_pin", "sandbox_border",
 	"marker_post", "drive_in_screen", "gas_pole_sign", "start_gate",
@@ -405,9 +451,15 @@ func _source_of(mi: MeshInstance3D, track: Node) -> String:
 			if lower.begins_with(k) or lower.begins_with(k.replace("_", "")):
 				return "GLB: " + k
 		n = n.get_parent()
-	if mi.mesh != null and mi.mesh.get_surface_count() > 0:
-		return "procedural (track.gd)"
-	return "necunoscut"
+	if mi is MeshInstance3D:
+		var solo := mi as MeshInstance3D
+		if solo.mesh != null and solo.mesh.get_surface_count() > 0:
+			return "procedural (track.gd)"
+		return "necunoscut"
+	# Un buffer copt care a ajuns aici si-a pierdut numele de varianta pe drum —
+	# nu e "procedural", e o gaura in atribuire. Il numim ca atare, ca sa se
+	# vada in raport in loc sa se topeasca in bucata procedurala.
+	return "MultiMesh neatribuit"
 
 
 func _walk(node: Node) -> Array[Node]:

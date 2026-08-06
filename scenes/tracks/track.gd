@@ -42,20 +42,21 @@ const FLYOFF_NET_FLOOR_DROP: float = 45.0
 var track_name: String = "Pista"
 var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
 
-## Din ce e facut drumul: "asphalt" (implicit) sau "dirt" — pamant batatorit.
+## Din ce e facut drumul: "asphalt" (implicit) sau "dirt" — nisip batatorit.
 ##
 ## NU e o intrare in tema, si asta e deliberat: Okinawa manual imparte tema
 ## "island" cu Okinawa v2 — si nu doar tema, ci LUMEA, pana la samanta (vezi
-## world_seed_name). Pus in tema, drumul de pamant ar fi schimbat amandoua
+## world_seed_name). Pus in tema, drumul de nisip ar fi schimbat amandoua
 ## pistele; aici schimba exact pista care l-a cerut.
 ##
 ## Ce atarna de el, in ordinea in care se vede din masina:
 ##   - materialul soselei — nisip tintat in loc de asfalt, fara sheen
 ##     (_build_road);
-##   - marcajele — un drum de pamant n-are nici linie de mijloc, nici borduri
+##   - marcajele — un drum nepavat n-are nici linie de mijloc, nici borduri
 ##     rosu-alb (_build_center_line, _build_kerbs);
-##   - urmele de cauciuc — nu mai stau doar in viraje, ci fac o poteca
-##     batatorita pe tot turul (_build_tire_marks);
+##   - urmele coapte in pista — DISPAR complet (_build_tire_marks): pe o
+##     suprafata pe care masinile lasa urme reale in fiecare cadru, o urma
+##     desenata dinainte nu se adauga la ele, le contrazice;
 ##   - masinile — ridica praf si lasa urme cat timp RULEAZA pe el, nu doar cand
 ##     derapeaza (Car._on_loose_ground).
 var road_surface: String = "asphalt"
@@ -71,11 +72,20 @@ func road_is_loose() -> bool:
 ## Culoarea prafului ridicat DE PE SOSEA.
 ##
 ## Praful de pe teren isi ia culoarea din theme_ground_tint (vezi
-## Car._update_dust), si asa trebuie sa ramana. Pe un drum de pamant rosu, insa,
-## nisipul coraligen de alaturi ar fi o minciuna: norul e al suprafetei pe care
-## calca roata, iar aia e alta decat plaja de langa ea.
+## Car._update_dust), si asa trebuie sa ramana: norul e al suprafetei pe care
+## calca roata, iar nisipul drumului nu e acelasi cu nisipul coraligen al plajei
+## de langa el — e mai auriu si mai inchis (vezi DIRT_ROAD_COLOR).
 func road_dust_color() -> Color:
 	return DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
+
+## Suprafata pe care masinile lasa brazde rulind (vezi SandTrail).
+##
+## O singura culoare pe pista, fiindca materialul urmelor e unul singur, partajat
+## de toate masinile. Se alege suprafata pe care se lasa CELE MAI MULTE urme: pe
+## o pista cu drum afanat aia e chiar drumul, pe una cu asfalt e terenul de
+## langa el — pe asfalt nu se depune nimic.
+func trail_surface_color() -> Color:
+	return DIRT_ROAD_COLOR if road_is_loose() else theme_ground_tint
 
 ## Sursa semintei pentru tot ce e procedural-aleator in lume: faza dunelor,
 ## imprastierea decorului, falezele, siluetele de orizont, stalpii.
@@ -661,9 +671,9 @@ func rebuild() -> void:
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.
 func _build_center_line() -> void:
-	# Pe pamant nu se picteaza. Linia ar fi ramas singurul marcaj de pe o
+	# Pe nisip nu se picteaza. Linia ar fi ramas singurul marcaj de pe o
 	# suprafata care nu poarta marcaje, si prima care ar fi spus "asta e tot
-	# asfalt, doar vopsit maro".
+	# asfalt, doar vopsit in nisipiu".
 	if road_is_loose():
 		return
 	var st := SurfaceTool.new()
@@ -2018,31 +2028,44 @@ const ROAD_COLOR: Color = Color(0.23, 0.24, 0.3)
 ## se imparte la ea, ca a doua inmultire sa nu intunece soseaua.
 const ASPHALT_MACRO_MEAN: float = 0.900
 
-## Culoarea drumului de pamant, INAINTE de compensarea trecerii macro.
+## Culoarea drumului afanat, INAINTE de compensarea trecerii macro.
 ##
-## Laterita rosie a Okinawei ("kunigami maaji"), nu un bej de nisip: terenul din
-## jur e verde-crem deschis, deci un drum nisipiu ar disparea in plaja pe care o
-## traverseaza.
+## ############################################################################
+## NISIP BATATORIT, nu laterita rosie — decizia dezvoltatorului dupa prima
+## captura de joc, si a doua oara cand nuanta asta se schimba.
 ##
-## Valoarea a fost COBORATA dupa prima captura de joc, si asta e regula care
-## conteaza aici, nu nuanta. La V 0.55 drumul iesea mai LUMINOS decat terenul din
-## jurul lui — o panglica portocalie stralucitoare care se batea si cu peretii
-## rosii de pe margine. Style_bible §1 nu spune "soseaua e gri", spune ca soseaua
-## e cea mai INCHISA suprafata continua din cadru, ca linia de curs sa se
-## citeasca la viteza; regula nu cade odata cu asfaltul, doar isi schimba nuanta.
-## V 0.36 la saturatie 0.58 pastreaza pamantul rosu si il baga inapoi sub tot ce
-## e in jur.
-const DIRT_ROAD_COLOR: Color = Color(0.36, 0.22, 0.15)
+## Prima versiune a mers pe laterita ("kunigami maaji"), pe argumentul ca un drum
+## nisipiu ar disparea in plaja pe care o traverseaza. Argumentul era corect
+## pentru plaja si gresit pentru pista: drumul trece prin campul VERDE al insulei
+## (inland_tint din tema island), nu prin fasia de nisip, iar rosul iesea maro
+## inchis de pamant ud — nu semana cu nimic din lumea din jurul lui.
+##
+## Tinta e acum EXPLICITA si se poate re-masura: nisipul insorit de pe marginea
+## soselei de pe Dunele, adica #D5A75E masurat pe captura de joc (track=0,
+## frac=0.21, --gamecam). Nu se poate copia albedo-ul de acolo — Dunele are alta
+## lumina (soare 0.8 / expunere 1.30, fata de 1.5 / 1.0 pe insula), deci aceeasi
+## culoare de material ar da alt pixel. Se calibreaza pe ECRAN:
+##   godot --path . res://tools/Snapshot.tscn -- --track=4 --frac=0.21 --gamecam
+## si se compara petecul de drum cu #D5A75E. Masurat la valoarea de mai jos:
+## #D8A55E, eroare 3/2/0 pe canale — sub pragul de 12 din style_bible §5.
+##
+## Ce se pierde, asumat: style_bible §1 cere ca soseaua sa fie cea mai INCHISA
+## suprafata continua din cadru, ca linia de curs sa se citeasca la viteza. Un
+## drum de nisip pe camp verde e mai LUMINOS decat terenul lui. Linia de curs
+## ramane citibila pentru ca separarea nu mai vine din valoare, ci din TON: cald
+## saturat pe drum, rece desaturat pe iarba — plus umerii si chevron-urile.
+## ############################################################################
+const DIRT_ROAD_COLOR: Color = Color(0.80, 0.66, 0.43)
 ## Media texturii macro de nisip (process_class_textures.surfaces()).
 const SAND_MACRO_MEAN: float = 0.850
 
-## Nuanta benzii de rulare pe un drum de pamant.
+## Nuanta benzii de rulare pe un drum nepavat.
 ##
 ## Gradientul e INVERS fata de asfalt, si asta e chiar diferenta dintre cele
 ## doua materiale. Pe asfalt marginile sunt mai INCHISE (praf si uzura se aduna
-## acolo unde nu calca nimeni); pe pamant, mijlocul e batatorit de roti — mai
+## acolo unde nu calca nimeni); pe nisip, mijlocul e batatorit de roti — mai
 ## tare, mai umed, mai inchis — iar spre margini ramane praf afanat, deci mai
-## deschis. Fara inversarea asta drumul de pamant ar fi doar asfalt vopsit maro.
+## deschis. Fara inversarea asta drumul ar fi doar asfalt vopsit in nisipiu.
 const DIRT_CENTER_SHADE: Color = Color(0.82, 0.80, 0.78)
 
 func _build_road() -> void:
@@ -2079,7 +2102,7 @@ func _build_road() -> void:
 	# margini — uzura/praful se aduna la margine, si gradientul face soseaua
 	# sa citeasca a suprafata cu latime, nu a panglica uniforma.
 	#
-	# Pe pamant gradientul se INTOARCE (vezi DIRT_CENTER_SHADE): banda din mijloc
+	# Pe nisip gradientul se INTOARCE (vezi DIRT_CENTER_SHADE): banda din mijloc
 	# e batatorita, deci inchisa, iar praful afanat ramane pe margini. Cele doua
 	# nuante se aplica pe acelasi profil de 5 pozitii, deci trecerea dintre ele
 	# se interpoleaza pe fasia t = 0.55..1.0 — o poteca cu margini difuze, nu o
@@ -2203,13 +2226,13 @@ func _build_road() -> void:
 	# Impartirea e pe canale, nu pe Color intreg: `Color / float` ar imparti si
 	# alfa, si ar iesi 1.11 pe un material opac.
 	#
-	# PAMANTUL foloseste ACELEASI doua trecere, dar cu texturile de nisip si fara
-	# sheen: un drum de pamant nu are pelicula de bitum care sa prinda lumina, iar
-	# specularul de 0.3 pastrat aici l-ar fi facut sa luceasca a asfalt vopsit
-	# maro. Roughness 1.0 + specular 0 il scoate din familia "suprafata neteda".
+	# DRUMUL NEPAVAT foloseste ACELEASI doua treceri, dar cu texturile de nisip si
+	# fara sheen: nisipul batatorit n-are pelicula de bitum care sa prinda lumina,
+	# iar specularul de 0.3 pastrat aici l-ar fi facut sa luceasca a asfalt vopsit.
+	# Roughness 1.0 + specular 0 il scoate din familia "suprafata neteda".
 	# Micro-ul e surface_sand (aceeasi granulatie ca terenul, la 3.5 m in loc de
 	# 3.125 — deci si aceeasi lume), macro-ul e surface_sand_macro: petele lui de
-	# 45 m sunt exact tiparul de pamant spalat de ploaie pe care il vrem.
+	# 45 m sunt exact tiparul de nisip spalat de ploaie pe care il vrem.
 	var base := DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
 	var macro_mean := SAND_MACRO_MEAN if road_is_loose() else ASPHALT_MACRO_MEAN
 	var road_color := Color(
@@ -3085,103 +3108,34 @@ func _patch_step(bucket: int, side_sign: float) -> float:
 ## inainte ca sa acopere si franarea. Alpha-ul creste/scade la capetele
 ## fiecarei serii prin vertex color — urmele apar si dispar gradual, nu taiat.
 ##
-## PE DRUM DE PAMANT (road_is_loose) aceeasi geometrie devine altceva: urmele nu
-## se mai opresc intre viraje, ci merg pe TOT turul, ca poteca batatorita a unui
-## drum pe care circula lume. Diferenta nu e doar "mai multe urme":
-##   - banda de rulare se muta lin spre interiorul virajelor si revine pe axa pe
-##     drepte (lane-ul se filtreaza, vezi TRACK_LANE_SMOOTH). Fara filtru, poteca
-##     ar sari 2.4 m lateral la intrarea in fiecare viraj — o falie, nu o urma;
-##   - alfa scade (TRACK_DIRT_ALPHA): pe asfalt urma e cauciuc ars si trebuie sa
-##     se vada ca atare, pe pamant e doar sant batatorit, deci o umbra, nu o dara
-##     neagra. Textura ramane aceeasi, deci si materialul — garda de materiale nu
-##     se misca.
-## Asta e si al treilea semnal de viraj care inlocuieste bordurile (_build_kerbs):
-## poteca iti arata linia inainte s-o vezi.
+## ############################################################################
+## PE DRUM AFANAT (road_is_loose) NU SE COACE NIMIC. Nici o urma, nici o poteca.
 ##
-## Costul, pe Okinawa: ~600 de segmente x 2 fasii x 2 triunghiuri = ~2.4k
-## triunghiuri pe toata pista, intr-un singur mesh, in loc de ~700 pe viraje.
-## Cat de mult spre interiorul virajului se muta banda de rulare, in fractii din
-## half_width. 0.35 din 7 m = 2.45 m — o masina intreaga in interiorul axei.
-const TIRE_LANE_FRAC: float = 0.35
-## Cati indecsi de o parte si de alta intra in filtrul benzii de rulare de pe
-## pamant. 8 pasi x 3 m (bake_interval) inseamna ca mutarea de 2.45 m se intinde
-## pe ~50 m — cam cat ii ia unei masini reale sa se aseze pe linia virajului.
-const TIRE_LANE_SMOOTH: int = 8
-## Cat de vizibila e poteca in afara virajelor, ca fractie din urma plina.
-const TIRE_DIRT_BASE: float = 0.78
-## Cu cat se stinge TOATA urma pe pamant.
+## Versiunea de dinainte facea invers: pe drumul nepavat intindea o poteca pe
+## TOT turul, ca semn ca pe acolo circula lume. Ca imagine statica era corect; in
+## joc, prima reactie a fost "urmele astea nu-s ale nimanui". Si chiar nu erau:
+## pista se nastea cu doua dare desenate pe ea, identice tur de tur, indiferent
+## pe unde treceai tu sau AI-ul. Pe o suprafata pe care masinile lasa urme REALE
+## in fiecare cadru (SandTrail, depusa cat timp rulezi), o urma coapta nu se
+## adauga la ele — le contrazice: cea coapta nu se schimba niciodata, deci o
+## recunosti ca decor imediat ce ai vazut-o de doua ori.
 ##
-## 1.0, adica deloc, si nu e o renuntare la ideea initiala (0.70) — e rezultatul
-## primei capturi de joc. Textura urmei e un CLOPOT pe latime: alfa 0.55 fix pe
-## mijlocul fasiei si zero la marginile ei, deci opacitatea MEDIE pe latime e
-## deja pe jumatate. Inmultita cu inca 0.70, poteca ajungea la ~0.1 medie peste
-## un drum deja patat de trecerea macro — adica exact nimic. Numarul de pe hartie
-## spunea "subtil", ecranul spunea "invizibil".
-const TIRE_DIRT_ALPHA: float = 1.0
-
-## Jumatatea de latime a unei fasii de urma, in metri.
-##
-## Pe asfalt sunt urme de CAUCIUC: latimea anvelopei, 0.34 m, si atat. Pe pamant
-## e o poteca batatorita de sute de treceri, iar aia nu are latimea unui cauciuc,
-## ci a unei roti care nu calca de doua ori la fel — 0.8 m de banda tocita. Cu
-## fasii de anvelopa, drumul de pamant avea doua fire desenate pe el; cu benzi,
-## are o poteca.
+## Pe asfalt urmele coapte raman, si nu e o inconsecventa: acolo masinile lasa
+## urme doar cand DERAPEAZA (Car._drop_skid_marks), si alea se sting. Fara stratul
+## copt, virajele ar fi curate ca in ziua turnarii asfaltului. Regula, pe scurt:
+## coci ce masinile nu pot produce, si lasa in seama lor ce pot.
+## ############################################################################
+## Jumatatea de latime a unei fasii de urma si ecartamentul lor, in metri:
+## latimea anvelopei si distanta dintre roti.
 const TIRE_HALF_W: float = 0.17
-const TIRE_DIRT_HALF_W: float = 0.40
-## Ecartamentul fasiilor fata de mijlocul benzii de rulare.
 const TIRE_GAUGE: float = 0.85
-const TIRE_DIRT_GAUGE: float = 0.95
-
 ## Cati metri de drum acopera o repetitie a texturii de urma, pe lungime.
-##
-## ############################################################################
-## De ce 6 m pe pamant si nu 1.4 ca pe asfalt — masurat, nu ales.
-##
-## Textura de urma isi tine tot desenul in ALFA (profil de anvelopa + uzura), iar
-## alfa trece prin mipmap ca orice alt canal. La o repetitie de 1.4 m sunt ~183
-## de texeli pe metru de drum: la doi pasi in fata masinii un pixel de ecran
-## acopera deja cativa texeli, deci GPU-ul citeste dintr-un mip in care desenul
-## e mediat — iar media alfei acestei texturi e ~0.11, nu 0.55. Rezultatul,
-## masurat pe captura: fasiile erau in scena, cu geometria si vertex color-ul
-## corecte, si nu se vedea NIMIC din ele. Aceeasi geometrie fara textura se vedea
-## perfect — asa s-a prins.
-##
-## Pe asfalt tiparul fin e chiar ce vrei (urma de cauciuc E fina, si se vede doar
-## de aproape, in viraj). Pe pamant vrei o poteca lata, si aia are nevoie de un
-## desen COARSE: la 6 m/repetitie densitatea scade de peste patru ori, deci
-## alfa ajunge pe ecran din mip-uri mult mai joase.
-## ############################################################################
 const TIRE_TILE: float = 1.4
-const TIRE_DIRT_TILE: float = 6.0
-
-## Culoarea potecii batatorite, asa cum ajunge pe ecran.
-##
-## ############################################################################
-## Doua incercari gresite inaintea ei, amandoua prinse de aceeasi masuratoare
-## (acelasi cadru cu si fara poteca, raport pe canale — vezi cifrele in PR).
-##
-## 1. Banda semi-transparenta LUMINATA, de culoarea drumului, mai inchisa. Pe
-##    ecran: R x0.94, G x1.16, B x2.11. Poteca nu inchidea drumul, il SPALA in
-##    albastru — o suprafata proprie isi primeste propria lumina, iar pe un
-##    albedo intunecat, sub cer tropical, ambianta albastra domina.
-## 2. Inmultire (BLEND_MODE_MUL), ca sa scada din lumina existenta in loc sa
-##    adauge o suprafata. Corect ca idee, imposibil de calibrat aici: cu factor
-##    ALB — adica identitate matematica — drumul iesea tot la 0.66/0.60/0.28.
-##    Inmultirea se aplica inainte de ceata si de tonemap, deci "cat de tare"
-##    depindea de distanta, nu de numarul din cod.
-##
-## Ce a ramas: culoare FIXA, nel uminata, amestecata prin alfa. Nu are ambianta
-## de unde sa se spele si nu are ce sa multiplice — e exact nuanta scrisa aici,
-## iar cat de tare bate se regleaza dintr-un singur loc (alfa din _mark_color).
-## Pretul asumat: in umbra deasa poteca nu se intuneca odata cu drumul. Pe o
-## sosea care sta in soare tot turul, e o plata mica.
-##
-## Nuanta e drumul insusi (DIRT_ROAD_COLOR) coborat in valoare si urcat putin in
-## saturatie: pamant tasat de roti ramane rosu, doar ca mai putin luminos.
-## ############################################################################
-const PATH_TINT: Color = Color(0.20, 0.095, 0.055)
 
 func _build_tire_marks() -> void:
+	# Vezi antetul: pe suprafata afanata urmele sunt treaba masinilor.
+	if road_is_loose():
+		return
 	var n := baked.size()
 	if n < 20:
 		return
@@ -3213,22 +3167,6 @@ func _build_tire_marks() -> void:
 		while run_out < 4 and strength[(i + run_out + 1) % n] > 0.0:
 			run_out += 1
 		alpha[i] = minf(float(mini(run_in, run_out) + 1) / 4.0, 1.0)
-	# 2b. Pe pamant poteca NU se intrerupe intre viraje: sub rampele de mai sus
-	# ramane un fundal continuu, iar tot ansamblul se stinge — pe asfalt urma e
-	# cauciuc ars, aici e doar sant batatorit.
-	if road_is_loose():
-		for i in n:
-			alpha[i] = maxf(alpha[i], TIRE_DIRT_BASE) * TIRE_DIRT_ALPHA
-	# 2c. Banda de rulare, in metri fata de axa. Pe asfalt e o TREAPTA (esti pe
-	# linia de apex sau nu esti, si intre serii nu se vede fiindca urmele lipsesc
-	# acolo). Pe pamant urmele sunt continue, deci treapta ar deveni vizibila: la
-	# intrarea in fiecare viraj poteca ar sari 2.4 m lateral. De-aia se filtreaza.
-	var lane: Array[float] = []
-	lane.resize(n)
-	for i in n:
-		lane[i] = -offset_sign[i] * half_width * TIRE_LANE_FRAC
-	if road_is_loose():
-		lane = _smooth_loop(lane, TIRE_LANE_SMOOTH)
 	# 3. Geometria: doua fasii (ecartamentul rotilor) pe linia de apex.
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -3246,56 +3184,31 @@ func _build_tire_marks() -> void:
 		if _road_gap(i, j):
 			continue
 		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
-		var lane0: float = lane[i]
-		var lane1: float = lane[j]
-		var tile := TIRE_DIRT_TILE if road_is_loose() else TIRE_TILE
-		var v0 := _dists[i] / tile
-		var v1 := _dists[i + 1] / tile
-		var gauge := TIRE_DIRT_GAUGE if road_is_loose() else TIRE_GAUGE
-		var half_w := TIRE_DIRT_HALF_W if road_is_loose() else TIRE_HALF_W
-		# Profilul TRANSVERSAL al fasiei: (deplasare in latimi, u, factor de alfa).
-		#
-		# Pe asfalt sunt doua colturi si atat: forma urmei — clopotul care o stinge
-		# spre margini — vine din ALFA TEXTURII, si acolo e la locul ei, fiindca
-		# urma de cauciuc se vede de aproape, in viraj.
-		#
-		# Pe pamant forma vine din VERTEX COLOR: trei colturi, transparent pe
-		# margini si plin pe mijloc. Nu e o preferinta de stil, e singura varianta
-		# care supravietuieste: alfa unei texturi trece prin mipmap si se mediaza
-		# (vezi TIRE_DIRT_TILE), pe cand alfa dintr-un vertex se interpoleaza si
-		# ramane exact cat ai cerut, la orice distanta. Prima varianta a potecii
-		# folosea textura si masuratoarea a dat-o afara: fasiile existau in scena
-		# si schimbau sub 2% din pixelii cadrului, cu delta medie 17/765.
-		var profile: Array = [[-1.0, 0.0, 1.0], [1.0, 1.0, 1.0]]
-		if road_is_loose():
-			profile = [[-1.0, 0.5, 0.0], [0.0, 0.5, 1.0], [1.0, 0.5, 0.0]]
-		for wheel: float in [-gauge, gauge]:
+		var lane0 := -offset_sign[i] * half_width * 0.35
+		var lane1 := -offset_sign[j] * half_width * 0.35
+		var v0 := _dists[i] / TIRE_TILE
+		var v1 := _dists[i + 1] / TIRE_TILE
+		for wheel: float in [-TIRE_GAUGE, TIRE_GAUGE]:
 			var c0 := baked[i] + _side_at(i) * (lane0 + wheel) + lift
 			var c1 := baked[j] + _side_at(j) * (lane1 + wheel) + lift
-			for k in profile.size() - 1:
-				var pa: Array = profile[k]
-				var pb: Array = profile[k + 1]
-				var oa := _side_at(i) * (half_w * float(pa[0]))
-				var ob := _side_at(i) * (half_w * float(pb[0]))
-				var aa0 := _mark_color(alpha[i] * float(pa[2]))
-				var aa1 := _mark_color(alpha[j] * float(pa[2]))
-				var ab0 := _mark_color(alpha[i] * float(pb[2]))
-				var ab1 := _mark_color(alpha[j] * float(pb[2]))
-				var ua := float(pa[1])
-				var ub := float(pb[1])
-				st.set_color(aa0)
-				st.set_uv(Vector2(ua, v0)); st.add_vertex(c0 + oa)
-				st.set_color(aa1)
-				st.set_uv(Vector2(ua, v1)); st.add_vertex(c1 + oa)
-				st.set_color(ab0)
-				st.set_uv(Vector2(ub, v0)); st.add_vertex(c0 + ob)
-				st.set_color(ab0)
-				st.set_uv(Vector2(ub, v0)); st.add_vertex(c0 + ob)
-				st.set_color(aa1)
-				st.set_uv(Vector2(ua, v1)); st.add_vertex(c1 + oa)
-				st.set_color(ab1)
-				st.set_uv(Vector2(ub, v1)); st.add_vertex(c1 + ob)
-				emitted = true
+			# Forma urmei — clopotul care o stinge spre margini — vine din ALFA
+			# TEXTURII; vertex color-ul poarta doar rampa de la capetele seriei.
+			var half := _side_at(i) * TIRE_HALF_W
+			var col0 := Color(1, 1, 1, alpha[i])
+			var col1 := Color(1, 1, 1, alpha[j])
+			st.set_color(col0)
+			st.set_uv(Vector2(0.0, v0)); st.add_vertex(c0 - half)
+			st.set_color(col1)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(c1 - half)
+			st.set_color(col0)
+			st.set_uv(Vector2(1.0, v0)); st.add_vertex(c0 + half)
+			st.set_color(col0)
+			st.set_uv(Vector2(1.0, v0)); st.add_vertex(c0 + half)
+			st.set_color(col1)
+			st.set_uv(Vector2(0.0, v1)); st.add_vertex(c1 - half)
+			st.set_color(col1)
+			st.set_uv(Vector2(1.0, v1)); st.add_vertex(c1 + half)
+			emitted = true
 	if not emitted:
 		return
 	# Fara normale, materialul (care e luminat per pixel) primea vectorul nul si
@@ -3306,42 +3219,8 @@ func _build_tire_marks() -> void:
 	var inst := MeshInstance3D.new()
 	inst.name = "TireMarks"
 	inst.mesh = st.commit()
-	inst.material_override = _path_material() if road_is_loose() \
-		else _decal_material()
+	inst.material_override = _decal_material()
 	add_child(inst)
-
-
-## Cat de opaca e poteca in punctul ei cel mai batatorit.
-##
-## Separat de intensitatea din alpha[] (care spune "aici e viraj, aici e
-## dreapta"): asta spune cat de tare bate poteca in general. Se regleaza singur,
-## fara sa atinga rampele.
-const PATH_OPACITY: float = 0.72
-
-## Vertex color-ul unui punct de urma, la o intensitate 0..1.
-func _mark_color(intensity: float) -> Color:
-	var a := clampf(intensity, 0.0, 1.0)
-	return Color(1, 1, 1, a * PATH_OPACITY if road_is_loose() else a)
-
-
-## Medie glisanta pe o serie INCHISA (indicele 0 e vecin cu n-1).
-##
-## Bucla conteaza: un filtru care trateaza capetele ca margini ar lasa exact la
-## linia de start o cusatura in banda de rulare — genul de artefact pe care il
-## vezi o data la trei tururi si nu ti-l explici.
-func _smooth_loop(values: Array[float], radius: int) -> Array[float]:
-	var n := values.size()
-	if n == 0 or radius <= 0:
-		return values
-	var out: Array[float] = []
-	out.resize(n)
-	var span := float(radius * 2 + 1)
-	for i in n:
-		var sum := 0.0
-		for k in range(-radius, radius + 1):
-			sum += values[(i + k + n) % n]
-		out[i] = sum / span
-	return out
 
 
 ## Materialul decal-urilor — UNUL singur, cache-uit. Transparenta alpha e
@@ -3360,33 +3239,6 @@ func _decal_material() -> StandardMaterial3D:
 	_decal_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	_decal_mat.cull_mode = BaseMaterial3D.CULL_BACK
 	return _decal_mat
-
-
-## Materialul potecii batatorite de pe drumul de pamant.
-##
-## Doua alegeri, amandoua explicate la PATH_TINT:
-##   - FARA textura: forma potecii vine din vertex color, deci nu are ce sa
-##     medieze mipmap-ul. Alfa unei texturi nu supravietuieste distantei; alfa
-##     unui vertex se interpoleaza si ramane exact cat ai cerut.
-##   - UNSHADED: culoarea scrisa e chiar culoarea de pe ecran, fara ambianta
-##     albastra care spalase prima varianta.
-var _path_mat: StandardMaterial3D
-
-func _path_material() -> StandardMaterial3D:
-	if _path_mat != null:
-		return _path_mat
-	_path_mat = StandardMaterial3D.new()
-	_path_mat.albedo_color = PATH_TINT
-	_path_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_path_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	# Vertex color-ul poarta doar ALFA (marginile stinse + rampele de intrare in
-	# viraj); culoarea vine din albedo. De-aia si steagul sRGB: pe alb, conversia
-	# e identitate, dar daca maine cineva pune culoare in vertecsi, o vrea citita
-	# ca in restul jocului.
-	_path_mat.vertex_color_use_as_albedo = true
-	_path_mat.vertex_color_is_srgb = true
-	_path_mat.cull_mode = BaseMaterial3D.CULL_BACK
-	return _path_mat
 
 
 ## Latimea benzii de bordura, in metri.
@@ -3426,7 +3278,7 @@ const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
 ## (curbura peste 0.08 rad). Nu sunt decor, sunt SEMNAL — daca ar margini toata
 ## pista, n-ar mai spune nimic despre unde se franeaza.
 func _build_kerbs() -> void:
-	# Un drum de pamant n-are borduri turnate. Semnalul lor — "aici se franeaza",
+	# Un drum de nisip n-are borduri turnate. Semnalul lor — "aici se franeaza",
 	# citit de departe — NU se pierde: pe virajele aceleiasi piste raman
 	# chevron-urile (_build_chevrons), umarul de pietris (_build_shoulders) si,
 	# de acum, poteca batatorita care se muta spre interiorul virajului

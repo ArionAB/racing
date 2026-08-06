@@ -719,14 +719,43 @@ func _update_dust(on_road: bool, loose: bool) -> void:
 
 
 ## Cat de des se depune o urma de rulare, in metri parcursi. 2.2 m cu placute de
-## 2.6 m (SandTrail.MARK_SIZE) inseamna suprapunere, deci dara e continua.
+## 2.4 m (SandTrail.MARK_SIZE) inseamna suprapunere, deci dara e continua.
 const TRAIL_SPACING: float = 2.2
 ## Sub viteza asta nu se depune nimic: o masina care abia se misca prin nisip tot
 ## lasa urme, una oprita nu — si mai ales nu vrem sa tapetam gridul de start.
 const TRAIL_MIN_SPEED: float = 3.0
-## Cat de sus peste sol sta placuta. Mai mult decat urmele coapte in pista
-## (0.025), ca sa treaca peste ele fara z-fighting.
-const TRAIL_LIFT: float = 0.05
+## Cat de sus peste SOL sta placuta — nu peste originea masinii.
+##
+## ############################################################################
+## Distinctia asta a costat o vanatoare intreaga: urmele se depuneau, cu pozitii
+## corecte, si nu se vedea niciuna.
+##
+## Originea unui Car NU e la nivelul solului. Colizorul e o cutie de 1 m inalta,
+## asezata la +0.6 (vezi _ready), deci talpa ei — punctul care atinge drumul —
+## sta la +0.1 fata de origine. O placuta ridicata cu 0.05 "peste masina" ajungea
+## astfel cu 5 cm SUB asfalt.
+##
+## Peste asta se aduna coroana soselei: suprafata VIZIBILA a drumului e bombata
+## cu pana la Track.ROAD_CROWN (0.03) peste cea de COLIZIUNE, pe care calca
+## roata. Adica exact pe banda de rulare, unde stau urmele, drumul desenat trece
+## peste drumul pipait — aceeasi capcana care ingropase si urmele coapte in
+## pista (vezi Track._build_tire_marks).
+##
+## De-aia inaltimea se calculeaza din talpa colizorului (_hull_bottom), iar
+## constanta de mai jos e doar MARJA peste sol: coroana plus ce trebuie ca
+## placuta sa nu clipeasca in ea pe denivelari.
+## ############################################################################
+const TRAIL_LIFT: float = 0.08
+
+## Cat de sus fata de originea masinii e talpa colizorului, adica solul.
+func _hull_bottom() -> float:
+	if _collision_shape == null:
+		return 0.1
+	var box := _collision_shape.shape as BoxShape3D
+	if box == null:
+		return _collision_shape.position.y
+	return _collision_shape.position.y - box.size.y * 0.5
+
 
 ## Dara de urme lasata rulind pe teren afanat. Creata la prima nevoie: pe o pista
 ## cu asfalt care nu iese niciodata de pe drum nu se aloca nimic.
@@ -762,12 +791,16 @@ func _drop_trail(delta: float, loose: bool) -> void:
 	var right := fwd.cross(up).normalized()
 	if _trail == null:
 		_trail = SandTrail.new()
+		# Nuanta brazdei tine de suprafata, nu de masina: materialul e partajat,
+		# deci o singura culoare pe pista (vezi SandTrail.set_surface_color).
+		SandTrail.set_surface_color(track.trail_surface_color())
 		add_child(_trail)
 	var half_track_w := data.body_width * 0.38 if data != null else 0.85
 	var rear_z := data.body_length * 0.34 if data != null else 1.3
 	# Rotile din SPATE: pe o linie dreapta ele calca peste urma celor din fata,
 	# deci doua fasii, nu patru.
-	var base := global_position - fwd * rear_z + up * TRAIL_LIFT
+	var base := global_position - fwd * rear_z \
+		+ up * (_hull_bottom() + TRAIL_LIFT)
 	var orientation := Basis(right, up, -fwd)
 	for side: float in [-1.0, 1.0]:
 		_trail.stamp(base + right * half_track_w * side, orientation)

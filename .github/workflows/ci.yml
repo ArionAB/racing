@@ -106,3 +106,25 @@ jobs:
             exit 1
           fi
           echo "OK — nicio masina intepenita."
+
+      # Soseaua e un platou cu fuste verticale de 3 m, iar terenul de langa ea
+      # sta mai jos — deci marginea drumului poate deveni un prag pe care un
+      # CharacterBody3D (fara step-up in Godot) nu-l mai urca. S-a intamplat: pe
+      # Dunele, 6 din 9 incercari de reintrare esuau, si intr-o cursa cu AI o
+      # masina a stat 22% din timp blocata pe nisip. Racordul il face umarul
+      # soselei; proba verifica exact ca a ramas racord.
+      - name: Reintrarea pe sosea dupa iesirea pe nisip
+        run: |
+          set -uo pipefail
+          ~/godot-bin/godot --headless --fixed-fps 60 \
+            res://tools/ProbeReentry.tscn -- --mode=drive --track=0 2>&1 | tee reentry.log
+          STATUS=${PIPESTATUS[0]}
+          if ! grep -q 'VERDICT:' reentry.log; then
+            echo "::error::Proba de reintrare nu a rulat pana la capat."
+            exit 1
+          fi
+          if [ "$STATUS" -ne 0 ] || grep -q 'VERDICT: PROBLEMA' reentry.log; then
+            echo "::error::Masini care nu mai pot intra pe sosea — vezi tabelul de mai sus."
+            exit 1
+          fi
+          echo "OK — se poate reintra de peste tot."

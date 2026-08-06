@@ -6,7 +6,17 @@ https://www.patreon.com/quaternius
 -------------------------------------------------------
 
 License:
-CC0 1.0 Universal (CC0 1.0) 
+CC0 1.0 Universal (CC0 1.0)
 Public Domain Dedication
 https://creativecommons.org/publicdomain/zero/1.0/
+
+-------------------------------------------------------
+Pachete folosite in proiect:
+  - Ultimate Low Poly Vehicles / props (assets vechi)
+  - Stylized Nature MegaKit [Standard], https://quaternius.com
+
+Din MegaKit se folosesc DOAR mesh-urile, prelucrate in
+tools/blender/build_megakit_rocks.py si build_megakit_plants.py:
+UV-urile lui se arunca si se colapseaza pe palette_atlas.png, iar vertex
+colors se recoc ca AO. Texturile pachetului NU intra in build.
 

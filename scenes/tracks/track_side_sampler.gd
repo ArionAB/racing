@@ -46,6 +46,21 @@ const GROUND_WEIGHT_SOFT: float = 7.0
 const GROUND_STRIDE: int = 2
 ## Cat sta nisipul sub cota asfaltului (buza umarului).
 const GROUND_DROP: float = 0.30
+## Pe cati metri dincolo de marginea asfaltului terenul e legat de cota LOCALA a
+## drumului, in loc de media ponderata.
+##
+## Media Shepard descrie CORIDORUL, nu marginea: pe o creasta ea sta sub asfalt,
+## intr-o vale peste el. Masurat pe Dunele, treapta de la buza soselei la nisip
+## iesea intre 0.12 m si 1.32 m in loc de GROUND_DROP — adica un prag pe care
+## masina nu-l mai urca la loc dupa ce iese de pe drum (16 profile masurate, 8
+## peste 0.15 m). Langa drum raspunsul corect e cota drumului de ACOLO; media
+## conteaza abia cand terenul se desprinde de el.
+##
+## 15 m si nu mai mult: pe pistele care se auto-intersecteaza (Dunele trece la
+## ~40 m de ea insasi) cele doua ramuri raman fiecare peste 15 m distanta una de
+## alta, deci nu exista punct in care "cea mai apropiata" sa sara de pe una pe
+## alta si sa lase o muchie. Vezi ground_y pentru de ce media exista.
+const GROUND_LOCK_LEN: float = 15.0
 
 # --- tarmul insulei (doar cand _far_drop > 0) ---
 ## Cat de departe INAUNTRUL poligonului de control se intinde plaja. Banda e
@@ -208,6 +223,15 @@ func ground_y(wx: float, wz: float) -> float:
 		i += GROUND_STRIDE
 	var road_level := (num / den) if den > 0.0 else _mean_y
 	var dist := sqrt(near_sq)
+	# Langa asfalt, cota LOCALA a drumului bate media (vezi GROUND_LOCK_LEN).
+	# Distanta e cea perpendiculara pe axa, nu cea pana la punctul copt: pasul de
+	# esantionare e ~6 m, deci pe mijlocul drumului "cel mai apropiat punct" poate
+	# fi la 3 m si lacatul s-ar slabi chiar acolo unde trebuie sa fie ferm.
+	var local := _local_road(wx, wz, near_i)
+	var lock := 1.0 - smoothstep(0.0, GROUND_LOCK_LEN,
+		maxf(local.x - _half_width, 0.0))
+	if lock > 0.0:
+		road_level = lerpf(road_level, local.y, lock)
 	var t := clampf((dist - GROUND_FLAT_RADIUS) / GROUND_BLEND_LEN, 0.0, 1.0)
 	# Campul departat se ancoreaza la media cotelor drumului, NU la zero: altfel
 	# toata pista ar sta pe un platou cu o faleza de 19 m la 115 m distanta. Cu
@@ -260,6 +284,36 @@ func ground_y(wx: float, wz: float) -> float:
 	y = _lift_branches(y, wx, wz, road_level, dist)
 	y = _carve_lagoon(y, dist, wx, wz)
 	return _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+
+
+## Distanta perpendiculara pana la axa soselei si cota drumului acolo, ca
+## Vector2(distanta, y).
+##
+## Se uita la SEGMENTELE din jurul punctului copt cel mai apropiat, nu la punctul
+## in sine: cu pasul de esantionare (~6 m) si cota lui, terenul de langa drum ar
+## iesi in trepte de latimea unui segment — pe o panta de 12% asta inseamna
+## praguri de 0.7 m exact acolo unde vrem racord.
+func _local_road(wx: float, wz: float, near_i: int) -> Vector2:
+	var n := _baked.size()
+	var p := Vector2(wx, wz)
+	var best_d := INF
+	var best_y := _baked[near_i].y
+	# Cele doua segmente care ating punctul: [near-stride, near] si [near, near+stride].
+	# near_i vine din bucla cu pasul GROUND_STRIDE, deci e mereu un capat de segment.
+	for k: int in [-GROUND_STRIDE, 0]:
+		var i0 := ((near_i + k) % n + n) % n
+		var i1 := (i0 + GROUND_STRIDE) % n
+		var a := _baked[i0]
+		var b := _baked[i1]
+		var a2 := Vector2(a.x, a.z)
+		var ab := Vector2(b.x, b.z) - a2
+		var len_sq := ab.length_squared()
+		var t := 0.0 if len_sq <= 0.0 else clampf((p - a2).dot(ab) / len_sq, 0.0, 1.0)
+		var d := p.distance_to(a2 + ab * t)
+		if d < best_d:
+			best_d = d
+			best_y = lerpf(a.y, b.y, t)
+	return Vector2(best_d, best_y)
 
 
 ## Cat de departe de axa unei benzi secundare terenul mai sta la cota ei.

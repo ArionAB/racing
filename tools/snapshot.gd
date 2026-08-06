@@ -21,6 +21,10 @@ extends Node
 ##   --train-at=0.55           muta ceasul trecerii de cale ferata la fractia
 ##                             ceruta din ciclu, ca trenul sa fie IN cadru la
 ##                             momentul capturii (implicit e parcat, invizibil)
+##   --typhoon-at=0.12         la fel, pentru mini-typhoon: 0 = pe axa soselei,
+##                             0.25 = la capatul maturarii, 0.12 = la jumatatea
+##                             traversarii. Fara el, captura o prinde mereu pe
+##                             mijlocul drumului si nu se vede niciodata trecerea.
 ##   --bridge-at=0.24          la fel, pentru podul mobil: 0 = inchis, ~0.24 =
 ##                             travee sus cu corabia in gol. Fara el, captura
 ##                             prinde podul la inceputul ciclului, adica exact
@@ -61,6 +65,7 @@ func _ready() -> void:
 	var landmark_dist := 30.0
 	var train_at := -1.0
 	var bridge_at := -1.0
+	var typhoon_at := -1.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -76,6 +81,8 @@ func _ready() -> void:
 			train_at = float(arg.trim_prefix("--train-at="))
 		elif arg.begins_with("--bridge-at="):
 			bridge_at = float(arg.trim_prefix("--bridge-at="))
+		elif arg.begins_with("--typhoon-at="):
+			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -94,6 +101,8 @@ func _ready() -> void:
 		_set_train_phase(track, train_at)
 	if bridge_at >= 0.0:
 		_set_bridge_phase(track, bridge_at)
+	if typhoon_at >= 0.0:
+		_set_typhoon_phase(track, typhoon_at)
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:
@@ -259,6 +268,28 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train._physics_process(0.0)
 		found += 1
 	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+
+
+## Muta tromba intr-un moment ales din traversarea ei.
+##
+## Fractia e din ciclul complet dus-intors: 0.00 o pune pe axa soselei venind
+## dinspre `travel_dir`, 0.25 la capatul maturarii, 0.50 din nou pe axa in sens
+## invers. Fara steagul asta, captura o prinde la inceputul ciclului — adica taman
+## in mijlocul drumului, ceea ce e util, dar niciodata nu poti fotografia
+## traversarea in curs.
+##
+## `_apply_cycle(0.0)` cu delta zero: aseaza pozitia si inclinarea fara sa mai
+## invarta palnia cu un pas de care nu are nevoie o poza.
+func _set_typhoon_phase(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.get_children():
+		var typhoon := node as TyphoonHazard
+		if typhoon == null:
+			continue
+		typhoon.set("_time", TyphoonHazard.PERIOD * clampf(at, 0.0, 0.999))
+		typhoon.call("_apply_cycle", 0.0)
+		found += 1
+	print("--typhoon-at=%.2f: %d trombe mutate in ciclu" % [at, found])
 
 
 ## Muta podul mobil intr-un moment ales din ciclul lui.

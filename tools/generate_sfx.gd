@@ -32,6 +32,8 @@ func _init() -> void:
 	_save("train_horn", _train_horn())
 	# Clopotul de trecere la nivel: ascutit, ca sa taie prin motor.
 	_save("crossing_bell", _tone(0.18, 1050.0, 14.0))
+	# Vuietul trombei: bucla lunga, larga, fara nicio inaltime recognoscibila.
+	_save("typhoon_roar", _typhoon_roar())
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -136,6 +138,47 @@ func _skid_loop() -> PackedFloat32Array:
 		lp = lp * 0.6 + (rng.randf() * 2.0 - 1.0) * 0.4
 		var whine := sin(TAU * 900.0 * t) * 0.12 # 900*0.4=360 cicluri intregi
 		out[i] = (lp * 0.5 + whine) * 0.55
+	return out
+
+## Vuietul mini-typhoon-ului: bucla de 2 s care nu are inaltime.
+##
+## Doua straturi peste zgomot alb, si niciunul dintre ele nu e o nota:
+##   - un filtru trece-jos foarte lent (`lp`) da huruitul de fond;
+##   - unul mai putin lent (`hp` scazut din zgomotul brut) da suieratul.
+## Amestecul lor pulseaza cu 0.7 Hz, ca sa nu para o statica de radio.
+##
+## FARA SINUSOIDA, si asta e important. Toate celelalte bucle din fisier au un
+## ton in ele (motorul are saw-ul, scrasnetul are 900 Hz). O tromba cu ton
+## citeste ca sirena sau ca turbina de avion — adica exact ca un obiect
+## FABRICAT, iar asta e singurul hazard de pe pista care trebuie sa fie natural.
+##
+## Capetele se suprapun in fondu (ultimele 15%), altfel bucla pocneste la
+## reluare: zgomotul e aleator, deci ultima esantion si prima nu au nicio sansa
+## sa se potriveasca. La celelalte bucle problema se rezolva alegand frecvente cu
+## cicluri intregi in durata — aici n-ai ce numara, deci se rezolva la montaj.
+func _typhoon_roar() -> PackedFloat32Array:
+	const DUR := 2.0
+	var n := int(RATE * DUR)
+	var raw := PackedFloat32Array()
+	raw.resize(n)
+	var lp := 0.0
+	var mid := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var white := rng.randf() * 2.0 - 1.0
+		lp = lp * 0.985 + white * 0.015      # huruit
+		mid = mid * 0.86 + white * 0.14      # suierat
+		var swell := 0.75 + 0.25 * sin(TAU * 0.7 * t)
+		raw[i] = (lp * 7.0 + (mid - lp) * 0.45) * swell * 0.5
+	# Fondu-incrucisat peste cusatura.
+	var fade := int(n * 0.15)
+	var out := PackedFloat32Array()
+	out.resize(n - fade)
+	for i in out.size():
+		out[i] = raw[i]
+	for k in fade:
+		var w := float(k) / float(fade)
+		out[k] = raw[k] * w + raw[out.size() + k] * (1.0 - w)
 	return out
 
 func _tone(dur: float, freq: float, decay: float) -> PackedFloat32Array:

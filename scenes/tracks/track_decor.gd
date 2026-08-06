@@ -121,7 +121,8 @@ const BRAKING_MIN_OFFSET: float = 8.0
 ## cactusi. Cat timp ambele veneau din acelasi sir "desert", nu se putea una
 ## fara cealalta.
 static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
-		mat_provider: Callable, props: String = "desert") -> Node3D:
+		mat_provider: Callable, props: String = "desert",
+		blockers: Array = []) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Decor"
 	# Un singur nod misca toata vegetatia. Se pune primul, ca _add_scatter sa-l
@@ -132,7 +133,7 @@ static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
 	if sampler.point_count() == 0:
 		return root
 	if mode == "bands":
-		_build_bands(root, sampler, seed_value, mat_provider, props)
+		_build_bands(root, sampler, seed_value, mat_provider, props, blockers)
 	else:
 		_build_scattered(root, sampler, seed_value, mat_provider)
 	# Decorul iese de aici cate un nod per prop, cum a fost mereu. Cine il coace
@@ -144,7 +145,8 @@ static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
 
 ## Benzi paralele cu drumul. Continutul lor vine din `props`, nu de aici.
 static func _build_bands(root: Node3D, sampler: TrackSideSampler,
-		seed_value: int, mat_provider: Callable, props: String) -> void:
+		seed_value: int, mat_provider: Callable, props: String,
+		blockers: Array = []) -> void:
 	# Evidenta stancilor SOLIDE deja asezate (x, z, raza siluetei). Traverseaza
 	# toate benzile fiindca un buzunar se poate forma si intre benzi.
 	var solids: Array[Vector3] = []
@@ -180,11 +182,13 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 				continue
 			if not _allowed(spec, band):
 				continue
+			if _inside_blocker(spec.position, blockers):
+				continue
 			_place_band_prop(container, spec, band, rng, mat_provider, props,
-				false, sampler, solids)
+				false, sampler, solids, blockers)
 			if rng.randf() < clump:
 				_place_satellites(container, sampler, spec, band, rng, mat_provider,
-					props, solids)
+					props, solids, blockers)
 				skip = 2
 
 
@@ -209,11 +213,53 @@ const SOLID_GAP: float = 2.6
 ## Argumentul `shoulder` pentru _add_canyon_rock: unde e drumul si incotro e
 ## afara. Gol daca n-avem sampler (apelanti vechi) — atunci regula nu se aplica.
 static func _shoulder(sampler: TrackSideSampler, spec: TrackDecorSpec,
-		solids: Array[Vector3]) -> Dictionary:
+		solids: Array[Vector3], blockers: Array = []) -> Dictionary:
 	if sampler == null:
 		return {}
 	return {"sampler": sampler, "out": spec.normal_out, "gap": HUG_SHOULDER,
-		"solids": solids}
+		"solids": solids, "blockers": blockers}
+
+
+## Punctul cade in interiorul unei amprente de faleza?
+##
+## Ce rezolva: falezele si decorul se construiesc independent, iar samplerul
+## aseaza prop-urile pe cota terenului fara sa stie ca acolo sta deja un perete
+## de 10 m. Masurat pe Dunele (tools/probe_decor_overlap.gd), 313 piese ajungeau
+## INTEGRAL in interiorul unei sectiuni de faleza — tufe, pietricele, chiar si
+## stanci mici.
+##
+## Efectul nu e "nu se vad, deci nu conteaza". O piesa ingropata are fete care
+## cad exact pe suprafata gazdei, iar doua suprafete coplanare se bat pe
+## adancime: la 60 km/h asta citeste ca peretele ar fi transparent si s-ar vedea
+## ceva prin el. Vegetatia agraveaza, fiindca materialul ei e fara backface
+## culling (Palette.foliage_material) — deci se vede si pe dos.
+##
+## Dreptunghi orientat, nu cerc: o sectiune are 15 m latime si ~6 m adancime, iar
+## un cerc circumscris ei ar goli o raza de 8 m in jurul fiecarui perete, adica
+## exact fasia de nisip pe care decorul trebuie s-o umple.
+##
+## `EDGE_KEEP` UMFLA dreptunghiul, nu il strange, si asta e o corectie masurata:
+## testul se face pe punctul slotului, dar piesa care ajunge acolo are si ea
+## marime. Cu marginea stransa cu 0.4 m mai ramaneau 93 de piese ingropate, mai
+## ales tufe si stanci mici a caror geometrie intra in perete desi originea lor
+## statea in afara. Umflata cu 0.7 m, un prop cu raza tipica de sub un metru nu
+## mai are cum sa ajunga cu jumatate din el in piatra.
+##
+## Nu mai mult: piesele lipite de BAZA peretelui sunt bune, ascund linia de
+## contact dintre stanca si nisip. Se taie ce intra in perete, nu ce se sprijina
+## de el.
+const EDGE_KEEP: float = -0.7
+
+static func _inside_blocker(pos: Vector3, blockers: Array) -> bool:
+	for b: Dictionary in blockers:
+		var d: Vector3 = pos - (b["pos"] as Vector3)
+		d.y = 0.0
+		if absf(d.dot(b["right"])) > float(b["hx"]) - EDGE_KEEP:
+			continue
+		if absf(d.dot(b["fwd"])) > float(b["hz"]) - EDGE_KEEP:
+			continue
+		return true
+	return false
 
 
 ## Regulile de siguranta, citite din steagurile pe care le-a calculat samplerul.
@@ -247,7 +293,7 @@ static func _allowed(spec: TrackDecorSpec, band: Dictionary) -> bool:
 static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
 		spec: TrackDecorSpec, band: Dictionary, rng: RandomNumberGenerator,
 		mat_provider: Callable, props: String,
-		solids: Array[Vector3] = []) -> void:
+		solids: Array[Vector3] = [], blockers: Array = []) -> void:
 	var count := rng.randi_range(CLUSTER_MIN, CLUSTER_MAX)
 	# Marginea benzii, in distanta fata de AXA drumului. Un satelit nu are voie
 	# sa treaca de ea, oricat de norocos ar fi unghiul lui.
@@ -290,8 +336,10 @@ static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
 		sat.is_elevated = spec.is_elevated
 		sat.is_apex = spec.is_apex
 		sat.is_braking = spec.is_braking
+		if _inside_blocker(sat.position, blockers):
+			continue
 		_place_band_prop(parent, sat, band, rng, mat_provider, props, true,
-			sampler, solids)
+			sampler, solids, blockers)
 
 
 ## Ce se aseaza intr-o banda. Sateliti = piese mai mici decat propul principal.
@@ -299,7 +347,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat_provider: Callable,
 		props: String, satellite: bool = false,
 		sampler: TrackSideSampler = null,
-		solids: Array[Vector3] = []) -> void:
+		solids: Array[Vector3] = [], blockers: Array = []) -> void:
 	if props == "island":
 		# Fractia se transmite fiindca UN prop insular depinde de sector
 		# (trestia de zahar). Restul o ignora — vezi CANE_FRAC_MIN.
@@ -330,7 +378,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 			# ramane fantoma, ca inainte.
 			if rng.randf() < 0.34 and _add_canyon_rock(
 					parent, pos, rng, "S", not satellite, 0.75, 1.35, 0.85, 1.25,
-					_shoulder(sampler, spec, solids)):
+					_shoulder(sampler, spec, solids, blockers)):
 				return
 			# Jumatate din rest primeste frunzis din kit in locul scatter-ului,
 			# din exact acelasi motiv pentru care s-au adaugat stancile mici:
@@ -372,7 +420,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 					_add_cactus(parent, pos, rng, mat_provider)
 			elif roll < 0.80:
 				if not _add_canyon_rock(parent, pos, rng, "M", true,
-						0.80, 1.30, 0.85, 1.25, _shoulder(sampler, spec, solids)):
+						0.80, 1.30, 0.85, 1.25, _shoulder(sampler, spec, solids, blockers)):
 					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 						true, mat_provider)
 			elif roll < 0.836:
@@ -413,7 +461,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 			var roll2 := rng.randf()
 			if satellite or roll2 < 0.30:
 				if not _add_canyon_rock(parent, pos, rng, "M", not satellite,
-						0.80, 1.30, 0.85, 1.25, _shoulder(sampler, spec, solids)):
+						0.80, 1.30, 0.85, 1.25, _shoulder(sampler, spec, solids, blockers)):
 					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
 						true, mat_provider)
 			elif roll2 < 0.72:
@@ -421,7 +469,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 				# canion ii iau locul cu aceeasi intentie (silueta dominanta in
 				# fundalul apropiat), dar pe textura de roca si cu trepte reale.
 				if not _add_canyon_rock(parent, pos, rng, "L", true,
-						0.85, 1.25, 0.85, 1.25, _shoulder(sampler, spec, solids)):
+						0.85, 1.25, 0.85, 1.25, _shoulder(sampler, spec, solids, blockers)):
 					_add_cluster(parent, pos, rng, ["Cluster_L1"], true,
 						mat_provider)
 			elif roll2 < 0.86:
@@ -985,6 +1033,11 @@ static func _fit_shoulder(model: Node3D, pos: Vector3,
 	var moved := pos + out.normalized() * (need - have + SHOULDER_EPS)
 	moved.y = sampler.ground_y(moved.x, moved.z)
 	if sampler.clearance_at(moved) < need - SHOULDER_EPS:
+		return [pos, false]
+	# Impingerea e SPRE exterior, adica exact acolo unde stau falezele (1.2-6 m
+	# de asfalt). Fara verificarea asta, regula umarului muta stancile din banda
+	# lipita fix in interiorul peretelui de canion.
+	if _inside_blocker(moved, shoulder.get("blockers", [])):
 		return [pos, false]
 	return _claim(moved, radius, solids)
 

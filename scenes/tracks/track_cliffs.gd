@@ -12,6 +12,9 @@ extends RefCounted
 
 const MODEL_PATH: String = "res://assets/models/cliff_wall.glb"
 
+## Cheia sub care falezele isi publica amprentele pe nodul-radacina.
+const FOOTPRINT_META: StringName = &"cliff_footprints"
+
 ## Pasul de asezare. Sectiunile au 15m latime, deci se suprapun 1m. Suprapunerea
 ## nu e cosmetica: doua cutii de coliziune care se ating exact la muchie lasa o
 ## fisura in care Jolt agata masina.
@@ -37,6 +40,17 @@ const OFFSET_INNER: float = 4.5
 ## Cat se ingroapa fiecare sectiune in nisip. Fara asta se vede linia de contact
 ## si se rupe iluzia de stanca iesita din sol.
 const SINK: float = 0.6
+## Cat trebuie sa respire COLTURILE fetei fata de marginea asfaltului.
+##
+## Mult mai putin decat OFFSET_OUTER, si intentionat: asta nu e o retragere
+## estetica, e ultima plasa de siguranta impotriva unui perete peste sosea.
+## Pusa la 1.2 m ar impinge in afara jumatate din canion pe fiecare viraj, adica
+## ar strica exact senzatia de defileu pentru o problema care apare la cinci
+## sectiuni din o suta treizeci.
+const FACE_CLEAR: float = 0.3
+## Cat se poate deplasa un colt de sectiune din inclinarea de "asezat de mana"
+## (yaw +-0.10 rad pe un colt aflat la ~8 m de centru).
+const YAW_SWING: float = 0.85
 ## Degajarea in jurul unui landmark hero. Style_bible §7 cere teren gol IN FATA
 ## landmark-urilor majore, iar „in fata" e o directie, nu o raza: silueta se
 ## vede de catre soferul care SE APROPIE. Ce sta dupa el, in oglinda, nu ascunde
@@ -151,6 +165,14 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 		landmarks: Array[Vector3], gorges: Array[Vector2] = []) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Cliffs"
+	# Amprentele sectiunilor asezate, publicate pe nodul-radacina ca metadata.
+	# Decorul se construieste DUPA faleze si le citeste de aici ca sa nu-si
+	# planteze tufele in interiorul peretelui — vezi TrackDecor.build.
+	#
+	# Metadata, si nu inca o valoare de retur: `build` intoarce un nod, iar cine
+	# nu are treaba cu amprentele nu trebuie sa afle ca exista.
+	var prints: Array[Dictionary] = []
+	root.set_meta(FOOTPRINT_META, prints)
 	if not enabled or not ResourceLoader.exists(MODEL_PATH):
 		return root
 
@@ -355,6 +377,55 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		# din duna, nu sa stea pe ea.
 		sink = SINK * 2.2
 	var pos := spec.position + spec.normal_out * (extra + half_depth)
+	# CORECTIA DE COARDA. Toata asezarea de pana aici lucreaza cu MIJLOCUL fetei
+	# sectiunii. O sectiune are insa 15 m latime si e dreapta, iar marginea
+	# drumului e curba: pe interiorul unui viraj, capetele fetei taie coltul si
+	# ajung peste asfalt chiar daca mijlocul sta cuminte la 1.2 m. Sagitta unei
+	# coarde de 15 m pe o raza de 25 m e ~1.1 m — masurat pe Dunele, cinci
+	# sectiuni intrau peste sosea, una cu 4.26 m.
+	#
+	# Se verifica deci COLTURILE fetei, nu centrul, si se impinge sectiunea in
+	# afara pana cand si ele respira. Iterativ, fiindca impingerea muta coltul si
+	# raspunsul se schimba; trei pasi ajung, iar peste ei renuntam si lasam cum e
+	# (mai bine un colt de 20 cm peste margine decat un perete impins la infinit
+	# pe o geometrie pe care n-am prevazut-o).
+	# Se testeaza TOATE PATRU colturile amprentei, nu doar cele doua din fata:
+	# pistele se auto-intersecteaza (Dunele trece la ~40 m de ea insasi), iar o
+	# sectiune adanca de 7 m poate sta cuminte fata de bucla ei si sa ajunga cu
+	# SPATELE peste cealalta. `clearance_at` masoara distanta pana la cea mai
+	# apropiata bucla, deci prinde ambele cazuri fara sa stie despre ele.
+	#
+	# `face_half` se umfla cu bataia yaw-ului: inclinarea de "asezat de mana" se
+	# aplica mai jos, pe nodul-model, dupa ce pozitia e deja decisa. Un colt la
+	# ~8 m de centru se deplaseaza cu pana la 0.8 m la +-0.10 rad, si fara marja
+	# asta corectia ar fi masurat o sectiune care nu exista inca.
+	var box := Track.model_aabb(model)
+	var face_half := box.size.x * 0.5 * scale_factor + YAW_SWING
+	var basis_now := Basis.looking_at(-spec.normal_out, Vector3.UP)
+	# Se PASTREAZA cea mai buna pozitie incercata, nu ultima. Impingerea "in
+	# afara" nu e monoton buna: pe portiunile unde pista trece pe langa ea insasi
+	# (Dunele, la ~40 m), a te departa de o bucla inseamna a te apropia de
+	# cealalta, si trei pasi la rand pot inrautati situatia — masurat, o sectiune
+	# a ajuns de la 4.26 m peste asfalt la 6.34 m.
+	var best_pos := pos
+	var best_clear := _face_clearance(pos, basis_now, face_half, half_depth,
+		sampler)
+	for _step in 3:
+		if best_clear >= sampler.half_width() + FACE_CLEAR:
+			break
+		pos += spec.normal_out * (sampler.half_width() + FACE_CLEAR - best_clear)
+		var got := _face_clearance(pos, basis_now, face_half, half_depth, sampler)
+		if got > best_clear:
+			best_clear = got
+			best_pos = pos
+	pos = best_pos
+	# Daca nici asa nu incape, sectiunea NU se aseaza. Un gol in perete se vede;
+	# un perete peste asfalt se loveste. Din 130 de sectiuni pe Dunele, cazul
+	# apare de cateva ori, si mereu acolo unde bucla vecina inchide oricum
+	# orizontul.
+	if best_clear < sampler.half_width():
+		model.queue_free()
+		return
 	# Dunele se auto-intersecteaza la ~40 m, deci orice piesa impinsa lateral
 	# poate ateriza pe cealalta bucla a soselei. Slotul a fost verificat la 1.2 m
 	# de margine; dupa retragere e alt punct, deci se verifica din nou. Fara asta,
@@ -385,6 +456,14 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	var xform := Transform3D(
 		basis.scaled(Vector3(scale_factor, scale_factor * squash, scale_factor)),
 		pos)
+
+	# Amprenta, pentru decorul care se aseaza dupa noi. Se publica DUPA ce
+	# pozitia s-a stabilizat (corectia de coarda de mai sus o poate fi mutat).
+	if root.has_meta(FOOTPRINT_META):
+		(root.get_meta(FOOTPRINT_META) as Array).append({
+			"pos": pos, "right": basis_now.x, "fwd": basis_now.z,
+			"hx": face_half, "hz": half_depth,
+		})
 
 	var holder := Node3D.new()
 	root.add_child(holder)
@@ -427,7 +506,7 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# dupa un fly-off ratat. Creasta de umplere primeste, fiindca e la 6 m si
 	# acolo exista deja stanci cu corp fizic din banda `mid`.
 	if body != null:
-		_add_collision(body, pick["node"], scene, xform)
+		_add_collision(body, pick["node"], scene, xform, mirror)
 	# Banda de contact are rost doar unde ochiul chiar ajunge la baza. La 30 m,
 	# doua pietricele de 30 cm sunt triunghiuri platite degeaba.
 	if kind != Kind.TERRACE:
@@ -565,9 +644,41 @@ static func _variant_for(height: float, rng: RandomNumberGenerator) -> Dictionar
 	return pool[rng.randi_range(0, pool.size() - 1)]
 
 
+## Cat de departe de cea mai apropiata bucla de sosea sta cel mai expus colt al
+## amprentei. Toate patru, fiindca o sectiune poate atinge drumul si cu spatele.
+static func _face_clearance(pos: Vector3, basis: Basis, face_half: float,
+		depth_half: float, sampler: TrackSideSampler) -> float:
+	var worst := 1e12
+	for side: float in [-1.0, 1.0]:
+		for front: float in [-1.0, 1.0]:
+			var corner := pos + basis * Vector3(
+				side * face_half, 0.0, front * depth_half)
+			worst = minf(worst, sampler.clearance_at(corner))
+	return worst
+
+
 ## Scoate o singura varianta din GLB si anuleaza offsetul ei din fisier
 ## (variantele sunt exportate toate in origine, dar importul poate pastra
 ## pozitii). Restul nodurilor se elibereaza.
+##
+## `remove_child` INAINTE de `queue_free`, si asta a fost un bug de fond, nu o
+## curatenie: eliberarea e AMANATA pana la sfarsitul cadrului, deci pana atunci
+## toate cele 24 de variante sunt inca in container. Iar tot ce citeste modelul
+## in acelasi cadru foloseste `_first_mesh`, care intoarce primul mesh gasit —
+## adica mereu prima varianta din GLB, indiferent ce s-a cerut.
+##
+## Consecintele, amandoua vizibile in joc si masurate:
+##   - `_add_collision` construia forma din primul mesh, deci TOATE sectiunile
+##     de faleza aveau coliziunea variantei A. Adancimea raportata era 4.49 m
+##     pentru fiecare, desi variantele au intre 5.0 si 7.2 m.
+##   - `_half_depth` intorcea tot adancimea variantei A, deci asezarea folosea
+##     un offset gresit: o sectiune mai adanca ajungea cu pana la 1.35 m mai
+##     aproape de sosea decat s-a cerut, uneori PESTE asfalt.
+## Impreuna, astea sunt exact "stanci care se intercaleaza cu drumul si prin
+## care putem trece": peretele vazut si peretele simtit nu erau acelasi obiect.
+##
+## Acelasi tipar e documentat si in TrackDecor.pick_from_glb, unde a fost prins
+## prima oara — aici scapase.
 static func _extract(scene: PackedScene, node_name: String) -> Node3D:
 	var container := scene.instantiate() as Node3D
 	var kept: Node3D = null
@@ -575,6 +686,7 @@ static func _extract(scene: PackedScene, node_name: String) -> Node3D:
 		if child.name == node_name:
 			kept = child
 		else:
+			container.remove_child(child)
 			child.queue_free()
 	if kept == null:
 		container.queue_free()
@@ -583,28 +695,63 @@ static func _extract(scene: PackedScene, node_name: String) -> Node3D:
 	return container
 
 
-## Cutie convexa per sectiune, construita din nodul `Cliff_X_col` din GLB.
+## Poliedru convex per sectiune, construit din mesh-ul VIZUAL.
 ##
-## Nu un trimesh din mesh-ul vizual: ar fi ~180 de triunghiuri de coliziune per
-## sectiune, ori ~70 de sectiuni, si fiecare crapatura din silueta ar deveni un
-## colt in care se agata masina. Cutia urmareste doar fata dinspre drum, unde se
-## produce de fapt contactul.
+## Aici a stat pana acum o cutie construita din nodul `Cliff_X_col` din GLB, cu
+## motivarea ca "urmareste doar fata dinspre drum, unde se produce de fapt
+## contactul". Masurat (tools/probe_cliff_depth.gd), premisa era falsa: proxy-ul
+## `_col` e centrat pe origine ca si vizualul, doar mai subtire. Nu urmarea fata
+## dinspre drum, urmarea MIJLOCUL — deci fata lui statea cu 1.35-1.60 m in
+## spatele peretelui pe care il vezi, pe toate cele zece variante:
+##
+##   varianta   fata vizuala   fata _col   diferenta
+##   Cliff_H        3.58          2.00       1.58
+##   Cliff_J        3.59          1.80       1.79
+##   Cliff_I        3.05          1.45       1.60
+##
+## Adica masina intra un metru si jumatate in stanca inainte sa fie oprita, pe
+## fiecare perete de canion din joc. Exact simptomul raportat: "stanci care se
+## intercaleaza cu drumul si prin ele putem trece".
+##
+## Obiectia din nota veche ramane valida si e respectata: un TRIMESH din vizual
+## ar fi ~180 de triunghiuri per sectiune si fiecare crapatura din silueta ar
+## deveni un colt in care se agata masina. Dar un HULL CONVEX din acelasi mesh
+## n-are niciuna dintre probleme — e o singura forma, cu cateva zeci de plane, si
+## e convex prin definitie, deci nu are crapaturi. Umple crestaturile dintre
+## trepte, ceea ce langa sol chiar e ce vrei: atingi treapta cea mai iesita si
+## aluneci pe langa ea. Acelasi rationament ca la stancile de canion
+## (TrackDecor.add_hull_collision).
 static func _add_collision(body: StaticBody3D, node_name: String,
-		scene: PackedScene, xform: Transform3D) -> void:
-	var col_source := _extract(scene, node_name + "_col")
-	if col_source == null:
+		scene: PackedScene, xform: Transform3D, mirror: bool = false) -> void:
+	var source := _extract(scene, node_name)
+	if source == null:
 		return
-	var mi := _first_mesh(col_source)
+	var mi := _first_mesh(source)
 	if mi == null:
-		col_source.queue_free()
+		source.queue_free()
 		return
+	var hull := mi.mesh.create_convex_shape()
+	if mirror and hull != null:
+		# Coliziunea URMEAZA oglindirea vizualului. Nota veche spunea ca n-o
+		# urmeaza fiindca "e o cutie aproape simetrica, iar oglindirea ei poate
+		# doar sa creeze pene intre sectiuni" — adevarat pentru cutia `_col`,
+		# fals pentru un hull din silueta reala, care e vizibil asimetric.
+		# Masurat: fara oglindire ramaneau sectiuni cu 0.40-0.57 m de perete in
+		# afara colizorului, exact pe latura intoarsa.
+		#
+		# Se rastoarna PUNCTELE, nu transformarea nodului: o baza cu determinant
+		# negativ pe o forma de coliziune e teren alunecos in orice motor.
+		var pts := hull.points
+		for i in pts.size():
+			pts[i] = Vector3(-pts[i].x, pts[i].y, pts[i].z)
+		hull.points = pts
 	var shape := CollisionShape3D.new()
-	shape.shape = mi.mesh.create_convex_shape()
+	shape.shape = hull
 	# Acelasi transform ca nodul vizual — mai putin inclinarea de pe X/Z, care sta
 	# pe copilul-model, nu aici.
 	body.add_child(shape)
 	shape.transform = xform
-	col_source.queue_free()
+	source.queue_free()
 
 
 ## Jumatate din adancimea modelului, in metri. Modelele sunt exportate cu fata

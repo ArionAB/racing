@@ -585,9 +585,18 @@ func _punch_scale(target: Vector3) -> void:
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _update_effects(delta: float) -> void:
+	# Suprafata de sub roti, aflata O DATA pe cadru: raspunsul il cer si urmele
+	# de drift, si praful, si dara de rulare.
+	var on_road := track != null \
+		and track.is_on_road(road_index, global_position)
+	var loose := _on_loose_ground(on_road)
 	if is_drifting:
 		_drift_particles.emitting = true
-		_drop_skid_marks(delta)
+		# Cauciuc ars doar pe suprafata TARE. Pe pamant derapajul se vede in dara
+		# de rulare si in norul de praf; o pata neagra lucioasa acolo ar fi
+		# asfaltul care se vede prin drum.
+		if not loose:
+			_drop_skid_marks(delta)
 		if not _skid_audio.playing:
 			_skid_audio.play()
 	else:
@@ -601,7 +610,8 @@ func _update_effects(delta: float) -> void:
 	elif turbo_charge < 0.95:
 		_turbo_full_latch = false
 	_boost_particles.emitting = is_boosting
-	_update_dust()
+	_update_dust(on_road, loose)
+	_drop_trail(delta, loose)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
 	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
 	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
@@ -647,35 +657,124 @@ func _drop_skid_marks(delta: float) -> void:
 	while skid_parent.get_child_count() > 160:
 		skid_parent.get_child(0).free()
 
-## Praful se ridica doar cand chiar zgarii solul: roti pe pamant, in afara
-## asfaltului, si cu viteza. Fara pragul de viteza, o masina oprita pe nisip ar
-## fumega la nesfarsit — si aia e fix imaginea care strica iluzia in loc s-o
-## construiasca.
+## Praful se ridica doar cand chiar zgarii solul: roti pe teren afanat si cu
+## viteza. Fara pragul de viteza, o masina oprita pe nisip ar fumega la
+## nesfarsit — si aia e fix imaginea care strica iluzia in loc s-o construiasca.
 const DUST_MIN_SPEED: float = 6.0
 
-## Praful ia culoarea solului temei, o data, cand masina afla pe ce pista e.
-var _dust_tinted: bool = false
+## Solul de sub roti e AFANAT — nisip, pamant? De asta atarna si praful, si
+## urmele lasate rulind.
+##
+## Pe majoritatea pistelor raspunsul e "doar in afara soselei": asfaltul e tare,
+## marginea nu. Pe o pista cu drum de pamant (Track.road_surface) raspunsul e
+## "peste tot", si asta e chiar rostul ei — nu mai exista panglica tare pe care
+## sa te odihnesti, tot turul scoate praf.
+func _on_loose_ground(on_road: bool) -> bool:
+	if track == null or not is_on_floor():
+		return false
+	return track.road_is_loose() or not on_road
 
-func _update_dust() -> void:
-	if _dust_particles == null:
+## Culorile prafului, coapte o data cand masina afla pe ce pista e: una a
+## terenului, una a soselei. Cat timp soseaua era asfalt exista o singura
+## suprafata pe care se ridica praf, deci si o singura culoare.
+var _dust_ground_color: Color = Color.BLACK
+var _dust_road_color: Color = Color.BLACK
+var _dust_colors_ready: bool = false
+## Ce culoare e pusa ACUM pe particule: -1 niciuna, 0 teren, 1 sosea.
+var _dust_source: int = -1
+
+func _update_dust(on_road: bool, loose: bool) -> void:
+	if _dust_particles == null or track == null:
 		return
-	if not _dust_tinted and track != null:
-		_dust_tinted = true
-		# Mai INCHIS decat solul, nu mai deschis. Prima versiune folosea
-		# lightened(0.22) si ProbeFx a aratat rezultatul: alb pal pe nisip
-		# luminat = invizibil. Contrastul care se citeste ca praf e cel al unei
-		# umbre usoare.
-		_dust_particles.color = track.theme_ground_tint.darkened(0.12)
-	var live := track != null and is_on_floor() \
-		and not track.is_on_road(road_index, global_position) \
-		and horizontal_speed() > DUST_MIN_SPEED
+	if not _dust_colors_ready:
+		_dust_colors_ready = true
+		# Praful de pe TEREN: mai INCHIS decat solul, nu mai deschis. Prima
+		# versiune folosea lightened(0.22) si ProbeFx a aratat rezultatul: alb pal
+		# pe nisip luminat = invizibil. Contrastul care se citeste ca praf e cel
+		# al unei umbre usoare.
+		_dust_ground_color = track.theme_ground_tint.darkened(0.12)
+		# Praful de pe SOSEA merge exact invers, din acelasi motiv: contrastul,
+		# nu luminozitatea. Drumul de pamant e cea mai inchisa suprafata de sub
+		# roti, deci un nor si mai inchis peste el ar fi invizibil la fel de sigur
+		# cum era cel alb pe nisip.
+		_dust_road_color = track.road_dust_color().lightened(0.18)
+	var live := loose and horizontal_speed() > DUST_MIN_SPEED
 	_dust_particles.emitting = live
 	if not live:
 		return
+	var src := 1 if on_road else 0
+	if src != _dust_source:
+		_dust_source = src
+		var tint := _dust_road_color if src == 1 else _dust_ground_color
+		_dust_particles.color = tint
+		# Si fumul de drift: pe pamant nu arde cauciucul, se ridica solul. Gri de
+		# anvelopa peste o dara rosie ar fi singurul lucru din cadru care spune
+		# ca dedesubt e tot asfalt.
+		_drift_particles.color = tint if track.road_is_loose() \
+			else DRIFT_SMOKE_COLOR
 	# Norul creste cu viteza: la 6 m/s e o adiere, la plafon e o dara adevarata.
 	var k := clampf(horizontal_speed() / maxf(max_speed, 1.0), 0.0, 1.0)
 	_dust_particles.initial_velocity_max = lerpf(2.5, 7.0, k)
 	_dust_particles.lifetime = lerpf(0.75, 1.35, k)
+
+
+## Cat de des se depune o urma de rulare, in metri parcursi. 2.2 m cu placute de
+## 2.6 m (SandTrail.MARK_SIZE) inseamna suprapunere, deci dara e continua.
+const TRAIL_SPACING: float = 2.2
+## Sub viteza asta nu se depune nimic: o masina care abia se misca prin nisip tot
+## lasa urme, una oprita nu — si mai ales nu vrem sa tapetam gridul de start.
+const TRAIL_MIN_SPEED: float = 3.0
+## Cat de sus peste sol sta placuta. Mai mult decat urmele coapte in pista
+## (0.025), ca sa treaca peste ele fara z-fighting.
+const TRAIL_LIFT: float = 0.05
+
+## Dara de urme lasata rulind pe teren afanat. Creata la prima nevoie: pe o pista
+## cu asfalt care nu iese niciodata de pe drum nu se aloca nimic.
+var _trail: SandTrail
+var _trail_accum: float = 0.0
+
+## Urme de rulare — DIFERITE de urmele de drift, si asta e tot rostul lor.
+##
+## Urma de drift e cauciuc ars pe asfalt: apare doar cu handbrake-ul tras, e
+## neagra si dispare in 8 secunde. Urma de rulare e sant in pamant moale: apare
+## din simplul fapt ca ai trecut pe acolo si ramane pana o rescrie inelul. Cele
+## doua nu apar niciodata pe aceeasi suprafata (vezi _update_effects).
+func _drop_trail(delta: float, loose: bool) -> void:
+	if not loose:
+		return
+	var speed := horizontal_speed()
+	if speed < TRAIL_MIN_SPEED:
+		return
+	_trail_accum += speed * delta
+	if _trail_accum < TRAIL_SPACING:
+		return
+	_trail_accum = 0.0
+	# Baza urmei sta pe PANTA, nu pe orizontala: y-ul placutei urmeaza normala
+	# solului, iar directia de mers se proiecteaza pe planul ei.
+	var up := get_floor_normal()
+	if up.length_squared() < 0.5:
+		up = Vector3.UP
+	var fwd := -global_transform.basis.z
+	fwd -= up * fwd.dot(up)
+	if fwd.length_squared() < 0.001:
+		return # masina exact perpendiculara pe panta: nu exista "inainte" pe ea
+	fwd = fwd.normalized()
+	var right := fwd.cross(up).normalized()
+	if _trail == null:
+		_trail = SandTrail.new()
+		add_child(_trail)
+	var half_track_w := data.body_width * 0.38 if data != null else 0.85
+	var rear_z := data.body_length * 0.34 if data != null else 1.3
+	# Rotile din SPATE: pe o linie dreapta ele calca peste urma celor din fata,
+	# deci doua fasii, nu patru.
+	var base := global_position - fwd * rear_z + up * TRAIL_LIFT
+	var orientation := Basis(right, up, -fwd)
+	for side: float in [-1.0, 1.0]:
+		_trail.stamp(base + right * half_track_w * side, orientation)
+
+## Fum de cauciuc ars. Pe drum de pamant se inlocuieste cu praful solului —
+## vezi _update_dust.
+const DRIFT_SMOKE_COLOR: Color = Color(0.78, 0.78, 0.8)
 
 func _build_effects() -> void:
 	# Fum de drift, colorat dupa nivelul de boost incarcat.
@@ -691,7 +790,7 @@ func _build_effects() -> void:
 	_drift_particles.gravity = Vector3(0, 1.5, 0)
 	_drift_particles.scale_amount_min = 0.6
 	_drift_particles.scale_amount_max = 1.4
-	_drift_particles.color = Color(0.78, 0.78, 0.8) # fum de cauciuc
+	_drift_particles.color = DRIFT_SMOKE_COLOR
 	# Sfera cu putine laturi, nu cub: particulele-cuburi erau una din cele trei
 	# cauze ale lui "parca am facut racing in Minecraft" (feedback direct).
 	# 24 de triunghiuri bucata, cu segmentele setate — vezi regula din CLAUDE.md.
@@ -715,6 +814,10 @@ func _build_effects() -> void:
 	# 18 mici si palide si sonda vizuala (ProbeFx) a aratat de ce nu le vedea
 	# nimeni: o dara punctata de cuburi, nu un nor.
 	_dust_particles = CPUParticles3D.new()
+	# Nume propriu ca sondele sa-l poata gasi: ProbeFx verifica praful si dara
+	# impreuna, iar pana acum singurul mod de a-l deosebi de fumul de drift era
+	# sa te iei dupa `amount`.
+	_dust_particles.name = "Dust"
 	_dust_particles.position = Vector3(0, 0.12, 1.7)
 	_dust_particles.emitting = false
 	_dust_particles.amount = 26

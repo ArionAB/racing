@@ -20,6 +20,10 @@ const SFX: Dictionary = {
 	&"rock_impact": preload("res://assets/audio/rock_impact.wav"),
 	&"train_horn": preload("res://assets/audio/train_horn.wav"),
 	&"crossing_bell": preload("res://assets/audio/crossing_bell.wav"),
+	# Singurul SFX de hazard care se reda IN BUCLA, nu la eveniment: tromba n-are
+	# un moment in care „se intampla", e acolo tot timpul si volumul ei e ce iti
+	# spune cat de aproape e. Vezi lista de bucle din _ready.
+	&"typhoon_roar": preload("res://assets/audio/typhoon_roar.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.
@@ -42,7 +46,7 @@ func _ready() -> void:
 	_create_bus(&"SFX")
 	_create_bus(&"Engine")
 	apply_volumes()
-	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP]:
+	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP, SFX[&"typhoon_roar"]]:
 		var wav := loop_stream as AudioStreamWAV
 		if wav != null:
 			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD

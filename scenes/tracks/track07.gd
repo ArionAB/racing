@@ -223,6 +223,35 @@ func _ramp_fracs() -> Array[float]:
 	return [0.383]
 
 
+## Mini-typhoon-ul pe coasta de est, pe intrarea catre dreapta de start.
+##
+## Fractia NU e aleasa din ochi, e scoasa din `tools/probe_typhoon.gd --scan`,
+## care claseaza tot turul dupa cat de dreapta e soseaua, cat de departe e de
+## celelalte hazarde, cata panta are si daca maturarea ajunge pe apa. Okinawa e
+## plina — trei rapi, un pod, o rampa, o bariera, o creasta de fly-off, un val si
+## un sat — si scanarea gaseste doar trei ferestre libere in tot turul:
+## 0.03-0.20, 0.44-0.75 si 0.86-0.92.
+##
+## 0.877 e cel mai bun punct din ele, si cifrele spun de ce:
+##   - raza 203 m, cea mai dreapta bucata din orice fereastra libera care nu e
+##     pe o panta. (Cele de 216-219 m sunt fie in sat, fie pe urcarea de 8% la
+##     creasta.) O tromba trebuie VAZUTA venind; pe un viraj de 22 m raza, cat
+##     au majoritatea punctelor libere, decizia n-ar exista.
+##   - panta 0.7%, practic orizontal: cotele aruncarii si ale aterizarii nu sunt
+##     distorsionate de o inclinare a drumului.
+##   - cota 4 m, adica jos, langa mare — palnia se citeste pe cer si pe apa, nu
+##     pe un versant.
+##   - 0.072 de creasta de fly-off (0.805) si 0.098 de val (0.975): ~130 m,
+##     respectiv ~176 m de sosea. Doua hazarde cu ceas lipite nu produc doua
+##     decizii, produc o loterie.
+##
+## Locul in ritmul turului: e ultima intrebare dinaintea dreptei de start, adica
+## exact acolo unde cineva care conduce din memorie a inceput deja sa se
+## gandeasca la turul urmator.
+func _typhoon_fracs() -> Array[float]:
+	return [0.877]
+
+
 ## Bariera mobila pe coasta de vest, inainte de rampa.
 ##
 ## A stat intai la 0.340 (bucla de dupa capul de vest) si apoi la 0.310, si de

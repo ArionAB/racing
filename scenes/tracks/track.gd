@@ -389,6 +389,14 @@ func _hose_fracs() -> Array[float]:
 func _wave_fracs() -> Array[float]:
 	return []
 
+## Trombe de mini-typhoon care ratacesc peste sosea (Okinawa).
+##
+## A treia familie de hazard cu ceas, dupa val si pod, si singura care nu te
+## opreste, nu te uda si nu te impinge: te RIDICA. Vezi antetul lui
+## scenes/hazards/typhoon_hazard.gd pentru de ce merita o familie proprie.
+func _typhoon_fracs() -> Array[float]:
+	return []
+
 ## Excavatoare suplimentare, explicite (pe langa hazardul tematic).
 func _excavator_fracs() -> Array[float]:
 	return []
@@ -579,6 +587,8 @@ func rebuild() -> void:
 		_build_hose(frac)
 	for frac in _wave_fracs():
 		_build_wave_surge(frac)
+	for frac in _typhoon_fracs():
+		_build_typhoon(frac)
 	for frac in _flyoff_fracs():
 		_build_flyoff(frac)
 	for frac in _deflector_fracs():
@@ -3719,6 +3729,40 @@ func _build_wave_surge(frac: float) -> void:
 	wave.phase = fposmod(frac * 2.3, 1.0)
 	add_child(wave)
 	wave.global_position = baked[idx]
+
+## Tromba de mini-typhoon care matura soseaua.
+##
+## Ce ii da pista si ce isi calculeaza singura: aici se hotaraste DOAR unde sta,
+## incotro matura si unde e apa. Cat de sus arunca, cat tine masina in aer si pe
+## unde o aduce inapoi sunt in hazard, fiindca sunt reglaje de feel; cotele
+## terenului sunt aici, fiindca hazardul n-are acces la sampler — aceeasi
+## despartire ca la `TrainHazard.ground_drop` si la pilonii podului.
+func _build_typhoon(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var typhoon := TyphoonHazard.new()
+	typhoon.name = "Typhoon%03d" % idx
+	typhoon.road_half_width = half_width
+	# Directia de maturat: perpendicular pe sosea. Ca la val, nu se alege la zar —
+	# o tromba vine dinspre larg, nu din mijlocul insulei.
+	typhoon.travel_dir = _side_at(idx)
+	# Maturarea trece de ambele margini ale asfaltului cu o marja buna: tromba
+	# trebuie sa se DEPARTEZE vizibil, nu doar sa iasa de pe banda. Cu 3.2 x
+	# jumatatea de latime, capetele cad la ~22 m de axa, adica pe apa de o parte
+	# si pe plaja de cealalta — acolo unde o vezi cum ridica altceva.
+	typhoon.sweep = half_width * 3.2
+	typhoon.phase = fposmod(frac * 2.3, 1.0)
+	# Linia apei, in spatiul PISTEI si nu al trombei — vezi nota de pe
+	# TyphoonHazard.water_y pentru de ce e altfel decat la podul mobil.
+	typhoon.water_y = _sampler.mean_road_y() + sea_level_offset
+	# Pozitia INAINTE de add_child, nu dupa. `add_child` declanseaza `_ready`, iar
+	# `_ready` isi retine punctul de ancorare — asezat dupa, ancora ar fi ramas la
+	# originea pistei si tromba ar fi maturat acolo. Exact capcana in care a cazut
+	# `_build_wave_surge`, care scrie pozitia dupa si apoi si-o si suprascrie in
+	# fiecare cadru.
+	typhoon.position = baked[idx]
+	add_child(typhoon)
+
 
 ## Popice pe marginile DESCHISE ale pistei (interior la nivelul solului,
 ## unde nu sunt pereti): delimitatoare fizice — stau cuminti pana le lovesti.

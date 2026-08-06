@@ -142,6 +142,10 @@ var _forced_boost: float = 0.0 # rocket start: ardere gratuita, nu goleste bara
 var skid_parent: Node3D
 
 var _visual: Node3D
+## Invartirea de caroserie data de tromba — vezi spin_body().
+var _spin_rate: float = 0.0
+var _spin_left: float = 0.0
+var _spin_angle: float = 0.0
 var _drift_particles: CPUParticles3D
 var _boost_particles: CPUParticles3D
 ## Praf de sub roti cand esti pe nisip. Separat de fumul de drift: fumul iese
@@ -416,6 +420,21 @@ func crush(seconds: float, factor: float, squash: Vector3,
 func apply_sweep(push: Vector3) -> void:
 	velocity += push
 
+## Invarte caroseria in jurul verticalei, `duration` secunde. DOAR VIZUAL.
+##
+## Colizorul si directia de mers raman ale masinii, si asta e deliberat: o
+## rotatie reala a lui `basis` in aer ar insemna ca aterizezi cu botul in alta
+## parte decat merge viteza, adica un tete-a-queue pe care jucatorul nu l-a cerut
+## si nu l-a putut evita. Tromba (`TyphoonHazard`) trebuie sa te SPERIE cat esti
+## in aer, nu sa-ti schimbe traiectoria pe ascuns.
+##
+## Se stinge singura: cine o porneste n-are nimic de curatat, deci nici o
+## repunere sau un abandon la mijlocul zborului nu lasa masina invartindu-se.
+func spin_body(rate_rad_s: float, duration: float) -> void:
+	_spin_rate = rate_rad_s
+	_spin_left = duration
+
+
 ## Aruncat in aer de o creasta de fly-off. SETAM velocity.y, nu adunam: pe sol
 ## el e mereu readus la ~0 de move_and_slide, deci o adunare s-ar pierde.
 func launch(up_speed: float) -> void:
@@ -541,6 +560,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	velocity = -global_transform.basis.z * 9.0
 	is_drifting = false
 	is_boosting = false
+	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
 	_forced_boost = 0.0
 	slip_time = 0.0
 	crush_time = 0.0
@@ -841,6 +861,25 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	var target_pitch := clampf(-velocity.y * 0.02, -0.15, 0.15) * speed_frac
 	_visual.rotation.z = lerpf(_visual.rotation.z, target_roll, 8.0 * delta)
 	_visual.rotation.x = lerpf(_visual.rotation.x, target_pitch, 5.0 * delta)
+	_update_spin(delta)
+
+
+## Invartirea de caroserie, cat tine si pe urma inapoi la zero.
+##
+## Axa Y e singura libera: `_update_visual_tilt` scrie in fiecare cadru pe Z
+## (inclinarea in viraj) si pe X (botul in aer), deci orice ar pune altcineva
+## acolo ar fi sters in cadrul urmator. Pe Y nu scrie nimeni.
+func _update_spin(delta: float) -> void:
+	if _spin_left > 0.0:
+		_spin_left -= delta
+		_spin_angle = wrapf(_spin_angle + _spin_rate * delta, -PI, PI)
+	elif not is_zero_approx(_spin_angle):
+		# Botul se intoarce in fata la aterizare. O masina lasata strambă dupa ce
+		# atinge solul citeste ca bug de rotatie, nu ca urmare a trombei.
+		_spin_angle = lerp_angle(_spin_angle, 0.0, minf(7.0 * delta, 1.0))
+		if absf(_spin_angle) < 0.01:
+			_spin_angle = 0.0
+	_visual.rotation.y = _spin_angle
 
 func _build_visual() -> void:
 	_visual = Node3D.new()

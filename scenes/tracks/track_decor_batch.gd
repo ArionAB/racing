@@ -62,13 +62,45 @@ const CELL_M: float = 250.0
 ## care instanta era tufa e sa fi lasat semnul dinainte.
 const SWAY_META: StringName = &"sway"
 
+## ############################################################################
+## OGLINDIREA NU SUPRAVIETUIESTE COACERII — de aceea exista `_flipped_mesh`.
+##
+## Un prop asezat cu `scale.x = -1` ramane vizibil cat timp e un
+## [MeshInstance3D]: Godot vede determinantul negativ al instantei si intoarce
+## singur sensul fetelor (masurat, tools/MirrorTest.tscn — nota din
+## `Palette` spune corect ca materialul geaman CULL_FRONT de acolo era un al
+## doilea flip, deci o greseala).
+##
+## Pentru instantele dintr-un MULTIMESH compensarea NU se face: transformarea
+## sta in buffer, nu pe nod, iar rasterizatorul primeste triunghiuri cu
+## winding-ul deja rasturnat si le culege ca fete din spate. Masurat pe 4.7
+## (tools/MultiMeshTest.tscn): acelasi quad CULL_BACK e alb ca MeshInstance3D
+## oglindit si NEGRU ca instanta oglindita de multimesh.
+##
+## Efectul in joc, si motivul pentru care sonda asta a fost scrisa: `TrackCliffs`
+## oglindeste jumatate din sectiunile de canion, iar dupa ce coacerea a intrat pe
+## main jumatate din peretii fiecarei piste si-au pierdut fata dinspre sofer. Ce
+## se vedea prin ea era interiorul sectiunii — bugul „stancile sunt goale pe
+## dinauntru". Nu era regresie de asset: exact aceleasi mesh-uri, exact aceleasi
+## pozitii, doar trimise altfel la GPU.
+##
+## Reparatia NU e materialul geaman CULL_FRONT (ar fi corect aici, dar ar adauga
+## un material pe clasa oglindita — exact axa pe care o numara garda). E un mesh
+## cu triunghiurile intoarse: al doilea flip il aduce inapoi pe cel bun, iar
+## normalele raman ale mesh-ului original, deci lumina nu se schimba. Costa un
+## [ArrayMesh] per varianta oglindita (sute de triunghiuri), zero materiale.
+## ############################################################################
+
 
 ## Coace tot subarborele `root`. Intoarce un dictionar cu ce s-a intamplat, ca
 ## sondele si log-ul de build sa aiba cifre, nu impresii.
 static func bake(root: Node3D, sway: SwayDriver = null) -> Dictionary:
 	var groups := {}
 	var sources: Array[MeshInstance3D] = []
-	_collect(root, Transform3D.IDENTITY, false, groups, sources)
+	# Cache-ul de mesh-uri intoarse traieste cat o coacere: acelasi mesh sursa
+	# oglindit de 60 de ori da UN singur ArrayMesh, deci un singur buffer.
+	var flipped := {}
+	_collect(root, Transform3D.IDENTITY, false, groups, sources, flipped)
 	if groups.is_empty():
 		return {"instances": 0, "batches": 0, "freed": 0}
 
@@ -124,33 +156,44 @@ static func bake(root: Node3D, sway: SwayDriver = null) -> Dictionary:
 ## nelegat, iar Track il adauga dupa). Fara parinte in arbore, `global_transform`
 ## nu inseamna nimic.
 static func _collect(node: Node3D, xf: Transform3D, swaying: bool,
-		groups: Dictionary, sources: Array[MeshInstance3D]) -> void:
+		groups: Dictionary, sources: Array[MeshInstance3D],
+		flipped: Dictionary) -> void:
 	var here := xf * node.transform
 	var sways := swaying or node.has_meta(SWAY_META)
 	if node is MeshInstance3D:
 		var mi := node as MeshInstance3D
 		if mi.mesh != null and mi.material_override != null:
-			_add(mi, here, sways, groups)
+			_add(mi, here, sways, groups, flipped)
 			sources.append(mi)
 		return
 	for c in node.get_children():
 		if c is Node3D and not c.is_queued_for_deletion():
-			_collect(c as Node3D, here, sways, groups, sources)
+			_collect(c as Node3D, here, sways, groups, sources, flipped)
 
 
 static func _add(mi: MeshInstance3D, xf: Transform3D, swaying: bool,
-		groups: Dictionary) -> void:
+		groups: Dictionary, flipped: Dictionary) -> void:
 	var cell := Vector2i(
 		int(floor(xf.origin.x / CELL_M)), int(floor(xf.origin.z / CELL_M)))
+	# Instanta oglindita primeste mesh-ul cu triunghiurile intoarse (vezi nota
+	# de la inceputul fisierului). Se separa de la sine in alt grup, fiindca
+	# cheia contine mesh-ul.
+	var mesh := mi.mesh
+	var mirrored := xf.basis.determinant() < 0.0
+	if mirrored:
+		mesh = _flipped_mesh(mesh, flipped)
 	# Cheia trebuie sa contina mesh SI material: acelasi mesh cu doua materiale
 	# sunt doua desenari oricum, iar un multimesh are un singur material.
-	var key := "%d|%d|%d|%d" % [mi.mesh.get_instance_id(),
+	var key := "%d|%d|%d|%d" % [mesh.get_instance_id(),
 		mi.material_override.get_instance_id(), cell.x, cell.y]
 	if not groups.has(key):
 		groups[key] = {
-			"mesh": mi.mesh,
+			"mesh": mesh,
 			"mat": mi.material_override,
-			"name": String(mi.name),
+			# Sufixul pastreaza numele variantei (de care depinde `probe_decor`
+			# ca sa stie din ce GLB vine geometria) si spune totusi care buffer
+			# e cel oglindit, fara sa lase Godot sa dezambiguizeze cu un "2".
+			"name": String(mi.name) + ("_m" if mirrored else ""),
 			"cell": "%d_%d" % [cell.x, cell.y],
 			"shadow": mi.cast_shadow,
 			"xforms": [] as Array[Transform3D],
@@ -161,6 +204,48 @@ static func _add(mi: MeshInstance3D, xf: Transform3D, swaying: bool,
 	if swaying:
 		(g["sway"] as Array).append(xforms.size())
 	xforms.append(xf)
+
+
+## Acelasi mesh cu triunghiurile parcurse invers.
+##
+## Se schimba DOAR ordinea indicilor: pozitiile, normalele si UV-urile raman
+## bit-identice, fiindca oglindirea le face deja transformarea instantei (pentru
+## o scalare pe o axa, matricea normalelor e chiar ea insasi). Singurul lucru pe
+## care transformarea NU-l poate repara e sensul in care rasterizatorul vede
+## triunghiul, si exact ala se inverseaza aici.
+##
+## Mesh-urile fara buffer de indici primesc unul: e mai ieftin decat sa
+## rescriem toate atributele vertexilor, si la scara asta (sute de triunghiuri)
+## nu se simte.
+static func _flipped_mesh(src: Mesh, cache: Dictionary) -> Mesh:
+	var id := src.get_instance_id()
+	if cache.has(id):
+		return cache[id]
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arrays := src.surface_get_arrays(s)
+		var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		if idx.is_empty():
+			var count := (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+			idx.resize(count)
+			for i in count:
+				idx[i] = i
+		var tri := idx.size() / 3
+		for t in tri:
+			var a := idx[t * 3]
+			idx[t * 3] = idx[t * 3 + 2]
+			idx[t * 3 + 2] = a
+		arrays[Mesh.ARRAY_INDEX] = idx
+		var prim := Mesh.PRIMITIVE_TRIANGLES
+		if src is ArrayMesh:
+			prim = (src as ArrayMesh).surface_get_primitive_type(s)
+		if prim != Mesh.PRIMITIVE_TRIANGLES:
+			# Nimic din decor nu e linie sau punct azi; daca ajunge sa fie,
+			# intoarcerea indicilor n-ar insemna nimic pentru primitiva aia.
+			continue
+		out.add_surface_from_arrays(prim, arrays)
+	cache[id] = out
+	return out
 
 
 ## Sterge nodurile ramase goale dupa ce vizualul lor a plecat in buffer:

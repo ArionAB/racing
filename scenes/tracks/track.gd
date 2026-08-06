@@ -2914,6 +2914,33 @@ func _build_world_decor() -> void:
 		_sampler.mean_road_y() + sea_level_offset)
 	add_child(scen)
 	_decor_roots.append(scen)
+	_bake_decor(cliffs, decor, scen)
+
+
+## Coace vizualul falezelor si al decorului in MultiMesh-uri.
+##
+## Aici, si nu in cei doi constructori, fiindca decizia e una de POLITICA a
+## pistei, nu de continut: amandoi produc noduri, iar daca maine mai apare un
+## generator de decor va trebui copt la fel, din acelasi loc. Tot de aici vine
+## si portita `--no-batch`, care exista ca sondele sa poata masura A/B pe
+## aceeasi build (tools/ProbeFrame.tscn).
+##
+## Scenografia intra si ea, desi prima intentie a fost s-o las pe dinafara —
+## "piese putine si mari, castig mic". Masuratoarea a contrazis intentia: pe
+## Okinawa manual sunt 524 de piese si ele sunt costul dominant al pistei, nu
+## decorul. O piesa cu parti pe clase de material diferite nu e o problema
+## pentru coacere: fiecare parte isi are grupul ei, fiindca cheia contine si
+## materialul.
+##
+## ORDINEA CONTEAZA: chevron-urile si gardul se aseaza dupa `_build_world_decor`
+## si isi cauta loc liber cu `_collect_obstacles`. Daca coacerea s-ar face dupa
+## ei, ar cauta printre noduri care intre timp au disparut in buffere.
+func _bake_decor(cliffs: Node3D, decor: Node3D, scen: Node3D) -> void:
+	if OS.get_cmdline_user_args().has("--no-batch"):
+		return
+	TrackDecorBatch.bake(cliffs)
+	TrackDecorBatch.bake(decor, decor.get_node_or_null(^"Sway") as SwayDriver)
+	TrackDecorBatch.bake(scen)
 
 func _build_excavator(frac: float) -> void:
 	const PATH := "res://assets/models/rusted_digger.glb"
@@ -3581,20 +3608,40 @@ func _collect_obstacles(node: Node, out: Array[PackedVector2Array]) -> void:
 			continue # variante de GLB "sterse" in cadrul curent, inca in arbore
 		if c is MeshInstance3D:
 			var mi := c as MeshInstance3D
-			var aabb := mi.get_aabb()
-			var world := mi.global_transform * aabb
-			if world.size.y >= 1.2:
-				var pts := PackedVector2Array()
-				for cx in 2:
-					for cy in 2:
-						for cz in 2:
-							var corner := aabb.position + Vector3(
-								aabb.size.x * cx, aabb.size.y * cy,
-								aabb.size.z * cz)
-							var g := mi.global_transform * corner
-							pts.append(Vector2(g.x, g.z))
-				out.append(Geometry2D.convex_hull(pts))
+			_add_obstacle(mi.get_aabb(), mi.global_transform, out)
+		elif c is MultiMeshInstance3D:
+			# Decorul copt (TrackDecorBatch) nu mai are cate un nod per prop:
+			# amprentele se citesc din buffer, instanta cu instanta. Fara
+			# ramura asta sonda ar gasi ZERO obstacole in decor si semnele s-ar
+			# aseza iar in falezele din spatele lor — bug-ul pentru care exista
+			# functia in primul rand.
+			var mmi := c as MultiMeshInstance3D
+			var mm := mmi.multimesh
+			if mm != null and mm.mesh != null:
+				var local := mm.mesh.get_aabb()
+				for i in mm.instance_count:
+					_add_obstacle(local,
+						mmi.global_transform * mm.get_instance_transform(i),
+						out)
 		_collect_obstacles(c, out)
+
+
+## Amprenta ORIENTATA a unei cutii, proiectata in plan. Extrasa din
+## `_collect_obstacles` cand decorul a capatat a doua reprezentare (noduri si
+## buffere): aceeasi matematica, doua surse.
+func _add_obstacle(aabb: AABB, xf: Transform3D,
+		out: Array[PackedVector2Array]) -> void:
+	if (xf * aabb).size.y < 1.2:
+		return
+	var pts := PackedVector2Array()
+	for cx in 2:
+		for cy in 2:
+			for cz in 2:
+				var corner := aabb.position + Vector3(
+					aabb.size.x * cx, aabb.size.y * cy, aabb.size.z * cz)
+				var g := xf * corner
+				pts.append(Vector2(g.x, g.z))
+	out.append(Geometry2D.convex_hull(pts))
 
 
 ## Un semn pentru virajul care incepe la `at0 + lead`. `turn` semnat: + stanga,

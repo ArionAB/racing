@@ -230,6 +230,19 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=cliff --track=0
   ```
 
+- **Poți intra înapoi pe șosea după ce ai ieșit pe nisip?** Pune mașina la 5 m
+  în afara asfaltului, cu AI la volan, în 16 puncte de pe traseu, și pică dacă
+  vreuna rămâne afară. Sar cazurile închise prin design (gard, faleză) —
+  raportul spune care și de ce.
+  ```
+  godot --headless --fixed-fps 60 --path . res://tools/ProbeReentry.tscn -- --mode=drive --track=0
+  godot --headless --fixed-fps 60 --path . res://tools/ProbeReentry.tscn -- --mode=step  --track=0
+  ```
+  `--mode=step` dă profilul transversal al **coliziunii reale** (raycast, nu
+  câmpul din sampler) — de acolo se citește dacă marginea drumului e rampă sau
+  prag. Șoseaua e un platou cu fuste verticale de 3 m; racordul îl face umărul,
+  vezi `_build_shoulders`.
+
 - **Pentru decizii de compoziție, folosește vederea de joc:**
   ```
   godot --path . res://tools/Snapshot.tscn -- --track=0 --frac=0.35 --gamecam

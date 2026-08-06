@@ -346,6 +346,17 @@ var routes: Array[TrackRoute] = []
 ## Se reconstruieste la fiecare rebuild(), dupa ce curba e coapta.
 var _sampler: TrackSideSampler
 
+## Grila de inaltimi a terenului, coapta o data si citita si de umeri.
+##
+## Umarul soselei trebuie sa se termine EXACT pe suprafata pe care o vede si o
+## atinge masina, iar aia nu e campul continuu din sampler: intre doua noduri de
+## grila terenul e o coarda dreapta, care pe o creasta trece cu pana la un metru
+## pe sub cota reala. Vezi _terrain_mesh_y().
+var _terr_origin: Vector3 = Vector3.ZERO
+var _terr_cells: int = 0
+var _terr_step: float = 0.0
+var _terr_heights: PackedFloat32Array = PackedFloat32Array()
+
 ## Materiale flat, refolosite pe culoare. Fara cache-ul asta fiecare mesh
 ## procedural isi facea propriul StandardMaterial3D — masurat cu
 ## tools/probe_decor.gd pe Dunele: 76 mesh-uri -> 72 materiale, adica tot atatea
@@ -508,6 +519,7 @@ func _ready() -> void:
 ## supravietuieste si la Regenerate, si la runtime. Vezi docs/decor_manual.md.
 func rebuild() -> void:
 	_mat_cache.clear() # altfel raman materialele temei precedente
+	_terr_cells = 0 # grila de teren se recoace odata cu curba
 	for child in get_children():
 		if child is Path3D:
 			continue # curba editabila a pistelor custom ramane
@@ -1069,8 +1081,11 @@ const BEACH_SAND_TOP: float = 1.4
 const BEACH_FADE: float = 3.5
 
 
-func _build_terrain() -> void:
-	var centroid := _centroid()
+## Coace grila de inaltimi (o data per rebuild). O cer si umerii, care se
+## construiesc INAINTEA terenului si trebuie sa se termine pe el.
+func _terrain_grid() -> void:
+	if _terr_cells > 0:
+		return
 	# 1500m si 56 de celule insemnau ~6200 de triunghiuri intinse pe o suprafata
 	# din care jumatate nu se vede niciodata: ceata inghite totul la 250m, iar
 	# siluetele de la orizont acopera fundalul. La 900m/36 raman ~2600, si nimeni
@@ -1079,18 +1094,58 @@ func _build_terrain() -> void:
 	# soseaua: pasul de 25 m lasa o cusatura de pana la 3 m la marginea drumului
 	# pe pantele de 12%. La 15.8 m cusatura scade sub 1 m, si asta se vede.
 	var size := _world_extent()
-	var cells := int(round(size / TERRAIN_CELL))
-	var step := size / float(cells)
-	var origin := centroid - Vector3(size * 0.5, 0, size * 0.5)
-	var heights: Array[float] = []
-	heights.resize((cells + 1) * (cells + 1))
-	for gz in cells + 1:
-		for gx in cells + 1:
+	_terr_cells = int(round(size / TERRAIN_CELL))
+	_terr_step = size / float(_terr_cells)
+	_terr_origin = _centroid() - Vector3(size * 0.5, 0, size * 0.5)
+	_terr_heights = PackedFloat32Array()
+	_terr_heights.resize((_terr_cells + 1) * (_terr_cells + 1))
+	for gz in _terr_cells + 1:
+		for gx in _terr_cells + 1:
 			# Toata matematica de inaltime traieste in sampler acum — aici doar
 			# o citim. Asa terenul, falezele, decorul si landmark-urile nu pot
 			# diverge: e literalmente aceeasi functie.
-			heights[gz * (cells + 1) + gx] = _sampler.ground_y(
-				origin.x + float(gx) * step, origin.z + float(gz) * step)
+			_terr_heights[gz * (_terr_cells + 1) + gx] = _sampler.ground_y(
+				_terr_origin.x + float(gx) * _terr_step,
+				_terr_origin.z + float(gz) * _terr_step)
+
+
+## Cota SUPRAFETEI de teren — nu a campului din sampler, ci a triunghiului care
+## se randeaza si de care se lovesc rotile.
+##
+## Diferenta nu e o subtilitate: intre noduri, grila e o coarda dreapta. Pe o
+## creasta, coarda taie pe dedesubt, iar campul spune "nisipul e la 30 cm sub
+## asfalt" in timp ce triunghiul real e la 1.1 m dedesubt (masurat pe Dunele,
+## fractia 0.31). Orice racord care se aliniaza la CAMP rateaza tocmai acolo
+## unde treapta e cea mai mare.
+##
+## Interpolarea urmeaza exact taietura celulei din _build_terrain: diagonala
+## merge de la (gx+1, gz) la (gx, gz+1), deci u + v = 1 separa cele doua
+## triunghiuri.
+func _terrain_mesh_y(x: float, z: float) -> float:
+	_terrain_grid()
+	var last := float(_terr_cells) - 0.0001
+	var fx := clampf((x - _terr_origin.x) / _terr_step, 0.0, last)
+	var fz := clampf((z - _terr_origin.z) / _terr_step, 0.0, last)
+	var gx := int(fx)
+	var gz := int(fz)
+	var u := fx - float(gx)
+	var v := fz - float(gz)
+	var row := _terr_cells + 1
+	var h00 := _terr_heights[gz * row + gx]
+	var h10 := _terr_heights[gz * row + gx + 1]
+	var h01 := _terr_heights[(gz + 1) * row + gx]
+	var h11 := _terr_heights[(gz + 1) * row + gx + 1]
+	if u + v <= 1.0:
+		return h00 + u * (h10 - h00) + v * (h01 - h00)
+	return h11 + (1.0 - u) * (h01 - h11) + (1.0 - v) * (h10 - h11)
+
+
+func _build_terrain() -> void:
+	_terrain_grid()
+	var cells := _terr_cells
+	var step := _terr_step
+	var origin := _terr_origin
+	var heights := _terr_heights
 	# Pozitiile falezelor, pentru umbra coapta de la baza lor.
 	var cliff_xz := _cliff_positions()
 	# Vegetatia de uscat: vezi "inland_tint" in themes(). Null pe pistele fara
@@ -2406,8 +2461,28 @@ func _build_start_line() -> void:
 	_add_visual_mesh(black.commit(), Color(0.08, 0.08, 0.08))
 
 ## Borduri rosu-alb pe marginile virajelor stranse — citesti pista de departe.
-## Latimea benzii de praf dintre asfalt si nisip.
+## Latimea MINIMA a benzii de praf dintre asfalt si nisip.
 const SHOULDER_WIDTH: float = 1.3
+
+## Panta maxima a umarului, in grade. Peste ea banda se LATESTE pana coboara
+## destul de lin.
+##
+## 25° si nu 45° (unghiul de la care Godot declara un plan "perete"): la limita
+## teoretica masina se catara doar cu botul si viteza potrivite, iar o
+## reintrare pe drum nu are voie sa fie o manevra de indemanare. Vezi de ce
+## exista panta asta in _build_shoulders.
+const SHOULDER_MAX_SLOPE_DEG: float = 25.0
+## Cat de lat poate ajunge umarul cand nisipul e mult sub asfalt. 4 m acopera si
+## treapta cea mai mare masurata pe Dunele (1.1 m pe creasta); dincolo de atat
+## nu mai e umar de drum, e rambleu, si atunci e o decizie de pista, nu un racord.
+const SHOULDER_MAX_WIDTH: float = 4.0
+## Cat de mult trece marginea exterioara a umarului PE SUB teren.
+##
+## Fara ea, banda si nisipul se termina cap la cap si orice nepotrivire de
+## cativa centimetri (coarda umarului e la ~3 m, a terenului la ~8 m) redevine
+## un prag. Ingropata, cele doua suprafete se INTERSECTEAZA: masina merge pe cea
+## de deasupra, care se schimba continuu, deci nu exista treapta nicaieri.
+const SHOULDER_SINK: float = 0.10
 
 
 ## Cati metri de sosea acopera o repetitie a texturii de umar.
@@ -2445,18 +2520,34 @@ const SHOULDER_PATCH_LENGTH: float = 7.0
 ## taietura brusca intre doua culori, si citeste ca decupaj de hartie, nu ca drum
 ## construit de cineva prin desert.
 ##
-## Doua mesh-uri (unul per latura ar fi fost inutil — culoarea e aceeasi), asezate
-## sub nivelul asfaltului cu 2cm ca sa nu produca z-fighting.
+## Banda e si RACORDUL FIZIC dintre asfalt si nisip, nu doar o culoare.
+##
+## Pana acum statea orizontala, la cota drumului, peste un teren care e cu 30 cm
+## mai jos (TrackSideSampler.GROUND_DROP) — deci o clapa care plutea, iar sub ea
+## soseaua ramanea un platou cu marginile verticale (fusta de 3 m din
+## _build_road, cu coliziune). Un CharacterBody3D cu cutie n-are step-up in
+## Godot: orice prag peste ~10 cm e perete. Masurat pe Dunele inainte de
+## reparatie, 13 din 16 incercari de reintrare pe sosea esuau — iesisei de pe
+## drum si ramaneai afara pana la repunere.
+##
+## Acum banda coboara de la buza asfaltului pana SUB suprafata reala a terenului
+## si se lateste unde e nevoie ca panta sa ramana sub SHOULDER_MAX_SLOPE_DEG.
+## Are coliziune proprie, deci e chiar rampa pe care urci inapoi.
 func _build_shoulders() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := baked.size()
-	var drop := Vector3.UP * -0.02
 	var tile := SHOULDER_TILE
-	# UV-uri PATRATE, aceeasi lectie ca la sosea. U mergea 0..1 de-a latul benzii
-	# de 1.3 m in timp ce V se repeta la 3.5 m — textura iesea intinsa 2.7:1
-	# transversal, deci orice granulatie citea ca dungi in lungul drumului.
-	var u_shoulder := SHOULDER_WIDTH / tile
+	# Latimea per (punct, latura), coapta INAINTE de emitere: doua segmente
+	# vecine trebuie sa foloseasca exact aceeasi valoare in punctul comun, altfel
+	# banda se rupe si fisura devine o capcana de coliziune.
+	var w_left := PackedFloat32Array()
+	var w_right := PackedFloat32Array()
+	w_left.resize(n)
+	w_right.resize(n)
+	for i in n:
+		w_left[i] = _shoulder_width(i, -1.0)
+		w_right[i] = _shoulder_width(i, 1.0)
 	for i in n:
 		var j := (i + 1) % n
 		var s0 := _side_at(i)
@@ -2464,10 +2555,23 @@ func _build_shoulders() -> void:
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
 		for side_sign: float in [-1.0, 1.0]:
-			var inner0 := baked[i] + s0 * half_width * side_sign + drop
-			var inner1 := baked[j] + s1 * half_width * side_sign + drop
-			var outer0 := inner0 + s0 * SHOULDER_WIDTH * side_sign
-			var outer1 := inner1 + s1 * SHOULDER_WIDTH * side_sign
+			var band := w_left if side_sign < 0.0 else w_right
+			var w0 := band[i]
+			var w1 := band[j]
+			# Buza interioara EXACT la cota asfaltului. Vechii 2 cm de garda
+			# contra z-fighting erau inofensivi cat timp banda nu avea coliziune;
+			# acum ar fi chiar ei pragul pe care masina nu-l urca. Nu e nevoie de
+			# ei: coroana soselei e zero la t = ±1, deci cele doua suprafete se
+			# ating pe o muchie comuna, nu se suprapun.
+			var inner0 := baked[i] + s0 * half_width * side_sign
+			var inner1 := baked[j] + s1 * half_width * side_sign
+			var outer0 := inner0 + s0 * w0 * side_sign
+			var outer1 := inner1 + s1 * w1 * side_sign
+			outer0.y = _terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK
+			outer1.y = _terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK
+			# U-ul urmeaza latimea REALA, altfel textura se intinde exact acolo
+			# unde banda se lateste.
+			var u_shoulder := maxf(w0, w1) / tile
 			# Gradient de vertex color: mai INCHIS la contactul cu asfaltul
 			# (praful batatorit de lansat rotile), plin spre nisip. Face umarul
 			# sa citeasca a tranzitie de material, nu a banda decupata.
@@ -2519,8 +2623,6 @@ func _build_shoulders() -> void:
 	var dust_override: Variant = theme_flag("dust_color")
 	var dust: Color = dust_override if dust_override != null \
 		else theme_ground_tint.darkened(0.25)
-	var inst := MeshInstance3D.new()
-	inst.mesh = st.commit()
 	# Winding-ul e tinut corect pe ambele laturi (vezi mai sus), deci umerii
 	# suporta CULL_BACK — banda care margineste toata pista nu se mai
 	# rasterizeaza pe ambele fete.
@@ -2528,10 +2630,39 @@ func _build_shoulders() -> void:
 	# praf batatorit cu pietre iesite din el, cum se vede in orice fotografie de
 	# drum de desert. Cat timp imprumuta textura nisipului, singura lui
 	# diferenta fata de teren era culoarea, si banda citea ca vopsea.
-	inst.material_override = _flat_material(dust,
+	#
+	# CU COLIZIUNE: banda e rampa de reintrare pe sosea, nu doar o culoare.
+	_add_mesh_with_collision(st.commit(), dust,
 		_tex("res://assets/textures/surface_gravel.png"), 1.0, 0.5,
 		BaseMaterial3D.CULL_BACK)
-	add_child(inst)
+
+
+## Cat de lat trebuie sa fie umarul intr-un punct ca panta lui sa ramana sub
+## SHOULDER_MAX_SLOPE_DEG.
+##
+## Se masoara intai cu latimea minima, apoi se corecteaza — o singura iteratie,
+## nu o cautare: terenul se schimba lent pe cativa metri, deci a doua estimare a
+## caderii e deja buna, iar diferenta ramasa o inghite marja dintre 25° si cele
+## 45° de la care panta ar deveni perete.
+##
+## Pe o RAPA declarata banda nu se lateste deloc. Acolo prapastia e chiar
+## subiectul: rapa exista tocmai ca terenul care urmareste soseaua sa NU umple
+## golul in care e gandita drama fly-off-ului (vezi _ravines()). Un rambleu de
+## 4 m pe buza ei ar da inapoi exact ce sapa ea — asa ca acolo ramane muchie, si
+## din rapa iesi cum ai iesit mereu: cu repunerea.
+func _shoulder_width(i: int, side_sign: float) -> float:
+	var frac := _dists[i] / _dists[baked.size()] if _dists[baked.size()] > 0.0 else 0.0
+	if _sampler.ravine_at(frac, side_sign):
+		return SHOULDER_WIDTH
+	var base: Vector3 = baked[i]
+	var lat := _side_at(i) * side_sign
+	var max_tan := tan(deg_to_rad(SHOULDER_MAX_SLOPE_DEG))
+	var w := SHOULDER_WIDTH
+	for _pass in 2:
+		var p := base + lat * (half_width + w)
+		var drop := base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK
+		w = clampf(drop / max_tan, SHOULDER_WIDTH, SHOULDER_MAX_WIDTH)
+	return w
 
 
 ## Nuanta petei de praf la un indice de pe traseu, ca factor in jurul lui 1.0.

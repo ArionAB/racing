@@ -499,6 +499,27 @@ func _rockfall_fracs() -> Array[float]:
 func _train_fracs() -> Array[float]:
 	return []
 
+## Canale navigabile care TAIE soseaua, sarite pe un pod cu travee ridicatoare.
+##
+## Spre deosebire de rapa si de laguna, care sapa DE LANGA drum, canalul trece pe
+## dedesubt: terenul dispare, soseaua ramane un gol, iar peste gol se ridica o
+## travee la interval fix. Vezi [LiftBridgeHazard] pentru ciclu si
+## [method TrackSideSampler._carve_channel] pentru taietura.
+##
+## Fiecare intrare e un dictionar:
+##   frac        unde taie canalul soseaua (0..1)
+##   gap         cati metri de sosea LIPSESC. Se rotunjeste la pasul curbei, iar
+##               valoarea OBTINUTA e cea care conteaza pentru saritura — o
+##               citeste tools/probe_bridge.gd, nu se presupune.
+##   water_half  jumatatea latimii apei, masurata in lungul soselei
+##   bank        pe cati metri urca malul de la apa la cota drumului
+##   depth       cat sub cota soselei de acolo sta fundul dragat
+##   reach       cat de departe merge canalul in fiecare parte
+##   fade        pe ultimii metri din `reach` canalul se stinge in largul din jur
+##   label       nume pentru sonde
+func _channel_specs() -> Array[Dictionary]:
+	return []
+
 ## Scenografia pistei: decorul asezat DUPA O REFERINTA, sector cu sector.
 ##
 ## Gol pe majoritatea pistelor — decorul lor vine din benzile statistice ale lui
@@ -527,12 +548,15 @@ func rebuild() -> void:
 			continue # asezat de mana in editor, salvat in scena
 		child.free()
 	_build_curve()
+	# Canalele INAINTEA samplerului: el sapa dupa ele, iar restul generatorilor
+	# intreaba tot de aici unde e golul din sosea.
+	_resolve_channels()
 	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
 	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
-		_lagoon_poly(), lagoon_depth)
+		_lagoon_poly(), lagoon_depth, _channels)
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -565,6 +589,8 @@ func rebuild() -> void:
 		_build_rockfall(frac)
 	for frac in _train_fracs():
 		_build_train(frac)
+	for ch in _channels:
+		_build_lift_bridge(ch)
 	_build_markers()
 	_build_start_gate()
 	_build_start_line()
@@ -601,6 +627,9 @@ func _build_center_line() -> void:
 		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
 			idx += 1
 		var i := idx % n
+		if _road_gap(i):
+			d += 6.5
+			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 		var side := _side_at(i)
 		var a := baked[i] + dir * (d - _dists[i]) + lift
@@ -1803,6 +1832,122 @@ func _side_at(i: int) -> Vector3:
 	var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 	return dir.cross(Vector3.UP).normalized()
 
+
+## ############################################################################
+## CANALE NAVIGABILE
+##
+## Un canal e singura structura din joc care taie soseaua in doua. Restul —
+## rapa, laguna, fundul de mare — sapa doar PE LANGA drum, tocmai ca sa nu apara
+## un gol sub roti. Aici golul E gimmick-ul.
+
+## Descrierile rezolvate ale canalelor: acelasi dictionar ca `_channel_specs()`,
+## plus tot ce se poate calcula O SINGURA DATA din curba coapta. Il citesc
+## samplerul (ca sa sape), fiecare generator de suprafata (ca sa lase gaura) si
+## hazardul (ca sa se aseze exact pe capetele gaurii).
+var _channels: Array[Dictionary] = []
+
+
+## Traduce fractiile declarate in indici, versori si cote.
+##
+## Golul din sosea NU poate avea lungimea ceruta la centimetru: soseaua se emite
+## din segmente coapte, deci capetele lui cad pe puncte de pe curba. Se alege
+## numarul de pasi care NIMERESTE CEL MAI BINE lungimea ceruta si se pastreaza
+## lungimea OBTINUTA — de la ea depinde cata viteza iti trebuie ca sa treci, deci
+## e o cifra care se masoara, nu una care se presupune.
+##
+## Pasul se cauta, nu se calculeaza dintr-o impartire, si asta a fost o
+## reparatie: `bake_interval` e un MAXIM, iar Curve3D indeseste punctele in
+## viraje. Pe Okinawa media iese ~2.0 m in timp ce pe dreapta unde sta podul
+## segmentele sunt la 2.5. Impartirea la medie a cerut 3 pasi si a livrat un gol
+## de 15.0 m in loc de 12 — cu 25% mai mult, adica pragul de viteza urcat de la
+## 71% la 79% din viteza de varf, fara ca nimeni sa fi cerut asta.
+func _resolve_channels() -> void:
+	_channels.clear()
+	var n := baked.size()
+	if n < 8:
+		return
+	for spec in _channel_specs():
+		var frac := fposmod(float(spec.get("frac", 0.0)), 1.0)
+		var ci := int(frac * float(n)) % n
+		var want := float(spec.get("gap", 12.0))
+		var steps := 1
+		var best := INF
+		for k in range(1, 12):
+			var a := baked[((ci - k) % n + n) % n]
+			var b := baked[(ci + k) % n]
+			var err := absf(a.distance_to(b) - want)
+			if err < best:
+				best = err
+				steps = k
+		var near_i := ((ci - steps) % n + n) % n
+		var far_i := (ci + steps) % n
+		# Sensul de mers si axa canalului, amandoua ORIZONTALE: taietura de teren
+		# lucreaza in plan, iar o componenta pe y ar face malul sa se incline cu
+		# panta soselei.
+		var across := baked[far_i] - baked[near_i]
+		across.y = 0.0
+		across = across.normalized()
+		var along := across.cross(Vector3.UP).normalized()
+		var ch := spec.duplicate()
+		ch["index"] = ci
+		ch["near"] = near_i
+		ch["far"] = far_i
+		ch["steps"] = steps
+		ch["origin"] = baked[ci]
+		ch["near_point"] = baked[near_i]
+		ch["far_point"] = baked[far_i]
+		ch["along"] = along
+		ch["across"] = across
+		ch["along2"] = Vector2(along.x, along.z)
+		ch["across2"] = Vector2(across.x, across.z)
+		ch["gap_requested"] = want
+		ch["gap"] = baked[near_i].distance_to(baked[far_i])
+		ch["water_half"] = float(spec.get("water_half", 26.0))
+		ch["bank"] = float(spec.get("bank", 20.0))
+		ch["depth"] = float(spec.get("depth", 13.0))
+		ch["reach"] = float(spec.get("reach", 200.0))
+		ch["fade"] = float(spec.get("fade", 60.0))
+		_channels.append(ch)
+
+
+## Bucata de sosea dintre indicii `i` si `j` cade in golul unui canal?
+##
+## Se testeaza pe INDICI, nu pe distante: capetele golului sunt puncte coapte, si
+## tot ele sunt punctele pe care se aseaza rampele si pilonii. O a doua definitie
+## in metri ar diverge de prima la primul reglaj de traseu si ar lasa ori o buza
+## de asfalt in aer, ori o rampa care incepe deasupra apei.
+func _road_gap(i: int, j: int = -1) -> bool:
+	if _channels.is_empty():
+		return false
+	var n := baked.size()
+	for ch in _channels:
+		var span: int = 2 * int(ch["steps"])
+		var near_i: int = ch["near"]
+		if ((i - near_i) % n + n) % n < span:
+			return true
+		if j >= 0 and ((j - near_i) % n + n) % n < span:
+			return true
+	return false
+
+
+## Cat de mult e indexul „pe pod", in 0..1: 1 deasupra apei, 0 pe uscat.
+##
+## Umerii de pietris, bordurile si gardul se opresc dupa masura asta, nu dupa
+## gol. Un umar de 4 m latime consolat peste senal ar fi fost o buza de nisip
+## plutind la 8 m deasupra apei — `_shoulder_width` il calculeaza din panta
+## terenului si nu are cum sa stie ca acolo terenul lipseste cu totul.
+func _bridge_mix(i: int) -> float:
+	if _channels.is_empty():
+		return 0.0
+	var best := 0.0
+	var p := baked[i]
+	for ch in _channels:
+		var o: Vector3 = ch["origin"]
+		var s := absf(Vector2(p.x - o.x, p.z - o.z).dot(ch["across2"] as Vector2))
+		var edge: float = float(ch["water_half"]) + float(ch["bank"]) * 0.35
+		best = maxf(best, 1.0 - smoothstep(edge - 8.0, edge, s))
+	return best
+
 ## Inaltimea coroanei soselei (bombarea din centru spre margini).
 ##
 ## Plafonul e dat de marcaje: linia de mijloc sta la lift 0.045 si linia de
@@ -1828,6 +1973,16 @@ func _build_road() -> void:
 	top.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var sides := SurfaceTool.new()
 	sides.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Fusta soselei peste apa se emite SEPARAT, in beton.
+	#
+	# Fusta obisnuita e vopsita in `theme_hill_color` — corect cat timp sub drum
+	# e mal, absurd pe pod: de pe tarm se vedea o panglica de gazon plutind la
+	# 8 m deasupra marii. Un tint pe vertex n-ar fi ajuns (culoarea de material se
+	# INMULTESTE, iar din verde nu iese beton), si o cutie construita in hazard
+	# nici atat: podul e drept, soseaua nu, deci grinda ii fuge de sub picioare pe
+	# 36 m. Aici geometria e deja pe curba — se schimba doar in ce mesh intra.
+	var deck_sides := SurfaceTool.new()
+	deck_sides.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# Coliziunea NU vine din mesh-ul cambrat: fizica ramane pe fasia plata
 	# veche (2 vertecsi transversal), ca feel-ul sa nu se miste deloc.
 	# Coroana de 3 cm e vizuala; rotile ruleaza pe planul de dinainte.
@@ -1849,6 +2004,10 @@ func _build_road() -> void:
 	var edge_shade := Color(0.84, 0.84, 0.86)
 	for i in n:
 		var j := (i + 1) % n
+		# Golul canalului: nici asfalt, nici coliziune, nici fusta laterala.
+		# Aici se rupe pista in doua si incepe saritura.
+		if _road_gap(i):
+			continue
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
@@ -1902,24 +2061,25 @@ func _build_road() -> void:
 		col.add_vertex(r0); col.add_vertex(l1); col.add_vertex(r1)
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
-		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0)
-		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1)
-		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(l0 + down)
-		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(l0 + down)
-		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1)
-		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(l1 + down)
-		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(r0)
-		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
-		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(r1)
-		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
-		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
-		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(r1)
-		sides.set_uv(Vector2(u0, 0)); sides.add_vertex(l0 + down)
-		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1 + down)
-		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
-		sides.set_uv(Vector2(u0, 1)); sides.add_vertex(r0 + down)
-		sides.set_uv(Vector2(u1, 0)); sides.add_vertex(l1 + down)
-		sides.set_uv(Vector2(u1, 1)); sides.add_vertex(r1 + down)
+		var skirt := deck_sides if _bridge_mix(i) > 0.5 else sides
+		skirt.set_uv(Vector2(u0, 0)); skirt.add_vertex(l0)
+		skirt.set_uv(Vector2(u1, 0)); skirt.add_vertex(l1)
+		skirt.set_uv(Vector2(u0, 1)); skirt.add_vertex(l0 + down)
+		skirt.set_uv(Vector2(u0, 1)); skirt.add_vertex(l0 + down)
+		skirt.set_uv(Vector2(u1, 0)); skirt.add_vertex(l1)
+		skirt.set_uv(Vector2(u1, 1)); skirt.add_vertex(l1 + down)
+		skirt.set_uv(Vector2(u0, 0)); skirt.add_vertex(r0)
+		skirt.set_uv(Vector2(u0, 1)); skirt.add_vertex(r0 + down)
+		skirt.set_uv(Vector2(u1, 0)); skirt.add_vertex(r1)
+		skirt.set_uv(Vector2(u0, 1)); skirt.add_vertex(r0 + down)
+		skirt.set_uv(Vector2(u1, 1)); skirt.add_vertex(r1 + down)
+		skirt.set_uv(Vector2(u1, 0)); skirt.add_vertex(r1)
+		skirt.set_uv(Vector2(u0, 0)); skirt.add_vertex(l0 + down)
+		skirt.set_uv(Vector2(u1, 0)); skirt.add_vertex(l1 + down)
+		skirt.set_uv(Vector2(u0, 1)); skirt.add_vertex(r0 + down)
+		skirt.set_uv(Vector2(u0, 1)); skirt.add_vertex(r0 + down)
+		skirt.set_uv(Vector2(u1, 0)); skirt.add_vertex(l1 + down)
+		skirt.set_uv(Vector2(u1, 1)); skirt.add_vertex(r1 + down)
 	# index() inainte de generate_normals(): fara el, fiecare triunghi isi tine
 	# vertecsii lui si normalele se mediaza doar in grupul implicit de netezire;
 	# indexat, inelele vecine IMPART vertecsii si lumina curge continuu in lungul
@@ -1928,6 +2088,8 @@ func _build_road() -> void:
 	top.generate_normals()
 	sides.index()
 	sides.generate_normals()
+	deck_sides.index()
+	deck_sides.generate_normals()
 	# Asfaltul racoros-inchis face masinile saturate sa "sara" din ecran, iar
 	# granulatia de pietris il scoate din senzatia de plastic turnat. Textura e
 	# gri si se inmulteste peste culoare, deci nu schimba paleta.
@@ -1962,6 +2124,10 @@ func _build_road() -> void:
 		BaseMaterial3D.CULL_BACK, col.commit(),
 		_tex("res://assets/textures/surface_asphalt_macro.png"))
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
+	if not _channels.is_empty():
+		var deck_mesh := deck_sides.commit()
+		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
+			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE))
 
 ## Cati metri de sosea raman FARA perete de o parte si de alta a unei
 ## bifurcatii.
@@ -2023,26 +2189,47 @@ func _build_walls() -> void:
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 		var emitted := false
+		# Peste apa, acelasi perete devine PARAPET DE POD: aceeasi geometrie, alt
+		# mesh, alta culoare. Podul isi cere balustrada, dar una construita in
+		# hazard ar fi insirata pe axa lui LOCALA — o dreapta — in timp ce soseaua
+		# se curbeaza: la 35 m de gol iesise deja de langa drum si plutea peste
+		# mare. Aici geometria e a soselei prin constructie, si asta e tot ce
+		# trebuia. Pe interiorul buclei peretele oricum nu se emite decat pe
+		# portiunile inaltate, deci pe pod parapetul apare exact unde e apa.
+		var deck := SurfaceTool.new()
+		deck.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var deck_emitted := false
 		for i in n:
 			var j := (i + 1) % n
 			if _near_junction(i, junctions, n):
 				continue
+			if _road_gap(i):
+				continue # buza golului: dincolo de ea nu mai e pe ce sa stea
 			var b0 := baked[i] + _side_at(i) * half_width * side_sign
 			var b1 := baked[j] + _side_at(j) * half_width * side_sign
 			var mid := (b0 + b1) * 0.5
+			var on_deck := _bridge_mix(i) > 0.5
 			var exterior := not Geometry2D.is_point_in_polygon(
 				Vector2(mid.x, mid.z), loop_poly)
 			var elevated := mid.y > 1.0
-			if not exterior and not elevated:
+			if not exterior and not elevated and not on_deck:
 				continue
 			var t0 := b0 + Vector3.UP * WALL_HEIGHT
 			var t1 := b1 + Vector3.UP * WALL_HEIGHT
-			st.add_vertex(b0); st.add_vertex(t0); st.add_vertex(b1)
-			st.add_vertex(t0); st.add_vertex(t1); st.add_vertex(b1)
-			emitted = true
+			var into := deck if on_deck else st
+			into.add_vertex(b0); into.add_vertex(t0); into.add_vertex(b1)
+			into.add_vertex(t0); into.add_vertex(t1); into.add_vertex(b1)
+			if on_deck:
+				deck_emitted = true
+			else:
+				emitted = true
 		if emitted:
 			st.generate_normals()
 			_add_mesh_with_collision(st.commit(), Color(0.9, 0.25, 0.2))
+		if deck_emitted:
+			deck.generate_normals()
+			_add_mesh_with_collision(deck.commit(),
+				Palette.color(Palette.CONCRETE))
 
 ## Rampa pe jumatatea exterioara a soselei: alegi intre linia sigura si
 ## saritura (airtime).
@@ -2187,6 +2374,82 @@ func _build_train(frac: float) -> void:
 	# tangenta la o curba pare ca o traverseaza de doua ori.
 	train.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
 	add_child(train)
+
+
+## Podul cu travee ridicatoare peste un canal.
+##
+## Track calculeaza AICI tot ce tine de traseu si de teren, iar hazardul primeste
+## numai numere in spatiul lui local. Aceeasi despartire ca la tren: o scena de
+## hazard n-are (si n-ar trebui sa aiba) acces la samplerul pistei, altfel ar
+## exista doua raspunsuri la "unde e fundul apei" si al doilea ar ramane in urma.
+##
+## Baza e facuta din DIRECTIA DRUMULUI, ca la trecerea de cale ferata: -Z local
+## iese pe sensul de mers, deci +X local cade pe axa canalului. Golul se intinde
+## in lungul lui Z, iar corabiile navigheaza pe X.
+func _build_lift_bridge(ch: Dictionary) -> void:
+	var origin: Vector3 = ch["origin"]
+	var across: Vector3 = ch["across"]
+	var bridge := LiftBridgeHazard.new()
+	bridge.name = String(ch.get("label", "PodMobil"))
+	bridge.road_half_width = half_width
+	bridge.gap = float(ch["gap"])
+	bridge.channel_reach = float(ch["reach"])
+	# Transformarea INAINTE de add_child: traveea e un AnimatableBody3D cu
+	# sync_to_physics, iar serverul de fizica ii tine transformarea. Adaugat mai
+	# intai in arbore, ar ramane un pas fizic in origine — adica exact peste
+	# grila de start (aceeasi capcana ca la carusel si la tren).
+	bridge.transform = Transform3D(Basis.looking_at(across, Vector3.UP), origin)
+	# Buzele in spatiul podului. NU se presupune ca soseaua e orizontala acolo:
+	# pe Okinawa are ~1.7% panta, deci cele doua capete difera cu ~20 cm, si
+	# rampa asezata pe o cota medie ar sta cu calcaiul in aer la un capat.
+	var inv := bridge.transform.affine_inverse()
+	bridge.near_lip = inv * (ch["near_point"] as Vector3)
+	bridge.far_lip = inv * (ch["far_point"] as Vector3)
+	# Baza e strict un yaw, deci verticala se pastreaza si cota apei se traduce
+	# printr-o scadere. (Un `inv * punct` ar fi fost la fel de corect, dar ar fi
+	# ascuns faptul ca aici ne bazam pe absenta oricarui tangaj.)
+	bridge.water_y = _sampler.mean_road_y() + sea_level_offset - origin.y
+	bridge.piers = _channel_piers(ch, bridge.transform.affine_inverse())
+	add_child(bridge)
+
+
+## Unde stau pilonii podului si cat de jos e fundul sub fiecare.
+##
+## Statiile se aleg PE SOSEA, mergand din punct copt in punct copt pana la
+## PIER_STEP metri de precedenta, si abia apoi se trec in spatiul podului. Nu se
+## insira pe axa locala a podului: aia e o dreapta, iar soseaua se curbeaza —
+## pe Okinawa, la 35 m de gol, un pilon asezat pe axa ar fi iesit de sub drum.
+##
+## Cotele terenului vin din `ground_y` din acelasi motiv ca la `_rail_ground_drop`:
+## e sursa unica pentru tot ce se aseaza pe sol, si sta in sampler.
+func _channel_piers(ch: Dictionary, to_local_xf: Transform3D) -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	var n := baked.size()
+	var ci: int = ch["index"]
+	var steps: int = ch["steps"]
+	var reach := float(ch["water_half"]) + float(ch["bank"]) * 0.5
+	var step := LiftBridgeHazard.PIER_STEP
+	for dir: int in [-1, 1]:
+		# Se pleaca de la BUZA, nu de la mijlocul podului: prima deschidere se
+		# masoara de la marginea golului, ca la orice pod.
+		var i := ci + dir * steps
+		var last := baked[((i % n) + n) % n]
+		var total := 0.0
+		var since := 0.0
+		while total < reach:
+			i += dir
+			var p := baked[((i % n) + n) % n]
+			var seg := p.distance_to(last)
+			total += seg
+			since += seg
+			last = p
+			if since < step:
+				continue
+			since = 0.0
+			var drop := p.y - _sampler.ground_y(p.x, p.z)
+			var local := to_local_xf * p
+			out.append(Vector4(local.x, local.y, local.z, drop))
+	return out
 
 
 ## Cat de jos e terenul sub linia ferata, pala cu pala.
@@ -2550,14 +2813,22 @@ func _build_shoulders() -> void:
 		w_right[i] = _shoulder_width(i, 1.0)
 	for i in n:
 		var j := (i + 1) % n
+		# Pe pod nu exista umar de pietris: sub el nu e nisip, e apa. Latimea se
+		# stinge treptat pe malul canalului in loc sa se taie brusc, altfel banda
+		# s-ar termina cu o buza vizibila exact unde incepe structura.
+		if _road_gap(i, j):
+			continue
+		var bridge := maxf(_bridge_mix(i), _bridge_mix(j))
 		var s0 := _side_at(i)
 		var s1 := _side_at(j)
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
 		for side_sign: float in [-1.0, 1.0]:
 			var band := w_left if side_sign < 0.0 else w_right
-			var w0 := band[i]
-			var w1 := band[j]
+			var w0 := band[i] * (1.0 - bridge)
+			var w1 := band[j] * (1.0 - bridge)
+			if w0 < 0.05 and w1 < 0.05:
+				continue
 			# Buza interioara EXACT la cota asfaltului. Vechii 2 cm de garda
 			# contra z-fighting erau inofensivi cat timp banda nu avea coliziune;
 			# acum ar fi chiar ei pragul pe care masina nu-l urca. Nu e nevoie de
@@ -2749,6 +3020,8 @@ func _build_tire_marks() -> void:
 		var j := (i + 1) % n
 		if alpha[i] <= 0.0 and alpha[j] <= 0.0:
 			continue
+		if _road_gap(i, j):
+			continue
 		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
 		var lane0 := -offset_sign[i] * half_width * 0.35
 		var lane1 := -offset_sign[j] * half_width * 0.35
@@ -2850,6 +3123,8 @@ func _build_kerbs() -> void:
 		if before.angle_to(after) < 0.08:
 			continue
 		var j := (i + 2) % n
+		if _road_gap(i, j):
+			continue
 		var v0 := _dists[i] / KERB_TILE
 		var v1 := _dists[mini(i + 2, n)] / KERB_TILE
 		var block := i / 2
@@ -3477,6 +3752,8 @@ func _build_markers() -> void:
 				Vector2(edge.x, edge.z), loop_poly)
 			if exterior or edge.y > 1.0:
 				continue # acolo sunt pereti; stalpii marcheaza doar golurile
+			if _road_gap(i) or _bridge_mix(i) > 0.05:
+				continue # pe pod: parapetul tine locul popicilor
 			var model := _extract_glb_node(scene, _marker_variant(rng))
 			if model == null:
 				continue

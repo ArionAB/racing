@@ -57,6 +57,14 @@ func _report() -> bool:
 	var props := _props(manual, "")
 	print("DecorManual.visible = %s, %d obiecte" % [manual.visible, props.size()])
 	var baked: PackedVector3Array = t.baked
+	# Prop-urile DE APA (ponton, barca, stanci in valuri) se judeca fata de
+	# nivelul marii, nu fata de teren: o barca pe apa "pluteste" la 4 m peste
+	# fundul lagunei si o stanca in valuri e "ingropata" fata de mal — ambele
+	# corecte. Regula: daca terenul de sub prop e sub nivelul marii, ancora e
+	# marea. Pe pistele fara mare, sea_y iese la -1e9 si regula nu se atinge.
+	var sea_y := -1e9
+	if "sea_level_offset" in t and t._sampler != null:
+		sea_y = t._sampler.mean_road_y() + t.sea_level_offset
 	var bad := 0
 	print("%-40s %9s %9s %8s   %11s   %s" % ["obiect", "y_obiect", "y_teren",
 		"delta", "dist. la ax", "verdict"])
@@ -68,13 +76,15 @@ func _report() -> bool:
 		for i in baked.size():
 			near = minf(near, Vector2(p.x - baked[i].x, p.z - baked[i].z).length())
 		var verdict := "ok"
-		if p.y - ground > FLOAT_MAX:
+		if ground < sea_y and absf(p.y - sea_y) <= 1.0:
+			verdict = "ok (pe apa)"
+		elif p.y - ground > FLOAT_MAX:
 			verdict = "PLUTESTE"
 		elif ground - p.y > SINK_MAX:
 			verdict = "INGROPAT"
 		if near < t.half_width + ROAD_MARGIN:
 			verdict += " / IN DRUM"
-		if verdict != "ok":
+		if not verdict.begins_with("ok") or verdict.contains("IN DRUM"):
 			bad += 1
 		print("%-40s %9.2f %9.2f %8.2f   %9.1f m   %s" % [entry["path"], p.y,
 			ground, p.y - ground, near, verdict])

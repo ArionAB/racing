@@ -151,9 +151,17 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## prinda urmatoarea sesiune de asezat decor. Ce ar trebui sa scada cifra fara
 ## sa taie din compozitie: un tetrapod are 5 104 de triunghiuri pentru un bloc
 ## de beton de 4.2 m, iar digul are 41.
+##
+## 1.3M -> 1.45M (august 2026): sesiunea de decor manual pe urcarea de coasta
+## (zidul de gradina, gardul de pe buza lagunei, gospodaria, pontonul cu barca
+## — zonele 05/06, dupa imaginea de referinta). Masurat inainte/dupa:
+## 1 237 260 -> 1 341 534 vizibile, +104k, cu materialele NESCHIMBATE, 22/38.
+## Pragul pastreaza ~8% aer — destul cat sa prinda clasa de accident (primitive
+## la rezolutia implicita sar cu zeci de mii dintr-un foc), fara sa respinga
+## urmatoarea sesiune de asezat.
 const TRIS_OVERRIDE := {
 	"Track07": 1000000,
-	"Track08": 1300000,
+	"Track08": 1450000,
 }
 
 
@@ -205,6 +213,16 @@ func _process(_delta: float) -> bool:
 	return false
 
 
+## E nodul un descendent al containerului de decor manual (DecorManual)?
+static func _under_manual(node: Node) -> bool:
+	var p := node.get_parent()
+	while p != null:
+		if p.name == &"DecorManual":
+			return true
+		p = p.get_parent()
+	return false
+
+
 func _measure(path: String, track: Node) -> Dictionary:
 	var world_mat := Palette.world_material()
 	var by_source := {}
@@ -229,6 +247,21 @@ func _measure(path: String, track: Node) -> Dictionary:
 		var mat: Material = null
 		var count := 1
 		var named: Node = node
+		# In DECORUL MANUAL, ce e stins nu se deseneaza niciodata — deci nu se
+		# numara. GLB-urile cu mai multe variante in acelasi fisier (gusuku_wall,
+		# coral_rock) se asaza intregi din editor si variantele nefolosite se
+		# sting cu `visible = false`; inainte de randul asta garda le numara ca
+		# si cum s-ar randa toate (masurat pe Track08: 222k tris "adaugati" din
+		# care 125k stinsi). Memoria nu e argumentul contrar: mesh-ul e aceeasi
+		# resursa partajata, oricate instante il sting sau il arata.
+		#
+		# DOAR sub DecorManual, si asta e important: hazardele procedurale
+		# (valul, tromba) isi sting nodurile in functie de faza ceasului, deci
+		# in restul scenei "invizibil la cadrul 3" nu inseamna "nu se randeaza
+		# in joc" — alea raman numarate.
+		if node is Node3D and not (node as Node3D).is_visible_in_tree() \
+				and _under_manual(node):
+			continue
 		if node is MeshInstance3D:
 			var mi := node as MeshInstance3D
 			mesh = mi.mesh

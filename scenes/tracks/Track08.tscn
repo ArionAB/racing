@@ -9,6 +9,12 @@
 [ext_resource type="PackedScene" uid="uid://b6kl5j0iue4iw" path="res://assets/models/coconut_palm.glb" id="6_jtx8o"]
 [ext_resource type="PackedScene" uid="uid://g21s8bu3nxg" path="res://assets/models/sabani_boat.glb" id="7_dydiq"]
 [ext_resource type="PackedScene" uid="uid://d23jdbp6g1jf8" path="res://assets/models/beach_palm_bent.glb" id="8_dledb"]
+[ext_resource type="PackedScene" uid="uid://2oyaii0arnxj" path="res://assets/models/gusuku_wall.glb" id="9_gsk"]
+[ext_resource type="PackedScene" uid="uid://byjaxq82w8lhs" path="res://assets/models/hibiscus_bush.glb" id="10_hib"]
+[ext_resource type="PackedScene" uid="uid://ve0un7poccny" path="res://assets/models/pandanus.glb" id="11_pnd"]
+[ext_resource type="PackedScene" uid="uid://bjlstofp3m14" path="res://assets/models/sugar_cane_clump.glb" id="12_cane"]
+[ext_resource type="PackedScene" uid="uid://n7u7ccamtb3k" path="res://assets/models/fence_ranch.glb" id="13_fnc"]
+[ext_resource type="PackedScene" uid="uid://6uiuyphujnhh" path="res://assets/models/wooden_pier.glb" id="14_pier"]
 
 [node name="Track08" type="Node3D" unique_id=598581151]
 script = ExtResource("1_track08")
@@ -294,3 +300,576 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 144.92636, 3.0994091, 199.727
 
 [node name="sabani_boat" parent="DecorManual/Zone08_SoutheastReturn" unique_id=1223948693 instance=ExtResource("7_dydiq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 216.92636, 3.5283747, 154.7276)
+
+[node name="wall" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.542476, 0, 0.25635886, 0, 0.6, 0, -0.25635886, 0, 0.542476, -0.014302731, 16.04061, -192.32425)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall"]
+visible = false
+
+[node name="wall2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.53800976, 0, 0.26560402, 0, 0.6, 0, -0.26560402, 0, 0.53800976, 4.2242417, 16.316206, -194.36417)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall2"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall2"]
+visible = false
+
+[node name="wall3" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.5279838, 0, 0.28501433, 0, 0.6, 0, -0.28501433, 0, 0.5279838, 8.212185, 16.590925, -196.42924)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall3"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall3"]
+visible = false
+
+[node name="wall4" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.5178061, 0, 0.30311194, 0, 0.6, 0, -0.30311194, 0, 0.5178061, 12.151153, 16.138002, -198.62619)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall4"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall4"]
+visible = false
+
+[node name="wall5" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.5113508, 0, 0.31387955, 0, 0.6, 0, -0.31387955, 0, 0.5113508, 16.148369, 16.441101, -201.0217)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall5"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall5"]
+visible = false
+
+[node name="wall6" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.50279045, 0, 0.32741687, 0, 0.6, 0, -0.32741687, 0, 0.50279045, 20.025328, 16.74854, -203.48985)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall6"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall6"]
+visible = false
+
+[node name="wall7" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.49622357, 0, 0.3372865, 0, 0.6, 0, -0.3372865, 0, 0.49622357, 23.912737, 17.07628, -206.0805)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall7"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall7"]
+visible = false
+
+[node name="wall8" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.4920818, 0, 0.3433009, 0, 0.6, 0, -0.3433009, 0, 0.4920818, 27.830196, 17.407175, -208.7747)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall8"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall8"]
+visible = false
+
+[node name="wall9" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.4907085, 0, 0.34526104, 0, 0.6, 0, -0.34526104, 0, 0.4907085, 31.797405, 17.752975, -211.55385)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall9"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall9"]
+visible = false
+
+[node name="wall10" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.49059096, 0, 0.34542805, 0, 0.6, 0, -0.34542805, 0, 0.49059096, 35.789257, 18.105888, -214.36687)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall10"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall10"]
+visible = false
+
+[node name="wall11" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.4916307, 0, 0.34394664, 0, 0.6, 0, -0.34394664, 0, 0.4916307, 39.815094, 18.466433, -217.19504)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall11"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall11"]
+visible = false
+
+[node name="wall_up" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.4648386, 0, 0.3793746, 0, 0.6, 0, -0.3793746, 0, 0.4648386, 70.80379, 21.659575, -240.06389)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall_up"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up"]
+visible = false
+
+[node name="wall_up2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.46388453, 0, 0.38054064, 0, 0.6, 0, -0.38054064, 0, 0.46388453, 74.55302, 22.100445, -243.14099)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall_up2"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up2"]
+visible = false
+
+[node name="wall_up3" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.46930856, 0, 0.37383085, 0, 0.6, 0, -0.37383085, 0, 0.46930856, 78.467896, 22.5456, -246.31927)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall_up3"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up3"]
+visible = false
+
+[node name="wall_up4" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.4809009, 0, 0.35879564, 0, 0.6, 0, -0.35879564, 0, 0.4809009, 82.60115, 22.985796, -249.53986)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall_up4"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up4"]
+visible = false
+
+[node name="wall_up5" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.49130782, 0, 0.34440768, 0, 0.6, 0, -0.34440768, 0, 0.49130782, 86.82584, 23.400322, -252.60208)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall_up5"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up5"]
+visible = false
+
+[node name="wall_up6" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.50914764, 0, 0.31744084, 0, 0.6, 0, -0.31744084, 0, 0.50914764, 91.41691, 23.827076, -255.6243)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall_up6"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up6"]
+visible = false
+
+[node name="wall_up7" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.52731967, 0, 0.2862412, 0, 0.6, 0, -0.2862412, 0, 0.52731967, 96.21828, 24.197756, -258.44876)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall_up7"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up7"]
+visible = false
+
+[node name="wall_up8" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.5385521, 0, 0.26450273, 0, 0.6, 0, -0.26450273, 0, 0.5385521, 100.96528, 24.545599, -260.92038)
+
+[node name="Gusuku_Wall_A" parent="DecorManual/Zone05_CoastalClimb/wall_up8"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up8"]
+visible = false
+
+[node name="wall_up9" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("9_gsk")]
+transform = Transform3D(0.5486239, 0, 0.24292348, 0, 0.6, 0, -0.24292348, 0, 0.5486239, 105.81032, 24.86751, -263.16962)
+
+[node name="Gusuku_Wall_B" parent="DecorManual/Zone05_CoastalClimb/wall_up9"]
+visible = false
+
+[node name="Gusuku_Wall_C" parent="DecorManual/Zone05_CoastalClimb/wall_up9"]
+visible = false
+
+[node name="farm_house" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("4_7180v")]
+transform = Transform3D(-0.94697315, 0, -0.3213128, 0, 1, 0, 0.3213128, 0, -0.94697315, -17.783945, 15.652272, -196.3931)
+
+[node name="farm_house2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("4_7180v")]
+transform = Transform3D(-0.7846799, 0, -0.5355161, 0, 0.95, 0, 0.5355161, 0, -0.7846799, -8.948702, 16.242262, -206.90233)
+
+[node name="hib" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("10_hib")]
+transform = Transform3D(-0.6635357, 0, 1.5651582, 0, 1.7, 0, -1.5651582, 0, -0.6635357, 4.9759803, 16.481901, -193.73169)
+
+[node name="hib2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("10_hib")]
+transform = Transform3D(-1.4991546, 0, 0.050355494, 0, 1.5, 0, -0.050355494, 0, -1.4991546, 21.720387, 17.047474, -205.32684)
+
+[node name="hib3" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("10_hib")]
+transform = Transform3D(1.6281458, 0, -0.9793575, 0, 1.9, 0, 0.9793575, 0, 1.6281458, 39.9661, 18.601234, -216.56842)
+
+[node name="hib4" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("10_hib")]
+transform = Transform3D(1.3742486, 0, 0.81941503, 0, 1.6, 0, -0.81941503, 0, 1.3742486, 66.1944, 21.18309, -237.368)
+
+[node name="hib5" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("10_hib")]
+transform = Transform3D(-1.209107, 0, -1.3334391, 0, 1.8, 0, 1.3334391, 0, -1.209107, 87.50267, 23.600986, -252.09955)
+
+[node name="hib6" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("10_hib")]
+transform = Transform3D(0.7622199, 0, -1.2919059, 0, 1.5, 0, 1.2919059, 0, 0.7622199, 107.91916, 25.154055, -264.6204)
+
+[node name="palm" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("6_jtx8o")]
+transform = Transform3D(0.80604786, 0, 0.7485232, 0, 1.1, 0, -0.7485232, 0, 0.80604786, -6.6365986, 16.001966, -193.60826)
+
+[node name="palm2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("6_jtx8o")]
+transform = Transform3D(0.28369132, 0, -0.90665275, 0, 0.95, 0, 0.90665275, 0, 0.28369132, 13.629095, 16.3482, -205.34135)
+
+[node name="palm3" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("6_jtx8o")]
+transform = Transform3D(-0.7914225, 0, 0.9020259, 0, 1.2, 0, -0.9020259, 0, -0.7914225, 33.152317, 17.131847, -216.79031)
+
+[node name="palm4" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("6_jtx8o")]
+transform = Transform3D(-0.8207548, 0, 0.5712806, 0, 1, 0, -0.5712806, 0, -0.8207548, 53.444176, 17.83366, -231.97147)
+
+[node name="palm5" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("6_jtx8o")]
+transform = Transform3D(-0.6683337, 0, 0.9358579, 0, 1.15, 0, -0.9358579, 0, -0.6683337, 76.72056, 20.490347, -250.16919)
+
+[node name="palm6" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("6_jtx8o")]
+transform = Transform3D(0.017662633, 0, -1.0498514, 0, 1.05, 0, 1.0498514, 0, 0.017662633, 98.95115, 23.50109, -265.056)
+
+[node name="banyan_farm" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("5_7180v")]
+transform = Transform3D(-0.62269837, 0, -0.9067783, 0, 1.1, 0, 0.9067783, 0, -0.62269837, -11.374243, 15.882575, -195.80374)
+
+[node name="pand" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("11_pnd")]
+transform = Transform3D(-0.2334038, 0, 1.1260651, 0, 1.15, 0, -1.1260651, 0, -0.2334038, -13.123763, 15.697024, -191.73488)
+
+[node name="pand2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("11_pnd")]
+transform = Transform3D(0.44927, 0, 1.1664718, 0, 1.25, 0, -1.1664718, 0, 0.44927, 60.472694, 19.17628, -236.46548)
+
+[node name="bent" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("8_dledb")]
+transform = Transform3D(-0.9732749, 0, -0.5125779, 0, 1.1, 0, 0.5125779, 0, -0.9732749, -18.90052, 15.643408, -198.67354)
+
+[node name="bent2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("8_dledb")]
+transform = Transform3D(-0.21480127, 0, -0.97665775, 0, 1, 0, 0.97665775, 0, -0.21480127, -18.689615, 15.7286215, -204.58093)
+
+[node name="fence" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.8912135, 0, 0.45358407, 0, 1, 0, -0.45358407, 0, 0.8912135, 14.09302, 16.478106, -175.8183)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence"]
+visible = false
+
+[node name="fence2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.87997293, 0, 0.47502387, 0, 1, 0, -0.47502387, 0, 0.87997293, 17.940153, 16.715727, -177.8162)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence2"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence2"]
+visible = false
+
+[node name="fence3" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.86861336, 0, 0.49549055, 0, 1, 0, -0.49549055, 0, 0.86861336, 21.726067, 16.210123, -179.91043)
+
+[node name="Fence_A" parent="DecorManual/Zone05_CoastalClimb/fence3"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence3"]
+visible = false
+
+[node name="fence4" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.857538, 0, 0.5144206, 0, 1, 0, -0.5144206, 0, 0.857538, 25.444515, 16.461655, -182.09236)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence4"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence4"]
+visible = false
+
+[node name="fence5" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.842424, 0, 0.53881526, 0, 1, 0, -0.53881526, 0, 0.842424, 29.166706, 16.716234, -184.3982)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence5"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence5"]
+visible = false
+
+[node name="fence6" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.83391786, 0, 0.5518885, 0, 1, 0, -0.5518885, 0, 0.83391786, 32.729538, 16.984077, -186.70985)
+
+[node name="Fence_A" parent="DecorManual/Zone05_CoastalClimb/fence6"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence6"]
+visible = false
+
+[node name="fence7" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.82703924, 0, 0.56214416, 0, 1, 0, -0.56214416, 0, 0.82703924, 36.227867, 17.259205, -189.05942)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence7"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence7"]
+visible = false
+
+[node name="fence8" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.82196313, 0, 0.5695407, 0, 1, 0, -0.5695407, 0, 0.82196313, 39.6706, 17.541195, -191.43)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence8"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence8"]
+visible = false
+
+[node name="fence9" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.8178475, 0, 0.57543504, 0, 1, 0, -0.57543504, 0, 0.8178475, 43.080643, 17.830578, -193.81555)
+
+[node name="Fence_A" parent="DecorManual/Zone05_CoastalClimb/fence9"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence9"]
+visible = false
+
+[node name="fence10" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.8173112, 0, 0.57619643, 0, 1, 0, -0.57619643, 0, 0.8173112, 46.43159, 18.123411, -196.17574)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence10"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence10"]
+visible = false
+
+[node name="fence11" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.81834376, 0, 0.574729, 0, 1, 0, -0.574729, 0, 0.81834376, 49.760082, 18.42129, -198.51987)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence11"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence11"]
+visible = false
+
+[node name="fence_up" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.7809264, 0, 0.624623, 0, 1, 0, -0.624623, 0, 0.7809264, 80.18595, 21.332394, -219.87524)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence_up"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up"]
+visible = false
+
+[node name="fence_up2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.774731, 0, 0.63229096, 0, 1, 0, -0.63229096, 0, 0.774731, 83.444305, 21.698435, -222.49971)
+
+[node name="Fence_A" parent="DecorManual/Zone05_CoastalClimb/fence_up2"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up2"]
+visible = false
+
+[node name="fence_up3" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.7725422, 0, 0.63496345, 0, 1, 0, -0.63496345, 0, 0.7725422, 86.63007, 22.070461, -225.10875)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence_up3"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up3"]
+visible = false
+
+[node name="fence_up4" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.7749457, 0, 0.6320278, 0, 1, 0, -0.6320278, 0, 0.7749457, 89.757416, 22.44544, -227.67186)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence_up4"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up4"]
+visible = false
+
+[node name="fence_up5" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.7821809, 0, 0.6230514, 0, 1, 0, -0.6230514, 0, 0.7821809, 92.84619, 22.819485, -230.15732)
+
+[node name="Fence_A" parent="DecorManual/Zone05_CoastalClimb/fence_up5"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up5"]
+visible = false
+
+[node name="fence_up6" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.8015015, 0, 0.5979927, 0, 1, 0, -0.5979927, 0, 0.8015015, 95.822556, 23.196035, -232.4548)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence_up6"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up6"]
+visible = false
+
+[node name="fence_up7" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.81884634, 0, 0.57401276, 0, 1, 0, -0.57401276, 0, 0.81884634, 98.88336, 23.554447, -234.67584)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence_up7"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up7"]
+visible = false
+
+[node name="fence_up8" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.838397, 0, 0.54506004, 0, 1, 0, -0.54506004, 0, 0.838397, 101.98045, 23.897015, -236.75198)
+
+[node name="Fence_A" parent="DecorManual/Zone05_CoastalClimb/fence_up8"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up8"]
+visible = false
+
+[node name="fence_up9" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("13_fnc")]
+transform = Transform3D(0.8689482, 0, 0.494903, 0, 1, 0, -0.494903, 0, 0.8689482, 104.95473, 24.204647, -238.57312)
+
+[node name="Fence_B" parent="DecorManual/Zone05_CoastalClimb/fence_up9"]
+visible = false
+
+[node name="Fence_C" parent="DecorManual/Zone05_CoastalClimb/fence_up9"]
+visible = false
+
+[node name="rock" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("4_wrrxe")]
+transform = Transform3D(-1.0861634, 0, 0.17392246, 0, 1.1, 0, -0.17392246, 0, -1.0861634, 25.86731, 16.066402, -178.26631)
+
+[node name="Coral_Rock_01" parent="DecorManual/Zone05_CoastalClimb/rock"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/Zone05_CoastalClimb/rock"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/Zone05_CoastalClimb/rock"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/Zone05_CoastalClimb/rock"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/Zone05_CoastalClimb/rock"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/Zone05_CoastalClimb/rock"]
+visible = false
+
+[node name="rock2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("4_wrrxe")]
+transform = Transform3D(-0.9973258, 0, -0.83387125, 0, 1.3, 0, 0.83387125, 0, -0.9973258, 47.52433, 17.407686, -193.27557)
+
+[node name="Coral_Rock_01" parent="DecorManual/Zone05_CoastalClimb/rock2"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/Zone05_CoastalClimb/rock2"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/Zone05_CoastalClimb/rock2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/Zone05_CoastalClimb/rock2"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/Zone05_CoastalClimb/rock2"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/Zone05_CoastalClimb/rock2"]
+visible = false
+
+[node name="rock3" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("4_wrrxe")]
+transform = Transform3D(-0.3883241, 0, -0.92152286, 0, 1, 0, 0.92152286, 0, -0.3883241, 92.10736, 21.596672, -225.33008)
+
+[node name="Coral_Rock_01" parent="DecorManual/Zone05_CoastalClimb/rock3"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/Zone05_CoastalClimb/rock3"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/Zone05_CoastalClimb/rock3"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/Zone05_CoastalClimb/rock3"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/Zone05_CoastalClimb/rock3"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/Zone05_CoastalClimb/rock3"]
+visible = false
+
+[node name="rock4" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("4_wrrxe")]
+transform = Transform3D(-0.8643624, 0, 0.83239275, 0, 1.2, 0, -0.83239275, 0, -0.8643624, 120.87081, 24.92277, -242.47583)
+
+[node name="Coral_Rock_01" parent="DecorManual/Zone05_CoastalClimb/rock4"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/Zone05_CoastalClimb/rock4"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/Zone05_CoastalClimb/rock4"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/Zone05_CoastalClimb/rock4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/Zone05_CoastalClimb/rock4"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/Zone05_CoastalClimb/rock4"]
+visible = false
+
+[node name="cane" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("12_cane")]
+transform = Transform3D(-0.95907676, 0, -0.5386761, 0, 1.1, 0, 0.5386761, 0, -0.95907676, 38.30509, 17.027155, -187.32887)
+
+[node name="Cane_Clump_A" parent="DecorManual/Zone05_CoastalClimb/cane"]
+visible = false
+
+[node name="Cane_Clump_C" parent="DecorManual/Zone05_CoastalClimb/cane"]
+visible = false
+
+[node name="cane2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("12_cane")]
+transform = Transform3D(-0.50313437, 0, 0.86420816, 0, 1, 0, -0.86420816, 0, -0.50313437, 103.12624, 23.67609, -235.34995)
+
+[node name="Cane_Clump_A" parent="DecorManual/Zone05_CoastalClimb/cane2"]
+visible = false
+
+[node name="Cane_Clump_B" parent="DecorManual/Zone05_CoastalClimb/cane2"]
+visible = false
+
+[node name="pand_r" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("11_pnd")]
+transform = Transform3D(-1.0623492, 0, 0.2853318, 0, 1.1, 0, -0.2853318, 0, -1.0623492, 20.760689, 16.87913, -175.36137)
+
+[node name="pand_r2" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("11_pnd")]
+transform = Transform3D(1.1864991, 0, -0.17949879, 0, 1.2, 0, 0.17949879, 0, 1.1864991, 76.182205, 20.186049, -212.61748)
+
+[node name="hib_r" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("10_hib")]
+transform = Transform3D(1.5951737, 0, -0.1241812, 0, 1.6, 0, 0.1241812, 0, 1.5951737, 61.26056, 19.365, -204.66003)
+
+[node name="pier" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("14_pier")]
+transform = Transform3D(0.57401276, 0, -0.81884634, 0, 1, 0, 0.81884634, 0, 0.57401276, 114.23253, -1.4492903, -212.40135)
+
+[node name="pier_boat" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("7_dydiq")]
+transform = Transform3D(0.656461, 0, -0.75435996, 0, 1, 0, 0.75435996, 0, 0.656461, 122.143005, -1.5692903, -205.1237)
+
+[node name="pier_palm" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("8_dledb")]
+transform = Transform3D(-0.28526694, 0, 1.0623666, 0, 1.1, 0, -1.0623666, 0, -0.28526694, 107.80008, 7.15169, -214.60896)
+
+[node name="pier_rock" parent="DecorManual/Zone05_CoastalClimb" instance=ExtResource("4_wrrxe")]
+transform = Transform3D(1.057019, 0, 0.5680765, 0, 1.2, 0, -0.5680765, 0, 1.057019, 113.9918, -1.9492903, -204.90521)
+
+[node name="Coral_Rock_01" parent="DecorManual/Zone05_CoastalClimb/pier_rock"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/Zone05_CoastalClimb/pier_rock"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/Zone05_CoastalClimb/pier_rock"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/Zone05_CoastalClimb/pier_rock"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/Zone05_CoastalClimb/pier_rock"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/Zone05_CoastalClimb/pier_rock"]
+visible = false
+
+[node name="hib_crest" parent="DecorManual/Zone06_Crest" instance=ExtResource("10_hib")]
+transform = Transform3D(-1.2368511, 0, -1.1662759, 0, 1.7, 0, 1.1662759, 0, -1.2368511, 152.96376, 27.256428, -272.0613)
+
+[node name="hib_crest2" parent="DecorManual/Zone06_Crest" instance=ExtResource("10_hib")]
+transform = Transform3D(1.4030604, 0, 0.5304915, 0, 1.5, 0, -0.5304915, 0, 1.4030604, 178.51483, 27.709396, -273.01147)
+
+[node name="hib_crest3" parent="DecorManual/Zone06_Crest" instance=ExtResource("10_hib")]
+transform = Transform3D(0.08173155, 0, 1.7981434, 0, 1.8, 0, -1.7981434, 0, 0.08173155, 209.73418, 27.471325, -268.12375)
+
+[node name="pand_crest" parent="DecorManual/Zone06_Crest" instance=ExtResource("11_pnd")]
+transform = Transform3D(-0.9857481, 0, 0.48816052, 0, 1.1, 0, -0.48816052, 0, -0.9857481, 165.38757, 27.444763, -273.62158)
+
+[node name="pand_crest2" parent="DecorManual/Zone06_Crest" instance=ExtResource("11_pnd")]
+transform = Transform3D(0.3426738, 0, -1.1500325, 0, 1.2, 0, 1.1500325, 0, 0.3426738, 196.3553, 27.747204, -271.9126)

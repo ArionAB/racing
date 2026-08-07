@@ -162,6 +162,7 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
     grand_total = 0
     ok = True
     assembly_lo = 1e9   # cel mai jos punct din TOT fisierul (pentru origin=assembly)
+    assembly_hi = -1e9  # si cel mai inalt (pentru origin=waterline)
 
     for node in nodes:
         if "mesh" not in node:
@@ -310,8 +311,9 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
         # verificare si iesea cu "niciun nod cu mesh". O garda care raporteaza
         # ca n-are ce masura, in loc sa masoare, e mai rea decat lipsa ei:
         # arata rosu din alt motiv decat cel adevarat.
-        if origin == "assembly":
+        if origin in ("assembly", "waterline"):
             assembly_lo = min(assembly_lo, min(ys) + tr[1])
+            assembly_hi = max(assembly_hi, max(ys) + tr[1])
         if any(abs(c) > 1e-6 for c in tr):
             # nod cu pivot propriu (ex. roata morii): coordonatele de mai sus sunt
             # relative la pivot, deci regula "baza la Y=0" nu i se aplica
@@ -330,13 +332,14 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
                 ok = False
             else:
                 print("    origine   : centru confirmat (bbox Y %+.3f, cerut ~0)" % off)
-        elif origin == "assembly":
+        elif origin in ("assembly", "waterline"):
             # Ansamblu cu ORIGINE COMUNA: mai multe noduri care formeaza un
             # singur obiect si trebuie sa-si pastreze pozitiile relative (arcada
             # din #C1: doua picioare, o traversa, doua proxy-uri de coliziune).
             # Regula "baza la Y=0" per nod ar fi gresita — traversa chiar
             # pluteste la 9 m, ala e tot rostul ei. Ce se verifica in schimb e ca
-            # ANSAMBLUL atinge solul (acumulat mai sus, in lume).
+            # ANSAMBLUL atinge solul (acumulat mai sus, in lume) — respectiv, la
+            # waterline, ca INCALECA linia apei.
             pass
         elif abs(min(ys)) > 0.01:
             print("    !! baza nu e la Y=0 (min Y = %.3f)" % min(ys))
@@ -402,6 +405,20 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
             print("\nansamblu : baza confirmata (cel mai jos punct Y=%.3f), "
                   "piesele isi pastreaza pozitiile relative" % assembly_lo)
 
+    if origin == "waterline":
+        # Obiect ancorat de LINIA APEI, nu de sol (pontonul): Y=0 e nivelul
+        # marii, pilonii coboara sub el, puntea sta peste el. Se aseaza cu
+        # y = sea_level, deci contractul e ca geometria INCALECA originea —
+        # un ponton exportat cu baza la 0 ar pluti cu totul PESTE apa.
+        if assembly_lo > -0.01 or assembly_hi < 0.01:
+            print("\n!! origin=waterline, dar geometria nu incaleca Y=0 "
+                  "(Y %.3f .. %.3f) — exportat cu originea la baza?"
+                  % (assembly_lo, assembly_hi))
+            ok = False
+        else:
+            print("\nlinia apei: confirmata (Y %.3f .. %.3f incaleca 0)"
+                  % (assembly_lo, assembly_hi))
+
     print("\nTOTAL: %d tris" % grand_total)
     print("VERDICT: %s" % ("OK" if ok else "PROBLEME — vezi mai sus"))
     return ok
@@ -425,8 +442,9 @@ if __name__ == "__main__":
                 sys.exit("--front asteapta +X, -X, +Z sau -Z (Y e sus)")
         elif f.startswith("--origin="):
             origin = f.split("=", 1)[1].strip().lower()
-            if origin not in ("base", "center", "assembly"):
-                sys.exit("--origin asteapta base (implicit), center sau assembly")
+            if origin not in ("base", "center", "assembly", "waterline"):
+                sys.exit("--origin asteapta base (implicit), center, assembly "
+                         "sau waterline")
         else:
             sys.exit("optiune necunoscuta: %s" % f)
 

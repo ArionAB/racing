@@ -25,6 +25,9 @@ extends Node
 ##                             0.25 = la capatul maturarii, 0.12 = la jumatatea
 ##                             traversarii. Fara el, captura o prinde mereu pe
 ##                             mijlocul drumului si nu se vede niciodata trecerea.
+##   --wave-at=0.30           la fel, pentru valul care spala soseaua: 0 = abia
+##                             intrat in cadru dinspre larg, ~0.30 = pe axa
+##                             soselei, peste ~0.60 = in larg, invizibil.
 ##   --bridge-at=0.24          la fel, pentru podul mobil: 0 = inchis, ~0.24 =
 ##                             travee sus cu corabia in gol. Fara el, captura
 ##                             prinde podul la inceputul ciclului, adica exact
@@ -66,6 +69,7 @@ func _ready() -> void:
 	var train_at := -1.0
 	var bridge_at := -1.0
 	var typhoon_at := -1.0
+	var wave_at := -1.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -83,6 +87,8 @@ func _ready() -> void:
 			bridge_at = float(arg.trim_prefix("--bridge-at="))
 		elif arg.begins_with("--typhoon-at="):
 			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
+		elif arg.begins_with("--wave-at="):
+			wave_at = float(arg.trim_prefix("--wave-at="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -103,6 +109,8 @@ func _ready() -> void:
 		_set_bridge_phase(track, bridge_at)
 	if typhoon_at >= 0.0:
 		_set_typhoon_phase(track, typhoon_at)
+	if wave_at >= 0.0:
+		_set_wave_phase(track, wave_at)
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:
@@ -290,6 +298,30 @@ func _set_typhoon_phase(root: Node, at: float) -> void:
 		typhoon.call("_apply_cycle", 0.0)
 		found += 1
 	print("--typhoon-at=%.2f: %d trombe mutate in ciclu" % [at, found])
+
+
+## Muta valul intr-un moment ales din traversarea lui.
+##
+## Fractia e din ciclul complet: 0 il pune la marginea dinspre larg (abia intrat
+## in cadru, telegrafierea), ~0.30 pe axa soselei, iar peste `ON_ROAD_FRAC +
+## LEAD_TIME/PERIOD` valul e in larg si INVIZIBIL. Fara steag, captura il prinde
+## unde s-a nimerit, si de cele mai multe ori asta inseamna „nicaieri" — exact
+## felul in care o poza poate arata un hazard care lipseste ca pe unul in regula.
+##
+## `_advance(0.0)` cu delta zero: aseaza pozitia si vizibilitatea fara sa mai
+## inainteze ceasul cu un pas de care o poza n-are nevoie.
+func _set_wave_phase(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.get_children():
+		var wave := node as WaveSurge
+		if wave == null:
+			continue
+		# Scazut defazajul: `at` inseamna acelasi lucru pe orice val de pe pista,
+		# nu „at plus cat s-a nimerit sa fie faza fractiei lui".
+		wave.set("_time", WaveSurge.PERIOD * (clampf(at, 0.0, 0.999) - wave.phase))
+		wave.call("_advance", 0.0)
+		found += 1
+	print("--wave-at=%.2f: %d valuri mutate in ciclu" % [at, found])
 
 
 ## Muta podul mobil intr-un moment ales din ciclul lui.

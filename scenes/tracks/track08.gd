@@ -54,6 +54,34 @@ func _init() -> void:
 
 
 ## ############################################################################
+## DIGUL DE START: apa de pe asfalt vine din mare, nu dintr-o teava.
+##
+## A treia abatere de la Okinawa v2, si prima care schimba un HAZARD. Traseul,
+## cotele si fractia raman neatinse: se schimba doar ce anume uda drumul la
+## 0.975.
+##
+## [b]De ce[/b]. Okinawa v2 pune acolo un `WaterHose` — o conducta sparta — si
+## comentariul ei zice, cuvant cu cuvant, „valul care spala digul". Adica
+## intentia era deja marea; furtunul era doar ce exista in cod atunci. Pe insula
+## teava nici nu se vede (`hose_model: ""` in tema island), deci sectorul arata
+## azi ca un jet de apa care tasneste din nimic peste un dig de tetrapozi.
+##
+## [b]Ce se schimba pentru cel care conduce[/b], si asta e adevaratul motiv:
+## conducta uda mereu, deci digul era o TAXA — treci alunecand, indiferent ce
+## faci. Valul uda doar cat trece, deci digul devine o DECIZIE: intri acum, sau
+## ridici piciorul o secunda si intri pe uscat. Ultima portiune a turului, exact
+## unde se decid depasirile, capata astfel o fereastra. E faza 2 din #106, luata
+## aici pe pista de lucru — pe Okinawa v2 banda permanenta ramane, ca sa se poata
+## simti diferenta una langa alta.
+func _hose_fracs() -> Array[float]:
+	return []
+
+
+func _wave_fracs() -> Array[float]:
+	return [0.975] # aceeasi fractie pe care o avea furtunul
+
+
+## ############################################################################
 ## STRAMTOAREA KAIUN: canalul cu pod mobil de pe coasta de vest.
 ##
 ## Singura abatere a acestei piste de la Okinawa v2, si prima care schimba

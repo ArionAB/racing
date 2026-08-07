@@ -96,7 +96,16 @@ func _physics_process(delta: float) -> void:
 	for body in _zone.get_overlapping_bodies():
 		var car := body as Car
 		if car != null:
-			car.apply_slip()
+			_touch_car(car, delta)
+
+
+## Ce pateste o masina care e in apa ACUM. Implicit: aquaplanare.
+##
+## Virtuala fiindca „ce face apa" difera intre surse, chiar daca „unde e apa" nu:
+## o balta de la o teava sparta iti ia doar aderenta, un val care traverseaza
+## drumul te si imbranceste si te franeaza. Vezi `WaveSurge._touch_car`.
+func _touch_car(car: Car, _delta: float) -> void:
+	car.apply_slip()
 
 
 func _build_wet_patch() -> void:

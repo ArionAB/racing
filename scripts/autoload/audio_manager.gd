@@ -24,6 +24,11 @@ const SFX: Dictionary = {
 	# un moment in care „se intampla", e acolo tot timpul si volumul ei e ce iti
 	# spune cat de aproape e. Vezi lista de bucle din _ready.
 	&"typhoon_roar": preload("res://assets/audio/typhoon_roar.wav"),
+	# A doua bucla de hazard, din acelasi motiv: valul e acolo tot timpul, doar
+	# ca se apropie si se departeaza. `WaveSurge` ii urca volumul cand urca pe
+	# drum si i-l coboara cand se scurge — porniri si opriri de stream ar fi
+	# pocnit la fiecare trecere.
+	&"wave_wash": preload("res://assets/audio/wave_wash.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.
@@ -46,7 +51,8 @@ func _ready() -> void:
 	_create_bus(&"SFX")
 	_create_bus(&"Engine")
 	apply_volumes()
-	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP, SFX[&"typhoon_roar"]]:
+	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP, SFX[&"typhoon_roar"],
+			SFX[&"wave_wash"]]:
 		var wav := loop_stream as AudioStreamWAV
 		if wav != null:
 			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD

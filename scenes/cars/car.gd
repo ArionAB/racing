@@ -21,6 +21,12 @@ signal respawned(car: Car)
 signal bumped(car: Car, other: Car, delta_v: float)
 ## Strivit de un hazard. `severity` in 0..1, pentru shake proportional.
 signal crushed(car: Car, severity: float)
+## Lovit de o masa de apa (valul care spala digul). `strength` in 0..1.
+##
+## Semnal separat de `crushed` desi amandoua zguduie ecranul: `crushed` inseamna
+## si turtire, si plafon de viteza taiat secunde intregi — un val nu te striveste,
+## te uda si te impinge. Legate la acelasi semnal, ar fi trebuit tunate impreuna.
+signal splashed(car: Car, strength: float)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -419,6 +425,12 @@ func crush(seconds: float, factor: float, squash: Vector3,
 
 func apply_sweep(push: Vector3) -> void:
 	velocity += push
+
+
+## Am intrat intr-o masa de apa: doar semnalul (shake + orice mai asculta).
+## Efectele pe fizica le aplica hazardul, ca sa ramana toate intr-un loc.
+func splash(strength: float) -> void:
+	splashed.emit(self, strength)
 
 ## Invarte caroseria in jurul verticalei, `duration` secunde. DOAR VIZUAL.
 ##

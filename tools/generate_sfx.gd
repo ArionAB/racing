@@ -34,6 +34,11 @@ func _init() -> void:
 	_save("crossing_bell", _tone(0.18, 1050.0, 14.0))
 	# Vuietul trombei: bucla lunga, larga, fara nicio inaltime recognoscibila.
 	_save("typhoon_roar", _typhoon_roar())
+	# Valul care spala digul. ADAUGAT LA SFARSIT, si nu e o chestiune de ordine
+	# estetica: `rng` e un singur sir semanat o data, deci orice sunet inserat mai
+	# sus decaleaza zgomotul tuturor celor de dupa el si rescrie fisiere pe care
+	# nu le-a atins nimeni.
+	_save("wave_wash", _wave_wash())
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -204,6 +209,43 @@ func _sweep_whoosh(dur: float, f0: float, f1: float, noise_amt: float) -> Packed
 		lp = lp * 0.75 + (rng.randf() * 2.0 - 1.0) * 0.25
 		out[i] = (sin(TAU * phase) * 0.5 + lp * noise_amt) * sin(PI * frac)
 	return out
+
+## Vuietul valului: bucla de 2.4 s, zgomot filtrat cu doua benzi.
+##
+## Diferenta fata de vuietul trombei nu e de intensitate, e de SPECTRU. Tromba e
+## huruit (aproape tot sub 100 Hz, cu un suierat subtire deasupra); apa e
+## SISAIT — energia sta sus, in banda in care se aude spuma. De aici cele doua
+## filtre: un trece-jos foarte lent pentru corpul valului si un trece-banda mult
+## mai deschis pentru spuma, amestecat invers fata de tromba.
+##
+## Pulsul lent (0.45 Hz) e ce face bucla sa nu citeasca a static de radio: apa
+## vine si se retrage. Capetele se suprapun in fondu-incrucisat, ca la tromba —
+## zgomotul e aleator, deci ultimul esantion si primul n-au nicio sansa sa se
+## potriveasca.
+func _wave_wash() -> PackedFloat32Array:
+	const DUR := 2.4
+	var n := int(RATE * DUR)
+	var raw := PackedFloat32Array()
+	raw.resize(n)
+	var lp := 0.0
+	var hiss := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var white := rng.randf() * 2.0 - 1.0
+		lp = lp * 0.975 + white * 0.025       # corpul de apa
+		hiss = hiss * 0.55 + white * 0.45     # spuma
+		var swell := 0.55 + 0.45 * sin(TAU * 0.45 * t)
+		raw[i] = (lp * 3.2 + hiss * 0.55) * swell * 0.55
+	var fade := int(n * 0.15)
+	var out := PackedFloat32Array()
+	out.resize(n - fade)
+	for i in out.size():
+		out[i] = raw[i]
+	for i in fade:
+		var k := float(i) / float(fade)
+		out[i] = raw[i] * k + raw[out.size() + i] * (1.0 - k)
+	return out
+
 
 func _save(name: String, data: PackedFloat32Array) -> void:
 	var path := "res://assets/audio/%s.wav" % name

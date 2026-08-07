@@ -13,6 +13,20 @@ extends WaterHazard
 ## sunt ale lui `WaterHazard` si sunt LITERAL acelasi cod. Ce e aici e miscarea —
 ## si fiindca apa e copil al nodului, ea calatoreste cu creasta pe gratis.
 ##
+## ## CE SE SIMTE, si de ce nu era destul grip-ul taiat
+##
+## Prima versiune doar taia aderenta laterala. Din masina nu se simtea NIMIC, si
+## motivul e geometric: digul e o dreapta de 200 m, iar pe o dreapta nu ceri
+## aderenta laterala — deci n-ai ce pierde. Un hazard care se manifesta numai
+## daca virezi e, pe sectorul asta, decor.
+##
+## Acum valul face ce face un metru cub de apa care te loveste din lateral:
+##   - te IMPINGE in directia lui de mers (`Car.apply_sweep`),
+##   - te FRANEAZA, ca orice masina bagata in apa mare,
+##   - taie grip-ul (mai departe, pentru cine chiar vira),
+##   - si zguduie ecranul prin semnalul `Car.splashed`.
+## Primele doua se simt mergand drept, care e singurul fel in care treci pe acolo.
+##
 ## De ce nu `SlidingHazard`: alea matura lateral si te IMPING. Valul trece peste
 ## sosea pe toata latimea, nu are coliziune si nu are pozitie de repaus pe
 ## margine — sunt doua obiecte diferite care se misca amandoua lateral, si a
@@ -33,6 +47,24 @@ const ON_ROAD_FRAC: float = 0.42
 const LEAD_TIME: float = 1.6
 ## Cati metri dincolo de marginea drumului mai e vazut valul dupa ce l-a trecut.
 const EXIT_MARGIN: float = 8.0
+
+## Imbrancitura, in m/s adaugati LATERAL o singura data cand creasta trece peste
+## masina. Nu e o acceleratie: apa te loveste o data, nu te impinge continuu.
+##
+## Cifra vine din masuratoare, nu din gust. `tools/ProbeWave.tscn` trece o masina
+## lansata prin sector de doua ori — o data cu valul peste ea, o data fara — si
+## citeste cat de departe ajung una de alta. La 9.0 cele doua masini terminau la
+## 9.5 m distanta, adica doua treimi din latimea drumului: nu „te imbranceste",
+## ci „te matura de pe dig". La 5.0 iese 2.6 m lateral (o masina si jumatate),
+## 2.0 m ramasi in urma si 3.4 m/s mai putin la iesirea din sector — cat sa te
+## sperie si sa ai ce corecta din volan. Masina din sonda nu contreaza deloc; un
+## jucator vede mai putin.
+const PUSH_IMPULSE: float = 5.0
+## Cat din viteza pierzi pe secunda de stat in apa (fractiune). Apa mare franeaza;
+## fara asta, valul era o pata de vopsea peste care treceai fara sa clipesti.
+const DRAG_PER_SEC: float = 0.40
+## Cat de mult zguduie ecranul o trecere prin creasta, la impact maxim.
+const SPLASH_TRAUMA: float = 0.30
 
 ## Latimea maturata, in metri de o parte si de alta a axei drumului.
 var sweep: float = 22.0
@@ -71,15 +103,21 @@ var water_y: float = INF
 var _anchor: Vector3 = Vector3.ZERO
 
 var _time: float = 0.0
+## Suportul care poarta leganarea, ca sa n-o dea si peliculei de apa de dedesubt.
 var _model: Node3D
-## Toate piesele de spuma din creasta, ca pulsul sa bata pe toata lungimea ei si
-## nu doar pe primul segment.
-var _foams: Array[Node3D] = []
-## Modelul unui segment de creasta si lungimea lui reala, masurata din GLB.
-var _model_scene: PackedScene
-var _segment_span: float = 0.0
-var _segment_depth: float = 2.6
-var _segments: int = 1
+## Piesele animate separat din GLB, cautate dupa nume (contractul din
+## `tools/blender/build_wave_surge.py`). Lipsa oricareia nu e fatala.
+var _foam: Node3D
+var _spray_piece: Node3D
+var _spray: CPUParticles3D
+var _audio: AudioStreamPlayer3D
+## Cat de departe de creasta era fiecare masina in cadrul trecut, ca sa stim cand
+## INTRA sub ea — imbrancitura si stropul se dau la intrare, nu continuu.
+##
+## Cheia e `get_instance_id()`, nu masina: un dictionar cu obiecte drept chei le
+## tine in viata si crapa la prima masina eliberata („previously freed instance",
+## bug pe care `typhoon_hazard.gd` inca il scoate in sonde).
+var _crest_dist: Dictionary = {}
 
 const MODEL_PATH := "res://assets/models/wave_surge.glb"
 
@@ -92,34 +130,9 @@ func _ready() -> void:
 	# se citeste basis-ul local — `look_at` ar fi cerut coordonate globale.
 	if travel_dir.length_squared() > 0.001:
 		basis = Basis.looking_at(travel_dir, Vector3.UP)
-	# INAINTE de super(): baza construieste pelicula de apa din `crest_length`,
-	# iar aici se afla cat de lunga iese ea de fapt.
-	_snap_crest_to_model()
 	super()
-
-
-## Rotunjeste lungimea crestei la un numar intreg de segmente de model.
-##
-## De ce segmente si nu o singura piesa intinsa: `wave_surge.glb` e o bucata de
-## val de 6 m, iar pista cere 30. Intinsa de cinci ori, spuma ei se latea odata
-## cu ea si se vedea ca o pata; repetata, fiecare bucata isi pastreaza scara la
-## care a fost desenata. Costul e cinci mesh-uri de 500 de triunghiuri in loc de
-## unul — nimic fata de bugetul pistei — si zero materiale in plus, fiindca toate
-## primesc materialul lumii.
-func _snap_crest_to_model() -> void:
-	if not ResourceLoader.exists(MODEL_PATH):
-		return
-	_model_scene = load(MODEL_PATH) as PackedScene
-	var probe := _model_scene.instantiate() as Node3D
-	var span := _model_span(probe)
-	probe.free()
-	_segment_span = span.x
-	_segment_depth = span.z
-	if _segment_span <= 0.01:
-		_model_scene = null
-		return
-	_segments = maxi(1, int(round(crest_length / _segment_span)))
-	crest_length = float(_segments) * _segment_span
+	if not Engine.is_editor_hint():
+		_start_wash()
 
 
 ## Petecul ud tine cat creasta: lung cat ea de-a lungul soselei (X local, fiindca
@@ -135,7 +148,34 @@ func _wet_patch_offset() -> float:
 
 
 func _build_source() -> void:
-	if _model_scene == null:
+	# Suportul poarta leganarea si inaintarea peliculei; piesele din GLB stau sub
+	# el. Fara suport, orice rotatie a valului ar fi invartit si apa de pe drum.
+	_model = Node3D.new()
+	_model.name = "Crest"
+	# Creasta sta pe MUCHIA DIN FATA a peliculei, nu pe mijlocul ei: valul impinge
+	# apa inaintea lui, deci foaia ramane in urma lui. Fata = -Z local.
+	_model.position.z = -0.28 * film_depth
+	add_child(_model)
+	_build_crest()
+	_build_spray()
+	_audio = AudioStreamPlayer3D.new()
+	_audio.bus = &"SFX"
+	# Raza mare, ca la tromba: vuietul e jumatate din telegrafiere. Il auzi
+	# crescand inainte sa te uiti dupa el.
+	_audio.max_distance = 180.0
+	_audio.unit_size = 20.0
+	add_child(_audio)
+
+
+## Creasta: O SINGURA piesa, scalata pe lungime la cat cere pista.
+##
+## Pana la #106 erau cinci copii de 6 m puse cap la cap, si din masina se vedea
+## exact ce erau — cinci valuri identice cu cusaturi intre ele. Un val e o LINIE
+## CONTINUA: orice ritm in ea se citeste instantaneu ca sablon. Acum GLB-ul e
+## construit intreg la 30 m, cu varfuri inegale si o portiune deja sparta
+## (`tools/blender/build_wave_surge.py`), iar aici se intinde doar cat trebuie.
+func _build_crest() -> void:
+	if not ResourceLoader.exists(MODEL_PATH):
 		# Fara GLB, o prisma turcoaz. Mecanica trebuie sa poata fi jucata si
 		# reglata inainte sa existe modelul — acelasi contract ca la tromba.
 		var mi := MeshInstance3D.new()
@@ -147,44 +187,76 @@ func _build_source() -> void:
 		mat.albedo_color = Palette.color(Palette.REEF_SHALLOW)
 		mat.roughness = 0.35
 		mi.material_override = mat
-		_model = mi
-		add_child(_model)
+		_model.add_child(mi)
 		return
-	# Creasta: `_segments` bucati asezate cap la cap pe X (adica de-a lungul
-	# soselei — nodul e intors cu -Z pe directia de mers), centrate pe hazard.
-	_model = Node3D.new()
-	_model.name = "Crest"
-	# Spuma sta pe MUCHIA DIN FATA a peliculei, nu pe mijlocul ei: valul impinge
-	# apa inaintea lui, deci foaia ramane in urma crestei. Fata = -Z local.
-	_model.position.z = -0.5 * (film_depth - _segment_depth)
-	add_child(_model)
-	var start := -0.5 * (crest_length - _segment_span)
-	for i in _segments:
-		var seg := _model_scene.instantiate() as Node3D
-		seg.position.x = start + float(i) * _segment_span
-		# Aceeasi bucata de sase metri repetata de cinci ori se citeste ca
-		# sablon, nu ca val — se vedea in captura, un sirag de piese identice.
-		# Variatia e derivata din indice (deci stabila intre rulari, ca tot
-		# decorul procedural din proiect), mica, si pe axele pe care un val chiar
-		# variaza: cat de mult a inaintat bucata si cat de sus a crescut.
-		seg.position.z = (-0.35 if i % 2 == 0 else 0.4)
-		seg.rotation.y = deg_to_rad(-4.0 if i % 3 == 0 else 3.0)
-		seg.scale = Vector3(1.0, 0.86 + 0.09 * float(i % 3), 1.0)
-		_model.add_child(seg)
-		# Nodul `Wave_Foam` se cauta dupa NUME, ca `Blades` la moara. Daca
-		# lipseste, valul merge fara pulsul de spuma in loc sa crape.
-		for child in seg.get_children():
-			if child.name == "Wave_Foam":
-				_foams.append(child as Node3D)
-	Palette.apply_world_material(_model)
+	var crest := (load(MODEL_PATH) as PackedScene).instantiate() as Node3D
+	_model.add_child(crest)
+	# Scalare doar pe X, si e intentionat neuniforma: o foaie de apa intinsa pe
+	# lungimea ei nu se vede alungita, dar un val inaltat proportional fiindca
+	# pista voia o creasta mai lunga ar iesi un zid de 6 m.
+	var span := _model_span(crest)
+	if span.x > 0.01:
+		crest.scale.x = crest_length / span.x
+	# Piesele animate se cauta dupa NUME, ca `Blades` la moara. Daca lipsesc,
+	# valul merge fara animatia lor in loc sa crape.
+	for child in crest.get_children():
+		if child.name == "Wave_Foam":
+			_foam = child as Node3D
+		elif child.name == "Wave_Spray":
+			_spray_piece = child as Node3D
+	Palette.apply_world_material(crest)
+
+
+## Stropii: particule, nu geometrie.
+##
+## Silueta singura nu vinde apa — tornada a invatat asta inaintea valului, si tot
+## ea a dat reteta (`typhoon_hazard.gd`): trei sisteme mici bat un model mare.
+## Emitatorul e o CUTIE cat toata creasta, deci stropii sar de pe toata lungimea
+## ei, nu dintr-un punct.
+func _build_spray() -> void:
+	_spray = CPUParticles3D.new()
+	_spray.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	_spray.emission_box_extents = Vector3(crest_length * 0.5, 0.2, 0.4)
+	_spray.position = Vector3(0.0, 1.4, -0.4)
+	_spray.direction = Vector3(0, 1, -0.55)
+	_spray.spread = 26.0
+	_spray.initial_velocity_min = 2.5
+	_spray.initial_velocity_max = 6.5
+	_spray.gravity = Vector3(0, -9.0, 0)
+	# Plafon de particule, regula din CLAUDE.md. 90 pe 30 m de creasta inseamna
+	# trei stropi pe metru — destul cat sa citeasca, destul de putin cat sa nu
+	# conteze pe mobil.
+	_spray.amount = 90
+	_spray.lifetime = 0.9
+	_spray.emitting = false
+	var drop := BoxMesh.new()
+	drop.size = Vector3(0.16, 0.16, 0.16)
+	var drop_mat := StandardMaterial3D.new()
+	drop_mat.vertex_color_use_as_albedo = true
+	drop_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	drop.material = drop_mat
+	_spray.mesh = drop
+	_spray.color = Palette.color(Palette.FOAM_WHITE)
+	_model.add_child(_spray)
+
+
+func _start_wash() -> void:
+	var manager := get_node_or_null(^"/root/AudioManager")
+	if manager == null or _audio == null:
+		return
+	var stream: AudioStream = manager.call("stream", &"wave_wash")
+	if stream == null:
+		return
+	_audio.stream = stream
+	_audio.play()
 
 
 func _advance(delta: float) -> bool:
 	_time += delta
 	var t := fposmod(_time / PERIOD + phase, 1.0)
 	# Valul e pe drum doar in prima parte a ciclului; in rest asteapta in larg.
-	# Se ascunde in loc sa fie mutat departe: un mesh de 500 de triunghiuri
-	# randat degeaba la 60 fps, de doua ori pe pista, nu e gratis pe mobil.
+	# Se ascunde in loc sa fie mutat departe: 2800 de triunghiuri plus 90 de
+	# particule randate degeaba la 60 fps nu sunt gratis pe mobil.
 	var span := ON_ROAD_FRAC + LEAD_TIME / PERIOD
 	if t >= span:
 		if _model != null:
@@ -218,17 +290,73 @@ func _advance(delta: float) -> bool:
 		var past := maxf(0.0, offset - (half + 2.0))
 		p.y -= minf(past * 0.35, 2.2)
 	position = p
-	# Pulsul de spuma: creste cat valul e pe asfalt. Nu e decor — e semnalul
-	# vizual care spune "ACUM", si de-aia e pe o piesa separata din GLB.
-	if not _foams.is_empty():
-		var pulse := 1.0 + (0.22 * sin(_time * 6.5) + 0.35 * on_road)
-		for foam in _foams:
-			foam.scale = Vector3(1.0, pulse, 1.0)
+	_animate(on_road)
 	# Apa taie grip-ul doar cat creasta chiar atinge asfaltul. Marja de 1 m peste
 	# jumatatea de latime tine cont de faptul ca petecul are si el grosime: fara
 	# ea, valul ar uda ultimul metru de drum din varful zonei, adica inainte sa
 	# se vada peste el.
 	return absf(offset) <= half + 1.0
+
+
+## Ce misca in val, in afara de deplasarea lui.
+##
+## Un obiect care se translateaza rigid citeste ca decupaj tras pe sfoara —
+## aceeasi lectie pe care tornada o rezolva cu rotatia si braiele elicoidale.
+## Valul n-are cum sa se roteasca (o suprafata de apa care se invarte e absurda),
+## deci miscarea lui e alta: se LEAGANA pe directia de mers, spuma pulseaza,
+## stropii sar, si toate trei se sting cand valul iese de pe drum.
+func _animate(on_road: float) -> void:
+	if _model != null:
+		# Leganare in jurul axei crestei (X local): buza se apleaca inainte si se
+		# ridica, adica exact miscarea unui val care se rastoarna. Amplitudine
+		# mica — la mai mult de ~4° apa incepe sa arate ca o barca.
+		_model.rotation.x = deg_to_rad(3.2 * sin(_time * 2.1))
+	# Pulsul de spuma: creste cat valul e pe asfalt. Nu e decor — e semnalul
+	# vizual care spune "ACUM", si de-aia e pe o piesa separata din GLB.
+	if _foam != null:
+		var pulse := 1.0 + (0.14 * sin(_time * 6.5) + 0.22 * on_road)
+		_foam.scale = Vector3(1.0, pulse, 1.0)
+	if _spray_piece != null:
+		# Stropii de geometrie sar defazat fata de spuma: doua piese care pulseaza
+		# la unison se citesc ca o singura piesa care pulseaza.
+		_spray_piece.position.y = 0.18 * sin(_time * 3.7 + 1.1)
+		_spray_piece.scale = Vector3.ONE * (1.0 + 0.18 * sin(_time * 5.3))
+	if _spray != null:
+		# Particulele pornesc doar cat valul e efectiv peste ceva: in larg n-are
+		# de ce sa stropeasca, si sunt 90 de particule care nu se randeaza degeaba.
+		_spray.emitting = on_road > 0.05
+	if _audio != null:
+		# Vuietul creste cand valul urca pe drum si scade cand se scurge. -30 dB
+		# la capat inseamna practic tacere, dar fara opriri si porniri de stream.
+		_audio.volume_db = lerpf(-30.0, -4.0, on_road)
+
+
+## Ce pateste masina prinsa de val.
+##
+## Ordinea conteaza: intai imbrancitura (o singura data, la INTRARE), apoi
+## franarea si grip-ul taiat (continue, cat stai in apa). Daca imbrancitura ar fi
+## continua, valul ar impinge masina in fata lui ca un buldozer si ai iesi de pe
+## dig — apa te LOVESTE o data si dupa aia doar te tine.
+func _touch_car(car: Car, delta: float) -> void:
+	super(car, delta)
+	# Distanta de la masina la linia crestei, pe directia de mers a valului.
+	var to_car := car.global_position - global_position
+	var d := absf(to_car.dot(travel_dir))
+	var key := car.get_instance_id()
+	var was: float = _crest_dist.get(key, 1e9)
+	_crest_dist[key] = d
+	# Franare: apa mare ia din viteza cat timp esti in ea. Proportional cu delta,
+	# deci nu depinde de rata de cadre.
+	var keep := 1.0 - clampf(DRAG_PER_SEC * delta, 0.0, 0.5)
+	car.velocity.x *= keep
+	car.velocity.z *= keep
+	# Imbrancitura + stropul: doar cand creasta chiar trece peste masina, adica in
+	# cadrul in care distanta scade sub un metru. `was` porneste de la infinit,
+	# deci prima intrare se prinde si ea.
+	if d > 1.0 or was <= 1.0:
+		return
+	car.apply_sweep(travel_dir * PUSH_IMPULSE)
+	car.splash(SPLASH_TRAUMA)
 
 
 ## Cotele modelului, in unitati locale. AABB-ul se aduna din mesh-uri: radacina

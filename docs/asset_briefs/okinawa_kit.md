@@ -38,7 +38,13 @@ declarate.
 | `sabani_boat.glb` | `Sabani_Hull`, `Sabani_Trim` | 5.00 m lungime | 1300 | #105 |
 | `beach_clutter.glb` | `Fishing_Crate`, `Net_Floats`, `Awamori_Pot`, `Bamboo_Rack`, `Driftwood_Log` | 0.19 – 1.37 m | 3594 | #105 |
 | `horizon_island.glb` | `Island_Low`, `Island_Peak`, `Island_Ridge` | 6.6 – 26.0 m | 750 | #105 |
-| `wave_surge.glb` | `Wave`, `Wave_Foam` | 1.80 m | 502 | #105 |
+| `wave_surge.glb` | `Wave`, `Wave_Foam`, `Wave_Spray` | 3.00 m / 30 m lungime | 2806 | #105, #106 |
+
+> Valul a fost RECONSTRUIT in august 2026, dupa playtest: era o bucata de 6 m pe
+> care pista o repeta de cinci ori ca sa acopere drumul, si din masina se vedeau
+> exact cinci valuri identice cu cusaturi intre ele. Acum e o singura piesa de
+> 30 m, cu varfuri inegale, o portiune deja sparta si un rulou de spuma pe buza.
+> Piesa noua `Wave_Spray` e a treia care se anima singura (`wave_surge.gd`).
 
 Total lot: **56.520 de triunghiuri** pentru cate o instanta din TOATE variantele
 — dar nicio pista nu le pune pe toate deodata. Ce conteaza e costul per

@@ -70,6 +70,9 @@ func _ready() -> void:
 		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
 	player.boost_started.connect(func(_c: Car) -> void:
 		camera.add_trauma(0.18))
+	# Valul care spala digul: izbitura de apa se vede, nu doar se aude.
+	player.splashed.connect(func(_c: Car, strength: float) -> void:
+		camera.add_trauma(clampf(strength, 0.05, 0.4)))
 	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
 	# din spate zguduie ecranul, o atingere lateral aproape deloc.
 	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:

@@ -110,7 +110,7 @@ culoare:**
 - **Sloturi folosite:** wood_weathered=9 (u=0.296875), rust_metal=10 (0.328125),
   painted_metal=11 (0.359375). u = (slot+0.5)/32 dacă se schimbă ordinea.
 - **Commit sursa `.blend` + `.glb`** — nu doar exportul.
-- **Checklist la primire** (`res://assets/models/windmill.glb`):
+- **Checklist la primire** (`res://assets/models/buildings/windmill.glb`):
   1. triunghiuri ≤ 1200
   2. nod separat `Blades`, pivot în centrul butucului, se rotește curat pe +Z
   3. UV-uri pe centrele sloturilor; AO pe roată arată bine în orice unghi

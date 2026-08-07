@@ -110,5 +110,5 @@ stats = finish(
 print("GasPoleSign -> %d tris | AO %.2f..%.2f" % (stats["tris"], stats["ao_min"], stats["ao_max"]))
 print("inaltime totala %.2f m | panou %.1f x %.1f la z=%.2f | inclinare %.1f°"
       % (TOTAL_H, PANEL_W, PANEL_H, PANEL_Z, TILT_DEG))
-print("GLB:   %s (%d B)" % export_glb([obj], "gas_pole_sign.glb"))
+print("GLB:   %s (%d B)" % export_glb([obj], "signs/gas_pole_sign.glb"))
 print("BLEND: %s (%d B)" % save_blend([obj], "gas_pole_sign.blend"))

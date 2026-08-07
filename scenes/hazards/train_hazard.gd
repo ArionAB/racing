@@ -14,7 +14,7 @@ extends Node3D
 ## Corpul solid face aruncarea — aia E explozia vizuala — iar repunerea
 ## temporizata garanteaza ca nimeni nu ramane blocat sub tren.
 ##
-## Garnitura e un MODEL (`assets/models/train.glb`: locomotiva cu abur, tender,
+## Garnitura e un MODEL (`assets/models/vehicles/train.glb`: locomotiva cu abur, tender,
 ## vagoane de lemn), nu cutiile din spike. Conteaza pentru gimmick, nu doar
 ## pentru poza: avertizarea vizuala e silueta care intra in cadru, iar o cutie
 ## nu spune de la 100 m nici incotro merge, nici cat mai are de trecut. Cotele
@@ -35,7 +35,7 @@ const HORN_AT: float = 0.4
 
 ## Garnitura: locomotiva cu abur + tender + vagoane de marfa.
 ## Trei noduri in GLB, vezi tools/blender/build_train.py.
-const MODEL_PATH := "res://assets/models/train.glb"
+const MODEL_PATH := "res://assets/models/vehicles/train.glb"
 const LOCO_NODE := "Train_Loco"
 const TENDER_NODE := "Train_Tender"
 const WAGON_NODE := "Train_Wagon"

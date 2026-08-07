@@ -108,7 +108,7 @@ for name, b in built:
 
 for o in objs:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(objs, "fence_ranch.glb"))
+print("GLB:   %s (%d B)" % export_glb(objs, "structures/fence_ranch.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "fence_ranch.blend"))
 for i, o in enumerate(objs):
     o.location = (i * 4.5, 0.0, 0.0)

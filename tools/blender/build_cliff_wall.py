@@ -272,7 +272,7 @@ if over_budget:
 # La export toate pleaca din origine: Godot le instantiaza individual.
 for o in built:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:  %s (%d B)" % export_glb(built, "cliff_wall.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "rocks/cliff_wall.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "cliff_wall.blend"))
 for i, o in enumerate(built):
     o.location = ((i // 2) * 17.0, 0.0, 0.0)

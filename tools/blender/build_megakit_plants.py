@@ -219,7 +219,7 @@ print("\nTOTAL: %d tris in biblioteca" % total)
 
 for o in built:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(built, "megakit_plants.glb"))
+print("GLB:   %s (%d B)" % export_glb(built, "plants/megakit_plants.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "megakit_plants.blend"))
 
 x = 0.0

@@ -67,7 +67,7 @@ culoare în engine:**
 - **Sloturi folosite:** `rust_metal` = 10 (u = (10+0.5)/32 = 0.328125),
   `wood_weathered` = 9 (u = (9+0.5)/32 = 0.296875). Dacă se schimbă ordinea în
   [palette.gd](../../scripts/palette.gd), se recalculează u.
-- **Checklist de verificare la primire** (`res://assets/models/water_tower.glb`):
+- **Checklist de verificare la primire** (`res://assets/models/buildings/water_tower.glb`):
   1. triunghiuri ≤ 900
   2. UV-urile nimeresc centrele sloturilor (metal 0.328125 / lemn 0.296875)
   3. origine la bază, centrată XZ; stă pe sol la Y=0

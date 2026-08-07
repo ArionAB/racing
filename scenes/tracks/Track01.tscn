@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_2wkjx"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="2_1xt1w"]
-[ext_resource type="PackedScene" uid="uid://bu1lgxcqt0lwn" path="res://assets/models/rock_cluster.glb" id="4_jfmch"]
-[ext_resource type="PackedScene" uid="uid://golsaeo2gcmr" path="res://assets/models/butte.glb" id="10_f51a1"]
+[ext_resource type="PackedScene" uid="uid://bu1lgxcqt0lwn" path="res://assets/models/rocks/rock_cluster.glb" id="4_jfmch"]
+[ext_resource type="PackedScene" uid="uid://golsaeo2gcmr" path="res://assets/models/rocks/butte.glb" id="10_f51a1"]
 
 [sub_resource type="Curve3D" id="Curve3D_rpgo3"]
 _data = {

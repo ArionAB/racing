@@ -119,7 +119,7 @@ def nuts(b, base, count, radius, slot, seed=5):
 # coroana lui pleaca lateral cu 2.2 m — silueta care rupe verticalele si spune
 # "vant dinspre mare" fara niciun efect.
 PALMS = {
-    "coconut_palm.glb": dict(
+    "trees/coconut_palm.glb": dict(
         prefix="Palm_",
         trunk_path=[(0.00, 0.00, 0.00), (0.04, 0.02, 1.30), (0.14, 0.06, 2.60),
                     (0.30, 0.12, 3.80), (0.55, 0.20, 5.15), (0.78, 0.28, 6.05)],
@@ -127,7 +127,7 @@ PALMS = {
         fronds=9, frond_len=2.95, droop=1.0, rise=0.60,
         nut_count=5, nut_radius=0.34,
     ),
-    "beach_palm_bent.glb": dict(
+    "trees/beach_palm_bent.glb": dict(
         prefix="BentPalm_",
         trunk_path=[(0.00, 0.00, 0.00), (0.16, 0.00, 0.62), (0.52, 0.03, 1.22),
                     (1.02, 0.08, 1.72), (1.62, 0.12, 2.08), (2.20, 0.16, 2.28)],

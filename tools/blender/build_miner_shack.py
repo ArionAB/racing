@@ -160,5 +160,5 @@ for name, fill, bevel, uv_size in PARTS:
              "cub %.1f" % uv_size if uv_size else "atlas"))
 
 print("TOTAL: %d tris (buget 1500)" % total)
-print("GLB:   %s (%d B)" % export_glb(built, "miner_shack.glb"))
+print("GLB:   %s (%d B)" % export_glb(built, "buildings/miner_shack.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "miner_shack.blend"))

@@ -137,7 +137,7 @@ Fara suruburi, balustrade subtiri sau detaliu de frecventa inalta: se pierde la
 bbox <x> × <y> × <z> m.
 
 ```
-python tools/blender/verify_glb.py assets/models/<nume>.glb <buget>
+python tools/blender/verify_glb.py assets/models/<categorie>/<nume>.glb <buget>
 ```
 
 ![<ce arata>](img/<nume>_<unghi>.png)

@@ -174,5 +174,5 @@ print("  adica size (%.2f, %.2f, %.2f) la position (%.2f, %.2f, %.2f)"
       % (ahi.x - alo.x, ahi.z - alo.z, ahi.y - alo.y,
          (alo.x + ahi.x) * 0.5, (alo.z + ahi.z) * 0.5, -(alo.y + ahi.y) * 0.5))
 
-print("GLB:   %s (%d B)" % export_glb([body, arm], "rusted_digger.glb"))
+print("GLB:   %s (%d B)" % export_glb([body, arm], "vehicles/rusted_digger.glb"))
 print("BLEND: %s (%d B)" % save_blend([body, arm], "rusted_digger.blend"))

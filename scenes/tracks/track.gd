@@ -214,12 +214,12 @@ static func themes() -> Dictionary:
 			"ambient_color": Color.html("E2B77A"),
 			"ambient_energy": 0.22,
 			"fog_depth": true, # 90 -> 250 m, style_bible §6
-			"horizon_model": "res://assets/models/butte.glb",
+			"horizon_model": "res://assets/models/rocks/butte.glb",
 			"walls": false,   # rolul lor il preiau falezele de canion
 			"cliffs": true,
 			"decor": "bands",
 			"props": "desert",
-			"hazard_model": "res://assets/models/boulder_roller.glb",
+			"hazard_model": "res://assets/models/rocks/boulder_roller.glb",
 			# Bolovanul e din aceeasi roca cu falezele — aceeasi clasa de
 			# textura, doar proiectata in spatiul obiectului (vezi
 			# SlidingHazard.model_tri_class).
@@ -297,7 +297,7 @@ static func themes() -> Dictionary:
 			# (style_bible §7), deci "sunt langa insula cu doua varfuri" trebuie
 			# sa fie o informatie reala. Inelul apropiat primeste insula joasa,
 			# cel departat conul — silueta cea mai citibila sta cel mai departe.
-			"horizon_model": "res://assets/models/horizon_island.glb",
+			"horizon_model": "res://assets/models/effects/horizon_island.glb",
 			"horizon_picks": [
 				["Island_Low", "Island_Ridge"],
 				["Island_Ridge", "Island_Peak"],
@@ -332,7 +332,7 @@ static func themes() -> Dictionary:
 			# proportional cu deplasarea daca `roll_radius > 0` — corect pentru
 			# bolovanul din canion, absurd pentru o barca. Fara steag, sabani
 			# s-ar fi rostogolit ca un butoi.
-			"hazard_model": "res://assets/models/sabani_boat.glb",
+			"hazard_model": "res://assets/models/vehicles/sabani_boat.glb",
 			"hazard_roll": false,
 			"hazard_scale": 1.0,
 			"hazard_classes": {"Sabani_Hull": "wood"},
@@ -2516,7 +2516,7 @@ func _build_hazard(frac: float) -> void:
 		ball.center = p
 		ball.travel = side * half_width * 0.9
 		ball.global_position = p
-	elif ResourceLoader.exists("res://assets/models/rusted_digger.glb"):
+	elif ResourceLoader.exists("res://assets/models/vehicles/rusted_digger.glb"):
 		_build_excavator(frac)
 	else:
 		var box := SlidingHazard.new()
@@ -3491,7 +3491,7 @@ func _bake_decor(cliffs: Node3D, decor: Node3D, scen: Node3D) -> void:
 	TrackDecorBatch.bake(scen)
 
 func _build_excavator(frac: float) -> void:
-	const PATH := "res://assets/models/rusted_digger.glb"
+	const PATH := "res://assets/models/vehicles/rusted_digger.glb"
 	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
@@ -3513,7 +3513,7 @@ func _build_excavator(frac: float) -> void:
 
 ## Dinozaurul de plastic: landmark care "priveste" cursa de pe margine.
 func _build_dino(frac: float, side_sign: float) -> void:
-	const PATH := "res://assets/models/dino_bones.glb"
+	const PATH := "res://assets/models/props/dino_bones.glb"
 	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
@@ -3587,7 +3587,7 @@ func _scatter_bones(scene: PackedScene, center: Vector3, frac: float) -> void:
 ## conventie ca la cliff_wall. Traversa NU primeste coliziune: nicio masina
 ## n-ar trebui s-o atinga, iar o forma concava acolo e o capcana.
 func _build_arch(frac: float) -> void:
-	const PATH := "res://assets/models/rock_arch.glb"
+	const PATH := "res://assets/models/rocks/rock_arch.glb"
 	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
@@ -3659,7 +3659,7 @@ const _MINE_CLASSES := {
 ## separat — de aia sunt trei GRUPURI in GLB si nu unul. Din #130 fiecare grup
 ## e la randul lui spart pe clase de material, deci se extrag dupa PREFIX.
 func _build_mine(frac: float, side_sign: float) -> void:
-	const PATH := "res://assets/models/mine_portal.glb"
+	const PATH := "res://assets/models/buildings/mine_portal.glb"
 	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
@@ -3741,7 +3741,7 @@ const _MINE_CAMP := [
 
 
 func _build_mine_camp(stand: Vector3, side: Vector3) -> void:
-	const PATH := "res://assets/models/props_junk.glb"
+	const PATH := "res://assets/models/props/props_junk.glb"
 	if not ResourceLoader.exists(PATH):
 		return
 	var scene := load(PATH) as PackedScene
@@ -3789,14 +3789,14 @@ const _LANDMARKS := {
 	# doar pentru assets dintr-un singur material dominant (turnul e integral
 	# metal ruginit). Cele cu mai multe materiale trec prin "classes" + parti
 	# numite, ca village_house.
-	0: {"path": "res://assets/models/water_tower.glb",
+	0: {"path": "res://assets/models/buildings/water_tower.glb",
 		"gap": 10.0, "col": "cyl", "radius": 2.4, "spin": false,
 		"tri_class": "rust_metal"},
 	# Benzinaria: patru clase de suprafata. Ce ramane pe atlas (Gas_Trim) ramane
 	# din motive — geamurile isi iau adancimea falsa din slotul cel mai inchis,
 	# iar panoul, fascia rosie si steaua sunt accente de culoare pe care o
 	# textura le-ar sterge.
-	1: {"path": "res://assets/models/gas_station.glb",
+	1: {"path": "res://assets/models/buildings/gas_station.glb",
 		"gap": 9.0, "col": "box", "spin": false,
 		"classes": {"Gas_Wood": "wood", "Gas_Rust": "rust_metal",
 			"Gas_Concrete": "concrete"}},
@@ -3805,11 +3805,11 @@ const _LANDMARKS := {
 	# cubica); Mill_Trim ramane pe atlas — vana albastra e singurul accent de
 	# culoare al morii, iar apa din jgheab e un slot, nu o textura.
 	# ATENTIE: `Blades` se roteste, deci UV-uri reale, NU triplanar de lume.
-	2: {"path": "res://assets/models/windmill.glb",
+	2: {"path": "res://assets/models/buildings/windmill.glb",
 		"gap": 11.0, "col": "cyl", "radius": 1.6, "spin": true,
 		"classes": {"Mill_Wood": "wood", "Mill_Metal": "rust_metal",
 			"Blades": "rust_metal"}},
-	3: {"path": "res://assets/models/route66_sign.glb",
+	3: {"path": "res://assets/models/signs/route66_sign.glb",
 		"gap": 3.5, "col": "none", "spin": false},
 	# Ecran de drive-in: 20.6 m lat si 10.8 m inalt, cel mai lat lucru construit
 	# de pe pista. Sta departe de sosea nu ca sa nu-l lovesti, ci ca sa incapa in
@@ -3817,19 +3817,19 @@ const _LANDMARKS := {
 	# Doar scheletul primeste textura. Fata ecranului RAMANE pe atlas: e cea mai
 	# deschisa si cea mai curata suprafata din cadru, si asta e tot rostul
 	# obiectului — o textura de metal peste ea ar face-o inca un perete ruginit.
-	4: {"path": "res://assets/models/drive_in_screen.glb",
+	4: {"path": "res://assets/models/buildings/drive_in_screen.glb",
 		"gap": 15.0, "col": "box", "spin": false,
 		"classes": {"DriveIn_Metal": "rust_metal"}},
 	# Stalpul GAS: 13.7 m, cel mai INALT. Raza mica intentionat — vrem sa lovesti
 	# stalpul, nu un cilindru de 1.9 m in jurul unui obiect subtire.
-	5: {"path": "res://assets/models/gas_pole_sign.glb",
+	5: {"path": "res://assets/models/signs/gas_pole_sign.glb",
 		"gap": 5.0, "col": "cyl", "radius": 0.55, "spin": false},
 	# Casa de sat (Okinawa) — PILOTUL texturilor de clasa: partile House_Roof/
 	# House_Plaster/House_Stone au UV-uri reale si primesc texturile din
 	# assets/textures/classes/ prin cheia "classes"; lemnaria si nisipul raman
 	# pe atlas. Raza de coliziune acopera cladirea, nu limba de nisip — poti
 	# rula peste marginea curtii, dar nu prin casa.
-	6: {"path": "res://assets/models/village_house.glb",
+	6: {"path": "res://assets/models/buildings/village_house.glb",
 		"gap": 10.0, "col": "cyl", "radius": 2.6, "spin": false,
 		"classes": {"House_Roof": "roof_tiles", "House_Plaster": "plaster",
 			"House_Stone": "stone_wall"}},
@@ -3839,29 +3839,29 @@ const _LANDMARKS := {
 	# soclul de piatra de 1.6 — poti calca treapta soclului, dar nu treci prin
 	# turn. Sta departe (12 m) fiindca rolul lui e sa se vada de pe jumatate de
 	# tur; de la 5 m nu mai vezi decat benzi rosii.
-	7: {"path": "res://assets/models/lighthouse.glb",
+	7: {"path": "res://assets/models/buildings/lighthouse.glb",
 		"gap": 12.0, "col": "cyl", "radius": 1.1, "spin": false,
 		"classes": {"Lighthouse_Stone": "stone_wall",
 			"Lighthouse_White": "plaster"}},
 	# Poarta de piatra: singurul landmark peste care se TRECE, deci "none".
 	# O cutie de coliziune pusa pe deschiderea ei ar fi zidit drumul, iar
 	# stalpii stau oricum dincolo de marginea asfaltului prin `gap`.
-	8: {"path": "res://assets/models/stone_gate_torii.glb",
+	8: {"path": "res://assets/models/structures/stone_gate_torii.glb",
 		"gap": 1.2, "col": "none", "spin": false,
 		"classes": {"Torii_Stone": "stone_wall", "Torii_Roof": "roof_tiles"}},
 	# Perechea de shisa: DOUA id-uri, nu unul cu doua modele. `_build_landmark`
 	# aseaza tot ce e intr-un GLB la o singura pozitie, deci perechea se face
 	# din doua intrari puse pe laturi opuse la aceeasi fractie (vezi
 	# `Track05._landmark_spots`). Traditia: gura deschisa in dreapta.
-	9: {"path": "res://assets/models/shisa_statue.glb",
+	9: {"path": "res://assets/models/props/shisa_statue.glb",
 		"gap": 2.2, "col": "box", "spin": false,
 		"classes": {"Shisa_Base": "stone_wall", "Shisa_Stone": "concrete"}},
-	10: {"path": "res://assets/models/shisa_statue_closed.glb",
+	10: {"path": "res://assets/models/props/shisa_statue_closed.glb",
 		"gap": 2.2, "col": "box", "spin": false,
 		"classes": {"Shisa_Base": "stone_wall", "Shisa_Stone": "concrete"}},
 	# Zidul gusuku: cutie de coliziune, nu cilindru — un zid de 8 m e lung, iar
 	# un cilindru in jurul lui ar fi inghitit jumatate de sosea.
-	11: {"path": "res://assets/models/gusuku_wall.glb",
+	11: {"path": "res://assets/models/structures/gusuku_wall.glb",
 		"gap": 4.5, "col": "box", "spin": false,
 		"classes": {"Gusuku_Wall": "stone_wall"}},
 	# --- Desert -----------------------------------------------------------
@@ -3878,7 +3878,7 @@ const _LANDMARKS := {
 	# 7-11 fiindca `Track05._landmark_spots` le referea deja din COD; baraca era
 	# referita doar din datele lui Track01, deci ea s-a mutat. Cand adaugi un
 	# landmark nou, ia urmatorul id LIBER si verifica intai ramurile deschise.
-	12: {"path": "res://assets/models/miner_shack.glb",
+	12: {"path": "res://assets/models/buildings/miner_shack.glb",
 		"gap": 12.0, "col": "box", "spin": false,
 		"classes": {"Shack_Wood": "wood", "Shack_Roof": "rust_metal"}},
 }
@@ -3957,7 +3957,7 @@ func _build_hose(frac: float) -> void:
 	# importata din alta pista — `WaterHose` accepta `model == null` si ramane
 	# doar cu balta si zona de grip taiat.
 	var path: String = theme_flag("hose_model",
-		"res://assets/models/pipe_leak.glb")
+		"res://assets/models/props/pipe_leak.glb")
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
@@ -4057,9 +4057,9 @@ const _MARKER_PICKS := [
 
 
 func _build_markers() -> void:
-	if not ResourceLoader.exists("res://assets/models/marker_post.glb"):
+	if not ResourceLoader.exists("res://assets/models/signs/marker_post.glb"):
 		return
-	var scene := load("res://assets/models/marker_post.glb") as PackedScene
+	var scene := load("res://assets/models/signs/marker_post.glb") as PackedScene
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _world_seed() + 7 # alt sir decat decorul si orizontul
 	var loop_poly := PackedVector2Array()
@@ -4116,7 +4116,7 @@ func _marker_variant(rng: RandomNumberGenerator) -> String:
 ## Semne chevron inaintea virajelor stranse: comunicare de gameplay, nu decor.
 ## De la 60-80 m, din chase cam, directia virajului trebuie citita inainte sa
 ## se vada virajul (brieful din docs/asset_briefs/chevron_sign.md).
-const CHEVRON_PATH := "res://assets/models/chevron_sign.glb"
+const CHEVRON_PATH := "res://assets/models/signs/chevron_sign.glb"
 ## Sub pragul asta de rotatie cumulata pe fereastra de ~30 m nu e "viraj
 ## strans", e curgere — un semn acolo ar fi zgomot (style_bible §3).
 const CHEVRON_TURN_MIN: float = 0.8    # rad (~46°)
@@ -4302,7 +4302,7 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 ## `_turn_angles`, dar cautand minimele in loc de maxime. Gardul are nevoie de
 ## o dreapta ca sa citeasca drept: pe un viraj, module rigide de 4 m ar taia
 ## coarda si ar iesi un poligon, nu o curba.
-const FENCE_PATH := "res://assets/models/fence_ranch.glb"
+const FENCE_PATH := "res://assets/models/structures/fence_ranch.glb"
 ## Peste atata cotitura cumulata pe fereastra nu mai e dreapta.
 ## 0.22 -> 0.40: Dunele n-are aproape nicio dreapta adevarata, e un circuit din
 ## curbe inlantuite. La pragul strict incapeau 7 randuri pe tot turul, adica
@@ -4511,11 +4511,11 @@ func _build_start_gate() -> void:
 	#
 	# Era o arcada de jucarie din tema abandonata "lada de nisip", pe TOATE
 	# pistele, si primul lucru pe care il vezi la countdown.
-	if ResourceLoader.exists("res://assets/models/start_gate.glb"):
+	if ResourceLoader.exists("res://assets/models/structures/start_gate.glb"):
 		var target_width := (half_width + 1.2) * 2.0
 		var gate := StaticBody3D.new()
 		gate.add_to_group("start_gate")
-		var model := (load("res://assets/models/start_gate.glb") as PackedScene) \
+		var model := (load("res://assets/models/structures/start_gate.glb") as PackedScene) \
 			.instantiate() as Node3D
 		# Latimea si inaltimea se MASOARA. Aici erau trei literale (22.8 si 8.7
 		# de doua ori) copiate din bbox-ul modelului de atunci; un GLB de alta

@@ -64,7 +64,7 @@ for i, (name, length, width, height, seed, humps) in enumerate(ISLANDS):
              d.x, d.y, d.z))
 
 print("TOTAL: %d tris" % sum(tri_count(o) for o in built))
-print("GLB:  %s (%d B)" % export_glb(built, "horizon_island.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "effects/horizon_island.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "horizon_island.blend"))
 for i, o in enumerate(built):
     o.location = (i * 70.0, 0.0, 0.0)

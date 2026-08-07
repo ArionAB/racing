@@ -28,7 +28,7 @@ extends Node3D
 ## treci, fara ea calculezi.
 ## ############################################################################
 
-const MODEL_PATH := "res://assets/models/typhoon.glb"
+const MODEL_PATH := "res://assets/models/effects/typhoon.glb"
 const FUNNEL_NODE := "Typhoon"
 const DEBRIS_NODE := "Typhoon_Debris"
 

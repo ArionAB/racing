@@ -194,5 +194,5 @@ print("sea_turtle.glb  %d tris  AO %.2f..%.2f"
       % (stats["tris"], stats["ao_min"], stats["ao_max"]))
 print("  %.2f m lungime (Z in Godot), %.2f m latime, %.2f m inaltime"
       % (d.y, d.x, d.z))
-print("GLB:  %s (%d B)" % export_glb([obj], "sea_turtle.glb"))
+print("GLB:  %s (%d B)" % export_glb([obj], "props/sea_turtle.glb"))
 print("BLEND: %s (%d B)" % save_blend([obj], "sea_turtle.blend"))

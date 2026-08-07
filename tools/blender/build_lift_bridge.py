@@ -347,10 +347,10 @@ print("Tall_Ship    %.1f x %.1f x %.1f m | %4d tris | AO %.2f..%.2f"
 report_slits([ramp], "bridge_ramp")
 
 ramp.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb([ramp], "bridge_ramp.glb"))
+print("GLB:   %s (%d B)" % export_glb([ramp], "structures/bridge_ramp.glb"))
 print("BLEND: %s (%d B)" % save_blend([ramp], "bridge_ramp.blend"))
 ship.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb([ship], "tall_ship.glb"))
+print("GLB:   %s (%d B)" % export_glb([ship], "vehicles/tall_ship.glb"))
 print("BLEND: %s (%d B)" % save_blend([ship], "tall_ship.blend"))
 
 ship.location = (24.0, 0.0, 0.0)

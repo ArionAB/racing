@@ -115,7 +115,7 @@ for i, (name, h, bow, seed, bastion) in enumerate(SEGMENTS):
              d.x, d.y, d.z))
 
 print("TOTAL: %d tris" % sum(tri_count(o) for o in built))
-print("GLB:  %s (%d B)" % export_glb(built, "gusuku_wall.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "structures/gusuku_wall.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "gusuku_wall.blend"))
 for i, o in enumerate(built):
     o.location = (0.0, i * 4.0, 0.0)

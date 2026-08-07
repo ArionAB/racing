@@ -90,7 +90,7 @@ for name, fill in PARTS:
              d.x, d.y, d.z))
 
 print("TOTAL: %d tris" % sum(tri_count(o) for o in built))
-print("GLB:  %s (%d B)" % export_glb(built, "sea_wall_segment.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "structures/sea_wall_segment.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "sea_wall_segment.blend"))
 for i, o in enumerate(built):
     o.location = (0.0, i * 1.4, 0.0)

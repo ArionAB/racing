@@ -208,7 +208,7 @@ for name, fn, budget in PIECES:
 
 for o in objs:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(objs, "dino_bones.glb"))
+print("GLB:   %s (%d B)" % export_glb(objs, "props/dino_bones.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "dino_bones.blend"))
 for i, o in enumerate(objs):
     o.location = (i * 6.0, 0.0, 0.0)

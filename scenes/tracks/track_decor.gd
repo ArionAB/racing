@@ -491,10 +491,10 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 ## sonda: garda numara triunghiuri, nu bunul-simt botanic.
 ##
 ## Cand GLB-urile apar, pick_from_glb le gaseste singur si primitivele dispar.
-const ISLAND_SCATTER: String = "res://assets/models/island_scatter.glb"
-const ISLAND_ROCKS: String = "res://assets/models/coral_rock.glb"
-const ISLAND_CLUTTER: String = "res://assets/models/beach_clutter.glb"
-const ISLAND_CANE: String = "res://assets/models/sugar_cane_clump.glb"
+const ISLAND_SCATTER: String = "res://assets/models/scatter/island_scatter.glb"
+const ISLAND_ROCKS: String = "res://assets/models/rocks/coral_rock.glb"
+const ISLAND_CLUTTER: String = "res://assets/models/scatter/beach_clutter.glb"
+const ISLAND_CANE: String = "res://assets/models/plants/sugar_cane_clump.glb"
 
 ## Arborii insulei.
 ##
@@ -513,13 +513,13 @@ const ISLAND_CANE: String = "res://assets/models/sugar_cane_clump.glb"
 ## piesele prin care treci. Pandanusul e o tufa, deci n-are; banyanul e singurul
 ## destul de gros cat sa opreasca o masina fara sa para nedrept.
 const ISLAND_TREES := [
-	{"path": "res://assets/models/coconut_palm.glb", "weight": 0.42,
+	{"path": "res://assets/models/trees/coconut_palm.glb", "weight": 0.42,
 		"scale_min": 0.85, "scale_max": 1.15, "collide": 0.45},
-	{"path": "res://assets/models/beach_palm_bent.glb", "weight": 0.22,
+	{"path": "res://assets/models/trees/beach_palm_bent.glb", "weight": 0.22,
 		"scale_min": 0.90, "scale_max": 1.25, "collide": 0.40},
-	{"path": "res://assets/models/pandanus.glb", "weight": 0.26,
+	{"path": "res://assets/models/trees/pandanus.glb", "weight": 0.26,
 		"scale_min": 0.85, "scale_max": 1.30, "collide": 0.0},
-	{"path": "res://assets/models/banyan.glb", "weight": 0.10,
+	{"path": "res://assets/models/trees/banyan.glb", "weight": 0.10,
 		"scale_min": 0.90, "scale_max": 1.20, "collide": 1.10},
 ]
 
@@ -630,7 +630,7 @@ static func _add_island_scatter(parent: Node3D, pos: Vector3,
 ## e ce citeste ochiul la 30 m, nu forma frunzei.
 static func _add_tropical_bush(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
-	const HIBISCUS := "res://assets/models/hibiscus_bush.glb"
+	const HIBISCUS := "res://assets/models/plants/hibiscus_bush.glb"
 	if ResourceLoader.exists(HIBISCUS):
 		var model := (load(HIBISCUS) as PackedScene).instantiate() as Node3D
 		parent.add_child(model)
@@ -889,7 +889,7 @@ static func _build_scattered(root: Node3D, sampler: TrackSideSampler,
 ## cu muchii perfect drepte. Stancile astea au TREPTE cu buza vizibila si moloz
 ## la baza; buza e ce se citeste de la 100 m, cand granulatia texturii s-a topit
 ## in mipmap.
-const CANYON_PATH: String = "res://assets/models/canyon_rocks.glb"
+const CANYON_PATH: String = "res://assets/models/rocks/canyon_rocks.glb"
 const CANYON_S: Array[String] = ["Canyon_S1", "Canyon_S2", "Canyon_S3",
 	"Canyon_S4", "Canyon_S5", "Canyon_S6", "Canyon_S7", "Canyon_S8"]
 const CANYON_M: Array[String] = ["Canyon_M1", "Canyon_M2", "Canyon_M3",
@@ -907,7 +907,7 @@ const CANYON_L: Array[String] = ["Canyon_L1", "Canyon_L2", "Canyon_L3",
 ## ochiul recunoaste GRAMATICA formei inainte sa numere piesele. Masele de
 ## gresie rotunjite sunt cealalta gramatica din acelasi peisaj; alternanta lor
 ## e ce transforma "un mesh reciclat" in geologie.
-const KIT_ROCK_PATH: String = "res://assets/models/megakit_rocks.glb"
+const KIT_ROCK_PATH: String = "res://assets/models/rocks/megakit_rocks.glb"
 const KIT_S: Array[String] = ["Kit_S1", "Kit_S2", "Kit_S3", "Kit_S4",
 	"Kit_S5", "Kit_S6"]
 const KIT_M: Array[String] = ["Kit_M1", "Kit_M2", "Kit_M3", "Kit_M4",
@@ -1176,7 +1176,7 @@ static func _pick_rock(cls: String, kit: bool, draw: int) -> Node3D:
 ## Toate se instantiaza cu `Palette.foliage_material()` — acelasi atlas, doar
 ## fara backface culling, fiindca geometria kitului e din foi deschise. Vezi
 ## nota de la foliage_material() pentru de ce nu s-a mers pe Solidify.
-const KIT_PLANT_PATH: String = "res://assets/models/megakit_plants.glb"
+const KIT_PLANT_PATH: String = "res://assets/models/plants/megakit_plants.glb"
 ## Langa asfalt: nimic peste ~1 m inaltime reala dupa scalare. Un obiect mai
 ## inalt la 1.5 m de drum ar acoperi apexul urmator.
 const KIT_SMALL_PLANTS: Array[String] = ["Tuft_A", "Tuft_B", "Tuft_C",
@@ -1257,7 +1257,7 @@ static func _add_scatter(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
 	const PICKS := ["Bush_A", "Bush_B", "Pebbles_A", "Pebbles_B", "Grass_Tuft"]
 	var name_pick: String = PICKS[rng.randi_range(0, PICKS.size() - 1)]
-	var kept := pick_from_glb("res://assets/models/desert_scatter.glb", name_pick)
+	var kept := pick_from_glb("res://assets/models/scatter/desert_scatter.glb", name_pick)
 	if kept == null:
 		_add_dry_bush(parent, pos, rng, mat)
 		return
@@ -1288,7 +1288,7 @@ static func _add_cluster(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, picks: Array, collide: bool,
 		mat: Callable) -> void:
 	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
-	var kept := pick_from_glb("res://assets/models/rock_cluster.glb", name_pick)
+	var kept := pick_from_glb("res://assets/models/rocks/rock_cluster.glb", name_pick)
 	if kept == null:
 		_add_glb_rock(parent, pos, rng, mat)
 		return
@@ -1439,10 +1439,10 @@ static func _add_rock(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator,
 ## style_bible §2, asa ca nu le scalam agresiv — altfel ies din interval.
 static func _add_cactus(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator,
 		mat: Callable) -> void:
-	if not ResourceLoader.exists("res://assets/models/cactus.glb"):
+	if not ResourceLoader.exists("res://assets/models/plants/cactus.glb"):
 		_add_dry_bush(parent, pos, rng, mat)
 		return
-	var container := (load("res://assets/models/cactus.glb") as PackedScene) \
+	var container := (load("res://assets/models/plants/cactus.glb") as PackedScene) \
 		.instantiate() as Node3D
 	var picks: Array[String] = ["Cactus_A", "Cactus_B", "Cactus_C"]
 	var keep_name: String = picks[rng.randi_range(0, picks.size() - 1)]
@@ -1487,10 +1487,10 @@ static func _add_cactus(parent: Node3D, pos: Vector3, rng: RandomNumberGenerator
 
 static func _add_glb_rock(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
-	if not ResourceLoader.exists("res://assets/models/rocks.glb"):
+	if not ResourceLoader.exists("res://assets/models/rocks/rocks.glb"):
 		_add_rock(parent, pos, rng, mat)
 		return
-	var container := (load("res://assets/models/rocks.glb") as PackedScene) \
+	var container := (load("res://assets/models/rocks/rocks.glb") as PackedScene) \
 		.instantiate() as Node3D
 	var picks: Array[String] = ["rock_small", "rock_medium", "rock_large"]
 	var keep_name: String = picks[rng.randi_range(0, 2)]

@@ -82,7 +82,7 @@ culoare:**
   tris/secțiune. La 6 laturi și 4 straturi, fără poală, iese ~185. Poala ascundea
   linia de contact cu nisipul — o rezolvă gratis AO-ul de teren din
   `_build_terrain`.
-- **Checklist la primire** (`res://assets/models/cliff_wall.glb`):
+- **Checklist la primire** (`res://assets/models/rocks/cliff_wall.glb`):
   1. ≤ 200 triunghiuri per secțiune vizuală
   2. cele 6 perechi `Cliff_X` + `Cliff_X_col` prezente, cu numele exacte
   3. lățime 15 m pe X, capete cu profil identic

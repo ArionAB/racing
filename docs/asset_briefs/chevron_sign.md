@@ -144,7 +144,7 @@ de triunghiuri (total 548). Verdict `verify_glb.py`: **OK**.
 bbox: A 2.40 × 1.60, B 0.90 × 1.60, C 1.01 × 1.65 m (X × înălțime).
 
 ```
-python tools/blender/verify_glb.py assets/models/chevron_sign.glb 240
+python tools/blender/verify_glb.py assets/models/signs/chevron_sign.glb 240
 ```
 
 - **Sloturi folosite:** `kerb_red` = 7 (u = 0.234375), `concrete` = 8
@@ -155,7 +155,7 @@ python tools/blender/verify_glb.py assets/models/chevron_sign.glb 240
   pentru colizor — probabil `col: "none"` ca route66_sign (semnul e
   comunicare, nu obstacol; un colizor pe stâlp la 70 km/h e frustrare), dar
   decizia se ia la integrare.
-- **Checklist la primire** (`res://assets/models/chevron_sign.glb`):
+- **Checklist la primire** (`res://assets/models/signs/chevron_sign.glb`):
   1. trei noduri cu numele exacte, copii direcți ai rădăcinii
   2. fiecare ≤ 240 triunghiuri
   3. UV-urile nimeresc centrele sloturilor (fără 14–31!)

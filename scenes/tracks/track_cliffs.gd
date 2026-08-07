@@ -10,7 +10,7 @@ extends RefCounted
 ##
 ## Coliziunea e o cutie convexa per sectiune, nu un trimesh: vezi _add_collision.
 
-const MODEL_PATH: String = "res://assets/models/cliff_wall.glb"
+const MODEL_PATH: String = "res://assets/models/rocks/cliff_wall.glb"
 
 ## Cheia sub care falezele isi publica amprentele pe nodul-radacina.
 const FOOTPRINT_META: StringName = &"cliff_footprints"
@@ -529,7 +529,7 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 ## exista deja, partajeaza atlasul, zero materiale noi) o rup de tot.
 ##
 ## Zero coliziune: sunt sub 40 cm, style_bible-ul le trateaza ca decor pur.
-const SCATTER_PATH: String = "res://assets/models/desert_scatter.glb"
+const SCATTER_PATH: String = "res://assets/models/scatter/desert_scatter.glb"
 const BASE_PROPS := ["Pebbles_A", "Pebbles_B", "Bush_A", "Grass_Tuft"]
 
 static func _dress_base(root: Node3D, sampler: TrackSideSampler,

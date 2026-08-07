@@ -106,7 +106,7 @@ print("TOTAL: %d tris (buget 200)" % sum(tri_count(o) for o in built))
 
 for o in built:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:  %s (%d B)" % export_glb(built, "desert_scatter.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "scatter/desert_scatter.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "desert_scatter.blend"))
 for i, o in enumerate(built):
     o.location = (i * 2.0, 0.0, 0.0)

@@ -230,5 +230,5 @@ print("gabarit     : %s" % ("NU a crescut  OK" if not grown
                             else "A CRESCUT pe " + ",".join(grown) + "  !!"))
 print("raza max fata de axa: %.3f m (colizor cilindric 2.400)"
       % max(math.hypot(v.x, v.y) for v in bb))
-print("GLB:   %s (%d B)" % export_glb([obj], "water_tower.glb"))
+print("GLB:   %s (%d B)" % export_glb([obj], "buildings/water_tower.glb"))
 print("BLEND: %s (%d B)" % save_blend([obj], "water_tower.blend"))

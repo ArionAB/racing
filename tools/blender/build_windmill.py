@@ -271,5 +271,5 @@ print("pivot Blades: (%.3f, %.3f, %.3f)  [windmill.gd:16 cauta NUMELE, nu cota]"
       % tuple(blades.location))
 print("TOTAL    -> %4d tris (buget 1200)" % total)
 
-print("GLB:   %s (%d B)" % export_glb(built, "windmill.glb"))
+print("GLB:   %s (%d B)" % export_glb(built, "buildings/windmill.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "windmill.blend"))

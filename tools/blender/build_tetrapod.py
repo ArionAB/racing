@@ -128,7 +128,7 @@ for obj, uv in ((single("Tetrapod_01", 1.80), 0.9),
              d.x, d.y, d.z))
 
 print("TOTAL: %d tris" % sum(tri_count(o) for o in built))
-print("GLB:  %s (%d B)" % export_glb(built, "tetrapod.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "structures/tetrapod.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "tetrapod.blend"))
 for i, o in enumerate(built):
     o.location = (i * 5.0, 0.0, 0.0)

@@ -65,7 +65,7 @@ culoare:**
   Altfel îl păstrăm ca fallback. Nu ținem ambele active în lume.
 - **Sloturi folosite:** cactus_green=12 (u=0.390625). u = (slot+0.5)/32.
 - **Commit sursa `.blend` + `.glb`** — nu doar exportul.
-- **Checklist la primire** (`res://assets/models/cactus.glb`):
+- **Checklist la primire** (`res://assets/models/plants/cactus.glb`):
   1. ≤ 180 triunghiuri per cactus
   2. UV pe centrul slotului cactus_green (0.390625)
   3. origine la bază, XZ centrat; stă pe sol la Y=0

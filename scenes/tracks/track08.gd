@@ -114,7 +114,7 @@ func _wave_fracs() -> Array[float]:
 ## incotro merge. Vezi Track._build_hazard.
 func _theme_overrides() -> Dictionary:
 	return {
-		"hazard_model": "res://assets/models/sea_turtle.glb",
+		"hazard_model": "res://assets/models/props/sea_turtle.glb",
 		"hazard_face_travel": true,
 		# Mostenite explicit de la tema, ca sa se citeasca tot contractul
 		# hazardului dintr-un loc: nu se rostogoleste (i-ar zbura carapacea peste

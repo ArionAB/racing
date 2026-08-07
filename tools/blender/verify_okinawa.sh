@@ -22,25 +22,25 @@ check() {
 	printf '%s' "$out" | grep -q "VERDICT: OK" || fail=1
 }
 
-check assets/models/tetrapod.glb 4000 --class-parts=Tetrapod_01,Tetrapod_04,Tetrapod_Stack_01
-check assets/models/coral_rock.glb 900
-check assets/models/island_scatter.glb 500
-check assets/models/sea_wall_segment.glb 400 --class-parts=Sea_Wall_A,Sea_Wall_B,Sea_Wall_C
-check assets/models/coconut_palm.glb 2000 --class-parts=Palm_Bark --origin=assembly
-check assets/models/beach_palm_bent.glb 1600 --class-parts=BentPalm_Bark --origin=assembly
-check assets/models/pandanus.glb 2400 --class-parts=Pandanus_Bark --origin=assembly
-check assets/models/banyan.glb 5200 --class-parts=Banyan_Bark --origin=assembly
-check assets/models/hibiscus_bush.glb 900
-check assets/models/sugar_cane_clump.glb 4000
-check assets/models/stone_gate_torii.glb 1200 --class-parts=Torii_Stone,Torii_Roof --origin=assembly
-check assets/models/lighthouse.glb 3000 --class-parts=Lighthouse_Stone,Lighthouse_White --origin=assembly
-check assets/models/shisa_statue.glb 5000 --class-parts=Shisa_Base,Shisa_Stone --origin=assembly
-check assets/models/shisa_statue_closed.glb 5000 --class-parts=Shisa_Base,Shisa_Stone --origin=assembly
-check assets/models/gusuku_wall.glb 2500 --class-parts=Gusuku_Wall_A,Gusuku_Wall_B,Gusuku_Wall_C
-check assets/models/sabani_boat.glb 1500 --class-parts=Sabani_Hull --origin=assembly
-check assets/models/beach_clutter.glb 1300
-check assets/models/horizon_island.glb 400
-check assets/models/wave_surge.glb 600 --origin=assembly
-check assets/models/wooden_pier.glb 2600 --class-parts=Pier_Wood --origin=waterline
+check assets/models/structures/tetrapod.glb 4000 --class-parts=Tetrapod_01,Tetrapod_04,Tetrapod_Stack_01
+check assets/models/rocks/coral_rock.glb 900
+check assets/models/scatter/island_scatter.glb 500
+check assets/models/structures/sea_wall_segment.glb 400 --class-parts=Sea_Wall_A,Sea_Wall_B,Sea_Wall_C
+check assets/models/trees/coconut_palm.glb 2000 --class-parts=Palm_Bark --origin=assembly
+check assets/models/trees/beach_palm_bent.glb 1600 --class-parts=BentPalm_Bark --origin=assembly
+check assets/models/trees/pandanus.glb 2400 --class-parts=Pandanus_Bark --origin=assembly
+check assets/models/trees/banyan.glb 5200 --class-parts=Banyan_Bark --origin=assembly
+check assets/models/plants/hibiscus_bush.glb 900
+check assets/models/plants/sugar_cane_clump.glb 4000
+check assets/models/structures/stone_gate_torii.glb 1200 --class-parts=Torii_Stone,Torii_Roof --origin=assembly
+check assets/models/buildings/lighthouse.glb 3000 --class-parts=Lighthouse_Stone,Lighthouse_White --origin=assembly
+check assets/models/props/shisa_statue.glb 5000 --class-parts=Shisa_Base,Shisa_Stone --origin=assembly
+check assets/models/props/shisa_statue_closed.glb 5000 --class-parts=Shisa_Base,Shisa_Stone --origin=assembly
+check assets/models/structures/gusuku_wall.glb 2500 --class-parts=Gusuku_Wall_A,Gusuku_Wall_B,Gusuku_Wall_C
+check assets/models/vehicles/sabani_boat.glb 1500 --class-parts=Sabani_Hull --origin=assembly
+check assets/models/scatter/beach_clutter.glb 1300
+check assets/models/effects/horizon_island.glb 400
+check assets/models/effects/wave_surge.glb 600 --origin=assembly
+check assets/models/structures/wooden_pier.glb 2600 --class-parts=Pier_Wood --origin=waterline
 
 exit $fail

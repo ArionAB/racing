@@ -394,9 +394,21 @@ func _print_node(node_name: String, zone: String, model: String, pos: Vector3,
 
 var _children_cache := {}
 
+## assets/models/ e impartit pe foldere de categorie; uneltele care primesc
+## doar numele modelului il cauta in toate categoriile.
+const MODEL_DIRS := ["rocks", "trees", "plants", "flowers", "buildings",
+	"signs", "structures", "vehicles", "props", "scatter", "effects"]
+
+static func _model_path(model: String) -> String:
+	for dir in MODEL_DIRS:
+		var p := "res://assets/models/%s/%s.glb" % [dir, model]
+		if ResourceLoader.exists(p):
+			return p
+	return "res://assets/models/%s.glb" % model
+
 func _glb_children(model: String) -> Array:
 	if not _children_cache.has(model):
-		var scene := load("res://assets/models/%s.glb" % model) as PackedScene
+		var scene := load(_model_path(model)) as PackedScene
 		var inst := scene.instantiate()
 		var names: Array = []
 		for c in inst.get_children():

@@ -123,7 +123,7 @@ for name, b in built:
 # (blender_export.md, sectiunea despre GLB-uri cu variante).
 for o in objs:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(objs, "marker_post.glb"))
+print("GLB:   %s (%d B)" % export_glb(objs, "signs/marker_post.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "marker_post.blend"))
 for i, o in enumerate(objs):
     o.location = (i * 0.9, 0.0, 0.0)

@@ -71,8 +71,14 @@ func _ready() -> void:
 	player.boost_started.connect(func(_c: Car) -> void:
 		camera.add_trauma(0.18))
 	# Valul care spala digul: izbitura de apa se vede, nu doar se aude.
+	#
+	# Plafonul e 0.85, cel mai mare din lista, si nu e o scapare: shake-ul e
+	# `trauma^2`, deci pana pe la 0.4 practic nu se vede nimic — prima versiune
+	# limita aici la 0.4 si raportul din joc a fost „ecranul nu se zguduie", desi
+	# semnalul se emitea. Un val care te acopera cu totul are voie sa loveasca mai
+	# tare decat o aripa frecata de perete (0.5).
 	player.splashed.connect(func(_c: Car, strength: float) -> void:
-		camera.add_trauma(clampf(strength, 0.05, 0.4)))
+		camera.add_trauma(clampf(strength, 0.05, 0.85)))
 	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
 	# din spate zguduie ecranul, o atingere lateral aproape deloc.
 	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:

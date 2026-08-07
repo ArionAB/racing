@@ -151,12 +151,12 @@ var _time: float = 0.0
 ## Punctul pe care a fost asezata tromba, in spatiul PARINTELUI. Traversarea se
 ## socoteste fata de el.
 ##
-## Nu e un detaliu: `wave_surge.gd` scrie in fiecare cadru
-## `position = travel_dir * offset + ...`, adica ARUNCA pozitia pe care i-a
-## dat-o pista la constructie (`wave.global_position = baked[idx]`) si matura in
-## jurul originii pistei, nu in jurul sectorului. Pe Track05 nu s-a vazut fiindca
-## sectorul cu val e aproape de origine. Tromba nu-si permite: e pe Okinawa, la
-## jumatate de tur de origine, si are 18 m.
+## Nu e un detaliu, si valul a facut deja greseala: `wave_surge.gd` scria in
+## fiecare cadru `position = travel_dir * offset + ...`, adica ARUNCA pozitia pe
+## care i-o daduse pista la constructie si matura in jurul originii pistei, nu in
+## jurul sectorului. Pe Track05 nu s-a vazut fiindca sectorul cu val e aproape de
+## origine. Tromba nu-si permite: e pe Okinawa, la jumatate de tur de origine, si
+## are 18 m. Valul si-a luat intre timp ancora proprie, dupa modelul asta.
 var _anchor: Vector3 = Vector3.ZERO
 ## Ultima cota buna a talpii. Punctul de plecare e cota la care a fost asezata
 ## tromba — adica soseaua — deci pana la prima raza reusita sta pe drum, care e

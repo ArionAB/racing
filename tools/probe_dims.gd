@@ -59,7 +59,8 @@ func _process(_delta: float) -> bool:
 ## Grupurile care poarta un model GLB si o coliziune derivata din el.
 const TAGS := {
 	"landmarks": "landmark", "start_gate": "poarta", "dinos": "dino",
-	"arches": "arcada", "mines": "mina", "markers": "stalp", "hazards": "hazard", "hoses": "furtun",
+	"arches": "arcada", "mines": "mina", "markers": "stalp", "hazards": "hazard",
+	"water_hazards": "apa",
 }
 
 

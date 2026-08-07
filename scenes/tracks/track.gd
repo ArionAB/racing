@@ -423,14 +423,19 @@ func _ramp_fracs() -> Array[float]:
 func _hazard_fracs() -> Array[float]:
 	return []
 
-## Fractii unde furtunul de gradina pulseaza apa peste drum.
+## Fractii unde conducta sparta pulseaza apa peste drum.
+##
+## Prima din cele doua SURSE de apa, ambele pe acelasi hazard
+## (`scenes/hazards/water_hazard.gd`): teava sta pe loc si uda o portiune fixa.
 func _hose_fracs() -> Array[float]:
 	return []
 
-## Valuri care matura soseaua (Okinawa, sectorul causeway). Separate de
-## `_hose_fracs` desi amandoua uda drumul: furtunul e o SURSA permanenta, valul
-## e un CEAS. Pe aceeasi fractie, banda uda taie grip-ul non-stop, iar valul
-## spune cand — vezi scenes/props/wave_surge.gd.
+## Fractii unde marea trece peste sosea (Okinawa: digul, causeway-ul).
+##
+## A doua sursa de apa. Doua hook-uri si nu unul fiindca difera ce ALEGI cand le
+## pui: teava e o portiune permanent alunecoasa (o taxa pe sector), valul e un
+## ceas (o fereastra prin care treci sau nu). Mecanica din spate e literalmente
+## aceeasi — vezi scenes/hazards/wave_surge.gd.
 func _wave_fracs() -> Array[float]:
 	return []
 
@@ -3878,22 +3883,42 @@ func _build_hose(frac: float) -> void:
 	hose.global_basis = Basis.looking_at(dir, Vector3.UP) # +X = marginea din dreapta
 
 
-## Valul care matura causeway-ul (#106). Banda uda ramane a furtunului; asta e
-## doar ceasul vizual peste ea.
+## Valul care spala soseaua (#106). E acelasi hazard de apa ca furtunul — banda
+## uda si taierea de grip vin amandoua din `WaterHazard` — doar ca sursa se misca
+## si uda doar cat trece.
 func _build_wave_surge(frac: float) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var wave := WaveSurge.new()
 	# Directia de mers: perpendicular pe sosea, dinspre larg spre uscat. Nu se
-	# alege la zar — pe un causeway marea vine de pe o parte anume, iar un val
-	# care porneste din interiorul insulei ar fi absurd.
+	# alege la zar — pe un dig marea vine de pe o parte anume, iar un val care
+	# porneste din interiorul insulei ar fi absurd.
 	wave.travel_dir = _side_at(idx)
 	wave.sweep = half_width * 3.2
+	wave.road_width = half_width * 2.0
+	# Creasta cat DOUA latimi de drum. Nu e o cifra de gust: la o latime de drum
+	# valul citea din masina ca un obiect care pluteste pe asfalt (captura din
+	# #106), fiindca ochiul il compara cu marginile soselei. Peste ele, devine ce
+	# trebuie sa fie — o portiune de drum acoperita de mare.
+	wave.crest_length = half_width * 4.0
+	# Linia apei, ca la tromba: fara ea valul traverseaza orizontal la cota
+	# soselei si pluteste in aer cat e in larg. Aceeasi despartire ca peste tot —
+	# cotele terenului le stie pista, nu hazardul.
+	if theme_flag("water", false):
+		wave.water_y = _sampler.mean_road_y() + sea_level_offset
+		# Apa de pe drum e chiar MAREA: acelasi material, deci acelasi turcoaz,
+		# aceeasi spuma animata si zero materiale in plus la numaratoarea garzii.
+		# La adancime ~0 shaderul da nisip ud cu spuma peste el — exact ce ramane
+		# in urma unui val care a trecut peste dig.
+		wave.film_material = _water_material()
 	# Defazaj derivat din fractie, ca doua valuri pe aceeasi pista sa nu bata la
 	# unison — acelasi truc ca la SlidingHazard.
 	wave.phase = fposmod(frac * 2.3, 1.0)
+	# Pozitia INAINTE de add_child: `add_child` declanseaza `_ready`, iar acolo
+	# valul isi retine ancora. Asezat dupa, ancora ar fi ramas la originea pistei
+	# si valul ar fi maturat acolo — vezi nota de pe `WaveSurge._anchor`.
+	wave.position = baked[idx]
 	add_child(wave)
-	wave.global_position = baked[idx]
 
 ## Tromba de mini-typhoon care matura soseaua.
 ##
@@ -3922,9 +3947,9 @@ func _build_typhoon(frac: float) -> void:
 	typhoon.water_y = _sampler.mean_road_y() + sea_level_offset
 	# Pozitia INAINTE de add_child, nu dupa. `add_child` declanseaza `_ready`, iar
 	# `_ready` isi retine punctul de ancorare — asezat dupa, ancora ar fi ramas la
-	# originea pistei si tromba ar fi maturat acolo. Exact capcana in care a cazut
-	# `_build_wave_surge`, care scrie pozitia dupa si apoi si-o si suprascrie in
-	# fiecare cadru.
+	# originea pistei si tromba ar fi maturat acolo. Exact capcana in care cazuse
+	# `_build_wave_surge`, care scria pozitia dupa si apoi si-o suprascria in
+	# fiecare cadru — reparata odata cu ancora valului.
 	typhoon.position = baked[idx]
 	add_child(typhoon)
 

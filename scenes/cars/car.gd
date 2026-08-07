@@ -119,7 +119,7 @@ var is_drifting: bool = false
 var drift_dir: float = 0.0
 var turbo_charge: float = 0.0 # 0..1, bara din UI
 var is_boosting: bool = false
-var slip_time: float = 0.0 # aquaplanare (setata de WaterHose sau de o banda uda)
+var slip_time: float = 0.0 # aquaplanare (setata de WaterHazard sau de o banda uda)
 ## Ce aderenta laterala are masina cat timp aluneca.
 ##
 ## Era o constanta de 0.8 in mijlocul fizicii — corect pentru o balta de furtun
@@ -232,7 +232,7 @@ func _physics_process(delta: float) -> void:
 		else:
 			road_index = track.closest_index(road_index, global_position, route)
 		# Banda uda: se reinnoieste in fiecare cadru, deci efectul tine exact cat
-		# stai pe ea. Refoloseste acelasi slip_time ca WaterHose — un al doilea
+		# stai pe ea. Refoloseste acelasi slip_time ca WaterHazard — un al doilea
 		# mecanism de aquaplanare ar fi insemnat doua feluri de a pierde grip-ul,
 		# care s-ar fi tunat separat si ar fi divergat.
 		if track.route_is_wet(route):
@@ -388,7 +388,7 @@ func force_boost(seconds: float) -> void:
 
 # ------------------------------------------------------------- imbranceli
 
-## Refresh-uit de WaterHose cat timp esti in banda uda activa.
+## Refresh-uit de WaterHazard cat timp esti in apa (conducta sau val).
 ## Cere alunecare pentru urmatoarea fractiune de secunda.
 ##
 ## `grip_value` e aderenta laterala cat timp tine: SLIP_GRIP_PUDDLE pentru o

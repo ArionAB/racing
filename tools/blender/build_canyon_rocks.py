@@ -132,7 +132,7 @@ print("TOTAL: %d tris in biblioteca" % sum(v[1] for v in per_class.values()))
 x = 0.0
 for o in built:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(built, "canyon_rocks.glb"))
+print("GLB:   %s (%d B)" % export_glb(built, "rocks/canyon_rocks.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "canyon_rocks.blend"))
 for o in built:
     o.location = (x, 0.0, 0.0)

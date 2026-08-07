@@ -146,5 +146,5 @@ lo = min(min((o.matrix_world @ Vector(c)).z for c in o.bound_box) for o in objs)
 hi = max(max((o.matrix_world @ Vector(c)).z for c in o.bound_box) for o in objs)
 print("banyan.glb  TOTAL %d tris  inaltime %.2f m"
       % (sum(s["tris"] for _o, s in built), hi - lo))
-print("GLB:  %s (%d B)" % export_glb(objs, "banyan.glb"))
+print("GLB:  %s (%d B)" % export_glb(objs, "trees/banyan.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "banyan.blend"))

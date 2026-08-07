@@ -120,7 +120,7 @@ func _build() -> void:
 ## Fara GLB, o sfera cu putine laturi — hazardul trebuie sa functioneze si daca
 ## lipseste un asset.
 func _rock_model() -> Node3D:
-	const PATH := "res://assets/models/rock_cluster.glb"
+	const PATH := "res://assets/models/rocks/rock_cluster.glb"
 	if ResourceLoader.exists(PATH):
 		var container := (load(PATH) as PackedScene).instantiate() as Node3D
 		var kept: Node3D = null

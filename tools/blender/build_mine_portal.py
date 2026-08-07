@@ -291,5 +291,5 @@ print("TOTAL: %d tris (buget 1000) %s" % (total, "OK" if total <= 1000 else "DEP
 
 for o in objs:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(objs, "mine_portal.glb"))
+print("GLB:   %s (%d B)" % export_glb(objs, "buildings/mine_portal.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "mine_portal.blend"))

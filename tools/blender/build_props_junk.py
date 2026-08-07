@@ -238,7 +238,7 @@ print("TOTAL: %d tris pe %d noduri" % (total, len(objs)))
 
 for o in objs:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(objs, "props_junk.glb"))
+print("GLB:   %s (%d B)" % export_glb(objs, "props/props_junk.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "props_junk.blend"))
 for i, o in enumerate(objs):
     o.location = (i * 1.6, 0.0, 0.0)

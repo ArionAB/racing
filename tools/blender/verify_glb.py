@@ -26,11 +26,11 @@ Verifica:
      devine aserttiune dura)
 
 Rulare:
-    python tools/blender/verify_glb.py assets/models/cactus.glb [buget_tris]
-    python tools/blender/verify_glb.py assets/models/route66_sign.glb 260 --front=-Z
-    python tools/blender/verify_glb.py assets/models/boulder_roller.glb 220 --origin=center
-    python tools/blender/verify_glb.py assets/models/rock_arch.glb 1000 --origin=assembly
-    python tools/blender/verify_glb.py assets/models/windmill.glb 3000 \
+    python tools/blender/verify_glb.py assets/models/plants/cactus.glb [buget_tris]
+    python tools/blender/verify_glb.py assets/models/signs/route66_sign.glb 260 --front=-Z
+    python tools/blender/verify_glb.py assets/models/rocks/boulder_roller.glb 220 --origin=center
+    python tools/blender/verify_glb.py assets/models/rocks/rock_arch.glb 1000 --origin=assembly
+    python tools/blender/verify_glb.py assets/models/buildings/windmill.glb 3000 \
         --class-parts=Mill_Wood,Mill_Metal,Blades
 """
 # `--class-parts=` a ramas optional: piesele pe clase se recunosc singure. Se

@@ -72,5 +72,5 @@ stats = finish(
 d = obj.dimensions
 print("Hibiscus  %d tris  AO %.2f..%.2f  bbox %.2f x %.2f x %.2f m"
       % (stats["tris"], stats["ao_min"], stats["ao_max"], d.x, d.y, d.z))
-print("GLB:  %s (%d B)" % export_glb([obj], "hibiscus_bush.glb"))
+print("GLB:  %s (%d B)" % export_glb([obj], "plants/hibiscus_bush.glb"))
 print("BLEND: %s (%d B)" % save_blend([obj], "hibiscus_bush.blend"))

@@ -102,7 +102,7 @@ for i, (name, count, h, seed) in enumerate(CLUMPS):
              d.x, d.y, d.z))
 
 print("TOTAL: %d tris" % sum(tri_count(o) for o in built))
-print("GLB:  %s (%d B)" % export_glb(built, "sugar_cane_clump.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "plants/sugar_cane_clump.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "sugar_cane_clump.blend"))
 for i, o in enumerate(built):
     o.location = (i * 2.5, 0.0, 0.0)

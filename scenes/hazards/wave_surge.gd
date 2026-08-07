@@ -157,7 +157,7 @@ var _crest_dist: Dictionary = {}
 ## masina: shake-ul e al CAMEREI, iar camera urmareste o singura masina.
 var _rumble: float = 0.0
 
-const MODEL_PATH := "res://assets/models/wave_surge.glb"
+const MODEL_PATH := "res://assets/models/effects/wave_surge.glb"
 
 
 func _ready() -> void:

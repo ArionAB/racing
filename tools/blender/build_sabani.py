@@ -135,5 +135,5 @@ hi = max(max((o.matrix_world @ Vector(c)).z for c in o.bound_box) for o in objs)
 d = objs[0].dimensions
 print("sabani_boat.glb  TOTAL %d tris  %.2f m lungime, %.2f m inaltime"
       % (sum(s["tris"] for _o, s in built), d.x, hi - lo))
-print("GLB:  %s (%d B)" % export_glb(objs, "sabani_boat.glb"))
+print("GLB:  %s (%d B)" % export_glb(objs, "vehicles/sabani_boat.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "sabani_boat.blend"))

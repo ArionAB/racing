@@ -48,7 +48,7 @@ const WARN: float = 2.0
 const LIFT_HEIGHT: float = 5.0
 
 # ------------------------------------------------------------------- rampa
-const RAMP_PATH := "res://assets/models/bridge_ramp.glb"
+const RAMP_PATH := "res://assets/models/structures/bridge_ramp.glb"
 const RAMP_NODE := "Bridge_Ramp"
 ## Lungimea si inaltimea rampei, IDENTICE cu cele din tools/blender/
 ## build_lift_bridge.py. Se rescriu aici fiindca din ele iese si cutia de
@@ -76,7 +76,7 @@ const LAUNCH_FACTOR: float = 0.27
 const LAUNCH_MAX: float = 12.0
 
 # ------------------------------------------------------------------ vapor
-const SHIP_PATH := "res://assets/models/tall_ship.glb"
+const SHIP_PATH := "res://assets/models/vehicles/tall_ship.glb"
 const SHIP_NODE := "Tall_Ship"
 ## Vaporul e mai mare decat il da kitul: 13.1 m e o barca de pescuit langa un
 ## canal de 52 m. La 1.15 iese o corabie de 15 m, adica de trei ori lungimea

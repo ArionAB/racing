@@ -94,7 +94,7 @@ Trei reguli care se sparg in tacere daca le incalci:
 ## Verificare
 
 ```
-python tools/blender/verify_glb.py assets/models/<nume>.glb <buget>
+python tools/blender/verify_glb.py assets/models/<categorie>/<nume>.glb <buget>
 ```
 
 Verifica UV-urile pe centre de slot, **legalitatea sloturilor** (doar 0-13:
@@ -128,13 +128,13 @@ masuratoare ar da verdicte opuse pe doua assets corecte.
   **Normals**. Fără camere/lumini. Fără materiale complexe (le înlocuim în Godot).
 - Apply Modifiers: ON (bevel etc. să fie în geometrie).
 - Y-up: ON (implicit).
-- Destinație: `res://assets/models/<nume>.glb`.
+- Destinație: `res://assets/models/<categorie>/<nume>.glb` (foldere pe categorii: rocks/, trees/, plants/, buildings/, signs/, structures/, vehicles/, props/, scatter/, effects/).
 
 ## În Godot
 
 La instanțiere, prop-ului i se pune materialul comun:
 ```gdscript
-var glb := (load("res://assets/models/barrel.glb") as PackedScene).instantiate()
+var glb := (load("res://assets/models/props/barrel.glb") as PackedScene).instantiate()
 Palette.apply_world_material(glb)   # înlocuiește materialele cu cel partajat
 ```
 UV-urile aduse din Blender arată deja spre atlas, deci culoarea iese corectă, iar

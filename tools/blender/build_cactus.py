@@ -81,7 +81,7 @@ print("TOTAL tris:", sum(tri_count(o) for o in built))
 # decalajul de mai sus a fost doar ca sa nu se suprapuna in viewport.
 for o in built:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:  %s (%d B)" % export_glb(built, "cactus.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "plants/cactus.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "cactus.blend"))
 for i, o in enumerate(built):
     o.location = (i * 2.6, 0.0, 0.0)

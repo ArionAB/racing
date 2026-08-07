@@ -2,9 +2,9 @@ extends SceneTree
 ## Unealta: masoara modelele GLB (dimensiuni + structura + originea).
 
 const MODELS: Array[String] = [
-	"res://assets/models/toy_dino.glb",
-	"res://assets/models/sandbox_border.glb",
-	"res://assets/models/rocks.glb",
+	"res://assets/models/props/toy_dino.glb",
+	"res://assets/models/structures/sandbox_border.glb",
+	"res://assets/models/rocks/rocks.glb",
 ]
 
 func _init() -> void:

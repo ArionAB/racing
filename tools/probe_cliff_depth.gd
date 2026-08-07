@@ -14,7 +14,7 @@ extends SceneTree
 ## Rulare:
 ##   godot --headless --path . --script res://tools/probe_cliff_depth.gd
 
-const MODEL_PATH: String = "res://assets/models/cliff_wall.glb"
+const MODEL_PATH: String = "res://assets/models/rocks/cliff_wall.glb"
 
 
 func _initialize() -> void:

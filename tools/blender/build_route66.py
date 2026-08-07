@@ -132,5 +132,5 @@ BEFORE_H = 2.90
 print("Route66Sign -> %d tris | AO %.2f..%.2f" % (stats["tris"], stats["ao_min"], stats["ao_max"]))
 print("inaltime %.3f m (inainte de #D4: %.2f) | latime %.2f | adancime %.2f"
       % (ext[2][1] - ext[2][0], BEFORE_H, ext[0][1] - ext[0][0], ext[1][1] - ext[1][0]))
-print("GLB:   %s (%d B)" % export_glb([obj], "route66_sign.glb"))
+print("GLB:   %s (%d B)" % export_glb([obj], "signs/route66_sign.glb"))
 print("BLEND: %s (%d B)" % save_blend([obj], "route66_sign.blend"))

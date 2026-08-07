@@ -36,7 +36,7 @@ exec(open(r"d:/GameDev/ignition-spike/tools/blender/build_windmill.py").read(), 
 Verificarea GLB-ului rezultat, fara Blender si fara Godot:
 
 ```
-python tools/blender/verify_glb.py assets/models/windmill.glb 1200
+python tools/blender/verify_glb.py assets/models/buildings/windmill.glb 1200
 ```
 
 ## Geometrie din afara: `vendor/`

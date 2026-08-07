@@ -186,8 +186,8 @@ AO_SPEC = dict(samples=30, dist=1.8, gradient="vertical",
 
 # (fisier, gura deschisa, inaltime ceruta)
 VARIANTS = [
-    ("shisa_statue.glb", True, 1.80),
-    ("shisa_statue_closed.glb", False, 1.60),
+    ("props/shisa_statue.glb", True, 1.80),
+    ("props/shisa_statue_closed.glb", False, 1.60),
 ]
 
 for filename, open_mouth, height in VARIANTS:

@@ -69,16 +69,26 @@ func _initialize() -> void:
 		print("nu gasesc res://assets/models")
 		quit(1)
 		return
+	# modelele stau in foldere de categorie (rocks/, trees/, ...); cheile din
+	# FOLIAGE si KNOWN raman nume scurte, deci raportul pastreaza doar fisierul
 	var files: Array[String] = []
 	for f in dir.get_files():
 		if f.ends_with(".glb"):
 			files.append(f)
+	for sub in dir.get_directories():
+		var sub_dir := DirAccess.open("res://assets/models/" + sub)
+		if sub_dir == null:
+			continue
+		for f in sub_dir.get_files():
+			if f.ends_with(".glb"):
+				files.append(sub + "/" + f)
 	files.sort()
 
-	for f in files:
+	for path in files:
+		var f := path.get_file()
 		if f in FOLIAGE:
 			continue
-		var scene := (load("res://assets/models/" + f) as PackedScene) \
+		var scene := (load("res://assets/models/" + path) as PackedScene) \
 			.instantiate()
 		_walk(f, scene)
 		scene.free()

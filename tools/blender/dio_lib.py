@@ -1525,9 +1525,12 @@ def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
 
 
 def export_glb(objects, filename):
-    """Export GLB cu UV + vertex colors, Y-up, modificatori aplicati."""
-    os.makedirs(MODELS, exist_ok=True)
+    """Export GLB cu UV + vertex colors, Y-up, modificatori aplicati.
+
+    `filename` include categoria (ex. "rocks/canyon_rocks.glb"): din august
+    2026 assets/models/ e organizat pe foldere de categorie."""
     path = os.path.join(MODELS, filename)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.ops.object.select_all(action="DESELECT")
     for o in objects:
         o.select_set(True)

@@ -2,7 +2,7 @@
 extends Node3D
 ## Moara de vant — prop "hero" animat, pe pipeline-ul "diorama".
 ##
-## GLB-ul (assets/models/windmill.glb) vine din Blender cu DOUA noduri: turnul
+## GLB-ul (assets/models/buildings/windmill.glb) vine din Blender cu DOUA noduri: turnul
 ## static si roata de pale, numita exact [b]Blades[/b]. Roata e nod separat tocmai
 ## ca sa nu avem nevoie de animatie bake: o rotim din script, ceea ce pe mobil e
 ## mai ieftin si ne lasa sa controlam viteza. Pivotul ei e in centrul butucului,

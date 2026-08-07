@@ -103,9 +103,9 @@ culoare în engine:**
 - **De raportat în PR:** înălțimea și jumătatea de lățime reale ale fiecărei
   variante — colizorul din `scenes/props/bowling_pin.gd:20-23` (cilindru
   `radius 0.3, height 1.55`) se redimensionează după ele.
-- **Checklist la primire** (`res://assets/models/marker_post.glb`):
+- **Checklist la primire** (`res://assets/models/signs/marker_post.glb`):
   1. trei noduri cu numele exacte, copii direcți ai rădăcinii
-  2. fiecare ≤ 90 triunghiuri (`verify_glb.py assets/models/marker_post.glb 90`)
+  2. fiecare ≤ 90 triunghiuri (`verify_glb.py assets/models/signs/marker_post.glb 90`)
   3. UV-urile nimeresc centrele sloturilor
   4. origine la bază, centrată XZ, fiecare la (0,0,0)
   5. există strat de vertex color (AO)

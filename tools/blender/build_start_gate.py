@@ -197,5 +197,5 @@ print("  degajare sub panou   : %.3f m   [minim 5.300]" % PANEL_BOTTOM)
 print("  degajare sub traversa: %.3f m" % BEAM_LO)
 
 obj.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb([obj], "start_gate.glb"))
+print("GLB:   %s (%d B)" % export_glb([obj], "structures/start_gate.glb"))
 print("BLEND: %s (%d B)" % save_blend([obj], "start_gate.blend"))

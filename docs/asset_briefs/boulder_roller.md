@@ -93,7 +93,7 @@ culoare în engine:**
   (`_pivot.position = Vector3.UP * roll_radius`).
 
   ```
-  python tools/blender/verify_glb.py assets/models/boulder_roller.glb 220 --origin=center
+  python tools/blender/verify_glb.py assets/models/rocks/boulder_roller.glb 220 --origin=center
   ```
 - **Nu-l face să semene cu `Cluster_L1`** din `rock_cluster.glb` — ăla e
   bolovanul static din decor *și* cel care cade în `RockfallHazard`. Ăsta trebuie

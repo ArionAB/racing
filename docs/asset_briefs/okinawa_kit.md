@@ -112,22 +112,22 @@ copt, care sunt gratis.
 ## Verificare
 
 ```
-python tools/blender/verify_glb.py assets/models/tetrapod.glb 900 --class-parts=Tetrapod_04
-python tools/blender/verify_glb.py assets/models/coral_rock.glb 1800
-python tools/blender/verify_glb.py assets/models/coconut_palm.glb 2000 \
+python tools/blender/verify_glb.py assets/models/structures/tetrapod.glb 900 --class-parts=Tetrapod_04
+python tools/blender/verify_glb.py assets/models/rocks/coral_rock.glb 1800
+python tools/blender/verify_glb.py assets/models/trees/coconut_palm.glb 2000 \
     --class-parts=Palm_Bark --origin=assembly
-python tools/blender/verify_glb.py assets/models/beach_palm_bent.glb 1600 \
+python tools/blender/verify_glb.py assets/models/trees/beach_palm_bent.glb 1600 \
     --class-parts=BentPalm_Bark --origin=assembly
-python tools/blender/verify_glb.py assets/models/pandanus.glb 2400 \
+python tools/blender/verify_glb.py assets/models/trees/pandanus.glb 2400 \
     --class-parts=Pandanus_Bark --origin=assembly
-python tools/blender/verify_glb.py assets/models/banyan.glb 5000 \
+python tools/blender/verify_glb.py assets/models/trees/banyan.glb 5000 \
     --class-parts=Banyan_Bark --origin=assembly
-python tools/blender/verify_glb.py assets/models/hibiscus_bush.glb 900
-python tools/blender/verify_glb.py assets/models/stone_gate_torii.glb 1200 \
+python tools/blender/verify_glb.py assets/models/plants/hibiscus_bush.glb 900
+python tools/blender/verify_glb.py assets/models/structures/stone_gate_torii.glb 1200 \
     --class-parts=Torii_Stone,Torii_Roof --origin=assembly
-python tools/blender/verify_glb.py assets/models/lighthouse.glb 3000 \
+python tools/blender/verify_glb.py assets/models/buildings/lighthouse.glb 3000 \
     --class-parts=Lighthouse_Stone,Lighthouse_White --origin=assembly
-python tools/blender/verify_glb.py assets/models/shisa.glb 5000 \
+python tools/blender/verify_glb.py assets/models/props/shisa_statue.glb 5000 \
     --class-parts=Shisa_Base,Shisa_Stone --origin=assembly
 ```
 

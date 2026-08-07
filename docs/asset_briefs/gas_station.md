@@ -83,7 +83,7 @@ culoare în engine:**
   ordinea în palette.gd, se recalculează u = (slot+0.5)/32.
 - **Commit sursa `.blend` + `.glb`** (regula de onboarding) — nu doar exportul,
   ca oricine din echipă să poată edita ulterior.
-- **Checklist la primire** (`res://assets/models/gas_station.glb`):
+- **Checklist la primire** (`res://assets/models/buildings/gas_station.glb`):
   1. triunghiuri ≤ 1800
   2. UV-urile nimeresc centrele sloturilor (verifică pompele = beton, acoperiș = rugină)
   3. origine la bază, centrată XZ; stă pe sol la Y=0

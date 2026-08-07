@@ -83,7 +83,7 @@ report_slits(built, "butte")
 
 for o in built:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:  %s (%d B)" % export_glb(built, "butte.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "rocks/butte.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "butte.blend"))
 for i, o in enumerate(built):
     o.location = (i * 95.0, 0.0, 0.0)

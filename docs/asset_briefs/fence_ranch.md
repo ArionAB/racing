@@ -119,7 +119,7 @@ lui `Fence_A` — la 4.0 modulele ar fi lăsat o fantă de 6 cm la fiecare
 îmbinare.
 
 ```
-python tools/blender/verify_glb.py assets/models/fence_ranch.glb 220
+python tools/blender/verify_glb.py assets/models/structures/fence_ranch.glb 220
 ```
 
 - **Slot folosit:** `wood_weathered` = 9 (u = 0.296875).

@@ -373,7 +373,7 @@ print("TOTAL: %d tris in biblioteca" % sum(v[1] for v in per_class.values()))
 
 for o in built:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(built, "megakit_rocks.glb"))
+print("GLB:   %s (%d B)" % export_glb(built, "rocks/megakit_rocks.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "megakit_rocks.blend"))
 
 # Asezate una langa alta doar pentru inspectie in Blender; instanta din joc

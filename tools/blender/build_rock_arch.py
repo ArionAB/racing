@@ -242,5 +242,5 @@ print("  gabarit    : %.2f x %.2f x %.2f m, baza la z=%.3f"
 
 for o in allo:
     o.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb(allo, "rock_arch.glb"))
+print("GLB:   %s (%d B)" % export_glb(allo, "rocks/rock_arch.glb"))
 print("BLEND: %s (%d B)" % save_blend(allo, "rock_arch.blend"))

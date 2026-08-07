@@ -152,5 +152,5 @@ print("  raza pe orizontala (Godot XZ) = %.3f m -> in joc, la model_scale 0.52: 
       % (max(ext[0][1], ext[1][1]), max(ext[0][1], ext[1][1]) * 0.52))
 
 obj.location = (0.0, 0.0, 0.0)
-print("GLB:   %s (%d B)" % export_glb([obj], "boulder_roller.glb"))
+print("GLB:   %s (%d B)" % export_glb([obj], "rocks/boulder_roller.glb"))
 print("BLEND: %s (%d B)" % save_blend([obj], "boulder_roller.blend"))

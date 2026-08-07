@@ -72,7 +72,7 @@ culoare:**
 - **Sloturi folosite:** concrete=8 (u=0.265625), asphalt=5 (0.171875),
   painted_metal=11 (0.359375), rust_metal=10 (0.328125). u = (slot+0.5)/32.
 - **Commit sursa `.blend` + `.glb`** — nu doar exportul.
-- **Checklist la primire** (`res://assets/models/route66_sign.glb`):
+- **Checklist la primire** (`res://assets/models/signs/route66_sign.glb`):
   1. triunghiuri ≤ 250
   2. UV-uri pe centrele sloturilor (câmp = beton, ramă = asfalt)
   3. origine la baza stâlpului, XZ centrat; stă pe sol la Y=0

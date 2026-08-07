@@ -185,5 +185,5 @@ for unit in UNITS:
 WAGONS = 3
 consist = tris["Train_Loco"] + tris["Train_Tender"] + WAGONS * tris["Train_Wagon"]
 print("garnitura (loco + tender + %d vagoane): %d triunghiuri" % (WAGONS, consist))
-print("GLB:   %s (%d B)" % export_glb(built, "train.glb"))
+print("GLB:   %s (%d B)" % export_glb(built, "vehicles/train.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "train.blend"))

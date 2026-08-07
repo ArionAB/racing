@@ -276,5 +276,5 @@ for name, fill in (("Typhoon", funnel), ("Typhoon_Debris", debris)):
              d.x, d.y, d.z))
 
 print("TOTAL: %d tris" % sum(tri_count(o) for o in built))
-print("GLB:  %s (%d B)" % export_glb(built, "typhoon.glb"))
+print("GLB:  %s (%d B)" % export_glb(built, "effects/typhoon.glb"))
 print("BLEND: %s (%d B)" % save_blend(built, "typhoon.blend"))

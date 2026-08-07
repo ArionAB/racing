@@ -280,5 +280,5 @@ print("delta gabarit    : %s  (toleranta %+.0f mm, zgomot de bevel)"
       % (", ".join(deltas), TOL * 1000))
 print("gabarit          : %s" % ("NU a crescut  OK" if not grown
                                  else "A CRESCUT pe " + ",".join(grown) + "  !!"))
-print("GLB:   %s (%d B)" % export_glb(objs, "gas_station.glb"))
+print("GLB:   %s (%d B)" % export_glb(objs, "buildings/gas_station.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "gas_station.blend"))

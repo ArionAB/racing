@@ -198,5 +198,5 @@ for name, obj, uv_size in raw:
 print("TOTAL: %d tris (buget 900) %s" % (total, "OK" if total <= 900 else "DEPASIT"))
 print("ecran %.1f x %.1f m, grosime %.2f | varf la %.2f m"
       % (SCREEN_W, SCREEN_H, SCREEN_T, hi[2] + shift[2]))
-print("GLB:   %s (%d B)" % export_glb(objs, "drive_in_screen.glb"))
+print("GLB:   %s (%d B)" % export_glb(objs, "buildings/drive_in_screen.glb"))
 print("BLEND: %s (%d B)" % save_blend(objs, "drive_in_screen.blend"))

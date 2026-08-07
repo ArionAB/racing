@@ -817,12 +817,20 @@ func _build_environment() -> void:
 	# deci efectul apare doar pe varfurile reale de lumina — soarele pe caroserii,
 	# spuma, cerul la orizont — nu ca un val lăptos pe toata scena. Doar
 	# nivelurile 2-3 (mip-uri mici) sunt active: halo strans, cost minim.
+	#
+	# ATENTIE la indici: `set_glow_level` numara de la 0 (sunt 7 niveluri,
+	# 0..6), dar inspectorul le eticheteaza `glow_levels/1`..`glow_levels/7`.
+	# Prima versiune a buclei mergea pe etichete (`range(1, 8)`) si arunca
+	# la fiecare incarcare de pista "Index p_level = 7 is out of bounds".
+	# Indicii 2 si 3 de mai jos sunt cei EFECTIV activi de atunci — adica
+	# etichetele 3-4 din inspector, nu 2-3. Se pastreaza asa: ei sunt in
+	# snapshot-urile pe care s-a calibrat restul tonemap-ului.
 	if theme_glow:
 		env.glow_enabled = true
 		env.glow_intensity = 0.25
 		env.glow_bloom = 0.04
 		env.glow_hdr_threshold = 1.1
-		for level in range(1, 8):
+		for level in range(7):
 			env.set_glow_level(level, 1.0 if level in [2, 3] else 0.0)
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env

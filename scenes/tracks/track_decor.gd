@@ -538,6 +538,9 @@ const ISLAND_CLASSES := {
 	"Tetrapod": "concrete",
 	"Sea_Wall": "concrete",
 	"Sabani_Hull": "wood",
+	# Pontonul din golful urcarii (Track08, decor manual): aceleasi scanduri
+	# ca bordajul sabani, deci aceeasi clasa — nu un material nou.
+	"Pier_Wood": "wood",
 }
 
 ## Fractiile pe care creste trestia de zahar (sectorul 7, `Track05.SECTORS`).

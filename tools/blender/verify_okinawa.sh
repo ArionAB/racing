@@ -41,5 +41,6 @@ check assets/models/sabani_boat.glb 1500 --class-parts=Sabani_Hull --origin=asse
 check assets/models/beach_clutter.glb 1300
 check assets/models/horizon_island.glb 400
 check assets/models/wave_surge.glb 600 --origin=assembly
+check assets/models/wooden_pier.glb 2600 --class-parts=Pier_Wood --origin=waterline
 
 exit $fail

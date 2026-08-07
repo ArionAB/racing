@@ -46,6 +46,22 @@ shader_type spatial;
 // kill-switch pentru profilarea pe device (M4): daca 60fps nu tine, se sting
 // pe rand de pe CPU, fara shader nou. Buget static: tot 2 esantioane de
 // textura per pixel, plus ~30 de operatii ALU.
+//
+// v3: hula directionala (umbra in vale, lumina pe creasta, spargeri albe rare)
+// si trepte de adancime. Motivul, in doua parti:
+//
+//   - un BUG: valurile de vertecsi din v2 (+/-12 cm) scufundau grila fina sub
+//     placa de larg, care statea cu doar 4 cm mai jos, iar prin gauri se vedea
+//     sea_deep. Pe laguna Okinawa ieseau pete mari albastru inchis, cu margini
+//     poligonale, care se PLIMBAU (sinusoidele au TIME in ele). Reparatia nu e
+//     in shader, ci in Track.SEA_FAR_DROP, acum derivat din amplitudine.
+//   - o LIPSA: cu petele stinse, marea deschisa ramanea o placa perfect plata
+//     de culoare. Singurul lucru care se misca pe ea era ondulatia din
+//     detail_rock — o textura de ROCA, cu straturile ei — deci de la distanta
+//     citea ca panza. Hula ii da directie si relief.
+//
+// Comparatie: docs/asset_briefs/img/okinawa_apa_v3.png.
+// Cost adaugat: 1 sin + 1 pow + 1 fwidth per pixel, zero esantioane noi.
 render_mode unshaded, cull_back, depth_draw_opaque;
 
 // detail_rock.png: gri, centrata pe ALB (medie masurata 0.89), tileabila.
@@ -75,6 +91,13 @@ uniform float ripple_strength : hint_range(0.0, 1.0) = 0.35;
 // functie de adancime. Forma ramane identica: 0 la tarm (un val acolo deschide
 // o fisura cu terenul), varf pe recif, 0 spre larg (granita cu planul fix
 // SeaFar, pe care un val l-ar strapunge).
+//
+// Valoarea EFECTIVA vine de pe CPU (Track.SEA_WAVE_AMP), nu de aici: din ea se
+// deriva Track.SEA_FAR_DROP, adica cat de jos sta placa de larg fata de grila
+// fina. Cand cele doua numere s-au desincronizat (drop 4 cm, val 12 cm), grila
+// s-a scufundat sub larg si prin gauri se vedea sea_deep — petele albastre
+// poligonale care se plimbau pe laguna. Implicita de aici e doar plasa de
+// siguranta pentru cine deschide shaderul singur.
 uniform float wave_amp : hint_range(0.0, 0.5) = 0.12;
 // Unde cade varful anvelopei, in adancime normalizata: SEA_REEF_DEPTH /
 // SEA_NEAR_DEPTH. Setat de Track odata cu restul uniformelor, ca sa nu existe
@@ -97,6 +120,34 @@ uniform float foam_speed = 1.1;
 // Scanteierea soarelui pe ondulatie. 0 = stinsa.
 uniform float glint_strength : hint_range(0.0, 2.0) = 0.0;
 uniform vec3 sun_dir = vec3(0.0, 1.0, 0.0); // SPRE soare, normalizat
+
+// --- v3. Doua adaugiri, amandoua pentru aceeasi problema: din masina, marea
+// deschisa era o placa PLATA de culoare, fara nicio informatie de suprafata —
+// singurul lucru care se misca pe ea era ondulatia din detail_rock, adica o
+// textura de ROCA, cu straturile ei orizontale. La distanta citea ca panza, nu
+// ca apa. Vezi capturile din docs/asset_briefs/img/okinawa_apa_v3.png.
+//
+// CRESTE DE HULA. Linii de val care traverseaza marea pe o directie fixa,
+// analitice (fara textura, deci fara tipar care se repeta si fara VRAM). Sunt
+// ce da apei DIRECTIE — fara ele nu se poate spune incotro merge marea. Doua
+// trenuri cu lungimi de unda necomensurabile si directii la ~20° unul de altul,
+// ridicate la putere ca sa iasa linii subtiri de creasta, nu sinusoide grase.
+// Cost: 2 sin + 2 pow, zero esantioane de textura.
+uniform float crest_strength : hint_range(0.0, 1.0) = 0.0;
+uniform vec2 crest_dir = vec2(0.80, 0.60); // directia hulei, in plan XZ
+uniform float crest_len = 26.0; // distanta intre creste, in metri
+uniform float crest_speed = 2.6; // cat de repede inainteaza, m/s
+uniform float crest_sharp : hint_range(1.0, 64.0) = 12.0;
+
+// BENZI DE ADANCIME. Rampa de culoare e continua, deci tranzitia laguna->larg
+// iesea ca un blur de zeci de metri — corect fizic, dar exact opusul liniei
+// grafice a jocului (style_bible §1: forme citibile, nu degrade-uri). Aici
+// se cuantizeaza adancimea in cateva trepte, iar marginea treptei se
+// SERPUIESTE cu ondulatia deja esantionata — altfel ar iesi curbe de nivel
+// trase cu compasul, la fel de artificiale ca blur-ul.
+uniform float band_strength : hint_range(0.0, 1.0) = 0.0;
+uniform float band_count : hint_range(2.0, 12.0) = 5.0;
+uniform float band_wobble : hint_range(0.0, 0.4) = 0.09;
 
 varying vec3 world_pos;
 
@@ -121,12 +172,18 @@ void fragment() {
 	// toate petecele de apa si nu se vede grila din care e facut planul.
 	vec2 p = world_pos.xz;
 	vec2 uv_near = p * scale_near + TIME * drift_near * scale_near;
-	// Al doilea strat pe coordonate ROTITE 90°. detail_rock.png are strate
+	// Al doilea strat pe coordonate ROTITE. detail_rock.png are strate
 	// ORIZONTALE (e o textura de roca sedimentara), deci doua esantioane cu
 	// aceeasi orientare se aduna in dungi paralele — la prima randare marea
 	// citea ca un gard de scanduri verticale. Rotite, cele doua seturi de dungi
 	// se incruciseaza si rezultatul citeste ca unda.
-	vec2 uv_far = vec2(p.y, -p.x) * scale_far + TIME * drift_far * scale_far;
+	//
+	// Unghiul a fost 90° si l-am schimbat la 63°: la 90° ambele seturi de dungi
+	// raman ALINIATE LA AXE, deci incrucisarea da o GRILA — vizibila ca tesatura
+	// in orice captura de sus a largului. Un unghi care nu e multiplu de 90 rupe
+	// si alinierea, nu doar paralelismul.
+	vec2 rot = vec2(p.x * 0.454 - p.y * 0.891, p.x * 0.891 + p.y * 0.454);
+	vec2 uv_far = rot * scale_far + TIME * drift_far * scale_far;
 	float a = texture(ripple_tex, uv_near).r;
 	float b = texture(ripple_tex, uv_far).r;
 	float ripple = mix(1.0, a * b, ripple_strength);
@@ -137,6 +194,12 @@ void fragment() {
 	// sqrt intinde partea de mica adancime: laguna turcoaz ocupa mai mult
 	// din banda vizibila, exact ca in imaginile de referinta.
 	float t = sqrt(depth01);
+	// Trepte de adancime. Serpuirea se aplica INAINTE de cuantizare, ca sa
+	// deformeze granita; aplicata dupa, ar fi doar zgomotat culoarea plata din
+	// interiorul benzii, adica fix ce nu voiam.
+	float tw = t + (a * b - 0.79) * band_wobble;
+	float tq = floor(tw * band_count) / max(band_count - 1.0, 1.0);
+	t = mix(t, clamp(tq, 0.0, 1.0), band_strength);
 	vec3 ramp = mix(shore_col, shallow_col, smoothstep(0.0, 0.40, t));
 	ramp = mix(ramp, deep_col, smoothstep(0.40, 1.0, t));
 	vec3 base = mix(COLOR.rgb, ramp, ramp_strength);
@@ -150,13 +213,64 @@ void fragment() {
 	float foam = clamp(band * pulse * ragged * 2.2, 0.0, 1.0) * foam_strength;
 	base = mix(base, foam_col, foam);
 
+	// HULA. Un singur tren de valuri, care da marii directie.
+	//
+	// Doua incercari gresite inaintea asteia, amandoua din acelasi motiv — am
+	// desenat SPUMA acolo unde trebuia desenata FORMA:
+	//
+	//   1. Doua trenuri de creste ascutite la 20° unul de altul: o PLASA alba
+	//      peste toata marea. Doua seturi de linii care se intersecteaza dau o
+	//      grila, oricat de necomensurabile ar fi lungimile de unda.
+	//   2. Un singur tren de creste albe: linii paralele care converg spre
+	//      punctul de fuga, ca liniile unui caiet. Marea vazuta de la 200 m nu
+	//      arata linii albe continue — arata alternanta lumina/umbra.
+	//
+	// Deci hula MODULEAZA LUMINOZITATEA (valea mai intunecata, creasta mai
+	// deschisa), si abia peste ea, rar, apar spargeri albe. Suprafata primeste
+	// relief citibil fara sa fie acoperita de spuma.
+	vec2 cd = normalize(crest_dir);
+	float k1 = 6.2831853 / max(crest_len, 1.0);
+	// Faza SERPUIESTE cu ondulatia deja esantionata: fara asta crestele sunt
+	// drepte pe kilometri, si nimic dintr-o mare nu e drept.
+	float phase = dot(p, cd) * k1 - TIME * crest_speed * k1
+		+ (a * b - 0.79) * 5.0;
+	// ANTIALIASING. Un tipar analitic n-are mipmap-uri: spre orizont o perioada
+	// intreaga intra intr-un pixel si iese moire. fwidth(phase) spune cate
+	// radiane trece tiparul pe un pixel; peste ~1.2 nu mai e rezolvabil si se
+	// stinge. Costul e o derivata, nu un esantion.
+	float crest_aa = (1.0 - smoothstep(0.35, 1.2, fwidth(phase)))
+		* crest_strength;
+	// Umbra de hula: ±6% pe culoarea deja calculata. Cat sa se vada forma, nu
+	// cat sa se vada efectul.
+	base *= 1.0 + (sin(phase) * 0.5 + 0.5) * 0.12 * crest_aa - 0.06 * crest_aa;
+	// Spargeri: doar varful crestei, si doar unde o modulatie lenta de-a lungul
+	// ei o lasa — altfel toata creasta ar sparge pe toata lungimea, la fel de
+	// artificial ca liniile de caiet.
+	vec2 along = vec2(-cd.y, cd.x);
+	float breaker = pow(max(sin(phase), 0.0), crest_sharp)
+		* smoothstep(0.62, 0.98, sin(dot(p, along) * 0.09 + TIME * 0.31) * 0.5
+			+ 0.5 + (a * b - 0.79));
+	// Se stinge chiar la tarm: acolo comanda banda de spuma, iar doua efecte
+	// albe suprapuse pe aceiasi pixeli ies ca o pata laptoasa.
+	breaker *= smoothstep(0.0, foam_reach * 2.0, depth01) * crest_aa;
+	base = mix(base, foam_col, breaker * (1.0 - foam));
+
 	base *= ripple;
 
 	// Sun glint: NU e specular din pasul de lumina (ramane unshaded — vezi
 	// contractul #2), e o scanteiere geometrica din aceleasi doua esantioane.
 	// Normala perturbata ieftin din ondulatie; exponentul mic tine pata larga,
 	// masca de ripple o sparge in scantei.
-	vec3 n = normalize(vec3((a - 0.89) * 0.9, 1.0, (b - 0.89) * 0.9));
+	//
+	// v3: la perturbarea din textura se adauga PANTA crestelor. Fara ea,
+	// scanteierea urma straturile din detail_rock — adica desena pe mare
+	// tiparul unei roci — si nu avea nimic de-a face cu valurile pe care le vezi
+	// trecand. Cu ea, sclipirea alearga de-a lungul crestelor, care e chiar
+	// motivul pentru care apa sclipeste in realitate. Amplitudinea vine din
+	// crest_strength: un singur intrerupator pentru tot ce tine de hula.
+	float slope = cos(phase) * crest_strength * 0.30;
+	vec3 n = normalize(vec3(
+		(a - 0.89) * 0.9 + cd.x * slope, 1.0, (b - 0.89) * 0.9 + cd.y * slope));
 	vec3 view = normalize(CAMERA_POSITION_WORLD - world_pos);
 	float glint = pow(max(dot(reflect(-sun_dir, n), view), 0.0), 48.0);
 	base += glint * smoothstep(0.55, 0.9, a * b) * glint_strength;

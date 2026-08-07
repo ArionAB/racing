@@ -1387,12 +1387,38 @@ const SEA_CELL: float = 9.5
 ## Cat de mult depaseste cvadrilaterul de larg grila fina. Trebuie sa ajunga
 ## dincolo de ceata (250 m) ca marea sa nu aiba margine vizibila.
 const SEA_FAR_EXTENT: float = 2400.0
+## Amplitudinea valurilor de vertecsi din water.gdshader, in metri.
+##
+## Traieste AICI, nu ca valoare implicita in shader, si nu din cochetarie: e
+## singurul numar din care se poate deriva corect SEA_FAR_DROP (vezi mai jos).
+## Doua copii ale ei — una in shader, una aici — s-ar desincroniza la prima
+## retusare a valurilor, si exact desincronizarea aia a produs bug-ul pe care
+## il descrie SEA_FAR_DROP.
+##
+## Vertecsii se misca cu +/- amplitudinea asta: suma sinusoidelor din shader e
+## 0.6 + 0.4 = 1.0 la varf, deci deplasarea maxima E chiar numarul de aici.
+const SEA_WAVE_AMP: float = 0.12
+
 ## Cu cat sta mai jos cvadrilaterul de larg fata de grila fina.
 ##
 ## Sunt doua suprafete la aceeasi cota, deci ar face z-fighting pe toata zona de
-## suprapunere. 4 cm le separa fara sa se vada: la nivelul marii, din masina,
-## treapta e sub un pixel.
-const SEA_FAR_DROP: float = 0.04
+## suprapunere. Cateva centimetri le separa fara sa se vada: la nivelul marii,
+## din masina, treapta e sub un pixel.
+##
+## Cat de mult: STRICT mai mult decat coboara valurile grila fina, plus o marja.
+## Valoarea a fost 4 cm fixi, scrisa cand marea era plata — si a devenit gresita
+## in tacere cand grila fina a primit valuri de vertecsi de +/-12 cm (#122).
+## Simptomul, vizibil in orice captura de sus a Okinawei: grila fina se scufunda
+## sub larg pe portiunile in care sinusoida e in vale, iar prin gaura se vedea
+## SeaFar — adica petele MARI, ALBASTRU INCHIS, cu margini poligonale (fatetele
+## grilei de 9.5 m), care se PLIMBAU pe laguna fiindca sinusoidele au TIME in
+## ele. Culoarea petelor masurata pe captura: #215965, adica exact sea_deep, la
+## 4 m de apa unde laguna trebuia sa fie turcoaz.
+##
+## Marja de 8 cm peste amplitudine: la nivelul marii, din masina, 20 cm de
+## treapta raman sub un pixel, iar in zona in care cele doua suprafete chiar se
+## invecineaza (adancime > SEA_NEAR_DEPTH) anvelopa valului e oricum zero.
+const SEA_FAR_DROP: float = SEA_WAVE_AMP + 0.08
 
 
 ## Marea: o grila fina langa tarm plus un cvadrilater urias pentru larg.
@@ -1664,11 +1690,27 @@ func _water_material() -> ShaderMaterial:
 		deg_to_rad(SUN_ROTATION_DEG.x), deg_to_rad(SUN_ROTATION_DEG.y),
 		deg_to_rad(SUN_ROTATION_DEG.z))) * Vector3.FORWARD)
 	_water_mat.set_shader_parameter("sun_dir", to_sun)
+	# v3: creste de hula si trepte de adancime. Doua intrerupatoare, ambele in
+	# lista de stins la profilarea pe device — crestele costa 2 sin + 2 pow,
+	# treptele nu costa nimic (aceleasi esantioane).
+	#
+	# Directia hulei NU e aleatoare si nici legata de pista: bate dinspre soare,
+	# adica dinspre partea din care si scanteierea vine. Doua directii diferite
+	# ar fi dat o mare care sclipeste intr-o parte si curge in alta.
+	_water_mat.set_shader_parameter("crest_strength", 0.85)
+	_water_mat.set_shader_parameter("crest_dir",
+		Vector2(to_sun.x, to_sun.z).normalized())
+	_water_mat.set_shader_parameter("band_strength", 0.60)
 	# Varful anvelopei de valuri, in adancime normalizata. Din constantele de
 	# aici, nu scris de mana in shader: reciful e o cota de gameplay, iar doua
 	# copii ale ei s-ar desincroniza tacut la prima retusare a lagunei.
 	_water_mat.set_shader_parameter("wave_reef",
 		SEA_REEF_DEPTH / SEA_NEAR_DEPTH)
+	# Amplitudinea valurilor vine tot de pe CPU, din acelasi motiv ca wave_reef,
+	# doar ca aici consecinta desincronizarii nu e cosmetica: SEA_FAR_DROP se
+	# calculeaza din ea, iar daca shaderul ar avea alta valoare, grila fina s-ar
+	# scufunda sub larg si ar reaparea petele de sea_deep pe laguna.
+	_water_mat.set_shader_parameter("wave_amp", SEA_WAVE_AMP)
 	return _water_mat
 
 

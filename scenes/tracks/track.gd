@@ -355,8 +355,37 @@ static func themes() -> Dictionary:
 func theme_flag(key: String, fallback: Variant = null) -> Variant:
 	if _theme.is_empty():
 		var all := themes()
-		_theme = all.get(theme_decor, all["forest"])
+		_theme = _with_overrides(all.get(theme_decor, all["forest"]))
 	return _theme.get(key, fallback)
+
+
+## Ce schimba PISTA ASTA din tema ei, cu aceleasi chei ca `themes()`.
+##
+## Exista fiindca o pista se putea abate pana acum doar prin metode (`_hose_fracs`,
+## `_wave_fracs`, `_channel_specs`) — adica doar pe axele pentru care cineva
+## apucase sa scrie un hook. Tot ce statea in tema (ce model are hazardul, cat de
+## mare e, daca se rostogoleste) era comun pe toate pistele temei: schimbat acolo,
+## se schimba si pe Okinawa si pe Okinawa v2, deci o incercare pe pista de lucru
+## n-ar mai fi fost o incercare.
+##
+## Nu tine loc de tema noua. O tema descrie o LUME (cer, mare, decor, faleze); un
+## override e o abatere declarata a unei piste de la lumea ei, si se scrie langa
+## motivul ei, ca celelalte abateri ale lui Track08.
+func _theme_overrides() -> Dictionary:
+	return {}
+
+
+## Tema + abaterile pistei. Duplicarea NU e defensiva: `themes()` intoarce un
+## cache PARTAJAT de toate pistele, iar `merge` pe el ar muta hazardul de pe
+## Okinawa manual si pe Okinawa v2, in tacere si doar in ordinea in care se
+## incarca scenele.
+func _with_overrides(base: Dictionary) -> Dictionary:
+	var over := _theme_overrides()
+	if over.is_empty():
+		return base
+	var merged := base.duplicate()
+	merged.merge(over, true)
+	return merged
 
 
 ## Paleta completa a unei teme, dintr-un singur apel.
@@ -369,7 +398,7 @@ func apply_theme(theme: String) -> void:
 			% [theme, ", ".join(all.keys())])
 		theme = "forest"
 	theme_decor = theme
-	_theme = all[theme]
+	_theme = _with_overrides(all[theme])
 	theme_ground_tint = _theme["ground_tint"]
 	theme_sky_top = _theme["sky_top"]
 	theme_sky_horizon = _theme["sky_horizon"]
@@ -2422,6 +2451,17 @@ func _build_hazard(frac: float) -> void:
 		# sosea pe latimea ASTA de drum (vezi SlidingHazard._clamp_travel).
 		ball.road_half_width = half_width
 		ball.phase = fposmod(frac * 3.7, 1.0) # doua obstacole nu bat la unison
+		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
+		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
+		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa
+		# care traverseaza mergand cu umarul inainte nu traverseaza, pluteste.
+		#
+		# Rotatia se pune INAINTE de add_child. `SlidingHazard` e un
+		# AnimatableBody3D cu sync_to_physics, deci dupa intrarea in arbore
+		# transformul il tine serverul de fizica — iar pozitia se rescrie oricum
+		# la fiecare pas, dar BAZA nu, deci o rotatie pusa dupa se pierde tacut.
+		if bool(theme_flag("hazard_face_travel", false)):
+			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
 		add_child(ball)
 		ball.center = p
 		ball.travel = side * half_width * 0.9

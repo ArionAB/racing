@@ -39,6 +39,13 @@ declarate.
 | `beach_clutter.glb` | `Fishing_Crate`, `Net_Floats`, `Awamori_Pot`, `Bamboo_Rack`, `Driftwood_Log` | 0.19 – 1.37 m | 3594 | #105 |
 | `horizon_island.glb` | `Island_Low`, `Island_Peak`, `Island_Ridge` | 6.6 – 26.0 m | 750 | #105 |
 | `wave_surge.glb` | `Wave`, `Wave_Foam`, `Wave_Spray` | 3.00 m / 30 m lungime | 2806 | #105, #106 |
+| `sea_turtle.glb` | `Sea_Turtle` | 3.60 m lungime / 3.63 m latime | 1090 | — |
+
+> Testoasa e `hazard_model` pe Okinawa manual, in locul barcii sabani: bariera
+> mobila de la fractia 0.256 sta la 90 m de apa, unde o barca „targ ita peste
+> causeway" nu mai avea nicio explicatie. E singura piesa din lot cu un
+> „inainte", deci pista o si roteste pe directia de maturare
+> (`hazard_face_travel`) — vezi antetul lui `scenes/tracks/track08.gd`.
 
 > Valul a fost RECONSTRUIT in august 2026, dupa playtest: era o bucata de 6 m pe
 > care pista o repeta de cinci ori ca sa acopere drumul, si din masina se vedeau
@@ -46,7 +53,7 @@ declarate.
 > 30 m, cu varfuri inegale, o portiune deja sparta si un rulou de spuma pe buza.
 > Piesa noua `Wave_Spray` e a treia care se anima singura (`wave_surge.gd`).
 
-Total lot: **56.520 de triunghiuri** pentru cate o instanta din TOATE variantele
+Total lot: **57.610 de triunghiuri** pentru cate o instanta din TOATE variantele
 — dar nicio pista nu le pune pe toate deodata. Ce conteaza e costul per
 instanta: scatter-ul sub 400 tris, stancile 300-870, hero-urile 900-4900.
 
@@ -139,7 +146,8 @@ for f in ("build_tetrapod.py", "build_coral_rock.py", "build_island_scatter.py",
           "build_banyan.py", "build_hibiscus.py", "build_sugar_cane.py",
           "build_torii.py", "build_lighthouse.py", "build_shisa.py",
           "build_gusuku_wall.py", "build_sabani.py", "build_beach_clutter.py",
-          "build_horizon_island.py", "build_wave_surge.py"):
+          "build_horizon_island.py", "build_wave_surge.py",
+          "build_sea_turtle.py"):
     exec(open(P + "/" + f).read(), g)
 ```
 

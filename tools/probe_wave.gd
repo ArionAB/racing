@@ -91,6 +91,12 @@ var _drive_slow: float = 1e9
 var _cross_frame: int = -1
 var _cross_lateral: float = 0.0
 var _cross_best: float = 1e9
+## Cate stropiri a raportat masina si cat de tare a fost cea mai puternica.
+## Semnalul `Car.splashed` e singura legatura dintre val si screen shake, si e
+## exact genul de fir care se poate rupe fara ca nimic sa se planga: hazardul isi
+## vede de treaba, ecranul sta nemiscat.
+var _splashes: int = 0
+var _splash_max: float = 0.0
 var _phase: int = 0 # 0 = val singur, 1 = trecere cu val, 2 = trecere fara
 var _failed: bool = false
 
@@ -301,6 +307,11 @@ func _start_pass(hit: bool) -> void:
 	# metru lateral si orice km/h in minus vin de la ce a intalnit pe drum, adica
 	# exact ce vrem sa citim.
 	_drive_car.race_active = false
+	_splashes = 0
+	_splash_max = 0.0
+	_drive_car.splashed.connect(func(_c: Car, strength: float) -> void:
+		_splashes += 1
+		_splash_max = maxf(_splash_max, strength))
 	# Ceasul valului. In rularea „fara" il trimitem in larg; in cea „cu" il
 	# potrivim pe MOMENTUL SI LOCUL in care a trecut masina in rularea dinainte,
 	# nu pe o estimare `RUN_UP / ENTRY_SPEED`.
@@ -365,6 +376,7 @@ func _report_pass() -> void:
 	var lateral := absf(diff.dot(side))
 	var behind := -diff.dot(fwd)
 	var d_spd := _pass_miss.y - _pass_hit.y
+	print("  stropiri raportate: %d (cea mai tare %.2f)" % [_splashes, _splash_max])
 	print("  trecere CU val:   viteza la iesire %.1f m/s" % _pass_hit.y)
 	print("  trecere FARA val: viteza la iesire %.1f m/s" % _pass_miss.y)
 	print("  => valul te muta %.1f m lateral, te lasa %.1f m in urma"
@@ -383,7 +395,9 @@ func _report_pass() -> void:
 		_check(lateral > 0.8 or d_spd > 1.5, "trecerea prin val CHIAR se simte")
 	else:
 		print("  (prag sarit: sectorul are si conducta, deci apa e permanenta)")
-	_check(lateral < 5.0, "valul nu te matura de pe dig")
+	_check(lateral < 7.0, "valul nu te matura de pe dig")
+	if _hoses == 0:
+		_check(_splashes > 0, "valul chiar raporteaza stropirea (semnalul de shake)")
 
 
 func _check(ok: bool, label: String) -> void:

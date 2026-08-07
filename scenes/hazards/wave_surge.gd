@@ -51,20 +51,51 @@ const EXIT_MARGIN: float = 8.0
 ## Imbrancitura, in m/s adaugati LATERAL o singura data cand creasta trece peste
 ## masina. Nu e o acceleratie: apa te loveste o data, nu te impinge continuu.
 ##
-## Cifra vine din masuratoare, nu din gust. `tools/ProbeWave.tscn` trece o masina
-## lansata prin sector de doua ori — o data cu valul peste ea, o data fara — si
-## citeste cat de departe ajung una de alta. La 9.0 cele doua masini terminau la
-## 9.5 m distanta, adica doua treimi din latimea drumului: nu „te imbranceste",
-## ci „te matura de pe dig". La 5.0 iese 2.6 m lateral (o masina si jumatate),
-## 2.0 m ramasi in urma si 3.4 m/s mai putin la iesirea din sector — cat sa te
-## sperie si sa ai ce corecta din volan. Masina din sonda nu contreaza deloc; un
-## jucator vede mai putin.
-const PUSH_IMPULSE: float = 5.0
+## Cifra se MASOARA cu `tools/ProbeWave.tscn` (o masina lansata trece prin sector
+## de doua ori, o data cu valul peste ea si o data fara, si se citeste diferenta)
+## dar se ALEGE din scaun. Istoricul, fiindca s-a jucat de doua ori:
+##
+##   impuls  apa    drag   rezultat masurat
+##   ------  -----  -----  --------------------------------------------------
+##    9.0    6 m    0.40   masinile terminau la 9.5 m una de alta (distanta
+##                         bruta, inainte sa desfac lateralul de longitudinal)
+##    5.0    6 m    0.40   2.6 m lateral, 3.4 m/s — masurabil, dar verdictul
+##                         din joc a fost „prea mic"
+##    9.0    9 m    1.40   4.1 m lateral, 5.8 m in urma, 7.1 m/s  <- acum
+##
+## Detaliul contraintuitiv din tabel: la 11.0 (incercat si el) masina pierdea mai
+## PUTINA viteza decat la 9.0 — 4.8 m/s fata de 7.1 — fiindca o imbrancitura mai
+## tare o scoate mai repede din apa, deci drag-ul are mai putin timp sa lucreze.
+## Impulsul si franarea nu se aduna, se concureaza.
+##
+## De ce sonda si scaunul nu cad de acord: sonda trece cu o masina LANSATA de la
+## 26 m/s care incetineste singura, jucatorul intra cu piciorul in podea la 30+.
+## Acelasi impuls lateral da un unghi mai mic si o corectie mai usoara cu cat
+## mergi mai repede — deci cifra care „se simte" in sonda e sub cea care se simte
+## in cursa. Sonda ramane pentru REGRESII (plafonul „nu te matura de pe dig"),
+## nu ca arbitru de feel.
+const PUSH_IMPULSE: float = 9.0
 ## Cat din viteza pierzi pe secunda de stat in apa (fractiune). Apa mare franeaza;
 ## fara asta, valul era o pata de vopsea peste care treceai fara sa clipesti.
-const DRAG_PER_SEC: float = 0.40
-## Cat de mult zguduie ecranul o trecere prin creasta, la impact maxim.
-const SPLASH_TRAUMA: float = 0.30
+##
+## Se citeste IMPREUNA cu `film_depth`: la 28 m/s traversezi 9 m de apa in 0.32 s,
+## deci vechiul 0.40/s lua 13% din viteza — sub pragul la care simti ceva. La 1.4
+## ies ~37%, adica intri in apa si te trezesti franat.
+const DRAG_PER_SEC: float = 1.40
+## Cat de mult zguduie ecranul intrarea in val.
+##
+## Shake-ul camerei e `trauma^2 * 0.35 m`, deci creste PATRATIC si valorile mici
+## practic nu exista: la 0.30 (prima versiune) ieseau 3 cm de offset stinsi in
+## 0.17 s. Semnalul chiar se emitea — sonda l-a si numarat, o stropire per
+## trecere — dar pe ecran nu se vedea nimic, si exact asta s-a raportat din joc.
+## La 0.75 ies 20 cm, mai mult decat o izbitura in perete (0.5 -> 9 cm), si e
+## corect asa: acolo atingi un zid cu o aripa, aici te ia un val cu totul.
+const SPLASH_TRAUMA: float = 0.75
+## Zguduitura de fond cat timp esti IN apa, adaugata la fiecare `SPLASH_EVERY`
+## secunde. Fara ea valul dadea o singura palma, iar trauma (care se stinge cu
+## 1.8 pe secunda) se termina inainte sa fi iesit din apa.
+const SPLASH_RUMBLE: float = 0.22
+const SPLASH_EVERY: float = 0.12
 
 ## Latimea maturata, in metri de o parte si de alta a axei drumului.
 var sweep: float = 22.0
@@ -79,8 +110,12 @@ var sweep: float = 22.0
 ## PORTIUNE de drum, si tocmai asta e decizia: intri in ea sau astepti.
 var crest_length: float = 30.0
 ## Cat de adanca e pelicula de apa pe directia de mers a valului. Mai lata decat
-## modelul crestei (2.6 m): apa nu se opreste la creasta, se intinde in urma ei.
-var film_depth: float = 6.0
+## modelul crestei (4.5 m): apa nu se opreste la creasta, se intinde in urma ei.
+##
+## E si CAT TIMP stai in apa, deci un reglaj de gameplay, nu doar de decor: la
+## 28 m/s, 9 m inseamna 0.32 s de franare si de grip taiat. La 6 m (versiunea
+## dinainte de playtest) erau 0.21 s — prea putin cat sa se simta ceva.
+var film_depth: float = 9.0
 ## Defazaj 0..1, ca doua valuri de pe aceeasi pista sa nu bata la unison.
 var phase: float = 0.0
 ## Directia in care merge valul (versor orizontal, perpendicular pe sosea),
@@ -118,6 +153,9 @@ var _audio: AudioStreamPlayer3D
 ## tine in viata si crapa la prima masina eliberata („previously freed instance",
 ## bug pe care `typhoon_hazard.gd` inca il scoate in sonde).
 var _crest_dist: Dictionary = {}
+## Cronometrul zguduiturii de fond. Unul singur pentru tot valul, nu unul per
+## masina: shake-ul e al CAMEREI, iar camera urmareste o singura masina.
+var _rumble: float = 0.0
 
 const MODEL_PATH := "res://assets/models/wave_surge.glb"
 
@@ -350,7 +388,15 @@ func _touch_car(car: Car, delta: float) -> void:
 	var keep := 1.0 - clampf(DRAG_PER_SEC * delta, 0.0, 0.5)
 	car.velocity.x *= keep
 	car.velocity.z *= keep
-	# Imbrancitura + stropul: doar cand creasta chiar trece peste masina, adica in
+	# Zguduitura de fond, cat esti in apa. Se da la intervale, nu in fiecare cadru:
+	# la 60 fps, `add_trauma` de 60 de ori pe secunda satureaza plafonul de 1.0 din
+	# doua cadre si ecranul intra in convulsii. La 0.22 pe 0.12 s, trauma se tine
+	# in jur de 0.3-0.4 cat timp esti udat — un tremur, nu o palma.
+	_rumble += delta
+	if _rumble >= SPLASH_EVERY:
+		_rumble = 0.0
+		car.splash(SPLASH_RUMBLE)
+	# Imbrancitura + palma: doar cand creasta chiar trece peste masina, adica in
 	# cadrul in care distanta scade sub un metru. `was` porneste de la infinit,
 	# deci prima intrare se prinde si ea.
 	if d > 1.0 or was <= 1.0:

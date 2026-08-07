@@ -82,6 +82,51 @@ func _wave_fracs() -> Array[float]:
 
 
 ## ############################################################################
+## TESTOASA DE PE DRUM: bariera mobila de la 0.256 nu mai e o barca.
+##
+## A patra abatere de la Okinawa v2, si a doua care schimba un hazard. Fractia,
+## amplitudinea maturarii si perioada raman ale lui `_hazard_fracs()` din
+## track07.gd — se schimba doar CE anume traverseaza soseaua.
+##
+## [b]De ce[/b]. Sabani a ajuns `hazard_model` fiindca era barca pe care o aveam
+## deja (#107), si a ramas ca „targ ita peste causeway" — o explicatie care merge
+## doar cat timp hazardul chiar sta langa apa. La 0.256 e coasta de vest, adica
+## exact bucata din tur pe care sonda de tarm o da drept punctul cel mai DEPARTE
+## de apa (86-90 m pana la larg). O barca de 5 m care aluneca inainte si inapoi
+## la 90 m de mal nu are nicio poveste in spate; o testoasa care traverseaza spre
+## plaja are, si e a insulei.
+##
+## [b]Ce se schimba pentru cel care conduce: nimic[/b], si asta e intentia.
+## Masurat cu o sonda pe ambele piste, nu presupus: barca e 5.01 x 1.02 m si
+## matura +/-4.50 m; testoasa e 3.60 x 3.63 m si matura +/-5.19 m. In amandoua
+## cazurile marginea obstacolului ajunge exact in marginea soselei (5.19 + 1.81 =
+## 4.50 + 2.50 = 7.0 = `half_width`), fiindca `SlidingHazard._clamp_travel` cere
+## chiar asta si isi taie singur cursa dupa cat de mare e modelul. Perioada iese
+## putin mai lunga (2.72 s fata de 2.35 s) tot din asta — cursa e mai lunga la
+## acelasi plafon de viteza de maturare, deci nu obstacolul a incetinit.
+##
+## Si o cota care merita retinuta: testoasa e cat o masina (3.60 x 0.99 m fata de
+## 3.80 x 1.00 m cutia unei masini). Nu e un bolovan care te sterge, e un corp de
+## marimea ta pe drum.
+##
+## `hazard_face_travel` NU e cosmetic, e acelasi soi de steag ca `hazard_roll:
+## false` de la barca: un animal are un „inainte", deci trebuie sa se uite
+## incotro merge. Vezi Track._build_hazard.
+func _theme_overrides() -> Dictionary:
+	return {
+		"hazard_model": "res://assets/models/sea_turtle.glb",
+		"hazard_face_travel": true,
+		# Mostenite explicit de la tema, ca sa se citeasca tot contractul
+		# hazardului dintr-un loc: nu se rostogoleste (i-ar zbura carapacea peste
+		# cap), e la scara ei reala din Blender si sta pe atlasul de paleta —
+		# fara `hazard_classes`, fiindca nicio clasa de material nu e o carapace.
+		"hazard_roll": false,
+		"hazard_scale": 1.0,
+		"hazard_classes": {},
+	}
+
+
+## ############################################################################
 ## STRAMTOAREA KAIUN: canalul cu pod mobil de pe coasta de vest.
 ##
 ## Singura abatere a acestei piste de la Okinawa v2, si prima care schimba

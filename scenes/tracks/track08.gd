@@ -114,6 +114,12 @@ func _wave_fracs() -> Array[float]:
 ## incotro merge. Vezi Track._build_hazard.
 func _theme_overrides() -> Dictionary:
 	return {
+		# Panglica rosie de pe margini se stinge, coliziunea ei ramane (vezi
+		# _build_walls): pe un drum de nisip de coasta, o bariera continua de
+		# santier era singurul lucru din cadru care nu apartinea insulei.
+		# Bariera VIZUALA e treaba scenografiei si a decorului manual: gard de
+		# lemn pe buza lagunei, ziduri gusuku spre interior.
+		"wall_visible": false,
 		"hazard_model": "res://assets/models/props/sea_turtle.glb",
 		"hazard_face_travel": true,
 		# Mostenite explicit de la tema, ca sa se citeasca tot contractul

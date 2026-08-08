@@ -1,18 +1,16 @@
-[gd_resource type="Resource" script_class="CarData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CarData" format=3 uid="uid://chtvtnqldaqm5"]
 
-[ext_resource type="Script" path="res://scenes/cars/car_data.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/models/vehicles/taxi.fbx" id="2"]
+[ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://cqc1m7hctaj32" path="res://assets/models/vehicles/taxi.fbx" id="2"]
 
 [resource]
 script = ExtResource("1")
 display_name = "Taxi"
 color = Color(0.95, 0.8, 0.15, 1)
 max_speed = 33.0
-acceleration = 16.0
 grip = 9.0
 mass_factor = 1.15
 model = ExtResource("2")
 model_scale = 0.739
-model_rotation_deg = 180.0
 body_length = 3.864
 body_width = 2.075

@@ -383,4 +383,3 @@ func _update_hud() -> void:
 func _fmt_ms(ms: int) -> String:
 	@warning_ignore("integer_division")
 	return "%d:%02d.%d" % [ms / 60000, (ms % 60000) / 1000, (ms % 1000) / 100]
-

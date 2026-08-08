@@ -126,6 +126,12 @@ func _theme_overrides() -> Dictionary:
 		# decat marginea drumului, ca umarul sa citeasca drept continuarea
 		# prafuita a drumului, nu alt material.
 		"dust_color": Color(0.62, 0.50, 0.33),
+		# Verdele campului, impins spre iarba grasa din referinta: tinta
+		# vizuala e pajistea densa, iar pastelul mostenit citea a fanata.
+		# Nuanta se calibreaza pe snapshot (--gamecam), nu pe hex-ul din
+		# paleta — lumina insulei (soare 1.5 / expunere 1.0) schimba pixelul.
+		"inland_tint": Color(0.30, 0.54, 0.19),
+		"inland_strength": 0.95,
 		"hazard_model": "res://assets/models/props/sea_turtle.glb",
 		"hazard_face_travel": true,
 		# Mostenite explicit de la tema, ca sa se citeasca tot contractul
@@ -136,6 +142,97 @@ func _theme_overrides() -> Dictionary:
 		"hazard_scale": 1.0,
 		"hazard_classes": {},
 	}
+
+
+## ############################################################################
+## PAJISTEA SI PIETRELE: densitatea din imaginea de referinta, declarata, nu
+## asezata cu mouse-ul.
+##
+## Referinta drumului de coasta arata doua lucruri pe care Okinawa v2 nu le
+## are: iarba VIE (smocuri, flori, tufe pana in buza drumului) si pietre din
+## belsug, in ciorchini, pe fasia dintre drum si garduri. Ambele sunt tipare
+## STATISTICE, nu compozitii — exact felul de lucru pentru grove/edge, nu
+## pentru decor manual: se reface la fiecare rebuild, se coace in MultiMesh,
+## si isi gaseste singur pamantul cu ground_y.
+##
+## `above_sea` la 1.6 e ce tine pajistea PE CAMP: sub BEACH_SAND_TOP (1.4 m)
+## terenul e plaja, si un smoc de iarba grasa pe nisipul spalat de valuri ar
+## fi la fel de nelalocul lui ca panglica rosie pe care tocmai am stins-o.
+## Plaja isi pastreaza imprastierea ei (island_scatter din benzile mostenite).
+func _scenography() -> Array[Dictionary]:
+	const M := "res://assets/models/"
+	var specs := super._scenography()
+	specs.append_array([
+		# --- PAJISTEA: covor marunt pe tot campul verde, ambele laturi.
+		# Speciile ieftine duc greul (smocuri, ~100-250 tri); florile si
+		# hibiscusul sunt accentele, nu umplutura — la fel ca in referinta,
+		# unde petele portocalii se numara, iar firele de iarba nu.
+		{"kind": "grove", "label": "Pajiste", "side": 1.0, "both_sides": true,
+			"from": 0.03, "to": 0.93, "off": [1.5, 12.0], "spacing": 3.5,
+			"above_sea": 1.6, "clear": 2.0, "species": [
+				{"path": M + "rocks/island_scatter.glb",
+					"picks": ["Beach_Grass"], "weight": 3.0,
+					"scale": [0.9, 1.5], "sink": 0.08},
+				{"path": M + "plants/megakit_plants.glb",
+					"picks": ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D"],
+					"weight": 4.0, "scale": [0.8, 1.4], "sink": 0.1},
+				{"path": M + "plants/grass_tuft_small.glb", "weight": 2.0,
+					"scale": [0.8, 1.3], "sink": 0.08},
+				{"path": M + "plants/grass_tuft_large.glb", "weight": 1.5,
+					"scale": [0.8, 1.2], "sink": 0.1},
+				{"path": M + "flowers/flowers_orange.glb", "weight": 1.5,
+					"scale": [0.9, 1.3], "sink": 0.06},
+				{"path": M + "flowers/flowers_white.glb", "weight": 1.5,
+					"scale": [0.9, 1.3], "sink": 0.06},
+				{"path": M + "plants/hibiscus_bush.glb", "weight": 1.0,
+					"scale": [0.7, 1.1], "sink": 0.12},
+			]},
+		# --- PIETRELE DE MARGINE: semnatura referintei pe urcarea de coasta
+		# si pe creasta. Doua siruri decalate pe fiecare latura (off si pas
+		# diferite), ca sa citeasca a ciorchini cazuti, nu a margele insirate.
+		# Fara coliziune: la 2.8-5 m de margine esti in zona de iertare, nu
+		# intr-un slalom nedeclarat (regula benzii `hug` din TrackDecor).
+		{"kind": "edge", "label": "Pietre_margine", "side": 1.0,
+			"from": 0.44, "to": 0.72, "off": 2.8, "spacing": 6.5,
+			"jitter": 1.6, "min_ground": 0.8,
+			"path": M + "rocks/coral_rock.glb",
+			"picks": ["Coral_Rock_01", "Coral_Rock_03", "Coral_Rock_05",
+				"Coral_Rock_07"],
+			"scale": [0.25, 0.55], "face": "random", "sink": 0.15},
+		{"kind": "edge", "label": "Pietre_margine", "side": 1.0,
+			"from": 0.45, "to": 0.71, "off": 4.8, "spacing": 12.0,
+			"jitter": 1.8, "min_ground": 0.8,
+			"path": M + "rocks/coral_rock.glb",
+			"picks": ["Coral_Rock_02", "Coral_Rock_04", "Coral_Rock_06",
+				"Coral_Rock_08"],
+			"scale": [0.4, 0.75], "face": "random", "sink": 0.2},
+		{"kind": "edge", "label": "Pietre_margine", "side": -1.0,
+			"from": 0.44, "to": 0.72, "off": 3.2, "spacing": 7.0,
+			"jitter": 1.6, "min_ground": 0.8,
+			"path": M + "rocks/coral_rock.glb",
+			"picks": ["Coral_Rock_02", "Coral_Rock_05", "Coral_Rock_08"],
+			"scale": [0.25, 0.6], "face": "random", "sink": 0.15},
+		{"kind": "edge", "label": "Pietre_margine", "side": -1.0,
+			"from": 0.46, "to": 0.70, "off": 5.2, "spacing": 13.0,
+			"jitter": 2.0, "min_ground": 0.8,
+			"path": M + "rocks/coral_rock.glb",
+			"picks": ["Coral_Rock_01", "Coral_Rock_04", "Coral_Rock_06"],
+			"scale": [0.45, 0.8], "face": "random", "sink": 0.2},
+		# --- CIORCHINII: grupuri gata sculptate (rock_cluster), rare, pe tot
+		# campul — punctele grele care ancoreaza covorul marunt al pajistii.
+		{"kind": "grove", "label": "Ciorchini_pietre", "side": 1.0,
+			"both_sides": true, "from": 0.03, "to": 0.93,
+			"off": [4.0, 14.0], "spacing": 34.0, "above_sea": 1.6,
+			"clear": 3.5, "species": [
+				{"path": M + "rocks/rock_cluster.glb",
+					"picks": ["Cluster_S1", "Cluster_S2", "Cluster_M1"],
+					"weight": 3.0, "scale": [0.5, 0.9], "sink": 0.2},
+				{"path": M + "rocks/coral_rock.glb",
+					"picks": ["Coral_Rock_03", "Coral_Rock_06"],
+					"weight": 2.0, "scale": [0.5, 0.9], "sink": 0.25},
+			]},
+	])
+	return specs
 
 
 ## ############################################################################

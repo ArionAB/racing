@@ -249,6 +249,33 @@ static func surfaces() -> Dictionary:
 		"surface_sand_macro": {"src": "surface_sand_macro_src.jpg",
 			"mean": 0.850, "sigma": 0.075, "grain": 0.12},
 
+		# --- IARBA ---
+		#
+		# Prima textura pe care campul verde o primeste vreodata: pana acum
+		# "iarba" era textura de nisip tentata verde din vertex color, si de
+		# acolo venea jumatate din distanta fata de referinta (deviatia de
+		# luminanta ~2.7 la noi vs ~36-40 la BBR, masurata in august).
+		#
+		# Sursa micro: leafy_grass (PolyHaven CC0, scanare de 2.0 m la
+		# repetitia de 3.125 m). Aleasa prin masuratoare din patru candidati:
+		# retine 0.87 din deviatie in dala (14.21 din 16.3) — la egalitate cu
+		# gravelly_sand a nisipului — si dezechilibru 1.3%/1.7%.
+		# sparse_grass retinea 0.83 dar cu sigma globala 9 (poza plata);
+		# aerial_grass_rock avea dezechilibru 4.0% — la limita benzilor.
+		#
+		# Sursa macro: coast_land_rocks_01 (PolyHaven CC0, aeriana de 20 m la
+		# repetitia de 45 m — aceeasi clasa de compromis ca aeriana nisipului).
+		# Cea mai UNIFORMA dintre candidati (1.3%/1.8%), criteriul care conteaza
+		# la scara la care o repetitie acopera jumatate de ecran.
+		#
+		# mean 0.850 pe amandoua, MOSTENIT de la nisip cu buna stiinta:
+		# produsul trecerilor (0.7225) ramane identic, deci expunerea campului
+		# nu se misca si inland_tint-ul calibrat pe snapshot ramane valabil.
+		"surface_grass": {"src": "surface_grass_src.jpg",
+			"mean": 0.850, "sigma": 0.075, "grain": 0.22},
+		"surface_grass_macro": {"src": "surface_grass_macro_src.jpg",
+			"mean": 0.850, "sigma": 0.075, "grain": 0.12},
+
 		# --- ASFALT ---
 		#
 		# Sursa micro: asphalt_02 (PolyHaven CC0, scanare de 3.0 m — practic 1:1

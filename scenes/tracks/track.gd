@@ -1210,6 +1210,10 @@ func _world_extent() -> float:
 ## vegetatie. Vezi "inland_tint" din themes().
 const BEACH_SAND_TOP: float = 1.4
 const BEACH_FADE: float = 3.5
+## Culoarea peticelor de pamant din camp (#206): pamant batut, cald, intre
+## verdele campului si ocrul drumului — acelasi sol, alta uzura. Se aplica
+## prin lerp in vertex color, doar unde greutatea de iarba e mare.
+const TERRAIN_DIRT_COLOR: Color = Color(0.56, 0.47, 0.32)
 
 
 ## Coace grila de inaltimi (o data per rebuild). O cer si umerii, care se
@@ -1284,6 +1288,15 @@ func _build_terrain() -> void:
 	var inland: Variant = theme_flag("inland_tint", null)
 	var inland_mix := float(theme_flag("inland_strength", 0.0))
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
+	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
+	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
+	# batut si iarba rarita, si tocmai lipsa lor facea campul nostru sa arate
+	# a masa de biliard. Functia e de pozitie pura, deci weld-ul de la
+	# st.index() ramane intact (acelasi colt => aceeasi culoare).
+	var dirt_noise := FastNoiseLite.new()
+	dirt_noise.seed = _world_seed() ^ 0xD127
+	dirt_noise.frequency = 0.035 # perioada ~28 m: pete de 8-15 m, ca in referinta
+	dirt_noise.fractal_octaves = 2
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for gz in cells:
@@ -1313,14 +1326,29 @@ func _build_terrain() -> void:
 					var shade := clampf(1.0 + rel * 0.012, 0.86, 1.10)
 					shade *= _cliff_shadow(v, cliff_xz)
 					var tint := theme_ground_tint
+					# Greutatea de iarba (0 = plaja/nisip, 1 = camp), plecata
+					# spre shader prin COLOR.a: acolo alege intre perechea de
+					# texturi de nisip si cea de iarba (#206).
+					var grass_w := 0.0
 					if inland != null:
 						# Banda de trecere e larga (3.5 m de cota) tocmai ca sa
 						# nu se vada o linie de nivel: dunele o strambă singure,
 						# iar marginea iese neregulata, ca o plaja.
 						var t := clampf((v.y - sea_y - BEACH_SAND_TOP)
 							/ BEACH_FADE, 0.0, 1.0)
-						tint = tint.lerp(inland as Color, t * inland_mix)
-					st.set_color(tint * shade)
+						grass_w = t * inland_mix
+						tint = tint.lerp(inland as Color, grass_w)
+						# Peticele de pamant, doar pe iarba: tenta coboara spre
+						# pamant batut si greutatea spre nisip, ca in petic sa
+						# se vada granulatia de sol, nu firele de iarba.
+						var patch := smoothstep(0.55, 0.75,
+							dirt_noise.get_noise_2d(v.x, v.z) * 0.5 + 0.5) \
+							* grass_w
+						if patch > 0.0:
+							tint = tint.lerp(TERRAIN_DIRT_COLOR, patch * 0.65)
+							grass_w *= 1.0 - patch * 0.75
+					var col := tint * shade
+					st.set_color(Color(col.r, col.g, col.b, grass_w))
 					# UV din coordonate de LUME, nu din indexul celulei: asa
 					# textura curge continuu peste toata suprafata, fara sa se
 					# vada grila de 32x32 in tiparul ei.
@@ -1337,37 +1365,33 @@ func _build_terrain() -> void:
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
 	inst.mesh = st.commit()
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_color = Color.WHITE
-	# Granulatie de nisip peste culoarea din vertex colors. Textura e gri si se
-	# inmulteste, deci nu aduce culori noi — doar rupe pata uniforma care facea
-	# terenul sa arate ca plastic turnat.
+	# Doua perechi de texturi gri (nisip pe plaja, iarba pe camp), amestecate
+	# per-vertex prin COLOR.a in shader-ul de teren — vezi antetul lui
+	# terrain_splat.gdshader pentru de ce nu StandardMaterial3D si de ce nu
+	# doua suprafete. Culoarea vine tot din vertex colors; texturile doar o
+	# moduleaza (gri, medie 0.850 toate patru, deci expunerea nu se misca).
+	# Pe pistele fara inland_tint greutatea e 0 peste tot si randarea iese
+	# identica cu vechea pereche de nisip, pixel cu pixel.
 	var sand_tex := _tex("res://assets/textures/surface_sand.png")
-	if sand_tex != null:
-		mat.albedo_texture = sand_tex
-		mat.uv1_scale = Vector3.ONE
-		# albedo_color ramane ALB: culoarea vine din vertex colors, iar textura o
-		# moduleaza. Orice ridicare aici impinge canalul rosu peste 1.0, se
-		# satureaza, si granulatia dispare exact unde trebuia sa se vada.
-		#
-		# A doua trecere pe UV2 (scara macro): granulatia deasa da suprafata,
-		# petele lente rup repetitia. Terenul are UV2 real (emis mai sus), deci
-		# NU are nevoie de triplanar ca prop-urile.
-		#
-		# ALTA textura pe trecerea macro, nu aceeasi ca inainte. Fotografia
-		# aeriana de 20 m arata pete si urme late — la 45 m/repetitie iese
-		# aproape la scara ei reala, in timp ce pe UV1 (3.1 m) era stransa de sase
-		# ori si se topea in mipmap. Granula fina o aduce acum sursa micro, care
-		# chiar e o scanare de 2.5 m. Mediile amandurora raman 0.850, deci
-		# produsul — si expunerea terenului — sunt neatinse.
-		mat.detail_enabled = true
-		mat.detail_albedo = _tex("res://assets/textures/surface_sand_macro.png")
-		mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
-		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
-	mat.roughness = 0.95 # style_bible §4: nisip
-	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	inst.material_override = mat
+	var grass_tex := _tex("res://assets/textures/surface_grass.png")
+	if sand_tex != null and grass_tex != null:
+		var mat := ShaderMaterial.new()
+		mat.shader = load("res://assets/shaders/terrain_splat.gdshader")
+		mat.set_shader_parameter("sand_micro", sand_tex)
+		mat.set_shader_parameter("sand_macro",
+			_tex("res://assets/textures/surface_sand_macro.png"))
+		mat.set_shader_parameter("grass_micro", grass_tex)
+		mat.set_shader_parameter("grass_macro",
+			_tex("res://assets/textures/surface_grass_macro.png"))
+		inst.material_override = mat
+	else:
+		# Checkout fara texturi: macar culoarea din vertex colors.
+		var flat := StandardMaterial3D.new()
+		flat.vertex_color_use_as_albedo = true
+		flat.albedo_color = Color.WHITE
+		flat.roughness = 0.95
+		flat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+		inst.material_override = flat
 
 	# COLIZIUNE PE TEREN — obligatorie de cand nisipul urmareste soseaua.
 	#

@@ -159,9 +159,16 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## Pragul pastreaza ~8% aer — destul cat sa prinda clasa de accident (primitive
 ## la rezolutia implicita sar cu zeci de mii dintr-un foc), fara sa respinga
 ## urmatoarea sesiune de asezat.
+##
+## 1.45M -> 1.5M (august 2026): inca o sesiune de decor manual in editor
+## (pietre, flori, palmieri pe zonele 06/08). Masurat inainte/dupa:
+## 1 341 534 -> 1 454 400 vizibile, +113k, materialele NESCHIMBATE, 22/38.
+## ~3% aer, strans intentionat: urmatoarea densificare (pajistea si pietrele
+## dupa imaginea de referinta) vine cu masuratoarea ei si isi ridica pragul
+## atunci, nu acum.
 const TRIS_OVERRIDE := {
 	"Track07": 1000000,
-	"Track08": 1450000,
+	"Track08": 1500000,
 }
 
 

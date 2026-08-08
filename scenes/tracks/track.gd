@@ -149,6 +149,13 @@ const SHADOW_DISTANCE: float = 110.0
 ## _water_material — scanteierea trebuie sa cada din acelasi soare.
 const SUN_ROTATION_DEG: Vector3 = Vector3(-42, 135, 0)
 
+
+## Unghiul soarelui, cu abaterea pistei daca exista (theme "sun_rotation_deg").
+## Citit si de lumina, si de scanteierea apei — o singura sursa de adevar.
+func _sun_rotation_deg() -> Vector3:
+	var v: Variant = theme_flag("sun_rotation_deg", SUN_ROTATION_DEG)
+	return v if v is Vector3 else SUN_ROTATION_DEG
+
 ## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
 ##
 ## Camera face raycast DOAR pe layer-ul asta. Pe layer-ul implicit (unde stau
@@ -810,8 +817,13 @@ func _build_environment() -> void:
 	# snapshot, nu din ochi — vezi comentariul de la theme_exposure.
 	env.tonemap_exposure = theme_exposure
 	env.adjustment_enabled = true
+	# Salturatia NU e cheie de tema cu buna stiinta: compensarea de saturatie
+	# a apei (vezi nota de la _water_material) e masurata pe 1.18, si o pista
+	# care ar schimba-o si-ar strica marea in tacere. Contrastul e — abaterea
+	# lui misca mult mai putin apa si e prima parghie de "adancime" din
+	# referinta (#207).
 	env.adjustment_saturation = 1.18
-	env.adjustment_contrast = 1.05
+	env.adjustment_contrast = float(theme_flag("adjust_contrast", 1.05))
 	# Bloom-ul din style_bible §8, pana acum doar specificat. Threshold-ul sta
 	# PESTE alb (1.1): dupa FILMIC aproape nimic nu-l depaseste in mod normal,
 	# deci efectul apare doar pe varfurile reale de lumina — soarele pe caroserii,
@@ -845,7 +857,12 @@ func _build_environment() -> void:
 	# umbrele cadeau SUB si IN SPATELE stancilor, unde nu le vede nimeni. La 42°
 	# umbra unei faleze de 10m se intinde ~11m pe nisip, transversal pe drum:
 	# exact indiciul de volum care lipsea.
-	sun.rotation_degrees = SUN_ROTATION_DEG
+	#
+	# De la #207 unghiul e cheie de tema ("sun_rotation_deg", default constanta
+	# de mai sus): referinta de coasta are soare de dupa-amiaza tarzie, iar o
+	# pista care vrea umbre mai lungi nu trebuie sa le ia pentru tot jocul.
+	# Apa isi ia scanteierea din ACEEASI valoare (vezi _water_material).
+	sun.rotation_degrees = _sun_rotation_deg()
 	sun.light_color = theme_sun_color
 	sun.light_energy = theme_sun_energy
 	# Umbrele contrazic litera CLAUDE.md ("umbre ieftine sau blob shadows").
@@ -1746,10 +1763,12 @@ func _water_material() -> ShaderMaterial:
 	_water_mat.set_shader_parameter("foam_col", Vector3(foam.r, foam.g, foam.b))
 	_water_mat.set_shader_parameter("glint_strength", 0.55)
 	# SPRE soare: inversul directiei in care bat razele. Din aceeasi rotatie
-	# ca lumina reala (SUN_ROTATION_DEG), ca scanteierea sa cada corect.
+	# ca lumina reala (theme "sun_rotation_deg"), ca scanteierea sa cada corect
+	# si pe pistele care isi coboara soarele.
+	var sun_rot := _sun_rotation_deg()
 	var to_sun := -(Basis.from_euler(Vector3(
-		deg_to_rad(SUN_ROTATION_DEG.x), deg_to_rad(SUN_ROTATION_DEG.y),
-		deg_to_rad(SUN_ROTATION_DEG.z))) * Vector3.FORWARD)
+		deg_to_rad(sun_rot.x), deg_to_rad(sun_rot.y),
+		deg_to_rad(sun_rot.z))) * Vector3.FORWARD)
 	_water_mat.set_shader_parameter("sun_dir", to_sun)
 	# v3: creste de hula si trepte de adancime. Doua intrerupatoare, ambele in
 	# lista de stins la profilarea pe device — crestele costa 2 sin + 2 pow,

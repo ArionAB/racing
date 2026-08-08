@@ -176,9 +176,17 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## tot ce e peste 250 m, iar pajistea se coace in MultiMesh (109 desene pe
 ## toata pista). ~3.5% aer: WP-ul urmator (promovarea decorului manual in
 ## scenografie) nu ADAUGA geometrie, doar o muta.
+## 1.95M -> 2.15M (august 2026, #209): regulile de grupare — paturi de
+## flori lipite de gard/zid pe urcare (Paturi_gard 174/83k) si "fuste" de
+## smocuri la baza pietrelor si ciorchinilor (skirt in TrackScenography;
+## Pietre_margine 220 -> 442 piese, Ciorchini 83 -> 243). Masurat
+## inainte/dupa: 1 917 178 -> 2 059 126 vizibile, +142k, cu desenele
+## NESCHIMBATE (~508, totul intra in MultiMesh) si materialele 21/38.
+## Pajistea a fost taiata in trei lanuri cu goluri (ritmul plin/gol),
+## deci piesele ei au SCAZUT usor. ~4% aer.
 const TRIS_OVERRIDE := {
 	"Track07": 1000000,
-	"Track08": 1950000,
+	"Track08": 2150000,
 }
 
 

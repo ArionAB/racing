@@ -249,6 +249,7 @@ static func _build_edge(root: Node3D, path: _Path, sampler: TrackSideSampler,
 		# fata de nivelul marii, deci se poate cere si "doar pe uscat bun".
 		if far_enough and pos.y >= sea_y + drop:
 			_place(holder, spec, pos, rng, st["along"], side)
+			_skirt(holder, spec, pos, rng, st["along"], side, sampler, sea_y)
 			last = pos
 		d += probe
 
@@ -302,6 +303,7 @@ static func _build_grove(root: Node3D, path: _Path, sampler: TrackSideSampler,
 				continue
 			var pick: Dictionary = _weighted(species, rng)
 			_place(holder, pick, pos, rng, st["along"], s)
+			_skirt(holder, spec, pos, rng, st["along"], s, sampler, sea_y)
 		d += spacing
 
 
@@ -380,6 +382,38 @@ static func _snap_to_land(sampler: TrackSideSampler, path: _Path, pos: Vector3,
 ## implicita alinieaza axa X a modelului cu drumul (asa sunt exportate zidurile
 ## si parapetele: lungimea pe X), iar `face_road` intoarce piesa cu fata spre
 ## sosea (case, statui).
+## "Fusta" unei piese: sateliti marunti pe o raza in jurul ei (#209).
+##
+## In referinta nimic nu sta singur pe gazon: pietrele au smocuri la baza,
+## tufele au fire rasarite in jur. Cheia "skirt" pe un spec de `edge`/`grove`
+## descrie satelitii o singura data si fiecare piesa plasata si-i primeste:
+##   "skirt": {"path": ..., "picks": [...], "count": [2, 4], "radius": 1.6,
+##             "scale": [0.7, 1.2], "sink": 0.1}
+## Raza e de la MARGINEA piesei spre afara (0.35..1.0 din valoare), ca
+## satelitii sa nu rasara din piesa. Aceleasi refuzuri ca la grove: apa si
+## alta banda de asfalt. E acelasi tipar ca _place_satellites din TrackDecor,
+## dar declarativ — nu cod nou per compozitie.
+static func _skirt(parent: Node3D, spec: Dictionary, pos: Vector3,
+		rng: RandomNumberGenerator, along: Vector3, side: float,
+		sampler: TrackSideSampler, sea_y: float) -> void:
+	var skirt: Dictionary = spec.get("skirt", {})
+	if skirt.is_empty():
+		return
+	var cnt: Array = skirt.get("count", [2, 3])
+	var radius := float(skirt.get("radius", 1.5))
+	var above := float(spec.get("above_sea", 0.4))
+	for _j in rng.randi_range(int(cnt[0]), int(cnt[1])):
+		var ang := rng.randf_range(0.0, TAU)
+		var rr := radius * (0.35 + rng.randf() * 0.65)
+		var p2 := pos + Vector3(cos(ang) * rr, 0.0, sin(ang) * rr)
+		p2.y = sampler.ground_y(p2.x, p2.z)
+		if p2.y < sea_y + above:
+			continue
+		if sampler.clearance_at(p2) < sampler.half_width() + 1.2:
+			continue
+		_place(parent, skirt, p2, rng, along, side)
+
+
 static func _place(parent: Node3D, spec: Dictionary, pos: Vector3,
 		rng: RandomNumberGenerator, along: Vector3, side: float) -> void:
 	var node := _instance(spec, rng)

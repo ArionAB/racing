@@ -178,31 +178,71 @@ func _scenography() -> Array[Dictionary]:
 	# global nedeclarat inca ar rupe parse-ul intregii piste.
 	specs.append_array(
 		preload("res://scenes/tracks/track08_manual_specs.gd").specs())
+	# Speciile pajistii, declarate O DATA: covorul e taiat in trei lanuri cu
+	# goluri intre ele (#209, ritmul plin/gol din style_bible §7) si toate
+	# trei trag din aceeasi lista. Speciile ieftine duc greul (smocuri,
+	# ~100-250 tri); florile si hibiscusul sunt accentele, nu umplutura.
+	var pajiste_species: Array = [
+		{"path": M + "rocks/island_scatter.glb",
+			"picks": ["Beach_Grass"], "weight": 3.0,
+			"scale": [0.9, 1.5], "sink": 0.08},
+		{"path": M + "plants/megakit_plants.glb",
+			"picks": ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D"],
+			"weight": 4.0, "scale": [0.8, 1.4], "sink": 0.1},
+		{"path": M + "plants/grass_tuft_small.glb", "weight": 2.0,
+			"scale": [0.8, 1.3], "sink": 0.08},
+		{"path": M + "plants/grass_tuft_large.glb", "weight": 1.5,
+			"scale": [0.8, 1.2], "sink": 0.1},
+		{"path": M + "flowers/flowers_orange.glb", "weight": 1.5,
+			"scale": [0.9, 1.3], "sink": 0.06},
+		{"path": M + "flowers/flowers_white.glb", "weight": 1.5,
+			"scale": [0.9, 1.3], "sink": 0.06},
+		{"path": M + "plants/hibiscus_bush.glb", "weight": 1.0,
+			"scale": [0.7, 1.1], "sink": 0.12},
+	]
 	specs.append_array([
-		# --- PAJISTEA: covor marunt pe tot campul verde, ambele laturi.
-		# Speciile ieftine duc greul (smocuri, ~100-250 tri); florile si
-		# hibiscusul sunt accentele, nu umplutura — la fel ca in referinta,
-		# unde petele portocalii se numara, iar firele de iarba nu.
+		# --- PAJISTEA: trei lanuri cu goluri intre ele. Golurile cad pe
+		# strambatoarea cu pod (0.27-0.315) si pe creasta cu ziduri
+		# (0.60-0.655) — acolo scenografia mostenita e deja densa, iar un
+		# covor continuu pe tot turul citeste a mocheta, nu a camp.
 		{"kind": "grove", "label": "Pajiste", "side": 1.0, "both_sides": true,
-			"from": 0.03, "to": 0.93, "off": [1.5, 12.0], "spacing": 3.5,
-			"above_sea": 1.6, "clear": 2.0, "species": [
-				{"path": M + "rocks/island_scatter.glb",
-					"picks": ["Beach_Grass"], "weight": 3.0,
-					"scale": [0.9, 1.5], "sink": 0.08},
-				{"path": M + "plants/megakit_plants.glb",
-					"picks": ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D"],
-					"weight": 4.0, "scale": [0.8, 1.4], "sink": 0.1},
-				{"path": M + "plants/grass_tuft_small.glb", "weight": 2.0,
-					"scale": [0.8, 1.3], "sink": 0.08},
-				{"path": M + "plants/grass_tuft_large.glb", "weight": 1.5,
-					"scale": [0.8, 1.2], "sink": 0.1},
-				{"path": M + "flowers/flowers_orange.glb", "weight": 1.5,
-					"scale": [0.9, 1.3], "sink": 0.06},
-				{"path": M + "flowers/flowers_white.glb", "weight": 1.5,
-					"scale": [0.9, 1.3], "sink": 0.06},
-				{"path": M + "plants/hibiscus_bush.glb", "weight": 1.0,
-					"scale": [0.7, 1.1], "sink": 0.12},
-			]},
+			"from": 0.03, "to": 0.27, "off": [1.5, 12.0], "spacing": 3.5,
+			"above_sea": 1.6, "clear": 2.0, "species": pajiste_species},
+		{"kind": "grove", "label": "Pajiste", "side": 1.0, "both_sides": true,
+			"from": 0.315, "to": 0.60, "off": [1.5, 12.0], "spacing": 3.5,
+			"above_sea": 1.6, "clear": 2.0, "species": pajiste_species},
+		{"kind": "grove", "label": "Pajiste", "side": 1.0, "both_sides": true,
+			"from": 0.655, "to": 0.93, "off": [1.5, 12.0], "spacing": 3.5,
+			"above_sea": 1.6, "clear": 2.0, "species": pajiste_species},
+		# --- PATURILE: flori si iarba LIPITE de gardul de pe buza lagunei si
+		# de zidul dinspre mare, pe urcarea de coasta — compozitia-semnatura a
+		# referintei: nimic nu creste in mijlocul gazonului, totul se aduna la
+		# picioarele a ceva. Offseturile stau cu ~0.5 m inauntrul liniei
+		# gardului (manual, la ~2.5-3.5 m), deci paturile rasar la baza lui.
+		{"kind": "edge", "label": "Paturi_gard", "side": 1.0,
+			"from": 0.495, "to": 0.585, "off": 2.0, "spacing": 6.0,
+			"jitter": 0.5, "min_ground": 0.8,
+			"path": M + "flowers/flowers_orange.glb",
+			"scale": [0.9, 1.25], "face": "random", "sink": 0.06,
+			"skirt": {"path": M + "plants/megakit_plants.glb",
+				"picks": ["Tuft_A", "Tuft_B"], "count": [1, 2],
+				"radius": 1.1, "scale": [0.7, 1.1], "sink": 0.1}},
+		{"kind": "edge", "label": "Paturi_gard", "side": 1.0,
+			"from": 0.505, "to": 0.578, "off": 2.6, "spacing": 7.5,
+			"jitter": 0.6, "min_ground": 0.8,
+			"path": M + "flowers/flowers_white.glb",
+			"scale": [0.85, 1.15], "face": "random", "sink": 0.06},
+		{"kind": "edge", "label": "Paturi_gard", "side": -1.0,
+			"from": 0.452, "to": 0.60, "off": 1.8, "spacing": 4.0,
+			"jitter": 0.5, "min_ground": 0.8,
+			"path": M + "plants/megakit_plants.glb",
+			"picks": ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D"],
+			"scale": [0.9, 1.4], "face": "random", "sink": 0.1},
+		{"kind": "edge", "label": "Paturi_gard", "side": -1.0,
+			"from": 0.46, "to": 0.595, "off": 2.7, "spacing": 8.0,
+			"jitter": 0.8, "min_ground": 0.8,
+			"path": M + "plants/hibiscus_bush.glb",
+			"scale": [0.6, 0.9], "face": "random", "sink": 0.12},
 		# --- PIETRELE DE MARGINE: semnatura referintei pe urcarea de coasta
 		# si pe creasta. Doua siruri decalate pe fiecare latura (off si pas
 		# diferite), ca sa citeasca a ciorchini cazuti, nu a margele insirate.
@@ -214,7 +254,10 @@ func _scenography() -> Array[Dictionary]:
 			"path": M + "rocks/coral_rock.glb",
 			"picks": ["Coral_Rock_01", "Coral_Rock_03", "Coral_Rock_05",
 				"Coral_Rock_07"],
-			"scale": [0.25, 0.55], "face": "random", "sink": 0.15},
+			"scale": [0.25, 0.55], "face": "random", "sink": 0.15,
+			"skirt": {"path": M + "plants/megakit_plants.glb",
+				"picks": ["Tuft_A", "Tuft_C"], "count": [1, 2],
+				"radius": 1.0, "scale": [0.7, 1.1], "sink": 0.1}},
 		{"kind": "edge", "label": "Pietre_margine", "side": 1.0,
 			"from": 0.45, "to": 0.71, "off": 4.8, "spacing": 12.0,
 			"jitter": 1.8, "min_ground": 0.8,
@@ -227,7 +270,10 @@ func _scenography() -> Array[Dictionary]:
 			"jitter": 1.6, "min_ground": 0.8,
 			"path": M + "rocks/coral_rock.glb",
 			"picks": ["Coral_Rock_02", "Coral_Rock_05", "Coral_Rock_08"],
-			"scale": [0.25, 0.6], "face": "random", "sink": 0.15},
+			"scale": [0.25, 0.6], "face": "random", "sink": 0.15,
+			"skirt": {"path": M + "plants/megakit_plants.glb",
+				"picks": ["Tuft_B", "Tuft_D"], "count": [1, 2],
+				"radius": 1.0, "scale": [0.7, 1.1], "sink": 0.1}},
 		{"kind": "edge", "label": "Pietre_margine", "side": -1.0,
 			"from": 0.46, "to": 0.70, "off": 5.2, "spacing": 13.0,
 			"jitter": 2.0, "min_ground": 0.8,
@@ -236,10 +282,16 @@ func _scenography() -> Array[Dictionary]:
 			"scale": [0.45, 0.8], "face": "random", "sink": 0.2},
 		# --- CIORCHINII: grupuri gata sculptate (rock_cluster), rare, pe tot
 		# campul — punctele grele care ancoreaza covorul marunt al pajistii.
+		# Cu fusta de smocuri: piatra care sta pe gazon fara iarba la baza e
+		# exact citirea de "obiect pus cu mana" pe care o reparam.
 		{"kind": "grove", "label": "Ciorchini_pietre", "side": 1.0,
 			"both_sides": true, "from": 0.03, "to": 0.93,
 			"off": [4.0, 14.0], "spacing": 34.0, "above_sea": 1.6,
-			"clear": 3.5, "species": [
+			"clear": 3.5, "skirt": {"path": M + "plants/megakit_plants.glb",
+				"picks": ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D"],
+				"count": [1, 3], "radius": 1.7, "scale": [0.8, 1.3],
+				"sink": 0.1},
+			"species": [
 				{"path": M + "rocks/rock_cluster.glb",
 					"picks": ["Cluster_S1", "Cluster_S2", "Cluster_M1"],
 					"weight": 3.0, "scale": [0.5, 0.9], "sink": 0.2},

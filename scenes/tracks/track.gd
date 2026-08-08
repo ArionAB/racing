@@ -2437,7 +2437,13 @@ func _build_walls() -> void:
 				emitted = true
 		if emitted:
 			st.generate_normals()
-			_add_mesh_with_collision(st.commit(), Color(0.9, 0.25, 0.2))
+			# wall_visible = false pastreaza trimesh-ul dar stinge panglica:
+			# bariera vizuala devine treaba scenografiei (gard, zid de piatra).
+			# Parapetul de pod NU asculta de cheie — balustrada podului e parte
+			# din citirea podului, nu o margine artificiala.
+			_add_mesh_with_collision(st.commit(), Color(0.9, 0.25, 0.2),
+				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
+				bool(theme_flag("wall_visible", true)))
 		if deck_emitted:
 			deck.generate_normals()
 			_add_mesh_with_collision(deck.commit(),
@@ -2898,12 +2904,17 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		specular: float = 0.5,
 		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
 		collision_mesh: ArrayMesh = null,
-		macro_texture: Texture2D = null) -> void:
-	var inst := MeshInstance3D.new()
-	inst.mesh = mesh
-	inst.material_override = _flat_material(color, texture, roughness, specular,
-		cull, macro_texture)
-	add_child(inst)
+		macro_texture: Texture2D = null,
+		visible_mesh: bool = true) -> void:
+	# visible_mesh = false: doar fizica, fara desen. Zidul exterior pe pistele
+	# care nu vor panglica vizibila ramane totusi zid — altfel se deschide
+	# marginea buclei (pe Okinawa, direct in mare).
+	if visible_mesh:
+		var inst := MeshInstance3D.new()
+		inst.mesh = mesh
+		inst.material_override = _flat_material(color, texture, roughness,
+			specular, cull, macro_texture)
+		add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
 	# collision_mesh separat cand vizualul nu trebuie sa fie si fizica: soseaua

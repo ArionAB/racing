@@ -162,6 +162,14 @@ func _theme_overrides() -> Dictionary:
 func _scenography() -> Array[Dictionary]:
 	const M := "res://assets/models/"
 	var specs := super._scenography()
+	# Decorul care a fost asezat cu mouse-ul, promovat piesa cu piesa (#201):
+	# aceleasi coordonate si orientari, dar y-ul se re-deriva din ground_y la
+	# fiecare rebuild si totul intra in bake-ul MultiMesh. DecorManual ramane
+	# in .tscn ca sketchpad GOL pentru compozitii noi. Preload, nu class_name:
+	# sondele headless ruleaza cu cache-ul de clase globale rece, si un nume
+	# global nedeclarat inca ar rupe parse-ul intregii piste.
+	specs.append_array(
+		preload("res://scenes/tracks/track08_manual_specs.gd").specs())
 	specs.append_array([
 		# --- PAJISTEA: covor marunt pe tot campul verde, ambele laturi.
 		# Speciile ieftine duc greul (smocuri, ~100-250 tri); florile si

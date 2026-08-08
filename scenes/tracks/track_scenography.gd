@@ -418,12 +418,23 @@ static func _place(parent: Node3D, spec: Dictionary, pos: Vector3,
 		"road":
 			var to_road := -along.cross(Vector3.UP) * side
 			yaw = atan2(-to_road.x, -to_road.z)
+		"world":
+			# Orientare LITERALA, pentru piesele promovate din decorul manual:
+			# yaw-ul (si eventual inclinarea, prin "rot") vin exact din spec,
+			# fara nicio deriva din drum si fara zar. O piesa asezata cu mouse-ul
+			# si promovata in scenografie trebuie sa ramana EXACT cum a lasat-o
+			# mana — altfel promovarea n-ar fi conservare, ci re-generare.
+			pass
 		_:
 			yaw = rng.randf_range(0.0, TAU)
 	yaw += deg_to_rad(float(spec.get("yaw", 0.0)))
 	yaw += deg_to_rad(rng.randf_range(-float(spec.get("yaw_jitter", 0.0)),
 		float(spec.get("yaw_jitter", 0.0))))
 	holder.rotation.y = yaw
+	if spec.has("rot"):
+		var r: Array = spec["rot"]
+		holder.rotation.x = deg_to_rad(float(r[0]))
+		holder.rotation.z = deg_to_rad(float(r[1]))
 	var tilt := float(spec.get("tilt", 0.0))
 	if tilt > 0.0:
 		# Inclinare mica pe doua axe: tetrapozii aruncati de macara nu stau

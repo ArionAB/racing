@@ -166,9 +166,19 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## ~3% aer, strans intentionat: urmatoarea densificare (pajistea si pietrele
 ## dupa imaginea de referinta) vine cu masuratoarea ei si isi ridica pragul
 ## atunci, nu acum.
+##
+## 1.5M -> 1.95M (august 2026): pajistea si pietrele dupa imaginea de
+## referinta, de data asta DECLARATE in scenografie, nu asezate cu mouse-ul
+## (track08._scenography: Pajiste 617 piese / 299k, Pietre_margine 220 /
+## 106k, Ciorchini_pietre 83 / 20k). Masurat inainte/dupa: 1 455 080 ->
+## 1 881 897 vizibile, +427k, materialele NESCHIMBATE, 21/38 — s-a
+## ingreunat din nou exact axa care nu doare pe mobil. Ceata taie oricum
+## tot ce e peste 250 m, iar pajistea se coace in MultiMesh (109 desene pe
+## toata pista). ~3.5% aer: WP-ul urmator (promovarea decorului manual in
+## scenografie) nu ADAUGA geometrie, doar o muta.
 const TRIS_OVERRIDE := {
 	"Track07": 1000000,
-	"Track08": 1500000,
+	"Track08": 1950000,
 }
 
 

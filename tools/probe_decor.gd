@@ -434,6 +434,10 @@ func _thousands(n: int) -> String:
 const VARIANT_SOURCE := {
 	"bush_": "desert_scatter", "pebbles_": "desert_scatter",
 	"grass_tuft": "desert_scatter",
+	# Setul de vegetatie refacut in #208. Prefixul "veg_" e AL LUI — numele
+	# de noduri incep cu Veg_ tocmai ca sa nu se calce cu "grass_tuft" de
+	# deasupra (aceeasi lectie ca Scrub_A vs Bush_A din kitul MegaKit).
+	"veg_": "veg_set",
 	"butte_": "butte", "mesa_": "butte",
 	"cluster_": "rock_cluster", "cactus_": "cactus", "cliff_": "cliff_wall",
 	"canyon_": "canyon_rocks",

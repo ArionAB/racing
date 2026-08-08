@@ -1580,3 +1580,69 @@ def clear_built(prefix=None):
 
 
 print("dio_lib incarcat | atlas:", os.path.exists(ATLAS), "| models:", MODELS)
+
+
+def leaf_vfold(b, base, azim_deg, length, width, rise, slot,
+        fold_deg=24.0, stations=5, thick=0.02, droop=0.35):
+    """O frunza cu pliu in V: doua jumatati de lama pe aceeasi nervura.
+
+    Reteta frondei de palmier (build_palms.frond), scoasa aici in #208 ca s-o
+    imparta toata vegetatia marunta: doua `blade()`-uri pe aceeasi cale,
+    rotite in jurul nervurii cu +/-fold si cu `side_bias` +/-1. O frunza
+    plata citeste a scandura vopsita verde; pliul ii da volum de la 40 m.
+
+    Profil: urca in arc (`rise * sin(t*1.4)`), varful cade cu `droop * t^2`;
+    latimea maxima e dupa mijloc, varful se inchide la 0 (muchie-cutit).
+    Cost: 2 * (4*(stations-1) + 2) tris.
+    """
+    a = math.radians(azim_deg)
+    d = Vector((math.cos(a), math.sin(a), 0.0))
+    path, widths = [], []
+    for i in range(stations):
+        t = i / float(stations - 1)
+        path.append(Vector(base) + d * (length * t)
+            + Vector((0, 0, rise * math.sin(t * 1.4)
+                - droop * length * t * t)))
+        widths.append(0.0 if i == stations - 1
+            else width * math.sin(math.pi * (0.15 + t * 0.62)))
+    for sign in (1.0, -1.0):
+        up = Matrix.Rotation(math.radians(fold_deg) * sign, 4, d) \
+            @ Vector((0.0, 0.0, 1.0))
+        b.blade(path, widths, thick, slot, up=up, side_bias=sign)
+
+
+def tint_gradient(obj, base, tip, power=0.85, green_only=True):
+    """Gradient de culoare pe verticala, INMULTIT peste AO-ul copt (#208).
+
+    Ruleaza DUPA finish() — bake_ao sterge atributele de culoare existente,
+    deci gradientul nu poate fi copt inainte; ordinea e o constrangere, nu o
+    preferinta. Doar pe sloturile verzi (12/13/21) cand `green_only`:
+    capetele de floare raman luminoase, altfel FOAM_WHITE iese gri-verzui.
+
+    Multiplicativ, deci poate doar inchide/deplasa nuanta fata de slotul din
+    atlas — exact ce trebuie: baza spre umbra rece, varfurile aproape de
+    culoarea slotului, usor incalzite (b sub 1 taie albastrul, nu adauga).
+    """
+    greens = {CACTUS_GREEN, DRY_VEGETATION, TROPICAL_GREEN}
+    me = obj.data
+    ca = me.color_attributes.get("AO")
+    if ca is None:
+        return
+    uv = me.uv_layers.active.data
+    vslot = {}
+    for poly in me.polygons:
+        for li in poly.loop_indices:
+            vslot[me.loops[li].vertex_index] = int(uv[li].uv.x * SLOTS)
+    zs = [v.co.z for v in me.vertices]
+    zmin = min(zs)
+    zrange = max(max(zs) - zmin, 1e-6)
+    for v in me.vertices:
+        if green_only and vslot.get(v.index) not in greens:
+            continue
+        t = ((v.co.z - zmin) / zrange) ** power
+        col = ca.data[v.index].color
+        ca.data[v.index].color = (
+            col[0] * (base[0] + (tip[0] - base[0]) * t),
+            col[1] * (base[1] + (tip[1] - base[1]) * t),
+            col[2] * (base[2] + (tip[2] - base[2]) * t),
+            1.0)

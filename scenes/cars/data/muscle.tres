@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="CarData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CarData" format=3 uid="uid://iogn873pptdf"]
 
-[ext_resource type="Script" path="res://scenes/cars/car_data.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/models/vehicles/muscle.fbx" id="2"]
+[ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://c2bp3hghijuk8" path="res://assets/models/vehicles/muscle.fbx" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -13,6 +13,5 @@ grip = 7.0
 mass_factor = 1.35
 model = ExtResource("2")
 model_scale = 0.693
-model_rotation_deg = 180.0
 body_length = 4.2
 body_width = 1.949

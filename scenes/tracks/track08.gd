@@ -132,6 +132,14 @@ func _theme_overrides() -> Dictionary:
 		# paleta — lumina insulei (soare 1.5 / expunere 1.0) schimba pixelul.
 		"inland_tint": Color(0.30, 0.54, 0.19),
 		"inland_strength": 0.95,
+		# Lumina din referinta (#207): soare de dupa-amiaza tarzie, nu de
+		# amiaza. Elevatia coboara 42° -> 33° (umbrele se lungesc ~1.4x, dealul
+		# capata volum), culoarea se incalzeste spre auriu, iar contrastul urca
+		# putin — pastelul spalat era jumatate din senzatia de "lume goala".
+		# Saturatia NU se atinge (compensarea apei e masurata pe 1.18).
+		"sun_rotation_deg": Vector3(-33, 135, 0),
+		"sun_color": Color(1.0, 0.93, 0.8),
+		"adjust_contrast": 1.12,
 		"hazard_model": "res://assets/models/props/sea_turtle.glb",
 		"hazard_face_travel": true,
 		# Mostenite explicit de la tema, ca sa se citeasca tot contractul

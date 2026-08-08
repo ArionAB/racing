@@ -108,3 +108,30 @@ de axul drumului. Nimic nu se vedea, fiindcă nodul stătea pe `visible = false`
 **Coliziunea nu vine de la sine.** Un obiect mare așezat manual lângă șosea, dar
 fără `StaticBody3D`, arată ca un perete prin care treci — mai rău decât lipsa
 lui. Ori îi pui coliziune, ori îl ții destul de departe cât să nu-l atingi.
+
+## Promovarea: din sketchpad în scenografie
+
+Din august 2026 (#201), `DecorManual` e un **sketchpad**, nu destinația finală.
+Compoziția se schițează în editor exact ca mai sus, iar când e bună se
+**promovează în scenografie**: fiecare piesă devine un spec `spot` cu
+`face: "world"` — poziție XZ, orientare și scală literale — în fișierul de
+date al pistei (pe Track08: `scenes/tracks/track08_manual_specs.gd`, apelat
+din `_scenography()`).
+
+De ce merită pasul în plus:
+
+- **y-ul se re-derivă din `ground_y` la fiecare rebuild** — piesele promovate
+  nu mai rămân suspendate sau îngropate când se mișcă terenul; exact clasa de
+  accident pe care o vânează `probe_manual` dispare prin construcție.
+- **Intră în `TrackDecorBatch.bake()`** — pe Track08, promovarea celor 186 de
+  piese a tăiat desenele de la 1061 la 505.
+- **Diff-urile sunt cod**, nu transformări binare într-un `.tscn` de 40 KB.
+
+Mecanic: converter-ul din #201 (scratchpad) citește subarborele `DecorManual`
+și emite fișierul de specs; după aceea nodurile se șterg din `.tscn`, iar
+`probe_manual` trebuie să raporteze `0 obiecte`. Pentru offseturile specurilor
+noi scrise de mână, măsoară terenul cu:
+
+```
+godot --headless --path . --script res://tools/survey_terrain.gd -- --track=8 --from=0.48 --to=0.64
+```

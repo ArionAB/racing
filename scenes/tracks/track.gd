@@ -2100,9 +2100,12 @@ func _bridge_mix(i: int) -> float:
 const ROAD_CROWN: float = 0.03
 
 ## Profilul transversal al soselei, in fractii din half_width.
-## 5 pozitii = 4 fasii: destul ca coroana sa prinda lumina continuu si ca
-## marginile sa poata purta un gradient de uzura, fara sa umfle geometria.
-const ROAD_PROFILE: Array[float] = [-1.0, -0.55, 0.0, 0.55, 1.0]
+## 7 pozitii = 6 fasii: coroana prinde lumina continuu, iar gradientul de
+## uzura are un inel intermediar (0.85) pe care sa se aseze — cu 5 pozitii
+## trecerea mid->edge se intampla intr-o singura fasie si iese o dunga, nu
+## un degrade. Costul: un inel de vertecsi in plus pe toata bucla, masurat
+## sub 1% din pista.
+const ROAD_PROFILE: Array[float] = [-1.0, -0.85, -0.5, 0.0, 0.5, 0.85, 1.0]
 
 ## Culoarea asfaltului, INAINTE de compensarea trecerii macro. Racoroasa-inchisa
 ## ca masinile saturate sa "sara" din ecran (style_bible §1: asfaltul e cea mai
@@ -2143,14 +2146,17 @@ const DIRT_ROAD_COLOR: Color = Color(0.80, 0.66, 0.43)
 ## Media texturii macro de nisip (process_class_textures.surfaces()).
 const SAND_MACRO_MEAN: float = 0.850
 
-## Nuanta benzii de rulare pe un drum nepavat.
+## Nuanta MARGINILOR pe un drum nepavat.
 ##
-## Gradientul e INVERS fata de asfalt, si asta e chiar diferenta dintre cele
-## doua materiale. Pe asfalt marginile sunt mai INCHISE (praf si uzura se aduna
-## acolo unde nu calca nimeni); pe nisip, mijlocul e batatorit de roti — mai
-## tare, mai umed, mai inchis — iar spre margini ramane praf afanat, deci mai
-## deschis. Fara inversarea asta drumul ar fi doar asfalt vopsit in nisipiu.
-const DIRT_CENTER_SHADE: Color = Color(0.82, 0.80, 0.78)
+## Prima versiune intorsese gradientul fata de asfalt (mijloc batatorit =
+## inchis, margini prafuite = deschise), pe un rationament de material corect
+## si o citire gresita a referintei. In imaginea de referinta a drumului de
+## coasta e exact invers: banda calcata de roti e PALIDA — praful fin s-a dus,
+## a ramas nisipul tare si uscat — iar spre margini drumul se INCHIDE si se
+## SATUREAZA (praf nebatut, umezeala de la iarba). Multiplicatorul de aici
+## lasa deci mijlocul alb si trage marginile spre ocru: inchide albastrul mai
+## mult decat rosul, ca marginea sa iasa calda, nu murdara.
+const DIRT_EDGE_SHADE: Color = Color(0.87, 0.78, 0.66)
 
 func _build_road() -> void:
 	var top := SurfaceTool.new()
@@ -2182,20 +2188,18 @@ func _build_road() -> void:
 	var tile := 3.5
 	var side_tile := 8.0
 	var u_half := half_width / tile
-	# Nuanta per pozitie de profil: alb pe banda de rulare, usor inchis spre
-	# margini — uzura/praful se aduna la margine, si gradientul face soseaua
-	# sa citeasca a suprafata cu latime, nu a panglica uniforma.
+	# Nuanta per pozitie de profil: alb pe banda de rulare, gradat spre margini
+	# — uzura/praful se aduna la margine, si gradientul face soseaua sa
+	# citeasca a suprafata cu latime, nu a panglica uniforma.
 	#
-	# Pe nisip gradientul se INTOARCE (vezi DIRT_CENTER_SHADE): banda din mijloc
-	# e batatorita, deci inchisa, iar praful afanat ramane pe margini. Cele doua
-	# nuante se aplica pe acelasi profil de 5 pozitii, deci trecerea dintre ele
-	# se interpoleaza pe fasia t = 0.55..1.0 — o poteca cu margini difuze, nu o
-	# banda decupata.
+	# Pe nisip aceeasi directie, alta paleta (vezi DIRT_EDGE_SHADE): mijloc
+	# palid batatorit, margini ocru. Nuanta nu se mai alege binar pe inelul
+	# exterior, ci curge cu smoothstep pe |t| = 0.45..1.0 — inelul de la 0.85
+	# primeste valoarea intermediara si trecerea iese degrade, nu dunga.
 	var edge_shade := Color(0.84, 0.84, 0.86)
 	var mid_shade := Color.WHITE
 	if road_is_loose():
-		edge_shade = Color.WHITE
-		mid_shade = DIRT_CENTER_SHADE
+		edge_shade = DIRT_EDGE_SHADE
 	for i in n:
 		var j := (i + 1) % n
 		# Golul canalului: nici asfalt, nici coliziune, nici fusta laterala.
@@ -2216,8 +2220,8 @@ func _build_road() -> void:
 		for k in ROAD_PROFILE.size() - 1:
 			var ta: float = ROAD_PROFILE[k]
 			var tb: float = ROAD_PROFILE[k + 1]
-			var ca := edge_shade if absf(ta) > 0.99 else mid_shade
-			var cb := edge_shade if absf(tb) > 0.99 else mid_shade
+			var ca := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(ta)))
+			var cb := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(tb)))
 			var ua := ta * u_half
 			var ub := tb * u_half
 			# UV2 din coordonate de LUME, ca la teren: a doua trecere trebuie sa

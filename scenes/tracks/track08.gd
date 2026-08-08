@@ -120,6 +120,12 @@ func _theme_overrides() -> Dictionary:
 		# Bariera VIZUALA e treaba scenografiei si a decorului manual: gard de
 		# lemn pe buza lagunei, ziduri gusuku spre interior.
 		"wall_visible": false,
+		# Umerii isi trag implicit culoarea din nisipul de coral intunecat 25%
+		# — pe langa drumul OCRU iesea o bordura gri de agregat, singura dunga
+		# rece dintre doua suprafete calde. Pamant batut, putin mai inchis
+		# decat marginea drumului, ca umarul sa citeasca drept continuarea
+		# prafuita a drumului, nu alt material.
+		"dust_color": Color(0.62, 0.50, 0.33),
 		"hazard_model": "res://assets/models/props/sea_turtle.glb",
 		"hazard_face_travel": true,
 		# Mostenite explicit de la tema, ca sa se citeasca tot contractul

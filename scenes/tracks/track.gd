@@ -556,6 +556,16 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Masivele declarate: (x, z, raza, cota varfului in lume).
+##
+## Perechea pe PLUS a rapelor, din acelasi motiv: terenul urmareste soseaua,
+## deci interiorul unei bucle care URCA ramane o campie — muntele pe care
+## pista pretinde ca se catara nu apare de la sine. Vezi
+## TrackSideSampler._lift_peaks pentru profil si pentru banda de protectie a
+## asfaltului.
+func _peak_specs() -> Array[Vector4]:
+	return []
+
 ## Laguna: conturul apei din INTERIORUL buclei, ca poligon in plan XZ.
 ##
 ## Regula implicita a temei cu apa e ca interiorul circuitului ramane USCAT
@@ -650,7 +660,7 @@ func rebuild() -> void:
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
-		_lagoon_poly(), lagoon_depth, _channels)
+		_lagoon_poly(), lagoon_depth, _channels, _peak_specs())
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()

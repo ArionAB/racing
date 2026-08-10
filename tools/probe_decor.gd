@@ -198,6 +198,15 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## ~5% aer, dimensionat pentru cele doua completari deja planificate:
 ## speciile noi din veg_set2 INTRA IN ROTATIE (0 net) si paturile de la
 ## baza zidurilor gusuku/gard ranch (~+20k, spot-uri in decorul manual).
+##
+## Bilantul final al lantului (august 2026): veg_set2 a costat +73k, nu
+## 0 net (tufa lata si coralul au intrat si ca straturi RARE in tiv —
+## linia tivului e ~2.6 km, nu ~1.5 cat estimase planul), iar paturile
+## de la ziduri s-au restrans la 12 accente la capetele si rostul
+## zidului (Paturi_ziduri, +9k): bazele dinspre drum aveau deja paturi
+## din oglindire, si dublarea lor ar fi fost geometrie fara castig.
+## Total masurat: 2 702 585 din 2 750 000, desene 532 (+24, celulele
+## MultiMesh ale speciilor noi), materiale 21/38 pe tot lantul.
 const TRIS_OVERRIDE := {
 	"Track07": 1000000,
 	"Track08": 2750000,

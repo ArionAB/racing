@@ -338,6 +338,63 @@ func _scenography() -> Array[Dictionary]:
 			"both_sides": true, "from": 0.44, "to": 0.72,
 			"off": [2.0, 9.0], "spacing": 3.0, "above_sea": 1.6,
 			"clear": 2.0, "species": pajiste_species},
+		# --- PATURILE DE LA ZIDURI: accente la CAPETELE si la rostul
+		# zidului gusuku si ale celor doua tronsoane de gard. Bazele
+		# dinspre drum au deja paturi (Paturi_gard, oglindite); ce
+		# ramanea gol si se vede din masina sunt exact incheieturile:
+		# capetele de zid care se termina brusc in gazon si trecerea
+		# dintre cele doua bucati de zid (x 40.8 -> 70.8). Pozitiile
+		# sunt DERIVATE din coordonatele zidurilor (track08_manual_specs,
+		# perpendiculara din yaw-ul segmentului, spre drum) — nu asezate
+		# cu mouse-ul, de aia stau aici si nu in fisierul regenerabil.
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(0.46, -191.33), "face": "world",
+			"path": M + "plants/hibiscus_bush.glb",
+			"scale": [0.85, 0.85], "sink": 0.12},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(2.1, -190.9), "face": "world",
+			"path": M + "plants/fern_cluster.glb",
+			"scale": [1.0, 1.0], "sink": 0.08},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(41.45, -215.30), "face": "world",
+			"path": M + "plants/fern_cluster.glb",
+			"scale": [1.0, 1.0], "sink": 0.08},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(42.55, -214.62), "face": "world",
+			"path": M + "flowers/flowers_coral.glb",
+			"scale": [0.9, 0.9], "sink": 0.06},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(71.50, -239.21), "face": "world",
+			"path": M + "plants/fern_cluster.glb",
+			"scale": [1.0, 1.0], "sink": 0.08},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(72.9, -238.3), "face": "world",
+			"path": M + "plants/hibiscus_bush.glb",
+			"scale": [0.75, 0.75], "sink": 0.12},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(106.26, -262.16), "face": "world",
+			"path": M + "plants/hibiscus_bush.glb",
+			"scale": [0.85, 0.85], "sink": 0.12},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(107.3, -261.5), "face": "world",
+			"path": M + "flowers/flowers_coral.glb",
+			"scale": [0.9, 0.9], "sink": 0.06},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(13.64, -176.71), "face": "world",
+			"path": M + "plants/hibiscus_bush.glb",
+			"scale": [0.7, 0.7], "sink": 0.1},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(49.19, -199.34), "face": "world",
+			"path": M + "plants/fern_cluster.glb",
+			"scale": [0.95, 0.95], "sink": 0.08},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(79.57, -220.66), "face": "world",
+			"path": M + "flowers/flowers_coral.glb",
+			"scale": [0.9, 0.9], "sink": 0.06},
+		{"kind": "spot", "label": "Paturi_ziduri",
+			"world": Vector2(104.46, -239.44), "face": "world",
+			"path": M + "plants/hibiscus_bush.glb",
+			"scale": [0.8, 0.8], "sink": 0.1},
 	])
 	# --- VERGE-UL: peretele verde de la umarul drumului. Pajistea incepe la
 	# 1.5 m si se rarefiaza spre camp; referinta are un tiv CONTINUU in primul

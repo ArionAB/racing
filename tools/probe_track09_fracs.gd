@@ -13,11 +13,20 @@ const ANCHORS := {
 	"car_cu_fan (ulita)": Vector2(112, -1),
 	"iesirea din sat": Vector2(238, -48),
 	"sania cu busteni (padure)": Vector2(266, -172),
-	"intrarea in lob": Vector2(48, -362),
-	"serpentina (intoarcerea)": Vector2(-24, -296),
-	"statia telecabina (diag. sus)": Vector2(44, -286),
-	"platou - inceput": Vector2(66, -252),
-	"tren (mijlocul platoului)": Vector2(-29, -239),
+	# --- CULMEA rescrisa: urcare -> ac -> traversare -> ac -> umar ---
+	"poalele (intrarea in urcare)": Vector2(114, -382),
+	"acul 1 (intrare)": Vector2(16, -380),
+	"acul 1 (varful arcului)": Vector2(-10, -366),
+	"acul 1 (iesire)": Vector2(-22, -346),
+	"traversarea (inceput)": Vector2(-18, -326),
+	"traversarea (mijloc/cornisa)": Vector2(-12, -306),
+	"traversarea (sfarsit)": Vector2(-16, -288),
+	"acul 2 (intrare)": Vector2(-37, -257),
+	"acul 2 (varful arcului)": Vector2(-23, -239),
+	"acul 2 (iesire)": Vector2(14, -257),
+	"umarul (statia telecabina)": Vector2(56, -261),
+	"umarul (varful de sus)": Vector2(56, -239),
+	"tren (platoul de nord)": Vector2(-2, -208),
 	"creasta fly-off (buza)": Vector2(-96, -254),
 	"entry scurtatura": Vector2(-186, -238),
 	"vaca (coborare)": Vector2(-220, -209),
@@ -58,8 +67,12 @@ func _ready() -> void:
 			if d < best_d:
 				best_d = d
 				best = i
-		print("%-32s frac %.3f  (y %.1f, abatere XZ %.1f m)" % [
-			anchor_name, r.frac_at(best), r.baked[best].y, sqrt(best_d)])
+		# Latura EXTERIOARA a buclei la punctul asta. O cere si rapa (pe ce
+		# semn se sapa prapastia), si parapetii (pe ce latura e golul), iar
+		# semnul NU se poate citi din desen: depinde de sensul de parcurgere.
+		var side := _outer_sign(track, r, best)
+		print("%-32s frac %.3f  (y %.1f, abatere XZ %.1f m, exterior %+d)" % [
+			anchor_name, r.frac_at(best), r.baked[best].y, sqrt(best_d), side])
 	for ri in range(1, track.routes.size()):
 		var b := track.routes[ri]
 		print("")
@@ -71,3 +84,22 @@ func _ready() -> void:
 	track.queue_free()
 	await get_tree().process_frame
 	get_tree().quit(0)
+
+
+## Pe ce semn de latura (+1/-1) cade EXTERIORUL buclei la punctul copt `i`.
+##
+## Aceeasi intrebare pe care si-o pune Track._build_walls: un punct offsetat cu
+## `side * half_width` care cade IN AFARA poligonului punctelor de control e pe
+## exterior. O repetam aici, in loc s-o citim de acolo, fiindca sonda are nevoie
+## de raspuns per PUNCT, nu per segment de perete.
+func _outer_sign(track: Track, r: TrackRoute, i: int) -> int:
+	var poly := PackedVector2Array()
+	for p in track._points():
+		poly.append(Vector2(p.x, p.z))
+	var n := r.count()
+	var nxt: Vector3 = r.baked[(i + 1) % n]
+	var cur: Vector3 = r.baked[i]
+	var dir := (nxt - cur)
+	var side := Vector3(-dir.z, 0.0, dir.x).normalized()
+	var probe := cur + side * track.half_width * 1.5
+	return -1 if Geometry2D.is_point_in_polygon(Vector2(probe.x, probe.z), poly) else 1

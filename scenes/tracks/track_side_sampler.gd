@@ -95,6 +95,26 @@ const RAVINE_RIM: float = 16.0
 ## Margini line pe traseu, in fractii de tur.
 const RAVINE_FADE_FRAC: float = 0.02
 
+## Rapa de CORNISA: aceeasi taietura, dar cu buza lipita de asfalt.
+##
+## Implicitul (4 + 16) descrie o VALE de sub o creasta de fly-off: acolo golul
+## trebuie sa fie sub traiectorie, la 20 m lateral, iar buza lina e o calitate —
+## cine rateaza saritura aluneca in ea, nu se opreste intr-un perete.
+##
+## Pe un drum de munte descrie insa exact lucrul gresit. Masurat pe traversarea
+## Alpilor, taind profilul terenului perpendicular pe sosea: primii 10 m de
+## langa asfalt coborau 1.1-1.4 m, adica o pajiste in panta, si abia pe la 20 m
+## incepea caderea. Din masina, „prapastia" citea ca un accident de teren —
+## puteai iesi cu doua roti pe iarba fara consecinte, ceea ce anuleaza tot ce ar
+## trebui sa comunice lipsa parapetului. Cu cornisa, acelasi profil da -5 m pe
+## buza si -17 m la cinci metri lateral.
+##
+## Cu buza la 0.5 m de asfalt si racord pe 6 m, marginea drumului chiar e
+## marginea lumii. Nu se schimba implicitul, fiindca rapele de fly-off de pe
+## celelalte piste sunt bine asa: se cere per rapa, cu `cornice`.
+const RAVINE_CORNICE_INNER: float = 0.5
+const RAVINE_CORNICE_RIM: float = 6.0
+
 # --- masivele declarate (ruda pe PLUS a rapelor) ---
 ## Banda de protectie a asfaltului: sub PEAK_ROAD_CLEAR de la marginea soselei
 ## muntele e stins complet, la PEAK_ROAD_FULL e la putere plina. NU e cosmetica:
@@ -123,6 +143,9 @@ var _noise: FastNoiseLite
 var _mean_y: float = 0.0
 ## Rapele declarate: (frac_start, frac_end, adancime, latura).
 var _ravines: Array[Vector4] = []
+## Indicii rapelor care sunt CORNISE (buza lipita de asfalt). Vezi
+## RAVINE_CORNICE_INNER.
+var _cornices: Array[int] = []
 ## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
 ## padure); > 0 = fund de mare (insula). Vezi ground_y.
 var _far_drop: float = 0.0
@@ -151,7 +174,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		lagoon_poly: PackedVector2Array = PackedVector2Array(),
 		lagoon_depth: float = 0.0,
 		channels: Array[Dictionary] = [],
-		peaks: Array[Vector4] = []) -> void:
+		peaks: Array[Vector4] = [],
+		cornices: Array[int] = []) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
@@ -163,6 +187,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_lagoon_depth = lagoon_depth
 	_channels = channels
 	_peaks = peaks
+	_cornices = cornices
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -585,14 +610,18 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 	if _ravines.is_empty():
 		return y
 	var f := _dists[near_i] / _total_len if _total_len > 0.0 else 0.0
-	for r in _ravines:
+	for ri in _ravines.size():
+		var r: Vector4 = _ravines[ri]
 		if not is_zero_approx(r.w) and signf(r.w) != _side_sign_at(near_i, wx, wz):
 			continue
 		var along := _ring_window(f, r.x, r.y, RAVINE_FADE_FRAC)
 		if along <= 0.0:
 			continue
+		var cornice := _cornices.has(ri)
+		var inner := RAVINE_CORNICE_INNER if cornice else RAVINE_INNER
+		var rim := RAVINE_CORNICE_RIM if cornice else RAVINE_RIM
 		var lat := smoothstep(0.0, 1.0,
-			clampf((dist - _half_width - RAVINE_INNER) / RAVINE_RIM, 0.0, 1.0))
+			clampf((dist - _half_width - inner) / rim, 0.0, 1.0))
 		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
 		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
 		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).

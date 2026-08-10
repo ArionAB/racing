@@ -25,9 +25,11 @@ const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track06.tscn",
 	"res://scenes/tracks/Track07.tscn",
 	"res://scenes/tracks/Track08.tscn",
+	"res://scenes/tracks/Track09.tscn",
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa", "Stramtoarea", "Okinawa v2", "Okinawa manual",
+	"Alpii",
 ]
 const CHAMP_ROUNDS: int = 3
 

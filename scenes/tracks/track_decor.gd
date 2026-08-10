@@ -1247,8 +1247,15 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 		holder = Node3D.new()
 	parent.add_child(holder)
 	holder.add_child(kept)
-	Palette.apply_rock_material(kept)
-	_tint_rock(kept)
+	# Clasa de roca a lumii: gresie de canion implicit, sisturi alpine pe
+	# munte. Steagul bate nuanta — o textura de granit ADEVARATA face ce
+	# incerca `rock_tint` sa aproximeze, si o face mai bine (vezi #227 pentru
+	# de ce nuanta era o compensare peste doua straturi calde).
+	if _rock_class.is_empty():
+		Palette.apply_rock_material(kept)
+		_tint_rock(kept)
+	else:
+		Palette.apply_triplanar_class(kept, _rock_class)
 	if collide:
 		add_hull_collision(holder as StaticBody3D, kept)
 	holder.rotation.y = rng.randf_range(0.0, TAU)
@@ -1276,9 +1283,17 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 ## adica exact soiul de "reparatie" care trece de o sonda care numara instante
 ## si pica pe o captura de ecran.
 static var _rock_tint: Color = Color.WHITE
+## Clasa de textura a stancilor lumii curente. Gol = `rock` (gresia de canion)
+## plus eventuala nuanta. Cand e setata, ea BATE nuanta: o piatra care chiar e
+## alta piatra n-are nevoie de un filtru de culoare peste ea.
+static var _rock_class: String = ""
 
 static func set_rock_tint(tint: Color) -> void:
 	_rock_tint = tint
+
+
+static func set_rock_class(cls: String) -> void:
+	_rock_class = cls
 
 
 static func _tint_rock(model: Node3D) -> void:

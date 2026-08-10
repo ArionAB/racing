@@ -137,7 +137,47 @@ static func classes() -> Dictionary:
 		# apar benzi pe trunchiurile lungi, aici se cauta.
 		"bark": {"src": "bark_src.jpg",
 			"anchor": Palette.color(Palette.WOOD_WEATHERED)},
+		# --- Clasele muntelui (Alpii) ---
+		#
+		# Granit alpin: stancile de pe flancuri si brauri, plus bolovanii din
+		# benzile de decor. Sursa: castle_wall_slates (PolyHaven CC0) — sisturi
+		# stratificate, adica exact tiparul geologic al unui masiv alpin, spre
+		# deosebire de gresia sedimentara a canionului.
+		#
+		# Ales prin masuratoare dintre trei candidati (ancora CONCRETE,
+		# luminanta 190):
+		#   castle_wall_slates  ratie 0.67  in-dala 23.27  dez 3.2/2.3  <- ales
+		#   aerial_rocks_02     ratie 0.49  in-dala 15.09  dez 0.2/1.9
+		#   dark_rock           ratie 0.15  in-dala  2.74  dez 0.1/0.9
+		#
+		# `dark_rock` a fost prima alegere DUPA NUME si dupa miniatura — "rocă
+		# întunecată" suna a granit — si a picat catastrofal: 0.15 din ancora
+		# (de cinci ori sub pragul de 0.85 care a produs turnul de moara negru)
+		# si complet PLAT, in-dala 2.74. Merita notat ca a fost respins din
+		# aceleasi motive si la Okinawa, cu alta ancora: e o fotografie de
+		# stanca uda in umbra, nu de granit.
+		#
+		# `lift` pozitiv, ca la beton si din acelasi motiv: ancora CONCRETE e
+		# aleasa deschis, iar nicio fotografie de piatra nu ajunge la 190.
+		# Gainul ridica contrastul stratificarii, care E semnatura clasei.
+		"alpine_granite": {"src": "alpine_granite_src.jpg",
+			"anchor": Palette.color(Palette.CONCRETE), "gain": 1.20,
+			"lift": 0.12},
 	}
+	# NU exista clasa "chalet_wood", si e o decizie, nu o omisiune.
+	#
+	# Sursa era descarcata si masurata (dark_planks, PolyHaven CC0: ratie 0.50,
+	# in-dala 6.22) cand s-a verificat UNDE ar ateriza — si raspunsul a fost
+	# "nicaieri, fara pagube". Fiecare cladire alpina din kitul #226 e UN SINGUR
+	# mesh cu toate suprafetele pe atlas (tencuiala, olane, ferestre, grinzi in
+	# sloturi diferite ale aceleiasi dale). O clasa triplanara se aplica pe tot
+	# subarborele, deci ar fi intins scandurile PESTE acoperisul rosu si peste
+	# ferestre. La fel stiva de lemne, care isi are capetele de bustean
+	# retag-uite ca accent deschis.
+	#
+	# Lemnul cu textura reala cere ce cere si `village_house`: parti NUMITE in
+	# GLB si UV-uri reale, adica re-export din Blender. Cand se face asta,
+	# sursa e deja aleasa si masurata — vezi istoricul acestui commit.
 
 
 ## Texturile GRI, multiplicative, ale suprafetelor mari.

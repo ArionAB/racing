@@ -378,17 +378,19 @@ static func themes() -> Dictionary:
 			"snow_line": 72.0,
 			"snow_fade": 18.0,
 			"snow_tint": Palette.color(Palette.FOAM_WHITE),
-			# Granit rece in loc de gresie rosiatica. E un FACTOR peste doua
-			# straturi calde (textura de clasa + vertex colors coapte in GLB),
-			# deci trebuie SA LE ANULEZE, nu sa descrie piatra.
+			# Granit ADEVARAT, nu o nuanta peste gresie.
 			#
-			# Calibrat in doi pasi, pe captura: (0.72,0.74,0.78) — gri neutru —
-			# lasa stancile portocalii; (0.62,0.72,0.92) le mai racea putin dar
-			# maro-ul razbatea. Rosul taiat la 0.42 e ce rupe in sfarsit gresia,
-			# fiindca fix canalul ala e umflat de ambele straturi calde. Verdele
-			# ramane peste rosu si albastrul peste verde: proportia aia da
-			# granit cenusiu-albastrui, nu piatra vopsita in albastru.
-			"rock_tint": Color(0.42, 0.58, 0.86),
+			# Pana la texturile PolyHaven, muntele imprumuta roca de canion si o
+			# racea cu `rock_tint` — o compensare peste doua straturi calde
+			# (textura de gresie + vertex colors coapte), calibrata in doi pasi
+			# pe captura ca sa nu iasa portocalie. Functiona, dar era un filtru
+			# de culoare peste piatra gresita.
+			#
+			# `rock_class` inlocuieste mecanismul cu unul mai simplu: sisturi
+			# stratificate reale, gradate spre paleta. Nuanta ramane in cod
+			# (`rock_tint`) pentru orice lume care vrea gresie colorata altfel,
+			# dar aici nu mai e nevoie de ea — piatra e deja piatra de munte.
+			"rock_class": "alpine_granite",
 			"hazard_model": "res://assets/models/vehicles/timber_sled.glb",
 			"hazard_roll": false, # o sanie nu se rostogoleste (vezi barca sabani)
 			"dust_color": Color(0.62, 0.58, 0.44), # pamant de pajiste, nu nisip
@@ -3767,6 +3769,7 @@ func _build_world_decor() -> void:
 	var rock_tint: Variant = theme_flag("rock_tint", null)
 	TrackDecor.set_rock_tint(rock_tint as Color if rock_tint != null
 		else Color.WHITE)
+	TrackDecor.set_rock_class(String(theme_flag("rock_class", "")))
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert"),

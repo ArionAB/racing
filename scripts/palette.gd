@@ -314,6 +314,8 @@ const CLASS_TEXTURES := {
 	# Insula (Okinawa): calcar coraligen si scoarta tropicala.
 	"coral_rock": "res://assets/textures/classes/coral_rock.png",
 	"bark": "res://assets/textures/classes/bark.png",
+	# Muntele (Alpii): sisturi stratificate.
+	"alpine_granite": "res://assets/textures/classes/alpine_granite.png",
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -329,6 +331,10 @@ const CLASS_TRIPLANAR_SCALE := {
 	# aproape la scara reala, iar o stanca de recif de 1.6-4 m prinde 1.5-3.5
 	# repetitii — destul cat tiparul sa nu se citeasca ca tapet.
 	"coral_rock": 0.85,
+	# Sursa e o dala de 2 m de sisturi. La 0.16 (o repetitie la 6.25 m) un
+	# strat de piatra citeste cat un strat pe o stanca de 2-4 m, exact ca la
+	# `rock` — aceeasi familie de geologie, alta piatra.
+	"alpine_granite": 0.16,
 }
 
 static var _tri_mats: Dictionary = {}

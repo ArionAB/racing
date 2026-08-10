@@ -208,7 +208,6 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## Total masurat: 2 702 585 din 2 750 000, desene 532 (+24, celulele
 ## MultiMesh ale speciilor noi), materiale 21/38 pe tot lantul.
 const TRIS_OVERRIDE := {
-	"Track07": 1000000,
 	"Track08": 2750000,
 }
 

@@ -142,7 +142,8 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   ```
   godot --headless --path . --script res://tools/probe_decor.gd
   ```
-  Aceeași comandă cu `-- --track=2` raportează o singură pistă.
+  Aceeași comandă cu `-- --track=8` raportează o singură pistă (numărul din
+  numele fișierului, `Track08.tscn`).
 
   **Adaugi un GLB nou în lume?** Trebuie trecut în lista `KNOWN` din
   `tools/probe_decor.gd`. Altfel mesh-urile lui sunt puse la socoteală drept

@@ -9,7 +9,7 @@ extends Node
 ##
 ## Ruleaza CA SCENA: masina are nevoie de autoload-urile GameState/AudioManager.
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeBridgeDrive.tscn
-##   ... -- --track=4 --speed=30 --open
+##   ... -- --track=1 --speed=30 --open
 ##
 ## `--open` tine traveea ridicata tot timpul; fara el, podul e inchis. Cele doua
 ## rulari raspund la intrebari diferite: inchis = "trec pe pod?", deschis = "sar
@@ -23,7 +23,7 @@ var _run_up: float = 70.0
 ## Cat urmarim, dupa ce a pornit.
 const WATCH_SECONDS: float = 12.0
 
-var _track_index: int = 4
+var _track_index: int = 1
 var _entry_speed: float = 30.0
 var _force_open: bool = false
 var _track: Track

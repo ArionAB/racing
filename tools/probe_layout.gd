@@ -3,7 +3,7 @@ extends Node
 ## dintre ramuri, si sanatatea scurtaturilor.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeLayout.tscn
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeLayout.tscn -- --track=4
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeLayout.tscn -- --track=1
 ##
 ## Trebuie rulata ca SCENA, nu cu --script: are nevoie de autoload-uri.
 ##

@@ -18,18 +18,14 @@ const CAR_DATA: Array[Resource] = [
 ]
 
 ## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in
-## cursa rapida.
+## cursa rapida — momentan toate trei, deci campionatul le acopera pe toate.
 const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
-	"res://scenes/tracks/Track05.tscn",
-	"res://scenes/tracks/Track06.tscn",
-	"res://scenes/tracks/Track07.tscn",
 	"res://scenes/tracks/Track08.tscn",
 	"res://scenes/tracks/Track09.tscn",
 ]
 const TRACK_NAMES: Array[String] = [
-	"Dunele", "Okinawa", "Stramtoarea", "Okinawa v2", "Okinawa manual",
-	"Alpii",
+	"Dunele", "Okinawa manual", "Alpii",
 ]
 const CHAMP_ROUNDS: int = 3
 

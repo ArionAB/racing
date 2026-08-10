@@ -2,11 +2,11 @@ extends Node
 ## Garda mini-typhoon-ului: incadrarea in ecran, asezarea pe pista si dovada ca
 ## masina prinsa chiar ATERIZEAZA PE SOSEA.
 ##
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeTyphoon.tscn -- --track=4
-##   ... -- --track=4 --scan          cauta fractii bune, nu verifica nimic
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeTyphoon.tscn -- --track=1
+##   ... -- --track=1 --scan          cauta fractii bune, nu verifica nimic
 ##
 ## ATENTIE la numarul pistei: e INDEXUL din `GameState.TRACK_SCENES`, nu numarul
-## din numele fisierului. 3 = Track07 (Okinawa v2), 4 = Track08 (Okinawa manual).
+## din numele fisierului. 1 = Track08 (Okinawa manual), 2 = Track09 (Alpii).
 ## `tools/probe_decor.gd` numara invers — acolo `--track=8` chiar inseamna
 ## Track08 — fiindca isi construieste singur calea din numar. Sonda asta
 ## foloseste GameState fiindca are nevoie si de `CAR_DATA` pentru proba de zbor.
@@ -68,7 +68,7 @@ const SCAN_MIN_RADIUS: float = 400.0
 ## Cat de departe trebuie sa stea de orice alt hazard cu ceas, in fractii de tur.
 const SCAN_MIN_GAP: float = 0.055
 
-var _track_index: int = 4 # Track08 — Okinawa manual
+var _track_index: int = 1 # Track08 — Okinawa manual
 var _scan: bool = false
 var _track: Track
 var _typhoons: Array = []

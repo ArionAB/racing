@@ -35,7 +35,7 @@ var _shots: Array[String] = []
 
 
 func _ready() -> void:
-	# Implicit Dunele (asfalt), ca inainte. --track=4 duce sonda pe Okinawa
+	# Implicit Dunele (asfalt), ca inainte. --track=1 duce sonda pe Okinawa
 	# manual, singura pista cu drum de pamant: acolo praful si urmele apar si
 	# PE sosea, nu doar in afara ei, si nu exista alt fel de a le vedea.
 	GameState.selected_track = 0

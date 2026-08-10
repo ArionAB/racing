@@ -13,7 +13,7 @@ extends SceneTree
 ## astea nu se vedea in joc, fiindca nodul era pe `visible = false`.
 ##
 ##   godot --headless --path . --script res://tools/probe_manual.gd
-##   ... -- --track=5
+##   ... -- --track=1
 
 ## Peste atat deasupra terenului, obiectul pluteste vizibil.
 const FLOAT_MAX: float = 3.0

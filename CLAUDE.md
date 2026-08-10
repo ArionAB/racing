@@ -141,12 +141,14 @@ res://
   Din august 2026 pragul e **per pistă**, nu global (`TRIS_OVERRIDE` în
   `tools/probe_decor.gd`): ridicat de patru ori la rând pentru o singură pistă,
   un prag global ajunsese să lase Dunele (~65k) să-și dubleze geometria de două
-  ori fără ca garda să clipească. Okinawa v2 are 1M — are scenografia după
-  referință (524 de piese: dig de tetrapozi, chei, sat, ziduri de cetate, lan,
-  perdele de palmieri), măsurată la ~899k. Okinawa manual a urcat la **1.45M**
-  (august 2026, decorul manual al urcării de coastă: zid de grădină, gospodărie,
-  gard pe buza lagunei, ponton cu barcă — măsurat 1.34M), tot cu **materialele
-  neschimbate, 22 din 38**. Tot de atunci garda numără doar ce se **vede**:
+  ori fără ca garda să clipească. Okinawa manual are **2.75M** (măsurat 2.72M,
+  cu **21 de materiale din 38**): scenografia după referință — dig de
+  tetrapozi, chei, sat, ziduri de cetate, lan, perdele de palmieri — plus
+  decorul manual al urcării de coastă (zid de grădină, gospodărie, gard pe buza
+  lagunei, ponton cu barcă) și straturile statistice de pajiște, paturi de
+  flori și pietre de margine. Pragul a crescut în trepte, de fiecare dată cu
+  **materialele neschimbate** — adică s-a îngreunat exact axa care nu doare pe
+  mobil. Tot de atunci garda numără doar ce se **vede**:
   variantele stinse (`visible = false`) ale GLB-urilor multi-variantă din
   decorul manual nu se randează, deci nu intră în cifră. Restul pistelor
   rămân la 400k.

@@ -2,7 +2,7 @@ extends Node
 ## Sonda de CADRU: cate triunghiuri si cate draw call-uri ajung efectiv la GPU
 ## dintr-o pozitie de joc, nu cate exista pe pista.
 ##
-##   godot --path . res://tools/ProbeFrame.tscn -- --track=3
+##   godot --path . res://tools/ProbeFrame.tscn -- --track=1
 ##
 ## Ruleaza CU FEREASTRA: RenderingServer nu contorizeaza nimic in --headless.
 ## Camera e cea reala (constantele lui ChaseCamera), inclusiv far-ul ei.

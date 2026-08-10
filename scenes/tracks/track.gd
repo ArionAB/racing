@@ -270,7 +270,7 @@ static func themes() -> Dictionary:
 		# nisipul fara sa strice marea.
 		#
 		# Daca se schimba ambientul sau unghiul soarelui, REIA masuratoarea:
-		#   godot --path . res://tools/Snapshot.tscn -- --track=4 --size=300
+		#   godot --path . res://tools/Snapshot.tscn -- --track=1 --size=300
 		# si compara nisipul cu #E9DCC0.
 		"island": {
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
@@ -1644,7 +1644,7 @@ const WATER_SATURATION_FIX: float = 1.18
 ## Valoarea vine din masuratoare, nu din formula: 0.87 e raportul dintre tinta
 ## si masurat pe cele doua zone. Daca se schimba tonemap-ul, expunerea sau
 ## ripple_strength din shader, se REIA masuratoarea:
-##   godot --path . res://tools/Snapshot.tscn -- --track=4 --size=300
+##   godot --path . res://tools/Snapshot.tscn -- --track=1 --size=300
 ## si se compara largul cu #2E5F6B, reciful cu #54BFB8.
 const WATER_GAIN: float = 0.87
 
@@ -2175,7 +2175,7 @@ const ASPHALT_MACRO_MEAN: float = 0.900
 ## frac=0.21, --gamecam). Nu se poate copia albedo-ul de acolo — Dunele are alta
 ## lumina (soare 0.8 / expunere 1.30, fata de 1.5 / 1.0 pe insula), deci aceeasi
 ## culoare de material ar da alt pixel. Se calibreaza pe ECRAN:
-##   godot --path . res://tools/Snapshot.tscn -- --track=4 --frac=0.21 --gamecam
+##   godot --path . res://tools/Snapshot.tscn -- --track=1 --frac=0.21 --gamecam
 ## si se compara petecul de drum cu #D5A75E. Masurat la valoarea de mai jos:
 ## #D8A55E, eroare 3/2/0 pe canale — sub pragul de 12 din style_bible §5.
 ##

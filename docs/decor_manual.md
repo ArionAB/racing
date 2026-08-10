@@ -68,8 +68,11 @@ array `custom_*` în Inspector.
   se recalculează și obiectele pot rămâne suspendate sau îngropate — refă
   Snap Object to Floor.
 - **Bugetul rămâne bugetul.** După o sesiune de așezat, rulează garda:
-  `godot --headless --path . --script res://tools/probe_decor.gd -- --track=1`.
-  Contează mai ales numărul de materiale, nu triunghiurile.
+  `godot --headless --path . --script res://tools/probe_decor.gd -- --track=8`.
+  Contează mai ales numărul de materiale, nu triunghiurile. (Atenție: aici
+  `--track=` e numărul din numele fișierului — sonda își compune singură calea
+  `Track%02d.tscn` — pe când `probe_manual.gd` de mai jos ia indexul din
+  `GameState.TRACK_SCENES`. Aceeași pistă, două numere.)
 
 ## Grupare pe zone
 

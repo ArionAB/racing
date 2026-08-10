@@ -95,6 +95,18 @@ const RAVINE_RIM: float = 16.0
 ## Margini line pe traseu, in fractii de tur.
 const RAVINE_FADE_FRAC: float = 0.02
 
+# --- masivele declarate (ruda pe PLUS a rapelor) ---
+## Banda de protectie a asfaltului: sub PEAK_ROAD_CLEAR de la marginea soselei
+## muntele e stins complet, la PEAK_ROAD_FULL e la putere plina. NU e cosmetica:
+## fara ea conul ar trece PESTE asfaltul care il traverseaza. Efectul secundar e
+## chiar cel dorit: intre doua diagonale de serpentina la ~45 m una de alta
+## ramane un val de teren la jumatatea distantei — citirea de drum taiat in
+## coasta muntelui.
+const PEAK_ROAD_CLEAR: float = 6.0
+const PEAK_ROAD_FULL: float = 32.0
+## Netezimea racordului munte-teren, aceeasi familie cu SMOOTH_* (issue #97).
+const SMOOTH_PEAK_K: float = 4.0
+
 var _baked: PackedVector3Array
 var _dists: PackedFloat32Array
 var _loop_poly: PackedVector2Array
@@ -125,6 +137,10 @@ var _lagoon_depth: float = 0.0
 ## Canalele navigabile care TAIE soseaua. Rezolvate de Track — vezi
 ## [method Track._resolve_channels] pentru forma dictionarului.
 var _channels: Array[Dictionary] = []
+## Masivele declarate: (x, z, raza, cota varfului IN LUME). Terenul urmareste
+## soseaua peste tot, deci interiorul unei bucle care URCA ramane o campie —
+## muntele pe care pista pretinde ca se catara nu exista pana nu e declarat.
+var _peaks: Array[Vector4] = []
 
 
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
@@ -134,7 +150,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		extra_corridors: PackedVector3Array = PackedVector3Array(),
 		lagoon_poly: PackedVector2Array = PackedVector2Array(),
 		lagoon_depth: float = 0.0,
-		channels: Array[Dictionary] = []) -> void:
+		channels: Array[Dictionary] = [],
+		peaks: Array[Vector4] = []) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
@@ -145,6 +162,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_lagoon_poly = lagoon_poly
 	_lagoon_depth = lagoon_depth
 	_channels = channels
+	_peaks = peaks
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -286,6 +304,9 @@ func ground_y(wx: float, wz: float) -> float:
 	# banda plata a soselei, plin dincolo de blend. Inainte de _lift_branches,
 	# ca bancurile scurtaturilor sa ramana netede.
 	y += _detail_dunes(wx, wz) * (t * t)
+	# Masivele INAINTE de benzi si de taieturi: poteca unei scurtaturi isi
+	# re-aseaza terenul peste flancul muntelui, iar rapele taie si prin el.
+	y = _lift_peaks(y, wx, wz, dist)
 	y = _lift_branches(y, wx, wz, road_level, dist)
 	y = _carve_lagoon(y, dist, wx, wz)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
@@ -321,6 +342,35 @@ func _local_road(wx: float, wz: float, near_i: int) -> Vector2:
 			best_d = d
 			best_y = lerpf(a.y, b.y, t)
 	return Vector2(best_d, best_y)
+
+
+## Ridica terenul spre masivele declarate — vezi [member _peaks].
+##
+## Fiecare masiv e un dom: cota varfului inmultita cu un profil neted care
+## moare la raza declarata. Se combina cu terenul existent prin max NETED
+## (aceeasi lectie #97 ca la podeaua vailor: min/max dur = muchie de rigla),
+## apoi TOT rezultatul e mascat de banda de protectie a asfaltului, ca muntele
+## sa nu treaca peste drumul care il traverseaza. Peste profil se adauga
+## acelasi zgomot de dune ca in campul departat, altfel flancul iese un con
+## de strung.
+func _lift_peaks(y: float, wx: float, wz: float, dist: float) -> float:
+	if _peaks.is_empty():
+		return y
+	var mask := smoothstep(PEAK_ROAD_CLEAR, PEAK_ROAD_FULL,
+		dist - _half_width)
+	if mask <= 0.0:
+		return y
+	var peak := -INF
+	for v in _peaks:
+		var d := Vector2(wx - v.x, wz - v.y).length()
+		if d >= v.z:
+			continue
+		var f := 1.0 - smoothstep(0.0, 1.0, d / v.z)
+		peak = maxf(peak, v.w * f)
+	if peak == -INF:
+		return y
+	peak += _dunes(wx, wz) * 0.5
+	return lerpf(y, _smax(y, peak, SMOOTH_PEAK_K), mask)
 
 
 ## Cat de departe de axa unei benzi secundare terenul mai sta la cota ei.

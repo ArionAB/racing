@@ -176,3 +176,20 @@ func _hazard_fracs() -> Array[float]:
 ## > 10): cine rateaza aterizarea chiar cade si e repus, nu aterizeaza pe iarba.
 func _ravines() -> Array[Vector4]:
 	return [Vector4(0.668, 0.732, 16.0, 1.0)]
+
+
+## Masivul central — muntele pe care pista chiar urca.
+##
+## Doua varfuri care se suprapun intr-o creasta, nu un con singuratic:
+##   - varful de NE (120, -300): serpentina ii urca flancul de vest, urcarea
+##     prin padure ii da ocol pe la est;
+##   - varful principal (10, -175): platoul culmii ii e umarul de sud, iar din
+##     sat si din vale il vezi ridicandu-se peste tot interiorul buclei.
+## Cotele (102 / 98) stau la ~35-40 m peste platoul drumului (63) — destul cat
+## varful sa domine cadrul si din vale, destul de putin cat sa nu para alta
+## lume; zapada de pe el vine odata cu tema "alpine".
+func _peak_specs() -> Array[Vector4]:
+	return [
+		Vector4(120, -300, 130, 102),
+		Vector4(10, -175, 150, 98),
+	]

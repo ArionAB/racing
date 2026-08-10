@@ -299,7 +299,60 @@ static func themes() -> Dictionary:
 			# in vale, iar crestele de fundal trebuie sa se piarda progresiv,
 			# nu sa fie taiate de un plan de ceata uniform.
 			"fog_depth": true,
-			"horizon_model": "", # crestele inzapezite vin in #225
+			# Crestele de fundal (#225): un singur model, folosit la scari si
+			# rotatii diferite de inelele de orizont. Are deja benzile pictate
+			# in sloturi — padure la poale, granit la mijloc, zapada peste
+			# 38 m — deci silueta ADUCE cu ea povestea de altitudine, fara
+			# niciun cost de material.
+			"horizon_model": "res://assets/models/rocks/mountain_peak.glb",
+			# Un singur nod in GLB, deci acelasi nume pe toate inelele. Varietatea
+			# vine din scara si din rotatie, nu din forme diferite — la 300 m si
+			# prin ceata, doua siluete rotite 90° citesc ca doi munti.
+			"horizon_picks": [["MountainPeak"], ["MountainPeak"],
+				["MountainPeak"]],
+			# ATLAS, nu clasa de roca — si asta e chiar rostul modelului.
+			#
+			# `horizon_class: "rock"` (implicitul) intinde textura de gresie
+			# peste tot varful si STERGE benzile pictate in sloturi: masurat pe
+			# captura, crestele ieseau portocalii ca niste dune de desert, adica
+			# exact opusul unui masiv alpin. Varful are deja padure la poale,
+			# granit la mijloc si zapada peste 38 m — povestea de altitudine e
+			# in UV-uri, si trebuie lasata sa se vada.
+			"horizon_class": "",
+			# Inele PROPRII: varful e de trei ori cat un butte de desert, deci
+			# vrea distanta mai mare si numar mai mic. Degajarea de 150-210 m e
+			# masurata contra esecului: cu cea implicita (95 m pe inelul
+			# apropiat) niciuna din cele 10 siluete n-a incaput pe o pista de
+			# 535x400 m. Scarile RAMAN mici (0.8-1.4): la 92 m nominal, un varf
+			# la scara 2.4 ar fi un zid de 220 m care inghite tot cerul.
+			# Cotele astea sunt LEGATE INTRE ELE — se schimba impreuna sau
+			# deloc:
+			#   ChaseCamera.FAR_PLANE = 380 m  <- plafonul absolut; orice
+			#     silueta dincolo e taiata din frustum.
+			#   fog_end = 370 m                <- ce nu inghite ceata.
+			#   inelele: 190 -> 355 m          <- incap sub amandoua.
+			# Prima incercare le pusese la 300-500 m: 13 siluete asezate
+			# corect si ZERO vizibile, taiate de ceata la 250 si de camera
+			# la 380.
+			# Degajarea a mai coborat o data, tot din masuratoare: la 120/145/165
+			# treceau 8 din 13 (pista are 535x400 m, deci sectoarele dinspre
+			# lungimea ei n-aveau unde sa puna un varf). La 95/115/140 intra
+			# toate 13. Nu e o slabire a regulii — un varf de fundal la 95 m de
+			# sosea e tot dincolo de orice banda de decor (far se opreste la
+			# 58 m), deci nu se poate ciocni cu nimic.
+			"horizon_rings": [
+				{"near": 190.0, "far": 240.0, "count": 4, "scale": 0.80,
+					"clear": 95.0, "picks": ["MountainPeak"]},
+				{"near": 240.0, "far": 300.0, "count": 5, "scale": 1.05,
+					"clear": 115.0, "picks": ["MountainPeak"]},
+				{"near": 300.0, "far": 355.0, "count": 4, "scale": 1.30,
+					"clear": 140.0, "picks": ["MountainPeak"]},
+			],
+			# Ceata merge pana aproape de planul camerei: intr-un peisaj alpin
+			# distanta mare E subiectul, iar la 250 m crestele nu existau
+			# pentru ochi. Vezi _build_environment.
+			"fog_begin": 130.0,
+			"fog_end": 370.0,
 			"walls": true,       # doar pe sectiunile inaltate — regula samplerului
 			"cliffs": false,     # flancurile masivului sunt teren, nu faleze de canion
 			"decor": "bands",
@@ -911,8 +964,13 @@ func _build_environment() -> void:
 		# prim-planul ramane complet limpede, in loc sa capete un val subtire de
 		# ceata pe tot ce e la 20-50m.
 		env.fog_mode = Environment.FOG_MODE_DEPTH
-		env.fog_depth_begin = 90.0
-		env.fog_depth_end = 250.0
+		env.fog_depth_begin = float(theme_flag("fog_begin", 90.0))
+		# Capatul e steag de tema, nu constanta, si diferenta se vede pe munte:
+		# la 250 m crestele de fundal (inele la 300-500 m) erau COMPLET
+		# inghitite — 13 siluete asezate corect, zero vizibile. Intr-un peisaj
+		# alpin distanta mare e chiar subiectul; intr-un canion, ceata care
+		# taie la 250 m e ce ascunde marginea lumii.
+		env.fog_depth_end = float(theme_flag("fog_end", 250.0))
 		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)
@@ -1084,7 +1142,17 @@ func _build_horizon(centroid: Vector3) -> void:
 	# RAPORTEAZA, nu dispare in tacere.
 	var missed := 0
 	var placed := 0
-	for ring in HORIZON_RINGS:
+	# Inelele pot veni din TEMA, ca si numele siluetelor.
+	#
+	# Cele implicite sunt calibrate pe butte-uri de desert (25-60 m, degajare
+	# 95-160 m). Un varf alpin de 92 m la scara 1.2 e o formatiune de peste
+	# 110 m latime, iar pe o pista de 535x400 m nu exista NICIUN punct la
+	# 150-200 m de centroid care sa aiba si 95 m degajare fata de sosea:
+	# masurat, 0 din 10 siluete incapeau si toata garda tipa. Muntele isi cere
+	# propriile inele — mai departe si mai putine, fiindca fiecare piesa e de
+	# trei ori cat un butte.
+	var rings: Array = theme_flag("horizon_rings", HORIZON_RINGS)
+	for ring in rings:
 		var count := int(ring["count"])
 		var arc := TAU / float(count)
 		var clear: float = float(ring["clear"])
@@ -1104,7 +1172,12 @@ func _build_horizon(centroid: Vector3) -> void:
 			# Plafonul e legat de grila de teren (centroid ±380 m), nu de inel:
 			# o silueta impinsa dincolo de ea ar sta peste cutia plata de rezerva,
 			# nu peste nisipul vizibil.
-			var limit: float = minf(float(ring["far"]) + 90.0, 355.0)
+			# Plafonul era fix (355 m), legat de grila de teren a Dunelor. Pe o
+			# lume mai mare el taia inelele inainte sa apuce sa caute: inelul
+			# alpin de la 430 m pornea deja peste limita, deci bucla nu rula
+			# niciodata. Acum plafonul urmeaza inelul CERUT, cu marja de
+			# cautare — cine declara un inel departat primeste unde sa-l puna.
+			var limit: float = maxf(float(ring["far"]) + 90.0, 355.0)
 			var dist: float = float(ring["near"])
 			while dist <= limit:
 				var cand := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
@@ -1125,7 +1198,7 @@ func _build_horizon(centroid: Vector3) -> void:
 			var picks: Array = ring["picks"]
 			var theme_picks: Array = theme_flag("horizon_picks", [])
 			if not theme_picks.is_empty():
-				picks = theme_picks[mini(HORIZON_RINGS.find(ring),
+				picks = theme_picks[mini(rings.find(ring),
 					theme_picks.size() - 1)]
 			var model := _extract_glb_node(scene,
 				picks[rng.randi_range(0, picks.size() - 1)])
@@ -1148,8 +1221,16 @@ func _build_horizon(centroid: Vector3) -> void:
 			# straturile la scara reala si pe siluetele scalate 25-60x.
 			# Era `apply_rock_material` fix, adica gresia rosiatica a canionului
 			# si pe insulele de recif.
-			Palette.apply_triplanar_class(model,
-				String(theme_flag("horizon_class", "rock")))
+			#
+			# Clasa GOALA = pastreaza atlasul modelului. Nu e un caz special
+			# inventat: un varf alpin isi are benzile (padure/granit/zapada)
+			# pictate in sloturi, iar o textura de roca intinsa peste ele le
+			# sterge — pe captura, crestele ieseau portocalii ca dunele.
+			var horizon_class := String(theme_flag("horizon_class", "rock"))
+			if horizon_class.is_empty():
+				Palette.apply_world_material(model)
+			else:
+				Palette.apply_triplanar_class(model, horizon_class)
 			placed += 1
 	print("%s: %d/%d siluete de orizont" % [track_name, placed,
 		placed + missed])

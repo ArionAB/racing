@@ -109,10 +109,15 @@ const BAND_OVERRIDES := {
 	# Gruparea urcata la 0.55/0.60 face restul: coniferele cresc in pilcuri,
 	# nu la distante egale. Pe banda lipita de drum gruparea ramane JOASA
 	# (0.30, ca in BANDS) — un pilc acolo ar fi un zid la 2 m de asfalt.
+	# Pasii au crescut o data, cand crestele de orizont (#225) au adaugat
+	# geometrie si pista a trecut pragul: 12/15/19 -> 14/17/21. Nu s-a taiat
+	# din DENSITATE ci din numarul brut de piese, iar diferenta pe ecran e
+	# invizibila — gruparea ramane la 0.55-0.60, deci padurea are in
+	# continuare pilcuri, doar ca pilcurile sunt cu ~15% mai putine.
 	"alpine": {
-		"mid": {"spacing": 12.0, "cluster": 0.55},
-		"back": {"spacing": 15.0, "cluster": 0.60},
-		"far": {"spacing": 19.0, "cluster": 0.55},
+		"mid": {"spacing": 14.0, "cluster": 0.55},
+		"back": {"spacing": 17.0, "cluster": 0.60},
+		"far": {"spacing": 21.0, "cluster": 0.55},
 	},
 }
 
@@ -648,6 +653,12 @@ const ALPINE_FENCE_PATH: String = "res://assets/models/structures/wooden_fence.g
 const ALPINE_FENCE_PICKS: Array[String] = ["Fence_A", "Fence_B"]
 const ALPINE_HAY_PATH: String = "res://assets/models/props/hay_bale.glb"
 const ALPINE_FLOWERS_PATH: String = "res://assets/models/flowers/flower_cluster.glb"
+const ALPINE_WOOD_PATH: String = "res://assets/models/props/wood_stack.glb"
+const ALPINE_SNOW_PATH: String = "res://assets/models/scatter/snow_patch.glb"
+## Peste ce cota apar peticele de zapada ramase in umbra. Sub linia zapezii din
+## tema (72 m) DELIBERAT: petice razlete care coboara pe vaiugi sunt exact ce
+## face limita zapezii sa citeasca a zona, nu a linie trasa cu rigla.
+const SNOW_PATCH_MIN_Y: float = 58.0
 
 ## Coniferele (#222), pe talii. Alegerea se face dupa BANDA, nu la intamplare —
 ## vezi antetul sectiunii pentru de ce inaltimea depinde de distanta.
@@ -675,30 +686,63 @@ static func _place_alpine_prop(parent: Node3D, spec: TrackDecorSpec,
 			# Lipit de asfalt: iarba, pietre si cel mult un pui de molid.
 			# Nimic inalt — un obiect mare la 1.5 m de drum acopera apexul.
 			var roll := rng.randf()
+			# Petic de zapada, DOAR la altitudine (#225). Nu e decor pus
+			# oriunde: sub SNOW_PATCH_MIN_Y ar fi zapada pe pajistea din vale
+			# in august. Verificat pe cota reala a punctului, nu pe fractie —
+			# fractiile se muta cand se muta traseul, cotele nu mint.
+			if pos.y >= SNOW_PATCH_MIN_Y and roll < 0.20 \
+					and _add_simple_prop(parent, ALPINE_SNOW_PATH, "SnowPatch",
+						pos, rng, 0.5, 1.0, -0.04):
+				return
 			if roll < 0.26 and _add_canyon_rock(parent, pos, rng, "S",
 					not satellite, 0.55, 1.00, 0.65, 1.00):
 				return
 			if roll < 0.36 and not satellite and _add_pine(
 					parent, pos, rng, PINE_SMALL, false, 0.55, 0.85):
 				return
-			if roll < 0.58 and _add_alpine_shrub(parent, pos, rng, 0.6, 0.95):
+			# Florile de pajiste: numai in vale, si RARE.
+			#
+			# Sunt semnatura de "pasune alpina in august", dar costa 496 de
+			# triunghiuri bucata — de doua ori cat un molid, fiindca fiecare
+			# floare are tulpina si cap propriu. La 20% din banda lipita ieseau
+			# 67 de smocuri si 33 232 de triunghiuri, adica pista peste prag.
+			# La 6% raman ~20, destule cat sa le vezi in viraje lente si
+			# suficient de putine cat sa nu fie covor.
+			if pos.y < SNOW_PATCH_MIN_Y and roll >= 0.36 and roll < 0.42 \
+					and not satellite \
+					and _add_simple_prop(parent, ALPINE_FLOWERS_PATH,
+						"FlowerCluster", pos, rng, 0.7, 1.2, -0.06):
+				return
+			if roll < 0.62 and _add_alpine_shrub(parent, pos, rng, 0.6, 0.95):
 				return
 			if not _add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.75, 1.15):
 				_add_scatter(parent, pos, rng, mat)
 		"mid":
 			var roll := rng.randf()
-			if satellite or roll < 0.26:
+			if satellite or roll < 0.16:
 				# Fantoma, ca sora ei din desert si din acelasi motiv: banda
 				# asta e coridorul de reintrare pe sosea (vezi comentariul de
 				# la "mid" din _place_band_prop).
+				#
+				# Felia a scazut de la 26% la 16% cand crestele de orizont au
+				# impins pista peste prag (402 583 fata de 400 000). Aici a
+				# fost taietura fiindca e cea mai putin vizibila: pietre mici
+				# la 4-11 m de asfalt, in spatele carora sta oricum padurea.
 				if not _add_canyon_rock(parent, pos, rng, "S", false):
 					_add_scatter(parent, pos, rng, mat)
 			elif roll < 0.58:
 				# Inima padurii: aici incepe masa de conifere.
 				if not _add_pine(parent, pos, rng, PINE_MID, true, 0.80, 1.15):
 					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS)
-			elif roll < 0.76:
+			elif roll < 0.72:
 				if not _add_alpine_shrub(parent, pos, rng, 0.85, 1.30):
+					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS)
+			elif roll < 0.755:
+				# Stiva de lemne: urma de om pe marginea drumului. Rara —
+				# la a cincea aparitie pe tur ar fi tapet, la a doua e "aici
+				# taie cineva lemne".
+				if not _add_simple_prop(parent, ALPINE_WOOD_PATH, "WoodStack",
+						pos, rng, 0.85, 1.15, -0.05):
 					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS)
 			elif roll < 0.92:
 				_add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.90, 1.35)
@@ -771,6 +815,27 @@ static func _add_pine(parent: Node3D, pos: Vector3,
 	holder.rotation.y = rng.randf_range(0.0, TAU)
 	# Infipt 12 cm: baza conica lasa altfel o muchie de aer pe partea din vale.
 	holder.position = pos + Vector3.UP * -0.12
+	return true
+
+
+## Un prop marunt de pe atlas, fara coliziune: flori, petic de zapada, stiva de
+## lemne. Exista ca sa nu se scrie a treia oara aceleasi opt linii.
+##
+## FARA `apply_foliage_material` si fara steagul de legănare, spre deosebire de
+## tufe: o stiva de lemne care se unduie in vant ar fi exact detaliul care
+## strica iluzia, iar un petic de zapada la fel. Frunzisul se leagana pentru ca
+## e frunzis, nu pentru ca e mic.
+static func _add_simple_prop(parent: Node3D, path: String, node_name: String,
+		pos: Vector3, rng: RandomNumberGenerator,
+		s_min: float, s_max: float, sink: float) -> bool:
+	var kept := pick_from_glb(path, node_name)
+	if kept == null:
+		return false
+	parent.add_child(kept)
+	kept.position = pos + Vector3.UP * sink
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
+	Palette.apply_world_material(kept)
 	return true
 
 

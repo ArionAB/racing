@@ -648,6 +648,17 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Ce fel de obstacol mobil sta la fiecare fractie: frac -> dictionar cu
+## `model`, si optional `scale`, `roll`, `face_travel`.
+##
+## Suprascrie steagurile de tema DOAR pentru fractiile listate; restul raman pe
+## `hazard_model` al temei. Exista fiindca o pista poate avea mai multe feluri
+## de obstacol — vezi Track09, unde fiecare din cele patru vine din alta parte
+## a lumii ei. Cheia se rotunjeste la 3 zecimale, ca sa se potriveasca cu
+## fractiile scrise in `_hazard_fracs`.
+func _hazard_kinds() -> Dictionary:
+	return {}
+
 ## Masivele declarate: (x, z, raza, cota varfului in lume).
 ##
 ## Perechea pe PLUS a rapelor, din acelasi motiv: terenul urmareste soseaua,
@@ -2672,20 +2683,46 @@ func _build_hazard(frac: float) -> void:
 	#
 	# Pana acum era o MINGE DE PLAJA — ramasita din tema abandonata "jucarii in
 	# lada de nisip", intr-un canion de desert.
-	var hazard_model: String = theme_flag("hazard_model", "")
+	# Suprascrierea PER FRACTIE bate steagul de tema.
+	#
+	# Cat timp o pista avea un singur fel de obstacol mobil, un model pe toata
+	# tema era destul. Alpii au patru, si fiecare vine din alta parte a lumii:
+	# car cu fan pe ulita satului, sanie cu busteni pe urcarea prin padure,
+	# vaca spre pasune, tractor pe returul din vale. Cu un singur steag ar fi
+	# fost aceeasi sanie de patru ori, ceea ce ar fi contrazis chiar regula pe
+	# care o aplica testoasa din track08: hazardul apartine LOCULUI in care
+	# sta, nu tabelului de teme.
+	#
+	# Potrivirea se face pe DISTANTA, nu pe egalitate de chei.
+	#
+	# Prima versiune folosea `_hazard_kinds().get(snappedf(frac, 0.001))` si
+	# pierdea tacut ultimul hazard: `snappedf(0.938, 0.001)` NU e bit-identic
+	# cu literalul `0.938` scris in dictionar, iar Dictionary compara float-uri
+	# exact. Trei din patru se potriveau din noroc, al patrulea cadea pe
+	# modelul temei — adica bug-ul arata ca "am uitat sa declar unul".
+	# O toleranta face intentia explicita si scoate norocul din ecuatie.
+	var kind := {}
+	for key in _hazard_kinds():
+		if absf(float(key) - frac) < 0.0005:
+			kind = _hazard_kinds()[key]
+			break
+	var hazard_model: String = String(kind.get("model",
+		theme_flag("hazard_model", "")))
 	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
 		var ball := SlidingHazard.new()
 		ball.model_scene = load(hazard_model)
 		# 0.52 vine din bolovanul de 5 m diametru -> 2.6 m in joc. O barca de
 		# 5 m lungime insa TREBUIE sa ramana de 5 m: la 0.52 ar fi fost o
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
-		ball.model_scale = float(theme_flag("hazard_scale", 0.52))
+		ball.model_scale = float(kind.get("scale",
+			theme_flag("hazard_scale", 0.52)))
 		ball.model_tri_class = theme_flag("hazard_class", "")
 		ball.model_classes = theme_flag("hazard_classes", {})
 		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
 		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
 		# causeway nu se da peste cap.
-		ball.roll_radius = 1.0 if bool(theme_flag("hazard_roll", true)) else 0.0
+		var rolls := bool(kind.get("roll", theme_flag("hazard_roll", true)))
+		ball.roll_radius = 1.0 if rolls else 0.0
 		# Noi ii cerem maturarea maxima; el isi taie cursa cat sa nu iasa din
 		# sosea pe latimea ASTA de drum (vezi SlidingHazard._clamp_travel).
 		ball.road_half_width = half_width
@@ -2699,7 +2736,8 @@ func _build_hazard(frac: float) -> void:
 		# AnimatableBody3D cu sync_to_physics, deci dupa intrarea in arbore
 		# transformul il tine serverul de fizica — iar pozitia se rescrie oricum
 		# la fiecare pas, dar BAZA nu, deci o rotatie pusa dupa se pierde tacut.
-		if bool(theme_flag("hazard_face_travel", false)):
+		if bool(kind.get("face_travel",
+				theme_flag("hazard_face_travel", false))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
 		add_child(ball)
 		ball.center = p

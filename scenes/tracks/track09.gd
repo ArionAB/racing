@@ -171,6 +171,39 @@ func _hazard_fracs() -> Array[float]:
 	]
 
 
+## Fiecare hazard cu modelul LUI (#224). Pana aici toate patru foloseau sania
+## din tema, adica acelasi obiect de patru ori pe tur.
+##
+## SCARA E 1.0 PESTE TOT, si asta e o decizie, nu o omisiune: modelele din
+## kitul alpin sunt construite la scara reala (masurate cu sonda de kit — carul
+## 3.7 m lungime, sania 4.8, vaca 2.9, plugul 4.0), iar masina de referinta are
+## 3.8 m. Implicitul de 0.52 vine de la bolovanul de canion, care era modelat
+## la 5 m si trebuia micsorat; aici ar face din car o jucarie de 1.9 m.
+##
+## `roll: false` pe toate — niciunul nu e bolovan. Un car care se da peste cap
+## traversand ulita ar fi exact greseala pe care o descrie barca sabani.
+##
+## `face_travel` doar pe VACA: un animal are un "inainte", deci trebuie sa se
+## uite incotro merge (lectia testoasei din track08). Carul, sania si plugul
+## sunt targite/impinse pe latime — ele chiar traverseaza cu flancul.
+func _hazard_kinds() -> Dictionary:
+	const M := "res://assets/models/"
+	return {
+		0.060: {"model": M + "vehicles/hay_cart.glb",
+			"scale": 1.0, "roll": false},
+		0.215: {"model": M + "vehicles/timber_sled.glb",
+			"scale": 1.0, "roll": false},
+		0.767: {"model": M + "props/cow.glb",
+			"scale": 1.0, "roll": false, "face_travel": true},
+		# Plugul de zapada tine loc de tractor: e utilajul de gospodarie pe care
+		# il avem in kit, si pe un drum de munte are rostul lui chiar vara —
+		# stationat in vale, nu la lucru. Un tractor propriu-zis ar fi un GLB
+		# nou pentru aceeasi silueta si acelasi rol.
+		0.938: {"model": M + "vehicles/snowplow.glb",
+			"scale": 1.0, "roll": false},
+	}
+
+
 ## Rapa de sub creasta de fly-off, pe latura din afara buclei. Adancimea 16 e
 ## peste pragul din _build_flyoff_net (plafonul plasei coboara 6 m, garda cere
 ## > 10): cine rateaza aterizarea chiar cade si e repus, nu aterizeaza pe iarba.

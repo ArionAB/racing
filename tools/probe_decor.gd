@@ -184,9 +184,23 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## NESCHIMBATE (~508, totul intra in MultiMesh) si materialele 21/38.
 ## Pajistea a fost taiata in trei lanuri cu goluri (ritmul plin/gol),
 ## deci piesele ei au SCAZUT usor. ~4% aer.
+##
+## 2.15M -> 2.75M (august 2026): tivul si subarboretul din imaginea de
+## referinta. Verge_Umar (953/327k): tiv continuu de smocuri + iarba de
+## plaja + flori rare in PRIMUL metru de la umar, pe ambele laturi, pe
+## aceleasi trei lanuri cu goluri ca pajistea — el face drumul sa
+## citeasca a taiat prin vegetatie. Sub_Palmieri (269/146k): tufaris
+## sub perdelele de palmieri ale urcarii (0.44-0.72), fara gol pe
+## creasta. Paturi_gard 174 -> 330 (83k -> 166k): florile oglindite si
+## pe latura zidului, portocaliul condus la pas 4-5 m. Masurat
+## inainte/dupa: 2 059 126 -> 2 619 394 vizibile, +560k, cu desenele
+## NESCHIMBATE (508, totul intra in MultiMesh) si materialele 21/38.
+## ~5% aer, dimensionat pentru cele doua completari deja planificate:
+## speciile noi din veg_set2 INTRA IN ROTATIE (0 net) si paturile de la
+## baza zidurilor gusuku/gard ranch (~+20k, spot-uri in decorul manual).
 const TRIS_OVERRIDE := {
 	"Track07": 1000000,
-	"Track08": 2150000,
+	"Track08": 2750000,
 }
 
 

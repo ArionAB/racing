@@ -65,36 +65,51 @@ func _points() -> Array[Vector3]:
 		Vector3(270, 22, -268),
 		Vector3(240, 28, -330),
 		Vector3(185, 33, -368),  # coltul de sud-est
-		Vector3(115, 38, -385),  # marginea de sud, spre vest
-		# --- CULMEA: lobul care urca pe umarul masivului central ---
+		# --- CULMEA: drumul care se catara PE masiv ---
 		#
-		# Doua diagonale aproape paralele legate de o intoarcere in U, apoi
-		# platoul. Intoarcerea e un SEMICERC ESANTIONAT: patru puncte de
-		# control asezate chiar pe arcul dorit (raza ~22 m, centru ~(-20,
-		# -308)), ca fiecare tangenta Catmull-Rom sa cada de-a lungul lui.
-		# S-a incercat intai cu unul si apoi cu doua puncte in varf, masurat
-		# de fiecare data cu probe_layout: cu unul, tangenta — (urmatorul -
-		# precedentul) * 0.22 — iese scurta si curba se strange la 9.3 m; cu
-		# doua, tot virajul de 180° cade intr-un singur segment ale carui
-		# tangente merg de-a lungul CORZII, si iese 8.7 m. Regula ramasa: la
-		# un viraj de peste ~90°, punctele de control se pun PE arc, nu la
-		# colturile lui.
-		Vector3(48, 44, -362),   # intrarea in lob
-		Vector3(20, 47, -345),   # diagonala de jos
-		Vector3(-2, 50, -332),   # diagonala de jos, capatul dinspre arc
-		Vector3(-20, 52, -330),  # SERPENTINA — intrarea in arc
-		Vector3(-38, 53, -320),  # arcul, coltul de SV
-		Vector3(-38, 55, -296),  # arcul, coltul de NV
-		Vector3(-20, 56, -286),  # SERPENTINA — iesirea din arc
-		Vector3(10, 57, -283),   # diagonala de sus, capatul dinspre arc
-		Vector3(46, 58, -284),   # diagonala de sus — statia de telecabina (M4+)
-		# Intoarcerea de sus, esantionata pe arc din acelasi motiv ca
-		# serpentina: cu un singur punct in varf iesea 11.2 m.
-		Vector3(64, 60, -272),   # intoarcerea de sus — intrarea in arc
-		Vector3(74, 62, -250),   # varful arcului
-		Vector3(48, 63, -236),   # iesirea din arc, spre platou
-		Vector3(6, 63, -238),    # platoul culmii — punctul cel mai inalt
-		Vector3(-64, 62, -240),  # dreapta trenului de culme
+		# Secventa e URCARE -> AC -> TRAVERSARE EXPUSA -> AC -> COBORARE, si
+		# fiecare bucata are o treaba:
+		#
+		#   urcarea      poalele de sud, drum larg — aici mai poti depasi
+		#   acul 1       te intoarce cu 180° si te pune cu fata la nord
+		#   traversarea  flancul de VEST, cu prapastia pe dreapta (vezi
+		#                _ravines si _rail_segments) — bucata care sperie
+		#   acul 2       te intoarce inapoi spre est, pe umarul de nord
+		#   umarul       punctul cel mai inalt (63 m), de unde VEZI traversarea
+		#                pe care tocmai ai facut-o, cu 5 m mai jos si la 30 m
+		#                lateral — asta e ce face muntele sa se citeasca
+		#
+		# Versiunea veche era un LOB cu doua diagonale paralele care treceau
+		# peste un teren aproape plat: masivul declarat in _peak_specs statea
+		# la 95-160 m de asfalt, adica prea departe ca sa fie flanc de munte.
+		# Acum drumul trece la 26-40 m de varf si il inconjoara pe trei laturi.
+		#
+		# Ambele ace SI intoarcerea de pe umar sunt ESANTIONATE PE ARC (patru
+		# puncte echidistante pe cercul dorit), regula platita pe serpentina
+		# veche: la peste ~90°, punctele de control se pun PE arc, altfel
+		# tangentele Catmull-Rom merg de-a lungul corzii si curba se strange.
+		# Raza minima masurata pe sectorul asta: 10.2 m in estimator (vechiul
+		# lob dadea 9.8 pe acelasi estimator), iar probe_layout ramane arbitrul.
+		Vector3(114, 40, -382),  # poalele de sud, intrarea in urcare
+		Vector3(80, 43, -388),
+		Vector3(46, 45, -388),
+		Vector3(16, 48, -380),   # ACUL 1 — arc r=~30, centru ~(20, -352)
+		Vector3(-10, 51, -366),
+		Vector3(-22, 54, -346),  # iesirea din ac, cu fata la nord
+		Vector3(-18, 56, -326),  # TRAVERSAREA EXPUSA — buza de vest
+		Vector3(-12, 58, -306),  # mijlocul cornisei: rapa de 26 m pe dreapta
+		Vector3(-16, 60, -288),
+		Vector3(-37, 61, -257),  # ACUL 2 — arc r=26, centru (-12, -262)
+		Vector3(-23, 62, -239),
+		Vector3(0, 63, -239),
+		Vector3(14, 63, -257),   # iesirea din ac, spre est pe umarul de nord
+		Vector3(40, 63, -276),   # umarul — intoarcerea, arc r=28, centru (30, -250)
+		Vector3(56, 63, -261),   # statia de telecabina (M4+)
+		Vector3(56, 62, -239),
+		Vector3(40, 62, -224),
+		Vector3(-2, 60, -208),   # platoul de nord — trecerea de cale ferata
+		Vector3(-46, 59, -228),
+		Vector3(-94, 58, -250),
 		# --- COBORAREA: flancul de vest, -52 m in ~300 m ---
 		Vector3(-128, 56, -268), # buza platoului — creasta de fly-off
 		Vector3(-186, 46, -238), # aici se desprinde scurtatura
@@ -125,8 +140,8 @@ func _points() -> Array[Vector3]:
 ## cu cotele intre cele doua drumuri ca terenul sa se aseze lin pe ea.
 func _branch_specs() -> Array[Dictionary]:
 	return [{
-		"entry": 0.743,   # derivat din (-186, -238), punctul de dupa buza
-		"exit": 0.881,    # derivat din (-196, -46), inainte de pod
+		"entry": 0.754,   # masurat pe (-186, -238), punctul de dupa buza
+		"exit": 0.886,    # masurat pe (-196, -46), inainte de pod
 		"half_width": 3.2,
 		"wet": false,
 		"label": "pasunea",
@@ -140,23 +155,29 @@ func _branch_specs() -> Array[Dictionary]:
 ## Creasta de fly-off, pe buza platoului: TOATA pista sare aici, alegerea e
 ## cat de tare intri. Sub ea, rapa declarata — vezi _ravines().
 func _flyoff_fracs() -> Array[float]:
-	return [0.683] # buza platoului, derivat din (-96, -254)
+	return [0.694] # buza platoului, masurat pe (-96, -254)
 
 
 ## Rampa de pe coltul de nord-vest: airtime pe care il POTI evita (alegere de
 ## linie, nu de curaj) — si pe care scurtatura il sare cu totul.
 func _ramp_fracs() -> Array[float]:
-	return [0.856] # dreapta dintre coltul NV si revenirea scurtaturii
+	return [0.862] # dreapta dintre coltul NV si revenirea scurtaturii
 
 
-## Trecerea de cale ferata, pe platoul culmii.
+## Trecerea de cale ferata, pe platoul de nord.
 ##
 ## Pusa pe singura bucata orizontala de la inaltime, deliberat: sina cere spatiu
-## lateral, iar acolo unde platoul cade spre serpentina, estacada de lemn a
-## trenului se vede de jos, din diagonale — avertizarea vizuala pe care o cere
-## gimmick-ul de timing.
+## lateral, iar aici il are — dupa umar, drumul coboara lin spre coborare, fara
+## nici un ac in apropiere. Ramane si citirea de dinainte: estacada se vede de
+## pe umar, cu un sector inainte sa ajungi la ea, care e chiar avertizarea pe
+## care o cere gimmick-ul de timing.
+##
+## NU se mai poate pune pe traversare, si asta e o consecinta buna a
+## rescrierii: acolo drumul e o cornisa cu prapastie pe o latura si perete pe
+## cealalta, adica exact locul in care o bariera de tren ar fi fost o capcana
+## fara iesire, nu o decizie.
 func _train_fracs() -> Array[float]:
-	return [0.647] # mijlocul platoului, derivat din (-29, -239)
+	return [0.631] # platoul de nord, masurat pe (-2, -208)
 
 
 ## Hazardele mobile, in ordinea turului: carul cu fan pe ulita satului, sania
@@ -164,10 +185,10 @@ func _train_fracs() -> Array[float]:
 ## pe returul din vale. Toate matura perpendicular, ca orice SlidingHazard.
 func _hazard_fracs() -> Array[float]:
 	return [
-		0.060, # carul cu fan, pe ulita satului
-		0.215, # sania cu busteni, pe urcarea prin padure
-		0.767, # vaca, pe coborare — scurtatura o evita
-		0.938, # tractorul, pe returul din vale
+		0.058, # carul cu fan, pe ulita satului
+		0.206, # sania cu busteni, pe urcarea prin padure
+		0.777, # vaca, pe coborare — scurtatura o evita
+		0.941, # tractorul, pe returul din vale
 	]
 
 
@@ -189,42 +210,128 @@ func _hazard_fracs() -> Array[float]:
 func _hazard_kinds() -> Dictionary:
 	const M := "res://assets/models/"
 	return {
-		0.060: {"model": M + "vehicles/hay_cart.glb",
+		0.058: {"model": M + "vehicles/hay_cart.glb",
 			"scale": 1.0, "roll": false},
-		0.215: {"model": M + "vehicles/timber_sled.glb",
+		0.206: {"model": M + "vehicles/timber_sled.glb",
 			"scale": 1.0, "roll": false},
-		0.767: {"model": M + "props/cow.glb",
+		0.777: {"model": M + "props/cow.glb",
 			"scale": 1.0, "roll": false, "face_travel": true},
 		# Plugul de zapada tine loc de tractor: e utilajul de gospodarie pe care
 		# il avem in kit, si pe un drum de munte are rostul lui chiar vara —
 		# stationat in vale, nu la lucru. Un tractor propriu-zis ar fi un GLB
 		# nou pentru aceeasi silueta si acelasi rol.
-		0.938: {"model": M + "vehicles/snowplow.glb",
+		0.941: {"model": M + "vehicles/snowplow.glb",
 			"scale": 1.0, "roll": false},
 	}
 
 
-## Rapa de sub creasta de fly-off, pe latura din afara buclei. Adancimea 16 e
-## peste pragul din _build_flyoff_net (plafonul plasei coboara 6 m, garda cere
-## > 10): cine rateaza aterizarea chiar cade si e repus, nu aterizeaza pe iarba.
+## Golurile declarate, amandoua pe latura din AFARA buclei (semnul +1 e masurat
+## cu ProbeTrack09Fracs, nu presupus — depinde de sensul de parcurgere).
+##
+## 1. PRAPASTIA DE SUB TRAVERSARE (0.462 - 0.502) e miezul pistei, nu decor.
+##    Traversarea merge pe cornisa flancului de vest, iar dedesubt terenul
+##    trebuie sa CADA — altfel „drumul expus" e o sosea pe iarba, exact ce era
+##    inainte. Fractiile acopera cu ~0.01 mai mult de fiecare parte decat
+##    traversarea masurata (0.472 - 0.492), fiindca RAVINE_FADE_FRAC stinge
+##    rapa gradual la capete: taiata fix pe capete, prapastia ar fi fost cea
+##    mai adanca la mijloc si inexistenta exact unde intri in ea.
+##
+##    Adancimea 26 e derivata, nu aleasa: drumul e la 56-60 m pe portiunea
+##    asta, iar poalele masivului stau pe la 30 m. O rapa mai adanca ar taia
+##    prin fundul lumii, una de 16 (cat cea de la fly-off) ar lasa o taluz pe
+##    care masina l-ar cobori rostogolindu-se, si ar disparea frica. La 26 m
+##    caderea e terminala vizual si mecanic: cine e impins afara nu se mai
+##    intoarce pe roti, il repune RespawnZone.
+##
+## 2. Rapa de sub creasta de fly-off (0.668 - 0.732 in vechea numerotare, acum
+##    remasurata pe curba noua). Adancimea 16 e peste pragul din
+##    _build_flyoff_net (plafonul plasei coboara 6 m, garda cere > 10): cine
+##    rateaza aterizarea chiar cade si e repus, nu aterizeaza pe iarba.
 func _ravines() -> Array[Vector4]:
-	return [Vector4(0.668, 0.732, 16.0, 1.0)]
+	return [
+		Vector4(0.462, 0.502, 26.0, 1.0), # prapastia traversarii
+		Vector4(0.679, 0.743, 16.0, 1.0), # sub creasta de fly-off
+	]
+
+
+## Prapastia traversarii (indicele 0) e o CORNISA: buza ei incepe la o jumatate
+## de metru de asfalt, nu la patru, si cade pe sase metri, nu pe saisprezece.
+##
+## Masurat pe forma implicita, taind profilul terenului perpendicular pe drum:
+## primii 10 m de langa sosea coborau 1.1-1.4 m. Adica exact ce se vedea si in
+## captura — o pajiste in panta pe care puteai iesi cu doua roti fara sa
+## patesti nimic, sub un drum de pe care tocmai scosesem parapetul ca sa para
+## periculos. Cu cornisa: -5 m pe buza, -17 m la cinci metri lateral.
+##
+## Rapa de fly-off (indicele 1) NU e cornisa, si ramane asa deliberat: acolo
+## buza lina e o calitate — cine rateaza saritura aluneca in vale, nu se
+## opreste intr-un perete.
+func _cornice_ravines() -> Array[int]:
+	return [0]
 
 
 ## Masivul central — muntele pe care pista chiar urca.
 ##
-## Doua varfuri care se suprapun intr-o creasta, nu un con singuratic:
-##   - varful de NE (120, -300): serpentina ii urca flancul de vest, urcarea
-##     prin padure ii da ocol pe la est;
-##   - varful principal (10, -175): platoul culmii ii e umarul de sud, iar din
-##     sat si din vale il vezi ridicandu-se peste tot interiorul buclei.
-## Cotele (102 / 98) stau la ~35-40 m peste platoul drumului (63) — destul cat
-## varful sa domine cadrul si din vale, destul de putin cat sa nu para alta
-## lume; zapada de pe el vine odata cu tema "alpine".
+## VARFUL (30, -302) e subiectul pistei, nu decor pe orizont: drumul ii da
+## ocol pe trei laturi la 26-40 m de axa, iar traversarea expusa ii taie
+## flancul de vest. Raza 130 cu cota 160 nu sunt alese din ochi, sunt singura
+## pereche care trece prin trei conditii deodata (masurate cu ProbeAlpineTerrain):
+##   - de pe cornisa (cota 58) varful se ridica cu ~60 m peste tine, adica
+##     umple cadrul chase cam-ului pe verticala si NU incape intr-o captura;
+##   - la acul 2 (cota 62) conul a coborat deja sub cota drumului, deci nu
+##     ingroapa asfaltul — un con mai LARG ar fi facut exact asta;
+##   - trece de linia de zapada a temei (72 m, fade 18) cu suprafata reala,
+##     nu cu varful singur: versiunea veche (104 m pe raza 210) tinea 0.23%
+##     din teren peste 90 m, adica un petic alb cat o batista.
+##
+## Cifra care conteaza NU e cota declarata, ci cat ramane din ea dupa banda de
+## protectie a asfaltului (PEAK_ROAD_CLEAR/FULL din TrackSideSampler) si dupa
+## zgomotul de dune. De aceea se remasoara dupa orice mutare de traseu.
+##
+## Al doilea varf (10, -175) ramane: e umarul de sud care inchide interiorul
+## buclei si il vezi din sat si din vale. Ridicat 99 -> 120 ca sa nu para o
+## movila pe langa noul varf principal — doua cote apropiate citesc a creasta,
+## una singura ar fi citit a con izolat.
 func _peak_specs() -> Array[Vector4]:
 	return [
-		Vector4(120, -300, 210, 104),
-		Vector4(10, -175, 230, 99),
+		Vector4(30, -302, 130, 160),
+		Vector4(10, -175, 210, 120),
+	]
+
+
+## Parapetii de pe munte: RITM, nu o singura decizie.
+##
+## Regula implicita a jocului e gard rosu continuu pe tot exteriorul. Pe
+## traversare spune exact pe dos decat vrea pista — un drum de cornisa cu
+## balustrada peste tot e o pista de curse, nu un drum de munte. Absenta
+## gardului e ce comunica „nu te lasa impins afara".
+##
+## Dar nici prapastie continua nu merge: 200 m de expunere neintrerupta devin
+## fundal, iar frica se toceste. Ritmul e alternanta, si e citit din
+## fractiile MASURATE ale sectorului (ProbeTrack09Fracs):
+##
+##   0.462 - 0.472  stalpi     intrarea pe cornisa — avertizarea
+##   0.472 - 0.484  NIMIC      prima bucata expusa: aici e cel mai rau
+##   0.484 - 0.490  stalpi     o rasuflare scurta, cat sa observi diferenta
+##   0.490 - 0.502  NIMIC      a doua bucata expusa, pana la iesire
+##
+## Restul turului ramane pe gardul implicit — inclusiv acul 2 si umarul, unde
+## caderea ar fi pe teren, nu in gol, deci gardul chiar isi face treaba.
+##
+## Proportia iese ~35% fara nimic si ~16% pe stalpi DIN SECTORUL DE CULME, nu
+## din tur: pe tot turul, portiunea fara parapet e sub 4%. Cifra care conteaza
+## pentru senzatie e prima; cea care conteaza pentru „nu pierzi masina din
+## greseala" e a doua.
+##
+## Toate pe latura +1 (exteriorul, masurat), adica exact peste rapa declarata
+## in _ravines — asta e conditia pe care o cere Track._rail_segments: fara
+## panglica dispare si coliziunea, deci se scoate numai unde caderea e gandita.
+func _rail_segments() -> Array[Vector4]:
+	return [
+		Vector4(0.462, 0.472, RAIL_POSTS, 1.0),
+		Vector4(0.472, 0.484, RAIL_NONE, 1.0),
+		Vector4(0.484, 0.490, RAIL_POSTS, 1.0),
+		Vector4(0.490, 0.502, RAIL_NONE, 1.0),
 	]
 
 
@@ -238,28 +345,34 @@ func _peak_specs() -> Array[Vector4]:
 ## plin/gol e ce face satul sa citeasca a asezare, nu a decor presarat.
 ##
 ## Fractiile sunt cele MASURATE (tools/ProbeTrack09Fracs), nu alese: sicana
-## satului cade la 0.971, podul peste parau la 0.922, statia pe diagonala de
-## sus a serpentinei la 0.551. Daca se muta un punct de control, se remasoara.
+## satului cade la 0.972, podul peste parau la 0.925, statia de telecabina pe
+## umarul de nord la 0.585. Daca se muta un punct de control, se remasoara.
 func _landmark_spots() -> Array[Vector3]:
 	return [
 		# --- SATUL (0.92-0.10): pilcul dens, de-o parte si de alta a ulitei ---
-		Vector3(0.922, -1.0, 18.0), # podul peste parau, la intrarea in sat
+		Vector3(0.925, -1.0, 18.0), # podul peste parau, la intrarea in sat
 		Vector3(0.941, 1.0, 15.0),  # chalet mic, pe dreapta
 		Vector3(0.958, -1.0, 14.0), # chalet MARE, pe stanga
-		# Biserica la 0.971: turla de 14 m in axul sicanei, deci o vezi cum se
+		# Biserica la 0.972: turla de 14 m in axul sicanei, deci o vezi cum se
 		# apropie pe toata ulita si stii unde se strange drumul. Exact rolul de
 		# "reper de franare" din style_bible §7.
-		Vector3(0.971, 1.0, 13.0),
+		Vector3(0.972, 1.0, 13.0),
 		Vector3(0.988, -1.0, 15.0), # chalet mic, inchide pilcul
 		Vector3(0.030, 1.0, 15.0),  # ultimul chalet, deja la iesirea din sat
 		# --- IESIREA SPRE PADURE: un singur indicator, apoi gol ---
-		Vector3(0.138, -1.0, 19.0),
+		Vector3(0.132, -1.0, 19.0),
 		# --- CULMEA: telecabina, singurul pilc de la inaltime ---
-		# Statia pe diagonala de sus (0.551), pilonul mai jos pe flanc (0.500):
-		# asa cablul dintre ele traverseaza serpentina, si il vezi de doua ori
-		# pe tur — o data de dedesubt urcand, o data de sus cand treci pe langa.
-		Vector3(0.500, 1.0, 17.0),
-		Vector3(0.551, -1.0, 16.0),
+		#
+		# Statia pe umarul de nord (0.585), pilonul pe INTERIORUL acului 2
+		# (0.526): cablul dintre ele trece pe deasupra acului, deci il vezi o
+		# data de dedesubt cand intri in ac si o data de alaturi de pe umar.
+		#
+		# Pilonul e pe latura -1 (spre munte) DIN OBLIGATIE, nu din gust: pe +1
+		# e prapastia traversarii, iar un pilon plantat in gol ar fi exact
+		# genul de obiect care pluteste. Statia la fel — pe umar, exteriorul
+		# cade spre acul 2.
+		Vector3(0.526, -1.0, 17.0),
+		Vector3(0.585, -1.0, 16.0),
 		# --- COBORAREA: indicator inainte de creasta de fly-off ---
-		Vector3(0.660, 1.0, 19.0),
+		Vector3(0.672, 1.0, 19.0),
 	]

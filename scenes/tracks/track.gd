@@ -378,6 +378,36 @@ static func themes() -> Dictionary:
 			"snow_line": 72.0,
 			"snow_fade": 18.0,
 			"snow_tint": Palette.color(Palette.FOAM_WHITE),
+			# BANDA DE STANCA dintre pajiste si zapada.
+			#
+			# Un munte adevarat are trei etaje, si lipsea cel din mijloc: pana
+			# la #229 terenul trecea direct din verde in alb, deci masivul
+			# citea ca un deal cu glazura. Cu masivul central urcat la 154 m
+			# (de la 104), etajul lipsa a devenit vizibil de pe drum, nu doar
+			# dintr-o captura de sus — de la 60 m in sus, pe cornisa, ai un
+			# perete de iarba unde ar trebui sa fie piatra.
+			#
+			# 46 m e cota de la care iarba se rareste. NU e aleasa rotund: pe
+			# traversare soseaua urca de la 54 la 63 m, deci o linie mai sus ar
+			# fi lasat exact bucata pe care o conduci tot verde, iar una mai
+			# jos ar fi impietrit si pasunea din vale (care sta sub 40 m).
+			# Trecerea larga (20 m) e din acelasi motiv ca la zapada: la munte
+			# limita padurii e o zona, nu o linie.
+			#
+			# Culoarea NU e Palette.ROCK_LIGHT, si asta e o abatere declarata:
+			# slotul ala e #C18446, gresie calda de canion („maro", scrie chiar
+			# in palette.gd), iar prima incercare a facut din masivul alpin o
+			# duna portocalie — se vede in captura de sus. Granitul din foaia
+			# de referinta a kitului e #8A8980, gri-verzui rece.
+			#
+			# Se pune ca nuanta de TEMA, nu ca slot nou in atlas: e o culoare
+			# de vertex peste terenul care are deja textura de clasa, deci nu
+			# adauga niciun material — exact conditia din CLAUDE.md. Un slot
+			# nou ar fi insemnat regenerarea atlasului si recalibrarea
+			# expunerii pentru toate pistele.
+			"rock_line": 46.0,
+			"rock_fade": 20.0,
+			"rock_band_tint": Color.html("8A8980"),
 			# Granit ADEVARAT, nu o nuanta peste gresie.
 			#
 			# Pana la texturile PolyHaven, muntele imprumuta roca de canion si o
@@ -703,6 +733,16 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Care dintre rapele de mai sus sunt CORNISE: buza lipita de asfalt, in loc de
+## valea lina de sub o creasta de fly-off. Indici in lista intoarsa de
+## [method _ravines].
+##
+## Doua forme, nu una singura reglabila, fiindca descriu doua lucruri diferite:
+## o vale de aterizare vrea buza lina (aluneci in ea), un drum de munte vrea
+## muchie (cazi de pe el). Vezi TrackSideSampler.RAVINE_CORNICE_INNER.
+func _cornice_ravines() -> Array[int]:
+	return []
+
 ## Ce fel de obstacol mobil sta la fiecare fractie: frac -> dictionar cu
 ## `model`, si optional `scale`, `roll`, `face_travel`.
 ##
@@ -723,6 +763,51 @@ func _hazard_kinds() -> Dictionary:
 ## asfaltului.
 func _peak_specs() -> Array[Vector4]:
 	return []
+
+## Portiunile pe care peretele exterior NU e panglica rosie continua:
+## (frac_start, frac_end, regim, latura ±1 sau 0 = ambele).
+##
+## Regimul e una din valorile RAIL_*:
+##   RAIL_NONE   nimic. Marginea drumului e marginea drumului.
+##   RAIL_POSTS  stalpi rari de lemn, fara panglica intre ei — se vede ca
+##               cineva a incercat sa marcheze buza, nu ca te opreste ceva.
+##
+## De ce exista, si de ce ca EXCEPTIE declarata si nu ca setare de tema:
+## regula implicita (gard peste tot pe exterior) e buna si ramane implicita —
+## pe majoritatea pistelor peretele e singurul lucru care tine masina in lume.
+## Dar pe un drum de munte gardul continuu spune exact pe dos decat vrea pista:
+## „esti in siguranta, e o pista". Absenta lui e ce comunica „nu te lasa
+## impins". Iar asta e o afirmatie despre O BUCATA de drum, nu despre o lume
+## intreaga — de aceea intervale, nu un flag.
+##
+## COLIZIUNEA DISPARE ODATA CU PANGLICA, si asta e chiar scopul. Pe RAIL_NONE
+## chiar poti cadea. Se declara deci numai acolo unde caderea e prevazuta:
+## peste o rapa (vezi _ravines) sau pe teren care coboara. Pe o portiune plata
+## ar insemna doar ca masina pleaca in campie si asteapta repunerea.
+func _rail_segments() -> Array[Vector4]:
+	return []
+
+## Regimurile de parapet pentru [method _rail_segments].
+enum { RAIL_NONE = 0, RAIL_POSTS = 1 }
+
+## Stalpii de pe RAIL_POSTS: la cati metri unul.
+const RAIL_POST_SPACING: float = 9.0
+const RAIL_POST_HEIGHT: float = 0.95
+const RAIL_POST_RADIUS: float = 0.11
+
+
+## Ce regim de parapet e declarat la fractia si latura date.
+## -1 = niciunul, deci peretele implicit al pistei.
+func _rail_mode_at(frac: float, side_sign: float) -> int:
+	for seg in _rail_segments():
+		if not is_zero_approx(seg.w) and signf(seg.w) != signf(side_sign):
+			continue
+		# Interval pe un INEL: 0.95 -> 0.05 trece prin start/finish.
+		var inside := (frac >= seg.x and frac <= seg.y) if seg.x <= seg.y \
+			else (frac >= seg.x or frac <= seg.y)
+		if inside:
+			return int(seg.z)
+	return -1
 
 ## Laguna: conturul apei din INTERIORUL buclei, ca poligon in plan XZ.
 ##
@@ -818,7 +903,8 @@ func rebuild() -> void:
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
-		_lagoon_poly(), lagoon_depth, _channels, _peak_specs())
+		_lagoon_poly(), lagoon_depth, _channels, _peak_specs(),
+		_cornice_ravines())
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -1505,6 +1591,10 @@ func _build_terrain() -> void:
 	var snow_tint: Variant = theme_flag("snow_tint", null)
 	var snow_line := float(theme_flag("snow_line", 0.0))
 	var snow_fade := maxf(float(theme_flag("snow_fade", 1.0)), 0.001)
+	# Etajul de stanca, sub zapada. Vezi "rock_line" in themes().
+	var rock_tint: Variant = theme_flag("rock_band_tint", null)
+	var rock_line := float(theme_flag("rock_line", 0.0))
+	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
 	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
@@ -1575,6 +1665,23 @@ func _build_terrain() -> void:
 					# Greutatea de iarba se stinge odata cu albul: pe piatra
 					# inghetata nu creste iarba, iar fara asta shader-ul ar
 					# amesteca textura de pajiste peste zapada.
+					# ETAJUL DE STANCA, intre pajiste si zapada. Aceeasi forma
+					# ca zapada de mai jos (cota absoluta, margine zdrentuita
+					# cu acelasi zgomot) fiindca e acelasi fel de lucru: o
+					# limita de vegetatie pe munte, nu o proprietate a pistei.
+					# Se aplica INAINTE de zapada, ca albul sa ramana ultimul
+					# strat — pe creasta e zapada peste piatra, nu invers.
+					if rock_tint != null:
+						var rock_w := clampf(
+							(v.y - rock_line) / rock_fade, 0.0, 1.0)
+						rock_w = clampf(rock_w + dirt_noise.get_noise_2d(
+							v.x * 0.5, v.z * 0.5) * 0.25, 0.0, 1.0)
+						rock_w = smoothstep(0.0, 1.0, rock_w)
+						if rock_w > 0.0:
+							tint = tint.lerp(rock_tint as Color, rock_w)
+							# Pe piatra nu creste iarba: greutatea coboara spre
+							# textura de nisip/roca, exact ca sub zapada.
+							grass_w *= 1.0 - rock_w
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)
@@ -2674,6 +2781,11 @@ func _build_walls() -> void:
 		loop_poly.append(Vector2(p.x, p.z))
 	var n := baked.size()
 	var junctions := _junction_indices()
+	var total_len: float = _dists[n] if _dists.size() > n else 0.0
+	# Buza pe care se planteaza stalpii de RAIL_POSTS, adunata cat se cladeste
+	# peretele: acolo se stie deja si latura, si ca segmentul chiar ar fi primit
+	# perete (nu e in dreptul unei jonctiuni sau al unui gol de canal).
+	var post_spots: Array[Vector3] = []
 	for side_sign: float in [-1.0, 1.0]:
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -2703,6 +2815,15 @@ func _build_walls() -> void:
 			var elevated := mid.y > 1.0
 			if not exterior and not elevated and not on_deck:
 				continue
+			# Parapetul declarat al pistei bate regula implicita. Pe pod NU:
+			# balustrada podului e parte din citirea podului (vezi mai sus).
+			if not on_deck:
+				var frac := _dists[i] / total_len if total_len > 0.0 else 0.0
+				var mode := _rail_mode_at(frac, side_sign)
+				if mode == RAIL_POSTS:
+					post_spots.append(b0)
+				if mode != -1:
+					continue
 			var t0 := b0 + Vector3.UP * WALL_HEIGHT
 			var t1 := b1 + Vector3.UP * WALL_HEIGHT
 			var into := deck if on_deck else st
@@ -2725,6 +2846,56 @@ func _build_walls() -> void:
 			deck.generate_normals()
 			_add_mesh_with_collision(deck.commit(),
 				Palette.color(Palette.CONCRETE))
+	_build_rail_posts(post_spots)
+
+
+## Stalpii rari de pe portiunile RAIL_POSTS.
+##
+## FARA COLIZIUNE, deliberat: un stalp de 11 cm care opreste o masina de tona
+## ar fi mai mincinos decat gardul pe care tocmai l-am scos, iar unul care o
+## deviaza imprevizibil pe buza prapastiei ar fi frustrare, nu tensiune. Rolul
+## lor e sa spuna „aici e marginea" cu o secunda inainte, atat.
+##
+## Un singur mesh pentru toti (nu un nod per stalp): pe traversare ies cateva
+## zeci, iar fiecare cu materialul lui ar fi cateva zeci de draw call-uri
+## pentru niste betisoare — exact clasa de risipa pe care o numara
+## tools/probe_decor.gd.
+func _build_rail_posts(spots: Array[Vector3]) -> void:
+	if spots.is_empty():
+		return
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var last := Vector3.INF
+	var placed := 0
+	for p in spots:
+		if last != Vector3.INF and p.distance_to(last) < RAIL_POST_SPACING:
+			continue
+		last = p
+		placed += 1
+		# Prisma hexagonala: 12 triunghiuri pe stalp. Un CylinderMesh la
+		# rezolutia implicita ar fi adus 64 de segmente pentru un obiect de
+		# 11 cm — lectia primitivelor din CLAUDE.md.
+		var base := p - Vector3.UP * 0.15 # infipt, nu asezat
+		var top := base + Vector3.UP * RAIL_POST_HEIGHT
+		for k in 6:
+			var a0 := TAU * float(k) / 6.0
+			var a1 := TAU * float(k + 1) / 6.0
+			var o0 := Vector3(cos(a0), 0.0, sin(a0)) * RAIL_POST_RADIUS
+			var o1 := Vector3(cos(a1), 0.0, sin(a1)) * RAIL_POST_RADIUS
+			st.add_vertex(base + o0); st.add_vertex(top + o0)
+			st.add_vertex(base + o1)
+			st.add_vertex(top + o0); st.add_vertex(top + o1)
+			st.add_vertex(base + o1)
+	if placed == 0:
+		return
+	st.generate_normals()
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = st.commit()
+	mesh.material_override = _flat_material(
+		Palette.color(Palette.WOOD_WEATHERED), null, 1.0, 0.35)
+	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	add_child(mesh)
+
 
 ## Rampa pe jumatatea exterioara a soselei: alegi intre linia sigura si
 ## saritura (airtime).

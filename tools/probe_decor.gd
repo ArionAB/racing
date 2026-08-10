@@ -505,6 +505,24 @@ const VARIANT_SOURCE := {
 	"awamori_": "beach_clutter", "bamboo_": "beach_clutter",
 	"fishing_": "beach_clutter", "net_": "beach_clutter",
 	"tetrapod_": "tetrapod", "island_": "horizon_island",
+	# --- Muntele (Alpii) ---
+	#
+	# Kitul alpin (#226) plus coniferele (#222). Inregistrate ODATA cu
+	# folosirea lor, nu dupa: pinii au aparut prima data pe pista ca 146 de
+	# instante contabilizate la "procedural (track.gd)", exact modul de esec
+	# descris in capul acestui dictionar. Se vedeau pe ecran, dar garda ii
+	# citea gresit — motiv suficient sa nu te increzi intr-o cifra care nu
+	# stie ce numara.
+	"pine_": "alpine_pines",
+	"alpineshrub": "alpine_shrub", "flowercluster": "flower_cluster",
+	"snowpatch": "snow_patch", "mountainpeak": "mountain_peak",
+	"fence_": "wooden_fence", "haybale": "hay_bale", "haycart": "hay_cart",
+	"timbersled": "timber_sled", "snowplow": "snowplow", "cow": "cow",
+	"alpinechurch": "alpine_church", "cablecarstation": "cable_car_station",
+	"cablecarpylon": "cable_car_pylon",
+	"mountainchalet": "mountain_chalet", "mountaintunnel": "mountain_tunnel",
+	"streambridge": "stream_bridge", "jumpkicker": "jump_kicker",
+	"alpinesignpost": "alpine_signpost", "woodstack": "wood_stack",
 }
 
 

@@ -255,6 +255,151 @@ static func themes() -> Dictionary:
 			"dust_color": null, # null = derivat din ground_tint
 			"water": false,
 		},
+		# --- Muntele de vara (pista Alpii) ---
+		#
+		# Nu e "forest cu alt cer". Diferentele care conteaza, toate din lumea
+		# reala si toate verificabile pe un snapshot:
+		#
+		# 1. AERUL E SUBTIRE. La altitudine cerul e mai adanc si mai rece la
+		#    zenit, iar ceata e albastruie (imprastiere Rayleigh pe distanta),
+		#    nu alb-laptoasa ca la nivelul marii. De aceea fog e mai albastru
+		#    decat cerul de la orizont, invers decat la desert.
+		# 2. UMBRELE SUNT RECI. Ambientul vine din CULOARE, nu din cer, exact
+		#    din motivul masurat pe insula: cerul singur trage tot verdele spre
+		#    cenusiu. Culoarea aleasa e bounce-ul de pe pajiste — verde palid
+		#    cald, nu gri.
+		# 3. VERDELE E DE PAJISTE ALPINA, nu de padure tropicala: mai galben si
+		#    mai putin saturat decat "forest" (#73B854 fata de un verde crud),
+		#    fiindca iarba de munte in august e uscata la varf.
+		#
+		# sun_energy 1.15 si nu 1.25 ca la forest: aici soarele bate pe un
+		# teren care URCA, deci flancurile orientate spre lumina primesc
+		# incidenta mai buna si se supraexpun la aceeasi energie. Diferenta
+		# e vizibila pe umarul masivului, unde panta e de 35-40%.
+		"alpine": {
+			# Pajiste de munte in august, NU gazon: verdele lui "forest"
+			# (0.45, 0.72, 0.33) iesea fluorescent pe prima randare — e acordat
+			# pentru o padure in umbra, iar aici cade pe pante intregi luminate
+			# direct. Coborat in saturatie si impins spre galben-oliv, adica
+			# spre iarba uscata la varf. Verificabil pe captura de sus: masa
+			# verde trebuie sa citeasca a fan tanar, nu a masa de biliard.
+			"ground_tint": Color(0.44, 0.60, 0.31),
+			# Cer de altitudine: zenit adanc, orizont palid si RECE.
+			"sky_top": Color(0.16, 0.42, 0.86),
+			"sky_horizon": Color(0.74, 0.86, 0.97),
+			# Ceata albastruie — vezi punctul 1 de mai sus.
+			"fog": Color(0.72, 0.83, 0.94),
+			"hill_color": Color(0.36, 0.56, 0.38),
+			"sun_color": Color(1.0, 0.97, 0.90),
+			"sun_energy": 1.15,
+			"exposure": 1.0,
+			"ambient_color": Color.html("C8D8B8"),
+			"ambient_energy": 0.26,
+			# Ceata de ADANCIME, ca la desert si insula: de pe platou vezi pana
+			# in vale, iar crestele de fundal trebuie sa se piarda progresiv,
+			# nu sa fie taiate de un plan de ceata uniform.
+			"fog_depth": true,
+			# Crestele de fundal (#225): un singur model, folosit la scari si
+			# rotatii diferite de inelele de orizont. Are deja benzile pictate
+			# in sloturi — padure la poale, granit la mijloc, zapada peste
+			# 38 m — deci silueta ADUCE cu ea povestea de altitudine, fara
+			# niciun cost de material.
+			"horizon_model": "res://assets/models/rocks/mountain_peak.glb",
+			# Un singur nod in GLB, deci acelasi nume pe toate inelele. Varietatea
+			# vine din scara si din rotatie, nu din forme diferite — la 300 m si
+			# prin ceata, doua siluete rotite 90° citesc ca doi munti.
+			"horizon_picks": [["MountainPeak"], ["MountainPeak"],
+				["MountainPeak"]],
+			# ATLAS, nu clasa de roca — si asta e chiar rostul modelului.
+			#
+			# `horizon_class: "rock"` (implicitul) intinde textura de gresie
+			# peste tot varful si STERGE benzile pictate in sloturi: masurat pe
+			# captura, crestele ieseau portocalii ca niste dune de desert, adica
+			# exact opusul unui masiv alpin. Varful are deja padure la poale,
+			# granit la mijloc si zapada peste 38 m — povestea de altitudine e
+			# in UV-uri, si trebuie lasata sa se vada.
+			"horizon_class": "",
+			# Inele PROPRII: varful e de trei ori cat un butte de desert, deci
+			# vrea distanta mai mare si numar mai mic. Degajarea de 150-210 m e
+			# masurata contra esecului: cu cea implicita (95 m pe inelul
+			# apropiat) niciuna din cele 10 siluete n-a incaput pe o pista de
+			# 535x400 m. Scarile RAMAN mici (0.8-1.4): la 92 m nominal, un varf
+			# la scara 2.4 ar fi un zid de 220 m care inghite tot cerul.
+			# Cotele astea sunt LEGATE INTRE ELE — se schimba impreuna sau
+			# deloc:
+			#   ChaseCamera.FAR_PLANE = 380 m  <- plafonul absolut; orice
+			#     silueta dincolo e taiata din frustum.
+			#   fog_end = 370 m                <- ce nu inghite ceata.
+			#   inelele: 190 -> 355 m          <- incap sub amandoua.
+			# Prima incercare le pusese la 300-500 m: 13 siluete asezate
+			# corect si ZERO vizibile, taiate de ceata la 250 si de camera
+			# la 380.
+			# Degajarea a mai coborat o data, tot din masuratoare: la 120/145/165
+			# treceau 8 din 13 (pista are 535x400 m, deci sectoarele dinspre
+			# lungimea ei n-aveau unde sa puna un varf). La 95/115/140 intra
+			# toate 13. Nu e o slabire a regulii — un varf de fundal la 95 m de
+			# sosea e tot dincolo de orice banda de decor (far se opreste la
+			# 58 m), deci nu se poate ciocni cu nimic.
+			"horizon_rings": [
+				{"near": 190.0, "far": 240.0, "count": 4, "scale": 0.80,
+					"clear": 95.0, "picks": ["MountainPeak"]},
+				{"near": 240.0, "far": 300.0, "count": 5, "scale": 1.05,
+					"clear": 115.0, "picks": ["MountainPeak"]},
+				{"near": 300.0, "far": 355.0, "count": 4, "scale": 1.30,
+					"clear": 140.0, "picks": ["MountainPeak"]},
+			],
+			# Ceata merge pana aproape de planul camerei: intr-un peisaj alpin
+			# distanta mare E subiectul, iar la 250 m crestele nu existau
+			# pentru ochi. Vezi _build_environment.
+			"fog_begin": 130.0,
+			"fog_end": 370.0,
+			"walls": true,       # doar pe sectiunile inaltate — regula samplerului
+			"cliffs": false,     # flancurile masivului sunt teren, nu faleze de canion
+			"decor": "bands",
+			"props": "alpine",
+			# ZAPADA PE CREASTA: mecanismul "inland_tint" al insulei, intors.
+			#
+			# Acolo verdele venea PESTE o cota (plaja jos, vegetatie sus); aici
+			# albul vine peste o cota mult mai sus. E acelasi cod si aceeasi
+			# cheie — vezi _build_terrain — fiindca intrebarea e identica: "de
+			# la ce inaltime terenul isi schimba materialul?".
+			#
+			# 72 m NU e ales din ochi, e MASURAT cu tools/ProbeAlpineTerrain:
+			# platoul drumului sta la 63.2 m, terenul urca la 104.2 m, dar
+			# distributia de cote e ascutita — doar 0.67% din suprafata trece
+			# de 70 m, si 0.48% de 78 m. Prima incercare la 78 punea zapada pe
+			# 0.48% din lume, adica doua pete cat o moneda pe o captura de sus.
+			#
+			# 72 pastreaza garda de 9 m peste cel mai inalt asfalt (zapada nu
+			# atinge pista, ceea ce ar fi absurd in august) si dubleaza flancul
+			# alb. Peste asta, `snow_fade` mai lat (18 m) face ca trecerea sa
+			# ocupe ea insasi o bucata de munte: la altitudine limita zapezii nu
+			# e o linie, e o zona in care petice albe coboara pe vaiugi.
+			"snow_line": 72.0,
+			"snow_fade": 18.0,
+			"snow_tint": Palette.color(Palette.FOAM_WHITE),
+			# Granit rece in loc de gresie rosiatica. E un FACTOR peste doua
+			# straturi calde (textura de clasa + vertex colors coapte in GLB),
+			# deci trebuie SA LE ANULEZE, nu sa descrie piatra.
+			#
+			# Calibrat in doi pasi, pe captura: (0.72,0.74,0.78) — gri neutru —
+			# lasa stancile portocalii; (0.62,0.72,0.92) le mai racea putin dar
+			# maro-ul razbatea. Rosul taiat la 0.42 e ce rupe in sfarsit gresia,
+			# fiindca fix canalul ala e umflat de ambele straturi calde. Verdele
+			# ramane peste rosu si albastrul peste verde: proportia aia da
+			# granit cenusiu-albastrui, nu piatra vopsita in albastru.
+			"rock_tint": Color(0.42, 0.58, 0.86),
+			"hazard_model": "res://assets/models/vehicles/timber_sled.glb",
+			"hazard_roll": false, # o sanie nu se rostogoleste (vezi barca sabani)
+			"dust_color": Color(0.62, 0.58, 0.44), # pamant de pajiste, nu nisip
+			"water": false,
+			# Poteca scurtaturii: pamant batatorit, nu nisip coraligen umed.
+			# Pietrisul e textura care exista si care se potriveste — o poteca
+			# de pasune calcata de vaci si de roti E pamant cu pietre, iar
+			# granulatia ei se citeste ca "nu mai esti pe asfalt" din mers.
+			"branch_tint": Color(0.52, 0.44, 0.30),
+			"branch_texture": "res://assets/textures/surface_gravel.png",
+		},
 		# --- Insula de recif (pista Okinawa) ---
 		#
 		# Culorile sunt sloturile insulare din paleta (17-23), ca sa nu existe
@@ -556,6 +701,27 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Ce fel de obstacol mobil sta la fiecare fractie: frac -> dictionar cu
+## `model`, si optional `scale`, `roll`, `face_travel`.
+##
+## Suprascrie steagurile de tema DOAR pentru fractiile listate; restul raman pe
+## `hazard_model` al temei. Exista fiindca o pista poate avea mai multe feluri
+## de obstacol — vezi Track09, unde fiecare din cele patru vine din alta parte
+## a lumii ei. Cheia se rotunjeste la 3 zecimale, ca sa se potriveasca cu
+## fractiile scrise in `_hazard_fracs`.
+func _hazard_kinds() -> Dictionary:
+	return {}
+
+## Masivele declarate: (x, z, raza, cota varfului in lume).
+##
+## Perechea pe PLUS a rapelor, din acelasi motiv: terenul urmareste soseaua,
+## deci interiorul unei bucle care URCA ramane o campie — muntele pe care
+## pista pretinde ca se catara nu apare de la sine. Vezi
+## TrackSideSampler._lift_peaks pentru profil si pentru banda de protectie a
+## asfaltului.
+func _peak_specs() -> Array[Vector4]:
+	return []
+
 ## Laguna: conturul apei din INTERIORUL buclei, ca poligon in plan XZ.
 ##
 ## Regula implicita a temei cu apa e ca interiorul circuitului ramane USCAT
@@ -650,7 +816,7 @@ func rebuild() -> void:
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
-		_lagoon_poly(), lagoon_depth, _channels)
+		_lagoon_poly(), lagoon_depth, _channels, _peak_specs())
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -798,8 +964,13 @@ func _build_environment() -> void:
 		# prim-planul ramane complet limpede, in loc sa capete un val subtire de
 		# ceata pe tot ce e la 20-50m.
 		env.fog_mode = Environment.FOG_MODE_DEPTH
-		env.fog_depth_begin = 90.0
-		env.fog_depth_end = 250.0
+		env.fog_depth_begin = float(theme_flag("fog_begin", 90.0))
+		# Capatul e steag de tema, nu constanta, si diferenta se vede pe munte:
+		# la 250 m crestele de fundal (inele la 300-500 m) erau COMPLET
+		# inghitite — 13 siluete asezate corect, zero vizibile. Intr-un peisaj
+		# alpin distanta mare e chiar subiectul; intr-un canion, ceata care
+		# taie la 250 m e ce ascunde marginea lumii.
+		env.fog_depth_end = float(theme_flag("fog_end", 250.0))
 		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)
@@ -971,7 +1142,17 @@ func _build_horizon(centroid: Vector3) -> void:
 	# RAPORTEAZA, nu dispare in tacere.
 	var missed := 0
 	var placed := 0
-	for ring in HORIZON_RINGS:
+	# Inelele pot veni din TEMA, ca si numele siluetelor.
+	#
+	# Cele implicite sunt calibrate pe butte-uri de desert (25-60 m, degajare
+	# 95-160 m). Un varf alpin de 92 m la scara 1.2 e o formatiune de peste
+	# 110 m latime, iar pe o pista de 535x400 m nu exista NICIUN punct la
+	# 150-200 m de centroid care sa aiba si 95 m degajare fata de sosea:
+	# masurat, 0 din 10 siluete incapeau si toata garda tipa. Muntele isi cere
+	# propriile inele — mai departe si mai putine, fiindca fiecare piesa e de
+	# trei ori cat un butte.
+	var rings: Array = theme_flag("horizon_rings", HORIZON_RINGS)
+	for ring in rings:
 		var count := int(ring["count"])
 		var arc := TAU / float(count)
 		var clear: float = float(ring["clear"])
@@ -991,7 +1172,12 @@ func _build_horizon(centroid: Vector3) -> void:
 			# Plafonul e legat de grila de teren (centroid ±380 m), nu de inel:
 			# o silueta impinsa dincolo de ea ar sta peste cutia plata de rezerva,
 			# nu peste nisipul vizibil.
-			var limit: float = minf(float(ring["far"]) + 90.0, 355.0)
+			# Plafonul era fix (355 m), legat de grila de teren a Dunelor. Pe o
+			# lume mai mare el taia inelele inainte sa apuce sa caute: inelul
+			# alpin de la 430 m pornea deja peste limita, deci bucla nu rula
+			# niciodata. Acum plafonul urmeaza inelul CERUT, cu marja de
+			# cautare — cine declara un inel departat primeste unde sa-l puna.
+			var limit: float = maxf(float(ring["far"]) + 90.0, 355.0)
 			var dist: float = float(ring["near"])
 			while dist <= limit:
 				var cand := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
@@ -1012,7 +1198,7 @@ func _build_horizon(centroid: Vector3) -> void:
 			var picks: Array = ring["picks"]
 			var theme_picks: Array = theme_flag("horizon_picks", [])
 			if not theme_picks.is_empty():
-				picks = theme_picks[mini(HORIZON_RINGS.find(ring),
+				picks = theme_picks[mini(rings.find(ring),
 					theme_picks.size() - 1)]
 			var model := _extract_glb_node(scene,
 				picks[rng.randi_range(0, picks.size() - 1)])
@@ -1035,8 +1221,16 @@ func _build_horizon(centroid: Vector3) -> void:
 			# straturile la scara reala si pe siluetele scalate 25-60x.
 			# Era `apply_rock_material` fix, adica gresia rosiatica a canionului
 			# si pe insulele de recif.
-			Palette.apply_triplanar_class(model,
-				String(theme_flag("horizon_class", "rock")))
+			#
+			# Clasa GOALA = pastreaza atlasul modelului. Nu e un caz special
+			# inventat: un varf alpin isi are benzile (padure/granit/zapada)
+			# pictate in sloturi, iar o textura de roca intinsa peste ele le
+			# sterge — pe captura, crestele ieseau portocalii ca dunele.
+			var horizon_class := String(theme_flag("horizon_class", "rock"))
+			if horizon_class.is_empty():
+				Palette.apply_world_material(model)
+			else:
+				Palette.apply_triplanar_class(model, horizon_class)
 			placed += 1
 	print("%s: %d/%d siluete de orizont" % [track_name, placed,
 		placed + missed])
@@ -1304,6 +1498,11 @@ func _build_terrain() -> void:
 	# tema de insula, deci restul lumii nu se schimba cu un pixel.
 	var inland: Variant = theme_flag("inland_tint", null)
 	var inland_mix := float(theme_flag("inland_strength", 0.0))
+	# Zapada de creasta: null pe orice tema fara munte, deci restul pistelor
+	# nu se schimba cu un pixel. Vezi "snow_line" in themes().
+	var snow_tint: Variant = theme_flag("snow_tint", null)
+	var snow_line := float(theme_flag("snow_line", 0.0))
+	var snow_fade := maxf(float(theme_flag("snow_fade", 1.0)), 0.001)
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
 	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
@@ -1364,6 +1563,29 @@ func _build_terrain() -> void:
 						if patch > 0.0:
 							tint = tint.lerp(TERRAIN_DIRT_COLOR, patch * 0.65)
 							grass_w *= 1.0 - patch * 0.75
+					# ZAPADA DE CREASTA, oglinda plajei de mai sus: acolo
+					# materialul se schimba SUB o cota, aici PESTE ea. Cota e
+					# absoluta (nu relativa la media pistei) fiindca linia
+					# zapezii e o proprietate a MUNTELUI, nu a traseului: daca
+					# maine soseaua urca cu 10 m, zapada nu trebuie sa urce cu
+					# ea. Vezi "snow_line" din themes().
+					#
+					# Greutatea de iarba se stinge odata cu albul: pe piatra
+					# inghetata nu creste iarba, iar fara asta shader-ul ar
+					# amesteca textura de pajiste peste zapada.
+					if snow_tint != null:
+						var snow_w := clampf(
+							(v.y - snow_line) / snow_fade, 0.0, 1.0)
+						# Marginea se zdrentuieste cu ACELASI zgomot ca peticele
+						# de pamant: o linie de nivel perfecta se citeste ca
+						# desen tehnic. Amplitudinea e in METRI de cota, deci
+						# raportata la latimea benzii de trecere.
+						snow_w = clampf(snow_w + dirt_noise.get_noise_2d(
+							v.x * 0.6, v.z * 0.6) * 0.22, 0.0, 1.0)
+						snow_w = smoothstep(0.0, 1.0, snow_w)
+						if snow_w > 0.0:
+							tint = tint.lerp(snow_tint as Color, snow_w)
+							grass_w *= 1.0 - snow_w
 					var col := tint * shade
 					st.set_color(Color(col.r, col.g, col.b, grass_w))
 					# UV din coordonate de LUME, nu din indexul celulei: asa
@@ -1980,10 +2202,16 @@ func _build_branch_surfaces() -> void:
 			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
 		st.index()
 		st.generate_normals()
-		# Nisip umed: coral_sand intunecat. Nu e asfalt si nu trebuie sa para.
-		_add_mesh_with_collision(st.commit(),
-			Palette.color(Palette.CORAL_SAND).darkened(0.22),
-			_tex("res://assets/textures/surface_sand.png"))
+		# Materialul benzii vine din TEMA, nu din cod: pe insula e nisip
+		# coraligen umed, pe munte e pamant batatorit de pasune. Implicit
+		# raman valorile Okinawei, ca pistele existente sa nu se schimbe cu
+		# un pixel — aceeasi regula ca la orice steag de tema adaugat tarziu.
+		var branch_tint: Variant = theme_flag("branch_tint", null)
+		var tint: Color = branch_tint if branch_tint != null \
+			else Palette.color(Palette.CORAL_SAND).darkened(0.22)
+		_add_mesh_with_collision(st.commit(), tint,
+			_tex(String(theme_flag("branch_texture",
+				"res://assets/textures/surface_sand.png"))))
 
 
 ## Construieste o scurtatura dintr-o specificatie.
@@ -2536,20 +2764,46 @@ func _build_hazard(frac: float) -> void:
 	#
 	# Pana acum era o MINGE DE PLAJA — ramasita din tema abandonata "jucarii in
 	# lada de nisip", intr-un canion de desert.
-	var hazard_model: String = theme_flag("hazard_model", "")
+	# Suprascrierea PER FRACTIE bate steagul de tema.
+	#
+	# Cat timp o pista avea un singur fel de obstacol mobil, un model pe toata
+	# tema era destul. Alpii au patru, si fiecare vine din alta parte a lumii:
+	# car cu fan pe ulita satului, sanie cu busteni pe urcarea prin padure,
+	# vaca spre pasune, tractor pe returul din vale. Cu un singur steag ar fi
+	# fost aceeasi sanie de patru ori, ceea ce ar fi contrazis chiar regula pe
+	# care o aplica testoasa din track08: hazardul apartine LOCULUI in care
+	# sta, nu tabelului de teme.
+	#
+	# Potrivirea se face pe DISTANTA, nu pe egalitate de chei.
+	#
+	# Prima versiune folosea `_hazard_kinds().get(snappedf(frac, 0.001))` si
+	# pierdea tacut ultimul hazard: `snappedf(0.938, 0.001)` NU e bit-identic
+	# cu literalul `0.938` scris in dictionar, iar Dictionary compara float-uri
+	# exact. Trei din patru se potriveau din noroc, al patrulea cadea pe
+	# modelul temei — adica bug-ul arata ca "am uitat sa declar unul".
+	# O toleranta face intentia explicita si scoate norocul din ecuatie.
+	var kind := {}
+	for key in _hazard_kinds():
+		if absf(float(key) - frac) < 0.0005:
+			kind = _hazard_kinds()[key]
+			break
+	var hazard_model: String = String(kind.get("model",
+		theme_flag("hazard_model", "")))
 	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
 		var ball := SlidingHazard.new()
 		ball.model_scene = load(hazard_model)
 		# 0.52 vine din bolovanul de 5 m diametru -> 2.6 m in joc. O barca de
 		# 5 m lungime insa TREBUIE sa ramana de 5 m: la 0.52 ar fi fost o
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
-		ball.model_scale = float(theme_flag("hazard_scale", 0.52))
+		ball.model_scale = float(kind.get("scale",
+			theme_flag("hazard_scale", 0.52)))
 		ball.model_tri_class = theme_flag("hazard_class", "")
 		ball.model_classes = theme_flag("hazard_classes", {})
 		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
 		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
 		# causeway nu se da peste cap.
-		ball.roll_radius = 1.0 if bool(theme_flag("hazard_roll", true)) else 0.0
+		var rolls := bool(kind.get("roll", theme_flag("hazard_roll", true)))
+		ball.roll_radius = 1.0 if rolls else 0.0
 		# Noi ii cerem maturarea maxima; el isi taie cursa cat sa nu iasa din
 		# sosea pe latimea ASTA de drum (vezi SlidingHazard._clamp_travel).
 		ball.road_half_width = half_width
@@ -2563,7 +2817,8 @@ func _build_hazard(frac: float) -> void:
 		# AnimatableBody3D cu sync_to_physics, deci dupa intrarea in arbore
 		# transformul il tine serverul de fizica — iar pozitia se rescrie oricum
 		# la fiecare pas, dar BAZA nu, deci o rotatie pusa dupa se pierde tacut.
-		if bool(theme_flag("hazard_face_travel", false)):
+		if bool(kind.get("face_travel",
+				theme_flag("hazard_face_travel", false))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
 		add_child(ball)
 		ball.center = p
@@ -3507,6 +3762,11 @@ func _build_world_decor() -> void:
 	_decor_roots.append(cliffs)
 	# Decorul primeste amprentele falezelor deja asezate. De asta ordinea celor
 	# doua apeluri nu mai e doar o conventie: falezele TREBUIE construite intai.
+	# Nuanta de roca a lumii, INAINTE de build: se aplica pe fiecare stanca la
+	# asezare. Alb = neatinsa, deci pistele fara steag raman identice.
+	var rock_tint: Variant = theme_flag("rock_tint", null)
+	TrackDecor.set_rock_tint(rock_tint as Color if rock_tint != null
+		else Color.WHITE)
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert"),
@@ -3939,6 +4199,42 @@ const _LANDMARKS := {
 	12: {"path": "res://assets/models/buildings/miner_shack.glb",
 		"gap": 12.0, "col": "box", "spin": false,
 		"classes": {"Shack_Wood": "wood", "Shack_Roof": "rust_metal"}},
+	# --- Alpii (#223) ---------------------------------------------------------
+	#
+	# Kitul alpin (#226) e INTEGRAL pe atlasul de paleta — vezi antetul lui
+	# build_alpine_buildings.py. Deci NICIUNA dintre intrarile de mai jos n-are
+	# "classes": culoarea vine din sloturi, iar a le da texturi de clasa ar
+	# insemna sa re-exportam GLB-uri care sunt deja corecte, ca sa castigam un
+	# detaliu pe care ceata il inghite oricum la 90 m.
+	#
+	# Biserica: 14 m cu tot cu turla, cel mai inalt lucru construit din sat si
+	# reperul lui de franare. Sta la 11 m — de la 5 m turla iese din cadru si
+	# reperul devine un zid alb (aceeasi lectie ca la ecranul de drive-in).
+	13: {"path": "res://assets/models/buildings/alpine_church.glb",
+		"gap": 11.0, "col": "cyl", "radius": 2.2, "spin": false},
+	# Chalet-urile: cutie, nu cilindru. Sunt dreptunghiulare si LATE (14.1 x
+	# 11.1 m cel mare), iar un cilindru in jurul lor ar inghiti curtea.
+	14: {"path": "res://assets/models/buildings/mountain_chalet_large.glb",
+		"gap": 9.0, "col": "box", "spin": false},
+	15: {"path": "res://assets/models/buildings/mountain_chalet_small.glb",
+		"gap": 7.5, "col": "box", "spin": false},
+	# Statia de telecabina: 14 m lata, se aseaza pe culme. `gap` mic (6 m)
+	# fiindca acolo drumul trece pe un umar ingust — la 12 m ar pluti pe panta
+	# de dincolo de creasta.
+	16: {"path": "res://assets/models/buildings/cable_car_station.glb",
+		"gap": 6.0, "col": "box", "spin": false},
+	# Pilonul: 18.2 m, cel mai INALT obiect din joc. Raza 0.9 acopera stalpul,
+	# nu bratele de sus — vrem sa lovesti piciorul, ca la stalpul GAS.
+	17: {"path": "res://assets/models/structures/cable_car_pylon.glb",
+		"gap": 8.0, "col": "cyl", "radius": 0.9, "spin": false},
+	# Podul peste parau: se TRECE pe langa el, deci fara coliziune proprie —
+	# parapetii lui sunt geometrie decorativa langa drum, iar un colizor acolo
+	# ar strange soseaua exact unde pista are nevoie de latime.
+	18: {"path": "res://assets/models/structures/stream_bridge.glb",
+		"gap": 2.0, "col": "none", "spin": false},
+	# Indicatorul de drum alpin: reper mic, fara coliziune, ca semnul Route 66.
+	19: {"path": "res://assets/models/signs/alpine_signpost.glb",
+		"gap": 3.0, "col": "none", "spin": false},
 }
 
 ## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual

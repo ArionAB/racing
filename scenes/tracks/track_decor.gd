@@ -70,13 +70,16 @@ const BANDS := [
 	#
 	# `props_only`: pe insula banda asta ar cadea in MARE. Poarta e pe setul de
 	# prop-uri, nu pe numele temei — aceeasi separare "ce" / "unde" ca la `build`.
+	# Lista, nu un singur nume: muntele o cere din exact acelasi motiv ca
+	# desertul (padurea de pe flancuri E masa care da scara), iar fara ea
+	# Alpii pierdeau tocmai stratul dintre 26 m si siluetele de orizont.
 	#
 	# Pas 52 -> 32 si grupare 0.25 -> 0.40: la 52 iesea o piesa la ~30 m de
 	# traseu, adica exact cat sa se vada ca sunt puse cu pipeta. Referinta are
 	# formatiuni CONTINUE, nu jaloane — drumul trebuie sa arate sapat intr-un
 	# masiv, nu pus pe o campie cu pietre presarate.
 	{"name": "far", "off_min": 26.0, "off_max": 58.0, "spacing": 32.0,
-		"collide": false, "cluster": 0.40, "props_only": "desert"},
+		"collide": false, "cluster": 0.40, "props_only": ["desert", "alpine"]},
 ]
 ## Pasii din `BANDS` sunt calibrati pe DESERT, unde tinta e masa continua de
 ## canion: drumul trebuie sa arate sapat intr-un masiv, nu pus pe o campie cu
@@ -94,6 +97,27 @@ const BAND_OVERRIDES := {
 	"island": {
 		"mid": {"spacing": 25.0, "cluster": 0.45},
 		"back": {"spacing": 42.0, "cluster": 0.35},
+	},
+	# Muntele merge in DIRECTIA OPUSA insulei: mai des, nu mai rar.
+	#
+	# O padure de conifere e, prin definitie, o masa continua — la densitatea
+	# de desert ies molizi razleti pe pajiste, adica parc, nu padure (vazut pe
+	# prima captura din vederea soferului: se numarau copacii). Isi permite
+	# densitatea fiindca piesele sunt IEFTINE: un molid costa 192-340 de
+	# triunghiuri, fata de 4852 cat costa un banyan pe insula.
+	#
+	# Gruparea urcata la 0.55/0.60 face restul: coniferele cresc in pilcuri,
+	# nu la distante egale. Pe banda lipita de drum gruparea ramane JOASA
+	# (0.30, ca in BANDS) — un pilc acolo ar fi un zid la 2 m de asfalt.
+	# Pasii au crescut o data, cand crestele de orizont (#225) au adaugat
+	# geometrie si pista a trecut pragul: 12/15/19 -> 14/17/21. Nu s-a taiat
+	# din DENSITATE ci din numarul brut de piese, iar diferenta pe ecran e
+	# invizibila — gruparea ramane la 0.55-0.60, deci padurea are in
+	# continuare pilcuri, doar ca pilcurile sunt cu ~15% mai putine.
+	"alpine": {
+		"mid": {"spacing": 14.0, "cluster": 0.55},
+		"back": {"spacing": 17.0, "cluster": 0.60},
+		"far": {"spacing": 21.0, "cluster": 0.55},
 	},
 }
 
@@ -153,7 +177,7 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 	for band in BANDS:
 		# Benzile cerute de un anumit set de prop-uri (vezi `far`) nu apar pe
 		# celelalte teme.
-		if band.has("props_only") and String(band["props_only"]) != props:
+		if band.has("props_only") and not (props in (band["props_only"] as Array)):
 			continue
 		# Un rng PER BANDA: asa poti itera pe densitatea benzii de mijloc fara sa
 		# se mute si pietricelele de langa drum.
@@ -353,6 +377,9 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		# (trestia de zahar). Restul o ignora — vezi CANE_FRAC_MIN.
 		_place_island_prop(parent, spec.position, band, rng, mat_provider,
 			satellite, spec.frac)
+		return
+	if props == "alpine":
+		_place_alpine_prop(parent, spec, band, rng, mat_provider, satellite)
 		return
 	var pos := spec.position
 	match band["name"]:
@@ -597,6 +624,235 @@ static func _place_island_prop(parent: Node3D, pos: Vector3, band: Dictionary,
 				_add_island_tree(parent, pos, rng, mat)
 			else:
 				_add_coral_rock(parent, pos, rng, mat, true)
+
+
+## ############################################################################
+## LUMEA ALPINA
+##
+## Padurea de conifere (#222) e masa vizuala a pistei: patru talii de molid
+## intr-un GLB (`alpine_pines.glb`), asezate dupa DISTANTA fata de drum, nu la
+## intamplare. Regula vine din frustumul camerei (vezi memoria
+## "inaltimea-obiectelor-si-camera"): un obiect de 13 m lipit de asfalt e un
+## zid care taie cadrul, acelasi obiect la 25 m e silueta care da scara.
+## De aceea banda lipita primeste doar puiul (4.8 m), mijlocul taliile mici si
+## medii, iar cei mari traiesc departe.
+##
+## Coeziunea vine din rocile REFOLOSITE, nu din modele noi: granitul e aceeasi
+## clasa de material ca stanca de canion (rock_material triplanar), doar
+## nuantata de tema. Un munte nu are nevoie de o roca proprie ca sa fie munte.
+
+## Piesele mici ale lumii alpine, in kitul de vegetatie deja existent. Alese
+## dintre cele care NU citesc a desert: smocurile si rozetele merg pe pajiste,
+## evantaiele si scrub-ul uscat nu.
+const ALPINE_TUFTS: Array[String] = ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D",
+	"Rosette_A"]
+
+## Gardul de pasune si tufa alpina, din kitul alpin (#226).
+const ALPINE_SHRUB_PATH: String = "res://assets/models/plants/alpine_shrub.glb"
+const ALPINE_FENCE_PATH: String = "res://assets/models/structures/wooden_fence.glb"
+const ALPINE_FENCE_PICKS: Array[String] = ["Fence_A", "Fence_B"]
+const ALPINE_HAY_PATH: String = "res://assets/models/props/hay_bale.glb"
+const ALPINE_FLOWERS_PATH: String = "res://assets/models/flowers/flower_cluster.glb"
+const ALPINE_WOOD_PATH: String = "res://assets/models/props/wood_stack.glb"
+const ALPINE_SNOW_PATH: String = "res://assets/models/scatter/snow_patch.glb"
+## Peste ce cota apar peticele de zapada ramase in umbra. Sub linia zapezii din
+## tema (72 m) DELIBERAT: petice razlete care coboara pe vaiugi sunt exact ce
+## face limita zapezii sa citeasca a zona, nu a linie trasa cu rigla.
+const SNOW_PATCH_MIN_Y: float = 58.0
+
+## Coniferele (#222), pe talii. Alegerea se face dupa BANDA, nu la intamplare —
+## vezi antetul sectiunii pentru de ce inaltimea depinde de distanta.
+const PINE_PATH: String = "res://assets/models/trees/alpine_pines.glb"
+## Langa asfalt: doar puiul de 4.8 m. Peste atat, coroana intra in cadru si
+## acopera apexul urmator.
+const PINE_SMALL: Array[String] = ["Pine_D"]
+## Banda de mijloc: taliile care dau padure fara sa inchida orizontul.
+const PINE_MID: Array[String] = ["Pine_A", "Pine_D", "Pine_A", "Pine_B"]
+## Departe: masa adevarata, inclusiv molidul de 13 m.
+const PINE_FAR: Array[String] = ["Pine_B", "Pine_C", "Pine_A", "Pine_C"]
+
+
+## Decorul de banda al muntelui de vara.
+##
+## Regula de compozitie (style_bible §7, si lectia gruparii din track08):
+## piesele MICI stau langa drum, masa vine de departe. Diferenta fata de desert
+## e ca aici masa e VERTICALA (stanca pe flanc), nu orizontala.
+static func _place_alpine_prop(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
+		satellite: bool) -> void:
+	var pos := spec.position
+	match band["name"]:
+		"hug":
+			# Lipit de asfalt: iarba, pietre si cel mult un pui de molid.
+			# Nimic inalt — un obiect mare la 1.5 m de drum acopera apexul.
+			var roll := rng.randf()
+			# Petic de zapada, DOAR la altitudine (#225). Nu e decor pus
+			# oriunde: sub SNOW_PATCH_MIN_Y ar fi zapada pe pajistea din vale
+			# in august. Verificat pe cota reala a punctului, nu pe fractie —
+			# fractiile se muta cand se muta traseul, cotele nu mint.
+			if pos.y >= SNOW_PATCH_MIN_Y and roll < 0.20 \
+					and _add_simple_prop(parent, ALPINE_SNOW_PATH, "SnowPatch",
+						pos, rng, 0.5, 1.0, -0.04):
+				return
+			if roll < 0.26 and _add_canyon_rock(parent, pos, rng, "S",
+					not satellite, 0.55, 1.00, 0.65, 1.00):
+				return
+			if roll < 0.36 and not satellite and _add_pine(
+					parent, pos, rng, PINE_SMALL, false, 0.55, 0.85):
+				return
+			# Florile de pajiste: numai in vale, si RARE.
+			#
+			# Sunt semnatura de "pasune alpina in august", dar costa 496 de
+			# triunghiuri bucata — de doua ori cat un molid, fiindca fiecare
+			# floare are tulpina si cap propriu. La 20% din banda lipita ieseau
+			# 67 de smocuri si 33 232 de triunghiuri, adica pista peste prag.
+			# La 6% raman ~20, destule cat sa le vezi in viraje lente si
+			# suficient de putine cat sa nu fie covor.
+			if pos.y < SNOW_PATCH_MIN_Y and roll >= 0.36 and roll < 0.42 \
+					and not satellite \
+					and _add_simple_prop(parent, ALPINE_FLOWERS_PATH,
+						"FlowerCluster", pos, rng, 0.7, 1.2, -0.06):
+				return
+			if roll < 0.62 and _add_alpine_shrub(parent, pos, rng, 0.6, 0.95):
+				return
+			if not _add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.75, 1.15):
+				_add_scatter(parent, pos, rng, mat)
+		"mid":
+			var roll := rng.randf()
+			if satellite or roll < 0.16:
+				# Fantoma, ca sora ei din desert si din acelasi motiv: banda
+				# asta e coridorul de reintrare pe sosea (vezi comentariul de
+				# la "mid" din _place_band_prop).
+				#
+				# Felia a scazut de la 26% la 16% cand crestele de orizont au
+				# impins pista peste prag (402 583 fata de 400 000). Aici a
+				# fost taietura fiindca e cea mai putin vizibila: pietre mici
+				# la 4-11 m de asfalt, in spatele carora sta oricum padurea.
+				if not _add_canyon_rock(parent, pos, rng, "S", false):
+					_add_scatter(parent, pos, rng, mat)
+			elif roll < 0.58:
+				# Inima padurii: aici incepe masa de conifere.
+				if not _add_pine(parent, pos, rng, PINE_MID, true, 0.80, 1.15):
+					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS)
+			elif roll < 0.72:
+				if not _add_alpine_shrub(parent, pos, rng, 0.85, 1.30):
+					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS)
+			elif roll < 0.755:
+				# Stiva de lemne: urma de om pe marginea drumului. Rara —
+				# la a cincea aparitie pe tur ar fi tapet, la a doua e "aici
+				# taie cineva lemne".
+				if not _add_simple_prop(parent, ALPINE_WOOD_PATH, "WoodStack",
+						pos, rng, 0.85, 1.15, -0.05):
+					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS)
+			elif roll < 0.92:
+				_add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.90, 1.35)
+			else:
+				_add_canyon_rock(parent, pos, rng, "M", true)
+		_:
+			# Departe: padurea plina si stanca de deasupra limitei ei. Aici stau
+			# molizii mari — la 25 m+ de drum silueta lor da SCARA muntelui, in
+			# loc sa taie cadrul cum ar face-o langa asfalt.
+			#
+			# Proportia inclina DECIS spre conifere, si e o alegere de buget cu
+			# acoperire: la densitatea alpina, prima incercare (52% pini, 30%
+			# stanca) a scos pista la 400 078 de triunghiuri — 78 peste prag.
+			# Un molid costa 192-340, o stanca de canion 200-600 si vine cu
+			# hull de coliziune. Deci padurea mai deasa se plateste subtiind
+			# STANCA, nu copacii: la fel de multa masa pe ecran, mai putini
+			# triunghiuri, si un flanc care citeste a padure de munte in loc de
+			# grohotis cu brazi.
+			var roll2 := rng.randf()
+			if roll2 < 0.66:
+				if not _add_pine(parent, pos, rng, PINE_FAR, true, 0.90, 1.35):
+					_add_canyon_rock(parent, pos, rng, "M", true)
+			elif satellite or roll2 < 0.78:
+				_add_canyon_rock(parent, pos, rng, "M", true)
+			elif roll2 < 0.84:
+				_add_canyon_rock(parent, pos, rng, "L", true)
+			elif roll2 < 0.94:
+				if not _add_alpine_shrub(parent, pos, rng, 1.0, 1.6):
+					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 1.0, 1.5)
+			else:
+				_add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 1.0, 1.5)
+
+
+## Un conifer. SOLID pe taliile mari, fantoma pe pui.
+##
+## Un molid de 10-13 m prin care treci citeste ca bug — aceeasi judecata ca la
+## copacul mort din desert. Puiul de 4.8 m ramane fantoma fiindca traieste in
+## banda lipita de drum, unde un obstacol solid transforma o roata scoasa pe
+## iarba in oprire (vezi regula umarului de la stanci).
+##
+## Coliziunea e pe TRUNCHI, nu pe coroana: un cilindru subtire in ax. Cu hull-ul
+## intregului model, coroana de 3.7 m devine un perete pe care il atingi cu
+## bara fara sa fi atins copacul — si pe o pista cu padure deasa asta ar face
+## marginea drumului o cursa de obstacole invizibile.
+static func _add_pine(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, picks: Array[String],
+		collide: bool, s_min: float = 0.85, s_max: float = 1.20) -> bool:
+	var name_pick: String = picks[rng.randi_range(0, picks.size() - 1)]
+	var kept := pick_from_glb(PINE_PATH, name_pick)
+	if kept == null:
+		return false
+	var s := rng.randf_range(s_min, s_max)
+	var holder: Node3D = StaticBody3D.new() if collide else Node3D.new()
+	parent.add_child(holder)
+	holder.add_child(kept)
+	kept.scale = Vector3.ONE * s
+	Palette.apply_world_material(kept)
+	if collide:
+		var body := holder as StaticBody3D
+		var shape := CylinderShape3D.new()
+		var aabb := Track.model_aabb(kept)
+		shape.height = aabb.size.y
+		# Raza trunchiului, nu a coroanei: ~11% din raza bazei (vezi
+		# build_alpine_pines.py), cu un minim ca sa ramana palpabil.
+		shape.radius = maxf(aabb.size.x * 0.13, 0.22)
+		var col := CollisionShape3D.new()
+		col.shape = shape
+		col.position = Vector3(0.0, aabb.size.y * 0.5, 0.0)
+		body.add_child(col)
+	holder.rotation.y = rng.randf_range(0.0, TAU)
+	# Infipt 12 cm: baza conica lasa altfel o muchie de aer pe partea din vale.
+	holder.position = pos + Vector3.UP * -0.12
+	return true
+
+
+## Un prop marunt de pe atlas, fara coliziune: flori, petic de zapada, stiva de
+## lemne. Exista ca sa nu se scrie a treia oara aceleasi opt linii.
+##
+## FARA `apply_foliage_material` si fara steagul de legănare, spre deosebire de
+## tufe: o stiva de lemne care se unduie in vant ar fi exact detaliul care
+## strica iluzia, iar un petic de zapada la fel. Frunzisul se leagana pentru ca
+## e frunzis, nu pentru ca e mic.
+static func _add_simple_prop(parent: Node3D, path: String, node_name: String,
+		pos: Vector3, rng: RandomNumberGenerator,
+		s_min: float, s_max: float, sink: float) -> bool:
+	var kept := pick_from_glb(path, node_name)
+	if kept == null:
+		return false
+	parent.add_child(kept)
+	kept.position = pos + Vector3.UP * sink
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
+	Palette.apply_world_material(kept)
+	return true
+
+
+## Tufa de ienupar alpin. Fantoma, ca tot frunzisul.
+static func _add_alpine_shrub(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, s_min: float = 0.85,
+		s_max: float = 1.25) -> bool:
+	var kept := pick_from_glb(ALPINE_SHRUB_PATH, "AlpineShrub")
+	if kept == null:
+		return false
+	parent.add_child(kept)
+	kept.position = pos + Vector3.UP * -0.08
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
+	Palette.apply_foliage_material(kept)
+	kept.set_meta(TrackDecorBatch.SWAY_META, true)
+	return true
 
 
 ## Maruntisuri de plaja, fara coliziune.
@@ -992,6 +1248,7 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 	parent.add_child(holder)
 	holder.add_child(kept)
 	Palette.apply_rock_material(kept)
+	_tint_rock(kept)
 	if collide:
 		add_hull_collision(holder as StaticBody3D, kept)
 	holder.rotation.y = rng.randf_range(0.0, TAU)
@@ -999,6 +1256,39 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 	# doar daca stanca chiar intra in teren.
 	holder.position = pos + Vector3.UP * -0.25
 	return true
+
+
+## Nuanta de roca a lumii curente, ca factor peste albedo. Gol = neatinsa.
+##
+## Rocile din `megakit_rocks` / `canyon_rocks` au gresia rosiatica a desertului
+## COAPTA in vertex colors, iar materialul de clasa le foloseste ca albedo
+## (`vertex_color_use_as_albedo`). Pe un munte alpin aia iese portocaliu — s-a
+## vazut din prima captura de sus.
+##
+## Rezolvarea nu e o roca noua (aia ar fi 20 de GLB-uri de granit pentru o
+## diferenta de NUANTA), ci acelasi material de clasa cu `albedo_color` mutat.
+##
+## Costa UN material in plus pe pistele care cer nuanta, si zero pe restul:
+## `Palette.tinted_rock_material` il cache-uieste per culoare, deci toate
+## stancile alpine impart o singura instanta. S-a incercat intai
+## `set_instance_shader_parameter("albedo_tint", ...)` — nu face nimic:
+## StandardMaterial3D nu declara uniforma aia, iar apelul e ignorat in tacere,
+## adica exact soiul de "reparatie" care trece de o sonda care numara instante
+## si pica pe o captura de ecran.
+static var _rock_tint: Color = Color.WHITE
+
+static func set_rock_tint(tint: Color) -> void:
+	_rock_tint = tint
+
+
+static func _tint_rock(model: Node3D) -> void:
+	if _rock_tint == Color.WHITE:
+		return
+	var mat := Palette.tinted_rock_material(_rock_tint)
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		(node as MeshInstance3D).material_override = mat
+	if model is MeshInstance3D:
+		(model as MeshInstance3D).material_override = mat
 
 
 ## Impinge stanca in afara pana cand intre marginea asfaltului si silueta ei

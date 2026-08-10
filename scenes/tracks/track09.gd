@@ -20,15 +20,15 @@ extends Track
 ## trecut de tools/probe_layout.gd. Daca se muta un punct de control, se
 ## remasoara toate — nu se ajusteaza.
 ##
-## Tema ramane "forest" pana la tema "alpine" dedicata (paleta de granit +
-## zapada pe varf) — verde de pajiste + cer albastru e deja 80% din citirea
-## alpina. Modelele de hazard (car cu fan, vaca, tractor) vin odata cu
-## asset-urile; pana atunci SlidingHazard foloseste modelul temei.
+## Tema e "alpine" (#221): cer de altitudine, ceata albastruie, zapada peste
+## 78 m si poteca de pamant pe scurtatura. Modelele de hazard individuale
+## (car cu fan, vaca, tractor) vin in #224 — pana atunci toate patru folosesc
+## sania cu busteni din tema.
 
 func _init() -> void:
 	track_name = "Alpii"
 	half_width = 7.0
-	apply_theme("forest")
+	apply_theme("alpine")
 
 
 ## Bucla: 1786 m, anvelopa ~535 x 400 m, urcare totala 63 m.
@@ -171,8 +171,95 @@ func _hazard_fracs() -> Array[float]:
 	]
 
 
+## Fiecare hazard cu modelul LUI (#224). Pana aici toate patru foloseau sania
+## din tema, adica acelasi obiect de patru ori pe tur.
+##
+## SCARA E 1.0 PESTE TOT, si asta e o decizie, nu o omisiune: modelele din
+## kitul alpin sunt construite la scara reala (masurate cu sonda de kit — carul
+## 3.7 m lungime, sania 4.8, vaca 2.9, plugul 4.0), iar masina de referinta are
+## 3.8 m. Implicitul de 0.52 vine de la bolovanul de canion, care era modelat
+## la 5 m si trebuia micsorat; aici ar face din car o jucarie de 1.9 m.
+##
+## `roll: false` pe toate — niciunul nu e bolovan. Un car care se da peste cap
+## traversand ulita ar fi exact greseala pe care o descrie barca sabani.
+##
+## `face_travel` doar pe VACA: un animal are un "inainte", deci trebuie sa se
+## uite incotro merge (lectia testoasei din track08). Carul, sania si plugul
+## sunt targite/impinse pe latime — ele chiar traverseaza cu flancul.
+func _hazard_kinds() -> Dictionary:
+	const M := "res://assets/models/"
+	return {
+		0.060: {"model": M + "vehicles/hay_cart.glb",
+			"scale": 1.0, "roll": false},
+		0.215: {"model": M + "vehicles/timber_sled.glb",
+			"scale": 1.0, "roll": false},
+		0.767: {"model": M + "props/cow.glb",
+			"scale": 1.0, "roll": false, "face_travel": true},
+		# Plugul de zapada tine loc de tractor: e utilajul de gospodarie pe care
+		# il avem in kit, si pe un drum de munte are rostul lui chiar vara —
+		# stationat in vale, nu la lucru. Un tractor propriu-zis ar fi un GLB
+		# nou pentru aceeasi silueta si acelasi rol.
+		0.938: {"model": M + "vehicles/snowplow.glb",
+			"scale": 1.0, "roll": false},
+	}
+
+
 ## Rapa de sub creasta de fly-off, pe latura din afara buclei. Adancimea 16 e
 ## peste pragul din _build_flyoff_net (plafonul plasei coboara 6 m, garda cere
 ## > 10): cine rateaza aterizarea chiar cade si e repus, nu aterizeaza pe iarba.
 func _ravines() -> Array[Vector4]:
 	return [Vector4(0.668, 0.732, 16.0, 1.0)]
+
+
+## Masivul central — muntele pe care pista chiar urca.
+##
+## Doua varfuri care se suprapun intr-o creasta, nu un con singuratic:
+##   - varful de NE (120, -300): serpentina ii urca flancul de vest, urcarea
+##     prin padure ii da ocol pe la est;
+##   - varful principal (10, -175): platoul culmii ii e umarul de sud, iar din
+##     sat si din vale il vezi ridicandu-se peste tot interiorul buclei.
+## Cotele (102 / 98) stau la ~35-40 m peste platoul drumului (63) — destul cat
+## varful sa domine cadrul si din vale, destul de putin cat sa nu para alta
+## lume; zapada de pe el vine odata cu tema "alpine".
+func _peak_specs() -> Array[Vector4]:
+	return [
+		Vector4(120, -300, 210, 104),
+		Vector4(10, -175, 230, 99),
+	]
+
+
+## Landmark-urile hero (#223): (fractie, latura ±1, id din Track._LANDMARKS).
+##   13 biserica · 14/15 chalet mare/mic · 16 statie telecabina
+##   17 pilon · 18 pod peste parau · 19 indicator
+##
+## GRUPAREA E INTENTIA, nu insiruirea (regula din track08): satul e un PILC
+## dens intre 0.95 si 0.10 — chalet-uri pe ambele laturi plus biserica — dupa
+## care lumea se goleste deliberat pana la telecabina de pe culme. Alternanta
+## plin/gol e ce face satul sa citeasca a asezare, nu a decor presarat.
+##
+## Fractiile sunt cele MASURATE (tools/ProbeTrack09Fracs), nu alese: sicana
+## satului cade la 0.971, podul peste parau la 0.922, statia pe diagonala de
+## sus a serpentinei la 0.551. Daca se muta un punct de control, se remasoara.
+func _landmark_spots() -> Array[Vector3]:
+	return [
+		# --- SATUL (0.92-0.10): pilcul dens, de-o parte si de alta a ulitei ---
+		Vector3(0.922, -1.0, 18.0), # podul peste parau, la intrarea in sat
+		Vector3(0.941, 1.0, 15.0),  # chalet mic, pe dreapta
+		Vector3(0.958, -1.0, 14.0), # chalet MARE, pe stanga
+		# Biserica la 0.971: turla de 14 m in axul sicanei, deci o vezi cum se
+		# apropie pe toata ulita si stii unde se strange drumul. Exact rolul de
+		# "reper de franare" din style_bible §7.
+		Vector3(0.971, 1.0, 13.0),
+		Vector3(0.988, -1.0, 15.0), # chalet mic, inchide pilcul
+		Vector3(0.030, 1.0, 15.0),  # ultimul chalet, deja la iesirea din sat
+		# --- IESIREA SPRE PADURE: un singur indicator, apoi gol ---
+		Vector3(0.138, -1.0, 19.0),
+		# --- CULMEA: telecabina, singurul pilc de la inaltime ---
+		# Statia pe diagonala de sus (0.551), pilonul mai jos pe flanc (0.500):
+		# asa cablul dintre ele traverseaza serpentina, si il vezi de doua ori
+		# pe tur — o data de dedesubt urcand, o data de sus cand treci pe langa.
+		Vector3(0.500, 1.0, 17.0),
+		Vector3(0.551, -1.0, 16.0),
+		# --- COBORAREA: indicator inainte de creasta de fly-off ---
+		Vector3(0.660, 1.0, 19.0),
+	]

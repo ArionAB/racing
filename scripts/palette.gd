@@ -253,6 +253,34 @@ static func apply_foliage_material(root: Node) -> void:
 static func rock_material() -> StandardMaterial3D:
 	return triplanar_class_material("rock")
 
+
+## Roca aceleiasi clase, cu albedo mutat spre o alta piatra.
+##
+## Textura de clasa (`classes/rock.png`) e gradata spre gresia desertului, iar
+## vertex colors coapte in GLB-uri o duc si mai mult intr-acolo. Pe alta lume —
+## granitul rece al Alpilor — nuanta se muta AICI, nu prin modele noi si nu
+## prin a strica materialul comun: fiecare culoare ceruta primeste o instanta
+## cache-uita, deci o pista intreaga de stanci alpine costa UN material.
+##
+## Restul lumii ramane neatinsa: cine nu cere nuanta cheama `rock_material()`.
+static var _rock_tints: Dictionary = {}
+
+## ATENTIE la ce inseamna `tint`: e un FACTOR, nu culoarea finala. Peste el se
+## inmultesc si textura de clasa (gradata spre gresie), si vertex colors coapte
+## in GLB (tot gresie) — masurat pe prima incercare, un albedo b8bdc7 "gri
+## granit" iesea tot portocaliu pe ecran, fiindca doi factori calzi bat un
+## factor neutru. De aceea culorile de aici sunt SUPRACOMPENSATE spre rece: ele
+## trebuie sa anuleze doua straturi calde, nu sa descrie piatra.
+static func tinted_rock_material(tint: Color) -> StandardMaterial3D:
+	var key := tint.to_html(false)
+	if _rock_tints.has(key):
+		return _rock_tints[key]
+	var base := rock_material()
+	var mat: StandardMaterial3D = base.duplicate()
+	mat.albedo_color = tint
+	_rock_tints[key] = mat
+	return mat
+
 ## Pune materialul de roca pe un subarbore — aceeasi mecanica precum
 ## apply_world_material, alt material. Doar pentru assets-uri INTEGRAL din
 ## roca: un GLB cu parti de lemn/metal (mine_portal) ar primi piatra pe grinzi.

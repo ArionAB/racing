@@ -4080,6 +4080,42 @@ const _LANDMARKS := {
 	12: {"path": "res://assets/models/buildings/miner_shack.glb",
 		"gap": 12.0, "col": "box", "spin": false,
 		"classes": {"Shack_Wood": "wood", "Shack_Roof": "rust_metal"}},
+	# --- Alpii (#223) ---------------------------------------------------------
+	#
+	# Kitul alpin (#226) e INTEGRAL pe atlasul de paleta — vezi antetul lui
+	# build_alpine_buildings.py. Deci NICIUNA dintre intrarile de mai jos n-are
+	# "classes": culoarea vine din sloturi, iar a le da texturi de clasa ar
+	# insemna sa re-exportam GLB-uri care sunt deja corecte, ca sa castigam un
+	# detaliu pe care ceata il inghite oricum la 90 m.
+	#
+	# Biserica: 14 m cu tot cu turla, cel mai inalt lucru construit din sat si
+	# reperul lui de franare. Sta la 11 m — de la 5 m turla iese din cadru si
+	# reperul devine un zid alb (aceeasi lectie ca la ecranul de drive-in).
+	13: {"path": "res://assets/models/buildings/alpine_church.glb",
+		"gap": 11.0, "col": "cyl", "radius": 2.2, "spin": false},
+	# Chalet-urile: cutie, nu cilindru. Sunt dreptunghiulare si LATE (14.1 x
+	# 11.1 m cel mare), iar un cilindru in jurul lor ar inghiti curtea.
+	14: {"path": "res://assets/models/buildings/mountain_chalet_large.glb",
+		"gap": 9.0, "col": "box", "spin": false},
+	15: {"path": "res://assets/models/buildings/mountain_chalet_small.glb",
+		"gap": 7.5, "col": "box", "spin": false},
+	# Statia de telecabina: 14 m lata, se aseaza pe culme. `gap` mic (6 m)
+	# fiindca acolo drumul trece pe un umar ingust — la 12 m ar pluti pe panta
+	# de dincolo de creasta.
+	16: {"path": "res://assets/models/buildings/cable_car_station.glb",
+		"gap": 6.0, "col": "box", "spin": false},
+	# Pilonul: 18.2 m, cel mai INALT obiect din joc. Raza 0.9 acopera stalpul,
+	# nu bratele de sus — vrem sa lovesti piciorul, ca la stalpul GAS.
+	17: {"path": "res://assets/models/structures/cable_car_pylon.glb",
+		"gap": 8.0, "col": "cyl", "radius": 0.9, "spin": false},
+	# Podul peste parau: se TRECE pe langa el, deci fara coliziune proprie —
+	# parapetii lui sunt geometrie decorativa langa drum, iar un colizor acolo
+	# ar strange soseaua exact unde pista are nevoie de latime.
+	18: {"path": "res://assets/models/structures/stream_bridge.glb",
+		"gap": 2.0, "col": "none", "spin": false},
+	# Indicatorul de drum alpin: reper mic, fara coliziune, ca semnul Route 66.
+	19: {"path": "res://assets/models/signs/alpine_signpost.glb",
+		"gap": 3.0, "col": "none", "spin": false},
 }
 
 ## Prop "hero" asezat cu intentie pe marginea pistei, ca reper vizual

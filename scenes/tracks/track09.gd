@@ -193,3 +193,40 @@ func _peak_specs() -> Array[Vector4]:
 		Vector4(120, -300, 210, 104),
 		Vector4(10, -175, 230, 99),
 	]
+
+
+## Landmark-urile hero (#223): (fractie, latura ±1, id din Track._LANDMARKS).
+##   13 biserica · 14/15 chalet mare/mic · 16 statie telecabina
+##   17 pilon · 18 pod peste parau · 19 indicator
+##
+## GRUPAREA E INTENTIA, nu insiruirea (regula din track08): satul e un PILC
+## dens intre 0.95 si 0.10 — chalet-uri pe ambele laturi plus biserica — dupa
+## care lumea se goleste deliberat pana la telecabina de pe culme. Alternanta
+## plin/gol e ce face satul sa citeasca a asezare, nu a decor presarat.
+##
+## Fractiile sunt cele MASURATE (tools/ProbeTrack09Fracs), nu alese: sicana
+## satului cade la 0.971, podul peste parau la 0.922, statia pe diagonala de
+## sus a serpentinei la 0.551. Daca se muta un punct de control, se remasoara.
+func _landmark_spots() -> Array[Vector3]:
+	return [
+		# --- SATUL (0.92-0.10): pilcul dens, de-o parte si de alta a ulitei ---
+		Vector3(0.922, -1.0, 18.0), # podul peste parau, la intrarea in sat
+		Vector3(0.941, 1.0, 15.0),  # chalet mic, pe dreapta
+		Vector3(0.958, -1.0, 14.0), # chalet MARE, pe stanga
+		# Biserica la 0.971: turla de 14 m in axul sicanei, deci o vezi cum se
+		# apropie pe toata ulita si stii unde se strange drumul. Exact rolul de
+		# "reper de franare" din style_bible §7.
+		Vector3(0.971, 1.0, 13.0),
+		Vector3(0.988, -1.0, 15.0), # chalet mic, inchide pilcul
+		Vector3(0.030, 1.0, 15.0),  # ultimul chalet, deja la iesirea din sat
+		# --- IESIREA SPRE PADURE: un singur indicator, apoi gol ---
+		Vector3(0.138, -1.0, 19.0),
+		# --- CULMEA: telecabina, singurul pilc de la inaltime ---
+		# Statia pe diagonala de sus (0.551), pilonul mai jos pe flanc (0.500):
+		# asa cablul dintre ele traverseaza serpentina, si il vezi de doua ori
+		# pe tur — o data de dedesubt urcand, o data de sus cand treci pe langa.
+		Vector3(0.500, 1.0, 17.0),
+		Vector3(0.551, -1.0, 16.0),
+		# --- COBORAREA: indicator inainte de creasta de fly-off ---
+		Vector3(0.660, 1.0, 19.0),
+	]

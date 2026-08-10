@@ -220,7 +220,7 @@ func _scenography() -> Array[Dictionary]:
 		# picioarele a ceva. Offseturile stau cu ~0.5 m inauntrul liniei
 		# gardului (manual, la ~2.5-3.5 m), deci paturile rasar la baza lui.
 		{"kind": "edge", "label": "Paturi_gard", "side": 1.0,
-			"from": 0.495, "to": 0.585, "off": 2.0, "spacing": 6.0,
+			"from": 0.495, "to": 0.585, "off": 2.0, "spacing": 4.0,
 			"jitter": 0.5, "min_ground": 0.8,
 			"path": M + "flowers/flowers_orange.glb",
 			"scale": [0.9, 1.25], "face": "random", "sink": 0.06,
@@ -228,7 +228,7 @@ func _scenography() -> Array[Dictionary]:
 				"picks": ["Tuft_A", "Tuft_B"], "count": [1, 2],
 				"radius": 1.1, "scale": [0.7, 1.1], "sink": 0.1}},
 		{"kind": "edge", "label": "Paturi_gard", "side": 1.0,
-			"from": 0.505, "to": 0.578, "off": 2.6, "spacing": 7.5,
+			"from": 0.505, "to": 0.578, "off": 2.6, "spacing": 9.0,
 			"jitter": 0.6, "min_ground": 0.8,
 			"path": M + "flowers/flowers_white.glb",
 			"scale": [0.85, 1.15], "face": "random", "sink": 0.06},
@@ -243,6 +243,22 @@ func _scenography() -> Array[Dictionary]:
 			"jitter": 0.8, "min_ground": 0.8,
 			"path": M + "plants/hibiscus_bush.glb",
 			"scale": [0.6, 0.9], "face": "random", "sink": 0.12},
+		# Florile lipseau CU TOTUL pe latura zidului (-1): referinta are
+		# accente portocalii pe ambele parti ale urcarii, nu doar la gard.
+		# Portocaliul conduce (pas 5 vs 10), albul doar puncteaza.
+		{"kind": "edge", "label": "Paturi_gard", "side": -1.0,
+			"from": 0.462, "to": 0.592, "off": 2.2, "spacing": 5.0,
+			"jitter": 0.5, "min_ground": 0.8,
+			"path": M + "flowers/flowers_orange.glb",
+			"scale": [0.85, 1.2], "face": "random", "sink": 0.06,
+			"skirt": {"path": M + "plants/megakit_plants.glb",
+				"picks": ["Tuft_B", "Tuft_D"], "count": [1, 2],
+				"radius": 1.1, "scale": [0.7, 1.1], "sink": 0.1}},
+		{"kind": "edge", "label": "Paturi_gard", "side": -1.0,
+			"from": 0.47, "to": 0.585, "off": 3.1, "spacing": 10.0,
+			"jitter": 0.6, "min_ground": 0.8,
+			"path": M + "flowers/flowers_white.glb",
+			"scale": [0.8, 1.1], "face": "random", "sink": 0.06},
 		# --- PIETRELE DE MARGINE: semnatura referintei pe urcarea de coasta
 		# si pe creasta. Doua siruri decalate pe fiecare latura (off si pas
 		# diferite), ca sa citeasca a ciorchini cazuti, nu a margele insirate.
@@ -299,7 +315,51 @@ func _scenography() -> Array[Dictionary]:
 					"picks": ["Coral_Rock_03", "Coral_Rock_06"],
 					"weight": 2.0, "scale": [0.5, 0.9], "sink": 0.25},
 			]},
+		# --- SUBARBORETUL: sub perdelele de palmieri ale urcarii (M05,
+		# 0.44-0.72) v2 are gazon gol; referinta are tufaris marunt sub
+		# fiecare coroana. Acelasi amestec ca pajistea, dar pas mai strans
+		# si mai aproape de drum — si FARA gol pe 0.60-0.655: acolo pajistea
+		# tace ca sa respire zidurile, dar sub copaci golul citeste a chelie.
+		# Fara fusta: subarboretul E el insusi covorul, fusta pe vegetatie
+		# ar fi geometrie dubla fara castig de citire.
+		{"kind": "grove", "label": "Sub_Palmieri", "side": 1.0,
+			"both_sides": true, "from": 0.44, "to": 0.72,
+			"off": [2.0, 9.0], "spacing": 3.0, "above_sea": 1.6,
+			"clear": 2.0, "species": pajiste_species},
 	])
+	# --- VERGE-UL: peretele verde de la umarul drumului. Pajistea incepe la
+	# 1.5 m si se rarefiaza spre camp; referinta are un tiv CONTINUU in primul
+	# metru, pe AMBELE laturi — el face drumul sa citeasca a taiat prin
+	# vegetatie, nu asezat peste ea. Trei straturi pe interval (smocuri des,
+	# iarba de plaja mediu, flori portocalii rar) — edge cu picks, ca la
+	# Paturi: amestecul se face din spec-uri single-source suprapuse, nu din
+	# `species` (edge nu stie de ponderi). Aceleasi trei lanuri si aceleasi
+	# goluri ca pajistea (#209): tivul tace si el pe pod si pe creasta.
+	# `min_ground` 1.6 = regula plajei de la pajiste (sub BEACH_SAND_TOP nu
+	# creste iarba grasa).
+	var verge_lanuri: Array[Vector2] = [Vector2(0.03, 0.27),
+		Vector2(0.315, 0.60), Vector2(0.655, 0.93)]
+	for lan: Vector2 in verge_lanuri:
+		for latura: float in [1.0, -1.0]:
+			specs.append_array([
+				{"kind": "edge", "label": "Verge_Umar", "side": latura,
+					"from": lan.x, "to": lan.y, "off": 1.0, "spacing": 3.2,
+					"jitter": 0.3, "min_ground": 1.6,
+					"path": M + "plants/megakit_plants.glb",
+					"picks": ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D"],
+					"scale": [0.7, 1.1], "face": "random", "sink": 0.1},
+				{"kind": "edge", "label": "Verge_Umar", "side": latura,
+					"from": lan.x, "to": lan.y, "off": 1.2, "spacing": 4.2,
+					"jitter": 0.4, "min_ground": 1.6,
+					"path": M + "rocks/island_scatter.glb",
+					"picks": ["Beach_Grass"],
+					"scale": [0.8, 1.3], "face": "random", "sink": 0.08},
+				{"kind": "edge", "label": "Verge_Umar", "side": latura,
+					"from": lan.x, "to": lan.y, "off": 1.3, "spacing": 15.0,
+					"jitter": 0.4, "min_ground": 1.6,
+					"path": M + "flowers/flowers_orange.glb",
+					"scale": [0.8, 1.1], "face": "random", "sink": 0.06},
+			])
 	return specs
 
 

@@ -1330,7 +1330,30 @@ static func _add_cluster(parent: Node3D, pos: Vector3,
 ## PUBLIC dinadins: il folosesc si TrackCliffs, si TrackScenography. A stat cu
 ## underscore in timp ce doua clase din afara il chemau oricum — adica era deja
 ## interfata, doar ca nu scria nicaieri.
+##
+## CU CACHE din august 2026: decuparea variantei din GLB-ul intreg se face O
+## DATA per (fisier, varianta) si rezultatul se impacheteaza intr-un
+## PackedScene minuscul; apelurile urmatoare doar il instantiaza. Inainte,
+## fiecare piesa plasata instantia TOATA scena GLB si arunca fratii — tivul de
+## pe Track08 instantia de ~1000 de ori megakit_plants ca sa pastreze cate un
+## smoc, si incarcarea pistei ajunsese la ~10 s. Cache-ul e pe PackedScene
+## (RefCounted), nu pe noduri vii, ca sa nu ramana instante orfane la iesire.
+## Mesh-urile raman resurse partajate intre instante, deci gruparea din
+## TrackDecorBatch.bake() nu se schimba.
+static var _pick_cache: Dictionary = {}
+
+
 static func pick_from_glb(path: String, node_name: String) -> Node3D:
+	var key := path + "::" + node_name
+	if not _pick_cache.has(key):
+		_pick_cache[key] = _pack_pick(path, node_name)
+	var packed: PackedScene = _pick_cache[key]
+	if packed == null:
+		return null
+	return packed.instantiate() as Node3D
+
+
+static func _pack_pick(path: String, node_name: String) -> PackedScene:
 	if not ResourceLoader.exists(path):
 		return null
 	var container := (load(path) as PackedScene).instantiate() as Node3D
@@ -1350,7 +1373,24 @@ static func pick_from_glb(path: String, node_name: String) -> Node3D:
 		container.queue_free()
 		return null
 	container.position = -kept.position
-	return container
+	# pack() salveaza doar nodurile cu owner setat — fara pasul asta scena
+	# impachetata ar fi containerul gol, si fiecare piesa ar disparea tacut.
+	_set_owner_deep(kept, container)
+	var packed := PackedScene.new()
+	if packed.pack(container) != OK:
+		# Nu se stie sa esueze pe un subarbore de GLB, dar daca totusi o face,
+		# piesa e prea importanta ca sa dispara: intoarcem null si apelantul
+		# cade pe fallback-ul lui obisnuit (primitive colorate).
+		container.free()
+		return null
+	container.free()
+	return packed
+
+
+static func _set_owner_deep(node: Node, new_owner: Node) -> void:
+	node.owner = new_owner
+	for c in node.get_children():
+		_set_owner_deep(c, new_owner)
 
 
 static func _first_mesh(node: Node) -> MeshInstance3D:

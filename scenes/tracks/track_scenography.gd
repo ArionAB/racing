@@ -242,15 +242,24 @@ static func _build_edge(root: Node3D, path: _Path, sampler: TrackSideSampler,
 		var out: Vector3 = st["right"] * side
 		var pos: Vector3 = st["pos"] + out * (off + rng.randf_range(-jitter,
 			jitter))
-		pos.y = sampler.ground_y(pos.x, pos.z)
 		var far_enough := last == Vector3.INF \
 			or Vector2(pos.x - last.x, pos.z - last.z).length() >= spacing
-		# Un zid care intra in apa nu e zid, e naufragiu. Pragul e in metri
-		# fata de nivelul marii, deci se poate cere si "doar pe uscat bun".
-		if far_enough and pos.y >= sea_y + drop:
-			_place(holder, spec, pos, rng, st["along"], side)
-			_skirt(holder, spec, pos, rng, st["along"], side, sampler, sea_y)
-			last = pos
+		if far_enough:
+			# ground_y DOAR pe pasii candidati la plasare, nu pe toti: pasul
+			# de sondare e 0.35 m iar ground_y scaneaza toata coacerea, deci
+			# un strat de tiv facea zeci de mii de scanari pentru cateva sute
+			# de piese. Distanta fata de ultima piesa e numai in XZ, deci
+			# mutarea nu schimba nicio plasare si nu consuma alt RNG —
+			# masurat: scenografia Track08 4.5 s -> ~2.5 s.
+			pos.y = sampler.ground_y(pos.x, pos.z)
+			# Un zid care intra in apa nu e zid, e naufragiu. Pragul e in
+			# metri fata de nivelul marii, deci se poate cere si "doar pe
+			# uscat bun".
+			if pos.y >= sea_y + drop:
+				_place(holder, spec, pos, rng, st["along"], side)
+				_skirt(holder, spec, pos, rng, st["along"], side, sampler,
+					sea_y)
+				last = pos
 		d += probe
 
 

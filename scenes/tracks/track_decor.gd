@@ -354,6 +354,9 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		_place_island_prop(parent, spec.position, band, rng, mat_provider,
 			satellite, spec.frac)
 		return
+	if props == "alpine":
+		_place_alpine_prop(parent, spec, band, rng, mat_provider, satellite)
+		return
 	var pos := spec.position
 	match band["name"]:
 		"hug":
@@ -597,6 +600,100 @@ static func _place_island_prop(parent: Node3D, pos: Vector3, band: Dictionary,
 				_add_island_tree(parent, pos, rng, mat)
 			else:
 				_add_coral_rock(parent, pos, rng, mat, true)
+
+
+## ############################################################################
+## LUMEA ALPINA
+##
+## Kitul alpin (#226) a venit fara conifere — pinii sunt inca de construit
+## (#222). Pana atunci padurea se face din ce EXISTA, si nu e un compromis
+## ascuns: `alpine_shrub` (1.7 x 0.9 m) e tufa de ienupar de munte, iar
+## `megakit_rocks` e stanca — la altitudine, deasupra limitei padurii, exact
+## asta si vezi. Cand vin pinii, ei intra AICI, in banda "far" si pe flancuri.
+##
+## Coeziunea vine din rocile REFOLOSITE, nu din modele noi: granitul e aceeasi
+## clasa de material ca stanca de canion (rock_material triplanar), doar
+## nuantata de tema. Un munte nu are nevoie de o roca proprie ca sa fie munte.
+
+## Piesele mici ale lumii alpine, in kitul de vegetatie deja existent. Alese
+## dintre cele care NU citesc a desert: smocurile si rozetele merg pe pajiste,
+## evantaiele si scrub-ul uscat nu.
+const ALPINE_TUFTS: Array[String] = ["Tuft_A", "Tuft_B", "Tuft_C", "Tuft_D",
+	"Rosette_A"]
+
+## Gardul de pasune si tufa alpina, din kitul alpin (#226).
+const ALPINE_SHRUB_PATH: String = "res://assets/models/plants/alpine_shrub.glb"
+const ALPINE_FENCE_PATH: String = "res://assets/models/structures/wooden_fence.glb"
+const ALPINE_FENCE_PICKS: Array[String] = ["Fence_A", "Fence_B"]
+const ALPINE_HAY_PATH: String = "res://assets/models/props/hay_bale.glb"
+
+
+## Decorul de banda al muntelui de vara.
+##
+## Regula de compozitie (style_bible §7, si lectia gruparii din track08):
+## piesele MICI stau langa drum, masa vine de departe. Diferenta fata de desert
+## e ca aici masa e VERTICALA (stanca pe flanc), nu orizontala.
+static func _place_alpine_prop(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
+		satellite: bool) -> void:
+	var pos := spec.position
+	match band["name"]:
+		"hug":
+			# Lipit de asfalt: iarba si pietre. Nimic peste 1 m — un obiect mai
+			# inalt la 1.5 m de drum acopera apexul urmator.
+			var roll := rng.randf()
+			if roll < 0.30 and _add_canyon_rock(parent, pos, rng, "S",
+					not satellite, 0.55, 1.00, 0.65, 1.00):
+				return
+			if roll < 0.55 and _add_alpine_shrub(parent, pos, rng, 0.6, 0.95):
+				return
+			if not _add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.75, 1.15):
+				_add_scatter(parent, pos, rng, mat)
+		"mid":
+			var roll := rng.randf()
+			if satellite or roll < 0.34:
+				# Fantoma, ca sora ei din desert si din acelasi motiv: banda
+				# asta e coridorul de reintrare pe sosea (vezi comentariul de
+				# la "mid" din _place_band_prop).
+				if not _add_canyon_rock(parent, pos, rng, "S", false):
+					_add_scatter(parent, pos, rng, mat)
+			elif roll < 0.62:
+				if not _add_alpine_shrub(parent, pos, rng, 0.85, 1.30):
+					_add_kit_plant(parent, pos, rng, ALPINE_TUFTS)
+			elif roll < 0.80:
+				_add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.90, 1.35)
+			else:
+				_add_canyon_rock(parent, pos, rng, "M", true)
+		_:
+			# Departe: masa de stanca. Aici va intra padurea de pini (#222) —
+			# pana atunci flancul e granit si ienupar, adica peisaj de peste
+			# limita padurii, nu o pajiste goala.
+			var roll2 := rng.randf()
+			if satellite or roll2 < 0.42:
+				_add_canyon_rock(parent, pos, rng, "M", true)
+			elif roll2 < 0.62:
+				_add_canyon_rock(parent, pos, rng, "L", true)
+			elif roll2 < 0.85:
+				if not _add_alpine_shrub(parent, pos, rng, 1.0, 1.6):
+					_add_canyon_rock(parent, pos, rng, "M", true)
+			else:
+				_add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 1.0, 1.5)
+
+
+## Tufa de ienupar alpin. Fantoma, ca tot frunzisul.
+static func _add_alpine_shrub(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, s_min: float = 0.85,
+		s_max: float = 1.25) -> bool:
+	var kept := pick_from_glb(ALPINE_SHRUB_PATH, "AlpineShrub")
+	if kept == null:
+		return false
+	parent.add_child(kept)
+	kept.position = pos + Vector3.UP * -0.08
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
+	Palette.apply_foliage_material(kept)
+	kept.set_meta(TrackDecorBatch.SWAY_META, true)
+	return true
 
 
 ## Maruntisuri de plaja, fara coliziune.
@@ -992,6 +1089,7 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 	parent.add_child(holder)
 	holder.add_child(kept)
 	Palette.apply_rock_material(kept)
+	_tint_rock(kept)
 	if collide:
 		add_hull_collision(holder as StaticBody3D, kept)
 	holder.rotation.y = rng.randf_range(0.0, TAU)
@@ -999,6 +1097,39 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 	# doar daca stanca chiar intra in teren.
 	holder.position = pos + Vector3.UP * -0.25
 	return true
+
+
+## Nuanta de roca a lumii curente, ca factor peste albedo. Gol = neatinsa.
+##
+## Rocile din `megakit_rocks` / `canyon_rocks` au gresia rosiatica a desertului
+## COAPTA in vertex colors, iar materialul de clasa le foloseste ca albedo
+## (`vertex_color_use_as_albedo`). Pe un munte alpin aia iese portocaliu — s-a
+## vazut din prima captura de sus.
+##
+## Rezolvarea nu e o roca noua (aia ar fi 20 de GLB-uri de granit pentru o
+## diferenta de NUANTA), ci acelasi material de clasa cu `albedo_color` mutat.
+##
+## Costa UN material in plus pe pistele care cer nuanta, si zero pe restul:
+## `Palette.tinted_rock_material` il cache-uieste per culoare, deci toate
+## stancile alpine impart o singura instanta. S-a incercat intai
+## `set_instance_shader_parameter("albedo_tint", ...)` — nu face nimic:
+## StandardMaterial3D nu declara uniforma aia, iar apelul e ignorat in tacere,
+## adica exact soiul de "reparatie" care trece de o sonda care numara instante
+## si pica pe o captura de ecran.
+static var _rock_tint: Color = Color.WHITE
+
+static func set_rock_tint(tint: Color) -> void:
+	_rock_tint = tint
+
+
+static func _tint_rock(model: Node3D) -> void:
+	if _rock_tint == Color.WHITE:
+		return
+	var mat := Palette.tinted_rock_material(_rock_tint)
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		(node as MeshInstance3D).material_override = mat
+	if model is MeshInstance3D:
+		(model as MeshInstance3D).material_override = mat
 
 
 ## Impinge stanca in afara pana cand intre marginea asfaltului si silueta ei

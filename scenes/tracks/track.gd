@@ -255,6 +255,93 @@ static func themes() -> Dictionary:
 			"dust_color": null, # null = derivat din ground_tint
 			"water": false,
 		},
+		# --- Muntele de vara (pista Alpii) ---
+		#
+		# Nu e "forest cu alt cer". Diferentele care conteaza, toate din lumea
+		# reala si toate verificabile pe un snapshot:
+		#
+		# 1. AERUL E SUBTIRE. La altitudine cerul e mai adanc si mai rece la
+		#    zenit, iar ceata e albastruie (imprastiere Rayleigh pe distanta),
+		#    nu alb-laptoasa ca la nivelul marii. De aceea fog e mai albastru
+		#    decat cerul de la orizont, invers decat la desert.
+		# 2. UMBRELE SUNT RECI. Ambientul vine din CULOARE, nu din cer, exact
+		#    din motivul masurat pe insula: cerul singur trage tot verdele spre
+		#    cenusiu. Culoarea aleasa e bounce-ul de pe pajiste — verde palid
+		#    cald, nu gri.
+		# 3. VERDELE E DE PAJISTE ALPINA, nu de padure tropicala: mai galben si
+		#    mai putin saturat decat "forest" (#73B854 fata de un verde crud),
+		#    fiindca iarba de munte in august e uscata la varf.
+		#
+		# sun_energy 1.15 si nu 1.25 ca la forest: aici soarele bate pe un
+		# teren care URCA, deci flancurile orientate spre lumina primesc
+		# incidenta mai buna si se supraexpun la aceeasi energie. Diferenta
+		# e vizibila pe umarul masivului, unde panta e de 35-40%.
+		"alpine": {
+			# Pajiste de munte in august, NU gazon: verdele lui "forest"
+			# (0.45, 0.72, 0.33) iesea fluorescent pe prima randare — e acordat
+			# pentru o padure in umbra, iar aici cade pe pante intregi luminate
+			# direct. Coborat in saturatie si impins spre galben-oliv, adica
+			# spre iarba uscata la varf. Verificabil pe captura de sus: masa
+			# verde trebuie sa citeasca a fan tanar, nu a masa de biliard.
+			"ground_tint": Color(0.44, 0.60, 0.31),
+			# Cer de altitudine: zenit adanc, orizont palid si RECE.
+			"sky_top": Color(0.16, 0.42, 0.86),
+			"sky_horizon": Color(0.74, 0.86, 0.97),
+			# Ceata albastruie — vezi punctul 1 de mai sus.
+			"fog": Color(0.72, 0.83, 0.94),
+			"hill_color": Color(0.36, 0.56, 0.38),
+			"sun_color": Color(1.0, 0.97, 0.90),
+			"sun_energy": 1.15,
+			"exposure": 1.0,
+			"ambient_color": Color.html("C8D8B8"),
+			"ambient_energy": 0.26,
+			# Ceata de ADANCIME, ca la desert si insula: de pe platou vezi pana
+			# in vale, iar crestele de fundal trebuie sa se piarda progresiv,
+			# nu sa fie taiate de un plan de ceata uniform.
+			"fog_depth": true,
+			"horizon_model": "", # crestele inzapezite vin in #225
+			"walls": true,       # doar pe sectiunile inaltate — regula samplerului
+			"cliffs": false,     # flancurile masivului sunt teren, nu faleze de canion
+			"decor": "bands",
+			"props": "alpine",
+			# ZAPADA PE CREASTA: mecanismul "inland_tint" al insulei, intors.
+			#
+			# Acolo verdele venea PESTE o cota (plaja jos, vegetatie sus); aici
+			# albul vine peste o cota mult mai sus. E acelasi cod si aceeasi
+			# cheie — vezi _build_terrain — fiindca intrebarea e identica: "de
+			# la ce inaltime terenul isi schimba materialul?".
+			#
+			# 72 m NU e ales din ochi, e MASURAT cu tools/ProbeAlpineTerrain:
+			# platoul drumului sta la 63.2 m, terenul urca la 104.2 m, dar
+			# distributia de cote e ascutita — doar 0.67% din suprafata trece
+			# de 70 m, si 0.48% de 78 m. Prima incercare la 78 punea zapada pe
+			# 0.48% din lume, adica doua pete cat o moneda pe o captura de sus.
+			#
+			# 72 pastreaza garda de 9 m peste cel mai inalt asfalt (zapada nu
+			# atinge pista, ceea ce ar fi absurd in august) si dubleaza flancul
+			# alb. Peste asta, `snow_fade` mai lat (18 m) face ca trecerea sa
+			# ocupe ea insasi o bucata de munte: la altitudine limita zapezii nu
+			# e o linie, e o zona in care petice albe coboara pe vaiugi.
+			"snow_line": 72.0,
+			"snow_fade": 18.0,
+			"snow_tint": Palette.color(Palette.FOAM_WHITE),
+			# Granit rece in loc de gresie rosiatica. E un FACTOR peste doua
+			# straturi calde (textura de clasa + vertex colors coapte), deci e
+			# supracompensat spre albastru: la (0.72, 0.74, 0.78) — un gri
+			# neutru cinstit — stancile ieseau tot portocalii pe captura. Vezi
+			# Palette.tinted_rock_material.
+			"rock_tint": Color(0.62, 0.72, 0.92),
+			"hazard_model": "res://assets/models/vehicles/timber_sled.glb",
+			"hazard_roll": false, # o sanie nu se rostogoleste (vezi barca sabani)
+			"dust_color": Color(0.62, 0.58, 0.44), # pamant de pajiste, nu nisip
+			"water": false,
+			# Poteca scurtaturii: pamant batatorit, nu nisip coraligen umed.
+			# Pietrisul e textura care exista si care se potriveste — o poteca
+			# de pasune calcata de vaci si de roti E pamant cu pietre, iar
+			# granulatia ei se citeste ca "nu mai esti pe asfalt" din mers.
+			"branch_tint": Color(0.52, 0.44, 0.30),
+			"branch_texture": "res://assets/textures/surface_gravel.png",
+		},
 		# --- Insula de recif (pista Okinawa) ---
 		#
 		# Culorile sunt sloturile insulare din paleta (17-23), ca sa nu existe
@@ -1314,6 +1401,11 @@ func _build_terrain() -> void:
 	# tema de insula, deci restul lumii nu se schimba cu un pixel.
 	var inland: Variant = theme_flag("inland_tint", null)
 	var inland_mix := float(theme_flag("inland_strength", 0.0))
+	# Zapada de creasta: null pe orice tema fara munte, deci restul pistelor
+	# nu se schimba cu un pixel. Vezi "snow_line" in themes().
+	var snow_tint: Variant = theme_flag("snow_tint", null)
+	var snow_line := float(theme_flag("snow_line", 0.0))
+	var snow_fade := maxf(float(theme_flag("snow_fade", 1.0)), 0.001)
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
 	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
@@ -1374,6 +1466,29 @@ func _build_terrain() -> void:
 						if patch > 0.0:
 							tint = tint.lerp(TERRAIN_DIRT_COLOR, patch * 0.65)
 							grass_w *= 1.0 - patch * 0.75
+					# ZAPADA DE CREASTA, oglinda plajei de mai sus: acolo
+					# materialul se schimba SUB o cota, aici PESTE ea. Cota e
+					# absoluta (nu relativa la media pistei) fiindca linia
+					# zapezii e o proprietate a MUNTELUI, nu a traseului: daca
+					# maine soseaua urca cu 10 m, zapada nu trebuie sa urce cu
+					# ea. Vezi "snow_line" din themes().
+					#
+					# Greutatea de iarba se stinge odata cu albul: pe piatra
+					# inghetata nu creste iarba, iar fara asta shader-ul ar
+					# amesteca textura de pajiste peste zapada.
+					if snow_tint != null:
+						var snow_w := clampf(
+							(v.y - snow_line) / snow_fade, 0.0, 1.0)
+						# Marginea se zdrentuieste cu ACELASI zgomot ca peticele
+						# de pamant: o linie de nivel perfecta se citeste ca
+						# desen tehnic. Amplitudinea e in METRI de cota, deci
+						# raportata la latimea benzii de trecere.
+						snow_w = clampf(snow_w + dirt_noise.get_noise_2d(
+							v.x * 0.6, v.z * 0.6) * 0.22, 0.0, 1.0)
+						snow_w = smoothstep(0.0, 1.0, snow_w)
+						if snow_w > 0.0:
+							tint = tint.lerp(snow_tint as Color, snow_w)
+							grass_w *= 1.0 - snow_w
 					var col := tint * shade
 					st.set_color(Color(col.r, col.g, col.b, grass_w))
 					# UV din coordonate de LUME, nu din indexul celulei: asa
@@ -1990,10 +2105,16 @@ func _build_branch_surfaces() -> void:
 			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
 		st.index()
 		st.generate_normals()
-		# Nisip umed: coral_sand intunecat. Nu e asfalt si nu trebuie sa para.
-		_add_mesh_with_collision(st.commit(),
-			Palette.color(Palette.CORAL_SAND).darkened(0.22),
-			_tex("res://assets/textures/surface_sand.png"))
+		# Materialul benzii vine din TEMA, nu din cod: pe insula e nisip
+		# coraligen umed, pe munte e pamant batatorit de pasune. Implicit
+		# raman valorile Okinawei, ca pistele existente sa nu se schimbe cu
+		# un pixel — aceeasi regula ca la orice steag de tema adaugat tarziu.
+		var branch_tint: Variant = theme_flag("branch_tint", null)
+		var tint: Color = branch_tint if branch_tint != null \
+			else Palette.color(Palette.CORAL_SAND).darkened(0.22)
+		_add_mesh_with_collision(st.commit(), tint,
+			_tex(String(theme_flag("branch_texture",
+				"res://assets/textures/surface_sand.png"))))
 
 
 ## Construieste o scurtatura dintr-o specificatie.
@@ -3517,6 +3638,11 @@ func _build_world_decor() -> void:
 	_decor_roots.append(cliffs)
 	# Decorul primeste amprentele falezelor deja asezate. De asta ordinea celor
 	# doua apeluri nu mai e doar o conventie: falezele TREBUIE construite intai.
+	# Nuanta de roca a lumii, INAINTE de build: se aplica pe fiecare stanca la
+	# asezare. Alb = neatinsa, deci pistele fara steag raman identice.
+	var rock_tint: Variant = theme_flag("rock_tint", null)
+	TrackDecor.set_rock_tint(rock_tint as Color if rock_tint != null
+		else Color.WHITE)
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert"),

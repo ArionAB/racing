@@ -20,15 +20,15 @@ extends Track
 ## trecut de tools/probe_layout.gd. Daca se muta un punct de control, se
 ## remasoara toate — nu se ajusteaza.
 ##
-## Tema ramane "forest" pana la tema "alpine" dedicata (paleta de granit +
-## zapada pe varf) — verde de pajiste + cer albastru e deja 80% din citirea
-## alpina. Modelele de hazard (car cu fan, vaca, tractor) vin odata cu
-## asset-urile; pana atunci SlidingHazard foloseste modelul temei.
+## Tema e "alpine" (#221): cer de altitudine, ceata albastruie, zapada peste
+## 78 m si poteca de pamant pe scurtatura. Modelele de hazard individuale
+## (car cu fan, vaca, tractor) vin in #224 — pana atunci toate patru folosesc
+## sania cu busteni din tema.
 
 func _init() -> void:
 	track_name = "Alpii"
 	half_width = 7.0
-	apply_theme("forest")
+	apply_theme("alpine")
 
 
 ## Bucla: 1786 m, anvelopa ~535 x 400 m, urcare totala 63 m.
@@ -190,6 +190,6 @@ func _ravines() -> Array[Vector4]:
 ## lume; zapada de pe el vine odata cu tema "alpine".
 func _peak_specs() -> Array[Vector4]:
 	return [
-		Vector4(120, -300, 130, 102),
-		Vector4(10, -175, 150, 98),
+		Vector4(120, -300, 210, 104),
+		Vector4(10, -175, 230, 99),
 	]

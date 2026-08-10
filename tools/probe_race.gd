@@ -87,6 +87,12 @@ var _bump_victim: Car = null
 var _bump_rows: Array[Dictionary] = []
 var _bump_peak: float = 0.0
 var _bump_attacker_loss: float = 0.0
+## Directia initiala a victimei — diferenta finala e rotatia PRIMITA din lovitura.
+var _bump_victim_yaw0: float = 0.0
+## Cea mai mica viteza a atacatorului dupa contact: "zidul" se vede aici — pe
+## modelul vechi cobora la ~0 chiar si intre mase egale, desi fizica cerea ca
+## amandoua masinile sa-si continue drumul.
+var _bump_attacker_floor: float = 0.0
 var _bump_impulses_att: int = 0
 var _bump_impulses_vic: int = 0
 var _bump_impulse_peak_att: float = 0.0
@@ -375,6 +381,17 @@ func _start_bump() -> void:
 		_bump_cases.append({
 			"attacker": garage[pair[0]] as CarData,
 			"victim": garage[pair[1]] as CarData,
+			"kind": "spate",
+		})
+	# Loviturile DIRECTIONALE: acelasi contact, alt loc pe caroserie.
+	#   colt    — din spate, dar prins pe coltul victimei (PIT): trebuie sa o
+	#             roteasca vizibil, in timp ce lovitura centrata de mai sus nu.
+	#   lateral — in plin, perpendicular (T-bone): victima impinsa si sucita.
+	for c: Array in [[0, 0, "colt"], [0, 0, "lateral"], [3, 1, "lateral"]]:
+		_bump_cases.append({
+			"attacker": garage[c[0]] as CarData,
+			"victim": garage[c[1]] as CarData,
+			"kind": c[2],
 		})
 	_next_bump_case()
 
@@ -389,17 +406,37 @@ func _next_bump_case() -> void:
 		_report_bump()
 		return
 	var c := _bump_cases[_bump_case]
-	# Distanta de pornire: lungimea celor doua caroserii + spatiu de contact.
-	var gap: float = ((c.attacker as CarData).body_length
-		+ (c.victim as CarData).body_length) * 0.5 + 4.0
-	# Amandoua in liber: masuram O SINGURA izbitura, nu un impins continuu.
-	_bump_attacker = _spawn_bump_car(c.attacker as CarData, Vector3(0, 0.6, gap), 0.0)
-	_bump_victim = _spawn_bump_car(c.victim as CarData, Vector3(0, 0.6, 0), 0.0)
-	# Atacatorul soseste deja lansat: masuram impactul, nu accelerarea.
-	_bump_attacker.velocity = Vector3(0, 0, -BUMP_ENTRY_SPEED)
+	var att := c.attacker as CarData
+	var vic := c.victim as CarData
+	var kind := String(c.kind)
+	# Victima sta pe loc, cu botul spre -Z; atacatorul soseste deja lansat:
+	# masuram impactul, nu accelerarea. Amandoua in liber — O SINGURA izbitura.
+	_bump_victim = _spawn_bump_car(vic, Vector3(0, 0.6, 0), 0.0)
+	match kind:
+		"lateral":
+			# T-bone: atacatorul vine perpendicular, dinspre +X, tintit putin
+			# spre spatele victimei ca sa existe brat de parghie (in realitate
+			# lovitura in dreptul centrului de masa doar impinge).
+			var gap_x: float = (att.body_length + vic.body_width) * 0.5 + 4.0
+			_bump_attacker = _spawn_bump_car(att,
+				Vector3(gap_x, 0.6, vic.body_length * 0.25), 0.0)
+			_bump_attacker.rotate_y(PI / 2.0) # cu botul spre -X, incotro merge
+			_bump_attacker.velocity = Vector3(-BUMP_ENTRY_SPEED, 0, 0)
+		"colt":
+			# PIT: din spate, dar decalat lateral — contactul prinde coltul.
+			var gap: float = (att.body_length + vic.body_length) * 0.5 + 4.0
+			_bump_attacker = _spawn_bump_car(att,
+				Vector3(vic.body_width * 0.45, 0.6, gap), 0.0)
+			_bump_attacker.velocity = Vector3(0, 0, -BUMP_ENTRY_SPEED)
+		_:
+			var gap: float = (att.body_length + vic.body_length) * 0.5 + 4.0
+			_bump_attacker = _spawn_bump_car(att, Vector3(0, 0.6, gap), 0.0)
+			_bump_attacker.velocity = Vector3(0, 0, -BUMP_ENTRY_SPEED)
+	_bump_victim_yaw0 = _bump_victim.rotation.y
 	_bump_frames = 0
 	_bump_peak = 0.0
 	_bump_attacker_loss = 0.0
+	_bump_attacker_floor = BUMP_ENTRY_SPEED
 	_bump_impulses_att = 0
 	_bump_impulses_vic = 0
 	_bump_impulse_peak_att = 0.0
@@ -535,9 +572,15 @@ func _report_cliff() -> void:
 
 func _spawn_bump_car(data: CarData, pos: Vector3, throttle: float) -> Car:
 	var car := (load(CAR_SCENE) as PackedScene).instantiate() as Car
+	# Pozitia INAINTE de add_child: corpul intra in serverul de fizica direct
+	# la locul lui. Setata dupa, exista un cadru in care ambele masini stau
+	# suprapuse la origine — depenetrarea o arunca pe victima pe ACOPERISUL
+	# atacatorului, unde platforma mobila o cara cu viteza proprie zero si
+	# cazul masoara o plimbare, nu o izbitura (primul rand din matrice iesea
+	# cu 0 impulsuri si victima "impinsa" 21 m).
+	car.position = pos
 	add_child(car)
 	car.apply_data(data)
-	car.global_position = pos
 	car.race_active = true
 	var ctrl := ScriptedController.new()
 	ctrl.throttle = throttle
@@ -566,21 +609,35 @@ func _tick_bump() -> void:
 		_bump_peak = maxf(_bump_peak, _bump_victim.horizontal_speed())
 		_bump_attacker_loss = maxf(_bump_attacker_loss,
 			BUMP_ENTRY_SPEED - _bump_attacker.horizontal_speed())
+		# Podeaua de viteza abia DUPA ce izbitura a avut loc — inainte de
+		# contact atacatorul merge cu viteza de intrare si cifra n-ar spune nimic.
+		if _bump_impulses_att + _bump_impulses_vic > 0:
+			_bump_attacker_floor = minf(_bump_attacker_floor,
+				_bump_attacker.horizontal_speed())
 	if _bump_frames < 90:
 		return
 	var c := _bump_cases[_bump_case]
 	var att := c.attacker as CarData
 	var vic := c.victim as CarData
-	# Distanta dintre centre la final vs. suma semi-lungimilor: sub 1.0 inseamna
-	# ca atacatorul a "inghitit" victima si o cara in el, nu a imbrancit-o.
-	var touching := (att.body_length + vic.body_length) * 0.5
-	var separation := absf(_bump_attacker.global_position.z
-		- _bump_victim.global_position.z) / touching
+	var kind := String(c.kind)
+	# Distanta dintre centre la final vs. suma semi-gabaritelor pe directia
+	# loviturii: sub 1.0 inseamna ca atacatorul a "inghitit" victima si o cara
+	# in el, nu a imbrancit-o.
+	var touching := (att.body_length + vic.body_length) * 0.5 \
+		if kind != "lateral" else (att.body_length + vic.body_width) * 0.5
+	var apart := _bump_attacker.global_position - _bump_victim.global_position
+	apart.y = 0.0
+	var pushed := _bump_victim.global_position
+	pushed.y = 0.0
 	_bump_rows.append({
 		"attacker": att.display_name, "victim": vic.display_name,
+		"kind": kind,
 		"ratio": att.mass_factor / vic.mass_factor,
 		"victim_dv": _bump_peak, "attacker_loss": _bump_attacker_loss,
-		"pushed": absf(_bump_victim.global_position.z), "sep": separation,
+		"attacker_floor": _bump_attacker_floor,
+		"pushed": pushed.length(), "sep": apart.length() / touching,
+		"yaw_deg": absf(rad_to_deg(wrapf(
+			_bump_victim.rotation.y - _bump_victim_yaw0, -PI, PI))),
 		"impulses": _bump_impulses_att + _bump_impulses_vic,
 		"impulse_peak": maxf(_bump_impulse_peak_att, _bump_impulse_peak_vic),
 	})
@@ -588,14 +645,17 @@ func _tick_bump() -> void:
 
 
 func _report_bump() -> void:
-	print("\n=== IMBRANCELI (atac din spate la %.0f m/s in masina oprita) ===" % [
+	print("\n=== IMBRANCELI (atac la %.0f m/s in masina oprita) ===" % [
 		BUMP_ENTRY_SPEED])
-	print("%-12s %-12s %8s %11s %11s %8s %7s %6s %8s" % [
-		"atacator", "victima", "m_a/m_v", "dv victima", "frana atac",
-		"impinsa", "separ", "impuls", "dv_max"])
+	print("frana atac = varful de viteza pierduta; v_min atac = podeaua de dupa")
+	print("contact (aproape de zero inseamna \"zid\", nu transfer de impuls)")
+	print("%-12s %-12s %-7s %8s %11s %11s %10s %8s %7s %6s %8s %6s" % [
+		"atacator", "victima", "tip", "m_a/m_v", "dv victima", "frana atac",
+		"v_min atac", "impinsa", "separ", "rotita", "impuls", "dv_max"])
 	for row in _bump_rows:
-		print("%-12s %-12s %8.2f %10.1f %10.1f %8.1f %7.2f %6d %8.1f" % [
-			row.attacker, row.victim, row.ratio,
-			row.victim_dv, row.attacker_loss, row.pushed, row.sep,
+		print("%-12s %-12s %-7s %8.2f %10.1f %10.1f %10.1f %8.1f %7.2f %5.0f° %6d %8.1f" % [
+			row.attacker, row.victim, row.kind, row.ratio,
+			row.victim_dv, row.attacker_loss, row.attacker_floor,
+			row.pushed, row.sep, row.yaw_deg,
 			row.impulses, row.impulse_peak])
 	_finish()

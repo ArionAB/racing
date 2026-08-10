@@ -94,6 +94,16 @@ const SLIP_GRIP_WET: float = 3.6
 ## Cat de tare se resping masinile intrepatrunse, per metru de patrundere.
 ## Fara asta o masina grea poate "inghiti" una usoara si o cara in ea.
 @export var bump_separation: float = 8.0
+## Lovitura care te prinde in afara centrului te si ROTESTE, nu doar te muta —
+## ca in realitate (PIT: forta prinde coltul din spate, nu centrul de masa).
+## rad/s per (m de brat de parghie x m/s de delta-v).
+@export var bump_yaw_factor: float = 0.25
+## Plafon pe rotatia primita dintr-o singura lovitura (rad/s). Sub el ramane
+## arcade: te sucesti, nu faci piruete de patinaj.
+@export var bump_yaw_max: float = 2.4
+## Peste acest delta-v incasat, rotile pierd scurt aderenta laterala: lovitura
+## se simte in directie, iar cel lovit isi prinde masina din alunecare.
+@export var bump_slip_dv: float = 5.0
 
 # --- Stare de cursa (scrisa de Race) ---
 var race_active: bool = false
@@ -180,6 +190,8 @@ var _wall_cooldown: float = 0.0
 var _bump_cooldown: float = 0.0
 ## instance_id-ul celeilalte masini -> secunde pana la urmatorul impuls admis.
 var _bump_pairs: Dictionary = {}
+## Rotatia (rad/s) primita dintr-o lovitura excentrica; se stinge singura.
+var _impact_yaw: float = 0.0
 var _skid_accum: float = 0.0
 var _respawn_cooldown: float = 0.0
 
@@ -287,6 +299,18 @@ func _physics_process(delta: float) -> void:
 			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
 	rotate_y(effective_steer * steer_speed * speed_frac * reverse_sign * delta)
+
+	# --- Rotatia primita din imbranceli (lovitura excentrica) ---
+	# Se stinge singura in ~o jumatate de secunda; cu grip-ul taiat de aceeasi
+	# lovitura, masina chiar ALUNECA pe durata ei — un derapaj de prins, nu o
+	# animatie. Rotim doar pe sol: in aer ar insemna sa aterizezi cu botul in
+	# alta parte decat merge viteza (aceeasi regula ca la spin_body).
+	if _impact_yaw != 0.0:
+		if is_on_floor():
+			rotate_y(_impact_yaw * delta)
+		_impact_yaw *= exp(-4.0 * delta)
+		if absf(_impact_yaw) < 0.05:
+			_impact_yaw = 0.0
 
 	# --- Grip lateral pe noua directie ---
 	forward = -global_transform.basis.z
@@ -493,11 +517,10 @@ func _handle_bumping() -> void:
 ##     plafonat pe IMPULS, nu pe masina, raportul de mase supravietuieste taierii.
 func _resolve_bump(other: Car, col: KinematicCollision3D) -> void:
 	var key := other.get_instance_id()
-	if float(_bump_pairs.get(key, 0.0)) > 0.0:
-		return
 	var n := col.get_normal() # dinspre cealalta masina spre noi
 	n.y = 0.0 # imbrancelile sunt orizontale; saltul il face suspensia, nu contactul
-	if n.length_squared() < 0.01:
+	var vertical_contact := n.length_squared() < 0.01
+	if vertical_contact:
 		# Normala aproape verticala = o masina s-a URCAT pe cealalta. Se intampla
 		# cu vehiculele lungi (autobuzul calca sportiva si o cara in el 20m, cu
 		# zero imbranceala — masurat inainte de fix). Atunci directia de respingere
@@ -507,6 +530,32 @@ func _resolve_bump(other: Car, col: KinematicCollision3D) -> void:
 		if n.length_squared() < 0.01:
 			return
 	n = n.normalized()
+	if float(_bump_pairs.get(key, 0.0)) > 0.0:
+		# Contact sustinut, in cooldown: impulsul nu se repeta, dar nici nu ne
+		# lasam opriti in zid — alunecarea ne sterge in fiecare cadru viteza
+		# spre contact, deci fara refacere un contact de 7 cadre insemna tot o
+		# oprire seaca. Pe normala, perechea primeste viteza COMUNA ponderata cu
+		# masa (contact plastic care conserva impulsul): cel din spate impinge,
+		# cel din fata e impins, amandoi isi continua drumul — bulldozer-ul din
+		# principiul de design nr. 1, nu un zid.
+		var m_s := maxf(mass_factor, 0.05)
+		var m_o := maxf(other.mass_factor, 0.05)
+		var vn_self := _prev_velocity.dot(n)
+		var vn_oth := other.velocity.dot(n)
+		# Tinta pe normala: viteza comuna cand inca impingem, propria viteza
+		# de dinainte cand doar ne atingem (clip-ul era oricum nemeritat).
+		# Refacerea se face NECONDITIONAT cat tine contactul — prima versiune
+		# o facea doar "cat impingem", si in cadrul imediat urmator egalizarii
+		# alunecarea stergea iar totul: atacatorul ramanea pe loc (masurat 0.0
+		# m/s), iar victima pleca singura cu tot impulsul.
+		var vn_goal := vn_self
+		if vn_self < vn_oth:
+			vn_goal = (m_s * vn_self + m_o * vn_oth) / (m_s + m_o)
+			other.velocity += n * (vn_goal - vn_oth)
+		var vn_held := velocity.dot(n)
+		if vn_goal < vn_held:
+			velocity += n * (vn_goal - vn_held)
+		return
 	# Cat de repede ne apropiem, masurat pe normala contactului — din vitezele
 	# DINAINTEA lui move_and_slide. Cele de acum au deja componenta spre coliziune
 	# stearsa de alunecare (de-aia se simtea ca un zid: te opreai sec si primeai
@@ -515,10 +564,26 @@ func _resolve_bump(other: Car, col: KinematicCollision3D) -> void:
 	# Depenetrare: cat de mult ne-am intrepatruns deja. Fara ea, o masina grea
 	# poate ingloba una usoara si o cara in ea zeci de metri.
 	var separation := col.get_depth() * bump_separation
+	if vertical_contact:
+		# ODIHNA pe acoperisul altei masini: fara adancime si fara viteza de
+		# apropiere, poarta de mai jos ar lasa masina de deasupra sa fie carata
+		# la nesfarsit ca pe o platforma mobila, cu zero imbranceala. Fortam un
+		# minim de separare: cine sta pe altcineva e impins mereu deoparte.
+		separation = maxf(separation, 1.0)
 	if closing < bump_min_closing and separation < 0.5:
 		return
 	_bump_pairs[key] = bump_pair_cooldown
 	other._bump_pairs[get_instance_id()] = bump_pair_cooldown
+	# move_and_slide a ALUNECAT deja: componenta noastra de viteza spre contact
+	# e stearsa inainte sa apucam sa aplicam impulsul. Fara restaurare, lovitura
+	# din spate insemna oprire seaca la zero plus recul — un zid, nu o masina.
+	# O punem la loc din _prev_velocity si lasam IMPULSUL sa decida cat se
+	# pierde: la mase egale amandoua isi continua drumul, cel din fata mai
+	# repede, cel din spate mai incet — conservarea impulsului, nu un caz special.
+	var vn_now := velocity.dot(n)
+	var vn_prev := _prev_velocity.dot(n)
+	if vn_prev < vn_now:
+		velocity += n * (vn_prev - vn_now)
 	var inv_self := 1.0 / maxf(mass_factor, 0.05)
 	var inv_other := 1.0 / maxf(other.mass_factor, 0.05)
 	var reduced_mass := 1.0 / (inv_self + inv_other)
@@ -532,12 +597,44 @@ func _resolve_bump(other: Car, col: KinematicCollision3D) -> void:
 	var dv_other := impulse * inv_other
 	velocity += n * dv_self
 	other.velocity += -n * dv_other
+	# Partea "de caroserie" a izbiturii: rotatie din loviturile excentrice si
+	# grip pierdut peste un prag — directia loviturii conteaza, nu doar marimea.
+	_receive_hit(other.global_position, n * dv_self, dv_self)
+	other._receive_hit(global_position, -n * dv_other, dv_other)
 	bumped.emit(self, other, dv_self)
 	other.bumped.emit(other, self, dv_other)
 	if _bump_cooldown <= 0.0 and (is_player or other.is_player):
 		_bump_cooldown = 0.25
 		other._bump_cooldown = 0.25
 		AudioManager.play_sfx(&"bump")
+
+## Ce pateste MASINA la o izbitura, dincolo de schimbarea de viteza.
+##
+## 1. Rotatie: bratul de parghie inmultit vectorial cu delta-v-ul primit —
+##    fizica reala a loviturii laterale sau a PIT-ului: o forta care trece prin
+##    centrul de masa doar impinge, una care prinde un colt ROTESTE. Bratul e
+##    directia spre CENTRUL celuilalt, nu punctul de contact raportat de Godot:
+##    pentru doua fete paralele acela cade intr-un COLT al cutiei (masurat cu
+##    sonda: 31° de rotatie la o lovitura perfect centrata, si atacatorul
+##    sfarsea sucit si oprit de propriul grip). Din centre, lovitura centrata
+##    da zero prin constructie — produsul vectorial cu un brat paralel cu
+##    normala e nul — iar cea excentrica exact cat ii da geometria.
+## 2. Alunecare: cand delta-v-ul are o componenta LATERALA serioasa fata de
+##    incotro e indreptata masina, rotile pierd scurt aderenta ("suprafata
+##    uda": se conduce, dar aluneca) — un T-bone te face sa derapezi, un sut
+##    drept in bara din spate doar te impinge, rotile raman pe directie.
+##    Refoloseste mecanismul de aquaplanare in loc sa inventeze altul.
+func _receive_hit(from_center: Vector3, dv: Vector3, _dv_len: float) -> void:
+	var lever := from_center - global_position
+	lever.y = 0.0
+	var kick := lever.cross(dv).y * bump_yaw_factor
+	_impact_yaw = clampf(_impact_yaw + kick, -bump_yaw_max, bump_yaw_max)
+	var fwd := -global_transform.basis.z
+	fwd = Vector3(fwd.x, 0.0, fwd.z).normalized()
+	var lat_dv := (dv - fwd * dv.dot(fwd)).length()
+	if lat_dv >= bump_slip_dv:
+		slip_time = maxf(slip_time, clampf(0.15 + lat_dv * 0.02, 0.0, 0.55))
+		slip_grip = SLIP_GRIP_WET
 
 func _detect_landing() -> void:
 	if is_on_floor() and not _was_on_floor and _prev_velocity.y < -6.0:
@@ -578,6 +675,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	crush_time = 0.0
 	crush_factor = 1.0
 	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
+	_impact_yaw = 0.0 # nici rotatia din ultima izbitura nu ne urmareste
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
 	route = last_safe_route
 	road_index = track.closest_index_global(global_position, route)

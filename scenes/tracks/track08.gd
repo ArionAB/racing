@@ -191,14 +191,26 @@ func _scenography() -> Array[Dictionary]:
 			"weight": 4.0, "scale": [0.8, 1.4], "sink": 0.1},
 		{"path": M + "plants/grass_tuft_small.glb", "weight": 2.0,
 			"scale": [0.8, 1.3], "sink": 0.08},
-		{"path": M + "plants/grass_tuft_large.glb", "weight": 1.5,
+		{"path": M + "plants/grass_tuft_large.glb", "weight": 1.2,
 			"scale": [0.8, 1.2], "sink": 0.1},
-		{"path": M + "flowers/flowers_orange.glb", "weight": 1.5,
+		{"path": M + "flowers/flowers_orange.glb", "weight": 1.2,
 			"scale": [0.9, 1.3], "sink": 0.06},
-		{"path": M + "flowers/flowers_white.glb", "weight": 1.5,
+		{"path": M + "flowers/flowers_white.glb", "weight": 0.8,
 			"scale": [0.9, 1.3], "sink": 0.06},
-		{"path": M + "plants/hibiscus_bush.glb", "weight": 1.0,
+		{"path": M + "plants/hibiscus_bush.glb", "weight": 0.8,
 			"scale": [0.7, 1.1], "sink": 0.12},
+		# Runda 2 (veg_set2): siluetele care lipseau rotatiei — arcul de
+		# feriga, tufa plina cu frunze late, a treia culoare de floare
+		# (CORAL_SAND, floare decolorata de soare). Ponderile vechi au
+		# scazut ca sa faca loc: piesele noi sunt la fel de scumpe ca
+		# florile (~750-800 tri), deci amestecul ramane aproape la acelasi
+		# cost mediu, doar mai variat la citire.
+		{"path": M + "plants/fern_cluster.glb", "weight": 1.0,
+			"scale": [0.8, 1.3], "sink": 0.08},
+		{"path": M + "plants/broadleaf_shrub.glb", "weight": 0.6,
+			"scale": [0.7, 1.1], "sink": 0.1},
+		{"path": M + "flowers/flowers_coral.glb", "weight": 0.6,
+			"scale": [0.85, 1.2], "sink": 0.06},
 	]
 	specs.append_array([
 		# --- PAJISTEA: trei lanuri cu goluri intre ele. Golurile cad pe
@@ -355,10 +367,25 @@ func _scenography() -> Array[Dictionary]:
 					"picks": ["Beach_Grass"],
 					"scale": [0.8, 1.3], "face": "random", "sink": 0.08},
 				{"kind": "edge", "label": "Verge_Umar", "side": latura,
-					"from": lan.x, "to": lan.y, "off": 1.3, "spacing": 15.0,
+					"from": lan.x, "to": lan.y, "off": 1.3, "spacing": 18.0,
 					"jitter": 0.4, "min_ground": 1.6,
 					"path": M + "flowers/flowers_orange.glb",
 					"scale": [0.8, 1.1], "face": "random", "sink": 0.06},
+				# veg_set2: tufa lata e silueta de gard viu a tivului —
+				# rara, dar ea face "peretele"; coralul e accentul pal
+				# dintre portocaliuri. Pasii mari nu sunt zgarcenie: linia
+				# tivului are ~2.6 km pe ambele laturi, si la 750-800 tri
+				# bucata fiecare metru de pas taiat costa zeci de mii.
+				{"kind": "edge", "label": "Verge_Umar", "side": latura,
+					"from": lan.x, "to": lan.y, "off": 1.4, "spacing": 40.0,
+					"jitter": 0.5, "min_ground": 1.6,
+					"path": M + "plants/broadleaf_shrub.glb",
+					"scale": [0.8, 1.15], "face": "random", "sink": 0.1},
+				{"kind": "edge", "label": "Verge_Umar", "side": latura,
+					"from": lan.x, "to": lan.y, "off": 1.3, "spacing": 55.0,
+					"jitter": 0.5, "min_ground": 1.6,
+					"path": M + "flowers/flowers_coral.glb",
+					"scale": [0.85, 1.15], "face": "random", "sink": 0.06},
 			])
 	return specs
 

@@ -1,10 +1,17 @@
-"""Set de vegetatie dupa foaia de referinta cu cinci piese, un GLB fiecare:
+"""Set de vegetatie dupa foaia de referinta, un GLB fiecare:
 
   Tropical_Shrub    2.3 x 2.3 x 1.5 m   plants/tropical_shrub.glb
   Flowers_Orange    1.5 x 1.5 x 0.8 m   flowers/flowers_orange.glb
   Flowers_White     1.5 x 1.5 x 0.6 m   flowers/flowers_white.glb
   Grass_Tuft_Large  1.8 x 1.8 x 1.2 m   plants/grass_tuft_large.glb
   Grass_Tuft_Small  0.9 x 0.9 x 0.6 m   plants/grass_tuft_small.glb
+
+Runda 2 (tivul si subarboretul din imaginea de referinta cereau siluete pe
+care cele cinci de mai sus nu le au — toate sunt smoc sau rozeta):
+
+  Fern_Cluster      1.3 x 1.3 x 0.7 m   plants/fern_cluster.glb
+  Broadleaf_Shrub   1.9 x 1.9 x 1.1 m   plants/broadleaf_shrub.glb
+  Flowers_Coral     1.4 x 1.4 x 0.6 m   flowers/flowers_coral.glb
 
 REFACUT in #208. Versiunea 1 era "sfere verzi cu buline": movile de bulgari
 cu discuri pe calota. Comparatia cu referinta a aratat ca distanta nu e in
@@ -191,12 +198,54 @@ def grass_small(b):
            slots=(DRY_VEGETATION, CACTUS_GREEN, DRY_VEGETATION), spread=0.36)
 
 
+# --- Runda 2: siluetele lipsa pentru tiv si subarboret ------------------------
+
+# Feriga: numai fronde, fara miez — arcul e toata silueta. Coroana pe unghiul
+# de aur cu frunze lungi si inguste (length_f mare, width_f mic) citeste a
+# feriga de la 10 m; un miez de bulgari i-ar umple exact golul dintre fronde
+# care o face feriga.
+def fern_cluster(b):
+    leaf_crown(b, 1.15, 0.60, 12, seed=211,
+               slots=(TROPICAL_GREEN, CACTUS_GREEN), z0=0.10,
+               length_f=0.40, width_f=0.12)
+    # cateva fronde tinere, drepte, din mijloc — rup simetria calotei
+    blades(b, 0.65, 0.52, 4, seed=213,
+           slots=(TROPICAL_GREEN,), spread=0.16, z0=0.05)
+
+
+# Tufa cu frunze late: intre smoc si tropical_shrub ca gabarit, dar cu
+# frunze LATE (width_f 0.22) — silueta "plina" care lipsea rotatiei.
+# Amprenta ~30% sub tropical_shrub, ca sa incapa in tiv fara sa-l inghita.
+def broadleaf_shrub(b):
+    core_mound(b, 1.35, 0.80, 3, seed=231)
+    leaf_crown(b, 1.55, 0.98, 9, seed=233,
+               slots=(TROPICAL_GREEN, CACTUS_GREEN), z0=0.40,
+               length_f=0.46, width_f=0.22)
+
+
+# A treia culoare de floare. NU exista slot roz legal (24-31 sunt interzise,
+# accentele de masina 14-16 la fel) — CORAL_SAND (19) e singurul ton cald-pal
+# din mediul insular si citeste a floare decolorata de soare langa
+# terracotta si alb. Decizia de paleta e asta, nu un slot nou.
+def flowers_coral(b):
+    core_mound(b, 1.00, 0.44, 2, seed=251)
+    leaf_crown(b, 1.32, 0.50, 8, seed=253,
+               slots=(TROPICAL_GREEN, CACTUS_GREEN), z0=0.15,
+               length_f=0.36, width_f=0.20)
+    # capete ca la alb (CORAL_SAND se stinge si el sub AO), dar mai putine:
+    # e accentul rar, nu covorul
+    flower_heads(b, 1.28, 0.54, 10, CORAL_SAND, head=0.24, seed=257)
+
+
 make("Veg_Tropical_Shrub", "plants/tropical_shrub.glb", tropical_shrub)
 make("Veg_Flowers_Orange", "flowers/flowers_orange.glb", flowers_orange)
 make("Veg_Flowers_White", "flowers/flowers_white.glb", flowers_white)
 make("Veg_Grass_Tuft_Large", "plants/grass_tuft_large.glb", grass_large)
 make("Veg_Grass_Tuft_Small", "plants/grass_tuft_small.glb", grass_small,
      tint=TINT_DRY)
+make("Veg_Fern_Cluster", "plants/fern_cluster.glb", fern_cluster)
+make("Veg_Broadleaf_Shrub", "plants/broadleaf_shrub.glb", broadleaf_shrub)
+make("Veg_Flowers_Coral", "flowers/flowers_coral.glb", flowers_coral)
 
 for obj, fname in built:
     obj.location = (0.0, 0.0, 0.0)

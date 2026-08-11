@@ -94,7 +94,7 @@ func _init() -> void:
 ## Cotele sunt profilul din referinta, nu inventate: fiecare punct isi ia y-ul
 ## de la fractia lui de tur. Daca se muta un punct pe orizontala, cota lui NU
 ## mai corespunde profilului — se reciteste, nu se ajusteaza din ochi.
-func _points() -> Array[Vector3]:
+func _code_points() -> Array[Vector3]:
 	return [
 		# --- 1. Digul de start: dreapta la nivelul marii, tetrapozi pe exterior
 		Vector3(30, 0.2, 217),    # LINIA DE START, mers spre -X

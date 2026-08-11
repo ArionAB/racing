@@ -147,6 +147,33 @@ la Regenerate (vezi `docs/decor_manual.md`).
 
 ---
 
+## 5b. Pistele definite in COD (Okinawa, Alpii) — si ele editabile
+
+Track08 si Track09 nu au exporturile `custom_*` — traseul, rapele si reperele
+lor sunt scrise in `track08.gd` / `track09.gd`. Dar drumul si muntii lor se
+pot edita la fel:
+
+1. Deschide scena (ex. `Track09.tscn`) si bifeaza **Regenerate** pe radacina.
+   PRIMA bifare creeaza nodul **Path** cu punctele reale ale traseului —
+   geometrie identica, doar ca de-acum curba e a ta.
+2. Trage de puncte exact ca la orice pista custom (sectiunea 2), Regenerate,
+   salveaza scena. Din momentul in care nodul Path exista, el CASTIGA in fata
+   punctelor din cod.
+3. **Munti noi:** adauga noduri TerrainPeak — se ADUNA la masivele declarate
+   in cod (nu le inlocuiesc). Ca sa muti masivele EXISTENTE ale Alpilor,
+   declaratiile din `track09.gd::_peak_specs` trebuie mutate in noduri —
+   cere asta cand vrei.
+
+**Atentie la fractii:** pe pistele din cod, rapele, parapetii si hazardele
+sunt legate de fractii de tur MASURATE pentru traseul actual (ex. cornisa
+Alpilor la 0.462-0.472). Un retus mic nu strica nimic; o reasezare mare a
+traseului muta toate reperele — dupa, ruleaza ProbeLayout si verifica din
+masina ca gimmick-urile au ramas unde le e locul.
+
+Daca vrei sa te intorci la traseul din cod: sterge nodul Path si Regenerate.
+
+---
+
 ## 6. Ce NU se poate inca vizual (exista in cod, cere-le cand ai nevoie)
 
 - **Scurtaturi** — sistemul de rute exista (Okinawa, Alpii le au, declarate

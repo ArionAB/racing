@@ -51,7 +51,7 @@ func _init() -> void:
 ## raza > half_width (7 m), ramuri paralele la >= 14 m, panta < 22%.
 ## Diagonalele serpentinei stau la ~34 m una de alta si la 8-10 m diferenta de
 ## cota — destul cat samplerul sa nu sara de pe una pe alta (GROUND_LOCK_LEN 15).
-func _points() -> Array[Vector3]:
+func _code_points() -> Array[Vector3]:
 	return [
 		# --- SATUL: ulita mare, aproape plata ---
 		Vector3(0, 0, 0),        # START/FINISH, mers spre +X

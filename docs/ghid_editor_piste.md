@@ -159,10 +159,11 @@ pot edita la fel:
 2. Trage de puncte exact ca la orice pista custom (sectiunea 2), Regenerate,
    salveaza scena. Din momentul in care nodul Path exista, el CASTIGA in fata
    punctelor din cod.
-3. **Munti noi:** adauga noduri TerrainPeak — se ADUNA la masivele declarate
-   in cod (nu le inlocuiesc). Ca sa muti masivele EXISTENTE ale Alpilor,
-   declaratiile din `track09.gd::_peak_specs` trebuie mutate in noduri —
-   cere asta cand vrei.
+3. **Munti:** masivele Alpilor sunt DEJA noduri TerrainPeak in Track09.tscn
+   (MasivCentral si UmarulDeSud) — le tragi ca pe orice nod, Regenerate, si
+   muntele se muta. Noduri noi se adauga la fel, oriunde. Dupa o mutare
+   serioasa, remasoara cu ProbeAlpineTerrain (regulile de calibrare sunt in
+   comentariul din `track09.gd`).
 
 **Atentie la fractii:** pe pistele din cod, rapele, parapetii si hazardele
 sunt legate de fractii de tur MASURATE pentru traseul actual (ex. cornisa

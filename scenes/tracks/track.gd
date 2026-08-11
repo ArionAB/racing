@@ -891,6 +891,8 @@ func rebuild() -> void:
 	for child in get_children():
 		if child is Path3D:
 			continue # curba editabila a pistelor custom ramane
+		if child is TerrainPeak:
+			continue # declaratie de INTRARE, ca si curba — nu e output generat
 		if child.owner != null:
 			continue # asezat de mana in editor, salvat in scena
 		child.free()

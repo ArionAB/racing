@@ -9,6 +9,11 @@ extends Track
 ##     reconstruieste pe loc (asfalt, pereti, borduri, decor, tot)
 ##  5. salveaza scena — doar curba se salveaza; restul se genereaza mereu
 ##
+## MUNTI SI DEALURI: adauga noduri [TerrainPeak] oriunde sub radacina si
+## trage-le in viewport — X/Z = unde sta masivul, Y = cota varfului, raza in
+## Inspector. La Regenerate terenul se ridica spre ele; asfaltul ramane mereu
+## la cota curbei (banda de protectie din TrackSideSampler._lift_peaks).
+##
 ## Nota: generatorul isi face propriile tangente netede (Catmull-Rom) din
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 
@@ -114,6 +119,26 @@ func _landmark_spots() -> Array[Vector3]:
 
 func _ravines() -> Array[Vector4]:
 	return custom_ravines
+
+## Masivele vin din noduri [TerrainPeak] plasate in scena, nu dintr-un export:
+## un munte se aseaza tragand de un gizmo, nu scriind un Vector4 din cap.
+## Cautarea e recursiva ca sa poti grupa varfurile sub un Node3D "Peaks", si
+## manuala (nu find_children pe nume de clasa) ca sa nu depinda de felul in
+## care Godot inregistreaza clasele de script la rulare headless.
+func _peak_specs() -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	_collect_peaks(self, out)
+	return out
+
+func _collect_peaks(node: Node, out: Array[Vector4]) -> void:
+	for child in node.get_children():
+		if child is TerrainPeak:
+			var pk := child as TerrainPeak
+			# In coordonatele PISTEI, ca baked si ca tot ce citeste samplerul —
+			# conteaza daca varful e grupat sub un nod cu transformare proprie.
+			var p := to_local(pk.global_position)
+			out.append(Vector4(p.x, p.z, pk.radius_m, p.y))
+		_collect_peaks(child, out)
 
 func _rockfall_fracs() -> Array[float]:
 	return custom_rockfall_fracs

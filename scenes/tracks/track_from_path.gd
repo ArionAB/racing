@@ -14,6 +14,11 @@ extends Track
 ## Inspector. La Regenerate terenul se ridica spre ele; asfaltul ramane mereu
 ## la cota curbei (banda de protectie din TrackSideSampler._lift_peaks).
 ##
+## SCURTATURI: adauga noduri [TrackBranch] (tot Path3D) si deseneaza doar
+## MIJLOCUL benzii — capetele se lipesc singure de bucla principala. Latimea si
+## `wet` sunt in Inspector; vezi antetul lui TrackBranch pentru de ce o
+## scurtatura fara contragreutate nu e o decizie, ci un cadou.
+##
 ## Nota: generatorul isi face propriile tangente netede (Catmull-Rom) din
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 

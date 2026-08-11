@@ -40,7 +40,15 @@ const FLYOFF_NET_FLOOR_DROP: float = 45.0
 
 ## Personalitatea pistei — suprascrise de subclase.
 var track_name: String = "Pista"
-var half_width: float = 7.0 # ingust = tehnic, lat = vitezomanie
+## Jumatatea latimii soselei, in metri. Ingust = tehnic, lat = vitezomanie.
+##
+## NU se citeste direct din generatoare: acolo se cheama [method width_at] sau
+## [method width_at_index]. Deocamdata amandoua intorc exact valoarea asta,
+## deci comportamentul e neschimbat — dar toate cele ~44 de locuri care
+## dimensionau ceva dupa latime trec printr-un singur punct, iar profilul de
+## latime pe sectoare (#236 pasul 2) devine o schimbare intr-o functie in loc
+## de una in patruzeci. Vezi [method width_at].
+var half_width: float = 7.0
 
 ## Din ce e facut drumul: "asphalt" (implicit) sau "dirt" — nisip batatorit.
 ##
@@ -693,6 +701,47 @@ var _mat_cache: Dictionary = {}
 
 # --- API pentru subclase ---
 
+## ############################################################################
+## LATIMEA SOSELEI, INTR-UN SINGUR LOC
+##
+## Toate generatoarele intreaba de aici cat de lat e drumul, in loc sa citeasca
+## `half_width` direct. Deocamdata raspunsul e mereu acelasi — pasul asta NU
+## schimba niciun pixel, si chiar asta e testul lui.
+##
+## De ce merita un pas separat (#236): latimea era citita in ~44 de locuri, si
+## nu doar pentru asfalt — hazardele isi dimensioneaza cursa dupa ea
+## (`travel`, `arm_reach`, `sweep`), grila de start isi imparte celulele,
+## chevron-urile si gardurile isi calculeaza degajarea. Fiecare presupunea
+## tacit ca latimea e CONSTANTA. Un profil de latime bagat direct peste ele
+## le-ar fi rupt pe rand, si nu zgomotos: o vana de carusel dimensionata pe
+## latimea de la fractia 0 ar fi trecut prin perete la fractia 0.5, tacut.
+##
+## Cu intrebarea centralizata, pasul 2 (profil pe sectoare) e o schimbare
+## intr-o functie, iar locurile care au nevoie de latimea LOCALA se vad deja:
+## sunt cele care cheama `width_at_index`.
+
+## Jumatatea latimii soselei la o fractie de tur (0..1).
+##
+## Deocamdata constanta. Cand va exista profilul pe sectoare, aici se
+## interpoleaza — si tot ce cheama functia asta capata latime variabila fara
+## sa se schimbe.
+func width_at(_frac: float) -> float:
+	return half_width
+
+
+## Acelasi lucru, dar intrebat cu un index din [member baked].
+##
+## Exista separat fiindca majoritatea generatoarelor itereaza pe indici si NU au
+## fractia la indemana; convertind aici, nu se imprastie prin cod aceeasi
+## impartire la `baked.size()`. Un index inseamna o fractie doar pe bucla
+## principala — pe scurtaturi latimea vine din [member TrackRoute.half_width].
+func width_at_index(i: int) -> float:
+	var n := baked.size()
+	if n == 0:
+		return half_width
+	return width_at(float(((i % n) + n) % n) / float(n))
+
+
 ## Punctele de control ale traseului. INTAI curba din nodul copil "Path"
 ## (editabila vizual, cu gizmo-uri), apoi cele scrise in cod. Asa ORICE pista
 ## — inclusiv una definita in cod, ca Alpii — devine editabila din editor in
@@ -904,6 +953,44 @@ func _collect_peaks(node: Node, out: Array[Vector4]) -> void:
 			out.append(Vector4(p.x, p.z, pk.radius_m, p.y))
 		_collect_peaks(child, out)
 
+
+## Scurtaturile desenate ca noduri [TrackBranch] — se ADUNA la cele declarate in
+## cod, exact ca varfurile de mai sus. O pista scrisa in cod (Alpii) poate primi
+## o scurtatura NOUA tragand un nod, fara sa atinga `_branch_specs()`.
+##
+## Intoarce acelasi dictionar pe care il returneaza `_branch_specs()`, deci
+## `_make_branch()` nu stie si nu-i pasa de unde vine banda.
+##
+## `entry` / `exit` NU sunt in dictionar, si asta e chiar decizia din #234:
+## se DERIVA din capetele curbei desenate (vezi `_branch_ends`), nu se declara.
+## Un capat scris de mana ramane in urma la prima ajustare a traseului si lasa
+## o treapta in aer.
+func _node_branches() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	_collect_branches(self, out)
+	return out
+
+
+func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
+	for child in node.get_children():
+		# Nodul "Path" al traseului principal e tot un Path3D, dar NU e o
+		# scurtatura — de aceea verificarea e pe TrackBranch, nu pe Path3D.
+		if child is TrackBranch:
+			var br := child as TrackBranch
+			var mid := br.mid_points(self)
+			if mid.size() < 1:
+				push_warning("Track: %s n-are puncte — se ignora" % br.name)
+				continue
+			var spec := {
+				"points": mid,
+				"wet": br.wet,
+				"label": br.label if br.label != "" else br.name,
+			}
+			if br.branch_half_width > 0.0:
+				spec["half_width"] = br.branch_half_width
+			out.append(spec)
+		_collect_branches(child, out)
+
 ## Portiunile pe care peretele exterior NU e panglica rosie continua:
 ## (frac_start, frac_end, regim, latura ±1 sau 0 = ambele).
 ##
@@ -1042,6 +1129,12 @@ func rebuild() -> void:
 	_resolve_channels()
 	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
 	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
+	#
+	# `half_width` SE DA INCA INTREG, nu prin width_at(), si asta e granita
+	# declarata a pasului 1 din #236: samplerul il tine ca scalar si il
+	# foloseste la banda de protectie a asfaltului si la degajarea decorului.
+	# Ca sa devina variabil trebuie schimbat samplerul, nu apelul de aici —
+	# treaba pasului 2, unde profilul chiar exista si merita costul.
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
@@ -2394,7 +2487,10 @@ func _build_routes() -> void:
 	main.closed = true
 	main.label = "principal"
 	routes.append(main)
-	for spec in _branch_specs():
+	# Cele din cod INTAI, cele desenate dupa: ordinea rutelor e stabila pentru
+	# sonde si mesaje, iar un nod adaugat in editor nu renumeroteaza benzile
+	# declarate in cod.
+	for spec in _branch_specs() + _node_branches():
 		var branch := _make_branch(spec)
 		if branch != null:
 			routes.append(branch)
@@ -2477,11 +2573,50 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	if mid.is_empty():
 		push_error("Track: scurtatura fara puncte intermediare")
 		return null
-	var entry := fposmod(float(spec.get("entry", 0.0)), 1.0)
-	var exit_f := fposmod(float(spec.get("exit", 0.0)), 1.0)
 	var n := baked.size()
-	var i_entry := int(entry * float(n)) % n
-	var i_exit := int(exit_f * float(n)) % n
+	var i_entry := 0
+	var i_exit := 0
+	if spec.has("entry") and spec.has("exit"):
+		# Scurtatura scrisa in cod: fractiile sunt MASURATE si declarate.
+		var entry := fposmod(float(spec["entry"]), 1.0)
+		var exit_f := fposmod(float(spec["exit"]), 1.0)
+		i_entry = int(entry * float(n)) % n
+		i_exit = int(exit_f * float(n)) % n
+	else:
+		# Scurtatura DESENATA: capetele se citesc de pe bucla principala, ca
+		# punctele ei cele mai apropiate de primul si ultimul punct desenat.
+		# Vezi antetul lui TrackBranch pentru de ce nu se deseneaza capetele.
+		var lbl := String(spec.get("label", "?"))
+		i_entry = _closest_baked_index(mid[0])
+		i_exit = _closest_baked_index(mid[mid.size() - 1])
+		if i_entry == i_exit:
+			push_warning(("Track: scurtatura '%s' pleaca si revine in acelasi "
+				+ "punct de pe bucla — se ignora") % lbl)
+			return null
+		# CAPETELE DESENATE TREBUIE SA FIE LANGA SOSEA, si asta e o conditie
+		# reala, nu o pedanterie. "Cel mai apropiat punct de pe bucla" e o
+		# intrebare bine pusa doar cat timp punctul chiar e langa bucla; pentru
+		# unul aruncat in mijlocul hartii raspunsul e arbitrar si se schimba din
+		# nimic la prima ajustare de traseu.
+		#
+		# Masurat pe scurtatura din COD a Alpilor, ale carei puncte sunt
+		# waypoint-uri de mijloc, nu capete: primul sta la 33.8 m de sosea, si
+		# de acolo cel mai apropiat punct de bucla iese la fractia 0.825, pe
+		# cand fractia masurata de mana e 0.754. Nici una nu e gresita — e
+		# intrebarea care e prost pusa la distanta aia.
+		#
+		# De aceea pragul e generos (BRANCH_END_NEAR_M): nu respinge, doar
+		# avertizeaza, ca sa vezi in Output DE CE banda ta pleaca de unde pleaca.
+		for pair in [[mid[0], i_entry, "pleaca"],
+				[mid[mid.size() - 1], i_exit, "revine"]]:
+			var p: Vector3 = pair[0]
+			var b: Vector3 = baked[int(pair[1])]
+			var d := Vector2(p.x - b.x, p.z - b.z).length()
+			if d > BRANCH_END_NEAR_M:
+				push_warning(("Track: scurtatura '%s' %s de la %.0f m de sosea "
+					+ "(prag %.0f) — deseneaza capatul LANGA drum, altfel "
+					+ "punctul de racord e ales arbitrar")
+					% [lbl, String(pair[2]), d, BRANCH_END_NEAR_M])
 	var pts: Array[Vector3] = [baked[i_entry]]
 	pts.append_array(mid)
 	pts.append(baked[i_exit])
@@ -2492,6 +2627,33 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.wet = bool(spec.get("wet", false))
 	route.label = String(spec.get("label", "scurtatura"))
 	return route
+
+## Cat de departe de sosea poate sta un capat DESENAT de scurtatura inainte sa
+## primeasca avertisment.
+##
+## 25 m e cam trei latimi de drum: destul cat sa desenezi relaxat primul punct
+## putin pe langa asfalt, prea putin cat sa ajungi langa ALT sector al buclei.
+## Nu e un prag de respingere — o scurtatura peste el se construieste oricum,
+## doar ca stii de ce s-a agatat unde s-a agatat.
+const BRANCH_END_NEAR_M: float = 25.0
+
+## Indexul de pe bucla principala cel mai apropiat de un punct, in plan (XZ).
+##
+## Distanta e 2D deliberat: o scurtatura de munte pleaca de pe un drum care urca,
+## iar capatul desenat sta aproape sigur la alta cota decat asfaltul. Cu distanta
+## 3D, o diferenta de cota de cativa metri ar fi mutat punctul de desprindere cu
+## zeci de metri de-a lungul soselei — capatul s-ar fi lipit de bucata de drum
+## care se INTAMPLA sa fie la aceeasi inaltime, nu de cea de deasupra lui.
+func _closest_baked_index(p: Vector3) -> int:
+	var best := 0
+	var best_d := INF
+	for i in baked.size():
+		var d := Vector2(p.x - baked[i].x, p.z - baked[i].z).length_squared()
+		if d < best_d:
+			best_d = d
+			best = i
+	return best
+
 
 func _side_at(i: int) -> Vector3:
 	var n := baked.size()
@@ -2716,7 +2878,6 @@ func _build_road() -> void:
 	# 14:1 lateral, deci granulatia aparea ca dungi longitudinale, nu ca pietris.
 	var tile := 3.5
 	var side_tile := 8.0
-	var u_half := half_width / tile
 	# Nuanta per pozitie de profil: alb pe banda de rulare, gradat spre margini
 	# — uzura/praful se aduna la margine, si gradientul face soseaua sa
 	# citeasca a suprafata cu latime, nu a panglica uniforma.
@@ -2774,20 +2935,27 @@ func _build_road() -> void:
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
 		var s1v := _side_at(j)
+		# Latimea la CELE DOUA capete ale segmentului, nu una singura: asa
+		# panglica se ingusteaza continuu cand va exista profilul, in loc sa
+		# sara in trepte de cate un segment. Acum sunt egale.
+		var hw0 := width_at_index(i)
+		var hw1 := width_at_index(j)
 		# Inelele profilului la capetele segmentului.
 		var ring0: Array[Vector3] = []
 		var ring1: Array[Vector3] = []
 		for t in ROAD_PROFILE:
 			var crown := Vector3.UP * (ROAD_CROWN * (1.0 - t * t))
-			ring0.append(baked[i] + s0v * half_width * t + crown)
-			ring1.append(baked[j] + s1v * half_width * t + crown)
+			ring0.append(baked[i] + s0v * hw0 * t + crown)
+			ring1.append(baked[j] + s1v * hw1 * t + crown)
 		for k in ROAD_PROFILE.size() - 1:
 			var ta: float = ROAD_PROFILE[k]
 			var tb: float = ROAD_PROFILE[k + 1]
 			var ca := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(ta)))
 			var cb := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(tb)))
-			var ua := ta * u_half
-			var ub := tb * u_half
+			# UV-ul urmareste latimea LOCALA, ca dala sa ramana patrata si acolo
+			# unde drumul se ingusteaza — altfel textura s-ar intinde in strangere.
+			var ua := ta * (hw0 / tile)
+			var ub := tb * (hw0 / tile)
 			# UV2 din coordonate de LUME, ca la teren: a doua trecere trebuie sa
 			# fie CONTINUA cu nisipul de langa ea, nu sa urmareasca panglica.
 			# Daca ar merge pe distanta parcursa, peticele s-ar aseza in dungi
@@ -2833,10 +3001,10 @@ func _build_road() -> void:
 			top.set_color(c1b); top.set_uv(Vector2(ub, v1)); top.set_uv2(m1b)
 			top.add_vertex(w1b)
 		# Fasia plata de coliziune (geometria veche, 2 vertecsi transversal).
-		var l0 := baked[i] - s0v * half_width
-		var r0 := baked[i] + s0v * half_width
-		var l1 := baked[j] - s1v * half_width
-		var r1 := baked[j] + s1v * half_width
+		var l0 := baked[i] - s0v * hw0
+		var r0 := baked[i] + s0v * hw0
+		var l1 := baked[j] - s1v * hw1
+		var r1 := baked[j] + s1v * hw1
 		col.add_vertex(l0); col.add_vertex(l1); col.add_vertex(r0)
 		col.add_vertex(r0); col.add_vertex(l1); col.add_vertex(r1)
 		var u0 := _dists[i] / side_tile
@@ -3103,8 +3271,8 @@ func _build_walls() -> void:
 				continue
 			if _road_gap(i):
 				continue # buza golului: dincolo de ea nu mai e pe ce sa stea
-			var b0 := baked[i] + _side_at(i) * half_width * side_sign
-			var b1 := baked[j] + _side_at(j) * half_width * side_sign
+			var b0 := baked[i] + _side_at(i) * width_at_index(i) * side_sign
+			var b1 := baked[j] + _side_at(j) * width_at_index(j) * side_sign
 			var mid := (b0 + b1) * 0.5
 			var on_deck := _bridge_mix(i) > 0.5
 			var exterior := not Geometry2D.is_point_in_polygon(
@@ -3203,9 +3371,10 @@ func _build_ramp(frac: float) -> void:
 	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
 	var side := _side_at(idx)
 	var half_l := 7.0
-	var half_w := half_width * 0.5
+	var hw := width_at(frac)
+	var half_w := hw * 0.5
 	var height := 2.6
-	var center := c + side * half_width * 0.5
+	var center := c + side * hw * 0.5
 	var fl := center - dir * half_l - side * half_w
 	var fr := center - dir * half_l + side * half_w
 	var bl := center + dir * half_l - side * half_w + Vector3.UP * height
@@ -3229,6 +3398,7 @@ func _build_hazard(frac: float) -> void:
 	var p := baked[idx]
 	var dir := (baked[(idx + 1) % n] - p).normalized()
 	var side := dir.cross(Vector3.UP).normalized()
+	var hw := width_at(frac)
 	# Hazard tematic: in desert, un bolovan desprins din faleza se rostogoleste
 	# peste sosea; in rest, excavatorul coboara bratul peste o banda.
 	#
@@ -3276,7 +3446,9 @@ func _build_hazard(frac: float) -> void:
 		ball.roll_radius = 1.0 if rolls else 0.0
 		# Noi ii cerem maturarea maxima; el isi taie cursa cat sa nu iasa din
 		# sosea pe latimea ASTA de drum (vezi SlidingHazard._clamp_travel).
-		ball.road_half_width = half_width
+		# Latimea e cea de la fractia LUI: un hazard dimensionat pe latimea
+		# medie ar iesi prin perete exact pe portiunile stramte.
+		ball.road_half_width = hw
 		ball.phase = fposmod(frac * 3.7, 1.0) # doua obstacole nu bat la unison
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
@@ -3292,17 +3464,17 @@ func _build_hazard(frac: float) -> void:
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
 		add_child(ball)
 		ball.center = p
-		ball.travel = side * half_width * 0.9
+		ball.travel = side * hw * 0.9
 		ball.global_position = p
 	elif ResourceLoader.exists("res://assets/models/vehicles/rusted_digger.glb"):
 		_build_excavator(frac)
 	else:
 		var box := SlidingHazard.new()
-		box.road_half_width = half_width
+		box.road_half_width = hw
 		box.phase = fposmod(frac * 3.7, 1.0)
 		add_child(box)
 		box.center = p
-		box.travel = side * half_width * 0.9
+		box.travel = side * hw * 0.9
 		box.global_position = p
 
 ## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
@@ -3316,7 +3488,7 @@ func _build_carousel(frac: float) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var carousel := CarouselHazard.new()
-	carousel.arm_reach = half_width - 0.2
+	carousel.arm_reach = width_at(frac) - 0.2
 	carousel.position = baked[idx]
 	add_child(carousel)
 
@@ -3336,7 +3508,7 @@ func _build_rockfall(frac: float) -> void:
 	rock.phase = fposmod(frac * 3.7, 1.0)
 	add_child(rock)
 	# Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
-	rock.global_position = p + side * (half_width * 0.45)
+	rock.global_position = p + side * (width_at(frac) * 0.45)
 
 
 ## Trecere de cale ferata cu tren.
@@ -3547,8 +3719,8 @@ func _build_flyoff(frac: float) -> void:
 		# exponent > 1 = panta creste spre buza (rampa de trambulina, nu cocoas)
 		var h0 := FLYOFF_HEIGHT * pow(float(k) / float(steps), 1.35)
 		var h1 := FLYOFF_HEIGHT * pow(float(k + 1) / float(steps), 1.35)
-		var s0 := _side_at(i) * half_width
-		var s1 := _side_at(j) * half_width
+		var s0 := _side_at(i) * width_at_index(i)
+		var s1 := _side_at(j) * width_at_index(j)
 		var l0 := baked[i] - s0 + Vector3.UP * h0
 		var r0 := baked[i] + s0 + Vector3.UP * h0
 		var l1 := baked[j] - s1 + Vector3.UP * h1
@@ -3566,7 +3738,7 @@ func _build_flyoff(frac: float) -> void:
 	# coborare lina masina ar ramane lipita de panta (floor snap) si creasta ar
 	# fi doar o denivelare — desprinderea trebuie sa fie o muchie.
 	var last := (idx + steps) % n
-	var sl := _side_at(last) * half_width
+	var sl := _side_at(last) * width_at_index(last)
 	var lip_l := baked[last] - sl
 	var lip_r := baked[last] + sl
 	var top_l := lip_l + Vector3.UP * FLYOFF_HEIGHT
@@ -3587,7 +3759,7 @@ func _build_flyoff_kicker(idx: int) -> void:
 	var kicker := FlyoffKicker.new()
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	box.size = Vector3(half_width * 2.0, 2.6, 3.0)
+	box.size = Vector3(width_at_index(idx) * 2.0, 2.6, 3.0)
 	shape.shape = box
 	kicker.add_child(shape)
 	kicker.transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
@@ -3709,14 +3881,14 @@ func _build_start_line() -> void:
 	var dir := start_direction()
 	var side := _side_at(0)
 	var cols := 8
-	var cell_w := half_width * 2.0 / float(cols)
+	var cell_w := width_at_index(0) * 2.0 / float(cols)
 	var cell_l := 1.6
 	var lift := Vector3.UP * 0.05 # putin peste asfalt, contra z-fighting
 	for row in 2:
 		for col in cols:
 			var origin := baked[0] + lift \
 				+ dir * (float(row) * cell_l) \
-				+ side * (-half_width + float(col) * cell_w)
+				+ side * (-width_at_index(0) + float(col) * cell_w)
 			var st := white if (row + col) % 2 == 0 else black
 			var a := origin
 			var b := origin + side * cell_w
@@ -3840,8 +4012,8 @@ func _build_shoulders() -> void:
 			# acum ar fi chiar ei pragul pe care masina nu-l urca. Nu e nevoie de
 			# ei: coroana soselei e zero la t = ±1, deci cele doua suprafete se
 			# ating pe o muchie comuna, nu se suprapun.
-			var inner0 := baked[i] + s0 * half_width * side_sign
-			var inner1 := baked[j] + s1 * half_width * side_sign
+			var inner0 := baked[i] + s0 * width_at_index(i) * side_sign
+			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
 			var outer0 := inner0 + s0 * w0 * side_sign
 			var outer1 := inner1 + s1 * w1 * side_sign
 			outer0.y = _terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK
@@ -3936,7 +4108,7 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 	var max_tan := tan(deg_to_rad(SHOULDER_MAX_SLOPE_DEG))
 	var w := SHOULDER_WIDTH
 	for _pass in 2:
-		var p := base + lat * (half_width + w)
+		var p := base + lat * (width_at_index(i) + w)
 		var drop := base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK
 		w = clampf(drop / max_tan, SHOULDER_WIDTH, SHOULDER_MAX_WIDTH)
 	return w
@@ -4062,8 +4234,8 @@ func _build_tire_marks() -> void:
 		if _road_gap(i, j):
 			continue
 		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
-		var lane0 := -offset_sign[i] * half_width * 0.35
-		var lane1 := -offset_sign[j] * half_width * 0.35
+		var lane0 := -offset_sign[i] * width_at_index(i) * 0.35
+		var lane1 := -offset_sign[j] * width_at_index(j) * 0.35
 		var v0 := _dists[i] / TIRE_TILE
 		var v1 := _dists[i + 1] / TIRE_TILE
 		for wheel: float in [-TIRE_GAUGE, TIRE_GAUGE]:
@@ -4194,8 +4366,8 @@ func _build_kerbs() -> void:
 		var tint := (KERB_RED if block % 2 == 0 else KERB_WHITE) * wear
 		var edge := tint * KERB_EDGE_SHADE
 		for side_sign: float in [-1.0, 1.0]:
-			var e0 := baked[i] + _side_at(i) * half_width * side_sign + lift
-			var e1 := baked[j] + _side_at(j) * half_width * side_sign + lift
+			var e0 := baked[i] + _side_at(i) * width_at_index(i) * side_sign + lift
+			var e1 := baked[j] + _side_at(j) * width_at_index(j) * side_sign + lift
 			var in0 := e0 - _side_at(i) * KERB_WIDTH * side_sign
 			var in1 := e1 - _side_at(j) * KERB_WIDTH * side_sign
 			st.set_color(edge)
@@ -4306,7 +4478,7 @@ func _build_excavator(frac: float) -> void:
 	add_child(excavator)
 	# Corpul sta PE marginea soselei (blocheaza banda exterioara),
 	# bratul coboara spre centru — lasa o strecuratoare pe interior.
-	var park := p + side * (half_width * 0.8)
+	var park := p + side * (width_at(frac) * 0.8)
 	excavator.look_at_from_position(park, p, Vector3.UP) # bratul spre drum
 
 ## Dinozaurul de plastic: landmark care "priveste" cursa de pe margine.
@@ -4344,7 +4516,7 @@ func _build_dino(frac: float, side_sign: float) -> void:
 	# 12 m de la marginea asfaltului, nu 6: la 6 statea in banda in care
 	# TrackCliffs ridica peretii (OFFSET_OUTER 1.2 .. CORNER 5.0) si silueta
 	# s-ar fi pierdut in stanca. Un sit de sapaturi nu sta oricum pe acostament.
-	var stand := p + side * (half_width + 12.0)
+	var stand := p + side * (width_at(frac) + 12.0)
 	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
 	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in
 	# lume, deci pe portiunile inaltate landmark-ul ramanea suspendat in aer.
@@ -4485,7 +4657,7 @@ func _build_mine(frac: float, side_sign: float) -> void:
 	body.add_child(shape)
 	add_child(body)
 	Palette.apply_class_materials(portal, _MINE_CLASSES)
-	var stand := p + side * (half_width + 16.0)
+	var stand := p + side * (width_at(frac) + 16.0)
 	stand.y = _sampler.ground_y(stand.x, stand.z)
 	body.look_at_from_position(stand, Vector3(p.x, stand.y, p.z), Vector3.UP)
 	# Sina iese din gura minei spre drum; vagonetul rasturnat langa ea.
@@ -4778,7 +4950,7 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 		Palette.apply_triplanar_class(root, info["tri_class"])
 	else:
 		Palette.apply_world_material(root)
-	var stand := p + side * (half_width + float(info["gap"]))
+	var stand := p + side * (width_at(frac) + float(info["gap"]))
 	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
 	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in
 	# lume, deci pe portiunile inaltate landmark-ul ramanea suspendat in aer.
@@ -4801,7 +4973,7 @@ func _build_hose(frac: float) -> void:
 	# dar apartine peisajului.
 	if not path.is_empty() and ResourceLoader.exists(path):
 		hose.model = _extract_glb_node(load(path) as PackedScene, "Pipe_Broken")
-	hose.road_width = half_width * 2.0
+	hose.road_width = width_at(frac) * 2.0
 	add_child(hose)
 	hose.global_position = baked[idx]
 	hose.global_basis = Basis.looking_at(dir, Vector3.UP) # +X = marginea din dreapta
@@ -4818,13 +4990,13 @@ func _build_wave_surge(frac: float) -> void:
 	# alege la zar — pe un dig marea vine de pe o parte anume, iar un val care
 	# porneste din interiorul insulei ar fi absurd.
 	wave.travel_dir = _side_at(idx)
-	wave.sweep = half_width * 3.2
-	wave.road_width = half_width * 2.0
+	wave.sweep = width_at(frac) * 3.2
+	wave.road_width = width_at(frac) * 2.0
 	# Creasta cat DOUA latimi de drum. Nu e o cifra de gust: la o latime de drum
 	# valul citea din masina ca un obiect care pluteste pe asfalt (captura din
 	# #106), fiindca ochiul il compara cu marginile soselei. Peste ele, devine ce
 	# trebuie sa fie — o portiune de drum acoperita de mare.
-	wave.crest_length = half_width * 4.0
+	wave.crest_length = width_at(frac) * 4.0
 	# Linia apei, ca la tromba: fara ea valul traverseaza orizontal la cota
 	# soselei si pluteste in aer cat e in larg. Aceeasi despartire ca peste tot —
 	# cotele terenului le stie pista, nu hazardul.
@@ -4864,7 +5036,7 @@ func _build_typhoon(frac: float) -> void:
 	# trebuie sa se DEPARTEZE vizibil, nu doar sa iasa de pe banda. Cu 3.2 x
 	# jumatatea de latime, capetele cad la ~22 m de axa, adica pe apa de o parte
 	# si pe plaja de cealalta — acolo unde o vezi cum ridica altceva.
-	typhoon.sweep = half_width * 3.2
+	typhoon.sweep = width_at(frac) * 3.2
 	typhoon.phase = fposmod(frac * 2.3, 1.0)
 	# Linia apei, in spatiul PISTEI si nu al trombei — vezi nota de pe
 	# TyphoonHazard.water_y pentru de ce e altfel decat la podul mobil.
@@ -4905,7 +5077,7 @@ func _build_markers() -> void:
 		if placed >= 110:
 			break
 		for side_sign: float in [-1.0, 1.0]:
-			var edge := baked[i] + _side_at(i) * half_width * side_sign
+			var edge := baked[i] + _side_at(i) * width_at_index(i) * side_sign
 			var exterior := not Geometry2D.is_point_in_polygon(
 				Vector2(edge.x, edge.z), loop_poly)
 			if exterior or edge.y > 1.0:
@@ -5101,7 +5273,7 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 		for slide in CHEVRON_SLIDE:
 			var i := (at0 + int(slide / spacing) + n) % n
 			var stand := baked[i] + _side_at(i) \
-				* (half_width + CHEVRON_GAP) * out_sign * side_mult
+				* (width_at_index(i) + CHEVRON_GAP) * out_sign * side_mult
 			var ground := _sampler.ground_y(stand.x, stand.z)
 			if absf(ground - baked[i].y) > 2.0:
 				continue # sectiune inaltata: ar pluti sau ar cadea sub drum
@@ -5238,7 +5410,7 @@ func _place_fence_row(scene: PackedScene, rng: RandomNumberGenerator,
 	for m in count:
 		var idx := (start + m * step) % n
 		var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
-		var spot := baked[idx] + _side_at(idx) * (half_width + FENCE_GAP) * side_sign
+		var spot := baked[idx] + _side_at(idx) * (width_at_index(idx) + FENCE_GAP) * side_sign
 		var ground := _sampler.ground_y(spot.x, spot.z)
 		if absf(ground - baked[idx].y) > FENCE_STEP_MAX:
 			return false
@@ -5346,7 +5518,7 @@ func _build_start_gate() -> void:
 	# Era o arcada de jucarie din tema abandonata "lada de nisip", pe TOATE
 	# pistele, si primul lucru pe care il vezi la countdown.
 	if ResourceLoader.exists("res://assets/models/structures/start_gate.glb"):
-		var target_width := (half_width + 1.2) * 2.0
+		var target_width := (width_at_index(0) + 1.2) * 2.0
 		var gate := StaticBody3D.new()
 		gate.add_to_group("start_gate")
 		var model := (load("res://assets/models/structures/start_gate.glb") as PackedScene) \
@@ -5383,12 +5555,12 @@ func _build_start_gate() -> void:
 		var box := BoxMesh.new()
 		box.size = Vector3(0.8, 6.0, 0.8)
 		pillar.mesh = box
-		pillar.position = baked[0] + side * (half_width + 0.8) * s + Vector3.UP * 3.0
+		pillar.position = baked[0] + side * (width_at_index(0) + 0.8) * s + Vector3.UP * 3.0
 		pillar.material_override = _flat_material(Color(0.9, 0.9, 0.95))
 		add_child(pillar)
 	var bar := MeshInstance3D.new()
 	var bar_box := BoxMesh.new()
-	bar_box.size = Vector3((half_width + 1.2) * 2.0, 0.7, 0.9)
+	bar_box.size = Vector3((width_at_index(0) + 1.2) * 2.0, 0.7, 0.9)
 	bar.mesh = bar_box
 	bar.position = baked[0] + Vector3.UP * 6.0
 	bar.basis = Basis.looking_at(start_direction(), Vector3.UP)
@@ -5544,7 +5716,7 @@ func spawn_transforms(count: int) -> Array[Transform3D]:
 	for i in count:
 		var back_m := 8.0 + float(i / 2) * 8.0
 		var idx := ((n - int(back_m / curve.bake_interval)) % n + n) % n
-		var side := (-1.0 if i % 2 == 0 else 1.0) * half_width * 0.4
+		var side := (-1.0 if i % 2 == 0 else 1.0) * width_at_index(idx) * 0.4
 		var pos := baked[idx] + _side_at(idx) * side + Vector3.UP * 0.5
 		var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
 		result.append(Transform3D(Basis.looking_at(dir, Vector3.UP), pos))

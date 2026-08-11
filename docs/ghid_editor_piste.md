@@ -101,6 +101,49 @@ Ce trebuie sa stii ca sa nu te lupti cu el:
 - Un deal mic = raza mica (20-40 m) si Y mic (5-10 m). Un masiv ca in Alpi =
   raza 130-210 m, varf 120-160 m.
 
+---
+
+## 3b. Scurtaturi: nodul TrackBranch
+
+O a doua banda de asfalt care se desprinde din traseu si revine mai tarziu.
+Vizual, e un nod **TrackBranch** (tot un Path3D, deci se deseneaza exact ca
+traseul principal):
+
+1. Click dreapta pe radacina pistei → **Add Child Node** → cauta `TrackBranch`.
+2. Selecteaza-l si deseneaza curba cu toolbar-ul Path3D, ca la traseu.
+3. In Inspector: `branch_half_width` (0 = cat pista), `wet`, `label`.
+4. **Regenerate** → banda apare, cu materialul de scurtatura al temei.
+
+**Capetele NU se deseneaza.** Tragi doar mijlocul benzii; unde se desprinde si
+unde revine se citeste automat de pe bucla principala, ca punctul cel mai
+apropiat de primul si de ultimul punct al curbei tale. Asa muti traseul
+principal si scurtatura se reataseaza singura — un capat desenat de mana ar fi
+ramas in urma si ar fi lasat o treapta in aer.
+
+Din asta iese **singura regula pe care trebuie s-o tii minte: primul si ultimul
+punct se deseneaza LANGA sosea** (sub ~25 m). Mai departe, „cel mai apropiat
+punct de pe bucla" devine o intrebare prost pusa — raspunsul e arbitrar si se
+schimba din nimic. Daca treci pragul, primesti un avertisment in Output care
+iti spune exact de la ce distanta s-a agatat.
+
+**Contragreutatea nu e optionala.** O scurtatura fara pret e un cadou: o iei
+mereu, deci nu mai e o decizie. Ai doua parghii, si se aleg din LUME, nu dintr-un
+tabel:
+
+| parghie | ce face | exemplu |
+|---|---|---|
+| `branch_half_width` | mai ingusta: singur incapi, in trafic nu | poteca de pasune din Alpii (3.2 fata de 7.0) |
+| `wet` | grip lateral taiat cat timp esti pe ea | bancul de nisip din Okinawa |
+
+Scurtatura da **timp, nu progres**: o masina de la jumatatea ei raporteaza
+aceeasi fractie de tur ca una de la jumatatea portiunii ocolite, deci
+clasamentul si numaratoarea de tururi raman corecte.
+
+Limitele de geometrie sunt cele ale oricarei curbe de pista si **nu se
+relaxeaza aici**: raza virajului > latimea benzii, iar banda sa stea la >= 2x
+latime de bucla principala pe portiunile paralele. Dupa ce desenezi, ruleaza
+**ProbeRace** — el e arbitrul care spune daca AI-ul chiar trece pe acolo.
+
 Sonda dedicata (construieste o pista cu si fara varf si compara):
 
 ```
@@ -177,11 +220,12 @@ Daca vrei sa te intorci la traseul din cod: sterge nodul Path si Regenerate.
 
 ## 6. Ce NU se poate inca vizual (exista in cod, cere-le cand ai nevoie)
 
-- **Scurtaturi** — sistemul de rute exista (Okinawa, Alpii le au, declarate
-  in cod); expunerea ca al doilea Path3D desenabil e urmatorul pas natural.
 - **Borduri pe alese** — bordurile apar automat pe orice viraj peste un prag
   de curbura; nu se pot inca opri/forta pe un viraj anume.
-- **Latime variabila pe sectoare** — latimea e una singura pe toata pista.
+- **Latime variabila pe sectoare** — latimea e inca una singura pe toata pista.
+  Jumatate din drum e facuta: toate generatoarele intreaba deja
+  `Track.width_at(frac)` in loc sa citeasca `half_width` direct, deci profilul
+  pe sectoare e o schimbare intr-o singura functie. Vezi #236.
 
 ---
 

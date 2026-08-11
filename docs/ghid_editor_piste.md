@@ -101,34 +101,77 @@ Ce trebuie sa stii ca sa nu te lupti cu el:
 - Un deal mic = raza mica (20-40 m) si Y mic (5-10 m). Un masiv ca in Alpi =
   raza 130-210 m, varf 120-160 m.
 
+Sonda dedicata (construieste o pista cu si fara varf si compara):
+
+```
+godot --headless --fixed-fps 60 --path . res://tools/ProbePeaks.tscn
+```
+
 ---
 
 ## 3b. Scurtaturi: nodul TrackBranch
 
 O a doua banda de asfalt care se desprinde din traseu si revine mai tarziu.
 Vizual, e un nod **TrackBranch** (tot un Path3D, deci se deseneaza exact ca
-traseul principal):
+traseul principal).
+
+### Pas cu pas
 
 1. Click dreapta pe radacina pistei → **Add Child Node** → cauta `TrackBranch`.
-2. Selecteaza-l si deseneaza curba cu toolbar-ul Path3D, ca la traseu.
-3. In Inspector: `branch_half_width` (0 = cat pista), `wet`, `label`.
-4. **Regenerate** → banda apare, cu materialul de scurtatura al temei.
+2. Selecteaza nodul. E gol la inceput, deci trebuie sa-i pui primul punct:
+   din toolbar-ul Path3D de sus alege **Add Point** si da click in viewport,
+   acolo unde vrei sa INCEAPA scurtatura — **langa sosea**, nu in camp.
+3. Mai da click de cateva ori de-a lungul ocolului pe care il vrei. Ultimul
+   punct il pui tot **langa sosea**, acolo unde banda revine pe traseu.
+4. Ridica punctele pe Y cat sa urmareasca terenul, exact ca la traseul
+   principal (cota unui punct = Y-ul lui).
+5. In Inspector, pe nodul `TrackBranch`:
+   - `branch_half_width` — JUMATATEA latimii benzii. **0 = cat pista.**
+   - `wet` — banda uda, cu grip lateral taiat.
+   - `label` — nume pentru sonde (gol = numele nodului).
+6. Selecteaza **radacina** pistei si bifeaza **Regenerate**.
+7. **Salveaza scena.**
 
-**Capetele NU se deseneaza.** Tragi doar mijlocul benzii; unde se desprinde si
-unde revine se citeste automat de pe bucla principala, ca punctul cel mai
-apropiat de primul si de ultimul punct al curbei tale. Asa muti traseul
-principal si scurtatura se reataseaza singura — un capat desenat de mana ar fi
-ramas in urma si ar fi lasat o treapta in aer.
+Poti pune oricate: fiecare nod `TrackBranch` e o banda. Le poti grupa sub un
+`Node3D` ca sa tii scena ordonata — cautarea e recursiva, ca la munti.
 
-Din asta iese **singura regula pe care trebuie s-o tii minte: primul si ultimul
-punct se deseneaza LANGA sosea** (sub ~25 m). Mai departe, „cel mai apropiat
-punct de pe bucla" devine o intrebare prost pusa — raspunsul e arbitrar si se
-schimba din nimic. Daca treci pragul, primesti un avertisment in Output care
-iti spune exact de la ce distanta s-a agatat.
+### Capetele NU se deseneaza
 
-**Contragreutatea nu e optionala.** O scurtatura fara pret e un cadou: o iei
-mereu, deci nu mai e o decizie. Ai doua parghii, si se aleg din LUME, nu dintr-un
-tabel:
+Tragi doar mijlocul benzii. Unde se desprinde si unde revine se citeste automat
+de pe bucla principala, ca punctul cel mai apropiat de primul si de ultimul
+punct al curbei tale. Asa muti traseul principal si **scurtatura se reataseaza
+singura** — un capat desenat de mana ar fi ramas in urma la prima ajustare si ar
+fi lasat o treapta in aer.
+
+De aici iese **singura regula pe care trebuie s-o tii minte: primul si ultimul
+punct se deseneaza langa sosea, sub ~25 m.** Mai departe, „cel mai apropiat
+punct de pe bucla" devine o intrebare prost pusa: raspunsul e arbitrar si se
+schimba din nimic.
+
+Cat de arbitrar — masurat pe scurtatura din cod a Alpilor, ale carei puncte
+sunt waypoint-uri de mijloc, nu capete: primul sta la **33.8 m** de asfalt, si
+de acolo racordul iese la fractia **0.825** in loc de 0.754. Niciuna nu e
+gresita; intrebarea e proasta la distanta aia.
+
+Daca treci pragul, pista se construieste oricum, dar primesti in **Output** un
+avertisment cu distanta reala:
+
+```
+Track: scurtatura 'Ocolul' pleaca de la 34 m de sosea (prag 25) —
+deseneaza capatul LANGA drum, altfel punctul de racord e ales arbitrar
+```
+
+**Banda nu apare deloc?** Uita-te tot in Output — sunt doua cazuri in care e
+ignorata pe fata, cu mesaj:
+
+- capetele cad pe acelasi punct de pe bucla (ocolul e prea scurt sau prea
+  lipit de drum) — **trage-l mai departe de traseu la mijloc**;
+- nodul n-are niciun punct desenat.
+
+### Contragreutatea nu e optionala
+
+O scurtatura fara pret e un cadou: o iei mereu, deci nu mai e o decizie. Ai
+doua parghii, si se aleg din LUME, nu dintr-un tabel:
 
 | parghie | ce face | exemplu |
 |---|---|---|
@@ -137,18 +180,26 @@ tabel:
 
 Scurtatura da **timp, nu progres**: o masina de la jumatatea ei raporteaza
 aceeasi fractie de tur ca una de la jumatatea portiunii ocolite, deci
-clasamentul si numaratoarea de tururi raman corecte.
+clasamentul si numaratoarea de tururi raman corecte. Nu poti trisa un tur pe
+aici, si nici nu trebuie sa-ti faci griji pentru asta.
 
-Limitele de geometrie sunt cele ale oricarei curbe de pista si **nu se
-relaxeaza aici**: raza virajului > latimea benzii, iar banda sa stea la >= 2x
-latime de bucla principala pe portiunile paralele. Dupa ce desenezi, ruleaza
-**ProbeRace** — el e arbitrul care spune daca AI-ul chiar trece pe acolo.
+### Limitele si verificarea
 
-Sonda dedicata (construieste o pista cu si fara varf si compara):
+Geometria are aceleasi reguli ca orice curba de pista, si **nu se relaxeaza
+aici**: raza virajului > latimea benzii, iar banda sa stea la >= 2× latime de
+bucla principala pe portiunile paralele.
+
+Arbitrul e **ProbeRace**, nu ochiul: el spune daca AI-ul chiar trece pe acolo
+sau se opinteste la jonctiune. Se uita la timpul petrecut in afara soselei, la
+marsarierul de anti-blocaj si la repuneri — exact simptomele unei benzi prea
+stramte.
 
 ```
-godot --headless --fixed-fps 60 --path . res://tools/ProbePeaks.tscn
+godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=race --track=N
 ```
+
+Daca masinile se blocheaza la intrarea sau la iesirea din banda, **largeste
+scurtatura** — nu ajusta cifra pana pare bine.
 
 ---
 
@@ -221,11 +272,15 @@ Daca vrei sa te intorci la traseul din cod: sterge nodul Path si Regenerate.
 ## 6. Ce NU se poate inca vizual (exista in cod, cere-le cand ai nevoie)
 
 - **Borduri pe alese** — bordurile apar automat pe orice viraj peste un prag
-  de curbura; nu se pot inca opri/forta pe un viraj anume.
-- **Latime variabila pe sectoare** — latimea e inca una singura pe toata pista.
-  Jumatate din drum e facuta: toate generatoarele intreaba deja
-  `Track.width_at(frac)` in loc sa citeasca `half_width` direct, deci profilul
-  pe sectoare e o schimbare intr-o singura functie. Vezi #236.
+  de curbura; nu se pot inca opri/forta pe un viraj anume. Ce POTI face azi:
+  le stingi pe toata pista, din tema (`"kerbs": false`, ca pe Alpii), sau le
+  lasi peste tot. Granularitatea pe viraj e #235.
+- **Latime variabila pe sectoare** — `custom_half_width` e inca **o singura
+  valoare pe toata pista**, deci un drum nu se poate strange intr-un defileu si
+  deschide pe o dreapta. Ce POTI face azi: o scurtatura are latimea EI
+  (`branch_half_width`), deci o portiune ingusta se poate face ca banda
+  separata. Restul e #236 — jumatate din drum e gata, fiindca generatoarele
+  intreaba deja `Track.width_at(frac)` in loc sa citeasca `half_width` direct.
 
 ---
 
@@ -233,6 +288,10 @@ Daca vrei sa te intorci la traseul din cod: sterge nodul Path si Regenerate.
 
 1. **Regenerate** + salveaza scena.
 2. `ProbeLayout` pe pista ta → VERDICT OK (raze, pante, apropieri).
-3. `probe_decor` daca ai adaugat mult decor manual (bugete tri/materiale).
-4. Joaca un tur: e satisfacator drift + saritura + bumping? Intai feel,
+3. Ai desenat scurtaturi? **Verifica Output-ul** dupa Regenerate: un
+   avertisment de capat prea departe de sosea inseamna ca racordul e ales
+   arbitrar. Apoi `ProbeRace --mode=race` — AI-ul e cel care spune daca banda
+   chiar se poate parcurge.
+4. `probe_decor` daca ai adaugat mult decor manual (bugete tri/materiale).
+5. Joaca un tur: e satisfacator drift + saritura + bumping? Intai feel,
    apoi continut.

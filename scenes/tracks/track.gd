@@ -624,9 +624,59 @@ var _mat_cache: Dictionary = {}
 
 # --- API pentru subclase ---
 
+## Punctele de control ale traseului. INTAI curba din nodul copil "Path"
+## (editabila vizual, cu gizmo-uri), apoi cele scrise in cod. Asa ORICE pista
+## — inclusiv una definita in cod, ca Alpii — devine editabila din editor in
+## clipa in care primeste un nod Path; pana atunci nimic nu se schimba.
 func _points() -> Array[Vector3]:
-	push_error("Track: suprascrie _points() in subclasa")
+	var path := get_node_or_null("Path") as Path3D
+	if path != null and path.curve != null and path.curve.point_count >= 3:
+		var pts: Array[Vector3] = []
+		for i in path.curve.point_count:
+			pts.append(path.curve.get_point_position(i))
+		return pts
+	return _code_points()
+
+## Punctele scrise in cod — hook-ul pe care il suprascriu pistele definite in
+## .gd. Pierde in fata nodului "Path" de indata ce acesta exista.
+func _code_points() -> Array[Vector3]:
+	push_error("Track: suprascrie _code_points() in subclasa sau adauga un nod Path")
 	return []
+
+## Bifeaza in Inspector ca sa reconstruiesti pista (doar in editor).
+## Pe o pista definita in cod, PRIMA bifare creeaza si nodul "Path" cu
+## punctele reale ale traseului — de atunci curba e a ta, trage de ea.
+@export var regenerate: bool = false:
+	set(_value):
+		regenerate = false
+		if Engine.is_editor_hint() and is_inside_tree():
+			_editor_regenerate()
+
+## Ce se intampla la Regenerate — suprascris de TrackFromPath, care isi
+## aplica intai exporturile custom_*.
+func _editor_regenerate() -> void:
+	_ensure_path_from_code()
+	rebuild()
+
+## Materializeaza curba editabila dintr-o pista definita in cod: un nod
+## "Path" cu EXACT punctele din _code_points(), salvat in scena (owner pe
+## radacina). Geometria nu se schimba cu nimic — aceleasi puncte, acelasi
+## Catmull-Rom — doar sursa lor devine trasabila cu mouse-ul.
+func _ensure_path_from_code() -> void:
+	if get_node_or_null("Path") != null:
+		return
+	var pts := _code_points()
+	if pts.size() < 3:
+		return
+	var path := Path3D.new()
+	path.name = "Path"
+	var curve := Curve3D.new()
+	for p in pts:
+		curve.add_point(p)
+	path.curve = curve
+	add_child(path)
+	if Engine.is_editor_hint():
+		path.owner = get_tree().edited_scene_root
 
 ## Fractii (0..1) din traseu unde apar rampe de saritura.
 func _ramp_fracs() -> Array[float]:
@@ -763,6 +813,27 @@ func _hazard_kinds() -> Dictionary:
 ## asfaltului.
 func _peak_specs() -> Array[Vector4]:
 	return []
+
+## Masivele plasate ca noduri [TerrainPeak] in scena — se ADUNA la cele
+## declarate in cod, deci pe o pista ca Alpii poti pune un deal NOU tragand
+## un nod, fara sa atingi declaratiile existente. Cautarea e recursiva (poti
+## grupa varfurile sub un Node3D "Peaks") si manuala, nu find_children pe
+## nume de clasa — sa nu depinda de inregistrarea claselor de script la
+## rularea headless.
+func _node_peaks() -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	_collect_peaks(self, out)
+	return out
+
+func _collect_peaks(node: Node, out: Array[Vector4]) -> void:
+	for child in node.get_children():
+		if child is TerrainPeak:
+			var pk := child as TerrainPeak
+			# In coordonatele PISTEI, ca baked si ca tot ce citeste samplerul —
+			# conteaza daca varful e grupat sub un nod cu transformare proprie.
+			var p := to_local(pk.global_position)
+			out.append(Vector4(p.x, p.z, pk.radius_m, p.y))
+		_collect_peaks(child, out)
 
 ## Portiunile pe care peretele exterior NU e panglica rosie continua:
 ## (frac_start, frac_end, regim, latura ±1 sau 0 = ambele).
@@ -905,7 +976,7 @@ func rebuild() -> void:
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
-		_lagoon_poly(), lagoon_depth, _channels, _peak_specs(),
+		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines())
 	_build_environment()
 	_build_road()

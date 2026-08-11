@@ -56,14 +56,13 @@ extends Track
 @export var custom_rockfall_fracs: Array[float] = []
 ## Treceri de cale ferata. Trenul ucide la contact si te repune.
 @export var custom_train_fracs: Array[float] = []
-## Bifeaza ca sa reconstruiesti pista din curba (doar in editor).
-@export var regenerate: bool = false:
-	set(_value):
-		regenerate = false
-		if Engine.is_editor_hint() and is_inside_tree():
-			_apply_custom()
-			_ensure_starter_curve()
-			rebuild()
+## Regenerate vine din Track (checkbox-ul e mostenit); aici doar ne aplicam
+## intai exporturile custom_* si curba de pornire. Citirea punctelor din
+## nodul "Path" traieste tot in Track — orice pista o are, nu doar asta.
+func _editor_regenerate() -> void:
+	_apply_custom()
+	_ensure_starter_curve()
+	rebuild()
 
 func _ready() -> void:
 	_apply_custom()
@@ -75,14 +74,6 @@ func _apply_custom() -> void:
 	half_width = custom_half_width
 	sea_level_offset = custom_sea_level_offset
 	apply_theme(custom_theme)
-
-func _points() -> Array[Vector3]:
-	var path := get_node_or_null("Path") as Path3D
-	var pts: Array[Vector3] = []
-	if path != null and path.curve != null:
-		for i in path.curve.point_count:
-			pts.append(path.curve.get_point_position(i))
-	return pts
 
 func _ramp_fracs() -> Array[float]:
 	return custom_ramp_fracs
@@ -119,26 +110,6 @@ func _landmark_spots() -> Array[Vector3]:
 
 func _ravines() -> Array[Vector4]:
 	return custom_ravines
-
-## Masivele vin din noduri [TerrainPeak] plasate in scena, nu dintr-un export:
-## un munte se aseaza tragand de un gizmo, nu scriind un Vector4 din cap.
-## Cautarea e recursiva ca sa poti grupa varfurile sub un Node3D "Peaks", si
-## manuala (nu find_children pe nume de clasa) ca sa nu depinda de felul in
-## care Godot inregistreaza clasele de script la rulare headless.
-func _peak_specs() -> Array[Vector4]:
-	var out: Array[Vector4] = []
-	_collect_peaks(self, out)
-	return out
-
-func _collect_peaks(node: Node, out: Array[Vector4]) -> void:
-	for child in node.get_children():
-		if child is TerrainPeak:
-			var pk := child as TerrainPeak
-			# In coordonatele PISTEI, ca baked si ca tot ce citeste samplerul —
-			# conteaza daca varful e grupat sub un nod cu transformare proprie.
-			var p := to_local(pk.global_position)
-			out.append(Vector4(p.x, p.z, pk.radius_m, p.y))
-		_collect_peaks(child, out)
 
 func _rockfall_fracs() -> Array[float]:
 	return custom_rockfall_fracs

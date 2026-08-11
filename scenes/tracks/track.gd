@@ -353,7 +353,31 @@ static func themes() -> Dictionary:
 			# pentru ochi. Vezi _build_environment.
 			"fog_begin": 130.0,
 			"fog_end": 370.0,
-			"walls": true,       # doar pe sectiunile inaltate — regula samplerului
+			# DRUM DE MUNTE DESCHIS, nu pista de curse.
+			#
+			# Restul lumii primeste gard rosu continuu pe exterior; aici NU. Un
+			# drum alpin care traverseaza pasuni si platouri n-are parapet pe
+			# toata lungimea lui, iar panglica rosie taia exact senzatia pe care
+			# o cere pista: esti sus, in gol, si nimic nu te tine.
+			#
+			# `walls: false` scoate SI coliziunea, deliberat — asta e chiar
+			# cererea: masina poate iesi pe pasune, poate lua o linie larga, poate
+			# rata un viraj si continua pe iarba (lenta, 45%) in loc sa se
+			# lipeasca de un zid invizibil. Regimul de risc ramane declarat in
+			# teren, nu in bariere: unde caderea chiar conteaza — cornisa
+			# traversarii, rapa de sub fly-off — o face `_ravines()`, iar
+			# RespawnZone repune masina care cade in gol.
+			#
+			# Consecinta pe _rail_segments(): stalpii de RAIL_POSTS de pe cornisa
+			# se adunau in _build_walls(), care acum nu mai ruleaza, deci dispar
+			# odata cu gardul. Nu e o pierdere — rolul lor era sa marcheze
+			# EXCEPTIA intr-un tur cu gard peste tot; fara gard, exceptia e
+			# regula si marcajul n-ar mai spune nimic.
+			"walls": false,
+			# Bordurile rosu-alb pleaca odata cu gardul, si e aceeasi decizie:
+			# amandoua spun „circuit", iar pista asta vrea sa spuna „drum".
+			# Vezi _build_kerbs.
+			"kerbs": false,
 			"cliffs": false,     # flancurile masivului sunt teren, nu faleze de canion
 			"decor": "bands",
 			"props": "alpine",
@@ -378,6 +402,51 @@ static func themes() -> Dictionary:
 			"snow_line": 72.0,
 			"snow_fade": 18.0,
 			"snow_tint": Palette.color(Palette.FOAM_WHITE),
+			# ZAPADA PE ASFALT: petice, nu un strat.
+			#
+			# Terenul isi ia albul de la o COTA (snow_line, 72 m) — asa se
+			# comporta o limita de zapada pe munte. Soseaua nu poate folosi
+			# aceeasi regula: cel mai inalt asfalt sta la 63 m, adica sub linie,
+			# deci pe cota drumul ar ramane negru pe tot turul. Si e corect ca
+			# regula: un drum e DESZAPEZIT si CALCAT de roti, deci pastreaza
+			# petice acolo unde plugul si traficul n-au ajuns, nu un strat
+			# continuu care urmeaza cota.
+			#
+			# De aceea peticele de aici sunt un tipar de ZGOMOT modulat de
+			# altitudine: exista peste tot, dar se indesesc cu inaltimea. Jos in
+			# sat (0 m) asfaltul e curat, pe culme (63 m) e patat serios — adica
+			# exact povestea pistei, "un tur = o urcare", spusa si de suprafata
+			# pe care conduci.
+			#
+			# ZAPADA DE PE DRUM INCEPE UNDE INCEPE CEA DE PE TEREN, si asta e o
+			# corectie facuta pe captura, nu pe tabel.
+			#
+			# Primele doua versiuni derivasera cotele din profilul SOSELEI (sonda
+			# de cote: min -0.4 · mediana 38.2 · max 107.8 m) si porneau albul de
+			# la 20 m. Cifrele erau masurate corect si rezultatul era gresit: la
+			# fractia 0.30 drumul iesea deja cenusiu prin PASUNE VERDE, fara un
+			# fulg de zapada in tot cadrul. Zapada pe asfalt intr-o lume fara
+			# zapada nu se citeste ca zapada, se citeste ca beton decolorat.
+			#
+			# Cotele sunt acum LEGATE de linia zapezii terenului (`snow_line` 72,
+			# `snow_fade` 18 — deci terenul se albeste intre 72 si 90 m):
+			#   80 m  primele petice pe asfalt, cand pe margini deja e alb
+			#   105 m densitate maxima, pe cel mai inalt asfalt masurat
+			# Drumul ramane cu o intarziere fata de teren, si asta e chiar
+			# adevarul fizic: un drum e batatorit si deszapezit, deci se albeste
+			# mai tarziu si mai putin decat pajistea de langa el.
+			#
+			# Daca se muta `snow_line`, se muta si astea — sunt aceeasi poveste
+			# spusa pe doua suprafete.
+			"road_snow_low": 80.0,
+			"road_snow_high": 105.0,
+			# Cat de ALB iese un petic la cota maxima (nu cat de des apare — de
+			# desime se ocupa pragul din _road_snow_weight). 0.85 face peticul
+			# sa fie zapada adevarata acolo unde e; ce tine linia de curs
+			# citibila nu e paloarea lui, ci faptul ca sta pe margini si ca
+			# banda de rulare ramane curata (style_bible §1).
+			"road_snow_amount": 0.85,
+			"road_snow_tint": Palette.color(Palette.FOAM_WHITE),
 			# BANDA DE STANCA dintre pajiste si zapada.
 			#
 			# Un munte adevarat are trei etaje, si lipsea cel din mijloc: pana
@@ -2568,6 +2637,13 @@ const ROAD_COLOR: Color = Color(0.23, 0.24, 0.3)
 ## se imparte la ea, ca a doua inmultire sa nu intunece soseaua.
 const ASPHALT_MACRO_MEAN: float = 0.900
 
+## Cat de aproape de zapada ajunge peticul CEL MAI ALB de pe sosea (0 = asfalt
+## curat, 1 = zapada plina). E plafonul pe care il poate atinge culoarea de
+## VERTEX, si de aceea exista ca prag explicit: culorile de vertex se taie la
+## 1.0, deci albul trebuie sa fie deja in materialul soselei, iar restul pistei
+## sa coboare de acolo inapoi la asfalt. Vezi _road_snow_weight.
+const ROAD_SNOW_CEIL: float = 0.42
+
 ## Culoarea drumului afanat, INAINTE de compensarea trecerii macro.
 ##
 ## ############################################################################
@@ -2653,6 +2729,41 @@ func _build_road() -> void:
 	var mid_shade := Color.WHITE
 	if road_is_loose():
 		edge_shade = DIRT_EDGE_SHADE
+	# Peticele de zapada de pe asfalt (vezi "road_snow_low" in themes()). Null pe
+	# orice tema fara munte, deci restul pistelor nu se schimba cu un pixel.
+	var snow_tint: Variant = theme_flag("road_snow_tint", null)
+	var snow_low := float(theme_flag("road_snow_low", 0.0))
+	var snow_high := maxf(float(theme_flag("road_snow_high", 1.0)),
+		snow_low + 0.001)
+	var snow_amount := float(theme_flag("road_snow_amount", 0.0))
+	# Zgomotul peticelor, in coordonate de LUME — din acelasi motiv ca UV2-ul de
+	# mai jos: peticele trebuie sa stea pe loc pe teren, nu sa curga cu panglica.
+	# Daca ar fi functie de distanta parcursa, ar iesi dungi transversale
+	# perfect regulate, adica exact tiparul de „desen tehnic" pe care il repara.
+	#
+	# Frecventa 0.09 da pete de 4-8 m: la 3.5 m latime de banda, o pata are
+	# marimea unei masini — destul cat s-o vezi venind si sa alegi daca o
+	# ocolesti, dar nu atat cat sa acopere toata soseaua deodata.
+	var snow_noise := FastNoiseLite.new()
+	snow_noise.seed = _world_seed() ^ 0x5A0D
+	snow_noise.frequency = 0.09
+	snow_noise.fractal_octaves = 2
+	# Pe o tema cu zapada, materialul e ridicat spre alb cu ROAD_SNOW_CEIL, iar
+	# vertecsii FARA zapada se intorc la asfalt cu factorul asta. Raportul e sub
+	# 1.0 prin constructie (numaratorul e asfaltul, numitorul e asfaltul ridicat
+	# spre alb), deci nu-l taie clamp-ul de vertex color.
+	#
+	# Pe restul pistelor `road_dark` ramane alb, deci `_road_shade` intoarce
+	# nuanta neatinsa — celelalte lumi nu se schimba cu un pixel.
+	var road_dark := Color.WHITE
+	if snow_tint != null and snow_amount > 0.0:
+		var lifted := (DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR) \
+			.lerp(snow_tint as Color, ROAD_SNOW_CEIL)
+		var plain := DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
+		road_dark = Color(
+			plain.r / maxf(lifted.r, 0.001),
+			plain.g / maxf(lifted.g, 0.001),
+			plain.b / maxf(lifted.b, 0.001))
 	for i in n:
 		var j := (i + 1) % n
 		# Golul canalului: nici asfalt, nici coliziune, nici fusta laterala.
@@ -2689,19 +2800,37 @@ func _build_road() -> void:
 			var m1 := Vector2(w1.x, w1.z) * SURFACE_TILING_MACRO
 			var m0b := Vector2(w0b.x, w0b.z) * SURFACE_TILING_MACRO
 			var m1b := Vector2(w1b.x, w1b.z) * SURFACE_TILING_MACRO
+			# Zapada se aplica PER VERTEX, nu per pozitie de profil ca `ca`/`cb`:
+			# tiparul e o functie de pozitie in lume, deci cele doua capete ale
+			# aceluiasi segment (w0 si w1, la 3 m distanta) trebuie sa poata cadea
+			# unul in petic si celalalt pe asfalt curat. Cu o culoare per profil,
+			# peticele s-ar fi intins pe toata lungimea segmentului si ar fi iesit
+			# tot dungi transversale.
+			#
+			# `road_shade` INTUNECA de la culoarea materialului (care e zapada, pe
+			# temele cu zapada) inapoi spre asfalt — vezi _road_snow_weight pentru
+			# de ce sensul e inversat.
+			var c0 := _road_shade(ca, road_dark, _road_snow_weight(
+				w0, snow_low, snow_high, snow_amount, snow_noise, ta))
+			var c1 := _road_shade(ca, road_dark, _road_snow_weight(
+				w1, snow_low, snow_high, snow_amount, snow_noise, ta))
+			var c0b := _road_shade(cb, road_dark, _road_snow_weight(
+				w0b, snow_low, snow_high, snow_amount, snow_noise, tb))
+			var c1b := _road_shade(cb, road_dark, _road_snow_weight(
+				w1b, snow_low, snow_high, snow_amount, snow_noise, tb))
 			# Ordinea l0,l1,r0: fata triunghiului iese IN SUS (vezi istoricul
 			# winding-ului — cu ordinea inversa normalele ieseau in jos).
-			top.set_color(ca); top.set_uv(Vector2(ua, v0)); top.set_uv2(m0)
+			top.set_color(c0); top.set_uv(Vector2(ua, v0)); top.set_uv2(m0)
 			top.add_vertex(w0)
-			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
+			top.set_color(c1); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
 			top.add_vertex(w1)
-			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
+			top.set_color(c0b); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
 			top.add_vertex(w0b)
-			top.set_color(cb); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
+			top.set_color(c0b); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
 			top.add_vertex(w0b)
-			top.set_color(ca); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
+			top.set_color(c1); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
 			top.add_vertex(w1)
-			top.set_color(cb); top.set_uv(Vector2(ub, v1)); top.set_uv2(m1b)
+			top.set_color(c1b); top.set_uv(Vector2(ub, v1)); top.set_uv2(m1b)
 			top.add_vertex(w1b)
 		# Fasia plata de coliziune (geometria veche, 2 vertecsi transversal).
 		var l0 := baked[i] - s0v * half_width
@@ -2776,6 +2905,24 @@ func _build_road() -> void:
 	# 45 m sunt exact tiparul de nisip spalat de ploaie pe care il vrem.
 	var base := DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
 	var macro_mean := SAND_MACRO_MEAN if road_is_loose() else ASPHALT_MACRO_MEAN
+	# Pe temele cu zapada pe drum, materialul poarta o culoare INTRE asfalt si
+	# zapada, iar vertecsii o duc in ambele sensuri: in jos spre asfalt (peste
+	# tot), in sus... nicaieri, ca nu se poate. Vezi _road_snow_weight pentru de
+	# ce culorile de vertex nu pot depasi 1.0.
+	#
+	# De ce nu direct culoarea zapezii, cum era intr-o versiune intermediara:
+	# TEXTURA SE INMULTESTE PESTE ALBEDO. Cu albedo alb, granulatia de asfalt
+	# (o textura gri, medie ~0.5) cadea peste alb si iesea gri deschis — adica
+	# soseaua se albea pe TOATA pista, si in pasunea verde de la 33 m, unde
+	# cifrele spuneau limpede ca zapada e 0%. Se vedea doar in A/B cu ramura de
+	# baza: acelasi cadru, drum albastru-inchis inainte, gri palid dupa.
+	#
+	# `ROAD_SNOW_CEIL` e cat de alb poate ajunge peticul cel mai alb. Materialul
+	# se ridica exact atat, iar restul soselei se intoarce la asfalt prin vertex
+	# color. Peste ~0.45 reapare spalarea de mai sus; sub ~0.25 peticul nu se mai
+	# vede ca zapada.
+	if road_dark != Color.WHITE:
+		base = base.lerp(snow_tint as Color, ROAD_SNOW_CEIL)
 	var road_color := Color(
 		base.r / macro_mean,
 		base.g / macro_mean,
@@ -2797,6 +2944,83 @@ func _build_road() -> void:
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
 			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE))
+
+
+## Cat de alba e zapada de pe asfalt, ca greutate 0..1 pentru un vertex.
+##
+## Intoarce DOAR greutatea, nu culoarea, si asta e consecinta directa a bugului
+## care a costat versiunea precedenta:
+##
+##   SURFACETOOL TAIE CULORILE DE VERTEX LA [0,1].
+##
+## Prima varianta a mers pe „culoarea de vertex se inmulteste cu albedo-ul, deci
+## ca sa iasa alb peste asfaltul inchis (#3B3D4D) pun un factor de ~3.9x".
+## Rationamentul e corect pe hartie si IMPOSIBIL de executat: `set_color(2.4)`
+## ajunge 1.0 in mesh. Masurat pe pista construita — max.r = 1.000 pe toate cele
+## 7490 de varfuri, 0.0% suprafata patata, adica efect ZERO — desi aceeasi
+## functie, chemata direct, dadea 53.8% acoperire si factori pana la 2.4.
+## Sonda de coacere spunea „e acolo", ecranul spunea „nu e nimic; vezi si nota
+## din CLAUDE.md despre efecte care se numara in loc sa se vada.
+##
+## Solutia inverseaza sensul: ALBEDO-UL MATERIALULUI DEVINE ZAPADA, iar culoarea
+## de vertex INTUNECA inapoi spre asfalt peste tot unde nu e zapada. Inmultirea
+## merge acum in jos (0.24 / 0.91 = 0.26, cuminte sub 1.0), deci nu se taie
+## nimic. E aceeasi mecanica pe care o foloseau deja bordurile — albedo alb,
+## culoarea din vertex — doar ca aici motivul e o limita a formatului, nu gustul.
+##
+## Costul: ZERO materiale in plus si nicio trecere de transparenta. Varianta
+## „naturala" (un al doilea mesh alb cu alfa peste sosea) ar fi adus si un
+## material, si overdraw pe toata banda de rulare — exact constrangerea pe care
+## CLAUDE.md o numeste cea reala pe mobil.
+## Nuanta finala a unui vertex de sosea: gradientul de uzura, intunecat de la
+## zapada inapoi la asfalt acolo unde nu e zapada (`w` = 0 -> asfalt curat,
+## `w` = 1 -> zapada plina). Pe pistele fara zapada `dark` e alb si functia
+## intoarce exact `shade`, deci nu schimba nimic.
+func _road_shade(shade: Color, dark: Color, w: float) -> Color:
+	if dark == Color.WHITE:
+		return shade
+	var mix := Color(
+		lerpf(dark.r, 1.0, w),
+		lerpf(dark.g, 1.0, w),
+		lerpf(dark.b, 1.0, w))
+	return Color(shade.r * mix.r, shade.g * mix.g, shade.b * mix.b)
+
+
+func _road_snow_weight(v: Vector3, low: float, high: float, amount: float,
+		noise: FastNoiseLite, t: float) -> float:
+	# Densitatea creste cu altitudinea: curat in sat, patat pe culme.
+	var alt := smoothstep(0.0, 1.0, clampf((v.y - low) / (high - low), 0.0, 1.0))
+	if alt <= 0.0:
+		return 0.0
+	# PRAGUL SE MISCA CU ALTITUDINEA, INTENSITATEA CU POZITIA PE LATIME — si cele
+	# doua NU se inmultesc intre ele. O versiune intermediara le combina intr-un
+	# singur prag (`1 - amount * alt * edge_bias`), si atunci pe axul soselei
+	# pragul ramanea la 0.81..1.00, unde zgomotul (masurat: 3.8% din valori trec
+	# de 0.75) nu ajunge aproape niciodata.
+	#
+	# Asa, pragul depinde DOAR de cota: la varf coboara la 0.45, unde trece ~60%
+	# din zgomot. Cat de alb iese peticul se decide dupa aceea.
+	# TRECEREA E INGUSTA (0.07), si asta e a doua corectie facuta pe captura, nu
+	# pe rationament. Cu o banda larga (0.18) aproape fiecare vertex primea o
+	# greutate mica dar nenula, iar rezultatul nu era „asfalt cu petice de
+	# zapada", ci o sosea uniform CENUSIE — beton ud pe toata culmea. Se vedea
+	# imediat in captura, desi cifrele de acoperire aratau bine: exact capcana
+	# „efectele nu se verifica numarand".
+	#
+	# Ingusta, marginea peticului e o margine: ai zapada SAU asfalt, cu doar
+	# cativa metri de trecere. Aia e si diferenta dintre „petic" si „ceata".
+	var noise_v := noise.get_noise_3d(v.x, v.y, v.z) * 0.5 + 0.5
+	var thresh := lerpf(0.92, 0.52, alt)
+	var w := smoothstep(thresh, thresh + 0.07, noise_v)
+	if w <= 0.0:
+		return 0.0
+	# Banda de rulare ramane curata: rotile o matura, zapada rezista pe margini
+	# si pe axul dintre urme. 0.12 la mijloc, 1.0 pe buza — pe ax peticul e doar
+	# o umbra de alb, cat sa nu iasa doua dungi negre perfect paralele, dar
+	# destul de putin cat linia de curs sa ramana citibila pe asfalt inchis
+	# (style_bible §1). Cu 0.45, cat era inainte, mijlocul se albea si el si
+	# soseaua isi pierdea rolul de suprafata cea mai inchisa din cadru.
+	return w * lerpf(0.12, 1.0, smoothstep(0.15, 0.95, absf(t))) * amount
 
 ## Cati metri de sosea raman FARA perete de o parte si de alta a unei
 ## bifurcatii.
@@ -3938,6 +4162,15 @@ func _build_kerbs() -> void:
 	# de acum, poteca batatorita care se muta spre interiorul virajului
 	# (_build_tire_marks). Trei semnale geometrice in loc de unul pictat.
 	if road_is_loose():
+		return
+	# Nici un drum public de munte n-are, si din acelasi motiv: bordura rosu-alb
+	# e mobilier de CIRCUIT. Pe Alpii ea era chiar „marginea rosie" cea mai
+	# vizibila din vederea soferului — mai vizibila decat gardul, fiindca sta pe
+	# asfalt, in ax, pe toata durata virajului. Un drum care traverseaza pasuni
+	# si serpentine de cornisa se termina in pietris si iarba, nu intr-o dunga
+	# vopsita. Semnalul de franare ramane pe chevron-uri si pe umar, ca la
+	# drumul de nisip. Vezi "kerbs" in themes().
+	if not theme_flag("kerbs", true):
 		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)

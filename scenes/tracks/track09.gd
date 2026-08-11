@@ -270,33 +270,23 @@ func _cornice_ravines() -> Array[int]:
 	return [0]
 
 
-## Masivul central — muntele pe care pista chiar urca.
-##
-## VARFUL (30, -302) e subiectul pistei, nu decor pe orizont: drumul ii da
-## ocol pe trei laturi la 26-40 m de axa, iar traversarea expusa ii taie
-## flancul de vest. Raza 130 cu cota 160 nu sunt alese din ochi, sunt singura
-## pereche care trece prin trei conditii deodata (masurate cu ProbeAlpineTerrain):
-##   - de pe cornisa (cota 58) varful se ridica cu ~60 m peste tine, adica
-##     umple cadrul chase cam-ului pe verticala si NU incape intr-o captura;
-##   - la acul 2 (cota 62) conul a coborat deja sub cota drumului, deci nu
-##     ingroapa asfaltul — un con mai LARG ar fi facut exact asta;
-##   - trece de linia de zapada a temei (72 m, fade 18) cu suprafata reala,
-##     nu cu varful singur: versiunea veche (104 m pe raza 210) tinea 0.23%
-##     din teren peste 90 m, adica un petic alb cat o batista.
-##
-## Cifra care conteaza NU e cota declarata, ci cat ramane din ea dupa banda de
-## protectie a asfaltului (PEAK_ROAD_CLEAR/FULL din TrackSideSampler) si dupa
-## zgomotul de dune. De aceea se remasoara dupa orice mutare de traseu.
-##
-## Al doilea varf (10, -175) ramane: e umarul de sud care inchide interiorul
-## buclei si il vezi din sat si din vale. Ridicat 99 -> 120 ca sa nu para o
-## movila pe langa noul varf principal — doua cote apropiate citesc a creasta,
-## una singura ar fi citit a con izolat.
-func _peak_specs() -> Array[Vector4]:
-	return [
-		Vector4(30, -302, 130, 160),
-		Vector4(10, -175, 210, 120),
-	]
+# Masivele Alpilor NU mai sunt declarate aici: traiesc ca noduri TerrainPeak
+# in Track09.tscn (MasivCentral la (30, 160, -302) raza 130, UmarulDeSud la
+# (10, 120, -175) raza 210), ca sa se poata trage de ele in editor. Valorile
+# NU sunt alese din ochi — calibrarea originala, masurata cu
+# ProbeAlpineTerrain, ramane regula si daca le muti:
+#   - de pe cornisa (cota 58) varful principal se ridica cu ~60 m peste tine:
+#     umple cadrul chase cam-ului pe verticala si NU incape intr-o captura;
+#   - la acul 2 (cota 62) conul a coborat deja sub cota drumului, deci nu
+#     ingroapa asfaltul — un con mai LARG ar fi facut exact asta;
+#   - trece de linia de zapada a temei (72 m, fade 18) cu suprafata reala, nu
+#     cu varful singur: versiunea veche (104 m pe raza 210) tinea 0.23% din
+#     teren peste 90 m, adica un petic alb cat o batista;
+#   - umarul de sud sta ridicat la 120 ca doua cote apropiate sa citeasca a
+#     creasta — una singura ar fi citit a con izolat.
+# Cifra care conteaza NU e cota declarata, ci cat ramane din ea dupa banda de
+# protectie a asfaltului (PEAK_ROAD_CLEAR/FULL) si dupa zgomotul de dune —
+# dupa orice mutare de varf sau de traseu, remasoara cu ProbeAlpineTerrain.
 
 
 ## Parapetii de pe munte: RITM, nu o singura decizie.

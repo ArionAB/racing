@@ -218,6 +218,87 @@ ochi — fractia creste uniform cu distanta parcursa pe tur.
 
 ---
 
+## 4b. Apa care TAIE drumul: nodul TrackChannel
+
+Rapele de mai sus sapa pe LANGA sosea. Un canal trece pe **dedesubt**: terenul
+dispare, soseaua ramane cu un gol, iar peste gol se pune ori un pod mobil, ori
+o trambulina. E singura structura din joc care rupe drumul in doua.
+
+Vizual, e un nod **TrackChannel** (un Marker3D, ca `TerrainPeak`).
+
+### Pas cu pas
+
+1. Click dreapta pe radacina pistei → **Add Child Node** → cauta `TrackChannel`.
+2. Trage nodul in viewport **langa soseaua** pe care vrei sa o taie. Nu trebuie
+   sa-l nimeresti exact pe asfalt: canalul taie la punctul de pe traseu cel mai
+   apropiat de nod.
+3. In Inspector:
+   - `gap` — cati metri de sosea LIPSESC. **Vezi avertismentul de mai jos.**
+   - `depth` — cat de adanca e albia sub cota drumului.
+   - `water_y_drop` — cat de jos sta APA. Diferenta `depth − water_y_drop` e
+     grosimea reala a apei (18 − 15 = 3 m: albie larga cu firicel de apa).
+     Pune **-1** pe o pista cu mare, si canalul se umple din ea.
+   - `water_half` / `bank` — latimea apei si cat de lat urca malul.
+   - `reach` / `fade` — cat tine albia in fiecare parte si pe cati metri se
+     stinge in terenul din jur.
+   - `jump` — **bifat** = trambulina, se trece din saritura. **debifat** = pod
+     cu travee ridicatoare, se trece asteptand.
+   - `label` — nume pentru sonde (gol = numele nodului).
+4. Selecteaza **radacina** pistei si bifeaza **Regenerate**.
+5. **Salveaza scena.**
+
+Crucea gizmo-ului se intinde cat `reach`, deci vezi amprenta albiei inainte de
+primul Regenerate. Poti pune oricate noduri; se pot grupa sub un `Node3D`,
+cautarea e recursiva ca la munti.
+
+### Fractia NU se declara
+
+Ca la scurtaturi: se citeste din pozitia nodului. Muti nodul, se muta taietura
+— fara sa remasori nimic. (Distanta se masoara in plan, deci un canal de langa
+un drum care urca se agata de bucata de deasupra lui, nu de cea care se
+intampla sa fie la aceeasi inaltime.)
+
+### `gap` NU e o cifra libera — se masoara, in DOUA trepte
+
+Asta e capcana care costa cel mai mult timp daca o afli tarziu. Un gol prea
+mare nu e "mai greu", e **imposibil pentru jumatate din garaj**.
+
+1. **`tools/ProbeJump.tscn`** — de la ce viteza se trece:
+   ```
+   godot --headless --fixed-fps 60 --path . res://tools/ProbeJump.tscn -- --track=2
+   ```
+   Tipareste un tabel viteza → a trecut / a cazut. Masinile au plafoane intre
+   **30 si 37 m/s** (autobuzul 30, Muscle 37), plus **11 m/s** cat arde turbo.
+2. **`tools/ProbeRace.tscn`** — arbitrul. Sonda de saritura spune ce poate o
+   masina; cursa spune ce face PLUTONUL.
+
+Masurat pe Alpii (august 2026), si merita citit ca avertisment:
+
+| `gap` cerut | obtinut | rezultat |
+|---|---|---|
+| 26 m | 26.8 m | se trecea de la 24 m/s — sub viteza de croaziera a oricui. O formalitate. |
+| 38 m | 36.3 m | cerea turbo... dar autobuzul si pompierii cadeau **la fiecare tur**: 16 repuneri intr-o cursa de 150 s. |
+| 22 m | 21.8 m | trec toate, zero repuneri, si tot cere viteza. |
+
+Concluzia care se generalizeaza: **"turbo-only" nu incape** cat timp garajul are
+masini de 30 m/s si turbo-ul da +11. Daca ProbeRace arata blocaje in albie,
+micsoreaza golul — nu cosmetiza cifra.
+
+Retine si ca **golul obtinut difera de cel cerut**: capetele cad pe puncte de pe
+curba coapta. Cifra care conteaza e cea tiparita de sonde.
+
+### Ce se mai verifica
+
+- **`depth` sub ~10 m** = masina coboara taluzul rostogolindu-se si se intoarce
+  in cursa, deci frica dispare. Peste, o prinde `RespawnZone`.
+- **Nu pune landmark-uri pe malul de aterizare.** Un chalet declarat la 4
+  miimi dupa rapa a blocat autobuzul la fiecare tur — cladirea are coliziune,
+  iar masina vine prin aer si nu o poate evita. Lasa ~2 sectoare libere dupa gol.
+- **Nici hazarde mobile peste gol**: un obstacol care matura soseaua exact acolo
+  ar matura peste vid.
+
+---
+
 ## 5. Restul reperelor de pe radacina (toate ca fractii 0..1)
 
 | Export | Ce pune |
@@ -258,6 +339,10 @@ pot edita la fel:
    muntele se muta. Noduri noi se adauga la fel, oriunde. Dupa o mutare
    serioasa, remasoara cu ProbeAlpineTerrain (regulile de calibrare sunt in
    comentariul din `track09.gd`).
+4. **Canale:** paraul din valea Alpilor e DEJA un nod TrackChannel in
+   Track09.tscn (`ParaulVaii`) — exemplul viu al sectiunii 4b. Il tragi si
+   rapa il urmeaza, fara sa remasori fractia. Nodurile se ADUNA la ce declara
+   codul in `_channel_specs()`, deci poti folosi si una, si alta.
 
 **Atentie la fractii:** pe pistele din cod, rapele, parapetii si hazardele
 sunt legate de fractii de tur MASURATE pentru traseul actual (ex. cornisa
@@ -343,6 +428,9 @@ de start (`Vector3(0.95, 0.05, 4.0)`) — e tratat corect.
    avertisment de capat prea departe de sosea inseamna ca racordul e ales
    arbitrar. Apoi `ProbeRace --mode=race` — AI-ul e cel care spune daca banda
    chiar se poate parcurge.
-4. `probe_decor` daca ai adaugat mult decor manual (bugete tri/materiale).
-5. Joaca un tur: e satisfacator drift + saritura + bumping? Intai feel,
+4. Ai pus un **TrackChannel** cu `jump`? `ProbeJump` pentru pragul de viteza,
+   apoi **obligatoriu** `ProbeRace` — golul care se trece cu o masina poate
+   opri plutonul (vezi tabelul din sectiunea 4b).
+5. `probe_decor` daca ai adaugat mult decor manual (bugete tri/materiale).
+6. Joaca un tur: e satisfacator drift + saritura + bumping? Intai feel,
    apoi continut.

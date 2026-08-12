@@ -183,12 +183,15 @@ func _train_fracs() -> Array[float]:
 ## Hazardele mobile, in ordinea turului: carul cu fan pe ulita satului, sania
 ## cu busteni pe urcarea prin padure, vaca pe coborare (spre pasune), tractorul
 ## pe returul din vale. Toate matura perpendicular, ca orice SlidingHazard.
+## Plugul statea la 0.941, adica la 13 miimi de rapa paraului (0.937) — un
+## hazard care matura soseaua exact peste gol. Mutat DUPA aterizare (0.960),
+## unde are si un rost mai bun: aterizezi din saritura si dai peste el.
 func _hazard_fracs() -> Array[float]:
 	return [
 		0.058, # carul cu fan, pe ulita satului
 		0.206, # sania cu busteni, pe urcarea prin padure
 		0.777, # vaca, pe coborare — scurtatura o evita
-		0.941, # tractorul, pe returul din vale
+		0.960, # plugul, dupa aterizarea de peste parau
 	]
 
 
@@ -220,9 +223,49 @@ func _hazard_kinds() -> Dictionary:
 		# il avem in kit, si pe un drum de munte are rostul lui chiar vara —
 		# stationat in vale, nu la lucru. Un tractor propriu-zis ar fi un GLB
 		# nou pentru aceeasi silueta si acelasi rol.
-		0.941: {"model": M + "vehicles/snowplow.glb",
+		0.960: {"model": M + "vehicles/snowplow.glb",
 			"scale": 1.0, "roll": false},
 	}
+
+
+## Paraul din vale: RAPA PESTE CARE SE SARE, singurul gol din sosea al pistei.
+##
+## NU e declarat aici, ci ca NOD in Track09.tscn ("ParaulVaii", un
+## [TrackChannel]) — asta e chiar exemplul viu al nodului editabil, si de aceea
+## a fost mutat: fractia se deriva din pozitia lui, deci muti nodul in viewport
+## si taietura il urmeaza, fara sa remasori nimic cu ProbeTrack09Fracs.
+## Metoda de mai jos ramane goala; cele doua surse se ADUNA (vezi
+## Track._node_channels), deci o pista poate folosi si una, si alta.
+##
+## De ce AICI si nu in alta parte: returul din vale e singura bucata aproape
+## plata a pistei pe care se vine cu viteza mare, si e imediat dupa revenirea
+## scurtaturii (0.906). Adica saritura e prima decizie de dupa reunirea celor
+## doua linii — cine a taiat pasunea si cine a stat pe sosea ajung aici cot la
+## cot, cu bara incarcata diferit. Exact locul in care turbo-ul ca RESURSA
+## (principiul 2) are ceva de spus. Locul era decis de desenul pistei inca de
+## la inceput: punctul de control (-126, 4, -14) era comentat "podul peste
+## parau (decor, M4+)".
+##
+## Dimensiunile de pe nod sunt derivate, nu rotunde — si drumul pana la ele e
+## chiar motivul pentru care exista tools/probe_jump.gd:
+##   gap 22      MASURAT, in doua trepte. La 26 m se trecea de la 24 m/s in sus,
+##               adica sub viteza de croaziera a oricarei masini din garaj
+##               (Muscle 37, autobuzul 30) — o formalitate, nu o decizie. Marit
+##               la 36 m ca sa ceara turbo, si atunci ProbeRace a aratat pretul
+##               real: autobuzul si pompierii cadeau la fiecare tur, 16 repuneri
+##               intr-o cursa. Adica "turbo-only" NU incape pe pista asta cat
+##               timp garajul are masini de 30 m/s. La 22 m trec toate, si tot
+##               ramane un gol care cere viteza.
+##   depth 18    peste pragul de la care caderea e terminala (lectia rapei de
+##               26 m de sub traversare: la 16 m masina coboara taluzul
+##               rostogolindu-se si dispare frica).
+##   water_y_drop 15  apa sta la 3 m deasupra fundului: un parau de munte are
+##               firicel de apa intr-o albie larga, nu un canal plin ochi.
+##   reach 90    cat tine albia in fiecare parte. Mai lunga ar taia scurtatura
+##               (revine la 0.906), mai scurta ar arata ca o groapa, nu ca o
+##               vale.
+func _channel_specs() -> Array[Dictionary]:
+	return []
 
 
 ## Golurile declarate, amandoua pe latura din AFARA buclei (semnul +1 e masurat
@@ -340,8 +383,26 @@ func _rail_segments() -> Array[Vector4]:
 func _landmark_spots() -> Array[Vector3]:
 	return [
 		# --- SATUL (0.92-0.10): pilcul dens, de-o parte si de alta a ulitei ---
-		Vector3(0.925, -1.0, 18.0), # podul peste parau, la intrarea in sat
-		Vector3(0.941, 1.0, 15.0),  # chalet mic, pe dreapta
+		# Podul peste parau, mutat de la 0.925 la 0.900 si impins la 26 m
+		# lateral (#240). Cat timp paraul era doar o intentie scrisa in
+		# comentarii, podul statea langa drum ca reper de intrare in sat. De
+		# cand paraul e rapa peste care se SARE, un pod la 18 m de trambulina
+		# spunea exact povestea gresita: "era un pod, tu ai sarit pe langa el".
+		#
+		# Mutat in AMONTE, si asta il face sa aiba din nou sens: e podul pe care
+		# il foloseste satul, vizibil de pe sosea cu un sector inainte de
+		# saritura — adica devine ANUNTUL rapei, nu concurenta ei.
+		Vector3(0.900, -1.0, 26.0), # podul peste parau, in amonte de rapa
+		# Chalet-ul mic statea la 0.941, adica pe malul de ATERIZARE al rapei
+		# (0.937). Cu albia sapata sub el, `_build_landmark` il impingea lateral
+		# ca sa nu pluteasca peste apa — si il aseza fix in zona in care cad
+		# masinile dupa saritura. ProbeRace l-a prins imediat: autobuzul se
+		# oprea in el la fiecare tur, cu blocaje la 82, 97, 119 si 141 s.
+		#
+		# Mutat la 0.955, dupa ce aterizarea s-a terminat. Pilcul satului nu
+		# pierde nimic: tot acolo incepe, doar ca prima casa nu mai sta in
+		# calea unei masini care vine prin aer.
+		Vector3(0.955, 1.0, 15.0),  # chalet mic, pe dreapta, dupa aterizare
 		Vector3(0.958, -1.0, 14.0), # chalet MARE, pe stanga
 		# Biserica la 0.972: turla de 14 m in axul sicanei, deci o vezi cum se
 		# apropie pe toata ulita si stii unde se strange drumul. Exact rolul de

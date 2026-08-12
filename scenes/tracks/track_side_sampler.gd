@@ -130,7 +130,17 @@ const SMOOTH_PEAK_K: float = 4.0
 var _baked: PackedVector3Array
 var _dists: PackedFloat32Array
 var _loop_poly: PackedVector2Array
+## Latimea de referinta a soselei — media, cand exista un profil pe sectoare.
+##
+## Ramane pentru raspunsurile care NU au un loc anume in vedere (vezi
+## [method half_width]); tot ce stie UNDE se afla trece prin [member _widths].
 var _half_width: float
+## Jumatatea latimii la fiecare punct copt, sau goala cand pista are latime
+## constanta.
+##
+## Goala inseamna „intreaba `_half_width`", nu „latime zero": pe pistele fara
+## profil declarat nu se aloca nimic si nu se schimba niciun raspuns.
+var _widths: PackedFloat32Array
 var _total_len: float
 ## Curbura precalculata per index — se cere de multe ori, se calculeaza o data.
 var _curvature: PackedFloat32Array
@@ -175,10 +185,12 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		lagoon_depth: float = 0.0,
 		channels: Array[Dictionary] = [],
 		peaks: Array[Vector4] = [],
-		cornices: Array[int] = []) -> void:
+		cornices: Array[int] = [],
+		widths: PackedFloat32Array = PackedFloat32Array()) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
+	_widths = widths
 	_dune_phase = dune_phase
 	_ravines = ravines
 	_far_drop = far_drop
@@ -221,8 +233,24 @@ func total_length() -> float:
 
 ## Jumatatea de latime a soselei — offseturile se dau fata de MARGINE, dar
 ## unii consumatori au nevoie si de distanta pana la axa.
+##
+## Cand pista are latime variabila, asta e MEDIA. Cine stie langa ce bucata de
+## drum se afla trebuie sa cheme [method half_width_at], nu functia asta:
+## raspunsul de aici e bun pentru bugete si praguri globale, nu pentru asezat
+## ceva pe marginea drumului.
 func half_width() -> float:
 	return _half_width
+
+
+## Jumatatea de latime la un index din punctele coapte.
+##
+## Pe o pista fara profil declarat, [member _widths] e goala si raspunsul e
+## acelasi peste tot — deci nicio pista existenta nu se schimba.
+func half_width_at(i: int) -> float:
+	var n := _widths.size()
+	if n == 0:
+		return _half_width
+	return _widths[((i % n) + n) % n]
 
 
 ## Cota terenului la o pozitie din lume. SURSA UNICA pentru tot ce se aseaza pe sol.
@@ -277,7 +305,7 @@ func ground_y(wx: float, wz: float) -> float:
 	# fi la 3 m si lacatul s-ar slabi chiar acolo unde trebuie sa fie ferm.
 	var local := _local_road(wx, wz, near_i)
 	var lock := 1.0 - smoothstep(0.0, GROUND_LOCK_LEN,
-		maxf(local.x - _half_width, 0.0))
+		maxf(local.x - half_width_at(near_i), 0.0))
 	if lock > 0.0:
 		road_level = lerpf(road_level, local.y, lock)
 	var t := clampf((dist - GROUND_FLAT_RADIUS) / GROUND_BLEND_LEN, 0.0, 1.0)
@@ -331,9 +359,9 @@ func ground_y(wx: float, wz: float) -> float:
 	y += _detail_dunes(wx, wz) * (t * t)
 	# Masivele INAINTE de benzi si de taieturi: poteca unei scurtaturi isi
 	# re-aseaza terenul peste flancul muntelui, iar rapele taie si prin el.
-	y = _lift_peaks(y, wx, wz, dist)
-	y = _lift_branches(y, wx, wz, road_level, dist)
-	y = _carve_lagoon(y, dist, wx, wz)
+	y = _lift_peaks(y, wx, wz, dist, near_i)
+	y = _lift_branches(y, wx, wz, road_level, dist, near_i)
+	y = _carve_lagoon(y, dist, wx, wz, near_i)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
 	# ULTIMA taietura, si singura care nu ocoleste asfaltul. Vezi _carve_channel.
 	return _carve_channel(y, wx, wz)
@@ -378,11 +406,12 @@ func _local_road(wx: float, wz: float, near_i: int) -> Vector2:
 ## sa nu treaca peste drumul care il traverseaza. Peste profil se adauga
 ## acelasi zgomot de dune ca in campul departat, altfel flancul iese un con
 ## de strung.
-func _lift_peaks(y: float, wx: float, wz: float, dist: float) -> float:
+func _lift_peaks(y: float, wx: float, wz: float, dist: float,
+		near_i: int) -> float:
 	if _peaks.is_empty():
 		return y
 	var mask := smoothstep(PEAK_ROAD_CLEAR, PEAK_ROAD_FULL,
-		dist - _half_width)
+		dist - half_width_at(near_i))
 	if mask <= 0.0:
 		return y
 	var peak := -INF
@@ -425,7 +454,7 @@ const BRANCH_LIFT_CLEAR: float = 12.0
 
 ## Ridica terenul la cota benzilor secundare, dar doar chiar langa ele.
 func _lift_branches(y: float, wx: float, wz: float,
-		road_level: float, road_dist: float) -> float:
+		road_level: float, road_dist: float, near_i: int) -> float:
 	var m := _extra.size()
 	if m == 0:
 		return y
@@ -455,7 +484,8 @@ func _lift_branches(y: float, wx: float, wz: float,
 	# BRANCH_LIFT_CLEAR: plafonul se ridica de la cota drumului la ridicatura
 	# libera pe primii metri de dincolo de asfalt, deci nu apare nicio treapta
 	# la marginea lui.
-	var room := clampf((road_dist - _half_width) / BRANCH_LIFT_CLEAR, 0.0, 1.0)
+	var room := clampf((road_dist - half_width_at(near_i)) / BRANCH_LIFT_CLEAR,
+		0.0, 1.0)
 	return minf(lifted, lerpf(road_level, lifted, room))
 
 
@@ -482,11 +512,13 @@ const LAGOON_RIM: float = 30.0
 ## `lerpf` simplu, nu `_smin`: tinta e prin constructie sub y, iar amestecul e
 ## produsul a doua smoothstep-uri, deci racordul e deja C1. Un _smin ar mai fi
 ## scazut k/4 = 0.75 m uniform pe toata suprafata lagunei, degeaba.
-func _carve_lagoon(y: float, road_dist: float, wx: float, wz: float) -> float:
+func _carve_lagoon(y: float, road_dist: float, wx: float, wz: float,
+		near_i: int) -> float:
 	if _lagoon_depth <= 0.0 or _lagoon_poly.size() < 3:
 		return y
 	var lat := smoothstep(0.0, 1.0,
-		clampf((road_dist - _half_width - LAGOON_INNER) / LAGOON_RIM, 0.0, 1.0))
+		clampf((road_dist - half_width_at(near_i) - LAGOON_INNER) / LAGOON_RIM,
+			0.0, 1.0))
 	if lat <= 0.0:
 		return y
 	var lag := _lagoon_mix(wx, wz)
@@ -621,7 +653,7 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		var inner := RAVINE_CORNICE_INNER if cornice else RAVINE_INNER
 		var rim := RAVINE_CORNICE_RIM if cornice else RAVINE_RIM
 		var lat := smoothstep(0.0, 1.0,
-			clampf((dist - _half_width - inner) / rim, 0.0, 1.0))
+			clampf((dist - half_width_at(near_i) - inner) / rim, 0.0, 1.0))
 		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
 		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
 		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).
@@ -829,8 +861,8 @@ func wall_segments(side_sign: float) -> Array[Vector2]:
 	var run_start := -1.0
 	for i in n:
 		var j := (i + 1) % n
-		var b0 := _baked[i] + side_at(i) * _half_width * side_sign
-		var b1 := _baked[j] + side_at(j) * _half_width * side_sign
+		var b0 := _baked[i] + side_at(i) * half_width_at(i) * side_sign
+		var b1 := _baked[j] + side_at(j) * half_width_at(j) * side_sign
 		var mid := (b0 + b1) * 0.5
 		var closed := (not Geometry2D.is_point_in_polygon(
 			Vector2(mid.x, mid.z), _loop_poly)) or mid.y > 1.0
@@ -862,7 +894,8 @@ func _make_spec(d: float, side_sign: float, offset: float) -> TrackDecorSpec:
 	var base := _baked[idx]
 	var along := (_baked[(idx + 1) % n] - base).normalized()
 	var side := along.cross(Vector3.UP).normalized() * side_sign
-	var pos := base + side * (_half_width + offset)
+	var hw := half_width_at(idx)
+	var pos := base + side * (hw + offset)
 	# PUNCTUL UNIC prin care trec toate falezele si tot decorul. Era `base.y`,
 	# adica exact cota drumului — de aici plutea tot ce se aseza langa o portiune
 	# inaltata. Vezi ground_y() pentru diagnosticul complet.
@@ -871,7 +904,7 @@ func _make_spec(d: float, side_sign: float, offset: float) -> TrackDecorSpec:
 	# Respins daca ar cadea peste alta bucla a pistei. Marja de 1m: vrem sa
 	# permitem slotul propriu (care e la exact half_width + offset), dar nu unul
 	# care s-a apropiat de o sosea vecina.
-	if clearance_at(pos) < _half_width + offset - 1.0:
+	if clearance_at(pos) < hw + offset - 1.0:
 		return null
 	# ...si daca ar cadea in canal. Slotul isi ia cota din ground_y, deci un
 	# palmier de acolo n-ar pluti: ar creste de pe fundul senalului, cu coroana

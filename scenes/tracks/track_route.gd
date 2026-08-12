@@ -146,11 +146,19 @@ func closest_index_global(pos: Vector3) -> int:
 
 
 ## Punct-tinta pentru AI: cu [code]ahead_m[/code] mai in fata, deplasat lateral.
+##
+## [code]half_width_override[/code] e latimea de la indexul TINTA, cand pista are
+## profil pe sectoare. Negativ (implicit) = latimea benzii, ca inainte.
+##
+## Contează pe cine intreaba: AI-ul isi alege linia cu cateva zeci de metri in
+## fata, deci pe o strangere linia calculata cu latimea de ACUM ar tinti langa
+## asfaltul de ACOLO — masina ar intra in perete tinand exact linia ceruta.
 func lookahead_point(i: int, ahead_m: float, lateral_frac: float,
-		bake_interval: float) -> Vector3:
+		bake_interval: float, half_width_override: float = -1.0) -> Vector3:
 	var steps := int(ahead_m / maxf(bake_interval, 0.001))
 	var idx := wrap_index(i + steps)
-	return baked[idx] + side_at(idx) * lateral_frac * half_width
+	var hw := half_width_override if half_width_override >= 0.0 else half_width
+	return baked[idx] + side_at(idx) * lateral_frac * hw
 
 
 ## Punctul de repunere: centrul benzii, cu `backoff_m` INAINTE de index.

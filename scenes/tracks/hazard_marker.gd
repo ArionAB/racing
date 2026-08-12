@@ -10,7 +10,8 @@ extends Marker3D
 ## exista o singura implementare per gimmick, hranita in doua feluri.
 ##
 ## Ce se declara si ce se DERIVA — impartirea e tot ce conteaza aici:
-##   - declari: tipul si POZITIA (tragi nodul in viewport)
+##   - declari: tipul, POZITIA (tragi nodul in viewport) si, optional, cu ce
+##     model se imbraca obstacolul (vezi grupul "Model")
 ##   - se deriva: fractia pe traseu, semilatimea soselei acolo, lateralul si
 ##     directia drumului
 ##
@@ -56,6 +57,74 @@ enum Kind {
 ## drumului si isi ia latura din semn — un nod tras cu 20 cm peste mijloc ar
 ## intoarce panta fara ca nimeni sa fi cerut asta.
 @export_enum("Dreapta:1", "Stanga:-1") var deflector_side: int = 1
+
+@export_group("Model")
+
+## Ce OBIECT traverseaza soseaua aici. Gol = ce alege tema (vezi
+## `Track._build_hazard`), adica exact comportamentul dinainte de #240.
+##
+## Pana aici, un obstacol tras in viewport iesea mereu imbracat de tema — o
+## singura haina pe toata pista — desi mecanica accepta de mult un model per
+## pozitie. Alpii au patru obstacole, fiecare din alta parte a lumii lor
+## (#224), dar toate patru se puteau declara DOAR din cod, in
+## `_hazard_kinds()`. Nodul stia unde, nu si ce, si asta lasa jumatate de
+## gimmick in editor.
+##
+## Regula testoasei (track08) spune ca hazardul apartine LOCULUI in care sta.
+## Locul se trage cu mana in viewport; de aici incolo si haina lui.
+@export var model: PackedScene = null
+
+## Scara modelului. 1.0 = cat l-a construit Blender.
+##
+## Implicitul temei (0.52) vine de la bolovanul de canion, modelat la 5 m si
+## micsorat la 2.6. Un model din kitul alpin e deja la scara reala, deci ar
+## fi micsorat pe nedrept — de-aia scara sta langa model, nu langa tema.
+@export_range(0.05, 4.0, 0.01) var model_scale: float = 1.0
+
+## Se uita spre directia in care matura.
+##
+## Fara asta obiectul ramane pe axele LUMII. La o barca targita e o nepasare
+## acceptabila (n-are un "inainte"), la un animal e vizibil gresit: o vaca
+## care traverseaza cu umarul inainte nu traverseaza, pluteste.
+@export var face_travel: bool = false
+
+## Se rostogoleste in timp ce traverseaza (raza reala o ia din model).
+##
+## Doar bolovanii. Un car cu fan care se da peste cap traversand ulita e exact
+## greseala descrisa la barca sabani.
+@export var roll: bool = false
+
+## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
+##
+## O CLASA, nu o textura proprie: garda de materiale din `tools/probe_decor.gd`
+## numara materialele per pista, iar un asset care isi aduce propriile texturi
+## e exact ce urca numarul ala. Vezi CLAUDE.md §texturi.
+@export var tri_class: String = ""
+
+
+## Ce a declarat nodul despre INFATISAREA obstacolului, in forma pe care o
+## citeste deja `Track._build_hazard`: acelasi dictionar ca o intrare din
+## `_hazard_kinds()`.
+##
+## Forma comuna e intentionata. Alternativa — campuri proprii duse separat
+## prin `_build_node_hazard` — ar fi insemnat doua feluri de a imbraca acelasi
+## obstacol, care s-ar fi tunat separat si ar fi divergat la prima corectie.
+## Asa, o pista scrisa in cod si un nod tras in viewport spun acelasi lucru in
+## acelasi vocabular.
+##
+## Cheile lipsesc cand nu s-a declarat nimic, ca `_build_hazard` sa cada pe
+## steagurile temei — un dictionar cu `"model": ""` ar fi STINS tema, nu ar fi
+## lasat-o sa vorbeasca.
+func model_spec() -> Dictionary:
+	var spec := {}
+	if model != null:
+		spec["model"] = model.resource_path
+		spec["scale"] = model_scale
+		spec["roll"] = roll
+		spec["face_travel"] = face_travel
+	if not tri_class.is_empty():
+		spec["tri_class"] = tri_class
+	return spec
 
 
 func _ready() -> void:

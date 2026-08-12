@@ -409,6 +409,54 @@ de start (`Vector3(0.95, 0.05, 4.0)`) — e tratat corect.
 
 ---
 
+## 5d. Obstacole trase cu mana: nodul HazardMarker
+
+Tabelul de la 5 pune obstacolele pe **fractii scrise de mana**. Alternativa, si
+cea recomandata cand stii UNDE vrei obstacolul dar nu si la ce fractie cade: un
+nod **HazardMarker** tras pe sosea in viewport.
+
+### Pas cu pas
+
+1. Click dreapta pe radacina pistei → **Add Child Node** → `HazardMarker`.
+2. Trage nodul **pe asfalt**, acolo unde vrei obstacolul. Y-ul e ignorat —
+   fiecare gimmick isi aseaza singur cota (bolovanul cade pe asfalt, caruselul
+   se planteaza in mijlocul drumului), deci un nod tras prea sus nu lasa nimic
+   plutind.
+3. In Inspector, `kind`: bariera mobila, bolovan, morisca, tren, tromba,
+   deflector, creasta, excavator, avalansa.
+4. **Regenerate** pe radacina + **salveaza scena.**
+
+Le poti grupa sub un `Node3D` — cautarea e recursiva, ca la munti.
+
+Avantajul fata de fractii: fractia se **recalculeaza** la fiecare Regenerate din
+pozitia nodului. Muti doua puncte de control, si obstacolul ramane pe asfalt in
+loc sa alunece pe langa drum.
+
+### Cu ce se imbraca obstacolul (grupul „Model")
+
+Implicit, un obstacol tras in viewport primeste haina TEMEI. Daca vrei alt
+obiect exact acolo — o vaca, un car cu fan, o barca — completeaza in Inspector:
+
+| Camp | Ce face |
+|---|---|
+| `model` | GLB-ul din `assets/models/` (gol = decide tema) |
+| `model_scale` | 1.0 = cat l-a construit Blender |
+| `face_travel` | se uita incotro merge — **obligatoriu la animale** |
+| `roll` | se rostogoleste (doar bolovanii) |
+| `tri_class` | clasa de material (ex. `rock`), nu o textura proprie |
+
+Se aplica azi la **bariera mobila** (`SLIDING`); bolovanul si deflectorul isi
+construiesc inca vizualul din cod.
+
+Doua reguli care nu-s de gust:
+
+- **`face_travel` la orice are un „inainte".** O vaca care traverseaza cu
+  umarul inainte nu traverseaza, pluteste.
+- **`roll` doar la bolovani.** Un car cu fan care se da peste cap traversand
+  ulita e exact greseala pe care o evita barca sabani din Okinawa.
+
+---
+
 ## 6. Ce NU se poate inca vizual (exista in cod, cere-le cand ai nevoie)
 
 - **Borduri pe alese** — bordurile apar automat pe orice viraj peste un prag

@@ -1257,6 +1257,10 @@ func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
 				"kind": hz.kind,
 				"frac": frac_at(_closest_baked_index(p)),
 				"side": hz.deflector_side,
+				# Infatisarea declarata pe nod, in acelasi vocabular ca o intrare
+				# din `_hazard_kinds()` — vezi HazardMarker.model_spec(). Gol cand
+				# nodul n-a cerut nimic, si atunci decide tema, ca pana acum.
+				"spec": hz.model_spec(),
 			})
 		_collect_hazards(child, out)
 
@@ -3838,7 +3842,11 @@ func _build_ramp(frac: float) -> void:
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
 
-func _build_hazard(frac: float) -> void:
+## `spec` suprascrie ce s-ar fi ales pentru fractia asta: e infatisarea ceruta
+## de un [HazardMarker] tras in viewport (vezi HazardMarker.model_spec()).
+## Gol — cazul pistelor scrise in cod — inseamna "cauta in `_hazard_kinds()`",
+## adica exact comportamentul de dinainte.
+func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var p := baked[idx]
@@ -3868,11 +3876,18 @@ func _build_hazard(frac: float) -> void:
 	# exact. Trei din patru se potriveau din noroc, al patrulea cadea pe
 	# modelul temei — adica bug-ul arata ca "am uitat sa declar unul".
 	# O toleranta face intentia explicita si scoate norocul din ecuatie.
+	#
+	# Un nod care si-a declarat modelul sare peste cautare: el A SPUS deja ce
+	# vrea, iar fractia lui e derivata din pozitie, deci n-ar avea cum sa se
+	# potriveasca cu o cheie scrisa de mana in dictionar.
 	var kind := {}
-	for key in _hazard_kinds():
-		if absf(float(key) - frac) < 0.0005:
-			kind = _hazard_kinds()[key]
-			break
+	if not spec.is_empty():
+		kind = spec
+	else:
+		for key in _hazard_kinds():
+			if absf(float(key) - frac) < 0.0005:
+				kind = _hazard_kinds()[key]
+				break
 	var hazard_model: String = String(kind.get("model",
 		theme_flag("hazard_model", "")))
 	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
@@ -3883,7 +3898,8 @@ func _build_hazard(frac: float) -> void:
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
 		ball.model_scale = float(kind.get("scale",
 			theme_flag("hazard_scale", 0.52)))
-		ball.model_tri_class = theme_flag("hazard_class", "")
+		ball.model_tri_class = String(kind.get("tri_class",
+			theme_flag("hazard_class", "")))
 		ball.model_classes = theme_flag("hazard_classes", {})
 		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
 		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
@@ -3931,11 +3947,17 @@ func _build_hazard(frac: float) -> void:
 ## fractie. Daca aparea aici o a doua cale de constructie, cele doua ar fi
 ## divergat la prima corectie de mecanica — exact ce evita [TerrainPeak] prin
 ## faptul ca hraneste `_peak_specs` in loc sa-si construiasca propriul munte.
+##
+## Infatisarea declarata pe nod (`spec`) ajunge deocamdata doar la bariera
+## mobila, fiindca ea e singura cu mecanica de model pe pozitie. Bolovanul si
+## deflectorul isi construiesc inca vizualul din cod — cand vor primi si ele
+## slot de model (#242, #244), aici se adauga o linie, nu un al doilea drum.
 func _build_node_hazard(hz: Dictionary) -> void:
 	var frac := float(hz.get("frac", 0.0))
+	var spec: Dictionary = hz.get("spec", {})
 	match int(hz.get("kind", 0)):
 		HazardMarker.Kind.SLIDING:
-			_build_hazard(frac)
+			_build_hazard(frac, spec)
 		HazardMarker.Kind.ROCKFALL:
 			_build_rockfall(frac)
 		HazardMarker.Kind.CAROUSEL:

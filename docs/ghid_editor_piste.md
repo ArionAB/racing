@@ -269,18 +269,69 @@ Daca vrei sa te intorci la traseul din cod: sterge nodul Path si Regenerate.
 
 ---
 
+## 5c. Latime variabila: drumul se strange si se deschide
+
+`custom_half_width` da latimea de baza a pistei. Peste ea se pot declara
+**sectoare cu latimea lor** — un defileu care strange drumul, o portiune de
+start care il deschide.
+
+Deocamdata se declara in cod, cu un script propriu peste `TrackFromPath`:
+
+```gdscript
+@tool
+extends TrackFromPath
+
+func _width_segments() -> Array[Vector3]:
+	# (frac_start, frac_end, half_width)
+	return [
+		Vector3(0.40, 0.55, 3.5),  # defileu: jumatate din latime
+		Vector3(0.80, 0.90, 9.0),  # se deschide inainte de start/finish
+	]
+```
+
+Fara nicio declaratie, latimea e constanta peste tot — adica exact
+comportamentul dinainte, pentru toate pistele existente.
+
+### Ce face singur
+
+- **Trecerea are lungime.** Latimea nu sare de la o valoare la alta: se
+  interpoleaza neted pe **30 m** de fiecare parte a sectorului (rampele stau in
+  AFARA intervalului, deci pe interiorul lui ai chiar latimea ceruta).
+- **Tot ce tine de latime urmeaza profilul**, nu doar asfaltul: bordurile,
+  umerii, peretii, chevron-urile, gardurile, hazardele mobile (isi taie cursa
+  dupa latimea de la fractia LOR), buza rapelor, malul lagunei si sloturile de
+  decor.
+- **Penalizarea de offroad** foloseste marginea locala, deci o portiune largita
+  nu te mai penalizeaza pe asfaltul ei propriu.
+- **AI-ul** isi calculeaza linia cu latimea de la punctul spre care se uita, nu
+  cu cea de sub el — altfel ar tinti langa asfalt intrand intr-o strangere.
+
+### De ce 30 m si nu 3
+
+Marginea asfaltului e si marginea fasiei de coliziune. Daca latimea sare cu
+3.5 m intre doua inele de drum aflate la ~2 m unul de altul, apare un **prag
+lateral** de 3.5 m — iar masina e un `CharacterBody3D` fara step-up, deci un
+prag lateral nu e o denivelare, e un **perete**: te opresti in el mergand drept,
+in mijlocul soselei. Cu rampa de 30 m, o ingustare de 3.5 m urca la ~0.33 m pe
+inel, adica margine oblica.
+
+### Ce se plange in Output
+
+Declaratiile stricate nu opresc pista, dar spun ce n-au inteles: sector gol,
+latime negativa, latime sub 2 m (nu mai incape o masina cu spatiu de manevra),
+si sectoare care se suprapun (castiga primul). Un sector poate trece peste linia
+de start (`Vector3(0.95, 0.05, 4.0)`) — e tratat corect.
+
+---
+
 ## 6. Ce NU se poate inca vizual (exista in cod, cere-le cand ai nevoie)
 
 - **Borduri pe alese** — bordurile apar automat pe orice viraj peste un prag
   de curbura; nu se pot inca opri/forta pe un viraj anume. Ce POTI face azi:
   le stingi pe toata pista, din tema (`"kerbs": false`, ca pe Alpii), sau le
   lasi peste tot. Granularitatea pe viraj e #235.
-- **Latime variabila pe sectoare** — `custom_half_width` e inca **o singura
-  valoare pe toata pista**, deci un drum nu se poate strange intr-un defileu si
-  deschide pe o dreapta. Ce POTI face azi: o scurtatura are latimea EI
-  (`branch_half_width`), deci o portiune ingusta se poate face ca banda
-  separata. Restul e #236 — jumatate din drum e gata, fiindca generatoarele
-  intreaba deja `Track.width_at(frac)` in loc sa citeasca `half_width` direct.
+- **Latime variabila pe sectoare** — se declara in COD (`_width_segments()`,
+  vezi sectiunea 5c), nu inca dintr-un export pe radacina.
 
 ---
 

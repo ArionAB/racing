@@ -720,13 +720,177 @@ var _mat_cache: Dictionary = {}
 ## intr-o functie, iar locurile care au nevoie de latimea LOCALA se vad deja:
 ## sunt cele care cheama `width_at_index`.
 
+## Sectoarele cu latime proprie: fiecare e (frac_start, frac_end, half_width).
+##
+## Gol (implicit) = latime constanta pe toata pista, adica exact
+## comportamentul dinainte de #236. Un drum care nu declara nimic nu se schimba
+## cu un pixel.
+##
+## Fractiile se dau ca oriunde in pista: 0..1 pe tur, 0 = linia de start. Un
+## sector poate trece peste linia de start ([code]end < start[/code]) — e tratat
+## prin desfasurare, ca la scurtaturi.
+##
+## Intre sectoare latimea NU sare: [method width_at] interpoleaza neted pe
+## [constant WIDTH_RAMP_M] metri de fiecare parte. Vezi acolo de ce lungimea
+## tranzitiei nu e o preferinta de gust.
+##
+## Sectoarele care se suprapun sunt o eroare de declaratie, nu o compunere:
+## castiga primul care contine fractia. Le semnaleaza `_validate_width_segments`.
+func _width_segments() -> Array[Vector3]:
+	return []
+
+## Pe cati metri se face trecerea de la o latime la alta, de fiecare parte a
+## marginii unui sector.
+##
+## NU e o preferinta de gust. Marginea asfaltului e si marginea fasiei de
+## coliziune: daca latimea sare cu 3.5 m intre doua inele de drum aflate la
+## ~3 m unul de altul, apare un PRAG LATERAL de 3.5 m. Masina e un
+## CharacterBody3D fara step-up, deci un prag lateral nu e o denivelare, e un
+## PERETE — te opresti in el mergand drept, in mijlocul soselei.
+##
+## Masurat pe o strangere 7.0 -> 3.5 cu inele la 1.91 m: 15.7 inele de
+## tranzitie, deci 0.22 m pe inel in medie si 0.33 m in varf (smoothstep-ul
+## e mai abrupt la mijloc decat la capete). O treime de metru pe pas, adica
+## margine oblica, nu zid.
+const WIDTH_RAMP_M: float = 30.0
+
 ## Jumatatea latimii soselei la o fractie de tur (0..1).
 ##
-## Deocamdata constanta. Cand va exista profilul pe sectoare, aici se
-## interpoleaza — si tot ce cheama functia asta capata latime variabila fara
-## sa se schimbe.
-func width_at(_frac: float) -> float:
-	return half_width
+## Fara sectoare declarate intoarce `half_width` — acelasi raspuns pentru
+## toata pista, deci pistele care nu cer nimic raman neatinse.
+##
+## Cu sectoare, latimea CURGE: fiecare margine de sector e o rampa de
+## [constant WIDTH_RAMP_M] metri, neteda la capete (smoothstep), nu o treapta.
+## Vezi constanta pentru ce se intampla fara ea.
+func width_at(frac: float) -> float:
+	var segs := _width_profile()
+	if segs.is_empty():
+		return half_width
+	var f := fposmod(frac, 1.0)
+	var out := half_width
+	for seg in segs:
+		# `seg` e (start, end, half_width) cu start/end deja desfasurate, deci
+		# un sector peste linia de start are end > 1.0 si se testeaza si la
+		# f + 1.0. Vezi `_width_profile`.
+		var w := _width_blend(f, seg)
+		if w < 0.0:
+			w = _width_blend(f + 1.0, seg)
+		if w >= 0.0:
+			out = w
+			break
+	return out
+
+
+## Cat de lata e soseaua la fractia `f` din perspectiva unui SINGUR sector, sau
+## -1.0 daca fractia e in afara lui cu totul (rampe incluse).
+##
+## Rampele stau IN AFARA sectorului declarat, nu inauntru: cine scrie
+## „de la 0.30 la 0.40 drumul are 3.5" vrea 3.5 pe tot intervalul ala, nu 3.5
+## doar la mijloc, cu capetele inca pe jumatate largi.
+func _width_blend(f: float, seg: Vector3) -> float:
+	var ramp := _width_ramp_frac()
+	var a := seg.x
+	var b := seg.y
+	if f >= a and f <= b:
+		return seg.z
+	if f < a:
+		if f < a - ramp:
+			return -1.0
+		return lerpf(half_width, seg.z, smoothstep(0.0, 1.0, (f - (a - ramp)) / ramp))
+	if f > b + ramp:
+		return -1.0
+	return lerpf(seg.z, half_width, smoothstep(0.0, 1.0, (f - b) / ramp))
+
+
+## Lungimea rampei exprimata in fractii de tur, ca sa fie comparabila cu
+## fractiile sectoarelor. Pe o pista de 2271 m, 30 m inseamna 0.0132.
+##
+## Daca lungimea inca nu se stie (chemat inainte de coacerea curbei), intoarce
+## o rampa lata in loc sa imparta la zero. Nu se intampla in fluxul normal —
+## `rebuild()` coace curba inaintea oricarui generator — dar functia e publica
+## prin `width_at`, deci nu se bazeaza pe ordinea apelurilor.
+func _width_ramp_frac() -> float:
+	var total := _dists[baked.size()] if _dists.size() > baked.size() else 0.0
+	if total <= 0.0:
+		return 0.05
+	return WIDTH_RAMP_M / total
+
+
+## Sectoarele cu fractiile desfasurate si validate, calculate O SINGURA DATA pe
+## rebuild. `width_at` e chemata de zeci de mii de ori pe constructie (o data pe
+## inel de drum, plus hazarde, decor, chevron-uri) — refacerea listei la fiecare
+## apel ar fi transformat o cautare liniara intr-una patratica.
+var _width_segs: Array[Vector3] = []
+var _width_segs_ready: bool = false
+
+func _width_profile() -> Array[Vector3]:
+	if not _width_segs_ready:
+		_width_segs = _validate_width_segments(_width_segments())
+		_width_segs_ready = true
+	return _width_segs
+
+
+## Curata declaratiile: latimi imposibile, sectoare goale, suprapuneri.
+##
+## Toate cele trei se plang in Output si CONTINUA cu ce se poate, in loc sa
+## opreasca pista: o pista pe jumatate construita e mai greu de depanat decat
+## una care spune ce n-a inteles.
+func _validate_width_segments(raw: Array[Vector3]) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for seg in raw:
+		var a := fposmod(seg.x, 1.0)
+		var b := fposmod(seg.y, 1.0)
+		var w: float = seg.z
+		if w <= 0.0:
+			push_warning("Track: sector de latime cu half_width %.2f — se ignora" % w)
+			continue
+		# Sub o latime de masina drumul nu mai e drum. Masina are ~1.8 m, deci
+		# 2.0 m jumatate de latime lasa 4 m de asfalt: se trece, dar nu se
+		# depaseste — exact ce vrea o strangere.
+		if w < 2.0:
+			push_warning(("Track: sector de latime cu half_width %.2f m — sub 2 m "
+				+ "nu mai incape o masina cu spatiu de manevra") % w)
+		if is_equal_approx(a, b):
+			push_warning("Track: sector de latime gol la fractia %.3f — se ignora" % a)
+			continue
+		# Sectorul care trece peste linia de start se desfasoara peste 1.0, ca
+		# `width_at` sa-l poata testa si la f + 1.0.
+		if b < a:
+			b += 1.0
+		out.append(Vector3(a, b, w))
+	for i in out.size():
+		for j in range(i + 1, out.size()):
+			if _width_segs_overlap(out[i], out[j]):
+				push_warning(("Track: sectoarele de latime %.3f-%.3f si %.3f-%.3f "
+					+ "se suprapun — castiga primul") % [
+					out[i].x, out[i].y, out[j].x, out[j].y])
+	return out
+
+
+## Doua sectoare se ating? Comparatia se face si cu al doilea mutat cu un tur,
+## fiindca unul dintre ele poate fi desfasurat peste 1.0.
+func _width_segs_overlap(p: Vector3, q: Vector3) -> bool:
+	for shift: float in [-1.0, 0.0, 1.0]:
+		if p.x < q.y + shift and q.x + shift < p.y:
+			return true
+	return false
+
+
+## Latimea la fiecare punct copt, pentru [TrackSideSampler].
+##
+## Lista GOALA cand pista n-are profil declarat, si asta nu e o optimizare de
+## dragul ei: samplerul trateaza lista goala ca „latime constanta" si raspunde
+## bit-identic ca inainte. Pistele existente nu platesc nici memorie, nici
+## risc, pentru o functie pe care n-o folosesc.
+func _baked_widths() -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	if _width_profile().is_empty():
+		return out
+	var n := baked.size()
+	out.resize(n)
+	for i in n:
+		out[i] = width_at(float(i) / float(n))
+	return out
 
 
 ## Acelasi lucru, dar intrebat cu un index din [member baked].
@@ -1114,6 +1278,10 @@ func _ready() -> void:
 ## supravietuieste si la Regenerate, si la runtime. Vezi docs/decor_manual.md.
 func rebuild() -> void:
 	_mat_cache.clear() # altfel raman materialele temei precedente
+	# Profilul de latime se recalculeaza: la Regenerate in editor, declaratiile
+	# se pot fi schimbat de sub noi, iar lungimea pistei (deci si lungimea
+	# rampelor, in fractii) se schimba la orice retus de traseu.
+	_width_segs_ready = false
 	_terr_cells = 0 # grila de teren se recoace odata cu curba
 	for child in get_children():
 		if child is Path3D:
@@ -1130,16 +1298,17 @@ func rebuild() -> void:
 	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
 	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
 	#
-	# `half_width` SE DA INCA INTREG, nu prin width_at(), si asta e granita
-	# declarata a pasului 1 din #236: samplerul il tine ca scalar si il
-	# foloseste la banda de protectie a asfaltului si la degajarea decorului.
-	# Ca sa devina variabil trebuie schimbat samplerul, nu apelul de aici —
-	# treaba pasului 2, unde profilul chiar exista si merita costul.
+	# Samplerul primeste SI latimea de referinta, SI profilul pe puncte coapte.
+	# Prima ramane pentru raspunsurile care nu au un loc anume in vedere
+	# (praguri, bugete); a doua e pentru tot ce stie UNDE se afla — banda de
+	# protectie a asfaltului, buza rapelor, malul lagunei, sloturile de decor.
+	# Pe o pista fara profil declarat lista e goala, deci samplerul raspunde
+	# exact ca inainte.
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
-		_cornice_ravines())
+		_cornice_ravines(), _baked_widths())
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -5623,16 +5792,34 @@ func lateral_distance(index: int, pos: Vector3, route: int = 0) -> float:
 	var r := route_at(route)
 	return r.lateral_distance(index, pos) if r != null else 1e9
 
+## Esti pe asfalt, sau pe iarba lenta?
+##
+## Cea mai importanta intrebare de latime din joc: de ea atarna penalizarea de
+## offroad (45% viteza), repunerea si anti-blocajul AI-ului. Pe o pista cu
+## profil, marginea trebuie sa fie cea LOCALA — altfel o portiune largita ar
+## penaliza masina care merge pe asfaltul ei propriu, iar una stramta ar lasa-o
+## sa taie prin iarba la viteza plina.
 func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	var r := route_at(route)
-	return r.is_on_road(index, pos) if r != null else false
+	if r == null:
+		return false
+	if route != 0 or _width_profile().is_empty():
+		return r.is_on_road(index, pos)
+	return r.lateral_distance(index, pos) <= width_at_index(index) + 0.5
 
 func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
 		route: int = 0) -> Vector3:
 	var r := route_at(route)
 	if r == null:
 		return Vector3.ZERO
-	return r.lookahead_point(index, ahead_m, lateral_frac, curve.bake_interval)
+	# Latimea de la indexul TINTA, nu de la cel curent — si doar pe bucla
+	# principala, fiindca profilul e declarat in fractii de tur. O scurtatura
+	# isi pastreaza latimea ei (vezi TrackRoute.half_width).
+	var hw := -1.0
+	if route == 0 and not _width_profile().is_empty():
+		var steps := int(ahead_m / maxf(curve.bake_interval, 0.001))
+		hw = width_at_index(index + steps)
+	return r.lookahead_point(index, ahead_m, lateral_frac, curve.bake_interval, hw)
 
 
 ## Cat de aproape de capetele unei scurtaturi se mai poate comuta pe ea.

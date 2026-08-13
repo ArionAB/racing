@@ -542,11 +542,21 @@ func _catch(car: Car) -> void:
 ## curba prin constructie si nu trebuie sa stie nimic despre geometria pistei.
 ## ############################################################################
 func _steer_lofted(delta: float) -> void:
-	for car: Car in _lofted.keys():
-		# Vezi nota de la `_tick_cooldowns`: cheia poate fi o masina deja
-		# eliberata, si atunci nu e nimic de purtat prin aer.
-		if not is_instance_valid(car):
-			_lofted.erase(car)
+	# Iterare NETIPATA, cu cast dupa: `for car: Car in` ATRIBUIE cheia in
+	# variabila tipata, si daca cheia e o masina deja eliberata, chiar
+	# atribuirea da "Trying to assign invalid previously freed instance" —
+	# inainte ca is_instance_valid sa apuce sa ruleze. Pe fizica intreaga
+	# zborul tine mai mult (corpul se rostogoleste, aterizarea intarzie),
+	# deci fereastra in care cheia moare in dictionar e reala, nu teoretica.
+	for key in _lofted.keys():
+		# Validitatea INAINTE de cast: si `as Car` pe un obiect eliberat
+		# arunca ("Trying to cast a freed object").
+		if not is_instance_valid(key):
+			_lofted.erase(key)
+			continue
+		var car := key as Car
+		if car == null:
+			_lofted.erase(key)
 			continue
 		var t: float = float(_lofted[car]) + delta
 		_lofted[car] = t
@@ -582,15 +592,16 @@ func _steer_lofted(delta: float) -> void:
 ## adica exact unde nu te uiti.
 ## ############################################################################
 func _tick_cooldowns(delta: float) -> void:
-	for car: Car in _cooldown.keys():
-		if not is_instance_valid(car):
-			_cooldown.erase(car)
+	# Netipat, cu validitatea inaintea oricarui cast — vezi _steer_lofted.
+	for key in _cooldown.keys():
+		if not is_instance_valid(key):
+			_cooldown.erase(key)
 			continue
-		var left: float = float(_cooldown[car]) - delta
+		var left: float = float(_cooldown[key]) - delta
 		if left <= 0.0:
-			_cooldown.erase(car)
+			_cooldown.erase(key)
 		else:
-			_cooldown[car] = left
+			_cooldown[key] = left
 
 
 # ---------------------------------------------------------------------- sunet

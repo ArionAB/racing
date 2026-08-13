@@ -530,12 +530,18 @@ func _play(sfx: StringName) -> void:
 
 
 func _tick_cooldowns(delta: float) -> void:
-	for car: Car in _cooldown.keys():
-		var left: float = float(_cooldown[car]) - delta
+	# Netipat: `for car: Car in` ar ATRIBUI si cheile-masini deja eliberate
+	# in variabila tipata, si chiar atribuirea da "previously freed instance"
+	# (vezi nota din TyphoonHazard._steer_lofted).
+	for key in _cooldown.keys():
+		if not is_instance_valid(key):
+			_cooldown.erase(key)
+			continue
+		var left: float = float(_cooldown[key]) - delta
 		if left <= 0.0:
-			_cooldown.erase(car)
+			_cooldown.erase(key)
 		else:
-			_cooldown[car] = left
+			_cooldown[key] = left
 
 
 func _hit_cars() -> void:

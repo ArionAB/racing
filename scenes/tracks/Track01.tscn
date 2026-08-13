@@ -3,10 +3,11 @@
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_2wkjx"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="2_1xt1w"]
 [ext_resource type="PackedScene" uid="uid://bu1lgxcqt0lwn" path="res://assets/models/rocks/rock_cluster.glb" id="4_jfmch"]
+[ext_resource type="PackedScene" uid="uid://golsaeo2gcmr" path="res://assets/models/rocks/butte.glb" id="10_f51a1"]
 
 [sub_resource type="Curve3D" id="Curve3D_rpgo3"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 0, 3, 0, 0, 0, 0, 0, 0, 130, 2, -8, 0, 0, 0, 0, 0, 0, 190, 7, -40, 0, 0, 0, 0, 0, 0, 222, 14, -92, 0, 0, 0, 0, 0, 0, 232, 19, -150, 0, 0, 0, 0, 0, 0, 205, 12, -200, 0, 0, 0, 0, 0, 0, 150, 6, -222, 0, 0, 0, 0, 0, 0, 98, 22.663269, -195, 0, 0, 0, 0, 0, 0, 79.48706, 2.977295, -139.51227, 0, 0, 0, 0, 0, 0, 110, 2, -98, 0, 0, 0, 0, 0, 0, 61.196045, 13.056122, -25.335938, 0, 0, 0, 0, 0, 0, -12, 6, -58, 0, 0, 0, 0, 0, 0, -82, 11, -92, 0, 0, 0, 0, 0, 0, -120, 9, -158, 0, 0, 0, 0, 0, 0, -150, 6, -115, 0, 0, 0, 0, 0, 0, -62, 1, -48, 0, 0, 0, 0, 0, 0, -22, 0, -6),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 0, 3, 0, 0, 0, 0, 0, 0, 130, 2, -8, 0, 0, 0, 0, 0, 0, 190, 7, -40, 0, 0, 0, 0, 0, 0, 222, 14, -92, 0, 0, 0, 0, 0, 0, 232, 19, -150, 0, 0, 0, 0, 0, 0, 205, 12, -200, 0, 0, 0, 0, 0, 0, 150, 6, -222, 0, 0, 0, 0, 0, 0, 98, 4, -195, 0, 0, 0, 0, 0, 0, 78, 3, -140, 0, 0, 0, 0, 0, 0, 110, 2, -98, 0, 0, 0, 0, 0, 0, 62, 2, -58, 0, 0, 0, 0, 0, 0, -12, 6, -58, 0, 0, 0, 0, 0, 0, -82, 11, -92, 0, 0, 0, 0, 0, 0, -120, 9, -158, 0, 0, 0, 0, 0, 0, -150, 6, -115, 0, 0, 0, 0, 0, 0, -62, 1, -48, 0, 0, 0, 0, 0, 0, -22, 0, -6),
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 18
@@ -32,7 +33,6 @@ custom_rockfall_fracs = Array[float]([0.545, 0.775])
 custom_train_fracs = Array[float]([0.3])
 
 [node name="Path" type="Path3D" parent="." unique_id=47815459]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.24609375, 0)
 curve = SubResource("Curve3D_rpgo3")
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=456835267]
@@ -40,3 +40,9 @@ script = ExtResource("2_1xt1w")
 
 [node name="rock_cluster" parent="DecorManual" unique_id=1810421892 instance=ExtResource("4_jfmch")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.067749, 3.23, -35.867615)
+
+[node name="butte" parent="DecorManual" unique_id=155351630 instance=ExtResource("10_f51a1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.335571, -0.39, 25.67331)
+
+[node name="butte2" parent="DecorManual" unique_id=1797167542 instance=ExtResource("10_f51a1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2875977, 5.15, -76.3696)

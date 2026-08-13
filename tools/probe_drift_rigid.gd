@@ -27,7 +27,7 @@ var _boost_seen: bool = false
 
 
 class ScriptDriver:
-	extends Node
+	extends CarController
 	var steer: float = 0.0
 	var throttle: float = 0.0
 	var drift: bool = false
@@ -47,7 +47,7 @@ func _ready() -> void:
 	await get_tree().physics_frame
 
 	print("")
-	print("=== Drift handbrake + turbo Ignition pe RigidCar ===")
+	print("=== Drift handbrake + turbo Ignition pe Car ===")
 	await _test_drift_and_release()
 	await _test_turbo()
 	await _test_slow_surface()
@@ -67,15 +67,16 @@ func _add_static_box(size: Vector3, pos: Vector3) -> void:
 	body.global_position = pos
 
 
-func _spawn() -> RigidCar:
-	var car := RigidCar.new()
+func _spawn() -> Car:
+	var car := Car.new()
 	add_child(car)
 	car.global_position = Vector3(0, 0.7, 0)
 	car.set_controller(ScriptDriver.new())
+	car.race_active = true # Car citeste comenzile doar cu cursa pornita
 	return car
 
 
-func _driver(car: RigidCar) -> ScriptDriver:
+func _driver(car: Car) -> ScriptDriver:
 	return car.controller as ScriptDriver
 
 
@@ -87,7 +88,7 @@ func _check(ok: bool, what: String) -> void:
 
 ## Unghiul de derapaj: intre directia caroseriei si directia de mers, semnat
 ## (pozitiv = spatele fuge spre dreapta). Sub 3 m/s nu inseamna nimic.
-func _slip_angle_deg(car: RigidCar) -> float:
+func _slip_angle_deg(car: Car) -> float:
 	var hvel := Vector3(car.linear_velocity.x, 0.0, car.linear_velocity.z)
 	if hvel.length() < 3.0:
 		return 0.0
@@ -149,17 +150,23 @@ func _test_drift_and_release() -> void:
 	_driver(car).drift = false
 	var recovered_at := -1.0
 	var crossings := 0
-	var prev_sign := signf(_slip_angle_deg(car))
+	# Pendularea se numara cu HISTEREZIS de 2°: pe fizica intreaga unghiul
+	# tremura sub un grad in jurul lui zero (suspensia vie + zgomot numeric),
+	# si o numaratoare bruta a semnului dadea 7 "treceri" pe o revenire
+	# perfect asezata. Fishtailing-ul pe care il interzice criteriul inseamna
+	# leganari VIZIBILE — de-o parte si de alta a lui zero cu amplitudine
+	# reala, nu tremur de zecimi de grad.
+	var prev_side := 0
 	var t := 0.0
 	for _f in int(2.0 / STEP):
 		await get_tree().physics_frame
 		t += STEP
 		var a := _slip_angle_deg(car)
-		var s := signf(a)
-		if s != 0.0 and prev_sign != 0.0 and s != prev_sign:
-			crossings += 1
-		if s != 0.0:
-			prev_sign = s
+		if absf(a) >= 2.0:
+			var side := 1 if a > 0.0 else -1
+			if prev_side != 0 and side != prev_side:
+				crossings += 1
+			prev_side = side
 		if recovered_at < 0.0 and absf(a) < 5.0:
 			recovered_at = t
 		elif recovered_at >= 0.0 and absf(a) >= 5.0:
@@ -206,7 +213,7 @@ func _test_turbo() -> void:
 
 	# Arderea: de la vmax, tine TURBO si masoara varful.
 	_boost_seen = false
-	car.boost_started.connect(func(_c: RigidCar) -> void: _boost_seen = true)
+	car.boost_started.connect(func(_c: Car) -> void: _boost_seen = true)
 	_driver(car).turbo = true
 	var top := 0.0
 	for _f in int(3.0 / STEP):

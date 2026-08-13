@@ -212,8 +212,7 @@ func _physics_process(delta: float) -> void:
 		# Cine o tine pe loc — fara asta un esec spune doar "nu s-a intors",
 		# nu si daca vina e a terenului, a unei stanci sau a unui gard.
 		var into := ""
-		for k in _car.get_slide_collision_count():
-			var b := _car.get_slide_collision(k).get_collider()
+		for b in _car.get_colliding_bodies():
 			if b is Node3D and not (b is Car):
 				var owner_name: String = (b as Node3D).name
 				if b.get_parent() != null:

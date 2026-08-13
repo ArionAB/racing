@@ -24,7 +24,7 @@ var _last_dv: float = 0.0
 
 
 class ScriptDriver:
-	extends Node
+	extends CarController
 	var steer: float = 0.0
 	var throttle: float = 0.0
 	func get_steer() -> float:
@@ -49,7 +49,7 @@ func _ready() -> void:
 	await get_tree().physics_frame
 
 	print("")
-	print("=== Imbranceli cu masa pe RigidCar ===")
+	print("=== Imbranceli cu masa pe Car ===")
 	await _test_mass_ratio()
 	await _test_cap()
 	await _test_push()
@@ -60,14 +60,15 @@ func _ready() -> void:
 	get_tree().quit(1 if _failed else 0)
 
 
-func _spawn(pos: Vector3, factor: float, with_driver: bool = false) -> RigidCar:
-	var car := RigidCar.new()
+func _spawn(pos: Vector3, factor: float, with_driver: bool = false) -> Car:
+	var car := Car.new()
 	car.mass_factor = factor # inainte de add_child: _ready citeste masa
 	add_child(car)
 	car.global_position = pos
+	car.race_active = true # Car citeste comenzile doar cu cursa pornita
 	if with_driver:
 		car.set_controller(ScriptDriver.new())
-	car.bumped.connect(func(_c: RigidCar, _o: RigidCar, dv: float) -> void:
+	car.bumped.connect(func(_c: Car, _o: Car, dv: float) -> void:
 		_signals += 1
 		_last_dv = dv)
 	return car
@@ -79,7 +80,7 @@ func _check(ok: bool, what: String) -> void:
 		_failed = true
 
 
-func _settle(cars: Array[RigidCar]) -> void:
+func _settle(cars: Array[Car]) -> void:
 	for _f in int(1.0 / STEP):
 		await get_tree().physics_frame
 	for car in cars:
@@ -88,7 +89,7 @@ func _settle(cars: Array[RigidCar]) -> void:
 
 ## Cel mai mare delta-v pe UN cadru — impulsul de coliziune se aplica
 ## intr-un singur pas de solver, deci asta e "lovitura".
-func _watch_impact(victim: RigidCar, attacker: RigidCar, seconds: float
+func _watch_impact(victim: Car, attacker: Car, seconds: float
 		) -> Dictionary:
 	var v_prev := victim.linear_velocity
 	var a_prev := attacker.linear_velocity

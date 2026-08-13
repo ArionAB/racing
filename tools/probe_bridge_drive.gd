@@ -135,16 +135,11 @@ func _physics_process(delta: float) -> void:
 		_bridge.call("_apply_cycle", 0.0)
 	_time += delta
 	var z := _z()
-	# CINE l-a oprit, nu doar ca a fost oprit. Semnalul `wall_hit` nu duce
-	# colizorul cu el, iar fara nume diagnosticul ramane la ghicit.
-	for i in _car.get_slide_collision_count():
-		var col := _car.get_slide_collision(i)
-		var n := col.get_normal()
-		if absf(n.y) > 0.7:
-			continue # podea, nu obstacol
-		var who: Node = col.get_collider()
+	# CINE l-a oprit, nu doar ca a fost oprit. Pe fizica intreaga contactele
+	# vin de la solver (fara normale per contact aici — numele ajunge pentru
+	# diagnostic; podeaua nu apare, colizerul caroseriei nu o atinge in mers).
+	for who in _car.get_colliding_bodies():
 		var parent := who.get_parent() if who != null else null
-		_normals["%s" % str(n.snappedf(0.01))] = z
 		_touch["%s / %s" % [
 			String(parent.name) if parent != null else "?",
 			String(who.name) if who != null else "?"]] = z

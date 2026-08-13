@@ -20,15 +20,26 @@ extends RigidBody3D
 ## aplicata LA COLT — de aici caroseria care se lasa pe exterior in viraj, isi
 ## inclina botul pe panta si se leagana pe denivelari, per roata, gratuit.
 ##
+## Drift-ul (#256) e handbrake pur, ca pe CharacterBody, dar cu un castig al
+## fizicii intregi: grip-ul se taie DOAR LA SPATE. Fata tine, spatele aluneca,
+## deci unghiul de derapaj nu mai e simulat — e consecinta diferentei de
+## aderenta intre axe, ca la o masina adevarata cu frana de mana trasa.
+##
 ## Comenzile vin dintr-un "creier" cu interfata CarController (get_steer /
 ## get_throttle / is_drift_pressed / is_turbo_pressed) — pattern-ul separarii
 ## fizica/input NU se schimba. Aici e tinut duck-typed (Node, nu CarController)
 ## fiindca ala are `var car: Car` legat de CharacterBody3D; unificarea tipurilor
 ## e treaba integrarii (#258), nu a nucleului.
 
+signal boost_started(car: RigidCar)
+
 ## Gravitatia arcade a jocului (m/s²) — aceeasi cifra ca pe CharacterBody.
 ## Se traduce in gravity_scale fata de gravitatia proiectului in _ready.
 const ARCADE_GRAVITY: float = 28.0
+## Aderenta laterala intr-o balta: practic zero directie (contract apply_slip).
+const SLIP_GRIP_PUDDLE: float = 0.8
+## Aderenta pe suprafata uda pe care se CONDUCE: intre drift si asfalt.
+const SLIP_GRIP_WET: float = 3.6
 
 # --- Motor (aceleasi cifre de feel ca in car.gd; sursa: CarData mai tarziu) ---
 @export_group("Motor")
@@ -46,6 +57,21 @@ const ARCADE_GRAVITY: float = 28.0
 @export_group("Directie")
 @export var steer_speed: float = 1.9      # rad/s la volan plin, viteza plina
 @export var grip: float = 8.0             # amortizarea vitezei laterale (1/s)
+
+@export_group("Drift (handbrake)")
+## Aderenta SPATELUI cat tine driftul; fata pastreaza `grip` intreg.
+@export var drift_grip: float = 2.0
+@export var drift_steer_bonus: float = 1.5
+@export var drift_bias: float = 0.4
+@export var drift_min_speed: float = 9.0
+
+@export_group("Turbo (model Ignition)")
+@export var turbo_fill_time: float = 10.0
+@export var turbo_drift_multiplier: float = 2.5
+@export var turbo_burn_time: float = 2.2
+@export var turbo_min_to_fire: float = 0.15
+@export var turbo_speed_bonus: float = 11.0
+@export var turbo_accel_bonus: float = 10.0
 
 @export_group("Suspensie")
 ## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
@@ -69,13 +95,28 @@ const ARCADE_GRAVITY: float = 28.0
 ## "Creierul" — duck-typed pe interfata CarController (vezi antetul).
 var controller: Node = null
 
+# --- Stare drift/turbo (aceleasi reguli ca pe CharacterBody) ---
+var is_drifting: bool = false
+var drift_dir: float = 0.0
+var turbo_charge: float = 0.0 # 0..1, bara din UI
+var is_boosting: bool = false
+var slip_time: float = 0.0
+var slip_grip: float = SLIP_GRIP_PUDDLE
+var _forced_boost: float = 0.0 # rocket start: ardere gratuita
+
+## Factor extern pe plafonul de viteza (offroad 45%, crush). Il scrie logica
+## de pista/hazard (#258); nucleul doar il respecta. Turbo-ul se ADUNA peste,
+## ca pe CharacterBody: scurtatura cu turbo ramane o alegere valida.
+var speed_limit_factor: float = 1.0
+
 ## Compresia curenta a fiecarui arc, in metri [0, suspension_rest].
 ## Publica: vizualul rotilor (#258) si sondele citesc de aici.
 var wheel_compression: Array[float] = [0.0, 0.0, 0.0, 0.0]
 ## Cate roti au atins solul in tick-ul curent (0-4).
 var wheels_on_ground: int = 0
 
-## Coltul fiecarei roti in spatiul masinii, in ordinea FL, FR, RL, RR.
+## Coltul fiecarei roti in spatiul masinii, in ordinea FL, FR, RL, RR
+## (fata = -Z, sensul de mers).
 var _wheel_points: Array[Vector3] = []
 var _collision_shape: CollisionShape3D
 ## Media punctelor de contact ale rotilor cu solul, ca offset fata de origine.
@@ -86,6 +127,10 @@ var _collision_shape: CollisionShape3D
 ## Aplicate central (prima versiune), toate astea lipseau cu desavarsire —
 ## ruliu masurat de sonda: fix 0.0°.
 var _contact_offset: Vector3 = Vector3.ZERO
+## Acelasi lucru, dar per axa (0 = fata, 1 = spate): grip-ul lateral se aplica
+## separat pe axe, ca driftul sa poata taia doar spatele.
+var _axle_offset: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
+var _axle_grounded: Array[int] = [0, 0]
 
 
 func _ready() -> void:
@@ -128,14 +173,28 @@ func set_controller(new_controller: Node) -> void:
 func _physics_process(delta: float) -> void:
 	var steer := 0.0
 	var throttle := 0.0
+	var drift_pressed := false
+	var turbo_pressed := false
 	if controller != null:
 		if controller.has_method("update"):
 			controller.update(delta)
 		steer = clampf(controller.get_steer(), -1.0, 1.0)
 		throttle = clampf(controller.get_throttle(), -1.0, 1.0)
+		drift_pressed = controller.is_drift_pressed()
+		turbo_pressed = controller.is_turbo_pressed()
 
 	_apply_suspension()
-	_apply_driving(steer, throttle)
+
+	var fwd := -global_transform.basis.z
+	var fwd_h := Vector3(fwd.x, 0.0, fwd.z).normalized()
+	var fwd_speed := Vector3(linear_velocity.x, 0.0, linear_velocity.z) \
+		.dot(fwd_h)
+
+	_update_drift(drift_pressed, steer, fwd_speed)
+	_update_turbo(turbo_pressed, delta)
+	slip_time = maxf(slip_time - delta, 0.0)
+
+	_apply_driving(steer, throttle, fwd_h, fwd_speed)
 
 
 ## Un raycast per colt; arcul impinge LA COLT, si exact asta produce ruliul si
@@ -143,6 +202,8 @@ func _physics_process(delta: float) -> void:
 func _apply_suspension() -> void:
 	wheels_on_ground = 0
 	var contact_sum := Vector3.ZERO
+	var axle_sum: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
+	_axle_grounded = [0, 0]
 	var space := get_world_3d().direct_space_state
 	var up := global_transform.basis.y
 	var cast_len := suspension_rest + wheel_radius
@@ -162,7 +223,10 @@ func _apply_suspension() -> void:
 			wheel_compression[i] = 0.0
 			continue
 		wheels_on_ground += 1
+		var axle := 0 if i < 2 else 1
 		contact_sum += hit.position as Vector3
+		axle_sum[axle] += hit.position as Vector3
+		_axle_grounded[axle] += 1
 		var dist := attach.distance_to(hit.position as Vector3)
 		var compression := clampf(cast_len - dist, 0.0, suspension_rest)
 		wheel_compression[i] = compression
@@ -178,28 +242,100 @@ func _apply_suspension() -> void:
 			apply_force(up * force_mag, offset)
 	if wheels_on_ground > 0:
 		_contact_offset = contact_sum / float(wheels_on_ground) - global_position
+	for axle in 2:
+		if _axle_grounded[axle] > 0:
+			_axle_offset[axle] = axle_sum[axle] / float(_axle_grounded[axle]) \
+				- global_position
 
 
-## Motor, frana, plafon, drag, grip lateral si directie — toate ca forte,
-## cu aceleasi reguli de feel ca vechea fizica pe CharacterBody.
-func _apply_driving(steer: float, throttle: float) -> void:
+## Handbrake pur: alunecare controlata pentru viraje, fara boost la iesire.
+func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float) -> void:
+	if not is_drifting:
+		if drift_pressed and fwd_speed > drift_min_speed and absf(steer) > 0.25:
+			is_drifting = true
+			drift_dir = signf(steer)
+	elif not drift_pressed or fwd_speed < drift_min_speed * 0.55:
+		is_drifting = false
+
+
+func _update_turbo(turbo_pressed: bool, delta: float) -> void:
+	_forced_boost = maxf(_forced_boost - delta, 0.0)
+	# Poti PORNI turbo doar cu bara peste prag; odata pornit, arzi pana la 0.
+	var can_fire := turbo_charge > (0.02 if is_boosting else turbo_min_to_fire)
+	if turbo_pressed and can_fire:
+		if not is_boosting:
+			_start_boost()
+		turbo_charge = maxf(turbo_charge - delta / turbo_burn_time, 0.0)
+		is_boosting = true
+	else:
+		is_boosting = _forced_boost > 0.0
+		# Bara se umple din mers; drift-ul o hraneste mult mai repede.
+		var fill := delta / turbo_fill_time
+		if is_drifting:
+			fill *= turbo_drift_multiplier
+		turbo_charge = minf(turbo_charge + fill, 1.0)
+
+
+func _start_boost() -> void:
+	# Lovitura de plecare: acelasi +4 m/s ca pe CharacterBody. Sunetul si
+	# squash-ul vizual vin la integrare (#258), pe semnalul boost_started.
+	var fwd := -global_transform.basis.z
+	linear_velocity += Vector3(fwd.x, 0.0, fwd.z).normalized() * 4.0
+	boost_started.emit(self)
+
+
+func grant_turbo(amount: float) -> void:
+	turbo_charge = clampf(turbo_charge + amount, 0.0, 1.0)
+
+
+## Ardere gratuita (rocket start): boost fara sa goleasca bara.
+func force_boost(seconds: float) -> void:
+	_forced_boost = seconds
+	is_boosting = true
+	_start_boost()
+
+
+## Contractul cu apa (WaterHazard / banda uda): alunecare pentru urmatoarea
+## fractiune de secunda, cu intensitatea ceruta de hazard.
+func apply_slip(grip_value: float = SLIP_GRIP_PUDDLE) -> void:
+	slip_time = 0.25
+	slip_grip = grip_value
+
+
+## Plafonul de viteza al momentului: taiat de factorul extern (offroad/crush),
+## ridicat de turbo. Turbo-ul se aduna DUPA taiere — scurtatura cu turbo
+## ramane o alegere valida, exact ca pe CharacterBody.
+func _current_max_speed() -> float:
+	var vmax := max_speed * speed_limit_factor
+	if is_boosting:
+		vmax += turbo_speed_bonus
+	return vmax
+
+
+## Motor, frana, plafon, drag si directie — toate ca forte, cu aceleasi reguli
+## de feel ca vechea fizica. Grip-ul lateral e PER AXA: fata tine mereu cu
+## `grip` intreg, spatele trece pe `drift_grip` cat tine driftul — de aici
+## unghiul de derapaj, fizic, nu simulat.
+func _apply_driving(steer: float, throttle: float,
+		fwd_h: Vector3, fwd_speed: float) -> void:
 	# Tractiunea cere contact: cu rotile in aer nu se accelereaza si nu se
 	# vireaza (aceeasi regula ca is_on_floor() in vechea fizica).
 	var ground_frac := float(wheels_on_ground) / 4.0
 	if ground_frac == 0.0:
 		return
 
-	var fwd := -global_transform.basis.z
-	var fwd_h := Vector3(fwd.x, 0.0, fwd.z).normalized()
 	var hvel := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
-	var fwd_speed := hvel.dot(fwd_h)
+	var vmax := _current_max_speed()
 
 	# Fortele de CAUCIUC se aplica la sol (media punctelor de contact), nu in
 	# centrul de masa — de acolo vin ruliul in viraj, squat-ul la accelerare si
 	# dive-ul la frana. Vezi nota de la _contact_offset.
 	# --- Motor / frana (fortele scaleaza cu cate roti au contact) ---
-	if throttle > 0.0 and fwd_speed < max_speed:
-		apply_force(fwd_h * acceleration * throttle * mass * ground_frac,
+	if throttle > 0.0 and fwd_speed < vmax:
+		var accel := acceleration
+		if is_boosting:
+			accel += turbo_accel_bonus
+		apply_force(fwd_h * accel * throttle * mass * ground_frac,
 			_contact_offset)
 	elif throttle < 0.0:
 		if fwd_speed > 2.0:
@@ -212,20 +348,39 @@ func _apply_driving(steer: float, throttle: float) -> void:
 	# Plafonul: peste vmax nu se taie viteza, se trage inapoi — echivalentul
 	# lui move_toward de pe CharacterBody. Central, nu la sol: e un guvernator
 	# de joc, nu o forta fizica — n-are voie sa adauge tangaj.
-	if fwd_speed > max_speed:
+	if fwd_speed > vmax:
 		apply_central_force(-fwd_h * overspeed_pull * mass)
 
 	# --- Rezistenta la rulare, doar pe sol ---
 	apply_force(-hvel * drag * mass * ground_frac, _contact_offset)
 
-	# --- Grip lateral: forta care amorteste viteza laterala ---
-	var lateral := hvel - fwd_h * fwd_speed
-	apply_force(-lateral * grip * mass * ground_frac, _contact_offset)
+	# --- Grip lateral, per axa (fata / spate) ---
+	for axle in 2:
+		if _axle_grounded[axle] == 0:
+			continue
+		var grip_axle := grip
+		if axle == 1 and is_drifting:
+			grip_axle = drift_grip
+		if slip_time > 0.0:
+			grip_axle = slip_grip
+		# Viteza laterala A AXEI (nu a centrului): include componenta din
+		# rotatie, deci spatele care se roteste in jurul fetei chiar "simte"
+		# ca aluneca si e amortizat acolo unde aluneca.
+		var offset: Vector3 = _axle_offset[axle]
+		var point_vel := linear_velocity + angular_velocity.cross(offset)
+		var lat := Vector3(point_vel.x, 0.0, point_vel.z)
+		lat -= fwd_h * lat.dot(fwd_h)
+		var axle_frac: float = float(_axle_grounded[axle]) / 2.0
+		apply_force(-lat * grip_axle * mass * 0.5 * axle_frac, offset)
 
 	# --- Directia: viteza unghiulara pe Y, scrisa direct (arcade asumat) ---
+	var effective_steer := steer
+	if is_drifting:
+		effective_steer = clampf(
+			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
 	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
-	var yaw_rate := steer * steer_speed * speed_frac * reverse_sign
+	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
 	angular_velocity = Vector3(
 		angular_velocity.x, yaw_rate, angular_velocity.z)
 

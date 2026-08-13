@@ -239,6 +239,15 @@ static func themes() -> Dictionary:
 			# textura, doar proiectata in spatiul obiectului (vezi
 			# SlidingHazard.model_tri_class).
 			"hazard_class": "rock",
+			# Bolovanul care se rostogoleste de pe faleza e din aceeasi roca cu
+			# ea (#242). Steag separat de `hazard_class` fiindca sunt doua
+			# obiecte diferite: bariera mobila poate fi orice (o barca, o
+			# testoasa), bolovanul e mereu piatra locului.
+			#
+			# Declarat explicit aici fiindca desertul n-are `rock_class` — pe
+			# temele care au (alpinul, cu sisturile lui), acela e implicitul si
+			# steagul asta nu mai trebuie scris.
+			"rockfall_class": "rock",
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
 			"water": false,
 		},
@@ -3961,10 +3970,10 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 ## divergat la prima corectie de mecanica — exact ce evita [TerrainPeak] prin
 ## faptul ca hraneste `_peak_specs` in loc sa-si construiasca propriul munte.
 ##
-## Infatisarea declarata pe nod (`spec`) ajunge deocamdata doar la bariera
-## mobila, fiindca ea e singura cu mecanica de model pe pozitie. Bolovanul si
-## deflectorul isi construiesc inca vizualul din cod — cand vor primi si ele
-## slot de model (#242, #244), aici se adauga o linie, nu un al doilea drum.
+## Infatisarea declarata pe nod (`spec`) ajunge la bariera mobila (model complet)
+## si la bolovan (clasa de material, #242). Deflectorul isi construieste inca
+## vizualul din cod — cand va primi si el slot de model (#244), aici se adauga o
+## linie, nu un al doilea drum.
 func _build_node_hazard(hz: Dictionary) -> void:
 	var frac := float(hz.get("frac", 0.0))
 	var spec: Dictionary = hz.get("spec", {})
@@ -3972,7 +3981,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.SLIDING:
 			_build_hazard(frac, spec)
 		HazardMarker.Kind.ROCKFALL:
-			_build_rockfall(frac)
+			_build_rockfall(frac, spec)
 		HazardMarker.Kind.CAROUSEL:
 			_build_carousel(frac)
 		HazardMarker.Kind.TRAIN:
@@ -4010,7 +4019,7 @@ func _build_carousel(frac: float) -> void:
 ## caruselului, iar aici trebuie sa ramana mereu o linie curata ca sa fie alegere.
 ## Latura alterneaza determinist cu fractia, ca doua bolovanuri consecutive sa nu
 ## cada pe aceeasi banda.
-func _build_rockfall(frac: float) -> void:
+func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var p := baked[idx]
@@ -4018,9 +4027,114 @@ func _build_rockfall(frac: float) -> void:
 	var rock := RockfallHazard.new()
 	# Defazare din fractie, ca la SlidingHazard: doua bolovanuri nu cad la unison.
 	rock.phase = fposmod(frac * 3.7, 1.0)
+	# Clasa de material: ce cere nodul, altfel steagul dedicat al temei, altfel
+	# ROCA LUMII (`rock_class` — sisturile alpine, gresia canionului). Ultima
+	# treapta e cea care conteaza: bolovanul care se desprinde dintr-o faleza e
+	# din aceeasi piatra cu ea, si asta ar trebui sa fie adevarat implicit, nu
+	# doar pe temele care si-au adus aminte sa declare.
+	rock.tri_class = String(spec.get("tri_class",
+		theme_flag("rockfall_class", theme_flag("rock_class", ""))))
+	# Punctul de impact: o banda, nu axa drumului (blocarea completa e treaba
+	# caruselului). Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
+	var hit := p + side * (width_at(frac) * 0.45)
+	# Din ce parte VINE. Se alege latura pe care chiar exista deal, masurand
+	# terenul de-o parte si de alta — un bolovan care se rostogoleste dintr-un
+	# camp neted ar fi la fel de neexplicat ca unul care cadea din cer.
+	rock.slope_side = _rockfall_slope_side(p, side, frac)
+	# Nodul se orienteaza cu +X spre versant, ca `_start_pos()` sa fie doar „pe X
+	# local" — aceeasi conventie ca la avalansa, unde masa coboara tot pe X.
+	# Transformarea INAINTE de add_child, ca la restul hazardelor cu corp
+	# cinematic: dupa intrarea in arbore o tine serverul de fizica.
+	if rock.slope_side != 0.0:
+		# Directia spre versant, in lume. `Basis.looking_at(f)` pune -Z pe `f` si
+		# +X la dreapta lui; ca +X sa cada FIX pe versant, privirea trebuie sa fie
+		# perpendiculara pe el — adica de-a lungul drumului, intr-un sens sau
+		# altul, ales tocmai ca +X sa iasa spre deal.
+		var toward := (side * rock.slope_side).normalized()
+		var look := Vector3(toward.z, 0.0, -toward.x) # rotit -90° in plan
+		rock.transform = Transform3D(Basis.looking_at(look, Vector3.UP), hit)
+	else:
+		rock.position = hit
 	add_child(rock)
-	# Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
-	rock.global_position = p + side * (width_at(frac) * 0.45)
+
+
+## Pe ce latura a punctului de impact e versantul din care se desprinde piatra:
+## +1 spre `side`, -1 spre partea opusa, 0 = teren plat pe amandoua (cade
+## vertical, ca inainte de #242).
+##
+## Se MASOARA terenul, nu se presupune. Pe o pista de munte dealul e cand la
+## stanga, cand la dreapta, iar o latura aleasa din fractie (ca banda de impact)
+## ar fi nimerit versantul pe jumatate din cazuri — adica exact jumatate din
+## bolovani ar fi venit dintr-o vale.
+func _rockfall_slope_side(p: Vector3, side: Vector3, frac: float) -> float:
+	if _sampler == null:
+		return 0.0
+	# Distanta la care se intreaba NU e aleasa din ochi: langa asfalt terenul e
+	# aplatizat deliberat, iar masivele sunt stinse complet sub
+	# `TrackSideSampler.PEAK_ROAD_CLEAR` (6 m de la marginea drumului) si ajung
+	# la putere plina abia la `PEAK_ROAD_FULL` (32 m). Intrebat mai aproape,
+	# orice munte pare camp — prima varianta masura la 14 m, adica in plina
+	# zona de stingere, si raporta „teren plat" langa masivul central al
+	# Alpilor.
+	var reach := width_at(frac) + TrackSideSampler.PEAK_ROAD_FULL
+	var a := p + side * reach
+	var b := p - side * reach
+	var ya := _sampler.ground_y(a.x, a.z) - p.y
+	var yb := _sampler.ground_y(b.x, b.z) - p.y
+	# Pragul: sub 3 m diferenta nu e „versant", e denivelare. O piatra care se
+	# rostogoleste de pe un damb de doi metri nu explica nimic.
+	const MIN_RISE := 3.0
+	if maxf(ya, yb) >= MIN_RISE:
+		return 1.0 if ya >= yb else -1.0
+	# Fara deal in teren, mai exista o sursa cinstita: FALEZELE de canion. Ele
+	# sunt geometrie separata, construita ABIA DUPA hazarde (`_build_world_decor`
+	# ruleaza la sfarsitul lui `rebuild`), deci nodul lor nici nu exista cand
+	# intrebam. Pe Dunele, unde bolovanii stau exact la poalele canionului,
+	# masuratoarea de teren raporta camp neted si piatra ar fi continuat sa cada
+	# din cer fix acolo unde peretele de stanca era la cativa metri.
+	#
+	# Se intreaba SURSA, nu rezultatul: `wall_segments` e chiar lista pe care o
+	# citeste si TrackCliffs ca sa decida unde ridica pereti, deci cele doua nu
+	# se pot contrazice.
+	# `+1` = latura pe care sta banda de impact (nodul e deja orientat cu +X
+	# spre ea), deci bolovanul vine de deasupra locului in care aterizeaza.
+	return _cliff_slope_side(frac, 1.0)
+
+
+## Latura pe care [TrackCliffs] ridica perete la fractia asta (+1 dreapta, -1
+## stanga, 0 daca niciuna).
+##
+## Pe o pista de canion peretii sunt de obicei pe AMANDOUA laturile (masurat:
+## in toate punctele de rockfall de pe Dunele si Alpii). O prima versiune
+## intorcea 0 in cazul asta — „nu exista partea cu dealul" — si efectul practic
+## era ca detectia de faleze nu se aplica NICIODATA, adica exact pistele pentru
+## care fusese scrisa ramaneau cu bolovani cazand din cer.
+##
+## Cu perete de ambele parti, alegerea ramane oricum cinstita: piatra vine de pe
+## faleza dinspre EXTERIORUL virajului, cea inalta si continua, nu de pe umarul
+## dinspre interior. Pe portiunile drepte cele doua sunt echivalente, deci
+## alegerea nu poate fi „gresita" — poate fi doar arbitrara, si atunci o facem
+## determinista (latura de impact), nu aleatoare.
+func _cliff_slope_side(frac: float, impact_side: float) -> float:
+	if _sampler == null or not theme_flag("cliffs", false):
+		return 0.0
+	var here := frac * _sampler.total_length()
+	var right := _within_wall(_sampler.wall_segments(1.0), here)
+	var left := _within_wall(_sampler.wall_segments(-1.0), here)
+	if not right and not left:
+		return 0.0
+	if right != left:
+		return 1.0 if right else -1.0
+	# Ambele: bolovanul vine dinspre banda pe care oricum aterizeaza, ca sa nu
+	# traverseze tot drumul si sa nu blocheze si linia curata de trecere.
+	return impact_side
+
+
+func _within_wall(segments: Array[Vector2], at_m: float) -> bool:
+	for s in segments:
+		if at_m >= s.x and at_m <= s.y:
+			return true
+	return false
 
 
 ## Avalansa: masa de zapada care coboara de pe versant si traverseaza soseaua.

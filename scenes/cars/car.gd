@@ -107,6 +107,15 @@ const SLIP_GRIP_WET: float = 3.6
 
 # --- Stare de cursa (scrisa de Race) ---
 var race_active: bool = false
+## Pe grila, inainte de GO: fizica e complet inghetata (vezi _physics_process).
+##
+## Flag SEPARAT de `race_active` desi amandoua sunt false in countdown, fiindca
+## `race_active = false` are al doilea inteles: "scoasa din cursa de un hazard"
+## (trenul si avalansa il folosesc pentru stun). Acolo fizica TREBUIE sa curga —
+## trenul isi arunca victima cu corpul lui solid cat tine stun-ul, iar aia se
+## intampla prin move_and_slide. Un inghet legat de `race_active` ar fi stins
+## tacut explozia trenului.
+var on_start_grid: bool = false
 var finished: bool = false
 var race_position: int = 1
 var is_player: bool = false
@@ -256,6 +265,27 @@ func _physics_process(delta: float) -> void:
 		if track.route_is_wet(route):
 			apply_slip(SLIP_GRIP_WET)
 
+	# Pe grila de start masina STA. Comenzile sunt deja blocate mai jos
+	# (race_active), dar asta singur nu ajunge: gravitatia se aplica oricum, iar
+	# move_and_slide o proiecteaza pe planul podelei — pe orice portiune inclinata
+	# de asfalt componenta aia devine viteza orizontala in josul pantei. Nimic
+	# n-o opreste (frecare statica nu modelam, iar drag-ul e proportional cu
+	# viteza, deci la 0.5 m/s frana e neglijabila), asa ca in cele 3.6 s de
+	# countdown plutonul se scurge cativa metri inainte de GO. Masurat cu
+	# tools/probe_start_grid.gd: 3.9-5.0 m pe Dunele, 0 pe Okinawa si Alpi — de
+	# aici si "cateodata" din raport, depinde de panta de sub grila.
+	#
+	# Inghetam complet: fara gravitatie, fara move_and_slide. Efectele vizuale
+	# raman (umbra, rotile, caroseria), ca masina sa nu para un obiect mort.
+	if on_start_grid:
+		velocity = Vector3.ZERO
+		_prev_velocity = Vector3.ZERO
+		_update_visual_tilt(delta, 0.0, 0.0)
+		_update_wheels(delta, 0.0, 0.0)
+		_update_shadow()
+		_update_effects(delta)
+		return
+
 	var steer := 0.0
 	var throttle := 0.0
 	var drift_pressed := false
@@ -289,7 +319,21 @@ func _physics_process(delta: float) -> void:
 			hvel += fwd_h * brake_force * throttle * delta
 		elif fwd_speed > -reverse_speed:
 			hvel += fwd_h * acceleration * 0.6 * throttle * delta
-	hvel -= hvel * drag * delta
+	# Drag-ul e REZISTENTA LA RULARE, deci se aplica doar cand rotile ating
+	# solul. Pana in august 2026 se aplica si in aer, iar consecinta nu era
+	# cosmetica: cu 0.35 si ~2.4 s de zbor, masina pierdea peste jumatate din
+	# viteza orizontala CAT ERA IN AER (masurat cu tools/probe_jump.gd: 36.9
+	# m/s la desprindere, 17.9 la aterizare). Efectele:
+	#   - orice saritura se plafona in jur de 40 m, oricat de tare intrai,
+	#     fiindca viteza in plus se topea in zbor;
+	#   - aterizarea venea mereu cu o franare invizibila, exact contrar
+	#     asteptarii ca airtime-ul PASTREAZA viteza;
+	#   - rezultatul devenea instabil (32 m/s trecea un gol pe care 34 il rata),
+	#     fiindca doua traiectorii diferite pierdeau altcat.
+	# In aer nu exista nici o rezistenta modelata: fara sol, nici o forta
+	# orizontala nu are de unde sa apara.
+	if is_on_floor():
+		hvel -= hvel * drag * delta
 
 	# --- Directie (amplificata si "impinsa" in directia drift-ului) ---
 	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
@@ -1104,7 +1148,45 @@ func _update_shadow() -> void:
 func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)
 	var target_roll := -steer * 0.09 * speed_frac * (1.6 if is_drifting else 1.0)
-	var target_pitch := clampf(-velocity.y * 0.02, -0.15, 0.15) * speed_frac
+	# Botul URMEAZA PANTA cat timp rotile sunt pe sol, si abia in aer se ridica
+	# dupa viteza verticala.
+	#
+	# Inainte, `target_pitch` se calcula mereu din `-velocity.y`, adica din cat
+	# de repede COBORI. La o saritura e corect (cazi, botul se ridica — e juice
+	# de aterizare). Pe o coborare lunga insa `velocity.y` sta negativ tot
+	# timpul, deci pitch-ul se lipea de plafonul +0.15 rad si ramanea acolo pe
+	# toata panta: masina cobora cu botul in sus, ca o barca. Efectul creste cu
+	# LUNGIMEA caroseriei (rotatia ridica capetele cu jumatate_lungime*sin):
+	# masurat cu tools/probe_visual_pitch.gd, autobuzul isi ridica botul cu
+	# 0.41 m si isi baga coada 0.41 m in asfalt, la o raza de roata de 0.25 —
+	# de aici raportul ca autobuzul si pompierii "zboara" la coborare. Sonda de
+	# desprindere (tools/probe_slope_hop.gd) confirmase deja ca nu fizica era
+	# de vina: tocmai ele stau lipite cel mai bine de drum (0.90 s / 0.83 s de
+	# aer, fata de 1.47-2.17 la masinile scurte).
+	#
+	# Pe sol luam unghiul REAL al pantei din normala podelei, deci caroseria
+	# sta paralela cu drumul — ce face o masina adevarata. In aer pastram
+	# comportamentul vechi, unde chiar e vrut.
+	var target_pitch := 0.0
+	if is_on_floor():
+		var up := get_floor_normal()
+		if up.length_squared() > 0.5:
+			# Componenta pantei pe axa "inainte": pozitiva la urcare, negativa la
+			# coborare. Semnul e ales ca botul sa urce pe urcare si sa coboare pe
+			# vale, adica invers fata de inclinarea terenului sub masina.
+			var fwd_h := -global_transform.basis.z
+			fwd_h = Vector3(fwd_h.x, 0.0, fwd_h.z).normalized()
+			# Plafon separat, mult mai larg decat cel din aer: pe sol unghiul nu
+			# mai e un efect inventat din viteza, ci PANTA REALA, iar pistele au
+			# coborari de 20-34 grade (masurat pe Alpii). Cu vechiul 0.15 rad
+			# (8.6 grade) masina ar fi ramas orizontala pe povarnis, adica exact
+			# minciuna de la care am plecat, doar in cealalta directie. 0.45 rad
+			# (~26 grade) prinde toata coborarea obisnuita; ce trece peste ramane
+			# taiat, ca la o rapa caroseria sa nu stea vertical.
+			target_pitch = clampf(asin(clampf(up.dot(fwd_h), -1.0, 1.0)),
+				-0.45, 0.45)
+	else:
+		target_pitch = clampf(-velocity.y * 0.02, -0.15, 0.15) * speed_frac
 	_visual.rotation.z = lerpf(_visual.rotation.z, target_roll, 8.0 * delta)
 	_visual.rotation.x = lerpf(_visual.rotation.x, target_pitch, 5.0 * delta)
 	_update_spin(delta)
@@ -1151,12 +1233,39 @@ func _build_visual() -> void:
 			# Raza reala = inaltimea centrului rotii (sta pe sol) x scala.
 			_wheel_radius = maxf(0.15,
 				_wheels_all[0].position.y * data.model_scale)
+		# Caroseria se inclina in jurul AXULUI ROTILOR, nu al originii.
+		#
+		# `_update_visual_tilt` roteste `_visual` pe X (botul la coborare) si pe Z
+		# (ruliul in viraj). Cu pivotul in originea masinii — adica pe sol —
+		# rotatia ridica capetele caroseriei cu `jumatate_lungime * sin(unghi)`,
+		# deci efectul creste cu LUNGIMEA masinii. La plafonul de 0.15 rad
+		# (tools/probe_visual_pitch.gd): taxiul 0.29 m, autobuzul 0.41 m — mai
+		# mult decat raza rotii lui (0.25), deci botul se ridica vizibil de pe
+		# asfalt in timp ce coada intra in el. De aici raportul ca autobuzul si
+		# pompierii "zboara" la coborare, desi sonda de desprindere arata ca
+		# tocmai ele stau LIPITE cel mai bine (0.90 s / 0.83 s de aer, fata de
+		# 1.47-2.17 la masinile scurte): nu corpul fizic pleca de pe drum, ci
+		# desenul.
+		#
+		# Ridicand pivotul la inaltimea axului, rotatia devine ce e si in
+		# realitate — o basculare in jurul rotilor — iar punctele de contact
+		# raman pe loc. Modelul se coboara cu exact aceeasi valoare inauntru, ca
+		# masina sa stea unde statea.
+		_visual.position.y = _wheel_radius
+		model.position.y -= _wheel_radius
 		return
-	_add_box(Vector3(2.2, 0.7, 3.6), Vector3(0, 0.55, 0), body_color)
-	_add_box(Vector3(1.6, 0.55, 1.7), Vector3(0, 1.1, 0.2), body_color.darkened(0.5))
-	_add_box(Vector3(2.3, 0.18, 0.7), Vector3(0, 0.9, 1.85), body_color.darkened(0.25))
-	for corner in [Vector3(-1.05, 0.45, -1.2), Vector3(1.05, 0.45, -1.2),
-			Vector3(-1.05, 0.45, 1.25), Vector3(1.05, 0.45, 1.25)]:
+	# Placeholder-ul din cuburi: acelasi pivot pe axul rotilor ca la modelele
+	# reale (rotile de mai jos sunt la y = 0.45), ca feel-ul sa nu depinda de
+	# faptul ca o masina are sau nu model 3D.
+	_wheel_radius = 0.48
+	_visual.position.y = 0.45
+	_add_box(Vector3(2.2, 0.7, 3.6), Vector3(0, 0.55 - 0.45, 0), body_color)
+	_add_box(Vector3(1.6, 0.55, 1.7), Vector3(0, 1.1 - 0.45, 0.2),
+		body_color.darkened(0.5))
+	_add_box(Vector3(2.3, 0.18, 0.7), Vector3(0, 0.9 - 0.45, 1.85),
+		body_color.darkened(0.25))
+	for corner in [Vector3(-1.05, 0.0, -1.2), Vector3(1.05, 0.0, -1.2),
+			Vector3(-1.05, 0.0, 1.25), Vector3(1.05, 0.0, 1.25)]:
 		var wheel := MeshInstance3D.new()
 		var cyl := CylinderMesh.new()
 		cyl.top_radius = 0.48

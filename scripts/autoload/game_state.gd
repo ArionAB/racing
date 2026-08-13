@@ -29,21 +29,27 @@ const TRACK_NAMES: Array[String] = [
 ]
 const CHAMP_ROUNDS: int = 3
 
-## Puncte pe pozitie (locul 1..4).
-const CHAMP_POINTS: Array[int] = [10, 7, 4, 2]
+## Puncte pe pozitie (locul 1..6). Lista TREBUIE sa aiba cel putin atatea
+## intrari cate masini sunt in cursa: `record_results` indexeaza cu rangul.
+const CHAMP_POINTS: Array[int] = [10, 8, 6, 4, 2, 1]
 
 # Config cursa.
 var total_laps: int = 3
-var ai_count: int = 3
+## Adversarii. 5 AI + jucatorul = 6 masini pe grila.
+var ai_count: int = 5
 
 # Selectii (masina aleasa se persista).
 var selected_car: int = 0
 var selected_track: int = 0
 
-# Campionat: 3 curse, punctaj cumulat per "slot" (0 = jucatorul, 1..3 = AI).
+# Campionat: 3 curse, punctaj cumulat per "slot" (0 = jucatorul, 1.. = AI).
 var champ_active: bool = false
 var champ_round: int = 0
-var champ_points: Array[int] = [0, 0, 0, 0]
+## Un slot per masina din cursa; se dimensioneaza din `ai_count`, nu cu o lista
+## scrisa de mana — altfel adaugarea unui adversar iese in afara tabloului.
+## Se reface la fiecare `start_championship`; valoarea de aici e doar ca tabloul
+## sa nu fie gol daca il citeste cineva inainte de prima cursa.
+var champ_points: Array[int] = [0, 0, 0, 0, 0, 0]
 
 # Setari utilizator (persistate).
 var steer_sensitivity: float = 1.0
@@ -114,13 +120,18 @@ func start_quick_race(track_index: int) -> void:
 func start_championship() -> void:
 	champ_active = true
 	champ_round = 0
-	champ_points = [0, 0, 0, 0]
+	champ_points.clear()
+	champ_points.resize(ai_count + 1) # un slot per masina, jucatorul inclus
 	selected_track = 0
 	start_race()
 
 ## order_slots[rank] = slotul de pe locul rank (0 = jucator).
 func record_results(order_slots: Array) -> void:
+	# Grila poate fi mai mare decat baremul de puncte: sub ultima pozitie
+	# punctata nu se mai da nimic, in loc sa iasa din tablou.
 	for rank in order_slots.size():
+		if rank >= CHAMP_POINTS.size():
+			break
 		champ_points[int(order_slots[rank])] += CHAMP_POINTS[rank]
 
 func champ_is_last_round() -> bool:

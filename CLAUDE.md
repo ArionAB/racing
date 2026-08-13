@@ -42,7 +42,10 @@ pur plus haosul fizic, nu proiectilele.
 
 ## Mecanici core (MVP)
 
-- Fizică arcade pe `CharacterBody3D` cu grip lateral amortizat ✔ (din spike)
+- **Fizică întreagă** pe `RigidBody3D` cu suspensie pe raycast ✔ (pivotul din
+  aug 2026, #261: 4 roți cu arc + amortizor, forțele de cauciuc la sol —
+  ruliul/tangajul/legănarea ies din fizică; grip lateral amortizat și direcție
+  arcade păstrate; suspensia e identitate per mașină în `CarData`)
 - Pante, gravitate, sărituri, iarbă lentă (45%), pereți doar pe exterior +
   secțiuni înălțate ✔
 - Bumping cu masă ✔ (de tunat)
@@ -174,6 +177,10 @@ legitimă; assets, nume sau trade dress copiate nu sunt.
 - **M3 ✔:** 3 piste cu gimmick propriu + garaj 4 mașini + mini-campionat
 - **M3.5 ✔:** identitate vizuală (linie start șah, kerbs, decor procedural cu
   coliziune) + recorduri best-lap persistate + scrâșnet de drift
+- **M3.75 ✔ (aug 2026):** pivot la fizica întreagă — `RigidBody3D` + suspensie
+  pe raycast, în 6 pași cu sonde (#255–#260, umbrela #261). Decizia: feelingul
+  de condus e produsul; verdictul final de feel rămâne al dezvoltatorului, la
+  volan, pe cele 3 piste
 - **M4 (amânat — dezvoltatorul nu are device Android):** build Android,
   profilare 60fps pe telefon. Până atunci: dezvoltare pe desktop, cu
   constrângerile mobile respectate în continuare (poly buget, particule

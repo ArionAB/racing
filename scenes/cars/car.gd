@@ -256,6 +256,13 @@ var _ground_normal: Vector3 = Vector3.UP
 ## Yaw-ul scris de NOI la finalul tick-ului trecut; diferenta la intrarea in
 ## tick = rotatia data de solver (lovitura excentrica).
 var _commanded_yaw: float = 0.0
+## Compresia statica (de repaus) a arcului — reperul fata de care rotile
+## vizuale se ridica/coboara. Setata de _rebuild_suspension_geometry.
+var _susp_static_comp: float = 0.11
+## Pozitia originala a fiecarui nod de roata din model si coltul de suspensie
+## de care apartine (0-3, FL FR RL RR in spatiul masinii).
+var _wheel_orig_pos: Array[Vector3] = []
+var _wheel_corner: Array[int] = []
 var _skid_accum: float = 0.0
 var _respawn_cooldown: float = 0.0
 
@@ -315,8 +322,8 @@ func _ready() -> void:
 ## Compresia statica nu depinde de masa: comp = g / omega^2.
 func _rebuild_suspension_geometry(wheel_x: float, wheel_z: float) -> void:
 	var omega := TAU * spring_freq
-	var static_comp := gravity / (omega * omega)
-	var attach_h := suspension_rest + _susp_wheel_radius - static_comp
+	_susp_static_comp = gravity / (omega * omega)
+	var attach_h := suspension_rest + _susp_wheel_radius - _susp_static_comp
 	_wheel_points = [
 		Vector3(-wheel_x, attach_h, -wheel_z),
 		Vector3(wheel_x, attach_h, -wheel_z),
@@ -345,8 +352,13 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	if _collision_shape != null:
 		var box := _collision_shape.shape as BoxShape3D
 		box.size = Vector3(data.body_width * 0.9, 1.0, data.body_length * 0.85)
-	# Raza fizica a rotii vine din model (via _build_visual); ecartamentul si
-	# ampatamentul din corpul masinii — autobuzul calca mai lat si mai lung.
+	# Suspensia e IDENTITATE (#260): rigiditatea, amortizarea si cursa vin din
+	# CarData — sportiva teapana, autobuzul moale si leganat. Raza fizica a
+	# rotii vine din model (via _build_visual); ecartamentul si ampatamentul
+	# din corpul masinii — autobuzul calca mai lat si mai lung.
+	spring_freq = data.spring_freq
+	damping_ratio = data.damping_ratio
+	suspension_rest = data.suspension_rest
 	_susp_wheel_radius = clampf(_wheel_radius, 0.22, 0.42)
 	_rebuild_suspension_geometry(
 		data.body_width * 0.42, data.body_length * 0.38)
@@ -1198,14 +1210,17 @@ func _build_effects() -> void:
 	add_child(_shadow)
 	_shadow.top_level = true
 
-## Rotile se invart cu viteza reala (unghi = viteza / raza) si cele din
-## fata se intorc vizual spre directia de viraj.
+## Rotile se invart cu viteza reala (unghi = viteza / raza), cele din fata se
+## intorc spre directia de viraj, si TOATE urmaresc compresia reala a arcului
+## lor: pe denivelari fiecare roata urca singura, in aer atarna la
+## destinderea completa. Vizualul citeste fizica, nu o mimeaza.
 func _update_wheels(delta: float, steer: float, fwd_speed: float) -> void:
 	if _wheels_all.is_empty():
 		return
 	_wheel_spin = fposmod(_wheel_spin + fwd_speed / _wheel_radius * delta, TAU)
 	_wheel_steer = lerpf(_wheel_steer, steer * 0.42, 10.0 * delta)
 	var spin_basis := Basis(Vector3.RIGHT, _wheel_spin)
+	var inv_scale := 1.0 / maxf(data.model_scale if data != null else 1.0, 0.001)
 	for idx in _wheels_all.size():
 		var wheel := _wheels_all[idx]
 		var anim := spin_basis
@@ -1213,6 +1228,14 @@ func _update_wheels(delta: float, steer: float, fwd_speed: float) -> void:
 			anim = Basis(Vector3.UP, _wheel_steer) * spin_basis
 		# Compunem PESTE transformarea originala, nu in locul ei.
 		wheel.basis = anim * _wheel_orig[idx]
+		# Mai multa compresie = roata mai sus fata de caroserie (distanta de la
+		# prindere la centrul rotii e rest - compresie). Offsetul e in spatiul
+		# modelului, deci impartit la scala.
+		if idx < _wheel_corner.size():
+			var corner: int = _wheel_corner[idx]
+			var lift := (wheel_compression[corner] - _susp_static_comp) \
+				* inv_scale
+			wheel.position.y = _wheel_orig_pos[idx].y + lift
 
 ## Umbra blob: raycast in jos, discul sta pe sol indiferent unde e masina.
 ## Cu cat sari mai sus, cu atat umbra palste — dar iti arata aterizarea.
@@ -1274,17 +1297,28 @@ func _build_visual() -> void:
 		model.scale = Vector3.ONE * data.model_scale
 		model.rotation.y = deg_to_rad(data.model_rotation_deg)
 		_visual.add_child(model)
-		# Gasim rotile dupa nume, ca sa le animam (spin + viraj vizual).
+		# Gasim rotile dupa nume, ca sa le animam (spin + viraj + compresie).
 		_wheels_all.clear()
 		_wheels_front.clear()
 		_wheel_orig.clear()
+		_wheel_orig_pos.clear()
+		_wheel_corner.clear()
 		for child in model.get_children():
 			var child_name := String(child.name).to_lower()
 			if child is Node3D and "wheel" in child_name:
-				_wheels_all.append(child)
-				_wheel_orig.append((child as Node3D).basis)
-				if "front" in child_name:
-					_wheels_front.append(child)
+				var wheel_node := child as Node3D
+				_wheels_all.append(wheel_node)
+				_wheel_orig.append(wheel_node.basis)
+				_wheel_orig_pos.append(wheel_node.position)
+				var is_front := "front" in child_name
+				if is_front:
+					_wheels_front.append(wheel_node)
+				# Coltul de suspensie al rotii vizuale. Modelul e rotit 180°
+				# (privea spre +Z), deci stanga masinii = +x in spatiul
+				# modelului — de-aia conditia pare inversata.
+				var car_left := wheel_node.position.x > 0.0
+				var axle := 0 if is_front else 1
+				_wheel_corner.append(axle * 2 + (0 if car_left else 1))
 		if not _wheels_all.is_empty():
 			# Raza reala = inaltimea centrului rotii (sta pe sol) x scala.
 			_wheel_radius = maxf(0.15,

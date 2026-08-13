@@ -4,7 +4,7 @@ Obstacole (300-1500 tris):
   HayCart    vehicles/hay_cart.glb     4 x 2 x 2.5 m
   TimberSled vehicles/timber_sled.glb  5 x 2 x 2 m
   Snowplow   vehicles/snowplow.glb     5 x 2.2 x 2.3 m
-  Cow        props/cow.glb             3.5 x 1.2 x 2 m
+(vaca s-a mutat in build_cow_animated.py — asset Quaternius cu schelet)
 Filler (100-600 tris):
   HayBale        props/hay_bale.glb        1.2 x 0.8 x 0.8
   WoodStack      props/wood_stack.glb      3 x 1.5 x 1.5
@@ -97,41 +97,9 @@ def build_timber_sled():
     return b
 
 
-# ==================================================================== Cow
-# Vaca: alb cu pete negre, bot si uger roz-crem. Petele sunt retag cu un camp
-# deterministic pe pozitia fetei — zero triunghiuri, aceeasi vaca la fiecare
-# build. Sta perpendicular pe drum cand rumega, deci silueta laterala conteaza.
-
-def build_cow():
-    b = Builder()
-    body = b.boulder((0.0, -0.15, 1.14), (1.15, 2.05, 1.05), FOAM_WHITE,
-                     seed=21, segments=8, rings=4, deviation=0.07)
-    b.retag(body, VOLCANIC_BLACK,
-            where=lambda c, n: math.sin(c.y * 4.2 + 1.2) +
-            math.cos(c.z * 5.0 + c.x * 3.0) > 0.85)
-    # picioare — urca pana IN corp (corpul are burta la ~0.62; un picior care
-    # doar il atinge lasa o fanta de lumina si vaca pare pe catalige)
-    for sx in (-1.0, 1.0):
-        for y in (-0.78, 0.62):
-            b.box((sx * 0.33, y, 0.42), (0.2, 0.22, 0.84), FOAM_WHITE)
-    # cap + bot
-    head = b.box((0.0, 1.08, 1.42), (0.5, 0.55, 0.62), FOAM_WHITE)
-    b.retag(head, VOLCANIC_BLACK,
-            where=lambda c, n: c.x > 0.1 and c.z > 1.5)
-    b.box((0.0, 1.38, 1.28), (0.4, 0.3, 0.34), CORAL_SAND)
-    # urechi + cornite
-    for sx in (-1.0, 1.0):
-        b.box((sx * 0.33, 1.05, 1.68), (0.18, 0.1, 0.1), VOLCANIC_BLACK)
-        b.frustum((sx * 0.19, 1.05, 1.80), 0.05, 0.015, 0.2, CUT_WOOD,
-                  segments=4)
-    # uger + coada
-    b.boulder((0.0, -0.62, 0.72), (0.42, 0.4, 0.34), CORAL_SAND, seed=3,
-              segments=6, rings=2, deviation=0.05)
-    b.beam((0.0, -1.15, 1.5), (0.0, -1.3, 0.75), 0.06, FOAM_WHITE)
-    b.box((0.0, -1.31, 0.62), (0.09, 0.09, 0.22), VOLCANIC_BLACK)
-    # clopotel la gat, accentul elvetian
-    b.box((0.0, 1.28, 1.05), (0.14, 0.08, 0.16), RUST)
-    return b
+# Vaca procedurala (alb cu pete) a plecat: props/cow.glb vine acum din
+# build_cow_animated.py — vaca maro Quaternius, cu schelet si animatii.
+# Regenerarea kitului asta NU trebuie sa o mai atinga.
 
 
 # =============================================================== Snowplow
@@ -244,7 +212,6 @@ ASSETS = [
      AO_PROP),
     ("TimberSled", build_timber_sled, "vehicles/timber_sled.glb", 1500,
      0.015, AO_PROP),
-    ("Cow", build_cow, "props/cow.glb", 1500, 0.02, AO_PROP),
     ("Snowplow", build_snowplow, "vehicles/snowplow.glb", 1500, 0.02,
      AO_PROP),
     ("HayBale", build_hay_bale, "props/hay_bale.glb", 600, 0.03,

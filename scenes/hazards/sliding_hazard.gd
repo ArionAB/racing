@@ -60,6 +60,23 @@ const ESCAPE_LANE_DEFAULT: float = 0.0
 ## m/s dati masinii lovite, ca sa iasa din calea obstacolului.
 const SWEEP_PUSH: float = 5.5
 
+## Modelele cu schelet (vaca) isi aleg animatia dupa VITEZA REALA a nodului,
+## nu dupa faza de miscare: aceeasi regula acopera si pendularea (viteza
+## sinusoidala — la capete vaca incetineste si se apuca de pascut) si
+## traversarea (parcat = paste, telegraf + trecere = merge). Numele sunt
+## conventia GLB-urilor noastre animate (build_cow_animated.py); un model
+## fara AnimationPlayer sau fara "Walk" ramane teapan, ca pana acum.
+const ANIM_REST := [&"Eating", &"Idle"] # prima gasita castiga
+const ANIM_WALK := &"Walk"
+const ANIM_RUN := &"Gallop"
+## Peste viteza asta pasul devine galop (vaca la trap real ~3 m/s).
+const RUN_SPEED: float = 3.0
+## Vitezele "naturale" ale ciclurilor, ca ritmul pasilor sa urmeze nodul:
+## speed_scale = viteza reala / viteza ciclului. Gasite la ochi pe sonda.
+const WALK_CYCLE_SPEED: float = 1.5
+const RUN_CYCLE_SPEED: float = 8.0
+const ANIM_BLEND: float = 0.4
+
 var center: Vector3
 var travel: Vector3 # amplitudinea (vector lateral, jumatate de cursa)
 ## Pendulare (implicit) sau traversare cu sens. Vezi [enum Motion].
@@ -92,6 +109,9 @@ var model_classes: Dictionary = {}
 
 var _time: float = 0.0
 var _pivot: Node3D
+## AnimationPlayer-ul modelului, daca GLB-ul are schelet. Vezi ANIM_* sus.
+var _anim: AnimationPlayer
+var _anim_rest: StringName = &""
 var _last_pos: Vector3
 var _area: Area3D
 var _half_extent: float = 1.3
@@ -221,6 +241,46 @@ func _build_model() -> void:
 			_half_extent = 2.25
 		shape.shape = box
 	add_child(shape)
+	_hook_animation(model)
+
+## Cauta AnimationPlayer-ul din GLB si pune ciclurile pe bucla. Buclele se
+## seteaza AICI, nu in setarile de import: importul implicit lasa animatiile
+## one-shot, iar o vaca ce face un singur pas si ingheata e mai rea decat una
+## teapana. Fara player sau fara "Walk", _anim ramane null si nimic nu se
+## schimba fata de modelele rigide.
+func _hook_animation(model: Node3D) -> void:
+	if Engine.is_editor_hint():
+		return # in preview-ul de editor modelul sta in poza de repaus
+	var players := model.find_children("*", "AnimationPlayer", true, false)
+	if players.is_empty():
+		return
+	var player := players[0] as AnimationPlayer
+	if not player.has_animation(ANIM_WALK):
+		return
+	_anim = player
+	for rest: StringName in ANIM_REST:
+		if _anim.has_animation(rest):
+			_anim_rest = rest
+			break
+	for anim_name: StringName in [ANIM_WALK, ANIM_RUN, _anim_rest]:
+		if anim_name != &"" and _anim.has_animation(anim_name):
+			_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+
+## Pasul urmeaza nodul: ce animatie si in ce ritm, din viteza reala (m/s).
+func _animate(speed: float) -> void:
+	var target := _anim_rest
+	var rate := 1.0
+	if speed > RUN_SPEED and _anim.has_animation(ANIM_RUN):
+		target = ANIM_RUN
+		rate = clampf(speed / RUN_CYCLE_SPEED, 0.7, 1.6)
+	elif speed > 0.15:
+		target = ANIM_WALK
+		rate = clampf(speed / WALK_CYCLE_SPEED, 0.75, 2.2)
+	if target == &"":
+		return
+	_anim.speed_scale = rate
+	if _anim.current_animation != String(target):
+		_anim.play(target, ANIM_BLEND)
 
 func _build_placeholder_box() -> void:
 	var mesh := MeshInstance3D.new()
@@ -265,6 +325,8 @@ func _physics_process(delta: float) -> void:
 		if flat.length() > 0.0001:
 			var axis := Vector3.UP.cross(flat.normalized()).normalized()
 			_pivot.global_rotate(axis, -flat.length() / roll_radius)
+	if _anim != null and delta > 0.0:
+		_animate(moved.length() / delta)
 	_last_pos = global_position
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)

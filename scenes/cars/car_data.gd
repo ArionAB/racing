@@ -22,6 +22,18 @@ extends Resource
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=bump
 @export var mass_factor: float = 1.0
 
+@export_group("Suspensie")
+## Frecventa naturala a arcurilor (Hz) — RIGIDITATEA ca identitate: sportiva
+## teapana (2.8-3.0), autobuzul moale si leganat (1.8). Compresia statica e
+## g/omega^2, deci o frecventa joasa cere si cursa mai lunga (vezi mai jos).
+@export var spring_freq: float = 2.5
+## Raportul de amortizare (1 = critic): cat de repede se ASAZA caroseria dupa
+## o leganare. Jos = balanseaza (autobuz), sus = revine sec (sport).
+@export var damping_ratio: float = 0.6
+## Cursa arcului in repaus (m). Regula: compresia statica (g/omega^2) sa cada
+## in 25-50% din cursa — altfel arcul e ori teapan, ori la fund.
+@export var suspension_rest: float = 0.35
+
 @export_group("Model 3D")
 ## Scena modelului (FBX importat); daca lipseste, se deseneaza cuburi.
 @export var model: PackedScene

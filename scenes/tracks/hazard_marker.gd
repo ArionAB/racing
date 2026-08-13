@@ -36,7 +36,14 @@ extends Marker3D
 ## alea pentru care nodul e o traducere directa. Lipsesc deliberat:
 ##   - LiftBridge: se leaga de un canal ([TrackChannel]), nu de o fractie — se
 ##     declara acolo, cu `jump: false`;
-##   - WaveSurge / WaterHose: portiuni de sosea, nu obiecte punctuale.
+##   - WaterHose: conducta sparta e legata de un obiect de decor (teava), nu de
+##     un punct oarecare de pe traseu.
+##
+## WAVE a fost si el exclus la inceput, cu motivul „portiune de sosea, nu obiect
+## punctual" — dar motivul nu s-a sustinut la a doua privire (#247): valul se
+## construieste dintr-o SINGURA fractie, exact ca tromba, care e in lista de
+## cand exista. Excluderea era mostenita de la furtun, nu castigata pe cont
+## propriu.
 enum Kind {
 	SLIDING,    ## bariera/bolovan care matura soseaua dintr-o parte in alta
 	ROCKFALL,   ## bolovan care cade de pe faleza pe o banda
@@ -47,6 +54,7 @@ enum Kind {
 	FLYOFF,     ## creasta care arunca toata pista in aer
 	EXCAVATOR,  ## excavatorul ruginit care matura cu bratul
 	AVALANCHE,  ## masa de zapada care se rostogoleste peste sosea
+	WAVE,       ## val care spala soseaua (cere o tema cu mare)
 }
 
 @export var kind: Kind = Kind.SLIDING

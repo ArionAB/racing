@@ -4036,6 +4036,9 @@ func _build_node_hazard(hz: Dictionary) -> void:
 			_build_excavator(frac)
 		HazardMarker.Kind.AVALANCHE:
 			_build_avalanche(frac)
+		HazardMarker.Kind.WAVE:
+			# Se sare singur, cu avertisment, daca tema n-are mare.
+			_build_wave_surge(frac)
 
 
 ## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
@@ -5820,6 +5823,21 @@ func _build_hose(frac: float) -> void:
 ## si uda doar cat trece.
 func _build_wave_surge(frac: float) -> void:
 	var n := baked.size()
+	if n == 0:
+		return
+	# Fara mare in tema, valul nu se construieste DELOC — si spune de ce.
+	#
+	# Pana la #247 asta nu se putea intampla: valul se declara numai din cod, iar
+	# singura pista care il cerea era o insula. De cand se poate pune din editor
+	# (`custom_wave_fracs`), un val cerut pe Dunele ar fi iesit o creasta de apa
+	# plutind peste desert, la o cota luata din senin — vizibil absurd, dar tacut
+	# in cod. Refuzul cu mesaj e conventia pistelor: scurtaturile prost desenate
+	# se plang tot in Output, in loc sa se construiasca gresit.
+	if not theme_flag("water", false):
+		push_warning(("%s: val cerut la fractia %.3f, dar tema '%s' n-are mare "
+			+ "— valul se sare (are nevoie de o linie a apei)")
+			% [track_name, frac, theme_decor])
+		return
 	var idx := int(frac * float(n)) % n
 	var wave := WaveSurge.new()
 	# Directia de mers: perpendicular pe sosea, dinspre larg spre uscat. Nu se
@@ -5836,13 +5854,13 @@ func _build_wave_surge(frac: float) -> void:
 	# Linia apei, ca la tromba: fara ea valul traverseaza orizontal la cota
 	# soselei si pluteste in aer cat e in larg. Aceeasi despartire ca peste tot —
 	# cotele terenului le stie pista, nu hazardul.
-	if theme_flag("water", false):
-		wave.water_y = _sampler.mean_road_y() + sea_level_offset
-		# Apa de pe drum e chiar MAREA: acelasi material, deci acelasi turcoaz,
-		# aceeasi spuma animata si zero materiale in plus la numaratoarea garzii.
-		# La adancime ~0 shaderul da nisip ud cu spuma peste el — exact ce ramane
-		# in urma unui val care a trecut peste dig.
-		wave.film_material = _water_material()
+	# Tema are mare (verificat la intrare), deci linia apei exista.
+	wave.water_y = _sampler.mean_road_y() + sea_level_offset
+	# Apa de pe drum e chiar MAREA: acelasi material, deci acelasi turcoaz,
+	# aceeasi spuma animata si zero materiale in plus la numaratoarea garzii.
+	# La adancime ~0 shaderul da nisip ud cu spuma peste el — exact ce ramane
+	# in urma unui val care a trecut peste dig.
+	wave.film_material = _water_material()
 	# Defazaj derivat din fractie, ca doua valuri pe aceeasi pista sa nu bata la
 	# unison — acelasi truc ca la SlidingHazard.
 	wave.phase = fposmod(frac * 2.3, 1.0)

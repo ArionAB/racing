@@ -386,8 +386,18 @@ func _physics_process(delta: float) -> void:
 		# stai pe ea. Refoloseste acelasi slip_time ca WaterHazard — un al doilea
 		# mecanism de aquaplanare ar fi insemnat doua feluri de a pierde grip-ul,
 		# care s-ar fi tunat separat si ar fi divergat.
-		if track.route_is_wet(route):
-			apply_slip(SLIP_GRIP_WET)
+		# Doua surse de ud, acelasi efect: banda (scurtatura declarata uda) si
+		# INTERVALUL de pe traseul principal (#246). A doua e cea care lipsea —
+		# se putea uda un ocol intreg, dar nu 80 m din linia pe care oricum mergi.
+		#
+		# Grip-ul vine de la pista cand tema il declara: „ud" inseamna altceva pe
+		# un drum de munte decat pe un dig batut de valuri. Fara declaratie,
+		# ramane implicitul masinii, deci nimic nu se schimba pe pistele actuale.
+		var wet_route := track.route_is_wet(route)
+		var wet_here := route == 0 and track.is_wet_at(track.frac_at(road_index))
+		if wet_route or wet_here:
+			var g := track.wet_grip()
+			apply_slip(g if g > 0.0 else SLIP_GRIP_WET)
 
 	# Pe grila de start corpul e INGHETAT (freeze, prin on_start_grid), deci
 	# gravitatia nu curge si nimeni nu aluneca la vale in countdown — bug-ul

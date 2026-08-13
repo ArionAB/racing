@@ -191,6 +191,9 @@ var slip_grip: float = SLIP_GRIP_PUDDLE
 var crush_time: float = 0.0
 var crush_factor: float = 1.0
 var _forced_boost: float = 0.0 # rocket start: ardere gratuita, nu goleste bara
+## Turtirea care tine cat incetinirea (vezi `_hold_squash`). Tinut ca sa poata fi
+## oprit: la repunere masina trebuie sa apara intreaga, nu latita.
+var _squash_tween: Tween
 
 ## Nodul (din Race) sub care se depun urmele de cauciuc.
 var skid_parent: Node3D
@@ -727,15 +730,26 @@ func apply_slip(grip_value: float = SLIP_GRIP_PUDDLE) -> void:
 ##
 ## `factor` inmulteste plafonul de viteza (0.55 = 55%), `keep_speed` cat din
 ## viteza orizontala ramane pe loc, iar `squash` e forma de turtire.
+## `hold_squash` tine caroseria turtita CAT TINE incetinirea, in loc s-o lase sa
+## revina in 0.25 s ca la un simplu punch.
+##
+## Diferenta e de citire, nu de cosmetica. La tren sau la o izbitura, turtirea e
+## un accent pe IMPACT — s-a intamplat ceva, gata. La bolovanul care te striveste
+## (#242), turtirea e chiar EXPLICATIA pentru care mergi mai incet trei secunde:
+## masina e latita, deci se tarie. Daca sare inapoi la forma normala in doua
+## zecimi si tu ramai lent, penalizarea devine invizibila si se citeste ca bug.
 func crush(seconds: float, factor: float, squash: Vector3,
-		keep_speed: float) -> void:
+		keep_speed: float, hold_squash: bool = false) -> void:
 	crush_time = maxf(crush_time, seconds)
 	crush_factor = minf(crush_factor, factor)
 	velocity.x *= keep_speed
 	velocity.z *= keep_speed
 	is_boosting = false
 	_forced_boost = 0.0
-	_punch_scale(squash)
+	if hold_squash:
+		_hold_squash(squash, seconds)
+	else:
+		_punch_scale(squash)
 	crushed.emit(self, 1.0 - factor)
 
 
@@ -819,6 +833,12 @@ func respawn(backoff_m: float = 14.0) -> void:
 	slip_time = 0.0
 	crush_time = 0.0
 	crush_factor = 1.0
+	# Si turtirea care tinea cat incetinirea: repusa pe sosea, masina apare
+	# intreaga. Fara asta ar rasari latita si ar ramane asa pana expira tween-ul.
+	if _squash_tween != null and _squash_tween.is_valid():
+		_squash_tween.kill()
+	if _visual != null:
+		_visual.scale = Vector3.ONE
 	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
 	_impact_yaw = 0.0 # nici rotatia din ultima izbitura nu ne urmareste
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
@@ -837,6 +857,26 @@ func _punch_scale(target: Vector3) -> void:
 	_visual.scale = target
 	var tw := create_tween()
 	tw.tween_property(_visual, "scale", Vector3.ONE, 0.25) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+## Turtire care RAMANE, apoi se dezumfla la loc. Vezi `crush(hold_squash)`.
+##
+## Tween-ul precedent se opreste explicit: doua tween-uri pe aceeasi proprietate
+## se calca reciproc, iar cel vechi (revenire in 0.25 s) ar fi tras masina inapoi
+## la forma normala chiar sub cel nou.
+func _hold_squash(target: Vector3, seconds: float) -> void:
+	if _visual == null:
+		return
+	if _squash_tween != null and _squash_tween.is_valid():
+		_squash_tween.kill()
+	# Turtirea intra repede (impactul e brusc), tine cat incetinirea, si abia la
+	# final revine — cu BACK, ca sa arate a redresare elastica, nu a lift.
+	_squash_tween = create_tween()
+	_squash_tween.tween_property(_visual, "scale", target, 0.08) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_squash_tween.tween_interval(maxf(seconds - 0.5, 0.0))
+	_squash_tween.tween_property(_visual, "scale", Vector3.ONE, 0.42) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _update_effects(delta: float) -> void:

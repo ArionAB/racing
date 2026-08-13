@@ -501,7 +501,26 @@ static func themes() -> Dictionary:
 			"hazard_model": "res://assets/models/vehicles/timber_sled.glb",
 			"hazard_roll": false, # o sanie nu se rostogoleste (vezi barca sabani)
 			"dust_color": Color(0.62, 0.58, 0.44), # pamant de pajiste, nu nisip
+			# Nu exista MARE pe pista asta, dar exista un canal cu apa (paraul
+			# din vale, vezi Track09._channel_specs): steagul de mai jos ramane
+			# false, iar apa de canal se construieste separat.
 			"water": false,
+			# Apa de munte, nu laguna. Fara sloturile astea, `_sea_color` ar
+			# folosi recif+larg (turcoaz tropical) si paraul iesea o lagunca
+			# intre brazi — asa arata prima randare in snapshots/alpii.png.
+			#
+			# Nu se aloca sloturi noi in atlas. Prima incercare a fost
+			# CONCRETE + ROCK_DARK si a iesit un ghetar: CONCRETE e #C8BDA9,
+			# adica un bej CALD (r > g > b) — de aproape nu se mai citea ca
+			# apa, ci ca prundis. PAINTED_METAL (#7692A8) e singurul
+			# albastru-cenusiu rece din paleta si e exact culoarea unei ape de
+			# munte; adancul ramane SEA_DEEP (#2E5F6B), care nu e tropical prin
+			# el insusi — turcoazul venea din REEF_SHALLOW.
+			#
+			# CAR_BLUE ar fi fost mai saturat, dar sloturile 14..16 sunt
+			# rezervate masinilor tocmai ca ele sa "sara" din decor.
+			"water_shallow_slot": Palette.PAINTED_METAL,
+			"water_deep_slot": Palette.SEA_DEEP,
 			# Poteca scurtaturii: pamant batatorit, nu nisip coraligen umed.
 			# Pietrisul e textura care exista si care se potriveste — o poteca
 			# de pasune calcata de vaci si de roti E pamant cu pietre, iar
@@ -968,6 +987,15 @@ func _ramp_fracs() -> Array[float]:
 func _hazard_fracs() -> Array[float]:
 	return []
 
+## Fractii unde coboara o avalansa peste sosea.
+##
+## Gol implicit, si nu doar fiindca asa e sablonul: avalansa e singurul hazard
+## care te scoate din cursa ACOPERIND TOT DRUMUL, deci nu are ce cauta pe o
+## pista care n-a cerut-o explicit. Se declara aici sau se planteaza vizual cu
+## un [HazardMarker] de tip AVALANCHE.
+func _avalanche_fracs() -> Array[float]:
+	return []
+
 ## Fractii unde conducta sparta pulseaza apa peste drum.
 ##
 ## Prima din cele doua SURSE de apa, ambele pe acelasi hazard
@@ -1096,6 +1124,21 @@ func _hazard_kinds() -> Dictionary:
 func _peak_specs() -> Array[Vector4]:
 	return []
 
+## Nodul e (sau contine) o declaratie de intrare, deci `rebuild` nu are voie
+## sa-l stearga: [TerrainPeak], [TrackChannel], [HazardMarker].
+##
+## Recursiv, fiindca toate trei se pot grupa sub un Node3D oarecare — vezi
+## comentariul din `rebuild`. Un grup gol NU e protejat: daca l-ai golit de
+## declaratii, e un nod generat ca oricare altul.
+func _holds_declarations(node: Node) -> bool:
+	if node is TerrainPeak or node is TrackChannel or node is HazardMarker:
+		return true
+	for child in node.get_children():
+		if _holds_declarations(child):
+			return true
+	return false
+
+
 ## Masivele plasate ca noduri [TerrainPeak] in scena — se ADUNA la cele
 ## declarate in cod, deci pe o pista ca Alpii poti pune un deal NOU tragand
 ## un nod, fara sa atingi declaratiile existente. Cautarea e recursiva (poti
@@ -1154,6 +1197,73 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				spec["half_width"] = br.branch_half_width
 			out.append(spec)
 		_collect_branches(child, out)
+
+## Canalele asezate ca noduri [TrackChannel] — se ADUNA la cele declarate in
+## cod, exact ca varfurile si scurtaturile de mai sus. O pista scrisa in cod
+## poate primi o rapa NOUA tragand un nod, fara sa atinga `_channel_specs()`.
+##
+## Intoarce acelasi dictionar ca `_channel_specs()`, cu o singura diferenta:
+## in loc de `frac` pune `at` (pozitia nodului). `_resolve_channels()` cauta
+## singur indicele — vezi acolo de ce fractia nu se scrie de mana.
+func _node_channels() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	_collect_channels(self, out)
+	return out
+
+
+func _collect_channels(node: Node, out: Array[Dictionary]) -> void:
+	for child in node.get_children():
+		if child is TrackChannel:
+			var ch := child as TrackChannel
+			var spec := ch.to_spec(self)
+			spec["at"] = ch.local_position(self)
+			out.append(spec)
+		_collect_channels(child, out)
+
+
+## Gimmickurile plasate ca noduri [HazardMarker] — se ADUNA la cele declarate in
+## cod, exact ca varfurile si scurtaturile de mai sus. O pista scrisa in cod
+## poate primi un obstacol NOU tragand un nod, fara sa atinga `_hazard_fracs()`
+## si celelalte hook-uri.
+##
+## Intoarce { kind: HazardMarker.Kind, frac: float, side: int } — adica traduce
+## POZITIA nodului in FRACTIA pe care o cer toate `_build_*`. Traducerea se face
+## aici si nu in nod fiindca are nevoie de `baked`, care exista abia dupa ce
+## traseul e generat.
+##
+## Cautarea e recursiva (poti grupa obstacolele sub un Node3D "Hazards") si
+## manuala, nu `find_children` pe nume de clasa — aceeasi regula ca la varfuri:
+## sa nu depinda de inregistrarea claselor de script la rularea headless.
+func _node_hazards() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if baked.is_empty():
+		return out # fara traseu nu exista fractie in care sa traducem pozitia
+	_collect_hazards(self, out)
+	return out
+
+
+func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
+	for child in node.get_children():
+		if child is HazardMarker:
+			var hz := child as HazardMarker
+			# In coordonatele PISTEI, ca la varfuri: conteaza daca nodul e grupat
+			# sub un Node3D cu transformare proprie.
+			var p := to_local(hz.global_position)
+			# Proiectia e 2D (vezi `_closest_baked_index`): un nod tras pe un drum
+			# care urca sta oricum la alta cota decat punctul baked cel mai
+			# apropiat, si cu distanta 3D obstacolul ar aluneca de-a lungul
+			# soselei pe bucata care se INTAMPLA sa fie la aceeasi inaltime.
+			out.append({
+				"kind": hz.kind,
+				"frac": frac_at(_closest_baked_index(p)),
+				"side": hz.deflector_side,
+				# Infatisarea declarata pe nod, in acelasi vocabular ca o intrare
+				# din `_hazard_kinds()` — vezi HazardMarker.model_spec(). Gol cand
+				# nodul n-a cerut nimic, si atunci decide tema, ca pana acum.
+				"spec": hz.model_spec(),
+			})
+		_collect_hazards(child, out)
+
 
 ## Portiunile pe care peretele exterior NU e panglica rosie continua:
 ## (frac_start, frac_end, regim, latura ±1 sau 0 = ambele).
@@ -1286,8 +1396,18 @@ func rebuild() -> void:
 	for child in get_children():
 		if child is Path3D:
 			continue # curba editabila a pistelor custom ramane
-		if child is TerrainPeak:
-			continue # declaratie de INTRARE, ca si curba — nu e output generat
+		if _holds_declarations(child):
+			# Declaratie de INTRARE, ca si curba — nu e output generat.
+			# Nodul declara varful / rapa / gimmickul, nu e lucrul insusi.
+			#
+			# Testul e RECURSIV, si asta a fost un bug real: pana aici se
+			# verifica doar copilul direct, desi documentatia lui `_node_peaks`
+			# invita explicit la grupare („poti grupa varfurile sub un Node3D").
+			# Un grup e un Node3D oarecare, fara owner in cod — deci pica la
+			# `child.free()` si ducea cu el toate declaratiile dinauntru.
+			# Se vedea ca „nodurile dispar la primul Regenerate", fara nimic in
+			# consola.
+			continue
 		if child.owner != null:
 			continue # asezat de mana in editor, salvat in scena
 		child.free()
@@ -1343,8 +1463,21 @@ func rebuild() -> void:
 		_build_rockfall(frac)
 	for frac in _train_fracs():
 		_build_train(frac)
+	for frac in _avalanche_fracs():
+		_build_avalanche(frac)
+	# Gimmickurile plantate ca noduri, DUPA cele din cod: intra prin exact
+	# aceleasi `_build_*`, deci un obstacol tras in viewport e identic cu unul
+	# declarat intr-o fractie. Vezi `_node_hazards`.
+	for hz in _node_hazards():
+		_build_node_hazard(hz)
 	for ch in _channels:
-		_build_lift_bridge(ch)
+		# Un canal se trece ori pe pod, ori din saritura — nu amandoua. Cu
+		# `jump: true` golul ramane gol si primeste in schimb o trambulina pe
+		# toata latimea (vezi _build_channel_kicker).
+		if bool(ch.get("jump", false)):
+			_build_channel_kicker(ch)
+		else:
+			_build_lift_bridge(ch)
 	_build_markers()
 	_build_start_gate()
 	_build_start_line()
@@ -2242,9 +2375,13 @@ const SEA_FAR_DROP: float = SEA_WAVE_AMP + 0.08
 ## de trei ori bugetul de triunghiuri al intregii piste. Asa geometria sta acolo
 ## unde se uita jucatorul.
 func _build_water() -> void:
-	if not theme_flag("water", false):
-		return
 	if _sampler == null or baked.is_empty():
+		return
+	# Canalele isi au apa lor, la cota LOR — un parau de munte curge la 4 m, nu
+	# la nivelul marii. De aceea rularea nu mai e conditionata de steagul de
+	# tema: o pista fara mare (Alpii) poate avea totusi un canal cu apa.
+	_build_channel_water()
+	if not theme_flag("water", false):
 		return
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	var root := Node3D.new()
@@ -2253,6 +2390,129 @@ func _build_water() -> void:
 	_build_sea_far(root, sea_y)
 	_build_sea_near(root, sea_y)
 	_build_sea_respawn(sea_y)
+
+
+## Apa dintr-un canal care NU e la nivelul marii.
+##
+## Pe Okinawa stramtoarea e sapata sub `sea_y`, deci grila de tarm a lui
+## [method _build_sea_near] o umple din mers si aici nu e nimic de facut. Un
+## parau de munte insa are cota lui, cu 60 m peste media soselei, si nici o
+## suprafata globala nu il poate acoperi — de aceea fiecare canal cu
+## `water_y_drop` declarat isi primeste banda proprie.
+##
+## Geometria e o BANDA in lungul canalului, nu o grila peste toata lumea:
+## canalul e un culoar ingust (water_half + bank lateral, reach in lungime),
+## iar o grila de talia celei de mare ar fi emis zeci de mii de celule uscate
+## ca sa gaseasca cateva ude. Adancimea intra tot in alfa culorii de vertex,
+## exact ca la mare (vezi _sea_color): shaderul de apa citeste COLOR.a ca
+## adancime, nu ca opacitate.
+func _build_channel_water() -> void:
+	if _channels.is_empty():
+		return
+	var mat := _water_material()
+	for ch in _channels:
+		var drop := float(ch.get("water_y_drop", -1.0))
+		if drop < 0.0:
+			continue # canal la nivelul marii — il acopera grila de tarm
+		var o: Vector3 = ch["origin"]
+		var along: Vector3 = ch["along"]
+		var across: Vector3 = ch["across"]
+		var water_y := o.y - drop
+		var half: float = float(ch["water_half"]) + float(ch["bank"]) * 0.5
+		var reach: float = ch["reach"]
+		# Pasul lateral e mai fin decat cel longitudinal: pe latime se vede
+		# rampa de adancime (mal -> senal -> mal), pe lungime apa e uniforma.
+		var nu := maxi(2, int(round(half * 2.0 / 3.0)))
+		var nv := maxi(2, int(round(reach * 2.0 / 12.0)))
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		const CORNERS: Array[Vector2] = [Vector2(0, 0), Vector2(1, 0),
+			Vector2(0, 1), Vector2(1, 1)]
+		const ORDER: Array[int] = [0, 1, 2, 1, 3, 2]
+		for iv in nv:
+			for iu in nu:
+				var quad: Array[Vector3] = []
+				for corner: Vector2 in CORNERS:
+					var u := (float(iu) + corner.x) / float(nu) * 2.0 - 1.0
+					var v := (float(iv) + corner.y) / float(nv) * 2.0 - 1.0
+					var p := o + across * (u * half) + along * (v * reach)
+					p.y = water_y
+					quad.append(p)
+				# Adancimea reala sub fiecare colt: terenul e deja sapat de
+				# _carve_channel, deci o citim, nu o presupunem.
+				var d: Array[float] = []
+				var wet := false
+				for p: Vector3 in quad:
+					var dd := water_y - _sampler.ground_y(p.x, p.z)
+					d.append(dd)
+					if dd > 0.0:
+						wet = true
+				if not wet:
+					continue # patrat uscat pe tot — malul, nu apa
+				for k: int in ORDER:
+					# Adancimea se normalizeaza pe ADANCIMEA REALA A APEI din
+					# canalul asta, nu pe cea a marii.
+					#
+					# Prima versiune trimitea `t * SEA_NEAR_DEPTH` cu `t`
+					# raportat la `depth` (18 m, adica adancimea SAPATURII).
+					# Apa masurata in albie are insa 3 m, deci intra in
+					# _sea_color ca ~2.3 dintr-o scara de 14 — adica exact in
+					# banda de mal, intre spuma (0.6) si recif (5). Rezultatul
+					# se vede in prima randare: un parau aproape alb, care
+					# citea ca ghetar. Cu scara refacuta pe adancimea proprie,
+					# aceiasi 3 m acopera tot gradientul, de la spuma la mal
+					# pana la culoarea plina la mijloc.
+					var t := clampf(d[k] / _channel_water_depth(ch), 0.0, 1.0)
+					st.set_color(_sea_color(t * SEA_NEAR_DEPTH))
+					st.add_vertex(quad[k] - global_position)
+
+		st.generate_normals()
+		var mesh := st.commit()
+		if mesh.get_surface_count() == 0:
+			continue
+		var mi := MeshInstance3D.new()
+		mi.name = "ChannelWater_%s" % String(ch.get("label", "canal"))
+		mi.mesh = mesh
+		# material_override, ca la SeaNear: acelasi obiect de material pentru
+		# toate suprafetele de apa din pista, deci un singur material in
+		# numaratoarea garzii (tools/probe_decor.gd).
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		_build_channel_respawn(ch, water_y)
+
+
+## Cata APA are efectiv un canal, in metri.
+##
+## NU e `depth`: aia e cat de adanc s-a SAPAT sub cota soselei. Apa sta la
+## `water_y_drop` sub aceeasi cota, deci grosimea stratului e diferenta lor.
+## Un parau sapat 18 m cu apa la 15 m are 3 m de apa — si dupa cei 3 m se
+## normalizeaza culoarea, altfel gradientul de adancime nu se vede deloc.
+func _channel_water_depth(ch: Dictionary) -> float:
+	return maxf(float(ch["depth"]) - float(ch.get("water_y_drop", 0.0)), 0.5)
+
+
+## Cine rateaza saritura peste canal cade in apa si e repus pe traseu.
+##
+## Acelasi tipar ca plasa de sub creasta de fly-off si ca volumul de mare:
+## un [RespawnZone] sub suprafata, destul de jos cat stropul de la intrare sa
+## apuce sa se vada, si destul de lat cat sa prinda si pe cine cade oblic.
+func _build_channel_respawn(ch: Dictionary, water_y: float) -> void:
+	var o: Vector3 = ch["origin"]
+	var along: Vector3 = ch["along"]
+	var top := water_y - 0.6
+	var bottom := water_y - float(ch["depth"]) - 6.0
+	var zone := RespawnZone.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	var width: float = (float(ch["water_half"]) + float(ch["bank"]) * 0.5) * 2.0
+	box.size = Vector3(width, top - bottom, float(ch["reach"]) * 2.0)
+	shape.shape = box
+	zone.add_child(shape)
+	zone.transform = Transform3D(
+		Basis.looking_at(along, Vector3.UP),
+		Vector3(o.x, (top + bottom) * 0.5, o.z) - global_position)
+	add_child(zone)
 
 
 ## Largul: doua triunghiuri. Nu are nevoie de mai mult.
@@ -2428,8 +2688,13 @@ func water_tint(slot: int) -> Color:
 ## un pas de citire a adancimii pe fiecare pixel de apa — pe mobil, exact
 ## genul de cost pe care nu-l vede nicio garda din proiect.
 func _sea_color(d: float) -> Color:
-	var reef := water_tint(Palette.REEF_SHALLOW)
-	var deep := water_tint(Palette.SEA_DEEP)
+	# Sloturile vin din TEMA, nu fix din paleta recifului. Pana la paraul din
+	# Alpii singura apa din joc era laguna Okinawei, deci recif+larg era o
+	# alegere buna; pe un parau de munte, insa, aceleasi doua culori dadeau o
+	# lagunca turcoaz intre brazi — se vede in snapshots/alpii.png de la prima
+	# randare. Apa rece nu e apa calda cu alt cer deasupra.
+	var reef := water_tint(theme_flag("water_shallow_slot", Palette.REEF_SHALLOW))
+	var deep := water_tint(theme_flag("water_deep_slot", Palette.SEA_DEEP))
 	# Spuma NU e alb curat, ci alb spart cu recif.
 	#
 	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
@@ -2483,8 +2748,10 @@ func _water_material() -> ShaderMaterial:
 	# Culorile trec toate prin water_tint() — calibrarea ramane pe CPU, intr-un
 	# singur loc. Intensitatile sunt kill-switch-uri: 0 = comportamentul v1,
 	# de stins pe rand la profilarea pe device (M4).
-	var shallow := water_tint(Palette.REEF_SHALLOW)
-	var deep := water_tint(Palette.SEA_DEEP)
+	# Aceleasi sloturi ca in _sea_color, din acelasi motiv: doua surse de
+	# adevar pentru culoarea apei s-ar desincroniza la prima tema noua.
+	var shallow := water_tint(theme_flag("water_shallow_slot", Palette.REEF_SHALLOW))
+	var deep := water_tint(theme_flag("water_deep_slot", Palette.SEA_DEEP))
 	# Nisipul ud de la linia apei: nisipul de coral, intunecat putin — apa
 	# uda nisipul inainte sa-l acopere.
 	var shore := water_tint(Palette.CORAL_SAND).darkened(0.12)
@@ -2863,9 +3130,23 @@ func _resolve_channels() -> void:
 	var n := baked.size()
 	if n < 8:
 		return
-	for spec in _channel_specs():
-		var frac := fposmod(float(spec.get("frac", 0.0)), 1.0)
-		var ci := int(frac * float(n)) % n
+	for spec in _channel_specs() + _node_channels():
+		# Doua feluri de a spune UNDE taie canalul, si doar unul se scrie de
+		# mana. Un nod [TrackChannel] pune in dictionar `at` (pozitia lui in
+		# coordonatele pistei) si NU pune `frac`: indicele se cauta pe curba
+		# coapta, deci tragi nodul in viewport si taietura il urmeaza. O pista
+		# scrisa in cod declara mai departe `frac`, ca pana acum.
+		var ci: int
+		if spec.has("at"):
+			# Acelasi cautator ca la capetele scurtaturilor desenate, si din
+			# acelasi motiv: distanta e in plan (XZ). Un canal asezat langa un
+			# drum care urca sta oricum la alta cota decat asfaltul, iar cu
+			# distanta 3D taietura ar fugi zeci de metri, pe bucata de sosea
+			# care se INTAMPLA sa fie la aceeasi inaltime.
+			ci = _closest_baked_index(spec["at"] as Vector3)
+		else:
+			var frac := fposmod(float(spec.get("frac", 0.0)), 1.0)
+			ci = int(frac * float(n)) % n
 		var want := float(spec.get("gap", 12.0))
 		var steps := 1
 		var best := INF
@@ -3561,7 +3842,11 @@ func _build_ramp(frac: float) -> void:
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
 
-func _build_hazard(frac: float) -> void:
+## `spec` suprascrie ce s-ar fi ales pentru fractia asta: e infatisarea ceruta
+## de un [HazardMarker] tras in viewport (vezi HazardMarker.model_spec()).
+## Gol — cazul pistelor scrise in cod — inseamna "cauta in `_hazard_kinds()`",
+## adica exact comportamentul de dinainte.
+func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var p := baked[idx]
@@ -3591,11 +3876,18 @@ func _build_hazard(frac: float) -> void:
 	# exact. Trei din patru se potriveau din noroc, al patrulea cadea pe
 	# modelul temei — adica bug-ul arata ca "am uitat sa declar unul".
 	# O toleranta face intentia explicita si scoate norocul din ecuatie.
+	#
+	# Un nod care si-a declarat modelul sare peste cautare: el A SPUS deja ce
+	# vrea, iar fractia lui e derivata din pozitie, deci n-ar avea cum sa se
+	# potriveasca cu o cheie scrisa de mana in dictionar.
 	var kind := {}
-	for key in _hazard_kinds():
-		if absf(float(key) - frac) < 0.0005:
-			kind = _hazard_kinds()[key]
-			break
+	if not spec.is_empty():
+		kind = spec
+	else:
+		for key in _hazard_kinds():
+			if absf(float(key) - frac) < 0.0005:
+				kind = _hazard_kinds()[key]
+				break
 	var hazard_model: String = String(kind.get("model",
 		theme_flag("hazard_model", "")))
 	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
@@ -3606,7 +3898,8 @@ func _build_hazard(frac: float) -> void:
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
 		ball.model_scale = float(kind.get("scale",
 			theme_flag("hazard_scale", 0.52)))
-		ball.model_tri_class = theme_flag("hazard_class", "")
+		ball.model_tri_class = String(kind.get("tri_class",
+			theme_flag("hazard_class", "")))
 		ball.model_classes = theme_flag("hazard_classes", {})
 		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
 		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
@@ -3646,6 +3939,43 @@ func _build_hazard(frac: float) -> void:
 		box.travel = side * hw * 0.9
 		box.global_position = p
 
+## Trimite un gimmick plantat ca nod ([HazardMarker]) la constructorul lui.
+##
+## Nu construieste NIMIC singur, si asta e tot rostul: fiecare tip trece prin
+## exact acelasi `_build_*` pe care il apeleaza si pistele scrise in cod, deci
+## un obstacol tras in viewport se comporta identic cu unul declarat intr-o
+## fractie. Daca aparea aici o a doua cale de constructie, cele doua ar fi
+## divergat la prima corectie de mecanica — exact ce evita [TerrainPeak] prin
+## faptul ca hraneste `_peak_specs` in loc sa-si construiasca propriul munte.
+##
+## Infatisarea declarata pe nod (`spec`) ajunge deocamdata doar la bariera
+## mobila, fiindca ea e singura cu mecanica de model pe pozitie. Bolovanul si
+## deflectorul isi construiesc inca vizualul din cod — cand vor primi si ele
+## slot de model (#242, #244), aici se adauga o linie, nu un al doilea drum.
+func _build_node_hazard(hz: Dictionary) -> void:
+	var frac := float(hz.get("frac", 0.0))
+	var spec: Dictionary = hz.get("spec", {})
+	match int(hz.get("kind", 0)):
+		HazardMarker.Kind.SLIDING:
+			_build_hazard(frac, spec)
+		HazardMarker.Kind.ROCKFALL:
+			_build_rockfall(frac)
+		HazardMarker.Kind.CAROUSEL:
+			_build_carousel(frac)
+		HazardMarker.Kind.TRAIN:
+			_build_train(frac)
+		HazardMarker.Kind.TYPHOON:
+			_build_typhoon(frac)
+		HazardMarker.Kind.DEFLECTOR:
+			_build_deflector(frac, signf(float(hz.get("side", 1))))
+		HazardMarker.Kind.FLYOFF:
+			_build_flyoff(frac)
+		HazardMarker.Kind.EXCAVATOR:
+			_build_excavator(frac)
+		HazardMarker.Kind.AVALANCHE:
+			_build_avalanche(frac)
+
+
 ## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
 ## latimea. Vanele stau sub half_width ca sa nu treaca prin pereti.
 ##
@@ -3678,6 +4008,39 @@ func _build_rockfall(frac: float) -> void:
 	add_child(rock)
 	# Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
 	rock.global_position = p + side * (width_at(frac) * 0.45)
+
+
+## Avalansa: masa de zapada care coboara de pe versant si traverseaza soseaua.
+##
+## Fractii, ca la restul gimmickurilor — dar spre deosebire de bolovan, care
+## ocupa o banda, avalansa ACOPERA TOT DRUMUL. E o alegere de ritm, nu de linie:
+## nu exista traiectorie sigura, exista doar „ai trecut inainte" sau „nu ai".
+## De aceea telegraful e de 3.2 s (vezi AvalancheHazard.TELEGRAPH) si de aceea
+## nu se pune niciodata in apex — style_bible §7 cere sa nu blochezi citirea
+## virajului, iar aici blocajul e total.
+func _build_avalanche(frac: float) -> void:
+	var n := baked.size()
+	if n == 0:
+		return
+	# Mutata din apexul unui viraj, ca trecerea de cale ferata: pe o portiune
+	# calma jucatorul VEDE masa venind si poate decide, ceea ce e tot rostul
+	# telegrafului lung.
+	var idx := _calm_index_near(int(frac * float(n)) % n, 30.0)
+	var p := baked[idx]
+	var dir := (baked[(idx + 1) % n] - p).normalized()
+	var av := AvalancheHazard.new()
+	av.road_half_width = width_at(frac_at(idx))
+	av.phase = fposmod(frac * 3.7, 1.0) # doua avalanse nu pornesc la unison
+	# ATENTIE la ordine: transformarea INAINTE de add_child. Masa e un
+	# AnimatableBody3D cu sync_to_physics, deci transformarea o tine serverul de
+	# fizica; pusa dupa intrarea in arbore, ramane un pas fizic in origine —
+	# adica exact peste grila de start, si matura tot plutonul la countdown.
+	#
+	# `looking_at(dir)` da -Z pe sensul cursei si +X pe marginea din dreapta,
+	# conventia din tot proiectul. Avalansa coboara pe X local (vezi
+	# `_start_point` / `_end_point`), deci traverseaza perpendicular pe drum.
+	av.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
+	add_child(av)
 
 
 ## Trecere de cale ferata cu tren.
@@ -3753,6 +4116,82 @@ func _build_lift_bridge(ch: Dictionary) -> void:
 	bridge.water_y = _sampler.mean_road_y() + sea_level_offset - origin.y
 	bridge.piers = _channel_piers(ch, bridge.transform.affine_inverse())
 	add_child(bridge)
+
+
+## Inaltimea trambulinei de peste canal, si cat de mult arunca.
+##
+## 1.4 m e jumatate din creasta de fly-off (2.6): acolo buza e pe marginea unei
+## rapi si panta ajuta, aici trambulina sta pe teren plat si TOATA inaltimea se
+## simte in suspensie la aterizare. Factorul 0.34 e peste cel al crestei (0.25)
+## din motivul opus: creasta arunca pe cine vrea sa zboare, trambulina asta
+## trebuie sa treaca pe toata lumea peste un gol de 26 m, altfel golul devine
+## o capcana, nu o decizie.
+## Plafonul NU e ce limiteaza distanta aici, desi asa pare la prima vedere.
+## Ce limiteaza e `Car.drag`, care se aplica si in aer (car.gd, "hvel -= hvel *
+## drag * delta", in afara oricarui `is_on_floor()`): la 0.35 si ~2.4 s de
+## zbor, masina pierde peste jumatate din viteza orizontala cat e in aer —
+## masurat cu tools/probe_jump.gd, 36.9 m/s la desprindere si 17.9 la
+## aterizare. De aceea saritura se plafoneaza in jur de 40 m indiferent cu ce
+## viteza intri, si de aceea golul de aici e dimensionat pe cifra MASURATA, nu
+## pe cea balistica (care ar da ~87 m).
+const CHANNEL_JUMP_HEIGHT: float = 1.4
+const CHANNEL_JUMP_FACTOR: float = 0.34
+const CHANNEL_JUMP_MAX: float = 13.0
+
+## Trambulina de peste un canal declarat cu `jump: true`.
+##
+## Spre deosebire de [method _build_ramp], care aseaza o rampa pe JUMATATE de
+## sosea (alegere de linie, o poti ocoli), asta tine toata latimea: golul e pe
+## toata soseaua, deci si lansarea trebuie sa fie. Cine intra incet tot cade —
+## si tocmai asta e decizia de turbo pe care o cere principiul 2.
+func _build_channel_kicker(ch: Dictionary) -> void:
+	var n := baked.size()
+	var near_i: int = ch["near"]
+	# Trambulina se sprijina pe ULTIMELE puncte de asfalt dinaintea golului.
+	# Indicele, nu metrii: capetele golului sunt puncte coapte (vezi _road_gap),
+	# iar o a doua definitie in metri ar diverge la primul retus de traseu.
+	var lip := baked[near_i]
+	var prev := baked[((near_i - 3) % n + n) % n]
+	var dir := (lip - prev).normalized()
+	var side := dir.cross(Vector3.UP).normalized()
+	var hw := width_at_index(near_i)
+	var run := 9.0
+	var base := lip - dir * run
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var bl := base - side * hw
+	var br := base + side * hw
+	var tl := lip - side * hw + Vector3.UP * CHANNEL_JUMP_HEIGHT
+	var tr := lip + side * hw + Vector3.UP * CHANNEL_JUMP_HEIGHT
+	# Panta de urcare.
+	st.add_vertex(bl); st.add_vertex(br); st.add_vertex(tl)
+	st.add_vertex(br); st.add_vertex(tr); st.add_vertex(tl)
+	# Peretele de la buza, ca trambulina sa nu fie o pana transparenta lateral.
+	st.add_vertex(tl); st.add_vertex(tr); st.add_vertex(lip - side * hw)
+	st.add_vertex(tr); st.add_vertex(lip + side * hw)
+	st.add_vertex(lip - side * hw)
+	# Laturile.
+	st.add_vertex(bl); st.add_vertex(tl); st.add_vertex(lip - side * hw)
+	st.add_vertex(br); st.add_vertex(lip + side * hw); st.add_vertex(tr)
+	st.generate_normals()
+	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
+	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+
+	var kicker := FlyoffKicker.new()
+	kicker.name = "Trambulina_%s" % String(ch.get("label", "canal"))
+	kicker.launch_factor = CHANNEL_JUMP_FACTOR
+	kicker.launch_max = CHANNEL_JUMP_MAX
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(hw * 2.0, 2.6, 3.0)
+	shape.shape = box
+	kicker.add_child(shape)
+	# Transformarea INAINTE de add_child, ca la pod si la tren.
+	kicker.transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
+		lip - dir * 1.2 + Vector3.UP * (CHANNEL_JUMP_HEIGHT + 0.9)
+			- global_position)
+	add_child(kicker)
 
 
 ## Unde stau pilonii podului si cat de jos e fundul sub fiecare.
@@ -5120,6 +5559,26 @@ func _build_landmark(frac: float, side_sign: float, id: int) -> void:
 	else:
 		Palette.apply_world_material(root)
 	var stand := p + side * (width_at(frac) + float(info["gap"]))
+	# Impins lateral daca ar cadea in canal, nu sters: un landmark e asezat DE
+	# MANA la o fractie anume (vezi _landmark_spots), deci disparitia lui tacuta
+	# ar fi mai rea decat mutarea. Se cauta primul loc pe raza lui care nu mai e
+	# apa; daca nici la dublul distantei nu e uscat, atunci chiar se renunta.
+	#
+	# Fara pasul asta, o cabana declarata la 0.941 pe Alpii ajungea sa pluteasca
+	# peste albia paraului de la 0.937 — cota ei venea din ground_y, adica de pe
+	# fundul rapei, iar cladirea ramanea in aer deasupra apei.
+	if _sampler.channel_mix(stand.x, stand.z) > 0.3:
+		var pushed := false
+		for step in range(1, 7):
+			var probe := p + side * (width_at(frac) + float(info["gap"])
+				+ float(step) * 8.0)
+			if _sampler.channel_mix(probe.x, probe.z) <= 0.3:
+				stand = probe
+				pushed = true
+				break
+		if not pushed:
+			root.queue_free()
+			return
 	# Chiar la nivelul solului, nu la cota drumului. Comentariul de aici spunea
 	# deja "la nivelul solului", dar terenul nu-l onora: statea la o cota fixa in
 	# lume, deci pe portiunile inaltate landmark-ul ramanea suspendat in aer.

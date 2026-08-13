@@ -1,17 +1,151 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dfqofhsagufkd"]
 
-[ext_resource type="Script" path="res://scenes/tracks/track09.gd" id="1_track09"]
+[ext_resource type="Script" uid="uid://c6nqwqdpfoeub" path="res://scenes/tracks/track09.gd" id="1_track09"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="2_sihgr"]
+[ext_resource type="PackedScene" uid="uid://cyw12qlbqbwjh" path="res://assets/models/structures/mountain_tunnel.glb" id="4_b614n"]
+[ext_resource type="PackedScene" uid="uid://cefm0w23eu87c" path="res://assets/models/buildings/mountain_chalet_small.glb" id="4_qkw6l"]
+[ext_resource type="PackedScene" uid="uid://leutcgcaotf7" path="res://assets/models/buildings/alpine_church.glb" id="5_b614n"]
+[ext_resource type="PackedScene" uid="uid://dlxannrku6jg0" path="res://assets/models/buildings/mountain_chalet_large.glb" id="6_cdra4"]
+[ext_resource type="PackedScene" uid="uid://6magybcahq4j" path="res://assets/models/structures/stream_bridge.glb" id="8_cdra4"]
+[ext_resource type="PackedScene" uid="uid://dnscyopl8y8be" path="res://assets/models/buildings/cable_car_station.glb" id="9_3s6xm"]
+[ext_resource type="Script" uid="uid://e77285gnuvv4" path="res://scenes/tracks/track_channel.gd" id="9_chan"]
+[ext_resource type="PackedScene" uid="uid://f0mxg2x5jwyt" path="res://assets/models/structures/cable_car_pylon.glb" id="10_4nepr"]
+[ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="10_jham1"]
+[ext_resource type="PackedScene" uid="uid://shcm1cury3ee" path="res://assets/models/vehicles/timber_sled.glb" id="11_thbhk"]
 
-[node name="Track09" type="Node3D"]
+[sub_resource type="Curve3D" id="Curve3D_0cd17"]
+closed = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 26.066105, 0, 0, 0, 0, 0, 0, 41.82457, 6.767626, 58.027073, 0, 0, 0, 0, 0, 0, 74.438065, 4.3075795, 41.091885, 0, 0, 0, 0, 0, 0, 150, 1, -2, 0, 0, 0, 0, 0, 0, 215, 2, -24, 0, 0, 0, 0, 0, 0, 258, 5, -76, 0, 0, 0, 0, 0, 0, 272, 10, -140, 0, 0, 0, 0, 0, 0, 258, 16, -204, 0, 0, 0, 0, 0, 0, 270, 22, -268, 0, 0, 0, 0, 0, 0, 240, 28, -330, 0, 0, 0, 0, 0, 0, 185, 33, -368, 0, 0, 0, 0, 0, 0, 114, 40, -382, 0, 0, 0, 0, 0, 0, 80, 43, -388, 0, 0, 0, 0, 0, 0, 46, 45, -388, 0, 0, 0, 0, 0, 0, 16, 48, -380, 0, 0, 0, 0, 0, 0, -10, 51, -366, 0, 0, 0, 0, 0, 0, -22, 54, -346, 0, 0, 0, 0, 0, 0, -18, 56, -326, 0, 0, 0, 0, 0, 0, -12, 58, -306, 0, 0, 0, 0, 0, 0, -16, 60, -288, 0, 0, 0, 0, 0, 0, -37, 61, -257, 0, 0, 0, 0, 0, 0, -23, 62, -239, 0, 0, 0, 0, 0, 0, 0, 63, -239, 0, 0, 0, 0, 0, 0, 14, 63, -257, 0, 0, 0, 0, 0, 0, 40, 63, -276, 0, 0, 0, 0, 0, 0, 109.117836, 80.92552, -228.56747, 0, 0, 0, 0, 0, 0, 164.49254, 83.62769, -180.63261, 0, 0, 0, 0, 0, 0, 166.07056, 96.4957, -127.273895, 0, 0, 0, 0, 0, 0, 114.80277, 95.56423, -70.49315, 0, 0, 0, 0, 0, 0, 53.2254, 104.24372, -56.720867, 0, 0, 0, 0, 0, 0, -3.453415, 105.62612, -52.26549, 0, 0, 0, 0, 0, 0, -65.08955, 83.70776, -90.24502, 0, 0, 0, 0, 0, 0, -128, 61.336243, -144.69034, 0, 0, 0, 0, 0, 0, -186, 46, -238, 0, 0, 0, 0, 0, 0, -254, 33, -180, 0, 0, 0, 0, 0, 0, -262, 21, -98, 0, 0, 0, 0, 0, 0, -196, 10, -46, 0, 0, 0, 0, 0, 0, -126, 4, -14, 0, 0, 0, 0, 0, 0, -58, 1, -10, 0, 0, 0, 0, 0, 0, -26, 0, 4),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 40
+
+[node name="Track09" type="Node3D" unique_id=96375356]
 script = ExtResource("1_track09")
 
-[node name="MasivCentral" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 160, -302)
-script = ExtResource("2_peak")
-radius_m = 130.0
-
-[node name="UmarulDeSud" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 120, -175)
+[node name="MasivCentral" type="Marker3D" parent="." unique_id=1643792922]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70.201035, 160, -302)
+gizmo_extents = 210.0
 script = ExtResource("2_peak")
 radius_m = 210.0
+
+[node name="UmarulDeSud" type="Marker3D" parent="." unique_id=1436006815]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.534195, 166.8412, -143.02124)
+gizmo_extents = 210.0
+script = ExtResource("2_peak")
+radius_m = 210.0
+
+[node name="DecorManual" type="Node3D" parent="." unique_id=1900699138]
+script = ExtResource("2_sihgr")
+
+[node name="mountain_tunnel" parent="DecorManual" unique_id=515346015 instance=ExtResource("4_b614n")]
+transform = Transform3D(0.8571343, 0, -0.51509297, 0, 1, 0, 0.51509297, 0, 0.8571343, 66.15587, 67.18689, -281.17932)
+
+[node name="mountain_tunnel2" parent="DecorManual" unique_id=1333379531 instance=ExtResource("4_b614n")]
+transform = Transform3D(-0.7600893, 0, 0.6498188, 0, 1, 0, -0.6498188, 0, -0.7600893, 35.34716, 66.94289, -234.70198)
+
+[node name="mountain_chalet_small" parent="DecorManual" unique_id=1087059876 instance=ExtResource("4_qkw6l")]
+transform = Transform3D(0.9600261, 0, -0.7747336, 0, 1.2336378, 0, 0.7747336, 0, 0.9600261, 16.185452, 2.8040714, 55.92718)
+
+[node name="mountain_chalet_small3" parent="DecorManual" unique_id=1390640341 instance=ExtResource("4_qkw6l")]
+transform = Transform3D(-1.1577477, 0, 0.42600736, 0, 1.2336377, 0, -0.42600736, 0, -1.1577477, 38.6325, 2.8040714, 38.33846)
+
+[node name="mountain_chalet_small4" parent="DecorManual" unique_id=658184320 instance=ExtResource("4_qkw6l")]
+transform = Transform3D(-1.1586361, 0, -0.42358494, 0, 1.2336377, 0, 0.42358494, 0, -1.1586361, 53.04541, 2.8040714, 38.33846)
+
+[node name="mountain_chalet_small2" parent="DecorManual" unique_id=1033579347 instance=ExtResource("4_qkw6l")]
+transform = Transform3D(1.1805496, 0, 0.35800114, 0, 1.2336377, 0, -0.35800114, 0, 1.1805496, 61.89518, 3.8256023, 65.659294)
+
+[node name="mountain_chalet_small5" parent="DecorManual" unique_id=1332068904 instance=ExtResource("4_qkw6l")]
+transform = Transform3D(1.0742537, 0, 0.6064992, 0, 1.2336377, 0, -0.6064992, 0, 1.0742537, 71.505104, 4.0486503, 56.805256)
+
+[node name="alpine_church" parent="DecorManual" unique_id=2029703227 instance=ExtResource("5_b614n")]
+transform = Transform3D(0.61075044, 0, 1.6512432, 0, 1.7605739, 0, -1.6512432, 0, 0.61075044, 88.46686, 3.7162676, 49.262794)
+
+[node name="mountain_chalet_large" parent="DecorManual" unique_id=854588203 instance=ExtResource("6_cdra4")]
+transform = Transform3D(0.7132218, 0, -0.70093846, 0, 1, 0, 0.70093846, 0, 0.7132218, -20.02452, 1.7558031, 27.88463)
+
+[node name="mountain_chalet_large2" parent="DecorManual" unique_id=1624215598 instance=ExtResource("6_cdra4")]
+transform = Transform3D(-0.9119111, 0, -0.41038787, 0, 1, 0, 0.41038787, 0, -0.9119111, 77.24993, 4.157454, 24.456087)
+
+[node name="stream_bridge2" parent="DecorManual" unique_id=146402821 instance=ExtResource("8_cdra4")]
+transform = Transform3D(0.2089464, 0.22012301, -1.9039246, -0.37593168, 1.8827097, 0.17641361, 1.879377, 0.35212532, 0.24696356, -222.41066, 22.314701, -129.05289)
+
+[node name="cable_car_station" parent="DecorManual" unique_id=1580109433 instance=ExtResource("9_3s6xm")]
+transform = Transform3D(0.34729022, 0, 0.93775773, 0, 1, 0, -0.93775773, 0, 0.34729022, 279.55515, 19.614697, -237.95227)
+
+[node name="cable_car_pylon" parent="DecorManual" unique_id=1452899913 instance=ExtResource("10_4nepr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280.2208, 18.379728, -226.54085)
+
+[node name="cable_car_pylon2" parent="DecorManual" unique_id=1048335976 instance=ExtResource("10_4nepr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 257.74094, 25.56109, -228.6268)
+
+[node name="timber_sled" parent="DecorManual" unique_id=765899827 instance=ExtResource("11_thbhk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 266.1574, 16.739931, -208.76744)
+
+[node name="Path" type="Path3D" parent="." unique_id=604906104]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.4437904e-05, 0)
+curve = SubResource("Curve3D_0cd17")
+
+[node name="ParaulVaii" type="Marker3D" parent="." unique_id=771203481]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128.787, 4.180802, -14.73617)
+gizmo_extents = 90.0
+script = ExtResource("9_chan")
+label = "paraul_vaii"
+
+[node name="train" type="Marker3D" parent="." unique_id=1390029219]
+transform = Transform3D(-0.6810895, 0, -0.7322001, 0, 1, 0, 0.7322001, 0, -0.6810895, 57.66455, 67.448074, -267.152)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+kind = 3
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="HazardMarker2" type="Marker3D" parent="." unique_id=1230051407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0698895, 55.046642, -372.31882)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+kind = 8
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="HazardMarker3" type="Marker3D" parent="." unique_id=1012030637]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.155287, 55.046642, -379.21588)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="HazardMarker4" type="Marker3D" parent="." unique_id=1848907879]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.155287, 45.14563, -383.4874)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+kind = 1
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="HazardMarker5" type="Marker3D" parent="." unique_id=459332706]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.93822, 47.170483, -383.4874)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+kind = 6
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="HazardMarker6" type="Marker3D" parent="." unique_id=1280093824]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.121964, 47.170483, -383.4874)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+kind = 7
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="HazardMarker7" type="Marker3D" parent="." unique_id=1447735226]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 78.35173, 47.170483, -394.21362)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+kind = 5
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="HazardMarker8" type="Marker3D" parent="." unique_id=599486694]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.002815, 47.170483, -394.21362)
+gizmo_extents = 3.0
+script = ExtResource("10_jham1")
+kind = 2
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"

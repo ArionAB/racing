@@ -6,11 +6,17 @@ extends Node3D
 
 const CAR_SCENE: PackedScene = preload("res://scenes/cars/Car.tscn")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
-const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna"]
+const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna", "Kai", "Nyx"]
 ## Lineup-ul AI: masina (index in GameState.CAR_DATA) + culoarea per slot.
-const AI_CARS: Array[int] = [3, 1, 4] # Autobuzul, Politia, Pompierii
+##
+## Garajul are 4 masini non-player, iar adversarii sunt 5: ultimul repeta un
+## model. E o repetare ACCEPTATA, nu o scapare — se rezolva cand apar modele
+## noi, adaugand un index aici. Culoarea ramane insa unica per slot, ca cele
+## doua autobuze sa nu fie confundabile pe pista si pe minimap.
+const AI_CARS: Array[int] = [3, 1, 4, 2, 3] # Autobuz, Politia, Pompieri, Taxi, Autobuz
 const AI_COLORS: Array[Color] = [
-	Color(0.3, 0.8, 0.4), Color(0.8, 0.4, 0.9), Color(0.55, 0.75, 0.95)]
+	Color(0.3, 0.8, 0.4), Color(0.8, 0.4, 0.9), Color(0.55, 0.75, 0.95),
+	Color(0.95, 0.8, 0.25), Color(0.9, 0.35, 0.3)]
 
 enum State { COUNTDOWN, RUNNING, FINISHED }
 
@@ -117,6 +123,9 @@ func _spawn_cars() -> void:
 			car.set_controller(ai)
 			ai.configure(track, _rng)
 			car.speed_scale = _rng.randf_range(0.88, 0.97)
+		# Inghetata pana la GO: pe grila nu se aluneca la vale. Vezi nota din
+		# Car._physics_process — blocarea comenzilor singura nu ajunge.
+		car.on_start_grid = true
 		cars.append(car)
 		var frac := track.frac_at(car.road_index, car.route)
 		_progress.append({
@@ -162,6 +171,7 @@ func _go() -> void:
 	_lap_start_ms = Time.get_ticks_msec()
 	for car in cars:
 		car.race_active = true
+		car.on_start_grid = false # se dezgheata fizica; de aici incolo e cursa
 		var hold := float(_drift_hold.get(car, 0.0))
 		if car == player:
 			if hold > 0.05 and hold <= 1.05:
@@ -256,8 +266,10 @@ func _show_results() -> void:
 		var car := cars[slot]
 		var right := ""
 		if GameState.champ_active:
-			right = "+%d p  (total %d)" % [
-				GameState.CHAMP_POINTS[rank], GameState.champ_points[slot]]
+			# Sub baremul de puncte nu se mai da nimic — vezi record_results.
+			var gained: int = GameState.CHAMP_POINTS[rank] \
+				if rank < GameState.CHAMP_POINTS.size() else 0
+			right = "+%d p  (total %d)" % [gained, GameState.champ_points[slot]]
 		rows.append({
 			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
 			"color": car.body_color,

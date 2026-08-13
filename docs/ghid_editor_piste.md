@@ -319,6 +319,7 @@ curba coapta. Cifra care conteaza e cea tiparita de sonde.
 | `custom_rockfall_fracs` | bolovani care cad de pe faleza |
 | `custom_hose_fracs` | conducta sparta care pulseaza apa |
 | `custom_wet_ranges` | portiuni UDE de sosea: **interval** (frac_start, frac_end) |
+| `custom_wave_fracs` | val care spala soseaua (**cere o tema cu mare**) |
 
 Decor asezat de mana (o stanca exact ACOLO): adauga orice scena din
 `assets/models/` ca nod copil, pozitioneaz-o si salveaz-o — supravietuieste
@@ -446,7 +447,8 @@ nod **HazardMarker** tras pe sosea in viewport.
    se planteaza in mijlocul drumului), deci un nod tras prea sus nu lasa nimic
    plutind.
 3. In Inspector, `kind`: bariera mobila, bolovan, morisca, tren, tromba,
-   deflector, creasta, excavator, avalansa.
+   deflector, creasta, excavator, avalansa, val (valul cere o tema cu mare —
+   altfel se sare, cu avertisment in Output).
 4. **Regenerate** pe radacina + **salveaza scena.**
 
 Le poti grupa sub un `Node3D` — cautarea e recursiva, ca la munti.

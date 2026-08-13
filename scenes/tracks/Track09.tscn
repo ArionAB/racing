@@ -13,6 +13,8 @@
 [ext_resource type="PackedScene" uid="uid://f0mxg2x5jwyt" path="res://assets/models/structures/cable_car_pylon.glb" id="10_4nepr"]
 [ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="10_jham1"]
 [ext_resource type="PackedScene" uid="uid://shcm1cury3ee" path="res://assets/models/vehicles/timber_sled.glb" id="11_thbhk"]
+[ext_resource type="PackedScene" uid="uid://dsbylt3v4prgi" path="res://assets/models/trees/alpine_pines.glb" id="14_4nepr"]
+[ext_resource type="PackedScene" uid="uid://w4kptwkt5aly" path="res://assets/models/props/cow.glb" id="14_thbhk"]
 
 [sub_resource type="Curve3D" id="Curve3D_0cd17"]
 closed = true
@@ -80,7 +82,7 @@ transform = Transform3D(0.34729022, 0, 0.93775773, 0, 1, 0, -0.93775773, 0, 0.34
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280.2208, 18.379728, -226.54085)
 
 [node name="cable_car_pylon2" parent="DecorManual" unique_id=1048335976 instance=ExtResource("10_4nepr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 257.74094, 25.56109, -228.6268)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 179.90794, 83.299416, -198.58154)
 
 [node name="timber_sled" parent="DecorManual" unique_id=765899827 instance=ExtResource("11_thbhk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 266.1574, 16.739931, -208.76744)
@@ -113,6 +115,8 @@ metadata/_custom_type_script = "uid://ccxa8xagvu55q"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.155287, 55.046642, -379.21588)
 gizmo_extents = 3.0
 script = ExtResource("10_jham1")
+model = ExtResource("14_thbhk")
+motion = 1
 metadata/_custom_type_script = "uid://ccxa8xagvu55q"
 
 [node name="HazardMarker4" type="Marker3D" parent="." unique_id=1848907879]
@@ -138,9 +142,12 @@ metadata/_custom_type_script = "uid://ccxa8xagvu55q"
 
 [node name="HazardMarker7" type="Marker3D" parent="." unique_id=1447735226]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 78.35173, 47.170483, -394.21362)
-gizmo_extents = 3.0
+gizmo_extents = 1.98
 script = ExtResource("10_jham1")
 kind = 5
+model = ExtResource("14_4nepr")
+model_scale = 0.53
+motion = 1
 metadata/_custom_type_script = "uid://ccxa8xagvu55q"
 
 [node name="HazardMarker8" type="Marker3D" parent="." unique_id=599486694]

@@ -457,21 +457,37 @@ Avantajul fata de fractii: fractia se **recalculeaza** la fiecare Regenerate din
 pozitia nodului. Muti doua puncte de control, si obstacolul ramane pe asfalt in
 loc sa alunece pe langa drum.
 
-### Cu ce se imbraca obstacolul (grupul „Model")
-
-Implicit, un obstacol tras in viewport primeste haina TEMEI. Daca vrei alt
-obiect exact acolo — o vaca, un car cu fan, o barca — completeaza in Inspector:
+### Toate campurile din Inspector, pe rand
 
 | Camp | Ce face |
 |---|---|
+| `kind` | tipul de gimmick (lista de la pasul 3) |
+| `deflector_side` | **doar pentru deflector**: pe ce parte a soselei sta panta (Dreapta/Stanga). Restul tipurilor o ignora. Nu se deduce din pozitia nodului — un nod tras cu 20 cm peste mijloc ar fi intors panta fara ca nimeni sa fi cerut asta. |
 | `model` | GLB-ul din `assets/models/` (gol = decide tema) |
 | `model_scale` | 1.0 = cat l-a construit Blender |
+| `model_node` | ce PIESA din GLB se pastreaza, cand fisierul are mai multe obiecte (ex. `Driftwood_Log` din `scatter/beach_clutter.glb`); gol = tot fisierul |
 | `face_travel` | se uita incotro merge — **obligatoriu la animale** |
 | `roll` | se rostogoleste (doar bolovanii) |
-| `tri_class` | clasa de material (ex. `rock`), nu o textura proprie |
+| `motion` | **doar pentru bariera mobila** (`SLIDING`): Pendulare = dus-intors fara oprire (implicitul); Traversare = tractorul din Ignition — asteapta pe acostament, trece, se opreste pe partea cealalta |
+| `tri_class` | clasa de material triplanar (ex. `rock`, `snow`), nu o textura proprie; gol = ce da tema |
 
-Se aplica azi la **bariera mobila** (`SLIDING`); bolovanul si deflectorul isi
-construiesc inca vizualul din cod.
+Din transformul nodului conteaza DOAR pozitia (X/Z — Y-ul e ignorat, vezi
+pasul 2). **Rotation si Scale nu fac nimic**: orientarea obstacolului se
+deriva din directia drumului, iar marimea vine din `model_scale`. Restul
+proprietatilor din Inspector (`gizmo_extents` de la Marker3D) sunt doar
+marimea crucii vizuale din editor — scriptul o seteaza la 3 m ca sa vezi
+amprenta obstacolului inainte de primul Regenerate.
+
+### Cu ce se imbraca obstacolul (grupul „Model")
+
+Implicit, un obstacol tras in viewport primeste haina TEMEI. Daca vrei alt
+obiect exact acolo — o vaca, un car cu fan, o barca — completeaza grupul
+„Model" din tabelul de mai sus.
+
+Se aplica azi la **bariera mobila** (model complet), **bolovan** (clasa de
+material, #242), **morisca** (modelul devine turnul morii de vant, #245) si
+**deflector** (model + piesa + scara + clasa). Tren, tromba, creasta,
+excavator, avalansa si val isi construiesc vizualul din cod si ignora grupul.
 
 Doua reguli care nu-s de gust:
 

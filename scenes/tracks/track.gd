@@ -259,6 +259,12 @@ static func themes() -> Dictionary:
 			# cladirea reala din kit, langa drum; peste sosea trec aripile.
 			"carousel_model": "res://assets/models/buildings/windmill.glb",
 			"carousel_scale": 1.0,
+			# Aceleasi clase ca moara decorativa din `_LANDMARKS` (id 2): moara
+			# are lemn SI metal, deci nu poate lua o clasa pe tot subarborele.
+			# `Mill_Trim` ramane pe atlas — vana albastra e singurul accent de
+			# culoare al morii.
+			"carousel_classes": {"Mill_Wood": "wood", "Mill_Metal": "rust_metal",
+				"Blades": "rust_metal"},
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
 			"water": false,
 		},
@@ -4016,10 +4022,10 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 ## divergat la prima corectie de mecanica — exact ce evita [TerrainPeak] prin
 ## faptul ca hraneste `_peak_specs` in loc sa-si construiasca propriul munte.
 ##
-## Infatisarea declarata pe nod (`spec`) ajunge la bariera mobila (model complet)
-## si la bolovan (clasa de material, #242). Deflectorul isi construieste inca
-## vizualul din cod — cand va primi si el slot de model (#244), aici se adauga o
-## linie, nu un al doilea drum.
+## Infatisarea declarata pe nod (`spec`) ajunge la bariera mobila (model
+## complet), la bolovan (clasa de material, #242), la morisca (turnul morii de
+## vant, #245) si la deflector (model + piesa + scara + clasa, #244). Restul
+## tipurilor isi construiesc vizualul din cod si ignora spec-ul.
 func _build_node_hazard(hz: Dictionary) -> void:
 	var frac := float(hz.get("frac", 0.0))
 	var spec: Dictionary = hz.get("spec", {})
@@ -4071,19 +4077,44 @@ func _build_carousel(frac: float, spec: Dictionary = {}) -> void:
 			theme_flag("carousel_scale", 1.0)))
 		carousel.tower_class = String(spec.get("tri_class",
 			theme_flag("carousel_class", "")))
+		carousel.tower_classes = theme_flag("carousel_classes", {})
 		carousel.mill_blades = true
+		# CALARE peste sosea: picioarele de o parte si de alta, tu treci pe
+		# dedesubt, aripile matura carosabilul de sus in jos. Varianta cu turnul
+		# lateral a picat la prima privire din masina — moara statea in nisip,
+		# iar aripile se roteau in jurul axei drumului, deci cele doua nu se
+		# legau vizual deloc.
+		carousel.straddle = true
+		carousel.road_half = width_at(frac)
+		# Latura alterneaza determinist cu fractia, ca la bolovan: doua mori pe
+		# aceeasi pista n-ar matura amandoua aceeasi banda.
+		carousel.straddle_side = signf(sin(frac * 23.0))
 		# Turnul sta pe MARGINEA drumului, dincolo de bataia aripilor: pe axa ar
 		# fi fost o cladire in mijlocul soselei. Bratele raman centrate pe axa,
 		# deci fereastra de trecere nu se schimba.
 		#
-		# `tower_offset` e pe X LOCAL, deci nodul trebuie orientat: `looking_at`
-		# pe directia drumului pune +X pe marginea din dreapta, conventia din tot
-		# proiectul. Fara orientare, turnul ar fi cazut pe axa X a LUMII — adica
-		# oriunde, in functie de cum se intampla sa fie intors drumul acolo.
+		# `tower_offset` e pe X LOCAL, deci nodul trebuie orientat. Fara
+		# orientare, turnul ar cadea pe axa X a LUMII — adica oriunde, in
+		# functie de cum se intampla sa fie intors drumul acolo.
+		#
+		# Rotatie DOAR pe verticala (yaw), nu `Basis.looking_at(dir)`: aia
+		# aliniaza -Z pe directia drumului CU TOT CU PANTA, deci pe o portiune
+		# inclinata inclina si axa verticala a nodului — iar moara, care e
+		# lipita de ea, se culca pe nisip. Exact ce s-a intamplat la prima
+		# incercare, pe Dunele la 0.945 (vezi snapshots/dunele_joc.png): turnul
+		# zacea pe o parte, cu paletele in pamant.
+		#
+		# Aripile se rotesc oricum in jurul lui Y local, deci nu au nevoie de
+		# panta; iar o moara sta vertical si pe un deal.
 		var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+		var yaw := atan2(dir.x, dir.z)
 		carousel.transform = Transform3D(
-			Basis.looking_at(dir, Vector3.UP), baked[idx])
-		carousel.tower_offset = width_at(frac) + 2.2
+			Basis(Vector3.UP, yaw), baked[idx])
+		# Picioarele stau chiar pe marginile soselei, cat sa nu intre in
+		# carosabil: `half_width` plus jumatatea latimii turnului (~1.4 m).
+		# Deschiderea dintre ele e atunci toata latimea drumului — treci pe sub
+		# moara fara sa atingi nimic, exact ideea gimmickului.
+		carousel.tower_offset = width_at(frac) + 1.4
 		add_child(carousel)
 		return
 	carousel.position = baked[idx]
@@ -4213,6 +4244,14 @@ func _within_wall(segments: Array[Vector2], at_m: float) -> bool:
 	return false
 
 
+## Avalansa: masa de zapada care coboara de pe versant si traverseaza soseaua.
+##
+## Fractii, ca la restul gimmickurilor — dar spre deosebire de bolovan, care
+## ocupa o banda, avalansa ACOPERA TOT DRUMUL. E o alegere de ritm, nu de linie:
+## nu exista traiectorie sigura, exista doar „ai trecut inainte" sau „nu ai".
+## De aceea telegraful e de 3.2 s (vezi AvalancheHazard.TELEGRAPH) si de aceea
+## nu se pune niciodata in apex — style_bible §7 cere sa nu blochezi citirea
+## virajului, iar aici blocajul e total.
 ## Avalansa: masa de zapada care coboara de pe versant si traverseaza soseaua.
 ##
 ## Fractii, ca la restul gimmickurilor — dar spre deosebire de bolovan, care

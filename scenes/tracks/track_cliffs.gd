@@ -498,10 +498,23 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# Pe creasta turtita, inclinarea de pe X/Z ar deveni forfecare (rotatie sub un
 	# parinte scalat neuniform), deci ramane doar yaw-ul, care e in axa scalarii.
 	var tilt := 0.0 if kind == Kind.FILL else 0.07
+	# LANGA ASFALT inclinarea X/Z se stinge. Colizorul ramane intentionat drept
+	# (unul inclinat deschide pene intre sectiuni — vezi mai sus), deci tot ce
+	# se apleaca spre drum e silueta FARA fizica: masina intra vizual in piatra
+	# inainte s-o opreasca ceva. probe_rock_fit pica la gauri de >= 0.35 m aflate
+	# sub 2.5 m de asfalt — exact ce a produs o sectiune Cliff_J aterizata la
+	# 0.77 m dupa ce moara de pe Dunele a redistribuit sloturile. Departe de
+	# drum compromisul documentat ramane (gaurile de 0.4 m la 4-6 m nu le simte
+	# nimeni). Yaw-ul NU se stinge: el intra si in colizor (_add_collision).
+	#
+	# Extragerile din rng raman NECONDITIONATE — zero-ul vine din inmultire, nu
+	# din sarirea apelurilor, altfel s-ar reamesteca toata pista din urma lor.
+	var tilt_room := smoothstep(2.0, 5.0,
+		best_clear - sampler.half_width())
 	model.rotation = Vector3(
-		rng.randf_range(-tilt, tilt),
+		rng.randf_range(-tilt, tilt) * tilt_room,
 		rng.randf_range(-0.10, 0.10),
-		rng.randf_range(-tilt, tilt))
+		rng.randf_range(-tilt, tilt) * tilt_room)
 	# Materialul de CLASA al rocii (trim sheet triplanar), nu cel de atlas:
 	# falezele sunt suprafata de roca dominanta din cadru — vezi
 	# Palette.rock_material() pentru de ce si de ce nu prin UV unwrap.

@@ -163,6 +163,36 @@ static func classes() -> Dictionary:
 		"alpine_granite": {"src": "alpine_granite_src.jpg",
 			"anchor": Palette.color(Palette.CONCRETE), "gain": 1.20,
 			"lift": 0.12},
+		# Zapada: masa avalansei. Sursa: snow_03 (PolyHaven CC0).
+		#
+		# Ales prin masuratoare dintre doi candidati (ancora FOAM_WHITE,
+		# luminanta 239.1 — cea mai deschisa ancora din paleta):
+		#   snow_03  ratie 0.65  in-dala 40.7  neuniformitate 6.34  <- ales
+		#   snow_02  ratie 0.69  in-dala  8.9  neuniformitate 3.13
+		#
+		# `snow_02` e de doua ori mai descarcat pe PolyHaven si vizibil mai
+		# „curat" in miniatura — si e exact capcana din CLAUDE.md: in-dala 8.9
+		# inseamna o suprafata aproape PLATA, adica fix diagnosticul pentru care
+		# exista clasele („deviatie ~2.7 la noi vs ~36-40 la referinta").
+		# `snow_03` e zapada murdara, cu urme si cruste, si sta in banda tinta.
+		#
+		# Neuniformitatea de 6.34 e cea mai mare din pipeline si e ACCEPTATA
+		# deliberat, spre deosebire de cazul lemnului unde a fost motiv de
+		# respingere. Diferenta e ce poarta textura: o dala de scanduri se
+		# repeta pe un turn de 8 m si dezechilibrul devine benzi orizontale
+		# vizibile. Aici dala sta pe un corp de 7 m care SE ROSTOGOLESTE — nu
+		# exista „sus" si „jos" stabile pe care sa se aseze o banda, iar petele
+		# sunt chiar ce face rotatia lizibila. O zapada perfect uniforma pe o
+		# sfera care se invarte arata identic cu una care sta pe loc.
+		#
+		# `lift` mare, cel mai mare din pipeline, si e cazul beton/granit dus la
+		# capat: ancora e la 239 din 255, iar nicio fotografie de zapada reala nu
+		# trece de ~155 (zapada in lumina zilei e gri mediu, nu alba — o vede
+		# alba doar ochiul, prin adaptare). Fara ridicare, masa ar iesi la 0.65
+		# din ancora, adica GRI, si ar concura cu granitul in loc sa iasa din el.
+		"snow": {"src": "snow_src.jpg",
+			"anchor": Palette.color(Palette.FOAM_WHITE), "gain": 1.10,
+			"lift": 0.26},
 	}
 	# NU exista clasa "chalet_wood", si e o decizie, nu o omisiune.
 	#

@@ -218,6 +218,19 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## destul pentru tuning de densitate, strans cat sa prinda clasa de accident.
 const TRIS_OVERRIDE := {
 	"Track08": 2750000,
+	# Alpii, istoricul pragului (august 2026, doua lanturi de lucru paralele
+	# care s-au intalnit la merge):
+	#   373k -> 461k  rapa paraului din vale (#240): taietura de canal
+	#     deschide sloturi noi de teren, iar benzile statistice le umplu
+	#     (brazii 344 -> 421, cabanele 4 -> 11); materialele 15 -> 17 din 38.
+	#   +~808k  iarba densa de margine (TrackGrass, #271): ~29k smocuri a 24
+	#     de triunghiuri pe banda de 0.35-7 m; materialele +1 (ShaderMaterial-ul
+	#     partajat al clasei "iarba"), desenele +~40 de celule MultiMesh.
+	#     Cifra e pe TOATA pista — topirea din shader (68-86 m) si
+	#     visibility_range fac felia randata pe cadru ~10% din total.
+	# Pragul de mai jos e pe COMBINATIA masurata dupa merge, cu ~8% aer:
+	# destul pentru tuning de densitate, strans cat sa prinda clasa de
+	# accident (o primitiva la rezolutia implicita sare cu zeci de mii).
 	"Track09": 1150000,
 }
 

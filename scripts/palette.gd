@@ -314,8 +314,9 @@ const CLASS_TEXTURES := {
 	# Insula (Okinawa): calcar coraligen si scoarta tropicala.
 	"coral_rock": "res://assets/textures/classes/coral_rock.png",
 	"bark": "res://assets/textures/classes/bark.png",
-	# Muntele (Alpii): sisturi stratificate.
+	# Muntele (Alpii): sisturi stratificate si zapada avalansei.
 	"alpine_granite": "res://assets/textures/classes/alpine_granite.png",
+	"snow": "res://assets/textures/classes/snow.png",
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -335,6 +336,15 @@ const CLASS_TRIPLANAR_SCALE := {
 	# strat de piatra citeste cat un strat pe o stanca de 2-4 m, exact ca la
 	# `rock` — aceeasi familie de geologie, alta piatra.
 	"alpine_granite": 0.16,
+	# Masa avalansei. Sursa e o scanare de teren de ~2 m; la 0.3 (o repetitie
+	# la 3.3 m) un corp de 7 m prinde ~2 repetitii — destul cat crustele si
+	# urmele sa se citeasca la rostogolire, prea putin cat sa devina tapet.
+	#
+	# Se aplica IN SPATIUL OBIECTULUI (`apply_object_triplanar_class`), nu al
+	# lumii: masa se rostogoleste, iar proiectia de lume i-ar face textura sa
+	# stea pe loc in timp ce corpul se invarte pe sub ea — adica exact
+	# contrariul lucrului pentru care am pus textura.
+	"snow": 0.3,
 }
 
 static var _tri_mats: Dictionary = {}

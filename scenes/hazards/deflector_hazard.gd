@@ -21,6 +21,23 @@ var slide_len: float = 13.0
 ## m/s adaugati lateral masinii care atinge lama.
 var push: float = 7.0
 
+## Modelul din care se face bariera. Gol = lama alba cu dungi, ca inainte.
+##
+## Mecanica e buna asa cum e (gimmick de linie), dar vizualul era o RIGLA: un
+## BoxMesh alb cu dungi rosii, identic pe orice tema. Orice lume are insa un
+## obiect cazut peste jumatate de drum — un trunchi, o statuie rasturnata, un
+## bolovan. Regula testoasei din track08: obstacolul apartine LUMII, mecanica
+## ramane a pistei.
+var model_scene: PackedScene
+## Nodul din GLB care se pastreaza (celelalte se arunca). Gol = tot fisierul.
+##
+## Kiturile isi tin mai multe piese intr-un singur fisier — `beach_clutter.glb`
+## are cinci, din care noua ne trebuie doar bustanul.
+var model_node: String = ""
+var model_scale: float = 1.0
+## Clasa de material triplanar ("" = atlasul comun al lumii).
+var tri_class: String = ""
+
 var _area: Area3D
 var _push_dir: Vector3 = Vector3.ZERO
 var _cooldown: Dictionary = {}
@@ -45,8 +62,20 @@ func _ready() -> void:
 
 	var body := StaticBody3D.new()
 	add_child(body)
-	_add_blade(body, basis, center, Vector3(blade_t, blade_h, blade_len))
-	_add_stripes(body, anchor, tip, blade_h)
+	# Cu model: obiectul din lume tine locul lamei, iar semnalul de avertizare
+	# ramane un element SEPARAT, mic, la capatul ancorat. Dungile nu se picteaza
+	# pe obiect — o statuie cu dungi de santier ar strica exact povestea pentru
+	# care am pus-o acolo.
+	if model_scene != null:
+		var placed := _add_objects(body, anchor, tip)
+		if placed:
+			_add_warning_post(body, anchor, blade_h)
+		else:
+			_add_blade(body, basis, center, Vector3(blade_t, blade_h, blade_len))
+			_add_stripes(body, anchor, tip, blade_h)
+	else:
+		_add_blade(body, basis, center, Vector3(blade_t, blade_h, blade_len))
+		_add_stripes(body, anchor, tip, blade_h)
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(blade_t, blade_h, blade_len)
@@ -63,6 +92,103 @@ func _ready() -> void:
 	area_shape.shape = area_box
 	area_shape.transform = Transform3D(basis, center + _push_dir * 0.65)
 	_area.add_child(area_shape)
+
+## Bariera facuta din obiectul cerut, repetat pe diagonala. Intoarce `false`
+## daca modelul n-a putut fi folosit (si atunci se cade pe lama de dinainte).
+##
+## Se REPETA, nu se intinde: un bustean de 4 m scalat la 13 m ar fi un bustean
+## deformat, si s-ar vedea imediat pe grosime. Lungimea reala se MASOARA din
+## AABB — acelasi tipar ca la SlidingHazard, unde cutia de coliziune se ia din
+## model tocmai ca sa nu ramana pe cotele altui obiect.
+func _add_objects(body: StaticBody3D, anchor: Vector3, tip: Vector3) -> bool:
+	var sample := _instance_model()
+	if sample == null:
+		return false
+	var aabb := Track.model_aabb(sample)
+	var piece := maxf(aabb.size.x, aabb.size.z)
+	if piece < 0.2:
+		sample.queue_free()
+		return false
+	sample.queue_free()
+	var along := (tip - anchor).normalized()
+	var span := anchor.distance_to(tip)
+	# Piesele se suprapun putin (0.85), ca bariera sa nu aiba gauri prin care
+	# masina sa treaca fara sa atinga nimic.
+	var step := piece * 0.85
+	var count := maxi(int(ceilf(span / step)), 1)
+	var yaw := atan2(along.x, along.z)
+	for k in count:
+		var node := _instance_model()
+		if node == null:
+			return k > 0
+		var t := (float(k) + 0.5) * step
+		var pos := anchor + along * minf(t, span)
+		# Fiecare piesa e rotita altfel in jurul axei ei: un sir de busteni
+		# identici, aliniati perfect, se citeste ca gard, nu ca lucruri cazute.
+		node.rotation = Vector3(0.0, yaw + float(k) * 0.31, 0.0)
+		node.position = pos - Vector3.UP * (aabb.size.y * 0.15)
+		body.add_child(node)
+	return true
+
+
+## Un stalp de avertizare la capatul ancorat: semnalul ramane al PISTEI, nu se
+## picteaza pe obiectul din lume.
+func _add_warning_post(body: StaticBody3D, anchor: Vector3,
+		blade_h: float) -> void:
+	var post := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.22, blade_h * 1.15, 0.22)
+	post.mesh = box
+	post.position = anchor + Vector3.UP * blade_h * 0.58
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.86, 0.16, 0.12)
+	post.material_override = mat
+	body.add_child(post)
+
+
+## O instanta a modelului, cu piesa ceruta pastrata si materialul de clasa pus.
+func _instance_model() -> Node3D:
+	if model_scene == null:
+		return null
+	var root := model_scene.instantiate() as Node3D
+	if root == null:
+		return null
+	if not model_node.is_empty():
+		var kept: Node3D = null
+		for child in root.get_children():
+			if child.name == model_node:
+				kept = child as Node3D
+			else:
+				child.queue_free()
+		if kept == null:
+			root.queue_free()
+			return null
+		# Piesa se aduce in origine, ca pozitia ei din kit sa nu deplaseze
+		# bariera fata de drum.
+		root.position = -kept.position
+	root.scale = Vector3.ONE * model_scale
+	if tri_class.is_empty():
+		Palette.apply_world_material(root)
+	elif Palette.CLASS_TRIPLANAR_SCALE.has(tri_class):
+		# Clasele triplanare sunt cele pentru assets cu UV-uri COLAPSATE (roca,
+		# rugina): proiectia tine loc de UV. Aici e in spatiul obiectului,
+		# fiindca bariera poate fi rotita.
+		Palette.apply_object_triplanar_class(root, tri_class, model_scale)
+	else:
+		# Restul claselor (lemn, tencuiala) presupun UV-uri proprii pe model —
+		# trecute prin triplanar, ar fi picat pe assert-ul din Palette
+		# (`CLASS_TRIPLANAR_SCALE` are doar clasele cu UV colapsate). Un bustean
+		# de driftwood ISI ARE UV-urile, deci merge pe calea normala.
+		#
+		# Prefixul gol se potriveste cu ORICE nume de mesh, deci toata piesa
+		# primeste clasa — exact ce vrem la un obiect dintr-un singur material.
+		Palette.apply_class_materials(root, {"": tri_class})
+	# Wrapper, ca `position`/`rotation` puse de apelant sa nu se bata cu
+	# corectia de origine de mai sus.
+	var holder := Node3D.new()
+	holder.add_child(root)
+	return holder
+
 
 func _add_blade(body: StaticBody3D, basis: Basis, center: Vector3,
 		size: Vector3) -> void:

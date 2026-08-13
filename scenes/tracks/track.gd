@@ -3314,6 +3314,19 @@ const DIRT_ROAD_COLOR: Color = Color(0.80, 0.66, 0.43)
 ## Media texturii macro de nisip (process_class_textures.surfaces()).
 const SAND_MACRO_MEAN: float = 0.850
 
+## Cat de mult se intuneca asfaltul UD, ca factor pe vertex color (#246).
+##
+## 0.62 e ales cat sa se vada DE LA DISTANTA DE FRANARE, nu doar de aproape:
+## portiunea trebuie citita din mers, ca sa poti ridica piciorul inainte de ea.
+## Mai jos de atat, drumul incepe sa arate ars, nu ud.
+const WET_DARKEN: float = 0.62
+## Pe cate fractii de tur se sting marginile petei ude.
+##
+## ~1.5% dintr-un tur — la o pista de 1.5 km inseamna ~20 m de tranzitie, adica
+## o jumatate de secunda de mers. Destul cat marginea sa nu fie o dunga trasa cu
+## rigla, prea putin cat sa nu inmoaie semnalul.
+const WET_FADE: float = 0.015
+
 ## Nuanta MARGINILOR pe un drum nepavat.
 ##
 ## Prima versiune intorsese gradientul fata de asfalt (mijloc batatorit =
@@ -3412,6 +3425,15 @@ func _build_road() -> void:
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
 		var s1v := _side_at(j)
+		# Asfaltul UD e mai inchis la culoare (#246). E semnalul, nu decorul: o
+		# portiune care iti taie grip-ul fara sa se vada ar fi necinstita — toate
+		# celelalte hazarde se anunta (telegraf, lumini, bariere).
+		#
+		# Vertex color INTUNECA, nu lumineaza: valorile sunt taiate la [0,1],
+		# deci se poate doar cobora din culoarea materialului. Aici asta e chiar
+		# ce ne trebuie.
+		var wet0 := _wet_shade(frac_at(i))
+		var wet1 := _wet_shade(frac_at(j))
 		# Latimea la CELE DOUA capete ale segmentului, nu una singura: asa
 		# panglica se ingusteaza continuu cand va exista profilul, in loc sa
 		# sara in trepte de cate un segment. Acum sunt egale.
@@ -3456,13 +3478,13 @@ func _build_road() -> void:
 			# temele cu zapada) inapoi spre asfalt — vezi _road_snow_weight pentru
 			# de ce sensul e inversat.
 			var c0 := _road_shade(ca, road_dark, _road_snow_weight(
-				w0, snow_low, snow_high, snow_amount, snow_noise, ta))
+				w0, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet0
 			var c1 := _road_shade(ca, road_dark, _road_snow_weight(
-				w1, snow_low, snow_high, snow_amount, snow_noise, ta))
+				w1, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet1
 			var c0b := _road_shade(cb, road_dark, _road_snow_weight(
-				w0b, snow_low, snow_high, snow_amount, snow_noise, tb))
+				w0b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet0
 			var c1b := _road_shade(cb, road_dark, _road_snow_weight(
-				w1b, snow_low, snow_high, snow_amount, snow_noise, tb))
+				w1b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet1
 			# Ordinea l0,l1,r0: fata triunghiului iese IN SUS (vezi istoricul
 			# winding-ului — cu ordinea inversa normalele ieseau in jos).
 			top.set_color(c0); top.set_uv(Vector2(ua, v0)); top.set_uv2(m0)
@@ -6401,6 +6423,95 @@ func route_at(route: int) -> TrackRoute:
 func route_is_wet(route: int) -> bool:
 	var r := route_at(route)
 	return r != null and r.wet
+
+
+## Portiunile UDE de pe traseul principal: (frac_start, frac_end).
+##
+## Pana la #246, „ud" exista doar ca proprietate a unei SCURTATURI
+## (`TrackBranch.wet`) — adica se putea uda un ocol intreg, dar nu 80 de metri
+## de drum principal. Asta lasa pe dinafara chiar cazul interesant: o portiune
+## umeda pe linia pe care oricum mergi, care iti schimba traiectoria si decizia
+## de turbo fara sa-ti ofere o ruta alternativa.
+##
+## Intervale, nu fractii punctuale, si acelasi tipar ca `_gorge_ranges()`: udul
+## e o STARE a drumului pe o distanta, nu un obiect asezat undeva. De aceea nu
+## intra nici in [HazardMarker] — vezi nota din antetul lui despre ce se
+## declara ca nod si ce nu.
+##
+## Un interval poate trece peste linia de start (ex. 0.95 -> 0.05): se trateaza
+## ca doua bucati, ca la sectoarele de latime.
+func _wet_ranges() -> Array[Vector2]:
+	return []
+
+
+## Cat de alunecos e udul pe pista asta. Vezi `Car.SLIP_GRIP_WET`.
+##
+## In tema, nu constanta in cod, fiindca „ud" inseamna altceva pe o sosea de
+## munte decat pe un dig batut de valuri. 0 = implicitul masinii.
+func wet_grip() -> float:
+	return float(theme_flag("wet_grip", 0.0))
+
+
+## Cat de mult se intuneca asfaltul la fractia asta, ca factor multiplicativ
+## (1.0 = neatins). Vezi `_build_road`.
+##
+## Marginile se sting NETED, pe `WET_FADE`, dintr-un motiv practic: o trecere
+## brusca ar desena o dunga transversala perfect dreapta peste sosea — exact
+## tiparul de „prag poligonal" pe care restul generatorului il evita peste tot
+## (vezi trecerea uscat -> fund de mare din sampler).
+func _wet_shade(frac: float) -> Color:
+	var segs := _wet_ranges()
+	if segs.is_empty():
+		return Color.WHITE
+	var f := fposmod(frac, 1.0)
+	var best := 0.0
+	for seg in segs:
+		best = maxf(best, _wet_weight(f, seg))
+	if best <= 0.0:
+		return Color.WHITE
+	# Asfaltul ud e mai inchis SI mai rece (apa trage spre albastru-cenusiu).
+	var dark := lerpf(1.0, WET_DARKEN, best)
+	return Color(dark, dark, lerpf(1.0, WET_DARKEN + 0.06, best))
+
+
+## Cat de „in interval" e fractia, cu marginile estompate. 0..1.
+func _wet_weight(f: float, seg: Vector2) -> float:
+	var d := _wet_distance_inside(f, seg)
+	if d <= 0.0:
+		return 0.0
+	return clampf(d / WET_FADE, 0.0, 1.0)
+
+
+## Cat de departe de cel mai apropiat capat al intervalului se afla fractia,
+## masurat pe interior, in fractii de tur. Negativ (0) daca e in afara.
+func _wet_distance_inside(f: float, seg: Vector2) -> float:
+	var inside := false
+	if seg.x <= seg.y:
+		inside = f >= seg.x and f <= seg.y
+	else:
+		inside = f >= seg.x or f <= seg.y # trece peste linia de start
+	if not inside:
+		return 0.0
+	var to_start := fposmod(f - seg.x, 1.0)
+	var to_end := fposmod(seg.y - f, 1.0)
+	return minf(to_start, to_end)
+
+
+## E uda soseaua principala la fractia asta?
+##
+## Se intreaba pe FRACTIE, nu pe indice de punct copt: intervalele se declara in
+## fractii ca sa supravietuiasca unei modificari de traseu, exact ca restul
+## reperelor.
+func is_wet_at(frac: float) -> bool:
+	var f := fposmod(frac, 1.0)
+	for seg in _wet_ranges():
+		if seg.x <= seg.y:
+			if f >= seg.x and f <= seg.y:
+				return true
+		# Interval care trece peste linia de start.
+		elif f >= seg.x or f <= seg.y:
+			return true
+	return false
 
 
 ## Punctul de pe axa benzii. Inlocuieste accesul direct la `baked[i]` din codul

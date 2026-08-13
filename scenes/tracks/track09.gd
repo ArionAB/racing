@@ -200,7 +200,8 @@ func _hazard_fracs() -> Array[float]:
 ##
 ## SCARA E 1.0 PESTE TOT, si asta e o decizie, nu o omisiune: modelele din
 ## kitul alpin sunt construite la scara reala (masurate cu sonda de kit — carul
-## 3.7 m lungime, sania 4.8, vaca 2.9, plugul 4.0), iar masina de referinta are
+## 3.7 m lungime, sania 4.8, plugul 4.0; vaca Quaternius e adusa la 2.6 in
+## build_cow_animated.py), iar masina de referinta are
 ## 3.8 m. Implicitul de 0.52 vine de la bolovanul de canion, care era modelat
 ## la 5 m si trebuia micsorat; aici ar face din car o jucarie de 1.9 m.
 ##
@@ -217,8 +218,14 @@ func _hazard_kinds() -> Dictionary:
 			"scale": 1.0, "roll": false},
 		0.206: {"model": M + "vehicles/timber_sled.glb",
 			"scale": 1.0, "roll": false},
+		# TRAVERSEAZA de cand vaca e assetul animat (Quaternius): pe acostament
+		# PASTE (animatia Eating), apoi trece drumul cu pas real — starea de
+		# repaus exista abia in modul asta. Pendularea veche avea sens pe vaca
+		# teapana ("se plimba, nu comuteaza"), dar o vaca animata care se
+		# plimba perpetuu pe acelasi metru de asfalt nu paste niciodata.
 		0.777: {"model": M + "props/cow.glb",
-			"scale": 1.0, "roll": false, "face_travel": true},
+			"scale": 1.0, "roll": false, "face_travel": true,
+			"motion": SlidingHazard.Motion.TRAVERSARE},
 		# Plugul de zapada tine loc de tractor: e utilajul de gospodarie pe care
 		# il avem in kit, si pe un drum de munte are rostul lui chiar vara —
 		# stationat in vale, nu la lucru. Un tractor propriu-zis ar fi un GLB
@@ -231,9 +238,9 @@ func _hazard_kinds() -> Dictionary:
 		# mai greu de crezut decat pe restul pistei — aici chiar ai un motiv sa
 		# treci dintr-o parte in alta a vaii.
 		#
-		# Celelalte trei raman pendulare: carul si sania sunt TARATE peste drum
-		# (n-au sofer care sa decida sa treaca), iar vaca pasteaza — se plimba,
-		# nu comuteaza.
+		# Carul si sania raman pendulare: sunt TARATE peste drum, n-au sofer
+		# care sa decida sa treaca. Vaca a trecut si ea pe traversare odata cu
+		# assetul animat — vezi comentariul ei.
 		0.960: {"model": M + "vehicles/snowplow.glb",
 			"scale": 1.0, "roll": false,
 			"motion": SlidingHazard.Motion.TRAVERSARE},

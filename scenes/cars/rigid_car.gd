@@ -32,6 +32,9 @@ extends RigidBody3D
 ## e treaba integrarii (#258), nu a nucleului.
 
 signal boost_started(car: RigidCar)
+## Izbitura cu o alta masina, cu delta-v-ul incasat de NOI — proportional cu
+## violenta contactului (shake, sunet — legate la #258).
+signal bumped(car: RigidCar, other: RigidCar, delta_v: float)
 
 ## Gravitatia arcade a jocului (m/s²) — aceeasi cifra ca pe CharacterBody.
 ## Se traduce in gravity_scale fata de gravitatia proiectului in _ready.
@@ -72,6 +75,34 @@ const SLIP_GRIP_WET: float = 3.6
 @export var turbo_min_to_fire: float = 0.15
 @export var turbo_speed_bonus: float = 11.0
 @export var turbo_accel_bonus: float = 10.0
+
+@export_group("Imbranceli")
+## MASA din identitate: mass = 100 * mass_factor. Motorul de fizica imparte
+## impulsul dupa raportul maselor DIN CONSTRUCTIE — autobuzul (2.6) intrat in
+## sport (0.9) o trimite de ~3x mai tare decat se opreste el, fara cod.
+@export var mass_factor: float = 1.0
+## Cat de "saltarea" e izbitura (PhysicsMaterial.bounce). Sub 1 = arcade.
+@export var bump_restitution: float = 0.35
+## Plafon pe delta-v-ul incasat dintr-un contact cu alta masina (m/s).
+## Motorul poate genera varfuri; peste plafon, excedentul se taie PASTRAND
+## directia — raportul de mase ramane, violenta scade. Acelasi rol ca
+## bump_max_impulse de pe CharacterBody.
+@export var bump_max_dv: float = 15.0
+## Sub viteza asta de apropiere contactul e frecare, nu izbitura: fara semnal,
+## fara shake — masinile care merg alaturi nu-si dau ghionturi.
+@export var bump_min_closing: float = 2.5
+## Cat nu mai emite ACEEASI pereche un al doilea semnal de bump. Fizica
+## contactului sustinut o rezolva solverul (impingere, nu impulsuri repetate);
+## cooldown-ul e doar pe semnal, ca shake-ul sa nu se acumuleze.
+@export var bump_signal_cooldown: float = 0.12
+## Peste acest delta-v incasat, rotile pierd scurt aderenta laterala.
+@export var bump_slip_dv: float = 5.0
+## Plafon pe rotatia primita dintr-o lovitura (rad/s): te sucesti, nu faci
+## piruete. Necesar si pe fizica intreaga, fiindca directia scrie yaw-ul
+## direct — rotatia din colizie ar fi STEARSA de scrierea urmatoare; o
+## preluam in _impact_yaw (plafonat, se stinge singur) si o adunam peste
+## comanda, exact ca pe CharacterBody.
+@export var bump_yaw_max: float = 2.4
 
 @export_group("Suspensie")
 ## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
@@ -132,13 +163,36 @@ var _contact_offset: Vector3 = Vector3.ZERO
 var _axle_offset: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 var _axle_grounded: Array[int] = [0, 0]
 
+# --- Imbranceli: masurarea delta-v-ului dat de solver ---
+## Viteza la FINALUL tick-ului trecut (dupa scrierile noastre directe). La
+## intrarea in tick-ul curent, diferenta fata de ea e exact ce a facut
+## solverul intre timp: coliziuni + fortele integrate. Fortele noastre
+## contribuie sub ~0.5 m/s per cadru, mult sub orice prag de bump.
+var _prev_velocity: Vector3 = Vector3.ZERO
+## Yaw-ul pe care L-AM scris noi la finalul tick-ului trecut; diferenta la
+## intrare = rotatia data de solver (lovitura excentrica).
+var _commanded_yaw: float = 0.0
+## Rotatia primita din lovituri, plafonata; se stinge singura si se ADUNA
+## peste comanda de directie — altfel scrierea directa a yaw-ului ar sterge-o.
+var _impact_yaw: float = 0.0
+## instance_id-ul celeilalte masini -> secunde pana la urmatorul semnal admis.
+var _bump_pairs: Dictionary = {}
+
 
 func _ready() -> void:
-	mass = 100.0
+	mass = 100.0 * mass_factor
 	# Gravitatia proiectului e cea implicita (9.8); jocul cade cu 28.
 	var project_g: float = ProjectSettings.get_setting(
 		"physics/3d/default_gravity", 9.8)
 	gravity_scale = ARCADE_GRAVITY / project_g
+	# Imbranceli: contactele se raporteaza (pentru semnal + plafon), iar
+	# restitutia arcade vine din material — se simte lovitura, nu ricoseaza.
+	contact_monitor = true
+	max_contacts_reported = 8
+	var mat := PhysicsMaterial.new()
+	mat.bounce = bump_restitution
+	mat.friction = 0.4
+	physics_material_override = mat
 	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
 	center_of_mass = Vector3(0.0, com_height, 0.0)
 	# Masina nu doarme niciodata: un corp adormit pe grila n-ar mai primi
@@ -171,6 +225,9 @@ func set_controller(new_controller: Node) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Intai bilantul solverului (izbituri), cat _prev_velocity mai e "ieri".
+	_process_bumps(delta)
+
 	var steer := 0.0
 	var throttle := 0.0
 	var drift_pressed := false
@@ -195,6 +252,65 @@ func _physics_process(delta: float) -> void:
 	slip_time = maxf(slip_time - delta, 0.0)
 
 	_apply_driving(steer, throttle, fwd_h, fwd_speed)
+
+	# Reperele pentru bilantul de la urmatorul tick: tot ce e diferit de astea
+	# la intrarea urmatoare e opera solverului (coliziuni), nu a noastra.
+	_prev_velocity = linear_velocity
+	_commanded_yaw = angular_velocity.y
+
+
+## Bilantul izbiturilor cu alte masini: solverul a impartit deja impulsul
+## dupa raportul maselor (identitatea din principiul 1, gratis); aici se
+## aplica REGULILE arcade de deasupra: plafonul de violenta, rotatia
+## plafonata, slip-ul la lovitura mare si semnalul cu prag + cooldown.
+func _process_bumps(delta: float) -> void:
+	var others: Array[RigidCar] = []
+	for body in get_colliding_bodies():
+		if body is RigidCar:
+			others.append(body as RigidCar)
+
+	if not others.is_empty():
+		var dv_vec := linear_velocity - _prev_velocity
+		var dv := dv_vec.length()
+		# Plafonul: excedentul se taie pastrand DIRECTIA — raportul de mase
+		# ramane in picioare, doar violenta scade.
+		if dv > bump_max_dv:
+			linear_velocity = _prev_velocity + dv_vec * (bump_max_dv / dv)
+			dv = bump_max_dv
+		# Rotatia din lovitura excentrica: preluata cu plafon in _impact_yaw,
+		# care se aduna peste comanda de directie si se stinge singur. Fara
+		# asta, scrierea directa a yaw-ului ar sterge-o in cadrul urmator.
+		var solver_yaw := angular_velocity.y - _commanded_yaw
+		if absf(solver_yaw) > 0.1:
+			_impact_yaw = clampf(_impact_yaw + solver_yaw,
+				-bump_yaw_max, bump_yaw_max)
+		# Lovitura mare pe lateral taie scurt aderenta: cel lovit isi prinde
+		# masina din alunecare, ca pe CharacterBody.
+		var fwd := -global_transform.basis.z
+		var fwd_h := Vector3(fwd.x, 0.0, fwd.z).normalized()
+		var lat_dv := (dv_vec - fwd_h * dv_vec.dot(fwd_h)).length()
+		if lat_dv >= bump_slip_dv:
+			slip_time = maxf(slip_time, clampf(0.15 + lat_dv * 0.02, 0.0, 0.55))
+			slip_grip = SLIP_GRIP_WET
+		# Semnalul: doar peste pragul de frecare si nu mai des decat
+		# cooldown-ul per pereche (fizica impingerii merge oricum inainte).
+		if dv >= bump_min_closing:
+			for other in others:
+				var key := other.get_instance_id()
+				if _bump_pairs.has(key):
+					continue
+				_bump_pairs[key] = bump_signal_cooldown
+				bumped.emit(self, other, dv)
+
+	for key: int in _bump_pairs.keys():
+		var left := float(_bump_pairs[key]) - delta
+		if left <= 0.0:
+			_bump_pairs.erase(key)
+		else:
+			_bump_pairs[key] = left
+	_impact_yaw *= exp(-4.0 * delta)
+	if absf(_impact_yaw) < 0.05:
+		_impact_yaw = 0.0
 
 
 ## Un raycast per colt; arcul impinge LA COLT, si exact asta produce ruliul si
@@ -381,8 +497,9 @@ func _apply_driving(steer: float, throttle: float,
 	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
 	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
+	# Comanda + rotatia ramasa din lovituri (se stinge singura).
 	angular_velocity = Vector3(
-		angular_velocity.x, yaw_rate, angular_velocity.z)
+		angular_velocity.x, yaw_rate + _impact_yaw, angular_velocity.z)
 
 
 func horizontal_speed() -> float:

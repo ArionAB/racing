@@ -209,6 +209,21 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## MultiMesh ale speciilor noi), materiale 21/38 pe tot lantul.
 const TRIS_OVERRIDE := {
 	"Track08": 2750000,
+	# Alpii: 460k dupa rapa paraului din vale (#240). Masurat 373k inainte,
+	# 461k dupa — si aproape TOATA diferenta e decor, nu geometria rapei:
+	# procedural (track.gd) creste doar cu ~7.5k (suprafata apei + trambulina),
+	# in timp ce brazii sar de la 344 la 421 de bucati si cabanele de la 4 la
+	# 11. Motivul e ca taietura de canal deschide sloturi noi de teren, iar
+	# benzile statistice ale lui TrackDecor le umplu — adica exact munca pe
+	# care pragul ar trebui sa o lase sa treaca.
+	#
+	# Ridicat, nu "reparat" prin taiat de vegetatie, din motivul scris in
+	# CLAUDE.md: MATERIALELE au ramas sub plafon (15 -> 17 din 38), deci s-a
+	# ingreunat axa care nu doare pe mobil (triunghiuri) si nu cea care doare
+	# (draw calls). 550k lasa ~20% marja peste cifra de acum, destul cat sa
+	# prinda in continuare clasa de accident (o primitiva la rezolutia
+	# implicita sare cu zeci de mii dintr-un foc).
+	"Track09": 550000,
 }
 
 

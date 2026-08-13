@@ -29,6 +29,13 @@ const SFX: Dictionary = {
 	# drum si i-l coboara cand se scurge — porniri si opriri de stream ar fi
 	# pocnit la fiecare trecere.
 	&"wave_wash": preload("res://assets/audio/wave_wash.wav"),
+	# A treia bucla de hazard: huruitul avalansei de pe versant. Ca la tromba si
+	# la val, hazardul e acolo inainte sa se vada — dar aici e SINGURUL
+	# avertisment, si pedeapsa e iesirea din cursa, deci volumul lui e chiar
+	# mecanica, nu ambianta.
+	&"avalanche_rumble": preload("res://assets/audio/avalanche_rumble.wav"),
+	# Impactul, o singura data, cand masa te inghite.
+	&"avalanche_hit": preload("res://assets/audio/avalanche_hit.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.
@@ -52,7 +59,7 @@ func _ready() -> void:
 	_create_bus(&"Engine")
 	apply_volumes()
 	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP, SFX[&"typhoon_roar"],
-			SFX[&"wave_wash"]]:
+			SFX[&"wave_wash"], SFX[&"avalanche_rumble"]]:
 		var wav := loop_stream as AudioStreamWAV
 		if wav != null:
 			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD

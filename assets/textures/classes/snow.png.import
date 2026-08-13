@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://lkog78ybnjvg"
-path.s3tc="res://.godot/imported/surface_grass.png-88b80fc39490844d4577d7bda62d45e5.s3tc.ctex"
-path.etc2="res://.godot/imported/surface_grass.png-88b80fc39490844d4577d7bda62d45e5.etc2.ctex"
+uid="uid://nfvlv03fytym"
+path.s3tc="res://.godot/imported/snow.png-03fefade6001495d268a9a1dfe7b40f6.s3tc.ctex"
+path.etc2="res://.godot/imported/snow.png-03fefade6001495d268a9a1dfe7b40f6.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/surface_grass.png"
-dest_files=["res://.godot/imported/surface_grass.png-88b80fc39490844d4577d7bda62d45e5.s3tc.ctex", "res://.godot/imported/surface_grass.png-88b80fc39490844d4577d7bda62d45e5.etc2.ctex"]
+source_file="res://assets/textures/classes/snow.png"
+dest_files=["res://.godot/imported/snow.png-03fefade6001495d268a9a1dfe7b40f6.s3tc.ctex", "res://.godot/imported/snow.png-03fefade6001495d268a9a1dfe7b40f6.etc2.ctex"]
 
 [params]
 

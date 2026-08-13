@@ -39,6 +39,20 @@ func _init() -> void:
 	# sus decaleaza zgomotul tuturor celor de dupa el si rescrie fisiere pe care
 	# nu le-a atins nimeni.
 	_save("wave_wash", _wave_wash())
+	# Avalansa. TOT LA SFARSIT, din acelasi motiv ca valul: `rng` e un singur sir
+	# semanat o data, deci orice sunet inserat mai sus rescrie fisiere pe care
+	# nu le-a atins nimeni.
+	#
+	# Doua sunete, fiindca avalansa are doua momente distincte, spre deosebire de
+	# tromba (care e acolo tot timpul, cu un singur vuiet):
+	#   - huruitul de pe versant, IN BUCLA, care creste cat timp se apropie. E
+	#     singurul avertisment pe care il primesti si pedeapsa e iesirea din
+	#     cursa, deci trebuie sa fie audibil inainte sa se vada ceva.
+	#   - impactul, o data, cand te inghite.
+	_save("avalanche_rumble", _avalanche_rumble())
+	# Mai jos si mai lung decat rock_impact: nu e o piatra care cade pe tabla, e
+	# o masa care te acopera. Fara varf ascutit — energia e in coada, nu in atac.
+	_save("avalanche_hit", _thud(0.85, 95.0, 24.0, 1.0))
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -236,6 +250,41 @@ func _wave_wash() -> PackedFloat32Array:
 		hiss = hiss * 0.55 + white * 0.45     # spuma
 		var swell := 0.55 + 0.45 * sin(TAU * 0.45 * t)
 		raw[i] = (lp * 3.2 + hiss * 0.55) * swell * 0.55
+	var fade := int(n * 0.15)
+	var out := PackedFloat32Array()
+	out.resize(n - fade)
+	for i in out.size():
+		out[i] = raw[i]
+	for i in fade:
+		var k := float(i) / float(fade)
+		out[i] = raw[i] * k + raw[out.size() + i] * (1.0 - k)
+	return out
+
+
+## Huruitul avalansei: bucla lunga, foarte joasa, fara nicio inaltime.
+##
+## Diferenta fata de `_typhoon_roar`, care ar fi fost usor de reciclat: tromba
+## are suierat (banda medie, `mid`), fiindca e aer. Zapada si roca nu suiera —
+## e masa care se rostogoleste, deci energia sta jos si ce se aude peste huruit
+## sunt POCNETE, nu sibilante. De aici filtrul mai lent (0.992, adica taie mai
+## sus decat cei 0.985 ai trombei) si stratul de impacturi rare.
+func _avalanche_rumble() -> PackedFloat32Array:
+	const DUR := 2.4
+	var n := int(RATE * DUR)
+	var raw := PackedFloat32Array()
+	raw.resize(n)
+	var lp := 0.0
+	var crack := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var white := rng.randf() * 2.0 - 1.0
+		lp = lp * 0.992 + white * 0.008        # corpul de masa
+		# Pocnetele: zgomot lasat sa treaca doar cand depaseste un prag, apoi
+		# lasat sa se stinga. Rare si neregulate, ca bolovanii care se ciocnesc.
+		var hit: float = white if absf(white) > 0.985 else 0.0
+		crack = crack * 0.90 + hit * 0.10
+		var swell := 0.7 + 0.3 * sin(TAU * 0.35 * t)
+		raw[i] = (lp * 9.0 + crack * 2.2) * swell * 0.5
 	var fade := int(n * 0.15)
 	var out := PackedFloat32Array()
 	out.resize(n - fade)

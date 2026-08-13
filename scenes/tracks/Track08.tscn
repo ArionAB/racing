@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://1m5dssfih8wn" path="res://scenes/tracks/track08.gd" id="1_track08"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="2_207ve"]
+[ext_resource type="PackedScene" uid="uid://e4lk66vnb8fn" path="res://assets/models/structures/stone_gate_torii.glb" id="3_207ve"]
+[ext_resource type="PackedScene" uid="uid://ducqvah08rwd6" path="res://assets/models/props/shisa_statue.glb" id="4_qd4rt"]
 
 [node name="Track08" type="Node3D" unique_id=598581151]
 script = ExtResource("1_track08")
@@ -10,3 +12,18 @@ lagoon_depth = 15.0
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=692727795]
 script = ExtResource("2_207ve")
+
+[node name="stone_gate_torii" parent="DecorManual" unique_id=1118802966 instance=ExtResource("3_207ve")]
+transform = Transform3D(3.9525692, 5.2030776e-07, -1.0590873, -5.382907e-07, 4.0920005, 1.3863769e-09, 1.0590873, 1.3798076e-07, 3.9525692, 185, 24, -241)
+
+[node name="shisa_statue" parent="DecorManual" unique_id=262651321 instance=ExtResource("4_qd4rt")]
+transform = Transform3D(2.1599998, 0, -3.74123, 0, 4.32, 0, 3.74123, 0, 2.1599998, -77, 0.12222266, 207)
+
+[node name="shisa_statue2" parent="DecorManual" unique_id=2119505187 instance=ExtResource("4_qd4rt")]
+transform = Transform3D(-4.1728, 0, -1.1180981, 0, 4.3199997, 0, 1.1180981, 0, -4.1728, -68, 0.12222266, 188)
+
+[node name="shisa_statue3" parent="DecorManual" unique_id=2122345539 instance=ExtResource("4_qd4rt")]
+transform = Transform3D(-3.74123, 0, -2.1599998, 0, 4.3199997, 0, 2.1599998, 0, -3.74123, -216, 6.122223, -162)
+
+[node name="shisa_statue4" parent="DecorManual" unique_id=1013985128 instance=ExtResource("4_qd4rt")]
+transform = Transform3D(3.7412312, 0, 2.16, 0, 4.3199997, 0, -2.16, 0, 3.7412312, -208, 7.122223, -145)

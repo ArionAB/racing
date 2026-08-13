@@ -347,6 +347,15 @@ static func _place_satellites(parent: Node3D, sampler: TrackSideSampler,
 				sat.position -= out_dir.normalized() * (dist * 2.0)
 			if sampler.clearance_at(sat.position) < floor_dist:
 				continue
+		# ...si nici in canal, din acelasi motiv pentru care nu are voie nici
+		# slotul principal (vezi TrackSideSampler._make_spec). Verificarea de
+		# acolo NU acopera satelitii: ei se imprastie pana la CLUSTER_RADIUS
+		# DUPA ce parintele a trecut testul, deci un slot bun de pe malul rapei
+		# putea arunca o piesa dincolo de buza. Asa a ajuns o cabana sa pluteasca
+		# peste albia paraului din Alpii — se vede in snapshots/alpii.png de la
+		# prima randare a canalului.
+		if sampler.channel_mix(sat.position.x, sat.position.z) > 0.3:
+			continue
 		# Satelitul s-a imprastiat pana la CLUSTER_RADIUS fata de propul principal,
 		# deci cota lui nu mai e cea masurata acolo.
 		sat.position.y = sampler.ground_y(sat.position.x, sat.position.z)

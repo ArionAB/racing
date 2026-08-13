@@ -3912,6 +3912,12 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# medie ar iesi prin perete exact pe portiunile stramte.
 		ball.road_half_width = hw
 		ball.phase = fposmod(frac * 3.7, 1.0) # doua obstacole nu bat la unison
+		# Pendulare (implicit) sau traversare cu sens — vezi SlidingHazard.Motion.
+		# Se pune INAINTE de `travel`: la traversare, capatul cursei e locul de
+		# PARCARE si trebuie sa cada dincolo de asfalt, deci `_clamp_travel` are
+		# nevoie sa stie modul ca sa nu taie cursa la marginea drumului.
+		ball.motion = int(kind.get("motion",
+			theme_flag("hazard_motion", 0))) as SlidingHazard.Motion
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa
@@ -3921,8 +3927,15 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# AnimatableBody3D cu sync_to_physics, deci dupa intrarea in arbore
 		# transformul il tine serverul de fizica — iar pozitia se rescrie oricum
 		# la fiecare pas, dar BAZA nu, deci o rotatie pusa dupa se pierde tacut.
+		#
+		# La TRAVERSARE e implicit pornit: un vehicul care asteapta pe
+		# acostament si intra pe drum are prin definitie un sens de mers, iar
+		# unul care ar traversa cu flancul inainte n-ar arata ca traverseaza.
+		# La pendulare ramane stins, ca pana acum — o barca targita dus-intors
+		# chiar n-are un "inainte".
+		var crossing := ball.motion == SlidingHazard.Motion.TRAVERSARE
 		if bool(kind.get("face_travel",
-				theme_flag("hazard_face_travel", false))):
+				theme_flag("hazard_face_travel", crossing))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
 		add_child(ball)
 		ball.center = p

@@ -94,6 +94,13 @@ enum Kind {
 ## greseala descrisa la barca sabani.
 @export var roll: bool = false
 
+## Cum se misca obstacolul: pendulare fara oprire, sau traversare cu sens.
+##
+## TRAVERSARE e tractorul din Ignition — asteapta pe acostament, trece, se
+## opreste pe partea cealalta. Pendularea ramane implicitul, deci nimic din ce
+## exista azi nu se schimba. Doar pentru SLIDING.
+@export_enum("Pendulare:0", "Traversare:1") var motion: int = 0
+
 ## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
 ##
 ## O CLASA, nu o textura proprie: garda de materiale din `tools/probe_decor.gd`
@@ -124,6 +131,11 @@ func model_spec() -> Dictionary:
 		spec["face_travel"] = face_travel
 	if not tri_class.is_empty():
 		spec["tri_class"] = tri_class
+	# Modul de miscare se trimite DOAR cand nu e implicitul. Cheia lipsa
+	# inseamna „ce zice pista", exact ca la model — un `motion: 0` trimis mereu
+	# ar fi stins o eventuala declaratie de tema, in loc s-o lase sa vorbeasca.
+	if motion != 0:
+		spec["motion"] = motion
 	return spec
 
 

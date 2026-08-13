@@ -178,6 +178,9 @@ doua parghii, si se aleg din LUME, nu dintr-un tabel:
 | `branch_half_width` | mai ingusta: singur incapi, in trafic nu | poteca de pasune din Alpii (3.2 fata de 7.0) |
 | `wet` | grip lateral taiat cat timp esti pe ea | bancul de nisip din Okinawa |
 
+(Pentru o portiune uda pe traseul PRINCIPAL, nu pe o scurtatura, vezi
+`custom_wet_ranges` la sectiunea 5.)
+
 Scurtatura da **timp, nu progres**: o masina de la jumatatea ei raporteaza
 aceeasi fractie de tur ca una de la jumatatea portiunii ocolite, deci
 clasamentul si numaratoarea de tururi raman corecte. Nu poti trisa un tur pe
@@ -315,10 +318,31 @@ curba coapta. Cifra care conteaza e cea tiparita de sonde.
 | `custom_mine_spots` / `custom_dino_spots` | intrare de mina / sit cu schelet (fractie, parte ±1) |
 | `custom_rockfall_fracs` | bolovani care cad de pe faleza |
 | `custom_hose_fracs` | conducta sparta care pulseaza apa |
+| `custom_wet_ranges` | portiuni UDE de sosea: **interval** (frac_start, frac_end) |
+| `custom_wave_fracs` | val care spala soseaua (**cere o tema cu mare**) |
 
 Decor asezat de mana (o stanca exact ACOLO): adauga orice scena din
 `assets/models/` ca nod copil, pozitioneaz-o si salveaz-o — supravietuieste
 la Regenerate (vezi `docs/decor_manual.md`).
+
+### Portiunile ude: `custom_wet_ranges`
+
+Pe interval, grip-ul lateral scade (de la 8.0 la 3.6 — intre asfalt si drift,
+deci **aluneci dar tii linia**) si asfaltul se vede mai inchis la culoare.
+Marginile se sting treptat, ca sa nu iasa o dunga trasa cu rigla.
+
+Doua reguli:
+
+- **Udul are nevoie de o CAUZA vizibila.** O balta aparuta din senin intr-un
+  desert e o taxa, nu un hazard. Pe Dunele intervalul incepe fix la conducta
+  sparta (`custom_hose_fracs = 0.478`, interval `0.478 → 0.53`): apa se scurge
+  pe drum dupa ea. Alte cauze bune: un vad, o scurgere de pe stanci, irigatie.
+- **Nu e acelasi lucru cu `wet` de pe o scurtatura.** Acolo udul e pretul unui
+  ocol mai scurt (ai o alternativa uscata). Aici e pe linia pe care oricum
+  mergi, deci nu-ti ofera o alegere de ruta — iti schimba traiectoria si decizia
+  de turbo.
+
+Grip-ul se poate schimba per tema cu steagul `wet_grip` (0 = implicitul masinii).
 
 ---
 
@@ -423,7 +447,8 @@ nod **HazardMarker** tras pe sosea in viewport.
    se planteaza in mijlocul drumului), deci un nod tras prea sus nu lasa nimic
    plutind.
 3. In Inspector, `kind`: bariera mobila, bolovan, morisca, tren, tromba,
-   deflector, creasta, excavator, avalansa.
+   deflector, creasta, excavator, avalansa, val (valul cere o tema cu mare —
+   altfel se sare, cu avertisment in Output).
 4. **Regenerate** pe radacina + **salveaza scena.**
 
 Le poti grupa sub un `Node3D` — cautarea e recursiva, ca la munti.

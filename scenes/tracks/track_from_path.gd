@@ -39,6 +39,19 @@ extends Track
 ## Defilee: intervale (frac_start, frac_end) unde falezele strang drumul de
 ## ambele parti — inalte, apropiate, fara ferestre. Momentul-semnatura (#28).
 @export var custom_gorge_ranges: Array[Vector2] = []
+## Valuri care spala soseaua: fractii pe tur (#247).
+##
+## Cere o tema cu MARE (`water`) — valul isi ia linia apei de acolo. Pe o pista
+## fara mare, se sare cu un avertisment in Output, in loc sa iasa o creasta de
+## apa plutind peste desert.
+@export var custom_wave_fracs: Array[float] = []
+## Portiuni UDE de sosea: intervale (frac_start, frac_end) unde grip-ul lateral
+## scade si asfaltul se vede mai inchis la culoare (#246).
+##
+## Spre deosebire de `wet` de pe o scurtatura, astea sunt pe traseul PRINCIPAL:
+## nu-ti dau o ruta alternativa, iti schimba linia pe drumul pe care oricum
+## mergi. Un interval poate trece peste linia de start (ex. 0.95 -> 0.05).
+@export var custom_wet_ranges: Array[Vector2] = []
 ## Intrari de mina lipite de perete: fiecare Vector2 = (fractie, parte ±1).
 @export var custom_mine_spots: Array[Vector2] = []
 ## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
@@ -97,6 +110,12 @@ func _arch_fracs() -> Array[float]:
 
 func _gorge_ranges() -> Array[Vector2]:
 	return custom_gorge_ranges
+
+func _wet_ranges() -> Array[Vector2]:
+	return custom_wet_ranges
+
+func _wave_fracs() -> Array[float]:
+	return custom_wave_fracs
 
 func _mine_spots() -> Array[Vector2]:
 	return custom_mine_spots

@@ -36,7 +36,14 @@ extends Marker3D
 ## alea pentru care nodul e o traducere directa. Lipsesc deliberat:
 ##   - LiftBridge: se leaga de un canal ([TrackChannel]), nu de o fractie — se
 ##     declara acolo, cu `jump: false`;
-##   - WaveSurge / WaterHose: portiuni de sosea, nu obiecte punctuale.
+##   - WaterHose: conducta sparta e legata de un obiect de decor (teava), nu de
+##     un punct oarecare de pe traseu.
+##
+## WAVE a fost si el exclus la inceput, cu motivul „portiune de sosea, nu obiect
+## punctual" — dar motivul nu s-a sustinut la a doua privire (#247): valul se
+## construieste dintr-o SINGURA fractie, exact ca tromba, care e in lista de
+## cand exista. Excluderea era mostenita de la furtun, nu castigata pe cont
+## propriu.
 enum Kind {
 	SLIDING,    ## bariera/bolovan care matura soseaua dintr-o parte in alta
 	ROCKFALL,   ## bolovan care cade de pe faleza pe o banda
@@ -47,6 +54,7 @@ enum Kind {
 	FLYOFF,     ## creasta care arunca toata pista in aer
 	EXCAVATOR,  ## excavatorul ruginit care matura cu bratul
 	AVALANCHE,  ## masa de zapada care se rostogoleste peste sosea
+	WAVE,       ## val care spala soseaua (cere o tema cu mare)
 }
 
 @export var kind: Kind = Kind.SLIDING
@@ -81,6 +89,13 @@ enum Kind {
 ## fi micsorat pe nedrept — de-aia scara sta langa model, nu langa tema.
 @export_range(0.05, 4.0, 0.01) var model_scale: float = 1.0
 
+## Ce PIESA din GLB se pastreaza (celelalte se arunca). Gol = tot fisierul.
+##
+## Kiturile isi tin mai multe obiecte intr-un singur fisier —
+## `scatter/beach_clutter.glb` are cinci, din care pentru un deflector ne
+## trebuie doar `Driftwood_Log`.
+@export var model_node: String = ""
+
 ## Se uita spre directia in care matura.
 ##
 ## Fara asta obiectul ramane pe axele LUMII. La o barca targita e o nepasare
@@ -93,6 +108,13 @@ enum Kind {
 ## Doar bolovanii. Un car cu fan care se da peste cap traversand ulita e exact
 ## greseala descrisa la barca sabani.
 @export var roll: bool = false
+
+## Cum se misca obstacolul: pendulare fara oprire, sau traversare cu sens.
+##
+## TRAVERSARE e tractorul din Ignition — asteapta pe acostament, trece, se
+## opreste pe partea cealalta. Pendularea ramane implicitul, deci nimic din ce
+## exista azi nu se schimba. Doar pentru SLIDING.
+@export_enum("Pendulare:0", "Traversare:1") var motion: int = 0
 
 ## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
 ##
@@ -122,8 +144,15 @@ func model_spec() -> Dictionary:
 		spec["scale"] = model_scale
 		spec["roll"] = roll
 		spec["face_travel"] = face_travel
+		if not model_node.is_empty():
+			spec["model_node"] = model_node
 	if not tri_class.is_empty():
 		spec["tri_class"] = tri_class
+	# Modul de miscare se trimite DOAR cand nu e implicitul. Cheia lipsa
+	# inseamna „ce zice pista", exact ca la model — un `motion: 0` trimis mereu
+	# ar fi stins o eventuala declaratie de tema, in loc s-o lase sa vorbeasca.
+	if motion != 0:
+		spec["motion"] = motion
 	return spec
 
 

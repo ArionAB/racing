@@ -223,8 +223,20 @@ func _hazard_kinds() -> Dictionary:
 		# il avem in kit, si pe un drum de munte are rostul lui chiar vara —
 		# stationat in vale, nu la lucru. Un tractor propriu-zis ar fi un GLB
 		# nou pentru aceeasi silueta si acelasi rol.
+		#
+		# TRAVERSEAZA, nu penduleaza (#241) — si e primul care o face, fiindca
+		# rolul lui e chiar tractorul din Ignition: iese dintr-o curte, trece
+		# drumul, se opreste pe partea cealalta. Un utilaj care ar mocai
+		# dus-intors pe ultimii metri inainte de linia de sosire ar fi fost si
+		# mai greu de crezut decat pe restul pistei — aici chiar ai un motiv sa
+		# treci dintr-o parte in alta a vaii.
+		#
+		# Celelalte trei raman pendulare: carul si sania sunt TARATE peste drum
+		# (n-au sofer care sa decida sa treaca), iar vaca pasteaza — se plimba,
+		# nu comuteaza.
 		0.960: {"model": M + "vehicles/snowplow.glb",
-			"scale": 1.0, "roll": false},
+			"scale": 1.0, "roll": false,
+			"motion": SlidingHazard.Motion.TRAVERSARE},
 	}
 
 

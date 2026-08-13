@@ -239,6 +239,26 @@ static func themes() -> Dictionary:
 			# textura, doar proiectata in spatiul obiectului (vezi
 			# SlidingHazard.model_tri_class).
 			"hazard_class": "rock",
+			# Bolovanul care se rostogoleste de pe faleza e din aceeasi roca cu
+			# ea (#242). Steag separat de `hazard_class` fiindca sunt doua
+			# obiecte diferite: bariera mobila poate fi orice (o barca, o
+			# testoasa), bolovanul e mereu piatra locului.
+			#
+			# Declarat explicit aici fiindca desertul n-are `rock_class` — pe
+			# temele care au (alpinul, cu sisturile lui), acela e implicitul si
+			# steagul asta nu mai trebuie scris.
+			"rockfall_class": "rock",
+			# Deflectorul: bolovani desprinsi din faleza, cazuti de-a curmezisul
+			# drumului (#244) — in locul lamei albe cu dungi, care pe o pista de
+			# canion se citea ca mobilier de santier.
+			"deflector_model": "res://assets/models/rocks/rock_large.glb",
+			"deflector_node": "Rock_Large",
+			"deflector_scale": 1.15,
+			# Morisca devine MOARA DE VANT (#245): pe un drum de desert cu ferma
+			# si moara la orizont, o morisca de balci nu avea ce cauta. Turnul e
+			# cladirea reala din kit, langa drum; peste sosea trec aripile.
+			"carousel_model": "res://assets/models/buildings/windmill.glb",
+			"carousel_scale": 1.0,
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
 			"water": false,
 		},
@@ -600,6 +620,13 @@ static func themes() -> Dictionary:
 			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
 			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
 			"props": "island",   # ...dar palmieri si bazalt, nu cactusi
+			# Deflectorul: busteni de driftwood aruncati de mare de-a curmezisul
+			# drumului (#244). Pe o insula, lemnul adus de valuri e cel mai
+			# firesc lucru cazut peste sosea — si e deja in kitul de plaja.
+			"deflector_model": "res://assets/models/scatter/beach_clutter.glb",
+			"deflector_node": "Driftwood_Log",
+			"deflector_scale": 1.0,
+			"deflector_class": "wood",
 			"water": true,       # singura tema cu mare (vezi _build_water)
 			# Cat de adanc cade terenul dincolo de coridorul pistei. Trebuie sa
 			# duca adancimea DECIS peste SEA_NEAR_DEPTH, altfel grila fina de tarm
@@ -3287,6 +3314,19 @@ const DIRT_ROAD_COLOR: Color = Color(0.80, 0.66, 0.43)
 ## Media texturii macro de nisip (process_class_textures.surfaces()).
 const SAND_MACRO_MEAN: float = 0.850
 
+## Cat de mult se intuneca asfaltul UD, ca factor pe vertex color (#246).
+##
+## 0.62 e ales cat sa se vada DE LA DISTANTA DE FRANARE, nu doar de aproape:
+## portiunea trebuie citita din mers, ca sa poti ridica piciorul inainte de ea.
+## Mai jos de atat, drumul incepe sa arate ars, nu ud.
+const WET_DARKEN: float = 0.62
+## Pe cate fractii de tur se sting marginile petei ude.
+##
+## ~1.5% dintr-un tur — la o pista de 1.5 km inseamna ~20 m de tranzitie, adica
+## o jumatate de secunda de mers. Destul cat marginea sa nu fie o dunga trasa cu
+## rigla, prea putin cat sa nu inmoaie semnalul.
+const WET_FADE: float = 0.015
+
 ## Nuanta MARGINILOR pe un drum nepavat.
 ##
 ## Prima versiune intorsese gradientul fata de asfalt (mijloc batatorit =
@@ -3385,6 +3425,15 @@ func _build_road() -> void:
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
 		var s1v := _side_at(j)
+		# Asfaltul UD e mai inchis la culoare (#246). E semnalul, nu decorul: o
+		# portiune care iti taie grip-ul fara sa se vada ar fi necinstita — toate
+		# celelalte hazarde se anunta (telegraf, lumini, bariere).
+		#
+		# Vertex color INTUNECA, nu lumineaza: valorile sunt taiate la [0,1],
+		# deci se poate doar cobora din culoarea materialului. Aici asta e chiar
+		# ce ne trebuie.
+		var wet0 := _wet_shade(frac_at(i))
+		var wet1 := _wet_shade(frac_at(j))
 		# Latimea la CELE DOUA capete ale segmentului, nu una singura: asa
 		# panglica se ingusteaza continuu cand va exista profilul, in loc sa
 		# sara in trepte de cate un segment. Acum sunt egale.
@@ -3429,13 +3478,13 @@ func _build_road() -> void:
 			# temele cu zapada) inapoi spre asfalt — vezi _road_snow_weight pentru
 			# de ce sensul e inversat.
 			var c0 := _road_shade(ca, road_dark, _road_snow_weight(
-				w0, snow_low, snow_high, snow_amount, snow_noise, ta))
+				w0, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet0
 			var c1 := _road_shade(ca, road_dark, _road_snow_weight(
-				w1, snow_low, snow_high, snow_amount, snow_noise, ta))
+				w1, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet1
 			var c0b := _road_shade(cb, road_dark, _road_snow_weight(
-				w0b, snow_low, snow_high, snow_amount, snow_noise, tb))
+				w0b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet0
 			var c1b := _road_shade(cb, road_dark, _road_snow_weight(
-				w1b, snow_low, snow_high, snow_amount, snow_noise, tb))
+				w1b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet1
 			# Ordinea l0,l1,r0: fata triunghiului iese IN SUS (vezi istoricul
 			# winding-ului — cu ordinea inversa normalele ieseau in jos).
 			top.set_color(c0); top.set_uv(Vector2(ua, v0)); top.set_uv2(m0)
@@ -3912,6 +3961,12 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# medie ar iesi prin perete exact pe portiunile stramte.
 		ball.road_half_width = hw
 		ball.phase = fposmod(frac * 3.7, 1.0) # doua obstacole nu bat la unison
+		# Pendulare (implicit) sau traversare cu sens — vezi SlidingHazard.Motion.
+		# Se pune INAINTE de `travel`: la traversare, capatul cursei e locul de
+		# PARCARE si trebuie sa cada dincolo de asfalt, deci `_clamp_travel` are
+		# nevoie sa stie modul ca sa nu taie cursa la marginea drumului.
+		ball.motion = int(kind.get("motion",
+			theme_flag("hazard_motion", 0))) as SlidingHazard.Motion
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa
@@ -3921,8 +3976,15 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# AnimatableBody3D cu sync_to_physics, deci dupa intrarea in arbore
 		# transformul il tine serverul de fizica — iar pozitia se rescrie oricum
 		# la fiecare pas, dar BAZA nu, deci o rotatie pusa dupa se pierde tacut.
+		#
+		# La TRAVERSARE e implicit pornit: un vehicul care asteapta pe
+		# acostament si intra pe drum are prin definitie un sens de mers, iar
+		# unul care ar traversa cu flancul inainte n-ar arata ca traverseaza.
+		# La pendulare ramane stins, ca pana acum — o barca targita dus-intors
+		# chiar n-are un "inainte".
+		var crossing := ball.motion == SlidingHazard.Motion.TRAVERSARE
 		if bool(kind.get("face_travel",
-				theme_flag("hazard_face_travel", false))):
+				theme_flag("hazard_face_travel", crossing))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
 		add_child(ball)
 		ball.center = p
@@ -3948,10 +4010,10 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 ## divergat la prima corectie de mecanica — exact ce evita [TerrainPeak] prin
 ## faptul ca hraneste `_peak_specs` in loc sa-si construiasca propriul munte.
 ##
-## Infatisarea declarata pe nod (`spec`) ajunge deocamdata doar la bariera
-## mobila, fiindca ea e singura cu mecanica de model pe pozitie. Bolovanul si
-## deflectorul isi construiesc inca vizualul din cod — cand vor primi si ele
-## slot de model (#242, #244), aici se adauga o linie, nu un al doilea drum.
+## Infatisarea declarata pe nod (`spec`) ajunge la bariera mobila (model complet)
+## si la bolovan (clasa de material, #242). Deflectorul isi construieste inca
+## vizualul din cod — cand va primi si el slot de model (#244), aici se adauga o
+## linie, nu un al doilea drum.
 func _build_node_hazard(hz: Dictionary) -> void:
 	var frac := float(hz.get("frac", 0.0))
 	var spec: Dictionary = hz.get("spec", {})
@@ -3959,21 +4021,24 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.SLIDING:
 			_build_hazard(frac, spec)
 		HazardMarker.Kind.ROCKFALL:
-			_build_rockfall(frac)
+			_build_rockfall(frac, spec)
 		HazardMarker.Kind.CAROUSEL:
-			_build_carousel(frac)
+			_build_carousel(frac, spec)
 		HazardMarker.Kind.TRAIN:
 			_build_train(frac)
 		HazardMarker.Kind.TYPHOON:
 			_build_typhoon(frac)
 		HazardMarker.Kind.DEFLECTOR:
-			_build_deflector(frac, signf(float(hz.get("side", 1))))
+			_build_deflector(frac, signf(float(hz.get("side", 1))), spec)
 		HazardMarker.Kind.FLYOFF:
 			_build_flyoff(frac)
 		HazardMarker.Kind.EXCAVATOR:
 			_build_excavator(frac)
 		HazardMarker.Kind.AVALANCHE:
 			_build_avalanche(frac)
+		HazardMarker.Kind.WAVE:
+			# Se sare singur, cu avertisment, daca tema n-are mare.
+			_build_wave_surge(frac)
 
 
 ## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
@@ -3983,11 +4048,38 @@ func _build_node_hazard(hz: Dictionary) -> void:
 ## AnimatableBody3D cu sync_to_physics, deci transformarea lui o tine serverul
 ## de fizica — plasat dupa intrarea in arbore, ramane un pas fizic in origine,
 ## adica exact peste grila de start, si matura tot plutonul la countdown.
-func _build_carousel(frac: float) -> void:
+func _build_carousel(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var carousel := CarouselHazard.new()
 	carousel.arm_reach = width_at(frac) - 0.2
+	# Cu turn declarat, morisca devine MOARA DE VANT (#245): butucul procedural
+	# e inlocuit de cladire, iar bratele se citesc ca aripi. Mecanica ramane
+	# aceeasi — rotatie continua, fereastra intre brate, ghiont pe tangenta.
+	var tower_path := String(spec.get("model", theme_flag("carousel_model", "")))
+	if not tower_path.is_empty() and ResourceLoader.exists(tower_path):
+		carousel.tower_scene = load(tower_path)
+		carousel.tower_node = String(spec.get("model_node",
+			theme_flag("carousel_node", "")))
+		carousel.tower_scale = float(spec.get("scale",
+			theme_flag("carousel_scale", 1.0)))
+		carousel.tower_class = String(spec.get("tri_class",
+			theme_flag("carousel_class", "")))
+		carousel.mill_blades = true
+		# Turnul sta pe MARGINEA drumului, dincolo de bataia aripilor: pe axa ar
+		# fi fost o cladire in mijlocul soselei. Bratele raman centrate pe axa,
+		# deci fereastra de trecere nu se schimba.
+		#
+		# `tower_offset` e pe X LOCAL, deci nodul trebuie orientat: `looking_at`
+		# pe directia drumului pune +X pe marginea din dreapta, conventia din tot
+		# proiectul. Fara orientare, turnul ar fi cazut pe axa X a LUMII — adica
+		# oriunde, in functie de cum se intampla sa fie intors drumul acolo.
+		var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+		carousel.transform = Transform3D(
+			Basis.looking_at(dir, Vector3.UP), baked[idx])
+		carousel.tower_offset = width_at(frac) + 2.2
+		add_child(carousel)
+		return
 	carousel.position = baked[idx]
 	add_child(carousel)
 
@@ -3997,7 +4089,7 @@ func _build_carousel(frac: float) -> void:
 ## caruselului, iar aici trebuie sa ramana mereu o linie curata ca sa fie alegere.
 ## Latura alterneaza determinist cu fractia, ca doua bolovanuri consecutive sa nu
 ## cada pe aceeasi banda.
-func _build_rockfall(frac: float) -> void:
+func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var p := baked[idx]
@@ -4005,9 +4097,114 @@ func _build_rockfall(frac: float) -> void:
 	var rock := RockfallHazard.new()
 	# Defazare din fractie, ca la SlidingHazard: doua bolovanuri nu cad la unison.
 	rock.phase = fposmod(frac * 3.7, 1.0)
+	# Clasa de material: ce cere nodul, altfel steagul dedicat al temei, altfel
+	# ROCA LUMII (`rock_class` — sisturile alpine, gresia canionului). Ultima
+	# treapta e cea care conteaza: bolovanul care se desprinde dintr-o faleza e
+	# din aceeasi piatra cu ea, si asta ar trebui sa fie adevarat implicit, nu
+	# doar pe temele care si-au adus aminte sa declare.
+	rock.tri_class = String(spec.get("tri_class",
+		theme_flag("rockfall_class", theme_flag("rock_class", ""))))
+	# Punctul de impact: o banda, nu axa drumului (blocarea completa e treaba
+	# caruselului). Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
+	var hit := p + side * (width_at(frac) * 0.45)
+	# Din ce parte VINE. Se alege latura pe care chiar exista deal, masurand
+	# terenul de-o parte si de alta — un bolovan care se rostogoleste dintr-un
+	# camp neted ar fi la fel de neexplicat ca unul care cadea din cer.
+	rock.slope_side = _rockfall_slope_side(p, side, frac)
+	# Nodul se orienteaza cu +X spre versant, ca `_start_pos()` sa fie doar „pe X
+	# local" — aceeasi conventie ca la avalansa, unde masa coboara tot pe X.
+	# Transformarea INAINTE de add_child, ca la restul hazardelor cu corp
+	# cinematic: dupa intrarea in arbore o tine serverul de fizica.
+	if rock.slope_side != 0.0:
+		# Directia spre versant, in lume. `Basis.looking_at(f)` pune -Z pe `f` si
+		# +X la dreapta lui; ca +X sa cada FIX pe versant, privirea trebuie sa fie
+		# perpendiculara pe el — adica de-a lungul drumului, intr-un sens sau
+		# altul, ales tocmai ca +X sa iasa spre deal.
+		var toward := (side * rock.slope_side).normalized()
+		var look := Vector3(toward.z, 0.0, -toward.x) # rotit -90° in plan
+		rock.transform = Transform3D(Basis.looking_at(look, Vector3.UP), hit)
+	else:
+		rock.position = hit
 	add_child(rock)
-	# Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
-	rock.global_position = p + side * (width_at(frac) * 0.45)
+
+
+## Pe ce latura a punctului de impact e versantul din care se desprinde piatra:
+## +1 spre `side`, -1 spre partea opusa, 0 = teren plat pe amandoua (cade
+## vertical, ca inainte de #242).
+##
+## Se MASOARA terenul, nu se presupune. Pe o pista de munte dealul e cand la
+## stanga, cand la dreapta, iar o latura aleasa din fractie (ca banda de impact)
+## ar fi nimerit versantul pe jumatate din cazuri — adica exact jumatate din
+## bolovani ar fi venit dintr-o vale.
+func _rockfall_slope_side(p: Vector3, side: Vector3, frac: float) -> float:
+	if _sampler == null:
+		return 0.0
+	# Distanta la care se intreaba NU e aleasa din ochi: langa asfalt terenul e
+	# aplatizat deliberat, iar masivele sunt stinse complet sub
+	# `TrackSideSampler.PEAK_ROAD_CLEAR` (6 m de la marginea drumului) si ajung
+	# la putere plina abia la `PEAK_ROAD_FULL` (32 m). Intrebat mai aproape,
+	# orice munte pare camp — prima varianta masura la 14 m, adica in plina
+	# zona de stingere, si raporta „teren plat" langa masivul central al
+	# Alpilor.
+	var reach := width_at(frac) + TrackSideSampler.PEAK_ROAD_FULL
+	var a := p + side * reach
+	var b := p - side * reach
+	var ya := _sampler.ground_y(a.x, a.z) - p.y
+	var yb := _sampler.ground_y(b.x, b.z) - p.y
+	# Pragul: sub 3 m diferenta nu e „versant", e denivelare. O piatra care se
+	# rostogoleste de pe un damb de doi metri nu explica nimic.
+	const MIN_RISE := 3.0
+	if maxf(ya, yb) >= MIN_RISE:
+		return 1.0 if ya >= yb else -1.0
+	# Fara deal in teren, mai exista o sursa cinstita: FALEZELE de canion. Ele
+	# sunt geometrie separata, construita ABIA DUPA hazarde (`_build_world_decor`
+	# ruleaza la sfarsitul lui `rebuild`), deci nodul lor nici nu exista cand
+	# intrebam. Pe Dunele, unde bolovanii stau exact la poalele canionului,
+	# masuratoarea de teren raporta camp neted si piatra ar fi continuat sa cada
+	# din cer fix acolo unde peretele de stanca era la cativa metri.
+	#
+	# Se intreaba SURSA, nu rezultatul: `wall_segments` e chiar lista pe care o
+	# citeste si TrackCliffs ca sa decida unde ridica pereti, deci cele doua nu
+	# se pot contrazice.
+	# `+1` = latura pe care sta banda de impact (nodul e deja orientat cu +X
+	# spre ea), deci bolovanul vine de deasupra locului in care aterizeaza.
+	return _cliff_slope_side(frac, 1.0)
+
+
+## Latura pe care [TrackCliffs] ridica perete la fractia asta (+1 dreapta, -1
+## stanga, 0 daca niciuna).
+##
+## Pe o pista de canion peretii sunt de obicei pe AMANDOUA laturile (masurat:
+## in toate punctele de rockfall de pe Dunele si Alpii). O prima versiune
+## intorcea 0 in cazul asta — „nu exista partea cu dealul" — si efectul practic
+## era ca detectia de faleze nu se aplica NICIODATA, adica exact pistele pentru
+## care fusese scrisa ramaneau cu bolovani cazand din cer.
+##
+## Cu perete de ambele parti, alegerea ramane oricum cinstita: piatra vine de pe
+## faleza dinspre EXTERIORUL virajului, cea inalta si continua, nu de pe umarul
+## dinspre interior. Pe portiunile drepte cele doua sunt echivalente, deci
+## alegerea nu poate fi „gresita" — poate fi doar arbitrara, si atunci o facem
+## determinista (latura de impact), nu aleatoare.
+func _cliff_slope_side(frac: float, impact_side: float) -> float:
+	if _sampler == null or not theme_flag("cliffs", false):
+		return 0.0
+	var here := frac * _sampler.total_length()
+	var right := _within_wall(_sampler.wall_segments(1.0), here)
+	var left := _within_wall(_sampler.wall_segments(-1.0), here)
+	if not right and not left:
+		return 0.0
+	if right != left:
+		return 1.0 if right else -1.0
+	# Ambele: bolovanul vine dinspre banda pe care oricum aterizeaza, ca sa nu
+	# traverseze tot drumul si sa nu blocheze si linia curata de trecere.
+	return impact_side
+
+
+func _within_wall(segments: Array[Vector2], at_m: float) -> bool:
+	for s in segments:
+		if at_m >= s.x and at_m <= s.y:
+			return true
+	return false
 
 
 ## Avalansa: masa de zapada care coboara de pe versant si traverseaza soseaua.
@@ -4299,13 +4496,27 @@ func _rail_reach(origin: Vector3, dir: Vector3, max_len: float,
 
 ## Deviatorul: bariera oblica ancorata pe o margine, care taie drumul in
 ## diagonala si te trimite pe cealalta banda.
-func _build_deflector(frac: float, side_sign: float = 1.0) -> void:
+func _build_deflector(frac: float, side_sign: float = 1.0,
+		spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
 	var deflector := DeflectorHazard.new()
 	deflector.road_half_width = half_width
 	deflector.side_sign = side_sign
+	# Din ce e facuta bariera: ce cere nodul, altfel obiectul temei, altfel
+	# lama alba cu dungi de dinainte (#244). Fiecare lume are alt lucru cazut
+	# peste drum — un trunchi pe insula, un bolovan in canion.
+	var model_path := String(spec.get("model",
+		theme_flag("deflector_model", "")))
+	if not model_path.is_empty() and ResourceLoader.exists(model_path):
+		deflector.model_scene = load(model_path)
+		deflector.model_node = String(spec.get("model_node",
+			theme_flag("deflector_node", "")))
+		deflector.model_scale = float(spec.get("scale",
+			theme_flag("deflector_scale", 1.0)))
+		deflector.tri_class = String(spec.get("tri_class",
+			theme_flag("deflector_class", theme_flag("rock_class", ""))))
 	# looking_at: -Z pe sensul cursei, deci +X = marginea din dreapta.
 	deflector.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), baked[idx])
 	add_child(deflector)
@@ -5612,6 +5823,21 @@ func _build_hose(frac: float) -> void:
 ## si uda doar cat trece.
 func _build_wave_surge(frac: float) -> void:
 	var n := baked.size()
+	if n == 0:
+		return
+	# Fara mare in tema, valul nu se construieste DELOC — si spune de ce.
+	#
+	# Pana la #247 asta nu se putea intampla: valul se declara numai din cod, iar
+	# singura pista care il cerea era o insula. De cand se poate pune din editor
+	# (`custom_wave_fracs`), un val cerut pe Dunele ar fi iesit o creasta de apa
+	# plutind peste desert, la o cota luata din senin — vizibil absurd, dar tacut
+	# in cod. Refuzul cu mesaj e conventia pistelor: scurtaturile prost desenate
+	# se plang tot in Output, in loc sa se construiasca gresit.
+	if not theme_flag("water", false):
+		push_warning(("%s: val cerut la fractia %.3f, dar tema '%s' n-are mare "
+			+ "— valul se sare (are nevoie de o linie a apei)")
+			% [track_name, frac, theme_decor])
+		return
 	var idx := int(frac * float(n)) % n
 	var wave := WaveSurge.new()
 	# Directia de mers: perpendicular pe sosea, dinspre larg spre uscat. Nu se
@@ -5628,13 +5854,13 @@ func _build_wave_surge(frac: float) -> void:
 	# Linia apei, ca la tromba: fara ea valul traverseaza orizontal la cota
 	# soselei si pluteste in aer cat e in larg. Aceeasi despartire ca peste tot —
 	# cotele terenului le stie pista, nu hazardul.
-	if theme_flag("water", false):
-		wave.water_y = _sampler.mean_road_y() + sea_level_offset
-		# Apa de pe drum e chiar MAREA: acelasi material, deci acelasi turcoaz,
-		# aceeasi spuma animata si zero materiale in plus la numaratoarea garzii.
-		# La adancime ~0 shaderul da nisip ud cu spuma peste el — exact ce ramane
-		# in urma unui val care a trecut peste dig.
-		wave.film_material = _water_material()
+	# Tema are mare (verificat la intrare), deci linia apei exista.
+	wave.water_y = _sampler.mean_road_y() + sea_level_offset
+	# Apa de pe drum e chiar MAREA: acelasi material, deci acelasi turcoaz,
+	# aceeasi spuma animata si zero materiale in plus la numaratoarea garzii.
+	# La adancime ~0 shaderul da nisip ud cu spuma peste el — exact ce ramane
+	# in urma unui val care a trecut peste dig.
+	wave.film_material = _water_material()
 	# Defazaj derivat din fractie, ca doua valuri pe aceeasi pista sa nu bata la
 	# unison — acelasi truc ca la SlidingHazard.
 	wave.phase = fposmod(frac * 2.3, 1.0)
@@ -6215,6 +6441,95 @@ func route_at(route: int) -> TrackRoute:
 func route_is_wet(route: int) -> bool:
 	var r := route_at(route)
 	return r != null and r.wet
+
+
+## Portiunile UDE de pe traseul principal: (frac_start, frac_end).
+##
+## Pana la #246, „ud" exista doar ca proprietate a unei SCURTATURI
+## (`TrackBranch.wet`) — adica se putea uda un ocol intreg, dar nu 80 de metri
+## de drum principal. Asta lasa pe dinafara chiar cazul interesant: o portiune
+## umeda pe linia pe care oricum mergi, care iti schimba traiectoria si decizia
+## de turbo fara sa-ti ofere o ruta alternativa.
+##
+## Intervale, nu fractii punctuale, si acelasi tipar ca `_gorge_ranges()`: udul
+## e o STARE a drumului pe o distanta, nu un obiect asezat undeva. De aceea nu
+## intra nici in [HazardMarker] — vezi nota din antetul lui despre ce se
+## declara ca nod si ce nu.
+##
+## Un interval poate trece peste linia de start (ex. 0.95 -> 0.05): se trateaza
+## ca doua bucati, ca la sectoarele de latime.
+func _wet_ranges() -> Array[Vector2]:
+	return []
+
+
+## Cat de alunecos e udul pe pista asta. Vezi `Car.SLIP_GRIP_WET`.
+##
+## In tema, nu constanta in cod, fiindca „ud" inseamna altceva pe o sosea de
+## munte decat pe un dig batut de valuri. 0 = implicitul masinii.
+func wet_grip() -> float:
+	return float(theme_flag("wet_grip", 0.0))
+
+
+## Cat de mult se intuneca asfaltul la fractia asta, ca factor multiplicativ
+## (1.0 = neatins). Vezi `_build_road`.
+##
+## Marginile se sting NETED, pe `WET_FADE`, dintr-un motiv practic: o trecere
+## brusca ar desena o dunga transversala perfect dreapta peste sosea — exact
+## tiparul de „prag poligonal" pe care restul generatorului il evita peste tot
+## (vezi trecerea uscat -> fund de mare din sampler).
+func _wet_shade(frac: float) -> Color:
+	var segs := _wet_ranges()
+	if segs.is_empty():
+		return Color.WHITE
+	var f := fposmod(frac, 1.0)
+	var best := 0.0
+	for seg in segs:
+		best = maxf(best, _wet_weight(f, seg))
+	if best <= 0.0:
+		return Color.WHITE
+	# Asfaltul ud e mai inchis SI mai rece (apa trage spre albastru-cenusiu).
+	var dark := lerpf(1.0, WET_DARKEN, best)
+	return Color(dark, dark, lerpf(1.0, WET_DARKEN + 0.06, best))
+
+
+## Cat de „in interval" e fractia, cu marginile estompate. 0..1.
+func _wet_weight(f: float, seg: Vector2) -> float:
+	var d := _wet_distance_inside(f, seg)
+	if d <= 0.0:
+		return 0.0
+	return clampf(d / WET_FADE, 0.0, 1.0)
+
+
+## Cat de departe de cel mai apropiat capat al intervalului se afla fractia,
+## masurat pe interior, in fractii de tur. Negativ (0) daca e in afara.
+func _wet_distance_inside(f: float, seg: Vector2) -> float:
+	var inside := false
+	if seg.x <= seg.y:
+		inside = f >= seg.x and f <= seg.y
+	else:
+		inside = f >= seg.x or f <= seg.y # trece peste linia de start
+	if not inside:
+		return 0.0
+	var to_start := fposmod(f - seg.x, 1.0)
+	var to_end := fposmod(seg.y - f, 1.0)
+	return minf(to_start, to_end)
+
+
+## E uda soseaua principala la fractia asta?
+##
+## Se intreaba pe FRACTIE, nu pe indice de punct copt: intervalele se declara in
+## fractii ca sa supravietuiasca unei modificari de traseu, exact ca restul
+## reperelor.
+func is_wet_at(frac: float) -> bool:
+	var f := fposmod(frac, 1.0)
+	for seg in _wet_ranges():
+		if seg.x <= seg.y:
+			if f >= seg.x and f <= seg.y:
+				return true
+		# Interval care trece peste linia de start.
+		elif f >= seg.x or f <= seg.y:
+			return true
+	return false
 
 
 ## Punctul de pe axa benzii. Inlocuieste accesul direct la `baked[i]` din codul

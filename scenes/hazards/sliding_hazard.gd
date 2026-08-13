@@ -21,10 +21,38 @@ extends AnimatableBody3D
 ## (cadre de contact per masina: ~10 la perioada originala, ~110 la dublu).
 ## Un obstacol rapid traverseaza si elibereaza drumul; unul lent sta in el.
 
+## Cum se misca obstacolul de-a lungul axei `travel`.
+##
+## PENDULARE e implicitul si tot ce a existat pana la #241: du-te-vino
+## sinusoidal, la nesfarsit. Mecanic e corect, dar nu spune nicio poveste —
+## nimic din lume nu se plimba perpetuu pe acelasi metru de drum. TRAVERSARE
+## e tractorul din Ignition: vehiculul asteapta parcat pe acostament,
+## traverseaza intr-un singur sens si parcheaza pe partea cealalta.
+##
+## Ritmul difera, si asta e tot rostul: la pendulare inveti o sinusoida, la
+## traversare PANDESTI O FEREASTRA — ca la tren, dar fara infrastructura lui.
+enum Motion {
+	PENDULARE,  ## du-te-vino sinusoidal, fara oprire
+	TRAVERSARE, ## asteapta, traverseaza intr-un sens, asteapta pe partea cealalta
+}
+
 ## Cat de repede matura, la maximum (mijlocul cursei). Perioada se DEDUCE din
 ## viteza asta si din cursa reala, ca obstacolele de pe piste late sa nu iasa
 ## automat mai violente decat cele de pe piste inguste.
 const MAX_SWEEP_SPEED_DEFAULT: float = 12.0
+
+## TRAVERSARE — cat sta parcat pe acostament intre doua treceri.
+##
+## Lung dinadins. Un vehicul care traverseaza la fiecare 2 s redevine exact
+## bariera pendulanta pe care o inlocuieste: daca e mereu pe drum, nu mai e un
+## eveniment, e mobilier. Pauza e cea care face fereastra sa insemne ceva.
+const CROSS_WAIT: float = 5.0
+## Cat se urneste in loc inainte de a intra pe asfalt.
+##
+## Telegraful obstacolelor din proiect (bolovanul 1.4 s, avalansa 3.2 s):
+## vehiculul se pune in miscare vizibil inainte sa ajunga pe carosabil, ca
+## trecerea sa poata fi anticipata, nu doar incasata.
+const CROSS_TELEGRAPH: float = 1.2
 ## Banda lasata libera langa perete. 0 = fara limitare (cursa exact cat cere
 ## pista). Exista pentru piste inguste, unde maturarea pana in perete ar lasa
 ## banda plina fara iesire.
@@ -34,6 +62,8 @@ const SWEEP_PUSH: float = 5.5
 
 var center: Vector3
 var travel: Vector3 # amplitudinea (vector lateral, jumatate de cursa)
+## Pendulare (implicit) sau traversare cu sens. Vezi [enum Motion].
+var motion: Motion = Motion.PENDULARE
 ## Lasata pe 0 = dedusa din `max_sweep_speed` si din cursa reala. Pusa explicit,
 ## are prioritate (util daca vrei un obstacol anume mai lent).
 var period: float = 0.0
@@ -88,14 +118,28 @@ func _configure() -> void:
 		period = _readable_period()
 	# Pozitia de start a defazajului, nu centrul: altfel primul cadru "vede" o
 	# deplasare de toata amplitudinea si roteste mingea brusc.
-	_last_pos = center + travel * sin(TAU * phase)
+	_last_pos = center + travel * _offset_now()
 
 ## Obstacolul nu iese niciodata din sosea: cursa se taie astfel incat MARGINEA
 ## lui sa se opreasca la marginea drumului (plus `escape_lane`, daca pista e
 ## ingusta si vrei sa ramana si o banda de trecere). Pista cere maturarea
 ## maxima, aici se decide cat e cinstit pe latimea asta de sosea.
+##
+## La TRAVERSARE regula se INVERSEAZA, si asta e diferenta de fond dintre cele
+## doua moduri: capatul cursei e locul in care vehiculul PARCHEAZA, deci trebuie
+## sa cada dincolo de asfalt. Taiat ca la pendulare, tractorul ar astepta oprit
+## pe banda si ar fi un zid pe jumatate de drum — exact ce nu vrem, fiindca un
+## obstacol care STA in drum e mobilier, nu eveniment (vezi masuratoarea din
+## antetul clasei: obstacol lent = toata lumea intra in el).
 func _clamp_travel() -> void:
 	if road_half_width <= 0.0:
+		return
+	if motion == Motion.TRAVERSARE:
+		# Capatul curse: marginea drumului PLUS tot corpul, ca sa se elibereze
+		# complet carosabilul, plus o palma de acostament.
+		var park := road_half_width + _half_extent + 1.0
+		travel = travel.normalized() * park if travel.length() > 0.001 \
+			else travel
 		return
 	var max_amp := maxf(road_half_width - _half_extent - escape_lane, 0.0)
 	if travel.length() > max_amp:
@@ -103,10 +147,19 @@ func _clamp_travel() -> void:
 
 ## Perioada la care varful de viteza (mijlocul cursei) ramane sub plafon.
 ## Viteza maxima a unei oscilatii sinusoidale de amplitudine A: A * TAU / T.
+##
+## La TRAVERSARE viteza e CONSTANTA, nu sinusoidala, deci formula e alta:
+## traversarea dureaza `period * 0.5` (vezi `_offset_now`) si acopera toata
+## cursa 2A, adica viteza e 2A / (T/2) = 4A / T. Cu formula sinusoidala,
+## acelasi numar ar fi dat o trecere cu ~27% mai iute decat plafonul cerut —
+## adica exact genul de „obstacolul asta e mai violent decat celelalte" care
+## nu se vede in cod, ci abia la playtest.
 func _readable_period() -> float:
 	var amp := travel.length()
 	if amp < 0.01 or max_sweep_speed <= 0.0:
 		return 3.2
+	if motion == Motion.TRAVERSARE:
+		return maxf(4.0 * amp / max_sweep_speed, 1.5)
 	return maxf(TAU * amp / max_sweep_speed, 1.5)
 
 func _build_model() -> void:
@@ -203,7 +256,7 @@ func _physics_process(delta: float) -> void:
 	if not _configured:
 		_configure()
 	_time += delta
-	global_position = center + travel * sin(TAU * (_time / period + phase))
+	global_position = center + travel * _offset_now()
 	var moved := global_position - _last_pos
 	if _pivot != null and roll_radius > 0.0:
 		# Rostogolire: rotatie in jurul axei perpendiculare pe miscare.
@@ -215,6 +268,47 @@ func _physics_process(delta: float) -> void:
 	_last_pos = global_position
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)
+
+## Unde se afla obstacolul pe axa `travel`, ca fractie -1..+1 (−1 si +1 fiind
+## cele doua margini ale cursei).
+##
+## Amandoua modurile se misca pe ACEEASI axa si sunt taiate de acelasi
+## `_clamp_travel()`. Ce difera e doar legea de miscare, si de-aia sta intr-o
+## singura functie: un al doilea camp de pozitie ar fi insemnat doua feluri de
+## a sti unde e obstacolul, care ar fi divergat la prima corectie de mecanica.
+func _offset_now() -> float:
+	if motion == Motion.PENDULARE:
+		return sin(TAU * (_time / period + phase))
+	# TRAVERSARE. Ciclul, in ordinea in care il vede jucatorul:
+	#   [parcat] -> [telegraf: se urneste] -> [traverseaza] -> [parcat pe partea
+	#   cealalta] -> ... si inapoi, cu sensul intors.
+	#
+	# Un ciclu complet duce vehiculul dus-intors, ca sa nu se teleporteze inapoi:
+	# la a doua trecere pleaca de unde a ramas.
+	var cross := period * 0.5 # cat dureaza o traversare propriu-zisa
+	var leg := CROSS_WAIT + CROSS_TELEGRAPH + cross # o trecere, cu asteptarea ei
+	var t := fposmod(_time + phase * leg * 2.0, leg * 2.0)
+	# A doua jumatate a ciclului e aceeasi trecere, in sens invers.
+	var back := t >= leg
+	if back:
+		t -= leg
+	var from := -1.0
+	var to := 1.0
+	if back:
+		from = 1.0
+		to = -1.0
+	if t < CROSS_WAIT:
+		return from # parcat pe acostament
+	var moving := t - CROSS_WAIT
+	if moving < CROSS_TELEGRAPH:
+		# Telegraful: se urneste in loc, fara sa intre inca pe asfalt. Deplasare
+		# mica si lina, cat sa se VADA ca a pornit.
+		var warn := moving / CROSS_TELEGRAPH
+		return from * (1.0 - 0.06 * warn * warn)
+	# Traversarea: viteza constanta, ca la val si la tren — o trecere care
+	# accelereaza nu se poate anticipa, si atunci fereastra devine ghicitoare.
+	var k := clampf((moving - CROSS_TELEGRAPH) / maxf(cross, 0.001), 0.0, 1.0)
+	return lerpf(from * 0.94, to, k)
 
 ## Contactul te DEZECHILIBREAZA, nu te captureaza. Ghiontul e RADIAL (dinspre
 ## obstacol spre masina) plus un pic inainte, nu in sensul maturarii: impins pe

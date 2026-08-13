@@ -763,6 +763,13 @@ func _detail_dunes(wx: float, wz: float) -> float:
 		+ sin((wx + wz) * 0.43 + _dune_phase * 5.0) * 0.13
 
 
+## Punctele benzilor secundare, pentru consumatorii care isi fac propria
+## evitare spatiala (iarba densa isi construieste un cos de cautare din ele —
+## clearance_at ar fi O(n) per smoc, si smocurile sunt mii).
+func extra_points() -> PackedVector3Array:
+	return _extra
+
+
 ## Un punct copt al axei pistei (pentru limite, iteratii proprii).
 func baked_point(i: int) -> Vector3:
 	var n := _baked.size()

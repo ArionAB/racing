@@ -207,8 +207,18 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## din oglindire, si dublarea lor ar fi fost geometrie fara castig.
 ## Total masurat: 2 702 585 din 2 750 000, desene 532 (+24, celulele
 ## MultiMesh ale speciilor noi), materiale 21/38 pe tot lantul.
+## Track09 (august 2026): iarba densa de margine (TrackGrass) — ~29k smocuri
+## a 24 de triunghiuri pe banda de 0.35-7 m, masurat 1 058 591 pe toata pista
+## (fata de ~250k inainte). Aceeasi structura de decizie ca la Okinawa:
+## materialele au urcat cu UNUL (28 -> 29 din 38, ShaderMaterial-ul partajat
+## al clasei "iarba"), desenele cu ~40 de celule de MultiMesh, iar cifra e pe
+## TOATA pista — topirea din shader scufunda firele in teren la 68-86 m de
+## camera si celulele au visibility_range, deci felia randata pe cadru e
+## ~10% din total, pe axa care nu doare pe mobil. ~8% aer peste masuratoare:
+## destul pentru tuning de densitate, strans cat sa prinda clasa de accident.
 const TRIS_OVERRIDE := {
 	"Track08": 2750000,
+	"Track09": 1150000,
 }
 
 

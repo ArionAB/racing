@@ -511,6 +511,12 @@ static func themes() -> Dictionary:
 			"rock_line": 46.0,
 			"rock_fade": 20.0,
 			"rock_band_tint": Color.html("8A8980"),
+			# IARBA DENSA pe marginea drumului (prototip TrackGrass): pajistea
+			# alpina e pista pe care firele vizibile vand cel mai mult lumea.
+			# Plafonul e sub rock_line (46): iarba se rareste si dispare INAINTE
+			# ca terenul sa devina piatra, nu exact pe linia lui.
+			"dense_grass": true,
+			"dense_grass_max_y": 42.0,
 			# Granit ADEVARAT, nu o nuanta peste gresie.
 			#
 			# Pana la texturile PolyHaven, muntele imprumuta roca de canion si o
@@ -5291,6 +5297,14 @@ func _build_world_decor() -> void:
 	add_child(scen)
 	_decor_roots.append(scen)
 	_bake_decor(cliffs, decor, scen)
+	# Iarba densa de margine (prototip): fire-geometrie pe banda de langa
+	# asfalt, cu vant in shader si topire cu distanta. NU intra in
+	# _decor_roots (n-are volum, nimic nu trebuie s-o ocoleasca) si nici in
+	# coacere (e deja MultiMesh pe celule). Vezi TrackGrass.
+	if bool(theme_flag("dense_grass", false)):
+		var grass := TrackGrass.build(_sampler, _world_seed(), theme_ground_tint,
+			float(theme_flag("dense_grass_max_y", 1e9)))
+		add_child(grass)
 
 
 ## Coace vizualul falezelor si al decorului in MultiMesh-uri.

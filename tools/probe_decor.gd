@@ -207,23 +207,31 @@ const MAX_TRIS_PER_TRACK: int = 400000
 ## din oglindire, si dublarea lor ar fi fost geometrie fara castig.
 ## Total masurat: 2 702 585 din 2 750 000, desene 532 (+24, celulele
 ## MultiMesh ale speciilor noi), materiale 21/38 pe tot lantul.
+## Track09 (august 2026): iarba densa de margine (TrackGrass) — ~29k smocuri
+## a 24 de triunghiuri pe banda de 0.35-7 m, masurat 1 058 591 pe toata pista
+## (fata de ~250k inainte). Aceeasi structura de decizie ca la Okinawa:
+## materialele au urcat cu UNUL (28 -> 29 din 38, ShaderMaterial-ul partajat
+## al clasei "iarba"), desenele cu ~40 de celule de MultiMesh, iar cifra e pe
+## TOATA pista — topirea din shader scufunda firele in teren la 68-86 m de
+## camera si celulele au visibility_range, deci felia randata pe cadru e
+## ~10% din total, pe axa care nu doare pe mobil. ~8% aer peste masuratoare:
+## destul pentru tuning de densitate, strans cat sa prinda clasa de accident.
 const TRIS_OVERRIDE := {
 	"Track08": 2750000,
-	# Alpii: 460k dupa rapa paraului din vale (#240). Masurat 373k inainte,
-	# 461k dupa — si aproape TOATA diferenta e decor, nu geometria rapei:
-	# procedural (track.gd) creste doar cu ~7.5k (suprafata apei + trambulina),
-	# in timp ce brazii sar de la 344 la 421 de bucati si cabanele de la 4 la
-	# 11. Motivul e ca taietura de canal deschide sloturi noi de teren, iar
-	# benzile statistice ale lui TrackDecor le umplu — adica exact munca pe
-	# care pragul ar trebui sa o lase sa treaca.
-	#
-	# Ridicat, nu "reparat" prin taiat de vegetatie, din motivul scris in
-	# CLAUDE.md: MATERIALELE au ramas sub plafon (15 -> 17 din 38), deci s-a
-	# ingreunat axa care nu doare pe mobil (triunghiuri) si nu cea care doare
-	# (draw calls). 550k lasa ~20% marja peste cifra de acum, destul cat sa
-	# prinda in continuare clasa de accident (o primitiva la rezolutia
-	# implicita sare cu zeci de mii dintr-un foc).
-	"Track09": 550000,
+	# Alpii, istoricul pragului (august 2026, doua lanturi de lucru paralele
+	# care s-au intalnit la merge):
+	#   373k -> 461k  rapa paraului din vale (#240): taietura de canal
+	#     deschide sloturi noi de teren, iar benzile statistice le umplu
+	#     (brazii 344 -> 421, cabanele 4 -> 11); materialele 15 -> 17 din 38.
+	#   +~808k  iarba densa de margine (TrackGrass, #271): ~29k smocuri a 24
+	#     de triunghiuri pe banda de 0.35-7 m; materialele +1 (ShaderMaterial-ul
+	#     partajat al clasei "iarba"), desenele +~40 de celule MultiMesh.
+	#     Cifra e pe TOATA pista — topirea din shader (68-86 m) si
+	#     visibility_range fac felia randata pe cadru ~10% din total.
+	# Pragul de mai jos e pe COMBINATIA masurata dupa merge, cu ~8% aer:
+	# destul pentru tuning de densitate, strans cat sa prinda clasa de
+	# accident (o primitiva la rezolutia implicita sare cu zeci de mii).
+	"Track09": 1150000,
 }
 
 

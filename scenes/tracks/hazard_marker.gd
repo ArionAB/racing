@@ -81,6 +81,13 @@ enum Kind {
 ## fi micsorat pe nedrept — de-aia scara sta langa model, nu langa tema.
 @export_range(0.05, 4.0, 0.01) var model_scale: float = 1.0
 
+## Ce PIESA din GLB se pastreaza (celelalte se arunca). Gol = tot fisierul.
+##
+## Kiturile isi tin mai multe obiecte intr-un singur fisier —
+## `scatter/beach_clutter.glb` are cinci, din care pentru un deflector ne
+## trebuie doar `Driftwood_Log`.
+@export var model_node: String = ""
+
 ## Se uita spre directia in care matura.
 ##
 ## Fara asta obiectul ramane pe axele LUMII. La o barca targita e o nepasare
@@ -129,6 +136,8 @@ func model_spec() -> Dictionary:
 		spec["scale"] = model_scale
 		spec["roll"] = roll
 		spec["face_travel"] = face_travel
+		if not model_node.is_empty():
+			spec["model_node"] = model_node
 	if not tri_class.is_empty():
 		spec["tri_class"] = tri_class
 	# Modul de miscare se trimite DOAR cand nu e implicitul. Cheia lipsa

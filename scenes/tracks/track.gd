@@ -248,6 +248,12 @@ static func themes() -> Dictionary:
 			# temele care au (alpinul, cu sisturile lui), acela e implicitul si
 			# steagul asta nu mai trebuie scris.
 			"rockfall_class": "rock",
+			# Deflectorul: bolovani desprinsi din faleza, cazuti de-a curmezisul
+			# drumului (#244) — in locul lamei albe cu dungi, care pe o pista de
+			# canion se citea ca mobilier de santier.
+			"deflector_model": "res://assets/models/rocks/rock_large.glb",
+			"deflector_node": "Rock_Large",
+			"deflector_scale": 1.15,
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
 			"water": false,
 		},
@@ -609,6 +615,13 @@ static func themes() -> Dictionary:
 			"cliffs": false,     # promontoriul e zid gusuku, nu faleza de canion
 			"decor": "bands",    # densitatea din style_bible §7, ca pe desert
 			"props": "island",   # ...dar palmieri si bazalt, nu cactusi
+			# Deflectorul: busteni de driftwood aruncati de mare de-a curmezisul
+			# drumului (#244). Pe o insula, lemnul adus de valuri e cel mai
+			# firesc lucru cazut peste sosea — si e deja in kitul de plaja.
+			"deflector_model": "res://assets/models/scatter/beach_clutter.glb",
+			"deflector_node": "Driftwood_Log",
+			"deflector_scale": 1.0,
+			"deflector_class": "wood",
 			"water": true,       # singura tema cu mare (vezi _build_water)
 			# Cat de adanc cade terenul dincolo de coridorul pistei. Trebuie sa
 			# duca adancimea DECIS peste SEA_NEAR_DEPTH, altfel grila fina de tarm
@@ -3989,7 +4002,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.TYPHOON:
 			_build_typhoon(frac)
 		HazardMarker.Kind.DEFLECTOR:
-			_build_deflector(frac, signf(float(hz.get("side", 1))))
+			_build_deflector(frac, signf(float(hz.get("side", 1))), spec)
 		HazardMarker.Kind.FLYOFF:
 			_build_flyoff(frac)
 		HazardMarker.Kind.EXCAVATOR:
@@ -4426,13 +4439,27 @@ func _rail_reach(origin: Vector3, dir: Vector3, max_len: float,
 
 ## Deviatorul: bariera oblica ancorata pe o margine, care taie drumul in
 ## diagonala si te trimite pe cealalta banda.
-func _build_deflector(frac: float, side_sign: float = 1.0) -> void:
+func _build_deflector(frac: float, side_sign: float = 1.0,
+		spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
 	var deflector := DeflectorHazard.new()
 	deflector.road_half_width = half_width
 	deflector.side_sign = side_sign
+	# Din ce e facuta bariera: ce cere nodul, altfel obiectul temei, altfel
+	# lama alba cu dungi de dinainte (#244). Fiecare lume are alt lucru cazut
+	# peste drum — un trunchi pe insula, un bolovan in canion.
+	var model_path := String(spec.get("model",
+		theme_flag("deflector_model", "")))
+	if not model_path.is_empty() and ResourceLoader.exists(model_path):
+		deflector.model_scene = load(model_path)
+		deflector.model_node = String(spec.get("model_node",
+			theme_flag("deflector_node", "")))
+		deflector.model_scale = float(spec.get("scale",
+			theme_flag("deflector_scale", 1.0)))
+		deflector.tri_class = String(spec.get("tri_class",
+			theme_flag("deflector_class", theme_flag("rock_class", ""))))
 	# looking_at: -Z pe sensul cursei, deci +X = marginea din dreapta.
 	deflector.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), baked[idx])
 	add_child(deflector)

@@ -496,6 +496,65 @@ Doua reguli care nu-s de gust:
 - **`roll` doar la bolovani.** Un car cu fan care se da peste cap traversand
   ulita e exact greseala pe care o evita barca sabani din Okinawa.
 
+### Modelele cu schelet se anima singure
+
+Un GLB cu schelet si animatii (vaca Quaternius de pe Alpi) isi alege singur
+ciclul, dupa **viteza reala** a obstacolului: parcat **paste** (Eating/Idle),
+la pas **merge** (Walk), peste ~3 m/s **galopeaza** (Gallop) — deci aceeasi
+vaca paste pe acostament in Traversare si incetineste in capetele pendularii,
+fara nicio setare. Conventia numelor de animatii vine din
+`tools/blender/build_cow_animated.py`; un GLB fara schelet ramane rigid, ca
+pana acum. Verificare vizuala: `tools/ProbeCow.tscn`.
+
+---
+
+## 5e. Figuranti animati pe traiectorie proprie: nodul PathMover
+
+Obstacolele de la 5d stau PE sosea si matura carosabilul. Un **figurant** e
+altceva: tractorul care se plimba pe langa drum, barca de pe lac, animalul
+care paste intre doua tufe — miscare care da viata lumii, pe margine, fara sa
+fie gimmick de cursa. Traiectoria o desenezi tu, exact ca traseul.
+
+### Pas cu pas
+
+1. Click dreapta pe radacina pistei → **Add Child Node** → `PathMover`
+   (e un Path3D, deci are acelasi gizmo de desenat curbe ca traseul).
+2. Deseneaza traiectoria cu **Add Point**, din vederea de sus, fara grija
+   cotelor: cu `stick_to_ground` bifat (implicitul), figurantul isi ia cota
+   din teren cu un raycast si urca dealul singur. Il stingi doar pentru barca,
+   care sta pe cota curbei (linia apei).
+3. In Inspector, grupul de infatisare — acelasi contract ca la HazardMarker:
+   - `model` — GLB-ul din `assets/models/` (gol = cutie galbena placeholder,
+     gabarit de tractor: se vede din prima ca e substituent, nu arta);
+   - `model_node` — ce piesa din GLB se pastreaza (gol = tot fisierul);
+   - `model_scale`, `tri_class` — ca la HazardMarker;
+   - `model_yaw` — corectie de orientare, in grade: daca figurantul merge cu
+     spatele sau cu umarul inainte, de aici se indreapta.
+4. Grupul **Miscare**:
+   - `speed` — m/s; **0 = parcat**, util cat timp asezi curba;
+   - `travel_mode` — **BUCLA** pentru trasee inchise (tractorul da ture;
+     inchide curba unde a inceput, altfel se vede teleportarea) sau
+     **DUS_INTORS** pentru trasee deschise (animalul intre doua tufe;
+     intoarcerea la capete e lina, ca o manevra, nu un snap);
+   - `phase` — de unde porneste pe curba (0..1): doi figuranti pe aceeasi
+     bucla cu faze diferite nu merg lipiti unul de altul;
+5. Grupul **Leganare** (pe pivotul vizual, nu pe coliziune): `bob_amplitude`
+   = saltare pe verticala (barca pe valuri), `rock_amplitude` = ruliu in jurul
+   axei de mers (tractor pe drum de tara), `sway_frequency` = ritmul.
+6. **Salveaza scena.** Nodul e al tau, deci supravietuieste la Regenerate, ca
+   orice decor manual.
+
+### Ce stie singur
+
+- **Coliziune cinstita**: corpul e AnimatableBody3D cu `sync_to_physics`, ca
+  trenul — masina care intra in el se ciocneste real. Dar figurantii NU imping
+  inapoi ca obstacolele de pe carosabil: stau pe margine, iar cine iese de pe
+  sosea ca sa-i loveasca isi asuma ciocnirea, ca la orice perete.
+- **GLB cu schelet** → porneste singur ciclul de mers in bucla (prefera
+  animatia „walk", altfel prima din fisier).
+
+Sonda dedicata: `tools/ProbePathMover.tscn`.
+
 ---
 
 ## 6. Ce NU se poate inca vizual (exista in cod, cere-le cand ai nevoie)
@@ -506,6 +565,13 @@ Doua reguli care nu-s de gust:
   lasi peste tot. Granularitatea pe viraj e #235.
 - **Latime variabila pe sectoare** — se declara in COD (`_width_segments()`,
   vezi sectiunea 5c), nu inca dintr-un export pe radacina.
+- **Iarba densa de margine** (covorul de fire care se leagana, de pe Alpii) —
+  se activeaza per TEMA, in cod: `"dense_grass": true` si plafonul de
+  altitudine `dense_grass_max_y` in `themes()` din `track.gd`. Banda
+  (0.35–7 m de la asfalt), densitatea si distanta de topire sunt constante in
+  `scenes/tracks/track_grass.gd`. Costul e in triunghiuri (axa ieftina), dar
+  cifra per pista creste serios — dupa activare ruleaza `probe_decor` si
+  ridica pragul pistei DOAR cu masuratoarea in fata.
 
 ---
 

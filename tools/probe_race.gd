@@ -228,9 +228,9 @@ func _tick_race(delta: float) -> void:
 			st.slow_s = float(st.slow_s) + delta
 		if car.controller != null and car.controller.get_throttle() < -0.5:
 			st.reverse_s = float(st.reverse_s) + delta
-		# Contactele ultimului move_and_slide sunt inca valide in acest tick.
-		for c in car.get_slide_collision_count():
-			var hit := car.get_slide_collision(c).get_collider()
+		# Pe fizica intreaga contactele vin de la solver (contact_monitor e
+		# pornit in Car._ready), nu din move_and_slide.
+		for hit in car.get_colliding_bodies():
 			if hit is SlidingHazard:
 				st.slide_hits = int(st.slide_hits) + 1
 			elif _is_under(hit as Node, "CarouselHazard"):
@@ -275,8 +275,8 @@ func _watch_stuck(car: Car, st: Dictionary, speed: float, delta: float) -> void:
 	st.stuck_t = 0.0
 	st.stuck_reports = int(st.stuck_reports) + 1
 	var touching: Array[String] = []
-	for c in car.get_slide_collision_count():
-		var hit := car.get_slide_collision(c).get_collider() as Node3D
+	for body in car.get_colliding_bodies():
+		var hit := body as Node3D
 		if hit != null:
 			touching.append("%s@(%.0f,%.0f,%.0f)" % [_describe(hit),
 				hit.global_position.x, hit.global_position.y, hit.global_position.z])

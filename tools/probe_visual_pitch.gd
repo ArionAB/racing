@@ -143,12 +143,18 @@ func _drive(data: CarData) -> Dictionary:
 		var slope := asin(clampf(up.dot(fwd_h), -1.0, 1.0))
 		if slope <= SLOPE_MIN: # doar coborari (bot in jos = panta pozitiva aici)
 			continue
-		var diff := absf(visual.rotation.x - slope)
+		# Pe fizica intreaga tangajul e al CORPULUI (suspensia il aseaza pe
+		# panta), nu al lui _visual — ala nu se mai inclina pe X deloc. Il
+		# citim din cat urca/coboara axa de mers a corpului, cu semnul lui
+		# `slope` (pozitiv = coborare, deci bot in jos = fwd.y negativ).
+		var fwd := -car.global_transform.basis.z
+		var body_pitch := asin(clampf(-fwd.y, -1.0, 1.0))
+		var diff := absf(body_pitch - slope)
 		total += diff
 		if diff > worst:
 			worst = diff
 			worst_at = {"frac": _track.frac_at(car.road_index, car.route),
-				"slope": slope, "pitch": visual.rotation.x,
+				"slope": slope, "pitch": body_pitch,
 				"v": car.horizontal_speed()}
 		samples += 1
 

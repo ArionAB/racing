@@ -1,16 +1,27 @@
 class_name Car
-extends CharacterBody3D
-## Masina arcade 3D — doar fizica; comenzile vin de la un CarController
-## (player sau AI), identitatea (statistici/culoare) dintr-un CarData.
+extends RigidBody3D
+## Masina pe FIZICA INTREAGA (pivotul #261, integrata in joc la #258): un
+## RigidBody3D sprijinit pe 4 raycasturi cu arc + amortizor, cate unul per
+## roata. Ruliul, tangajul si legănarea peste denivelari ies din fizica, nu
+## mai sunt efecte desenate. Comenzile vin de la un CarController (player sau
+## AI), identitatea (statistici/culoare) dintr-un CarData — neschimbat.
 ##
-## Fizica: viteza descompusa in "inainte" + "lateral" fata de directia
-## masinii; grip-ul amortizeaza lateralul, drift-ul il lasa sa alunece.
-## Gravitatia si pantele raman in grija lui move_and_slide().
+## Ce ramane arcade, deliberat: directia scrie viteza unghiulara pe Y direct
+## (un torque "realist" ar fi inca un etaj intre jucator si raspuns), grip-ul
+## lateral e o forta de amortizare a vitezei laterale, plafonul de viteza e o
+## contra-forta. Fortele de cauciuc se aplica LA SOL, nu in centrul de masa —
+## de acolo vin ruliul in viraj, squat-ul la accelerare, dive-ul la frana.
+##
+## Compatibilitate: `velocity` si `is_on_floor()`/`get_floor_normal()` raman
+## ca proprietate/metode-shim peste linear_velocity si suspensie, ca tot ce
+## vorbeste cu masina (hazarde, sonde, AI) sa nu-si schimbe limbajul.
 ##
 ## Turbo model Ignition: o bara care se incarca in timp (mai repede in
 ## drift) si pe care o arzi CAND VREI TU tinand butonul de turbo — skill de
 ## decizie (pe ce dreapta, inaintea carei sarituri), nu de timing la viraj.
-## Drift-ul e handbrake pur: unealta de viraj care hraneste bara mai repede.
+## Drift-ul e handbrake pur, iar pe fizica intreaga taie aderenta DOAR LA
+## SPATE: fata tine, spatele aluneca — unghiul de derapaj e consecinta, nu
+## simulare.
 
 signal boost_started(car: Car)
 signal wall_hit(car: Car, impact: float)
@@ -77,45 +88,63 @@ const SLIP_GRIP_WET: float = 3.6
 @export_group("Imbranceli")
 ## Cat de "saltarea" e izbitura. 0 = perfect plastica (se lipesc), 1 = bile de
 ## biliard. Sub 1 = arcade: se simte lovitura, dar nu ricoseaza absurd.
+## Pe fizica intreaga intra in PhysicsMaterial-ul corpului.
 @export var bump_restitution: float = 0.35
-## Plafon pe IMPULS, nu pe delta-v-ul fiecarei masini. Diferenta conteaza: taiat
-## pe masina, plafonul le egalizeaza (si autobuzul, si sportiva primesc fix
-## maximul, adica exact identitatea pe care o vrem), taiat pe impuls, raportul de
-## mase se pastreaza intact — doar violenta scade. Calibrat ca cea mai usoara
-## masina din garaj (0.9) sa incaseze cel mult ~15 m/s.
-@export var bump_max_impulse: float = 14.0
+## Plafon pe delta-v-ul incasat dintr-un contact cu alta masina (m/s).
+## Solverul imparte impulsul dupa raportul maselor din constructie; peste
+## plafon excedentul se taie PASTRAND directia — identitatea prin masa ramane,
+## violenta scade. Inlocuieste bump_max_impulse de pe CharacterBody.
+@export var bump_max_dv: float = 15.0
 ## Sub viteza asta de apropiere, contactul e frecare, nu izbitura: masinile care
 ## se ating mergand alaturi nu trebuie sa-si dea ghionturi.
 @export var bump_min_closing: float = 2.5
-## Cat nu mai poate genera un al doilea impuls ACEEASI pereche de masini.
-## Fara asta, contactul sustinut aduna un impuls la fiecare cadru de fizica —
-## de acolo veneau catapultarile de 50 m/s masurate cu tools/probe_race.gd.
+## Cat nu mai emite ACEEASI pereche un al doilea semnal de bump. Doar pe
+## semnal: impingerea fizica sustinuta o rezolva solverul, fara impulsuri
+## repetate — catapultarile din vechiul cod nu mai au de unde sa apara.
 @export var bump_pair_cooldown: float = 0.12
-## Cat de tare se resping masinile intrepatrunse, per metru de patrundere.
-## Fara asta o masina grea poate "inghiti" una usoara si o cara in ea.
-@export var bump_separation: float = 8.0
-## Lovitura care te prinde in afara centrului te si ROTESTE, nu doar te muta —
-## ca in realitate (PIT: forta prinde coltul din spate, nu centrul de masa).
-## rad/s per (m de brat de parghie x m/s de delta-v).
-@export var bump_yaw_factor: float = 0.25
-## Plafon pe rotatia primita dintr-o singura lovitura (rad/s). Sub el ramane
-## arcade: te sucesti, nu faci piruete de patinaj.
+## Plafon pe rotatia primita dintr-o lovitura (rad/s). Necesar si pe fizica
+## intreaga: directia scrie yaw-ul direct, deci rotatia data de solver ar fi
+## STEARSA in cadrul urmator — o preluam in _impact_yaw (plafonat, se stinge
+## singur) si o adunam peste comanda. Te sucesti, nu faci piruete.
 @export var bump_yaw_max: float = 2.4
 ## Peste acest delta-v incasat, rotile pierd scurt aderenta laterala: lovitura
 ## se simte in directie, iar cel lovit isi prinde masina din alunecare.
 @export var bump_slip_dv: float = 5.0
 
+@export_group("Suspensie")
+## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
+@export var suspension_rest: float = 0.35
+## Frecventa naturala a arcului (Hz). 2-3 = masina de strada arcade;
+## rigiditatea se deriva din ea si din masa pe roata, deci tuning-ul nu
+## depinde de cat cantareste corpul. Devine per masina in CarData la #260.
+@export var spring_freq: float = 2.5
+## Raportul de amortizare (1 = critic). 0.5-0.7 = revii asezat.
+@export var damping_ratio: float = 0.6
+
 # --- Stare de cursa (scrisa de Race) ---
 var race_active: bool = false
-## Pe grila, inainte de GO: fizica e complet inghetata (vezi _physics_process).
+## Pe grila, inainte de GO: corpul e INGHETAT (freeze), deci gravitatia nu
+## curge si nimeni nu aluneca la vale in countdown — bug-ul din aug 2026,
+## rezolvat pe rigid body din constructie.
 ##
 ## Flag SEPARAT de `race_active` desi amandoua sunt false in countdown, fiindca
 ## `race_active = false` are al doilea inteles: "scoasa din cursa de un hazard"
 ## (trenul si avalansa il folosesc pentru stun). Acolo fizica TREBUIE sa curga —
-## trenul isi arunca victima cu corpul lui solid cat tine stun-ul, iar aia se
-## intampla prin move_and_slide. Un inghet legat de `race_active` ar fi stins
-## tacut explozia trenului.
-var on_start_grid: bool = false
+## trenul isi arunca victima cu corpul lui solid cat tine stun-ul. Un inghet
+## legat de `race_active` ar fi stins tacut explozia trenului.
+var on_start_grid: bool = false:
+	set(value):
+		on_start_grid = value
+		freeze = value
+
+## Shim de compatibilitate: CharacterBody3D avea `velocity` si tot ce vorbeste
+## cu masina (hazarde, sonde, AI, kickere) il foloseste. Pe rigid body e
+## acelasi lucru cu linear_velocity — proprietatea pastreaza limbajul.
+var velocity: Vector3:
+	get:
+		return linear_velocity
+	set(value):
+		linear_velocity = value
 var finished: bool = false
 var race_position: int = 1
 var is_player: bool = false
@@ -197,10 +226,36 @@ var _was_on_floor: bool = true
 var _prev_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
 var _bump_cooldown: float = 0.0
-## instance_id-ul celeilalte masini -> secunde pana la urmatorul impuls admis.
+## instance_id-ul celeilalte masini -> secunde pana la urmatorul semnal admis.
 var _bump_pairs: Dictionary = {}
-## Rotatia (rad/s) primita dintr-o lovitura excentrica; se stinge singura.
+## Rotatia (rad/s) primita dintr-o lovitura excentrica; se stinge singura si
+## se ADUNA peste comanda de directie (care altfel ar sterge-o).
 var _impact_yaw: float = 0.0
+
+# --- Suspensia pe raycast (fizica intreaga) ---
+## Compresia curenta a fiecarui arc [0, suspension_rest], ordinea FL FR RL RR.
+var wheel_compression: Array[float] = [0.0, 0.0, 0.0, 0.0]
+## Cate roti au atins solul in tick-ul curent (0-4).
+var wheels_on_ground: int = 0
+## Factor extern pe plafonul de viteza (crush-ul are al lui; asta e pentru
+## sonde si hazarde care vor sa taie viteza fara sa stie de crush).
+var speed_limit_factor: float = 1.0
+## Raza rotii fizice (cast = rest + raza); se deriva din model in apply_data.
+var _susp_wheel_radius: float = 0.30
+## Colturile rotilor in spatiul masinii; din dimensiunile CarData.
+var _wheel_points: Array[Vector3] = []
+## Media punctelor de contact cu solul (offset fata de origine): AICI se
+## aplica fortele de cauciuc — la sol, nu in centrul de masa. De aici ruliul
+## in viraj, squat-ul la accelerare, dive-ul la frana.
+var _contact_offset: Vector3 = Vector3.ZERO
+## Acelasi lucru per axa (0 = fata, 1 = spate): driftul taie doar spatele.
+var _axle_offset: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
+var _axle_grounded: Array[int] = [0, 0]
+## Normala medie a solului de sub roti (shim pentru get_floor_normal).
+var _ground_normal: Vector3 = Vector3.UP
+## Yaw-ul scris de NOI la finalul tick-ului trecut; diferenta la intrarea in
+## tick = rotatia data de solver (lovitura excentrica).
+var _commanded_yaw: float = 0.0
 var _skid_accum: float = 0.0
 var _respawn_cooldown: float = 0.0
 
@@ -211,15 +266,63 @@ static var _skid_mat: StandardMaterial3D
 var _collision_shape: CollisionShape3D
 
 func _ready() -> void:
-	floor_snap_length = 2.0 # tine masina lipita de asfalt peste creste
+	mass = 100.0 * mass_factor
+	# Gravitatia proiectului e cea implicita (9.8); jocul cade cu `gravity`.
+	var project_g: float = ProjectSettings.get_setting(
+		"physics/3d/default_gravity", 9.8)
+	gravity_scale = gravity / project_g
+	# Centrul de masa sub origine: parghia care tine masina pe roti in viraj.
+	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
+	center_of_mass = Vector3(0.0, -0.15, 0.0)
+	# Nu doarme niciodata: un corp adormit pe grila n-ar mai primi fortele
+	# suspensiei si s-ar aseza pe colizer cand il trezeste contactul.
+	can_sleep = false
+	# Amortizarile globale raman mici: franarea reala vine din drag si grip.
+	linear_damp = 0.0
+	angular_damp = 0.5
+	# Imbranceli: contactele se raporteaza (semnal + plafon), restitutia
+	# arcade vine din material.
+	contact_monitor = true
+	max_contacts_reported = 8
+	var pmat := PhysicsMaterial.new()
+	pmat.bounce = bump_restitution
+	pmat.friction = 0.4
+	physics_material_override = pmat
 	_build_visual()
 	_build_effects()
+	# Colizerul caroseriei NU atinge solul in mers (garda la sol o da
+	# suspensia); exista pentru imbranceli si aterizari dure. Talpa lui sta la
+	# +0.25 fata de origine (care e la nivelul solului): bordurile si dalele
+	# sub inaltimea aia sunt treaba ROTILOR (raycasturile trec peste ele), nu
+	# a caroseriei. Cu talpa la +0.1, ca pe CharacterBody, o dala de 16 cm era
+	# un zid frontal — masurat cu testul de denivelari: masina se oprea in
+	# prima dala in loc sa o calce. move_and_slide pasea peste; solverul nu.
 	_collision_shape = CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(2.2, 1.0, 3.8)
 	_collision_shape.shape = box
-	_collision_shape.position = Vector3(0, 0.6, 0)
+	_collision_shape.position = Vector3(0, 0.75, 0)
 	add_child(_collision_shape)
+	_rebuild_suspension_geometry(0.85, 1.45)
+
+
+## Punctele de prindere ale arcurilor, din dimensiunile vehiculului.
+##
+## Inaltimea lor e aleasa EXACT astfel incat, la echilibru static, originea
+## masinii sa cada la nivelul solului — acelasi contract ca pe CharacterBody.
+## Toata aritmetica de efecte construita pe el (talpa colizerului la +0.1,
+## urmele, umbra, pozitiile particulelor) ramane valabila fara nicio ajustare.
+## Compresia statica nu depinde de masa: comp = g / omega^2.
+func _rebuild_suspension_geometry(wheel_x: float, wheel_z: float) -> void:
+	var omega := TAU * spring_freq
+	var static_comp := gravity / (omega * omega)
+	var attach_h := suspension_rest + _susp_wheel_radius - static_comp
+	_wheel_points = [
+		Vector3(-wheel_x, attach_h, -wheel_z),
+		Vector3(wheel_x, attach_h, -wheel_z),
+		Vector3(-wheel_x, attach_h, wheel_z),
+		Vector3(wheel_x, attach_h, wheel_z),
+	]
 
 func set_controller(new_controller: CarController) -> void:
 	controller = new_controller
@@ -233,14 +336,20 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	acceleration = data.acceleration
 	grip = data.grip
 	mass_factor = data.mass_factor
+	mass = 100.0 * mass_factor # identitatea prin masa, direct in solver
 	body_color = data.color if color_override.a == 0.0 else color_override
 	if _visual != null:
 		_visual.queue_free()
 	_build_visual()
-	# Colizerul si efectele urmeaza dimensiunile vehiculului.
+	# Colizerul, suspensia si efectele urmeaza dimensiunile vehiculului.
 	if _collision_shape != null:
 		var box := _collision_shape.shape as BoxShape3D
 		box.size = Vector3(data.body_width * 0.9, 1.0, data.body_length * 0.85)
+	# Raza fizica a rotii vine din model (via _build_visual); ecartamentul si
+	# ampatamentul din corpul masinii — autobuzul calca mai lat si mai lung.
+	_susp_wheel_radius = clampf(_wheel_radius, 0.22, 0.42)
+	_rebuild_suspension_geometry(
+		data.body_width * 0.42, data.body_length * 0.38)
 	if _drift_particles != null:
 		_drift_particles.position.z = data.body_length * 0.5
 		_boost_particles.position.z = data.body_length * 0.5 + 0.1
@@ -265,26 +374,14 @@ func _physics_process(delta: float) -> void:
 		if track.route_is_wet(route):
 			apply_slip(SLIP_GRIP_WET)
 
-	# Pe grila de start masina STA. Comenzile sunt deja blocate mai jos
-	# (race_active), dar asta singur nu ajunge: gravitatia se aplica oricum, iar
-	# move_and_slide o proiecteaza pe planul podelei — pe orice portiune inclinata
-	# de asfalt componenta aia devine viteza orizontala in josul pantei. Nimic
-	# n-o opreste (frecare statica nu modelam, iar drag-ul e proportional cu
-	# viteza, deci la 0.5 m/s frana e neglijabila), asa ca in cele 3.6 s de
-	# countdown plutonul se scurge cativa metri inainte de GO. Masurat cu
-	# tools/probe_start_grid.gd: 3.9-5.0 m pe Dunele, 0 pe Okinawa si Alpi — de
-	# aici si "cateodata" din raport, depinde de panta de sub grila.
-	#
-	# Inghetam complet: fara gravitatie, fara move_and_slide. Efectele vizuale
-	# raman (umbra, rotile, caroseria), ca masina sa nu para un obiect mort.
-	if on_start_grid:
-		velocity = Vector3.ZERO
-		_prev_velocity = Vector3.ZERO
-		_update_visual_tilt(delta, 0.0, 0.0)
-		_update_wheels(delta, 0.0, 0.0)
-		_update_shadow()
-		_update_effects(delta)
-		return
+	# Pe grila de start corpul e INGHETAT (freeze, prin on_start_grid), deci
+	# gravitatia nu curge si nimeni nu aluneca la vale in countdown — bug-ul
+	# masurat in aug 2026 (3.9-5.0 m pe Dunele), rezolvat aici din constructie.
+	# Efectele vizuale de mai jos ruleaza oricum: masina nu pare obiect mort.
+
+	# Bilantul solverului INTAI, cat _prev_velocity e inca "ieri": ce s-a
+	# schimbat intre tick-uri e opera coliziunilor, nu a fortelor noastre.
+	_process_contacts(delta)
 
 	var steer := 0.0
 	var throttle := 0.0
@@ -297,87 +394,21 @@ func _physics_process(delta: float) -> void:
 		drift_pressed = controller.is_drift_pressed()
 		turbo_pressed = controller.is_turbo_pressed()
 
-	velocity.y -= gravity * delta
+	_apply_suspension()
 
 	var forward := -global_transform.basis.z
 	var fwd_h := Vector3(forward.x, 0.0, forward.z).normalized()
-	var hvel := Vector3(velocity.x, 0.0, velocity.z)
-	var fwd_speed := hvel.dot(fwd_h)
+	var fwd_speed := Vector3(velocity.x, 0.0, velocity.z).dot(fwd_h)
 
 	_update_drift(drift_pressed, steer, fwd_speed)
 	_update_turbo(turbo_pressed, delta)
 
-	# --- Motor / frana ---
-	var vmax := _current_max_speed()
-	if throttle > 0.0 and fwd_speed < vmax:
-		var accel := acceleration
-		if is_boosting:
-			accel += turbo_accel_bonus
-		hvel += fwd_h * accel * throttle * delta
-	elif throttle < 0.0:
-		if fwd_speed > 2.0:
-			hvel += fwd_h * brake_force * throttle * delta
-		elif fwd_speed > -reverse_speed:
-			hvel += fwd_h * acceleration * 0.6 * throttle * delta
-	# Drag-ul e REZISTENTA LA RULARE, deci se aplica doar cand rotile ating
-	# solul. Pana in august 2026 se aplica si in aer, iar consecinta nu era
-	# cosmetica: cu 0.35 si ~2.4 s de zbor, masina pierdea peste jumatate din
-	# viteza orizontala CAT ERA IN AER (masurat cu tools/probe_jump.gd: 36.9
-	# m/s la desprindere, 17.9 la aterizare). Efectele:
-	#   - orice saritura se plafona in jur de 40 m, oricat de tare intrai,
-	#     fiindca viteza in plus se topea in zbor;
-	#   - aterizarea venea mereu cu o franare invizibila, exact contrar
-	#     asteptarii ca airtime-ul PASTREAZA viteza;
-	#   - rezultatul devenea instabil (32 m/s trecea un gol pe care 34 il rata),
-	#     fiindca doua traiectorii diferite pierdeau altcat.
-	# In aer nu exista nici o rezistenta modelata: fara sol, nici o forta
-	# orizontala nu are de unde sa apara.
-	if is_on_floor():
-		hvel -= hvel * drag * delta
-
-	# --- Directie (amplificata si "impinsa" in directia drift-ului) ---
-	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
-	var effective_steer := steer
-	if is_drifting:
-		effective_steer = clampf(
-			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
-	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
-	rotate_y(effective_steer * steer_speed * speed_frac * reverse_sign * delta)
-
-	# --- Rotatia primita din imbranceli (lovitura excentrica) ---
-	# Se stinge singura in ~o jumatate de secunda; cu grip-ul taiat de aceeasi
-	# lovitura, masina chiar ALUNECA pe durata ei — un derapaj de prins, nu o
-	# animatie. Rotim doar pe sol: in aer ar insemna sa aterizezi cu botul in
-	# alta parte decat merge viteza (aceeasi regula ca la spin_body).
-	if _impact_yaw != 0.0:
-		if is_on_floor():
-			rotate_y(_impact_yaw * delta)
-		_impact_yaw *= exp(-4.0 * delta)
-		if absf(_impact_yaw) < 0.05:
-			_impact_yaw = 0.0
-
-	# --- Grip lateral pe noua directie ---
-	forward = -global_transform.basis.z
-	fwd_h = Vector3(forward.x, 0.0, forward.z).normalized()
-	fwd_speed = hvel.dot(fwd_h)
-	var lateral := hvel - fwd_h * fwd_speed
-	var grip_now := drift_grip if is_drifting else grip
-	if slip_time > 0.0:
-		grip_now = slip_grip
-	lateral *= exp(-grip_now * delta)
-	if fwd_speed > vmax:
-		fwd_speed = move_toward(fwd_speed, vmax, 12.0 * delta)
-	hvel = fwd_h * fwd_speed + lateral
+	_apply_driving(steer, throttle, fwd_h, fwd_speed)
 
 	slip_time = maxf(slip_time - delta, 0.0)
 	crush_time = maxf(crush_time - delta, 0.0)
 	if crush_time <= 0.0:
 		crush_factor = 1.0
-	velocity.x = hvel.x
-	velocity.z = hvel.z
-	_prev_velocity = velocity
-	move_and_slide()
-	_handle_bumping()
 	_detect_landing()
 	_update_visual_tilt(delta, steer, fwd_speed)
 	_update_wheels(delta, steer, fwd_speed)
@@ -386,23 +417,228 @@ func _physics_process(delta: float) -> void:
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
+	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta.
+	if track != null and is_on_floor() \
+			and track.is_on_road(road_index, global_position, route):
+		last_safe_index = road_index
+		last_safe_route = route
+	# Reperele pentru bilantul urmatorului tick.
+	_prev_velocity = velocity
+	_commanded_yaw = angular_velocity.y
+
+
+## Shim de compatibilitate: "pe sol" inseamna cel putin o roata cu contact.
+func is_on_floor() -> bool:
+	return wheels_on_ground > 0
+
+
+## Shim de compatibilitate: normala medie a solului de sub roti.
+func get_floor_normal() -> Vector3:
+	return _ground_normal
+
+
+## Un raycast per colt; arcul impinge LA COLT, si exact asta produce ruliul si
+## tangajul: rotile incarcate imping mai tare decat cele usurate.
+func _apply_suspension() -> void:
+	wheels_on_ground = 0
+	var contact_sum := Vector3.ZERO
+	var normal_sum := Vector3.ZERO
+	var axle_sum: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
+	_axle_grounded = [0, 0]
+	var space := get_world_3d().direct_space_state
+	var up := global_transform.basis.y
+	var cast_len := suspension_rest + _susp_wheel_radius
+	# Rigiditatea pe roata din frecventa si masa pe roata (k = m(2*pi*f)^2),
+	# amortizarea din raport — tuning independent de cat cantareste masina.
+	var wheel_mass := mass * 0.25
+	var omega := TAU * spring_freq
+	var k := wheel_mass * omega * omega
+	var c := 2.0 * damping_ratio * sqrt(k * wheel_mass)
+	for i in _wheel_points.size():
+		var attach := to_global(_wheel_points[i])
+		var query := PhysicsRayQueryParameters3D.create(
+			attach, attach - up * cast_len)
+		query.exclude = [get_rid()]
+		var hit := space.intersect_ray(query)
+		if hit.is_empty():
+			wheel_compression[i] = 0.0
+			continue
+		wheels_on_ground += 1
+		var axle := 0 if i < 2 else 1
+		contact_sum += hit.position as Vector3
+		normal_sum += hit.normal as Vector3
+		axle_sum[axle] += hit.position as Vector3
+		_axle_grounded[axle] += 1
+		var dist := attach.distance_to(hit.position as Vector3)
+		var compression := clampf(cast_len - dist, 0.0, suspension_rest)
+		wheel_compression[i] = compression
+		var offset := attach - global_position
+		var point_vel := linear_velocity + angular_velocity.cross(offset)
+		var spring_vel := point_vel.dot(up)
+		var force_mag := k * compression - c * spring_vel
+		# Arcul doar IMPINGE — daca ar si trage, orice creasta ar smulge
+		# masina in jos nefiresc.
+		if force_mag > 0.0:
+			apply_force(up * force_mag, offset)
+	if wheels_on_ground > 0:
+		_contact_offset = contact_sum / float(wheels_on_ground) - global_position
+		_ground_normal = normal_sum.normalized()
+	for axle in 2:
+		if _axle_grounded[axle] > 0:
+			_axle_offset[axle] = axle_sum[axle] / float(_axle_grounded[axle]) \
+				- global_position
+
+
+## Motor, frana, plafon, drag si directie — ca FORTE, cu aceleasi reguli de
+## feel. Fortele de cauciuc se aplica la punctele de contact (vezi nota de la
+## _contact_offset); grip-ul lateral e per axa, ca driftul sa taie doar
+## spatele.
+func _apply_driving(steer: float, throttle: float,
+		fwd_h: Vector3, fwd_speed: float) -> void:
+	# Tractiunea cere contact: cu rotile in aer nu se accelereaza si nu se
+	# vireaza. Drag-ul lipseste si el — lectia sariturii din aug 2026 (in aer
+	# nu exista nicio rezistenta modelata) e pastrata de constructie.
+	var ground_frac := float(wheels_on_ground) / 4.0
+	if ground_frac == 0.0:
+		return
+
+	var hvel := Vector3(velocity.x, 0.0, velocity.z)
+	var vmax := _current_max_speed()
+
+	# --- Motor / frana ---
+	if throttle > 0.0 and fwd_speed < vmax:
+		var accel := acceleration
+		if is_boosting:
+			accel += turbo_accel_bonus
+		apply_force(fwd_h * accel * throttle * mass * ground_frac,
+			_contact_offset)
+	elif throttle < 0.0:
+		if fwd_speed > 2.0:
+			apply_force(fwd_h * brake_force * throttle * mass * ground_frac,
+				_contact_offset)
+		elif fwd_speed > -reverse_speed:
+			apply_force(
+				fwd_h * acceleration * 0.6 * throttle * mass * ground_frac,
+				_contact_offset)
+	# Plafonul: peste vmax nu se taie viteza, se trage inapoi — echivalentul
+	# lui move_toward(12.0) de pe CharacterBody. Central, nu la sol: e un
+	# guvernator de joc, nu o forta fizica, n-are voie sa adauge tangaj.
+	if fwd_speed > vmax:
+		apply_central_force(-fwd_h * 12.0 * mass)
+
+	# --- Rezistenta la rulare, doar pe sol ---
+	apply_force(-hvel * drag * mass * ground_frac, _contact_offset)
+
+	# --- Grip lateral, per axa: fata tine, spatele aluneca in drift ---
+	for axle in 2:
+		if _axle_grounded[axle] == 0:
+			continue
+		var grip_axle := grip
+		if axle == 1 and is_drifting:
+			grip_axle = drift_grip
+		if slip_time > 0.0:
+			grip_axle = slip_grip
+		# Viteza laterala A AXEI (cu componenta din rotatie): spatele care se
+		# roteste in jurul fetei chiar simte ca aluneca, si e amortizat acolo.
+		var offset: Vector3 = _axle_offset[axle]
+		var point_vel := linear_velocity + angular_velocity.cross(offset)
+		var lat := Vector3(point_vel.x, 0.0, point_vel.z)
+		lat -= fwd_h * lat.dot(fwd_h)
+		var axle_frac: float = float(_axle_grounded[axle]) / 2.0
+		apply_force(-lat * grip_axle * mass * 0.5 * axle_frac, offset)
+
+	# --- Directia (amplificata si "impinsa" in directia drift-ului) ---
+	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
+	var effective_steer := steer
+	if is_drifting:
+		effective_steer = clampf(
+			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
+	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
+	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
+	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
+	angular_velocity = Vector3(
+		angular_velocity.x, yaw_rate + _impact_yaw, angular_velocity.z)
+
+
+## Bilantul contactelor raportate de solver: izbituri cu alte masini (plafon,
+## rotatie, slip, semnal), pereti (wall_hit) si popice (imprastiate).
+func _process_contacts(delta: float) -> void:
+	var cars_hit: Array[Car] = []
+	var static_hit := false
+	for body in get_colliding_bodies():
+		if body is Car:
+			cars_hit.append(body as Car)
+		elif body is RigidBody3D:
+			# Popice & co: imprastiate cu un impuls scalat cu masa noastra —
+			# autobuzul le trimite mai departe decat un sport.
+			var dir := (body as Node3D).global_position - global_position
+			dir.y = 0.0
+			if dir.length_squared() < 0.01:
+				dir = -global_transform.basis.z
+			(body as RigidBody3D).apply_central_impulse(
+				dir.normalized() * clampf(
+					horizontal_speed() * 0.5 * mass_factor, 1.0, 16.0)
+				+ Vector3.UP * 1.5)
+		elif body is StaticBody3D:
+			static_hit = true
+
+	var dv_vec := velocity - _prev_velocity
+	if not cars_hit.is_empty():
+		var dv := dv_vec.length()
+		# Plafonul de violenta: excedentul se taie pastrand DIRECTIA, deci
+		# raportul de mase (identitatea) supravietuieste taierii.
+		if dv > bump_max_dv:
+			velocity = _prev_velocity + dv_vec * (bump_max_dv / dv)
+			dv = bump_max_dv
+		# Rotatia data de solver din lovitura excentrica, preluata cu plafon.
+		var solver_yaw := angular_velocity.y - _commanded_yaw
+		if absf(solver_yaw) > 0.1:
+			_impact_yaw = clampf(_impact_yaw + solver_yaw,
+				-bump_yaw_max, bump_yaw_max)
+		# Lovitura mare pe lateral taie scurt aderenta (mecanismul de
+		# aquaplanare, refolosit): un T-bone te face sa derapezi.
+		var fwd := -global_transform.basis.z
+		var fwd_hn := Vector3(fwd.x, 0.0, fwd.z).normalized()
+		var lat_dv := (dv_vec - fwd_hn * dv_vec.dot(fwd_hn)).length()
+		if lat_dv >= bump_slip_dv:
+			slip_time = maxf(slip_time, clampf(0.15 + lat_dv * 0.02, 0.0, 0.55))
+			slip_grip = SLIP_GRIP_WET
+		# Semnalul, cu prag (frecarea nu e ghiont) si cooldown per pereche.
+		if dv >= bump_min_closing:
+			for other in cars_hit:
+				var key := other.get_instance_id()
+				if _bump_pairs.has(key):
+					continue
+				_bump_pairs[key] = bump_pair_cooldown
+				bumped.emit(self, other, dv)
+				if _bump_cooldown <= 0.0 and (is_player or other.is_player):
+					_bump_cooldown = 0.25
+					AudioManager.play_sfx(&"bump")
+	elif static_hit:
+		# Perete/bariera: impact = schimbarea ORIZONTALA de viteza (aterizarea
+		# dura pe sol are dv vertical si nu e izbitura de perete).
+		var dv_h := Vector3(dv_vec.x, 0.0, dv_vec.z).length()
+		if dv_h > 8.0 and _wall_cooldown <= 0.0:
+			_wall_cooldown = 0.35
+			wall_hit.emit(self, dv_h)
+			if is_player:
+				AudioManager.play_sfx(&"wall_hit")
+
 	for key: int in _bump_pairs.keys():
 		var left := float(_bump_pairs[key]) - delta
 		if left <= 0.0:
 			_bump_pairs.erase(key)
 		else:
 			_bump_pairs[key] = left
-	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta. Dupa
-	# move_and_slide, ca is_on_floor() sa fie al cadrului curent.
-	if track != null and is_on_floor() \
-			and track.is_on_road(road_index, global_position, route):
-		last_safe_index = road_index
-		last_safe_route = route
+	_impact_yaw *= exp(-4.0 * delta)
+	if absf(_impact_yaw) < 0.05:
+		_impact_yaw = 0.0
+
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.
 ## Turbo-ul merge SI pe iarba — scurtatura cu turbo e o alegere valida.
 func _current_max_speed() -> float:
-	var vmax := max_speed * speed_scale
+	var vmax := max_speed * speed_scale * speed_limit_factor
 	if track != null and not track.is_on_road(road_index, global_position, route):
 		vmax *= offroad_speed_factor
 	if is_boosting:
@@ -523,162 +759,9 @@ func launch(up_speed: float) -> void:
 	velocity.y = up_speed
 	_punch_scale(Vector3(0.9, 1.18, 0.92)) # intinsa pe verticala la desprindere
 
-func _handle_bumping() -> void:
-	for i in get_slide_collision_count():
-		var col := get_slide_collision(i)
-		var other := col.get_collider() as Car
-		var n := col.get_normal() # dinspre obstacol spre noi
-		var rigid := col.get_collider() as RigidBody3D
-		if rigid != null:
-			# Popice & co: le imprastiem cu un impuls — juice fizic ieftin.
-			# Scalat cu masa: autobuzul le trimite mai departe decat un sport.
-			rigid.apply_central_impulse(-n * clampf(
-				horizontal_speed() * 0.5 * mass_factor, 1.0, 16.0) + Vector3.UP * 1.5)
-			continue
-		if other != null:
-			_resolve_bump(other, col)
-		elif absf(n.y) < 0.5:
-			# Obstacol vertical (perete/bariera): impact = viteza "in" perete.
-			var impact := maxf(0.0, Vector3(
-				_prev_velocity.x, 0.0, _prev_velocity.z).dot(-n))
-			if impact > 8.0 and _wall_cooldown <= 0.0:
-				_wall_cooldown = 0.35
-				wall_hit.emit(self, impact)
-				if is_player:
-					AudioManager.play_sfx(&"wall_hit")
-
-## Izbitura dintre doua masini, cu MASA in ecuatie — principiul de design nr. 1
-## ("grea impinge, usoara zboara") nu ca un caz special, ci ca fizica: acelasi
-## impuls pentru amandoua, impartit la masa fiecareia. Autobuzul (2.6) intrat in
-## Politie (0.9) o trimite de ~3 ori mai tare decat se opreste el.
-##
-## Trei lucruri il fac sa NU fie pinball:
-##  1. impulsul creste cu viteza de APROPIERE, nu e o constanta — frecarea
-##     alaturi de cineva nu mai da ghionturi;
-##  2. o pereche de masini nu poate genera un al doilea impuls mai devreme de
-##     `bump_pair_cooldown` (contactul dura zeci de cadre si aduna la infinit);
-##  3. impulsul e plafonat, deci nimeni nu e catapultat de pe pista — si fiind
-##     plafonat pe IMPULS, nu pe masina, raportul de mase supravietuieste taierii.
-func _resolve_bump(other: Car, col: KinematicCollision3D) -> void:
-	var key := other.get_instance_id()
-	var n := col.get_normal() # dinspre cealalta masina spre noi
-	n.y = 0.0 # imbrancelile sunt orizontale; saltul il face suspensia, nu contactul
-	var vertical_contact := n.length_squared() < 0.01
-	if vertical_contact:
-		# Normala aproape verticala = o masina s-a URCAT pe cealalta. Se intampla
-		# cu vehiculele lungi (autobuzul calca sportiva si o cara in el 20m, cu
-		# zero imbranceala — masurat inainte de fix). Atunci directia de respingere
-		# o luam din pozitiile relative, ca sa se desprinda oricum.
-		n = global_position - other.global_position
-		n.y = 0.0
-		if n.length_squared() < 0.01:
-			return
-	n = n.normalized()
-	if float(_bump_pairs.get(key, 0.0)) > 0.0:
-		# Contact sustinut, in cooldown: impulsul nu se repeta, dar nici nu ne
-		# lasam opriti in zid — alunecarea ne sterge in fiecare cadru viteza
-		# spre contact, deci fara refacere un contact de 7 cadre insemna tot o
-		# oprire seaca. Pe normala, perechea primeste viteza COMUNA ponderata cu
-		# masa (contact plastic care conserva impulsul): cel din spate impinge,
-		# cel din fata e impins, amandoi isi continua drumul — bulldozer-ul din
-		# principiul de design nr. 1, nu un zid.
-		var m_s := maxf(mass_factor, 0.05)
-		var m_o := maxf(other.mass_factor, 0.05)
-		var vn_self := _prev_velocity.dot(n)
-		var vn_oth := other.velocity.dot(n)
-		# Tinta pe normala: viteza comuna cand inca impingem, propria viteza
-		# de dinainte cand doar ne atingem (clip-ul era oricum nemeritat).
-		# Refacerea se face NECONDITIONAT cat tine contactul — prima versiune
-		# o facea doar "cat impingem", si in cadrul imediat urmator egalizarii
-		# alunecarea stergea iar totul: atacatorul ramanea pe loc (masurat 0.0
-		# m/s), iar victima pleca singura cu tot impulsul.
-		var vn_goal := vn_self
-		if vn_self < vn_oth:
-			vn_goal = (m_s * vn_self + m_o * vn_oth) / (m_s + m_o)
-			other.velocity += n * (vn_goal - vn_oth)
-		var vn_held := velocity.dot(n)
-		if vn_goal < vn_held:
-			velocity += n * (vn_goal - vn_held)
-		return
-	# Cat de repede ne apropiem, masurat pe normala contactului — din vitezele
-	# DINAINTEA lui move_and_slide. Cele de acum au deja componenta spre coliziune
-	# stearsa de alunecare (de-aia se simtea ca un zid: te opreai sec si primeai
-	# in schimb un ghiont fix, fara legatura cu forta izbiturii).
-	var closing := (_prev_velocity - other._prev_velocity).dot(-n)
-	# Depenetrare: cat de mult ne-am intrepatruns deja. Fara ea, o masina grea
-	# poate ingloba una usoara si o cara in ea zeci de metri.
-	var separation := col.get_depth() * bump_separation
-	if vertical_contact:
-		# ODIHNA pe acoperisul altei masini: fara adancime si fara viteza de
-		# apropiere, poarta de mai jos ar lasa masina de deasupra sa fie carata
-		# la nesfarsit ca pe o platforma mobila, cu zero imbranceala. Fortam un
-		# minim de separare: cine sta pe altcineva e impins mereu deoparte.
-		separation = maxf(separation, 1.0)
-	if closing < bump_min_closing and separation < 0.5:
-		return
-	_bump_pairs[key] = bump_pair_cooldown
-	other._bump_pairs[get_instance_id()] = bump_pair_cooldown
-	# move_and_slide a ALUNECAT deja: componenta noastra de viteza spre contact
-	# e stearsa inainte sa apucam sa aplicam impulsul. Fara restaurare, lovitura
-	# din spate insemna oprire seaca la zero plus recul — un zid, nu o masina.
-	# O punem la loc din _prev_velocity si lasam IMPULSUL sa decida cat se
-	# pierde: la mase egale amandoua isi continua drumul, cel din fata mai
-	# repede, cel din spate mai incet — conservarea impulsului, nu un caz special.
-	var vn_now := velocity.dot(n)
-	var vn_prev := _prev_velocity.dot(n)
-	if vn_prev < vn_now:
-		velocity += n * (vn_prev - vn_now)
-	var inv_self := 1.0 / maxf(mass_factor, 0.05)
-	var inv_other := 1.0 / maxf(other.mass_factor, 0.05)
-	var reduced_mass := 1.0 / (inv_self + inv_other)
-	# Un singur impuls pentru pereche (izbitura + desprindere), impartit apoi la
-	# masa fiecareia. Asa "cine pe cine arunca" iese din raportul de mase, nu
-	# dintr-un caz special scris de mana.
-	var impulse := (1.0 + bump_restitution) * maxf(closing, 0.0) * reduced_mass
-	impulse += separation * reduced_mass
-	impulse = minf(impulse, bump_max_impulse)
-	var dv_self := impulse * inv_self
-	var dv_other := impulse * inv_other
-	velocity += n * dv_self
-	other.velocity += -n * dv_other
-	# Partea "de caroserie" a izbiturii: rotatie din loviturile excentrice si
-	# grip pierdut peste un prag — directia loviturii conteaza, nu doar marimea.
-	_receive_hit(other.global_position, n * dv_self, dv_self)
-	other._receive_hit(global_position, -n * dv_other, dv_other)
-	bumped.emit(self, other, dv_self)
-	other.bumped.emit(other, self, dv_other)
-	if _bump_cooldown <= 0.0 and (is_player or other.is_player):
-		_bump_cooldown = 0.25
-		other._bump_cooldown = 0.25
-		AudioManager.play_sfx(&"bump")
-
-## Ce pateste MASINA la o izbitura, dincolo de schimbarea de viteza.
-##
-## 1. Rotatie: bratul de parghie inmultit vectorial cu delta-v-ul primit —
-##    fizica reala a loviturii laterale sau a PIT-ului: o forta care trece prin
-##    centrul de masa doar impinge, una care prinde un colt ROTESTE. Bratul e
-##    directia spre CENTRUL celuilalt, nu punctul de contact raportat de Godot:
-##    pentru doua fete paralele acela cade intr-un COLT al cutiei (masurat cu
-##    sonda: 31° de rotatie la o lovitura perfect centrata, si atacatorul
-##    sfarsea sucit si oprit de propriul grip). Din centre, lovitura centrata
-##    da zero prin constructie — produsul vectorial cu un brat paralel cu
-##    normala e nul — iar cea excentrica exact cat ii da geometria.
-## 2. Alunecare: cand delta-v-ul are o componenta LATERALA serioasa fata de
-##    incotro e indreptata masina, rotile pierd scurt aderenta ("suprafata
-##    uda": se conduce, dar aluneca) — un T-bone te face sa derapezi, un sut
-##    drept in bara din spate doar te impinge, rotile raman pe directie.
-##    Refoloseste mecanismul de aquaplanare in loc sa inventeze altul.
-func _receive_hit(from_center: Vector3, dv: Vector3, _dv_len: float) -> void:
-	var lever := from_center - global_position
-	lever.y = 0.0
-	var kick := lever.cross(dv).y * bump_yaw_factor
-	_impact_yaw = clampf(_impact_yaw + kick, -bump_yaw_max, bump_yaw_max)
-	var fwd := -global_transform.basis.z
-	fwd = Vector3(fwd.x, 0.0, fwd.z).normalized()
-	var lat_dv := (dv - fwd * dv.dot(fwd)).length()
-	if lat_dv >= bump_slip_dv:
-		slip_time = maxf(slip_time, clampf(0.15 + lat_dv * 0.02, 0.0, 0.55))
-		slip_grip = SLIP_GRIP_WET
+# Imbrancelile, peretii si popicele: vezi _process_contacts — solverul imparte
+# impulsul dupa masa, regulile arcade (plafon, rotatie, slip, semnal) se aplica
+# peste bilantul lui.
 
 func _detect_landing() -> void:
 	if is_on_floor() and not _was_on_floor and _prev_velocity.y < -6.0:
@@ -711,6 +794,12 @@ func respawn(backoff_m: float = 14.0) -> void:
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei
 	# curse e mai frustranta decat saritura ratata.
 	velocity = -global_transform.basis.z * 9.0
+	# Teleportare de corp rigid: si rotatia, si reperele bilantului de bump se
+	# reseteaza — altfel saltul de pozitie ar citi ca "izbitura" (dv urias) si
+	# ar declansa plafonari si semnale fantoma in primul tick de dupa.
+	angular_velocity = Vector3.ZERO
+	_prev_velocity = velocity
+	_commanded_yaw = 0.0
 	is_drifting = false
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
@@ -901,14 +990,13 @@ const TRAIL_MIN_SPEED: float = 3.0
 ## ############################################################################
 const TRAIL_LIFT: float = 0.08
 
-## Cat de sus fata de originea masinii e talpa colizorului, adica solul.
+## Cat de sus fata de originea masinii e SOLUL. Pe fizica intreaga originea
+## sta chiar la nivelul solului prin constructia suspensiei (vezi
+## _rebuild_suspension_geometry), deci nu se mai deriva din talpa colizerului
+## — aia s-a ridicat la +0.25 ca bordurile sa fie treaba rotilor, si ar fi
+## tras urmele de rulare in aer.
 func _hull_bottom() -> float:
-	if _collision_shape == null:
-		return 0.1
-	var box := _collision_shape.shape as BoxShape3D
-	if box == null:
-		return _collision_shape.position.y
-	return _collision_shape.position.y - box.size.y * 0.5
+	return 0.02
 
 
 ## Dara de urme lasata rulind pe teren afanat. Creata la prima nevoie: pe o pista
@@ -1146,49 +1234,17 @@ func _update_shadow() -> void:
 	_shadow_mat.albedo_color.a = clampf(0.38 - height * 0.03, 0.08, 0.38)
 
 func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
+	# Pe fizica intreaga, CORPUL insusi se inclina: panta, ruliul, squat-ul si
+	# dive-ul vin din suspensie, nu mai e nimic de desenat. Toata istoria
+	# fake-pitch-ului (botul in sus la coborare, pivotul pe axul rotilor — vezi
+	# git blame pe blocul asta) a murit odata cu CharacterBody3D.
+	#
+	# Ce ramane pe _visual: un STROP de ruliu suplimentar in drift — juice-ul
+	# care vinde alunecarea, calibrat mic ca sa nu se bata cu ruliul fizic —
+	# si invartirea de tromba (_update_spin), care e doar vizuala prin design.
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)
-	var target_roll := -steer * 0.09 * speed_frac * (1.6 if is_drifting else 1.0)
-	# Botul URMEAZA PANTA cat timp rotile sunt pe sol, si abia in aer se ridica
-	# dupa viteza verticala.
-	#
-	# Inainte, `target_pitch` se calcula mereu din `-velocity.y`, adica din cat
-	# de repede COBORI. La o saritura e corect (cazi, botul se ridica — e juice
-	# de aterizare). Pe o coborare lunga insa `velocity.y` sta negativ tot
-	# timpul, deci pitch-ul se lipea de plafonul +0.15 rad si ramanea acolo pe
-	# toata panta: masina cobora cu botul in sus, ca o barca. Efectul creste cu
-	# LUNGIMEA caroseriei (rotatia ridica capetele cu jumatate_lungime*sin):
-	# masurat cu tools/probe_visual_pitch.gd, autobuzul isi ridica botul cu
-	# 0.41 m si isi baga coada 0.41 m in asfalt, la o raza de roata de 0.25 —
-	# de aici raportul ca autobuzul si pompierii "zboara" la coborare. Sonda de
-	# desprindere (tools/probe_slope_hop.gd) confirmase deja ca nu fizica era
-	# de vina: tocmai ele stau lipite cel mai bine de drum (0.90 s / 0.83 s de
-	# aer, fata de 1.47-2.17 la masinile scurte).
-	#
-	# Pe sol luam unghiul REAL al pantei din normala podelei, deci caroseria
-	# sta paralela cu drumul — ce face o masina adevarata. In aer pastram
-	# comportamentul vechi, unde chiar e vrut.
-	var target_pitch := 0.0
-	if is_on_floor():
-		var up := get_floor_normal()
-		if up.length_squared() > 0.5:
-			# Componenta pantei pe axa "inainte": pozitiva la urcare, negativa la
-			# coborare. Semnul e ales ca botul sa urce pe urcare si sa coboare pe
-			# vale, adica invers fata de inclinarea terenului sub masina.
-			var fwd_h := -global_transform.basis.z
-			fwd_h = Vector3(fwd_h.x, 0.0, fwd_h.z).normalized()
-			# Plafon separat, mult mai larg decat cel din aer: pe sol unghiul nu
-			# mai e un efect inventat din viteza, ci PANTA REALA, iar pistele au
-			# coborari de 20-34 grade (masurat pe Alpii). Cu vechiul 0.15 rad
-			# (8.6 grade) masina ar fi ramas orizontala pe povarnis, adica exact
-			# minciuna de la care am plecat, doar in cealalta directie. 0.45 rad
-			# (~26 grade) prinde toata coborarea obisnuita; ce trece peste ramane
-			# taiat, ca la o rapa caroseria sa nu stea vertical.
-			target_pitch = clampf(asin(clampf(up.dot(fwd_h), -1.0, 1.0)),
-				-0.45, 0.45)
-	else:
-		target_pitch = clampf(-velocity.y * 0.02, -0.15, 0.15) * speed_frac
+	var target_roll := -steer * 0.05 * speed_frac * (1.6 if is_drifting else 0.0)
 	_visual.rotation.z = lerpf(_visual.rotation.z, target_roll, 8.0 * delta)
-	_visual.rotation.x = lerpf(_visual.rotation.x, target_pitch, 5.0 * delta)
 	_update_spin(delta)
 
 
@@ -1233,39 +1289,20 @@ func _build_visual() -> void:
 			# Raza reala = inaltimea centrului rotii (sta pe sol) x scala.
 			_wheel_radius = maxf(0.15,
 				_wheels_all[0].position.y * data.model_scale)
-		# Caroseria se inclina in jurul AXULUI ROTILOR, nu al originii.
-		#
-		# `_update_visual_tilt` roteste `_visual` pe X (botul la coborare) si pe Z
-		# (ruliul in viraj). Cu pivotul in originea masinii — adica pe sol —
-		# rotatia ridica capetele caroseriei cu `jumatate_lungime * sin(unghi)`,
-		# deci efectul creste cu LUNGIMEA masinii. La plafonul de 0.15 rad
-		# (tools/probe_visual_pitch.gd): taxiul 0.29 m, autobuzul 0.41 m — mai
-		# mult decat raza rotii lui (0.25), deci botul se ridica vizibil de pe
-		# asfalt in timp ce coada intra in el. De aici raportul ca autobuzul si
-		# pompierii "zboara" la coborare, desi sonda de desprindere arata ca
-		# tocmai ele stau LIPITE cel mai bine (0.90 s / 0.83 s de aer, fata de
-		# 1.47-2.17 la masinile scurte): nu corpul fizic pleca de pe drum, ci
-		# desenul.
-		#
-		# Ridicand pivotul la inaltimea axului, rotatia devine ce e si in
-		# realitate — o basculare in jurul rotilor — iar punctele de contact
-		# raman pe loc. Modelul se coboara cu exact aceeasi valoare inauntru, ca
-		# masina sa stea unde statea.
-		_visual.position.y = _wheel_radius
-		model.position.y -= _wheel_radius
+		# Pe fizica intreaga pivotul vizual nu mai conteaza: corpul intreg se
+		# inclina fizic in jurul propriului centru de masa, iar modelul sta
+		# simplu la origine. Hack-ul "pivot pe axul rotilor" de pe
+		# CharacterBody a murit odata cu fake-pitch-ul.
 		return
-	# Placeholder-ul din cuburi: acelasi pivot pe axul rotilor ca la modelele
-	# reale (rotile de mai jos sunt la y = 0.45), ca feel-ul sa nu depinda de
-	# faptul ca o masina are sau nu model 3D.
+	# Placeholder din cuburi, cand masina n-are model in CarData.
 	_wheel_radius = 0.48
-	_visual.position.y = 0.45
-	_add_box(Vector3(2.2, 0.7, 3.6), Vector3(0, 0.55 - 0.45, 0), body_color)
-	_add_box(Vector3(1.6, 0.55, 1.7), Vector3(0, 1.1 - 0.45, 0.2),
+	_add_box(Vector3(2.2, 0.7, 3.6), Vector3(0, 0.55, 0), body_color)
+	_add_box(Vector3(1.6, 0.55, 1.7), Vector3(0, 1.1, 0.2),
 		body_color.darkened(0.5))
-	_add_box(Vector3(2.3, 0.18, 0.7), Vector3(0, 0.9 - 0.45, 1.85),
+	_add_box(Vector3(2.3, 0.18, 0.7), Vector3(0, 0.9, 1.85),
 		body_color.darkened(0.25))
-	for corner in [Vector3(-1.05, 0.0, -1.2), Vector3(1.05, 0.0, -1.2),
-			Vector3(-1.05, 0.0, 1.25), Vector3(1.05, 0.0, 1.25)]:
+	for corner in [Vector3(-1.05, 0.45, -1.2), Vector3(1.05, 0.45, -1.2),
+			Vector3(-1.05, 0.45, 1.25), Vector3(1.05, 0.45, 1.25)]:
 		var wheel := MeshInstance3D.new()
 		var cyl := CylinderMesh.new()
 		cyl.top_radius = 0.48

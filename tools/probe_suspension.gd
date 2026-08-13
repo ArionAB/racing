@@ -1,5 +1,5 @@
 extends Node
-## Testbed-ul nucleului de fizica intreaga (#255): RigidCar pe suspensie de
+## Testbed-ul nucleului de fizica intreaga (#255): Car pe suspensie de
 ## raycast, masurat pe un teren construit din cod — platou, panta de 20°,
 ## banda de denivelari. Nicio pista reala: aici se valideaza CORPUL, nu jocul.
 ##
@@ -20,7 +20,7 @@ var _failed: bool = false
 
 ## "Creier" minimal cu interfata CarController — comenzi setate de test.
 class ScriptDriver:
-	extends Node
+	extends CarController
 	var steer: float = 0.0
 	var throttle: float = 0.0
 	func get_steer() -> float:
@@ -38,7 +38,7 @@ func _ready() -> void:
 	await get_tree().physics_frame
 
 	print("")
-	print("=== Testbed suspensie RigidCar ===")
+	print("=== Testbed suspensie Car ===")
 	await _test_settle()
 	await _test_straight()
 	await _test_slope()
@@ -73,15 +73,16 @@ func _add_static_box(size: Vector3, pos: Vector3) -> StaticBody3D:
 	return body
 
 
-func _spawn(pos: Vector3) -> RigidCar:
-	var car := RigidCar.new()
+func _spawn(pos: Vector3) -> Car:
+	var car := Car.new()
 	add_child(car)
 	car.global_position = pos
 	car.set_controller(ScriptDriver.new())
+	car.race_active = true # Car citeste comenzile doar cu cursa pornita
 	return car
 
 
-func _driver(car: RigidCar) -> ScriptDriver:
+func _driver(car: Car) -> ScriptDriver:
 	return car.controller as ScriptDriver
 
 

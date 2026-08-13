@@ -254,6 +254,11 @@ static func themes() -> Dictionary:
 			"deflector_model": "res://assets/models/rocks/rock_large.glb",
 			"deflector_node": "Rock_Large",
 			"deflector_scale": 1.15,
+			# Morisca devine MOARA DE VANT (#245): pe un drum de desert cu ferma
+			# si moara la orizont, o morisca de balci nu avea ce cauta. Turnul e
+			# cladirea reala din kit, langa drum; peste sosea trec aripile.
+			"carousel_model": "res://assets/models/buildings/windmill.glb",
+			"carousel_scale": 1.0,
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
 			"water": false,
 		},
@@ -3996,7 +4001,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.ROCKFALL:
 			_build_rockfall(frac, spec)
 		HazardMarker.Kind.CAROUSEL:
-			_build_carousel(frac)
+			_build_carousel(frac, spec)
 		HazardMarker.Kind.TRAIN:
 			_build_train(frac)
 		HazardMarker.Kind.TYPHOON:
@@ -4018,11 +4023,38 @@ func _build_node_hazard(hz: Dictionary) -> void:
 ## AnimatableBody3D cu sync_to_physics, deci transformarea lui o tine serverul
 ## de fizica — plasat dupa intrarea in arbore, ramane un pas fizic in origine,
 ## adica exact peste grila de start, si matura tot plutonul la countdown.
-func _build_carousel(frac: float) -> void:
+func _build_carousel(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
 	var carousel := CarouselHazard.new()
 	carousel.arm_reach = width_at(frac) - 0.2
+	# Cu turn declarat, morisca devine MOARA DE VANT (#245): butucul procedural
+	# e inlocuit de cladire, iar bratele se citesc ca aripi. Mecanica ramane
+	# aceeasi — rotatie continua, fereastra intre brate, ghiont pe tangenta.
+	var tower_path := String(spec.get("model", theme_flag("carousel_model", "")))
+	if not tower_path.is_empty() and ResourceLoader.exists(tower_path):
+		carousel.tower_scene = load(tower_path)
+		carousel.tower_node = String(spec.get("model_node",
+			theme_flag("carousel_node", "")))
+		carousel.tower_scale = float(spec.get("scale",
+			theme_flag("carousel_scale", 1.0)))
+		carousel.tower_class = String(spec.get("tri_class",
+			theme_flag("carousel_class", "")))
+		carousel.mill_blades = true
+		# Turnul sta pe MARGINEA drumului, dincolo de bataia aripilor: pe axa ar
+		# fi fost o cladire in mijlocul soselei. Bratele raman centrate pe axa,
+		# deci fereastra de trecere nu se schimba.
+		#
+		# `tower_offset` e pe X LOCAL, deci nodul trebuie orientat: `looking_at`
+		# pe directia drumului pune +X pe marginea din dreapta, conventia din tot
+		# proiectul. Fara orientare, turnul ar fi cazut pe axa X a LUMII — adica
+		# oriunde, in functie de cum se intampla sa fie intors drumul acolo.
+		var dir := (baked[(idx + 1) % n] - baked[idx]).normalized()
+		carousel.transform = Transform3D(
+			Basis.looking_at(dir, Vector3.UP), baked[idx])
+		carousel.tower_offset = width_at(frac) + 2.2
+		add_child(carousel)
+		return
 	carousel.position = baked[idx]
 	add_child(carousel)
 

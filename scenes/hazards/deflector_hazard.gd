@@ -159,6 +159,10 @@ func _instance_model() -> Node3D:
 			if child.name == model_node:
 				kept = child as Node3D
 			else:
+				# `remove_child` inainte de `queue_free`: eliberarea e amanata la
+				# sfarsitul cadrului, deci pana atunci piesele nedorite ar
+				# ramane in arbore si s-ar randa.
+				root.remove_child(child)
 				child.queue_free()
 		if kept == null:
 			root.queue_free()

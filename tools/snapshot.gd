@@ -9,6 +9,12 @@ extends Node
 ##   --track=0 --frac=0.2 --gamecam
 ##                             vederea reala de JOC, cu parametrii curenti ai
 ##                             camerei de urmarire
+##   --track=0 --frac=0.5 --gamecam --route=1
+##                             la fel, dar pe BANDA SECUNDARA cu indexul dat
+##                             (1 = prima scurtatura, in ordinea din
+##                             Track.routes); fractia e din lungimea benzii,
+##                             nu din tur. Fara asta, o scurtatura se putea
+##                             vedea doar din racorduri, de pe sosea.
 ##   --track=0 --landmark=2 [--dist=30]
 ##                             LANDMARK-ul cu id-ul cerut (`_LANDMARKS` din
 ##                             track.gd), vazut DE PE SOSEA, de la inaltimea
@@ -78,6 +84,7 @@ func _ready() -> void:
 	var typhoon_at := -1.0
 	var wave_at := -1.0
 	var rock_at := -1.0
+	var route_idx := 0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -99,6 +106,8 @@ func _ready() -> void:
 			wave_at = float(arg.trim_prefix("--wave-at="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
+		elif arg.begins_with("--route="):
+			route_idx = int(arg.trim_prefix("--route="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -159,10 +168,14 @@ func _ready() -> void:
 			fov = ChaseCamera.BASE_FOV
 			look_ahead = ChaseCamera.LOOK_AHEAD
 			look_h = ChaseCamera.LOOK_HEIGHT
-		var n := track.baked.size()
+		# Banda ceruta (0 = soseaua): pe o scurtatura fractia e din lungimea
+		# EI si nu se infasoara — capatul benzii e capat, nu tur.
+		var route := track.route_at(clampi(route_idx, 0, track.routes.size() - 1))
+		var pts := route.baked
+		var n := pts.size()
 		var idx := int(zoom_frac * float(n)) % n
-		var focus: Vector3 = track.baked[idx]
-		var ahead: Vector3 = track.baked[(idx + 12) % n]
+		var focus: Vector3 = pts[idx]
+		var ahead: Vector3 = pts[route.wrap_index(idx + 12)]
 		var dir := (ahead - focus).normalized()
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
@@ -176,9 +189,10 @@ func _ready() -> void:
 		var dimg := get_viewport().get_texture().get_image()
 		var ddir := ProjectSettings.globalize_path("res://snapshots")
 		DirAccess.make_dir_recursive_absolute(ddir)
-		var dout := "%s/%s_%s.png" % [ddir,
+		var dout := "%s/%s_%s%s.png" % [ddir,
 			GameState.TRACK_NAMES[track_index].to_lower(),
-			"joc" if game_cam else "sofer"]
+			"joc" if game_cam else "sofer",
+			"" if route_idx == 0 else "_ruta%d" % route_idx]
 		dimg.save_png(dout)
 		print("SNAPSHOT: ", dout)
 		get_tree().quit()

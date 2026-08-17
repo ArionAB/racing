@@ -559,6 +559,12 @@ static func themes() -> Dictionary:
 			# granulatia ei se citeste ca "nu mai esti pe asfalt" din mers.
 			"branch_tint": Color(0.52, 0.44, 0.30),
 			"branch_texture": "res://assets/textures/surface_gravel.png",
+			# ...si reteta „drum de tara" (fagase, brazda de iarba, margini
+			# zdrentuite, smocuri): pana aici banda era o panglica plata in
+			# nuanta de mai sus, si de la 20 m se citea ca un dreptunghi maro
+			# lipit peste pajiste. Un nod TrackBranch poate suprascrie reteta
+			# (`surface`), tema da doar implicitul lumii.
+			"branch_surface": "dirt_road",
 		},
 		# --- Insula de recif (pista Okinawa) ---
 		#
@@ -1231,9 +1237,23 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				"points": mid,
 				"wet": br.wet,
 				"label": br.label if br.label != "" else br.name,
+				# Suprafata si contragreutatea de viteza, cu aceleasi chei pe
+				# care le poate scrie si o pista din cod in `_branch_specs()`.
+				# `surface` lipseste cand nodul zice THEME — atunci
+				# `_make_branch` completeaza din tema, ca la culoare.
+				"speed_factor": br.speed_factor,
+				"rut_depth": br.rut_depth,
+				"grass_center": br.grass_center,
+				"edge_noise": br.edge_noise,
+				"bumpiness": br.bumpiness,
+				"tufts": br.tufts,
 			}
 			if br.branch_half_width > 0.0:
 				spec["half_width"] = br.branch_half_width
+			if br.surface_name() != "":
+				spec["surface"] = br.surface_name()
+			if br.tint.a > 0.0:
+				spec["tint"] = br.tint
 			out.append(spec)
 		_collect_branches(child, out)
 
@@ -1478,7 +1498,7 @@ func rebuild() -> void:
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
-		_cornice_ravines(), _baked_widths())
+		_cornice_ravines(), _baked_widths(), _branch_carve_points())
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -2993,6 +3013,18 @@ func _branch_corridor_points() -> PackedVector3Array:
 	return out
 
 
+## Punctele coapte ale benzilor DE PE USCAT (drum de tara, pietris): pentru
+## ele samplerul si sapa terenul pana la cota benzii, nu doar il ridica.
+## Bancul de nisip ("sand") ramane pe lista de ridicare doar. Vezi
+## TrackSideSampler._carve_branches.
+func _branch_carve_points() -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for i in range(1, routes.size()):
+		if routes[i].surface != "sand":
+			out.append_array(routes[i].baked)
+	return out
+
+
 ## Conturul lagunei in forma pe care o vrea samplerul.
 func _lagoon_poly() -> PackedVector2Array:
 	var out := PackedVector2Array()
@@ -3007,44 +3039,318 @@ func _lagoon_poly() -> PackedVector2Array:
 ## submers, nu sosea. Fara borduri, fara linie de mijloc, fara umeri, fara
 ## pereti — si cu nisip coraligen in loc de asfalt. Asta e si diferenta pe care
 ## trebuie s-o citesti din mers ca sa stii ca intri pe alta banda.
+##
+## Fiecare banda isi alege RETETA dupa `TrackRoute.surface` (vezi acolo):
+## "sand" e panglica plata de pana acum, neschimbata cu un pixel; "dirt_road"
+## si "gravel" trec prin `_build_branch_dirt`.
 func _build_branch_surfaces() -> void:
 	for bi in range(1, routes.size()):
 		var r := routes[bi]
 		var n := r.count()
 		if n < 2:
 			continue
-		var st := SurfaceTool.new()
-		st.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var tile := 3.5
-		var u_half := r.half_width / tile
-		# Banda submersa sta putin SUB cota capetelor: asa se vede de departe ca
-		# intri in apa, si asa nu se bate cu asfaltul in punctele de racord.
-		for i in n - 1:
-			var j := i + 1
-			var l0 := r.baked[i] - r.side_at(i) * r.half_width
-			var r0 := r.baked[i] + r.side_at(i) * r.half_width
-			var l1 := r.baked[j] - r.side_at(j) * r.half_width
-			var r1 := r.baked[j] + r.side_at(j) * r.half_width
-			var v0 := r.dists[i] / tile
-			var v1 := r.dists[j] / tile
-			st.set_uv(Vector2(-u_half, v0)); st.add_vertex(l0)
-			st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
-			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
-			st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
-			st.set_uv(Vector2(u_half, v1)); st.add_vertex(r1)
-			st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
-		st.index()
-		st.generate_normals()
-		# Materialul benzii vine din TEMA, nu din cod: pe insula e nisip
-		# coraligen umed, pe munte e pamant batatorit de pasune. Implicit
-		# raman valorile Okinawei, ca pistele existente sa nu se schimbe cu
-		# un pixel — aceeasi regula ca la orice steag de tema adaugat tarziu.
-		var branch_tint: Variant = theme_flag("branch_tint", null)
-		var tint: Color = branch_tint if branch_tint != null \
-			else Palette.color(Palette.CORAL_SAND).darkened(0.22)
-		_add_mesh_with_collision(st.commit(), tint,
-			_tex(String(theme_flag("branch_texture",
-				"res://assets/textures/surface_sand.png"))))
+		match r.surface:
+			"dirt_road":
+				_build_branch_dirt(r, true)
+			"gravel":
+				_build_branch_dirt(r, false)
+			_:
+				_build_branch_sand(r)
+
+
+## Reteta "sand": banda plata, doi vertecsi transversal, culoarea + granulatia
+## din tema. E codul original al bancului de nisip din Okinawa si NU se atinge:
+## orice retus vizual se face intr-o reteta noua, ca pistele existente sa nu se
+## miste.
+func _build_branch_sand(r: TrackRoute) -> void:
+	var n := r.count()
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var tile := 3.5
+	var u_half := r.half_width / tile
+	# Banda submersa sta putin SUB cota capetelor: asa se vede de departe ca
+	# intri in apa, si asa nu se bate cu asfaltul in punctele de racord.
+	for i in n - 1:
+		var j := i + 1
+		var l0 := r.baked[i] - r.side_at(i) * r.half_width
+		var r0 := r.baked[i] + r.side_at(i) * r.half_width
+		var l1 := r.baked[j] - r.side_at(j) * r.half_width
+		var r1 := r.baked[j] + r.side_at(j) * r.half_width
+		var v0 := r.dists[i] / tile
+		var v1 := r.dists[j] / tile
+		st.set_uv(Vector2(-u_half, v0)); st.add_vertex(l0)
+		st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
+		st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
+		st.set_uv(Vector2(u_half, v0)); st.add_vertex(r0)
+		st.set_uv(Vector2(u_half, v1)); st.add_vertex(r1)
+		st.set_uv(Vector2(-u_half, v1)); st.add_vertex(l1)
+	st.index()
+	st.generate_normals()
+	# Materialul benzii vine din TEMA, nu din cod: pe insula e nisip
+	# coraligen umed, pe munte e pamant batatorit de pasune. Implicit
+	# raman valorile Okinawei, ca pistele existente sa nu se schimbe cu
+	# un pixel — aceeasi regula ca la orice steag de tema adaugat tarziu.
+	var tint: Color = _branch_dirt_color(r)
+	_add_mesh_with_collision(st.commit(), tint,
+		_tex(String(theme_flag("branch_texture",
+			"res://assets/textures/surface_sand.png"))))
+
+
+## Culoarea pamantului unei benzi: a nodului daca a cerut una, altfel a temei,
+## altfel nisipul coraligen al Okinawei (implicitul istoric).
+func _branch_dirt_color(r: TrackRoute) -> Color:
+	if r.tint.a > 0.0:
+		return Color(r.tint.r, r.tint.g, r.tint.b, 1.0)
+	var branch_tint: Variant = theme_flag("branch_tint", null)
+	return branch_tint if branch_tint != null \
+		else Palette.color(Palette.CORAL_SAND).darkened(0.22)
+
+
+## Ecartamentul fagaselor (m intre axele celor doua urme) si jumatatea latimii
+## unei urme. Masinile de jucarie au ~1.6-1.9 m intre roti; ecartamentul e al
+## drumului, nu al masinii — pe un drum umblat toate rotile cad in aceleasi
+## urme, si de aceea exista fagase.
+const RUT_GAUGE: float = 1.7
+const RUT_HALF_W: float = 0.32
+## Cat de departe de marginea urmei se mai vede pamant curat inainte ca
+## iarba sa inceapa sa castige spre margine.
+const RUT_SHOULDER: float = 0.6
+## Ridicarea vizuala a benzii peste planul de coliziune — acelasi rol ca
+## ROAD_CROWN pe sosea: fizica ramane pe planul benzii, ochiul vede fagasele.
+const BRANCH_LIFT: float = 0.02
+## Cat coboara MARGINEA benzii sub planul ei, ca sa se ingroape in teren.
+## Terenul sta la TrackSideSampler.BRANCH_DROP (0.25) sub banda; marginea
+## coboara mai jos de atat, deci linia vizibila a drumului e unde suprafata
+## benzii intra in pajiste — o linie pe care o deseneaza doua suprafete si
+## zgomotul terenului, nu o muchie de mesh. Asta, plus `edge_noise`, e ce
+## face marginea sa para calcata, nu trasa. Intra si in coliziune (o panta de
+## ~20% pe ultimul metru si ceva), ca rotile de la margine sa stea pe ce vad.
+const BRANCH_EDGE_SINK: float = 0.35
+## Media texturii macro folosite pe banda (surface_sand_macro), la care se
+## imparte culoarea ca a doua trecere sa n-o intunece. Vezi SAND_MACRO_MEAN.
+const BRANCH_MACRO_MEAN: float = SAND_MACRO_MEAN
+
+
+## Reteta "dirt_road" (cu fagase si iarba) / "gravel" (fara).
+##
+## De ce arata a drum de tara si nu a dreptunghi maro — cele patru lucruri pe
+## care banda veche nu le avea:
+##   1. SECTIUNE: 11 vertecsi transversal, nu 2. Doua fagase adancite cu
+##      `rut_depth` la ecartament fix (RUT_GAUGE), brazda dintre ele, umeri,
+##      margini. Adancitura se citeste din umbra chiar la 4 cm — normalele
+##      generate o vand.
+##   2. CULOARE PE VERTEX: urmele sunt pamant deschis, batatorit; brazda e
+##      iarba (cat cere `grass_center`, in pete, nu uniform); marginile ajung
+##      la CULOAREA TERENULUI, deci banda se dizolva in pajiste in loc sa se
+##      termine cu o linie. Materialul e maximul pe canale dintre pamant si
+##      iarba, iar vertecsii coboara din el (culorile de vertex doar
+##      INTUNECA — vezi _road_shade).
+##   3. MARGINI ZDRENTUITE: vertexul exterior iese/intra cu `edge_noise` metri,
+##      dupa un zgomot in coordonate de LUME (nu de distanta parcursa, altfel
+##      ies valuri regulate).
+##   4. A DOUA TRECERE DE TEXTURA (macro, UV2), ca soseaua si terenul: fara ea
+##      granulatia de 3.5 m se repeta identic pe 200 m si ochiul o prinde.
+## Plus smocurile de iarba (TrackGrass) pe margini si pe brazda, care sunt
+## singurul lucru „3D" din tot pachetul si cel care vinde restul.
+##
+## COLIZIUNEA e planul benzii (fara fagase — alea sunt vizuale, ca ROAD_CROWN),
+## cu marginile ingropate (BRANCH_EDGE_SINK) si, doar daca `bumpiness` > 0, cu
+## denivelarile — atunci suspensia le simte.
+func _build_branch_dirt(r: TrackRoute, with_ruts: bool) -> void:
+	var n := r.count()
+	var hw := r.half_width
+	var tile := 3.5
+	# Culorile-tinta, in „unitati de material" (inainte de textura):
+	#   dirt  = pamantul benzii (tema / nod), ce se vedea si pana acum
+	#   dust  = urmele batatorite, putin mai deschise si mai calde (praf)
+	#   grass = terenul de langa, ca marginile sa se topeasca in el
+	var dirt := _branch_dirt_color(r)
+	var dust := dirt.lightened(0.16)
+	var grass_v: Variant = theme_flag("inland_tint", null)
+	var grass: Color = grass_v if grass_v != null else theme_ground_tint
+	# Materialul poarta maximul pe canale, IMPARTIT la media trecerii macro
+	# (ca la sosea), iar fiecare vertex coboara la tinta lui.
+	var mat_col := Color(
+		maxf(dust.r / BRANCH_MACRO_MEAN, grass.r),
+		maxf(dust.g / BRANCH_MACRO_MEAN, grass.g),
+		maxf(dust.b / BRANCH_MACRO_MEAN, grass.b))
+	var v_dirt := _color_ratio(Color(dirt.r / BRANCH_MACRO_MEAN,
+		dirt.g / BRANCH_MACRO_MEAN, dirt.b / BRANCH_MACRO_MEAN), mat_col)
+	var v_dust := _color_ratio(Color(dust.r / BRANCH_MACRO_MEAN,
+		dust.g / BRANCH_MACRO_MEAN, dust.b / BRANCH_MACRO_MEAN), mat_col)
+	var v_grass := _color_ratio(grass, mat_col)
+	# Geometria fagaselor, stransa daca banda e prea ingusta pentru ecartament.
+	var rc := RUT_GAUGE * 0.5
+	var rw := RUT_HALF_W
+	var sh := RUT_SHOULDER
+	var need := rc + rw + sh + 0.4
+	if hw < need:
+		var k := hw / need
+		rc *= k
+		rw *= k
+		sh *= k
+	var depth := r.rut_depth if with_ruts else 0.0
+	var grass_c := r.grass_center if with_ruts else 0.0
+	# Offsetele laterale ale profilului (m), de la stanga la dreapta.
+	var offs: Array[float] = [-hw, -(rc + rw + sh), -(rc + rw), -rc, -(rc - rw),
+		0.0, rc - rw, rc, rc + rw, rc + rw + sh, hw]
+	# Adancimea la fiecare pozitie de profil (0 = planul benzii): fagasele
+	# doar vizual, marginile (ingropate in teren) si in coliziune.
+	var dips: Array[float] = [-BRANCH_EDGE_SINK, 0.0, 0.0, -depth, 0.0, 0.0,
+		0.0, -depth, 0.0, 0.0, -BRANCH_EDGE_SINK]
+	var col_dips: Array[float] = [-BRANCH_EDGE_SINK, 0.0, 0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, -BRANCH_EDGE_SINK]
+	# Zgomotele, toate in coordonate de LUME (vezi punctul 3 din antet).
+	var edge_noise := FastNoiseLite.new()
+	edge_noise.seed = _world_seed() ^ 0xB0A7
+	edge_noise.frequency = 0.18 # perioada ~5.5 m: dantelura, nu valuri
+	var patch_noise := FastNoiseLite.new()
+	patch_noise.seed = _world_seed() ^ 0x6A55
+	patch_noise.frequency = 0.11 # pete de iarba de 4-9 m pe brazda
+	patch_noise.fractal_octaves = 2
+	var bump_noise := FastNoiseLite.new()
+	bump_noise.seed = _world_seed() ^ 0xB0B0
+	bump_noise.frequency = 0.45 # gropi/valuri de 1-3 m
+	bump_noise.fractal_octaves = 2
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var col := SurfaceTool.new()
+	col.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var m := offs.size()
+	# Inelul precedent, ca fiecare segment sa refoloseasca vertecsii de sus.
+	var prev_ring: Array[Vector3] = []
+	var prev_col_ring: Array[Vector3] = []
+	var prev_cols: Array[Color] = []
+	for i in n:
+		var side := r.side_at(i)
+		var c := r.baked[i]
+		var ring: Array[Vector3] = []
+		var col_ring: Array[Vector3] = []
+		var cols: Array[Color] = []
+		for k in m:
+			var x := offs[k]
+			# Doar vertexul exterior se zdrentuieste; restul profilului
+			# ramane fix, ca fagasele sa nu serpuiasca.
+			if k == 0 or k == m - 1:
+				var e := edge_noise.get_noise_2d(c.x + x, c.z) * r.edge_noise
+				x += e * signf(x)
+			var p := c + side * x + Vector3.UP * (BRANCH_LIFT + dips[k])
+			var pc := c + side * x + Vector3.UP * col_dips[k]
+			if r.bumpiness > 0.0:
+				var bump := bump_noise.get_noise_2d(p.x, p.z) * r.bumpiness
+				p.y += bump
+				pc.y += bump
+			ring.append(p)
+			col_ring.append(pc)
+			cols.append(_branch_vertex_color(absf(offs[k]), rc, rw, sh,
+				grass_c, patch_noise.get_noise_2d(p.x, p.z) * 0.5 + 0.5,
+				v_dirt, v_dust, v_grass))
+		if i > 0:
+			var v0 := r.dists[i - 1] / tile
+			var v1 := r.dists[i] / tile
+			for k in m - 1:
+				var a0 := prev_ring[k]
+				var b0 := prev_ring[k + 1]
+				var a1 := ring[k]
+				var b1 := ring[k + 1]
+				var ua := offs[k] / tile
+				var ub := offs[k + 1] / tile
+				# Ordinea a0, a1, b0: fata in sus (ca la sosea).
+				_branch_vert(st, a0, prev_cols[k], Vector2(ua, v0))
+				_branch_vert(st, a1, cols[k], Vector2(ua, v1))
+				_branch_vert(st, b0, prev_cols[k + 1], Vector2(ub, v0))
+				_branch_vert(st, b0, prev_cols[k + 1], Vector2(ub, v0))
+				_branch_vert(st, a1, cols[k], Vector2(ua, v1))
+				_branch_vert(st, b1, cols[k + 1], Vector2(ub, v1))
+			# Coliziunea: acelasi profil, fara fagase (planul benzii, cu
+			# marginile ingropate si, daca sunt cerute, cu denivelarile).
+			for k in m - 1:
+				col.add_vertex(prev_col_ring[k])
+				col.add_vertex(col_ring[k])
+				col.add_vertex(prev_col_ring[k + 1])
+				col.add_vertex(prev_col_ring[k + 1])
+				col.add_vertex(col_ring[k])
+				col.add_vertex(col_ring[k + 1])
+		prev_ring = ring
+		prev_col_ring = col_ring
+		prev_cols = cols
+	st.index()
+	st.generate_normals()
+	var mesh := st.commit()
+	col.index()
+	var col_mesh := col.commit()
+	# Granulatia din tema (pietris pe munte), macro-ul de nisip: petele lui de
+	# 45 m sunt exact tiparul de pamant spalat de ploaie. Roughness 1, specular
+	# 0 — pamantul e mat, ca drumul de nisip din _build_road.
+	_add_mesh_with_collision(mesh, mat_col,
+		_tex(String(theme_flag("branch_texture",
+			"res://assets/textures/surface_gravel.png"))),
+		1.0, 0.0, BaseMaterial3D.CULL_DISABLED, col_mesh,
+		_tex("res://assets/textures/surface_sand_macro.png"))
+	if with_ruts and r.tufts:
+		_build_branch_tufts(r, rc - rw, grass_c)
+
+
+func _branch_vert(st: SurfaceTool, p: Vector3, c: Color, uv: Vector2) -> void:
+	st.set_color(c)
+	st.set_uv(uv)
+	st.set_uv2(Vector2(p.x, p.z) * SURFACE_TILING_MACRO)
+	st.add_vertex(p)
+
+
+## Raportul pe canale intre o culoare-tinta si culoarea materialului — adica
+## culoarea de vertex care, inmultita cu materialul, da tinta. Prin
+## constructie <= 1 pe fiecare canal (materialul e maximul tintelor).
+static func _color_ratio(target: Color, mat: Color) -> Color:
+	return Color(target.r / maxf(mat.r, 0.001), target.g / maxf(mat.g, 0.001),
+		target.b / maxf(mat.b, 0.001), 1.0)
+
+
+## Culoarea de vertex la o pozitie de profil, dupa |x| (m de la axa).
+##
+## Zonele, dinspre axa spre margine: brazda (iarba in pete, cat cere
+## `grass_c`), urma (praf batatorit, fundul putin umbrit), umarul (pamant
+## curat care incepe sa prinda iarba), marginea (culoarea terenului, cu un pic
+## de pamant razlet ca sa nu fie o linie).
+func _branch_vertex_color(ax: float, rc: float, rw: float,
+		sh: float, grass_c: float, patch: float, v_dirt: Color, v_dust: Color,
+		v_grass: Color) -> Color:
+	if ax < rc - rw + 0.001:
+		# Brazda: iarba in pete, mai plina pe axa, stinsa spre urma.
+		var g := grass_c * (0.45 + 0.55 * smoothstep(0.35, 0.75, patch))
+		g *= 1.0 - 0.6 * (ax / maxf(rc - rw, 0.001))
+		return v_dirt.lerp(v_grass, g)
+	if ax < rc + rw + 0.001:
+		# Urma: praf, cu fundul umbrit.
+		var bottom := 1.0 - absf(ax - rc) / rw
+		return v_dust.darkened(0.16 * bottom)
+	if ax < rc + rw + sh + 0.001:
+		# Umarul: pamant care se raspandeste dincolo de urma.
+		return v_dirt.lerp(v_grass, 0.30 * (0.5 + 0.5 * patch))
+	# Marginea: teren, cu pamant razlet unde zgomotul o cere.
+	return v_grass.lerp(v_dirt, 0.15 * patch)
+
+
+## Smocurile drumului de tara: pe MARGINI (in afara benzii, unde iarba densa a
+## soselei nu ajunge — TrackGrass o taie la CORRIDOR_CLEAR de orice banda
+## secundara, tocmai ca sa nu creasca prin ea) si RAR pe brazda dintre fagase.
+##
+## `center_hw` = jumatatea latimii brazdei; `grass_c` scaleaza desimea de pe
+## brazda: la 0 nu creste nimic acolo, la 1 e o poteca prin fan.
+func _build_branch_tufts(r: TrackRoute, center_hw: float,
+		grass_c: float) -> void:
+	var main := routes[0]
+	var keep_out := func(p: Vector3) -> bool:
+		# Nu pe soseaua principala si nici pe umerii ei — la racorduri banda
+		# intra sub asfalt.
+		var i := main.closest_index_global(p)
+		return main.lateral_distance(i, p) < width_at_index(i) + 1.5
+	var ground := func(x: float, z: float) -> float:
+		return _sampler.ground_y(x, z)
+	var tufts := TrackGrass.build_strip(r, _world_seed(), theme_ground_tint,
+		grass_c * 1.6, center_hw, 4.5, -0.6, 3.0, keep_out, ground)
+	tufts.name = "BranchGrass_%s" % r.label
+	add_child(tufts)
 
 
 ## Construieste o scurtatura dintr-o specificatie.
@@ -3112,6 +3418,18 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.exit_frac = frac_at(i_exit)
 	route.wet = bool(spec.get("wet", false))
 	route.label = String(spec.get("label", "scurtatura"))
+	# Suprafata: ce zice spec-ul, altfel ce zice tema, altfel nisipul de pana
+	# acum — deci o pista care n-a auzit de retete ramane cum era.
+	route.surface = String(spec.get("surface",
+		theme_flag("branch_surface", "sand")))
+	route.rut_depth = float(spec.get("rut_depth", route.rut_depth))
+	route.grass_center = float(spec.get("grass_center", route.grass_center))
+	route.edge_noise = float(spec.get("edge_noise", route.edge_noise))
+	route.bumpiness = float(spec.get("bumpiness", route.bumpiness))
+	route.speed_factor = clampf(float(spec.get("speed_factor", 1.0)), 0.3, 1.0)
+	route.tufts = bool(spec.get("tufts", true))
+	if spec.has("tint"):
+		route.tint = spec["tint"] as Color
 	return route
 
 ## Cat de departe de sosea poate sta un capat DESENAT de scurtatura inainte sa
@@ -6548,6 +6866,20 @@ func route_at(route: int) -> TrackRoute:
 func route_is_wet(route: int) -> bool:
 	var r := route_at(route)
 	return r != null and r.wet
+
+
+## Plafonul de viteza al benzii, ca fractie (1 = neatins). Ruta 0 = 1.
+func route_speed_factor(route: int) -> float:
+	var r := route_at(route)
+	return 1.0 if r == null or route == 0 else r.speed_factor
+
+
+## Culoarea prafului ridicat de pe o banda SECUNDARA: pamantul ei, nu solul.
+func route_dust_color(route: int) -> Color:
+	var r := route_at(route)
+	if r == null or route == 0:
+		return road_dust_color()
+	return _branch_dirt_color(r)
 
 
 ## Portiunile UDE de pe traseul principal: (frac_start, frac_end).

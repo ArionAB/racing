@@ -41,6 +41,32 @@ var wet: bool = false
 ## Numele afisat in sonde si in mesaje de eroare.
 var label: String = "principal"
 
+## ---------------------------------------------------------------- suprafata
+## Ce fel de suprafata are banda: "sand" (bancul de nisip din Okinawa, banda
+## plata de pana acum), "dirt_road" (drum de tara: fagase, brazda de iarba,
+## margini care se topesc in pajiste) sau "gravel" (pietris batatorit, fara
+## fagase). Ruta 0 nu citeste campul asta — soseaua isi are generatorul ei.
+##
+## Cheile de mai jos sunt PARAMETRII retetei "dirt_road"; celelalte retete le
+## ignora. Vezi Track._build_branch_surfaces pentru ce face fiecare.
+var surface: String = "sand"
+## Adancimea fagaselor (m). 0 = fara fagase.
+var rut_depth: float = 0.04
+## Cat de inierbata e brazda dintre fagase (0 = pamant, 1 = iarba plina).
+var grass_center: float = 0.6
+## Amplitudinea zdrentuirii marginilor (m). 0 = margini taiate cu rigla.
+var edge_noise: float = 0.8
+## Amplitudinea denivelarilor de rulare (m). 0 = neted; peste 0 intra SI in
+## coliziune, deci suspensia le simte.
+var bumpiness: float = 0.0
+## Plafonul de viteza pe banda, ca fractie din viteza maxima (1 = neatins).
+## A treia contragreutate, dupa `wet` si latime: un drum de tara e mai LENT.
+var speed_factor: float = 1.0
+## Culoarea pamantului. Alfa 0 = se ia din tema (`branch_tint`).
+var tint: Color = Color(0.0, 0.0, 0.0, 0.0)
+## Smocuri de iarba pe margini si pe brazda (doar "dirt_road").
+var tufts: bool = true
+
 
 func count() -> int:
 	return baked.size()

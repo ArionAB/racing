@@ -12,10 +12,15 @@ func get_steer() -> float:
 	return clampf(steer * GameState.steer_sensitivity, -1.0, 1.0)
 
 func get_throttle() -> float:
-	# Auto-accelerate: masina merge singura, franezi doar explicit.
 	if Input.is_action_pressed("brake"):
 		return -1.0
-	return 1.0
+	if Input.is_action_pressed("accelerate"):
+		return 1.0
+	# Touch: auto-accelerate — orice deget pe ecran inseamna gaz (standardul
+	# mobile, nu exista pedala). Pe tastatura accelerezi explicit cu W/Sus.
+	if GameState.touch_active:
+		return 1.0
+	return 0.0
 
 func is_drift_pressed() -> bool:
 	return Input.is_action_pressed("drift") or GameState.touch_drift

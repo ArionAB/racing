@@ -59,6 +59,7 @@ func _refresh() -> void:
 	GameState.touch_steer = clampf(steer, -1.0, 1.0)
 	GameState.touch_drift = drift
 	GameState.touch_turbo = turbo
+	GameState.touch_active = not _touches.is_empty()
 
 func _turbo_center() -> Vector2:
 	return Vector2(size.x - 130.0, size.y - 130.0)

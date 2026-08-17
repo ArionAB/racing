@@ -681,11 +681,40 @@ Sonda dedicata: `tools/ProbePathMover.tscn`.
 2. `ProbeLayout` pe pista ta → VERDICT OK (raze, pante, apropieri).
 3. Ai desenat scurtaturi? **Verifica Output-ul** dupa Regenerate: un
    avertisment de capat prea departe de sosea inseamna ca racordul e ales
-   arbitrar. Apoi `ProbeRace --mode=race` — AI-ul e cel care spune daca banda
-   chiar se poate parcurge.
+   arbitrar. Apoi `ProbeBranch` (banda e la vedere, nu sub teren?) si
+   `ProbeRace --mode=race` — AI-ul e cel care spune daca banda chiar se
+   poate parcurge.
 4. Ai pus un **TrackChannel** cu `jump`? `ProbeJump` pentru pragul de viteza,
    apoi **obligatoriu** `ProbeRace` — golul care se trece cu o masina poate
    opri plutonul (vezi tabelul din sectiunea 4b).
 5. `probe_decor` daca ai adaugat mult decor manual (bugete tri/materiale).
 6. Joaca un tur: e satisfacator drift + saritura + bumping? Intai feel,
    apoi continut.
+
+---
+
+## 8. Mai multe sesiuni pe acelasi repo (Claude in paralel)
+
+Pe repo lucreaza de obicei mai multe sesiuni deodata, fiecare pe alta
+functionalitate. Regulile de mai jos au fost platite fiecare cu un accident:
+
+1. **Fiecare sesiune intr-un `git worktree` propriu**, pe ramura ei
+   (`git worktree add -b feat/x .claude/worktrees/x main`). Doua sesiuni pe
+   acelasi checkout isi calca una alteia fisierele si scena salvata de una
+   ajunge in commit-ul celeilalte.
+2. **Niciodata `git stash`.** Stiva de stash e a REPO-ULUI, nu a
+   worktree-ului: `git stash pop` scoate stash@{0}, oricine l-ar fi pus.
+   S-a intamplat (aug 2026): un pop dintr-un worktree a scos stash-ul altei
+   sesiuni si a trebuit reconstruit de mana. Pentru A/B fata de main foloseste
+   inca un worktree pe `main` (detached), sau `git show main:cale > temp`.
+3. **Niciodata push pe `main`; merge doar prin PR.** Ramura ta se rebazeaza
+   pe main inainte de merge, nu invers.
+4. **Working tree-ul comun (`d:\GameDev\ignition-spike`) poate avea
+   modificari necomise ale dezvoltatorului** (scene desenate in editor).
+   Nu le atinge, nu le comite din alta sesiune, nu presupune ca sunt ale
+   tale. Daca PR-ul tau schimba comportamentul unei scene pe care el o
+   editeaza chiar atunci (ex. noduri `TrackBranch` noi), spune-o in PR.
+5. `.godot/` e per worktree: prima rulare intr-un worktree nou cere
+   `godot --headless --import --path .` (dureaza ~1 min), altfel sondele
+   pica pe resurse neimportate.
+

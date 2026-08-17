@@ -96,7 +96,9 @@ culoare în engine:**
   python tools/blender/verify_glb.py assets/models/rocks/boulder_roller.glb 220 --origin=center
   ```
 - **Nu-l face să semene cu `Cluster_L1`** din `rock_cluster.glb` — ăla e
-  bolovanul static din decor *și* cel care cade în `RockfallHazard`. Ăsta trebuie
+  bolovanul static din decor (și, până în august 2026, cel care cădea în
+  `RockfallHazard`; de atunci și rockfall-ul folosește `boulder_roller`, la
+  scara 0.5, fiindcă o movilă cu baza plată nu se rostogolește). Ăsta trebuie
   să se distingă în mișcare.
 - **Diametrul e contract.** Godot are `model_scale = 0.52` și `roll_radius = 1.3`
   derivate din cei 5.0 m (`track.gd:902-903`). Alt diametru → două numere de

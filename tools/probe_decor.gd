@@ -536,7 +536,7 @@ const VARIANT_SOURCE := {
 	# descris in capul acestui dictionar. Se vedeau pe ecran, dar garda ii
 	# citea gresit — motiv suficient sa nu te increzi intr-o cifra care nu
 	# stie ce numara.
-	"pine_": "alpine_pines",
+	"pine_": "alpine_pines", "trunk_": "alpine_pines",
 	"alpineshrub": "alpine_shrub", "flowercluster": "flower_cluster",
 	"snowpatch": "snow_patch", "mountainpeak": "mountain_peak",
 	"fence_": "wooden_fence", "haybale": "hay_bale", "haycart": "hay_cart",

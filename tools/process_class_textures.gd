@@ -193,6 +193,20 @@ static func classes() -> Dictionary:
 		"snow": {"src": "snow_src.jpg",
 			"anchor": Palette.color(Palette.FOAM_WHITE), "gain": 1.10,
 			"lift": 0.26},
+		# Acele coniferelor: coroana molizilor din kitul alpin (#222). Singura
+		# clasa PICTATA, nu fotografiata — sursa e generata de
+		# tools/paint_pine_needles.py, si acolo sta si motivul: o fotografie de
+		# crengi are adancime, iar proiectata triplanar pe un con citeste ca
+		# tapet. Masurat pe sursa: medie 91 (ratie 0.86 fata de CACTUS_GREEN,
+		# 106), in-dala 26.6, dezechilibru 0.8%/0.8%. `gain` 1.2 + `lift` 0.10
+		# duc media la ~1.1x ancora, DELIBERAT peste: coroana primeste in joc
+		# AO copt cu `low` 0.30 plus gradientul de baza (0.46), deci vertex
+		# color-ul o inchide oricum; la lift 0.05 padurea iesea uniform
+		# intunecata pe captura de sofer, fara varfurile luminate care
+		# separa un molid de urmatorul.
+		"pine_needles": {"src": "pine_needles_src.png",
+			"anchor": Palette.color(Palette.CACTUS_GREEN), "gain": 1.20,
+			"lift": 0.10},
 	}
 	# NU exista clasa "chalet_wood", si e o decizie, nu o omisiune.
 	#

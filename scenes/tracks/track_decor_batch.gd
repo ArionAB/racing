@@ -107,6 +107,9 @@ static func bake(root: Node3D, sway: SwayDriver = null) -> Dictionary:
 	# Sursele se scot INAINTE de a adauga multimesh-urile, ca sa nu existe nici
 	# macar un cadru cu geometria dublata.
 	for mi in sources:
+		# Un copil mesh al unei surse deja eliberate a plecat odata cu ea.
+		if not is_instance_valid(mi):
+			continue
 		mi.get_parent().remove_child(mi)
 		mi.free()
 
@@ -165,7 +168,11 @@ static func _collect(node: Node3D, xf: Transform3D, swaying: bool,
 		if mi.mesh != null and mi.material_override != null:
 			_add(mi, here, sways, groups, flipped)
 			sources.append(mi)
-		return
+		# NU se opreste aici: un mesh poate avea copii mesh (coroana de molid cu
+		# trunchiul sub ea, `Pine_X` > `Trunk_X`). Prima versiune intorcea
+		# dupa parinte si trunchiul disparea tacut din padure — pe captura,
+		# brazii pluteau fara picior. Coborarea continua cu transformarea
+		# parintelui inclusa, deci copilul ajunge exact unde il pune GLB-ul.
 	for c in node.get_children():
 		if c is Node3D and not c.is_queued_for_deletion():
 			_collect(c as Node3D, here, sways, groups, sources, flipped)

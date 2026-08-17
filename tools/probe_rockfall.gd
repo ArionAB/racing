@@ -61,6 +61,53 @@ func _ready() -> void:
 	print("  pornire laterala   -> %.2f m  %s"
 			% [flat_lat, "OK (cade vertical)" if flat_ok else "PROBLEMA"])
 
+	# --- 2b: modul cu TRASEU — porneste de unde i s-a spus, ajunge la capat,
+	# se rostogoleste tot drumul, iar raza vine din model, nu din constanta.
+	var routed := _trace_route()
+	print("
+traseu desenat (Path3D):")
+	var r_start: float = routed["start_err"]
+	var r_start_ok := r_start < 0.05
+	if not r_start_ok:
+		failed = true
+	print("  porneste din primul punct  -> abatere %.2f m  %s"
+			% [r_start, "OK" if r_start_ok else "PROBLEMA"])
+	var r_end: float = routed["end_err"]
+	# Ultimul cadru masurat e cu un pas inainte de capat: 9 m/s / 60 = 0.15 m.
+	var r_end_ok := r_end < 0.2
+	if not r_end_ok:
+		failed = true
+	print("  ajunge la ultimul punct    -> abatere %.2f m  %s"
+			% [r_end, "OK" if r_end_ok else "PROBLEMA"])
+	var r_spin: float = routed["spin_total"]
+	var r_len: float = routed["length"]
+	var r_radius: float = routed["radius"]
+	# Rostogolire fara alunecare: unghiul total = lungime / raza (+-15%, curba
+	# e esantionata).
+	var expect := r_len / r_radius
+	var r_spin_ok := absf(r_spin - expect) < expect * 0.15
+	if not r_spin_ok:
+		failed = true
+	print("  rotatie totala             -> %.1f rad (asteptat %.1f = %.1f m / %.2f m)  %s"
+			% [r_spin, expect, r_len, r_radius, "OK" if r_spin_ok else "PROBLEMA"])
+	var r_still: int = routed["frames_still"]
+	var r_still_ok := r_still == 0
+	if not r_still_ok:
+		failed = true
+	print("  cadre in care sta pe loc   -> %d  %s"
+			% [r_still, "OK (se rostogoleste continuu)" if r_still_ok else "PROBLEMA"])
+	var r_model: String = routed["model"]
+	var r_model_ok := r_model == "boulder_roller"
+	if not r_model_ok:
+		failed = true
+	print("  model                      -> %s  %s"
+			% [r_model, "OK" if r_model_ok else "PROBLEMA (nu e bolovanul rotund)"])
+	var r_rad_ok := absf(r_radius - 1.25) < 0.05
+	if not r_rad_ok:
+		failed = true
+	print("  raza masurata din model    -> %.2f m (asteptat 1.25)  %s"
+			% [r_radius, "OK" if r_rad_ok else "PROBLEMA"])
+
 	# --- 3: strivirea, masurata pe masina
 	var crush := await _crush_test()
 	print("\nstrivirea, masurata pe masina:")
@@ -149,6 +196,58 @@ func _trace(slope_side: float) -> Dictionary:
 		"start_lateral": start_lateral,
 		"impact_lateral": impact_lateral,
 		"spin": spin,
+	}
+	hz.queue_free()
+	return out
+
+
+## Un bolovan cu traseu: curba de la (12, 8, -3) prin (4, 3, 0) peste origine
+## pana la (-10, 0, 4). Urmareste o trecere intreaga si masoara ce a facut.
+func _trace_route() -> Dictionary:
+	var curve := Curve3D.new()
+	curve.add_point(Vector3(12.0, 8.0, -3.0))
+	curve.add_point(Vector3(4.0, 3.0, 0.0))
+	curve.add_point(Vector3(0.0, 0.0, 0.0))
+	curve.add_point(Vector3(-10.0, 0.0, 4.0))
+	var hz := RockfallHazard.new()
+	hz.route = curve
+	hz.route_pause = 1.0
+	add_child(hz)
+
+	var step := 1.0 / 60.0
+	var radius: float = hz._radius
+	var first := curve.get_point_position(0) + Vector3.UP * radius
+	var last := curve.get_point_position(3) + Vector3.UP * radius
+	var start_err := INF
+	var end_err := INF
+	var spin_total := 0.0
+	var frames_still := 0
+	var prev_basis: Basis = hz._pivot.transform.basis
+	var frames := int(hz._route_travel / step)
+	for i in frames:
+		hz._physics_process(step)
+		var pos: Vector3 = hz._last_pos
+		if i == 0:
+			start_err = pos.distance_to(first)
+		end_err = pos.distance_to(last)
+		var b: Basis = hz._pivot.transform.basis
+		var da := prev_basis.get_rotation_quaternion().angle_to(
+			b.get_rotation_quaternion())
+		prev_basis = b
+		if i > 0 and da < 0.0005:
+			frames_still += 1
+		spin_total += da
+	var model_name := ""
+	if hz._pivot.get_child_count() > 0:
+		model_name = String(hz._pivot.get_child(0).name)
+	var out := {
+		"start_err": start_err,
+		"end_err": end_err,
+		"spin_total": spin_total,
+		"length": hz._route_len,
+		"radius": radius,
+		"frames_still": frames_still,
+		"model": model_name,
 	}
 	hz.queue_free()
 	return out

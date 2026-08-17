@@ -1292,6 +1292,17 @@ func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
 			# care urca sta oricum la alta cota decat punctul baked cel mai
 			# apropiat, si cu distanta 3D obstacolul ar aluneca de-a lungul
 			# soselei pe bucata care se INTAMPLA sa fie la aceeasi inaltime.
+			var spec := hz.model_spec()
+			# Bolovanul isi poate aduce TRASEUL, desenat ca Path3D sub nod. Se
+			# aduce in coordonatele pistei aici, unde stim si transformul
+			# grupului in care sta nodul; hazardul il duce apoi in spatiul lui.
+			if hz.kind == HazardMarker.Kind.ROCKFALL:
+				var curve := hz.route_curve_in(self)
+				if curve != null:
+					spec["route"] = curve
+					# Punctul de impact e al TRASEULUI, nu al nodului: nodul da
+					# fractia (unde pe sosea), curba spune exact pe unde trece.
+					spec["at"] = p
 			out.append({
 				"kind": hz.kind,
 				"frac": frac_at(_closest_baked_index(p)),
@@ -1299,7 +1310,7 @@ func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
 				# Infatisarea declarata pe nod, in acelasi vocabular ca o intrare
 				# din `_hazard_kinds()` — vezi HazardMarker.model_spec(). Gol cand
 				# nodul n-a cerut nimic, si atunci decide tema, ca pana acum.
-				"spec": hz.model_spec(),
+				"spec": spec,
 			})
 		_collect_hazards(child, out)
 
@@ -4023,7 +4034,8 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 ## faptul ca hraneste `_peak_specs` in loc sa-si construiasca propriul munte.
 ##
 ## Infatisarea declarata pe nod (`spec`) ajunge la bariera mobila (model
-## complet), la bolovan (clasa de material, #242), la morisca (turnul morii de
+## complet), la bolovan (model + clasa de material + TRASEUL desenat ca Path3D
+## sub nod, #242 si urmatoarele), la morisca (turnul morii de
 ## vant, #245) si la deflector (model + piesa + scara + clasa, #244). Restul
 ## tipurilor isi construiesc vizualul din cod si ignora spec-ul.
 func _build_node_hazard(hz: Dictionary) -> void:
@@ -4141,6 +4153,32 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	# doar pe temele care si-au adus aminte sa declare.
 	rock.tri_class = String(spec.get("tri_class",
 		theme_flag("rockfall_class", theme_flag("rock_class", ""))))
+	# Modelul: ce cere nodul (grupul „Model" de pe HazardMarker), altfel
+	# bolovanul implicit al hazardului (`boulder_roller.glb`). Scara 0 =
+	# „implicitul modelului ales" — un GLB din kit e la scara reala, bolovanul
+	# de 5 m se micsoreaza singur.
+	var model_path := String(spec.get("model", ""))
+	if not model_path.is_empty() and ResourceLoader.exists(model_path):
+		rock.model_scene = load(model_path)
+		rock.model_scale = float(spec.get("scale", 1.0))
+		rock.model_node = String(spec.get("model_node", ""))
+	rock.route_speed = float(spec.get("rock_speed",
+		RockfallHazard.DEFAULT_ROUTE_SPEED))
+	rock.route_pause = float(spec.get("rock_pause",
+		RockfallHazard.DEFAULT_ROUTE_PAUSE))
+	rock.stick_to_ground = bool(spec.get("rock_stick_to_ground", true))
+	# Cu TRASEU desenat in editor: bolovanul urmeaza curba de la primul punct
+	# la ultimul, iar hazardul se planteaza pe sosea sub locul in care curba
+	# trece cel mai aproape de nod. Nu mai e nimic de dedus despre versant —
+	# a spus dezvoltatorul, cu mana, de unde vine si pe unde merge.
+	var route: Curve3D = spec.get("route", null)
+	if route != null:
+		var at: Vector3 = spec.get("at", p)
+		var near := _route_point_near(route, at)
+		rock.route = route
+		rock.position = Vector3(near.x, p.y, near.z)
+		add_child(rock)
+		return
 	# Punctul de impact: o banda, nu axa drumului (blocarea completa e treaba
 	# caruselului). Y de pe SOSEA, nu de pe teren: piatra aterizeaza pe asfalt.
 	var hit := p + side * (width_at(frac) * 0.45)
@@ -4163,6 +4201,22 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	else:
 		rock.position = hit
 	add_child(rock)
+
+
+## Punctul de pe curba cel mai apropiat (in plan) de `at`.
+func _route_point_near(route: Curve3D, at: Vector3) -> Vector3:
+	var best := route.get_point_position(0)
+	var best_d := INF
+	var total := route.get_baked_length()
+	var d := 0.0
+	while d <= total:
+		var s := route.sample_baked(d, true)
+		var dist := Vector2(s.x - at.x, s.z - at.z).length()
+		if dist < best_d:
+			best_d = dist
+			best = s
+		d += 0.25
+	return best
 
 
 ## Pe ce latura a punctului de impact e versantul din care se desprinde piatra:

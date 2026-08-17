@@ -467,7 +467,10 @@ loc sa alunece pe langa drum.
 | `model_scale` | 1.0 = cat l-a construit Blender |
 | `model_node` | ce PIESA din GLB se pastreaza, cand fisierul are mai multe obiecte (ex. `Driftwood_Log` din `scatter/beach_clutter.glb`); gol = tot fisierul |
 | `face_travel` | se uita incotro merge — **obligatoriu la animale** |
-| `roll` | se rostogoleste (doar bolovanii) |
+| `roll` | se rostogoleste (doar bolovanii din bariera mobila; bolovanul care CADE se rostogoleste oricum) |
+| `rock_speed` | **doar pentru bolovan (`ROCKFALL`) cu traseu**: viteza de croaziera pe traseu, m/s (implicit 9). Porneste din loc si accelereaza pana aici. |
+| `rock_pause` | **doar bolovan cu traseu**: cat sta ascuns intre doua treceri, secunde (implicit 3) |
+| `rock_stick_to_ground` | **doar bolovan cu traseu**: cota din teren (raycast), nu din curba — implicit bifat. Stins = urmeaza exact cota curbei. |
 | `motion` | **doar pentru bariera mobila** (`SLIDING`): Pendulare = dus-intors fara oprire (implicitul); Traversare = tractorul din Ignition — asteapta pe acostament, trece, se opreste pe partea cealalta |
 | `tri_class` | clasa de material triplanar (ex. `rock`, `snow`), nu o textura proprie; gol = ce da tema |
 
@@ -484,10 +487,18 @@ Implicit, un obstacol tras in viewport primeste haina TEMEI. Daca vrei alt
 obiect exact acolo — o vaca, un car cu fan, o barca — completeaza grupul
 „Model" din tabelul de mai sus.
 
-Se aplica azi la **bariera mobila** (model complet), **bolovan** (clasa de
-material, #242), **morisca** (modelul devine turnul morii de vant, #245) si
-**deflector** (model + piesa + scara + clasa). Tren, tromba, creasta,
+Se aplica azi la **bariera mobila** (model complet), **bolovan** (model +
+piesa + scara + clasa; implicit `rocks/boulder_roller.glb`, bolovanul rotund
+modelat pentru rostogolire), **morisca** (modelul devine turnul morii de vant,
+#245) si **deflector** (model + piesa + scara + clasa). Tren, tromba, creasta,
 excavator, avalansa si val isi construiesc vizualul din cod si ignora grupul.
+
+La bolovan orice GLB merge, cu originea unde o fi: hazardul il centreaza pe
+cutia lui si il roteste in jurul propriului mijloc, iar raza sferei de
+coliziune se masoara din model (`rock_large.glb` cu `model_node = Rock_Large`
+la `model_scale` 0.6 e un bolovan coltuos de ~2 m, de exemplu). Modelul
+implicit e convex si aproape sferic tocmai ca rostogolirea sa nu se
+poticneasca — un model foarte alungit se va vedea „saltand".
 
 Doua reguli care nu-s de gust:
 
@@ -495,6 +506,39 @@ Doua reguli care nu-s de gust:
   umarul inainte nu traverseaza, pluteste.
 - **`roll` doar la bolovani.** Un car cu fan care se da peste cap traversand
   ulita e exact greseala pe care o evita barca sabani din Okinawa.
+
+### Bolovanul cu traseu desenat (`ROCKFALL` + Path3D)
+
+Fara nimic in plus, bolovanul cade pe ciclul vechi: pista masoara singura de
+pe ce parte e versantul si piatra coboara pe o dreapta inventata din cod —
+care, pe multe portiuni, „pluteste" fara sa vina de undeva anume. Ca sa
+spui TU de unde vine si pe unde merge:
+
+1. Sub nodul `HazardMarker` (kind = `ROCKFALL`) → **Add Child Node** →
+   `Path3D`.
+2. Deseneaza curba cu **Add Point**, din vederea de sus: **primul punct sus
+   pe deal sau pe buza falezei** (de acolo se desprinde), apoi peste sosea,
+   iar **ultimul punct unde vrei sa dispara** (la poalele peretelui opus, in
+   rapa, in vale). Nu-ti bate capul cu cotele — cu `rock_stick_to_ground`
+   bifat, piatra isi ia inaltimea din teren cu un raycast si sare de pe buza
+   falezei in parabola. Curba e drumul pe care CALCA piatra.
+3. **Regenerate** pe radacina + salveaza.
+
+Ce face bolovanul pe traseu: apare la primul punct, prinde viteza pana la
+`rock_speed`, se **rostogoleste continuu** (unghiul rotit = distanta parcursa /
+raza, tot drumul, si in aer), umbra pe asfalt creste in ultimele 1.4 s inainte
+sa treaca peste drum, striveste ce prinde (3 s la 70% din viteza) si il
+imbranceste in directia in care mergea, apoi la capatul curbei dispare, sta
+`rock_pause` secunde si o ia de la inceput. Ciclul e determinist — cu doua
+noduri pe pista, fractia da defazarea.
+
+Nodul HazardMarker ramane pe asfalt (el da fractia si locul umbrei: umbra se
+pune sub punctul curbei cel mai apropiat de nod). Un traseu care ocoleste
+nodul cu 10 m pune umbra la 10 m de unde cade piatra — semnul ca nodul sau
+curba trebuie mutate.
+
+Verificare headless: `tools/ProbeRockfall.tscn` (traseu, rostogolire fara
+alunecare, raza masurata din model, strivire).
 
 ### Modelele cu schelet se anima singure
 

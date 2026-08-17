@@ -32,6 +32,13 @@ extends Node
 ##                             travee sus cu corabia in gol. Fara el, captura
 ##                             prinde podul la inceputul ciclului, adica exact
 ##                             starea in care gimmick-ul nu se vede.
+##   --rock-at=3.5             bolovanii cu traseu, la N SECUNDE de la
+##                             desprindere (nu fractie: traseele au lungimi
+##                             diferite). Se SIMULEAZA cadru cu cadru de la 0,
+##                             fiindca lipirea de teren si saltul de pe buza
+##                             sunt stare, nu functie de timp. Ceasul din
+##                             hazard (`_cross_time`) spune cand e piatra
+##                             deasupra soselei; sonda il tipareste.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -70,6 +77,7 @@ func _ready() -> void:
 	var bridge_at := -1.0
 	var typhoon_at := -1.0
 	var wave_at := -1.0
+	var rock_at := -1.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -89,6 +97,8 @@ func _ready() -> void:
 			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
 		elif arg.begins_with("--wave-at="):
 			wave_at = float(arg.trim_prefix("--wave-at="))
+		elif arg.begins_with("--rock-at="):
+			rock_at = float(arg.trim_prefix("--rock-at="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -111,6 +121,8 @@ func _ready() -> void:
 		_set_typhoon_phase(track, typhoon_at)
 	if wave_at >= 0.0:
 		_set_wave_phase(track, wave_at)
+	if rock_at >= 0.0:
+		await _set_rock_time(track, rock_at)
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:
@@ -276,6 +288,33 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train._physics_process(0.0)
 		found += 1
 	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+
+
+## Aduce bolovanii cu traseu la `seconds` de la desprindere, simuland cadrele.
+##
+## Nu se poate sari direct la un timp: cu `stick_to_ground`, cota vine din
+## raycast pe teren si dintr-o cadere libera care are memorie (viteza
+## verticala) — deci se ruleaza `_physics_process` de la zero, cu pasul
+## fizicii, DUPA ce serverul de fizica a apucat sa vada terenul (un cadru).
+func _set_rock_time(root: Node, seconds: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	var step := 1.0 / 60.0
+	for node in root.get_children():
+		var rock := node as RockfallHazard
+		if rock == null:
+			continue
+		rock.set("_time", 0.0)
+		rock.set("_last_phase", 3)
+		var t := 0.0
+		while t < seconds:
+			rock._physics_process(step)
+			t += step
+		found += 1
+		print("--rock-at=%.2f: bolovan la (%.1f, %.1f, %.1f), trecere peste sosea la %.2f s, o trecere = %.2f s"
+			% [seconds, rock.global_position.x, rock.global_position.y,
+			rock.global_position.z, rock.get("_cross_time"), rock.get("_route_travel")])
+	print("--rock-at=%.2f: %d bolovani mutati" % [seconds, found])
 
 
 ## Muta tromba intr-un moment ales din traversarea ei.

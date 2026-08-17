@@ -24,6 +24,11 @@ extends Marker3D
 ## De aceea si Marker3D, nu MeshInstance3D: obstacolul adevarat e cel construit
 ## la Regenerate, cu coliziunea si mecanica lui. Nodul e doar unde-ul.
 ##
+## Un ROCKFALL poate primi un copil Path3D: traseul pe care se rostogoleste
+## bolovanul (de unde se desprinde, pe unde coboara, unde iese). Vezi grupul
+## „Rostogolire" si `route_curve_in()`. Fara Path3D, pista deduce singura
+## versantul si piatra cade pe ciclul vechi.
+##
 ## Y-ul nodului e IGNORAT deliberat. Fiecare gimmick isi asaza singur cota:
 ## bolovanul cade pe asfalt, trenul sta la cota drumului cu estacada sub el,
 ## caruselul se planteaza in mijlocul soselei. Un Y luat de la nod ar insemna ca
@@ -123,6 +128,35 @@ enum Kind {
 ## e exact ce urca numarul ala. Vezi CLAUDE.md §texturi.
 @export var tri_class: String = ""
 
+@export_group("Rostogolire")
+
+## Doar pentru ROCKFALL, cand nodul are un copil Path3D cu traseul.
+##
+## Traseul se DESENEAZA, nu se declara in cifre: adaugi un Path3D sub nod, pui
+## primul punct sus pe deal (de unde se desprinde piatra), duci curba peste
+## sosea si o termini unde vrei sa dispara. Curba e drumul pe care CALCA
+## bolovanul — o desenezi pe suprafata terenului, centrul lui sta cu o raza mai
+## sus. Bolovanul se rostogoleste continuu pe toata lungimea, dispare la capat,
+## sta `rock_pause` secunde si o ia de la inceput.
+##
+## Fara Path3D, pista masoara singura versantul si piatra cade pe ciclul vechi
+## (telegraf, cadere, asezare, retragere) — asa raman pistele care nu si-au
+## desenat inca traseul.
+
+## Viteza de croaziera pe traseu (m/s). Porneste din loc si accelereaza pana
+## aici; masina merge cu ~25-30, deci 9 se citeste ca bolovan greu, nu proiectil.
+@export_range(1.0, 30.0, 0.5) var rock_speed: float = 9.0
+
+## Cat sta ascuns intre doua treceri (secunde).
+@export_range(0.0, 20.0, 0.5) var rock_pause: float = 3.0
+
+## Cota din TEREN, nu din curba: desenezi traseul din vederea de sus si
+## bolovanul isi ia inaltimea cu un raycast, urca dealul, coboara pe versant
+## si SARE de pe buza falezei in parabola. Stins = urmeaza exact cota curbei
+## (cand vrei o traiectorie prin aer desenata de mana). Acelasi contract ca
+## `PathMover.stick_to_ground`.
+@export var rock_stick_to_ground: bool = true
+
 
 ## Ce a declarat nodul despre INFATISAREA obstacolului, in forma pe care o
 ## citeste deja `Track._build_hazard`: acelasi dictionar ca o intrare din
@@ -153,7 +187,34 @@ func model_spec() -> Dictionary:
 	# ar fi stins o eventuala declaratie de tema, in loc s-o lase sa vorbeasca.
 	if motion != 0:
 		spec["motion"] = motion
+	if kind == Kind.ROCKFALL:
+		spec["rock_speed"] = rock_speed
+		spec["rock_pause"] = rock_pause
+		spec["rock_stick_to_ground"] = rock_stick_to_ground
 	return spec
+
+
+## Traseul bolovanului (primul copil Path3D), adus in coordonatele lui
+## `target` (pista). Null daca nodul n-are Path3D sau curba are sub 2 puncte.
+##
+## Curba se copiaza cu manerele transformate ca VECTORI (nu ca puncte), altfel
+## o rotatie a nodului sau a grupului parinte ar indoi traseul.
+func route_curve_in(target: Node3D) -> Curve3D:
+	for child in get_children():
+		var path := child as Path3D
+		if path == null or path.curve == null or path.curve.point_count < 2:
+			continue
+		var out := Curve3D.new()
+		var src := path.curve
+		for i in src.point_count:
+			var p := src.get_point_position(i)
+			var gp := path.to_global(p)
+			var lp := target.to_local(gp)
+			var lin := target.to_local(path.to_global(p + src.get_point_in(i))) - lp
+			var lout := target.to_local(path.to_global(p + src.get_point_out(i))) - lp
+			out.add_point(lp, lin, lout)
+		return out
+	return null
 
 
 func _ready() -> void:

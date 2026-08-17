@@ -539,6 +539,7 @@ const VARIANT_SOURCE := {
 	"pine_": "alpine_pines", "trunk_": "alpine_pines",
 	"alpineshrub": "alpine_shrub", "flowercluster": "flower_cluster",
 	"snowpatch": "snow_patch", "mountainpeak": "mountain_peak",
+	"peaksnow": "mountain_peak",
 	"fence_": "wooden_fence", "haybale": "hay_bale", "haycart": "hay_cart",
 	"timbersled": "timber_sled", "snowplow": "snowplow", "cow": "cow",
 	"alpinechurch": "alpine_church", "cablecarstation": "cable_car_station",

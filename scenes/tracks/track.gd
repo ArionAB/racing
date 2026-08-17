@@ -344,15 +344,20 @@ static func themes() -> Dictionary:
 			# prin ceata, doua siluete rotite 90° citesc ca doi munti.
 			"horizon_picks": [["MountainPeak"], ["MountainPeak"],
 				["MountainPeak"]],
-			# ATLAS, nu clasa de roca — si asta e chiar rostul modelului.
+			# DOUA clase pe prefix de nod, nu una pe tot modelul si nu atlasul.
 			#
-			# `horizon_class: "rock"` (implicitul) intinde textura de gresie
-			# peste tot varful si STERGE benzile pictate in sloturi: masurat pe
-			# captura, crestele ieseau portocalii ca niste dune de desert, adica
-			# exact opusul unui masiv alpin. Varful are deja padure la poale,
-			# granit la mijloc si zapada peste 38 m — povestea de altitudine e
-			# in UV-uri, si trebuie lasata sa se vada.
-			"horizon_class": "",
+			# Istoric: `horizon_class: "rock"` (implicitul) intindea gresia
+			# canionului peste tot varful si crestele ieseau portocalii; apoi
+			# `horizon_class: ""` lasa atlasul, cu benzile pictate in sloturi —
+			# padure/granit/zapada — dar benzile erau culori UNIFORME cu granita
+			# dura pe fete, si muntii citeau a carton langa stancile de drum
+			# deja texturate cu `alpine_granite`. Din august 2026 GLB-ul e spart
+			# pe doua noduri (vezi build_alpine_nature.py): corpul primeste
+			# granitul stancilor de langa sosea, calota primeste zapada masei de
+			# avalansa. Aceeasi piatra in fundal si in prim-plan. Padurea de la
+			# poale ramane tenta de vertex color, deci nu are nevoie de nod.
+			"horizon_classes": {"MountainPeak": "tri:alpine_granite",
+				"PeakSnow": "tri:snow"},
 			# Inele PROPRII: varful e de trei ori cat un butte de desert, deci
 			# vrea distanta mai mare si numar mai mic. Degajarea de 150-210 m e
 			# masurata contra esecului: cu cea implicita (95 m pe inelul
@@ -1902,7 +1907,13 @@ func _build_horizon(centroid: Vector3) -> void:
 			# pictate in sloturi, iar o textura de roca intinsa peste ele le
 			# sterge — pe captura, crestele ieseau portocalii ca dunele.
 			var horizon_class := String(theme_flag("horizon_class", "rock"))
-			if horizon_class.is_empty():
+			# `horizon_classes` (dictionar prefix -> clasa) are prioritate:
+			# un model spart pe noduri (corp de granit + calota de zapada) isi
+			# ia fiecare parte clasa ei, ca ansamblurile din decorul manual.
+			var horizon_classes: Dictionary = theme_flag("horizon_classes", {})
+			if not horizon_classes.is_empty():
+				Palette.apply_class_materials(model, horizon_classes)
+			elif horizon_class.is_empty():
 				Palette.apply_world_material(model)
 			else:
 				Palette.apply_triplanar_class(model, horizon_class)

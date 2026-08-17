@@ -317,6 +317,8 @@ const CLASS_TEXTURES := {
 	# Muntele (Alpii): sisturi stratificate si zapada avalansei.
 	"alpine_granite": "res://assets/textures/classes/alpine_granite.png",
 	"snow": "res://assets/textures/classes/snow.png",
+	# Coroana coniferelor (pictata, vezi tools/paint_pine_needles.py).
+	"pine_needles": "res://assets/textures/classes/pine_needles.png",
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -345,6 +347,15 @@ const CLASS_TRIPLANAR_SCALE := {
 	# stea pe loc in timp ce corpul se invarte pe sub ea — adica exact
 	# contrariul lucrului pentru care am pus textura.
 	"snow": 0.3,
+	# Acele coniferelor. Sursa e pictata la ~1 m/dala (ramurele de 5-10 cm,
+	# ace de 1-2 cm), dar la 1.0 (scara reala) coroana iesea GRANULATA pe
+	# captura de sofer — la 10-15 m un ac e sub un texel si ramane zgomot.
+	# La 0.6 (o repetitie la 1.67 m) ramurelele au 8-16 cm si smocurile
+	# 25-40 cm: se citesc ca ramuri de la distanta de joc, iar un etaj de
+	# 2.6 m prinde ~1.5 repetitii, destul cat tiparul sa nu se vada. Proiectie
+	# in spatiul LUMII (brazii nu se misca): un singur material pentru toata
+	# padurea, oricate scari ar avea instantele.
+	"pine_needles": 0.6,
 }
 
 static var _tri_mats: Dictionary = {}

@@ -679,6 +679,11 @@ const PINE_SMALL: Array[String] = ["Pine_D"]
 const PINE_MID: Array[String] = ["Pine_A", "Pine_D", "Pine_A", "Pine_B"]
 ## Departe: masa adevarata, inclusiv molidul de 13 m.
 const PINE_FAR: Array[String] = ["Pine_B", "Pine_C", "Pine_A", "Pine_C"]
+## Materialele coniferului, pe prefix de nod: coroana texturata, restul
+## (trunchiul) pe atlas. Prima clasa de VEGETATIE — pana aici texturile de
+## clasa erau doar piatra/lemn/metal, iar coroana pe un singur slot verde
+## era exact "culoarea plata" din diagnosticul BBR2 (CLAUDE.md, texturi).
+const PINE_CLASSES: Dictionary = {"Pine": "tri:pine_needles"}
 
 
 ## Decorul de banda al muntelui de vara.
@@ -808,7 +813,11 @@ static func _add_pine(parent: Node3D, pos: Vector3,
 	parent.add_child(holder)
 	holder.add_child(kept)
 	kept.scale = Vector3.ONE * s
-	Palette.apply_world_material(kept)
+	# Coroana pe clasa `pine_needles` (ace pictate, triplanar in spatiul
+	# lumii), trunchiul — copilul `Trunk_X` din GLB — pe atlas (WOOD). Un
+	# singur material pe toata padurea, oricate scari ar avea instantele;
+	# vertex color-ul copt (AO + gradient) se inmulteste peste textura.
+	Palette.apply_class_materials(kept, PINE_CLASSES)
 	if collide:
 		var body := holder as StaticBody3D
 		var shape := CylinderShape3D.new()

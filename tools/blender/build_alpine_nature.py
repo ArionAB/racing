@@ -1,22 +1,45 @@
 """Kitul alpin — NATURA (planşa "Swiss Alps — Alpine Switchback").
 
   MountainPeak  rocks/mountain_peak.glb      100 x 80 x 80 m  <= 2000 (backdrop)
+    + PeakSnow  (acelasi GLB, copil)      calota de zapada, alta clasa
   AlpineShrub   plants/alpine_shrub.glb      1.5 x 1.5 x 1.2  <= 600
   FlowerCluster flowers/flower_cluster.glb   1.5 x 1.5 x 0.6  <= 600
   SnowPatch     scatter/snow_patch.glb       5 x 5 x 0.2      <= 200
 
 Muntele e fundal: sta la sute de metri, dincolo de ceata partiala, deci
 silueta si cele trei benzi de culoare (padure - granit - zapada) sunt tot
-mesajul. Granit = CONCRETE/ASPHALT_EDGE/VOLCANIC_BLACK, zapada = FOAM_WHITE,
-padurea de la poale = TROPICAL_GREEN. Fara bevel — la scara asta tesitura
-nu se vede, doar plateste triunghiuri.
+mesajul. Fara bevel — la scara asta tesitura nu se vede, doar plateste
+triunghiuri.
+
+BENZILE, DIN AUGUST 2026, NU MAI SUNT SLOTURI DE ATLAS. Prima versiune le
+picta in sloturi (CONCRETE/ASPHALT_EDGE ciclate pe inele, TROPICAL_GREEN la
+poale, FOAM_WHITE peste linia zapezii) si tema lasa muntele pe atlas tocmai ca
+sa nu i le stearga o textura de roca. Rezultatul, pe captura de sofer: benzi
+de culoare UNIFORMA cu granita dura pe fete intregi, granit maro-portocaliu
+saturat — muntii de carton, in timp ce stancile de langa drum aveau deja
+textura de clasa `alpine_granite`. Doua lumi.
+
+Acum muntele e DOUA obiecte in acelasi GLB, ca sa primeasca doua clase:
+  MountainPeak  corpul de roca (copilul de mai jos e atasat de el)
+    PeakSnow    fetele de peste linia zapezii, DESPRINSE din acelasi mesh
+In joc (Track._build_horizon, `horizon_classes`): MountainPeak -> tri:alpine_granite,
+PeakSnow -> tri:snow — aceleasi clase ca stancile si masa de avalansa de langa
+drum, deci fundalul si prim-planul sunt din aceeasi piatra. Zapada e obiect
+separat fiindca vertex color-ul doar INTUNECA (SurfaceTool taie la [0,1]): nu
+poti "albi" granitul din vertecsi, dar poti da alta clasa altui nod.
+
+Padurea de la poale NU e obiect separat: e o TENTA verde in vertex color peste
+granit (inmultire, deci merge — spre inchis), cu granita moale si zgomotoasa
+pe cota, nu pe fete. La 200-350 m si prin ceata, o banda verde-inchis pe
+piatra deschisa citeste "padure sub linia golului", si costa zero noduri.
+
+Linia zapezii are ZGOMOT pe fata (±ZIGZAG m): o cota unica da o dunga trasa cu
+rigla, iar zapada reala coboara pe vaiugi si se retrage de pe muchii.
 """
 
 import math
 
-# Doar doua valori apropiate: banda neagra (VOLCANIC_BLACK) iesea o pata
-# stridenta pe con, nu sedimentare — vazut la prima randare.
-GRANITE_STRATA = (CONCRETE, ASPHALT_EDGE)
+SNOW_ZIGZAG = 7.0
 
 # ============================================================ MountainPeak
 # Doua varfuri (principal + umar), ca silueta sa nu fie un con simetric.
@@ -25,27 +48,126 @@ GRANITE_STRATA = (CONCRETE, ASPHALT_EDGE)
 # intregi si treapta rezultata citeste ca limba de zapada, nu ca greseala.
 
 SNOW_LINE = 38.0
-TREE_LINE = 13.0
+TREE_LINE = 14.0
 
 
 def build_peak():
     b = Builder()
+    # Un singur slot (CONCRETE): sub triplanar UV-ul nu mai inseamna culoare,
+    # iar CONCRETE e ancora clasei `alpine_granite` — daca vreodata muntele
+    # cade inapoi pe atlas, iese in aceeasi familie, nu portocaliu.
     b.rock((0.0, 0.0, 0.0), (92.0, 74.0, 80.0), CONCRETE, seed=41,
-           segments=9, rings=6, taper=0.88, squash=0.94,
-           strata_slots=GRANITE_STRATA)
+           segments=9, rings=6, taper=0.88, squash=0.94)
     b.rock((30.0, -14.0, 0.0), (48.0, 42.0, 52.0), CONCRETE, seed=57,
-           segments=8, rings=5, taper=0.82, squash=0.9,
-           strata_slots=GRANITE_STRATA)
+           segments=8, rings=5, taper=0.82, squash=0.9)
     b.rock((-32.0, 10.0, 0.0), (34.0, 30.0, 34.0), CONCRETE, seed=69,
-           segments=7, rings=4, taper=0.78, squash=0.9,
-           strata_slots=GRANITE_STRATA)
-    all_faces = set(b.bm.faces)
-    # ordinea conteaza: intai padurea (banda joasa), apoi zapada peste varf.
-    # Linia zapezii e o cota unica: prima incercare o cobora pe umarul estic
-    # dupa c.x si jumatate de munte iesea alba pana aproape de poale.
-    b.retag(all_faces, TROPICAL_GREEN, where=lambda c, n: c.z < TREE_LINE)
-    b.retag(all_faces, FOAM_WHITE, where=lambda c, n: c.z > SNOW_LINE)
+           segments=7, rings=4, taper=0.78, squash=0.9)
     return b
+
+
+def _hash01(x, y, seed=0):
+    """Zgomot determinist 0..1 din pozitie — acelasi munte la fiecare build."""
+    h = math.sin(x * 12.9898 + y * 78.233 + seed * 37.719) * 43758.5453
+    return h - math.floor(h)
+
+
+def split_snow(obj):
+    """Desprinde fetele de peste linia zapezii intr-un obiect copil `PeakSnow`.
+
+    Se face DUPA finish(): AO-ul e copt pe muntele intreg (umbra din vai trece
+    prin linia zapezii), iar bevel-ul nu exista aici oricum. Culorile de vertex
+    (atributul AO, pe puncte) supravietuiesc stergerii de fete in bmesh.
+    """
+    me = obj.data
+    # Intai TAIEM mesh-ul pe cota zapezii: fetele muntelui au 10-13 m pe
+    # verticala, iar o granita pe fete intregi urca si coboara in trepte de
+    # un inel — dunga trasa cu rigla, doar mai stramba. Bisectia pune o bucla
+    # de vertecsi noi exact pe linie; pe ea se aplica zgomotul (in jos si in
+    # sus cu SNOW_ZIGZAG), deci limbile de zapada sunt in GEOMETRIE, si
+    # amandoua obiectele (roca/zapada) le impart, fara crapaturi.
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+                           plane_co=(0.0, 0.0, SNOW_LINE), plane_no=(0.0, 0.0, 1.0),
+                           dist=1e-4)
+    # Apartenenta se decide INAINTE de zgomot, cand fiecare fata e complet
+    # sub sau complet peste plan; dupa zimtare, o fata ingusta de langa linie
+    # ar putea sa-si mute centrul de partea cealalta si sa apara o pata de
+    # granit in zapada.
+    tag = bm.faces.layers.int.new("snow")
+    for f in bm.faces:
+        f[tag] = 1 if f.calc_center_median().z > SNOW_LINE else 0
+    for v in bm.verts:
+        if abs(v.co.z - SNOW_LINE) < 1e-3:
+            v.co.z += (_hash01(v.co.x * 0.13, v.co.y * 0.13, 3) - 0.5) * 2.0 * SNOW_ZIGZAG
+    bm.to_mesh(me)
+    bm.free()
+
+    bm_rock = bmesh.new()
+    bm_rock.from_mesh(me)
+    bm_snow = bmesh.new()
+    bm_snow.from_mesh(me)
+    tr = bm_rock.faces.layers.int["snow"]
+    ts = bm_snow.faces.layers.int["snow"]
+    bmesh.ops.delete(bm_rock, geom=[f for f in bm_rock.faces if f[tr] == 1],
+                     context="FACES")
+    bmesh.ops.delete(bm_snow, geom=[f for f in bm_snow.faces if f[ts] == 0],
+                     context="FACES")
+    bm_rock.to_mesh(me)
+    bm_rock.free()
+    snow_me = bpy.data.meshes.new(obj.name.replace("MountainPeak", "PeakSnow"))
+    bm_snow.to_mesh(snow_me)
+    bm_snow.free()
+    for m_ in (me, snow_me):   # atributul de lucru nu are ce cauta in GLB
+        if "snow" in m_.attributes:
+            m_.attributes.remove(m_.attributes["snow"])
+    for m in me.materials:
+        snow_me.materials.append(m)
+    snow = bpy.data.objects.new(snow_me.name, snow_me)
+    bpy.context.collection.objects.link(snow)
+    snow.parent = obj
+    snow.matrix_parent_inverse = snow.matrix_parent_inverse.Identity(4)
+    return snow
+
+
+TREE_BAND = 6.0
+
+
+def tint_forest(obj):
+    """Tenta de padure la poale, in vertex color, peste AO: verde-inchis sub
+    TREE_LINE, granit curat peste, cu o banda de tranzitie de ±TREE_BAND m si
+    zgomot pe cota ca liziera sa nu fie o linie.
+
+    Intai doua bisectii, la marginile benzii. Fara ele, tenta se interpoleaza
+    Gouraud intre inelele muntelui (la 13 m distanta): pe captura, verdele
+    urca pana aproape de zapada, iar granitul curat disparea — vazut pe varful
+    din inelul apropiat, unde ocupa jumatate de ecran. Cu buclele de vertecsi
+    puse exact la marginile benzii, sub e padure, peste e piatra, si tranzitia
+    e cat am spus ca e."""
+    me = obj.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    for z in (TREE_LINE - TREE_BAND, TREE_LINE + TREE_BAND):
+        bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+                               plane_co=(0.0, 0.0, z), plane_no=(0.0, 0.0, 1.0),
+                               dist=1e-4)
+    bm.to_mesh(me)
+    bm.free()
+    ca = me.color_attributes.get("AO")
+    if ca is None:
+        return
+    forest = (0.44, 0.62, 0.34)
+    for v in me.vertices:
+        jitter = (_hash01(v.co.x * 0.21, v.co.y * 0.21, 5) - 0.5) * 8.0
+        t = (v.co.z - (TREE_LINE + jitter) + TREE_BAND) / (2.0 * TREE_BAND)
+        t = max(0.0, min(1.0, t))
+        t = t * t * (3.0 - 2.0 * t)   # smoothstep
+        col = ca.data[v.index].color
+        ca.data[v.index].color = (
+            col[0] * (forest[0] + (1.0 - forest[0]) * t),
+            col[1] * (forest[1] + (1.0 - forest[1]) * t),
+            col[2] * (forest[2] + (1.0 - forest[2]) * t),
+            1.0)
 
 
 # ============================================================= AlpineShrub
@@ -126,6 +248,11 @@ for name, make, glb, budget, bevel, ao, smooth in ASSETS:
     if name == "AlpineShrub":
         # baza spre umbra rece, varfurile aproape de culoarea slotului
         tint_gradient(obj, base=(0.55, 0.62, 0.55), tip=(1.05, 1.0, 0.88))
+    extra = []
+    if name == "MountainPeak":
+        clear_built("PeakSnow")
+        tint_forest(obj)
+        extra.append(split_snow(obj))
     me = obj.data
     dims = [max(v.co[i] for v in me.vertices) - min(v.co[i] for v in me.vertices)
             for i in range(3)]
@@ -133,7 +260,8 @@ for name, make, glb, budget, bevel, ao, smooth in ASSETS:
           % (name, stats["tris"], budget,
              "OK" if stats["tris"] <= budget else "DEPASIT",
              dims[0], dims[1], dims[2], stats["ao_min"], stats["ao_max"]))
-    print("GLB:   %s (%d B)" % export_glb([obj], glb))
+    print("GLB:   %s (%d B)" % export_glb([obj] + extra, glb))
     built.append(obj)
+    built.extend(extra)
 
 print("BLEND: %s (%d B)" % save_blend(built, "alpine_nature.blend"))

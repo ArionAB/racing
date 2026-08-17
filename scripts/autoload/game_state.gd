@@ -72,6 +72,7 @@ var cam_follow_scale: float = 1.0
 var touch_steer: float = 0.0
 var touch_drift: bool = false
 var touch_turbo: bool = false
+var touch_active: bool = false # cel putin un deget pe ecran (auto-accelerate)
 
 # Best lap per pista (nume pista -> milisecunde), persistat. Cheia e numele,
 # nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
@@ -155,6 +156,7 @@ func reset_touch() -> void:
 	touch_steer = 0.0
 	touch_drift = false
 	touch_turbo = false
+	touch_active = false
 
 # ---------------------------------------------------------------- setari
 

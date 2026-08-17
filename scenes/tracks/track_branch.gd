@@ -48,6 +48,69 @@ extends Path3D
 ## Numele afisat in sonde si in mesaje de eroare.
 @export var label: String = ""
 
+## Plafonul de viteza PE BANDA, ca fractie din viteza maxima a masinii.
+##
+## A treia contragreutate, langa `wet` si latime — si cea mai naturala pentru
+## un drum de tara: pamantul batatorit nu tine viteza asfaltului. 1.0 = neatins
+## (banda merge cat soseaua). 0.85 taie 15% din plafon, cat sa castigi din
+## scurtatura doar daca o iei curat. Se aplica DUPA offroad, deci pe iarba de
+## langa banda ramane pedeapsa obisnuita, nu una dubla.
+@export_range(0.5, 1.0, 0.01) var speed_factor: float = 1.0
+
+@export_group("Suprafata")
+
+## Din ce e facuta banda. THEME = ce spune tema pistei (`branch_surface`:
+## nisip pe insula, drum de tara pe munte); restul suprascriu tema DOAR pe
+## banda asta.
+##
+##   SAND       banda plata de nisip (bancul submers din Okinawa) — reteta
+##              veche, neschimbata cu un pixel
+##   DIRT_ROAD  drum de tara: doua fagase batatorite, brazda de iarba intre
+##              ele, margini zdrentuite care se topesc in pajiste, smocuri de
+##              iarba pe margini si pe brazda
+##   GRAVEL     pietris batatorit: aceleasi margini zdrentuite, fara fagase
+##              si fara iarba pe mijloc
+enum Surface { THEME, SAND, DIRT_ROAD, GRAVEL }
+@export var surface: Surface = Surface.THEME
+
+## Culoarea pamantului benzii. Alfa 0 = culoarea din tema (`branch_tint`).
+## Se INMULTESTE cu granulatia texturii, deci alege-o cu ~15% mai deschisa
+## decat vrei s-o vezi pe ecran.
+@export var tint: Color = Color(0.0, 0.0, 0.0, 0.0)
+
+## Adancimea fagaselor (m), doar la DIRT_ROAD. 3-5 cm se citesc din umbra;
+## peste 8 cm banda arata sapata, nu calcata. 0 = fara fagase.
+@export_range(0.0, 0.12, 0.005, "suffix:m") var rut_depth: float = 0.04
+
+## Cat de inierbata e brazda dintre fagase, doar la DIRT_ROAD: 0 = pamant
+## peste tot (drum umblat des), 1 = iarba plina pe mijloc (poteca rara).
+## Iarba vine si ca smocuri, nu doar ca nuanta.
+@export_range(0.0, 1.0, 0.05) var grass_center: float = 0.6
+
+## Cat de neregulate sunt marginile (m). 0 = taiate cu rigla (banda pare
+## lipita peste teren). ~0.8 e destul cat marginea sa para calcata, nu trasa.
+@export_range(0.0, 2.0, 0.1, "suffix:m") var edge_noise: float = 0.8
+
+## Denivelari de rulare (m amplitudine): gropi si valuri de 1-3 m lungime.
+## Peste 0 intra SI in coliziune — suspensia le simte, caroseria se leagana.
+## 0.03 e „drum de tara"; 0.06 e „drum forestier". 0 = neted (implicit,
+## ca banda sa nu schimbe feel-ul pana nu ceri).
+@export_range(0.0, 0.10, 0.005, "suffix:m") var bumpiness: float = 0.0
+
+## Iarba densa (smocuri) pe margini si pe brazda, doar la DIRT_ROAD.
+## Se stinge daca vrei banda curata sau daca numeri triunghiuri.
+@export var tufts: bool = true
+
+
+## Numele retetei, cum il citeste [Track] (cheia `surface` din spec).
+## THEME intoarce "" — pista completeaza din tema.
+func surface_name() -> String:
+	match surface:
+		Surface.SAND: return "sand"
+		Surface.DIRT_ROAD: return "dirt_road"
+		Surface.GRAVEL: return "gravel"
+	return ""
+
 
 ## Punctele din mijlocul scurtaturii, in coordonatele PISTEI.
 ##

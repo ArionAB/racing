@@ -128,7 +128,11 @@ traseul principal).
 5. In Inspector, pe nodul `TrackBranch`:
    - `branch_half_width` — JUMATATEA latimii benzii. **0 = cat pista.**
    - `wet` — banda uda, cu grip lateral taiat.
+   - `speed_factor` — plafonul de viteza PE banda (1 = cat soseaua, 0.85 =
+     taie 15%). Vezi contragreutatea, mai jos.
    - `label` — nume pentru sonde (gol = numele nodului).
+   - grupul **Suprafata** — cum ARATA banda (drum de tara, nisip, pietris).
+     Vezi „Cum arata scurtatura", mai jos.
 6. Selecteaza **radacina** pistei si bifeaza **Regenerate**.
 7. **Salveaza scena.**
 
@@ -177,6 +181,10 @@ doua parghii, si se aleg din LUME, nu dintr-un tabel:
 |---|---|---|
 | `branch_half_width` | mai ingusta: singur incapi, in trafic nu | poteca de pasune din Alpii (3.2 fata de 7.0) |
 | `wet` | grip lateral taiat cat timp esti pe ea | bancul de nisip din Okinawa |
+| `speed_factor` | plafon de viteza mai jos cat timp esti pe ea (0.5..1) | drum de tara: 0.85-0.9 — castigi doar daca o iei curat |
+
+`speed_factor` nu se cumuleaza cu pedeapsa de offroad: pe iarba de LANGA banda
+esti offroad (45%), pe banda esti la plafonul ei. Turbo-ul merge si aici.
 
 (Pentru o portiune uda pe traseul PRINCIPAL, nu pe o scurtatura, vezi
 `custom_wet_ranges` la sectiunea 5.)
@@ -186,11 +194,59 @@ aceeasi fractie de tur ca una de la jumatatea portiunii ocolite, deci
 clasamentul si numaratoarea de tururi raman corecte. Nu poti trisa un tur pe
 aici, si nici nu trebuie sa-ti faci griji pentru asta.
 
+### Cum arata scurtatura: grupul „Suprafata"
+
+Banda NU e un model — e generata din cod, iar aspectul ei se alege din
+Inspector, pe nodul `TrackBranch`, grupul **Suprafata**:
+
+| camp | ce face |
+|---|---|
+| `surface` | reteta. **THEME** = ce spune tema pistei (nisip pe insula, drum de tara pe munte). **DIRT_ROAD** = doua fagase batatorite, brazda de iarba intre ele, margini zdrentuite care se topesc in pajiste, smocuri de iarba pe margini si pe brazda. **GRAVEL** = pietris batatorit, aceleasi margini, fara fagase si fara iarba. **SAND** = banda plata (bancul din Okinawa). |
+| `tint` | culoarea pamantului. Alfa 0 = din tema. Se inmulteste cu granulatia texturii, deci alege-o cu ~15% mai deschisa decat vrei s-o vezi. |
+| `rut_depth` | adancimea fagaselor (m). 3-5 cm se citesc din umbra; peste 8 arata sapat. Doar vizual — rotile ruleaza pe planul benzii. |
+| `grass_center` | cat de inierbata e brazda: 0 = drum umblat des, 1 = poteca prin fan. Da si nuanta, si smocuri. |
+| `edge_noise` | cat de neregulate sunt marginile (m). 0 = taiate cu rigla — adica exact „dreptunghi lipit peste teren". |
+| `bumpiness` | denivelari de rulare (m amplitudine, gropi si valuri de 1-3 m). **Intra si in fizica**: suspensia le simte, caroseria se leagana. 0.03 = drum de tara, 0.06 = drum forestier. 0 = neted (implicit). |
+| `tufts` | smocurile de iarba de pe margini si de pe brazda. Stinge-le daca numeri triunghiuri. |
+
+Dupa orice schimbare: **Regenerate** pe radacina. Ca sa vezi rezultatul din
+masina, nu de sus (vederile de sus mint despre margini si iarba):
+
+```
+godot --path . res://tools/Snapshot.tscn -- --track=N --route=1 --frac=0.5 --gamecam
+```
+
+`--route=1` e prima scurtatura (in ordinea din `Track.routes`: intai cele din
+cod, apoi nodurile), iar `--frac` e din lungimea EI, nu din tur.
+
+Ce face motorul pentru tine, ca sa stii ce sa NU incerci sa repari de mana:
+- **terenul se aseaza pe banda**: pentru DIRT_ROAD/GRAVEL pajistea se si SAPA
+  pana la cota benzii (nu doar se ridica, ca la nisip), deci poti desena poteca
+  printr-un deal si ea ramane la vedere. Marginea benzii se ingroapa in teren,
+  de aceea linia drumului e neregulata fara sa faci nimic;
+- **iarba deasa a soselei ocoleste banda**, iar banda isi pune propriile
+  smocuri (`tufts`);
+- **praful de la roti** ia culoarea pamantului benzii (`tint`), nu a solului.
+
+Ce trebuie sa faci TU: **capetele desenate sa fie la cota drumului**, iar
+coborarea/urcarea sa inceapa dupa 10-15 m, nu chiar din asfalt. O banda care
+pleaca de pe sosea si cade 4 m in primii 18 m (scurtatura din cod a Alpilor)
+ramane sub teren pe racord: langa asfalt terenul e blocat la cota soselei si
+nu se sapa, ca sa nu-i fuga pamantul de sub margine.
+
 ### Limitele si verificarea
 
 Geometria are aceleasi reguli ca orice curba de pista, si **nu se relaxeaza
 aici**: raza virajului > latimea benzii, iar banda sa stea la >= 2× latime de
 bucla principala pe portiunile paralele.
+
+Sonda benzilor spune, punct cu punct, daca banda e sub teren (o banda ingropata
+exista in fizica si nu se vede — asa era scurtatura din cod a Alpilor pana in
+aug 2026, 58 din 90 de puncte sub pajiste):
+
+```
+godot --headless --fixed-fps 60 --path . res://tools/ProbeBranch.tscn -- --track=N
+```
 
 Arbitrul e **ProbeRace**, nu ochiul: el spune daca AI-ul chiar trece pe acolo
 sau se opinteste la jonctiune. Se uita la timpul petrecut in afara soselei, la
@@ -625,11 +681,40 @@ Sonda dedicata: `tools/ProbePathMover.tscn`.
 2. `ProbeLayout` pe pista ta → VERDICT OK (raze, pante, apropieri).
 3. Ai desenat scurtaturi? **Verifica Output-ul** dupa Regenerate: un
    avertisment de capat prea departe de sosea inseamna ca racordul e ales
-   arbitrar. Apoi `ProbeRace --mode=race` — AI-ul e cel care spune daca banda
-   chiar se poate parcurge.
+   arbitrar. Apoi `ProbeBranch` (banda e la vedere, nu sub teren?) si
+   `ProbeRace --mode=race` — AI-ul e cel care spune daca banda chiar se
+   poate parcurge.
 4. Ai pus un **TrackChannel** cu `jump`? `ProbeJump` pentru pragul de viteza,
    apoi **obligatoriu** `ProbeRace` — golul care se trece cu o masina poate
    opri plutonul (vezi tabelul din sectiunea 4b).
 5. `probe_decor` daca ai adaugat mult decor manual (bugete tri/materiale).
 6. Joaca un tur: e satisfacator drift + saritura + bumping? Intai feel,
    apoi continut.
+
+---
+
+## 8. Mai multe sesiuni pe acelasi repo (Claude in paralel)
+
+Pe repo lucreaza de obicei mai multe sesiuni deodata, fiecare pe alta
+functionalitate. Regulile de mai jos au fost platite fiecare cu un accident:
+
+1. **Fiecare sesiune intr-un `git worktree` propriu**, pe ramura ei
+   (`git worktree add -b feat/x .claude/worktrees/x main`). Doua sesiuni pe
+   acelasi checkout isi calca una alteia fisierele si scena salvata de una
+   ajunge in commit-ul celeilalte.
+2. **Niciodata `git stash`.** Stiva de stash e a REPO-ULUI, nu a
+   worktree-ului: `git stash pop` scoate stash@{0}, oricine l-ar fi pus.
+   S-a intamplat (aug 2026): un pop dintr-un worktree a scos stash-ul altei
+   sesiuni si a trebuit reconstruit de mana. Pentru A/B fata de main foloseste
+   inca un worktree pe `main` (detached), sau `git show main:cale > temp`.
+3. **Niciodata push pe `main`; merge doar prin PR.** Ramura ta se rebazeaza
+   pe main inainte de merge, nu invers.
+4. **Working tree-ul comun (`d:\GameDev\ignition-spike`) poate avea
+   modificari necomise ale dezvoltatorului** (scene desenate in editor).
+   Nu le atinge, nu le comite din alta sesiune, nu presupune ca sunt ale
+   tale. Daca PR-ul tau schimba comportamentul unei scene pe care el o
+   editeaza chiar atunci (ex. noduri `TrackBranch` noi), spune-o in PR.
+5. `.godot/` e per worktree: prima rulare intr-un worktree nou cere
+   `godot --headless --import --path .` (dureaza ~1 min), altfel sondele
+   pica pe resurse neimportate.
+

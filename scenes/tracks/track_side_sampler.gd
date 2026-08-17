@@ -186,7 +186,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		channels: Array[Dictionary] = [],
 		peaks: Array[Vector4] = [],
 		cornices: Array[int] = [],
-		widths: PackedFloat32Array = PackedFloat32Array()) -> void:
+		widths: PackedFloat32Array = PackedFloat32Array(),
+		carve_corridors: PackedVector3Array = PackedVector3Array()) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
@@ -195,6 +196,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_ravines = ravines
 	_far_drop = far_drop
 	_extra = extra_corridors
+	_carve = carve_corridors
 	_lagoon_poly = lagoon_poly
 	_lagoon_depth = lagoon_depth
 	_channels = channels
@@ -361,6 +363,7 @@ func ground_y(wx: float, wz: float) -> float:
 	# re-aseaza terenul peste flancul muntelui, iar rapele taie si prin el.
 	y = _lift_peaks(y, wx, wz, dist, near_i)
 	y = _lift_branches(y, wx, wz, road_level, dist, near_i)
+	y = _carve_branches(y, wx, wz, dist, near_i)
 	y = _carve_lagoon(y, dist, wx, wz, near_i)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
 	# ULTIMA taietura, si singura care nu ocoleste asfaltul. Vezi _carve_channel.
@@ -487,6 +490,76 @@ func _lift_branches(y: float, wx: float, wz: float,
 	var room := clampf((road_dist - half_width_at(near_i)) / BRANCH_LIFT_CLEAR,
 		0.0, 1.0)
 	return minf(lifted, lerpf(road_level, lifted, room))
+
+
+## Punctele coapte ale benzilor care se conduc PE teren (drum de tara, pietris)
+## — pentru ele terenul se si SAPA pana la cota benzii, nu doar se ridica.
+## Vezi _carve_branches. Bancul de nisip din Okinawa nu e aici.
+var _carve: PackedVector3Array = PackedVector3Array()
+
+
+## Coboara terenul la cota benzilor de pe uscat, chiar langa ele.
+##
+## `_lift_branches` doar RIDICA (max neted), si asta e corect pentru un banc de
+## nisip: e sub apa prin definitie, iar uscatul din jurul racordurilor trebuie
+## sa ramana uscat. Dar un drum de tara desenat printr-un deal ramanea sub deal:
+## masurat pe scurtatura din cod a Alpilor, 58 din 90 de puncte coapte erau sub
+## teren, cu pana la 4.9 m — banda exista in fizica si era invizibila (sonda:
+## tools/probe_branch.gd). Un drum de pe uscat e o suprafata pe care terenul o
+## INTALNESTE din ambele parti, deci aici se si sapa.
+##
+## Aceeasi raza plata si acelasi racord ca la ridicare, ca banda sa aiba o
+## singura forma de coridor. Langa soseaua principala nu se sapa (BRANCH_LIFT_CLEAR,
+## din acelasi motiv ca la ridicare, cu semn schimbat: nu se scoate pamantul de
+## sub marginea asfaltului).
+func _carve_branches(y: float, wx: float, wz: float, road_dist: float,
+		near_i: int) -> float:
+	var m := _carve.size()
+	if m == 0:
+		return y
+	var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
+	var reach_sq := reach * reach
+	var near_sq := INF
+	var level := 0.0
+	var k := 0
+	while k < m:
+		var q := _carve[k]
+		var dx := q.x - wx
+		var dz := q.z - wz
+		var d_sq := dx * dx + dz * dz
+		if d_sq < near_sq:
+			near_sq = d_sq
+			level = q.y
+		k += GROUND_STRIDE
+	# Terenul sta putin SUB banda (BRANCH_DROP), ca sub sosea (GROUND_DROP):
+	# grila de teren e la ~8 m si intre noduri planul ei se abate de la curba
+	# benzii — fara marja, colturi de pajiste rasareau prin drum (vazut pe
+	# captura: o pana verde peste banda). Marginea benzii coboara pana sub
+	# nivelul asta si se ingroapa in teren, deci linia vizibila a drumului e
+	# INTERSECTIA celor doua suprafete, nu o muchie de mesh — vezi
+	# Track._build_branch_dirt.
+	level -= BRANCH_DROP
+	if near_sq > reach_sq or level >= y:
+		return y
+	var d := sqrt(near_sq)
+	var t := smoothstep(0.0, 1.0,
+		clampf((d - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0))
+	var carved := lerpf(level, y, t)
+	var room := clampf((road_dist - half_width_at(near_i)) / BRANCH_CARVE_CLEAR,
+		0.0, 1.0)
+	return lerpf(y, carved, room)
+
+
+## Pe cati metri dincolo de marginea asfaltului se aprinde saparea benzii.
+## Mai STRANS decat BRANCH_LIFT_CLEAR (12 m), si nu din neatentie: ridicarea
+## trebuia tinuta departe de drum ca sa nu creasca o pana de nisip prin asfalt;
+## saparea are grija doar sa nu scoata pamantul de sub buza asfaltului, iar
+## pentru asta ajung cativa metri. Cu 12 m, o banda care coboara abrupt de pe
+## sosea (scurtatura Alpilor: -4 m in primii 18 m) ramanea sub teren pe tot
+## racordul — masina iesea de pe asfalt direct intr-un mal.
+const BRANCH_CARVE_CLEAR: float = 4.0
+## Cat sta terenul sub planul unei benzi de pe uscat. Vezi _carve_branches.
+const BRANCH_DROP: float = 0.25
 
 
 ## De la cati metri dincolo de marginea asfaltului incepe malul lagunei, si pe

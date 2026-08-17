@@ -165,6 +165,78 @@ static func build(sampler: TrackSideSampler, world_seed: int,
 	return root
 
 
+## Smocuri de-a lungul unei benzi SECUNDARE (drumul de tara al scurtaturii).
+##
+## Doua fasii, cu aceleasi smocuri si acelasi material ca iarba de margine:
+##   - BRAZDA dintre fagase (|x| < center_hw), rara — `center_per_m` smocuri pe
+##     metru; cota e a benzii (interpolata din punctele coapte), nu a terenului,
+##     ca firele sa creasca DIN drum, nu de sub el.
+##   - MARGINILE, in afara benzii, de la `edge_from` la `edge_to` metri dincolo
+##     de half_width (negativ = intra putin peste marginea zdrentuita), cate
+##     `edge_per_m` pe metru PE O PARTE; cota din `ground_y`.
+## `keep_out(p) -> bool` respinge un smoc (soseaua principala la racorduri).
+##
+## Exista fiindca [method build] taie iarba la CORRIDOR_CLEAR de orice banda
+## secundara — corect pentru un banc de nisip, dar un drum de tara are iarba
+## chiar pe buza lui, si un inel gol de 5 m in jur ar fi spus „aici e o
+## panglica lipita", nu „aici e o poteca prin fan".
+static func build_strip(route: TrackRoute, world_seed: int, ground_tint: Color,
+		center_per_m: float, center_hw: float, edge_per_m: float,
+		edge_from: float, edge_to: float, keep_out: Callable,
+		ground_y: Callable) -> Node3D:
+	var root := Node3D.new()
+	root.name = "StripGrass"
+	var rng := RandomNumberGenerator.new()
+	rng.seed = world_seed ^ 0x5721B
+	var mesh := _patch_mesh(rng, ground_tint)
+	var cells := {}
+	var n := route.count()
+	var placed := 0
+	for i in n - 1:
+		var a := route.baked[i]
+		var b := route.baked[i + 1]
+		var seg := a.distance_to(b)
+		if seg <= 0.0:
+			continue
+		var along := (b - a) / seg
+		var side := route.side_at(i)
+		# Brazda: pe cota benzii.
+		var want := center_per_m * seg
+		var count := int(want) + (1 if rng.randf() < want - float(int(want)) else 0)
+		for _k in count:
+			var p := a + along * rng.randf_range(0.0, seg) 				+ side * rng.randf_range(-center_hw, center_hw)
+			if keep_out.call(p):
+				continue
+			placed += _drop(cells, rng, p, p.y)
+		# Marginile: pe cota terenului.
+		for side_sign: float in [-1.0, 1.0]:
+			want = edge_per_m * seg
+			count = int(want) + (1 if rng.randf() < want - float(int(want)) else 0)
+			for _k in count:
+				var off := route.half_width + rng.randf_range(edge_from, edge_to)
+				var p := a + along * rng.randf_range(0.0, seg) 					+ side * side_sign * off
+				if keep_out.call(p):
+					continue
+				placed += _drop(cells, rng, p, float(ground_y.call(p.x, p.z)))
+	_emit_cells(root, cells, mesh)
+	root.set_meta(&"grass_patches", placed)
+	return root
+
+
+## Un smoc in cosul de celule, cu scara si rotatia aleatoare ale lui build().
+static func _drop(cells: Dictionary, rng: RandomNumberGenerator, p: Vector3,
+		y: float) -> int:
+	var basis := Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(
+		Vector3(rng.randf_range(0.85, 1.15), rng.randf_range(0.75, 1.35),
+			rng.randf_range(0.85, 1.15)))
+	var xf := Transform3D(basis, Vector3(p.x, y - SINK, p.z))
+	var key := Vector2i(int(floor(p.x / CELL_M)), int(floor(p.z / CELL_M)))
+	if not cells.has(key):
+		cells[key] = [] as Array[Transform3D]
+	(cells[key] as Array).append(xf)
+	return 1
+
+
 ## Materialul UNIC al ierbii (vezi antetul: clasa de assets cu material propriu).
 static func material() -> ShaderMaterial:
 	if _material == null:

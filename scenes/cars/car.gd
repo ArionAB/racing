@@ -666,6 +666,11 @@ func _current_max_speed() -> float:
 	var vmax := max_speed * speed_scale * speed_limit_factor
 	if track != null and not track.is_on_road(road_index, global_position, route):
 		vmax *= offroad_speed_factor
+	elif track != null and route != 0:
+		# Pe o banda secundara, plafonul ei: drumul de tara e mai lent decat
+		# asfaltul (TrackBranch.speed_factor). `elif`, ca sa nu se cumuleze cu
+		# offroad-ul cand esti pe iarba de LANGA banda.
+		vmax *= track.route_speed_factor(route)
 	if is_boosting:
 		vmax += turbo_speed_bonus
 	# Strivirea taie plafonul, nu viteza curenta: pierzi timp reaccelerand, exact
@@ -894,6 +899,10 @@ func _update_effects(delta: float) -> void:
 	# de drift, si praful, si dara de rulare.
 	var on_road := track != null \
 		and track.is_on_road(road_index, global_position)
+	# Pe o banda SECUNDARA (scurtatura): nu e sosea, dar nici camp — e pamant
+	# batatorit, deci praful ia culoarea EI (vezi _update_dust).
+	var on_branch := track != null and route != 0 \
+		and track.is_on_road(road_index, global_position, route)
 	var loose := _on_loose_ground(on_road)
 	if is_drifting:
 		_drift_particles.emitting = true
@@ -915,7 +924,7 @@ func _update_effects(delta: float) -> void:
 	elif turbo_charge < 0.95:
 		_turbo_full_latch = false
 	_boost_particles.emitting = is_boosting
-	_update_dust(on_road, loose)
+	_update_dust(on_road, loose, on_branch)
 	_drop_trail(delta, loose)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
 	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
@@ -985,10 +994,12 @@ func _on_loose_ground(on_road: bool) -> bool:
 var _dust_ground_color: Color = Color.BLACK
 var _dust_road_color: Color = Color.BLACK
 var _dust_colors_ready: bool = false
-## Ce culoare e pusa ACUM pe particule: -1 niciuna, 0 teren, 1 sosea.
+## Ce culoare e pusa ACUM pe particule: -1 niciuna, 0 teren, 1 sosea,
+## 2 banda secundara (ruta curenta; se recalculeaza la schimbarea rutei).
 var _dust_source: int = -1
+var _dust_route: int = -1
 
-func _update_dust(on_road: bool, loose: bool) -> void:
+func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 	if _dust_particles == null or track == null:
 		return
 	if not _dust_colors_ready:
@@ -1007,10 +1018,15 @@ func _update_dust(on_road: bool, loose: bool) -> void:
 	_dust_particles.emitting = live
 	if not live:
 		return
-	var src := 1 if on_road else 0
-	if src != _dust_source:
+	var src := 1 if on_road else (2 if on_branch else 0)
+	if src != _dust_source or (src == 2 and route != _dust_route):
 		_dust_source = src
+		_dust_route = route
 		var tint := _dust_road_color if src == 1 else _dust_ground_color
+		if src == 2:
+			# Praful scurtaturii: pamantul benzii, deschis ca la sosea (norul
+			# trebuie sa fie mai luminos decat suprafata de sub el ca sa se vada).
+			tint = track.route_dust_color(route).lightened(0.18)
 		_dust_particles.color = tint
 		# Si fumul de drift: pe pamant nu arde cauciucul, se ridica solul. Gri de
 		# anvelopa peste o dara rosie ar fi singurul lucru din cadru care spune

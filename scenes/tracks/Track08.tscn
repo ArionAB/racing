@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://dlcj8g6oj7s50" path="res://assets/models/buildings/village_house.glb" id="21_villag"]
 [ext_resource type="PackedScene" uid="uid://tkaxqac1lv" path="res://assets/models/rocks/coral_rock.glb" id="22_coral_"]
 [ext_resource type="PackedScene" uid="uid://ct0kpsqxmrhe6" path="res://assets/models/trees/banyan.glb" id="23_banyan"]
+[ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="23_t3ugw"]
 [ext_resource type="PackedScene" uid="uid://b6kl5j0iue4iw" path="res://assets/models/trees/coconut_palm.glb" id="24_coconu"]
 [ext_resource type="PackedScene" uid="uid://g21s8bu3nxg" path="res://assets/models/vehicles/sabani_boat.glb" id="25_sabani"]
 [ext_resource type="PackedScene" uid="uid://d23jdbp6g1jf8" path="res://assets/models/trees/beach_palm_bent.glb" id="26_beach_"]
@@ -25,10 +26,17 @@
 
 [sub_resource type="Curve3D" id="Curve3D_wrrxe"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 10.20755, -4.4697495, 0.6244507, 0, 0, 0, 0, 0, 0, 14.042389, -4.4521484, -28.442604, 0, 0, 0, 0, 0, 0, -7.511322, -3.5574875, -30.480232, 0, 0, 0, 0, 0, 0, -7.770996, -3.7185974, -6.481781),
-"tilts": PackedFloat32Array(0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 9.3645935, -4.435423, 0.5427246, 0, 0, 0, 0, 0, 0, 14.042389, -4.4521484, -28.442604, 0, 0, 0, 0, 0, 0, -7.511322, -3.5574875, -30.480232, 0, 0, 0, 0, 0, 0, -7.770996, -3.7185974, -6.481781, 0, 0, 0, 0, 0, 0, 1.5894775, -4.0806046, -3.8804016, 0, 0, 0, 0, 0, 0, 8.669998, -4.4037848, 0.21743774),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0)
 }
-point_count = 4
+point_count = 6
+
+[sub_resource type="Curve3D" id="Curve3D_t3ugw"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 30, 0.2, 217, 0, 0, 0, 0, 0, 0, -2, 0.2, 201, 0, 0, 0, 0, 0, 0, -43, 0.2, 205, 0, 0, 0, 0, 0, 0, -84, 0.2, 191, 0, 0, 0, 0, 0, 0, -131, 1, 150, 0, 0, 0, 0, 0, 0, -171, 2.1, 128, 0, 0, 0, 0, 0, 0, -233, 4.7, 119, 0, 0, 0, 0, 0, 0, -297, 6.7, 102, 0, 0, 0, 0, 0, 0, -317, 7.1, 86, 0, 0, 0, 0, 0, 0, -316, 7.8, 60, 0, 0, 0, 0, 0, 0, -290, 8.6, 1, 0, 0, 0, 0, 0, 0, -277, 7.5, -45, 0, 0, 0, 0, 0, 0, -277, 6.7, -90, 0, 0, 0, 0, 0, 0, -256, 6.7, -124, 0, 0, 0, 0, 0, 0, -204, 8.5, -158, 0, 0, 0, 0, 0, 0, -130, 12.9, -196, 0, 0, 0, 0, 0, 0, -89, 14.5, -211, 0, 0, 0, 0, 0, 0, -60, 15.5, -197, 0, 0, 0, 0, 0, 0, -28, 15.5, -176, 0, 0, 0, 0, 0, 0, 6, 16.6, -183, 0, 0, 0, 0, 0, 0, 59, 20.9, -217, 0, 0, 0, 0, 0, 0, 111, 26.2, -253, 0, 0, 0, 0, 0, 0, 161, 27.7, -261, 0, 0, 0, 0, 0, 0, 212, 27.5, -256, 0, 0, 0, 0, 0, 0, 237, 25.4, -237, 0, 0, 0, 0, 0, 0, 243, 21.3, -207, 0, 0, 0, 0, 0, 0, 227, 15.5, -150, 0, 0, 0, 0, 0, 0, 212, 11.6, -93, 0, 0, 0, 0, 0, 0, 218, 7.1, -25, 0, 0, 0, 0, 0, 0, 226, 3.2, 60, 0, 0, 0, 0, 0, 0, 232, 3.4, 112, 0, 0, 0, 0, 0, 0, 214, 3.6, 139, 0, 0, 0, 0, 0, 0, 181, 3.2, 184, 0, 0, 0, 0, 0, 0, 161, 2.1, 227, 0, 0, 0, 0, 0, 0, 134, 1, 240, 0, 0, 0, 0, 0, 0, 86, 0, 237),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 36
 
 [node name="Track08" type="Node3D" unique_id=598581151]
 script = ExtResource("1_track08")
@@ -635,3 +643,13 @@ curve = SubResource("Curve3D_wrrxe")
 script = ExtResource("5_7timm")
 model = ExtResource("6_v6lfj")
 metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="HazardMarker" type="Marker3D" parent="." unique_id=749852400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 230, 3, 104)
+gizmo_extents = 3.0
+script = ExtResource("23_t3ugw")
+kind = 4
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="Path" type="Path3D" parent="." unique_id=1870058444]
+curve = SubResource("Curve3D_t3ugw")

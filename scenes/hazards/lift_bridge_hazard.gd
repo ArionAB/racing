@@ -487,9 +487,13 @@ func _build_ships() -> void:
 		holder.name = "Ship%d" % i
 		holder.add_child(model)
 		holder.scale = Vector3.ONE * SHIP_SCALE
-		# Modelul e construit cu prova spre -Z (conventia proiectului), iar
-		# canalul merge pe +X local. -90° pe Y intoarce prova pe drumul apei.
-		model.rotation.y = -PI * 0.5
+		# Canalul merge pe +X local, iar corabia are prova spre +Z, NU spre -Z
+		# cum cere conventia proiectului: masurat pe GLB (sonda temporara
+		# probe_ship_bow), capatul +Z e ingust si jos (bompresul, 0.4 m latime),
+		# capatul -Z e lat si inalt (castelul pupei, 4.4 m / 9.2 m). Prima
+		# versiune presupunea -Z si rotea cu -90°: corabiile navigau cu pupa
+		# inainte. +90° pe Y aduce prova pe +X, in sensul de mers.
+		model.rotation.y = PI * 0.5
 		add_child(holder)
 		Palette.apply_world_material(model)
 		_ships.append(holder)

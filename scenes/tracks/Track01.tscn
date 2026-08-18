@@ -1,8 +1,13 @@
-[gd_scene load_steps=9 format=3 uid="uid://btg3jv2wj5b5a"]
+[gd_scene format=3 uid="uid://btg3jv2wj5b5a"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_2wkjx"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="2_1xt1w"]
+[ext_resource type="PackedScene" uid="uid://83u8nbhqmiwu" path="res://assets/models/buildings/miner_shack.glb" id="4_1xt1w"]
 [ext_resource type="PackedScene" uid="uid://bu1lgxcqt0lwn" path="res://assets/models/rocks/rock_cluster.glb" id="4_jfmch"]
+[ext_resource type="PackedScene" uid="uid://dy35uyy34emuk" path="res://assets/models/buildings/mine_portal.glb" id="5_0kgta"]
+[ext_resource type="PackedScene" uid="uid://cyw12qlbqbwjh" path="res://assets/models/structures/mountain_tunnel.glb" id="8_047ul"]
+[ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="8_jfmch"]
+[ext_resource type="PackedScene" uid="uid://dbtpxyjgpllxc" path="res://assets/models/vehicles/snowplow.glb" id="9_047ul"]
 [ext_resource type="PackedScene" uid="uid://golsaeo2gcmr" path="res://assets/models/rocks/butte.glb" id="10_f51a1"]
 [ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="11_hzmrk"]
 
@@ -15,7 +20,7 @@ point_count = 18
 
 [sub_resource type="Curve3D" id="Curve3D_rock1"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -20.0, 9.5, -0.4, 0, 0, 0, 0, 0, 0, -12.1, 9.6, 2.8, 0, 0, 0, 0, 0, 0, -3.1, 0, 5.9, 0, 0, 0, 0, 0, 0, 8.8, -0.3, 9.2),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -20, 9.5, -0.4, 0, 0, 0, 0, 0, 0, -12.1, 9.6, 2.8, 0, 0, 0, 0, 0, 0, -3.1, 0, 5.9, 0, 0, 0, 0, 0, 0, 8.8, -0.3, 9.2),
 "tilts": PackedFloat32Array(0, 0, 0, 0)
 }
 point_count = 4
@@ -27,30 +32,32 @@ _data = {
 }
 point_count = 4
 
+[sub_resource type="Curve3D" id="Curve3D_f51a1"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -6.9368286, -0.88952637, 35.607925, 0, 0, 0, 0, 0, 0, 1.0037537, -0.4430542, -6.73172),
+"tilts": PackedFloat32Array(0, 0)
+}
+point_count = 2
+
 [node name="Track01" type="Node3D" unique_id=1385677875]
 script = ExtResource("1_2wkjx")
 custom_name = "Dunele"
 custom_theme = "desert"
 custom_ramp_fracs = Array[float]([0.066, 0.885])
-custom_hazard_fracs = Array[float]([0.602])
-custom_hose_fracs = Array[float]([0.478])
-custom_wet_ranges = Array[Vector2]([Vector2(0.478, 0.53)])
 custom_dino_spots = Array[Vector2]([Vector2(0.33, -1)])
 custom_arch_fracs = Array[float]([0.65])
 custom_gorge_ranges = Array[Vector2]([Vector2(0.725, 0.825)])
+custom_wet_ranges = Array[Vector2]([Vector2(0.478, 0.53)])
 custom_mine_spots = Array[Vector2]([Vector2(0.155, 1)])
-custom_carousel_fracs = Array[float]([0.945])
-custom_deflector_fracs = Array[float]([0.119])
 custom_flyoff_fracs = Array[float]([0.256])
 custom_landmarks = Array[Vector3]([Vector3(0.03, 1, 3), Vector3(0.178, 1, 12), Vector3(0.2, -1, 0), Vector3(0.42, 1, 4), Vector3(0.57, -1, 5), Vector3(0.7, -1, 2), Vector3(0.85, 1, 1)])
 custom_ravines = Array[Vector4]([Vector4(0.24, 0.335, 16, 1)])
-custom_train_fracs = Array[float]([0.3])
 
 [node name="Path" type="Path3D" parent="." unique_id=47815459]
 curve = SubResource("Curve3D_rpgo3")
 
 [node name="BolovanFaleza1" type="Marker3D" parent="." unique_id=1907331201]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110.2, 2.0, -101.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110.2, 2, -101.2)
 gizmo_extents = 3.0
 script = ExtResource("11_hzmrk")
 kind = 1
@@ -60,7 +67,7 @@ metadata/_custom_type_script = "uid://ccxa8xagvu55q"
 curve = SubResource("Curve3D_rock1")
 
 [node name="BolovanFaleza2" type="Marker3D" parent="." unique_id=1907331203]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -134.5, 8.2, -156.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -134.5, 8.2, -156)
 gizmo_extents = 3.0
 script = ExtResource("11_hzmrk")
 kind = 1
@@ -72,6 +79,15 @@ curve = SubResource("Curve3D_rock2")
 [node name="DecorManual" type="Node3D" parent="." unique_id=456835267]
 script = ExtResource("2_1xt1w")
 
+[node name="mine_portal2" parent="DecorManual" unique_id=625874957 instance=ExtResource("5_0kgta")]
+transform = Transform3D(-0.8756711, -0.14541025, -0.4604951, -0.12869945, 0.9893714, -0.06768005, 0.4654421, 0, -0.8850782, 172.0697, 6.1158905, -39.37622)
+
+[node name="miner_shack2" parent="DecorManual" unique_id=31207427 instance=ExtResource("4_1xt1w")]
+transform = Transform3D(0.6342072, 0, 0.77316314, 0, 1, 0, -0.77316314, 0, 0.6342072, 165.781, 4.5517316, -33.230278)
+
+[node name="miner_shack" parent="DecorManual" unique_id=861465980 instance=ExtResource("4_1xt1w")]
+transform = Transform3D(0.8672703, 0, 0.49783757, 0, 1, 0, -0.49783757, 0, 0.8672703, 126.60254, 4.6314697, -228.94781)
+
 [node name="rock_cluster" parent="DecorManual" unique_id=1810421892 instance=ExtResource("4_jfmch")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.067749, 3.23, -35.867615)
 
@@ -79,4 +95,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.067749, 3.23, -35.867615)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.335571, -0.39, 25.67331)
 
 [node name="butte2" parent="DecorManual" unique_id=1797167542 instance=ExtResource("10_f51a1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2875977, 5.15, -76.3696)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2875977, 5.15, -87.80318)
+
+[node name="mountain_tunnel" parent="DecorManual" unique_id=515346015 instance=ExtResource("8_047ul")]
+transform = Transform3D(0.68857497, 0, -0.7251652, 0, 1, 0, 0.7251652, 0, 0.68857497, 187.35449, 11.225941, -188.0614)
+
+[node name="TrainHazard" type="Marker3D" parent="." unique_id=1432518980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 191.57446, 13.421, -189.96994)
+gizmo_extents = 3.0
+script = ExtResource("11_hzmrk")
+kind = 3
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="PathMover" type="Path3D" parent="." unique_id=88059532]
+transform = Transform3D(0.7364925, 0, 0.6764457, 0, 1, 0, -0.6764457, 0, 0.7364925, 173.34424, 6.2789917, -38.483887)
+curve = SubResource("Curve3D_f51a1")
+script = ExtResource("8_jfmch")
+model = ExtResource("9_047ul")
+animation = null
+animation_speed = null
+travel_mode = 1
+metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="HazardMarker" type="Marker3D" parent="." unique_id=555439266]
+gizmo_extents = 3.0
+script = ExtResource("11_hzmrk")
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"

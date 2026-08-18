@@ -129,21 +129,30 @@ def build():
     print("bbox import: %.2f x %.2f x %.2f m, lungimea pe %s"
           % (size.x, size.y, size.z, length_axis))
 
+    # Importatorul glTF lasa nodul pe rotation_mode QUATERNION, iar atunci
+    # rotation_euler e ignorat in tacere — rotatiile de mai jos n-ar face nimic.
+    arm.rotation_mode = "XYZ"
     if length_axis == "X":
         # lungimea pe X -> intoarcem 90 de grade sa cada pe Y
         arm.rotation_euler.rotate_axis("Z", 1.5707963)
-    # Incotro e capul: geometria de deasupra a 70% din inaltime (cap + gat).
-    deps = bpy.context.evaluated_depsgraph_get()
-    ev = mesh.evaluated_get(deps)
-    zs = [(mesh.matrix_world @ v.co) for v in ev.data.vertices]
-    z_top = lo.z + size.z * 0.7
-    head = [w for w in zs if w.z > z_top]
-    assert head, "niciun vertex peste 70%% din inaltime — euristica de cap orbecaie"
-    head_y = sum(w.y for w in head) / len(head)
-    mid_y = (lo.y + hi.y) * 0.5
-    if head_y < mid_y:
+    # Incotro e capul: din OASE, nu din geometrie. Prima versiune lua
+    # "geometria de deasupra a 70% din inaltime" drept cap+gat — dar la vaca
+    # asta coada e ridicata MAI SUS decat capul, iar media a picat pe coada:
+    # vaca a plecat cu botul spre +Z in Godot si a mers cu spatele pe Alpi
+    # (masurat: Head z=+0.95, Tail z=-1.28 in GLB-ul vechi). Oasele nu mint.
+    # matrix_basis, nu matrix_world: in background, matrix_world nu se
+    # reimprospateaza dupa rotation_euler nici cu view_layer.update(), iar
+    # armatura n-are parinte, deci cele doua coincid oricum.
+    def bone_y(prefix):
+        for b in arm.data.bones:
+            if b.name.startswith(prefix):
+                return (arm.matrix_basis @ b.head_local).y
+        raise AssertionError("os lipsa: %s*" % prefix)
+    head_y, tail_y = bone_y("Head"), bone_y("Tail")
+    if head_y < tail_y:
         arm.rotation_euler.rotate_axis("Z", 3.1415926)
         print("capul era spre -Y, am intors vaca")
+        assert bone_y("Head") > bone_y("Tail"), "capul tot nu e spre +Y"
 
     arm.scale *= TARGET_LENGTH / length
     bpy.context.view_layer.update()

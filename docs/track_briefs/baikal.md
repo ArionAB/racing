@@ -198,12 +198,22 @@ trenului din tunel, câini care latră în sat, nerpa care suflă.
 
 ## 7. Ordinea de construcție recomandată
 
-Stadiu (aug 2026): pasul 1 și baza pasului 2 sunt făcute (PR „Baikal: traseu +
-gheață + vânt"): `Track10.tscn` cu traseul din §2, tema `baikal` (placă de
-gheață cu coliziune, zăpadă, soare jos), `custom_ice_ranges` cu grip 1.5 și
-bete cu stegulețe, vântul temei pe gheață, cornișa viaductului. Sonde:
-`ProbePathFracs`, `ProbeIce`, ProbeLayout OK, ProbeRace 0 repuneri. Restul
-(hazarde, assets, textura de gheață) urmează în PR-uri separate.
+Stadiu (18 aug 2026, PR #283–#290, toate în main):
+
+| pas | ce e făcut | unde |
+|---|---|---|
+| 1 traseu + temă | `Track10.tscn` (traseul din §2, 1603 m, editabil din nodul Path), tema `baikal`: placă înghețată cu coliziune, zăpadă la linia gheții, soare jos, vânt; cornișa viaductului | #283 |
+| 2 gheață + vânt | `custom_ice_ranges` (grip 1.5, bandă proprie, bețe cu stegulețe), `wind_at`; textura de clasă `ice` pictată (`tools/paint_ice.py`) pe placă și bandă | #283, #287 |
+| 3 hazarde | placa basculantă (`IceSlabHazard`, 3 buc. la C); hovercraft = figurant cu suflu pe larg + traversări pe culoar (0.30 hovercraft, 0.50 sania pescarului); tren PE SENS pe viaduct (`TrainHazard.along_road` + AI care se ține de margine); torosuri (`custom_hummock_fracs`, 2 buc.); arcada grotei (granit, placeholder) | #284–#286, #288, #290 |
+| 4 decor | props `baikal` (iarnă: pini, stânci, petice de zăpadă; fără flori/fân/garduri); satul de la start din landmark-uri (chalet-uri, biserică, baracă) — toate provizorii până la kit | #288, #289 |
+| sonde | `ProbePathFracs`, `ProbeIce` (6 pași), `ProbeIceSlab`, `ProbeTrainAlong`; ProbeLayout OK, ProbeRace 0 repuneri, probe_decor 263k tris / 29 materiale | — |
+
+Rămân, în ordinea din §3/§5: modelele (hovercraft Khivus pe markerul de la
+0.30, nerpa, grota cu țurțuri, viaduct de piatră, kitul de sat/gheață/pădure,
+serge, Stânca Șamanului), țurțurii care cad la trecere, sunetul (gheața care
+„cântă", vânt, elice), și — cel mai important — verdictul de feel al
+dezvoltatorului la volan: gripul 1.5 și vântul 2.2·√2 m/s² sunt prima
+măsurătoare, nu ultima.
 
 1. `Track10.tscn` din `TrackFromPath`, temă `baikal` (paletă + fog + horizon),
    traseul desenat, ProbeLayout OK.

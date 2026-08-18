@@ -2573,17 +2573,33 @@ func _channel_water_depth(ch: Dictionary) -> float:
 	return maxf(float(ch["depth"]) - float(ch.get("water_y_drop", 0.0)), 0.5)
 
 
+## Cati metri INAINTE de buza e repus cine cade in canal.
+##
+## Nu cei 14 m impliciti ai lui RespawnZone: golul se trece cu ~24 m/s, iar
+## repunerea porneste de la 9. De la 14 m de trambulina nu ajungi la viteza,
+## cazi din nou, si bucla aia tine masina in apa toata cursa (vazut pe Alpii,
+## la paraul vaii). Aceeasi cifra si acelasi motiv ca LiftBridgeHazard.FALL_BACKOFF.
+##
+## Nu mai mult: la 150 m ProbeRace pe Alpii dadea MAI multe repuneri (17-18
+## fata de 8-10 pe aceleasi seed-uri) — repus inainte de virajul dinaintea
+## dreptei, AI-ul il ia cu frana si ajunge la trambulina mai incet decat cel
+## repus la 70 m, care sta pe dreapta finala cu pedala la fund.
+const CHANNEL_FALL_BACKOFF: float = 70.0
+
 ## Cine rateaza saritura peste canal cade in apa si e repus pe traseu.
 ##
 ## Acelasi tipar ca plasa de sub creasta de fly-off si ca volumul de mare:
 ## un [RespawnZone] sub suprafata, destul de jos cat stropul de la intrare sa
 ## apuce sa se vada, si destul de lat cat sa prinda si pe cine cade oblic.
+## Cu spatiu de ELAN in fata (CHANNEL_FALL_BACKOFF), nu doar repus pe buza.
 func _build_channel_respawn(ch: Dictionary, water_y: float) -> void:
 	var o: Vector3 = ch["origin"]
 	var along: Vector3 = ch["along"]
 	var top := water_y - 0.6
 	var bottom := water_y - float(ch["depth"]) - 6.0
 	var zone := RespawnZone.new()
+	zone.name = "ChannelFall_%s" % String(ch.get("label", "canal"))
+	zone.backoff_m = CHANNEL_FALL_BACKOFF
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	var width: float = (float(ch["water_half"]) + float(ch["bank"]) * 0.5) * 2.0

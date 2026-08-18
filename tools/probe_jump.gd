@@ -9,7 +9,11 @@ extends Node
 ##
 ## Ruleaza CA SCENA: masina are nevoie de autoload-urile GameState/AudioManager.
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeJump.tscn
-##   ... -- --track=2 --speeds=24,30,36,42,48
+##   ... -- --track=2 --speeds=24,30,36,42,48 [--car=3] [--runup=70]
+##
+## `--car=` alege masina din garaj (implicit 0, Muscle). Cu --runup=70 si
+## --speeds=9 sonda raspunde la alta intrebare: cine e REPUS dupa o cadere
+## (CHANNEL_FALL_BACKOFF, cu 9 m/s) mai ajunge la viteza de saritura?
 ##
 ## Pentru fiecare viteza tipareste: a trecut sau a cazut, cat airtime a avut si
 ## cat de departe a ajuns fata de buza de aterizare.
@@ -26,6 +30,7 @@ var _run_up: float = 18.0
 const WATCH_SECONDS: float = 8.0
 
 var _track_index: int = 2
+var _car_index: int = 0
 var _speeds: Array[float] = [24.0, 30.0, 36.0, 42.0, 48.0]
 var _trace: bool = false
 var _track: Track
@@ -39,6 +44,8 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			_track_index = int(arg.trim_prefix("--track="))
+		elif arg.begins_with("--car="):
+			_car_index = int(arg.trim_prefix("--car="))
 		elif arg.begins_with("--runup="):
 			_run_up = float(arg.trim_prefix("--runup="))
 		elif arg == "--trace":
@@ -69,8 +76,9 @@ func _ready() -> void:
 	_across = _ch["across"]
 
 	print("")
-	print("=== SARITURA PESTE CANAL — %s / %s ===" % [
-		_track.track_name, String(_ch.get("label", "canal"))])
+	print("=== SARITURA PESTE CANAL — %s / %s — %s, elan %.0f m ===" % [
+		_track.track_name, String(_ch.get("label", "canal")),
+		GameState.CAR_DATA[_car_index].display_name, _run_up])
 	print("gol cerut %.1f m, gol OBTINUT %.2f m (asta conteaza)" % [
 		float(_ch["gap_requested"]), float(_ch["gap"])])
 	print("buza de plecare %s -> buza de aterizare %s" % [
@@ -89,7 +97,7 @@ func _ready() -> void:
 func _run_one(entry_speed: float) -> void:
 	var car := (load(CAR_SCENE) as PackedScene).instantiate() as Car
 	add_child(car)
-	car.apply_data(GameState.CAR_DATA[0])
+	car.apply_data(GameState.CAR_DATA[_car_index])
 	car.track = _track
 	# Pornirea se ia DE PE CURBA COAPTA, mergand inapoi din buza de plecare pana
 	# la `_run_up` metri. Prima versiune mergea in linie dreapta pe axa

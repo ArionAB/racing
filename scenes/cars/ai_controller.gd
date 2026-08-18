@@ -117,6 +117,12 @@ func update(delta: float) -> void:
 	# a_far pozitiv inseamna viraj la stanga: interiorul e in sens invers.
 	var line := clampf(line_offset - signf(a_far) * severity * INSIDE_BIAS,
 		-LINE_MAX, LINE_MAX)
+	# Sector cu hazard PE AXA (trenul pe sens de pe Baikal): pilotul se tine
+	# de margine, pe partea lui de personalitate. Zero peste tot in rest.
+	var keep_off := track.lane_bias_at(idx)
+	if keep_off > 0.0:
+		var side_pref := signf(line_offset) if absf(line_offset) > 0.02 else 1.0
+		line = side_pref * maxf(absf(line), keep_off)
 	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
 	# Bifurcatia: cine a decis ca o ia, tinteste banda cealalta cat timp cele
 	# doua sunt inca lipite. Comutarea propriu-zisa de ruta o face Car, pe

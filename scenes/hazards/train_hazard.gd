@@ -106,6 +106,14 @@ const STUN_SECONDS: float = 0.9
 const RESPAWN_BACKOFF: float = 20.0
 
 @export var period: float = DEFAULT_PERIOD
+## TREN PE SENS (Baikal, viaductul Circum-Baikal): sina merge IN LUNGUL soselei
+## si trenul vine din fata, spre masini. Nu mai e gimmick de timing la o
+## trecere, e de LINIE: drumul ramane deschis pe margini, moartea e pe axa.
+## Track aseaza nodul cu X local pe directia drumului (invers sensului de mers)
+## si spune AI-ului sa se tina de margine cat tine sectorul (Track.lane_bias_at).
+## Barierele nu au sens; in locul lor, luminile de avertizare stau la INTRAREA
+## in sector, pe ambele margini — semnalul de la gura tunelului.
+@export var along_road: bool = false
 ## Lungimea sinei de fiecare parte a soselei. Se scurteaza automat daca ar da
 ## peste alta bucla a pistei — vezi Track._build_train.
 @export var half_rail: float = 90.0
@@ -289,6 +297,11 @@ func _build_gates() -> void:
 		mesh.size = Vector3(0.22, 3.2, 0.22)
 		post.mesh = mesh
 		post.position = Vector3(side * 3.4, 1.6, (road_half_width + 2.2) * side)
+		if along_road:
+			# Masinile intra in sector dinspre +X (merg spre -X, trenul vine
+			# spre +X): semnalele stau la capatul lor, pe ambele margini.
+			post.position = Vector3(half_rail - 3.0, 1.6,
+				(road_half_width + 2.2) * side)
 		post.material_override = _structure_material()
 		add_child(post)
 

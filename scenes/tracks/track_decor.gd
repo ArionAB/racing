@@ -79,7 +79,7 @@ const BANDS := [
 	# formatiuni CONTINUE, nu jaloane — drumul trebuie sa arate sapat intr-un
 	# masiv, nu pus pe o campie cu pietre presarate.
 	{"name": "far", "off_min": 26.0, "off_max": 58.0, "spacing": 32.0,
-		"collide": false, "cluster": 0.40, "props_only": ["desert", "alpine"]},
+		"collide": false, "cluster": 0.40, "props_only": ["desert", "alpine", "baikal"]},
 ]
 ## Pasii din `BANDS` sunt calibrati pe DESERT, unde tinta e masa continua de
 ## canion: drumul trebuie sa arate sapat intr-un masiv, nu pus pe o campie cu
@@ -393,6 +393,9 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		return
 	if props == "alpine":
 		_place_alpine_prop(parent, spec, band, rng, mat_provider, satellite)
+		return
+	if props == "baikal":
+		_place_baikal_prop(parent, spec, band, rng, mat_provider, satellite)
 		return
 	var pos := spec.position
 	match band["name"]:
@@ -805,6 +808,52 @@ static func _place_alpine_prop(parent: Node3D, spec: TrackDecorSpec,
 ## intregului model, coroana de 3.7 m devine un perete pe care il atingi cu
 ## bara fara sa fi atins copacul — si pe o pista cu padure deasa asta ar face
 ## marginea drumului o cursa de obstacole invizibile.
+## Iarna pe Baikal: aceleasi piese ca la alpin, fara ce nu are ce cauta in
+## februarie — flori, fan, garduri de pasune, tufe verzi. Petice de zapada la
+## orice cota (aici zapada e jos, nu pe creasta), pini si stanci (nuanta de
+## roca a temei le albeste). PROVIZORIU pana la kitul din brief (larici,
+## mesteceni, sat) — vezi docs/track_briefs/baikal.md §5.5.
+static func _place_baikal_prop(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
+		satellite: bool) -> void:
+	var pos := spec.position
+	match band["name"]:
+		"hug":
+			var roll := rng.randf()
+			if roll < 0.28 and _add_simple_prop(parent, ALPINE_SNOW_PATH,
+					"SnowPatch", pos, rng, 0.6, 1.2, -0.04):
+				return
+			if roll < 0.52 and _add_canyon_rock(parent, pos, rng, "S",
+					not satellite, 0.55, 1.00, 0.65, 1.00):
+				return
+			if roll < 0.68 and not satellite and _add_pine(
+					parent, pos, rng, PINE_SMALL, false, 0.55, 0.85):
+				return
+			if not _add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.7, 1.0):
+				_add_scatter(parent, pos, rng, mat)
+		"mid":
+			var roll := rng.randf()
+			if satellite or roll < 0.20:
+				if not _add_canyon_rock(parent, pos, rng, "S", false):
+					_add_scatter(parent, pos, rng, mat)
+			elif roll < 0.72:
+				if not _add_pine(parent, pos, rng, PINE_MID, true, 0.80, 1.15):
+					_add_canyon_rock(parent, pos, rng, "M", true)
+			elif roll < 0.84:
+				_add_kit_plant(parent, pos, rng, ALPINE_TUFTS, 0.85, 1.2)
+			else:
+				_add_canyon_rock(parent, pos, rng, "M", true)
+		_:
+			var roll2 := rng.randf()
+			if roll2 < 0.70:
+				if not _add_pine(parent, pos, rng, PINE_FAR, true, 0.90, 1.35):
+					_add_canyon_rock(parent, pos, rng, "M", true)
+			elif satellite or roll2 < 0.86:
+				_add_canyon_rock(parent, pos, rng, "M", true)
+			else:
+				_add_canyon_rock(parent, pos, rng, "L", true)
+
+
 static func _add_pine(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, picks: Array[String],
 		collide: bool, s_min: float = 0.85, s_max: float = 1.20) -> bool:

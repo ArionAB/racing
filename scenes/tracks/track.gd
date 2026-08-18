@@ -689,8 +689,8 @@ static func themes() -> Dictionary:
 		#    rafale — sufla doar pe portiunile de gheata (vezi wind_at). Pe
 		#    gheata cu grip 1.5 iti muta linia; steguletele il arata.
 		#
-		# Decorul (`props: alpine`) e PROVIZORIU: pini cu zapada pana vine
-		# kitul de larici/mesteceni din brief. Fara pereti si borduri pe gheata
+		# Decorul (`props: baikal`, varianta de iarna a celui alpin — fara
+		# flori, fan, garduri) e PROVIZORIU pana vine kitul de larici/mesteceni. Fara pereti si borduri pe gheata
 		# (le taie `_road_ice`), cu borduri pe mal.
 		"baikal": {
 			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
@@ -722,7 +722,7 @@ static func themes() -> Dictionary:
 			"kerbs": true,
 			"cliffs": false,
 			"decor": "bands",
-			"props": "alpine",
+			"props": "baikal",
 			"snow_line": -0.2,
 			"snow_fade": 1.5,
 			"snow_tint": Palette.color(Palette.FOAM_WHITE),
@@ -6221,8 +6221,15 @@ func _build_arch(frac: float) -> void:
 		child.queue_free()
 	body.add_child(model)
 	add_child(body)
-	# Arcada e integral roca — primeste trim sheet-ul de clasa.
-	Palette.apply_rock_material(model)
+	# Arcada e integral roca — primeste trim sheet-ul de clasa. Piatra
+	# LOCULUI: pe temele cu `rock_class` declarat (granitul alpin, pe Baikal)
+	# ia clasa aia, altfel gresia canionului — o arcada de gresie portocalie
+	# peste un lac inghetat se vedea din prima captura.
+	var arch_cls := String(theme_flag("rock_class", ""))
+	if arch_cls.is_empty():
+		Palette.apply_rock_material(model)
+	else:
+		Palette.apply_triplanar_class(model, arch_cls)
 	var stand := p
 	stand.y = _sampler.ground_y(p.x, p.z)
 	body.global_position = stand

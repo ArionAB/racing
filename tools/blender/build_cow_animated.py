@@ -110,15 +110,7 @@ def build():
 
     # NLA stash: exportatorul glTF ('ACTIONS') exporta actiunea activa plus
     # strip-urile stashuite — fara asta ar pleca doar una singura.
-    if arm.animation_data is None:
-        arm.animation_data_create()
-    arm.animation_data.action = None
-    for name in KEEP_ACTIONS:
-        act = bpy.data.actions[name]
-        track = arm.animation_data.nla_tracks.new()
-        track.name = name
-        track.mute = True
-        track.strips.new(name, int(act.frame_range[0]), act)
+    stash_actions(arm, KEEP_ACTIONS)
 
     # -- Orientare + scara, pe NODUL armaturii (vezi antet). Intai masuram in
     # poza de repaus, cu transformul de import inca pe nod.
@@ -204,42 +196,10 @@ def build():
     return arm, mesh
 
 
-def export_animated(objects, filename):
-    """export_glb din dio_lib, plus armatura: animatii ca actiuni separate,
-    skinning pastrat. Ramane aici pana mai apare un al doilea asset animat."""
-    import os
-    path = os.path.join(MODELS, filename)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    bpy.ops.object.select_all(action="DESELECT")
-    for o in objects:
-        o.select_set(True)
-    bpy.context.view_layer.objects.active = objects[0]
-    bpy.ops.export_scene.gltf(
-        filepath=path,
-        export_format="GLB",
-        use_selection=True,
-        export_apply=True,
-        export_yup=True,
-        export_normals=True,
-        export_texcoords=True,
-        export_vertex_color="ACTIVE",
-        export_materials="EXPORT",
-        export_image_format="NONE",
-        export_animations=True,
-        export_animation_mode="ACTIONS",
-        export_cameras=False,
-        export_lights=False,
-        export_extras=False,
-    )
-    return path, os.path.getsize(path)
-
-
 arm, mesh = build()
-path, size = export_animated([arm, mesh], "props/cow.glb")
+path, size = export_glb([arm, mesh], "props/cow.glb", animations=True)
 print("export: %s (%.0f KB)" % (path, size / 1024))
-# save_blend, dar comprimat: fcurve-urile celor 4 animatii pe 42 de oase fac
-# 11 MB necomprimat — de 10x peste orice alta sursa din assets/blender.
-import os as _os
-_blend = _os.path.join(BLENDS, "cow.blend")
-bpy.data.libraries.write(_blend, {arm, mesh}, fake_user=True, compress=True)
-print("sursa:  %s (%.0f KB)" % (_blend, _os.path.getsize(_blend) / 1024))
+# Comprimat: fcurve-urile celor 4 animatii pe 42 de oase fac 11 MB
+# necomprimat — de 10x peste orice alta sursa din assets/blender.
+path, size = save_blend([arm, mesh], "cow.blend", compress=True)
+print("sursa:  %s (%.0f KB)" % (path, size / 1024))

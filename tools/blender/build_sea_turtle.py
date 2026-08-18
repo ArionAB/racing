@@ -27,10 +27,30 @@ si `model_tri_class` sunt goale).
 ORIENTARE: construita cu botul spre +Y in Blender, adica spre -Z in Godot — fata
 nodului. Track._build_hazard roteste hazardul pe directia de maturare
 (`hazard_face_travel`), deci testoasa merge INCOTRO se uita, nu de-a latul.
+
+SCHELET SI ANIMATIE (aug 2026): pe PathMover testoasa ALUNECA pe drum cu
+lopetile teapene — un bolovan verde pe role. Primul asset animat construit de
+noi (vaca e importata gata skinnuita): 7 oase — Body, Head, Tail si cele patru
+lopeti — puse pe insulele Builder-ului (fiecare piesa e o insula, vezi
+`mesh_islands`), cu greutatea care curge la radacina (`weight_ramp`), ca lopata
+sa se INDOAIE de sub carapace, nu sa se franga la o muchie.
+
+  Walk (1 s): tarasul de testoasa de mare pe uscat, cu lopetile din fata
+        SINCRON (broasca verde: intinde amandoua inainte, le infige si se trage
+        pe ele, corpul se ridica pe stroke si cade la loc), cele din spate in
+        contratimp, capul da din cap cu efortul, coada bate usor. Miscarea pe
+        drum NU e in animatie — PathMover/SlidingHazard misca nodul; ciclul e
+        gandit pentru ~4 m/s (viteza implicita de PathMover), la 1.0 speed.
+  Idle (2 s): respiratie — capul se uita in jur, lopetile din fata abia se
+        ridica, coada se misca. PathMover o alege singur la speed 0.
+
+Rotatiile se scriu in spatiul armaturii ("ridica varful", "du-l inainte"),
+nu pe axele locale ale osului — asa nu conteaza roll-ul si simetria stanga-
+dreapta e un semn, nu doua rig-uri.
 """
 
 import math
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 SHELL_LEN = 2.60     # Y — lungimea carapacei
 SHELL_WID = 2.20     # X — latimea ei maxima
@@ -178,6 +198,185 @@ def tail(b):
 AO_SPEC = dict(samples=28, dist=1.6, gradient="vertical",
                low=0.42, high=1.0, power=0.85, floor=0.16, z_range=(0.0, 1.20))
 
+# ---------------------------------------------------------------------------
+# Scheletul. Cotele de mai jos sunt in sistemul in care e CONSTRUITA testoasa
+# (cel al functiilor de sus); `finish` muta geometria (origine la baza, centrat
+# XY), asa ca toate trec prin `P()`, care adauga deplasarea masurata.
+# ---------------------------------------------------------------------------
+
+def _bbox(obj):
+    return island_bbox(obj, range(len(obj.data.vertices)))
+
+
+def rig(obj, shift):
+    """Oasele + greutatile. Fiecare piesa se recunoaste dupa insula ei
+    (bbox-ul insulei in coordonate CONSTRUITE, adica dupa ce scadem `shift`):
+      |cx| > 0.75            -> lopata (fata/spate dupa semnul lui cy, stanga/
+                                dreapta dupa semnul lui cx)
+      cy > 0.9               -> gat, cap, cioc, ochi
+      cy < -1.0 si ingusta   -> coada
+      restul                 -> corp (carapace, plastron, creasta)
+    """
+    def P(x, y, z):
+        return Vector((x, y, z)) + shift
+
+    bones = [
+        dict(name="Body", head=P(0.0, -0.5, 0.30), tail=P(0.0, 0.5, 0.30)),
+        dict(name="Head", head=P(0.0, 1.05, 0.50), tail=P(0.0, 2.0, 0.45),
+             parent="Body"),
+        dict(name="Tail", head=P(0.0, -1.30, 0.38), tail=P(0.0, -1.76, 0.24),
+             parent="Body"),
+    ]
+    for sx, side in ((-1.0, "L"), (1.0, "R")):
+        # Capul osului sta la RADACINA lopetii (sub carapace); varful, la
+        # varful lamelei — asa rotatia se face de unde iese lopata, ca la o
+        # articulatie de umar.
+        bones.append(dict(name="FlipperF" + side, parent="Body",
+                          head=P(sx * 0.62, 0.76, 0.40),
+                          tail=P(sx * 1.75, 0.24, 0.13)))
+        bones.append(dict(name="FlipperR" + side, parent="Body",
+                          head=P(sx * 0.60, -0.90, 0.36),
+                          tail=P(sx * 1.20, -1.50, 0.12)))
+    arm = make_armature("Sea_Turtle", bones, mesh=obj)
+
+    def cx_abs(co):
+        return abs(co.x - shift.x)
+
+    def cy(co):
+        return co.y - shift.y
+
+    def neg_cy(co):
+        return -(co.y - shift.y)
+
+    counts = {}
+    for island in mesh_islands(obj):
+        lo, hi = island_bbox(obj, island)
+        c = (lo + hi) * 0.5 - shift
+        size = hi - lo
+        if abs(c.x) > 0.75:
+            name = "Flipper" + ("F" if c.y > 0 else "R") + ("L" if c.x < 0 else "R")
+            # Rampa pe |x|: pana la marginea carapacei greutatea e a corpului
+            # (partea aia e ascunsa), dincolo de ea lopata urmeaza osul.
+            lo_x, hi_x = (0.80, 1.20) if c.y > 0 else (0.65, 1.00)
+            weight_ramp(obj, island, name, "Body", cx_abs, lo_x, hi_x)
+        elif c.y > 0.9:
+            name = "Head"
+            weight_ramp(obj, island, name, "Body", cy, 1.10, 1.40)
+        elif c.y < -1.0 and size.x < 0.5:
+            name = "Tail"
+            weight_ramp(obj, island, name, "Body", neg_cy, 1.45, 1.65)
+        else:
+            name = "Body"
+            weight_ramp(obj, island, "Body", "Body", None, 0.0, 1.0)
+        counts[name] = counts.get(name, 0) + 1
+    expect = {"Body", "Head", "Tail", "FlipperFL", "FlipperFR", "FlipperRL",
+              "FlipperRR"}
+    assert set(counts) == expect, "piese nerecunoscute/lipsa: %r" % counts
+    print("  insule pe oase:", counts)
+    return arm
+
+
+# Rotatii in spatiul armaturii, in grade. `forward` = varful lopetii spre bot
+# (semnul se intoarce pentru partea stanga, ca aceeasi cifra sa insemne
+# acelasi gest pe ambele parti); `up` = varful ridicat de la sol.
+Z_AXIS = Vector((0.0, 0.0, 1.0))
+
+
+def _flipper_rot(pb, forward, up, side):
+    d = (pb.bone.tail_local - pb.bone.head_local)
+    d.z = 0.0
+    d.normalize()
+    pitch = Matrix.Rotation(math.radians(up), 3, d.cross(Z_AXIS))
+    yaw = Matrix.Rotation(math.radians(forward * side), 3, Z_AXIS)
+    return yaw @ pitch
+
+
+def _axis_rot(x=0.0, y=0.0, z=0.0):
+    return (Matrix.Rotation(math.radians(z), 3, "Z")
+            @ Matrix.Rotation(math.radians(y), 3, "Y")
+            @ Matrix.Rotation(math.radians(x), 3, "X"))
+
+
+def _key_pose(arm, frame, pose):
+    """`pose`: dict os -> ("rot", Matrix) / ("move", Vector) / lista din ele."""
+    for name, ops in pose.items():
+        pb = arm.pose.bones[name]
+        if not isinstance(ops, list):
+            ops = [ops]
+        for kind, val in ops:
+            if kind == "rot":
+                pose_rotate(pb, val)
+                pb.keyframe_insert("rotation_quaternion", frame=frame)
+            else:
+                pose_move(pb, val)
+                pb.keyframe_insert("location", frame=frame)
+
+
+def _flippers(arm, front, rear):
+    """(forward, up) pentru fata si spate — pe amandoua partile, sincron."""
+    out = {}
+    for sx, side in ((-1.0, "L"), (1.0, "R")):
+        pbf = arm.pose.bones["FlipperF" + side]
+        pbr = arm.pose.bones["FlipperR" + side]
+        out["FlipperF" + side] = ("rot", _flipper_rot(pbf, front[0], front[1], sx))
+        out["FlipperR" + side] = ("rot", _flipper_rot(pbr, rear[0], rear[1], sx))
+    return out
+
+
+def _body(lift, pitch):
+    return [("move", Vector((0.0, 0.0, lift))), ("rot", _axis_rot(x=pitch))]
+
+
+def _key_cycle(arm, phases):
+    for frame, front, rear, body, head_r, tail_yaw in phases:
+        pose = _flippers(arm, front, rear)
+        pose["Body"] = _body(*body)
+        pose["Head"] = ("rot", _axis_rot(x=head_r[0], z=head_r[1]))
+        pose["Tail"] = ("rot", _axis_rot(z=tail_yaw))
+        _key_pose(arm, frame, pose)
+
+
+def animate(arm):
+    """Cele doua actiuni. Cadrele-cheie inchid ciclul (ultimul = primul), ca
+    bucla LOOP_LINEAR din Godot sa nu sara."""
+    scene = bpy.context.scene
+    scene.render.fps = 24
+    if arm.animation_data is None:
+        arm.animation_data_create()
+
+    # WALK — 24 de cadre = 1 s. Patru faze: intins inainte / infipt / tras
+    # inapoi (stroke) / ridicat pentru recuperare.
+    walk = bpy.data.actions.new("Walk")
+    arm.animation_data.action = walk
+    #   cadru  fata(inainte,sus)  spate(inainte,sus)  corp(ridic,tangaj)  cap(tangaj,yaw)  coada
+    phases = [
+        (1,  (28.0, 18.0), (-12.0, -4.0), (0.00, -1.0), (-4.0, 0.0), 0.0),
+        (7,  (20.0, -6.0), (-2.0, 12.0), (0.02, 0.5), (-1.0, 3.0), 8.0),
+        (13, (-22.0, -4.0), (14.0, 8.0), (0.07, 2.5), (6.0, 0.0), 0.0),
+        (19, (-8.0, 22.0), (6.0, -6.0), (0.03, 0.5), (1.0, -3.0), -8.0),
+    ]
+    phases.append((25,) + phases[0][1:])
+    _key_cycle(arm, phases)
+
+    # IDLE — 48 de cadre = 2 s. Aproape nemiscata: capul se uita in jur.
+    idle = bpy.data.actions.new("Idle")
+    arm.animation_data.action = idle
+    phases = [
+        (1,  (0.0, 0.0), (0.0, 0.0), (0.00, 0.0), (-3.0, 5.0), 0.0),
+        (13, (2.0, 4.0), (0.0, 1.0), (0.01, 0.3), (1.0, 0.0), 4.0),
+        (25, (0.0, 1.0), (0.0, 0.0), (0.00, 0.0), (4.0, -5.0), 0.0),
+        (37, (2.0, 3.0), (0.0, 1.0), (0.01, 0.3), (0.0, 0.0), -4.0),
+    ]
+    phases.append((49,) + phases[0][1:])
+    _key_cycle(arm, phases)
+
+    stash_actions(arm, ("Walk", "Idle"))
+    # Poza de repaus in fisier: fara actiune activa, oasele la zero.
+    for pb in arm.pose.bones:
+        pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
+        pb.location = (0.0, 0.0, 0.0)
+
+
 clear_built("Sea_Turtle")
 b = Builder()
 shell(b)
@@ -185,8 +384,18 @@ keel(b)
 head(b)
 flippers(b)
 tail(b)
-obj = b.to_object("Sea_Turtle")
+obj = b.to_object("Sea_Turtle_Mesh")
+lo0, hi0 = _bbox(obj)
 stats = finish(obj, bevel=0.035, origin="base", ao=AO_SPEC)
+lo1, hi1 = _bbox(obj)
+# Cat a mutat `finish` geometria (bevel-ul schimba bbox-ul cu < 1 cm — sub
+# orice prag de greutate de mai sus).
+shift = Vector((((lo1 + hi1) - (lo0 + hi0)).x * 0.5,
+                ((lo1 + hi1) - (lo0 + hi0)).y * 0.5,
+                lo1.z - lo0.z))
+print("  deplasarea din finish: %.3f %.3f %.3f" % tuple(shift))
+arm = rig(obj, shift)
+animate(arm)
 
 bpy.context.view_layer.update()
 d = obj.dimensions
@@ -194,5 +403,7 @@ print("sea_turtle.glb  %d tris  AO %.2f..%.2f"
       % (stats["tris"], stats["ao_min"], stats["ao_max"]))
 print("  %.2f m lungime (Z in Godot), %.2f m latime, %.2f m inaltime"
       % (d.y, d.x, d.z))
-print("GLB:  %s (%d B)" % export_glb([obj], "props/sea_turtle.glb"))
-print("BLEND: %s (%d B)" % save_blend([obj], "sea_turtle.blend"))
+print("GLB:  %s (%d B)" % export_glb([arm, obj], "props/sea_turtle.glb",
+                                       animations=True))
+print("BLEND: %s (%d B)" % save_blend([arm, obj], "sea_turtle.blend",
+                                        compress=True))

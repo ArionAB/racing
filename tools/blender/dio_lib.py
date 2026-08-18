@@ -1524,11 +1524,18 @@ def finish(obj, bevel=0.04, bevel_angle=30.0, ao=None, origin="base",
     return {"tris": tri_count(obj), "ao_min": round(rng[0], 3), "ao_max": round(rng[1], 3)}
 
 
-def export_glb(objects, filename):
+def export_glb(objects, filename, animations=False):
     """Export GLB cu UV + vertex colors, Y-up, modificatori aplicati.
 
     `filename` include categoria (ex. "rocks/canyon_rocks.glb"): din august
-    2026 assets/models/ e organizat pe foldere de categorie."""
+    2026 assets/models/ e organizat pe foldere de categorie.
+
+    `animations=True` pentru piesele cu SCHELET (vaca, testoasa): actiunile
+    pleaca separat, fiecare cu numele ei (mod "ACTIONS" — exporta actiunea
+    activa plus strip-urile stashuite in NLA, vezi `stash_actions`), iar
+    skinning-ul se pastreaza — `export_apply` aplica doar modificatorii
+    ne-armatura. Numele actiunilor sunt contractul cu Godot: SlidingHazard si
+    PathMover cauta "Walk" / "Idle" (vezi build_cow_animated.py)."""
     path = os.path.join(MODELS, filename)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.ops.object.select_all(action="DESELECT")
@@ -1550,6 +1557,8 @@ def export_glb(objects, filename):
         # si am ajunge cu 4 copii ale aceluiasi atlas in build. Culoarea vine oricum
         # din Palette.apply_world_material, la instantiere.
         export_image_format="NONE",
+        export_animations=animations,
+        export_animation_mode="ACTIONS",
         export_cameras=False,
         export_lights=False,
         export_extras=False,
@@ -1557,12 +1566,150 @@ def export_glb(objects, filename):
     return path, os.path.getsize(path)
 
 
-def save_blend(objects, filename):
-    """Scrie sursa .blend FARA sa schimbe fisierul deschis in sesiunea curenta."""
+def save_blend(objects, filename, compress=False):
+    """Scrie sursa .blend FARA sa schimbe fisierul deschis in sesiunea curenta.
+
+    `compress=True` pentru piesele animate: fcurve-urile fac din .blend un
+    fisier de 10x mai mare decat orice alta sursa (vaca: 11 MB -> 1.2 MB)."""
     os.makedirs(BLENDS, exist_ok=True)
     path = os.path.join(BLENDS, filename)
-    bpy.data.libraries.write(path, set(objects), fake_user=True)
+    bpy.data.libraries.write(path, set(objects), fake_user=True,
+                             compress=compress)
     return path, os.path.getsize(path)
+
+
+# ---------------------------------------------------------------------------
+# Schelet si animatie — pentru piesele care se MISCA din articulatii (testoasa),
+# nu doar pe traiectorie. Tot ce e aici e independent de forma: numai oase,
+# greutati si poze exprimate in spatiul armaturii.
+# ---------------------------------------------------------------------------
+
+def mesh_islands(obj):
+    """Componentele conexe ale mesh-ului, ca liste de indici de varfuri.
+
+    Builder-ul pune fiecare piesa (carapace, lopata, cap) intr-o insula
+    separata si bevel-ul nu le lipeste — deci insula E piesa, si e cea mai
+    sigura cheie pentru "care varfuri sunt lopata din fata-stanga": un test pe
+    pozitie ar prinde si marginea carapacei de deasupra radacinii lopetii."""
+    me = obj.data
+    parent = list(range(len(me.vertices)))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    for e in me.edges:
+        a, b = e.vertices
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+    groups = {}
+    for i in range(len(me.vertices)):
+        groups.setdefault(find(i), []).append(i)
+    return list(groups.values())
+
+
+def island_bbox(obj, indices):
+    """(lo, hi) al unei insule, in coordonatele mesh-ului."""
+    vs = obj.data.vertices
+    lo = Vector((1e9, 1e9, 1e9))
+    hi = Vector((-1e9, -1e9, -1e9))
+    for i in indices:
+        co = vs[i].co
+        lo = Vector(map(min, lo, co))
+        hi = Vector(map(max, hi, co))
+    return lo, hi
+
+
+def make_armature(name, bones, mesh=None):
+    """Armatura la identitate din liste de oase: dict(name, head, tail,
+    parent=None). Cu `mesh`, il parenteaza si ii pune modificatorul Armature —
+    greutatile le pui tu in vertex groups cu numele oaselor (`weight_ramp`).
+
+    Toate oasele cu roll 0: orientarea locala nu conteaza, pozele se scriu in
+    spatiul armaturii prin `pose_rotate` / `pose_move`."""
+    arm_data = bpy.data.armatures.new(name)
+    arm = bpy.data.objects.new(name, arm_data)
+    bpy.context.collection.objects.link(arm)
+    bpy.ops.object.select_all(action="DESELECT")
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    made = {}
+    for spec in bones:
+        eb = arm_data.edit_bones.new(spec["name"])
+        eb.head = Vector(spec["head"])
+        eb.tail = Vector(spec["tail"])
+        eb.roll = 0.0
+        if spec.get("parent"):
+            eb.parent = made[spec["parent"]]
+            eb.use_connect = False
+        made[spec["name"]] = eb
+    bpy.ops.object.mode_set(mode="OBJECT")
+    if mesh is not None:
+        mesh.parent = arm
+        mod = mesh.modifiers.new("Armature", "ARMATURE")
+        mod.object = arm
+    return arm
+
+
+def weight_ramp(mesh, indices, bone, root_bone, value, lo, hi):
+    """Greutati pe o insula: `value(co)` creste de la `lo` (0 -> tot pe
+    `root_bone`) la `hi` (1 -> tot pe `bone`), cu smoothstep intre ele.
+
+    Asa se indoaie o lopata la radacina in loc sa se franga: partea ascunsa
+    sub carapace ramane pe corp, varful urmeaza osul, iar intre ele greutatea
+    curge. Restul (1 - w) merge pe `root_bone`, ca suma sa fie mereu 1."""
+    vg = mesh.vertex_groups.get(bone) or mesh.vertex_groups.new(name=bone)
+    if bone == root_bone:
+        # Piesa intreaga pe un singur os (carapacea pe Body). Fara ramura asta,
+        # al doilea REPLACE de mai jos ar scrie 1-w = 0 PESTE greutatea de 1
+        # din acelasi grup, iar exportatorul glTF ar inventa un `neutral_bone`
+        # pentru varfurile ramase fara greutate.
+        vg.add(list(indices), 1.0, "REPLACE")
+        return
+    rg = mesh.vertex_groups.get(root_bone) or mesh.vertex_groups.new(name=root_bone)
+    span = max(hi - lo, 1e-6)
+    for i in indices:
+        t = (value(mesh.data.vertices[i].co) - lo) / span
+        t = max(0.0, min(1.0, t))
+        w = t * t * (3.0 - 2.0 * t)
+        vg.add([i], w, "REPLACE")
+        rg.add([i], 1.0 - w, "REPLACE")
+
+
+def pose_rotate(pb, rot):
+    """Rotatie data in SPATIUL ARMATURII (Matrix 3x3, in jurul capului osului),
+    scrisa ca quaternion local pe osul de poza. Osul se roteste in jurul
+    propriului cap, cum vrei — dar cu axele lumii, nu cu axele lui de roll."""
+    ml = pb.bone.matrix_local.to_3x3()
+    pb.rotation_mode = "QUATERNION"
+    pb.rotation_quaternion = (ml.inverted() @ rot @ ml).to_quaternion()
+
+
+def pose_move(pb, delta):
+    """Deplasare data in spatiul armaturii, scrisa ca `location` locala."""
+    ml = pb.bone.matrix_local.to_3x3()
+    pb.location = ml.inverted() @ Vector(delta)
+
+
+def stash_actions(arm, names):
+    """Actiunile date raman in GLB toate: exportatorul (mod ACTIONS) ia
+    actiunea activa plus strip-urile din NLA — fara stash ar pleca doar una.
+    Se lasa fara actiune activa si cu track-urile mute, ca poza de repaus sa
+    fie cea din fisier."""
+    if arm.animation_data is None:
+        arm.animation_data_create()
+    arm.animation_data.action = None
+    for name in names:
+        act = bpy.data.actions[name]
+        act.use_fake_user = True
+        track = arm.animation_data.nla_tracks.new()
+        track.name = name
+        track.mute = True
+        track.strips.new(name, int(act.frame_range[0]), act)
 
 
 def clear_built(prefix=None):

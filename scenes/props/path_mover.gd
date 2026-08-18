@@ -59,6 +59,15 @@ const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 ## O CLASA, nu texturi proprii — garda din tools/probe_decor.gd numara
 ## materialele per pista (CLAUDE.md §texturi).
 @export var tri_class: String = ""
+## Ce clip din GLB se reda in bucla, daca modelul are AnimationPlayer. Gol =
+## automat: "Walk" (indiferent de majuscule) cand se misca, o animatie de
+## repaus ("Idle"/"Eating") cand `speed` e 0, altfel primul clip din fisier.
+## Numele se scrie EXACT ca in fisier (ex. "Gallop"); un nume care nu exista
+## se anunta la consola si cade pe automat, nu lasa modelul teapan in tacere.
+@export var animation: String = ""
+## Viteza de redare a clipului (1 = cum a fost exportat). Un ciclu de mers
+## exportat pentru 1.5 m/s arata a patinaj la 4 m/s — de aici se potriveste.
+@export_range(0.1, 4.0, 0.05) var animation_speed: float = 1.0
 
 @export_group("Miscare")
 ## m/s. 0 = parcat pe traiectorie (util cat asezi curba).
@@ -180,8 +189,13 @@ func _extract_node(scene: PackedScene, node_name: String) -> Node3D:
 
 ## Daca modelul vine cu schelet si animatii (ciclu de mers exportat din
 ## Blender), porneste-l in bucla: un animal care aluneca cu picioarele
-## teapene nu e ambient, e defect vizibil. Se prefera o animatie numita
-## "walk"; altfel prima din fisier.
+## teapene nu e ambient, e defect vizibil. Clipul il alege `animation`; gol =
+## automat, dupa viteza. Potrivirea e fara majuscule/minuscule: primul GLB
+## animat (vaca Quaternius) are "Walk", iar cautarea dupa "walk" cadea pe
+## primul clip alfabetic — "Eating" — si vaca traversa drumul pascand.
+const AUTO_WALK := ["walk", "run", "gallop", "swim", "fly", "move"]
+const AUTO_REST := ["idle", "eating", "rest", "stand"]
+
 func _autoplay_animation(root: Node3D) -> void:
 	var players := root.find_children("*", "AnimationPlayer", true, false)
 	if players.is_empty():
@@ -190,11 +204,32 @@ func _autoplay_animation(root: Node3D) -> void:
 	var names := ap.get_animation_list()
 	if names.is_empty():
 		return
-	var pick := "walk" if "walk" in names else String(names[0])
+	var pick := ""
+	if not animation.is_empty():
+		if ap.has_animation(animation):
+			pick = animation
+		else:
+			push_warning("PathMover '%s': animatia '%s' nu exista in model (are: %s); cad pe automat"
+				% [name, animation, ", ".join(names)])
+	if pick.is_empty():
+		pick = _pick_by_name(names, AUTO_WALK if speed > 0.0 else AUTO_REST)
+	if pick.is_empty():
+		pick = String(names[0])
 	var anim := ap.get_animation(pick)
 	if anim != null:
 		anim.loop_mode = Animation.LOOP_LINEAR
+	ap.speed_scale = animation_speed
 	ap.play(pick)
+
+
+## Primul clip al carui nume contine (fara majuscule) unul din cuvintele date,
+## in ordinea cuvintelor. Gol daca niciunul.
+func _pick_by_name(names: PackedStringArray, words: Array) -> String:
+	for w: String in words:
+		for n in names:
+			if String(n).to_lower().contains(w):
+				return String(n)
+	return ""
 
 
 func _physics_process(delta: float) -> void:

@@ -629,7 +629,17 @@ fie gimmick de cursa. Traiectoria o desenezi tu, exact ca traseul.
    - `model_node` — ce piesa din GLB se pastreaza (gol = tot fisierul);
    - `model_scale`, `tri_class` — ca la HazardMarker;
    - `model_yaw` — corectie de orientare, in grade: daca figurantul merge cu
-     spatele sau cu umarul inainte, de aici se indreapta.
+     spatele sau cu umarul inainte, de aici se indreapta. (Convenția
+     asseturilor e „înainte = −Z"; un GLB exportat corect n-are nevoie de ea —
+     vaca a mers cu spatele pe Alpi fiindca era exportata invers, si s-a
+     reparat la sursa, in `build_cow_animated.py`, nu de aici.)
+   - `animation` — clipul din GLB redat in bucla, cu numele EXACT din fisier
+     (vaca are `Idle`, `Eating`, `Walk`, `Gallop`). Gol = automat: un clip de
+     mers cand `speed` > 0, unul de repaus cand e parcat. Un nume gresit se
+     anunta la consola si cade pe automat.
+   - `animation_speed` — viteza de redare a clipului: ciclul de mers e
+     exportat pentru un anumit ritm, iar la o `speed` mai mare copitele
+     patineaza; de aici se potriveste.
 4. Grupul **Miscare**:
    - `speed` — m/s; **0 = parcat**, util cat timp asezi curba;
    - `travel_mode` — **BUCLA** pentru trasee inchise (tractorul da ture;

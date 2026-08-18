@@ -61,6 +61,7 @@ enum Kind {
 	AVALANCHE,  ## masa de zapada care se rostogoleste peste sosea
 	WAVE,       ## val care spala soseaua (cere o tema cu mare)
 	ICE_SLAB,   ## placa de gheata libera care se balanseaza sub masini (Baikal)
+	TRAIN_ALONG, ## tren PE SENS: sina in lungul soselei, vine din fata (Baikal)
 }
 
 @export var kind: Kind = Kind.SLIDING

@@ -1613,6 +1613,9 @@ func rebuild() -> void:
 		_build_rockfall(frac)
 	for frac in _train_fracs():
 		_build_train(frac)
+	_lane_bias.clear()
+	for frac in _train_along_fracs():
+		_build_train_along(frac)
 	for frac in _avalanche_fracs():
 		_build_avalanche(frac)
 	for frac in _ice_slab_fracs():
@@ -4624,6 +4627,8 @@ func _build_node_hazard(hz: Dictionary) -> void:
 			_build_wave_surge(frac)
 		HazardMarker.Kind.ICE_SLAB:
 			_build_ice_slab(frac)
+		HazardMarker.Kind.TRAIN_ALONG:
+			_build_train_along(frac)
 
 
 ## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
@@ -4936,6 +4941,108 @@ func _build_train(frac: float) -> void:
 	# tangenta la o curba pare ca o traverseaza de doua ori.
 	train.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
 	add_child(train)
+
+
+## TREN PE SENS (Baikal): sina in lungul soselei, trenul vine din fata.
+##
+## Baza e looking_at(rail): -Z pe perpendiculara, deci X local cade pe
+## directia drumului, INVERSATA (X = -dir) — trenul inainteaza spre +X in
+## spatiul lui, adica spre masinile care vin. E chiar prima versiune de la
+## trecerea perpendiculara, folosita acum cu intentie.
+##
+## Lungimea sinei nu vine din degajarea fata de sosea (aici e zero — sina E pe
+## sosea), ci din cat de DREAPTA e soseaua in jurul fractiei: se merge inainte
+## si inapoi cat timp axa nu se abate mai mult de 1.5 m de la dreapta prin
+## origine, cu plafon 110 m. Un tren drept pe un drum curb ar iesi de pe asfalt.
+##
+## Sectorul intra in `_lane_bias` (cu 40 m inainte de capatul dinspre masini),
+## de unde AI-ul afla ca aici se sta pe margine, nu pe axa — altfel jumatate
+## din pluton ar muri la fiecare tur, si asta nu e AI onest, e AI orb.
+func _build_train_along(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	# Directia din puncte la +/-20 m, nu din segmentul local: pe o curba coapta
+	# Catmull-Rom tangenta locala tremura cu ~1 grad, si la 100 m de sina 1
+	# grad inseamna aproape 2 m de abatere. Aceeasi directie intra si in
+	# masuratoarea de dreptime.
+	var dir := _smooth_dir(idx, 20.0)
+	var rail := dir.cross(Vector3.UP).normalized()
+	var half := _straight_reach(idx, 110.0, 1.5)
+	var train := TrainHazard.new()
+	train.along_road = true
+	train.road_half_width = width_at(frac)
+	train.half_rail = half
+	train.ground_drop = _rail_ground_drop(p, dir, half)
+	train.transform = Transform3D(Basis.looking_at(rail, Vector3.UP), p)
+	add_child(train)
+	var total := _dists[n]
+	var f0 := fposmod((_dists[idx] - half - 40.0) / total, 1.0)
+	var f1 := fposmod((_dists[idx] + half) / total, 1.0)
+	_lane_bias.append(Vector3(f0, f1, 0.62))
+
+
+## Cat de departe (m) ramane soseaua DREAPTA in jurul indexului: se avanseaza
+## in ambele sensuri cat timp abaterea laterala fata de tangenta din origine
+## sta sub `tol`. Intoarce minimul celor doua parti, plafonat.
+func _straight_reach(idx: int, max_len: float, tol: float) -> float:
+	var n := baked.size()
+	var p := baked[idx]
+	var dir := _smooth_dir(idx, 20.0)
+	var reach := max_len
+	for sgn: int in [1, -1]:
+		var d := 0.0
+		var k := 1
+		while d < max_len:
+			var q := baked[((idx + sgn * k) % n + n) % n]
+			var v := q - p
+			var along := v.dot(dir)
+			var lat := (v - dir * along).length()
+			d = absf(along)
+			if lat > tol:
+				break
+			k += 1
+		reach = minf(reach, d)
+	return maxf(reach, 30.0)
+
+
+## Directia soselei la index, netezita pe +/- `span_m`: coarda dintre punctul
+## din spate si cel din fata, nu segmentul local.
+func _smooth_dir(idx: int, span_m: float) -> Vector3:
+	var n := baked.size()
+	var steps := maxi(1, int(span_m / maxf(_dists[n] / float(n), 0.001)))
+	var a := baked[((idx - steps) % n + n) % n]
+	var b := baked[(idx + steps) % n]
+	var d := b - a
+	d.y = 0.0
+	if d.length() < 0.01:
+		return (baked[(idx + 1) % n] - baked[idx]).normalized()
+	return d.normalized()
+
+
+## Sectoare in care AI-ul se tine de MARGINE, nu de axa: (frac_start,
+## frac_end, |linie| minima 0..1). Umplut de hazardele care ocupa axa (trenul
+## pe sens). Vezi AIController.
+var _lane_bias: Array[Vector3] = []
+
+func lane_bias_at(index: int) -> float:
+	if _lane_bias.is_empty():
+		return 0.0
+	var f := frac_at(index)
+	var out := 0.0
+	for seg in _lane_bias:
+		var inside: bool
+		if seg.x <= seg.y:
+			inside = f >= seg.x and f <= seg.y
+		else:
+			inside = f >= seg.x or f <= seg.y
+		if inside:
+			out = maxf(out, seg.z)
+	return out
+
+
+func _train_along_fracs() -> Array[float]:
+	return []
 
 
 ## Placa de gheata libera (Baikal): basculant pe axa transversala, plantat pe

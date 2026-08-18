@@ -83,6 +83,9 @@ extends Track
 @export var custom_rockfall_fracs: Array[float] = []
 ## Treceri de cale ferata. Trenul ucide la contact si te repune.
 @export var custom_train_fracs: Array[float] = []
+## Tren PE SENS: sina in lungul soselei, trenul vine din fata (Baikal, viaduct).
+## Cere o portiune dreapta (~100 m) — sina se scurteaza singura la cat e drept.
+@export var custom_train_along_fracs: Array[float] = []
 ## Placi de gheata libere care se balanseaza sub masini (Baikal). Au sens doar
 ## pe o portiune din `custom_ice_ranges`. Vezi IceSlabHazard.
 @export var custom_ice_slab_fracs: Array[float] = []
@@ -161,6 +164,9 @@ func _train_fracs() -> Array[float]:
 
 func _ice_slab_fracs() -> Array[float]:
 	return custom_ice_slab_fracs
+
+func _train_along_fracs() -> Array[float]:
+	return custom_train_along_fracs
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

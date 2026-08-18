@@ -1,0 +1,56 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+
+[sub_resource type="Curve3D" id="Curve3D_baikal"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 120, 4, 7, 0, 0, 0, 0, 0, 0, 180, 3.5, 30, 0, 0, 0, 0, 0, 0, 225, 1.2, 68, 0, 0, 0, 0, 0, 0, 262, 0.1, 112, 0, 0, 0, 0, 0, 0, 322, 0.1, 150, 0, 0, 0, 0, 0, 0, 398, 0.1, 172, 0, 0, 0, 0, 0, 0, 472, 0.1, 158, 0, 0, 0, 0, 0, 0, 532, 0.1, 120, 0, 0, 0, 0, 0, 0, 570, 0.1, 68, 0, 0, 0, 0, 0, 0, 570, 0.1, 8, 0, 0, 0, 0, 0, 0, 555, 0.1, -68, 0, 0, 0, 0, 0, 0, 518, 0.1, -120, 0, 0, 0, 0, 0, 0, 465, 1.0, -158, 0, 0, 0, 0, 0, 0, 405, 6, -180, 0, 0, 0, 0, 0, 0, 345, 10.5, -188, 0, 0, 0, 0, 0, 0, 285, 12, -180, 0, 0, 0, 0, 0, 0, 225, 12, -165, 0, 0, 0, 0, 0, 0, 180, 12, -150, 0, 0, 0, 0, 0, 0, 142, 11, -142, 0, 0, 0, 0, 0, 0, 90, 9, -112, 0, 0, 0, 0, 0, 0, 38, 8, -135, 0, 0, 0, 0, 0, 0, -15, 6, -105, 0, 0, 0, 0, 0, 0, -45, 5, -60, 0, 0, 0, 0, 0, 0, -48, 4.3, -22, 0, 0, 0, 0, 0, 0, -28, 4, -3),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 26
+
+[node name="Track10" type="Node3D"]
+script = ExtResource("1_track")
+custom_name = "Baikal"
+custom_theme = "baikal"
+custom_half_width = 7.0
+custom_sea_level_offset = -4.23
+custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])
+custom_ravines = Array[Vector4]([Vector4(0.69, 0.75, 13, 0)])
+custom_cornice_ravines = Array[int]([0])
+
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource("Curve3D_baikal")
+
+[node name="Peaks" type="Node3D" parent="."]
+
+[node name="MasivulTunelului" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 34, -215)
+gizmo_extents = 75.0
+script = ExtResource("2_peak")
+radius_m = 75.0
+
+[node name="DealulPadurii" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 20, -190)
+gizmo_extents = 60.0
+script = ExtResource("2_peak")
+radius_m = 60.0
+
+[node name="DealulSatului" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75, 14, -70)
+gizmo_extents = 55.0
+script = ExtResource("2_peak")
+radius_m = 55.0
+
+[node name="StancaSamanului" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 13, 58)
+gizmo_extents = 20.0
+script = ExtResource("2_peak")
+radius_m = 20.0
+
+[node name="CapulGrotei" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 598, 9, 38)
+gizmo_extents = 24.0
+script = ExtResource("2_peak")
+radius_m = 24.0

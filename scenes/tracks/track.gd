@@ -670,6 +670,81 @@ static func themes() -> Dictionary:
 			"hose_model": "",
 			"dust_color": null,
 		},
+		# --- Lacul inghetat (pista Baikal, docs/track_briefs/baikal.md) ---
+		#
+		# Iarna pe Olkhon: jumatate de tur PE gheata, jumatate pe mal. Cheile
+		# care conteaza si de ce:
+		#
+		# 1. `water` + `frozen`: marea e o PLACA — se randeaza ca gheata si are
+		#    coliziune (vezi _build_water). Soseaua de pe lac sta la cativa cm
+		#    peste ea, in `_ice_ranges`, iar restul terenului de langa drum e
+		#    sub placa, deci gheata citeste continua pana la banda.
+		# 2. Zapada e PESTE TOT pe uscat: `snow_line` la 0.5 m (linia ghetii e
+		#    la 0), cu iarba uscata galbena care iese pe langa mal — aceeasi
+		#    mecanica de cota ca pe Alpi, doar ca linia e jos.
+		# 3. Soare JOS (~15°), lumina calda, umbre lungi si albastre din
+		#    ambient — dupa-amiaza de februarie, nu amiaza. Cer alb-laptos spre
+		#    roz la orizont, ceata alba.
+		# 4. `wind`: vantul de pe lac (dinspre larg, adica din SE, spre NV), cu
+		#    rafale — sufla doar pe portiunile de gheata (vezi wind_at). Pe
+		#    gheata cu grip 1.5 iti muta linia; steguletele il arata.
+		#
+		# Decorul (`props: alpine`) e PROVIZORIU: pini cu zapada pana vine
+		# kitul de larici/mesteceni din brief. Fara pereti si borduri pe gheata
+		# (le taie `_road_ice`), cu borduri pe mal.
+		"baikal": {
+			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
+			"sky_top": Color(0.52, 0.66, 0.84),
+			"sky_horizon": Color(0.95, 0.88, 0.86),
+			"fog": Color(0.90, 0.90, 0.92),
+			"hill_color": Color(0.84, 0.87, 0.90),
+			"sun_color": Color(1.0, 0.90, 0.78),
+			"sun_energy": 1.0,
+			"sun_rotation_deg": Vector3(-24, 135, 0),
+			"exposure": 1.0,
+			"ambient_color": Color.html("C4D2E6"),
+			"ambient_energy": 0.32,
+			"fog_depth": true,
+			"fog_begin": 120.0,
+			"fog_end": 330.0,
+			"horizon_model": "res://assets/models/rocks/mountain_peak.glb",
+			"horizon_picks": [["MountainPeak"], ["MountainPeak"],
+				["MountainPeak"]],
+			"horizon_classes": {"MountainPeak": "tri:snow",
+				"PeakSnow": "tri:snow"},
+			"horizon_rings": [
+				{"near": 190.0, "far": 240.0, "count": 4, "scale": 0.70,
+					"clear": 95.0, "picks": ["MountainPeak"]},
+				{"near": 240.0, "far": 300.0, "count": 5, "scale": 0.90,
+					"clear": 115.0, "picks": ["MountainPeak"]},
+			],
+			"walls": false,
+			"kerbs": true,
+			"cliffs": false,
+			"decor": "bands",
+			"props": "alpine",
+			"snow_line": -0.2,
+			"snow_fade": 1.5,
+			"snow_tint": Palette.color(Palette.FOAM_WHITE),
+			"road_snow_low": 2.0,
+			"road_snow_high": 14.0,
+			"road_snow_amount": 0.7,
+			"road_snow_tint": Palette.color(Palette.FOAM_WHITE),
+			"rock_class": "alpine_granite",
+			"rock_tint": Color(0.86, 0.88, 0.92),
+			"hazard_model": "res://assets/models/vehicles/timber_sled.glb",
+			"hazard_roll": false,
+			"dust_color": Color(0.90, 0.94, 0.97),
+			"water": true,
+			"frozen": true,
+			"seabed_drop": 12.0,
+			"ice_grip": 1.5,
+			"ice_road_tint": Color(0.60, 0.83, 0.86),
+			"wind": Vector3(-2.2, 0.0, -2.2),
+			"wind_gust": 0.5,
+			"branch_tint": Color(0.86, 0.90, 0.94),
+			"branch_surface": "gravel",
+		},
 	}
 	return _themes_cache
 
@@ -1554,6 +1629,7 @@ func rebuild() -> void:
 		else:
 			_build_lift_bridge(ch)
 	_build_markers()
+	_build_ice_flags()
 	_build_start_gate()
 	_build_start_line()
 	_build_center_line()
@@ -1594,7 +1670,7 @@ func _build_center_line() -> void:
 		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
 			idx += 1
 		var i := idx % n
-		if _road_gap(i):
+		if _road_gap(i) or _road_ice(i):
 			d += 6.5
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
@@ -2470,7 +2546,34 @@ func _build_water() -> void:
 	add_child(root)
 	_build_sea_far(root, sea_y)
 	_build_sea_near(root, sea_y)
+	if is_frozen():
+		# LAC INGHETAT (Baikal): aceeasi geometrie de mare, dar e o PLACA — se
+		# calca pe ea. Materialul e opac si iluminat (nu shaderul de apa cu
+		# valuri), colorat din adancime prin `_ice_color`, iar dedesubt sta un
+		# corp de coliziune cat toata placa: cine iese din culoarul marcat ruleaza
+		# mai departe pe gheata (offroad, deci lent), nu cade in apa. De aceea nu
+		# exista nici zona de repunere — nu e unde sa cazi.
+		for child in root.get_children():
+			if child is MeshInstance3D:
+				(child as MeshInstance3D).material_override = _ice_sheet_material()
+		var body := StaticBody3D.new()
+		body.name = "IceSheet"
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = Vector3(SEA_FAR_EXTENT, 2.0, SEA_FAR_EXTENT)
+		shape.shape = box
+		body.add_child(shape)
+		root.add_child(body)
+		var c := _centroid()
+		body.global_position = Vector3(c.x, sea_y - 1.0, c.z)
+		return
 	_build_sea_respawn(sea_y)
+
+
+## Marea e INGHETATA pe tema asta (`frozen`): placa se randeaza ca gheata si
+## are coliziune. Vezi `_build_water`.
+func is_frozen() -> bool:
+	return bool(theme_flag("frozen", false))
 
 
 ## Apa dintr-un canal care NU e la nivelul marii.
@@ -2620,6 +2723,8 @@ func _build_sea_far(root: Node3D, sea_y: float) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var deep := water_tint(Palette.SEA_DEEP)
+	if is_frozen():
+		deep = _ice_color(SEA_NEAR_DEPTH)
 	# Alfa 1.0 = ADANCIMEA maxima (vezi _sea_color), nu opacitate. Placa asta e
 	# largul, deci sta la capatul rampei de culoare.
 	#
@@ -2785,6 +2890,8 @@ func water_tint(slot: int) -> Color:
 ## un pas de citire a adancimii pe fiecare pixel de apa — pe mobil, exact
 ## genul de cost pe care nu-l vede nicio garda din proiect.
 func _sea_color(d: float) -> Color:
+	if is_frozen():
+		return _ice_color(d)
 	# Sloturile vin din TEMA, nu fix din paleta recifului. Pana la paraul din
 	# Alpii singura apa din joc era laguna Okinawei, deci recif+larg era o
 	# alegere buna; pe un parau de munte, insa, aceleasi doua culori dadeau o
@@ -2823,6 +2930,58 @@ func _sea_color(d: float) -> Color:
 	# anvelopa urca si coboara, deci doua adancimi diferite dau acelasi numar.
 	c.a = clampf(d / SEA_NEAR_DEPTH, 0.0, 1.0)
 	return c
+
+
+## Culoarea PLACII DE GHEATA dupa cata apa are sub ea (tema `frozen`).
+##
+## Aceeasi intrebare ca la `_sea_color`, alt raspuns: langa mal gheata e
+## subtire si prinsa cu zapada (alb-albastrui), la larg e groasa si se vede
+## adancul prin ea (turcoaz spre albastru inchis). Culorile sunt LITERALE, nu
+## trecute prin `water_tint`: materialul e iluminat, nu unshaded, deci nu are
+## nevoie nici de srgb_to_linear, nici de compensarea de saturatie.
+func _ice_color(d: float) -> Color:
+	# Terenul de langa drumul de gheata sta la ~15 cm sub placa (GROUND_DROP),
+	# deci aproape toata gheata pe care o vezi din masina are "adancime" mica —
+	# rampa trebuie sa ajunga la turcoaz repede, altfel lacul iese alb.
+	var shore := Color(0.90, 0.94, 0.95)
+	var thin := Color(0.66, 0.85, 0.88)
+	var deep := Color(0.40, 0.70, 0.76)
+	var c: Color
+	if d < 0.12:
+		c = shore.lerp(thin, clampf(d / 0.12, 0.0, 1.0))
+	else:
+		c = thin.lerp(deep, clampf((d - 0.12) / (SEA_REEF_DEPTH - 0.12), 0.0, 1.0))
+	c.a = 1.0
+	return c
+
+
+var _ice_sheet_mat: StandardMaterial3D
+
+## Materialul placii de gheata: opac, iluminat, culoare din vertex (adancime),
+## granulatia stratului de detaliu al lumii peste, luciu mai mare decat orice
+## sol. Unul singur pentru ambele mesh-uri, ca la apa.
+func _ice_sheet_material() -> StandardMaterial3D:
+	if _ice_sheet_mat != null:
+		return _ice_sheet_mat
+	_ice_sheet_mat = StandardMaterial3D.new()
+	_ice_sheet_mat.albedo_color = Color.WHITE
+	_ice_sheet_mat.vertex_color_use_as_albedo = true
+	# Luciu MIC: cu 0.28/0.75 soarele jos punea o pata alba cat jumatate de
+	# ecran pe placa (masurat pe snapshot la frac 0.30, si tot acolo cu
+	# 0.55/0.35). Gheata cu zapada suflata pe ea nu e oglinda; luciul de
+	# gheata curata il va da textura de clasa, cand va exista.
+	_ice_sheet_mat.roughness = 0.75
+	_ice_sheet_mat.metallic_specular = 0.2
+	_ice_sheet_mat.cull_mode = BaseMaterial3D.CULL_BACK
+	var detail := _tex(Palette.DETAIL_PATH)
+	if detail != null:
+		_ice_sheet_mat.detail_enabled = true
+		_ice_sheet_mat.detail_albedo = detail
+		_ice_sheet_mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+		_ice_sheet_mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_1
+		_ice_sheet_mat.uv1_triplanar = true
+		_ice_sheet_mat.uv1_scale = Vector3(0.2, 0.2, 0.2)
+	return _ice_sheet_mat
 
 
 ## Materialul apei — UNUL SINGUR pentru ambele mesh-uri.
@@ -2898,6 +3057,21 @@ func _water_material() -> ShaderMaterial:
 ## Acelasi tipar ca plasa de sub creasta de fly-off (_build_flyoff_net): un
 ## Area3D care prinde ce a cazut si cheama RespawnZone. Volumul incepe SUB
 ## suprafata, ca stropul de la intrare sa apuce sa se vada.
+## Materialul benzii de gheata de pe sosea (`_ice_ranges`).
+##
+## Culoarea vine din tema (`ice_road_tint`, implicit un turcoaz palid) peste
+## granulatia de asfalt — aceeasi textura de clasa, alt albedo si luciu: gheata
+## batatorita de roti e mai lucioasa si mai deschisa decat placa de langa ea.
+## Textura proprie de gheata (crapaturi, bule) e un pas urmator; aici e doar
+## suprafata pe care se testeaza feelingul, si asta se vede din masina.
+func _ice_road_material() -> StandardMaterial3D:
+	var tint: Variant = theme_flag("ice_road_tint", null)
+	var c: Color = tint as Color if tint != null else Color(0.62, 0.84, 0.86)
+	return _flat_material(c, _tex("res://assets/textures/surface_asphalt.png"),
+		0.30, 0.7, BaseMaterial3D.CULL_BACK,
+		_tex("res://assets/textures/surface_asphalt_macro.png"))
+
+
 func _build_sea_respawn(sea_y: float) -> void:
 	var c := _centroid()
 	var zone := RespawnZone.new()
@@ -3589,6 +3763,17 @@ func _resolve_channels() -> void:
 ## tot ele sunt punctele pe care se aseaza rampele si pilonii. O a doua definitie
 ## in metri ar diverge de prima la primul reglaj de traseu si ar lasa ori o buza
 ## de asfalt in aer, ori o rampa care incepe deasupra apei.
+## Segmentul i (si j) e pe o portiune de GHEATA (vezi `_ice_ranges`).
+## Folosit de generatorii de „mobilier" de sosea ca sa nu puna linie de mijloc,
+## borduri, umeri, urme sau semne pe banda de gheata.
+func _road_ice(i: int, j: int = -1) -> bool:
+	if _ice_ranges().is_empty():
+		return false
+	if is_ice_at(frac_at(i)):
+		return true
+	return j >= 0 and is_ice_at(frac_at(j))
+
+
 func _road_gap(i: int, j: int = -1) -> bool:
 	if _channels.is_empty():
 		return false
@@ -3727,6 +3912,12 @@ func _build_road() -> void:
 	# Coroana de 3 cm e vizuala; rotile ruleaza pe planul de dinainte.
 	var col := SurfaceTool.new()
 	col.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Banda de GHEATA (vezi `_ice_ranges`): aceeasi geometrie, alt mesh si alt
+	# material — nu e asfalt ud, e alta suprafata. Fusta ei intra tot aici, ca
+	# marginea sa fie tot gheata, nu un tiv de pajiste sub un drum de gheata.
+	var ice_top := SurfaceTool.new()
+	ice_top.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var has_ice := not _ice_ranges().is_empty()
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
 	# UV-uri PATRATE: acelasi numar de metri pe ambele axe.
@@ -3789,6 +3980,8 @@ func _build_road() -> void:
 		# Aici se rupe pista in doua si incepe saritura.
 		if _road_gap(i):
 			continue
+		var on_ice := has_ice and _road_ice(i, j)
+		var dst := ice_top if on_ice else top
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
@@ -3853,20 +4046,25 @@ func _build_road() -> void:
 				w0b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet0
 			var c1b := _road_shade(cb, road_dark, _road_snow_weight(
 				w1b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet1
+			if on_ice:
+				# Gheata n-are uzura de margine si nici petice: culoarea vine
+				# toata din material (vezi `_ice_road_material`).
+				c0 = Color.WHITE; c1 = Color.WHITE
+				c0b = Color.WHITE; c1b = Color.WHITE
 			# Ordinea l0,l1,r0: fata triunghiului iese IN SUS (vezi istoricul
 			# winding-ului — cu ordinea inversa normalele ieseau in jos).
-			top.set_color(c0); top.set_uv(Vector2(ua, v0)); top.set_uv2(m0)
-			top.add_vertex(w0)
-			top.set_color(c1); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
-			top.add_vertex(w1)
-			top.set_color(c0b); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
-			top.add_vertex(w0b)
-			top.set_color(c0b); top.set_uv(Vector2(ub, v0)); top.set_uv2(m0b)
-			top.add_vertex(w0b)
-			top.set_color(c1); top.set_uv(Vector2(ua, v1)); top.set_uv2(m1)
-			top.add_vertex(w1)
-			top.set_color(c1b); top.set_uv(Vector2(ub, v1)); top.set_uv2(m1b)
-			top.add_vertex(w1b)
+			dst.set_color(c0); dst.set_uv(Vector2(ua, v0)); dst.set_uv2(m0)
+			dst.add_vertex(w0)
+			dst.set_color(c1); dst.set_uv(Vector2(ua, v1)); dst.set_uv2(m1)
+			dst.add_vertex(w1)
+			dst.set_color(c0b); dst.set_uv(Vector2(ub, v0)); dst.set_uv2(m0b)
+			dst.add_vertex(w0b)
+			dst.set_color(c0b); dst.set_uv(Vector2(ub, v0)); dst.set_uv2(m0b)
+			dst.add_vertex(w0b)
+			dst.set_color(c1); dst.set_uv(Vector2(ua, v1)); dst.set_uv2(m1)
+			dst.add_vertex(w1)
+			dst.set_color(c1b); dst.set_uv(Vector2(ub, v1)); dst.set_uv2(m1b)
+			dst.add_vertex(w1b)
 		# Fasia plata de coliziune (geometria veche, 2 vertecsi transversal).
 		var l0 := baked[i] - s0v * hw0
 		var r0 := baked[i] + s0v * hw0
@@ -3877,6 +4075,8 @@ func _build_road() -> void:
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
 		var skirt := deck_sides if _bridge_mix(i) > 0.5 else sides
+		if on_ice:
+			skirt = ice_top
 		skirt.set_uv(Vector2(u0, 0)); skirt.add_vertex(l0)
 		skirt.set_uv(Vector2(u1, 0)); skirt.add_vertex(l1)
 		skirt.set_uv(Vector2(u0, 1)); skirt.add_vertex(l0 + down)
@@ -3975,6 +4175,16 @@ func _build_road() -> void:
 		_tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro))
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
+	if has_ice:
+		ice_top.index()
+		ice_top.generate_normals()
+		var ice_mesh := ice_top.commit()
+		if ice_mesh != null and ice_mesh.get_surface_count() > 0:
+			var inst := MeshInstance3D.new()
+			inst.name = "IceRoad"
+			inst.mesh = ice_mesh
+			inst.material_override = _ice_road_material()
+			add_child(inst)
 	if not _channels.is_empty():
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
@@ -4136,7 +4346,7 @@ func _build_walls() -> void:
 			var j := (i + 1) % n
 			if _near_junction(i, junctions, n):
 				continue
-			if _road_gap(i):
+			if _road_gap(i) or _road_ice(i):
 				continue # buza golului: dincolo de ea nu mai e pe ce sa stea
 			var b0 := baked[i] + _side_at(i) * width_at_index(i) * side_sign
 			var b1 := baked[j] + _side_at(j) * width_at_index(j) * side_sign
@@ -5257,7 +5467,7 @@ func _build_shoulders() -> void:
 		# Pe pod nu exista umar de pietris: sub el nu e nisip, e apa. Latimea se
 		# stinge treptat pe malul canalului in loc sa se taie brusc, altfel banda
 		# s-ar termina cu o buza vizibila exact unde incepe structura.
-		if _road_gap(i, j):
+		if _road_gap(i, j) or _road_ice(i, j):
 			continue
 		var bridge := maxf(_bridge_mix(i), _bridge_mix(j))
 		var s0 := _side_at(i)
@@ -5494,7 +5704,7 @@ func _build_tire_marks() -> void:
 		var j := (i + 1) % n
 		if alpha[i] <= 0.0 and alpha[j] <= 0.0:
 			continue
-		if _road_gap(i, j):
+		if _road_gap(i, j) or _road_ice(i, j):
 			continue
 		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
 		var lane0 := -offset_sign[i] * width_at_index(i) * 0.35
@@ -5620,7 +5830,7 @@ func _build_kerbs() -> void:
 		if before.angle_to(after) < 0.08:
 			continue
 		var j := (i + 2) % n
-		if _road_gap(i, j):
+		if _road_gap(i, j) or _road_ice(i, j):
 			continue
 		var v0 := _dists[i] / KERB_TILE
 		var v1 := _dists[mini(i + 2, n)] / KERB_TILE
@@ -5682,6 +5892,10 @@ func _build_world_decor() -> void:
 	TrackDecor.set_rock_tint(rock_tint as Color if rock_tint != null
 		else Color.WHITE)
 	TrackDecor.set_rock_class(String(theme_flag("rock_class", "")))
+	# Pe gheata nu se pune decor de margine (vezi TrackDecor.set_frac_veto);
+	# Callable gol pe pistele fara gheata, deci nimic nu se schimba acolo.
+	TrackDecor.set_frac_veto(Callable(self, "is_ice_at")
+		if not _ice_ranges().is_empty() else Callable())
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert"),
@@ -6368,6 +6582,92 @@ const _MARKER_PICKS := [
 ]
 
 
+## Betele cu stegulete ale DRUMULUI DE GHEATA (`_ice_ranges`).
+##
+## Pe gheata nu exista asfalt, borduri sau gard: culoarul e marcat cu bete de
+## lemn infipte in gheata la ~20 m, cu un stegulet rosu in varf — asa arata
+## un drum de iarna pe Baikal, si asa citeste jucatorul unde e „soseaua" pe o
+## placa turcoaz fara margini. Steguletele flutura toate in ACEEASI directie —
+## cea a vantului din tema — deci sunt si o informatie de gameplay: vezi de
+## unde bate inainte sa te loveasca.
+##
+## Doua mesh-uri (lemn + rosu), fara coliziune: un bat de 6 cm nu e un
+## obstacol, e un reper. Nimic pe pistele fara gheata.
+const ICE_FLAG_SPACING_M: float = 20.0
+
+func _build_ice_flags() -> void:
+	if _ice_ranges().is_empty() or baked.is_empty():
+		return
+	var wood := SurfaceTool.new()
+	wood.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var cloth := SurfaceTool.new()
+	cloth.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var wind_v: Variant = theme_flag("wind", null)
+	var flutter := Vector3(1, 0, 0)
+	if wind_v != null and (wind_v as Vector3).length() > 0.01:
+		flutter = (wind_v as Vector3)
+		flutter.y = 0.0
+		flutter = flutter.normalized()
+	var n := baked.size()
+	var total := _dists[n]
+	var d := 0.0
+	var idx := 0
+	var count := 0
+	while d < total:
+		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
+			idx += 1
+		var i := idx % n
+		if not is_ice_at(frac_at(i)) or _road_gap(i):
+			d += ICE_FLAG_SPACING_M
+			continue
+		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
+		var side := _side_at(i)
+		var on_axis := baked[i] + dir * (d - _dists[i])
+		for sgn: float in [-1.0, 1.0]:
+			var base := on_axis + side * (width_at_index(i) + 1.3) * sgn
+			base.y -= 0.12 # infipt in placa, nu plutind la cota drumului
+			_emit_ice_flag(wood, cloth, base, side, flutter)
+			count += 1
+		d += ICE_FLAG_SPACING_M
+	if count == 0:
+		return
+	wood.generate_normals()
+	cloth.generate_normals()
+	var w := MeshInstance3D.new()
+	w.name = "IceFlagSticks"
+	w.mesh = wood.commit()
+	w.material_override = _flat_material(Palette.color(Palette.WOOD_WEATHERED))
+	add_child(w)
+	var c := MeshInstance3D.new()
+	c.name = "IceFlags"
+	c.mesh = cloth.commit()
+	c.material_override = _flat_material(Palette.color(Palette.KERB_RED))
+	add_child(c)
+
+
+func _emit_ice_flag(wood: SurfaceTool, cloth: SurfaceTool, base: Vector3,
+		side: Vector3, flutter: Vector3) -> void:
+	const H := 1.45
+	const R := 0.035
+	# Batul: prisma cu 4 fete (fara capace — nu se vad).
+	var ax := side * R
+	var az := side.cross(Vector3.UP).normalized() * R
+	var top := base + Vector3.UP * H
+	var corners := [base + ax + az, base - ax + az, base - ax - az, base + ax - az]
+	for k in 4:
+		var a: Vector3 = corners[k]
+		var b: Vector3 = corners[(k + 1) % 4]
+		var au := a + Vector3.UP * H
+		var bu := b + Vector3.UP * H
+		wood.add_vertex(a); wood.add_vertex(b); wood.add_vertex(au)
+		wood.add_vertex(au); wood.add_vertex(b); wood.add_vertex(bu)
+	# Steguletul: triunghi care pleaca din varf pe directia vantului.
+	var tip := top + flutter * 0.42
+	var low := top - Vector3.UP * 0.26
+	cloth.add_vertex(top); cloth.add_vertex(tip); cloth.add_vertex(low)
+	cloth.add_vertex(top); cloth.add_vertex(low); cloth.add_vertex(tip)
+
+
 func _build_markers() -> void:
 	if not ResourceLoader.exists("res://assets/models/signs/marker_post.glb"):
 		return
@@ -6388,7 +6688,7 @@ func _build_markers() -> void:
 				Vector2(edge.x, edge.z), loop_poly)
 			if exterior or edge.y > 1.0:
 				continue # acolo sunt pereti; stalpii marcheaza doar golurile
-			if _road_gap(i) or _bridge_mix(i) > 0.05:
+			if _road_gap(i) or _road_ice(i) or _bridge_mix(i) > 0.05:
 				continue # pe pod: parapetul tine locul popicilor
 			var model := _extract_glb_node(scene, _marker_variant(rng))
 			if model == null:
@@ -6996,6 +7296,60 @@ func is_wet_at(frac: float) -> bool:
 		elif f >= seg.x or f <= seg.y:
 			return true
 	return false
+
+
+## Portiunile de GHEATA de pe traseul principal: (frac_start, frac_end).
+##
+## Sora udului (`_wet_ranges`), cu doua diferente care conteaza amandoua:
+##
+## 1. Grip-ul e MULT mai jos (vezi `ice_grip`, ~1.5 fata de 3.6 la ud): pe ud
+##    aluneci dar tii linia; pe gheata drift-ul devine modul principal de
+##    condus, nu unealta de viraj. Asta e chiar promisiunea pistei Baikal
+##    (docs/track_briefs/baikal.md §0).
+## 2. Nu e o STARE a asfaltului, e ALTA SUPRAFATA: pe interval soseaua se
+##    construieste ca banda de gheata (material propriu, fara linie de mijloc,
+##    borduri, umeri sau urme de cauciuc — vezi `_road_ice`), iar culoarul
+##    e marcat cu bete cu stegulete, ca un drum de gheata adevarat.
+##
+## Un interval poate trece peste linia de start, ca la ud.
+func _ice_ranges() -> Array[Vector2]:
+	return []
+
+
+## Cat de alunecoasa e gheata pe pista asta. Reper: asfalt 8, ud 3.6, drift 2.
+## In tema, ca si `wet_grip`; 0 = implicitul din Car.SLIP_GRIP_ICE.
+func ice_grip() -> float:
+	return float(theme_flag("ice_grip", 0.0))
+
+
+func is_ice_at(frac: float) -> bool:
+	var f := fposmod(frac, 1.0)
+	for seg in _ice_ranges():
+		if seg.x <= seg.y:
+			if f >= seg.x and f <= seg.y:
+				return true
+		elif f >= seg.x or f <= seg.y:
+			return true
+	return false
+
+
+## VANTUL: acceleratie (m/s^2) aplicata masinii la fractia data.
+##
+## Vine din tema (`wind`, un Vector3 in coordonate de lume) si sufla doar pe
+## portiunile de gheata — pe mal il opresc casele, padurea, faleza. Rafalele
+## sunt un zgomot lent peste valoarea de baza (`wind_gust`, fractie 0..1), cu
+## FAZA din pozitia pe tur, ca doua masini din acelasi loc sa simta aceeasi
+## rafala. Zero pe orice pista fara vant declarat, deci nimic nu se schimba.
+func wind_at(frac: float, time_s: float) -> Vector3:
+	var base: Variant = theme_flag("wind", null)
+	if base == null or not is_ice_at(frac):
+		return Vector3.ZERO
+	var w: Vector3 = base
+	var gust := float(theme_flag("wind_gust", 0.0))
+	if gust > 0.0:
+		var g := sin(time_s * 0.7 + frac * 40.0) * 0.6 			+ sin(time_s * 1.9 + frac * 13.0) * 0.4
+		w *= 1.0 + gust * g
+	return w
 
 
 ## Punctul de pe axa benzii. Inlocuieste accesul direct la `baked[i]` din codul

@@ -22,7 +22,9 @@ mereu din ele — deci poti da Regenerate oricand, fara sa strici nimic.
    **Path** cu un circuit de pornire — ai de unde sa tragi.
 5. Pe nodul radacina, in Inspector, seteaza:
    - `custom_name` — numele pistei (apare in meniu si da samanta lumii);
-   - `custom_theme` — `forest`, `desert` sau `island`;
+   - `custom_theme` — `forest`, `desert`, `island` sau `baikal` (lac
+     inghetat: marea e o placa de gheata pe care se calca, zapada peste tot pe
+     uscat, soare jos; se combina cu `custom_ice_ranges`, vezi sectiunea 5);
    - `custom_half_width` — JUMATATEA latimii soselei, in metri
      (7 = standard; mai ingust = tehnic, mai lat = vitezomanie).
 
@@ -273,7 +275,14 @@ intrare e un **Vector4 (frac_start, frac_end, adancime_m, latura)**:
 - rapa incepe la cativa metri de asfalt, ca sa nu-ti apara groapa sub roti.
 
 Ca sa afli fractia unui loc: ruleaza ProbeLayout (vezi mai sus) sau numara pe
-ochi — fractia creste uniform cu distanta parcursa pe tur.
+ochi — fractia creste uniform cu distanta parcursa pe tur. Mai exact, sonda
+care tipareste fractia FIECARUI punct de control din nodul Path (plus cota
+terenului la 20/50/90 m stanga-dreapta, ca sa vezi daca rapa/muntele au ajuns
+acolo, si media cotelor drumului, de care depinde `custom_sea_level_offset`):
+
+```
+godot --headless --fixed-fps 60 --path . res://tools/ProbePathFracs.tscn -- --track=N
+```
 
 ---
 
@@ -376,6 +385,8 @@ curba coapta. Cifra care conteaza e cea tiparita de sonde.
 | `custom_hose_fracs` | conducta sparta care pulseaza apa |
 | `custom_wet_ranges` | portiuni UDE de sosea: **interval** (frac_start, frac_end) |
 | `custom_wave_fracs` | val care spala soseaua (**cere o tema cu mare**) |
+| `custom_ice_ranges` | portiuni de GHEATA pe traseu: **interval** (frac_start, frac_end) — alta suprafata, nu asfalt ud: grip ~1.5 (drift-ul devine modul de condus), banda proprie fara borduri/linie/umeri, bete cu stegulete, vantul temei sufla doar aici (tema `baikal`) |
+| `custom_cornice_ravines` | care dintre `custom_ravines` sunt CORNISE (indici): buza la 0.5 m de asfalt — drum de munte, viaduct — nu vale lina de fly-off |
 
 Decor asezat de mana (o stanca exact ACOLO): adauga orice scena din
 `assets/models/` ca nod copil, pozitioneaz-o si salveaz-o — supravietuieste

@@ -85,6 +85,21 @@ const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 ## Lipit de teren (tractor, animal) sau pe cota curbei (barca pe linia apei).
 @export var stick_to_ground: bool = true
 
+@export_group("Suflu")
+## Raza (m) in care figurantul IMPINGE masinile din jur — hovercraftul de pe
+## Baikal (docs/track_briefs/baikal.md §3): jetul elicei si perna de aer
+## arunca zapada si masinile deoparte. 0 = figurant obisnuit, nu impinge.
+##
+## Nu e o coliziune (aia exista oricum, pe corp): e o zona in jurul corpului
+## in care masinile primesc o acceleratie DINSPRE figurant, care scade liniar
+## cu distanta. Pe gheata, cu grip 1.5, iti muta linia; pe asfalt abia se
+## simte — asa trebuie: hazardul e al lacului, nu al pistei.
+@export_range(0.0, 20.0, 0.5) var push_radius: float = 0.0
+## Acceleratia la contact (m/s^2), scade la zero la marginea razei.
+@export_range(0.0, 40.0, 0.5) var push_accel: float = 12.0
+## Jetul de zapada din spate (particule), aprins cat timp se misca.
+@export var plume: bool = false
+
 @export_group("Leganare")
 ## Miscarea CORPULUI pe traiectorie e rigida; astea doua dau viata modelului:
 ## saltare pe verticala (barca pe valuri) si ruliu in jurul axei de mers
@@ -96,6 +111,8 @@ const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 
 var _body: AnimatableBody3D
 var _pivot: Node3D
+var _push_area: Area3D
+var _plume: CPUParticles3D
 var _pivot_rest_y: float = 0.0
 var _dist: float = 0.0
 var _dir: float = 1.0
@@ -147,6 +164,48 @@ func _build_body() -> void:
 		_build_model()
 	else:
 		_build_placeholder()
+	if push_radius > 0.0:
+		_build_push()
+
+
+## Zona de suflu + jetul de zapada. Vezi `push_radius`.
+func _build_push() -> void:
+	_push_area = Area3D.new()
+	_push_area.name = "Push"
+	_push_area.monitoring = true
+	_push_area.monitorable = false
+	var shape := CollisionShape3D.new()
+	var sph := SphereShape3D.new()
+	sph.radius = push_radius
+	shape.shape = sph
+	shape.position = Vector3.UP * 1.0
+	_push_area.add_child(shape)
+	_body.add_child(_push_area)
+	if not plume:
+		return
+	# Jetul: fulgi de zapada aruncati in spate (+Z local = spatele, modelul
+	# merge cu -Z inainte), putin in sus, cu gravitatie mica. Cutii mici
+	# nemodulate de lumina, ca stropii furtunului — acelasi tipar ieftin.
+	_plume = CPUParticles3D.new()
+	_plume.name = "Plume"
+	_plume.position = Vector3(0.0, 1.2, 2.5)
+	_plume.direction = Vector3(0, 0.35, 1)
+	_plume.spread = 22.0
+	_plume.initial_velocity_min = 9.0
+	_plume.initial_velocity_max = 14.0
+	_plume.gravity = Vector3(0, -3.0, 0)
+	_plume.amount = 60
+	_plume.lifetime = 1.3
+	_plume.emitting = false
+	var flake := BoxMesh.new()
+	flake.size = Vector3(0.28, 0.28, 0.28)
+	var flake_mat := StandardMaterial3D.new()
+	flake_mat.vertex_color_use_as_albedo = true
+	flake_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flake.material = flake_mat
+	_plume.mesh = flake
+	_plume.color = Color(0.94, 0.97, 1.0)
+	_pivot.add_child(_plume)
 
 
 func _build_model() -> void:
@@ -290,6 +349,29 @@ func _physics_process(delta: float) -> void:
 	# pozitia singura sau transformul intreg merg, perechea de scrieri nu.
 	_body.global_transform = Transform3D(Basis(Vector3.UP, _yaw), pos)
 	_apply_sway()
+	_apply_push()
+
+
+## Impinge masinile din raza de suflu, dinspre corp spre ele. Doar cu rotile
+## pe sol e treaba masinii sa decida (apply_central_force nu are efect vizibil
+## in aer oricum, si un hovercraft nu zboara masini).
+func _apply_push() -> void:
+	if _push_area == null or Engine.is_editor_hint():
+		return
+	if _plume != null:
+		_plume.emitting = speed > 0.5
+	var origin := _body.global_position
+	for b in _push_area.get_overlapping_bodies():
+		var car := b as Car
+		if car == null:
+			continue
+		var away := car.global_position - origin
+		away.y = 0.0
+		var d := away.length()
+		if d < 0.3 or d > push_radius:
+			continue
+		var k := 1.0 - d / push_radius
+		car.apply_central_force(away / d * push_accel * k * car.mass)
 
 
 func _advance(delta: float, length: float) -> void:

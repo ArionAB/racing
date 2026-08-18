@@ -101,8 +101,51 @@ func _ready() -> void:
 	print("5. derapaj (volan la maxim 1.2 s de la 30 m/s): gheata %.1f°, asfalt %.1f°  %s" % [
 		slip_ice, slip_land, "OK" if ok5 else "PROBLEMA (nu se simte diferenta)"])
 
+	# 6. suflul hovercraftului (PathMover.push_radius): un figurant parcat pe
+	# gheata impinge masina de langa el dinspre el; unul fara suflu, nu.
+	var i6: int = int(f_ice * float(n)) % n
+	var origin: Vector3 = track.baked[i6]
+	var side6: Vector3 = track._side_at(i6)
+	var pushed := await _push_test(track, car, origin, side6, 9.0)
+	var still := await _push_test(track, car, origin, side6, 0.0)
+	var ok6 := pushed > 1.0 and still < 0.3
+	failed = failed or not ok6
+	print("6. suflu (PathMover.push_radius): cu suflu masina pleaca %.2f m/s, fara %.2f  %s" % [
+		pushed, still, "OK" if ok6 else "PROBLEMA"])
+
 	print("VERDICT: ", "OK" if not failed else "PROBLEME")
 	get_tree().quit(1 if failed else 0)
+
+
+## Un PathMover parcat la `origin` cu raza de suflu data; masina la 4 m lateral,
+## libera. Intoarce viteza masinii dinspre figurant dupa 1 s.
+func _push_test(track: Track, car: Car, origin: Vector3, side: Vector3,
+		radius: float) -> float:
+	var mover := PathMover.new()
+	mover.push_radius = radius
+	mover.push_accel = 14.0
+	mover.speed = 0.0
+	mover.stick_to_ground = false
+	var c := Curve3D.new()
+	c.add_point(Vector3.ZERO)
+	c.add_point(Vector3(0, 0, 5))
+	mover.curve = c
+	mover.position = origin + Vector3.UP * 0.1
+	track.add_child(mover)
+	car.freeze = false
+	car.global_transform = Transform3D(Basis.IDENTITY, origin + side * 4.0 + Vector3.UP * 0.5)
+	car.velocity = Vector3.ZERO
+	car.angular_velocity = Vector3.ZERO
+	car.controller = null
+	car.race_active = false
+	for k in 60:
+		await get_tree().physics_frame
+	var v := car.velocity
+	v.y = 0.0
+	var out := v.dot(side)
+	mover.queue_free()
+	await get_tree().process_frame
+	return out
 
 
 ## Aseaza masina pe axa la fractia data, cu 30 m/s inainte, si tine volanul la

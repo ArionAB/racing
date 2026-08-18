@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="3_mover"]
+[ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="4_hz"]
 
 [sub_resource type="Curve3D" id="Curve3D_baikal"]
 _data = {
@@ -9,6 +11,13 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 26
+
+[sub_resource type="Curve3D" id="Curve3D_hover"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 330, 0.1, 300, 0, 0, 0, 0, 0, 0, 470, 0.1, 260, 0, 0, 0, 0, 0, 0, 640, 0.1, 150, 0, 0, 0, 0, 0, 0, 680, 0.1, -20, 0, 0, 0, 0, 0, 0, 560, 0.1, -200, 0, 0, 0, 0, 0, 0, 430, 0.1, -240, 0, 0, 0, 0, 0, 0, 330, 0.1, 300),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 7
 
 [node name="Track10" type="Node3D"]
 script = ExtResource("1_track")
@@ -55,3 +64,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 598, 9, 38)
 gizmo_extents = 24.0
 script = ExtResource("2_peak")
 radius_m = 24.0
+
+[node name="HovercraftLarg" type="Path3D" parent="."]
+curve = SubResource("Curve3D_hover")
+script = ExtResource("3_mover")
+speed = 22.0
+stick_to_ground = false
+push_radius = 9.0
+push_accel = 14.0
+plume = true
+bob_amplitude = 0.06
+sway_frequency = 1.4
+metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="Traversari" type="Node3D" parent="."]
+
+[node name="HovercraftTraversare" type="Marker3D" parent="Traversari"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435, 0.1, 166)
+gizmo_extents = 3.0
+script = ExtResource("4_hz")
+motion = 1
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="SaniaPescarului" type="Marker3D" parent="Traversari"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 537, 0.1, -94)
+gizmo_extents = 3.0
+script = ExtResource("4_hz")
+motion = 1
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"

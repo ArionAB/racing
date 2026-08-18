@@ -663,10 +663,17 @@ fie gimmick de cursa. Traiectoria o desenezi tu, exact ca traseul.
      intoarcerea la capete e lina, ca o manevra, nu un snap);
    - `phase` — de unde porneste pe curba (0..1): doi figuranti pe aceeasi
      bucla cu faze diferite nu merg lipiti unul de altul;
-5. Grupul **Leganare** (pe pivotul vizual, nu pe coliziune): `bob_amplitude`
+5. Grupul **Suflu** (hovercraftul de pe Baikal): `push_radius` — raza (m) in
+   care figurantul IMPINGE masinile dinspre el (acceleratie `push_accel`, scade
+   liniar cu distanta; 0 = nu impinge); `plume` — jet de zapada in spate cat
+   timp se misca. Nu inlocuieste coliziunea, o completeaza: pe gheata iti muta
+   linia, pe asfalt abia se simte. Un figurant care trece RAR prin culoar nu e
+   hazard — pentru „traverseaza cand vii" foloseste HazardMarker cu `motion =
+   Traversare` (5d); suflul e pentru cel care se plimba pe larg.
+6. Grupul **Leganare** (pe pivotul vizual, nu pe coliziune): `bob_amplitude`
    = saltare pe verticala (barca pe valuri), `rock_amplitude` = ruliu in jurul
    axei de mers (tractor pe drum de tara), `sway_frequency` = ritmul.
-6. **Salveaza scena.** Nodul e al tau, deci supravietuieste la Regenerate, ca
+7. **Salveaza scena.** Nodul e al tau, deci supravietuieste la Regenerate, ca
    orice decor manual.
 
 ### Ce stie singur

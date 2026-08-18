@@ -23,7 +23,7 @@ extends Track
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 
 @export var custom_name: String = "Pista noua"
-@export_enum("forest", "desert", "island") var custom_theme: String = "forest"
+@export_enum("forest", "desert", "island", "baikal") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
 ## Cota marii, RELATIV la media cotelor soselei (doar tema "island").
 ## Vezi Track.sea_level_offset — nu e o cota absoluta in lume.
@@ -52,6 +52,11 @@ extends Track
 ## nu-ti dau o ruta alternativa, iti schimba linia pe drumul pe care oricum
 ## mergi. Un interval poate trece peste linia de start (ex. 0.95 -> 0.05).
 @export var custom_wet_ranges: Array[Vector2] = []
+## Portiuni de GHEATA pe traseul principal: intervale (frac_start, frac_end).
+## Alta suprafata, nu asfalt ud: grip mult mai jos (drift-ul devine modul de
+## condus), banda proprie fara borduri/linie/umeri, culoar marcat cu bete cu
+## stegulete, si vantul temei sufla doar aici. Vezi Track._ice_ranges.
+@export var custom_ice_ranges: Array[Vector2] = []
 ## Intrari de mina lipite de perete: fiecare Vector2 = (fractie, parte ±1).
 @export var custom_mine_spots: Array[Vector2] = []
 ## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
@@ -70,6 +75,10 @@ extends Track
 ## Terenul urmareste soseaua peste tot; aici il sapam inapoi, ca sa existe unde
 ## sa cazi. Fara o rapa sub un fly-off, zbori si aterizezi linistit pe nisip.
 @export var custom_ravines: Array[Vector4] = []
+## Care dintre rapele de mai sus sunt CORNISE (indici in `custom_ravines`):
+## buza cade la jumatate de metru de asfalt, ca pe un drum de munte sau pe un
+## viaduct — nu valea lina de sub un fly-off. Vezi Track._cornice_ravines.
+@export var custom_cornice_ravines: Array[int] = []
 ## Bolovani care cad de pe faleza.
 @export var custom_rockfall_fracs: Array[float] = []
 ## Treceri de cale ferata. Trenul ucide la contact si te repune.
@@ -114,6 +123,9 @@ func _gorge_ranges() -> Array[Vector2]:
 func _wet_ranges() -> Array[Vector2]:
 	return custom_wet_ranges
 
+func _ice_ranges() -> Array[Vector2]:
+	return custom_ice_ranges
+
 func _wave_fracs() -> Array[float]:
 	return custom_wave_fracs
 
@@ -134,6 +146,9 @@ func _landmark_spots() -> Array[Vector3]:
 
 func _ravines() -> Array[Vector4]:
 	return custom_ravines
+
+func _cornice_ravines() -> Array[int]:
+	return custom_cornice_ravines
 
 func _rockfall_fracs() -> Array[float]:
 	return custom_rockfall_fracs

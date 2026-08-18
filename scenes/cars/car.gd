@@ -61,6 +61,10 @@ const SLIP_GRIP_PUDDLE: float = 0.8
 ## Aderenta pe o suprafata uda pe care se CONDUCE, nu prin care se trece.
 ## Intre drift (2.0) si asfalt (7-10): simti ca aluneca, dar poti tine linia.
 const SLIP_GRIP_WET: float = 3.6
+## Aderenta pe GHEATA (drumul de gheata al Baikalului): sub drift. Aici drift-ul
+## nu mai e unealta de viraj, e modul de condus. Tema poate suprascrie prin
+## Track.ice_grip(); asta e implicitul.
+const SLIP_GRIP_ICE: float = 1.5
 @export var drift_steer_bonus: float = 1.5
 @export var drift_bias: float = 0.4
 @export var drift_min_speed: float = 9.0
@@ -182,6 +186,9 @@ var slip_time: float = 0.0 # aquaplanare (setata de WaterHazard sau de o banda u
 ## AI-ul de la 2.5 la 1.6 tururi, cu 27% din timp in apa. Acum intensitatea vine
 ## de la cel care cere alunecarea.
 var slip_grip: float = SLIP_GRIP_PUDDLE
+## Ceasul rafalelor de vant (vezi Track.wind_at) — acumulat din delta, nu din
+## ceasul de perete, ca sondele cu --fixed-fps sa fie deterministe.
+var _wind_time: float = 0.0
 ## Strivit: cat mai tine penalizarea, si cat de tare taie din viteza.
 ##
 ## Oglindeste slip_time in loc sa inventeze un al doilea mecanism. NU exista
@@ -394,10 +401,27 @@ func _physics_process(delta: float) -> void:
 		# un drum de munte decat pe un dig batut de valuri. Fara declaratie,
 		# ramane implicitul masinii, deci nimic nu se schimba pe pistele actuale.
 		var wet_route := track.route_is_wet(route)
-		var wet_here := route == 0 and track.is_wet_at(track.frac_at(road_index))
-		if wet_route or wet_here:
+		var frac_here := track.frac_at(road_index)
+		var wet_here := route == 0 and track.is_wet_at(frac_here)
+		# GHEATA (Baikal): acelasi mecanism, alt grip — mult sub ud. Se
+		# verifica INAINTEA udului: pe un interval care e si ud si gheata,
+		# gheata castiga (e suprafata, udul e o stare).
+		var ice_here := route == 0 and track.is_ice_at(frac_here)
+		if ice_here:
+			var gi := track.ice_grip()
+			apply_slip(gi if gi > 0.0 else SLIP_GRIP_ICE)
+		elif wet_route or wet_here:
 			var g := track.wet_grip()
 			apply_slip(g if g > 0.0 else SLIP_GRIP_WET)
+		# VANTUL temei (doar pe gheata, vezi Track.wind_at): forta centrala,
+		# proportionala cu masa — toate masinile deriveaza la fel, dar cea
+		# grea o simte in acelasi mod ca pe cea usoara (e o acceleratie). Doar
+		# cu rotile pe sol: in aer vantul ar fi inca un mecanism de zbor.
+		_wind_time += delta
+		if wheels_on_ground > 0:
+			var wind := track.wind_at(frac_here, _wind_time)
+			if wind != Vector3.ZERO:
+				apply_central_force(wind * mass)
 
 	# Pe grila de start corpul e INGHETAT (freeze, prin on_start_grid), deci
 	# gravitatia nu curge si nimeni nu aluneca la vale in countdown — bug-ul

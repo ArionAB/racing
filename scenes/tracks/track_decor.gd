@@ -292,6 +292,10 @@ static func _allowed(spec: TrackDecorSpec, band: Dictionary) -> bool:
 	# Un cactus plutind peste prapastie ar strica exact efectul.
 	if spec.is_ravine:
 		return false
+	# Veto-ul pistei pe fractie (vezi set_frac_veto): pe drumul de gheata al
+	# Baikalului nu cresc pini pe placa.
+	if _frac_veto.is_valid() and bool(_frac_veto.call(spec.frac)):
+		return false
 	if spec.is_braking:
 		# 8m liberi in zonele de franare (style_bible §7).
 		if band["name"] == "hug":
@@ -1300,6 +1304,16 @@ static func _add_canyon_rock(parent: Node3D, pos: Vector3,
 ## StandardMaterial3D nu declara uniforma aia, iar apelul e ignorat in tacere,
 ## adica exact soiul de "reparatie" care trece de o sonda care numara instante
 ## si pica pe o captura de ecran.
+## Veto pe FRACTIE: `Callable(frac) -> bool`, true = nu se pune nimic acolo.
+## Setat de Track inainte de build (ca nuanta de roca), gol pe pistele fara
+## nevoie. Rostul: portiuni de traseu unde benzile statistice n-au ce cauta —
+## drumul de gheata (decorul ar sta pe placa, la larg) — fara sa stie samplerul
+## de ele si fara sa carre inca un parametru prin toate semnaturile.
+static var _frac_veto: Callable = Callable()
+
+static func set_frac_veto(veto: Callable) -> void:
+	_frac_veto = veto
+
 static var _rock_tint: Color = Color.WHITE
 ## Clasa de textura a stancilor lumii curente. Gol = `rock` (gresia de canion)
 ## plus eventuala nuanta. Cand e setata, ea BATE nuanta: o piatra care chiar e

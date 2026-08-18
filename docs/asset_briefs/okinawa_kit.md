@@ -39,13 +39,19 @@ declarate.
 | `beach_clutter.glb` | `Fishing_Crate`, `Net_Floats`, `Awamori_Pot`, `Bamboo_Rack`, `Driftwood_Log` | 0.19 – 1.37 m | 3594 | #105 |
 | `horizon_island.glb` | `Island_Low`, `Island_Peak`, `Island_Ridge` | 6.6 – 26.0 m | 750 | #105 |
 | `wave_surge.glb` | `Wave`, `Wave_Foam`, `Wave_Spray` | 3.00 m / 30 m lungime | 2806 | #105, #106 |
-| `sea_turtle.glb` | `Sea_Turtle` | 3.60 m lungime / 3.63 m latime | 1090 | — |
+| `sea_turtle.glb` | `Sea_Turtle` (armatura, 7 oase) + `Sea_Turtle_Mesh` | 3.60 m lungime / 3.63 m latime | 1090 | — |
 
 > Testoasa e `hazard_model` pe Okinawa manual, in locul barcii sabani: bariera
 > mobila de la fractia 0.256 sta la 90 m de apa, unde o barca „targ ita peste
 > causeway" nu mai avea nicio explicatie. E singura piesa din lot cu un
 > „inainte", deci pista o si roteste pe directia de maturare
 > (`hazard_face_travel`) — vezi antetul lui `scenes/tracks/track08.gd`.
+> Din august 2026 are SCHELET si doua animatii (`Walk` 1 s, `Idle` 2 s) — pe
+> PathMover aluneca cu lopetile teapene. Rig-ul e facut in cod (primul asset
+> animat construit de noi, nu importat): insulele Builder-ului devin oase,
+> greutatile curg la radacina lopetii, pozele se scriu in spatiul armaturii.
+> Vezi antetul lui `build_sea_turtle.py` si helperele din `dio_lib`
+> (`make_armature`, `weight_ramp`, `pose_rotate`, `stash_actions`).
 
 > Valul a fost RECONSTRUIT in august 2026, dupa playtest: era o bucata de 6 m pe
 > care pista o repeta de cinci ori ca sa acopere drumul, si din masina se vedeau

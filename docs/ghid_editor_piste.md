@@ -604,7 +604,9 @@ la pas **merge** (Walk), peste ~3 m/s **galopeaza** (Gallop) — deci aceeasi
 vaca paste pe acostament in Traversare si incetineste in capetele pendularii,
 fara nicio setare. Conventia numelor de animatii vine din
 `tools/blender/build_cow_animated.py`; un GLB fara schelet ramane rigid, ca
-pana acum. Verificare vizuala: `tools/ProbeCow.tscn`.
+pana acum. Verificare vizuala: `tools/ProbeCow.tscn`. Aceeasi conventie o
+respecta si testoasa de pe Okinawa (`Walk`/`Idle`, rig facut in cod in
+`build_sea_turtle.py`) — pe PathMover se anima singura.
 
 ---
 

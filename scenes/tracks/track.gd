@@ -4501,8 +4501,12 @@ func _build_ramp(frac: float) -> void:
 ## cadere scurta. La 30 m/s decolezi ~0.8 s; la 20 abia saltezi — deci
 ## rasplateste viteza fara sa opreasca pe nimeni. Textura de clasa `snow`
 ## (zapada suflata pe creasta), ca sa se citeasca de departe pe turcoaz.
-const HUMMOCK_RUN: float = 4.5
-const HUMMOCK_RISE: float = 0.9
+## 0.75 pe 5.5 m (~8 grade), NU 0.9 pe 4.5 (~11): cu panta mai abrupta,
+## masurat cu ProbeRace, autobuzul si pompierii (grele, inalte) faceau 2
+## repuneri fiecare si 20% din timp in afara culoarului — decolau, aterizau
+## strimb pe gheata si se invarteau. La 8 grade: 0 repuneri, 0% offroad.
+const HUMMOCK_RUN: float = 5.5
+const HUMMOCK_RISE: float = 0.75
 const HUMMOCK_DROP: float = 1.6
 
 func _build_hummock(frac: float) -> void:

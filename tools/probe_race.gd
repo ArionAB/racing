@@ -308,8 +308,14 @@ func _on_bumped(_car: Car, _other: Car, delta_v: float, index: int) -> void:
 	_stats[index].bump_peak = maxf(float(_stats[index].bump_peak), delta_v)
 
 
-func _on_respawn(_car: Car, index: int) -> void:
+func _on_respawn(car: Car, index: int) -> void:
 	_stats[index].respawns = int(_stats[index].respawns) + 1
+	# Unde a fost repusa: o repunere in acelasi loc, tur de tur, e o bucla
+	# (masina cade, e repusa fara elan, cade iar) — vezi CHANNEL_FALL_BACKOFF.
+	print("[repunere] t=%5.1fs  %-18s frac=%.3f  poz=(%.0f,%.0f,%.0f)" % [
+		_elapsed, _stats[index].name,
+		_race.track.frac_at(car.road_index, car.route),
+		car.global_position.x, car.global_position.y, car.global_position.z])
 
 
 func _on_wall(car: Car, impact: float, index: int) -> void:

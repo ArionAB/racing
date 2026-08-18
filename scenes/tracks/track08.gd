@@ -190,18 +190,12 @@ func _lagoon_points() -> Array[Vector2]:
 ## dintre castig si cost se gaseste la playtest — aici se fixeaza doar
 ## geometria.
 func _branch_specs() -> Array[Dictionary]:
-	return [{
-		"entry": 0.615,   # varful crestei
-		"exit": 0.735,    # coborarea de est, la +11 m
-		"half_width": 5.5,
-		"wet": true,
-		"label": "pragul de corali",
-		"points": [
-			Vector3(175, 23.6, -207),
-			Vector3(179, 19.2, -163),
-			Vector3(193, 14.8, -121),
-		],
-	}]
+	# Golit (aug 2026): scurtaturile se deseneaza DOAR de mana, ca noduri
+	# [TrackBranch] (Path3D) in scena. Specificatia veche ramane mai jos, ca reper.
+	# Era: entry 0.615 (varful crestei), exit 0.735 (coborarea de est, +11 m),
+	# half_width 5.5, wet true, label "pragul de corali", puncte
+	# (175, 23.6, -207), (179, 19.2, -163), (193, 14.8, -121).
+	return []
 
 
 ## Creasta de fly-off, pe coborarea de est.
@@ -278,7 +272,9 @@ func _ramp_fracs() -> Array[float]:
 ## exact acolo unde cineva care conduce din memorie a inceput deja sa se
 ## gandeasca la turul urmator.
 func _typhoon_fracs() -> Array[float]:
-	return [0.877]
+	# Golit (aug 2026): hazardele se pun DOAR de mana, ca noduri [HazardMarker]
+	# in scena. Fractia veche ramane in comentariul de mai sus, ca reper.
+	return [] # era [0.877]
 
 
 ## Bariera mobila pe coasta de vest, inainte de rampa.
@@ -288,7 +284,9 @@ func _typhoon_fracs() -> Array[float]:
 ## mijlocul drumului. O bariera care mica pe un drum unde n-ai pe unde s-o
 ## ocolesti nu e obstacol, e usa. La 0.256 drumul e drept si larg.
 func _hazard_fracs() -> Array[float]:
-	return [0.256]
+	# Golit (aug 2026): hazardele se pun DOAR de mana, ca noduri [HazardMarker]
+	# in scena. Fractia veche ramane in comentariul de mai sus, ca reper.
+	return [] # era [0.256]
 
 
 ## Satul din port (id 6 = village_house, texturi de clasa: olane, tencuiala,
@@ -343,7 +341,9 @@ func _hose_fracs() -> Array[float]:
 
 
 func _wave_fracs() -> Array[float]:
-	return [0.975] # aceeasi fractie pe care o avea furtunul
+	# Golit (aug 2026): hazardele se pun DOAR de mana, ca noduri [HazardMarker]
+	# in scena. Fractia veche ramane in comentariul de mai sus, ca reper.
+	return [] # era [0.975], aceeasi fractie pe care o avea furtunul
 
 
 ## ############################################################################
@@ -435,14 +435,13 @@ func _theme_overrides() -> Dictionary:
 func _scenography() -> Array[Dictionary]:
 	const M := "res://assets/models/"
 	var specs := _scenography_island()
-	# Decorul care a fost asezat cu mouse-ul, promovat piesa cu piesa (#201):
-	# aceleasi coordonate si orientari, dar y-ul se re-deriva din ground_y la
-	# fiecare rebuild si totul intra in bake-ul MultiMesh. DecorManual ramane
-	# in .tscn ca sketchpad GOL pentru compozitii noi. Preload, nu class_name:
-	# sondele headless ruleaza cu cache-ul de clase globale rece, si un nume
-	# global nedeclarat inca ar rupe parse-ul intregii piste.
-	specs.append_array(
-		preload("res://scenes/tracks/track08_manual_specs.gd").specs())
+	# Decorul asezat cu mouse-ul (dig de tetrapozi, port, urcarea de coasta,
+	# creasta, intoarcerea de sud-est) sta ca NODURI sub DecorManual in
+	# Track08.tscn, editabile in editor. A fost o vreme promovat aici ca specs
+	# "spot"/"world" (#201, track08_manual_specs.gd), dar decizia din aug 2026
+	# e: sketchpad-ul ramane sursa de adevar pe toata dezvoltarea, iar
+	# promovarea in cod (y re-derivat din ground_y, bake in MultiMesh) se face
+	# O DATA, la delivery. Pretul pana atunci: ~550 de desene in plus.
 	# Speciile pajistii, declarate O DATA: covorul e taiat in trei lanuri cu
 	# goluri intre ele (#209, ritmul plin/gol din style_bible §7) si toate
 	# trei trag din aceeasi lista. Speciile ieftine duc greul (smocuri,
@@ -609,7 +608,7 @@ func _scenography() -> Array[Dictionary]:
 		# ramanea gol si se vede din masina sunt exact incheieturile:
 		# capetele de zid care se termina brusc in gazon si trecerea
 		# dintre cele doua bucati de zid (x 40.8 -> 70.8). Pozitiile
-		# sunt DERIVATE din coordonatele zidurilor (track08_manual_specs,
+		# sunt DERIVATE din coordonatele zidurilor (Zone05_CoastalClimb din DecorManual,
 		# perpendiculara din yaw-ul segmentului, spre drum) — nu asezate
 		# cu mouse-ul, de aia stau aici si nu in fisierul regenerabil.
 		{"kind": "spot", "label": "Paturi_ziduri",

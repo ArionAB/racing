@@ -739,7 +739,7 @@ static func themes() -> Dictionary:
 			"frozen": true,
 			"seabed_drop": 12.0,
 			"ice_grip": 1.5,
-			"ice_road_tint": Color(0.60, 0.83, 0.86),
+			"ice_road_tint": Color(0.74, 0.90, 0.95),
 			"wind": Vector3(-2.2, 0.0, -2.2),
 			"wind_gust": 0.5,
 			"branch_tint": Color(0.86, 0.90, 0.94),
@@ -2948,9 +2948,11 @@ func _ice_color(d: float) -> Color:
 	# Terenul de langa drumul de gheata sta la ~15 cm sub placa (GROUND_DROP),
 	# deci aproape toata gheata pe care o vezi din masina are "adancime" mica —
 	# rampa trebuie sa ajunga la turcoaz repede, altfel lacul iese alb.
-	var shore := Color(0.90, 0.94, 0.95)
-	var thin := Color(0.66, 0.85, 0.88)
-	var deep := Color(0.40, 0.70, 0.76)
+	# Se INMULTESC cu textura de clasa (turcoaz mediu, cu crapaturi si bule),
+	# deci "alb" aici inseamna textura neatinsa, iar "adanc" o intuneca.
+	var shore := Color(1.0, 1.0, 1.0)
+	var thin := Color(0.92, 0.97, 0.98)
+	var deep := Color(0.62, 0.80, 0.84)
 	var c: Color
 	if d < 0.12:
 		c = shore.lerp(thin, clampf(d / 0.12, 0.0, 1.0))
@@ -2968,24 +2970,11 @@ var _ice_sheet_mat: StandardMaterial3D
 func _ice_sheet_material() -> StandardMaterial3D:
 	if _ice_sheet_mat != null:
 		return _ice_sheet_mat
-	_ice_sheet_mat = StandardMaterial3D.new()
-	_ice_sheet_mat.albedo_color = Color.WHITE
-	_ice_sheet_mat.vertex_color_use_as_albedo = true
 	# Luciu MIC: cu 0.28/0.75 soarele jos punea o pata alba cat jumatate de
 	# ecran pe placa (masurat pe snapshot la frac 0.30, si tot acolo cu
-	# 0.55/0.35). Gheata cu zapada suflata pe ea nu e oglinda; luciul de
-	# gheata curata il va da textura de clasa, cand va exista.
-	_ice_sheet_mat.roughness = 0.75
-	_ice_sheet_mat.metallic_specular = 0.2
+	# 0.55/0.35). Gheata cu zapada suflata pe ea nu e oglinda.
+	_ice_sheet_mat = _ice_class_material(Color.WHITE, 0.75, 0.2)
 	_ice_sheet_mat.cull_mode = BaseMaterial3D.CULL_BACK
-	var detail := _tex(Palette.DETAIL_PATH)
-	if detail != null:
-		_ice_sheet_mat.detail_enabled = true
-		_ice_sheet_mat.detail_albedo = detail
-		_ice_sheet_mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
-		_ice_sheet_mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_1
-		_ice_sheet_mat.uv1_triplanar = true
-		_ice_sheet_mat.uv1_scale = Vector3(0.2, 0.2, 0.2)
 	return _ice_sheet_mat
 
 
@@ -3069,14 +3058,42 @@ func _water_material() -> ShaderMaterial:
 ## batatorita de roti e mai lucioasa si mai deschisa decat placa de langa ea.
 ## Textura proprie de gheata (crapaturi, bule) e un pas urmator; aici e doar
 ## suprafata pe care se testeaza feelingul, si asta se vede din masina.
+var _ice_road_mat: StandardMaterial3D
+
 func _ice_road_material() -> StandardMaterial3D:
+	if _ice_road_mat != null:
+		return _ice_road_mat
 	var tint: Variant = theme_flag("ice_road_tint", null)
 	var c: Color = tint as Color if tint != null else Color(0.62, 0.84, 0.86)
+	# ACEEASI textura de clasa ca placa (`ice`, triplanar in spatiul lumii,
+	# aceeasi scara): crapaturile trec continuu de pe placa pe banda, deci
+	# banda se citeste ca o fasie CURATATA din aceeasi gheata, nu ca alt
+	# material lipit peste. Diferenta o face nuanta (mai deschisa) si luciul.
 	# Luciu moderat (0.5/0.4): la 0.3/0.7 soarele jos punea o pata alba pe
 	# banda la fiecare viraj catre el (snapshot la frac 0.37).
-	return _flat_material(c, _tex("res://assets/textures/surface_asphalt.png"),
-		0.5, 0.4, BaseMaterial3D.CULL_BACK,
-		_tex("res://assets/textures/surface_asphalt_macro.png"))
+	_ice_road_mat = _ice_class_material(c, 0.5, 0.4)
+	_ice_road_mat.cull_mode = BaseMaterial3D.CULL_BACK
+	return _ice_road_mat
+
+
+## Material pe textura de clasa `ice` (tools/paint_ice.py), proiectata
+## triplanar in spatiul lumii la scara clasei, cu culoarea de vertex ca
+## multiplicator (placa isi ia albul de mal / turcoazul de larg din
+## `_ice_color`; banda e alba, deci ia doar tenta de aici).
+func _ice_class_material(tint: Color, roughness: float,
+		specular: float) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = tint
+	mat.albedo_texture = load(Palette.CLASS_TEXTURES["ice"])
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.vertex_color_use_as_albedo = true
+	mat.uv1_triplanar = true
+	mat.uv1_world_triplanar = true
+	var sc: float = Palette.CLASS_TRIPLANAR_SCALE["ice"]
+	mat.uv1_scale = Vector3(sc, sc, sc)
+	mat.roughness = roughness
+	mat.metallic_specular = specular
+	return mat
 
 
 func _build_sea_respawn(sea_y: float) -> void:

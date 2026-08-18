@@ -46,7 +46,12 @@ const GROUND_PROBE_DOWN: float = 40.0
 const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 
 ## Modelul carat pe traiectorie. Gol = cutia galbena placeholder.
-@export var model: PackedScene = null
+@export var model: PackedScene = null:
+	set(v):
+		model = v
+		# Lista de sugestii pentru `animation` vine din modelul ales — la
+		# schimbarea lui, Inspectorul trebuie sa reciteasca proprietatile.
+		notify_property_list_changed()
 ## Ce PIESA din GLB se pastreaza (kiturile tin mai multe obiecte intr-un
 ## fisier). Gol = tot fisierul. Acelasi contract ca la HazardMarker.
 @export var model_node: String = ""
@@ -62,8 +67,9 @@ const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 ## Ce clip din GLB se reda in bucla, daca modelul are AnimationPlayer. Gol =
 ## automat: "Walk" (indiferent de majuscule) cand se misca, o animatie de
 ## repaus ("Idle"/"Eating") cand `speed` e 0, altfel primul clip din fisier.
-## Numele se scrie EXACT ca in fisier (ex. "Gallop"); un nume care nu exista
-## se anunta la consola si cade pe automat, nu lasa modelul teapan in tacere.
+## In Inspector apare ca dropdown cu clipurile din GLB (se poate si tasta —
+## sau lasa gol pentru automat); un nume care nu exista se anunta la consola
+## si cade pe automat, nu lasa modelul teapan in tacere.
 @export var animation: String = ""
 ## Viteza de redare a clipului (1 = cum a fost exportat). Un ciclu de mers
 ## exportat pentru 1.5 m/s arata a patinaj la 4 m/s — de aici se potriveste.
@@ -96,6 +102,32 @@ var _dir: float = 1.0
 var _yaw: float = 0.0
 var _time: float = 0.0
 var _started: bool = false
+
+
+## Dropdown-ul de la `animation`: sugestii citite din modelul ales (o
+## instantiere scurta, doar in editor). ENUM_SUGGESTION, nu ENUM: campul
+## ramane text liber, deci gol = automat si un GLB fara animatii nu-l strica.
+func _validate_property(property: Dictionary) -> void:
+	if property.name != "animation" or not Engine.is_editor_hint():
+		return
+	var names := _model_animation_names()
+	if names.is_empty():
+		return
+	property.hint = PROPERTY_HINT_ENUM_SUGGESTION
+	property.hint_string = ",".join(names)
+
+
+func _model_animation_names() -> PackedStringArray:
+	var out := PackedStringArray()
+	if model == null:
+		return out
+	var inst := model.instantiate() as Node3D
+	if inst == null:
+		return out
+	for ap in inst.find_children("*", "AnimationPlayer", true, false):
+		out.append_array((ap as AnimationPlayer).get_animation_list())
+	inst.free()
+	return out
 
 
 func _ready() -> void:

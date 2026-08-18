@@ -103,12 +103,17 @@ func _ready() -> void:
 
 	# 6. suflul hovercraftului (PathMover.push_radius): un figurant parcat pe
 	# gheata impinge masina de langa el dinspre el; unul fara suflu, nu.
-	var i6: int = int(f_ice * float(n)) % n
+	# Alt loc decat f_ice: la 0.34 e in raza barierei mobile de la 0.30
+	# (Traversare), care porneste cand se apropie o masina si o impinge —
+	# masuratoarea iesea identica cu si fara vant, si cu semn strain.
+	var f_push := fposmod(seg.x + 0.70 * (seg.y - seg.x), 1.0)
+	var i6: int = int(f_push * float(n)) % n
 	var origin: Vector3 = track.baked[i6]
 	var side6: Vector3 = track._side_at(i6)
 	var pushed := await _push_test(track, car, origin, side6, 9.0)
 	var still := await _push_test(track, car, origin, side6, 0.0)
-	var ok6 := pushed > 1.0 and still < 0.3
+	# Diferenta, nu valoarea bruta: vantul temei sufla si el pe gheata.
+	var ok6 := pushed - still > 1.5
 	failed = failed or not ok6
 	print("6. suflu (PathMover.push_radius): cu suflu masina pleaca %.2f m/s, fara %.2f  %s" % [
 		pushed, still, "OK" if ok6 else "PROBLEMA"])

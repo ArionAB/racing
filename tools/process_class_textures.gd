@@ -193,6 +193,17 @@ static func classes() -> Dictionary:
 		"snow": {"src": "snow_src.jpg",
 			"anchor": Palette.color(Palette.FOAM_WHITE), "gain": 1.10,
 			"lift": 0.26},
+		# Gheata Baikalului (placa lacului si banda drumului de gheata): a doua
+		# clasa PICTATA, tools/paint_ice.py — retea de crapaturi negre pe tor,
+		# bule de metan albe in ciorchini, fond turcoaz cu pete. Ancora e
+		# recifului (REEF_SHALLOW): singurul turcoaz din paleta, si e chiar
+		# culoarea ghetii de lac vazute prin grosime mica.
+		# Ancora e recifului AMESTECAT cu spuma (nu recif pur): la ancora pura
+		# lacul iesea turcoaz de bazin pe toata suprafata; gheata de lac e
+		# aproape alba, cu tenta rece, iar culoarea o da adancimea (vertex).
+		"ice": {"src": "ice_src.png",
+			"anchor": Palette.color(Palette.REEF_SHALLOW).lerp(
+				Palette.color(Palette.FOAM_WHITE), 0.5), "gain": 1.05},
 		# Acele coniferelor: coroana molizilor din kitul alpin (#222). Singura
 		# clasa PICTATA, nu fotografiata — sursa e generata de
 		# tools/paint_pine_needles.py, si acolo sta si motivul: o fotografie de

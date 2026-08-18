@@ -319,6 +319,8 @@ const CLASS_TEXTURES := {
 	"snow": "res://assets/textures/classes/snow.png",
 	# Coroana coniferelor (pictata, vezi tools/paint_pine_needles.py).
 	"pine_needles": "res://assets/textures/classes/pine_needles.png",
+	# Gheata lacului (Baikal; pictata, vezi tools/paint_ice.py).
+	"ice": "res://assets/textures/classes/ice.png",
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -356,6 +358,12 @@ const CLASS_TRIPLANAR_SCALE := {
 	# in spatiul LUMII (brazii nu se misca): un singur material pentru toata
 	# padurea, oricate scari ar avea instantele.
 	"pine_needles": 0.6,
+	# Gheata Baikalului. Dala pictata reprezinta ~6 m (celule de crapaturi de
+	# ~1 m, bule de 5-15 cm): la 0.16 (o repetitie la 6.25 m) crapaturile mari
+	# citesc ca fisuri de un metru din chase cam, iar tiparul nu se vede ca
+	# tapet pe placa de 200 m — variatia mare o dau culorile de vertex
+	# (adancimea, vezi Track._ice_color). Spatiul LUMII: placa nu se misca.
+	"ice": 0.16,
 }
 
 static var _tri_mats: Dictionary = {}

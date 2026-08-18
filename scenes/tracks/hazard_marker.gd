@@ -60,6 +60,7 @@ enum Kind {
 	EXCAVATOR,  ## excavatorul ruginit care matura cu bratul
 	AVALANCHE,  ## masa de zapada care se rostogoleste peste sosea
 	WAVE,       ## val care spala soseaua (cere o tema cu mare)
+	ICE_SLAB,   ## placa de gheata libera care se balanseaza sub masini (Baikal)
 }
 
 @export var kind: Kind = Kind.SLIDING

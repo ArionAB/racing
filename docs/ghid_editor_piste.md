@@ -515,7 +515,9 @@ nod **HazardMarker** tras pe sosea in viewport.
    plutind.
 3. In Inspector, `kind`: bariera mobila, bolovan, morisca, tren, tromba,
    deflector, creasta, excavator, avalansa, val (valul cere o tema cu mare —
-   altfel se sare, cu avertisment in Output).
+   altfel se sare, cu avertisment in Output), placa de gheata (basculant sub
+   masini — are sens doar pe o portiune din `custom_ice_ranges`; si prin
+   `custom_ice_slab_fracs`).
 4. **Regenerate** pe radacina + **salveaza scena.**
 
 Le poti grupa sub un `Node3D` — cautarea e recursiva, ca la munti.

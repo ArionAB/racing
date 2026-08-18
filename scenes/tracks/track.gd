@@ -1615,6 +1615,8 @@ func rebuild() -> void:
 		_build_train(frac)
 	for frac in _avalanche_fracs():
 		_build_avalanche(frac)
+	for frac in _ice_slab_fracs():
+		_build_ice_slab(frac)
 	# Gimmickurile plantate ca noduri, DUPA cele din cod: intra prin exact
 	# aceleasi `_build_*`, deci un obstacol tras in viewport e identic cu unul
 	# declarat intr-o fractie. Vezi `_node_hazards`.
@@ -3067,8 +3069,10 @@ func _water_material() -> ShaderMaterial:
 func _ice_road_material() -> StandardMaterial3D:
 	var tint: Variant = theme_flag("ice_road_tint", null)
 	var c: Color = tint as Color if tint != null else Color(0.62, 0.84, 0.86)
+	# Luciu moderat (0.5/0.4): la 0.3/0.7 soarele jos punea o pata alba pe
+	# banda la fiecare viraj catre el (snapshot la frac 0.37).
 	return _flat_material(c, _tex("res://assets/textures/surface_asphalt.png"),
-		0.30, 0.7, BaseMaterial3D.CULL_BACK,
+		0.5, 0.4, BaseMaterial3D.CULL_BACK,
 		_tex("res://assets/textures/surface_asphalt_macro.png"))
 
 
@@ -4618,6 +4622,8 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.WAVE:
 			# Se sare singur, cu avertisment, daca tema n-are mare.
 			_build_wave_surge(frac)
+		HazardMarker.Kind.ICE_SLAB:
+			_build_ice_slab(frac)
 
 
 ## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
@@ -4930,6 +4936,27 @@ func _build_train(frac: float) -> void:
 	# tangenta la o curba pare ca o traverseaza de doua ori.
 	train.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
 	add_child(train)
+
+
+## Placa de gheata libera (Baikal): basculant pe axa transversala, plantat pe
+## axa drumului. Vezi [IceSlabHazard]. Baza din directia drumului, ca la tren:
+## -Z local = sensul de mers, deci placa se intinde in lungul lui Z.
+##
+## Transformarea INAINTE de add_child (AnimatableBody3D cu sync_to_physics).
+func _build_ice_slab(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p := baked[idx]
+	var dir := (baked[(idx + 1) % n] - p).normalized()
+	var slab := IceSlabHazard.new()
+	slab.name = "IceSlab"
+	slab.road_half_width = width_at(frac)
+	slab.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
+	add_child(slab)
+
+
+func _ice_slab_fracs() -> Array[float]:
+	return []
 
 
 ## Podul cu travee ridicatoare peste un canal.

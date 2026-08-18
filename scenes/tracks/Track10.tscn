@@ -29,6 +29,7 @@ custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])
 custom_ice_slab_fracs = Array[float]([0.372, 0.398, 0.425])
 custom_train_along_fracs = Array[float]([0.705])
 custom_arch_fracs = Array[float]([0.447])
+custom_landmarks = Array[Vector3]([Vector3(0.975, -1, 13), Vector3(0.02, 1, 15), Vector3(0.045, -1, 14), Vector3(0.07, 1, 12), Vector3(0.1, -1, 15), Vector3(0.94, 1, 15), Vector3(0.905, -1, 12)])
 custom_ravines = Array[Vector4]([Vector4(0.69, 0.75, 13, 0)])
 custom_cornice_ravines = Array[int]([0])
 

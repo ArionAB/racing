@@ -112,9 +112,17 @@ de axul drumului. Nimic nu se vedea, fiindcă nodul stătea pe `visible = false`
 fără `StaticBody3D`, arată ca un perete prin care treci — mai rău decât lipsa
 lui. Ori îi pui coliziune, ori îl ții destul de departe cât să nu-l atingi.
 
-## Promovarea: din sketchpad în scenografie
+## Promovarea: din sketchpad în scenografie (PASUL DE DELIVERY)
 
-Din august 2026 (#201), `DecorManual` e un **sketchpad**, nu destinația finală.
+**Decizia din 18 aug 2026:** pe toată durata dezvoltării, `DecorManual` e
+**sursa de adevăr** — piesele stau ca noduri în `.tscn`, ca să le poți selecta,
+muta și șterge din editor oricând. Promovarea de mai jos s-a făcut o dată pe
+Track08 (#201) și a fost **întoarsă**: cele 186 de piese sunt din nou noduri sub
+`DecorManual/Zone0X_*`, iar `track08_manual_specs.gd` a murit (rămâne în git
+la `3d0511e` ca model de format). Prețul: ~550 de desene în plus pe Okinawa
+(1098 vs 505), acceptat. Promovarea se reface **o singură dată, la delivery**,
+pentru toate pistele. Textul de mai jos descrie mecanica pentru atunci.
+
 Compoziția se schițează în editor exact ca mai sus, iar când e bună se
 **promovează în scenografie**: fiecare piesă devine un spec `spot` cu
 `face: "world"` — poziție XZ, orientare și scală literale — în fișierul de

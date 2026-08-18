@@ -5,7 +5,8 @@ extends SceneTree
 ## mint despre relief, iar editorul nu are terenul generat la indemana).
 ##
 ## E tot ce a ramas din gen_decor_climb.gd dupa ce specurile lui au fost
-## promovate in track08_manual_specs.gd (#201): partea de MASURA era singura
+## promovate in specs (#201, promovare intoarsa in aug 2026 — pana la delivery
+## decorul manual sta ca noduri sub DecorManual): partea de MASURA era singura
 ## cu valoare de unealta; partea de emis .tscn pentru paste manual a murit
 ## odata cu nodurile pe care le emitea.
 ##

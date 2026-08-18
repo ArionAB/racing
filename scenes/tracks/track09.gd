@@ -139,17 +139,12 @@ func _code_points() -> Array[Vector3]:
 ## Punctele intermediare tin poteca pe linia de cadere a pantei (44 -> 10 m),
 ## cu cotele intre cele doua drumuri ca terenul sa se aseze lin pe ea.
 func _branch_specs() -> Array[Dictionary]:
-	return [{
-		"entry": 0.754,   # masurat pe (-186, -238), punctul de dupa buza
-		"exit": 0.886,    # masurat pe (-196, -46), inainte de pod
-		"half_width": 3.2,
-		"wet": false,
-		"label": "pasunea",
-		"points": [
-			Vector3(-215, 36, -180),
-			Vector3(-206, 22, -108),
-		],
-	}]
+	# Golit (aug 2026): scurtaturile se deseneaza DOAR de mana, ca noduri
+	# [TrackBranch] (Path3D) in scena. Specificatia veche ramane mai jos, ca reper.
+	# Era: entry 0.754 (masurat pe (-186, -238)), exit 0.886 (pe (-196, -46)),
+	# half_width 3.2, wet false, label "pasunea", puncte
+	# (-215, 36, -180), (-206, 22, -108).
+	return []
 
 
 ## Creasta de fly-off, pe buza platoului: TOATA pista sare aici, alegerea e
@@ -177,7 +172,9 @@ func _ramp_fracs() -> Array[float]:
 ## cealalta, adica exact locul in care o bariera de tren ar fi fost o capcana
 ## fara iesire, nu o decizie.
 func _train_fracs() -> Array[float]:
-	return [0.631] # platoul de nord, masurat pe (-2, -208)
+	# Golit (aug 2026): hazardele se pun DOAR de mana, ca noduri [HazardMarker]
+	# in scena. Fractia veche ramane in comentariul de mai sus, ca reper.
+	return [] # era [0.631], platoul de nord, masurat pe (-2, -208)
 
 
 ## Hazardele mobile, in ordinea turului: carul cu fan pe ulita satului, sania
@@ -187,12 +184,11 @@ func _train_fracs() -> Array[float]:
 ## hazard care matura soseaua exact peste gol. Mutat DUPA aterizare (0.960),
 ## unde are si un rost mai bun: aterizezi din saritura si dai peste el.
 func _hazard_fracs() -> Array[float]:
-	return [
-		0.058, # carul cu fan, pe ulita satului
-		0.206, # sania cu busteni, pe urcarea prin padure
-		0.777, # vaca, pe coborare — scurtatura o evita
-		0.960, # plugul, dupa aterizarea de peste parau
-	]
+	# Golit (aug 2026): hazardele se pun DOAR de mana, ca noduri [HazardMarker]
+	# in scena. Fractia veche ramane in comentariul de mai sus, ca reper.
+	# Erau: 0.058 carul cu fan (ulita satului), 0.206 sania cu busteni
+	# (urcarea prin padure), 0.777 vaca (coborare), 0.960 plugul (dupa parau).
+	return []
 
 
 ## Fiecare hazard cu modelul LUI (#224). Pana aici toate patru foloseau sania

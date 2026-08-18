@@ -1620,6 +1620,8 @@ func rebuild() -> void:
 		_build_avalanche(frac)
 	for frac in _ice_slab_fracs():
 		_build_ice_slab(frac)
+	for frac in _hummock_fracs():
+		_build_hummock(frac)
 	# Gimmickurile plantate ca noduri, DUPA cele din cod: intra prin exact
 	# aceleasi `_build_*`, deci un obstacol tras in viewport e identic cu unul
 	# declarat intr-o fractie. Vezi `_node_hazards`.
@@ -4492,6 +4494,66 @@ func _build_ramp(frac: float) -> void:
 	st.add_vertex(fr); st.add_vertex(br_low); st.add_vertex(br)
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+
+## TOROS (Baikal): creasta de gheata impinsa de vant peste culoar — un
+## kicker natural, mic. Prisma asimetrica pe TOATA latimea benzii (+1 m de
+## fiecare parte): urcare lina pe HUMMOCK_RUN metri pana la HUMMOCK_RISE, apoi
+## cadere scurta. La 30 m/s decolezi ~0.8 s; la 20 abia saltezi — deci
+## rasplateste viteza fara sa opreasca pe nimeni. Textura de clasa `snow`
+## (zapada suflata pe creasta), ca sa se citeasca de departe pe turcoaz.
+## 0.75 pe 5.5 m (~8 grade), NU 0.9 pe 4.5 (~11): cu panta mai abrupta,
+## masurat cu ProbeRace, autobuzul si pompierii (grele, inalte) faceau 2
+## repuneri fiecare si 20% din timp in afara culoarului — decolau, aterizau
+## strimb pe gheata si se invarteau. La 8 grade: 0 repuneri, 0% offroad.
+const HUMMOCK_RUN: float = 5.5
+const HUMMOCK_RISE: float = 0.75
+const HUMMOCK_DROP: float = 1.6
+
+func _build_hummock(frac: float) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var c := baked[idx]
+	var dir := _smooth_dir(idx, 6.0)
+	var side := dir.cross(Vector3.UP).normalized()
+	var hw := width_at(frac) + 1.0
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var foot := c - dir * HUMMOCK_RUN
+	var crest := c + Vector3.UP * HUMMOCK_RISE
+	var back := c + dir * HUMMOCK_DROP
+	var l := -side * hw
+	var r := side * hw
+	# panta de urcare
+	st.add_vertex(foot + l); st.add_vertex(foot + r); st.add_vertex(crest + l)
+	st.add_vertex(foot + r); st.add_vertex(crest + r); st.add_vertex(crest + l)
+	# caderea
+	st.add_vertex(crest + l); st.add_vertex(crest + r); st.add_vertex(back + l)
+	st.add_vertex(crest + r); st.add_vertex(back + r); st.add_vertex(back + l)
+	# capetele (triunghiuri laterale), ca sa nu se vada prin creasta
+	st.add_vertex(foot + l); st.add_vertex(crest + l); st.add_vertex(back + l)
+	st.add_vertex(foot + r); st.add_vertex(back + r); st.add_vertex(crest + r)
+	st.generate_normals()
+	var mesh := st.commit()
+	var inst := MeshInstance3D.new()
+	inst.name = "Hummock"
+	inst.mesh = mesh
+	# Clasa SNOW, nu ice: creasta e din placi sparte cu zapada suflata peste
+	# ele, si mai ales trebuie sa se citeasca de departe pe turcoaz — cu aceeasi
+	# textura ca banda se pierdea (masurat pe snapshot la 0.238).
+	inst.material_override = Palette.triplanar_class_material("snow")
+	add_child(inst)
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var tri := mesh.create_trimesh_shape() as ConcavePolygonShape3D
+	tri.backface_collision = true
+	shape.shape = tri
+	body.add_child(shape)
+	add_child(body)
+
+
+func _hummock_fracs() -> Array[float]:
+	return []
+
 
 ## `spec` suprascrie ce s-ar fi ales pentru fractia asta: e infatisarea ceruta
 ## de un [HazardMarker] tras in viewport (vezi HazardMarker.model_spec()).

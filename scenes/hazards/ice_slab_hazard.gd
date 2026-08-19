@@ -36,8 +36,10 @@ const STIFF: float = 30.0
 const DAMP: float = 7.0
 ## Cat sta fata de sus a placii peste cota drumului cand e orizontala.
 const LIP: float = 0.05
-## Rama de apa neagra din jurul placii (metri in afara conturului).
-const RIM: float = 1.4
+## Rama de apa neagra din jurul placii (metri in afara conturului). 0 din
+## august 2026: apa se vede prin CRAPATURILE dintre bucatile placii, nu ca un
+## dreptunghi negru in jurul ei — dreptunghiul citea ca un capac de canal.
+const RIM: float = 0.0
 
 ## Jumatatea latimii soselei — placa e cu 1 m mai lata pe fiecare parte.
 var road_half_width: float = 7.0
@@ -73,28 +75,21 @@ func _build() -> void:
 	mat_water.roughness = 0.6
 	mat_water.metallic_specular = 0.3
 	water.material_override = mat_water
-	water.position = Vector3(0.0, 0.02, 0.0)
+	# Chiar sub fata placii (nu la 2 cm peste drum): asa se vede APA prin
+	# crapaturile dintre bucati, nu banda de gheata a drumului de dedesubt.
+	water.position = Vector3(0.0, LIP - 0.015, 0.0)
 	add_child(water)
 
 	_plate = AnimatableBody3D.new()
 	_plate.name = "Plate"
 	_plate.sync_to_physics = true
 	add_child(_plate)
-	var box := BoxMesh.new()
-	box.size = Vector3(w, THICKNESS, LENGTH)
-	var mi := MeshInstance3D.new()
-	mi.mesh = box
-	var mat_ice := StandardMaterial3D.new()
-	# Mai palida decat banda de gheata (se citeste ca alta bucata) si MATA:
-	# cu luciu, soarele jos al Baikalului punea o pata alba pe toata placa.
-	mat_ice.albedo_color = Color(0.80, 0.92, 0.94)
-	mat_ice.roughness = 0.75
-	mat_ice.metallic_specular = 0.2
-	mi.material_override = mat_ice
-	_plate.add_child(mi)
+	var size := Vector3(w, THICKNESS, LENGTH)
+	if not _build_plate_model(size):
+		_build_plate_box(size)
 	var col := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
-	shape.size = box.size
+	shape.size = size
 	col.shape = shape
 	_plate.add_child(col)
 	# Fata de sus la LIP peste drum, cand e orizontala.
@@ -137,6 +132,78 @@ func _physics_process(delta: float) -> void:
 	# tools/ProbeIceSlab, nu doar din semne.
 	_plate.transform = Transform3D(Basis(Vector3.RIGHT, -_angle),
 		Vector3(0.0, LIP - THICKNESS * 0.5, 0.0))
+
+
+## Corpul VIZUAL al placii: `IceSlabCracked` din kitul Baikal (placa poligonala
+## cu muchii de gheata alba, 7x8 m), pe atlasul comun. Placa hazardului e ~13x14
+## m, deci se pun 2x2 bucati — rosturile dintre ele citesc ca un camp de placi,
+## nu ca un capac; fiecare bucata se scaleaza pe X/Z ca sa umple exact sfertul
+## ei si pe Y la grosimea coliziunii. Originea GLB-ului e la baza (y 0..0.88).
+##
+## Inainte era un BoxMesh gri-pal peste planul negru de apa: in joc citea ca un
+## capac de canal, nu ca gheata. Intoarce false daca GLB-ul lipseste (clona
+## proaspata) — atunci ramane cutia, ca pista sa nu ramana fara gimmick.
+const PLATE_MODEL: String = "res://assets/models/baikal/props/ice_slab_cracked.glb"
+## Amprenta GLB-ului si cota FETEI DE SUS a placii (0.80) — nu inaltimea totala
+## (0.88, cu blocurile albe de pe muchie). Scalat pe inaltimea totala, fata
+## placii cobora sub rama de apa (0.02 m peste drum) si se vedea doar inelul de
+## blocuri peste un dreptunghi negru — masurat pe captura, nu ghicit.
+const PLATE_MODEL_SIZE: Vector3 = Vector3(6.88, 0.80, 7.89)
+const PLATE_OVERLAP: float = 1.32
+## Centrele bucatilor, ca fractie din sfert: trase putin spre mijloc, ca
+## suprapunerea sa nu iasa in afara cutiei de coliziune.
+const PLATE_PULL: float = 0.42
+
+func _build_plate_model(size: Vector3) -> bool:
+	if not ResourceLoader.exists(PLATE_MODEL):
+		return false
+	var scene := load(PLATE_MODEL) as PackedScene
+	if scene == null:
+		return false
+	var tile := Vector3(size.x * 0.5, size.y, size.z * 0.5)
+	# Bucatile sunt POLIGOANE (heptagoane), nu patrate: la scara exacta a
+	# sfertului raman goluri mari intre ele si se vede rama de apa ca patru
+	# nuferi pe negru. Scalate cu PLATE_OVERLAP, se calca una pe alta ca niste
+	# placi de gheata impinse — exact ce cere brief-ul — iar golurile ramase
+	# sunt crapaturi subtiri cu apa neagra. Fiecare bucata sta cu cativa mm
+	# mai jos decat vecina, ca fetele suprapuse sa nu palpaie.
+	var scale := Vector3(tile.x * PLATE_OVERLAP / PLATE_MODEL_SIZE.x,
+		tile.y / PLATE_MODEL_SIZE.y, tile.z * PLATE_OVERLAP / PLATE_MODEL_SIZE.z)
+	var k := 0
+	for ix in 2:
+		for iz in 2:
+			var inst := scene.instantiate() as Node3D
+			if inst == null:
+				return false
+			inst.name = "Slab_%d_%d" % [ix, iz]
+			inst.scale = scale
+			# Baza GLB-ului la fundul cutiei de coliziune, ca fata de sus sa
+			# iasa exact la LIP peste drum, ca inainte.
+			inst.position = Vector3((float(ix) - 0.5) * 2.0 * PLATE_PULL * tile.x,
+				-size.y * 0.5 - 0.008 * float(k),
+				(float(iz) - 0.5) * 2.0 * PLATE_PULL * tile.z)
+			# Intoarse cu 180 de grade din doua in doua (nu 90: GLB-ul nu e
+			# patrat, la 90 amprenta s-ar roti si ar iesi din cutie): acelasi
+			# heptagon de 4 ori in aceeasi orientare s-ar citi ca un tipar.
+			inst.rotation.y = PI * float(k % 2) + 0.35 * float(k / 2)
+			_plate.add_child(inst)
+			Palette.apply_world_material(inst)
+			k += 1
+	return true
+
+
+## Rezerva: cutia de dinainte (pentru cand assets-ul lipseste).
+func _build_plate_box(size: Vector3) -> void:
+	var box := BoxMesh.new()
+	box.size = size
+	var mi := MeshInstance3D.new()
+	mi.mesh = box
+	var mat_ice := StandardMaterial3D.new()
+	mat_ice.albedo_color = Color(0.80, 0.92, 0.94)
+	mat_ice.roughness = 0.75
+	mat_ice.metallic_specular = 0.2
+	mi.material_override = mat_ice
+	_plate.add_child(mi)
 
 
 ## Unghiul curent, in grade (pozitiv = capatul din fata jos). Pentru sonde.

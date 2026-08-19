@@ -76,6 +76,31 @@ def _slab_plate(b, outline, thickness, slot, z0=0.0):
     return b._tag(top + bot + [ct, cb], slot)
 
 
+def _lift_slab_top_ao(slab):
+    """Fata de sus a placii la AO plin.
+
+    bake_ao trage razele din emisfera NORMALEI DE VERTEX, iar pe conturul
+    placii normala aia e media dintre fata de sus (+Z) si laturi — inclinata la
+    ~45 de grade. Jumatate din raze pleaca sub planul fetei si lovesc imediat
+    placa insasi, deci conturul iese la ~0.3-0.4 si Gouraud intinde umbra pe
+    tot evantaiul: in Godot fata de sus citea ca apa neagra, nu ca gheata
+    (masurat pe GLB: media culorii de vertex pe fata de sus 0.42). Pe piesele
+    mici efectul e invizibil; pe singura fata mare si plana din kit e tot ce
+    se vede. Doar fata de sus — muchia de blocuri albe si laturile raman cu
+    AO-ul lor.
+    """
+    me = slab.data
+    ca = me.color_attributes["AO"]
+    zs = [v.co.z for v in me.vertices]
+    top = max(zs)
+    for i, v in enumerate(me.vertices):
+        # placa de sus e la ~0.80 din 0.92 (blocurile); bevel-ul o misca putin
+        if 0.74 <= v.co.z <= top - 0.05 and v.normal.z > 0.3:
+            c = ca.data[i].color
+            val = max(c[0], 0.96)
+            ca.data[i].color = (val, val, val, 1.0)
+
+
 # ============================================================ Torosuri (kicker)
 def _toros(name, length, height, seed, width=2.6):
     """Creasta de gheata sparta: placi impinse una peste alta.
@@ -160,6 +185,7 @@ def build_ice_kit():
                 slot=ICE_CRACK, z0=-0.02)
     slab = b.to_object("IceSlabCracked")
     finish(slab, bevel=0.03, ao=AO_ICE, origin="base")
+    _lift_slab_top_ao(slab)
     objs.append(slab)
 
     # --- batul cu steguletul rosu, 1.5 m -----------------------------------

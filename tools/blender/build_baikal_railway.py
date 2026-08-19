@@ -122,9 +122,16 @@ def build_arch():
     n = 13                              # blocuri pe bolta (impar: cheia la mijloc)
     ring_t = 0.9                        # grosimea inelului de bolta
 
+    # AXELE: patul de cale ferata merge pe Y (vezi _deck), deci bolta se
+    # intinde tot pe Y — intre doua pile aflate la ±6 m PE DIRECTIA DE MERS —
+    # iar grosimea ei (latimea tablierului) e pe X. Prima versiune a construit
+    # bolta in planul XZ, cu grosimea PIER_W pe Y: un arc de 12 m de-a
+    # CURMEZISUL drumului, gros de 3 m, si nimic sub restul patului de 12 m.
+    # Vazut din lateral, viaductul n-avea arcade; masurat pe GLB: bolta x ±8.8,
+    # y ±1.6, patul x ±3.5, y ±6. Acum bolta e in planul YZ si lata cat patul.
     for i in range(n):
-        a = math.pi * (i + 0.5) / n     # 0..pi, de la stanga la dreapta
-        cx = -math.cos(a) * (r + ring_t * 0.5)
+        a = math.pi * (i + 0.5) / n     # 0..pi, de la spate spre fata
+        cy = -math.cos(a) * (r + ring_t * 0.5)
         cz = spring_z + math.sin(a) * (r + ring_t * 0.5)
         # Fiecare voussoir se roteste cu UNGHIUL POLAR, nu cu complementul lui:
         # `Matrix.Rotation(a, 3, "Y")` duce axa lunga a blocului (Z local) in
@@ -133,8 +140,11 @@ def build_arch():
         # versiune) axa iesea RADIALA: blocurile stateau cu capul spre centru
         # si bolta se citea ca un morman. Se verifica numeric — produsul scalar
         # dintre axa lunga si raza trebuie sa fie 0.
-        rot = Matrix.Rotation(a, 3, "Y")
-        b.box((cx, 0.0, cz), (ring_t * 1.05, PIER_W, (math.pi * r / n) * 1.12),
+        # Rotatie in jurul lui X cu -a: duce axa lunga (Z local) in
+        # (0, sin a, cos a), tangenta la arcul din planul YZ — produsul scalar
+        # cu raza (-cos a, sin a) e zero, ca inainte in planul XZ.
+        rot = Matrix.Rotation(-a, 3, "X")
+        b.box((0.0, cy, cz), (DECK_W + 0.5, ring_t * 1.05, (math.pi * r / n) * 1.12),
               CONCRETE, rotation=rot)
 
     # timpanele: zidaria dintre extradosul boltii si pat, pe ambele fete.
@@ -146,30 +156,30 @@ def build_arch():
     # arcada — de aici jumatatea de sus haotica din prima randare de control.
     # Aici, sub extrados nu se pune NIMIC: golul e gol prin constructie.
     r_out = r + ring_t
-    for col in _span_points((-r - 2.4, 0, 0), (r + 2.4, 0, 0), 0.8):
-        x = col.x
-        if abs(x) < r_out:
-            base_z = spring_z + math.sqrt(max(r_out * r_out - x * x, 0.0))
+    for col in _span_points((0, -r - 2.4, 0), (0, r + 2.4, 0), 0.8):
+        y = col.y
+        if abs(y) < r_out:
+            base_z = spring_z + math.sqrt(max(r_out * r_out - y * y, 0.0))
         else:
             base_z = spring_z - 1.0     # in afara deschiderii, zidarie plina
         top_z = DECK_Z
         if top_z - base_z < 0.35:
             continue                    # deasupra cheii nu mai incape nimic
-        _stone_face(b, (x, 0.0, (base_z + top_z) * 0.5),
-                    (0.82, PIER_W, top_z - base_z), seed=int(abs(x) * 31) + 5)
+        _stone_face(b, (0.0, y, (base_z + top_z) * 0.5),
+                    (DECK_W + 0.5, 0.82, top_z - base_z), seed=int(abs(y) * 31) + 5)
 
     # sub nasterea boltii, plinul dintre pile
-    for sx in (-r - 1.55, r + 1.55):
-        _stone_face(b, (sx, 0.0, spring_z * 0.5), (2.1, PIER_W, spring_z),
-                    seed=int(abs(sx) * 13) + 400)
+    for sy in (-r - 1.55, r + 1.55):
+        _stone_face(b, (0.0, sy, spring_z * 0.5), (DECK_W + 0.5, 2.1, spring_z),
+                    seed=int(abs(sy) * 13) + 400)
 
     # turturi sub arcada (brief): 6 tepi de gheata la intrados
     rand = _lcg(2211)
     for i in range(6):
         a = math.pi * (0.18 + 0.64 * (i / 5.0))
-        ix = -math.cos(a) * r * 0.96
+        iy = -math.cos(a) * r * 0.96
         iz = spring_z + math.sin(a) * r * 0.96
-        _icicle(b, (ix, (rand() - 0.5) * PIER_W * 0.7, iz),
+        _icicle(b, ((rand() - 0.5) * DECK_W * 0.7, iy, iz),
                 length=0.7 + rand() * 1.5, radius=0.09 + rand() * 0.06)
 
     _deck(b, 0.0, ARCH_SPAN)

@@ -1249,6 +1249,38 @@ func _ravines() -> Array[Vector4]:
 func _cornice_ravines() -> Array[int]:
 	return []
 
+## Care dintre rape sunt VIADUCTE (indici in [method _ravines]): golul e si
+## SUB sosea, tablierul ramane in aer pe fusta lui, iar dedesubt se aseaza
+## pilele si arcadele din kit (DecorManual). O cornisa pe ambele parti fara
+## asta e o creasta de stanca cu drumul pe muchie, nu un pod. Vezi
+## TrackSideSampler.RAVINE_VIADUCT_OVERHANG.
+func _viaduct_ravines() -> Array[int]:
+	return []
+
+## Cat de mult e indexul „pe viaduct", 0..1, cu aceeasi rampa de capat ca
+## sapatura (TrackSideSampler.RAVINE_FADE_FRAC). Umerii de pietris se sting
+## dupa masura asta, ca pe pod — sub tablier nu e pamant, e gol.
+func _viaduct_mix(i: int) -> float:
+	var ids := _viaduct_ravines()
+	if ids.is_empty() or baked.is_empty():
+		return 0.0
+	var n := baked.size()
+	var total: float = _dists[n] if _dists.size() > n else 0.0
+	if total <= 0.0:
+		return 0.0
+	var f := _dists[i] / total
+	var rav := _ravines()
+	var best := 0.0
+	for ri in ids:
+		if ri < 0 or ri >= rav.size():
+			continue
+		var r: Vector4 = rav[ri]
+		var fade := TrackSideSampler.RAVINE_FADE_FRAC
+		var a := smoothstep(r.x - fade, r.x, f)
+		var b := 1.0 - smoothstep(r.y, r.y + fade, f)
+		best = maxf(best, minf(a, b))
+	return best
+
 ## Ce fel de obstacol mobil sta la fiecare fractie: frac -> dictionar cu
 ## `model`, si optional `scale`, `roll`, `face_travel`.
 ##
@@ -1599,7 +1631,8 @@ func rebuild() -> void:
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
-		_cornice_ravines(), _baked_widths(), _branch_carve_points())
+		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
+		_viaduct_ravines())
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -5703,7 +5736,10 @@ func _build_shoulders() -> void:
 		# s-ar termina cu o buza vizibila exact unde incepe structura.
 		if _road_gap(i, j) or _road_ice(i, j):
 			continue
-		var bridge := maxf(_bridge_mix(i), _bridge_mix(j))
+		# Pe VIADUCT la fel: umarul cobora de la buza asfaltului pana la fundul
+		# rapei — un zid de 13 m cu textura de pietris, care ascundea pilele
+		# si arcadele din kit (vazut din lateral cu Snapshot --eye).
+		var bridge := maxf(maxf(_bridge_mix(i), _bridge_mix(j)), _viaduct_mix(i))
 		var s0 := _side_at(i)
 		var s1 := _side_at(j)
 		var v0 := _dists[i] / tile

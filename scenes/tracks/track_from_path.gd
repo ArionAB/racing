@@ -89,6 +89,11 @@ extends Track
 ## buza cade la jumatate de metru de asfalt, ca pe un drum de munte sau pe un
 ## viaduct — nu valea lina de sub un fly-off. Vezi Track._cornice_ravines.
 @export var custom_cornice_ravines: Array[int] = []
+## Care dintre rapele de mai sus sunt VIADUCTE (indici in `custom_ravines`):
+## terenul coboara si SUB sosea, tablierul ramane in aer, iar pilele/arcadele
+## din kit se pun sub el (Baikal, viaductul Circum-Baikal). Se combina cu
+## `custom_cornice_ravines` (cazi de pe margine). Vezi Track._viaduct_ravines.
+@export var custom_viaduct_ravines: Array[int] = []
 ## Bolovani care cad de pe faleza.
 @export var custom_rockfall_fracs: Array[float] = []
 ## Treceri de cale ferata. Trenul ucide la contact si te repune.
@@ -175,6 +180,9 @@ func _ravines() -> Array[Vector4]:
 
 func _cornice_ravines() -> Array[int]:
 	return custom_cornice_ravines
+
+func _viaduct_ravines() -> Array[int]:
+	return custom_viaduct_ravines
 
 func _rockfall_fracs() -> Array[float]:
 	return custom_rockfall_fracs

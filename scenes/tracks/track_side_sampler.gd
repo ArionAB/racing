@@ -114,6 +114,11 @@ const RAVINE_FADE_FRAC: float = 0.02
 ## celelalte piste sunt bine asa: se cere per rapa, cu `cornice`.
 const RAVINE_CORNICE_INNER: float = 0.5
 const RAVINE_CORNICE_RIM: float = 6.0
+## Viaduct: cat de departe DINCOLO de axa ajunge buza interioara (metri peste
+## jumatatea latimii) si cat de scurt e racordul pana la fund. Cu 1.5 + 2.5,
+## chiar sub axa sapatura e la ~85% din adancime; sub tablier nu se vede.
+const RAVINE_VIADUCT_OVERHANG: float = 1.5
+const RAVINE_VIADUCT_RIM: float = 2.5
 
 # --- masivele declarate (ruda pe PLUS a rapelor) ---
 ## Banda de protectie a asfaltului: sub PEAK_ROAD_CLEAR de la marginea soselei
@@ -156,6 +161,9 @@ var _ravines: Array[Vector4] = []
 ## Indicii rapelor care sunt CORNISE (buza lipita de asfalt). Vezi
 ## RAVINE_CORNICE_INNER.
 var _cornices: Array[int] = []
+## Care rape sunt VIADUCTE: terenul coboara si SUB sosea, nu doar langa ea.
+## Vezi _carve_ravines.
+var _viaducts: Array[int] = []
 ## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
 ## padure); > 0 = fund de mare (insula). Vezi ground_y.
 var _far_drop: float = 0.0
@@ -187,7 +195,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		peaks: Array[Vector4] = [],
 		cornices: Array[int] = [],
 		widths: PackedFloat32Array = PackedFloat32Array(),
-		carve_corridors: PackedVector3Array = PackedVector3Array()) -> void:
+		carve_corridors: PackedVector3Array = PackedVector3Array(),
+		viaducts: Array[int] = []) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
@@ -202,6 +211,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_channels = channels
 	_peaks = peaks
 	_cornices = cornices
+	_viaducts = viaducts
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
@@ -725,6 +735,17 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		var cornice := _cornices.has(ri)
 		var inner := RAVINE_CORNICE_INNER if cornice else RAVINE_INNER
 		var rim := RAVINE_CORNICE_RIM if cornice else RAVINE_RIM
+		if _viaducts.has(ri):
+			# VIADUCT: golul e si sub asfalt. O rapa obisnuita lasa terenul de
+			# sub sosea la cota ei (lacatul de langa drum), deci o cornisa pe
+			# ambele parti iesea o CREASTA de stanca de 13 m cu drumul pe
+			# muchie — de pe gheata se vedea un zid, nu arcade. Aici buza
+			# interioara trece dincolo de axa (inner negativ), cu racordul
+			# scurt: sub tablier terenul e la fund, iar pilele din kit
+			# (DecorManual) au unde sa stea. Tablierul soselei isi are fusta si
+			# coliziunea lui (ROAD_THICKNESS), deci nu ramane nimic in aer.
+			inner = -(half_width_at(near_i) + RAVINE_VIADUCT_OVERHANG)
+			rim = RAVINE_VIADUCT_RIM
 		var lat := smoothstep(0.0, 1.0,
 			clampf((dist - half_width_at(near_i) - inner) / rim, 0.0, 1.0))
 		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar

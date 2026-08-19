@@ -37,7 +37,8 @@ serge și hovercraftul sunt accentele.
 ## 2. Traseul și punctele de interes (POI)
 
 Lungime țintă **~1.7 km** (tur ~50 s, cursă 3 tururi ≈ 2:30). Sens: orar.
-Fracțiile sunt orientative — se măsoară cu ProbeLayout după desen.
+Fracțiile sunt orientative — se măsoară cu ProbeLayout după desen. Harta 2D
+(`img/baikal_map.html`, artefactul „Baikal Recon") folosește aceleași litere.
 
 ```
             [F] viaduct CFR + tunel        [E] tabăra pescarilor + nerpa
@@ -55,15 +56,15 @@ Fracțiile sunt orientative — se măsoară cu ProbeLayout după desen.
 |---|---|---|---|---|
 | **A** | 0.00 | **Start în Khuzhir** — ulița principală a satului, pe mal la ~12.5 m peste lac, poartă de start din bârne, case de lemn pe ambele părți, fum, sănii parcate, câini husky (PathMover) | grilă de start pe zăpadă bătătorită, grip normal | 8 m |
 | **B** | 0.10 | **Stânca Șamanului** — drumul iese pe promontoriu, la ~12 m peste lac; în stânga cele două colțuri de marmură (cu gulerul de gheață `Shaman_Ice` la bază), în dreapta șirul de **serge** cu panglici; viraj larg cu vedere spre lac | panglicile flutură (shader vertex-wind); primul viraj de drift pe zăpadă; ~~scurtătură strâmtă *printre* stâlpi~~ — **retrasă**, vezi §10: traseul e drept aici, nu există ocol de tăiat | 7 m |
-| **B→B'** | 0.12–0.21 | **Rampa de coborâre pe gheață** — pantă 15% de pe mal pe lac (măsurat cu ProbeLayout: 15.4% la 0.14; coada rampei se stinge în trepte 0.7 → 0.22 → 0.12 m ca drumul de pe lac să rămână plat — PR #300), marcaje cu bețe și stegulețe roșii ale drumului de gheață | intri pe gheață cu viteză; primul moment de „alunecă totul" | 7 → 10 m |
-| **B'** | 0.20–0.38 | **Autostrada de gheață** — plan larg turcoaz cu bule de metan sub roți și crăpături negre; **torosuri** în șiruri diagonale (kicker-e naturale, 0.6–1.2 m), un camion Kamaz parcat, indicatoare rutiere înfipte în gheață; **hovercraftul** traversează diagonal la ~0.30 | grip lateral gheață (~1.5, sub `wet`); **vânt lateral** constant dinspre larg; săritură de pe toros; hovercraftul te orbește cu jet de zăpadă + push lateral | 10–12 m (fără pereți; marginea = zăpadă adâncă = offroad 45%) |
+| **B→B'** (B2 pe hartă) | 0.12–0.21 | **Rampa de coborâre pe gheață** — pantă 15% de pe mal pe lac (măsurat cu ProbeLayout: 15.4% la 0.14; coada rampei se stinge în trepte 0.7 → 0.22 → 0.12 m ca drumul de pe lac să rămână plat — PR #300), marcaje cu bețe și stegulețe roșii ale drumului de gheață | intri pe gheață cu viteză; primul moment de „alunecă totul" | 7 → 10 m |
+| **B'** | 0.20–0.38 | **Autostrada de gheață** — plan larg turcoaz cu bule de metan sub roți și crăpături negre; **torosuri** în șiruri diagonale (kicker-e naturale, 0.6–1.2 m), un camion Kamaz parcat, indicatoare rutiere înfipte în gheață; **hovercraftul** traversează diagonal la ~0.30 (H pe hartă) | grip lateral gheață (~1.5, sub `wet`); **vânt lateral** constant dinspre larg; săritură de pe toros; hovercraftul te orbește cu jet de zăpadă + push lateral | 10–12 m (fără pereți; marginea = zăpadă adâncă = offroad 45%) |
 | **C** | 0.40–0.50 | **Câmpul de plăci crăpate** — o zonă unde gheața e fisurată în plăci poligonale mari (5–8 m), fisurile mai late, apă neagră vizibilă în ele | **placa care se înclină** când e încărcată (2+ mașini sau turbo): se lasă 0.4 m, se aude trosnetul, apoi revine; cine e pe marginea joasă alunecă în apă → repunere. Plăcile „vii" sunt marcate cu crăpături mai albe (cinstit) | 12 m, traseu liber, waypoints AI pe 3 linii |
 | **D** | 0.55 | **Grota de gheață** — capul stâncos al insulei, drumul trece pe sub un arc de stâncă îmbrăcat în țurțuri și „valuri" de gheață înghețată; lumină albastră | tunel scurt (25 m), țurțuri cad când treci (particule + 1 obstacol mic care cade pe bandă), ieșire în viraj strâns pe gheață → drift obligatoriu | 6 m (îngustare) |
 | **E** | 0.62 | **Tabăra pescarilor** — copci în gheață, corturi mici, lăzi de pește, sănii, un UAZ „pâine" verde parcat, **nerpa** care se uită și se scufundă când vii; uscătoare de omul pe mal | figurant + obstacole statice; scurtătură pe zăpadă printre corturi (`speed_factor` 0.85) | 9 m |
 | **E→F** | 0.66–0.72 | **Rampa de urcare pe mal** — pe sub viaductul CFR, apoi urcare pe lângă el până la nivelul liniei | ieșirea de pe gheață: grip-ul revine brusc — schimbarea de suprafață E momentul de skill | 7 m |
 | **F** | 0.74–0.84 | **Viaductul Circum-Baikal + tunelul** — drumul urcă PE terasamentul căii ferate (linia în mijloc, kerb-uri = șine), viaduct de piatră cu 5 arcade peste un golf, apoi **tunel** săpat în faleză | **trenul** vine din tunel spre tine (nou: pe SENSUL tău, nu perpendicular) — te bagi în nișa laterală a tunelului sau ieși la timp; pe viaduct fără parapet: cazi 12 m pe gheață → repunere | 6.5 m |
 | **G** | 0.86–0.96 | **Pădurea de mesteceni și larici** — coborâre în S prin pădure rară, zăpadă, lumină printre trunchiuri, un stâlp de înaltă tensiune sovietic ruginit, o cabană de vânătoare | zăpadă = grip normal-scăzut (0.75× asfalt), porțiuni cu polei (`wet_ranges`, cauză: umbra pădurii); ultimul drift înainte de sat | 7 m |
-| **A** | 1.00 | intrare în sat pe lângă biserica mică de lemn cu cupolă albastră | linia de sosire | 8 m |
+| **A'** | 1.00 | intrare în sat pe lângă biserica mică de lemn cu cupolă albastră | linia de sosire | 8 m |
 
 **Ritmul turului:** sat (tehnic) → promontoriu (viraj larg, priveliște) → gheață
 (viteză + drift + haos) → grotă (strângere) → tabără (respiro) → viaduct

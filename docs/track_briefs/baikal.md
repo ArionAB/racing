@@ -53,9 +53,9 @@ Fracțiile sunt orientative — se măsoară cu ProbeLayout după desen.
 
 | # | frac | POI | ce se întâmplă | lățime |
 |---|---|---|---|---|
-| **A** | 0.00 | **Start în Khuzhir** — ulița principală a satului, poartă de start din bârne, case de lemn pe ambele părți, fum, sănii parcate, câini husky (PathMover) | grilă de start pe zăpadă bătătorită, grip normal | 8 m |
-| **B** | 0.10 | **Stânca Șamanului** — drumul iese pe promontoriu; în stânga cele două colțuri de marmură, în dreapta șirul de **serge** cu panglici; viraj larg cu vedere spre lac | panglicile flutură (shader vertex-wind); primul viraj de drift pe zăpadă; scurtătură strâmtă *printre* stâlpi (`branch_half_width` 2.5) | 7 m |
-| **B→B'** | 0.12–0.20 | **Rampa de coborâre pe gheață** — pantă 15% de pe mal pe lac (satul și promontoriul stau la ~13 m peste lac; măsurat cu ProbeLayout: 14.8% la 0.14), marcaje cu bețe și stegulețe roșii ale drumului de gheață | intri pe gheață cu viteză; primul moment de „alunecă totul" | 7 → 10 m |
+| **A** | 0.00 | **Start în Khuzhir** — ulița principală a satului, pe mal la ~12.5 m peste lac, poartă de start din bârne, case de lemn pe ambele părți, fum, sănii parcate, câini husky (PathMover) | grilă de start pe zăpadă bătătorită, grip normal | 8 m |
+| **B** | 0.10 | **Stânca Șamanului** — drumul iese pe promontoriu, la ~12 m peste lac; în stânga cele două colțuri de marmură (cu gulerul de gheață `Shaman_Ice` la bază), în dreapta șirul de **serge** cu panglici; viraj larg cu vedere spre lac | panglicile flutură (shader vertex-wind); primul viraj de drift pe zăpadă; ~~scurtătură strâmtă *printre* stâlpi~~ — **retrasă**, vezi §10: traseul e drept aici, nu există ocol de tăiat | 7 m |
+| **B→B'** | 0.12–0.21 | **Rampa de coborâre pe gheață** — pantă 15% de pe mal pe lac (măsurat cu ProbeLayout: 15.4% la 0.14; coada rampei se stinge în trepte 0.7 → 0.22 → 0.12 m ca drumul de pe lac să rămână plat — PR #300), marcaje cu bețe și stegulețe roșii ale drumului de gheață | intri pe gheață cu viteză; primul moment de „alunecă totul" | 7 → 10 m |
 | **B'** | 0.20–0.38 | **Autostrada de gheață** — plan larg turcoaz cu bule de metan sub roți și crăpături negre; **torosuri** în șiruri diagonale (kicker-e naturale, 0.6–1.2 m), un camion Kamaz parcat, indicatoare rutiere înfipte în gheață; **hovercraftul** traversează diagonal la ~0.30 | grip lateral gheață (~1.5, sub `wet`); **vânt lateral** constant dinspre larg; săritură de pe toros; hovercraftul te orbește cu jet de zăpadă + push lateral | 10–12 m (fără pereți; marginea = zăpadă adâncă = offroad 45%) |
 | **C** | 0.40–0.50 | **Câmpul de plăci crăpate** — o zonă unde gheața e fisurată în plăci poligonale mari (5–8 m), fisurile mai late, apă neagră vizibilă în ele | **placa care se înclină** când e încărcată (2+ mașini sau turbo): se lasă 0.4 m, se aude trosnetul, apoi revine; cine e pe marginea joasă alunecă în apă → repunere. Plăcile „vii" sunt marcate cu crăpături mai albe (cinstit) | 12 m, traseu liber, waypoints AI pe 3 linii |
 | **D** | 0.55 | **Grota de gheață** — capul stâncos al insulei, drumul trece pe sub un arc de stâncă îmbrăcat în țurțuri și „valuri" de gheață înghețată; lumină albastră | tunel scurt (25 m), țurțuri cad când treci (particule + 1 obstacol mic care cade pe bandă), ieșire în viraj strâns pe gheață → drift obligatoriu | 6 m (îngustare) |
@@ -386,6 +386,9 @@ cu **raza 3.5–8 m**, când cel mai strâns viraj de pe pista principală are 1
 Mașinile nu pot intra la unghiul ăla cu viteza cu care ajung acolo. Lățirea
 benzii înrăutățește (2 → 8 pereți): atrage mai multe mașini într-un racord care
 tot nu le poate primi.
+
+Concluzia e aplicată (PR #300): rândul B din §2 nu mai cere scurtătura, iar
+harta 2D (`img/baikal_map.html`) o spune explicit la POI-ul B.
 
 **Ce ar debloca scurtăturile:** un cot mai pronunțat pe traseul principal, care
 să creeze ocolul de tăiat. Intrarea în sat e candidatul natural — e oricum felia

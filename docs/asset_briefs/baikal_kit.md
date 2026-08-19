@@ -46,43 +46,85 @@ recursiv.
 
 ## Ce contine
 
-Douazeci si sase de fisiere. Triunghiurile sunt MASURATE pe GLB.
+56 de fisiere. Triunghiurile sunt MASURATE pe GLB.
 
-**Cladirile de sat sunt UN FISIER PE PIESA**, spre deosebire de celelalte
-kituri (`ice_kit`, `forest_kit`, `shore_kit`), care raman GLB-uri multi-nod.
-Sunt piese hero, asezate una cate una pe ulita din Khuzhir, nu imprastiate
-statistic — deci se refera direct, fara `Track._extract_glb_node()`. Numarul de
-materiale nu se schimba (tot atlasul), deci nici draw call-urile: batch-ul se
-face pe material, nu pe fisier.
+**UN FISIER PE PIESA.** Toate kiturile (sat, gheata, padure, mal, serge) sunt
+sparte: o piesa = un GLB, cu originea la baza ei. Se refera direct, fara `keep`
+si fara `Track._extract_glb_node()`.
 
-| fisier | noduri | tris | scriptul sursa |
-|---|---|---|---|
-| `baikal/rocks/shaman_rock.glb` | `Shaman_Crag_Big`, `Shaman_Crag_Small`, `Shaman_Ice` | 1376 | `build_baikal_shaman.py` |
-| `baikal/props/serge_pole.glb` | `Serge_A/B/C` | 4020 | `build_baikal_shaman.py` |
-| `baikal/structures/railway_viaduct.glb` | `Viaduct_Pier`, `Viaduct_Arch`, `Viaduct_End` | 9340 | `build_baikal_railway.py` |
-| `baikal/structures/railway_tunnel_portal.glb` | `Tunnel_Portal`, `Tunnel_Bore`, `Tunnel_Niche` | 7480 | `build_baikal_railway.py` |
-| `baikal/structures/ice_grotto_arch.glb` | `Grotto_Rock`, `Grotto_Ice`, `Icicle_A..D` | 6224 | `build_baikal_grotto.py` |
-| `baikal/buildings/khuzhir_church.glb` | `Church_Body`, `Church_Roof`, `Church_Dome` | 3706 | `build_baikal_grotto.py` |
-| `baikal/vehicles/hovercraft_khivus.glb` | `Khivus_Skirt/Hull/Cabin/Fan` | 1968 | `build_baikal_vehicles.py` |
-| `baikal/vehicles/train_baikal.glb` | `Baikal_Loco`, `Baikal_Carriage_A/B` | 5600 | `build_baikal_vehicles.py` |
-| `baikal/structures/power_pylon_soviet.glb` | `Pylon_Soviet` | 6764 | `build_baikal_vehicles.py` |
-| `baikal/structures/start_gate_logs.glb` | `StartGate_Logs` | 2348 | `build_baikal_vehicles.py` |
-| `baikal/buildings/log_house_a.glb` | `LogHouse_A` | 2012 | `build_baikal_village.py` |
-| `baikal/buildings/log_house_b.glb` | `LogHouse_B` | 2540 | `build_baikal_village.py` |
-| `baikal/buildings/log_house_c.glb` | `LogHouse_C` | 1616 | `build_baikal_village.py` |
-| `baikal/buildings/banya.glb` | `Banya` | 868 | `build_baikal_village.py` |
-| `baikal/props/fish_rack.glb` | `FishRack` | 1144 | `build_baikal_village.py` |
-| `baikal/props/well_crane.glb` | `Well` | 488 | `build_baikal_village.py` |
-| `baikal/props/woodpile.glb` | `Woodpile` | 4364 | `build_baikal_village.py` |
-| `baikal/props/village_signpost.glb` | `Signpost` | 360 | `build_baikal_village.py` |
-| `baikal/props/village_props.glb` | `PlankFence`, `FenceGate`, `Sled`, `BarrelsCrates` | 5528 | `build_baikal_village.py` |
-| `baikal/vehicles/uaz_bukhanka.glb` | `UAZ_Bukhanka` | 1128 | `build_baikal_village.py` |
-| `baikal/vehicles/kamaz_truck.glb` | `Kamaz_Truck` | 3624 | `build_baikal_village.py` |
-| `baikal/props/ice_kit.glb` | `Toros_A/B/C`, `IceSlabCracked`, `IceRoadMarker`, `IceRoadSign`, `IceHole`, `FisherTent_Green/Orange`, `IceBlockStack`, `FrozenBoat`, `IceShards` | 8110 | `build_baikal_ice.py` |
-| `baikal/trees/forest_kit.glb` | `LarchWinter_A/B/C`, `BirchWinter_A/B/C`, `PineSiberian_A/B` | 54272 | `build_baikal_forest.py` |
-| `baikal/props/shore_kit.glb` | `ShrubSnow`, `GrassTuftDry`, `BoulderLichen_A/B/C`, `CliffFaceOlkhon`, `HuntingCabin`, `ShoreStaircase` | 5816 | `build_baikal_forest.py` |
-| `baikal/props/husky_dog.glb` | `Husky_Dog` (armatura, 7 oase) + `Husky_Dog_Mesh` | 1164 | `build_baikal_animals.py` |
-| `baikal/props/nerpa_seal.glb` | `Nerpa_Seal` (armatura, 4 oase) + `Nerpa_Seal_Mesh` | 1164 | `build_baikal_animals.py` |
+Raman multi-nod doar **ANSAMBLURILE** — biserica (`Church_Body/Roof/Dome`),
+viaductul, tunelul, grota, hovercraftul, trenul si Stanca Samanului: acolo
+nodurile impart o origine si se instantiaza impreuna, deci spargerea le-ar
+rupe.
+
+Fiecare piesa merge in CATEGORIA ei, nu toate in `props/`: bolovanii si faleza
+la `rocks/`, tufele la `plants/`, cabana de vanatoare la `buildings/`, scara de
+mal la `structures/`.
+
+Numarul de materiale nu se schimba (tot atlasul), deci nici draw call-urile:
+batch-ul se face pe material, nu pe fisier. Castigul masurat e in ALTA parte —
+iesirea generatorului de decor a scazut de la **2614 la 384 de linii**, fiindca
+piesele nu mai carauza dupa ele fratii stinsi cu `visible = false`. Cele **349
+de plasari reale si transformarile lor raman IDENTICE la bit**.
+
+| fisier | noduri | tris |
+|---|---|---|
+| `baikal/buildings/banya.glb` | `Banya` | 868 |
+| `baikal/buildings/hunting_cabin.glb` | `HuntingCabin` | 1248 |
+| `baikal/buildings/khuzhir_church.glb` | `Church_Body`, `Church_Dome`, `Church_Roof` | 3706 |
+| `baikal/buildings/log_house_a.glb` | `LogHouse_A` | 2012 |
+| `baikal/buildings/log_house_b.glb` | `LogHouse_B` | 2540 |
+| `baikal/buildings/log_house_c.glb` | `LogHouse_C` | 1616 |
+| `baikal/plants/grass_tuft_dry.glb` | `GrassTuftDry` | 616 |
+| `baikal/plants/shrub_snow.glb` | `ShrubSnow` | 592 |
+| `baikal/props/barrels_crates.glb` | `BarrelsCrates` | 1464 |
+| `baikal/props/fence_gate.glb` | `FenceGate` | 1468 |
+| `baikal/props/fish_rack.glb` | `FishRack` | 1144 |
+| `baikal/props/fisher_tent_green.glb` | `FisherTent_Green` | 508 |
+| `baikal/props/fisher_tent_orange.glb` | `FisherTent_Orange` | 508 |
+| `baikal/props/frozen_boat.glb` | `FrozenBoat` | 962 |
+| `baikal/props/husky_dog.glb` | `Husky_Dog_Mesh` | 1164 |
+| `baikal/props/ice_block_stack.glb` | `IceBlockStack` | 264 |
+| `baikal/props/ice_hole.glb` | `IceHole` | 1208 |
+| `baikal/props/ice_road_marker.glb` | `IceRoadMarker` | 192 |
+| `baikal/props/ice_road_sign.glb` | `IceRoadSign` | 384 |
+| `baikal/props/ice_shards.glb` | `IceShards` | 616 |
+| `baikal/props/ice_slab_cracked.glb` | `IceSlabCracked` | 1708 |
+| `baikal/props/nerpa_seal.glb` | `Nerpa_Seal_Mesh` | 1164 |
+| `baikal/props/plank_fence.glb` | `PlankFence` | 1584 |
+| `baikal/props/serge_pole_a.glb` | `Serge_A` | 1340 |
+| `baikal/props/serge_pole_b.glb` | `Serge_B` | 1164 |
+| `baikal/props/serge_pole_c.glb` | `Serge_C` | 1516 |
+| `baikal/props/sled.glb` | `Sled` | 1012 |
+| `baikal/props/toros_a.glb` | `Toros_A` | 308 |
+| `baikal/props/toros_b.glb` | `Toros_B` | 616 |
+| `baikal/props/toros_c.glb` | `Toros_C` | 836 |
+| `baikal/props/village_signpost.glb` | `Signpost` | 360 |
+| `baikal/props/well_crane.glb` | `Well` | 488 |
+| `baikal/props/woodpile.glb` | `Woodpile` | 4364 |
+| `baikal/rocks/boulder_lichen_a.glb` | `BoulderLichen_A` | 294 |
+| `baikal/rocks/boulder_lichen_b.glb` | `BoulderLichen_B` | 286 |
+| `baikal/rocks/boulder_lichen_c.glb` | `BoulderLichen_C` | 266 |
+| `baikal/rocks/cliff_face_olkhon.glb` | `CliffFaceOlkhon` | 622 |
+| `baikal/rocks/shaman_rock.glb` | `Shaman_Crag_Big`, `Shaman_Crag_Small`, `Shaman_Ice` | 1376 |
+| `baikal/structures/ice_grotto_arch.glb` | 6 noduri | 6224 |
+| `baikal/structures/power_pylon_soviet.glb` | `Pylon_Soviet` | 6764 |
+| `baikal/structures/railway_tunnel_portal.glb` | `Tunnel_Bore`, `Tunnel_Niche`, `Tunnel_Portal` | 7480 |
+| `baikal/structures/railway_viaduct.glb` | `Viaduct_Arch`, `Viaduct_End`, `Viaduct_Pier` | 9340 |
+| `baikal/structures/shore_staircase.glb` | `ShoreStaircase` | 1892 |
+| `baikal/structures/start_gate_logs.glb` | `StartGate_Logs` | 2348 |
+| `baikal/trees/birch_winter_a.glb` | `BirchWinter_A` | 4368 |
+| `baikal/trees/birch_winter_b.glb` | `BirchWinter_B` | 4368 |
+| `baikal/trees/birch_winter_c.glb` | `BirchWinter_C` | 4368 |
+| `baikal/trees/larch_winter_a.glb` | `LarchWinter_A` | 13140 |
+| `baikal/trees/larch_winter_b.glb` | `LarchWinter_B` | 13140 |
+| `baikal/trees/larch_winter_c.glb` | `LarchWinter_C` | 13140 |
+| `baikal/trees/pine_siberian_a.glb` | `PineSiberian_A` | 874 |
+| `baikal/trees/pine_siberian_b.glb` | `PineSiberian_B` | 874 |
+| `baikal/vehicles/hovercraft_khivus.glb` | 4 noduri | 1968 |
+| `baikal/vehicles/kamaz_truck.glb` | `Kamaz_Truck` | 3624 |
+| `baikal/vehicles/train_baikal.glb` | `Baikal_Carriage_A`, `Baikal_Carriage_B`, `Baikal_Loco` | 5600 |
+| `baikal/vehicles/uaz_bukhanka.glb` | `UAZ_Bukhanka` | 1128 |
 
 **Total: 143 024 de triunghiuri**, tot lotul. Bugetul din brief §6 era ~400k pe
 pista cu tot cu teren, din care ~120k doar padurea — kitul intra confortabil.

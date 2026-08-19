@@ -188,9 +188,18 @@ def build_serge_poles():
                            seed=91 + i * 13, x_offset=i * 2.0))
 
     tris = sum(tri_count(o) for o in objs)
-    print("SergePole: %d tris (%s)"
-          % (tris, ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "baikal/props/serge_pole.glb")
+    print("SergePole: %d tris in %d fisiere (%s)"
+          % (tris, len(objs), ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
+    # UN FISIER PE VARIANTA. Cele trei serge stau toate la x=0 in kit, deci
+    # nu erau un "rand" ci trei VARIANTE suprapuse, alese cu `keep` — exact
+    # cazul in care fisierul separat e mai simplu decat filtrul de noduri.
+    files = {
+        "Serge_A": "baikal/props/serge_pole_a.glb",
+        "Serge_B": "baikal/props/serge_pole_b.glb",
+        "Serge_C": "baikal/props/serge_pole_c.glb",
+    }
+    for o in objs:
+        export_glb([o], files[o.name])
     save_blend(objs, "baikal_serge_pole.blend")
     return objs
 

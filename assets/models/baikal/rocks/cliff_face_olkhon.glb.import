@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://l1ehr67duel"
-path="res://.godot/imported/ice_kit.glb-0b9be082612abd32300164d95c3b1430.scn"
+uid="uid://b1o8umssytq03"
+path="res://.godot/imported/cliff_face_olkhon.glb-3d6dc77758ec70d758aa70795c6b16ce.scn"
 
 [deps]
 
-source_file="res://assets/models/baikal/props/ice_kit.glb"
-dest_files=["res://.godot/imported/ice_kit.glb-0b9be082612abd32300164d95c3b1430.scn"]
+source_file="res://assets/models/baikal/rocks/cliff_face_olkhon.glb"
+dest_files=["res://.godot/imported/cliff_face_olkhon.glb-3d6dc77758ec70d758aa70795c6b16ce.scn"]
 
 [params]
 

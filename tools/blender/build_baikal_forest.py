@@ -1,7 +1,8 @@
 """Baikal — kitul de padure si mal (planşa, pozitia 13).
 
-  forest_kit.glb (trees/)  LarchWinter_A/B/C, BirchWinter_A/B/C,
-                           PineSiberian_A/B
+  UN FISIER PE COPAC (baikal/trees/): larch_winter_a/b/c.glb,
+                                      birch_winter_a/b/c.glb,
+                                      pine_siberian_a/b.glb
   shore_kit.glb  (props/)  ShrubSnow, GrassTuftDry, BoulderLichen_A/B/C,
                            CliffFaceOlkhon, HuntingCabin, ShoreStaircase
 
@@ -232,14 +233,41 @@ def build_forest_kit():
     for k, h in enumerate((12.0, 18.0)):
         objs.append(_pine("PineSiberian_%s" % "AB"[k], h, seed=3300 + k * 53))
 
+    # UN FISIER PE COPAC, ca la cladirile de sat.
+    #
+    # Copacii se imprastie statistic (spre deosebire de case), deci ar fi fost
+    # candidatii naturali pentru un GLB multi-nod. Ii spargem oricum, din doua
+    # motive practice:
+    #   - sunt de trei SPECII cu siluete complet diferite, iar decorul alege
+    #     specia dupa zona (larice pe deal, mesteacan in padure, pin la umbra);
+    #     cu fisiere separate, alegerea e calea, nu un filtru de noduri.
+    #   - laricele are 13.140 de triunghiuri, pinul 874 — de 15 ori mai putin.
+    #     Intr-un GLB comun, orice incarcare a unui pin aducea in memorie si
+    #     cele trei larice, adica ~40k de triunghiuri nefolositi.
+    #
+    # Piesele se exporta DIN ORIGINE: fiecare fisier isi are originea la baza
+    # trunchiului. Asezarea pe rand se face DUPA export, doar pentru .blend.
+    files = {
+        "LarchWinter_A": "baikal/trees/larch_winter_a.glb",
+        "LarchWinter_B": "baikal/trees/larch_winter_b.glb",
+        "LarchWinter_C": "baikal/trees/larch_winter_c.glb",
+        "BirchWinter_A": "baikal/trees/birch_winter_a.glb",
+        "BirchWinter_B": "baikal/trees/birch_winter_b.glb",
+        "BirchWinter_C": "baikal/trees/birch_winter_c.glb",
+        "PineSiberian_A": "baikal/trees/pine_siberian_a.glb",
+        "PineSiberian_B": "baikal/trees/pine_siberian_b.glb",
+    }
+    for o in objs:
+        export_glb([o], files[o.name])
+    print("ForestKit: %d tris in %d fisiere (%s)"
+          % (sum(tri_count(o) for o in objs), len(objs),
+             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
+
+    # .blend-ul ramane comun, cu copacii pe un rand ca sa fie lizibil.
     x = 0.0
     for o in objs:
         o.location.x = x
         x += 8.0
-    print("ForestKit: %d tris (%s)"
-          % (sum(tri_count(o) for o in objs),
-             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "baikal/trees/forest_kit.glb")
     save_blend(objs, "baikal_forest_kit.blend")
     return objs
 
@@ -355,15 +383,34 @@ def build_shore_kit():
     finish(stairs, bevel=0.02, ao=AO_PROP, origin="base")
     objs.append(stairs)
 
+    # Exportul se face DIN ORIGINE (asezarea pe rand vine dupa), altfel
+    # offsetul de prezentare ar intra in fiecare fisier.
+    _drop_to_zero(objs)
+    print("ShoreKit: %d tris in %d fisiere (%s)"
+          % (sum(tri_count(o) for o in objs), len(objs),
+             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
+    # UN FISIER PE PIESA — piesele kitului sunt obiecte independente,
+    # nu partile unui ansamblu. Vezi nota din build_baikal_village.py.
+    # Fiecare piesa in CATEGORIA ei, nu toate in props/: bolovanii si faleza
+    # la rocks/, tufele la plants/, cabana la buildings/, scara la structures/.
+    files = {
+        "ShrubSnow": "baikal/plants/shrub_snow.glb",
+        "GrassTuftDry": "baikal/plants/grass_tuft_dry.glb",
+        "BoulderLichen_A": "baikal/rocks/boulder_lichen_a.glb",
+        "BoulderLichen_B": "baikal/rocks/boulder_lichen_b.glb",
+        "BoulderLichen_C": "baikal/rocks/boulder_lichen_c.glb",
+        "CliffFaceOlkhon": "baikal/rocks/cliff_face_olkhon.glb",
+        "HuntingCabin": "baikal/buildings/hunting_cabin.glb",
+        "ShoreStaircase": "baikal/structures/shore_staircase.glb",
+    }
+    for o in objs:
+        export_glb([o], files[o.name])
+
+    # .blend-ul ramane comun, cu piesele pe un rand ca sa fie lizibil.
     x = 0.0
     for o in objs:
         o.location.x = x
         x += 10.0
-    _drop_to_zero(objs)
-    print("ShoreKit: %d tris (%s)"
-          % (sum(tri_count(o) for o in objs),
-             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "baikal/props/shore_kit.glb")
     save_blend(objs, "baikal_shore_kit.blend")
     return objs
 

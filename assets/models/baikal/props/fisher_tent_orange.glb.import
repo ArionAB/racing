@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c5hhmlo56qvme"
-path="res://.godot/imported/village_props.glb-37d1f3739e4fce660f2d5c024c0c9508.scn"
+uid="uid://da17pht7ug2xi"
+path="res://.godot/imported/fisher_tent_orange.glb-1fc0e319222905a3e82edfbb6610c8bd.scn"
 
 [deps]
 
-source_file="res://assets/models/baikal/props/village_props.glb"
-dest_files=["res://.godot/imported/village_props.glb-37d1f3739e4fce660f2d5c024c0c9508.scn"]
+source_file="res://assets/models/baikal/props/fisher_tent_orange.glb"
+dest_files=["res://.godot/imported/fisher_tent_orange.glb-1fc0e319222905a3e82edfbb6610c8bd.scn"]
 
 [params]
 

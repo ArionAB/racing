@@ -3,8 +3,8 @@ extends SceneTree
 ##
 ##   godot --headless --path . --script res://tools/measure_kit.gd -- --kit=baikal
 ##
-## De ce per nod si nu per fisier: kiturile multi-piesa (ice_kit,
-## forest_kit) tin zece piese intr-un GLB. Un `size` pe fisier masoara cutia
+## De ce per nod si nu per fisier: ansamblurile (biserica, viaductul, trenul)
+## tin mai multe piese intr-un GLB. Un `size` pe fisier masoara cutia
 ## care le cuprinde pe toate — numar care nu spune nimic despre cat loc ocupa
 ## o casa. Plasarea are nevoie de amprenta piesei, nu a lotului.
 ##
@@ -13,7 +13,9 @@ extends SceneTree
 const KITS := {
 	"baikal": [
 		"res://assets/models/baikal/rocks/shaman_rock.glb",
-		"res://assets/models/baikal/props/serge_pole.glb",
+		"res://assets/models/baikal/props/serge_pole_a.glb",
+		"res://assets/models/baikal/props/serge_pole_b.glb",
+		"res://assets/models/baikal/props/serge_pole_c.glb",
 		"res://assets/models/baikal/structures/railway_viaduct.glb",
 		"res://assets/models/baikal/structures/railway_tunnel_portal.glb",
 		"res://assets/models/baikal/structures/ice_grotto_arch.glb",
@@ -22,9 +24,9 @@ const KITS := {
 		"res://assets/models/baikal/vehicles/train_baikal.glb",
 		"res://assets/models/baikal/structures/power_pylon_soviet.glb",
 		"res://assets/models/baikal/structures/start_gate_logs.glb",
-		# Cladirile de sat au UN FISIER PE PIESA (spre deosebire de ice_kit /
-		# forest_kit / shore_kit, care raman multi-nod): sunt asezate una
-		# cate una pe ulita, nu imprastiate statistic.
+		# Toate kiturile Baikal au UN FISIER PE PIESA. Multi-nod raman doar
+		# ANSAMBLURILE — biserica, viaductul, tunelul, grota, hovercraftul,
+		# trenul, Stanca Samanului: piese care impart o origine.
 		"res://assets/models/baikal/buildings/log_house_a.glb",
 		"res://assets/models/baikal/buildings/log_house_b.glb",
 		"res://assets/models/baikal/buildings/log_house_c.glb",
@@ -33,12 +35,43 @@ const KITS := {
 		"res://assets/models/baikal/props/well_crane.glb",
 		"res://assets/models/baikal/props/woodpile.glb",
 		"res://assets/models/baikal/props/village_signpost.glb",
-		"res://assets/models/baikal/props/village_props.glb",
+		"res://assets/models/baikal/props/plank_fence.glb",
+		"res://assets/models/baikal/props/fence_gate.glb",
+		"res://assets/models/baikal/props/sled.glb",
+		"res://assets/models/baikal/props/barrels_crates.glb",
 		"res://assets/models/baikal/vehicles/uaz_bukhanka.glb",
 		"res://assets/models/baikal/vehicles/kamaz_truck.glb",
-		"res://assets/models/baikal/props/ice_kit.glb",
-		"res://assets/models/baikal/trees/forest_kit.glb",
-		"res://assets/models/baikal/props/shore_kit.glb",
+		"res://assets/models/baikal/props/toros_a.glb",
+		"res://assets/models/baikal/props/toros_b.glb",
+		"res://assets/models/baikal/props/toros_c.glb",
+		"res://assets/models/baikal/props/ice_slab_cracked.glb",
+		"res://assets/models/baikal/props/ice_road_marker.glb",
+		"res://assets/models/baikal/props/ice_road_sign.glb",
+		"res://assets/models/baikal/props/ice_hole.glb",
+		"res://assets/models/baikal/props/fisher_tent_green.glb",
+		"res://assets/models/baikal/props/fisher_tent_orange.glb",
+		"res://assets/models/baikal/props/ice_block_stack.glb",
+		"res://assets/models/baikal/props/frozen_boat.glb",
+		"res://assets/models/baikal/props/ice_shards.glb",
+		# Copacii au si ei un fisier fiecare (vezi build_baikal_forest.py):
+		# trei specii cu siluete diferite, si un larice costa de 15 ori cat
+		# un pin — intr-un GLB comun, orice pin ar fi adus si laricii.
+		"res://assets/models/baikal/trees/larch_winter_a.glb",
+		"res://assets/models/baikal/trees/larch_winter_b.glb",
+		"res://assets/models/baikal/trees/larch_winter_c.glb",
+		"res://assets/models/baikal/trees/birch_winter_a.glb",
+		"res://assets/models/baikal/trees/birch_winter_b.glb",
+		"res://assets/models/baikal/trees/birch_winter_c.glb",
+		"res://assets/models/baikal/trees/pine_siberian_a.glb",
+		"res://assets/models/baikal/trees/pine_siberian_b.glb",
+		"res://assets/models/baikal/plants/shrub_snow.glb",
+		"res://assets/models/baikal/plants/grass_tuft_dry.glb",
+		"res://assets/models/baikal/rocks/boulder_lichen_a.glb",
+		"res://assets/models/baikal/rocks/boulder_lichen_b.glb",
+		"res://assets/models/baikal/rocks/boulder_lichen_c.glb",
+		"res://assets/models/baikal/rocks/cliff_face_olkhon.glb",
+		"res://assets/models/baikal/buildings/hunting_cabin.glb",
+		"res://assets/models/baikal/structures/shore_staircase.glb",
 		"res://assets/models/baikal/props/husky_dog.glb",
 		"res://assets/models/baikal/props/nerpa_seal.glb",
 	],

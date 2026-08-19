@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://n5v6lk8i4s3f"
-path="res://.godot/imported/serge_pole.glb-3d129239752b2a29b5f4789ea873bf45.scn"
+uid="uid://bjpybhnyhrs3w"
+path="res://.godot/imported/sled.glb-1f26614de5db8acbe33a30e0d294afd1.scn"
 
 [deps]
 
-source_file="res://assets/models/baikal/props/serge_pole.glb"
-dest_files=["res://.godot/imported/serge_pole.glb-3d129239752b2a29b5f4789ea873bf45.scn"]
+source_file="res://assets/models/baikal/props/sled.glb"
+dest_files=["res://.godot/imported/sled.glb-1f26614de5db8acbe33a30e0d294afd1.scn"]
 
 [params]
 

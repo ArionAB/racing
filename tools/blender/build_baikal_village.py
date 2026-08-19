@@ -396,15 +396,27 @@ def build_village_props():
     finish(crates, bevel=0.02, ao=AO_PROP, origin="base")
     objs.append(crates)
 
+    # Exportul se face DIN ORIGINE (asezarea pe rand vine dupa export),
+    # altfel offsetul de prezentare ar intra in fiecare fisier.
+    _drop_to_zero(objs)
+    print("VillageKit(props): %d tris in %d fisiere (%s)"
+          % (sum(tri_count(o) for o in objs), len(objs),
+             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
+    # UN FISIER PE PIESA, ca la case.
+    files = {
+        "PlankFence": "baikal/props/plank_fence.glb",
+        "FenceGate": "baikal/props/fence_gate.glb",
+        "Sled": "baikal/props/sled.glb",
+        "BarrelsCrates": "baikal/props/barrels_crates.glb",
+    }
+    for o in objs:
+        export_glb([o], files[o.name])
+
+    # .blend-ul ramane comun, cu piesele pe un rand ca sa fie lizibil.
     x = 0.0
     for o in objs:
         o.location.x = x
         x += 5.0
-    _drop_to_zero(objs)
-    print("VillageKit(props): %d tris (%s)"
-          % (sum(tri_count(o) for o in objs),
-             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "baikal/props/village_props.glb")
     save_blend(objs, "baikal_village_props.blend")
     return objs
 

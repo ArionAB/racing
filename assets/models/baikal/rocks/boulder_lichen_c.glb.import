@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bf5lg56rimcip"
-path="res://.godot/imported/forest_kit.glb-47ab7cfb1f7dc48704bba60c049d928b.scn"
+uid="uid://ex8jrlo7oku"
+path="res://.godot/imported/boulder_lichen_c.glb-1e6b208437e11cd01f172541998d20ba.scn"
 
 [deps]
 
-source_file="res://assets/models/baikal/trees/forest_kit.glb"
-dest_files=["res://.godot/imported/forest_kit.glb-47ab7cfb1f7dc48704bba60c049d928b.scn"]
+source_file="res://assets/models/baikal/rocks/boulder_lichen_c.glb"
+dest_files=["res://.godot/imported/boulder_lichen_c.glb-1e6b208437e11cd01f172541998d20ba.scn"]
 
 [params]
 

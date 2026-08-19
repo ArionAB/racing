@@ -318,15 +318,41 @@ def build_ice_kit():
     objs.append(shards)
 
     # asezate pe un rand
+    # Exportul se face DIN ORIGINE (asezarea pe rand vine dupa export),
+    # altfel offsetul de prezentare ar intra in fiecare fisier.
+    _drop_to_zero(objs)
+    print("IceKit: %d tris in %d fisiere (%s)"
+          % (sum(tri_count(o) for o in objs), len(objs),
+             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
+    # UN FISIER PE PIESA: piesele kitului sunt obiecte independente,
+    # nu partile unui ansamblu (cum sunt Church_Body/Roof/Dome sau
+    # Viaduct_Pier/Arch/End, care raman grupate fiindca impart o
+    # origine si se instantiaza impreuna).
+    #
+    # Fiecare piesa merge in CATEGORIA ei, nu toate in props/:
+    # bolovanii la rocks/, tufele la plants/, cabana la buildings/.
+    files = {
+        "Toros_A": "baikal/props/toros_a.glb",
+        "Toros_B": "baikal/props/toros_b.glb",
+        "Toros_C": "baikal/props/toros_c.glb",
+        "IceSlabCracked": "baikal/props/ice_slab_cracked.glb",
+        "IceRoadMarker": "baikal/props/ice_road_marker.glb",
+        "IceRoadSign": "baikal/props/ice_road_sign.glb",
+        "IceHole": "baikal/props/ice_hole.glb",
+        "FisherTent_Green": "baikal/props/fisher_tent_green.glb",
+        "FisherTent_Orange": "baikal/props/fisher_tent_orange.glb",
+        "IceBlockStack": "baikal/props/ice_block_stack.glb",
+        "FrozenBoat": "baikal/props/frozen_boat.glb",
+        "IceShards": "baikal/props/ice_shards.glb",
+    }
+    for o in objs:
+        export_glb([o], files[o.name])
+
+    # .blend-ul ramane comun, cu piesele pe un rand ca sa fie lizibil.
     x = 0.0
     for o in objs:
         o.location.x = x
         x += 9.0
-    _drop_to_zero(objs)
-    print("IceKit: %d tris (%s)"
-          % (sum(tri_count(o) for o in objs),
-             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "baikal/props/ice_kit.glb")
     save_blend(objs, "baikal_ice_kit.blend")
     return objs
 

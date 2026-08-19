@@ -38,7 +38,14 @@ const RES := {
 	"vehicles/train_baikal": "27_train",
 	"structures/power_pylon_soviet": "28_pylon",
 	"structures/start_gate_logs": "29_gate",
-	"buildings/village_kit": "30_village",
+	"buildings/log_house_a": "30_house_a",
+	"buildings/log_house_b": "30_house_b",
+	"buildings/log_house_c": "30_house_c",
+	"buildings/banya": "30_banya",
+	"props/fish_rack": "30_fish_rack",
+	"props/well_crane": "30_well",
+	"props/woodpile": "30_woodpile",
+	"props/village_signpost": "30_signpost",
 	"props/village_props": "31_vprops",
 	"vehicles/uaz_bukhanka": "32_uaz",
 	"vehicles/kamaz_truck": "33_kamaz",
@@ -160,16 +167,23 @@ func _specs() -> Array[Dictionary]:
 		# Casele: ciorchine strans pe ambele parti. Retragerea de 5.5 m e
 		# derivata, nu aleasa: LogHouse_B are 11.4 m latime, soseaua 8 m
 		# jumatate-latime, iar gardul cere 1.5 m intre casa si drum.
-		{"poi": "A", "kind": "row", "model": "buildings/village_kit",
+		# Casele: ciorchine strans pe ambele parti. Retragerea de 5.5 m e
+		# derivata, nu aleasa: LogHouse_B are 11.4 m latime, soseaua 8 m
+		# jumatate-latime, iar gardul cere 1.5 m intre casa si drum.
+		#
+		# `model_cycle` in loc de `keep_cycle`: fiecare casa e acum fisierul ei.
+		# Pasul si intervalul raman NESCHIMBATE, deci si pozitiile.
+		{"poi": "A", "kind": "row", "model": "buildings/log_house_a",
 			"name": "CasaS", "from": 0.010, "to": 0.043, "spacing": 13.0,
 			"side": -1.0, "off": 5.5, "scale": 1.0, "face": "road",
 			"yaw_jitter": 7.0,
-			"keep_cycle": [["LogHouse_A"], ["LogHouse_C"], ["LogHouse_B"]]},
-		{"poi": "A", "kind": "row", "model": "buildings/village_kit",
+			"model_cycle": ["buildings/log_house_a", "buildings/log_house_c",
+				"buildings/log_house_b"]},
+		{"poi": "A", "kind": "row", "model": "buildings/log_house_b",
 			"name": "CasaD", "from": 0.014, "to": 0.040, "spacing": 14.0,
 			"side": 1.0, "off": 6.0, "scale": 1.0, "face": "road",
 			"yaw_jitter": 7.0,
-			"keep_cycle": [["LogHouse_B"], ["LogHouse_A"]]},
+			"model_cycle": ["buildings/log_house_b", "buildings/log_house_a"]},
 		# Gardul continuu intre case — semnatura satului in diorama.
 		{"poi": "A", "kind": "row", "model": "props/village_props",
 			"name": "GardS", "from": 0.008, "to": 0.046, "spacing": 3.1,
@@ -181,28 +195,27 @@ func _specs() -> Array[Dictionary]:
 			"side": 1.0, "off": 2.8, "scale": 1.0, "face": "along",
 			"sink": 0.05, "keep_cycle": [["PlankFence"], ["PlankFence"]]},
 		# Gospodaria din spatele caselor: baie, uscator, fantana, lemne.
-		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
+		{"poi": "A", "kind": "one", "model": "buildings/banya",
 			"name": "Banya", "frac": 0.022, "side": 1.0, "off": 15.0,
-			"scale": 1.0, "face": "road", "yaw_jitter": 20.0,
-			"keep": ["Banya"]},
-		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
+			"scale": 1.0, "face": "road", "yaw_jitter": 20.0},
+		{"poi": "A", "kind": "one", "model": "props/fish_rack",
 			"name": "Uscator", "frac": 0.017, "side": -1.0, "off": 13.5,
-			"scale": 1.0, "face": "road", "keep": ["FishRack"]},
-		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
+			"scale": 1.0, "face": "road"},
+		{"poi": "A", "kind": "one", "model": "props/fish_rack",
 			"name": "Uscator2", "frac": 0.031, "side": -1.0, "off": 14.5,
-			"scale": 1.0, "face": "road", "keep": ["FishRack"]},
-		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
+			"scale": 1.0, "face": "road"},
+		{"poi": "A", "kind": "one", "model": "props/well_crane",
 			"name": "Fantana", "frac": 0.027, "side": 1.0, "off": 12.0,
-			"scale": 1.0, "face": "random", "keep": ["Well"]},
-		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
+			"scale": 1.0, "face": "random"},
+		{"poi": "A", "kind": "one", "model": "props/woodpile",
 			"name": "Lemne", "frac": 0.019, "side": -1.0, "off": 10.5,
-			"scale": 1.0, "face": "along", "keep": ["Woodpile"]},
-		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
+			"scale": 1.0, "face": "along"},
+		{"poi": "A", "kind": "one", "model": "props/woodpile",
 			"name": "Lemne2", "frac": 0.037, "side": 1.0, "off": 11.0,
-			"scale": 1.0, "face": "along", "keep": ["Woodpile"]},
-		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
+			"scale": 1.0, "face": "along"},
+		{"poi": "A", "kind": "one", "model": "props/village_signpost",
 			"name": "IndicatorSat", "frac": 0.048, "side": -1.0, "off": 3.2,
-			"scale": 1.0, "face": "road", "keep": ["Signpost"]},
+			"scale": 1.0, "face": "road"},
 		# Marunt: sanii si lazi lipite de garduri.
 		{"poi": "A", "kind": "one", "model": "props/village_props",
 			"name": "Sanie", "frac": 0.015, "side": -1.0, "off": 4.2,
@@ -494,13 +507,13 @@ func _specs() -> Array[Dictionary]:
 			"name": "GardBiserica", "from": 0.952, "to": 0.976, "spacing": 3.1,
 			"side": -1.0, "off": 3.0, "scale": 1.0, "face": "along",
 			"sink": 0.05, "keep_cycle": [["PlankFence"]]},
-		{"poi": "I", "kind": "row", "model": "buildings/village_kit",
+		{"poi": "I", "kind": "row", "model": "buildings/log_house_c",
 			"name": "CasaIntrare", "from": 0.968, "to": 0.984, "spacing": 12.0,
 			"side": 1.0, "off": 6.0, "scale": 1.0, "face": "road",
-			"yaw_jitter": 8.0, "keep_cycle": [["LogHouse_C"]]},
-		{"poi": "I", "kind": "one", "model": "buildings/village_kit",
+			"yaw_jitter": 8.0},
+		{"poi": "I", "kind": "one", "model": "props/woodpile",
 			"name": "LemneIntrare", "frac": 0.958, "side": 1.0, "off": 4.5,
-			"scale": 1.0, "face": "along", "keep": ["Woodpile"]},
+			"scale": 1.0, "face": "along"},
 	]
 
 
@@ -513,12 +526,26 @@ func _emit_row(spec: Dictionary) -> void:
 	var keeps: Array = spec.get("keep_cycle", [])
 	var jitter := float(spec.get("off_jitter", 0.0))
 	var i := 0
+	# `model_cycle` alterneaza FISIERUL de la o pozitie la alta, asa cum
+	# `keep_cycle` alterneaza nodul pastrat dintr-un GLB multi-nod. De cand
+	# cladirile de sat au un fisier fiecare, varianta pe noduri nu mai are ce
+	# filtra — dar ciclul trebuie sa ramana, altfel casele ies toate la fel.
+	#
+	# Alternativa incercata intai (un rand separat per model, cu pasul
+	# inmultit) NU e echivalenta: pe intervalul si pasul din spec ea a pierdut
+	# o casa din opt, fiindca impartirea pe sloturi nu cade la fel. Ciclul pe
+	# acelasi rand pastreaza exact pozitiile vechi.
+	var models: Array = spec.get("model_cycle", [])
 	var d := d0
 	while d <= d1:
 		var st := _path.at(d)
 		var keep: Array = keeps[i % keeps.size()] if not keeps.is_empty() else []
 		var off := float(spec["off"]) + _rng.randf_range(-jitter, jitter)
-		_place(spec, st, off, keep, _numbered(String(spec["name"]), i))
+		var one := spec
+		if not models.is_empty():
+			one = spec.duplicate()
+			one["model"] = models[i % models.size()]
+		_place(one, st, off, keep, _numbered(String(spec["name"]), i))
 		i += 1
 		d += spacing
 

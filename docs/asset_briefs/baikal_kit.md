@@ -13,8 +13,14 @@ crapa nimic — se vede abia la urmatorul screenshot).
 
 ## Ce contine
 
-Nouasprezece fisiere. Cotele si triunghiurile sunt MASURATE pe GLB, nu
-declarate.
+Douazeci si sase de fisiere. Triunghiurile sunt MASURATE pe GLB.
+
+**Cladirile de sat sunt UN FISIER PE PIESA**, spre deosebire de celelalte
+kituri (`ice_kit`, `forest_kit`, `shore_kit`), care raman GLB-uri multi-nod.
+Sunt piese hero, asezate una cate una pe ulita din Khuzhir, nu imprastiate
+statistic — deci se refera direct, fara `Track._extract_glb_node()`. Numarul de
+materiale nu se schimba (tot atlasul), deci nici draw call-urile: batch-ul se
+face pe material, nu pe fisier.
 
 | fisier | noduri | tris | scriptul sursa |
 |---|---|---|---|
@@ -28,7 +34,14 @@ declarate.
 | `vehicles/train_baikal.glb` | `Baikal_Loco`, `Baikal_Carriage_A/B` | 5600 | `build_baikal_vehicles.py` |
 | `structures/power_pylon_soviet.glb` | `Pylon_Soviet` | 6764 | `build_baikal_vehicles.py` |
 | `structures/start_gate_logs.glb` | `StartGate_Logs` | 2348 | `build_baikal_vehicles.py` |
-| `buildings/village_kit.glb` | `LogHouse_A/B/C`, `Banya`, `FishRack`, `Well`, `Woodpile`, `Signpost` | 13392 | `build_baikal_village.py` |
+| `buildings/log_house_a.glb` | `LogHouse_A` | 2012 | `build_baikal_village.py` |
+| `buildings/log_house_b.glb` | `LogHouse_B` | 2540 | `build_baikal_village.py` |
+| `buildings/log_house_c.glb` | `LogHouse_C` | 1616 | `build_baikal_village.py` |
+| `buildings/banya.glb` | `Banya` | 868 | `build_baikal_village.py` |
+| `props/fish_rack.glb` | `FishRack` | 1144 | `build_baikal_village.py` |
+| `props/well_crane.glb` | `Well` | 488 | `build_baikal_village.py` |
+| `props/woodpile.glb` | `Woodpile` | 4364 | `build_baikal_village.py` |
+| `props/village_signpost.glb` | `Signpost` | 360 | `build_baikal_village.py` |
 | `props/village_props.glb` | `PlankFence`, `FenceGate`, `Sled`, `BarrelsCrates` | 5528 | `build_baikal_village.py` |
 | `vehicles/uaz_bukhanka.glb` | `UAZ_Bukhanka` | 1128 | `build_baikal_village.py` |
 | `vehicles/kamaz_truck.glb` | `Kamaz_Truck` | 3624 | `build_baikal_village.py` |

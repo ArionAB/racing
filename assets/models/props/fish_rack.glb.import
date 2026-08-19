@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://braxrpblhb0bu"
-path="res://.godot/imported/village_kit.glb-374969057cdf1cbda92996dd0b03c2a3.scn"
+uid="uid://by5u6i3eah8cs"
+path="res://.godot/imported/fish_rack.glb-523e8d56f13d7c9360c50ec187fb8348.scn"
 
 [deps]
 
-source_file="res://assets/models/buildings/village_kit.glb"
-dest_files=["res://.godot/imported/village_kit.glb-374969057cdf1cbda92996dd0b03c2a3.scn"]
+source_file="res://assets/models/props/fish_rack.glb"
+dest_files=["res://.godot/imported/fish_rack.glb-523e8d56f13d7c9360c50ec187fb8348.scn"]
 
 [params]
 

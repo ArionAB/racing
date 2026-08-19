@@ -5,14 +5,39 @@
 [ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="3_mover"]
 [ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="4_hz"]
 [ext_resource type="PackedScene" uid="uid://cyw12qlbqbwjh" path="res://assets/models/structures/mountain_tunnel.glb" id="5_5ulhg"]
+[ext_resource type="PackedScene" uid="uid://n7u7ccamtb3k" path="res://assets/models/structures/fence_ranch.glb" id="8_cfr8q"]
+[ext_resource type="PackedScene" uid="uid://btaima4gtsps7" path="res://assets/models/baikal/buildings/banya.glb" id="8_mwbs2"]
+[ext_resource type="PackedScene" uid="uid://bx5s71i4eh1fn" path="res://assets/models/baikal/buildings/log_house_c.glb" id="9_cfr8q"]
+[ext_resource type="PackedScene" uid="uid://b4eaiq1k8k2ob" path="res://assets/models/baikal/buildings/log_house_a.glb" id="10_tnkmd"]
+[ext_resource type="PackedScene" uid="uid://e02q0xlu7g2y" path="res://assets/models/baikal/buildings/log_house_b.glb" id="15_h42an"]
+[ext_resource type="PackedScene" uid="uid://dsntbo71enxnt" path="res://assets/models/baikal/props/village_signpost.glb" id="18_w3si4"]
+[ext_resource type="PackedScene" uid="uid://dpm80o2itwdfi" path="res://assets/models/baikal/props/well_crane.glb" id="19_ji21j"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="19_wprop"]
+[ext_resource type="PackedScene" uid="uid://5msfclmxw1gv" path="res://assets/models/baikal/props/woodpile.glb" id="20_g742r"]
+[ext_resource type="PackedScene" uid="uid://by5u6i3eah8cs" path="res://assets/models/baikal/props/fish_rack.glb" id="21_fn64w"]
+[ext_resource type="PackedScene" uid="uid://shcm1cury3ee" path="res://assets/models/vehicles/timber_sled.glb" id="22_hfw80"]
+[ext_resource type="PackedScene" uid="uid://m8ehaq3yn6wu" path="res://assets/models/baikal/rocks/shaman_rock.glb" id="22_yw6cq"]
+[ext_resource type="PackedScene" uid="uid://dpqn8jxott6qw" path="res://assets/models/baikal/props/ice_block_stack.glb" id="23_g742r"]
+[ext_resource type="PackedScene" uid="uid://cvxe0v2cc1k8m" path="res://assets/models/baikal/props/ice_shards.glb" id="23_km8wo"]
+[ext_resource type="PackedScene" uid="uid://jyqmu1jclt5n" path="res://assets/models/baikal/buildings/khuzhir_church.glb" id="25_church"]
+[ext_resource type="PackedScene" uid="uid://bsa7nn0d42qhy" path="res://assets/models/baikal/props/serge_pole_a.glb" id="25_hfw80"]
+[ext_resource type="PackedScene" uid="uid://sxlm8fcp84mo" path="res://assets/models/baikal/props/ice_road_marker.glb" id="25_nnftx"]
+[ext_resource type="PackedScene" uid="uid://dqt5h7y3i461d" path="res://assets/models/baikal/props/serge_pole_b.glb" id="26_3ylwr"]
+[ext_resource type="PackedScene" uid="uid://hsuyi1gra5s7" path="res://assets/models/baikal/vehicles/hovercraft_khivus.glb" id="26_khivus"]
+[ext_resource type="PackedScene" uid="uid://c2mkgjmmy7wp" path="res://assets/models/baikal/props/serge_pole_c.glb" id="27_km8wo"]
+[ext_resource type="PackedScene" uid="uid://c3qvn6tmytsax" path="res://assets/models/baikal/rocks/boulder_lichen_a.glb" id="28_3ylwr"]
+[ext_resource type="PackedScene" uid="uid://blx1lq0lx0dml" path="res://assets/models/baikal/structures/start_gate_logs.glb" id="29_gate"]
+[ext_resource type="PackedScene" uid="uid://dx4uxbdm3a4la" path="res://assets/models/baikal/rocks/boulder_lichen_b.glb" id="29_km8wo"]
+[ext_resource type="PackedScene" uid="uid://py17rg2km4ok" path="res://assets/models/baikal/props/frozen_boat.glb" id="30_nnftx"]
+[ext_resource type="PackedScene" uid="uid://cd2ohlp6i00qi" path="res://assets/models/baikal/vehicles/kamaz_truck.glb" id="33_kamaz"]
+[ext_resource type="PackedScene" uid="uid://d0tw1lq21jo3b" path="res://assets/models/baikal/props/husky_dog.glb" id="37_husky"]
 
 [sub_resource type="Curve3D" id="Curve3D_baikal"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 120, 4, 7, 0, 0, 0, 0, 0, 0, 180, 3.5, 30, 0, 0, 0, 0, 0, 0, 225, 1.2, 68, 0, 0, 0, 0, 0, 0, 262, 0.1, 112, 0, 0, 0, 0, 0, 0, 322, 0.1, 150, 0, 0, 0, 0, 0, 0, 398, 0.1, 172, 0, 0, 0, 0, 0, 0, 472, 0.1, 158, 0, 0, 0, 0, 0, 0, 532, 0.1, 120, 0, 0, 0, 0, 0, 0, 570, 0.1, 68, 0, 0, 0, 0, 0, 0, 570, 0.1, 8, 0, 0, 0, 0, 0, 0, 555, 0.1, -68, 0, 0, 0, 0, 0, 0, 518, 0.1, -120, 0, 0, 0, 0, 0, 0, 465, 1, -158, 0, 0, 0, 0, 0, 0, 403.5, 6, -201, 0, 0, 0, 0, 0, 0, 345, 10.5, -188, 0, 0, 0, 0, 0, 0, 286.5, 12, -174.7, 0, 0, 0, 0, 0, 0, 228, 12, -161.5, 0, 0, 0, 0, 0, 0, 179, 12, -150.4, 0, 0, 0, 0, 0, 0, 142, 11, -142, 0, 0, 0, 0, 0, 0, 90, 9, -112, 0, 0, 0, 0, 0, 0, 38, 8, -135, 0, 0, 0, 0, 0, 0, -15, 6, -105, 0, 0, 0, 0, 0, 0, -45, 5, -60, 0, 0, 0, 0, 0, 0, -48, 4.3, -22, 0, 0, 0, 0, 0, 0, -28, 4, -3),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 12.5, 0, 0, 0, 0, 0, 0, 0, 120, 12, 7, 0, 0, 0, 0, 0, 0, 180, 12, 30, 0, 0, 0, 0, 0, 0, 225, 4.9, 68, 0, 0, 0, 0, 0, 0, 262, 0.7, 112, 0, 0, 0, 0, 0, 0, 282, 0.22, 124.7, 0, 0, 0, 0, 0, 0, 302, 0.12, 137.3, 0, 0, 0, 0, 0, 0, 322, 0.1, 150, 0, 0, 0, 0, 0, 0, 398, 0.1, 172, 0, 0, 0, 0, 0, 0, 472, 0.1, 158, 0, 0, 0, 0, 0, 0, 532, 0.1, 120, 0, 0, 0, 0, 0, 0, 570, 0.1, 68, 0, 0, 0, 0, 0, 0, 570, 0.1, 8, 0, 0, 0, 0, 0, 0, 555, 0.1, -68, 0, 0, 0, 0, 0, 0, 518, 0.1, -120, 0, 0, 0, 0, 0, 0, 465, 1, -158, 0, 0, 0, 0, 0, 0, 403.5, 6, -201, 0, 0, 0, 0, 0, 0, 345, 10.5, -188, 0, 0, 0, 0, 0, 0, 286.5, 12, -174.7, 0, 0, 0, 0, 0, 0, 228, 12, -161.5, 0, 0, 0, 0, 0, 0, 179, 12, -150.4, 0, 0, 0, 0, 0, 0, 142, 12.5, -142, 0, 0, 0, 0, 0, 0, 90, 13.5, -112, 0, 0, 0, 0, 0, 0, 38, 14.5, -135, 0, 0, 0, 0, 0, 0, -15, 14, -105, 0, 0, 0, 0, 0, 0, -45, 13.5, -60, 0, 0, 0, 0, 0, 0, -48, 13, -22, 0, 0, 0, 0, 0, 0, -28, 12.5, -3),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
-point_count = 26
+point_count = 28
 
 [sub_resource type="Curve3D" id="Curve3D_hover"]
 _data = {
@@ -21,11 +46,19 @@ _data = {
 }
 point_count = 7
 
+[sub_resource type="Curve3D" id="Curve3D_43ue3"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 3.8964767, 0.41713524, 29.257866, 0, 0, 0, 0, 0, 0, 3.975422, 0.41530418, 36.061493, 0, 0, 0, 0, 0, 0, -1.4914188, 0.37412834, 19.204039, 0, 0, 0, 0, 0, 0, -3.9101453, 0.37072563, 15.409637, 0, 0, 0, 0, 0, 0, -2.5942636, 0.40094185, 8.460148, 0, 0, 0, 0, 0, 0, 2.8350658, 0.4798107, 6.755373, 0, 0, 0, 0, 0, 0, 2.0159988, 0.56962013, -1.3354912, 0, 0, 0, 0, 0, 0, 7.6776342, 0.65616035, 0.091041565),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 8
+
 [node name="Track10" type="Node3D" unique_id=1242242835]
 script = ExtResource("1_track")
 custom_name = "Baikal"
 custom_theme = "baikal"
-custom_sea_level_offset = -4.23
+custom_gate_model = "uid://blx1lq0lx0dml"
+custom_sea_level_offset = -7.05
 custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])
 custom_ravines = Array[Vector4]([Vector4(0.69, 0.75, 13, 0)])
 custom_cornice_ravines = Array[int]([0])
@@ -33,7 +66,7 @@ custom_train_along_fracs = Array[float]([0.705])
 custom_hummock_fracs = Array[float]([0.245, 0.335])
 custom_ice_slab_fracs = Array[float]([0.372, 0.398, 0.425])
 custom_width_segments = Array[Vector3]([Vector3(0.955, 0.075, 8), Vector3(0.205, 0.545, 11), Vector3(0.56, 0.61, 6), Vector3(0.715, 0.855, 6.5)])
-sea_level_offset = -4.23
+sea_level_offset = -7.05
 
 [node name="Path" type="Path3D" parent="." unique_id=1711934443]
 curve = SubResource("Curve3D_baikal")
@@ -73,6 +106,7 @@ radius_m = 24.0
 [node name="HovercraftLarg" type="Path3D" parent="." unique_id=513364004]
 curve = SubResource("Curve3D_hover")
 script = ExtResource("3_mover")
+model = ExtResource("26_khivus")
 speed = 22.0
 stick_to_ground = false
 push_radius = 9.0
@@ -88,6 +122,7 @@ metadata/_custom_type_script = "uid://b1848dr3kabqm"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435, 0.1, 166)
 gizmo_extents = 3.0
 script = ExtResource("4_hz")
+model = ExtResource("26_khivus")
 motion = 1
 metadata/_custom_type_script = "uid://ccxa8xagvu55q"
 
@@ -106,3 +141,268 @@ transform = Transform3D(1.0840882, 0, 0.46411216, 0, 1.179257, 0, -0.46411216, 0
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=1106331250]
 script = ExtResource("19_wprop")
+
+[node name="1)START Khuzhir" type="Node3D" parent="DecorManual" unique_id=1156927533]
+
+[node name="fence_ranch" parent="DecorManual/1)START Khuzhir" unique_id=1482496780 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.595299, 12.517, -9.807127)
+
+[node name="fence_ranch2" parent="DecorManual/1)START Khuzhir" unique_id=1752491196 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.884659, 12.517, -9.807127)
+
+[node name="fence_ranch3" parent="DecorManual/1)START Khuzhir" unique_id=580895611 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.13848, 12.517, -9.807127)
+
+[node name="fence_ranch4" parent="DecorManual/1)START Khuzhir" unique_id=1743389460 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.186966, 12.517, -9.807127)
+
+[node name="fence_ranch5" parent="DecorManual/1)START Khuzhir" unique_id=1672721364 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.208853, 12.517, -9.807127)
+
+[node name="fence_ranch6" parent="DecorManual/1)START Khuzhir" unique_id=1037866954 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.332399, 12.517, -9.807127)
+
+[node name="fence_ranch7" parent="DecorManual/1)START Khuzhir" unique_id=373136298 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4624567, 12.517, -9.807127)
+
+[node name="fence_ranch11" parent="DecorManual/1)START Khuzhir" unique_id=1247478362 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4624567, 12.517, 10.758975)
+
+[node name="fence_ranch12" parent="DecorManual/1)START Khuzhir" unique_id=1567109856 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5170937, 12.517, 10.758975)
+
+[node name="fence_ranch13" parent="DecorManual/1)START Khuzhir" unique_id=2009701025 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.3518505, 12.517, 10.758975)
+
+[node name="fence_ranch14" parent="DecorManual/1)START Khuzhir" unique_id=1084818187 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.171856, 12.517, 10.758975)
+
+[node name="fence_ranch15" parent="DecorManual/1)START Khuzhir" unique_id=1297782942 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.024593, 12.517, 10.758975)
+
+[node name="fence_ranch16" parent="DecorManual/1)START Khuzhir" unique_id=605175277 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.919207, 12.517, 10.758975)
+
+[node name="fence_ranch17" parent="DecorManual/1)START Khuzhir" unique_id=567192630 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.978563, 12.517, 10.758975)
+
+[node name="fence_ranch18" parent="DecorManual/1)START Khuzhir" unique_id=1164243260 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.04809, 12.517, 10.758975)
+
+[node name="fence_ranch19" parent="DecorManual/1)START Khuzhir" unique_id=1718632999 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.878212, 12.517, 10.758975)
+
+[node name="fence_ranch20" parent="DecorManual/1)START Khuzhir" unique_id=1069327798 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.9089, 12.517, 10.758975)
+
+[node name="fence_ranch8" parent="DecorManual/1)START Khuzhir" unique_id=910970337 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(0.9981923, 0, -0.06010063, 0, 1, 0, 0.06010063, 0, 0.9981923, -3.1546526, 12.517, -10.689057)
+
+[node name="fence_ranch9" parent="DecorManual/1)START Khuzhir" unique_id=255811685 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(0.9981923, 0, -0.06010063, 0, 1, 0, 0.06010063, 0, 0.9981923, -7.078416, 12.517, -10.689057)
+
+[node name="fence_ranch10" parent="DecorManual/1)START Khuzhir" unique_id=1491827259 instance=ExtResource("8_cfr8q")]
+transform = Transform3D(0.9981923, 0, -0.06010063, 0, 1, 0, 0.06010063, 0, 0.9981923, -10.93027, 12.517, -10.689057)
+
+[node name="banya" parent="DecorManual/1)START Khuzhir" unique_id=367788128 instance=ExtResource("8_mwbs2")]
+transform = Transform3D(-0.9995514, 0, 0.029948518, 0, 1, 0, -0.029948518, 0, -0.9995514, 30.52483, 12.2214, -14.77785)
+
+[node name="banya2" parent="DecorManual/1)START Khuzhir" unique_id=516153858 instance=ExtResource("8_mwbs2")]
+transform = Transform3D(0.99608785, 0, 0.088368244, 0, 1, 0, -0.088368244, 0, 0.99608785, 30.52483, 12.2214, 15.801826)
+
+[node name="log_house_c" parent="DecorManual/1)START Khuzhir" unique_id=537638852 instance=ExtResource("9_cfr8q")]
+transform = Transform3D(-0.9986633, 0, 0.051687475, 0, 1, 0, -0.051687475, 0, -0.9986633, 21.172277, 12.2122, -16.473385)
+
+[node name="log_house_c2" parent="DecorManual/1)START Khuzhir" unique_id=1189695716 instance=ExtResource("9_cfr8q")]
+transform = Transform3D(0.99810547, 0, 0.061526455, 0, 1, 0, -0.061526455, 0, 0.99810547, 21.172277, 12.2122, 16.205303)
+
+[node name="log_house_c3" parent="DecorManual/1)START Khuzhir" unique_id=29722143 instance=ExtResource("9_cfr8q")]
+transform = Transform3D(0.959105, 0, -0.28305045, 0, 1, 0, 0.28305045, 0, 0.959105, -23.64493, 12.2122, 13.439922)
+
+[node name="log_house_a" parent="DecorManual/1)START Khuzhir" unique_id=28249827 instance=ExtResource("10_tnkmd")]
+transform = Transform3D(-0.97992104, 0, 0.1993859, 0, 1, 0, -0.1993859, 0, -0.97992104, 11.375815, 12.2076, -18.10482)
+
+[node name="log_house_a3" parent="DecorManual/1)START Khuzhir" unique_id=566507074 instance=ExtResource("10_tnkmd")]
+transform = Transform3D(0.96687526, 0, -0.25524935, 0, 1, 0, 0.25524935, 0, 0.96687526, -12.844701, 12.2076, 14.947872)
+
+[node name="log_house_a2" parent="DecorManual/1)START Khuzhir" unique_id=61073777 instance=ExtResource("10_tnkmd")]
+transform = Transform3D(0.999997, 0, 0.002454266, 0, 1, 0, -0.002454266, 0, 0.999997, 11.375815, 12.2076, 16.748615)
+
+[node name="khuzhir_church" parent="DecorManual/1)START Khuzhir" unique_id=321623571 instance=ExtResource("25_church")]
+transform = Transform3D(-0.9759338, 0, 0.21806699, 0, 1, 0, -0.21806699, 0, -0.9759338, -14.210766, 12.4531, -25.709246)
+
+[node name="kamaz_truck" parent="DecorManual/1)START Khuzhir" unique_id=942740877 instance=ExtResource("33_kamaz")]
+transform = Transform3D(-0.9319982, 0, 0.36246288, 0, 1, 0, -0.36246288, 0, -0.9319982, -19.323345, 12.2513, -15.809343)
+
+[node name="husky_dog2" parent="DecorManual/1)START Khuzhir" unique_id=1941916545 instance=ExtResource("37_husky")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.058765, 12.4946, -22.061163)
+
+[node name="husky_dog3" parent="DecorManual/1)START Khuzhir" unique_id=780414597 instance=ExtResource("37_husky")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.992945, 12.4946, -14.265453)
+
+[node name="start_gate_logs" parent="DecorManual/1)START Khuzhir" unique_id=344225898 instance=ExtResource("29_gate")]
+transform = Transform3D(-0.0632937, 0, 1.6369145, 0, 1.6381377, 0, -1.6369145, 0, -0.0632937, 0.42554235, 12.0803, -0.5589791)
+visible = false
+
+[node name="log_house_b" parent="DecorManual/1)START Khuzhir" unique_id=495180342 instance=ExtResource("15_h42an")]
+transform = Transform3D(-0.9338343, 0, 0.3577058, 0, 1, 0, -0.3577058, 0, -0.9338343, 0, 12.2208, -22.940628)
+
+[node name="log_house_b2" parent="DecorManual/1)START Khuzhir" unique_id=1286841378 instance=ExtResource("15_h42an")]
+transform = Transform3D(0.9992683, 0, 0.03824812, 0, 1, 0, -0.03824812, 0, 0.9992683, 0, 12.2208, 17.636272)
+
+[node name="village_signpost" parent="DecorManual/1)START Khuzhir" unique_id=672314980 instance=ExtResource("18_w3si4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.091494, 12.2562, 13.177596)
+
+[node name="well_crane" parent="DecorManual/1)START Khuzhir" unique_id=944313461 instance=ExtResource("19_ji21j")]
+transform = Transform3D(-0.9986305, 0, 0.052316524, 0, 1, 0, -0.052316524, 0, -0.9986305, 40.769035, 11.8317, -9.76203)
+
+[node name="woodpile" parent="DecorManual/1)START Khuzhir" unique_id=62185190 instance=ExtResource("20_g742r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.765182, 12.2241, -9.604711)
+
+[node name="woodpile4" parent="DecorManual/1)START Khuzhir" unique_id=1943081656 instance=ExtResource("20_g742r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.94444, 12.2241, -9.604711)
+
+[node name="woodpile2" parent="DecorManual/1)START Khuzhir" unique_id=1152638706 instance=ExtResource("20_g742r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.656631, 12.2241, -16.892988)
+
+[node name="woodpile3" parent="DecorManual/1)START Khuzhir" unique_id=569105522 instance=ExtResource("20_g742r")]
+transform = Transform3D(0.9099234, 0, -0.41477636, 0, 1, 0, 0.41477636, 0, 0.9099234, -37.353477, 12.2241, 5.4326153)
+
+[node name="fish_rack" parent="DecorManual/1)START Khuzhir" unique_id=646765015 instance=ExtResource("21_fn64w")]
+transform = Transform3D(-0.99998987, 0, 0.0045000482, 0, 1, 0, -0.0045000482, 0, -0.99998987, -10.28016, 11.2155, 9.526552)
+
+[node name="fish_rack2" parent="DecorManual/1)START Khuzhir" unique_id=2039251971 instance=ExtResource("21_fn64w")]
+transform = Transform3D(-0.99998987, 0, 0.0045000482, 0, 1, 0, -0.0045000482, 0, -0.99998987, 41.34292, 11.2155, 12.365994)
+
+[node name="timber_sled" parent="DecorManual/1)START Khuzhir" unique_id=765899827 instance=ExtResource("22_hfw80")]
+transform = Transform3D(0.99958354, 0.028857766, 0, -0.028857766, 0.99958354, 0, 0, 0, 1, 45.542915, 12.2682, 13.7302)
+
+[node name="timber_sled2" parent="DecorManual/1)START Khuzhir" unique_id=1355489126 instance=ExtResource("22_hfw80")]
+transform = Transform3D(0.86202973, 0.024886617, -0.5062464, -0.028857766, 0.99958354, 0, 0.50603557, 0.014609139, 0.8623889, -32.077316, 12.2682, 8.5411625)
+
+[node name="timber_sled3" parent="DecorManual/1)START Khuzhir" unique_id=1238150701 instance=ExtResource("22_hfw80")]
+transform = Transform3D(0.835477, 0.024120044, 0.548996, -0.028857764, 0.99958354, -1.7461197e-09, -0.5487673, -0.015842797, 0.83582497, -36.14552, 12.2682, -25.098864)
+
+[node name="Huskey1" type="Path3D" parent="DecorManual/1)START Khuzhir" unique_id=641444295]
+transform = Transform3D(0.25233936, 0, 0.9676388, 0, 1, 0, -0.9676388, 0, 0.25233936, 55.79851, 11.8294, -12.625604)
+curve = SubResource("Curve3D_43ue3")
+script = ExtResource("3_mover")
+model = ExtResource("37_husky")
+animation = "Run"
+metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="Huskey2" type="Path3D" parent="DecorManual/1)START Khuzhir" unique_id=1330568021]
+transform = Transform3D(0.25233936, 0, 0.9676388, 0, 1, 0, -0.9676388, 0, 0.25233936, -34.227005, 11.8294, -18.763498)
+curve = SubResource("Curve3D_43ue3")
+script = ExtResource("3_mover")
+model = ExtResource("37_husky")
+animation = "Run"
+metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="2)Stanca samanului" type="Node3D" parent="DecorManual" unique_id=1424802178]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 189.66707, 11.8, 34.047485)
+
+[node name="ice_shards" parent="DecorManual/2)Stanca samanului" unique_id=940683641 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.523056, 0, -18.436453)
+
+[node name="ice_shards2" parent="DecorManual/2)Stanca samanului" unique_id=1131087895 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.01260376, 0, -14.407946)
+
+[node name="ice_shards3" parent="DecorManual/2)Stanca samanului" unique_id=1159567154 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.890381, 0, -9.838713)
+
+[node name="ice_shards4" parent="DecorManual/2)Stanca samanului" unique_id=337697982 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.754196, 0, -3.1746597)
+
+[node name="ice_road_marker" parent="DecorManual/2)Stanca samanului" unique_id=173811357 instance=ExtResource("25_nnftx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.275162, 0, 0)
+
+[node name="shaman_rock" parent="DecorManual/2)Stanca samanului" unique_id=2008906963 instance=ExtResource("22_yw6cq")]
+transform = Transform3D(0.8138932, 0, -0.5810145, 0, 1, 0, 0.5810145, 0, 0.8138932, 9.395203, 0, -16.218403)
+
+[node name="shaman_rock2" parent="DecorManual/2)Stanca samanului" unique_id=245756743 instance=ExtResource("22_yw6cq")]
+transform = Transform3D(-0.6941438, 0, 0.2721777, 0, 0.745598, 0, -0.2721777, 0, -0.6941438, -4.0245667, 0, -24.902872)
+
+[node name="serge_pole_a" parent="DecorManual/2)Stanca samanului" unique_id=256955729 instance=ExtResource("25_hfw80")]
+transform = Transform3D(1.8030362, 0, 0, 0, 1.8030362, 0, 0, 0, 1.8030362, -20.436295, -0.17823005, 1.6853218)
+
+[node name="serge_pole_a2" parent="DecorManual/2)Stanca samanului" unique_id=203527150 instance=ExtResource("25_hfw80")]
+transform = Transform3D(1.8030362, 0, 0, 0, 1.8030362, 0, 0, 0, 1.8030362, -17.436646, -0.17823005, 3.3501854)
+
+[node name="serge_pole_a3" parent="DecorManual/2)Stanca samanului" unique_id=2032139759 instance=ExtResource("25_hfw80")]
+transform = Transform3D(1.8030362, 0, 0, 0, 1.8030362, 0, 0, 0, 1.8030362, -14.602921, -0.17823005, 4.8588753)
+
+[node name="serge_pole_a4" parent="DecorManual/2)Stanca samanului" unique_id=333423962 instance=ExtResource("25_hfw80")]
+transform = Transform3D(1.8030362, 0, 0, 0, 1.8030362, 0, 0, 0, 1.8030362, -11.682617, -0.17823005, 5.6881676)
+
+[node name="serge_pole_b" parent="DecorManual/2)Stanca samanului" unique_id=1954176664 instance=ExtResource("26_3ylwr")]
+transform = Transform3D(1.5448787, 0, 0, 0, 1.5448787, 0, 0, 0, 1.5448787, -7.209793, -0.6267042, 10.673969)
+
+[node name="serge_pole_b2" parent="DecorManual/2)Stanca samanului" unique_id=1908665797 instance=ExtResource("26_3ylwr")]
+transform = Transform3D(1.5448787, 0, 0, 0, 1.5448787, 0, 0, 0, 1.5448787, -10.015381, -0.6267042, 7.742447)
+
+[node name="serge_pole_b3" parent="DecorManual/2)Stanca samanului" unique_id=89339975 instance=ExtResource("26_3ylwr")]
+transform = Transform3D(1.5365006, 0, -0.16067342, 0, 1.5448786, 0, 0.16067342, 0, 1.5365006, -3.6156464, -0.6267042, 13.12957)
+
+[node name="serge_pole_c" parent="DecorManual/2)Stanca samanului" unique_id=2076929796 instance=ExtResource("27_km8wo")]
+transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 0, -0.93430996, 20.375332)
+
+[node name="serge_pole_c2" parent="DecorManual/2)Stanca samanului" unique_id=1929288860 instance=ExtResource("27_km8wo")]
+transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 3.3667755, -0.93430996, 23.552376)
+
+[node name="serge_pole_c3" parent="DecorManual/2)Stanca samanului" unique_id=967496719 instance=ExtResource("27_km8wo")]
+transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 5.980377, -0.93430996, 25.239967)
+
+[node name="boulder_lichen_a" parent="DecorManual/2)Stanca samanului" unique_id=889794186 instance=ExtResource("28_3ylwr")]
+transform = Transform3D(1.8302251, 0, 0, 0, 1.8302251, 0, 0, 0, 1.8302251, 26.430038, -4.08846, 8.571781)
+
+[node name="boulder_lichen_a2" parent="DecorManual/2)Stanca samanului" unique_id=1011095174 instance=ExtResource("28_3ylwr")]
+transform = Transform3D(1.390369, 0, 0, 0, 1.390369, 0, 0, 0, 1.390369, 41.912643, -2.1701326, 13.436165)
+
+[node name="boulder_lichen_a3" parent="DecorManual/2)Stanca samanului" unique_id=1677327246 instance=ExtResource("28_3ylwr")]
+transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 41.912643, -6.8736897, 24.340366)
+
+[node name="boulder_lichen_a5" parent="DecorManual/2)Stanca samanului" unique_id=258914358 instance=ExtResource("28_3ylwr")]
+transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 31.936523, -7.7795672, 46.167786)
+
+[node name="boulder_lichen_a4" parent="DecorManual/2)Stanca samanului" unique_id=516879280 instance=ExtResource("28_3ylwr")]
+transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 12.477951, -2.1701326, 24.340366)
+
+[node name="boulder_lichen_b" parent="DecorManual/2)Stanca samanului" unique_id=1830287457 instance=ExtResource("29_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.349594, -6.1680446, 19.492775)
+
+[node name="boulder_lichen_b2" parent="DecorManual/2)Stanca samanului" unique_id=1325703318 instance=ExtResource("29_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.420898, -6.687013, 39.00798)
+
+[node name="boulder_lichen_b4" parent="DecorManual/2)Stanca samanului" unique_id=659409115 instance=ExtResource("29_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.004745, -8.635202, 39.00798)
+
+[node name="boulder_lichen_b3" parent="DecorManual/2)Stanca samanului" unique_id=529248682 instance=ExtResource("29_km8wo")]
+transform = Transform3D(1.294848, 0, 0, 0, 1.294848, 0, 0, 0, 1.294848, 24.420898, -7.0049725, 44.184807)
+
+[node name="3) Rampa de coborare" type="Node3D" parent="DecorManual" unique_id=588236169]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 238.30525, 0, 85.955414)
+
+[node name="frozen_boat" parent="DecorManual/3) Rampa de coborare" unique_id=445725937 instance=ExtResource("30_nnftx")]
+transform = Transform3D(0.9963987, 0, -0.084791996, 0, 1, 0, 0.084791996, 0, 0.9963987, 18.625534, 0.7, 33.44494)
+
+[node name="ice_block_stack" parent="DecorManual/3) Rampa de coborare" unique_id=1639058807 instance=ExtResource("23_g742r")]
+transform = Transform3D(0.46625674, 0, -0.88464946, 0, 1, 0, 0.88464946, 0, 0.46625674, 21.633469, 1.1, 13.291977)
+
+[node name="ice_block_stack2" parent="DecorManual/3) Rampa de coborare" unique_id=226757289 instance=ExtResource("23_g742r")]
+transform = Transform3D(0.68732256, 0, -0.7263523, 0, 1, 0, 0.7263523, 0, 0.68732256, 29.79161, 0.5, 17.452866)
+
+[node name="ice_block_stack3" parent="DecorManual/3) Rampa de coborare" unique_id=636530883 instance=ExtResource("23_g742r")]
+transform = Transform3D(0.68732256, 0, -0.7263523, 0, 1, 0, 0.7263523, 0, 0.68732256, 25.444168, 0.9, 15.151855)
+
+[node name="ice_road_marker" parent="DecorManual/3) Rampa de coborare" unique_id=598430201 instance=ExtResource("25_nnftx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 13.00515)
+
+[node name="ice_road_marker2" parent="DecorManual/3) Rampa de coborare" unique_id=357965038 instance=ExtResource("25_nnftx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.759857, 2.1, 6.7278366)
+
+[node name="ice_road_marker3" parent="DecorManual/3) Rampa de coborare" unique_id=1640766333 instance=ExtResource("25_nnftx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3604736, 1.4, 17.387482)
+
+[node name="4) Autostrada de gheata" type="Node3D" parent="DecorManual" unique_id=1098377090]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 346.32178, 0, 155.59076)

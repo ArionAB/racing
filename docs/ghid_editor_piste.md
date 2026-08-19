@@ -395,6 +395,52 @@ Decor asezat de mana (o stanca exact ACOLO): adauga orice scena din
 `assets/models/` ca nod copil, pozitioneaz-o si salveaz-o — supravietuieste
 la Regenerate (vezi `docs/decor_manual.md`).
 
+### Poarta de start: `custom_gate_model`
+
+Poarta e primul lucru pe care il vezi la countdown, deci tine de identitatea
+pistei, nu de mobilierul comun. Se schimba pe **doua** nivele, fiindca sunt
+doua intrebari diferite:
+
+- **Pe TEMA** — cheia `gate_model` in intrarea temei din `Track.themes()`.
+  O primesc toate pistele temei. Asta vrei cand poarta e a *lumii*: toate
+  pistele de Baikal au poarta de busteni.
+- **Pe PISTA** — `custom_gate_model` in Inspector, pe nodul radacina, cu
+  butonul de fisier. Suprascrie tema. Asta vrei cand doar pista aia are
+  poarta ei.
+
+Ordinea e: pista > tema > `Track.DEFAULT_GATE_MODEL`
+(`assets/models/structures/start_gate.glb`).
+
+Scrie `none` de mana in campul din Inspector ca sa nu ai **nicio** poarta.
+
+Ce face singur, deci nu ai de potrivit cifre:
+
+- **se scaleaza** pe latimea soselei + 1.2 m degajare pe fiecare parte, din
+  bbox-ul masurat al modelului (nu din literale) — acelasi GLB iese 16.4 m pe
+  o pista de 14 m si 18.4 m pe una de 16 m;
+- **isi ia coliziunea** pe cele doua picioare, la inaltimea masurata;
+- **primeste atlasul comun** (`Palette.apply_world_material`), deci GLB-ul are
+  nevoie de UV-uri spre sloturi de paleta ca restul assetelor
+  (vezi `docs/style_bible.md` §4);
+- **se aseaza** pe linia de start, intoarsa pe directia de mers.
+
+Contractul de orientare e cel din tot proiectul: fata de prezentare spre
+**+Y in Blender** (= **−Z in Godot**). Poarta se intoarce spre masinile care
+VIN, adica in sens invers mersului — `Basis.looking_at(-start_direction())`.
+Cu semnul plus, poarta era pe linia de start, scalata corect, cu orientarea
+"valida" in orice cifra — dar la countdown vedeai spatele panoului.
+
+In campul din Inspector poti avea fie o cale `res://`, fie un `uid://` (butonul
+de fisier scrie UID). Amandoua merg: UID-ul se traduce in cale la citire.
+
+O cale gresita nu te lasa fara poarta in tacere: se plange in Output si cade
+pe cea implicita. Sonda: `ProbeGate` — verifica pe fiecare pista ce model a
+ajuns efectiv in scena, latimea dupa scalare, pozitia si orientarea.
+
+```
+godot --headless --fixed-fps 60 --path . res://tools/ProbeGate.tscn
+```
+
 ### Portiunile ude: `custom_wet_ranges`
 
 Pe interval, grip-ul lateral scade (de la 8.0 la 3.6 — intre asfalt si drift,

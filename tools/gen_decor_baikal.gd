@@ -201,7 +201,7 @@ func _specs() -> Array[Dictionary]:
 			"name": "Lemne2", "frac": 0.037, "side": 1.0, "off": 11.0,
 			"scale": 1.0, "face": "along", "keep": ["Woodpile"]},
 		{"poi": "A", "kind": "one", "model": "buildings/village_kit",
-			"name": "Indicator", "frac": 0.048, "side": -1.0, "off": 3.2,
+			"name": "IndicatorSat", "frac": 0.048, "side": -1.0, "off": 3.2,
 			"scale": 1.0, "face": "road", "keep": ["Signpost"]},
 		# Marunt: sanii si lazi lipite de garduri.
 		{"poi": "A", "kind": "one", "model": "props/village_props",
@@ -260,21 +260,28 @@ func _specs() -> Array[Dictionary]:
 		# in diorama, prezent pe toata portiunea de lac.
 		{"poi": "B2", "kind": "row", "model": "props/ice_kit",
 			"name": "BatRampa", "from": 0.140, "to": 0.172, "spacing": 9.0,
-			"side": 1.0, "off": 1.6, "scale": 1.0, "face": "road",
+			"side": 1.0, "off": 2.4, "scale": 1.0, "face": "road",
 			"keep_cycle": [["IceRoadMarker"]]},
 		# De la 0.175 terenul e deja sub linia gheții (masurat cu --scan):
 		# de acolo bețele stau PE gheata, nu pe mal.
+		#
+		# Se opresc la 0.190, unde INCEPE rampa de latire spre autostrada
+		# (7 -> 11 m intre 0.190 si 0.205). Un bat asezat in rampa la o
+		# retragere fixa ajunge sub asfaltul care se largeste peste el —
+		# probe_manual l-a prins de doua ori la rand, si raspunsul nu era o
+		# retragere mai mare, ci sa nu pui marcaje IN tranzitie. Sirul
+		# continua oricum: grupul "Bat" reia de la 0.204, pe latimea plina.
 		{"poi": "B2", "kind": "row", "model": "props/ice_kit",
-			"name": "BatRampaGheata", "from": 0.178, "to": 0.196, "spacing": 9.0,
-			"side": 1.0, "off": 1.6, "scale": 1.0, "face": "road",
+			"name": "BatRampaGheata", "from": 0.178, "to": 0.185, "spacing": 6.0,
+			"side": 1.0, "off": 3.4, "scale": 1.0, "face": "road",
 			"on_ice": true, "keep_cycle": [["IceRoadMarker"]]},
 		{"poi": "B2", "kind": "row", "model": "props/ice_kit",
 			"name": "BatRampaS", "from": 0.144, "to": 0.168, "spacing": 9.0,
-			"side": -1.0, "off": 1.6, "scale": 1.0, "face": "road",
+			"side": -1.0, "off": 2.4, "scale": 1.0, "face": "road",
 			"keep_cycle": [["IceRoadMarker"]]},
 		{"poi": "B2", "kind": "row", "model": "props/ice_kit",
-			"name": "BatRampaGheataS", "from": 0.178, "to": 0.196, "spacing": 9.0,
-			"side": -1.0, "off": 1.6, "scale": 1.0, "face": "road",
+			"name": "BatRampaGheataS", "from": 0.178, "to": 0.185, "spacing": 6.0,
+			"side": -1.0, "off": 3.4, "scale": 1.0, "face": "road",
 			"on_ice": true, "keep_cycle": [["IceRoadMarker"]]},
 		{"poi": "B2", "kind": "one", "model": "props/ice_kit",
 			"name": "BarcaInghetata", "frac": 0.163, "side": 1.0, "off": 11.0,
@@ -295,12 +302,12 @@ func _specs() -> Array[Dictionary]:
 			"keep_cycle": [["Toros_B"], ["Toros_A"], ["Toros_C"]]},
 		# Betele rosii pe toata autostrada, la ~20 m ca in brief.
 		{"poi": "C", "kind": "row", "model": "props/ice_kit",
-			"name": "Bat", "from": 0.200, "to": 0.360, "spacing": 12.0,
-			"side": 1.0, "off": 1.4, "scale": 1.0, "face": "road",
+			"name": "Bat", "from": 0.204, "to": 0.360, "spacing": 12.0,
+			"side": 1.0, "off": 3.0, "scale": 1.0, "face": "road",
 			"on_ice": true, "keep_cycle": [["IceRoadMarker"]]},
 		{"poi": "C", "kind": "row", "model": "props/ice_kit",
-			"name": "BatS", "from": 0.206, "to": 0.356, "spacing": 12.0,
-			"side": -1.0, "off": 1.4, "scale": 1.0, "face": "road",
+			"name": "BatS", "from": 0.208, "to": 0.356, "spacing": 12.0,
+			"side": -1.0, "off": 3.0, "scale": 1.0, "face": "road",
 			"on_ice": true, "keep_cycle": [["IceRoadMarker"]]},
 		{"poi": "C", "kind": "one", "model": "vehicles/kamaz_truck",
 			"name": "Kamaz", "frac": 0.246, "side": 1.0, "off": 13.0,
@@ -315,14 +322,14 @@ func _specs() -> Array[Dictionary]:
 			"keep": ["IceRoadSign"]},
 		{"poi": "C", "kind": "cluster", "model": "props/ice_kit",
 			"name": "Cioburi", "frac": 0.258, "count": 8, "side": 0.0,
-			"spread_along": 60.0, "off": 5.0, "off_jitter": 4.0,
+			"spread_along": 60.0, "off": 6.5, "off_jitter": 3.0,
 			"scale": 1.0, "scale_jitter": 0.3, "face": "random",
 			"on_ice": true, "keep_cycle": [["IceShards"]]},
 
 		# ------------------------------------------- D: campul de placi
 		{"poi": "D", "kind": "cluster", "model": "props/ice_kit",
 			"name": "CiobPlaci", "frac": 0.400, "count": 12, "side": 0.0,
-			"spread_along": 90.0, "off": 4.5, "off_jitter": 5.0,
+			"spread_along": 90.0, "off": 6.5, "off_jitter": 3.5,
 			"scale": 1.1, "scale_jitter": 0.3, "face": "random",
 			"on_ice": true, "keep_cycle": [["IceShards"]]},
 		{"poi": "D", "kind": "cluster", "model": "props/ice_kit",
@@ -346,40 +353,45 @@ func _specs() -> Array[Dictionary]:
 
 		# ------------------------------------------ F: tabara pescarilor
 		# Grup MIC si izolat, cu spatiu gol in jur — asa apare in diorama.
+		#
+		# STA PE GHEATA, deci inainte de 0.56 unde se termina `custom_ice_ranges`.
+		# Prima incercare a pus-o la 0.65, fractia din alocarea hartii, unde pista
+		# urcase deja 11 m pe terasamentul viaductului: corturile pluteau la cota
+		# lacului sub un drum aflat mult deasupra. probe_manual a prins-o.
 		{"poi": "F", "kind": "one", "model": "props/ice_kit",
-			"name": "CortVerde", "frac": 0.652, "side": -1.0, "off": 7.0,
+			"name": "CortVerde", "frac": 0.478, "side": -1.0, "off": 7.0,
 			"scale": 1.0, "face": "road", "on_ice": true, "yaw_jitter": 25.0,
 			"keep": ["FisherTent_Green"]},
 		{"poi": "F", "kind": "one", "model": "props/ice_kit",
-			"name": "CortVerde2", "frac": 0.658, "side": -1.0, "off": 10.0,
+			"name": "CortVerde2", "frac": 0.486, "side": -1.0, "off": 10.0,
 			"scale": 1.0, "face": "road", "on_ice": true, "yaw_jitter": 25.0,
 			"keep": ["FisherTent_Green"]},
 		{"poi": "F", "kind": "one", "model": "props/ice_kit",
-			"name": "CortPortocaliu", "frac": 0.664, "side": 1.0, "off": 8.0,
+			"name": "CortPortocaliu", "frac": 0.494, "side": 1.0, "off": 8.0,
 			"scale": 1.0, "face": "road", "on_ice": true, "yaw_jitter": 25.0,
 			"keep": ["FisherTent_Orange"]},
 		{"poi": "F", "kind": "one", "model": "props/ice_kit",
-			"name": "CortPortocaliu2", "frac": 0.670, "side": 1.0, "off": 11.5,
+			"name": "CortPortocaliu2", "frac": 0.502, "side": 1.0, "off": 11.5,
 			"scale": 1.0, "face": "road", "on_ice": true, "yaw_jitter": 25.0,
 			"keep": ["FisherTent_Orange"]},
 		{"poi": "F", "kind": "cluster", "model": "props/ice_kit",
-			"name": "Copca", "frac": 0.661, "count": 5, "side": 0.0,
+			"name": "Copca", "frac": 0.487, "count": 5, "side": 0.0,
 			"spread_along": 34.0, "off": 8.5, "off_jitter": 3.5,
 			"scale": 1.0, "face": "random", "on_ice": true,
 			"keep_cycle": [["IceHole"]]},
 		{"poi": "F", "kind": "one", "model": "props/nerpa_seal",
-			"name": "Nerpa", "frac": 0.666, "side": 1.0, "off": 10.5,
+			"name": "Nerpa", "frac": 0.496, "side": 1.0, "off": 10.5,
 			"scale": 1.0, "face": "road", "on_ice": true, "yaw_jitter": 30.0},
 		{"poi": "F", "kind": "one", "model": "vehicles/uaz_bukhanka",
-			"name": "UAZTabara", "frac": 0.648, "side": -1.0, "off": 9.5,
+			"name": "UAZTabara", "frac": 0.470, "side": -1.0, "off": 9.5,
 			"scale": 1.0, "face": "along", "on_ice": true, "yaw_jitter": 15.0},
 		{"poi": "F", "kind": "cluster", "model": "props/village_props",
-			"name": "LaziTabara", "frac": 0.660, "count": 5, "side": 0.0,
+			"name": "LaziTabara", "frac": 0.488, "count": 5, "side": 0.0,
 			"spread_along": 28.0, "off": 6.5, "off_jitter": 3.0,
 			"scale": 1.0, "face": "random", "on_ice": true,
 			"keep_cycle": [["BarrelsCrates"], ["Sled"]]},
 		{"poi": "F", "kind": "cluster", "model": "props/ice_kit",
-			"name": "BlocTabara", "frac": 0.656, "count": 2, "side": -1.0,
+			"name": "BlocTabara", "frac": 0.474, "count": 2, "side": -1.0,
 			"spread_along": 16.0, "off": 12.5, "off_jitter": 2.0,
 			"scale": 1.0, "face": "random", "on_ice": true,
 			"keep_cycle": [["IceBlockStack"]]},
@@ -420,11 +432,23 @@ func _specs() -> Array[Dictionary]:
 			"side": -1.0, "off": 5.5, "scale": 1.0, "face": "random",
 			"off_jitter": 2.5, "keep_cycle": [["BirchWinter_A"],
 				["BirchWinter_B"], ["BirchWinter_A"], ["BirchWinter_C"]]},
+		# Laricele costa 13 140 de triunghiuri BUCATA — de trei ori un mesteacan
+		# si de cincisprezece ori un pin (masurat cu tools/measure_pieces.gd).
+		# Treisprezece dintre ei faceau 170k, adica 60% din padure pentru 28%
+		# din copaci. Raman patru, ca ACCENTE ruginii pe fundal — silueta de
+		# larice iarna e semnatura malului, deci nu dispare, doar se raresc —
+		# iar desimea o duc mestecenii si pinii, care sunt ieftini.
 		{"poi": "H", "kind": "row", "model": "trees/forest_kit",
-			"name": "Larice", "from": 0.866, "to": 0.940, "spacing": 9.5,
-			"side": -1.0, "off": 13.0, "scale": 1.0, "face": "random",
-			"off_jitter": 3.5, "keep_cycle": [["LarchWinter_A"],
-				["LarchWinter_B"], ["LarchWinter_C"]]},
+			"name": "Larice", "from": 0.872, "to": 0.932, "spacing": 20.0,
+			"side": -1.0, "off": 15.0, "scale": 1.0, "face": "random",
+			"off_jitter": 3.5, "keep_cycle": [["LarchWinter_B"],
+				["LarchWinter_A"], ["LarchWinter_C"]]},
+		# Pinii preiau desimea de la larici: 874 tris fata de 13 140.
+		{"poi": "H", "kind": "row", "model": "trees/forest_kit",
+			"name": "PinDes", "from": 0.868, "to": 0.938, "spacing": 6.0,
+			"side": -1.0, "off": 12.0, "scale": 1.0, "face": "random",
+			"off_jitter": 3.0, "keep_cycle": [["PineSiberian_B"],
+				["PineSiberian_A"]]},
 		{"poi": "H", "kind": "row", "model": "trees/forest_kit",
 			"name": "Pin", "from": 0.870, "to": 0.936, "spacing": 13.0,
 			"side": -1.0, "off": 20.0, "scale": 1.0, "face": "random",
@@ -438,7 +462,7 @@ func _specs() -> Array[Dictionary]:
 				["BirchWinter_B"]]},
 		{"poi": "H", "kind": "row", "model": "props/shore_kit",
 			"name": "Tufa", "from": 0.864, "to": 0.942, "spacing": 5.0,
-			"side": -1.0, "off": 3.2, "scale": 1.0, "face": "random",
+			"side": -1.0, "off": 3.8, "scale": 1.0, "face": "random",
 			"off_jitter": 1.6, "sink": 0.1, "keep_cycle": [["ShrubSnow"],
 				["GrassTuftDry"], ["GrassTuftDry"]]},
 		{"poi": "H", "kind": "row", "model": "props/shore_kit",
@@ -606,8 +630,20 @@ func _warn_if_tall(spec: Dictionary, keep: Array, off: float,
 			% [node_name, tallest, off])
 
 
+## Numele emise pana acum. Godot cere nume unic per parinte: doua noduri cu
+## acelasi nume in .tscn nu dau eroare, se SUPRAPUN — al doilea mosteneste
+## pozitia primului. S-a intamplat cu doi "Indicator" (unul in sat, unul pe
+## gheata): cel de pe gheata a ajuns ingropat 3.7 m in dealul satului, si s-a
+## vazut abia la probe_manual.
+var _names := {}
+
 func _print_node(node_name: String, model: String, pos: Vector3, yaw: float,
 		scale: float, keep: Array) -> void:
+	if _names.has(node_name):
+		push_error("gen_decor_baikal: nume dublat '%s' — se suprapun in .tscn"
+			% node_name)
+		print("; EROARE: nume dublat '%s'" % node_name)
+	_names[node_name] = true
 	var basis := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(
 		Vector3.ONE * scale)
 	var t := Transform3D(basis, pos)

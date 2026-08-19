@@ -232,6 +232,18 @@ const TRIS_OVERRIDE := {
 	# destul pentru tuning de densitate, strans cat sa prinda clasa de
 	# accident (o primitiva la rezolutia implicita sare cu zeci de mii).
 	"Track09": 1150000,
+	# Baikal, la integrarea decorului manual (august 2026):
+	#   267k  doar procedural (decorul de tema, fara nimic asezat de mana)
+	#   +528k kitul manual: 349 de instante din cele 19 GLB-uri, din care
+	#     padurea singura 195k (mestecenii si pinii de pe coborarea in S).
+	#     Laricele costa 13 140 de triunghiuri BUCATA — treisprezece dintre ei
+	#     faceau 170k, adica 60% din padure pentru 28% din copaci; au ramas
+	#     patru, ca accente, si desimea a trecut pe pini (874 tris).
+	# MATERIALELE au SCAZUT in aceeasi miscare, 47 -> 30 din 38, fiindca
+	# `world_prop.gd` de pe container colapseaza cele 18 materiale ale kitului
+	# pe atlasul comun. Adica s-a ingreunat axa care nu doare pe mobil si s-a
+	# usurat cea care doare — acelasi rationament ca la Okinawa.
+	"Track10": 900000,
 }
 
 

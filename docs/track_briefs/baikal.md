@@ -357,3 +357,38 @@ Kituri (o planșă pe kit, obiectele aliniate pe un rând, aceeași scară):
 | village kit | log houses A/B/C (8×6×5, 10×7×6, 6×5×4 m) with carved window frames in 2 colors, plank fence 3 m module + gate, banya, fish-drying rack, wooden sled, UAZ van, Kamaz truck, well with sweep, woodpile, barrels + crates, signpost, husky dog (T-pose) |
 | ice kit | hummock ridges A/B/C (4–10 m), cracked slab 7×7 m, red-flag stick, road sign in ice block, ice hole with rod and stool, fisher tent ×2, nerpa seal (idle pose), stacked ice blocks, frozen boat, ice shards |
 | forest kit | winter larch ×3 (10–16 m), winter birch ×3 (8–14 m), Siberian pine ×2 (12–18 m), snowy shrub, dry grass tuft, lichen boulders ×3, cliff face module 15–30 m, hunting cabin, wooden shore staircase 12 m |
+
+## 10. Scurtăturile: măsurate, nu obținute (august 2026)
+
+Brief-ul cere două scurtături — §2 la **B** (printre serge, `branch_half_width`
+2.5) și la **E** (printre corturi, `speed_factor` 0.85). **Niciuna nu poate
+exista acolo**, și motivul e geometric, nu de reglaj.
+
+O scurtătură are sens doar unde traseul OCOLEȘTE ceva: câștigul e diferența
+dintre arc și coardă. Măsurat pe toată bucla, fereastră cu fereastră:
+
+| zonă | frac | arc | coardă | câștig posibil |
+|---|---|---|---|---|
+| serge (B) | 0.085–0.132 | 78 m | 76 m | **3 m** |
+| tabăra (E) | 0.455–0.515 | 101 m | 102 m | **0 m** |
+| intrarea în sat | 0.925–0.005 | 122 m | 90 m | 33 m |
+| intrarea în sat, larg | 0.88–0.04 | 241 m | 136 m | 88 m |
+
+Pe B și E traseul e aproape drept — nu există ocol de tăiat, deci orice bandă
+desenată acolo iese **mai lungă** decât drumul principal (măsurat: −46% și
+−117%). Nu e o problemă de unde pui punctele.
+
+Singurul ocol real e **intrarea în sat**. Acolo o bandă trece ProbeLayout
+(câștig 18–24 m), dar **pică ProbeRace**: 9–11% offroad, 2–9 lovituri de
+perete, o repunere. Cauza e a doua constrângere, care se compune cu prima:
+banda trebuie să stea la `2 × half_width` = 14 m de buclă, deci racordurile ies
+cu **raza 3.5–8 m**, când cel mai strâns viraj de pe pista principală are 15.7 m.
+Mașinile nu pot intra la unghiul ăla cu viteza cu care ajung acolo. Lățirea
+benzii înrăutățește (2 → 8 pereți): atrage mai multe mașini într-un racord care
+tot nu le poate primi.
+
+**Ce ar debloca scurtăturile:** un cot mai pronunțat pe traseul principal, care
+să creeze ocolul de tăiat. Intrarea în sat e candidatul natural — e oricum felia
+cea mai lentă a turului (16.6 m/s, 35% timp „lent", raza 15.7 m), deci un traseu
+retrasat acolo rezolvă două lucruri odată. Asta cere însă mutat puncte pe Path3D,
+adică o decizie de traseu, nu una de decor.

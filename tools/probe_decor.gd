@@ -497,6 +497,14 @@ func _thousands(n: int) -> String:
 ## Numele de varianta sunt un contract pe care il impunem oricum — in briefuri,
 ## in `verify_glb.py` si in registrele din `track.gd` — deci sunt cheia stabila.
 const VARIANT_SOURCE := {
+	# --- Baikal (kitul de padure si mal, un fisier pe piesa) ---
+	#
+	# PRIMELE in dictionar, nu ultimele: atribuirea ia primul prefix care se
+	# potriveste, iar "boulderlichen_" ar cadea altfel pe "boulder" (rostogolul
+	# de pe Dunele) si "pinesiberian_" pe "pine_" (coniferele alpine).
+	"larchwinter_": "larch_winter", "birchwinter_": "birch_winter",
+	"pinesiberian_": "pine_siberian", "boulderlichen_": "boulder_lichen",
+	"shrubsnow": "shrub_snow", "grasstuftdry": "grass_tuft_dry",
 	"bush_": "desert_scatter", "pebbles_": "desert_scatter",
 	"grass_tuft": "desert_scatter",
 	# Setul de vegetatie refacut in #208. Prefixul "veg_" e AL LUI — numele

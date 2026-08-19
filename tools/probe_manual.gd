@@ -73,8 +73,12 @@ func _report() -> bool:
 		var p := n3.global_position
 		var ground: float = t._sampler.ground_y(p.x, p.z)
 		var near := 1e9
+		var near_i := 0
 		for i in baked.size():
-			near = minf(near, Vector2(p.x - baked[i].x, p.z - baked[i].z).length())
+			var d := Vector2(p.x - baked[i].x, p.z - baked[i].z).length()
+			if d < near:
+				near = d
+				near_i = i
 		var verdict := "ok"
 		if ground < sea_y and absf(p.y - sea_y) <= 1.0:
 			verdict = "ok (pe apa)"
@@ -82,7 +86,12 @@ func _report() -> bool:
 			verdict = "PLUTESTE"
 		elif ground - p.y > SINK_MAX:
 			verdict = "INGROPAT"
-		if near < t.half_width + ROAD_MARGIN:
+		# Latimea LOCALA, nu `half_width`. Pe o pista cu profil de latime
+		# (Baikal: 6 m in grota, 11 m pe gheata) marginea masurata fata de
+		# latimea implicita raporteaza "IN DRUM" obiecte asezate cuminte langa
+		# asfaltul lat, si trece cu vederea unele chiar pe asfaltul ingust.
+		var hw_here: float = t.width_at(t.frac_at(near_i))
+		if near < hw_here + ROAD_MARGIN and not _spans_road(entry["path"]):
 			verdict += " / IN DRUM"
 		if not verdict.begins_with("ok") or verdict.contains("IN DRUM"):
 			bad += 1
@@ -119,3 +128,25 @@ func _props(node: Node, prefix: String) -> Array[Dictionary]:
 			out.append({"node": n3, "path": path})
 		out.append_array(_props(n3, path + "/"))
 	return out
+
+
+## Piesele care TREC peste sosea, prin proiect: portalul de tunel si arcada de
+## viaduct au drumul pe sub ele, poarta de start si arcul grotei il incaleca.
+## Pentru astea "aproape de ax" e specificatia, nu defectul — asa cum pentru o
+## barca "sub nivelul terenului" e specificatia, iar sonda are deja exceptia aia
+## de la inceput.
+##
+## Recunoasterea se face dupa NUME fiindca sonda citeste scena coapta, unde
+## intentia autorului nu mai exista ca date — generatorul o marcheaza cu
+## `spans_road`, dar `.tscn` pastreaza doar nodul. Numele sunt cele emise de
+## tools/gen_decor_baikal.gd.
+const SPANS_ROAD_PREFIXES: Array[String] = [
+	"PoartaStart", "Grota", "Arcada", "Pila", "CapatViaduct", "PortalTunel",
+]
+
+static func _spans_road(path: String) -> bool:
+	var leaf := path.get_file() if path.contains("/") else path
+	for prefix in SPANS_ROAD_PREFIXES:
+		if leaf.begins_with(prefix):
+			return true
+	return false

@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://d4nghg2iarhvw"]
+
+[ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_tyffc"]
+[ext_resource type="Script" uid="uid://dgqq1tf8prx5s" path="res://addons/proton_scatter/src/scatter.gd" id="2_aj7ea"]
+[ext_resource type="Script" uid="uid://ba8jou0xje0c7" path="res://addons/proton_scatter/src/stack/modifier_stack.gd" id="3_umdqk"]
+[ext_resource type="Script" uid="uid://b5s7ggmsi8g5u" path="res://addons/proton_scatter/src/modifiers/base_modifier.gd" id="4_6l3rs"]
+[ext_resource type="Script" uid="uid://gjjh4mw1wn51" path="res://addons/proton_scatter/src/modifiers/create_inside_random.gd" id="5_2u1at"]
+[ext_resource type="Script" uid="uid://b0332hlb7q5t1" path="res://addons/proton_scatter/src/modifiers/randomize_transforms.gd" id="6_dn2ro"]
+[ext_resource type="Script" uid="uid://dc4rwlje6dfca" path="res://addons/proton_scatter/src/modifiers/relax.gd" id="7_hup21"]
+[ext_resource type="Script" uid="uid://it6ja2wjneak" path="res://addons/proton_scatter/src/modifiers/project_on_geometry.gd" id="8_4cwgp"]
+[ext_resource type="Script" uid="uid://c85i0481q4uog" path="res://addons/proton_scatter/src/scatter_item.gd" id="9_dvicb"]
+[ext_resource type="Script" uid="uid://dx7e7heldjwmg" path="res://addons/proton_scatter/src/scatter_shape.gd" id="10_bvueo"]
+[ext_resource type="Script" uid="uid://ba7ljvtfgk4cp" path="res://addons/proton_scatter/src/shapes/sphere_shape.gd" id="11_d7w74"]
+[ext_resource type="Script" uid="uid://devkng6iaf5do" path="res://addons/proton_scatter/src/shapes/box_shape.gd" id="12_0814m"]
+
+[sub_resource type="Curve3D" id="Curve3D_yagcb"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 110, 2, -35, 0, 0, 0, 0, 0, 0, 105, 5, -85, 0, 0, 0, 0, 0, 0, 60, 2, -115, 0, 0, 0, 0, 0, 0, -10, 0, -110, 0, 0, 0, 0, 0, 0, -50, 3, -75, 0, 0, 0, 0, 0, 0, -45, 1, -30),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 8
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_1ugaf"]
+
+[sub_resource type="Resource" id="Resource_bnfrd"]
+script = ExtResource("5_2u1at")
+restrict_height = true
+reference_frame = 1
+
+[sub_resource type="Resource" id="Resource_05pwu"]
+script = ExtResource("6_dn2ro")
+position = Vector3(0.15, 0.15, 0.15)
+rotation = Vector3(5, 360, 5)
+scale = Vector3(0.1, 0.1, 0.1)
+reference_frame = 2
+
+[sub_resource type="Resource" id="Resource_lr7et"]
+script = ExtResource("7_hup21")
+offset_step = 0.2
+consecutive_step_multiplier = 0.75
+restrict_height = true
+
+[sub_resource type="Resource" id="Resource_pyrfw"]
+script = ExtResource("8_4cwgp")
+ray_length = 5.0
+ray_offset = 5.0
+remove_points_on_miss = false
+
+[sub_resource type="Resource" id="Resource_oliio"]
+script = ExtResource("3_umdqk")
+stack = Array[ExtResource("4_6l3rs")]([SubResource("Resource_bnfrd"), SubResource("Resource_05pwu"), SubResource("Resource_lr7et"), SubResource("Resource_pyrfw")])
+
+[sub_resource type="Resource" id="Resource_08333"]
+script = ExtResource("11_d7w74")
+radius = 8.0
+metadata/_custom_type_script = "uid://ba7ljvtfgk4cp"
+
+[sub_resource type="Resource" id="Resource_h7kal"]
+script = ExtResource("12_0814m")
+size = Vector3(30, 1, 30)
+metadata/_custom_type_script = "uid://devkng6iaf5do"
+
+[node name="Node3D" type="Node3D" unique_id=1174290711]
+script = ExtResource("1_tyffc")
+
+[node name="Path" type="Path3D" parent="." unique_id=1814797104]
+curve = SubResource("Curve3D_yagcb")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2115113996]
+mesh = SubResource("PlaneMesh_1ugaf")
+
+[node name="ProtonScatter" type="Node3D" parent="." unique_id=889994129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12.199232)
+script = ExtResource("2_aj7ea")
+modifier_stack = SubResource("Resource_oliio")
+Performance/use_chunks = true
+Performance/chunk_dimensions = Vector3(15, 15, 15)
+metadata/_custom_type_script = "uid://dgqq1tf8prx5s"
+
+[node name="ScatterItem2" type="Node3D" parent="ProtonScatter" unique_id=1484058052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12.199232)
+script = ExtResource("9_dvicb")
+path = "uid://d23jdbp6g1jf8"
+
+[node name="ProtonScatterShape" type="Node3D" parent="ProtonScatter" unique_id=229277715]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 7.4783993, 0, -8.387879)
+script = ExtResource("10_bvueo")
+negative = true
+shape = SubResource("Resource_08333")
+metadata/_custom_type_script = "uid://dx7e7heldjwmg"
+
+[node name="ScatterItem" type="Node3D" parent="ProtonScatter" unique_id=69858253]
+script = ExtResource("9_dvicb")
+proportion = 50
+path = "uid://dsbylt3v4prgi"
+
+[node name="ScatterShape" type="Node3D" parent="ProtonScatter" unique_id=1835515665]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 7.4783993, 0, -9.886946)
+script = ExtResource("10_bvueo")
+shape = SubResource("Resource_h7kal")

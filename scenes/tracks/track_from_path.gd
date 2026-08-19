@@ -92,6 +92,11 @@ extends Track
 ## Placi de gheata libere care se balanseaza sub masini (Baikal). Au sens doar
 ## pe o portiune din `custom_ice_ranges`. Vezi IceSlabHazard.
 @export var custom_ice_slab_fracs: Array[float] = []
+## Sectoare cu latime proprie: (frac_start, frac_end, half_width). Restul
+## pistei ramane la `custom_half_width`, iar trecerea se face pe o rampa de
+## Track.WIDTH_RAMP_M metri de fiecare parte — deci un sector mai scurt decat
+## doua rampe nu-si atinge niciodata latimea ceruta. Vezi Track.width_at.
+@export var custom_width_segments: Array[Vector3] = []
 ## Regenerate vine din Track (checkbox-ul e mostenit); aici doar ne aplicam
 ## intai exporturile custom_* si curba de pornire. Citirea punctelor din
 ## nodul "Path" traieste tot in Track — orice pista o are, nu doar asta.
@@ -173,6 +178,9 @@ func _train_along_fracs() -> Array[float]:
 
 func _hummock_fracs() -> Array[float]:
 	return custom_hummock_fracs
+
+func _width_segments() -> Array[Vector3]:
+	return custom_width_segments
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

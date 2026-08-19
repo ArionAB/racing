@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cnexxb5ewq67s"]
+[gd_scene format=3 uid="uid://cnexxb5ewq67s"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -26,9 +26,7 @@ script = ExtResource("1_track")
 custom_name = "Baikal"
 custom_theme = "baikal"
 custom_sea_level_offset = -4.23
-custom_arch_fracs = Array[float]([0.447])
 custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])
-custom_landmarks = Array[Vector3]([Vector3(0.975, -1, 13), Vector3(0.02, 1, 15), Vector3(0.045, -1, 14), Vector3(0.07, 1, 12), Vector3(0.1, -1, 15), Vector3(0.94, 1, 15), Vector3(0.905, -1, 12)])
 custom_ravines = Array[Vector4]([Vector4(0.69, 0.75, 13, 0)])
 custom_cornice_ravines = Array[int]([0])
 custom_train_along_fracs = Array[float]([0.705])
@@ -106,5 +104,5 @@ transform = Transform3D(1.1469752, 0, 0.27403474, 0, 1.179257, 0, -0.27403474, 0
 [node name="mountain_tunnel2" parent="." unique_id=271033949 instance=ExtResource("5_5ulhg")]
 transform = Transform3D(1.0840882, 0, 0.46411216, 0, 1.179257, 0, -0.46411216, 0, 1.0840882, 565.0783, -0.034873962, -41.262817)
 
-[node name="DecorManual" type="Node3D" parent="."]
+[node name="DecorManual" type="Node3D" parent="." unique_id=1106331250]
 script = ExtResource("19_wprop")

@@ -1,7 +1,7 @@
 """Baikal — Stanca Samanului + stalpii serge (planşa "Baikal kit", pozitiile 1 si 2).
 
-  ShamanRock   rocks/shaman_rock.glb    Shaman_Crag_Big / Shaman_Crag_Small / Shaman_Ice
-  SergePole    props/serge_pole.glb     Serge_A / Serge_B / Serge_C (+ panglici)
+  ShamanRock   baikal/rocks/shaman_rock.glb    Shaman_Crag_Big / Shaman_Crag_Small / Shaman_Ice
+  SergePole    baikal/props/serge_pole.glb     Serge_A / Serge_B / Serge_C (+ panglici)
 
 Stanca Samanului (capul Burhan) e POI-ul de la fractia 0.10 si silueta pe care
 o vezi de pe gheata, deci e singura piesa din lot careia ii dam doi "dinti" cu
@@ -99,7 +99,7 @@ def build_shaman_rock():
 
     tris = sum(tri_count(o) for o in (big, small, ice))
     print("ShamanRock: %d tris" % tris)
-    export_glb([big, small, ice], "rocks/shaman_rock.glb")
+    export_glb([big, small, ice], "baikal/rocks/shaman_rock.glb")
     save_blend([big, small, ice], "baikal_shaman_rock.blend")
     return big, small, ice
 
@@ -190,7 +190,7 @@ def build_serge_poles():
     tris = sum(tri_count(o) for o in objs)
     print("SergePole: %d tris (%s)"
           % (tris, ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "props/serge_pole.glb")
+    export_glb(objs, "baikal/props/serge_pole.glb")
     save_blend(objs, "baikal_serge_pole.blend")
     return objs
 

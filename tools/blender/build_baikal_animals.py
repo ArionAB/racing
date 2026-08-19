@@ -250,7 +250,7 @@ def build_husky():
         pb.location = (0.0, 0.0, 0.0)
 
     print("HuskyDog: %d tris" % tri_count(obj))
-    export_glb([arm, obj], "props/husky_dog.glb", animations=True)
+    export_glb([arm, obj], "baikal/props/husky_dog.glb", animations=True)
     save_blend([arm, obj], "baikal_husky_dog.blend", compress=True)
     return [arm, obj]
 
@@ -389,7 +389,7 @@ def build_nerpa():
         pb.location = (0.0, 0.0, 0.0)
 
     print("NerpaSeal: %d tris" % tri_count(obj))
-    export_glb([arm, obj], "props/nerpa_seal.glb", animations=True)
+    export_glb([arm, obj], "baikal/props/nerpa_seal.glb", animations=True)
     save_blend([arm, obj], "baikal_nerpa_seal.blend", compress=True)
     return [arm, obj]
 

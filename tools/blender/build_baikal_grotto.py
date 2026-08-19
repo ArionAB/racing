@@ -1,8 +1,8 @@
 """Baikal — grota de gheata + biserica din Khuzhir (planşa, pozitiile 5 si 6).
 
-  IceGrottoArch  structures/ice_grotto_arch.glb
+  IceGrottoArch  baikal/structures/ice_grotto_arch.glb
                  Grotto_Rock / Grotto_Ice / Icicle_A..D
-  KhuzhirChurch  buildings/khuzhir_church.glb
+  KhuzhirChurch  baikal/buildings/khuzhir_church.glb
                  Church_Body / Church_Roof / Church_Dome
 
 Grota (POI D, fractia 0.55) e un TUNEL SCURT prin care trece pista: 12 m
@@ -144,7 +144,7 @@ def build_grotto():
     print("IceGrottoArch: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "structures/ice_grotto_arch.glb")
+    export_glb(objs, "baikal/structures/ice_grotto_arch.glb")
     save_blend(objs, "baikal_ice_grotto.blend")
     return objs
 
@@ -225,7 +225,7 @@ def build_church():
     print("KhuzhirChurch: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "buildings/khuzhir_church.glb")
+    export_glb(objs, "baikal/buildings/khuzhir_church.glb")
     save_blend(objs, "baikal_khuzhir_church.blend")
     return objs
 

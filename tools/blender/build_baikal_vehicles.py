@@ -1,11 +1,11 @@
 """Baikal — hovercraft, tren, pilon si poarta de start (planşa, pozitiile 7-10).
 
-  HovercraftKhivus  vehicles/hovercraft_khivus.glb
+  HovercraftKhivus  baikal/vehicles/hovercraft_khivus.glb
                     Khivus_Skirt / Khivus_Hull / Khivus_Cabin / Khivus_Fan
-  BaikalTrain       vehicles/train_baikal.glb
+  BaikalTrain       baikal/vehicles/train_baikal.glb
                     Baikal_Loco / Baikal_Carriage_A / Baikal_Carriage_B
-  PowerPylon        structures/power_pylon_soviet.glb   Pylon_Soviet
-  LogStartGate      structures/start_gate_logs.glb      StartGate_Logs
+  PowerPylon        baikal/structures/power_pylon_soviet.glb   Pylon_Soviet
+  LogStartGate      baikal/structures/start_gate_logs.glb      StartGate_Logs
 
 Orientarea e CONTRACT, nu preferinta:
   - hovercraftul si trenul merg pe PathMover / TrainHazard, care deplaseaza
@@ -135,7 +135,7 @@ def build_hovercraft():
     print("HovercraftKhivus: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "vehicles/hovercraft_khivus.glb")
+    export_glb(objs, "baikal/vehicles/hovercraft_khivus.glb")
     save_blend(objs, "baikal_hovercraft.blend")
     return objs
 
@@ -246,7 +246,7 @@ def build_train():
     print("BaikalTrain: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "vehicles/train_baikal.glb")
+    export_glb(objs, "baikal/vehicles/train_baikal.glb")
     save_blend(objs, "baikal_train.blend")
     return objs
 
@@ -327,7 +327,7 @@ def build_pylon():
     obj = b.to_object("Pylon_Soviet")
     finish(obj, bevel=0.02, ao=AO_STEEL, origin="base")
     print("PowerPylon: %d tris" % tri_count(obj))
-    export_glb([obj], "structures/power_pylon_soviet.glb")
+    export_glb([obj], "baikal/structures/power_pylon_soviet.glb")
     save_blend([obj], "baikal_power_pylon.blend")
     return [obj]
 
@@ -398,7 +398,7 @@ def build_start_gate():
     obj = b.to_object("StartGate_Logs")
     finish(obj, bevel=0.03, ao=AO_WOOD, origin="base")
     print("LogStartGate: %d tris" % tri_count(obj))
-    export_glb([obj], "structures/start_gate_logs.glb")
+    export_glb([obj], "baikal/structures/start_gate_logs.glb")
     save_blend([obj], "baikal_start_gate.blend")
     return [obj]
 

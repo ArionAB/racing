@@ -3,7 +3,7 @@ extends SceneTree
 ##
 ##   godot --headless --path . --script res://tools/measure_kit.gd -- --kit=baikal
 ##
-## De ce per nod si nu per fisier: kiturile multi-piesa (village_kit, ice_kit,
+## De ce per nod si nu per fisier: kiturile multi-piesa (ice_kit,
 ## forest_kit) tin zece piese intr-un GLB. Un `size` pe fisier masoara cutia
 ## care le cuprinde pe toate — numar care nu spune nimic despre cat loc ocupa
 ## o casa. Plasarea are nevoie de amprenta piesei, nu a lotului.
@@ -12,25 +12,35 @@ extends SceneTree
 
 const KITS := {
 	"baikal": [
-		"res://assets/models/rocks/shaman_rock.glb",
-		"res://assets/models/props/serge_pole.glb",
-		"res://assets/models/structures/railway_viaduct.glb",
-		"res://assets/models/structures/railway_tunnel_portal.glb",
-		"res://assets/models/structures/ice_grotto_arch.glb",
-		"res://assets/models/buildings/khuzhir_church.glb",
-		"res://assets/models/vehicles/hovercraft_khivus.glb",
-		"res://assets/models/vehicles/train_baikal.glb",
-		"res://assets/models/structures/power_pylon_soviet.glb",
-		"res://assets/models/structures/start_gate_logs.glb",
-		"res://assets/models/buildings/village_kit.glb",
-		"res://assets/models/props/village_props.glb",
-		"res://assets/models/vehicles/uaz_bukhanka.glb",
-		"res://assets/models/vehicles/kamaz_truck.glb",
-		"res://assets/models/props/ice_kit.glb",
-		"res://assets/models/trees/forest_kit.glb",
-		"res://assets/models/props/shore_kit.glb",
-		"res://assets/models/props/husky_dog.glb",
-		"res://assets/models/props/nerpa_seal.glb",
+		"res://assets/models/baikal/rocks/shaman_rock.glb",
+		"res://assets/models/baikal/props/serge_pole.glb",
+		"res://assets/models/baikal/structures/railway_viaduct.glb",
+		"res://assets/models/baikal/structures/railway_tunnel_portal.glb",
+		"res://assets/models/baikal/structures/ice_grotto_arch.glb",
+		"res://assets/models/baikal/buildings/khuzhir_church.glb",
+		"res://assets/models/baikal/vehicles/hovercraft_khivus.glb",
+		"res://assets/models/baikal/vehicles/train_baikal.glb",
+		"res://assets/models/baikal/structures/power_pylon_soviet.glb",
+		"res://assets/models/baikal/structures/start_gate_logs.glb",
+		# Cladirile de sat au UN FISIER PE PIESA (spre deosebire de ice_kit /
+		# forest_kit / shore_kit, care raman multi-nod): sunt asezate una
+		# cate una pe ulita, nu imprastiate statistic.
+		"res://assets/models/baikal/buildings/log_house_a.glb",
+		"res://assets/models/baikal/buildings/log_house_b.glb",
+		"res://assets/models/baikal/buildings/log_house_c.glb",
+		"res://assets/models/baikal/buildings/banya.glb",
+		"res://assets/models/baikal/props/fish_rack.glb",
+		"res://assets/models/baikal/props/well_crane.glb",
+		"res://assets/models/baikal/props/woodpile.glb",
+		"res://assets/models/baikal/props/village_signpost.glb",
+		"res://assets/models/baikal/props/village_props.glb",
+		"res://assets/models/baikal/vehicles/uaz_bukhanka.glb",
+		"res://assets/models/baikal/vehicles/kamaz_truck.glb",
+		"res://assets/models/baikal/props/ice_kit.glb",
+		"res://assets/models/baikal/trees/forest_kit.glb",
+		"res://assets/models/baikal/props/shore_kit.glb",
+		"res://assets/models/baikal/props/husky_dog.glb",
+		"res://assets/models/baikal/props/nerpa_seal.glb",
 	],
 }
 

@@ -640,8 +640,15 @@ func _process_contacts(delta: float) -> void:
 			velocity = _prev_velocity + dv_vec * (bump_max_dv / dv)
 			dv = bump_max_dv
 		# Rotatia data de solver din lovitura excentrica, preluata cu plafon.
+		# DOAR la izbituri reale (dv peste pragul de inchidere) — acelasi
+		# criteriu ca semnalul: sub el, contactul e frecare, nu lovitura. In
+		# contactul SUSTINUT solverul se opune in fiecare tick rotatiei
+		# comandate (corpul celuilalt freaca de al nostru), iar diferenta —
+		# mereu de semn opus comenzii — s-ar acumula aici pana la plafon si
+		# ti-ar anula directia cat tine contactul. Masurat in
+		# ProbeContactSteer: impins bara-n bara, virajul cadea la jumatate.
 		var solver_yaw := angular_velocity.y - _commanded_yaw
-		if absf(solver_yaw) > 0.1:
+		if dv >= bump_min_closing and absf(solver_yaw) > 0.1:
 			_impact_yaw = clampf(_impact_yaw + solver_yaw,
 				-bump_yaw_max, bump_yaw_max)
 		# Lovitura mare pe lateral taie scurt aderenta (mecanismul de

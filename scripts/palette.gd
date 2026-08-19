@@ -67,6 +67,38 @@ const TROPICAL_GREEN: int = 21  # vegetatie subtropicala (CACTUS_GREEN e oliv st
 const FOAM_WHITE: int = 22      # creste de val, spuma la tarm
 const TILE_TERRACOTTA: int = 23 # olane rosii
 
+## --- Baikal (Track10): iarna pe lacul inghetat ------------------------------
+##
+## Sase sloturi din rezerva 24..31, nu opt cate propunea brief-ul pistei. Doua
+## au picat la integrare, si motivul e acelasi in ambele cazuri: un slot e o
+## CULOARE, nu o eticheta semantica.
+##
+##   - `snow_white`, propus la 27, e in cifre acelasi alb-albastrui ca
+##     FOAM_WHITE (22, #E9F2F0). Un slot nou l-ar fi duplicat, cu costul unei
+##     culori din rezerva si al unei a doua surse de adevar pentru zapada.
+##     Brief-ul lasa el insusi portita ("sau reuse 22").
+##   - `ribbon_accents`, propus la 31, cerea CINCI culori intr-un singur slot,
+##     ceea ce atlasul nu poate reprezenta (un slot = o banda de o culoare).
+##     Panglicile serge sunt insa accentele saturate ale pistei, deci nu se pot
+##     sterge: iau sloturile de masina, singurele culori pure din paleta —
+##     CAR_BLUE (15), FOAM_WHITE (22), CAR_YELLOW (16), CAR_RED (14) si
+##     TROPICAL_GREEN (21). E o abatere CONSTIENTA de la style_bible §1
+##     ("14..16 nu se folosesc in decor"): regula exista ca masinile sa ramana
+##     cele mai saturate obiecte din cadru, iar panglicile sunt fasii de
+##     60-90 cm pe 13 stalpi — sub un metru patrat in total, la marginea pistei,
+##     si semnaleaza VANTUL, care aici e mecanica, nu ornament. Daca la primul
+##     tur de mana concureaza vizual cu masinile, coboara pe variante desaturate.
+const ICE_TURQUOISE: int = 24  # gheata in lumina, fata de sus
+const ICE_DEEP: int = 25       # gheata in adancime, sub torosuri si in crapaturi
+const ICE_CRACK: int = 26      # crapaturi, apa neagra dintre placi
+const LARCH_RUST: int = 27     # larice iarna, ruginiu (era snow_white in brief)
+const LOG_DARK: int = 28       # barne de casa siberiana, aproape negre
+const MARBLE_GREY: int = 29    # marmura Stancii Samanului, faleza Olkhon
+## 30..31 raman rezerva (magenta in atlas, ca greselile de UV sa sara in ochi).
+
+## Zapada NU are slot propriu — alias peste FOAM_WHITE, vezi nota de mai sus.
+const SNOW_WHITE: int = FOAM_WHITE
+
 ## Culorile, in ordinea sloturilor (identice cu atlasul generat).
 ##
 ## Doua dintre culorile insulare au fost mutate fata de prima propunere, ca sa
@@ -98,6 +130,7 @@ const HEX: Array[String] = [
 	"BB3522", "C8BDA9", "835C34", "91461E", "7692A8", "5B7C34", "AF9F4E",
 	"E54839", "2C82E8", "F2D03C",
 	"54BFB8", "2E5F6B", "E9DCC0", "55535A", "3F7A3C", "E9F2F0", "C4784F",
+	"7FC4C9", "2F6E82", "1A2A33", "A8683A", "4A3526", "B8B4AC",
 ]
 
 ## Culoarea unui slot.

@@ -458,6 +458,16 @@ func _texture_for(slot: int, base: Color, x: int, y: int) -> Color:
 			return _volcanic(base, x, y)
 		Palette.TILE_TERRACOTTA:
 			return _tile(base, x, y)
+		Palette.ICE_TURQUOISE, Palette.ICE_DEEP:
+			return _ice(base, x, y)
+		Palette.ICE_CRACK:
+			return _water(base, x, y)
+		Palette.LARCH_RUST:
+			return _vegetation(base, x, y)
+		Palette.LOG_DARK:
+			return _wood(base, x, y)
+		Palette.MARBLE_GREY:
+			return _marble(base, x, y)
 		_:
 			# Accentele de masina (14-16) raman plate: masinile trebuie sa fie
 			# cele mai saturate si mai curate suprafete din cadru (style_bible §1).
@@ -593,6 +603,53 @@ func _tile(base: Color, x: int, y: int) -> Color:
 		joint = -0.05
 	var grain := (_hash01(x, y, 3) - 0.5) * 0.025
 	return _shade(base, rib + joint + grain)
+
+
+## Gheata de Baikal: bule de metan inghetate in straturi + retea de fisuri fine.
+##
+## Cele doua trasaturi ale gheatii de Baikal in fotografii sunt exact astea, si
+## se citesc la scari diferite: bulele sunt discuri albe de 5-15 cm prinse in
+## straturi la adancimi diferite (deci se suprapun partial, cu opacitati
+## diferite), iar fisurile sunt o retea fina, aproape rectilinie. Amplitudinea
+## bulelor e mai mare decat la celelalte suprafete (+0.16 fata de ±0.04-0.08
+## uzual): pe gheata ele SUNT desenul, nu o rupere de monotonie. Fara ele
+## suprafata citeste ca sticla turnata, adica exact plasticul de care fugim.
+func _ice(base: Color, x: int, y: int) -> Color:
+	# Bule pe trei straturi de adancime, fiecare cu propria grila si opacitate.
+	# Straturile suprapuse sunt ce da senzatia de volum transparent.
+	var bub := 0.0
+	for layer in 3:
+		var scale := 7.0 + float(layer) * 6.0
+		var fade := 0.16 - float(layer) * 0.045
+		var cx := fposmod(float(x) + float(layer) * 3.7, scale) - scale * 0.5
+		var cy := fposmod(float(y) + float(layer) * 11.3, scale) - scale * 0.5
+		var d := sqrt(cx * cx + cy * cy) / (scale * 0.30)
+		if d < 1.0:
+			bub += (1.0 - d * d) * fade
+	# Fisuri: linii aproape drepte, rare, INTUNECATE — reteaua neagra din poze.
+	var crack := 0.0
+	var warp := sin(float(y) * 0.014) * 6.0
+	if fposmod(float(x) + warp, 13.0) < 1.0:
+		crack = -0.13
+	if fposmod(float(y) + sin(float(x) * 0.03) * 9.0, 61.0) < 1.2:
+		crack = -0.11
+	var grain := (_hash01(x, y, 7) - 0.5) * 0.03
+	return _shade(base, bub + crack + grain)
+
+
+## Marmura Stancii Samanului: vene diagonale palide pe fond cenusiu.
+##
+## Venele sunt DIAGONALE si de doua grosimi — cele late dau silueta pietrei la
+## distanta, cele fine apar abia de aproape. Orizontale ar fi citit ca strate
+## sedimentare (aia e roca din _rock), iar marmura de Olkhon e masiva, nu
+## stratificata: diferenta se vede exact in orientarea venei.
+func _marble(base: Color, x: int, y: int) -> Color:
+	var diag := float(x) * 3.0 + float(y) * 0.7
+	var vein := sin(diag * 0.06 + sin(float(y) * 0.02) * 2.0)
+	var wide := smoothstep(0.55, 1.0, vein) * 0.075
+	var fine := smoothstep(0.80, 1.0, sin(diag * 0.19)) * 0.035
+	var grain := (_hash01(x, y, 8) - 0.5) * 0.035
+	return _shade(base, wide + fine + grain)
 
 
 ## Aplica o deviatie de luminozitate pastrand nuanta. Lucreaza in HSV ca sa nu

@@ -3,8 +3,6 @@
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="3_mover"]
-[ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="4_hz"]
-[ext_resource type="PackedScene" uid="uid://cyw12qlbqbwjh" path="res://assets/models/structures/mountain_tunnel.glb" id="5_5ulhg"]
 [ext_resource type="PackedScene" uid="uid://n7u7ccamtb3k" path="res://assets/models/structures/fence_ranch.glb" id="8_cfr8q"]
 [ext_resource type="PackedScene" uid="uid://btaima4gtsps7" path="res://assets/models/baikal/buildings/banya.glb" id="8_mwbs2"]
 [ext_resource type="PackedScene" uid="uid://bx5s71i4eh1fn" path="res://assets/models/baikal/buildings/log_house_c.glb" id="9_cfr8q"]
@@ -29,8 +27,25 @@
 [ext_resource type="PackedScene" uid="uid://blx1lq0lx0dml" path="res://assets/models/baikal/structures/start_gate_logs.glb" id="29_gate"]
 [ext_resource type="PackedScene" uid="uid://dx4uxbdm3a4la" path="res://assets/models/baikal/rocks/boulder_lichen_b.glb" id="29_km8wo"]
 [ext_resource type="PackedScene" uid="uid://py17rg2km4ok" path="res://assets/models/baikal/props/frozen_boat.glb" id="30_nnftx"]
+[ext_resource type="PackedScene" uid="uid://dx1hcmt6dgfyj" path="res://assets/models/baikal/props/toros_c.glb" id="32_3eilb"]
+[ext_resource type="PackedScene" uid="uid://cgic2en50yl21" path="res://assets/models/baikal/props/toros_b.glb" id="33_asgu2"]
 [ext_resource type="PackedScene" uid="uid://cd2ohlp6i00qi" path="res://assets/models/baikal/vehicles/kamaz_truck.glb" id="33_kamaz"]
+[ext_resource type="PackedScene" uid="uid://bu8l7abbcic00" path="res://assets/models/baikal/props/toros_a.glb" id="34_hjrxu"]
+[ext_resource type="PackedScene" uid="uid://b6ues2hqaby2j" path="res://assets/models/rocks/cliff_wall.glb" id="35_7yuns"]
+[ext_resource type="PackedScene" uid="uid://bweuomeoef73b" path="res://assets/models/baikal/props/ice_road_sign.glb" id="35_asgu2"]
+[ext_resource type="PackedScene" uid="uid://b7fbq5qy476ng" path="res://assets/models/baikal/structures/ice_grotto_arch.glb" id="35_hjrxu"]
+[ext_resource type="PackedScene" uid="uid://bmtl6nf8xyge3" path="res://assets/models/baikal/props/barrels_crates.glb" id="36_6dbs0"]
+[ext_resource type="PackedScene" uid="uid://iq24bqlni6gg" path="res://assets/models/baikal/props/fisher_tent_green.glb" id="36_7felo"]
+[ext_resource type="PackedScene" uid="uid://bwgufrat0guja" path="res://assets/models/baikal/props/nerpa_seal.glb" id="36_j3enj"]
+[ext_resource type="PackedScene" uid="uid://bjpybhnyhrs3w" path="res://assets/models/baikal/props/sled.glb" id="36_jjn54"]
 [ext_resource type="PackedScene" uid="uid://d0tw1lq21jo3b" path="res://assets/models/baikal/props/husky_dog.glb" id="37_husky"]
+[ext_resource type="PackedScene" uid="uid://da17pht7ug2xi" path="res://assets/models/baikal/props/fisher_tent_orange.glb" id="37_j3enj"]
+[ext_resource type="PackedScene" uid="uid://b1o8umssytq03" path="res://assets/models/baikal/rocks/cliff_face_olkhon.glb" id="37_n3umy"]
+[ext_resource type="PackedScene" uid="uid://dfm1lt3manbhg" path="res://assets/models/baikal/props/ice_hole.glb" id="38_usuc4"]
+[ext_resource type="PackedScene" uid="uid://cwalkvr4b65u8" path="res://assets/models/baikal/vehicles/uaz_bukhanka.glb" id="40_usuc4"]
+[ext_resource type="PackedScene" uid="uid://t3bradwvpug1" path="res://assets/models/baikal/structures/railway_viaduct.glb" id="44_fs1qj"]
+[ext_resource type="PackedScene" uid="uid://bo8ova55jdoxq" path="res://assets/models/baikal/structures/railway_tunnel_portal.glb" id="45_hhdxr"]
+[ext_resource type="PackedScene" uid="uid://dlq1wj8iehuft" path="res://assets/models/baikal/vehicles/train_baikal.glb" id="46_yrnvh"]
 
 [sub_resource type="Curve3D" id="Curve3D_baikal"]
 _data = {
@@ -39,19 +54,26 @@ _data = {
 }
 point_count = 28
 
-[sub_resource type="Curve3D" id="Curve3D_hover"]
-_data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 330, 0.1, 300, 0, 0, 0, 0, 0, 0, 470, 0.1, 260, 0, 0, 0, 0, 0, 0, 640, 0.1, 150, 0, 0, 0, 0, 0, 0, 680, 0.1, -20, 0, 0, 0, 0, 0, 0, 560, 0.1, -200, 0, 0, 0, 0, 0, 0, 430, 0.1, -240, 0, 0, 0, 0, 0, 0, 330, 0.1, 300),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
-}
-point_count = 7
-
 [sub_resource type="Curve3D" id="Curve3D_43ue3"]
 _data = {
 "points": PackedVector3Array(0, 0, 0, 0, 0, 0, 3.8964767, 0.41713524, 29.257866, 0, 0, 0, 0, 0, 0, 3.975422, 0.41530418, 36.061493, 0, 0, 0, 0, 0, 0, -1.4914188, 0.37412834, 19.204039, 0, 0, 0, 0, 0, 0, -3.9101453, 0.37072563, 15.409637, 0, 0, 0, 0, 0, 0, -2.5942636, 0.40094185, 8.460148, 0, 0, 0, 0, 0, 0, 2.8350658, 0.4798107, 6.755373, 0, 0, 0, 0, 0, 0, 2.0159988, 0.56962013, -1.3354912, 0, 0, 0, 0, 0, 0, 7.6776342, 0.65616035, 0.091041565),
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 8
+
+[sub_resource type="Curve3D" id="Curve3D_asgu2"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 53.137024, -0.065216064, -35.639465, 0, 0, 0, 0, 0, 0, 86.94379, -0.065208435, -37.05832, 0, 0, 0, 0, 0, 0, 126.568054, -0.065216064, -5.98732, 0, 0, 0, 0, 0, 0, 80.90256, -0.065216064, 7.67865, 0, 0, 0, 0, 0, 0, 46.13437, -0.065200806, 10.436279, 0, 0, 0, 0, 0, 0, 32.768616, -0.065216064, 8.452347, 0, 0, 0, 0, 0, 0, 1.1999817, -0.065216064, -3.8478699, 0, 0, 0, 0, 0, 0, 31.61679, -0.065223694, -39.420914, 0, 0, 0, 0, 0, 0, 48.21942, -0.065216064, -37.196777),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 9
+
+[sub_resource type="Curve3D" id="Curve3D_6dbs0"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 2.8967667, -0.06521797, 11.954895, 0, 0, 0, 0, 0, 0, 2.920395, 0.090457916, 26.484436, 0, 0, 0, 0, 0, 0, 4.2116165, -0.06521797, 36.968994, 0, 0, 0, 0, 0, 0, 6.1959534, -3.1524043, 39.916992),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
 
 [node name="Track10" type="Node3D" unique_id=1242242835]
 script = ExtResource("1_track")
@@ -62,6 +84,7 @@ custom_sea_level_offset = -7.05
 custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])
 custom_ravines = Array[Vector4]([Vector4(0.69, 0.75, 13, 0)])
 custom_cornice_ravines = Array[int]([0])
+custom_viaduct_ravines = Array[int]([0])
 custom_train_along_fracs = Array[float]([0.705])
 custom_hummock_fracs = Array[float]([0.245, 0.335])
 custom_ice_slab_fracs = Array[float]([0.372, 0.398, 0.425])
@@ -69,6 +92,7 @@ custom_width_segments = Array[Vector3]([Vector3(0.955, 0.075, 8), Vector3(0.205,
 sea_level_offset = -7.05
 
 [node name="Path" type="Path3D" parent="." unique_id=1711934443]
+visible = false
 curve = SubResource("Curve3D_baikal")
 
 [node name="Peaks" type="Node3D" parent="." unique_id=1774665205]
@@ -102,42 +126,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 598, 9, 38)
 gizmo_extents = 24.0
 script = ExtResource("2_peak")
 radius_m = 24.0
-
-[node name="HovercraftLarg" type="Path3D" parent="." unique_id=513364004]
-curve = SubResource("Curve3D_hover")
-script = ExtResource("3_mover")
-model = ExtResource("26_khivus")
-speed = 22.0
-stick_to_ground = false
-push_radius = 9.0
-push_accel = 14.0
-plume = true
-bob_amplitude = 0.06
-sway_frequency = 1.4
-metadata/_custom_type_script = "uid://b1848dr3kabqm"
-
-[node name="Traversari" type="Node3D" parent="." unique_id=84623444]
-
-[node name="HovercraftTraversare" type="Marker3D" parent="Traversari" unique_id=1011313036]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435, 0.1, 166)
-gizmo_extents = 3.0
-script = ExtResource("4_hz")
-model = ExtResource("26_khivus")
-motion = 1
-metadata/_custom_type_script = "uid://ccxa8xagvu55q"
-
-[node name="SaniaPescarului" type="Marker3D" parent="Traversari" unique_id=1858791998]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 537, 0.1, -94)
-gizmo_extents = 3.0
-script = ExtResource("4_hz")
-motion = 1
-metadata/_custom_type_script = "uid://ccxa8xagvu55q"
-
-[node name="mountain_tunnel" parent="." unique_id=515346015 instance=ExtResource("5_5ulhg")]
-transform = Transform3D(1.1469752, 0, 0.27403474, 0, 1.179257, 0, -0.27403474, 0, 1.1469752, 566.3939, -0.034873962, -27.641008)
-
-[node name="mountain_tunnel2" parent="." unique_id=271033949 instance=ExtResource("5_5ulhg")]
-transform = Transform3D(1.0840882, 0, 0.46411216, 0, 1.179257, 0, -0.46411216, 0, 1.0840882, 565.0783, -0.034873962, -41.262817)
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=1106331250]
 script = ExtResource("19_wprop")
@@ -406,3 +394,312 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3604736, 1.4, 17.387482)
 
 [node name="4) Autostrada de gheata" type="Node3D" parent="DecorManual" unique_id=1098377090]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 346.32178, 0, 155.59076)
+
+[node name="kamaz_truck" parent="DecorManual/4) Autostrada de gheata" unique_id=379038009 instance=ExtResource("33_kamaz")]
+transform = Transform3D(-0.18840474, 0, 0.9820915, 0, 1, 0, -0.9820915, 0, -0.18840474, 102.69568, 0, 40.154724)
+
+[node name="ice_shards" parent="DecorManual/4) Autostrada de gheata" unique_id=2118402244 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.06485, 0, -11.56134)
+
+[node name="ice_shards2" parent="DecorManual/4) Autostrada de gheata" unique_id=520674220 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6755676, 0, -9.988251)
+
+[node name="ice_shards3" parent="DecorManual/4) Autostrada de gheata" unique_id=412981783 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.832916, 0, -3.7449188)
+
+[node name="ice_shards4" parent="DecorManual/4) Autostrada de gheata" unique_id=1320443243 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80.60083, 0, 1.6996613)
+
+[node name="ice_shards5" parent="DecorManual/4) Autostrada de gheata" unique_id=249309235 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.042297, 0, 30.469925)
+
+[node name="ice_shards6" parent="DecorManual/4) Autostrada de gheata" unique_id=461514313 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.3609, 0, 25.820938)
+
+[node name="ice_shards7" parent="DecorManual/4) Autostrada de gheata" unique_id=317665787 instance=ExtResource("23_km8wo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.154724, 0, 20.879166)
+
+[node name="toros_c" parent="DecorManual/4) Autostrada de gheata" unique_id=1513521380 instance=ExtResource("32_3eilb")]
+transform = Transform3D(0.9867217, 0, 0.16242003, 0, 1, 0, -0.16242003, 0, 0.9867217, 87.194244, 0, 0)
+
+[node name="toros_c2" parent="DecorManual/4) Autostrada de gheata" unique_id=368976780 instance=ExtResource("32_3eilb")]
+transform = Transform3D(0.9867217, 0, 0.16242003, 0, 1, 0, -0.16242003, 0, 0.9867217, 33.493744, 0, 31.159775)
+
+[node name="toros_c3" parent="DecorManual/4) Autostrada de gheata" unique_id=1150732498 instance=ExtResource("32_3eilb")]
+transform = Transform3D(-0.8379184, 0, -0.5457958, 0, 1, 0, 0.5457958, 0, -0.8379184, 27.500671, 0, -7.6272736)
+
+[node name="toros_b" parent="DecorManual/4) Autostrada de gheata" unique_id=1729352899 instance=ExtResource("33_asgu2")]
+transform = Transform3D(0.95440364, 0, -0.2985192, 0, 1, 0, 0.2985192, 0, 0.95440364, -10.587982, -0.06521845, 13.560715)
+
+[node name="toros_b2" parent="DecorManual/4) Autostrada de gheata" unique_id=1197020108 instance=ExtResource("33_asgu2")]
+transform = Transform3D(0.95440364, 0, -0.2985192, 0, 1, 0, 0.2985192, 0, 0.95440364, -10.587982, -0.06521845, -14.239548)
+
+[node name="toros_b3" parent="DecorManual/4) Autostrada de gheata" unique_id=1599488250 instance=ExtResource("33_asgu2")]
+transform = Transform3D(0.9998725, 0, -0.015967816, 0, 1, 0, 0.015967816, 0, 0.9998725, 67.728546, -0.06521839, 2.0045166)
+
+[node name="toros_b4" parent="DecorManual/4) Autostrada de gheata" unique_id=1872435181 instance=ExtResource("33_asgu2")]
+transform = Transform3D(0.9998725, 0, -0.015967816, 0, 1, 0, 0.015967816, 0, 0.9998725, 52.537872, -0.06521839, 32.13742)
+
+[node name="toros_b5" parent="DecorManual/4) Autostrada de gheata" unique_id=1330715327 instance=ExtResource("33_asgu2")]
+transform = Transform3D(0.9767909, 0, -0.21419512, 0, 1, 0, 0.21419512, 0, 0.9767909, 16.336853, -0.06521797, 23.774933)
+
+[node name="toros_a" parent="DecorManual/4) Autostrada de gheata" unique_id=854227595 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(0.93448794, 0, -0.35599482, 0, 1, 0, 0.35599482, 0, 0.93448794, 0, 0, -11.389984)
+
+[node name="toros_a2" parent="DecorManual/4) Autostrada de gheata" unique_id=1677672063 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(0.93448794, 0, -0.35599482, 0, 1, 0, 0.35599482, 0, 0.93448794, 17.334198, 0, -3.7054596)
+
+[node name="toros_a3" parent="DecorManual/4) Autostrada de gheata" unique_id=696779371 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(0.93448794, 0, -0.35599482, 0, 1, 0, 0.35599482, 0, 0.93448794, 32.08731, -0.06521836, 0.8075409)
+
+[node name="toros_a4" parent="DecorManual/4) Autostrada de gheata" unique_id=336446149 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(0.93448794, 0, -0.35599482, 0, 1, 0, 0.35599482, 0, 0.93448794, 50.11508, -0.06521836, 2.9627838)
+
+[node name="toros_a5" parent="DecorManual/4) Autostrada de gheata" unique_id=103316740 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(-0.9653136, 0, 0.26109332, 0, 1, 0, -0.26109332, 0, -0.9653136, 43.316315, -0.06521836, 28.107407)
+
+[node name="toros_a6" parent="DecorManual/4) Autostrada de gheata" unique_id=1815030098 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(-0.9653136, 0, 0.26109332, 0, 1, 0, -0.26109332, 0, -0.9653136, 25.261353, -0.06521836, 25.930145)
+
+[node name="toros_a7" parent="DecorManual/4) Autostrada de gheata" unique_id=85540539 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(-0.9653136, 0, 0.26109332, 0, 1, 0, -0.26109332, 0, -0.9653136, 3.6704712, -0.06521836, 19.471909)
+
+[node name="toros_a8" parent="DecorManual/4) Autostrada de gheata" unique_id=1347309640 instance=ExtResource("34_hjrxu")]
+transform = Transform3D(-0.9653136, 0, 0.26109332, 0, 1, 0, -0.26109332, 0, -0.9653136, 3.6704712, -0.06521836, 19.471909)
+
+[node name="ice_road_sign" parent="DecorManual/4) Autostrada de gheata" unique_id=579113334 instance=ExtResource("35_asgu2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -66.39279, 0, -17.947235)
+
+[node name="ice_road_sign2" parent="DecorManual/4) Autostrada de gheata" unique_id=100436367 instance=ExtResource("35_asgu2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55.29706, 0, -10.154251)
+
+[node name="ice_road_sign3" parent="DecorManual/4) Autostrada de gheata" unique_id=258467056 instance=ExtResource("35_asgu2")]
+transform = Transform3D(0.15478978, 0, 0.9879474, 0, 1, 0, -0.9879474, 0, 0.15478978, -55.53311, 0, -39.480347)
+
+[node name="ice_road_sign4" parent="DecorManual/4) Autostrada de gheata" unique_id=2138429292 instance=ExtResource("35_asgu2")]
+transform = Transform3D(0.15478978, 0, 0.9879474, 0, 1, 0, -0.9879474, 0, 0.15478978, -45.701416, 0, -33.162468)
+
+[node name="Hovercraft" type="Path3D" parent="DecorManual/4) Autostrada de gheata" unique_id=1019695147]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.1016846, 0, 29.674866)
+curve = SubResource("Curve3D_asgu2")
+script = ExtResource("3_mover")
+model = ExtResource("26_khivus")
+speed = 22.0
+push_radius = 9.0
+push_accel = 14.0
+plume = true
+metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="5) Grota de gheata" type="Node3D" parent="DecorManual" unique_id=1618752616]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 499.99084, 0, -135.19556)
+
+[node name="cliff_wall" parent="DecorManual/5) Grota de gheata" unique_id=308775602 instance=ExtResource("35_7yuns")]
+transform = Transform3D(0.68059987, 0, -0.73265535, 0, 1, 0, 0.73265535, 0, 0.68059987, 39.717712, 0, 15.645355)
+
+[node name="cliff_wall3" parent="DecorManual/5) Grota de gheata" unique_id=1356095319 instance=ExtResource("35_7yuns")]
+transform = Transform3D(0.76583546, 0, -0.64303654, 0, 1, 0, 0.64303654, 0, 0.76583546, 6.0963745, 0, -14.2178955)
+
+[node name="ice_grotto_arch" parent="DecorManual/5) Grota de gheata" unique_id=822411698 instance=ExtResource("35_hjrxu")]
+transform = Transform3D(-1.0085443, 0, -1.0360132, 0, 1.4458508, 0, 1.0360132, 0, -1.0085443, 0, 0, 0)
+
+[node name="cliff_face_olkhon" parent="DecorManual/5) Grota de gheata" unique_id=364986860 instance=ExtResource("37_n3umy")]
+transform = Transform3D(-0.8138016, 0, 0.5811429, 0, 1, 0, -0.5811429, 0, -0.8138016, -15.152252, 0, 4.831909)
+
+[node name="cliff_face_olkhon2" parent="DecorManual/5) Grota de gheata" unique_id=42158949 instance=ExtResource("37_n3umy")]
+transform = Transform3D(-0.73575455, 0, 0.67724836, 0, 1, 0, -0.67724836, 0, -0.73575455, 22.171875, 0, 40.234886)
+
+[node name="Tabara pescarilor" type="Node3D" parent="DecorManual" unique_id=558756320]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 563.0349, 0, -87.60012)
+
+[node name="ice_block_stack" parent="DecorManual/Tabara pescarilor" unique_id=1263150792 instance=ExtResource("23_g742r")]
+transform = Transform3D(-0.53124446, 0, 0.84721863, 0, 1, 0, -0.84721863, 0, -0.53124446, -29.708984, 0, 23.601627)
+
+[node name="ice_block_stack2" parent="DecorManual/Tabara pescarilor" unique_id=1616467277 instance=ExtResource("23_g742r")]
+transform = Transform3D(-0.6438792, 0, 0.7651272, 0, 1, 0, -0.7651272, 0, -0.6438792, -6.897522, 0, -7.427498)
+
+[node name="sled" parent="DecorManual/Tabara pescarilor" unique_id=899158999 instance=ExtResource("36_jjn54")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.06521845, 1.4379196)
+
+[node name="sled3" parent="DecorManual/Tabara pescarilor" unique_id=1668883377 instance=ExtResource("36_jjn54")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.00946, -0.06521845, 3.1102524)
+
+[node name="sled2" parent="DecorManual/Tabara pescarilor" unique_id=936020738 instance=ExtResource("36_jjn54")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.522827, 0.015889645, 21.28083)
+
+[node name="barrels_crates2" parent="DecorManual/Tabara pescarilor" unique_id=1079374821 instance=ExtResource("36_6dbs0")]
+transform = Transform3D(0.9615859, 0, -0.27450433, 0, 1, 0, 0.27450433, 0, 0.9615859, -2.1854248, 0, -11.705124)
+
+[node name="nerpaMover" type="Path3D" parent="DecorManual/Tabara pescarilor" unique_id=1725221638]
+transform = Transform3D(0.22490236, 0, -0.9743813, 0, 1, 0, 0.9743813, 0, 0.22490236, 11.754517, 0, 1.0604782)
+curve = SubResource("Curve3D_6dbs0")
+script = ExtResource("3_mover")
+model = ExtResource("36_j3enj")
+model_scale = 2.0
+speed = 7.0
+metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="fisher_tent_green" parent="DecorManual/Tabara pescarilor" unique_id=360724630 instance=ExtResource("36_7felo")]
+transform = Transform3D(-0.97431713, 0, -0.22518012, 0, 1, 0, 0.22518012, 0, -0.97431713, -5.456604, 0, -9.963982)
+
+[node name="fisher_tent_green2" parent="DecorManual/Tabara pescarilor" unique_id=762935321 instance=ExtResource("36_7felo")]
+transform = Transform3D(-0.6427855, 0, -0.7660464, 0, 1, 0, 0.7660464, 0, -0.6427855, -5.456604, 0, -3.1474686)
+
+[node name="fisher_tent_green3" parent="DecorManual/Tabara pescarilor" unique_id=680840509 instance=ExtResource("36_7felo")]
+transform = Transform3D(0.10499138, 0, 0.9944733, 0, 1, 0, -0.9944733, 0, 0.10499138, 0.025817871, 0, -3.1474686)
+
+[node name="fisher_tent_orange" parent="DecorManual/Tabara pescarilor" unique_id=1205346001 instance=ExtResource("37_j3enj")]
+transform = Transform3D(-0.7602708, 0, 0.6496062, 0, 1, 0, -0.6496062, 0, -0.7602708, -3.4526367, 0, 0)
+
+[node name="fisher_tent_orange2" parent="DecorManual/Tabara pescarilor" unique_id=568658871 instance=ExtResource("37_j3enj")]
+transform = Transform3D(-0.9971136, 0, -0.07592407, 0, 1, 0, 0.07592407, 0, -0.9971136, 0, 0, -8.160652)
+
+[node name="ice_hole" parent="DecorManual/Tabara pescarilor" unique_id=2060146366 instance=ExtResource("38_usuc4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3861084, 0, -5.2013855)
+
+[node name="uaz_bukhanka" parent="DecorManual/Tabara pescarilor" unique_id=1113960181 instance=ExtResource("40_usuc4")]
+transform = Transform3D(0.9378275, 0, 0.34710154, 0, 1, 0, -0.34710154, 0, 0.9378275, -33.73993, 0, 6.1647034)
+
+[node name="ice_hole2" parent="DecorManual/Tabara pescarilor" unique_id=686962748 instance=ExtResource("38_usuc4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.542969, 0, 16.47905)
+
+[node name="ice_hole3" parent="DecorManual/Tabara pescarilor" unique_id=1438328486 instance=ExtResource("38_usuc4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3175049, 0, 6.56472)
+
+[node name="6)Viaductul" type="Node3D" parent="DecorManual" unique_id=536924686]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 222.39514, 11.608814, -172.49826)
+
+[node name="train_baikal" parent="DecorManual/6)Viaductul" unique_id=2013409326 instance=ExtResource("46_yrnvh")]
+transform = Transform3D(0.97985154, 0, 0.1997273, 0, 1, 0, -0.1997273, 0, 0.97985154, 58.49646, 0, -1.308075)
+visible = false
+
+[node name="Viaduct_End1" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.221004, 0, 0.975273, 0, 1, 0, -0.975273, 0, -0.221004, 66.5105, -12.2945, 13.6602)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_End1"]
+visible = false
+
+[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_End1"]
+visible = false
+
+[node name="Viaduct_Pier1" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.220104, 0, 0.975476, 0, 1, 0, -0.975476, 0, -0.220104, 54.5973, -13.4343, -14.4006)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier1"]
+visible = false
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier1"]
+visible = false
+
+[node name="Viaduct_Arch1" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.220171, 0, 0.975461, 0, 1, 0, -0.975461, 0, -0.220171, 49.6692, -12.1809, 1.05901)
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch1"]
+visible = false
+
+[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch1"]
+visible = false
+
+[node name="Viaduct_Pier2" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.219473, 0, 0.975619, 0, 1, 0, -0.975619, 0, -0.219473, 38.5883, -13.3588, -10.7912)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier2"]
+visible = false
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier2"]
+visible = false
+
+[node name="Viaduct_Arch2" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.219616, 0, 0.975586, 0, 1, 0, -0.975586, 0, -0.219616, 33.6521, -12.1888, 4.67397)
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch2"]
+visible = false
+
+[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch2"]
+visible = false
+
+[node name="Viaduct_Pier3" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.219794, 0, 0.975546, 0, 1, 0, -0.975546, 0, -0.219794, 22.5661, -13.4316, -7.17804)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier3"]
+visible = false
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier3"]
+visible = false
+
+[node name="Viaduct_Arch3" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.22038, 0, 0.975414, 0, 1, 0, -0.975414, 0, -0.22038, 17.6346, -12.2785, 8.2868)
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch3"]
+visible = false
+
+[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch3"]
+visible = false
+
+[node name="Viaduct_Pier4" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.220448, 0, 0.975399, 0, 1, 0, -0.975399, 0, -0.220448, 6.53788, -13.5088, -3.56974)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier4"]
+visible = false
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier4"]
+visible = false
+
+[node name="Viaduct_Arch4" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.220998, 0, 0.975274, 0, 1, 0, -0.975274, 0, -0.220998, 1.61733, -12.3088, 11.9009)
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch4"]
+visible = false
+
+[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch4"]
+visible = false
+
+[node name="Viaduct_Pier5" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.220514, 0, 0.975384, 0, 1, 0, -0.975384, 0, -0.220514, -9.47815, -13.5188, 0.05432)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier5"]
+visible = false
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier5"]
+visible = false
+
+[node name="Viaduct_Arch5" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.220995, 0, 0.975275, 0, 1, 0, -0.975275, 0, -0.220995, -14.3981, -12.3357, 15.5235)
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch5"]
+visible = false
+
+[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch5"]
+visible = false
+
+[node name="Viaduct_Pier6" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.221079, 0, 0.975256, 0, 1, 0, -0.975256, 0, -0.221079, -25.4998, -13.5556, 3.68575)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier6"]
+visible = false
+
+[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier6"]
+visible = false
+
+[node name="Viaduct_End2" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
+transform = Transform3D(-0.221109, 0, 0.975249, 0, 1, 0, -0.975249, 0, -0.221109, -24.1634, -12.3588, 34.1402)
+
+[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_End2"]
+visible = false
+
+[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_End2"]
+visible = false
+
+[node name="Tunel_Intrare" parent="DecorManual/6)Viaductul" instance=ExtResource("45_hhdxr")]
+transform = Transform3D(-0.183827, 0, 0.982959, 0, 1, 0, -0.982959, 0, -0.183827, -31.133, 0.478111, 19.3191)
+
+[node name="Tunnel_Niche" parent="DecorManual/6)Viaductul/Tunel_Intrare"]
+visible = false
+
+[node name="Tunel_Iesire" parent="DecorManual/6)Viaductul" instance=ExtResource("45_hhdxr")]
+transform = Transform3D(0.183827, 0, -0.982959, 0, 1, 0, 0.982959, 0, 0.183827, -70.3885, 0.478111, 26.6604)
+
+[node name="Tunnel_Niche" parent="DecorManual/6)Viaductul/Tunel_Iesire"]
+visible = false
+
+[node name="Tunnel_Bore" parent="DecorManual/6)Viaductul/Tunel_Iesire"]
+visible = false

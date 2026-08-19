@@ -390,6 +390,7 @@ curba coapta. Cifra care conteaza e cea tiparita de sonde.
 | `custom_ice_slab_fracs` | placi de gheata libere care se balanseaza sub masini (Baikal); doar pe `custom_ice_ranges`. Sonda: `ProbeIceSlab` |
 | `custom_ice_ranges` | portiuni de GHEATA pe traseu: **interval** (frac_start, frac_end) — alta suprafata, nu asfalt ud: grip ~1.5 (drift-ul devine modul de condus), banda proprie fara borduri/linie/umeri, bete cu stegulete, vantul temei sufla doar aici (tema `baikal`) |
 | `custom_cornice_ravines` | care dintre `custom_ravines` sunt CORNISE (indici): buza la 0.5 m de asfalt — drum de munte, viaduct — nu vale lina de fly-off |
+| `custom_viaduct_ravines` | care dintre `custom_ravines` sunt VIADUCTE (indici): golul e si SUB sosea, tablierul ramane in aer pe fusta lui, umerii de pietris se sting; dedesubt pui pilele/arcadele din kit sub `DecorManual` (Baikal: `railway_viaduct.glb`, module End/Pier/Arch pe axa, baza la cota drumului − 12.7 / − 13.9 la pile). Se combina cu `custom_cornice_ravines` ca sa cazi de pe margine. Verifici din lateral cu `Snapshot --eye=x,y,z --look=x,y,z` |
 
 Decor asezat de mana (o stanca exact ACOLO): adauga orice scena din
 `assets/models/` ca nod copil, pozitioneaz-o si salveaz-o — supravietuieste

@@ -7,6 +7,10 @@ extends Node
 ##   --track=0 --frac=0.2 --driver
 ##                             POZA DE MASURARE (perspectiva). Vezi mai jos.
 ##   --track=0 --frac=0.2 --gamecam
+##   --track=3 --eye=250,6,-118 --look=232,8,-165
+##                             CAMERA LIBERA: ochi si punct privit, in metri
+##                             de lume (x,y,z). Pentru ce nu se vede de pe
+##                             sosea: viaductul din lateral, de pe gheata.
 ##                             vederea reala de JOC, cu parametrii curenti ai
 ##                             camerei de urmarire
 ##   --track=0 --frac=0.5 --gamecam --route=1
@@ -71,12 +75,22 @@ const MEASURE_FOV: float = 68.0
 const MEASURE_LOOK_AHEAD: float = 14.0
 const MEASURE_LOOK_HEIGHT: float = 1.2
 
+func _vec3(text: String) -> Vector3:
+	var p := text.split(",")
+	if p.size() != 3:
+		return Vector3.ZERO
+	return Vector3(float(p[0]), float(p[1]), float(p[2]))
+
+
 func _ready() -> void:
 	var track_index := 0
 	var zoom_frac := -1.0 # >= 0: prim-plan la fractia respectiva din traseu
 	var zoom_size := 60.0
 	var driver_view := false
 	var game_cam := false
+	var free_cam := false
+	var eye_pos := Vector3.ZERO
+	var look_pos := Vector3.ZERO
 	var landmark_id := -1
 	var landmark_dist := 30.0
 	var train_at := -1.0
@@ -108,6 +122,11 @@ func _ready() -> void:
 			rock_at = float(arg.trim_prefix("--rock-at="))
 		elif arg.begins_with("--route="):
 			route_idx = int(arg.trim_prefix("--route="))
+		elif arg.begins_with("--eye="):
+			eye_pos = _vec3(arg.trim_prefix("--eye="))
+			free_cam = true
+		elif arg.begins_with("--look="):
+			look_pos = _vec3(arg.trim_prefix("--look="))
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -150,6 +169,27 @@ func _ready() -> void:
 	var aspect := viewport_size.x / viewport_size.y
 	var cam := Camera3D.new()
 	add_child(cam)
+	if free_cam:
+		# CAMERA LIBERA: ochi + punct privit in coordonate de lume. Pentru
+		# lucruri care nu se vad nici de pe sosea, nici de sus: un viaduct se
+		# judeca din lateral, de pe gheata, si nicio fractie nu te duce acolo.
+		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
+		cam.fov = ChaseCamera.BASE_FOV
+		cam.far = 600.0
+		cam.position = eye_pos
+		cam.look_at(look_pos, Vector3.UP)
+		cam.current = true
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		var fimg := get_viewport().get_texture().get_image()
+		var fdir := ProjectSettings.globalize_path("res://snapshots")
+		DirAccess.make_dir_recursive_absolute(fdir)
+		var fout := "%s/%s_liber.png" % [fdir, GameState.TRACK_NAMES[track_index].to_lower()]
+		fimg.save_png(fout)
+		print("SNAPSHOT: ", fout)
+		get_tree().quit()
+		return
 	if landmark_id >= 0:
 		await _shoot_landmark(track, cam, track_index, landmark_id, landmark_dist)
 		return

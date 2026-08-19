@@ -326,7 +326,7 @@ def build_ice_kit():
     print("IceKit: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "props/ice_kit.glb")
+    export_glb(objs, "baikal/props/ice_kit.glb")
     save_blend(objs, "baikal_ice_kit.blend")
     return objs
 

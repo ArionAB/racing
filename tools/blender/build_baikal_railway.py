@@ -1,8 +1,8 @@
 """Baikal — calea ferata Circum-Baikal (planşa "Baikal kit", pozitiile 3 si 4).
 
-  RailwayViaduct  structures/railway_viaduct.glb
+  RailwayViaduct  baikal/structures/railway_viaduct.glb
                   Viaduct_Pier / Viaduct_Arch / Viaduct_End
-  TunnelPortal    structures/railway_tunnel_portal.glb
+  TunnelPortal    baikal/structures/railway_tunnel_portal.glb
                   Tunnel_Portal / Tunnel_Bore / Tunnel_Niche
 
 Viaductul e MODULAR, nu o piesa de 60 m: pista are 5 arcade in brief, dar
@@ -220,7 +220,7 @@ def build_viaduct():
     print("RailwayViaduct: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "structures/railway_viaduct.glb")
+    export_glb(objs, "baikal/structures/railway_viaduct.glb")
     save_blend(objs, "baikal_railway_viaduct.blend")
     return objs
 
@@ -388,7 +388,7 @@ def build_tunnel():
     print("TunnelPortal: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "structures/railway_tunnel_portal.glb")
+    export_glb(objs, "baikal/structures/railway_tunnel_portal.glb")
     save_blend(objs, "baikal_railway_tunnel.blend")
     return objs
 

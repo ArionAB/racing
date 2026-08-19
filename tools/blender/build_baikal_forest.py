@@ -239,7 +239,7 @@ def build_forest_kit():
     print("ForestKit: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "trees/forest_kit.glb")
+    export_glb(objs, "baikal/trees/forest_kit.glb")
     save_blend(objs, "baikal_forest_kit.blend")
     return objs
 
@@ -363,7 +363,7 @@ def build_shore_kit():
     print("ShoreKit: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "props/shore_kit.glb")
+    export_glb(objs, "baikal/props/shore_kit.glb")
     save_blend(objs, "baikal_shore_kit.blend")
     return objs
 

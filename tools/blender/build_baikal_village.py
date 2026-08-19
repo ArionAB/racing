@@ -1,7 +1,9 @@
 """Baikal — kitul satului Khuzhir (planşa, pozitia 11).
 
-  village_kit.glb  (buildings/)   LogHouse_A/B/C, Banya, FishRack, Woodpile,
-                                  Well, Signpost
+  UN FISIER PE PIESA (buildings/): log_house_a.glb, log_house_b.glb,
+                                   log_house_c.glb, banya.glb
+                        (props/):  fish_rack.glb, well_crane.glb,
+                                   woodpile.glb, village_signpost.glb
   village_props.glb (props/)      PlankFence, FenceGate, Sled, BarrelsCrates
   vehicles          (vehicles/)   uaz_bukhanka.glb, kamaz_truck.glb
   husky_dog.glb     (props/)      caine animat (Idle / Walk), figurant PathMover
@@ -264,16 +266,45 @@ def build_houses():
     finish(sign, bevel=0.02, ao=AO_PROP, origin="base_axis")
     objs.append(sign)
 
-    # asezate pe un rand, ca planşa de referinta
+    # UN FISIER PE PIESA, spre deosebire de celelalte kituri (ice/forest/shore),
+    # care raman GLB-uri multi-nod.
+    #
+    # Cererea a fost explicita, dar are si o justificare care tine: cladirile de
+    # sat sunt piese HERO, asezate una cate una pe ulita din Khuzhir, nu
+    # imprastiate statistic ca pietrele sau copacii. O piesa asezata manual se
+    # refera direct (`baikal/buildings/log_house_a.glb`), fara sa mai treaca prin
+    # `Track._extract_glb_node()` si fara offsetul de pe rand.
+    #
+    # Costul: 8 incarcari de resursa in loc de una, si 8 perechi .glb/.import.
+    # Materialul ramane UNUL SINGUR (atlasul), deci numarul de draw call-uri NU
+    # creste — batch-ul se face oricum pe material, nu pe fisier.
+    #
+    # Piesele se exporta DIN ORIGINE, nu de pe rand: fiecare fisier isi are
+    # originea la baza lui. De aia asezarea pe rand (pentru .blend si pentru
+    # planşa de referinta) se face DUPA export.
+    _drop_to_zero(objs)
+    files = {
+        "LogHouse_A": "baikal/buildings/log_house_a.glb",
+        "LogHouse_B": "baikal/buildings/log_house_b.glb",
+        "LogHouse_C": "baikal/buildings/log_house_c.glb",
+        "Banya": "baikal/buildings/banya.glb",
+        "FishRack": "baikal/props/fish_rack.glb",
+        "Well": "baikal/props/well_crane.glb",
+        "Woodpile": "baikal/props/woodpile.glb",
+        "Signpost": "baikal/props/village_signpost.glb",
+    }
+    for o in objs:
+        export_glb([o], files[o.name])
+    print("VillageKit: %d tris in %d fisiere (%s)"
+          % (sum(tri_count(o) for o in objs), len(objs),
+             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
+
+    # .blend-ul ramane comun (o singura sursa pentru tot satul), cu piesele
+    # asezate pe rand ca sa fie lizibil la deschidere.
     x = 0.0
     for o in objs:
         o.location.x = x
         x += 13.0
-    _drop_to_zero(objs)
-    print("VillageKit(buildings): %d tris (%s)"
-          % (sum(tri_count(o) for o in objs),
-             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "buildings/village_kit.glb")
     save_blend(objs, "baikal_village_kit.blend")
     return objs
 
@@ -373,7 +404,7 @@ def build_village_props():
     print("VillageKit(props): %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "props/village_props.glb")
+    export_glb(objs, "baikal/props/village_props.glb")
     save_blend(objs, "baikal_village_props.blend")
     return objs
 
@@ -421,7 +452,7 @@ def build_uaz():
     obj = b.to_object("UAZ_Bukhanka")
     finish(obj, bevel=0.03, ao=AO_VEHICLE, origin="base")
     print("UAZ: %d tris" % tri_count(obj))
-    export_glb([obj], "vehicles/uaz_bukhanka.glb")
+    export_glb([obj], "baikal/vehicles/uaz_bukhanka.glb")
     save_blend([obj], "baikal_uaz.blend")
     return [obj]
 
@@ -477,7 +508,7 @@ def build_kamaz():
     obj = b.to_object("Kamaz_Truck")
     finish(obj, bevel=0.03, ao=AO_VEHICLE, origin="base")
     print("Kamaz: %d tris" % tri_count(obj))
-    export_glb([obj], "vehicles/kamaz_truck.glb")
+    export_glb([obj], "baikal/vehicles/kamaz_truck.glb")
     save_blend([obj], "baikal_kamaz.blend")
     return [obj]
 

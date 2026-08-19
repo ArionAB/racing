@@ -62,6 +62,19 @@ const KNOWN_SLACK: float = 0.3
 var _rows: Array[Dictionary] = []
 
 
+## Aduna recursiv toate .glb-urile de sub `base`, cu calea relativa in `out`.
+func _collect_glb(base: String, rel: String, out: Array[String]) -> void:
+	var here := base if rel.is_empty() else base + "/" + rel
+	var d := DirAccess.open(here)
+	if d == null:
+		return
+	for f in d.get_files():
+		if f.ends_with(".glb"):
+			out.append(f if rel.is_empty() else rel + "/" + f)
+	for sub in d.get_directories():
+		_collect_glb(base, sub if rel.is_empty() else rel + "/" + sub, out)
+
+
 func _initialize() -> void:
 	var show_all := "--all" in OS.get_cmdline_user_args()
 	var dir := DirAccess.open("res://assets/models")
@@ -71,17 +84,17 @@ func _initialize() -> void:
 		return
 	# modelele stau in foldere de categorie (rocks/, trees/, ...); cheile din
 	# FOLIAGE si KNOWN raman nume scurte, deci raportul pastreaza doar fisierul
+	#
+	# Scanarea e RECURSIVA, nu pe un singur nivel. Pistele cu multe assets isi
+	# grupeaza modelele intr-un folder propriu cu categoriile inauntru
+	# (`baikal/trees/`, `baikal/buildings/`, ...), ca sa nu se amestece copacii
+	# si casele tuturor pistelor intr-un morman comun. Cu scanarea pe un nivel,
+	# garda ORBEA tacut pe tot ce statea la al doilea: la mutarea kitului
+	# Baikal numarul de mesh-uri masurate a scazut de la 331 la 257 fara niciun
+	# avertisment, adica 26 de modele iesisera din verificare. O garda care nu
+	# spune ca s-a uitat mai putin e mai rea decat lipsa ei.
 	var files: Array[String] = []
-	for f in dir.get_files():
-		if f.ends_with(".glb"):
-			files.append(f)
-	for sub in dir.get_directories():
-		var sub_dir := DirAccess.open("res://assets/models/" + sub)
-		if sub_dir == null:
-			continue
-		for f in sub_dir.get_files():
-			if f.ends_with(".glb"):
-				files.append(sub + "/" + f)
+	_collect_glb("res://assets/models", "", files)
 	files.sort()
 
 	for path in files:

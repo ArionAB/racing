@@ -11,32 +11,78 @@ piesele asa cum arata. Fara el, integrarea porneste tacit pe fallback (fiecare
 punct de incarcare e pazit de `ResourceLoader.exists()`, deci un nume gresit nu
 crapa nimic — se vede abia la urmatorul screenshot).
 
+## Unde stau
+
+Toate modelele Baikal sunt sub **`assets/models/baikal/<categorie>/`**, nu
+imprastiate prin categoriile comune.
+
+```
+assets/models/
+  baikal/
+    buildings/   banya, khuzhir_church, log_house_a/b/c
+    props/       fish_rack, husky_dog, ice_kit, nerpa_seal, serge_pole,
+                 shore_kit, village_props, village_signpost, well_crane,
+                 woodpile
+    rocks/       shaman_rock
+    structures/  ice_grotto_arch, power_pylon_soviet,
+                 railway_tunnel_portal, railway_viaduct, start_gate_logs
+    trees/       forest_kit
+    vehicles/    hovercraft_khivus, kamaz_truck, train_baikal, uaz_bukhanka
+  buildings/     (celelalte piste)
+  trees/         ...
+```
+
+Pista intai, categoria a doua — DELIBERAT in ordinea asta. Cu 125 de modele in
+repo, `trees/` si `buildings/` comune devenisera un morman in care nu se mai
+vedea ce e al cui. Categoria ramane al doilea nivel (nu se pierde) tocmai ca o
+cautare dupa "flowers" sa scoata florile de pe TOATE pistele, nu doar dintr-un
+folder plat pe pista.
+
+⚠️ **Structura pe doua niveluri cere garzi RECURSIVE.** `probe_watertight.gd`
+scana un singur nivel si a orbit tacut pe tot kitul la mutare — de la 331 la
+257 de mesh-uri masurate, fara niciun avertisment. E reparat (`_collect_glb`),
+dar orice unealta noua care umbla prin `assets/models/` trebuie sa coboare
+recursiv.
+
 ## Ce contine
 
-Nouasprezece fisiere. Cotele si triunghiurile sunt MASURATE pe GLB, nu
-declarate.
+Douazeci si sase de fisiere. Triunghiurile sunt MASURATE pe GLB.
+
+**Cladirile de sat sunt UN FISIER PE PIESA**, spre deosebire de celelalte
+kituri (`ice_kit`, `forest_kit`, `shore_kit`), care raman GLB-uri multi-nod.
+Sunt piese hero, asezate una cate una pe ulita din Khuzhir, nu imprastiate
+statistic — deci se refera direct, fara `Track._extract_glb_node()`. Numarul de
+materiale nu se schimba (tot atlasul), deci nici draw call-urile: batch-ul se
+face pe material, nu pe fisier.
 
 | fisier | noduri | tris | scriptul sursa |
 |---|---|---|---|
-| `rocks/shaman_rock.glb` | `Shaman_Crag_Big`, `Shaman_Crag_Small`, `Shaman_Ice` | 1376 | `build_baikal_shaman.py` |
-| `props/serge_pole.glb` | `Serge_A/B/C` | 4020 | `build_baikal_shaman.py` |
-| `structures/railway_viaduct.glb` | `Viaduct_Pier`, `Viaduct_Arch`, `Viaduct_End` | 9340 | `build_baikal_railway.py` |
-| `structures/railway_tunnel_portal.glb` | `Tunnel_Portal`, `Tunnel_Bore`, `Tunnel_Niche` | 7480 | `build_baikal_railway.py` |
-| `structures/ice_grotto_arch.glb` | `Grotto_Rock`, `Grotto_Ice`, `Icicle_A..D` | 6224 | `build_baikal_grotto.py` |
-| `buildings/khuzhir_church.glb` | `Church_Body`, `Church_Roof`, `Church_Dome` | 3706 | `build_baikal_grotto.py` |
-| `vehicles/hovercraft_khivus.glb` | `Khivus_Skirt/Hull/Cabin/Fan` | 1968 | `build_baikal_vehicles.py` |
-| `vehicles/train_baikal.glb` | `Baikal_Loco`, `Baikal_Carriage_A/B` | 5600 | `build_baikal_vehicles.py` |
-| `structures/power_pylon_soviet.glb` | `Pylon_Soviet` | 6764 | `build_baikal_vehicles.py` |
-| `structures/start_gate_logs.glb` | `StartGate_Logs` | 2348 | `build_baikal_vehicles.py` |
-| `buildings/village_kit.glb` | `LogHouse_A/B/C`, `Banya`, `FishRack`, `Well`, `Woodpile`, `Signpost` | 13392 | `build_baikal_village.py` |
-| `props/village_props.glb` | `PlankFence`, `FenceGate`, `Sled`, `BarrelsCrates` | 5528 | `build_baikal_village.py` |
-| `vehicles/uaz_bukhanka.glb` | `UAZ_Bukhanka` | 1128 | `build_baikal_village.py` |
-| `vehicles/kamaz_truck.glb` | `Kamaz_Truck` | 3624 | `build_baikal_village.py` |
-| `props/ice_kit.glb` | `Toros_A/B/C`, `IceSlabCracked`, `IceRoadMarker`, `IceRoadSign`, `IceHole`, `FisherTent_Green/Orange`, `IceBlockStack`, `FrozenBoat`, `IceShards` | 8110 | `build_baikal_ice.py` |
-| `trees/forest_kit.glb` | `LarchWinter_A/B/C`, `BirchWinter_A/B/C`, `PineSiberian_A/B` | 54272 | `build_baikal_forest.py` |
-| `props/shore_kit.glb` | `ShrubSnow`, `GrassTuftDry`, `BoulderLichen_A/B/C`, `CliffFaceOlkhon`, `HuntingCabin`, `ShoreStaircase` | 5816 | `build_baikal_forest.py` |
-| `props/husky_dog.glb` | `Husky_Dog` (armatura, 7 oase) + `Husky_Dog_Mesh` | 1164 | `build_baikal_animals.py` |
-| `props/nerpa_seal.glb` | `Nerpa_Seal` (armatura, 4 oase) + `Nerpa_Seal_Mesh` | 1164 | `build_baikal_animals.py` |
+| `baikal/rocks/shaman_rock.glb` | `Shaman_Crag_Big`, `Shaman_Crag_Small`, `Shaman_Ice` | 1376 | `build_baikal_shaman.py` |
+| `baikal/props/serge_pole.glb` | `Serge_A/B/C` | 4020 | `build_baikal_shaman.py` |
+| `baikal/structures/railway_viaduct.glb` | `Viaduct_Pier`, `Viaduct_Arch`, `Viaduct_End` | 9340 | `build_baikal_railway.py` |
+| `baikal/structures/railway_tunnel_portal.glb` | `Tunnel_Portal`, `Tunnel_Bore`, `Tunnel_Niche` | 7480 | `build_baikal_railway.py` |
+| `baikal/structures/ice_grotto_arch.glb` | `Grotto_Rock`, `Grotto_Ice`, `Icicle_A..D` | 6224 | `build_baikal_grotto.py` |
+| `baikal/buildings/khuzhir_church.glb` | `Church_Body`, `Church_Roof`, `Church_Dome` | 3706 | `build_baikal_grotto.py` |
+| `baikal/vehicles/hovercraft_khivus.glb` | `Khivus_Skirt/Hull/Cabin/Fan` | 1968 | `build_baikal_vehicles.py` |
+| `baikal/vehicles/train_baikal.glb` | `Baikal_Loco`, `Baikal_Carriage_A/B` | 5600 | `build_baikal_vehicles.py` |
+| `baikal/structures/power_pylon_soviet.glb` | `Pylon_Soviet` | 6764 | `build_baikal_vehicles.py` |
+| `baikal/structures/start_gate_logs.glb` | `StartGate_Logs` | 2348 | `build_baikal_vehicles.py` |
+| `baikal/buildings/log_house_a.glb` | `LogHouse_A` | 2012 | `build_baikal_village.py` |
+| `baikal/buildings/log_house_b.glb` | `LogHouse_B` | 2540 | `build_baikal_village.py` |
+| `baikal/buildings/log_house_c.glb` | `LogHouse_C` | 1616 | `build_baikal_village.py` |
+| `baikal/buildings/banya.glb` | `Banya` | 868 | `build_baikal_village.py` |
+| `baikal/props/fish_rack.glb` | `FishRack` | 1144 | `build_baikal_village.py` |
+| `baikal/props/well_crane.glb` | `Well` | 488 | `build_baikal_village.py` |
+| `baikal/props/woodpile.glb` | `Woodpile` | 4364 | `build_baikal_village.py` |
+| `baikal/props/village_signpost.glb` | `Signpost` | 360 | `build_baikal_village.py` |
+| `baikal/props/village_props.glb` | `PlankFence`, `FenceGate`, `Sled`, `BarrelsCrates` | 5528 | `build_baikal_village.py` |
+| `baikal/vehicles/uaz_bukhanka.glb` | `UAZ_Bukhanka` | 1128 | `build_baikal_village.py` |
+| `baikal/vehicles/kamaz_truck.glb` | `Kamaz_Truck` | 3624 | `build_baikal_village.py` |
+| `baikal/props/ice_kit.glb` | `Toros_A/B/C`, `IceSlabCracked`, `IceRoadMarker`, `IceRoadSign`, `IceHole`, `FisherTent_Green/Orange`, `IceBlockStack`, `FrozenBoat`, `IceShards` | 8110 | `build_baikal_ice.py` |
+| `baikal/trees/forest_kit.glb` | `LarchWinter_A/B/C`, `BirchWinter_A/B/C`, `PineSiberian_A/B` | 54272 | `build_baikal_forest.py` |
+| `baikal/props/shore_kit.glb` | `ShrubSnow`, `GrassTuftDry`, `BoulderLichen_A/B/C`, `CliffFaceOlkhon`, `HuntingCabin`, `ShoreStaircase` | 5816 | `build_baikal_forest.py` |
+| `baikal/props/husky_dog.glb` | `Husky_Dog` (armatura, 7 oase) + `Husky_Dog_Mesh` | 1164 | `build_baikal_animals.py` |
+| `baikal/props/nerpa_seal.glb` | `Nerpa_Seal` (armatura, 4 oase) + `Nerpa_Seal_Mesh` | 1164 | `build_baikal_animals.py` |
 
 **Total: 143 024 de triunghiuri**, tot lotul. Bugetul din brief §6 era ~400k pe
 pista cu tot cu teren, din care ~120k doar padurea — kitul intra confortabil.
@@ -120,7 +166,7 @@ in total, si semnaleaza **vantul**, care aici e mecanica. Garda o accepta doar
 DECLARAT:
 
 ```
-python tools/blender/verify_glb.py assets/models/props/serge_pole.glb \
+python tools/blender/verify_glb.py assets/models/baikal/props/serge_pole.glb \
     --origin=assembly --allow-car-slots=Serge
 ```
 

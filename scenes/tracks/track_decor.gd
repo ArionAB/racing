@@ -808,15 +808,139 @@ static func _place_alpine_prop(parent: Node3D, spec: TrackDecorSpec,
 ## intregului model, coroana de 3.7 m devine un perete pe care il atingi cu
 ## bara fara sa fi atins copacul — si pe o pista cu padure deasa asta ar face
 ## marginea drumului o cursa de obstacole invizibile.
-## Iarna pe Baikal: aceleasi piese ca la alpin, fara ce nu are ce cauta in
-## februarie — flori, fan, garduri de pasune, tufe verzi. Petice de zapada la
-## orice cota (aici zapada e jos, nu pe creasta), pini si stanci (nuanta de
-## roca a temei le albeste). PROVIZORIU pana la kitul din brief (larici,
-## mesteceni, sat) — vezi docs/track_briefs/baikal.md §5.5.
+## ---------------------------------------------------------------- scatter pe DATE
+##
+## Lista de piese a unei teme, in loc de "zarul" hardcodat pe benzi (vezi mai jos
+## cum arata varianta veche, pastrata ca rezerva). O intrare = un asset:
+##
+##   glb        calea sub assets/models/, fara extensie (un fisier pe piesa)
+##   bands      pe ce benzi poate cadea: "hug" (1.5-4 m de asfalt), "mid"
+##              (4-11 m), "back" (11-26 m), "far" (26-58 m)
+##   weight     frecventa RELATIVA fata de celelalte intrari eligibile pe aceeasi
+##              banda — 3.0 iese de trei ori mai des decat 1.0
+##   scale      [min, max], scara uniforma trasa la sorti per instanta
+##   collide    "trunk" (cilindru subtire in ax, ca la conifere — treci prin
+##              coroana, nu prin trunchi), "hull" (hull convex pe forma reala,
+##              ca la stanci) sau "none" (fantoma: frunzis, smocuri)
+##   sway       true = material de frunzis + leganare in vant (numai pe plante)
+##   satellite  true = poate fi si piesa MICA din jurul unui prop principal
+##              (tufe, bolovani); copacii nu, ca sa nu rasara un larice de 14 m
+##              la un metru de alt larice
+##   sink       cati metri se infige in pamant (implicit 0.10, ca baza plata
+##              sa nu lase o muchie de aer pe partea din vale a pantei)
+##
+## Adaugi un asset = adaugi o linie. Schimbi frecventa = schimbi un numar. Ce
+## NU decide lista: plafonul de triunghiuri/materiale (il numara probe_decor,
+## ruleaza-l dupa orice schimbare de ponderi) si ce e COMPOZITIE (case, serge,
+## corturi, vehicule) — aia sta in decorul manual, nu se trage la sorti.
+##
+## Iarna pe Baikal: larice fara ace, mesteacan cu trunchi alb, pin siberian
+## (singurul verde, 12-18 m — numai pe benzile departate, ca sa nu iasa din
+## cadrul camerei langa drum), bolovani cu licheni, tufe si smocuri uscate iesind
+## din zapada. Toate din kitul Baikal (docs/track_briefs/baikal.md §5.5), pe
+## atlasul comun: un singur material.
+##
+## PONDERILE SUNT DICTATE DE COST, nu de brief. Brief-ul vrea laricele ca masa
+## principala a padurii, dar laricele din kit e construit din ~290 de beam-uri
+## (ramuri reale, fiindca iarna e transparent) si costa 13 140 de triunghiuri —
+## de 60 de ori un conifer alpin (~220) si de 15 ori pinul siberian (874).
+## Masurat cu ponderea "de masa" (3.0): 55 de larici = 723 000 de triunghiuri,
+## pista la 1.26 M. De aceea masa padurii o face pinul (874) si laricele e
+## ACCENT (0.5), pana la o varianta de larice pentru scatter (planuri
+## incrucisate, ~300 tri — exact ce spune brief-ul §6, "3 planuri pe copac").
+## Mesteacanul (4 368) la fel, accent. Cand apare laricele ieftin, urci ponderea
+## si rulezi probe_decor; nu e nimic altceva de schimbat.
+const SCATTER_BAIKAL: Array[Dictionary] = [
+	{"glb": "baikal/trees/larch_winter_a", "bands": ["mid", "back", "far"],
+		"weight": 0.5, "scale": [0.85, 1.25], "collide": "trunk"},
+	{"glb": "baikal/trees/birch_winter_b", "bands": ["mid"],
+		"weight": 1.0, "scale": [0.8, 1.1], "collide": "trunk"},
+	{"glb": "baikal/trees/pine_siberian_a", "bands": ["mid", "back", "far"],
+		"weight": 3.0, "scale": [0.85, 1.15], "collide": "trunk"},
+	{"glb": "baikal/rocks/boulder_lichen_a", "bands": ["hug", "mid"],
+		"weight": 1.5, "scale": [0.6, 1.4], "collide": "hull",
+		"satellite": true},
+	{"glb": "baikal/plants/shrub_snow", "bands": ["hug", "mid"],
+		"weight": 2.5, "scale": [0.8, 1.3], "collide": "none", "sway": true,
+		"satellite": true},
+	{"glb": "baikal/plants/grass_tuft_dry", "bands": ["hug"],
+		"weight": 4.0, "scale": [0.7, 1.2], "collide": "none", "sway": true,
+		"satellite": true},
+]
+
+
+## O piesa din lista unei teme, pe banda data. Intoarce `false` daca nimic nu e
+## eligibil sau fisierul lipseste (checkout fara assets) — apelantul cade atunci
+## pe plasatorul vechi, ca pista sa ramana jucabila.
+##
+## Satelitii aleg doar dintre intrarile cu `satellite: true` de pe banda lor;
+## daca banda n-are niciuna (padurea departata e numai copaci), iau din TOATE
+## intrarile-satelit — un bolovan langa un pin e mai bine decat nimic.
+static func _place_from_set(parent: Node3D, set: Array, band_name: String,
+		pos: Vector3, rng: RandomNumberGenerator, satellite: bool) -> bool:
+	var picks: Array = []
+	for e: Dictionary in set:
+		if not (e.get("bands", []) as Array).has(band_name):
+			continue
+		if satellite and not bool(e.get("satellite", false)):
+			continue
+		picks.append(e)
+	if picks.is_empty() and satellite:
+		for e: Dictionary in set:
+			if bool(e.get("satellite", false)):
+				picks.append(e)
+	if picks.is_empty():
+		return false
+	var entry: Dictionary = TrackScenography._weighted(picks, rng)
+	var path := "res://assets/models/" + String(entry["glb"]) + ".glb"
+	if not ResourceLoader.exists(path):
+		return false
+	var model := (load(path) as PackedScene).instantiate() as Node3D
+	var sr: Array = entry.get("scale", [1.0, 1.0])
+	var s := rng.randf_range(float(sr[0]), float(sr[1]))
+	model.scale = Vector3.ONE * s
+	var holder: Node3D = model
+	match String(entry.get("collide", "none")):
+		"trunk":
+			# Acelasi cilindru ca la _add_pine: raza trunchiului, nu a coroanei.
+			var body := StaticBody3D.new()
+			body.add_child(model)
+			var aabb := Track.model_aabb(model)
+			var cyl := CylinderShape3D.new()
+			cyl.height = aabb.size.y
+			cyl.radius = maxf(aabb.size.x * 0.13, 0.22)
+			var col := CollisionShape3D.new()
+			col.shape = cyl
+			col.position = Vector3(0.0, aabb.size.y * 0.5, 0.0)
+			body.add_child(col)
+			holder = body
+		"hull":
+			var body := StaticBody3D.new()
+			body.add_child(model)
+			add_hull_collision(body, model)
+			holder = body
+	parent.add_child(holder)
+	holder.position = pos - Vector3.UP * float(entry.get("sink", 0.10))
+	holder.rotation.y = rng.randf_range(0.0, TAU)
+	if bool(entry.get("sway", false)):
+		Palette.apply_foliage_material(model)
+		model.set_meta(TrackDecorBatch.SWAY_META, true)
+	else:
+		Palette.apply_world_material(model)
+	return true
+
+
+## Iarna pe Baikal: piesele vin din SCATTER_BAIKAL (lista de mai sus). Ce urmeaza
+## dupa primul `if` e plasatorul vechi — aceleasi piese ca la alpin, fara ce nu
+## are ce cauta in februarie — si ramane DOAR ca rezerva pentru un checkout fara
+## kitul Baikal (larice, mesteceni, bolovani cu licheni).
 static func _place_baikal_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
 		satellite: bool) -> void:
 	var pos := spec.position
+	if _place_from_set(parent, SCATTER_BAIKAL, String(band["name"]), pos, rng,
+			satellite):
+		return
 	match band["name"]:
 		"hug":
 			var roll := rng.randf()

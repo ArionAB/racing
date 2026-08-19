@@ -504,12 +504,16 @@ func _physics_process(delta: float) -> void:
 		var k := (_time - WARN) / CROSS
 		# Traverseaza de la un capat la altul al sinei, cu garnitura cu tot.
 		var span := half_rail * 2.0 + _train_len
-		_train.position.x = -half_rail - _train_len + span * k
+		_train.position = Vector3(-half_rail - _train_len + span * k, 0.0, 0.0)
 		_train.visible = true
 	else:
-		# Parcat departe, cu coliziunea inactiva prin distanta. Mai simplu si mai
-		# sigur decat sa comutam disabled pe cinci forme in fiecare cadru.
-		_train.position.x = -half_rail - _train_len * 3.0
+		# Parcat departe SI sub lume. Doar "departe" nu ajunge: pe Baikal sina
+		# de pe sens are tangenta care taie din nou bucla la ~220 m (soseaua se
+		# intoarce dupa tunel), iar trenul parcat acolo era un perete invizibil
+		# pe asfalt — tacut cat timp drumul trecea pe sub el, lovit din plin de
+		# cum s-a ridicat malul la 13 m (ProbeRace: 29 de pereti la 0.80). Sub lume, nimic nu-l atinge;
+		# mai simplu si mai sigur decat sa comutam disabled pe cinci forme.
+		_train.position = Vector3(-half_rail - _train_len * 3.0, -200.0, 0.0)
 		_train.visible = false
 
 	if Engine.is_editor_hint():

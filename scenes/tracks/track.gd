@@ -27,6 +27,10 @@ const SURFACE_TILING_MACRO: float = 0.022
 ## prin el la viteza (depenetrarea o poate impinge pe partea gresita).
 const ROAD_THICKNESS: float = 3.0
 
+## Poarta de start folosita cand nici pista, nici tema nu cer alta.
+## Vezi [member gate_model] pentru cum se suprascrie.
+const DEFAULT_GATE_MODEL: String = "res://assets/models/structures/start_gate.glb"
+
 ## Creasta de fly-off: urcare cu panta CRESCATOARE care se termina intr-o
 ## muchie (nu un cocoas lin — vezi FlyoffKicker pentru de ce).
 const FLYOFF_RISE_LEN: float = 12.0
@@ -112,6 +116,19 @@ func _world_seed() -> int:
 	var src := world_seed_name if not world_seed_name.is_empty() else track_name
 	return src.hash()
 
+## Modelul portii de start AL PISTEI. Gol = ce cere tema (cheia `gate_model`);
+## daca nici tema nu cere nimic, [constant DEFAULT_GATE_MODEL].
+##
+## Poarta e primul lucru pe care il vezi la countdown, deci tine de identitatea
+## pistei, nu de mobilierul comun: o pista de iarna vrea alta silueta decat una
+## de plaja. Doua nivele, fiindca sunt doua intrebari diferite — "toate pistele
+## din tema asta au poarta de lemn" se scrie pe TEMA, "pista asta anume are
+## poarta ei" se scrie PE PISTA, din Inspector (vezi
+## TrackFromPath.custom_gate_model).
+##
+## "none" = fara poarta deloc, nici macar stalpii procedurali de fallback.
+var gate_model: String = ""
+
 ## Tema vizuala: fiecare pista isi defineste LUMEA (teren, cer, decor).
 var theme_decor: String = "forest" # cheie in Track.themes()
 var theme_ground_tint := Color(0.45, 0.72, 0.33)
@@ -191,6 +208,10 @@ var _theme: Dictionary = {}
 ##
 ## Nu e `const` fiindca valorile vin din Palette (apel de functie). E incarcat
 ## o data si partajat.
+##
+## Cheia `gate_model` (optionala) da poarta de start a temei — calea unui GLB,
+## sau "none" pentru nicio poarta. Lipsa ei = [constant DEFAULT_GATE_MODEL].
+## O pista anume o suprascrie cu [member gate_model].
 static var _themes_cache: Dictionary
 
 static func themes() -> Dictionary:
@@ -7337,18 +7358,50 @@ func _add_visual_mesh(mesh: ArrayMesh, color: Color) -> void:
 	inst.material_override = _flat_material(color)
 	add_child(inst)
 
+## Calea GLB-ului de poarta pentru pista asta, dupa toate suprascrierile:
+## intai ce cere pista, apoi ce cere tema, apoi poarta implicita.
+func _gate_model_path() -> String:
+	if not gate_model.is_empty():
+		return _resolve_uid(gate_model)
+	return _resolve_uid(String(theme_flag("gate_model", DEFAULT_GATE_MODEL)))
+
+
+## Traduce un "uid://..." in calea "res://..." pe care o are in spate.
+##
+## Butonul de fisier din Inspector scrie UID, nu cale (asa a iesit Baikal cu
+## `uid://blx1lq0lx0dml` in loc de calea GLB-ului). Ambele incarca la fel, dar
+## restul codului COMPARA si verifica existenta pe cale — cu un UID, verificarea
+## de mai jos ar fi picat pe modelul implicit desi assetul era acolo. Se
+## normalizeaza o data, in punctul in care intra in sistem.
+static func _resolve_uid(path: String) -> String:
+	if not path.begins_with("uid://"):
+		return path
+	var id := ResourceUID.text_to_id(path)
+	if id == ResourceUID.INVALID_ID or not ResourceUID.has_id(id):
+		return path
+	return ResourceUID.get_id_path(id)
+
+
 func _build_start_gate() -> void:
 	# Poarta de start din Blender, scalata pe latimea pistei; picioarele
 	# au coliziune. Fallback pe stalpii procedurali daca lipseste modelul.
 	#
 	# Era o arcada de jucarie din tema abandonata "lada de nisip", pe TOATE
 	# pistele, si primul lucru pe care il vezi la countdown.
-	if ResourceLoader.exists("res://assets/models/structures/start_gate.glb"):
+	var gate_path := _gate_model_path()
+	if gate_path == "none":
+		return
+	if not gate_path.is_empty() and not ResourceLoader.exists(gate_path):
+		# Un GLB scris gresit in Inspector nu are voie sa lase pista fara poarta
+		# in tacere: se vede in Output si se cade pe cea implicita.
+		push_warning("Poarta de start lipseste: %s — se foloseste cea implicita."
+			% gate_path)
+		gate_path = DEFAULT_GATE_MODEL
+	if ResourceLoader.exists(gate_path):
 		var target_width := (width_at_index(0) + 1.2) * 2.0
 		var gate := StaticBody3D.new()
 		gate.add_to_group("start_gate")
-		var model := (load("res://assets/models/structures/start_gate.glb") as PackedScene) \
-			.instantiate() as Node3D
+		var model := (load(gate_path) as PackedScene).instantiate() as Node3D
 		# Latimea si inaltimea se MASOARA. Aici erau trei literale (22.8 si 8.7
 		# de doua ori) copiate din bbox-ul modelului de atunci; un GLB de alta
 		# marime se scala gresit si ramanea cu coliziunea in aer, fara eroare.
@@ -7373,7 +7426,13 @@ func _build_start_gate() -> void:
 			gate.add_child(pillar)
 		add_child(gate)
 		gate.global_position = baked[0]
-		gate.global_basis = Basis.looking_at(start_direction(), Vector3.UP)
+		# MINUS start_direction: poarta se uita INAPOI, spre masinile care vin.
+		#
+		# looking_at intoarce -Z spre directia ceruta, iar contractul assetului e
+		# "fata spre +Y in Blender" = tot -Z in Godot. Cu directia de mers, cele
+		# doua se compun si fata pleaca IN JOSUL pistei: la countdown vedeai
+		# spatele panoului si zabrelele stalpilor inclinate invers.
+		gate.global_basis = Basis.looking_at(-start_direction(), Vector3.UP)
 		return
 	var side := _side_at(0)
 	for s in [-1.0, 1.0]:

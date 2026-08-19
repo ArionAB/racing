@@ -25,6 +25,16 @@ extends Track
 @export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island", "baikal") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
+## Poarta de start a pistei — GLB-ul ales cu butonul de fisier.
+##
+## Gol = ce cere tema, si daca nici tema nu cere nimic, poarta implicita.
+## Scrie "none" de mana ca sa NU ai poarta deloc.
+##
+## Modelul se scaleaza singur pe latimea soselei si isi ia coliziunea pe
+## picioare din bbox, deci orice arcada merge fara cifre de potrivit. Atlasul
+## comun se aplica automat, asa ca GLB-ul are nevoie de UV-uri spre sloturi
+## de paleta ca restul assetelor — vezi docs/style_bible.md §4.
+@export_file("*.glb") var custom_gate_model: String = ""
 ## Cota marii, RELATIV la media cotelor soselei (doar tema "island").
 ## Vezi Track.sea_level_offset — nu e o cota absoluta in lume.
 @export var custom_sea_level_offset: float = -7.0
@@ -115,6 +125,8 @@ func _apply_custom() -> void:
 	half_width = custom_half_width
 	sea_level_offset = custom_sea_level_offset
 	apply_theme(custom_theme)
+	# DUPA apply_theme: aici e suprascrierea pistei peste ce cere tema.
+	gate_model = custom_gate_model
 
 func _ramp_fracs() -> Array[float]:
 	return custom_ramp_fracs

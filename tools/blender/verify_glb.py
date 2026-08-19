@@ -7,8 +7,8 @@ Verifica:
   1. numele nodurilor (Godot cauta noduri dupa nume, ex. "Blades")
   2. numarul de triunghiuri fata de buget
   3. UV-urile: toate colapsate pe centre de slot din atlas -> ce sloturi foloseste
-  4. sloturile sunt LEGALE (0-13). 14-16 sunt accente de masina, 17-31 se
-     randeaza magenta in joc — vezi LEGAL_SLOTS mai jos.
+  4. sloturile sunt LEGALE (vezi LEGAL_SLOTS). 14-16 sunt accente de masina;
+     30-31 sunt rezerva si se randeaza magenta in joc.
      Piesele care poarta o textura de CLASA (assets/textures/classes/) au
      UV-uri REALE si nu li se aplica regula slotului; sonda le RECUNOASTE
      SINGURA din forma UV-urilor (vezi uv_kind). Pe ele verificarea se
@@ -67,7 +67,11 @@ SLOT_NAMES = [
 # rezerva: 0-13 desert, GAURA la 14-16 pentru masini, 17-23 insula. De-asta e
 # frozenset, nu range — un `range(0, 24)` ar fi legalizat in tacere accentele
 # de masina in decor.
-LEGAL_SLOTS = frozenset(list(range(0, 14)) + list(range(17, 24)))
+# Sloturile cu culoare REALA in palette_atlas.png. Lista urmareste
+# scripts/palette.gd: 0-13 baza, 17-23 mediul insular (Okinawa), 24-29 Baikal
+# (gheata, larice, barne, marmura). 30-31 raman rezerva si se randeaza
+# magenta, deci o piesa care le foloseste e o greseala de UV, nu o alegere.
+LEGAL_SLOTS = frozenset(list(range(0, 14)) + list(range(17, 30)))
 CAR_SLOTS = frozenset(range(14, 17))
 
 COMPONENT = {5120: ("b", 1), 5121: ("B", 1), 5122: ("h", 2),
@@ -106,6 +110,12 @@ def read_accessor(gltf, blob, index):
     for i in range(count):
         out.append(struct.unpack_from("<" + fmt * n, blob, base + i * stride))
     return out
+
+
+def _name_matches(node_name, patterns):
+    """Nodul e intr-o exceptie declarata? Potrivire pe PREFIX, ca `Serge` sa
+    acopere Serge_A/B/C fara sa le enumeri pe toate."""
+    return any(node_name.startswith(pat) for pat in patterns)
 
 
 def slot_problem(slot):
@@ -150,7 +160,8 @@ def uv_kind(uv_count, exact_count):
     return "mixed"
 
 
-def verify(path, budget=None, front=None, origin="base", class_parts=()):
+def verify(path, budget=None, front=None, origin="base", class_parts=(),
+           allow_car=()):
     gltf, blob, total, version = load_glb(path)
     print("=" * 74)
     print("%s  —  %d B, glTF v%d" % (os.path.basename(path), total, version))
@@ -281,7 +292,8 @@ def verify(path, budget=None, front=None, origin="base", class_parts=()):
                          else "slot%d" % slot)
                 names.append(label)
                 why = slot_problem(slot)
-                if why:
+                if why and not (14 <= slot <= 16
+                                and _name_matches(name, allow_car)):
                     illegal.append((slot, label, why))
             print("    sloturi UV : %s" % (", ".join(names) or "FARA UV!"))
             if not slots_used:
@@ -431,6 +443,7 @@ if __name__ == "__main__":
     front = None
     origin = "base"
     class_parts = ()
+    allow_car = ()
     for f in flags:
         if f.startswith("--class-parts="):
             class_parts = tuple(p.strip()
@@ -440,6 +453,15 @@ if __name__ == "__main__":
             front = f.split("=", 1)[1].strip().upper()
             if front not in ("+X", "-X", "+Z", "-Z"):
                 sys.exit("--front asteapta +X, -X, +Z sau -Z (Y e sus)")
+        elif f.startswith("--allow-car-slots="):
+            # Exceptie DECLARATA la regula "14-16 sunt doar pentru masini".
+            # Se cere pe piese anume, cu motivul scris in build script — nu e
+            # un comutator global. Prima (si azi singura) folosire: panglicile
+            # serge de pe Baikal, fasii de 60-90 cm care semnaleaza vantul,
+            # adica o MECANICA a pistei. Vezi nota din scripts/palette.gd.
+            allow_car = tuple(x.strip()
+                              for x in f.split("=", 1)[1].split(",")
+                              if x.strip())
         elif f.startswith("--origin="):
             origin = f.split("=", 1)[1].strip().lower()
             if origin not in ("base", "center", "assembly", "waterline"):
@@ -450,4 +472,5 @@ if __name__ == "__main__":
 
     target = args[0]
     budget = int(args[1]) if len(args) > 1 else None
-    sys.exit(0 if verify(target, budget, front, origin, class_parts) else 1)
+    sys.exit(0 if verify(target, budget, front, origin, class_parts,
+                         allow_car) else 1)

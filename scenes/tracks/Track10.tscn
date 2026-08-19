@@ -1,13 +1,14 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://cnexxb5ewq67s"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="3_mover"]
 [ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="4_hz"]
+[ext_resource type="PackedScene" uid="uid://cyw12qlbqbwjh" path="res://assets/models/structures/mountain_tunnel.glb" id="5_5ulhg"]
 
 [sub_resource type="Curve3D" id="Curve3D_baikal"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 120, 4, 7, 0, 0, 0, 0, 0, 0, 180, 3.5, 30, 0, 0, 0, 0, 0, 0, 225, 1.2, 68, 0, 0, 0, 0, 0, 0, 262, 0.1, 112, 0, 0, 0, 0, 0, 0, 322, 0.1, 150, 0, 0, 0, 0, 0, 0, 398, 0.1, 172, 0, 0, 0, 0, 0, 0, 472, 0.1, 158, 0, 0, 0, 0, 0, 0, 532, 0.1, 120, 0, 0, 0, 0, 0, 0, 570, 0.1, 68, 0, 0, 0, 0, 0, 0, 570, 0.1, 8, 0, 0, 0, 0, 0, 0, 555, 0.1, -68, 0, 0, 0, 0, 0, 0, 518, 0.1, -120, 0, 0, 0, 0, 0, 0, 465, 1.0, -158, 0, 0, 0, 0, 0, 0, 403.5, 6, -201, 0, 0, 0, 0, 0, 0, 345, 10.5, -188, 0, 0, 0, 0, 0, 0, 286.5, 12, -174.7, 0, 0, 0, 0, 0, 0, 228, 12, -161.5, 0, 0, 0, 0, 0, 0, 179, 12, -150.4, 0, 0, 0, 0, 0, 0, 142, 11, -142, 0, 0, 0, 0, 0, 0, 90, 9, -112, 0, 0, 0, 0, 0, 0, 38, 8, -135, 0, 0, 0, 0, 0, 0, -15, 6, -105, 0, 0, 0, 0, 0, 0, -45, 5, -60, 0, 0, 0, 0, 0, 0, -48, 4.3, -22, 0, 0, 0, 0, 0, 0, -28, 4, -3),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 120, 4, 7, 0, 0, 0, 0, 0, 0, 180, 3.5, 30, 0, 0, 0, 0, 0, 0, 225, 1.2, 68, 0, 0, 0, 0, 0, 0, 262, 0.1, 112, 0, 0, 0, 0, 0, 0, 322, 0.1, 150, 0, 0, 0, 0, 0, 0, 398, 0.1, 172, 0, 0, 0, 0, 0, 0, 472, 0.1, 158, 0, 0, 0, 0, 0, 0, 532, 0.1, 120, 0, 0, 0, 0, 0, 0, 570, 0.1, 68, 0, 0, 0, 0, 0, 0, 570, 0.1, 8, 0, 0, 0, 0, 0, 0, 555, 0.1, -68, 0, 0, 0, 0, 0, 0, 518, 0.1, -120, 0, 0, 0, 0, 0, 0, 465, 1, -158, 0, 0, 0, 0, 0, 0, 403.5, 6, -201, 0, 0, 0, 0, 0, 0, 345, 10.5, -188, 0, 0, 0, 0, 0, 0, 286.5, 12, -174.7, 0, 0, 0, 0, 0, 0, 228, 12, -161.5, 0, 0, 0, 0, 0, 0, 179, 12, -150.4, 0, 0, 0, 0, 0, 0, 142, 11, -142, 0, 0, 0, 0, 0, 0, 90, 9, -112, 0, 0, 0, 0, 0, 0, 38, 8, -135, 0, 0, 0, 0, 0, 0, -15, 6, -105, 0, 0, 0, 0, 0, 0, -45, 5, -60, 0, 0, 0, 0, 0, 0, -48, 4.3, -22, 0, 0, 0, 0, 0, 0, -28, 4, -3),
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 26
@@ -19,58 +20,58 @@ _data = {
 }
 point_count = 7
 
-[node name="Track10" type="Node3D"]
+[node name="Track10" type="Node3D" unique_id=1242242835]
 script = ExtResource("1_track")
 custom_name = "Baikal"
 custom_theme = "baikal"
-custom_half_width = 7.0
 custom_sea_level_offset = -4.23
-custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])
-custom_ice_slab_fracs = Array[float]([0.372, 0.398, 0.425])
-custom_width_segments = Array[Vector3]([Vector3(0.955, 0.075, 8), Vector3(0.205, 0.545, 11), Vector3(0.56, 0.61, 6), Vector3(0.63, 0.695, 9), Vector3(0.715, 0.855, 6.5)])
-custom_train_along_fracs = Array[float]([0.705])
 custom_arch_fracs = Array[float]([0.447])
-custom_hummock_fracs = Array[float]([0.245, 0.335])
+custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])
 custom_landmarks = Array[Vector3]([Vector3(0.975, -1, 13), Vector3(0.02, 1, 15), Vector3(0.045, -1, 14), Vector3(0.07, 1, 12), Vector3(0.1, -1, 15), Vector3(0.94, 1, 15), Vector3(0.905, -1, 12)])
 custom_ravines = Array[Vector4]([Vector4(0.69, 0.75, 13, 0)])
 custom_cornice_ravines = Array[int]([0])
+custom_train_along_fracs = Array[float]([0.705])
+custom_hummock_fracs = Array[float]([0.245, 0.335])
+custom_ice_slab_fracs = Array[float]([0.372, 0.398, 0.425])
+custom_width_segments = Array[Vector3]([Vector3(0.955, 0.075, 8), Vector3(0.205, 0.545, 11), Vector3(0.56, 0.61, 6), Vector3(0.63, 0.695, 9), Vector3(0.715, 0.855, 6.5)])
+sea_level_offset = -4.23
 
-[node name="Path" type="Path3D" parent="."]
+[node name="Path" type="Path3D" parent="." unique_id=1711934443]
 curve = SubResource("Curve3D_baikal")
 
-[node name="Peaks" type="Node3D" parent="."]
+[node name="Peaks" type="Node3D" parent="." unique_id=1774665205]
 
-[node name="MasivulTunelului" type="Marker3D" parent="Peaks"]
+[node name="MasivulTunelului" type="Marker3D" parent="Peaks" unique_id=1304075120]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 34, -215)
 gizmo_extents = 75.0
 script = ExtResource("2_peak")
 radius_m = 75.0
 
-[node name="DealulPadurii" type="Marker3D" parent="Peaks"]
+[node name="DealulPadurii" type="Marker3D" parent="Peaks" unique_id=240012648]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 20, -190)
 gizmo_extents = 60.0
 script = ExtResource("2_peak")
 radius_m = 60.0
 
-[node name="DealulSatului" type="Marker3D" parent="Peaks"]
+[node name="DealulSatului" type="Marker3D" parent="Peaks" unique_id=1175425029]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75, 14, -70)
 gizmo_extents = 55.0
 script = ExtResource("2_peak")
 radius_m = 55.0
 
-[node name="StancaSamanului" type="Marker3D" parent="Peaks"]
+[node name="StancaSamanului" type="Marker3D" parent="Peaks" unique_id=1571464909]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 13, 58)
 gizmo_extents = 20.0
 script = ExtResource("2_peak")
 radius_m = 20.0
 
-[node name="CapulGrotei" type="Marker3D" parent="Peaks"]
+[node name="CapulGrotei" type="Marker3D" parent="Peaks" unique_id=691118470]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 598, 9, 38)
 gizmo_extents = 24.0
 script = ExtResource("2_peak")
 radius_m = 24.0
 
-[node name="HovercraftLarg" type="Path3D" parent="."]
+[node name="HovercraftLarg" type="Path3D" parent="." unique_id=513364004]
 curve = SubResource("Curve3D_hover")
 script = ExtResource("3_mover")
 speed = 22.0
@@ -82,18 +83,24 @@ bob_amplitude = 0.06
 sway_frequency = 1.4
 metadata/_custom_type_script = "uid://b1848dr3kabqm"
 
-[node name="Traversari" type="Node3D" parent="."]
+[node name="Traversari" type="Node3D" parent="." unique_id=84623444]
 
-[node name="HovercraftTraversare" type="Marker3D" parent="Traversari"]
+[node name="HovercraftTraversare" type="Marker3D" parent="Traversari" unique_id=1011313036]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435, 0.1, 166)
 gizmo_extents = 3.0
 script = ExtResource("4_hz")
 motion = 1
 metadata/_custom_type_script = "uid://ccxa8xagvu55q"
 
-[node name="SaniaPescarului" type="Marker3D" parent="Traversari"]
+[node name="SaniaPescarului" type="Marker3D" parent="Traversari" unique_id=1858791998]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 537, 0.1, -94)
 gizmo_extents = 3.0
 script = ExtResource("4_hz")
 motion = 1
 metadata/_custom_type_script = "uid://ccxa8xagvu55q"
+
+[node name="mountain_tunnel" parent="." unique_id=515346015 instance=ExtResource("5_5ulhg")]
+transform = Transform3D(1.1469752, 0, 0.27403474, 0, 1.179257, 0, -0.27403474, 0, 1.1469752, 566.3939, -0.034873962, -27.641008)
+
+[node name="mountain_tunnel2" parent="." unique_id=271033949 instance=ExtResource("5_5ulhg")]
+transform = Transform3D(1.0840882, 0, 0.46411216, 0, 1.179257, 0, -0.46411216, 0, 1.0840882, 565.0783, -0.034873962, -41.262817)

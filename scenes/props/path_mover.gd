@@ -52,14 +52,27 @@ const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 		# Lista de sugestii pentru `animation` vine din modelul ales — la
 		# schimbarea lui, Inspectorul trebuie sa reciteasca proprietatile.
 		notify_property_list_changed()
+		# Si corpul se reface PE LOC: fara asta, modelul ales in Inspector
+		# aparea abia in joc — corpul se construia doar in _ready, iar
+		# Regenerate pe pista nu atinge copiii PathMover-ului (nu au owner).
+		_rebuild_in_editor()
 ## Ce PIESA din GLB se pastreaza (kiturile tin mai multe obiecte intr-un
 ## fisier). Gol = tot fisierul. Acelasi contract ca la HazardMarker.
-@export var model_node: String = ""
-@export_range(0.05, 4.0, 0.01) var model_scale: float = 1.0
+@export var model_node: String = "":
+	set(v):
+		model_node = v
+		_rebuild_in_editor()
+@export_range(0.05, 4.0, 0.01) var model_scale: float = 1.0:
+	set(v):
+		model_scale = v
+		_rebuild_in_editor()
 ## Corectie de orientare, in grade. Conventia Godot e "inainte = -Z", dar nu
 ## toate GLB-urile o respecta; daca figurantul merge cu spatele sau cu umarul
 ## inainte, de aici se indreapta — pe instanta, nu regenerand modelul.
-@export_range(-180.0, 180.0, 1.0) var model_yaw: float = 0.0
+@export_range(-180.0, 180.0, 1.0) var model_yaw: float = 0.0:
+	set(v):
+		model_yaw = v
+		_rebuild_in_editor()
 ## Clasa de material triplanar (ex. "rock"). Gol = atlasul comun de paleta.
 ## O CLASA, nu texturi proprii — garda din tools/probe_decor.gd numara
 ## materialele per pista (CLAUDE.md §texturi).
@@ -149,6 +162,18 @@ func _model_animation_names() -> PackedStringArray:
 
 func _ready() -> void:
 	_build_body()
+
+
+## Reconstructia din editor, la schimbarea unui export de infatisare. Numai in
+## editor: in joc exporturile nu se schimba, iar corpul viu tine stare (pozitia
+## pe curba) pe care nu vrem s-o resetam dintr-un setter.
+func _rebuild_in_editor() -> void:
+	if not Engine.is_editor_hint() or not is_inside_tree() or _body == null:
+		return
+	_body.queue_free()
+	_body = null
+	_push_area = null
+	_build_body.call_deferred()
 
 
 ## Corpul si infatisarea, o singura data. Copiii nu primesc owner, deci in

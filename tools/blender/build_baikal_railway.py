@@ -219,6 +219,29 @@ def build_end():
     return obj
 
 
+# ============================================================ Sina libera
+def build_rail_track():
+    """Patul de cale ferata SINGUR: pietris + traverse + sine, 12 m, pe sol.
+
+    Piesa exista ca sina sa poata continua DINCOLO de viaduct si de tunel —
+    pe terasament, spre sat — fara sa cari un modul de zidarie intreg. Acelasi
+    _deck() ca pe module (cota patului identica la imbinare), doar ca la
+    top_z=0: originea la baza pietrisului, gata de pus pe drum.
+
+    12 m ca arcada: aceleasi pozitii de instantiere, cap la cap. In Godot
+    sina merge pe -Z local (Blender +Y), conventia "face along" a proiectului.
+    """
+    clear_built()
+    b = Builder()
+    _deck(b, 0.0, ARCH_SPAN, top_z=0.0)
+    obj = b.to_object("RailTrack")
+    finish(obj, bevel=0.03, ao=AO_STONE, origin="base_axis")
+    print("RailTrack: %d tris" % tri_count(obj))
+    export_glb([obj], "baikal/structures/rail_track.glb")
+    save_blend([obj], "baikal_rail_track.blend")
+    return obj
+
+
 def build_viaduct():
     clear_built()
     pier, arch, end = build_pier(), build_arch(), build_end()
@@ -406,3 +429,4 @@ def build_tunnel():
 if __name__ == "__main__":
     build_viaduct()
     build_tunnel()
+    build_rail_track()

@@ -109,6 +109,7 @@ de plasari reale si transformarile lor raman IDENTICE la bit**.
 | `baikal/rocks/shaman_rock.glb` | `Shaman_Crag_Big`, `Shaman_Crag_Small`, `Shaman_Ice` | 1376 |
 | `baikal/structures/ice_grotto_arch.glb` | 6 noduri | 6224 |
 | `baikal/structures/power_pylon_soviet.glb` | `Pylon_Soviet` | 6764 |
+| `baikal/structures/rail_track.glb` | `RailTrack` | 968 |
 | `baikal/structures/railway_tunnel_portal.glb` | `Tunnel_Bore`, `Tunnel_Niche`, `Tunnel_Portal` | 7480 |
 | `baikal/structures/railway_viaduct.glb` | `Viaduct_Arch`, `Viaduct_End`, `Viaduct_Pier` | 9340 |
 | `baikal/structures/shore_staircase.glb` | `ShoreStaircase` | 1892 |

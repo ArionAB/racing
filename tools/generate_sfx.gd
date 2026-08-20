@@ -53,8 +53,41 @@ func _init() -> void:
 	# Mai jos si mai lung decat rock_impact: nu e o piatra care cade pe tabla, e
 	# o masa care te acopera. Fara varf ascutit — energia e in coada, nu in atac.
 	_save("avalanche_hit", _thud(0.85, 95.0, 24.0, 1.0))
+	# Trosnetul ghetii (campul de placi, Baikal). TOT LA SFARSIT — `rng` e un
+	# singur sir semanat o data, orice sunet inserat mai sus rescrie fisiere
+	# neatinse. Un singur fisier pentru ambele momente: hazardul il canta la
+	# pitch ~1.35 ca avertisment (placa se inclina) si la ~0.62 la rupere.
+	_save("ice_crack", _ice_crack())
 	print("SFX generate in res://assets/audio/")
 	quit()
+
+## Trosnet de gheata: pocnetul (atac de zgomot de 8 ms) urmat de „coborarea"
+## fisurii — un sweep rezonant 340->70 Hz care se stinge in ~0.35 s, cu un
+## huruit jos dedesubt. Gheata reala pocneste intai ascutit (fisura sparge
+## suprafata), apoi sunetul fuge in placa si se ingroasa — de-aia sweep-ul,
+## nu un simplu thud.
+func _ice_crack() -> PackedFloat32Array:
+	var n := int(RATE * 0.42)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var phase := 0.0
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		# pocnetul: zgomot filtrat-sus, doar primele ~8 ms
+		var snap := 0.0
+		if t < 0.008:
+			snap = (rng.randf() * 2.0 - 1.0) * (1.0 - t / 0.008) * 0.9
+		# fisura: sinus cu frecventa in cadere si amortizare exponentiala
+		var freq := lerpf(340.0, 70.0, minf(t / 0.3, 1.0))
+		phase += freq / float(RATE)
+		var body := sin(TAU * phase) * exp(-t * 9.0) * 0.7
+		# huruitul placii: zgomot trecut prin low-pass grosier
+		lp = lp * 0.93 + (rng.randf() * 2.0 - 1.0) * 0.07
+		var rumble := lp * exp(-t * 6.0) * 0.5
+		out[i] = clampf(snap + body + rumble, -1.0, 1.0)
+	return out
+
 
 ## Saw 110Hz + octava cu tremolo; cicluri intregi in 0.5s -> loop fara click.
 func _engine_loop() -> PackedFloat32Array:

@@ -60,7 +60,7 @@ enum Kind {
 	EXCAVATOR,  ## excavatorul ruginit care matura cu bratul
 	AVALANCHE,  ## masa de zapada care se rostogoleste peste sosea
 	WAVE,       ## val care spala soseaua (cere o tema cu mare)
-	ICE_SLAB,   ## placa de gheata libera care se balanseaza sub masini (Baikal)
+	ICE_SLAB,   ## camp de placi crapate centrat pe nod (Baikal); vezi IceFieldHazard
 	TRAIN_ALONG, ## tren PE SENS: sina in lungul soselei, vine din fata (Baikal)
 }
 

@@ -104,9 +104,11 @@ extends Track
 ## Torosuri (Baikal): creste de gheata peste culoar, kicker-e naturale mici
 ## (0.75 m). Vezi Track._build_hummock.
 @export var custom_hummock_fracs: Array[float] = []
-## Placi de gheata libere care se balanseaza sub masini (Baikal). Au sens doar
-## pe o portiune din `custom_ice_ranges`. Vezi IceSlabHazard.
-@export var custom_ice_slab_fracs: Array[float] = []
+## Campuri de placi crapate (Baikal): intervale (frac_start, frac_end) pe care
+## gheata se sparge in placi Voronoi cu fisuri de apa neagra si placi „vii"
+## care se inclina si se rup. Au sens doar pe o portiune din
+## `custom_ice_ranges`. Vezi IceFieldHazard.
+@export var custom_ice_field_ranges: Array[Vector2] = []
 ## Sectoare cu latime proprie: (frac_start, frac_end, half_width). Restul
 ## pistei ramane la `custom_half_width`, iar trecerea se face pe o rampa de
 ## Track.WIDTH_RAMP_M metri de fiecare parte — deci un sector mai scurt decat
@@ -190,8 +192,8 @@ func _rockfall_fracs() -> Array[float]:
 func _train_fracs() -> Array[float]:
 	return custom_train_fracs
 
-func _ice_slab_fracs() -> Array[float]:
-	return custom_ice_slab_fracs
+func _ice_field_ranges() -> Array[Vector2]:
+	return custom_ice_field_ranges
 
 func _train_along_fracs() -> Array[float]:
 	return custom_train_along_fracs

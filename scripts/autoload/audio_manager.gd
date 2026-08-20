@@ -34,6 +34,9 @@ const SFX: Dictionary = {
 	# avertisment, si pedeapsa e iesirea din cursa, deci volumul lui e chiar
 	# mecanica, nu ambianta.
 	&"avalanche_rumble": preload("res://assets/audio/avalanche_rumble.wav"),
+	# Trosnetul ghetii (campul de placi, Baikal): mic la inclinare (pitch
+	# ~1.35), mare la rupere (pitch ~0.62) — acelasi fisier, alta viteza.
+	&"ice_crack": preload("res://assets/audio/ice_crack.wav"),
 	# Impactul, o singura data, cand masa te inghite.
 	&"avalanche_hit": preload("res://assets/audio/avalanche_hit.wav"),
 }

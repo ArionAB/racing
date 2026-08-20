@@ -1615,6 +1615,9 @@ func rebuild() -> void:
 			continue # asezat de mana in editor, salvat in scena
 		child.free()
 	_build_curve()
+	# Se aduna din nou la fiecare regenerare, altfel Regenerate in editor ar
+	# lasa steguletele sa ocoleasca si campuri care nu mai exista.
+	_built_ice_fields.clear()
 	# Canalele INAINTEA samplerului: el sapa dupa ele, iar restul generatorilor
 	# intreaba tot de aici unde e golul din sosea.
 	_resolve_channels()
@@ -1672,8 +1675,8 @@ func rebuild() -> void:
 		_build_train_along(frac)
 	for frac in _avalanche_fracs():
 		_build_avalanche(frac)
-	for frac in _ice_slab_fracs():
-		_build_ice_slab(frac)
+	for rg in _ice_field_ranges():
+		_build_ice_field(rg)
 	for frac in _hummock_fracs():
 		_build_hummock(frac)
 	# Gimmickurile plantate ca noduri, DUPA cele din cod: intra prin exact
@@ -4759,7 +4762,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 			# Se sare singur, cu avertisment, daca tema n-are mare.
 			_build_wave_surge(frac)
 		HazardMarker.Kind.ICE_SLAB:
-			_build_ice_slab(frac)
+			_build_ice_field_at(frac)
 		HazardMarker.Kind.TRAIN_ALONG:
 			_build_train_along(frac)
 
@@ -5178,25 +5181,67 @@ func _train_along_fracs() -> Array[float]:
 	return []
 
 
-## Placa de gheata libera (Baikal): basculant pe axa transversala, plantat pe
-## axa drumului. Vezi [IceSlabHazard]. Baza din directia drumului, ca la tren:
-## -Z local = sensul de mers, deci placa se intinde in lungul lui Z.
+## Campul de placi crapate (Baikal, brief §2 POI C): pe intervalul dat,
+## suprafata de gheata se sparge in placi poligonale Voronoi ridicate peste
+## placa lacului, cu fisuri de apa neagra intre ele si 3-4 placi „vii" care
+## se inclina sub masini si se rup sub incarcare mare. Vezi [IceFieldHazard]
+## — pista calculeaza aici traseul (probe de centru, laterale, semilatimi),
+## hazardul primeste doar numere, ca la tren si la pod.
 ##
-## Transformarea INAINTE de add_child (AnimatableBody3D cu sync_to_physics).
-func _build_ice_slab(frac: float) -> void:
+## A inlocuit placa singulara IceSlabHazard: trei dreptunghiuri identice pe
+## banda nu citeau ca un camp si nu lasau nimic de ales; skill-ul cerut de
+## brief e citirea campului si alegerea liniei.
+func _build_ice_field(rg: Vector2) -> void:
 	var n := baked.size()
-	var idx := int(frac * float(n)) % n
-	var p := baked[idx]
-	var dir := (baked[(idx + 1) % n] - p).normalized()
-	var slab := IceSlabHazard.new()
-	slab.name = "IceSlab"
-	slab.road_half_width = width_at(frac)
-	slab.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
-	add_child(slab)
+	var i0 := int(fposmod(rg.x, 1.0) * float(n))
+	var count := int(fposmod(rg.y - rg.x, 1.0) * float(n))
+	if count < 4:
+		return
+	var pts := PackedVector3Array()
+	var sides := PackedVector3Array()
+	var hws := PackedFloat32Array()
+	for k in count + 1:
+		var i := (i0 + k) % n
+		pts.append(baked[i])
+		sides.append(_side_at(i))
+		hws.append(width_at_index(i))
+	var field := IceFieldHazard.new()
+	field.name = "IceField"
+	# ACEEASI instanta de material ca banda de gheata: placile sunt, la
+	# propriu, din gheata drumului, si numaratoarea de materiale nu urca.
+	field.setup(pts, sides, hws, _world_seed(), _ice_road_material())
+	add_child(field)
+	_built_ice_fields.append(rg)
 
 
-func _ice_slab_fracs() -> Array[float]:
+## Un HazardMarker ICE_SLAB tras in viewport devine un camp centrat pe nod,
+## cu lungimea implicita — acelasi generator, hranit in doua feluri.
+const ICE_FIELD_DEFAULT_LEN: float = 120.0
+
+func _build_ice_field_at(frac: float) -> void:
+	var total := _dists[baked.size()]
+	var half := ICE_FIELD_DEFAULT_LEN * 0.5 / total
+	_build_ice_field(Vector2(fposmod(frac - half, 1.0),
+		fposmod(frac + half, 1.0)))
+
+
+func _ice_field_ranges() -> Array[Vector2]:
 	return []
+
+
+## Intervalele campurilor CONSTRUITE (din cod sau din markere) — betele cu
+## stegulete le ocolesc, altfel ar ramane ingropate in campul ridicat.
+var _built_ice_fields: Array[Vector2] = []
+
+func _in_ice_field(frac: float) -> bool:
+	var f := fposmod(frac, 1.0)
+	for rg in _built_ice_fields:
+		if rg.x <= rg.y:
+			if f >= rg.x and f <= rg.y:
+				return true
+		elif f >= rg.x or f <= rg.y:
+			return true
+	return false
 
 
 ## Podul cu travee ridicatoare peste un canal.
@@ -6894,7 +6939,8 @@ func _build_ice_flags() -> void:
 		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
 			idx += 1
 		var i := idx % n
-		if not is_ice_at(frac_at(i)) or _road_gap(i):
+		if not is_ice_at(frac_at(i)) or _road_gap(i) \
+				or _in_ice_field(frac_at(i)):
 			d += ICE_FLAG_SPACING_M
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()

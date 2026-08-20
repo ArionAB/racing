@@ -387,7 +387,7 @@ curba coapta. Cifra care conteaza e cea tiparita de sonde.
 | `custom_wave_fracs` | val care spala soseaua (**cere o tema cu mare**) |
 | `custom_train_along_fracs` | tren PE SENS (Baikal): sina in lungul soselei, trenul vine din fata; drumul ramane deschis pe margini, moartea e pe axa. Cere ~100 m de drum drept (sina se scurteaza singura la cat e drept); AI-ul stie sa se tina de margine (`Track.lane_bias_at`). Sonda: `ProbeTrainAlong` |
 | `custom_hummock_fracs` | torosuri (Baikal): creste de gheata peste culoar, kicker-e naturale mici (0.75 m pe 5.5 m) — la 30 m/s decolezi scurt, la 20 abia saltezi |
-| `custom_ice_slab_fracs` | placi de gheata libere care se balanseaza sub masini (Baikal); doar pe `custom_ice_ranges`. Sonda: `ProbeIceSlab` |
+| `custom_ice_field_ranges` | campuri de placi crapate (Baikal): interval `(frac_start, frac_end)` pe care culoarul de gheata se sparge in placi Voronoi ridicate, cu 3-4 placi vii care se inclina si se rup sub incarcare; doar pe `custom_ice_ranges`. Sonda: `ProbeIceField` |
 | `custom_ice_ranges` | portiuni de GHEATA pe traseu: **interval** (frac_start, frac_end) — alta suprafata, nu asfalt ud: grip ~1.5 (drift-ul devine modul de condus), banda proprie fara borduri/linie/umeri, bete cu stegulete, vantul temei sufla doar aici (tema `baikal`) |
 | `custom_cornice_ravines` | care dintre `custom_ravines` sunt CORNISE (indici): buza la 0.5 m de asfalt — drum de munte, viaduct — nu vale lina de fly-off |
 | `custom_viaduct_ravines` | care dintre `custom_ravines` sunt VIADUCTE (indici): golul e si SUB sosea, tablierul ramane in aer pe fusta lui, umerii de pietris se sting; dedesubt pui pilele/arcadele din kit sub `DecorManual` (Baikal: `railway_viaduct.glb`, module End/Pier/Arch pe axa, baza la cota drumului − 12.7 / − 13.9 la pile). Se combina cu `custom_cornice_ravines` ca sa cazi de pe margine. Verifici din lateral cu `Snapshot --eye=x,y,z --look=x,y,z` |
@@ -565,9 +565,10 @@ nod **HazardMarker** tras pe sosea in viewport.
    plutind.
 3. In Inspector, `kind`: bariera mobila, bolovan, morisca, tren, tromba,
    deflector, creasta, excavator, avalansa, val (valul cere o tema cu mare —
-   altfel se sare, cu avertisment in Output), placa de gheata (basculant sub
-   masini — are sens doar pe o portiune din `custom_ice_ranges`; si prin
-   `custom_ice_slab_fracs`), tren pe sens (sina in lungul soselei, vine din
+   altfel se sare, cu avertisment in Output), camp de placi crapate (120 m
+   centrati pe nod, placi vii care se inclina si se rup — are sens doar pe o
+   portiune din `custom_ice_ranges`; si prin `custom_ice_field_ranges`, ca
+   interval), tren pe sens (sina in lungul soselei, vine din
    fata; cere drum drept — si prin `custom_train_along_fracs`).
 4. **Regenerate** pe radacina + **salveaza scena.**
 

@@ -18,16 +18,24 @@ extends Node3D
 ## isi pierdea efectul hazardul vechi. Ridicat, tot jocul plăcii ramane
 ## DEASUPRA lacului, deci fiecare grad de inclinare chiar ajunge la roti.
 ##
-## Placile „VII" (3-4 din camp, marcate cinstit cu retea de crapaturi albe si
-## fata mai alba):
-##   - se INCLINA spre coltul incarcat (ambele axe, arc rapid ~0.1 s) — la
-##     30 m/s simti si vezi caderea sub roti cat esti inca pe placa;
-##   - sub incarcare mare (2+ masini, o masina grea, sau TURBO — turbo-ul
-##     dubleaza apasarea) placa SE RUPE: trosnet, tasnitura de cioburi, placa
-##     se scufunda sub linia apei si cine e pe ea e repus pe traseu. Revine
-##     la loc in ~2 s (flotabilitate).
-## Skill-ul e citirea campului: alegi linia care ocoleste placile marcate, sau
-## risti prin mijloc cu turbo si platesti daca esti prea greu / prea insotit.
+## Placile MOARTE sunt DENIVELATE (panta si cota aleatoare per placa,
+## UNEVEN_*): campul e drumul prost al pistei, cu trepte de 8-15 cm intre
+## placi vecine pe care suspensia le simte la orice viteza — reglaj din
+## playtest, versiunea coplanara nu se simtea deloc in volan.
+##
+## Placile „VII" (8 din camp, pe culoar, marcate cinstit cu retea de
+## crapaturi albe si fata mai inchisa):
+##   - se ASAZA 10 cm sub orice masina care calca pe ele, cu trosnet la
+##     primul contact — feedback imediat, chiar si solo;
+##   - se INCLINA spre coltul incarcat (ambele axe, arc rapid ~0.1 s);
+##   - acumuleaza STRICACIUNE la fiecare trecere (masa x timp; turbo
+##     dubleaza) si nu se vindeca intre treceri: a 3-a trecere normala /
+##     a 2-a cu turbo / prima a unui mastodont boostat o RUPE — trosnet,
+##     tasnitura de cioburi, placa se scufunda sub linia apei si cine e pe
+##     ea e repus pe traseu. Revine in ~2 s (flotabilitate), cu
+##     stricaciunea stearsa.
+## Skill-ul e citirea campului: ocolesti placile marcate, sau risti prin
+## mijloc si tii minte cate treceri are placa in ea — si a cui e urmatoarea.
 ##
 ## AnimatableBody3D cu sync_to_physics pentru placile vii (ca traveea podului
 ## si trenul): masina e purtata, nu strapunsa. Transformarea se scrie
@@ -48,6 +56,14 @@ const JITTER: float = 0.38
 ## Cu cat se retrage fiecare placa din celula ei = jumatate de fisura (m).
 const INSET_STATIC: float = 0.18
 const INSET_LIVE: float = 0.42
+## Denivelarea STATICA a placilor moarte: panta aleatoare (m/m, ~±2.6°) si
+## abaterea de cota a centrului (m). Campul de presiune e drumul prost al
+## pistei — pragurile de 8-15 cm dintre placi vecine sunt ce simti in volan
+## la orice viteza, cu suspensia reala, nu un shake pe camera. Primul reglaj
+## (±3 cm, placi coplanare cu profilul) nu se simtea deloc: la 30 m/s o
+## fisura de 0.5 m e UN tick de fizica, doar treptele dintre placi raman.
+const UNEVEN_GRAD: float = 0.045
+const UNEVEN_H: float = 0.06
 ## Cat iese campul lateral dincolo de semilatimea drumului (m).
 const EXTRA_W: float = 5.0
 ## Grosimea vizuala/de coliziune a unei placi (m).
@@ -63,19 +79,24 @@ const FULL_TORQUE: float = 100.0 * 2.2
 ## Arcul inclinarii: raspuns in ~0.1 s — se simte CAT esti pe placa.
 const TILT_STIFF: float = 80.0
 const TILT_DAMP: float = 12.0
-## Incarcarea (kg-echivalent; turbo dubleaza) peste care placa incepe sa cedeze.
+## Sarcina de referinta (kg-echivalent) care NORMEAZA stricaciunea: o masina
+## medie. Turbo dubleaza apasarea, masinile grele conteaza proportional.
 const BREAK_LOAD: float = 165.0
-## Cat timp trebuie TINUTA incarcarea peste prag ca placa sa se rupa (s).
-##
-## 0.55, nu 0.28: la 30 m/s traversezi o placa de 7 m in ~0.23 s, deci
-## plutonul care trece IN VITEZA nu o rupe nici cand e bunched — o rupe cine
-## zaboveste (lupta bara la bara sub 15 m/s, camparea, turbo prelungit).
-## Masurat cu ProbeRace la 0.55: ~2 ruperi pe o cursa de 150 s cu 6 masini —
-## eveniment, nu rutina. Pedeapsa e pentru lacomie, nu pentru curse.
-const BREAK_TIME: float = 0.55
-const STRESS_DECAY: float = 2.0
+## Stricaciunea CUMULATA (in secunde-de-sarcina-de-referinta) la care placa
+## se rupe. Prima versiune cerea sarcina TINUTA 0.55 s peste un prag — adica
+## niciodata in cursa: la 30 m/s stai pe o placa de 7 m fix 0.23 s, deci nici
+## turbo (200-520 kg-echiv.) nu apuca sa o rupa, si hazardul era mort la
+## volan (feedback de playtest). Acum stricaciunea NU se mai vindeca intre
+## treceri: o masina normala rupe placa la a 3-a trecere, cu turbo la a 2-a,
+## autobuzul cu turbo chiar sub el. Placa revine dupa HOLD_TIME cu
+## stricaciunea stearsa — evenimentul se poate repeta, dar nu escaladeaza
+## in gauri permanente.
+const BREAK_TIME: float = 0.45
+## Cat se lasa o placa vie sub PRIMA masina care calca pe ea (m) — feedback
+## imediat, cu trosnet, chiar si solo: simti CA e vie inainte sa afli CE face.
+const SETTLE_DROP: float = 0.10
 ## Scufundarea placii rupte si arcul ei (mai moale — e o masa mare in apa).
-const SINK_STIFF: float = 26.0
+const SINK_STIFF: float = 34.0
 const SINK_DAMP: float = 9.0
 ## Cat sta scufundata inainte sa revina (s, de la rupere).
 const HOLD_TIME: float = 2.0
@@ -90,7 +111,10 @@ var _sides: PackedVector3Array = PackedVector3Array()
 var _hws: PackedFloat32Array = PackedFloat32Array()
 var _seed: int = 0
 var _plate_mat: Material
-var _live_count: int = 4
+## 8, nu 4: cu 4 pe ~110 placi puteai face tururi fara sa atingi una — iar
+## distantarea de 12 m tine totusi campul de mine departe (brieful cere
+## "cel mult una-doua pe linie", nu zero).
+var _live_count: int = 8
 
 var _s: PackedFloat32Array = PackedFloat32Array() # abscisa curbilinie per proba
 var _len: float = 0.0
@@ -109,7 +133,7 @@ var _crack_cd: float = 0.0
 ## primeste numere in spatiul lui.
 func setup(pts: PackedVector3Array, sides: PackedVector3Array,
 		hws: PackedFloat32Array, world_seed: int, plate_mat: Material,
-		live_count: int = 4) -> void:
+		live_count: int = 8) -> void:
 	_pts = pts
 	_sides = sides
 	_hws = hws
@@ -371,7 +395,7 @@ func _build() -> void:
 			continue
 		var ok := true
 		for li: int in live_idx:
-			if _poly_centroid(cells[li]).distance_to(c) < 18.0:
+			if _poly_centroid(cells[li]).distance_to(c) < 12.0:
 				ok = false
 				break
 		if ok:
@@ -447,10 +471,22 @@ func _build() -> void:
 			poly = cells[k] # celula prea mica pentru retragere: fara fisura
 		var c2 := _poly_centroid(poly)
 		# planul fetei de sus: cota + pantele profilului la centroid (rampele
-		# de capat SI cea laterala); placa ramane PLANA — se inclina in bloc
-		var h_c := _top_y(c2.x, c2.y) + rng.randf_range(-0.03, 0.03)
+		# de capat SI cea laterala); placa ramane PLANA — se inclina in bloc.
+		#
+		# Placile MOARTE primesc peste profil o panta si o cota aleatoare
+		# (UNEVEN_*): campul de presiune e denivelat pe bune, cu trepte de
+		# 8-15 cm intre vecine, si suspensia le simte la orice viteza.
+		# Mesh-ul si coliziunea ies din ACEIASI parametri, deci raman
+		# consistente. Placile VII raman plane la cota profilului: gheata
+		# subtire, proaspata — netezimea lor e parte din semnal, iar bugetul
+		# lor de inclinare (theta_max) ramane intreg pentru joc.
+		var h_c := _top_y(c2.x, c2.y)
 		var grad_s := _top_y(c2.x + 0.5, c2.y) - _top_y(c2.x - 0.5, c2.y)
 		var grad_t := _top_y(c2.x, c2.y + 0.5) - _top_y(c2.x, c2.y - 0.5)
+		if not is_live:
+			h_c += rng.randf_range(-UNEVEN_H, UNEVEN_H)
+			grad_s += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD)
+			grad_t += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD)
 		if is_live:
 			_build_live_plate(poly, c2, h_c, grad_s, grad_t, live_k, rng)
 			live_k += 1
@@ -786,21 +822,24 @@ func _step_plate(plate: Dictionary, cars: Array[Car], delta: float) -> void:
 		# inclinare spre incarcare; semnele derivate din (axa x brat).y
 		tgt_u = -plate["cu"] * clampf(torque_t / FULL_TORQUE, -1, 1) * theta_max
 		tgt_v = -plate["cv"] * clampf(torque_s / FULL_TORQUE, -1, 1) * theta_max
-		# avertisment: primul lasat serios sub roti = trosnet mic
-		var bent := absf(tgt_u) + absf(tgt_v) > theta_max * 0.4
-		if bent and not plate["warned"] and _crack_cd <= 0.0:
-			plate["warned"] = true
-			_crack_cd = CRACK_COOLDOWN
-			_play_crack(plate, 1.35, -8.0)
-		elif not bent:
-			plate["warned"] = false
-		# cedarea: incarcare peste prag, tinuta
-		if load_kg >= BREAK_LOAD:
-			plate["stress"] = float(plate["stress"]) \
-				+ delta * load_kg / BREAK_LOAD
+		# Asezarea: placa se lasa sub ORICE masina care calca pe ea, cu
+		# trosnet la primul contact. Inainte, avertismentul era legat de
+		# inclinare (>40% din theta_max) — prin centrul placii cuplul e ~0,
+		# deci majoritatea trecerilor nu declansau nimic si placa parea
+		# moarta. Contactul e semnalul cinstit: esti pe gheata subtire.
+		if not on_plate.is_empty():
+			tgt_sink = SETTLE_DROP
+			if not plate["warned"] and _crack_cd <= 0.0:
+				plate["warned"] = true
+				_crack_cd = CRACK_COOLDOWN
+				_play_crack(plate, 1.35, -8.0)
 		else:
-			plate["stress"] = maxf(
-				float(plate["stress"]) - delta * STRESS_DECAY, 0.0)
+			plate["warned"] = false
+		# Stricaciunea se ACUMULEAZA si nu se vindeca intre treceri (vezi
+		# BREAK_TIME): fiecare traversare lasa urme, proportional cu masa
+		# si cu turbo. Se sterge doar cand placa rupta revine la suprafata.
+		plate["stress"] = float(plate["stress"]) \
+			+ delta * load_kg / BREAK_LOAD
 		if float(plate["stress"]) >= BREAK_TIME:
 			print("DBG IceField: placa rupta, %d masini" % on_plate.size())
 			plate["state"] = PlateState.BROKEN

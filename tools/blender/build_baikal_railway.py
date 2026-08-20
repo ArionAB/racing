@@ -221,19 +221,29 @@ def build_end():
 
 # ============================================================ Sina libera
 def build_rail_track():
-    """Patul de cale ferata SINGUR: pietris + traverse + sine, 12 m, pe sol.
+    """DOAR calea ferata: traverse + sine, 12 m — fara patul de pietris.
 
     Piesa exista ca sina sa poata continua DINCOLO de viaduct si de tunel —
-    pe terasament, spre sat — fara sa cari un modul de zidarie intreg. Acelasi
-    _deck() ca pe module (cota patului identica la imbinare), doar ca la
-    top_z=0: originea la baza pietrisului, gata de pus pe drum.
+    pe terasament, spre sat. Prima versiune folosea _deck() intreg, dar patul
+    de pietris de 7 m citea ca o placa de asfalt pusa PESTE drum — pe module
+    patul e al zidariei, aici suportul e chiar drumul. Raman traversele si
+    sinele, cu aceleasi cote relative ca pe module (traverse 2.7 x 0.24 x
+    0.14, sine pe ecartament RAIL_GAUGE, +13 cm), deci la imbinarea cu un
+    modul sina cade la fel fata de fata de rulare.
 
-    12 m ca arcada: aceleasi pozitii de instantiere, cap la cap. In Godot
-    sina merge pe -Z local (Blender +Y), conventia "face along" a proiectului.
+    12 m ca arcada: se pune cap la cap. In Godot sina merge pe -Z local
+    (Blender +Y), conventia "face along" a proiectului.
     """
     clear_built()
     b = Builder()
-    _deck(b, 0.0, ARCH_SPAN, top_z=0.0)
+    length = ARCH_SPAN
+    z_sleep = 0.0
+    for pt in _span_points((0.0, -length * 0.5, z_sleep),
+                           (0.0, length * 0.5, z_sleep),
+                           0.65, endpoints=False):
+        b.box((pt.x, pt.y, pt.z + 0.07), (2.7, 0.24, 0.14), LOG_DARK)
+    for sx in (-RAIL_GAUGE * 0.5, RAIL_GAUGE * 0.5):
+        b.box((sx, 0.0, z_sleep + 0.14 + 0.13), (0.12, length, 0.12), RUST)
     obj = b.to_object("RailTrack")
     finish(obj, bevel=0.03, ao=AO_STONE, origin="base_axis")
     print("RailTrack: %d tris" % tri_count(obj))

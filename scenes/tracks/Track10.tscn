@@ -62,7 +62,7 @@ point_count = 8
 
 [sub_resource type="Curve3D" id="Curve3D_asgu2"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 53.137024, -0.065216064, -35.639465, 0, 0, 0, 0, 0, 0, 86.94379, -0.065208435, -37.05832, 0, 0, 0, 0, 0, 0, 126.568054, -0.065216064, -5.98732, 0, 0, 0, 0, 0, 0, 80.90256, -0.065216064, 7.67865, 0, 0, 0, 0, 0, 0, 46.13437, -0.065200806, 10.436279, 0, 0, 0, 0, 0, 0, 32.768616, -0.065216064, 8.452347, 0, 0, 0, 0, 0, 0, 1.1999817, -0.065216064, -3.8478699, 0, 0, 0, 0, 0, 0, 31.61679, -0.065223694, -39.420914, 0, 0, 0, 0, 0, 0, 48.21942, -0.065216064, -37.196777),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 53.137024, -0.065216064, -35.639465, 0, 0, 0, 0, 0, 0, 81.06644, -0.065208435, -30.238022, 0, 0, 0, 0, 0, 0, 126.568054, -0.065216064, -5.98732, 0, 0, 0, 0, 0, 0, 80.90256, -0.065216064, 3.3809967, 0, 0, 0, 0, 0, 0, 46.13437, -0.065200806, 4.9510956, 0, 0, 0, 0, 0, 0, 32.768616, -0.065216064, 0.043914795, 0, 0, 0, 0, 0, 0, 1.1999817, -0.065216064, -3.8478699, 0, 0, 0, 0, 0, 0, 31.61679, -0.065223694, -39.420914, 0, 0, 0, 0, 0, 0, 48.21942, -0.065216064, -37.196777),
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 9
@@ -330,22 +330,22 @@ transform = Transform3D(1.8030362, 0, 0, 0, 1.8030362, 0, 0, 0, 1.8030362, -14.6
 transform = Transform3D(1.8030362, 0, 0, 0, 1.8030362, 0, 0, 0, 1.8030362, -11.682617, -0.17823005, 5.6881676)
 
 [node name="serge_pole_b" parent="DecorManual/2)Stanca samanului" unique_id=1954176664 instance=ExtResource("26_3ylwr")]
-transform = Transform3D(1.5448787, 0, 0, 0, 1.5448787, 0, 0, 0, 1.5448787, -7.209793, -0.6267042, 10.673969)
+transform = Transform3D(1.5448787, 0, 0, 0, 1.5448787, 0, 0, 0, 1.5448787, -7.209793, -1.0799551, 10.673969)
 
 [node name="serge_pole_b2" parent="DecorManual/2)Stanca samanului" unique_id=1908665797 instance=ExtResource("26_3ylwr")]
 transform = Transform3D(1.5448787, 0, 0, 0, 1.5448787, 0, 0, 0, 1.5448787, -10.015381, -0.6267042, 7.742447)
 
 [node name="serge_pole_b3" parent="DecorManual/2)Stanca samanului" unique_id=89339975 instance=ExtResource("26_3ylwr")]
-transform = Transform3D(1.5365006, 0, -0.16067342, 0, 1.5448786, 0, 0.16067342, 0, 1.5365006, -3.6156464, -0.6267042, 13.12957)
+transform = Transform3D(1.5365006, 0, -0.16067342, 0, 1.5448786, 0, 0.16067342, 0, 1.5365006, -3.6156464, -1.6184177, 13.12957)
 
 [node name="serge_pole_c" parent="DecorManual/2)Stanca samanului" unique_id=2076929796 instance=ExtResource("27_km8wo")]
-transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 0, -0.93430996, 20.375332)
+transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 0, -2.1078634, 20.375332)
 
 [node name="serge_pole_c2" parent="DecorManual/2)Stanca samanului" unique_id=1929288860 instance=ExtResource("27_km8wo")]
-transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 3.3667755, -0.93430996, 23.552376)
+transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 3.3667755, -2.8245983, 23.552376)
 
 [node name="serge_pole_c3" parent="DecorManual/2)Stanca samanului" unique_id=967496719 instance=ExtResource("27_km8wo")]
-transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 5.980377, -0.93430996, 25.239967)
+transform = Transform3D(1.4423227, 0, 0, 0, 1.4423227, 0, 0, 0, 1.4423227, 5.980377, -3.312581, 25.239967)
 
 [node name="boulder_lichen_a" parent="DecorManual/2)Stanca samanului" unique_id=889794186 instance=ExtResource("28_3ylwr")]
 transform = Transform3D(1.8302251, 0, 0, 0, 1.8302251, 0, 0, 0, 1.8302251, 26.430038, -4.08846, 8.571781)
@@ -357,10 +357,10 @@ transform = Transform3D(1.390369, 0, 0, 0, 1.390369, 0, 0, 0, 1.390369, 41.91264
 transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 41.912643, -6.8736897, 24.340366)
 
 [node name="boulder_lichen_a5" parent="DecorManual/2)Stanca samanului" unique_id=258914358 instance=ExtResource("28_3ylwr")]
-transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 31.936523, -7.7795672, 46.167786)
+transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 31.936523, -7.7795753, 46.167786)
 
 [node name="boulder_lichen_a4" parent="DecorManual/2)Stanca samanului" unique_id=516879280 instance=ExtResource("28_3ylwr")]
-transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 12.477951, -2.1701326, 24.340366)
+transform = Transform3D(2.3147433, 0, 0, 0, 2.3147433, 0, 0, 0, 2.3147433, 12.477951, -4.2273517, 24.340366)
 
 [node name="boulder_lichen_b" parent="DecorManual/2)Stanca samanului" unique_id=1830287457 instance=ExtResource("29_km8wo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.349594, -6.1680446, 19.492775)
@@ -369,7 +369,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.349594, -6.1680446, 19.492
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.420898, -6.687013, 39.00798)
 
 [node name="boulder_lichen_b4" parent="DecorManual/2)Stanca samanului" unique_id=659409115 instance=ExtResource("29_km8wo")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.004745, -8.635202, 39.00798)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.004745, -8.635199, 39.00798)
 
 [node name="boulder_lichen_b3" parent="DecorManual/2)Stanca samanului" unique_id=529248682 instance=ExtResource("29_km8wo")]
 transform = Transform3D(1.294848, 0, 0, 0, 1.294848, 0, 0, 0, 1.294848, 24.420898, -7.0049725, 44.184807)

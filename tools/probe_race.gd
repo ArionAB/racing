@@ -215,6 +215,16 @@ func _start_race() -> void:
 func _tick_race(delta: float) -> void:
 	_elapsed += delta
 	var cars: Array[Car] = _race.cars
+	if OS.get_environment("PROBE_RACE_TRACE") == "1" \
+			and int(_elapsed * 60.0) % 120 == 0:
+		for i in cars.size():
+			var c := cars[i]
+			print("TRACE t=%5.1f car%d frac=%.3f on_road=%s v=%4.1f pos=(%.0f,%.1f,%.0f)" % [
+				_elapsed, i,
+				_race.track.frac_at(c.road_index, c.route),
+				_race.track.is_on_road(c.road_index, c.global_position,
+					c.route), c.horizontal_speed(),
+				c.global_position.x, c.global_position.y, c.global_position.z])
 	for i in cars.size():
 		var car := cars[i]
 		var st := _stats[i]

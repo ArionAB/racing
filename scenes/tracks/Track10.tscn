@@ -43,7 +43,6 @@
 [ext_resource type="PackedScene" uid="uid://b1o8umssytq03" path="res://assets/models/baikal/rocks/cliff_face_olkhon.glb" id="37_n3umy"]
 [ext_resource type="PackedScene" uid="uid://dfm1lt3manbhg" path="res://assets/models/baikal/props/ice_hole.glb" id="38_usuc4"]
 [ext_resource type="PackedScene" uid="uid://cwalkvr4b65u8" path="res://assets/models/baikal/vehicles/uaz_bukhanka.glb" id="40_usuc4"]
-[ext_resource type="PackedScene" uid="uid://t3bradwvpug1" path="res://assets/models/baikal/structures/railway_viaduct.glb" id="44_fs1qj"]
 [ext_resource type="PackedScene" uid="uid://bo8ova55jdoxq" path="res://assets/models/baikal/structures/railway_tunnel_portal.glb" id="45_hhdxr"]
 [ext_resource type="PackedScene" uid="uid://dlq1wj8iehuft" path="res://assets/models/baikal/vehicles/train_baikal.glb" id="46_yrnvh"]
 
@@ -75,6 +74,13 @@ _data = {
 }
 point_count = 4
 
+[sub_resource type="Curve3D" id="Curve3D_7yuns"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 38.084137, 9.2095375, 27.861343, 0, 0, 0, 0, 0, 0, 87.00464, 8.872534, 23.192642, 0, 0, 0, 0, 0, 0, 119.145065, 8.844612, 15.862274, 0, 0, 0, 0, 0, 0, 140.18604, 8.868704, 10.916458, 0, 0, 0, 0, 0, 0, 152.264, 8.91165, 8.16246, 0, 0, 0, 0, 0, 0, 172.77109, 12.23056, 4.0644073, 0, 0, 0, 0, 0, 0, 208.37567, 12.867027, -3.6327057, 0, 0, 0, 0, 0, 0, 227.88187, 8.417477, -8.863495, 0, 0, 0, 0, 0, 0, 252.01779, 6.567951, -40.78221, 0, 0, 0, 0, 0, 0, 254.00735, 4.830929, -82.20485, 0, 0, 0, 0, 0, 0, 229.6409, -3.1987038, -115.1039),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 11
+
 [node name="Track10" type="Node3D" unique_id=1242242835]
 script = ExtResource("1_track")
 custom_name = "Baikal"
@@ -98,7 +104,7 @@ curve = SubResource("Curve3D_baikal")
 [node name="Peaks" type="Node3D" parent="." unique_id=1774665205]
 
 [node name="MasivulTunelului" type="Marker3D" parent="Peaks" unique_id=1304075120]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 34, -215)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.101563, 41.146973, -164.08414)
 gizmo_extents = 75.0
 script = ExtResource("2_peak")
 radius_m = 75.0
@@ -122,7 +128,7 @@ script = ExtResource("2_peak")
 radius_m = 20.0
 
 [node name="CapulGrotei" type="Marker3D" parent="Peaks" unique_id=691118470]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 598, 9, 38)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 619.52374, 9, 38)
 gizmo_extents = 24.0
 script = ExtResource("2_peak")
 radius_m = 24.0
@@ -568,138 +574,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3175049, 0, 6.56472)
 [node name="6)Viaductul" type="Node3D" parent="DecorManual" unique_id=536924686]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 222.39514, 11.608814, -172.49826)
 
-[node name="train_baikal" parent="DecorManual/6)Viaductul" unique_id=2013409326 instance=ExtResource("46_yrnvh")]
-transform = Transform3D(0.97985154, 0, 0.1997273, 0, 1, 0, -0.1997273, 0, 0.97985154, 58.49646, 0, -1.308075)
-visible = false
+[node name="TrainMover" type="Path3D" parent="DecorManual/6)Viaductul" unique_id=767319110]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131.39407, -8.475327, -0.61079407)
+curve = SubResource("Curve3D_7yuns")
+script = ExtResource("3_mover")
+model = ExtResource("46_yrnvh")
+model_yaw = 180.0
+speed = 22.0
+push_radius = 4.0
+plume = true
+bob_amplitude = 0.5
+metadata/_custom_type_script = "uid://b1848dr3kabqm"
 
-[node name="Viaduct_End1" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.221004, 0, 0.975273, 0, 1, 0, -0.975273, 0, -0.221004, 66.5105, -12.2945, 13.6602)
+[node name="Tunel_Intrare" parent="DecorManual/6)Viaductul" unique_id=159077119 instance=ExtResource("45_hhdxr")]
+transform = Transform3D(-0.3787398, 0, 1.9638118, 0, 2, 0, -1.9638118, 0, -0.3787398, 0.17593384, -0.30779266, 12.17627)
 
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_End1"]
-visible = false
-
-[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_End1"]
-visible = false
-
-[node name="Viaduct_Pier1" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.220104, 0, 0.975476, 0, 1, 0, -0.975476, 0, -0.220104, 54.5973, -13.4343, -14.4006)
-
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier1"]
-visible = false
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier1"]
-visible = false
-
-[node name="Viaduct_Arch1" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.220171, 0, 0.975461, 0, 1, 0, -0.975461, 0, -0.220171, 49.6692, -12.1809, 1.05901)
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch1"]
-visible = false
-
-[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch1"]
-visible = false
-
-[node name="Viaduct_Pier2" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.219473, 0, 0.975619, 0, 1, 0, -0.975619, 0, -0.219473, 38.5883, -13.3588, -10.7912)
-
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier2"]
-visible = false
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier2"]
-visible = false
-
-[node name="Viaduct_Arch2" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.219616, 0, 0.975586, 0, 1, 0, -0.975586, 0, -0.219616, 33.6521, -12.1888, 4.67397)
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch2"]
-visible = false
-
-[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch2"]
-visible = false
-
-[node name="Viaduct_Pier3" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.219794, 0, 0.975546, 0, 1, 0, -0.975546, 0, -0.219794, 22.5661, -13.4316, -7.17804)
-
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier3"]
-visible = false
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier3"]
-visible = false
-
-[node name="Viaduct_Arch3" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.22038, 0, 0.975414, 0, 1, 0, -0.975414, 0, -0.22038, 17.6346, -12.2785, 8.2868)
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch3"]
-visible = false
-
-[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch3"]
-visible = false
-
-[node name="Viaduct_Pier4" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.220448, 0, 0.975399, 0, 1, 0, -0.975399, 0, -0.220448, 6.53788, -13.5088, -3.56974)
-
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier4"]
-visible = false
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier4"]
-visible = false
-
-[node name="Viaduct_Arch4" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.220998, 0, 0.975274, 0, 1, 0, -0.975274, 0, -0.220998, 1.61733, -12.3088, 11.9009)
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch4"]
-visible = false
-
-[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch4"]
-visible = false
-
-[node name="Viaduct_Pier5" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.220514, 0, 0.975384, 0, 1, 0, -0.975384, 0, -0.220514, -9.47815, -13.5188, 0.05432)
-
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier5"]
-visible = false
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier5"]
-visible = false
-
-[node name="Viaduct_Arch5" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.220995, 0, 0.975275, 0, 1, 0, -0.975275, 0, -0.220995, -14.3981, -12.3357, 15.5235)
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Arch5"]
-visible = false
-
-[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_Arch5"]
-visible = false
-
-[node name="Viaduct_Pier6" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.221079, 0, 0.975256, 0, 1, 0, -0.975256, 0, -0.221079, -25.4998, -13.5556, 3.68575)
-
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_Pier6"]
-visible = false
-
-[node name="Viaduct_End" parent="DecorManual/6)Viaductul/Viaduct_Pier6"]
-visible = false
-
-[node name="Viaduct_End2" parent="DecorManual/6)Viaductul" instance=ExtResource("44_fs1qj")]
-transform = Transform3D(-0.221109, 0, 0.975249, 0, 1, 0, -0.975249, 0, -0.221109, -24.1634, -12.3588, 34.1402)
-
-[node name="Viaduct_Arch" parent="DecorManual/6)Viaductul/Viaduct_End2"]
-visible = false
-
-[node name="Viaduct_Pier" parent="DecorManual/6)Viaductul/Viaduct_End2"]
-visible = false
-
-[node name="Tunel_Intrare" parent="DecorManual/6)Viaductul" instance=ExtResource("45_hhdxr")]
-transform = Transform3D(-0.183827, 0, 0.982959, 0, 1, 0, -0.982959, 0, -0.183827, -31.133, 0.478111, 19.3191)
-
-[node name="Tunnel_Niche" parent="DecorManual/6)Viaductul/Tunel_Intrare"]
-visible = false
-
-[node name="Tunel_Iesire" parent="DecorManual/6)Viaductul" instance=ExtResource("45_hhdxr")]
-transform = Transform3D(0.183827, 0, -0.982959, 0, 1, 0, 0.982959, 0, 0.183827, -70.3885, 0.478111, 26.6604)
-
-[node name="Tunnel_Niche" parent="DecorManual/6)Viaductul/Tunel_Iesire"]
-visible = false
-
-[node name="Tunnel_Bore" parent="DecorManual/6)Viaductul/Tunel_Iesire"]
-visible = false
+[node name="Tunel_Iesire" parent="DecorManual/6)Viaductul" unique_id=557840196 instance=ExtResource("45_hhdxr")]
+transform = Transform3D(0.36765382, 0, -1.9659172, 0, 2, 0, 1.9659172, 0, 0.36765382, -70.38849, 0.060725212, 26.6604)

@@ -37,6 +37,7 @@ func _ready() -> void:
 static func _prop_classes() -> Dictionary:
 	var out := {}
 	out.merge(TrackDecor.ISLAND_CLASSES)
+	out.merge(TrackDecor.BAIKAL_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

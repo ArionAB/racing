@@ -586,6 +586,42 @@ const ISLAND_CLASSES := {
 	"Pier_Wood": "wood",
 }
 
+## Maparea de clase pentru kitul Baikal — DOAR piesele dintr-un singur
+## material. Nu e o scapare ca satul si vehiculele lipsesc: o clasa triplanara
+## pusa pe tot corpul STERGE culorile din sloturi, iar casele isi tin
+## acoperisurile, ferestrele si caciulile de zapada exact acolo. Torosii,
+## bolovanii si faleza sunt insa un singur material de sus pana jos, deci
+## textura pictata nu acopera nimic — iar lichenii si adancimea gheții stau in
+## vertex colors, care se inmultesc peste clasa (SurfaceTool le pastreaza).
+##
+## Gheata pe `ice_bloc` (aceeasi dala pictata ca lacul, la scara de piesa si
+## cu tenta slotului — vezi CLASS_TINT in palette.gd; pe `ice` curat, torosii
+## ieseau piatra sparta palida), roca pe `alpine_granite` (Olkhonul e aceeasi
+## geologie de sisturi ca Alpii, nu gresia rosiatica din `rock`).
+## `PineCrown`/`PineSnow` sunt partile pinului siberian spart la export
+## (build_baikal_forest.py), pe modelul pinilor alpini (PINE_CLASSES).
+const BAIKAL_CLASSES := {
+	"Toros": Palette.TRI_PREFIX + "ice_bloc",
+	"IceShards": Palette.TRI_PREFIX + "ice_bloc",
+	"IceBlockStack": Palette.TRI_PREFIX + "ice_bloc",
+	"IceSlabCracked": Palette.TRI_PREFIX + "ice_bloc",
+	"Grotto_Ice": Palette.TRI_PREFIX + "ice_bloc",
+	"Icicle": Palette.TRI_PREFIX + "ice_bloc",
+	# Naledi — poalele de gheata ale Stancii Samanului. Craca de marmura
+	# ramane pe atlas: dala ei pictata (_marble) e deja acolo.
+	"Shaman_Ice": Palette.TRI_PREFIX + "ice_bloc",
+	# DOAR bolovanii iau granitul, nu si grota/faleza. Incercat pe toate
+	# trei: pe suprafetele mari de langa drum (arcul grotei la 2 m de
+	# asfalt), dala de sisturi citeste ca zidarie de cetate — iar grota si
+	# faleza isi au stratele pictate in sloturi + dala _marble din atlas,
+	# prin decizia din brieful kitului. Pe un bolovan de 1-2 m insa, o
+	# felie de strat e doar granulatie, iar tenta calda a lichenilor
+	# (vertex colors) ramane deasupra.
+	"BoulderLichen": Palette.TRI_PREFIX + "alpine_granite",
+	"PineCrown": Palette.TRI_PREFIX + "pine_needles",
+	"PineSnow": Palette.TRI_PREFIX + "snow",
+}
+
 ## Fractiile pe care creste trestia de zahar (sectorul 7, `Track05.SECTORS`).
 ##
 ## Ratele de aparitie (0.32/0.38/0.34 pe cele trei benzi) sunt reglate pe
@@ -837,8 +873,9 @@ static func _place_alpine_prop(parent: Node3D, spec: TrackDecorSpec,
 ## Iarna pe Baikal: larice fara ace, mesteacan cu trunchi alb, pin siberian
 ## (singurul verde, 12-18 m — numai pe benzile departate, ca sa nu iasa din
 ## cadrul camerei langa drum), bolovani cu licheni, tufe si smocuri uscate iesind
-## din zapada. Toate din kitul Baikal (docs/track_briefs/baikal.md §5.5), pe
-## atlasul comun: un singur material.
+## din zapada. Toate din kitul Baikal (docs/track_briefs/baikal.md §5.5).
+## Piesele dintr-un singur material (bolovani, coroana/zapada pinilor) isi iau
+## clasa pictata prin BAIKAL_CLASSES; restul raman pe atlasul comun.
 ##
 ## PONDERILE SUNT DICTATE DE COST, nu de brief. Brief-ul vrea laricele ca masa
 ## principala a padurii, dar laricele din kit e construit din ~290 de beam-uri
@@ -926,7 +963,10 @@ static func _place_from_set(parent: Node3D, set: Array, band_name: String,
 		Palette.apply_foliage_material(model)
 		model.set_meta(TrackDecorBatch.SWAY_META, true)
 	else:
-		Palette.apply_world_material(model)
+		# Prin mapare, nu direct pe atlas: bolovanii cu licheni si coroanele
+		# pinilor isi iau clasa pictata, restul cade oricum pe materialul
+		# lumii (apply_class_materials face exact asta pentru nemapate).
+		Palette.apply_class_materials(model, BAIKAL_CLASSES)
 	return true
 
 

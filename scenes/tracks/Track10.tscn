@@ -74,12 +74,12 @@ _data = {
 }
 point_count = 4
 
-[sub_resource type="Curve3D" id="Curve3D_7yuns"]
+[sub_resource type="Curve3D" id="Curve3D_n3umy"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 38.084137, 9.2095375, 27.861343, 0, 0, 0, 0, 0, 0, 87.00464, 8.872534, 23.192642, 0, 0, 0, 0, 0, 0, 119.145065, 8.844612, 15.862274, 0, 0, 0, 0, 0, 0, 140.18604, 8.868704, 10.916458, 0, 0, 0, 0, 0, 0, 152.264, 8.91165, 8.16246, 0, 0, 0, 0, 0, 0, 172.77109, 12.23056, 4.0644073, 0, 0, 0, 0, 0, 0, 208.37567, 12.867027, -3.6327057, 0, 0, 0, 0, 0, 0, 227.88187, 8.417477, -8.863495, 0, 0, 0, 0, 0, 0, 252.01779, 6.567951, -40.78221, 0, 0, 0, 0, 0, 0, 254.00735, 4.830929, -82.20485, 0, 0, 0, 0, 0, 0, 229.6409, -3.1987038, -115.1039),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 8.784416, -0.7182255, 0.43574524, 0, 0, 0, 0, 0, 0, 31.82943, -1.3989887, -0.90519714, 0, 0, 0, 0, 0, 0, 62.86081, -2.1769314, -5.0507813, 0, 0, 0, 0, 0, 0, 92.92158, -2.3202724, -16.147446, 0, 0, 0, 0, 0, 0, 124.23351, -2.6754026, -31.272629, 0, 0, 0, 0, 0, 0, 156.25293, -2.6431255, -48.224854, 0, 0, 0, 0, 0, 0, 177.76086, -2.582796, -59.284134, 0, 0, 0, 0, 0, 0, 194.86652, -2.4942036, -68.399796, 0, 0, 0, 0, 0, 0, 214.12994, -2.6295605, -78.581375, 0, 0, 0, 0, 0, 0, 235.27222, -2.9011936, -89.3643, 0, 0, 0, 0, 0, 0, 264.78317, -4.9604855, -125.66289, 0, 0, 0, 0, 0, 0, 292.47794, -7.5713024, -176.08305, 0, 0, 0, 0, 0, 0, 297.86594, -11.562819, -215.15846),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
-point_count = 11
+point_count = 13
 
 [node name="Track10" type="Node3D" unique_id=1242242835]
 script = ExtResource("1_track")
@@ -103,13 +103,13 @@ curve = SubResource("Curve3D_baikal")
 [node name="Peaks" type="Node3D" parent="." unique_id=1774665205]
 
 [node name="MasivulTunelului" type="Marker3D" parent="Peaks" unique_id=1304075120]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.101563, 41.146973, -164.08414)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.748444, 41.146973, -174.1551)
 gizmo_extents = 75.0
 script = ExtResource("2_peak")
 radius_m = 75.0
 
 [node name="DealulPadurii" type="Marker3D" parent="Peaks" unique_id=240012648]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 20, -190)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 20, -207.18904)
 gizmo_extents = 60.0
 script = ExtResource("2_peak")
 radius_m = 60.0
@@ -311,10 +311,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.754196, 0, -3.1746597)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.275162, 0, 0)
 
 [node name="shaman_rock" parent="DecorManual/2)Stanca samanului" unique_id=2008906963 instance=ExtResource("22_yw6cq")]
-transform = Transform3D(0.8138932, 0, -0.5810145, 0, 1, 0, 0.5810145, 0, 0.8138932, 9.395203, 0, -16.218403)
+transform = Transform3D(0.8138932, 0, -0.5810145, 0, 1, 0, 0.5810145, 0, 0.8138932, 9.395203, -1.7918453, -16.218403)
 
 [node name="shaman_rock2" parent="DecorManual/2)Stanca samanului" unique_id=245756743 instance=ExtResource("22_yw6cq")]
-transform = Transform3D(-0.6941438, 0, 0.2721777, 0, 0.745598, 0, -0.2721777, 0, -0.6941438, -4.0245667, 0, -24.902872)
+transform = Transform3D(-0.6941438, 0, 0.2721777, 0, 0.745598, 0, -0.2721777, 0, -0.6941438, -4.0245667, 0.02849865, -24.902872)
 
 [node name="serge_pole_a" parent="DecorManual/2)Stanca samanului" unique_id=256955729 instance=ExtResource("25_hfw80")]
 transform = Transform3D(1.8030362, 0, 0, 0, 1.8030362, 0, 0, 0, 1.8030362, -20.436295, -0.17823005, 1.6853218)
@@ -573,20 +573,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3175049, 0, 6.56472)
 [node name="6)Viaductul" type="Node3D" parent="DecorManual" unique_id=536924686]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 222.39514, 11.608814, -172.49826)
 
-[node name="TrainMover" type="Path3D" parent="DecorManual/6)Viaductul" unique_id=767319110]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131.39407, -8.475327, -0.61079407)
-curve = SubResource("Curve3D_7yuns")
-script = ExtResource("3_mover")
-model = ExtResource("46_yrnvh")
-model_yaw = 180.0
-speed = 22.0
-push_radius = 4.0
-plume = true
-bob_amplitude = 0.5
-metadata/_custom_type_script = "uid://b1848dr3kabqm"
+[node name="railway_tunnel_portal" parent="DecorManual/6)Viaductul" unique_id=1407099838 instance=ExtResource("45_hhdxr")]
+transform = Transform3D(0.377091, 0, 1.4899881, 0, 1.5369651, 0, -1.4899881, 0, 0.377091, -149.53366, 0, 21.236572)
 
 [node name="Tunel_Intrare" parent="DecorManual/6)Viaductul" unique_id=159077119 instance=ExtResource("45_hhdxr")]
 transform = Transform3D(-0.3787398, 0, 1.9638118, 0, 2, 0, -1.9638118, 0, -0.3787398, 0.17593384, -0.30779266, 12.17627)
 
 [node name="Tunel_Iesire" parent="DecorManual/6)Viaductul" unique_id=557840196 instance=ExtResource("45_hhdxr")]
 transform = Transform3D(0.36765382, 0, -1.9659172, 0, 2, 0, 1.9659172, 0, 0.36765382, -70.38849, 0.060725212, 26.6604)
+
+[node name="PathMover" type="Path3D" parent="DecorManual/6)Viaductul" unique_id=640823668]
+transform = Transform3D(0.96523726, 0, -0.26137513, 0, 1, 0, 0.26137513, 0, 0.96523726, -164.01802, 3.031763, 17.888016)
+curve = SubResource("Curve3D_n3umy")
+script = ExtResource("3_mover")
+model = ExtResource("46_yrnvh")
+model_yaw = 90.0
+speed = 22.0
+push_radius = 4.0
+plume = true
+metadata/_custom_type_script = "uid://b1848dr3kabqm"

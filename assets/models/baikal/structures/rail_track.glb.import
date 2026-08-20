@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dhrb11o8365im"
-path="res://.godot/imported/railway_viaduct.glb-c09f493ba0a61181fe13d1cc03f23a3d.scn"
+uid="uid://dhra7di1r7oky"
+path="res://.godot/imported/rail_track.glb-370d4087f13fafef66e8e9ff3bddfdb2.scn"
 
 [deps]
 
-source_file="res://assets/models/baikal/structures/railway_viaduct.glb"
-dest_files=["res://.godot/imported/railway_viaduct.glb-c09f493ba0a61181fe13d1cc03f23a3d.scn"]
+source_file="res://assets/models/baikal/structures/rail_track.glb"
+dest_files=["res://.godot/imported/rail_track.glb-370d4087f13fafef66e8e9ff3bddfdb2.scn"]
 
 [params]
 

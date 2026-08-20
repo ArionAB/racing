@@ -187,7 +187,13 @@ func _build_plate_model(size: Vector3) -> bool:
 			# heptagon de 4 ori in aceeasi orientare s-ar citi ca un tipar.
 			inst.rotation.y = PI * float(k % 2) + 0.35 * float(k / 2)
 			_plate.add_child(inst)
-			Palette.apply_world_material(inst)
+			# Clasa `ice_bloc` in spatiul OBIECTULUI, nu al lumii: placa se
+			# inclina sub greutate, iar proiectia de lume ar face crapaturile
+			# pictate sa "inoate" pe suprafata exact in momentul in care
+			# jucatorul se uita la ea. Scara compenseaza scalarea neuniforma
+			# a bucatii cu media pe X/Z (pe Y placa e o folie, nu conteaza).
+			Palette.apply_object_triplanar_class(inst, "ice_bloc",
+				(scale.x + scale.z) * 0.5)
 			k += 1
 	return true
 

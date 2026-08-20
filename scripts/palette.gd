@@ -354,6 +354,23 @@ const CLASS_TEXTURES := {
 	"pine_needles": "res://assets/textures/classes/pine_needles.png",
 	# Gheata lacului (Baikal; pictata, vezi tools/paint_ice.py).
 	"ice": "res://assets/textures/classes/ice.png",
+	# Aceeasi dala, pentru PIESELE de gheata (torosuri, turturi, blocuri).
+	# Clasa separata fiindca difera pe DOUA axe fata de lac: scara (un bloc
+	# de 1.5 m nu prinde nimic dintr-o repetitie la 6.25 m) si culoarea —
+	# lacul isi ia turcoazul din vertex colors (_ice_color, adancimea), pe
+	# cand GLB-urile au in vertecsi doar AO, deci dala palida iesea piatra
+	# sparta, nu gheata. Tenta e in CLASS_TINT.
+	"ice_bloc": "res://assets/textures/classes/ice.png",
+}
+
+## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
+## REFOLOSESC dala alteia dar trebuie sa aterizeze pe alta culoare medie:
+## ice_bloc readuce dala palida a lacului la culoarea slotului ICE_TURQUOISE
+## (media dalei e ~(0.75, 0.87, 0.885), slotul e (0.49, 0.757, 0.776) —
+## raportul da tenta). Textura NU se dubleaza in memorie: acelasi PNG,
+## alt multiplicator pe material.
+const CLASS_TINT := {
+	"ice_bloc": Color(0.65, 0.87, 0.88),
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -397,6 +414,11 @@ const CLASS_TRIPLANAR_SCALE := {
 	# tapet pe placa de 200 m — variatia mare o dau culorile de vertex
 	# (adancimea, vezi Track._ice_color). Spatiul LUMII: placa nu se misca.
 	"ice": 0.16,
+	# Piesele de gheata: la scara lacului un toros de 1.5 m cadea intre
+	# crapaturi si iesea o dala goala. La 0.55 (o repetitie la 1.8 m) un
+	# bloc prinde o celula de crapaturi si cateva bule — se citeste ca
+	# gheata sparta de la distanta de joc.
+	"ice_bloc": 0.55,
 }
 
 static var _tri_mats: Dictionary = {}
@@ -416,6 +438,8 @@ static func triplanar_class_material(cls: String) -> StandardMaterial3D:
 	mat.uv1_world_triplanar = true
 	var s: float = CLASS_TRIPLANAR_SCALE[cls]
 	mat.uv1_scale = Vector3(s, s, s)
+	if CLASS_TINT.has(cls):
+		mat.albedo_color = CLASS_TINT[cls]
 	_tri_mats[cls] = mat
 	return mat
 
@@ -480,6 +504,8 @@ static func class_material(cls: String) -> StandardMaterial3D:
 	mat.vertex_color_use_as_albedo = true # AO copt, ca peste tot
 	mat.roughness = 0.9
 	mat.metallic_specular = 0.15
+	if CLASS_TINT.has(cls):
+		mat.albedo_color = CLASS_TINT[cls]
 	_class_mats[cls] = mat
 	return mat
 

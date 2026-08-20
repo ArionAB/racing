@@ -185,12 +185,23 @@ def _pine(name, height, seed):
     profunzime padurii de siluete. Etajele se suprapun (0.34 din inaltimea
     etajului), altfel intre conuri raman inele de trunchi gol si copacul
     citeste ca o stiva de palarii — problema deja rezolvata la kitul alpin.
+
+    Iese in TREI obiecte (trunchi / coroana / zapada), nu unul: coroana ia
+    clasa triplanara `pine_needles` si zapada clasa `snow`, iar
+    `apply_class_materials` mapeaza pe NUME de nod — intr-un singur mesh,
+    acele pictate ar imbraca si trunchiul, si zapada (BAIKAL_CLASSES in
+    track_decor.gd, acelasi model ca pinii alpini / PINE_CLASSES).
+    Toate trei se construiesc in acelasi spatiu si se exporta impreuna,
+    deci impart originea de la baza trunchiului — un ansamblu, ca biserica.
     """
-    b = Builder()
+    suffix = name.rsplit("_", 1)[1]
+    bt = Builder()
+    bc = Builder()
+    bs = Builder()
     rand = _lcg(seed)
     trunk_h = height * 0.22
     r_base = height * 0.020
-    _tapered_trunk(b, trunk_h * 1.25, r_base, r_base * 0.7, LOG_DARK,
+    _tapered_trunk(bt, trunk_h * 1.25, r_base, r_base * 0.7, LOG_DARK,
                    segments=6, bends=1, seed=seed)
     tiers = 6
     canopy = height - trunk_h
@@ -201,8 +212,8 @@ def _pine(name, height, seed):
         r_bot = height * 0.16 * (1.0 - 0.46 * t)
         r_top = r_bot * (0.0 if i == tiers - 1 else 0.32)
         segs = 12 if i % 2 == 0 else 10
-        b.frustum((0.0, 0.0, z + tier_h * 0.5), r_bot, r_top, tier_h,
-                  TROPICAL_GREEN, segments=segs)
+        bc.frustum((0.0, 0.0, z + tier_h * 0.5), r_bot, r_top, tier_h,
+                   TROPICAL_GREEN, segments=segs)
         # Zapada pe "palme": inel turtit asezat PE UMARUL etajului, adica pe
         # cota de jos a conului (z), unde creanga e orizontala si zapada chiar
         # se aduna. Prima versiune il punea la z + tier_h*0.16 — adica in
@@ -213,13 +224,16 @@ def _pine(name, height, seed):
         # Inelul e mai LAT decat conul la baza (1.02), nu mai ingust: zapada
         # sta pe varful crengii si depaseste conturul acelor.
         if i < tiers - 1:
-            b.frustum((0.0, 0.0, z + tier_h * 0.03), r_bot * 1.02,
-                      r_bot * 0.70, tier_h * 0.16, FOAM_WHITE, segments=segs)
+            bs.frustum((0.0, 0.0, z + tier_h * 0.03), r_bot * 1.02,
+                       r_bot * 0.70, tier_h * 0.16, FOAM_WHITE, segments=segs)
         z += tier_h * 0.66
-    obj = b.to_object(name)
-    finish(obj, bevel=0.02, bevel_angle=40.0, ao=AO_TREE, origin="none",
-           smooth_angle=50.0)
-    return obj
+    parts = [bt.to_object(name),
+             bc.to_object("PineCrown_" + suffix),
+             bs.to_object("PineSnow_" + suffix)]
+    for obj in parts:
+        finish(obj, bevel=0.02, bevel_angle=40.0, ao=AO_TREE, origin="none",
+               smooth_angle=50.0)
+    return parts
 
 
 def build_forest_kit():
@@ -230,8 +244,11 @@ def build_forest_kit():
         objs.append(_larch("LarchWinter_%s" % "ABC"[k], h, seed=1100 + k * 37))
     for k, h in enumerate((8.0, 11.0, 14.0)):
         objs.append(_birch("BirchWinter_%s" % "ABC"[k], h, seed=2200 + k * 41))
+    # Pinul iese in trei parti (trunchi/coroana/zapada, vezi _pine) — in
+    # liste, ca partile unui copac sa ramana impreuna la export si in .blend.
+    pines = []
     for k, h in enumerate((12.0, 18.0)):
-        objs.append(_pine("PineSiberian_%s" % "AB"[k], h, seed=3300 + k * 53))
+        pines.append(_pine("PineSiberian_%s" % "AB"[k], h, seed=3300 + k * 53))
 
     # UN FISIER PE COPAC, ca la cladirile de sat.
     #
@@ -259,13 +276,20 @@ def build_forest_kit():
     }
     for o in objs:
         export_glb([o], files[o.name])
+    for parts in pines:
+        export_glb(parts, files[parts[0].name])
+        objs.extend(parts)
     print("ForestKit: %d tris in %d fisiere (%s)"
-          % (sum(tri_count(o) for o in objs), len(objs),
+          % (sum(tri_count(o) for o in objs), len(objs) - len(pines) * 2,
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
 
     # .blend-ul ramane comun, cu copacii pe un rand ca sa fie lizibil.
+    # Partile unui pin se muta IMPREUNA — sunt acelasi copac.
     x = 0.0
     for o in objs:
+        if o.name.startswith(("PineCrown", "PineSnow")):
+            o.location.x = x - 8.0  # acelasi x ca trunchiul dinaintea lor
+            continue
         o.location.x = x
         x += 8.0
     save_blend(objs, "baikal_forest_kit.blend")

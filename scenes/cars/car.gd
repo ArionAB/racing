@@ -114,6 +114,13 @@ const SLIP_GRIP_ICE: float = 1.5
 ## Peste acest delta-v incasat, rotile pierd scurt aderenta laterala: lovitura
 ## se simte in directie, iar cel lovit isi prinde masina din alunecare.
 @export var bump_slip_dv: float = 5.0
+## Impulsul de separare (reteta SuperTuxKart): in contact SUSTINUT cu alta
+## masina, o acceleratie laterala (m/s^2, inainte de scalarea cu masa) impinge
+## corpurile unul de langa altul. Fara ea, doua masini pe aceeasi linie se
+## lipesc si macina una in alta ("collision deadlock") -- rotatia pe yaw e
+## scrisa direct de directie, deci solverul n-are cum sa le roteasca una de pe
+## linia celeilalte. Vezi _process_contacts.
+@export var bump_separation_accel: float = 6.0
 
 @export_group("Suspensie")
 ## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
@@ -670,6 +677,29 @@ func _process_contacts(delta: float) -> void:
 				if _bump_cooldown <= 0.0 and (is_player or other.is_player):
 					_bump_cooldown = 0.25
 					AudioManager.play_sfx(&"bump")
+		# Impulsul de separare (reteta SuperTuxKart): contactul sustinut nu
+		# are voie sa lipeasca masinile. O acceleratie LATERALA le impinge una
+		# de langa alta -- centrala (fara rotatie: directia ramane a soferului),
+		# pe orizontala, scalata cu raportul maselor (usoara e maturata, grea
+		# abia se clinteste -- identitatea prin masa ramane) si cu cat de
+		# "alaturi" e contactul: bara-n bara aproape deloc (plutonul ramane
+		# pluton, impingerea din spate e mecanica legitima), umar la umar din
+		# plin. Doar cu rotile pe sol: in aer ar fi inca un mecanism de zbor.
+		if wheels_on_ground > 0:
+			for other in cars_hit:
+				var away := global_position - other.global_position
+				away.y = 0.0
+				var dist := away.length()
+				if dist < 0.05:
+					continue
+				var lat := away - fwd_hn * away.dot(fwd_hn)
+				var lat_len := lat.length()
+				if lat_len < 0.05:
+					continue
+				var side_frac := lat_len / dist
+				var mass_share := 2.0 * other.mass / (mass + other.mass)
+				apply_central_force(lat / lat_len
+					* bump_separation_accel * side_frac * mass_share * mass)
 	elif static_hit:
 		# Perete/bariera: impact = schimbarea ORIZONTALA de viteza (aterizarea
 		# dura pe sol are dv vertical si nu e izbitura de perete).

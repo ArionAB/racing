@@ -1694,11 +1694,17 @@ static func _claim(pos: Vector3, radius: float,
 ## transformarile globale inca nu inseamna nimic. Scalarea instantei (inclusiv
 ## cea neuniforma, pe inaltime) intra astfel direct in puncte — nu ramane pe
 ## nodul de coliziune, unde formele convexe scalate sunt teren alunecos.
-static func add_hull_collision(body: StaticBody3D, model: Node3D) -> bool:
+## `only_visible` sare peste mesh-urile stinse. Nu e un detaliu de confort:
+## GLB-urile multi-varianta din decorul manual se aseaza stingand variantele
+## nefolosite (`visible = false`, vezi docs/decor_manual.md), iar un colizor
+## construit din ele ar fi un ZID INVIZIBIL — exact clasa de bug pe care nici
+## garda de materiale, nici o captura n-o prind.
+static func add_hull_collision(body: StaticBody3D, model: Node3D,
+		only_visible: bool = false) -> bool:
 	if body == null or model == null:
 		return false
 	var added := false
-	for entry in _hull_meshes(model, model.transform):
+	for entry in _hull_meshes(model, model.transform, [], only_visible):
 		var mi: MeshInstance3D = entry[0]
 		var xform: Transform3D = entry[1]
 		var src := _hull_points(mi.mesh)
@@ -1715,6 +1721,14 @@ static func add_hull_collision(body: StaticBody3D, model: Node3D) -> bool:
 		body.add_child(shape)
 		added = true
 	return added
+
+
+## Mesh-urile VIZIBILE dintr-un model, fiecare cu transformarea lui pana la
+## parintele lui. Publica fiindca decorul manual (`world_prop.gd`) construieste
+## si colizoare TRIMESH pentru piesele prin care se TRECE (arcade, tuneluri,
+## porti), si are nevoie de exact aceeasi plimbare prin arbore ca hull-urile.
+static func visible_meshes(model: Node3D, xform: Transform3D) -> Array:
+	return _hull_meshes(model, xform, [], true)
 
 
 ## Cache pe RESURSA de mesh, nu pe instanta: cele 34 de variante din cele doua
@@ -1744,14 +1758,17 @@ static func _hull_points(mesh: Mesh) -> PackedVector3Array:
 
 ## Mesh-urile din model, fiecare cu transformarea lui pana la radacina data.
 static func _hull_meshes(node: Node, xform: Transform3D,
-		out: Array = []) -> Array:
+		out: Array = [], only_visible: bool = false) -> Array:
+	var spatial_self := node as Node3D
+	if only_visible and spatial_self != null and not spatial_self.visible:
+		return out
 	var mi := node as MeshInstance3D
 	if mi != null and mi.mesh != null:
 		out.append([mi, xform])
 	for c in node.get_children():
 		var spatial := c as Node3D
 		_hull_meshes(c, xform * spatial.transform if spatial != null else xform,
-			out)
+			out, only_visible)
 	return out
 
 

@@ -39,10 +39,32 @@ după rulare dispare la următorul rebuild.
    - meniul **Transform** din bara viewportului 3D → **Snap Object to Floor**
      (`PgDown`) îl lipește de teren — terenul are coliziune, deci funcționează;
    - `Ctrl` ținut apăsat activează snap-ul pe grilă.
-6. Coliziune, dacă vrei să te lovești de obiect (implicit treci prin el):
-   adaugă un `StaticBody3D` ca părinte al modelului și un `CollisionShape3D` cu
-   un `BoxShape3D` / `CylinderShape3D` sub el. Pentru decor mărunt (tufe, oase,
-   gunoaie) e mai bine fără — mașina care se agață de un cactus e frustrantă.
+6. **Coliziunea vine singură** (august 2026). Orice model așezat sub
+   `DecorManual` primește la rulare un `StaticBody3D` cu forme construite din
+   mesh-urile lui **vizibile**. Nu trebuie să adaugi nimic în scenă: corpurile
+   se construiesc doar în joc, fără `owner`, deci nu intră în `.tscn` și nu-ți
+   încarcă arborele din editor. Vechea rețetă (`StaticBody3D` pus de mână) încă
+   funcționează — un model care e deja sub un corp fizic e sărit.
+
+   Patru moduri, alese pe **numele fișierului** în `PROP_COLLISION`
+   (`scenes/props/world_prop.gd`):
+
+   | mod | formă | pentru ce |
+   |---|---|---|
+   | `hull` (implicit) | poliedru convex per mesh | case, garduri, stânci, lăzi, vehicule |
+   | `trunk` | cilindru subțire în ax | copaci și stâlpi — treci prin coroană, nu prin trunchi |
+   | `mesh` | colizor exact | **doar** piese prin care se TRECE: arcade, tuneluri, poarta de start |
+   | `none` | fantomă | ce ar strica cursa dacă ar opri mașina: flori, tufe, cioburi, șina de pe șosea |
+
+   O instanță anume iese din regulă cu o metadată: Inspector → **Add Metadata**
+   → nume `coliziune`, valoare `hull` / `trunk` / `mesh` / `none`. Tot
+   containerul se poate stinge din bifa `auto_collision` a nodului
+   `DecorManual`.
+
+   **De ce nu `hull` peste tot:** hull-ul e convex, deci pe o arcadă umple
+   golul — adică pune un zid invizibil peste șosea. Și invers, `mesh` peste tot
+   ar fi mai rău decât pare: `track_cliffs.gd` documentează măsurătoarea prin
+   care fiecare crăpătură din siluetă devine un colț în care se agață mașina.
 7. `Ctrl+S`. Rulează cursa (`F5` sau `scenes/race/Race.tscn`) — obiectul e acolo.
    Bifa **Regenerate** din Inspector reconstruiește pista fără să-l atingă.
 
@@ -108,9 +130,25 @@ de reparat. Prima rulare (#151) a găsit, din nouă obiecte: unul la **128 m în
 aer**, patru care pluteau, și patru așezate **pe carosabil** — o arcadă la 2.2 m
 de axul drumului. Nimic nu se vedea, fiindcă nodul stătea pe `visible = false`.
 
-**Coliziunea nu vine de la sine.** Un obiect mare așezat manual lângă șosea, dar
-fără `StaticBody3D`, arată ca un perete prin care treci — mai rău decât lipsa
-lui. Ori îi pui coliziune, ori îl ții destul de departe cât să nu-l atingi.
+**Coliziunea vine acum de la sine** (vezi pasul 6) — și exact de aceea are și
+ea o sondă. Corpurile se construiesc la rulare, fără `owner`: nu se văd în
+`.tscn`, nu se văd în editor și nu apar în nicio captură, deci un zid invizibil
+peste șosea n-ar fi prins de nimic altceva:
+
+```
+godot --headless --path . --script res://tools/probe_solid.gd -- --track=10
+```
+
+Sonda nu face socoteli pe cutii (pe un butte de 50 m orice măsurătoare pe AABB
+raportează „în carosabil"): plimbă **gabaritul mașinii** — o cutie de 2.4 × 1.4
+× 4 m, la înălțimea ei — pe linia șoselei, din doi în doi metri, și întreabă
+fizica pe cine atinge. Așa a ieșit la iveală podețul de peste pârâu de pe Alpi,
+care e o treaptă fix pe linia de curs (mașina trece PE el, șoseaua are deja
+coliziunea ei acolo) — de aceea e pe `none`.
+
+Verdictul de cursă rămâne `ProbeRace`: pe Baikal, cu decorul solid, repunerile
+au scăzut de la 13 la 7 și blocajele de la 18 la 9 (același seed), fiindcă
+mașinile care ieșeau din drum se opresc acum în gard, nu mai rătăcesc prin sat.
 
 ## Promovarea: din sketchpad în scenografie (PASUL DE DELIVERY)
 

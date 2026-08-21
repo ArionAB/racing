@@ -5,7 +5,7 @@ extends Node
 ##
 ## Ce verifica:
 ##   1. SE CONSTRUIESTE: pista are campul, cu placi statice destule (din
-##      care macar 5 kickere), exact atatea placi vii cate s-au cerut, apa
+##      care macar 4 creste de presiune), atatea placi vii cate s-au cerut, apa
 ##      si zona de incarcare.
 ##   2. SEMNUL INCLINARII: o masina parcata langa marginea unei placi vii o
 ##      inclina spre EA — unghi peste prag si, geometric, coltul incarcat mai
@@ -16,10 +16,10 @@ extends Node
 ##      si masina e repusa. Pragul e cumulativ (BREAK_TIME), nu instantaneu.
 ##   4. DOUA MASINI pe o placa proaspata o rup RAPID (sub o secunda) ->
 ##      BROKEN, placa se scufunda si AMBELE sunt repuse; placa revine SOLID.
-##   5. SE TRAVERSEAZA: o masina lansata la 30 m/s intra pe rampa campului si
-##      iese pe partea cealalta cu viteza — campul ridicat nu e un perete —
-##      si macar un kicker o arunca in aer pe drum (viteza verticala reala,
-##      nu doar geometrie ridicata).
+##   5. SE TRAVERSEAZA SI ARUNCA: o masina lansata la 30 m/s intra pe rampa
+##      campului, iese pe partea cealalta cu viteza (campul nu e un perete)
+##      si o creasta o tine in aer macar 0.25 s, cu un sfert din traversare
+##      prin aer — airtime masurat din contactul rotilor, nu din viteza.
 
 func _ready() -> void:
 	await get_tree().process_frame
@@ -53,10 +53,10 @@ func _ready() -> void:
 	var ok1 := static_count > 40 and live.size() == 8 \
 		and field.get_node_or_null("Water") != null \
 		and field.get_node_or_null("Load") != null \
-		and field.bump_count() >= 5
+		and field.ridge_count() >= 4
 	failed = failed or not ok1
-	print("1. constructie: %d placi statice (%d kickere), %d vii, apa+zona  %s (lungime camp %.0f m)" % [
-		static_count, field.bump_count(), live.size(),
+	print("1. constructie: %d placi statice, %d vii, %d creste, apa+zona  %s (lungime camp %.0f m)" % [
+		static_count, live.size(), field.ridge_count(),
 		"OK" if ok1 else "PROBLEMA", field.field_length()])
 
 	var car_scene: PackedScene = load("res://scenes/cars/Car.tscn")
@@ -170,32 +170,65 @@ func _ready() -> void:
 	var min_speed := INF
 	var max_s := 0.0
 	var max_vy := 0.0
+	# Airtime-ul e ce s-a cerut la playtest, deci se MASOARA ca atare: cat
+	# timp la rand nu atinge gheata, si cat din traversare a fost prin aer.
+	# Viteza verticala singura minte — poate veni si dintr-un arc care se
+	# descarca fara ca roata sa plece de pe placa.
+	var air_now := 0.0
+	var air_best := 0.0
+	var air_total := 0.0
+	var in_field := 0.0
 	for k in int(8.0 * 60.0):
 		await get_tree().physics_frame
 		min_speed = minf(min_speed, car.velocity.length())
 		var s_now := field._to_st(car.global_position).x
 		max_s = maxf(max_s, s_now)
-		# saltul de pe kicker se masoara doar in interiorul campului, ca sa
-		# nu treaca drept "salt" intrarea pe rampa de capat
+		# saltul se masoara doar in interiorul campului, ca sa nu treaca drept
+		# "saritura" intrarea pe rampa de capat
 		if s_now > IceFieldHazard.RAMP_LEN + 4.0 \
 				and s_now < field.field_length() - IceFieldHazard.RAMP_LEN:
 			max_vy = maxf(max_vy, car.velocity.y)
+			in_field += 1.0 / 60.0
+			if car.is_on_floor():
+				air_now = 0.0
+			else:
+				air_now += 1.0 / 60.0
+				air_total += 1.0 / 60.0
+				air_best = maxf(air_best, air_now)
+		if OS.get_environment("PROBE_FIELD_TRACE") == "1" and k % 6 == 0:
+			print("  TR t=%.2f s=%6.1f t=%5.1f y=%5.2f v=%5.1f vy=%5.1f sol=%s" % [
+				float(k) / 60.0, s_now,
+				field._to_st(car.global_position).y,
+				car.global_position.y, car.horizontal_speed(),
+				car.velocity.y, car.is_on_floor()])
 		if car.global_position.distance_to(exit) < 12.0:
 			break
 	# „a trecut" = ori a ajuns aproape de punctul de iesire, ori abscisa ei a
 	# strabatut campul (bucla se opreste cu 12 m inainte de iesire, deci
 	# abscisa maxima consemnata e legitim sub lungimea campului; drumul si
 	# curbeaza pe cei ~150 m, asa ca nici distanta pura nu ajunge singura).
-	# Iar kickerele trebuie sa se SIMTA: macar un salt cu >0.8 m/s vertical
-	# pe traversare — altfel rampele exista doar in geometrie, nu in volan.
+	# Iar crestele trebuie sa ARUNCE, nu sa zgaltaie: macar o saritura de
+	# 0.25 s din roti si un sfert din traversare prin aer. Pragul vine din
+	# fizica, nu din gust — la 30 m/s si g = 28, panta crestei da
+	# 4*v*p/g secunde de zbor, deci sub 0.25 s ar insemna ca masina nici nu
+	# urmareste rampa (roti prea moi, creasta prea scurta), nu ca e "putin".
+	var air_pct := 100.0 * air_total / maxf(in_field, 0.001)
 	var passed := car.global_position.distance_to(exit) < 14.0 \
 		or max_s > field.field_length() - 6.0
-	var ok5 := passed and min_speed > 12.0 and max_vy > 0.8
+	# Prag pe DOUA capete, si amandoua prind cate o clasa de regresie.
+	# Sub 0.22 s inseamna ca placile au inceput iar sa reteze crestele
+	# (asa a aratat fiecare versiune rupta de pana acum: 0.02 s cu placi
+	# prea mari, 0.15 s cu varful in mijlocul unei placi). Peste 70% nu mai
+	# e drum: daca masina nu atinge gheata intre creste, volanul nu face
+	# nimic si sectiunea devine un tobogan pe care doar astepti.
+	# Masurat pe reglajul livrat: 0.30 s si 25%, deci ambele praguri au
+	# marja — nu sunt cifra masurata scrisa inapoi ca prag.
+	var ok5 := passed and min_speed > 12.0 and air_best > 0.22 \
+		and air_pct > 18.0 and air_pct < 70.0
 	failed = failed or not ok5
-	print("5. traversare: s maxim %.0f/%.0f m, viteza minima %.1f m/s, salt maxim %.1f m/s vertical  %s (final la %.0f m de iesire)" % [
-		max_s, field.field_length(), min_speed, max_vy,
-		"OK" if ok5 else "PROBLEMA",
-		car.global_position.distance_to(exit)])
+	print("5. traversare: s maxim %.0f/%.0f m, viteza minima %.1f m/s, saritura cea mai lunga %.2f s (%.0f%% din camp prin aer, varf %.1f m/s vertical)  %s" % [
+		max_s, field.field_length(), min_speed, air_best, air_pct, max_vy,
+		"OK" if ok5 else "PROBLEMA"])
 
 	print("VERDICT: ", "OK" if not failed else "PROBLEME")
 	get_tree().quit(1 if failed else 0)

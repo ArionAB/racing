@@ -64,6 +64,18 @@ const INSET_LIVE: float = 0.42
 ## fisura de 0.5 m e UN tick de fizica, doar treptele dintre placi raman.
 const UNEVEN_GRAD: float = 0.045
 const UNEVEN_H: float = 0.06
+## KICKERELE: fiecare a BUMP_EVERY-a placa moarta de pe culoar e o mini-rampa
+## (cerut la playtest: denivelarea aleatoare zgaltaie, dar nu ARUNCA).
+## Placa e ridicata cu BUMP_LIFT si inclinata PE SENSUL DE MERS: intri pe
+## muchia joasa (mica adancitura, te anunta), iesi de pe muchia inalta —
+## la 30 m/s panta de ~5-6% da ~1.6-1.9 m/s vertical, un salt scurt cu botul
+## in sus plus caderea de pe muchie. Muchia din spate e PLAFONATA la
+## BUMP_EDGE_CAP peste vecine: lectia pragurilor (>0.3 m e zid) — o masina
+## intoarsa sau in marsarier trebuie sa poata trece peste ea inapoi.
+const BUMP_EVERY: int = 3
+const BUMP_LIFT: float = 0.10
+const BUMP_SLOPE_MAX: float = 0.065
+const BUMP_EDGE_CAP: float = 0.26
 ## Cat iese campul lateral dincolo de semilatimea drumului (m).
 const EXTRA_W: float = 5.0
 ## Grosimea vizuala/de coliziune a unei placi (m).
@@ -123,6 +135,8 @@ var _area: Area3D
 var _audio: AudioStreamPlayer3D
 var _live: Array[Dictionary] = []
 var _crack_cd: float = 0.0
+var _bump_seen: int = 0
+var _bump_count: int = 0
 
 
 ## Track ii da PROBELE traseului pe intervalul campului (puncte de centru la
@@ -483,7 +497,25 @@ func _build() -> void:
 		var h_c := _top_y(c2.x, c2.y)
 		var grad_s := _top_y(c2.x + 0.5, c2.y) - _top_y(c2.x - 0.5, c2.y)
 		var grad_t := _top_y(c2.x, c2.y + 0.5) - _top_y(c2.x, c2.y - 0.5)
-		if not is_live:
+		var hw_here := _hws[_seg_at(c2.x)]
+		# kicker: a BUMP_EVERY-a placa moarta DE PE CULOAR (nu pe sortul
+		# lateral — ala e zona de recuperare — si nu pe rampele de capat)
+		var is_bump := false
+		if not is_live and absf(c2.y) <= hw_here \
+				and c2.x > RAMP_LEN + 4.0 and c2.x < _len - RAMP_LEN - 8.0:
+			_bump_seen += 1
+			is_bump = _bump_seen % BUMP_EVERY == 0
+		if is_bump:
+			# rampa DELIBERATA, nu zgomot: cota si panta pe sensul de mers,
+			# fara inclinare laterala — muchia joasa in fata, cea inalta in
+			# spate, cu saltul plafonat de BUMP_EDGE_CAP
+			var r_s := 0.5
+			for p in poly:
+				r_s = maxf(r_s, absf(p.x - c2.x))
+			h_c += BUMP_LIFT
+			grad_s += minf(BUMP_SLOPE_MAX, (BUMP_EDGE_CAP - BUMP_LIFT) / r_s)
+			_bump_count += 1
+		elif not is_live:
 			h_c += rng.randf_range(-UNEVEN_H, UNEVEN_H)
 			grad_s += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD)
 			grad_t += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD)
@@ -491,8 +523,11 @@ func _build() -> void:
 			_build_live_plate(poly, c2, h_c, grad_s, grad_t, live_k, rng)
 			live_k += 1
 		else:
-			var tint := Color(1, 1, 1).lerp(Color(0.88, 0.95, 0.96),
-				rng.randf() * 0.8)
+			# creasta kickerului iese alba (zapada pe muchia ridicata) — se
+			# citeste de departe ca "de aici sari"
+			var tint := Color(1, 1, 1) if is_bump \
+				else Color(1, 1, 1).lerp(Color(0.88, 0.95, 0.96),
+					rng.randf() * 0.8)
 			_emit_plate(st, poly, c2, h_c, grad_s, grad_t, tint,
 				func(v: Vector3) -> Vector3: return v)
 			var shape := CollisionShape3D.new()
@@ -924,3 +959,7 @@ func plate_sink(idx: int) -> float:
 
 func field_length() -> float:
 	return _len
+
+
+func bump_count() -> int:
+	return _bump_count

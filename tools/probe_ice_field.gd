@@ -4,8 +4,9 @@ extends Node
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeIceField.tscn [-- --track=3]
 ##
 ## Ce verifica:
-##   1. SE CONSTRUIESTE: pista are campul, cu placi statice destule, exact
-##      atatea placi vii cate s-au cerut, apa si zona de incarcare.
+##   1. SE CONSTRUIESTE: pista are campul, cu placi statice destule (din
+##      care macar 5 kickere), exact atatea placi vii cate s-au cerut, apa
+##      si zona de incarcare.
 ##   2. SEMNUL INCLINARII: o masina parcata langa marginea unei placi vii o
 ##      inclina spre EA — unghi peste prag si, geometric, coltul incarcat mai
 ##      jos decat cel opus. Semnele se verifica pe geometrie, nu se ghicesc
@@ -16,7 +17,9 @@ extends Node
 ##   4. DOUA MASINI pe o placa proaspata o rup RAPID (sub o secunda) ->
 ##      BROKEN, placa se scufunda si AMBELE sunt repuse; placa revine SOLID.
 ##   5. SE TRAVERSEAZA: o masina lansata la 30 m/s intra pe rampa campului si
-##      iese pe partea cealalta cu viteza — campul ridicat nu e un perete.
+##      iese pe partea cealalta cu viteza — campul ridicat nu e un perete —
+##      si macar un kicker o arunca in aer pe drum (viteza verticala reala,
+##      nu doar geometrie ridicata).
 
 func _ready() -> void:
 	await get_tree().process_frame
@@ -49,11 +52,12 @@ func _ready() -> void:
 	var live := field.live_plates()
 	var ok1 := static_count > 40 and live.size() == 8 \
 		and field.get_node_or_null("Water") != null \
-		and field.get_node_or_null("Load") != null
+		and field.get_node_or_null("Load") != null \
+		and field.bump_count() >= 5
 	failed = failed or not ok1
-	print("1. constructie: %d placi statice, %d vii, apa+zona  %s (lungime camp %.0f m)" % [
-		static_count, live.size(), "OK" if ok1 else "PROBLEMA",
-		field.field_length()])
+	print("1. constructie: %d placi statice (%d kickere), %d vii, apa+zona  %s (lungime camp %.0f m)" % [
+		static_count, field.bump_count(), live.size(),
+		"OK" if ok1 else "PROBLEMA", field.field_length()])
 
 	var car_scene: PackedScene = load("res://scenes/cars/Car.tscn")
 	var car: Car = car_scene.instantiate()
@@ -165,22 +169,31 @@ func _ready() -> void:
 	car.controller = ctrl
 	var min_speed := INF
 	var max_s := 0.0
+	var max_vy := 0.0
 	for k in int(8.0 * 60.0):
 		await get_tree().physics_frame
 		min_speed = minf(min_speed, car.velocity.length())
-		max_s = maxf(max_s, field._to_st(car.global_position).x)
+		var s_now := field._to_st(car.global_position).x
+		max_s = maxf(max_s, s_now)
+		# saltul de pe kicker se masoara doar in interiorul campului, ca sa
+		# nu treaca drept "salt" intrarea pe rampa de capat
+		if s_now > IceFieldHazard.RAMP_LEN + 4.0 \
+				and s_now < field.field_length() - IceFieldHazard.RAMP_LEN:
+			max_vy = maxf(max_vy, car.velocity.y)
 		if car.global_position.distance_to(exit) < 12.0:
 			break
 	# „a trecut" = ori a ajuns aproape de punctul de iesire, ori abscisa ei a
 	# strabatut campul (bucla se opreste cu 12 m inainte de iesire, deci
 	# abscisa maxima consemnata e legitim sub lungimea campului; drumul si
 	# curbeaza pe cei ~150 m, asa ca nici distanta pura nu ajunge singura).
+	# Iar kickerele trebuie sa se SIMTA: macar un salt cu >0.8 m/s vertical
+	# pe traversare — altfel rampele exista doar in geometrie, nu in volan.
 	var passed := car.global_position.distance_to(exit) < 14.0 \
 		or max_s > field.field_length() - 6.0
-	var ok5 := passed and min_speed > 12.0
+	var ok5 := passed and min_speed > 12.0 and max_vy > 0.8
 	failed = failed or not ok5
-	print("5. traversare: s maxim %.0f/%.0f m, viteza minima %.1f m/s  %s (final la %.0f m de iesire)" % [
-		max_s, field.field_length(), min_speed,
+	print("5. traversare: s maxim %.0f/%.0f m, viteza minima %.1f m/s, salt maxim %.1f m/s vertical  %s (final la %.0f m de iesire)" % [
+		max_s, field.field_length(), min_speed, max_vy,
 		"OK" if ok5 else "PROBLEMA",
 		car.global_position.distance_to(exit)])
 

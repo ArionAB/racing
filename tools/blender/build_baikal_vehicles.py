@@ -171,12 +171,20 @@ def build_train():
     objs = []
 
     # --- locomotiva ---------------------------------------------------------
+    # TREI obiecte, nu unul: caroseria ramane pe atlas (verdele, dunga galbena
+    # si geamurile sunt sloturi, iar o clasa triplanara le-ar sterge pe toate),
+    # dar sasiul cu boghiurile ia `rust_metal` si gheata de pe acoperis
+    # `ice_bloc`. Alea doua SUNT dintr-un singur material fiecare, deci textura
+    # nu acopera nimic — si sunt exact ce se vede din masina cand trenul trece
+    # pe langa tine: fusta de jos si coama alba.
     b = Builder()
+    bf = Builder()      # sasiu + boghiuri (rugina)
+    bi = Builder()      # gheata de pe acoperis
     L = 14.0
     floor_z = BOGIE_R + 0.55
     body_h = 2.55
     # sasiul
-    b.box((0.0, 0.0, floor_z - 0.18), (L, 2.9, 0.36), VOLCANIC_BLACK)
+    bf.box((0.0, 0.0, floor_z - 0.18), (L, 2.9, 0.36), VOLCANIC_BLACK)
     # capota lunga + cabina inalta (silueta M62: cabina retrasa spre spate)
     b.box((-0.6, 0.0, floor_z + body_h * 0.5), (L - 2.6, 2.85, body_h),
           TROPICAL_GREEN)
@@ -201,21 +209,27 @@ def build_train():
     b.cylinder((L * 0.5 - 0.15, 0.0, floor_z + body_h * 0.86), 0.26, 0.22,
                DRY_VEGETATION, segments=8, axis="X")
     # gheata pe acoperis (brief)
-    _roof_ice(b, x0=-6.4, x1=5.4, z=floor_z + body_h + 0.86, half_w=1.35,
+    _roof_ice(bi, x0=-6.4, x1=5.4, z=floor_z + body_h + 0.86, half_w=1.35,
               seed=505)
-    _bogie(b, -4.4)
-    _bogie(b, 4.4)
+    _bogie(bf, -4.4)
+    _bogie(bf, 4.4)
     loco = b.to_object("Baikal_Loco")
     finish(loco, bevel=0.04, ao=AO_VEHICLE, origin=None)
-    objs.append(loco)
+    frame = bf.to_object("TrainFrame_Loco")
+    finish(frame, bevel=0.03, ao=AO_VEHICLE, origin=None)
+    ice = bi.to_object("TrainIce_Loco")
+    finish(ice, bevel=0.02, ao=AO_VEHICLE, origin=None)
+    objs.extend([loco, frame, ice])
 
     # --- doua vagoane -------------------------------------------------------
     for k in range(2):
         b = Builder()
+        bf = Builder()
+        bi = Builder()
         C = 12.0
         cf = BOGIE_R + 0.55
         ch = 2.75
-        b.box((0.0, 0.0, cf - 0.18), (C, 2.8, 0.36), VOLCANIC_BLACK)
+        bf.box((0.0, 0.0, cf - 0.18), (C, 2.8, 0.36), VOLCANIC_BLACK)
         b.box((0.0, 0.0, cf + ch * 0.5), (C, 2.8, ch), TROPICAL_GREEN)
         # acoperis usor bombat, mai deschis
         b.box((0.0, 0.0, cf + ch + 0.10), (C - 0.3, 2.6, 0.22), ASPHALT_EDGE)
@@ -232,15 +246,21 @@ def build_train():
         # usile de capat
         for dx in (-C * 0.5 + 0.35, C * 0.5 - 0.35):
             b.box((dx, 0.0, cf + 1.15), (0.10, 1.15, 2.10), ASPHALT_EDGE)
-        _roof_ice(b, x0=-C * 0.5 + 0.6, x1=C * 0.5 - 0.6, z=cf + ch + 0.24,
+        _roof_ice(bi, x0=-C * 0.5 + 0.6, x1=C * 0.5 - 0.6, z=cf + ch + 0.24,
                   half_w=1.25, seed=800 + k * 61)
-        _bogie(b, -C * 0.5 + 2.2)
-        _bogie(b, C * 0.5 - 2.2)
+        _bogie(bf, -C * 0.5 + 2.2)
+        _bogie(bf, C * 0.5 - 2.2)
         obj = b.to_object("Baikal_Carriage_%s" % "AB"[k])
         finish(obj, bevel=0.04, ao=AO_VEHICLE, origin=None)
-        # asezate in linie, ca planşa; pista le repozitioneaza oricum
-        obj.location.x = -(L * 0.5 + 1.0 + C * (k + 0.5) + k * 1.0)
-        objs.append(obj)
+        frame = bf.to_object("TrainFrame_%s" % "AB"[k])
+        finish(frame, bevel=0.03, ao=AO_VEHICLE, origin=None)
+        ice = bi.to_object("TrainIce_%s" % "AB"[k])
+        finish(ice, bevel=0.02, ao=AO_VEHICLE, origin=None)
+        # asezate in linie, ca planşa; pista le repozitioneaza oricum. Cele trei
+        # bucati ale unui vagon se muta IMPREUNA — altfel sasiul ramane in urma.
+        for part in (obj, frame, ice):
+            part.location.x = -(L * 0.5 + 1.0 + C * (k + 0.5) + k * 1.0)
+        objs.extend([obj, frame, ice])
 
     _drop_to_zero(objs)
     print("BaikalTrain: %d tris (%s)"

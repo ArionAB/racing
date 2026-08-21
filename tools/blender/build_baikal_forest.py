@@ -49,6 +49,20 @@ def _drop_to_zero(objs):
         o.location.z -= lo
 
 
+def _origin_group(objs, ref):
+    """Muta un grup de obiecte ca baza lui `ref`, centrata pe XY, sa cada in
+    origine — echivalentul lui finish(origin="base") pentru o piesa din mai
+    multe obiecte, cu pozitiile relative pastrate."""
+    bpy.context.view_layer.update()
+    bb = [ref.matrix_world @ Vector(c) for c in ref.bound_box]
+    cx = (min(v.x for v in bb) + max(v.x for v in bb)) * 0.5
+    cy = (min(v.y for v in bb) + max(v.y for v in bb)) * 0.5
+    lo = min(v.z for v in bb)
+    for o in objs:
+        set_origin_at(o, Vector((cx, cy, lo)))
+        o.location = Vector((0.0, 0.0, 0.0))
+
+
 def _tapered_trunk(b, height, r_base, r_top, slot, segments=7, lean=0.0,
                    bends=3, seed=0):
     """Trunchi din cateva tronsoane, cu o inclinare usoara si o indoitura.
@@ -360,17 +374,28 @@ def build_shore_kit():
     b.rock((0.0, 0.0, 0.0), (18.0, 9.0, 15.0), MARBLE_GREY, seed=6161,
            segments=9, rings=6, taper=0.12, wall_axis="y",
            strata_slots=(MARBLE_GREY, ROCK_DARK, MARBLE_GREY, ASPHALT_EDGE))
-    # gheata scursa pe fata: fasii verticale inguste, de sus in jos
+    # Gheata scursa pe fata: fasii verticale inguste, de sus in jos. OBIECT
+    # SEPARAT (`CliffFaceOlkhon_Ice`), fiindca roca ia clasa `olkhon_marble`
+    # iar o clasa se aplica pe obiect: lipite de faleza, fasiile ar fi iesit
+    # coloane de marmura pe un perete de marmura — exact ce s-a vazut pe prima
+    # captura din PR-ul de texturi.
+    bi = Builder()
     rand = _lcg(717)
     for i in range(9):
         x = -7.5 + rand() * 15.0
         top = 6.0 + rand() * 7.0
         h = top * (0.45 + rand() * 0.5)
-        b.box((x, -4.4, top - h * 0.5), (0.35 + rand() * 0.5, 0.30, h),
-              ICE_TURQUOISE)
+        bi.box((x, -4.4, top - h * 0.5), (0.35 + rand() * 0.5, 0.30, h),
+               ICE_TURQUOISE)
     cliff = b.to_object("CliffFaceOlkhon")
-    finish(cliff, bevel=0.06, ao=AO_ROCK, origin="base")
-    objs.append(cliff)
+    cliff_ice = bi.to_object("CliffFaceOlkhon_Ice")
+    for o in (cliff, cliff_ice):
+        finish(o, bevel=0.06, ao=AO_ROCK, origin=None)
+    # Origine COMUNA (baza rocii, centrata pe XY): `origin="base"` ar fi
+    # centrat FIECARE bucata pe bbox-ul ei, iar fasiile de gheata — care stau
+    # toate pe o singura fata — ar fi sarit in mijlocul falezei.
+    _origin_group((cliff, cliff_ice), cliff)
+    objs.extend([cliff, cliff_ice])
 
     # --- cabana de vanatoare, 5x4x3.5 --------------------------------------
     b = Builder()
@@ -427,8 +452,14 @@ def build_shore_kit():
         "HuntingCabin": "baikal/buildings/hunting_cabin.glb",
         "ShoreStaircase": "baikal/structures/shore_staircase.glb",
     }
-    for o in objs:
-        export_glb([o], files[o.name])
+    # O piesa poate avea si bucati de alt material (faleza + gheata scursa pe
+    # ea): merg in ACELASI fisier, ca asezarea in editor sa ramana un nod.
+    by_name = {o.name: o for o in objs}
+    for name, path in files.items():
+        parts = [by_name[name]]
+        if name + "_Ice" in by_name:
+            parts.append(by_name[name + "_Ice"])
+        export_glb(parts, path)
 
     # .blend-ul ramane comun, cu piesele pe un rand ca sa fie lizibil.
     x = 0.0

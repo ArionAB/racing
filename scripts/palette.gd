@@ -361,6 +361,22 @@ const CLASS_TEXTURES := {
 	# cand GLB-urile au in vertecsi doar AO, deci dala palida iesea piatra
 	# sparta, nu gheata. Tenta e in CLASS_TINT.
 	"ice_bloc": "res://assets/textures/classes/ice.png",
+	# Marmura Olkhonului (Stanca Samanului, arcul grotei, faleza insulei si
+	# peretii de stanca asezati de mana pe Track10). Dala PROPRIE, nu cea
+	# alpina: sursa alpina e o fotografie de ZID de piatra uscata de 2 m, si
+	# pe o fata de 18 m coltii Samanului ieseau cetate (masurat pe captura,
+	# de doua ori — #313 si prima incercare din PR-ul asta). Sursa de aici
+	# (marble_cliff_04, 12.7 m) e o faleza de marmura cu vine si strate, la
+	# scara pieselor pe care cade. Vezi tools/process_class_textures.gd.
+	"olkhon_marble": "res://assets/textures/classes/olkhon_marble.png",
+	# Zidaria taiata a caii ferate Circum-Baikal: viaduct, portal si galeria
+	# tunelului. Aici dala ALPINA e alegerea corecta, si din exact motivul
+	# pentru care a picat pe coltii Samanului: sursa ei e o fotografie de ZID
+	# de piatra uscata. Pe o stanca naturala iesea cetate; pe zidaria unui
+	# viaduct de piatra e chiar subiectul. Sursa `stone_wall` (calcar ciupit,
+	# ancora de insula) s-a incercat prima si citea beton turnat pe captura
+	# din galerie — netedul ei nu are randuri.
+	"cut_stone": "res://assets/textures/classes/alpine_granite.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -371,6 +387,12 @@ const CLASS_TEXTURES := {
 ## alt multiplicator pe material.
 const CLASS_TINT := {
 	"ice_bloc": Color(0.65, 0.87, 0.88),
+	# `olkhon_marble` NU are tenta: dala lui e gradata direct spre slotul
+	# MARBLE_GREY in pipeline, deci aterizeaza singura pe culoarea corecta.
+	# Zidaria caii ferate e gradata spre CORAL_SAND (crem de insula, slotul
+	# calcarului de Okinawa); pe Baikal trebuie sa ramana piatra cenusie sub
+	# soare rece, de unde tenta rece de aici.
+	"cut_stone": Color(0.88, 0.91, 0.97),
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -419,6 +441,19 @@ const CLASS_TRIPLANAR_SCALE := {
 	# bloc prinde o celula de crapaturi si cateva bule — se citeste ca
 	# gheata sparta de la distanta de joc.
 	"ice_bloc": 0.55,
+	# Marmura Olkhonului: 0.09 = o repetitie la ~11 m, adica SCARA REALA a
+	# sursei (12.7 m) cu 12% mai mica. Regula 1 din pipeline (scara sursei
+	# fata de repetitia din joc) e singura care conteaza aici: piesele au
+	# 12-22 m, deci fata dinspre drum a unui colt prinde aproape exact o
+	# repetitie — vinele si stratele fotografiei se citesc ca geologie, nu ca
+	# tipar care se repeta.
+	"olkhon_marble": 0.09,
+	# Zidaria taiata: 0.5 = o repetitie la 2 m, adica SCARA REALA a sursei.
+	# Blocurile din fotografie ies atunci la 20-40 cm, randurile din geometrie
+	# sunt la 0.9 m: doua scari de zidarie care se sprijina una pe alta, exact
+	# ca la o pila reala. La scara alpina (0.16, 6.25 m) blocurile ar fi de
+	# 1-1.2 m — zidarie ciclopica, alt fel de constructie.
+	"cut_stone": 0.28,
 }
 
 static var _tri_mats: Dictionary = {}
@@ -522,25 +557,107 @@ static func class_material(cls: String) -> StandardMaterial3D:
 ## piese care stau pe loc (style_bible §4).
 const TRI_PREFIX := "tri:"
 
+## Al doilea prefix acceptat in mapari: "finish:<nume>". NU schimba textura, ci
+## FINISAJUL — acelasi atlas, alt raspuns la lumina.
+##
+## Exista pentru piesele care nu pot primi o clasa fara sa piarda tot: trenul
+## are verdele, dunga galbena si geamurile in sloturi, deci orice albedo de
+## clasa le-ar sterge. Ce lipsea insa nu era tiparul de suprafata, ci faptul ca
+## tabla vopsita raspundea la soarele jos exact ca zapada din jur — roughness
+## 0.9, specular 0.15, adica hartie. Un singur material in plus (cache-uit,
+## textura si masca sunt ACELEASI obiecte) da locomotivei o lucire pe fetele
+## dinspre soare, si atat.
+const FINISH_PREFIX := "finish:"
+
+## Finisajele disponibile: nume -> [roughness, metallic_specular].
+const FINISHES := {
+	# Tabla vopsita a vehiculelor de decor (trenul, hovercraftul). Nu e
+	# cromare: 0.55 sta la jumatatea drumului dintre lumea mata (0.9) si
+	# gheata lacului (0.35), care ramane cea mai lucioasa suprafata din scena.
+	"vehicle": [0.55, 0.40],
+}
+
+static var _finish_mats: Dictionary = {}
+
+static func finish_material(name: String) -> StandardMaterial3D:
+	if _finish_mats.has(name):
+		return _finish_mats[name]
+	assert(FINISHES.has(name), "finisaj necunoscut: " + name)
+	# duplicate() fara subresurse, ca la foliage_material: atlasul, masca si
+	# stratul de detaliu raman aceleasi obiecte in memoria GPU.
+	var mat := world_material().duplicate() as StandardMaterial3D
+	var f: Array = FINISHES[name]
+	mat.roughness = f[0]
+	mat.metallic_specular = f[1]
+	_finish_mats[name] = mat
+	return mat
+
 static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 	for node in _walk(root):
 		if not (node is MeshInstance3D):
 			continue
 		var mi := node as MeshInstance3D
-		var assigned := false
-		for prefix: String in mapping:
-			if not String(mi.name).begins_with(prefix):
-				continue
-			var cls: String = mapping[prefix]
-			if cls.begins_with(TRI_PREFIX):
-				mi.material_override = triplanar_class_material(
-					cls.trim_prefix(TRI_PREFIX))
-			else:
-				mi.material_override = class_material(cls)
-			assigned = true
-			break
-		if not assigned:
+		var cls := _class_for(String(mi.name), mapping)
+		if cls.is_empty():
 			mi.material_override = world_material()
+		elif cls.begins_with(FINISH_PREFIX):
+			mi.material_override = finish_material(
+				cls.trim_prefix(FINISH_PREFIX))
+		elif cls.begins_with(TRI_PREFIX):
+			mi.material_override = triplanar_class_material(
+				cls.trim_prefix(TRI_PREFIX))
+		else:
+			mi.material_override = class_material(cls)
+
+
+## Ca `apply_class_materials`, dar cu clasele triplanare proiectate in spatiul
+## OBIECTULUI — pentru modelele care SE MISCA (trenul, hovercraftul, figuranti
+## pe PathMover).
+##
+## Nu e un detaliu: proiectia de lume isi ia coordonatele din pozitia vertexului
+## in scena, deci pe un tren care traverseaza 200 m textura ii curge pe sub
+## tabla — rugina „sta pe loc" si trenul aluneca prin ea. Aceeasi capcana e
+## descrisa pe larg la `apply_object_triplanar_class`; aici e varianta ei pe
+## PARTI, ca un model mixt (caroserie pe atlas, sasiu ruginit, gheata pe
+## acoperis) sa poata avea si clase, si culorile din sloturi.
+static func apply_object_class_materials(root: Node, mapping: Dictionary,
+		world_scale: float = 1.0) -> void:
+	for node in _walk(root):
+		if not (node is MeshInstance3D):
+			continue
+		var mi := node as MeshInstance3D
+		var cls := _class_for(String(mi.name), mapping)
+		if cls.is_empty():
+			mi.material_override = world_material()
+		elif cls.begins_with(FINISH_PREFIX):
+			mi.material_override = finish_material(
+				cls.trim_prefix(FINISH_PREFIX))
+		elif cls.begins_with(TRI_PREFIX):
+			mi.material_override = object_triplanar_class_material(
+				cls.trim_prefix(TRI_PREFIX), world_scale)
+		else:
+			mi.material_override = class_material(cls)
+
+
+## Clasa unei parti, dupa prefixul CEL MAI LUNG care se potriveste. Gol = pe
+## materialul lumii.
+##
+## Lungimea, nu ordinea din dictionar: de cand piesele mixte se sparg la export
+## in bucati cu acelasi radacina de nume ("Tunnel_Bore" + "Tunnel_Bore_Ice",
+## "RailTrack" + "RailTrack_Rails"), prima potrivire ar fi depins de ordinea in
+## care sunt scrise cheile — adica o mapare corecta ar fi devenit gresita la o
+## reordonare inocenta. Cu prefixul cel mai lung, partea cea mai specifica
+## castiga intotdeauna.
+static func _class_for(name: String, mapping: Dictionary) -> String:
+	var best := ""
+	var best_len := -1
+	for prefix: String in mapping:
+		if not name.begins_with(prefix):
+			continue
+		if prefix.length() > best_len:
+			best_len = prefix.length()
+			best = mapping[prefix]
+	return best
 
 
 ## Pune materialul comun pe toate mesh-urile dintr-un subarbore. Pentru GLB-uri

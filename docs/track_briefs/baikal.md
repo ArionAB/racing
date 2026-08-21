@@ -123,7 +123,7 @@ Bugete de triunghiuri orientative.
 |---|---|---|
 | `shaman_rock.glb` | 2 colțuri: 22×14×18 m și 15×10×12 m | marmură albă-cenușie cu vene, licheni roșu-cărămiziu pe fețele sudice, gheață la bază; siluetele reale (doi „dinți" cu o șa între ei) |
 | `serge_pole.glb` (3 variante) | 2.5 m înalt, Ø 20 cm | stâlp de lemn cioplit cu 3 crestături, panglici de 60–90 cm în 5 culori (mesh plan, vertex-wind); un șir de 13 pe promontoriu |
-| `railway_viaduct.glb` (modular: pilă + arcadă + capăt) | arcadă 12 m deschidere, 12 m înălțime; 5 arcade | piatră cenușie cioplită, terasament de pietriș, șine + traverse pe deasupra (șinele = kerb-ul pistei), țurțuri sub arcade |
+| `viaduct_pier/arch/end.glb` (modular: pilă + arcadă + capăt, un fișier pe modul) | arcadă 12 m deschidere, 12 m înălțime; 5 arcade | piatră cenușie cioplită, terasament de pietriș, șine + traverse pe deasupra (șinele = kerb-ul pistei), țurțuri sub arcade |
 | `railway_tunnel_portal.glb` | 7×7 m gură, 40 m lungime | portal de piatră cu boltă, placă cu „1904" pe frontispiciu (placă în relief, fără text real), interior cu nișe laterale la 12 m (refugiul), gheață pe pereți |
 | `ice_grotto_arch.glb` | 12 m deschidere, 9 m înalt, 25 m adâncime | stâncă de faleză îmbrăcată în țurțuri lungi (1–3 m) și „draperii" de gheață; interior albastru; 3–4 țurțuri separate (`icicle_dropper.glb`) ca piese detașabile |
 | `khuzhir_church.glb` | 9×7 m, turlă 12 m | biserică mică de lemn, albă cu cupolă albastră și cruce; POI de sosire |
@@ -207,7 +207,8 @@ Stadiu (18 aug 2026, PR #283–#290, toate în main):
 | 2 gheață + vânt | `custom_ice_ranges` (grip 1.5, bandă proprie, bețe cu stegulețe), `wind_at`; textura de clasă `ice` pictată (`tools/paint_ice.py`) pe placă și bandă | #283, #287 |
 | 3 hazarde | câmpul de plăci crăpate la C (`IceFieldHazard` #314, a înlocuit cele 3 plăci `IceSlabHazard` din #284); hovercraft = figurant cu suflu pe larg + traversări pe culoar (0.30 hovercraft, 0.50 sania pescarului); tren PE SENS pe viaduct (`TrainHazard.along_road` + AI care se ține de margine); torosuri (`custom_hummock_fracs`, 2 buc.); arcada grotei (granit, placeholder) | #284–#286, #288, #290, #314 |
 | 4 decor | props `baikal` (iarnă: pini, stânci, petice de zăpadă; fără flori/fân/garduri); satul de la start din landmark-uri (chalet-uri, biserică, baracă) — toate provizorii până la kit | #288, #289 |
-| sonde | `ProbePathFracs`, `ProbeIce` (6 pași), `ProbeIceSlab`, `ProbeTrainAlong`; ProbeLayout OK, ProbeRace 0 repuneri, probe_decor 263k tris / 29 materiale | — |
+| 5 texturi de clasă | kitul (gheață, bolovani, pini) #313; apoi **hero-assets**: `olkhon_marble` (sursă proprie, `marble_cliff_04` — Stânca Șamanului, arcul grotei, faleza Olkhon și pereții `cliff_wall` puși de mână, care erau gresie **portocalie** de canion pe zăpadă), `cut_stone` pe zidăria căii ferate (portal, galerie, module de viaduct), sașiul trenului pe `rust_metal` și gheața de pe acoperiș pe `ice_bloc`, caroseria pe finisaj `finish:vehicle`. Piesele mixte s-au spart la export în obiecte de un singur material; viaductul a devenit **un fișier pe modul** | acest PR |
+| sonde | `ProbePathFracs`, `ProbeIce` (6 pași), `ProbeIceSlab`, `ProbeTrainAlong`; ProbeLayout OK, ProbeRace 0 repuneri, probe_decor 263k tris / 29 materiale (după kit + hero: 792k tris / 24 materiale, prag propriu 900k) | — |
 
 Rămân, în ordinea din §3/§5: modelele (hovercraft Khivus pe markerul de la
 0.30, nerpa, grota cu țurțuri, viaduct de piatră, kitul de sat/gheață/pădure,

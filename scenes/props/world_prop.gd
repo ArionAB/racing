@@ -25,7 +25,7 @@ extends Node3D
 ## nemapate, deci e un inlocuitor direct: prop-urile facute in casa, cu UV-uri pe
 ## sloturi, se comporta exact ca inainte.
 func _ready() -> void:
-	Palette.apply_class_materials(self, _prop_classes())
+	Palette.apply_class_materials(self, prop_classes())
 
 
 ## Maparea nume-de-parte -> clasa de material, adunata din sursele EXISTENTE.
@@ -34,7 +34,10 @@ func _ready() -> void:
 ## iar aici doar se citesc. O a doua listă scrisa de mana ar rămâne in urma la
 ## primul asset nou — exact capcana descrisa in track08.gd despre punctele de
 ## control duplicate.
-static func _prop_classes() -> Dictionary:
+## PUBLICA dinadins: acelasi tabel il foloseste si [PathMover], pentru
+## modelele care se misca (vezi `Palette.apply_object_class_materials`). O a
+## doua lista scrisa de mana ar fi ramas in urma la primul asset nou.
+static func prop_classes() -> Dictionary:
 	var out := {}
 	out.merge(TrackDecor.ISLAND_CLASSES)
 	out.merge(TrackDecor.BAIKAL_CLASSES)

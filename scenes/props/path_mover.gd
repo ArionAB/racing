@@ -37,6 +37,10 @@ enum TravelMode {
 ## Cat de repede se intoarce spre directia de mers (rad/s). Mic dinadins:
 ## intoarcerea de la capatul unui dus-intors trebuie sa se VADA ca manevra,
 ## nu ca un snap — un tractor care se rasuceste instant citeste ca teleportare.
+## Tabelul de clase de material, prin PRELOAD si nu prin numele global:
+## sondele rulate cu `--script` n-au cache de clase globale (vezi
+## docs/decor_manual.md), iar un `class_name` nou nu s-ar rezolva acolo.
+const WorldProp = preload("res://scenes/props/world_prop.gd")
 const TURN_RATE: float = 2.2
 ## De cat de sus porneste si cat de adanc cauta raycast-ul de teren.
 const GROUND_PROBE_UP: float = 4.0
@@ -242,7 +246,12 @@ func _build_model() -> void:
 	inst.rotation.y = deg_to_rad(model_yaw)
 	_pivot.add_child(inst)
 	if tri_class.is_empty():
-		Palette.apply_world_material(inst)
+		# Pe PARTI, nu pe tot corpul: trenul are caroseria pe atlas (verdele si
+		# dunga galbena sunt sloturi), dar sasiul pe `rust_metal` si gheata de
+		# pe acoperis pe `ice_bloc`. Ce nu e mapat cade oricum pe materialul
+		# lumii, deci figurantii fara clase se comporta ca inainte.
+		Palette.apply_object_class_materials(inst, WorldProp.prop_classes(),
+			model_scale)
 	else:
 		Palette.apply_object_triplanar_class(inst, tri_class, model_scale)
 	_autoplay_animation(inst)

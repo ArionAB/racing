@@ -278,7 +278,31 @@ Ce e permis:
   devin o extensie a paletei. Clase active: `rock` (faleze/butte/arcadă/
   bolovani, triplanar), `rust_metal` (turn de apă/excavator/conductă
   triplanar; moară pe UV cubic), `wood` (turnul morii),
-  `roof_tiles`/`plaster`/`stone_wall` (village_house, UV cubic).
+  `roof_tiles`/`plaster`/`stone_wall` (village_house, UV cubic),
+  `coral_rock`/`bark` (Okinawa), `alpine_granite`/`snow`/`pine_needles`
+  (Alpii), `ice`/`ice_bloc`/`olkhon_marble`/`cut_stone` (Baikal).
+
+  > **Aceeași dală poate fi corectă pentru o clasă și greșită pentru alta —
+  > decide SCARA sursei față de piesă, nu materialul din nume.**
+  > `alpine_granite` e o fotografie de zid de piatră uscată de 2 m. Pusă pe
+  > colții de marmură de 18 m ai Stâncii Șamanului, i-a făcut cetate (măsurat
+  > pe captură, de două ori: #313 și PR-ul de texturi Baikal). Aceeași dală,
+  > la 2 m/repetiție pe zidăria viaductului Circum-Baikal, e chiar subiectul —
+  > acolo se numește `cut_stone`. Pentru stâncă a trebuit o sursă la scara
+  > piesei: `marble_cliff_04`, 12.7 m, afișată la 11 m/repetiție.
+  >
+  > **Corolar pentru piese ÎNGUSTE:** traversele (24 cm) și șinele (12 cm)
+  > rămân pe atlas. O bandă atât de îngustă primește ~15 texeli pe pixel, deci
+  > GPU-ul alege un mip mic și orice dală iese plată (aceeași măsurătoare ca
+  > la pietrișul de pe umăr, §14). Acolo variația vine din vertex colors.
+
+  Pe lângă clase există și **finisaje** (`Palette.FINISHES`, prefix `finish:`
+  în mapări): același atlas, alt răspuns la lumină. Sunt pentru piesele care
+  n-au ce clasă să primească fără să piardă tot — caroseria trenului are
+  verdele, dunga galbenă și geamurile în sloturi, iar ce-i lipsea nu era
+  tiparul de suprafață, ci faptul că tabla vopsită răspundea la soarele jos
+  exact ca zăpada din jur (roughness 0.9). `finish:vehicle` = 0.55/0.40, un
+  singur material în plus, zero culori pierdute.
 
   > ⚠️ **Sursa se alege prin măsurătoare, pe două criterii, nu din miniatură.**
   > Gradarea păstrează luminanța sursei prin construcție — deci nu poate

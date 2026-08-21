@@ -193,6 +193,30 @@ static func classes() -> Dictionary:
 		"snow": {"src": "snow_src.jpg",
 			"anchor": Palette.color(Palette.FOAM_WHITE), "gain": 1.10,
 			"lift": 0.26},
+		# Marmura Olkhonului (Baikal): Stanca Samanului, arcul grotei, faleza
+		# insulei si peretii de stanca asezati de mana la grota.
+		# Sursa: marble_cliff_04 (PolyHaven CC0), ALEASA PRIN MASURATOARE
+		# dintre cinci candidati de marmura, ancora MARBLE_GREY (luminanta
+		# 180.3):
+		#
+		#   marble_cliff_04  ratie 0.93  in-dala 18.9  dez 1.4/5.5  12.7 m  <-
+		#   marble_cliff_06  ratie 0.70  in-dala 23.1  dez 6.0/6.4   8.1 m
+		#   marble_cliff_03  ratie 0.72  in-dala 13.6  dez 7.0/0.6   5.7 m
+		#   marble_cliff_02  ratie 0.66  in-dala 21.7  dez 1.9/8.8   6.8 m
+		#   marble_rock_03   ratie 0.48  in-dala 13.2  dez 1.1/4.5   1.8 m
+		#
+		# Ultima coloana e SCARA REALA a sursei, si aici a decis: piesele pe
+		# care cade clasa au 12-22 m (coltii Samanului 18 m, arcul grotei 12 m
+		# deschidere), deci o dala de 1.8 m ar fi trebuit repetata de zece ori
+		# pe o fata — adica exact esecul din #313, cand dala alpina (2 m,
+		# fotografie de ZID de piatra uscata) a facut din coltii de marmura o
+		# cetate. La 12.7 m sursa acopera aproape toata fata dintr-o singura
+		# repetitie, iar ce se vede sunt vinele si stratele ei, nu un tipar.
+		# Ratia de 0.93 fata de ancora e cea mai buna din pipeline: marmura
+		# alba in soare e singura piatra care ajunge la luminanta unui slot
+		# deschis, deci nu are nevoie nici de `lift`, nici de `gain`.
+		"olkhon_marble": {"src": "olkhon_marble_src.jpg",
+			"anchor": Palette.color(Palette.MARBLE_GREY)},
 		# Gheata Baikalului (placa lacului si banda drumului de gheata): a doua
 		# clasa PICTATA, tools/paint_ice.py — retea de crapaturi negre pe tor,
 		# bule de metan albe in ciorchini, fond turcoaz cu pete. Ancora e

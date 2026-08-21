@@ -25,7 +25,8 @@ assets/models/
                  woodpile
     rocks/       shaman_rock
     structures/  ice_grotto_arch, power_pylon_soviet,
-                 railway_tunnel_portal, railway_viaduct, start_gate_logs
+                 railway_tunnel_portal, rail_track, start_gate_logs,
+                 viaduct_pier / viaduct_arch / viaduct_end
     trees/       forest_kit
     vehicles/    hovercraft_khivus, kamaz_truck, train_baikal, uaz_bukhanka
   buildings/     (celelalte piste)
@@ -105,13 +106,15 @@ de plasari reale si transformarile lor raman IDENTICE la bit**.
 | `baikal/rocks/boulder_lichen_a.glb` | `BoulderLichen_A` | 294 |
 | `baikal/rocks/boulder_lichen_b.glb` | `BoulderLichen_B` | 286 |
 | `baikal/rocks/boulder_lichen_c.glb` | `BoulderLichen_C` | 266 |
-| `baikal/rocks/cliff_face_olkhon.glb` | `CliffFaceOlkhon` | 622 |
+| `baikal/rocks/cliff_face_olkhon.glb` | `CliffFaceOlkhon`, `CliffFaceOlkhon_Ice` | 622 |
 | `baikal/rocks/shaman_rock.glb` | `Shaman_Crag_Big`, `Shaman_Crag_Small`, `Shaman_Ice` | 1376 |
 | `baikal/structures/ice_grotto_arch.glb` | 6 noduri | 6224 |
 | `baikal/structures/power_pylon_soviet.glb` | `Pylon_Soviet` | 6764 |
 | `baikal/structures/rail_track.glb` | `RailTrack` | 924 |
-| `baikal/structures/railway_tunnel_portal.glb` | `Tunnel_Bore`, `Tunnel_Niche`, `Tunnel_Portal` | 7480 |
-| `baikal/structures/railway_viaduct.glb` | `Viaduct_Arch`, `Viaduct_End`, `Viaduct_Pier` | 9340 |
+| `baikal/structures/railway_tunnel_portal.glb` | `Tunnel_Portal`, `Tunnel_Bore`, `Tunnel_Bore_Ice`, `Tunnel_Niche` | 7480 |
+| `baikal/structures/viaduct_pier.glb` | `Viaduct_Pier`, `RailDeck_Pier` | 924 |
+| `baikal/structures/viaduct_arch.glb` | `Viaduct_Arch`, `Viaduct_Arch_Ice`, `RailDeck_Arch` | 5732 |
+| `baikal/structures/viaduct_end.glb` | `Viaduct_End`, `RailDeck_End` | 2684 |
 | `baikal/structures/shore_staircase.glb` | `ShoreStaircase` | 1892 |
 | `baikal/structures/start_gate_logs.glb` | `StartGate_Logs` | 2348 |
 | `baikal/trees/birch_winter_a.glb` | `BirchWinter_A` | 4368 |

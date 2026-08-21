@@ -610,16 +610,66 @@ const BAIKAL_CLASSES := {
 	# Naledi — poalele de gheata ale Stancii Samanului. Craca de marmura
 	# ramane pe atlas: dala ei pictata (_marble) e deja acolo.
 	"Shaman_Ice": Palette.TRI_PREFIX + "ice_bloc",
-	# DOAR bolovanii iau granitul, nu si grota/faleza. Incercat pe toate
-	# trei: pe suprafetele mari de langa drum (arcul grotei la 2 m de
-	# asfalt), dala de sisturi citeste ca zidarie de cetate — iar grota si
-	# faleza isi au stratele pictate in sloturi + dala _marble din atlas,
-	# prin decizia din brieful kitului. Pe un bolovan de 1-2 m insa, o
-	# felie de strat e doar granulatie, iar tenta calda a lichenilor
-	# (vertex colors) ramane deasupra.
+	"CliffFaceOlkhon_Ice": Palette.TRI_PREFIX + "ice_bloc",
+	"Tunnel_Bore_Ice": Palette.TRI_PREFIX + "ice_bloc",
+	"Viaduct_Arch_Ice": Palette.TRI_PREFIX + "ice_bloc",
 	"BoulderLichen": Palette.TRI_PREFIX + "alpine_granite",
 	"PineCrown": Palette.TRI_PREFIX + "pine_needles",
 	"PineSnow": Palette.TRI_PREFIX + "snow",
+	# --- Roca insulei -----------------------------------------------------
+	#
+	# In #313 grota, coltii Samanului si faleza au ramas pe atlas, fiindca dala
+	# alpina la scara ei (6.25 m/repetitie) citea ca zidarie de cetate pe
+	# suprafete de 12-20 m aflate la 2 m de drum. Concluzia de atunci — "raman
+	# pe stratele pictate" — trata scara ca pe o constanta. Nu e: `olkhon_marble`
+	# e aceeasi dala la 9 m/repetitie si cu galbenul scos (Palette.CLASS_TINT),
+	# adica un strat de ~1.3 m in loc de ~0.9 m. Ce ramanea altfel era o fata de
+	# marmura complet PLATA in cadru, langa gheata care are deja textura.
+	#
+	# `Cliff_` sunt sectiunile din `rocks/cliff_wall.glb` asezate de mana la
+	# grota. Piesa e desenata pentru canion — stratele ei sunt gresie
+	# portocalie COAPTA IN SLOTURI (ROCK_DARK/SAND_SHADOW), deci pe zapada
+	# ieseau doua blocuri ruginii langa gheata turcoaz. Clasa le inlocuieste cu
+	# roca insulei; vertex colors (AO) raman dedesubt. Track10 e singura pista
+	# care aseaza piesa asta de mana — daca alta o va aseza pe desert, maparea
+	# trebuie mutata pe tema, nu lasata globala.
+	"Shaman_Crag": Palette.TRI_PREFIX + "olkhon_marble",
+	"Grotto_Rock": Palette.TRI_PREFIX + "olkhon_marble",
+	"CliffFaceOlkhon": Palette.TRI_PREFIX + "olkhon_marble",
+	"Cliff_": Palette.TRI_PREFIX + "olkhon_marble",
+	# --- Calea ferata Circum-Baikal ---------------------------------------
+	#
+	# Zidaria taiata (portal, galerie, nisa, pile, arcade, capete) pe
+	# `cut_stone`. Patul de cale ferata (`RailDeck`, bucata separata de la
+	# export — vezi build_baikal_railway.py) ramane pe ATLAS, deliberat:
+	# traversele au 24 cm si sinele 12 cm, iar o banda atat de ingusta
+	# primeste ~15 texeli pe pixel, deci GPU-ul alege un mip mic si orice dala
+	# iese plata (lectia masurata pe pietrisul umarului, style_bible §14).
+	# Pe piese inguste variatia trebuie sa vina din vertex colors, nu din
+	# textura — de aceea sina libera (`rail_track.glb`) nici nu se sparge.
+	"Tunnel_Portal": Palette.TRI_PREFIX + "cut_stone",
+	"Tunnel_Bore": Palette.TRI_PREFIX + "cut_stone",
+	"Tunnel_Niche": Palette.TRI_PREFIX + "cut_stone",
+	"Viaduct_Pier": Palette.TRI_PREFIX + "cut_stone",
+	"Viaduct_Arch": Palette.TRI_PREFIX + "cut_stone",
+	"Viaduct_End": Palette.TRI_PREFIX + "cut_stone",
+	# --- Trenul ------------------------------------------------------------
+	#
+	# Caroseria NU are clasa: verdele, dunga galbena si geamurile sunt sloturi
+	# din atlas, iar o clasa triplanara le-ar sterge pe toate (regula din
+	# #313). Ce se sparge la export sunt exact partile dintr-un singur
+	# material: sasiul cu boghiurile — otel unsuros, deci `rust_metal` — si
+	# gheata de pe acoperis. Amandoua se aplica in spatiul OBIECTULUI
+	# (PathMover -> Palette.apply_object_class_materials), altfel textura ar
+	# ramane pe loc in lume in timp ce trenul trece prin ea.
+	"TrainFrame": Palette.TRI_PREFIX + "rust_metal",
+	"TrainIce": Palette.TRI_PREFIX + "ice_bloc",
+	# Caroseria ramane pe atlas, dar cu FINISAJ de tabla vopsita: singurul
+	# lucru care lipsea vizual la 20 m nu era tiparul, ci faptul ca tabla
+	# raspundea la soarele jos ca zapada de langa ea (vezi Palette.FINISHES).
+	"Baikal_Loco": Palette.FINISH_PREFIX + "vehicle",
+	"Baikal_Carriage": Palette.FINISH_PREFIX + "vehicle",
+	"Khivus_": Palette.FINISH_PREFIX + "vehicle",
 }
 
 ## Fractiile pe care creste trestia de zahar (sectorul 7, `Track05.SECTORS`).

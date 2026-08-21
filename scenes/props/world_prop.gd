@@ -24,8 +24,204 @@ extends Node3D
 ## `apply_class_materials` cade oricum pe materialul lumii pentru partile
 ## nemapate, deci e un inlocuitor direct: prop-urile facute in casa, cu UV-uri pe
 ## sloturi, se comporta exact ca inainte.
+##
+## Din august 2026 face si a doua treaba, din acelasi motiv: le da CORP FIZIC.
+## Vezi `PROP_COLLISION` mai jos si docs/decor_manual.md §6.
+
+
+## --- Coliziunea decorului asezat de mana -----------------------------------
+
+## Cat de gros e cilindrul de trunchi, ca fractie din latimea coroanei, si cat
+## de subtire poate ajunge. Aceleasi cifre ca la scatter (`_place_from_set`),
+## ca un mesteacan pus de mana sa se simta ca unul tras la sorti.
+const TRUNK_FRACTION: float = 0.13
+const TRUNK_MIN_RADIUS: float = 0.22
+
+## Numele metadatei prin care o INSTANTA anume iese din regula generala.
+## In editor: Inspector -> Add Metadata -> `coliziune`, cu una din valorile
+## "hull" / "trunk" / "mesh" / "none".
+const COLLISION_META := "coliziune"
+
+## Modul de coliziune per MODEL (numele fisierului .glb, fara extensie).
+## Ce nu e in tabel primeste "hull" — un poliedru convex per mesh vizibil, ca
+## la stancile din scatter. Adica, implicit, ORICE prop asezat de mana e solid.
+##
+## Cele patru moduri:
+##   hull   poliedru convex per mesh (implicit) — case, garduri, stanci, lazi
+##   trunk  cilindru subtire in ax — copaci si stalpi: treci prin coroana si
+##          prin panglici, nu prin trunchi (hull-ul unui larice e un CON de 14 m
+##          care te opreste in aer, la trei metri de trunchi)
+##   mesh   colizor exact, din triunghiurile mesh-ului — DOAR pentru piesele
+##          prin care se TRECE: hull-ul unei arcade e un bloc plin, adica un zid
+##          invizibil peste sosea. Nu se foloseste in rest: track_cliffs.gd
+##          documenteaza de ce (fiecare crapatura din silueta devine un colt in
+##          care se agata masina)
+##   none   fantoma — ce ar strica cursa daca ar opri masina
+const PROP_COLLISION := {
+	# --- se trece PRIN ele ------------------------------------------------
+	"ice_grotto_arch": "mesh",       # tunelul scurt de la POI D
+	"railway_tunnel_portal": "mesh", # galeria + portalul, drumul intra in ele
+	"viaduct_arch": "mesh",          # soseaua trece pe DEDESUBT la 0.66-0.72
+	"start_gate_logs": "mesh",       # poarta de start, peste linia de plecare
+	"stone_gate_torii": "mesh",      # Okinawa: torii peste drum
+	"wooden_pier": "mesh",           # pontonul are gol dedesubt
+	# --- copaci si stalpi: cilindru pe trunchi ----------------------------
+	"larch_winter_a": "trunk", "larch_winter_b": "trunk",
+	"larch_winter_c": "trunk", "birch_winter_a": "trunk",
+	"birch_winter_b": "trunk", "birch_winter_c": "trunk",
+	"pine_siberian_a": "trunk", "pine_siberian_b": "trunk",
+	"coconut_palm": "trunk", "beach_palm_bent": "trunk",
+	"pandanus": "trunk", "banyan": "trunk",
+	"serge_pole_a": "trunk", "serge_pole_b": "trunk", "serge_pole_c": "trunk",
+	"village_signpost": "trunk", "power_pylon_soviet": "trunk",
+	"well_crane": "trunk",
+	# --- fantome ----------------------------------------------------------
+	# Sina zace PE sosea: traversele au 27 cm cu tot cu sina, adica praguri
+	# pe linia de curs, si sunt 34 de bucati una dupa alta.
+	"rail_track": "none",
+	# Podetul de peste parau (Alpii): drumul trece PE el, iar soseaua isi are
+	# deja coliziunea ei acolo. Un corp solid ar fi o treapta fix pe linia de
+	# curs — masurat cu tools/probe_solid.gd, gabaritul masinii il atingea la
+	# fractia 0.252.
+	"stream_bridge": "none",
+	"ice_hole": "none",         # gaura in gheata, plata prin definitie
+	"ice_shards": "none",       # cioburi de 0.5 m, imprastiate pe banda
+	"ice_road_marker": "none",  # betele cu steguleț care marcheaza drumul
+	"husky_dog": "none", "nerpa_seal": "none",  # figuranti
+	"flowers_orange": "none", "flowers_white": "none",
+	"hibiscus_bush": "none", "sugar_cane_clump": "none",
+	"shrub_snow": "none", "grass_tuft_dry": "none",
+}
+
+## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
+##
+## Pana in august 2026 decorul manual era DECOR: treceai prin case, prin
+## tetrapozi, prin Stanca Samanului. `docs/decor_manual.md` cerea sa adaugi de
+## fiecare data, de mana, un StaticBody3D si un CollisionShape3D — si nimeni nu
+## a facut-o niciodata: zero corpuri in patru piste, 450 de obiecte.
+##
+## Se construieste DOAR la rulare (`Engine.is_editor_hint()`), si fara `owner`,
+## deci nu intra in .tscn si nu incurca selectia din editor: scena ramane exact
+## lista ta de modele.
+@export var auto_collision: bool = true
+
+
 func _ready() -> void:
 	Palette.apply_class_materials(self, prop_classes())
+	if auto_collision and not Engine.is_editor_hint():
+		_build_collision()
+
+
+func _build_collision() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var mode := _collision_mode(model)
+		if mode == "none":
+			continue
+		var body := StaticBody3D.new()
+		body.name = "%s_col" % model.name
+		var added := false
+		match mode:
+			"trunk":
+				added = _add_trunk(body, model)
+			"mesh":
+				added = _add_trimesh(body, model)
+			_:
+				added = TrackDecor.add_hull_collision(body, model, true)
+		if not added:
+			body.free()
+			continue
+		# Modul ramane lipit de corp, ca sonda (tools/probe_solid.gd) sa poata
+		# separa piesele care stau peste sosea PRIN PROIECT de accidente.
+		body.set_meta("mod_coliziune", mode)
+		# FRATE, nu parinte: `add_hull_collision` scrie formele in spatiul
+		# PARINTELUI modelului (porneste din `model.transform`), iar
+		# reparentarea ar muta nodul asezat de mana — adica exact ce n-are voie
+		# sa faca un pas automat peste munca din editor.
+		model.get_parent().add_child(body)
+
+
+## Instantele de model din subarbore. Se opreste la prima gasita (un .glb nu
+## contine alt .glb) si sare peste ce e deja sub un corp fizic — atat peste
+## StaticBody-urile puse de mana dupa reteta veche din docs, cat si peste
+## modelele purtate de un [PathMover], care sunt copiii unui AnimatableBody3D si
+## se MISCA: un colizor static lasat in urma lor ar fi un zid fantoma.
+func _collect_models(node: Node, out: Array[Node3D]) -> void:
+	for c in node.get_children():
+		var spatial := c as Node3D
+		if spatial == null:
+			continue
+		if spatial is PhysicsBody3D:
+			continue
+		if not spatial.scene_file_path.is_empty():
+			out.append(spatial)
+			continue
+		_collect_models(spatial, out)
+
+
+func _collision_mode(model: Node3D) -> String:
+	if model.has_meta(COLLISION_META):
+		return String(model.get_meta(COLLISION_META))
+	var stem := model.scene_file_path.get_file().get_basename()
+	return String(PROP_COLLISION.get(stem, "hull"))
+
+
+## Cilindru pe axa modelului, cu raza trunchiului. Aceeasi forma ca la copacii
+## din scatter, ca sa nu existe doua feluri de copac in aceeasi padure.
+func _add_trunk(body: StaticBody3D, model: Node3D) -> bool:
+	var aabb := Track.model_aabb(model)
+	if aabb.size.y <= 0.01:
+		return false
+	var cyl := CylinderShape3D.new()
+	cyl.height = aabb.size.y
+	cyl.radius = maxf(aabb.size.x * TRUNK_FRACTION, TRUNK_MIN_RADIUS)
+	var col := CollisionShape3D.new()
+	col.shape = cyl
+	col.position = aabb.position + Vector3(aabb.size.x * 0.5,
+		aabb.size.y * 0.5, aabb.size.z * 0.5)
+	body.add_child(col)
+	return true
+
+
+## Colizor exact, pentru piesele prin care se trece. Fetele se transforma o
+## data, la constructie, in spatiul parintelui — ca la hull-uri — ca sa nu
+## depinda de scalarea nodului de forma.
+func _add_trimesh(body: StaticBody3D, model: Node3D) -> bool:
+	var added := false
+	for entry in TrackDecor.visible_meshes(model, model.transform):
+		var mi: MeshInstance3D = entry[0]
+		var xform: Transform3D = entry[1]
+		var src := _trimesh_faces(mi.mesh)
+		if src.is_empty():
+			continue
+		var faces := PackedVector3Array()
+		faces.resize(src.size())
+		for i in src.size():
+			faces[i] = xform * src[i]
+		var shape := ConcavePolygonShape3D.new()
+		shape.set_faces(faces)
+		var col := CollisionShape3D.new()
+		col.shape = shape
+		body.add_child(col)
+		added = true
+	return added
+
+
+## Cache pe RESURSA de mesh, ca la hull-uri: portalul de tunel e asezat de
+## patru ori pe Baikal, si e cea mai grea piesa din tabel.
+static var _face_cache: Dictionary = {}
+
+static func _trimesh_faces(mesh: Mesh) -> PackedVector3Array:
+	if mesh == null:
+		return PackedVector3Array()
+	var key := mesh.get_rid()
+	if _face_cache.has(key):
+		return _face_cache[key]
+	var shape := mesh.create_trimesh_shape()
+	var faces := PackedVector3Array() if shape == null else shape.get_faces()
+	_face_cache[key] = faces
+	return faces
 
 
 ## Maparea nume-de-parte -> clasa de material, adunata din sursele EXISTENTE.

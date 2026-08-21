@@ -1619,6 +1619,10 @@ func _ready() -> void:
 ## supravietuieste si la Regenerate, si la runtime. Vezi docs/decor_manual.md.
 func rebuild() -> void:
 	_mat_cache.clear() # altfel raman materialele temei precedente
+	# Foaia de uzura e copil fara owner, deci bucla de mai jos o elibereaza;
+	# referinta trebuie sa moara odata cu ea, altfel stamp_wear ar scrie
+	# intr-un viewport eliberat.
+	_road_wear = null
 	# Profilul de latime se recalculeaza: la Regenerate in editor, declaratiile
 	# se pot fi schimbat de sub noi, iar lungimea pistei (deci si lungimea
 	# rampelor, in fractii) se schimba la orice retus de traseu.
@@ -4025,6 +4029,44 @@ const SNOW_MACRO_MEAN: float = 0.850
 ## iasa rece, nu murdara.
 const SNOW_MID_SHADE: Color = Color(0.84, 0.88, 0.95)
 
+## Foaia de uzura a drumului de zapada (doar pe road_surface == "snow").
+## Traieste cat pista; masinile scriu in ea prin stamp_wear.
+var _road_wear: RoadWear = null
+
+
+## Materialul soselei de zapada: acelasi continut ca materialul standard
+## (culoare compensata x micro x macro x vertex color, mat), plus masca de
+## uzura din RoadWear. Tot aici se NASTE foaia de uzura — material si foaie
+## sunt un singur mecanism, nu au sens separat, iar dimensiunile benzii
+## (lungime, latime acoperita) trebuie sa fie ACELEASI in amandoua.
+func _snow_road_material(road_color: Color, micro: String, macro: String,
+		tile: float) -> ShaderMaterial:
+	var n := baked.size()
+	var total: float = _dists[n]
+	var span := 0.0
+	for i in n:
+		span = maxf(span, width_at_index(i))
+	# Toata latimea, ambele parti, plus un metru de marja pe fiecare: o roata
+	# cu doua tale afara inca lasa urma pe buza drumului.
+	span = span * 2.0 + 2.0
+	_road_wear = RoadWear.new()
+	_road_wear.name = "RoadWear"
+	_road_wear.setup(total, span)
+	add_child(_road_wear)
+	# Fagasele "de-o iarna": drumul de sat nu incepe alb ca foaia.
+	_road_wear.preseed()
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/road_snow.gdshader") as Shader
+	mat.set_shader_parameter("base_color", road_color)
+	mat.set_shader_parameter("micro_tex", _tex(micro))
+	mat.set_shader_parameter("macro_tex", _tex(macro))
+	mat.set_shader_parameter("wear_tex", _road_wear.get_texture())
+	mat.set_shader_parameter("lane_len", total)
+	mat.set_shader_parameter("lane_span", span)
+	mat.set_shader_parameter("road_tile", tile)
+	return mat
+
+
 func _build_road() -> void:
 	var top := SurfaceTool.new()
 	top.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -4331,9 +4373,16 @@ func _build_road() -> void:
 		macro = "res://assets/textures/surface_sand_macro.png"
 		rough = 1.0
 		spec = 0.0
+	# Pe zapada, materialul standard e inlocuit cu shaderul care citeste masca
+	# de uzura — ACELASI continut vizual si zero materiale in plus: il
+	# inlocuieste pe cel pe care soseaua l-ar fi avut oricum.
+	var road_override: Material = null
+	if road_surface == "snow":
+		road_override = _snow_road_material(road_color, micro, macro, tile)
 	_add_mesh_with_collision(top.commit(), road_color,
 		_tex(micro), rough, spec,
-		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro))
+		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro), true,
+		road_override)
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
 	if has_ice:
 		ice_top.index()
@@ -5711,15 +5760,20 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
 		collision_mesh: ArrayMesh = null,
 		macro_texture: Texture2D = null,
-		visible_mesh: bool = true) -> void:
+		visible_mesh: bool = true,
+		override_material: Material = null) -> void:
 	# visible_mesh = false: doar fizica, fara desen. Zidul exterior pe pistele
 	# care nu vor panglica vizibila ramane totusi zid — altfel se deschide
 	# marginea buclei (pe Okinawa, direct in mare).
 	if visible_mesh:
 		var inst := MeshInstance3D.new()
 		inst.mesh = mesh
-		inst.material_override = _flat_material(color, texture, roughness,
-			specular, cull, macro_texture)
+		# override_material: pentru suprafetele care au nevoie de shader
+		# propriu (soseaua de zapada cu masca de uzura), in locul materialului
+		# standard din cache.
+		inst.material_override = override_material if override_material != null \
+			else _flat_material(color, texture, roughness,
+				specular, cull, macro_texture)
 		add_child(inst)
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
@@ -7828,6 +7882,37 @@ func recovery_transform(index: int, backoff_m: float,
 func lateral_distance(index: int, pos: Vector3, route: int = 0) -> float:
 	var r := route_at(route)
 	return r.lateral_distance(index, pos) if r != null else 1e9
+
+## Pozitia unui punct in SPATIUL BENZII buclei principale: (metri de-a lungul
+## soselei, metri lateral de ax, cu semn — pozitiv spre dreapta sensului).
+## Proiectie pe segmentul de la indexul dat, deci ieftina si fara cautare:
+## apelantul aduce indexul pe care oricum il intretine (Car.road_index).
+## E exact spatiul in care sunt intinse UV-urile soselei (_build_road), deci
+## si cel in care scrie masca de uzura.
+func road_coords(index: int, pos: Vector3) -> Vector2:
+	var n := baked.size()
+	if n < 2:
+		return Vector2.ZERO
+	var i := ((index % n) + n) % n
+	var j := (i + 1) % n
+	var a := baked[i]
+	var seg := baked[j] - a
+	var seg_len := seg.length()
+	var t := 0.0
+	if seg_len > 0.001:
+		t = clampf((pos - a).dot(seg) / (seg_len * seg_len), 0.0, 1.0)
+	return Vector2(_dists[i] + seg_len * t, (pos - a).dot(_side_at(i)))
+
+## Depune uzura in masca drumului de zapada, la pozitia rotii date in lume.
+## Pe pistele fara foaie de uzura si in afara soselei nu face nimic — masca
+## acopera doar carosabilul, iar o roata pe camp isi lasa urma prin SandTrail.
+func stamp_wear(index: int, pos: Vector3, strength: float = 1.0) -> void:
+	if _road_wear == null:
+		return
+	var rc := road_coords(index, pos)
+	if absf(rc.y) > width_at_index(index) + 0.5:
+		return
+	_road_wear.stamp(rc.x, rc.y, strength)
 
 ## Esti pe asfalt, sau pe iarba lenta?
 ##

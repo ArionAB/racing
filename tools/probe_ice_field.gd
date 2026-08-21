@@ -70,7 +70,12 @@ func _ready() -> void:
 	var body := plate["body"] as AnimatableBody3D
 	var origin: Vector3 = (plate["rest"] as Transform3D).origin
 	var side: Vector3 = plate["v"]
-	var offset: Vector3 = side * 1.8
+	# Offsetul se ia din MARIMEA placii, nu fix 1.8 m: placile sunt celule
+	# Voronoi, deci difera de la o generare la alta, iar un offset fix cadea
+	# in afara uneia mai mici — sonda raporta atunci "nu se inclina" (unghi
+	# 0.0) desi mecanica era intreaga. Un test care pica din cauza masuratorii
+	# lui, nu a codului masurat, e mai rau decat niciun test.
+	var offset: Vector3 = side * _plate_reach(plate)
 	car.global_transform = Transform3D(Basis.IDENTITY,
 		origin + offset + Vector3.UP * 0.7)
 	car.freeze = true
@@ -112,7 +117,7 @@ func _ready() -> void:
 	# 4. doua masini pe o placa PROASPATA: se rupe rapid, scufunda, le repune
 	var plate2: Dictionary = live[1]
 	var origin2: Vector3 = (plate2["rest"] as Transform3D).origin
-	var offset2: Vector3 = (plate2["v"] as Vector3) * 1.8
+	var offset2: Vector3 = (plate2["v"] as Vector3) * _plate_reach(plate2)
 	var car2: Car = car_scene.instantiate()
 	track.add_child(car2)
 	car2.track = track
@@ -157,8 +162,13 @@ func _ready() -> void:
 	var exit := field._map(field.field_length(), 0.0)
 	var toward := (field._map(6.0, 0.0) - entry).normalized()
 	car.freeze = false
+	# Pornire la 8 m de buza campului, nu la 25: masuram CAMPUL, iar pe cei 25
+	# de metri de dinainte incape decorul pistei — pe scena reala acolo statea
+	# un toros (StaticBody al pistei, prins in trace) care arunca masina in aer
+	# si o punea sa aterizeze cu 5 m/s pe primele placi. Sonda raporta atunci
+	# campul ca fiind un zid, cand de fapt masina intra deja avariata.
 	car.global_transform = Transform3D(
-		Basis.looking_at(toward, Vector3.UP), entry - toward * 25.0
+		Basis.looking_at(toward, Vector3.UP), entry - toward * 8.0
 			+ Vector3.UP * 0.5)
 	car.velocity = toward * 30.0
 	car.angular_velocity = Vector3.ZERO
@@ -195,6 +205,16 @@ func _ready() -> void:
 				air_now += 1.0 / 60.0
 				air_total += 1.0 / 60.0
 				air_best = maxf(air_best, air_now)
+		if OS.get_environment("PROBE_FIELD_TRACE") == "1" \
+				and (car.horizontal_speed() < 20.0 or absf(car.velocity.y) > 2.0):
+			var hits := ""
+			for b in car.get_colliding_bodies():
+				hits += " [%s < %s]" % [(b as Node).name,
+					(b as Node).get_parent().name if (b as Node).get_parent() \
+						!= null else "?"]
+			if hits != "":
+				print("  HIT s=%.1f v=%.1f%s" % [s_now,
+					car.horizontal_speed(), hits])
 		if OS.get_environment("PROBE_FIELD_TRACE") == "1" and k % 6 == 0:
 			print("  TR t=%.2f s=%6.1f t=%5.1f y=%5.2f v=%5.1f vy=%5.1f sol=%s" % [
 				float(k) / 60.0, s_now,
@@ -232,6 +252,17 @@ func _ready() -> void:
 
 	print("VERDICT: ", "OK" if not failed else "PROBLEME")
 	get_tree().quit(1 if failed else 0)
+
+
+## Cat de departe de centrul placii se poate parca masina ca sa fie tot pe ea:
+## 45% din semi-latimea ei laterala, intre 1.0 si 2.5 m.
+func _plate_reach(plate: Dictionary) -> float:
+	var poly: PackedVector2Array = plate["poly"]
+	var c2: Vector2 = plate["c2"]
+	var half := 0.0
+	for p in poly:
+		half = maxf(half, absf(p.y - c2.y))
+	return clampf(half * 0.45, 1.0, 2.5)
 
 
 ## Tine axa campului cu un volan minimal: tinteste punctul de pe axa cu 14 m

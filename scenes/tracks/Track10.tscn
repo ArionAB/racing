@@ -44,7 +44,18 @@
 [ext_resource type="PackedScene" uid="uid://dfm1lt3manbhg" path="res://assets/models/baikal/props/ice_hole.glb" id="38_usuc4"]
 [ext_resource type="PackedScene" uid="uid://cwalkvr4b65u8" path="res://assets/models/baikal/vehicles/uaz_bukhanka.glb" id="40_usuc4"]
 [ext_resource type="PackedScene" uid="uid://bo8ova55jdoxq" path="res://assets/models/baikal/structures/railway_tunnel_portal.glb" id="45_hhdxr"]
+[ext_resource type="PackedScene" uid="uid://dhra7di1r7oky" path="res://assets/models/baikal/structures/rail_track.glb" id="46_fs1qj"]
 [ext_resource type="PackedScene" uid="uid://dlq1wj8iehuft" path="res://assets/models/baikal/vehicles/train_baikal.glb" id="46_yrnvh"]
+[ext_resource type="PackedScene" uid="uid://ylhwd4j6d0vm" path="res://assets/models/baikal/trees/larch_winter_a.glb" id="47_dxh6m"]
+[ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="47_hhdxr"]
+[ext_resource type="PackedScene" uid="uid://rujhs4hm4f0k" path="res://assets/models/baikal/trees/larch_winter_b.glb" id="48_5xlb4"]
+[ext_resource type="PackedScene" uid="uid://b6o2o3m6c8eeg" path="res://assets/models/baikal/trees/larch_winter_c.glb" id="49_ks0xc"]
+[ext_resource type="PackedScene" uid="uid://bpn6sbqlodyyl" path="res://assets/models/baikal/trees/birch_winter_a.glb" id="50_lmonk"]
+[ext_resource type="PackedScene" uid="uid://csx8f1ammycbq" path="res://assets/models/baikal/trees/birch_winter_b.glb" id="51_125k3"]
+[ext_resource type="PackedScene" uid="uid://udevi62c2n8x" path="res://assets/models/baikal/trees/birch_winter_c.glb" id="52_b7em7"]
+[ext_resource type="PackedScene" uid="uid://cmjjm875n00m8" path="res://assets/models/baikal/trees/pine_siberian_b.glb" id="53_da6kc"]
+[ext_resource type="PackedScene" uid="uid://bj2srdyr0833h" path="res://assets/models/baikal/buildings/hunting_cabin.glb" id="54_mr7ny"]
+[ext_resource type="PackedScene" uid="uid://gonuh6u0wka2" path="res://assets/models/baikal/structures/power_pylon_soviet.glb" id="56_bb2l7"]
 
 [sub_resource type="Curve3D" id="Curve3D_baikal"]
 _data = {
@@ -76,10 +87,10 @@ point_count = 4
 
 [sub_resource type="Curve3D" id="Curve3D_n3umy"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 8.784416, -0.7182255, 0.43574524, 0, 0, 0, 0, 0, 0, 31.82943, -1.3989887, -0.90519714, 0, 0, 0, 0, 0, 0, 62.86081, -2.1769314, -5.0507813, 0, 0, 0, 0, 0, 0, 92.92158, -2.3202724, -16.147446, 0, 0, 0, 0, 0, 0, 124.23351, -2.6754026, -31.272629, 0, 0, 0, 0, 0, 0, 156.25293, -2.6431255, -48.224854, 0, 0, 0, 0, 0, 0, 177.76086, -2.582796, -59.284134, 0, 0, 0, 0, 0, 0, 194.86652, -2.4942036, -68.399796, 0, 0, 0, 0, 0, 0, 214.12994, -2.6295605, -78.581375, 0, 0, 0, 0, 0, 0, 235.27222, -2.9011936, -89.3643, 0, 0, 0, 0, 0, 0, 264.78317, -4.9604855, -125.66289, 0, 0, 0, 0, 0, 0, 292.47794, -7.5713024, -176.08305, 0, 0, 0, 0, 0, 0, 297.86594, -11.562819, -215.15846),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 8.784416, -0.7182255, 0.43574524, 0, 0, 0, 0, 0, 0, 31.82943, -1.3989887, -0.90519714, 0, 0, 0, 0, 0, 0, 62.86081, -2.1769314, -5.0507813, 0, 0, 0, 0, 0, 0, 92.92158, -2.3202724, -16.147446, 0, 0, 0, 0, 0, 0, 124.23351, -2.6754026, -31.272629, 0, 0, 0, 0, 0, 0, 156.25293, -2.6431255, -48.224854, 0, 0, 0, 0, 0, 0, 177.76086, -2.582796, -59.284134, 0, 0, 0, 0, 0, 0, 194.59271, -2.4942036, -69.410995, 0, 0, 0, 0, 0, 0, 213.24643, -2.6295605, -81.844315, 0, 0, 0, 0, 0, 0, 232.22382, -2.9011936, -100.62184, 0, 0, 0, 0, 0, 0, 292.47794, -7.5713024, -176.08305, 0, 0, 0, 0, 0, 0, 297.86594, -11.562819, -215.15846),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
-point_count = 13
+point_count = 12
 
 [node name="Track10" type="Node3D" unique_id=1242242835]
 script = ExtResource("1_track")
@@ -92,7 +103,6 @@ custom_ravines = Array[Vector4]([Vector4(0.69, 0.75, 13, 0)])
 custom_cornice_ravines = Array[int]([0])
 custom_viaduct_ravines = Array[int]([0])
 custom_hummock_fracs = Array[float]([0.245, 0.335])
-custom_ice_field_ranges = Array[Vector2]([Vector2(0.4, 0.485)])
 custom_width_segments = Array[Vector3]([Vector3(0.955, 0.075, 8), Vector3(0.205, 0.545, 11), Vector3(0.56, 0.61, 6), Vector3(0.715, 0.855, 6.5)])
 sea_level_offset = -7.05
 
@@ -577,10 +587,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 222.39514, 11.608814, -172.49
 transform = Transform3D(0.377091, 0, 1.4899881, 0, 1.5369651, 0, -1.4899881, 0, 0.377091, -149.53366, 0, 21.236572)
 
 [node name="Tunel_Intrare" parent="DecorManual/6)Viaductul" unique_id=159077119 instance=ExtResource("45_hhdxr")]
-transform = Transform3D(-0.3787398, 0, 1.9638118, 0, 2, 0, -1.9638118, 0, -0.3787398, 0.17593384, -0.30779266, 12.17627)
+transform = Transform3D(-0.58662266, 0, 2.5963085, 0, 2.6617556, 0, -2.5963085, 0, -0.58662266, 3.2994995, -0.30779266, 12.17627)
 
 [node name="Tunel_Iesire" parent="DecorManual/6)Viaductul" unique_id=557840196 instance=ExtResource("45_hhdxr")]
-transform = Transform3D(0.36765382, 0, -1.9659172, 0, 2, 0, 1.9659172, 0, 0.36765382, -70.38849, 0.060725212, 26.6604)
+transform = Transform3D(0.45537025, 0, -2.2078602, 0, 2.254331, 0, 2.2078602, 0, 0.45537025, -70.38849, -0.90196323, 26.399872)
 
 [node name="PathMover" type="Path3D" parent="DecorManual/6)Viaductul" unique_id=640823668]
 transform = Transform3D(0.96523726, 0, -0.26137513, 0, 1, 0, 0.26137513, 0, 0.96523726, -164.01802, 3.031763, 17.888016)
@@ -592,3 +602,337 @@ speed = 22.0
 push_radius = 4.0
 plume = true
 metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="rail_track" parent="DecorManual/6)Viaductul" unique_id=2124266252 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.23531762, 0, 0.97191846, 0, 1, 0, -0.97191846, 0, -0.23531762, 33.734924, 0.5131588, 4.7300415)
+
+[node name="rail_track18" parent="DecorManual/6)Viaductul" unique_id=1214490571 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.23531763, 0, 0.97191846, 0, 1, 0, -0.97191846, 0, -0.23531763, 22.865524, 0.5131588, 7.3887177)
+
+[node name="rail_track19" parent="DecorManual/6)Viaductul" unique_id=796533319 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.21857855, 0, 0.97581935, 0, 1, 0, -0.97581935, 0, -0.21857855, 11.2226715, 0.5131588, 10.187851)
+
+[node name="rail_track20" parent="DecorManual/6)Viaductul" unique_id=1371896585 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.21857855, 0, 0.97581935, 0, 1, 0, -0.97581935, 0, -0.21857855, -0.34214783, 0.5131588, 12.728867)
+
+[node name="rail_track21" parent="DecorManual/6)Viaductul" unique_id=1477513568 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.20585689, 0, 0.9785821, 0, 1, 0, -0.9785821, 0, -0.20585689, -11.8038025, 0.5131588, 15.269974)
+
+[node name="rail_track22" parent="DecorManual/6)Viaductul" unique_id=1128603400 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.20585689, 0, 0.9785822, 0, 1, 0, -0.9785822, 0, -0.20585689, -22.703415, 0.5131588, 17.579056)
+
+[node name="rail_track23" parent="DecorManual/6)Viaductul" unique_id=654724342 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.20585689, 0, 0.9785822, 0, 1, 0, -0.9785822, 0, -0.20585689, -34.316742, 0.5131588, 19.980179)
+
+[node name="rail_track24" parent="DecorManual/6)Viaductul" unique_id=1429575516 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.20585689, 0, 0.9785822, 0, 1, 0, -0.9785822, 0, -0.20585689, -45.864532, 0.5131588, 22.368286)
+
+[node name="rail_track25" parent="DecorManual/6)Viaductul" unique_id=2070749004 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.17204277, 0, 0.9850895, 0, 1, 0, -0.9850895, 0, -0.17204277, -56.934784, 0.5131588, 24.672363)
+
+[node name="rail_track26" parent="DecorManual/6)Viaductul" unique_id=1388220151 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.14405894, 0.0117927315, 0.98949885, 0.0024324046, 0.99993014, -0.011562925, -0.98956615, 0.0007411184, -0.14407758, -68.41202, 0.75646114, 26.349045)
+
+[node name="rail_track27" parent="DecorManual/6)Viaductul" unique_id=577160570 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.10176993, 0.039655354, 0.99401724, 0.005274991, 0.99921274, -0.039322563, -0.9947941, 0.0012415778, -0.101899, -80.035034, 1.1119223, 27.604752)
+
+[node name="rail_track28" parent="DecorManual/6)Viaductul" unique_id=770336827 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.05953001, 0.039567143, 0.99744207, 0.005274991, 0.99921274, -0.039322566, -0.9982128, 0.0029206253, -0.059691884, -91.03441, 1.0797968, 28.65416)
+
+[node name="rail_track29" parent="DecorManual/6)Viaductul" unique_id=560836164 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.023033518, -0.008145634, 0.99970156, 0.0041839876, 0.9999573, 0.0082440935, -0.9997262, 0.00437263, -0.022998491, -102.89322, 1.4243937, 29.03778)
+
+[node name="rail_track30" parent="DecorManual/6)Viaductul" unique_id=740285546 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(0.10588233, 0.03854394, 0.9936314, 0.00527499, 0.99921274, -0.03932257, -0.9943649, 0.009404958, 0.10559559, -113.6779, 1.3078175, 28.415619)
+
+[node name="rail_track31" parent="DecorManual/6)Viaductul" unique_id=2035337081 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(0.10588233, 0.03854394, 0.9936314, 0.00527499, 0.99921274, -0.03932257, -0.9943649, 0.009404958, 0.10559559, -125.18273, 1.4243937, 27.215683)
+
+[node name="rail_track32" parent="DecorManual/6)Viaductul" unique_id=1510269504 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(0.18572825, 0.037659932, 0.9818792, 0.0052749906, 0.99921274, -0.03932257, -0.9825872, 0.012482711, 0.1853833, -137.2548, 1.8948908, 25.693375)
+
+[node name="rail_track33" parent="DecorManual/6)Viaductul" unique_id=1655849706 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(0.18560043, 0.019349927, 0.9824347, 0.008676294, 0.9997349, -0.021329807, -0.9825871, 0.012482708, 0.18538328, -148.61108, 2.0225716, 23.640366)
+
+[node name="rail_track34" parent="DecorManual/6)Viaductul" unique_id=565054340 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(0.18573746, 0.039464433, 0.9818066, 0.0049395594, 0.99914306, -0.041095763, -0.9825871, 0.012482708, 0.18538326, -160.06099, 2.5166388, 21.259003)
+
+[node name="rail_track2" parent="DecorManual/6)Viaductul" unique_id=414260925 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.32064438, 0, 0.9471996, 0, 1, 0, -0.9471996, 0, -0.32064438, 45.39386, 0.53510857, 1.2899017)
+
+[node name="rail_track3" parent="DecorManual/6)Viaductul" unique_id=1509195602 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.37958676, 0, 0.92515624, 0, 1, 0, -0.92515624, 0, -0.37958676, 56.37378, 0.4707756, -2.8605652)
+
+[node name="rail_track4" parent="DecorManual/6)Viaductul" unique_id=377949362 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.42290613, 0, 0.90617347, 0, 1, 0, -0.90617347, 0, -0.42290613, 67.11163, 0.33859348, -7.788452)
+
+[node name="rail_track5" parent="DecorManual/6)Viaductul" unique_id=1971053654 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.42290613, 0, 0.90617347, 0, 1, 0, -0.90617347, 0, -0.42290613, 76.55954, 0.31918335, -12.322205)
+
+[node name="rail_track6" parent="DecorManual/6)Viaductul" unique_id=1942019946 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.52897537, 0.06207516, 0.84636414, 0.032899667, 0.9980715, -0.052639697, -0.8479994, 0, -0.5299974, 84.372955, -0.122273445, -16.859879)
+
+[node name="rail_track7" parent="DecorManual/6)Viaductul" unique_id=654260387 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.59219736, 0, 0.80579305, 0, 1, 0, -0.80579305, 0, -0.59219736, 94.277466, -0.44064045, -23.337357)
+
+[node name="rail_track8" parent="DecorManual/6)Viaductul" unique_id=1127858335 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.59219736, 0, 0.80579305, 0, 1, 0, -0.80579305, 0, -0.59219736, 100.787445, -0.7160473, -28.357422)
+
+[node name="rail_track9" parent="DecorManual/6)Viaductul" unique_id=1961334446 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.6070741, 0.055075746, 0.7927344, 0.033485886, 0.99848217, -0.04372681, -0.7939395, 0, -0.60799694, 110.0401, -1.2784195, -35.195724)
+
+[node name="rail_track10" parent="DecorManual/6)Viaductul" unique_id=1513978943 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.6067794, 0.063255176, 0.7923495, 0.038458955, 0.9979974, -0.05022078, -0.7939395, 0, -0.60799694, 118.81323, -1.9647617, -41.956085)
+
+[node name="rail_track11" parent="DecorManual/6)Viaductul" unique_id=1626028954 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.6067794, 0.063255176, 0.7923495, 0.038458955, 0.9979974, -0.05022078, -0.7939395, 0, -0.60799694, 129.0217, -1.9647617, -49.85135)
+
+[node name="rail_track12" parent="DecorManual/6)Viaductul" unique_id=1704384980 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.6067794, 0.063255176, 0.7923495, 0.038458955, 0.9979974, -0.05022078, -0.7939395, 0, -0.60799694, 138.13306, -2.8135262, -56.9953)
+
+[node name="rail_track13" parent="DecorManual/6)Viaductul" unique_id=711159794 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.6067794, 0.063255176, 0.7923495, 0.038458955, 0.9979974, -0.05022078, -0.7939395, 0, -0.60799694, 147.88766, -3.3720074, -64.22157)
+
+[node name="rail_track14" parent="DecorManual/6)Viaductul" unique_id=1520828882 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.6067794, 0.063255176, 0.7923495, 0.038458955, 0.9979974, -0.05022078, -0.7939395, 0, -0.60799694, 157.52524, -3.859005, -71.60416)
+
+[node name="rail_track15" parent="DecorManual/6)Viaductul" unique_id=274242988 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.859119, 0.058690574, 0.5083997, 0.03845895, 0.9979974, -0.050220788, -0.51032907, -0.023593098, -0.8596557, 165.2893, -4.3047614, -78.78467)
+
+[node name="rail_track16" parent="DecorManual/6)Viaductul" unique_id=1150945881 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.9118611, 0.055606134, 0.40671545, 0.038458947, 0.9979973, -0.05022078, -0.4086935, -0.030152524, -0.91217345, 170.05988, -4.928493, -88.8074)
+
+[node name="rail_track17" parent="DecorManual/6)Viaductul" unique_id=1721636985 instance=ExtResource("46_fs1qj")]
+transform = Transform3D(-0.9118611, 0.055606134, 0.40671545, 0.038458947, 0.9979973, -0.05022078, -0.4086935, -0.030152524, -0.91217345, 173.61841, -5.830907, -97.39868)
+
+[node name="railway_tunnel_portal2" parent="DecorManual/6)Viaductul" unique_id=303567609 instance=ExtResource("45_hhdxr")]
+transform = Transform3D(0.93708867, 0, -0.3490915, 0, 1, 0, 0.3490915, 0, 0.93708867, 167.849, -6.6145825, -84.235565)
+
+[node name="7)Padurea" type="Node3D" parent="DecorManual" unique_id=175816797]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.042698, 13.776617, -88.85973)
+
+[node name="larch_winter_a9" parent="DecorManual/7)Padurea" unique_id=1047448537 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63.001415, 0.42746162, -30.692345)
+
+[node name="larch_winter_a8" parent="DecorManual/7)Padurea" unique_id=1641618142 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.874233, 0.25980854, -41.572716)
+
+[node name="larch_winter_a7" parent="DecorManual/7)Padurea" unique_id=576071371 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.34325, -0.652585, 35.64011)
+
+[node name="larch_winter_a6" parent="DecorManual/7)Padurea" unique_id=1376879411 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9659424, -0.624279, 40.825928)
+
+[node name="larch_winter_a5" parent="DecorManual/7)Padurea" unique_id=1646374914 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.47501, -0.0043764114, -32.797943)
+
+[node name="larch_winter_a4" parent="DecorManual/7)Padurea" unique_id=648618040 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.179153, 3.0406666, -57.765236)
+
+[node name="larch_winter_a3" parent="DecorManual/7)Padurea" unique_id=918653854 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.349174, 0.29350376, -24.033226)
+
+[node name="larch_winter_a2" parent="DecorManual/7)Padurea" unique_id=1018755102 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.251451, -0.070487976, -4.570076)
+
+[node name="larch_winter_a" parent="DecorManual/7)Padurea" unique_id=1186467203 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9392052, -0.15939045, -13.105034)
+
+[node name="larch_winter_a10" parent="DecorManual/7)Padurea" unique_id=649587208 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.96611, 0.037278175, -18.815727)
+
+[node name="larch_winter_a11" parent="DecorManual/7)Padurea" unique_id=1975458636 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110.10567, 0.05846882, -41.263756)
+
+[node name="larch_winter_a12" parent="DecorManual/7)Padurea" unique_id=364574187 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140.595, -0.68331814, -11.724022)
+
+[node name="larch_winter_a13" parent="DecorManual/7)Padurea" unique_id=1932550602 instance=ExtResource("47_dxh6m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130.9828, -0.5806637, -34.676216)
+
+[node name="larch_winter_b" parent="DecorManual/7)Padurea" unique_id=1172594901 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.214966, -0.35239124, -13.403488)
+
+[node name="larch_winter_b2" parent="DecorManual/7)Padurea" unique_id=1085820679 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.92204, 4.7946453, -50.73632)
+
+[node name="larch_winter_b3" parent="DecorManual/7)Padurea" unique_id=1742455150 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.251205, 5.437229, -34.50979)
+
+[node name="larch_winter_b4" parent="DecorManual/7)Padurea" unique_id=1082704334 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.091644, 0.64773655, -50.865074)
+
+[node name="larch_winter_b5" parent="DecorManual/7)Padurea" unique_id=1624462334 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.710285, -0.22108936, 9.173004)
+
+[node name="larch_winter_b6" parent="DecorManual/7)Padurea" unique_id=1747909323 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.190235, -0.41772556, 13.924164)
+
+[node name="larch_winter_b7" parent="DecorManual/7)Padurea" unique_id=1793338769 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.376442, -0.44886684, 28.293953)
+
+[node name="larch_winter_b8" parent="DecorManual/7)Padurea" unique_id=548847749 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.781788, -1.169879, 84.14306)
+
+[node name="larch_winter_b9" parent="DecorManual/7)Padurea" unique_id=458864927 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.751633, -1.2968044, 89.59885)
+
+[node name="larch_winter_b10" parent="DecorManual/7)Padurea" unique_id=350020641 instance=ExtResource("48_5xlb4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.926668, -1.0857878, 67.02548)
+
+[node name="larch_winter_c" parent="DecorManual/7)Padurea" unique_id=1230798625 instance=ExtResource("49_ks0xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.681042, -0.8258505, 54.781902)
+
+[node name="larch_winter_c2" parent="DecorManual/7)Padurea" unique_id=1161749295 instance=ExtResource("49_ks0xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.678856, -0.531765, 36.102173)
+
+[node name="larch_winter_c3" parent="DecorManual/7)Padurea" unique_id=316335074 instance=ExtResource("49_ks0xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.981262, -0.04671669, -25.143173)
+
+[node name="larch_winter_c4" parent="DecorManual/7)Padurea" unique_id=1908267274 instance=ExtResource("49_ks0xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.24522, -0.24434471, -4.3187943)
+
+[node name="larch_winter_c5" parent="DecorManual/7)Padurea" unique_id=1954880745 instance=ExtResource("49_ks0xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56.735756, 2.041726, -55.53585)
+
+[node name="larch_winter_c6" parent="DecorManual/7)Padurea" unique_id=573107822 instance=ExtResource("49_ks0xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 106.84715, -0.1268282, -15.418846)
+
+[node name="birch_winter_a" parent="DecorManual/7)Padurea" unique_id=776874829 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 144.56314, -0.8083019, -17.56305)
+
+[node name="birch_winter_a2" parent="DecorManual/7)Padurea" unique_id=1065885114 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 122.50099, -0.346735, -37.424477)
+
+[node name="birch_winter_a3" parent="DecorManual/7)Padurea" unique_id=964620764 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112.62712, -0.29321766, -14.201508)
+
+[node name="birch_winter_a4" parent="DecorManual/7)Padurea" unique_id=758832697 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.54256, 0.11303806, -24.460648)
+
+[node name="birch_winter_a5" parent="DecorManual/7)Padurea" unique_id=1154616478 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.78204, 0.2354536, -49.483925)
+
+[node name="birch_winter_a6" parent="DecorManual/7)Padurea" unique_id=1983778752 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68.44889, 0.42381382, -32.921318)
+
+[node name="birch_winter_a7" parent="DecorManual/7)Padurea" unique_id=1611964538 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.910597, 0.08855629, -36.974457)
+
+[node name="birch_winter_a8" parent="DecorManual/7)Padurea" unique_id=677131705 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.119354, -0.1748867, 2.0883102)
+
+[node name="birch_winter_a9" parent="DecorManual/7)Padurea" unique_id=1965216914 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.316513, -0.35934925, 4.06044)
+
+[node name="birch_winter_a10" parent="DecorManual/7)Padurea" unique_id=229319943 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5080795, -0.9107809, 56.335484)
+
+[node name="birch_winter_a11" parent="DecorManual/7)Padurea" unique_id=1720329923 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.20963, -1.1131191, 75.05872)
+
+[node name="birch_winter_a12" parent="DecorManual/7)Padurea" unique_id=463288026 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.044323, -1.4071598, 92.966156)
+
+[node name="birch_winter_a13" parent="DecorManual/7)Padurea" unique_id=1620151252 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6714668, -1.0162811, 61.060158)
+
+[node name="birch_winter_a14" parent="DecorManual/7)Padurea" unique_id=323365016 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6525764, -1.5158968, 100.6151)
+
+[node name="birch_winter_a15" parent="DecorManual/7)Padurea" unique_id=617732459 instance=ExtResource("50_lmonk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.036144, -1.563736, 74.00889)
+
+[node name="birch_winter_b" parent="DecorManual/7)Padurea" unique_id=1908044152 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.470188, -1.2165413, 82.22044)
+
+[node name="birch_winter_b2" parent="DecorManual/7)Padurea" unique_id=1548064635 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.885914, -1.0145988, 69.10707)
+
+[node name="birch_winter_b3" parent="DecorManual/7)Padurea" unique_id=1146572987 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2876663, -0.8150158, 51.329487)
+
+[node name="birch_winter_b4" parent="DecorManual/7)Padurea" unique_id=1734851687 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.280945, -0.43481445, 25.35878)
+
+[node name="birch_winter_b5" parent="DecorManual/7)Padurea" unique_id=958220175 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.95744, -0.7426195, 42.13203)
+
+[node name="birch_winter_b6" parent="DecorManual/7)Padurea" unique_id=1465736229 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.157883, -0.31584072, -0.40444946)
+
+[node name="birch_winter_b7" parent="DecorManual/7)Padurea" unique_id=807445016 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.16971, 0.015339851, -10.124855)
+
+[node name="birch_winter_b8" parent="DecorManual/7)Padurea" unique_id=1173038064 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.913652, 0.037929535, -33.394035)
+
+[node name="birch_winter_b9" parent="DecorManual/7)Padurea" unique_id=394216434 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.143597, 0.13017082, -18.51921)
+
+[node name="birch_winter_b10" parent="DecorManual/7)Padurea" unique_id=1625048320 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.45599, 0.4083891, -32.04805)
+
+[node name="birch_winter_b11" parent="DecorManual/7)Padurea" unique_id=1547448284 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.94476, 0.5532284, -58.698982)
+
+[node name="birch_winter_b12" parent="DecorManual/7)Padurea" unique_id=1652639818 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.243258, 0.13992691, -40.16407)
+
+[node name="birch_winter_b13" parent="DecorManual/7)Padurea" unique_id=691979317 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 94.37355, 0.112864494, -27.554573)
+
+[node name="birch_winter_b14" parent="DecorManual/7)Padurea" unique_id=922342168 instance=ExtResource("51_125k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 92.148186, 5.432871, -49.281593)
+
+[node name="birch_winter_c" parent="DecorManual/7)Padurea" unique_id=971707508 instance=ExtResource("52_b7em7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.46298, 0.4030981, -32.839966)
+
+[node name="birch_winter_c2" parent="DecorManual/7)Padurea" unique_id=437837709 instance=ExtResource("52_b7em7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60.537125, 1.3416739, -57.328636)
+
+[node name="birch_winter_c3" parent="DecorManual/7)Padurea" unique_id=1083840448 instance=ExtResource("52_b7em7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.009624, 0.40925694, -46.203453)
+
+[node name="birch_winter_c4" parent="DecorManual/7)Padurea" unique_id=143167468 instance=ExtResource("52_b7em7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.801964, 0.077534676, -13.501511)
+
+[node name="birch_winter_c5" parent="DecorManual/7)Padurea" unique_id=1243929124 instance=ExtResource("52_b7em7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.72007, -0.01380825, -28.137802)
+
+[node name="birch_winter_c6" parent="DecorManual/7)Padurea" unique_id=935833060 instance=ExtResource("52_b7em7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.752148, -0.5652027, 27.942879)
+
+[node name="birch_winter_c7" parent="DecorManual/7)Padurea" unique_id=1223579351 instance=ExtResource("52_b7em7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.666069, -0.39287853, 9.586052)
+
+[node name="pine_siberian_b" parent="DecorManual/7)Padurea" unique_id=1815687782 instance=ExtResource("53_da6kc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.3941, -0.7700901, 43.35345)
+
+[node name="pine_siberian_b2" parent="DecorManual/7)Padurea" unique_id=410995113 instance=ExtResource("53_da6kc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.127247, 0.0554924, -10.344772)
+
+[node name="pine_siberian_b3" parent="DecorManual/7)Padurea" unique_id=1595553339 instance=ExtResource("53_da6kc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.665966, -0.17122841, -20.202927)
+
+[node name="pine_siberian_b4" parent="DecorManual/7)Padurea" unique_id=1862355658 instance=ExtResource("53_da6kc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77.40185, 0.25270653, -24.254044)
+
+[node name="power_pylon_soviet" parent="DecorManual/7)Padurea" unique_id=269465656 instance=ExtResource("56_bb2l7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77.01907, 0.53518105, -57.826897)
+
+[node name="power_pylon_soviet2" parent="DecorManual/7)Padurea" unique_id=2037082689 instance=ExtResource("56_bb2l7")]
+transform = Transform3D(0.9159863, 0, -0.4012095, 0, 1, 0, 0.4012095, 0, 0.9159863, 9.036158, -0.08434391, -19.805367)
+
+[node name="power_pylon_soviet3" parent="DecorManual/7)Padurea" unique_id=77384294 instance=ExtResource("56_bb2l7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.217028, -0.587718, 33.662743)
+
+[node name="hunting_cabin" parent="DecorManual/7)Padurea" unique_id=2124009851 instance=ExtResource("54_mr7ny")]
+transform = Transform3D(0.6823118, 0, 0, 0, 0.6823118, 0, 0, 0, 0.6823118, 85.33342, -10.069342, 42.528763)
+
+[node name="IceSlabHazard" type="Marker3D" parent="." unique_id=1129236258]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 544.5151, 0, 113.03221)
+gizmo_extents = 3.0
+script = ExtResource("47_hhdxr")
+kind = 10
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"

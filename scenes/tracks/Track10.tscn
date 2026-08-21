@@ -96,6 +96,7 @@ point_count = 12
 script = ExtResource("1_track")
 custom_name = "Baikal"
 custom_theme = "baikal"
+custom_road_surface = "snow"
 custom_gate_model = "uid://blx1lq0lx0dml"
 custom_sea_level_offset = -7.05
 custom_ice_ranges = Array[Vector2]([Vector2(0.19, 0.56)])

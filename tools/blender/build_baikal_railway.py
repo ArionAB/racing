@@ -1,9 +1,21 @@
 """Baikal — calea ferata Circum-Baikal (planşa "Baikal kit", pozitiile 3 si 4).
 
-  RailwayViaduct  baikal/structures/railway_viaduct.glb
-                  Viaduct_Pier / Viaduct_Arch / Viaduct_End
+  ViaductPier     baikal/structures/viaduct_pier.glb
+                  Viaduct_Pier + RailDeck_Pier
+  ViaductArch     baikal/structures/viaduct_arch.glb
+                  Viaduct_Arch + Viaduct_Arch_Ice + RailDeck_Arch
+  ViaductEnd      baikal/structures/viaduct_end.glb
+                  Viaduct_End + RailDeck_End
   TunnelPortal    baikal/structures/railway_tunnel_portal.glb
-                  Tunnel_Portal / Tunnel_Bore / Tunnel_Niche
+                  Tunnel_Portal / Tunnel_Bore + Tunnel_Bore_Ice / Tunnel_Niche
+
+UN FISIER PE MODUL, nu unul singur cu toate trei (asa era pana in august 2026).
+Motivul e maparea de clase: zidaria ia textura `cut_stone`, patul de cale
+ferata ramane pe atlas, iar gheata de sub arcada pe `ice_bloc` — deci fiecare
+modul se sparge in doua-trei OBIECTE (o clasa se aplica pe obiect, nu pe
+poligon). Intr-un singur fisier, cine aseaza o pila ar fi trebuit sa stinga
+sase copii din opt la fiecare instanta. Cu un fisier pe modul, nu stinge
+niciunul.
 
 Viaductul e MODULAR, nu o piesa de 60 m: pista are 5 arcade in brief, dar
 lungimea reala se masoara abia dupa ce traseul e desenat. Trei module (pila,
@@ -21,6 +33,8 @@ Rulare:
 """
 
 import math
+
+import bpy
 from mathutils import Matrix, Vector
 
 AO_STONE = dict(samples=28, dist=6.0, gradient="vertical",
@@ -46,6 +60,12 @@ def _deck(b, y_center, length, top_z=DECK_Z):
     Comun celor trei module, ca sa iasa cota IDENTICA la imbinari — daca fiecare
     modul si-ar calcula patul separat, o diferenta de un centimetru s-ar citi ca
     o treapta sub roti la 100 km/h.
+
+    Se cheama pe un Builder SEPARAT de zidarie (obiectul `RailDeck`): patul are
+    pietris, lemn si otel in sloturi, iar clasa `cut_stone` a zidariei le-ar
+    sterge pe toate trei. Traversele (24 cm) si sinele (12 cm) raman deci pe
+    atlas — o banda atat de ingusta primeste ~15 texeli pe pixel si orice dala
+    i-ar iesi plata (style_bible §14, lectia pietrisului de pe umar).
     """
     # patul de pietris, usor mai lat decat tablierul
     b.box((0.0, y_center, top_z + BALLAST_H * 0.5),
@@ -101,10 +121,15 @@ def build_pier():
                                        DECK_Z / steps), seed=71 + i * 17)
     # soclu evazat, in apa/gheata
     _stone_face(b, (0.0, 0.0, -0.6), (5.0, PIER_W + 1.2, 1.2), seed=903)
-    _deck(b, 0.0, PIER_W + 0.6)
     obj = b.to_object("Viaduct_Pier")
-    finish(obj, bevel=0.05, ao=AO_STONE, origin="base")
-    return obj
+    finish(obj, bevel=0.05, ao=AO_STONE, origin=None)
+    bd = Builder()
+    _deck(bd, 0.0, PIER_W + 0.6)
+    deck = bd.to_object("RailDeck_Pier")
+    finish(deck, bevel=0.03, ao=AO_STONE, origin=None)
+    objs = [obj, deck]
+    _drop_group(objs)
+    return objs
 
 
 # ============================================================ Viaduct: arcada
@@ -173,19 +198,30 @@ def build_arch():
         _stone_face(b, (0.0, sy, spring_z * 0.5), (DECK_W + 0.5, 2.1, spring_z),
                     seed=int(abs(sy) * 13) + 400)
 
-    # turturi sub arcada (brief): 6 tepi de gheata la intrados
+    obj = b.to_object("Viaduct_Arch")
+    finish(obj, bevel=0.04, ao=AO_STONE, origin=None)
+
+    # turturi sub arcada (brief): 6 tepi de gheata la intrados. OBIECT SEPARAT,
+    # ca sa poata lua clasa `ice_bloc` — lipiti de zidarie ar fi iesit tepi de
+    # piatra sub un pod de piatra.
+    bi = Builder()
     rand = _lcg(2211)
     for i in range(6):
         a = math.pi * (0.18 + 0.64 * (i / 5.0))
         iy = -math.cos(a) * r * 0.96
         iz = spring_z + math.sin(a) * r * 0.96
-        _icicle(b, ((rand() - 0.5) * DECK_W * 0.7, iy, iz),
+        _icicle(bi, ((rand() - 0.5) * DECK_W * 0.7, iy, iz),
                 length=0.7 + rand() * 1.5, radius=0.09 + rand() * 0.06)
+    ice = bi.to_object("Viaduct_Arch_Ice")
+    finish(ice, bevel=0.02, ao=AO_STONE, origin=None)
 
-    _deck(b, 0.0, ARCH_SPAN)
-    obj = b.to_object("Viaduct_Arch")
-    finish(obj, bevel=0.04, ao=AO_STONE, origin="base")
-    return obj
+    bd = Builder()
+    _deck(bd, 0.0, ARCH_SPAN)
+    deck = bd.to_object("RailDeck_Arch")
+    finish(deck, bevel=0.03, ao=AO_STONE, origin=None)
+    objs = [obj, ice, deck]
+    _drop_group(objs)
+    return objs
 
 
 def _icicle(b, tip_anchor, length, radius, slot=ICE_TURQUOISE, segments=6):
@@ -213,10 +249,15 @@ def build_end():
         b.box((sx * (DECK_W * 0.5 + 0.55), -length * 0.32, DECK_Z * 0.42),
               (1.1, length * 0.5, DECK_Z * 0.84), CONCRETE,
               rotation=Matrix.Rotation(math.radians(sx * -7.0), 3, "Y"))
-    _deck(b, 0.0, length)
     obj = b.to_object("Viaduct_End")
-    finish(obj, bevel=0.05, ao=AO_STONE, origin="base")
-    return obj
+    finish(obj, bevel=0.05, ao=AO_STONE, origin=None)
+    bd = Builder()
+    _deck(bd, 0.0, length)
+    deck = bd.to_object("RailDeck_End")
+    finish(deck, bevel=0.03, ao=AO_STONE, origin=None)
+    objs = [obj, deck]
+    _drop_group(objs)
+    return objs
 
 
 # ============================================================ Sina libera
@@ -252,20 +293,38 @@ def build_rail_track():
     return obj
 
 
+def _drop_group(objs):
+    """Coboara un grup de obiecte astfel incat MINIMUL comun sa cada la z=0.
+
+    finish(origin=None) lasa originile in loc; fara pasul asta zidaria si patul
+    ar fi fost centrate fiecare separat si s-ar fi despartit la instantiere.
+    """
+    bpy.context.view_layer.update()
+    lo = min(min((o.matrix_world @ Vector(c)).z for c in o.bound_box)
+             for o in objs)
+    for o in objs:
+        o.location.z -= lo
+
+
 def build_viaduct():
     clear_built()
-    pier, arch, end = build_pier(), build_arch(), build_end()
-    # asezate distantat pe X, ca planşa de referinta: modulele se instantiaza
-    # separat in Godot, deci nu trebuie sa se atinga in GLB.
-    pier.location.x = -14.0
-    end.location.x = 16.0
-    objs = [pier, arch, end]
-    print("RailwayViaduct: %d tris (%s)"
-          % (sum(tri_count(o) for o in objs),
-             ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
-    export_glb(objs, "baikal/structures/railway_viaduct.glb")
-    save_blend(objs, "baikal_railway_viaduct.blend")
-    return objs
+    pieces = [("viaduct_pier", build_pier()),
+              ("viaduct_arch", build_arch()),
+              ("viaduct_end", build_end())]
+    all_objs = []
+    for name, objs in pieces:
+        print("%s: %d tris (%s)"
+              % (name, sum(tri_count(o) for o in objs),
+                 ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))
+        export_glb(objs, "baikal/structures/%s.glb" % name)
+        all_objs.extend(objs)
+    # abia DUPA export se aseaza pe un rand in .blend, ca planşa de referinta:
+    # in fisiere fiecare modul pleaca din originea lui.
+    for k, (name, objs) in enumerate(pieces):
+        for o in objs:
+            o.location.x += -14.0 + k * 15.0
+    save_blend(all_objs, "baikal_railway_viaduct.blend")
+    return all_objs
 
 
 # ============================================================ Tunelul
@@ -407,16 +466,23 @@ def build_tunnel():
     # Gheata reala pe un perete de tunel e o pelicula verticala de cativa
     # centimetri, mai lata jos unde se aduna. De aici: adancime 6 cm (nu 20),
     # latime sub 40 cm, si mai putine — 14 in loc de 26.
+    bore = b.to_object("Tunnel_Bore")
+    finish(bore, bevel=0.03, ao=AO_TUNNEL, origin=None)
+
+    # OBIECT SEPARAT, din acelasi motiv ca turturii de sub arcada: captuseala
+    # ia clasa `cut_stone`, iar o pelicula de gheata cu textura de zidarie e
+    # doar un perete cu o dunga in plus.
+    bi = Builder()
     rand = _lcg(4417)
     for i in range(14):
         yy = 2.0 + rand() * (TUNNEL_LEN - 4.0)
         sx = -1 if rand() > 0.5 else 1
         h = 0.7 + rand() * 1.8
         w = 0.16 + rand() * 0.22
-        b.box((sx * (TUNNEL_W * 0.5 - 0.03), yy, h * 0.5),
-              (0.06, w, h), ICE_TURQUOISE)
-    bore = b.to_object("Tunnel_Bore")
-    finish(bore, bevel=0.03, ao=AO_TUNNEL, origin=None)
+        bi.box((sx * (TUNNEL_W * 0.5 - 0.03), yy, h * 0.5),
+               (0.06, w, h), ICE_TURQUOISE)
+    bore_ice = bi.to_object("Tunnel_Bore_Ice")
+    finish(bore_ice, bevel=0.02, ao=AO_TUNNEL, origin=None)
 
     # --- o nisa separata, ca piesa de sine statatoare ----------------------
     # Pista poate avea nevoie s-o aseze independent (refugiul e mecanica).
@@ -427,7 +493,7 @@ def build_tunnel():
     finish(niche, bevel=0.04, ao=AO_TUNNEL, origin="base")
     niche.location.x = 14.0
 
-    objs = [portal, bore, niche]
+    objs = [portal, bore, bore_ice, niche]
     print("TunnelPortal: %d tris (%s)"
           % (sum(tri_count(o) for o in objs),
              ", ".join("%s %d" % (o.name, tri_count(o)) for o in objs)))

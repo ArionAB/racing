@@ -193,6 +193,30 @@ static func classes() -> Dictionary:
 		"snow": {"src": "snow_src.jpg",
 			"anchor": Palette.color(Palette.FOAM_WHITE), "gain": 1.10,
 			"lift": 0.26},
+		# Marmura Olkhonului (Baikal): Stanca Samanului, arcul grotei, faleza
+		# insulei si peretii de stanca asezati de mana la grota.
+		# Sursa: marble_cliff_04 (PolyHaven CC0), ALEASA PRIN MASURATOARE
+		# dintre cinci candidati de marmura, ancora MARBLE_GREY (luminanta
+		# 180.3):
+		#
+		#   marble_cliff_04  ratie 0.93  in-dala 18.9  dez 1.4/5.5  12.7 m  <-
+		#   marble_cliff_06  ratie 0.70  in-dala 23.1  dez 6.0/6.4   8.1 m
+		#   marble_cliff_03  ratie 0.72  in-dala 13.6  dez 7.0/0.6   5.7 m
+		#   marble_cliff_02  ratie 0.66  in-dala 21.7  dez 1.9/8.8   6.8 m
+		#   marble_rock_03   ratie 0.48  in-dala 13.2  dez 1.1/4.5   1.8 m
+		#
+		# Ultima coloana e SCARA REALA a sursei, si aici a decis: piesele pe
+		# care cade clasa au 12-22 m (coltii Samanului 18 m, arcul grotei 12 m
+		# deschidere), deci o dala de 1.8 m ar fi trebuit repetata de zece ori
+		# pe o fata — adica exact esecul din #313, cand dala alpina (2 m,
+		# fotografie de ZID de piatra uscata) a facut din coltii de marmura o
+		# cetate. La 12.7 m sursa acopera aproape toata fata dintr-o singura
+		# repetitie, iar ce se vede sunt vinele si stratele ei, nu un tipar.
+		# Ratia de 0.93 fata de ancora e cea mai buna din pipeline: marmura
+		# alba in soare e singura piatra care ajunge la luminanta unui slot
+		# deschis, deci nu are nevoie nici de `lift`, nici de `gain`.
+		"olkhon_marble": {"src": "olkhon_marble_src.jpg",
+			"anchor": Palette.color(Palette.MARBLE_GREY)},
 		# Gheata Baikalului (placa lacului si banda drumului de gheata): a doua
 		# clasa PICTATA, tools/paint_ice.py — retea de crapaturi negre pe tor,
 		# bule de metan albe in ciorchini, fond turcoaz cu pete. Ancora e
@@ -402,6 +426,29 @@ static func surfaces() -> Dictionary:
 		# inlocuieste, deci umarul isi pastreaza expunerea.
 		"surface_gravel": {"src": "surface_gravel_src.jpg",
 			"mean": 0.850, "sigma": 0.090, "grain": 0.20},
+
+		# --- ZAPADA BATATORITA (drumul de pe malul Baikalului) ---
+		#
+		# Sursa micro: snow_01 (PolyHaven CC0, scanare de 2.0 m la repetitia de
+		# 3.5 m a soselei) — zapada CALCATA, cu urme si fagase; dupa desaturare
+		# urmele raman variatie de luminanta, adica exact „suprafata pe care s-a
+		# circulat". Masurat cu measure_texture_src: in-dala 5.79, dezechilibru
+		# 1.8%/0.6% (sub pragul de 5% al benzilor). Candidatul cu cifre mai bune
+		# (snow_floor, in-dala 18.67) a picat pe CONTINUT: desaturat citeste a
+		# granit pistruiat, nu a zapada — capcana „alege cifra, pierde subiectul"
+		# din style_bible §4.
+		#
+		# sigma 0.070, sub nisip (0.075): zapada tasata e mai NETEDA decat
+		# pietrisul; grain 0.18 tot sub nisip, ca scanteierea sa nu devina sare
+		# si piper pe o suprafata aproape alba.
+		"surface_snow": {"src": "surface_snow_src.jpg",
+			"mean": 0.850, "sigma": 0.070, "grain": 0.18},
+		# Sursa macro: snow_field_aerial (PolyHaven CC0, aeriana de 80 m la
+		# repetitia de 45 m — aceeasi clasa de compromis ca aeriana nisipului).
+		# In-dala 22.85, dezechilibru 2.4%/0.7%. Petele ei de zapada suflata de
+		# vant rup repetitia dalei micro pe sute de metri de mal.
+		"surface_snow_macro": {"src": "surface_snow_macro_src.jpg",
+			"mean": 0.850, "sigma": 0.065, "grain": 0.10},
 
 		# --- BORDURA ---
 		#

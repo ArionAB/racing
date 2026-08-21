@@ -25,6 +25,9 @@ extends Track
 @export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island", "baikal") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
+## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
+## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).
+@export_enum("asphalt", "dirt", "snow") var custom_road_surface: String = "asphalt"
 ## Poarta de start a pistei — GLB-ul ales cu butonul de fisier.
 ##
 ## Gol = ce cere tema, si daca nici tema nu cere nimic, poarta implicita.
@@ -130,6 +133,7 @@ func _ready() -> void:
 func _apply_custom() -> void:
 	track_name = custom_name
 	half_width = custom_half_width
+	road_surface = custom_road_surface
 	sea_level_offset = custom_sea_level_offset
 	apply_theme(custom_theme)
 	# DUPA apply_theme: aici e suprascrierea pistei peste ce cere tema.

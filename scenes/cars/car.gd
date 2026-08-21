@@ -1173,8 +1173,8 @@ func _drop_trail(delta: float, loose: bool) -> void:
 	if _trail == null:
 		_trail = SandTrail.new()
 		# Nuanta brazdei tine de suprafata, nu de masina: materialul e partajat,
-		# deci o singura culoare pe pista (vezi SandTrail.set_surface_color).
-		SandTrail.set_surface_color(track.trail_surface_color())
+		# deci o singura culoare pe pista (vezi SandTrail.set_mark_color).
+		SandTrail.set_mark_color(track.trail_mark_color())
 		add_child(_trail)
 	var half_track_w := data.body_width * 0.38 if data != null else 0.85
 	var rear_z := data.body_length * 0.34 if data != null else 1.3

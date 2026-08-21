@@ -403,6 +403,29 @@ static func surfaces() -> Dictionary:
 		"surface_gravel": {"src": "surface_gravel_src.jpg",
 			"mean": 0.850, "sigma": 0.090, "grain": 0.20},
 
+		# --- ZAPADA BATATORITA (drumul de pe malul Baikalului) ---
+		#
+		# Sursa micro: snow_01 (PolyHaven CC0, scanare de 2.0 m la repetitia de
+		# 3.5 m a soselei) — zapada CALCATA, cu urme si fagase; dupa desaturare
+		# urmele raman variatie de luminanta, adica exact „suprafata pe care s-a
+		# circulat". Masurat cu measure_texture_src: in-dala 5.79, dezechilibru
+		# 1.8%/0.6% (sub pragul de 5% al benzilor). Candidatul cu cifre mai bune
+		# (snow_floor, in-dala 18.67) a picat pe CONTINUT: desaturat citeste a
+		# granit pistruiat, nu a zapada — capcana „alege cifra, pierde subiectul"
+		# din style_bible §4.
+		#
+		# sigma 0.070, sub nisip (0.075): zapada tasata e mai NETEDA decat
+		# pietrisul; grain 0.18 tot sub nisip, ca scanteierea sa nu devina sare
+		# si piper pe o suprafata aproape alba.
+		"surface_snow": {"src": "surface_snow_src.jpg",
+			"mean": 0.850, "sigma": 0.070, "grain": 0.18},
+		# Sursa macro: snow_field_aerial (PolyHaven CC0, aeriana de 80 m la
+		# repetitia de 45 m — aceeasi clasa de compromis ca aeriana nisipului).
+		# In-dala 22.85, dezechilibru 2.4%/0.7%. Petele ei de zapada suflata de
+		# vant rup repetitia dalei micro pe sute de metri de mal.
+		"surface_snow_macro": {"src": "surface_snow_macro_src.jpg",
+			"mean": 0.850, "sigma": 0.065, "grain": 0.10},
+
 		# --- BORDURA ---
 		#
 		# Sursa: concrete_src, REFOLOSITA (concrete_floor_02, PolyHaven CC0) —

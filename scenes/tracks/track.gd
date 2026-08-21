@@ -54,7 +54,8 @@ var track_name: String = "Pista"
 ## de una in patruzeci. Vezi [method width_at].
 var half_width: float = 7.0
 
-## Din ce e facut drumul: "asphalt" (implicit) sau "dirt" — nisip batatorit.
+## Din ce e facut drumul: "asphalt" (implicit), "dirt" — nisip batatorit —
+## sau "snow" — zapada batatorita (malul Baikalului).
 ##
 ## NU e o intrare in tema, si asta e deliberat: Okinawa manual imparte tema
 ## "island" cu Okinawa v2 — si nu doar tema, ci LUMEA, pana la samanta (vezi
@@ -62,15 +63,16 @@ var half_width: float = 7.0
 ## pistele; aici schimba exact pista care l-a cerut.
 ##
 ## Ce atarna de el, in ordinea in care se vede din masina:
-##   - materialul soselei — nisip tintat in loc de asfalt, fara sheen
+##   - materialul soselei — nisip/zapada in loc de asfalt, fara sheen
 ##     (_build_road);
-##   - marcajele — un drum nepavat n-are nici linie de mijloc, nici borduri
-##     rosu-alb (_build_center_line, _build_kerbs);
+##   - marcajele — un drum nepavat n-are linie de mijloc (_build_center_line);
+##     bordurile dispar pe nisip dar RAMAN pe zapada (vezi _build_kerbs);
 ##   - urmele coapte in pista — DISPAR complet (_build_tire_marks): pe o
 ##     suprafata pe care masinile lasa urme reale in fiecare cadru, o urma
 ##     desenata dinainte nu se adauga la ele, le contrazice;
 ##   - masinile — ridica praf si lasa urme cat timp RULEAZA pe el, nu doar cand
-##     derapeaza (Car._on_loose_ground).
+##     derapeaza (Car._on_loose_ground); pe zapada praful e alb-albastrui si
+##     brazda e zapada presata (vezi trail_mark_color).
 var road_surface: String = "asphalt"
 
 ## Drumul e o suprafata AFANATA (pamant, nisip)?
@@ -88,6 +90,8 @@ func road_is_loose() -> bool:
 ## calca roata, iar nisipul drumului nu e acelasi cu nisipul coraligen al plajei
 ## de langa el — e mai auriu si mai inchis (vezi DIRT_ROAD_COLOR).
 func road_dust_color() -> Color:
+	if road_surface == "snow":
+		return SNOW_ROAD_COLOR
 	return DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
 
 ## Suprafata pe care masinile lasa brazde rulind (vezi SandTrail).
@@ -97,7 +101,31 @@ func road_dust_color() -> Color:
 ## o pista cu drum afanat aia e chiar drumul, pe una cu asfalt e terenul de
 ## langa el — pe asfalt nu se depune nimic.
 func trail_surface_color() -> Color:
+	if road_surface == "snow":
+		return SNOW_ROAD_COLOR
 	return DIRT_ROAD_COLOR if road_is_loose() else theme_ground_tint
+
+## Cat de INCHISA e brazda fata de suprafata pe care e lasata, pe drumurile de
+## pamant/nisip. Tinta e o brazda, nu vopsea: nisipul rascolit isi pierde din
+## lumina fiindca boabele stau altfel si pentru ca sub crusta uscata e material
+## mai umed. 0.42 e cat s-a masurat pe drumul de nisip (#D3A855 curat ->
+## #9E7A45 pe brazda) — se citeste din masina, dar nu face din urma o dara de
+## pacura. (Constanta a stat in SandTrail cat timp exista o singura suprafata
+## afanata; culoarea brazdei e insa a PISTEI, ca si cea a prafului.)
+const TRAIL_MARK_DARKEN: float = 0.42
+
+## Culoarea FINALA a brazdei de rulare (SandTrail o pune direct pe material).
+##
+## Pe nisip e suprafata intunecata cu TRAIL_MARK_DARKEN. Pe zapada, aceeasi
+## reteta ar da o dara gri-noroi: zapada presata nu doar ca e mai intunecata,
+## e mai ALBASTRA — fagasul compact devine semi-transparent si tine umbra
+## cerului, in timp ce spulberul din jur ramane alb. Coeficientii per canal
+## coboara rosul mai tare decat albastrul exact ca sa pastreze racoarea.
+func trail_mark_color() -> Color:
+	if road_surface == "snow":
+		var s := SNOW_ROAD_COLOR
+		return Color(s.r * 0.68, s.g * 0.74, s.b * 0.86)
+	return trail_surface_color().darkened(TRAIL_MARK_DARKEN)
 
 ## Sursa semintei pentru tot ce e procedural-aleator in lume: faza dunelor,
 ## imprastierea decorului, falezele, siluetele de orizont, stalpii.
@@ -3975,6 +4003,28 @@ const WET_FADE: float = 0.015
 ## mult decat rosul, ca marginea sa iasa calda, nu murdara.
 const DIRT_EDGE_SHADE: Color = Color(0.87, 0.78, 0.66)
 
+## Culoarea drumului de ZAPADA BATATORITA (road_surface == "snow"), inainte de
+## compensarea trecerii macro. Sub albul zapezii proaspete din paleta
+## (snow #E9F2F0) si trasa spre albastru: pe drumul pe care se circula zapada
+## e tasata si sta in umbra cerului. Alaturi de ea, terenul alb al iernii
+## ramane treapta LUMINOASA — deci si aici linia de curs se citeste din
+## valoare, doar ca pe dos fata de asfalt: drumul e cu o idee mai INCHIS si
+## mai rece decat campul.
+const SNOW_ROAD_COLOR: Color = Color(0.87, 0.91, 0.95)
+## Media texturii macro de zapada (process_class_textures.surfaces()).
+const SNOW_MACRO_MEAN: float = 0.850
+
+## Nuanta BENZII DE RULARE pe drumul de zapada, ca multiplicator de vertex.
+##
+## Pe zapada gradientul lateral e INVERSUL nisipului, si citirea de referinta
+## e alta: pe un drum de iarna banda calcata e mai INCHISA si mai albastra
+## (zapada presata, aproape gheata), iar spre margini sta zapada proaspata,
+## alba. Cum culorile de vertex doar INTUNECA (SurfaceTool taie la [0,1]),
+## albul marginilor trebuie sa fie chiar materialul, iar mijlocul coboara de
+## acolo: multiplicatorul inchide rosul mai tare decat albastrul, ca banda sa
+## iasa rece, nu murdara.
+const SNOW_MID_SHADE: Color = Color(0.84, 0.88, 0.95)
+
 func _build_road() -> void:
 	var top := SurfaceTool.new()
 	top.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -4020,7 +4070,12 @@ func _build_road() -> void:
 	# primeste valoarea intermediara si trecerea iese degrade, nu dunga.
 	var edge_shade := Color(0.84, 0.84, 0.86)
 	var mid_shade := Color.WHITE
-	if road_is_loose():
+	if road_surface == "snow":
+		# Gradient INVERSAT (vezi SNOW_MID_SHADE): alb la margini, banda de
+		# rulare tasata si albastruie la mijloc.
+		edge_shade = Color.WHITE
+		mid_shade = SNOW_MID_SHADE
+	elif road_is_loose():
 		edge_shade = DIRT_EDGE_SHADE
 	# Peticele de zapada de pe asfalt (vezi "road_snow_low" in themes()). Null pe
 	# orice tema fara munte, deci restul pistelor nu se schimba cu un pixel.
@@ -4029,6 +4084,11 @@ func _build_road() -> void:
 	var snow_high := maxf(float(theme_flag("road_snow_high", 1.0)),
 		snow_low + 0.001)
 	var snow_amount := float(theme_flag("road_snow_amount", 0.0))
+	# Pe un drum DIN zapada, peticele de zapada de pe asfalt n-au obiect:
+	# suprafata e deja alba toata, iar mecanismul lor (materialul ridicat spre
+	# alb + vertecsii intorsi spre asfalt) ar dilua chiar culoarea drumului.
+	if road_surface == "snow":
+		snow_amount = 0.0
 	# Zgomotul peticelor, in coordonate de LUME — din acelasi motiv ca UV2-ul de
 	# mai jos: peticele trebuie sa stea pe loc pe teren, nu sa curga cu panglica.
 	# Daca ar fi functie de distanta parcursa, ar iesi dungi transversale
@@ -4221,8 +4281,14 @@ func _build_road() -> void:
 	# Micro-ul e surface_sand (aceeasi granulatie ca terenul, la 3.5 m in loc de
 	# 3.125 — deci si aceeasi lume), macro-ul e surface_sand_macro: petele lui de
 	# 45 m sunt exact tiparul de nisip spalat de ploaie pe care il vrem.
-	var base := DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
-	var macro_mean := SAND_MACRO_MEAN if road_is_loose() else ASPHALT_MACRO_MEAN
+	var base := ROAD_COLOR
+	var macro_mean := ASPHALT_MACRO_MEAN
+	if road_surface == "snow":
+		base = SNOW_ROAD_COLOR
+		macro_mean = SNOW_MACRO_MEAN
+	elif road_is_loose():
+		base = DIRT_ROAD_COLOR
+		macro_mean = SAND_MACRO_MEAN
 	# Pe temele cu zapada pe drum, materialul poarta o culoare INTRE asfalt si
 	# zapada, iar vertecsii o duc in ambele sensuri: in jos spre asfalt (peste
 	# tot), in sus... nicaieri, ca nu se poate. Vezi _road_snow_weight pentru de
@@ -4249,7 +4315,18 @@ func _build_road() -> void:
 	var macro := "res://assets/textures/surface_asphalt_macro.png"
 	var rough := 0.82
 	var spec := 0.3
-	if road_is_loose():
+	if road_surface == "snow":
+		# Zapada tasata, in ACEEASI schema de doua treceri: micro = snow_01
+		# (zapada calcata, urmele raman variatie de luminanta), macro =
+		# snow_field_aerial (pete de zapada suflata de vant, la 45 m).
+		# MATA, ca placa de gheata (_ice_sheet_material a invatat lectia):
+		# cu soarele jos al Baikalului, orice luciu pe o suprafata aproape
+		# alba pune o pata alba cat jumatate de ecran.
+		micro = "res://assets/textures/surface_snow.png"
+		macro = "res://assets/textures/surface_snow_macro.png"
+		rough = 1.0
+		spec = 0.0
+	elif road_is_loose():
 		micro = "res://assets/textures/surface_sand.png"
 		macro = "res://assets/textures/surface_sand_macro.png"
 		rough = 1.0
@@ -6121,7 +6198,12 @@ func _build_kerbs() -> void:
 	# chevron-urile (_build_chevrons), umarul de pietris (_build_shoulders) si,
 	# de acum, poteca batatorita care se muta spre interiorul virajului
 	# (_build_tire_marks). Trei semnale geometrice in loc de unul pictat.
-	if road_is_loose():
+	#
+	# DOAR pe nisip, nu pe orice suprafata afanata: pe drumul de ZAPADA
+	# bordurile raman — sunt mobilier turnat care iese de sub stratul alb, nu
+	# vopsea pe el, iar pe o suprafata altfel uniform alba sunt singurul semnal
+	# saturat de franare (brief-ul Baikal le cere explicit pe virajele malului).
+	if road_surface == "dirt":
 		return
 	# Nici un drum public de munte n-are, si din acelasi motiv: bordura rosu-alb
 	# e mobilier de CIRCUIT. Pe Alpii ea era chiar „marginea rosie" cea mai

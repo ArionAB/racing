@@ -1047,7 +1047,15 @@ const DUST_MIN_SPEED: float = 6.0
 func _on_loose_ground(on_road: bool) -> bool:
 	if track == null or not is_on_floor():
 		return false
-	return track.road_is_loose() or not on_road
+	if not on_road:
+		return true
+	# Banda de GHEATA (Baikal) e sosea, dar nu e suprafata afanata: pe ea
+	# derapajul lasa scrasnet de cauciuc (zgarieturi pe gheata), nu brazde de
+	# zapada, si nu se ridica spulber. Fara verificarea asta, un drum "snow"
+	# ar intinde brazdele albastrui si peste autostrada de gheata.
+	if route == 0 and track.is_ice_at(track.frac_at(road_index)):
+		return false
+	return track.road_is_loose()
 
 ## Culorile prafului, coapte o data cand masina afla pe ce pista e: una a
 ## terenului, una a soselei. Cat timp soseaua era asfalt exista o singura
@@ -1184,7 +1192,14 @@ func _drop_trail(delta: float, loose: bool) -> void:
 		+ up * (_hull_bottom() + TRAIL_LIFT)
 	var orientation := Basis(right, up, -fwd)
 	for side: float in [-1.0, 1.0]:
-		_trail.stamp(base + right * half_track_w * side, orientation)
+		var wheel := base + right * half_track_w * side
+		_trail.stamp(wheel, orientation)
+		# Aceleasi roti scriu si in masca PERSISTENTA a drumului de zapada
+		# (Track.stamp_wear refuza singur ce cade in afara soselei si nu face
+		# nimic pe pistele fara foaie de uzura). SandTrail e dara proaspata
+		# din spatele masinii; masca e istoria batatorita a intregii curse.
+		if route == 0:
+			track.stamp_wear(road_index, wheel)
 
 ## Fum de cauciuc ars. Pe drum de pamant se inlocuieste cu praful solului —
 ## vezi _update_dust.

@@ -18,10 +18,20 @@ extends Node3D
 ## isi pierdea efectul hazardul vechi. Ridicat, tot jocul plăcii ramane
 ## DEASUPRA lacului, deci fiecare grad de inclinare chiar ajunge la roti.
 ##
+## Campul e strabatut de CRESTE DE PRESIUNE (torosi) diagonale, la ~20 m una
+## de alta: le vezi ca linii albe taind gheata, si de pe ele masina chiar
+## ZBOARA — masurat 0.33 s de aer si 23% din camp fara roti pe gheata, cu
+## viteza pastrata (25-28 m/s prin camp, din 30 la intrare). Pe capatul jos
+## al crestei plateste mai
+## putin aer, deci alegi pe unde treci. Vezi `_ridge_y` pentru de ce o
+## creasta arunca si o placa ridicata doar zgaltaie; e al treilea reglaj de
+## agresivitate cerut la playtest, si primul care da airtime adevarat.
+##
 ## Placile MOARTE sunt DENIVELATE (panta si cota aleatoare per placa,
-## UNEVEN_*): campul e drumul prost al pistei, cu trepte de 8-15 cm intre
+## UNEVEN_*): campul e drumul prost al pistei, cu trepte de 10-20 cm intre
 ## placi vecine pe care suspensia le simte la orice viteza — reglaj din
-## playtest, versiunea coplanara nu se simtea deloc in volan.
+## playtest, versiunea coplanara nu se simtea deloc in volan. Pe creste
+## zgomotul se stinge (`calm`), ca linia alba sa se citeasca intreaga.
 ##
 ## Placile „VII" (8 din camp, pe culoar, marcate cinstit cu retea de
 ## crapaturi albe si fata mai inchisa):
@@ -62,20 +72,40 @@ const INSET_LIVE: float = 0.42
 ## la orice viteza, cu suspensia reala, nu un shake pe camera. Primul reglaj
 ## (±3 cm, placi coplanare cu profilul) nu se simtea deloc: la 30 m/s o
 ## fisura de 0.5 m e UN tick de fizica, doar treptele dintre placi raman.
-const UNEVEN_GRAD: float = 0.045
-const UNEVEN_H: float = 0.06
-## KICKERELE: fiecare a BUMP_EVERY-a placa moarta de pe culoar e o mini-rampa
-## (cerut la playtest: denivelarea aleatoare zgaltaie, dar nu ARUNCA).
-## Placa e ridicata cu BUMP_LIFT si inclinata PE SENSUL DE MERS: intri pe
-## muchia joasa (mica adancitura, te anunta), iesi de pe muchia inalta —
-## la 30 m/s panta de ~5-6% da ~1.6-1.9 m/s vertical, un salt scurt cu botul
-## in sus plus caderea de pe muchie. Muchia din spate e PLAFONATA la
-## BUMP_EDGE_CAP peste vecine: lectia pragurilor (>0.3 m e zid) — o masina
-## intoarsa sau in marsarier trebuie sa poata trece peste ea inapoi.
-const BUMP_EVERY: int = 3
-const BUMP_LIFT: float = 0.10
-const BUMP_SLOPE_MAX: float = 0.065
-const BUMP_EDGE_CAP: float = 0.26
+const UNEVEN_GRAD: float = 0.055
+const UNEVEN_H: float = 0.07
+## CRESTELE DE PRESIUNE (torosii campului) — vezi `_ridge_y` pentru DE CE o
+## creasta arunca masina, iar o placa ridicata doar o zgaltaie.
+##
+## Cifrele se deriva din fizica, nu se aleg: la v = 30 m/s si gravitatia
+## jocului g = 28 m/s^2, o creasta cu panta p pe ambele fete ar tine masina
+## in aer t = 4*v*p/g. Balistica e insa doar plafonul — SUSPENSIA mananca
+## prima parte a caderii: rotile stau lipite de gheata pana cand arcurile se
+## intind pe toata cursa lor (0.35 m). De aceea o creasta blanda nu decoleaza
+## deloc, oricat de lat i-ai face varful, si de aceea prima incercare
+## (p = 0.089) a iesit cu 16% din camp prin aer desi balistica promitea 45%:
+## panta trebuie sa fie ABRUPTA, nu creasta inalta si domoala.
+##
+## Cu p = RIDGE_H / RIDGE_LEN = 0.176, terenul fuge de sub roti mai repede
+## decat se pot intinde arcurile si masina chiar pleaca. Mai sus de atat nu
+## se poate: la RIDGE_H 0.66 masina nu mai TRECE creasta, o urca — viteza
+## minima a cazut de la 21 la 9.8 m/s, adica sectiunea devenise o frana.
+##
+## Distanta dintre creste E densitatea ceruta la playtest, dar are un prag
+## propriu: zborul e ~9 m, si la 18 m intre creste aterizarea cadea FIX pe
+## fata urmatoarei (masurat: viteza minima 15.5 in loc de 21). Pasul trebuie
+## sa lase pamant intre sarituri — altfel nu mai e ritm, e o singura
+## rostogolire lunga in care volanul nu face nimic.
+const RIDGE_SPACING: float = 20.0
+const RIDGE_LEN: float = 3.3
+const RIDGE_H: float = 0.58
+## Inclinarea crestei fata de drum (m de deplasare a varfului per m lateral).
+const RIDGE_SKEW: float = 0.32
+## Pasul semintelor Voronoi PE creasta: sloiuri de ~2 m, destul de mici cat
+## sa urmareasca profilul crestei (vezi `_voronoi_cells`).
+const RIDGE_CELL: float = 2.1
+## Cat de aproape de varf stau semintele perechii care ii da muchia (m).
+const RIDGE_APEX: float = 0.55
 ## Cat iese campul lateral dincolo de semilatimea drumului (m).
 const EXTRA_W: float = 5.0
 ## Grosimea vizuala/de coliziune a unei placi (m).
@@ -135,8 +165,7 @@ var _area: Area3D
 var _audio: AudioStreamPlayer3D
 var _live: Array[Dictionary] = []
 var _crack_cd: float = 0.0
-var _bump_seen: int = 0
-var _bump_count: int = 0
+var _ridges: Array[Dictionary] = []
 
 
 ## Track ii da PROBELE traseului pe intervalul campului (puncte de centru la
@@ -212,7 +241,74 @@ func _top_y(s: float, t: float = 0.0) -> float:
 	var ramp_in := smoothstep(0.0, RAMP_LEN, s)
 	var ramp_out := smoothstep(0.0, RAMP_LEN, _len - s)
 	var ramp_side := smoothstep(_wide, _wide - EXTRA_W, absf(t))
-	return base + LIP + RAISE * ramp_in * ramp_out * ramp_side
+	return base + LIP + RAISE * ramp_in * ramp_out * ramp_side \
+		+ _ridge_y(s, t) * ramp_in * ramp_out * ramp_side
+
+
+## Inaltimea CRESTELOR DE PRESIUNE la (s, t) — cortul liniar al torosului.
+##
+## De ce creasta si nu placa inclinata (lectia care a schimbat designul):
+## masina nu e aruncata de PANTA, ci de faptul ca terenul ii FUGE DE SUB ROTI
+## dincolo de varf. Kickerul dinainte (o placa ridicata, urmata de teren plat)
+## dadea la 30 m/s v_y = 2.3 m/s, adica — cu gravitatia jocului de 28 m/s^2,
+## nu 9.8 — 0.16 s de aer si 9 cm inaltime: o zdruncinatura, nu o saritura.
+## Pe o creasta cu panta `p` de o parte si de alta, masina pleaca cu v*p si
+## solul cade la randul lui cu v*p, deci timpul de zbor e t = 2*v*2p/g —
+## DUBLU fata de acelasi kicker urmat de teren plat, si aterizarea e lina
+## (cazi "cu" panta, nu pe ea).
+##
+## Cortul e LINIAR, nu neted, si asta conteaza: placile sunt plane, iar planul
+## tangent al unei functii CONCAVE (cortul e concav) sta mereu DEASUPRA ei,
+## deci nicio placa nu poate cadea sub podeaua de apa derivata din acelasi
+## cort. Cu un profil neted (smoothstep) placile din zona convexa de la baza
+## ar fi intrat in podea.
+##
+## Crestele sunt DIAGONALE (`skew`) si mai joase spre un capat, alternand
+## partea: exact ca torosurile reale impinse de vant pe Baikal, si — la
+## volan — inseamna ca poti alege pe unde treci creasta. Ridicarea e stinsa
+## de aceleasi rampe ca restul campului (vezi apelul de mai sus), ca sortul
+## lateral si capetele sa ramana curate.
+func _ridge_y(s: float, t: float) -> float:
+	var best := 0.0
+	for r in _ridges:
+		var apex: float = float(r["s0"]) + float(r["skew"]) * t
+		var d := absf(s - apex)
+		var half: float = float(r["len"])
+		if d >= half:
+			continue
+		# mai jos spre un capat al crestei: 55%..100% din inaltime
+		var across := clampf((t * float(r["low_side"]) / _wide + 1.0) * 0.5,
+			0.0, 1.0)
+		var h: float = float(r["h"]) * (0.55 + 0.45 * across)
+		best = maxf(best, h * (1.0 - d / half))
+	return best
+
+
+## Cat de "pe creasta" e punctul, 0..1 — pentru albul de pe muchie.
+func _ridge_frac(s: float, t: float) -> float:
+	if _ridges.is_empty():
+		return 0.0
+	return clampf(_ridge_y(s, t) / RIDGE_H, 0.0, 1.0)
+
+
+## Asaza crestele pe lungimea campului, la ~RIDGE_SPACING metri.
+func _place_ridges(rng: RandomNumberGenerator) -> void:
+	_ridges.clear()
+	var first := RAMP_LEN + RIDGE_LEN + 3.0
+	var last := _len - RAMP_LEN - RIDGE_LEN - 3.0
+	var s := first
+	var side := 1.0
+	while s <= last:
+		_ridges.append({
+			"s0": s,
+			"h": RIDGE_H * rng.randf_range(0.78, 1.16),
+			"len": RIDGE_LEN * rng.randf_range(0.85, 1.15),
+			"skew": RIDGE_SKEW * rng.randf_range(0.5, 1.0)
+				* (1.0 if rng.randf() > 0.5 else -1.0),
+			"low_side": side,
+		})
+		side = -side # capatul jos alterneaza: linia buna nu e mereu aceeasi
+		s += RIDGE_SPACING * rng.randf_range(0.85, 1.15)
 
 
 ## (s, t) pentru un punct din lume — cautare liniara pe probe (~70), apelata
@@ -255,6 +351,39 @@ func _voronoi_cells(rng: RandomNumberGenerator) -> Array[PackedVector2Array]:
 				+ rng.randf_range(-JITTER, JITTER) * CELL
 			seeds.append(Vector2(clampf(s, 0.5, _len - 0.5),
 				clampf(t, -_wide + 0.3, _wide - 0.3)))
+	# --- semintele DESE de pe creste ---------------------------------------
+	# O placa nu poate reda un relief mai fin decat ea: cu placi de 6 m si
+	# creste de 3.3 m semi-lungime, planul fiecarei placi trecea peste toata
+	# creasta si o RETEZA — sonda a masurat 0% airtime, adica exact hazardul
+	# pe care il construiam nu exista pentru fizica. Pe linia crestei semanam
+	# dens (RIDGE_CELL), deci acolo gheata se sparge in sloiuri mici care
+	# urmaresc profilul; intre creste raman lespezile mari. Asta e si ce e un
+	# toros in realitate — gheata SPARTA si indesata, nu o lespede indoita.
+	# Semintele vin in PERECHI SIMETRICE fata de varf (±RIDGE_APEX), si asta e
+	# tot trucul: bisectoarea a doua seminte simetrice cade exact pe linia
+	# varfului, deci acolo e o MUCHIE intre doua placi, nu mijlocul uneia.
+	# Cu varful in mijlocul unei placi, planul ei retează creasta si masina
+	# trece peste un platou de 2 m (masurat: 0.15 s de aer, adica nimic).
+	# Cu muchia pe varf, cele doua placi vin din panta pe o portiune DREAPTA a
+	# cortului — coarda lor e exacta — si se intalnesc intr-un unghi ascutit:
+	# solul isi schimba panta cu 2p dintr-un tick, iar arcurile nu au ce urma.
+	for r in _ridges:
+		var across := -_wide + RIDGE_CELL * 0.5
+		while across < _wide:
+			var apex: float = float(r["s0"]) + float(r["skew"]) * across
+			# DOAR perechea de la varf, nu tot flancul: cortul e liniar, iar
+			# coarda unei lespezi mari peste o portiune DREAPTA e exacta —
+			# flancurile n-au nevoie de rezolutie. Semanand des pe toata
+			# creasta, campul s-a facut un pavaj uniform de sloiuri de 2 m
+			# (vazut pe captura) si si-a pierdut identitatea de lespezi mari
+			# de gheata; sparta ramane doar linia varfului, exact ca in
+			# realitate.
+			var jt := rng.randf_range(-0.2, 0.2)
+			for sgn: float in [-1.0, 1.0]:
+				seeds.append(Vector2(
+					clampf(apex + sgn * RIDGE_APEX, 0.5, _len - 0.5),
+					clampf(across + jt, -_wide + 0.3, _wide - 0.3)))
+			across += RIDGE_CELL
 	var cells: Array[PackedVector2Array] = []
 	var reach := CELL * 2.7
 	for k in seeds.size():
@@ -268,7 +397,7 @@ func _voronoi_cells(rng: RandomNumberGenerator) -> Array[PackedVector2Array]:
 				(seeds[k] - seeds[m]).normalized())
 			if poly.size() < 3:
 				break
-		if poly.size() >= 3 and _poly_area(poly) > 2.0:
+		if poly.size() >= 3 and _poly_area(poly) > 0.6:
 			cells.append(poly)
 	return cells
 
@@ -384,6 +513,16 @@ func _build() -> void:
 	_prepare_spine()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _seed ^ 0x1CEF1E1D
+	# INAINTEA oricarei geometrii: crestele intra in `_top_y`, deci si apa, si
+	# placile, si coliziunea lor se aseaza peste ele fara sa stie ca exista.
+	#
+	# Cu SIRUL LOR de numere, nu cu `rng`: altfel plasarea crestelor consuma
+	# din sirul comun si reamesteca tot campul (celule, placi vii, denivelari)
+	# la orice reglaj de creasta — prima incercare a facut exact asta si a
+	# picat sonda pe teste care n-aveau legatura cu crestele.
+	var ridge_rng := RandomNumberGenerator.new()
+	ridge_rng.seed = _seed ^ 0x70705
+	_place_ridges(ridge_rng)
 	var cells := _voronoi_cells(rng)
 
 	# placile vii: pe culoarul de rulare, dincolo de rampe, distantate — ca
@@ -407,9 +546,18 @@ func _build() -> void:
 			continue
 		if absf(c.y) > hw_here * 0.75:
 			continue
+		# Doar LESPEZI INTREGI, niciodata sloiurile marunte de pe creasta:
+		# o placa vie e gheata subtire si proaspata, adica intinsa si neteda,
+		# iar mecanica ei (inclinare spre coltul incarcat) n-are nici un sens
+		# pe un ciob de 2 m — masina l-ar acoperi in intregime si n-ar mai
+		# exista "colt incarcat". Sonda a si prins asta: cu sloiurile in
+		# joc, masina parcata excentric cadea in afara placii si nu incarca
+		# nimic.
+		if _poly_area(cells[k]) < 10.0 or _ridge_frac(c.x, c.y) > 0.30:
+			continue
 		var ok := true
 		for li: int in live_idx:
-			if _poly_centroid(cells[li]).distance_to(c) < 12.0:
+			if _poly_centroid(cells[li]).distance_to(c) < 8.5:
 				ok = false
 				break
 		if ok:
@@ -436,18 +584,27 @@ func _build() -> void:
 	# rampei, iar o podea prea sus acolo ar iesi prin fetele lor.
 	var drops: Array[float] = [GAP_DROP * 2.3, GAP_DROP, GAP_DROP,
 		GAP_DROP, GAP_DROP * 2.3]
+	# Pasul pe LUNGIME e mai fin decat probele traseului (~3 m): podeaua
+	# interpoleaza liniar, iar interpolarea unei creste o taie pe la baza —
+	# sub un toros fisurile ar fi ajuns gropi de 40 cm, adica exact capcana
+	# de roata pe care GAP_DROP o evita. Un sfert din lungimea crestei o
+	# urmareste destul de aproape.
+	var floor_step := minf(RIDGE_LEN * 0.25, 1.2)
+	var rows := maxi(int(ceil(_len / floor_step)), 2)
 	var water := SurfaceTool.new()
 	water.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for i in range(_pts.size() - 1):
+	for i in rows:
+		var sa := _len * float(i) / float(rows)
+		var sb := _len * float(i + 1) / float(rows)
 		for c in range(cols.size() - 1):
-			var a0 := _map(_s[i], cols[c])
-			var a1 := _map(_s[i], cols[c + 1])
-			var b0 := _map(_s[i + 1], cols[c])
-			var b1 := _map(_s[i + 1], cols[c + 1])
-			a0.y = _top_y(_s[i], cols[c]) - drops[c]
-			a1.y = _top_y(_s[i], cols[c + 1]) - drops[c + 1]
-			b0.y = _top_y(_s[i + 1], cols[c]) - drops[c]
-			b1.y = _top_y(_s[i + 1], cols[c + 1]) - drops[c + 1]
+			var a0 := _map(sa, cols[c])
+			var a1 := _map(sa, cols[c + 1])
+			var b0 := _map(sb, cols[c])
+			var b1 := _map(sb, cols[c + 1])
+			a0.y = _top_y(sa, cols[c]) - drops[c]
+			a1.y = _top_y(sa, cols[c + 1]) - drops[c + 1]
+			b0.y = _top_y(sb, cols[c]) - drops[c]
+			b1.y = _top_y(sb, cols[c + 1]) - drops[c + 1]
 			water.add_vertex(a0)
 			water.add_vertex(b0)
 			water.add_vertex(a1)
@@ -480,7 +637,16 @@ func _build() -> void:
 	var live_k := 0
 	for k in cells.size():
 		var is_live := k in live_idx
-		var poly := _inset(cells[k], INSET_LIVE if is_live else INSET_STATIC)
+		# Fisuri STRANSE pe creste: acolo placile stau chiar unele in altele
+		# (asta si e un toros — sloiuri indesate), iar coarda de mai jos lasa
+		# varful putin retezat, deci intre placile de pe creasta apar oricum
+		# cele mai mari diferente de cota. O fisura lata acolo ar fi o groapa
+		# in care cade raza rotii exact in punctul in care masina decoleaza.
+		var ridge_here := _ridge_frac(_poly_centroid(cells[k]).x,
+			_poly_centroid(cells[k]).y)
+		var inset := INSET_LIVE if is_live \
+			else INSET_STATIC * (1.0 - 0.75 * ridge_here)
+		var poly := _inset(cells[k], inset)
 		if poly.is_empty():
 			poly = cells[k] # celula prea mica pentru retragere: fara fisura
 		var c2 := _poly_centroid(poly)
@@ -494,40 +660,55 @@ func _build() -> void:
 		# consistente. Placile VII raman plane la cota profilului: gheata
 		# subtire, proaspata — netezimea lor e parte din semnal, iar bugetul
 		# lor de inclinare (theta_max) ramane intreg pentru joc.
-		var h_c := _top_y(c2.x, c2.y)
-		var grad_s := _top_y(c2.x + 0.5, c2.y) - _top_y(c2.x - 0.5, c2.y)
-		var grad_t := _top_y(c2.x, c2.y + 0.5) - _top_y(c2.x, c2.y - 0.5)
-		var hw_here := _hws[_seg_at(c2.x)]
-		# kicker: a BUMP_EVERY-a placa moarta DE PE CULOAR (nu pe sortul
-		# lateral — ala e zona de recuperare — si nu pe rampele de capat)
-		var is_bump := false
-		if not is_live and absf(c2.y) <= hw_here \
-				and c2.x > RAMP_LEN + 4.0 and c2.x < _len - RAMP_LEN - 8.0:
-			_bump_seen += 1
-			is_bump = _bump_seen % BUMP_EVERY == 0
-		if is_bump:
-			# rampa DELIBERATA, nu zgomot: cota si panta pe sensul de mers,
-			# fara inclinare laterala — muchia joasa in fata, cea inalta in
-			# spate, cu saltul plafonat de BUMP_EDGE_CAP
-			var r_s := 0.5
-			for p in poly:
-				r_s = maxf(r_s, absf(p.x - c2.x))
-			h_c += BUMP_LIFT
-			grad_s += minf(BUMP_SLOPE_MAX, (BUMP_EDGE_CAP - BUMP_LIFT) / r_s)
-			_bump_count += 1
-		elif not is_live:
-			h_c += rng.randf_range(-UNEVEN_H, UNEVEN_H)
-			grad_s += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD)
-			grad_t += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD)
+		# Planul placii e COARDA profilului peste propria ei intindere, nu
+		# tangenta in centroid. Diferenta e intre un camp traversabil si un
+		# zid: pe o creasta, tangenta unei placi de 6 m urca mai departe si
+		# dupa ce cortul a inceput sa coboare, deci depaseste vecina de pe
+		# panta cealalta cu panta*jumatate_de_placa — masurat 0.29 m la
+		# p = 0.145, adica o treapta verticala in plin. Masina a intrat in ea
+		# cu 26 m/s si s-a oprit MORT (sonda, traversare la s = 113).
+		# Coarda trece exact prin cotele profilului la capetele placii, deci
+		# doua placi vecine se intalnesc la aceeasi cota: varful crestei iese
+		# putin retezat, dar suprafata ramane continua si nu mai exista nicio
+		# fata verticala catre care sa mergi.
+		var s_lo := c2.x
+		var s_hi := c2.x
+		var t_lo := c2.y
+		var t_hi := c2.y
+		for p in poly:
+			s_lo = minf(s_lo, p.x)
+			s_hi = maxf(s_hi, p.x)
+			t_lo = minf(t_lo, p.y)
+			t_hi = maxf(t_hi, p.y)
+		var grad_s := (_top_y(s_hi, c2.y) - _top_y(s_lo, c2.y)) \
+			/ maxf(s_hi - s_lo, 0.5)
+		var grad_t := (_top_y(c2.x, t_hi) - _top_y(c2.x, t_lo)) \
+			/ maxf(t_hi - t_lo, 0.5)
+		var h_c := _top_y(s_lo, c2.y) + grad_s * (c2.x - s_lo)
+		# Cat de sus pe creasta sta placa — zapada de pe muchie (albul de mai
+		# jos) si, la placile moarte, cu cat se atenueaza zgomotul: crestele
+		# se citesc ca o LINIE numai daca placile de pe ele nu-s ciobite
+		# aleatoriu. Denivelarea ramane intreaga intre creste, unde e treaba
+		# ei.
+		var on_ridge := _ridge_frac(c2.x, c2.y)
+		if not is_live:
+			var calm := 1.0 - 0.7 * on_ridge
+			h_c += rng.randf_range(-UNEVEN_H, UNEVEN_H) * calm
+			grad_s += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD) * calm
+			grad_t += rng.randf_range(-UNEVEN_GRAD, UNEVEN_GRAD) * calm
 		if is_live:
 			_build_live_plate(poly, c2, h_c, grad_s, grad_t, live_k, rng)
 			live_k += 1
 		else:
-			# creasta kickerului iese alba (zapada pe muchia ridicata) — se
-			# citeste de departe ca "de aici sari"
-			var tint := Color(1, 1, 1) if is_bump \
-				else Color(1, 1, 1).lerp(Color(0.88, 0.95, 0.96),
-					rng.randf() * 0.8)
+			# Creasta iese ALBA (zapada spulberata se aduna pe torosuri), si
+			# asta e singurul avertisment pe care il primesti: vezi linia
+			# alba taind campul si alegi pe unde o treci, inainte s-o simti.
+			# Albul se aprinde SCURT langa varf (smoothstep), nu proportional
+			# cu cortul: altfel toata panta iese palida si creasta nu mai e o
+			# LINIE, ci o zona sparta care se pierde in camp.
+			var tint := Color(1, 1, 1).lerp(Color(0.88, 0.95, 0.96),
+				rng.randf() * 0.8).lerp(Color(1, 1, 1),
+				smoothstep(0.45, 0.95, on_ridge))
 			_emit_plate(st, poly, c2, h_c, grad_s, grad_t, tint,
 				func(v: Vector3) -> Vector3: return v)
 			var shape := CollisionShape3D.new()
@@ -961,5 +1142,10 @@ func field_length() -> float:
 	return _len
 
 
-func bump_count() -> int:
-	return _bump_count
+func ridge_count() -> int:
+	return _ridges.size()
+
+
+## Panta maxima a unei creste (m/m) — sonda o compara cu saltul masurat.
+func ridge_slope() -> float:
+	return RIDGE_H / RIDGE_LEN

@@ -238,11 +238,28 @@ func _map(s: float, t: float) -> Vector3:
 ## directie, ca orice alta bucata de lume (regula scurtaturilor risc/rasplata).
 func _top_y(s: float, t: float = 0.0) -> float:
 	var base := _map(s, 0.0).y
-	var ramp_in := smoothstep(0.0, RAMP_LEN, s)
-	var ramp_out := smoothstep(0.0, RAMP_LEN, _len - s)
-	var ramp_side := smoothstep(_wide, _wide - EXTRA_W, absf(t))
-	return base + LIP + RAISE * ramp_in * ramp_out * ramp_side \
-		+ _ridge_y(s, t) * ramp_in * ramp_out * ramp_side
+	# Rampele sunt LINIARE, nu smoothstep, din acelasi motiv ca profilul
+	# crestelor: o placa e un PLAN, deci reda exact o rampa dreapta, dar
+	# aproximeaza una curbata — si doua aproximari vecine ale aceleiasi curbe
+	# se despart intr-o treapta. Cu smoothstep, curbura rampei de intrare
+	# lasa trepte de pana la 13 cm exact acolo unde masina aterizeaza dupa
+	# buza campului: sonda a prins-o intrand cu 27 m/s si iesind cu 10 (corp
+	# lovit: `Plates`). O rampa dreapta n-are curbura de aproximat.
+	var ramp_in := clampf(s / RAMP_LEN, 0.0, 1.0)
+	var ramp_out := clampf((_len - s) / RAMP_LEN, 0.0, 1.0)
+	var ramp_side := clampf((_wide - absf(t)) / EXTRA_W, 0.0, 1.0)
+	# Cele trei rampe se combina prin MINIM, nu prin inmultire. Produsul a
+	# doua functii liniare e patratic — adica o suprafata CURBATA, pe care
+	# placile (plane) o aproximeaza fiecare altfel si se despart in trepte.
+	# Exact asta se intampla acolo unde o creasta ajungea peste rampa de
+	# iesire sau peste sortul lateral: masina traversa curat 110 m din 123 si
+	# se oprea din 23 m/s in 5 fix in petecul unde cele doua se inmulteau.
+	# Minimul a doua functii liniare ramane liniar pe portiuni, deci fiecare
+	# petec e un plan si placile vecine se intalnesc la cota.
+	var env := minf(minf(ramp_in, ramp_out), ramp_side)
+	# Creasta se stinge cu acelasi plic, tot prin minim: pe sort si la capete
+	# nu mai iese din camp, dar nici nu se curbeaza.
+	return base + LIP + RAISE * env + minf(_ridge_y(s, t), RIDGE_H * env)
 
 
 ## Inaltimea CRESTELOR DE PRESIUNE la (s, t) — cortul liniar al torosului.
@@ -257,17 +274,21 @@ func _top_y(s: float, t: float = 0.0) -> float:
 ## DUBLU fata de acelasi kicker urmat de teren plat, si aterizarea e lina
 ## (cazi "cu" panta, nu pe ea).
 ##
-## Cortul e LINIAR, nu neted, si asta conteaza: placile sunt plane, iar planul
-## tangent al unei functii CONCAVE (cortul e concav) sta mereu DEASUPRA ei,
-## deci nicio placa nu poate cadea sub podeaua de apa derivata din acelasi
-## cort. Cu un profil neted (smoothstep) placile din zona convexa de la baza
-## ar fi intrat in podea.
+## Cortul e LINIAR, nu neted, si e liniar SI PE LATIME — adica pe fiecare
+## fata a lui e un PLAN, nu o suprafata curba. Asta nu e o alegere estetica,
+## e conditia ca hazardul sa nu fie un zid: placile sunt plane, deci pot reda
+## exact o fata plana si se intalnesc la aceeasi cota, dar aproximeaza una
+## curba fiecare in felul ei — si intre doua aproximari vecine apare o
+## treapta verticala. Prima versiune scadea inaltimea crestei spre un capat
+## (55%..100% pe latime), ceea ce facea produsul cort x atenuare PATRATIC:
+## in worktree traversarea trecea, in scena reala masina intra cu 26 m/s
+## intr-o treapta la s = 35 si se oprea la 1.7 m/s, urcata cu botul pe fata
+## unei placi. Inaltimea variaza acum PER CREASTA (`h`), nu pe latimea ei.
 ##
-## Crestele sunt DIAGONALE (`skew`) si mai joase spre un capat, alternand
-## partea: exact ca torosurile reale impinse de vant pe Baikal, si — la
-## volan — inseamna ca poti alege pe unde treci creasta. Ridicarea e stinsa
-## de aceleasi rampe ca restul campului (vezi apelul de mai sus), ca sortul
-## lateral si capetele sa ramana curate.
+## Crestele raman DIAGONALE (`skew`) — un cort inclinat e tot piecewise-liniar,
+## deci sigur — si asta e ce lasa alegere la volan: le tai in unghi, nu
+## perpendicular. Ridicarea e stinsa de aceleasi rampe ca restul campului
+## (vezi apelul de mai sus), ca sortul lateral si capetele sa ramana curate.
 func _ridge_y(s: float, t: float) -> float:
 	var best := 0.0
 	for r in _ridges:
@@ -276,11 +297,7 @@ func _ridge_y(s: float, t: float) -> float:
 		var half: float = float(r["len"])
 		if d >= half:
 			continue
-		# mai jos spre un capat al crestei: 55%..100% din inaltime
-		var across := clampf((t * float(r["low_side"]) / _wide + 1.0) * 0.5,
-			0.0, 1.0)
-		var h: float = float(r["h"]) * (0.55 + 0.45 * across)
-		best = maxf(best, h * (1.0 - d / half))
+		best = maxf(best, float(r["h"]) * (1.0 - d / half))
 	return best
 
 
@@ -297,17 +314,17 @@ func _place_ridges(rng: RandomNumberGenerator) -> void:
 	var first := RAMP_LEN + RIDGE_LEN + 3.0
 	var last := _len - RAMP_LEN - RIDGE_LEN - 3.0
 	var s := first
-	var side := 1.0
+	var flip := 1.0
 	while s <= last:
 		_ridges.append({
 			"s0": s,
-			"h": RIDGE_H * rng.randf_range(0.78, 1.16),
+			"h": RIDGE_H * rng.randf_range(0.72, 1.12),
 			"len": RIDGE_LEN * rng.randf_range(0.85, 1.15),
-			"skew": RIDGE_SKEW * rng.randf_range(0.5, 1.0)
-				* (1.0 if rng.randf() > 0.5 else -1.0),
-			"low_side": side,
+			# Inclinarea alterneaza sensul: doua creste la rand taiate in
+			# acelasi unghi ar fi insemnat o singura linie buna pe tot campul.
+			"skew": RIDGE_SKEW * rng.randf_range(0.55, 1.0) * flip,
 		})
-		side = -side # capatul jos alterneaza: linia buna nu e mereu aceeasi
+		flip = -flip
 		s += RIDGE_SPACING * rng.randf_range(0.85, 1.15)
 
 

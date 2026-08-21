@@ -51,13 +51,6 @@ const EDGE_FRAC: float = 0.62
 ## Cat de opaca e urma in miez.
 const MARK_ALPHA: float = 0.6
 
-## Cat de INCHISA e urma fata de suprafata pe care e lasata.
-##
-## Tinta e o brazda, nu vopsea: nisipul rascolit isi pierde din lumina fiindca
-## boabele stau altfel si pentru ca sub crusta uscata e material mai umed. 0.42
-## e cat s-a masurat pe drumul de nisip (#D3A855 curat -> #9E7A45 pe brazda) —
-## se citeste din masina, dar nu face din urma o dara de pacura.
-const MARK_DARKEN: float = 0.42
 
 ## Anvelopa (AABB) declarata a darei: toata lumea, cu mult peste orice pista.
 ##
@@ -173,15 +166,17 @@ static func _shared_mesh() -> Mesh:
 	return _mesh
 
 
-## Nuanta brazdei, pentru suprafata pe care se conduce ACUM.
+## Nuanta brazdei, FINALA — o decide pista (Track.trail_mark_color), fiindca
+## e o proprietate a suprafetei, nu a placutei: pe nisip e suprafata intunecata
+## cu 42% (masurat), pe zapada e "zapada presata" — mai inchisa DAR mai
+## albastra, nu doar stinsa.
 ##
 ## Se cheama o data per cursa, de prima masina care lasa urme: materialul e
 ## partajat de toate, iar toate sunt pe aceeasi pista. Culoarea nu poate fi o
 ## constanta — aceeasi placuta cade si pe drumul de nisip al Okinawei, si pe
-## nisipul coraligen de langa el, si pe cel auriu al Dunelor.
-static func set_surface_color(surface: Color) -> void:
-	_shared_material().albedo_color = Color(
-		surface.darkened(MARK_DARKEN), MARK_ALPHA)
+## nisipul coraligen de langa el, si pe zapada Baikalului.
+static func set_mark_color(mark: Color) -> void:
+	_shared_material().albedo_color = Color(mark, MARK_ALPHA)
 
 
 static func _shared_material() -> StandardMaterial3D:
@@ -189,7 +184,7 @@ static func _shared_material() -> StandardMaterial3D:
 		return _mat
 	_mat = StandardMaterial3D.new()
 	# FARA textura: alfa ei nu supravietuieste mipmap-ului (vezi _shared_mesh).
-	# Forma vine din vertecsi, culoarea din set_surface_color.
+	# Forma vine din vertecsi, culoarea din set_mark_color.
 	_mat.albedo_color = Color(0.35, 0.28, 0.18, MARK_ALPHA)
 	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	# UNSHADED, ca poteca de dinainte (Track._path_material): culoarea scrisa e

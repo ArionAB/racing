@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://cgpvuv5ee337g" path="res://scenes/hazards/eruption_cycle.gd" id="4_erupt"]
 [ext_resource type="Script" uid="uid://b3ggqeosp3aap" path="res://scenes/hazards/lava_flow_hazard.gd" id="5_lava"]
 [ext_resource type="PackedScene" uid="uid://d04oqmtngqx5m" path="res://assets/models/stromboli/effects/lava_flow.glb" id="6_lavaglb"]
-[ext_resource type="Script" uid="uid://cbxpsyhc0lqe2" path="res://scenes/props/world_prop.gd" id="7_wprop"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="7_wprop"]
 
 [sub_resource type="Curve3D" id="Curve3D_stromboli"]
 _data = {

@@ -877,7 +877,10 @@ static func themes() -> Dictionary:
 			"kerbs": false,
 			"cliffs": false,
 			"decor": "bands",
-			"props": "island",
+			# Kitul mediteranean (docs/asset_briefs/stromboli_slope_kit.md).
+			# Pana la el pista a imprumutat props-urile insulare — palmieri si
+			# coral — exact cum Baikal a stat pe props alpine pana la kitul lui.
+			"props": "stromboli",
 			"rock_class": "rock",
 			"water": true,
 			"seabed_drop": 26.0,

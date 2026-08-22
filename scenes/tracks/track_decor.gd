@@ -397,6 +397,9 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 	if props == "baikal":
 		_place_baikal_prop(parent, spec, band, rng, mat_provider, satellite)
 		return
+	if props == "stromboli":
+		_place_stromboli_prop(parent, spec, band, rng, mat_provider, satellite)
+		return
 	var pos := spec.position
 	match band["name"]:
 		"hug":
@@ -937,6 +940,83 @@ static func _place_alpine_prop(parent: Node3D, spec: TrackDecorSpec,
 ## incrucisate, ~300 tri — exact ce spune brief-ul §6, "3 planuri pe copac").
 ## Mesteacanul (4 368) la fel, accent. Cand apare laricele ieftin, urci ponderea
 ## si rulezi probe_decor; nu e nimic altceva de schimbat.
+## FLANCUL VULCANULUI (Stromboli). Piesele vin din kitul de panta —
+## docs/asset_briefs/stromboli_slope_kit.md, 12 fisiere.
+##
+## Trei lucruri de stiut inainte sa umbli la ponderi:
+##
+## 1. `node` alege O VARIANTA dintr-un GLB multi-nod. Fara el s-ar instantia
+##    fisierul intreg, adica AMANDOI maslinii odata (5 m si 7 m, in acelasi
+##    punct). Kitul asta are variante in aproape fiecare fisier, deci cheia e
+##    regula, nu exceptia.
+##
+## 2. Ponderile urmeaza ETAJELE conului, nu gustul: masline si vita jos
+##    (serpentinele C), ginestra si scoria la mijloc, doar roca sus. Cine
+##    planteaza manual peste decorul asta gaseste deja densitatea potrivita
+##    pentru fiecare etaj.
+##
+## 3. Bugetele sunt de BANDA: piesele se inmultesc cu sutele. De-asta
+##    `caper_bush` (96 tris) are pondere mare si `olive_tree` (808) mica —
+##    nu fiindca maslinii ar fi mai rari pe insula, ci fiindca ii platesti
+##    de zece ori mai scump.
+const SCATTER_STROMBOLI: Array[Dictionary] = [
+	# --- etajul de jos: terase, masline, vita ---------------------------------
+	{"glb": "stromboli/trees/olive_tree", "node": "Olive_Trunk_A",
+		"extra": ["Olive_Canopy_A"], "bands": ["mid", "back"],
+		"weight": 1.4, "scale": [0.85, 1.15], "collide": "trunk"},
+	{"glb": "stromboli/trees/olive_tree", "node": "Olive_Trunk_B",
+		"extra": ["Olive_Canopy_B"], "bands": ["back", "far"],
+		"weight": 1.0, "scale": [0.85, 1.20], "collide": "trunk"},
+	{"glb": "stromboli/trees/fig_tree", "node": "Fig_Trunk",
+		"extra": ["Fig_Canopy"], "bands": ["mid", "back"],
+		"weight": 0.8, "scale": [0.85, 1.15], "collide": "trunk"},
+	# --- tufaris: ieftin, deci des ---------------------------------------------
+	{"glb": "stromboli/plants/caper_bush", "node": "Caper_Bush",
+		"bands": ["hug", "mid"], "weight": 4.0, "scale": [0.7, 1.3],
+		"collide": "none", "sway": true, "satellite": true},
+	{"glb": "stromboli/plants/ginestra_bush", "node": "Ginestra_A",
+		"bands": ["mid", "back"], "weight": 2.2, "scale": [0.8, 1.2],
+		"collide": "none", "sway": true},
+	{"glb": "stromboli/plants/ginestra_bush", "node": "Ginestra_B",
+		"bands": ["hug", "mid"], "weight": 2.6, "scale": [0.8, 1.2],
+		"collide": "none", "sway": true, "satellite": true},
+	{"glb": "stromboli/plants/prickly_pear", "node": "Prickly_A",
+		"bands": ["mid", "back"], "weight": 1.2, "scale": [0.85, 1.15],
+		"collide": "hull"},
+	{"glb": "stromboli/plants/prickly_pear", "node": "Prickly_B",
+		"bands": ["hug", "mid"], "weight": 1.6, "scale": [0.85, 1.15],
+		"collide": "none", "satellite": true},
+	{"glb": "stromboli/plants/cane_clump", "node": "Cane_Clump",
+		"bands": ["mid", "back"], "weight": 0.9, "scale": [0.8, 1.25],
+		"collide": "none", "sway": true},
+	# --- roca: bazalt spart jos, scorie sus ------------------------------------
+	{"glb": "stromboli/rocks/basalt_boulder", "node": "Basalt_C",
+		"bands": ["hug", "mid"], "weight": 3.0, "scale": [0.7, 1.3],
+		"collide": "hull", "satellite": true},
+	{"glb": "stromboli/rocks/basalt_boulder", "node": "Basalt_B",
+		"bands": ["mid", "back"], "weight": 2.0, "scale": [0.8, 1.2],
+		"collide": "hull"},
+	{"glb": "stromboli/rocks/basalt_boulder", "node": "Basalt_A",
+		"bands": ["back", "far"], "weight": 1.2, "scale": [0.85, 1.25],
+		"collide": "hull"},
+	{"glb": "stromboli/rocks/scoria_rock", "node": "Scoria_C",
+		"bands": ["hug", "mid"], "weight": 2.4, "scale": [0.7, 1.3],
+		"collide": "none", "satellite": true},
+	{"glb": "stromboli/rocks/scoria_rock", "node": "Scoria_B",
+		"bands": ["mid", "back"], "weight": 1.8, "scale": [0.8, 1.2],
+		"collide": "hull"},
+	{"glb": "stromboli/rocks/scoria_rock", "node": "Scoria_A",
+		"bands": ["back", "far"], "weight": 1.0, "scale": [0.85, 1.2],
+		"collide": "hull"},
+	{"glb": "stromboli/rocks/lava_slab_broken", "node": "Lava_Slab_C",
+		"bands": ["mid", "back"], "weight": 1.0, "scale": [0.8, 1.2],
+		"collide": "hull"},
+	{"glb": "stromboli/rocks/lava_slab_broken", "node": "Lava_Slab_B",
+		"bands": ["back", "far"], "weight": 0.8, "scale": [0.85, 1.2],
+		"collide": "hull"},
+]
+
+
 const SCATTER_BAIKAL: Array[Dictionary] = [
 	{"glb": "baikal/trees/larch_winter_a", "bands": ["mid", "back", "far"],
 		"weight": 0.5, "scale": [0.85, 1.25], "collide": "trunk"},
@@ -982,7 +1062,26 @@ static func _place_from_set(parent: Node3D, set: Array, band_name: String,
 	var path := "res://assets/models/" + String(entry["glb"]) + ".glb"
 	if not ResourceLoader.exists(path):
 		return false
-	var model := (load(path) as PackedScene).instantiate() as Node3D
+	# `node`: o SINGURA varianta din GLB-urile multi-nod (kitul Stromboli are
+	# variante in aproape fiecare fisier). Fara asta s-ar instantia fisierul
+	# intreg — adica amandoi maslinii in acelasi punct.
+	#
+	# `extra`: nodurile care merg IMPREUNA cu el, in aceeasi instanta. Un copac
+	# e trunchi + coroana in noduri separate, si n-au sens unul fara altul.
+	var model: Node3D = null
+	var pick_name := String(entry.get("node", ""))
+	if pick_name.is_empty():
+		model = (load(path) as PackedScene).instantiate() as Node3D
+	else:
+		model = pick_from_glb(path, pick_name)
+		if model == null:
+			return false
+		for extra_name in (entry.get("extra", []) as Array):
+			var side := pick_from_glb(path, String(extra_name))
+			if side != null:
+				model.add_child(side)
+	if model == null:
+		return false
 	var sr: Array = entry.get("scale", [1.0, 1.0])
 	var s := rng.randf_range(float(sr[0]), float(sr[1]))
 	model.scale = Vector3.ONE * s
@@ -1024,6 +1123,22 @@ static func _place_from_set(parent: Node3D, set: Array, band_name: String,
 ## dupa primul `if` e plasatorul vechi — aceleasi piese ca la alpin, fara ce nu
 ## are ce cauta in februarie — si ramane DOAR ca rezerva pentru un checkout fara
 ## kitul Baikal (larice, mesteceni, bolovani cu licheni).
+## FLANCUL MEDITERANEAN (Stromboli). Totul vine din SCATTER_STROMBOLI; nu mai
+## exista ramura de rezerva ca la Baikal, fiindca nu exista set mai vechi de pe
+## care sa cada — pana acum pista imprumuta props-urile insulare (palmieri si
+## coral), care n-au ce cauta pe un vulcan eolian.
+##
+## Daca setul nu da nimic (checkout fara kit), cade pe scatter-ul generic:
+## pietricele, adica exact ce ai vrea sa vezi in locul unui palmier.
+static func _place_stromboli_prop(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
+		satellite: bool) -> void:
+	if _place_from_set(parent, SCATTER_STROMBOLI, String(band["name"]),
+			spec.position, rng, satellite):
+		return
+	_add_scatter(parent, spec.position, rng, mat)
+
+
 static func _place_baikal_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
 		satellite: bool) -> void:

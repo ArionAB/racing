@@ -497,6 +497,19 @@ func _thousands(n: int) -> String:
 ## Numele de varianta sunt un contract pe care il impunem oricum — in briefuri,
 ## in `verify_glb.py` si in registrele din `track.gd` — deci sunt cheia stabila.
 const VARIANT_SOURCE := {
+	# --- Stromboli (kitul de flanc) ---
+	#
+	# PRIMELE, din acelasi motiv ca Baikal mai jos: atribuirea ia primul prefix
+	# care se potriveste. "lava_slab_" ar cadea altfel pe nimic, dar "prickly_"
+	# si "caper_" sunt nume noi si e mai ieftin sa stea toate la un loc decat
+	# sa se caute cine cu cine se calca peste doua luni.
+	"olive_": "olive_tree", "fig_": "fig_tree",
+	"prickly_": "prickly_pear", "caper_": "caper_bush",
+	"ginestra_": "ginestra_bush", "cane_clump": "cane_clump",
+	"vine_row": "vine_row",
+	"basalt_": "basalt_boulder", "scoria_": "scoria_rock",
+	"lava_slab": "lava_slab_broken", "lava_stage": "lava_flow",
+	"terrace_wall": "terrace_wall", "coast_cliff": "coast_cliff_basalt",
 	# --- Baikal (kitul de padure si mal, un fisier pe piesa) ---
 	#
 	# PRIMELE in dictionar, nu ultimele: atribuirea ia primul prefix care se

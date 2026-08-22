@@ -35,17 +35,11 @@ curve = SubResource("Curve3D_stromboli")
 
 [node name="Peaks" type="Node3D" parent="."]
 
-[node name="CraterPeak" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 68, 268.3)
-gizmo_extents = 60.0
-script = ExtResource("2_peak")
-radius_m = 60.0
-
 [node name="FlanculConului" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 40, 268.3)
-gizmo_extents = 155.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 72, 268.3)
+gizmo_extents = 200.0
 script = ExtResource("2_peak")
-radius_m = 155.0
+radius_m = 200.0
 
 [node name="DealulSatului" type="Marker3D" parent="Peaks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.2, 16, 72.8)

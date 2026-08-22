@@ -92,7 +92,7 @@ func road_is_loose() -> bool:
 func road_dust_color() -> Color:
 	if road_surface == "snow":
 		return SNOW_ROAD_COLOR
-	return DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
+	return dirt_road_color() if road_is_loose() else ROAD_COLOR
 
 ## Suprafata pe care masinile lasa brazde rulind (vezi SandTrail).
 ##
@@ -103,7 +103,7 @@ func road_dust_color() -> Color:
 func trail_surface_color() -> Color:
 	if road_surface == "snow":
 		return SNOW_ROAD_COLOR
-	return DIRT_ROAD_COLOR if road_is_loose() else theme_ground_tint
+	return dirt_road_color() if road_is_loose() else theme_ground_tint
 
 ## Cat de INCHISA e brazda fata de suprafata pe care e lasata, pe drumurile de
 ## pamant/nisip. Tinta e o brazda, nu vopsea: nisipul rascolit isi pierde din
@@ -846,8 +846,29 @@ static func themes() -> Dictionary:
 				{"near": 250.0, "far": 295.0, "count": 2, "scale": 1.10,
 					"clear": 130.0, "picks": ["Island_Peak"]},
 			],
+			# TREI ETAJE DE CULOARE PE CON (brief §5.5), nu verde peste tot.
+			#
+			# Prima versiune a copiat `inland_tint` de la Okinawa: verde
+			# tropical la 0.75 peste tot interiorul insulei. Captura de sus a
+			# iesit o insula VERDE cu drum galben — adica Okinawa cu alt
+			# traseu, nu un vulcan. Pe Stromboli verdele are voie doar la
+			# POALE; de la ~18 m in sus incepe scoria, iar de la ~48 m cenusa.
+			#
+			# Etajele se fac cu mecanismele care exista deja, nu cu cod nou:
+			#   - `inland_tint`  = etajul verde, slabit la 0.40 si oprit de
+			#                      banda de roca de deasupra lui
+			#   - `rock_band_tint` (mecanismul alpin) = scoria, de la 18 m
+			#   - `snow_tint`    = capul de cenusa, de la 48 m
+			# Toate trei sunt culori de VERTEX peste terenul existent: zero
+			# materiale noi, zero sloturi noi (conditia din CLAUDE.md).
 			"inland_tint": Palette.color(Palette.TROPICAL_GREEN),
-			"inland_strength": 0.75,
+			"inland_strength": 0.40,
+			# Etajul de scorie: incepe jos (18 m) fiindca vegetatia de pe
+			# Stromboli se opreste repede — insula e conul, nu are platou.
+			# `rock_fade` mare (16) ca trecerea sa fie o zona, nu o linie.
+			"rock_line": 18.0,
+			"rock_fade": 16.0,
+			"rock_band_tint": Palette.color(Palette.VOLCANIC_BLACK),
 			# Capul de cenusa: mecanismul zapezii, cu gri in loc de alb.
 			"snow_line": 48.0,
 			"snow_fade": 9.0,
@@ -860,6 +881,11 @@ static func themes() -> Dictionary:
 			"rock_class": "rock",
 			"water": true,
 			"seabed_drop": 26.0,
+			# Nisip negru vulcanic pe drum si pe plaja, nu nisipul auriu
+			# implicit (vezi dirt_road_color). Nu e VOLCANIC_BLACK curat:
+			# nisipul batatorit de roti e putin mai deschis si mai cald decat
+			# bazaltul de langa el, altfel drumul dispare in teren.
+			"dirt_road_tint": Color(0.34, 0.32, 0.33),
 			"dust_color": Color(0.28, 0.26, 0.27),
 			"branch_tint": Color(0.30, 0.28, 0.30),
 			"branch_surface": "gravel",
@@ -4049,6 +4075,20 @@ const ROAD_SNOW_CEIL: float = 0.42
 ## saturat pe drum, rece desaturat pe iarba — plus umerii si chevron-urile.
 ## ############################################################################
 const DIRT_ROAD_COLOR: Color = Color(0.80, 0.66, 0.43)
+
+## Culoarea drumului afanat, cu voie de suprascriere din TEMA.
+##
+## `DIRT_ROAD_COLOR` e nisipul auriu al desertului, potrivit pe Dunele si
+## Okinawa. Pe Stromboli plaja si drumul sunt NISIP NEGRU vulcanic: cu galbenul
+## implicit, captura de sus arata o insula vulcanica traversata de o panglica
+## de plaja tropicala.
+##
+## Se rezolva cu o cheie de tema, nu cu o constanta noua si un `if` per pista:
+## la fel ca `ice_road_tint` pe Baikal. Temele care n-o declara raman exact pe
+## valoarea veche.
+func dirt_road_color() -> Color:
+	var tint: Variant = theme_flag("dirt_road_tint", null)
+	return tint as Color if tint != null else DIRT_ROAD_COLOR
 ## Media texturii macro de nisip (process_class_textures.surfaces()).
 const SAND_MACRO_MEAN: float = 0.850
 
@@ -4222,9 +4262,9 @@ func _build_road() -> void:
 	# nuanta neatinsa — celelalte lumi nu se schimba cu un pixel.
 	var road_dark := Color.WHITE
 	if snow_tint != null and snow_amount > 0.0:
-		var lifted := (DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR) \
+		var lifted := (dirt_road_color() if road_is_loose() else ROAD_COLOR) \
 			.lerp(snow_tint as Color, ROAD_SNOW_CEIL)
-		var plain := DIRT_ROAD_COLOR if road_is_loose() else ROAD_COLOR
+		var plain := dirt_road_color() if road_is_loose() else ROAD_COLOR
 		road_dark = Color(
 			plain.r / maxf(lifted.r, 0.001),
 			plain.g / maxf(lifted.g, 0.001),
@@ -4399,7 +4439,7 @@ func _build_road() -> void:
 		base = SNOW_ROAD_COLOR
 		macro_mean = SNOW_MACRO_MEAN
 	elif road_is_loose():
-		base = DIRT_ROAD_COLOR
+		base = dirt_road_color()
 		macro_mean = SAND_MACRO_MEAN
 	# Pe temele cu zapada pe drum, materialul poarta o culoare INTRE asfalt si
 	# zapada, iar vertecsii o duc in ambele sensuri: in jos spre asfalt (peste

@@ -8,7 +8,7 @@ Verifica:
   2. numarul de triunghiuri fata de buget
   3. UV-urile: toate colapsate pe centre de slot din atlas -> ce sloturi foloseste
   4. sloturile sunt LEGALE (vezi LEGAL_SLOTS). 14-16 sunt accente de masina;
-     30-31 sunt rezerva si se randeaza magenta in joc.
+     31 e ultima rezerva si se randeaza magenta in joc.
      Piesele care poarta o textura de CLASA (assets/textures/classes/) au
      UV-uri REALE si nu li se aplica regula slotului; sonda le RECUNOASTE
      SINGURA din forma UV-urilor (vezi uv_kind). Pe ele verificarea se
@@ -18,6 +18,8 @@ Verifica:
      numite, pentru cazurile in care vrei sa-l AFIRMI, nu sa-l lasi dedus.
   5. COLOR_0 prezent (AO copt) + intervalul de valori
   6. bounding box: originea la baza (min Y ~ 0), centrata in XZ. Cu
+     --origin=rim se cere invers: geometria ATARNA sub Y=0, care e muchia
+     de sus (craterul — originea la coronament, cuva coboara la -13 m). Cu
      --origin=center se cere in schimb bbox centrat pe Y (obiecte care se
      rostogolesc — exceptia declarata din #45). Cu --origin=assembly se verifica
      doar ca ANSAMBLUL atinge solul: piesele unui obiect compus (arcada din #C1)
@@ -30,6 +32,7 @@ Rulare:
     python tools/blender/verify_glb.py assets/models/signs/route66_sign.glb 260 --front=-Z
     python tools/blender/verify_glb.py assets/models/rocks/boulder_roller.glb 220 --origin=center
     python tools/blender/verify_glb.py assets/models/rocks/rock_arch.glb 1000 --origin=assembly
+    python tools/blender/verify_glb.py assets/models/stromboli/structures/crater_bowl.glb 3100 --origin=rim
     python tools/blender/verify_glb.py assets/models/buildings/windmill.glb 3000 \
         --class-parts=Mill_Wood,Mill_Metal,Blades
 """
@@ -49,6 +52,8 @@ SLOT_NAMES = [
     "car_red", "car_blue", "car_yellow",
     "reef_shallow", "sea_deep", "coral_sand", "volcanic_black",
     "tropical_green", "foam_white", "tile_terracotta",
+    "ice_turquoise", "ice_deep", "ice_crack", "larch_rust", "log_dark",
+    "marble_grey", "lava_orange",
 ]
 
 # Sloturile pe care le poate folosi un asset de decor.
@@ -69,9 +74,16 @@ SLOT_NAMES = [
 # de masina in decor.
 # Sloturile cu culoare REALA in palette_atlas.png. Lista urmareste
 # scripts/palette.gd: 0-13 baza, 17-23 mediul insular (Okinawa), 24-29 Baikal
-# (gheata, larice, barne, marmura). 30-31 raman rezerva si se randeaza
-# magenta, deci o piesa care le foloseste e o greseala de UV, nu o alegere.
-LEGAL_SLOTS = frozenset(list(range(0, 14)) + list(range(17, 30)))
+# (gheata, larice, barne, marmura), 30 Stromboli (LAVA_ORANGE).
+#
+# 30 a intrat odata cu pista Stromboli: lava, crapaturile bombelor si gurile
+# craterului sunt SEMNALUL pistei, singura sursa de portocaliu saturat din
+# decor. Emisivul NU vine din slot (atlasul e albedo) — vine din materialul
+# de clasa al lavei, atasat la integrare in Godot.
+#
+# 31 ramane ULTIMA rezerva si se randeaza magenta, deci o piesa care il
+# foloseste e o greseala de UV, nu o alegere.
+LEGAL_SLOTS = frozenset(list(range(0, 14)) + list(range(17, 31)))
 CAR_SLOTS = frozenset(range(14, 17))
 
 COMPONENT = {5120: ("b", 1), 5121: ("B", 1), 5122: ("h", 2),
@@ -323,7 +335,7 @@ def verify(path, budget=None, front=None, origin="base", class_parts=(),
         # verificare si iesea cu "niciun nod cu mesh". O garda care raporteaza
         # ca n-are ce masura, in loc sa masoare, e mai rea decat lipsa ei:
         # arata rosu din alt motiv decat cel adevarat.
-        if origin in ("assembly", "waterline"):
+        if origin in ("assembly", "waterline", "rim"):
             assembly_lo = min(assembly_lo, min(ys) + tr[1])
             assembly_hi = max(assembly_hi, max(ys) + tr[1])
         if any(abs(c) > 1e-6 for c in tr):
@@ -344,14 +356,14 @@ def verify(path, budget=None, front=None, origin="base", class_parts=(),
                 ok = False
             else:
                 print("    origine   : centru confirmat (bbox Y %+.3f, cerut ~0)" % off)
-        elif origin in ("assembly", "waterline"):
+        elif origin in ("assembly", "waterline", "rim"):
             # Ansamblu cu ORIGINE COMUNA: mai multe noduri care formeaza un
             # singur obiect si trebuie sa-si pastreze pozitiile relative (arcada
             # din #C1: doua picioare, o traversa, doua proxy-uri de coliziune).
             # Regula "baza la Y=0" per nod ar fi gresita — traversa chiar
             # pluteste la 9 m, ala e tot rostul ei. Ce se verifica in schimb e ca
             # ANSAMBLUL atinge solul (acumulat mai sus, in lume) — respectiv, la
-            # waterline, ca INCALECA linia apei.
+            # waterline, ca INCALECA linia apei; la rim, ca ATARNA sub ea.
             pass
         elif abs(min(ys)) > 0.01:
             print("    !! baza nu e la Y=0 (min Y = %.3f)" % min(ys))
@@ -362,7 +374,7 @@ def verify(path, budget=None, front=None, origin="base", class_parts=(),
         # intentionat (un semn a carui origine trebuie sa stea pe axa stalpului),
         # iar la un ansamblu piesele individuale sunt decentrate prin definitie.
         for axis, vals in (("X", xs), ("Z", zs)):
-            if origin == "assembly":
+            if origin in ("assembly", "rim"):
                 break
             span = max(vals) - min(vals)
             center = (min(vals) + max(vals)) / 2
@@ -431,6 +443,25 @@ def verify(path, budget=None, front=None, origin="base", class_parts=(),
             print("\nlinia apei: confirmata (Y %.3f .. %.3f incaleca 0)"
                   % (assembly_lo, assembly_hi))
 
+    if origin == "rim":
+        # Obiect ancorat de MUCHIA DE SUS: craterul. Y=0 e coronamentul (cota
+        # drumului de pe buza), iar cuva coboara sub el. Contractul e invers
+        # fata de "baza la zero": geometria ATARNA sub origine si atinge zero
+        # pe sus. Un crater exportat cu baza la 0 ar sta ca un castron pe masa,
+        # la 13 m DEASUPRA soselei de pe buza.
+        if assembly_hi < -0.01 or assembly_lo > -0.01:
+            print("\n!! origin=rim, dar geometria nu atarna sub Y=0 "
+                  "(Y %.3f .. %.3f) — exportat cu originea la baza?"
+                  % (assembly_lo, assembly_hi))
+            ok = False
+        elif assembly_hi > 0.01:
+            print("\n!! origin=rim: geometria trece PESTE coronament cu %.3f m "
+                  "(Y %.3f .. %.3f)" % (assembly_hi, assembly_lo, assembly_hi))
+            ok = False
+        else:
+            print("\ncoronament: confirmat (Y %.3f .. %.3f, atarna sub origine)"
+                  % (assembly_lo, assembly_hi))
+
     print("\nTOTAL: %d tris" % grand_total)
     print("VERDICT: %s" % ("OK" if ok else "PROBLEME — vezi mai sus"))
     return ok
@@ -464,9 +495,9 @@ if __name__ == "__main__":
                               if x.strip())
         elif f.startswith("--origin="):
             origin = f.split("=", 1)[1].strip().lower()
-            if origin not in ("base", "center", "assembly", "waterline"):
-                sys.exit("--origin asteapta base (implicit), center, assembly "
-                         "sau waterline")
+            if origin not in ("base", "center", "assembly", "waterline", "rim"):
+                sys.exit("--origin asteapta base (implicit), center, assembly, "
+                         "waterline sau rim")
         else:
             sys.exit("optiune necunoscuta: %s" % f)
 

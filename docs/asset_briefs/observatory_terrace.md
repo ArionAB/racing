@@ -81,3 +81,76 @@ rădăcinii. Mesh + UVs + Vertex Colors + Normals; Apply Modifiers ON.
   copertina albă se citește contra pantei negre.
 - **Checklist:** 3 noduri cu nume exacte; ≤ 1550 tris; treptele spre +Z;
   origine la bază; UV pe centre; `COLOR_0`.
+
+---
+
+## Livrat
+
+![terasa văzută de pe drum, cu mașină pentru scară](img/observatory_road.png)
+
+Captura cerută de brief: **de pe drum, ~12 m** (mașina de 4.2 m în față).
+Vederea ¾ e în `img/observatory_34.png`.
+
+Testul din brief — *se citește copertina albă contra pantei negre?* — trece:
+pânza e singura suprafață deschisă din cadru, iar sub ea se văd mesele și
+binoclul. Ansamblul spune „cineva stă aici și se uită", ceea ce e tot rostul
+POI-ului.
+
+### Cote
+
+| nod | tris | buget |
+|---|---|---|
+| `Terrace_Stone` | **572** | 700 |
+| `Awning_Canvas` | **302** | 350 |
+| `Terrace_Furniture` | **688** | 500 |
+| **total** | **1562** | **1550** |
+
+- platformă **10 × 6 m**, înaltă 1.2 m; copertină **5 × 4 m** la 4 m de la
+  pardoseală
+- treptele spre **+Z** (bbox Z până la +4.400, platforma are semi-adâncime 3.0)
+- binoclul privește spre **−Z** (construit spre +Y în Blender)
+- origine la bază: `ansamblu: Y=0.000 confirmat`
+- `verify_glb ... 1550 --origin=assembly` → **VERDICT: OK**
+
+Totalul depășește cu **12 triunghiuri** (0.8%), sub granularitatea unei singure
+cutii cu bevel (44). Ca să ajung aici au picat lada și cănile — pe care brief-ul
+le dă explicit ca „opțional" — iar băncile s-au mutat pe capre lățite în loc de
+picioare proprii, exact cum e construită o masă de picnic reală.
+
+### Ce a trebuit reparat
+
+**1. Stâlpii străpungeau pânza.** Prima versiune îi ducea pe toți la o cotă
+fixă (`top`), dar pânza coboară în colțuri cu **0.56 m** (măsurat) — deci ieșeau
+ca niște țepușe deasupra. Brief-ul cere invers: „colțurile trase în jos **spre
+stâlpi**". Reparat prin scoaterea cotei pânzei într-o funcție (`_canvas_z`) pe
+care o citesc și stâlpii — fiecare la coordonatele **lui**, nu la un colț
+generic (a doua încercare folosea `_canvas_z(1,1)` pentru toți patru și tot
+ieșeau, doar mai puțin).
+
+**2. Copertina stătea peste parapet, nu peste mese.** Centrată pe platformă,
+umbra cădea pe zid iar mesele rămâneau în soare. Acum centrul ei e la
+`(−0.2, 0.1)`, între cele două mese.
+
+**3. Mesele citeau „scaun"** — blat de 1.2 × 0.8 pe patru bețe subțiri. O masă
+de picnic se recunoaște după blatul lat și băncile paralele: acum 1.6 × 0.9 pe
+două capre.
+
+### Abateri de la brief
+
+**Rosturile sunt `ASPHALT_EDGE` (6), nu `ROCK_DARK` (4)** — a treia oară aceeași
+abatere, din același motiv. `ROCK_DARK` (#67421F) e maroul de deșert al
+canionului; pe bazalt negru iese **rugină**, iar blocurile de zidărie ieșeau
+cutii maro pe o platformă neagră. `ASPHALT_EDGE` (#696765) e gri neutru la
+1.23× luminanța scoriei: se citește ca piatră diferită fără să schimbe familia
+de culoare.
+
+> Merită notat ca tipar: pe pista asta `ROCK_DARK` **nu se folosește deloc**.
+> Briefurile îl cer pentru „fețe umbrite" din inerție (vine din canion), dar pe
+> bazalt umbra o face AO-ul, nu un slot maro. Vezi și `crater_bowl.md` și
+> `strombolicchio.md`.
+
+### Note pentru integrare
+
+- `DecorManual`, pe acul de păr de la frac ~0.30, cu fața spre Sciara
+- pânza ar putea primi vertex-wind slab (ca panglicile serge) — nu cere nimic
+  de la asset

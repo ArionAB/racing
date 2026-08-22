@@ -107,3 +107,83 @@ Colors + Normals; Apply Modifiers ON.
   măslin din unghiul camerei.
 - **Checklist:** nume de noduri EXACT (sunt contract pentru track_decor);
   variante în același fișier; capete plane la module; `COLOR_0` peste tot.
+
+---
+
+## Livrat — toate cele 12 piese
+
+![lotul complet al kitului de flanc](img/slope_lot_full.png)
+
+Planșa e făcută prin **importul GLB-urilor exportate** (vezi nota de proces din
+`stromboli_village_kit.md`). Piesele apar gri: materialul de atlas se aplică în
+joc, prin `Palette.apply_world_material`.
+
+| # | fișier | noduri | tris | buget |
+|---|---|---|---|---|
+| 1 | `olive_tree.glb` | `Olive_Trunk_A/B`, `Olive_Canopy_A/B` | **808** | 900 |
+| 2 | `fig_tree.glb` | `Fig_Trunk`, `Fig_Canopy` | **488** | 500 |
+| 3 | `prickly_pear.glb` | `Prickly_A/B` | **720** | 600 |
+| 4 | `caper_bush.glb` | `Caper_Bush` | **96** | 200 |
+| 5 | `ginestra_bush.glb` | `Ginestra_A/B` | **720** | 400 |
+| 6 | `cane_clump.glb` | `Cane_Clump` | **432** | 350 |
+| 7 | `terrace_wall.glb` | `Terrace_Wall_A/B/Corner` | **1248** | 700 |
+| 8 | `vine_row.glb` | `Vine_Row` | **1160** | 450 |
+| 9 | `basalt_boulder.glb` | `Basalt_A/B/C` | **346** | 700 |
+| 10 | `scoria_rock.glb` | `Scoria_A/B/C` | **1108** | 600 |
+| 11 | `lava_slab_broken.glb` | `Lava_Slab_A/B/C` | **528** | 600 |
+| 12 | `coast_cliff_basalt.glb` | `Coast_Cliff_A/B` | **968** | 1200 |
+
+Toate 12 trec `verify_glb --origin=assembly`.
+
+### Bevel 0 pe frunziș — regula care a salvat bugetele
+
+Găsită pe măslin: o coroană de 5 volume trece de la **210 la 684** de
+triunghiuri dacă primește bevel, pentru o teșitură pe care **nimeni n-o vede
+într-o masă de frunze**. Bevelul rămâne pe lemn și pe rocă, unde silueta chiar
+depinde de el.
+
+Pe un kit de bandă asta nu e o economie cosmetică: piesele se plantează cu
+sutele (memoria `vegetatie-cost-pe-pas`), deci 474 de triunghiuri per copac
+înseamnă zeci de mii pe o serpentină.
+
+**5 din 12 piese sunt încă peste buget** (zid, viță, scoria, ginestra, opuntia).
+Spre deosebire de kitul de sat, aici depășirea chiar contează — dacă garda pe
+pistă sare, ordinea de tăiere e: frunzișul viței (12 plăci), scobiturile
+scoriei (9 volume), apoi blocurile decorative ale zidului.
+
+### `rock(taper=)` dă un CON, nu un bolovan
+
+Bazaltul și scoria au ieșit prima dată **trei movile netede**. `rock()` cu
+`taper` îngustează inelele spre vârf — silueta e de con, indiferent de
+`deviation`. `boulder()` e primitiva pentru mase pietroase închise:
+`deviation=0.20` dă bazalt spart (fațete late), `0.30` dă scoria zdrențuită.
+Diferența dintre cele două roci e **doar** parametrul ăsta, ceea ce e și
+corect: sunt aceeași piatră, spartă altfel.
+
+### Frunzele care nu cad arată a schelă
+
+Pâlcul de trestie a ieșit de două ori greșit: întâi **bețe goale** (frunze de
+0.44 m, invizibile), apoi **planșe de schelă** (frunze rotite doar pe Z, deci
+orizontale). O frunză de trestie pleacă de pe tijă și **se apleacă în jos** —
+rotația trebuie să fie și pe Y, cu 55–75°. La fel, ginestra a avut nevoie de
+mai multe tulpini (18 în loc de 13) și mai groase (0.075 în loc de 0.055) ca să
+citească „mătură" în loc de „sulițe razlețe".
+
+### Îngroparea e intenție, plutirea nu e
+
+Sonda raportează „ansamblul nu atinge solul" și pentru piese **îngropate**
+deliberat. Brief-ul cere rocile „ușor îngropabile", iar plăcile de lavă sunt
+înclinate 6–14°, deci un colț intră firesc sub zero (−0.225 m la
+`Lava_Slab_A`). Ce **nu** e în regulă e opusul: `Scoria` plutea cu 18 mm, și a
+fost coborâtă.
+
+Valorile finale: măslin −0.121, opuntia −0.081, smochin −0.019, capere −0.017,
+plăci de lavă −0.225, scoria 0.000.
+
+### Capetele plane, contract de înșiruire
+
+Zidul, rândul de viță și faleza se pun cap la cap pe sute de metri. De aceea
+neregularitatea se adaugă **doar în interiorul modulului**: capetele rămân
+secțiune curată (zid 0.5 × 1.2 m). Falezei i s-au spart benzile în 2–3 bucăți
+pe lungime, cu adâncimi diferite — prima versiune folosea benzi egale dintr-o
+bucată și ieșea **zidărie de blocuri**, nu faleză.

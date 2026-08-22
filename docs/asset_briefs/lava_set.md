@@ -115,3 +115,100 @@ Apply Modifiers ON.
   testul: poarta de 4 m se citește ca trecere, buzele ei ca pericol?
 - **Checklist:** 3+3 noduri cu nume exacte; bugete; crăpături la AO 1.0;
   fronturile spre −Z; bombele cu pivot central.
+
+---
+
+## Livrat
+
+![stadiul 2 cu poarta de 4 m, mașină pentru scară](img/lava_gate.png)
+
+![cele trei bombe](img/volcanic_bombs.png)
+
+Captura cerută de brief e stadiul 2, de la nivelul drumului, cu o mașină
+(1.8 m lățime) în culoar. Testul trece: **poarta se citește ca trecere**, iar
+buzele ei sunt cele mai încărcate de crăpături — pericolul se vede exact unde
+treci.
+
+### Cote
+
+| fișier / nod | tris | buget |
+|---|---|---|
+| `Lava_Stage1` | 390 | 900 |
+| `Lava_Stage2` | 1138 | 1300 |
+| `Lava_Stage3` | 1068 | 1400 |
+| **lava_flow.glb** | **2596** | **3600** |
+| `Bomb_S` | 236 | 250 |
+| `Bomb_M` | 192 | 250 |
+| `Bomb_L` | 226 | 250 |
+| **volcanic_bomb.glb** | **654** | **750** |
+
+Ambele: `verify_glb` → **VERDICT: OK** (`--origin=assembly` pe limbă,
+`--origin=center` pe bombe — *centru confirmat* pe toate trei).
+
+### Contractele, verificate pe mesh
+
+- **Coada comună:** `Lava_Stage1/2/3` pleacă toate din y=0.00 și cresc la
+  **40 / 60 / 80 m**. `LavaFlowHazard` poate schimba mesh-ul fără să mute
+  nodul — altfel limba ar sări la fiecare tur în loc să avanseze.
+- **Poarta = 4.00 m**, măsurată pe mesh-ul exportat (nu pe constantă). Valoarea
+  nominală din cod e **4.37**: bevelul de 0.10 umflă fiecare braț spre culoar
+  cu ~0.18 m, iar jitterul de lățime mai mușcă. Un `GATE = 4.0` naiv dădea
+  **3.63 m** liberi — sub cerință, adică sub cât trebuie ca mașina să treacă
+  cu margine de eroare.
+- **Bombele au pivot central**, confirmat de sondă. AO-ul lor e **sferic**, nu
+  vertical: un gradient vertical coace o umbră la bază care, după o jumătate de
+  rotație, ajunge în vârf — o pată întunecată care se plimbă.
+
+### Crăpăturile vizibile din orice unghi — calibrate pe măsurătoare
+
+Brief-ul cere ca de la orice unghi să se vadă măcar o crăpătură (bombele se
+rostogolesc). Am scris o sondă care verifică din **14 direcții** (12 pe ecuator
++ sus + jos) dacă există o față incandescentă orientată într-acolo. Calibrarea
+a trecut prin două extreme, ambele „arătau plauzibil" în cod:
+
+| variantă | fețe glow | direcții acoperite | verdict |
+|---|---|---|---|
+| 3 benzi înguste | 4 (3%) | **6 / 14** | invizibil din jumătate din unghiuri |
+| 5 benzi late | 36 (29%) | 14 / 14 | dungi portocalii late, nu crăpături |
+| **6 benzi subțiri** | **10 (8%)** | **14 / 14** | ✔ |
+
+Fără sondă, prima variantă ar fi trecut: pe o randare statică se vede o
+crăpătură și pare în regulă. Defectul apare abia când obiectul se rotește în
+joc — adică prea târziu.
+
+### Abateri de la brief
+
+**1. Crăpăturile bombelor sunt fețe re-etichetate, nu geometrie scufundată** —
+abatere impusă de propriul buget al brief-ului. 30 de fâșii pe bombă costă
+**1320 de triunghiuri** după bevel, iar bugetul e **250 per bombă**, din care
+corpul ia deja ~256. `retag` costă **zero**. La scara jocului (bombe de
+0.6–1.2 m care se rostogolesc) se vede pata portocalie, nu adâncitura ei de 5 cm.
+
+**2. Bombele folosesc `boulder()`, nu `rock()`.** Prima versiune cu
+`rock(taper=0.85)` a scos trei **conuri** — `taper` mare înseamnă vârf ascuțit.
+`boulder()` e primitiva pentru corpuri rotunde care se rostogolesc, aceeași
+folosită de `boulder_roller`.
+
+### Bug prins de numărătoare, nu de ochi
+
+Prima versiune a ridicării de AO căuta vârfurile **după distanță** față de
+centrele reținute la construcție. Pe stadiile 1 și 3 raporta **0 vârfuri
+ridicate**: o crăpătură se întinde până la ±2 m, iar o rază de 1.2 m în jurul
+mijlocului ei nu prinde niciun vârf. Pe bombe rata din alt motiv — centrele de
+față nu coincid cu pozițiile vârfurilor, iar `finish(origin="center")` mută
+geometria după ce centrele au fost reținute.
+
+Reparat pe amândouă cu aceeași metodă, mai robustă: **crăpăturile se recunosc
+din UV**, fiindcă `assign_uvs` a colapsat deja fiecare față pe centrul slotului
+ei. Nu mai depinde de nicio cotă.
+
+Merită notat că **numărătoarea e cea care a prins bug-ul** — pe imagine, o
+crăpătură întunecată lângă una luminoasă nu sare în ochi.
+
+### Note pentru integrare
+
+- un **singur** material de clasă emisiv, partajat între `lava_flow`,
+  `volcanic_bomb` și `Crater_Vents` — garda numără materialele
+- limba primește collider din `world_prop`; marginea teșită la ~35° e ca să nu
+  fie citită ca zid vertical de raycast-ul suspensiei
+- bombele: `RockfallHazard` pe trasee `Path3D`, declanșate de `EruptionCycle`

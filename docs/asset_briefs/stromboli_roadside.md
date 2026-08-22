@@ -109,3 +109,95 @@ Modifiers ON.
   săgeata?); pontonul de pe apă la 30 m.
 - **Checklist:** nume exacte; bugete; fumarolele cu gura întunecată; săgețile
   chevron geometrie, nu textură; dana cu origine la linia apei.
+
+---
+
+## Livrat
+
+![chevronul de aproape](img/chevron_post.png)
+![fumarolele](img/fumaroles.png)
+![dana Ginostra, vedere laterală pe linia apei](img/ginostra_pier.png)
+
+### Cote
+
+| fișier / nod | tris | buget |
+|---|---|---|
+| `Fumarole_A` / `_B` / `_C` | 168 fiecare | 220 |
+| **fumarole_vent.glb** | **504** | **660** |
+| `Chevron_Post` | **84** | **120** |
+| `Pier_Slab` | 176 | 300 |
+| `Pier_Stairs` | 384 | 250 |
+| `Pier_Fittings` | 52 | 150 |
+| **ginostra_pier.glb** | **612** | **700** |
+
+Toate trei: `verify_glb` → **VERDICT: OK**. Pontonul:
+`linia apei: Y −1.250 .. 7.300 încalecă 0`. Chevronul: săgețile spre **+X**
+(vârful conturului la x=+0.080), placa spre **−Z**.
+
+### Bugetele au dictat forma, nu invers
+
+Pe piesele mici bugetul nu e o limită pe care o atingi la final — e **prima
+constrângere de proiectare**, fiindcă bevelul triplează orice. Trei exemple,
+toate rezolvate prin măsurătoare înainte de a modela:
+
+**Fumarolele (220/bucată).** Varianta „corectă" — două etaje de con + cilindru
+de gură + tor de sulf + 3 limbi — dă **204 triunghiuri brute**, adică ~590 după
+bevel. Torul singur (9×4 = 72 brut) costă cât tot bugetul. Ce a rămas: **un**
+trunchi de con cu 7 laturi, gura = capacul lui re-etichetat, sulful = inelul de
+fețe de sub buză, tot re-etichetat. Ambele costă **zero**. Singura geometrie în
+plus sunt două limbi de sulf care se scurg pe pantă — pe alea `retag` nu le
+poate face, fiindcă fețele laterale sunt inele orizontale, nu fâșii verticale.
+
+**Chevronul (120).** Stâlp 12 + placă 12 + 3 chevroane (hexagon concav: 8 tri
+pe fețe + 12 laterale = 20) = **84 brute**. Cu bevel 0.008 sar la **277** —
+bevelul costă *topologic*, nu după lățime, deci 8 mm costă exact cât 10 cm.
+Soluția e **bevel 0**, și e și corectă stilistic: bevelul e semnătura pieselor
+de piatră și lemn, dar un semn de circulație e placă tăiată și stâlp gelui;
+muchia vie e ce îl face să citească a obiect fabricat.
+
+**Bolarzii (150).** 4 cilindri (bolarzi cu capac) + tor = 128 brut → ~460 după
+bevel. Acum: bolardul e **un singur frustum** care se lățește spre vârf, inelul
+de acostare e o cutie subțire în locul torului (la 30 m, distanța din brief, un
+inel de 34 cm e o pată oricum), bevel 0.
+
+### Ce a trebuit reparat
+
+**Stânca pontonului plutea, iar scara era îngropată în ea.** Prima versiune
+punea pana de stâncă *sub* scară (`center y=−1.5`, lățime 2.6 m): rampele urcau
+prin interiorul ei, iar în randare scara dispăruse complet. E aceeași greșeală
+ca la biserică — **geometrie îngropată într-o masă** — doar că aici masa era
+stânca. Reparat prin retragerea stâncii la `y=−2.9`, cu scara urcând pe **fața**
+ei dinspre dană.
+
+A doua rundă: stânca tot plutea. `rock()` cu `taper` îngustează inelele de jos,
+deci o pană așezată „exact" pe zero nu ajunge cu masă până la apă. Îngropată
+deliberat (centru la 0.9 pe 6.4 m înălțime → baza la −2.3), ce iese din apă e
+doar partea lată.
+
+Pe drum am tras și **o concluzie greșită** pe care măsurătoarea a corectat-o:
+la prima randare de sus am pus „plutirea" pe seama perspectivei și a podelei de
+preview (care se așază la cel mai jos punct, −1.25). O vedere laterală pură a
+arătat că nu — chiar plutea.
+
+**Chevronul părea fără săgeți.** Randarea arăta placă albă goală și stâlpul în
+fața ei. `verify_glb` însă raporta `kerb_red` prezent. Camera de preview privea
+din **−Y**, adică spatele semnului: fața utilă e pe +Y (= −Z în Godot). Nu era
+un defect al modelului, ci al unghiului din care mă uitam.
+
+### Abateri de la brief
+
+1. **Fumarolele:** gura și sulful de pe buză sunt **fețe re-etichetate**, nu
+   cilindru retras și tor. Motivul e bugetul, detaliat mai sus.
+2. **Chevronul: bevel 0** în loc de 0.03–0.08.
+3. **Bolarzii:** o singură piesă per bolard, inel de acostare din cutie, fără
+   colac de frânghie (brief-ul îl dă „opțional").
+
+### Limitare cunoscută
+
+`Pier_Stairs` depășește bugetul de nod (384 vs 250) — pana de stâncă pe care e
+tăiată scara e inclusă în nodul ăsta, iar `rock()` cu 7×4 inele costă ~250
+singur. Totalul fișierului rămâne sub buget (612 / 700).
+
+Vizual, stânca citește încă mai degrabă „bloc" decât „pană fațetată". La
+distanța de joc (30 m, de pe apă) e acceptabil; dacă dana ajunge vreodată în
+prim-plan, stânca merită refăcută cu `mesa()` sau cu inele explicite.

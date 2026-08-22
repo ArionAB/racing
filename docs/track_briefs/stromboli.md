@@ -673,3 +673,77 @@ Kituri (o planșă pe kit, obiectele aliniate pe un rând, aceeași scară):
   vede 5° în sus și 63° în jos, deci un con de 100 m e invizibil de la bază.
 - **v2** (acest document): traseul urcă pe vulcan — serpentine, buza
   craterului, coborâre pe Sciara. Decizia dezvoltatorului, 22 aug 2026.
+
+---
+
+## Verdict la volan (video de 70 s, august 2026) — **v2 nu se citește încă**
+
+Dezvoltatorul a filmat un tur. Planșele extrase sunt în
+`img/video_plaja.png`, `img/video_buza.png`, `img/video_coborare.png`.
+
+**Concluzia contrazice validarea pasului 2.** Captura statică de pe buză
+trecuse; în mișcare nu ține. Merită spus explicit fiindcă e o lecție de
+metodă, nu o scăpare: o captură dintr-un unghi ales de mine arată ce caut,
+un tur filmat arată ce vede jucătorul.
+
+### Ce s-a măsurat pe cadre
+
+**Marea ocupă 0.2–1.3% din cadru**, pe tot turul:
+
+| moment | mare în cadru |
+|---|---|
+| plaja (t=6 s) | 1.0% |
+| plaja (t=10 s) | 0.2% |
+| buza (t=30 s) | 0.2% |
+| buza (t=34 s) | 0.5% |
+| coborâre (t=52 s) | 1.3% |
+
+Pe o pistă de insulă unde marea e **și pedeapsă, și dezvăluire**, asta
+înseamnă că nu există. Se vede ca o dungă turcoaz pe marginea de sus a
+cadrului, sau deloc.
+
+### Ce nu se citește
+
+- **plaja B** — conduci printr-un câmp verde-maro; marea nu e „pe dreapta,
+  fără parapet", e undeva la orizont
+- **buza craterului D** — nu se vede nici craterul, nici marea, nici că ești
+  la 60 m altitudine. E o cuvetă bej.
+- **coborârea Sciarei E** — pantă vizibilă, dar fără senzația de a coborî de
+  pe un vulcan
+
+### Ce ține
+
+Pista **se conduce bine**: 79–144 km/h, fără atingeri de pereți, fără
+repuneri, AI-ul se ține după tine. Etajarea de culoare (verde jos, cenușă
+sus) se vede și în mișcare. Decorul mediteranean e la locul lui.
+
+### Cauza comună, măsurată
+
+Toate trei au aceeași rădăcină, iar ea NU e banda de țărm (am încercat, zero
+efect — vezi commit-ul `wip(stromboli): plaja la mal`):
+
+```
+track_side_sampler.gd:335   GROUND_FLAT_RADIUS = 45 m   teren PLAT la cota șoselei
+track_side_sampler.gd:336   GROUND_BLEND_LEN   = 70 m   apoi amestec spre far_level
+track_side_sampler.gd:379   y = lerpf(road_level, far_level, t * t)   ← PĂTRATIC
+```
+
+Terenul rămâne la cota șoselei pe **45 m** în lateral, apoi se amestecă lent.
+La 80 m, `far_level` — unde trăiesc marea și fundul — cântărește doar **25%**.
+Efectul: orice pistă insulară primește un platou de ~100 m în jurul drumului,
+iar marea e împinsă dincolo de el. Pe Okinawa se vede mai puțin fiindcă
+șoseaua e la 0.2–1.2 m peste apă; pe Stromboli, la 1.5–60 m, platoul devine
+peisajul dominant.
+
+**Ambele constante sunt globale.** Reparația cere chei de temă pe ELE (nu pe
+banda de țărm), cu implicitele actuale pentru restul pistelor — și verificare
+pe Okinawa înainte, fiindcă „45 m de teren plat lângă drum" e o decizie veche
+cu motivele ei (racordul asfaltului, benzile de decor).
+
+### Camera
+
+12.5 m în spate, 10 m sus = **~39° în jos**, conform specificației din §2.0.
+Nu e dereglată, dar în video se vede cât de sus e: mașina apare de deasupra,
+iar orizontul intră rar în cadru. Dacă dezvăluirea de pe buză trebuie să
+funcționeze, unghiul ăsta e a doua pârghie după relief — o cameră mai joasă
+vede mai mult *înainte*, nu mai mult *în jos*.

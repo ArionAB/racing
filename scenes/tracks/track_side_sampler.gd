@@ -71,6 +71,18 @@ const SHORE_BAND_IN: float = 30.0
 ## Cat de departe in larg se termina coborarea spre fundul marii.
 const SHORE_BAND_OUT: float = 60.0
 
+## Banda efectiva, pe care tema o poate strange (cheile `shore_band_in/out`).
+##
+## Constantele de mai sus descriu un ATOL: recif care se intinde lenes spre
+## larg, potrivit pe Okinawa. O insula vulcanica tanara are tarmul ABRUPT —
+## conul intra direct in apa. Cu 30+60 m, plaja de pe Stromboli iesea la
+## ~90 m de sosea, deci pedeapsa "intri in mare" nu se putea intampla.
+##
+## Se seteaza dupa constructie, din Track.rebuild; pistele care nu declara
+## nimic raman exact pe valorile vechi.
+var shore_in: float = SHORE_BAND_IN
+var shore_out: float = SHORE_BAND_OUT
+
 # --- laguna dinauntrul buclei (doar cand _lagoon_depth > 0) ---
 ## Banda de tarm a lagunei, oglinda lui SHORE_BAND_*: IN = spre apa, OUT = spre
 ## uscat. Mai stramta decat a tarmului exterior fiindca panta e mai scurta —
@@ -779,7 +791,7 @@ func _shore_mix(wx: float, wz: float) -> float:
 	var sd := sqrt(d_sq)
 	if Geometry2D.is_point_in_polygon(p, _loop_poly):
 		sd = -sd
-	return smoothstep(-SHORE_BAND_IN, SHORE_BAND_OUT, sd)
+	return smoothstep(-shore_in, shore_out, sd)
 
 
 ## 0 = uscat, 1 = fundul lagunei. Oglinda lui _shore_mix, cu semnul invers:

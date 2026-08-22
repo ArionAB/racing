@@ -31,6 +31,40 @@ const TRACK_NAMES: Array[String] = [
 ]
 const CHAMP_ROUNDS: int = 3
 
+
+## Traduce un `--track=N` de pe linia de comanda in POZITIE din TRACK_SCENES.
+##
+## Uneltele din tools/ folosesc doua conventii, si amandoua sunt legitime:
+## `snapshot`/`probe_race` iau POZITIA din lista asta (Stromboli = 4), fiindca
+## pornesc o cursa prin GameState.selected_track; `probe_decor`/`survey_terrain`
+## iau NUMARUL SCENEI (Track11 = 11), fiindca baleiaza fisierele direct de pe
+## disc, inclusiv piste care nu sunt in lista.
+##
+## Pana acum `snapshot` facea `clampi()` pe numar: un `--track=11` dat din
+## reflex devenea TACUT indexul 4. Pe Stromboli a nimerit pista buna din pur
+## noroc, dar `--track=8` pentru Okinawa ar fi randat tot Stromboli si ar fi
+## trecut drept dovada ca "Okinawa e neschimbata". O verificare care nu poate
+## da gres nu verifica nimic.
+##
+## Deci: indexul CASTIGA (orice comanda veche merge la fel), iar un numar care
+## nu e index valid dar e numar de scena din lista se rezolva ca numar de scena,
+## in loc sa fie retezat. Ce nu e nici una, nici alta -> -1, adica eroare la
+## apelant. Singurul numar ambiguu e 1 (index -> Track08, scena -> Track01) si
+## se rezolva ca index, ca sa nu se schimbe sub picioare comenzile existente.
+static func resolve_track_index(n: int) -> int:
+	if n >= 0 and n < TRACK_SCENES.size():
+		return n
+	var wanted := "res://scenes/tracks/Track%02d.tscn" % n
+	return TRACK_SCENES.find(wanted)
+
+
+## Numele lizibil pentru un index deja rezolvat — pentru mesajele uneltelor.
+static func track_label(index: int) -> String:
+	if index < 0 or index >= TRACK_SCENES.size():
+		return "?"
+	return "%s (%s)" % [TRACK_NAMES[index],
+		String(TRACK_SCENES[index]).get_file().get_basename()]
+
 ## Puncte pe pozitie (locul 1..6). Lista TREBUIE sa aiba cel putin atatea
 ## intrari cate masini sunt in cursa: `record_results` indexeaza cu rangul.
 const CHAMP_POINTS: Array[int] = [10, 8, 6, 4, 2, 1]

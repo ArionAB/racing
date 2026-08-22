@@ -130,6 +130,18 @@ func _ready() -> void:
 	# assets — de fapt se schimbase masina sub noi. Aceeasi capcana ca la
 	# --mode=cliff, care nu-si seta `car.track` si masura altceva decat credea.
 	GameState.selected_car = clampi(_player_car, 0, GameState.CAR_DATA.size() - 1)
+	# `--track=` ia POZITIA din lista (Stromboli = 4), dar accepta si numarul
+	# scenei (--track=11). Fara verificarea asta, un index gresit nu se plangea
+	# aici, ci pica mai tarziu cu "Out of bounds" si turna zeci de mii de erori
+	# derivate, in care cauza nu se mai vedea.
+	var resolved := GameState.resolve_track_index(_track_index)
+	if resolved < 0:
+		push_error("probe_race: --track=%d nu e nici pozitie in lista (0..%d), nici numar de pista din lista."
+			% [_track_index, GameState.TRACK_SCENES.size() - 1])
+		get_tree().quit(1)
+		return
+	_track_index = resolved
+	print("probe_race: pista %s" % GameState.track_label(_track_index))
 	match _mode:
 		"race":
 			_start_race()

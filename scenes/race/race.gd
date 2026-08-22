@@ -233,6 +233,12 @@ func _watch_recovery(car: Car, delta: float) -> void:
 		_stalled[car] = 0.0
 
 func _on_player_lap(laps: int) -> void:
+	# Lava creste odata cu tururile. E o proprietate a LUMII, nu a cursei
+	# tale: ce vede jucatorul pe canal trebuie sa fie acelasi lucru pe care
+	# il vede si AI-ul cand isi alege ruta.
+	for child in track.get_children():
+		if child is LavaFlowHazard:
+			(child as LavaFlowHazard).on_lap_completed()
 	var now := Time.get_ticks_msec()
 	if _lap_start_ms >= 0:
 		var lap_ms := now - _lap_start_ms

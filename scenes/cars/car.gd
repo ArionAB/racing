@@ -414,12 +414,20 @@ func _physics_process(delta: float) -> void:
 		# verifica INAINTEA udului: pe un interval care e si ud si gheata,
 		# gheata castiga (e suprafata, udul e o stare).
 		var ice_here := route == 0 and track.is_ice_at(frac_here)
+		# AFANAT (cenusa, nisip negru adanc): al treilea nivel, cel mai bland.
+		# Se verifica ULTIMUL — pe o portiune si udă si cu cenusa, udul
+		# castiga, la fel cum gheata castiga in fata udului.
+		var loose_here := route == 0 and track.is_loose_at(frac_here)
 		if ice_here:
 			var gi := track.ice_grip()
 			apply_slip(gi if gi > 0.0 else SLIP_GRIP_ICE)
 		elif wet_route or wet_here:
 			var g := track.wet_grip()
 			apply_slip(g if g > 0.0 else SLIP_GRIP_WET)
+		elif loose_here:
+			var gl := track.loose_grip()
+			if gl > 0.0:
+				apply_slip(gl)
 		# VANTUL temei (doar pe gheata, vezi Track.wind_at): forta centrala,
 		# proportionala cu masa — toate masinile deriveaza la fel, dar cea
 		# grea o simte in acelasi mod ca pe cea usoara (e o acceleratie). Doar

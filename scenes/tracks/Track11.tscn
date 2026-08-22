@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://b82usw4sot3ep" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
+[ext_resource type="Script" uid="uid://cgpvuv5ee337g" path="res://scenes/hazards/eruption_cycle.gd" id="4_erupt"]
+[ext_resource type="Script" uid="uid://b3ggqeosp3aap" path="res://scenes/hazards/lava_flow_hazard.gd" id="5_lava"]
+[ext_resource type="PackedScene" uid="uid://d04oqmtngqx5m" path="res://assets/models/stromboli/effects/lava_flow.glb" id="6_lavaglb"]
+[ext_resource type="Script" uid="uid://cbxpsyhc0lqe2" path="res://scenes/props/world_prop.gd" id="7_wprop"]
 
 [sub_resource type="Curve3D" id="Curve3D_stromboli"]
 _data = {
@@ -24,6 +28,7 @@ custom_name = "Stromboli"
 custom_theme = "stromboli"
 custom_road_surface = "dirt"
 custom_sea_level_offset = -22.95
+custom_loose_ranges = Array[Vector2]([Vector2(0.05, 0.13), Vector2(0.44, 0.66)])
 custom_ravines = Array[Vector4]([Vector4(0.466, 0.522, 14, -1)])
 custom_cornice_ravines = Array[int]([0])
 custom_width_segments = Array[Vector3]([Vector3(0.036, 0.121, 9.0), Vector3(0.46, 0.524, 6.5), Vector3(0.72, 0.748, 6.0)])
@@ -35,17 +40,11 @@ curve = SubResource("Curve3D_stromboli")
 
 [node name="Peaks" type="Node3D" parent="."]
 
-[node name="CraterPeak" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 68, 268.3)
-gizmo_extents = 60.0
-script = ExtResource("2_peak")
-radius_m = 60.0
-
 [node name="FlanculConului" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 40, 268.3)
-gizmo_extents = 155.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 72, 268.3)
+gizmo_extents = 200.0
 script = ExtResource("2_peak")
-radius_m = 155.0
+radius_m = 200.0
 
 [node name="DealulSatului" type="Marker3D" parent="Peaks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.2, 16, 72.8)
@@ -58,3 +57,19 @@ curve = SubResource("Curve3D_scurta")
 script = ExtResource("3_branch")
 branch_half_width = 3.0
 label = "Scurtatura de lava"
+
+[node name="EruptionCycle" type="Node3D" parent="."]
+script = ExtResource("4_erupt")
+period = 45.0
+telegraph = 3.0
+burst_window = 6.0
+metadata/_custom_type_script = "uid://cgpvuv5ee337g"
+
+[node name="LavaFlow" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -217.36, 17.8, 453.44)
+script = ExtResource("5_lava")
+branch_index = 1
+metadata/_custom_type_script = "uid://b3ggqeosp3aap"
+
+[node name="lava_flow" parent="LavaFlow" instance=ExtResource("6_lavaglb")]
+script = ExtResource("7_wprop")

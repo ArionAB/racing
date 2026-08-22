@@ -127,7 +127,12 @@ func update(delta: float) -> void:
 	# Bifurcatia: cine a decis ca o ia, tinteste banda cealalta cat timp cele
 	# doua sunt inca lipite. Comutarea propriu-zisa de ruta o face Car, pe
 	# proximitate laterala — aici doar ne mutam acolo la timp.
-	if prefers_shortcut and car.route == 0:
+	# `prefers_shortcut` se trage o data pe cursa, dar o scurtatura poate fi
+	# INCHISA la un moment dat (limba de lava de pe Stromboli, care creste tur
+	# de tur). De-asta se intreaba pista de fiecare data, nu doar la start:
+	# fara asta, un AI care a decis la turul 1 "o iau pe scurta" intra in zid
+	# la turul 3.
+	if prefers_shortcut and car.route == 0 and track.branch_is_open(1):
 		var lure := track.branch_lure(car.global_position, _lookahead_near(speed))
 		if lure != Vector3.INF:
 			near = lure

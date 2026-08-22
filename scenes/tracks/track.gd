@@ -794,6 +794,76 @@ static func themes() -> Dictionary:
 			"branch_tint": Color(0.86, 0.90, 0.94),
 			"branch_surface": "gravel",
 		},
+		# --- Insula vulcanica (pista Stromboli, docs/track_briefs/stromboli.md) --
+		#
+		# Sfarsit de dupa-amiaza pe un vulcan activ in Mediterana. Cheile care
+		# conteaza si de ce:
+		#
+		# 1. Trei etaje de culoare pe ACELASI mecanism ca insula + Alpii:
+		#    `ground_tint` negru vulcanic la nivelul marii (plaja neagra),
+		#    `inland_tint` verde prafuit peste fasia de plaja (tufaris),
+		#    `snow_line` la 48 m cu "zapada" GRI (MARBLE_GREY) = capul de cenusa
+		#    al conului. Niciun cod nou — doar valori.
+		# 2. Soare JOS (~20°), cald, dinspre mare — ora la care emisivul lavei
+		#    (PR-ul hazardului) incepe sa se citeasca fara sa fie noapte.
+		# 3. `fog_end` 300, peste ce cer alte teme calde: de pe buza craterului
+		#    (70 m) diagonala pana la sat e ~280 m, iar dezvaluirea din brief
+		#    (§2.0) exista doar daca satul ramane sub ceata. Cotele raman legate:
+		#    inele orizont < fog_end < FAR_PLANE 380.
+		# 4. `walls: false`, ca pe Alpi, si din acelasi motiv: e drum de munte
+		#    deschis, nu circuit. Riscul e declarat in teren (buza craterului,
+		#    marginea spre mare) prin `custom_ravines` + RespawnZone.
+		#
+		# Decorul (`props: island`) e PROVIZORIU pana vine kitul mediteranean —
+		# aceeasi conventie ca Baikal, care a stat pe props alpine pana la kit.
+		"stromboli": {
+			"ground_tint": Palette.color(Palette.VOLCANIC_BLACK),
+			"sky_top": Color(0.28, 0.50, 0.82),
+			"sky_horizon": Color(0.96, 0.89, 0.76),
+			"fog": Color(0.93, 0.87, 0.78),
+			"hill_color": Color(0.40, 0.44, 0.42),
+			"sun_color": Color(1.0, 0.88, 0.72),
+			"sun_energy": 1.30,
+			"sun_rotation_deg": Vector3(-20, 210, 0),
+			"exposure": 1.0,
+			"ambient_color": Color.html("D8C4A8"),
+			"ambient_energy": 0.30,
+			"fog_depth": true,
+			"fog_begin": 110.0,
+			"fog_end": 300.0,
+			# Panarea si Salina: doua siluete joase, albastrui, pe orizont.
+			# Refolosesc modelul insulelor Okinawa — la 200+ m prin ceata calda
+			# citesc ca insule vecine, nu ca recif tropical.
+			"horizon_model": "res://assets/models/effects/horizon_island.glb",
+			"horizon_picks": [
+				["Island_Ridge", "Island_Low"],
+				["Island_Peak"],
+			],
+			"horizon_class": "coral_rock",
+			"horizon_rings": [
+				{"near": 200.0, "far": 250.0, "count": 2, "scale": 0.85,
+					"clear": 110.0, "picks": ["Island_Ridge", "Island_Low"]},
+				{"near": 250.0, "far": 295.0, "count": 2, "scale": 1.10,
+					"clear": 130.0, "picks": ["Island_Peak"]},
+			],
+			"inland_tint": Palette.color(Palette.TROPICAL_GREEN),
+			"inland_strength": 0.75,
+			# Capul de cenusa: mecanismul zapezii, cu gri in loc de alb.
+			"snow_line": 48.0,
+			"snow_fade": 9.0,
+			"snow_tint": Palette.color(Palette.MARBLE_GREY),
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "bands",
+			"props": "island",
+			"rock_class": "rock",
+			"water": true,
+			"seabed_drop": 26.0,
+			"dust_color": Color(0.28, 0.26, 0.27),
+			"branch_tint": Color(0.30, 0.28, 0.30),
+			"branch_surface": "gravel",
+		},
 	}
 	return _themes_cache
 

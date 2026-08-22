@@ -36,12 +36,17 @@ CACTUS_GREEN, DRY_VEGETATION = 12, 13
 REEF_SHALLOW, SEA_DEEP = 17, 18
 CORAL_SAND, VOLCANIC_BLACK = 19, 20
 TROPICAL_GREEN, FOAM_WHITE, TILE_TERRACOTTA = 21, 22, 23
-# Baikal (Track10) ocupa 24..29; 30..31 raman rezerva. Zapada NU are slot
-# propriu (SNOW_WHITE e alias peste FOAM_WHITE) si panglicile serge iau
-# sloturile de masina — motivele complete sunt in scripts/palette.gd.
+# Baikal (Track10) ocupa 24..29. Zapada NU are slot propriu (SNOW_WHITE e
+# alias peste FOAM_WHITE) si panglicile serge iau sloturile de masina —
+# motivele complete sunt in scripts/palette.gd.
 ICE_TURQUOISE, ICE_DEEP, ICE_CRACK = 24, 25, 26
 LARCH_RUST, LOG_DARK, MARBLE_GREY = 27, 28, 29
 SNOW_WHITE = FOAM_WHITE
+# Stromboli (Track11) ia UN singur slot: lava e singura sursa de portocaliu
+# saturat din decor. Emisivul nu vine de aici (atlasul e albedo) — vine din
+# materialul de clasa al lavei, atasat la integrare in Godot. 31 ramane
+# ULTIMA rezerva si se randeaza magenta, ca greselile de UV sa sara in ochi.
+LAVA_ORANGE = 30
 # Cele 5 culori de panglica serge, in ordinea din brief (albastru, alb, galben,
 # rosu, verde). CAR_* nu sunt definite mai sus fiindca decorul nu le foloseste:
 # aici sunt explicit indicii lor.

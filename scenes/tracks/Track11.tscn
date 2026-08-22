@@ -29,8 +29,8 @@ custom_theme = "stromboli"
 custom_road_surface = "dirt"
 custom_sea_level_offset = -22.95
 custom_loose_ranges = Array[Vector2]([Vector2(0.05, 0.13), Vector2(0.44, 0.66)])
-custom_ravines = Array[Vector4]([Vector4(0.466, 0.522, 14, -1), Vector4(0.045, 0.125, 16, 1)])
-custom_cornice_ravines = Array[int]([0, 1])
+custom_ravines = Array[Vector4]([Vector4(0.466, 0.522, 30, -1), Vector4(0.045, 0.125, 16, 1), Vector4(0.466, 0.522, 34, 1)])
+custom_cornice_ravines = Array[int]([0, 1, 2])
 custom_width_segments = Array[Vector3]([Vector3(0.036, 0.121, 9.0), Vector3(0.46, 0.524, 6.5), Vector3(0.72, 0.748, 6.0)])
 sea_level_offset = -22.95
 

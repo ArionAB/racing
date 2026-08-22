@@ -820,17 +820,35 @@ static func themes() -> Dictionary:
 		"stromboli": {
 			"ground_tint": Palette.color(Palette.VOLCANIC_BLACK),
 			"sky_top": Color(0.28, 0.50, 0.82),
-			"sky_horizon": Color(0.96, 0.89, 0.76),
-			"fog": Color(0.93, 0.87, 0.78),
+			"sky_horizon": Color(0.86, 0.89, 0.88),
+			"fog": Color(0.80, 0.85, 0.88),
 			"hill_color": Color(0.40, 0.44, 0.42),
-			"sun_color": Color(1.0, 0.88, 0.72),
-			"sun_energy": 1.30,
-			"sun_rotation_deg": Vector3(-20, 210, 0),
+			# LUMINA E CE FACEA VULCANUL SA ARATE A PLAJA.
+			#
+			# Terenul de pe buza avea deja culoarea corecta — masurat direct in
+			# mesh, COLOR = (0.235, 0.231, 0.251), adica bazalt inchis, iar cele
+			# patru texturi de suprafata sunt gri neutru (media 215). Si totusi
+			# la volan iesea nisip cald, (132, 111, 89).
+			#
+			# Cauza era aici: soare chihlimbariu (1.0, 0.88, 0.72) la energie
+			# 1.30, plus ambiental D8C4A8 (bej) si ceata calda de la 110 m.
+			# Socoteala da (139, 131, 124) pe un albedo neutru inchis — exact ce
+			# se vedea. Atmosfera era copiata din desert, unde apusul auriu e
+			# tocmai ideea; pe o insula eoliana la amiaza lumina e ALBA si dura,
+			# iar cenusa trebuie sa ramana cea mai inchisa suprafata din cadru.
+			#
+			# Am pierdut trei incercari retusand albedo-uri (snow_tint,
+			# rock_class) fiindca am presupus ca o suprafata palida are o culoare
+			# palida. Verificarea care a rupt bucla n-a fost o captura, ci
+			# citirea culorilor de vertex din mesh plus inmultirea cu lumina.
+			"sun_color": Color(1.0, 0.98, 0.95),
+			"sun_energy": 0.85,
+			"sun_rotation_deg": Vector3(-34, 210, 0),
 			"exposure": 1.0,
-			"ambient_color": Color.html("D8C4A8"),
-			"ambient_energy": 0.30,
+			"ambient_color": Color.html("9FB0BF"),
+			"ambient_energy": 0.18,
 			"fog_depth": true,
-			"fog_begin": 110.0,
+			"fog_begin": 150.0,
 			"fog_end": 300.0,
 			# Panarea si Salina: doua siluete joase, albastrui, pe orizont.
 			# Refolosesc modelul insulelor Okinawa — la 200+ m prin ceata calda
@@ -869,11 +887,21 @@ static func themes() -> Dictionary:
 			# `rock_fade` mare (16) ca trecerea sa fie o zona, nu o linie.
 			"rock_line": 18.0,
 			"rock_fade": 16.0,
-			"rock_band_tint": Palette.color(Palette.VOLCANIC_BLACK),
+			"rock_band_tint": Palette.color(Palette.VOLCANIC_BLACK).darkened(0.42),
 			# Capul de cenusa: mecanismul zapezii, cu gri in loc de alb.
 			"snow_line": 48.0,
 			"snow_fade": 9.0,
-			"snow_tint": Palette.color(Palette.MARBLE_GREY),
+			# CENUSA PROASPATA, nu zapada. Mecanismul se numeste "snow" fiindca
+			# s-a nascut pe Alpi, unde etajul de sus e cel mai DESCHIS. Pe un
+			# vulcan e exact invers: verdele se opreste jos, iar spre crater
+			# roca devine tot mai neagra, fiindca acolo cade cenusa proaspata.
+			#
+			# Prima versiune a pus MARBLE_GREY (182,178,170) ca sa citeasca a
+			# "cap de cenusa". De pe buza, la volan, iesea NISIP: un varf palid
+			# si cald langa asfaltul inchis — plaja Dunelor pusa pe vulcan.
+			# Toata buza sta peste 48 m (54-60 m masurati), deci nu era o dunga
+			# de sus, era toata scena.
+			"snow_tint": Palette.color(Palette.VOLCANIC_BLACK).darkened(0.62),
 			"walls": false,
 			"kerbs": false,
 			"cliffs": false,
@@ -882,7 +910,17 @@ static func themes() -> Dictionary:
 			# Pana la el pista a imprumutat props-urile insulare — palmieri si
 			# coral — exact cum Baikal a stat pe props alpine pana la kitul lui.
 			"props": "stromboli",
-			"rock_class": "rock",
+			# BAZALT, nu gresie. Clasa "rock" e dala de desert (medie
+			# (141, 97, 58)) si NU trece prin `_tint_rock` — compensarea aia se
+			# aplica doar cand `rock_class` e gol (track_decor.gd:1654). Deci pe
+			# buza craterului ieseau bolovani de nisip cald, masurati la volan
+			# ca (132, 111, 89): plaja Dunelor pusa pe vulcan.
+			#
+			# Clasa nu se putea tenta pe loc: "rock" e si `horizon_class`
+			# implicit pentru toate temele, si `rock_material()` comun.
+			# `volcanic_rock` foloseste ACELASI PNG cu alt multiplicativ — zero
+			# textura in plus, zero atingere pe celelalte piste.
+			"rock_class": "volcanic_rock",
 			"water": true,
 			"seabed_drop": 26.0,
 			# Nisip negru vulcanic pe drum si pe plaja, nu nisipul auriu

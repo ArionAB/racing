@@ -356,6 +356,14 @@ const CLASS_TEXTURES := {
 	"plaster": "res://assets/textures/classes/plaster.png",
 	"stone_wall": "res://assets/textures/classes/stone_wall.png",
 	"rock": "res://assets/textures/classes/rock.png",
+	# BAZALT. ACELASI PNG ca "rock" — nu se dubleaza in memorie, se schimba
+	# doar multiplicatorul (vezi CLASS_TINT si nota de la ice_bloc). Dala
+	# de "rock" e gresie de desert, medie (141, 97, 58): pe conul
+	# Strombolilui iesea NISIP CALD pe toata buza craterului. Nu se putea
+	# tenta clasa "rock" direct, fiindca ea e si `horizon_class` implicit
+	# pentru TOATE temele (track.gd) si `rock_material()` comun — ar fi
+	# revopsit siluetele de orizont pe celelalte piste.
+	"volcanic_rock": "res://assets/textures/classes/rock.png",
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
 	"wood": "res://assets/textures/classes/wood.png",
 	"concrete": "res://assets/textures/classes/concrete.png",
@@ -408,6 +416,11 @@ const CLASS_TINT := {
 	# calcarului de Okinawa); pe Baikal trebuie sa ramana piatra cenusie sub
 	# soare rece, de unde tenta rece de aici.
 	"cut_stone": Color(0.88, 0.91, 0.97),
+	# Bazalt: gresia calda a dalei impinsa spre cenusiu-rece si coborata mult.
+	# Nu e o alegere de gust — pe un vulcan tanar roca de langa crater e cea
+	# mai INCHISA suprafata din cadru, iar cu dala netentata buza citea ca o
+	# duna de nisip. Multiplicativ pe (141, 97, 58) da ~(48, 40, 37).
+	"volcanic_rock": Color(0.34, 0.41, 0.63),
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -418,6 +431,8 @@ const CLASS_TRIPLANAR_SCALE := {
 	# mai fine decat benzile trim-ului pictat, iar la 5 m/repetitie se topeau
 	# in mipmap. La ~7 m, un strat citeste cat un strat.
 	"rock": 0.14,
+	# Aceeasi scara ca "rock": e aceeasi dala, doar alta tenta.
+	"volcanic_rock": 0.14,
 	"rust_metal": 0.45, # o repetitie la ~2.2 m — panouri, nu strate
 	# Sursa e o scanare de 1.1 m; la 1.18 m/repetitie scobiturile de calcar cad
 	# aproape la scara reala, iar o stanca de recif de 1.6-4 m prinde 1.5-3.5

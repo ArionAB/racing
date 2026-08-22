@@ -2,6 +2,11 @@ extends Node
 ## Randeaza o pista si salveaza PNG in snapshots/. Ruleaza CU FEREASTRA
 ## (randarea nu merge headless); fereastra apare ~o secunda si se inchide singura.
 ##
+##   --track=N   POZITIA din GameState.TRACK_SCENES (Dunele 0 · Okinawa 1 ·
+##               Alpii 2 · Baikal 3 · Stromboli 4). Se accepta si numarul
+##               scenei (--track=11 = Track11); un numar care nu e nici una,
+##               nici alta opreste cu eroare, nu se retează tăcut.
+##
 ##   --track=0                 ansamblu, de sus (ortografic)
 ##   --track=0 --frac=0.2      prim-plan inclinat la o fractie din traseu
 ##   --track=0 --frac=0.2 --driver
@@ -134,7 +139,18 @@ func _ready() -> void:
 			game_cam = true
 	if driver_view and zoom_frac < 0.0:
 		zoom_frac = 0.0
-	track_index = clampi(track_index, 0, GameState.TRACK_SCENES.size() - 1)
+	# `--track=` accepta si pozitia din lista (Stromboli = 4), si numarul
+	# scenei (Track11 = 11) — vezi GameState.resolve_track_index. Inainte era
+	# un clampi() tacut, care transforma un numar gresit in alta pista si o
+	# captura de "verificare" intr-un fals pozitiv.
+	var resolved := GameState.resolve_track_index(track_index)
+	if resolved < 0:
+		push_error("snapshot: --track=%d nu e nici pozitie in lista (0..%d), nici numar de pista din lista. Vezi GameState.TRACK_SCENES."
+			% [track_index, GameState.TRACK_SCENES.size() - 1])
+		get_tree().quit(1)
+		return
+	track_index = resolved
+	print("snapshot: pista %s" % GameState.track_label(track_index))
 
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track

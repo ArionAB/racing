@@ -145,6 +145,15 @@ Toate: low-poly stilizat (Art of Rally / machetă de masă), un singur material
 Origine la bază (linia solului / linia apei), +Y sus, „înainte" = −Z.
 Dimensiunile sunt și în artefactul `img/stromboli_map.html`, la POI-ul lor.
 
+> **✔ LIVRAT (august 2026): 36 de fișiere GLB, 36 986 de triunghiuri în total.**
+> Tabelele de mai jos sunt PLANUL. Ce s-a construit efectiv, cu numele exacte
+> de noduri și cifrele măsurate, e în **§5.7** — aia e sursa de adevăr pentru
+> plasare. Trei nume diferă de plan (vezi §5.7), iar `start_banner_alley` nu
+> există încă.
+>
+> Fiecare brief de asset din `docs/asset_briefs/` are secțiunea „Livrat" cu
+> cotele măsurate și abaterile motivate.
+
 ### 5.1 Teren și suprafețe (generate din cod, cer texturi de clasă)
 | asset | descriere | note |
 |---|---|---|
@@ -217,11 +226,149 @@ bubuitul erupției (bas, ~3 s înaintea bombelor — telegraph-ul), sfârâitul
 lavei, șuierul fumarolelor, vântul pe buză (se întărește cu altitudinea),
 valuri pe nisip, clopot la start, greieri pe terase, măgarul din Ginostra.
 
+## 5.7 Ce s-a livrat și cum se plasează
+
+**Sursa de adevăr pentru plasare.** Tabelele §5.1–5.6 sunt planul; asta e ce
+există pe disc, cu numele exacte de noduri (contract pentru `track_decor`) și
+triunghiurile măsurate pe fișierul exportat.
+
+### Abateri de nume față de plan (verifică-le înainte să cauți fișiere)
+
+| plan (§5.2/5.3) | livrat | de ce |
+|---|---|---|
+| `lava_flow_stage1/2/3.glb` | **`effects/lava_flow.glb`**, un fișier cu 3 noduri | contractul cu `LavaFlowHazard` cere ca stadiile să împartă originea și coada — într-un singur fișier alinierea e garantată prin construcție |
+| `nets_buoys_set.glb` | **`props/nets_buoys.glb`** | fără sufixul `_set` |
+| `start_banner_alley.glb` | **nu există** | nu era în niciun brief de asset; POI A merge și fără el, dar bannerul în carouri lipsește de la linia de start |
+
+### Inventarul complet (36 fișiere)
+
+Rădăcina: `assets/models/stromboli/`.
+
+| fișier | noduri | tris | POI |
+|---|---|---|---|
+| `structures/crater_bowl.glb` | `Crater_Bowl`, `Crater_Vents` | 2586 | D |
+| `structures/strombolicchio.glb` | `Stack_Rock`, `Stack_Stairs`, `Lighthouse_White`, `Lighthouse_Lantern` | 1564 | fundal (larg) |
+| `structures/observatory_terrace.glb` | `Terrace_Stone`, `Awning_Canvas`, `Terrace_Furniture` | 1562 | C (~frac 0.30) |
+| `buildings/stromboli_church.glb` | `Church_Body`, `Church_Tower`, `Church_Trim` | 2296 | A |
+| `buildings/aeolian_house_a.glb` | `House_A` | 836 | A, G |
+| `buildings/aeolian_house_b.glb` | `House_B` | 1416 | A, G |
+| `buildings/aeolian_house_c.glb` | `House_C` | 400 | A, G |
+| `buildings/pergola_pulera.glb` | `Pergola_Frame`, `Pergola_Canopy` | 720 | A, G |
+| `buildings/white_wall.glb` | `Wall_A`, `Wall_Gate`, `Wall_Corner` | 536 | A, G |
+| `buildings/alley_stairs.glb` | `Alley_Stairs` | 396 | A, G |
+| `buildings/street_shrine.glb` | `Shrine_Body`, `Shrine_Niche` | 498 | A, G, C |
+| `vehicles/ape_piaggio.glb` | `Ape_Body`, `Ape_Wheels`, `Ape_Bed` | 636 | A |
+| `vehicles/fishing_boat_small.glb` | `Boat_S_Hull`, `Boat_S_Trim`, `Boat_Rollers` | 350 | B |
+| `vehicles/fishing_boat_large.glb` | `Boat_L_Hull`, `Boat_L_Trim`, `Boat_L_Cabin` | 350 | G (la dană) |
+| `props/ginostra_pier.glb` | `Pier_Slab`, `Pier_Stairs`, `Pier_Fittings` | 612 | G |
+| `props/boat_winch.glb` | `Boat_Winch` | 864 | B, G |
+| `props/nets_buoys.glb` | `Net_Pile`, `Buoys` | 1348 | B, G |
+| `props/fumarole_vent.glb` | `Fumarole_A/B/C` | 504 | H |
+| `props/chevron_post.glb` | `Chevron_Post` | 84 | C, E |
+| `props/bougainvillea.glb` | `Bougainvillea_A`, `Bougainvillea_B` | 3884 | A, G |
+| `props/pot_cluster.glb` | `Pot_Cluster` | 2396 | A, G |
+| `props/donkey.glb` | `Donkey` | 1276 | G |
+| `effects/lava_flow.glb` | `Lava_Stage1/2/3` | 2596 | F |
+| `effects/volcanic_bomb.glb` | `Bomb_S/M/L` | 654 | D, E |
+| `trees/olive_tree.glb` | `Olive_Trunk_A/B`, `Olive_Canopy_A/B` | 808 | C (etaj jos) |
+| `trees/fig_tree.glb` | `Fig_Trunk`, `Fig_Canopy` | 488 | H |
+| `plants/prickly_pear.glb` | `Prickly_A/B` | 720 | H, C sus |
+| `plants/caper_bush.glb` | `Caper_Bush` | 96 | C (pe ziduri) |
+| `plants/ginestra_bush.glb` | `Ginestra_A/B` | 720 | C (etaj mijloc) |
+| `plants/cane_clump.glb` | `Cane_Clump` | 432 | C (vâlcele) |
+| `plants/vine_row.glb` | `Vine_Row` | 1160 | C (terase) |
+| `rocks/terrace_wall.glb` | `Terrace_Wall_A/B/Corner` | 1248 | C |
+| `rocks/basalt_boulder.glb` | `Basalt_A/B/C` | 346 | tot flancul |
+| `rocks/scoria_rock.glb` | `Scoria_A/B/C` | 1108 | D, E |
+| `rocks/lava_slab_broken.glb` | `Lava_Slab_A/B/C` | 528 | F |
+| `rocks/coast_cliff_basalt.glb` | `Coast_Cliff_A/B` | 968 | B, H |
+
+### Cum se plasează assets-urile (decor manual)
+
+Procedura completă e în [decor_manual.md](../decor_manual.md); aici doar ce e
+specific pistei ăsteia.
+
+**1. Containerul.** În `Track11.tscn`, sub rădăcină, un `Node3D` numit
+`DecorManual` cu scriptul `scenes/props/world_prop.gd`. **Fără script, toate
+GLB-urile ies ALBE** — modelele n-au material propriu, culoarea vine din atlas.
+
+**2. Grupează pe POI**, ca la Track10 (`1)START Khuzhir`, …). Convenția care
+se citește ușor în arbore:
+
+```
+DecorManual
+  1) A - Piata satului
+  2) B - Plaja Piscita
+  3) C - Serpentine
+  4) D - Buza craterului
+  5) E - Coborarea Sciarei
+  6) F - Campul de lava
+  7) G - Ginostra
+  8) H - Coasta si fumarole
+```
+
+**3. Așezarea pe teren.** `PgDown` (Transform → Snap Object to Floor) lipește
+obiectul de relief — terenul are coliziune. Excepțiile sunt piesele cu origine
+NON-standard, care se așază pe cotă, nu pe sol:
+
+| piesă | originea e la | cum se așază |
+|---|---|---|
+| `crater_bowl` | **coronament** (cuva coboară în −Y) | `y` = cota drumului de pe buză; centrul craterului din Track11 e la godot **(−109.2, y_buză, 268.3)**, în gaura din `custom_ravines[0]` |
+| `strombolicchio` | **linia apei** | `y = sea_level`; poziția din hartă: godot **(−187, 0, −137)** |
+| `ginostra_pier` | **linia apei** | `y = sea_level`; dana iese spre **−Z** (spre mare) |
+| `fishing_boat_large` | **linia de plutire** | `y = sea_level` — plutește, nu se pune pe sol |
+| `volcanic_bomb` | **centrul volumului** (se rostogolesc) | le pune `RockfallHazard` pe traseu, nu manual |
+| `lava_flow` | coada, la sol | toate 3 stadiile la ACELAȘI transform (vezi mai jos) |
+
+**4. Orientarea.** Fațadele și fețele „utile" sunt spre **−Z** (convenția
+proiectului). Concret: biserica, casele, edicola, chevronul privesc spre −Z;
+treptele terasei observatorului sunt spre **+Z**, iar binoclul spre −Z; scara
+Strombolicchio e pe fața −Z.
+
+**5. Modulele care se înșiruie** (`Wall_A/Gate/Corner`, `Alley_Stairs`,
+`Vine_Row`, `Terrace_Wall_*`, `Coast_Cliff_A/B`) au **capete plane**, secțiune
+identică. Se pun cap la cap la pasul lor exact — 3 m zidul, 4 m vița și scara,
+10/15 m falezele. Un decalaj face rost vizibil la fiecare modul.
+
+**6. Variantele din același fișier.** Un GLB cu mai multe noduri se
+instanțiază o dată, iar variantele nefolosite se sting cu `visible = false` —
+NU intră în numărătoarea gărzii (`probe_decor` numără doar ce se randează).
+Așa se folosesc `House_A/B/C`, `Basalt_A/B/C`, `Lava_Stage1/2/3`.
+
+**7. Materialul emisiv al lavei** se atașează la integrare, nu e în GLB. **UN
+singur material de clasă**, partajat între `Crater_Vents`, `Lava_Stage*` și
+`Bomb_*` — toate poartă slotul `LAVA_ORANGE` (30) în albedo. Garda numără
+materialele, deci unul, nu trei.
+
+### Cum se plasează hazardele
+
+| hazard | nod / script | unde | cum se leagă |
+|---|---|---|---|
+| **`EruptionCycle`** | nod nou, copil al pistei | oriunde (e un metronom, n-are poziție) | emite semnal la ~45 s; bombele și particulele se abonează. Telegraph ~3 s înainte |
+| **Bombele** | `RockfallHazard` (există) + `Path3D` sub `HazardMarker` | canalul Sciarei (E), 3–5 trasee paralele cu coborârea; 1–2 taie drumul, 1 peste buza D | traseele se desenează pe grilă și se verifică cu `Snapshot --rock-at` (memoria `rockfall-traseu-path3d`); mesh-ul: `Bomb_S/M/L`, pivot central |
+| **`LavaFlowHazard`** | script NOU | ruta scurtă din F | instanțiază `lava_flow.glb` O DATĂ și comută `visible` între `Lava_Stage1/2/3` la `lap_completed` al liderului. **Toate trei au coada la origine** (y=0, cresc la 40/60/80 m), deci nodul NU se mută — dacă îl muți, limba sare în loc să avanseze |
+| **Căderea în crater** | `custom_ravines` + zonă de distrugere | D, `custom_ravines[0]` (frac 0.466–0.522) există deja în `Track11.tscn` | distrugere + repunere din stând |
+| **Fumarolele** | `props/fumarole_vent.glb` + particule + `Area3D` | H, 2–3 bucăți lângă drum | hazard-teatru: albire ~0.5 s + șuier, fără fizică. Asset-ul e DOAR conul |
+| **Marea / buza exterioară** | `custom_ravines` + `RespawnZone` (există) | B (plaja) și exteriorul lui D | repunere ~2 s |
+| **Suprafețe** | intervale pe traseu (generalizate la Baikal) | nisip adânc pe B (~45%), cenușă pe D–E (grip 0.85×) | nu cer assets |
+
+**Coliziunea decorului** vine automat din `world_prop` pentru piesele care o
+cer (memoria `decor-manual-coliziune`); se verifică cu `probe_solid`, care
+plimbă gabaritul mașinii — nu se socotește pe AABB.
+
+**Înainte de benzile statistice** (kitul de flanc, plantat cu sutele):
+măsoară **tris/pas** pe lungimea benzii, nu după plantare (memoria
+`vegetatie-cost-pe-pas`). Cinci piese din kitul de flanc sunt peste bugetul
+lor de bandă — ordinea de tăiere e în `stromboli_slope_kit.md`.
+
 ## 6. Bugete și costuri (estimare, se măsoară)
 
-- triunghiuri: țintă sub **400k** (kit sat ~35k, flanc/vegetație ~100k,
-  crater_bowl ~10k, Strombolicchio ~8k, lavă+bombe ~20k, faleze ~40k,
-  restul ~50k)
+- triunghiuri: țintă sub **400k**. **Măsurat pe assets-urile livrate: 36 986
+  de triunghiuri pentru TOATE cele 36 de fișiere, o instanță din fiecare.**
+  Cifra pe pistă depinde de câte instanțe plantezi — kitul de flanc e cel care
+  se înmulțește cu sutele, deci acolo se măsoară tris/pas, nu la sfârșit.
+  Estimarea inițială de mai jos s-a dovedit prea mare pe hero-assets
+  (crater_bowl ~10k estimat → **2586** real) și prea mică pe unele piese mici
 - materiale: atlas + `rock_material`/`lava_rock` + `scoria` + decal-uri +
   emisivul lavei → țintă **≤ 20**. Emisivul e UN material de clasă partajat
   (lavă + bombe + crater), nu per asset
@@ -250,8 +397,22 @@ valuri pe nisip, clopot la start, greieri pe terase, măgarul din Ginostra.
    (memoria `proberace-nedeterminism`).
 6. Hero-assets în ordinea POI-urilor: biserica + kit sat, **crater_bowl**,
    Strombolicchio, observatorul, lava (stadiile), fumarolele, chevroanele.
+   **✔ FĂCUT** (august 2026) — vezi §5.7.
 7. Kit flanc (statistice), figuranți. probe_decor, ProbeRace, tur de mână —
-   verdictul de feel al dezvoltatorului.
+   verdictul de feel al dezvoltatorului. **✔ assets FĂCUTE**; plantarea și
+   sondele rămân.
+
+> **Stare reală (august 2026):** pașii **1**, **6** și **7 (partea de assets)**
+> sunt gata. Pașii **2–5 NU sunt începuți** — `Track11.tscn` are 60 de linii
+> (traseu, temă, gaura craterului), iar `EruptionCycle` și `LavaFlowHazard` nu
+> există ca scripturi.
+>
+> Assets-urile s-au construit înaintea pașilor 2–5, adică **în afara ordinii
+> recomandate**. Consecința de care trebuie ținut cont: pasul 2 (captura
+> `--driver` de pe buză) poate încă trimite traseul înapoi la desen, iar
+> `crater_bowl` e ancorat de `custom_ravines[0]`. **Validează pasul 2 înainte
+> de plasarea manuală pe urcare și pe buză** — POI-urile de la baza muntelui
+> (A, B) nu depind de cota buzei și se pot planta oricând.
 
 ## 8. Lecții aplicate anticipat (ca să nu le replătim)
 

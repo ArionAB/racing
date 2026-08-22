@@ -59,10 +59,18 @@ mașinile se desprind mereu de fundal.
 la 0.69 la 0.60 saturație. Acoperișurile sunt o suprafață mare, iar un roșu
 saturat le-ar fi pus în competiție cu `car_red`.
 
-**Regulă de citire:** asfaltul (slot 5) trebuie să rămână **cea mai închisă
-suprafață continuă** din scenă — linia de curs se citește la viteză.
-*Consecință măsurată:* `volcanic_black` e `#55535A` (V 0.35), nu un negru real —
-bazaltul de recif ar fi coborât sub asfalt (V 0.30) și ar fi mâncat linia de curs.
+**Regulă de citire:** linia de curs trebuie să se citească la viteză. Cum se
+obține **nu e fixat**: prin valoare (o șosea mai închisă decât tot ce o
+înconjoară), prin ton (cald saturat pe drum, rece desaturat pe teren) sau prin
+bordaj (umeri, chevron-uri, kerbs). Se alege per pistă și se verifică pe o
+captură de joc, nu pe tabel.
+*Istoric:* până în august 2026 regula cerea explicit ca asfaltul (slot 5) să fie
+**cea mai închisă suprafață continuă** din scenă. A fost scoasă odată cu drumul
+de nisip de pe Okinawa manual, care e mai luminos decât câmpul verde din jurul
+lui și se citește la fel de bine. Două decizii vechi îi poartă în continuare
+urma, și rămân bune independent de ea: `volcanic_black` e `#55535A` (V 0.35), nu
+un negru real, ca să nu concureze cu suprafața pe care se conduce; iar
+`tile_terracotta` a coborât la 0.60 saturație (vezi regula de saturație).
 
 ---
 
@@ -500,7 +508,9 @@ Dincolo de ramă: doar cer în cursă. Rama întreagă se vede în meniuri / pho
    spațiul lumii prin `Palette.rock_material()` — pietre individuale cu mortar
    și bevel fals pictate, un singur material nou pentru toată clasa. (Restul
    texturii de suprafață vine din stratul partajat — §4.)
-5. **Asfaltul rămâne cea mai închisă suprafață continuă.**
+5. **Linia de curs se citește la viteză** — prin valoare, ton sau bordaj, cum se
+   potrivește pistei (§1). Nu mai există cerința ca șoseaua să fie cea mai
+   închisă suprafață din cadru.
 
 ---
 

@@ -35,7 +35,7 @@ const SAND_MID: int = 1       # majoritatea terenului
 const SAND_SHADOW: int = 2    # nisip umbrit, tenta de AO
 const ROCK_LIGHT: int = 3     # fete de stanca
 const ROCK_DARK: int = 4      # interior de faleza, crapaturi
-const ASPHALT: int = 5        # sosea — cea mai INCHISA suprafata continua
+const ASPHALT: int = 5        # sosea asfaltata — cea mai inchisa dintre ele
 const ASPHALT_EDGE: int = 6   # margini tocite
 const KERB_RED: int = 7       # borduri, marcaje de avertizare
 const CONCRETE: int = 8       # pod, fundatii
@@ -117,9 +117,11 @@ const SNOW_WHITE: int = FOAM_WHITE
 ##
 ## Doua dintre culorile insulare au fost mutate fata de prima propunere, ca sa
 ## respecte regulile din style_bible §1:
-##   - VOLCANIC_BLACK e #55535A (V 0.35), nu un negru real: asfaltul (#4B4B4D,
-##     V 0.30) trebuie sa ramana cea mai inchisa suprafata din scena, altfel
-##     linia de curs nu se mai citeste la viteza.
+##   - VOLCANIC_BLACK e #55535A (V 0.35), nu un negru real: pe pistele cu asfalt
+##     (#4B4B4D, V 0.30) linia de curs se citeste prin VALOARE, iar un bazalt mai
+##     inchis decat soseaua ar fi mancat-o. Regula generala „soseaua e cea mai
+##     inchisa suprafata" a fost scoasa din §1 in august 2026, odata cu drumul de
+##     nisip, dar valoarea asta ramane buna acolo unde chiar e asfalt.
 ##   - TILE_TERRACOTTA e la saturatie 0.60, nu 0.69: acoperisurile sunt o
 ##     suprafata MARE, iar un rosu saturat ar concura cu CAR_RED. Asa ramane
 ##     distinct si de KERB_RED (nuanta 21° fata de 8°).

@@ -4040,8 +4040,9 @@ const ROAD_CROWN: float = 0.03
 const ROAD_PROFILE: Array[float] = [-1.0, -0.85, -0.5, 0.0, 0.5, 0.85, 1.0]
 
 ## Culoarea asfaltului, INAINTE de compensarea trecerii macro. Racoroasa-inchisa
-## ca masinile saturate sa "sara" din ecran (style_bible §1: asfaltul e cea mai
-## inchisa suprafata continua).
+## ca masinile saturate sa "sara" din ecran, si ca linia de curs sa se citeasca
+## la viteza (style_bible §1). Pe asfalt separarea vine din VALOARE; pe drumul
+## nepavat vine din ton — vezi DIRT_ROAD_COLOR.
 const ROAD_COLOR: Color = Color(0.23, 0.24, 0.3)
 ## Media texturii macro de asfalt (process_class_textures.surfaces()). Culoarea
 ## se imparte la ea, ca a doua inmultire sa nu intunece soseaua.
@@ -4075,11 +4076,12 @@ const ROAD_SNOW_CEIL: float = 0.42
 ## si se compara petecul de drum cu #D5A75E. Masurat la valoarea de mai jos:
 ## #D8A55E, eroare 3/2/0 pe canale — sub pragul de 12 din style_bible §5.
 ##
-## Ce se pierde, asumat: style_bible §1 cere ca soseaua sa fie cea mai INCHISA
-## suprafata continua din cadru, ca linia de curs sa se citeasca la viteza. Un
-## drum de nisip pe camp verde e mai LUMINOS decat terenul lui. Linia de curs
-## ramane citibila pentru ca separarea nu mai vine din valoare, ci din TON: cald
-## saturat pe drum, rece desaturat pe iarba — plus umerii si chevron-urile.
+## Un drum de nisip pe camp verde e mai LUMINOS decat terenul lui, deci separarea
+## nu mai poate veni din valoare, ci din TON: cald saturat pe drum, rece
+## desaturat pe iarba — plus umerii si chevron-urile. Style_bible §1 cere ca linia
+## de curs sa se citeasca la viteza si lasa MIJLOCUL la alegere; pana la drumul
+## asta, cerea explicit ca soseaua sa fie cea mai inchisa suprafata din cadru, si
+## regula a fost scoasa aici.
 ## ############################################################################
 const DIRT_ROAD_COLOR: Color = Color(0.80, 0.66, 0.43)
 

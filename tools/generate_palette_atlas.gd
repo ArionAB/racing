@@ -351,6 +351,9 @@ func _write_detail_mask(path: String) -> void:
 		21: 0.45,                    # vegetatie tropicala, ca 12/13
 		22: 0.20,                    # spuma: cea mai curata suprafata din decor
 		23: 0.55,                    # olane: manufacturate, dar cu uzura
+		# --- Stromboli ---
+		30: 0.15,                    # lava: semnal incandescent, aproape curat —
+									 # granulatia de roca peste glow l-ar murdari
 	}
 	var img := Image.create(Palette.SLOTS, 1, false, Image.FORMAT_RGBA8)
 	for slot in Palette.SLOTS:
@@ -469,8 +472,10 @@ func _texture_for(slot: int, base: Color, x: int, y: int) -> Color:
 		Palette.MARBLE_GREY:
 			return _marble(base, x, y)
 		_:
-			# Accentele de masina (14-16) raman plate: masinile trebuie sa fie
-			# cele mai saturate si mai curate suprafete din cadru (style_bible §1).
+			# Accentele de masina (14-16) si LAVA_ORANGE (30) raman plate:
+			# accentele trebuie sa fie cele mai saturate si mai curate suprafete
+			# din cadru (style_bible §1); lava isi ia viata din emisivul de
+			# clasa la integrare, nu din granulatie de albedo.
 			return base
 
 

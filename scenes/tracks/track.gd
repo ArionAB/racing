@@ -899,6 +899,18 @@ static func themes() -> Dictionary:
 			"shore_band_in": 14.0,
 			"shore_band_out": 30.0,
 			"loose_grip": 6.8,
+			# MARE VULCANICA, nu lagună. Sloturile implicite (recif turcoaz +
+			# larg) descriu un atol cu fund de nisip alb la doi metri. Stromboli
+			# cade abrupt: conul intra direct in apa, fundul e bazalt negru, iar
+			# adancimea incepe de la mal. Cu turcoazul de recif, plaja de la POI
+			# B citea ca Okinawa cu alt drum — aceeasi capcana ca paraul din
+			# Alpi, unde recif+larg dadeau o lagunca intre brazi.
+			#
+			# Fara slot nou: SEA_DEEP tine acum apa de langa mal, iar ICE_CRACK
+			# (albastru aproape negru) tine largul. Atlasul e comun tuturor
+			# pistelor, deci un slot in plus s-ar plati pe toate.
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.ICE_CRACK,
 			"dirt_road_tint": Color(0.34, 0.32, 0.33),
 			"dust_color": Color(0.28, 0.26, 0.27),
 			"branch_tint": Color(0.30, 0.28, 0.30),
@@ -2692,6 +2704,13 @@ func _build_terrain() -> void:
 ## oricum sea_deep uniform, deci preia cvadrilaterul de larg.
 const SEA_NEAR_DEPTH: float = 14.0
 ## Sub atat de multa apa, un varf e "larg"; peste, e recif.
+##
+## Pragul asta NU e parghia cand marea citeste palid — am incercat, si n-a
+## schimbat un pixel. Culoarea de larg se atinge la SEA_NEAR_DEPTH (14 m), deci
+## ce conteaza e cata APA e acolo, nu unde pui pragul: pe Stromboli fundul era
+## la 3 m pe 180 m de la mal, adica ~10% din rampa, si ar fi ramas palid cu
+## orice sloturi. Reparatia a fost sa se SAPE (rapa de cornisa, adancime 16),
+## nu sa se retuseze rampa.
 const SEA_REEF_DEPTH: float = 5.0
 ## Banda de spuma: cati metri de apa peste tarm mai citesc ca sparger de val.
 const SEA_FOAM_DEPTH: float = 0.6

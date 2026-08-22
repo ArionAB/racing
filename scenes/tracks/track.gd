@@ -885,6 +885,10 @@ static func themes() -> Dictionary:
 			# implicit (vezi dirt_road_color). Nu e VOLCANIC_BLACK curat:
 			# nisipul batatorit de roti e putin mai deschis si mai cald decat
 			# bazaltul de langa el, altfel drumul dispare in teren.
+			# Cenusa si nisipul negru adanc: 0.85x fata de asfalt (brief §3),
+			# adica 6.8 pe scara grip-ului. Intre asfalt (8) si ud (3.6) —
+			# aluneci, dar nu patinezi.
+			"loose_grip": 6.8,
 			"dirt_road_tint": Color(0.34, 0.32, 0.33),
 			"dust_color": Color(0.28, 0.26, 0.27),
 			"branch_tint": Color(0.30, 0.28, 0.30),
@@ -7923,6 +7927,17 @@ func _ice_ranges() -> Array[Vector2]:
 	return []
 
 
+## Intervalele de suprafata AFANATA de pe traseul principal (cenusa, nisip
+## negru adanc). Acelasi tipar ca `_ice_ranges`, si dinadins: e acelasi fel de
+## lucru — o portiune pe care grip-ul e altul — deci merita acelasi mecanism,
+## nu inca unul care s-ar tuna separat.
+##
+## Diferenta fata de gheata e doar de intensitate: gheata e sub apa ca grip
+## (SLIP_GRIP_ICE), afanatul sta intre asfalt si ud.
+func _loose_ranges() -> Array[Vector2]:
+	return []
+
+
 ## Cat de alunecoasa e gheata pe pista asta. Reper: asfalt 8, ud 3.6, drift 2.
 ## In tema, ca si `wet_grip`; 0 = implicitul din Car.SLIP_GRIP_ICE.
 func ice_grip() -> float:
@@ -7930,8 +7945,46 @@ func ice_grip() -> float:
 
 
 func is_ice_at(frac: float) -> bool:
+	return _frac_in_ranges(frac, _ice_ranges())
+
+
+## Cat de putin tine cenusa / nisipul adanc. Reper: asfalt 8, ud 3.6, drift 2.
+## Brief-ul Stromboli cere 0.85x pe cenusa, adica ~6.8 pe scara asta.
+## 0 = nu se schimba nimic (implicitul masinii).
+func loose_grip() -> float:
+	return float(theme_flag("loose_grip", 0.0))
+
+
+func is_loose_at(frac: float) -> bool:
+	return _frac_in_ranges(frac, _loose_ranges())
+
+
+## Mai e practicabila banda secundara cu indexul dat?
+##
+## Implicit DA — pistele care n-au nimic care sa inchida o banda nu simt
+## nimic. Pe Stromboli raspunde `LavaFlowHazard`: limba creste tur de tur si
+## de la stadiul 3 ruta scurta e zid.
+##
+## Intrebarea o pune AIController la fiecare cadru, nu o data pe cursa: o
+## banda se poate inchide IN TIMPUL cursei, si un AI care a decis la turul 1
+## ca merge pe scurta ar intra in lava la turul 3.
+func branch_is_open(index: int) -> bool:
+	for child in get_children():
+		if child is LavaFlowHazard:
+			var lf := child as LavaFlowHazard
+			if lf.branch_index == index:
+				return lf.shortcut_open()
+	return true
+
+
+## Fractia cade intr-unul din intervale? Intervalele au voie sa treaca peste
+## linia de start (seg.x > seg.y), de-asta nu e o simpla comparatie.
+##
+## Scos in comun fiindca gheata si afanatul faceau exact aceeasi bucla; a
+## treia suprafata pe interval ar fi copiat-o a treia oara.
+func _frac_in_ranges(frac: float, ranges: Array[Vector2]) -> bool:
 	var f := fposmod(frac, 1.0)
-	for seg in _ice_ranges():
+	for seg in ranges:
 		if seg.x <= seg.y:
 			if f >= seg.x and f <= seg.y:
 				return true

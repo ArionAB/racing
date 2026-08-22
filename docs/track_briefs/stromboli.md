@@ -402,17 +402,92 @@ lor de bandă — ordinea de tăiere e în `stromboli_slope_kit.md`.
    verdictul de feel al dezvoltatorului. **✔ assets FĂCUTE**; plantarea și
    sondele rămân.
 
-> **Stare reală (august 2026):** pașii **1**, **6** și **7 (partea de assets)**
-> sunt gata. Pașii **2–5 NU sunt începuți** — `Track11.tscn` are 60 de linii
-> (traseu, temă, gaura craterului), iar `EruptionCycle` și `LavaFlowHazard` nu
-> există ca scripturi.
->
-> Assets-urile s-au construit înaintea pașilor 2–5, adică **în afara ordinii
-> recomandate**. Consecința de care trebuie ținut cont: pasul 2 (captura
-> `--driver` de pe buză) poate încă trimite traseul înapoi la desen, iar
-> `crater_bowl` e ancorat de `custom_ravines[0]`. **Validează pasul 2 înainte
-> de plasarea manuală pe urcare și pe buză** — POI-urile de la baza muntelui
-> (A, B) nu depind de cota buzei și se pot planta oricând.
+> **Stare reală (august 2026): pașii 1–7 sunt făcuți, mai puțin plantarea.**
+> Ce rămâne e **decorul manual** (§5.7) și verdictul de feel al
+> dezvoltatorului, la volan.
+
+### Ce au găsit sondele la pașii 2–5
+
+**Pasul 2 — validat, după trei reparații.** Prima captură `--driver` de pe
+buză a picat, și fiecare cauză a fost alta decât părea:
+
+1. *Tema era Okinawa cu alt traseu.* `inland_tint` = `TROPICAL_GREEN` la 0.75,
+   copiat de la insula tropicală: captura de sus arăta o insulă **verde**.
+   Reparat cu **trei etaje de culoare** pe con, din mecanisme care existau
+   deja (zero cod nou, zero sloturi noi): verde doar la poale (0.40), scorie
+   de la 18 m (`rock_band_tint`, mecanismul alpin), cenușă de la 48 m
+   (`snow_tint`).
+2. *Drumul era nisip auriu.* `DIRT_ROAD_COLOR` e constanta deșertului.
+   Adăugat `dirt_road_tint` ca aceeași cheie de temă ca `ice_road_tint` de pe
+   Baikal, plus accesorul `dirt_road_color()`. Temele care n-o declară rămân
+   neatinse.
+3. *Nu se citea altitudinea* — defectul real. Profilul confirma că traseul
+   **urcă** (3.7 → 60.8 m pe 40% din tur), iar ravena craterului funcționa
+   (14.4 m măsurați). Dar `CraterPeak` (rază 60) cădea aproape integral în
+   banda de protecție a asfaltului (`PEAK_ROAD_FULL` = 32 m, iar șoseaua trece
+   la 42 m de centru): ieșea o **mesa cu vârf plat**.
+   > Reparația n-a fost o cotă, ci o înțelegere: **craterul e o gaură, nu o
+   > culme.** Interiorul buzei îl face `crater_bowl.glb`, nu terenul.
+   > `CraterPeak` șters; `FlanculConului` urcat la 72 m și lățit la rază 200.
+
+**Verdict: trece.** De pe buză marea e jos în cadru, peretele craterului cade
+în stânga, serpentinele se văd ca fiind *sub* tine.
+
+Măsurat: urcare medie **7–9%** (brief-ul cere 12–13%, deci mai blând, nu mai
+abrupt), panta maximă la frac 0.64 — coborârea Sciarei, unde brief-ul chiar
+vrea ~19%.
+
+**Pasul 3 — suprafețe afânate.** Cenușa și nisipul negru adânc folosesc
+**același mecanism ca gheața de pe Baikal** (`is_loose_at` + `loose_grip`),
+nu unul nou: e același fel de lucru — o porțiune pe care grip-ul e altul — iar
+două mecanisme s-ar tuna separat și ar diverge. Declarate în `Track11.tscn` ca
+`custom_loose_ranges`: plaja B (0.05–0.13) și buza + coborârea D–E (0.44–0.66),
+la 6.8 din 8 (0.85×, cifra din §3).
+
+**Pasul 4 — `EruptionCycle`.** Un nod fără geometrie, care bate ritmul (45 s,
+telegraph 3 s) și **sincronizează ceasurile** tuturor hazardelor dintr-un grup.
+Bombele sunt `RockfallHazard`-uri cu traseu, fiecare cu `period` + `phase` — pe
+cont propriu ar bate fiecare în ritmul lui și pe pistă ar ploua cu pietre
+continuu. Erupția reală e un **puls**: liniște lungă, apoi câteva secunde în
+care sar toate. Aia se poate învăța, deci e mecanică, nu taxă.
+
+**Pasul 5 — `LavaFlowHazard`.** Verificat cu sondă, stadiile se comută corect:
+
+| tur | stadiu | vizibil | scurtătura |
+|---|---|---|---|
+| 1 | 0 | `Lava_Stage1` | DESCHISĂ |
+| 2 | 1 | `Lava_Stage2` | DESCHISĂ (poarta de 4 m) |
+| 3 | 2 | `Lava_Stage3` | **ÎNCHISĂ** |
+
+Poarta de 4 m rămâne **deschisă** deliberat: măsurat pe mesh, culoarul are
+4.00 m liberi iar mașina 1.8 m — trece, dar cere linie curată. Aia e decizia
+pe care o vindem, deci n-o luăm noi de la jucător.
+
+**AI-ul re-alege.** `prefers_shortcut` se trage o dată pe cursă în
+`AIController`, deci fără nimic altceva un AI care a decis la turul 1 „o iau pe
+scurtă" ar intra în zid la turul 3. Adăugat `Track.branch_is_open(index)`,
+întrebat la fiecare cadru.
+
+**ProbeRace pe Stromboli** (150 s, 6 mașini): **0 repuneri, 0 atingeri de
+pereți**, toate mașinile termină tururi, ecart de ritm 0.46 tururi. Nimeni nu
+se blochează pe urcare. Singura felie „lentă" (0.95–1.00, 17.1 m/s) e
+**startul**, nu un defect: felia vecină 0.00–0.05 are 28.6 m/s și 0% lent, iar
+geometria de acolo e dreaptă (rază ~999 m).
+
+### Capcane de proces (ca să nu se replătească)
+
+**Indicii de pistă diferă între unelte.** `Snapshot` și `ProbeRace` folosesc
+**poziția în listă** (`GameState.TRACK_SCENES`) — Stromboli e **4**.
+`survey_terrain` folosește **numărul scenei** — Track**11**. Un `--track=11`
+dat la ProbeRace se lovește de `Out of bounds` și apoi toarnă zeci de mii de
+erori derivate, care ascund cauza.
+
+**Un UID greșit nu dă eroare, dă alt asset.** Prima instanță de lavă din
+`Track11.tscn` avea UID-ul lui `crater_bowl` — scena se încărca fără să se
+plângă, dar nodurile erau `Crater_Bowl`/`Crater_Vents`. S-a văzut doar fiindcă
+`LavaFlowHazard` avertizează pe nume lipsă (avertismentul din `okinawa_kit.md`,
+pus în cod). **Verifică UID-ul în `.glb.import`, nu îl copia dintr-o linie
+vecină.**
 
 ## 8. Lecții aplicate anticipat (ca să nu le replătim)
 

@@ -70,6 +70,10 @@ extends Track
 ## condus), banda proprie fara borduri/linie/umeri, culoar marcat cu bete cu
 ## stegulete, si vantul temei sufla doar aici. Vezi Track._ice_ranges.
 @export var custom_ice_ranges: Array[Vector2] = []
+
+## Intervalele de suprafata AFANATA (cenusa, nisip negru adanc). Vezi
+## Track._loose_ranges. Pe Stromboli: plaja de la B si buza+coborarea D-E.
+@export var custom_loose_ranges: Array[Vector2] = []
 ## Intrari de mina lipite de perete: fiecare Vector2 = (fractie, parte ±1).
 @export var custom_mine_spots: Array[Vector2] = []
 ## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
@@ -162,6 +166,10 @@ func _wet_ranges() -> Array[Vector2]:
 
 func _ice_ranges() -> Array[Vector2]:
 	return custom_ice_ranges
+
+func _loose_ranges() -> Array[Vector2]:
+	return custom_loose_ranges
+
 
 func _wave_fracs() -> Array[float]:
 	return custom_wave_fracs

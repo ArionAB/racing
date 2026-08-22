@@ -699,7 +699,7 @@ static func themes() -> Dictionary:
 			"deflector_node": "Driftwood_Log",
 			"deflector_scale": 1.0,
 			"deflector_class": "wood",
-			"water": true,       # singura tema cu mare (vezi _build_water)
+			"water": true,       # apa mare deschisa (vezi _build_water)
 			# Cat de adanc cade terenul dincolo de coridorul pistei. Trebuie sa
 			# duca adancimea DECIS peste SEA_NEAR_DEPTH, altfel grila fina de tarm
 			# se emite pe toata marea. Vezi TrackSideSampler.ground_y.
@@ -814,8 +814,9 @@ static func themes() -> Dictionary:
 		#    deschis, nu circuit. Riscul e declarat in teren (buza craterului,
 		#    marginea spre mare) prin `custom_ravines` + RespawnZone.
 		#
-		# Decorul (`props: island`) e PROVIZORIU pana vine kitul mediteranean —
-		# aceeasi conventie ca Baikal, care a stat pe props alpine pana la kit.
+		# Decorul e pe kitul mediteranean propriu (`props: "stromboli"`) de la
+		# integrarea celor 12 piese de flanc; a stat provizoriu pe props insulare
+		# — palmieri si coral — exact cum Baikal a stat pe props alpine.
 		"stromboli": {
 			"ground_tint": Palette.color(Palette.VOLCANIC_BLACK),
 			"sky_top": Color(0.28, 0.50, 0.82),

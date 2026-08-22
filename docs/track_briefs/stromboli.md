@@ -735,10 +735,55 @@ iar marea e împinsă dincolo de el. Pe Okinawa se vede mai puțin fiindcă
 șoseaua e la 0.2–1.2 m peste apă; pe Stromboli, la 1.5–60 m, platoul devine
 peisajul dominant.
 
-**Ambele constante sunt globale.** Reparația cere chei de temă pe ELE (nu pe
-banda de țărm), cu implicitele actuale pentru restul pistelor — și verificare
-pe Okinawa înainte, fiindcă „45 m de teren plat lângă drum" e o decizie veche
-cu motivele ei (racordul asfaltului, benzile de decor).
+**Ambele constante sunt globale**, iar `track.gd` dimensionează plasa de teren
+din ele. Prima idee — chei de temă pe ELE — a fost **abandonată**: cerința e ca
+o pistă să nu strice alta, iar aici se atinge exact mecanismul comun.
+
+### Reparația, august 2026 (PR #336, #337)
+
+Unealta potrivită exista deja și e **per pistă**: `_carve_ravines` rulează
+DUPĂ amestecul de coridor și folosește `min`, deci sapă indiferent de platou.
+Cu `custom_cornice_ravines`, buza stă la 0.5 m de asfalt în loc de 4.
+
+| | înainte | după |
+|---|---|---|
+| apa de la șosea, plaja B | 92–97 m | **11 m** |
+| căderea la 10 m, buza D (crater) | −7 m | **−15 m** |
+| căderea la 10 m, buza D (mare) | ~0 | **−17 m** |
+
+Adâncimea rapei nu e decor: culoarea de larg se atinge la `SEA_NEAR_DEPTH`
+(14 m), iar fundul era la **3 m pe 180 m** de mal — ~10% din rampă, deci marea
+rămânea palidă cu orice sloturi. Se **sapă**, nu se retușează rampa.
+
+### Lecția scumpă: albedo vs. lumină
+
+Buza arăta a plajă, `(132, 111, 89)`. Am dat vina pe albedo de **trei ori**
+(`snow_tint`, apoi `rock_class`), presupunând de fiecare dată că o suprafață
+palidă are o culoare palidă. Niciuna n-a mișcat un pixel.
+
+Bucla s-a rupt citind **culorile de vertex direct din mesh**: terenul avea deja
+`COLOR = (0.235, 0.231, 0.251)` — bazalt închis — iar cele patru texturi de
+suprafață sunt gri neutru (media 215). Înmulțit cu lumina temei (soare
+chihlimbariu 1.30, ambiental bej, ceață caldă de la 110 m) → `(139, 131, 124)`.
+
+**Nu terenul era nisipos, ci lumina** — atmosferă copiată din deșert. Acum:
+soare alb `(1.0, 0.98, 0.95)` la 0.85 și −34°, ambiental `9FB0BF`, ceață rece
+de la 150 m.
+
+> Regula generală: **o captură arată ce caut eu, un tur filmat arată ce vede
+> jucătorul** — verdictul „pasul 2 trece" fusese dat pe o captură statică
+> dintr-un unghi ales de mine. Iar când o suprafață pare de altă culoare
+> decât ai cerut, măsoară întâi vertex color × textură × lumină; nu retușa
+> albedo-ul pe ghicite.
+
+### Ce a rămas neatins, deliberat
+
+- **coborârea Sciarei E** rămâne iertătoare — zonă de recuperare după buză
+- **traseul** nu s-a mutat: împinsul spre exterior a înrăutățit (78 → 90 m),
+  fiindcă poligonul de țărm se construiește *din* punctele de traseu
+- **Okinawa** — verificată explicit după fiecare pas, captură și cote
+  identice. Verificarea era gata să dea fals pozitiv: `snapshot.gd` reteza
+  tăcut `--track=`, deci `--track=8` randa tot Stromboli (reparat în #335)
 
 ### Camera
 

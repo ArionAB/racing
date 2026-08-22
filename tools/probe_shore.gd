@@ -61,8 +61,12 @@ func _ready() -> void:
 		dir.y = 0.0
 		dir = dir.normalized()
 		var out := ""
+		# DREAPTA soferului = dir.cross(UP), exact ca `TrackSideSampler.side_at`
+		# si ca `latura` din `custom_ravines`. Prima versiune calcula inversul si
+		# eticheta "dr" ce era de fapt stanga — cifrele erau bune, numele erau
+		# pe dos, si era gata sa ma trimita sa "corectez" un brief corect.
 		for sgn in [1.0, -1.0]:
-			var side := Vector3(dir.z * sgn, 0.0, -dir.x * sgn)
+			var side: Vector3 = dir.cross(Vector3.UP).normalized() * sgn
 			var found := -1.0
 			for d in range(3, MAX_DIST):
 				var q: Vector3 = p + side * float(d)

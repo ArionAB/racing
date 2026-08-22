@@ -360,6 +360,29 @@ valuri pe nisip, clopot la start, greieri pe terase, măgarul din Ginostra.
 > white — one drifting through a hairpin mid-climb, one on the crater rim,
 > one mid-jump on the descent, two choosing different routes at the lava fork.
 >
+> **PROP INVENTORY [!] — every item below must appear at least once, in its
+> zone (this is the track's full asset list):**
+> - *village square:* the church with bell tower, the checkered banner, cubic
+>   houses in 3 sizes, pergolas, low white walls with one gate, white alley
+>   stairs, a small street shrine with a blue niche, terracotta pot clusters
+>   with geraniums, the green Ape three-wheeler, bougainvillea.
+> - *black beach:* wooden fishing boats on log rollers, a rusty boat winch,
+>   nets with orange buoys, black basalt boulders.
+> - *the climb:* black dry-stone terrace walls, low vine rows, twisted olive
+>   trees, prickly pears, caper bushes, yellow-tipped broom bushes, cane
+>   clumps, the observatory terrace with white awning, red-and-white chevron
+>   posts on the hairpins.
+> - *rim and descent:* the open crater bowl with three glowing vents, glowing
+>   volcanic bombs in three sizes, red-black porous scoria rocks.
+> - *the lava fork:* the glowing lava tongue (mid stage, with the 4 m gap),
+>   broken ropey lava slabs, two red warning signs.
+> - *Ginostra:* the concrete pier with one larger boat, white stairs in the
+>   rock, 4–5 white houses, a standing donkey.
+> - *east coast:* fig trees, prickly pears, pale fumarole vents puffing
+>   steam, low black stratified sea cliffs.
+> - *offshore:* the Strombolicchio sea stack with its white lighthouse; two
+>   faint island silhouettes on the horizon.
+>
 > Colors: basalt black #55535A, black sand slightly darker, whitewash
 > #E9F2F0, sea turquoise #62B8C4 to deep #2F6E82, scrub green #5E7D4A, ash
 > grey #B8B4AC, terracotta #C46A4C, **lava orange #E8622D (emissive)**, dry

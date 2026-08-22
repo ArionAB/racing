@@ -94,7 +94,21 @@ const ICE_CRACK: int = 26      # crapaturi, apa neagra dintre placi
 const LARCH_RUST: int = 27     # larice iarna, ruginiu (era snow_white in brief)
 const LOG_DARK: int = 28       # barne de casa siberiana, aproape negre
 const MARBLE_GREY: int = 29    # marmura Stancii Samanului, faleza Olkhon
-## 30..31 raman rezerva (magenta in atlas, ca greselile de UV sa sara in ochi).
+
+## --- Stromboli (Track11): insula vulcanica -----------------------------------
+##
+## UN singur slot din rezerva, decizia din brief (docs/track_briefs/stromboli.md
+## §4, scrisa cu lectia Baikal in fata: un slot e o CULOARE, nu o eticheta).
+## Lava, crapaturile bombelor si gurile craterului sunt SEMNALUL pistei —
+## singura sursa de portocaliu saturat din decor, cu acelasi statut de exceptie
+## ca panglicile serge. Emisivul nu vine din slot (atlasul e albedo): vine din
+## materialul de clasa partajat al lavei, la integrarea hazardului. Restul
+## paletei Stromboli reutilizeaza: VOLCANIC_BLACK 20, FOAM_WHITE 22 (var),
+## REEF_SHALLOW/SEA_DEEP 17/18, TROPICAL_GREEN 21, MARBLE_GREY 29 (cenusa).
+const LAVA_ORANGE: int = 30    # lava incandescenta; accent, nu suprafata mare
+
+## 31 ramane ULTIMA rezerva (magenta in atlas, ca greselile de UV sa sara in
+## ochi). Urmatoarea pista fie reutilizeaza, fie plateste o discutie serioasa.
 
 ## Zapada NU are slot propriu — alias peste FOAM_WHITE, vezi nota de mai sus.
 const SNOW_WHITE: int = FOAM_WHITE
@@ -131,6 +145,7 @@ const HEX: Array[String] = [
 	"E54839", "2C82E8", "F2D03C",
 	"54BFB8", "2E5F6B", "E9DCC0", "55535A", "3F7A3C", "E9F2F0", "C4784F",
 	"7FC4C9", "2F6E82", "1A2A33", "A8683A", "4A3526", "B8B4AC",
+	"E8622D",
 ]
 
 ## Culoarea unui slot.

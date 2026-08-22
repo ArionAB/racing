@@ -246,6 +246,73 @@ Deliver: (a) one wide 3/4 overview of the entire diorama with the loop clearly r
   </div>
 </div>
 
+<div class="gaps">
+  <div class="card">
+    <h2>Prompturi per asset &middot; turnaround pentru Blender <button class="copy" id="copy-assets" type="button">Copiaz&#259; tot</button></h2>
+    <div class="note" style="border-top:0"><b>Varianta A (recomandat&#259;, formatul care a mers la Baikal): O SINGUR&#258;
+    PLAN&#536;&#258; cu toate sec&#539;iunile</b> &mdash; promptul e primul bloc de mai jos. Etichetele de pe foaie
+    (FRONT / SIDE / numele pieselor) sunt permise &#537;i utile; interzis e doar textul <i>pe obiecte</i>
+    (semne, pl&#259;ci, firme &mdash; lec&#539;ia &bdquo;SCURTA/LIBERA&rdquo; din dioram&#259;). <b>Varianta B:</b> blocurile
+    individuale de sub el, pentru regenerarea unei singure sec&#539;iuni care a ie&#537;it prost.
+    La ambele: ata&#537;eaz&#259; diorama low-poly ca ancor&#259; de stil. Din plan&#537;e se scriu apoi brief-urile &#238;n
+    <code>docs/asset_briefs/</code> &#537;i scripturile <code>tools/blender/build_*.py</code>.</div>
+    <div class="prompt-body"><pre id="asset-prompts">═══════════ VARIANTA A · FOAIA COMPLETA (ca la Baikal) ═══════════
+
+Create a single tall REFERENCE SHEET of low-poly game assets for a volcanic-island racing track (Stromboli, Italy), in the same style as the attached low-poly diorama: faceted flat-shaded meshes, no fine surface texture, chunky tabletop-miniature proportions, soft baked ambient occlusion, muted colors (~50% saturation), one low warm sun. Plain neutral grey background, assets organized in numbered titled panels, each panel with its own 1 m scale bar. Small caption labels on the sheet (FRONT / SIDE / TOP / 3/4 VIEW and piece names) are allowed — but NO lettering on the objects themselves (no signs with words, no plaques with text).
+
+1. CRATER BOWL — open volcano crater, 55 m across, 12-15 m deep: stepped dark scoria walls in rough terraces, three vents on the floor with glowing orange lips and radiating orange cracks, thin smoke; outer rim is a walkable crest of packed grey ash. Views: front, cutaway side (showing depth profile), top, 3/4.
+2. STROMBOLI CHURCH — small white Aeolian church 12x8 m, curved gable, 14 m bell tower with three bell openings, wide front steps, rounded plastered corners, small blue door. Front, side, top, 3/4.
+3. STROMBOLICCHIO — slender black volcanic sea stack, 30x22 m base, 32 m tall near-vertical faceted walls, narrow stair zig-zagging up, small plain white lighthouse (8 m) with lantern on top; waterline at base. Front, side, top, 3/4.
+4. OBSERVATORY TERRACE — 10x6 m terrace of dark basalt blocks, black stone parapet, white canvas awning on four poles at 4 m, two simple tables and benches, coin-operated binocular on a post. Front, side, 3/4.
+5. LAVA FLOW (3 STAGES) — the same lava tongue at three stages, same scale, top + low 3/4 each: stage 1 = 40 m long, 8-12 m wide, black ropey crust, glowing orange cracks, bulbous front; stage 2 = 60 m, split into TWO arms leaving a clean 4 m gap, glowing edges; stage 3 = 80 m, one solid wall-like flow, 0.5-1 m crust, strongest glow at the front. Crust reads as faceted plates, not liquid.
+6. VOLCANIC BOMBS (x3) — rounded bombs Ø 0.6 / 0.9 / 1.2 m: dark cracked crust, glowing orange in the cracks, slightly flattened silhouettes.
+7. FUMAROLE VENTS (x3) — small crater cones Ø 0.8 / 1.2 / 1.5 m, heights 0.4-0.8 m, pale grey-white crusted ground, yellow-white sulfur deposits on the lip; one with a soft white steam column.
+8. CHEVRON POST — 1.2 m dark wooden post with rectangular plate showing a bold red-and-white chevron arrow pattern (geometric stripes only). Front, side.
+9. GINOSTRA PIER — tiny concrete pier 8x3 m with two bollards and a mooring ring + 4 m white-painted stair cut into dark rock; waterline shown. Front, side, 3/4.
+10. VILLAGE KIT — one row, same scale: cubic whitewashed house 7x6x4 m with blue shutters and roof-terrace parapet; two-story house 9x7x5.5 m with external staircase and pergola terrace; small storehouse 5x5x3.5 m; pergola on round white pillars 4x3 m (2.5 m tall) with wooden beams; low rounded white wall module 3 m + gate variant; white alley stairs module 4 m; small white street shrine 1.5 m with blue niche; green Piaggio Ape three-wheeler 2.7 m with wooden flatbed; wooden fishing boat 5 m on log rollers; larger fishing boat 7 m; rusty hand winch 2x1x1 m; nets with orange buoys; magenta bougainvillea on a 2x2 m wall panel; terracotta pot cluster with geraniums; standing donkey (1.4 m at the shoulder).
+11. SLOPE KIT — one row, same scale: twisted olive tree 6 m with silvery-green canopy; broad fig tree 5 m; prickly pear 2 m with paddles and reddish fruit; caper bush 0.8 m; broom bush 1.8 m with tiny yellow tips; cane clump 3 m; dry-stone black basalt terrace wall module 3 m (h 1.2 m); low vine row module 4 m on wooden stakes; black basalt boulders x3 (1-3 m); red-black porous scoria rocks x3 (0.5-2 m); broken ropey lava slabs 2-4 m; black stratified coast cliff module 15 m.
+
+═══════════ VARIANTA B · BLOCURI INDIVIDUALE (regenerare punctuala) ═══════════
+
+STYLE HEADER — incepe FIECARE prompt cu blocul asta:
+
+Same low-poly flat-shaded style as the Stromboli diorama reference (the low-poly one: faceted meshes, no fine surface texture, chunky tabletop-miniature proportions, soft baked ambient occlusion, muted colors ~50% saturation, one low warm sun). Turnaround sheet on a plain neutral grey background, no scene, no ground clutter: front view, side view, top view and one 3/4 view, all orthographic, same scale, with a 1 m scale bar. Show only this object. No text or lettering anywhere.
+
+──────────── 1 · crater_bowl (primul: e ce vede camera de pe buza) ────────────
+Turnaround sheet of an open volcano crater bowl, 55 m across, 12-15 m deep: stepped dark scoria walls descending in rough terraces, three vents on the floor with glowing orange lips and orange cracks radiating from them, thin smoke columns; the outer rim is a walkable crest of packed grey ash. Include one extra cutaway side view showing the bowl depth profile.
+
+──────────── 2 · stromboli_church ────────────
+Turnaround sheet of a small white Aeolian church, 12 x 8 m footprint, with a curved baroque-style gable and a 14 m bell tower with three bell openings, wide front steps, slightly rounded plastered corners, one small blue door.
+
+──────────── 3 · village kit (o singura plansa, aceeasi scara) ────────────
+Turnaround-style sheet of a matched kit of Aeolian village pieces, all lined up on one row on plain grey, same scale, 1 m scale bar: cubic flat-roofed whitewashed house 7x6x4 m with blue shutters and roof-terrace parapet; two-story house 9x7x5.5 m with external staircase and pergola terrace; small storehouse 5x5x3.5 m; pergola on round white pillars 4x3 m, 2.5 m tall, with wooden beams; low rounded white wall module 3 m (one variant with gate opening); white alley stairs module 4 m; small white street shrine 1.5 m with a blue niche; green Piaggio Ape three-wheeler 2.7 m with wooden flatbed; wooden fishing boat 5 m on log rollers; larger fishing boat 7 m; rusty hand winch 2x1x1 m; bundle of nets with orange buoys; magenta bougainvillea bush trained on a wall panel 2x2 m; cluster of terracotta pots with geraniums; standing donkey 1.4 m at the shoulder.
+
+──────────── 4 · strombolicchio ────────────
+Turnaround sheet of a slender black volcanic sea stack, 30x22 m base, 32 m tall with near-vertical faceted walls, a narrow stair zig-zagging up the rock, and a small white lighthouse (8 m, plain white, small lantern) on the flat top. Waterline at the base.
+
+──────────── 5 · observatory_terrace ────────────
+Turnaround sheet of a small stone observation terrace 10x6 m built of dark basalt blocks, black stone parapet, white canvas awning on four poles at 4 m, two simple tables and benches, one coin-operated binocular on a post.
+
+──────────── 6 · lava_flow (3 stadii, o plansa) ────────────
+Sheet with three stages of the same lava tongue, lined up at the same scale on plain grey, top view plus one low 3/4 view each: stage 1 — tongue 40 m long, 8-12 m wide, black ropey crust with glowing orange cracks and a bulbous rounded front; stage 2 — 60 m long, split into TWO arms leaving a clean 4 m gap between them, both arms glowing at the edges; stage 3 — 80 m long, one solid wall-like flow, 0.5-1 m thick crust, strongest glow at the front. Crust reads as faceted plates, not smooth liquid.
+
+──────────── 7 · volcanic_bomb (3 variante, o plansa) ────────────
+Sheet with three rounded volcanic bombs, diameters 0.6 m, 0.9 m and 1.2 m, same scale: dark cracked crust with glowing orange light in the cracks, slightly flattened rugby-ball silhouettes, faceted surfaces.
+
+──────────── 8 · fumarole_vent (3 variante, o plansa) ────────────
+Sheet with three small fumarole vents, diameters 0.8 m, 1.2 m and 1.5 m, heights 0.4-0.8 m: small crater cones of pale grey-white crusted ground with yellow-white sulfur deposits on the lip, one shown with a soft white steam column.
+
+──────────── 9 · chevron_post ────────────
+Turnaround sheet of a 1.2 m roadside chevron post: dark wooden post with a rectangular plate showing a bold red-and-white chevron arrow pattern (geometric stripes only, no letters).
+
+──────────── 10 · ginostra_pier ────────────
+Turnaround sheet of a tiny concrete harbor pier 8x3 m with two bollards and a mooring ring, plus a 4 m white-painted stair cut into dark rock rising from the pier; waterline shown.
+
+──────────── 11 · slope kit (o singura plansa, aceeasi scara) ────────────
+Turnaround-style sheet of a matched kit of Mediterranean volcanic-slope pieces, lined up on one row, same scale, 1 m scale bar: twisted olive tree 6 m with silvery-green canopy; broad fig tree 5 m with large leaves; prickly pear cactus 2 m with paddle segments and reddish fruit; low caper bush 0.8 m spilling over; broom bush 1.8 m with tiny yellow tips; tall cane clump 3 m; dry-stone black basalt terrace wall module 3 m long, 1.2 m tall; low vine row module 4 m on wooden stakes; three faceted black basalt boulders 1-3 m; three red-black porous scoria rocks 0.5-2 m; broken ropey lava slabs 2-4 m; black stratified coast cliff module 15 m.</pre></div>
+  </div>
+</div>
+
 <footer>Sursa: <code>docs/track_briefs/stromboli.md</code> (v2) &middot; 22 aug 2026 &middot;
 traseul se valideaz&#259; cu ProbeLayout dup&#259; desenul real &#238;n <code>Track11.tscn</code> &mdash;
 &#238;nt&#226;i pantele, apoi captura <code>--driver</code> de pe buz&#259;: se vede craterul? se vede satul jos?</footer>
@@ -596,6 +663,18 @@ document.getElementById("copy-btn").addEventListener("click", async e=>{
     e.target.textContent = "Selectat — Ctrl+C";
   }
   setTimeout(()=>{ e.target.textContent = "Copiază promptul"; }, 2200);
+});
+
+document.getElementById("copy-assets").addEventListener("click", async e=>{
+  const txt = document.getElementById("asset-prompts").textContent;
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copiat ✓"; }
+  catch(_) {
+    const rng = document.createRange();
+    rng.selectNodeContents(document.getElementById("asset-prompts"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(rng);
+    e.target.textContent = "Selectat — Ctrl+C";
+  }
+  setTimeout(()=>{ e.target.textContent = "Copiază tot"; }, 2200);
 });
 
 // tema se poate schimba fara reload — redeseneaza pe schimbare

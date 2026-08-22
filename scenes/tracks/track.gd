@@ -891,6 +891,13 @@ static func themes() -> Dictionary:
 			# Cenusa si nisipul negru adanc: 0.85x fata de asfalt (brief §3),
 			# adica 6.8 pe scara grip-ului. Intre asfalt (8) si ud (3.6) —
 			# aluneci, dar nu patinezi.
+			# TARM ABRUPT, nu recif: conul vulcanic intra direct in apa.
+			# Singur, reglajul asta NU apropie apa de plaja (masurat: banda
+			# se masoara fata de poligonul buclei, iar plaja e la ~80 m
+			# INAUNTRUL lui) — de asta traseul a fost si impins spre coasta.
+			# Ramane fiindca face tarmul sa citeasca vulcanic pe tot turul.
+			"shore_band_in": 14.0,
+			"shore_band_out": 30.0,
 			"loose_grip": 6.8,
 			"dirt_road_tint": Color(0.34, 0.32, 0.33),
 			"dust_color": Color(0.28, 0.26, 0.27),
@@ -1771,6 +1778,12 @@ func rebuild() -> void:
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
 		_viaduct_ravines())
+	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
+	# Vezi TrackSideSampler.shore_in / shore_out.
+	_sampler.shore_in = float(theme_flag("shore_band_in",
+		TrackSideSampler.SHORE_BAND_IN))
+	_sampler.shore_out = float(theme_flag("shore_band_out",
+		TrackSideSampler.SHORE_BAND_OUT))
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()

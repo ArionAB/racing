@@ -1,0 +1,259 @@
+"""Stromboli — limba de lava, trei stadii (brief docs/asset_briefs/lava_set.md).
+
+  LavaFlow  stromboli/effects/lava_flow.glb
+            Lava_Stage1 / Lava_Stage2 / Lava_Stage3
+
+Gimmick-ul pistei: limba inchide ruta scurta tur dupa tur. Stadiul 1 e liber,
+stadiul 2 lasa o poarta de 4 m, stadiul 3 e zid.
+
+Trei lucruri sunt CONTRACT cu `LavaFlowHazard` si cu fizica:
+
+1. **Coada comuna.** Toate trei stadiile pleaca din acelasi punct (y=0 in
+   Blender) si cresc INAINTE. Hazardul schimba doar mesh-ul vizibil, fara sa
+   mute nodul — deci daca stadiile n-ar impartasi coada, limba ar SARI la
+   fiecare tur in loc sa avanseze.
+
+2. **Directia.** Frontul e spre -Z in Godot, adica spre +Y in Blender (exportul
+   Y-up inverseaza). Acelasi semn pe care l-am gresit pe Strombolicchio.
+
+3. **Marginea tesita sub 40 de grade.** Nu e estetica: raycast-ul suspensiei
+   citeste un prag vertical ca zid, iar masina care atinge lateral limba
+   trebuie oprita de fizica, nu aruncata. Vezi memoria
+   `suprafete-cu-goluri-si-praguri`.
+
+Crapaturile sunt geometrie separata, pe slotul 30, si raman la AO 1.0 —
+altfel ocluzia le stinge exact semnalul pentru care exista slotul.
+
+Rulare:
+    D:/Blender/blender.exe --background --factory-startup \
+        --python tools/blender/run_build.py -- build_lava_flow.py
+"""
+
+import math
+from mathutils import Matrix, Vector
+
+# `dist` mic: pliurile de funie au 0.2-0.3 m, deci ocluzia care conteaza e
+# LOCALA. Cu dist mare, toata limba iese uniform intunecata.
+AO_CRUST = dict(samples=26, dist=2.2, gradient="none", floor=0.55)
+
+THICK = 0.85           # grosimea crustei peste sol
+BEVEL_SIDE = 0.55      # cat se retrage fata laterala pe verticala -> ~35 grade
+CRACK_W = 0.28
+CRACK_SINK = 0.05
+
+CRUST = VOLCANIC_BLACK
+GLOW = LAVA_ORANGE
+
+
+def _lcg(seed):
+    st = [seed & 0x7FFFFFFF]
+
+    def nxt():
+        st[0] = (st[0] * 1103515245 + 12345) & 0x7FFFFFFF
+        return st[0] / float(0x7FFFFFFF)
+    return nxt
+
+
+def _half_width(t, length, base=5.0):
+    """Semi-latimea limbii la fractia `t` din lungime (0 = coada, 1 = front).
+
+    Brief: 8-12 m lat, variabil. Coada mai ingusta (lava s-a scurs), mijlocul
+    plin, frontul bulbos — lobii care se impung inainte sunt tot o umflare.
+    """
+    w = base * (0.72 + 0.42 * math.sin(t * math.pi * 0.85 + 0.35))
+    if t > 0.82:                      # frontul se umfla
+        w *= 1.0 + 0.16 * math.sin((t - 0.82) / 0.18 * math.pi)
+    return w
+
+
+def _ribbon(b, path, seed, crack_density=1.0, tail_taper=True):
+    """O limba de lava de-a lungul unei axe, cu crusta + crapaturi.
+
+    `path` e o lista de (x, y, half_width) de la coada spre front.
+    Returneaza lista de centre de crapatura, ca sa le putem ridica AO-ul.
+    """
+    rnd = _lcg(seed)
+    n = len(path)
+    glow_pts = []
+
+    # --- crusta: doua inele de varfuri (sus si jos), legate lateral ----------
+    bm = b.bm
+    layer = b.slot
+    top_l, top_r, bot_l, bot_r = [], [], [], []
+    for i, (x, y, hw) in enumerate(path):
+        t = i / float(n - 1)
+        # pliurile de funie: unde joase PE DIRECTIA curgerii
+        fold = 0.13 * math.sin(t * math.pi * 7.0) + 0.07 * math.sin(t * math.pi * 13.0)
+        z_top = THICK + fold
+        jitter = (rnd() - 0.5) * 0.5
+        hwj = hw + jitter
+        top_l.append(bm.verts.new((x - hwj, y, z_top)))
+        top_r.append(bm.verts.new((x + hwj, y, z_top)))
+        # baza iese mai in afara: fata laterala cade tesit (vezi antet)
+        bot_l.append(bm.verts.new((x - hwj - BEVEL_SIDE, y, 0.0)))
+        bot_r.append(bm.verts.new((x + hwj + BEVEL_SIDE, y, 0.0)))
+
+    for i in range(n - 1):
+        f = bm.faces.new((top_l[i], top_r[i], top_r[i + 1], top_l[i + 1]))
+        f[layer] = CRUST
+        f = bm.faces.new((bot_l[i], top_l[i], top_l[i + 1], bot_l[i + 1]))
+        f[layer] = CRUST
+        f = bm.faces.new((top_r[i], bot_r[i], bot_r[i + 1], top_r[i + 1]))
+        f[layer] = CRUST
+
+    # capacul frontului: buza bulboasa, incandescenta (brief)
+    f = bm.faces.new((top_l[-1], top_r[-1], bot_r[-1], bot_l[-1]))
+    f[layer] = GLOW
+    glow_pts.append((path[-1][0], path[-1][1], THICK * 0.5))
+    # coada: inchisa, dar pe crusta (lava veche)
+    f = bm.faces.new((bot_l[0], bot_r[0], top_r[0], top_l[0]))
+    f[layer] = CRUST
+
+    # --- crapaturi: fasii scufundate care urmeaza pliurile ------------------
+    # Se inmultesc spre front (lava proaspata), se raresc spre coada.
+    count = max(3, int(n * 0.42 * crack_density))
+    for k in range(count):
+        # distributie inclinata spre front: t = u^0.65
+        u = (k + 0.5) / count
+        t = u ** 0.65
+        i = min(int(t * (n - 1)), n - 2)
+        x, y, hw = path[i]
+        z = THICK + 0.13 * math.sin(t * math.pi * 7.0) - CRACK_SINK
+        # crapatura transversala, cu lungime aleatoare, decalata pe latime
+        span = hw * (0.35 + 0.55 * rnd())
+        off = (rnd() - 0.5) * hw * 0.8
+        ang = (rnd() - 0.5) * 0.9          # usor oblica, urmeaza pliul
+        dx, dy = math.cos(ang) * span, math.sin(ang) * span * 0.55
+        p0 = (x + off - dx, y - dy, z)
+        p1 = (x + off + dx, y + dy, z)
+        b.beam(p0, p1, (CRACK_W, 0.07), GLOW, up=(0, 0, 1))
+        # Se retin AMBELE capete, nu mijlocul: o crapatura se intinde pana la
+        # +-2 m pe Y (dx/dy sunt aleatoare), iar o cautare cu raza 1.2 in jurul
+        # mijlocului nu prinde niciun varf al ei. Prima versiune raporta "0
+        # varfuri ridicate la AO 1.0" pe stadiile 1 si 3 — numaratoarea aia e
+        # singurul motiv pentru care s-a vazut; pe imagine, o crapatura
+        # intunecata langa una luminoasa nu sare in ochi.
+        glow_pts.append(p0)
+        glow_pts.append(p1)
+    return glow_pts
+
+
+def _spine(length, bend=0.0, seed=1):
+    """Axa limbii: puncte (x, y, half_width) de la coada (y=0) spre front."""
+    step = 2.6
+    n = max(6, int(length / step))
+    pts = []
+    for i in range(n + 1):
+        t = i / float(n)
+        y = length * t
+        x = bend * math.sin(t * math.pi * 0.8) * length * 0.06
+        pts.append((x, y, _half_width(t, length)))
+    return pts
+
+
+def build_stage1():
+    clear_built()
+    b = Builder()
+    glow = _ribbon(b, _spine(40.0, bend=0.35, seed=3), seed=11,
+                   crack_density=0.85)
+    return b.to_object("Lava_Stage1"), glow
+
+
+def build_stage2():
+    """60 m; la ~2/3 se desparte in DOUA brate cu un culoar de 4.0 m intre ele.
+
+    Culoarul e MASURAT, nu aproximat: `GATE` e distanta libera dintre marginile
+    interioare ale bratelor, iar axele lor se aseaza la GATE/2 + semi-latime.
+    Daca il desenezi din ochi, poarta iese 2 m sau 7 m si gimmick-ul pistei
+    (mai incapi sau nu) devine intamplare.
+    """
+    b = Builder()
+    # 4.37, nu 4.0: bevelul de 0.10 m umfla fiecare brat spre culoar cu ~0.18
+    # m, iar jitterul de latime (+-0.25) mai musca putin. Masurat pe mesh-ul
+    # exportat, un GATE nominal de 4.0 dadea 3.63 m liberi — sub cei 4 m ceruti
+    # de brief, adica sub cat trebuie ca sa incapa masina cu margine de eroare.
+    # Cifra de aici e cea CORECTATA; poarta reala se masoara pe mesh, nu se
+    # citeste din constanta.
+    GATE = 4.37
+    split_at = 40.0             # unde incepe despartirea
+    glow = []
+
+    # trunchiul comun, pana la despartire
+    trunk = _spine(split_at, bend=0.3, seed=5)
+    glow += _ribbon(b, trunk, seed=21, crack_density=0.8)
+
+    # cele doua brate: pleaca din capatul trunchiului si diverg
+    for sgn in (-1, 1):
+        arm = []
+        n = 9
+        for i in range(n + 1):
+            t = i / float(n)
+            y = split_at + 20.0 * t
+            hw = 3.1 * (0.9 + 0.25 * math.sin(t * math.pi))
+            # marginea interioara a bratului trebuie sa stea la GATE/2 de axa
+            x = sgn * (GATE * 0.5 + hw)
+            arm.append((x, y, hw))
+        glow += _ribbon(b, arm, seed=31 + (sgn > 0) * 7, crack_density=1.6)
+
+    return b.to_object("Lava_Stage2"), glow
+
+
+def build_stage3():
+    """80 m, front lat si continuu: lobii s-au unit, culoarul nu mai exista."""
+    b = Builder()
+    path = _spine(80.0, bend=0.25, seed=9)
+    # frontul se latteste mult in ultima cincime: zid revarsat
+    path = [(x, y, hw * (1.0 + 0.85 * max(0.0, (i / float(len(path) - 1)) - 0.78) / 0.22))
+            for i, (x, y, hw) in enumerate(path)]
+    glow = _ribbon(b, path, seed=41, crack_density=1.35)
+    return b.to_object("Lava_Stage3"), glow
+
+
+def _lift_glow(obj, slot=GLOW):
+    """Ridica AO la 1.0 pe varfurile fetelor incandescente (brief).
+
+    Se recunosc dupa UV: `assign_uvs` a colapsat deja fiecare fata pe centrul
+    slotului ei, deci `u` spune exact ce e fata. Varianta anterioara cauta dupa
+    DISTANTA fata de centrele retinute la constructie si rata: o crapatura se
+    intinde pana la +-2 m, iar o raza in jurul mijlocului ei nu prinde niciun
+    varf (stadiile 1 si 3 raportau 0). Cu UV-ul nu mai exista cazul.
+    """
+    me = obj.data
+    ca = me.color_attributes.get("AO")
+    uv = me.uv_layers.get("UVMap")
+    if ca is None or uv is None:
+        return 0
+    want = (slot + 0.5) / 32.0
+    touched = set()
+    for poly in me.polygons:
+        u = sum(uv.data[li].uv[0] for li in poly.loop_indices) / poly.loop_total
+        if abs(u - want) < 0.008:
+            for vi in poly.vertices:
+                touched.add(vi)
+    for vi in touched:
+        ca.data[vi].color = (1.0, 1.0, 1.0, 1.0)
+    return len(touched)
+
+
+if __name__ == "__main__":
+    built = []
+    for fn in (build_stage1, build_stage2, build_stage3):
+        obj, glow = fn()
+        snap = snapshot_slots(obj)
+        apply_bevel(obj, 0.10, segments=1, angle_deg=30.0)
+        apply_smooth(obj, 40.0)     # prag mic: crusta trebuie sa ramana fatetata
+        assign_uvs(obj, snap)
+        obj.data.materials.clear()
+        obj.data.materials.append(atlas_material())
+        bake_ao(obj, **AO_CRUST)
+        if "slot" in obj.data.attributes:
+            obj.data.attributes.remove(obj.data.attributes["slot"])
+        lit = _lift_glow(obj)
+        print("%-12s %4d tris  (%d varfuri de crapatura la AO 1.0)"
+              % (obj.name, tri_count(obj), lit))
+        built.append(obj)
+
+    total = sum(tri_count(o) for o in built)
+    print("TOTAL        %4d tris  (buget 3600)" % total)
+    path, size = export_glb(built, "stromboli/effects/lava_flow.glb")
+    print("export: %s (%.1f KB)" % (path, size / 1024.0))

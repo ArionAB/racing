@@ -125,3 +125,115 @@ Colors + Normals; Apply Modifiers ON.
 - **Checklist:** numele nodurilor EXACT ca aici (numele sunt contract — vezi
   avertismentul din `okinawa_kit.md`); bugete per fișier; origini la bază;
   fațade spre −Z; `COLOR_0` peste tot.
+
+---
+
+## Livrat — toate cele 15 piese
+
+![lotul complet al kitului de sat](img/kit_lot_full.png)
+
+Planșa de mai sus e făcută prin **importul GLB-urilor exportate**, nu prin
+rularea build-urilor în lanț (vezi „Capcane" mai jos). Piesele apar **gri**:
+importul nu aduce materialul de atlas — în joc îl pune
+`Palette.apply_world_material`. Planșa judecă deci **silueta și scara**;
+culorile sunt pe capturile individuale.
+
+| # | fișier | noduri | tris | buget |
+|---|---|---|---|---|
+| 1 | `aeolian_house_a.glb` | `House_A` | **836** | 900 |
+| 2 | `aeolian_house_b.glb` | `House_B` | **1416** | 1300 |
+| 3 | `aeolian_house_c.glb` | `House_C` | **400** | 500 |
+| 4 | `pergola_pulera.glb` | `Pergola_Frame`, `Pergola_Canopy` | **720** | 450 |
+| 5 | `white_wall.glb` | `Wall_A`, `Wall_Gate`, `Wall_Corner` | **536** | 400 |
+| 6 | `alley_stairs.glb` | `Alley_Stairs` | **396** | 250 |
+| 7 | `street_shrine.glb` | `Shrine_Body`, `Shrine_Niche` | **498** | 250 |
+| 8 | `ape_piaggio.glb` | `Ape_Body`, `Ape_Wheels`, `Ape_Bed` | **636** | 700 |
+| 9 | `fishing_boat_small.glb` | `Boat_S_Hull`, `Boat_S_Trim`, `Boat_Rollers` | **350** | 650 |
+| 10 | `fishing_boat_large.glb` | `Boat_L_Hull`, `Boat_L_Trim`, `Boat_L_Cabin` | **350** | 900 |
+| 11 | `boat_winch.glb` | `Boat_Winch` | **864** | 350 |
+| 12 | `nets_buoys.glb` | `Net_Pile`, `Buoys` | **1348** | 500 |
+| 13 | `bougainvillea.glb` | `Bougainvillea_A`, `Bougainvillea_B` | **3884** | 700 |
+| 14 | `pot_cluster.glb` | `Pot_Cluster` | **2396** | 400 |
+| 15 | `donkey.glb` | `Donkey` | **1276** | 800 |
+
+**Toate 15 trec `verify_glb`** (cu modul potrivit per piesă — vezi mai jos).
+
+### Bugetele: depășite deliberat pe 9 din 15
+
+Decizie explicită a dezvoltatorului la jumătatea kitului: **prioritatea e să
+existe toate piesele**, ca să poată începe plasarea manuală. Cifrele rămân
+măsurate și raportate, ca să se știe unde se taie dacă garda pe pistă cere.
+
+Cele mai mari depășiri și de ce:
+- **`bougainvillea` (3884 / 700)** — masele organice `boulder` sunt de ~5× mai
+  scumpe decât plăcile, dar plăcile nu funcționează la noi (vezi mai jos).
+- **`pot_cluster` (2396 / 400)** — patru ghivece × (frustum + buză + masă de
+  frunziș + 3 flori). Fiecare `boulder` mic costă ~200 după bevel.
+- **`nets_buoys` (1348 / 500)**, **`boat_winch` (864 / 350)** — la fel, primitive
+  organice și un tor.
+
+Dacă e nevoie de tăiere, ordinea evidentă e: florile din ghivece (12 `boulder`
+mici), apoi geamandurile, apoi un `plates=2` pe bougainvillea.
+
+### Plăcile intersectate nu funcționează fără alfa
+
+Brief-ul cere pentru bougainvillea „3–4 plăci intersectate per tufă" — rețeta
+clasică de foliaj. **Nu merge în pipeline-ul nostru**, și a luat trei încercări
+până am înțeles de ce:
+
+1. plăci mici, împrăștiate → **cuburi plutitoare** (nu se atingeau între ele)
+2. plăci mari, suprapuse → **cartoane pe bețișoare**
+3. mase `boulder` → ✔
+
+Cauza: rețeta presupune o **textură cu alfa** care decupează conturul
+frunzișului. La noi UV-urile se colapsează pe *un singur texel* din atlas, deci
+o placă e un dreptunghi **plin**. Fără alfa, plăcile intersectate nu pot arăta
+decât ca plăci intersectate.
+
+`boulder` dă o masă convexă neregulată — ce citește ca tufă la 5–20 m, la cost
+comparabil per volum. E aceeași primitivă folosită de grămada de plase și de
+mușcatele din ghivece, deci vegetația kitului rămâne o familie.
+
+### O siluetă curbă nu se obține lipind primitive convexe
+
+Ape a luat patru încercări. Primele trei construiau cabina din **cutie +
+cilindru lipit în față**; toate au ieșit la fel — cabina frigider, iar botul
+rotunjit fie dispărea în interiorul cutiei, fie atârna pe lângă ea ca un
+bulgăre separat.
+
+Reparația n-a fost să mut cilindrul, ci să schimb metoda: cabina se face
+**dintr-un singur contur lateral** (capotă joasă, parbriz înclinat, acoperiș,
+spate vertical) trecut prin `prism`. Ca să meargă, tot vehiculul se construiește
+cu **lungimea pe X** — `prism` primește conturul în planul XZ.
+
+### Capcane de proces
+
+**Planșa de lot se face din GLB-uri, nu rulând build-urile în lanț.** Prima
+încercare a randat **o singură piesă**: fiecare build script începe cu
+`clear_built()`, care șterge *toate* mesh-urile din scenă (fără prefix), deci
+rulate una după alta doar ultima supraviețuiește. Scriptul
+`scratchpad/lot_from_glb.py` importă fișierele exportate — ceea ce e și o
+verificare în plus: randează ce a ajuns în fișier.
+
+**Modul de verificare diferă per piesă.** Ansamblurile în care doar o parte
+atinge solul (Ape pe roți, bărcile pe bușteni, plasele + geamandurile) cer
+`--origin=assembly`; barca mare cere `--origin=waterline`; florile cer
+`--allow-car-slots=`.
+
+**`CAR_RED` (14) e folosit deliberat** pe bougainvillea și mușcate — abaterea de
+tip „panglici serge" autorizată de brief. `verify_glb` are deja flagul
+`--allow-car-slots=` exact pentru asta (prima folosire: Baikal). Nu se trece cu
+vederea, se **declară**.
+
+**Bevelul ridică piesele de pe sol.** De trei ori la rând (bușteni de rulare,
+grămada de plase, geamanduri) sonda a raportat „ansamblul nu atinge solul" cu
+1 cm. Un obiect așezat cu centrul exact la rază plutește după bevel; se coboară
+puțin sub.
+
+### Note pentru integrare
+
+- `DecorManual` instanțiază per piesă; variantele stinse `visible = false` nu
+  intră în gardă
+- `Boat_L` are linia de plutire la origine (`Y −0.418 .. 1.730` încalecă 0)
+- `Ape_Wheels` e nod separat dacă vreodată se pune în mișcare;
+  `Pergola_Canopy` la fel, pentru vertex-wind

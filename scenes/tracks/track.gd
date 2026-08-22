@@ -842,11 +842,21 @@ static func themes() -> Dictionary:
 			# palida. Verificarea care a rupt bucla n-a fost o captura, ci
 			# citirea culorilor de vertex din mesh plus inmultirea cu lumina.
 			"sun_color": Color(1.0, 0.98, 0.95),
-			"sun_energy": 0.85,
-			"sun_rotation_deg": Vector3(-34, 210, 0),
+			"sun_energy": 0.95,
+			"sun_rotation_deg": Vector3(-46, 210, 0),
 			"exposure": 1.0,
 			"ambient_color": Color.html("9FB0BF"),
-			"ambient_energy": 0.18,
+			# AMBIENTALUL E CE UMPLE RAPELE, si pista asta e facuta din rape.
+			#
+			# La 0.18 (cel mai mic din joc — restul temelor sunt la 0.22-0.32)
+			# fetele intoarse de la soare primeau aproape nimic: masurat pe un
+			# cadru de pe buza craterului, peretii erau la (9,13,17)-(14,18,22)
+			# si 54.6% din cadrul util cadea sub luminanta 40. Prapastia exista
+			# in geometrie, dar pe ecran era o pata neagra plata — nu se citea
+			# nici adancimea, nici ca e roca.
+			#
+			# Umbra o face ocluzia si contrastul cu soarele, nu lipsa luminii.
+			"ambient_energy": 0.34,
 			"fog_depth": true,
 			"fog_begin": 150.0,
 			"fog_end": 300.0,

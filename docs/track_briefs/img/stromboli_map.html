@@ -1,0 +1,580 @@
+<title>Stromboli Recon</title>
+<style>
+:root{
+  --lava:#E8622D; --lava-deep:#B23E14; --basalt:#55535A; --white:#E9F2F0;
+  --sea:#62B8C4; --sea-deep:#2F6E82; --scrub:#5E7D4A; --ash:#B8B4AC;
+  --ground:#F2F0EC; --panel:#FFFFFF; --sunk:#E9E6E0;
+  --ink:#221F24; --ink-soft:#655F6B; --hair:#D5D0C8;
+  --grid:rgba(85,83,90,.12);
+  --accent-title:#B23E14;
+  --ok:#3F7A3C; --warn:#A8683A; --bad:#C43A22;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#171519; --panel:#201D22; --sunk:#141216;
+    --ink:#ECE9E4; --ink-soft:#9C95A3; --hair:#37333C;
+    --ash:#8A868E; --grid:rgba(232,98,45,.08);
+    --accent-title:#E8622D;
+    --ok:#8FCB8C; --warn:#D9975F; --bad:#FF8577;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#171519; --panel:#201D22; --sunk:#141216;
+  --ink:#ECE9E4; --ink-soft:#9C95A3; --hair:#37333C;
+  --ash:#8A868E; --grid:rgba(232,98,45,.08);
+  --accent-title:#E8622D;
+  --ok:#8FCB8C; --warn:#D9975F; --bad:#FF8577;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:15px; line-height:1.55;
+}
+.mono{font-family:ui-monospace,"Cascadia Mono","Consolas",monospace}
+.wrap{max-width:1180px; margin:0 auto; padding:28px 22px 64px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 28px; margin-bottom:8px}
+h1{
+  font-size:clamp(30px,4.4vw,46px); line-height:1.02; margin:0;
+  font-weight:700; letter-spacing:-.022em; text-wrap:balance;
+}
+h1 small{display:block; font-size:.32em; font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent-title); margin-bottom:8px}
+.facts{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+.fact{display:flex; flex-direction:column}
+.fact b{font-size:19px; font-variant-numeric:tabular-nums; font-weight:700}
+.fact span{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-soft)}
+.lede{color:var(--ink-soft); max-width:70ch; margin:14px 0 26px}
+.lede b{color:var(--ink)}
+
+.layout{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr); gap:22px; align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+
+.card{background:var(--panel); border:1px solid var(--hair); border-radius:4px}
+.card h2{
+  margin:0; padding:11px 15px; font-size:11px; font-weight:700;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--ink-soft);
+  border-bottom:1px solid var(--hair);
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.plan{padding:6px}
+canvas{display:block; width:100%; height:auto; border-radius:2px; cursor:crosshair}
+
+.legend{display:flex; flex-wrap:wrap; gap:5px 16px; padding:10px 15px;
+  border-top:1px solid var(--hair); font-size:11.5px; color:var(--ink-soft)}
+.legend i{display:inline-block; width:16px; height:3px; vertical-align:middle;
+  margin-right:6px; border-radius:2px}
+
+.detail{padding:15px; min-height:150px}
+.detail .tag{
+  display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; padding:3px 8px; border-radius:3px;
+  background:var(--lava-deep); color:#FFF3EC; margin-bottom:9px;
+}
+.detail h3{margin:0 0 3px; font-size:20px; letter-spacing:-.01em}
+.detail .coord{font-size:12px; color:var(--ink-soft); margin-bottom:11px}
+.detail p{margin:0 0 13px; font-size:14px}
+.detail .assets{font-size:12.5px; line-height:1.7; color:var(--ink-soft);
+  border-top:1px dashed var(--hair); padding-top:11px}
+.detail .assets b{display:block; font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink); margin-bottom:5px}
+.hint{color:var(--ink-soft); font-size:13px; font-style:italic}
+
+.stages{padding:13px 15px; display:flex; flex-direction:column; gap:9px}
+.stage{display:flex; gap:10px; align-items:baseline; font-size:13px}
+.stage .lap{flex:none; width:52px; font-size:10.5px; font-weight:700;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--ink-soft)}
+.stage .bar{flex:none; width:74px; height:8px; border-radius:2px; position:relative;
+  background:var(--sunk); overflow:hidden; align-self:center}
+.stage .bar i{position:absolute; inset:0; background:var(--lava); border-radius:2px}
+
+table{width:100%; border-collapse:collapse; font-size:13px}
+.scroll{overflow-x:auto}
+th,td{text-align:left; padding:8px 15px; border-bottom:1px solid var(--hair); vertical-align:top}
+th{font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-soft); font-weight:700}
+td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.grp td{font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--accent-title); background:var(--sunk); padding-top:9px; padding-bottom:9px}
+tr.row:hover{background:var(--sunk); cursor:pointer}
+tr.row.on{background:var(--sunk)}
+.pill{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px;
+  border-radius:9px; white-space:nowrap}
+.pill.hero{background:rgba(178,62,20,.14); color:var(--accent-title)}
+.pill.kit{background:rgba(94,125,74,.16); color:var(--scrub)}
+.pill.cls{background:rgba(85,83,90,.16); color:var(--ink-soft)}
+
+.gaps{margin-top:22px}
+.note{padding:13px 15px; font-size:13.5px; color:var(--ink-soft); border-top:1px solid var(--hair)}
+.note b{color:var(--ink)}
+.prompt-body{padding:15px; position:relative}
+.prompt-body pre{
+  margin:0; max-height:420px; overflow:auto; white-space:pre-wrap;
+  font-family:ui-monospace,"Cascadia Mono","Consolas",monospace;
+  font-size:12px; line-height:1.6; color:var(--ink-soft);
+  background:var(--sunk); border:1px solid var(--hair); border-radius:3px; padding:14px;
+}
+.copy{
+  font:inherit; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  border:1px solid var(--hair); background:var(--panel); color:var(--ink);
+  padding:5px 12px; border-radius:3px; cursor:pointer;
+}
+.copy:hover{background:var(--sunk)}
+.copy:focus-visible{outline:2px solid var(--lava); outline-offset:2px}
+footer{margin-top:30px; padding-top:16px; border-top:1px solid var(--hair);
+  font-size:12.5px; color:var(--ink-soft)}
+code{font-family:ui-monospace,"Cascadia Mono",monospace; font-size:.92em;
+  background:var(--sunk); padding:1px 5px; border-radius:3px}
+</style>
+
+<div class="wrap">
+<header>
+  <h1><small>Track11 &middot; tem&#259; stromboli &middot; propunere</small>Stromboli Recon</h1>
+  <div class="facts">
+    <div class="fact"><b id="f-len">&mdash;</b><span>lungime desenat&#259;</span></div>
+    <div class="fact"><b>1 800 m</b><span>&#539;int&#259; brief</span></div>
+    <div class="fact"><b>9</b><span>POI</span></div>
+    <div class="fact"><b id="f-inst">&mdash;</b><span>piese propuse</span></div>
+    <div class="fact"><b>45 s</b><span>ciclu erup&#539;ie</span></div>
+  </div>
+</header>
+
+<p class="lede">Spre deosebire de Baikal Recon, harta asta e <b>propunerea din brief, nu geometrie m&#259;surat&#259;</b> &mdash;
+<code>Track11.tscn</code> nu exist&#259; &#238;nc&#259;. Traseul, cotele &#537;i loturile de assets sunt cele din
+<code>docs/track_briefs/stromboli.md</code>; dup&#259; desenul real, cifrele se re-m&#259;soar&#259; cu ProbeLayout.
+Dreptunghiurile arat&#259; <b>c&#226;t loc cere fiecare lot</b> la POI-ul lui, la scar&#259;: dac&#259; nu &#238;ncap aici,
+nu &#238;ncap nici &#238;n scen&#259;. Gimmick-ul pistei: limba de lav&#259; &#238;nchide <b>ruta scurt&#259;</b> tur dup&#259; tur.</p>
+
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Plan &middot; vedere de sus <span class="mono" id="cursor">&mdash;</span></h2>
+      <div class="plan"><canvas id="plan" width="1000" height="900"></canvas></div>
+      <div class="legend">
+        <span><i style="background:#55535A"></i>drum (gros = lat)</span>
+        <span><i style="background:#1F1D22"></i>nisip negru / lav&#259; veche</span>
+        <span><i style="background:#B8B4AC"></i>cenu&#537;&#259; (Sciara)</span>
+        <span><i style="background:#E8622D"></i>lav&#259; nou&#259; / bombe</span>
+        <span><i style="background:#2F6E82"></i>mare (c&#259;dere = repunere)</span>
+        <span><i style="background:#8A6FA0"></i>ruta scurt&#259; (se &#238;nchide)</span>
+        <span><i style="background:#B8B4AC"></i>amprenta loturilor</span>
+        <span style="margin-left:auto"><label style="cursor:pointer"><input type="checkbox" id="lots" checked> arat&#259; loturile</label></span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Profil de eleva&#539;ie &middot; 0 &rarr; 1 tur (propus)</h2>
+      <div class="plan"><canvas id="elev" width="1000" height="200"></canvas></div>
+      <div class="note">Punctul cel mai &#238;nalt (~45 m) e creasta teraselor de la <b>G</b> &mdash; acolo se
+      deschide priveli&#537;tea spre sat &#537;i Strombolicchio (&bdquo;urcarea care dezv&#259;luie&rdquo;).
+      Traversarea Sciarei (<b>D</b>) st&#259; pe buz&#259; la ~35 m peste mare, f&#259;r&#259; parapet.</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Punct selectat &middot; lotul lui</h2>
+      <div class="detail" id="detail"><p class="hint">Alege un POI pe hart&#259; sau un r&#226;nd din tabelul de assets.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Lava pe tururi &middot; ruta scurt&#259; de la E</h2>
+      <div class="stages">
+        <div class="stage"><span class="lap">tur 1</span><span class="bar"><i style="width:30%"></i></span><span>limba abia coboar&#259; &mdash; scurta <b>liber&#259;</b> (&minus;4&ndash;5 s)</span></div>
+        <div class="stage"><span class="lap">tur 2</span><span class="bar"><i style="width:65%"></i></span><span>poart&#259; de <b>4 m</b> &#238;ntre dou&#259; bra&#539;e incandescente &mdash; risc/recompens&#259;</span></div>
+        <div class="stage"><span class="lap">tur 3</span><span class="bar"><i style="width:100%"></i></span><span><b>&#238;nchis&#259;</b> &mdash; zid de lav&#259; semnalizat; to&#539;i pe ocol</span></div>
+      </div>
+      <div class="note">Contact cu lava = distrugere + repornire din st&#226;nd (~2 s, calibrarea din
+      <code>sisteme.md</code>). Ciclul de erup&#539;ie (45 s) e sub durata turului (~55 s), deci faza
+      bombelor de pe Sciara se mut&#259; de la tur la tur.</div>
+    </div>
+  </div>
+</div>
+
+<div class="gaps">
+  <div class="card">
+    <h2>Assets propuse &middot; dimensiuni pentru dioram&#259; <span id="a-count" class="mono"></span></h2>
+    <div class="scroll"><table id="asset-tbl"></table></div>
+    <div class="note"><b>Paleta:</b> un singur slot nou &mdash; <code>LAVA_ORANGE #E8622D</code> (30), emisiv,
+    semnalul pistei. Restul reutilizeaz&#259;: <code>VOLCANIC_BLACK</code> 20 &middot; <code>FOAM_WHITE</code> 22 (var)
+    &middot; <code>REEF_SHALLOW</code>/<code>SEA_DEEP</code> 17/18 &middot; <code>TROPICAL_GREEN</code> 21 &middot;
+    <code>MARBLE_GREY</code> 29 (cenu&#537;&#259;) &middot; <code>TILE_TERRACOTTA</code> 23 &middot;
+    <code>WOOD_WEATHERED</code> 9 &middot; <code>CAR_RED</code> 14 (bougainvillea, abaterea con&#537;tient&#259;).</div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Prompt dioram&#259; (ChatGPT) &middot; paste-ready <button class="copy" id="copy-btn" type="button">Copiaz&#259; promptul</button></h2>
+    <div class="prompt-body"><pre id="prompt-text">Create a stylized low-poly tabletop diorama of a toy-car racing track on the volcanic island of Stromboli, Italy, in late-afternoon golden light.
+
+STYLE (strict): faceted, flat-shaded low-poly meshes like a Blender viewport render - no fine surface texture, no painterly brushwork, no photorealism. Chunky toy proportions: cars are stubby and ~1.3x wider than real cars; houses and trees are simplified into a few big planes. Soft baked ambient occlusion in the crevices, muted environment colors (~50% saturation) with only three saturated accents: the glowing orange lava, the bougainvillea on the white walls, and the toy cars. One single low warm sun (about 20 degrees above the horizon) from the sea side, long soft shadows across the WHOLE overview. Sky is a plain gradient - warm cream at the horizon, pale blue at the zenith - no painted clouds except the volcano's ash plume. Show the diorama on a thin dark rounded-rectangle table base, from a raised 3/4 view.
+
+THE ISLAND [!]: one steep volcanic cone (about 100 m tall at diorama scale) rises from the sea, with the racing loop wrapped around its LOWER flank - the summit crater is close and always visible above the track, not a distant backdrop. A thin grey ash plume rises from the crater. On the north-west flank a broad grey scree channel (the Sciara del Fuoco) runs straight from the crater down into the sea; a few glowing orange bombs are bouncing down it. Offshore, ~200 m from the island, a slender black sea stack with near-vertical walls and a small white lighthouse on top (Strombolicchio).
+
+THE ROUTE - a single closed loop of about 1.8 km, counter-clockwise, the sea always on the right [!]:
+1. Start/finish in a white Aeolian village square: cubic flat-roofed whitewashed houses with blue and green shutters, external staircases, pergolas on round white pillars, a white church with a curved gable and a 14 m bell tower, a checkered banner strung between two houses over the street, a green Piaggio Ape three-wheeler parked, magenta bougainvillea spilling over white walls.
+2. A black-sand beach: the road drops onto a strip of BLACK volcanic sand along the water; wooden fishing boats pulled up on log rollers, nets and orange buoys; no guardrail toward the sea; turquoise water with white foam.
+3. A switchback climb through dusty-green Mediterranean scrub - prickly pears, caper bushes, yellow-tipped broom - between low black stone walls, up to a small observatory terrace with a white canvas awning and a stone parapet, looking straight at the Sciara.
+4. The Sciara crossing [!]: the road cuts straight across the grey scree channel, ~35 m above the sea, with the water visible directly below on the right and the crater above on the left; glowing bombs bounce down the channel across the road; the road surface here is pale grey ash.
+5. The lava fork [!] - the signature of this track: on an old black ropey lava field the route SPLITS: a short straight route across the field, and a longer loop swinging toward the shore around a lava delta. A fresh orange-glowing lava tongue with a dark crust is flowing down from the crater toward the short route, shown just reaching it, leaving only a narrow gap between two glowing arms. Red warning signs at the split.
+6. Ginostra: a tiny hamlet of 4-5 white houses on black rock above the world's smallest harbor - a small concrete pier with one boat and white stairs cut into the rock; the track squeezes between the houses.
+7. Malvasia vine terraces: the long climb back - switchbacks between dry-stone black basalt terrace walls, low vine rows on stakes, twisted olive trees and broad fig trees; from the crest (the highest point of the lap, ~45 m) the white village, the sea and the lighthouse sea stack are all visible below.
+8. A fumarole field: the descent crosses pale yellow-white ground where small vents puff white steam columns across the road, then the loop returns into the village under a white archway.
+
+Details that matter: the road is dark packed volcanic soil with red-and-white curbs only on the switchback corners; black deep sand borders the racing line on the beach; the sea is one continuous turquoise surface and clearly the lowest thing in the diorama; the lava and the bombs are the only strong orange in the scene; all white walls are slightly rounded, never sharp-cornered.
+
+Background: two faint blue island silhouettes on the horizon; a low warm sun with a soft halo; warm haze.
+
+Toy cars: 4-6 chunky low-poly racing cars in saturated red, blue, yellow, white - one drifting on the black beach, one mid-jump over the crest, two choosing different routes at the lava fork.
+
+Colors: basalt black #55535A, black sand slightly darker, whitewash #E9F2F0, sea turquoise #62B8C4 to deep #2F6E82, scrub green #5E7D4A, ash grey #B8B4AC, terracotta #C46A4C, lava orange #E8622D (emissive), dry grass #AF9F4E.
+
+Deliver: (a) one wide 3/4 overview of the entire diorama with the loop clearly readable and the cone rising inside it; (b) one low driver's-eye shot on the black beach between the boats, with the white village behind and Strombolicchio out at sea; (c) one shot from the lava fork looking up the Sciara at the crater and its plume, bombs mid-bounce, with the two routes and the glowing tongue in the foreground.</pre></div>
+  </div>
+</div>
+
+<footer>Sursa: <code>docs/track_briefs/stromboli.md</code> &middot; propunere, 22 aug 2026 &middot;
+traseul se valideaz&#259; cu ProbeLayout dup&#259; desenul real &#238;n <code>Track11.tscn</code>;
+bifurca&#539;ia E se m&#259;soar&#259;, nu se sper&#259; (lec&#539;ia Baikal &sect;10).</footer>
+</div>
+
+<script>
+"use strict";
+// ---- date (metri; M scaleaza propunerea la ~1.8 km) --------------------------
+const M = 1.2;
+const PTS = [ // [x, y, elev] — bucla principala, antiorar, marea pe dreapta
+  [300,240,8],[240,262,5],[150,252,3],[80,218,4],[52,150,18],[75,95,32],
+  [68,40,35],[52,-48,31],[75,-128,15],[85,-152,13],
+  [58,-200,9],[105,-245,6],[168,-212,8],           // ocolul (ruta lunga)
+  [210,-235,6],[252,-222,10],[318,-178,25],[352,-118,40],[358,-68,45],
+  [348,-8,30],[330,62,20],[318,132,14],[308,200,10]
+].map(p=>[p[0]*M,p[1]*M,p[2]]);
+const SHORT = [[85,-152],[128,-180],[168,-212]].map(p=>[p[0]*M,p[1]*M]);
+const COAST = [
+  [20,300],[120,330],[240,310],[330,270],[400,200],[430,60],[420,-120],
+  [370,-230],[280,-295],[160,-295],[60,-252],[10,-140],[0,-20],[5,120]
+].map(p=>[p[0]*M,p[1]*M]);
+const CONE = {x:190*M, y:-30*M, r:[88*M,56*M,28*M]};
+const SCIARA = [[185*M,-25*M],[5*M,42*M],[5*M,-108*M]];
+const TONGUE = [[178*M,-42*M],[196*M,-52*M],[140*M,-172*M],[118*M,-166*M]];
+const STACK = {x:120*M, y:372*M};
+
+// suprafete pe fractia turului: [de la, pana la, culoare]
+const SURF = [
+  [0.00,0.035,"#C9C4BA"],[0.035,0.165,"#1F1D22"],[0.165,0.300,"#4A4038"],
+  [0.300,0.425,"#B8B4AC"],[0.425,0.615,"#26232B"],[0.615,0.675,"#C9C4BA"],
+  [0.675,0.880,"#4A4038"],[0.880,0.965,"#CBC49E"],[0.965,1.001,"#C9C4BA"]
+];
+
+const POI = [
+  {k:"A", x:300, y:240, frac:"0.00", name:"Piața satului — START",
+   w:"8 m · dale albe-cenușii",
+   desc:"Biserica albă cu campanil de 14 m, banner în carouri între două case, pergole, un Ape parcat, bougainvillea pe ziduri. Uliță-culoar între case.",
+   lot:["stromboli_church 12×8 m (turn 14 m)","start_banner_alley 10 m","aeolian_house A/B/C ×6","pergola 4×3 m ×3","white_wall 3 m ×8","alley_stairs ×2","street_shrine 1.5 m","ape_piaggio 2.7 m","bougainvillea ×4","pot_cluster ×5"]},
+  {k:"B", x:150, y:252, frac:"0.06–0.16", name:"Plaja neagră Piscità",
+   w:"9 m · nisip negru bătătorit, fără parapet spre mare",
+   desc:"Bărci pe bușteni, plase, geamanduri. Nisipul adânc de lângă linie taie viteza la ~45%; intri în mare → repunere ~2 s. Parapetul e punctuație, nu regulă (ref 04).",
+   lot:["fishing_boat_small 5 m ×3","boat_winch 2×1 m","nets_buoys_set 2×2 m ×2","basalt_boulder 1–3 m ×4"]},
+  {k:"C", x:75, y:95, frac:"0.18–0.28", name:"Observatorul Punta Labronzo",
+   w:"7 m · serpentină în urcare (~30 m altitudine)",
+   desc:"Urcuș prin opuntia, capere și ginestre, între ziduri joase de bazalt. Sus, terasa cu copertină — primul loc de unde se vede Sciara întreagă. Aici auzi ciclul: bubuitul te anunță ce urmează la D.",
+   lot:["observatory_terrace 10×6 m (copertină 4 m)","prickly_pear ×6","caper_bush ×8","ginestra_bush ×6","white_wall/terrace_wall module"]},
+  {k:"D", x:52, y:-48, frac:"0.30–0.42", name:"Traversarea Sciara del Fuoco",
+   w:"8 m · cenușă (grip 0.85×) · buză fără parapet la ~35 m peste mare",
+   desc:"La fiecare puls al ciclului (~45 s), 3–5 bombe incandescente sar pe canal și traversează drumul (reuse RockfallHazard, declanșat de ciclu). Lovitura te învârte; căderea în mare = repunere. Telegraph: bubuit + coloană de cenușă, ~3 s înainte.",
+   lot:["volcanic_bomb Ø 0.6/0.9/1.2 m ×3 var","scoria_rock 0.5–2 m ×6","crater_vents 25×25 m (pe vârf)"]},
+  {k:"E", x:110, y:-190, frac:"0.46–0.58", name:"Bifurcația de lavă",
+   w:"scurtă 6 m / ocol 8 m · câmp de lavă veche",
+   desc:"Ruta scurtă taie câmpul (coardă ~120 m); ocolul cade spre țărm (arc ~190 m). Câștig țintă 4–5 s. Limba de lavă închide scurta în 3 stadii — vezi cardul „Lava pe tururi”. AI-ul re-alege ruta per tur; semnalizare la intrare.",
+   lot:["lava_flow_stage1/2/3: 40/60/80 m × 8–12 m","lava_slab_broken 2–4 m ×6","semne de avertizare ×2"]},
+  {k:"F", x:210, y:-235, frac:"0.60–0.66", name:"Ginostra",
+   w:"6 m · strângerea adevărată a turului",
+   desc:"4–5 case albe pe stâncă neagră, dana „celui mai mic port din lume”, o barcă ancorată, scări albe, un măgar care se ferește (figurant). Viraj strâns între case.",
+   lot:["ginostra_pier 8×3 m + scară 4 m","aeolian_house ×5 (reuse kit)","fishing_boat_large 7 m","donkey 1.4 m greabăn"]},
+  {k:"G", x:358, y:-68, frac:"0.68–0.84", name:"Terasele de malvasia — creasta",
+   w:"7 m · două ace de păr largi (raze ≥ 16 m) · punct maxim ~45 m",
+   desc:"Serpente între ziduri de bazalt fără mortar și rânduri de viță. La creastă priveliștea se deschide: satul, marea, Strombolicchio — câștigată prin urcuș (world_design). Creasta e kicker natural pe fizica întreagă.",
+   lot:["terrace_wall 3 m ×20 module","vine_row 4 m ×12","olive_tree 5–7 m ×6","fig_tree 4–6 m ×4","cane_clump 3 m ×4"]},
+  {k:"H", x:330, y:62, frac:"0.86–0.96", name:"Câmpul de fumarole",
+   w:"7 m · pământ gălbui-alb",
+   desc:"2–3 fumarole suflă aburi peste drum în ritm propriu. Hazard-TEATRU, cost zero (clasa care ne lipsea, ref 05): ecranul se albește ~0.5 s, șuier — și atât. Înveți să treci prin el cu turbo.",
+   lot:["fumarole_vent Ø 0.8–1.5 m ×3 var","scoria_rock ×4","dry veg tufts"]},
+  {k:"S", x:120, y:372, frac:"fundal", name:"Strombolicchio",
+   w:"~200 m în larg — în interiorul lui fog_end",
+   desc:"Neck vulcanic zvelt, pereți aproape verticali, far alb în vârf. Fundal-erou, vizibil de pe creasta G și de pe plajă. Cotele legate: siluetă < fog_end < FAR_PLANE.",
+   lot:["strombolicchio.glb: bază 30×22 m, stâncă 32 m, far +8 m"]}
+].map(p=>({...p, x:p.x*M, y:p.y*M}));
+
+const LOTS = [ // amprente [x, y, w, h, poi] in metri (nescalate)
+  [318,248,34,22,"A"],[132,270,24,10,"B"],[95,88,12,8,"C"],
+  [205,-18,26,26,"D"],[120,-158,52,14,"E"],[222,-252,22,14,"F"],
+  [330,-150,30,18,"G"],[344,80,14,9,"H"],[104,360,32,24,"S"]
+].map(l=>[l[0]*M,l[1]*M,l[2]*M,l[3]*M,l[4]]);
+
+const ASSETS = [
+  ["Structuri mari (hero)", null],
+  ["stromboli_church.glb","12×8 m, campanil 14 m",1,"A","biserica de start, fronton curb"],
+  ["start_banner_alley.glb","10 m deschidere",1,"A","banner în carouri între case"],
+  ["observatory_terrace.glb","10×6 m, copertină la 4 m",1,"C","parapet negru, copertină albă"],
+  ["strombolicchio.glb","bază 30×22 m, 32 m + far 8 m",1,"S","fundal-erou, sub fog_end"],
+  ["lava_flow_stage1/2/3.glb","40/60/80 m × 8–12 m, crustă 0.5–1 m",3,"E","crăpături LAVA_ORANGE emisive"],
+  ["volcanic_bomb.glb","Ø 0.6 / 0.9 / 1.2 m",3,"D","proiectilele rockfall, emisiv în crăpături"],
+  ["crater_vents.glb","platou 25×25 m",1,"D","coronița vârfului; conul = TerrainPeak"],
+  ["ginostra_pier.glb","dană 8×3 m + scară 4 m",1,"F","cel mai mic port din lume"],
+  ["fumarole_vent.glb","Ø 0.8–1.5 m, h 0.4–0.8 m",3,"H","depuneri galbene de sulf pe buză"],
+  ["Satul eolian (kit — A și F)", null],
+  ["aeolian_house_a.glb","7×6×4 m",4,"A","cubică, terasă cu parapet rotunjit"],
+  ["aeolian_house_b.glb","9×7×5.5 m",3,"A","două niveluri, scară exterioară"],
+  ["aeolian_house_c.glb","5×5×3.5 m",4,"A/F","căsuța mică / magazie"],
+  ["pergola_pulera.glb","4×3 m, h 2.5 m",3,"A","stâlpi albi cilindrici, grinzi de lemn"],
+  ["white_wall.glb","modul 3 m, h 0.9 m",12,"A/C","zid alb rotunjit; variantă cu poartă"],
+  ["alley_stairs.glb","modul 4 m",2,"A/F","trepte late albe"],
+  ["street_shrine.glb","1.5 m",1,"A","edicolă cu nișă albastră"],
+  ["ape_piaggio.glb","2.7×1.3×1.6 m",1,"A","verde, benă de lemn, static"],
+  ["fishing_boat_small.glb","5 m",3,"B","pe bușteni de rulare"],
+  ["fishing_boat_large.glb","7 m",1,"F","ancorată la dană"],
+  ["boat_winch.glb","2×1×1 m",1,"B","scripete ruginit + bușteni"],
+  ["nets_buoys_set.glb","amprentă 2×2 m",2,"B","plase, geamanduri portocalii"],
+  ["bougainvillea.glb","2×2 m / arcadă 3 m",4,"A","CAR_RED pe zid alb — accentul satului"],
+  ["pot_cluster.glb","Ø 0.3–0.6 m",5,"A","teracotă, mușcate, opuntia mică"],
+  ["donkey.glb","1.4 m la greabăn",1,"F","figurant, se ferește la apropiere"],
+  ["Flancul vulcanului (kit de pantă)", null],
+  ["olive_tree.glb (×2 var)","5–7 m",6,"G","trunchi răsucit, coroană argintie"],
+  ["fig_tree.glb","4–6 m",4,"G","frunze mari, coroană lată"],
+  ["prickly_pear.glb (×2 var)","1.5–2.5 m",6,"C","opuntia cu fructe roșiatice"],
+  ["caper_bush.glb","0.8 m",8,"C","revărsată peste zid"],
+  ["ginestra_bush.glb (×2 var)","1.5–2 m",6,"C","vârfuri galbene desaturate"],
+  ["cane_clump.glb","3 m",4,"G","trestie pe vâlcele"],
+  ["terrace_wall.glb","modul 3 m, h 1.2 m",20,"G","muretto a secco din bazalt"],
+  ["vine_row.glb","modul 4 m, h 0.8 m",12,"G","malvasia joasă pe araci"],
+  ["basalt_boulder.glb (×3 var)","1–3 m",8,"B/D","fețe fațetate negre"],
+  ["scoria_rock.glb (×3 var)","0.5–2 m",10,"D/H","roșu-negru poroasă"],
+  ["lava_slab_broken.glb","set 2–4 m",6,"E","plăci cordate rupte, margini de câmp"],
+  ["coast_cliff_basalt.glb","module 10–20 m",8,"B/D","faleze negre stratificate"],
+  ["Texturi de clasă (teren, din cod)", null],
+  ["lava_rock (triplanar)","dală",1,"E","pahoehoe: pliuri de funie, irizații"],
+  ["scoria_material","dală",1,"D","canalul Sciarei"],
+  ["black_sand","dală + variantă adâncă",1,"B","urme de roți și dâre de val"],
+  ["ash_ground","dală (sau beton gradat)",1,"D","cenușă bătătorită"],
+  ["tire_tracks_black (decal)","clasa existentă",1,"A/D","culoare nouă pe dale albe"]
+];
+
+// ---- proiectie ---------------------------------------------------------------
+const plan = document.getElementById("plan"), pcx = plan.getContext("2d");
+const allx = COAST.map(p=>p[0]).concat([STACK.x-40*M, STACK.x+40*M]);
+const ally = COAST.map(p=>p[1]).concat([STACK.y-30*M, STACK.y+34*M]);
+const minx = Math.min(...allx)-18, maxx = Math.max(...allx)+18;
+const miny = Math.min(...ally)-18, maxy = Math.max(...ally)+18;
+const S = Math.min(plan.width/(maxx-minx), plan.height/(maxy-miny));
+const ox = (plan.width -(maxx-minx)*S)/2, oy = (plan.height-(maxy-miny)*S)/2;
+const X = x => ox+(x-minx)*S, Y = y => oy+(maxy-y)*S;
+
+// Catmull-Rom inchis, esantionat
+function sampleLoop(pts, per){
+  const n = pts.length, out = [];
+  for (let i=0;i<n;i++){
+    const p0=pts[(i-1+n)%n], p1=pts[i], p2=pts[(i+1)%n], p3=pts[(i+2)%n];
+    for (let t=0;t<per;t++){
+      const u=t/per, u2=u*u, u3=u2*u;
+      const c = k => 0.5*((2*p1[k]) + (-p0[k]+p2[k])*u +
+        (2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*u2 + (-p0[k]+3*p1[k]-3*p2[k]+p3[k])*u3);
+      out.push([c(0), c(1), c(2)]);
+    }
+  }
+  return out;
+}
+const LOOP = sampleLoop(PTS, 14);
+let LEN = 0; const CUM = [0];
+for (let i=1;i<=LOOP.length;i++){
+  const a=LOOP[i-1], b=LOOP[i%LOOP.length];
+  LEN += Math.hypot(b[0]-a[0], b[1]-a[1]); CUM.push(LEN);
+}
+document.getElementById("f-len").textContent = Math.round(LEN).toLocaleString("ro-RO")+" m";
+document.getElementById("f-inst").textContent =
+  ASSETS.filter(a=>a[1]!==null).reduce((s,a)=>s+a[2],0);
+
+function surfColor(frac){
+  for (const [a,b,c] of SURF) if (frac>=a && frac<b) return c;
+  return "#55535A";
+}
+
+// ---- desen -------------------------------------------------------------------
+const css = getComputedStyle(document.documentElement);
+const col = v => css.getPropertyValue(v).trim();
+let showLots = true, sel = null;
+
+function poly(ctx, pts, close){
+  ctx.beginPath();
+  pts.forEach((p,i)=> i? ctx.lineTo(X(p[0]),Y(p[1])) : ctx.moveTo(X(p[0]),Y(p[1])));
+  if (close) ctx.closePath();
+}
+function draw(){
+  const c = pcx; c.clearRect(0,0,plan.width,plan.height);
+  // marea
+  c.fillStyle = "#2F6E82"; c.globalAlpha = .28;
+  c.fillRect(0,0,plan.width,plan.height); c.globalAlpha = 1;
+  // grila
+  c.strokeStyle = col("--grid"); c.lineWidth = 1;
+  for (let gx=Math.ceil(minx/100)*100; gx<maxx; gx+=100){
+    c.beginPath(); c.moveTo(X(gx),0); c.lineTo(X(gx),plan.height); c.stroke(); }
+  for (let gy=Math.ceil(miny/100)*100; gy<maxy; gy+=100){
+    c.beginPath(); c.moveTo(0,Y(gy)); c.lineTo(plan.width,Y(gy)); c.stroke(); }
+  // insula
+  poly(c, COAST, true); c.fillStyle = "#3B3830"; c.globalAlpha=.9; c.fill(); c.globalAlpha=1;
+  c.strokeStyle = "#E9F2F0"; c.lineWidth = 1.5; c.stroke();
+  // conul (trei etaje de culoare)
+  const ring = ["#5E7D4A","#7A4A3A","#B8B4AC"];
+  CONE.r.forEach((r,i)=>{
+    c.beginPath(); c.arc(X(CONE.x),Y(CONE.y),r*S,0,7);
+    c.fillStyle = ring[i]; c.globalAlpha=.55; c.fill(); c.globalAlpha=1;
+  });
+  // Sciara
+  poly(c, SCIARA, true); c.fillStyle="#B8B4AC"; c.globalAlpha=.7; c.fill(); c.globalAlpha=1;
+  // limba de lava (stadiul 2)
+  poly(c, TONGUE, true); c.fillStyle="#E8622D"; c.globalAlpha=.9; c.fill(); c.globalAlpha=1;
+  // crater plume
+  c.beginPath(); c.arc(X(CONE.x),Y(CONE.y),5,0,7); c.fillStyle="#E8622D"; c.fill();
+  // ruta scurta
+  c.setLineDash([7,5]); c.strokeStyle = "#8A6FA0"; c.lineWidth = 4;
+  c.beginPath(); SHORT.forEach((p,i)=> i? c.lineTo(X(p[0]),Y(p[1])) : c.moveTo(X(p[0]),Y(p[1])));
+  c.stroke(); c.setLineDash([]);
+  // bucla principala, colorata pe suprafete
+  for (let i=0;i<LOOP.length;i++){
+    const a=LOOP[i], b=LOOP[(i+1)%LOOP.length], f=CUM[i]/LEN;
+    c.strokeStyle = surfColor(f); c.lineWidth = 7; c.lineCap="round";
+    c.beginPath(); c.moveTo(X(a[0]),Y(a[1])); c.lineTo(X(b[0]),Y(b[1])); c.stroke();
+  }
+  // linia de start
+  const a0=LOOP[0];
+  c.fillStyle="#E9F2F0"; c.fillRect(X(a0[0])-6, Y(a0[1])-2, 12, 4);
+  // sens
+  c.fillStyle = col("--ink-soft"); c.font = "11px system-ui";
+  c.fillText("← antiorar (marea pe dreapta)", X(150*M), Y(300*M));
+  // Strombolicchio
+  c.beginPath(); c.arc(X(STACK.x),Y(STACK.y),7,0,7);
+  c.fillStyle="#221F24"; c.fill();
+  c.strokeStyle="#E9F2F0"; c.lineWidth=1.5; c.stroke();
+  c.beginPath(); c.arc(X(STACK.x),Y(STACK.y)-9,2.6,0,7); c.fillStyle="#E9F2F0"; c.fill();
+  // loturi
+  if (showLots){
+    c.setLineDash([4,3]);
+    LOTS.forEach(l=>{
+      const on = sel && sel.k===l[4];
+      c.strokeStyle = on ? "#E8622D" : col("--ash");
+      c.lineWidth = on ? 2 : 1;
+      c.strokeRect(X(l[0]-l[2]/2), Y(l[1]+l[3]/2), l[2]*S, l[3]*S);
+    });
+    c.setLineDash([]);
+  }
+  // POI
+  POI.forEach(p=>{
+    const on = sel && sel.k===p.k;
+    c.beginPath(); c.arc(X(p.x),Y(p.y),on?12:10,0,7);
+    c.fillStyle = on ? "#E8622D" : col("--panel"); c.fill();
+    c.strokeStyle = on ? "#B23E14" : col("--ink-soft"); c.lineWidth=1.5; c.stroke();
+    c.fillStyle = on ? "#FFF3EC" : col("--ink");
+    c.font = "bold 11px system-ui"; c.textAlign="center"; c.textBaseline="middle";
+    c.fillText(p.k, X(p.x), Y(p.y)); c.textAlign="left"; c.textBaseline="alphabetic";
+  });
+}
+
+// ---- profil de elevatie ------------------------------------------------------
+const ev = document.getElementById("elev"), ec = ev.getContext("2d");
+function drawElev(){
+  ec.clearRect(0,0,ev.width,ev.height);
+  const pad=26, w=ev.width-2*pad, h=ev.height-2*pad, emax=50;
+  ec.strokeStyle = col("--grid");
+  for (let m=0;m<=emax;m+=10){
+    const y = pad+h-(m/emax)*h;
+    ec.beginPath(); ec.moveTo(pad,y); ec.lineTo(pad+w,y); ec.stroke();
+    ec.fillStyle = col("--ink-soft"); ec.font="10px system-ui";
+    ec.fillText(m+" m", 2, y+3);
+  }
+  ec.beginPath();
+  LOOP.forEach((p,i)=>{
+    const x = pad+(CUM[i]/LEN)*w, y = pad+h-(p[2]/emax)*h;
+    i? ec.lineTo(x,y) : ec.moveTo(x,y);
+  });
+  ec.strokeStyle = "#E8622D"; ec.lineWidth = 2; ec.stroke();
+  ec.lineTo(pad+w,pad+h); ec.lineTo(pad,pad+h); ec.closePath();
+  ec.fillStyle = "#E8622D"; ec.globalAlpha=.12; ec.fill(); ec.globalAlpha=1;
+  POI.filter(p=>p.k!=="S").forEach(p=>{
+    let best=0,bd=1e9;
+    LOOP.forEach((q,i)=>{const d=Math.hypot(q[0]-p.x,q[1]-p.y); if(d<bd){bd=d;best=i;}});
+    const x = pad+(CUM[best]/LEN)*w, y = pad+h-(LOOP[best][2]/emax)*h;
+    ec.beginPath(); ec.arc(x,y,3.5,0,7); ec.fillStyle=col("--panel"); ec.fill();
+    ec.strokeStyle=col("--ink-soft"); ec.stroke();
+    ec.fillStyle=col("--ink"); ec.font="bold 10px system-ui"; ec.fillText(p.k, x-3, y-8);
+  });
+}
+
+// ---- interactiune ------------------------------------------------------------
+const detail = document.getElementById("detail");
+function select(p){
+  sel = p; draw();
+  document.querySelectorAll("#asset-tbl tr.row").forEach(tr=>
+    tr.classList.toggle("on", tr.dataset.poi && p && tr.dataset.poi.includes(p.k)));
+  if (!p){ detail.innerHTML = '<p class="hint">Alege un POI pe hartă sau un rând din tabel.</p>'; return; }
+  detail.innerHTML =
+    '<span class="tag">POI '+p.k+' · frac '+p.frac+'</span>'+
+    '<h3>'+p.name+'</h3>'+
+    '<div class="coord">'+p.w+'</div>'+
+    '<p>'+p.desc+'</p>'+
+    '<div class="assets"><b>Lotul de assets</b>'+p.lot.join(" · ")+'</div>';
+}
+plan.addEventListener("click", e=>{
+  const r = plan.getBoundingClientRect();
+  const mx = (e.clientX-r.left)*(plan.width/r.width);
+  const my = (e.clientY-r.top)*(plan.height/r.height);
+  let best=null, bd=24;
+  POI.forEach(p=>{ const d=Math.hypot(X(p.x)-mx, Y(p.y)-my); if (d<bd){bd=d;best=p;} });
+  select(best);
+});
+plan.addEventListener("mousemove", e=>{
+  const r = plan.getBoundingClientRect();
+  const wx = minx+((e.clientX-r.left)*(plan.width/r.width)-ox)/S;
+  const wy = maxy-((e.clientY-r.top)*(plan.height/r.height)-oy)/S;
+  document.getElementById("cursor").textContent =
+    Math.round(wx)+", "+Math.round(wy)+" m";
+});
+document.getElementById("lots").addEventListener("change", e=>{
+  showLots = e.target.checked; draw();
+});
+
+// ---- tabel assets ------------------------------------------------------------
+const tbl = document.getElementById("asset-tbl");
+let html = "<thead><tr><th>piesă</th><th>dimensiuni</th><th class='num'>buc.</th><th>POI</th><th>notă</th></tr></thead><tbody>";
+let grp = "";
+ASSETS.forEach(a=>{
+  if (a[1]===null){ grp=a[0].includes("hero")?"hero":a[0].includes("clas")?"cls":"kit";
+    html += '<tr class="grp"><td colspan="5">'+a[0]+'</td></tr>'; return; }
+  html += '<tr class="row" data-poi="'+a[3]+'"><td class="mono">'+a[0]+'</td><td>'+a[1]+
+    '</td><td class="num">'+a[2]+'</td><td><span class="pill '+grp+'">'+a[3]+
+    '</span></td><td style="color:var(--ink-soft)">'+a[4]+'</td></tr>';
+});
+tbl.innerHTML = html + "</tbody>";
+document.getElementById("a-count").textContent =
+  ASSETS.filter(a=>a[1]!==null).length + " tipuri";
+tbl.addEventListener("click", e=>{
+  const tr = e.target.closest("tr.row"); if (!tr) return;
+  const k = tr.dataset.poi.split("/")[0];
+  select(POI.find(p=>p.k===k) || null);
+});
+
+// ---- copy prompt -------------------------------------------------------------
+document.getElementById("copy-btn").addEventListener("click", async e=>{
+  const txt = document.getElementById("prompt-text").textContent;
+  try { await navigator.clipboard.writeText(txt);
+    e.target.textContent = "Copiat ✓"; }
+  catch(_) {
+    const rng = document.createRange();
+    rng.selectNodeContents(document.getElementById("prompt-text"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(rng);
+    e.target.textContent = "Selectat — Ctrl+C";
+  }
+  setTimeout(()=>{ e.target.textContent = "Copiază promptul"; }, 2200);
+});
+
+// tema se poate schimba fara reload — redeseneaza pe schimbare
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{draw();drawElev();});
+draw(); drawElev();
+</script>

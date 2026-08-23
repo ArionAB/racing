@@ -199,7 +199,7 @@ func _start_race() -> void:
 		if car == player:
 			var ai := AIController.new()
 			car.set_controller(ai)
-			ai.configure(_race.track, rng)
+			ai.configure(_race.track, rng, cars)
 		else:
 			(car.controller as AIController).line_offset = rng.randf_range(-0.35, 0.35)
 		# Variatie onesta, dar determinista — altfel cifrele danseaza intre rulari.

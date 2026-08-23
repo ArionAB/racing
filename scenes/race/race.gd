@@ -132,7 +132,9 @@ func _spawn_cars() -> void:
 				AI_COLORS[(i - 1) % AI_COLORS.size()])
 			var ai := AIController.new()
 			car.set_controller(ai)
-			ai.configure(track, _rng)
+			# `cars` e aceeasi lista in care se adauga toate masinile mai jos,
+			# deci fiecare pilot le vede pe toate — asa stie pe cine depaseste.
+			ai.configure(track, _rng, cars)
 			car.speed_scale = _rng.randf_range(0.88, 0.97)
 		# Inghetata pana la GO: pe grila nu se aluneca la vale. Vezi nota din
 		# Car._physics_process — blocarea comenzilor singura nu ajunge.

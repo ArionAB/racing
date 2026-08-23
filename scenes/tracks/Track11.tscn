@@ -35,6 +35,11 @@
 [ext_resource type="PackedScene" uid="uid://yp1ovlq61rph" path="res://assets/models/stromboli/structures/crater_bowl.glb" id="31_pfiwi"]
 [ext_resource type="PackedScene" uid="uid://cgfjfd2i2o40u" path="res://assets/models/stromboli/rocks/scoria_rock.glb" id="33_luffo"]
 [ext_resource type="Script" uid="uid://gqbkuahm3vdk" path="res://scenes/hazards/respawn_zone.gd" id="34_resp"]
+[ext_resource type="PackedScene" uid="uid://cnlfrqf232v22" path="res://assets/models/stromboli/rocks/lava_slab_broken.glb" id="35_4m0l7"]
+[ext_resource type="PackedScene" uid="uid://bkded5n4hbr4x" path="res://assets/models/stromboli/rocks/coast_cliff_basalt.glb" id="37_s11hq"]
+[ext_resource type="PackedScene" uid="uid://dj01fb3wey2qm" path="res://assets/models/stromboli/props/ginostra_pier.glb" id="38_7wvw5"]
+[ext_resource type="PackedScene" uid="uid://bx52plwpgepeu" path="res://assets/models/stromboli/props/donkey.glb" id="39_7wvw5"]
+[ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="39_gp84v"]
 
 [sub_resource type="Curve3D" id="Curve3D_stromboli"]
 _data = {
@@ -87,6 +92,13 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0)
 }
 point_count = 4
+
+[sub_resource type="Curve3D" id="Curve3D_xbr6o"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -1.2370529, -0.23027658, -1.75354, 0, 0, 0, 0, 0, 0, -14.2479515, -0.5299382, -17.722595, 0, 0, 0, 0, 0, 0, -2.711132, 0.047482967, -21.565369, 0, 0, 0, 0, 0, 0, 11.0805855, 0.5818324, -33.87155, 0, 0, 0, 0, 0, 0, 27.650658, 0.6792979, -22.591095, 0, 0, 0, 0, 0, 0, 13.349026, 0.20451307, -7.262726, 0, 0, 0, 0, 0, 0, -0.29800034, -0.19087648, -2.3301392),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 7
 
 [node name="Track11" type="Node3D" unique_id=780237443]
 script = ExtResource("1_track")
@@ -143,7 +155,7 @@ script = ExtResource("7_wprop")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.6, 60.8, 255.8)
 gizmo_extents = 40.0
 script = ExtResource("8_chan")
-gap = 8.0
+gap = 12.0
 water_half = 12.0
 bank = 28.0
 depth = 22.0
@@ -899,10 +911,13 @@ transform = Transform3D(1.7910943, 0, 0, 0, 1.7910943, 0, 0, 0, 1.7910943, -16.2
 transform = Transform3D(1.7910943, 0, 0, 0, 1.7910943, 0, 0, 0, 1.7910943, -22.83, -3.12, -6.2)
 
 [node name="crater_bowl" parent="DecorManual/4)Crater" unique_id=1923490205 instance=ExtResource("31_pfiwi")]
-transform = Transform3D(1.1937588, 0, 0, 0, 1.1937588, 0, 0, 0, 1.1937588, -19.63069, 11.382735, -10.30446)
+transform = Transform3D(1.1937588, 0, 0, 0, 1.1937588, 0, 0, 0, 1.1937588, -19.709045, 11.382736, -10.219666)
 
 [node name="5)Coborarea ciarei" type="Node3D" parent="DecorManual" unique_id=104457763]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -171.77417, 57.359432, 347.80273)
+
+[node name="lava_slab_broken" parent="DecorManual/5)Coborarea ciarei" unique_id=1769088820 instance=ExtResource("35_4m0l7")]
+transform = Transform3D(0.41036922, 0, -0.9119195, 0, 1, 0, 0.9119195, 0, 0.41036922, -31.28276, -43.971066, 129.61002)
 
 [node name="basalt_boulder" parent="DecorManual/5)Coborarea ciarei" unique_id=2143840579 instance=ExtResource("22_8g0lj")]
 transform = Transform3D(2.0412164, 0, 0, 0, 2.0412164, 0, 0, 0, 2.0412164, 19.198822, -13.352779, 0)
@@ -930,3 +945,65 @@ transform = Transform3D(2.1219332, 0, 0, 0, 2.1219332, 0, 0, 0, 2.1219332, 58.98
 
 [node name="scoria_rock4" parent="DecorManual/5)Coborarea ciarei" unique_id=374577093 instance=ExtResource("33_luffo")]
 transform = Transform3D(2.1219332, 0, 0, 0, 2.1219332, 0, 0, 0, 2.1219332, 54.60022, 1.4357147, -110.037506)
+
+[node name="6)Ginostra" type="Node3D" parent="DecorManual" unique_id=839263383]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68.684845, 7.567757, 486.56897)
+
+[node name="coast_cliff_basalt" parent="DecorManual/6)Ginostra" unique_id=1182461412 instance=ExtResource("37_s11hq")]
+transform = Transform3D(0.93770623, 0, -0.34742916, 0, 1, 0, 0.34742916, 0, 0.93770623, -48.478012, -1.1028361, 10.19574)
+
+[node name="coast_cliff_basalt4" parent="DecorManual/6)Ginostra" unique_id=457334411 instance=ExtResource("37_s11hq")]
+transform = Transform3D(0.93770623, 0, -0.34742916, 0, 1, 0, 0.34742916, 0, 0.93770623, -66.84201, -1.1028361, 2.6744385)
+
+[node name="coast_cliff_basalt5" parent="DecorManual/6)Ginostra" unique_id=1913274202 instance=ExtResource("37_s11hq")]
+transform = Transform3D(0.92331, 0, 0.38405547, 0, 1, 0, -0.38405547, 0, 0.92331, -79.61777, -1.1028361, 3.3206787)
+
+[node name="coast_cliff_basalt6" parent="DecorManual/6)Ginostra" unique_id=1294183556 instance=ExtResource("37_s11hq")]
+transform = Transform3D(0.88449913, 0, 0.46654195, 0, 1, 0, -0.46654195, 0, 0.88449913, -92.496155, -1.1028361, 10.128357)
+
+[node name="coast_cliff_basalt2" parent="DecorManual/6)Ginostra" unique_id=785000469 instance=ExtResource("37_s11hq")]
+transform = Transform3D(0.9752169, 0, -0.22125082, 0, 1, 0, 0.22125082, 0, 0.9752169, -33.837326, -1.1028361, 14.710785)
+
+[node name="coast_cliff_basalt3" parent="DecorManual/6)Ginostra" unique_id=779907280 instance=ExtResource("37_s11hq")]
+transform = Transform3D(0.99999213, 0, 0.003961131, 0, 1, 0, -0.003961131, 0, 0.99999213, -19.518959, -1.1028361, 14.710785)
+
+[node name="aeolian_house_c5" parent="DecorManual/6)Ginostra" unique_id=1822299862 instance=ExtResource("9_j6dkv")]
+transform = Transform3D(0.96221226, -0.04693459, 0.2682255, 0.045210868, 0.99889797, 0.012602945, -0.2685214, 1.110223e-16, 0.9632738, -2.48069, 9.2102585, 14.839142)
+
+[node name="aeolian_house_c6" parent="DecorManual/6)Ginostra" unique_id=1031203313 instance=ExtResource("9_j6dkv")]
+transform = Transform3D(0.96221226, -0.04693459, 0.2682255, 0.045210868, 0.99889797, 0.012602945, -0.2685214, 1.110223e-16, 0.9632738, 7.393593, 9.792515, 12.010071)
+
+[node name="aeolian_house_a7" parent="DecorManual/6)Ginostra" unique_id=1267664753 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(0.96842253, -0.04693459, 0.2448569, 0.045502666, 0.99889797, 0.011504939, -0.24512704, 0, 0.96949095, 6.731098, -0.30385113, 10.172028)
+
+[node name="aeolian_house_a8" parent="DecorManual/6)Ginostra" unique_id=696159504 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(0.96842253, -0.04693459, 0.2448569, 0.045502666, 0.99889797, 0.011504939, -0.24512704, 0, 0.96949095, 0.19430542, -0.6109915, 12.076447)
+
+[node name="aeolian_house_a9" parent="DecorManual/6)Ginostra" unique_id=748893038 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(0.96987635, -0.0469346, 0.23903386, 0.045570966, 0.99889797, 0.011231333, -0.23929758, 0, 0.9709464, -6.6414566, -0.932179, 13.765533)
+
+[node name="aeolian_house_b5" parent="DecorManual/6)Ginostra" unique_id=891389029 instance=ExtResource("12_5gsx0")]
+transform = Transform3D(0.9702005, -0.046934593, 0.23771566, 0.045586202, 0.99889797, 0.011169397, -0.23797792, 0, 0.97127086, 5.867592, 3.7964406, 12.344818)
+
+[node name="aeolian_house_b6" parent="DecorManual/6)Ginostra" unique_id=1697208638 instance=ExtResource("12_5gsx0")]
+transform = Transform3D(0.9702005, -0.046934593, 0.23771566, 0.045586202, 0.99889797, 0.011169397, -0.23797792, 0, 0.97127086, -4.2109756, 3.322885, 15.282196)
+
+[node name="bougainvillea5" parent="DecorManual/6)Ginostra" unique_id=2028441493 instance=ExtResource("14_jjxvn")]
+transform = Transform3D(-0.98951954, -0.046934593, -0.13655877, -0.046493933, 0.99889797, -0.0064164014, 0.13670942, 0, -0.9906112, -7.255951, 3.7068028, 12.281036)
+
+[node name="bougainvillea6" parent="DecorManual/6)Ginostra" unique_id=1195540810 instance=ExtResource("14_jjxvn")]
+transform = Transform3D(-0.98951954, -0.046934593, -0.13655877, -0.046493933, 0.99889797, -0.0064164014, 0.13670942, 0, -0.9906112, 2.8360443, 3.9843078, 9.574371)
+
+[node name="ginostra_pier" parent="DecorManual/6)Ginostra" unique_id=1827304586 instance=ExtResource("38_7wvw5")]
+transform = Transform3D(-0.95774543, 0, 0.2876175, -0.0038186095, 0.99991184, -0.012715693, -0.28759214, -0.013276693, -0.957661, -58.619377, -1.3675485, 8.5659485)
+
+[node name="alley_stairs" parent="DecorManual/6)Ginostra" unique_id=1645969805 instance=ExtResource("16_c3svt")]
+transform = Transform3D(-1.2966839, 0, 0.045471262, 0, 1.297481, 0, -0.045471262, 0, -1.2966839, -39.353645, -1.5121002, 14.601593)
+
+[node name="donkeyPathMover" type="Path3D" parent="DecorManual/6)Ginostra" unique_id=1975559791]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.07291, 0, 7.7007446)
+curve = SubResource("Curve3D_xbr6o")
+script = ExtResource("39_gp84v")
+model = ExtResource("39_7wvw5")
+model_scale = 1.5
+metadata/_custom_type_script = "uid://b1848dr3kabqm"

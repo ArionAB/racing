@@ -80,3 +80,12 @@ gap = 8.0
 depth = 24.0
 water_y_drop = -1.0
 label = "Gaura craterului"
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("7_wprop")
+
+[node name="1)Piata satului" type="Node3D" parent="DecorManual"]
+
+[node name="2) Plaja neagra Piscita" type="Node3D" parent="DecorManual"]
+
+[node name="3) Serpentinele" type="Node3D" parent="DecorManual"]

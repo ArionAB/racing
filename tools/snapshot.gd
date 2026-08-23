@@ -47,6 +47,9 @@ extends Node
 ##                             travee sus cu corabia in gol. Fara el, captura
 ##                             prinde podul la inceputul ciclului, adica exact
 ##                             starea in care gimmick-ul nu se vede.
+##   --lava-stage=1            stadiul limbii de lava (Stromboli): 0 = turul 1,
+##                             1 = poarta, 2 = zid. Implicit 0 — adica exact
+##                             starea in care gimmick-ul nu se vede.
 ##   --rock-at=3.5             bolovanii cu traseu, la N SECUNDE de la
 ##                             desprindere (nu fractie: traseele au lungimi
 ##                             diferite). Se SIMULEAZA cadru cu cadru de la 0,
@@ -103,6 +106,7 @@ func _ready() -> void:
 	var typhoon_at := -1.0
 	var wave_at := -1.0
 	var rock_at := -1.0
+	var lava_stage := -1
 	var route_idx := 0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
@@ -125,6 +129,8 @@ func _ready() -> void:
 			wave_at = float(arg.trim_prefix("--wave-at="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
+		elif arg.begins_with("--lava-stage="):
+			lava_stage = int(arg.trim_prefix("--lava-stage="))
 		elif arg.begins_with("--route="):
 			route_idx = int(arg.trim_prefix("--route="))
 		elif arg.begins_with("--eye="):
@@ -167,6 +173,16 @@ func _ready() -> void:
 		_set_wave_phase(track, wave_at)
 	if rock_at >= 0.0:
 		await _set_rock_time(track, rock_at)
+	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,
+	# captura prinde mereu stadiul 1 — exact starea in care gimmick-ul nu se
+	# vede (aceeasi clasa de capcana ca la --bridge-at).
+	if lava_stage >= 0:
+		for child in track.get_children():
+			if child is LavaFlowHazard:
+				var lf := child as LavaFlowHazard
+				while lf.current_stage() < lava_stage:
+					lf.on_lap_completed()
+				print("--lava-stage=%d: %s" % [lava_stage, lf.name])
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:

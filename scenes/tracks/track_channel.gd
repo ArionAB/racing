@@ -85,6 +85,16 @@ extends Marker3D
 ## Golul se trece din SARITURA, nu pe pod. Vezi antetul clasei.
 @export var jump: bool = true
 
+## Sapatura e o GROAPA CIRCULARA centrata pe taietura, nu o albie in lungul
+## axei. Pentru gauri care exista doar ca sa se ascunda sub un asset rotund
+## (cuva craterului de pe Stromboli): terenul coboara radial de la
+## [member water_half] (fund plat) la [member water_half] + [member bank]
+## (buza), iar in afara cercului plateul ramane neatins — o albie
+## dreptunghiulara ar fi scos colturi de sapatura de sub marginea rotunda a
+## asset-ului, oricum am fi potrivit-o. [member reach] si [member fade] nu
+## participa: cercul isi e propriul capat.
+@export var pit: bool = false
+
 ## Numele afisat in sonde si in mesaje de eroare.
 @export var label: String = ""
 
@@ -109,6 +119,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"reach": reach,
 		"fade": fade,
 		"jump": jump,
+		"pit": pit,
 		"label": label if label != "" else name,
 	}
 	if water_y_drop >= 0.0:

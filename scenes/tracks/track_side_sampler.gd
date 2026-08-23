@@ -645,6 +645,16 @@ func _carve_lagoon(y: float, road_dist: float, wx: float, wz: float,
 func _carve_channel(y: float, wx: float, wz: float) -> float:
 	for ch in _channels:
 		var o: Vector3 = ch["origin"]
+		# Groapa circulara (vezi TrackChannel.pit): acelasi profil de mal, dar
+		# radial fata de taietura, nu in lungul unei axe. Adancimea se masoara
+		# tot de la cota DRUMULUI de acolo (o.y), ca la albie.
+		if bool(ch.get("pit", false)):
+			var rr := Vector2(wx - o.x, wz - o.z).length()
+			var mix := 1.0 - smoothstep(float(ch["water_half"]),
+				float(ch["water_half"]) + float(ch["bank"]), rr)
+			if mix > 0.0:
+				y = _smin(y, o.y - float(ch["depth"]) * mix, SMOOTH_RAVINE_K)
+			continue
 		var along: Vector2 = ch["along2"]
 		var across: Vector2 = ch["across2"]
 		var d := Vector2(wx - o.x, wz - o.z)
@@ -677,6 +687,11 @@ func channel_mix(wx: float, wz: float) -> float:
 	var best := 0.0
 	for ch in _channels:
 		var o: Vector3 = ch["origin"]
+		if bool(ch.get("pit", false)):
+			var rr := Vector2(wx - o.x, wz - o.z).length()
+			best = maxf(best, 1.0 - smoothstep(float(ch["water_half"]),
+				float(ch["water_half"]) + float(ch["bank"]), rr))
+			continue
 		var d := Vector2(wx - o.x, wz - o.z)
 		var t := absf(d.dot(ch["along2"] as Vector2))
 		var reach: float = ch["reach"]

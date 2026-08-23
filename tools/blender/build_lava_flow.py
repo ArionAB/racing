@@ -24,6 +24,26 @@ Trei lucruri sunt CONTRACT cu `LavaFlowHazard` si cu fizica:
 Crapaturile sunt geometrie separata, pe slotul 30, si raman la AO 1.0 —
 altfel ocluzia le stinge exact semnalul pentru care exista slotul.
 
+FORMA E UN CLESTE, NU TRUNCHI+BRATE, si asta e o lectie platita (aug 2026):
+
+Versiunea din brief (trunchi comun care se desparte la 2/3 in doua brate) avea
+poarta INFUNDATA prin constructie: culoarul dintre brate se inchidea in amonte
+de fata trunchiului, deci nu se putea traversa din nicio directie — cutia de
+gabarit a masinii (tools/probe_lava_stages.gd) atingea la orice aliniere a
+rutei, chiar cu banda coapta centrata pe axa la ±0.2 m. Captura de livrare
+arata o masina PARCATA in culoar; nimeni nu incercase o trecere.
+
+Acum:
+  Stage1  lobul dinspre munte, singur, 12 m — ruta e libera langa el
+  Stage2  DOUA limbi gemene (0->38 si 6->38) cu banda de 4.0 m intre ele pe
+          TOATA lungimea: ruta trece drept prin canionul de lava
+  Stage3  limba unita, lata, 0->48: zidul care inchide banda
+
+Lungimile sunt si ele masurate pe pista, nu din brief: scurtatura reala are
+~46 m, iar buzunarul dintre ea si ocol ~40-50 m — cu 40/60/80 coada ajungea
+pe ocol oriunde am fi rotit axa. Coada comuna (y=0) si latimile per limba
+raman contractul vechi; nodul sta pe INTRAREA scurtaturii, cu -Z pe axa ei.
+
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \
         --python tools/blender/run_build.py -- build_lava_flow.py
@@ -151,57 +171,67 @@ def _spine(length, bend=0.0, seed=1):
     return pts
 
 
+# 4.37, nu 4.0: bevelul de 0.10 m umfla fiecare limba spre banda cu ~0.18 m,
+# iar jitterul de latime (+-0.25) mai musca putin. Masurat pe mesh-ul exportat,
+# un GATE nominal de 4.0 dadea 3.63 m liberi — sub cei 4 m ceruti de brief,
+# adica sub cat trebuie ca sa incapa masina cu margine de eroare. Poarta reala
+# se masoara pe mesh, nu se citeste din constanta.
+GATE = 4.37
+
+
+def _twin_arm(sgn, start, length, seed):
+    """O limba a clestelui: axa ei sta la GATE/2 + semi-latime de axa benzii,
+    pe partea `sgn`, de la `start` la `length`. Semi-latimea foloseste fractia
+    din PROPRIA lungime, ca frontul bulbos sa cada la capatul ei real."""
+    step = 2.6
+    n = max(6, int((length - start) / step))
+    pts = []
+    for i in range(n + 1):
+        t = i / float(n)
+        y = start + (length - start) * t
+        hw = _half_width(t, length - start, base=3.4)
+        # unda usoara pe axa limbii, ca marginea interioara sa nu iasa rigla —
+        # amplitudine sub jumatate de jitter, ca poarta sa ramana ~4 m
+        x = sgn * (GATE * 0.5 + hw) + 0.35 * math.sin(y * 0.31 + sgn)
+        pts.append((x, y, hw))
+    return pts
+
+
 def build_stage1():
     clear_built()
     b = Builder()
-    glow = _ribbon(b, _spine(40.0, bend=0.35, seed=3), seed=11,
+    # Lobul dinspre munte (x negativ = latura din amonte la asezarea din
+    # Track11). Singur si scurt: la turul 1 ruta trece libera pe langa el.
+    glow = _ribbon(b, _twin_arm(-1, 0.0, 12.0, seed=3), seed=11,
                    crack_density=0.85)
     return b.to_object("Lava_Stage1"), glow
 
 
 def build_stage2():
-    """60 m; la ~2/3 se desparte in DOUA brate cu un culoar de 4.0 m intre ele.
+    """Clestele: doua limbi gemene cu banda de 4.0 m intre ele, cap la cap.
 
-    Culoarul e MASURAT, nu aproximat: `GATE` e distanta libera dintre marginile
-    interioare ale bratelor, iar axele lor se aseaza la GATE/2 + semi-latime.
-    Daca il desenezi din ochi, poarta iese 2 m sau 7 m si gimmick-ul pistei
-    (mai incapi sau nu) devine intamplare.
+    Banda e MASURATA, nu aproximata: `GATE` e distanta libera dintre marginile
+    interioare, iar axele limbilor se aseaza la GATE/2 + semi-latime. Daca o
+    desenezi din ochi, poarta iese 2 m sau 7 m si gimmick-ul pistei (mai
+    incapi sau nu) devine intamplare.
     """
     b = Builder()
-    # 4.37, nu 4.0: bevelul de 0.10 m umfla fiecare brat spre culoar cu ~0.18
-    # m, iar jitterul de latime (+-0.25) mai musca putin. Masurat pe mesh-ul
-    # exportat, un GATE nominal de 4.0 dadea 3.63 m liberi — sub cei 4 m ceruti
-    # de brief, adica sub cat trebuie ca sa incapa masina cu margine de eroare.
-    # Cifra de aici e cea CORECTATA; poarta reala se masoara pe mesh, nu se
-    # citeste din constanta.
-    GATE = 4.37
-    split_at = 40.0             # unde incepe despartirea
     glow = []
-
-    # trunchiul comun, pana la despartire
-    trunk = _spine(split_at, bend=0.3, seed=5)
-    glow += _ribbon(b, trunk, seed=21, crack_density=0.8)
-
-    # cele doua brate: pleaca din capatul trunchiului si diverg
-    for sgn in (-1, 1):
-        arm = []
-        n = 9
-        for i in range(n + 1):
-            t = i / float(n)
-            y = split_at + 20.0 * t
-            hw = 3.1 * (0.9 + 0.25 * math.sin(t * math.pi))
-            # marginea interioara a bratului trebuie sa stea la GATE/2 de axa
-            x = sgn * (GATE * 0.5 + hw)
-            arm.append((x, y, hw))
-        glow += _ribbon(b, arm, seed=31 + (sgn > 0) * 7, crack_density=1.6)
-
+    glow += _ribbon(b, _twin_arm(-1, 0.0, 38.0, seed=5), seed=21,
+                    crack_density=1.2)
+    # limba a doua porneste putin mai tarziu: clestele se citeste ca lobul 1
+    # ajuns din urma de al doilea, nu ca doua obiecte stampilate
+    glow += _ribbon(b, _twin_arm(1, 6.0, 38.0, seed=7), seed=31,
+                    crack_density=1.6)
     return b.to_object("Lava_Stage2"), glow
 
 
 def build_stage3():
-    """80 m, front lat si continuu: lobii s-au unit, culoarul nu mai exista."""
+    """48 m, front lat si continuu: limbile s-au unit, banda nu mai exista."""
     b = Builder()
-    path = _spine(80.0, bend=0.25, seed=9)
+    path = _spine(48.0, bend=0.25, seed=9)
+    # destul de lata cat sa acopere amprenta ambelor limbi + banda
+    path = [(x, y, hw * 1.75) for (x, y, hw) in path]
     # frontul se latteste mult in ultima cincime: zid revarsat
     path = [(x, y, hw * (1.0 + 0.85 * max(0.0, (i / float(len(path) - 1)) - 0.78) / 0.22))
             for i, (x, y, hw) in enumerate(path)]

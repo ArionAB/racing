@@ -18,9 +18,14 @@ extends Node3D
 ## sa avanseze, si tocmai avansul e ce trebuie sa se citeasca de sus, in timpul
 ## coborarii pe Sciara.
 ##
-## COLIZIUNEA nu e aici: limba primeste corp fizic din `world_prop` la
-## integrare (memoria `decor-manual-coliziune`). Hazardul se ocupa doar de
-## STADIU si de semnalul catre AI.
+## COLIZIUNEA e TOT aici, si nu din comoditate: `world_prop` construieste
+## corpurile o singura data, la `_ready`, pentru mesh-urile vizibile atunci —
+## iar copilul (instanta GLB) isi face `_ready` inaintea parintelui care
+## stinge stadiile. Rezultatul masurat: toate trei stadiile primeau colizor,
+## deci zidul stadiului 3 exista INVIZIBIL inca din turul 1 si taia
+## scurtatura. De aceea `lava_flow` e "none" in `world_prop.PROP_COLLISION`,
+## iar hazardul isi reconstruieste trimesh-ul (poarta de 4 m trebuie sa
+## ramana libera — un hull convex ar sigila-o) la fiecare stadiu.
 ##
 ## AI-UL RE-ALEGE. `prefers_shortcut` se trage o data pe cursa in
 ## AIController, deci fara nimic aici un AI care a decis "o iau pe scurta" ar
@@ -114,3 +119,27 @@ func _apply() -> void:
 		var m := _meshes[i]
 		if m != null:
 			m.visible = (i == _stage)
+	_rebuild_collision()
+
+
+## Colizorul urmeaza stadiul (vezi antetul: de ce nu e treaba lui world_prop).
+## Trimesh pe mesh-ul vizibil, copil al lui — mosteneste transformul, deci nu
+## depinde de cum e rotit/inclinat nodul in scena.
+func _rebuild_collision() -> void:
+	if Engine.is_editor_hint():
+		return
+	for i in _meshes.size():
+		var m := _meshes[i] as MeshInstance3D
+		if m == null:
+			continue
+		var body := m.get_node_or_null("stage_col") as StaticBody3D
+		if i == _stage and body == null:
+			body = StaticBody3D.new()
+			body.name = "stage_col"
+			body.set_meta("mod_coliziune", "mesh")
+			var cs := CollisionShape3D.new()
+			cs.shape = m.mesh.create_trimesh_shape()
+			body.add_child(cs)
+			m.add_child(body)
+		elif i != _stage and body != null:
+			body.queue_free()

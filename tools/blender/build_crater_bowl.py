@@ -56,8 +56,18 @@ AO_VENTS = dict(samples=28, dist=6.0, gradient="vertical",
                 low=0.55, high=1.00, power=0.9, floor=0.35)
 
 RIM_R = 29.0          # raza la coronament (diametru 58 m)
-SKIRT_R = 32.0        # fusta exterioara, 3 m, tesita in jos
-SKIRT_DROP = 1.6      # cat coboara fusta, ca sa se ingroape in teren
+# Fusta exterioara: era 3 m / 1.6 m adancime, gandita pentru un crater care
+# INTRA intr-o gaura sapata in teren — acolo doar cosea imbinarea. Din august
+# 2026 integrarea e inversa (Track11): terenul varfului ramane PLAT, iar cuva
+# e singura gaura, cu buza deasupra reliefului. Pe arcele unde terenul de sub
+# buza coboara (spre serpentine, spre coborarea Sciarei) s-au masurat 2-4.5 m
+# de gol sub marginea fustei — muchia de tabla despre care avertiza brief-ul.
+# De aceea fusta e acum poalele conului: 8 m late, 9 m cadere (~48 de grade),
+# destul cat sa se ingroape si sub cel mai jos teren masurat pe inelul de
+# asezare (tools/probe_crater_fit.gd — grila radiala teren-vs-cuva; vrem
+# negativ sub asset). Costul e zero triunghiuri: acelasi inel, alta cota.
+SKIRT_R = 37.0        # poalele conului, 8 m late
+SKIRT_DROP = 9.0      # cat coboara poalele sub coronament
 FLOOR_R = 9.0         # platou de fund, ~18 m diametru
 FLOOR_Z = -13.0
 SEG = 40              # segmente pe inel: fatete de ~4.5 m la coronament

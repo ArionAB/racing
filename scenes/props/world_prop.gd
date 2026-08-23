@@ -65,6 +65,18 @@ const PROP_COLLISION := {
 	"start_gate_logs": "mesh",       # poarta de start, peste linia de plecare
 	"stone_gate_torii": "mesh",      # Okinawa: torii peste drum
 	"wooden_pier": "mesh",           # pontonul are gol dedesubt
+	# Cuva craterului (Stromboli): hull-ul unei cuve DESCHISE e un capac plan
+	# peste gura — masina care rata saritura plutea pe el, deasupra craterului,
+	# prea sus ca s-o prinda RespawnZone-ul din cuva. Cine cade trebuie sa CADA.
+	"crater_bowl": "mesh",
+	# Limba de lava (Stromboli): coliziunea NU e a decorului, e a hazardului.
+	# world_prop construieste corpurile O DATA, la _ready, pentru mesh-urile
+	# vizibile ATUNCI — adica toate trei stadiile (copilul isi face _ready
+	# inaintea parintelui care le stinge). Zidul stadiului 3 ar fi existat
+	# invizibil inca din turul 1, taind scurtatura. LavaFlowHazard isi
+	# reconstruieste colizorul (trimesh — poarta de 4 m trebuie sa ramana
+	# libera) la fiecare schimbare de stadiu.
+	"lava_flow": "none",
 	# --- copaci si stalpi: cilindru pe trunchi ----------------------------
 	"larch_winter_a": "trunk", "larch_winter_b": "trunk",
 	"larch_winter_c": "trunk", "birch_winter_a": "trunk",

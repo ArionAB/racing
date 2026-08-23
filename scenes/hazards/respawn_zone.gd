@@ -11,7 +11,10 @@ extends Area3D
 ## cineva care conduce normal.
 
 ## Cati metri INAINTE de checkpoint e repusa masina (spatiu de elan).
-var backoff_m: float = 14.0
+##
+## Export, ca zona sa se poata declara si direct in scena pistei (cuva
+## craterului de pe Stromboli), nu doar construita din cod.
+@export var backoff_m: float = 14.0
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)

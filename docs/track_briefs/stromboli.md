@@ -313,7 +313,7 @@ NON-standard, care se așază pe cotă, nu pe sol:
 
 | piesă | originea e la | cum se așază |
 |---|---|---|
-| `crater_bowl` | **coronament** (cuva coboară în −Y) | `y` = cota drumului de pe buză; centrul craterului din Track11 e la godot **(−109.2, y_buză, 268.3)**, în gaura din `custom_ravines[0]` |
+| `crater_bowl` | **coronament** (cuva coboară în −Y) | `y` = cota drumului de pe buză; centrul craterului din Track11 e la godot **(−149.6, 60.0, 255.8)** — exact pe tăietura `GauraCraterului`. Din aug 2026 terenul vârfului e PLAT: cuva e singura gaură, iar sub ea sapă modul `pit` al canalului (groapă circulară ascunsă complet sub asset); fusta de 8 m / 9 m cădere a asset-ului face racordul cu platoul |
 | `strombolicchio` | **linia apei** | `y = sea_level`; poziția din hartă: godot **(−187, 0, −137)** |
 | `ginostra_pier` | **linia apei** | `y = sea_level`; dana iese spre **−Z** (spre mare) |
 | `fishing_boat_large` | **linia de plutire** | `y = sea_level` — plutește, nu se pune pe sol |

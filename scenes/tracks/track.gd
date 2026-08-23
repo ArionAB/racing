@@ -1645,6 +1645,16 @@ func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
 			# apropiat, si cu distanta 3D obstacolul ar aluneca de-a lungul
 			# soselei pe bucata care se INTAMPLA sa fie la aceeasi inaltime.
 			var spec := hz.model_spec()
+			# Grupurile puse pe marker in editor trec pe hazardul CONSTRUIT:
+			# markerul e o declaratie, dar cine se aboneaza la grup (metronomul
+			# eruptiei, de pilda) are nevoie de nodul viu, nu de declaratie.
+			# Grupurile interne ale editorului (prefixate cu _) nu se cara.
+			var carried: Array[StringName] = []
+			for g in hz.get_groups():
+				if not String(g).begins_with("_"):
+					carried.append(g)
+			if not carried.is_empty():
+				spec["groups"] = carried
 			# Bolovanul isi poate aduce TRASEUL, desenat ca Path3D sub nod. Se
 			# aduce in coordonatele pistei aici, unde stim si transformul
 			# grupului in care sta nodul; hazardul il duce apoi in spatiul lui.
@@ -5177,13 +5187,20 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	# treapta e cea care conteaza: bolovanul care se desprinde dintr-o faleza e
 	# din aceeasi piatra cu ea, si asta ar trebui sa fie adevarat implicit, nu
 	# doar pe temele care si-au adus aminte sa declare.
-	rock.tri_class = String(spec.get("tri_class",
-		theme_flag("rockfall_class", theme_flag("rock_class", ""))))
+	#
+	# DOAR pentru bolovanul implicit, insa: un model adus de nod (bomba
+	# vulcanica) vine cu propriile sloturi din atlas, iar clasa temei le-ar
+	# sterge pe toate — bombele Stromboli ieseau portocalii pe tot corpul, cu
+	# semnalul crapaturilor pierdut. Modelul custom isi ia clasele pe PARTI,
+	# din maparea comuna (vezi RockfallHazard._extract).
+	var model_path := String(spec.get("model", ""))
+	rock.tri_class = String(spec.get("tri_class", ""))
+	if rock.tri_class.is_empty() and model_path.is_empty():
+		rock.tri_class = theme_flag("rockfall_class", theme_flag("rock_class", ""))
 	# Modelul: ce cere nodul (grupul „Model" de pe HazardMarker), altfel
 	# bolovanul implicit al hazardului (`boulder_roller.glb`). Scara 0 =
 	# „implicitul modelului ales" — un GLB din kit e la scara reala, bolovanul
 	# de 5 m se micsoreaza singur.
-	var model_path := String(spec.get("model", ""))
 	if not model_path.is_empty() and ResourceLoader.exists(model_path):
 		rock.model_scene = load(model_path)
 		rock.model_scale = float(spec.get("scale", 1.0))
@@ -5193,6 +5210,8 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	rock.route_pause = float(spec.get("rock_pause",
 		RockfallHazard.DEFAULT_ROUTE_PAUSE))
 	rock.stick_to_ground = bool(spec.get("rock_stick_to_ground", true))
+	for g in spec.get("groups", []):
+		rock.add_to_group(g)
 	# Cu TRASEU desenat in editor: bolovanul urmeaza curba de la primul punct
 	# la ultimul, iar hazardul se planteaza pe sosea sub locul in care curba
 	# trece cel mai aproape de nod. Nu mai e nimic de dedus despre versant —

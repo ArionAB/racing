@@ -53,6 +53,41 @@ point_count = 5
 [sub_resource type="BoxShape3D" id="BoxShape3D_craterfall"]
 size = Vector3(52, 15, 52)
 
+[sub_resource type="Curve3D" id="Curve3D_bomba1"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 6.5, 2.7, -11, 0, 0, 0, 0, 0, 0, 3, 0.7, -4, 0, 0, 0, 0, 0, 0, 0.5, -0.3, 1, 0, 0, 0, 0, 0, 0, -3, -3.3, 8, 0, 0, 0, 0, 0, 0, -6, -5.3, 14),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[sub_resource type="Curve3D" id="Curve3D_bomba2"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -11, -1, -18, 0, 0, 0, 0, 0, 0, -16, -6, 2, 0, 0, 0, 0, 0, 0, -19, -11, 22, 0, 0, 0, 0, 0, 0, -21, -16, 42, 0, 0, 0, 0, 0, 0, -19, -21, 62),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[sub_resource type="Curve3D" id="Curve3D_bomba3"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 7, 1.5, -12, 0, 0, 0, 0, 0, 0, 1, -0.5, -2, 0, 0, 0, 0, 0, 0, -5, -3.5, 8, 0, 0, 0, 0, 0, 0, -9, -5.5, 16),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
+
+[sub_resource type="Curve3D" id="Curve3D_bomba4"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 5.5, 2.3, -12.5, 0, 0, 0, 0, 0, 0, 1.5, 0.8, -4.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2.5, -1.7, 7.5, 0, 0, 0, 0, 0, 0, -1.5, -2.7, 13.5),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[sub_resource type="Curve3D" id="Curve3D_bomba5"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 9, 4.3, -27, 0, 0, 0, 0, 0, 0, 11, 0.3, -7, 0, 0, 0, 0, 0, 0, 12, -2.7, 13, 0, 0, 0, 0, 0, 0, 11, -5.7, 30),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
+
 [node name="Track11" type="Node3D" unique_id=780237443]
 script = ExtResource("1_track")
 custom_name = "Stromboli"
@@ -91,18 +126,18 @@ label = "Scurtatura de lava"
 
 [node name="EruptionCycle" type="Node3D" parent="." unique_id=875532986]
 script = ExtResource("4_erupt")
+column_position = Vector3(-149.6, 46, 255.8)
 metadata/_custom_type_script = "uid://cgpvuv5ee337g"
 
 [node name="LavaFlow" type="Node3D" parent="." unique_id=949212694]
 transform = Transform3D(-0.43, 0.121, -0.895, 0, 0.991, 0.134, 0.903, 0.058, -0.426, -219.2, 17.5, 452.6)
 script = ExtResource("5_lava")
-closed_from_stage = 1
 stage_nodes = PackedStringArray("Lava_Stage1", "Lava_Stage2", "Lava_Stage3")
+closed_from_stage = 1
 metadata/_custom_type_script = "uid://b3ggqeosp3aap"
 
 [node name="lava_flow" parent="LavaFlow" unique_id=261022229 instance=ExtResource("6_lavaglb")]
 script = ExtResource("7_wprop")
-
 
 [node name="GauraCraterului" type="Marker3D" parent="." unique_id=944992766]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.6, 60.8, 255.8)
@@ -124,6 +159,73 @@ backoff_m = 70.0
 
 [node name="Shape" type="CollisionShape3D" parent="CraterFall" unique_id=944992768]
 shape = SubResource("BoxShape3D_craterfall")
+
+[node name="Bombe" type="Node3D" parent="." unique_id=944992769]
+
+[node name="BombaBuza" type="Marker3D" parent="Bombe" unique_id=944992770 groups=["eruption_bombs"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -167, 57.3, 300)
+gizmo_extents = 3.0
+script = ExtResource("8_4m0l7")
+kind = 1
+model = ExtResource("31_4hama")
+model_scale = 1.6
+model_node = "Bomb_M"
+rock_speed = 13.0
+
+[node name="Traseu" type="Path3D" parent="Bombe/BombaBuza" unique_id=944992771]
+curve = SubResource("Curve3D_bomba1")
+
+[node name="BombaCanalVest" type="Marker3D" parent="Bombe" unique_id=944992772 groups=["eruption_bombs"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -189, 51, 318)
+gizmo_extents = 3.0
+script = ExtResource("8_4m0l7")
+kind = 1
+model = ExtResource("31_4hama")
+model_scale = 1.8
+model_node = "Bomb_L"
+rock_speed = 15.0
+
+[node name="Traseu" type="Path3D" parent="Bombe/BombaCanalVest" unique_id=944992773]
+curve = SubResource("Curve3D_bomba2")
+
+[node name="BombaAculSus" type="Marker3D" parent="Bombe" unique_id=944992774 groups=["eruption_bombs"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -187, 50.5, 324)
+gizmo_extents = 3.0
+script = ExtResource("8_4m0l7")
+kind = 1
+model = ExtResource("31_4hama")
+model_scale = 1.5
+model_node = "Bomb_S"
+rock_speed = 12.0
+
+[node name="Traseu" type="Path3D" parent="Bombe/BombaAculSus" unique_id=944992775]
+curve = SubResource("Curve3D_bomba3")
+
+[node name="BombaAculJos" type="Marker3D" parent="Bombe" unique_id=944992776 groups=["eruption_bombs"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -184.5, 39.7, 370.5)
+gizmo_extents = 3.0
+script = ExtResource("8_4m0l7")
+kind = 1
+model = ExtResource("31_4hama")
+model_scale = 1.4
+model_node = "Bomb_L"
+rock_speed = 14.0
+
+[node name="Traseu" type="Path3D" parent="Bombe/BombaAculJos" unique_id=944992777]
+curve = SubResource("Curve3D_bomba4")
+
+[node name="BombaCanalEst" type="Marker3D" parent="Bombe" unique_id=944992778 groups=["eruption_bombs"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -167, 43.7, 352)
+gizmo_extents = 3.0
+script = ExtResource("8_4m0l7")
+kind = 1
+model = ExtResource("31_4hama")
+model_scale = 1.3
+model_node = "Bomb_M"
+rock_speed = 15.0
+
+[node name="Traseu" type="Path3D" parent="Bombe/BombaCanalEst" unique_id=944992779]
+curve = SubResource("Curve3D_bomba5")
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=1029819703]
 script = ExtResource("7_wprop")

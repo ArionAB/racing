@@ -599,12 +599,24 @@ const TRI_PREFIX := "tri:"
 ## dinspre soare, si atat.
 const FINISH_PREFIX := "finish:"
 
-## Finisajele disponibile: nume -> [roughness, metallic_specular].
+## Finisajele disponibile: nume -> [roughness, metallic_specular] sau, pentru
+## finisajele care ARD, [roughness, metallic_specular, energie, slot].
 const FINISHES := {
 	# Tabla vopsita a vehiculelor de decor (trenul, hovercraftul). Nu e
 	# cromare: 0.55 sta la jumatatea drumului dintre lumea mata (0.9) si
 	# gheata lacului (0.35), care ramane cea mai lucioasa suprafata din scena.
 	"vehicle": [0.55, 0.40],
+	# Lava (Stromboli): crapaturile, buzele gurilor si bombele poarta slotul 30
+	# in albedo si trebuie sa ARDA — e semnalul pistei, iar la soarele jos al
+	# temei albedo-ul singur citea ca vopsea. Emisia NU vine din atlas (ar
+	# lumina si crusta): vine dintr-o masca 32x1 generata la rulare, neagra
+	# peste tot in afara slotului declarat aici. UN material pentru lava,
+	# guri si bombe — garda numara materialele, deci unul, nu trei.
+	# Energia 2.6 e aleasa pe captura: peste ea tonemap-ul nu mai schimba
+	# nimic (portocaliul saturat e deja la plafonul lui de luminanta, iar
+	# bloom nu exista — constrangerile mobile interzic post-procesarea).
+	# Castigul real al emisiei e ca semnalul ramane aprins si in umbra cuvei.
+	"lava": [0.9, 0.15, 2.6, LAVA_ORANGE],
 }
 
 static var _finish_mats: Dictionary = {}
@@ -619,8 +631,27 @@ static func finish_material(name: String) -> StandardMaterial3D:
 	var f: Array = FINISHES[name]
 	mat.roughness = f[0]
 	mat.metallic_specular = f[1]
+	if f.size() >= 4:
+		mat.emission_enabled = true
+		# NEGRU, nu alb: operatorul implicit e ADD, deci culoarea de emisie se
+		# ADUNA cu textura — cu alb aici, toata crusta ardea orbitor si masca
+		# de slot nu mai conta (masurat pe prima captura). Textura e semnalul.
+		mat.emission = Color.BLACK
+		mat.emission_energy_multiplier = f[2]
+		mat.emission_texture = _slot_glow_texture(int(f[3]))
 	_finish_mats[name] = mat
 	return mat
+
+
+## Masca de emisie pe UN slot: 32x1, negru peste tot, culoarea slotului pe
+## texelul lui. UV-urile colapsate pe centrul slotului (contractul atlasului)
+## cad exact pe centrul texelului, deci filtrarea liniara nu trage din vecini.
+## Fara mipmap-uri: la distanta ar amesteca tot randul si ar stinge semnalul.
+static func _slot_glow_texture(slot: int) -> ImageTexture:
+	var img := Image.create(HEX.size(), 1, false, Image.FORMAT_RGB8)
+	img.fill(Color.BLACK)
+	img.set_pixel(slot, 0, color(slot))
+	return ImageTexture.create_from_image(img)
 
 static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 	for node in _walk(root):

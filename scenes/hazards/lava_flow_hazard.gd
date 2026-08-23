@@ -137,6 +137,9 @@ func _rebuild_collision() -> void:
 			body = StaticBody3D.new()
 			body.name = "stage_col"
 			body.set_meta("mod_coliziune", "mesh")
+			# Contactul cu lava e distrugere, nu perete: Car._process_contacts
+			# citeste meta si se arde (turtire + repunere din stand).
+			body.set_meta("lava", true)
 			var cs := CollisionShape3D.new()
 			cs.shape = m.mesh.create_trimesh_shape()
 			body.add_child(cs)

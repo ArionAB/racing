@@ -107,9 +107,19 @@ const CRUSH_FACTOR: float = 0.70
 const CRUSH_KEEP_SPEED: float = 0.50
 const CRUSH_SQUASH := Vector3(1.55, 0.245, 1.45)
 
-@export var period: float = DEFAULT_PERIOD
+## Setter-ele exista pentru RESINCRONIZAREA de dupa `_ready`: metronomul
+## eruptiei (EruptionCycle) scrie period + phase pe hazardele din grupul lui
+## DUPA ce pista le-a construit, iar fara re-derivarea lui `_time` scrierea
+## ar fi ramas litera moarta — ceasul intern pornise deja din faza veche.
+@export var period: float = DEFAULT_PERIOD:
+	set(value):
+		period = maxf(value, 0.1)
+		_time = fposmod(phase, 1.0) * period
 ## Defazare 0..1, ca doua bolovanuri sa nu cada la unison.
-@export var phase: float = 0.0
+@export var phase: float = 0.0:
+	set(value):
+		phase = value
+		_time = fposmod(phase, 1.0) * period
 ## Culoarea umbrei de avertisment.
 @export var telegraph_color: Color = Color(0.05, 0.03, 0.02, 0.55)
 
@@ -292,7 +302,13 @@ func _rock_model() -> Node3D:
 			# lume, textura ar "inota" pe suprafata in timp ce piatra se
 			# invarte (style_bible §4, aceeasi nota ca la SlidingHazard).
 			if tri_class.is_empty():
-				Palette.apply_world_material(container)
+				# Fara clasa de pista: modelul isi tine sloturile din atlas,
+				# dar trece prin maparea de clase pe PARTI — bombele vulcanice
+				# isi iau finisajul emisiv (`Bomb_` -> finish:lava), restul
+				# raman pe materialul lumii, exact ca la decorul manual. In
+				# spatiul OBIECTULUI, fiindca piatra se rostogoleste.
+				Palette.apply_object_class_materials(container,
+					WorldProp.prop_classes(), scl)
 			else:
 				Palette.apply_object_triplanar_class(container, tri_class, scl)
 			return container
@@ -354,6 +370,13 @@ func _setup_route() -> void:
 		d += 0.25
 	_cross_time = _time_for_distance(best)
 	_last_pos = _route_pos(0.0)
+
+
+## Cand ajunge piatra DEASUPRA soselei, in secunde de la plecare. Public
+## pentru metronomul eruptiei: pulsul trebuie sa prinda bomba peste drum,
+## nu la plecarea de sus, deci faza se calculeaza scazand timpul asta.
+func cross_time() -> float:
+	return _cross_time
 
 
 ## Distanta parcursa dupa `t` secunde: acceleratie constanta pana la croaziera,

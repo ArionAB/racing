@@ -675,6 +675,22 @@ const BAIKAL_CLASSES := {
 	"Khivus_": Palette.FINISH_PREFIX + "vehicle",
 }
 
+## Maparea de clase pentru Stromboli: DOAR piesele incandescente.
+##
+## Toate poarta slotul 30 in albedo si primesc acelasi finisaj `lava` — o
+## masca de emisie pe slot (vezi Palette.FINISHES), deci crapaturile ard iar
+## crusta ramane stinsa. UN material partajat intre limba, gurile craterului
+## si bombe: garda numara materialele, deci unul, nu trei. Restul kitului
+## mediteranean ramane pe atlasul comun — corpul cuvei (`Crater_Bowl`) NU e
+## aici dinadins, ca ocluzia teraselor sa nu primeasca niciun strop de emisie.
+## Atentie la prefixe: "Lava_Stage" nu prinde "Lava_Slab_" (placile sparte
+## raman decor stins), iar "Bomb_" prinde toate cele trei marimi.
+const STROMBOLI_CLASSES := {
+	"Lava_Stage": Palette.FINISH_PREFIX + "lava",
+	"Crater_Vents": Palette.FINISH_PREFIX + "lava",
+	"Bomb_": Palette.FINISH_PREFIX + "lava",
+}
+
 ## Fractiile pe care creste trestia de zahar (sectorul 7, `Track05.SECTORS`).
 ##
 ## Ratele de aparitie (0.32/0.38/0.34 pe cele trei benzi) sunt reglate pe

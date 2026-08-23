@@ -1,4 +1,5 @@
 @tool
+class_name WorldProp
 extends Node3D
 ## Pentru un prop GLB asezat de mana in editor. Ii pune pe fiecare parte
 ## materialul corect: textura de CLASA acolo unde partea are UV-uri reale
@@ -249,6 +250,7 @@ static func prop_classes() -> Dictionary:
 	var out := {}
 	out.merge(TrackDecor.ISLAND_CLASSES)
 	out.merge(TrackDecor.BAIKAL_CLASSES)
+	out.merge(TrackDecor.STROMBOLI_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

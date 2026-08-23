@@ -265,6 +265,11 @@ var _wheel_points: Array[Vector3] = []
 ## aplica fortele de cauciuc — la sol, nu in centrul de masa. De aici ruliul
 ## in viraj, squat-ul la accelerare, dive-ul la frana.
 var _contact_offset: Vector3 = Vector3.ZERO
+## Cotele rotilor din tick-ul curent, pentru detectorul de lava (vezi finalul
+## lui _apply_suspension): cea mai INALTA roata pe lava vs cea mai JOASA pe
+## drum — diferenta spune daca doar atingi evazarea sau chiar te-ai catarat.
+var _lava_wheel_y: float = -INF
+var _road_wheel_y: float = INF
 ## Acelasi lucru per axa (0 = fata, 1 = spate): driftul taie doar spatele.
 var _axle_offset: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 var _axle_grounded: Array[int] = [0, 0]
@@ -505,6 +510,8 @@ func get_floor_normal() -> Vector3:
 ## tangajul: rotile incarcate imping mai tare decat cele usurate.
 func _apply_suspension() -> void:
 	wheels_on_ground = 0
+	_lava_wheel_y = -INF
+	_road_wheel_y = INF
 	var contact_sum := Vector3.ZERO
 	var normal_sum := Vector3.ZERO
 	var axle_sum: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
@@ -527,6 +534,11 @@ func _apply_suspension() -> void:
 		if hit.is_empty():
 			wheel_compression[i] = 0.0
 			continue
+		var ground := hit.collider as Node
+		if ground != null and ground.has_meta(&"lava"):
+			_lava_wheel_y = maxf(_lava_wheel_y, (hit.position as Vector3).y)
+		else:
+			_road_wheel_y = minf(_road_wheel_y, (hit.position as Vector3).y)
 		wheels_on_ground += 1
 		var axle := 0 if i < 2 else 1
 		contact_sum += hit.position as Vector3
@@ -551,6 +563,17 @@ func _apply_suspension() -> void:
 		if _axle_grounded[axle] > 0:
 			_axle_offset[axle] = axle_sum[axle] / float(_axle_grounded[axle]) \
 				- global_position
+	# Roata URCATA pe crusta de lava = ars. Nu orice atingere de raza: marginea
+	# crustei e evazata la baza (~0.55 m la sol), iar o roata care o atinge la
+	# firul drumului e frecatura, nu incendiu — cu ars-la-orice-atingere poarta
+	# de 4 m se ingusta efectiv la ~3.3 si pedepsea o trecere curata (masurat in
+	# ProbeLavaStages, cu AI la volan). Arde cine calca VIZIBIL mai sus decat
+	# rotile de pe drum — adica s-a catarat pe limba — sau cine nu mai are nicio
+	# roata pe altceva (crusta l-a inghitit; si zidul peste care incerci sa
+	# treci, masurat: fara asta il urcai cu 13 m/s).
+	if _lava_wheel_y > -INF \
+			and (_road_wheel_y == INF or _lava_wheel_y > _road_wheel_y + 0.35):
+		scorch()
 
 
 ## Motor, frana, plafon, drag si directie — ca FORTE, cu aceleasi reguli de
@@ -645,6 +668,10 @@ func _process_contacts(delta: float) -> void:
 				+ Vector3.UP * 1.5)
 		elif body is StaticBody3D:
 			static_hit = true
+			# Lava (Stromboli): contactul e distrugere, nu perete. Meta vine de
+			# la LavaFlowHazard, pe colizorul stadiului curent.
+			if body.has_meta(&"lava"):
+				scorch()
 
 	var dv_vec := velocity - _prev_velocity
 	if not cars_hit.is_empty():
@@ -835,6 +862,23 @@ func crush(seconds: float, factor: float, squash: Vector3,
 	else:
 		_punch_scale(squash)
 	crushed.emit(self, 1.0 - factor)
+
+
+## Ars de lava (Stromboli): "contact = distrugere" din brief, tradus in
+## limbajul jocului — pedeapsa e TIMP, nu o stare de distrus (vezi nota de la
+## `crush_time`). Turtire + shake plin (semnalul `crushed` la severitate 1),
+## apoi repunere DIN STAND: spre deosebire de repunerea obisnuita, nu primesti
+## avansul de 9 m/s — repornirea de la zero E costul (brief §3: ~2 s + ~2
+## pozitii). Cooldown-ul repunerii taie contactele repetate din acelasi tick.
+func scorch() -> void:
+	if _respawn_cooldown > 0.0 or track == null or finished:
+		return
+	crush(0.0, 1.0, Vector3(1.4, 0.35, 1.3), 0.0)
+	if is_player:
+		AudioManager.play_sfx(&"avalanche_hit", 1.15)
+	respawn(12.0)
+	velocity = Vector3.ZERO
+	_prev_velocity = velocity
 
 
 func apply_sweep(push: Vector3) -> void:

@@ -171,12 +171,14 @@ def _spine(length, bend=0.0, seed=1):
     return pts
 
 
-# 4.37, nu 4.0: bevelul de 0.10 m umfla fiecare limba spre banda cu ~0.18 m,
-# iar jitterul de latime (+-0.25) mai musca putin. Masurat pe mesh-ul exportat,
-# un GATE nominal de 4.0 dadea 3.63 m liberi — sub cei 4 m ceruti de brief,
-# adica sub cat trebuie ca sa incapa masina cu margine de eroare. Poarta reala
-# se masoara pe mesh, nu se citeste din constanta.
-GATE = 4.37
+# 5.0, nu 4.0 (brief): poarta reala se masoara CU MASINA, nu pe mesh. Doua
+# lucruri o ingusteaza sub cifra nominala: bevelul de 0.10 umfla fiecare limba
+# spre banda cu ~0.18 m, iar EVAZAREA bazei (BEVEL_SIDE 0.55) mai ia o data pe
+# atat la firul solului — unde calca rotile. Cu 4.37 nominal, ProbeLavaStages
+# (masina reala, AI la volan) ardea pe o trecere cu ±1 m abatere: toleranta
+# era sub ce poate tine cineva la 20 m/s. La 5.0 golul de sus ramane ~4.6 —
+# citeste tot "abia incap" — iar la sol raman ~3.5 m intre evazari.
+GATE = 5.0
 
 
 def _twin_arm(sgn, start, length, seed):
@@ -219,9 +221,12 @@ def build_stage2():
     glow = []
     glow += _ribbon(b, _twin_arm(-1, 0.0, 38.0, seed=5), seed=21,
                     crack_density=1.2)
-    # limba a doua porneste putin mai tarziu: clestele se citeste ca lobul 1
-    # ajuns din urma de al doilea, nu ca doua obiecte stampilate
-    glow += _ribbon(b, _twin_arm(1, 6.0, 38.0, seed=7), seed=31,
+    # Limba a doua abia AJUNGE: canionul cu ambii pereti tine doar ultimii
+    # 16 m (22->38) — cat poarta din brief. Restul apropierii are un singur
+    # perete, pe stanga: loc sa te aliniezi INAINTE de stramtoare. Cu ambele
+    # limbi pe toata lungimea, ProbeLavaStages ardea trecerea cu ±1 m abatere
+    # — un canion de 38 m e alt joc decat o poarta de 16.
+    glow += _ribbon(b, _twin_arm(1, 22.0, 38.0, seed=7), seed=31,
                     crack_density=1.6)
     return b.to_object("Lava_Stage2"), glow
 

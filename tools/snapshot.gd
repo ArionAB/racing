@@ -172,6 +172,14 @@ func _ready() -> void:
 	if wave_at >= 0.0:
 		_set_wave_phase(track, wave_at)
 	if rock_at >= 0.0:
+		# Metronomul eruptiei isi resincronizeaza bombele AMANAT (dupa ce
+		# pista le construieste) si le-ar calca ceasul pus de --rock-at:
+		# captura ar prinde bolovanii unde i-a asezat pulsul, nu simularea.
+		# Cu grupul golit inainte sa ruleze resync-ul amanat, ceasul ramane
+		# al capturii.
+		for child in track.get_children():
+			if child is EruptionCycle:
+				(child as EruptionCycle).hazard_group = &""
 		await _set_rock_time(track, rock_at)
 	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,
 	# captura prinde mereu stadiul 1 — exact starea in care gimmick-ul nu se
@@ -396,10 +404,16 @@ func _set_rock_time(root: Node, seconds: float) -> void:
 		while t < seconds:
 			rock._physics_process(step)
 			t += step
+		# INGHETAT dupa simulare: pana la captura mai trec cadre (fizica ruleaza
+		# normal) si piatra ar ajunge in alt loc decat cel tiparit — la vitezele
+		# bombelor Stromboli, dincolo de capatul traseului, adica ASCUNSA.
+		rock.set_physics_process(false)
 		found += 1
+		var body := rock.get("_rock") as Node3D
+		var bp := body.global_position if body != null else rock.global_position
 		print("--rock-at=%.2f: bolovan la (%.1f, %.1f, %.1f), trecere peste sosea la %.2f s, o trecere = %.2f s"
-			% [seconds, rock.global_position.x, rock.global_position.y,
-			rock.global_position.z, rock.get("_cross_time"), rock.get("_route_travel")])
+			% [seconds, bp.x, bp.y, bp.z,
+			rock.get("_cross_time"), rock.get("_route_travel")])
 	print("--rock-at=%.2f: %d bolovani mutati" % [seconds, found])
 
 

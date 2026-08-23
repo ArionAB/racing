@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://eu5e5fgfu13"]
+[gd_scene format=3 uid="uid://dvssag5y00x12"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -8,6 +8,29 @@
 [ext_resource type="PackedScene" uid="uid://d04oqmtngqx5m" path="res://assets/models/stromboli/effects/lava_flow.glb" id="6_lavaglb"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="7_wprop"]
 [ext_resource type="Script" uid="uid://e77285gnuvv4" path="res://scenes/tracks/track_channel.gd" id="8_chan"]
+[ext_resource type="PackedScene" uid="uid://bd3qg4v0gsxh7" path="res://assets/models/stromboli/buildings/aeolian_house_c.glb" id="9_j6dkv"]
+[ext_resource type="PackedScene" uid="uid://mukunp67nxdk" path="res://assets/models/stromboli/structures/strombolicchio.glb" id="9_sxylx"]
+[ext_resource type="PackedScene" uid="uid://drbu1ao6n1q6u" path="res://assets/models/stromboli/buildings/stromboli_church.glb" id="10_wkh6h"]
+[ext_resource type="PackedScene" uid="uid://gha2jqditl17" path="res://assets/models/stromboli/buildings/aeolian_house_a.glb" id="11_tx8xw"]
+[ext_resource type="PackedScene" uid="uid://dyayqwshxbcg6" path="res://assets/models/stromboli/buildings/aeolian_house_b.glb" id="12_5gsx0"]
+[ext_resource type="PackedScene" uid="uid://cb8ei0issox6i" path="res://assets/models/stromboli/buildings/pergola_pulera.glb" id="13_8g0lj"]
+[ext_resource type="PackedScene" uid="uid://b6n1qu50hasii" path="res://assets/models/stromboli/props/bougainvillea.glb" id="14_jjxvn"]
+[ext_resource type="PackedScene" uid="uid://n4hi3dua11by" path="res://assets/models/stromboli/buildings/white_wall.glb" id="15_xgr5v"]
+[ext_resource type="PackedScene" uid="uid://csaqduhq30lxa" path="res://assets/models/stromboli/buildings/alley_stairs.glb" id="16_c3svt"]
+[ext_resource type="PackedScene" uid="uid://u8qq3hcewprr" path="res://assets/models/stromboli/buildings/street_shrine.glb" id="17_0n0fx"]
+[ext_resource type="PackedScene" uid="uid://xdiggxhxw1fn" path="res://assets/models/stromboli/vehicles/ape_piaggio.glb" id="18_gbtar"]
+[ext_resource type="PackedScene" uid="uid://43k027lj852u" path="res://assets/models/stromboli/props/boat_winch.glb" id="19_5gsx0"]
+[ext_resource type="PackedScene" uid="uid://bbspcr662mi25" path="res://assets/models/stromboli/vehicles/fishing_boat_small.glb" id="20_8g0lj"]
+[ext_resource type="PackedScene" uid="uid://cxdlmku46ki0t" path="res://assets/models/stromboli/props/nets_buoys.glb" id="21_jjxvn"]
+[ext_resource type="PackedScene" uid="uid://dxvhxod5h41le" path="res://assets/models/stromboli/rocks/basalt_boulder.glb" id="22_8g0lj"]
+[ext_resource type="PackedScene" uid="uid://cq6ptjhlj8jst" path="res://assets/models/stromboli/structures/observatory_terrace.glb" id="23_jjxvn"]
+[ext_resource type="PackedScene" uid="uid://cmxufmvkfd4b4" path="res://assets/models/stromboli/plants/vine_row.glb" id="24_c3svt"]
+[ext_resource type="PackedScene" uid="uid://cds2wpesn6n74" path="res://assets/models/stromboli/rocks/terrace_wall.glb" id="24_xgr5v"]
+[ext_resource type="PackedScene" uid="uid://dck4m6aw2kfw2" path="res://assets/models/stromboli/trees/olive_tree.glb" id="26_0n0fx"]
+[ext_resource type="PackedScene" uid="uid://bg8ntxxiopqcu" path="res://assets/models/stromboli/plants/prickly_pear.glb" id="27_gbtar"]
+[ext_resource type="PackedScene" uid="uid://cfv50wowcth5k" path="res://assets/models/stromboli/plants/caper_bush.glb" id="28_k6t67"]
+[ext_resource type="PackedScene" uid="uid://bssnajt68mbob" path="res://assets/models/stromboli/plants/ginestra_bush.glb" id="29_2r1w0"]
+[ext_resource type="PackedScene" uid="uid://yp1ovlq61rph" path="res://assets/models/stromboli/structures/crater_bowl.glb" id="31_pfiwi"]
 
 [sub_resource type="Curve3D" id="Curve3D_stromboli"]
 _data = {
@@ -42,7 +65,7 @@ curve = SubResource("Curve3D_stromboli")
 [node name="Peaks" type="Node3D" parent="." unique_id=1808448604]
 
 [node name="FlanculConului" type="Marker3D" parent="Peaks" unique_id=548656424]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 72, 268.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.2, 49.133026, 268.3)
 gizmo_extents = 200.0
 script = ExtResource("2_peak")
 radius_m = 200.0
@@ -77,15 +100,673 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.6, 60.8, 255.8)
 gizmo_extents = 90.0
 script = ExtResource("8_chan")
 gap = 8.0
-depth = 24.0
+bank = 30.0
+depth = 30.0
 water_y_drop = -1.0
+fade = 0.0
 label = "Gaura craterului"
 
-[node name="DecorManual" type="Node3D" parent="."]
+[node name="DecorManual" type="Node3D" parent="." unique_id=1029819703]
 script = ExtResource("7_wprop")
 
-[node name="1)Piata satului" type="Node3D" parent="DecorManual"]
+[node name="strombolicchio" parent="DecorManual" unique_id=239262812 instance=ExtResource("9_sxylx")]
+transform = Transform3D(-0.39994887, 0, -0.91653746, 0, 1, 0, 0.91653746, 0, -0.39994887, -348.68875, 0, 0)
 
-[node name="2) Plaja neagra Piscita" type="Node3D" parent="DecorManual"]
+[node name="1)Piata satului" type="Node3D" parent="DecorManual" unique_id=1255498162]
 
-[node name="3) Serpentinele" type="Node3D" parent="DecorManual"]
+[node name="aeolian_house_c" parent="DecorManual/1)Piata satului" unique_id=43473483 instance=ExtResource("9_j6dkv")]
+transform = Transform3D(-0.46072072, 0, 0.88754517, 0, 1, 0, -0.88754517, 0, -0.46072072, 18.248665, 17.773516, 11.195747)
+
+[node name="aeolian_house_c2" parent="DecorManual/1)Piata satului" unique_id=1021394900 instance=ExtResource("9_j6dkv")]
+transform = Transform3D(-0.46072072, 0, 0.88754517, 0, 1, 0, -0.88754517, 0, -0.46072072, 13.447685, 17.891684, 2.0973358)
+
+[node name="stromboli_church" parent="DecorManual/1)Piata satului" unique_id=1303479893 instance=ExtResource("10_wkh6h")]
+transform = Transform3D(-0.7624104, 0, 0.64709395, 0, 1, 0, -0.64709395, 0, -0.7624104, 5.478757, 7.3206315, -9.413308)
+
+[node name="aeolian_house_a" parent="DecorManual/1)Piata satului" unique_id=1512590692 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.439103, 0, 0.8984367, 0, 1, 0, -0.8984367, 0, -0.439103, 11.882171, 7.8375387, 3.5864315)
+
+[node name="aeolian_house_a2" parent="DecorManual/1)Piata satului" unique_id=898379422 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.439103, 0, 0.8984367, 0, 1, 0, -0.8984367, 0, -0.439103, 15.090606, 7.8375387, 9.599503)
+
+[node name="aeolian_house_a3" parent="DecorManual/1)Piata satului" unique_id=804982459 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.433697, 0, 0.90105885, 0, 1, 0, -0.90105885, 0, -0.433697, 18.14979, 7.8375387, 15.949715)
+
+[node name="aeolian_house_b" parent="DecorManual/1)Piata satului" unique_id=1328758957 instance=ExtResource("12_5gsx0")]
+transform = Transform3D(-0.43247202, 0, 0.9016473, 0, 1, 0, -0.9016473, 0, -0.43247202, 14.146326, 11.973841, 3.7957726)
+
+[node name="aeolian_house_b2" parent="DecorManual/1)Piata satului" unique_id=1888463354 instance=ExtResource("12_5gsx0")]
+transform = Transform3D(-0.43247202, 0, 0.9016473, 0, 1, 0, -0.9016473, 0, -0.43247202, 19.094193, 11.973841, 13.066624)
+
+[node name="pergola_pulera" parent="DecorManual/1)Piata satului" unique_id=33125690 instance=ExtResource("13_8g0lj")]
+transform = Transform3D(0.33603138, 0, -0.9418508, 0, 1, 0, 0.9418508, 0, 0.33603138, 17.858503, 8.394445, 26.629217)
+
+[node name="pergola_pulera2" parent="DecorManual/1)Piata satului" unique_id=1408671854 instance=ExtResource("13_8g0lj")]
+transform = Transform3D(0.33603138, 0, -0.9418508, 0, 1, 0, 0.9418508, 0, 0.33603138, 23.604946, 8.394445, 24.728964)
+
+[node name="bougainvillea" parent="DecorManual/1)Piata satului" unique_id=558679183 instance=ExtResource("14_jjxvn")]
+transform = Transform3D(0.51107, 0, -0.85953903, 0, 1, 0, 0.85953903, 0, 0.51107, 16.222885, 9.908624, 18.956942)
+
+[node name="bougainvillea2" parent="DecorManual/1)Piata satului" unique_id=388288366 instance=ExtResource("14_jjxvn")]
+transform = Transform3D(0.51107, 0, -0.85953903, 0, 1, 0, 0.85953903, 0, 0.51107, 8.166956, 9.908624, 3.2067423)
+
+[node name="white_wall" parent="DecorManual/1)Piata satului" unique_id=231748650 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.97082555, 0, 0.23978683, 0, 1, 0, -0.23978683, 0, 0.97082555, 17.052979, 8.514786, 32.045162)
+
+[node name="white_wall2" parent="DecorManual/1)Piata satului" unique_id=867295072 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.97082555, 0, 0.23978683, 0, 1, 0, -0.23978683, 0, 0.97082555, 20.248549, 8.514786, 31.430424)
+
+[node name="white_wall3" parent="DecorManual/1)Piata satului" unique_id=187857306 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.97082555, 0, 0.23978683, 0, 1, 0, -0.23978683, 0, 0.97082555, 23.259516, 8.514786, 31.027287)
+
+[node name="white_wall4" parent="DecorManual/1)Piata satului" unique_id=163072829 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.97082555, 0, 0.23978683, 0, 1, 0, -0.23978683, 0, 0.97082555, 25.82274, 8.514786, 30.431667)
+
+[node name="white_wall5" parent="DecorManual/1)Piata satului" unique_id=1486572446 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.97082555, 0, 0.23978683, 0, 1, 0, -0.23978683, 0, 0.97082555, 28.682022, 8.514786, 29.887695)
+
+[node name="white_wall6" parent="DecorManual/1)Piata satului" unique_id=547191649 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.14720368, 0, 0.98910624, 0, 1, 0, -0.98910624, 0, -0.14720368, 28.682022, 8.514786, 27.970284)
+
+[node name="white_wall7" parent="DecorManual/1)Piata satului" unique_id=531544495 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.14720368, 0, 0.98910624, 0, 1, 0, -0.98910624, 0, -0.14720368, 28.437931, 8.514786, 25.027325)
+
+[node name="white_wall8" parent="DecorManual/1)Piata satului" unique_id=667093594 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.14720368, 0, 0.98910624, 0, 1, 0, -0.98910624, 0, -0.14720368, 28.151184, 8.514786, 21.592213)
+
+[node name="white_wall9" parent="DecorManual/1)Piata satului" unique_id=1408916156 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.14720368, 0, 0.98910624, 0, 1, 0, -0.98910624, 0, -0.14720368, 28.151184, 8.514786, 18.315329)
+
+[node name="aeolian_house_c3" parent="DecorManual/1)Piata satului" unique_id=1853110670 instance=ExtResource("9_j6dkv")]
+transform = Transform3D(-0.93268096, 0, 0.36070243, 0, 1, 0, -0.36070243, 0, -0.93268096, -12.703961, 15.9858055, -22.80753)
+
+[node name="aeolian_house_c4" parent="DecorManual/1)Piata satului" unique_id=68534855 instance=ExtResource("9_j6dkv")]
+transform = Transform3D(-0.93268096, 0, 0.36070243, 0, 1, 0, -0.36070243, 0, -0.93268096, -22.323586, 15.622768, -26.453537)
+
+[node name="aeolian_house_a4" parent="DecorManual/1)Piata satului" unique_id=2052680089 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.9236771, 0, 0.38317198, 0, 1, 0, -0.38317198, 0, -0.9236771, -22.512272, 5.511454, -24.301182)
+
+[node name="aeolian_house_a5" parent="DecorManual/1)Piata satului" unique_id=1493612302 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.9236771, 0, 0.38317198, 0, 1, 0, -0.38317198, 0, -0.9236771, -16.128113, 6.2161403, -21.915052)
+
+[node name="aeolian_house_a6" parent="DecorManual/1)Piata satului" unique_id=404779560 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.9213582, 0, 0.38871485, 0, 1, 0, -0.38871485, 0, -0.9213582, -9.632814, 6.6177764, -19.177374)
+
+[node name="aeolian_house_b3" parent="DecorManual/1)Piata satului" unique_id=517596630 instance=ExtResource("12_5gsx0")]
+transform = Transform3D(-0.92082906, 0, 0.38996658, 0, 1, 0, -0.38996658, 0, -0.92082906, -20.676003, 9.746952, -25.642204)
+
+[node name="aeolian_house_b4" parent="DecorManual/1)Piata satului" unique_id=630366441 instance=ExtResource("12_5gsx0")]
+transform = Transform3D(-0.92082906, 0, 0.38996658, 0, 1, 0, -0.38996658, 0, -0.92082906, -10.83215, 10.458207, -21.964075)
+
+[node name="pergola_pulera3" parent="DecorManual/1)Piata satului" unique_id=1372316388 instance=ExtResource("13_8g0lj")]
+transform = Transform3D(0.9706328, 0, -0.24056569, 0, 1, 0, 0.24056569, 0, 0.9706328, -36.452293, 3.5237381, -32.817604)
+
+[node name="pergola_pulera4" parent="DecorManual/1)Piata satului" unique_id=1634662336 instance=ExtResource("13_8g0lj")]
+transform = Transform3D(0.9658701, 0, -0.25902674, 0, 1, 0, 0.25902674, 0, 0.9658701, -31.722408, 3.5529032, -32.227493)
+
+[node name="bougainvillea3" parent="DecorManual/1)Piata satului" unique_id=819954962 instance=ExtResource("14_jjxvn")]
+transform = Transform3D(0.9519059, 0, -0.3063904, 0, 1, 0, 0.3063904, 0, 0.9519059, -9.088073, 8.959514, -15.6475525)
+
+[node name="bougainvillea4" parent="DecorManual/1)Piata satului" unique_id=1938794984 instance=ExtResource("14_jjxvn")]
+transform = Transform3D(0.9519059, 0, -0.3063904, 0, 1, 0, 0.3063904, 0, 0.9519059, -23.523848, 8.959514, -20.218313)
+
+[node name="white_wall10" parent="DecorManual/1)Piata satului" unique_id=546053966 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.15546197, 0, -0.9878419, 0, 1, 0, 0.9878419, 0, -0.15546197, -37.689106, 3.3232768, -37.704636)
+
+[node name="white_wall11" parent="DecorManual/1)Piata satului" unique_id=1953360089 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.15546197, 0, -0.9878419, 0, 1, 0, 0.9878419, 0, -0.15546197, -38.36171, 3.3070045, -34.520744)
+
+[node name="white_wall12" parent="DecorManual/1)Piata satului" unique_id=709636027 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.15546197, 0, -0.9878419, 0, 1, 0, 0.9878419, 0, -0.15546197, -39.157764, 3.257382, -31.589067)
+
+[node name="white_wall13" parent="DecorManual/1)Piata satului" unique_id=1895780524 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.15546197, 0, -0.9878419, 0, 1, 0, 0.9878419, 0, -0.15546197, -39.60277, 3.2237568, -28.995447)
+
+[node name="white_wall14" parent="DecorManual/1)Piata satului" unique_id=1955577309 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.15546197, 0, -0.9878419, 0, 1, 0, 0.9878419, 0, -0.15546197, -40.279076, 3.227622, -26.442938)
+
+[node name="white_wall15" parent="DecorManual/1)Piata satului" unique_id=2056381213 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.96878827, 0, -0.24788928, 0, 1, 0, 0.24788928, 0, 0.96878827, -38.784348, 3.4841533, -25.072054)
+
+[node name="white_wall16" parent="DecorManual/1)Piata satului" unique_id=530677228 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.96878827, 0, -0.24788928, 0, 1, 0, 0.24788928, 0, 0.96878827, -35.635517, 3.8992362, -24.489119)
+
+[node name="white_wall17" parent="DecorManual/1)Piata satului" unique_id=1678957082 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.96878827, 0, -0.24788928, 0, 1, 0, 0.24788928, 0, 0.96878827, -32.35802, 4.3861947, -23.421297)
+
+[node name="white_wall18" parent="DecorManual/1)Piata satului" unique_id=564755149 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.96878827, 0, -0.24788928, 0, 1, 0, 0.24788928, 0, 0.96878827, -29.337566, 4.8125887, -22.150528)
+
+[node name="alley_stairs" parent="DecorManual/1)Piata satului" unique_id=1596377422 instance=ExtResource("16_c3svt")]
+transform = Transform3D(0.54891425, 0, -1.2858495, 0, 1.3981115, 0, 1.2858495, 0, 0.54891425, 9.6518135, 7.5869884, -1.3269136)
+
+[node name="alley_stairs2" parent="DecorManual/1)Piata satului" unique_id=1155439367 instance=ExtResource("16_c3svt")]
+transform = Transform3D(0.54891425, 0, -1.2858495, 0, 1.3981115, 0, 1.2858495, 0, 0.54891425, 20.374235, 7.5869884, 20.789854)
+
+[node name="alley_stairs3" parent="DecorManual/1)Piata satului" unique_id=982771873 instance=ExtResource("16_c3svt")]
+transform = Transform3D(1.3335903, 0, -0.41982487, 0, 1.3981116, 0, 0.41982487, 0, 1.3335903, -27.132156, 4.1885586, -26.750109)
+
+[node name="alley_stairs4" parent="DecorManual/1)Piata satului" unique_id=1536676585 instance=ExtResource("16_c3svt")]
+transform = Transform3D(1.2623359, 0, -0.60101897, 0, 1.3981115, 0, 0.60101897, 0, 1.2623359, -5.6232824, 6.894464, -16.740456)
+
+[node name="street_shrine" parent="DecorManual/1)Piata satului" unique_id=1174574981 instance=ExtResource("17_0n0fx")]
+transform = Transform3D(0.47777438, 0, -1.3925948, 0, 1.4722732, 0, 1.3925948, 0, 0.47777438, 18.003052, 8.617283, 35.975845)
+
+[node name="ape_piaggio" parent="DecorManual/1)Piata satului" unique_id=954259689 instance=ExtResource("18_gbtar")]
+transform = Transform3D(0.7382895, 0, 1.0082855, 0, 1.2496843, 0, -1.0082855, 0, 0.7382895, 19.236643, 8.717821, 38.69599)
+
+[node name="2) Plaja neagra Piscita" type="Node3D" parent="DecorManual" unique_id=1797281407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.90796, 0, -19.318317)
+
+[node name="nets_buoys" parent="DecorManual/2) Plaja neagra Piscita" unique_id=56062511 instance=ExtResource("21_jjxvn")]
+transform = Transform3D(1.2703639, 0, 0, 0, 1.2703639, 0, 0, 0, 1.2703639, 26.50148, 1.3900547, -17.573414)
+
+[node name="nets_buoys3" parent="DecorManual/2) Plaja neagra Piscita" unique_id=60624098 instance=ExtResource("21_jjxvn")]
+transform = Transform3D(1.8221815, 0, 0, 0, 1.8221815, 0, 0, 0, 1.8221815, 11.569809, 0.2183088, -32.75536)
+
+[node name="nets_buoys4" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1019118851 instance=ExtResource("21_jjxvn")]
+transform = Transform3D(1.8221815, 0, 0, 0, 1.8221815, 0, 0, 0, 1.8221815, 14.540535, -0.17352784, -25.575779)
+
+[node name="nets_buoys2" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1105447912 instance=ExtResource("21_jjxvn")]
+transform = Transform3D(1.2703639, 0, 0, 0, 1.2703639, 0, 0, 0, 1.2703639, -40.59958, 1.3900547, 22.043247)
+
+[node name="basalt_boulder" parent="DecorManual/2) Plaja neagra Piscita" unique_id=875593987 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.654274, 1.3333081, 17.595745)
+
+[node name="basalt_boulder7" parent="DecorManual/2) Plaja neagra Piscita" unique_id=2011954948 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(0.11632839, 0, 1.3127147, 0, 1.3178589, 0, -1.3127147, 0, 0.11632839, -16.020973, 1.3333081, 17.595745)
+
+[node name="basalt_boulder8" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1688472329 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(0.11632839, 0, 1.3127147, 0, 1.3178589, 0, -1.3127147, 0, 0.11632839, -50.420624, 1.494476, 22.468634)
+
+[node name="basalt_boulder9" parent="DecorManual/2) Plaja neagra Piscita" unique_id=83545749 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(-0.3957154, 0, -0.78243005, 0, 0.87680525, 0, 0.78243005, 0, -0.3957154, -61.942184, 1.494476, 26.273912)
+
+[node name="basalt_boulder2" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1550813049 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(1.3159475, 0, 0, 0, 1.3159475, 0, 0, 0, 1.3159475, 15.230652, 1.3333081, 15.621588)
+
+[node name="basalt_boulder3" parent="DecorManual/2) Plaja neagra Piscita" unique_id=336574354 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(0.7855053, 0, 1.0557932, 0, 1.3159475, 0, -1.0557932, 0, 0.7855053, 23.297188, 1.3333081, 15.621588)
+
+[node name="basalt_boulder4" parent="DecorManual/2) Plaja neagra Piscita" unique_id=892683481 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(0.41170675, 0, 0.5533727, 0, 0.6897273, 0, -0.5533727, 0, 0.41170675, 35.901802, 1.3333081, 13.008846)
+
+[node name="basalt_boulder5" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1497125141 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(0.4554269, 0, 0.6121367, 0, 0.76297116, 0, -0.6121367, 0, 0.4554269, 35.901802, 1.3333081, -14.557598)
+
+[node name="basalt_boulder6" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1158643216 instance=ExtResource("22_8g0lj")]
+transform = Transform3D(0.5391032, 0, 0.72460556, 0, 0.90315306, 0, -0.72460556, 0, 0.5391032, 42.48392, 1.3333081, -14.557598)
+
+[node name="boat_winch" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1950746571 instance=ExtResource("19_5gsx0")]
+transform = Transform3D(1.1689575, 0, -1.6640825, 0, 2.0336254, 0, 1.6640825, 0, 1.1689575, 20.514389, 1.038436, -20.799068)
+
+[node name="boat_winch2" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1774597113 instance=ExtResource("19_5gsx0")]
+transform = Transform3D(1.9904417, 0, -0.4168616, 0, 2.0336254, 0, 0.4168616, 0, 1.9904417, 34.940804, 1.038436, -20.799068)
+
+[node name="boat_winch3" parent="DecorManual/2) Plaja neagra Piscita" unique_id=469132533 instance=ExtResource("19_5gsx0")]
+transform = Transform3D(-0.70914656, 0, 1.9059753, 0, 2.0336254, 0, -1.9059753, 0, -0.70914656, -0.49567413, 1.038436, 16.986156)
+
+[node name="fishing_boat_small" parent="DecorManual/2) Plaja neagra Piscita" unique_id=457677309 instance=ExtResource("20_8g0lj")]
+transform = Transform3D(0.5763258, 0, -1.1664118, 0, 1.3010256, 0, 1.1664118, 0, 0.5763258, 7.3144226, 1.2820598, 13.211172)
+
+[node name="fishing_boat_small4" parent="DecorManual/2) Plaja neagra Piscita" unique_id=1911481431 instance=ExtResource("20_8g0lj")]
+transform = Transform3D(0.5763258, 0, -1.1664118, 0, 1.3010256, 0, 1.1664118, 0, 0.5763258, -23.291885, 1.3028206, 16.286942)
+
+[node name="fishing_boat_small2" parent="DecorManual/2) Plaja neagra Piscita" unique_id=2030896668 instance=ExtResource("20_8g0lj")]
+transform = Transform3D(0.5763258, 0, -1.1664118, 0, 1.3010256, 0, 1.1664118, 0, 0.5763258, 16.202103, 0.04836905, -16.799534)
+
+[node name="fishing_boat_small3" parent="DecorManual/2) Plaja neagra Piscita" unique_id=515815233 instance=ExtResource("20_8g0lj")]
+transform = Transform3D(1.2031256, 0, -0.49513295, 0, 1.3010257, 0, 0.49513295, 0, 1.2031256, 32.784935, 1.3602643, -16.799534)
+
+[node name="3) Serpentinele" type="Node3D" parent="DecorManual" unique_id=551918647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.01578, 44.439125, 140.34741)
+
+[node name="olive_tree" parent="DecorManual/3) Serpentinele" unique_id=683185415 instance=ExtResource("26_0n0fx")]
+transform = Transform3D(1.3648233, 0, 0, 0, 1.3648233, 0, 0, 0, 1.3648233, -36.807312, -26.841805, -69.38315)
+
+[node name="olive_tree2" parent="DecorManual/3) Serpentinele" unique_id=1616932848 instance=ExtResource("26_0n0fx")]
+transform = Transform3D(1.3648233, 0, 0, 0, 1.3648233, 0, 0, 0, 1.3648233, -61.919632, -23.2546, -58.575867)
+
+[node name="olive_tree3" parent="DecorManual/3) Serpentinele" unique_id=4352426 instance=ExtResource("26_0n0fx")]
+transform = Transform3D(1.3648233, 0, 0, 0, 1.3648233, 0, 0, 0, 1.3648233, -42.72209, -21.274422, -31.017433)
+
+[node name="olive_tree4" parent="DecorManual/3) Serpentinele" unique_id=1671815973 instance=ExtResource("26_0n0fx")]
+transform = Transform3D(1.3648233, 0, 0, 0, 1.3648233, 0, 0, 0, 1.3648233, -14.004105, -42.454716, -114.751564)
+
+[node name="olive_tree5" parent="DecorManual/3) Serpentinele" unique_id=1324972116 instance=ExtResource("26_0n0fx")]
+transform = Transform3D(1.3648233, 0, 0, 0, 1.3648233, 0, 0, 0, 1.3648233, 69.52773, -31.701357, -75.98108)
+
+[node name="olive_tree6" parent="DecorManual/3) Serpentinele" unique_id=1797227211 instance=ExtResource("26_0n0fx")]
+transform = Transform3D(1.3648233, 0, 0, 0, 1.3648233, 0, 0, 0, 1.3648233, 37.479614, -35.774933, -110.81444)
+
+[node name="observatory_terrace" parent="DecorManual/3) Serpentinele" unique_id=2037564372 instance=ExtResource("23_jjxvn")]
+transform = Transform3D(-1.3180037, 0, -0.096385315, 0, 1.3215232, 0, 0.096385315, 0, -1.3180037, -31.259537, -24.245594, -39.59137)
+
+[node name="plant_terrace" type="Node3D" parent="DecorManual/3) Serpentinele" unique_id=1344789828]
+transform = Transform3D(0.9995103, 0.031293154, 0, -0.031293154, 0.9995103, 0, 0, 0, 1, 0, 0.41374207, 0)
+
+[node name="vine_row" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=970210021 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 0, -29.683949, -68.8948)
+
+[node name="vine_row7" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1868972685 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -7.7078857, -29.683949, -68.8948)
+
+[node name="vine_row8" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1461234973 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -16.102127, -29.683949, -68.8948)
+
+[node name="vine_row9" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1393100418 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row10" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1620354280 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row2" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1699586955 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 8.255081, -29.683949, -68.8948)
+
+[node name="vine_row3" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1226729735 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 16.359406, -29.683949, -68.8948)
+
+[node name="vine_row4" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=476068464 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 24.592987, -29.683949, -68.8948)
+
+[node name="vine_row5" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1872503832 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="vine_row6" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1487280069 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="terrace_wall" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=703273647 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 33.47406, -30.99855, -70.595764)
+
+[node name="terrace_wall2" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1713227073 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 30.564697, -30.99855, -70.595764)
+
+[node name="terrace_wall3" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1350351485 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 27.417023, -30.99855, -70.595764)
+
+[node name="terrace_wall4" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=130598054 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 24.510757, -30.99855, -70.595764)
+
+[node name="terrace_wall5" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1484109804 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 21.69226, -30.99855, -70.595764)
+
+[node name="terrace_wall6" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1274052777 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 18.621078, -30.99855, -70.595764)
+
+[node name="terrace_wall7" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1294831502 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 15.6210785, -30.99855, -70.595764)
+
+[node name="terrace_wall8" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1335816075 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 12.746094, -30.99855, -70.595764)
+
+[node name="terrace_wall9" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=2134819614 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 9.628235, -30.99855, -70.595764)
+
+[node name="terrace_wall10" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=748173689 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 6.490326, -30.99855, -70.595764)
+
+[node name="terrace_wall11" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1502701069 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 3.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall12" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=837695661 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 0.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall13" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=2074347908 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -2.4319305, -30.99855, -70.595764)
+
+[node name="terrace_wall14" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=743214529 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -5.2600403, -30.99855, -70.595764)
+
+[node name="terrace_wall15" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1945207347 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -7.86467, -30.99855, -70.595764)
+
+[node name="terrace_wall16" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=62510697 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -10.9077, -30.99855, -70.595764)
+
+[node name="terrace_wall17" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1474222363 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall18" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1104996115 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall19" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=876304555 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -16.697006, -30.99855, -70.595764)
+
+[node name="terrace_wall20" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1766489975 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -19.863571, -30.78656, -70.595764)
+
+[node name="terrace_wall21" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1824677394 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -22.773819, -30.698196, -70.595764)
+
+[node name="terrace_wall22" parent="DecorManual/3) Serpentinele/plant_terrace" unique_id=1239924424 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -26.656952, -30.99855, -70.595764)
+
+[node name="plant_terrace3" type="Node3D" parent="DecorManual/3) Serpentinele" unique_id=2052835486]
+transform = Transform3D(0.9991458, -0.041324105, 0, 0.041324105, 0.9991458, 0, 0, 0, 1, 0, 12.185692, 41.473312)
+
+[node name="vine_row" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1687351177 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 0, -29.683949, -68.8948)
+
+[node name="vine_row7" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1278336385 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -7.7078857, -29.683949, -68.8948)
+
+[node name="vine_row8" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=235180625 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -16.102127, -29.683949, -68.8948)
+
+[node name="vine_row9" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1598343206 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row10" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1106512190 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row2" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=744169999 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 8.255081, -29.683949, -68.8948)
+
+[node name="vine_row3" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1752458178 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 16.359406, -29.683949, -68.8948)
+
+[node name="vine_row4" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1767963066 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 24.592987, -29.683949, -68.8948)
+
+[node name="vine_row5" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1411469698 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="vine_row6" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=845914645 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="terrace_wall" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1931513595 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 33.47406, -30.99855, -70.595764)
+
+[node name="terrace_wall2" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=879527634 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 30.564697, -30.99855, -70.595764)
+
+[node name="terrace_wall3" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1908975364 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 27.417023, -30.99855, -70.595764)
+
+[node name="terrace_wall4" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1714302526 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 24.510757, -30.99855, -70.595764)
+
+[node name="terrace_wall5" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=54966394 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 21.69226, -30.99855, -70.595764)
+
+[node name="terrace_wall6" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=656021559 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 18.621078, -30.99855, -70.595764)
+
+[node name="terrace_wall7" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=728527653 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 15.6210785, -30.99855, -70.595764)
+
+[node name="terrace_wall8" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1294956388 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 12.746094, -30.99855, -70.595764)
+
+[node name="terrace_wall9" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=12891390 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 9.628235, -30.99855, -70.595764)
+
+[node name="terrace_wall10" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1736396466 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 6.490326, -30.99855, -70.595764)
+
+[node name="terrace_wall11" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=203779079 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 3.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall12" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1935969977 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 0.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall13" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=780706295 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -2.4319305, -30.99855, -70.595764)
+
+[node name="terrace_wall14" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1797092998 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -5.2600403, -30.99855, -70.595764)
+
+[node name="terrace_wall15" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=924079349 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -7.86467, -30.99855, -70.595764)
+
+[node name="terrace_wall16" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1001722573 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -10.9077, -30.99855, -70.595764)
+
+[node name="terrace_wall17" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=52239718 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall18" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=57280410 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall19" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1114026870 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -16.697006, -30.99855, -70.595764)
+
+[node name="terrace_wall20" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1652112941 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -19.863571, -30.78656, -70.595764)
+
+[node name="terrace_wall21" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=785897260 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -22.773819, -30.698196, -70.595764)
+
+[node name="terrace_wall22" parent="DecorManual/3) Serpentinele/plant_terrace3" unique_id=1141086888 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -26.656952, -30.99855, -70.595764)
+
+[node name="plant_terrace4" type="Node3D" parent="DecorManual/3) Serpentinele" unique_id=224600926]
+transform = Transform3D(0.99870247, 0.050664403, 0.00514156, -0.0506945, 0.9986967, 0.0059018014, -0.004835844, -0.006154796, 0.99996936, 4.510971, 4.6684875, 27.629532)
+
+[node name="vine_row" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=459162740 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 0, -29.683949, -68.8948)
+
+[node name="vine_row7" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=201178944 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -7.7078857, -29.683949, -68.8948)
+
+[node name="vine_row8" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1344156002 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -16.102127, -29.683949, -68.8948)
+
+[node name="vine_row9" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=503369648 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row10" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1093956305 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row2" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=2096784854 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 8.255081, -29.683949, -68.8948)
+
+[node name="vine_row3" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=824855461 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 16.359406, -29.683949, -68.8948)
+
+[node name="vine_row4" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1720828922 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 24.592987, -29.683949, -68.8948)
+
+[node name="vine_row5" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=449154057 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="vine_row6" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1075338577 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="terrace_wall" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1297102092 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 33.47406, -30.99855, -70.595764)
+
+[node name="terrace_wall2" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1318615381 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 30.564697, -30.99855, -70.595764)
+
+[node name="terrace_wall3" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1320966119 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 27.417023, -30.99855, -70.595764)
+
+[node name="terrace_wall4" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=2092969190 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 24.510757, -30.99855, -70.595764)
+
+[node name="terrace_wall5" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1622530812 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 21.69226, -30.99855, -70.595764)
+
+[node name="terrace_wall6" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1726992407 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 18.621078, -30.99855, -70.595764)
+
+[node name="terrace_wall7" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1836880290 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 15.6210785, -30.99855, -70.595764)
+
+[node name="terrace_wall8" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=79125917 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 12.746094, -30.99855, -70.595764)
+
+[node name="terrace_wall9" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=128687232 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 9.628235, -30.99855, -70.595764)
+
+[node name="terrace_wall10" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1573876480 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 6.490326, -30.99855, -70.595764)
+
+[node name="terrace_wall11" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=349672277 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 3.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall12" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=377414873 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 0.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall13" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=130673331 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -2.4319305, -30.99855, -70.595764)
+
+[node name="terrace_wall14" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=848624383 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -5.2600403, -30.99855, -70.595764)
+
+[node name="terrace_wall15" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=510213896 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -7.86467, -30.99855, -70.595764)
+
+[node name="terrace_wall16" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=2097459546 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -10.9077, -30.99855, -70.595764)
+
+[node name="terrace_wall17" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=120265037 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall18" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1594063748 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall19" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=633857360 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -16.697006, -30.99855, -70.595764)
+
+[node name="terrace_wall20" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=1988378948 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -19.863571, -30.78656, -70.595764)
+
+[node name="terrace_wall21" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=295126939 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -22.773819, -30.698196, -70.595764)
+
+[node name="terrace_wall22" parent="DecorManual/3) Serpentinele/plant_terrace4" unique_id=182286037 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -26.656952, -30.99855, -70.595764)
+
+[node name="plant_terrace2" type="Node3D" parent="DecorManual/3) Serpentinele" unique_id=441316210]
+transform = Transform3D(0.9988639, -0.047654655, 0, 0.047654655, 0.9988639, 0, 0, 0, 1, 0, -4.590328, -9.517456)
+
+[node name="vine_row" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1067235701 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 0, -29.683949, -68.8948)
+
+[node name="vine_row7" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1527473163 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -7.7078857, -29.683949, -68.8948)
+
+[node name="vine_row8" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1126252077 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -16.102127, -29.683949, -68.8948)
+
+[node name="vine_row9" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=859775192 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row10" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1558967416 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, -25.235733, -29.683949, -68.8948)
+
+[node name="vine_row2" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=294552535 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 8.255081, -29.683949, -68.8948)
+
+[node name="vine_row3" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=412287890 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 16.359406, -29.683949, -68.8948)
+
+[node name="vine_row4" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=467691286 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 24.592987, -29.683949, -68.8948)
+
+[node name="vine_row5" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1424525126 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="vine_row6" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1689539368 instance=ExtResource("24_c3svt")]
+transform = Transform3D(2.0958686, 0, 0, 0, 2.0958686, 0, 0, 0, 2.0958686, 32.53566, -29.683949, -68.8948)
+
+[node name="terrace_wall" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1517571709 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 33.47406, -30.99855, -70.595764)
+
+[node name="terrace_wall2" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1522978244 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 30.564697, -30.99855, -70.595764)
+
+[node name="terrace_wall3" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=776320248 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 27.417023, -30.99855, -70.595764)
+
+[node name="terrace_wall4" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1052914476 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 24.510757, -30.99855, -70.595764)
+
+[node name="terrace_wall5" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=2020153160 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 21.69226, -30.99855, -70.595764)
+
+[node name="terrace_wall6" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1946939534 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 18.621078, -30.99855, -70.595764)
+
+[node name="terrace_wall7" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=646790943 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 15.6210785, -30.99855, -70.595764)
+
+[node name="terrace_wall8" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1710711495 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 12.746094, -30.99855, -70.595764)
+
+[node name="terrace_wall9" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=815340328 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 9.628235, -30.99855, -70.595764)
+
+[node name="terrace_wall10" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1778326114 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 6.490326, -30.99855, -70.595764)
+
+[node name="terrace_wall11" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=2055937106 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 3.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall12" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=479635560 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, 0.5401764, -30.99855, -70.595764)
+
+[node name="terrace_wall13" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1047863978 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -2.4319305, -30.99855, -70.595764)
+
+[node name="terrace_wall14" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1326667999 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -5.2600403, -30.99855, -70.595764)
+
+[node name="terrace_wall15" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1418101404 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -7.86467, -30.99855, -70.595764)
+
+[node name="terrace_wall16" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1466676823 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -10.9077, -30.99855, -70.595764)
+
+[node name="terrace_wall17" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1351908402 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall18" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=750341327 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -13.832428, -30.99855, -70.595764)
+
+[node name="terrace_wall19" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=1992663906 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -16.697006, -30.99855, -70.595764)
+
+[node name="terrace_wall20" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=441061540 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -19.863571, -30.78656, -70.595764)
+
+[node name="terrace_wall21" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=908360798 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -22.773819, -30.698196, -70.595764)
+
+[node name="terrace_wall22" parent="DecorManual/3) Serpentinele/plant_terrace2" unique_id=253024686 instance=ExtResource("24_xgr5v")]
+transform = Transform3D(-0.9999827, 0, -0.0058867633, 0, 1, 0, 0.0058867633, 0, -0.9999827, -26.656952, -30.99855, -70.595764)
+
+[node name="prickly_pear" parent="DecorManual/3) Serpentinele" unique_id=2145345220 instance=ExtResource("27_gbtar")]
+transform = Transform3D(1.1465616, 0, 0, 0, 1.1465616, 0, 0, 0, 1.1465616, -12.414459, -39.319046, -106.79026)
+
+[node name="prickly_pear2" parent="DecorManual/3) Serpentinele" unique_id=386824797 instance=ExtResource("27_gbtar")]
+transform = Transform3D(1.1465616, 0, 0, 0, 1.1465616, 0, 0, 0, 1.1465616, 61.4413, -30.650106, -55.832703)
+
+[node name="prickly_pear3" parent="DecorManual/3) Serpentinele" unique_id=1750916038 instance=ExtResource("27_gbtar")]
+transform = Transform3D(1.1465616, 0, 0, 0, 1.1465616, 0, 0, 0, 1.1465616, -66.17386, -20.873247, -22.402145)
+
+[node name="prickly_pear4" parent="DecorManual/3) Serpentinele" unique_id=1462698141 instance=ExtResource("27_gbtar")]
+transform = Transform3D(1.1465616, 0, 0, 0, 1.1465616, 0, 0, 0, 1.1465616, -63.795883, -22.260824, -45.066666)
+
+[node name="prickly_pear5" parent="DecorManual/3) Serpentinele" unique_id=179584337 instance=ExtResource("27_gbtar")]
+transform = Transform3D(1.1465616, 0, 0, 0, 1.1465616, 0, 0, 0, 1.1465616, -43.916916, -22.260824, -38.55658)
+
+[node name="caper_bush" parent="DecorManual/3) Serpentinele" unique_id=1136048618 instance=ExtResource("28_k6t67")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.40628, -22.095055, -36.12938)
+
+[node name="caper_bush2" parent="DecorManual/3) Serpentinele" unique_id=556097133 instance=ExtResource("28_k6t67")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.319138, -21.049763, -22.826553)
+
+[node name="ginestra_bush" parent="DecorManual/3) Serpentinele" unique_id=786095294 instance=ExtResource("29_2r1w0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.82318, -22.561346, -49.790443)
+
+[node name="ginestra_bush2" parent="DecorManual/3) Serpentinele" unique_id=1184534710 instance=ExtResource("29_2r1w0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.085297, -16.76202, -4.7070465)
+
+[node name="4)Crater" type="Node3D" parent="DecorManual" unique_id=1386511514]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -129.96931, 47.817265, 266.10446)
+
+[node name="crater_bowl" parent="DecorManual/4)Crater" unique_id=1923490205 instance=ExtResource("31_pfiwi")]
+transform = Transform3D(1.1937588, 0, 0, 0, 1.1937588, 0, 0, 0, 1.1937588, -18.446259, 6.236305, -9.05896)

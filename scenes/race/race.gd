@@ -95,6 +95,17 @@ func _ready() -> void:
 		camera.snap_behind()
 		camera.add_trauma(0.22)
 		hud.flash_message("RATAT — repus pe pista"))
+	# Strivit / ars: shake proportional cu severitatea. Semnalul exista de la
+	# bolovani (#242), dar nu fusese legat la camera; lava il refoloseste.
+	player.crushed.connect(func(_c: Car, severity: float) -> void:
+		camera.add_trauma(clampf(0.25 + severity * 0.35, 0.25, 0.6)))
+	# Eruptia (Stromboli): bubuitul e al lumii (il reda EruptionCycle), dar
+	# tremurul de ecran e feedback de jucator, deci se leaga aici — pentru
+	# TOATE ciclurile de pe pista, oriunde ai fi (telegraph-ul din brief).
+	for child in track.get_children():
+		if child is EruptionCycle:
+			(child as EruptionCycle).erupted.connect(func(_i: int) -> void:
+				camera.add_trauma(0.5))
 
 func _spawn_cars() -> void:
 	var count := GameState.ai_count + 1

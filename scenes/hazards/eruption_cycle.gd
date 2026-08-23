@@ -54,14 +54,22 @@ extends Node3D
 ## Se emite cu `telegraph` secunde inaintea fiecarui puls.
 signal erupted(index: int)
 
+## Unde rasare coloana de cenusa (in coordonatele pistei). ZERO = fara
+## coloana. E singurul semnal al eruptiei vizibil de ORIUNDE de pe pista —
+## bombele se vad doar pe Sciara, bubuitul nu spune de unde vine.
+@export var column_position: Vector3 = Vector3.ZERO
+
 var _clock: float = 0.0
 var _fired: int = -1
+var _column: GPUParticles3D = null
 
 
 func _ready() -> void:
-	# In editor nu batem ceasul, dar sincronizarea o facem: asa vezi in
-	# Inspector ce phase a primit fiecare bomba, fara sa rulezi jocul.
-	_resync()
+	# AMANAT, nu direct: bombele din grup sunt construite de pista din
+	# HazardMarker-e in _ready-ul EI, care ruleaza dupa al nostru (parintele
+	# isi face _ready dupa copii). Un _resync imediat ar gasi grupul gol si
+	# fiecare bomba ar bate in ritmul ei — exact ce interzice antetul.
+	_resync.call_deferred()
 	if Engine.is_editor_hint():
 		set_process(false)
 
@@ -75,8 +83,64 @@ func _process(delta: float) -> void:
 	if _clock >= warn and _fired != idx:
 		_fired = idx
 		erupted.emit(idx)
+		_boom()
 	elif _clock < warn:
 		_fired = -1
+
+
+## Teatrul propriu al pulsului: bubuitul (2D — vine "de peste tot", exact ca
+## in realitate cand bubuie muntele) si coloana de cenusa din crater. Tremurul
+## de ecran NU e aici: e feedback de jucator si il leaga race.gd de semnal.
+func _boom() -> void:
+	AudioManager.play_sfx(&"avalanche_hit", 0.55)
+	if column_position != Vector3.ZERO:
+		if _column == null:
+			_column = _build_column()
+			add_child(_column)
+			_column.global_position = column_position
+		_column.restart()
+
+
+## Coloana: un burst de fum gri care urca ~50 m si se destrama. UN emitator,
+## 40 de particule (limita de count din CLAUDE.md), quad-uri billboard pe un
+## material static — nimic per-cadru cand nu erupe.
+func _build_column() -> GPUParticles3D:
+	var p := GPUParticles3D.new()
+	p.name = "ColoanaCenusa"
+	p.amount = 40
+	p.one_shot = true
+	p.explosiveness = 0.85
+	p.lifetime = 7.0
+	p.emitting = false
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = Vector3.UP
+	pm.spread = 7.0
+	pm.initial_velocity_min = 10.0
+	pm.initial_velocity_max = 16.0
+	# Cenusa URCA (aer fierbinte), apoi franata de damping se destrama sus.
+	pm.gravity = Vector3(0.6, 2.2, 0.0) # usor aplecata: vantul temei
+	pm.damping_min = 0.4
+	pm.damping_max = 0.9
+	pm.scale_min = 2.4
+	pm.scale_max = 4.6
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(0.42, 0.40, 0.40, 0.85))
+	ramp.set_color(1, Color(0.62, 0.60, 0.58, 0.0))
+	var ramp_tex := GradientTexture1D.new()
+	ramp_tex.gradient = ramp
+	pm.color_ramp = ramp_tex
+	p.process_material = pm
+	var quad := QuadMesh.new()
+	quad.size = Vector2(7.0, 7.0)
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	quad.material = mat
+	p.draw_pass_1 = quad
+	return p
 
 
 ## Scrie acelasi `period` si `phase`-uri esalonate pe toate hazardele din grup.
@@ -99,10 +163,17 @@ func _resync() -> void:
 		# Esalonare egala in fereastra: prima bomba la inceputul ei, ultima la
 		# capat. Cu o singura bomba, pleaca fix la inceput.
 		var offset := 0.0 if n == 1 else burst_window * float(i) / float(n - 1)
+		# Pulsul trebuie sa prinda bomba DEASUPRA drumului, nu la plecare:
+		# scadem timpul ei de traversare, cand hazardul il expune.
+		var cross := 0.0
+		if h.has_method("cross_time"):
+			cross = float(h.call("cross_time"))
 		if "period" in h:
 			h.set("period", period)
 		if "phase" in h:
-			# Faza e "cu cat e decalat ceasul propriu fata de al nostru".
-			# Pulsul cade la sfarsitul ciclului (dupa telegraph), deci bombele
-			# pleaca de acolo.
-			h.set("phase", fposmod(period - telegraph + offset, period))
+			# Faza e FRACTIE din perioada (contractul RockfallHazard), "cu cat
+			# e decalat ceasul propriu fata de al nostru". Pulsul cade la
+			# sfarsitul ciclului (dupa telegraph, la trecerea prin zero), deci
+			# bomba i (offset in fereastra) trebuie sa fie peste drum la
+			# t = offset — adica pleaca la offset - cross.
+			h.set("phase", fposmod(cross - offset, period) / period)

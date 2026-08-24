@@ -163,6 +163,35 @@ Dimensiunile sunt și în artefactul `img/stromboli_map.html`, la POI-ul lor.
 | `ash_ground` | cenușă gri-deschis bătătorită pe buză și coborâre | poate refolosi dala de beton gradată spre MARBLE_GREY |
 | decal `tire_tracks_black` | urme pe dalele albe ale satului și pe cenușă | clasa de decal existentă, culoare nouă |
 
+> **✔ Clasele de suprafață pe DECOR (august 2026).** Tabelul de mai sus e despre
+> teren. Kitul de 36 de GLB-uri era însă, până acum, singurul kit de pistă cu
+> **zero** clase de suprafață — Okinawa are `ISLAND_CLASSES`, Baikal are
+> `BAIKAL_CLASSES`, iar aici `STROMBOLI_CLASSES` conținea doar cele trei intrări
+> de lavă incandescentă. Restul (fațade, bazalt, trunchiuri) stătea pe atlas, cu
+> culoare plată — exact diferența măsurată față de RR3/BBR din style_bible §4.
+>
+> S-au adăugat **5 materiale de clasă** (16 → 21 din 38), toate pe dale care
+> **existau deja** — zero PNG-uri noi, zero re-export, triunghiurile neschimbate
+> (462 954, identic la bit cu `main`): `volcanic_rock` pe bazalt/scorie/cuvă/
+> terase, `plaster` pe zidurile de var, `concrete` pe dana din Ginostra,
+> `rust_metal` pe bolarzi, `bark` pe trunchiuri, `wood` pe lemnărie.
+>
+> Două măsurători au decis forma listei, și sunt scrise pe larg în comentariul
+> lui `STROMBOLI_CLASSES`:
+> 1. **UV-urile kitului sunt colapsate** (`u_min == u_max`, iar `v` e 0.5000 pe
+>    toate cele 36 de fișiere) → clasele trebuie să fie **triplanare**; una pe
+>    UV-uri reale ar citi un singur texel și fața ar rămâne la fel de plată.
+> 2. **O clasă triplanară șterge sloturile** → primesc clasă doar părțile care
+>    mătură UN singur slot. Casele, biserica, Ape, chevronul, măgarul,
+>    fumarolele, ghivecele și bougainvillea rămân pe atlas **dinadins**: la
+>    fiecare, textura ar fi costat exact accentul pictat pentru care există piesa.
+>
+> Măsurat pe zidul de terasă (piesa cea mai repetată, 264 de instanțe), captură
+> `--gamecam` la frac 0.20, A/B față de `main` în worktree separat:
+> deviația de suprafață **38.40 → 52.58** (+37%), iar pixelii portocalii —
+> slotul greșit de deșert, capcana din memoria `rock-dark-nu-pe-bazalt` —
+> **5.9% → 0.7%**. Celelalte piste: materiale și triunghiuri **neschimbate**.
+
 ### 5.2 Structuri mari (hero, unice)
 | asset | dimensiuni | descriere |
 |---|---|---|

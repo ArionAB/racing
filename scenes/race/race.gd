@@ -85,6 +85,12 @@ func _ready() -> void:
 	# tare decat o aripa frecata de perete (0.5).
 	player.splashed.connect(func(_c: Car, strength: float) -> void:
 		camera.add_trauma(clampf(strength, 0.05, 0.85)))
+	# Rafala de abur: DOAR ecranul se albeste. Fara shake si fara sunet de
+	# impact, fiindca nu te-a lovit nimic — fumarola e hazard-teatru, iar un
+	# zgomot de izbitura ar promite o pedeapsa care nu vine (vezi
+	# FumaroleHazard).
+	player.blinded.connect(func(_c: Car, seconds: float) -> void:
+		hud.blind_flash(seconds))
 	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
 	# din spate zguduie ecranul, o atingere lateral aproape deloc.
 	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:

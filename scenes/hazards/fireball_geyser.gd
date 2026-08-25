@@ -172,7 +172,21 @@ func _build_geyser(index: int, vent: Vector3) -> Dictionary:
 	root.position = vent
 	add_child(root)
 
-	var lava_mat := Palette.finish_material("lava")
+	# Materialul de lava, DEFAZAT pe faza fizica a gheizerului asta.
+	#
+	# Nu `finish_material("lava")`, care era aici pana in august 2026 si scotea
+	# COLOANE IN DUNGI DE ACADEA: finisajul pastreaza textura atlasului, iar
+	# contractul atlasului cere UV-uri colapsate pe centrul slotului. Un
+	# CylinderMesh/SphereMesh al lui Godot are insa UV-uri 0..1 si matura tot
+	# atlasul — masurat, cilindrul atinge 21 de sloturi si sfera 13, amandoua
+	# prin rezerva MAGENTA. Shaderul isi ia culoarea din pozitie, nu din UV,
+	# deci pe primitive merge la fel de bine ca pe GLB-uri.
+	#
+	# Defazajul e ACELASI cu cel al miscarii (`_slot_phase`), inmultit cu TAU ca
+	# sa fie unghi: cand un gheizer e sus si altul jos, se vede si in pulsatia
+	# jarului, nu doar in pozitie. Curgerea e mai rapida decat pe limba de lava
+	# (0.16) fiindca asta chiar tasneste — jetul urca, nu se scurge.
+	var lava_mat := Palette.lava_material_phased(_slot_phase(index) * TAU, 0.55)
 
 	# Coloana: cilindru ingust, ancorat cu BAZA la gura.
 	var body := AnimatableBody3D.new()

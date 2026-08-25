@@ -192,6 +192,47 @@ Dimensiunile sunt și în artefactul `img/stromboli_map.html`, la POI-ul lor.
 > slotul greșit de deșert, capcana din memoria `rock-dark-nu-pe-bazalt` —
 > **5.9% → 0.7%**. Celelalte piste: materiale și triunghiuri **neschimbate**.
 
+> **✔ Lava animată, gheizerele reparate, varul satului (august 2026).**
+> Trei plângeri de la volan, toate în aceeași captură: gheizerele ieșeau
+> **curcubeu în dungi**, lava era „niște dungi portocalii", iar casele „n-au
+> material pus pe ele".
+>
+> 1. **Gheizerele.** Cauză măsurată: `finish_material("lava")` păstrează textura
+>    atlasului, iar contractul atlasului cere UV-uri colapsate. Primitivele lui
+>    Godot au însă UV-uri 0..1 — măsurat, `CylinderMesh` mătură **21 de
+>    sloturi** și `SphereMesh` **13**, ambele prin rezerva MAGENTA (24..31).
+> 2. **Lava.** `assets/shaders/lava.gdshader`: crustă întunecată cu vene
+>    incandescente care **curg** (scroll pe timp) și **pulsează**, defazat per
+>    gheizer (aceeași fază ca opoziția fizică). Nu citește niciun UV — culoarea
+>    vine din poziția în spațiul obiectului, deci merge identic pe GLB-uri și pe
+>    primitive. **+1 material, 0 draw calls, 0 triunghiuri, zero
+>    post-procesare.** Scânteile de particule au fost **amânate deliberat**:
+>    craterul are deja două sisteme (cenușă 40, aburi 48), iar al treilea ar fi
+>    însemnat overdraw exact în punctul cel mai încărcat.
+> 3. **Casele.** Cauza reală nu era o omisiune, ci un **slot reutilizat între
+>    două piste cu nevoi opuse**: slotul 22 e `FOAM_WHITE`, iar masca de detaliu
+>    îi dă **0.20** („spuma: cea mai curată suprafață din decor"). Corect pentru
+>    creasta de val la Okinawa; pe Stromboli același slot ține **varul**, deci
+>    toate cele 27 de case moșteneau instrucțiunea „rămâi imaculată".
+>
+>    În PR-ul precedent le lăsasem pe atlas fiindcă mătură 3–4 sloturi. Regula e
+>    bună, aplicarea a fost greșită: n-am măsurat **cât** din arie stă pe fiecare
+>    slot. Măsurat acum, varul e **90–98%** din fațadă și obloanele 1–9%. Clasa
+>    nouă `village_plaster` (aceeași dală ca `plaster`, **ridicată** prin
+>    `CLASS_LIFT` și răcită prin `CLASS_TINT`) + `split_accents`, care rupe
+>    obloanele pe un nod propriu rămas pe atlas.
+>
+> **Capcana plătită de trei ori: numele de noduri NU sunt unice între kituri.**
+> `"House_"` prindea `House_Sand`/`House_Stone` din `village_house.glb`
+> (Track08), `Church_Body` există și în `khuzhir_church.glb` (Track10), iar
+> `Lighthouse_White` e și landmark-ul 7 al Okinawei. Toate trei au fost prinse
+> **comparând cu `main` într-un worktree curat**, nu la citirea codului. De aici
+> `CLASSES_BY_MODEL` și `SPLIT_MODELS` (chei pe **fișier**, nu pe nume de nod).
+>
+> Măsurat la final: Track01/08/09/10 **identice la bit** cu `main` (materiale,
+> prop-uri, desene, triunghiuri); Track11 materiale 21 → 28, triunghiuri
+> **neschimbate** (480 046).
+
 ### 5.2 Structuri mari (hero, unice)
 | asset | dimensiuni | descriere |
 |---|---|---|

@@ -32,6 +32,9 @@ signal respawned(car: Car)
 signal bumped(car: Car, other: Car, delta_v: float)
 ## Strivit de un hazard. `severity` in 0..1, pentru shake proportional.
 signal crushed(car: Car, severity: float)
+## Aprinsa de o coloana de foc. `seconds` = cat arde, ca sa poata HUD-ul si
+## camera sa-si potriveasca efectele pe aceeasi durata.
+signal ignited(car: Car, seconds: float)
 ## Lovit de o masa de apa (valul care spala digul). `strength` in 0..1.
 ##
 ## Semnal separat de `crushed` desi amandoua zguduie ecranul: `crushed` inseamna
@@ -204,6 +207,12 @@ var _wind_time: float = 0.0
 ## acelasi lucru dus la extrem, plus repunere.
 var crush_time: float = 0.0
 var crush_factor: float = 1.0
+## Ars de o coloana de foc (gheizerele din craterul Stromboli, vezi
+## `ignite`). Se tine SEPARAT de `crush_time` desi amandoua taie plafonul:
+## strivirea e o forma turtita care se vede pe caroserie, arderea e un nor de
+## flacari care se vede pe ECRAN. Un singur ceas pentru amandoua ar fi facut
+## ca o repunere sa stinga focul, sau ca o piatra sa prelungeasca arderea.
+var burn_time: float = 0.0
 var _forced_boost: float = 0.0 # rocket start: ardere gratuita, nu goleste bara
 ## Turtirea care tine cat incetinirea (vezi `_hold_squash`). Tinut ca sa poata fi
 ## oprit: la repunere masina trebuie sa apara intreaga, nu latita.
@@ -219,6 +228,10 @@ var _spin_left: float = 0.0
 var _spin_angle: float = 0.0
 var _drift_particles: CPUParticles3D
 var _boost_particles: CPUParticles3D
+## Flacarile de pe capota cat masina arde. Emit din FATA masinii, catre
+## spate: la camera din spate, fumul trece PESTE parbriz si mananca partea de
+## sus a ecranului — asta e pedeapsa, nu cifra taiata din plafon.
+var _fire_particles: CPUParticles3D
 ## Praf de sub roti cand esti pe nisip. Separat de fumul de drift: fumul iese
 ## din cauciuc si e gri, praful e ridicat din SOL si ia culoarea temei.
 var _dust_particles: CPUParticles3D
@@ -478,6 +491,7 @@ func _physics_process(delta: float) -> void:
 	crush_time = maxf(crush_time - delta, 0.0)
 	if crush_time <= 0.0:
 		crush_factor = 1.0
+	burn_time = maxf(burn_time - delta, 0.0)
 	_detect_landing()
 	_update_visual_tilt(delta, steer, fwd_speed)
 	_update_wheels(delta, steer, fwd_speed)
@@ -792,6 +806,13 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 	_forced_boost = maxf(_forced_boost - delta, 0.0)
 	# Poti PORNI turbo doar cu bara peste prag; odata pornit, arzi pana la 0.
 	var can_fire := turbo_charge > (0.02 if is_boosting else turbo_min_to_fire)
+	# Cat arzi nu ai ce arde: focul ti-a consumat combustibilul (vezi
+	# `ignite`). Fara clauza asta bara s-ar umple in timp ce masina e in
+	# flacari, si golirea de la impact ar fi fost recuperata inainte sa se
+	# stinga focul — adica pedeapsa ar fi existat doar pe hartie.
+	if burn_time > 0.0:
+		is_boosting = _forced_boost > 0.0
+		return
 	if turbo_pressed and can_fire:
 		if not is_boosting:
 			_start_boost()
@@ -881,6 +902,44 @@ func scorch() -> void:
 	_prev_velocity = velocity
 
 
+## Aprinsa de o coloana de foc (gheizerele din crater, [FireballGeyser]).
+##
+## NU e `scorch()`: arderea de lava te repune din stand, si craterul n-are
+## nevoie de a doua pedeapsa identica cu limba de lava. Aici ramai in cursa si
+## PLATESTI ALTFEL:
+##
+##   - flacari pe capota, `seconds` de zile — la chase cam ele urca prin
+##     dreptul parbrizului si iti mananca partea de sus a ecranului, adica
+##     exact banda in care vezi urmatorul gheizer. Pedeapsa e INFORMATIONALA;
+##   - plafonul de viteza taiat cu `factor` (imprumuta `crush_factor`, ca sa
+##     existe UN singur loc care taie viteza — vezi `_current_max_speed`);
+##   - bara de turbo GOLITA, si nu se mai incarca pana nu se stinge focul
+##     (vezi `_update_turbo`). Focul consuma combustibilul: tematic, si
+##     loveste exact resursa care e centrul designului.
+##
+## Nu turteste caroseria: turtirea e limbajul loviturilor de MASA (bolovan,
+## tren, aripa de moara). O coloana de gaz care te arde si te arunca nu te
+## indoaie, si daca ar folosi acelasi vocabular n-ai mai putea citi din
+## silueta masinii ce ai patit.
+func ignite(seconds: float, factor: float, keep_speed: float) -> void:
+	burn_time = maxf(burn_time, seconds)
+	# Prin `crush_time`, nu printr-un al doilea plafon: `_current_max_speed`
+	# trebuie sa ramana cu O singura taietura de citit.
+	crush_time = maxf(crush_time, seconds)
+	crush_factor = minf(crush_factor, factor)
+	velocity.x *= keep_speed
+	velocity.z *= keep_speed
+	is_boosting = false
+	_forced_boost = 0.0
+	turbo_charge = 0.0
+	if is_player:
+		AudioManager.play_sfx(&"avalanche_hit", 1.05)
+	ignited.emit(self, seconds)
+	# Semnalul de strivire ramane cel care zguduie camera (race.gd il asculta
+	# deja). Severitate moderata: te-a lovit un jet, nu ti-a cazut muntele.
+	crushed.emit(self, 0.55)
+
+
 func apply_sweep(push: Vector3) -> void:
 	velocity += push
 
@@ -957,6 +1016,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	is_drifting = false
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
+	burn_time = 0.0 # repusa pe sosea, nu mai arde
 	_forced_boost = 0.0
 	slip_time = 0.0
 	crush_time = 0.0
@@ -1037,6 +1097,10 @@ func _update_effects(delta: float) -> void:
 	elif turbo_charge < 0.95:
 		_turbo_full_latch = false
 	_boost_particles.emitting = is_boosting
+	# Focul se stinge SINGUR cand expira ceasul: nimeni nu are de curatat dupa
+	# el, deci nici o repunere si nici un abandon nu lasa masina arzand.
+	if _fire_particles != null:
+		_fire_particles.emitting = burn_time > 0.0
 	_update_dust(on_road, loose, on_branch)
 	_drop_trail(delta, loose)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
@@ -1369,6 +1433,51 @@ func _build_effects() -> void:
 	flame.material = flame_mat
 	_boost_particles.mesh = flame
 	add_child(_boost_particles)
+
+	# Flacarile de pe capota, cat masina arde (vezi `ignite`).
+	#
+	# Pozitionate in FATA si suflate spre spate: la chase cam, ce iese de pe
+	# capota urca prin dreptul parbrizului si acopera partea de sus a
+	# ecranului — adica exact banda in care vezi urmatorul obstacol. Pedeapsa
+	# arderii e vizibilitatea, nu cifra din plafon.
+	_fire_particles = CPUParticles3D.new()
+	_fire_particles.position = Vector3(0, 0.62, -0.75)
+	_fire_particles.emitting = false
+	# 26: sub plafonul de particule al proiectului, si oricum doar UNA din
+	# masini (a ta) e vazuta de aproape.
+	_fire_particles.amount = 26
+	_fire_particles.lifetime = 0.75
+	_fire_particles.direction = Vector3(0, 1, 0.55)
+	_fire_particles.spread = 24.0
+	_fire_particles.initial_velocity_min = 2.4
+	_fire_particles.initial_velocity_max = 5.0
+	# Gravitatie POZITIVA pe Y: aerul cald urca, flacara nu cade.
+	_fire_particles.gravity = Vector3(0, 3.4, 0)
+	_fire_particles.scale_amount_min = 0.5
+	_fire_particles.scale_amount_max = 1.5
+	# Se sting din portocaliu incins in fum gri — o flacara care ramane
+	# portocalie pana dispare arata a sprite, nu a foc.
+	var fire_ramp := Gradient.new()
+	fire_ramp.set_color(0, Color(1.0, 0.72, 0.18, 1.0))
+	fire_ramp.set_color(1, Color(0.32, 0.29, 0.28, 0.0))
+	_fire_particles.color_ramp = fire_ramp
+	var fire_mesh := SphereMesh.new()
+	fire_mesh.radius = 0.16
+	fire_mesh.height = 0.32
+	# Segmente EXPLICIT: implicitul (64x32) ar da 4224 de triunghiuri pe o
+	# bila de 16 cm, ori 26 de bucati (CLAUDE.md, regula sferei).
+	fire_mesh.radial_segments = 6
+	fire_mesh.rings = 3
+	var fire_mat := StandardMaterial3D.new()
+	fire_mat.vertex_color_use_as_albedo = true
+	fire_mat.vertex_color_is_srgb = true
+	fire_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fire_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	# Fara scriere in depth, ca la praf: flacarile se suprapun fara sa se taie.
+	fire_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	fire_mesh.material = fire_mat
+	_fire_particles.mesh = fire_mesh
+	add_child(_fire_particles)
 
 	# Motor pozitional: al tau se aude mereu, adversarii cand sunt aproape.
 	_engine_audio = AudioStreamPlayer3D.new()

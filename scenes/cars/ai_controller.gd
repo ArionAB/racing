@@ -115,6 +115,14 @@ var _attempts: int = 0
 ## urmaritorul sa penduleze stanga-dreapta la fiecare centimetru de deriva.
 var _avoid_car: Car = null
 var _avoid_side: float = 0.0
+## Perechea de gheizere pe care o traversam acum si culoarul ales pentru ea.
+##
+## Se tine minte din acelasi motiv ca `_avoid_car`: fara angajament, pilotul
+## pendula. Masurat pe ProbeRace, doua cadre consecutive cereau side=-1 si
+## side=+1 (perechea cea mai apropiata se schimba, si fiecare are alta faza),
+## deci masina smucea stanga-dreapta in loc sa treaca prin culoarul liber.
+var _fb_pair: Node = null
+var _fb_side: float = 0.0
 
 func configure(race_track: Track, rng: RandomNumberGenerator,
 		cars: Array[Car] = []) -> void:
@@ -155,6 +163,18 @@ func update(delta: float) -> void:
 	if keep_off > 0.0:
 		var side_pref := signf(line_offset) if absf(line_offset) > 0.02 else 1.0
 		line = side_pref * maxf(absf(line), keep_off)
+	# Gheizerele de foc din craterul Stromboli: culoarul liber se SCHIMBA in
+	# timp, deci nu se poate rezolva cu `lane_bias_at` (aia tine pilotul pe o
+	# parte FIXA, bun pentru un tren pe axa, inutil aici).
+	#
+	# Fara asta pilotii intrau direct in coloane. Masurat cu ProbeRace pe felia
+	# craterului (0.45-0.50), A/B in acelasi worktree cu gheizerele stinse:
+	#   stinse:  21.1 m/s,  0 pereti,  3 repuneri
+	#   aprinse: 10.2 m/s, 33 pereti, 53 repuneri, nimeni peste 0.5 tururi
+	# Adica exact esecul caruselului: un hazard pe care AI-ul nu-l poate citi
+	# devine ambuteiaj. Cu linia de mai jos + gurile departate: 2 pereti, 14
+	# repuneri, masini care termina tururi.
+	line = _fireball_line(speed, line)
 	# Cineva mai lent pe culoarul nostru? Linia se muta pe langa el.
 	line = _avoid_line(idx, speed, line, keep_off)
 	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
@@ -212,6 +232,85 @@ func update(delta: float) -> void:
 ## depasirii, deci nici verdictul "imi sta in drum / nu-mi sta" — fara asta,
 ## prima mutare reusita ar curata blocajul din propriul test si linia ar
 ## pendula intre cele doua raspunsuri la 60 Hz.
+## Muta linia pe culoarul pe care gheizerul va fi JOS cand ajungem noi acolo.
+##
+## Intreaba perechea cea mai apropiata din fata cu `ahead` = timpul nostru de
+## sosire, nu cu „acum": la 25 m/s, o pereche la 30 m se schimba de doua ori
+## pana ajungem. Raspunsul e despre momentul sosirii.
+##
+## Se aplica doar in raza de decizie a perechii (`AI_REACH_M`) si doar cat timp
+## e IN FATA — dupa ce am trecut de ea, linia se intoarce la ce cerea virajul.
+func _fireball_line(speed: float, line: float) -> float:
+	var geysers := get_tree().get_nodes_in_group(FireballGeyser.AI_GROUP)
+	if geysers.is_empty():
+		return line
+	# Distanta se masoara PE AXA DRUMULUI, nu pe directia botului.
+	#
+	# Prima versiune folosea `to.dot(-basis.z)` si rata perechile: craterul e o
+	# bucla, deci o pereche la 30 m de drum sta mult in lateral fata de unde
+	# priveste masina, iar proiectia iesea mica. Masurat pe ProbeRace, pilotul
+	# „vedea" gheizerul abia de la 0.2-9.4 m — prea tarziu ca sa mai schimbe
+	# culoarul. Pe indici de traseu, 30 m de drum inseamna 30 m de drum si in
+	# viraj.
+	var n_pts: int = track.route_at(car.route).count()
+	var my_idx: int = car.road_index
+	var bake: float = track.curve.bake_interval
+	var best: FireballGeyser = null
+	var best_d := INF
+	for node in geysers:
+		var g := node as FireballGeyser
+		if g == null:
+			continue
+		var g_idx: int = track.closest_index_global(g.global_position, car.route)
+		var d_idx := g_idx - my_idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		# Doar ce e in FATA si in raza de decizie.
+		if along < 0.0 or along > FireballGeyser.AI_REACH_M:
+			continue
+		if along < best_d:
+			best_d = along
+			best = g
+	if best == null:
+		_fb_pair = null
+		return line
+	# Timpul pana ajungem. Cu viteza mica, plafonat: la 2 m/s „sosirea" ar fi
+	# peste 15 s si raspunsul ar fi despre alt ciclu.
+	var ahead := clampf(best_d / maxf(speed, 6.0), 0.0, 6.0)
+	var side := 0.0
+	if _fb_pair == best and absf(_fb_side) > 0.01:
+		# Deja angajati pe perechea asta: TINEM culoarul ales.
+		#
+		# Reevaluarea in fiecare cadru era exact bug-ul: la 25 m/s masina
+		# strabate raza de decizie in ~1.4 s, adica o treime de ciclu, deci
+		# raspunsul „corect" chiar se schimba sub ea. Un culoar ales tarziu si
+		# tinut bate unul recalculat impecabil si niciodata urmat.
+		side = _fb_side
+	else:
+		side = best.safe_side(ahead)
+		_fb_pair = best
+		_fb_side = side
+	if absf(side) < 0.01:
+		return line
+	# Cat de lateral: se DERIVA din geometria perechii, nu se alege (vezi
+	# `FireballGeyser.ai_line_offset` — culoarul liber tine de la marginea
+	# drumului pana la buza zonei de impact, iar masina sta la mijlocul lui).
+	var target := clampf(side * best.ai_line_offset(), -LINE_MAX, LINE_MAX)
+	# MUTARE PROGRESIVA, ca la `_avoid_line`: aproape = mutare completa, departe
+	# = abia schitata.
+	#
+	# Prima versiune intorcea `target` direct si a fost masurata ca fiind mai rea
+	# decat nimic: la 30 m de gheizer pilotul smucea volanul dintr-o data, iesea
+	# de pe sosea si se bloca INAINTE sa ajunga la crater (lat 0.6 m -> 5.8 m ->
+	# 12.2 m in trei zecimi de secunda). Numarul lateral era corect; saltul spre
+	# el nu.
+	var t := clampf(1.0 - best_d / FireballGeyser.AI_REACH_M, 0.0, 1.0)
+	return lerpf(line, target, t)
+
+
 func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	if traffic.is_empty():
 		return line

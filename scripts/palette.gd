@@ -484,6 +484,39 @@ const CLASS_TRIPLANAR_SCALE := {
 	# ca la o pila reala. La scara alpina (0.16, 6.25 m) blocurile ar fi de
 	# 1-1.2 m — zidarie ciclopica, alt fel de constructie.
 	"cut_stone": 0.28,
+	# --- Clasele insulei vulcanice (Stromboli) ----------------------------
+	#
+	# Toate patru exista deja ca dale, dar pana acum DOAR pe UV-uri reale
+	# (`class_material`). Pe kitul Stromboli asta nu se putea folosi: masurat
+	# pe toate cele 36 de GLB-uri, UV-urile sunt colapsate pe un punct
+	# (u_min == u_max, iar v e 0.5000 peste tot), deci un material pe UV ar
+	# citi UN texel si fata ar ramane exact la fel de plata ca pe atlas. De
+	# aceea intrarile de aici sunt scari TRIPLANARE, nu clase noi: acelasi
+	# PNG, aceeasi textura in VRAM, alta proiectie.
+	#
+	# Tencuiala satului eolian. Sursa e o dala de perete de ~2 m; la 0.55 (o
+	# repetitie la 1.8 m) un zid de 3 m prinde ~1.7 repetitii si o casa de 7 m
+	# vreo patru — destul cat varul sa aiba pete si rosturi, prea putin cat
+	# tiparul sa se citeasca ca tapet pe fatade care stau una langa alta.
+	# Mai fin ar fi gresit in mod specific aici: satul e MASA ALBA a pistei,
+	# iar o textura care se repeta des pe zeci de fatade citeste imediat ca
+	# tipar, nu ca var.
+	"plaster": 0.55,
+	# Betonul danei din Ginostra si al parapetilor. Aceeasi scara ca
+	# tencuiala, si din acelasi motiv — sursa e tot o suprafata de ~2 m — dar
+	# clasa ramane separata fiindca ancora ei e ridicata cu `lift` 0.20
+	# (vezi process_class_textures.gd): dana trebuie sa ramana mai rece si mai
+	# inchisa decat varul de deasupra ei, altfel portul devine o singura pata.
+	"concrete": 0.5,
+	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
+	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
+	# la scara reala pe piese de 1-3 m.
+	"wood": 0.7,
+	# Trunchiuri de maslin si de smochin. Sursa `bark` e o scanare de 1.3 m de
+	# trunchi, deci 0.77 (o repetitie la 1.3 m) e SCARA REALA — cicatricile
+	# cad exact cat sunt. Regula 1 din pipeline (scara sursei fata de
+	# repetitia din joc, style_bible §4).
+	"bark": 0.77,
 }
 
 static var _tri_mats: Dictionary = {}

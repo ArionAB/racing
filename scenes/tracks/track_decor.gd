@@ -675,20 +675,108 @@ const BAIKAL_CLASSES := {
 	"Khivus_": Palette.FINISH_PREFIX + "vehicle",
 }
 
-## Maparea de clase pentru Stromboli: DOAR piesele incandescente.
+## Maparea de clase pentru Stromboli: piesele incandescente + suprafetele.
 ##
-## Toate poarta slotul 30 in albedo si primesc acelasi finisaj `lava` — o
-## masca de emisie pe slot (vezi Palette.FINISHES), deci crapaturile ard iar
-## crusta ramane stinsa. UN material partajat intre limba, gurile craterului
-## si bombe: garda numara materialele, deci unul, nu trei. Restul kitului
-## mediteranean ramane pe atlasul comun — corpul cuvei (`Crater_Bowl`) NU e
-## aici dinadins, ca ocluzia teraselor sa nu primeasca niciun strop de emisie.
+## Partea de LAVA, neschimbata din #325: toate poarta slotul 30 in albedo si
+## primesc acelasi finisaj `lava` — o masca de emisie pe slot (vezi
+## Palette.FINISHES), deci crapaturile ard iar crusta ramane stinsa. UN material
+## partajat intre limba, gurile craterului si bombe: garda numara materialele,
+## deci unul, nu trei. Corpul cuvei (`Crater_Bowl`) NU e in lista de lava
+## dinadins, ca ocluzia teraselor sa nu primeasca niciun strop de emisie.
 ## Atentie la prefixe: "Lava_Stage" nu prinde "Lava_Slab_" (placile sparte
 ## raman decor stins), iar "Bomb_" prinde toate cele trei marimi.
+##
+## --- Partea de SUPRAFETE (august 2026) --------------------------------------
+##
+## Pana acum Stromboli era singura pista cu kit propriu si ZERO clase de
+## suprafata: Okinawa are ISLAND_CLASSES, Baikal are BAIKAL_CLASSES, iar aici
+## cele 36 de GLB-uri stateau integral pe atlasul comun — adica fatade, bazalt
+## si trunchiuri, toate cu culoare plata, exact ce descrie style_bible §4 ca
+## fiind diferenta masurata fata de Reckless Racing 3 / Beach Buggy Racing.
+##
+## Doua masuratori au decis forma listei de mai jos, si ele sunt motivul pentru
+## care nu e mai lunga:
+##
+## 1. UV-urile kitului sunt COLAPSATE pe un punct (masurat pe toate cele 36 de
+##    fisiere: u_min == u_max pe partile de mai jos, iar v e 0.5000 fara
+##    exceptie). Deci clasele NU pot fi pe UV-uri reale — `class_material` ar
+##    citi un singur texel si fata ar ramane la fel de plata. Toate intrarile
+##    sunt triplanare (`TRI_PREFIX`), scarile in Palette.CLASS_TRIPLANAR_SCALE.
+##
+## 2. O clasa triplanara STERGE culorile din sloturi (regula din #313, repetata
+##    in BAIKAL_CLASSES). De aceea primesc clasa DOAR partile care matura UN
+##    SINGUR slot de atlas — alea sunt monocrome, deci textura nu acopera nimic.
+##    Partile care matura 2-4 sloturi isi tin culoarea pictata acolo si RAMAN pe
+##    atlas: `House_A/B/C` (obloane albastre pe var, 4 sloturi), `Church_Body`
+##    (3), `Ape_Body` (3), `Chevron_Post` (rosu/alb, 3), `Donkey` (3),
+##    `Fumarole_*` (depunerile de sulf, 3), `Pot_Cluster` (4),
+##    `Bougainvillea_*` (florile CAR_RED pe verde, 3). Alea nu sunt scapari:
+##    pe fiecare, textura ar fi costat exact accentul pentru care exista piesa.
+##
+## AO-ul din vertex colors ramane dedesubt in toate cazurile (SurfaceTool il
+## pastreaza, iar materialele de clasa au `vertex_color_use_as_albedo`).
 const STROMBOLI_CLASSES := {
+	# --- Incandescentele (neschimbate) ------------------------------------
 	"Lava_Stage": Palette.FINISH_PREFIX + "lava",
 	"Crater_Vents": Palette.FINISH_PREFIX + "lava",
 	"Bomb_": Palette.FINISH_PREFIX + "lava",
+	# --- Bazaltul si scoria: `volcanic_rock` ------------------------------
+	#
+	# Clasa exista din #337 si e deja tenta corecta pentru insula (aceeasi dala
+	# ca `rock`, impinsa spre cenusiu-rece si coborata mult — vezi
+	# Palette.CLASS_TINT), dar pana acum se folosea DOAR pe terenul procedural
+	# si pe faleze, prin `rock_class` din tema. Niciun prop nu o purta, desi
+	# bolovanii de bazalt sunt piesa cea mai des repetata din pista (172 de
+	# instante, masurat cu probe_decor) — adica exact suprafata pe care se uita
+	# jucatorul cel mai mult.
+	#
+	# Toate maturau slotul 20 (VOLCANIC_BLACK) si atat, deci sunt monocrome.
+	# Proiectia e in spatiul LUMII: piesele stau pe loc, iar stratele curg
+	# continuu dintr-un bolovan in faleza de langa el — acelasi efect pentru
+	# care rock_material e triplanar pe canion.
+	"Basalt_": Palette.TRI_PREFIX + "volcanic_rock",
+	"Scoria_": Palette.TRI_PREFIX + "volcanic_rock",
+	"Lava_Slab_": Palette.TRI_PREFIX + "volcanic_rock",
+	"Coast_Cliff_": Palette.TRI_PREFIX + "volcanic_rock",
+	"Terrace_Wall_": Palette.TRI_PREFIX + "volcanic_rock",
+	# Cuva craterului si soclul Strombolicchio: aceeasi roca, si e chiar
+	# argumentul pentru clasa — cuva e „piesa de rezistenta vizuala" a pistei
+	# (brief §5.2), adica ultimul loc unde ne permitem o suprafata plata.
+	# `Crater_Bowl` prinde corpul; gurile raman pe finisajul de lava fiindca
+	# "Crater_Vents" e prefix mai LUNG si castiga (vezi Palette._class_for).
+	"Crater_Bowl": Palette.TRI_PREFIX + "volcanic_rock",
+	"Stack_Rock": Palette.TRI_PREFIX + "volcanic_rock",
+	"Terrace_Stone": Palette.TRI_PREFIX + "volcanic_rock",
+	# --- Varul satului eolian: `plaster` ----------------------------------
+	#
+	# Zidurile, treptele si edicola matura toate SINGURUL slot 22 (FOAM_WHITE),
+	# deci n-au ce pierde. Casele NU sunt aici — ele au obloanele in sloturi.
+	"Wall_": Palette.TRI_PREFIX + "plaster",
+	"Alley_Stairs": Palette.TRI_PREFIX + "plaster",
+	"Shrine_Body": Palette.TRI_PREFIX + "plaster",
+	"Lighthouse_White": Palette.TRI_PREFIX + "plaster",
+	# --- Betonul portului: `concrete` -------------------------------------
+	#
+	# Dana din Ginostra (slot 8). Scara si treptele raman pe atlas: `Pier_Stairs`
+	# matura 2 sloturi.
+	"Pier_Slab": Palette.TRI_PREFIX + "concrete",
+	# --- Fierul ruginit: `rust_metal` -------------------------------------
+	#
+	# Bolarzii si inelele danei (slot 10), singura piesa de metal a portului.
+	"Pier_Fittings": Palette.TRI_PREFIX + "rust_metal",
+	# --- Scoarta: `bark` --------------------------------------------------
+	#
+	# Trunchiuri de maslin si de smochin (slot 9). Coroanele raman pe atlas:
+	# verdele argintiu al maslinului e slotul 13, si e chiar identitatea
+	# etajului de jos. `Olive_Trunk_` prinde ambele variante A/B.
+	"Olive_Trunk_": Palette.TRI_PREFIX + "bark",
+	"Fig_Trunk": Palette.TRI_PREFIX + "bark",
+	# --- Lemnaria: `wood` -------------------------------------------------
+	#
+	# Bena tricicletei si bustenii de rulare ai barcii mici (slot 9). Corpurile
+	# barcilor raman pe atlas — bordajul alb si dunga colorata sunt sloturi.
+	"Ape_Bed": Palette.TRI_PREFIX + "wood",
+	"Boat_Rollers": Palette.TRI_PREFIX + "wood",
 }
 
 ## Fractiile pe care creste trestia de zahar (sectorul 7, `Track05.SECTORS`).

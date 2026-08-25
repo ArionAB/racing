@@ -24,6 +24,11 @@ var _settings: SettingsPanel
 var _results_panel: PanelContainer
 var _results_box: VBoxContainer
 var _minimap: Minimap
+## Voalul alb al rafalelor de abur (fumarolele de pe Stromboli). Sta SUB text
+## si sub butoane: aburul iti ia vederea la drum, nu si HUD-ul — un jucator
+## care nu-si mai vede pozitia sau bara de turbo ar citi asta ca bug, nu ca
+## hazard.
+var _blind_veil: ColorRect
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -85,6 +90,16 @@ func _ready() -> void:
 	_respawn_button.position += Vector2(0, 76.0 + Minimap.MAP_SIZE + 12.0)
 	_respawn_button.pressed.connect(func() -> void: respawn_requested.emit())
 	root.add_child(_respawn_button)
+
+	# Voalul de abur. Adaugat INAINTE de countdown/mesaje ca sa ramana sub ele.
+	_blind_veil = ColorRect.new()
+	_blind_veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_blind_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Alb usor albastrui: abur, nu blitz. Alfa pornit de la zero — se ridica
+	# doar cat tine rafala.
+	_blind_veil.color = Color(0.94, 0.96, 0.98, 1.0)
+	_blind_veil.modulate.a = 0.0
+	root.add_child(_blind_veil)
 
 	_countdown = _make_label(110)
 	_countdown.set_anchors_and_offsets_preset(
@@ -270,6 +285,27 @@ func show_countdown(text: String) -> void:
 ## cursa terminata). Fara asta, apesi si nu se intampla nimic, fara explicatie.
 func set_respawn_enabled(enabled: bool) -> void:
 	_respawn_button.disabled = not enabled
+
+
+## Rafala de abur peste parbriz: ecranul se albeste si se limpezeste la loc.
+##
+## Nu merge la opacitate 1: la alb complet nu se mai vede NIMIC, iar un hazard
+## care iti ia complet vederea pe o dreapta de depasire nu mai e teatru, e
+## pedeapsa — exact ce nu vrem aici (vezi FumaroleHazard). La ~0.55 vezi
+## drumul prin el, dar te sperii.
+##
+## Urcarea e mai scurta decat coborarea: aburul te ACOPERA brusc si se
+## risipeste lin, ca un nor real prin care ai trecut.
+const BLIND_PEAK: float = 0.55
+
+func blind_flash(seconds: float) -> void:
+	if _blind_veil == null:
+		return
+	var hold := maxf(seconds, 0.1)
+	var tw := create_tween()
+	tw.tween_property(_blind_veil, "modulate:a", BLIND_PEAK, 0.12)
+	tw.tween_interval(hold * 0.45)
+	tw.tween_property(_blind_veil, "modulate:a", 0.0, hold * 0.75)
 
 
 func flash_message(text: String) -> void:

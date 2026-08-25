@@ -41,6 +41,14 @@ signal ignited(car: Car, seconds: float)
 ## si turtire, si plafon de viteza taiat secunde intregi — un val nu te striveste,
 ## te uda si te impinge. Legate la acelasi semnal, ar fi trebuit tunate impreuna.
 signal splashed(car: Car, strength: float)
+## Prins de o rafala de abur (fumarolele de pe coasta Stromboli). `seconds` =
+## cat tine albirea, ca HUD-ul sa-si potriveasca efectul pe aceeasi durata.
+##
+## Semnal separat de `splashed` desi amandoua sunt „ti-a intrat ceva in fata":
+## valul te si IMBRANCESTE si te uda, deci trebuie tunat impreuna cu fizica.
+## Aburul nu atinge masina deloc — daca ar fi legate, prima tunare a valului ar
+## fi mutat si comportamentul unui hazard care prin definitie nu costa nimic.
+signal blinded(car: Car, seconds: float)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -206,6 +214,10 @@ var _wind_time: float = 0.0
 ## PIERDUT, ca la repunere. Bolovanul te turteste si te incetineste; trenul face
 ## acelasi lucru dus la extrem, plus repunere.
 var crush_time: float = 0.0
+## Cat mai tine albirea de la o rafala de abur. NU intra in nicio formula de
+## fizica, deliberat: e singura penalizare din joc care se vede si nu se simte
+## in volan (vezi FumaroleHazard).
+var blind_time: float = 0.0
 var crush_factor: float = 1.0
 ## Ars de o coloana de foc (gheizerele din craterul Stromboli, vezi
 ## `ignite`). Se tine SEPARAT de `crush_time` desi amandoua taie plafonul:
@@ -489,6 +501,7 @@ func _physics_process(delta: float) -> void:
 
 	slip_time = maxf(slip_time - delta, 0.0)
 	crush_time = maxf(crush_time - delta, 0.0)
+	blind_time = maxf(blind_time - delta, 0.0)
 	if crush_time <= 0.0:
 		crush_factor = 1.0
 	burn_time = maxf(burn_time - delta, 0.0)
@@ -854,6 +867,22 @@ func force_boost(seconds: float) -> void:
 func apply_slip(grip_value: float = SLIP_GRIP_PUDDLE) -> void:
 	slip_time = 0.25
 	slip_grip = grip_value
+
+
+## Prins de o rafala de abur: vezi prost cateva zecimi de secunda, si ATAT.
+##
+## Nicio atingere de viteza, grip, turbo sau caroserie — e intentia, nu o
+## scapare. Fumarola e clasa „hazard-teatru, cost zero" din brief: sperie,
+## invata un ritm, si nu rupe singura dreapta pe care se mai poate depasi.
+##
+## Se APELEAZA IN FIECARE CADRU cat esti in nor (ca `apply_slip`), deci ceasul
+## se prelungeste cat stai in el; `maxf` face ca o a doua gura sa nu-l scurteze
+## pe al primeia. Semnalul se emite doar la INTRARE, altfel HUD-ul ar primi
+## zeci de mesaje pe secunda.
+func blind(seconds: float = 0.5) -> void:
+	if blind_time <= 0.0:
+		blinded.emit(self, seconds)
+	blind_time = maxf(blind_time, seconds)
 
 ## Ghiont de la un obstacol care iti schimba traiectoria: caruselul te matura
 ## pe tangenta, deviatorul te trimite pe cealalta banda. Impactul in sine

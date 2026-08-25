@@ -1658,6 +1658,11 @@ func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
 			# Bolovanul isi poate aduce TRASEUL, desenat ca Path3D sub nod. Se
 			# aduce in coordonatele pistei aici, unde stim si transformul
 			# grupului in care sta nodul; hazardul il duce apoi in spatiul lui.
+			# Fumarola sta LANGA drum, nu pe axa lui: gura e un obiect de decor
+			# asezat pe marginea faleze. Fractia singura ar aduce-o pe mijlocul
+			# soselei, deci se cara si punctul ei, exact ca la rockfall.
+			if hz.kind == HazardMarker.Kind.FUMAROLE:
+				spec["at"] = p
 			if hz.kind == HazardMarker.Kind.ROCKFALL:
 				var curve := hz.route_curve_in(self)
 				if curve != null:
@@ -5099,6 +5104,8 @@ func _build_node_hazard(hz: Dictionary) -> void:
 			_build_ice_field_at(frac)
 		HazardMarker.Kind.TRAIN_ALONG:
 			_build_train_along(frac)
+		HazardMarker.Kind.FUMAROLE:
+			_build_fumarole(frac, spec)
 
 
 ## Caruselul: morisca plantata in mijlocul soselei, cu vane care matura toata
@@ -5437,6 +5444,32 @@ func _build_train(frac: float) -> void:
 ## Sectorul intra in `_lane_bias` (cu 40 m inainte de capatul dinspre masini),
 ## de unde AI-ul afla ca aici se sta pe margine, nu pe axa — altfel jumatate
 ## din pluton ar muri la fiecare tur, si asta nu e AI onest, e AI orb.
+## Fumarola: gura de abur de pe marginea drumului, cu ceas propriu.
+##
+## Nu construieste model — gura in sine e decor asezat de mana in .tscn
+## (`fumarole_vent.glb` sub DecorManual). Ce adauga aici e MECANICA: coloana
+## de particule si zona care albeste ecranul. Asa ramane hazardul deasupra
+## decorului fara sa duplice assetul, si fara sa consume un material.
+##
+## Pozitia vine din `spec["at"]` (unde a fost tras nodul), nu din fractie:
+## gurile stau pe faleza, la cativa metri lateral. Doar COTA se ia de la drum,
+## dupa regula lui HazardMarker (Y-ul nodului e ignorat) — o gura tarata cu 3 m
+## prea sus ar sufla din aer.
+func _build_fumarole(frac: float, spec: Dictionary = {}) -> void:
+	var n := baked.size()
+	var idx := int(frac * float(n)) % n
+	var p: Vector3 = baked[idx]
+	var f := FumaroleHazard.new()
+	f.road_width = width_at(frac) * 2.0
+	for key in ["period", "on_time", "phase", "reach", "blind_seconds"]:
+		if spec.has(key):
+			f.set(key, spec[key])
+	var at: Vector3 = spec.get("at", p)
+	# Cota de la sosea, restul de la nod: vezi nota din antet.
+	add_child(f)
+	f.position = Vector3(at.x, p.y, at.z)
+
+
 func _build_train_along(frac: float) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n

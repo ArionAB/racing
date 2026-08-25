@@ -62,6 +62,7 @@ enum Kind {
 	WAVE,       ## val care spala soseaua (cere o tema cu mare)
 	ICE_SLAB,   ## camp de placi crapate centrat pe nod (Baikal); vezi IceFieldHazard
 	TRAIN_ALONG, ## tren PE SENS: sina in lungul soselei, vine din fata (Baikal)
+	FUMAROLE,   ## gura de abur care sufla in rafale peste drum (Stromboli)
 }
 
 @export var kind: Kind = Kind.SLIDING

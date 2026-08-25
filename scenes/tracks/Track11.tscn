@@ -40,6 +40,9 @@
 [ext_resource type="PackedScene" uid="uid://dj01fb3wey2qm" path="res://assets/models/stromboli/props/ginostra_pier.glb" id="38_7wvw5"]
 [ext_resource type="PackedScene" uid="uid://bx52plwpgepeu" path="res://assets/models/stromboli/props/donkey.glb" id="39_7wvw5"]
 [ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="39_gp84v"]
+[ext_resource type="PackedScene" uid="uid://n2wb5p6hjuwn" path="res://assets/models/stromboli/props/fumarole_vent.glb" id="41_hyldl"]
+[ext_resource type="PackedScene" uid="uid://dtw8m0j8r6au2" path="res://assets/models/stromboli/trees/fig_tree.glb" id="42_k64jy"]
+[ext_resource type="Script" uid="uid://cjap2gpbe7hjs" path="res://scenes/hazards/fireball_geyser.gd" id="43_fireball"]
 
 [sub_resource type="Curve3D" id="Curve3D_stromboli"]
 _data = {
@@ -165,6 +168,28 @@ metadata/_custom_type_script = "uid://b3ggqeosp3aap"
 [node name="lava_flow" parent="LavaFlow" unique_id=261022229 instance=ExtResource("6_lavaglb")]
 script = ExtResource("7_wprop")
 
+[node name="LavaFlow2" type="Node3D" parent="." unique_id=89845038]
+transform = Transform3D(-0.43, 0.121, -0.895, 0, 0.991, 0.134, 0.903, 0.058, -0.426, -130.10239, 55.203156, 274.62994)
+script = ExtResource("5_lava")
+stage_nodes = PackedStringArray("Lava_Stage1", "Lava_Stage2", "Lava_Stage3")
+closed_from_stage = 1
+metadata/_custom_type_script = "uid://b3ggqeosp3aap"
+
+[node name="lava_flow" parent="LavaFlow2" unique_id=1572427916 instance=ExtResource("6_lavaglb")]
+transform = Transform3D(0.14307356, 0.12539238, -0.98173636, -0.13668649, 0.9849394, 0.105881274, 0.9802278, 0.119041294, 0.15805851, 0.83514404, 5.2100677, 0.3031311)
+script = ExtResource("7_wprop")
+
+[node name="LavaFlow3" type="Node3D" parent="." unique_id=1559990414]
+transform = Transform3D(-0.8602617, 0.06814745, -0.50574225, 6.567687e-09, 0.991, 0.134, 0.5101558, 0.11558948, -0.8524821, -190.88248, 57.70099, 265.16797)
+script = ExtResource("5_lava")
+stage_nodes = PackedStringArray("Lava_Stage1", "Lava_Stage2", "Lava_Stage3")
+closed_from_stage = 1
+metadata/_custom_type_script = "uid://b3ggqeosp3aap"
+
+[node name="lava_flow" parent="LavaFlow3" unique_id=773377658 instance=ExtResource("6_lavaglb")]
+transform = Transform3D(0.6420759, 0.10272801, -0.75972724, -0.102727994, 0.9935734, 0.047528405, 0.7597273, 0.04752842, 0.6485024, 0, 0, 0)
+script = ExtResource("7_wprop")
+
 [node name="GauraCraterului" type="Marker3D" parent="." unique_id=944992766]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.6, 60.8, 255.8)
 gizmo_extents = 40.0
@@ -252,6 +277,31 @@ rock_speed = 15.0
 
 [node name="Traseu" type="Path3D" parent="Bombe/BombaCanalEst" unique_id=944992779]
 curve = SubResource("Curve3D_bomba5")
+
+[node name="GheizereCrater" type="Node3D" parent="." unique_id=944992790]
+
+[node name="Pereche1" type="Node3D" parent="GheizereCrater" unique_id=944992791]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.97, 60.6, 243.08)
+script = ExtResource("43_fireball")
+radius = 1.25
+vents = Array[Vector3]([Vector3(3.53, 0, 2.26), Vector3(-3.53, 0, -2.26)])
+metadata/_custom_type_script = "uid://cjap2gpbe7hjs"
+
+[node name="Pereche2" type="Node3D" parent="GheizereCrater" unique_id=944992792]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.58, 60.83, 255.8)
+script = ExtResource("43_fireball")
+radius = 1.25
+phase = 0.0
+vents = Array[Vector3]([Vector3(4.06, 0, 1.05), Vector3(-4.06, 0, -1.05)])
+metadata/_custom_type_script = "uid://cjap2gpbe7hjs"
+
+[node name="Pereche3" type="Node3D" parent="GheizereCrater" unique_id=944992793]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.32, 60.75, 273.25)
+script = ExtResource("43_fireball")
+radius = 1.25
+phase = 0.0
+vents = Array[Vector3]([Vector3(3.96, 0, -1.40), Vector3(-3.96, 0, 1.40)])
+metadata/_custom_type_script = "uid://cjap2gpbe7hjs"
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=1029819703]
 script = ExtResource("7_wprop")
@@ -927,14 +977,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.085297, -16.76202, -4.7070
 [node name="4)Crater" type="Node3D" parent="DecorManual" unique_id=1386511514]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -129.96931, 47.817265, 266.10446)
 
-[node name="volcanic_bomb" parent="DecorManual/4)Crater" unique_id=111247546 instance=ExtResource("31_4hama")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.53, -3.52, -12.6)
+[node name="volcanic_bomb" parent="DecorManual/4)Crater" unique_id=864269607 instance=ExtResource("31_4hama")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.529999, 0.39365768, -12.600006)
 
 [node name="volcanic_bomb2" parent="DecorManual/4)Crater" unique_id=2011877234 instance=ExtResource("31_4hama")]
-transform = Transform3D(1.7910943, 0, 0, 0, 1.7910943, 0, 0, 0, 1.7910943, -16.23, -2.92, -6.8)
+transform = Transform3D(1.7910943, 0, 0, 0, 1.7910943, 0, 0, 0, 1.7910943, -16.229996, 1.16222, -6.799988)
 
 [node name="volcanic_bomb3" parent="DecorManual/4)Crater" unique_id=2102256339 instance=ExtResource("31_4hama")]
-transform = Transform3D(1.7910943, 0, 0, 0, 1.7910943, 0, 0, 0, 1.7910943, -22.83, -3.12, -6.2)
+transform = Transform3D(1.7910943, 0, 0, 0, 1.7910943, 0, 0, 0, 1.7910943, -22.830002, -0.5818138, -6.200012)
 
 [node name="crater_bowl" parent="DecorManual/4)Crater" unique_id=1923490205 instance=ExtResource("31_pfiwi")]
 transform = Transform3D(1.1937588, 0, 0, 0, 1.1937588, 0, 0, 0, 1.1937588, -19.709045, 11.382736, -10.219666)
@@ -972,41 +1022,56 @@ transform = Transform3D(2.1219332, 0, 0, 0, 2.1219332, 0, 0, 0, 2.1219332, 58.98
 [node name="scoria_rock4" parent="DecorManual/5)Coborarea ciarei" unique_id=374577093 instance=ExtResource("33_luffo")]
 transform = Transform3D(2.1219332, 0, 0, 0, 2.1219332, 0, 0, 0, 2.1219332, 54.60022, 1.4357147, -110.037506)
 
+[node name="fumarole_vent4" parent="DecorManual/5)Coborarea ciarei" unique_id=1736529127 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.441864, 1.4812355, -59.505768)
+
+[node name="fumarole_vent5" parent="DecorManual/5)Coborarea ciarei" unique_id=869143618 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.221664, -20.128769, 21.142517)
+
 [node name="6)Ginostra" type="Node3D" parent="DecorManual" unique_id=839263383]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70.586845, 7.567757, 480.87497)
 
 [node name="aeolian_house_c5" parent="DecorManual/6)Ginostra" unique_id=1822299862 instance=ExtResource("9_j6dkv")]
-transform = Transform3D(0.96221226, -0.04693459, 0.2682255, 0.045210868, 0.99889797, 0.012602945, -0.2685214, 1.110223e-16, 0.9632738, -2.48069, 9.2102585, 14.839142)
+transform = Transform3D(-0.9559618, -0.039818943, -0.29077747, -0.03777448, 0.9992063, -0.01264327, 0.29105008, -0.0011025161, -0.9567072, -11.486801, 8.724903, -3.4709473)
 
 [node name="aeolian_house_c6" parent="DecorManual/6)Ginostra" unique_id=1031203313 instance=ExtResource("9_j6dkv")]
-transform = Transform3D(0.96221226, -0.04693459, 0.2682255, 0.045210868, 0.99889797, 0.012602945, -0.2685214, 1.110223e-16, 0.9632738, 7.393593, 9.792515, 12.010071)
+transform = Transform3D(-0.9559618, -0.039818943, -0.29077747, -0.03777448, 0.9992063, -0.01264327, 0.29105008, -0.0011025161, -0.9567072, -21.305473, 8.455261, -0.41070557)
 
 [node name="aeolian_house_a7" parent="DecorManual/6)Ginostra" unique_id=1267664753 instance=ExtResource("11_tx8xw")]
-transform = Transform3D(0.96842253, -0.04693459, 0.2448569, 0.045502666, 0.99889797, 0.011504939, -0.24512704, 0, 0.96949095, 6.731098, -0.30385113, 10.172028)
+transform = Transform3D(-0.9627199, -0.039818935, -0.2675536, -0.038069446, 0.9992065, -0.011725254, 0.26780817, -0.0011025164, -0.96347183, -19.7277, -1.5419827, 1.4112854)
+
+[node name="aeolian_house_a10" parent="DecorManual/6)Ginostra" unique_id=475540918 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.9627199, -0.039818935, -0.2675536, -0.038069446, 0.9992065, -0.011725254, 0.26780817, -0.0011025164, -0.96347183, -20.920006, -1.1932378, -2.5598755)
+
+[node name="aeolian_house_a11" parent="DecorManual/6)Ginostra" unique_id=1549417555 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.9627199, -0.039818935, -0.2675536, -0.038069446, 0.9992065, -0.011725254, 0.26780817, -0.0011025164, -0.96347183, -14.198708, -0.98954964, -4.1566467)
+
+[node name="aeolian_house_a12" parent="DecorManual/6)Ginostra" unique_id=1677160583 instance=ExtResource("11_tx8xw")]
+transform = Transform3D(-0.9627199, -0.039818935, -0.2675536, -0.038069446, 0.9992065, -0.011725254, 0.26780817, -0.0011025164, -0.96347183, -7.4671097, -0.69133854, -6.187256)
 
 [node name="aeolian_house_a8" parent="DecorManual/6)Ginostra" unique_id=696159504 instance=ExtResource("11_tx8xw")]
-transform = Transform3D(0.96842253, -0.04693459, 0.2448569, 0.045502666, 0.99889797, 0.011504939, -0.24512704, 0, 0.96949095, 0.19430542, -0.6109915, 12.076447)
+transform = Transform3D(-0.9627199, -0.039818935, -0.2675536, -0.038069446, 0.9992065, -0.011725254, 0.26780817, -0.0011025164, -0.96347183, -13.235245, -1.2855248, -0.6461792)
 
 [node name="aeolian_house_a9" parent="DecorManual/6)Ginostra" unique_id=748893038 instance=ExtResource("11_tx8xw")]
-transform = Transform3D(0.96987635, -0.0469346, 0.23903386, 0.045570966, 0.99889797, 0.011231333, -0.23929758, 0, 0.9709464, -6.6414566, -0.932179, 13.765533)
+transform = Transform3D(-0.9643101, -0.03981893, -0.2617644, -0.03813921, 0.99920624, -0.011496305, 0.26201445, -0.0011025183, -0.9650635, -6.438774, -1.0167217, -2.4953613)
 
 [node name="aeolian_house_b5" parent="DecorManual/6)Ginostra" unique_id=891389029 instance=ExtResource("12_5gsx0")]
-transform = Transform3D(0.9702005, -0.046934593, 0.23771566, 0.045586202, 0.99889797, 0.011169397, -0.23797792, 0, 0.97127086, 5.867592, 3.7964406, 12.344818)
+transform = Transform3D(-0.9646651, -0.039818935, -0.26045373, -0.03815481, 0.9992063, -0.011444469, 0.26070276, -0.0011025171, -0.96541876, -19.27385, 2.6132712, -0.78118896)
 
 [node name="aeolian_house_b6" parent="DecorManual/6)Ginostra" unique_id=1697208638 instance=ExtResource("12_5gsx0")]
-transform = Transform3D(0.9702005, -0.046934593, 0.23771566, 0.045586202, 0.99889797, 0.011169397, -0.23797792, 0, 0.97127086, -4.2109756, 3.322885, 15.282196)
+transform = Transform3D(-0.9646651, -0.039818935, -0.26045373, -0.03815481, 0.9992063, -0.011444469, 0.26070276, -0.0011025171, -0.96541876, -9.2636795, 3.0086808, -3.9545288)
 
 [node name="bougainvillea5" parent="DecorManual/6)Ginostra" unique_id=2028441493 instance=ExtResource("14_jjxvn")]
-transform = Transform3D(-0.98951954, -0.046934593, -0.13655877, -0.046493933, 0.99889797, -0.0064164014, 0.13670942, 0, -0.9906112, -7.255951, 3.7068028, 12.281036)
+transform = Transform3D(0.98635477, -0.039818935, 0.15974593, 0.039130356, 0.9992063, 0.00745516, -0.15991601, -0.0011025171, 0.98713, -6.194031, 3.6610675, -1.0257263)
 
 [node name="bougainvillea6" parent="DecorManual/6)Ginostra" unique_id=1195540810 instance=ExtResource("14_jjxvn")]
-transform = Transform3D(-0.98951954, -0.046934593, -0.13655877, -0.046493933, 0.99889797, -0.0064164014, 0.13670942, 0, -0.9906112, 2.8360443, 3.9843078, 9.574371)
+transform = Transform3D(0.98635477, -0.039818935, 0.15974593, 0.039130356, 0.9992063, 0.00745516, -0.15991601, -0.0011025171, 0.98713, -16.205994, 3.0687118, 1.9172668)
 
 [node name="ginostra_pier" parent="DecorManual/6)Ginostra" unique_id=1827304586 instance=ExtResource("38_7wvw5")]
-transform = Transform3D(-0.95774543, 0, 0.2876175, -0.0038186095, 0.99991184, -0.012715693, -0.28759214, -0.013276693, -0.957661, -58.619377, -7.6375485, 8.5659485)
+transform = Transform3D(-0.95774543, 0, 0.2876175, -0.0038186095, 0.99991184, -0.012715693, -0.28759214, -0.013276693, -0.957661, -58.619377, -7.6375484, 8.5659485)
 
 [node name="alley_stairs" parent="DecorManual/6)Ginostra" unique_id=1645969805 instance=ExtResource("16_c3svt")]
-transform = Transform3D(-1.2750446, 0, -0.24024643, 0, 1.2974811, 0, 0.24024643, 0, -1.2750446, -11.595116, -1.5121002, 14.601593)
+transform = Transform3D(1.2690492, 0, 0.27013156, 0, 1.2974811, 0, -0.27013156, 0, 1.2690492, -1.8688126, -0.8488312, -3.4475708)
 
 [node name="ginostraBoatPathMover" type="Path3D" parent="DecorManual/6)Ginostra" unique_id=1975559792]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.6378, 0)
@@ -1026,3 +1091,54 @@ script = ExtResource("39_gp84v")
 model = ExtResource("39_7wvw5")
 model_scale = 1.5
 metadata/_custom_type_script = "uid://b1848dr3kabqm"
+
+[node name="pergola_pulera5" parent="DecorManual/6)Ginostra" unique_id=281545747 instance=ExtResource("13_8g0lj")]
+transform = Transform3D(-0.38733515, 0, 0.9219391, 0, 1, 0, -0.9219391, 0, -0.38733515, -0.15634155, -1.1881695, -6.555847)
+
+[node name="pergola_pulera6" parent="DecorManual/6)Ginostra" unique_id=526848633 instance=ExtResource("13_8g0lj")]
+transform = Transform3D(-0.38733515, 0, 0.9219391, 0, 1, 0, -0.9219391, 0, -0.38733515, -26.359375, -1.2783151, -0.8602905)
+
+[node name="white_wall19" parent="DecorManual/6)Ginostra" unique_id=16217295 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.9561645, 0, -0.29283023, 0, 1, 0, 0.29283023, 0, -0.9561645, -20.219803, -1.0319552, -12.007904)
+
+[node name="white_wall20" parent="DecorManual/6)Ginostra" unique_id=1939183734 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.9561645, 0, -0.29283023, 0, 1, 0, 0.29283023, 0, -0.9561645, -23.376717, -1.0860362, -11.218323)
+
+[node name="white_wall21" parent="DecorManual/6)Ginostra" unique_id=1299292719 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.9561645, 0, -0.29283023, 0, 1, 0, 0.29283023, 0, -0.9561645, -26.360939, -1.0914826, -10.6501465)
+
+[node name="white_wall22" parent="DecorManual/6)Ginostra" unique_id=1031282469 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.9561645, 0, -0.29283023, 0, 1, 0, 0.29283023, 0, -0.9561645, -28.887527, -1.0885286, -9.914429)
+
+[node name="white_wall23" parent="DecorManual/6)Ginostra" unique_id=1975631765 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(-0.9561645, 0, -0.29283023, 0, 1, 0, 0.29283023, 0, -0.9561645, -31.712532, -1.0850053, -9.213989)
+
+[node name="white_wall24" parent="DecorManual/6)Ginostra" unique_id=1870023995 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.20139292, 0, -0.9795105, 0, 1, 0, 0.9795105, 0, 0.20139292, -31.60707, -1.1387057, -7.299469)
+
+[node name="white_wall25" parent="DecorManual/6)Ginostra" unique_id=2128878502 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.20139292, 0, -0.9795105, 0, 1, 0, 0.9795105, 0, 0.20139292, -31.201454, -1.2222958, -4.3743896)
+
+[node name="white_wall26" parent="DecorManual/6)Ginostra" unique_id=441800541 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.20139292, 0, -0.9795105, 0, 1, 0, 0.9795105, 0, 0.20139292, -30.726173, -1.3308072, -0.9602661)
+
+[node name="white_wall27" parent="DecorManual/6)Ginostra" unique_id=731100829 instance=ExtResource("15_xgr5v")]
+transform = Transform3D(0.20139292, 0, -0.9795105, 0, 1, 0, 0.9795105, 0, 0.20139292, -30.545898, -1.4222646, 2.3116455)
+
+[node name="7)Coasta de est" type="Node3D" parent="DecorManual" unique_id=1651220830]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.95929, 12.343519, 215.25758)
+
+[node name="fig_tree" parent="DecorManual/7)Coasta de est" unique_id=2147385524 instance=ExtResource("42_k64jy")]
+transform = Transform3D(0.82065696, 0, -0.57142115, 0, 1, 0, 0.57142115, 0, 0.82065696, 15.518414, 0.7775755, -15.27803)
+
+[node name="fumarole_vent" parent="DecorManual/7)Coasta de est" unique_id=173276079 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.161808, 1.1419239, 13.388077)
+
+[node name="fumarole_vent2" parent="DecorManual/7)Coasta de est" unique_id=275589749 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.9351463, 1.1419239, -25.76352)
+
+[node name="fumarole_vent3" parent="DecorManual/7)Coasta de est" unique_id=1750649261 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.752495, 1.4741955, 48.488907)
+
+[node name="prickly_pear" parent="DecorManual/7)Coasta de est" unique_id=940792068 instance=ExtResource("27_gbtar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.354549, 0, 0)

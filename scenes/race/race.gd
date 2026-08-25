@@ -99,6 +99,11 @@ func _ready() -> void:
 	# bolovani (#242), dar nu fusese legat la camera; lava il refoloseste.
 	player.crushed.connect(func(_c: Car, severity: float) -> void:
 		camera.add_trauma(clampf(0.25 + severity * 0.35, 0.25, 0.6)))
+	# Aprins de o coloana de foc: mesajul spune de ce vezi prost, ca sa nu se
+	# citeasca drept bug grafic. Shake-ul il da deja `crushed`, emis din
+	# `Car.ignite` — nu-l dublam aici.
+	player.ignited.connect(func(_c: Car, _s: float) -> void:
+		hud.flash_message("IN FLACARI!"))
 	# Eruptia (Stromboli): bubuitul e al lumii (il reda EruptionCycle), dar
 	# tremurul de ecran e feedback de jucator, deci se leaga aici — pentru
 	# TOATE ciclurile de pe pista, oriunde ai fi (telegraph-ul din brief).

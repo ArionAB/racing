@@ -364,6 +364,18 @@ const CLASS_TEXTURES := {
 	# pentru TOATE temele (track.gd) si `rock_material()` comun — ar fi
 	# revopsit siluetele de orizont pe celelalte piste.
 	"volcanic_rock": "res://assets/textures/classes/rock.png",
+	# VARUL SATULUI EOLIAN. ACELASI PNG ca "plaster" — nu se dubleaza in
+	# memorie, se schimba doar multiplicatorul (vezi CLASS_TINT), aceeasi
+	# mecanica ca la volcanic_rock/ice_bloc.
+	#
+	# Nu se putea folosi "plaster" direct: dala lui e gradata spre ancora
+	# CONCRETE, iar varul din Stromboli sta pe slotul 22 (FOAM_WHITE, #E9F2F0).
+	# Masurat: dala are luminanta 0.557, slotul 0.941 — raport 0.592. Pusa
+	# netentata pe case, fatada se INTUNECA cu 44% (masurat si pe captura:
+	# luminanta 95.3 -> 53.2 pe o fereastra strict pe perete). Gradarea
+	# pastreaza luminanta sursei prin constructie, deci nu putea repara asta
+	# singura — exact avertismentul din style_bible §4.
+	"village_plaster": "res://assets/textures/classes/plaster.png",
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
 	"wood": "res://assets/textures/classes/wood.png",
 	"concrete": "res://assets/textures/classes/concrete.png",
@@ -421,6 +433,28 @@ const CLASS_TINT := {
 	# mai INCHISA suprafata din cadru, iar cu dala netentata buza citea ca o
 	# duna de nisip. Multiplicativ pe (141, 97, 58) da ~(48, 40, 37).
 	"volcanic_rock": Color(0.34, 0.41, 0.63),
+	# Varul: dala (151.7, 140.7, 125.7) trebuie sa aterizeze pe slotul 22
+	# (233, 242, 240). Raportul pe canale e (1.536, 1.720, 1.909) — PESTE 1,
+	# deci nu se poate obtine dintr-un multiplicator: `albedo_color` doar
+	# intuneca. Urcarea se face pe TEXTURA, in CLASS_LIFT; aici ramane doar
+	# corectia de nuanta (dala e calda, varul e rece).
+	"village_plaster": Color(0.97, 1.0, 1.0),
+}
+
+## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
+## tinta (0..1). Exista fiindca `CLASS_TINT` e un multiplicator: poate doar sa
+## intunece, iar unele clase reutilizeaza o dala mai INCHISA decat slotul pe
+## care trebuie sa aterizeze.
+##
+## `village_plaster` e cazul: dala (gradata spre CONCRETE) are luminanta 0.557,
+## iar varul satului sta pe FOAM_WHITE (0.941). Fara ridicare, casele se
+## intunecau cu 44% — masurat pe captura, nu presupus.
+##
+## Se ridica MULTIPLICATIV si se retine contrastul relativ: nu e o spalare spre
+## alb, e o schimbare de expunere. Ce depaseste 1.0 se retează, deci tinta se
+## alege sub alb pur.
+const CLASS_LIFT := {
+	"village_plaster": 0.88,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -502,6 +536,9 @@ const CLASS_TRIPLANAR_SCALE := {
 	# iar o textura care se repeta des pe zeci de fatade citeste imediat ca
 	# tipar, nu ca var.
 	"plaster": 0.55,
+	# Varul satului: aceeasi scara ca `plaster` (aceeasi dala), doar ridicata
+	# si racita. Vezi CLASS_LIFT / CLASS_TINT.
+	"village_plaster": 0.55,
 	# Betonul danei din Ginostra si al parapetilor. Aceeasi scara ca
 	# tencuiala, si din acelasi motiv — sursa e tot o suprafata de ~2 m — dar
 	# clasa ramane separata fiindca ancora ei e ridicata cu `lift` 0.20
@@ -521,13 +558,53 @@ const CLASS_TRIPLANAR_SCALE := {
 
 static var _tri_mats: Dictionary = {}
 
+## Textura unei clase, cu ridicarea din CLASS_LIFT aplicata daca e ceruta.
+## Cache pe clasa: dala ridicata se construieste O DATA, deci doua materiale pe
+## aceeasi clasa nu platesc doua imagini.
+static var _lifted: Dictionary = {}
+
+static func _class_texture(cls: String) -> Texture2D:
+	var src: Texture2D = load(CLASS_TEXTURES[cls])
+	if not CLASS_LIFT.has(cls):
+		return src
+	if _lifted.has(cls):
+		return _lifted[cls]
+	var img: Image = src.get_image()
+	if img == null:
+		return src # checkout fara textura importata: mai bine dala originala
+	img = img.duplicate()
+	img.decompress() # dalele sunt importate comprimat (ETC2/S3TC)
+	img.convert(Image.FORMAT_RGB8)
+	# Luminanta medie actuala, esantionata din 4 in 4 pixeli (destul pentru o
+	# medie, de 16 ori mai ieftin decat tot).
+	var sum: float = 0.0
+	var n: int = 0
+	for y in range(0, img.get_height(), 4):
+		for x in range(0, img.get_width(), 4):
+			sum += img.get_pixel(x, y).get_luminance()
+			n += 1
+	var cur: float = sum / maxf(float(n), 1.0)
+	if cur <= 0.001:
+		return src
+	var gain: float = float(CLASS_LIFT[cls]) / cur
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			img.set_pixel(x, y, Color(minf(c.r * gain, 1.0),
+				minf(c.g * gain, 1.0), minf(c.b * gain, 1.0)))
+	img.generate_mipmaps()
+	var tex := ImageTexture.create_from_image(img)
+	_lifted[cls] = tex
+	return tex
+
+
 static func triplanar_class_material(cls: String) -> StandardMaterial3D:
 	if _tri_mats.has(cls):
 		return _tri_mats[cls]
 	assert(CLASS_TRIPLANAR_SCALE.has(cls),
 		"clasa triplanara necunoscuta: " + cls)
 	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = load(CLASS_TEXTURES[cls])
+	mat.albedo_texture = _class_texture(cls)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 0.9
@@ -597,7 +674,7 @@ static func class_material(cls: String) -> StandardMaterial3D:
 		return _class_mats[cls]
 	assert(CLASS_TEXTURES.has(cls), "clasa de material necunoscuta: " + cls)
 	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = load(CLASS_TEXTURES[cls])
+	mat.albedo_texture = _class_texture(cls)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	mat.vertex_color_use_as_albedo = true # AO copt, ca peste tot
 	mat.roughness = 0.9
@@ -631,6 +708,16 @@ const TRI_PREFIX := "tri:"
 ## textura si masca sunt ACELEASI obiecte) da locomotivei o lucire pe fetele
 ## dinspre soare, si atat.
 const FINISH_PREFIX := "finish:"
+
+## Al treilea prefix acceptat: "shader:<nume>". Pentru partile a caror aparenta
+## nu se poate obtine dintr-un StandardMaterial3D, oricat i-ai regla
+## parametrii — azi doar lava, care trebuie sa CURGA si sa pulseze.
+##
+## Nu e o portita pentru „materiale speciale": un shader e un material in plus
+## la garda si o compilare in plus pe GPU. Se adauga doar cand miscarea E
+## continutul, ca aici (o limba de lava statica e o dunga portocalie, adica
+## verdictul dezvoltatorului pe captura din august 2026).
+const SHADER_PREFIX := "shader:"
 
 ## Finisajele disponibile: nume -> [roughness, metallic_specular] sau, pentru
 ## finisajele care ARD, [roughness, metallic_specular, energie, slot].
@@ -676,6 +763,68 @@ static func finish_material(name: String) -> StandardMaterial3D:
 	return mat
 
 
+## --- Lava incandescenta (Stromboli) -----------------------------------------
+
+## Materialul lavei: crusta neagra cu crapaturi care CURG si pulseaza.
+## Vezi assets/shaders/lava.gdshader pentru ce face si cat costa.
+##
+## INLOCUIESTE `finish_material("lava")` pe piesele de lava, si nu e o
+## rafinare cosmetica — finisajul avea un BUG pe geometria generata in cod.
+## Finisajul pastreaza textura ATLASULUI, iar contractul atlasului cere UV-uri
+## colapsate pe centrul slotului. GLB-urile respecta contractul; primitivele lui
+## Godot NU: un CylinderMesh are UV-uri 0..1, deci matura tot atlasul. Masurat:
+## cilindrul atinge 21 de sloturi si sfera 13, amandoua trecand prin rezerva
+## MAGENTA (24..31). De-aia coloanele gheizerelor ieseau in dungi de acadea.
+##
+## Shaderul nu citeste niciun UV — isi calculeaza culoarea din pozitia in
+## spatiul obiectului — deci merge la fel pe GLB-uri si pe primitive, si nu
+## exista drum pe care sa culeaga slotul gresit.
+##
+## Un SINGUR material pentru toate piesele care nu se defazeaza (limba, gurile,
+## bombele, placile): garda numara materialele. Gheizerele cer defazaj per
+## instanta, deci isi iau o duplicare — vezi `lava_material_phased`.
+static var _lava_mat: ShaderMaterial
+
+static func lava_material() -> ShaderMaterial:
+	if _lava_mat != null:
+		return _lava_mat
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/lava.gdshader")
+	# Culorile vin din PALETA, nu din shader: lava trebuie sa ramana in aceeasi
+	# familie cu bazaltul de langa ea. Crusta e slotul 20 (VOLCANIC_BLACK)
+	# coborat, jarul e slotul 30 (LAVA_ORANGE).
+	var crust := color(VOLCANIC_BLACK)
+	mat.set_shader_parameter("crust_color",
+		Color(crust.r * 0.45, crust.g * 0.45, crust.b * 0.45))
+	mat.set_shader_parameter("glow_color", color(LAVA_ORANGE))
+	_lava_mat = mat
+	return mat
+
+
+## Varianta defazata, pentru piesele care trebuie sa NU pulseze la unison —
+## gheizerele. `duplicate()` pastreaza acelasi Shader (o singura compilare pe
+## GPU); ce difera e un uniform.
+##
+## Costa cate un material per gheizer in numaratoarea garzii. E acceptat
+## deliberat: alternativa (toate gheizerele pulsand la aceeasi bataie) ar fi
+## anulat exact citirea pe care se bazeaza hazardul — opozitia de faza trebuie
+## sa se VADA, nu doar sa existe in fizica.
+## Materialul din spatele prefixului "shader:<nume>" dintr-o mapare de clase.
+## Un singur nume azi; e o functie ca sa existe UN loc unde se adauga al doilea,
+## nu un `if` strecurat in dispatcher.
+static func shader_material(name: String) -> ShaderMaterial:
+	assert(name == "lava", "shader necunoscut: " + name)
+	return lava_material()
+
+
+static func lava_material_phased(phase: float, flow: float = -1.0) -> ShaderMaterial:
+	var mat := lava_material().duplicate() as ShaderMaterial
+	mat.set_shader_parameter("phase_offset", phase)
+	if flow >= 0.0:
+		mat.set_shader_parameter("flow_speed", flow)
+	return mat
+
+
 ## Masca de emisie pe UN slot: 32x1, negru peste tot, culoarea slotului pe
 ## texelul lui. UV-urile colapsate pe centrul slotului (contractul atlasului)
 ## cad exact pe centrul texelului, deci filtrarea liniara nu trage din vecini.
@@ -697,6 +846,9 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 		elif cls.begins_with(FINISH_PREFIX):
 			mi.material_override = finish_material(
 				cls.trim_prefix(FINISH_PREFIX))
+		elif cls.begins_with(SHADER_PREFIX):
+			mi.material_override = shader_material(
+				cls.trim_prefix(SHADER_PREFIX))
 		elif cls.begins_with(TRI_PREFIX):
 			mi.material_override = triplanar_class_material(
 				cls.trim_prefix(TRI_PREFIX))
@@ -726,6 +878,9 @@ static func apply_object_class_materials(root: Node, mapping: Dictionary,
 		elif cls.begins_with(FINISH_PREFIX):
 			mi.material_override = finish_material(
 				cls.trim_prefix(FINISH_PREFIX))
+		elif cls.begins_with(SHADER_PREFIX):
+			mi.material_override = shader_material(
+				cls.trim_prefix(SHADER_PREFIX))
 		elif cls.begins_with(TRI_PREFIX):
 			mi.material_override = object_triplanar_class_material(
 				cls.trim_prefix(TRI_PREFIX), world_scale)
@@ -743,6 +898,12 @@ static func apply_object_class_materials(root: Node, mapping: Dictionary,
 ## reordonare inocenta. Cu prefixul cel mai lung, partea cea mai specifica
 ## castiga intotdeauna.
 static func _class_for(name: String, mapping: Dictionary) -> String:
+	# Nodurile de accente rupte de `split_accents` raman pe materialul lumii,
+	# ORICE ar spune maparea. Fara linia asta, `House_A_Accente` s-ar potrivi
+	# tot pe prefixul "House_" si ar primi tencuiala — adica exact obloanele pe
+	# care ruptura le salva. Prinsa pe scena incarcata, nu prin numaratoare.
+	if name.ends_with(ACCENT_SUFFIX):
+		return ""
 	var best := ""
 	var best_len := -1
 	for prefix: String in mapping:
@@ -767,6 +928,75 @@ static func apply_world_material(root: Node) -> void:
 		if node is MeshInstance3D:
 			var mi := node as MeshInstance3D
 			mi.material_override = mat
+
+## --- Ruperea accentelor de pe o parte care primeste clasa ------------------
+
+## Numele nodului-copil in care ajung triunghiurile pastrate pe atlas.
+const ACCENT_SUFFIX: String = "_Accente"
+
+## Rupe dintr-un MeshInstance triunghiurile care NU stau pe `keep_slot` si le
+## muta intr-un copil propriu, ramas pe materialul lumii.
+##
+## De ce exista: regula „o clasa triplanara sterge sloturile" a tinut casele
+## Stromboli pe atlas, plate, ca sa nu piardem obloanele albastre. Masurat pe
+## arie, varul e 90-98% din fatada si obloanele 1-9% — deci alegerea era intre
+## „90% plat" si „5% pierdut", si amandoua sunt proaste cand se poate si una si
+## alta. Aici corpul ia clasa si accentul ramane pictat.
+##
+## Nu cere re-export din Blender: se face la incarcare, pe arrays. Costa un
+## draw call in plus per piesa care CHIAR are accente (mesh-urile fara ele nu
+## se ating) si ZERO materiale — copilul foloseste `world_material()`, care era
+## deja numarat.
+##
+## Intoarce `true` daca a rupt ceva.
+static func split_accents(mi: MeshInstance3D, keep_slot: int) -> bool:
+	if mi.mesh == null or mi.mesh.get_surface_count() == 0:
+		return false
+	if mi.has_node(NodePath(String(mi.name) + ACCENT_SUFFIX)):
+		return false # deja rupt (scena reincarcata in editor)
+	var arr: Array = mi.mesh.surface_get_arrays(0)
+	var uvs: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+	if uvs.is_empty() or idx.is_empty():
+		return false
+	var keep: PackedInt32Array = PackedInt32Array()
+	var move: PackedInt32Array = PackedInt32Array()
+	var i: int = 0
+	while i + 2 < idx.size():
+		# Slotul triunghiului dupa PRIMUL vertex: UV-urile sunt colapsate pe
+		# centrul slotului, deci toate trei cad in acelasi loc prin constructie.
+		var slot: int = clampi(int(uvs[idx[i]].x * float(SLOTS)), 0, SLOTS - 1)
+		var tri := PackedInt32Array([idx[i], idx[i + 1], idx[i + 2]])
+		if slot == keep_slot:
+			keep.append_array(tri)
+		else:
+			move.append_array(tri)
+		i += 3
+	if move.is_empty() or keep.is_empty():
+		return false # totul intr-o parte: nu e nimic de rupt
+	var accents := MeshInstance3D.new()
+	accents.name = String(mi.name) + ACCENT_SUFFIX
+	accents.mesh = _mesh_with_indices(arr, move)
+	accents.material_override = world_material()
+	mi.mesh = _mesh_with_indices(arr, keep)
+	mi.add_child(accents)
+	return true
+
+
+## Un ArrayMesh cu ACELEASI arrays de vertecsi, dar alt set de indici. Vertecsii
+## nefolositi raman in buffer — irosesc cativa kb dar pastreaza indicii valizi
+## fara remapare, si mesh-urile astea au sute de vertecsi, nu sute de mii.
+static func _mesh_with_indices(src: Array, indices: PackedInt32Array) -> ArrayMesh:
+	var out: Array = []
+	out.resize(Mesh.ARRAY_MAX)
+	for k: int in [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TANGENT,
+			Mesh.ARRAY_COLOR, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2]:
+		out[k] = src[k]
+	out[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out)
+	return mesh
+
 
 static func _walk(node: Node) -> Array[Node]:
 	var out: Array[Node] = [node]

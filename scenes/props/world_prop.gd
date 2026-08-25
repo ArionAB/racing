@@ -119,10 +119,117 @@ const PROP_COLLISION := {
 @export var auto_collision: bool = true
 
 
+## Partile care primesc clasa DAR au accente pictate in alte sloturi: se rup in
+## doua inainte de aplicarea materialelor (vezi Palette.split_accents).
+##
+## Casele eoliene si biserica sunt 90-98% var (slot 22) si 1-9% obloane/usi.
+## Fara ruptura, alegerea era intre o fatada plata si niste obloane pierdute;
+## cu ea, corpul ia textura de tencuiala si accentul ramane pictat pe atlas.
+## ATENTIE la lacomia prefixelor: prima versiune folosea "House_" si prindea si
+## `House_Sand`/`House_Stone` din `village_house.glb` (Okinawa si Dunele), care
+## n-au nicio treaba cu varul eolian — Track08 a capatat un material si doua
+## prop-uri in plus, prins la comparatia cu `main`. Numele de aici sunt EXACTE.
+## Modelele pe care se face ruptura de accente. Fara lista asta, `Church_Body`
+## ar prinde si biserica din Khuzhir (Baikal) — vezi CLASSES_BY_MODEL.
+const SPLIT_MODELS := {
+	"aeolian_house_a": true, "aeolian_house_b": true, "aeolian_house_c": true,
+	"stromboli_church": true,
+}
+
+const ACCENT_SPLIT := {
+	"House_A": Palette.FOAM_WHITE,
+	"House_B": Palette.FOAM_WHITE,
+	"House_C": Palette.FOAM_WHITE,
+	"Church_Body": Palette.FOAM_WHITE,
+	"Church_Tower": Palette.FOAM_WHITE,
+}
+
+
+## Clase legate de un MODEL anume, nu de un nume de nod.
+##
+## Exista fiindca maparea din `prop_classes()` e GLOBALA, iar numele de noduri
+## nu sunt unice intre kituri: `stromboli_church.glb` si `khuzhir_church.glb`
+## au amandoua un `Church_Body`, iar `village_house.glb` (Okinawa, Dunele) are
+## `House_Sand`/`House_Stone`. Prima versiune a maparii de var a prins si
+## biserica siberiana — masurat, Track10 lua un material in plus si biserica de
+## lemn ar fi primit tencuiala mediteraneana.
+##
+## Cheia e numele fisierului .glb (fara extensie); valoarea, o mapare
+## nume-de-parte -> clasa, aplicata DOAR instantelor modelului aluia.
+const CLASSES_BY_MODEL := {
+	"stromboli_church": {
+		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
+	},
+}
+
+
 func _ready() -> void:
+	_split_shutters()
 	Palette.apply_class_materials(self, prop_classes())
+	_apply_model_classes()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
+
+
+## Rupe accentele pictate de pe partile din ACCENT_SPLIT, ca ele sa poata primi
+## o clasa fara sa piarda culoarea. Trebuie sa ruleze INAINTE de
+## `apply_class_materials`: nodul nou trebuie sa existe cand se impart
+## materialele, altfel ar ramane fara.
+func _split_shutters() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		# Pe MODEL, nu pe tot arborele: `Church_Body` exista si la biserica
+		# siberiana din Khuzhir, care n-are obloane de rupt. Ruptura acolo era
+		# inofensiva vizual, dar adauga un nod si un desen pe o pista pe care
+		# task-ul asta n-are ce cauta — iar diferentele „inofensive" fata de
+		# `main` sunt exact cele care se acumuleaza netestate.
+		if not SPLIT_MODELS.has(model.scene_file_path.get_file().get_basename()):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null:
+				continue
+			for prefix: String in ACCENT_SPLIT:
+				if String(mi.name).begins_with(prefix):
+					Palette.split_accents(mi, int(ACCENT_SPLIT[prefix]))
+					break
+
+
+## Aplica `CLASSES_BY_MODEL` peste materialele deja puse. Ruleaza DUPA
+## `apply_class_materials`, ca sa aiba ultimul cuvant pe partile ambigue.
+func _apply_model_classes() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not CLASSES_BY_MODEL.has(stem):
+			continue
+		# NU `apply_class_materials`: ala pune materialul lumii pe tot ce nu e
+		# in mapare, deci ar sterge clasele deja aplicate pe celelalte parti
+		# (`Church_Tower` tocmai primise varul). Aici se ating DOAR partile
+		# numite.
+		var mapping: Dictionary = CLASSES_BY_MODEL[stem]
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null:
+				continue
+			var nm := String(mi.name)
+			if nm.ends_with(Palette.ACCENT_SUFFIX):
+				continue
+			for part: String in mapping:
+				if nm.begins_with(part):
+					mi.material_override = Palette.triplanar_class_material(
+						String(mapping[part]).trim_prefix(Palette.TRI_PREFIX))
+					break
 
 
 func _build_collision() -> void:

@@ -716,10 +716,16 @@ const BAIKAL_CLASSES := {
 ## AO-ul din vertex colors ramane dedesubt in toate cazurile (SurfaceTool il
 ## pastreaza, iar materialele de clasa au `vertex_color_use_as_albedo`).
 const STROMBOLI_CLASSES := {
-	# --- Incandescentele (neschimbate) ------------------------------------
-	"Lava_Stage": Palette.FINISH_PREFIX + "lava",
-	"Crater_Vents": Palette.FINISH_PREFIX + "lava",
-	"Bomb_": Palette.FINISH_PREFIX + "lava",
+	# --- Incandescentele --------------------------------------------------
+	#
+	# Pe SHADER din august 2026, nu pe finisajul de atlas. Verdictul
+	# dezvoltatorului pe captura: limba de lava era „niste dungi portocalii" —
+	# corecta ca slot, moarta ca imagine. Un rau de lava care nu curge si
+	# gheizere care nu pulseaza nu citesc ca lava, oricat de bine ar fi ales
+	# slotul. Vezi assets/shaders/lava.gdshader (+1 material, 0 draw calls).
+	"Lava_Stage": Palette.SHADER_PREFIX + "lava",
+	"Crater_Vents": Palette.SHADER_PREFIX + "lava",
+	"Bomb_": Palette.SHADER_PREFIX + "lava",
 	# --- Bazaltul si scoria: `volcanic_rock` ------------------------------
 	#
 	# Clasa exista din #337 si e deja tenta corecta pentru insula (aceeasi dala
@@ -751,10 +757,54 @@ const STROMBOLI_CLASSES := {
 	#
 	# Zidurile, treptele si edicola matura toate SINGURUL slot 22 (FOAM_WHITE),
 	# deci n-au ce pierde. Casele NU sunt aici — ele au obloanele in sloturi.
-	"Wall_": Palette.TRI_PREFIX + "plaster",
-	"Alley_Stairs": Palette.TRI_PREFIX + "plaster",
-	"Shrine_Body": Palette.TRI_PREFIX + "plaster",
-	"Lighthouse_White": Palette.TRI_PREFIX + "plaster",
+	"Wall_": Palette.TRI_PREFIX + "village_plaster",
+	"Alley_Stairs": Palette.TRI_PREFIX + "village_plaster",
+	"Shrine_Body": Palette.TRI_PREFIX + "village_plaster",
+	# `Lighthouse_White` NU e aici, desi farul Strombolicchio e tot var: acelasi
+	# nume de nod il are si `buildings/lighthouse.glb`, landmark-ul 7 al
+	# Okinawei, care are deja "plaster" prin tabelul lui de landmark (track.gd).
+	# Maparea asta e GLOBALA, deci ar fi mutat si farul insulei pe clasa noua —
+	# masurat: Track10 lua un material procedural in plus. Farul Stromboli
+	# ramane pe `plaster` prin acelasi tabel de landmark-uri, adica exact
+	# culoarea de dinainte; diferenta fata de casele satului e sub pragul la
+	# care merita un al doilea material.
+	# CASELE si BISERICA, adaugate in august 2026 dupa verdictul pe captura
+	# („nici casele nu au material pus pe ele"). In PR-ul precedent le-am lasat
+	# pe atlas fiindca matura 3-4 sloturi, iar regula spune ca o clasa
+	# triplanara sterge sloturile. Regula e buna; aplicarea a fost gresita —
+	# n-am masurat CAT din suprafata sta pe fiecare slot. Masurat acum, pe arie
+	# de triunghi:
+	#
+	#   House_A      slot 22 = 90%   (18: 5%, 5: 3%, 9: 2%)
+	#   House_B      slot 22 = 94%
+	#   House_C      slot 22 = 96%
+	#   Church_Body  slot 22 = 98%
+	#   Church_Tower slot 22 = 91%   (5: 9%)
+	#
+	# Adica varul e casa, iar obloanele sunt 1-9% din arie. Am tinut 90+% din
+	# fatada plata ca sa protejez 5% de accent — schimbul invers fata de cel
+	# corect.
+	#
+	# DE CE ERAU PLATE, cauza reala: slotul 22 e FOAM_WHITE, iar masca de
+	# detaliu (generate_palette_atlas.gd) ii da 0.20 — „spuma: cea mai curata
+	# suprafata din decor". Corect pentru creasta de val la Okinawa; pe
+	# Stromboli acelasi slot tine VARUL satului, deci toate cele 27 de case
+	# mosteneau instructiunea „ramai imaculata". Nu era o omisiune, era un slot
+	# reutilizat intre doua piste cu nevoi opuse. Clasa `plaster` ocoleste masca
+	# fiindca aduce textura ei.
+	#
+	# Obloanele NU se pierd: vezi `_split_shutters` mai jos, care le muta pe un
+	# nod propriu ramas pe atlas. Zero materiale noi (plaster exista deja).
+	# Nume EXACTE, nu prefixul "House_": ala prinde si `House_Sand`/`House_Stone`
+	# din village_house.glb (Okinawa, Dunele) — masurat, Track08 lua un material
+	# in plus.
+	"House_A": Palette.TRI_PREFIX + "village_plaster",
+	"House_B": Palette.TRI_PREFIX + "village_plaster",
+	"House_C": Palette.TRI_PREFIX + "village_plaster",
+	# `Church_Tower` e doar la Stromboli (Khuzhir are Dome/Roof), deci se poate
+	# mapa global. `Church_Body` EXISTA IN AMANDOUA si se mapeaza pe fisier,
+	# in CLASSES_BY_MODEL — vezi nota de acolo.
+	"Church_Tower": Palette.TRI_PREFIX + "village_plaster",
 	# --- Betonul portului: `concrete` -------------------------------------
 	#
 	# Dana din Ginostra (slot 8). Scara si treptele raman pe atlas: `Pier_Stairs`

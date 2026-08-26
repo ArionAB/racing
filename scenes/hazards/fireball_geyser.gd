@@ -63,7 +63,7 @@ extends Node3D
 ## Cat din ciclu sta coloana SUS la inaltime plina (fractie). Peste ea vin
 ## caderea si asteptarea jos.
 ##
-## 0.30, si valoarea NU e la alegere libera: coloana e „solida" si cat urca, si
+## 0.30, si valoarea NU e la alegere libera: bila e periculoasa si cat urca, si
 ## cat cade, deci fereastra ei blocata e `up_fraction * (1 + FALL_FRAC)`, nu
 ## `up_fraction`. Ca sa nu fie doua coloane sus deodata, fereastra aia trebuie
 ## sa incapa in decalajul de faza dintre doua guri vecine (1/n).
@@ -135,6 +135,14 @@ const GAP_FRAC: float = 0.04
 ## Segmente pe primitivele coloanei. EXPLICIT, nu implicit: un CylinderMesh
 ## lasat la valorile din fabrica are 64 de segmente, adica mii de triunghiuri
 ## pentru un obiect de 1.6 m (CLAUDE.md §triunghiuri — regula sferei).
+## Cati bulgari raman in urma bilei, si cat de mult (fractie din zbor).
+##
+## Coada exista ca sa se vada TRAIECTORIA, nu ca ornament: la o bila care urca
+## si cade, ce trebuie sa citesti de departe e „de unde vine si incotro", si
+## un singur bulgare in aer nu spune asta.
+const TRAIL_COUNT: int = 3
+const TRAIL_LAG: float = 0.055
+
 const COLUMN_SEGMENTS: int = 10
 const BLOB_RADIAL: int = 10
 const BLOB_RINGS: int = 5
@@ -188,46 +196,54 @@ func _build_geyser(index: int, vent: Vector3) -> Dictionary:
 	# (0.16) fiindca asta chiar tasneste — jetul urca, nu se scurge.
 	var lava_mat := Palette.lava_material_phased(_slot_phase(index) * TAU, 0.55)
 
-	# Coloana: cilindru ingust, ancorat cu BAZA la gura.
+	# BILA DE FOC. Nu coloana care creste: pana in august 2026 gheizerul era un
+	# cilindru scalat pe Y, si arata exact ca ce era — un cilindru care se
+	# lungeste si se face mic. Decizia dezvoltatorului: bile de foc aruncate in
+	# sus, care recad. Aceeasi mecanica de ritm, alta citire: ce te ameninta e
+	# un OBIECT pe o traiectorie, nu un perete care apare.
+	#
+	# Bila are marime FIXA — se misca, nu se umfla. Un obiect care isi schimba
+	# volumul in zbor nu citeste ca materie aruncata.
 	var body := AnimatableBody3D.new()
-	body.name = "Coloana"
-	# Contactul cu ea nu e perete de piatra — restul lumii vede o coloana de
-	# lava, nu o stanca (aceeasi conventie ca meta `lava` de pe limba).
+	body.name = "Bila"
+	# Contactul cu ea nu e perete de piatra — restul lumii vede foc, nu stanca
+	# (aceeasi conventie ca meta `lava` de pe limba).
 	body.set_meta(&"fireball", true)
-	var col_mesh := MeshInstance3D.new()
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = radius * 0.72 # se subtiaza spre varf, ca un jet real
-	cyl.bottom_radius = radius
-	cyl.height = height
-	cyl.radial_segments = COLUMN_SEGMENTS
-	cyl.rings = 1
-	col_mesh.mesh = cyl
-	col_mesh.material_override = lava_mat
-	# Cilindrul lui Godot e centrat pe origine: il ridicam cu o jumatate de
-	# inaltime ca baza sa cada fix pe gura.
-	col_mesh.position = Vector3.UP * (height * 0.5)
-	body.add_child(col_mesh)
+	var ball := MeshInstance3D.new()
+	ball.name = "Foc"
+	var sph := SphereMesh.new()
+	sph.radius = radius
+	sph.height = radius * 2.0
+	sph.radial_segments = BLOB_RADIAL
+	sph.rings = BLOB_RINGS
+	ball.mesh = sph
+	ball.material_override = lava_mat
+	body.add_child(ball)
 	var col_shape := CollisionShape3D.new()
-	var cap := CapsuleShape3D.new()
-	cap.radius = radius
-	cap.height = height
-	col_shape.shape = cap
-	col_shape.position = Vector3.UP * (height * 0.5)
+	var col_sphere := SphereShape3D.new()
+	col_sphere.radius = radius
+	col_shape.shape = col_sphere
 	body.add_child(col_shape)
 	root.add_child(body)
 
-	# Bulgarele din varf: capul jetului, ce se vede primul de departe.
-	var blob := MeshInstance3D.new()
-	blob.name = "Cap"
-	var sph := SphereMesh.new()
-	sph.radius = radius * 1.35
-	sph.height = radius * 2.7
-	sph.radial_segments = BLOB_RADIAL
-	sph.rings = BLOB_RINGS
-	blob.mesh = sph
-	blob.material_override = lava_mat
-	blob.position = Vector3.UP * height
-	root.add_child(blob)
+	# Coada: bulgari mai mici care raman in urma bilei, ca sa se vada de unde a
+	# venit si incotro merge. Nu particule — trei mesh-uri refolosite, care se
+	# aseaza pe traiectoria de acum cateva zecimi.
+	var trail: Array[MeshInstance3D] = []
+	for k in TRAIL_COUNT:
+		var t_mesh := MeshInstance3D.new()
+		t_mesh.name = "Coada%d" % (k + 1)
+		var t_sph := SphereMesh.new()
+		# Se subtiaza spre coada: bulgarii vechi s-au risipit deja.
+		var f := 1.0 - float(k + 1) / float(TRAIL_COUNT + 1)
+		t_sph.radius = radius * 0.62 * f
+		t_sph.height = radius * 1.24 * f
+		t_sph.radial_segments = 6
+		t_sph.rings = 3
+		t_mesh.mesh = t_sph
+		t_mesh.material_override = lava_mat
+		root.add_child(t_mesh)
+		trail.append(t_mesh)
 
 	# Avertismentul: un disc incins la gura, aprins cu `telegraph` secunde
 	# inainte de tasnire. E singurul lucru vizibil cand coloana e jos, deci el
@@ -246,24 +262,22 @@ func _build_geyser(index: int, vent: Vector3) -> Dictionary:
 	warn.visible = false
 	root.add_child(warn)
 
-	# Zona de impact: urmareste coloana, deci te prinde doar cat e ridicata.
+	# Zona de impact: CALATORESTE cu bila (e copil al corpului), deci te arde
+	# unde e focul, nu pe toata verticala gurii. La coloana era o capsula cat
+	# tot jetul; la bila, o sfera ceva mai larga decat ea — te arde si cand o
+	# razuiesti, nu doar cand intri in ea cu botul.
 	var area := Area3D.new()
 	area.name = "Impact"
 	var a_shape := CollisionShape3D.new()
-	var a_cap := CapsuleShape3D.new()
-	# Ceva mai groasa decat coloana: te arde si cand o razuiesti, nu doar cand
-	# intri in ea cu botul.
-	a_cap.radius = radius + 0.8
-	a_cap.height = height
-	a_shape.shape = a_cap
-	a_shape.position = Vector3.UP * (height * 0.5)
+	var a_sphere := SphereShape3D.new()
+	a_sphere.radius = radius + 0.8
+	a_shape.shape = a_sphere
 	area.add_child(a_shape)
-	root.add_child(area)
+	body.add_child(area)
 
 	return {
-		"root": root, "body": body, "blob": blob, "warn": warn, "area": area,
-		"col_mesh": col_mesh, "col_shape": col_shape, "col_cap": cap,
-		"a_shape": a_shape, "a_cap": a_cap,
+		"root": root, "body": body, "warn": warn, "area": area,
+		"trail": trail,
 		"phase": _slot_phase(index), "cooldown": {}, "up": false,
 	}
 
@@ -281,7 +295,7 @@ func _slot_phase(index: int) -> float:
 
 ## Cat poate sta o coloana sus fara ca doua sa fie ridicate deodata.
 ##
-## Fereastra in care gura e OBSTACOL nu e `up_fraction`: coloana e solida si cat
+## Fereastra in care gura e OBSTACOL nu e `up_fraction`: bila e in aer si cat
 ## urca, si cat cade, deci tine `up_fraction * (1 + FALL_FRAC)` din ciclu
 ## (tasnirea e deja inauntru — vezi `_tick`, unde ea consuma primul
 ## `RISE_FRAC` din fereastra). Ca sa existe MEREU un culoar liber, fereastra
@@ -404,6 +418,7 @@ func _road_half() -> float:
 ## 0 = e sus chiar acum.
 func _time_down_from(g: Dictionary, t_world: float) -> float:
 	var up := minf(up_fraction, _max_up_fraction())
+	# Fereastra in care gura e periculoasa = cat e bila in aer (vezi `_tick`).
 	var blocked := up * (1.0 + FALL_FRAC)
 	var t := fposmod(t_world - phase - float(g["phase"]), 1.0)
 	if t < blocked:
@@ -419,84 +434,58 @@ func _physics_process(delta: float) -> void:
 
 func _tick(g: Dictionary, delta: float) -> void:
 	var t := fposmod(_clock / period - phase - float(g["phase"]), 1.0)
-	# Plafonata, nu luata ca atare: vezi `_max_up_fraction` — invariantul
-	# „mereu un culoar liber" nu are voie sa depinda de ce s-a tastat in
-	# inspector.
-	var up := minf(up_fraction, _max_up_fraction())
-	var rise := up * RISE_FRAC
-	var fall := up * FALL_FRAC
-
-	var extend := 0.0
-	if t < rise:
-		# Tasnirea: rapida, cu franare spre varf — impinsa de presiune, nu
-		# ridicata cu macaraua.
-		var k := t / rise
-		extend = 1.0 - pow(1.0 - k, 2.0)
-	elif t < up:
-		extend = 1.0
-	elif t < up + fall:
-		# Caderea: se prabuseste inapoi, accelerat (gravitatie).
-		var k := (t - up) / fall
-		extend = 1.0 - k * k
-	else:
-		extend = 0.0
+	# Cat din ciclu e bila IN AER. Plafonat, ca invariantul sa nu depinda de ce
+	# s-a tastat in inspector (vezi `_max_up_fraction`).
+	var flight := minf(up_fraction * (1.0 + FALL_FRAC), _max_up_fraction()
+		* (1.0 + FALL_FRAC))
 
 	var body := g["body"] as AnimatableBody3D
-	var blob := g["blob"] as Node3D
 	var area := g["area"] as Area3D
-	# Coloana CRESTE din gura (nu se translateaza: o coloana intreaga ridicata
-	# din pamant ar arata a piston, nu a jet), dar cresterea se face
-	# REDIMENSIONAND, nu scaland nodurile.
-	#
-	# Jolt refuza scara neuniforma pe corpuri: masurat, un `scale` de
-	# (1, 0.98, 1) pe `Coloana` era acceptat tacut ca (0.99, 0.99, 0.99) — cu
-	# un avertisment pe consola si, mai rau, cu un colizor care se SUBTIA odata
-	# cu inaltimea. Adica exact cand coloana era jos, ea devenea si ingusta, si
-	# culoarul blocat nu mai avea latimea pe care o vede jucatorul.
-	#
-	# Doar mesh-ul se scaleaza (n-are fizica); formele isi primesc inaltimea.
-	var s := maxf(extend, 0.001)
-	var live_h := height * s
-	var col_mesh := g["col_mesh"] as MeshInstance3D
-	col_mesh.scale = Vector3(1.0, s, 1.0)
-	col_mesh.position = Vector3.UP * (live_h * 0.5)
-	# Capsula are `height` INCLUSIV emisferele: sub 2*radius ar fi o sfera, si
-	# Godot oricum ridica valoarea la minimul ei. Clamp explicit, ca inaltimea
-	# ceruta si cea reala sa nu divergheze tacut.
-	var cap := g["col_cap"] as CapsuleShape3D
-	cap.height = maxf(live_h, radius * 2.0 + 0.01)
-	(g["col_shape"] as CollisionShape3D).position = Vector3.UP * (live_h * 0.5)
-	var a_cap := g["a_cap"] as CapsuleShape3D
-	a_cap.height = maxf(live_h, a_cap.radius * 2.0 + 0.01)
-	(g["a_shape"] as CollisionShape3D).position = Vector3.UP * (live_h * 0.5)
-	blob.position = Vector3.UP * live_h
-	blob.visible = extend > 0.02
+	var trail := g["trail"] as Array[MeshInstance3D]
 
-	# Coloana cazuta nu are voie sa fie nici obstacol, nici un colizor de 1 cm
-	# peste care sa se impiedice masinile.
-	var solid := extend > 0.08
-	body.visible = solid
-	# `monitoring` de pe zona, nu process_mode pe corp: colizorul unui
+	var airborne := t < flight
+	if airborne:
+		# ARC BALISTIC: y = 4h * k * (1 - k), k = 0..1.
+		#
+		# Parabola, nu doua rampe lipite: bila urca incetinind si cade
+		# accelerand, dintr-o singura formula — asa arata ceva aruncat, si
+		# varful iese exact la `height` la mijlocul zborului.
+		var k := t / flight
+		body.position = Vector3.UP * (4.0 * height * k * (1.0 - k))
+		# Coada: unde era bila cu cateva zecimi in urma, pe ACEEASI parabola.
+		for idx in trail.size():
+			var lag := TRAIL_LAG * float(idx + 1)
+			var kt := clampf(k - lag, 0.0, 1.0)
+			var m := trail[idx]
+			m.position = Vector3.UP * (4.0 * height * kt * (1.0 - kt))
+			# Coada dispare cand bila abia a plecat (n-are ce lasa in urma).
+			m.visible = kt > 0.001
+	else:
+		body.position = Vector3.ZERO
+		for m in trail:
+			m.visible = false
+
+	body.visible = airborne
+	# `monitoring` pe zona, nu process_mode pe corp: colizorul unui
 	# AnimatableBody3D ramane in spatiul fizic si cu procesarea stinsa, deci
 	# oprirea trebuie facuta pe forma, nu pe nod.
-	area.monitoring = solid
-	body.process_mode = Node.PROCESS_MODE_INHERIT if solid \
-		else Node.PROCESS_MODE_DISABLED
+	area.monitoring = airborne
+	body.process_mode = Node.PROCESS_MODE_INHERIT if airborne 		else Node.PROCESS_MODE_DISABLED
 
-	# Avertismentul: aprins in fereastra dinaintea tasnirii, cat coloana e inca
-	# jos. Pulseaza, ca sa se citeasca drept ceas, nu decor.
+	# Avertismentul: discul incins de la gura, aprins inainte de plecare, cat
+	# bila e inca jos. Pulseaza, ca sa se citeasca drept ceas, nu decor.
 	var warn := g["warn"] as MeshInstance3D
 	var to_rise := fposmod(1.0 - t, 1.0)
-	var warning := not solid and to_rise <= telegraph / period
+	var warning := not airborne and to_rise <= telegraph / period
 	warn.visible = warning
 	if warning:
 		var pulse := 1.0 + 0.35 * sin(t * TAU * 14.0)
 		warn.scale = Vector3(pulse, 1.0, pulse)
 
-	if extend > 0.5 and not bool(g["up"]):
+	if airborne and not bool(g["up"]):
 		g["up"] = true
 		AudioManager.play_sfx(&"avalanche_hit", 0.85)
-	elif extend < 0.2:
+	elif not airborne:
 		g["up"] = false
 
 	var cooldown := g["cooldown"] as Dictionary
@@ -507,7 +496,8 @@ func _tick(g: Dictionary, delta: float) -> void:
 		else:
 			cooldown[key] = left
 
-	if solid:
+	# Doar cat bila e in aer: cazuta, nu exista si nu are ce arde.
+	if bool(g["up"]):
 		_hit_cars(g)
 
 

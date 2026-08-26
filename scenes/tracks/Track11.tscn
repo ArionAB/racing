@@ -1090,6 +1090,7 @@ curve = SubResource("Curve3D_xbr6o")
 script = ExtResource("39_gp84v")
 model = ExtResource("39_7wvw5")
 model_scale = 1.5
+speed = 1.2
 metadata/_custom_type_script = "uid://b1848dr3kabqm"
 
 [node name="pergola_pulera5" parent="DecorManual/6)Ginostra" unique_id=281545747 instance=ExtResource("13_8g0lj")]

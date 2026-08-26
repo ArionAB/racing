@@ -1116,6 +1116,16 @@ func respawn(backoff_m: float = 14.0) -> void:
 func horizontal_speed() -> float:
 	return Vector3(velocity.x, 0.0, velocity.z).length()
 
+## Jumatatile gabaritului colizerului caroseriei (m) — pentru cine trebuie sa
+## stie daca masina incape intr-un prag (usa telecabinei).
+func collider_half_length() -> float:
+	var box := _collision_shape.shape as BoxShape3D if _collision_shape != null else null
+	return box.size.z * 0.5 if box != null else 1.9
+
+func collider_half_width() -> float:
+	var box := _collision_shape.shape as BoxShape3D if _collision_shape != null else null
+	return box.size.x * 0.5 if box != null else 1.1
+
 ## Squash & stretch: deformare scurta a caroseriei care "vinde" evenimentul.
 func _punch_scale(target: Vector3) -> void:
 	if _visual == null:

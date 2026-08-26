@@ -23,6 +23,9 @@ extends Node
 ##  (iii) plecarea/sosirea nu o arunca: |viteza verticala| < 6 m/s tot drumul.
 ##  (iv)  B, ajunsa dupa fereastra, nu e la bord si ramane pe peron.
 ##  (v)   ciclul 2, 26 m/s: A tot la bord, ajunge sus, nu cade in golf.
+##  (vi)  ciclul 3, 26 m/s plecata la t=2.2 din fereastra (intra pe podea la
+##        ~2.95, in ultima zecime): usa din spate NU se inchide sub ea —
+##        plecarea asteapta (door_hold), e la bord, ajunge sus, nu cade.
 ##
 ## Ruleaza CA SCENA (masina cere autoload-urile):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeCableway.tscn
@@ -45,6 +48,9 @@ const DOCK_BOTTOM := Vector3(60, 0, -8)
 const APPROACH := Vector3(60, 0.6, 5)
 const APPROACH_SPEED: float = 18.0
 const FAST_SPEED: float = 26.0
+## Ciclul 3: plecarea de pe sosea la t=2.2 din fereastra cu 26 m/s pune
+## masina pe podea la ~2.95 s (masurat de critic in runda 2).
+const LATE_DEPART_T: float = 2.2
 const MAX_DRIFT: float = 0.5
 const MAX_VY: float = 6.0
 const UPPER_MIN_Y: float = 24.0
@@ -202,9 +208,11 @@ func _wait_boarding_start() -> bool:
 ## Imbarcarea la viteza: A pleaca de pe sosea cu `speed`, gazul tinut, in
 ## clipa deschiderii usilor. Intoarce masina si tipareste ce s-a intamplat
 ## pana la inchiderea usilor.
-func _board_at_speed(speed: float, driver: ProbeDriver) -> Car:
+func _board_at_speed(speed: float, driver: ProbeDriver, depart_t: float = 0.0) -> Car:
 	var ok_start := await _wait_boarding_start()
 	_verdict(ok_start, "fereastra de imbarcare a inceput")
+	while _hazard.cycle_time() < depart_t:
+		await get_tree().physics_frame
 	var a := _spawn(APPROACH, Basis.IDENTITY, speed)
 	a.set_controller(driver)
 	driver.throttle = 1.0
@@ -230,16 +238,23 @@ func _board_at_speed(speed: float, driver: ProbeDriver) -> Car:
 			if t_stop < 0.0 and a.horizontal_speed() < 0.5:
 				t_stop = _hazard.cycle_time()
 		if frames % 15 == 0 or (on_deck and frames % 5 == 0):
-			print("    t=%4.2f A z=%+7.2f (local %+6.2f) y=%5.2f v=%5.2f roti %d pe podea=%s"
+			print("    t=%4.2f A z=%+7.2f (local %+6.2f) y=%5.2f v=%5.2f roti %d pe podea=%s prag=%s asteptare %.2f"
 				% [_hazard.cycle_time(), a.global_position.z, local.z, a.global_position.y,
-				a.horizontal_speed(), a.wheels_on_ground, str(on_deck)])
+				a.horizontal_speed(), a.wheels_on_ground, str(on_deck),
+				str(_hazard.doorway_cars().has(a)), _hazard.door_hold()])
 	var local_end := body.to_local(a.global_position)
 	print("--- (0) imbarcare la %.0f m/s: pe podea la t=%.2f cu %.1f m/s, oprita la t=%.2f; z local min %+.2f (marginea podelei %+.2f); la inchidere local (%+.2f, %+.2f, %+.2f), v=%.2f, roti %d, y min %.2f"
 		% [speed, t_deck, v_deck, t_stop, min_z, floor_edge, local_end.x, local_end.y, local_end.z,
 		a.horizontal_speed(), a.wheels_on_ground, min_y])
+	print("    plecarea a asteptat %.2f s (max %.2f); usa din spate ramasa deschisa: %s"
+		% [_hazard.door_hold(), _hazard.door_hold_max, str(_hazard.rear_door_pending())])
 	_verdict(t_deck >= 0.0, "A a intrat pe podea in fereastra (t=%.2f s)" % t_deck)
-	_verdict(t_stop >= 0.0 and t_stop < _hazard.boarding_window,
-		"A s-a oprit pe podea inainte de inchiderea usilor (t=%.2f < %.1f s)" % [t_stop, _hazard.boarding_window])
+	# O masina intrata in ultima zecime nu mai apuca sa se opreasca inainte
+	# de plecare: e de ajuns sa fie INAUNTRU (pragul liber) si aproape oprita
+	# — ancora traversarii o tine de acolo (verdictele (i)/(vi) o masoara).
+	var settled := t_stop >= 0.0 or (a.horizontal_speed() < 5.0 and _hazard.doorway_cars().is_empty())
+	_verdict(settled, "A e oprita sau prinsa inauntru la inchiderea usilor (oprita t=%.2f, v=%.2f m/s)" % [t_stop, a.horizontal_speed()])
+	_verdict(_hazard.doorway_cars().is_empty(), "usa din spate nu s-a inchis peste A")
 	_verdict(min_z > floor_edge, "A n-a iesit pe fata (z local min %+.2f > %+.2f)" % [min_z, floor_edge])
 	_verdict(_hazard.aboard().has(a), "A e la bord la inchiderea usilor")
 	_verdict(a.wheels_on_ground == 4 and absf(local_end.y) < 0.3,
@@ -364,3 +379,35 @@ func _run() -> void:
 	_verdict(c.global_position.y > TOP.y - 1.0 and absf(loc2.y) < 0.3, "A a ajuns sus pe podea (y=%.1f)" % c.global_position.y)
 	_verdict(min_y2 > BOTTOM.y - 1.0, "A n-a cazut in golf (y min %.2f)" % min_y2)
 	_verdict(max_vy2 < MAX_VY, "A nu e aruncata (|vy| max %.2f)" % max_vy2)
+
+	# ============================ ciclul 3: 26 m/s, in ultima zecime a ferestrei
+	c.queue_free()
+	await get_tree().physics_frame
+	print("=== ciclul 3: imbarcare la %.0f m/s plecata la t=%.1f (intra pe podea in ultima zecime) ===" % [FAST_SPEED, LATE_DEPART_T])
+	var driver3 := ProbeDriver.new()
+	var d := await _board_at_speed(FAST_SPEED, driver3, LATE_DEPART_T)
+	var hold := _hazard.door_hold()
+	var min_y3 := INF
+	var max_vy3 := 0.0
+	var off3 := 0
+	var samples3 := 0
+	while _hazard.state() == CablewayScript.State.UP:
+		await get_tree().physics_frame
+		samples3 += 1
+		min_y3 = minf(min_y3, d.global_position.y)
+		max_vy3 = maxf(max_vy3, absf(d.velocity.y))
+		if d.wheels_on_ground < 3:
+			off3 += 1
+		if samples3 % 60 == 0:
+			var l3 := body.to_local(d.global_position)
+			print("    t=%5.2f cabina y=%5.1f | A local (%+.2f, %+.2f, %+.2f) roti %d vy %+.2f"
+				% [_hazard.cycle_time(), body.global_position.y, l3.x, l3.y, l3.z, d.wheels_on_ground, d.velocity.y])
+	var loc3 := body.to_local(d.global_position)
+	print("--- (vi) %.0f m/s tarziu: plecarea a asteptat %.2f s; la sosire A local (%+.2f, %+.2f, %+.2f), y=%.1f, y min %.2f, |vy| max %.2f, cadre <3 roti %d"
+		% [FAST_SPEED, hold, loc3.x, loc3.y, loc3.z, d.global_position.y, min_y3, max_vy3, off3])
+	_verdict(hold > 0.0 and hold <= _hazard.door_hold_max, "usa a asteptat masina din prag (%.2f s)" % hold)
+	_verdict(_hazard.aboard().has(d) or d.global_position.y > TOP.y - 1.0, "A e la bord")
+	_verdict(d.global_position.y > TOP.y - 1.0 and absf(loc3.y) < 0.3, "A a ajuns sus pe podea (y=%.1f, dy %+.2f)" % [d.global_position.y, loc3.y])
+	_verdict(min_y3 > BOTTOM.y - 1.0, "A n-a cazut in golf (y min %.2f)" % min_y3)
+	_verdict(max_vy3 < MAX_VY, "A nu e aruncata (|vy| max %.2f)" % max_vy3)
+	_verdict(off3 <= 6, "rotile raman pe podea (%d cadre fara contact)" % off3)

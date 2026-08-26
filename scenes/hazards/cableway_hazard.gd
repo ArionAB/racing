@@ -43,6 +43,16 @@ extends Node3D
 ##     intrata pe podea e trasa spre centrul ei de un arc+amortizor cu plafon
 ##     mai mare decat al ancorei de drum (catch_max_accel) — „lantul" care te
 ##     opreste pe un bac. Din 18 m/s cu gazul tinut se opreste in ~3.5 m.
+##  6. USA DIN SPATE NU SE INCHIDE PESTE MASINA (runda 3): o masina care intra
+##     pe podea in ultima zecime a ferestrei (26 m/s, gazul tinut) inca sta
+##     peste pragul usii cand vine plecarea; colizerul barei activat sub ea o
+##     lasa calare, fara roti pe podea, si cade de pe spatele cabinei in
+##     timpul traversarii (masurat: y=-5 m, |vy| 17). Ca la orice usa cu
+##     senzor: cat timp o masina e in prag, PLECAREA ASTEAPTA (cel mult
+##     door_hold_max), prinderea o trage inauntru, apoi se inchide. Daca nici
+##     asa nu s-a eliberat pragul, masina NU e la bord si usa ramane
+##     deschisa (bara dezactivata) pana iese din suprapunere — nu e aruncata,
+##     ramane pe peron.
 
 ## Tabelul de clase de material, prin PRELOAD (vezi PathMover).
 const WorldProp = preload("res://scenes/props/world_prop.gd")
@@ -57,6 +67,8 @@ const WALL_THICKNESS: float = 0.12
 ## (colizer 3.8 m) sa aiba loc intre ele (2 x 2.27 m).
 const END_BAR_OVERHANG: float = 0.2
 const END_BAR_HEIGHT: float = 0.5
+## Nota 6: cat loc se cere intre gabaritul masinii si usa ca sa se inchida.
+const DOOR_MARGIN: float = 0.1
 ## Varful turnului din GLB (unde trece cablul).
 const TOWER_TOP: float = 16.14
 ## Turnul sta LANGA linia cablului, nu pe ea: cabina trece pe langa el, iar
@@ -95,6 +107,8 @@ enum State { BOARDING, UP, UNLOADING, DOWN }
 ## o masina intrata pe podea cat usile sunt deschise jos. 60 cu gazul tinut
 ## (16 m/s^2) inseamna 44 net: 18 m/s se opresc in 3.7 m, sub podeaua de 4.25.
 @export_range(1.0, 120.0, 1.0) var catch_max_accel: float = 60.0
+## Nota 6: cat poate intarzia plecarea o masina prinsa in pragul usii (s).
+@export_range(0.0, 3.0, 0.05) var door_hold_max: float = 1.0
 
 @export_group("Constructie")
 ## Cabina si turnul: goale = modelele din kitul Chongqing.
@@ -134,6 +148,10 @@ var _velocity: Vector3 = Vector3.ZERO
 var _prev_pos: Vector3 = Vector3.ZERO
 ## Car -> ancora (pozitia locala pe podea) pentru masinile de la bord.
 var _aboard: Dictionary = {}
+## Nota 6: cat a asteptat plecarea in ciclul curent si daca usa din spate
+## a ramas deschisa peste o masina neimbarcata.
+var _door_hold: float = 0.0
+var _rear_door_pending: bool = false
 
 
 func _ready() -> void:
@@ -245,7 +263,7 @@ func _bar_mesh(size: Vector3, at: Vector3) -> MeshInstance3D:
 ## usa din spate e deschisa doar la imbarcare (intri pe spate).
 func _set_bars(st: State) -> void:
 	var front_open := st == State.UNLOADING
-	var rear_open := st == State.BOARDING
+	var rear_open := st == State.BOARDING or _rear_door_pending
 	_front_bar.disabled = front_open
 	_rear_bar.disabled = rear_open
 	_front_bar_mesh.visible = not front_open
@@ -385,6 +403,10 @@ func _physics_process(delta: float) -> void:
 		_started = true
 		_time = phase * period
 	_time += delta
+	# Nota 6: usa cu senzor — plecarea asteapta cat o masina sta in prag.
+	if _state == State.BOARDING and fposmod(_time, period) >= boarding_window 			and _door_hold < door_hold_max and not _doorway_cars().is_empty():
+		_time -= delta
+		_door_hold += delta
 	var t := fposmod(_time, period)
 	var prev_state := _state
 	var s := _progress(t)
@@ -393,8 +415,11 @@ func _physics_process(delta: float) -> void:
 	_prev_pos = _body.global_position
 	_body.set_meta(&"platform_velocity", _velocity)
 	if _state != prev_state:
-		_set_bars(_state)
 		_on_state_changed(prev_state, _state)
+		_set_bars(_state)
+	if _rear_door_pending and _doorway_cars().is_empty():
+		_rear_door_pending = false
+		_set_bars(_state)
 	if _state == State.BOARDING:
 		_catch_boarding()
 	elif _state == State.UP or _state == State.DOWN:
@@ -426,12 +451,18 @@ func _place(s: float) -> void:
 
 
 func _on_state_changed(from: State, to: State) -> void:
+	if to == State.BOARDING:
+		_door_hold = 0.0
 	if to == State.UP or to == State.DOWN:
-		# Usile se inchid: cine e pe podea e la bord, ancorat unde sta.
+		# Usile se inchid: cine e pe podea e la bord, ancorat unde sta — mai
+		# putin cine a ramas in pragul usii din spate (nota 6): usa ramane
+		# deschisa peste el si el ramane pe peron.
 		_aboard.clear()
+		var doorway := _doorway_cars()
+		_rear_door_pending = to == State.UP and not doorway.is_empty()
 		for b in _deck.get_overlapping_bodies():
 			var car := b as Car
-			if car == null:
+			if car == null or doorway.has(car):
 				continue
 			_aboard[car] = _body.to_local(car.global_position)
 	elif from == State.UP or from == State.DOWN:
@@ -442,6 +473,26 @@ func _on_state_changed(from: State, to: State) -> void:
 				continue
 			car.road_index = car.track.closest_index_global(car.global_position, car.route)
 		_aboard.clear()
+
+
+## Masinile de pe podea al caror gabarit (colizerul, in lungul cabinei)
+## se suprapune cu bara din spate — usa nu se poate inchide peste ele.
+func _doorway_cars() -> Array:
+	var out: Array = []
+	var bar_near := _rear_bar.position.z - WALL_THICKNESS * 0.5 - DOOR_MARGIN
+	for b in _deck.get_overlapping_bodies():
+		var car := b as Car
+		if car == null:
+			continue
+		var half_len := car.collider_half_length()
+		var local := _body.to_local(car.global_position)
+		# Directia masinii poate fi oblica: proiecteaza jumatatea de lungime pe
+		# axa cabinei si ia maximul dintre lungime si latime.
+		var fwd := _body.global_transform.basis.inverse() * (-car.global_transform.basis.z)
+		var reach := maxf(absf(fwd.z) * half_len, car.collider_half_width())
+		if local.z + reach > bar_near:
+			out.append(car)
+	return out
 
 
 ## Prinderea la imbarcare (nota 5): cat usile sunt deschise jos, orice masina
@@ -504,6 +555,18 @@ func velocity() -> Vector3:
 
 func aboard() -> Array:
 	return _aboard.keys()
+
+
+func door_hold() -> float:
+	return _door_hold
+
+
+func rear_door_pending() -> bool:
+	return _rear_door_pending
+
+
+func doorway_cars() -> Array:
+	return _doorway_cars()
 
 
 ## Masinile de pe podea in clipa asta (indiferent de usi).

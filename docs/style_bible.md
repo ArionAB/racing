@@ -280,7 +280,16 @@ Ce e permis:
   triplanar; moară pe UV cubic), `wood` (turnul morii),
   `roof_tiles`/`plaster`/`stone_wall` (village_house, UV cubic),
   `coral_rock`/`bark` (Okinawa), `alpine_granite`/`snow`/`pine_needles`
-  (Alpii), `ice`/`ice_bloc`/`olkhon_marble`/`cut_stone` (Baikal).
+  (Alpii), `ice`/`ice_bloc`/`olkhon_marble`/`cut_stone` (Baikal),
+  `volcanic_rock`/`village_plaster`/`macchia`/`macchia_dry` (Stromboli).
+
+  `macchia` e a doua clasă **pictată** (după `pine_needles`), din același
+  motiv: o fotografie de tufă are adâncime și, proiectată triplanar pe un
+  volum neted, citește tapet. Sursa: `tools/paint_macchia.py` — frunză lată
+  în buchete, nu ac în spic. `macchia_dry` e ACEEAȘI dală, ridicată și tentată
+  spre slotul 13: frunzișul verde (slot 21) și tufa arsă de soare (slot 13)
+  sunt o distincție pe care paleta o făcea deja, și pe care o singură dală
+  ar fi șters-o.
 
   > **Aceeași dală poate fi corectă pentru o clasă și greșită pentru alta —
   > decide SCARA sursei față de piesă, nu materialul din nume.**

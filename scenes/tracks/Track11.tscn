@@ -43,6 +43,7 @@
 [ext_resource type="PackedScene" uid="uid://n2wb5p6hjuwn" path="res://assets/models/stromboli/props/fumarole_vent.glb" id="41_hyldl"]
 [ext_resource type="PackedScene" uid="uid://dtw8m0j8r6au2" path="res://assets/models/stromboli/trees/fig_tree.glb" id="42_k64jy"]
 [ext_resource type="Script" uid="uid://cjap2gpbe7hjs" path="res://scenes/hazards/fireball_geyser.gd" id="43_fireball"]
+[ext_resource type="Script" uid="uid://hean3pv6afrl" path="res://scenes/hazards/fumarole_hazard.gd" id="44_k2q6q"]
 
 [sub_resource type="Curve3D" id="Curve3D_stromboli"]
 _data = {
@@ -98,7 +99,7 @@ point_count = 4
 
 [sub_resource type="Curve3D" id="Curve3D_hyldl"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -8.980904, 0.49040377, 11.917902, 0, 0, 0, 0, 0, 0, -28.640991, 0.32597613, 16.931864, 0, 0, 0, 0, 0, 0, -50.917877, 0.31718397, 19.575825, 0, 0, 0, 0, 0, 0, -88.39201, 0.9432349, 27.302696, 0, 0, 0, 0, 0, 0, -127.34679, 0.4153738, 43.511673, 0, 0, 0, 0, 0, 0, -141.20412, 1.0472894, 51.1392),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -8.980904, 0.49040377, 11.917902, 0, 0, 0, 0, 0, 0, -28.640991, 0.32597613, 13.528351, 0, 0, 0, 0, 0, 0, -50.917877, 0.31718397, 13.629627, 0, 0, 0, 0, 0, 0, -88.39201, 0.9432349, 27.302696, 0, 0, 0, 0, 0, 0, -127.34679, 0.4153738, 43.511673, 0, 0, 0, 0, 0, 0, -141.20412, 1.0472894, 51.1392),
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0)
 }
 point_count = 6
@@ -281,26 +282,25 @@ curve = SubResource("Curve3D_bomba5")
 [node name="GheizereCrater" type="Node3D" parent="." unique_id=944992790]
 
 [node name="Pereche1" type="Node3D" parent="GheizereCrater" unique_id=944992791]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.97, 60.6, 243.08)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.59529, 52.668613, 251.27821)
 script = ExtResource("43_fireball")
 radius = 1.25
 vents = Array[Vector3]([Vector3(3.53, 0, 2.26), Vector3(-3.53, 0, -2.26)])
 metadata/_custom_type_script = "uid://cjap2gpbe7hjs"
 
 [node name="Pereche2" type="Node3D" parent="GheizereCrater" unique_id=944992792]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.58, 60.83, 255.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.58, 57.51888, 255.8)
 script = ExtResource("43_fireball")
+height = 14.0
 radius = 1.25
-phase = 0.0
 vents = Array[Vector3]([Vector3(4.06, 0, 1.05), Vector3(-4.06, 0, -1.05)])
 metadata/_custom_type_script = "uid://cjap2gpbe7hjs"
 
 [node name="Pereche3" type="Node3D" parent="GheizereCrater" unique_id=944992793]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.32, 60.75, 273.25)
+transform = Transform3D(0.71800214, 0, 0.6960409, 0, 1, 0, -0.6960409, 0, 0.71800214, -137.13892, 54.091103, 256.45273)
 script = ExtResource("43_fireball")
 radius = 1.25
-phase = 0.0
-vents = Array[Vector3]([Vector3(3.96, 0, -1.40), Vector3(-3.96, 0, 1.40)])
+vents = Array[Vector3]([Vector3(3.96, 0, -1.4), Vector3(-3.96, 0, 1.4)])
 metadata/_custom_type_script = "uid://cjap2gpbe7hjs"
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=1029819703]
@@ -992,6 +992,27 @@ transform = Transform3D(1.1937588, 0, 0, 0, 1.1937588, 0, 0, 0, 1.1937588, -19.7
 [node name="5)Coborarea ciarei" type="Node3D" parent="DecorManual" unique_id=104457763]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -171.77417, 57.359432, 347.80273)
 
+[node name="fumarole_vent6" parent="DecorManual/5)Coborarea ciarei" unique_id=1736529127 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.096146, -21.490116, 38.02066)
+
+[node name="FumaroleHazard" type="Node3D" parent="DecorManual/5)Coborarea ciarei/fumarole_vent6" unique_id=984720617]
+script = ExtResource("44_k2q6q")
+metadata/_custom_type_script = "uid://hean3pv6afrl"
+
+[node name="fumarole_vent8" parent="DecorManual/5)Coborarea ciarei" unique_id=1035880514 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8905334, -1.311966, -60.24063)
+
+[node name="FumaroleHazard" type="Node3D" parent="DecorManual/5)Coborarea ciarei/fumarole_vent8" unique_id=123704230]
+script = ExtResource("44_k2q6q")
+metadata/_custom_type_script = "uid://hean3pv6afrl"
+
+[node name="fumarole_vent7" parent="DecorManual/5)Coborarea ciarei" unique_id=1917270241 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.22203, -30.55437, 86.29355)
+
+[node name="FumaroleHazard" type="Node3D" parent="DecorManual/5)Coborarea ciarei/fumarole_vent7" unique_id=642245982]
+script = ExtResource("44_k2q6q")
+metadata/_custom_type_script = "uid://hean3pv6afrl"
+
 [node name="lava_slab_broken" parent="DecorManual/5)Coborarea ciarei" unique_id=1769088820 instance=ExtResource("35_4m0l7")]
 transform = Transform3D(0.41036922, 0, -0.9119195, 0, 1, 0, 0.9119195, 0, 0.41036922, -31.28276, -43.971066, 129.61002)
 
@@ -1022,11 +1043,20 @@ transform = Transform3D(2.1219332, 0, 0, 0, 2.1219332, 0, 0, 0, 2.1219332, 58.98
 [node name="scoria_rock4" parent="DecorManual/5)Coborarea ciarei" unique_id=374577093 instance=ExtResource("33_luffo")]
 transform = Transform3D(2.1219332, 0, 0, 0, 2.1219332, 0, 0, 0, 2.1219332, 54.60022, 1.4357147, -110.037506)
 
-[node name="fumarole_vent4" parent="DecorManual/5)Coborarea ciarei" unique_id=1736529127 instance=ExtResource("41_hyldl")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.441864, 1.4812355, -59.505768)
+[node name="fumarole_vent4" parent="DecorManual/5)Coborarea ciarei" unique_id=1212157993 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.291046, 2.6558418, -56.786194)
+
+[node name="FumaroleHazard2" type="Node3D" parent="DecorManual/5)Coborarea ciarei" unique_id=296240797]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.221664, -20.128769, 21.142517)
+script = ExtResource("44_k2q6q")
+metadata/_custom_type_script = "uid://hean3pv6afrl"
 
 [node name="fumarole_vent5" parent="DecorManual/5)Coborarea ciarei" unique_id=869143618 instance=ExtResource("41_hyldl")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.221664, -20.128769, 21.142517)
+
+[node name="FumaroleHazard" type="Node3D" parent="DecorManual/5)Coborarea ciarei/fumarole_vent5" unique_id=1312755353]
+script = ExtResource("44_k2q6q")
+metadata/_custom_type_script = "uid://hean3pv6afrl"
 
 [node name="6)Ginostra" type="Node3D" parent="DecorManual" unique_id=839263383]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70.586845, 7.567757, 480.87497)
@@ -1131,14 +1161,38 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.95929, 12.343519, 215.2575
 [node name="fig_tree" parent="DecorManual/7)Coasta de est" unique_id=2147385524 instance=ExtResource("42_k64jy")]
 transform = Transform3D(0.82065696, 0, -0.57142115, 0, 1, 0, 0.57142115, 0, 0.82065696, 15.518414, 0.7775755, -15.27803)
 
-[node name="fumarole_vent" parent="DecorManual/7)Coasta de est" unique_id=173276079 instance=ExtResource("41_hyldl")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.161808, 1.1419239, 13.388077)
-
 [node name="fumarole_vent2" parent="DecorManual/7)Coasta de est" unique_id=275589749 instance=ExtResource("41_hyldl")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.9351463, 1.1419239, -25.76352)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.9351463, 0.81666183, -25.76352)
+
+[node name="FumaroleHazard" type="Node3D" parent="DecorManual/7)Coasta de est/fumarole_vent2" unique_id=358618114]
+script = ExtResource("44_k2q6q")
+metadata/_custom_type_script = "uid://hean3pv6afrl"
 
 [node name="fumarole_vent3" parent="DecorManual/7)Coasta de est" unique_id=1750649261 instance=ExtResource("41_hyldl")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.752495, 1.4741955, 48.488907)
 
+[node name="FumaroleHazard" type="Node3D" parent="DecorManual/7)Coasta de est/fumarole_vent3" unique_id=57713970]
+script = ExtResource("44_k2q6q")
+phase = 0.4
+metadata/_custom_type_script = "uid://hean3pv6afrl"
+
+[node name="fumarole_vent4" parent="DecorManual/7)Coasta de est" unique_id=1240130826 instance=ExtResource("41_hyldl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22233963, 1.5194016, -0.41812134)
+
+[node name="FumaroleHazard" type="Node3D" parent="DecorManual/7)Coasta de est/fumarole_vent4" unique_id=1185699299]
+script = ExtResource("44_k2q6q")
+phase = 0.4
+reach = 10.0
+blind_seconds = 1.0
+metadata/_custom_type_script = "uid://hean3pv6afrl"
+
 [node name="prickly_pear" parent="DecorManual/7)Coasta de est" unique_id=940792068 instance=ExtResource("27_gbtar")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.354549, 0, 0)
+
+[node name="fumoareleHazard1" type="Marker3D" parent="DecorManual/7)Coasta de est" unique_id=305050764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1250534, 0)
+gizmo_extents = 3.0
+script = ExtResource("8_4m0l7")
+kind = 12
+model = ExtResource("41_hyldl")
+metadata/_custom_type_script = "uid://ccxa8xagvu55q"

@@ -67,7 +67,7 @@ func _test_invariant(grup: Node) -> void:
 		for p in perechi:
 			var sus := 0
 			for g in p.get_children():
-				var body := g.get_node_or_null("Coloana") as Node3D
+				var body := g.get_node_or_null("Bila") as Node3D
 				if body != null and body.visible:
 					sus += 1
 			if sus >= p.get_child_count():
@@ -76,10 +76,10 @@ func _test_invariant(grup: Node) -> void:
 				blocate[p.name] += 1
 	for p in perechi:
 		var pct := 100.0 * float(blocate[p.name]) / float(esantioane)
-		print("  %-10s  ambele_sus=%d   drum blocat partial %.0f%% din timp"
+		print("  %-10s  ambele_in_aer=%d   gura activa %.0f%% din timp"
 			% [p.name, incalcari[p.name], pct])
 		if incalcari[p.name] > 0:
-			_fails.append("%s: %d cadre cu toate coloanele ridicate"
+			_fails.append("%s: %d cadre cu toate bilele in aer simultan"
 				% [p.name, incalcari[p.name]])
 	print("  esantioane: %d (~%.1f s)" % [esantioane, esantioane / 60.0])
 
@@ -111,8 +111,13 @@ func _test_impact(grup: Node) -> void:
 	# Asteptam sa se ridice coloana, apoi punem masina in ea cu viteza.
 	for _i in 900:
 		await get_tree().physics_frame
-		var body := gheizer.get_node_or_null("Coloana") as Node3D
+		var body := gheizer.get_node_or_null("Bila") as Node3D
 		if body == null or not body.visible:
+			continue
+		# Bila e periculoasa doar cand e JOS, la cota masinii: pe restul
+		# arcului trece pe deasupra. Asteptam fereastra aia — altfel sonda ar
+		# raporta „nu m-a lovit" pentru ceva ce zboara la 9 m.
+		if body.position.y > 1.2:
 			continue
 		if lovit:
 			continue
@@ -121,10 +126,11 @@ func _test_impact(grup: Node) -> void:
 		# degenerat (directia radiala are lungime zero) si nu se intampla in
 		# joc — prima versiune a sondei il folosea si raporta, corect, ca nu
 		# exista zvarlire laterala.
-		var gp := gheizer.global_position
+		# Sub BILA, nu deasupra gurii: obiectul periculos se misca acum.
+		var gp := body.global_position
 		var fwd := -pereche.global_transform.basis.z
 		var right := pereche.global_transform.basis.x
-		car.global_position = gp + Vector3.UP * 0.6 + right * 1.0
+		car.global_position = gp + right * 0.8
 		car.velocity = fwd * v0
 		car.turbo_charge = 1.0
 		car.burn_time = 0.0
@@ -148,7 +154,7 @@ func _test_impact(grup: Node) -> void:
 	print("  viteza laterala:     %.2f m/s  (scoasa de pe linie)" % lateral)
 
 	if not lovit:
-		_fails.append("masina pusa IN coloana ridicata nu a fost aprinsa")
+		_fails.append("masina pusa IN bila (jos pe arc) nu a fost aprinsa")
 		return
 	if factor >= 1.0:
 		_fails.append("plafonul de viteza nu a fost taiat (crush_factor=1)")

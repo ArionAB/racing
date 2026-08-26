@@ -122,14 +122,18 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   > e câte materiale distincte randează o pistă, fiindcă ăla e numărul de draw
   > calls.
 
-  **Triunghiuri.** Raportate la fiecare rulare, prag `MAX_TRIS_PER_TRACK = 150000`.
-  **Nu e o limită de hardware** — un telefon mid-range duce câteva sute de mii de
+  **Triunghiuri.** Raportate la fiecare rulare, dar **fără prag** — nu pică
+  build-ul (august 2026). Un telefon mid-range duce câteva sute de mii de
   triunghiuri pe cadru, iar cifra de aici e pe toată pista, din care ceața taie
-  tot ce e peste 250 m. E un prag de *alarmă*, calibrat să prindă clasa de
-  accident (primitive lăsate la rezoluția implicită, care sar cu zeci de mii
-  dintr-un foc), nu un buget de artă. Constrângerea reală pe mobil e draw calls,
-  de aceea testul principal e numărătoarea de materiale. Dacă pică cu `TRIS`, uită-te la tabelul pe surse,
-  care arată exact de unde vin.
+  tot ce e peste 250 m și `visibility_range` scoate vegetația de departe: pe
+  Alpi, felia randată pe cadru măsurase ~10% din total. Plafonul fusese ridicat
+  de cinci ori la rând, de fiecare dată cu materialele neschimbate — adică
+  devenise o ceremonie înainte de merge, nu o gardă.
+  Cifra rămâne utilă ca să prinzi *clasa de accident* (primitive lăsate la
+  rezoluția implicită, care sar cu zeci de mii dintr-un foc) — dacă un număr
+  sare brusc, uită-te la tabelul pe surse, care arată exact de unde vine.
+  Constrângerea reală pe mobil e draw calls, deci singurul test care pică e
+  numărătoarea de materiale (`MAT`).
 
   > Prima măsurătoare a găsit **147k tris pe Dunele**, din care ~110k veneau din
   > primitive Godot lăsate la rezoluția implicită: un `SphereMesh` are 64×32 =

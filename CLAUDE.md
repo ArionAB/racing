@@ -113,48 +113,31 @@ res://
   era poligonajul, ci detaliul pictat în texturi (deviație de luminanță ~2.7
   la noi vs ~36–40 la ei), iar texturile comprimate sunt aproape gratis pe
   GPU-urile mobile.
-- **Triunghiuri: măsurate, nu presupuse.** Versiunea inițială a acestui document
-  scria „~50k pe scenă" fără nicio măsurătoare în spate. Prima numărătoare reală
-  (august 2026) a găsit pistele la 147–163k, din care ~110k veneau din primitive
-  Godot lăsate la rezoluția implicită — un `SphereMesh` are 64×32 = **4.224 de
-  triunghiuri**, deci fiecare tufă de 40 cm avea geometria unei planete.
-  **Când creezi o primitivă în cod, setează-i `radial_segments`/`rings`.**
-  După reparație și după canion: Dunele ~65k, celelalte 21–32k. Plafonul din
-  `tools/probe_decor.gd` a stat un timp la 80k („măsurătoarea + 20%") și **era
-  prea strâmt, din motivul greșit**: un telefon mid-range randează câteva *sute*
-  de mii de triunghiuri pe cadru, iar cifra e pe toată pista, din care ceața taie
-  tot ce e peste 250 m. Regula „măsurătoare + marjă" e bună pentru un prag care
-  prinde regresii, dar aplicată prost devine un plafon care respinge muncă
-  legitimă — prima benzinărie cu ferestre reale (1148 → 4864 de triunghiuri, o
-  singură instanță) ar fi picat pe un număr derivat din cât de sărac era jocul în
-  ziua în care l-am scris. Pragul a stat apoi la 150k. În august 2026
-  dezvoltatorul a decis explicit să ridice bugetele vizuale (un telefon
-  post-2020 duce 300–500k de triunghiuri pe cadru) și să folosească marja
-  pentru upgrade-ul grafic — pragul a urcat la 300k, prag de alarmă cu ~2x
-  headroom față de pistele de atunci (~140–165k), destul cât să prindă în
-  continuare clasa de accident (primitive la rezoluția implicită sar cu zeci de
-  mii dintr-un foc). Ridicat din nou la **400k** în august 2026, la integrarea
-  kitului Okinawa: pista aia a ajuns la 302k, din care decorul singur face 184k
-  (palmieri, pandanus, banyan, coral pe assets reale în locul primitivelor
-  provizorii) — dar în aceeași mișcare **materialele au scăzut, 29 → 22**.
-  Adică s-a îngreunat exact axa care nu doare pe mobil și s-a ușurat cea care
-  doare. Constrângerea reală rămâne **draw calls / overdraw / fill rate**, de
-  aceea testul principal al gărzii e numărătoarea de materiale. Validarea
-  finală e primul test pe device — și se începe cu Okinawa, fiind cea mai grea.
-  Din august 2026 pragul e **per pistă**, nu global (`TRIS_OVERRIDE` în
-  `tools/probe_decor.gd`): ridicat de patru ori la rând pentru o singură pistă,
-  un prag global ajunsese să lase Dunele (~65k) să-și dubleze geometria de două
-  ori fără ca garda să clipească. Okinawa manual are **2.75M** (măsurat 2.72M,
-  cu **21 de materiale din 38**): scenografia după referință — dig de
-  tetrapozi, chei, sat, ziduri de cetate, lan, perdele de palmieri — plus
-  decorul manual al urcării de coastă (zid de grădină, gospodărie, gard pe buza
-  lagunei, ponton cu barcă) și straturile statistice de pajiște, paturi de
-  flori și pietre de margine. Pragul a crescut în trepte, de fiecare dată cu
-  **materialele neschimbate** — adică s-a îngreunat exact axa care nu doare pe
-  mobil. Tot de atunci garda numără doar ce se **vede**:
-  variantele stinse (`visible = false`) ale GLB-urilor multi-variantă din
-  decorul manual nu se randează, deci nu intră în cifră. Restul pistelor
-  rămân la 400k.
+- **Triunghiuri: măsurate și raportate, dar fără plafon.** Garda le numără în
+  continuare (`tools/probe_decor.gd`) fiindcă cifra prinde *clasa de accident*:
+  o primitivă lăsată la rezoluția implicită sare cu zeci de mii dintr-un foc —
+  un `SphereMesh` are 64×32 = **4.224 de triunghiuri**, deci o tufă de 40 cm
+  ajunge cu geometria unei planete. **Când creezi o primitivă în cod,
+  setează-i `radial_segments`/`rings`.** Dar numărul **nu mai pică build-ul**
+  (decizia dezvoltatorului, august 2026).
+  Două motive, amândouă verificate în practică. Întâi: cifra e pe **toată
+  pista**, iar pe ecran nu ajunge niciodată toată — ceața taie tot ce e peste
+  250 m, iar `visibility_range` plus topirea din shader scot vegetația de
+  departe (pe Alpi, felia randată pe cadru măsurase ~10% din total). Un plafon
+  pe suma întregii piste pedepsește geometrie care nu se desenează în același
+  cadru. Al doilea, mai convingător: pragul a fost ridicat de **cinci** ori
+  (80k → 150k → 300k → 400k, plus patru override-uri per pistă), de fiecare
+  dată fiindcă muncă legitimă nu încăpea, și **de fiecare dată cu materialele
+  neschimbate sau în scădere** — adică se îngreuna axa care nu doare pe mobil.
+  Un prag care se mută ori de câte ori e atins nu măsoară nimic: cere doar o
+  ceremonie înainte de fiecare merge. Ajunsese să țină CI-ul roșu pe main
+  (Track10 la 1.36M cu override de 900k).
+  Constrângerea reală rămâne **draw calls / overdraw / fill rate**, de aceea
+  singurul test cu drept de veto e numărătoarea de **materiale** (max 38 per
+  pistă). Validarea finală e primul test pe device fizic — și se începe cu
+  Okinawa, fiind cea mai grea (2.75M triunghiuri, dar doar **21 de materiale**).
+  Garda numără doar ce se **vede**: variantele stinse (`visible = false`) ale
+  GLB-urilor multi-variantă nu se randează, deci nu intră în cifră.
 - Texturi comprimate ETC2/ASTC, materiale simple (albedo, fără PBR complex)
 - Particule cu limită de count; test pe device fizic de la primul build (M4,
   dar mai devreme dacă apar dubii de feel pe touch)

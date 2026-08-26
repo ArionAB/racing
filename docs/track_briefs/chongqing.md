@@ -1,6 +1,9 @@
 # Track brief — Chongqing (`Track12`, temă `chongqing`) — v0.1 (concept)
 
-> Concept de pistă, înaintea listei de assets. Scheletul e cel din
+> Concept de pistă, înaintea listei de assets. Harta interactivă cu POI-urile,
+> profilul, ceasurile și loturile la scară: `img/chongqing_map.html`
+> (artefactul „Chongqing Recon").
+> Scheletul e cel din
 > `stromboli.md`; secțiunile de assets (§5) sunt schițate, nu complete —
 > se detaliază după ce traseul trece de ProbeLayout și de captura `--driver`.
 > Prima pistă **urbană**, prima **de noapte**, prima cu **pista peste pistă**.
@@ -91,8 +94,8 @@ pe spirală, etaj cu etaj.
 
 ## 2. Traseul și punctele de interes (POI)
 
-Lungime țintă **~2.0 km** (tur ~60 s, 3 tururi ≈ 3:00). Sens: orar — golful
-și râurile pe dreapta pe cornișă și pe chei. Cota maximă **~65 m** (platoul),
+Lungime țintă **~2.0 km** (tur ~60 s, 3 tururi ≈ 3:00). Sens: **antiorar** — golful
+și râurile pe dreapta (în AFARA buclei: interiorul rămâne uscat, ca la Stromboli). Cota maximă **~65 m** (platoul),
 minimă **~5 m** (cheiul). Coborâre totală ~60 m pe 40% din tur, urcare ~60 m
 pe 30% din tur — **pantele se măsoară cu ProbeLayout înaintea oricărui decor**
 (media urcării pe spirală sub 13%, vârf sub 16%, precedent Baikal 15.4%).
@@ -352,7 +355,7 @@ de deasupra.
 > silhouettes with lit windows, fading into the mist — they are background
 > only. Near the track, buildings are never taller than 4 storeys.
 >
-> **THE ROUTE — a single closed loop of about 2 km, clockwise, the bay
+> **THE ROUTE — a single closed loop of about 2 km, counter-clockwise, the water
 > always on the right [!]:**
 > 1. **Start/finish on the plateau square (top):** wet dark granite paving,
 >    a small pagoda-roofed pavilion, benches, lamp posts hung with red

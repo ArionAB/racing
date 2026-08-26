@@ -1,0 +1,532 @@
+<title>Chongqing Recon</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --gold:#B8741F; --gold-deep:#8C5612; --lantern:#B0291F; --neon:#D4247F;
+  --concrete:#7C838C; --river-a:#4F7A5A; --river-b:#7A6142;
+  --ground:#EEF0F2; --panel:#FFFFFF; --sunk:#E3E6EA;
+  --ink:#1B2029; --ink-soft:#5C6470; --hair:#CBD0D6;
+  --grid:rgba(27,32,41,.10); --water:#B9C6CF; --land:#D9DDE1; --land-low:#C9CFD5;
+  --accent-title:#B8741F; --glow:rgba(184,116,31,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --gold:#F2A840; --gold-deep:#C9822A; --lantern:#E0453A; --neon:#FF3FA4;
+    --ground:#14181F; --panel:#1B2029; --sunk:#10141A;
+    --ink:#E6E4DE; --ink-soft:#9AA3AF; --hair:#2C333D;
+    --grid:rgba(242,168,64,.07); --water:#1E2A36; --land:#252C36; --land-low:#1F252E;
+    --accent-title:#F2A840; --glow:rgba(242,168,64,.22);
+  }
+}
+:root[data-theme="dark"]{
+  --gold:#F2A840; --gold-deep:#C9822A; --lantern:#E0453A; --neon:#FF3FA4;
+  --ground:#14181F; --panel:#1B2029; --sunk:#10141A;
+  --ink:#E6E4DE; --ink-soft:#9AA3AF; --hair:#2C333D;
+  --grid:rgba(242,168,64,.07); --water:#1E2A36; --land:#252C36; --land-low:#1F252E;
+  --accent-title:#F2A840; --glow:rgba(242,168,64,.22);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif; font-size:15px; line-height:1.55}
+.mono{font-family:ui-monospace,"Cascadia Mono","Consolas",monospace}
+.wrap{max-width:1180px; margin:0 auto; padding:28px 22px 64px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 28px; margin-bottom:8px}
+h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif; font-size:clamp(34px,5vw,54px);
+  line-height:.98; margin:0; font-weight:700; letter-spacing:.01em; text-transform:uppercase; text-wrap:balance}
+h1 small{display:block; font-family:"Source Sans 3",sans-serif; font-size:.26em; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--accent-title); margin-bottom:8px}
+.facts{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+.fact{display:flex; flex-direction:column}
+.fact b{font-family:"Barlow Condensed",sans-serif; font-size:24px; font-variant-numeric:tabular-nums; font-weight:700; line-height:1}
+.fact span{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-soft); margin-top:3px}
+.lede{color:var(--ink-soft); max-width:72ch; margin:14px 0 26px}
+.lede b{color:var(--ink)}
+.layout{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr); gap:22px; align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel); border:1px solid var(--hair); border-radius:3px}
+.card h2{margin:0; padding:11px 15px; font-size:11px; font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-soft); border-bottom:1px solid var(--hair);
+  display:flex; justify-content:space-between; align-items:center; gap:10px}
+.plan{padding:6px}
+canvas{display:block; width:100%; height:auto; border-radius:2px; cursor:crosshair}
+.legend{display:flex; flex-wrap:wrap; gap:5px 16px; padding:10px 15px; border-top:1px solid var(--hair);
+  font-size:11.5px; color:var(--ink-soft)}
+.legend i{display:inline-block; width:16px; height:3px; vertical-align:middle; margin-right:6px; border-radius:2px}
+.detail{padding:15px; min-height:150px}
+.detail .tag{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px; background:var(--gold-deep); color:#1A1206; margin-bottom:9px}
+.detail h3{margin:0 0 3px; font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700; letter-spacing:.01em}
+.detail .coord{font-size:12px; color:var(--ink-soft); margin-bottom:11px}
+.detail p{margin:0 0 13px; font-size:14px}
+.detail .assets{font-size:12.5px; line-height:1.7; color:var(--ink-soft); border-top:1px dashed var(--hair); padding-top:11px}
+.detail .assets b{display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); margin-bottom:5px}
+.hint{color:var(--ink-soft); font-size:13px; font-style:italic}
+.clocks{padding:13px 15px; display:flex; flex-direction:column; gap:10px}
+.clock{display:grid; grid-template-columns:78px 1fr 44px; gap:10px; align-items:center; font-size:13px}
+.clock .nm{font-weight:600}
+.clock .bar{height:8px; border-radius:2px; background:var(--sunk); position:relative; overflow:hidden}
+.clock .bar i{position:absolute; top:0; bottom:0; left:0; background:var(--gold); border-radius:2px}
+.clock .bar em{position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--lantern)}
+.clock .s{font-family:"Barlow Condensed",sans-serif; font-size:16px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums}
+.clocks .note{padding:8px 0 0; border-top:1px dashed var(--hair); font-size:12.5px}
+table{width:100%; border-collapse:collapse; font-size:13px}
+.scroll{overflow-x:auto}
+th,td{text-align:left; padding:8px 15px; border-bottom:1px solid var(--hair); vertical-align:top}
+th{font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-soft); font-weight:700}
+td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.grp td{font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-title);
+  background:var(--sunk); padding-top:9px; padding-bottom:9px}
+tr.row:hover{background:var(--sunk); cursor:pointer}
+tr.row.on{background:var(--glow)}
+.pill{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:9px; white-space:nowrap}
+.pill.hero{background:var(--glow); color:var(--accent-title)}
+.pill.kit{background:rgba(124,131,140,.18); color:var(--ink-soft)}
+.pill.cls{background:rgba(79,122,90,.18); color:var(--river-a)}
+.gaps{margin-top:22px}
+.note{padding:13px 15px; font-size:13.5px; color:var(--ink-soft); border-top:1px solid var(--hair)}
+.note b{color:var(--ink)}
+.prompt-body{padding:15px}
+.prompt-body pre{margin:0; max-height:440px; overflow:auto; white-space:pre-wrap;
+  font-family:ui-monospace,"Cascadia Mono","Consolas",monospace; font-size:12px; line-height:1.6; color:var(--ink-soft);
+  background:var(--sunk); border:1px solid var(--hair); border-radius:3px; padding:14px}
+.copy{font:inherit; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  border:1px solid var(--hair); background:var(--panel); color:var(--ink); padding:5px 12px; border-radius:2px; cursor:pointer}
+.copy:hover,.copy:focus-visible{border-color:var(--gold); outline:none; box-shadow:0 0 0 2px var(--glow)}
+label.chk{font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); cursor:pointer}
+label.chk input{vertical-align:middle; margin-right:4px}
+.rules{padding:13px 15px; font-size:13.5px}
+.rules p{margin:0 0 9px}
+.rules b{color:var(--accent-title)}
+</style>
+
+<div class="wrap">
+<header>
+  <h1><small>Track12 &middot; tem&#259; chongqing &middot; propunere v0.1</small>Chongqing Recon</h1>
+  <div class="facts">
+    <div class="fact"><b id="f-len">&mdash;</b><span>lungime desenat&#259;</span></div>
+    <div class="fact"><b>2 000 m</b><span>&#539;int&#259; brief</span></div>
+    <div class="fact"><b>65 m</b><span>platou &rarr; chei 5 m</span></div>
+    <div class="fact"><b id="f-inst">&mdash;</b><span>piese propuse</span></div>
+    <div class="fact"><b>5</b><span>ceasuri de hazard</span></div>
+  </div>
+</header>
+
+<p class="lede"><b>Un ora&#537; construit peste el &#238;nsu&#537;i.</b> Camera vede ~5&deg; &#238;n sus &#537;i ~63&deg; &#238;n jos,
+deci tot ce e impresionant st&#259; <b>sub</b> drum: pornim de pe platou (65 m), c&#259;dem pe sc&#259;ri &#537;i pe corni&#537;a
+de deasupra caselor pe piloni, atingem cheiul (5 m) &#537;i urc&#259;m &#238;napoi pe nodul rutier &#238;n spiral&#259; &mdash;
+drumul trece <b>peste el &#238;nsu&#537;i de dou&#259; ori</b> &mdash; apoi printr-un bloc t&#259;iat de monorail.
+Sens <b>antiorar, apa pe dreapta</b> (&#238;n afara buclei; interiorul r&#259;m&#226;ne uscat, ca la Stromboli).
+Harta e <b>propunerea din brief, nu geometrie m&#259;surat&#259;</b>: <code>Track12.tscn</code> nu exist&#259; &#238;nc&#259;;
+dup&#259; desen, pantele se m&#259;soar&#259; cu ProbeLayout. Dreptunghiurile arat&#259; c&#226;t loc cere fiecare lot de assets, la scar&#259;.</p>
+
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Plan &middot; vedere de sus <span class="mono" id="cursor">&mdash;</span></h2>
+      <div class="plan"><canvas id="plan" width="1000" height="860"></canvas></div>
+      <div class="legend">
+        <span><i style="background:#3A3F47"></i>asfalt ud</span>
+        <span><i style="background:#9A9FA6"></i>beton (chei, pod, nod)</span>
+        <span><i style="background:#6E6A66"></i>granit / trepte</span>
+        <span><i style="background:#F2A840"></i>Hongya Dong (auriu, SUB corni&#537;&#259;)</span>
+        <span><i style="background:#E0453A"></i>hazard / lampioane</span>
+        <span><i style="background:#4F7A5A"></i>Jialing</span>
+        <span><i style="background:#7A6142"></i>Yangtze</span>
+        <span><i style="background:#8A8FA3"></i>cea&#539;&#259;</span>
+        <span style="margin-left:auto"><label class="chk"><input type="checkbox" id="lots" checked>loturi</label></span>
+      </div>
+    </div>
+    <div class="card gaps">
+      <h2>Profil de eleva&#539;ie &middot; un tur</h2>
+      <div class="plan"><canvas id="elev" width="1000" height="200"></canvas></div>
+      <div class="note">Cobor&#226;re continu&#259; A&rarr;E (~60 m pe 45% din tur), urcare continu&#259; F&rarr;G (~60 m pe 30%).
+        Pe spiral&#259; media trebuie s&#259; ias&#259; <b>sub 13%</b> (v&#226;rf sub 16%, precedent Baikal 15,4%) &mdash; dac&#259; nu, se lunge&#537;te spirala, nu se for&#539;eaz&#259;.</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:22px">
+    <div class="card">
+      <h2>POI selectat</h2>
+      <div class="detail" id="detail"><p class="hint">Alege un POI pe hart&#259; sau un r&#226;nd din tabel.</p></div>
+    </div>
+    <div class="card">
+      <h2>Ceasurile de hazard <span class="mono">tur ~60 s</span></h2>
+      <div class="clocks" id="clocks"></div>
+    </div>
+    <div class="card">
+      <h2>Reguli care au decis harta</h2>
+      <div class="rules">
+        <p><b>Frustumul.</b> La distan&#539;a <i>d</i> vezi &#238;n sus cel mult 10 + 0,093&middot;<i>d</i> m. Nimic mai &#238;nalt de 4 etaje l&#226;ng&#259; carosabil; turnurile sunt siluete peste ap&#259;, sub fog_end (250 m).</p>
+        <p><b>Pista peste pist&#259;.</b> Tablierele sunt <code>custom_overpass_ranges</code> (PR #353): terenul nu urc&#259; dup&#259; ele. Separare vertical&#259; &#238;ntre etaje &gt; 12 m.</p>
+        <p><b>Hazard ciclic, &#238;nv&#259;&#539;abil.</b> Cinci ceasuri, niciunul divizor al turului. F&#259;r&#259; set piece unic.</p>
+        <p><b>Noaptea.</b> Umbre stinse, un emisiv de clas&#259;, ferestrele &#238;n textur&#259; (<code>facade_night</code>). Slotul 31 e ultimul.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card gaps">
+  <h2>Lista de assets <span class="mono" id="a-count">&mdash;</span></h2>
+  <div class="scroll"><table id="asset-tbl"></table></div>
+  <div class="note"><b>Materiale:</b> atlas + ~6 clase (concrete_wet, asphalt_wet, granite_tiles, stone_stairs, facade_night, puddle decal) + un emisiv partajat &rarr; &#539;int&#259; &le; 22. Kitul urban se num&#259;r&#259; pe pies&#259; &#238;nainte de plantare; nodul rutier &#537;i Hongya Dong sunt cele dou&#259; piese grele.</div>
+</div>
+
+<div class="card gaps">
+  <h2>Prompt pentru dioram&#259; (ChatGPT) <button class="copy" id="copy-btn">Copiaz&#259; promptul</button></h2>
+  <div class="prompt-body"><pre id="prompt-text">Create a stylized low-poly tabletop diorama of a toy-car racing track in Chongqing, China, at blue hour on a drizzly night — the "mountain city" where roads, bridges and a monorail stack on top of each other above two rivers. Use the attached top-down plan as the layout: same loop shape, same positions of the landmarks.
+
+STYLE (strict): faceted, flat-shaded low-poly meshes like a Blender viewport render — no fine surface texture, no painterly brushwork, no photorealism, NOT cyberpunk. Chunky toy proportions: cars are stubby and ~1.3× wider than real cars; buildings are simplified into big planes with a grid of lit windows. Soft baked ambient occlusion in the crevices, muted concrete and blue-grey environment colors (~40% saturation), with only three saturated accents: the warm gold light of the stilt-house complex, red lanterns and signs, and the toy cars. One rare pink neon sign, no more. Lighting: a dim cool moon through mist from above (almost no visible shadows) plus warm light coming UP from the city's windows and street lamps; wet asphalt reflects the lights as soft streaks. Thin grey-violet mist fills the lower valley. Sky is a plain dark blue-grey gradient, no stars. Show the diorama on a thin dark rounded-rectangle table base, from a raised 3/4 view.
+
+THE CITY: the whole diorama is a steep rocky peninsula falling ~65 m from a plateau on top to two rivers below. Everything impressive is BELOW the road, never beside it: the track runs on the plateau, on cliff cornices and on elevated ramps, and the city hangs underneath it. The two rivers meet in a bay at the bottom and are two clearly different colors (one murky green, one muddy brown) with a visible line where they merge. Across the bay, a row of tall apartment towers stands as dark silhouettes with lit windows, fading into the mist — they are background only. Near the track, buildings are never taller than 4 storeys.
+
+THE ROUTE — a single closed loop of about 2 km, counter-clockwise, the water always on the right:
+1. Start/finish on the plateau square (top): wet dark granite paving, a small pagoda-roofed pavilion, benches, lamp posts hung with red lanterns; the far edge of the square is a railing over a sheer drop — a 22-storey block is built into the cliff BELOW the square. At the exit, a traffic jam of tiny cars and two buses blocks the boulevard with a single narrow gap between the buses.
+2. The stair descent: the road drops in an S beside a giant stone stairway (hundreds of wide steps) lined with old shuttered shops, laundry on wires, and tiny porters carrying bamboo poles. A small ramp lets a car jump diagonally OVER the stairway, cutting a whole S of the road.
+3. The hotpot alley: a tight corridor between restaurants — red lanterns, tables and stools on the pavement, a parked scooter, steam blowing from kitchen vents across the road.
+4. The cliff cornice above the stilt-house complex — the biggest feature: the road comes out onto a cliff-edge cornice with no railing on the right; directly below it, hanging off the cliff face, an 11-storey stack of traditional timber stilt houses with curved dark tiled roofs, every floor glowing warm gold (Hongya Dong style), and below that the quay and the two-color river confluence. The road descends along the cornice in a long S.
+5. The riverside quay (bottom): a long fast straight at water level — a concrete quay, stacked containers, a lit cargo ship passing under a bridge and sending a wave over the low quay road; the lower station of an aerial cable car whose cabin crosses the bay on a cable. Then a short fog bank (only tail-lights, signs and road markings visible) from which the road bursts out onto a long bridge over the bay.
+6. The spiral interchange — the race gimmick: on the far side the road climbs back up 45 m on a stacked concrete interchange on tall pillars: three levels of curved ramps spiraling over each other, the road literally passing OVER itself twice, concrete parapets on both sides. On the middle level a short ramp launches cars over the lower ramp onto the upper one. On the top level a 12 m section of roadway is rotating on a pivot, half-open, with construction-site lights, and a tower crane swings a prefab concrete slab across the ramp. The city, quay and gold stilt houses are visible below the ramps.
+7. The apartment block with the monorail: the road enters a residential block through its ground-level hall (pillars, mailboxes, bicycles) and a monorail train runs straight through the building, crossing the road at grade behind a striped barrier with flashing lights; the road exits onto a footbridge back to the plateau square.
+
+Details that matter: the road is dark wet asphalt with reflections, white lane markings, red-and-white curbs only on the interchange ramps and the cornice corners; the road on the interchange must visibly stack — a car on the lower ramp under a car on the upper ramp; the stilt-house complex is the ONLY strong gold and sits BELOW the road; the two rivers are the lowest thing in the diorama and clearly two colors; the elevation must read — plateau at the top, quay at the bottom, one continuous descent (stairs, alley, cornice) and one continuous climb (interchange, block).
+
+Background: dark tower silhouettes with lit windows across the bay, a second bridge as a faint silhouette, mist rising from the water.
+
+Toy cars: 4–6 chunky low-poly racing cars in saturated red, blue, yellow, white — one jumping the stairway, one drifting on the cornice with the gold houses below, two stacked on different levels of the interchange, one waiting at the monorail barrier as the train passes.
+
+PROP INVENTORY — every item below must appear at least once, in its zone:
+- plateau square: the pagoda pavilion, granite paving, benches, lamp posts with red lanterns, the cliff railing, the traffic jam with two buses and tiny cars.
+- stair descent: the giant stone stairway, old shophouses with shutters, laundry lines, porters with bamboo poles, the jump ramp.
+- hotpot alley: restaurant fronts with red signs, tables and stools, steam vents, a parked scooter, hanging lanterns.
+- cornice: the 11-storey gold-lit stilt-house complex under the road, curved tiled roofs, cliff face, red-and-white chevron posts, one short railing on the outside of one corner only.
+- quay: concrete quay edge with bollards, stacked containers, the lit cargo ship, the cable-car lower station and a cabin on its cable, the fog bank, the long bay bridge.
+- interchange: concrete ramps on tall round pillars, parapets, the rotating road section with construction lights, the tower crane with a hanging slab, the small launch ramp, construction barriers.
+- apartment block: the block with the monorail passing through it, the 3-car monorail train with headlights, the striped barrier with flashing lights, hall pillars, mailboxes, bicycles, the footbridge.
+- background: tower silhouettes with lit windows, the second bridge, the two-color river confluence.
+
+Colors: wet concrete #7C838C, dark blue-grey shadow #2E3A4A, wet asphalt #2A2D33, stilt-house gold #F2A840 (emissive), lantern red #C8322B, window warm #FFD79A, green river #4F7A5A, brown river #7A6142, mist #8A8FA3, one pink neon #FF3FA4, tiled roof #3F3A3A.
+
+Deliver: (a) one wide 3/4 overview of the entire diorama matching the attached plan — plateau on top, quay at the bottom, the stacked interchange on the left; (b) one driver's-eye shot ON THE CORNICE — the gold stilt houses directly below on the right, the two-color rivers further down, tower silhouettes in the mist; (c) one shot from the quay looking up at the interchange: three stacked ramps with cars on different levels, the rotating section and the crane at the top, the cable car crossing the bay in the foreground.</pre></div>
+  <div class="note">Ata&#537;eaz&#259; la prompt o captur&#259; a planului de mai sus (click dreapta pe hart&#259; &rarr; salveaz&#259; imaginea). Dac&#259; generatorul pune zg&#226;rie-nori l&#226;ng&#259; drum sau face totul neon, reafirm&#259; &bdquo;buildings never taller than 4 storeys near the track&rdquo; &#537;i &bdquo;NOT cyberpunk&rdquo;.</div>
+</div>
+</div>
+
+<script>
+"use strict";
+// ---- date (metri) -------------------------------------------------------------
+// Bucla principala, ANTIORAR, apa pe dreapta (in afara). [x, y, cota, zona]
+// zona coloreaza segmentul care pleaca din punct.
+const PTS = [
+  [-120,200,65,"granit"],[-50,215,65,"asfalt"],                       // A platou + nod de trafic
+  [40,205,62,"trepte"],[95,175,54,"trepte"],[60,135,46,"trepte"],[110,105,38,"asfalt"], // B scarile
+  [160,85,35,"asfalt"],[205,72,34,"asfalt"],                           // C aleea hot-pot
+  [245,40,31,"asfalt"],[228,-25,24,"asfalt"],[262,-85,16,"asfalt"],[232,-145,10,"asfalt"], // D cornisa
+  [185,-190,5,"beton"],[90,-205,4,"beton"],[0,-205,4,"ceata"],[-60,-200,5,"beton"],       // E chei + ceata
+  [-150,-190,6,"beton"],                                                                    // podul
+  [-205,-205,8,"beton"],[-262,-175,14,"beton"],[-275,-115,21,"beton"],[-238,-72,28,"beton"], // F nivel 1-2
+  [-190,-112,35,"beton"],[-200,-200,42,"beton"],[-255,-235,47,"beton"],[-300,-190,51,"beton"], // F nivel 3 (peste 1)
+  [-278,-118,55,"beton"],                                                                   // F peste nivel 2
+  [-250,-40,60,"asfalt"],[-235,10,61,"asfalt"],[-215,60,62,"asfalt"],[-180,130,64,"asfalt"] // G bloc + pasarela
+];
+const WATER_A = [[290,260],[420,260],[420,-150],[300,-160],[285,-80],[300,60],[280,180]]; // Jialing (est)
+const WATER_B = [[420,-150],[420,-300],[-330,-300],[-330,-262],[-120,-262],[-60,-240],[-40,-215],[220,-215],[300,-160]]; // Yangtze (sud)
+const INLET = [[-130,-215],[-75,-215],[-70,-150],[-105,-135],[-135,-160]];           // golful de sub pod
+const CLIFF = [[212,72],[262,40],[248,-30],[282,-90],[252,-150],[300,-160],[285,-80],[300,60],[280,180],[240,200],[230,110]];
+const CABLE = [[120,-200],[-238,-72]];
+const TOWERS = [[350,120],[385,60],[360,-10],[395,-60],[340,-110],[100,-250],[40,-262],[-20,-255],[-200,-270],[-260,-262]];
+const MONO = [[-300,40],[-235,10],[-170,-20]];
+const STAIRS = [[70,215],[110,195],[75,150],[120,120]];
+
+const SURF = {granit:"#6E6A66", asfalt:"#3A3F47", trepte:"#6E6A66", beton:"#9A9FA6", ceata:"#8A8FA3"};
+
+const POI = [
+  {k:"A", x:-120, y:200, frac:"0.00", name:"Piața Kuixinglou — START",
+   w:"9 m · dale de granit ude · platou 65 m",
+   desc:"Pagodă-chioșc, bănci, stâlpi cu lampioane; parapetul din capătul pieței dă spre gol — sub el, 22 de etaje de bloc. La ieșire, nodul de trafic: o singură fantă de 3 m între două autobuze (decor static, cost zero).",
+   lot:["kuixinglou_pavilion 8×8 m","granit (clasă)","lamp_lantern ×6","bench ×4","cliff_railing 30 m","bus ×2 + mini_car ×12"]},
+  {k:"B", x:80, y:160, frac:"0.04–0.14", name:"Coborârea Shibati",
+   w:"8 m · 65 → 38 m · scara uriașă pe dreapta",
+   desc:"Drumul coboară în S pe lângă strada-scară: magazine cu obloane, rufe pe sârme, hamali cu prăjini SUB linia camerei. Kicker la jumătate: sari în diagonală peste scară, tai un S (~3 s). Ratezi → pe trepte, grip 0.8×.",
+   lot:["stone_stairway 60×12 m (clasă stone_stairs)","shophouse ×6","laundry_line ×5","porter ×4 (figurant)","flyoff_kicker"]},
+  {k:"C", x:182, y:78, frac:"0.16–0.24", name:"Aleea hot-pot",
+   w:"6 m · strângerea tehnică · aburi peste drum",
+   desc:"Coridor între restaurante: lampioane roșii, mese pe trotuar, scuter parcat. Aburii din bucătării albesc ecranul ~0.5 s (clasa fumarolă, zero cod).",
+   lot:["restaurant_front ×6","table_stools ×5","steam_vent ×3","scooter","lantern_string ×4","UN neon roz"]},
+  {k:"D", x:250, y:-50, frac:"0.26–0.44", name:"Cornișa Hongya Dong",
+   w:"7 m · 31 → 10 m · fără parapet pe dreapta · vârful vizual",
+   desc:"Drumul iese pe buza falezei; SUB el, 11 etaje de case pe piloni luminate auriu, apoi cheiul și confluența în două culori. Camera vede 63° în jos — exact asta. Cădere = repunere ~2 s. Ploaia ciclică se citește aici (reflexii aurii).",
+   lot:["hongya_dong 60×25×45 m (hero)","cliff_face module","chevron_post ×6","short_railing 12 m (un singur viraj)"]},
+  {k:"E", x:60, y:-205, frac:"0.46–0.58", name:"Cheiul Chaotianmen + ceața + podul",
+   w:"9 m · 5 m cotă · fâșia de viteză",
+   desc:"Dană, containere, navă cargo pe sub pod — sirena (3 s) anunță siajul care inundă cheiul (grip 0.7× / 2 s). Stația de jos a telecabinei. Culoar de ceață 60–80 m, apoi ieșire bruscă pe podul peste golf: orașul se deschide sub tine.",
+   lot:["quay_edge module + bollard ×8","container ×10","cargo_ship 60 m (pe Path3D)","cableway_station","fog corridor (Area3D)","bay_bridge 90 m"]},
+  {k:"E′", x:-60, y:-135, frac:"0.50 →", name:"Telecabina — scurtătura",
+   w:"cabină 5×4 m · pleacă la ~20 s · 8 s peste golf",
+   desc:"Te lasă la etajul 2 al nodului: sari podul + primul etaj al spiralei (~4–5 s). Fereastra de îmbarcare ~3 s, cabina se vede venind de pe cornișă. RISC: mașină pe platformă mobilă — sondă separată; fallback = cabine ca obstacole mobile.",
+   lot:["cableway_cabin","cableway_towers ×2 + cablu"]},
+  {k:"F", x:-240, y:-150, frac:"0.60–0.82", name:"Nodul Huangjuewan — spirala",
+   w:"7 m · 5 → 55 m pe 3 etaje · pista peste pistă ×2",
+   desc:"Rampe pe piloni, parapet de beton pe ambele părți, gol pe interior. Etaj 2: kicker peste etajul 1 pe etajul 3 (ratezi → refaci o buclă). Etaj 3: pasajul rotativ (~25 s, LiftBridge) + macaraua care leagănă un prefabricat (Carousel; contact = învârtit). La fiecare etaj vezi mai mult din chei și Hongya Dong.",
+   lot:["interchange_kit: rampă 10 m, arc 15°, pilon, parapet ×~60","rotating_span 12 m","tower_crane + slab","launch_ramp","construction_barrier ×8"]},
+  {k:"G", x:-235, y:10, frac:"0.84–0.96", name:"Liziba — blocul cu monorail",
+   w:"7 m · 55 → 65 m · hol de 90 m prin bloc",
+   desc:"Intri în bloc la „parterul” nostru (etajul 8 real): stâlpi, cutii poștale, biciclete. Monorailul taie holul la nivel (~35 s, TrainHazard): clopoțel + lumini + bariera coboară cu 3 s înainte. Contact = ești aruncat, nu distrus. Ieșire pe pasarelă spre piață.",
+   lot:["liziba_block 100×30 m (hero)","monorail_train 3×9 m","crossing_barrier + lights","footbridge 40 m","bicycles, mailboxes"]},
+  {k:"S", x:370, y:20, frac:"fundal", name:"Turnurile de peste râu",
+   w:"150–250 m · sub fog_end 250 · doar siluete",
+   desc:"Blocuri-siluetă cu ferestre aprinse (clasa facade_night), al doilea pod ca siluetă, ceață luminată de jos. De la 5° în sus camera nu vede turnuri lângă drum — de aceea stau peste apă.",
+   lot:["tower_silhouette ×10 (facade_night)","second_bridge silhouette","plan de apă în două culori (shader)"]}
+];
+
+const LOTS = [ // amprente [x, y, w, h, poi]
+  [-120,200,40,30,"A"],[-40,222,50,10,"A"],[95,175,60,14,"B"],[182,78,50,14,"C"],
+  [278,-60,25,60,"D"],[60,-222,120,14,"E"],[-105,-190,90,12,"E"],[-240,-150,120,140,"F"],
+  [-235,10,30,100,"G"],[370,20,50,190,"S"]
+];
+
+const ASSETS = [
+  ["Hero (unice)", null],
+  ["hongya_dong.glb","60×25×45 m, 11 etaje pe piloni",1,"D","se vede doar de SUS și din lateral — detaliu pe acoperișuri și fațada spre râu"],
+  ["liziba_block.glb","hol 7×90 m + fațade",1,"G","monorailul intră pe o latură"],
+  ["monorail_train.glb","3 vagoane × 9 m, faruri emisive",1,"G","TrainHazard pe orar ~35 s"],
+  ["cableway_cabin.glb + towers","cabină 5×4 m, 2 turnuri",1,"E′","platformă mobilă — RISC, sondă întâi"],
+  ["interchange_kit (modular)","rampă 10 m, arc 15°, pilon, parapet, kicker",60,"F","custom_overpass_ranges pe tabliere"],
+  ["rotating_span.glb","12 m",1,"F","LiftBridgeHazard cu rotație"],
+  ["tower_crane.glb + slab","braț 30 m",1,"F","CarouselHazard"],
+  ["cargo_ship.glb","60 m, luminată",1,"E","pe Path3D, siaj = WaveSurge"],
+  ["bay_bridge.glb","90 m",1,"E","pilonii NU primesc geometrie (invizibili)"],
+  ["kuixinglou_pavilion.glb","8×8 m",1,"A","chioșcul-pagodă din piață"],
+  ["stone_stairway","60×12 m, trepte ≤ 15 cm",1,"B","geometrie din cod + clasa stone_stairs"],
+  ["Kit urban (statistice)", null],
+  ["lamp_lantern.glb (×3 var)","4 m",14,"A/C/G","lampion roșu, halo billboard"],
+  ["neon_sign.glb (×4 var)","1–3 m",6,"C/G","emisivul partajat; UNA roz"],
+  ["shophouse.glb (×3 var)","8×6×7 m",8,"B/C","obloane, fațadă pe facade_night"],
+  ["restaurant_front.glb","6 m",6,"C","firme roșii, mese"],
+  ["table_stools.glb","1.5 m",5,"C","pe trotuar"],
+  ["steam_vent.glb","0.6 m",3,"C","reuse fumarolă"],
+  ["laundry_line.glb","4 m",5,"B","rufe pe sârmă"],
+  ["porter.glb","1.7 m",4,"B","figurant, reuse rig măgar"],
+  ["bus.glb + mini_car.glb","10 m / 3 m",14,"A","nodul de trafic, static cu coliziune"],
+  ["container.glb","6×2.4 m",10,"E","PAINTED_METAL"],
+  ["bollard.glb","0.5 m",8,"E","RUST_METAL"],
+  ["chevron_post.glb","1.2 m",10,"D/F","reuse Stromboli"],
+  ["construction_barrier.glb","2 m",8,"F","dungi roșu-alb"],
+  ["bicycle.glb / mailbox.glb","—",8,"G","holul blocului"],
+  ["tower_silhouette.glb (×3 var)","40–80 m",10,"S","fundal, facade_night"],
+  ["Texturi de clasă (din cod)", null],
+  ["concrete_wet","dală",1,"E/F","rampe, chei, pod"],
+  ["asphalt_wet","dală, comutată de ploaie",1,"toate","reflexii false + specular"],
+  ["granite_tiles","dală",1,"A","piața"],
+  ["stone_stairs","dală",1,"B","uzura treptelor"],
+  ["facade_night","dală triplanară, 30% ferestre aprinse",1,"B/C/G/S","TOATE fațadele — detaliul pictat"],
+  ["neon_emissive","clasă emisivă (shader ca lava)",1,"C/G/F","firme, lampioane, faruri"],
+  ["puddle (decal)","clasa decal existentă",1,"A/D","bălți cu reflexie falsă"]
+];
+
+// ---- proiectie ---------------------------------------------------------------
+const plan = document.getElementById("plan"), pcx = plan.getContext("2d");
+const allp = WATER_A.concat(WATER_B, TOWERS);
+const minx = Math.min(...allp.map(p=>p[0]))-10, maxx = Math.max(...allp.map(p=>p[0]))+10;
+const miny = Math.min(...allp.map(p=>p[1]))-10, maxy = Math.max(...allp.map(p=>p[1]))+10;
+const S = Math.min(plan.width/(maxx-minx), plan.height/(maxy-miny));
+const ox = (plan.width-(maxx-minx)*S)/2, oy = (plan.height-(maxy-miny)*S)/2;
+const X = x => ox+(x-minx)*S, Y = y => oy+(maxy-y)*S;
+
+function sampleLoop(pts, per){
+  const n = pts.length, out = [];
+  for (let i=0;i<n;i++){
+    const p0=pts[(i-1+n)%n], p1=pts[i], p2=pts[(i+1)%n], p3=pts[(i+2)%n];
+    for (let t=0;t<per;t++){
+      const u=t/per, u2=u*u, u3=u2*u;
+      const c = k => 0.5*((2*p1[k]) + (-p0[k]+p2[k])*u +
+        (2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*u2 + (-p0[k]+3*p1[k]-3*p2[k]+p3[k])*u3);
+      out.push([c(0), c(1), c(2), p1[3]]);
+    }
+  }
+  return out;
+}
+const LOOP = sampleLoop(PTS, 14);
+let LEN = 0; const CUM = [0];
+for (let i=1;i<=LOOP.length;i++){
+  const a=LOOP[i-1], b=LOOP[i%LOOP.length];
+  LEN += Math.hypot(b[0]-a[0], b[1]-a[1]); CUM.push(LEN);
+}
+document.getElementById("f-len").textContent = Math.round(LEN).toLocaleString("ro-RO")+" m";
+document.getElementById("f-inst").textContent = ASSETS.filter(a=>a[1]!==null).reduce((s,a)=>s+a[2],0);
+
+const css = getComputedStyle(document.documentElement);
+const col = v => css.getPropertyValue(v).trim();
+let showLots = true, sel = null;
+
+function poly(ctx, pts, close){
+  ctx.beginPath();
+  pts.forEach((p,i)=> i? ctx.lineTo(X(p[0]),Y(p[1])) : ctx.moveTo(X(p[0]),Y(p[1])));
+  if (close) ctx.closePath();
+}
+function draw(){
+  const c = pcx; c.clearRect(0,0,plan.width,plan.height);
+  c.fillStyle = col("--land"); c.fillRect(0,0,plan.width,plan.height);
+  // cele doua rauri
+  poly(c, WATER_A, true); c.fillStyle="#4F7A5A"; c.globalAlpha=.55; c.fill();
+  poly(c, WATER_B, true); c.fillStyle="#7A6142"; c.globalAlpha=.55; c.fill();
+  poly(c, INLET, true); c.fillStyle="#7A6142"; c.globalAlpha=.55; c.fill(); c.globalAlpha=1;
+  // linia de confluenta
+  c.setLineDash([6,4]); c.strokeStyle="#B9C6CF"; c.lineWidth=1.2;
+  c.beginPath(); c.moveTo(X(300),Y(-160)); c.lineTo(X(420),Y(-150)); c.stroke(); c.setLineDash([]);
+  // grila
+  c.strokeStyle = col("--grid"); c.lineWidth = 1;
+  for (let gx=Math.ceil(minx/100)*100; gx<maxx; gx+=100){ c.beginPath(); c.moveTo(X(gx),0); c.lineTo(X(gx),plan.height); c.stroke(); }
+  for (let gy=Math.ceil(miny/100)*100; gy<maxy; gy+=100){ c.beginPath(); c.moveTo(0,Y(gy)); c.lineTo(plan.width,Y(gy)); c.stroke(); }
+  // etajele de teren: platou (sus), faleza, zona joasa
+  poly(c, [[-330,260],[290,260],[280,180],[230,110],[212,72],[110,105],[60,135],[-200,140],[-330,120]], true);
+  c.fillStyle = col("--panel"); c.globalAlpha=.35; c.fill(); c.globalAlpha=1;
+  poly(c, [[-330,-262],[-120,-262],[-60,-240],[-40,-215],[220,-215],[252,-150],[200,-130],[-100,-130],[-330,-160]], true);
+  c.fillStyle = col("--land-low"); c.fill();
+  // faleza (hasura)
+  poly(c, CLIFF, true); c.fillStyle="#3F3A3A"; c.globalAlpha=.35; c.fill(); c.globalAlpha=1;
+  // Hongya Dong: 11 trepte aurii sub cornisa
+  for (let i=0;i<11;i++){
+    c.fillStyle="#F2A840"; c.globalAlpha=.45+i*.04;
+    c.fillRect(X(252+i*3), Y(-20-i*5), 22*S, 4*S);
+  }
+  c.globalAlpha=1;
+  // turnuri-silueta
+  TOWERS.forEach(t=>{ c.fillStyle="#2E3A4A"; c.fillRect(X(t[0])-6,Y(t[1])-14,12,28);
+    c.fillStyle="#FFD79A"; for(let k=0;k<4;k++){ c.fillRect(X(t[0])-3+(k%2)*4, Y(t[1])-10+Math.floor(k/2)*8, 2, 3);} });
+  // scara Shibati
+  c.strokeStyle="#6E6A66"; c.lineWidth=5; c.setLineDash([2,3]);
+  c.beginPath(); STAIRS.forEach((p,i)=> i? c.lineTo(X(p[0]),Y(p[1])) : c.moveTo(X(p[0]),Y(p[1]))); c.stroke(); c.setLineDash([]);
+  // monorail
+  c.strokeStyle="#E0453A"; c.lineWidth=2; c.setLineDash([8,4]);
+  c.beginPath(); MONO.forEach((p,i)=> i? c.lineTo(X(p[0]),Y(p[1])) : c.moveTo(X(p[0]),Y(p[1]))); c.stroke();
+  // telecabina
+  c.strokeStyle="#9AA3AF"; c.lineWidth=1.5; c.setLineDash([3,4]);
+  c.beginPath(); c.moveTo(X(CABLE[0][0]),Y(CABLE[0][1])); c.lineTo(X(CABLE[1][0]),Y(CABLE[1][1])); c.stroke(); c.setLineDash([]);
+  // bucla: intai nivelurile joase, apoi cele inalte (ca sa se citeasca suprapunerea)
+  const segs = [];
+  for (let i=0;i<LOOP.length;i++){ const a=LOOP[i], b=LOOP[(i+1)%LOOP.length]; segs.push([a,b,(a[2]+b[2])/2]); }
+  segs.sort((p,q)=>p[2]-q[2]);
+  segs.forEach(([a,b,e])=>{
+    // umbra de tablier pe pasaje (>20 m peste chei)
+    if (a[3]==="beton" && e>18){ c.strokeStyle="rgba(0,0,0,.35)"; c.lineWidth=11; c.lineCap="butt";
+      c.beginPath(); c.moveTo(X(a[0]),Y(a[1])); c.lineTo(X(b[0]),Y(b[1])); c.stroke(); }
+    c.strokeStyle = SURF[a[3]]; c.lineWidth = 7; c.lineCap="round";
+    c.beginPath(); c.moveTo(X(a[0]),Y(a[1])); c.lineTo(X(b[0]),Y(b[1])); c.stroke();
+  });
+  // hazarduri punctuale
+  const dot=(x,y,cl,r)=>{ c.beginPath(); c.arc(X(x),Y(y),r||5,0,7); c.fillStyle=cl; c.fill(); };
+  dot(-40,215,"#E0453A",4);  // nod trafic
+  dot(80,160,"#E0453A",4);   // kicker scari
+  dot(183,78,"#FF3FA4",4);   // UN neon
+  dot(-235,10,"#E0453A",5);  // monorail crossing
+  dot(-270,-125,"#E0453A",5); // pasaj rotativ (etaj 3)
+  dot(-215,-100,"#E0453A",4); // kicker nod
+  dot(90,-205,"#E0453A",4);  // siaj nava
+  // linia de start
+  const a0=LOOP[0]; c.fillStyle="#E6E4DE"; c.fillRect(X(a0[0])-2, Y(a0[1])-7, 4, 14);
+  c.fillStyle = col("--ink-soft"); c.font = "11px 'Source Sans 3',system-ui";
+  c.fillText("← antiorar (apa pe dreapta)", X(-40), Y(245));
+  c.fillText("Jialing", X(330), Y(200)); c.fillText("Yangtze", X(-280), Y(-285));
+  c.fillText("ceață", X(-30), Y(-225));
+  // loturi
+  if (showLots){
+    c.setLineDash([4,3]);
+    LOTS.forEach(l=>{ const on = sel && sel.k===l[4];
+      c.strokeStyle = on ? "#F2A840" : col("--ink-soft"); c.lineWidth = on ? 2 : 1;
+      c.strokeRect(X(l[0]-l[2]/2), Y(l[1]+l[3]/2), l[2]*S, l[3]*S); });
+    c.setLineDash([]);
+  }
+  POI.forEach(p=>{
+    const on = sel && sel.k===p.k;
+    c.beginPath(); c.arc(X(p.x),Y(p.y),on?12:10,0,7);
+    c.fillStyle = on ? "#F2A840" : col("--panel"); c.fill();
+    c.strokeStyle = on ? "#C9822A" : col("--ink-soft"); c.lineWidth=1.5; c.stroke();
+    c.fillStyle = on ? "#1A1206" : col("--ink");
+    c.font = "bold 11px 'Source Sans 3',system-ui"; c.textAlign="center"; c.textBaseline="middle";
+    c.fillText(p.k, X(p.x), Y(p.y)); c.textAlign="left"; c.textBaseline="alphabetic";
+  });
+}
+
+// ---- profil ------------------------------------------------------------------
+const ev = document.getElementById("elev"), ec = ev.getContext("2d");
+function drawElev(){
+  ec.clearRect(0,0,ev.width,ev.height);
+  const pad=26, w=ev.width-2*pad, h=ev.height-2*pad, emax=70;
+  ec.strokeStyle = col("--grid");
+  for (let m=0;m<=emax;m+=10){ const y = pad+h-(m/emax)*h;
+    ec.beginPath(); ec.moveTo(pad,y); ec.lineTo(pad+w,y); ec.stroke();
+    ec.fillStyle = col("--ink-soft"); ec.font="10px system-ui"; ec.fillText(m+" m", 2, y+3); }
+  ec.beginPath();
+  LOOP.forEach((p,i)=>{ const x = pad+(CUM[i]/LEN)*w, y = pad+h-(p[2]/emax)*h; i? ec.lineTo(x,y) : ec.moveTo(x,y); });
+  ec.strokeStyle = "#F2A840"; ec.lineWidth = 2; ec.stroke();
+  ec.lineTo(pad+w,pad+h); ec.lineTo(pad,pad+h); ec.closePath();
+  ec.fillStyle = "#F2A840"; ec.globalAlpha=.12; ec.fill(); ec.globalAlpha=1;
+  POI.filter(p=>p.k!=="S" && p.k!=="E′").forEach(p=>{
+    let best=0,bd=1e9;
+    LOOP.forEach((q,i)=>{const d=Math.hypot(q[0]-p.x,q[1]-p.y); if(d<bd){bd=d;best=i;}});
+    const x = pad+(CUM[best]/LEN)*w, y = pad+h-(LOOP[best][2]/emax)*h;
+    ec.beginPath(); ec.arc(x,y,3.5,0,7); ec.fillStyle=col("--panel"); ec.fill();
+    ec.strokeStyle=col("--ink-soft"); ec.stroke();
+    ec.fillStyle=col("--ink"); ec.font="bold 10px system-ui"; ec.fillText(p.k, x-3, y-8);
+  });
+}
+
+// ---- ceasuri -----------------------------------------------------------------
+const CLOCKS = [["telecabina",20,"pleacă din stația de jos"],["pasaj rotativ",25,"deschis ↔ închis"],
+  ["monorail",35,"telegraph 3 s: clopoțel + barieră"],["nava",40,"sirenă → siaj pe chei"],["ploaia",50,"rafală 15 s, grip 0.85×"]];
+document.getElementById("clocks").innerHTML = CLOCKS.map(([n,s,d])=>
+  '<div class="clock"><span class="nm">'+n+'</span><span class="bar"><i style="width:'+(s/60*100)+'%"></i><em style="left:'+(s/60*100)+'%"></em></span><span class="s">'+s+' s</span></div>'
+).join("") + '<div class="note">Niciun ceas nu împarte turul (~60 s): faza se mută de la tur la tur. Bara = perioada față de tur.</div>';
+
+// ---- interactiune ------------------------------------------------------------
+const detail = document.getElementById("detail");
+function select(p){
+  sel = p; draw();
+  document.querySelectorAll("#asset-tbl tr.row").forEach(tr=>
+    tr.classList.toggle("on", tr.dataset.poi && p && tr.dataset.poi.includes(p.k)));
+  if (!p){ detail.innerHTML = '<p class="hint">Alege un POI pe hartă sau un rând din tabel.</p>'; return; }
+  detail.innerHTML = '<span class="tag">POI '+p.k+' · frac '+p.frac+'</span><h3>'+p.name+'</h3>'+
+    '<div class="coord">'+p.w+'</div><p>'+p.desc+'</p>'+
+    '<div class="assets"><b>Lotul de assets</b>'+p.lot.join(" · ")+'</div>';
+}
+plan.addEventListener("click", e=>{
+  const r = plan.getBoundingClientRect();
+  const mx = (e.clientX-r.left)*(plan.width/r.width), my = (e.clientY-r.top)*(plan.height/r.height);
+  let best=null, bd=24;
+  POI.forEach(p=>{ const d=Math.hypot(X(p.x)-mx, Y(p.y)-my); if (d<bd){bd=d;best=p;} });
+  select(best);
+});
+plan.addEventListener("mousemove", e=>{
+  const r = plan.getBoundingClientRect();
+  const wx = minx+((e.clientX-r.left)*(plan.width/r.width)-ox)/S;
+  const wy = maxy-((e.clientY-r.top)*(plan.height/r.height)-oy)/S;
+  document.getElementById("cursor").textContent = Math.round(wx)+", "+Math.round(wy)+" m";
+});
+document.getElementById("lots").addEventListener("change", e=>{ showLots = e.target.checked; draw(); });
+
+const tbl = document.getElementById("asset-tbl");
+let html = "<thead><tr><th>piesă</th><th>dimensiuni</th><th class='num'>buc.</th><th>POI</th><th>notă</th></tr></thead><tbody>";
+let grp = "";
+ASSETS.forEach(a=>{
+  if (a[1]===null){ grp=a[0].includes("Hero")?"hero":a[0].includes("clas")?"cls":"kit";
+    html += '<tr class="grp"><td colspan="5">'+a[0]+'</td></tr>'; return; }
+  html += '<tr class="row" data-poi="'+a[3]+'"><td class="mono">'+a[0]+'</td><td>'+a[1]+'</td><td class="num">'+a[2]+
+    '</td><td><span class="pill '+grp+'">'+a[3]+'</span></td><td style="color:var(--ink-soft)">'+a[4]+'</td></tr>';
+});
+tbl.innerHTML = html + "</tbody>";
+document.getElementById("a-count").textContent = ASSETS.filter(a=>a[1]!==null).length + " tipuri";
+tbl.addEventListener("click", e=>{
+  const tr = e.target.closest("tr.row"); if (!tr) return;
+  const k = tr.dataset.poi.split("/")[0];
+  select(POI.find(p=>p.k===k) || null);
+});
+document.getElementById("copy-btn").addEventListener("click", async e=>{
+  const txt = document.getElementById("prompt-text").textContent;
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copiat ✓"; }
+  catch(_) { const rng = document.createRange(); rng.selectNodeContents(document.getElementById("prompt-text"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(rng); e.target.textContent = "Selectat — Ctrl+C"; }
+  setTimeout(()=>{ e.target.textContent = "Copiază promptul"; }, 2200);
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{draw();drawElev();});
+draw(); drawElev();
+</script>

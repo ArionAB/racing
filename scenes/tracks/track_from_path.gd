@@ -23,7 +23,7 @@ extends Track
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 
 @export var custom_name: String = "Pista noua"
-@export_enum("forest", "desert", "island", "baikal", "stromboli") var custom_theme: String = "forest"
+@export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
 ## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
 ## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).

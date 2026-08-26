@@ -137,6 +137,7 @@ const BRAKING_MIN_OFFSET: float = 8.0
 ## sa se prefaca ca e desert sau sa adauge inca un `or`.
 ##   "bands"   — benzi paralele cu drumul, densitatea din style_bible §7
 ##   "scatter" — esantionare prin respingere in dreptunghi (metoda veche)
+##   "none"    — nimic procedural (oras asezat de mana, Chongqing)
 ##
 ## `mat_provider` = Callable(Color) -> StandardMaterial3D.
 ## `props` alege CE se aseaza; `mode` alege UNDE. Sunt doua decizii separate,
@@ -154,7 +155,7 @@ static func build(sampler: TrackSideSampler, mode: String, seed_value: int,
 	var sway := SwayDriver.new()
 	sway.name = "Sway"
 	root.add_child(sway)
-	if sampler.point_count() == 0:
+	if sampler.point_count() == 0 or mode == "none":
 		return root
 	if mode == "bands":
 		_build_bands(root, sampler, seed_value, mat_provider, props, blockers)

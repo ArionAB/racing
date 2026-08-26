@@ -57,6 +57,12 @@ extends Path3D
 ## langa banda ramane pedeapsa obisnuita, nu una dubla.
 @export_range(0.5, 1.0, 0.01) var speed_factor: float = 1.0
 
+## Banda sta IN AER: telecabina de pe Chongqing, o pasarela. Terenul NU o
+## urmareste — fara flag, samplerul ridica pamantul pana la cota benzii
+## (_lift_branches) si o banda peste un golf ar iesi un dig de pamant, nu un
+## cablu. Banda ramane in fizica si in AI exact ca oricare alta.
+@export var elevated: bool = false
+
 @export_group("Suprafata")
 
 ## Din ce e facuta banda. THEME = ce spune tema pistei (`branch_surface`:

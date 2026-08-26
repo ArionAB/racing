@@ -965,6 +965,57 @@ static func themes() -> Dictionary:
 			"branch_tint": Color(0.30, 0.28, 0.30),
 			"branch_surface": "gravel",
 		},
+		"chongqing": {
+			# NOAPTE CU BURNITA, ORAS CONSTRUIT PESTE EL INSUSI (brief §0.1, §4).
+			# Prima tema de noapte: lumina nu vine de la soare, ci de la oras —
+			# ambientul gri-violaceu e "cerul luminat de jos", iar "soarele" e o
+			# luna rece, aproape verticala, doar cat sa dea volum. Fara umbre:
+			# n-are ce arunca o luna la 0.35, iar pe mobil e si setarea cea mai
+			# scumpa (CLAUDE.md). Ceata 150 -> 250, gri-violacee: turnurile de
+			# peste rau se sting in ea firesc (§2.0).
+			"ground_tint": Palette.color(Palette.CONCRETE).darkened(0.70),
+			"sky_top": Color(0.05, 0.05, 0.10),
+			"sky_horizon": Color(0.27, 0.24, 0.36),
+			"fog": Color(0.34, 0.31, 0.42),
+			"hill_color": Color(0.16, 0.16, 0.22),
+			"sun_color": Color(0.78, 0.84, 1.0),
+			"sun_energy": 0.35,
+			"sun_rotation_deg": Vector3(-78, 200, 0),
+			"exposure": 1.0,
+			"ambient_color": Color.html("6E6A8E"),
+			"ambient_energy": 0.40,
+			"shadows": false,
+			"fog_depth": true,
+			"fog_begin": 150.0,
+			"fog_end": 250.0,
+			# Fara insule pe orizont: siluetele de turnuri vin din DecorManual.
+			"horizon_rings": [],
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			# Fara decor procedural: orasul se aseaza de mana (DecorManual), nu
+			# din benzi de vegetatie. Kitul "chongqing" nu exista inca in
+			# TrackDecor; cand apare, aici se pune "bands" + "props".
+			"decor": "none",
+			"props": "stromboli",
+			"rock_class": "volcanic_rock",
+			# Doua rauri de culori diferite (Jialing verde, Yangtze brun) — dar
+			# apa are doar doua sloturi, dupa ADANCIME, nu dupa loc. Noaptea
+			# amandoua trebuie sa fie INCHISE: TROPICAL_GREEN la mal iesea o
+			# pata verde luminoasa in captura de sus, deci malul ia SEA_DEEP si
+			# largul ICE_CRACK (aproape negru), ca pe Stromboli. Jialing verde /
+			# Yangtze brun (SAND_SHADOW) raman pentru un shader pe plan de apa,
+			# cand vine (brief §5 "plan de apa in doua culori"). Fara slot nou.
+			"water": true,
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.ICE_CRACK,
+			"seabed_drop": 20.0,
+			"shore_band_in": 10.0,
+			"shore_band_out": 24.0,
+			"dust_color": Color(0.30, 0.30, 0.34),
+			"branch_tint": Color(0.62, 0.63, 0.66),
+			"branch_surface": "sand",
+		},
 	}
 	return _themes_cache
 
@@ -1032,6 +1083,10 @@ func apply_theme(theme: String) -> void:
 	theme_sun_color = _theme["sun_color"]
 	theme_sun_energy = _theme["sun_energy"]
 	theme_exposure = _theme["exposure"]
+	# Umbrele raman comutatorul de performanta (vezi _build_environment), dar o
+	# tema de NOAPTE nu are ce umbri: soarele e o luna palida aproape verticala,
+	# iar o umbra dura ar contrazice lumina. "shadows": false le stinge pe tema.
+	theme_shadows = bool(_theme.get("shadows", true))
 
 var curve: Curve3D
 var baked: PackedVector3Array
@@ -1601,6 +1656,7 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				"edge_noise": br.edge_noise,
 				"bumpiness": br.bumpiness,
 				"tufts": br.tufts,
+				"elevated": br.elevated,
 			}
 			if br.branch_half_width > 0.0:
 				spec["half_width"] = br.branch_half_width
@@ -3546,6 +3602,9 @@ func _build_routes() -> void:
 func _branch_corridor_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for i in range(1, routes.size()):
+		# O banda in aer (TrackBranch.elevated) nu e coridor: terenul n-o vede.
+		if routes[i].elevated:
+			continue
 		out.append_array(routes[i].baked)
 	return out
 
@@ -3557,7 +3616,7 @@ func _branch_corridor_points() -> PackedVector3Array:
 func _branch_carve_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for i in range(1, routes.size()):
-		if routes[i].surface != "sand":
+		if routes[i].surface != "sand" and not routes[i].elevated:
 			out.append_array(routes[i].baked)
 	return out
 
@@ -3965,6 +4024,7 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.bumpiness = float(spec.get("bumpiness", route.bumpiness))
 	route.speed_factor = clampf(float(spec.get("speed_factor", 1.0)), 0.3, 1.0)
 	route.tufts = bool(spec.get("tufts", true))
+	route.elevated = bool(spec.get("elevated", false))
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
 	return route

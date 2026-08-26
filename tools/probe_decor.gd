@@ -10,9 +10,10 @@ extends SceneTree
 ##    decor si fiecare instanta isi capata materialul ei — atunci raportul
 ##    mesh-uri/material cade spre 1.0 si build-ul pica.
 ##
-## 2. TRIUNGHIURI (instrumentare). Raportate mereu, cu prag larg. Nu erau masurate
-##    deloc pana acum, desi CLAUDE.md vorbeste de un buget — vezi
-##    MAX_TRIS_PER_TRACK pentru de ce pragul e unde e.
+## 2. TRIUNGHIURI (doar instrumentare). Raportate mereu, dar NU dau verdict:
+##    cifra e pe toata pista, iar ceata si visibility_range fac sa nu se
+##    randeze niciodata toata in acelasi cadru. Vezi blocul de sub
+##    `MAX_MATERIALS_PER_TRACK` pentru de ce plafonul a fost scos.
 ##
 ## Rulare (toate pistele, cod de iesire 1 daca vreuna pica):
 ##   godot --headless --path . --script res://tools/probe_decor.gd
@@ -108,148 +109,29 @@ const MIN_SAMPLE: int = 20
 ## draw calls / overdraw / fill rate, de asta testul principal al garzii ramane
 ## numaratoarea de MATERIALE. Validarea finala e primul test pe device — si
 ## Okinawa e pista pe care trebuie inceput, fiind cea mai grea.
-const MAX_TRIS_PER_TRACK: int = 400000
-
-## Praguri PER PISTA, pentru abaterile decise cu cifrele in fata.
+## TRIUNGHIURILE NU MAI DAU VERDICT (august 2026, decizia dezvoltatorului).
 ##
-## Pragul global a crescut de patru ori (80k -> 150k -> 300k -> 400k) fiindca o
-## singura pista avea nevoie de aer, si de fiecare data l-a primit toata lumea.
-## Efectul secundar nu e vizibil pana nu se intampla: Dunele masoara ~65k, deci
-## si-ar putea DUBLA geometria de doua ori la rand fara ca garda sa clipeasca.
-## Un prag pe pista tine alarma stransa acolo unde nu s-a schimbat nimic.
+## Se numara in continuare si se tipares in tabel — cifra ramane utila ca sa
+## prinzi accidentul clasic (o primitiva lasata la rezolutia implicita sare cu
+## zeci de mii dintr-un foc, iar un `SphereMesh` de 40 cm ajunge sa aiba 4 224
+## de triunghiuri). Dar nu mai PICA nimic.
 ##
-## Okinawa v2 (si Okinawa manual, care mosteneste aceeasi lume) au scenografia
-## dupa referinta: 524 de piese asezate — dig de tetrapozi, chei, sat, ziduri de
-## cetate, lan de trestie, perdele de palmieri — masurate la 896k pe pista.
+## DE CE: cifra e pe TOATA pista, iar pe ecran nu ajunge niciodata toata.
+## Ceata taie tot ce e peste 250 m, `visibility_range` si topirea din shader
+## scot vegetatia de departe — pe Alpi felia randata pe cadru masurase ~10% din
+## total. Un plafon pe suma intregii piste pedepseste geometrie care nu se
+## deseneaza in acelasi cadru.
 ##
-## De ce e acceptabil, in cifrele care conteaza pe mobil:
-##   - MATERIALELE raman 22 din 38. Scenografia nu aduce niciunul nou: totul
-##     trece prin atlasul comun si prin cele 8 clase de textura existente.
-##   - Cifra e pe TOATA pista (1.8 km). Camera de joc sta la 11 m in spate cu
-##     FOV 47.6, iar ceata taie la 250 m — deci ce se randeaza pe cadru e o
-##     fractiune, si fiecare piesa e un nod separat, adica frustum-culled.
-##   - Decizia e explicita a dezvoltatorului ("nu-ti fie frica de draw calls si
-##     triunghiuri"), luata dupa ce a fixat parametrii camerei.
-## Ce NU stim inca: cat trage asta pe un telefon real. De aia ramane un prag de
-## ALARMA, si de aia primul test pe device se face pe Okinawa.
+## Si istoricul o spune la fel de clar: pragul a fost ridicat de CINCI ori
+## (80k -> 150k -> 300k -> 400k, plus patru override-uri per pista), de fiecare
+## data fiindca munca legitima nu incapea, si de fiecare data cu MATERIALELE
+## neschimbate sau in scadere. Un prag care se muta ori de cate ori e atins nu
+## masoara nimic — doar cere o ceremonie inainte de fiecare merge. Track10
+## ajunsese la 1.36M cu override de 900k, iar CI-ul era rosu pe main.
 ##
-## Track08 sta mai sus decat Track07 desi impart aceeasi lume, si nu din
-## neglijenta: cele 896k de mai sus s-au masurat pe Track08 cand scena lui era
-## un ciot de sase linii, cu cele 87 de prop-uri asezate de mana inca necomise.
-## Dar Okinawa manual E, prin definitie, lumea comuna PLUS decor pus cu mouse-ul
-## (vezi antetul lui track08.gd) — deci un prag care nu-l cuprinde masoara o
-## pista care nu exista. Decorul manual aduce 341 026 de triunghiuri peste
-## Track07, si pista iese la 1 237 328.
-##
-## E fix capcana descrisa in CLAUDE.md: "masuratoare + marja" e buna pentru un
-## prag care prinde regresii, dar aplicata pe o masuratoare luata inaintea
-## muncii devine un plafon care respinge munca legitima — ca prima benzinarie cu
-## ferestre reale, respinsa de un numar derivat din cat de sarac era jocul in
-## ziua aia. Materialele, axa care chiar doare pe mobil, raman 22 din 38.
-##
-## 1.3M lasa ~5% aer peste masuratoarea de acum: strans intentionat, cat sa
-## prinda urmatoarea sesiune de asezat decor. Ce ar trebui sa scada cifra fara
-## sa taie din compozitie: un tetrapod are 5 104 de triunghiuri pentru un bloc
-## de beton de 4.2 m, iar digul are 41.
-##
-## 1.3M -> 1.45M (august 2026): sesiunea de decor manual pe urcarea de coasta
-## (zidul de gradina, gardul de pe buza lagunei, gospodaria, pontonul cu barca
-## — zonele 05/06, dupa imaginea de referinta). Masurat inainte/dupa:
-## 1 237 260 -> 1 341 534 vizibile, +104k, cu materialele NESCHIMBATE, 22/38.
-## Pragul pastreaza ~8% aer — destul cat sa prinda clasa de accident (primitive
-## la rezolutia implicita sar cu zeci de mii dintr-un foc), fara sa respinga
-## urmatoarea sesiune de asezat.
-##
-## 1.45M -> 1.5M (august 2026): inca o sesiune de decor manual in editor
-## (pietre, flori, palmieri pe zonele 06/08). Masurat inainte/dupa:
-## 1 341 534 -> 1 454 400 vizibile, +113k, materialele NESCHIMBATE, 22/38.
-## ~3% aer, strans intentionat: urmatoarea densificare (pajistea si pietrele
-## dupa imaginea de referinta) vine cu masuratoarea ei si isi ridica pragul
-## atunci, nu acum.
-##
-## 1.5M -> 1.95M (august 2026): pajistea si pietrele dupa imaginea de
-## referinta, de data asta DECLARATE in scenografie, nu asezate cu mouse-ul
-## (track08._scenography: Pajiste 617 piese / 299k, Pietre_margine 220 /
-## 106k, Ciorchini_pietre 83 / 20k). Masurat inainte/dupa: 1 455 080 ->
-## 1 881 897 vizibile, +427k, materialele NESCHIMBATE, 21/38 — s-a
-## ingreunat din nou exact axa care nu doare pe mobil. Ceata taie oricum
-## tot ce e peste 250 m, iar pajistea se coace in MultiMesh (109 desene pe
-## toata pista). ~3.5% aer: WP-ul urmator (promovarea decorului manual in
-## scenografie) nu ADAUGA geometrie, doar o muta.
-## 1.95M -> 2.15M (august 2026, #209): regulile de grupare — paturi de
-## flori lipite de gard/zid pe urcare (Paturi_gard 174/83k) si "fuste" de
-## smocuri la baza pietrelor si ciorchinilor (skirt in TrackScenography;
-## Pietre_margine 220 -> 442 piese, Ciorchini 83 -> 243). Masurat
-## inainte/dupa: 1 917 178 -> 2 059 126 vizibile, +142k, cu desenele
-## NESCHIMBATE (~508, totul intra in MultiMesh) si materialele 21/38.
-## Pajistea a fost taiata in trei lanuri cu goluri (ritmul plin/gol),
-## deci piesele ei au SCAZUT usor. ~4% aer.
-##
-## 2.15M -> 2.75M (august 2026): tivul si subarboretul din imaginea de
-## referinta. Verge_Umar (953/327k): tiv continuu de smocuri + iarba de
-## plaja + flori rare in PRIMUL metru de la umar, pe ambele laturi, pe
-## aceleasi trei lanuri cu goluri ca pajistea — el face drumul sa
-## citeasca a taiat prin vegetatie. Sub_Palmieri (269/146k): tufaris
-## sub perdelele de palmieri ale urcarii (0.44-0.72), fara gol pe
-## creasta. Paturi_gard 174 -> 330 (83k -> 166k): florile oglindite si
-## pe latura zidului, portocaliul condus la pas 4-5 m. Masurat
-## inainte/dupa: 2 059 126 -> 2 619 394 vizibile, +560k, cu desenele
-## NESCHIMBATE (508, totul intra in MultiMesh) si materialele 21/38.
-## ~5% aer, dimensionat pentru cele doua completari deja planificate:
-## speciile noi din veg_set2 INTRA IN ROTATIE (0 net) si paturile de la
-## baza zidurilor gusuku/gard ranch (~+20k, spot-uri in decorul manual).
-##
-## Bilantul final al lantului (august 2026): veg_set2 a costat +73k, nu
-## 0 net (tufa lata si coralul au intrat si ca straturi RARE in tiv —
-## linia tivului e ~2.6 km, nu ~1.5 cat estimase planul), iar paturile
-## de la ziduri s-au restrans la 12 accente la capetele si rostul
-## zidului (Paturi_ziduri, +9k): bazele dinspre drum aveau deja paturi
-## din oglindire, si dublarea lor ar fi fost geometrie fara castig.
-## Total masurat: 2 702 585 din 2 750 000, desene 532 (+24, celulele
-## MultiMesh ale speciilor noi), materiale 21/38 pe tot lantul.
-## Track09 (august 2026): iarba densa de margine (TrackGrass) — ~29k smocuri
-## a 24 de triunghiuri pe banda de 0.35-7 m, masurat 1 058 591 pe toata pista
-## (fata de ~250k inainte). Aceeasi structura de decizie ca la Okinawa:
-## materialele au urcat cu UNUL (28 -> 29 din 38, ShaderMaterial-ul partajat
-## al clasei "iarba"), desenele cu ~40 de celule de MultiMesh, iar cifra e pe
-## TOATA pista — topirea din shader scufunda firele in teren la 68-86 m de
-## camera si celulele au visibility_range, deci felia randata pe cadru e
-## ~10% din total, pe axa care nu doare pe mobil. ~8% aer peste masuratoare:
-## destul pentru tuning de densitate, strans cat sa prinda clasa de accident.
-const TRIS_OVERRIDE := {
-	"Track08": 2750000,
-	# Alpii, istoricul pragului (august 2026, doua lanturi de lucru paralele
-	# care s-au intalnit la merge):
-	#   373k -> 461k  rapa paraului din vale (#240): taietura de canal
-	#     deschide sloturi noi de teren, iar benzile statistice le umplu
-	#     (brazii 344 -> 421, cabanele 4 -> 11); materialele 15 -> 17 din 38.
-	#   +~808k  iarba densa de margine (TrackGrass, #271): ~29k smocuri a 24
-	#     de triunghiuri pe banda de 0.35-7 m; materialele +1 (ShaderMaterial-ul
-	#     partajat al clasei "iarba"), desenele +~40 de celule MultiMesh.
-	#     Cifra e pe TOATA pista — topirea din shader (68-86 m) si
-	#     visibility_range fac felia randata pe cadru ~10% din total.
-	# Pragul de mai jos e pe COMBINATIA masurata dupa merge, cu ~8% aer:
-	# destul pentru tuning de densitate, strans cat sa prinda clasa de
-	# accident (o primitiva la rezolutia implicita sare cu zeci de mii).
-	"Track09": 1150000,
-	# Baikal, la integrarea decorului manual (august 2026):
-	#   267k  doar procedural (decorul de tema, fara nimic asezat de mana)
-	#   +528k kitul manual: 349 de instante din cele 19 GLB-uri, din care
-	#     padurea singura 195k (mestecenii si pinii de pe coborarea in S).
-	#     Laricele costa 13 140 de triunghiuri BUCATA — treisprezece dintre ei
-	#     faceau 170k, adica 60% din padure pentru 28% din copaci; au ramas
-	#     patru, ca accente, si desimea a trecut pe pini (874 tris).
-	# MATERIALELE au SCAZUT in aceeasi miscare, 47 -> 30 din 38, fiindca
-	# `world_prop.gd` de pe container colapseaza cele 18 materiale ale kitului
-	# pe atlasul comun. Adica s-a ingreunat axa care nu doare pe mobil si s-a
-	# usurat cea care doare — acelasi rationament ca la Okinawa.
-	"Track10": 900000,
-}
-
-
-static func tris_limit(path: String) -> int:
-	return int(TRIS_OVERRIDE.get(path.get_file().get_basename(),
-		MAX_TRIS_PER_TRACK))
+## Constrangerea reala pe mobil ramane DRAW CALLS / overdraw / fill rate, si aia
+## e masurata de `MAX_MATERIALS_PER_TRACK` — testul care a si ramas singurul cu
+## drept de veto. Validarea finala e primul test pe device fizic.
 
 var _paths: Array[String] = []
 var _index: int = 0
@@ -404,8 +286,7 @@ func _measure(path: String, track: Node) -> Dictionary:
 		"tris": tris,
 		"unique_meshes": unique_meshes.size(),
 		"ratio_ok": ratio_ok,
-		"tris_ok": tris <= tris_limit(path),
-		"ok": ratio_ok and tris <= tris_limit(path),
+		"ok": ratio_ok,
 		"sources": by_source,
 	}
 
@@ -419,13 +300,8 @@ func _tris_of(mesh: Mesh) -> int:
 
 func _report() -> bool:
 	var failed := false
-	print("=== GARDA DE SCENA (materiale: maxim %d / pista · triunghiuri: alarma la %s) ==="
-		% [MAX_MATERIALS_PER_TRACK, _thousands(MAX_TRIS_PER_TRACK)])
-	if not TRIS_OVERRIDE.is_empty():
-		var notes: PackedStringArray = []
-		for key: String in TRIS_OVERRIDE:
-			notes.append("%s %s" % [key, _thousands(int(TRIS_OVERRIDE[key]))])
-		print("praguri proprii de triunghiuri: %s" % ", ".join(notes))
+	print("=== GARDA DE SCENA (materiale: maxim %d / pista · triunghiurile se raporteaza, nu pica) ==="
+		% MAX_MATERIALS_PER_TRACK)
 	print("%-10s %7s %7s %5s %6s %11s %7s %9s %6s %6s"
 		% ["pista", "prop-uri", "desene", "mat.", "atlas", "procedural",
 			"raport", "triunghi", "unice", "stare"])
@@ -433,13 +309,7 @@ func _report() -> bool:
 	for row in _rows:
 		if not row.ok:
 			failed = true
-		var state := "OK"
-		if not row.ratio_ok and not row.tris_ok:
-			state = "PICA×2"
-		elif not row.ratio_ok:
-			state = "MAT"
-		elif not row.tris_ok:
-			state = "TRIS"
+		var state := "OK" if row.ratio_ok else "MAT"
 		print("%-10s %7d %7d %5d %6d %5d/%-5d %7.2f %9s %6d %6s" % [
 			row.path, row.meshes, row.draws, row.materials, row.on_atlas,
 			row.proc_meshes, row.proc_materials, row.ratio,

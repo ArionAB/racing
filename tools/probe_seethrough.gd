@@ -37,9 +37,16 @@ extends Node
 ## peste suprafata marii. E tot un defect vizual, dar ALTUL, si nu se repara de
 ## unde se repara gaurile — de aceea sta scris in prag, nu ascuns intr-o medie.
 ##
-## Pragurile de mai jos sunt MASURATE, in aceeasi logica cu `TRIS_OVERRIDE` din
-## probe_decor.gd: valoarea de azi plus marja, ca sa prinda regresia, nu un
-## numar ales din teorie. Ce inseamna fiecare, la data scrierii:
+## Pragurile de mai jos sunt MASURATE: valoarea de azi plus marja, ca sa prinda
+## regresia, nu un numar ales din teorie.
+##
+## ATENTIE la capcana in care a cazut plafonul de triunghiuri din probe_decor.gd
+## (scos in august 2026): „masuratoare + marja" tine doar cat timp cifra masoara
+## ceva ce chiar doare. Acolo se aduna geometrie de pe TOATA pista, din care
+## ceata randeaza o zecime, si pragul a ajuns sa fie ridicat de cinci ori la
+## rand — o ceremonie inainte de fiecare merge, nu o garda. Aici cifra e in
+## pixeli de ecran, deci masoara exact ce vede jucatorul; daca vreodata inceteaza
+## sa fie asa, scoate-o, n-o ridica. Ce inseamna fiecare, la data scrierii:
 ##   Dunele 1.769 — capul unui stalp de marcaj care se vede pe dinauntru
 ##   Stramtoarea 1.117 — acelasi tip de rest, pe prop-uri marunte
 ##   Okinawa 103.171 / v2 18.136 / manual 17.953 — placile de apa, coplanare

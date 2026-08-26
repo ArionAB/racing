@@ -448,7 +448,7 @@ de deasupra.
 >
 > Deliver: (a) one wide 3/4 overview of the entire diorama with the loop
 > clearly readable — plateau on top, quay at the bottom, the stacked
-> interchange on the far side; (b) one driver's-eye shot ON THE CORNICE —
+> interchange on the left; (b) one driver's-eye shot ON THE CORNICE —
 > the gold stilt houses directly below on the right, the two-color rivers
 > further down, tower silhouettes in the mist; (c) one shot from the quay
 > looking up at the interchange: three stacked ramps with cars on different

@@ -1,138 +1,84 @@
 extends Node
-## Sonda portiunilor ude de pe traseul principal (#246).
+## Sonda "interiorul buclei ramane uscat" (Chongqing, brief §2): pe o grila de
+## 10 m, cate puncte din INTERIORUL poligonului pistei au terenul sub cota apei.
+## Plus profilul transversal (ambele parti) pe fractiile date.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeWet.tscn
-##
-## Ce verifica:
-##
-##   1. INTERVALUL RASPUNDE. `is_wet_at` e adevarat inauntru si fals in afara,
-##      inclusiv pentru un interval care trece peste linia de start.
-##   2. SE VEDE. Asfaltul din interval e mai INCHIS decat cel din afara. Fara
-##      verdictul asta, o portiune care taie grip-ul ar fi invizibila — adica
-##      necinstita fata de jucator, si exact clasa de bug in care „efectul
-##      exista" dar pe ecran nu e nimic.
-##   3. MARGINEA E ESTOMPATA. Intunecarea creste treptat, nu dintr-un vertex in
-##      altul: o trecere brusca ar desena o dunga transversala trasa cu rigla.
-##   4. GRIP-UL SCADE CU ADEVARAT. Se masoara pe MASINA, prin cate cadre de
-##      alunecare primeste — nu pe constante din cod.
-##   5. NEREGRESIE: fara intervale declarate, asfaltul ramane bit-identic.
-
-const HALF_WIDTH: float = 7.0
-
+##   ... -- [--scene=res://scenes/tracks/Track12.tscn] [--step=10]
+##          [--fracs=0.50,0.52,0.54,0.56,0.59]
 
 func _ready() -> void:
+	var scene := "res://scenes/tracks/Track12.tscn"
+	var step := 10.0
+	var fracs: Array[float] = [0.48, 0.50, 0.52, 0.54, 0.56, 0.59, 0.62]
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--scene="):
+			scene = arg.trim_prefix("--scene=")
+		elif arg.begins_with("--step="):
+			step = float(arg.trim_prefix("--step="))
+		elif arg.begins_with("--fracs="):
+			fracs.clear()
+			for t in arg.trim_prefix("--fracs=").split(","):
+				fracs.append(float(t))
+	var track: Track = (load(scene) as PackedScene).instantiate()
+	add_child(track)
 	await get_tree().process_frame
-
-	print("")
-	print("=== Sonda sosea uda ===")
-	var failed := false
-
-	# --- 1. intervalul raspunde
-	var t := TrackFromPath.new()
-	t.custom_name = "SondaUd"
-	t.custom_wet_ranges = [Vector2(0.30, 0.40), Vector2(0.95, 0.05)]
-	get_tree().root.add_child(t)
-	await get_tree().process_frame
-	await get_tree().process_frame
-
-	print("\nintervalul (0.30-0.40 si 0.95-0.05, peste linia de start):")
-	for probe in [[0.35, true], [0.20, false], [0.45, false],
-			[0.97, true], [0.02, true], [0.50, false]]:
-		var f: float = probe[0]
-		var want: bool = probe[1]
-		var got: bool = t.is_wet_at(f)
-		var ok := got == want
-		if not ok:
-			failed = true
-		print("  frac %.2f -> %s (asteptat %s)  %s"
-				% [f, got, want, "OK" if ok else "PROBLEMA"])
-
-	# --- 2 + 3. se vede, cu margine estompata
-	var inside: float = t._wet_shade(0.35).r
-	var outside: float = t._wet_shade(0.20).r
-	var edge: float = t._wet_shade(0.302).r # foarte aproape de capat
-	var darker := inside < outside - 0.15
-	if not darker:
-		failed = true
-	print("\nsemnalul vizual (factor de intunecare, 1.0 = neatins):")
-	print("  in interval  -> %.2f" % inside)
-	print("  in afara     -> %.2f" % outside)
-	print("  %s" % ["OK (se vede)" if darker else "PROBLEMA (nu se distinge)"])
-	var faded := edge > inside + 0.05 and edge < outside
-	if not faded:
-		failed = true
-	print("  langa margine-> %.2f  %s"
-			% [edge, "OK (estompat)" if faded else "PROBLEMA (dunga brusca)"])
-
-	# --- 5. neregresie
-	var dry := TrackFromPath.new()
-	dry.custom_name = "SondaUd"
-	get_tree().root.add_child(dry)
-	await get_tree().process_frame
-	var dry_shade: float = dry._wet_shade(0.35).r
-	var clean := is_equal_approx(dry_shade, 1.0)
-	if not clean:
-		failed = true
-	print("\nfara intervale (neregresie):")
-	print("  factor -> %.2f  %s"
-			% [dry_shade, "OK (asfalt neatins)" if clean else "PROBLEMA"])
-	dry.queue_free()
-
-	# --- 4. grip-ul, masurat pe masina
-	var slip := await _slip_frames(t)
-	print("\ngrip-ul, masurat pe masina:")
-	var wet_frames: int = slip["wet"]
-	var dry_frames: int = slip["dry"]
-	var slips := wet_frames > 0 and dry_frames == 0
-	if not slips:
-		failed = true
-	print("  cadre de alunecare -> in ud %d, pe uscat %d  %s"
-			% [wet_frames, dry_frames, "OK" if slips else "PROBLEMA"])
-	var grip: float = slip["grip"]
-	var grip_ok := grip < 8.0
-	if not grip_ok:
-		failed = true
-	print("  grip lateral in ud -> %.1f (uscat 8.0)  %s"
-			% [grip, "OK" if grip_ok else "PROBLEMA"])
-
-	t.queue_free()
-	print("")
-	print("VERDICT: ", "OK" if not failed else "PROBLEME")
-	get_tree().quit(1 if failed else 0)
-
-
-## Pune o masina pe pista, o plimba prin ud si prin uscat, si numara cadrele in
-## care chiar a primit alunecare.
-func _slip_frames(track: Track) -> Dictionary:
-	var car_scene: PackedScene = load("res://scenes/cars/Car.tscn")
-	var car: Car = car_scene.instantiate()
-	track.add_child(car)
-	car.track = track
-	await get_tree().process_frame
-
-	var wet_hits := 0
-	var dry_hits := 0
-	var grip := 0.0
-	for pair in [[0.35, true], [0.20, false]]:
-		var frac: float = pair[0]
-		var is_wet: bool = pair[1]
-		var n: int = track.baked.size()
-		var idx: int = int(frac * float(n)) % n
-		car.global_position = track.baked[idx] + Vector3.UP * 0.5
-		car.route = 0
-		car.road_index = idx
-		car.slip_time = 0.0
-		# Cateva cadre de fizica: udul se reinnoieste in fiecare cadru cat stai
-		# pe el, deci daca mecanismul merge, `slip_time` ramane pozitiv.
-		for i in 8:
-			await get_tree().physics_frame
-		if car.slip_time > 0.0:
-			if is_wet:
-				wet_hits += 1
-				grip = car.slip_grip
-			else:
-				dry_hits += 1
-
-	var out := {"wet": wet_hits, "dry": dry_hits, "grip": grip}
-	car.queue_free()
-	return out
+	var sampler: TrackSideSampler = track._sampler
+	var sea_y: float = sampler.mean_road_y() + track.sea_level_offset
+	print("=== ProbeWet %s  apa la %.2f m  grila %.0f m ===" % [scene, sea_y, step])
+	var n := track.baked.size()
+	var poly := PackedVector2Array()
+	var bb_min := Vector2(INF, INF)
+	var bb_max := Vector2(-INF, -INF)
+	for p in track.baked:
+		poly.append(Vector2(p.x, p.z))
+		bb_min = bb_min.min(Vector2(p.x, p.z))
+		bb_max = bb_max.max(Vector2(p.x, p.z))
+	var wet := 0
+	var total := 0
+	var wet_fracs := {}
+	var x := bb_min.x
+	while x <= bb_max.x:
+		var z := bb_min.y
+		while z <= bb_max.y:
+			if Geometry2D.is_point_in_polygon(Vector2(x, z), poly):
+				total += 1
+				if sampler.ground_y(x, z) < sea_y:
+					wet += 1
+					var best := 0
+					var best_d := INF
+					for i in n:
+						var d := Vector2(track.baked[i].x, track.baked[i].z).distance_squared_to(Vector2(x, z))
+						if d < best_d:
+							best_d = d
+							best = i
+					var f := snappedf(float(best) / float(n), 0.01)
+					wet_fracs[f] = int(wet_fracs.get(f, 0)) + 1
+			z += step
+		x += step
+	print("  interior: %d puncte, %d ude" % [total, wet])
+	if wet > 0:
+		print("  ude pe fractii: %s" % str(wet_fracs))
+	var offsets := [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0]
+	var header := "  frac   drum |"
+	for o in offsets:
+		header += " L%-3d" % int(o)
+	header += " |"
+	for o in offsets:
+		header += " R%-3d" % int(o)
+	print(header)
+	for f in fracs:
+		var i := int(f * float(n)) % n
+		var p: Vector3 = track.baked[i]
+		var s: Vector3 = track._side_at(i)
+		var line := "  %.2f  %5.1f |" % [f, p.y]
+		for o in offsets:
+			var y: float = sampler.ground_y(p.x - s.x * o, p.z - s.z * o)
+			line += " %4.1f%s" % [y, "~" if y < sea_y else " "]
+		line += " |"
+		for o in offsets:
+			var y: float = sampler.ground_y(p.x + s.x * o, p.z + s.z * o)
+			line += " %4.1f%s" % [y, "~" if y < sea_y else " "]
+		print(line + "   (~ = sub apa; L = stanga/interior)")
+	print("VERDICT: %s (%d puncte ude in interior)" % ["OK" if wet == 0 else "PICAT", wet])
+	get_tree().quit(1 if wet > 0 else 0)

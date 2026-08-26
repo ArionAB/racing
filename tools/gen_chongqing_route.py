@@ -304,7 +304,11 @@ overpass = (r3(frac["F3 a"] - 0.004),
 # uscat de sub faleza, apa incepe dincolo de el (LAGOON).
 ravines = [
     (r3(frac["D cornisa in"] - 0.006), r3(frac["E chei in"] - 0.008), 30, 1),
-    (r3(frac["E pod in"] + 0.004), r3(frac["E pod out / F etaj 1 in"] + 0.012), 12, 0),
+    # Podul peste golf: golul e DOAR pe dreapta (exteriorul buclei). Cu 0
+    # (ambele parti) sapatura cobora si interiorul sub cota apei si drumul
+    # iesea un dig cu apa pe ambele parti (runda 2, 88 de puncte ude in
+    # interior pe 0.50-0.60). Brief §2: interiorul ramane uscat.
+    (r3(frac["E pod in"] + 0.004), r3(frac["E pod out / F etaj 1 in"] + 0.012), 12, 1),
     (r3(frac["F1 a"] + 0.004), r3(frac["F etaj 2 (sosire telecabina)"] - 0.008), 10, -1),
 ]
 widths = [
@@ -314,7 +318,10 @@ widths = [
     (r3(frac["E chei in"] + 0.004), r3(frac["E pod in"] + 0.006), 9.0),
 ]
 # Podeaua cornisei D: WATER_Y + 3 (chei la ~6 m, uscat).
-RAVINE_FLOOR = [(0, WATER_Y + 3.0)]
+# Cornisa de la poalele spiralei F (rapa 2, pe stanga = interior) primeste
+# aceeasi podea: drumul e la 12-15 m acolo si 10 m de sapatura ajungea la
+# 2 m, sub apa (runda 2: apa la 15-20 m stanga pe 0.59).
+RAVINE_FLOOR = [(0, WATER_Y + 3.0), (2, WATER_Y + 3.0)]
 # APA: golful + cele doua rauri, pe SUD si EST in harta (godot: +z si -x).
 # Poligon in coordonate GODOT. Cu banda de mal a temei (6 + 10 m) linia apei
 # iese la ~3-5 m INAUNTRUL conturului (cu implicitul de atol, 25 + 45 m, apa
@@ -322,8 +329,13 @@ RAVINE_FLOOR = [(0, WATER_Y + 3.0)]
 # Conturul URMEAZA cornisa D la ~55 m de axa (malul e abrupt: lagoon_band
 # 6 + 10 m in tema), deci linia apei iese la ~50 m si terasa 14-50 m ramane
 # uscata; pe chei (E, z=205) sta la z=235; ocoleste poalele spiralei F.
+# Pe chei (E, x -110..55, axa la z=205, semilatime 9) conturul sta la z=222:
+# linia apei la ~17 m de axa, cheiul uscat pe 8 m de la marginea asfaltului.
+# Sub pod (x 75..150, axa la z 191-198) conturul urca la 6-9 m de margine,
+# ca apa golfului sa fie chiar sub tablier, in continuarea rapei-viaduct.
 LAGOON = [(-300, -45), (-283, 25), (-317, 85), (-287, 150), (-225, 235),
-          (170, 235), (230, 300), (330, 320), (900, 400), (900, 900),
+          (-110, 222), (55, 222), (75, 206), (150, 200), (185, 214),
+          (230, 300), (330, 320), (900, 400), (900, 900),
           (-900, 900), (-900, -45)]
 # Fundul lagunei: sub media soselei cu atat cat sa iasa la ~-6 m (apa la 3).
 LAGOON_DEPTH = round(mean_elev + 6.0, 1)

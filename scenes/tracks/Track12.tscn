@@ -23,13 +23,13 @@ custom_name = "Chongqing"
 custom_theme = "chongqing"
 custom_half_width = 7.0
 custom_sea_level_offset = -31.45
-custom_ravines = Array[Vector4]([Vector4(0.225, 0.362, 30, 1), Vector4(0.496, 0.552, 12, 0), Vector4(0.569, 0.642, 10, -1)])
+custom_ravines = Array[Vector4]([Vector4(0.225, 0.362, 30, 1), Vector4(0.496, 0.552, 12, 1), Vector4(0.569, 0.642, 10, -1)])
 custom_cornice_ravines = Array[int]([0, 2])
 custom_viaduct_ravines = Array[int]([1])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.676, 0.898)])
 custom_width_segments = Array[Vector3]([Vector3(0.963, 0.055, 9.0), Vector3(0.085, 0.158, 8.0), Vector3(0.188, 0.218, 6.0), Vector3(0.374, 0.498, 9.0)])
-custom_ravine_floors = Array[Vector2]([Vector2(0, 6.0)])
-custom_lagoon = Array[Vector2]([Vector2(-300, -45), Vector2(-283, 25), Vector2(-317, 85), Vector2(-287, 150), Vector2(-225, 235), Vector2(170, 235), Vector2(230, 300), Vector2(330, 320), Vector2(900, 400), Vector2(900, 900), Vector2(-900, 900), Vector2(-900, -45)])
+custom_ravine_floors = Array[Vector2]([Vector2(0, 6.0), Vector2(2, 6.0)])
+custom_lagoon = Array[Vector2]([Vector2(-300, -45), Vector2(-283, 25), Vector2(-317, 85), Vector2(-287, 150), Vector2(-225, 235), Vector2(-110, 222), Vector2(55, 222), Vector2(75, 206), Vector2(150, 200), Vector2(185, 214), Vector2(230, 300), Vector2(330, 320), Vector2(900, 400), Vector2(900, 900), Vector2(-900, 900), Vector2(-900, -45)])
 sea_level_offset = -31.45
 lagoon_depth = 40.4
 

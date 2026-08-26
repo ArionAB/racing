@@ -1021,14 +1021,22 @@ static func themes() -> Dictionary:
 			# Jialing la mal, brun Yangtze in larg — dupa adancime, nu dupa
 			# loc) si trec printr-o "lumina" de 0.30; spuma si scanteierea sunt
 			# stinse, hula si treptele abia sugerate. Malul: pamant inchis.
+			# RUNDA 3: verde/brun la 0.42 citeau ca PAJISTE (mata, fara nimic
+			# care sa se miste, si mai deschisa decat cheiul). Apa de noapte
+			# se citeste prin doua lucruri: e mai INCHISA decat malul si
+			# SCLIPESTE — luminile orasului pe hula (referinta: pete aurii
+			# pe verde inchis). Deci: SEA_DEEP (teal, Jialing) la mal si
+			# ICE_CRACK (albastru aproape negru, Yangtze noaptea) in larg,
+			# hula la 0.55 ca sa aiba forma, iar scanteierea ramane aprinsa
+			# la 0.35: nu e soare, e luna in ceata + orasul de peste rau.
 			"water": true,
-			"water_shallow_slot": Palette.TROPICAL_GREEN,
-			"water_deep_slot": Palette.SAND_SHADOW,
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.ICE_CRACK,
 			"water_shore_slot": Palette.LOG_DARK,
-			"water_dim": 0.42,
+			"water_dim": 0.55,
 			"water_foam": 0.0,
-			"water_glint": 0.0,
-			"water_crest": 0.30,
+			"water_glint": 0.35,
+			"water_crest": 0.55,
 			"water_band": 0.25,
 			# UNDE e apa: NU "tot ce e in afara buclei" (seabed_drop) — asta
 			# ar fi facut o insula, iar Chongqing e o peninsula: golful si cele

@@ -266,6 +266,15 @@ var _shadow: MeshInstance3D
 var _shadow_mat: StandardMaterial3D
 var _was_on_floor: bool = true
 var _prev_velocity: Vector3 = Vector3.ZERO
+## Viteza SOLULUI de sub roti (media pe rotile cu contact). Zero pe asfalt;
+## pe o platforma mobila (telecabina din Chongqing, CablewayHazard) e viteza
+## platformei, citita din meta `platform_velocity` de pe corpul lovit de
+## raycast. Toate fortele de cauciuc (drag, grip lateral, amortizor, plafon)
+## se socotesc fata de EA, nu fata de lume: o roata pe o podea care merge cu
+## 25 m/s nu „aluneca" cu 25 m/s — sta pe loc fata de podea. Fara asta,
+## guvernatorul de viteza (fwd_speed > vmax) tragea masina inapoi cu 12 m/s^2
+## si o dadea jos din cabina pe usa din spate (masurat in ProbeCableway).
+var _ground_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
 var _bump_cooldown: float = 0.0
 ## instance_id-ul celeilalte masini -> secunde pana la urmatorul semnal admis.
@@ -492,7 +501,10 @@ func _physics_process(delta: float) -> void:
 
 	var forward := -global_transform.basis.z
 	var fwd_h := Vector3(forward.x, 0.0, forward.z).normalized()
-	var fwd_speed := Vector3(velocity.x, 0.0, velocity.z).dot(fwd_h)
+	# Viteza fata de SOL (vezi _ground_velocity): pe asfalt e identica cu cea
+	# fata de lume, deci nimic nu se schimba pe pistele fara platforme.
+	var rel_vel := velocity - _ground_velocity
+	var fwd_speed := Vector3(rel_vel.x, 0.0, rel_vel.z).dot(fwd_h)
 
 	_update_drift(drift_pressed, steer, fwd_speed)
 	_update_turbo(turbo_pressed, delta)
@@ -533,6 +545,11 @@ func get_floor_normal() -> Vector3:
 	return _ground_normal
 
 
+## Viteza solului de sub roti (platforma mobila), pentru sonde si hazarde.
+func ground_velocity() -> Vector3:
+	return _ground_velocity
+
+
 ## Un raycast per colt; arcul impinge LA COLT, si exact asta produce ruliul si
 ## tangajul: rotile incarcate imping mai tare decat cele usurate.
 func _apply_suspension() -> void:
@@ -541,6 +558,7 @@ func _apply_suspension() -> void:
 	_road_wheel_y = INF
 	var contact_sum := Vector3.ZERO
 	var normal_sum := Vector3.ZERO
+	var ground_vel_sum := Vector3.ZERO
 	var axle_sum: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 	_axle_grounded = [0, 0]
 	var space := get_world_3d().direct_space_state
@@ -566,6 +584,10 @@ func _apply_suspension() -> void:
 			_lava_wheel_y = maxf(_lava_wheel_y, (hit.position as Vector3).y)
 		else:
 			_road_wheel_y = minf(_road_wheel_y, (hit.position as Vector3).y)
+		var ground_vel := Vector3.ZERO
+		if ground != null and ground.has_meta(&"platform_velocity"):
+			ground_vel = ground.get_meta(&"platform_velocity") as Vector3
+		ground_vel_sum += ground_vel
 		wheels_on_ground += 1
 		var axle := 0 if i < 2 else 1
 		contact_sum += hit.position as Vector3
@@ -577,7 +599,9 @@ func _apply_suspension() -> void:
 		wheel_compression[i] = compression
 		var offset := attach - global_position
 		var point_vel := linear_velocity + angular_velocity.cross(offset)
-		var spring_vel := point_vel.dot(up)
+		# Amortizorul masoara viteza RELATIVA la sol: pe o platforma care urca
+		# cu 3 m/s, arcul nu e „comprimat cu 3 m/s" — se misca odata cu ea.
+		var spring_vel := (point_vel - ground_vel).dot(up)
 		var force_mag := k * compression - c * spring_vel
 		# Arcul doar IMPINGE — daca ar si trage, orice creasta ar smulge
 		# masina in jos nefiresc.
@@ -586,6 +610,9 @@ func _apply_suspension() -> void:
 	if wheels_on_ground > 0:
 		_contact_offset = contact_sum / float(wheels_on_ground) - global_position
 		_ground_normal = normal_sum.normalized()
+		_ground_velocity = ground_vel_sum / float(wheels_on_ground)
+	else:
+		_ground_velocity = Vector3.ZERO
 	for axle in 2:
 		if _axle_grounded[axle] > 0:
 			_axle_offset[axle] = axle_sum[axle] / float(_axle_grounded[axle]) \
@@ -616,7 +643,8 @@ func _apply_driving(steer: float, throttle: float,
 	if ground_frac == 0.0:
 		return
 
-	var hvel := Vector3(velocity.x, 0.0, velocity.z)
+	var rel_vel := velocity - _ground_velocity
+	var hvel := Vector3(rel_vel.x, 0.0, rel_vel.z)
 	var vmax := _current_max_speed()
 
 	# --- Motor / frana ---
@@ -655,7 +683,8 @@ func _apply_driving(steer: float, throttle: float,
 		# Viteza laterala A AXEI (cu componenta din rotatie): spatele care se
 		# roteste in jurul fetei chiar simte ca aluneca, si e amortizat acolo.
 		var offset: Vector3 = _axle_offset[axle]
-		var point_vel := linear_velocity + angular_velocity.cross(offset)
+		var point_vel := linear_velocity + angular_velocity.cross(offset) \
+			- _ground_velocity
 		var lat := Vector3(point_vel.x, 0.0, point_vel.z)
 		lat -= fwd_h * lat.dot(fwd_h)
 		var axle_frac: float = float(_axle_grounded[axle]) / 2.0

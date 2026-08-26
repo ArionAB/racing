@@ -94,5 +94,12 @@ if __name__ == "__main__":
     stats = finish(post, bevel=0.0, ao=AO_POST, origin="base_axis")
     print("Chevron_Post %3d tris  (buget 120)  AO %.2f..%.2f"
           % (stats["tris"], stats["ao_min"], stats["ao_max"]))
-    path, size = export_glb([post], "stromboli/props/chevron_post.glb")
-    print("export: %s (%.1f KB)" % (path, size / 1024.0))
+    # Piesa e neutra ca tema (rosu/alb/lemn, fara nimic vulcanic), iar plansa
+    # Chongqing o cere la pozitia 17 pentru curbele oarbe ale spiralei. Se
+    # exporta in AMBELE locuri din aceeasi sursa, ca sa nu existe doua
+    # geometrii care se pot desincroniza — o pista nu trebuie sa depinda de
+    # folderul alteia.
+    for dest in ("stromboli/props/chevron_post.glb",
+                 "chongqing/props/chevron_post.glb"):
+        path, size = export_glb([post], dest)
+        print("export: %s (%.1f KB)" % (path, size / 1024.0))

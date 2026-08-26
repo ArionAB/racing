@@ -23,10 +23,10 @@ până când slotul se deschide).
 | 14 | `props/cliff_railing.glb` | build_chongqing_railing.py |
 | 15 | `props/lamp_lantern_{a,b,c}.glb`, `neon_sign_{a,b,c,d}.glb`, `bollard.glb`, `bicycle.glb`, `mailbox_wall.glb`, `scooter.glb`, `table_stools.glb`, `steam_vent.glb`, `laundry_line.glb`, `porter.glb` | build_chongqing_kit_a.py |
 | 16 | `buildings/shophouse_{a,b,c}.glb`, `restaurant_front.glb`, `tower_silhouette_{a,b,c}.glb`; `vehicles/bus.glb`, `mini_car_{a,b,c}.glb`; `props/container.glb` | build_chongqing_kit_b.py |
-| 17 | `props/chevron_post.glb` | există deja (`props/chevron_post.glb`) — se reutilizează |
+| 17 | `props/chevron_post.glb` | `build_chevron_post.py` — aceeaşi sursă exportă şi în `stromboli/props/` (piesă neutră ca temă) |
 
 
-## Rezultat (48 GLB-uri, 171732 triunghiuri)
+## Rezultat (49 GLB-uri, 171.816 triunghiuri)
 
 Toate trec `verify_glb.py`: sloturi legale, AO copt in vertex colors,
 originea pe contractul cerut de fiecare piesa.

@@ -1006,12 +1006,32 @@ func launch(up_speed: float) -> void:
 # peste bilantul lui.
 
 func _detect_landing() -> void:
-	if is_on_floor() and not _was_on_floor and _prev_velocity.y < -6.0:
-		landed.emit(self, -_prev_velocity.y)
-		_punch_scale(Vector3(1.15, 0.8, 1.15))
-		if is_player:
-			AudioManager.play_sfx(&"land")
+	if is_on_floor() and not _was_on_floor:
+		_relocate_level()
+		if _prev_velocity.y < -6.0:
+			landed.emit(self, -_prev_velocity.y)
+			_punch_scale(Vector3(1.15, 0.8, 1.15))
+			if is_player:
+				AudioManager.play_sfx(&"land")
 	_was_on_floor = is_on_floor()
+
+## La aterizare pe ALT etaj, indexul se recauta pe toata ruta — o data.
+##
+## Cautarea de index e locala (~72 m de-a lungul rutei), si asa trebuie sa
+## ramana: e anti-cut-ul jocului. Dar pe o pista care trece peste ea insasi,
+## o cadere de pe tablier pe drumul de jos (sau un salt proiectat de pe un
+## etaj pe altul) te lasa la sute de metri de ruta fata de indexul tinut —
+## fereastra nu-l vede niciodata si fractia de tur ingheata. Acelasi
+## mecanism ca la comutarea rutelor (Track.resolve_route scaneaza global o
+## data per comutare), extins la etaje. Scanarea e 3D, deci alege etajul pe
+## care ai aterizat, nu pe cel de deasupra.
+func _relocate_level() -> void:
+	if track == null:
+		return
+	var r: TrackRoute = track.route_at(route)
+	if r == null or not r.is_other_level(road_index, global_position):
+		return
+	road_index = track.closest_index_global(global_position, route)
 
 # ------------------------------------------------------------------ restul
 

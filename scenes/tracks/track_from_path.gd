@@ -101,6 +101,11 @@ extends Track
 ## din kit se pun sub el (Baikal, viaductul Circum-Baikal). Se combina cu
 ## `custom_cornice_ravines` (cazi de pe margine). Vezi Track._viaduct_ravines.
 @export var custom_viaduct_ravines: Array[int] = []
+## PASAJE PE PILONI: intervale de tur (fractii x..y) in care soseaua trece in
+## aer PESTE un alt tronson al aceleiasi piste. Terenul nu urca dupa tablier,
+## tablierul primeste fusta + parapet, pilonii vin din DecorManual. Vezi
+## Track._overpass_ranges.
+@export var custom_overpass_ranges: Array[Vector2] = []
 ## Bolovani care cad de pe faleza.
 @export var custom_rockfall_fracs: Array[float] = []
 ## Treceri de cale ferata. Trenul ucide la contact si te repune.
@@ -197,6 +202,9 @@ func _cornice_ravines() -> Array[int]:
 
 func _viaduct_ravines() -> Array[int]:
 	return custom_viaduct_ravines
+
+func _overpass_ranges() -> Array[Vector2]:
+	return custom_overpass_ranges
 
 func _rockfall_fracs() -> Array[float]:
 	return custom_rockfall_fracs

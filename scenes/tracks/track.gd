@@ -1456,6 +1456,28 @@ func _cornice_ravines() -> Array[int]:
 func _viaduct_ravines() -> Array[int]:
 	return []
 
+## PASAJE PE PILONI: intervale de tur (fractii, x..y, cu wrap peste 1.0) in care
+## soseaua trece IN AER peste un alt tronson al aceleiasi piste — nodul rutier
+## din Chongqing, sau orice „pista peste pista".
+##
+## Nu e un viaduct si nu e un pod peste canal, si diferenta e de teren: alea
+## sapa un gol SUB drum, iar aici sub drum e un alt drum, care trebuie sa
+## ramana pe pamant. Punctele din interval nu mai trag terenul (vezi
+## TrackSideSampler.ground_y); tablierul primeste fusta de beton si parapet pe
+## ambele parti, iar umerii de pietris se sting. Pilonii vin din kit, ca la
+## viaduct. Separarea VERTICALA intre etaje e regula de desen, nu de cod:
+## peste TrackRoute.ROAD_ABOVE_TOLERANCE (12 m), altfel testul „pe sosea" nu
+## poate deosebi etajele. Vezi docs/track_briefs/chongqing.md §7.1.
+func _overpass_ranges() -> Array[Vector2]:
+	return []
+
+## Cat de mult e indexul „pe pasaj", 0..1 — masca sampler-ului, ca sa existe o
+## singura definitie a intervalului (aceeasi pe care o vede si terenul).
+func _overpass_mix(i: int) -> float:
+	if _sampler == null:
+		return 0.0
+	return 1.0 if _sampler.on_overpass(i) else 0.0
+
 ## Cat de mult e indexul „pe viaduct", 0..1, cu aceeasi rampa de capat ca
 ## sapatura (TrackSideSampler.RAVINE_FADE_FRAC). Umerii de pietris se sting
 ## dupa masura asta, ca pe pod — sub tablier nu e pamant, e gol.
@@ -1853,7 +1875,7 @@ func rebuild() -> void:
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
-		_viaduct_ravines())
+		_viaduct_ravines(), _overpass_ranges())
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",
@@ -4472,7 +4494,8 @@ func _build_road() -> void:
 		col.add_vertex(r0); col.add_vertex(l1); col.add_vertex(r1)
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
-		var skirt := deck_sides if _bridge_mix(i) > 0.5 else sides
+		var skirt := deck_sides \
+			if _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5 else sides
 		if on_ice:
 			skirt = ice_top
 		skirt.set_uv(Vector2(u0, 0)); skirt.add_vertex(l0)
@@ -4773,7 +4796,9 @@ func _build_walls() -> void:
 			var b0 := baked[i] + _side_at(i) * width_at_index(i) * side_sign
 			var b1 := baked[j] + _side_at(j) * width_at_index(j) * side_sign
 			var mid := (b0 + b1) * 0.5
-			var on_deck := _bridge_mix(i) > 0.5
+			# Pe pasaj, parapet de beton pe AMBELE parti: e un tablier in aer,
+			# si golul de sub el e un alt drum — cazi pe el, nu in apa.
+			var on_deck := _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5
 			var exterior := not Geometry2D.is_point_in_polygon(
 				Vector2(mid.x, mid.z), loop_poly)
 			var elevated := mid.y > 1.0
@@ -6165,7 +6190,8 @@ func _build_shoulders() -> void:
 		# Pe VIADUCT la fel: umarul cobora de la buza asfaltului pana la fundul
 		# rapei — un zid de 13 m cu textura de pietris, care ascundea pilele
 		# si arcadele din kit (vazut din lateral cu Snapshot --eye).
-		var bridge := maxf(maxf(_bridge_mix(i), _bridge_mix(j)), _viaduct_mix(i))
+		var bridge := maxf(maxf(_bridge_mix(i), _bridge_mix(j)),
+			maxf(_viaduct_mix(i), _overpass_mix(i)))
 		var s0 := _side_at(i)
 		var s1 := _side_at(j)
 		var v0 := _dists[i] / tile

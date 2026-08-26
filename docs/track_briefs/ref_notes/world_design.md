@@ -76,6 +76,15 @@ Nu e un blocaj de arhitectură, e **trei apeluri de reparat** (fie ponderând
 diferența de cotă, fie ținând ultimul index valid și căutând local). Merită
 știut înainte, nu după ce se desenează pista.
 
+> **Corectat la implementare (aug 2026, `feat/pista-suprapusa`):** scanarea
+> globala era deja 3D, deci nu ea era problema. Ce s-a reparat de fapt:
+> (1) terenul — `ground_y` facea media 2D a cotelor si lacatul local se lipea
+> de tablier, ingropand etajul de jos cu +14.7 m (masurat cu `ProbeOverpass
+> --no-fix`); acum intervalele `custom_overpass_ranges` nu trag terenul;
+> (2) `is_on_road` era doar XZ — are toleranta verticala (-2.5 / +12 m);
+> (3) fereastra locala de index nu vede alt etaj — la aterizare pe alt etaj,
+> `Car._relocate_level` rescaneaza global o data. Vezi `chongqing.md` §7.1.
+
 ## Ordinea în care aș ataca asta
 
 1. **O pistă pe buză, cu ceva jos, în interiorul lui `fog_end`.** Nu cere cod

@@ -1000,6 +1000,7 @@ static func themes() -> Dictionary:
 			# Fara insule pe orizont: siluetele de turnuri vin din DecorManual.
 			"horizon_rings": [],
 			"walls": false,
+			"deck_rails": true,
 			"kerbs": false,
 			"cliffs": false,
 			# Fara decor procedural: orasul se aseaza de mana (DecorManual), nu
@@ -1022,21 +1023,31 @@ static func themes() -> Dictionary:
 			# loc) si trec printr-o "lumina" de 0.30; spuma si scanteierea sunt
 			# stinse, hula si treptele abia sugerate. Malul: pamant inchis.
 			# RUNDA 3: verde/brun la 0.42 citeau ca PAJISTE (mata, fara nimic
-			# care sa se miste, si mai deschisa decat cheiul). Apa de noapte
-			# se citeste prin doua lucruri: e mai INCHISA decat malul si
-			# SCLIPESTE — luminile orasului pe hula (referinta: pete aurii
-			# pe verde inchis). Deci: SEA_DEEP (teal, Jialing) la mal si
-			# ICE_CRACK (albastru aproape negru, Yangtze noaptea) in larg,
-			# hula la 0.55 ca sa aiba forma, iar scanteierea ramane aprinsa
-			# la 0.35: nu e soare, e luna in ceata + orasul de peste rau.
+			# care sa se miste, si mai deschisa decat cheiul); SEA_DEEP la
+			# 0.55 + glint citea ca apa, dar TURCOAZ SATURAT (masurat pe
+			# captura: saturatie mediana 0.65) — laguna de amiaza, nu rau de
+			# noapte. RUNDA 4: inapoi la sloturile brief-ului (TROPICAL_GREEN
+			# = Jialing verde tulbure la mal, SAND_SHADOW = Yangtze brun in
+			# larg), dar trecute prin "water_desat" (trase spre gri in jurul
+			# luminantei) si o tenta de oras gri-verde ("water_mul") — asta
+			# le fereste si de pajistea rundei 2 (sunt INTUNECATE si tinute
+			# in familie de glint) si de turcoazul rundei 3. Gate-ul rundei:
+			# saturatie HSV mediana < 0.35, luminanta < 60, sclipiri pastrate.
 			"water": true,
-			"water_shallow_slot": Palette.SEA_DEEP,
-			"water_deep_slot": Palette.ICE_CRACK,
+			"water_shallow_slot": Palette.TROPICAL_GREEN,
+			"water_deep_slot": Palette.SAND_SHADOW,
 			"water_shore_slot": Palette.LOG_DARK,
-			"water_dim": 0.55,
+			"water_desat": 0.65,
+			"water_mul": Color(0.85, 0.89, 0.87),
+			"water_dim": 0.50,
 			"water_foam": 0.0,
-			"water_glint": 0.35,
-			"water_crest": 0.55,
+			# Glint/crest URCATE in runda 4: cu verdele/brunul desaturat, apa
+			# de la distanta (vederea de pe cornisa D) iesea camp mat — ce o
+			# face sa citeasca APA noaptea sunt sclipirile orasului pe hula
+			# (referinta: diorama, pete aurii pe verde inchis). Sclipirile
+			# sunt pete mici: mediana de saturatie/luminanta ramane sub gate.
+			"water_glint": 0.55,
+			"water_crest": 0.65,
 			"water_band": 0.25,
 			# UNDE e apa: NU "tot ce e in afara buclei" (seabed_drop) — asta
 			# ar fi facut o insula, iar Chongqing e o peninsula: golful si cele
@@ -1047,6 +1058,11 @@ static func themes() -> Dictionary:
 			# Mal de CHEI, nu plaja: apa incepe la cativa metri de contur.
 			"lagoon_band_in": 10.0,
 			"lagoon_band_out": 6.0,
+			# Sapatura lagunei incepe imediat dincolo de buza tablierului
+			# (1.5 m) si coboara scurt (8 m): apa golfului sta SUB pod, nu
+			# la 15 m de el (implicitul 8+30 e plaja de atol).
+			"lagoon_inner": 1.5,
+			"lagoon_rim": 8.0,
 			"dust_color": Color(0.30, 0.30, 0.34),
 			"branch_tint": Color(0.62, 0.63, 0.66),
 			"branch_surface": "sand",
@@ -1985,10 +2001,15 @@ func rebuild() -> void:
 		TrackSideSampler.LAGOON_BAND_IN))
 	_sampler.lagoon_out = float(theme_flag("lagoon_band_out",
 		TrackSideSampler.LAGOON_BAND_OUT))
+	_sampler.lagoon_inner = float(theme_flag("lagoon_inner",
+		TrackSideSampler.LAGOON_INNER))
+	_sampler.lagoon_rim = float(theme_flag("lagoon_rim",
+		TrackSideSampler.LAGOON_RIM))
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
 	_build_walls()
+	_build_viaduct_nets()
 	for frac in _ramp_fracs():
 		_build_ramp(frac)
 	for frac in _hazard_fracs():
@@ -3304,15 +3325,25 @@ const WATER_GAIN: float = 0.87
 func water_tint(slot: int, gain: float = 1.0) -> Color:
 	var c := Palette.color(slot)
 	var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
-	var k := 1.0 / WATER_SATURATION_FIX
+	# Doua chei de tema aplicate O DATA, aici, pe toate culorile apei (rampa,
+	# spuma, glint — toate trec prin functia asta, deci raman in familie):
+	#  - "water_desat" (0..1) trage culoarea spre luminanta EI, in jurul
+	#    luminantei, exact invers fata de WATER_SATURATION_FIX. Chongqing:
+	#    raurile de noapte sunt verde tulbure/maro noroios cu saturatie mica
+	#    (brief §4), nu teal de recif.
+	#  - "water_mul" — tenta multiplicativa (lumina de oras gri-verde), fara
+	#    slot nou de paleta.
+	var desat := clampf(float(theme_flag("water_desat", 0.0)), 0.0, 1.0)
+	var mul: Color = theme_flag("water_mul", Color.WHITE)
+	var k := (1.0 - desat) / WATER_SATURATION_FIX
 	# `gain` se aplica in sRGB, INAINTE de conversie: e „cata lumina cade pe
 	# apa" pe o tema de noapte (water_dim), si trebuie sa citeasca perceptual.
 	# Un darkened() dupa conversie (in liniar) la 0.3 iesea 58% luminozitate
 	# pe ecran — apa de amiaza cu putin fum, nu rau de noapte (masurat r2).
 	return Color(
-		(lum + (c.r - lum) * k) * WATER_GAIN * gain,
-		(lum + (c.g - lum) * k) * WATER_GAIN * gain,
-		(lum + (c.b - lum) * k) * WATER_GAIN * gain).srgb_to_linear()
+		(lum + (c.r - lum) * k) * WATER_GAIN * gain * mul.r,
+		(lum + (c.g - lum) * k) * WATER_GAIN * gain * mul.g,
+		(lum + (c.b - lum) * k) * WATER_GAIN * gain * mul.b).srgb_to_linear()
 
 
 ## Culoarea unui varf dupa cata apa are sub el.
@@ -4921,7 +4952,14 @@ func _near_junction(i: int, junctions: PackedInt32Array, n: int) -> bool:
 ## s-a mutat in TrackSideSampler.wall_segments(), de unde o citesc si falezele, si
 ## popicele. O singura definitie, deci nu se pot contrazice.
 func _build_walls() -> void:
-	if not theme_flag("walls", true):
+	var walls_on := bool(theme_flag("walls", true))
+	# Parapetul de TABLIER traieste separat de peretii pistei: pe Chongqing
+	# ("walls": false — e oras, nu circuit cu mantinela) podul peste golf si
+	# rampele suspendate tot au balustrada de beton, fiindca balustrada e
+	# parte din citirea podului (si, masurat cu ProbeRace: fara ea, bumping-ul
+	# pe tablierul cu apa pe ambele parti arunca masinile in golf).
+	var deck_rails := bool(theme_flag("deck_rails", walls_on))
+	if not walls_on and not deck_rails:
 		return
 	var loop_poly := PackedVector2Array()
 	for p in _points():
@@ -4958,7 +4996,11 @@ func _build_walls() -> void:
 			var mid := (b0 + b1) * 0.5
 			# Pe pasaj, parapet de beton pe AMBELE parti: e un tablier in aer,
 			# si golul de sub el e un alt drum — cazi pe el, nu in apa.
-			var on_deck := _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5
+			# Viaductul e tot un tablier (gol si sub asfalt), doar ca golul
+			# lui e sapat in teren, nu un canal — parapetul i se cuvine la fel.
+			var on_deck := _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5 				or _viaduct_mix(i) > 0.5
+			if not walls_on and not on_deck:
+				continue
 			var exterior := not Geometry2D.is_point_in_polygon(
 				Vector2(mid.x, mid.z), loop_poly)
 			var elevated := mid.y > 1.0
@@ -6111,6 +6153,58 @@ func _build_flyoff_kicker(idx: int) -> void:
 	kicker.transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
 		baked[idx] - dir * 1.2 + Vector3.UP * (FLYOFF_HEIGHT + 0.9))
 	add_child(kicker)
+
+## Plasa de repunere a viaductului: o cutie sub fiecare tablier declarat in
+## [method _viaduct_ravines]. SeaRespawn incepe abia la 1.2 m sub apa, dar o
+## cadere de pe tablier se poate opri pe bancul de mal de langa fusta
+## (teren la 0.9-2 m; masurat cu ProbeRace pe Chongqing: masini intepenite
+## 25 s la frac 0.547, y intre -4 si 0, deasupra plasei marii si fara drum
+## inapoi pe tablier). Aceeasi idee ca _build_flyoff_net: plafonul se ia din
+## cel mai jos punct de tablier al ferestrei, minus o marja — cine conduce pe
+## pod nu il atinge, cine a cazut sub buza lui e prins oriunde ar ateriza.
+func _build_viaduct_nets() -> void:
+	var n := baked.size()
+	if n == 0:
+		return
+	var total: float = _dists[n] if _dists.size() > n else 0.0
+	if total <= 0.0:
+		return
+	var rav := _ravines()
+	for ri in _viaduct_ravines():
+		if ri < 0 or ri >= rav.size():
+			continue
+		var r: Vector4 = rav[ri]
+		var lo := Vector2(INF, INF)
+		var hi := Vector2(-INF, -INF)
+		var deck_min := INF
+		for i in n:
+			var f := _dists[i] / total
+			var inside := (f >= r.x and f <= r.y) if r.x <= r.y 				else (f >= r.x or f <= r.y)
+			if not inside:
+				continue
+			var p := baked[i]
+			lo = lo.min(Vector2(p.x, p.z))
+			hi = hi.max(Vector2(p.x, p.z))
+			deck_min = minf(deck_min, p.y)
+		if deck_min == INF:
+			continue
+		var top := deck_min - 1.6
+		var bottom := top - 25.0
+		var zone := RespawnZone.new()
+		zone.name = "ViaductNet%d" % ri
+		zone.backoff_m = 16.0
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = Vector3(hi.x - lo.x + VIADUCT_NET_MARGIN * 2.0,
+			top - bottom, hi.y - lo.y + VIADUCT_NET_MARGIN * 2.0)
+		shape.shape = box
+		zone.add_child(shape)
+		zone.position = Vector3((lo.x + hi.x) * 0.5, (top + bottom) * 0.5,
+			(lo.y + hi.y) * 0.5)
+		add_child(zone)
+
+## Cat dincolo de amprenta XZ a tablierului se intinde plasa viaductului.
+const VIADUCT_NET_MARGIN: float = 45.0
 
 ## Plasa de siguranta a unei creste: un volum plat de nisip, mult SUB sosea,
 ## in jurul zonei de aterizare. Plafonul se calculeaza din cea mai joasa

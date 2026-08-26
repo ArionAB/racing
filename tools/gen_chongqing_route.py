@@ -28,6 +28,21 @@ S = 1.0  # scara hartii -> lume (bucla din Recon are deja ~2.0 km)
 # Runda 2: G urca 52 -> 65 (brief: 50 -> 65), nu 60 -> 64 ca in runda 1 —
 # varful spiralei (F3 c/d/e) a coborat cu 3-6 m ca panta medie pe F sa
 # ramana sub 13% si stiva F3 e / F etaj 2 sa ramana >= 14 m (49 - 28 = 21).
+# Runda 4 — GOLFUL. Lectia de topologie care a decis forma: testul par-impar
+# (ProbeWet / is_point_in_polygon) isi schimba paritatea la FIECARE trecere
+# peste axa drumului, deci un drum simplu nu poate avea apa pe ambele parti
+# fara ca o parte sa fie "interior" (ud interzis). Singurul loc unde ambele
+# parti pot fi exterioare e acolo unde bucla trece DE DOUA ORI prin acelasi
+# culoar XZ — pista peste pista. De aceea rampa F3 nu mai face bucla ei
+# separata in sud-vest, ci iese spre EST peste golf (F3 a -> b) si se
+# intoarce STIVUITA peste pod si peste etajul 1 (F3 c..g deasupra lui E pod /
+# F1 a..c / F2 — un dublu-etaj ca podul Qiansimen). Orice raza verticala
+# dinspre golf taie bucla de doua ori (pod + rampa), deci golful dintre pod
+# si diagonala F3 a->b, plus curtea interioara a spiralei, sunt TOPOLOGIC in
+# afara buclei: apa de sub tablier, pe ambele parti, trece de ProbeWet fara
+# nicio exceptie. D sta acum SUS (36 -> 32.5 pana la iesirea din cornisa) ca
+# faleza sa fie faleza (cadere ~26 m chiar la buza), iar coborarea in S se
+# termina pe chei inainte de statia telecabinei (mutata la x=30, pe plat).
 WPTS = [
     (-120, 200, 30, 65.0, "A start piata Kuixinglou"),
     (-50,  215, 30, 65.0, "A nod de trafic"),
@@ -36,25 +51,27 @@ WPTS = [
     (60,   135, 26, 50.5, "B S2"),
     (110,  105, 26, 43.5, "B S3 / iesire scari"),
     (160,  85,  28, 39.0, "C aleea hot-pot in"),
-    (205,  72,  28, 36.5, "C aleea hot-pot out"),
-    (245,  40,  28, 32.0, "D cornisa in"),
-    (228,  -25, 30, 24.0, "D cornisa S1"),
-    (262,  -85, 30, 16.0, "D cornisa S2"),
-    (232,  -145,28, 10.0, "D cornisa out"),
-    (185,  -190,28, 5.0,  "E chei in"),
-    (90,   -205,30, 4.0,  "E chei / statia telecabinei"),
-    (0,    -205,30, 4.0,  "E culoar de ceata"),
+    (205,  72,  28, 37.0, "C aleea hot-pot out"),
+    (245,  40,  28, 36.0, "D cornisa in"),
+    (228,  -25, 30, 34.5, "D cornisa S1"),
+    (262,  -85, 30, 33.0, "D cornisa S2"),
+    (232,  -145,28, 32.5, "D cornisa out"),
+    (185,  -190,28, 24.0, "E chei in"),
+    (105,  -200,30, 12.0, "E chei rampa"),
+    (30,   -206,30, 4.5,  "E chei / statia telecabinei"),
     (-60,  -200,30, 5.0,  "E pod in"),
     (-150, -190,28, 6.0,  "E pod out / F etaj 1 in"),
     (-205, -205,28, 8.0,  "F1 a"),
     (-262, -175,28, 14.0, "F1 b"),
     (-275, -115,28, 21.0, "F1 c (sub incrucisarea 2)"),
     (-238, -72, 26, 28.0, "F etaj 2 (sosire telecabina)"),
-    (-190, -112,28, 35.0, "F3 a"),
-    (-200, -200,28, 42.0, "F3 b (peste etajul 1)"),
-    (-255, -235,28, 44.0, "F3 c"),
-    (-300, -190,28, 46.5, "F3 d"),
-    (-278, -118,28, 49.0, "F3 e (peste etajul 2)"),
+    (-135, -105,26, 35.0, "F3 a"),
+    (-80,  -186,20, 38.0, "F3 b (peste golf)"),
+    (-150, -185.5,28, 40.5, "F3 c (peste pod)"),
+    (-206, -200.5,28, 42.5, "F3 d (peste etajul 1)"),
+    (-259, -170,28, 44.5, "F3 e"),
+    (-279, -111,28, 47.0, "F3 f (peste incrucisarea 2)"),
+    (-241, -66, 24, 49.5, "F3 g (peste etajul 2)"),
     (-250, -40, 30, 52.0, "G Liziba in"),
     (-235, 10,  30, 56.5, "G monorail"),
     (-215, 60,  30, 60.5, "G Liziba out"),
@@ -77,9 +94,16 @@ WPTS = [
 # de 0.5 m (4 repuneri la intrare, seed 2). Primul mid sta deci DINCOLO de
 # margine (drumul are 9 m jumatate pe chei): 12 m de axa, la cota drumului;
 # ultimul la cota tablierului (30 m), nu sub el.
-BRANCH_MID = [(28, -193, 4.0), (-35, -182, 9.5), (-95, -150, 19.0),
-              (-145, -112, 30.0), (-175, -60, 32.5), (-238, -52, 31.2),
-              (-222, -76, 30.0)]
+# Runda 4: cablul zboara PESTE GOLF, ca in diorama — iese de pe chei spre
+# larg (mid 1-4, peste mare), trece prin "fereastra" dublu-etajului (peste
+# banda E pod out -> F1 a, la ~22 m, sub rampa F3 c..d de la ~41 m), taie
+# golful si curtea interioara a spiralei si aterizeaza TANGENT pe tronsonul
+# F1 c -> F etaj 2 (unghi ~21 grade, regula veche pastrata). Sub >70% din
+# lungimea lui e apa (gate-ul rundei: >= 60%).
+BRANCH_MID = [(12, -217, 4.7), (-30, -220, 5.6), (-72, -228, 7.8),
+              (-115, -238, 11.0), (-152, -228, 14.5), (-170, -208, 17.5),
+              (-182, -188, 19.5), (-196, -166, 21.2), (-212, -146, 22.6),
+              (-226, -127, 23.6), (-236, -112, 24.3), (-242, -100, 24.7)]
 
 def v(a, b):
     return (b[0] - a[0], b[1] - a[1])
@@ -303,12 +327,18 @@ overpass = (r3(frac["F3 a"] - 0.004),
 # la capatul de sus (drum la 32 m); podeaua absoluta (RAVINE_FLOOR) e cheiul
 # uscat de sub faleza, apa incepe dincolo de el (LAGOON).
 ravines = [
-    (r3(frac["D cornisa in"] - 0.006), r3(frac["E chei in"] - 0.008), 30, 1),
-    # Podul peste golf: golul e DOAR pe dreapta (exteriorul buclei). Cu 0
-    # (ambele parti) sapatura cobora si interiorul sub cota apei si drumul
-    # iesea un dig cu apa pe ambele parti (runda 2, 88 de puncte ude in
-    # interior pe 0.50-0.60). Brief §2: interiorul ramane uscat.
-    (r3(frac["E pod in"] + 0.004), r3(frac["E pod out / F etaj 1 in"] + 0.012), 12, 1),
+    # Cornisa D tine acum si coborarea in S: faleza insoteste drumul pana la
+    # iesirea pe cheiul plat (statia telecabinei), cu podeaua absoluta la 6 m.
+    (r3(frac["D cornisa in"] - 0.006),
+     r3(frac["E chei / statia telecabinei"] - 0.010), 30, 1),
+    # Podul peste golf: golul ramane sapat DOAR pe dreapta (w=+1) — sub
+    # jumatatea stanga a tablierului ramane un prag de mal ascuns sub pod
+    # (bancul de namol de sub orice pod de Yangtze). Apa de pe STANGA (golful)
+    # nu vine din rapa, ci din limba lagunei (LAGOON + lagoon_inner/rim de
+    # tema): rapa pe ambele parti ar fi sapat si dincolo de diagonala F3 a->b,
+    # in zona care topologic e interior si trebuie sa ramana uscata.
+    # Viaductul tine acum pana la F1 a: tot dublu-etajul de peste golf e pod.
+    (r3(frac["E pod in"] + 0.004), r3(frac["F1 a"] - 0.004), 12, 1),
     (r3(frac["F1 a"] + 0.004), r3(frac["F etaj 2 (sosire telecabina)"] - 0.008), 10, -1),
 ]
 widths = [
@@ -322,21 +352,21 @@ widths = [
 # aceeasi podea: drumul e la 12-15 m acolo si 10 m de sapatura ajungea la
 # 2 m, sub apa (runda 2: apa la 15-20 m stanga pe 0.59).
 RAVINE_FLOOR = [(0, WATER_Y + 3.0), (2, WATER_Y + 3.0)]
-# APA: golful + cele doua rauri, pe SUD si EST in harta (godot: +z si -x).
-# Poligon in coordonate GODOT. Cu banda de mal a temei (6 + 10 m) linia apei
-# iese la ~3-5 m INAUNTRUL conturului (cu implicitul de atol, 25 + 45 m, apa
-# iesea abia la 80 m de axa si terasa se topea de la 40 m — ProbeTerrace).
-# Conturul URMEAZA cornisa D la ~55 m de axa (malul e abrupt: lagoon_band
-# 6 + 10 m in tema), deci linia apei iese la ~50 m si terasa 14-50 m ramane
-# uscata; pe chei (E, z=205) sta la z=235; ocoleste poalele spiralei F.
-# Pe chei (E, x -110..55, axa la z=205, semilatime 9) conturul sta la z=222:
-# linia apei la ~17 m de axa, cheiul uscat pe 8 m de la marginea asfaltului.
-# Sub pod (x 75..150, axa la z 191-198) conturul urca la 6-9 m de margine,
-# ca apa golfului sa fie chiar sub tablier, in continuarea rapei-viaduct.
+# APA: raurile pe SUD si EST plus GOLFUL — o LIMBA de apa care urca din larg
+# printre pod si diagonala F3 a->b (godot x 72..155) si umple si curtea
+# interioara a spiralei (godot x 185..254). Poligon in coordonate GODOT
+# (gx=-x, gz=-y fata de harta). Limba sta la >= 8-10 m sud de diagonala
+# F3 a->b si la >= 12 m de orice drum DE PE SOL (bermele F2->F3a si F1),
+# ca sapatura lagunei sa nu atinga zonele topologic interioare (uscate).
+# Conturul D ramane la ~55 m de axa (terasa cheiului 25-40 m, uscata, apoi
+# apa); pe chei apa sta la ~16 m de axa (chei ingust de lucru).
 LAGOON = [(-300, -45), (-283, 25), (-317, 85), (-287, 150), (-225, 235),
-          (-110, 222), (55, 222), (75, 206), (150, 200), (185, 214),
-          (230, 300), (330, 320), (900, 400), (900, 900),
-          (-900, 900), (-900, -45)]
+          (-110, 223), (45, 221), (72, 206), (150, 198), (190, 209),
+          (205, 219), (222, 190), (228, 177), (252, 162), (254, 135),
+          (242, 108), (215, 97), (180, 112), (158, 122), (136, 138),
+          (127, 160), (122, 172), (122, 182), (150, 182), (190, 192),
+          (204, 196), (212, 212), (230, 300), (330, 320), (900, 400),
+          (900, 900), (-900, 900), (-900, -45)]
 # Fundul lagunei: sub media soselei cu atat cat sa iasa la ~-6 m (apa la 3).
 LAGOON_DEPTH = round(mean_elev + 6.0, 1)
 print(f"\noverpass: {overpass}\nravines: {ravines}\nwidths: {widths}")

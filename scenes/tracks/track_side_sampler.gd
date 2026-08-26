@@ -88,6 +88,13 @@ var shore_out: float = SHORE_BAND_OUT
 ## cu 20 m inainte de linia apei (masurat cu ProbeTerrace pe Chongqing).
 var lagoon_in: float = LAGOON_BAND_IN
 var lagoon_out: float = LAGOON_BAND_OUT
+## De la cati metri dincolo de marginea asfaltului incepe sapatura lagunei si
+## pe cati metri coboara (theme "lagoon_inner/lagoon_rim"). Implicitul (8+30)
+## e plaja de atol; pe Chongqing apa golfului trebuie sa vina pana sub buza
+## tablierului (1.5+8), altfel podul peste golf are un prag de namol de 14 m
+## pe fiecare parte inainte de linia apei.
+var lagoon_inner: float = LAGOON_INNER
+var lagoon_rim: float = LAGOON_RIM
 
 # --- laguna dinauntrul buclei (doar cand _lagoon_depth > 0) ---
 ## Banda de tarm a lagunei, oglinda lui SHORE_BAND_*: IN = spre apa, OUT = spre
@@ -678,7 +685,7 @@ func _carve_lagoon(y: float, road_dist: float, wx: float, wz: float,
 	if _lagoon_depth <= 0.0 or _lagoon_poly.size() < 3:
 		return y
 	var lat := smoothstep(0.0, 1.0,
-		clampf((road_dist - half_width_at(near_i) - LAGOON_INNER) / LAGOON_RIM,
+		clampf((road_dist - half_width_at(near_i) - lagoon_inner) / lagoon_rim,
 			0.0, 1.0))
 	if lat <= 0.0:
 		return y

@@ -251,6 +251,62 @@ static func apply_foliage_material(root: Node) -> void:
 			(node as MeshInstance3D).material_override = mat
 
 
+## Varianta DUBLA-FATA a unei clase triplanare, pentru frunzisul din foi.
+##
+## Exista fiindca cele doua nevoi se bateau cap in cap: `apply_foliage_material`
+## rezolva conturul (foile de 0 grosime dispar pe jumatate cu CULL_BACK), dar
+## pune materialul ATLASULUI, deci sterge orice clasa; iar
+## `triplanar_class_material` aduce textura, dar cu cull normal. Tufele care
+## se legana (caper, ginestra, trestie) au nevoie de amandoua — pana in august
+## 2026 primeau doar prima si de-aia ieseau blob-uri de o singura culoare,
+## chiar dupa ce li s-a mapat o clasa.
+##
+## Se cheie pe clasa, si duplicatul e fara subresurse: textura ramane ACELASI
+## obiect, deci nu se dubleaza nimic in memoria GPU. Costa un material per
+## clasa de frunzis (azi unul singur, `macchia`) — acelasi schimb ca la
+## `foliage_material`, si din acelasi motiv (garda numara materialele, si un
+## material partajat e mai ieftin decat geometria care l-ar inlocui).
+static var _foliage_class: Dictionary = {}
+
+static func foliage_class_material(cls: String) -> StandardMaterial3D:
+	if _foliage_class.has(cls):
+		return _foliage_class[cls]
+	var mat := triplanar_class_material(cls).duplicate() as StandardMaterial3D
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_foliage_class[cls] = mat
+	return mat
+
+
+## Varianta dubla-fata a unei clase, pusa pe TOT subarborele — pentru piesele
+## cu un singur material dominant, unde clasa vine din alta parte decat maparea
+## pe nume (vezi `class` din SCATTER_STROMBOLI).
+static func apply_foliage_class_material(root: Node, cls: String) -> void:
+	var mat := foliage_class_material(cls)
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			(node as MeshInstance3D).material_override = mat
+
+
+## Ca `apply_class_materials`, dar piesele mapate primesc varianta dubla-fata a
+## clasei, iar cele nemapate materialul de frunzis (tot dubla-fata) in loc de
+## cel al lumii. Pentru prop-urile cu `sway`, unde conturul conteaza pe TOT
+## corpul — inclusiv pe partile fara clasa.
+static func apply_foliage_class_materials(root: Node, mapping: Dictionary) -> void:
+	var plain := foliage_material()
+	for node in _walk(root):
+		var mi := node as MeshInstance3D
+		if mi == null:
+			continue
+		var cls := _class_for(String(mi.name), mapping)
+		if cls.begins_with(TRI_PREFIX):
+			mi.material_override = foliage_class_material(
+				cls.trim_prefix(TRI_PREFIX))
+		else:
+			# Fara clasa (sau pe o clasa care nu e triplanara): conturul
+			# ramane rezolvat, culoarea vine din atlas ca inainte.
+			mi.material_override = plain
+
+
 ## ############################################################################
 ## OGLINDIREA NU CERE MATERIAL SEPARAT.
 ##
@@ -387,6 +443,25 @@ const CLASS_TEXTURES := {
 	"snow": "res://assets/textures/classes/snow.png",
 	# Coroana coniferelor (pictata, vezi tools/paint_pine_needles.py).
 	"pine_needles": "res://assets/textures/classes/pine_needles.png",
+	# Frunzisul mediteranean: tufele, coroanele si trestia de pe Stromboli.
+	# A doua clasa pictata (tools/paint_macchia.py) — frunza lata in buchete,
+	# nu ac in spic. Vezi nota din CLASS_TRIPLANAR_SCALE pentru scara.
+	"macchia": "res://assets/textures/classes/macchia.png",
+	# TUFARISUL USCAT. ACELASI PNG ca "macchia" — nu se dubleaza in memorie,
+	# se schimba doar ridicarea si tenta (aceeasi mecanica ca volcanic_rock /
+	# ice_bloc / village_plaster).
+	#
+	# Exista fiindca paleta face o distinctie pe care o singura dala ar sterge-o:
+	# frunzisul verde sta pe slotul 21 (TROPICAL_GREEN, luminanta 0.382), iar
+	# tufele USCATE de soare pe 13 (DRY_VEGETATION, #AF9F4E, 0.606) — caperul e
+	# integral pe 13. Cu dala verde pusa pe tot, capirul devenea verde si insula
+	# pierdea contrastul dintre tufa suculenta si cea uscata, adica exact ce
+	# spune un flanc mediteranean despre cat de arsa e panta.
+	#
+	# Nu se putea obtine dintr-o tenta: raportul pe canale fata de verde e
+	# (2.78, 1.30, 1.30), PESTE 1 pe toate trei, iar `albedo_color` doar
+	# intuneca. Ridicarea sta in CLASS_LIFT, tenta doar corecteaza nuanta.
+	"macchia_dry": "res://assets/textures/classes/macchia.png",
 	# Gheata lacului (Baikal; pictata, vezi tools/paint_ice.py).
 	"ice": "res://assets/textures/classes/ice.png",
 	# Aceeasi dala, pentru PIESELE de gheata (torosuri, turturi, blocuri).
@@ -439,6 +514,13 @@ const CLASS_TINT := {
 	# intuneca. Urcarea se face pe TEXTURA, in CLASS_LIFT; aici ramane doar
 	# corectia de nuanta (dala e calda, varul e rece).
 	"village_plaster": Color(0.97, 1.0, 1.0),
+	# Tufarisul uscat: dala verde, ridicata in CLASS_LIFT la luminanta 0.82,
+	# adusa pe culoarea slotului 13 (DRY_VEGETATION, 0.686/0.624/0.306).
+	# Ridicarea e aleasa cat sa NU trebuiasca sa urce nimic din tenta —
+	# multiplicatorul poate doar sa coboare, deci verdele si albastrul se
+	# taie de aici, iar rosul ramane aproape neatins. Asa iese galben-oliv
+	# dintr-o dala verde, fara un al doilea PNG.
+	"macchia_dry": Color(1.0, 0.66, 0.54),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -455,6 +537,11 @@ const CLASS_TINT := {
 ## alege sub alb pur.
 const CLASS_LIFT := {
 	"village_plaster": 0.88,
+	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
+	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
+	# tinta se atinge DUPA tenta de mai sus, care coboara doua canale din trei.
+	# Calculata, nu aleasa — k = max(slot_c / dala_c) pe canale.
+	"macchia_dry": 0.82,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -494,6 +581,22 @@ const CLASS_TRIPLANAR_SCALE := {
 	# in spatiul LUMII (brazii nu se misca): un singur material pentru toata
 	# padurea, oricate scari ar avea instantele.
 	"pine_needles": 0.6,
+	# Frunzisul mediteranean. Sursa e pictata la ~1 m/dala (buchete de 20-30 cm,
+	# frunze de 1-3 cm), dar piesele pe care cade sunt MULT mai mici decat un
+	# molid: o tufa de caper are 0.6 m, una de ginestra ~1.2 m, coroana unui
+	# maslin ~2.5 m. La scara acelor (0.6, adica o repetitie la 1.67 m) o tufa
+	# intreaga ar fi prins jumatate de dala si ar fi iesit o pata de frunze
+	# uriase — exact greseala inversa fata de cea din #222.
+	#
+	# La 1.4 (o repetitie la 0.71 m) buchetele au 14-21 cm si frunzele 1-2 cm:
+	# o tufa de ginestra prinde ~1.7 repetitii, un maslin ~3.5. Adica fiecare
+	# piesa vede tiparul intreg de macar o data, iar de la distanta de joc
+	# (10-25 m) frunzele se topesc in mipmap si ramane variatia de valoare —
+	# tocmai ce lipsea. Proiectie in spatiul LUMII (plantele nu se misca):
+	# un singur material pentru tot frunzisul pistei.
+	"macchia": 1.4,
+	# Aceeasi scara ca frunzisul verde: e aceeasi dala, doar alta tenta.
+	"macchia_dry": 1.4,
 	# Gheata Baikalului. Dala pictata reprezinta ~6 m (celule de crapaturi de
 	# ~1 m, bule de 5-15 cm): la 0.16 (o repetitie la 6.25 m) crapaturile mari
 	# citesc ca fisuri de un metru din chase cam, iar tiparul nu se vede ca

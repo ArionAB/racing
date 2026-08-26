@@ -160,6 +160,14 @@ const CLASSES_BY_MODEL := {
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},
+	# Trestia de pe Stromboli, pe frunzisul mediteranean. Aici si nu in
+	# STROMBOLI_CLASSES fiindca numele nodului ei (`Cane_Clump`) e PREFIX
+	# pentru `Cane_Clump_A/B/C` din `props/sugar_cane.glb`, lanul Okinawei:
+	# maparea globala ar fi imbracat si trestia de zahar in macchia si ar fi
+	# adaugat un material pe Track08. Aceeasi capcana ca la `Church_Body`.
+	"cane_clump": {
+		"Cane_Clump": Palette.TRI_PREFIX + "macchia",
+	},
 }
 
 

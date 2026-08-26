@@ -455,6 +455,82 @@ de deasupra.
 > levels, the rotating section and the crane at the top, the cable car
 > crossing the bay in the foreground.
 
+## 10. Prompt pentru inventarul de assets (ChatGPT) — v0.1, paste-ready
+
+Toate assets-urile într-o singură foaie de referință, ca la Stromboli (`img/stromboli_assets_v2.png`), cu **numele de fișier scris sub fiecare piesă** — numele de pe foaie e contractul cu `docs/asset_briefs/` și `tools/blender/build_*.py`. Varianta B regenerează o singură piesă. Textul e și în artefactul „Chongqing Recon", cu buton de copiere.
+
+```text
+═══════════ VARIANTA A · FOAIA COMPLETĂ (toate assets-urile într-un singur fișier) ═══════════
+
+Create a single tall REFERENCE SHEET of low-poly game assets for a night-time city racing track (Chongqing, China), in the same style as the attached low-poly diorama: faceted flat-shaded meshes, no fine surface texture, chunky tabletop-miniature proportions, soft baked ambient occlusion, muted concrete and blue-grey colors (~40% saturation), lit windows and lanterns as simple warm emissive shapes. NOT cyberpunk. Plain neutral grey background, assets organized in numbered titled panels, each panel with its own 1 m scale bar. EVERY panel and every piece inside a kit panel MUST carry a small caption with its exact file name written below it, e.g. "hongya_dong.glb", "lamp_lantern_a.glb" — these names are how we will identify the pieces. Captions and view labels (FRONT / SIDE / TOP / 3/4) are the ONLY text allowed: no lettering on the objects themselves (shop signs and neon are abstract shapes and stripes, no readable words).
+
+1. hongya_dong.glb — HERO. An 11-storey stack of traditional timber stilt houses built down a cliff face, 60 m wide, 25 m deep, 45 m tall: tiers of curved dark tiled roofs stepping down, timber balconies and railings, red lanterns on the eaves, tall stilts into the rock at the bottom, every floor glowing warm gold from inside. Seen mostly from ABOVE and from the river side — detail the roofs and the front, keep the back plain. Views: front (river side), side, top, 3/4 from above.
+2. liziba_block.glb — HERO. A plain 1990s residential slab block, 100 m long, 30 m deep, 8 storeys visible above our "ground" (the block continues below), grid of windows with ~30% lit, air-conditioner boxes, laundry on balconies; a 7 m wide, 90 m long ground-level hall runs through it lengthwise with square pillars, and a MONORAIL portal cuts across the hall at mid-length (opening on both long facades). Front, side, top, cutaway showing the hall.
+3. monorail_train.glb — 3-car straddle-beam monorail train, each car 9 m long, rounded ends, pale green-white livery, warm headlights, riding a single concrete beam. Front, side, top, 3/4.
+4. cableway_cabin.glb + cableway_towers.glb — a boxy aerial cable-car cabin 5×4 m with a flat floor, red-and-white stripes, roof carrier arm, lit interior; and two 30 m steel lattice towers with cable sheaves. Cabin: front, side, top, 3/4. Towers: side, 3/4.
+5. interchange_kit (modular pieces, one panel, same scale): ramp_straight_10m.glb (7 m wide concrete road slab with parapet), ramp_arc_15deg.glb (same, curved 15°), pillar_round.glb (round concrete column, 20 m, with cap), parapet_module.glb (3 m concrete parapet), launch_ramp.glb (short 6 m kicker slab rising 1.5 m), construction_barrier.glb (2 m red-and-white striped barrier with a small lamp). Each piece labeled.
+6. rotating_span.glb — a 12 m section of concrete roadway on a central pivot drum, shown at three angles (closed / 45° / open 90°), construction-site lamps on its parapets, striped edges. Top and 3/4.
+7. tower_crane.glb + prefab_slab.glb — a yellow tower crane, 40 m tall, 30 m jib, counterweight, cabin; and a 6×3 m grey prefab concrete panel hanging from its hook on four cables. Front, side, 3/4.
+8. cargo_ship.glb — a 60 m river cargo ship with a low hull, stacked containers, a white superstructure at the stern, lit windows, a fog horn on the bridge. Front, side, top, 3/4.
+9. bay_bridge.glb — a 90 m concrete road bridge deck with parapets and lamp posts, on two plain piers (the piers are simple — they are never seen from the road). Side, top, 3/4.
+10. kuixinglou_pavilion.glb — an 8×8 m open pavilion with a double curved tiled roof on red columns, stone base, three steps. Front, side, top, 3/4.
+11. stone_stairway.glb — a 60 m long, 12 m wide flight of wide worn stone steps (each step 1.5 m deep, 15 cm high) with two landings, low stone side walls, a handrail. Side profile, top, 3/4.
+12. footbridge.glb — a 40 m pedestrian footbridge in painted steel with railings and lamp posts. Side, 3/4.
+13. crossing_barrier.glb — a railway crossing barrier: red-and-white boom 6 m, post with two flashing lamps and a bell. Front, side.
+14. cliff_railing.glb — a 30 m steel railing module with vertical bars on a low stone curb. Front, side.
+15. URBAN KIT A — street furniture, one row, same scale, each piece labeled: lamp_lantern_a.glb / lamp_lantern_b.glb / lamp_lantern_c.glb (4 m lamp posts with red paper lanterns, three shapes), neon_sign_a.glb / _b / _c / _d (1–3 m abstract neon shapes on brackets: a bowl, a fish, a vertical bar, a circle — NO letters; one of them pink, the others warm white and red), bollard.glb (0.5 m rusty iron), bicycle.glb, mailbox_wall.glb (a bank of small metal mailboxes), scooter.glb (2 m parked scooter), table_stools.glb (a round table with four plastic stools), steam_vent.glb (0.6 m kitchen vent hood with a soft steam column), laundry_line.glb (4 m wire with hanging clothes), porter.glb (1.7 m standing figure with a bamboo pole and two baskets).
+16. URBAN KIT B — buildings and traffic, one row, same scale, each piece labeled: shophouse_a.glb / shophouse_b.glb / shophouse_c.glb (8×6×7 m two-storey shophouses with roll-up shutters, one open with goods, tiled roof, ~30% windows lit), restaurant_front.glb (6 m restaurant facade with red awning, hanging lanterns, open steamy kitchen window), bus.glb (10 m city bus, green-white), mini_car_a.glb / mini_car_b.glb / mini_car_c.glb (3 m tiny hatchbacks in three colors), container.glb (6×2.4 m shipping container, painted metal), tower_silhouette_a.glb / _b / _c (40, 60, 80 m plain apartment towers with a window grid, for the far background — very simple boxes).
+17. chevron_post.glb — reuse: 1.2 m post with red-and-white chevron plate (include for completeness).
+
+═══════════ VARIANTA B · BLOCURI INDIVIDUALE (regenerare punctuală) ═══════════
+
+STYLE HEADER — începe FIECARE prompt cu blocul ăsta:
+
+Same low-poly flat-shaded style as the Chongqing night diorama reference (faceted meshes, no fine surface texture, chunky tabletop-miniature proportions, soft baked ambient occlusion, muted concrete and blue-grey colors ~40% saturation, lit windows as simple warm emissive shapes, NOT cyberpunk). Turnaround sheet on a plain neutral grey background, no scene, no ground clutter: front view, side view, top view and one 3/4 view, all orthographic, same scale, with a 1 m scale bar. Show only this object. The only text allowed is the caption with the file name under the object.
+
+──────────── 1 · hongya_dong.glb (primul: e ce vede camera de pe cornișă) ────────────
+Turnaround sheet of an 11-storey stack of traditional timber stilt houses built down a cliff face, 60 m wide, 25 m deep, 45 m tall: tiers of curved dark tiled roofs stepping down the cliff, timber balconies and railings, red lanterns on the eaves, tall stilts into the rock at the bottom, every floor glowing warm gold from inside. Detail the roofs and the river-facing front; the back against the cliff is plain. Add one extra view from directly above at 45°.
+
+──────────── 2 · liziba_block.glb ────────────
+Turnaround sheet of a plain 1990s residential slab block, 100 m long, 30 m deep, 8 storeys, grid of windows with about 30% lit, air-conditioner boxes and laundry on balconies; a 7 m wide hall runs the full 90 m length at ground level on square pillars, and a monorail portal cuts across the hall at mid-length, open on both long facades. Include a cutaway view of the hall.
+
+──────────── 3 · monorail_train.glb ────────────
+Turnaround sheet of a 3-car straddle-beam monorail train, each car 9 m long with rounded ends, pale green-white livery, warm headlights, riding a single concrete beam shown under it.
+
+──────────── 4 · cableway_cabin.glb + cableway_towers.glb ────────────
+Sheet with a boxy aerial cable-car cabin 5×4 m with a flat floor, red-and-white stripes, roof carrier arm and lit interior, plus two 30 m steel lattice towers with cable sheaves, same scale.
+
+──────────── 5 · interchange_kit (o singură planșă, aceeași scară) ────────────
+Sheet of a matched kit of elevated-road pieces lined up on one row, each labeled with its file name: ramp_straight_10m.glb (7 m wide concrete road slab, 10 m long, parapets both sides), ramp_arc_15deg.glb (same slab curved 15°), pillar_round.glb (round concrete column 20 m with cap), parapet_module.glb (3 m concrete parapet), launch_ramp.glb (6 m kicker slab rising 1.5 m), construction_barrier.glb (2 m red-and-white striped barrier with a small lamp).
+
+──────────── 6 · rotating_span.glb ────────────
+Sheet of a 12 m section of concrete roadway on a central pivot drum, shown at three angles (closed, 45°, open 90°), construction-site lamps on its parapets, striped edges; top view and 3/4 for each.
+
+──────────── 7 · tower_crane.glb + prefab_slab.glb ────────────
+Turnaround sheet of a yellow tower crane 40 m tall with a 30 m jib, counterweight and cabin, and a 6×3 m grey prefab concrete panel hanging from the hook on four cables.
+
+──────────── 8 · cargo_ship.glb ────────────
+Turnaround sheet of a 60 m river cargo ship with a low hull, stacked containers, white superstructure at the stern with lit windows, a fog horn on the bridge; waterline shown.
+
+──────────── 9 · bay_bridge.glb ────────────
+Sheet of a 90 m concrete road bridge deck with parapets and lamp posts on two plain piers (piers simple, never seen from the road); side, top, 3/4.
+
+──────────── 10 · kuixinglou_pavilion.glb ────────────
+Turnaround sheet of an 8×8 m open pavilion with a double curved tiled roof on red columns, a stone base and three steps.
+
+──────────── 11 · stone_stairway.glb ────────────
+Sheet of a 60 m long, 12 m wide flight of wide worn stone steps (each step 1.5 m deep, 15 cm high) with two landings, low stone side walls and a handrail; side profile, top, 3/4.
+
+──────────── 12 · footbridge.glb · crossing_barrier.glb · cliff_railing.glb (o planșă) ────────────
+Sheet with three pieces, same scale, each labeled: a 40 m painted-steel pedestrian footbridge with railings and lamp posts; a railway crossing barrier with a 6 m red-and-white boom, post with two flashing lamps and a bell; a 30 m steel railing module with vertical bars on a low stone curb.
+
+──────────── 13 · urban kit A (mobilier stradal, o planșă) ────────────
+Sheet of a matched kit of street pieces lined up on one row, same scale, each labeled: lamp_lantern_a/b/c.glb (4 m lamp posts with red paper lanterns, three shapes), neon_sign_a/b/c/d.glb (1–3 m abstract neon shapes on brackets — a bowl, a fish, a vertical bar, a circle; NO letters; one pink, the others warm white and red), bollard.glb (0.5 m rusty iron), bicycle.glb, mailbox_wall.glb (bank of small metal mailboxes), scooter.glb (2 m parked scooter), table_stools.glb (round table with four plastic stools), steam_vent.glb (0.6 m kitchen vent hood with a soft steam column), laundry_line.glb (4 m wire with hanging clothes), porter.glb (1.7 m standing figure with a bamboo pole and two baskets).
+
+──────────── 14 · urban kit B (clădiri și trafic, o planșă) ────────────
+Sheet of a matched kit lined up on one row, same scale, each labeled: shophouse_a/b/c.glb (8×6×7 m two-storey shophouses with roll-up shutters, one open with goods, tiled roof, ~30% windows lit), restaurant_front.glb (6 m facade with red awning, hanging lanterns, open steamy kitchen window), bus.glb (10 m green-white city bus), mini_car_a/b/c.glb (3 m tiny hatchbacks in three colors), container.glb (6×2.4 m painted shipping container), tower_silhouette_a/b/c.glb (40, 60, 80 m plain apartment towers with a window grid — very simple boxes for the far background).
+```
+
 ## Istoric
 
 - **v0.1 (26 aug 2026):** concept extern integrat — regula 70/15/10/5,

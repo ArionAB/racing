@@ -8,15 +8,21 @@ extends Node
 ##
 ## Pista-test din TrackFromPath: o bucla cu dreapta de jos pe z=0 (y=0) si
 ## dreapta de sus pe z=-172 (y=25); cablul leaga cele doua drepte, cu un turn
-## la mijloc. Masina A e asezata pe cabina in fereastra de imbarcare; masina
-## B ajunge la peron dupa plecare.
+## la mijloc. Masina A VINE de pe sosea CA IN JOC: pleaca in fereastra de
+## imbarcare cu 18 m/s si gazul tinut, traverseaza peronul, intra pe podea
+## (4.25 m) si trebuie oprita acolo de cabina (prindere + bara din fata),
+## inainte sa se inchida usile. Masina B ajunge la peron dupa plecare. Un al
+## doilea ciclu repeta imbarcarea cu 26 m/s (viteza de cursa pe dreapta).
 ##
+##  (0)   A e la bord la inchiderea usilor, oprita pe podea, fara sa fi iesit
+##        pe fata (z local min > marginea podelei) si fara cadere.
 ##  (i)   A ramane pe podea toata traversarea: abaterea pozitiei ei fata de
 ##        cabina < 0.5 m orizontal, rotile pe podea, fara cadere.
 ##  (ii)  la sosire A iese pe drum si isi gaseste indexul pe etajul de sus in
 ##        < 1 s (indexul e pe cota 25), apoi e „pe sosea" sus.
 ##  (iii) plecarea/sosirea nu o arunca: |viteza verticala| < 6 m/s tot drumul.
 ##  (iv)  B, ajunsa dupa fereastra, nu e la bord si ramane pe peron.
+##  (v)   ciclul 2, 26 m/s: A tot la bord, ajunge sus, nu cade in golf.
 ##
 ## Ruleaza CA SCENA (masina cere autoload-urile):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeCableway.tscn
@@ -34,6 +40,11 @@ const BOTTOM := Vector3(60, 0, -14)
 const MID := Vector3(60, 13, -89)
 const TOP := Vector3(60, 25, -164)
 const DOCK_BOTTOM := Vector3(60, 0, -8)
+## De unde pleaca A: PE sosea (drumul de jos e pe z=0, jumatate de latime 6 m;
+## dincolo de el e decorul temei, cu coliziune), cu botul spre peron (-Z).
+const APPROACH := Vector3(60, 0.6, 5)
+const APPROACH_SPEED: float = 18.0
+const FAST_SPEED: float = 26.0
 const MAX_DRIFT: float = 0.5
 const MAX_VY: float = 6.0
 const UPPER_MIN_Y: float = 24.0
@@ -155,13 +166,13 @@ func _print_terrain() -> void:
 	print("  teren fata de podeaua cabinei, max %+.1f m (coarda dreapta; traseul real trece pe turn)" % worst)
 
 
-func _spawn(at: Vector3) -> Car:
+func _spawn(at: Vector3, heading: Basis = Basis.IDENTITY, speed: float = 0.0) -> Car:
 	var car := (load(CAR_SCENE) as PackedScene).instantiate() as Car
 	add_child(car)
 	car.apply_data(GameState.CAR_DATA[0])
 	car.track = _track
-	car.global_transform = Transform3D(Basis.IDENTITY, at)
-	car.velocity = Vector3.ZERO
+	car.global_transform = Transform3D(heading, at)
+	car.velocity = -heading.z * speed
 	car.route = 0
 	car.road_index = _track.closest_index_global(at, 0)
 	car.last_safe_index = car.road_index
@@ -179,25 +190,73 @@ func _wait_state(st: int, timeout: float = 30.0) -> bool:
 	return false
 
 
-func _run() -> void:
-	# Ciclul incepe cu IMBARCAREA; A se aseaza pe podea in fereastra.
-	await _wait_state(CablewayScript.State.BOARDING)
-	var a := _spawn(BOTTOM + Vector3(0, 0.6, 0))
-	var driver := ProbeDriver.new()
-	a.set_controller(driver)
-	for _f in 60:
+## Inceputul ferestrei de imbarcare (usile abia deschise jos).
+func _wait_boarding_start() -> bool:
+	for _f in int(_hazard.period * 60.0 * 1.5):
+		if _hazard.state() == CablewayScript.State.BOARDING and _hazard.cycle_time() < 0.1:
+			return true
 		await get_tree().physics_frame
-	var body := _hazard.body()
-	var idx_lo := a.road_index
-	print("--- imbarcare: A pe podea la t=%.2f, y=%.2f, roti pe sol %d, index %d (cota drum %.1f), stare %d"
-		% [_hazard.cycle_time(), a.global_position.y, a.wheels_on_ground, idx_lo,
-		_track.baked[idx_lo].y, _hazard.state()])
-	_verdict(a.wheels_on_ground == 4 and absf(a.global_position.y - BOTTOM.y) < 0.3,
-		"A sta pe podeaua cabinei inainte de plecare (y=%.2f, roti %d)" % [a.global_position.y, a.wheels_on_ground])
+	return false
 
-	# --- (i) + (iii): traversarea
-	var ok_up := await _wait_state(CablewayScript.State.UP, 5.0)
-	_verdict(ok_up, "cabina pleaca (stare UP)")
+
+## Imbarcarea la viteza: A pleaca de pe sosea cu `speed`, gazul tinut, in
+## clipa deschiderii usilor. Intoarce masina si tipareste ce s-a intamplat
+## pana la inchiderea usilor.
+func _board_at_speed(speed: float, driver: ProbeDriver) -> Car:
+	var ok_start := await _wait_boarding_start()
+	_verdict(ok_start, "fereastra de imbarcare a inceput")
+	var a := _spawn(APPROACH, Basis.IDENTITY, speed)
+	a.set_controller(driver)
+	driver.throttle = 1.0
+	var body := _hazard.body()
+	var floor_edge := -CablewayScript.CABIN_SIZE.z * 0.5
+	var min_z := INF
+	var t_deck := -1.0
+	var t_stop := -1.0
+	var v_deck := 0.0
+	var min_y := INF
+	var frames := 0
+	while _hazard.state() == CablewayScript.State.BOARDING:
+		await get_tree().physics_frame
+		frames += 1
+		var local := body.to_local(a.global_position)
+		min_y = minf(min_y, a.global_position.y)
+		var on_deck := _hazard.on_deck().has(a)
+		if on_deck:
+			min_z = minf(min_z, local.z)
+			if t_deck < 0.0:
+				t_deck = _hazard.cycle_time()
+				v_deck = a.horizontal_speed()
+			if t_stop < 0.0 and a.horizontal_speed() < 0.5:
+				t_stop = _hazard.cycle_time()
+		if frames % 15 == 0 or (on_deck and frames % 5 == 0):
+			print("    t=%4.2f A z=%+7.2f (local %+6.2f) y=%5.2f v=%5.2f roti %d pe podea=%s"
+				% [_hazard.cycle_time(), a.global_position.z, local.z, a.global_position.y,
+				a.horizontal_speed(), a.wheels_on_ground, str(on_deck)])
+	var local_end := body.to_local(a.global_position)
+	print("--- (0) imbarcare la %.0f m/s: pe podea la t=%.2f cu %.1f m/s, oprita la t=%.2f; z local min %+.2f (marginea podelei %+.2f); la inchidere local (%+.2f, %+.2f, %+.2f), v=%.2f, roti %d, y min %.2f"
+		% [speed, t_deck, v_deck, t_stop, min_z, floor_edge, local_end.x, local_end.y, local_end.z,
+		a.horizontal_speed(), a.wheels_on_ground, min_y])
+	_verdict(t_deck >= 0.0, "A a intrat pe podea in fereastra (t=%.2f s)" % t_deck)
+	_verdict(t_stop >= 0.0 and t_stop < _hazard.boarding_window,
+		"A s-a oprit pe podea inainte de inchiderea usilor (t=%.2f < %.1f s)" % [t_stop, _hazard.boarding_window])
+	_verdict(min_z > floor_edge, "A n-a iesit pe fata (z local min %+.2f > %+.2f)" % [min_z, floor_edge])
+	_verdict(_hazard.aboard().has(a), "A e la bord la inchiderea usilor")
+	_verdict(a.wheels_on_ground == 4 and absf(local_end.y) < 0.3,
+		"A sta pe podea la plecare (dy=%+.2f, roti %d)" % [local_end.y, a.wheels_on_ground])
+	_verdict(min_y > BOTTOM.y - 1.0, "A n-a cazut in golf la imbarcare (y min %.2f)" % min_y)
+	return a
+
+
+func _run() -> void:
+	# ============================ ciclul 1: imbarcare la 18 m/s, gazul tinut
+	var driver := ProbeDriver.new()
+	var a := await _board_at_speed(APPROACH_SPEED, driver)
+	var body := _hazard.body()
+
+	# --- (i) + (iii): traversarea (gazul ramane tinut — soferul nu stie ca
+	# trebuie sa-l lase; ancora + bara din fata trebuie sa tina si asa)
+	_verdict(_hazard.state() == CablewayScript.State.UP, "cabina pleaca (stare UP)")
 	var anchor := body.to_local(a.global_position)
 	var max_drift := 0.0
 	var max_dy := 0.0
@@ -248,7 +307,6 @@ func _run() -> void:
 	var t_arrive := _hazard.cycle_time()
 	var t_index := -1.0
 	var t_road := -1.0
-	driver.throttle = 1.0
 	var vy_exit := 0.0
 	for _f in 300:
 		await get_tree().physics_frame
@@ -285,3 +343,24 @@ func _run() -> void:
 		b.global_position.distance_to(body.global_position)])
 	_verdict(not b_aboard, "B nu e la bord")
 	_verdict(b.global_position.y > DOCK_BOTTOM.y - 0.5 and b_d < 3.0, "B ramane pe peron (y=%.2f, %.2f m)" % [b.global_position.y, b_d])
+
+	# ============================ ciclul 2: imbarcare la 26 m/s (viteza de cursa)
+	# A si B pleaca din scena; cabina coboara si redeschide usile.
+	a.queue_free()
+	b.queue_free()
+	await get_tree().physics_frame
+	print("=== ciclul 2: imbarcare la %.0f m/s ===" % FAST_SPEED)
+	var driver2 := ProbeDriver.new()
+	var c := await _board_at_speed(FAST_SPEED, driver2)
+	var min_y2 := INF
+	var max_vy2 := 0.0
+	while _hazard.state() == CablewayScript.State.UP:
+		await get_tree().physics_frame
+		min_y2 = minf(min_y2, c.global_position.y)
+		max_vy2 = maxf(max_vy2, absf(c.velocity.y))
+	var loc2 := body.to_local(c.global_position)
+	print("--- (v) %.0f m/s: la sosire A local (%+.2f, %+.2f, %+.2f), y=%.1f, y min pe drum %.2f, |vy| max %.2f"
+		% [FAST_SPEED, loc2.x, loc2.y, loc2.z, c.global_position.y, min_y2, max_vy2])
+	_verdict(c.global_position.y > TOP.y - 1.0 and absf(loc2.y) < 0.3, "A a ajuns sus pe podea (y=%.1f)" % c.global_position.y)
+	_verdict(min_y2 > BOTTOM.y - 1.0, "A n-a cazut in golf (y min %.2f)" % min_y2)
+	_verdict(max_vy2 < MAX_VY, "A nu e aruncata (|vy| max %.2f)" % max_vy2)

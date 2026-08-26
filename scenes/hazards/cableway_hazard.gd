@@ -34,6 +34,15 @@ extends Node3D
 ##     sus, si nu exista „aterizare" (rotile n-au parasit podeaua). La sosire
 ##     cabina recauta indexul global pentru fiecare masina de la bord — ea e
 ##     cea care a teleportat-o, ea o si anunta.
+##  5. IMBARCAREA la viteza (runda 2 a sondei): podeaua are 4.25 m, iar o
+##     masina care soseste in fereastra cu 18 m/s si acceleratia tinuta trecea
+##     prin capatul deschis din fata si cadea in golf (masurat: y=-31 m).
+##     Doua masuri, amandoua vizibile: (a) BARE la capete — bara din fata e
+##     coborata mereu, mai putin la debarcare; usa din spate se inchide la
+##     plecare; (b) PRINDEREA: cat stau usile deschise jos, orice masina
+##     intrata pe podea e trasa spre centrul ei de un arc+amortizor cu plafon
+##     mai mare decat al ancorei de drum (catch_max_accel) — „lantul" care te
+##     opreste pe un bac. Din 18 m/s cu gazul tinut se opreste in ~3.5 m.
 
 ## Tabelul de clase de material, prin PRELOAD (vezi PathMover).
 const WorldProp = preload("res://scenes/props/world_prop.gd")
@@ -44,6 +53,10 @@ const CABIN_SIZE := Vector3(5.25, 4.35, 4.25)
 const FLOOR_THICKNESS: float = 0.48
 const WALL_HEIGHT: float = 1.4
 const WALL_THICKNESS: float = 0.12
+## Barele de la capete: iesite cu putin peste marginea podelei, ca masina
+## (colizer 3.8 m) sa aiba loc intre ele (2 x 2.27 m).
+const END_BAR_OVERHANG: float = 0.2
+const END_BAR_HEIGHT: float = 0.5
 ## Varful turnului din GLB (unde trece cablul).
 const TOWER_TOP: float = 16.14
 ## Turnul sta LANGA linia cablului, nu pe ea: cabina trece pe langa el, iar
@@ -78,6 +91,10 @@ enum State { BOARDING, UP, UNLOADING, DOWN }
 @export_range(0.0, 60.0, 0.5) var hold_damping: float = 15.0
 ## Plafonul acceleratiei ancorei (m/s^2): tine, dar nu poate arunca.
 @export_range(1.0, 80.0, 1.0) var hold_max_accel: float = 30.0
+## Prinderea la imbarcare (nota 5): plafonul (m/s^2) cu care cabina opreste
+## o masina intrata pe podea cat usile sunt deschise jos. 60 cu gazul tinut
+## (16 m/s^2) inseamna 44 net: 18 m/s se opresc in 3.7 m, sub podeaua de 4.25.
+@export_range(1.0, 120.0, 1.0) var catch_max_accel: float = 60.0
 
 @export_group("Constructie")
 ## Cabina si turnul: goale = modelele din kitul Chongqing.
@@ -87,12 +104,25 @@ enum State { BOARDING, UP, UNLOADING, DOWN }
 ## Peronul static de la fiecare statie (m), in prelungirea podelei: jos in
 ## spatele cabinei (de unde intri), sus in fata ei (pe unde iesi). 0 = fara.
 @export_range(0.0, 20.0, 0.5) var dock_length: float = 6.0
+## Rampa de acces la capatul fiecarui peron (jos in spate, sus in fata): o
+## pana care coboara `apron_drop` pe `apron_length`, ca marginea peronului sa
+## nu fie prag. Masurat in ProbeCableway: soseaua e cu 0.6 m sub podea la
+## marginea drumului, iar fata peronului (0.37 m peste talpa colizerului) era
+## un zid — masina se oprea in ea cu botul (memoria `suprafete-cu-goluri-
+## si-praguri`: pragurile > 0.3 m sunt ziduri, marginile se fac in panta).
+## Capatul de jos al penei intra in pamant: nu e nevoie de cota din raycast.
+@export_range(0.0, 10.0, 0.5) var apron_length: float = 3.0
+@export_range(0.0, 2.0, 0.05) var apron_drop: float = 0.7
 ## Slotul de paleta al peroanelor si al cablului.
 @export_range(0, 31) var dock_slot: int = 8
 @export_range(0, 31) var cable_slot: int = 10
 
 var _body: AnimatableBody3D
 var _deck: Area3D
+var _front_bar: CollisionShape3D
+var _rear_bar: CollisionShape3D
+var _front_bar_mesh: MeshInstance3D
+var _rear_bar_mesh: MeshInstance3D
 var _pivot: Node3D
 var _route: Path3D
 var _length: float = 0.0
@@ -123,6 +153,7 @@ func _ready() -> void:
 	_build_cable()
 	_place(0.0)
 	_prev_pos = _body.global_position
+	_set_bars(_state)
 
 
 func _find_route() -> Path3D:
@@ -156,6 +187,14 @@ func _build_body() -> void:
 	for sx in [-1.0, 1.0]:
 		_add_shape(_body, Vector3(WALL_THICKNESS, WALL_HEIGHT, CABIN_SIZE.z),
 			Vector3(sx * (CABIN_SIZE.x - WALL_THICKNESS) * 0.5, WALL_HEIGHT * 0.5, 0.0))
+	# Barele de la capete (nota 5): fata (-Z local) si spate (+Z local),
+	# comutate pe stari — colizer + o bara vizibila pe slotul peronului.
+	var bar_size := Vector3(CABIN_SIZE.x, END_BAR_HEIGHT, WALL_THICKNESS)
+	var bar_z := CABIN_SIZE.z * 0.5 + END_BAR_OVERHANG
+	_front_bar = _add_shape(_body, bar_size, Vector3(0.0, END_BAR_HEIGHT * 0.5, -bar_z))
+	_rear_bar = _add_shape(_body, bar_size, Vector3(0.0, END_BAR_HEIGHT * 0.5, bar_z))
+	_front_bar_mesh = _bar_mesh(bar_size, _front_bar.position)
+	_rear_bar_mesh = _bar_mesh(bar_size, _rear_bar.position)
 	_pivot = Node3D.new()
 	_body.add_child(_pivot)
 	var scene := cabin_model if cabin_model != null else load(CABIN_MODEL) as PackedScene
@@ -183,13 +222,34 @@ func _build_body() -> void:
 	_body.add_child(_deck)
 
 
-func _add_shape(body: PhysicsBody3D, size: Vector3, at: Vector3) -> void:
+func _add_shape(body: PhysicsBody3D, size: Vector3, at: Vector3) -> CollisionShape3D:
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = size
 	shape.shape = box
 	shape.position = at
 	body.add_child(shape)
+	return shape
+
+
+func _bar_mesh(size: Vector3, at: Vector3) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = _box_mesh(size, dock_slot)
+	mi.position = at
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_body.add_child(mi)
+	return mi
+
+
+## Bara din fata e coborata mereu, mai putin la debarcare (iesi pe fata);
+## usa din spate e deschisa doar la imbarcare (intri pe spate).
+func _set_bars(st: State) -> void:
+	var front_open := st == State.UNLOADING
+	var rear_open := st == State.BOARDING
+	_front_bar.disabled = front_open
+	_rear_bar.disabled = rear_open
+	_front_bar_mesh.visible = not front_open
+	_rear_bar_mesh.visible = not rear_open
 
 
 ## Peroanele: jos in spatele cabinei (+Z local), sus in fata ei (-Z local).
@@ -211,6 +271,25 @@ func _build_docks(a: Vector3, b: Vector3) -> void:
 		var mi := MeshInstance3D.new()
 		mi.mesh = _box_mesh(size, dock_slot)
 		dock.add_child(mi)
+		if apron_length <= 0.0:
+			continue
+		# Pana de acces, in continuarea peronului, cu suprafata de sus
+		# plecand din cota podelei si coborand spre capatul dinspre drum.
+		var sign := signf(dz)
+		var pitch := sign * atan2(apron_drop, apron_length)
+		var apron_basis := basis * Basis(Vector3.RIGHT, pitch)
+		var apron_len := sqrt(apron_length * apron_length + apron_drop * apron_drop)
+		var apron_size := Vector3(CABIN_SIZE.x, FLOOR_THICKNESS, apron_len)
+		var apron := StaticBody3D.new()
+		apron.name = "Apron"
+		add_child(apron)
+		var top_edge := at + basis * Vector3(0.0, 0.0, dz + sign * dock_length * 0.5)
+		apron.global_transform = Transform3D(apron_basis,
+			top_edge + apron_basis * Vector3(0.0, -FLOOR_THICKNESS * 0.5, sign * apron_len * 0.5))
+		_add_shape(apron, apron_size, Vector3.ZERO)
+		var ami := MeshInstance3D.new()
+		ami.mesh = _box_mesh(apron_size, dock_slot)
+		apron.add_child(ami)
 
 
 ## Un turn la fiecare punct de control intermediar, cu varful la cablu,
@@ -314,8 +393,11 @@ func _physics_process(delta: float) -> void:
 	_prev_pos = _body.global_position
 	_body.set_meta(&"platform_velocity", _velocity)
 	if _state != prev_state:
+		_set_bars(_state)
 		_on_state_changed(prev_state, _state)
-	if _state == State.UP or _state == State.DOWN:
+	if _state == State.BOARDING:
+		_catch_boarding()
+	elif _state == State.UP or _state == State.DOWN:
 		_hold_aboard()
 
 
@@ -362,6 +444,28 @@ func _on_state_changed(from: State, to: State) -> void:
 		_aboard.clear()
 
 
+## Prinderea la imbarcare (nota 5): cat usile sunt deschise jos, orice masina
+## de pe podea e trasa spre centrul ei — asa se opreste o masina care intra
+## la viteza, inainte sa ajunga in bara din fata. Aceeasi lege ca ancora
+## (arc+amortizor fata de cabina), cu plafon mai mare.
+func _catch_boarding() -> void:
+	for b in _deck.get_overlapping_bodies():
+		var car := b as Car
+		if car == null:
+			continue
+		_pull_to(car, Vector3.ZERO, catch_max_accel)
+
+
+## Arc+amortizor orizontal spre punctul local `anchor` al cabinei.
+func _pull_to(car: Car, anchor_local: Vector3, max_accel: float) -> void:
+	var d := _body.to_global(anchor_local) - car.global_position
+	d.y = 0.0
+	var dv := _velocity - car.linear_velocity
+	dv.y = 0.0
+	var acc := (d * hold_stiffness + dv * hold_damping).limit_length(max_accel)
+	car.apply_central_force(acc * car.mass)
+
+
 ## Ancora din timpul traversarii (vezi nota 3 din antet). Orizontal doar:
 ## vertical o tine suspensia ei pe podea. Cine a parasit podeaua (sarit,
 ## impins) e lasat in plata golfului.
@@ -377,13 +481,7 @@ func _hold_aboard() -> void:
 		if not overlapping.has(car):
 			_aboard.erase(key)
 			continue
-		var anchor := _body.to_global(_aboard[key] as Vector3)
-		var d := anchor - car.global_position
-		d.y = 0.0
-		var dv := _velocity - car.linear_velocity
-		dv.y = 0.0
-		var acc := (d * hold_stiffness + dv * hold_damping).limit_length(hold_max_accel)
-		car.apply_central_force(acc * car.mass)
+		_pull_to(car, _aboard[key] as Vector3, hold_max_accel)
 
 
 # ---------------------------------------------------------------- pentru sonde
@@ -406,6 +504,15 @@ func velocity() -> Vector3:
 
 func aboard() -> Array:
 	return _aboard.keys()
+
+
+## Masinile de pe podea in clipa asta (indiferent de usi).
+func on_deck() -> Array:
+	var out: Array = []
+	for b in _deck.get_overlapping_bodies():
+		if b is Car:
+			out.append(b)
+	return out
 
 
 func station_bottom() -> Vector3:

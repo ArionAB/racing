@@ -196,6 +196,44 @@ var _channels: Array[Dictionary] = []
 var _peaks: Array[Vector4] = []
 
 
+## PASAJE PE PILONI: intervalele de tur (fractii, ca la rape) in care soseaua
+## e un tablier in aer, peste un alt tronson al ACELEIASI piste. Vezi
+## [method ground_y] pentru ce se schimba — si de ce nu se poate altfel.
+##
+## Masca e pe indexul copt (1 = pe pasaj), coapta o data: `ground_y` se
+## cheama pe fiecare nod al grilei de teren si pe fiecare punct de decor, deci
+## un test pe intervale in bucla interioara ar fi costat mai mult decat masca.
+var _over_mask: PackedByteArray = PackedByteArray()
+## Cate puncte coapte NU sunt pe pasaj — daca e zero, masca se ignora, altfel
+## media terenului n-ar mai avea din ce se face.
+var _ground_points: int = 0
+
+
+func _bake_overpass_mask(overpasses: Array[Vector2]) -> void:
+	var n := _baked.size()
+	_over_mask = PackedByteArray()
+	_over_mask.resize(n)
+	_over_mask.fill(0)
+	_ground_points = n
+	if overpasses.is_empty() or _total_len <= 0.0:
+		return
+	for i in n:
+		var f := _dists[i] / _total_len
+		for r in overpasses:
+			var inside := (f >= r.x and f <= r.y) if r.x <= r.y \
+				else (f >= r.x or f <= r.y)
+			if inside:
+				_over_mask[i] = 1
+				_ground_points -= 1
+				break
+
+
+## E indexul copt pe un pasaj pe piloni? Consumat de Track pentru fusta
+## tablierului, parapet si umeri — aceeasi masca, o singura definitie.
+func on_overpass(i: int) -> bool:
+	return not _over_mask.is_empty() and _over_mask[i] == 1
+
+
 func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		control_points: Array[Vector3], half_width: float,
 		dune_phase: float = 0.0, ravines: Array[Vector4] = [],
@@ -208,7 +246,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		cornices: Array[int] = [],
 		widths: PackedFloat32Array = PackedFloat32Array(),
 		carve_corridors: PackedVector3Array = PackedVector3Array(),
-		viaducts: Array[int] = []) -> void:
+		viaducts: Array[int] = [],
+		overpasses: Array[Vector2] = []) -> void:
 	_baked = baked
 	_dists = dists
 	_half_width = half_width
@@ -225,6 +264,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_cornices = cornices
 	_viaducts = viaducts
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
+	_bake_overpass_mask(overpasses)
 	_loop_poly = PackedVector2Array()
 	for p in control_points:
 		_loop_poly.append(Vector2(p.x, p.z))
@@ -306,8 +346,19 @@ func ground_y(wx: float, wz: float) -> float:
 	var n := _baked.size()
 	if n == 0:
 		return -GROUND_DROP
+	# PASAJELE nu trag terenul. Media de mai jos e in XZ: la o incrucisare
+	# suprapusa (etaj jos la 5 m, tablier la 20 m) terenul s-ar aseza la MEDIA
+	# lor — ingropa etajul de jos si lasa tablierul in aer pe nimic. Punctele
+	# de pe pasaj ies si din media, si din cautarea celui mai apropiat punct
+	# (altfel lacatul local ar ridica terenul la cota tablierului chiar sub el).
+	# Terenul urmeaza deci doar ce sta pe pamant; tablierul isi aduce fusta si
+	# pilonii lui. Vezi docs/track_briefs/chongqing.md §7.1.
+	var skip_over := _ground_points > 0 and _ground_points < n
 	var i := 0
 	while i < n:
+		if skip_over and _over_mask[i] == 1:
+			i += GROUND_STRIDE
+			continue
 		var p := _baked[i]
 		var dx := p.x - wx
 		var dz := p.z - wz

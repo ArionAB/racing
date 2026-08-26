@@ -134,8 +134,32 @@ func lateral_distance(i: int, pos: Vector3) -> float:
 	return Vector2(pos.x - p.x, pos.z - p.z).length()
 
 
+## Cat de jos SUB cota drumului mai esti „pe el". Masina sta cu originea
+## deasupra asfaltului, deci orice cadere sub el inseamna alt etaj sau gol.
+const ROAD_BELOW_TOLERANCE: float = 2.5
+## Cat de sus DEASUPRA drumului mai esti „pe el": in aer, dupa un kicker, tot
+## drumul asta te asteapta jos. Larg, ca sariturile sa nu taie viteza.
+## Pe un etaj de deasupra la peste atat nu mai esti pe drumul de jos.
+const ROAD_ABOVE_TOLERANCE: float = 12.0
+
+
+## Pe sosea = in banda LATERAL si la cota ei VERTICAL.
+##
+## Testul era doar 2D (XZ), si asta ajungea cat timp pista nu trecea peste ea
+## insasi. Cu un pasaj la 15 m peste un alt tronson, o masina cazuta pe etajul
+## de jos care inca tine indexul etajului de sus era „pe sosea" — isi innoia
+## checkpoint-ul pe etajul de SUS si repunerea urmatoare era un cadou.
 func is_on_road(i: int, pos: Vector3) -> bool:
-	return lateral_distance(i, pos) <= half_width + 0.5
+	if lateral_distance(i, pos) > half_width + 0.5:
+		return false
+	return not is_other_level(i, pos)
+
+
+## E pozitia la ALT etaj decat punctul copt dat? Consumat de Car la aterizare,
+## ca sa stie cand fereastra locala de index nu mai ajunge.
+func is_other_level(i: int, pos: Vector3) -> bool:
+	var dy := pos.y - baked[wrap_index(i)].y
+	return dy < -ROAD_BELOW_TOLERANCE or dy > ROAD_ABOVE_TOLERANCE
 
 
 ## Cel mai apropiat index, cautat LOCAL in jurul celui precedent.

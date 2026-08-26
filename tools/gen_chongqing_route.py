@@ -25,6 +25,9 @@ S = 1.0  # scara hartii -> lume (bucla din Recon are deja ~2.0 km)
 # (x, y, fillet_r, cota, eticheta) — toate waypoint-urile sunt ancore de cota
 # (brief §2 + Recon PTS). Sens: in harta CLOCKWISE (est pe nord, sud pe est),
 # adica ANTIORAR in Godot (gz = -y); apa (est + sud) ramane pe DREAPTA.
+# Runda 2: G urca 52 -> 65 (brief: 50 -> 65), nu 60 -> 64 ca in runda 1 —
+# varful spiralei (F3 c/d/e) a coborat cu 3-6 m ca panta medie pe F sa
+# ramana sub 13% si stiva F3 e / F etaj 2 sa ramana >= 14 m (49 - 28 = 21).
 WPTS = [
     (-120, 200, 30, 65.0, "A start piata Kuixinglou"),
     (-50,  215, 30, 65.0, "A nod de trafic"),
@@ -49,12 +52,12 @@ WPTS = [
     (-238, -72, 26, 28.0, "F etaj 2 (sosire telecabina)"),
     (-190, -112,28, 35.0, "F3 a"),
     (-200, -200,28, 42.0, "F3 b (peste etajul 1)"),
-    (-255, -235,28, 47.0, "F3 c"),
-    (-300, -190,28, 51.0, "F3 d"),
-    (-278, -118,28, 55.0, "F3 e (peste etajul 2)"),
-    (-250, -40, 30, 60.0, "G Liziba in"),
-    (-235, 10,  30, 61.0, "G monorail"),
-    (-215, 60,  30, 62.0, "G Liziba out"),
+    (-255, -235,28, 44.0, "F3 c"),
+    (-300, -190,28, 46.5, "F3 d"),
+    (-278, -118,28, 49.0, "F3 e (peste etajul 2)"),
+    (-250, -40, 30, 52.0, "G Liziba in"),
+    (-235, 10,  30, 56.5, "G monorail"),
+    (-215, 60,  30, 60.5, "G Liziba out"),
     (-180, 130, 30, 64.0, "A2 pasarela"),
 ]
 
@@ -69,9 +72,14 @@ WPTS = [
 # de axa soselei: capatul se deriva ca piciorul PERPENDICULAREI, deci un prim
 # mid departat face banda sa plece la 90 de grade (masurat: 5 repuneri la
 # intrare); mid-ul 2 e cel care da directia de desprindere.
-BRANCH_MID = [(25, -199, 4.5), (-35, -182, 9.5), (-95, -150, 19.0),
+# Runda 2: capetele unei benzi `elevated` se racordeaza la MARGINEA soselei
+# (Track._branch_end), nu la axa — bucata de banda de peste asfalt era un prag
+# de 0.5 m (4 repuneri la intrare, seed 2). Primul mid sta deci DINCOLO de
+# margine (drumul are 9 m jumatate pe chei): 12 m de axa, la cota drumului;
+# ultimul la cota tablierului (30 m), nu sub el.
+BRANCH_MID = [(28, -193, 4.0), (-35, -182, 9.5), (-95, -150, 19.0),
               (-145, -112, 30.0), (-175, -60, 32.5), (-238, -52, 31.2),
-              (-222, -76, 29.4)]
+              (-222, -76, 30.0)]
 
 def v(a, b):
     return (b[0] - a[0], b[1] - a[1])
@@ -291,8 +299,11 @@ def r3(x):
 # Soseaua de la sol de dupa 0.898 isi sapa singura platoul.
 overpass = (r3(frac["F3 a"] - 0.004),
             r3(frac["G monorail"] + 0.006))
+# Cornisa D: adancimea (30 m) e doar ca sapatura sa ajunga SIGUR la podea si
+# la capatul de sus (drum la 32 m); podeaua absoluta (RAVINE_FLOOR) e cheiul
+# uscat de sub faleza, apa incepe dincolo de el (LAGOON).
 ravines = [
-    (r3(frac["D cornisa in"] - 0.006), r3(frac["E chei in"] - 0.008), 24, 1),
+    (r3(frac["D cornisa in"] - 0.006), r3(frac["E chei in"] - 0.008), 30, 1),
     (r3(frac["E pod in"] + 0.004), r3(frac["E pod out / F etaj 1 in"] + 0.012), 12, 0),
     (r3(frac["F1 a"] + 0.004), r3(frac["F etaj 2 (sosire telecabina)"] - 0.008), 10, -1),
 ]
@@ -302,7 +313,22 @@ widths = [
     (r3(frac["C aleea hot-pot in"]), r3(frac["C aleea hot-pot out"] + 0.006), 6.0),
     (r3(frac["E chei in"] + 0.004), r3(frac["E pod in"] + 0.006), 9.0),
 ]
+# Podeaua cornisei D: WATER_Y + 3 (chei la ~6 m, uscat).
+RAVINE_FLOOR = [(0, WATER_Y + 3.0)]
+# APA: golful + cele doua rauri, pe SUD si EST in harta (godot: +z si -x).
+# Poligon in coordonate GODOT. Cu banda de mal a temei (6 + 10 m) linia apei
+# iese la ~3-5 m INAUNTRUL conturului (cu implicitul de atol, 25 + 45 m, apa
+# iesea abia la 80 m de axa si terasa se topea de la 40 m — ProbeTerrace).
+# Conturul URMEAZA cornisa D la ~55 m de axa (malul e abrupt: lagoon_band
+# 6 + 10 m in tema), deci linia apei iese la ~50 m si terasa 14-50 m ramane
+# uscata; pe chei (E, z=205) sta la z=235; ocoleste poalele spiralei F.
+LAGOON = [(-300, -45), (-283, 25), (-317, 85), (-287, 150), (-225, 235),
+          (170, 235), (230, 300), (330, 320), (900, 400), (900, 900),
+          (-900, 900), (-900, -45)]
+# Fundul lagunei: sub media soselei cu atat cat sa iasa la ~-6 m (apa la 3).
+LAGOON_DEPTH = round(mean_elev + 6.0, 1)
 print(f"\noverpass: {overpass}\nravines: {ravines}\nwidths: {widths}")
+print(f"ravine_floors: {RAVINE_FLOOR}  lagoon_depth: {LAGOON_DEPTH}")
 
 if len(sys.argv) > 1:
     def pva(seq):
@@ -314,6 +340,8 @@ if len(sys.argv) > 1:
     branch_pts = [godot(p, p[2]) for p in BRANCH_MID]
     rav_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d in ravines)
     w_txt = ", ".join(f"Vector3({a}, {b}, {c})" for a, b, c in widths)
+    fl_txt = ", ".join(f"Vector2({a}, {b})" for a, b in RAVINE_FLOOR)
+    lag_txt = ", ".join(f"Vector2({a}, {b})" for a, b in LAGOON)
     tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -344,7 +372,10 @@ custom_cornice_ravines = Array[int]([0, 2])
 custom_viaduct_ravines = Array[int]([1])
 custom_overpass_ranges = Array[Vector2]([Vector2({overpass[0]}, {overpass[1]})])
 custom_width_segments = Array[Vector3]([{w_txt}])
+custom_ravine_floors = Array[Vector2]([{fl_txt}])
+custom_lagoon = Array[Vector2]([{lag_txt}])
 sea_level_offset = {sea}
+lagoon_depth = {LAGOON_DEPTH}
 
 [node name="Path" type="Path3D" parent="."]
 visible = false

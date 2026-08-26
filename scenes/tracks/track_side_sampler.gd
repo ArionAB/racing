@@ -82,6 +82,12 @@ const SHORE_BAND_OUT: float = 60.0
 ## nimic raman exact pe valorile vechi.
 var shore_in: float = SHORE_BAND_IN
 var shore_out: float = SHORE_BAND_OUT
+## Malul lagunei, la fel de reglabil ca tarmul (theme "lagoon_band_in/out").
+## Implicitul (25 + 45 m) e o plaja de atol; un chei de oras cade in apa in
+## cativa metri — cu banda lenesa, terasa de sub cornisa se topea in laguna
+## cu 20 m inainte de linia apei (masurat cu ProbeTerrace pe Chongqing).
+var lagoon_in: float = LAGOON_BAND_IN
+var lagoon_out: float = LAGOON_BAND_OUT
 
 # --- laguna dinauntrul buclei (doar cand _lagoon_depth > 0) ---
 ## Banda de tarm a lagunei, oglinda lui SHORE_BAND_*: IN = spre apa, OUT = spre
@@ -176,6 +182,12 @@ var _cornices: Array[int] = []
 ## Care rape sunt VIADUCTE: terenul coboara si SUB sosea, nu doar langa ea.
 ## Vezi _carve_ravines.
 var _viaducts: Array[int] = []
+## PODEAUA unei rape, cota ABSOLUTA (indice de rapa -> y): sapatura nu coboara
+## sub ea. O cornisa cu podea e o faleza cu un chei la picior — terasa uscata
+## dintre faleza si apa (Chongqing, D: Hongya Dong sta pe ea). Fara podea,
+## rapa se masoara de la cota drumului si, pe o coborare de 30 m, capatul de
+## jos iesea sub apa: lac direct sub buza. Vezi _carve_ravines.
+var _floors: Dictionary = {}
 ## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
 ## padure); > 0 = fund de mare (insula). Vezi ground_y.
 var _far_drop: float = 0.0
@@ -247,8 +259,11 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		widths: PackedFloat32Array = PackedFloat32Array(),
 		carve_corridors: PackedVector3Array = PackedVector3Array(),
 		viaducts: Array[int] = [],
-		overpasses: Array[Vector2] = []) -> void:
+		overpasses: Array[Vector2] = [],
+		floors: Array[Vector2] = []) -> void:
 	_baked = baked
+	for fl in floors:
+		_floors[int(fl.x)] = fl.y
 	_dists = dists
 	_half_width = half_width
 	_widths = widths
@@ -826,10 +841,15 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 			rim = RAVINE_VIADUCT_RIM
 		var lat := smoothstep(0.0, 1.0,
 			clampf((dist - half_width_at(near_i) - inner) / rim, 0.0, 1.0))
+		var target := road_level - r.z * along * lat
+		if _floors.has(ri):
+			# Podeaua e absoluta, nu relativa la drum: cheiul sta la aceeasi
+			# cota pe toata lungimea cornisei, oricat coboara soseaua.
+			target = maxf(target, float(_floors[ri]))
 		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
 		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
 		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).
-		y = _smin(y, road_level - r.z * along * lat, SMOOTH_RAVINE_K)
+		y = _smin(y, target, SMOOTH_RAVINE_K)
 	return y
 
 
@@ -875,7 +895,7 @@ func _lagoon_mix(wx: float, wz: float) -> float:
 	var sd := sqrt(d_sq)
 	if not Geometry2D.is_point_in_polygon(p, _lagoon_poly):
 		sd = -sd
-	return smoothstep(-LAGOON_BAND_OUT, LAGOON_BAND_IN, sd)
+	return smoothstep(-lagoon_out, lagoon_in, sd)
 
 
 ## Minim neted polinomial: coincide cu minf departe de intersectie, rotunjeste

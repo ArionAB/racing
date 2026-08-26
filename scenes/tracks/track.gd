@@ -974,15 +974,24 @@ static func themes() -> Dictionary:
 			# scumpa (CLAUDE.md). Ceata 150 -> 250, gri-violacee: turnurile de
 			# peste rau se sting in ea firesc (§2.0).
 			"ground_tint": Palette.color(Palette.CONCRETE).darkened(0.70),
-			"sky_top": Color(0.05, 0.05, 0.10),
-			"sky_horizon": Color(0.27, 0.24, 0.36),
-			"fog": Color(0.34, 0.31, 0.42),
-			"hill_color": Color(0.16, 0.16, 0.22),
+			# Cer de oras innorat: gradient albastru-gri INCHIS, nu violet
+			# saturat (runda 1 iesea mov de afis). Orizontul e putin mai
+			# deschis decat zenitul — orasul lumineaza norii de jos (§4) — iar
+			# ceata e in aceeasi familie, cu o idee de violet, nu mai mult.
+			"sky_top": Color(0.045, 0.05, 0.075),
+			"sky_horizon": Color(0.17, 0.18, 0.24),
+			"fog": Color(0.25, 0.25, 0.31),
+			"hill_color": Color(0.12, 0.13, 0.17),
+			# Fara disc de soare (luna e in ceata, nu se vede) si norii aproape
+			# stinsi: la 0.35 stratul de nori ADUNAT peste gradientul intunecat
+			# facea o pata alburie la zenit.
+			"sky_sun_disc": false,
+			"sky_cover_alpha": 0.08,
 			"sun_color": Color(0.78, 0.84, 1.0),
 			"sun_energy": 0.35,
 			"sun_rotation_deg": Vector3(-78, 200, 0),
 			"exposure": 1.0,
-			"ambient_color": Color.html("6E6A8E"),
+			"ambient_color": Color.html("66667A"),
 			"ambient_energy": 0.40,
 			"shadows": false,
 			"fog_depth": true,
@@ -1006,12 +1015,30 @@ static func themes() -> Dictionary:
 			# largul ICE_CRACK (aproape negru), ca pe Stromboli. Jialing verde /
 			# Yangtze brun (SAND_SHADOW) raman pentru un shader pe plan de apa,
 			# cand vine (brief §5 "plan de apa in doua culori"). Fara slot nou.
+			# APA DE NOAPTE (runda 2). Shaderul apei e unshaded, deci sloturile
+			# "inchise" iesisera tot o laguna de amiaza: turcoaz, spuma alba,
+			# glint de soare. Acum sloturile chiar sunt cele doua rauri (verde
+			# Jialing la mal, brun Yangtze in larg — dupa adancime, nu dupa
+			# loc) si trec printr-o "lumina" de 0.30; spuma si scanteierea sunt
+			# stinse, hula si treptele abia sugerate. Malul: pamant inchis.
 			"water": true,
-			"water_shallow_slot": Palette.SEA_DEEP,
-			"water_deep_slot": Palette.ICE_CRACK,
-			"seabed_drop": 20.0,
-			"shore_band_in": 10.0,
-			"shore_band_out": 24.0,
+			"water_shallow_slot": Palette.TROPICAL_GREEN,
+			"water_deep_slot": Palette.SAND_SHADOW,
+			"water_shore_slot": Palette.LOG_DARK,
+			"water_dim": 0.42,
+			"water_foam": 0.0,
+			"water_glint": 0.0,
+			"water_crest": 0.30,
+			"water_band": 0.25,
+			# UNDE e apa: NU "tot ce e in afara buclei" (seabed_drop) — asta
+			# ar fi facut o insula, iar Chongqing e o peninsula: golful si cele
+			# doua rauri stau pe sud si pe est (custom_lagoon, in Track12.tscn),
+			# spre nord si vest orasul continua pe dealuri. seabed_drop ramane
+			# 0 ca sa nu se sape si acolo.
+			"seabed_drop": 0.0,
+			# Mal de CHEI, nu plaja: apa incepe la cativa metri de contur.
+			"lagoon_band_in": 10.0,
+			"lagoon_band_out": 6.0,
 			"dust_color": Color(0.30, 0.30, 0.34),
 			"branch_tint": Color(0.62, 0.63, 0.66),
 			"branch_surface": "sand",
@@ -1511,6 +1538,14 @@ func _cornice_ravines() -> Array[int]:
 func _viaduct_ravines() -> Array[int]:
 	return []
 
+## PODELE de rapa: (indice in [method _ravines], cota ABSOLUTA y). Sapatura
+## nu coboara sub cota, deci o cornisa cu podea e o faleza cu un chei USCAT la
+## picior, iar apa incepe dincolo de el (laguna / rapa urmatoare). Fara podea,
+## adancimea se masoara de la drum, si un drum care coboara 30 m isi duce
+## rapa sub apa la capatul de jos. Vezi TrackSideSampler._floors.
+func _ravine_floors() -> Array[Vector2]:
+	return []
+
 ## PASAJE PE PILONI: intervale de tur (fractii, x..y, cu wrap peste 1.0) in care
 ## soseaua trece IN AER peste un alt tronson al aceleiasi piste — nodul rutier
 ## din Chongqing, sau orice „pista peste pista".
@@ -1931,13 +1966,17 @@ func rebuild() -> void:
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
-		_viaduct_ravines(), _overpass_ranges())
+		_viaduct_ravines(), _overpass_ranges(), _ravine_floors())
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",
 		TrackSideSampler.SHORE_BAND_IN))
 	_sampler.shore_out = float(theme_flag("shore_band_out",
 		TrackSideSampler.SHORE_BAND_OUT))
+	_sampler.lagoon_in = float(theme_flag("lagoon_band_in",
+		TrackSideSampler.LAGOON_BAND_IN))
+	_sampler.lagoon_out = float(theme_flag("lagoon_band_out",
+		TrackSideSampler.LAGOON_BAND_OUT))
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
@@ -2068,7 +2107,15 @@ func _build_environment() -> void:
 	var clouds := _tex("res://assets/textures/sky_cover.png")
 	if clouds != null:
 		sky_mat.sky_cover = clouds
-		sky_mat.sky_cover_modulate = Color(1.0, 0.97, 0.92, 0.35)
+		# Alfa din tema: noaptea norii nu sunt luminati de nimic, iar la 0.35
+		# stratul ADUNAT peste un gradient intunecat iesea o pata alburie.
+		sky_mat.sky_cover_modulate = Color(1.0, 0.97, 0.92,
+			float(theme_flag("sky_cover_alpha", 0.35)))
+	# Discul soarelui + haloul lui (sun_angle_max, 30 grade implicit) se
+	# deseneaza din DirectionalLight. Pe o tema de noapte cu "luna" aproape
+	# verticala iesea o pata luminoasa la zenit, in cadru la fiecare urcare.
+	if not bool(theme_flag("sky_sun_disc", true)):
+		sky_mat.sun_angle_max = 0.0
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 	var env := Environment.new()
@@ -3246,14 +3293,18 @@ const WATER_GAIN: float = 0.87
 ## (-7, +21, +22) la (+21, +22, +24) — adica exact ce nu voiam.
 ## adjustment_saturation lucreaza in jurul luminantei, deci si compensarea
 ## trebuie sa faca la fel.
-func water_tint(slot: int) -> Color:
+func water_tint(slot: int, gain: float = 1.0) -> Color:
 	var c := Palette.color(slot)
 	var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
 	var k := 1.0 / WATER_SATURATION_FIX
+	# `gain` se aplica in sRGB, INAINTE de conversie: e „cata lumina cade pe
+	# apa" pe o tema de noapte (water_dim), si trebuie sa citeasca perceptual.
+	# Un darkened() dupa conversie (in liniar) la 0.3 iesea 58% luminozitate
+	# pe ecran — apa de amiaza cu putin fum, nu rau de noapte (masurat r2).
 	return Color(
-		(lum + (c.r - lum) * k) * WATER_GAIN,
-		(lum + (c.g - lum) * k) * WATER_GAIN,
-		(lum + (c.b - lum) * k) * WATER_GAIN).srgb_to_linear()
+		(lum + (c.r - lum) * k) * WATER_GAIN * gain,
+		(lum + (c.g - lum) * k) * WATER_GAIN * gain,
+		(lum + (c.b - lum) * k) * WATER_GAIN * gain).srgb_to_linear()
 
 
 ## Culoarea unui varf dupa cata apa are sub el.
@@ -3270,14 +3321,18 @@ func _sea_color(d: float) -> Color:
 	# alegere buna; pe un parau de munte, insa, aceleasi doua culori dadeau o
 	# lagunca turcoaz intre brazi — se vede in snapshots/alpii.png de la prima
 	# randare. Apa rece nu e apa calda cu alt cer deasupra.
-	var reef := water_tint(theme_flag("water_shallow_slot", Palette.REEF_SHALLOW))
-	var deep := water_tint(theme_flag("water_deep_slot", Palette.SEA_DEEP))
+	# Aceeasi "lumina" de tema ca in _water_material (water_dim).
+	var dim := clampf(float(theme_flag("water_dim", 1.0)), 0.0, 1.0)
+	var reef := water_tint(theme_flag("water_shallow_slot",
+		Palette.REEF_SHALLOW), dim)
+	var deep := water_tint(theme_flag("water_deep_slot",
+		Palette.SEA_DEEP), dim)
 	# Spuma NU e alb curat, ci alb spart cu recif.
 	#
 	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
-	var foam := water_tint(Palette.FOAM_WHITE).lerp(reef, 0.35)
+	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(reef, 0.35)
 	var c: Color
 	if d <= 0.0:
 		c = foam # varf uscat al unei celule de mal
@@ -3368,20 +3423,33 @@ func _water_material() -> ShaderMaterial:
 	# de stins pe rand la profilarea pe device (M4).
 	# Aceleasi sloturi ca in _sea_color, din acelasi motiv: doua surse de
 	# adevar pentru culoarea apei s-ar desincroniza la prima tema noua.
-	var shallow := water_tint(theme_flag("water_shallow_slot", Palette.REEF_SHALLOW))
-	var deep := water_tint(theme_flag("water_deep_slot", Palette.SEA_DEEP))
+	# Shaderul e UNSHADED (contractul #2): apa nu vede nici soarele, nici
+	# ambientul, deci pe o tema de noapte ramane apa de amiaza daca nu i se
+	# spune. `water_dim` e lumina pe care ar fi primit-o — se aplica pe toate
+	# culorile, o data, aici si in _sea_color.
+	var dim := clampf(float(theme_flag("water_dim", 1.0)), 0.0, 1.0)
+	var shallow := water_tint(theme_flag("water_shallow_slot",
+		Palette.REEF_SHALLOW), dim)
+	var deep := water_tint(theme_flag("water_deep_slot",
+		Palette.SEA_DEEP), dim)
 	# Nisipul ud de la linia apei: nisipul de coral, intunecat putin — apa
-	# uda nisipul inainte sa-l acopere.
-	var shore := water_tint(Palette.CORAL_SAND).darkened(0.12)
-	var foam := water_tint(Palette.FOAM_WHITE).lerp(shallow, 0.35)
+	# uda nisipul inainte sa-l acopere. Slot de tema: un rau de noapte n-are
+	# plaja crem la mal.
+	var shore := water_tint(theme_flag("water_shore_slot",
+		Palette.CORAL_SAND), dim).darkened(0.12)
+	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(shallow, 0.35)
 	_water_mat.set_shader_parameter("ramp_strength", 1.0)
 	_water_mat.set_shader_parameter("shore_col", Vector3(shore.r, shore.g, shore.b))
 	_water_mat.set_shader_parameter("shallow_col",
 		Vector3(shallow.r, shallow.g, shallow.b))
 	_water_mat.set_shader_parameter("deep_col", Vector3(deep.r, deep.g, deep.b))
-	_water_mat.set_shader_parameter("foam_strength", 0.75)
+	# Spuma, scanteierea si hula sunt chei de tema (implicitele = Okinawa):
+	# un rau noroios sub burnita n-are nici spuma alba, nici soare de reflectat.
+	_water_mat.set_shader_parameter("foam_strength",
+		float(theme_flag("water_foam", 0.75)))
 	_water_mat.set_shader_parameter("foam_col", Vector3(foam.r, foam.g, foam.b))
-	_water_mat.set_shader_parameter("glint_strength", 0.55)
+	_water_mat.set_shader_parameter("glint_strength",
+		float(theme_flag("water_glint", 0.55)))
 	# SPRE soare: inversul directiei in care bat razele. Din aceeasi rotatie
 	# ca lumina reala (theme "sun_rotation_deg"), ca scanteierea sa cada corect
 	# si pe pistele care isi coboara soarele.
@@ -3397,10 +3465,12 @@ func _water_material() -> ShaderMaterial:
 	# Directia hulei NU e aleatoare si nici legata de pista: bate dinspre soare,
 	# adica dinspre partea din care si scanteierea vine. Doua directii diferite
 	# ar fi dat o mare care sclipeste intr-o parte si curge in alta.
-	_water_mat.set_shader_parameter("crest_strength", 0.85)
+	_water_mat.set_shader_parameter("crest_strength",
+		float(theme_flag("water_crest", 0.85)))
 	_water_mat.set_shader_parameter("crest_dir",
 		Vector2(to_sun.x, to_sun.z).normalized())
-	_water_mat.set_shader_parameter("band_strength", 0.60)
+	_water_mat.set_shader_parameter("band_strength",
+		float(theme_flag("water_band", 0.60)))
 	# Varful anvelopei de valuri, in adancime normalizata. Din constantele de
 	# aici, nu scris de mana in shader: reciful e o cota de gameplay, iar doua
 	# copii ale ei s-ar desincroniza tacut la prima retusare a lagunei.
@@ -4005,9 +4075,10 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 					+ "(prag %.0f) — deseneaza capatul LANGA drum, altfel "
 					+ "punctul de racord e ales arbitrar")
 					% [lbl, String(pair[2]), d, BRANCH_END_NEAR_M])
-	var pts: Array[Vector3] = [baked[i_entry]]
+	var elevated := bool(spec.get("elevated", false))
+	var pts: Array[Vector3] = [_branch_end(i_entry, mid[0], elevated)]
 	pts.append_array(mid)
-	pts.append(baked[i_exit])
+	pts.append(_branch_end(i_exit, mid[mid.size() - 1], elevated))
 	var route := TrackRoute.from_points(pts, false, curve.bake_interval)
 	route.half_width = float(spec.get("half_width", half_width))
 	route.entry_frac = frac_at(i_entry)
@@ -4024,10 +4095,31 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.bumpiness = float(spec.get("bumpiness", route.bumpiness))
 	route.speed_factor = clampf(float(spec.get("speed_factor", 1.0)), 0.3, 1.0)
 	route.tufts = bool(spec.get("tufts", true))
-	route.elevated = bool(spec.get("elevated", false))
+	route.elevated = elevated
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
 	return route
+
+## Capatul unei benzi pe bucla principala: AXA soselei, sau — pentru o banda
+## `elevated` — MARGINEA ei, pe partea din care vine banda.
+##
+## O banda de la sol se termina in axa si nu deranjeaza: e o panglica plata,
+## la cota terenului, iar peste asfalt sta sub el. O banda in aer (platforma
+## telecabinei) isi tine insa cota proprie, deci bucata dintre margine si axa
+## iese PESTE asfalt: un prag de 0.3-0.5 m pe carosabil, adica un zid pentru
+## roata (masurat pe Chongqing: 4 repuneri intr-o cursa, toate la intrare) si
+## un triunghi de banda vizibil peste tablier la sosire. Racordata la
+## margine, banda nu mai calca deloc pe asfalt.
+func _branch_end(i: int, toward: Vector3, elevated: bool) -> Vector3:
+	var b := baked[i]
+	if not elevated:
+		return b
+	var side := _side_at(i)
+	var sgn := signf(Vector2(side.x, side.z).dot(
+		Vector2(toward.x - b.x, toward.z - b.z)))
+	if sgn == 0.0:
+		return b
+	return b + side * (sgn * width_at_index(i))
 
 ## Cat de departe de sosea poate sta un capat DESENAT de scurtatura inainte sa
 ## primeasca avertisment.

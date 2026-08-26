@@ -162,11 +162,16 @@ func _check_route(track: Track, ri: int) -> int:
 		# Scurtatura: capetele trebuie sa cada FIX pe sosea, altfel racordul e o
 		# treapta in aer. Si trebuie sa fie mai scurta decat portiunea ocolita,
 		# altfel n-are niciun rost.
+		# O banda `elevated` se racordeaza la MARGINEA soselei, nu la axa
+		# (Track._branch_end): acolo distanta corecta e fata de margine.
 		var main := track.routes[0]
-		var d_in := main.lateral_distance(
-			main.closest_index_global(r.baked[0]), r.baked[0])
-		var d_out := main.lateral_distance(
-			main.closest_index_global(r.baked[n - 1]), r.baked[n - 1])
+		var i_in := main.closest_index_global(r.baked[0])
+		var i_out := main.closest_index_global(r.baked[n - 1])
+		var d_in := main.lateral_distance(i_in, r.baked[0])
+		var d_out := main.lateral_distance(i_out, r.baked[n - 1])
+		if r.elevated:
+			d_in = absf(d_in - track.width_at_index(i_in))
+			d_out = absf(d_out - track.width_at_index(i_out))
 		var span := r.exit_frac - r.entry_frac
 		if span < 0.0:
 			span += 1.0

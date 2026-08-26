@@ -101,6 +101,17 @@ extends Track
 ## din kit se pun sub el (Baikal, viaductul Circum-Baikal). Se combina cu
 ## `custom_cornice_ravines` (cazi de pe margine). Vezi Track._viaduct_ravines.
 @export var custom_viaduct_ravines: Array[int] = []
+## PODELE de rapa: (indice in `custom_ravines`, cota ABSOLUTA y). Sapatura nu
+## coboara sub cota — o cornisa cu podea e o faleza cu un chei uscat la picior
+## (Chongqing D: Hongya Dong sta pe el, apa incepe dincolo). Vezi
+## Track._ravine_floors.
+@export var custom_ravine_floors: Array[Vector2] = []
+## APA declarata, ca poligon in plan XZ (coordonate de lume): se sapa la
+## `lagoon_depth` sub media soselei, cu mal lin (TrackSideSampler.LAGOON_*).
+## E singurul fel de a pune apa DOAR pe o parte a lumii: `seabed_drop` inunda
+## tot exteriorul buclei (insula), iar un oras la confluenta are apa pe doua
+## laturi si dealuri pe celelalte. Gol = fara. Vezi Track._lagoon_points.
+@export var custom_lagoon: Array[Vector2] = []
 ## PASAJE PE PILONI: intervale de tur (fractii x..y) in care soseaua trece in
 ## aer PESTE un alt tronson al aceleiasi piste. Terenul nu urca dupa tablier,
 ## tablierul primeste fusta + parapet, pilonii vin din DecorManual. Vezi
@@ -202,6 +213,14 @@ func _cornice_ravines() -> Array[int]:
 
 func _viaduct_ravines() -> Array[int]:
 	return custom_viaduct_ravines
+
+func _ravine_floors() -> Array[Vector2]:
+	return custom_ravine_floors
+
+func _lagoon_points() -> Array[Vector2]:
+	if custom_lagoon.is_empty():
+		return super()
+	return custom_lagoon
 
 func _overpass_ranges() -> Array[Vector2]:
 	return custom_overpass_ranges

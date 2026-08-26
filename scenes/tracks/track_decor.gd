@@ -821,6 +821,71 @@ const STROMBOLI_CLASSES := {
 	# etajului de jos. `Olive_Trunk_` prinde ambele variante A/B.
 	"Olive_Trunk_": Palette.TRI_PREFIX + "bark",
 	"Fig_Trunk": Palette.TRI_PREFIX + "bark",
+	# --- Frunzisul: `macchia` ---------------------------------------------
+	#
+	# Pana in august 2026 TOT frunzisul pistei statea pe atlas, adica pe o
+	# singura culoare plata per slot. Masurat cu o sonda pe GLB-uri: din cele
+	# 9 piese de planta/arbore, doar cele 3 TRUNCHIURI de mai sus aveau clasa;
+	# coroanele, tufele, paletele de prickly pear si trestia — niciuna. Pe
+	# captura de sofer se vedea imediat: tufa de ginestra iesea un BLOB GALBEN
+	# uniform langa un teren cu textura fotografica.
+	#
+	# NU era o problema de masca de detaliu (capcana din memoria „slot
+	# reutilizat": slotul 22 al varului chiar are 0.20). Sloturile de
+	# vegetatie, 13 si 21, au 0.45 — deci primeau detaliu, doar ca detaliul
+	# ala e granulatia de ROCA a atlasului, care pe o tufa citeste praf, nu
+	# frunze. Ce lipsea era o textura care sa arate a frunzis, adica o clasa.
+	#
+	# Regula „o clasa triplanara sterge sloturile" se aplica si aici, deci
+	# decizia se ia pe ARIE, nu pe numarul de sloturi maturate — acelasi
+	# criteriu care a mutat casele pe `plaster` (masurat cu o sonda pe
+	# triunghiuri, vezi nota lor de mai sus):
+	#
+	#   Cane_Clump      slot 21 = 100%
+	#   Caper_Bush      slot 13 = 100%
+	#   Fig_Canopy      slot 21 = 100%
+	#   Olive_Canopy_A  slot 13 = 100%      (la fel B)
+	#   Ginestra_A      slot 21 =  87%, slot 13 = 13%    (la fel B: 86/14)
+	#   Prickly_A       slot 21 =  98%, slot 23 =  2%
+	#   Prickly_B       slot 21 =  91%, slot 23 =  9%
+	#   Vine_Row        slot 21 =  55%, slot  9 = 45%
+	#
+	# Primele patru sunt monocrome: clasa n-are ce sterge — dar „monocrom" nu
+	# inseamna „verde": `Caper_Bush` sta integral pe slotul 13
+	# (DRY_VEGETATION, #AF9F4E), adica GALBEN-OLIV. Tufele galbene de pe
+	# captura de sofer erau ea, nu ginestra; merita spus, fiindca prima citire
+	# a capturii le-a confundat si era cat pe ce sa scoata din lista exact
+	# planta care avea cea mai mare nevoie de textura.
+	#
+	# Prickly pear si ginestra intra si ele: 87-98% din arie e frunzis, iar
+	# restul (fructul, respectiv floarea) se pierde in dala. E acelasi schimb
+	# ca la case — nu tii 90% din suprafata plata ca sa protejezi 10% de
+	# accent. Daca floarea ginestrei ajunge sa conteze, solutia nu e sa lasi
+	# tufa plata, e s-o rupi pe un nod propriu (vezi `_split_shutters`).
+	#
+	# VINE_ROW nu intra, si e singura piesa unde masuratoarea chiar spune „nu":
+	# 55/45 nu e un accent pe un fond, sunt DOUA materiale pe acelasi corp
+	# (frunza si aracii de lemn). O clasa pusa pe tot ar imbraca lemnul in
+	# frunze. Lemnul ei primeste in schimb `wood`, exact ca trunchiurile de
+	# mai sus — dar asta cere piese NUMITE in GLB (azi e un singur mesh
+	# `Vine_Row`), deci e o schimbare de asset, nu de mapare. Ramane pe atlas
+	# pana atunci.
+	# `Cane_Clump` NU e aici, desi trestia de pe Stromboli ar merita clasa la
+	# fel ca restul: numele se cioneste cu `Cane_Clump_A/B/C` din
+	# `props/sugar_cane.glb` (lanul Okinawei), iar maparea asta e GLOBALA si
+	# potrivirea e pe PREFIX — trestia de zahar ar fi luat frunzis mediteranean
+	# si Track08 un material in plus. Sta in `WorldProp.CLASSES_BY_MODEL`,
+	# care se cheie pe fisier. Aceeasi capcana ca la `Church_Body`.
+	# Doua tente pe ACEEASI dala, dupa slotul pe care statea piesa — altfel
+	# clasa ar fi sters distinctia pe care paleta o facea deja: verdele
+	# suculent (slot 21) si tufa arsa de soare (slot 13). Costa zero
+	# triunghiuri si un material, si e chiar ce spune un flanc mediteranean
+	# despre cat de uscata e panta.
+	"Fig_Canopy": Palette.TRI_PREFIX + "macchia",           # slot 21
+	"Prickly_": Palette.TRI_PREFIX + "macchia",             # slot 21, ambele
+	"Ginestra_": Palette.TRI_PREFIX + "macchia",            # 87% slot 21
+	"Olive_Canopy_": Palette.TRI_PREFIX + "macchia_dry",    # slot 13, ambele
+	"Caper_Bush": Palette.TRI_PREFIX + "macchia_dry",       # slot 13
 	# --- Lemnaria: `wood` -------------------------------------------------
 	#
 	# Bena tricicletei si bustenii de rulare ai barcii mici (slot 9). Corpurile
@@ -1142,7 +1207,7 @@ const SCATTER_STROMBOLI: Array[Dictionary] = [
 		"collide": "none", "satellite": true},
 	{"glb": "stromboli/plants/cane_clump", "node": "Cane_Clump",
 		"bands": ["mid", "back"], "weight": 0.9, "scale": [0.8, 1.25],
-		"collide": "none", "sway": true},
+		"collide": "none", "sway": true, "class": "macchia"},
 	# --- roca: bazalt spart jos, scorie sus ------------------------------------
 	{"glb": "stromboli/rocks/basalt_boulder", "node": "Basalt_C",
 		"bands": ["hug", "mid"], "weight": 3.0, "scale": [0.7, 1.3],
@@ -1197,8 +1262,15 @@ const SCATTER_BAIKAL: Array[Dictionary] = [
 ## Satelitii aleg doar dintre intrarile cu `satellite: true` de pe banda lor;
 ## daca banda n-are niciuna (padurea departata e numai copaci), iau din TOATE
 ## intrarile-satelit — un bolovan langa un pin e mai bine decat nimic.
+## `classes`: maparea nume-de-piesa -> clasa de material, a TEMEI care cheama.
+## Parametru si nu constanta fiindca functia e comuna (Baikal si Stromboli):
+## pana in august 2026 aici era scris `BAIKAL_CLASSES`, deci prop-urile
+## imprastiate ale Strombolilui erau masurate cu maparea altei piste si nu
+## primeau NICIODATA o clasa — de-aia tot frunzisul iesea plat, chiar dupa ce
+## piesele fusesera mapate in STROMBOLI_CLASSES.
 static func _place_from_set(parent: Node3D, set: Array, band_name: String,
-		pos: Vector3, rng: RandomNumberGenerator, satellite: bool) -> bool:
+		pos: Vector3, rng: RandomNumberGenerator, satellite: bool,
+		classes: Dictionary = BAIKAL_CLASSES) -> bool:
 	var picks: Array = []
 	for e: Dictionary in set:
 		if not (e.get("bands", []) as Array).has(band_name):
@@ -1262,14 +1334,31 @@ static func _place_from_set(parent: Node3D, set: Array, band_name: String,
 	parent.add_child(holder)
 	holder.position = pos - Vector3.UP * float(entry.get("sink", 0.10))
 	holder.rotation.y = rng.randf_range(0.0, TAU)
+	# `class`: clasa pusa pe TOATA instanta, cand numele piesei nu poate intra
+	# in maparea globala. Cazul de azi e `Cane_Clump` (trestia Strombolilui):
+	# numele e PREFIX pentru `Cane_Clump_A/B/C` din `sugar_cane_clump.glb`,
+	# lanul manual al Okinawei, care trece prin `prop_classes()` — o intrare
+	# globala ar fi imbracat si trestia de zahar in macchia. Aici clasa e
+	# legata de INTRAREA din set, deci de pista, nu de nume.
+	var forced := String(entry.get("class", ""))
 	if bool(entry.get("sway", false)):
-		Palette.apply_foliage_material(model)
+		# Frunzisul care se leagana: dubla-fata (foile de 0 grosime dispar pe
+		# jumatate altfel) SI pe clasa, daca piesa e mapata. Pana in august
+		# 2026 aici era doar `apply_foliage_material`, care pune materialul
+		# atlasului si deci STERGEA orice clasa — tufele ieseau blob-uri de o
+		# singura culoare oricat de bine ar fi fost mapate.
+		if forced.is_empty():
+			Palette.apply_foliage_class_materials(model, classes)
+		else:
+			Palette.apply_foliage_class_material(model, forced)
 		model.set_meta(TrackDecorBatch.SWAY_META, true)
+	elif not forced.is_empty():
+		Palette.apply_triplanar_class(model, forced)
 	else:
 		# Prin mapare, nu direct pe atlas: bolovanii cu licheni si coroanele
 		# pinilor isi iau clasa pictata, restul cade oricum pe materialul
 		# lumii (apply_class_materials face exact asta pentru nemapate).
-		Palette.apply_class_materials(model, BAIKAL_CLASSES)
+		Palette.apply_class_materials(model, classes)
 	return true
 
 
@@ -1288,7 +1377,7 @@ static func _place_stromboli_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
 		satellite: bool) -> void:
 	if _place_from_set(parent, SCATTER_STROMBOLI, String(band["name"]),
-			spec.position, rng, satellite):
+			spec.position, rng, satellite, STROMBOLI_CLASSES):
 		return
 	_add_scatter(parent, spec.position, rng, mat)
 

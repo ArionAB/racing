@@ -242,6 +242,20 @@ static func classes() -> Dictionary:
 		"pine_needles": {"src": "pine_needles_src.png",
 			"anchor": Palette.color(Palette.CACTUS_GREEN), "gain": 1.20,
 			"lift": 0.10},
+		# Frunzisul mediteranean: tufele si coroanele de pe Stromboli. A doua
+		# clasa PICTATA, din acelasi motiv ca acele (o fotografie de tufa are
+		# adancime si citeste tapet pe un volum neted) — sursa vine din
+		# tools/paint_macchia.py. Masurat pe sursa: medie 83.4 (ratie 0.86
+		# fata de TROPICAL_GREEN, 97.3 — deliberat aceeasi ratie ca la brazi),
+		# in-dala 27.0, dezechilibru 0.4%/2.2%.
+		#
+		# `gain` si `lift` copiaza reteta acelor, si din acelasi motiv: piesele
+		# primesc in joc AO copt plus gradient de baza, deci vertex color-ul le
+		# inchide oricum. Fara ridicare, tufele ies uniform intunecate si
+		# pierd exact varfurile luminate care separa o tufa de urmatoarea.
+		"macchia": {"src": "macchia_src.png",
+			"anchor": Palette.color(Palette.TROPICAL_GREEN), "gain": 1.20,
+			"lift": 0.10},
 	}
 	# NU exista clasa "chalet_wood", si e o decizie, nu o omisiune.
 	#

@@ -320,6 +320,138 @@ de deasupra.
   nu mai are slot nou — sau paleta trece la 64 (decizie separată, cu
   regenerarea atlasului).
 
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready
+
+> Create a stylized low-poly **tabletop diorama** of a toy-car racing track
+> in **Chongqing, China, at blue hour on a drizzly night** — the "mountain
+> city" where roads, bridges and a monorail stack on top of each other above
+> two rivers.
+>
+> **STYLE (strict):** faceted, flat-shaded low-poly meshes like a Blender
+> viewport render — **no fine surface texture, no painterly brushwork, no
+> photorealism, NOT cyberpunk**. Chunky toy proportions: cars are stubby and
+> ~1.3× wider than real cars; buildings are simplified into big planes with
+> a grid of lit windows. Soft baked ambient occlusion in the crevices, muted
+> concrete and blue-grey environment colors (~40% saturation), with only
+> three saturated accents: the **warm gold light of the stilt-house complex**,
+> **red lanterns and signs**, and the toy cars. One rare pink neon sign, no
+> more. Lighting: a dim cool moon through mist from above (almost no visible
+> shadows) plus warm light coming UP from the city's windows and street
+> lamps; wet asphalt reflects the lights as soft streaks. Thin grey-violet
+> mist fills the lower valley. Sky is a plain dark blue-grey gradient, no
+> stars. Show the diorama on a thin dark rounded-rectangle table base, from
+> a raised 3/4 view.
+>
+> **THE CITY [!]:** the whole diorama is a **steep rocky peninsula falling
+> ~65 m from a plateau on top to two rivers below**. Everything impressive
+> is BELOW the road, never beside it: the track runs on the plateau, on
+> cliff cornices and on elevated ramps, and the city hangs *underneath* it.
+> The two rivers meet in a bay at the bottom and are **two clearly different
+> colors** (one murky green, one muddy brown) with a visible line where they
+> merge. Across the bay, a row of tall apartment towers stands as dark
+> silhouettes with lit windows, fading into the mist — they are background
+> only. Near the track, buildings are never taller than 4 storeys.
+>
+> **THE ROUTE — a single closed loop of about 2 km, clockwise, the bay
+> always on the right [!]:**
+> 1. **Start/finish on the plateau square (top):** wet dark granite paving,
+>    a small pagoda-roofed pavilion, benches, lamp posts hung with red
+>    lanterns; the far edge of the square is a railing over a sheer drop —
+>    a 22-storey block is built into the cliff BELOW the square. At the
+>    exit, a **traffic jam** of tiny cars and two buses blocks the boulevard
+>    with a single narrow gap between the buses.
+> 2. **The stair descent [!]:** the road drops in an S beside a **giant
+>    stone stairway** (hundreds of wide steps) lined with old shuttered
+>    shops, laundry on wires, and tiny porters carrying bamboo poles. A
+>    small ramp lets a car **jump diagonally OVER the stairway**, cutting a
+>    whole S of the road.
+> 3. **The hotpot alley:** a tight corridor between restaurants — red
+>    lanterns, tables and stools on the pavement, a parked scooter, steam
+>    blowing from kitchen vents across the road.
+> 4. **The cliff cornice above the stilt-house complex [!] — the biggest
+>    feature:** the road comes out onto a cliff-edge cornice with no railing
+>    on the right; directly below it, hanging off the cliff face, an
+>    **11-storey stack of traditional timber stilt houses with curved dark
+>    tiled roofs, every floor glowing warm gold** (Hongya Dong style), and
+>    below that the quay and the two-color river confluence. The road
+>    descends along the cornice in a long S.
+> 5. **The riverside quay (bottom):** a long fast straight at water level —
+>    a concrete quay, stacked containers, a lit cargo ship passing under a
+>    bridge and sending a wave over the low quay road; the lower station of
+>    an **aerial cable car** whose cabin crosses the bay on a cable. Then a
+>    short **fog bank** (only tail-lights, signs and road markings visible)
+>    from which the road bursts out onto a **long bridge over the bay**.
+> 6. **The spiral interchange [!] — the race gimmick:** on the far side the
+>    road climbs back up 45 m on a **stacked concrete interchange on tall
+>    pillars**: three levels of curved ramps spiraling over each other, the
+>    road literally passing OVER itself twice, concrete parapets on both
+>    sides. On the middle level a short ramp launches cars over the lower
+>    ramp onto the upper one. On the top level a **12 m section of roadway
+>    is rotating on a pivot, half-open, with construction-site lights**, and
+>    a **tower crane swings a prefab concrete slab across the ramp**. The
+>    city, quay and gold stilt houses are visible below the ramps.
+> 7. **The apartment block with the monorail [!]:** the road enters a
+>    residential block through its ground-level hall (pillars, mailboxes,
+>    bicycles) and a **monorail train runs straight through the building**,
+>    crossing the road at grade behind a striped barrier with flashing
+>    lights; the road exits onto a footbridge back to the plateau square.
+>
+> **Details that matter:** the road is dark wet asphalt with reflections,
+> white lane markings, red-and-white curbs only on the interchange ramps
+> and the cornice corners; the road on the interchange must visibly stack —
+> a car on the lower ramp under a car on the upper ramp; the stilt-house
+> complex is the ONLY strong gold and sits BELOW the road; the two rivers
+> are the lowest thing in the diorama and clearly two colors; the elevation
+> must read — plateau at the top, quay at the bottom, one continuous
+> descent (stairs, alley, cornice) and one continuous climb (interchange,
+> block).
+>
+> Background: dark tower silhouettes with lit windows across the bay, a
+> second bridge as a faint silhouette, mist rising from the water.
+>
+> Toy cars: 4–6 chunky low-poly racing cars in saturated red, blue, yellow,
+> white — one jumping the stairway, one drifting on the cornice with the
+> gold houses below, two stacked on different levels of the interchange,
+> one waiting at the monorail barrier as the train passes.
+>
+> **PROP INVENTORY [!] — every item below must appear at least once, in its
+> zone (this is the track's full asset list):**
+> - *plateau square:* the pagoda pavilion, granite paving, benches, lamp
+>   posts with red lanterns, the cliff railing, the traffic jam with two
+>   buses and tiny cars.
+> - *stair descent:* the giant stone stairway, old shophouses with shutters,
+>   laundry lines, porters with bamboo poles, the jump ramp.
+> - *hotpot alley:* restaurant fronts with red signs, tables and stools,
+>   steam vents, a parked scooter, hanging lanterns.
+> - *cornice:* the 11-storey gold-lit stilt-house complex under the road,
+>   curved tiled roofs, cliff face, red-and-white chevron posts, one short
+>   railing on the outside of one corner only.
+> - *quay:* concrete quay edge with bollards, stacked containers, the lit
+>   cargo ship, the cable-car lower station and a cabin on its cable, the
+>   fog bank, the long bay bridge.
+> - *interchange:* concrete ramps on tall round pillars, parapets, the
+>   rotating road section with construction lights, the tower crane with a
+>   hanging slab, the small launch ramp, construction barriers.
+> - *apartment block:* the block with the monorail passing through it, the
+>   3-car monorail train with headlights, the striped barrier with flashing
+>   lights, hall pillars, mailboxes, bicycles, the footbridge.
+> - *background:* tower silhouettes with lit windows, the second bridge,
+>   the two-color river confluence.
+>
+> Colors: wet concrete #7C838C, dark blue-grey shadow #2E3A4A, wet asphalt
+> #2A2D33, **stilt-house gold #F2A840 (emissive)**, lantern red #C8322B,
+> window warm #FFD79A, green river #4F7A5A, brown river #7A6142, mist
+> #8A8FA3, **one pink neon #FF3FA4**, tiled roof #3F3A3A.
+>
+> Deliver: (a) one wide 3/4 overview of the entire diorama with the loop
+> clearly readable — plateau on top, quay at the bottom, the stacked
+> interchange on the far side; (b) one driver's-eye shot ON THE CORNICE —
+> the gold stilt houses directly below on the right, the two-color rivers
+> further down, tower silhouettes in the mist; (c) one shot from the quay
+> looking up at the interchange: three stacked ramps with cars on different
+> levels, the rotating section and the crane at the top, the cable car
+> crossing the bay in the foreground.
+
 ## Istoric
 
 - **v0.1 (26 aug 2026):** concept extern integrat — regula 70/15/10/5,

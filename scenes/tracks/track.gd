@@ -1085,19 +1085,59 @@ static func themes() -> Dictionary:
 			# pastoasa, fiindca trecea din maro-inchis in verde pe 8 m.
 			"water_deep_gain": 0.72,
 			"water_shore_gain": 0.62,
-			"water_desat": 0.84,
+			# RUNDA 9: la 0.84 verdele iesea pe ecran la saturatie 0.13, sub
+			# banda 0.18-0.28 masurata in diorama (verde 0.217). 0.76 il aduce
+			# la ~0.19 fara sa-l scoata din familia de gri-verde.
+			"water_desat": 0.79,
 			# Tenta de oras trasa spre rece: cu (0.85,0.89,0.87) verdele iesea
 			# la nuanta 123 (sub tinta 130-155). Cu asta: verde 142, brun 26.
-			"water_mul": Color(0.835, 0.915, 0.925),
+			# RUNDA 9: cu (0.835, 0.915, 0.925) verdele masura 120 pe ecran, iar
+			# in diorama e 148-152 — prea albastru, adica apa de piscina, nu de
+			# rau. Albastrul coboara si rosul urca putin: nuanta se muta spre
+			# verde-galbui fara sa ridice saturatia.
+			"water_mul": Color(0.795, 0.900, 0.925),
 			# Tenta raului brun. Vezi water_tint: cu tenta verde de mai sus
 			# (albastru urcat, rosu coborat) Yangtze-ul iesea la saturatie 0.10 —
 			# ocru-gri, adica nisip ud vazut de pe pod, nu apa. Cu asta: 0.35 la
 			# nuanta 24, langa 0.37/29 masurate pe bratul auriu al dioramei.
-			"water_b_mul": Color(0.98, 1.00, 0.88),
+			# RUNDA 9: cu (1.00, 0.98, 0.93) brunul iesea la saturatie 0.21 in
+			# albedo, dar pe ECRAN, sub aurul reflexiilor, se masura 0.26-0.55
+			# — culoare de pamant arat. Tenta se raceste pana aproape de
+			# neutru: raul e NAMOL, iar namolul e gri-maroniu, nu ocru. Ce ii
+			# tine nuanta calda e tot slotul (RUST_METAL), doar mai putin.
+			"water_b_mul": Color(0.95, 0.93, 0.91),
 			# Vezi water_tint: desaturarea verdelui (0.84) transforma brunul in
 			# noroi. Diorama masurata: verde sat 0.18, brun sat 0.42.
-			"water_b_desat": 0.64,
-			"water_b_gain": 1.05,
+			# RUNDA 9: tinta masurata pe corpul apei e saturatie 0.18-0.28.
+			# 0.86 lasa albedo-ul la 0.21, dar peste el se aduna aurul, care
+			# urca mediana. Se coboara la 0.90 ca SUMA sa cada in banda.
+			"water_b_desat": 0.91,
+			# RUNDA 8. Cifra care a picat runda 7: brunul era cea mai DESCHISA
+			# suprafata mare dintr-un cadru de noapte — luminanta 45-63 langa o
+			# stanca de 47.7 (raport 0.97-1.08), la saturatie 0.52. Ocru viu,
+			# uniform, mai deschis decat piatra: pamant, nu apa. In diorama
+			# raportul apa/uscat pe bratul auriu e 1.21 fata de TERASA
+			# LUMINATA, dar bratul ala e luminos din REFLEXII (2% din pixeli
+			# peste 150), nu din vopsea. Deci albedo-ul coboara aici, iar
+			# lumina se intoarce prin "water_b_glint" de mai jos.
+			# RUNDA 9: 1.05 lasa brunul la aceeasi luminanta cu verdele (48 vs
+			# 48, masurat). In diorama bratul auriu e mai DESCHIS decat cel
+			# verde (76 fata de 52), dar din reflexii, nu din vopsea — deci
+			# albedo-ul coboara si diferenta o face `water_b_glint`.
+			"water_b_gain": 0.82,
+			# CAT de aprins e Yangtze fata de Jialing. Vezi nota v6 din shader:
+			# in diorama bratul auriu are de cinci ori mai multi pixeli aprinsi
+			# decat cel verde (11.8% fata de 2.4% peste luminanta 90). La noi
+			# era pe dos: brunul avea p99 = 92-96 si maximul 143, adica nicio
+			# scanteie, pe cand verdele urca la 128.
+			# RUNDA 9. Masurat pe captura rundei 8, apa din stanga podului:
+			# 25% din pixeli peste luminanta 90 si ecart p10-p90 = 107, adica
+			# de patru ori cat are diorama (11.4% si 28). Nu e "prea multa
+			# lumina", e prea multa SUPRAFATA aprinsa deodata — vezi
+			# `facet_gate` in shader. Castigul coboara putin fiindca poarta
+			# lasa acum mai putine placi, dar cele care trec raman aprinse.
+			"water_b_glint": 1.7,
+			"water_b_glint_cut": 0.64,
 			# Cat de INCHISA e apa fata de mal. Nu "inchisa" in absolut: pragul
 			# e un RAPORT, apa <= 0.65 x uscatul din ACELASI cadru, fiindca de
 			# aia citea runda 4 miriste — 42 langa 41, adica aceeasi valoare, si
@@ -1105,7 +1145,15 @@ static func themes() -> Dictionary:
 			# faleza 51, terasa/cheiul 38. La 0.50 apa iesea 29.6, deci 0.58
 			# fata de faleza dar 0.77 fata de chei; la 0.40 iese 24-25, adica
 			# sub prag fata de amandoua.
-			"water_dim": 0.62,
+			# RUNDA 9. Regula "apa <= 0.65 x uscatul" pe care era calibrata
+			# valoarea asta a fost RETRASA: masurat in diorama, apa NU e mai
+			# inchisa decat malul (verde 52 si auriu 76, fata de 39-45 pe
+			# betonul cheiului — apa e mai DESCHISA). Apa nu se deosebeste de
+			# uscat prin faptul ca e inchisa, ci prin saturatie mica si prin
+			# suprafata fatetata. 0.62 tragea corpul apei la 36-40, adica sub
+			# tot ce e in jur; 0.78 il aduce in banda 45-55 a dioramei fara sa
+			# atinga saturatia, care e reglata separat (`water_desat`).
+			"water_dim": 0.78,
 			"water_foam": 0.0,
 			# Unde se despart cele doua rauri: o dreapta prin (60, 215) — malul
 			# de sud al peninsulei, la mijloc — spre SSE. La vest de ea curge
@@ -1114,10 +1162,34 @@ static func themes() -> Dictionary:
 			# de confluenta se vede din vederea de cursa la fractia 0.46.
 			"water_split": 1.0,
 			"water_split_dir": Vector2(0.94, -0.35),
-			"water_split_offset": -18.85,
-			"water_split_soft": 35.0,
-			"water_split_meander": 55.0,
-			"water_seam": 0.45,
+			# RUNDA 9. Linia era la -18.85, adica trecea la ~100 m in SPATELE
+			# camerei de pe pod: din vederea de cursa la fractia 0.52 se vedea
+			# numai Yangtze, pe amandoua malurile, si masuratoarea a spus-o
+			# fara ocolisuri — "ambele rauri ale noastre sunt la nuanta 30, nu
+			# exista rau verde". Un rau verde care nu se vede din cadrele de
+			# joc nu exista, oricat de corect ar fi autorat.
+			#
+			# La 90, dreapta trece CHIAR PE SUB TABLIER: apa din stanga soselei
+			# e Jialing (distanta cu semn de la -15 la -36 pe primii 45 m, deci
+			# verde pana la mal) si cea din dreapta e Yangtze (+3 la +27).
+			# Adica exact geografia din brief — soseaua traverseaza confluenta,
+			# si o vezi ca pe doua ape diferite de o parte si de alta a masinii,
+			# nu ca pe o nota din documentatie. Cornisa D ramane la -363 (verde
+			# curat) si cheiul E la -128 (tot verde), deci cele doua cadre in
+			# care Jialing-ul se vedea deja bine nu se schimba.
+			"water_split_offset": 70.0,
+			# RUNDA 8: 35 m de amestec plus 55 m de serpuire faceau din
+			# confluenta o ZONA de peste 100 m, pastoasa, cu pete reticulate —
+			# muschi pe noroi, nu doua ape care se intalnesc. In natura linia e
+			# de ordinul metrilor si serpuieste pe zeci, nu invers.
+			"water_split_soft": 12.0,
+			"water_split_meander": 24.0,
+			# Pe ce distanta se abate granita cu cei 24 m de mai sus. Vezi nota
+			# din shader: pana in runda 9 serpuirea se lua din zgomotul de
+			# suprafata, deci granita se zimtea pe metru si cele doua ape
+			# ieseau marmorate. 260 m = o cotitura pe toata largimea golfului.
+			"water_split_wave": 260.0,
+			"water_seam": 0.55,
 			# Glint/crest URCATE in runda 4: cu verdele/brunul desaturat, apa
 			# de la distanta (vederea de pe cornisa D) iesea camp mat — ce o
 			# face sa citeasca APA noaptea sunt sclipirile orasului pe hula
@@ -1140,7 +1212,7 @@ static func themes() -> Dictionary:
 			# 11.8% pe cel brun. Sub 0.58 pragul lasa peste 15% si apa devine o
 			# foaie de aur; peste 0.70 scade sub 6% si redevine mata. 0.64 da
 			# 9-11% pe cornisa D.
-			"water_glint_cut": 0.62,
+			"water_glint_cut": 0.66,
 			# Cat de lungite. 3.2 (incercat intai) trage petele in fasii de zeci
 			# de metri; la 1.4 ies limbi de flacara pe cheiul E. 0.9 le lasa
 			# pete cu coada — alungite pe verticala, dar tot pete.
@@ -1154,15 +1226,76 @@ static func themes() -> Dictionary:
 			"water_glint_grain": 0.36,
 			# Suprafata NETEDA sub reflexii (implicitul 0.35 e de laguna
 			# vazuta de aproape; de la 60 m in sus iese pasla).
-			"water_ripple": 0.10,
-			"water_facet": 0.78,
+			# RUNDA 8: 0.10 lasa suprafata prea neteda pentru apa de APROAPE.
+			# Masurat pe capturile rundei 7, energia de detaliu la raza 2 px:
+			# diorama 9.84, brunul nostru 2.75 — iar ASFALTUL din acelasi cadru
+			# 4.89. Cand soseaua are mai multa viata pe suprafata decat raul,
+			# raul citeste material solid.
+			"water_ripple": 0.21,
+			# RUNDA 9: dupa ce petele-amiba au disparut, ecartul p10-p90 a cazut
+			# la 18-20 fata de 28-39 in diorama — suprafata devenise linoleum.
+			# Placa e acum singura care mai da variatie de valoare, deci ea
+			# trebuie sa o dea toata.
+			"water_facet": 0.52,
 			"water_facet_count": 7.0,
-			"water_facet_scale": 0.17,
-			"water_facet_wobble": 0.40,
-			"water_view_lo": 0.68,
-			"water_view_hi": 1.32,
+			# RUNDA 8. 0.17 rad/m inseamna fatete de ~37 m, iar banda de apa
+			# vizibila de pe pod are 60-150 m: doua-patru fatete pe toata
+			# suprafata, adica nici una. In diorama o fateta subintinde cam a
+			# zecea parte din latimea benzii de apa. 0.46 => 13.7 / 9.8 / 6.9 m
+			# pe cele trei sinusoide, deci 6-14 m pe ecran.
+			"water_facet_scale": 0.46,
+			# RUNDA 9: 0.10 lasa muchia placii dreapta pe zeci de metri, deci
+			# placile ies un caroiaj regulat. In diorama fiecare triunghi are
+			# alta marime si alta orientare.
+			"water_facet_wobble": 0.10,
+			# Cat se indoaie grila. Vezi nota din shader: la 0.22 (valoarea
+			# scrisa in cod pana in runda 9) laturile triunghiului se curbeaza
+			# pana ies lobi inchisi unul in altul — camuflaj. 0.07 le lasa
+			# drepte, iar neregularitatea vine din tesela in sine.
+			"water_facet_warp": 0.07,
+			# Distanta la care fateta are chiar marimea autorata; mai aproape
+			# se micsoreaza. Sub tablier apa incepe la 10 m, unde o fateta de
+			# 14 m umplea un sfert de cadru — pete late cat un camion.
+			"water_facet_ref": 95.0,
+			# CAT de mult se poate micsora celula langa camera. 2.5 (scris in
+			# cod pana la runda 9) e calibrat pe cornisa, unde apa cea mai
+			# apropiata e la 40 m. Tablierul golfului trece la 3.3 m peste apa
+			# si apa incepe la 5 m de ochi: acolo raportul cerut e 19x, iar
+			# plafonul de 2.5 lasa celula la 5.5 m, adica JUMATATE DE ECRAN pe
+			# o placa. 5.5 o duce la ~2.5 m langa camera, deci placile de sub
+			# pod se vad ca placi, nu ca judete.
+			"water_facet_near": 5.5,
+			# RARITATEA reflexiilor. Vezi `facet_gate` in shader: fateta spune
+			# CARE placi prind lumina, fisura deseneaza pata inauntru. La 0.62
+			# trec cam 38% din placi, si in ele fisura mai taie o data — de
+			# aici acoperirea de 3-10% pe care o are diorama, in loc de 25%.
+			"water_facet_gate": 0.55,
+			# RUNDA 8: 0.68 / 1.32 erau calibrate pe cornisa D, unde camera e
+			# la 27 m deasupra apei. Tablierul de peste golf trece la 3.3 m,
+			# deci de acolo apa se vede razant pe toata suprafata si aceeasi
+			# regula o inchidea uniform — pamant. Panta se domoleste, iar ce se
+			# intampla razant il preia "water_fresnel".
+			"water_view_lo": 0.86,
+			"water_view_hi": 1.14,
 			"water_view_ref": 0.20,
 			"water_crest_shade": 0.22,
+			# OGLINDA RAZANTA. Vezi nota v7 din shader: singurul semnal de
+			# lichid care functioneaza cand te uiti PESTE apa, nu IN ea — si de
+			# pe tablier, la 3.3 m peste golf, asa se vede toata. Culoarea vine
+			# din ceata temei (mediul reflectat), nu dintr-un slot.
+			"water_fresnel": 0.55,
+			"water_fresnel_sharp": 14.0,
+			"water_fresnel_gain": 1.0,
+			# CE se oglindeste. Implicitul e ceata, si pentru o tema de zi e
+			# corect — dar aici ceata e gri-violacee, iar amestecata razant
+			# peste un rau brun il ducea la saturatie 0.08, adica gri neutru:
+			# cerinta "brun intre 20 si 40 grade" pica nu fiindca nuanta se
+			# muta, ci fiindca nu mai ramane nuanta deloc. Ce se vede razant
+			# peste apa unui oras noaptea nu e cerul, e MALUL OPUS: felinare de
+			# sodiu si ferestre, adica o lumina CALDA si joasa. Si e chiar
+			# explicatia bratului auriu din diorama — nu are alt albedo decat
+			# cel verde, are drumul de lumina al malului de dincolo.
+			"water_fresnel_color": Color(0.33, 0.24, 0.145),
 			"water_glint_soft": 0.22,
 			"water_glint_body": 0.75,
 			"water_cell": 4.0,
@@ -1173,7 +1306,23 @@ static func themes() -> Dictionary:
 			# petele masoara nuanta 30-40 la saturatie 0.45-0.55, iar SAND_LIGHT
 			# (E8C074) sta la 37/0.50.
 			"water_glint_slot": Palette.SAND_LIGHT,
-			"water_glint_tint": 1.0,
+			# RUNDA 8: la 1.0 (aurul intreg) petele ieseau portocaliu saturat
+			# pe brun inchis — foita de aur, nu lumina. In diorama reflexiile
+			# sunt CREM palid: masurate pe pete individuale, saturatie 0.22-0.30
+			# la nuanta 40-46, nu 0.50.
+			"water_glint_tint": 0.95,
+			# FORMA reflexiei: poligon de fateta, nu fisura de roca. Vezi nota
+			# din shader — pe apa de la 20-40 m fisurile ies zigzaguri
+			# ramificate, iar in diorama petele au muchii drepte si interior
+			# plat, taiate pe aceeasi tesela ca fatetele de culoare.
+			# Doar pe Yangtze, si doar de aproape: Jialing se vede de pe
+			# cornisa la 60-250 m, unde fisura texturii are chiar marimea unei
+			# pete si celula de fateta ar cadea sub un pixel. Masurat cand
+			# fatetele erau pornite si pe Jialing: nuanta verdelui sarea de la
+			# 147 la 69 (galben) si 8.9% din pixeli treceau de 150 — adica
+			# fix miristea rundei 4, inapoi.
+			"water_b_glint_facet": 0.85,
+			"water_glint_facet_far": 110.0,
 			# Hula da si umbra suprafetei, si panta din care se naste lobul
 			# speculat — nu poate merge la 0. La 0.45 dungile ei se vedeau ca
 			# brazde pe o suprafata deja fara ondulatie fina; 0.35 le lasa doar
@@ -3322,39 +3471,13 @@ func _build_far_shore(sea_y: float) -> void:
 	if banks.is_empty():
 		return
 	var c := _centroid()
+	var runs := _far_shore_runs(banks, sea_y)
+	if runs.is_empty():
+		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var face := Color(0.09, 0.09, 0.12)
-	var crown := Color(0.13, 0.13, 0.17)
-	for bank: Dictionary in banks:
-		var line: Array = bank.get("line", [])
-		if line.size() < 2:
-			continue
-		var h := float(bank.get("h", 9.0))
-		var depth := float(bank.get("depth", 80.0))
-		for i in line.size() - 1:
-			var a: Vector2 = line[i]
-			var b: Vector2 = line[i + 1]
-			var n := Vector2(-(b.y - a.y), b.x - a.x).normalized()
-			# Spatele malului se duce DEPARTE de pista.
-			if n.dot(a - Vector2(c.x, c.z)) < 0.0:
-				n = -n
-			var a0 := Vector3(a.x, sea_y - 2.0, a.y)
-			var a1 := Vector3(a.x, sea_y + h, a.y)
-			var b0 := Vector3(b.x, sea_y - 2.0, b.y)
-			var b1 := Vector3(b.x, sea_y + h, b.y)
-			var a2 := Vector3(a.x + n.x * depth, sea_y + h * 0.8,
-				a.y + n.y * depth)
-			var b2 := Vector3(b.x + n.x * depth, sea_y + h * 0.8,
-				b.y + n.y * depth)
-			for tri: Array in [[a0, a1, b0], [a1, b1, b0]]:
-				for v: Vector3 in tri:
-					st.set_color(face if v.y < sea_y + h - 0.01 else crown)
-					st.add_vertex(v)
-			for tri2: Array in [[a1, a2, b1], [a2, b2, b1]]:
-				for v2: Vector3 in tri2:
-					st.set_color(crown)
-					st.add_vertex(v2)
+	for bank: Dictionary in runs:
+		_far_shore_run(st, bank, sea_y, c)
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
 	inst.name = "FarShore"
@@ -3363,6 +3486,144 @@ func _build_far_shore(sea_y: float) -> void:
 		Palette.color(Palette.CONCRETE), null, 1.0, 0.5,
 		BaseMaterial3D.CULL_DISABLED)
 	add_child(inst)
+
+
+## Poliliniile de mal TAIATE acolo unde nu mai au apa in fata, si lipite acolo
+## unde se continua una pe alta.
+##
+## Amandoua taieturile sunt din masuratoare, nu din precautie. Malurile autorate
+## fac un inel in jurul intregii periferii, iar terenul pistei nu se termina
+## unde se termina bucla: din 9 segmente, 3 cadeau PESTE uscat — vertecsii lor
+## masurati la cota 16.3, 35.5 si 41.1 m, cu prisma intre 1 si 15 m. Unde
+## dealul e mai inalt decat prisma, ea dispare in el (inofensiv); unde coasta
+## URCA prin ea, iese exact ce a vazut criticul: o pata bleumarin cu muchie
+## dreapta asezata peste terenul gri, adica o pata de ulei pe un platou.
+##
+## A doua: doua maluri care se termina in acelasi punct erau doua rulari
+## independente de SurfaceTool, fiecare cu normala segmentului ei, deci in
+## nodul comun spatele lor pleca in doua directii — o crestatura in "V" la
+## (95, 335), acolo unde de fapt cele doua polilinii sunt aproape coliniare
+## (directiile lor difera cu 7 grade). Lipite intr-o singura polilinie,
+## normalele se mediaza si crestatura dispare fara sa se piarda nimic.
+func _far_shore_runs(banks: Array, sea_y: float) -> Array:
+	var runs: Array = []
+	for bank: Dictionary in banks:
+		var line: Array = bank.get("line", [])
+		var run: Array[Vector2] = []
+		for i in maxi(line.size() - 1, 0):
+			var a: Vector2 = line[i]
+			var b: Vector2 = line[i + 1]
+			# Segmentul are voie sa existe doar daca apa e in fata lui pe toata
+			# lungimea: capete SI mijloc sub linia apei.
+			var wet := _far_shore_wet(a, sea_y) and _far_shore_wet(b, sea_y) 				and _far_shore_wet(a.lerp(b, 0.5), sea_y)
+			if not wet:
+				if run.size() > 1:
+					runs.append({"line": run, "h": bank.get("h", 9.0),
+						"depth": bank.get("depth", 80.0)})
+				run = []
+				continue
+			if run.is_empty():
+				run.append(a)
+			run.append(b)
+		if run.size() > 1:
+			runs.append({"line": run, "h": bank.get("h", 9.0),
+				"depth": bank.get("depth", 80.0)})
+	# Lipirea: doua rulari care se ating in acelasi punct sunt un singur mal.
+	var merged: Array = []
+	for run: Dictionary in runs:
+		var line: Array = run["line"]
+		if not merged.is_empty():
+			var prev: Dictionary = merged[-1]
+			var pline: Array = prev["line"]
+			if (pline[-1] as Vector2).distance_to(line[0]) < 0.5 					and is_equal_approx(float(prev["h"]), float(run["h"])):
+				for i in range(1, line.size()):
+					pline.append(line[i])
+				continue
+		merged.append(run)
+	return merged
+
+
+## E apa in fata malului in punctul asta? Panza de teren se intinde doar cat
+## bucla plus o margine, deci in afara ei nu exista uscat de care sa te lovesti
+## si raspunsul e „da" fara sa mai intrebi sampler-ul.
+func _far_shore_wet(p: Vector2, sea_y: float) -> bool:
+	var c := _centroid()
+	var half := _world_extent() * 0.5
+	if absf(p.x - c.x) > half or absf(p.y - c.z) > half:
+		return true
+	return _sampler.ground_y(p.x, p.y) < sea_y - 1.0
+
+
+## Un mal intreg: fata verticala + coama, cu normalele MEDIATE pe noduri.
+##
+## Normala per NOD, nu per segment: cu una per segment fiecare patrulater isi
+## trimitea spatele in alta directie, deci intre doua segmente ramanea o pana
+## deschisa pe coama (la coturi convexe) sau o suprapunere (la cele concave).
+## Mediata, coama e o banda continua.
+##
+## Inaltimea nu mai e constanta: 800 m de creasta la exact 12 m citeau ZID, nu
+## mal. Doua sinusoide necomensurabile pe distanta parcursa o plimba cu ±22%,
+## adica destul cat silueta sa aiba profil, prea putin cat sa se vada tiparul.
+func _far_shore_run(st: SurfaceTool, bank: Dictionary, sea_y: float,
+		c: Vector3) -> void:
+	var line: Array = bank["line"]
+	var h := float(bank.get("h", 9.0))
+	var depth := float(bank.get("depth", 80.0))
+	# Culoarea de la linia apei e mai INCHISA decat coama: un mal care se
+	# termina brusc in apa pluteste, unul care se intuneca la baza se aseaza in
+	# ea. Aceleasi trei valori pentru toate temele care au far_shore.
+	var foot := Color(0.05, 0.05, 0.07)
+	var face := Color(0.09, 0.09, 0.12)
+	var crown := Color(0.13, 0.13, 0.17)
+	var normals: Array[Vector2] = []
+	var dist: Array[float] = []
+	var run := 0.0
+	for i in line.size():
+		var a: Vector2 = line[maxi(i - 1, 0)]
+		var b: Vector2 = line[mini(i + 1, line.size() - 1)]
+		var t := (b - a)
+		if t.length() < 0.001:
+			t = Vector2(1.0, 0.0)
+		var n := Vector2(-t.y, t.x).normalized()
+		if n.dot((line[i] as Vector2) - Vector2(c.x, c.z)) < 0.0:
+			n = -n
+		normals.append(n)
+		if i > 0:
+			run += (line[i] as Vector2).distance_to(line[i - 1])
+		dist.append(run)
+	for i in line.size() - 1:
+		var pa: Vector2 = line[i]
+		var pb: Vector2 = line[i + 1]
+		var ha := h * _far_shore_height(dist[i])
+		var hb := h * _far_shore_height(dist[i + 1])
+		var na: Vector2 = normals[i]
+		var nb: Vector2 = normals[i + 1]
+		var a0 := Vector3(pa.x, sea_y - 2.0, pa.y)
+		var a1 := Vector3(pa.x, sea_y + ha, pa.y)
+		var b0 := Vector3(pb.x, sea_y - 2.0, pb.y)
+		var b1 := Vector3(pb.x, sea_y + hb, pb.y)
+		var a2 := Vector3(pa.x + na.x * depth, sea_y + ha * 0.8,
+			pa.y + na.y * depth)
+		var b2 := Vector3(pb.x + nb.x * depth, sea_y + hb * 0.8,
+			pb.y + nb.y * depth)
+		for tri: Array in [[a0, a1, b0], [a1, b1, b0]]:
+			for v: Vector3 in tri:
+				if v.y <= sea_y - 1.99:
+					st.set_color(foot)
+				elif v.y < sea_y + minf(ha, hb) - 0.01:
+					st.set_color(face)
+				else:
+					st.set_color(crown)
+				st.add_vertex(v)
+		for tri2: Array in [[a1, a2, b1], [a2, b2, b1]]:
+			for v2: Vector3 in tri2:
+				st.set_color(crown)
+				st.add_vertex(v2)
+
+
+## Cat de inalt e malul la `d` metri de la capatul lui, ca fractie din `h`.
+func _far_shore_height(d: float) -> float:
+	return 1.0 + 0.14 * sin(d * 0.0163) + 0.08 * sin(d * 0.0071 + 1.7)
 
 
 ## Marea e INGHETATA pe tema asta (`frozen`): placa se randeaza ca gheata si
@@ -3908,6 +4169,14 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_facet_scale", 0.10)))
 	_water_mat.set_shader_parameter("facet_wobble",
 		float(theme_flag("water_facet_wobble", 0.35)))
+	_water_mat.set_shader_parameter("facet_warp",
+		float(theme_flag("water_facet_warp", 0.22)))
+	_water_mat.set_shader_parameter("facet_ref",
+		float(theme_flag("water_facet_ref", 0.0)))
+	_water_mat.set_shader_parameter("facet_near_max",
+		float(theme_flag("water_facet_near", 2.5)))
+	_water_mat.set_shader_parameter("facet_gate",
+		float(theme_flag("water_facet_gate", 0.0)))
 	# Gradientul de perspectiva: cat de mult se deschide apa cand privirea cade
 	# mai de sus pe ea. Implicit 1.0/1.0 = plat, ca pana acum.
 	_water_mat.set_shader_parameter("view_lo",
@@ -3918,6 +4187,24 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_view_ref", 0.22)))
 	_water_mat.set_shader_parameter("crest_shade",
 		float(theme_flag("water_crest_shade", 0.12)))
+	# LUCIUL RAZANT. Culoarea nu e un slot de paleta ci MEDIUL REFLECTAT: pe o
+	# tema de noapte, ceata. Se ia de acolo tocmai ca sa nu se poata
+	# desincroniza — daca cerul se schimba, si ce se oglindeste in apa se
+	# schimba odata cu el.
+	var fres := float(theme_flag("water_fresnel", 0.0))
+	_water_mat.set_shader_parameter("fresnel_strength", fres)
+	if fres > 0.0:
+		var fc: Color = theme_flag("water_fresnel_color",
+			theme_flag("fog", Color(0.5, 0.5, 0.5)))
+		fc = fc.srgb_to_linear()
+		# NU se normalizeaza: aici e RADIANTA a ceea ce se oglindeste, adica
+		# exact culoarea cetii, in liniar. `water_fresnel` e cat de mult din ea
+		# se vede la incidenta razanta (0..1), nu cat de tare straluceste.
+		var fg := float(theme_flag("water_fresnel_gain", 1.0))
+		_water_mat.set_shader_parameter("fresnel_col",
+			Vector3(fc.r * fg, fc.g * fg, fc.b * fg))
+	_water_mat.set_shader_parameter("fresnel_sharp",
+		float(theme_flag("water_fresnel_sharp", 4.0)))
 	# --- AL DOILEA RAU (v4). Vezi nota lunga din water.gdshader: apa se imparte
 	# dupa LOC, nu dupa adancime, fiindca doua familii de culoare amestecate pe
 	# axa adancimii dau oliv — culoarea unei mirisiti, nu a unui rau.
@@ -3952,6 +4239,8 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_split_soft", 24.0)))
 	_water_mat.set_shader_parameter("split_meander",
 		float(theme_flag("water_split_meander", 40.0)))
+	_water_mat.set_shader_parameter("split_wave",
+		float(theme_flag("water_split_wave", 260.0)))
 	_water_mat.set_shader_parameter("seam_strength",
 		float(theme_flag("water_seam", 0.0)))
 	# Lumina care sclipeste si forma sclipirii. Pe temele vechi raman 0 =
@@ -3966,6 +4255,24 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_glint_cut", 0.0)))
 	_water_mat.set_shader_parameter("glint_grain",
 		float(theme_flag("water_glint_grain", 1.0)))
+	# CAT de aprins e raul B fata de A. Vezi nota v6 din shader: in diorama
+	# bratul auriu nu are alt albedo, are alt DRUM DE LUMINA — 2.0% din pixeli
+	# peste 150 si varf 201, fata de 0.4% si 160 pe cel verde. La noi era exact
+	# invers: brunul avea vopseaua cea mai deschisa si sclipirile cele mai
+	# putine. 1.0 / 0.0 = o singura apa, ca pe temele vechi.
+	_water_mat.set_shader_parameter("glint_b_gain",
+		float(theme_flag("water_b_glint", 1.0)))
+	_water_mat.set_shader_parameter("glint_b_cut",
+		float(theme_flag("water_b_glint_cut", 0.0)))
+	# Din ce se face FORMA unei reflexii: fisurile texturii (0, temele vechi)
+	# sau fateta apei (1). Vezi nota din shader — pe apa de la 20-40 m fisurile
+	# de roca ies zigzaguri late de zeci de pixeli, adica flacari.
+	_water_mat.set_shader_parameter("glint_facet",
+		float(theme_flag("water_glint_facet", 0.0)))
+	_water_mat.set_shader_parameter("glint_b_facet",
+		float(theme_flag("water_b_glint_facet", 0.0)))
+	_water_mat.set_shader_parameter("glint_facet_far",
+		float(theme_flag("water_glint_facet_far", 130.0)))
 	# Marginea si interiorul unei reflexii. Masurat: petele dioramei stau la
 	# 1.8-2.8x fata de apa de sub ele, ale noastre la 6-7.4x, cu contur taiat cu
 	# cutitul si interior de o singura culoare — de aia se citeau frunze lipite

@@ -164,7 +164,12 @@ uniform float split_strength : hint_range(0.0, 1.0) = 0.0;
 uniform vec2 split_dir = vec2(1.0, 0.0); // normala dreptei, in plan XZ
 uniform float split_offset = 0.0;        // dot(p, split_dir) al dreptei
 uniform float split_soft = 24.0;         // latimea amestecului, in metri
-uniform float split_meander = 40.0;      // cat serpuieste granita (metri)
+uniform float split_meander = 40.0;
+// Lungimea de unda a serpuirii, in metri (v8, runda 9). Vezi nota de la `sd`
+// in fragment: amplitudinea spune CAT se abate granita, asta spune PE CE
+// DISTANTA — si fara ea meandrul se lua din zgomotul de suprafata, deci se
+// abatea cu zeci de metri pe fiecare metru parcurs.
+uniform float split_wave = 260.0;      // cat serpuieste granita (metri)
 uniform vec3 shore_col_b;
 uniform vec3 shallow_col_b;
 uniform vec3 deep_col_b;
@@ -244,7 +249,36 @@ uniform float facet_strength : hint_range(0.0, 1.0) = 0.0;
 uniform float facet_count : hint_range(2.0, 12.0) = 5.0;
 uniform float facet_scale = 0.10; // rad/m; 0.10 => fatete de ~30-65 m
 uniform float facet_wobble : hint_range(0.0, 1.0) = 0.35;
+// Cat de tare se indoaie grila de fatete (v8, runda 9). Era scris in cod,
+// 0.22, si e chiar butonul dintre "caroiaj de rigla" si "lobi de camuflaj":
+// deformarea vine din sinusoide netede, deci cu cat e mai mare, cu atat
+// laturile triunghiului se curbeaza mai mult. Diorama are laturi DREPTE cu
+// orientari diferite, adica deformare mica pe o tesela deja neregulata.
+uniform float facet_warp : hint_range(0.0, 1.0) = 0.22;
 uniform float facet_speed = 0.05;
+// Cat de mare e o fateta e o marime de LUME, dar ce vede ochiul e o marime de
+// ECRAN — iar sub tablier apa incepe la 10 m, deci o fateta de 14 m umplea un
+// sfert de cadru. Pe captura ies pete late cat un camion, cu muchii moi: bataturi
+// de pamant, nu unde. Apropiindu-te de o apa chiar vezi structura mai fina
+// (rezolvi valuri mai mici), deci celula se micsoreaza cu distanta pana la
+// `facet_ref` metri, unde ramane cea autorata. 0 = aceeasi marime peste tot,
+// adica temele vechi neatinse.
+uniform float facet_ref = 0.0;
+
+// --- v8 (Chongqing, runda 9). Plafonul micsorarii celulei langa camera.
+//
+// Era scris in cod, 2.5, si calibrat pe apa privita de pe cornisa (60-250 m).
+// Sub tablierul golfului apa incepe la 5 m de ochi si trece pe la 3.3 m sub
+// el: acolo `facet_ref / cam_r` cere 19x, primeste 2.5x, deci celula ramane la
+// ~5.5 m si SUBINTINDE JUMATATE DE ECRAN. O celula care se aprinde nu mai e o
+// reflexie, e o balta de aur cu contur de amiba — masurat pe captura rundei 8,
+// 25% din pixelii apei din stanga peste luminanta 90, cu p90-p10 = 107.
+//
+// Nu se poate ridica la infinit: peste ~6x celula scade sub 2.5 m si alungirea
+// reflexiei o trage in FIRE (paie peste pamant, incercat in runda 8). Cheia de
+// tema exista tocmai fiindca plafonul corect depinde de cat de jos trece
+// camera peste apa, si asta difera de la o pista la alta.
+uniform float facet_near_max : hint_range(1.0, 12.0) = 2.5;
 
 // GRADIENT DE PERSPECTIVA. Motivul pentru care apa dioramei se citeste ca plan
 // orizontal si a noastra nu. Nu e ceata (aia coloreaza spre cer, aici valoarea
@@ -256,6 +290,35 @@ uniform float facet_speed = 0.05;
 uniform float view_lo : hint_range(0.2, 2.0) = 1.0;
 uniform float view_hi : hint_range(0.2, 3.0) = 1.0;
 uniform float view_ref : hint_range(0.02, 1.0) = 0.22; // unghiul de "plin"
+
+// --- v7 (Chongqing, runda 8). LUCIUL RAZANT, adica singurul lucru care
+// deosebeste apa de pamant cand te uiti PESTE ea, nu IN ea.
+//
+// De ce lipsea. Toate reglajele de pana acum au fost calibrate pe cornisa D,
+// unde camera sta la 27 m deasupra apei si se uita IN JOS: acolo `view_lo` /
+// `view_hi` sunt suficiente, si spun corect ca apa privita de sus e mai
+// deschisa (aluviuni luminate) decat cea privita razant (reflexia malului
+// intunecat). Dar tablierul de peste golf trece la 3.3 m deasupra apei
+// (masurat: drum y=6.3, apa y=3.0), deci de acolo TOATA apa se vede razant, si
+// aceeasi regula o face uniform inchisa si mata pana la mal — un camp arat.
+//
+// Fizic, la incidenta razanta apa devine OGLINDA (Fresnel): departe se vede
+// cerul si malul opus, nu adancul. E cel mai puternic semnal de "lichid" pe
+// care il are o suprafata orizontala, si e cel pe care nu-l poate imita niciun
+// pamant. Aici e un singur termen ADITIV, in liniar, cu culoarea mediului
+// reflectat (pe o noapte cu burnita: ceata, adica gri-violaceu rece — NU
+// aurul felinarelor, ala e deja glint).
+//
+// Se AMESTECA, nu se aduna, si asta nu e o preferinta: o oglinda INLOCUIESTE
+// ce e sub ea. Adunat, luciul rece peste un rau brun da mov — masurat pe banda
+// departata de pe pod, nuanta 324 la saturatie 0.10, adica magenta. Amestecat,
+// apa trece pur si simplu in culoarea a ceea ce oglindeste, si nu poate iesi
+// nicio nuanta care sa nu fie ori a apei, ori a cerului.
+//
+// Cost: un pow. 0 = nimic, deci temele vechi sunt neatinse.
+uniform float fresnel_strength : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 fresnel_col = vec3(1.0);
+uniform float fresnel_sharp : hint_range(1.0, 16.0) = 4.0;
 
 // Cat de adanca e umbra hulei. Pana la v4 era scrisa in cod, 0.12 — calibrata
 // pe o mare vazuta de departe, unde crestele sunt ce da relieful. Pe un rau
@@ -271,6 +334,61 @@ uniform float crest_shade : hint_range(0.0, 0.8) = 0.12;
 // loc sa sara la maxim imediat dupa prag. 0 = taietura de pana acum.
 uniform float glint_soft : hint_range(0.02, 0.6) = 0.17;
 uniform float glint_body : hint_range(0.0, 1.0) = 0.0;
+
+// --- v6 (Chongqing, runda 8). Scanteierea era pana aici o marime GLOBALA, iar
+// pe o pista cu doua rauri asta e o presupunere falsa. Masurand diorama
+// (bar/E_chei.png) pe cele doua brate:
+//
+//              luminanta medie   p99   max   pixeli peste 150
+//   verde .......... 55.6        153   ~160        0.4%
+//   auriu .......... 78.1        167    201        2.0%
+//
+// Bratul auriu nu e mai deschis fiindca are alt ALBEDO, e mai deschis fiindca
+// pe el cade drumul de reflexii al felinarelor: aceeasi apa, alt unghi. Noi
+// faceam exact invers — brunul avea albedo ocru viu (luminanta 45-63, mai
+// deschis decat stanca de langa el) si aproape zero sclipiri (p99 = 92-96,
+// maximul 143). Adica desenam cu vopsea ce trebuia desenat cu lumina, si de
+// aia citea pamant: o suprafata mata, uniforma, mai deschisa decat piatra.
+//
+// Aici cele doua marimi care hotarasc CATA lumina se aprinde pe apa devin per
+// rau, folosind acelasi `side` cu care se aleg si culorile. 1.0 / 0.0 =
+// exact comportamentul de pana acum, deci temele cu un singur rau nu se
+// schimba.
+uniform float glint_b_gain : hint_range(0.0, 6.0) = 1.0; // x glint pe raul B
+uniform float glint_b_cut : hint_range(0.0, 0.95) = 0.0; // 0 = acelasi prag
+
+// REFLEXIA E O FATETA, NU O FISURA. Masca sclipirilor se citea pana aici din
+// detail_rock.png — o textura de ROCA, deci fisuri RAMIFICATE. Pe apa de
+// departe treceau drept pete; pe apa de la 20-40 m (vederea de pe pod) ies
+// exact ce sunt: zigzaguri de crapatura, late de zeci de pixeli si legate
+// intre ele — flacari pe pamant, nu lumina pe unda.
+//
+// In diorama (bar/E_chei.png) reflexiile aurii sunt POLIGOANE PLATE cu muchii
+// drepte, si stau exact peste tesela de fatete a apei: o fateta ori prinde
+// lumina felinarului, ori nu. De aia arata ca hartie de aur pusa pe apa, nu ca
+// ceva desenat peste ea.
+//
+// Aici masca devine un numar CONSTANT PE FATETA: doua campuri de sinusoide
+// cuantizate independent (celula = intersectia benzilor lor, deci poligoane
+// neregulate de marimi diferite), amestecate intr-o cheie pseudo-aleatoare.
+// Muchia celulei o rupe acelasi `facet_wobble` care rupe si fatetele de
+// culoare, deci reflexia si suprafata sunt taiate cu acelasi cutit.
+// 0 = masca din fisuri, adica exact comportamentul temelor vechi.
+// Fisurile nu sunt gresite peste tot: la 150 m o fisura are cativa pixeli si
+// citeste chiar pata, iar o celula de fateta ar avea sub un pixel, adica moire.
+// Marimea de care depinde alegerea e DISTANTA, deci masca trece de la fatete la
+// fisuri pe `glint_facet_far` metri. `glint_b_facet` exista fiindca cele doua
+// rauri se vad de la departari diferite in cadrele care conteaza: Jialing de pe
+// cornisa (60-250 m), Yangtze de pe pod (20-60 m).
+uniform float glint_facet : hint_range(0.0, 1.0) = 0.0;
+uniform float glint_b_facet : hint_range(0.0, 1.0) = 0.0;
+uniform float glint_facet_far = 130.0;
+// Sub ce cheie de fateta o placa nu se aprinde deloc (v8, runda 9). Cu cat e
+// mai sus, cu atat mai putine placi prind lumina — butonul de RARITATE, pe
+// cand `glint_cut` ramane butonul de cat de adanca trebuie sa fie fisura in
+// placile care au voie. Doua marimi, fiindca in diorama reflexiile sunt si
+// rare (putine placi), si mici in placile alea.
+uniform float facet_gate : hint_range(0.0, 0.95) = 0.0;
 
 varying vec3 world_pos;
 
@@ -331,8 +449,28 @@ void fragment() {
 	// Granita SERPUIESTE cu ondulatia deja esantionata (acelasi a*b ca peste
 	// tot in shaderul asta) — o dreapta perfecta ar fi citit ca margine de
 	// poligon, nu ca intalnirea a doua ape.
-	float sd = dot(p, normalize(split_dir)) - split_offset
-		+ (a * b - 0.79) * split_meander;
+	// RUNDA 9. Serpuirea granitei se lua din `a * b`, adica din chiar
+	// esantioanele texturii de ondulatie — un camp de frecventa INALTA, de
+	// ordinul metrului. Inmultit cu o amplitudine de zeci de metri, iese o
+	// granita care sare inainte si inapoi pe fiecare texel: cele doua ape se
+	// intrepatrund in dungi subtiri pe o banda lata de zeci de metri. Pe
+	// captura se vede exact asa — pensulatii verzi si brune amestecate, adica
+	// marmura, nu confluenta. In natura linia serpuieste pe SUTE de metri, cu
+	// raza de zeci; ce nu face niciodata e sa se zimteasca pe metru.
+	//
+	// Deci meandrul isi ia forma dintr-o singura sinusoida lenta pe directia
+	// granitei (lungime de unda `split_wave` metri), nu din zgomotul de
+	// suprafata. Ramane o urma mica din `a * b` pentru ca muchia sa nu fie de
+	// rigla, dar o zecime, nu intreaga amplitudine.
+	vec2 sdir = normalize(split_dir);
+	vec2 salong = vec2(-sdir.y, sdir.x);
+	float smeander = sin(dot(p, salong) * (6.2831853 / max(split_wave, 1.0)))
+			* 0.62
+		+ sin(dot(p, salong) * (6.2831853 / max(split_wave * 0.41, 1.0))
+			+ 1.7) * 0.38;
+	float sd = dot(p, sdir) - split_offset
+		+ smeander * split_meander
+		+ (a * b - 0.79) * split_meander * 0.10;
 	float side = smoothstep(-split_soft, split_soft, sd) * split_strength;
 	vec3 ramp_b = mix(shore_col_b, shallow_col_b, t_shore);
 	ramp_b = mix(ramp_b, deep_col_b, t_deep);
@@ -402,24 +540,105 @@ void fragment() {
 	// 60 m. Marginea treptei se rupe cu ondulatia deja esantionata (acelasi
 	// a*b ca peste tot aici); fara asta ies contururi de sinusoida, adica
 	// exact curbele de nivel pe care band_wobble le evita si el.
-	if (facet_strength > 0.0) {
-		float f = sin(dot(p, vec2(0.83, 0.55) * facet_scale) + TIME * facet_speed)
-			+ sin(dot(p, vec2(-0.47, 1.31) * facet_scale)
-				- TIME * facet_speed * 0.74)
-			+ sin(dot(p, vec2(1.67, 1.04) * facet_scale)
-				+ TIME * facet_speed * 0.41);
-		f = f * 0.1667 + 0.5 + (a * b - 0.79) * facet_wobble;
-		float fq = floor(clamp(f, 0.0, 0.999) * facet_count)
-			/ max(facet_count - 1.0, 1.0);
-		base *= 1.0 + (clamp(fq, 0.0, 1.0) - 0.5) * facet_strength;
-	}
-
 	vec3 view = normalize(CAMERA_POSITION_WORLD - world_pos);
 	// Directia privirii, proiectata in plan: axa pe care reflexiile trebuie sa
 	// se lungeasca (pe ecran e verticala).
 	vec2 to_cam = world_pos.xz - CAMERA_POSITION_WORLD.xz;
 	float cam_r = length(to_cam);
 	vec2 vdir = to_cam / max(cam_r, 1e-4);
+
+	float facet_key = 0.0;
+	if (facet_strength > 0.0 || glint_facet > 0.0 || glint_b_facet > 0.0) {
+		// DOMENIU DEFORMAT, APOI GRILA — nu sinusoide taiate in trepte.
+		//
+		// Pana in runda 8 fatetele se faceau cuantizand direct suma de
+		// sinusoide. Un camp neted taiat in trepte da BENZI, adica exact curbe
+		// de nivel, iar doua seturi de benzi aproape paralele se intersecteaza
+		// in PANGLICI lungi si serpuite: pe captura de pe pod iesea marmorare,
+		// nu tesela. Se vede si in cifre — energia de detaliu la raza 16 px
+		// era 29.8 fata de 16.8 in diorama, adica prea multa variatie, dar
+		// toata pe frecventa gresita.
+		//
+		// O placa de apa are muchii DREPTE si e cam la fel de lata pe ambele
+		// axe. Deci celula trebuie sa fie o CELULA: o grila patrata careia i
+		// se deformeaza coordonatele cu acelasi camp de sinusoide, plus un
+		// jitter din ondulatie care ii rupe muchia. Iese un caroiaj neregulat
+		// cu laturi drepte pe portiuni — ce se vede in bar/E_chei.png.
+		//
+		// Din aceeasi celula ies AMANDOUA: valoarea placii (`facet_strength`)
+		// si cine prinde lumina (`facet_key`). In diorama reflexiile aurii cad
+		// exact pe teselele apei, fiindca reflexia E fateta care s-a inclinat
+		// bine — doua tipare independente s-ar fi vazut ca doua straturi.
+		// Vezi `facet_ref`: celula se micsoreaza cu apropierea, ca marimea ei
+		// pe ecran sa ramana aceeasi. Plafonat la 2.5x, si plafonul e masurat,
+		// nu ales: la 6x celula ajungea la 2.3 m sub tablier, iar alungirea
+		// reflexiei o intindea in FIRE — pe captura, paie peste pamant. La
+		// 2.5x ramane la ~5.5 m, adica tot pata.
+		// SCARA CELULEI, IN TREPTE — nu continuu cu distanta.
+		//
+		// Bug-ul care a picat runda 9 la prima incercare: `fs` se inmultea cu
+		// `facet_ref / cam_r`, adica scara grilei se schimba CONTINUU de la un
+		// pixel la vecinul lui. O grila careia i se schimba pasul intre doi
+		// pixeli vecini nu mai e o grila — e o functie care se FORFECA, si o
+		// grila forfecata radial iese exact ce s-a masurat pe captura: dungi
+		// lungi care converg spre orizont. Adica pensulatii, ce incercam sa
+		// scoatem de trei runde.
+		//
+		// Se pastreaza intentia (o placa sa aiba cam aceeasi marime pe ecran
+		// oriunde e apa) fara sa se piarda grila: raportul se CUANTIZEAZA in
+		// puteri de doi. Intre doua inele consecutive scara e constanta, deci
+		// celula ramane celula; la trecerea dintre inele latura se
+		// injumatateste dintr-o data, si o muchie de placa peste alta muchie
+		// de placa nu se vede — asta e chiar mecanismul unui mipmap.
+		float fs = facet_scale;
+		if (facet_ref > 0.0) {
+			float want = clamp(facet_ref / max(cam_r, 1.0), 1.0,
+				facet_near_max);
+			fs *= exp2(floor(log2(want)));
+		}
+		float w1 = sin(dot(p, vec2(0.83, 0.55) * fs) + TIME * facet_speed)
+			+ sin(dot(p, vec2(-0.47, 1.31) * fs)
+				- TIME * facet_speed * 0.74);
+		float w2 = sin(dot(p, vec2(1.67, 1.04) * fs)
+				+ TIME * facet_speed * 0.41)
+			+ sin(dot(p, vec2(-1.21, 0.77) * fs)
+				- TIME * facet_speed * 0.63);
+		// Latura celulei in metri e 2*PI / facet_scale, aceeasi conventie ca
+		// lungimea de unda a sinusoidelor de deasupra.
+		vec2 wp = p * (fs * 0.15915494) + vec2(w1, w2) * facet_warp
+			+ vec2(a - 0.89, b - 0.89) * facet_wobble * 2.0;
+		// TRIUNGHIURI, NU PATRATE DEFORMATE (v8, runda 9).
+		//
+		// `floor(wp)` da o celula PATRATA, iar deformarea domeniului ii
+		// rotunjeste laturile: la deformare mare ies lobi, la deformare mica
+		// un caroiaj. Nici una din cele doua nu e ce se vede in diorama, unde
+		// apa e taiata in TRIUNGHIURI cu laturi drepte, de marimi diferite —
+		// masurat pe captura de pe pod, placile noastre ieseau contururi
+		// rotunjite inchise unele in altele, adica exact desenul unui camuflaj.
+		//
+		// Un triunghi se obtine taind patratul cu diagonala lui: partea de sub
+		// diagonala si cea de deasupra sunt doua celule distincte, si amandoua
+		// au trei laturi drepte. Diagonala alterneaza dupa paritatea celulei,
+		// ca sa nu iasa toate triunghiurile cu varful in aceeasi parte —
+		// altfel tesela se citeste ca un tesut in zigzag.
+		vec2 cell = floor(wp);
+		vec2 f = wp - cell;
+		float flip = mod(cell.x + cell.y, 2.0);
+		float diag = mix(f.x + f.y, 1.0 + f.x - f.y, flip);
+		float half_id = step(1.0, diag);
+		vec3 tri = vec3(cell, half_id);
+		float h1 = fract(sin(dot(tri, vec3(12.9898, 78.233, 37.719)))
+			* 43758.5453);
+		float h2 = fract(sin(dot(tri, vec3(39.3468, 11.1357, 83.155)))
+			* 24634.6345);
+		if (facet_strength > 0.0) {
+			// Valoarea placii, in `facet_count` trepte: placi de valori
+			// DIFERITE, nu un degrade continuu (style_bible §1).
+			float lvl = floor(h1 * facet_count) / max(facet_count - 1.0, 1.0);
+			base *= 1.0 + (clamp(lvl, 0.0, 1.0) - 0.5) * facet_strength;
+		}
+		facet_key = h2;
+	}
 
 	// GRADIENT DE PERSPECTIVA. view.y e sinusul unghiului sub care cade
 	// privirea pe apa: aproape 0 la orizont, mare in prim-plan. Suprafata se
@@ -428,6 +647,14 @@ void fragment() {
 	// toata adancimea cadrului).
 	if (view_lo != 1.0 || view_hi != 1.0) {
 		base *= mix(view_lo, view_hi, smoothstep(0.0, view_ref, view.y));
+	}
+	// Vezi `fresnel_strength`: cu cat privirea cade mai razant, cu atat apa e
+	// mai OGLINDA. Se ADUNA, ca glint-ul, si tot in liniar — e lumina venita
+	// din alta parte, nu o retusare a culorii de sub ea.
+	if (fresnel_strength > 0.0) {
+		float fr = fresnel_strength
+			* pow(1.0 - clamp(view.y, 0.0, 1.0), fresnel_sharp);
+		base = mix(base, fresnel_col, clamp(fr, 0.0, 1.0));
 	}
 
 	// Sun glint: NU e specular din pasul de lumina (ramane unshaded — vezi
@@ -512,14 +739,47 @@ void fragment() {
 		// hartie rupta — contur zimtat, interior de o singura culoare plata;
 		// in diorama fiecare pata are un halou si valoare care variaza pe ea.
 		float m = 1.0 - c1 * c2;
-		gmask = smoothstep(glint_cut, glint_cut + glint_soft, m);
+		// Vezi `glint_facet`: masca trece de la fisurile texturii la cheia
+		// constanta pe fateta, deci pata are muchii drepte si interior plat.
+		// Doar de aproape: mai departe de `glint_facet_far` celula ar fi sub
+		// un pixel, si o cuantizare sub pixel e moire, nu forma.
+		float gf = mix(glint_facet, glint_b_facet, side)
+			* (1.0 - smoothstep(glint_facet_far * 0.55, glint_facet_far,
+				cam_r));
+		// RUNDA 9. Aici era un `mix(m, facet_key, gf)`, si asta e chiar bugul
+		// care a picat runda 8. Amestecat la 0.85, `facet_key` — care e
+		// CONSTANT pe toata celula — inlocuia aproape complet forma din
+		// textura: o celula ori trecea de prag pe toata suprafata ei, ori nu
+		// trecea deloc. Rezultatul nu e o reflexie, e o celula VOPSITA. Pe apa
+		// de sub tablier, unde celula subintinde zeci de mii de pixeli, iese
+		// exact ce s-a masurat: pete de aur cu contur de amiba, 25% acoperire,
+		// gauri intunecate in mijloc — piele de vaca peste noroi.
+		//
+		// Fateta trebuie sa spuna CARE placi prind lumina, nu sa deseneze ea
+		// pata. Deci `facet_key` devine o POARTA multiplicativa peste masca de
+		// textura: placile cu cheie mica raman stinse oricat de adanca e
+		// fisura pe ele, cele cu cheie mare lasa fisurile sa se aprinda — si
+		// forma dinauntru ramane a fisurii, adica pete de metri cu halou.
+		// Asa se obtine si acoperirea mica din diorama (2-12%): poarta taie
+		// intai placile, masca taie apoi in ele.
+		//
+		// `gf` ramane aceeasi cheie si se stinge tot cu distanta, dar acum
+		// interpoleaza intre "poarta deschisa peste tot" (1.0) si "poarta
+		// dupa fateta", nu intre doua desene diferite.
+		m *= mix(1.0, smoothstep(facet_gate, 1.0, facet_key), gf);
+		// Pragul e per rau: in diorama bratul auriu are de cinci ori mai multi
+		// pixeli aprinsi decat cel verde (11.8% fata de 2.4% peste luminanta
+		// 90), iar pragul e chiar butonul care regleaza acoperirea.
+		float cut = glint_b_cut > 0.0 ? mix(glint_cut, glint_b_cut, side)
+			: glint_cut;
+		gmask = smoothstep(cut, cut + glint_soft, m);
 		// Interiorul nu e plat: cu cat fisura e mai adanca, cu atat pata e mai
 		// aprinsa. Fara asta o pata e o singura culoare pana la contur, adica
 		// hartie decupata; in diorama fiecare reflexie are miez si halou.
-		gmask *= mix(1.0, smoothstep(glint_cut, 1.0, m), glint_body);
+		gmask *= mix(1.0, smoothstep(cut, 1.0, m), glint_body);
 	}
 	float g = glint * gmask;
-	base += g * glint_strength * glint_col;
+	base += g * glint_strength * mix(1.0, glint_b_gain, side) * glint_col;
 
 	ALBEDO = base;
 }

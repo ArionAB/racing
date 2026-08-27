@@ -59,8 +59,8 @@ func _scan() -> void:
 	# adancimea lui (autobuzul are 2.7 m, masinutele stau in spate).
 	var best_gap := 0.0
 	var best_line := ""
-	var fr := _frac - 0.006
-	while fr <= _frac + 0.006:
+	var fr := _frac - 0.008
+	while fr <= _frac + 0.008:
 		var idx := int(fr * float(n)) % n
 		var p: Vector3 = baked[idx]
 		var nx: Vector3 = baked[(idx + 1) % n]
@@ -82,26 +82,35 @@ func _scan() -> void:
 			var blocked := false
 			for h in hits:
 				var col = h["collider"]
-				# soseaua si terenul nu conteaza: masina sta PE ele
+				# Soseaua si terenul nu conteaza (masina sta PE ele); ORICE
+				# altceva blocheaza.
+				#
+				# Filtrul de dinainte cerea ca NUMELE colizorului sa contina
+				# „_col", si asta masura gresit in ambele sensuri: corpurile
+				# prop-urilor se construiesc la runtime in `world_prop.gd`, cu
+				# nume care nu sunt garantate, deci un blocaj real putea fi
+				# raportat ca fanta libera. Se exclude acum ce stim ca e
+				# podea, nu se include ce s-a nimerit sa fie botezat.
 				var nm := String(col.name)
-				if nm.contains("_col"):
-					blocked = true
-					break
+				if nm.begins_with("Road") or nm.begins_with("Terrain") 						or nm.begins_with("Ground") or nm == "StaticBody3D":
+					continue
+				blocked = true
+				break
 			if blocked:
 				if run > local_best:
 					local_best = run; local_a = run_start; local_b = lat
 				run = 0.0
-				run_start = lat + 0.1
+				run_start = lat + 0.05
 			else:
-				run += 0.1
-			lat += 0.1
+				run += 0.05
+			lat += 0.05
 		if run > local_best:
 			local_best = run; local_a = run_start; local_b = 11.0
 		if local_best > 0.0 and (best_gap == 0.0 or local_best < best_gap):
 			best_gap = local_best
 			best_line = "f=%.4f fanta=%.2f m intre lat %.1f si %.1f" % [
 				fr, local_best, local_a, local_b]
-		fr += 0.0015
+		fr += 0.0005
 
 	print("--- FANTA din nodul de trafic (POI A) ---")
 	print(best_line)

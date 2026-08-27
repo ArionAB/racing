@@ -376,8 +376,14 @@ func _poi_c_alee() -> void:
 			# conteaza peretele (30% slot 11 gri-albastru + 19% slot 29 gri,
 			# adica dominanta rece masurata), firmele le dau restaurantele si
 			# lampioanele de langa ele.
+			# Distanta se CITESTE din sampler (`_clear`), nu se scrie de mana.
+			# Cu 10.5 m fix, in aleea care se stramteaza la 6 m latime utila
+			# pravaliile intrau peste linia de curs: ProbeRace seed 1 a dat 41
+			# atingeri de pereti pe feliile 0.15-0.25 si viteza cazuta la
+			# 12-18 m/s (fata de 26-32 pe restul turului). `_clear` da
+			# jumatatea LOCALA plus marja sondei, deci urmareste stramtarea.
 			_wash(_place(shop[k % 3], "pravalie",
-				_off_ground(st, sd, 10.5), _yaw_to_road(st, sd), 1.0),
+				_off_ground(st, sd, _clear(st, 3.6)), _yaw_to_road(st, sd), 1.0),
 				"3,8,11,20,28,29", 1.0, "#FFB877")
 			k += 1
 		f += 7.0 / _path.total
@@ -388,8 +394,12 @@ func _poi_c_alee() -> void:
 	var side := 1.0
 	while f2 < 0.236:
 		var st := _at(f2)
+		# La 6.4 m fix, `restaurant151_col` a fost blocantul numit de ProbeRace
+		# (2 repuneri, seed 1). Piesa are 9.2 m latime, deci centrul ei trebuie
+		# sa stea la jumatatea aia distanta de marginea benzii, nu pe ea.
 		_light(_place("chongqing/buildings/restaurant_front", "restaurant",
-			_off_ground(st, side, 6.4), _yaw_to_road(st, side), 1.0), 1.5)
+			_off_ground(st, side, _clear(st, 1.2)), _yaw_to_road(st, side),
+			1.0), 1.6)
 		side = -side
 		f2 += 7.4 / _path.total
 
@@ -555,14 +565,24 @@ func _poi_d_cornisa() -> void:
 		# COAMA la `buza - HONGYA_DROP`, talpa unde cade. Scara ramane 1.0:
 		# piesa e proiectata pentru masa asta, iar micsorarea ei a fost chiar
 		# greseala rundelor trecute.
+		# CAT DE JOS, exact. Cu coama la buza-5 si piesa lipita la 11 m, de pe
+		# sosea vezi ACOPERISUL, nu fatada: la 63° in jos linia de vedere
+		# trece pe deasupra coamei si tot ce ajunge pe ecran e un camp de
+		# placi cenusii (masurat pe captura — dreapta cadrului iesea gri, cu
+		# zero ferestre). In referinta se vad FATADELE cu ferestre, fiindca
+		# ele coboara PE LANGA drum, nu sub el.
+		#
+		# Deci coama coboara sub buza cat sa intre fatada in cadru, si piesa
+		# se departeaza cat sa nu fie privita vertical: la 16 m lateral si
+		# coama la buza-13, linia de la 63° taie fatada pe la mijloc.
 		var ridge := brink + sp.y - HONGYA_DROP
-		var p := _off(st, 1.0, 11.0)
+		var p := _off(st, 1.0, 13.0)
 		p.y = ridge - 47.74
 		var node_name := _place("chongqing/structures/hongya_dong", "hongya_hero",
 			p, _yaw_to_road(st, 1.0), 1.0)
 		# LUMINA: ard FERESTRELE (slotul 30), nu corpul — lumina calda care
 		# scapa dintre lemne intunecate, exact limbajul referintei.
-		_meta(node_name, "lumina", "30|2.0|#FFC98A")
+		_light(node_name, 2.0)
 		# Fara corp fizic: cine cade de pe cornisa trebuie sa CADA in terasa
 		# si sa fie repus, nu sa aterizeze pe un acoperis la 30 m.
 		_meta(node_name, "coliziune", "none")
@@ -570,12 +590,48 @@ func _poi_d_cornisa() -> void:
 		# AL DOILEA RAND, mai in afara si cu coama mai jos: da adancime
 		# (acoperisuri care coboara in trepte spre apa) fara sa acopere
 		# randul intai.
-		var p2 := _off(st, 1.0, 11.0 + 21.0)
-		p2.y = ridge - 47.74 - 9.0
+		var p2 := _off(st, 1.0, 13.0 + 20.0)
+		p2.y = ridge - 47.74 - 7.0
 		var n2 := _place("chongqing/structures/hongya_dong", "hongya_jos",
 			p2, _yaw_to_road(st, 1.0) + deg_to_rad(14.0), 1.0)
-		_meta(n2, "lumina", "30|2.0|#FFC98A")
+		_light(n2, 2.0)
 		_meta(n2, "coliziune", "none")
+
+		# RANDUL DE BUZA — ce repara „dreapta e un camp de placi cenusii".
+		#
+		# Masurat cu `tools/tmp/probe_view.gd`: stivele de mai sus cad la
+		# -14° .. -60° sub orizontala, adica bine INAUNTRUL frustumului. Nu
+		# erau invizibile, erau privite DE SUS — iar de sus dintr-o casa vezi
+		# acoperisul, si acoperisul lui hongya_dong e o placa mare fara
+		# ferestre. In referinta cadrul e umplut de FATADE cu balcoane
+		# aprinse, fiindca ele urca pana aproape de cota drumului.
+		#
+		# Deci un rand lipit de buza (9 m) cu coama la 2 m sub sosea: de acolo
+		# unghiul spre perete e mic si pe ecran ajunge fatada cu ferestre, nu
+		# invelitoarea. Randurile dinainte raman si dau adancimea.
+		# COTA se alege dupa CE E LA COTA AIA IN MESH, nu dupa cat de sus e
+		# piesa. Masurat cu `tools/tmp/hd_shape.gd` (aria pe benzi de 5 m,
+		# separata in orizontala/verticala): piesa alterneaza benzi de FATADA
+		# (y 10-15 si 20-25 m: 83% si 72% suprafata verticala) cu TERASE de
+		# acoperis (y 5-10, 15-20, 25-30: doar 10-12% vertical, cate ~1400 m²
+		# de placa orizontala). Varful (y 40-50) e tot acoperis.
+		#
+		# De-aia dreapta cadrului iesea „camp de placi cenusii" oricat mutam
+		# piesa pe verticala: nimereau mereu terasele. Aici banda de fatada
+		# 20-25 m se aduce la nivelul ochiului, adica la cota drumului: talpa
+		# = sosea - 22.5.
+		# Talpa la `sosea - 27.5` pune banda de fatada 20-25 m intre cotele
+		# -7.5 si -2.5 fata de drum: fatada e SUB buza (regula §2.0 tine —
+		# coama piesei ramane la -22.5 fata de nimic ce depaseste soseaua),
+		# dar destul de aproape de cota ochiului cat sa fie privita aproape
+		# frontal, nu de deasupra. La -22.5 (incercat, masurat pe captura)
+		# corpul urca 25 m PESTE drum si ocupa jumatate de ecran.
+		var p3 := _off(st, 1.0, 9.0)
+		p3.y = brink + sp.y - 27.5
+		var n3 := _place("chongqing/structures/hongya_dong", "hongya_buza",
+			p3, _yaw_to_road(st, 1.0) + deg_to_rad(-7.0), 1.0)
+		_light(n3, 2.4)
+		_meta(n3, "coliziune", "none")
 
 	# PERETELE DIN STANGA — jumatatea goala din verdict.
 	#
@@ -601,14 +657,20 @@ func _poi_d_cornisa() -> void:
 		# Randul din fata: la 11.5 m de ax, cu fata spre drum.
 		var nw := _place(shopd[wi % 3], "casa_cornisa",
 			_off_ground(stw, -1.0, 11.5), _yaw_to_road(stw, -1.0), 1.0)
-		_meta(nw, "lumina", "30|1.7|#FFC07A")
+		# ACEEASI RETETA ca pravaliile aleii C, care sunt aceleasi mesh-uri:
+		# sloturile de fatada la energie 1.0 cu operatorul MULTIPLY (`*`).
+		# Slotul 30 la 1.7 — ce incercasem intai — aprindea geamul ca pe un
+		# panou alb (se vede in captura: ferestre arse, fara cadru), fiindca
+		# ADD peste un albedo deja deschis satureaza. MULTIPLY pastreaza
+		# relieful si lasa ramele sa se citeasca.
+		_meta(nw, "lumina", "3,8,11,20,28,29|1.00|#FFB877*")
 		# Randul din spate: mai departat si rotit, ca sa se vada acoperisuri
 		# peste primul rand (adancime), nu o singura linie de fatade.
 		if wi % 2 == 0:
 			var nb := _place(shopd[(wi + 2) % 3], "casa_cornisa_spate",
 				_off_ground(stw, -1.0, 20.5), _yaw_to_road(stw, -1.0)
 				+ deg_to_rad(22.0), 1.0)
-			_meta(nb, "lumina", "30|1.5|#FFC07A")
+			_meta(nb, "lumina", "3,8,11,20,28,29|1.00|#FFB877*")
 		wi += 1
 		wf += 8.6 / _path.total
 

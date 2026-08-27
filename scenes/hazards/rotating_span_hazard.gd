@@ -61,17 +61,39 @@ const DECK_THICK: float = 0.55
 ## Cat de des se esantioneaza rampa de serviciu (m). Sub un metru cotul ei e
 ## neted; peste doi, imbinarile dintre placi devin praguri (memoria
 ## `suprafete-din-placi-plane`).
-const SERVICE_STEP: float = 1.6
+const SERVICE_STEP: float = 1.2
 ## Cati metri de pasaj mai raman fara parapet DUPA capatul ocolului, pe partea
 ## pe care el se intoarce in banda directa.
 ##
-## Fereastra de desprindere e simetrica geometric, dar manevra nu e: la
-## intrare ocolul se departeaza de banda si ai toata lungimea lui ca sa treci
-## pe el, iar la iesire se apropie si ajungi pe pasaj inca la 4 m de axa. Fara
-## marginea asta de scurgere, parapetul pasajului reincepea exact in capatul
-## ocolului si sonda a masurat rezultatul: masina se oprea in el la z=-18, cu
-## ocolul terminat si banda directa la un metru.
-const MERGE_RUNOUT: float = 8.0
+## [b]Zero de cand ocolul e facut din arce.[/b] Marginea de scurgere a existat
+## pentru valul de sinus, care se reintorcea in banda sub 35° si ajungea pe
+## pasaj inca la 4 m de axa: parapetul reincepea exact in capatul ocolului,
+## si sonda masurase masina oprita in el la z=-18. Arcele se inchid TANGENT,
+## deci masina e deja paralela cu banda si la 1.5 m de axa cand ocolul se
+## termina — n-are ce sa mai atinga.
+##
+## Si nu e o curatenie estetica: cati metri de scurgere lasi, atatia metri de
+## buza de pasaj raman fara parapet SI fara rampa alaturi, adica o cadere de
+## 3 m fara nimic in fata ei. Masurat in aceeasi sesiune, pe o varianta cu
+## palier: masina scoasa din al doilea cot a plecat lateral si a cazut exact
+## acolo, y = -0.12, la 2 m dincolo de capatul ocolului.
+const MERGE_RUNOUT: float = 0.0
+## Cat de larga are voie sa fie pana dintre buza pasajului si marginea dinspre
+## drum a ocolului inainte sa fie INCHISA cu parapet in loc sa fie UMPLUTA cu
+## beton (m).
+##
+## Pana aia e triunghiul dintre banda directa si rampa care se desprinde din
+## ea — la un nod rutier adevarat e pavat, si se numeste „gore". Aici nu e
+## realism gratuit, e singura reparatie care tine: fara el, masina scoasa de
+## poarta ajunge exact INTRE cele doua parapete (al pasajului, la 3.6 m, si al
+## ocolului, care fuge in lateral cu ~40°) si intra intr-un fund de sac care
+## se ingusteaza in fata ei. Sonda a masurat-o acolo, 32 s, zbatandu-se intre
+## „fata-dr(ServiceRamp)" si „dr(Deck)". Cu triunghiul pavat, acelasi loc e
+## asfalt: masina calca pe el si intra pe ocol virand, nu manevrand.
+##
+## Dincolo de latimea asta pana chiar e o gaura de 3 m, si acolo se pune
+## parapetul — botul de beton dintre banda si rampa, ca in realitate.
+const GORE_MAX: float = 12.0
 
 enum State {
 	OPEN,           ## tronsonul continua pasajul
@@ -114,7 +136,9 @@ enum State {
 ## Lungimea golului = lungimea tronsonului (m).
 @export_range(4.0, 30.0, 0.1) var span_length: float = 11.84
 ## Cat pasaj construieste hazardul dincolo de fiecare buza (m).
-@export_range(4.0, 60.0, 0.5) var deck_run: float = 20.0
+## Nu poate fi mai mic decat `service_lead`: ocolul se desprinde de pe pasaj,
+## deci pasajul trebuie sa ajunga pana acolo.
+@export_range(4.0, 60.0, 0.5) var deck_run: float = 34.0
 ## Cat de sus sta pasajul fata de originea nodului (m). Pe pista adevarata
 ## rampa e deja sus si asta ramane 0; in sonda ridica modulul deasupra
 ## soselei-test, ca golul sa fie gol.
@@ -132,16 +156,71 @@ enum State {
 @export_range(2.0, 80.0, 0.5) var ramp_run: float = 24.0
 
 @export_group("Rampa de serviciu")
+## [b]Cele doua cifre de mai jos SUNT contractul de pedeapsa.[/b] Brief §3 si
+## §2 randul F: „inchis -> rampa de serviciu (+3 s)". Pedeapsa NU se ia din
+## franare impusa si nici dintr-o suprafata lenta pusa acolo doar ca sa manance
+## timp — alea ar fi o taxa lipita peste gimmick, si jucatorul ar simti mana
+## autorului. Se ia din DRUM: cotul iese mai departe si se strange mai tare,
+## deci ridici piciorul si mergi mai mult.
+##
+## [b]De ce forma s-a schimbat (si de ce „mai lung" nu era raspunsul).[/b]
+## Prima versiune era un val de sinus, 9 m lateral pe 40 m de z, si costa
+## +1.90 s masurat — 63% din contract. Aritmetica spune de ce, si spune si ca
+## nu se repara lungind ocolul. Un ocol parcurs la limita de aderenta costa
+## `integrala ds / sqrt(a*R(s))`, iar pentru un val de sinus integrala aia iese
+## `2.39 * sqrt(A/a)` — [b]nu depinde deloc de lungime[/b]: sinusul isi petrece
+## metrii acolo unde e aproape drept si nu te incetineste. Cum linia dreapta
+## de alaturi se lungeste si ea, un ocol de sinus mai lung costa MAI PUTIN,
+## nu mai mult. Masurat exact asa: 9 m pe 40 m -> +1.90 s.
+##
+## Forma care chiar costa e cea cu [b]curbura constanta[/b]: trei arce de
+## cerc (stanga φ, dreapta 2φ, stanga φ) in loc de val. Un arc te tine la
+## `sqrt(a*R)` pe toata lungimea lui, nu doar in varf. La aceleasi gabarite
+## (9 m pe 40 m) arcele dau R = 13.3 m in loc de 17.9 si +2.70 s in loc de
+## +0.97 din model — aceeasi cutie, alt pret, fiindca timpul nu se cumpara cu
+## metri, ci cu metri INTORSI.
+##
+## Raza si unghiul nu se mai regleaza separat: din `service_offset` (A) si din
+## lungimea ocolului (`dz = 2*(span_length/2 + service_lead)`) ies singure
+## `tan(φ/2) = 2A/dz` si `R = (dz^2 + 4A^2) / (16A)` — arcele cele mai LARGI
+## care mai incap in cutia data. O raza mai mica ar incapea si ea (cu o
+## portiune dreapta la mijloc), dar portiunea dreapta e exact locul in care
+## masina accelereaza inapoi: o versiune cu palier a fost masurata in aceeasi
+## sesiune si a iesit din al doilea cot cu 17 m/s, s-a invartit si a cazut de
+## pe pasaj (y = -0.12). Palierul da timp la calcul si accidente pe pista.
+##
 ## Pe ce parte ocoleste golul: +1 dreapta, -1 stanga sensului de mers.
 @export_enum("Dreapta:1", "Stanga:-1") var service_side: int = 1
 ## Cat de departe iese cotul, masurat de la marginea pasajului (m).
-@export_range(0.0, 40.0, 0.5) var service_offset: float = 9.0
+@export_range(0.0, 40.0, 0.5) var service_offset: float = 24.0
 ## Latimea rampei de serviciu (m). Mai ingusta decat pasajul: si asta e o
 ## parte din pretul ocolului.
 @export_range(3.0, 20.0, 0.1) var service_width: float = 5.0
 ## Cu cati metri inainte de buza se desprinde ocolul (si dupa cealalta buza
-## se intoarce).
-@export_range(2.0, 60.0, 0.5) var service_lead: float = 14.0
+## se intoarce). Impreuna cu `service_offset` fixeaza raza arcelor (vezi mai
+## sus). `deck_run` trebuie sa fie cel putin atat — ocolul se desprinde de pe
+## pasaj, deci pasajul trebuie sa ajunga pana acolo.
+@export_range(2.0, 60.0, 0.5) var service_lead: float = 30.0
+## Cat din suma razelor primeste cotul de INTRARE (si cel de iesire), restul
+## mergand la arcul din mijloc. 0.5 = trei arce cu aceeasi raza.
+##
+## [b]Nu e un reglaj de gust: cele doua capete ale ocolului au sarcini
+## diferite.[/b] Cotul de intrare e locul in care se SCHIMBA BANDA — cu cat e
+## mai larg, cu atat ocolul sta mai mult lipit de pasaj, fereastra de
+## desprindere e mai lunga si linia de bariere are unde sa te scoata lin.
+## Arcul din mijloc e cel care trece pe langa gol si care PLATESTE pedeapsa,
+## deci il vrem stramt.
+##
+## Si nu costa nimic sa dai unuia din celalalt: suma razelor e fixata de cutie
+## (`R1 + R2 = dz / (2 sin φ)`), deci fiecare metru dat cotului de intrare il
+## ia arcul din mijloc, care se stramteaza si incetineste mai tare. Intrare
+## blanda, mijloc stramt — amandoua in favoarea noastra.
+##
+## Cu 0.5 (trei arce egale) sonda a masurat si capatul celalalt al
+## compromisului: mijlocul se largeste, pedeapsa scade, iar fereastra de
+## desprindere se scurteaza atat incat masina imbrancita de poarta ramane in
+## gura devierii.
+@export_range(0.5, 0.9, 0.01) var service_entry_ratio: float = 0.58
 ## Inaltimea parapetului de pe marginile ocolului (m). 0 = fara.
 ##
 ## Nu e decor. Ocolul e o banda ingusta care iese in consola de pe un pasaj
@@ -197,18 +276,34 @@ enum State {
 ## pe roti, iar o linie oblica cu frecare normala te OPRESTE in loc sa te
 ## aluneca — vezi `gate_skew_deg`.
 @export_range(0.0, 1.0, 0.01) var gate_friction: float = 0.05
-## Cu cati metri inaintea buzei sta poarta.
+## Cu cati metri DUPA desprinderea ocolului sta linia de bariere.
 ##
-## Valoarea e o DORINTA, nu o pozitie finala: `_gate_z()` o aduce inauntrul
-## ferestrei in care ocolul e lipit de pasaj. Poarta pusa dupa desprinderea
-## ocolului inchide un fund de sac — masina care a ignorat semaforul se
-## opreste intre bariere si parapeti, cu ocolul deja in spate, si singura
-## iesire ar fi mersul in marsarier. Peste ramificatie, aceeasi linie oblica
-## e o palnie: te freci de ea si te scoate pe ocol.
-@export_range(0.5, 30.0, 0.5) var gate_lead: float = 3.0
+## [b]Se masoara de la desprindere, nu de la buza golului, si sta cat mai sus
+## cu putinta.[/b] Multa vreme poarta a stat la capatul de JOS al ferestrei de
+## desprindere — singurul loc in care ocolul se departase destul cat sa fie
+## barata banda directa fara sa fie barat si el. Dar exact acolo ocolul se
+## abate cu ~40° de la banda, iar o linie de bariere nu poate arunca o masina
+## pe o rampa care fuge lateral mai repede decat poate ea vira: sonda a masurat
+## masina oprita in gura devierii, cu 15-30 s pierdute in manevre.
+##
+## Sus, langa desprindere, ocolul se abate cu ~10° si masina aluneca pe el
+## firesc. Ca sa poata sta acolo, poarta isi aduce cu ea si peretele lateral
+## (`_build_gate_taper`), care e tot al PORTII — apare si dispare cu ciclul —
+## si de aceea are voie sa stea peste banda directa, unde un parapet fix ar fi
+## un zid permanent pe drum.
+@export_range(0.5, 30.0, 0.5) var gate_lead: float = 6.0
 ## Cat poate intarzia inchiderea unei porti peste care sta o masina (s).
 ## Aceeasi usa cu senzor ca la telecabina: colizorul nu apare sub nimeni.
 @export_range(0.0, 4.0, 0.05) var gate_hold_max: float = 1.5
+## Cu cati metri se retrage linia de bariere de la marginea dinspre drum a
+## rampei de serviciu (m) — adica cat de larga ramane gura devierii.
+##
+## Poarta si peretele ei lateral merg lipite de marginea ocolului, si „lipite"
+## inseamna, pentru o masina de doi metri care intra virand, exact pe linia ei.
+## Sonda a masurat pretul cand jocul a fost zero: masina care lua ocolul CORECT
+## se freca de perete si cobora la 6.8 m/s prin gura devierii, adica pedeapsa
+## nu mai venea din drum, ci dintr-un zid.
+@export_range(0.0, 4.0, 0.1) var gate_clearance: float = 0.3
 ## Cat de GROS e colizorul portii (m). Nu e o alegere estetica, e o conditie
 ## de tunelare: la 30 m/s masina inainteaza 0.5 m intre doua cadre de fizica,
 ## iar un colizor de 0.5 m (cat barierele in sine) o lasa sa treaca prin el
@@ -232,6 +327,7 @@ enum State {
 var _span: AnimatableBody3D
 var _gate: StaticBody3D
 var _gate_shape: CollisionShape3D
+var _gate_shapes: Array[CollisionShape3D] = []
 var _gate_zone: Area3D
 var _gate_meshes: Array[Node3D] = []
 var _lamp: HazardLamp
@@ -343,7 +439,8 @@ func _tick_gate(delta: float, frac: float) -> void:
 	elif _gate_shape.disabled and not _cars_in_gate().is_empty() 			and _gate_hold < gate_hold_max:
 		_gate_hold += delta
 		want = false
-	_gate_shape.disabled = not want
+	for sh in _gate_shapes:
+		sh.disabled = not want
 	for m in _gate_meshes:
 		m.visible = frac > 0.02
 
@@ -424,25 +521,125 @@ func _lip_near() -> float:
 	return span_length * 0.5
 
 
+## Lungimea ocolului pe axa drumului (m): de la desprindere pana la reintrare.
+func _service_span() -> float:
+	return 2.0 * (_lip_near() + service_lead)
+
+
+## Unghiul maxim cu care ocolul se abate de la banda directa (rad).
+##
+## Nu se alege: iese din cutie. Cu `A = service_offset` si `dz` lungimea
+## ocolului, cele trei arce inchid figura doar daca `tan(φ/2) = 2A/dz`.
+func _service_turn() -> float:
+	if service_offset <= 0.01:
+		return 0.0
+	return 2.0 * atan(2.0 * service_offset / _service_span())
+
+
+## Suma razelor (m). Si ea iese din cutie: `R1 + R2 = dz / (2*sin φ)`.
+## Ce se poate alege e doar IMPARTIREA ei — vezi `service_entry_ratio`.
+func _radius_sum() -> float:
+	var phi := _service_turn()
+	if phi <= 0.001:
+		return INF
+	return _service_span() / (2.0 * sin(phi))
+
+
+## Raza cotului de intrare si de iesire (m): cat de repede se desprinde
+## ocolul de banda directa.
+func entry_radius() -> float:
+	var sum := _radius_sum()
+	return INF if is_inf(sum) else sum * service_entry_ratio
+
+
+## Raza arcului din mijloc (m) — cel care trece pe langa gol si care fixeaza
+## viteza pe ocol.
+func service_radius() -> float:
+	var sum := _radius_sum()
+	return INF if is_inf(sum) else sum * (1.0 - service_entry_ratio)
+
+
+## Viteza la care aderenta mai tine masina pe arcul din mijloc (m/s), cu
+## acceleratia laterala data. Nu e o limita impusa de cod — nimeni nu frineaza
+## masina — e cifra pe care o citeste soferul din geometrie.
+func service_speed(lateral_accel: float = 16.0) -> float:
+	var r := service_radius()
+	return INF if is_inf(r) else sqrt(lateral_accel * r)
+
+
+## Profilul lateral al ocolului: ce fractie din `service_offset` e atinsa la
+## fractia `u` de lungime (0 = desprinderea, 1 = reintrarea).
+##
+## Trei arce de cerc: `φ` intr-un sens pe raza de intrare, `2φ` in celalalt pe
+## raza din mijloc, `φ` inapoi pe raza de intrare — adica o schimbare de banda
+## dusa pana la capat si intoarsa. Se desprinde si se reintoarce TANGENT la
+## banda directa (spre deosebire de valul de sinus de la prima versiune, care
+## pleca sub 35°), deci intrarea pe ocol e o manevra de schimbare de banda,
+## nu o smucitura.
+func _profile(u: float) -> float:
+	if service_offset <= 0.01:
+		return 0.0
+	var dz := _service_span()
+	var amp := service_offset
+	var phi := _service_turn()
+	var r1 := entry_radius()
+	var r2 := service_radius()
+	var q := r1 * sin(phi) # lungimea unui cot de intrare, pe axa drumului
+	var zeta := clampf(u, 0.0, 1.0) * dz
+	var h := 0.0
+	if zeta <= q:
+		h = r1 - sqrt(maxf(r1 * r1 - zeta * zeta, 0.0))
+	elif zeta >= dz - q:
+		var d := dz - zeta
+		h = r1 - sqrt(maxf(r1 * r1 - d * d, 0.0))
+	else:
+		var e := zeta - dz * 0.5
+		h = (amp - r2) + sqrt(maxf(r2 * r2 - e * e, 0.0))
+	return clampf(h / amp, 0.0, 1.0)
+
+
 ## Fereastra (|z| minim, |z| maxim) in care ocolul e destul de aproape de
 ## pasaj ca sa poti trece de pe unul pe altul. In afara ei intre cele doua
 ## benzi e aer, deci acolo pasajul are parapet.
 ##
-## Geometria e explicita, nu esantionata: ocolul are axa la
-## `road_half_width*0.45 + service_offset*sin(u*PI)` de la centru, deci
-## marginea lui dinspre drum e la atat minus jumatate din latime. Fereastra e
-## multimea de u pentru care marginea aia n-a depasit inca buza pasajului.
-## Gol daca ocolul nu se desprinde niciodata (e lipit tot drumul).
+## Se cauta prin esantionare, nu prin `asin`: profilul nu mai e un sinus, ci
+## trei arce lipite, iar formula scrisa pentru sinus ar fi raspuns in
+## continuare — doar gresit, si fara sa se planga.
+## Fereastra e multimea de u pentru care marginea dinspre drum a ocolului
+## n-a depasit inca buza pasajului. Gol daca ocolul nu se desprinde niciodata.
+## Fereastra (|z| minim, |z| maxim) pe care pana dintre pasaj si ocol e destul
+## de ingusta cat sa fie pavata (vezi `GORE_MAX`). Contine intotdeauna
+## fereastra de desprindere, si se intinde mai jos decat ea.
+func _gore_window() -> Array[float]:
+	if service_offset <= 0.01:
+		return []
+	var z_in := _lip_near() + service_lead
+	var edge := road_half_width + 0.18
+	var n := 400
+	var lo := -1.0
+	for i in n + 1:
+		var u := 0.5 * float(i) / float(n)
+		var inner := road_half_width * 0.45 + service_offset * _profile(u) 			- service_width * 0.5
+		if inner - edge > GORE_MAX:
+			lo = z_in * (1.0 - 2.0 * u)
+			break
+	if lo < 0.0:
+		lo = -z_in # ocolul nu se departeaza niciodata atat: pavat pe tot
+	return [lo, z_in]
+
+
 func _merge_window() -> Array[float]:
 	if service_offset <= 0.01:
 		return []
 	var z_in := _lip_near() + service_lead
-	var reach := road_half_width + 0.2 + service_width * 0.5 - road_half_width * 0.45
-	var k := reach / service_offset
-	if k >= 1.0:
-		return [] # ocolul ramane lipit de pasaj pe toata lungimea
-	var u0 := asin(clampf(k, -1.0, 1.0)) / PI
-	return [z_in * (1.0 - 2.0 * u0), z_in]
+	var lim := road_half_width + 0.2
+	var n := 400
+	for i in n + 1:
+		var u := 0.5 * float(i) / float(n)
+		var inner := road_half_width * 0.45 + service_offset * _profile(u) 			- service_width * 0.5
+		if inner > lim:
+			return [z_in * (1.0 - 2.0 * u), z_in]
+	return [] # ocolul ramane lipit de pasaj pe toata lungimea
 
 
 ## Cat de departe de axa e AXA ocolului la un z dat (m), si cat de departe e
@@ -454,7 +651,7 @@ func _service_center_mag(z: float) -> float:
 	if absf(z) > z_in:
 		return INF
 	var u := (z_in - z) / (2.0 * z_in)
-	return road_half_width * 0.45 + service_offset * sin(u * PI)
+	return road_half_width * 0.45 + service_offset * _profile(u)
 
 
 func _service_inner_mag(z: float) -> float:
@@ -464,11 +661,10 @@ func _service_inner_mag(z: float) -> float:
 
 ## Unde sta efectiv linia de bariere (z local). Vezi nota de la `gate_lead`.
 func _gate_z() -> float:
-	var z := _lip_near() + gate_lead
 	var win := _merge_window()
-	if win.size() == 2 and win[1] - win[0] > 2.0:
-		z = clampf(z, win[0] + 1.0, win[1] - 1.0)
-	return z
+	if win.size() != 2 or win[1] - win[0] <= 2.0:
+		return _lip_near() + gate_lead
+	return clampf(win[1] - gate_lead, win[0] + 1.0, win[1] - 1.0)
 
 
 ## Pasajul de pe cele doua buze plus rampele de racord.
@@ -500,9 +696,11 @@ func _build_decks() -> void:
 ## Rampa de serviciu: un cot care iese lateral inainte de buza, trece pe langa
 ## gol si se intoarce pe pasaj dupa cealalta buza.
 ##
-## Costul ei nu e lungimea in plus (cativa metri), ci VIRAJELE: doua coturi pe
-## o banda mai ingusta te obliga sa ridici piciorul, si de acolo vin secundele
-## din contractul de pedeapsa. Sonda le masoara.
+## Costul lui are doua parti si nici una nu e o taxa: COTURILE (doua, pe o
+## banda mai ingusta, te obliga sa ridici piciorul) si PALIERUL dintre ele —
+## zecile de metri pe care le faci cu viteza scoasa de primul cot, inainte sa
+## te lase al doilea sa accelerezi. Contractul din brief (+3 s) se plateste
+## din a doua parte; prima singura daduse 1.90 s. Sonda masoara suma.
 func _build_service() -> void:
 	if service_offset <= 0.01:
 		return
@@ -520,17 +718,18 @@ func _build_service() -> void:
 	for i in n + 1:
 		var u := float(i) / float(n)
 		var z := lerpf(z_in, z_out, u)
-		# Cotul: o SINGURA functie neteda intre cele doua racorduri, deci
-		# nicio imbinare de portiuni care sa lase prag (memoria
-		# `suprafete-din-placi-plane`).
-		var bulge := sin(u * PI)
-		var x := side * (road_half_width * 0.45 + service_offset * bulge)
+		# Cotul: o singura functie CONTINUA IN PANTA intre cele doua racorduri
+		# (`_profile`), deci nicio imbinare de portiuni care sa lase prag sau
+		# frantura (memoria `suprafete-din-placi-plane`).
+		var x := side * (road_half_width * 0.45 + service_offset * _profile(u))
 		pts.append(Vector3(x, deck_rise, z))
 	_service_points = pts
 	var half_w := service_width * 0.5
-	# Fereastra de desprindere: singurul loc in care marginea dinspre drum a
-	# ocolului n-are voie sa aiba parapet.
-	var win := _merge_window()
+	# Pana pavata dintre pasaj si ocol (vezi `GORE_MAX`): tot pe lungimea ei
+	# marginea dinspre drum a ocolului da in beton, nu in gol, deci nici acolo
+	# nu primeste parapet.
+	var gore := _gore_window()
+	var edge := road_half_width + 0.18
 	for i in n:
 		var a := pts[i]
 		var b := pts[i + 1]
@@ -540,33 +739,44 @@ func _build_service() -> void:
 			continue
 		var lat := Vector3(-dir.z, 0.0, dir.x).normalized() * half_w
 		_slab(st, body, a - lat, a + lat, b + lat, b - lat)
+		_gore_slab(st, body, a, b, half_w, edge, gore)
 		# Parapetul creste doar unde marginea a IESIT de pe pasaj: peste
 		# carosabil ar fi un zid fix pe banda directa, iar in consola e
 		# singurul lucru care tine masina pe ocol.
 		for edge_sign: float in [-1.0, 1.0]:
 			var ea := a + lat * edge_sign
 			var eb := b + lat * edge_sign
-			if absf(ea.x) <= road_half_width + 0.2 					or absf(eb.x) <= road_half_width + 0.2:
-				continue
-			# Marginea dinspre axa drumului e cea pe care se INTRA pe ocol.
-			# Un parapet acolo, unde ocolul tocmai se desprinde, e un zid pus
-			# de-a curmezisul manevrei de schimbare de banda — sonda a oprit
-			# masina in capatul lui, la 6 m de gol. Deci pe partea dinspre drum
-			# parapetul lipseste EXACT pe fereastra de desprindere, si exista
-			# peste tot in rest.
-			#
-			# „In rest" a insemnat initial doar in dreptul golului (|z| sub
-			# lip+2), si intre el si fereastra ramanea o pana de AER: ocolul se
-			# departeaza de pasaj mai repede decat isi ia parapetul, deci la
-			# z = 8..13 exista un culoar de ~3 m intre buza pasajului si
-			# marginea ocolului, fara nimic dedesubt. Sonda a cazut fix in el
-			# (masina scoasa din bariere, y de la 3.0 la 1.39, rasturnata la
-			# up.y 0.57). Parapetul urca acum pana la buza ferestrei.
 			var outer := absf(ea.x) > absf(a.x)
-			var inner_free: float = win[0] if win.size() == 2 else _lip_near() + 2.0
-			if not outer and absf((ea.z + eb.z) * 0.5) > inner_free:
-				continue
+			var z_mid := absf((ea.z + eb.z) * 0.5)
+			var inner_free: float = gore[0] if gore.size() == 2 else _lip_near() + 2.0
+			if outer:
+				# Marginea dinspre gol: parapet peste tot unde a IESIT de pe pasaj.
+				# Peste carosabil ar fi un zid fix pe banda directa.
+				if absf(ea.x) <= edge and absf(eb.x) <= edge:
+					continue
+			else:
+				# Marginea dinspre axa drumului e cea pe care se INTRA pe ocol, si
+				# ea are un singur reper: POARTA.
+				#
+				# In amonte de poarta lipseste — acolo schimbi banda, si un parapet
+				# ar fi un zid de-a curmezisul manevrei (sonda a oprit masina in
+				# capatul lui, la 6 m de gol, cand incepea mai devreme).
+				#
+				# Din dreptul portii in aval exista FARA INTRERUPERE, si se leaga de
+				# capatul dinspre ocol al liniei de bariere: acolo marginea dinspre
+				# drum a ocolului si capatul portii sunt, prin constructie, acelasi
+				# punct. Peretele iese astfel dintr-o bucata — banda inchisa pe o
+				# parte, devierea pe cealalta — si masina imbrancita de poarta nu mai
+				# are pe unde sa treaca pe partea gresita a lui.
+				#
+				# Cat a fost o bucata cu o fanta de un metru intre capatul portii si
+				# inceputul parapetului, sonda a masurat exact ce inseamna fanta: la
+				# 25 m/s masina trecea prin ea in doua cadre si ajungea in pana
+				# dintre banda si rampa, unde a stat 32 s.
+				if z_mid > inner_free:
+					continue
 			_parapet(st, body, ea, eb)
+	_gore_nose(st, body, gore, edge)
 	var mi := PaletteBox.emit(st, "ServiceMesh")
 	if mi != null:
 		# Cu 2 cm sub pasaj: capetele ocolului se suprapun peste carosabil, iar
@@ -577,12 +787,78 @@ func _build_service() -> void:
 		body.add_child(mi)
 
 
+## Pana pavata dintre buza pasajului si marginea dinspre drum a ocolului, pe
+## o portiune de ocol. Nu face nimic acolo unde ocolul e inca peste pasaj (n-au
+## ce sa lege) sau unde s-a departat prea mult (acolo e gol, si primeste
+## parapet, nu beton).
+func _gore_slab(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
+		half_w: float, edge: float, gore: Array[float]) -> void:
+	if gore.size() != 2:
+		return
+	var side := signf(float(service_side))
+	var mag_a := absf(a.x) - half_w
+	var mag_b := absf(b.x) - half_w
+	if mag_a <= edge and mag_b <= edge:
+		return # ocolul e inca peste carosabil
+	var z_mid := absf((a.z + b.z) * 0.5)
+	if z_mid < gore[0] or z_mid > gore[1]:
+		return
+	var ia := maxf(mag_a, edge)
+	var ib := maxf(mag_b, edge)
+	# Colturile in ordinea „de la x mic la x mare" pe capatul dinspre venire,
+	# ca fata de sus sa iasa cu normala in sus (acelasi tipar ca la placile
+	# ocolului).
+	var lo_a := Vector3(minf(side * ia, side * edge), a.y, a.z)
+	var hi_a := Vector3(maxf(side * ia, side * edge), a.y, a.z)
+	var lo_b := Vector3(minf(side * ib, side * edge), b.y, b.z)
+	var hi_b := Vector3(maxf(side * ib, side * edge), b.y, b.z)
+	_slab(st, body, lo_a, hi_a, hi_b, lo_b)
+
+
+## Botul de beton din capatul penei pavate, pe amandoua jumatatile.
+##
+## Pana se termina acolo unde ocolul s-a departat de pasaj cu `GORE_MAX`, si
+## dincolo de capatul ei e gol de 3 m. Fara peretele asta de-a curmezisul,
+## masina care se freaca de parapetul benzii inchise merge pe pana pana se
+## termina si CADE — masurat: iesita la x=-5, y de la 3 la 0, cu 32 s pierdute
+## in vale. Cu el, se opreste in bot, ca in realitate, si vireaza pe ocol
+## avand toata latimea penei la dispozitie.
+func _gore_nose(st: SurfaceTool, body: StaticBody3D, gore: Array[float],
+		edge: float) -> void:
+	if gore.size() != 2 or service_offset <= 0.01:
+		return
+	var side := signf(float(service_side))
+	for sign_z: float in [1.0, -1.0]:
+		var z := sign_z * gore[0]
+		var inner := _service_inner_mag(z)
+		if is_inf(inner) or inner <= edge + 0.2:
+			continue
+		# Botul se opreste cu un metru INAINTE de marginea ocolului. Capatul lui
+		# lipit de ea sta chiar pe linia pe care intra masina care ia devierea
+		# corect, iar sonda a masurat-o acolo: viteza minima pe ocol cadea de la
+		# 14.6 la 6.8 m/s, adica pretul ocolului incepea sa fie dat de un colt de
+		# beton. Metrul lasat liber nu deschide nicio scurtatura — pe langa bot se
+		# intra tot pe ocol.
+		_parapet(st, body, Vector3(side * edge, deck_rise, z),
+			Vector3(side * (inner - 1.0), deck_rise, z))
+
+
 ## Parapetii unei portiuni de pasaj, pe amandoua marginile, in pasi de ~2 m
 ## ca sa poata lipsi exact peste fereastra de desprindere a ocolului.
 func _deck_parapets(st: SurfaceTool, body: StaticBody3D, za: float, zb: float,
 		sign_z: float, ya: float, yb: float) -> void:
 	if deck_parapet <= 0.01:
 		return
+	# Parapetul pasajului lipseste EXACT cat tine fereastra de desprindere —
+	# nici un metru mai mult. Pe portiunea aia treci de pe banda pe ocol; sub
+	# ea, acelasi parapet e peretele care desparte banda inchisa de deviere,
+	# si el e cel care tine masina scoasa de poarta pe ocol.
+	#
+	# S-a incercat, in aceeasi sesiune, sa lipseasca pe toata pana pavata: cu
+	# peretele ala scos, masina imbrancita de poarta la x=-5 s-a intors linistit
+	# pe banda directa si a mers pana in tronsonul rotit, unde s-a oprit cu botul
+	# in el, pe buza golului (y min 2.74, rasturnata pe 0.80). Devierea nu mai
+	# devia.
 	var win := _merge_window()
 	var side := signf(float(service_side))
 	var hw := road_half_width + 0.18
@@ -714,7 +990,9 @@ func _build_gate() -> void:
 	var inner := _service_inner_mag(gz)
 	var near_x := side * (road_half_width + 0.3)
 	if not is_inf(inner) and inner < road_half_width:
-		near_x = side * maxf(inner, -road_half_width)
+		# Capatul dinspre ocol se opreste cu `gate_clearance` metri INAINTE de
+		# marginea lui, ca gura devierii sa ramana mai lata decat masina.
+		near_x = side * maxf(inner - gate_clearance, -road_half_width)
 	var center_x := (far_x + near_x) * 0.5
 	_gate.transform = Transform3D(basis, Vector3(center_x, deck_rise, gz))
 	# Linia oblica trebuie sa fie o PANTA, nu un zid: cu frecarea implicita
@@ -734,6 +1012,7 @@ func _build_gate() -> void:
 	_gate_shape.position = Vector3(0.0, 0.65, 0.0)
 	_gate_shape.disabled = true
 	_gate.add_child(_gate_shape)
+	_gate_shapes.append(_gate_shape)
 
 	var scene := barrier_model if barrier_model != null else load(BARRIER_MODEL) as PackedScene
 	var count := maxi(int(ceil(width / BARRIER_WIDTH)), 1)
@@ -753,6 +1032,8 @@ func _build_gate() -> void:
 		_gate.add_child(piece)
 		_gate_meshes.append(piece)
 
+	_build_gate_taper(basis, center_x, gz, scene)
+
 	# Zona senzorului: mai groasa decat poarta, ca sa vada masina care tocmai
 	# o strabate.
 	_gate_zone = Area3D.new()
@@ -765,6 +1046,79 @@ func _build_gate() -> void:
 	zs.position = Vector3(0.0, 1.3, 0.0)
 	_gate_zone.add_child(zs)
 	_gate.add_child(_gate_zone)
+
+
+## Peretele lateral al portii: linia de bariere nu se opreste unde se termina
+## banda directa, ci coteste si merge IN AVAL de-a lungul marginii dinspre drum
+## a ocolului, pana acolo unde ocolul a iesit de pe pasaj si parapetul lui fix
+## preia treaba.
+##
+## Asta e ce transforma poarta dintr-un zid intr-o palnie. Fara el, masina
+## alunecata pe linie ajunge, dupa capatul ei, intr-o banda inca deschisa spre
+## gol si trebuie sa vireze singura 40°; cu el, e purtata pe langa un perete
+## care se desface incet (~20°) si iese pe ocol cu viteza in ea.
+##
+## E al PORTII, nu al pasajului: se aprinde si se stinge odata cu ea. De-aia
+## are voie sa taie banda directa — cand tronsonul e la locul lui, peretele nu
+## exista, si drumul e drum.
+func _build_gate_taper(basis: Basis, center_x: float, gz: float,
+		scene: PackedScene) -> void:
+	var win := _merge_window()
+	if win.size() != 2:
+		return
+	var side := signf(float(service_side))
+	var z_end := win[0]
+	if gz - z_end < 1.0:
+		return
+	var steps := maxi(int(ceil((gz - z_end) / 4.0)), 1)
+	var prev := Vector3(side * (_service_inner_mag(gz) - gate_clearance), 0.0, gz)
+	for i in steps:
+		var z := lerpf(gz, z_end, float(i + 1) / float(steps))
+		var inner := _service_inner_mag(z)
+		if is_inf(inner):
+			break
+		var cur := Vector3(side * (inner - gate_clearance), 0.0, z)
+		var seg := cur - prev
+		var length := seg.length()
+		if length < 0.2:
+			prev = cur
+			continue
+		var fwd := seg / length
+		var right := Vector3.UP.cross(fwd).normalized()
+		var mid := (prev + cur) * 0.5
+		# In coordonatele corpului portii (care e deja rotit cu skew).
+		var local := basis.inverse() * (mid - Vector3(center_x, 0.0, gz))
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = Vector3(0.5, 1.3, length + 0.2)
+		shape.shape = box
+		shape.transform = Transform3D(
+			basis.inverse() * Basis(right, Vector3.UP, fwd),
+			local + Vector3.UP * 0.65)
+		shape.disabled = true
+		_gate.add_child(shape)
+		_gate_shapes.append(shape)
+		var count := maxi(int(round(length / BARRIER_WIDTH)), 1)
+		for k in count:
+			var t := (float(k) + 0.5) / float(count)
+			var at := prev.lerp(cur, t)
+			var piece: Node3D = null
+			if scene != null:
+				piece = scene.instantiate() as Node3D
+			if piece != null:
+				piece.scale = Vector3.ONE * model_scale
+				Palette.apply_object_class_materials(piece,
+					WorldProp.prop_classes(), model_scale)
+			else:
+				piece = PaletteBox.instance(
+					Vector3(BARRIER_WIDTH * 0.95, 1.35, 0.3),
+					Palette.KERB_RED, Vector3(0.0, 0.68, 0.0))
+			piece.transform = Transform3D(
+				basis.inverse() * Basis(right, Vector3.UP, fwd),
+				basis.inverse() * (at - Vector3(center_x, 0.0, gz)))
+			_gate.add_child(piece)
+			_gate_meshes.append(piece)
+		prev = cur
 
 
 ## Semaforul de santier, pe marginea dinspre ocol, inaintea portii.
@@ -809,6 +1163,10 @@ func lamp() -> int:
 ## ocolului — sonda are nevoie de amandoua ca sa stie unde sa se uite.
 func gate_z() -> float:
 	return _gate_z()
+
+
+func service_turn() -> float:
+	return _service_turn()
 
 
 func merge_window() -> Array[float]:

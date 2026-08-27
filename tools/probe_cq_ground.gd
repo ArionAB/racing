@@ -1,32 +1,37 @@
 extends Node
-## Cota terenului la offset-uri laterale in dreptul unei fractii.
-##   -- --fracs=0.47,0.50 --offs=-30,-20,-12,-8,8,12,20,30,50
+## Care dintre piesele noi de pe rampa de sus au PAMANT sub ele? Cele care
+## plutesc (drumul e pe viaduct, malul lipseste pe partea deschisa) trebuie
+## scoase sau coborate. Raportam numele si cat de mult atarna in gol.
 func _ready() -> void:
 	await get_tree().process_frame
-	var fracs: Array[float] = []
-	var offs: Array[float] = [-30.0,-20.0,-12.0,-9.0,9.0,12.0,20.0,30.0,50.0]
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--fracs="):
-			for s in arg.trim_prefix("--fracs=").split(","): fracs.append(float(s))
-		if arg.begins_with("--offs="):
-			offs = []
-			for s in arg.trim_prefix("--offs=").split(","): offs.append(float(s))
-	var scene := load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)]) as PackedScene
-	var track := scene.instantiate() as Track
-	get_tree().root.add_child(track)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var r := track.routes[0]
-	var n := r.count()
-	var hdr := "frac    road_y |"
-	for o in offs: hdr += " %7.0f" % o
-	print(hdr)
-	for f in fracs:
-		var i := int(round(f * float(n))) % n
-		var p := r.baked[i]
-		var side := track._side_at(i)
-		var line := "%.3f %6.2f |" % [f, p.y]
-		for o in offs:
-			line += " %7.2f" % track._sampler.ground_y(p.x + side.x * o, p.z + side.z * o)
-		print(line + "   pos(%.1f,%.1f,%.1f) side(%.3f,%.3f)" % [p.x,p.y,p.z,side.x,side.z])
+	var track := (load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)])
+		as PackedScene).instantiate() as Track
+	add_child(track)
+	for _i in 10:
+		await get_tree().process_frame
+	var space := get_viewport().world_3d.direct_space_state
+	var dm := track.find_child("6) Nodul Huangjuewan", true, false)
+	var floating: Array[String] = []
+	var ok := 0
+	for child in dm.get_children():
+		var nm := str(child.name)
+		if not nm.begins_with("casaFmal") and not nm.begins_with("neonF") and not nm.begins_with("felinarF"):
+			continue
+		var p: Vector3 = (child as Node3D).global_position
+		# ignoram propriile corpuri: tragem raza de sub piesa in jos
+		var q := PhysicsRayQueryParameters3D.create(p + Vector3.UP * 1.2, p + Vector3.DOWN * 8.0)
+		var h := space.intersect_ray(q)
+		if h.is_empty():
+			floating.append("%s (nimic sub ea 60 m)" % nm)
+		else:
+			var mount: float = 3.0 if nm.begins_with("neonF") else 0.0
+			var drop: float = p.y - h.position.y - mount
+			if drop > 2.5:
+				floating.append("%s atarna %.1f m peste %s" % [nm, drop, h.collider.name])
+			else:
+				ok += 1
+	print("piese cu sprijin: %d" % ok)
+	print("piese care plutesc: %d" % floating.size())
+	for f in floating:
+		print("   %s" % f)
 	get_tree().quit()

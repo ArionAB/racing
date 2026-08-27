@@ -365,9 +365,9 @@ period = 19.0
 phase = 0.25
 telegraph_lead = 3.0
 road_half_width = 7.0
-tower_offset = 12.0
+tower_offset = 16.0
 tower_side = 1
-hook_radius = 15.0
+hook_radius = 19.0
 load_clearance = 0.5
 
 [node name="Monorail" type="Node3D" parent="."]
@@ -475,10 +475,6 @@ metadata/coliziune = "none"
 transform = Transform3D(-0.996458, 0, -0.084097, 0, 1.000000, 0, 0.084097, 0, -0.996458, 56.631931, 7.088769, 188.235168)
 metadata/coliziune = "none"
 
-[node name="firmaE123" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("41_neonc")]
-transform = Transform3D(-0.993878, 0, -0.110484, 0, 1.000000, 0, 0.110484, 0, -0.993878, 117.975166, 7.726033, 183.501221)
-metadata/coliziune = "none"
-
 [node name="pila124" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
 transform = Transform3D(1.074696, 0, -0.731457, 0, 2.669113, 0, 0.731457, 0, 1.074696, 114.233711, 11.346058, 142.424774)
 metadata/coliziune = "hull"
@@ -513,10 +509,6 @@ metadata/coliziune = "hull"
 
 [node name="pila132" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
 transform = Transform3D(0.304126, 0, 1.263925, 0, 1.896753, 0, -1.263925, 0, 0.304126, 160.581604, 22.492702, 182.798462)
-metadata/coliziune = "hull"
-
-[node name="pila133" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(0.379525, 0, 1.243367, 0, 1.917028, 0, -1.243367, 0, 0.379525, 185.822266, 6.324655, 189.584885)
 metadata/coliziune = "hull"
 
 [node name="pila134" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
@@ -591,16 +583,8 @@ metadata/coliziune = "hull"
 transform = Transform3D(-0.111686, 0, 0.993744, 0, 1.000000, 0, -0.993744, 0, -0.111686, 250.467834, 11.164122, 122.223381)
 metadata/coliziune = "none"
 
-[node name="casaF152" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
-transform = Transform3D(-0.997102, 0, 0.753848, 0, 1.250000, 0, -0.753848, 0, -0.997102, 247.811890, 16.141315, 117.228355)
-metadata/coliziune = "none"
-
 [node name="casaF153" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
 transform = Transform3D(-0.778911, 0, 0.340291, 0, 0.850000, 0, -0.340291, 0, -0.778911, 238.044403, 16.812965, 105.788353)
-metadata/coliziune = "none"
-
-[node name="casaF154" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
-transform = Transform3D(-0.951823, 0, -0.306648, 0, 1.000000, 0, 0.306648, 0, -0.951823, 216.129669, 4.300667, 102.071487)
 metadata/coliziune = "none"
 
 [node name="casaF155" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
@@ -617,14 +601,6 @@ metadata/coliziune = "none"
 
 [node name="casaF158" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
 transform = Transform3D(-0.996753, 0, -0.754310, 0, 1.250000, 0, 0.754310, 0, -0.996753, 153.157501, 28.304848, 122.127213)
-metadata/coliziune = "none"
-
-[node name="casaF159" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
-transform = Transform3D(-0.199538, 0, -0.826247, 0, 0.850000, 0, 0.826247, 0, -0.199538, 148.687775, 29.729258, 124.375076)
-metadata/coliziune = "none"
-
-[node name="casaF160" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
-transform = Transform3D(-0.558277, 0, -0.829654, 0, 1.000000, 0, 0.829654, 0, -0.558277, 138.946198, 7.807607, 138.335495)
 metadata/coliziune = "none"
 
 [node name="casaF161" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
@@ -832,15 +808,7 @@ transform = Transform3D(-0.611627, 0, 1.090143, 0, 1.250000, 0, -1.090143, 0, -0
 metadata/coliziune = "none"
 
 [node name="santier212" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("32_barrier")]
-transform = Transform3D(0.270496, 0, 0.962721, 0, 1.000000, 0, -0.962721, 0, 0.270496, 184.728058, 41.750000, 186.315689)
-metadata/coliziune = "none"
-
-[node name="santier213" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("32_barrier")]
-transform = Transform3D(0.173889, 0, 0.984765, 0, 1.000000, 0, -0.984765, 0, 0.173889, 193.754593, 42.133743, 188.922150)
-metadata/coliziune = "none"
-
-[node name="santier214" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("32_barrier")]
-transform = Transform3D(0.021999, 0, 0.999758, 0, 1.000000, 0, -0.999758, 0, 0.021999, 199.888489, 42.415771, 206.400497)
+transform = Transform3D(0.270496, 0.000000, 0.962721, 0.000000, 1.000000, 0.000000, -0.962721, 0.000000, 0.270496, 184.728058, 43.860000, 186.315689)
 metadata/coliziune = "none"
 
 [node name="masinuta215" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("43_minia")]

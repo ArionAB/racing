@@ -1,6 +1,7 @@
 extends Node
 ## Garda de materiale a celor patru hazarduri de Chongqing: niciunul nu are voie
-## sa aduca un material NOU in scena.
+## sa aduca un material NOU in scena, in afara unui buget declarat de materiale
+## de CLASA (partajate de mai multe mesh-uri), si al unuia singur in total.
 ##
 ## De ce o sonda separata, cand `tools/probe_decor.gd` numara deja materialele
 ## per pista: garda aia masoara pistele care EXISTA. Hazardele astea nu sunt
@@ -35,13 +36,20 @@ func _ready() -> void:
 	print("=== MATERIALELE HAZARDELOR: zero materiale noi ===")
 	_collect_shared()
 	print("  materiale comune cunoscute: %d (atlas + clase de paleta)" % _shared.size())
+	# Al treilea camp e BUGETUL de clase proprii: cate materiale partajate are
+	# voie sa aduca hazardul peste atlasul lumii. Zero e regula; culoarul de
+	# ceata are unu, si e o decizie scrisa in antetul lui — benzile reflectori-
+	# zante de pe repere ard, fiindca „marcajele raman vizibile (emisive slabe)"
+	# din brief nu se poate indeplini cu un atlas care n-are emisie. CLAUDE.md
+	# permite exact asta: „o clasa de assets poate primi un material partajat
+	# deliberat, decis explicit, nu strecurat".
 	for entry: Array in [
-		["Pasajul rotativ", SpanScript],
-		["Macaraua", CraneScript],
-		["Culoarul de ceata", FogScript],
-		["Monorailul", MonoScript],
+		["Pasajul rotativ", SpanScript, 0],
+		["Macaraua", CraneScript, 0],
+		["Culoarul de ceata", FogScript, 1],
+		["Monorailul", MonoScript, 0],
 	]:
-		await _check(entry[0] as String, entry[1] as GDScript)
+		await _check(entry[0] as String, entry[1] as GDScript, entry[2] as int)
 	print("=== %s ===" % ("PICAT: %d verdicte" % _fails if _fails > 0 else "TOATE OK"))
 	get_tree().quit(1 if _fails > 0 else 0)
 
@@ -90,7 +98,7 @@ func _class_names() -> Array[String]:
 	return out
 
 
-func _check(label: String, script: GDScript) -> void:
+func _check(label: String, script: GDScript, budget: int) -> void:
 	var hazard: Node3D = script.new()
 	hazard.name = label.replace(" ", "")
 	add_child(hazard)
@@ -104,13 +112,25 @@ func _check(label: String, script: GDScript) -> void:
 		for m in _materials_of(mi):
 			mats[m] = true
 			if not _shared.has(m):
-				strangers[m] = mi.name
-	print("--- %s: %d mesh-uri, %d materiale distincte" % [label, meshes, mats.size()])
+				strangers[m] = int(strangers.get(m, 0)) + 1
+	print("--- %s: %d mesh-uri, %d materiale distincte (buget de clase proprii: %d)"
+		% [label, meshes, mats.size(), budget])
+	# Un material propriu e acceptabil doar daca e o CLASA: purtat de mai multe
+	# mesh-uri deodata. Unul singur pe un singur mesh e exact „textura proprie
+	# per asset", regula pe care CLAUDE.md o interzice, si e si clasa de
+	# regresie pe care garda per pista o vaneaza (un draw call care nu se
+	# imparte cu nimeni).
+	var per_asset := 0
 	for m in strangers.keys():
-		print("    STRAIN: %s pe nodul %s" % [str(m), strangers[m]])
-	_verdict(strangers.is_empty(),
-		"%s: nu aduce niciun material propriu (%d straine)"
-		% [label, strangers.size()])
+		var users: int = strangers[m]
+		print("    propriu: %s pe %d mesh-uri" % [str(m), users])
+		if users < 2:
+			per_asset += 1
+	_verdict(strangers.size() <= budget,
+		"%s: %d materiale proprii (buget %d)"
+		% [label, strangers.size(), budget])
+	_verdict(per_asset == 0,
+		"%s: niciun material per-asset (toate cele proprii sunt clase)" % label)
 	_verdict(meshes > 0, "%s: chiar a construit ceva (%d mesh-uri)" % [label, meshes])
 	hazard.queue_free()
 	await get_tree().physics_frame

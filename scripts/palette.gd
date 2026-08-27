@@ -922,12 +922,6 @@ static func glow_material_slots(slots: Array, energy: float = 1.2,
 	# incalzeste: cladirea ramane o cladire, dar arde.
 	if multiply:
 		mat.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
-		# CULOAREA DE BAZA TREBUIE SA FIE ALBA la MULTIPLY, altfel materialul
-		# nu face nimic: emisia finala e `emission * textura`, iar cu NEGRU
-		# (bun pentru ADD, unde tocmai negrul opreste aprinderea intregii
-		# piese) produsul e zero pe TOATE sloturile. Masurat: 112 de fatade
-		# „spalate" cu MULTIPLY nu schimbau niciun pixel pe captura.
-		mat.emission = Color.WHITE
 	_glow_mats[key] = mat
 	return mat
 

@@ -171,10 +171,19 @@ func _traffic_node() -> void:
 		_off(_at(f - 0.005), 1.0, 8.6), _yaw_drive(_at(f - 0.005)), 1.0)
 
 	# Cele doua masinute care STRANG fanta, fata in fata pe cele doua benzi.
+	#
+	# Offsetul e 6.2 m, nu 4.8, si nu din estetica. La 4.8 `probe_fanta` masura
+	# 3.20 m liberi, intre lat -1.5 si +1.7: trece gabaritul (2.4 m), dar
+	# ProbeRace seed 2 raporta un blocaj la frac 0.029 cu masina oprita la
+	# lat 1.6 — adica FIX pe buza fantei. AI-ul nu vine prin centrul soselei,
+	# deci o fanta centrata pe ax nu e o decizie pentru el, e o capcana: intra
+	# cu o roata in masinuta si se opreste. La 6.2 m raman 6.0 m liberi, intre
+	# -2.9 si +3.1, iar linia AI-ului e inauntru cu margine de fiecare parte.
+	# Bulevardul are 18 m, deci blocajul tot acopera doua treimi din el.
 	_place("chongqing/vehicles/mini_car_a", "masina_fanta_stanga",
-		_off(st, -1.0, 4.8), _yaw_drive(st) + deg_to_rad(6.0), 1.0)
+		_off(st, -1.0, 6.2), _yaw_drive(st) + deg_to_rad(6.0), 1.0)
 	_place("chongqing/vehicles/mini_car_b", "masina_fanta_dreapta",
-		_off(st, 1.0, 4.8), _yaw_drive(st) - deg_to_rad(6.0), 1.0)
+		_off(st, 1.0, 6.2), _yaw_drive(st) - deg_to_rad(6.0), 1.0)
 
 	# Coada din spatele lor: masinute pe doua randuri, esalonate. Adancimea
 	# blocajului conteaza — un singur rand se trece prin bumping, trei randuri
@@ -213,81 +222,82 @@ func _traffic_node() -> void:
 ## Referinta (bar/B_scari.png): scara de piatra taie panta pe langa drum, iar
 ## de-a lungul ei case vechi cu obloane, rufe intinse, oameni marunti.
 ##
-## Terenul (masurat): pe latura -1 pamantul cade de la 25-40 m offset — 62.3 la
-## 25 m, 61.7 la 40 m pe f=0.07, si tot mai mult mai jos. Aia e panta pe care
-## sta scara. Piesele se aseaza pe `ground_y` real, nu pe cota drumului.
+## CE S-A MASURAT, si de ce prima versiune n-a mers: pe latura -1 terenul e
+## PLAT pana la 28 m (64.0 -> 63.9 la fractia 0.05). Nu exista panta laterala
+## pe care sa curga o scara. Ce coboara aici e DRUMUL — 64 m la 0.05, 56 m la
+## 0.11 — iar terenul coboara odata cu el.
+##
+## Deci scara nu taie panta perpendicular pe drum (n-are ce taia): merge PE
+## LANGA drum, in jos, si fiecare bucata sta pe cota terenului ei. Ordinea
+## laterala e cea din referinta — intai treptele, apoi casele in spatele lor:
+## treptele sunt primul lucru sub tine cand te uiti in stanga.
+##
+## Distantele nu sunt alese pentru inaltime (7.6 m de pravalie incap in frustum
+## la ORICE distanta) ci pentru LATIME: la 11 m lateral o singura pravalie de
+## 7 m umple jumatate de cadru si in loc de un cartier se vede un perete. In
+## referinta casele sunt marunte si multe tocmai fiindca sunt departe.
 func _poi_b_shibati() -> void:
 	_open_section("2) Coborarea Shibati")
 
-	# SCARA. stone_stairway e 10.4 x 7.7 x 12.6 m: o bucata de scara, nu o
-	# scara intreaga. Se insiruie in jos pe panta, fiecare pe cota terenului
-	# ei, ca sa citeasca drept o singura fuga de trepte care coboara.
-	var f := 0.058
-	var lat := 17.0
-	while f < 0.104:
+	# SCARA, langa drum: `stone_stairway` e o BUCATA (10.4 x 12.6 m), deci
+	# pasul e lungimea ei, si fiecare bucata sta pe cota terenului ei.
+	var f := 0.052
+	while f < 0.108:
 		var st := _at(f)
-		var p := _off_ground(st, -1.0, lat)
 		_place("chongqing/structures/stone_stairway", "scara",
-			p, _yaw_to_road(st, -1.0), 1.0)
-		f += 10.5 / _path.total
-		lat += 1.6
+			_off_ground(st, -1.0, _clear(st, 2.0)), _yaw_to_road(st, -1.0), 1.0)
+		f += 12.0 / _path.total
 
-	# Casele de pe marginea scarii. Pe latura scarii, in doua siruri: unul
-	# aproape de drum (peretele de coridor, 7.6 m inaltime = sub plafonul
-	# camerei la 12 m distanta) si unul mai jos pe panta, care se vede PESTE
-	# primul fiindca terenul coboara.
+	# Pravaliile, in doua siruri DINCOLO de scara.
 	var shops := [
 		"chongqing/buildings/shophouse_a", "chongqing/buildings/shophouse_b",
 		"chongqing/buildings/shophouse_c",
 	]
-	var g := 0.052
+	var g := 0.050
 	var k := 0
-	while g < 0.108:
+	while g < 0.110:
 		var st2 := _at(g)
-		# sirul de langa drum
 		_place(shops[k % 3], "pravalie",
-			_off_ground(st2, -1.0, 11.5), _yaw_to_road(st2, -1.0), 1.0)
-		# sirul de jos, decalat, mai departe
+			_off_ground(st2, -1.0, 21.0), _yaw_to_road(st2, -1.0), 1.0)
 		if k % 2 == 0:
 			_place(shops[(k + 1) % 3], "pravalie_jos",
-				_off_ground(st2, -1.0, 27.0),
-				_yaw_to_road(st2, -1.0) + 0.22, 1.0)
-		g += 9.0 / _path.total
+				_off_ground(st2, -1.0, 31.0),
+				_yaw_to_road(st2, -1.0) + 0.25, 1.0)
+		g += 8.5 / _path.total
 		k += 1
 
-	# Rufele pe sarma: intre case, la inaltime de etaj. Sunt „mesh" la
-	# coliziune, dar aici oricum stau la 11 m lateral, deci departe de linia
-	# de curs. In referinta ele sunt ce spune „aici locuieste cineva".
-	var h := 0.056
-	while h < 0.104:
+	# Rufele intre case, la inaltime de etaj: in referinta ele sunt ce spune
+	# „aici locuieste cineva".
+	var h := 0.054
+	while h < 0.106:
 		var st3 := _at(h)
-		var p3 := _off_ground(st3, -1.0, 14.0)
-		p3.y += 3.4
+		var p3 := _off_ground(st3, -1.0, 24.0)
+		p3.y += 3.2
 		_place("chongqing/props/laundry_line", "rufe", p3,
 			_yaw_across(st3), 1.0)
 		h += 13.0 / _path.total
 
-	# HAMALII. Figuranti SUB linia camerei — brief §2 B: „pietonii sunt
-	# figuranti SUB linia camerei — exact unde vede". Stau pe scara si pe
-	# palierele ei, nu pe carosabil.
+	# HAMALII pe scara, sub linia camerei (brief §2 B). Nu pe carosabil: sunt
+	# figuranti, iar un figurant care opreste o masina de cursa e un bug.
 	var porters := [
-		Vector2(0.060, 19.0), Vector2(0.068, 22.5), Vector2(0.074, 20.0),
-		Vector2(0.082, 25.0), Vector2(0.090, 23.0), Vector2(0.098, 27.0),
+		Vector2(0.058, 15.0), Vector2(0.066, 17.5), Vector2(0.072, 16.0),
+		Vector2(0.080, 18.5), Vector2(0.088, 16.5), Vector2(0.096, 19.0),
 	]
 	var m := 0
 	for pp: Vector2 in porters:
 		var st4 := _at(pp.x)
 		_place("chongqing/props/porter", "hamal",
 			_off_ground(st4, -1.0, pp.y),
-			_yaw_across(st4) + deg_to_rad(float(m) * 47.0), 1.0)
+			_yaw_to_road(st4, -1.0) + deg_to_rad(float(m) * 41.0), 1.0)
 		m += 1
 
-	# Lampioanele scarii: sirul de lumini care face scara citibila noaptea.
-	var q := 0.056
-	while q < 0.106:
+	# Lampioanele scarii: sirul de lumini care o face citibila noaptea.
+	var q := 0.054
+	while q < 0.108:
 		var st5 := _at(q)
 		_place("chongqing/props/lamp_lantern_c", "felinar_scara",
-			_off_ground(st5, -1.0, 15.5), _yaw_to_road(st5, -1.0), 1.0)
+			_off_ground(st5, -1.0, _clear(st5, 0.8)),
+			_yaw_to_road(st5, -1.0), 1.0)
 		q += 11.0 / _path.total
 
 

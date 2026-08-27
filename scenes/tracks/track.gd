@@ -1137,7 +1137,7 @@ static func themes() -> Dictionary:
 			# `facet_gate` in shader. Castigul coboara putin fiindca poarta
 			# lasa acum mai putine placi, dar cele care trec raman aprinse.
 			"water_b_glint": 1.9,
-			"water_b_glint_cut": 0.56,
+			"water_b_glint_cut": 0.66,
 			# Cat de INCHISA e apa fata de mal. Nu "inchisa" in absolut: pragul
 			# e un RAPORT, apa <= 0.65 x uscatul din ACELASI cadru, fiindca de
 			# aia citea runda 4 miriste — 42 langa 41, adica aceeasi valoare, si
@@ -1204,7 +1204,12 @@ static func themes() -> Dictionary:
 			# continuarea privirii, deci drumul de sclipiri vine spre camera.
 			# `water_glint_streak` il si lungeste pe axa privirii — pe ecran,
 			# vertical.
-			"water_glint": 0.24,
+			# RUNDA 12: 0.24 -> 0.62. Vezi `facet_lid`: partea luminoasa a
+			# histogramei a fost eliberata de placi ca sa fie a reflexiilor, si
+			# atunci reflexiile chiar trebuie sa o ocupe. Masurat pe pixelii
+			# peste mediana+25: fractia AURIE urca de la 0.2-1% la 2.3-5.1%
+			# (diorama 2.9%), fara ca acoperirea totala sa creasca.
+			"water_glint": 0.62,
 			"water_glint_horizon": 0.30,
 			"water_glint_sharp": 16.0,
 			# CAT de mult din apa e reflexie. Masurat in diorama
@@ -1212,11 +1217,19 @@ static func themes() -> Dictionary:
 			# 11.8% pe cel brun. Sub 0.58 pragul lasa peste 15% si apa devine o
 			# foaie de aur; peste 0.70 scade sub 6% si redevine mata. 0.64 da
 			# 9-11% pe cornisa D.
-			"water_glint_cut": 0.64,
+			# RUNDA 12: 0.64 -> 0.66, impreuna cu `water_b_glint_cut`
+			# (0.56 -> 0.66) si `facet_gate` (0.42 -> 0.60). Glint-ul e mai
+			# puternic acum, deci pragul urca cat sa tina acoperirea acolo unde
+			# o are diorama (4.7%): masurat, 3.1-4.9% pe vederile de cursa.
+			"water_glint_cut": 0.66,
 			# Cat de lungite. 3.2 (incercat intai) trage petele in fasii de zeci
 			# de metri; la 1.4 ies limbi de flacara pe cheiul E. 0.9 le lasa
 			# pete cu coada — alungite pe verticala, dar tot pete.
-			"water_glint_streak": 0.28,
+			# RUNDA 12: 0.28 -> 0.55. Petele masurate de critic ieseau ROTUNDE
+			# (alungire 1.33 fata de 2.24-2.43 in diorama), nu alungite cum
+			# raportase runda 11. Reflexia unei lumini pe apa e o dara pe axa
+			# privitorului, si asta e butonul ei: alungirea urca la 1.6-2.9.
+			"water_glint_streak": 0.55,
 			# Marimea unei reflexii. Vezi nota din shader: la 1.0 (scara
 			# ondulatiei) petele ies de cativa pixeli si in randuri regulate —
 			# masurat pe captura rundei 5, o grila de ferestre aprinse peste
@@ -1250,8 +1263,20 @@ static func themes() -> Dictionary:
 			# 7, doua placi vecine cad mai des in cutii diferite, si diferenta
 			# lor e mai mare. Nu se poate urca la nesfarsit — peste ~1.0 apar
 			# placi negre langa placi albe, adica sah, nu apa.
-			"water_facet": 0.7,
-			"water_facet_count": 4,
+			# RUNDA 12: amplitudinea URCA (0.7 -> 0.95) desi defectul era
+			# „prea multa variatie”. Nu e o contradictie: `facet_calm` de mai
+			# jos schimba DISTRIBUTIA, nu marimea, si strange corpul spre
+			# mijloc. Coborand in schimb amplitudinea s-ar fi sters si coada,
+			# deci si muchia, si suprafata redevenea degradeul neted al
+			# rundelor 8-9. Aici corpul se linisteste si coada isi pastreaza
+			# muscatura: edge% ramane 9.5-12 (diorama 10.3) cu calm4 42-46%.
+			#
+			# Si treptele se INDESESC (4 -> 9): cu 4 trepte, corpul strans de
+			# `facet_calm` tot cadea pe cateva rungi departate una de alta, deci
+			# „linistea” iesea tot tabla de sah, doar cu mai putine culori.
+			# Cu 9, majoritatea placilor cad pe rungi vecine langa mijloc.
+			"water_facet": 0.95,
+			"water_facet_count": 9,
 			# RUNDA 8. 0.17 rad/m inseamna fatete de ~37 m, iar banda de apa
 			# vizibila de pe pod are 60-150 m: doua-patru fatete pe toata
 			# suprafata, adica nici una. In diorama o fateta subintinde cam a
@@ -1310,12 +1335,18 @@ static func themes() -> Dictionary:
 			# scrise fiindca alte teme le folosesc; pe Chongqing `facet_px` le
 			# ia locul (vezi shader: cand e > 0, ramura veche nu mai ruleaza).
 			#
-			# 24 px e citit din bar/E_chei.png, nu ales: acolo lungimea medie de
-			# segment intre doua muchii de luminanta >= 8 e 17.7 px pe
-			# orizontala in prim-plan si 71 px pe banda departata, iar 24 cade
-			# intre ele si tine si de aproape, si departe. Cu mecanismul vechi
-			# (facet_ref 95 / near 16) placile ieseau 89-171 px late in
-			# prim-plan — sub zece placi pe toata apa din cadru, adica pete.
+			# Marimea e citita din bar/E_chei.png, nu aleasa: acolo lungimea
+			# medie de segment intre doua muchii de luminanta >= 8 e 17.7 px pe
+			# orizontala in prim-plan si 71 px pe banda departata. Cu
+			# mecanismul vechi (facet_ref 95 / near 16) placile ieseau 89-171 px
+			# late in prim-plan — sub zece placi pe toata apa din cadru, adica
+			# pete.
+			#
+			# RUNDA 12: corectat comentariul, care spunea „24 px” in timp ce
+			# valoarea scrisa era 16 — inconsecventa semnalata de critic. 16 e
+			# cea masurata: aria medie a fatetei iese 6.0-6.5 px in capturi
+			# fata de 4.9-8.5 px in diorama, deci scara e nimerita si nu ea era
+			# problema rundei 11 (era amplitudinea, reparata prin `facet_calm`).
 			"water_facet_px": 16,
 			# Plafonul micsorarii fata de placa autorata (13.7 m). 32 il lasa
 			# sa coboare la 0.43 m langa camera, adica tot placa, nu granulatie.
@@ -1324,7 +1355,7 @@ static func themes() -> Dictionary:
 			# CARE placi prind lumina, fisura deseneaza pata inauntru. La 0.62
 			# trec cam 38% din placi, si in ele fisura mai taie o data — de
 			# aici acoperirea de 3-10% pe care o are diorama, in loc de 25%.
-			"water_facet_gate": 0.42,
+			"water_facet_gate": 0.60,
 			# RUNDA 10. Butonul care repara defectul care a picat runda 9.
 			# Vezi nota lunga din shader (`facet_aniso`): de pe tablier camera
 			# sta la 3.3 m peste apa, deci proiectia intinde axa radiala de r/h
@@ -1335,12 +1366,22 @@ static func themes() -> Dictionary:
 			# in diorama. 12 e derivat, nu ales: la 150 m lasa celula la ~1.1 m
 			# pe axa radiala, adica tot ~10 px pe ecran — cat sa se vada muchia,
 			# prea putin cat sa se citeasca fir.
-			# RUNDA 11: semnul corectat in shader (placa se LUNGESTE radial,
-			# nu se scurteaza). Cu semnul vechi orice valoare > 1 inrautatea
-			# lucrurile, de-aia 12 dadea aschii. Acum 24 e chiar alungirea
-			# ceruta de proiectie la ~80 m de pe tablier; peste ea placa ar
-			# deveni dunga in lume.
-			"water_facet_aniso": 24.0,
+			# RUNDA 12: STINS, si nu fiindca ar fi reglat prost — fiindca
+			# premisa lui e gresita, iar rundele 10 si 11 au discutat doar
+			# semnul ei. Amandoua au cerut ca fateta sa iasa PATRATA PE ECRAN.
+			# Dar bar/E_chei.png e o suprafata 3D fotografiata: fatetele ei
+			# sunt cam echilaterale IN LUME, iar perspectiva le turteste pe
+			# ecran — si tocmai turtirea aia e semnalul „planul asta e
+			# orizontal si se departeaza”. Corectand-o, o placa patrata pe
+			# ecran devine o PANGLICA in lume, si o panglica orientata radial
+			# se citeste ca pensulatie. Se vede direct pe captura, la orice
+			# semn: prim-planul de sub tablier iesea in dungi verticale (r10 le
+			# facea aschii transversale, r11 dungi radiale — aceeasi eroare, in
+			# oglinda), iar zona de mai departe, unde raportul cerut e mic si
+			# corectia aproape nu lucra, era chiar singura care arata a apa.
+			# Cu 1.0 placa ramane echilaterala in lume peste tot si se
+			# scurteaza pe ecran cat cere distanta, ca in diorama.
+			"water_facet_aniso": 1.0,
 			# Vezi `facet_aa` in shader. La 0.5 tesela se stinge cand celula
 			# ajunge la doi pixeli — masurat, aia e granita intre "placi" si
 			# "pietris" pe banda departata a Yangtze-ului.
@@ -1355,7 +1396,36 @@ static func themes() -> Dictionary:
 			# amplitudine relativa ii da cu o treime mai putine NIVELURI de
 			# luminanta intre doua placi vecine — masurat, 6.7% densitate de
 			# muchii fata de 10.6% pe verde. 1.55 = chiar inversul raportului.
-			"water_facet_b_gain": 1.20,
+			# RUNDA 12 (lead): 1.20 -> 0.80. Cheia a fost pusa ca sa compenseze
+			# o apa mai INCHISA (aceeasi amplitudine relativa da mai putine
+			# niveluri de luminanta, iar muchia se vede in niveluri) — dar pe
+			# Chongqing raul B, Yangtze, e cel mai DESCHIS dintre cele doua
+			# (lum 56 fata de 52 la Jialing, masurat pe r12_gamecam_pod).
+			# Amplificarea lucra deci in sensul invers motivului ei si scotea
+			# tocmai malul de sub ochiul soferului ca mozaic de piatra, in timp
+			# ce verdele de dincolo de drum se linistise deja corect.
+			"water_facet_b_gain": 0.80,
+			# RUNDA 12, si asta e reparatia principala. Vezi `facet_calm` in
+			# shader: treptele de placa erau echiprobabile, deci FIECARE placa
+			# purta tonul ei si nu ramanea suprafata neteda intre ele. Masurat
+			# pe corpul apei, procentul din suprafata la +-4 niveluri de
+			# mediana: 18.9% la noi fata de 36.5% in bar/E_chei.png, iar golul
+			# se tinea la orice prag. Pe plansa oarba panelul nostru citea
+			# PIATRA acoperita cu licheni; culoarea era corecta, materialul nu
+			# era lichid. 2.2 aduce cifra la 42-46% pe prim-plan cu edge% 9.5-12
+			# (diorama 10.3), adica placi care se vad pe o apa care se
+			# odihneste. Peste ~3 suprafata redevine degrade neted.
+			"water_facet_calm": 2.2,
+			# Coada de SUS a placilor, taiata la 58%. Motivul e o masuratoare
+			# care desparte doua suprafete cu aceeasi statistica de luminanta:
+			# in diorama 61% din pixelii peste mediana+25 sunt AURII (reflexii
+			# de felinar), la noi erau 1-2% — restul, placi verzi palide. O apa
+			# de noapte primeste lumina in PETE, nu pe placi, deci placa are
+			# voie sa se inchida cat vrea (umbra dintre valuri e a apei) dar nu
+			# sa se deschida: partea luminoasa a histogramei ramane a
+			# glint-ului. Masurat dupa: 45-70% din pete sunt aurii, cu
+			# acoperire 3.1-4.9% (diorama 4.7%).
+			"water_facet_lid": 0.58,
 			# A doua jumatate a aceluiasi defect: lobul speculat. Razant,
 			# dot(reflect, view) sta lipit de 1 pe toata apa, deci lobul e un
 			# camp neted fara varf si diferenta de panta dintre doua fatete
@@ -1364,6 +1434,14 @@ static func themes() -> Dictionary:
 			# imparte la 6 la incidenta zero si ramane intreg cand privesti de
 			# sus, deci golful (care masura deja ancora) nu se schimba.
 			"water_glint_graze": 6.0,
+			# RUNDA 12. `glint_graze` de mai sus lateste lobul razant ca sa
+			# existe reflexii si de pe tablier — corect ca forma, dar din
+			# scaunul soferului (1.2 m peste sosea) TOATA apa e razanta, deci
+			# lobul latit se aprindea peste tot deodata si banda de apa iesea
+			# crema plina: 15.4% acoperire in vederea D. Ce se lateste ca forma
+			# se stinge ca intensitate, si cele doua se compenseaza — acoperirea
+			# ramane a temei, nu a unghiului. Vederea D scade la 7.3%.
+			"water_glint_graze_cap": 0.30,
 			# RUNDA 8: 0.68 / 1.32 erau calibrate pe cornisa D, unde camera e
 			# la 27 m deasupra apei. Tablierul de peste golf trece la 3.3 m,
 			# deci de acolo apa se vede razant pe toata suprafata si aceeasi
@@ -1390,8 +1468,15 @@ static func themes() -> Dictionary:
 			# explicatia bratului auriu din diorama — nu are alt albedo decat
 			# cel verde, are drumul de lumina al malului de dincolo.
 			"water_fresnel_color": Color(0.33, 0.24, 0.145),
-			"water_glint_soft": 0.22,
-			"water_glint_body": 0.75,
+			# RUNDA 12. Amandoua faceau reflexia MOALE, si critic a masurat
+			# exact asta: raportul rampa/miez 16.6 in prim-plan fata de 1.5-4.5
+			# in diorama — fum auriu difuz, nu cioburi taioase. `glint_soft`
+			# 0.22 e o tranzitie lata cat un sfert din masca, iar `glint_body`
+			# 0.75 face intensitatea sa creasca cu adancimea fisurii, adica tot
+			# halou. Cioburile din diorama au margine scurta si miez aproape
+			# plat. Aria medie a petei scade de la 411 px la 16-22 (diorama 21).
+			"water_glint_soft": 0.09,
+			"water_glint_body": 0.30,
 			"water_cell": 4.0,
 			# Aurul lampilor de sodiu, INTREG. La 0.75 (tras spre alb, ca sa nu
 			# iasa neon) reflexiile ieseau crem — pe o apa verde-inchisa asta e
@@ -1415,6 +1500,17 @@ static func themes() -> Dictionary:
 			# fatetele erau pornite si pe Jialing: nuanta verdelui sarea de la
 			# 147 la 69 (galben) si 8.9% din pixeli treceau de 150 — adica
 			# fix miristea rundei 4, inapoi.
+			# RUNDA 12: PORNIT si pe Jialing (verde). Era 0, deci reflexiile
+			# raului verde nu treceau prin nicio poarta de fateta — ieseau
+			# direct din fisura texturii, adica pete rotunde si difuze lipite
+			# peste suprafata (masurat de critic: arie medie 411 px, alungire
+			# 1.33, rampa/miez 16.6, fata de 43-83 px / 2.24-2.43 / 1.5-4.5 in
+			# diorama). Comentariul de la `water_b_glint_facet` explica de ce
+			# fusese stins: cu fatetele de dinainte, nuanta verdelui sarea la
+			# galben. Aia era o consecinta a amplitudinii, si amplitudinea s-a
+			# reparat mai sus — cu `facet_calm` si `facet_lid` nuanta ramane la
+			# 155-157 si petele devin cioburi cu muchii drepte (arie 16-22 px).
+			"water_glint_facet": 0.80,
 			"water_b_glint_facet": 0.85,
 			"water_glint_facet_far": 110.0,
 			# Hula da si umbra suprafetei, si panta din care se naste lobul
@@ -4286,6 +4382,12 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_glint_aa", 0.0)))
 	_water_mat.set_shader_parameter("facet_b_gain",
 		float(theme_flag("water_facet_b_gain", 1.0)))
+	_water_mat.set_shader_parameter("facet_calm",
+		float(theme_flag("water_facet_calm", 1.0)))
+	_water_mat.set_shader_parameter("facet_lid",
+		float(theme_flag("water_facet_lid", 1.0)))
+	_water_mat.set_shader_parameter("glint_graze_cap",
+		float(theme_flag("water_glint_graze_cap", 1.0)))
 	# Gradientul de perspectiva: cat de mult se deschide apa cand privirea cade
 	# mai de sus pe ea. Implicit 1.0/1.0 = plat, ca pana acum.
 	_water_mat.set_shader_parameter("view_lo",

@@ -322,6 +322,17 @@ uniform float glint_aa : hint_range(0.0, 2.0) = 0.0;
 // amplitudine relativa pe o apa mai inchisa da mai putine niveluri de
 // luminanta, iar muchia se vede in niveluri. 1.0 = amandoua la fel.
 uniform float facet_b_gain : hint_range(0.5, 3.0) = 1.0;
+// LINISTEA CORPULUI APEI (v11, runda 12). Exponentul cu care se strange
+// distributia valorilor de placa in jurul mijlocului. 1 = trepte
+// echiprobabile, adica mecanismul de pana acum (temele vechi neatinse).
+// Peste 1, majoritatea placilor cad aproape de aceeasi valoare si doar o
+// minoritate se departeaza — vezi nota lunga de la locul folosirii.
+uniform float facet_calm : hint_range(1.0, 6.0) = 1.0;
+// Cat din amplitudinea de placa ramane pe partea LUMINOASA (v11, runda 12).
+// 1 = simetric, adica mecanismul de pana acum. Sub 1, placile se pot inchide
+// intreg dar se deschid mai putin, si zona luminoasa a histogramei ramane a
+// reflexiilor. Vezi nota de la locul folosirii.
+uniform float facet_lid : hint_range(0.1, 1.0) = 1.0;
 
 // --- v9 (Chongqing, runda 10). CAT de mult se lateste lobul speculat cand
 // privirea cade razant.
@@ -348,6 +359,11 @@ uniform float glint_graze : hint_range(1.0, 12.0) = 1.0;
 // Unghiul (sinusul lui) la care lobul redevine cel autorat. Peste el nu se
 // schimba nimic, deci vederile de sus — golful, cornisa — raman ce erau.
 uniform float glint_graze_ref : hint_range(0.05, 1.0) = 0.5;
+// Cat ramane din INTENSITATEA reflexiei la incidenta razanta (v11, runda 12).
+// 1 = neatins (temele vechi). Sub 1, lobul latit de `glint_graze` primeste in
+// schimb mai putina lumina, deci reflexiile exista si de pe tablier fara ca
+// apa sa se aprinda toata din scaunul soferului. Vezi nota de la folosire.
+uniform float glint_graze_cap : hint_range(0.05, 1.0) = 1.0;
 
 // GRADIENT DE PERSPECTIVA. Motivul pentru care apa dioramei se citeste ca plan
 // orizontal si a noastra nu. Nu e ceata (aia coloreaza spre cer, aici valoarea
@@ -824,6 +840,50 @@ void fragment() {
 			// Valoarea placii, in `facet_count` trepte: placi de valori
 			// DIFERITE, nu un degrade continuu (style_bible §1).
 			float lvl = floor(h1 * facet_count) / max(facet_count - 1.0, 1.0);
+			// LINISTEA SUPRAFETEI (v11, runda 12). Vezi `facet_calm`.
+			//
+			// Treptele de mai sus sunt echiprobabile: cu 4 trepte, un sfert
+			// din placi cad pe fiecare nivel, deci FIECARE placa poarta tonul
+			// ei si intre doua placi vecine nu ramane nicaieri suprafata
+			// neteda. Masurat pe bar/E_chei.png, apa nu arata asa: cuartilele
+			// ei stau la 45.0 si 56.3 in jurul medianei 51.0, adica jumatate
+			// din suprafata incape in 11 niveluri de luminanta, iar la noi in
+			// 19. Apa DIN diorama se odihneste, si abia peste linistea aia se
+			// aprind cateva cioburi.
+			//
+			// Distributia se strange spre mijloc cu o putere impara aplicata
+			// pe abaterea semnata: `facet_calm` = 1 lasa scara echiprobabila
+			// (temele vechi), iar peste 1 trage majoritatea placilor spre
+			// valoarea de mijloc si lasa doar cozile sa se departeze. Puterea
+			// e IMPARA ca sa pastreze semnul, deci si placile mai inchise, si
+			// cele mai deschise raman de aceeasi parte a medianei.
+			//
+			// De ce nu se coboara pur si simplu `facet_strength`: aia
+			// micsoreaza SI cozile, deci sterge muchia peste tot si suprafata
+			// redevine degrade neted (defectul rundelor 8-9). Aici corpul se
+			// linisteste iar coada ramane la amplitudinea intreaga.
+			if (facet_calm > 1.0) {
+				float d = clamp(lvl, 0.0, 1.0) * 2.0 - 1.0;
+				d = sign(d) * pow(abs(d), facet_calm);
+				// Coada de SUS se taie separat (`facet_lid`). Motivul e
+				// masurat, si e chiar diferenta care ramasese: in
+				// bar/E_chei.png 61% din pixelii mai luminosi decat mediana+25
+				// sunt AURII, adica reflexii de felinar; la noi erau 1%, restul
+				// fiind placi verzi palide. Doua suprafete pot avea aceeasi
+				// statistica de luminanta si totusi una sa arate ca apa cu
+				// lumini pe ea, iar cealalta ca gresie decolorata — ce le
+				// deosebeste e din CE sunt facute punctele luminoase.
+				//
+				// Deci placa are voie sa se INCHIDA cat vrea (umbra dintre
+				// valuri e a apei), dar nu are voie sa se deschida mai mult
+				// decat `facet_lid`: partea luminoasa a histogramei ramane
+				// libera pentru glint, care e auriu. Asimetric intentionat —
+				// o apa de noapte primeste lumina in pete, nu pe placi.
+				if (d > 0.0) {
+					d *= facet_lid;
+				}
+				lvl = d * 0.5 + 0.5;
+			}
 			// Amplitudinea e per rau. Modulatia e MULTIPLICATIVA, deci acelasi
 			// procent pe o apa mai inchisa da mai putine NIVELURI de luminanta
 			// — iar muchia pe care o vede ochiul (si pe care o numara garda) e
@@ -903,6 +963,7 @@ void fragment() {
 	// unde apa umple cadrul. Sinusul unghiului de incidenta e mic pe TOATA apa
 	// vazuta de pe pod (0.55 la 5 m, 0.08 la 40 m), deci pragul lui trebuie sa
 	// fie de ordinul lui 0.5, nu 0.2.
+	float g_att = 1.0;
 	float gsharp = glint_sharp;
 	if (glint_graze > 1.0) {
 		gsharp /= mix(glint_graze, 1.0,
@@ -1031,7 +1092,26 @@ void fragment() {
 		// hartie decupata; in diorama fiecare reflexie are miez si halou.
 		gmask *= mix(1.0, smoothstep(cut, 1.0, m), glint_body);
 	}
-	float g = glint * gmask;
+	// PLAFONUL DE LA VOLAN (v11, runda 12). Vezi `glint_graze_cap`.
+	//
+	// `glint_graze` de mai sus lateste lobul cand privirea cade razant, ca sa
+	// existe reflexii si de pe tablier. Corect ca FORMA, dar are un cost care
+	// se vede abia din scaunul soferului: la 1.2 m peste sosea toata apa din
+	// cadru e razanta, deci lobul latit se aprinde peste tot deodata si banda
+	// de apa iese crema plina. Masurat pe vederea D: 15.4% din pixelii apei
+	// peste mediana+25 si doar 4.4% din suprafata la +-4 de mediana, fata de
+	// 4.7% si 36.5% in bar/E_chei.png — adica exact inversul linistii pe care
+	// o repara runda asta, si in singura vedere din care se conduce.
+	//
+	// Deci ce se lateste ca forma se stinge ca INTENSITATE: lobul mai larg
+	// prinde mai multe pante (ca sa nu dispara reflexiile), dar fiecare dintre
+	// ele primeste mai putina lumina (ca sa nu se aprinda toata apa). Cele
+	// doua se compenseaza, si acoperirea ramane a temei, nu a unghiului.
+	if (glint_graze_cap < 1.0) {
+		g_att = mix(glint_graze_cap, 1.0,
+			smoothstep(0.0, glint_graze_ref, clamp(view.y, 0.0, 1.0)));
+	}
+	float g = glint * gmask * g_att;
 	base += g * glint_strength * mix(1.0, glint_b_gain, side) * glint_col;
 
 	ALBEDO = base;

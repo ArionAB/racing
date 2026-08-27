@@ -359,7 +359,7 @@ apron_length = 3.0
 curve = SubResource("Curve3D_cablu")
 
 [node name="Macara" type="Node3D" parent="."]
-transform = Transform3D(0.259299, 0.000000, 0.965797, 0.000000, 1.000000, 0.000000, -0.965797, 0.000000, 0.259299, 179.264800, 41.626200, 193.339800)
+transform = Transform3D(-0.889870, 0.000000, -0.456215, 0.000000, 1.000000, 0.000000, 0.456215, 0.000000, -0.889870, 260.834686, 44.766815, 163.486023)
 script = ExtResource("12_crane")
 period = 19.0
 phase = 0.25
@@ -968,7 +968,7 @@ transform = Transform3D(0.712083, 0, 0.702095, 0, 1.000000, 0, -0.702095, 0, 0.7
 metadata/coliziune = "none"
 
 [node name="PasajRotativ" type="Node3D" parent="."]
-transform = Transform3D(0.110892, 0.000000, 0.993832, -0.010652, 0.999943, 0.001189, -0.993775, -0.010718, 0.110885, 99.596805, 5.437155, 195.603531)
+transform = Transform3D(-0.233943, 0, 0.972250, 0, 1, 0, -0.972250, 0, -0.233943, 159.330002, 40.860001, 188.000000)
 script = ExtResource("11_span")
 period = 25.0
 turn_time = 4.0
@@ -976,14 +976,14 @@ telegraph_lead = 3.0
 phase = 0.6
 road_half_width = 7.0
 span_length = 11.84
-deck_run = 26.0
-deck_rise = 0.0
+deck_run = 34.0
+deck_rise = 3.0
 deck_parapet = 0.9
-ramp_run = 24.0
+ramp_run = 30.0
 service_side = -1
-service_offset = 20.0
-service_width = 5.5
-service_lead = 22.0
+service_offset = 24.0
+service_width = 5.0
+service_lead = 30.0
 
 [node name="casaFmal600" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
 transform = Transform3D(-0.012844, 0.000000, -0.999918, 0.000000, 1.000000, 0.000000, 0.999918, 0.000000, -0.012844, 285.042114, 20.299467, 123.149948)

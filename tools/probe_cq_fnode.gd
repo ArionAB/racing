@@ -21,7 +21,7 @@ func _ready() -> void:
 
 	# 1. Podeaua pe toata lungimea modulului, pe 3 benzi.
 	var lip: float = span.span_length * 0.5
-	var reach: float = lip + span.deck_run
+	var reach: float = lip + span.deck_run + span.ramp_run
 	print("PasajRotativ la %s" % span.global_position)
 	print("  podea pe %.0f m, banda directa x = +-%.2f (golul e intre +-%.1f)" % [2.0 * reach, CAR_HALF, lip])
 	var prev := {}

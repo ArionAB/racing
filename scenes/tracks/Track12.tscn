@@ -359,31 +359,31 @@ apron_length = 3.0
 curve = SubResource("Curve3D_cablu")
 
 [node name="PasajRotativ" type="Node3D" parent="."]
-transform = Transform3D(0.084155, 0, -0.996452, 0, 1, 0, 0.996452, 0, 0.084155, 57.640000, 4.990000, 200.190002)
+transform = Transform3D(0.304907, 0.000000, 0.952382, 0.062946, 0.997813, -0.020152, -0.950300, 0.066093, 0.304241, 181.510406, 31.788177, 90.095200)
 script = ExtResource("11_span")
 period = 25.0
 turn_time = 4.0
 telegraph_lead = 3.0
 phase = 0.6
-road_half_width = 10.0
+road_half_width = 7.0
 span_length = 11.84
-deck_run = 34.0
+deck_run = 20.0
 deck_rise = 0.0
 deck_parapet = 0.0
 ramp_run = 24.0
 service_side = -1
-service_offset = 24.0
-service_width = 5.0
-service_lead = 30.0
+service_offset = 18.0
+service_width = 5.5
+service_lead = 16.0
 
 [node name="Macara" type="Node3D" parent="."]
-transform = Transform3D(0.753919, 0, 0.656968, 0, 1, 0, -0.656968, 0, 0.753919, 260.383942, 48.418400, 88.934044)
+transform = Transform3D(0.259299, 0.000000, 0.965797, 0.000000, 1.000000, 0.000000, -0.965797, 0.000000, 0.259299, 179.264800, 41.626200, 193.339800)
 script = ExtResource("12_crane")
 period = 19.0
 phase = 0.25
 telegraph_lead = 3.0
 road_half_width = 7.0
-tower_offset = 11.0
+tower_offset = 12.0
 tower_side = 1
 hook_radius = 15.0
 load_clearance = 0.5

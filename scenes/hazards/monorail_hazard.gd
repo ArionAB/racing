@@ -15,10 +15,19 @@ extends Node3D
 ##  2. [b]Pedeapsa e ARUNCAREA, nu repunerea.[/b] `TrainHazard` face
 ##     `race_active = false` + `respawn()`: te scoate din cursa 0.9 s si te
 ##     pune inapoi. Aici nu exista niciun moment in care jucatorul nu-si
-##     conduce masina. Masa mare a garniturii se traduce intr-un ghiont
-##     lateral pe directia in care merge trenul, plus inaltare si invartire:
-##     zbori de pe pasaj si aterizezi cu 30 m si o pozitie pierdute, dar
-##     volanul a fost al tau tot timpul.
+##     conduce masina. Masa mare a garniturii se traduce intr-o aruncare
+##     ([HazardThrow]): viteza orizontala e SCRISA (a ta, taiata, plus
+##     impinsul trenului), inaltimea trece prin `Car.launch` si e ceruta in
+##     METRI, iar garnitura primeste o exceptie de coliziune cat tine zborul.
+##     Aterizezi cu ~12 m si o pozitie pierdute, dar volanul a fost al tau tot
+##     timpul.
+##
+##     Aruncarea are un PLAFON, si el e chiar contractul: `side_push` +
+##     `throw_height` decid unde aterizezi, iar aterizarea trebuie sa fie pe
+##     sosea sau pe umarul ei. Prima versiune aduna un ghiont de 26 m/s la
+##     viteza masinii si criticul a masurat rezultatul — 62.75 m lateral, sub
+##     cota soselei, masina nemiscata de la t=7 la t=42. Pe POI G, unde orasul
+##     e SUB drum, „aruncat departe" nu e o pedeapsa, e o iesire din lume.
 ##
 ## De ce nu repunere: pe Chongqing traseul trece PESTE alte benzi (brief §2), si
 ## o repunere „cu 20 m in spate" pe un nod cu trei etaje suprapuse e o loterie
@@ -53,6 +62,9 @@ const BEAM_HALF: float = 1.15
 const BEAM_SHOULDER: float = 0.9
 ## Pasul de esantionare a traseului.
 const ROUTE_STEP: float = 3.0
+## Cat de departe de trecere mai are voie garnitura sa loveasca, peste
+## semilatimea soselei (m).
+const HIT_RANGE: float = 25.0
 
 enum Phase {
 	IDLE,      ## trenul e departe, drumul e liber
@@ -85,12 +97,26 @@ enum Phase {
 @export_range(30.0, 100.0, 1.0) var boom_up_deg: float = 88.0
 
 @export_group("Lovitura")
-## Ghiontul lateral, pe directia de mers a garniturii (m/s). Mare: asta e
-## „masa mare" din brief, tradusa in singura unitate care conteaza.
-@export_range(0.0, 60.0, 0.5) var throw_speed: float = 26.0
-## Cat te ridica (m/s). Aruncarea trebuie sa aiba si zbor, altfel e o
-## imbranceala.
-@export_range(0.0, 20.0, 0.1) var throw_lift: float = 7.5
+## Cat de departe te impinge garnitura, pe directia ei de mers (m/s).
+##
+## [b]Nu se ADUNA la viteza ta, o INLOCUIESTE[/b] (vezi [HazardThrow]): masa
+## garniturii e a doua ordine de marime fata de a masinii, deci viteza de dupa
+## lovitura e a trenului. Adunarea a fost prima versiune si criticul a masurat
+## unde duce: 26 m/s peste 30 m/s de mers = o masina ejectata 62.75 m in
+## afara lumii, sub cota soselei, de unde nu mai pleca. Cifra e mica dinadins
+## — impreuna cu `throw_height` ea decide unde ATERIZEZI, si aterizarea
+## trebuie sa fie langa sosea, nu in oras: pe POI G orasul e SUB drum.
+@export_range(0.0, 30.0, 0.5) var side_push: float = 9.0
+## Cat de SUS te arunca (m). In metri, nu in m/s: cifra din inspector e chiar
+## ce masoara sonda. Zborul trece prin `Car.launch`, care SETEAZA viteza
+## verticala — o adunare se pierde in amortizorul suspensiei.
+@export_range(0.0, 8.0, 0.05) var throw_height: float = 2.6
+## Cat timp dupa lovitura garnitura nu mai are voie sa atinga masina (s).
+##
+## Fara asta, corpul solid al trenului rezolva patrunderea in cadrul urmator
+## si aruncarea moare acolo: masurat vy 12 -> 0 in 0.13 s, cu o urcare de
+## 0.45 m. Trebuie sa acopere zborul plus trecerea cozii garniturii.
+@export_range(0.0, 6.0, 0.05) var clear_seconds: float = 2.2
 ## Invartirea VIZUALA a caroseriei dupa lovitura (rad/s) si cat tine (s).
 @export_range(0.0, 20.0, 0.5) var spin_rate: float = 9.0
 @export_range(0.0, 5.0, 0.1) var spin_seconds: float = 1.4
@@ -98,7 +124,10 @@ enum Phase {
 ## repunere — vezi antetul.
 @export_range(0.0, 3.0, 0.05) var crush_seconds: float = 0.5
 @export_range(0.3, 1.0, 0.01) var crush_factor: float = 0.8
-@export_range(0.0, 1.0, 0.01) var keep_speed: float = 0.5
+## Cat din viteza ta orizontala ramane in zbor. Se aplica O SINGURA DATA, in
+## aruncare — `Car.crush` primeste 1.0, altfel taietura s-ar aplica de doua ori
+## si masina ar cadea din aer aproape pe loc.
+@export_range(0.0, 1.0, 0.01) var keep_speed: float = 0.55
 ## Cat sta o masina imuna dupa o lovitura (s).
 @export_range(0.05, 4.0, 0.05) var hit_cooldown: float = 1.5
 
@@ -477,20 +506,26 @@ func _hit_cars() -> void:
 		var car := body as Car
 		if car == null or _cooldown.has(car):
 			continue
+		# Doar la TRECEREA propriu-zisa: pe o pista care se intoarce in ea
+		# insasi, grinda poate trece a doua oara pe langa alt etaj de asfalt,
+		# fara bariere si fara clopot. Lectia lui `TrainHazard._hit_cars`.
+		if car.global_position.distance_to(crossing_point()) 				> road_half_width + HIT_RANGE:
+			continue
 		_cooldown[car] = hit_cooldown
-		# Ghiontul merge INCOTRO MERGE TRENUL, plus in sus. Fara componenta
-		# verticala masina ramane lipita de flancul garniturii si e impinsa
-		# 27 m de-a lungul ei — adica exact „intepenita sub tren", lucrul pe
-		# care aruncarea trebuie sa-l inlocuiasca.
-		var push := _train_dir * throw_speed + Vector3.UP * throw_lift
-		car.apply_sweep(push)
+		# Viteza de dupa lovitura: ce ti-a mai ramas din a ta, plus impinsul
+		# garniturii pe directia ei. Se SCRIE (vezi [HazardThrow]) — cu o
+		# adunare, aruncarea devine ejectare in afara hartii.
+		var mine := Vector3(car.velocity.x, 0.0, car.velocity.z) * keep_speed
+		var horizontal := mine + _train_dir * side_push
+		HazardThrow.throw(car, _train, horizontal, throw_height, clear_seconds)
 		var sign := signf(_train_dir.cross(Vector3.UP).dot(
 			-car.global_transform.basis.z))
 		car.spin_body(spin_rate * (sign if absf(sign) > 0.01 else 1.0),
 			spin_seconds)
 		# Strivire SCURTA, si nimic altceva: fara `race_active = false`, fara
-		# repunere. Vezi antetul — jucatorul isi conduce masina si in zbor.
-		car.crush(crush_seconds, crush_factor, Vector3(1.3, 0.7, 1.3), keep_speed)
+		# repunere. `keep_speed` e 1.0 aici — taietura de viteza s-a facut deja
+		# in aruncare, iar aplicata a doua oara ar opri masina in aer.
+		car.crush(crush_seconds, crush_factor, Vector3(1.3, 0.7, 1.3), 1.0)
 
 
 # ---------------------------------------------------------- pentru sonde

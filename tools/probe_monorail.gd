@@ -14,11 +14,21 @@ extends Node
 ##        el — fara strivire, fara oprire, fara sa piarda viteza.
 ##  (iii) grinda e trecuta: cand nu vine niciun tren, masina traverseaza
 ##        linia fara sa fie oprita si fara sa fie aruncata in aer de prag.
-##  (iv)  LOVITURA: masina prinsa pe trecere e ARUNCATA — ia viteza laterala,
-##        se desprinde de sol si ajunge departe de linie. NU: `race_active`
-##        stins, NU repunere, NU strivire lunga, NU intepenita sub garnitura.
+##  (iv)  LOVITURA: masina prinsa pe trecere e ARUNCATA. „Aruncata" se
+##        masoara in METRI DE URCARE fata de turul de control peste aceeasi
+##        grinda, nu in secunde cu rotile in aer — asta a fost lipsa gasita de
+##        critic in runda 1: sonda culegea `max_y` si nu-l transforma niciodata
+##        in verdict, iar pragul de aer (0.25 s) era chiar valoarea martorului,
+##        deci un hazard care n-ar fi facut NIMIC pe verticala il trecea.
+##        NU: `race_active` stins, NU repunere, NU strivire lunga, NU
+##        intepenita sub garnitura.
 ##  (v)   dupa aruncare masina isi duce indexul mai departe si termina bucata
-##        de tur.
+##        de tur, si ATERIZEAZA langa sosea — nu la 60 m in afara ei.
+##  (vi)  cazul advers al criticului: masina OPRITA fix pe trecere. Ea nu are
+##        viteza proprie din care aruncarea sa-si ia partea, deci e cazul in
+##        care un ghiont necontrolat o scotea din lume (masurat in runda 1:
+##        62.75 m lateral, sub cota soselei, nemiscata de la t=7 la t=42).
+##        Verdictul cere ca dupa aruncare sa poata PLECA singura de acolo.
 ##
 ## Ruleaza CA SCENA (masina cere autoload-urile):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeMonorail.tscn
@@ -43,6 +53,21 @@ const FINISH_Z: float = -70.0
 const ENTRY_SPEED: float = 26.0
 ## Peste atata strivire, „aruncat" a devenit „distrus".
 const CRUSH_MAX: float = 0.8
+## Cat de sus trebuie sa urce masina peste turul de CONTROL (m). Nu e o cifra
+## rotunda: e „vizibil mai sus decat trecerea peste grinda", adica peste un
+## metru, iar contractul de proportionalitate cu `throw_height` il verifica
+## verdictul de langa el.
+const RISE_MIN: float = 1.2
+## Cat din `throw_height` are voie sa manance amortizorul suspensiei in cadrele
+## de dupa lansare. Masurat pe implicite: 2.6 m ceruti -> 1.73 m urcati, adica
+## 0.66. Pragul e sub masuratoare, dar mult peste zero — un `throw_height`
+## ignorat (cazul din runda 1, cu urcare de 0.45 m dintr-un lift de 7.5 m/s)
+## nu are cum sa treaca.
+const RISE_FRACTION: float = 0.5
+## Cat de departe de axa soselei are voie sa aterizeze (peste semilatime, m).
+## Pe POI G orasul e SUB drum: „aruncat departe" nu e pedeapsa, e iesire din
+## lume.
+const LAND_MARGIN: float = 8.0
 
 var _track: TrackFromPath
 var _hazard: MonoScript
@@ -290,8 +315,29 @@ func _run() -> void:
 	_verdict(hit["spin"] > 0.0 or hit["max_x"] > 6.0 or hit["air"] > 0.4,
 		"garnitura chiar a lovit (spin %.2f, |x| %.2f, aer %.2f)"
 		% [hit["spin"], hit["max_x"], hit["air"]])
-	_verdict(hit["air"] > 0.25,
-		"e ARUNCATA, nu impinsa (%.2f s in aer)" % hit["air"])
+	# --- verdictul care lipsea: URCAREA, fata de martor -----------------
+	# `free_run` a trecut peste ACEEASI grinda cu aceeasi masina si aceeasi
+	# viteza, deci `max_y` al lui e cota de rulare, cu tot cu cei 22 cm de
+	# grinda. Diferenta e zborul, si nimic altceva.
+	var rise: float = hit["max_y"] - free_run["max_y"]
+	var want: float = _hazard.throw_height
+	print("    URCARE: %.2f m (martor %.2f -> lovita %.2f); throw_height cere %.2f m, prag %.2f"
+		% [rise, free_run["max_y"], hit["max_y"], want, maxf(RISE_MIN, want * RISE_FRACTION)])
+	_verdict(rise >= RISE_MIN,
+		"aruncarea chiar RIDICA masina: %.2f m peste turul de control (prag %.2f)"
+		% [rise, RISE_MIN])
+	_verdict(rise >= want * RISE_FRACTION,
+		"`throw_height` nu e un export mort: %.2f m urcati din %.2f ceruti (%.0f%%)"
+		% [rise, want, 100.0 * rise / maxf(want, 0.01)])
+	_verdict(hit["air"] >= free_run["air"] + 0.5,
+		"aer semnificativ peste martor (%.2f fata de %.2f s)"
+		% [hit["air"], free_run["air"]])
+	# --- si nu ARUNCATA IN AFARA LUMII ---------------------------------
+	var land: Vector3 = hit["pos"]
+	_verdict(absf(land.x) <= _hazard.road_half_width + LAND_MARGIN,
+		"aterizeaza langa sosea, nu in oras (|x| %.2f <= %.2f)"
+		% [absf(land.x), _hazard.road_half_width + LAND_MARGIN])
+	_verdict(hit["on_road"], "iese pe sosea dupa zbor")
 	_verdict(hit["crush"] <= CRUSH_MAX,
 		"nu e distrusa (strivire %.2f <= %.2f)" % [hit["crush"], CRUSH_MAX])
 	_verdict(hit["active"], "ramane in cursa (fara race_active stins)")
@@ -301,3 +347,64 @@ func _run() -> void:
 		"nu ramane intepenita sub garnitura (a terminat in %.2f s)" % hit["t"])
 	_verdict(hit["t"] > free_run["t"],
 		"lovitura costa timp (%.2f fata de %.2f liber)" % [hit["t"], free_run["t"]])
+
+	await _parked_run()
+
+
+# ------------------------------------------- (vi) masina OPRITA pe trecere
+
+## Cazul advers al criticului. O masina oprita fix pe trecere e cazul limita:
+## aruncarea nu are din ce sa-si ia partea orizontala „a ta", deci tot ce o
+## misca e impinsul garniturii. Daca acela e nemasurat, masina pleaca din
+## lume — masurat in runda 1: 62.75 m lateral, y = -0.33, v = 0.1 m/s de la
+## t=7 pana la t=42, adica salvata doar de plasa de 5 s din `race.gd`.
+##
+## Verdictul nu e „a fost lovita", ci „poate PLECA de acolo": pe roti, langa
+## sosea, si cu gaz plin ajunge iar la viteza de mers.
+func _parked_run() -> void:
+	print("--- (vi) advers: masina OPRITA fix pe trecere")
+	var ok := await _wait_until_arrival_in(3.0)
+	_verdict(ok, "am prins fereastra pentru masina parcata")
+	var cross := _hazard.crossing_point()
+	var car := _spawn(Vector3(cross.x, 0.9, cross.z), 0.0)
+	var idle := WaypointDriver.new()
+	idle.waypoints = []
+	idle.throttle_when_done = 0.0
+	car.set_controller(idle)
+	# Pana trece garnitura: stationara, fara gaz.
+	var hit_t := -1.0
+	var t := 0.0
+	for _f in int(5.0 * 60.0):
+		await get_tree().physics_frame
+		t += 1.0 / 60.0
+		if hit_t < 0.0 and car.crush_time > 0.0:
+			hit_t = t
+	var thrown := car.global_position
+	print("    lovita la %.2f s; dupa 5 s: pozitie %s (deplasare %.2f m), y %.2f, activa %s"
+		% [hit_t, str(thrown.round()), thrown.distance_to(cross), thrown.y,
+		str(car.race_active)])
+	_verdict(hit_t > 0.0, "garnitura a lovit masina parcata (%.2f s)" % hit_t)
+	_verdict(absf(thrown.x - cross.x) <= _hazard.road_half_width + LAND_MARGIN,
+		"nu e ejectata din lume (|x| %.2f <= %.2f)"
+		% [absf(thrown.x - cross.x), _hazard.road_half_width + LAND_MARGIN])
+	_verdict(thrown.y > cross.y - 1.0,
+		"nu ajunge sub cota soselei (y %.2f)" % thrown.y)
+	_verdict(car.race_active, "ramane in cursa")
+	# Si acum: poate pleca singura de acolo?
+	var driver := WaypointDriver.new()
+	driver.waypoints = [Vector3(0.0, 0.0, FINISH_Z - 40.0)]
+	driver.target_speed = ENTRY_SPEED
+	car.set_controller(driver)
+	var best := 0.0
+	var moved := 0.0
+	var from := car.global_position
+	for _f in int(4.0 * 60.0):
+		await get_tree().physics_frame
+		best = maxf(best, car.horizontal_speed())
+		moved = maxf(moved, car.global_position.distance_to(from))
+	print("    cu gaz plin, 4 s: viteza max %.2f m/s, %.2f m parcursi, pozitie %s"
+		% [best, moved, str(car.global_position.round())])
+	_verdict(best > 12.0, "pleaca singura de acolo (viteza max %.2f m/s)" % best)
+	_verdict(moved > 25.0, "chiar se misca (%.2f m in 4 s)" % moved)
+	car.queue_free()
+	await get_tree().physics_frame

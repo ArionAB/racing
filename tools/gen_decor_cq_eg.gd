@@ -43,6 +43,7 @@ const RES := {
 	"chongqing/props/neon_sign_a": "40_neona",
 	"chongqing/props/neon_sign_c": "41_neonc",
 	"chongqing/props/lamp_lantern_c": "42_lampc",
+	"chongqing/props/lamp_lantern_b": "53_lampb",
 	"chongqing/vehicles/mini_car_a": "43_minia",
 	"chongqing/vehicles/mini_car_b": "44_minib",
 	"chongqing/props/scooter": "45_scooter",
@@ -126,6 +127,28 @@ func _yaw_fwd(f: float) -> float:
 func _yaw_side(f: float) -> float:
 	var side: Vector3 = _at(f)[1]
 	return atan2(side.x, side.z)
+
+
+## Cea mai mica distanta din `p` pana la axa ORICARUI tronson de pista aflat la
+## aceeasi cota (±8 m), impreuna cu semilatimea acolo.
+##
+## Exista fiindca un offset lateral „22 m" nu inseamna 22 m de sosea: pe
+## spirala, tronsonul urmator trece la 8 m de acelasi punct, iar o casa pusa
+## fata de UN tronson ajunge in carosabilul ALTUIA. Masurat: `casaF` la 6.3 m
+## de o axa cu semilatimea 7, adica in mijlocul drumului.
+func _road_clearance(p: Vector3) -> Array:
+	var r := _track.routes[0]
+	var n := r.count()
+	var best := INF
+	var hw := 0.0
+	for j in n:
+		if absf(r.baked[j].y - p.y) > 8.0:
+			continue
+		var d := Vector2(r.baked[j].x - p.x, r.baked[j].z - p.z).length()
+		if d < best:
+			best = d
+			hw = _track.width_at_index(j)
+	return [best, hw]
 
 
 # ----------------------------------------------------------- 5) cheiul (E)
@@ -461,6 +484,20 @@ func _zone_liziba() -> void:
 	_node("chongqing/structures/footbridge", "pasarela",
 		Vector3(pq.x, (_at(fp)[0] as Vector3).y + 1.2, pq.z), _yaw_fwd(fp), 1.0,
 		"none")
+	# LAMPI IN HOL. Blocul e singurul loc din tur cu tavan, deci si singurul in
+	# care lumina lunii nu ajunge: fara ele holul e o pata neagra in care nu se
+	# vede nici bariera, nici trenul (masurat in captura de la 0.88, unde
+	# jumatatea de sus a cadrului e negru curat). Lampioanele stau intre
+	# stalpi, la 11 m de axa, deci in afara carosabilului.
+	var k := 0
+	for dz: float in [-0.009, -0.003, 0.003, 0.009]:
+		for sgn: float in [-1.0, 1.0]:
+			var fr := LIZIBA_FRAC + dz
+			var q := _off(fr, 11.0 * sgn)
+			_node("chongqing/props/lamp_lantern_b", "lampaHol",
+				Vector3(q.x, (_at(fr)[0] as Vector3).y, q.z),
+				_yaw_side(fr) + (PI if sgn > 0.0 else 0.0), 1.0, "none")
+			k += 1
 	# Firma de neon si felinare la gura de intrare — semnalizarea ceruta de
 	# brief §8 („intrarea in bloc primeste chevroane/semafoare").
 	for spec: Array in [[LIZIBA_FRAC - 0.016, 10.6, "lamp_lantern_c", "42_lampc"],
@@ -551,8 +588,17 @@ func _zone_fundal() -> void:
 
 # ------------------------------------------------------------------ iesirea
 
+## Marja peste semilatimea soselei sub care o piesa nu se mai aseaza.
+## Blocul Liziba e singura exceptie: el STA pe drum, prin definitie.
+const ROAD_MARGIN: float = 1.0
+
 func _node(model: String, base: String, pos: Vector3, yaw: float,
 		scl: float, coll: String, scl3: Vector3 = Vector3.ZERO) -> void:
+	if base != "bloc_liziba":
+		var cl := _road_clearance(pos)
+		if float(cl[0]) < float(cl[1]) + ROAD_MARGIN:
+			print("; SARIT %s: %.1f m de axa, semilatime %.1f" % [base, cl[0], cl[1]])
+			return
 	_n += 1
 	var s3 := scl3 if scl3 != Vector3.ZERO else Vector3(scl, scl, scl)
 	var c := cos(yaw)

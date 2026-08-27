@@ -1011,7 +1011,13 @@ static func _slot_glow_texture(slot: int) -> ImageTexture:
 ## pastrand masca — adica „partile astea ale piesei ard, in nuanta asta".
 static func _slots_glow_texture(slots: Array,
 		tint: Color = Color.BLACK) -> ImageTexture:
-	var img := Image.create(HEX.size(), 1, false, Image.FORMAT_RGB8)
+	# LATIMEA E `SLOTS`, NU `HEX.size()`. Sunt 32 de sloturi alocate si doar 31
+	# de culori scrise, iar UV-ul unui slot e `(slot + 0.5) / 32` (vezi `uv()`).
+	# Cu o masca de 31 px, slotul 30 cadea la x = 0.953 * 31 = 29.5 — adica FIX
+	# intre texelul aprins si vecinul lui negru, deci filtrarea liniara statea
+	# la jumatate de emisie si mai si murdarea slotul 29. De aici venea
+	# masuratoarea „slotul 30 singur da o silueta neagra": masca nu-l nimerea.
+	var img := Image.create(SLOTS, 1, false, Image.FORMAT_RGB8)
 	img.fill(Color.BLACK)
 	for s: int in slots:
 		img.set_pixel(s, 0, color(s) if tint == Color.BLACK else tint)

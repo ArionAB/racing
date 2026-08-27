@@ -9,6 +9,26 @@
 [ext_resource type="PackedScene" uid="uid://c0lvvumae0dww" path="res://assets/models/chongqing/props/container.glb" id="22_box"]
 [ext_resource type="PackedScene" uid="uid://dms8bggi3xdc1" path="res://assets/models/chongqing/structures/hongya_dong.glb" id="23_hongya"]
 [ext_resource type="PackedScene" uid="uid://dp4eew6dhmyjj" path="res://assets/models/chongqing/buildings/tower_silhouette_a.glb" id="24_tower"]
+[ext_resource type="Script" uid="uid://cgah36jofjie7" path="res://scenes/hazards/cableway_hazard.gd" id="10_cableway"]
+[ext_resource type="Script" uid="uid://b7qgdmqvwg6ph" path="res://scenes/hazards/rotating_span_hazard.gd" id="11_span"]
+[ext_resource type="Script" uid="uid://beau0lj3nlk12" path="res://scenes/hazards/crane_hazard.gd" id="12_crane"]
+[ext_resource type="Script" uid="uid://jq60wynggqon" path="res://scenes/hazards/fog_corridor_hazard.gd" id="13_fog"]
+[ext_resource type="Script" uid="uid://c2girltym22fa" path="res://scenes/hazards/monorail_hazard.gd" id="14_monorail"]
+[ext_resource type="PackedScene" uid="uid://bs6kw6ee1hu22" path="res://assets/models/chongqing/props/bollard.glb" id="30_bollard"]
+[ext_resource type="PackedScene" uid="uid://dtgwry0a5b554" path="res://assets/models/chongqing/structures/pillar_round.glb" id="31_pillar"]
+[ext_resource type="PackedScene" uid="uid://b1ly1888tobtr" path="res://assets/models/chongqing/props/construction_barrier.glb" id="32_barrier"]
+[ext_resource type="PackedScene" uid="uid://cyyrj88wi11tx" path="res://assets/models/chongqing/buildings/liziba_block.glb" id="33_liziba"]
+[ext_resource type="PackedScene" uid="uid://clrhwm54wo1i4" path="res://assets/models/chongqing/structures/footbridge.glb" id="34_footbridge"]
+[ext_resource type="PackedScene" uid="uid://40q8s8g0jnis" path="res://assets/models/chongqing/props/mailbox_wall.glb" id="35_mailbox"]
+[ext_resource type="PackedScene" uid="uid://cpidfrwsqjx4x" path="res://assets/models/chongqing/props/bicycle.glb" id="36_bike"]
+[ext_resource type="PackedScene" uid="uid://t5atvpxuijn0" path="res://assets/models/chongqing/buildings/tower_silhouette_b.glb" id="37_towerb"]
+[ext_resource type="PackedScene" uid="uid://bf2epigdrr6yq" path="res://assets/models/chongqing/buildings/tower_silhouette_c.glb" id="38_towerc"]
+[ext_resource type="PackedScene" uid="uid://dx2hft56rmmh8" path="res://assets/models/chongqing/structures/bay_bridge.glb" id="39_baybridge"]
+[ext_resource type="PackedScene" uid="uid://cn0qoy4nucwra" path="res://assets/models/chongqing/props/neon_sign_a.glb" id="40_neona"]
+[ext_resource type="PackedScene" uid="uid://6uoomayulw7k" path="res://assets/models/chongqing/props/neon_sign_c.glb" id="41_neonc"]
+[ext_resource type="PackedScene" uid="uid://8uda8ilwvux1" path="res://assets/models/chongqing/props/lamp_lantern_c.glb" id="42_lampc"]
+[ext_resource type="PackedScene" uid="uid://c35gl5rmx4u3y" path="res://assets/models/chongqing/vehicles/mini_car_a.glb" id="43_minia"]
+[ext_resource type="PackedScene" uid="uid://cb8rky12rwynx" path="res://assets/models/chongqing/vehicles/mini_car_b.glb" id="44_minib"]
 
 [sub_resource type="Curve3D" id="Curve3D_chongqing"]
 _data = {
@@ -23,6 +43,20 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 13
+
+[sub_resource type="Curve3D" id="Curve3D_cablu"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 73, 5.9, 199.4, 0, 0, 0, 0, 0, 0, 116.8, 17.1, 173, 0, 0, 0, 0, 0, 0, 248, 25.9, 94),
+"tilts": PackedFloat32Array(0, 0, 0)
+}
+point_count = 3
+
+[sub_resource type="Curve3D" id="Curve3D_monorail"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -85, 0, 0, 0, 0, 0, 0, 0, 0, -42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 85, 0, 0),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
 
 [node name="Track12" type="Node3D"]
 script = ExtResource("1_track")
@@ -58,6 +92,14 @@ tint = Color(0.62, 0.63, 0.66, 1)
 
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("7_wprop")
+
+[node name="5) Cheiul Chaotianmen" type="Node3D" parent="DecorManual"]
+
+[node name="6) Nodul Huangjuewan" type="Node3D" parent="DecorManual"]
+
+[node name="7) Liziba" type="Node3D" parent="DecorManual"]
+
+[node name="8) Fundal" type="Node3D" parent="DecorManual"]
 
 [node name="felinar1" parent="DecorManual" instance=ExtResource("21_lamp")]
 transform = Transform3D(-0.493013, 0, 0.870022, 0, 1.000000, 0, -0.870022, 0, -0.493013, -283.319000, 6.201686, 39.761375)
@@ -285,4 +327,395 @@ metadata/coliziune = "none"
 
 [node name="turn57" parent="DecorManual" instance=ExtResource("24_tower")]
 transform = Transform3D(0.172554, 0, 0.832301, 0, 0.850000, 0, -0.832301, 0, 0.172554, 483.560822, 13.148353, 222.517105)
+metadata/coliziune = "none"
+
+[node name="CuloarCeata" type="Node3D" parent="."]
+transform = Transform3D(0.109864, 0, 0.993947, 0, 1, 0, -0.993947, 0, 0.109864, 113.120003, 5.590000, 194.100006)
+script = ExtResource("13_fog")
+length = 70.0
+half_width = 11.0
+ramp_in = 45.0
+ramp_out = 4.0
+fog_begin_inside = 8.0
+fog_end_inside = 46.0
+marker_spacing = 12.0
+
+[node name="Telecabina3D" type="Node3D" parent="."]
+script = ExtResource("10_cableway")
+period = 21.0
+boarding_window = 3.0
+travel_time = 12.0
+unload_time = 2.0
+phase = 0.35
+dock_length = 6.0
+apron_length = 3.0
+
+[node name="Route" type="Path3D" parent="Telecabina3D"]
+curve = SubResource("Curve3D_cablu")
+
+[node name="PasajRotativ" type="Node3D" parent="."]
+transform = Transform3D(-0.233943, 0, 0.972250, 0, 1, 0, -0.972250, 0, -0.233943, 159.330002, 40.860001, 188.000000)
+script = ExtResource("11_span")
+period = 25.0
+turn_time = 4.0
+telegraph_lead = 3.0
+phase = 0.6
+road_half_width = 7.0
+span_length = 11.84
+deck_run = 34.0
+deck_rise = 3.0
+deck_parapet = 0.9
+ramp_run = 30.0
+service_side = -1
+service_offset = 24.0
+service_width = 5.0
+service_lead = 30.0
+
+[node name="Macara" type="Node3D" parent="."]
+transform = Transform3D(0.753919, 0, -0.656968, 0, 1, 0, 0.656968, 0, 0.753919, 260.383942, 48.418400, 88.934044)
+script = ExtResource("12_crane")
+period = 19.0
+phase = 0.25
+telegraph_lead = 3.0
+road_half_width = 7.0
+tower_offset = 11.0
+tower_side = 1
+hook_radius = 15.0
+load_clearance = 0.5
+
+[node name="Monorail" type="Node3D" parent="."]
+transform = Transform3D(0.957791, 0, -0.287464, 0, 1, 0, 0.287464, 0, 0.957791, 241.443695, 54.551197, 11.490620)
+script = ExtResource("14_monorail")
+period = 33.0
+warn_lead = 3.0
+cross_time = 6.0
+phase_offset = 0.45
+road_half_width = 7.0
+barrier_side = 1
+
+[node name="Route" type="Path3D" parent="Monorail"]
+curve = SubResource("Curve3D_monorail")
+
+[node name="bolard101" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.997845, 0, -0.065621, 0, 1.000000, 0, 0.065621, 0, 0.997845, 42.179752, 4.744175, 211.812149)
+metadata/coliziune = "none"
+
+[node name="bolard102" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.997080, 0, -0.076369, 0, 1.000000, 0, 0.076369, 0, 0.997080, 56.909443, 4.824831, 210.879745)
+metadata/coliziune = "none"
+
+[node name="bolard103" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.993723, 0, -0.111873, 0, 1.000000, 0, 0.111873, 0, 0.993723, 70.762520, 4.959796, 209.476486)
+metadata/coliziune = "none"
+
+[node name="bolard104" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.993898, 0, -0.110300, 0, 1.000000, 0, 0.110300, 0, 0.993898, 84.396835, 5.110000, 207.293381)
+metadata/coliziune = "none"
+
+[node name="bolard105" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.993850, 0, -0.110731, 0, 1.000000, 0, 0.110731, 0, 0.993850, 98.000107, 5.259572, 204.555969)
+metadata/coliziune = "none"
+
+[node name="bolard106" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.993947, 0, -0.109859, 0, 1.000000, 0, 0.109859, 0, 0.993947, 111.443008, 5.408581, 202.937729)
+metadata/coliziune = "none"
+
+[node name="bolard107" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.993824, 0, -0.110965, 0, 1.000000, 0, 0.110965, 0, 0.993824, 125.998474, 5.575825, 201.322723)
+metadata/coliziune = "none"
+
+[node name="bolard108" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("30_bollard")]
+transform = Transform3D(0.997211, 0, -0.074634, 0, 1.000000, 0, 0.074634, 0, 0.997211, 140.243317, 5.721534, 199.552078)
+metadata/coliziune = "none"
+
+[node name="cont109" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.065903, 0, -0.997826, 0, 1.000000, 0, 0.997826, 0, -0.065903, 43.128925, 4.613808, 186.094437)
+metadata/coliziune = "hull"
+
+[node name="cont110" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.065903, 0, -0.997826, 0, 1.000000, 0, 0.997826, 0, -0.065903, 43.128925, 7.813808, 186.094437)
+metadata/coliziune = "hull"
+
+[node name="cont111" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.065903, 0, -0.997826, 0, 1.000000, 0, 0.997826, 0, -0.065903, 49.489590, 4.613808, 185.289505)
+metadata/coliziune = "hull"
+
+[node name="cont112" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.111533, 0, -0.993761, 0, 1.000000, 0, 0.993761, 0, -0.111533, 75.686638, 4.896916, 183.345169)
+metadata/coliziune = "hull"
+
+[node name="cont113" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.111533, 0, -0.993761, 0, 1.000000, 0, 0.993761, 0, -0.111533, 82.003502, 4.896916, 182.249786)
+metadata/coliziune = "hull"
+
+[node name="cont114" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.111533, 0, -0.993761, 0, 1.000000, 0, 0.993761, 0, -0.111533, 82.003502, 8.096916, 182.249786)
+metadata/coliziune = "hull"
+
+[node name="cont115" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.110110, 0, -0.993919, 0, 1.000000, 0, 0.993919, 0, -0.110110, 107.532013, 5.244876, 181.638855)
+metadata/coliziune = "hull"
+
+[node name="cont116" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.110110, 0, -0.993919, 0, 1.000000, 0, 0.993919, 0, -0.110110, 107.532013, 8.444876, 181.638855)
+metadata/coliziune = "hull"
+
+[node name="cont117" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("22_box")]
+transform = Transform3D(-0.110110, 0, -0.993919, 0, 1.000000, 0, 0.993919, 0, -0.110110, 113.850388, 5.244876, 180.552551)
+metadata/coliziune = "hull"
+
+[node name="felinarE118" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("21_lamp")]
+transform = Transform3D(-0.997797, 0, 0.066338, 0, 1.000000, 0, -0.066338, 0, -0.997797, 32.933376, 4.850384, 190.375473)
+metadata/coliziune = "none"
+
+[node name="felinarE119" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("21_lamp")]
+transform = Transform3D(-0.993967, 0, 0.109679, 0, 1.000000, 0, -0.109679, 0, -0.993967, 61.544998, 5.030831, 188.392105)
+metadata/coliziune = "none"
+
+[node name="felinarE120" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("21_lamp")]
+transform = Transform3D(-0.993902, 0, 0.110265, 0, 1.000000, 0, -0.110265, 0, -0.993902, 92.346069, 5.370337, 186.560547)
+metadata/coliziune = "none"
+
+[node name="felinarE121" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("21_lamp")]
+transform = Transform3D(-0.993839, 0, 0.110834, 0, 1.000000, 0, -0.110834, 0, -0.993839, 121.377632, 5.697328, 183.726456)
+metadata/coliziune = "none"
+
+[node name="slep_chei122" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("20_ship")]
+transform = Transform3D(-0.094803, 0, -0.844697, 0, 0.850000, 0, 0.844697, 0, -0.094803, 80.239853, 1.301686, 223.914444)
+metadata/coliziune = "none"
+
+[node name="firmaE123" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("40_neona")]
+transform = Transform3D(-0.996458, 0, 0.084097, 0, 1.000000, 0, -0.084097, 0, -0.996458, 56.631931, 7.088769, 188.235168)
+metadata/coliziune = "none"
+
+[node name="firmaE124" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("41_neonc")]
+transform = Transform3D(-0.993878, 0, 0.110484, 0, 1.000000, 0, -0.110484, 0, -0.993878, 117.975166, 7.726033, 183.501221)
+metadata/coliziune = "none"
+
+[node name="pila125" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(1.074696, 0, 0.731457, 0, 2.669113, 0, -0.731457, 0, 1.074696, 114.233711, 11.346058, 142.424774)
+metadata/coliziune = "hull"
+
+[node name="pila126" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(1.074696, 0, 0.731457, 0, 2.514629, 0, -0.731457, 0, 1.074696, 107.868202, 12.711696, 138.092316)
+metadata/coliziune = "hull"
+
+[node name="pila127" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(1.276504, 0, 0.246043, 0, 3.459775, 0, -0.246043, 0, 1.276504, 100.941620, 5.323114, 163.766785)
+metadata/coliziune = "hull"
+
+[node name="pila128" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(1.276504, 0, 0.246043, 0, 3.471891, 0, -0.246043, 0, 1.276504, 93.380783, 5.216007, 162.309448)
+metadata/coliziune = "hull"
+
+[node name="pila129" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(0.385382, 0, -1.241564, 0, 3.588388, 0, 1.241564, 0, 0.385382, 109.612427, 5.272171, 180.539352)
+metadata/coliziune = "hull"
+
+[node name="pila130" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.009236, 0, -1.299967, 0, 1.865450, 0, 1.299967, 0, -0.009236, 133.767822, 5.186288, 181.763000)
+metadata/coliziune = "hull"
+
+[node name="pila131" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.009236, 0, -1.299967, 0, 1.865450, 0, 1.299967, 0, -0.009236, 133.767822, 21.676867, 181.763000)
+metadata/coliziune = "hull"
+
+[node name="pila132" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(0.304126, 0, -1.263925, 0, 1.896753, 0, 1.263925, 0, 0.304126, 160.581604, 5.725404, 182.798462)
+metadata/coliziune = "hull"
+
+[node name="pila133" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(0.304126, 0, -1.263925, 0, 1.896753, 0, 1.263925, 0, 0.304126, 160.581604, 22.492702, 182.798462)
+metadata/coliziune = "hull"
+
+[node name="pila134" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(0.379525, 0, -1.243367, 0, 1.917028, 0, 1.243367, 0, 0.379525, 185.822266, 6.324655, 189.584885)
+metadata/coliziune = "hull"
+
+[node name="pila135" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(0.379525, 0, -1.243367, 0, 1.917028, 0, 1.243367, 0, 0.379525, 185.822266, 23.271179, 189.584885)
+metadata/coliziune = "hull"
+
+[node name="pila136" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.393705, 0, -1.238950, 0, 1.932842, 0, 1.238950, 0, -0.393705, 207.440903, 6.957470, 191.757507)
+metadata/coliziune = "hull"
+
+[node name="pila137" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.393705, 0, -1.238950, 0, 1.932842, 0, 1.238950, 0, -0.393705, 207.440903, 24.043791, 191.757507)
+metadata/coliziune = "hull"
+
+[node name="pila138" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.649054, 0, -1.126379, 0, 1.856851, 0, 1.126379, 0, -0.649054, 230.398544, 9.141697, 180.862747)
+metadata/coliziune = "hull"
+
+[node name="pila139" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.649054, 0, -1.126379, 0, 1.856851, 0, 1.126379, 0, -0.649054, 230.398544, 25.556261, 180.862747)
+metadata/coliziune = "hull"
+
+[node name="pila140" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.940743, 0, -0.897219, 0, 1.845189, 0, 0.897219, 0, -0.940743, 251.587997, 10.165490, 167.266617)
+metadata/coliziune = "hull"
+
+[node name="pila141" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.940743, 0, -0.897219, 0, 1.845189, 0, 0.897219, 0, -0.940743, 251.587997, 26.476965, 167.266617)
+metadata/coliziune = "hull"
+
+[node name="pila142" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.234847, 0, -0.406391, 0, 3.353320, 0, 0.406391, 0, -1.234847, 258.470703, 14.264344, 145.604950)
+metadata/coliziune = "hull"
+
+[node name="pila143" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.234847, 0, -0.406391, 0, 3.028738, 0, 0.406391, 0, -1.234847, 277.183380, 17.133648, 151.763351)
+metadata/coliziune = "hull"
+
+[node name="pila144" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.283925, 0, -0.203804, 0, 3.162664, 0, 0.203804, 0, -1.283925, 262.586548, 17.122049, 121.802246)
+metadata/coliziune = "hull"
+
+[node name="pila145" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.283925, 0, -0.203804, 0, 2.823148, 0, 0.203804, 0, -1.283925, 282.042938, 20.123369, 124.890671)
+metadata/coliziune = "hull"
+
+[node name="pila146" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.072557, 0, 0.734589, 0, 2.626150, 0, -0.734589, 0, -1.072557, 272.198303, 23.004993, 97.214661)
+metadata/coliziune = "hull"
+
+[node name="pila147" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-0.982663, 0, 0.851102, 0, 2.424035, 0, -0.851102, 0, -0.982663, 255.541748, 25.910343, 77.226738)
+metadata/coliziune = "hull"
+
+[node name="pila148" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.235098, 0, -0.405626, 0, 2.434105, 0, 0.405626, 0, -1.235098, 241.336426, 27.538485, 54.424149)
+metadata/coliziune = "hull"
+
+[node name="pila149" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.235098, 0, -0.405626, 0, 2.486978, 0, 0.405626, 0, -1.235098, 248.652008, 27.071093, 56.826706)
+metadata/coliziune = "hull"
+
+[node name="pila150" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.251963, 0, 0.350127, 0, 2.078505, 0, -0.350127, 0, -1.251963, 243.031464, 32.953884, 30.496565)
+metadata/coliziune = "hull"
+
+[node name="pila151" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
+transform = Transform3D(-1.251963, 0, 0.350127, 0, 1.935522, 0, -0.350127, 0, -1.251963, 250.446930, 34.217857, 28.422735)
+metadata/coliziune = "hull"
+
+[node name="santier152" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("32_barrier")]
+transform = Transform3D(0.270496, 0, -0.962721, 0, 1.000000, 0, 0.962721, 0, 0.270496, 184.728058, 41.750000, 186.315689)
+metadata/coliziune = "none"
+
+[node name="santier153" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("32_barrier")]
+transform = Transform3D(0.173889, 0, -0.984765, 0, 1.000000, 0, 0.984765, 0, 0.173889, 193.754593, 42.133743, 188.922150)
+metadata/coliziune = "none"
+
+[node name="santier154" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("32_barrier")]
+transform = Transform3D(0.021999, 0, -0.999758, 0, 1.000000, 0, 0.999758, 0, 0.021999, 199.888489, 42.415771, 206.400497)
+metadata/coliziune = "none"
+
+[node name="masinuta155" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("43_minia")]
+transform = Transform3D(-0.135783, 0, -0.990739, 0, 1.000000, 0, 0.990739, 0, -0.135783, 226.088455, 28.331915, 66.468361)
+metadata/coliziune = "hull"
+
+[node name="masinuta156" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("44_minib")]
+transform = Transform3D(-0.305016, 0, -0.952347, 0, 1.000000, 0, 0.952347, 0, -0.305016, 196.391693, 30.238840, 74.830093)
+metadata/coliziune = "hull"
+
+[node name="masinuta157" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("43_minia")]
+transform = Transform3D(0.766287, 0, -0.642498, 0, 1.000000, 0, 0.642498, 0, 0.766287, 256.045532, 23.274187, 99.328491)
+metadata/coliziune = "hull"
+
+[node name="bloc_liziba158" parent="DecorManual/7) Liziba" instance=ExtResource("33_liziba")]
+transform = Transform3D(-2.490257, 0, 0.747407, 0, 1.000000, 0, -0.287464, 0, -0.957791, 241.443695, 54.401196, 11.490620)
+metadata/coliziune = "mesh"
+
+[node name="hol159" parent="DecorManual/7) Liziba" instance=ExtResource("35_mailbox")]
+transform = Transform3D(-0.269328, 0, -0.963048, 0, 1.000000, 0, 0.963048, 0, -0.269328, 255.791855, 52.927872, 26.927963)
+metadata/coliziune = "none"
+
+[node name="hol160" parent="DecorManual/7) Liziba" instance=ExtResource("35_mailbox")]
+transform = Transform3D(0.282666, 0, 0.959218, 0, 1.000000, 0, -0.959218, 0, 0.282666, 229.943359, 55.299999, 5.867060)
+metadata/coliziune = "none"
+
+[node name="hol161" parent="DecorManual/7) Liziba" instance=ExtResource("36_bike")]
+transform = Transform3D(-0.302852, 0, -0.953038, 0, 1.000000, 0, 0.953038, 0, -0.302852, 252.750122, 53.968796, 14.952752)
+metadata/coliziune = "none"
+
+[node name="hol162" parent="DecorManual/7) Liziba" instance=ExtResource("36_bike")]
+transform = Transform3D(-0.637760, 0, -0.770235, 0, 1.000000, 0, 0.770235, 0, -0.637760, 251.796341, 54.259998, 11.892771)
+metadata/coliziune = "none"
+
+[node name="hol163" parent="DecorManual/7) Liziba" instance=ExtResource("36_bike")]
+transform = Transform3D(0.269588, 0, 0.962976, 0, 1.000000, 0, -0.962976, 0, 0.269588, 228.585632, 55.594913, 2.624862)
+metadata/coliziune = "none"
+
+[node name="pasarela164" parent="DecorManual/7) Liziba" instance=ExtResource("34_footbridge")]
+transform = Transform3D(-0.370543, 0, -0.928816, 0, 1.000000, 0, 0.928816, 0, -0.370543, 220.098038, 59.495728, -47.341549)
+metadata/coliziune = "mesh"
+
+[node name="gura165" parent="DecorManual/7) Liziba" instance=ExtResource("42_lampc")]
+transform = Transform3D(-0.129729, 0, 0.991550, 0, 1.000000, 0, -0.991550, 0, -0.129729, 258.319794, 51.671700, 45.213421)
+metadata/coliziune = "none"
+
+[node name="gura166" parent="DecorManual/7) Liziba" instance=ExtResource("42_lampc")]
+transform = Transform3D(0.366496, 0, 0.930420, 0, 1.000000, 0, -0.930420, 0, 0.366496, 221.347565, 57.259998, -15.595141)
+metadata/coliziune = "none"
+
+[node name="gura167" parent="DecorManual/7) Liziba" instance=ExtResource("40_neona")]
+transform = Transform3D(-0.202221, 0, 0.979340, 0, 1.000000, 0, -0.979340, 0, -0.202221, 236.968445, 51.321854, 45.897938)
+metadata/coliziune = "none"
+
+[node name="siluetaS168" parent="DecorManual/8) Fundal" instance=ExtResource("37_towerb")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, 64.619156, 4.001686, 372.119904)
+metadata/coliziune = "none"
+
+[node name="siluetaS169" parent="DecorManual/8) Fundal" instance=ExtResource("38_towerc")]
+transform = Transform3D(0.484856, 0, -0.610995, 0, 0.780000, 0, 0.610995, 0, 0.484856, 90.661957, 4.001686, 411.939819)
+metadata/coliziune = "none"
+
+[node name="siluetaS170" parent="DecorManual/8) Fundal" instance=ExtResource("24_tower")]
+transform = Transform3D(-0.261282, 0, -1.119925, 0, 1.150000, 0, 1.119925, 0, -0.261282, 100.087738, 4.001686, 364.578979)
+metadata/coliziune = "none"
+
+[node name="siluetaS171" parent="DecorManual/8) Fundal" instance=ExtResource("37_towerb")]
+transform = Transform3D(-0.904072, 0, -0.427380, 0, 1.000000, 0, 0.427380, 0, -0.904072, 122.724121, 4.001686, 426.462646)
+metadata/coliziune = "none"
+
+[node name="siluetaS172" parent="DecorManual/8) Fundal" instance=ExtResource("38_towerc")]
+transform = Transform3D(-0.699472, 0, 0.345166, 0, 0.780000, 0, -0.345166, 0, -0.699472, 130.931961, 4.001686, 379.263977)
+metadata/coliziune = "none"
+
+[node name="siluetaS173" parent="DecorManual/8) Fundal" instance=ExtResource("24_tower")]
+transform = Transform3D(-0.242415, 0, 1.124160, 0, 1.150000, 0, -1.124160, 0, -0.242415, 150.344269, 4.001686, 419.367767)
+metadata/coliziune = "none"
+
+[node name="siluetaS174" parent="DecorManual/8) Fundal" instance=ExtResource("37_towerb")]
+transform = Transform3D(0.634693, 0, 0.772764, 0, 1.000000, 0, -0.772764, 0, 0.634693, 78.328880, 4.001686, 445.321228)
+metadata/coliziune = "none"
+
+[node name="siluetaS175" parent="DecorManual/8) Fundal" instance=ExtResource("38_towerc")]
+transform = Transform3D(0.779890, 0, -0.013115, 0, 0.780000, 0, 0.013115, 0, 0.779890, 107.069260, 4.001686, 333.622772)
+metadata/coliziune = "none"
+
+[node name="podS176" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
+transform = Transform3D(-0.111055, 0, -0.993814, 0, 1.000000, 0, 0.993814, 0, -0.111055, 93.999466, 10.001686, 393.277344)
+metadata/coliziune = "none"
+
+[node name="podS177" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
+transform = Transform3D(-0.111055, 0, -0.993814, 0, 1.000000, 0, 0.993814, 0, -0.111055, 133.750305, 10.001686, 388.835358)
+metadata/coliziune = "none"
+
+[node name="podS178" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
+transform = Transform3D(-0.111055, 0, -0.993814, 0, 1.000000, 0, 0.993814, 0, -0.111055, 173.501144, 10.001686, 384.393372)
+metadata/coliziune = "none"
+
+[node name="podS179" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
+transform = Transform3D(-0.111055, 0, -0.993814, 0, 1.000000, 0, 0.993814, 0, -0.111055, 213.251984, 10.001686, 379.951355)
+metadata/coliziune = "none"
+
+[node name="podS180" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
+transform = Transform3D(-0.111055, 0, -0.993814, 0, 1.000000, 0, 0.993814, 0, -0.111055, 253.002808, 10.001686, 375.509369)
+metadata/coliziune = "none"
+
+[node name="podS181" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
+transform = Transform3D(-0.111055, 0, -0.993814, 0, 1.000000, 0, 0.993814, 0, -0.111055, 292.753662, 10.001686, 371.067383)
 metadata/coliziune = "none"

@@ -56,6 +56,12 @@ const CAR_W := 2.4
 const HONGYA_DROP := 5.0
 
 var _track: Track
+var _space: PhysicsDirectSpaceState3D
+## Corpurile decorului DEJA existent in Track12.tscn. Generatorul reruleaza
+## peste o pista care contine deja rezultatul rularii anterioare, deci fara
+## excluderea asta fiecare piesa s-ar aseza pe acoperisul propriei versiuni
+## precedente si cotele ar urca la fiecare rulare.
+var _excluded: Array[RID] = []
 var _sampler: TrackSideSampler
 var _path
 var _out: Array[String] = []
@@ -69,14 +75,38 @@ func _ready() -> void:
 	get_tree().root.add_child(_track)
 	await get_tree().process_frame
 	await get_tree().process_frame
+	# CADRE DE FIZICA, nu doar de proces: `_ground` trage raze in `TerrainBody`,
+	# iar corpul ala nu exista in spatiu inainte sa ruleze fizica.
+	for i in 4:
+		await get_tree().physics_frame
 	_sampler = _track._sampler
 	_path = TrackScenography._Path.new(_sampler)
+	_space = _track.get_world_3d().direct_space_state
+	_collect_excluded()
 	print("; total=%.1f  half_width=%.2f" % [_path.total, _sampler.half_width()])
 	_emit_all()
 	print("")
 	for line in _out:
 		print(line)
 	get_tree().quit(0)
+
+
+## Aduna corpurile fizice ale DECORULUI (manual si procedural), lasand terenul.
+func _collect_excluded() -> void:
+	_excluded.clear()
+	for root_name: String in ["DecorManual", "Decor"]:
+		var root := _track.get_node_or_null(NodePath(root_name))
+		if root == null:
+			continue
+		var stack: Array = [root]
+		while not stack.is_empty():
+			var x = stack.pop_back()
+			for c in x.get_children():
+				stack.append(c)
+			var b := x as CollisionObject3D
+			if b != null:
+				_excluded.append(b.get_rid())
+	print("; corpuri de decor excluse din raze: %d" % _excluded.size())
 
 
 # ------------------------------------------------------------------ compozitia
@@ -123,8 +153,9 @@ func _poi_a_piata() -> void:
 	var side := 1.0
 	while g < 0.040:
 		var s3 := _at(g)
-		_place("chongqing/props/lamp_lantern_a", "felinar_piata",
-			_off_ground(s3, side, _clear(s3, 2.5)), _yaw_to_road(s3, side), 1.0)
+		_light(_place("chongqing/props/lamp_lantern_a", "felinar_piata",
+			_off_ground(s3, side, _clear(s3, 2.5)), _yaw_to_road(s3, side), 1.0),
+			1.6)
 		side = -side
 		g += 22.0 / _path.total
 
@@ -295,9 +326,9 @@ func _poi_b_shibati() -> void:
 	var q := 0.054
 	while q < 0.108:
 		var st5 := _at(q)
-		_place("chongqing/props/lamp_lantern_c", "felinar_scara",
+		_light(_place("chongqing/props/lamp_lantern_c", "felinar_scara",
 			_off_ground(st5, -1.0, _clear(st5, 0.8)),
-			_yaw_to_road(st5, -1.0), 1.0)
+			_yaw_to_road(st5, -1.0), 1.0), 1.6)
 		q += 11.0 / _path.total
 
 
@@ -305,22 +336,62 @@ func _poi_b_shibati() -> void:
 ##
 ## Brief §2 C: coridor strans de 6 m intre restaurante. Carosabilul se
 ## stramteaza singur (custom_width_segments: 6.0 intre 0.18 si 0.209), deci
-## treaba decorului e sa faca PERETII. restaurant_front e 9.2 x 4.7 m — jos si
-## lat, exact ce cere frustumul: la 9 m lateral vezi 10.8 m inaltime, iar
-## piesa are 4.7.
+## treaba decorului e sa faca PERETII.
+##
+## RUNDA 3 — de ce aleea „exista ca geometrie, dar e stinsa si nu e coridor".
+## `restaurant_front` are 4.68 m inaltime, adica UN nivel. Pus la 8.2 m
+## lateral, capatul lui de sus ramane sub linia de vedere si de pe sosea nu se
+## vad decat ACOPERISURILE — masurat pe captura rundei 2: un sir de soproane
+## privite de sus, nu un tunel. Frustumul (§2.0) spune cat poti sa pui, nu cat
+## TREBUIE: la 7 m lateral incap 10.6 m de perete, iar noi foloseam 4.7.
+##
+## Deci peretele il fac `shophouse_a/b/c` (7.6 m, doua niveluri), asezate mai
+## aproape (7.2 m), iar restaurantele raman la parter, in fata lor, ca
+## tejghelele luminate de unde vine aburul. Doua randuri, nu unul: asa
+## coridorul are si inaltime si adancime.
 func _poi_c_alee() -> void:
 	_open_section("3) Aleea hot-pot")
 
-	# Peretii de restaurante, de o parte si de alta, decalati intre ei ca sa
-	# nu iasa un tunel simetric.
-	var f := 0.170
-	var side := 1.0
-	while f < 0.238:
+	# PERETELE: pravalii de doua niveluri pe amandoua partile, alternand
+	# piesa ca sa nu iasa un gard repetat. La 7.2 m lateral cei 7.6 m de
+	# fatada intra in cadru pana sus (la 7 m lateral camera vede 10.6 m).
+	# Distanta e 10.5 m, nu 7.2. La 7.2 m pravaliile de 7.6 m ies din cadru pe
+	# sus si raman in imagine cu ACOPERISUL — masurat pe captura: un zid de
+	# invelitori cenusii care inghesuie aleea si ascunde chiar tejghelele
+	# luminate pentru care exista coridorul. Camera priveste in JOS, deci o
+	# fatada se vede doar de la distanta la care unghiul ei de sus intra sub
+	# linia de vedere: la 10.5 m, cei 7.6 m de pravalie se citesc ca PERETE.
+	var shop := ["chongqing/buildings/shophouse_a",
+		"chongqing/buildings/shophouse_b", "chongqing/buildings/shophouse_c"]
+	var f := 0.168
+	var k := 0
+	while f < 0.240:
 		var st := _at(f)
-		_place("chongqing/buildings/restaurant_front", "restaurant",
-			_off_ground(st, side, 8.2), _yaw_to_road(st, side), 1.0)
+		for sd: float in [-1.0, 1.0]:
+			# Peretii pravaliei stau IN lumina calda a aleii (MULTIPLY pe
+			# sloturile de zidarie), nu sunt ei sursa. Slotul 30 (firma) NU
+			# intra in spalare: MULTIPLY l-ar INCHIDE, si tocmai el trebuie
+			# sa arda. O piesa are un singur material_override, deci alegerea
+			# e „ori firma arde, ori peretele se incalzeste" — pe pravalii
+			# conteaza peretele (30% slot 11 gri-albastru + 19% slot 29 gri,
+			# adica dominanta rece masurata), firmele le dau restaurantele si
+			# lampioanele de langa ele.
+			_wash(_place(shop[k % 3], "pravalie",
+				_off_ground(st, sd, 10.5), _yaw_to_road(st, sd), 1.0),
+				"3,8,11,20,28,29", 1.0, "#FFB877")
+			k += 1
+		f += 7.0 / _path.total
+
+	# RESTAURANTELE, la parter in fata pravaliilor: tejgheaua luminata de unde
+	# ies aburii. Decalate fata de pravalii, ca sa nu se suprapuna fatadele.
+	var f2 := 0.172
+	var side := 1.0
+	while f2 < 0.236:
+		var st := _at(f2)
+		_light(_place("chongqing/buildings/restaurant_front", "restaurant",
+			_off_ground(st, side, 6.4), _yaw_to_road(st, side), 1.0), 1.5)
 		side = -side
-		f += 5.6 / _path.total
+		f2 += 7.4 / _path.total
 
 	# Mesele cu scaunele pe trotuar. „none" la coliziune: in aleea de 6 m ele
 	# stau la o roata de linia de curs, iar o masa care opreste o masina de
@@ -350,8 +421,9 @@ func _poi_c_alee() -> void:
 	var qs := 1.0
 	while q < 0.237:
 		var st4 := _at(q)
-		_place("chongqing/props/lamp_lantern_b", "felinar_alee",
-			_off_ground(st4, qs, _clear(st4, 0.6)), _yaw_to_road(st4, qs), 1.0)
+		_light(_place("chongqing/props/lamp_lantern_b", "felinar_alee",
+			_off_ground(st4, qs, _clear(st4, 0.6)), _yaw_to_road(st4, qs), 1.0),
+			1.6)
 		qs = -qs
 		q += 6.2 / _path.total
 
@@ -364,8 +436,8 @@ func _poi_c_alee() -> void:
 	# §4 il vrea „accent, sub 1% din pixeli". Unul se vede; zece devin identitate,
 	# si identitatea pistei nu e cyberpunk (§0.1).
 	var st6 := _at(0.204)
-	_place("chongqing/props/neon_sign_a", "neon_roz",
-		_off_ground(st6, 1.0, 6.0), _yaw_to_road(st6, 1.0), 1.0)
+	_light(_place("chongqing/props/neon_sign_a", "neon_roz",
+		_off_ground(st6, 1.0, 6.0), _yaw_to_road(st6, 1.0), 1.0), 2.2, "#FF3FA4")
 
 
 ## --- D: cornisa Hongya Dong (frac 0.26-0.44) ------------------------------
@@ -409,84 +481,156 @@ func _poi_d_cornisa() -> void:
 	# coboara coama, ci coboara TALPA sub buza, ca etajele sa se vada
 	# coborand in gol.
 	var terrace_y := 5.7
-	# MASA se face din NUMAR SI DIN APROPIERE, nu din inaltime.
+	# CE VEDE CAMERA, si de ce runda 2 a picat cu „hero-ul e mic si lateral".
 	#
-	# Runda 2 a picat la comparatia oarba cu „hero-ul e mic, lateral si randat
-	# ca placi crem plate". Cauzele erau trei, si doar una era de compozitie:
+	# Trei cauze, toate masurate, si doar una era de compozitie:
 	#
 	#  1. AO-ul copt in `hongya_dong.glb` era STRICAT: mediana vertex color
-	#     0.098, adica FIX podeaua lui `floor=0.10`, pe peste jumatate din
-	#     mesh (masurat). `AO_HERO` folosea `dist=9.0` pe o cladire de 47.7 m
-	#     cu geometrie densa — razele loveau ceva in toate directiile, ocluzia
-	#     satura, si tot corpul cadea pe podea. Prin comparatie, props-urile
-	#     aceluiasi kit folosesc `dist=2.0-2.6`, iar `buildings/village_house`
-	#     de pe o pista livrata are mediana 0.475. Cu jumatate din mesh la
-	#     0.098 NIMIC nu putea arata a cladire: ADD dadea placa portocalie,
-	#     MULTIPLY dadea placa crem — ambele „plate" fiindca sub ele nu mai
-	#     era relief, doar o constanta. Reparat in asset (vertex colors
-	#     recompuse: mediana 0.675), nu compensat din lumina.
-	#  2. Masca emisiva era de 31 px in loc de 32 (`HEX.size()` vs `SLOTS`),
-	#     deci slotul 30 cadea intre texeli si ardea pe jumatate. De aici
-	#     masuratoarea „slotul 30 singur da o silueta neagra" din runda 1 —
-	#     concluzie corecta pe o masca gresita. Reparat in `palette.gd`.
-	#  3. Compozitia: stivele stateau la 17-25 m lateral, adica DINCOLO de
-	#     buza (masurat: buza cade intre 8 si 12 m). De acolo hero-ul se vede
-	#     ca un obiect mic in dreapta, nu ca un masiv agatat sub tine.
+	#     0.098 — FIX podeaua lui `floor=0.10` — pe peste jumatate din mesh.
+	#     `AO_HERO` folosea `dist=9.0` pe o cladire de 47.7 m cu geometrie
+	#     densa: razele loveau ceva in toate directiile, ocluzia satura, tot
+	#     corpul cadea pe podea. Props-urile aceluiasi kit folosesc 2.0-2.6,
+	#     iar `buildings/village_house` de pe o pista livrata are mediana
+	#     0.475. Cu jumatate din mesh la 0.098, NIMIC nu putea arata a
+	#     cladire: ADD dadea placa portocalie, MULTIPLY placa crem — ambele
+	#     „plate" fiindca dedesubt nu mai era relief, doar o constanta.
+	#     Reparat IN ASSET (vertex colors recompuse, mediana 0.675).
+	#  2. Masca emisiva avea 31 px in loc de 32 (`HEX.size()` vs `SLOTS`):
+	#     slotul 30 cadea intre texeli si ardea pe jumatate. De aici venea
+	#     masuratoarea „slotul 30 singur da o silueta neagra" — concluzie
+	#     corecta pe o masca gresita. Reparat in `palette.gd`.
+	#  3. Ferestrele erau de 0.62 x 0.78 m, adica 0.29 x 0.37 m la scara
+	#     hero-ului: sub-pixel de la 40 m. Dovada ca nu era o problema de
+	#     energie: la 6, 12 si 20 warm% masura acelasi 0.66 — emisia satura pe
+	#     o arie prea mica. Largite in asset la 1.15 x 1.13 m (traveea e
+	#     2.1 m, deci ramane ~1 m de perete intre ele) si retragerea de 12 cm
+	#     NU s-a atins, ca golul sa ramana gol, nu autocolant.
 	#
-	# Ce se schimba aici e (3): stivele se lipesc de buza si se indesesc.
-	# Pasul scade la ~0.008 din tur (≈17 m) si randul al doilea coboara pe
-	# terasa, ca de pe cornisa sa vezi acoperisuri care COBOARA in trepte.
+	# GEOMETRIA LOCULUI, masurata cu ground_y pe toata cornisa: soseaua e la
+	# 32-34 m, fata falezei cade SCURT si abrupt (8 m -> 31 m, 13 m -> 5.7 m),
+	# iar dincolo de 13 m e terasa PLATA la 5.7 m. Deci nu exista perete pe
+	# care sa „atarne" casele: ele stau pe terasa si trebuie sa fie destul de
+	# INALTE cat sa urce inapoi pana sub buza.
+	#
+	# Si mai important, ce vede camera: la 63° in jos, de la o distanta
+	# laterala `d` vezi cel mult `d * tan(63) = 1.96 * d` metri sub ochi. La
+	# 12 m lateral vezi pana la cota 9 — deci dintr-o casa cu talpa pe terasa
+	# se vede DOAR ce trece de cota aia. De-aia stivele se pun aproape (12 m,
+	# pe muchia de sus a falezei) si inalte (coama la 5 m sub buza, brief §8):
+	# tot ce e mai jos sau mai departe nu ajunge niciodata pe ecran.
+	# CE VEDE CAMERA DIN HERO, si de ce runda 3 a picat cu „fragmente
+	# imprastiate, cu spatiu pe sub ele".
+	#
+	# Camera vede ~63° SUB orizontala: de la distanta laterala `d` vezi cel
+	# mult `1.96 * d` metri sub cota ochiului. Stivele stateau la 12 m cu
+	# TALPA pe terasa (5.7 m) si drumul la 32-34 m — deci din 47 m de casa,
+	# primii 26 cadeau sub linia de vedere si NU AJUNGEAU NICIODATA pe ecran.
+	# Ce ramanea vizibil era o fasie de 5-8 m din varf: exact „fragmentele
+	# portocalii mici" din verdict. Masa exista in lume si lipsea din cadru.
+	#
+	# Deci talpa NU mai sta pe terasa. Fiecare stiva se aseaza astfel incat
+	# coama ei sa fie la `HONGYA_DROP` sub buza (brief §8 — hero-ul incepe la
+	# ~5 m sub buza, nu la 27), iar corpul sa coboare de acolo in gol. Piesa
+	# pastreaza scara 1.0: la 47.74 m coama e la buza-5 si talpa la buza-53,
+	# adica bine sub terasa — dar terasa e ORIZONT, nu podea, iar ce e sub ea
+	# oricum nu se vede. Ce se castiga: cei 20 m de fatada de sub buza, care
+	# sunt chiar fasia pe care camera o vede.
+	#
+	# STIVELE se ating intre ele (pas ≈14 m pe o piesa de 42 m latime, deci
+	# suprapunere reala): in referinta nu sunt case separate pe o terasa, e un
+	# ZID continuu de balcoane care coboara.
 	var spots := [
-		Vector2(0.258, 0.0), Vector2(0.266, -1.5), Vector2(0.274, -0.5),
-		Vector2(0.282, -2.0), Vector2(0.290, -0.5), Vector2(0.298, -1.5),
-		Vector2(0.306, -0.5), Vector2(0.314, -2.0), Vector2(0.322, -1.0),
-		Vector2(0.330, -2.5), Vector2(0.338, -1.0), Vector2(0.346, -2.0),
+		Vector2(0.250, 0.0), Vector2(0.257, -1.5), Vector2(0.264, 0.0),
+		Vector2(0.271, -1.5), Vector2(0.278, 0.0), Vector2(0.285, -1.5),
+		Vector2(0.292, 0.0), Vector2(0.299, -1.5), Vector2(0.306, 0.0),
+		Vector2(0.313, -1.5), Vector2(0.320, 0.0), Vector2(0.327, -1.5),
+		Vector2(0.334, 0.0), Vector2(0.341, -1.5), Vector2(0.348, 0.0),
+		Vector2(0.355, -1.5), Vector2(0.362, 0.0), Vector2(0.369, -1.5),
+		Vector2(0.376, 0.0), Vector2(0.383, -1.5), Vector2(0.390, 0.0),
+		Vector2(0.397, -1.5), Vector2(0.404, 0.0), Vector2(0.411, -1.5),
 	]
 	for sp: Vector2 in spots:
 		var st := _at(sp.x)
 		var brink: float = st["pos"].y
-		# TALPA PE TERASA, COAMA SUB BUZA — si de aici scala, nu invers.
-		# Coama la `buza - HONGYA_DROP` tine regula frustumului (§2.0: ce e
-		# impresionant sta SUB jucator) si brief §8 (incepe la ~5 m sub buza).
-		var foot := terrace_y
+		# COAMA la `buza - HONGYA_DROP`, talpa unde cade. Scara ramane 1.0:
+		# piesa e proiectata pentru masa asta, iar micsorarea ei a fost chiar
+		# greseala rundelor trecute.
 		var ridge := brink + sp.y - HONGYA_DROP
-		var scl := clampf((ridge - foot) / 47.74, 0.2, 1.0)
-		# LIPIT DE BUZA. Buza cade intre 8 si 12 m lateral (masurat pe toata
-		# cornisa cu ground_y), deci 9.5 m pune fatada exact peste muchie: de
-		# pe sosea vezi acoperisurile imediat sub tine, nu un obiect departe.
-		# Adancimea piesei (17.7 * scala) intra in stanca, unde oricum n-are
-		# detaliu (brief §5.2).
-		var p := _off(st, 1.0, 9.5)
-		p.y = foot
+		var p := _off(st, 1.0, 11.0)
+		p.y = ridge - 47.74
 		var node_name := _place("chongqing/structures/hongya_dong", "hongya_hero",
-			p, _yaw_to_road(st, 1.0), scl)
-		# LUMINA: ard FERESTRELE (slotul 30), nu corpul.
-		#
-		# Cu AO-ul reparat asta e si tot ce trebuie: lemnul se vede fiindca e
-		# o cladire luminata, iar ferestrele sunt sursa — exact limbajul
-		# referintei (lumina calda care scapa dintre lemne intunecate).
-		# Aprinderea corpului (9,20,28) a fost incercarea de a compensa un
-		# asset stricat si producea placa uniforma; nu mai e necesara.
-		_meta(node_name, "lumina", "30|3.4|#FFC98A")
+			p, _yaw_to_road(st, 1.0), 1.0)
+		# LUMINA: ard FERESTRELE (slotul 30), nu corpul — lumina calda care
+		# scapa dintre lemne intunecate, exact limbajul referintei.
+		_meta(node_name, "lumina", "30|2.0|#FFC98A")
 		# Fara corp fizic: cine cade de pe cornisa trebuie sa CADA in terasa
 		# si sa fie repus, nu sa aterizeze pe un acoperis la 30 m.
 		_meta(node_name, "coliziune", "none")
 
-		# AL DOILEA RAND, mai in afara pe terasa si mai scund: fara el cele
-		# 12 stive fac o singura linie de creasta si terasa ramane goala.
-		var ridge2 := foot + (ridge - foot) * 0.55
-		var scl2 := clampf((ridge2 - foot) / 47.74, 0.18, 1.0)
-		var p2 := _off(st, 1.0, 9.5 + 13.0 + 8.8 * scl)
-		p2.y = foot
+		# AL DOILEA RAND, mai in afara si cu coama mai jos: da adancime
+		# (acoperisuri care coboara in trepte spre apa) fara sa acopere
+		# randul intai.
+		var p2 := _off(st, 1.0, 11.0 + 21.0)
+		p2.y = ridge - 47.74 - 9.0
 		var n2 := _place("chongqing/structures/hongya_dong", "hongya_jos",
-			p2, _yaw_to_road(st, 1.0) + deg_to_rad(18.0), scl2)
-		_meta(n2, "lumina", "30|3.4|#FFC98A")
+			p2, _yaw_to_road(st, 1.0) + deg_to_rad(14.0), 1.0)
+		_meta(n2, "lumina", "30|2.0|#FFC98A")
 		_meta(n2, "coliziune", "none")
+
+	# PERETELE DIN STANGA — jumatatea goala din verdict.
+	#
+	# Masurat cu raze in mesh-ul de coliziune: pe toata cornisa (0.26-0.44)
+	# terenul din stanga e PLAT si la cota drumului (-0.5 .. +1.1 m la 11-40 m
+	# lateral), si `is_on_road` spune „liber" peste tot acolo. Adica exista un
+	# platou intreg pe care nu statea nimic — de-aia stanga cadrului iesea
+	# camp gri, si de-aia soseaua se citea ca o banda izolata.
+	#
+	# In referinta drumul TRECE PRIN oras: are case pe amandoua partile, iar
+	# intunericul e fundal, nu vecin. Deci stanga primeste un perete de
+	# coridor din `shophouse_a/b/c` (7.6 m inaltime = doua niveluri, exact ce
+	# permite frustumul la 10-12 m lateral: `10 + 0.093*11` ≈ 11 m).
+	# Se aseaza pe TEREN (`_off_ground`, deci raycast), in doua siruri:
+	# primul lipit de drum, al doilea in spate si mai departat, ca peretele sa
+	# aiba adancime in loc sa fie un panou.
+	var shopd := ["chongqing/buildings/shophouse_a",
+		"chongqing/buildings/shophouse_b", "chongqing/buildings/shophouse_c"]
+	var wf := 0.252
+	var wi := 0
+	while wf < 0.436:
+		var stw := _at(wf)
+		# Randul din fata: la 11.5 m de ax, cu fata spre drum.
+		var nw := _place(shopd[wi % 3], "casa_cornisa",
+			_off_ground(stw, -1.0, 11.5), _yaw_to_road(stw, -1.0), 1.0)
+		_meta(nw, "lumina", "30|1.7|#FFC07A")
+		# Randul din spate: mai departat si rotit, ca sa se vada acoperisuri
+		# peste primul rand (adancime), nu o singura linie de fatade.
+		if wi % 2 == 0:
+			var nb := _place(shopd[(wi + 2) % 3], "casa_cornisa_spate",
+				_off_ground(stw, -1.0, 20.5), _yaw_to_road(stw, -1.0)
+				+ deg_to_rad(22.0), 1.0)
+			_meta(nb, "lumina", "30|1.5|#FFC07A")
+		wi += 1
+		wf += 8.6 / _path.total
+
+	# RUFELE intre casele din stanga: semnatura cartierului, si singurul lucru
+	# care umple aerul dintre fatade. Sunt INTINSE intre cladiri, deci stau
+	# legitim deasupra terenului (cota drumului + 3 m).
+	var rf := 0.258
+	while rf < 0.430:
+		var str2 := _at(rf)
+		var pr := _off(str2, -1.0, 15.5)
+		pr.y += 3.0
+		_place("chongqing/props/laundry_line", "rufe_cornisa",
+			pr, _yaw_to_road(str2, -1.0), 1.0)
+		rf += 17.0 / _path.total
 
 	# CHEVROANELE pe curbele oarbe. Cornisa e un S larg fara parapet pe
 	# dreapta: chevronul e singurul lucru care spune unde se duce drumul cand
 	# faleza inghite orizontul.
-	var chevrons := [0.286, 0.291, 0.296, 0.336, 0.341, 0.346, 0.394, 0.399]
+	# Acoperirea merge pana la 0.44, nu se opreste la 0.40: verdictul rundei 3
+	# a gasit „la 0.36 si 0.42 nu e practic nimic acolo".
+	var chevrons := [0.286, 0.291, 0.296, 0.336, 0.341, 0.346,
+		0.376, 0.381, 0.394, 0.399, 0.416, 0.421, 0.432, 0.437]
 	for cf: float in chevrons:
 		var st2 := _at(cf)
 		_place("chongqing/props/chevron_post", "chevron",
@@ -503,12 +647,13 @@ func _poi_d_cornisa() -> void:
 
 	# Felinarele cornisei, pe latura DINSPRE MUNTE (-1): pe dreapta e golul,
 	# iar un stalp acolo ar fi si obstacol si contradictie cu „fara parapet".
-	var lf := 0.268
-	while lf < 0.424:
+	var lf := 0.258
+	while lf < 0.444:
 		var st4 := _at(lf)
-		_place("chongqing/props/lamp_lantern_a", "felinar_cornisa",
-			_off_ground(st4, -1.0, _clear(st4, 0.8)), _yaw_to_road(st4, -1.0), 1.0)
-		lf += 26.0 / _path.total
+		_light(_place("chongqing/props/lamp_lantern_a", "felinar_cornisa",
+			_off_ground(st4, -1.0, _clear(st4, 0.8)), _yaw_to_road(st4, -1.0), 1.0),
+			1.6)
+		lf += 19.0 / _path.total
 
 
 
@@ -545,8 +690,36 @@ func _off(st: Dictionary, side: float, dist: float) -> Vector3:
 ## pe pamant: pe o panta, cota drumului ar lasa piesele in aer sau ingropate.
 func _off_ground(st: Dictionary, side: float, dist: float) -> Vector3:
 	var p := _off(st, side, dist)
-	p.y = _sampler.ground_y(p.x, p.z)
+	p.y = _ground(p.x, p.z, p.y)
 	return p
+
+
+## COTA TERENULUI, CITITA DIN MESH-UL DE COLIZIUNE, nu din `ground_y`.
+##
+## `ground_y` e un camp NETED (medie ponderata a cotelor drumului plus dune) —
+## sursa buna pentru cat de sus e lumea in general, sursa GRESITA pentru unde
+## se aseaza o piesa. Terenul randat e sculptat pe deasupra (cornisa, rapa,
+## terasa per POI), deci cele doua diverg exact acolo unde panta e mare:
+## masurat pe cornisa, `ground_y` da 25.77 acolo unde `TerrainBody` e la 17.06
+## — 8.7 m de aer sub piesa. Pe aleea C diferenta ajunge la 11.7 m.
+##
+## De aici veneau piesele plutitoare gasite de critic: nu erau asezate „la cota
+## drumului din greseala", erau asezate pe un teren care nu exista.
+##
+## Raza porneste de SUS (cota data + 80 m) ca sa nu inceapa deja sub deal, si
+## exclude decorul deja pus — altfel a doua piesa se aseaza pe acoperisul
+## primeia. Daca nu loveste nimic (gol real), intoarce cota data, iar apelantul
+## decide; nicio piesa din fisierul asta nu se pune deliberat peste gol.
+func _ground(wx: float, wz: float, hint: float) -> float:
+	if _space == null:
+		return _sampler.ground_y(wx, wz)
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(wx, hint + 80.0, wz), Vector3(wx, hint - 400.0, wz))
+	q.exclude = _excluded
+	var hit := _space.intersect_ray(q)
+	if hit.is_empty():
+		return _sampler.ground_y(wx, wz)
+	return (hit["position"] as Vector3).y
 
 
 ## Yaw-ul care intoarce piesa CU FATA spre ax (pentru fatade si felinare).
@@ -611,6 +784,39 @@ func _yaw_drive(st: Dictionary) -> float:
 
 
 # ------------------------------------------------------------------ iesirea
+
+## Aprinde o piesa asezata: scrie metadata `lumina` citita de `world_prop.gd`.
+##
+## De ce e o functie si nu doua linii la fiecare apel: lumina calda e SUBIECTUL
+## pistei (brief §4, „auriu de Hongya Dong, rosu de lampioane"), iar runda 2 a
+## picat fiindca lipsea peste tot, nu doar pe hero. Masurat pe cadrul cornisei:
+## bara are R-B = +24.7 si 20% pixeli calzi, noi aveam R-B = -18 si 0.6% — semn
+## INVERS, adica o scena albastru-cenusie cu cateva pete portocalii. Cauza nu
+## era o nuanta gresita, ci ca nimic in afara de hero nu ardea: cei 13 felinari
+## ai cornisei, lampioanele pietei, neonul aleii si ferestrele pravaliilor
+## stateau toate STINSE, desi fiecare are 33-68% din arie in slotul 30.
+const WARM := "#FFC98A"
+
+func _light(node_name: String, energy: float, tint: String = WARM) -> void:
+	_meta(node_name, "lumina", "30|%.1f|%s" % [energy, tint])
+
+
+## Aceeasi lumina, dar peste MAI MULTE sloturi si cu operatorul MULTIPLY:
+## „peretii astia stau intr-o lumina calda", nu „peretii astia sunt surse".
+##
+## De ce MULTIPLY si de ce si peretii: pe hero MULTIPLY a esuat (a iesit placa
+## crem) fiindca AO-ul assetului era stricat si inmultea totul cu ~0.2. Pe
+## fatadele kitului, cu AO teafar, inmultirea face exact ce trebuie: pastreaza
+## si albedo-ul si umbra si doar le muta temperatura. Iar fara ea aleea ramane
+## reala dar RECE — masurat pe cadrul aleii, peretii sunt 30% slot 11
+## (`#7692A8`, gri-albastru) si 19% slot 29 (gri), adica fix dominanta rece pe
+## care o reclama comparatia cu bara (R-B -14.5 la noi, +15.7 la ea). In
+## referinta peretii nu sunt cenusii: sunt spalati de lumina care iese din
+## pravalii.
+func _wash(node_name: String, slots: String, energy: float,
+		tint: String = WARM) -> void:
+	_meta(node_name, "lumina", "%s|%.2f|%s*" % [slots, energy, tint])
+
 
 func _place(model: String, base: String, pos: Vector3, yaw: float,
 		scl: float) -> String:

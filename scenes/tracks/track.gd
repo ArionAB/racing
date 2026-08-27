@@ -1048,6 +1048,25 @@ static func themes() -> Dictionary:
 			# in plan XZ), iar adancimea doar INTUNECA aceeasi culoare
 			# (`water_deep_gain` / `water_shore_gain`). Fiecare rau ramane in
 			# familia lui pe toata suprafata.
+			# RUNDA 7. Ce a ramas dupa ce culoarea a fost calibrata pe diorama
+			# (runda 6) si tot a picat cu "apa nu citeste ca apa": SUPRAFATA era
+			# reglata, CONTEXTUL lipsea. Masurat pe bar/E_chei.png, semnalul de
+			# lichid nu e pe apa — e zidul de chei de deasupra ei, slepul care
+			# sta IN ea, felinarele ale caror reflexii sunt chiar sclipirile, si
+			# malul de dincolo care o TERMINA. Un plan care se intinde pana la
+			# orizont se citeste camp, oricat de bine i-ai nimeri nuanta. De
+			# aici "quay_wall" si "far_shore" mai jos, plus scenografia din
+			# DecorManual (tools/gen_decor_chongqing.gd).
+			#
+			# Culoarea s-a mai mutat o data, cu masuratoarea alaturi. Nuanta
+			# ceruta era 130-155; runda 6 iesea 166 PE ECRAN desi tema calcula
+			# 142 — diferenta o face ceata (fog 0.25,0.25,0.31, adica
+			# albastru-violet) peste o apa care se vede la 60-200 m. Se
+			# calibreaza deci pe captura, nu pe culoarea autorata. Acum:
+			#   verde D (frac 0.30): mean 55.5  hue 147.2  sat 0.152
+			#   diorama (E_chei):    mean 52.2  hue 141.6  sat 0.180
+			#   brun pod (frac 0.52): mean 63.9  hue 30.0
+			#   diorama (bratul auriu): mean 80.3  hue 28.1
 			"water": true,
 			# Jialing — verde tulbure. Un singur slot pe toata rampa.
 			"water_shallow_slot": Palette.TROPICAL_GREEN,
@@ -1066,16 +1085,19 @@ static func themes() -> Dictionary:
 			# pastoasa, fiindca trecea din maro-inchis in verde pe 8 m.
 			"water_deep_gain": 0.72,
 			"water_shore_gain": 0.62,
-			"water_desat": 0.76,
+			"water_desat": 0.84,
 			# Tenta de oras trasa spre rece: cu (0.85,0.89,0.87) verdele iesea
 			# la nuanta 123 (sub tinta 130-155). Cu asta: verde 142, brun 26.
-			"water_mul": Color(0.80, 0.90, 0.97),
+			"water_mul": Color(0.835, 0.915, 0.925),
 			# Tenta raului brun. Vezi water_tint: cu tenta verde de mai sus
 			# (albastru urcat, rosu coborat) Yangtze-ul iesea la saturatie 0.10 —
 			# ocru-gri, adica nisip ud vazut de pe pod, nu apa. Cu asta: 0.35 la
 			# nuanta 24, langa 0.37/29 masurate pe bratul auriu al dioramei.
-			"water_b_mul": Color(1.00, 0.95, 0.91),
-			"water_b_gain": 0.94,
+			"water_b_mul": Color(0.98, 1.00, 0.88),
+			# Vezi water_tint: desaturarea verdelui (0.84) transforma brunul in
+			# noroi. Diorama masurata: verde sat 0.18, brun sat 0.42.
+			"water_b_desat": 0.64,
+			"water_b_gain": 1.05,
 			# Cat de INCHISA e apa fata de mal. Nu "inchisa" in absolut: pragul
 			# e un RAPORT, apa <= 0.65 x uscatul din ACELASI cadru, fiindca de
 			# aia citea runda 4 miriste — 42 langa 41, adica aceeasi valoare, si
@@ -1122,26 +1144,26 @@ static func themes() -> Dictionary:
 			# Cat de lungite. 3.2 (incercat intai) trage petele in fasii de zeci
 			# de metri; la 1.4 ies limbi de flacara pe cheiul E. 0.9 le lasa
 			# pete cu coada — alungite pe verticala, dar tot pete.
-			"water_glint_streak": 0.65,
+			"water_glint_streak": 0.28,
 			# Marimea unei reflexii. Vezi nota din shader: la 1.0 (scara
 			# ondulatiei) petele ies de cativa pixeli si in randuri regulate —
 			# masurat pe captura rundei 5, o grila de ferestre aprinse peste
 			# rau. Masurat in diorama (bar/E_chei.png): reflexiile aurii au
 			# 20-60 px pe o apa vazuta de la aceeasi distanta, adica pete de
 			# metri, rare, cu marimi diferite.
-			"water_glint_grain": 0.30,
+			"water_glint_grain": 0.36,
 			# Suprafata NETEDA sub reflexii (implicitul 0.35 e de laguna
 			# vazuta de aproape; de la 60 m in sus iese pasla).
 			"water_ripple": 0.10,
-			"water_facet": 0.48,
-			"water_facet_count": 5.0,
-			"water_facet_scale": 0.075,
+			"water_facet": 0.78,
+			"water_facet_count": 7.0,
+			"water_facet_scale": 0.17,
 			"water_facet_wobble": 0.40,
 			"water_view_lo": 0.68,
 			"water_view_hi": 1.32,
 			"water_view_ref": 0.20,
 			"water_crest_shade": 0.22,
-			"water_glint_soft": 0.34,
+			"water_glint_soft": 0.22,
 			"water_glint_body": 0.75,
 			"water_cell": 4.0,
 			# Aurul lampilor de sodiu, INTREG. La 0.75 (tras spre alb, ca sa nu
@@ -1166,6 +1188,28 @@ static func themes() -> Dictionary:
 			# spre nord si vest orasul continua pe dealuri. seabed_drop ramane
 			# 0 ca sa nu se sape si acolo.
 			"seabed_drop": 0.0,
+			# CHEIUL si MALUL OPUS (runda 7). Vezi _build_quay_wall si
+			# _build_far_shore pentru de ce culoarea apei nu putea rezolva
+			# singura "apa nu citeste ca apa": lipsea muchia de sus si malul
+			# de dincolo.
+			"quay_wall": true,
+			# Doua maluri care se ATING intr-un varf, la (95, 335): de pe chei
+			# se vede o pana de uscat cu varful spre tine, cu Jialing la
+			# stanga ei si Yangtze la dreapta. Varful sta CHIAR pe dreapta de
+			# despartire a culorilor (water_split trece prin (60,215) spre
+			# SSE), deci linia de confluenta pleaca din varful penei catre
+			# privitor. Departari: 130 m de chei, 150 m de cornisa D — sub
+			# fog_end (250) si peste fog_begin (150), adica exact "turnurile
+			# de peste rau se sting in ceata" din brief §2.0.
+			"far_shore": [
+				{"line": [Vector2(-395, -140), Vector2(-400, 40),
+					Vector2(-372, 170), Vector2(-300, 258),
+					Vector2(-170, 308), Vector2(-30, 330),
+					Vector2(95, 335)], "h": 12.0, "depth": 45.0},
+				{"line": [Vector2(95, 335), Vector2(245, 316),
+					Vector2(385, 266), Vector2(505, 190)],
+					"h": 12.0, "depth": 45.0},
+			],
 			# Mal de CHEI, nu plaja: apa incepe la cativa metri de contur.
 			"lagoon_band_in": 10.0,
 			"lagoon_band_out": 6.0,
@@ -1828,6 +1872,10 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				"tufts": br.tufts,
 				"elevated": br.elevated,
 			}
+			if br.entry_at >= 0.0:
+				spec["entry"] = br.entry_at
+			if br.exit_at >= 0.0:
+				spec["exit"] = br.exit_at
 			if br.branch_half_width > 0.0:
 				spec["half_width"] = br.branch_half_width
 			if br.surface_name() != "":
@@ -3127,7 +3175,194 @@ func _build_water() -> void:
 		var c := _centroid()
 		body.global_position = Vector3(c.x, sea_y - 1.0, c.z)
 		return
+	_build_quay_wall(sea_y)
+	_build_far_shore(sea_y)
 	_build_sea_respawn(sea_y)
+
+
+
+## Cat de des se esantioneaza conturul lagunei cand se ridica cheiul.
+const QUAY_STEP: float = 5.0
+## Cat de departe de linia apei se citeste daca CHIAR e uscat in spate.
+const QUAY_INLAND: float = 20.0
+## Cat de lata e dala de deasupra zidului.
+const QUAY_DECK: float = 9.0
+## Cat de sus sta muchia cheiului peste apa.
+##
+## FIXA, nu citita din teren, si asta e chiar lectia primei incercari: cu
+## inaltimea luata din `ground_y` la cativa metri in spate, muchia urma panta
+## malului — adica exact suprafata pe care terenul o coboara sub apa — si
+## zidul iesea o dantela de petice de 0.3-0.6 m, vizibila ca zgomot alb pe
+## captura. Un chei real are gabarit constant fata de apa; unde malul e mai
+## inalt, zidul intra in pamant si nu se vede, ceea ce e raspunsul corect.
+const QUAY_FREEBOARD: float = 3.2
+
+
+## ZIDUL DE CHEI: muchia dintre apa si uscat, construita, nu interpolata.
+##
+## De ce exista. Pe Chongqing apa nu se citea ca apa nici dupa ce culoarea,
+## valoarea si sclipirile au fost calibrate pe diorama pixel cu pixel. Masurand
+## referinta (`docs/track_briefs/img` -> bar/E_chei.png) a iesit ca semnalul
+## cel mai tare nu e pe apa deloc: e ZIDUL de deasupra ei. Apa unei diorame
+## incepe la o muchie verticala de beton, cu bolarzi si baloane de acostare;
+## un camp nu are asa ceva, si de-aia o suprafata verde care se termina intr-o
+## panta de pietris se citeste camp indiferent ce nuanta are.
+##
+## A doua problema pe care o rezolva: linia apei. Grila de tarm
+## ([method _build_sea_near]) are celula de `water_cell` metri, deci conturul
+## malului iesea o SCARA de trepte in unghi drept — masurat pe capturile rundei
+## 6, zimti de zeci de pixeli, exact ce nu are un chei. Zidul e desenat pe
+## conturul AUTORAT al lagunei, deci muchia lui e o polilinie neteda care
+## acopera treptele grilei.
+##
+## Geometria: pentru fiecare esantion de pe contur, o fata verticala de la
+## `sea_y - 2.5` pana la cota uscatului de la [constant QUAY_INLAND] metri in
+## spate, plus o dala orizontala pana acolo. Culoarea de varf vine din vertex
+## color, deci intra pe acelasi material ca parapetii — zero materiale in plus.
+## Fara coliziune, deliberat: cheiul sta DINCOLO de marginea carosabilului, iar
+## un corp fizic acolo ar prinde masinile care oricum cad in rau (gate-ul de
+## repuneri e platit in alta parte, la racordul benzii).
+func _build_quay_wall(sea_y: float) -> void:
+	if not bool(theme_flag("quay_wall", false)):
+		return
+	var poly := _lagoon_poly()
+	if poly.size() < 3:
+		return
+	var half := _world_extent() * 0.5
+	var c := _centroid()
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var prev: Dictionary = {}
+	var emitted := 0
+	for i in poly.size():
+		var a := poly[i]
+		var b := poly[(i + 1) % poly.size()]
+		var seg := a.distance_to(b)
+		var steps := maxi(int(seg / QUAY_STEP), 1)
+		for k in steps + 1:
+			if k == steps and i < poly.size() - 1:
+				continue # nodul urmator il emite latura urmatoare
+			var p := a.lerp(b, float(k) / float(steps))
+			var cur := _quay_sample(p, b - a, poly, sea_y, c, half)
+			if not prev.is_empty() and not cur.is_empty():
+				_quay_quad(st, prev, cur)
+				emitted += 1
+			prev = cur
+	if emitted == 0:
+		return
+	st.generate_normals()
+	var inst := MeshInstance3D.new()
+	inst.name = "QuayWall"
+	inst.mesh = st.commit()
+	inst.material_override = _flat_material(
+		Palette.color(Palette.CONCRETE), null, 1.0, 0.5,
+		BaseMaterial3D.CULL_DISABLED)
+	add_child(inst)
+
+
+## Un esantion de chei, sau {} daca acolo nu e chei (uscatul e deja sub apa,
+## sau punctul a iesit din panza de teren).
+func _quay_sample(p: Vector2, along: Vector2, poly: PackedVector2Array,
+		sea_y: float, c: Vector3, half: float) -> Dictionary:
+	if absf(p.x - c.x) > half - QUAY_INLAND 			or absf(p.y - c.z) > half - QUAY_INLAND:
+		return {}
+	var n := Vector2(-along.y, along.x).normalized()
+	# Normala catre APA: interiorul conturului de laguna.
+	if not Geometry2D.is_point_in_polygon(p + n * 2.0, poly):
+		n = -n
+	var inland := p - n * QUAY_INLAND
+	if _sampler.ground_y(inland.x, inland.y) < sea_y + 1.0:
+		return {} # nu e mal, e larg — nimic de zidit
+	return {"p": p, "n": n, "top": sea_y + QUAY_FREEBOARD, "base": sea_y - 2.5}
+
+
+## Fasia de zid + dala dintre doua esantioane de chei.
+func _quay_quad(st: SurfaceTool, a: Dictionary, b: Dictionary) -> void:
+	# Betonul ud de la linia apei e INCHIS, cel de sus e curat: muchia dintre
+	# ele e chiar ce spune ochiului unde se termina apa.
+	var wet := Color(0.13, 0.14, 0.17)
+	var dry := Color(0.27, 0.28, 0.32)
+	var pa: Vector2 = a["p"]
+	var pb: Vector2 = b["p"]
+	var fa0 := Vector3(pa.x, a["base"], pa.y)
+	var fa1 := Vector3(pa.x, a["top"], pa.y)
+	var fb0 := Vector3(pb.x, b["base"], pb.y)
+	var fb1 := Vector3(pb.x, b["top"], pb.y)
+	for tri: Array in [[fa0, fa1, fb0], [fa1, fb1, fb0]]:
+		for v: Vector3 in tri:
+			st.set_color(wet if v.y < a["top"] - 0.01 and v.y < b["top"] - 0.01 				else dry)
+			st.add_vertex(v)
+	# Dala orizontala pana la uscat: acopera panta de sub ea, deci malul se
+	# termina in muchie, nu in trecere pastoasa.
+	var ia: Vector2 = pa - (a["n"] as Vector2) * QUAY_DECK
+	var ib: Vector2 = pb - (b["n"] as Vector2) * QUAY_DECK
+	var ca := Vector3(ia.x, a["top"], ia.y)
+	var cb := Vector3(ib.x, b["top"], ib.y)
+	for tri2: Array in [[fa1, ca, fb1], [ca, cb, fb1]]:
+		for v2: Vector3 in tri2:
+			st.set_color(dry)
+			st.add_vertex(v2)
+
+
+## MALUL OPUS. Fara el, apa se intinde pana la orizont si un plan care nu se
+## termina nicaieri se citeste CAMP, nu rau — asta a fost verdictul rundei 6.
+##
+## Nu e teren: panza de teren se intinde doar cat bucla plus o margine
+## ([method _world_extent]), iar malul opus trebuie sa stea la 100-160 m
+## DINCOLO de tarm, adica in afara ei. E o prisma joasa asezata pe planul apei,
+## opaca si intunecata, exact cat sa inchida apa si sa primeasca siluetele de
+## turnuri. Ceata temei o preia oricum de la 150 m in sus.
+##
+## Cheia de tema e o lista de maluri, fiecare cu polilinia lui in plan XZ,
+## inaltimea peste apa si adancimea spre spate. Doua maluri care se ating
+## intr-un varf fac exact confluenta: o pana de uscat cu apa pe amandoua
+## partile, cu varful spre jucator.
+func _build_far_shore(sea_y: float) -> void:
+	var banks: Array = theme_flag("far_shore", [])
+	if banks.is_empty():
+		return
+	var c := _centroid()
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var face := Color(0.09, 0.09, 0.12)
+	var crown := Color(0.13, 0.13, 0.17)
+	for bank: Dictionary in banks:
+		var line: Array = bank.get("line", [])
+		if line.size() < 2:
+			continue
+		var h := float(bank.get("h", 9.0))
+		var depth := float(bank.get("depth", 80.0))
+		for i in line.size() - 1:
+			var a: Vector2 = line[i]
+			var b: Vector2 = line[i + 1]
+			var n := Vector2(-(b.y - a.y), b.x - a.x).normalized()
+			# Spatele malului se duce DEPARTE de pista.
+			if n.dot(a - Vector2(c.x, c.z)) < 0.0:
+				n = -n
+			var a0 := Vector3(a.x, sea_y - 2.0, a.y)
+			var a1 := Vector3(a.x, sea_y + h, a.y)
+			var b0 := Vector3(b.x, sea_y - 2.0, b.y)
+			var b1 := Vector3(b.x, sea_y + h, b.y)
+			var a2 := Vector3(a.x + n.x * depth, sea_y + h * 0.8,
+				a.y + n.y * depth)
+			var b2 := Vector3(b.x + n.x * depth, sea_y + h * 0.8,
+				b.y + n.y * depth)
+			for tri: Array in [[a0, a1, b0], [a1, b1, b0]]:
+				for v: Vector3 in tri:
+					st.set_color(face if v.y < sea_y + h - 0.01 else crown)
+					st.add_vertex(v)
+			for tri2: Array in [[a1, a2, b1], [a2, b2, b1]]:
+				for v2: Vector3 in tri2:
+					st.set_color(crown)
+					st.add_vertex(v2)
+	st.generate_normals()
+	var inst := MeshInstance3D.new()
+	inst.name = "FarShore"
+	inst.mesh = st.commit()
+	inst.material_override = _flat_material(
+		Palette.color(Palette.CONCRETE), null, 1.0, 0.5,
+		BaseMaterial3D.CULL_DISABLED)
+	add_child(inst)
 
 
 ## Marea e INGHETATA pe tema asta (`frozen`): placa se randeaza ca gheata si
@@ -3449,7 +3684,8 @@ const WATER_GAIN: float = 0.87
 ## 0.10 — adica nisip ud, nu apa noroioasa. Cheia lipsa se intoarce la
 ## "water_mul", deci temele cu un singur rau nu se schimba.
 func water_tint(slot: int, gain: float = 1.0,
-		mul_key: String = "water_mul") -> Color:
+		mul_key: String = "water_mul",
+		desat_key: String = "water_desat") -> Color:
 	var c := Palette.color(slot)
 	var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
 	# Doua chei de tema aplicate O DATA, aici, pe toate culorile apei (rampa,
@@ -3460,7 +3696,13 @@ func water_tint(slot: int, gain: float = 1.0,
 	#    (brief §4), nu teal de recif.
 	#  - "water_mul" — tenta multiplicativa (lumina de oras gri-verde), fara
 	#    slot nou de paleta.
-	var desat := clampf(float(theme_flag("water_desat", 0.0)), 0.0, 1.0)
+	# `desat_key` exista pentru acelasi motiv ca `mul_key`: cele doua rauri ale
+	# Chongqing-ului nu suporta aceeasi desaturare. Masurat pe RUST_METAL
+	# (91461E, saturatie 0.79): trecut prin water_desat 0.84 iese la 0.19 —
+	# gri-maroniu, adica NOROI, exact verdictul criticului. Verdele are nevoie
+	# de desaturarea mare (diorama: 0.18), brunul de una mica (diorama: 0.42).
+	var desat := clampf(float(theme_flag(desat_key,
+		theme_flag("water_desat", 0.0))), 0.0, 1.0)
 	var mul: Color = theme_flag(mul_key, theme_flag("water_mul", Color.WHITE))
 	var k := (1.0 - desat) / WATER_SATURATION_FIX
 	# `gain` se aplica in sRGB, INAINTE de conversie: e „cata lumina cade pe
@@ -3687,13 +3929,13 @@ func _water_material() -> ShaderMaterial:
 	var b_k := float(theme_flag("water_b_gain", 1.0))
 	var b_shallow := water_tint(theme_flag("water_b_shallow_slot",
 		theme_flag("water_shallow_slot", Palette.REEF_SHALLOW)),
-		dim * b_k, "water_b_mul")
+		dim * b_k, "water_b_mul", "water_b_desat")
 	var b_deep := water_tint(theme_flag("water_b_deep_slot",
 		theme_flag("water_deep_slot", Palette.SEA_DEEP)),
-		dim * b_k * deep_k, "water_b_mul")
+		dim * b_k * deep_k, "water_b_mul", "water_b_desat")
 	var b_shore := water_tint(theme_flag("water_b_shore_slot",
 		theme_flag("water_shore_slot", Palette.CORAL_SAND)),
-		dim * b_k * shore_k, "water_b_mul").darkened(0.12)
+		dim * b_k * shore_k, "water_b_mul", "water_b_desat").darkened(0.12)
 	_water_mat.set_shader_parameter("shore_col_b",
 		Vector3(b_shore.r, b_shore.g, b_shore.b))
 	_water_mat.set_shader_parameter("shallow_col_b",
@@ -4016,6 +4258,11 @@ func _build_branch_surfaces() -> void:
 ## masina si jumatate — cat sa treaca, prea putin cat sa apuce sa alunece.
 const BRANCH_RAIL_SKIP: float = 5.0
 
+## Cat spatiu se lasa intre parapetul benzii si marginea soselei.
+##
+## Vezi `_branch_rail_clear`: sub atat, parapetul ar sta PE carosabil.
+const BRANCH_RAIL_CLEAR: float = 1.5
+
 
 ## Parapetul unei benzi IN AER.
 ##
@@ -4050,6 +4297,9 @@ func _build_branch_rails(r: TrackRoute) -> void:
 				continue
 			var b0 := r.baked[i] + r.side_at(i) * r.half_width * side_sign
 			var b1 := r.baked[j] + r.side_at(j) * r.half_width * side_sign
+			# ... si nici acolo unde parapetul ar cadea PE sosea.
+			if not _branch_rail_clear(b0) or not _branch_rail_clear(b1):
+				continue
 			var t0 := b0 + Vector3.UP * WALL_HEIGHT
 			var t1 := b1 + Vector3.UP * WALL_HEIGHT
 			st.add_vertex(b0); st.add_vertex(t0); st.add_vertex(b1)
@@ -4060,6 +4310,22 @@ func _build_branch_rails(r: TrackRoute) -> void:
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Palette.color(Palette.CONCRETE),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED)
+
+
+## Are voie sa stea un parapet de banda in punctul asta?
+##
+## Nu si daca punctul e pe carosabilul buclei principale. `BRANCH_RAIL_SKIP`
+## masoara pe LUNGIMEA benzii si ajunge cat timp banda se desprinde in unghi
+## drept: dupa cativa metri e deja in lateral, departe de asfalt. O banda care
+## pleaca TANGENT (TrackBranch.entry_at) merge insa zeci de metri pe langa
+## marginea soselei, iar parapetul ei dinspre drum ar fi un zid ridicat pe banda
+## din dreapta a soselei. Masurat pe Chongqing inainte de verificarea asta:
+## Politia lovea parapetul de 25 de ori intr-o cursa si pierdea 27% din tur in
+## afara soselei — un singur pilot, mereu acelasi, mereu la fractia 0.42.
+func _branch_rail_clear(p: Vector3) -> bool:
+	var i := routes[0].closest_index_global(p)
+	var lat := routes[0].lateral_distance(i, p)
+	return lat > width_at_index(i) + BRANCH_RAIL_CLEAR
 
 
 ## Reteta "sand": banda plata, doi vertecsi transversal, culoarea + granulatia
@@ -4370,21 +4636,24 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 		push_error("Track: scurtatura fara puncte intermediare")
 		return null
 	var n := baked.size()
-	var i_entry := 0
-	var i_exit := 0
-	if spec.has("entry") and spec.has("exit"):
-		# Scurtatura scrisa in cod: fractiile sunt MASURATE si declarate.
-		var entry := fposmod(float(spec["entry"]), 1.0)
-		var exit_f := fposmod(float(spec["exit"]), 1.0)
-		i_entry = int(entry * float(n)) % n
-		i_exit = int(exit_f * float(n)) % n
-	else:
+	# Fiecare capat se rezolva pe cont propriu: o banda desenata poate declara
+	# DOAR intrarea (Chongqing: desprinderea trebuie sa fie tangenta, vezi
+	# TrackBranch.entry_at) si sa lase revenirea dedusa ca pana acum.
+	var i_entry := -1
+	var i_exit := -1
+	if spec.has("entry"):
+		i_entry = int(fposmod(float(spec["entry"]), 1.0) * float(n)) % n
+	if spec.has("exit"):
+		i_exit = int(fposmod(float(spec["exit"]), 1.0) * float(n)) % n
+	if i_entry < 0 or i_exit < 0:
 		# Scurtatura DESENATA: capetele se citesc de pe bucla principala, ca
 		# punctele ei cele mai apropiate de primul si ultimul punct desenat.
 		# Vezi antetul lui TrackBranch pentru de ce nu se deseneaza capetele.
 		var lbl := String(spec.get("label", "?"))
-		i_entry = _closest_baked_index(mid[0])
-		i_exit = _closest_baked_index(mid[mid.size() - 1])
+		if i_entry < 0:
+			i_entry = _closest_baked_index(mid[0])
+		if i_exit < 0:
+			i_exit = _closest_baked_index(mid[mid.size() - 1])
 		if i_entry == i_exit:
 			push_warning(("Track: scurtatura '%s' pleaca si revine in acelasi "
 				+ "punct de pe bucla — se ignora") % lbl)
@@ -4403,8 +4672,12 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 		#
 		# De aceea pragul e generos (BRANCH_END_NEAR_M): nu respinge, doar
 		# avertizeaza, ca sa vezi in Output DE CE banda ta pleaca de unde pleaca.
-		for pair in [[mid[0], i_entry, "pleaca"],
-				[mid[mid.size() - 1], i_exit, "revine"]]:
+		var checks := []
+		if not spec.has("entry"):
+			checks.append([mid[0], i_entry, "pleaca"])
+		if not spec.has("exit"):
+			checks.append([mid[mid.size() - 1], i_exit, "revine"])
+		for pair in checks:
 			var p: Vector3 = pair[0]
 			var b: Vector3 = baked[int(pair[1])]
 			var d := Vector2(p.x - b.x, p.z - b.z).length()

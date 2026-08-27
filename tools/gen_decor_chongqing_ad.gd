@@ -113,7 +113,7 @@ func _poi_a_piata() -> void:
 	while f < 0.037:
 		var s2 := _at(f)
 		_place("chongqing/props/cliff_railing", "parapet",
-			_off(s2, 1.0, 8.5), _yaw_across(s2), 1.0)
+			_off_ground(s2, 1.0, _clear(s2, 1.0)), _yaw_across(s2), 1.0)
 		f += 4.3 / _path.total
 
 	# Stalpii cu lampioane: pe amandoua partile, alternand, la 22 m pas. In
@@ -124,7 +124,7 @@ func _poi_a_piata() -> void:
 	while g < 0.040:
 		var s3 := _at(g)
 		_place("chongqing/props/lamp_lantern_a", "felinar_piata",
-			_off(s3, side, 10.5), _yaw_to_road(s3, side), 1.0)
+			_off_ground(s3, side, _clear(s3, 2.5)), _yaw_to_road(s3, side), 1.0)
 		side = -side
 		g += 22.0 / _path.total
 
@@ -133,6 +133,12 @@ func _poi_a_piata() -> void:
 
 ## NODUL DE TRAFIC (brief §2 A si §3): bulevardul blocat de autobuze si
 ## masinute, cu O SINGURA fanta trecabila.
+##
+## Singurul grup din tot fisierul care sta INTENTIONAT pe carosabil, deci
+## singurul pentru care `probe_manual` raporteaza „IN DRUM" fara ca asta sa fie
+## o eroare: blocajul care nu e in drum nu blocheaza nimic. Ce trebuie sa fie
+## adevarat aici nu e distanta fata de ax, ci latimea fantei — si aia se
+## masoara separat, cu `tools/tmp/probe_fanta.gd`.
 ##
 ## Geometria e aleasa ca sa lase fanta pe o BANDA CONTINUA, nu ca sa arate bine
 ## de sus: latimea utila e 9 m (custom_width_segments da 9.0 pana la 0.053),
@@ -147,23 +153,28 @@ func _traffic_node() -> void:
 	var f := 0.0315
 	var st := _at(f)
 
-	# Cele doua autobuze care fac fanta.
+	# CE FACE FANTA. Autobuzul (10.64 m) s-a dovedit unealta gresita pentru
+	# treaba asta: la fractia nodului drumul coteste, iar orice eroare de
+	# cateva grade intre cadrul in care il asez si cel in care il masoara sonda
+	# se inmulteste cu lungimea lui — masurat, o singura piesa acoperea toata
+	# latimea bulevardului, si „fanta" gasita de sonda era pe acostament.
+	# S-au incercat sase combinatii de offset si inclinare; niciuna n-a lasat o
+	# banda libera INTRE autobuze.
 	#
-	# Offsetul NU se citeste pe latimea autobuzului (2.68 m). Un autobuz de
-	# 10.64 m lungime, rotit cu unghiul `a`, mananca lateral
-	# `(W*cos a + L*sin a) / 2`: la 7° aia e 1.98 m, adica se umfla cu 64 cm
-	# peste jumatatea lui de caroserie. Prima incercare, cu centrele la 4.4 si
-	# 4.6 m si 6-7° de oblic, a masurat 0.10 m de fanta — practic un zid.
-	#
-	# Deci: oblicul scade la 3° (tot se citeste „s-au oprit unde au apucat",
-	# dar mananca doar 1.62 m) si centrele se duc la 4.2 m de o parte si de
-	# alta a fantei. Ce ramane liber se MASOARA cu tools/tmp/probe_fanta.gd,
-	# nu se socoteste aici: gabaritul are si 4 m lungime, deci trece prin
-	# blocaj pe o banda, nu printr-un punct.
+	# Deci fanta o fac masinutele (3.68 m): destul de scurte cat orientarea sa
+	# nu mai conteze, si destule cat blocajul sa se citeasca. Autobuzele raman,
+	# dar se muta pe MARGINI, unde lungimea lor lucreaza pentru compozitie (un
+	# perete de bulevard blocat) in loc sa lucreze impotriva fantei.
 	_place("chongqing/vehicles/bus", "autobuz_stanga",
-		_off(st, -1.0, 5.4), _yaw_drive(st) + deg_to_rad(3.0), 1.0)
+		_off(st, -1.0, 8.6), _yaw_drive(st), 1.0)
 	_place("chongqing/vehicles/bus", "autobuz_dreapta",
-		_off(st, 1.0, 5.4), _yaw_drive(st) - deg_to_rad(3.0), 1.0)
+		_off(_at(f - 0.005), 1.0, 8.6), _yaw_drive(_at(f - 0.005)), 1.0)
+
+	# Cele doua masinute care STRANG fanta, fata in fata pe cele doua benzi.
+	_place("chongqing/vehicles/mini_car_a", "masina_fanta_stanga",
+		_off(st, -1.0, 4.8), _yaw_drive(st) + deg_to_rad(6.0), 1.0)
+	_place("chongqing/vehicles/mini_car_b", "masina_fanta_dreapta",
+		_off(st, 1.0, 4.8), _yaw_drive(st) - deg_to_rad(6.0), 1.0)
 
 	# Coada din spatele lor: masinute pe doua randuri, esalonate. Adancimea
 	# blocajului conteaza — un singur rand se trece prin bumping, trei randuri
@@ -193,7 +204,7 @@ func _traffic_node() -> void:
 		while j < 3:
 			var s3 := _at(f - 0.004 + float(j) * 0.003)
 			_place("chongqing/props/bollard", "bolard",
-				_off(s3, signf(lat), absf(lat)), 0.0, 1.0)
+				_off_ground(s3, signf(lat), _clear(s3, 0.6)), 0.0, 1.0)
 			j += 1
 
 
@@ -330,7 +341,7 @@ func _poi_c_alee() -> void:
 	while q < 0.237:
 		var st4 := _at(q)
 		_place("chongqing/props/lamp_lantern_b", "felinar_alee",
-			_off_ground(st4, qs, 6.4), _yaw_to_road(st4, qs), 1.0)
+			_off_ground(st4, qs, _clear(st4, 0.6)), _yaw_to_road(st4, qs), 1.0)
 		qs = -qs
 		q += 6.2 / _path.total
 
@@ -365,23 +376,107 @@ func _poi_c_alee() -> void:
 func _poi_d_cornisa() -> void:
 	_open_section("4) Cornisa Hongya Dong")
 
-	var hongya_h := 47.74
+	# Piesa are originea pe TALPA (masurat: aabb pos.y = 0, size.y = 47.74),
+	# deci `p.y` e cota talpii, nu a coamei. Prima incercare a scazut toata
+	# inaltimea din cota drumului si a ingropat hero-ul la y = -19 .. -27,
+	# adica sub podeaua lumii — verificat cu tools/tmp/check_glow2.gd, care
+	# scrie si pozitia, nu doar materialul.
+	#
+	# Asezarea corecta se citeste de la TALPA in sus: talpa sta pe terasa
+	# (masurat 5.7 m pe toata cornisa), iar de acolo cele 47.7 m de casa urca
+	# pana la ~53 m — adica exact sub buza, care e la 32-34 m. Ca sa incapa
+	# sub buza cu cei 5 m de HONGYA_DROP ceruti de brief, piesa se scaleaza
+	# pana cand coama ajunge la `buza - HONGYA_DROP`.
+	# A doua greseala, prinsa tot pe captura: scalasem piesa pana cand coama ei
+	# incapea SUB buza. Cu 47.7 m de casa si o faleza de 27, iesea un factor de
+	# 0.4 — hero-ul ajungea o cladire de 17 m, la 25 m lateral, adica un obiect
+	# pe langa care treci. In referinta (bar/D_cornisa.png) casele umplu doua
+	# treimi din cadru si URCA pe langa drum: nu te uiti la ele de sus, esti
+	# INTRE ele.
+	#
+	# Deci scara ramane 1.0 si piesa se lipeste de buza (8.5 m masurat): coama
+	# trece de cota soselei, iar `HONGYA_DROP` isi schimba rolul — nu mai
+	# coboara coama, ci coboara TALPA sub buza, ca etajele sa se vada
+	# coborand in gol.
+	var terrace_y := 5.7
+	# MASA se face din NUMAR, nu din inaltime. Cele trei bucati de dinainte
+	# umpleau cadrul doar fiindca depaseau soseaua cu 20 m; odata coborate sub
+	# buza (vezi mai jos), trei piese devin un obiect pe langa care treci.
+	# Referinta (bar/D_cornisa.png) nu arata trei case mari, ci zeci de etaje
+	# inghesuite cat tine virajul — deci pasul scade la ~0.012 din tur (≈25 m)
+	# si stivele se aseaza pe DOUA randuri, al doilea mai in afara pe terasa
+	# si mai jos, ca sa nu iasa o singura linie de creasta.
 	var spots := [
-		Vector2(0.272, 0.0), Vector2(0.296, -3.5), Vector2(0.320, -7.0),
+		Vector2(0.262, 0.0), Vector2(0.274, -1.0), Vector2(0.286, -2.0),
+		Vector2(0.298, -1.0), Vector2(0.310, -2.5), Vector2(0.322, -1.5),
+		Vector2(0.334, -3.0), Vector2(0.346, -2.0),
 	]
 	for sp: Vector2 in spots:
 		var st := _at(sp.x)
-		# Lipit de peretele falezei: centrul piesei la jumatate din latimea ei
-		# dincolo de buza, ca fatada dinspre rau sa fie in gol si spatele in
-		# stanca (piesa n-are detaliu pe spate — brief §5.2).
-		var p := _off(st, 1.0, 8.0 + 17.0)
-		p.y = st["pos"].y + sp.y - HONGYA_DROP - hongya_h
+		var brink: float = st["pos"].y
+		# TALPA PE TERASA, COAMA SUB BUZA — si de aici scala, nu invers.
+		#
+		# Varianta dinainte tinea scala pe 1.0 si lasa talpa sa se aseze pe
+		# terasa. Cu 47.74 m de casa pe o faleza de 27, coama urca la 53.4 m
+		# in timp ce soseaua e la 32-34: hero-ul iesea cu 20 m PESTE drum si
+		# acoperea virajul urmator (se vede in captura frac 0.30). Argumentul
+		# ei — „in referinta esti INTRE case, nu deasupra lor" — descrie un
+		# cadru de diorama vazut din lateral, nu ce vede ChaseCamera, si intra
+		# direct in regula care decide toata pista (brief §2.0 si §8: tot ce e
+		# impresionant sta SUB jucator, iar Hongya Dong incepe la 5 m sub buza,
+		# nu la 50). Cine e mai inalt decat drumul nu mai e „orasul de dedesubt".
+		#
+		# Deci: talpa pe terasa (masurat 5.7 m pe toata cornisa), coama la
+		# `buza - HONGYA_DROP`, iar scala e raportul dintre cele doua. Iese
+		# ~0.46-0.57, adica 22-27 m de casa — tot un masiv, dar unul pe care
+		# il ai SUB tine.
+		var foot := terrace_y
+		var ridge := brink + sp.y - HONGYA_DROP
+		var scl := clampf((ridge - foot) / 47.74, 0.2, 1.0)
+		# Lipit de buza (8.5 m masurat), la jumatate din adancimea piesei
+		# (17.7 / 2 * scala), ca fatada dinspre rau sa fie in gol si spatele
+		# in stanca (piesa n-are detaliu pe spate — brief §5.2).
+		var p := _off(st, 1.0, 8.5 + 8.8 * scl)
+		p.y = foot
 		var node_name := _place("chongqing/structures/hongya_dong", "hongya_hero",
-			p, _yaw_to_road(st, 1.0), 1.0)
-		# LUMINA: aici e tot rostul POI-ului. Sloturile 28 (lemnul, 61% din
-		# arie) + 30 (aurul ferestrelor, 0.8%) — masurat cu slot_area.gd.
-		# Doar 30 ar lasa o silueta neagra pe o faleza neagra.
-		_meta(node_name, "lumina", "28,30|1.35")
+			p, _yaw_to_road(st, 1.0), scl)
+		# LUMINA. Doza s-a gasit prin trei esecuri masurate pe captura, si
+		# fiecare a spus altceva:
+		#
+		#  - slotul 30 singur (aurul, 0.8% din arie): L=13.7, dominanta RECE
+		#    (R-B = -4) — silueta neagra pe faleza neagra;
+		#  - sloturile 20+28+30, adica 95% din arie: la ORICE energie peretii
+		#    ieseau placi portocalii uniforme (deviatie de luminanta 15-19 fata
+		#    de 30.8 in referinta). Culoare buna, obiect pierdut;
+		#  - acelasi set cu operatorul MULTIPLY: relieful revenea (deviatie 21)
+		#    dar cladirea ramanea neagra (L=19) — fiindca AO-ul copt in asset
+		#    are media 0.201 (masurat cu tools/tmp/vcol.gd), adica inmulteste
+		#    albedo-ul pana la o cincime.
+		#
+		# Ce a mers: se aprind streasinile si accentele (9, 20, 30) si se lasa
+		# STINS corpul de lemn (28, 61% din arie). Asta e chiar limbajul
+		# referintei — lumina calda care scapa dintre lemne intunecate, nu lemn
+		# care straluceste. Masurat: L=28.7, deviatie 44.9 (referinta 60.0 /
+		# 30.8) — mai inchis decat diorama, dar cu relieful intact, ceea ce la
+		# 60 km/h se citeste mai bine decat o pata portocalie corect expusa.
+		_meta(node_name, "lumina", "9,20,30|1.8|#FFBF7A")
+		# Fara corp fizic: e o cladire de 40 m langa o cornisa fara parapet, iar
+		# cine cade de pe cornisa trebuie sa CADA in terasa si sa fie repus, nu
+		# sa aterizeze pe un acoperis la 30 m si sa ramana acolo.
+		_meta(node_name, "coliziune", "none")
+
+		# AL DOILEA RAND, mai in afara pe terasa si mai scund: fara el, cele
+		# opt stive de sus formeaza o singura linie de creasta si terasa ramane
+		# goala in spatele ei. Cu el, de pe cornisa vezi acoperisuri care
+		# COBOARA in trepte spre apa — adancimea din referinta.
+		var ridge2 := foot + (ridge - foot) * 0.55
+		var scl2 := clampf((ridge2 - foot) / 47.74, 0.18, 1.0)
+		var p2 := _off(st, 1.0, 8.5 + 8.8 * scl + 15.0)
+		p2.y = foot
+		var n2 := _place("chongqing/structures/hongya_dong", "hongya_jos",
+			p2, _yaw_to_road(st, 1.0) + deg_to_rad(18.0), scl2)
+		_meta(n2, "lumina", "9,20,30|1.8|#FFBF7A")
+		_meta(n2, "coliziune", "none")
 
 	# CHEVROANELE pe curbele oarbe. Cornisa e un S larg fara parapet pe
 	# dreapta: chevronul e singurul lucru care spune unde se duce drumul cand
@@ -390,7 +485,7 @@ func _poi_d_cornisa() -> void:
 	for cf: float in chevrons:
 		var st2 := _at(cf)
 		_place("chongqing/props/chevron_post", "chevron",
-			_off_ground(st2, 1.0, 7.6), _yaw_to_road(st2, 1.0), 1.0)
+			_off_ground(st2, 1.0, _clear(st2, 0.3)), _yaw_to_road(st2, 1.0), 1.0)
 
 	# PARAPETUL: pe exteriorul unui SINGUR viraj, ca punctuatie (brief §2 D).
 	# Un parapet continuu ar anula frica de cadere, care e subiectul POI-ului.
@@ -398,7 +493,7 @@ func _poi_d_cornisa() -> void:
 	while pf < 0.366:
 		var st3 := _at(pf)
 		_place("chongqing/props/cliff_railing", "parapet_cornisa",
-			_off_ground(st3, 1.0, 7.8), _yaw_across(st3), 1.0)
+			_off_ground(st3, 1.0, _clear(st3, 0.3)), _yaw_across(st3), 1.0)
 		pf += 4.3 / _path.total
 
 	# Felinarele cornisei, pe latura DINSPRE MUNTE (-1): pe dreapta e golul,
@@ -407,8 +502,25 @@ func _poi_d_cornisa() -> void:
 	while lf < 0.424:
 		var st4 := _at(lf)
 		_place("chongqing/props/lamp_lantern_a", "felinar_cornisa",
-			_off_ground(st4, -1.0, 8.4), _yaw_to_road(st4, -1.0), 1.0)
+			_off_ground(st4, -1.0, _clear(st4, 0.8)), _yaw_to_road(st4, -1.0), 1.0)
 		lf += 26.0 / _path.total
+
+
+
+## Cel mai apropiat offset lateral PERMIS pentru un obiect solid, la fractia
+## data: latimea LOCALA a benzii plus marja cu care lucreaza `probe_manual`
+## (`ROAD_MARGIN` = 2.0 m). Sub cifra asta, sonda raporteaza „IN DRUM" — si are
+## dreptate, fiindca acolo chiar trece masina.
+##
+## Se citeste din sampler, nu se scrie de mana: pista are profil de latime
+## (`custom_width_segments`), deci piata are 9 m si aleea 6, iar un singur
+## numar ar fi gresit intr-una din ele.
+func _clear(st: Dictionary, extra: float = 0.0) -> float:
+	# `half_width_at` vrea un INDEX din punctele coapte, iar `_Path.at` da o
+	# fractie: conversia trece prin numarul de puncte.
+	var n := _track.baked.size()
+	var idx := int(float(st["frac"]) * float(n)) % n
+	return _sampler.half_width_at(idx) + 2.0 + extra
 
 
 # ------------------------------------------------------------------ geometria
@@ -459,8 +571,38 @@ func _yaw_across(st: Dictionary) -> float:
 ## capetele la mijloc — `probe_fanta` a masurat 0.10 m de fanta, adica un zid.
 ## De-aia sunt doua functii cu nume care spun ce fac, nu una „de-a lungul".
 func _yaw_drive(st: Dictionary) -> float:
-	var r: Vector3 = st["right"]
-	return atan2(-r.z, r.x)
+	# Tangenta se ia din punctele COAPTE, nu din `_Path`. Cele doua nu sunt
+	# acelasi lucru: la fractia nodului de trafic esantionul lui `_Path` cade
+	# la ~1.8 m de punctul copt, iar acolo drumul coteste — masurat, autobuzele
+	# ieseau la 23.6° si 29.6° fata de tangenta pe care o foloseste
+	# `probe_fanta`, in loc de cei 3° ceruti. Un autobuz de 10.64 m la 26°
+	# mananca lateral ~7 m, adica exact latimea bulevardului: de-aia „fanta"
+	# gasita de sonda era pe acostament, nu intre autobuze.
+	#
+	# Vehiculele se orienteaza deci dupa ACEEASI directie pe care o masoara
+	# sonda, altfel cele doua unelte vorbesc despre doua drumuri diferite.
+	var n := _track.baked.size()
+	# indexul se ia dupa POZITIE, nu dupa fractie: fractia lui `_Path` si
+	# fractia pe punctele coapte nu sunt aceeasi parametrizare.
+	var road: Vector3 = st["pos"]
+	var idx := 0
+	var best := 1e30
+	for i in n:
+		var d: float = (_track.baked[i] - road).length_squared()
+		if d < best:
+			best = d
+			idx = i
+	var nx: Vector3 = _track.baked[(idx + 1) % n]
+	var pv: Vector3 = _track.baked[(idx - 1 + n) % n]
+	var fw := nx - pv
+	fw.y = 0.0
+	fw = fw.normalized()
+	# +90°: gasit prin masurare, nu prin deducere. Cu `atan2(fw.x, fw.z)` gol,
+	# amprenta de coliziune a autobuzului iesea 6.5 m lata pe latimea soselei
+	# (tools/tmp/probe_fanta2.gd) desi colizorul e o cutie curata de 2.68 m
+	# (tools/tmp/bus_local.gd) — adica piesa statea de-a curmezisul. Diferenta
+	# se citeste direct in amprenta, si aia e proba care conteaza aici.
+	return atan2(fw.x, fw.z) + PI * 0.5
 
 
 # ------------------------------------------------------------------ iesirea
@@ -469,12 +611,32 @@ func _place(model: String, base: String, pos: Vector3, yaw: float,
 		scl: float) -> String:
 	_n += 1
 	var node_name := "%s%d" % [base, _n]
-	var c := cos(yaw) * scl
-	var s := sin(yaw) * scl
+	# Baza se ia de la Godot, nu se scrie de mana. Versiunea scrisa de mana
+	# folosea (c, 0, -s / s, 0, c), adica TRANSPUSA lui `Basis(UP, yaw)` — deci
+	# fiecare piesa iesea rotita in sensul invers fata de unghiul verificat cu
+	# `tools/tmp/yaw_check.gd`. Pe stalpi si pe parapete nu se vedea (sunt
+	# simetrice), dar autobuzele nodului de trafic stateau de-a curmezisul
+	# bulevardului si sonda gasea fanta pe acostament, nu intre ele.
+	#
+	# Cu `Basis` real, unghiul verificat si unghiul scris in .tscn sunt acelasi
+	# lucru prin constructie.
+	var b := Basis(Vector3.UP, yaw).scaled(Vector3(scl, scl, scl))
 	_out.append('[node name="%s" parent="DecorManual/%s" instance=ExtResource("%s")]'
 		% [node_name, _section, RES[model]])
-	_out.append("transform = Transform3D(%f, 0, %f, 0, %f, 0, %f, 0, %f, %f, %f, %f)"
-		% [c, -s, scl, s, c, pos.x, pos.y, pos.z])
+	# ATENTIE la ordinea componentelor. `Basis.x/.y/.z` sunt COLOANELE bazei,
+	# dar constructorul `Transform3D(...)` isi ia primele noua argumente pe
+	# LINII. Scrise ca mai jos in ordinea coloanelor, matricea iesea
+	# TRANSPUSA — adica o rotatie cu -yaw.
+	#
+	# Pe piesele simetrice (stalpi, parapete) nu se vedea. Pe autobuzele
+	# nodului de trafic se vedea tare: masurat cu tools/tmp/yaw3.gd, stateau la
+	# 23° si 29° fata de tangenta in loc de cei 3° ceruti, adica aproape
+	# de-a curmezisul bulevardului, si sonda gasea „fanta" pe acostament.
+	#
+	# `b[0]` / `b[1]` / `b[2]` sunt liniile, deci exact ce vrea constructorul.
+	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
+		% [b[0].x, b[0].y, b[0].z, b[1].x, b[1].y, b[1].z,
+			b[2].x, b[2].y, b[2].z, pos.x, pos.y, pos.z])
 	_out.append("")
 	return node_name
 

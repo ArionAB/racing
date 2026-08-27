@@ -55,7 +55,21 @@ const FALL_MARGIN: float = 1.2
 const HW_HAZ: float = 3.4
 ## Fereastra contractului de pedeapsa (s).
 const PENALTY_MIN: float = 1.0
-const PENALTY_MAX: float = 8.0
+const PENALTY_MAX: float = 6.0
+## Cat are voie sa coste ATINGEREA barierelor, fata de trecerea deschisa (s).
+##
+## Verdictul care lipsea in runda 1. Contractul din brief e „+3 s, nu
+## distrugere", si el se refera la ocol — dar cine ignora si semaforul, si
+## barierele, plateste tot un pret, si acela trebuie sa fie tot o pedeapsa de
+## cursa, nu sfarsitul ei. Criticul a masurat +18.7 s la prima versiune (masina
+## in noua cicluri de marsarier in poarta): intr-o cursa de 2-3 minute aia nu e
+## o pedeapsa, e abandon. Plafonul e un ordin de marime sub el.
+const BARRIER_COST_MAX: float = 10.0
+## Cat sta sonda sa se uite la masina oprita in bariere inainte sa incerce
+## iesirea (s). Scurt dinadins: fiecare secunda in plus intra in cost si l-ar
+## umfla artificial. Verdictele de „nu cade / nu trece / nu e distrusa" se
+## decid oricum in prima secunda dupa impact.
+const STUCK_WATCH: float = 2.5
 
 var _track: TrackFromPath
 var _hazard: SpanScript
@@ -341,9 +355,11 @@ func _run() -> void:
 	# fie pusa: masina a stat 8 s in bariere, intre timp pasajul s-a redeschis,
 	# si sonda masura o plimbare printr-un nod fara niciun obstacol. Perioada
 	# si telegraph-ul si-au primit oricum verdictele lor la (0) si (i).
-	_hazard.set_physics_process(false)
-	print("    ceasul hazardului oprit pe INCHIS (tronson la %.2f, poarta solida: %s)"
-		% [_hazard.turn_fraction(), str(_hazard.gate_solid())])
+	# Doar CEASUL, nu tot nodul: `_physics_process` stins ar fi stins si
+	# ghiontul portii, adica exact mecanismul care trebuie testat aici.
+	_hazard.clock_running = false
+	print("    ceasul hazardului oprit pe INCHIS (tronson la %.2f, poarta solida: %s, ghiont %.1f m/s)"
+		% [_hazard.turn_fraction(), str(_hazard.gate_solid()), _hazard.gate_push])
 	var car := _spawn(Vector3(0.0, 0.7, START_Z), ENTRY_SPEED)
 	var driver := WaypointDriver.new()
 	driver.waypoints = _hazard.direct_waypoints()
@@ -353,8 +369,10 @@ func _run() -> void:
 	var max_crush := 0.0
 	var hit_t := -1.0
 	var passed := false
-	for f in int(6.0 * 60.0):
+	var t_total := 0.0
+	for f in int(STUCK_WATCH * 60.0):
 		await get_tree().physics_frame
+		t_total += 1.0 / 60.0
 		if _over_module(car):
 			min_y = minf(min_y, car.global_position.y)
 		max_crush = maxf(max_crush, car.crush_time)
@@ -365,9 +383,10 @@ func _run() -> void:
 		# colizor de 0.5 m la 0.5 m pe cadru.
 		if car.global_position.z < -_hazard.span_length * 0.5 - 1.0:
 			passed = true
-	print("    dupa 6 s: pozitie %s, viteza %.2f, y min %.2f, strivire max %.2f, activa %s, sus %.2f"
-		% [str(car.global_position.round()), car.horizontal_speed(), min_y,
-		max_crush, str(car.race_active), car.global_transform.basis.y.y])
+	print("    dupa %.1f s: pozitie %s, viteza %.2f, y min %.2f, strivire max %.2f, activa %s, sus %.2f"
+		% [STUCK_WATCH, str(car.global_position.round()),
+		car.horizontal_speed(), min_y, max_crush, str(car.race_active),
+		car.global_transform.basis.y.y])
 	_verdict(min_y > DECK_RISE - FALL_MARGIN,
 		"nu a cazut in gol (y min %.2f)" % min_y)
 	_verdict(not passed, "poarta a oprit-o inainte de gol (trecuta: %s)" % str(passed))
@@ -402,6 +421,7 @@ func _run() -> void:
 	for f in int(32.0 * 60.0):
 		await get_tree().physics_frame
 		t_out += 1.0 / 60.0
+		t_total += 1.0 / 60.0
 		# „Desprinsa" = a rulat iar, nu doar s-a zbatut in bariere.
 		if t_freed < 0.0 and car.horizontal_speed() > 8.0:
 			t_freed = t_out
@@ -423,7 +443,15 @@ func _run() -> void:
 	_verdict(escaped, "masina nu ramane intepenita (a terminat ocolul in %.2f s)" % t_out)
 	_verdict(min_out > DECK_RISE - FALL_MARGIN,
 		"la reluare nu cade de pe pasaj (y min %.2f)" % min_out)
-	_hazard.set_physics_process(true)
+	# Costul REAL al atingerii barierelor, masurat de la pornire pana la
+	# iesirea din nod — nu „cat a stat in ele", care depindea de cate secunde
+	# se uita sonda.
+	var barrier_cost := t_total - t_direct
+	print("--- cost total cu barierele: %.2f - %.2f = %+.2f s (plafon %+.2f)"
+		% [t_total, t_direct, barrier_cost, BARRIER_COST_MAX])
+	_verdict(escaped and barrier_cost <= BARRIER_COST_MAX,
+		"barierele costa %+.2f s, nu cursa" % barrier_cost)
+	_hazard.clock_running = true
 	car.queue_free()
 	await get_tree().physics_frame
 

@@ -20,7 +20,10 @@ extends Node3D
 ##     face un cot in jurul golului si se intoarce pe pasaj dupa el, plus o
 ##     linie de bariere de santier (`construction_barrier.glb`) care inchide
 ##     banda directa cat tine ciclul. Cine ignora si semaforul, si barierele,
-##     se opreste in ele — nu cade.
+##     e SCOS pe ocol de ele — nu cade, si nu ramane in ele. Linia e oblica,
+##     lunecoasa si imbranceste lateral (`gate_push`), fiindca un zid frontal
+##     de bariere nu costa +3 s, ci sfarsitul cursei: criticul a masurat +18.7
+##     s la prima versiune, cu masina in noua cicluri de marsarier.
 ##
 ## [b]Ce construieste nodul[/b] (tot, fara sa ceara nimic pistei): rampa de
 ## acces, pasajul de pe cele doua buze, golul, tronsonul rotitor, rampa de
@@ -89,6 +92,16 @@ enum State {
 @export_range(0.0, 10.0, 0.1) var telegraph_lead: float = 3.0
 ## Decalajul ciclului (0..1 din period).
 @export_range(0.0, 1.0, 0.01) var phase: float = 0.0
+## Merge ceasul? Stins, tronsonul si poarta INGHEATA unde sunt — dar tot restul
+## lucreaza mai departe: senzorul portii si ghiontul care te scoate pe ocol.
+##
+## Exista pentru sonde, si distinctia nu e un moft. Intrebarea „se descurca
+## cine a intrat in bariere?" trebuie pusa cu pasajul inchis, altfel ciclul se
+## redeschide sub masina si sonda masoara o plimbare printr-un nod fara
+## obstacol. Prima versiune obtinea inghetul stingand `_physics_process`, ceea
+## ce stingea si palnia — adica testul cel mai important rula pe un hazard
+## caruia tocmai i se scosese mecanismul de scapare.
+@export var clock_running: bool = true
 ## Cat se roteste tronsonul cand se inchide.
 @export_range(15.0, 180.0, 1.0) var closed_angle_deg: float = 90.0
 
@@ -142,7 +155,48 @@ enum State {
 @export_group("Poarta")
 ## Cat de oblica e linia de bariere (grade). Oblica te ALUNECA spre ocol; pe
 ## zero e un zid frontal.
+##
+## [b]Ramane 22, si asta e o cifra masurata, nu prima care a parut buna.[/b]
+## Prima reparatie a costului de +18.7 s a fost s-o urc la 38, pe ideea ca o
+## linie mai oblica se aluneca mai bine. Sonda a aratat pretul: la 38° cutia
+## rotita a barierei se intinde cu ~0.9 m mai mult in AMONTE si a inceput sa
+## agate exact masina care lua ocolul corect — traversarea pe rampa de
+## serviciu a sarit de la 7.02 la 23.37 s. Alunecarea o fac `gate_friction` si
+## ghiontul tangential (`gate_push`); unghiul doar spune incotro.
 @export_range(0.0, 60.0, 1.0) var gate_skew_deg: float = 22.0
+## Cu ce viteza te scoate poarta spre ocol (m/s). Trebuie sa ramana SUB
+## `gate_push_speed_max`, altfel alunecarea se opreste imediat ce a inceput
+## (masina depaseste pragul si nu mai e ajutata) si iese o zvacnire, nu o
+## alunecare.
+##
+## [b]Asta e diferenta dintre o palnie si un fund de sac.[/b] Geometria oblica
+## singura nu ajunge: cauciucul se agata de linie, masina se opreste cu botul
+## in ea, iar soferul (om sau AI) intra intr-o bucla de marsarier-si-inapoi —
+## criticul a numarat noua cicluri si 18.33 s pana la desprindere. Barierele de
+## santier sunt tabla pe ROTI: cine intra in ele le impinge si e deviat, nu
+## zidit.
+##
+## Ghiontul e TANGENT LA LINIA DE BARIERE, adica in chiar planul ei, spre
+## capatul dinspre ocol. Doua variante au fost masurate inainte si aruncate:
+## un ghiont pur lateral muta masina din poarta intr-o pana intre pasaj si ocol
+## (blocata 32 s la x = -5), iar unul tintit spre un punct de pe rampa cu 8-14 m
+## in fata o scotea peste buza consolei (cazuta de pe pasaj, y = -0.08).
+## Tangenta n-are cum sa faca niciuna: e chiar directia in care blocajul se
+## ingusta.
+@export_range(0.0, 25.0, 0.5) var gate_push: float = 4.5
+## Peste viteza asta nu mai primesti ghiontul (m/s).
+##
+## Palnia e o iesire din BLOCAJ, nu un tobogan: cine trece pe langa bariere cu
+## 20 m/s si-a facut treaba singur, iar un ghiont peste el ar fi un hazard
+## invizibil care il muta de pe linia lui. Pragul e jos (viteza de om care
+## merge pe jos) fiindca o varianta anterioara l-a pus la 9 si sonda a masurat
+## pretul: masina care lua ocolul corect, dar incetinea in cot, primea ghiont
+## dupa ghiont si iesea de pe consola la x = -16.
+@export_range(0.0, 30.0, 0.5) var gate_push_speed_max: float = 6.0
+## Frecarea colizorului portii. Aproape zero: barierele de santier sunt tabla
+## pe roti, iar o linie oblica cu frecare normala te OPRESTE in loc sa te
+## aluneca — vezi `gate_skew_deg`.
+@export_range(0.0, 1.0, 0.01) var gate_friction: float = 0.05
 ## Cu cati metri inaintea buzei sta poarta.
 ##
 ## Valoarea e o DORINTA, nu o pozitie finala: `_gate_z()` o aduce inauntrul
@@ -248,7 +302,8 @@ func _physics_process(delta: float) -> void:
 	if not _started:
 		_started = true
 		_time = phase * period
-	_time += delta
+	if clock_running:
+		_time += delta
 	_apply_cycle(delta)
 
 
@@ -263,6 +318,7 @@ func _apply_cycle(delta: float) -> void:
 			Basis(Vector3.UP, deg_to_rad(closed_angle_deg) * frac),
 			Vector3(0.0, deck_rise, 0.0))
 	_tick_gate(delta, frac)
+	_push_cars()
 	_tick_lamp(t)
 
 
@@ -290,6 +346,44 @@ func _tick_gate(delta: float, frac: float) -> void:
 	_gate_shape.disabled = not want
 	for m in _gate_meshes:
 		m.visible = frac > 0.02
+
+
+## Ghiontul care te scoate spre ocol, cat poarta e solida.
+##
+## Se aplica DOAR cand poarta chiar bareaza (`disabled == false`): cu pasajul
+## deschis linia nu exista, si o zona care imbranceste acolo ar fi un hazard
+## invizibil. Directia e +X local inmultit cu partea ocolului — adica exact
+## incotro trebuie sa pleci.
+func _push_cars() -> void:
+	if _gate_zone == null or _gate == null or _gate_shape == null \
+			or _gate_shape.disabled:
+		return
+	if gate_push <= 0.0:
+		return
+	# Tangenta liniei de bariere, spre capatul dinspre ocol. `_gate.global_basis.x`
+	# e chiar axa lunga a liniei (cutia e construita pe X), iar semnul o intoarce
+	# spre partea pe care ocolul se desprinde.
+	var dir := _gate.global_basis.x * signf(float(service_side))
+	dir.y = 0.0
+	if dir.length_squared() < 0.01:
+		return
+	dir = dir.normalized()
+	for b in _gate_zone.get_overlapping_bodies():
+		var car := b as Car
+		if car == null:
+			continue
+		if car.horizontal_speed() > gate_push_speed_max:
+			continue
+		# Se ADUCE la o viteza de alunecare, nu se ADUNA un impuls.
+		#
+		# Prima varianta aduna `gate_push` la fiecare 0.35 s cat masina statea in
+		# poarta, si sonda a masurat unde duce asta: componenta tangentiala
+		# creste din ghiont in ghiont, masina pleaca lateral de pe pasaj si
+		# ajunge la x = -24, cazuta. Un plafon face din el ce trebuia sa fie —
+		# o alunecare de-a lungul barierelor, cu viteza omului care impinge.
+		var along := car.velocity.dot(dir)
+		if along < gate_push:
+			car.velocity += dir * (gate_push - along)
 
 
 func _cars_in_gate() -> Array:
@@ -434,6 +528,9 @@ func _build_service() -> void:
 		pts.append(Vector3(x, deck_rise, z))
 	_service_points = pts
 	var half_w := service_width * 0.5
+	# Fereastra de desprindere: singurul loc in care marginea dinspre drum a
+	# ocolului n-are voie sa aiba parapet.
+	var win := _merge_window()
 	for i in n:
 		var a := pts[i]
 		var b := pts[i + 1]
@@ -454,11 +551,20 @@ func _build_service() -> void:
 			# Marginea dinspre axa drumului e cea pe care se INTRA pe ocol.
 			# Un parapet acolo, unde ocolul tocmai se desprinde, e un zid pus
 			# de-a curmezisul manevrei de schimbare de banda — sonda a oprit
-			# masina in capatul lui, la 6 m de gol. Deci pe partea dinspre
-			# drum parapetul creste doar in dreptul GOLULUI, unde nimeni nu
-			# mai are ce cauta pe banda directa.
+			# masina in capatul lui, la 6 m de gol. Deci pe partea dinspre drum
+			# parapetul lipseste EXACT pe fereastra de desprindere, si exista
+			# peste tot in rest.
+			#
+			# „In rest" a insemnat initial doar in dreptul golului (|z| sub
+			# lip+2), si intre el si fereastra ramanea o pana de AER: ocolul se
+			# departeaza de pasaj mai repede decat isi ia parapetul, deci la
+			# z = 8..13 exista un culoar de ~3 m intre buza pasajului si
+			# marginea ocolului, fara nimic dedesubt. Sonda a cazut fix in el
+			# (masina scoasa din bariere, y de la 3.0 la 1.39, rasturnata la
+			# up.y 0.57). Parapetul urca acum pana la buza ferestrei.
 			var outer := absf(ea.x) > absf(a.x)
-			if not outer and absf((ea.z + eb.z) * 0.5) > _lip_near() + 2.0:
+			var inner_free: float = win[0] if win.size() == 2 else _lip_near() + 2.0
+			if not outer and absf((ea.z + eb.z) * 0.5) > inner_free:
 				continue
 			_parapet(st, body, ea, eb)
 	var mi := PaletteBox.emit(st, "ServiceMesh")
@@ -611,6 +717,14 @@ func _build_gate() -> void:
 		near_x = side * maxf(inner, -road_half_width)
 	var center_x := (far_x + near_x) * 0.5
 	_gate.transform = Transform3D(basis, Vector3(center_x, deck_rise, gz))
+	# Linia oblica trebuie sa fie o PANTA, nu un zid: cu frecarea implicita
+	# masina se agata de ea si se opreste (masurat de critic: 18.33 s pana la
+	# desprindere). Materialul se pune pe corp, nu pe forma — colizorul portii
+	# se aprinde si se stinge, materialul ramane.
+	var slick := PhysicsMaterial.new()
+	slick.friction = gate_friction
+	slick.bounce = 0.0
+	_gate.physics_material_override = slick
 	var width := absf(far_x - near_x) / cos(skew) + 0.4
 	_gate_shape = CollisionShape3D.new()
 	_gate_shape.name = "GateWall"

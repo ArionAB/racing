@@ -52,6 +52,7 @@ const RES := {
 	"chongqing/buildings/shophouse_a": "49_shopa",
 	"chongqing/buildings/shophouse_b": "50_shopb",
 	"chongqing/buildings/shophouse_c": "51_shopc",
+	"chongqing/buildings/restaurant_front": "52_restaurant",
 }
 
 ## Aceeasi valoare ca `Track.QUAY_FREEBOARD` — cat de sus sta dala cheiului
@@ -129,49 +130,72 @@ func _yaw_side(f: float) -> float:
 
 # ----------------------------------------------------------- 5) cheiul (E)
 
+## Cat de sus peste linia apei mai numara terenul drept „chei uscat". Sub
+## atat, un obiect asezat acolo pluteste peste rau — exact ce a iesit in prima
+## rundă cu bolarzii.
+const DRY_MARGIN: float = 0.4
+
+## Offsetul lateral la care se termina cheiul uscat, cautat DIN drum spre apa.
+## Se cauta, nu se calculeaza din `width_at_index`: soseaua se ingusteaza de la
+## 9 la 7 m intre 0.478 si 0.490, iar buza cheiului NU se ingusteaza odata cu
+## ea — bolarzii pusi la „marginea asfaltului + 1.6" ajungeau in apa exact pe
+## portiunea aia (vazut in captura de la 0.50).
+func _quay_edge(f: float, dir: float) -> float:
+	var o := _at(f)[3] as float
+	var last := o
+	while absf(o) < 60.0:
+		var q := _off(f, o * dir)
+		if _sampler.ground_y(q.x, q.z) < _sea + DRY_MARGIN:
+			break
+		last = o
+		o += 0.5
+	return last * dir
+
+
 ## Cheiul Chaotianmen, 0.455..0.515: bolarzi pe buza dinspre apa, stive de
 ## containere pe umarul dinspre uscat, un slep acostat la dana si felinare.
 ##
-## Partea dinspre apa e DREAPTA (side pozitiv): `ground_y` la +10 m cade sub
-## cota apei de la 0.48 incolo. Bolardul sta pe buza, deci intre marginea
-## asfaltului (`width_at_index`) si linia apei — la +1.6 m de buza.
+## Partea dinspre apa e DREAPTA (side pozitiv): `ground_y` cade sub cota apei
+## de la ~+8 m incolo. Toate piesele isi iau cota din `ground_y`, nu din cota
+## soselei: cheiul e cu 0.3 m mai jos decat asfaltul, si un container asezat la
+## cota drumului sta pe jumatate ingropat, inclinat pe panta umarului.
 func _zone_chei() -> void:
 	_zone = "5) Cheiul Chaotianmen"
-	# Bolarzi pe buza dinspre apa. Pasul e de 14 m: in referinta (bar/E_chei)
-	# sunt des, si sunt singurul lucru care spune „cheiul se termina aici" pe
-	# o margine care n-are parapet (brief §2: „apa pe dreapta, fara parapet").
+	# Bolarzi pe BUZA cheiului, cautata (vezi `_quay_edge`), retrasi cu 1.2 m.
 	var f := 0.462
 	while f < 0.512:
-		var st := _at(f)
-		var w: float = st[3]
+		var edge := _quay_edge(f, 1.0)
+		var q := _off(f, edge - 1.2)
 		_node("chongqing/props/bollard", "bolard",
-			_off(f, w + 1.6) + Vector3(0, -0.15, 0), _yaw_side(f), 1.0, "none")
+			Vector3(q.x, _sampler.ground_y(q.x, q.z), q.z),
+			_yaw_side(f), 1.0, "none")
 		f += 14.0 / 2068.3
 	# Stive de containere pe umarul dinspre USCAT (stanga), in trei grupuri.
 	# Grupuri mici si rare — restul cheiului ramane gol, ca in referinta.
+	# Cota fiecarei bucati e `ground_y` SUB EA, nu sub centrul grupului: pe un
+	# umar in panta, doua containere alaturate nu stau la aceeasi cota.
 	var stacks := [
-		[0.4635, 0.0, 0.0], [0.4635, 0.0, 3.2], [0.4635, 6.4, 0.0],
-		[0.4795, 0.0, 0.0], [0.4795, 6.4, 0.0], [0.4795, 6.4, 3.2],
-		[0.4955, 0.0, 0.0], [0.4955, 0.0, 3.2], [0.4955, 6.4, 0.0],
+		[0.4635, 0.0, 0.0], [0.4635, 0.0, 2.6], [0.4635, 6.4, 0.0],
+		[0.4795, 0.0, 0.0], [0.4795, 6.4, 0.0], [0.4795, 6.4, 2.6],
+		[0.4955, 0.0, 0.0], [0.4955, 0.0, 2.6], [0.4955, 6.4, 0.0],
 	]
 	for s: Array in stacks:
 		var fr: float = s[0]
 		var st := _at(fr)
-		var w: float = st[3]
-		var g := _sampler.ground_y(_off(fr, -(w + 6.0)).x, _off(fr, -(w + 6.0)).z)
-		var base := _off(fr, -(w + 6.0) - s[1] * 0.06)
-		# Containerul sta CULCAT de-a lungul cheiului: latura lunga (6.26 m) pe
-		# directia de mers, ca sa nu iasa in sosea.
+		var fwd: Vector3 = st[2]
+		var base := _off(fr, -(st[3] as float) - 6.5)
+		var q := Vector3(base.x + fwd.x * s[1], 0.0, base.z + fwd.z * s[1])
 		_node("chongqing/props/container", "cont",
-			Vector3(base.x + st[2].x * s[1], g + s[2], base.z + st[2].z * s[1]),
+			Vector3(q.x, _sampler.ground_y(q.x, q.z) + s[2], q.z),
 			_yaw_fwd(fr), 1.0, "hull")
 	# Felinare pe umarul dinspre uscat, la 30 m — continua sirul de pe malul
 	# de vest, care se opreste inainte de cheiul asta.
 	f = 0.458
 	while f < 0.516:
-		var st := _at(f)
+		var q := _off(f, -(_at(f)[3] as float) - 2.4)
 		_node("chongqing/props/lamp_lantern_a", "felinarE",
-			_off(f, -(st[3] as float) - 2.4), _yaw_side(f) + PI, 1.0, "none")
+			Vector3(q.x, _sampler.ground_y(q.x, q.z), q.z),
+			_yaw_side(f) + PI, 1.0, "none")
 		f += 30.0 / 2068.3
 	# Slepul acostat la dana, langa stiva din mijloc. Pescajul: carena sub apa.
 	var dana := _off(0.4795, 26.0)
@@ -213,6 +237,12 @@ func _zone_nod() -> void:
 	while f < 0.888:
 		_bent(f)
 		f += 26.0 / 2068.3
+	# ORASUL DE SUB NOD. Brief §2.0: „tot ce e impresionant sta SUB jucator".
+	# Fara el, flancul spiralei e o panta gri goala — masurat la volan, capturile
+	# de la 0.65/0.75/0.80 nu aveau nimic intre asfalt si linia cerului.
+	# Casele stau pe TEREN, la 22..34 m de axa, deci sub linia camerei (5° in
+	# sus la 25 m inseamna 12 m — o casa de 7.6 m intra intreaga).
+	_orasul_de_jos()
 	# Bariere de santier pe umarul interior, in dreptul pasajului rotativ:
 	# anunta santierul cu doua curbe inainte, ca in referinta.
 	for spec: Array in [[0.762, -1.0], [0.766, -1.0], [0.770, 1.0]]:
@@ -255,6 +285,45 @@ func _zone_nod() -> void:
 ## drept pila, nu drept stalp orfan.
 const CLEAR: float = 2.5
 const MAX_ARM: float = 13.0
+
+## Casele de sub nodul rutier si de pe flancurile spiralei.
+##
+## [b]Nu sunt umplutura.[/b] Regula frustumului (brief §2.0) spune ca orasul se
+## vede DOAR in jos, deci un flanc gol nu e „sobru", e chiar lucrul pe care
+## camera il priveste tot POI-ul. Se aseaza numai unde terenul e cu cel putin
+## `SUB_MIN` metri sub sosea (altfel casa ar creste in fata masinii, nu sub ea)
+## si cu cel mult `SUB_MAX` (mai jos de atat se pierde in ceata).
+##
+## Coliziunea e „none" fiindca sunt sub cota drumului: un corp solid acolo n-ar
+## opri niciodata o masina care merge, dar ar prinde una care cade — iar
+## caderea trebuie sa ajunga la `RespawnZone`, nu sa se agate de un acoperis
+## (memoria `coliziune-contact-si-platforma`).
+const SUB_MIN: float = 5.0
+const SUB_MAX: float = 34.0
+
+func _orasul_de_jos() -> void:
+	var kinds := ["buildings/shophouse_a", "buildings/shophouse_b",
+		"buildings/shophouse_c", "buildings/restaurant_front"]
+	var k := 0
+	var f := 0.600
+	while f < 0.900:
+		for spec: Array in [[-1.0, 22.0], [-1.0, 33.0], [1.0, 24.0], [1.0, 35.0]]:
+			var off: float = spec[1] * spec[0]
+			var q := _off(f, off)
+			var g := _sampler.ground_y(q.x, q.z)
+			var drop := (_at(f)[0] as Vector3).y - g
+			if drop < SUB_MIN or drop > SUB_MAX:
+				continue
+			if g < _sea + 0.5:
+				continue
+			# Fatada se uita spre drum; casele nu stau la unison.
+			_node("chongqing/" + kinds[k % kinds.size()], "casaF",
+				Vector3(q.x, g, q.z),
+				_yaw_side(f) + (PI if spec[0] > 0.0 else 0.0) + float(k % 3) * 0.22,
+				[1.0, 1.25, 0.85][k % 3], "none")
+			k += 1
+		f += 17.0 / 2068.3
+
 
 func _bent(f: float) -> void:
 	var st := _at(f)
@@ -414,32 +483,70 @@ func _zone_liziba() -> void:
 ## Al doilea pod (brief §2 S) e `bay_bridge.glb` intins ca silueta peste golf,
 ## la 190 m de chei: un tronson de 40 m nu ajunge peste un golf, deci se pun
 ## cinci bucati cap la cap pe aceeasi linie.
+## Cat de mult in spatele liniei de mal se infig siluetele.
+const SHORE_BACK: float = 22.0
+
 func _zone_fundal() -> void:
 	_zone = "8) Fundal"
-	# Turnurile: pe un arc in jurul golfului, la 165..235 m in dreapta cheiului.
+	# TURNURILE stau pe malul OPUS, si pozitia lor se citeste din tema, nu se
+	# tasteaza ca offset fata de sosea.
+	#
+	# Prima versiune le punea la 140..250 m in dreapta cheiului si le lua cota
+	# cu `max(ground_y, apa + 1)`. Opt din opt au iesit peste apa (verificat cu
+	# o sonda care compara cota terenului cu linia apei sub fiecare prop): malul
+	# de peste golf, declarat in `far_shore`, se opreste la z ~335, iar
+	# offsetul de 140-250 m ii ducea pana la z 445. Un obiect care sta pe o
+	# geometrie declarata in ALTA PARTE trebuie sa-si ia si pozitia de acolo —
+	# aceeasi lectie ca la `gen_decor_chongqing._far_towers`.
 	var models := ["buildings/tower_silhouette_b", "buildings/tower_silhouette_c",
 		"buildings/tower_silhouette_a"]
 	var k := 0
-	for spec: Array in [[0.468, 172.0], [0.474, 214.0], [0.482, 168.0],
-			[0.489, 232.0], [0.496, 186.0], [0.503, 228.0], [0.470, 246.0],
-			[0.486, 138.0]]:
-		var fr: float = spec[0]
-		var q := _off(fr, spec[1])
-		# Silueta sta pe malul opus, adica pe coroana construita de
-		# `Track._build_far_shore`; unde nu ajunge, pe cota terenului.
-		var g := maxf(_sampler.ground_y(q.x, q.z), _sea + 1.0)
-		_node("chongqing/" + models[k % 3], "siluetaS",
-			Vector3(q.x, g, q.z), float(k) * 0.9, [1.0, 0.78, 1.15][k % 3],
-			"none")
-		k += 1
-	# Al doilea pod: cinci tronsoane cap la cap, peste golf, la 190 m.
-	var a := _off(0.470, 196.0)
-	var b := _off(0.508, 196.0)
-	var dir := (b - a).normalized()
-	for m in 6:
-		var q := a + dir * (40.0 * (float(m) + 0.5))
+	# Numai malul dinspre golf (a doua linie din `far_shore`) si coada primei:
+	# restul e in fata cornisei D, unde siluetele exista deja.
+	var banks: Array = _track.theme_flag("far_shore", [])
+	for bi in banks.size():
+		var bank: Dictionary = banks[bi]
+		var line: Array = bank.get("line", [])
+		var h := float(bank.get("h", 12.0))
+		var depth := float(bank.get("depth", 45.0))
+		# Coroana coboara liniar de la `h` la 0.8*h pe `depth`; la SHORE_BACK
+		# metri in spate iese cota de mai jos, minus un metru ca sa fie infipta.
+		var y := _sea + h - 0.2 * h * (SHORE_BACK / depth) - 1.0
+		var c := _track._centroid()
+		for i in line.size() - 1:
+			var a: Vector2 = line[i]
+			var b: Vector2 = line[i + 1]
+			# Numai bucata dinspre golf: siluetele de pe Jialing sunt deja puse.
+			if maxf(a.x, b.x) < -50.0:
+				continue
+			var seg := a.distance_to(b)
+			var steps := maxi(int(seg / 75.0), 1)
+			for m in steps:
+				var p := a.lerp(b, (float(m) + 0.5) / float(steps))
+				var nrm := Vector2(-(b.y - a.y), b.x - a.x).normalized()
+				if nrm.dot(a - Vector2(c.x, c.z)) < 0.0:
+					nrm = -nrm
+				var q := p + nrm * SHORE_BACK
+				_node("chongqing/" + models[k % 3], "siluetaS",
+					Vector3(q.x, y, q.y), float(k) * 0.8 + 0.3,
+					[1.05, 0.8, 1.2][k % 3], "none")
+				k += 1
+	# AL DOILEA POD (brief §2 S): silueta unui pod care traverseaza golful, de
+	# la coltul cheiului spre malul opus. Un tronson are 40 m, deci se pun cap
+	# la cap pana la mal — cota e cea a unui tablier peste apa, nu cea a lui
+	# `_sea + 7` din prima versiune, care il lasa in aer peste apa deschisa
+	# fiindca nici capetele nu atingeau uscatul.
+	var a0 := _off(0.507, 30.0)
+	var b0 := Vector3(230.0, _sea, 316.0)
+	var dir := (b0 - a0)
+	dir.y = 0.0
+	var total := dir.length()
+	dir = dir.normalized()
+	var pieces := int(ceil(total / 40.0))
+	for m in pieces:
+		var q := a0 + dir * (40.0 * (float(m) + 0.5))
 		_node("chongqing/structures/bay_bridge", "podS",
-			Vector3(q.x, _sea + 7.0, q.z), atan2(dir.x, dir.z), 1.0, "none")
+			Vector3(q.x, _sea + 6.0, q.z), atan2(dir.x, dir.z), 1.0, "none")
 
 
 # ------------------------------------------------------------------ iesirea

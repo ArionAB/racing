@@ -104,6 +104,23 @@ const PROP_COLLISION := {
 	"flowers_orange": "none", "flowers_white": "none",
 	"hibiscus_bush": "none", "sugar_cane_clump": "none",
 	"shrub_snow": "none", "grass_tuft_dry": "none",
+	# --- Chongqing (POI A-D) ----------------------------------------------
+	# Stalpii: lampioanele si firmele au bratul si felinarul latite mult peste
+	# stalp (lamp_lantern_a e 1.40 m lat pe un stalp de ~12 cm). Un hull ar
+	# pune pe trotuar un bloc de un metru si jumatate, la inaltimea capotei.
+	"lamp_lantern_a": "trunk", "lamp_lantern_b": "trunk",
+	"lamp_lantern_c": "trunk",
+	"neon_sign_a": "trunk", "neon_sign_b": "trunk",
+	"neon_sign_c": "trunk", "neon_sign_d": "trunk",
+	"bollard": "trunk", "chevron_post": "trunk",
+	# Rufele stau pe o sarma peste alee, la 2.6 m: hull-ul lor ar fi un tavan
+	# plin exact peste carosabil.
+	"laundry_line": "mesh",
+	# --- figuranti si marunt: nimic care sa opreasca o masina de cursa -----
+	# Hamalii se plimba pe scara, sub linia camerei; mesele si scuterul stau pe
+	# trotuarul din aleea de 6 m, adica la o roata distanta de linia de curs.
+	"porter": "none", "table_stools": "none", "steam_vent": "none",
+	"scooter": "none", "bicycle": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.

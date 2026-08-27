@@ -85,11 +85,20 @@ func _ready() -> void:
 				# Soseaua, terenul si umerii nu sunt obstacol: cutia sta PE ele,
 				# si corpul lor se numeste tot „root". Ne intereseaza numai ce a
 				# fost ASEZAT — decorul manual si geometria hazardelor.
-				# Grinda monorailului NU e obstacol: e o dala de 22 cm cu umeri in
-				# panta, peste care se trece ca peste o sina de tramvai (vezi
-				# antetul lui MonorailHazard). Cutia masinii o atinge fiindca sta
-				# la 5 cm de asfalt — asta e corect, nu e blocaj.
-				if owner_name.find("/DecorManual/") < 0:
+				# Ce se numara ca obstacol: decorul asezat de mana SI geometria
+				# statica a hazardelor (peroanele telecabinei, turnul macaralei,
+				# grinzile). ProbeRace le-a prins pe primele doua ca blocaje
+				# reale — peronul de jos statea in mijlocul cheiului.
+				#
+				# Trei exceptii, si toate trei sunt CONTRACTE, nu scapari:
+				#  * grinda monorailului — o dala de 22 cm cu umeri in panta,
+				#    peste care se trece ca peste o sina (antetul MonorailHazard);
+				#  * pasajul si rampa de serviciu ale pasajului rotativ — ele SUNT
+				#    carosabilul acolo, cutia sta pe ele;
+				#  * reperele culoarului de ceata, care n-au colizor oricum.
+				if owner_name.find("/DecorManual/") < 0 						and owner_name.find("/Telecabina3D/") < 0 						and owner_name.find("/Macara/") < 0:
+					continue
+				if owner_name.find("/Monorail/Beam") >= 0 						or owner_name.find("Deck") >= 0 						or owner_name.find("ServiceRamp") >= 0:
 					continue
 				# Unde anume: pozitia cutiei si, pentru un prop, coordonatele
 				# ei in spatiul MODELULUI — acolo se citeste ce a atins.

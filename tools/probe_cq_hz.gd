@@ -24,7 +24,10 @@ func _ready() -> void:
 		var side := track._side_at(i)
 		print("frac %.4f  hw %.1f  pos(%.3f, %.3f, %.3f) yaw %.2f deg  fwd(%.3f,%.3f)" % [
 			f, track.width_at_index(i), p.x, p.y, p.z, rad_to_deg(yaw), fwd.x, fwd.z])
+		# Cele noua numere din .tscn sunt baza pe LINII (masurat — vezi
+		# gen_decor_cq_eg._node). Coloanele cerute: X = (cos, 0, -sin),
+		# Z = (sin, 0, cos). Scrise pe linii: (xx, yx, zx, xy, yy, zy, xz, yz, zz).
 		print("  transform = Transform3D(%f, 0, %f, 0, 1, 0, %f, 0, %f, %f, %f, %f)" % [
-			c, -s, s, c, p.x, p.y, p.z])
+			c, s, -s, c, p.x, p.y, p.z])
 		print("  side(%.3f,%.3f)  panta %.1f%%" % [side.x, side.z, fwd.y / maxf(Vector2(fwd.x,fwd.z).length(),0.01) * 100.0])
 	get_tree().quit()

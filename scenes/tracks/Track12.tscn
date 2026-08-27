@@ -46,7 +46,7 @@ point_count = 13
 
 [sub_resource type="Curve3D" id="Curve3D_cablu"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 73, 5.9, 199.4, 0, 0, 0, 0, 0, 0, 116.8, 17.1, 173, 0, 0, 0, 0, 0, 0, 248, 25.9, 94),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 26.0, 5.3, 188.2, 0, 0, 0, 0, 0, 0, 117.3, 17.8, 159.3, 0, 0, 0, 0, 0, 0, 265.14, 25.3, 82.07),
 "tilts": PackedFloat32Array(0, 0, 0)
 }
 point_count = 3
@@ -330,9 +330,9 @@ transform = Transform3D(0.172554, 0, 0.832301, 0, 0.850000, 0, -0.832301, 0, 0.1
 metadata/coliziune = "none"
 
 [node name="CuloarCeata" type="Node3D" parent="."]
-transform = Transform3D(0.109864, 0, 0.993947, 0, 1, 0, -0.993947, 0, 0.109864, 113.120003, 5.590000, 194.100006)
+transform = Transform3D(0.031488, 0, -0.999504, 0, 1, 0, 0.999504, 0, 0.031488, 142.940002, 5.920000, 190.779999)
 script = ExtResource("13_fog")
-length = 70.0
+length = 52.0
 half_width = 11.0
 ramp_in = 45.0
 ramp_out = 4.0
@@ -354,25 +354,25 @@ apron_length = 3.0
 curve = SubResource("Curve3D_cablu")
 
 [node name="PasajRotativ" type="Node3D" parent="."]
-transform = Transform3D(-0.233943, 0, 0.972250, 0, 1, 0, -0.972250, 0, -0.233943, 159.330002, 40.860001, 188.000000)
+transform = Transform3D(0.084155, 0, -0.996452, 0, 1, 0, 0.996452, 0, 0.084155, 57.640000, 4.990000, 200.190002)
 script = ExtResource("11_span")
 period = 25.0
 turn_time = 4.0
 telegraph_lead = 3.0
 phase = 0.6
-road_half_width = 7.0
+road_half_width = 10.0
 span_length = 11.84
 deck_run = 34.0
-deck_rise = 3.0
-deck_parapet = 0.9
-ramp_run = 30.0
+deck_rise = 0.0
+deck_parapet = 0.0
+ramp_run = 24.0
 service_side = -1
 service_offset = 24.0
 service_width = 5.0
 service_lead = 30.0
 
 [node name="Macara" type="Node3D" parent="."]
-transform = Transform3D(0.753919, 0, -0.656968, 0, 1, 0, 0.656968, 0, 0.753919, 260.383942, 48.418400, 88.934044)
+transform = Transform3D(0.753919, 0, 0.656968, 0, 1, 0, -0.656968, 0, 0.753919, 260.383942, 48.418400, 88.934044)
 script = ExtResource("12_crane")
 period = 19.0
 phase = 0.25
@@ -384,7 +384,7 @@ hook_radius = 15.0
 load_clearance = 0.5
 
 [node name="Monorail" type="Node3D" parent="."]
-transform = Transform3D(0.957791, 0, -0.287464, 0, 1, 0, 0.287464, 0, 0.957791, 241.443695, 54.551197, 11.490620)
+transform = Transform3D(0.957791, 0, 0.287464, 0, 1, 0, -0.287464, 0, 0.957791, 241.443695, 54.551197, 11.490620)
 script = ExtResource("14_monorail")
 period = 33.0
 warn_lead = 3.0

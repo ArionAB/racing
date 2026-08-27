@@ -265,31 +265,54 @@ uniform float facet_speed = 0.05;
 // adica temele vechi neatinse.
 uniform float facet_ref = 0.0;
 
-// --- v8 (Chongqing, runda 9). Plafonul micsorarii celulei langa camera.
+// --- v10 (Chongqing, runda 11). MARIMEA CELULEI PE ECRAN, in pixeli.
 //
-// Era scris in cod, 2.5, si calibrat pe apa privita de pe cornisa (60-250 m).
-// Sub tablierul golfului apa incepe la 5 m de ochi si trece pe la 3.3 m sub
-// el: acolo `facet_ref / cam_r` cere 19x, primeste 2.5x, deci celula ramane la
-// ~5.5 m si SUBINTINDE JUMATATE DE ECRAN. O celula care se aprinde nu mai e o
-// reflexie, e o balta de aur cu contur de amiba — masurat pe captura rundei 8,
-// 25% din pixelii apei din stanga peste luminanta 90, cu p90-p10 = 107.
+// Pana in runda 10 marimea celulei se cerea prin `facet_ref / cam_r`, adica
+// printr-o DISTANTA de referinta. Asta functioneaza doar cat timp camera se
+// uita la apa mereu de la aceeasi inaltime si cu acelasi FOV — si nu e cazul:
+// cornisa D sta la 27 m peste apa, tablierul golfului la 3.3 m. O celula
+// calibrata pentru una iese de zece ori gresita in cealalta, si de-aia
+// `facet_near` a tot urcat (2.5 -> 5.5 -> 16) fara sa nimereasca vreodata.
 //
-// Nu se poate ridica la infinit: peste ~6x celula scade sub 2.5 m si alungirea
-// reflexiei o trage in FIRE (paie peste pamant, incercat in runda 8). Cheia de
-// tema exista tocmai fiindca plafonul corect depinde de cat de jos trece
-// camera peste apa, si asta difera de la o pista la alta.
+// Marimea care conteaza e in PIXELI, si se poate cere direct. `fwidth` da cat
+// se schimba pozitia in lume de la un pixel la vecinul lui, deci un metru
+// costa `1 / fwidth` pixeli — masurat pe fragmentul curent, cu FOV-ul,
+// rezolutia si unghiul lui reale, fara nicio constanta de calibrare.
+// `facet_px` e latimea dorita a placii, si e o marime pe care o poti CITI din
+// referinta: in bar/E_chei.png placile din prim-plan au 17.7 px pe orizontala
+// si 7.1 px pe verticala, cele departate 71 si 26 (masurat pe lungimea medie
+// de segment intre doua muchii de luminanta >= 8).
+//
+// 0 = mecanismul vechi (`facet_ref`), adica temele vechi neatinse.
+uniform float facet_px = 0.0;
+// Plafonul micsorarii, ca raport fata de celula autorata. Exista din acelasi
+// motiv pentru care exista si la mecanismul vechi: langa camera cererea
+// diverge, iar o placa sub jumatate de metru nu mai e o fateta de apa, e
+// granulatie.
+uniform float facet_px_max : hint_range(1.0, 128.0) = 32.0;
 uniform float facet_near_max : hint_range(1.0, 12.0) = 2.5;
 
-// --- v9 (Chongqing, runda 10). CAT de mult se poate comprima celula pe axa
-// privirii. Vezi nota lunga din fragment: la incidenta razanta proiectia
-// intinde axa radiala de r/h ori (12x la 40 m de pe tablier, 45x la 150 m),
-// deci o celula patrata in lume iese aschie pe ecran si tesela dispare. Asta
-// e plafonul compresiei care o repara. 1.0 = efect stins, adica temele vechi
-// neatinse. Peste ~16 celula devine dunga in lume si reapar pensulatiile.
-uniform float facet_aniso : hint_range(1.0, 16.0) = 1.0;
-// Peste cate celule pe pixel se stinge tesela in valoarea ei medie. Vezi nota
-// din fragment: sub pragul asta un tipar cuantizat e zgomot, nu desen. 0.5 =
-// se stinge cand celula ajunge la doi pixeli.
+// --- v10 (Chongqing, runda 11). ALUNGIREA RADIALA. Semnul corectat.
+//
+// Runda 10 a pus corectia pe dos, si asta e chiar defectul care a picat-o.
+// Rationamentul era corect — proiectia unui plan orizontal privit razant
+// intinde axa radiala de r/h ori, deci o celula patrata in lume iese aschie pe
+// ecran — dar reparatia mergea invers. `pa = p + vdir * (dot(p,vdir) * (k-1))`
+// INMULTESTE coordonata radiala cu k, deci placa devine de k ori mai SCURTA in
+// lume. Adica exact ce facea perspectiva oricum, inca o data.
+//
+// Ca sa iasa patrata pe ecran, placa trebuie sa fie mai LUNGA in lume pe
+// directia privirii, cu chiar factorul cu care proiectia o scurteaza: 1/view.y.
+// La 5 m de pe tablier asta cere 1.8x, la 150 m cere 45x. De-aia se si
+// plafoneaza (`facet_aniso`): dincolo de plafon placa devine dunga in lume,
+// adica pensulatiile scoase in rundele 8-9.
+//
+// Verificarea e aritmetica si se poate reface pe hartie: un metru transversal
+// subintinde 1/(d*k) pixeli, unul radial view.y/(d*k). Ca cei doi sa dea
+// acelasi numar de pixeli, latura radiala in metri trebuie sa fie de 1/view.y
+// ori cea transversala. Cu semnul din runda 10 raportul iesea view.y, adica
+// patratul erorii.
+uniform float facet_aniso : hint_range(1.0, 64.0) = 1.0;
 uniform float facet_aa : hint_range(0.05, 2.0) = 0.5;
 // Perechea lui pentru masca de reflexii. Vezi nota din fragment: punctul de
 // esantionare al mastii e comprimat radial, deci mipmap-ul nu-l mai poate
@@ -640,7 +663,21 @@ void fragment() {
 		// injumatateste dintr-o data, si o muchie de placa peste alta muchie
 		// de placa nu se vede — asta e chiar mecanismul unui mipmap.
 		float fs = facet_scale;
-		if (facet_ref > 0.0) {
+		// Latura autorata, in metri (2*PI/fs e conventia de peste tot aici).
+		float cell_m = 6.2831853 / max(facet_scale, 1e-4);
+		// Cati pixeli costa un metru TRANSVERSAL pe fragmentul asta. fwidth pe
+		// pozitia in lume da metri-per-pixel direct, cu FOV-ul si rezolutia
+		// reale; se ia minimul pe cele doua axe fiindca transversala e axa
+		// care NU e scurtata de incidenta.
+		float m_px = max(min(fwidth(world_pos.x), fwidth(world_pos.z)), 1e-5);
+		if (facet_px > 0.0) {
+			// Cat trebuie micsorata placa autorata ca sa iasa `facet_px` lata.
+			// Se cuantizeaza in puteri de doi din acelasi motiv ca inainte: o
+			// scara care se schimba continuu intre doi pixeli vecini forfeca
+			// grila, si o grila forfecata radial iese dungi convergente.
+			float want = clamp(cell_m / (facet_px * m_px), 1.0, facet_px_max);
+			fs *= exp2(floor(log2(want)));
+		} else if (facet_ref > 0.0) {
 			float want = clamp(facet_ref / max(cam_r, 1.0), 1.0,
 				facet_near_max);
 			fs *= exp2(floor(log2(want)));
@@ -698,14 +735,24 @@ void fragment() {
 		// dungi convergente spre orizont. In trepte, intre doua inele celula
 		// ramane celula.
 		if (facet_aniso > 1.0) {
-			float want_a = (1.0 / max(view.y, 1e-3)) / max(fs / facet_scale, 1e-3);
-			aniso = exp2(floor(log2(clamp(want_a, 1.0, facet_aniso))));
+			// Chiar jacobianul proiectiei, si nimic altceva: latura radiala
+			// trebuie sa fie de 1/view.y ori cea transversala ca sa iasa
+			// patrata pe ecran. Nu se mai imparte la micsorarea deja aplicata
+			// — aia lucreaza pe AMANDOUA axele deodata, deci nu schimba
+			// raportul dintre ele, iar impartirea la ea (runda 10) stergea
+			// tocmai corectia pe care o cerea perspectiva.
+			aniso = exp2(floor(log2(clamp(1.0 / max(view.y, 1e-3),
+				1.0, facet_aniso))));
 		}
 		// Domeniul comprimat pe directia privirii. Se aplica INAINTE de
 		// sinusoidele de deformare, ca sa se indoaie tot atat de tare si ele —
 		// altfel warp-ul ar fi izotrop peste o grila anizotropa si ar reintroduce
 		// laturi curbe exact acolo unde celula e cea mai ingusta.
-		vec2 pa = p + vdir * (dot(p, vdir) * (aniso - 1.0));
+		// Semnul, corectat in runda 11. Coordonata radiala se IMPARTE la
+		// `aniso`, deci placa iese de `aniso` ori mai LUNGA in lume pe directia
+		// privirii — cat trebuie ca proiectia sa o aduca inapoi la patrat pe
+		// ecran. Runda 10 inmultea, deci o scurta inca o data.
+		vec2 pa = p - vdir * (dot(p, vdir) * (1.0 - 1.0 / aniso));
 		float w1 = sin(dot(pa, vec2(0.83, 0.55) * fs) + TIME * facet_speed)
 			+ sin(dot(pa, vec2(-0.47, 1.31) * fs)
 				- TIME * facet_speed * 0.74);
@@ -733,7 +780,20 @@ void fragment() {
 		// altfel tesela se citeste ca un tesut in zigzag.
 		vec2 cell = floor(wp);
 		vec2 f = wp - cell;
-		float flip = mod(cell.x + cell.y, 2.0);
+		// DIAGONALA, ALEASA PE CELULA (runda 11). Era `mod(cell.x + cell.y, 2)`,
+		// adica o tabla de sah: directia diagonalei se repeta din doua in doua
+		// celule pe amandoua axele, deci tesela are o perioada de 2x2 oricat de
+		// mult ai rupe muchia din `facet_wobble`. Pe captura asta se vede ca un
+		// motiv de romburi care se repeta — tapiterie capitonata, nu apa. (Si
+		// nu se poate repara din wobble: peste 0.3 muchiile se curbeaza inapoi
+		// in lobii de camuflaj scosi in runda 9, masurat.)
+		//
+		// Cu diagonala trasa dintr-un hash pe celula, doua celule vecine pot
+		// avea aceeasi orientare sau orientari diferite, deci triunghiurile ies
+		// de marimi si directii amestecate — ce se vede in bar/E_chei.png — iar
+		// laturile raman drepte, fiindca taietura e tot o dreapta.
+		float flip = step(0.5, fract(sin(dot(cell, vec2(23.14, 61.07)))
+			* 31415.9265));
 		float diag = mix(f.x + f.y, 1.0 + f.x - f.y, flip);
 		float half_id = step(1.0, diag);
 		vec3 tri = vec3(cell, half_id);

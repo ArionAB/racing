@@ -1250,8 +1250,8 @@ static func themes() -> Dictionary:
 			# 7, doua placi vecine cad mai des in cutii diferite, si diferenta
 			# lor e mai mare. Nu se poate urca la nesfarsit — peste ~1.0 apar
 			# placi negre langa placi albe, adica sah, nu apa.
-			"water_facet": 0.70,
-			"water_facet_count": 4.0,
+			"water_facet": 0.7,
+			"water_facet_count": 4,
 			# RUNDA 8. 0.17 rad/m inseamna fatete de ~37 m, iar banda de apa
 			# vizibila de pe pod are 60-150 m: doua-patru fatete pe toata
 			# suprafata, adica nici una. In diorama o fateta subintinde cam a
@@ -1261,7 +1261,15 @@ static func themes() -> Dictionary:
 			# RUNDA 9: 0.10 lasa muchia placii dreapta pe zeci de metri, deci
 			# placile ies un caroiaj regulat. In diorama fiecare triunghi are
 			# alta marime si alta orientare.
-			"water_facet_wobble": 0.10,
+			#
+			# RUNDA 11: regularitatea NU se repara de aici, si asta s-a masurat.
+			# La 0.30 muchiile se curbeaza inapoi in lobii de camuflaj scosi in
+			# runda 9 (edge% urca la 9.8, dar pe captura tesela dispare), iar la
+			# 0.45 si mai rau. Periodicitatea venea din diagonala aleasa pe
+			# paritatea celulei — o tabla de sah cu perioada 2x2 — si se repara
+			# acolo (vezi `flip` in shader). 0.18 rupe muchia cat sa nu fie de
+			# rigla, si atat.
+			"water_facet_wobble": 0.18,
 			# Cat se indoaie grila. Vezi nota din shader: la 0.22 (valoarea
 			# scrisa in cod pana in runda 9) laturile triunghiului se curbeaza
 			# pana ies lobi inchisi unul in altul — camuflaj. 0.07 le lasa
@@ -1286,7 +1294,32 @@ static func themes() -> Dictionary:
 			# banda departata (unde anizotropia lucreaza) si 19.8% in diorama.
 			# 16 duce celula la ~0.85 m langa camera, deci 25-80 px — marimea
 			# pe care o au placile in bar/E_chei.png.
+			# RUNDA 11: cele doua chei de mai jos (`water_facet_ref` /
+			# `water_facet_near`) NU MAI SUNT ACTIVE pe tema asta — `facet_px`
+			# de mai jos le ia locul in shader. Raman scrise pentru ca alte teme
+			# (Okinawa, Baikal, Alpii) tot pe ele merg, si ca sa se vada de ce
+			# s-a renuntat: 16.0 e la aproape 3x pragul de esec documentat chiar
+			# deasupra uniformei `facet_near_max` (~6x, peste care celula scade
+			# sub 2.5 m si reflexia o trage in fire). Ridicat de trei ori
+			# (2.5 -> 5.5 -> 16) fara sa nimereasca, fiindca o DISTANTA de
+			# calibrare nu poate fi corecta si de pe cornisa (27 m peste apa) si
+			# de pe tablier (3.3 m). Marimea ceruta in pixeli nu are problema.
 			"water_facet_near": 16.0,
+			# RUNDA 11. Inlocuieste `water_facet_ref`/`water_facet_near` cu
+			# marimea CERUTA DIRECT IN PIXELI. Cele doua de deasupra raman
+			# scrise fiindca alte teme le folosesc; pe Chongqing `facet_px` le
+			# ia locul (vezi shader: cand e > 0, ramura veche nu mai ruleaza).
+			#
+			# 24 px e citit din bar/E_chei.png, nu ales: acolo lungimea medie de
+			# segment intre doua muchii de luminanta >= 8 e 17.7 px pe
+			# orizontala in prim-plan si 71 px pe banda departata, iar 24 cade
+			# intre ele si tine si de aproape, si departe. Cu mecanismul vechi
+			# (facet_ref 95 / near 16) placile ieseau 89-171 px late in
+			# prim-plan — sub zece placi pe toata apa din cadru, adica pete.
+			"water_facet_px": 16,
+			# Plafonul micsorarii fata de placa autorata (13.7 m). 32 il lasa
+			# sa coboare la 0.43 m langa camera, adica tot placa, nu granulatie.
+			"water_facet_px_max": 32.0,
 			# RARITATEA reflexiilor. Vezi `facet_gate` in shader: fateta spune
 			# CARE placi prind lumina, fisura deseneaza pata inauntru. La 0.62
 			# trec cam 38% din placi, si in ele fisura mai taie o data — de
@@ -1302,7 +1335,12 @@ static func themes() -> Dictionary:
 			# in diorama. 12 e derivat, nu ales: la 150 m lasa celula la ~1.1 m
 			# pe axa radiala, adica tot ~10 px pe ecran — cat sa se vada muchia,
 			# prea putin cat sa se citeasca fir.
-			"water_facet_aniso": 12.0,
+			# RUNDA 11: semnul corectat in shader (placa se LUNGESTE radial,
+			# nu se scurteaza). Cu semnul vechi orice valoare > 1 inrautatea
+			# lucrurile, de-aia 12 dadea aschii. Acum 24 e chiar alungirea
+			# ceruta de proiectie la ~80 m de pe tablier; peste ea placa ar
+			# deveni dunga in lume.
+			"water_facet_aniso": 24.0,
 			# Vezi `facet_aa` in shader. La 0.5 tesela se stinge cand celula
 			# ajunge la doi pixeli — masurat, aia e granita intre "placi" si
 			# "pietris" pe banda departata a Yangtze-ului.
@@ -4231,6 +4269,13 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_facet_ref", 0.0)))
 	_water_mat.set_shader_parameter("facet_near_max",
 		float(theme_flag("water_facet_near", 2.5)))
+	# RUNDA 11: marimea placii ceruta in PIXELI, nu printr-o distanta de
+	# referinta. Vezi `facet_px` in shader — o distanta de calibrare nu poate fi
+	# corecta si de pe cornisa (27 m peste apa) si de pe tablier (3.3 m).
+	_water_mat.set_shader_parameter("facet_px",
+		float(theme_flag("water_facet_px", 0.0)))
+	_water_mat.set_shader_parameter("facet_px_max",
+		float(theme_flag("water_facet_px_max", 32.0)))
 	_water_mat.set_shader_parameter("facet_gate",
 		float(theme_flag("water_facet_gate", 0.0)))
 	_water_mat.set_shader_parameter("facet_aniso",

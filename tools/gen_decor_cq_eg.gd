@@ -223,11 +223,18 @@ func _zone_nod() -> void:
 			Vector3(q.x, (st[0] as Vector3).y, q.z), _yaw_fwd(fr), 1.0, "none")
 	# Masinute oprite pe umarul din afara curbei, la etajul de jos: dau scara
 	# tablierului de deasupra si spun „e un nod rutier, nu o rampa".
+	# Fractiile sunt de pe etajul de JOS al spiralei, unde umarul e chiar teren.
+	# Cea de la 0.842 a fost scoasa: acolo drumul e pe pasaj, iar `ground_y` a
+	# pus masinuta pe carosabilul etajului 1, la 25 m sub ea — `probe_cq_hall`
+	# a prins-o ca obstacol pe banda extrema a etajului de jos.
 	for spec: Array in [[0.632, "mini_car_a", 1.0], [0.646, "mini_car_b", 1.0],
-			[0.842, "mini_car_a", -1.0]]:
+			[0.660, "mini_car_a", 1.0]]:
 		var fr: float = spec[0]
 		var st := _at(fr)
-		var q := _off(fr, (st[3] as float + 3.0) * spec[2])
+		# 3 m de la buza asfaltului nu ajung: masina parcata are 1.84 m de la
+		# origine pana la bot, iar `probe_cq_hall.gd` a prins-o pe cea de la
+		# 0.842 in banda extrema. 6 m de la buza, deci coada ei la 4 m de asfalt.
+		var q := _off(fr, (st[3] as float + 6.0) * spec[2])
 		_node("chongqing/vehicles/" + spec[1], "masinuta",
 			Vector3(q.x, _sampler.ground_y(q.x, q.z), q.z),
 			_yaw_fwd(fr) + PI, 1.0, "hull")
@@ -309,33 +316,51 @@ func _lateral_free(road: Vector3, side: Vector3, o: float) -> bool:
 
 ## Blocul traversat si scenografia din jurul lui.
 ##
-## GEOMETRIA MODELULUI DECIDE ASEZAREA, nu invers. `liziba_block.glb` are
-## parterul pe piloni: 40.6 x 27.2 m in plan, o gura de 11 m in fatada
-## (x -5.5..+5.5) si, inauntru, patru perechi de nuclee de scara la x = ±3.0..4.0
-## care lasa un culoar liber de doar 5.94 m. Masurat cu `probe_liziba*.gd`.
+## [b]GEOMETRIA MODELULUI DECIDE ASEZAREA, nu invers[/b], si trei masuratori au
+## fost necesare (`tools/probe_liziba*.gd`, sectiuni prin mesh, nu AABB-uri —
+## AABB-ul unui bloc pe piloni spune ca totul e plin):
 ##
-## Soseaua are 14 m acolo, deci blocul se SCALEAZA pe X ca gura si culoarul sa
-## fie mai late decat drumul: la 2.6 gura are 28.6 m si culoarul 15.4 m — cu
-## 1.4 m de joc de fiecare parte peste asfalt. Pe Y si Z ramane la 1.0: cei
-## 24.9 m de inaltime si 27.2 m de adancime sunt reali, iar drumul trece prin
-## adancime (holul are 27 m, nu 90 ca in brief — atat da modelul).
+##  1. [b]Parterul e deschis, dar nu pe unde crezi.[/b] 40.6 x 27.2 m in plan,
+##     inaltime 24.9. Capetele scurte (x = ±20.3) sunt colonade de 13 stalpi la
+##     2.2 m — nu se trece pe acolo. Se trece pe ADANCIME (Z), printr-o gura de
+##     11 m in fatada (x -5.5..+5.5).
+##  2. [b]Inauntru sunt patru perechi de nuclee de scara[/b] la x = ±2.97..4.00
+##     (z ≈ -10, -3.5, +3, +9.5), care string culoarul liber la 5.94 m. Soseaua
+##     are 14 m, deci blocul se scaleaza pe X pana cand nucleele ies din
+##     gabaritul masinii de pe banda extrema: la 2.7 sunt la ±8.0, cu un metru
+##     de joc peste buza asfaltului.
+##  3. [b]Gura are un PRAG.[/b] La y = 0 fatada are un sill continuu peste toata
+##     deschiderea (~0.25 m). Cu talpa blocului la cota soselei din CENTRU,
+##     pragul ajungea la +0.35 m fata de asfalt la intrare — un zid de 60 cm pe
+##     toata latimea drumului, prins de `probe_cq_hall.gd` pe toate benzile.
+##     De aceea talpa se pune sub cota soselei de la INTRARE, nu de la centru:
+##     holul urca 8.7% pe 35 m, iar podeaua modelului e orizontala.
 ##
 ## Scara pe X e si motivul pentru care blocul e `mesh`, nu `hull`: hull-ul unei
 ## piese prin care se TRECE e un bloc plin, adica un zid peste sosea.
-const LIZIBA_SCALE_X: float = 2.6
+const LIZIBA_SCALE_X: float = 2.7
+const LIZIBA_SCALE_Y: float = 1.15
+const LIZIBA_SCALE_Z: float = 1.3
 const LIZIBA_FRAC: float = 0.8855
+## Semiadancimea modelului (m). Cu scara pe Z da jumatatea holului.
+const LIZIBA_HALF_DEPTH: float = 13.62
+## Cat de jos sub asfaltul de la intrare sta talpa blocului (m) — vezi nota 3.
+const LIZIBA_SILL_CLEAR: float = 0.35
 
 func _zone_liziba() -> void:
 	_zone = "7) Liziba"
 	var st := _at(LIZIBA_FRAC)
 	var road: Vector3 = st[0]
-	var fwd: Vector3 = st[2]
-	# Blocul se aseaza cu +Z pe directia de mers (holul e pe adancimea Z a
-	# modelului) si cu talpa pe cota SOSELEI, nu pe teren: podeaua holului e
-	# chiar carosabilul.
+	# Cota de asezare: cea mai JOASA cota a soselei din hol, minus garda de
+	# prag. Se citeste din ruta, la capatul de intrare al blocului.
+	var half := LIZIBA_HALF_DEPTH * LIZIBA_SCALE_Z
+	var f_in := LIZIBA_FRAC - half / 2068.3
+	var f_out := LIZIBA_FRAC + half / 2068.3
+	var y_lo: float = minf((_at(f_in)[0] as Vector3).y, (_at(f_out)[0] as Vector3).y)
 	_node("chongqing/buildings/liziba_block", "bloc_liziba",
-		Vector3(road.x, road.y - 0.15, road.z), _yaw_fwd(LIZIBA_FRAC), 1.0,
-		"mesh", Vector3(LIZIBA_SCALE_X, 1.0, 1.0))
+		Vector3(road.x, y_lo - LIZIBA_SILL_CLEAR, road.z), _yaw_fwd(LIZIBA_FRAC),
+		1.0, "mesh",
+		Vector3(LIZIBA_SCALE_X, LIZIBA_SCALE_Y, LIZIBA_SCALE_Z))
 	# Cutii postale si biciclete in hol, LANGA stalpi (la 9 m de axa, adica in
 	# afara asfaltului de 7 m dar sub bloc) — decorul care spune „aici locuiesc
 	# oameni", fara sa intre pe linia de curs.
@@ -350,14 +375,23 @@ func _zone_liziba() -> void:
 		_node("chongqing/" + d, "hol",
 			Vector3(q.x, (_at(fr)[0] as Vector3).y, q.z),
 			_yaw_side(fr) + spec[4], 1.0, "none")
-	# Pasarela de iesire spre piata (brief §2 G: „iesirea pe o pasarela"):
-	# trece PESTE sosea, la 6.4 m — sub ea intra masina, si e primul lucru din
-	# tur care se citeste ca tavan scurt.
-	var fp := LIZIBA_FRAC + 0.030
-	var pq := _off(fp, 0.0)
+	# Pasarela de iesire spre piata (brief §2 G: „iesirea pe o pasarela").
+	#
+	# [b]Nu peste sosea.[/b] Prima versiune o punea perpendicular pe drum, ca sa
+	# dea „tavanul scurt" de 2 secunde; `probe_cq_hall.gd` a masurat ce iese:
+	# picioarele ei sunt la ±6.7 m de axa (cadre in V, `build_footbridge`), deci
+	# o pasarela care traverseaza o sosea de 14 m isi pune stalpii FIX pe benzile
+	# extreme — 56 de atingeri, pe ±1.00. Ar fi cerut scara 2.2, adica 53 m de
+	# pasarela pentru un drum de 14.
+	#
+	# Sta deci PARALEL cu drumul, pe umarul dinspre rapa, ca legatura dintre
+	# bloc si terasa de dincolo: se vede tot, nu incurca linia de curs, si
+	# ramane exact ce spune briefingul — iesirea pietonala din bloc.
+	var fp := LIZIBA_FRAC + 0.022
+	var pq := _off(fp, 19.0)
 	_node("chongqing/structures/footbridge", "pasarela",
-		Vector3(pq.x, (_at(fp)[0] as Vector3).y, pq.z), _yaw_side(fp), 1.0,
-		"mesh")
+		Vector3(pq.x, (_at(fp)[0] as Vector3).y + 1.2, pq.z), _yaw_fwd(fp), 1.0,
+		"none")
 	# Firma de neon si felinare la gura de intrare — semnalizarea ceruta de
 	# brief §8 („intrarea in bloc primeste chevroane/semafoare").
 	for spec: Array in [[LIZIBA_FRAC - 0.016, 10.6, "lamp_lantern_c", "42_lampc"],
@@ -418,11 +452,19 @@ func _node(model: String, base: String, pos: Vector3, yaw: float,
 	var s := sin(yaw)
 	_out.append('[node name="%s%d" parent="DecorManual/%s" instance=ExtResource("%s")]'
 		% [base, _n, _zone, RES[model]])
-	# Constructorul ia COLOANELE bazei: X=(xx,xy,xz), Y=(...), Z=(...). Scara
-	# se aplica pe coloana, nu pe componenta — altfel o scara neuniforma pe X
-	# ar taia si din Z (o data cu rotatia amestecate, blocul Liziba ar iesi
-	# rombic). Vezi memoria `rotatii-in-builder-semnul`.
+	# [b]Cele noua numere din .tscn sunt baza pe LINII, nu pe coloane.[/b]
+	# Masurat, nu presupus (o scena de o linie cu Transform3D(1..9)):
+	# `Transform3D(a,b,c, d,e,f, g,h,i)` da X=(a,d,g), Y=(b,e,h), Z=(c,f,i).
+	#
+	# Cu scara uniforma diferenta e doar semnul rotatiei si nu se vede pe un
+	# felinar. Cu scara NEUNIFORMA e o greseala care nu iarta: prima versiune
+	# a compus X din (c*sx, .., s*sz) — coloane amestecate — si blocul Liziba a
+	# iesit rotit cu ~26° fata de sosea, cu axa drumului trecand fix prin
+	# nucleul de scara de la x = -3.8 (masurat de `probe_cq_hall.gd`).
+	#
+	# Coloanele corecte: X = (cos, 0, -sin) * sx, Y = (0, 1, 0) * sy,
+	# Z = (sin, 0, cos) * sz. Scrise pe linii, in ordinea de mai jos.
 	_out.append("transform = Transform3D(%f, 0, %f, 0, %f, 0, %f, 0, %f, %f, %f, %f)"
-		% [c * s3.x, -s * s3.x, s3.y, s * s3.z, c * s3.z, pos.x, pos.y, pos.z])
+		% [c * s3.x, s * s3.z, s3.y, -s * s3.x, c * s3.z, pos.x, pos.y, pos.z])
 	_out.append('metadata/coliziune = "%s"' % coll)
 	_out.append("")

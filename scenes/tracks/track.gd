@@ -1066,10 +1066,16 @@ static func themes() -> Dictionary:
 			# pastoasa, fiindca trecea din maro-inchis in verde pe 8 m.
 			"water_deep_gain": 0.72,
 			"water_shore_gain": 0.62,
-			"water_desat": 0.65,
+			"water_desat": 0.76,
 			# Tenta de oras trasa spre rece: cu (0.85,0.89,0.87) verdele iesea
 			# la nuanta 123 (sub tinta 130-155). Cu asta: verde 142, brun 26.
-			"water_mul": Color(0.82, 0.90, 0.92),
+			"water_mul": Color(0.80, 0.90, 0.97),
+			# Tenta raului brun. Vezi water_tint: cu tenta verde de mai sus
+			# (albastru urcat, rosu coborat) Yangtze-ul iesea la saturatie 0.10 —
+			# ocru-gri, adica nisip ud vazut de pe pod, nu apa. Cu asta: 0.35 la
+			# nuanta 24, langa 0.37/29 masurate pe bratul auriu al dioramei.
+			"water_b_mul": Color(1.00, 0.95, 0.91),
+			"water_b_gain": 0.94,
 			# Cat de INCHISA e apa fata de mal. Nu "inchisa" in absolut: pragul
 			# e un RAPORT, apa <= 0.65 x uscatul din ACELASI cadru, fiindca de
 			# aia citea runda 4 miriste — 42 langa 41, adica aceeasi valoare, si
@@ -1077,7 +1083,7 @@ static func themes() -> Dictionary:
 			# faleza 51, terasa/cheiul 38. La 0.50 apa iesea 29.6, deci 0.58
 			# fata de faleza dar 0.77 fata de chei; la 0.40 iese 24-25, adica
 			# sub prag fata de amandoua.
-			"water_dim": 0.40,
+			"water_dim": 0.62,
 			"water_foam": 0.0,
 			# Unde se despart cele doua rauri: o dreapta prin (60, 215) — malul
 			# de sud al peninsulei, la mijloc — spre SSE. La vest de ea curge
@@ -1104,7 +1110,7 @@ static func themes() -> Dictionary:
 			# continuarea privirii, deci drumul de sclipiri vine spre camera.
 			# `water_glint_streak` il si lungeste pe axa privirii — pe ecran,
 			# vertical.
-			"water_glint": 0.45,
+			"water_glint": 0.24,
 			"water_glint_horizon": 0.30,
 			"water_glint_sharp": 16.0,
 			# CAT de mult din apa e reflexie. Masurat in diorama
@@ -1112,11 +1118,11 @@ static func themes() -> Dictionary:
 			# 11.8% pe cel brun. Sub 0.58 pragul lasa peste 15% si apa devine o
 			# foaie de aur; peste 0.70 scade sub 6% si redevine mata. 0.64 da
 			# 9-11% pe cornisa D.
-			"water_glint_cut": 0.66,
+			"water_glint_cut": 0.62,
 			# Cat de lungite. 3.2 (incercat intai) trage petele in fasii de zeci
 			# de metri; la 1.4 ies limbi de flacara pe cheiul E. 0.9 le lasa
 			# pete cu coada — alungite pe verticala, dar tot pete.
-			"water_glint_streak": 0.9,
+			"water_glint_streak": 0.65,
 			# Marimea unei reflexii. Vezi nota din shader: la 1.0 (scara
 			# ondulatiei) petele ies de cativa pixeli si in randuri regulate —
 			# masurat pe captura rundei 5, o grila de ferestre aprinse peste
@@ -1126,7 +1132,18 @@ static func themes() -> Dictionary:
 			"water_glint_grain": 0.30,
 			# Suprafata NETEDA sub reflexii (implicitul 0.35 e de laguna
 			# vazuta de aproape; de la 60 m in sus iese pasla).
-			"water_ripple": 0.12,
+			"water_ripple": 0.10,
+			"water_facet": 0.48,
+			"water_facet_count": 5.0,
+			"water_facet_scale": 0.075,
+			"water_facet_wobble": 0.40,
+			"water_view_lo": 0.68,
+			"water_view_hi": 1.32,
+			"water_view_ref": 0.20,
+			"water_crest_shade": 0.22,
+			"water_glint_soft": 0.34,
+			"water_glint_body": 0.75,
+			"water_cell": 4.0,
 			# Aurul lampilor de sodiu, INTREG. La 0.75 (tras spre alb, ca sa nu
 			# iasa neon) reflexiile ieseau crem — pe o apa verde-inchisa asta e
 			# culoare de miriste uscata, adica exact tema pe care o rezolv.
@@ -3306,7 +3323,15 @@ func _build_sea_near(root: Node3D, sea_y: float) -> void:
 	var c := _centroid()
 	# Aceeasi intindere ca terenul: dincolo preia cvadrilaterul de larg.
 	var size := _world_extent()
-	var cells := int(round(size / SEA_CELL))
+	# Cat de fin e conturul malului. SEA_CELL (9.5 m) e calibrat pe o laguna cu
+	# plaja: acolo apa se termina pe nisip in panta, deci muchia grilei nu se
+	# vede. Pe un chei apa se termina in ZID, iar celula de 9.5 m devine chiar
+	# forma malului: masurat pe captura rundei 5, linia apei era o SCARA de
+	# trepte in unghi drept de ~30x18 px, nu o muchie. In diorama malul e o
+	# dreapta neta de-a lungul cheiului. Se plateste in triunghiuri (patratic),
+	# de aceea e cheie de tema si nu o constanta coborata pentru toata lumea.
+	var cell := maxf(float(theme_flag("water_cell", SEA_CELL)), 1.0)
+	var cells := int(round(size / cell))
 	var step := size / float(cells)
 	var origin := c - Vector3(size * 0.5, 0, size * 0.5)
 
@@ -3416,7 +3441,15 @@ const WATER_GAIN: float = 0.87
 ## (-7, +21, +22) la (+21, +22, +24) — adica exact ce nu voiam.
 ## adjustment_saturation lucreaza in jurul luminantei, deci si compensarea
 ## trebuie sa faca la fel.
-func water_tint(slot: int, gain: float = 1.0) -> Color:
+##
+## `mul_key` alege TENTA. Exista fiindca Chongqing are doua rauri de nuante
+## opuse pe acelasi luciu: o singura tenta globala nu poate servi si verdele
+## (care are nevoie de albastru urcat) si brunul (pe care exact aia il face
+## gri). Masurat cu tenta verde pe amandoua: Jialing saturatie 0.25, Yangtze
+## 0.10 — adica nisip ud, nu apa noroioasa. Cheia lipsa se intoarce la
+## "water_mul", deci temele cu un singur rau nu se schimba.
+func water_tint(slot: int, gain: float = 1.0,
+		mul_key: String = "water_mul") -> Color:
 	var c := Palette.color(slot)
 	var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
 	# Doua chei de tema aplicate O DATA, aici, pe toate culorile apei (rampa,
@@ -3428,7 +3461,7 @@ func water_tint(slot: int, gain: float = 1.0) -> Color:
 	#  - "water_mul" — tenta multiplicativa (lumina de oras gri-verde), fara
 	#    slot nou de paleta.
 	var desat := clampf(float(theme_flag("water_desat", 0.0)), 0.0, 1.0)
-	var mul: Color = theme_flag("water_mul", Color.WHITE)
+	var mul: Color = theme_flag(mul_key, theme_flag("water_mul", Color.WHITE))
 	var k := (1.0 - desat) / WATER_SATURATION_FIX
 	# `gain` se aplica in sRGB, INAINTE de conversie: e „cata lumina cade pe
 	# apa" pe o tema de noapte (water_dim), si trebuie sa citeasca perceptual.
@@ -3617,18 +3650,50 @@ func _water_material() -> ShaderMaterial:
 		Vector2(to_sun.x, to_sun.z).normalized())
 	_water_mat.set_shader_parameter("band_strength",
 		float(theme_flag("water_band", 0.60)))
+	# --- v5 (runda 6). Trei chei de SUPRAFATA, nu de culoare. Motivul e masurat
+	# si sta scris pe larg in water.gdshader: apa noastra avea 90% din pixeli
+	# intre luminanta 22 si 26 si exact aceeasi valoare de la orizont pana in
+	# prim-plan, in timp ce diorama are ecart intercuartilic de ~12 puncte si
+	# isi dubleaza valoarea pe adancimea cadrului. Fara variatie de valoare pe
+	# suprafata, orice reglaj de nuanta iese linoleum luminat.
+	# Toate trei au implicitul = comportamentul de dinainte, deci Okinawa,
+	# Baikal, Alpii si Stromboli nu se misca.
+	_water_mat.set_shader_parameter("facet_strength",
+		float(theme_flag("water_facet", 0.0)))
+	_water_mat.set_shader_parameter("facet_count",
+		float(theme_flag("water_facet_count", 5.0)))
+	_water_mat.set_shader_parameter("facet_scale",
+		float(theme_flag("water_facet_scale", 0.10)))
+	_water_mat.set_shader_parameter("facet_wobble",
+		float(theme_flag("water_facet_wobble", 0.35)))
+	# Gradientul de perspectiva: cat de mult se deschide apa cand privirea cade
+	# mai de sus pe ea. Implicit 1.0/1.0 = plat, ca pana acum.
+	_water_mat.set_shader_parameter("view_lo",
+		float(theme_flag("water_view_lo", 1.0)))
+	_water_mat.set_shader_parameter("view_hi",
+		float(theme_flag("water_view_hi", 1.0)))
+	_water_mat.set_shader_parameter("view_ref",
+		float(theme_flag("water_view_ref", 0.22)))
+	_water_mat.set_shader_parameter("crest_shade",
+		float(theme_flag("water_crest_shade", 0.12)))
 	# --- AL DOILEA RAU (v4). Vezi nota lunga din water.gdshader: apa se imparte
 	# dupa LOC, nu dupa adancime, fiindca doua familii de culoare amestecate pe
 	# axa adancimii dau oliv — culoarea unei mirisiti, nu a unui rau.
 	# Implicit sloturile lui = ale primului rau, deci o tema care nu cere
 	# despartirea (`water_split` 0) se randeaza exact ca inainte.
+	# `water_b_gain` = cata lumina primeste raul B fata de A (Yangtze-ul e apa
+	# mai noroioasa decat Jialing-ul), `water_b_mul` = tenta lui. Implicit
+	# amandoua = ale raului A, deci o tema cu un singur rau nu se misca.
+	var b_k := float(theme_flag("water_b_gain", 1.0))
 	var b_shallow := water_tint(theme_flag("water_b_shallow_slot",
-		theme_flag("water_shallow_slot", Palette.REEF_SHALLOW)), dim)
+		theme_flag("water_shallow_slot", Palette.REEF_SHALLOW)),
+		dim * b_k, "water_b_mul")
 	var b_deep := water_tint(theme_flag("water_b_deep_slot",
-		theme_flag("water_deep_slot", Palette.SEA_DEEP)), dim * deep_k)
+		theme_flag("water_deep_slot", Palette.SEA_DEEP)),
+		dim * b_k * deep_k, "water_b_mul")
 	var b_shore := water_tint(theme_flag("water_b_shore_slot",
 		theme_flag("water_shore_slot", Palette.CORAL_SAND)),
-		dim * shore_k).darkened(0.12)
+		dim * b_k * shore_k, "water_b_mul").darkened(0.12)
 	_water_mat.set_shader_parameter("shore_col_b",
 		Vector3(b_shore.r, b_shore.g, b_shore.b))
 	_water_mat.set_shader_parameter("shallow_col_b",
@@ -3659,6 +3724,14 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_glint_cut", 0.0)))
 	_water_mat.set_shader_parameter("glint_grain",
 		float(theme_flag("water_glint_grain", 1.0)))
+	# Marginea si interiorul unei reflexii. Masurat: petele dioramei stau la
+	# 1.8-2.8x fata de apa de sub ele, ale noastre la 6-7.4x, cu contur taiat cu
+	# cutitul si interior de o singura culoare — de aia se citeau frunze lipite
+	# pe suprafata, nu lumina in unda. Implicit: taietura de pana acum.
+	_water_mat.set_shader_parameter("glint_soft",
+		float(theme_flag("water_glint_soft", 0.17)))
+	_water_mat.set_shader_parameter("glint_body",
+		float(theme_flag("water_glint_body", 0.0)))
 	# Cat de MOTLATA e suprafata sub reflexii. Implicitul shaderului (0.35) e
 	# calibrat pe o laguna vazuta de aproape; pe un rau vazut de la 60 m in sus
 	# aceeasi valoare iese pasla — captura rundei 5 avea apa cu granulatie de
@@ -3931,6 +4004,62 @@ func _build_branch_surfaces() -> void:
 				_build_branch_dirt(r, false)
 			_:
 				_build_branch_sand(r)
+		if r.elevated:
+			_build_branch_rails(r)
+
+
+## Cat de aproape de capetele unei benzi in aer NU se pune parapet.
+##
+## Capatul benzii `elevated` e lipit de MARGINEA soselei (vezi _branch_end),
+## deci pe primii metri masina inca trece dintr-o suprafata in cealalta: un
+## parapet acolo ar fi un zid pus fix in dreptul racordului. 5 m e o lungime de
+## masina si jumatate — cat sa treaca, prea putin cat sa apuce sa alunece.
+const BRANCH_RAIL_SKIP: float = 5.0
+
+
+## Parapetul unei benzi IN AER.
+##
+## De ce exista: banda telecabinei e o panglica de 8 m suspendata peste apa, si
+## pana aici n-avea nimic pe margini. Masurat cu ProbeRace pe seed 2 (2 rulari
+## din 3, si aceleasi coordonate raportate independent de doua sesiuni):
+## Autobuzul intra pe ea, aluneca lateral la 7-50 m de la capat si cade in
+## volumul de repunere al marii — apoi e repus, o ia iar pe scurtatura si cade
+## iar, la fiecare ciclu, 15 repuneri intr-o cursa. Nu era nedeterminism Jolt:
+## era o panglica ingusta fara buza, luata la 25 m/s de masina cea mai grea.
+##
+## Acelasi argument (si acelasi mesh) ca parapetul de tablier din _build_walls:
+## "fara ea, bumping-ul pe tablierul cu apa pe ambele parti arunca masinile in
+## golf". O banda in aer E un tablier.
+##
+## Nu se emite decat pentru benzile `elevated` — adica, azi, doar Chongqing.
+func _build_branch_rails(r: TrackRoute) -> void:
+	var n := r.count()
+	if n < 3:
+		return
+	var total: float = r.dists[n - 1]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var emitted := false
+	for side_sign: float in [-1.0, 1.0]:
+		for i in n - 1:
+			var j := i + 1
+			# Capetele raman deschise: acolo se face racordul cu asfaltul.
+			if r.dists[i] < BRANCH_RAIL_SKIP:
+				continue
+			if total - r.dists[j] < BRANCH_RAIL_SKIP:
+				continue
+			var b0 := r.baked[i] + r.side_at(i) * r.half_width * side_sign
+			var b1 := r.baked[j] + r.side_at(j) * r.half_width * side_sign
+			var t0 := b0 + Vector3.UP * WALL_HEIGHT
+			var t1 := b1 + Vector3.UP * WALL_HEIGHT
+			st.add_vertex(b0); st.add_vertex(t0); st.add_vertex(b1)
+			st.add_vertex(t0); st.add_vertex(t1); st.add_vertex(b1)
+			emitted = true
+	if not emitted:
+		return
+	st.generate_normals()
+	_add_mesh_with_collision(st.commit(), Palette.color(Palette.CONCRETE),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED)
 
 
 ## Reteta "sand": banda plata, doi vertecsi transversal, culoarea + granulatia
@@ -5169,6 +5298,21 @@ func _build_walls() -> void:
 			# Viaductul e tot un tablier (gol si sub asfalt), doar ca golul
 			# lui e sapat in teren, nu un canal — parapetul i se cuvine la fel.
 			var on_deck := _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5 				or _viaduct_mix(i) > 0.5
+			# Parapetul DECLARAT se citeste inaintea oricarei alte reguli.
+			# Pana aici era citit dupa `if not walls_on: continue`, deci pe o
+			# pista fara gard (Chongqing) stalpii declarati nu se emiteau
+			# niciodata — iar exact acolo sunt singurul lucru care spune
+			# soferului ca la marginea asfaltului incepe caderea: din scaunul
+			# masinii buza cornisei e sub linia orizontului, deci nu se vede
+			# nimic din rapa, doar apa lipita de asfalt (masurat, r4 si r6).
+			# Un stalp de 0.95 m e peste linia aia. Nu aduce coliziune (vezi
+			# _build_rail_posts) — nu inchide drumul, doar il marcheaza.
+			var mode := -1
+			if not on_deck:
+				var frac := _dists[i] / total_len if total_len > 0.0 else 0.0
+				mode = _rail_mode_at(frac, side_sign)
+				if mode == RAIL_POSTS:
+					post_spots.append(b0)
 			if not walls_on and not on_deck:
 				continue
 			var exterior := not Geometry2D.is_point_in_polygon(
@@ -5178,13 +5322,8 @@ func _build_walls() -> void:
 				continue
 			# Parapetul declarat al pistei bate regula implicita. Pe pod NU:
 			# balustrada podului e parte din citirea podului (vezi mai sus).
-			if not on_deck:
-				var frac := _dists[i] / total_len if total_len > 0.0 else 0.0
-				var mode := _rail_mode_at(frac, side_sign)
-				if mode == RAIL_POSTS:
-					post_spots.append(b0)
-				if mode != -1:
-					continue
+			if not on_deck and mode != -1:
+				continue
 			var t0 := b0 + Vector3.UP * WALL_HEIGHT
 			var t1 := b1 + Vector3.UP * WALL_HEIGHT
 			var into := deck if on_deck else st

@@ -215,6 +215,63 @@ uniform float glint_grain : hint_range(0.05, 1.0) = 1.0;
 // raman rotunde, peste ea se lungesc spre privitor — vezi nota din fragment.
 uniform float glint_ref = 120.0;
 
+// --- v5 (Chongqing, runda 6). Pana aici toate reglajele au fost de CULOARE:
+// nuanta, saturatie, cat de inchisa e apa. Masurand diorama pixel cu pixel a
+// iesit ca problema nu era niciodata culoarea, ci SUPRAFATA — apa noastra n-are
+// nicio variatie de valoare pe ea, iar cea din referinta are peste tot:
+//
+//   percentile 5/25/50/75/90 ale luminantei, pe aceeasi suprafata de apa
+//     diorama (bratul verde): 32 / 44 / 49 / 56 / 72   — ecart intercuartilic 12
+//     noi (runda 5, cornisa D): 22 / 22 / 22 / 24 / 26 — o placa moarta
+//
+//   luminanta de baza pe 6 benzi, de la departare spre prim-plan
+//     diorama: 22.9 -> 18.1 -> 22.1 -> 41.3 -> 47.2 -> 48.0  (se dubleaza)
+//     noi:     22.3 -> 22.3 -> 22.3 -> 22.3 -> 22.3 -> 23.4  (aceeasi valoare)
+//
+// A doua cifra e cea care rupe iluzia: o suprafata care RECEDE in perspectiva
+// si nu isi schimba valoarea nu se citeste ca plan orizontal, se citeste ca
+// perete vopsit. De aici cele doua adaugiri, in ordinea in care conteaza.
+
+// FATETE. In diorama apa e un poliedru plat: pete mari, de zeci de metri,
+// fiecare de o valoare usor diferita, cu muchii drepte intre ele. Aia e toata
+// "textura" ei — nu granulatie, ci trepte de valoare pe suprafete mari.
+// `band_strength` face deja asa ceva, dar cuantizeaza ADANCIMEA, iar pe un rau
+// adanc peste tot adancimea e constanta, deci nu produce nimic. Aici campul
+// cuantizat e SPATIAL: trei sinusoide cu directii si lungimi de unda
+// necomensurabile (30-65 m), foarte lente in timp, cu marginea treptei rupta de
+// ondulatia deja esantionata ca sa nu iasa curbe de nivel. Cost: 3 sin.
+uniform float facet_strength : hint_range(0.0, 1.0) = 0.0;
+uniform float facet_count : hint_range(2.0, 12.0) = 5.0;
+uniform float facet_scale = 0.10; // rad/m; 0.10 => fatete de ~30-65 m
+uniform float facet_wobble : hint_range(0.0, 1.0) = 0.35;
+uniform float facet_speed = 0.05;
+
+// GRADIENT DE PERSPECTIVA. Motivul pentru care apa dioramei se citeste ca plan
+// orizontal si a noastra nu. Nu e ceata (aia coloreaza spre cer, aici valoarea
+// CREsTE spre prim-plan) si nu e adancime: e unghiul sub care privesti apa.
+// Razant, vezi reflexia malului opus — intuneric. De sus, vezi in apa tulbure,
+// iar aluviunile in suspensie sunt ce se lumineaza. `view.y` e chiar sinusul
+// unghiului ala si nu costa nimic: vectorul spre camera se calculeaza oricum
+// pentru glint. view_lo = view_hi = 1.0 => niciun efect (temele vechi).
+uniform float view_lo : hint_range(0.2, 2.0) = 1.0;
+uniform float view_hi : hint_range(0.2, 3.0) = 1.0;
+uniform float view_ref : hint_range(0.02, 1.0) = 0.22; // unghiul de "plin"
+
+// Cat de adanca e umbra hulei. Pana la v4 era scrisa in cod, 0.12 — calibrata
+// pe o mare vazuta de departe, unde crestele sunt ce da relieful. Pe un rau
+// vazut de sus e singura modulatie CONTINUA de pe suprafata, deci trebuie sa
+// poata fi urcata fara sa se atinga si spargerile albe.
+uniform float crest_shade : hint_range(0.0, 0.8) = 0.12;
+
+// MARGINEA si INTERIORUL unei reflexii. Masurat in diorama, petele aurii stau
+// la 1.8-2.8x fata de apa pe care se afla, cu halou si cu valoare care variaza
+// pe ele; la noi ieseau la 6-7.4x, cu contur de hartie rupta si interior plat —
+// adica obiecte lipite pe suprafata, nu lumina in unda. `glint_soft` lateste
+// tranzitia, `glint_body` face intensitatea sa creasca cu adancimea fisurii in
+// loc sa sara la maxim imediat dupa prag. 0 = taietura de pana acum.
+uniform float glint_soft : hint_range(0.02, 0.6) = 0.17;
+uniform float glint_body : hint_range(0.0, 1.0) = 0.0;
+
 varying vec3 world_pos;
 
 // Anvelopa valurilor din adancimea normalizata: urca de la 0 la tarm pana la 1
@@ -324,7 +381,8 @@ void fragment() {
 		* crest_strength;
 	// Umbra de hula: ±6% pe culoarea deja calculata. Cat sa se vada forma, nu
 	// cat sa se vada efectul.
-	base *= 1.0 + (sin(phase) * 0.5 + 0.5) * 0.12 * crest_aa - 0.06 * crest_aa;
+	base *= 1.0 + (sin(phase) * 0.5 + 0.5) * crest_shade * crest_aa
+		- crest_shade * 0.5 * crest_aa;
 	// Spargeri: doar varful crestei, si doar unde o modulatie lenta de-a lungul
 	// ei o lasa — altfel toata creasta ar sparge pe toata lungimea, la fel de
 	// artificial ca liniile de caiet.
@@ -338,6 +396,39 @@ void fragment() {
 	base = mix(base, foam_col, breaker * (1.0 - foam));
 
 	base *= ripple;
+
+	// FATETE. Un camp spatial lent, cuantizat in trepte: pete mari de valoare
+	// usor diferita, cu muchii — ce vezi in diorama cand te uiti la apa de la
+	// 60 m. Marginea treptei se rupe cu ondulatia deja esantionata (acelasi
+	// a*b ca peste tot aici); fara asta ies contururi de sinusoida, adica
+	// exact curbele de nivel pe care band_wobble le evita si el.
+	if (facet_strength > 0.0) {
+		float f = sin(dot(p, vec2(0.83, 0.55) * facet_scale) + TIME * facet_speed)
+			+ sin(dot(p, vec2(-0.47, 1.31) * facet_scale)
+				- TIME * facet_speed * 0.74)
+			+ sin(dot(p, vec2(1.67, 1.04) * facet_scale)
+				+ TIME * facet_speed * 0.41);
+		f = f * 0.1667 + 0.5 + (a * b - 0.79) * facet_wobble;
+		float fq = floor(clamp(f, 0.0, 0.999) * facet_count)
+			/ max(facet_count - 1.0, 1.0);
+		base *= 1.0 + (clamp(fq, 0.0, 1.0) - 0.5) * facet_strength;
+	}
+
+	vec3 view = normalize(CAMERA_POSITION_WORLD - world_pos);
+	// Directia privirii, proiectata in plan: axa pe care reflexiile trebuie sa
+	// se lungeasca (pe ecran e verticala).
+	vec2 to_cam = world_pos.xz - CAMERA_POSITION_WORLD.xz;
+	float cam_r = length(to_cam);
+	vec2 vdir = to_cam / max(cam_r, 1e-4);
+
+	// GRADIENT DE PERSPECTIVA. view.y e sinusul unghiului sub care cade
+	// privirea pe apa: aproape 0 la orizont, mare in prim-plan. Suprafata se
+	// deschide odata cu el — asta e semnalul "planul asta e orizontal si se
+	// departeaza", si e ce lipsea cel mai tare (masurat: valoare identica pe
+	// toata adancimea cadrului).
+	if (view_lo != 1.0 || view_hi != 1.0) {
+		base *= mix(view_lo, view_hi, smoothstep(0.0, view_ref, view.y));
+	}
 
 	// Sun glint: NU e specular din pasul de lumina (ramane unshaded — vezi
 	// contractul #2), e o scanteiere geometrica din aceleasi doua esantioane.
@@ -361,12 +452,6 @@ void fragment() {
 	if (glint_streak > 0.0) {
 		tilt = cd * slope;
 	}
-	vec3 view = normalize(CAMERA_POSITION_WORLD - world_pos);
-	// Directia privirii, proiectata in plan: axa pe care reflexiile trebuie sa
-	// se lungeasca (pe ecran e verticala).
-	vec2 to_cam = world_pos.xz - CAMERA_POSITION_WORLD.xz;
-	float cam_r = length(to_cam);
-	vec2 vdir = to_cam / max(cam_r, 1e-4);
 	float tilt_along = dot(tilt, vdir);
 	// Componenta pe adancime se comprima, cea transversala se amplifica:
 	// suprafata isi pastreaza aceeasi "energie" de valuri, dar pata speculara
@@ -400,7 +485,16 @@ void fragment() {
 		//    aia scara transversala ramane 1, iar cea radiala scade, deci
 		//    petele se lungesc SPRE privitor. Pe ecran, spre verticala.
 		float k = 1.0 + glint_streak * 4.0;
-		float rg = glint_ref + (cam_r - glint_ref) / k;
+		// Compresia distantei e LOGARITMICA in jurul lui `glint_ref`, nu afina.
+		// Cu forma afina (rg = ref + (r - ref) / k) tot ce e mult mai APROAPE
+		// decat referinta cadea practic in acelasi punct de esantionare: pe pod,
+		// apa de la 20-40 m primea o singura pata intinsa pe zeci de metri —
+		// limbi de flacara verticale, nu reflexii (masurat, runda 6). Aici
+		// factorul de alungire LOCAL e rg / (k * cam_r): mic in prim-plan (pete
+		// aproape rotunde, cum se vad de pe chei) si mare in departare (dungi
+		// spre privitor, cum se vede luna pe mare). Acelasi `glint_streak`, doar
+		// ca acum inseamna acelasi lucru la orice distanta.
+		float rg = glint_ref * pow(max(cam_r, 1.0) / glint_ref, 1.0 / k);
 		vec2 gp = CAMERA_POSITION_WORLD.xz + vdir * rg;
 		float s = scale_near * glint_grain;
 		// A doua dala pe axe rotite si la o scara incomensurabila (0.37, nu
@@ -417,7 +511,12 @@ void fragment() {
 		// Marginea NU e taiata cu cutitul. La 0.09 latime petele ieseau ca
 		// hartie rupta — contur zimtat, interior de o singura culoare plata;
 		// in diorama fiecare pata are un halou si valoare care variaza pe ea.
-		gmask = smoothstep(glint_cut, glint_cut + 0.17, 1.0 - c1 * c2);
+		float m = 1.0 - c1 * c2;
+		gmask = smoothstep(glint_cut, glint_cut + glint_soft, m);
+		// Interiorul nu e plat: cu cat fisura e mai adanca, cu atat pata e mai
+		// aprinsa. Fara asta o pata e o singura culoare pana la contur, adica
+		// hartie decupata; in diorama fiecare reflexie are miez si halou.
+		gmask *= mix(1.0, smoothstep(glint_cut, 1.0, m), glint_body);
 	}
 	float g = glint * gmask;
 	base += g * glint_strength * glint_col;

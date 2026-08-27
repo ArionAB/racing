@@ -29,6 +29,7 @@ custom_viaduct_ravines = Array[int]([1])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.676, 0.901)])
 custom_width_segments = Array[Vector3]([Vector3(0.963, 0.053, 9.0), Vector3(0.082, 0.151, 8.0), Vector3(0.18, 0.209, 6.0), Vector3(0.358, 0.477, 9.0)])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 6.0), Vector2(2, 6.0)])
+custom_rail_segments = Array[Vector4]([Vector4(0.215, 0.42, 1, 1), Vector4(0.545, 0.62, 1, -1)])
 custom_lagoon = Array[Vector2]([Vector2(-300, -45), Vector2(-283, 25), Vector2(-317, 85), Vector2(-287, 150), Vector2(-225, 235), Vector2(-110, 223), Vector2(45, 221), Vector2(72, 206), Vector2(150, 198), Vector2(190, 209), Vector2(205, 219), Vector2(222, 190), Vector2(228, 177), Vector2(252, 162), Vector2(254, 135), Vector2(242, 108), Vector2(215, 97), Vector2(180, 112), Vector2(158, 122), Vector2(136, 138), Vector2(127, 160), Vector2(122, 172), Vector2(122, 182), Vector2(150, 182), Vector2(190, 192), Vector2(204, 196), Vector2(212, 212), Vector2(230, 300), Vector2(330, 320), Vector2(900, 400), Vector2(900, 900), Vector2(-900, 900), Vector2(-900, -45)])
 sea_level_offset = -33.75
 lagoon_depth = 42.8

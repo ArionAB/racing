@@ -680,12 +680,16 @@ func _run() -> void:
 	# --------------------------------------------- (iv) contractul de pedeapsa
 	print("--- (iv) contractul de pedeapsa (brief §3: +3 s, fereastra %.1f..%.1f)"
 		% [PENALTY_MIN, PENALTY_MAX])
+	# Verdict pe FIECARE viteza, nu doar pe cea de referinta. Brieful nu spune
+	# „+3 s daca intri cu 24", spune „+3 s" — iar o fereastra care atinge curba
+	# intr-un singur punct lasa sa treaca o geometrie care costa +5.5 s la
+	# intrare inceata si +3.3 la cea de referinta. Aceeasi lectie ca la
+	# fereastra pusa in jurul masuratorii, cu o treapta mai sus.
 	for v: float in ENTRY_SPEEDS:
-		print("    la %2.0f m/s: ocol %.2f - direct %.2f = %+.2f s"
-			% [v, t_service[v], t_direct[v], t_service[v] - t_direct[v]])
-	var penalty: float = t_service[ENTRY_SPEED] - t_direct[ENTRY_SPEED]
-	_verdict(penalty >= PENALTY_MIN and penalty <= PENALTY_MAX,
-		"ocolul costa %+.2f s la %.0f m/s (contract +3 s)" % [penalty, ENTRY_SPEED])
+		var pen: float = t_service[v] - t_direct[v]
+		_verdict(pen >= PENALTY_MIN and pen <= PENALTY_MAX,
+			"ocolul costa %+.2f s la %.0f m/s (contract +3 s, fereastra %.1f..%.1f)"
+			% [pen, v, PENALTY_MIN, PENALTY_MAX])
 
 	await _run_barrier(t_direct[GATE_SPEED])
 

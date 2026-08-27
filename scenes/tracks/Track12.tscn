@@ -365,9 +365,9 @@ period = 19.0
 phase = 0.25
 telegraph_lead = 3.0
 road_half_width = 7.0
-tower_offset = 16.0
-tower_side = 1
-hook_radius = 19.0
+tower_offset = 26.0
+tower_side = -1
+hook_radius = 29.0
 load_clearance = 0.5
 
 [node name="Monorail" type="Node3D" parent="."]

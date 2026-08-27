@@ -149,6 +149,72 @@ uniform float band_strength : hint_range(0.0, 1.0) = 0.0;
 uniform float band_count : hint_range(2.0, 12.0) = 5.0;
 uniform float band_wobble : hint_range(0.0, 0.4) = 0.09;
 
+// --- v4 (Chongqing). Trei adaugiri, toate pentru aceeasi intrebare: de ce o
+// suprafata desaturata si inchisa citea tot CAMP, nu apa.
+//
+// DOUA RAURI. Rampa de culoare e dupa ADANCIME, deci pe un singur material
+// intreaga apa avea o singura familie de culoare. Cu un rau verde la mal si
+// unul brun la larg (ce incercase runda 4), fiecare pixel de adancime medie
+// cadea intre verde si brun — adica exact pe OLIV. Media dintre verde si maro
+// e culoarea unei mirisiti; nu exista reglaj de saturatie care sa o salveze.
+// Aici raul nu se mai alege dupa adancime, ci dupa LOC: o dreapta in planul
+// XZ imparte apa in doua, fiecare mal cu rampa lui, iar granita e chiar linia
+// de confluenta. `split_strength = 0` => o singura apa, ca inainte.
+uniform float split_strength : hint_range(0.0, 1.0) = 0.0;
+uniform vec2 split_dir = vec2(1.0, 0.0); // normala dreptei, in plan XZ
+uniform float split_offset = 0.0;        // dot(p, split_dir) al dreptei
+uniform float split_soft = 24.0;         // latimea amestecului, in metri
+uniform float split_meander = 40.0;      // cat serpuieste granita (metri)
+uniform vec3 shore_col_b;
+uniform vec3 shallow_col_b;
+uniform vec3 deep_col_b;
+// Linia de confluenta: dara de spuma/gunoi care se vede intre doua curenti.
+// Se INTUNECA, nu se albeste — o dunga alba pe apa neagra ar fi citit iar
+// spuma, iar brief-ul cere explicit fara spuma lata.
+uniform float seam_strength : hint_range(0.0, 1.0) = 0.0;
+
+// LUMINA CARE SCLIPESTE. Pana aici scanteierea venea de la soare, iar pe o
+// tema de noapte soarele sta la -78 grade (aproape in zenit): reflexia lui
+// pleaca in sus, camera de cursa se uita aproape razant, deci pe apa nu ajungea
+// aproape nimic — cateva pete izolate in prim-plan. Ce lumineaza un rau de
+// oras noaptea sunt felinarele de pe MALUL OPUS, adica o lumina JOASA, dincolo
+// de apa. `glint_horizon > 0` inlocuieste soarele cu exact asa ceva: o sursa
+// virtuala la inaltimea aia deasupra orizontului, mereu in continuarea privirii
+// — de aceea drumul de sclipiri vine spre camera, ca luna pe mare.
+uniform float glint_horizon : hint_range(0.0, 1.0) = 0.0;
+// Culoarea sclipirii, in LINIAR (se ADUNA peste albedo). Alb = ca pana acum.
+uniform vec3 glint_col = vec3(1.0);
+// Cat de ALUNGITE sunt reflexiile pe directia privirii. Pe ecran directia aia
+// e verticala, deci asta e diferenta dintre "pete pe camp" si "reflexii pe
+// apa". Mecanismul: panta suprafetei se comprima pe axa privirii si se
+// amplifica pe cea transversala, deci pata speculara se plimba mult in lateral
+// si aproape deloc in adancime => dungi verticale. 0 = izotrop, ca in v3.
+uniform float glint_streak : hint_range(0.0, 4.0) = 0.0;
+// Cat de STRANSA e pata speculara. 48 (soarele) e un punct; cu o lumina joasa
+// pe directia privirii, conditia de oglinda e aproape indeplinita pe toata apa
+// din departare, iar un exponent mare aprinde o BANDA continua la orizont —
+// masurat: toata apa la luminanta 130+, adica dune de nisip. Un exponent mic
+// intinde lobul, deci sclipirea nu mai are prag, iar ce o sparge in reflexii
+// separate ramane doar ondulatia.
+uniform float glint_sharp : hint_range(2.0, 256.0) = 48.0;
+// PRAGUL care rupe luciul in reflexii SEPARATE. Fara el, o lumina joasa pe
+// directia privirii indeplineste conditia de oglinda pe aproape toata apa —
+// masurat: cu intensitate 0.05, mediana apei sarea de la 18 la 44, adica
+// efectul nu era o sclipire, era un strat. Cu prag, tot ce e sub el ramane
+// apa neagra si doar varfurile rup pragul, deci intensitatea poate fi mare
+// fara sa spele suprafata. 0 = fara prag (comportamentul v3, temele vechi).
+uniform float glint_cut : hint_range(0.0, 0.95) = 0.0;
+// CAT DE MARE e o reflexie. Multiplica scara mastii: sub 1 = tipar mai mare.
+// A fost lipsa care a facut runda 5 sa citeasca oras, nu apa: la scara
+// ondulatiei (33 m pe dala, deci detalii de ~1.5 m), petele ieseau de cativa
+// pixeli si cadeau in randuri regulate — masurat pe captura, exact o grila de
+// ferestre aprinse intinsa peste rau. In diorama reflexiile sunt PETE de cativa
+// metri, rare si neregulate. 1.0 = masca de dinainte (temele vechi).
+uniform float glint_grain : hint_range(0.05, 1.0) = 1.0;
+// Raza (in metri) la care reflexiile NU sunt inca alungite. Sub ea petele
+// raman rotunde, peste ea se lungesc spre privitor — vezi nota din fragment.
+uniform float glint_ref = 120.0;
+
 varying vec3 world_pos;
 
 // Anvelopa valurilor din adancimea normalizata: urca de la 0 la tarm pana la 1
@@ -200,8 +266,24 @@ void fragment() {
 	float tw = t + (a * b - 0.79) * band_wobble;
 	float tq = floor(tw * band_count) / max(band_count - 1.0, 1.0);
 	t = mix(t, clamp(tq, 0.0, 1.0), band_strength);
-	vec3 ramp = mix(shore_col, shallow_col, smoothstep(0.0, 0.40, t));
-	ramp = mix(ramp, deep_col, smoothstep(0.40, 1.0, t));
+	float t_shore = smoothstep(0.0, 0.40, t);
+	float t_deep = smoothstep(0.40, 1.0, t);
+	vec3 ramp = mix(shore_col, shallow_col, t_shore);
+	ramp = mix(ramp, deep_col, t_deep);
+	// Al doilea rau: aceeasi rampa de adancime, alta familie de culoare.
+	// Granita SERPUIESTE cu ondulatia deja esantionata (acelasi a*b ca peste
+	// tot in shaderul asta) — o dreapta perfecta ar fi citit ca margine de
+	// poligon, nu ca intalnirea a doua ape.
+	float sd = dot(p, normalize(split_dir)) - split_offset
+		+ (a * b - 0.79) * split_meander;
+	float side = smoothstep(-split_soft, split_soft, sd) * split_strength;
+	vec3 ramp_b = mix(shore_col_b, shallow_col_b, t_shore);
+	ramp_b = mix(ramp_b, deep_col_b, t_deep);
+	ramp = mix(ramp, ramp_b, side);
+	// Dara de confluenta: ingusta (putere 6 peste triunghiul de tranzitie),
+	// si doar acolo unde amestecul chiar are loc.
+	float seam = pow(1.0 - abs(side * 2.0 - 1.0), 6.0) * split_strength;
+	ramp *= 1.0 - seam * seam_strength;
 	vec3 base = mix(COLOR.rgb, ramp, ramp_strength);
 
 	// Spuma: o banda care "linge" plaja. Pulsul curge SPRE mal (faza scade cu
@@ -269,11 +351,76 @@ void fragment() {
 	// motivul pentru care apa sclipeste in realitate. Amplitudinea vine din
 	// crest_strength: un singur intrerupator pentru tot ce tine de hula.
 	float slope = cos(phase) * crest_strength * 0.30;
-	vec3 n = normalize(vec3(
-		(a - 0.89) * 0.9 + cd.x * slope, 1.0, (b - 0.89) * 0.9 + cd.y * slope));
+	vec2 tilt = vec2(
+		(a - 0.89) * 0.9 + cd.x * slope, (b - 0.89) * 0.9 + cd.y * slope);
+	// Cu `glint_streak`, panta care hotaraste unde e oglinda ramane DOAR cea a
+	// hulei — neteda, de zeci de metri. Ondulatia din textura are detalii de
+	// ~1.5 m: bagata in normala speculara, sparge lobul in sclipici de cativa
+	// pixeli, iar o apa acoperita de sclipici marunt citeste oras, nu rau
+	// (masurat, runda 5). Forma reflexiei o da MASCA, care are grauntele ei.
+	if (glint_streak > 0.0) {
+		tilt = cd * slope;
+	}
 	vec3 view = normalize(CAMERA_POSITION_WORLD - world_pos);
-	float glint = pow(max(dot(reflect(-sun_dir, n), view), 0.0), 48.0);
-	base += glint * smoothstep(0.55, 0.9, a * b) * glint_strength;
+	// Directia privirii, proiectata in plan: axa pe care reflexiile trebuie sa
+	// se lungeasca (pe ecran e verticala).
+	vec2 to_cam = world_pos.xz - CAMERA_POSITION_WORLD.xz;
+	float cam_r = length(to_cam);
+	vec2 vdir = to_cam / max(cam_r, 1e-4);
+	float tilt_along = dot(tilt, vdir);
+	// Componenta pe adancime se comprima, cea transversala se amplifica:
+	// suprafata isi pastreaza aceeasi "energie" de valuri, dar pata speculara
+	// nu mai fuge in departare la fiecare rid — ramane pe loc si se intinde.
+	tilt = (tilt - vdir * tilt_along) * (1.0 + glint_streak * 0.6)
+		+ vdir * tilt_along / (1.0 + glint_streak * 3.0);
+	vec3 n = normalize(vec3(tilt.x, 1.0, tilt.y));
+	// Sursa: soarele, sau o lumina joasa dincolo de apa (vezi glint_horizon).
+	vec3 gl = sun_dir;
+	if (glint_horizon > 0.0) {
+		gl = normalize(vec3(vdir.x, glint_horizon, vdir.y));
+	}
+	float glint = pow(max(dot(reflect(-gl, n), view), 0.0), glint_sharp);
+	float gmask = smoothstep(0.55, 0.90, a * b);
+	if (glint_streak > 0.0) {
+		// FORMA reflexiei. Doua lucruri, amandoua invatate masurand:
+		//
+		// 1. Se citesc CRAPATURILE texturii, nu campul ei. detail_rock.png e
+		//    o roca: mediana canalului rosu e 0.96, un sfert din texeli sunt
+		//    fix 1.0 — adica e alba cu fisuri rare. Masca de pana acum lua
+		//    partea ALBA, deci "reflexie" insemna aproape toata apa, iar ce
+		//    ramanea intunecat erau fisurile: rau de aur cu crapaturi verzi.
+		//    Inversata, fisurile devin exact ce trebuie — pete rare, cu
+		//    marimi diferite si margini neregulate.
+		// 2. Deformarea e RADIALA fata de CAMERA, si asta cere o raza de
+		//    referinta. Varianta dinainte descompunea pozitia ABSOLUTA pe
+		//    directia privirii; termenul dot(camera, vdir) se roteste odata cu
+		//    vdir, deci petele ieseau arcuite intr-un evantai in jurul
+		//    camerei — pensulatii, nu reflexii. Aici se comprima doar
+		//    DISTANTA fata de camera, in jurul lui `glint_ref` metri: la raza
+		//    aia scara transversala ramane 1, iar cea radiala scade, deci
+		//    petele se lungesc SPRE privitor. Pe ecran, spre verticala.
+		float k = 1.0 + glint_streak * 4.0;
+		float rg = glint_ref + (cam_r - glint_ref) / k;
+		vec2 gp = CAMERA_POSITION_WORLD.xz + vdir * rg;
+		float s = scale_near * glint_grain;
+		// A doua dala pe axe rotite si la o scara incomensurabila (0.37, nu
+		// 1/2 sau 1/3): perioada comuna a celor doua iese in afara cadrului,
+		// deci petele nu mai cad intr-o grila.
+		vec2 gq = vec2(gp.x * 0.454 - gp.y * 0.891,
+			gp.x * 0.891 + gp.y * 0.454);
+		float c1 = texture(ripple_tex, gp * s + TIME * drift_near * s).r;
+		float c2 = texture(ripple_tex,
+			gq * s * 0.37 + TIME * drift_far * s * 0.37).r;
+		// `glint_cut` = cat de adanca trebuie sa fie fisura ca sa se aprinda.
+		// E singura marime pe care o compar cu diorama: acolo reflexiile aurii
+		// tin 2-12% din pixelii apei.
+		// Marginea NU e taiata cu cutitul. La 0.09 latime petele ieseau ca
+		// hartie rupta — contur zimtat, interior de o singura culoare plata;
+		// in diorama fiecare pata are un halou si valoare care variaza pe ea.
+		gmask = smoothstep(glint_cut, glint_cut + 0.17, 1.0 - c1 * c2);
+	}
+	float g = glint * gmask;
+	base += g * glint_strength * glint_col;
 
 	ALBEDO = base;
 }

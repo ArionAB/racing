@@ -1033,22 +1033,116 @@ static func themes() -> Dictionary:
 			# le fereste si de pajistea rundei 2 (sunt INTUNECATE si tinute
 			# in familie de glint) si de turcoazul rundei 3. Gate-ul rundei:
 			# saturatie HSV mediana < 0.35, luminanta < 60, sclipiri pastrate.
+			# RUNDA 5. Masurat pe capturile rundei 4: apa iesea la luminanta
+			# 39-41 langa un uscat de 44-51 (raport 0.85-0.93 — practic aceeasi
+			# valoare) si la nuanta 60-78 HSV, adica GALBEN-VERDE. Pe diorama,
+			# aceleasi doua marimi masurate in bar/E_chei.png si overview.png
+			# dau rau verde la nuanta 148-160, rau brun la 16-27, si apa mereu
+			# SEPARATA in valoare de mal. Runda 4 nu masurase separarea, doar
+			# "desaturat si inchis", si a trecut cu apa care citea miriste.
+			#
+			# De unde venea olivul, cauza reala: rampa apei e dupa ADANCIME, iar
+			# runda 4 pusese verde la mal si BRUN in larg. Fiecare pixel de
+			# adancime medie cadea intre verde si maro — media lor E oliv. Deci
+			# aici raul nu se mai alege dupa adancime (`water_split`, o dreapta
+			# in plan XZ), iar adancimea doar INTUNECA aceeasi culoare
+			# (`water_deep_gain` / `water_shore_gain`). Fiecare rau ramane in
+			# familia lui pe toata suprafata.
 			"water": true,
+			# Jialing — verde tulbure. Un singur slot pe toata rampa.
 			"water_shallow_slot": Palette.TROPICAL_GREEN,
-			"water_deep_slot": Palette.SAND_SHADOW,
-			"water_shore_slot": Palette.LOG_DARK,
+			"water_deep_slot": Palette.TROPICAL_GREEN,
+			"water_shore_slot": Palette.TROPICAL_GREEN,
+			# Yangtze — brun noroios. RUST_METAL e cel mai jos ca nuanta din
+			# paleta (21 grade); SAND_SHADOW, incercat intai, iesea la 44 dupa
+			# tenta de oras, adica inca in galben. Un slot e o CULOARE, nu o
+			# eticheta (nota din palette.gd) — nu se aloca unul nou, si oricum
+			# slotul 31 era ultimul liber pe pista asta.
+			"water_b_shallow_slot": Palette.RUST_METAL,
+			"water_b_deep_slot": Palette.RUST_METAL,
+			"water_b_shore_slot": Palette.RUST_METAL,
+			# Adancimea = valoare, nu nuanta. Malul e cel mai inchis (umbra
+			# cheiului) — de aici iese linia de mal neta pe care runda 4 o avea
+			# pastoasa, fiindca trecea din maro-inchis in verde pe 8 m.
+			"water_deep_gain": 0.72,
+			"water_shore_gain": 0.62,
 			"water_desat": 0.65,
-			"water_mul": Color(0.85, 0.89, 0.87),
-			"water_dim": 0.50,
+			# Tenta de oras trasa spre rece: cu (0.85,0.89,0.87) verdele iesea
+			# la nuanta 123 (sub tinta 130-155). Cu asta: verde 142, brun 26.
+			"water_mul": Color(0.82, 0.90, 0.92),
+			# Cat de INCHISA e apa fata de mal. Nu "inchisa" in absolut: pragul
+			# e un RAPORT, apa <= 0.65 x uscatul din ACELASI cadru, fiindca de
+			# aia citea runda 4 miriste — 42 langa 41, adica aceeasi valoare, si
+			# nimic nu mai spunea ca e alta materie. Masurat pe cornisa D:
+			# faleza 51, terasa/cheiul 38. La 0.50 apa iesea 29.6, deci 0.58
+			# fata de faleza dar 0.77 fata de chei; la 0.40 iese 24-25, adica
+			# sub prag fata de amandoua.
+			"water_dim": 0.40,
 			"water_foam": 0.0,
+			# Unde se despart cele doua rauri: o dreapta prin (60, 215) — malul
+			# de sud al peninsulei, la mijloc — spre SSE. La vest de ea curge
+			# Jialing (bratul care coboara pe langa cornisa D), la est Yangtze
+			# (golful de sub pod). Granita trece prin fata cheiului, deci linia
+			# de confluenta se vede din vederea de cursa la fractia 0.46.
+			"water_split": 1.0,
+			"water_split_dir": Vector2(0.94, -0.35),
+			"water_split_offset": -18.85,
+			"water_split_soft": 35.0,
+			"water_split_meander": 55.0,
+			"water_seam": 0.45,
 			# Glint/crest URCATE in runda 4: cu verdele/brunul desaturat, apa
 			# de la distanta (vederea de pe cornisa D) iesea camp mat — ce o
 			# face sa citeasca APA noaptea sunt sclipirile orasului pe hula
 			# (referinta: diorama, pete aurii pe verde inchis). Sclipirile
 			# sunt pete mici: mediana de saturatie/luminanta ramane sub gate.
-			"water_glint": 0.55,
-			"water_crest": 0.65,
-			"water_band": 0.25,
+			# SEMNALUL DE LICHID. Scanteierea nu mai vine de la soare: soarele
+			# temei sta la -78 grade, aproape in zenit, deci reflexia lui pleaca
+			# in sus si camera razanta de cursa nu prindea decat cateva pete in
+			# prim-plan — pete izolate pe o suprafata mata, adica exact cum
+			# arata un camp. `water_glint_horizon` pune in loc o lumina JOASA
+			# dincolo de apa (felinarele de pe malul opus), mereu in
+			# continuarea privirii, deci drumul de sclipiri vine spre camera.
+			# `water_glint_streak` il si lungeste pe axa privirii — pe ecran,
+			# vertical.
+			"water_glint": 0.45,
+			"water_glint_horizon": 0.30,
+			"water_glint_sharp": 16.0,
+			# CAT de mult din apa e reflexie. Masurat in diorama
+			# (bar/E_chei.png, cu pragul de luminanta 90): 2.4% pe bratul verde,
+			# 11.8% pe cel brun. Sub 0.58 pragul lasa peste 15% si apa devine o
+			# foaie de aur; peste 0.70 scade sub 6% si redevine mata. 0.64 da
+			# 9-11% pe cornisa D.
+			"water_glint_cut": 0.66,
+			# Cat de lungite. 3.2 (incercat intai) trage petele in fasii de zeci
+			# de metri; la 1.4 ies limbi de flacara pe cheiul E. 0.9 le lasa
+			# pete cu coada — alungite pe verticala, dar tot pete.
+			"water_glint_streak": 0.9,
+			# Marimea unei reflexii. Vezi nota din shader: la 1.0 (scara
+			# ondulatiei) petele ies de cativa pixeli si in randuri regulate —
+			# masurat pe captura rundei 5, o grila de ferestre aprinse peste
+			# rau. Masurat in diorama (bar/E_chei.png): reflexiile aurii au
+			# 20-60 px pe o apa vazuta de la aceeasi distanta, adica pete de
+			# metri, rare, cu marimi diferite.
+			"water_glint_grain": 0.30,
+			# Suprafata NETEDA sub reflexii (implicitul 0.35 e de laguna
+			# vazuta de aproape; de la 60 m in sus iese pasla).
+			"water_ripple": 0.12,
+			# Aurul lampilor de sodiu, INTREG. La 0.75 (tras spre alb, ca sa nu
+			# iasa neon) reflexiile ieseau crem — pe o apa verde-inchisa asta e
+			# culoare de miriste uscata, adica exact tema pe care o rezolv.
+			# Reflexia unei lampi de sodiu chiar E galben-portocalie: in diorama
+			# petele masoara nuanta 30-40 la saturatie 0.45-0.55, iar SAND_LIGHT
+			# (E8C074) sta la 37/0.50.
+			"water_glint_slot": Palette.SAND_LIGHT,
+			"water_glint_tint": 1.0,
+			# Hula da si umbra suprafetei, si panta din care se naste lobul
+			# speculat — nu poate merge la 0. La 0.45 dungile ei se vedeau ca
+			# brazde pe o suprafata deja fara ondulatie fina; 0.35 le lasa doar
+			# cat sa arate ca apa curge.
+			"water_crest": 0.35,
+			# Trepte, nu degrade: linia de mal trebuie sa fie o MUCHIE (brief
+			# §2 E, style_bible §1). 0.25 lasa o trecere pastoasa pe 8 m.
+			"water_band": 0.55,
 			# UNDE e apa: NU "tot ce e in afara buclei" (seabed_drop) — asta
 			# ar fi facut o insula, iar Chongqing e o peninsula: golful si cele
 			# doua rauri stau pe sud si pe est (custom_lagoon, in Track12.tscn),
@@ -3364,8 +3458,11 @@ func _sea_color(d: float) -> Color:
 	var dim := clampf(float(theme_flag("water_dim", 1.0)), 0.0, 1.0)
 	var reef := water_tint(theme_flag("water_shallow_slot",
 		Palette.REEF_SHALLOW), dim)
+	# Aceleasi trepte de lumina ca in _water_material — promisiunea "doua surse
+	# de adevar pentru culoarea apei s-ar desincroniza la prima tema noua" se
+	# aplica si aici.
 	var deep := water_tint(theme_flag("water_deep_slot",
-		Palette.SEA_DEEP), dim)
+		Palette.SEA_DEEP), dim * float(theme_flag("water_deep_gain", 1.0)))
 	# Spuma NU e alb curat, ci alb spart cu recif.
 	#
 	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
@@ -3467,15 +3564,25 @@ func _water_material() -> ShaderMaterial:
 	# spune. `water_dim` e lumina pe care ar fi primit-o — se aplica pe toate
 	# culorile, o data, aici si in _sea_color.
 	var dim := clampf(float(theme_flag("water_dim", 1.0)), 0.0, 1.0)
+	# "Cata lumina primeste" fiecare treapta a rampei, ca FACTOR peste dim.
+	# Pana aici singurul mod de a face apa mai adanca sa arate mai adanca era
+	# sa-i dai alt SLOT — adica alta nuanta. Pe o laguna de recif e corect
+	# (turcoaz -> albastru), pe un rau tulbure nu: Yangtze-ul e aceeasi apa
+	# maro si la mal si in mijloc, doar mai intunecata. Fara treptele astea,
+	# "adanc" trebuia autorat cu o a doua culoare, iar amestecul dintre doua
+	# familii de culoare pe acelasi luciu de apa iese OLIV (vezi runda 4).
+	# Implicit 1.0 => exact comportamentul de dinainte pe toate pistele vechi.
+	var deep_k := float(theme_flag("water_deep_gain", 1.0))
+	var shore_k := float(theme_flag("water_shore_gain", 1.0))
 	var shallow := water_tint(theme_flag("water_shallow_slot",
 		Palette.REEF_SHALLOW), dim)
 	var deep := water_tint(theme_flag("water_deep_slot",
-		Palette.SEA_DEEP), dim)
+		Palette.SEA_DEEP), dim * deep_k)
 	# Nisipul ud de la linia apei: nisipul de coral, intunecat putin — apa
 	# uda nisipul inainte sa-l acopere. Slot de tema: un rau de noapte n-are
 	# plaja crem la mal.
 	var shore := water_tint(theme_flag("water_shore_slot",
-		Palette.CORAL_SAND), dim).darkened(0.12)
+		Palette.CORAL_SAND), dim * shore_k).darkened(0.12)
 	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(shallow, 0.35)
 	_water_mat.set_shader_parameter("ramp_strength", 1.0)
 	_water_mat.set_shader_parameter("shore_col", Vector3(shore.r, shore.g, shore.b))
@@ -3510,6 +3617,69 @@ func _water_material() -> ShaderMaterial:
 		Vector2(to_sun.x, to_sun.z).normalized())
 	_water_mat.set_shader_parameter("band_strength",
 		float(theme_flag("water_band", 0.60)))
+	# --- AL DOILEA RAU (v4). Vezi nota lunga din water.gdshader: apa se imparte
+	# dupa LOC, nu dupa adancime, fiindca doua familii de culoare amestecate pe
+	# axa adancimii dau oliv — culoarea unei mirisiti, nu a unui rau.
+	# Implicit sloturile lui = ale primului rau, deci o tema care nu cere
+	# despartirea (`water_split` 0) se randeaza exact ca inainte.
+	var b_shallow := water_tint(theme_flag("water_b_shallow_slot",
+		theme_flag("water_shallow_slot", Palette.REEF_SHALLOW)), dim)
+	var b_deep := water_tint(theme_flag("water_b_deep_slot",
+		theme_flag("water_deep_slot", Palette.SEA_DEEP)), dim * deep_k)
+	var b_shore := water_tint(theme_flag("water_b_shore_slot",
+		theme_flag("water_shore_slot", Palette.CORAL_SAND)),
+		dim * shore_k).darkened(0.12)
+	_water_mat.set_shader_parameter("shore_col_b",
+		Vector3(b_shore.r, b_shore.g, b_shore.b))
+	_water_mat.set_shader_parameter("shallow_col_b",
+		Vector3(b_shallow.r, b_shallow.g, b_shallow.b))
+	_water_mat.set_shader_parameter("deep_col_b",
+		Vector3(b_deep.r, b_deep.g, b_deep.b))
+	_water_mat.set_shader_parameter("split_strength",
+		float(theme_flag("water_split", 0.0)))
+	var split_dir: Vector2 = theme_flag("water_split_dir", Vector2(1.0, 0.0))
+	_water_mat.set_shader_parameter("split_dir", split_dir.normalized())
+	_water_mat.set_shader_parameter("split_offset",
+		float(theme_flag("water_split_offset", 0.0)))
+	_water_mat.set_shader_parameter("split_soft",
+		float(theme_flag("water_split_soft", 24.0)))
+	_water_mat.set_shader_parameter("split_meander",
+		float(theme_flag("water_split_meander", 40.0)))
+	_water_mat.set_shader_parameter("seam_strength",
+		float(theme_flag("water_seam", 0.0)))
+	# Lumina care sclipeste si forma sclipirii. Pe temele vechi raman 0 =
+	# soarele si pete izotrope, adica v3 neatins.
+	_water_mat.set_shader_parameter("glint_horizon",
+		float(theme_flag("water_glint_horizon", 0.0)))
+	_water_mat.set_shader_parameter("glint_streak",
+		float(theme_flag("water_glint_streak", 0.0)))
+	_water_mat.set_shader_parameter("glint_sharp",
+		float(theme_flag("water_glint_sharp", 48.0)))
+	_water_mat.set_shader_parameter("glint_cut",
+		float(theme_flag("water_glint_cut", 0.0)))
+	_water_mat.set_shader_parameter("glint_grain",
+		float(theme_flag("water_glint_grain", 1.0)))
+	# Cat de MOTLATA e suprafata sub reflexii. Implicitul shaderului (0.35) e
+	# calibrat pe o laguna vazuta de aproape; pe un rau vazut de la 60 m in sus
+	# aceeasi valoare iese pasla — captura rundei 5 avea apa cu granulatie de
+	# muschi, adica jumatate din motivul pentru care citea camp. In diorama
+	# suprafata e NETEDA, cu fatete mari; detaliul il dau reflexiile.
+	_water_mat.set_shader_parameter("ripple_strength",
+		float(theme_flag("water_ripple", 0.35)))
+	# Culoarea sclipirii se ADUNA in LINIAR, deci trece prin srgb_to_linear ca
+	# orice culoare a apei, dar NORMALIZATA la 1 pe canalul cel mai mare:
+	# intensitatea o da `glint_strength`, aici e doar nuanta. Fara normalizare,
+	# un slot inchis ar fi stins scanteierea in loc s-o coloreze.
+	var glint_slot: int = int(theme_flag("water_glint_slot", Palette.FOAM_WHITE))
+	var gc := Palette.color(glint_slot).srgb_to_linear()
+	var gmax := maxf(gc.r, maxf(gc.g, gc.b))
+	if gmax > 0.0:
+		gc = Color(gc.r / gmax, gc.g / gmax, gc.b / gmax)
+	# Spre alb cu `water_glint_white`: felinarele de sodiu sunt aurii, dar un
+	# reflex pur saturat pe apa neagra iese lampa de neon, nu lumina pe unda.
+	gc = Color.WHITE.lerp(gc, clampf(
+		float(theme_flag("water_glint_tint", 1.0)), 0.0, 1.0))
+	_water_mat.set_shader_parameter("glint_col", Vector3(gc.r, gc.g, gc.b))
 	# Varful anvelopei de valuri, in adancime normalizata. Din constantele de
 	# aici, nu scris de mana in shader: reciful e o cota de gameplay, iar doua
 	# copii ale ei s-ar desincroniza tacut la prima retusare a lagunei.

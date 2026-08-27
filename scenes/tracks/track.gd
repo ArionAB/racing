@@ -1136,8 +1136,8 @@ static func themes() -> Dictionary:
 			# lumina", e prea multa SUPRAFATA aprinsa deodata — vezi
 			# `facet_gate` in shader. Castigul coboara putin fiindca poarta
 			# lasa acum mai putine placi, dar cele care trec raman aprinse.
-			"water_b_glint": 1.7,
-			"water_b_glint_cut": 0.64,
+			"water_b_glint": 1.9,
+			"water_b_glint_cut": 0.56,
 			# Cat de INCHISA e apa fata de mal. Nu "inchisa" in absolut: pragul
 			# e un RAPORT, apa <= 0.65 x uscatul din ACELASI cadru, fiindca de
 			# aia citea runda 4 miriste — 42 langa 41, adica aceeasi valoare, si
@@ -1212,7 +1212,7 @@ static func themes() -> Dictionary:
 			# 11.8% pe cel brun. Sub 0.58 pragul lasa peste 15% si apa devine o
 			# foaie de aur; peste 0.70 scade sub 6% si redevine mata. 0.64 da
 			# 9-11% pe cornisa D.
-			"water_glint_cut": 0.66,
+			"water_glint_cut": 0.64,
 			# Cat de lungite. 3.2 (incercat intai) trage petele in fasii de zeci
 			# de metri; la 1.4 ies limbi de flacara pe cheiul E. 0.9 le lasa
 			# pete cu coada — alungite pe verticala, dar tot pete.
@@ -1236,8 +1236,22 @@ static func themes() -> Dictionary:
 			# la 18-20 fata de 28-39 in diorama — suprafata devenise linoleum.
 			# Placa e acum singura care mai da variatie de valoare, deci ea
 			# trebuie sa o dea toata.
-			"water_facet": 0.52,
-			"water_facet_count": 7.0,
+			# RUNDA 10. Cifra care decide daca tesela se VEDE, si a fost tot
+			# timpul prea mica. Masurat pe saltul de luminanta intre pixeli
+			# vecini (adica exact ce e o muchie de fateta): in diorama p90 e
+			# 5.7 pe bratul verde si 10.8 pe cel auriu, la noi era 1.9-2.0 in
+			# prim-plan — placile difereau intre ele cu mai putin de un nivel,
+			# deci ochiul nu avea ce muchie sa vada oricat de corect ar fi fost
+			# desenata tesela. 0.52 impartit la 7 trepte inseamna ~7% intre
+			# doua placi vecine, iar 7% dintr-o apa la luminanta 55 e sub 4
+			# niveluri, din care jumatate se pierd in ondulatie.
+			#
+			# Se urca amplitudinea SI se rareste treapta: cu 4 trepte in loc de
+			# 7, doua placi vecine cad mai des in cutii diferite, si diferenta
+			# lor e mai mare. Nu se poate urca la nesfarsit — peste ~1.0 apar
+			# placi negre langa placi albe, adica sah, nu apa.
+			"water_facet": 0.70,
+			"water_facet_count": 4.0,
 			# RUNDA 8. 0.17 rad/m inseamna fatete de ~37 m, iar banda de apa
 			# vizibila de pe pod are 60-150 m: doua-patru fatete pe toata
 			# suprafata, adica nici una. In diorama o fateta subintinde cam a
@@ -1252,7 +1266,7 @@ static func themes() -> Dictionary:
 			# scrisa in cod pana in runda 9) laturile triunghiului se curbeaza
 			# pana ies lobi inchisi unul in altul — camuflaj. 0.07 le lasa
 			# drepte, iar neregularitatea vine din tesela in sine.
-			"water_facet_warp": 0.07,
+			"water_facet_warp": 0.02,
 			# Distanta la care fateta are chiar marimea autorata; mai aproape
 			# se micsoreaza. Sub tablier apa incepe la 10 m, unde o fateta de
 			# 14 m umplea un sfert de cadru — pete late cat un camion.
@@ -1264,12 +1278,54 @@ static func themes() -> Dictionary:
 			# plafonul de 2.5 lasa celula la 5.5 m, adica JUMATATE DE ECRAN pe
 			# o placa. 5.5 o duce la ~2.5 m langa camera, deci placile de sub
 			# pod se vad ca placi, nu ca judete.
-			"water_facet_near": 5.5,
+			# RUNDA 10: 5.5 lasa celula la 3.42 m in tot prim-planul, iar de pe
+			# tablier 3.42 m la 5-15 m de ochi inseamna 98-320 px pe ecran —
+			# adica sub zece placi pe toata apa din cadru. O tesela din care
+			# vezi cinci placi nu se citeste tesela, se citeste pata: masurat
+			# pe banda de aproape, densitate de muchii 2.9% fata de 13.6% pe
+			# banda departata (unde anizotropia lucreaza) si 19.8% in diorama.
+			# 16 duce celula la ~0.85 m langa camera, deci 25-80 px — marimea
+			# pe care o au placile in bar/E_chei.png.
+			"water_facet_near": 16.0,
 			# RARITATEA reflexiilor. Vezi `facet_gate` in shader: fateta spune
 			# CARE placi prind lumina, fisura deseneaza pata inauntru. La 0.62
 			# trec cam 38% din placi, si in ele fisura mai taie o data — de
 			# aici acoperirea de 3-10% pe care o are diorama, in loc de 25%.
-			"water_facet_gate": 0.55,
+			"water_facet_gate": 0.42,
+			# RUNDA 10. Butonul care repara defectul care a picat runda 9.
+			# Vezi nota lunga din shader (`facet_aniso`): de pe tablier camera
+			# sta la 3.3 m peste apa, deci proiectia intinde axa radiala de r/h
+			# ori — 12x la 40 m, 45x la 150 m. Celula patrata in lume iesea
+			# aschie de sub 10 px pe ecran de la 40 m in sus, si o tesela de
+			# aschii se amesteca intr-un degrade: 8.2% densitate de muchii pe
+			# pod fata de 20.9% in golf (de sus, unde raportul e 1) si 19-31%
+			# in diorama. 12 e derivat, nu ales: la 150 m lasa celula la ~1.1 m
+			# pe axa radiala, adica tot ~10 px pe ecran — cat sa se vada muchia,
+			# prea putin cat sa se citeasca fir.
+			"water_facet_aniso": 12.0,
+			# Vezi `facet_aa` in shader. La 0.5 tesela se stinge cand celula
+			# ajunge la doi pixeli — masurat, aia e granita intre "placi" si
+			# "pietris" pe banda departata a Yangtze-ului.
+			"water_facet_aa": 0.5,
+			# Perechea pentru masca de reflexii. Vezi `glint_aa` in shader:
+			# fara ea banda departata a Yangtze-ului se rupea in sclipici de
+			# sub un pixel — 24-33% densitate de muchii fata de 19.8% in
+			# diorama, si pe captura pietris in loc de apa.
+			"water_glint_aa": 0.18,
+			# Yangtze-ul porneste de la ~64% din luminanta lui Jialing
+			# (water_b_gain 0.82 peste water_dim 0.78), deci aceeasi
+			# amplitudine relativa ii da cu o treime mai putine NIVELURI de
+			# luminanta intre doua placi vecine — masurat, 6.7% densitate de
+			# muchii fata de 10.6% pe verde. 1.55 = chiar inversul raportului.
+			"water_facet_b_gain": 1.20,
+			# A doua jumatate a aceluiasi defect: lobul speculat. Razant,
+			# dot(reflect, view) sta lipit de 1 pe toata apa, deci lobul e un
+			# camp neted fara varf si diferenta de panta dintre doua fatete
+			# vecine nu mai produce diferenta de stralucire — de aia malul brun
+			# avea 2 pete de reflexie fata de 59 in diorama. Exponentul se
+			# imparte la 6 la incidenta zero si ramane intreg cand privesti de
+			# sus, deci golful (care masura deja ancora) nu se schimba.
+			"water_glint_graze": 6.0,
 			# RUNDA 8: 0.68 / 1.32 erau calibrate pe cornisa D, unde camera e
 			# la 27 m deasupra apei. Tablierul de peste golf trece la 3.3 m,
 			# deci de acolo apa se vede razant pe toata suprafata si aceeasi
@@ -4177,6 +4233,14 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_facet_near", 2.5)))
 	_water_mat.set_shader_parameter("facet_gate",
 		float(theme_flag("water_facet_gate", 0.0)))
+	_water_mat.set_shader_parameter("facet_aniso",
+		float(theme_flag("water_facet_aniso", 1.0)))
+	_water_mat.set_shader_parameter("facet_aa",
+		float(theme_flag("water_facet_aa", 0.5)))
+	_water_mat.set_shader_parameter("glint_aa",
+		float(theme_flag("water_glint_aa", 0.0)))
+	_water_mat.set_shader_parameter("facet_b_gain",
+		float(theme_flag("water_facet_b_gain", 1.0)))
 	# Gradientul de perspectiva: cat de mult se deschide apa cand privirea cade
 	# mai de sus pe ea. Implicit 1.0/1.0 = plat, ca pana acum.
 	_water_mat.set_shader_parameter("view_lo",
@@ -4251,6 +4315,10 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_glint_streak", 0.0)))
 	_water_mat.set_shader_parameter("glint_sharp",
 		float(theme_flag("water_glint_sharp", 48.0)))
+	_water_mat.set_shader_parameter("glint_graze",
+		float(theme_flag("water_glint_graze", 1.0)))
+	_water_mat.set_shader_parameter("glint_graze_ref",
+		float(theme_flag("water_glint_graze_ref", 0.5)))
 	_water_mat.set_shader_parameter("glint_cut",
 		float(theme_flag("water_glint_cut", 0.0)))
 	_water_mat.set_shader_parameter("glint_grain",

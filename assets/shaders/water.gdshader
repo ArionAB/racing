@@ -280,6 +280,52 @@ uniform float facet_ref = 0.0;
 // camera peste apa, si asta difera de la o pista la alta.
 uniform float facet_near_max : hint_range(1.0, 12.0) = 2.5;
 
+// --- v9 (Chongqing, runda 10). CAT de mult se poate comprima celula pe axa
+// privirii. Vezi nota lunga din fragment: la incidenta razanta proiectia
+// intinde axa radiala de r/h ori (12x la 40 m de pe tablier, 45x la 150 m),
+// deci o celula patrata in lume iese aschie pe ecran si tesela dispare. Asta
+// e plafonul compresiei care o repara. 1.0 = efect stins, adica temele vechi
+// neatinse. Peste ~16 celula devine dunga in lume si reapar pensulatiile.
+uniform float facet_aniso : hint_range(1.0, 16.0) = 1.0;
+// Peste cate celule pe pixel se stinge tesela in valoarea ei medie. Vezi nota
+// din fragment: sub pragul asta un tipar cuantizat e zgomot, nu desen. 0.5 =
+// se stinge cand celula ajunge la doi pixeli.
+uniform float facet_aa : hint_range(0.05, 2.0) = 0.5;
+// Perechea lui pentru masca de reflexii. Vezi nota din fragment: punctul de
+// esantionare al mastii e comprimat radial, deci mipmap-ul nu-l mai poate
+// alege corect si masca se rupe in zgomot la incidenta razanta. 0 = stins.
+uniform float glint_aa : hint_range(0.0, 2.0) = 0.0;
+// Cat de tare fateteaza raul B fata de A. Vezi nota din fragment: aceeasi
+// amplitudine relativa pe o apa mai inchisa da mai putine niveluri de
+// luminanta, iar muchia se vede in niveluri. 1.0 = amandoua la fel.
+uniform float facet_b_gain : hint_range(0.5, 3.0) = 1.0;
+
+// --- v9 (Chongqing, runda 10). CAT de mult se lateste lobul speculat cand
+// privirea cade razant.
+//
+// A doua jumatate a aceluiasi defect. `glint_sharp` e exponentul lobului si e
+// o constanta, dar produsul scalar pe care il ridica la putere NU e la fel de
+// sensibil la orice unghi: razant, reflexia cade aproape de directia privirii
+// pe toata apa vizibila, deci `dot(reflect, view)` sta lipit de 1 si lobul
+// devine un camp neted fara varf — masurat, acoperire 0.02% pe malul brun de
+// pe pod fata de 5.15% in diorama, adica 2 pete fata de 59. Nu lipsea LUMINA
+// (aia e simptomul pe care runda 9 l-a diagnosticat gresit si a vrut sa-l
+// repare cu o lampa), lipsea CONTRASTUL dintre fete: cand lobul e plat,
+// diferenta de panta dintre doua fatete vecine nu mai produce nicio diferenta
+// de stralucire, si atunci nici fatetarea nu se mai vede in reflexii.
+//
+// Exponentul se coboara cu incidenta: la view.y mare ramane `glint_sharp`
+// (pata stransa, cum se vede de sus in golf), la view.y -> 0 se imparte la
+// `glint_graze`, deci lobul se lateste si prinde si pantele mici pe care le au
+// fatetele departate. Lobul mai larg inseamna mai multa apa peste prag — de
+// aia poarta de fateta (`facet_gate`) si `glint_cut` raman butoanele care
+// hotarasc CATA, si tot de aia acoperirea creste fara ca suprafata sa devina
+// foaie de aur. 1.0 = stins.
+uniform float glint_graze : hint_range(1.0, 12.0) = 1.0;
+// Unghiul (sinusul lui) la care lobul redevine cel autorat. Peste el nu se
+// schimba nimic, deci vederile de sus — golful, cornisa — raman ce erau.
+uniform float glint_graze_ref : hint_range(0.05, 1.0) = 0.5;
+
 // GRADIENT DE PERSPECTIVA. Motivul pentru care apa dioramei se citeste ca plan
 // orizontal si a noastra nu. Nu e ceata (aia coloreaza spre cer, aici valoarea
 // CREsTE spre prim-plan) si nu e adancime: e unghiul sub care privesti apa.
@@ -548,6 +594,9 @@ void fragment() {
 	vec2 vdir = to_cam / max(cam_r, 1e-4);
 
 	float facet_key = 0.0;
+	// Declarata aici, nu in blocul de fatete: poarta de reflexii de mai jos are
+	// nevoie de ea ca sa stie pana unde mai are celula marime pe ecran.
+	float aniso = 1.0;
 	if (facet_strength > 0.0 || glint_facet > 0.0 || glint_b_facet > 0.0) {
 		// DOMENIU DEFORMAT, APOI GRILA — nu sinusoide taiate in trepte.
 		//
@@ -596,16 +645,77 @@ void fragment() {
 				facet_near_max);
 			fs *= exp2(floor(log2(want)));
 		}
-		float w1 = sin(dot(p, vec2(0.83, 0.55) * fs) + TIME * facet_speed)
-			+ sin(dot(p, vec2(-0.47, 1.31) * fs)
+		// CELULA ANIZOTROPA (v9, runda 10). Defectul care a picat runda 9, si
+		// e unul singur, geometric — nu de lumina.
+		//
+		// Celula era PATRATA IN LUME. Dar ochiul nu vede lumea, vede ecranul,
+		// iar proiectia unui plan orizontal privit razant NU e izotropa: la
+		// inaltimea `h` peste apa si distanta `r`, un metru TRANSVERSAL
+		// subintinde 1/r radiani, iar un metru RADIAL doar h/(h^2+r^2), deci
+		// raportul e r/h. De pe tablier (h = 3.3 m) asta inseamna 12x la 40 m
+		// si 45x la 150 m. Masurat pe captura rundei 9: o fateta autorata la
+		// 13.7 m iese 643 px lata si 85 px adanca la 10 m, si 43 x 0.9 px la
+		// 150 m. Adica de la 40 m in sus fiecare placa e o ASCHIE orizontala
+		// mai subtire de 10 px — vecinele ei se amesteca intr-un singur pixel,
+		// si ce ramane pe ecran e un degrade neted. Exact ce s-a masurat:
+		// densitate de muchii 8.2% pe pod fata de 20.9% in golf (de sus,
+		// unde raportul e ~1) si 19-31% in diorama.
+		//
+		// De-aia se stingeau si reflexiile: masca de glint calatoreste pe
+		// ACEEASI celula (`facet_key`), deci o poarta care se subtiaza sub un
+		// pixel nu mai lasa sa treaca nimic — 2 pete pe malul brun fata de 59
+		// in diorama. Golul de fatetare si golul de reflexii sunt un singur
+		// defect, si asta e el.
+		//
+		// Reparatia e chiar raportul de mai sus: axa RADIALA a domeniului se
+		// comprima cu `view.y` (sinusul unghiului de incidenta, adica h/hypot,
+		// deci ~h/r), asa incat o celula scurta in lume sa iasa la fel de
+		// inalta pe ecran ca una lata. Nu e o corectie inventata: e chiar
+		// jacobianul proiectiei, si la incidenta mare (golf, vedere de sus)
+		// view.y -> 1 si nu se schimba nimic — vederea care masura deja
+		// ancora ramane neatinsa.
+		//
+		// Plafonat cu `facet_aniso`: la view.y -> 0 raportul diverge, iar o
+		// celula comprimata la infinit devine o DUNGA in lume, adica pensulatii
+		// radiale — chiar boala pe care ultimele trei runde au scos-o.
+		//
+		// DOUA CORECTII CARE NU AU VOIE SA SE INMULTEASCA. `facet_ref / cam_r`
+		// de mai sus micsoreaza celula pe AMANDOUA axele cand te apropii, si e
+		// tot o corectie de marime pe ECRAN. Prima incercare le-a lasat sa se
+		// suprapuna, si cifrele au spus imediat: la 5-20 m celula iesea 0.56 -
+		// 1.9 m pe raza fata de 3.42 m transversal, adica panglica de 2-6:1
+		// chiar acolo unde perspectiva aproape nu intinde nimic. Pe captura,
+		// malul brun avea alungire mediana 9.6 — dungi, exact ce nu vrem.
+		//
+		// Corectia radiala trebuie deci sa fie doar ce a RAMAS neacoperit:
+		// raportul cerut impartit la micsorarea deja aplicata pe ambele axe.
+		// La 5 m nu mai ramane nimic (1.8 cerut, 4 deja aplicat) si celula
+		// redevine patrata; la 150 m ramane tot, fiindca acolo shrink-ul e 1.
+		//
+		// Si se CUANTIZEAZA in puteri de doi, din acelasi motiv pentru care se
+		// cuantizeaza si shrink-ul: un raport care se schimba continuu de la un
+		// pixel la vecinul lui forfeca grila, iar o grila forfecata radial iese
+		// dungi convergente spre orizont. In trepte, intre doua inele celula
+		// ramane celula.
+		if (facet_aniso > 1.0) {
+			float want_a = (1.0 / max(view.y, 1e-3)) / max(fs / facet_scale, 1e-3);
+			aniso = exp2(floor(log2(clamp(want_a, 1.0, facet_aniso))));
+		}
+		// Domeniul comprimat pe directia privirii. Se aplica INAINTE de
+		// sinusoidele de deformare, ca sa se indoaie tot atat de tare si ele —
+		// altfel warp-ul ar fi izotrop peste o grila anizotropa si ar reintroduce
+		// laturi curbe exact acolo unde celula e cea mai ingusta.
+		vec2 pa = p + vdir * (dot(p, vdir) * (aniso - 1.0));
+		float w1 = sin(dot(pa, vec2(0.83, 0.55) * fs) + TIME * facet_speed)
+			+ sin(dot(pa, vec2(-0.47, 1.31) * fs)
 				- TIME * facet_speed * 0.74);
-		float w2 = sin(dot(p, vec2(1.67, 1.04) * fs)
+		float w2 = sin(dot(pa, vec2(1.67, 1.04) * fs)
 				+ TIME * facet_speed * 0.41)
-			+ sin(dot(p, vec2(-1.21, 0.77) * fs)
+			+ sin(dot(pa, vec2(-1.21, 0.77) * fs)
 				- TIME * facet_speed * 0.63);
 		// Latura celulei in metri e 2*PI / facet_scale, aceeasi conventie ca
 		// lungimea de unda a sinusoidelor de deasupra.
-		vec2 wp = p * (fs * 0.15915494) + vec2(w1, w2) * facet_warp
+		vec2 wp = pa * (fs * 0.15915494) + vec2(w1, w2) * facet_warp
 			+ vec2(a - 0.89, b - 0.89) * facet_wobble * 2.0;
 		// TRIUNGHIURI, NU PATRATE DEFORMATE (v8, runda 9).
 		//
@@ -631,13 +741,46 @@ void fragment() {
 			* 43758.5453);
 		float h2 = fract(sin(dot(tri, vec3(39.3468, 11.1357, 83.155)))
 			* 24634.6345);
+		// STINGEREA SUB PIXEL, si e regula de igiena a oricarui tipar
+		// procedural, nu un reglaj de tema: un tipar cuantizat a carui celula
+		// scade sub cativa pixeli nu se mai vede ca tipar, se vede ca ZGOMOT.
+		//
+		// Compresia radiala (v9) tine celula inalta pe ecran, dar transversal
+		// ea ramane de latimea autorata si se micsoreaza cu 1/r ca orice
+		// altceva. Cand latimea aia trece sub prag, o poarta care taie pe
+		// celula taie in bucati mai mici decat pixelul: masurat pe banda
+		// departata a Yangtze-ului, densitate de muchii 32.6% fata de 19.8% in
+		// diorama — pe captura, PIETRIS in loc de apa. (Iar fara compresie
+		// aceeasi banda dadea 5.7%, adica pamant arat: amandoua gresite,
+		// adevarul e intre ele.)
+		//
+		// `fwidth` da chiar cat se schimba coordonata de celula de la un pixel
+		// la vecinul lui, deci masoara direct marimea celulei pe ecran, in
+		// unitati de celula. Peste `facet_aa` celule pe pixel, tiparul se
+		// stinge in valoarea medie.
+		float cell_px = max(fwidth(wp.x), fwidth(wp.y));
+		float aa = 1.0 - smoothstep(facet_aa * 0.5, facet_aa, cell_px);
 		if (facet_strength > 0.0) {
 			// Valoarea placii, in `facet_count` trepte: placi de valori
 			// DIFERITE, nu un degrade continuu (style_bible §1).
 			float lvl = floor(h1 * facet_count) / max(facet_count - 1.0, 1.0);
-			base *= 1.0 + (clamp(lvl, 0.0, 1.0) - 0.5) * facet_strength;
+			// Amplitudinea e per rau. Modulatia e MULTIPLICATIVA, deci acelasi
+			// procent pe o apa mai inchisa da mai putine NIVELURI de luminanta
+			// — iar muchia pe care o vede ochiul (si pe care o numara garda) e
+			// in niveluri, nu in procente. Yangtze-ul e inmultit cu
+			// `water_b_gain` (0.82) peste `water_dim` (0.78), deci pornea de la
+			// ~64% din luminanta lui Jialing: masurat, densitate de muchii 6.7%
+			// fata de 10.6% pe verde, cu exact aceeasi tesela dedesubt. Nu era
+			// tesela mai proasta pe brun, era acelasi contrast pe o baza mai
+			// mica.
+			float fstr = facet_strength * mix(1.0, facet_b_gain, side);
+			base *= 1.0 + (clamp(lvl, 0.0, 1.0) - 0.5) * fstr * aa;
 		}
-		facet_key = h2;
+		// Poarta se deschide odata cu stingerea: acolo unde fateta nu se mai
+		// vede, reflexia isi recapata forma din fisura texturii (care are
+		// mipmaps, deci se stinge singura cum trebuie) in loc sa fie taiata
+		// pe o celula sub pixel.
+		facet_key = mix(1.0, h2, aa);
 	}
 
 	// GRADIENT DE PERSPECTIVA. view.y e sinusul unghiului sub care cade
@@ -691,7 +834,21 @@ void fragment() {
 	if (glint_horizon > 0.0) {
 		gl = normalize(vec3(vdir.x, glint_horizon, vdir.y));
 	}
-	float glint = pow(max(dot(reflect(-gl, n), view), 0.0), glint_sharp);
+	// Vezi `glint_graze`: exponentul lobului scade cu incidenta, ca sclipirea
+	// sa supravietuiasca acolo unde privirea cade razant — adica exact in
+	// vederea de cursa, singura pe care jucatorul o are.
+	// Rampa are referinta PROPRIE, nu `view_ref`. Aia e unghiul la care se
+	// satureaza gradientul de CULOARE si e 0.20 pe tema asta, adica ~15 m de
+	// pe tablier: cu ea, latirea lobului se stingea deja in prim-plan, exact
+	// unde apa umple cadrul. Sinusul unghiului de incidenta e mic pe TOATA apa
+	// vazuta de pe pod (0.55 la 5 m, 0.08 la 40 m), deci pragul lui trebuie sa
+	// fie de ordinul lui 0.5, nu 0.2.
+	float gsharp = glint_sharp;
+	if (glint_graze > 1.0) {
+		gsharp /= mix(glint_graze, 1.0,
+			smoothstep(0.0, glint_graze_ref, clamp(view.y, 0.0, 1.0)));
+	}
+	float glint = pow(max(dot(reflect(-gl, n), view), 0.0), gsharp);
 	float gmask = smoothstep(0.55, 0.90, a * b);
 	if (glint_streak > 0.0) {
 		// FORMA reflexiei. Doua lucruri, amandoua invatate masurand:
@@ -739,13 +896,49 @@ void fragment() {
 		// hartie rupta — contur zimtat, interior de o singura culoare plata;
 		// in diorama fiecare pata are un halou si valoare care variaza pe ea.
 		float m = 1.0 - c1 * c2;
+		// STINGEREA SUB PIXEL A MASTII, perechea lui `facet_aa` de mai sus si
+		// la fel de putin optionala.
+		//
+		// Punctul de esantionare `gp` e comprimat radial fata de camera, deci
+		// NU e o functie afina de pozitia pe ecran — iar selectia de mipmap a
+		// placii video presupune tocmai ca este. Rezultat: la incidenta razanta
+		// hardware-ul alege un LOD prea fin si masca se esantioneaza sub pixel.
+		// Ce iese nu e o reflexie mai mica, e ZGOMOT: masurat pe banda
+		// departata a Yangtze-ului, densitate de muchii 24-33% (diorama: 19.8%)
+		// si pe captura o suprafata de PIETRIS. Se vede si in ablatie — cu
+		// fatetele stinse de tot, banda aia ramanea la 24.4%, deci zgomotul
+		// venea de aici, nu din tesela.
+		//
+		// `fwidth(gp)` masoara direct cat sare punctul de esantionare intre doi
+		// pixeli vecini, in metri. Cand saltul depaseste `glint_aa` perioade de
+		// textura, masca se stinge in valoarea ei medie si reflexiile dispar
+		// neted in culoarea apei, in loc sa se rupa in sclipici.
+		if (glint_aa > 0.0) {
+			float step_px = max(fwidth(gp.x), fwidth(gp.y)) * s;
+			m = mix(m, 0.5, smoothstep(glint_aa * 0.5, glint_aa, step_px));
+		}
 		// Vezi `glint_facet`: masca trece de la fisurile texturii la cheia
 		// constanta pe fateta, deci pata are muchii drepte si interior plat.
 		// Doar de aproape: mai departe de `glint_facet_far` celula ar fi sub
 		// un pixel, si o cuantizare sub pixel e moire, nu forma.
+		// Distanta la care poarta de fateta se stinge. Vezi `glint_facet_far`:
+		// pragul exista fiindca departe celula ar cadea sub un pixel si o
+		// cuantizare sub pixel e moire.
+		//
+		// Compresia radiala (v9) tine celula INALTA pe ecran oricat de departe,
+		// deci ridica pragul — dar numai pe axa aia. TRANSVERSAL celula ramane
+		// de latimea autorata si se micsoreaza cu 1/r ca orice altceva, iar
+		// cand latimea aia scade sub cativa pixeli poarta taie tot in bucati
+		// mai mici decat pixelul: nu mai ies fatete, ies PUNCTE. S-a masurat
+		// cand pragul a fost ridicat cu `aniso` intreg — banda departata de pe
+		// pod urca la densitate de muchii 32.5% fata de 19.8% in diorama, si pe
+		// captura malul opus se citea PIETRIS, nu apa.
+		//
+		// Deci extinderea se plafoneaza: cel mult de doua ori, adica exact cat
+		// castiga o celula care nu mai e aschie, nu cat cere compresia.
+		float ffar = glint_facet_far * min(aniso, 2.0);
 		float gf = mix(glint_facet, glint_b_facet, side)
-			* (1.0 - smoothstep(glint_facet_far * 0.55, glint_facet_far,
-				cam_r));
+			* (1.0 - smoothstep(ffar * 0.55, ffar, cam_r));
 		// RUNDA 9. Aici era un `mix(m, facet_key, gf)`, si asta e chiar bugul
 		// care a picat runda 8. Amestecat la 0.85, `facet_key` — care e
 		// CONSTANT pe toata celula — inlocuia aproape complet forma din

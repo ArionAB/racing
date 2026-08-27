@@ -27,6 +27,9 @@ const MAX_SLOPE: float = 0.22
 ## Cate puncte coapte se sar cand se cauta o alta bucla a pistei, ca sa nu se
 ## compare un punct cu vecinii lui imediati (care sunt normal aproape).
 const SELF_SKIP: int = 30
+## De la ce diferenta de cota doua puncte apropiate in plan sunt ETAJE, nu o
+## atingere: peste toleranta verticala a testului "pe sosea" (12 m), cu marja.
+const STACK_MIN_DY: float = 14.0
 
 
 func _ready() -> void:
@@ -118,10 +121,22 @@ func _check_route(track: Track, ri: int) -> int:
 	var min_sep := INF
 	var sep_at := 0.0
 	var sep_limit := r.half_width * MIN_SEPARATION_FACTOR
+	# Pista peste pista: doua puncte apropiate in plan dar STIVUITE (pasaj pe
+	# piloni peste un tronson anterior) nu se ating — se cere in schimb
+	# separare VERTICALA de cel putin STACK_MIN_DY, altfel o masina de pe
+	# etajul de jos "e pe sosea" si pe cel de sus (TrackRoute.ROAD_ABOVE_TOLERANCE).
+	var min_dy := INF
+	var dy_at := 0.0
 	for i in range(0, n, 3):
 		for j in range(i + SELF_SKIP, n - (SELF_SKIP if r.closed else 0), 3):
 			var d := Vector2(r.baked[i].x - r.baked[j].x,
 				r.baked[i].z - r.baked[j].z).length()
+			var dy := absf(r.baked[i].y - r.baked[j].y)
+			if d < sep_limit and dy >= STACK_MIN_DY:
+				if dy < min_dy:
+					min_dy = dy
+					dy_at = r.frac_at(i)
+				continue
 			if d < min_sep:
 				min_sep = d
 				sep_at = r.frac_at(i)
@@ -140,15 +155,23 @@ func _check_route(track: Track, ri: int) -> int:
 	if min_sep < INF:
 		print("      apropiere de sine %5.1f m la frac %.2f%s"
 			% [min_sep, sep_at, flag_sep])
+	if min_dy < INF:
+		print("      stiva (pista peste pista): separare verticala minima %5.1f m la frac %.2f (prag %.0f)"
+			% [min_dy, dy_at, STACK_MIN_DY])
 	if ri > 0:
 		# Scurtatura: capetele trebuie sa cada FIX pe sosea, altfel racordul e o
 		# treapta in aer. Si trebuie sa fie mai scurta decat portiunea ocolita,
 		# altfel n-are niciun rost.
+		# O banda `elevated` se racordeaza la MARGINEA soselei, nu la axa
+		# (Track._branch_end): acolo distanta corecta e fata de margine.
 		var main := track.routes[0]
-		var d_in := main.lateral_distance(
-			main.closest_index_global(r.baked[0]), r.baked[0])
-		var d_out := main.lateral_distance(
-			main.closest_index_global(r.baked[n - 1]), r.baked[n - 1])
+		var i_in := main.closest_index_global(r.baked[0])
+		var i_out := main.closest_index_global(r.baked[n - 1])
+		var d_in := main.lateral_distance(i_in, r.baked[0])
+		var d_out := main.lateral_distance(i_out, r.baked[n - 1])
+		if r.elevated:
+			d_in = absf(d_in - track.width_at_index(i_in))
+			d_out = absf(d_out - track.width_at_index(i_out))
 		var span := r.exit_frac - r.entry_frac
 		if span < 0.0:
 			span += 1.0

@@ -62,6 +62,9 @@ var bumpiness: float = 0.0
 ## Plafonul de viteza pe banda, ca fractie din viteza maxima (1 = neatins).
 ## A treia contragreutate, dupa `wet` si latime: un drum de tara e mai LENT.
 var speed_factor: float = 1.0
+## Banda sta IN AER (telecabina, pasarela): terenul nu o urmareste — nici nu
+## se ridica sub ea, nici nu se sapa. Vezi Track._branch_corridor_points.
+var elevated: bool = false
 ## Culoarea pamantului. Alfa 0 = se ia din tema (`branch_tint`).
 var tint: Color = Color(0.0, 0.0, 0.0, 0.0)
 ## Smocuri de iarba pe margini si pe brazda (doar "dirt_road").

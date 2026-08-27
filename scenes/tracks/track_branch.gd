@@ -57,6 +57,35 @@ extends Path3D
 ## langa banda ramane pedeapsa obisnuita, nu una dubla.
 @export_range(0.5, 1.0, 0.01) var speed_factor: float = 1.0
 
+## De unde PLEACA banda de pe bucla principala, ca fractie de tur. Negativ =
+## se deduce din primul punct desenat (implicit, vezi antetul clasei).
+##
+## Exista pentru un caz pe care deducerea nu-l poate servi: capatul dedus e
+## mereu piciorul PERPENDICULAREI pe sosea din primul punct, deci banda pleaca
+## mereu LATERAL, in unghi drept. Pentru o panglica la sol asta e doar un
+## racord scurt; pentru o banda `elevated` peste apa e chiar accidentul —
+## AI-ul e atras spre banda (Track.branch_lure) de la 70 m si tinteste un
+## punct la 20 m pe ea, iar daca banda a ajuns deja la 25 m in lateral,
+## masina iese de pe sosea in apa inainte sa apuce sa urce pe tablier.
+## Masurat pe Chongqing: 12-18 repuneri pe cursa, toate intre fractiile
+## 0.42 si 0.44.
+##
+## Cu fractia declarata, capatul se muta INAINTEA punctelor desenate si banda
+## se desprinde in unghi mic, pe langa marginea soselei, peste teren uscat —
+## adica exact cum arata o banda de desprindere reala. Se declara cand banda
+## trebuie sa plece TANGENT; altfel se lasa negativ.
+@export_range(-0.01, 1.0, 0.001) var entry_at: float = -1.0
+
+## Unde REVINE banda pe bucla, ca fractie de tur. Negativ = se deduce din
+## ultimul punct desenat. Aceleasi motive ca [member entry_at].
+@export_range(-0.01, 1.0, 0.001) var exit_at: float = -1.0
+
+## Banda sta IN AER: telecabina de pe Chongqing, o pasarela. Terenul NU o
+## urmareste — fara flag, samplerul ridica pamantul pana la cota benzii
+## (_lift_branches) si o banda peste un golf ar iesi un dig de pamant, nu un
+## cablu. Banda ramane in fizica si in AI exact ca oricare alta.
+@export var elevated: bool = false
+
 @export_group("Suprafata")
 
 ## Din ce e facuta banda. THEME = ce spune tema pistei (`branch_surface`:

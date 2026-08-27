@@ -16,8 +16,16 @@ extends Node3D
 ## [b]Fara volumetrie[/b] (brief §3, si constrangerea de mobil din CLAUDE.md:
 ## fara post-procesare scumpa). Se misca `fog_depth_begin` / `fog_depth_end` /
 ## `fog_light_color` din `Environment`-ul pistei, adica exact ceata ieftina pe
-## care motorul o deseneaza oricum. Costul e zero draw call-uri si zero
-## materiale noi.
+## care motorul o deseneaza oricum. Costul e zero draw call-uri.
+##
+## Culoarul aduce UN material peste atlasul lumii, si e o decizie, nu o
+## scapare: benzile reflectorizante de pe repere ard
+## (`Palette.glow_material(marker_slot)`, un material partajat de toate
+## reperele — vezi CLAUDE.md, „o clasa de assets poate primi un material
+## partajat deliberat"). Fara el, cerinta din brief „marcajele raman vizibile
+## (emisive slabe)" era indeplinita din intamplare: reperele la 12 m, ceata
+## care inghite la 46. Un culoar in care poti conduce fiindca reperele sunt
+## din fericire aproape nu e un culoar proiectat.
 ##
 ## [b]Ceata e a CAMEREI, nu a masinii[/b]. Environment-ul e unul singur pentru
 ## toata scena, deci culoarul se uita numai dupa masina jucatorului
@@ -73,12 +81,36 @@ const MARKER_MODEL: String = "res://assets/models/chongqing/props/chevron_post.g
 ## `fog_end_inside`, altfel exista pozitii din care nu se vede NICIUN reper —
 ## adica un culoar prin care nu poti conduce, doar ghici.
 @export_range(2.0, 60.0, 0.5) var marker_spacing: float = 12.0
-## Slotul de paleta al reperelor. Deschis, ca sa se desprinda din ceata.
-@export_range(0, 31) var marker_slot: int = Palette.CAR_YELLOW
+## Slotul de paleta al benzii reflectorizante de pe fiecare reper. Deschis, ca
+## sa se desprinda din ceata.
+##
+## Banda e si singurul lucru din culoar care ARDE: primeste
+## `Palette.glow_material(marker_slot)`, adica atlasul comun cu emisie doar pe
+## texelul slotului. Fara ea, „marcajele raman vizibile" (brief §3) se rezolva
+## prin distanta — reperele la 12 m, ceata care inghite la 46 — si atunci
+## culoarul e citibil din intamplare, nu prin constructie.
+@export_range(0, 31) var marker_slot: int = Palette.CAR_YELLOW:
+	set(value):
+		marker_slot = value
+		_rebuild()
+## Cat de puternic ard benzile. Mic: un reper care ARDE in ceata devine un far
+## si sterge tot ce voia sa marcheze.
+@export_range(0.0, 4.0, 0.05) var marker_glow: float = 1.2:
+	set(value):
+		marker_glow = value
+		_rebuild()
 ## Inaltimea reperelor (m).
-@export_range(0.3, 4.0, 0.1) var marker_height: float = 1.5
+##
+## Nu e o cota decorativa: e SCARA piesei. Modelul din GLB se masoara si se
+## scaleaza ca sa ajunga fix la ea (si tot din ea iese scara stratului
+## triplanar), iar banda reflectorizanta se aseaza in treimea de sus. Prima
+## versiune o folosea doar pe ramura de rezerva, cu GLB-ul la scara lui — un
+## @export mort din doua, exact obiectia criticului.
+@export_range(0.3, 4.0, 0.1) var marker_height: float = 1.5:
+	set(value):
+		marker_height = value
+		_rebuild()
 @export var marker_model: PackedScene = null
-@export_range(0.2, 3.0, 0.05) var model_scale: float = 1.0
 
 var _zone: Area3D
 var _env: Environment
@@ -91,6 +123,7 @@ var _base_density: float = 0.0
 var _base_color: Color = Color.WHITE
 var _base_taken: bool = false
 var _markers: Array[Node3D] = []
+var _bands: Array[MeshInstance3D] = []
 
 
 func _ready() -> void:
@@ -104,6 +137,7 @@ func _rebuild() -> void:
 		remove_child(child)
 		child.queue_free()
 	_markers.clear()
+	_bands.clear()
 	_build_zone()
 	_build_markers()
 
@@ -138,20 +172,78 @@ func _build_markers() -> void:
 		for side: float in [-1.0, 1.0]:
 			var at := Vector3(side * (half_width - 0.8), 0.0, z)
 			var piece: Node3D = null
+			var scale := 1.0
 			if scene != null:
 				piece = scene.instantiate() as Node3D
 			if piece != null:
-				piece.scale = Vector3.ONE * model_scale
+				# Scara se DERIVA din inaltimea ceruta: modelul se masoara
+				# (AABB pe mesh-uri), nu se presupune. Asa `marker_height`
+				# conteaza si cand GLB-ul exista, si scara stratului triplanar
+				# ramane cea a piesei asezate, nu cea a fisierului.
+				scale = _fit_scale(piece)
+				piece.scale = Vector3.ONE * scale
 				piece.position = at
 				Palette.apply_object_class_materials(piece,
-					WorldProp.prop_classes(), model_scale)
+					WorldProp.prop_classes(), scale)
 			else:
 				piece = PaletteBox.instance(
 					Vector3(0.24, marker_height, 0.24), marker_slot,
 					at + Vector3.UP * marker_height * 0.5)
+				piece.position = at
 			piece.name = "Marker%d%s" % [i, "L" if side < 0.0 else "R"]
 			add_child(piece)
+			_bands.append(_add_band(piece))
 			_markers.append(piece)
+
+
+## Banda reflectorizanta: o cutie subtire pe slotul de paleta, in treimea de
+## sus a reperului, cu materialul care arde.
+##
+## Se pune pe ORICE reper, si din GLB, si din rezerva: ea e ce ramane citibil
+## cand ceata inghite la 46 m, deci n-are voie sa depinda de ce fisier a fost
+## gasit. Materialul e unul singur (`Palette.glow_material` e cached per slot),
+## deci culoarul aduce un material, nu unul per reper.
+func _add_band(piece: Node3D) -> MeshInstance3D:
+	var band := PaletteBox.instance(
+		Vector3(0.34, marker_height * 0.16, 0.34), marker_slot,
+		piece.position + Vector3.UP * marker_height * 0.78)
+	band.name = "Band%s" % piece.name
+	band.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	band.material_override = Palette.glow_material(marker_slot, marker_glow)
+	# Copil al culoarului, nu al piesei: piesa din GLB e scalata ca sa ajunga
+	# la `marker_height`, si banda i-ar mosteni scara inca o data.
+	add_child(band)
+	return band
+
+
+## Cat trebuie scalat modelul ca inaltimea lui sa fie `marker_height`.
+func _fit_scale(piece: Node3D) -> float:
+	var h := _model_height(piece)
+	if h < 0.01:
+		return 1.0
+	return marker_height / h
+
+
+func _model_height(node: Node) -> float:
+	var top := -INF
+	var bottom := INF
+	for child in _walk(node):
+		var mi := child as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var box := mi.mesh.get_aabb()
+		top = maxf(top, box.position.y + box.size.y)
+		bottom = minf(bottom, box.position.y)
+	if top == -INF:
+		return 0.0
+	return top - bottom
+
+
+func _walk(node: Node) -> Array[Node]:
+	var out: Array[Node] = [node]
+	for c in node.get_children():
+		out.append_array(_walk(c))
+	return out
 
 
 ## `Environment`-ul pistei. Se cauta o singura data, in sus pe arbore: hazardul
@@ -285,3 +377,10 @@ func environment() -> Environment:
 
 func markers() -> Array[Node3D]:
 	return _markers
+
+
+## Benzile reflectorizante — pentru sonda, care trebuie sa poata contrazice
+## „marcajele raman vizibile": verifica emisia si numarul de materiale, nu
+## faptul ca exista niste noduri.
+func bands() -> Array[MeshInstance3D]:
+	return _bands

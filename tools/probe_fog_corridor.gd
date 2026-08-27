@@ -182,6 +182,7 @@ func _check_shape() -> void:
 		% [_hazard.marker_spacing, _hazard.fog_end_inside])
 	_verdict(_hazard.markers().size() >= 4,
 		"culoarul are repere pe margini (%d)" % _hazard.markers().size())
+	await _check_markers()
 
 	# Profilul, esantionat din metru in metru.
 	var rise_lo := -1.0
@@ -216,7 +217,7 @@ func _check_shape() -> void:
 
 
 func _run(t_clean: float, base: Dictionary) -> void:
-	_check_shape()
+	await _check_shape()
 
 	print("--- (iii) masina reala prin culoar: ceata camerei chiar se misca")
 	var t_fog := await _drive_through(base, "exponentiala")
@@ -301,3 +302,90 @@ func _drive_through(base: Dictionary, label: String) -> float:
 		"%s: a ajuns la valoarea ceruta in culoar (%.4f, cerut %.4f)"
 		% [label, deepest, target])
 	return t_fog
+
+
+## Reperele: „raman vizibile (emisive slabe)" din brief, verificat pe LUMINA,
+## nu pe distanta.
+##
+## Lipsa de igiena gasita de critic in runda 1: `marker_slot` si `marker_height`
+## nu faceau nimic cand GLB-ul se incarca (traiau doar pe ramura de rezerva), iar
+## „marcajele raman vizibile" se rezolva prin noroc — reperele la 12 m, ceata
+## care inghite la 46. Aici se cere: banda arde, arde pe SLOTUL cerut, e UN
+## singur material pentru tot culoarul, si inaltimea ceruta e chiar inaltimea
+## piesei asezate.
+func _check_markers() -> void:
+	print("--- (ii-b) reperele: emisie reala, un singur material, scara ceruta")
+	var bands := _hazard.bands()
+	_verdict(bands.size() == _hazard.markers().size(),
+		"fiecare reper are banda lui (%d benzi / %d repere)"
+		% [bands.size(), _hazard.markers().size()])
+	if bands.is_empty():
+		return
+	var mats := {}
+	var emissive := 0
+	for b in bands:
+		var mat := b.material_override as StandardMaterial3D
+		if mat == null:
+			continue
+		mats[mat.get_instance_id()] = true
+		if mat.emission_enabled and mat.emission_energy_multiplier > 0.0 \
+				and mat.emission_texture != null:
+			emissive += 1
+	var mat0 := bands[0].material_override as StandardMaterial3D
+	print("    %d benzi, %d materiale distincte, %d emisive; energie %.2f"
+		% [bands.size(), mats.size(), emissive,
+		mat0.emission_energy_multiplier if mat0 != null else 0.0])
+	_verdict(emissive == bands.size(),
+		"toate benzile ARD (%d din %d)" % [emissive, bands.size()])
+	_verdict(mats.size() == 1,
+		"un SINGUR material pentru toate benzile (%d)" % mats.size())
+	# Slotul cerut, nu un slot oarecare: materialul de ardere e cache-uit per
+	# slot, deci identitatea lui e chiar dovada ca `marker_slot` a ajuns acolo.
+	_verdict(mat0 == Palette.glow_material(_hazard.marker_slot, _hazard.marker_glow),
+		"banda arde pe slotul cerut (%d)" % _hazard.marker_slot)
+	_verdict(mat0 != Palette.glow_material(
+			(_hazard.marker_slot + 1) % 32, _hazard.marker_glow),
+		"si nu pe altul (slotul chiar conteaza)")
+
+	# `marker_height` e SCARA piesei, si asta se masoara pe AABB-ul asezat in
+	# lume — inclusiv cand piesa vine din GLB, care era chiar gaura din runda 1.
+	var h0 := _marker_height(_hazard.markers()[0])
+	print("    inaltimea reperului asezat: %.2f m (cerut %.2f)"
+		% [h0, _hazard.marker_height])
+	_verdict(absf(h0 - _hazard.marker_height) < 0.12,
+		"`marker_height` e chiar inaltimea piesei (%.2f fata de %.2f)"
+		% [h0, _hazard.marker_height])
+	# Si se misca odata cu ea: schimbam cifra si remasuram.
+	var before := _hazard.marker_height
+	_hazard.marker_height = before * 1.6
+	await get_tree().process_frame
+	var h1 := _marker_height(_hazard.markers()[0])
+	print("    la marker_height = %.2f: %.2f m" % [_hazard.marker_height, h1])
+	_verdict(absf(h1 - _hazard.marker_height) < 0.2,
+		"si urmeaza cifra cand se schimba (%.2f la %.2f cerut)"
+		% [h1, _hazard.marker_height])
+	_hazard.marker_height = before
+	await get_tree().process_frame
+
+
+## Inaltimea reala a unei piese asezate in lume (AABB pe mesh-uri, cu scara).
+func _marker_height(piece: Node3D) -> float:
+	var top := -INF
+	var bottom := INF
+	for n in _walk(piece):
+		var mi := n as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var box := mi.get_aabb()
+		var scale := mi.global_transform.basis.get_scale().y
+		var base := mi.global_position.y
+		top = maxf(top, base + (box.position.y + box.size.y) * scale)
+		bottom = minf(bottom, base + box.position.y * scale)
+	return 0.0 if top == -INF else top - bottom
+
+
+func _walk(node: Node) -> Array[Node]:
+	var out: Array[Node] = [node]
+	for c in node.get_children():
+		out.append_array(_walk(c))
+	return out

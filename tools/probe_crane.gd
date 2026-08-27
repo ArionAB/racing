@@ -51,6 +51,19 @@ const LAUNCH_MAX: float = 5.0
 const CRUSH_MAX: float = 0.9
 ## Sub atata viteza dupa lovitura, hazardul e un zid, nu o maturare.
 const MIN_SPEED_AFTER: float = 4.0
+## Cat din viteza dinaintea contactului trebuie sa ramana in secunda de dupa.
+##
+## Verdictul care lipsea in runda 1: „viteza finala 28.37" era masurata la
+## t=14, dupa noua secunde de reaccelerare, deci trecea si cu un PERETE in
+## mijloc. Criticul a masurat ce ascundea: 22.0 -> 1.1 m/s la impact, adica
+## 5%. Un prefabricat care te matura iti ia un sfert din viteza; unul care te
+## zideste ti-o ia pe toata, si diferenta se vede doar aici.
+const KEEP_MIN: float = 0.45
+## Cat tine fereastra in care se masoara impactul (s). Vezi nota din `_hit_run`.
+const IMPACT_WINDOW: float = 0.5
+## Cat din `lift_rise` trebuie sa se si vada in urcarea masurata (restul il
+## mananca amortizorul suspensiei in cadrele de dupa lansare).
+const RISE_FRACTION: float = 0.4
 
 var _track: TrackFromPath
 var _hazard: CraneScript
@@ -231,6 +244,22 @@ func _hit_run() -> void:
 	var touched := false
 	var t := 0.0
 	var t_touch := -1.0
+	# Cifrele care despart „maturat" de „zidit": viteza chiar inainte de
+	# contact, viteza minima din secunda de DUPA el, si urcarea peste cota de
+	# RULARE de dinainte.
+	#
+	# Amandoua se iau dintr-o fereastra de o secunda TINUTA IN URMA, nu din
+	# cadrul curent: cand `spin` devine pozitiv, hazardul si-a aplicat deja
+	# lovitura in cadrul ala, deci viteza „de dinainte" citita atunci e cea de
+	# dupa (masurat: 13.47 in loc de 22.0). Iar cota de rulare nu se poate lua
+	# ca maxim de la pornire — masina e lansata de la y = 0.7 si se aseaza,
+	# deci maximul ala e inaltimea de spawn (0.69), nu drumul.
+	var hist_v: Array[float] = []
+	var hist_y: Array[float] = []
+	var v_before := 0.0
+	var v_after := INF
+	var y_roll := 0.0
+	var y_air := -INF
 	while t < 14.0:
 		await get_tree().physics_frame
 		t += 1.0 / 60.0
@@ -240,8 +269,30 @@ func _hit_run() -> void:
 		if spin > 0.0 and not touched:
 			touched = true
 			t_touch = t
-		if touched:
+			v_before = hist_v[0] if hist_v.size() > 0 else car.horizontal_speed()
+			for y in hist_y:
+				y_roll = maxf(y_roll, y)
+		if not touched:
+			# Coada de o secunda: [0] e cel mai vechi cadru din ea.
+			hist_v.append(car.horizontal_speed())
+			hist_y.append(car.global_position.y)
+			if hist_v.size() > 60:
+				hist_v.pop_front()
+				hist_y.pop_front()
+		else:
 			lateral = maxf(lateral, absf(car.global_position.x))
+			y_air = maxf(y_air, car.global_position.y)
+			# Fereastra de IMPACT e o jumatate de secunda, si e o alegere, nu o
+			# comoditate: la +0.50 s masina e iar pe patru roti, iar ce se
+			# masoara dupa aia e soferul care se intoarce pe linie (traseul
+			# arata dipul de la +1.00 s si revenirea la +1.50 s). Verdictul
+			# trebuie sa fie despre hazard.
+			if t - t_touch <= IMPACT_WINDOW:
+				v_after = minf(v_after, car.horizontal_speed())
+			if int(round((t - t_touch) * 60.0)) in [3, 6, 12, 21, 30, 60, 90]:
+				print("      +%.2f s: v %.2f, y %.2f, rotile %d"
+					% [t - t_touch, car.horizontal_speed(),
+					car.global_position.y, car.wheels_on_ground])
 		if int(round(t * 60.0)) % 60 == 0:
 			print("    t=%5.2f pos %s v=%5.1f spin %.2f crush %.2f index %d"
 				% [t, str(car.global_position.round()), car.horizontal_speed(),
@@ -261,6 +312,20 @@ func _hit_run() -> void:
 		% car.global_position.distance_to(pos0))
 	_verdict(car.horizontal_speed() > MIN_SPEED_AFTER,
 		"nu e oprita de sarcina (viteza finala %.2f m/s)" % car.horizontal_speed())
+	# --- nu e un PERETE: cifra se ia la impact, nu dupa reaccelerare ------
+	var kept := v_after / maxf(v_before, 0.01)
+	print("    la IMPACT: %.2f -> %.2f m/s in %.2f s (%.0f%% pastrat, prag %.0f%%)"
+		% [v_before, v_after, IMPACT_WINDOW, 100.0 * kept, 100.0 * KEEP_MIN])
+	_verdict(kept >= KEEP_MIN,
+		"sarcina MATURA, nu zideste (%.0f%% din viteza pastrat la impact)"
+		% (100.0 * kept))
+	# --- si `lift_rise` chiar ridica -------------------------------------
+	var rise := y_air - y_roll
+	print("    URCARE: %.2f m (rulare %.2f -> varf %.2f); lift_rise cere %.2f m"
+		% [rise, y_roll, y_air, _hazard.lift_rise])
+	_verdict(rise >= _hazard.lift_rise * RISE_FRACTION,
+		"`lift_rise` nu e un export mort: %.2f m din %.2f ceruti"
+		% [rise, _hazard.lift_rise])
 	_verdict(car.road_index > idx0,
 		"isi duce indexul mai departe (%d -> %d)" % [idx0, car.road_index])
 	_verdict(_track.is_on_road(car.road_index, car.global_position, 0),

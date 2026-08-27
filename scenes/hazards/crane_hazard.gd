@@ -21,6 +21,14 @@ extends Node3D
 ## nu exista `race_active = false`, iar strivirea e minima: pierzi linia si
 ## cateva zecimi, nu turul.
 ##
+## [b]Si sarcina NU e un perete[/b]. Un bloc de beton de 4.6 m latime care
+## atarna la 0.56 m de asfalt opreste orice masina — criticul a masurat 22.0
+## -> 1.1 m/s la impact, adica exact „distrus", pe dos fata de contract.
+## De aceea contactul deschide o exceptie de coliziune cu prefabricatul
+## (`clear_seconds`, vezi [HazardThrow]) cu cateva cadre inainte, prin zona de
+## ghiont care e mai grasa decat el: sarcina trece prin tine invartindu-te si
+## maturandu-te de pe linie, in loc sa te zideasca.
+##
 ## De ce spin VIZUAL si nu o rotatie reala: nota din `Car.spin_body` — o
 ## rotire a lui `basis` in aer te-ar face sa aterizezi cu botul in alta parte
 ## decat merge viteza, adica un tete-a-queue pe care nu l-ai putut evita.
@@ -65,8 +73,11 @@ const SLAB_TOP_OFFSET: float = -0.06
 ## Raza la care atarna sarcina pe braț (m). Trebuie sa fie mai mare decat
 ## `tower_offset`, altfel sarcina nu ajunge niciodata deasupra drumului.
 @export_range(4.0, 30.0, 0.5) var hook_radius: float = 13.0
-## Cat spatiu ramane sub prefabricat cand trece peste asfalt (m). Sub 1.1 m
-## (inaltimea colizorului masinii) sarcina chiar loveste — asta e rostul.
+## Cat spatiu ramane sub prefabricat cand trece peste asfalt (m).
+##
+## Sub 1.1 m (inaltimea colizorului masinii) sarcina chiar te prinde — asta e
+## rostul. „Te prinde" inseamna aici ghiont + invartire, nu oprire: contactul
+## solid e taiat de `clear_seconds` (vezi antetul).
 @export_range(0.0, 4.0, 0.05) var load_clearance: float = 0.5
 ## Legănarea sarcinii, in grade, in planul de mers al brațului.
 @export_range(0.0, 15.0, 0.5) var sway_deg: float = 3.0
@@ -74,10 +85,26 @@ const SLAB_TOP_OFFSET: float = -0.06
 @export_range(1.0, 20.0, 0.1) var sway_period: float = 4.5
 
 @export_group("Lovitura")
-## Ghiontul pe tangenta rotatiei (m/s).
+## Ghiontul pe tangenta rotatiei (m/s), ADUNAT la viteza care ti-a mai ramas.
+##
+## Se aduna, spre deosebire de monorail (unde viteza de dupa lovitura se
+## scrie): acolo te ia un tren, aici te sterge o sarcina care se plimba cu
+## 4 m/s. Ce te scoate de pe linie e tangenta, nu masa.
 @export_range(0.0, 20.0, 0.5) var sweep_push: float = 7.0
-## Cat te ridica lovitura (m/s). Mic: sarcina te matura, nu te lanseaza.
-@export_range(0.0, 8.0, 0.1) var lift_push: float = 1.2
+## Cat te ridica lovitura (m). Mic dinadins: sarcina te matura, nu te lanseaza
+## — dar trebuie sa se si VADA, deci trece prin `Car.launch` ca la monorail
+## (vezi [HazardThrow]). Cu vechiul „+= Vector3.UP * 1.2" urcarea masurata era
+## sub 5 cm: un @export mort.
+@export_range(0.0, 3.0, 0.05) var lift_rise: float = 0.45
+## Cat timp dupa contact prefabricatul nu mai are voie sa atinga masina (s).
+##
+## [b]Asta e ce transforma sarcina din PERETE in matura.[/b] Criticul a
+## masurat prima versiune: 22.0 -> 1.1 m/s la impact, adica un zid de beton de
+## 4.6 m latime la 0.56 m de asfalt. „Contact = te INVARTE, nu te distruge"
+## (brief §3) nu poate fi scris cu un corp solid care te opreste: zona de
+## ghiont e mai GRASA decat sarcina, deci exceptia se pune cu cateva cadre
+## inainte de contactul solid, iar prefabricatul trece prin tine invartindu-te.
+@export_range(0.0, 4.0, 0.05) var clear_seconds: float = 1.0
 ## Rotirea VIZUALA a caroseriei dupa contact (rad/s) si cat tine (s).
 @export_range(0.0, 20.0, 0.5) var spin_rate: float = 7.0
 @export_range(0.0, 5.0, 0.1) var spin_seconds: float = 1.1
@@ -85,6 +112,8 @@ const SLAB_TOP_OFFSET: float = -0.06
 ## viteza ramane. Deliberat blande — pedeapsa e linia pierduta, nu turul.
 @export_range(0.0, 3.0, 0.05) var crush_seconds: float = 0.6
 @export_range(0.3, 1.0, 0.01) var crush_factor: float = 0.85
+## Cat din viteza ta ramane dupa contact. Se aplica O SINGURA DATA, in
+## aruncare; `Car.crush` primeste 1.0 (altfel taietura ar cadea de doua ori).
 @export_range(0.0, 1.0, 0.01) var keep_speed: float = 0.75
 ## Cat sta o masina imuna dupa o lovitura (s), ca sa nu primeasca ghiontul de
 ## 60 de ori pe secunda cat sta lipita de prefabricat.
@@ -213,14 +242,19 @@ func _build_load() -> void:
 		_load.add_child(PaletteBox.instance(SLAB_SIZE * model_scale,
 			Palette.CONCRETE, col.position))
 
-	# Zona de ghiont: mai grasa decat sarcina, ca sa prinda contactul (acelasi
-	# tipar ca la carusel — corpul solid opreste, zona da directia).
+	# Zona de ghiont: mult mai grasa decat sarcina pe orizontala, si asta e
+	# functional, nu generos. Ghiontul si exceptia de coliziune trebuie sa
+	# apuce sa se aplice INAINTE ca solverul sa rezolve contactul cu betonul:
+	# la 22 m/s masina inainteaza 0.37 m pe cadru de fizica, deci marginea de
+	# 1.2 m de fiecare parte e o fereastra de trei cadre. Cu vechii 0.6 m
+	# aveam un singur cadru si sonda criticului a masurat ce inseamna asta —
+	# viteza cazuta de la 22.0 la 1.1 m/s, adica un perete.
 	_area = Area3D.new()
 	_area.name = "SweepZone"
 	_area.monitorable = false
 	var azone := CollisionShape3D.new()
 	var abox := BoxShape3D.new()
-	abox.size = (SLAB_SIZE + Vector3(1.2, 0.6, 1.2)) * model_scale
+	abox.size = (SLAB_SIZE + Vector3(2.4, 0.6, 2.4)) * model_scale
 	azone.shape = abox
 	azone.position = col.position
 	_area.add_child(azone)
@@ -348,14 +382,16 @@ func _hit_cars(delta: float) -> void:
 			tangent = Vector3.RIGHT * signf(float(tower_side))
 		else:
 			tangent = tangent.normalized()
-		car.apply_sweep(tangent * sweep_push + Vector3.UP * lift_push)
+		var mine := Vector3(car.velocity.x, 0.0, car.velocity.z) * keep_speed
+		HazardThrow.throw(car, _load, mine + tangent * sweep_push,
+			lift_rise, clear_seconds)
 		# Sensul rotirii urmeaza sensul maturarii, ca invartirea sa se citeasca
 		# drept „m-a impins prefabricatul", nu ca un bug de fizica.
 		var sign := signf(tangent.cross(Vector3.UP).dot(
 			-car.global_transform.basis.z))
 		car.spin_body(spin_rate * (sign if absf(sign) > 0.01 else 1.0),
 			spin_seconds)
-		car.crush(crush_seconds, crush_factor, Vector3(1.2, 0.62, 1.2), keep_speed)
+		car.crush(crush_seconds, crush_factor, Vector3(1.2, 0.62, 1.2), 1.0)
 
 
 # ---------------------------------------------------------- pentru sonde

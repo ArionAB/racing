@@ -296,7 +296,22 @@ func _apply_glow() -> void:
 		for token in parts[0].split(",", false):
 			slots.append(int(token))
 		var energy := float(parts[1]) if parts.size() > 1 else 1.2
-		var mat := Palette.glow_material_slots(slots, energy)
+		# Al treilea camp, optional, e CULOAREA luminii (`#RRGGBB`). Fara el,
+		# fiecare slot arde in propria culoare — bun pentru jar. Cu el, masca
+		# ramane aceeasi dar lumina are o singura nuanta: vezi
+		# `Palette._slots_glow_texture`, unde scrie de ce lemnul lui Hongya
+		# Dong nu se poate lumina cu propria lui culoare.
+		var tint := Color.BLACK
+		var multiply := false
+		if parts.size() > 2:
+			var t := String(parts[2]).strip_edges()
+			# un `*` la coada cere operatorul MULTIPLY: pastreaza relieful
+			# (albedo + AO) si doar il incalzeste. Vezi Palette.
+			if t.ends_with("*"):
+				multiply = true
+				t = t.substr(0, t.length() - 1)
+			tint = Color.html(t)
+		var mat := Palette.glow_material_slots(slots, energy, tint, multiply)
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
 			var node: Node = stack.pop_back()

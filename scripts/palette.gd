@@ -866,6 +866,36 @@ static func finish_material(name: String) -> StandardMaterial3D:
 	return mat
 
 
+## Un material care ARDE pe UN slot din atlas, cached per slot.
+##
+## Generalizarea ramurii emisive din `finish_material` ("lava"), scoasa de sub
+## tabelul de finisaje fiindca al doilea client al ei nu e un finisaj, ci o
+## CLASA de piese: reperele din culoarul de ceata (Chongqing, brief §3 POI E —
+## „marcajele si stopurile raman vizibile, emisive slabe"). Fara ea, „raman
+## vizibile" se rezolva prin distanta (reperele la 12 m, ceata inghite la 46),
+## adica prin noroc, nu prin lumina — exact obiectia criticului.
+##
+## UN material per slot, partajat de toate piesele care il cer: garda numara
+## materialele per pista, deci un culoar cu 12 repere aduce +1, nu +12.
+## Energia e mica dinadins (`energy`): un reper care ARDE in ceata devine un
+## far si sterge tot ce voia sa marcheze.
+static var _glow_mats: Dictionary = {}
+
+static func glow_material(slot: int, energy: float = 1.2) -> StandardMaterial3D:
+	var key := "%d|%.2f" % [slot, energy]
+	if _glow_mats.has(key):
+		return _glow_mats[key]
+	var mat := world_material().duplicate() as StandardMaterial3D
+	# NEGRU + textura de masca, ca la lava: operatorul e ADD, deci o culoare
+	# de emisie alba ar aprinde toata piesa, nu slotul.
+	mat.emission_enabled = true
+	mat.emission = Color.BLACK
+	mat.emission_energy_multiplier = energy
+	mat.emission_texture = _slot_glow_texture(slot)
+	_glow_mats[key] = mat
+	return mat
+
+
 ## --- Lava incandescenta (Stromboli) -----------------------------------------
 
 ## Materialul lavei: crusta neagra cu crapaturi care CURG si pulseaza.

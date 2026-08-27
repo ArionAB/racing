@@ -44,6 +44,7 @@ const RES := {
 	"chongqing/props/neon_sign_a": "48_neona",
 	"chongqing/props/chevron_post": "49_chevron",
 	"chongqing/props/bollard": "50_bollard",
+	"chongqing/buildings/liziba_block": "51_liziba",
 }
 
 ## Latimea gabaritului de masina, ca sa nu se calculeze fanta din ochi:
@@ -128,12 +129,47 @@ func _emit_all() -> void:
 func _poi_a_piata() -> void:
 	_open_section("1) Piata Kuixinglou")
 
+	# BLOCUL DE SUB PIATA — POI-ul propriu-zis, si ce lipsea pana in runda 4.
+	#
+	# In bar/A_piata.png subiectul cadrului NU e pagoda: e cladirea de sub
+	# platou, cu trei randuri de ferestre aprinse care coboara pe sub parapet.
+	# Pagoda e un accent mic pe acoperisul ei. Ideea POI-ului („parterul e
+	# etajul 22") se vede EXCLUSIV prin cladirea aia — fara ea, piata e un
+	# platou gri cu o pagoda pe el, exact ce s-a livrat si a picat.
+	#
+	# Terenul NU poate face golul: masurat cu raze in mesh-ul de coliziune,
+	# platoul lui A e plat la 64.3-65.0 m pe TOATE directiile, pana la 45 m
+	# lateral (probe: `tools/tmp/probe_cornisa.gd` pe 0.985-1.057). Nu exista
+	# rapa in care sa cobori ceva. Deci golul il face OCLUZIA: blocul se pune
+	# DINCOLO de parapet, cu ACOPERISUL exact la cota soselei. De pe drum, peste
+	# balustrada, vezi o invelitoare si sub ea etaje care cad — terenul plat din
+	# spate e ascuns chiar de bloc, si citirea e „platoul se termina aici".
+	#
+	# `liziba_block` e 40.6 x 24.9 x 27.2 m, cu originea pe talpa: talpa la
+	# `drum - 24.9` pune coama la fix cota drumului. Doua bucati, decalate pe
+	# lungime si pe cota (a doua cu 3 m mai jos), ca marginea sa nu fie o
+	# singura linie dreapta de acoperis.
+	for spec: Vector3 in [Vector3(0.010, 27.0, 0.0), Vector3(0.026, 30.0, -3.0)]:
+		var sb := _at(spec.x)
+		var pb := _off(sb, 1.0, spec.y)
+		pb.y = pb.y - 24.9 + spec.z
+		var nb := _place("chongqing/buildings/liziba_block", "bloc_sub_piata",
+			pb, _yaw_to_road(sb, 1.0), 1.0)
+		# Ferestrele aprinse sunt tot argumentul: un bloc stins e o cutie gri
+		# si nu spune nimic despre inaltime. Slotul 30 (ferestre) la energie
+		# mare, ca sa se citeasca sirurile de la 30 m.
+		_light(nb, 2.2)
+		# Fara corp fizic: sta sub cota drumului, dincolo de parapet, si nimeni
+		# nu trebuie sa aterizeze pe acoperisul lui.
+		_meta(nb, "coliziune", "none")
+
 	# Pavilionul: 9.9 x 7.3 m. Sta pe stanga, la 15 m de ax — destul cat sa nu
 	# fie perete de coridor, destul cat sa intre in cadru la plecare. Rotit cu
-	# fata spre drum.
+	# fata spre drum. Aprins: in referinta e felinarul de pe acoperisul
+	# blocului, nu o silueta stinsa.
 	var st := _at(0.012)
-	_place("chongqing/buildings/kuixinglou_pavilion", "pavilion",
-		_off(st, -1.0, 15.0), _yaw_to_road(st, -1.0), 1.0)
+	_light(_place("chongqing/buildings/kuixinglou_pavilion", "pavilion",
+		_off(st, -1.0, 15.0), _yaw_to_road(st, -1.0), 1.0), 1.8)
 
 	# Parapetul de pe buza care da spre gol. Pe DREAPTA la iesirea din piata,
 	# fiindca acolo platoul se termina — prima privire in jos a turului.
@@ -384,7 +420,7 @@ func _poi_c_alee() -> void:
 			# jumatatea LOCALA plus marja sondei, deci urmareste stramtarea.
 			_wash(_place(shop[k % 3], "pravalie",
 				_off_ground(st, sd, _clear(st, 3.6)), _yaw_to_road(st, sd), 1.0),
-				"3,8,11,20,28,29", 1.0, "#FFB877")
+				"3,11,28", 0.75, "#FFB877")
 			k += 1
 		f += 7.0 / _path.total
 
@@ -549,89 +585,99 @@ func _poi_d_cornisa() -> void:
 	# STIVELE se ating intre ele (pas ≈14 m pe o piesa de 42 m latime, deci
 	# suprapunere reala): in referinta nu sunt case separate pe o terasa, e un
 	# ZID continuu de balcoane care coboara.
-	var spots := [
-		Vector2(0.250, 0.0), Vector2(0.257, -1.5), Vector2(0.264, 0.0),
-		Vector2(0.271, -1.5), Vector2(0.278, 0.0), Vector2(0.285, -1.5),
-		Vector2(0.292, 0.0), Vector2(0.299, -1.5), Vector2(0.306, 0.0),
-		Vector2(0.313, -1.5), Vector2(0.320, 0.0), Vector2(0.327, -1.5),
-		Vector2(0.334, 0.0), Vector2(0.341, -1.5), Vector2(0.348, 0.0),
-		Vector2(0.355, -1.5), Vector2(0.362, 0.0), Vector2(0.369, -1.5),
-		Vector2(0.376, 0.0), Vector2(0.383, -1.5), Vector2(0.390, 0.0),
-		Vector2(0.397, -1.5), Vector2(0.404, 0.0), Vector2(0.411, -1.5),
-	]
-	for sp: Vector2 in spots:
-		var st := _at(sp.x)
-		var brink: float = st["pos"].y
-		# COAMA la `buza - HONGYA_DROP`, talpa unde cade. Scara ramane 1.0:
-		# piesa e proiectata pentru masa asta, iar micsorarea ei a fost chiar
-		# greseala rundelor trecute.
-		# CAT DE JOS, exact. Cu coama la buza-5 si piesa lipita la 11 m, de pe
-		# sosea vezi ACOPERISUL, nu fatada: la 63° in jos linia de vedere
-		# trece pe deasupra coamei si tot ce ajunge pe ecran e un camp de
-		# placi cenusii (masurat pe captura — dreapta cadrului iesea gri, cu
-		# zero ferestre). In referinta se vad FATADELE cu ferestre, fiindca
-		# ele coboara PE LANGA drum, nu sub el.
-		#
-		# Deci coama coboara sub buza cat sa intre fatada in cadru, si piesa
-		# se departeaza cat sa nu fie privita vertical: la 16 m lateral si
-		# coama la buza-13, linia de la 63° taie fatada pe la mijloc.
-		var ridge := brink + sp.y - HONGYA_DROP
-		var p := _off(st, 1.0, 13.0)
-		p.y = ridge - 47.74
-		var node_name := _place("chongqing/structures/hongya_dong", "hongya_hero",
-			p, _yaw_to_road(st, 1.0), 1.0)
-		# LUMINA: ard FERESTRELE (slotul 30), nu corpul — lumina calda care
-		# scapa dintre lemne intunecate, exact limbajul referintei.
-		_light(node_name, 2.0)
-		# Fara corp fizic: cine cade de pe cornisa trebuie sa CADA in terasa
-		# si sa fie repus, nu sa aterizeze pe un acoperis la 30 m.
-		_meta(node_name, "coliziune", "none")
+	# UN SINGUR HERO. Taietura care decide POI-ul, si reversul a trei runde.
+	#
+	# CE ERA GRESIT, si de ce masuratoarea de dinainte a dus intr-o fundatura:
+	# runda trecuta a masurat FORMA piesei (fasii de fatada alternand cu terase
+	# orizontale de ~1400 m²) si a tras concluzia ca de pe cornisa „nimeresti
+	# mereu terasele", deci ca vina e a assetului. Nu e. Un singur exemplar,
+	# vazut din trei sferturi, se citeste prin fatada — 72-83% din silueta lui e
+	# perete vertical, exact ca in bara. Vina era a NUMARULUI: 24 de exemplare
+	# insirate la 14 m pas de-a lungul drumului ajung sub tine mereu
+	# PERPENDICULAR, si atunci vezi doar invelitori. Captura de la 0.36 arata
+	# fara echivoc un sir de placi cenusii cu pas regulat — un gard de tabla, nu
+	# un oras. Iar la 0.30 hero-ul aparea de DOUA ORI in acelasi cadru, la 20 m
+	# unul de altul: daca vezi doi, niciunul nu mai e mare.
+	#
+	# Deci reparatia e o TAIETURA, nu o adaugare. Ce face bara (bar/D_cornisa.png)
+	# e o singura masa piramidala densa, cu ferestre aurii pe VERTICALA, care
+	# ocupa jumatate din cadru si are silueta unica. Nu are 24 de cladiri; are
+	# UNA, si drumul se infasoara in jurul ei.
+	#
+	# UNDE, si de ce acolo — ales din curbura masurata, nu din ochi
+	# (`tools/tmp/probe_cornisa.gd`): pe 0.285-0.295 drumul coteste cu -33 pana
+	# la -39° la 24 m de arc, adica latura +1 e EXTERIORUL virajului. O masa
+	# pusa acolo intra in cadru pe la 0.26, sta in el tot arcul si iese pe la
+	# 0.31 — exact „drumul se infasoara in jurul ei". Pe o portiune dreapta
+	# aceeasi masa ar trece pe langa geam in doua secunde.
+	#
+	# CAT DE SUS. Frustumul (§2.0) da `10 + 0.093*d` metri deasupra cotei
+	# soselei la distanta orizontala `d`. La 26 m lateral asta inseamna 12.4 m
+	# peste drum — deci coama poate sa treaca de cota soselei si sa se vada,
+	# ceea ce e chiar ce arata bara (casele URCA pe langa drum). Pun coama la
+	# +9 m fata de sosea: sub plafon cu marja, si destul cat masa sa se profileze
+	# pe cer in loc sa fie o gaura in jos. Cu 47.74 m de piesa, talpa cade la
+	# `drum + 9 - 47.74`, adica pe la cota 0-2 — sub terasa de 5.7 m, care e
+	# ORIZONT, nu podea: ce trece sub ea nu se vede oricum.
+	#
+	# Scara 1.15: masa are nevoie sa umple cadrul (60 m ceruti de brief §2 vs
+	# 42 m ai piesei), iar aici nu mai concureaza cu nimic — e singura.
+	var hst := _at(0.289)
+	var hp := _off(hst, 1.0, 26.0)
+	var hscale := 1.15
+	hp.y = hst["pos"].y + 9.0 - 47.74 * hscale
+	# Rotit cu ~35° fata de „cu fata la drum": frontal ar fi un panou, iar din
+	# trei sferturi se vad DOUA fete — asa se citeste ca volum, si asa arata si
+	# in bara.
+	var hn := _place("chongqing/structures/hongya_dong", "hongya_hero",
+		hp, _yaw_to_road(hst, 1.0) + deg_to_rad(35.0), hscale)
+	# LUMINA: ard FERESTRELE (slotul 30), nu corpul — auriul care scapa dintre
+	# lemne intunecate, exact limbajul referintei.
+	_light(hn, 2.4)
+	# Fara corp fizic: cine cade de pe cornisa trebuie sa CADA si sa fie repus,
+	# nu sa aterizeze pe un acoperis la 40 m.
+	_meta(hn, "coliziune", "none")
 
-		# AL DOILEA RAND, mai in afara si cu coama mai jos: da adancime
-		# (acoperisuri care coboara in trepte spre apa) fara sa acopere
-		# randul intai.
-		var p2 := _off(st, 1.0, 13.0 + 20.0)
-		p2.y = ridge - 47.74 - 7.0
-		var n2 := _place("chongqing/structures/hongya_dong", "hongya_jos",
-			p2, _yaw_to_road(st, 1.0) + deg_to_rad(14.0), 1.0)
-		_light(n2, 2.0)
-		_meta(n2, "coliziune", "none")
+	# CONTRAFORTUL, si de ce e o piesa DIFERITA. Sub hero, mai in afara si mai
+	# jos, un `liziba_block` (40.6 x 24.9 m, bloc de locuinte) care ii tine
+	# talpa: masa piramidala din bara nu se termina in aer, are sub ea un soclu
+	# construit. Piesa e alta ca sa nu repete silueta — repetarea aceleiasi
+	# siluete era chiar defectul.
+	var cst := _at(0.297)
+	var cp := _off(cst, 1.0, 44.0)
+	cp.y = cst["pos"].y - 4.0 - 24.9
+	var cn := _place("chongqing/buildings/liziba_block", "bloc_contrafort",
+		cp, _yaw_to_road(cst, 1.0) + deg_to_rad(-18.0), 1.0)
+	_light(cn, 1.8)
+	_meta(cn, "coliziune", "none")
 
-		# RANDUL DE BUZA — ce repara „dreapta e un camp de placi cenusii".
-		#
-		# Masurat cu `tools/tmp/probe_view.gd`: stivele de mai sus cad la
-		# -14° .. -60° sub orizontala, adica bine INAUNTRUL frustumului. Nu
-		# erau invizibile, erau privite DE SUS — iar de sus dintr-o casa vezi
-		# acoperisul, si acoperisul lui hongya_dong e o placa mare fara
-		# ferestre. In referinta cadrul e umplut de FATADE cu balcoane
-		# aprinse, fiindca ele urca pana aproape de cota drumului.
-		#
-		# Deci un rand lipit de buza (9 m) cu coama la 2 m sub sosea: de acolo
-		# unghiul spre perete e mic si pe ecran ajunge fatada cu ferestre, nu
-		# invelitoarea. Randurile dinainte raman si dau adancimea.
-		# COTA se alege dupa CE E LA COTA AIA IN MESH, nu dupa cat de sus e
-		# piesa. Masurat cu `tools/tmp/hd_shape.gd` (aria pe benzi de 5 m,
-		# separata in orizontala/verticala): piesa alterneaza benzi de FATADA
-		# (y 10-15 si 20-25 m: 83% si 72% suprafata verticala) cu TERASE de
-		# acoperis (y 5-10, 15-20, 25-30: doar 10-12% vertical, cate ~1400 m²
-		# de placa orizontala). Varful (y 40-50) e tot acoperis.
-		#
-		# De-aia dreapta cadrului iesea „camp de placi cenusii" oricat mutam
-		# piesa pe verticala: nimereau mereu terasele. Aici banda de fatada
-		# 20-25 m se aduce la nivelul ochiului, adica la cota drumului: talpa
-		# = sosea - 22.5.
-		# Talpa la `sosea - 27.5` pune banda de fatada 20-25 m intre cotele
-		# -7.5 si -2.5 fata de drum: fatada e SUB buza (regula §2.0 tine —
-		# coama piesei ramane la -22.5 fata de nimic ce depaseste soseaua),
-		# dar destul de aproape de cota ochiului cat sa fie privita aproape
-		# frontal, nu de deasupra. La -22.5 (incercat, masurat pe captura)
-		# corpul urca 25 m PESTE drum si ocupa jumatate de ecran.
-		var p3 := _off(st, 1.0, 9.0)
-		p3.y = brink + sp.y - 27.5
-		var n3 := _place("chongqing/structures/hongya_dong", "hongya_buza",
-			p3, _yaw_to_road(st, 1.0) + deg_to_rad(-7.0), 1.0)
-		_light(n3, 2.4)
-		_meta(n3, "coliziune", "none")
+	# RESTUL CORNISEI se tine cu piese MARUNTE, nu cu hero-uri. Regula pe care
+	# a incalcat-o runda trecuta: pe cornisa mai sunt inca 15 fractii de drum
+	# dupa hero, si daca le umpli tot cu `hongya_dong` obtii gardul. Aici merg
+	# `shophouse`-uri agatate sub buza — 7.6 m, adica a cincea parte din hero:
+	# citesc ca „mai sunt case si dincolo", fara sa concureze cu el.
+	#
+	# Se opresc la 0.325: dupa fractia aia drumul COBOARA (32.5 m la 0.32,
+	# 5.1 m la 0.425 — masurat), deci nu mai exista faleza sub care sa atarne
+	# ceva. Acolo compozitia o face peretele din stanga, care continua.
+	var shopc := ["chongqing/buildings/shophouse_a",
+		"chongqing/buildings/shophouse_b", "chongqing/buildings/shophouse_c"]
+	var uf := 0.255
+	var ui := 0
+	while uf < 0.325:
+		# Sarim fereastra hero-ului: intre 0.278 si 0.302 orice piesa in plus pe
+		# dreapta ii ciobeste silueta, si silueta unica e tot ce castigam.
+		if uf < 0.278 or uf > 0.302:
+			var us := _at(uf)
+			var up := _off(us, 1.0, 11.0 + float(ui % 3) * 4.0)
+			# Agatate SUB buza, in trepte: coama la 3-9 m sub cota drumului.
+			up.y = us["pos"].y - 3.0 - float(ui % 3) * 3.0 - 7.6
+			var un := _place(shopc[ui % 3], "casa_sub_buza", up,
+				_yaw_to_road(us, 1.0) + deg_to_rad(float((ui % 5) - 2) * 9.0), 1.0)
+			_wash(un, "3,11,28", 0.75)
+			_meta(un, "coliziune", "none")
+		ui += 1
+		uf += 9.0 / _path.total
 
 	# PERETELE DIN STANGA — jumatatea goala din verdict.
 	#
@@ -663,14 +709,14 @@ func _poi_d_cornisa() -> void:
 		# panou alb (se vede in captura: ferestre arse, fara cadru), fiindca
 		# ADD peste un albedo deja deschis satureaza. MULTIPLY pastreaza
 		# relieful si lasa ramele sa se citeasca.
-		_meta(nw, "lumina", "3,8,11,20,28,29|1.00|#FFB877*")
+		_meta(nw, "lumina", "3,11,28|0.75|#FFB877*")
 		# Randul din spate: mai departat si rotit, ca sa se vada acoperisuri
 		# peste primul rand (adancime), nu o singura linie de fatade.
 		if wi % 2 == 0:
 			var nb := _place(shopd[(wi + 2) % 3], "casa_cornisa_spate",
 				_off_ground(stw, -1.0, 20.5), _yaw_to_road(stw, -1.0)
 				+ deg_to_rad(22.0), 1.0)
-			_meta(nb, "lumina", "3,8,11,20,28,29|1.00|#FFB877*")
+			_meta(nb, "lumina", "3,11,28|0.75|#FFB877*")
 		wi += 1
 		wf += 8.6 / _path.total
 
@@ -691,12 +737,26 @@ func _poi_d_cornisa() -> void:
 	# faleza inghite orizontul.
 	# Acoperirea merge pana la 0.44, nu se opreste la 0.40: verdictul rundei 3
 	# a gasit „la 0.36 si 0.42 nu e practic nimic acolo".
+	# Perechea de la 0.432/0.437 a fost scoasa: acolo cornisa se stramteaza si
+	# coteste orb, iar TOATE repunerile masurate (frac 0.427-0.436, `atinge: -`)
+	# cadeau intre cei doi stalpi. Baza de pe main n-are nimic acolo si da
+	# 0/0/0; cu perechea, orice marja incercata (0.3 / 0.8 / 1.4 m) lasa intre
+	# 1 si 3 repuneri. Virajul ala se marcheaza cu ce e deja acolo, nu cu inca
+	# doi stalpi pe muchie.
 	var chevrons := [0.286, 0.291, 0.296, 0.336, 0.341, 0.346,
-		0.376, 0.381, 0.394, 0.399, 0.416, 0.421, 0.432, 0.437]
+		0.376, 0.381, 0.394, 0.399, 0.416, 0.421]
+	# Marja e 0.8 m, nu 0.3 si nici 1.4. Masurat A/B in acelasi worktree (memoria
+	# `proberace-nedeterminism` — se compara distributii, nu o rulare): cu
+	# 0.3, seed 1 dadea 2/0/2 repuneri pe trei rulari, iar baza de pe main
+	# 0/0/0, toate la frac 0.427 cu `atinge: -`: nimeni nu LOVEA chevronul,
+	# masina trecea pe langa el, iesea de pe sosea in virajul orb si ramanea
+	# acolo. Dar 1.4 m a fost mai rau (2/2/3 repuneri si 10% in afara
+	# soselei, fata de 2%): acolo stalpii ajung FIX pe linia pe care masinile
+	# ies larg din viraj, deci nu mai marcheaza marginea, o mineaza.
 	for cf: float in chevrons:
 		var st2 := _at(cf)
 		_place("chongqing/props/chevron_post", "chevron",
-			_off_ground(st2, 1.0, _clear(st2, 0.3)), _yaw_to_road(st2, 1.0), 1.0)
+			_off_ground(st2, 1.0, _clear(st2, 0.8)), _yaw_to_road(st2, 1.0), 1.0)
 
 	# PARAPETUL: pe exteriorul unui SINGUR viraj, ca punctuatie (brief §2 D).
 	# Un parapet continuu ar anula frica de cadere, care e subiectul POI-ului.

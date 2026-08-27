@@ -409,83 +409,78 @@ func _poi_d_cornisa() -> void:
 	# coboara coama, ci coboara TALPA sub buza, ca etajele sa se vada
 	# coborand in gol.
 	var terrace_y := 5.7
-	# MASA se face din NUMAR, nu din inaltime. Cele trei bucati de dinainte
-	# umpleau cadrul doar fiindca depaseau soseaua cu 20 m; odata coborate sub
-	# buza (vezi mai jos), trei piese devin un obiect pe langa care treci.
-	# Referinta (bar/D_cornisa.png) nu arata trei case mari, ci zeci de etaje
-	# inghesuite cat tine virajul — deci pasul scade la ~0.012 din tur (≈25 m)
-	# si stivele se aseaza pe DOUA randuri, al doilea mai in afara pe terasa
-	# si mai jos, ca sa nu iasa o singura linie de creasta.
+	# MASA se face din NUMAR SI DIN APROPIERE, nu din inaltime.
+	#
+	# Runda 2 a picat la comparatia oarba cu „hero-ul e mic, lateral si randat
+	# ca placi crem plate". Cauzele erau trei, si doar una era de compozitie:
+	#
+	#  1. AO-ul copt in `hongya_dong.glb` era STRICAT: mediana vertex color
+	#     0.098, adica FIX podeaua lui `floor=0.10`, pe peste jumatate din
+	#     mesh (masurat). `AO_HERO` folosea `dist=9.0` pe o cladire de 47.7 m
+	#     cu geometrie densa — razele loveau ceva in toate directiile, ocluzia
+	#     satura, si tot corpul cadea pe podea. Prin comparatie, props-urile
+	#     aceluiasi kit folosesc `dist=2.0-2.6`, iar `buildings/village_house`
+	#     de pe o pista livrata are mediana 0.475. Cu jumatate din mesh la
+	#     0.098 NIMIC nu putea arata a cladire: ADD dadea placa portocalie,
+	#     MULTIPLY dadea placa crem — ambele „plate" fiindca sub ele nu mai
+	#     era relief, doar o constanta. Reparat in asset (vertex colors
+	#     recompuse: mediana 0.675), nu compensat din lumina.
+	#  2. Masca emisiva era de 31 px in loc de 32 (`HEX.size()` vs `SLOTS`),
+	#     deci slotul 30 cadea intre texeli si ardea pe jumatate. De aici
+	#     masuratoarea „slotul 30 singur da o silueta neagra" din runda 1 —
+	#     concluzie corecta pe o masca gresita. Reparat in `palette.gd`.
+	#  3. Compozitia: stivele stateau la 17-25 m lateral, adica DINCOLO de
+	#     buza (masurat: buza cade intre 8 si 12 m). De acolo hero-ul se vede
+	#     ca un obiect mic in dreapta, nu ca un masiv agatat sub tine.
+	#
+	# Ce se schimba aici e (3): stivele se lipesc de buza si se indesesc.
+	# Pasul scade la ~0.008 din tur (≈17 m) si randul al doilea coboara pe
+	# terasa, ca de pe cornisa sa vezi acoperisuri care COBOARA in trepte.
 	var spots := [
-		Vector2(0.262, 0.0), Vector2(0.274, -1.0), Vector2(0.286, -2.0),
-		Vector2(0.298, -1.0), Vector2(0.310, -2.5), Vector2(0.322, -1.5),
-		Vector2(0.334, -3.0), Vector2(0.346, -2.0),
+		Vector2(0.258, 0.0), Vector2(0.266, -1.5), Vector2(0.274, -0.5),
+		Vector2(0.282, -2.0), Vector2(0.290, -0.5), Vector2(0.298, -1.5),
+		Vector2(0.306, -0.5), Vector2(0.314, -2.0), Vector2(0.322, -1.0),
+		Vector2(0.330, -2.5), Vector2(0.338, -1.0), Vector2(0.346, -2.0),
 	]
 	for sp: Vector2 in spots:
 		var st := _at(sp.x)
 		var brink: float = st["pos"].y
 		# TALPA PE TERASA, COAMA SUB BUZA — si de aici scala, nu invers.
-		#
-		# Varianta dinainte tinea scala pe 1.0 si lasa talpa sa se aseze pe
-		# terasa. Cu 47.74 m de casa pe o faleza de 27, coama urca la 53.4 m
-		# in timp ce soseaua e la 32-34: hero-ul iesea cu 20 m PESTE drum si
-		# acoperea virajul urmator (se vede in captura frac 0.30). Argumentul
-		# ei — „in referinta esti INTRE case, nu deasupra lor" — descrie un
-		# cadru de diorama vazut din lateral, nu ce vede ChaseCamera, si intra
-		# direct in regula care decide toata pista (brief §2.0 si §8: tot ce e
-		# impresionant sta SUB jucator, iar Hongya Dong incepe la 5 m sub buza,
-		# nu la 50). Cine e mai inalt decat drumul nu mai e „orasul de dedesubt".
-		#
-		# Deci: talpa pe terasa (masurat 5.7 m pe toata cornisa), coama la
-		# `buza - HONGYA_DROP`, iar scala e raportul dintre cele doua. Iese
-		# ~0.46-0.57, adica 22-27 m de casa — tot un masiv, dar unul pe care
-		# il ai SUB tine.
+		# Coama la `buza - HONGYA_DROP` tine regula frustumului (§2.0: ce e
+		# impresionant sta SUB jucator) si brief §8 (incepe la ~5 m sub buza).
 		var foot := terrace_y
 		var ridge := brink + sp.y - HONGYA_DROP
 		var scl := clampf((ridge - foot) / 47.74, 0.2, 1.0)
-		# Lipit de buza (8.5 m masurat), la jumatate din adancimea piesei
-		# (17.7 / 2 * scala), ca fatada dinspre rau sa fie in gol si spatele
-		# in stanca (piesa n-are detaliu pe spate — brief §5.2).
-		var p := _off(st, 1.0, 8.5 + 8.8 * scl)
+		# LIPIT DE BUZA. Buza cade intre 8 si 12 m lateral (masurat pe toata
+		# cornisa cu ground_y), deci 9.5 m pune fatada exact peste muchie: de
+		# pe sosea vezi acoperisurile imediat sub tine, nu un obiect departe.
+		# Adancimea piesei (17.7 * scala) intra in stanca, unde oricum n-are
+		# detaliu (brief §5.2).
+		var p := _off(st, 1.0, 9.5)
 		p.y = foot
 		var node_name := _place("chongqing/structures/hongya_dong", "hongya_hero",
 			p, _yaw_to_road(st, 1.0), scl)
-		# LUMINA. Doza s-a gasit prin trei esecuri masurate pe captura, si
-		# fiecare a spus altceva:
+		# LUMINA: ard FERESTRELE (slotul 30), nu corpul.
 		#
-		#  - slotul 30 singur (aurul, 0.8% din arie): L=13.7, dominanta RECE
-		#    (R-B = -4) — silueta neagra pe faleza neagra;
-		#  - sloturile 20+28+30, adica 95% din arie: la ORICE energie peretii
-		#    ieseau placi portocalii uniforme (deviatie de luminanta 15-19 fata
-		#    de 30.8 in referinta). Culoare buna, obiect pierdut;
-		#  - acelasi set cu operatorul MULTIPLY: relieful revenea (deviatie 21)
-		#    dar cladirea ramanea neagra (L=19) — fiindca AO-ul copt in asset
-		#    are media 0.201 (masurat cu tools/tmp/vcol.gd), adica inmulteste
-		#    albedo-ul pana la o cincime.
-		#
-		# Ce a mers: se aprind streasinile si accentele (9, 20, 30) si se lasa
-		# STINS corpul de lemn (28, 61% din arie). Asta e chiar limbajul
-		# referintei — lumina calda care scapa dintre lemne intunecate, nu lemn
-		# care straluceste. Masurat: L=28.7, deviatie 44.9 (referinta 60.0 /
-		# 30.8) — mai inchis decat diorama, dar cu relieful intact, ceea ce la
-		# 60 km/h se citeste mai bine decat o pata portocalie corect expusa.
-		_meta(node_name, "lumina", "9,20,30|1.8|#FFBF7A")
-		# Fara corp fizic: e o cladire de 40 m langa o cornisa fara parapet, iar
-		# cine cade de pe cornisa trebuie sa CADA in terasa si sa fie repus, nu
-		# sa aterizeze pe un acoperis la 30 m si sa ramana acolo.
+		# Cu AO-ul reparat asta e si tot ce trebuie: lemnul se vede fiindca e
+		# o cladire luminata, iar ferestrele sunt sursa — exact limbajul
+		# referintei (lumina calda care scapa dintre lemne intunecate).
+		# Aprinderea corpului (9,20,28) a fost incercarea de a compensa un
+		# asset stricat si producea placa uniforma; nu mai e necesara.
+		_meta(node_name, "lumina", "30|3.4|#FFC98A")
+		# Fara corp fizic: cine cade de pe cornisa trebuie sa CADA in terasa
+		# si sa fie repus, nu sa aterizeze pe un acoperis la 30 m.
 		_meta(node_name, "coliziune", "none")
 
-		# AL DOILEA RAND, mai in afara pe terasa si mai scund: fara el, cele
-		# opt stive de sus formeaza o singura linie de creasta si terasa ramane
-		# goala in spatele ei. Cu el, de pe cornisa vezi acoperisuri care
-		# COBOARA in trepte spre apa — adancimea din referinta.
+		# AL DOILEA RAND, mai in afara pe terasa si mai scund: fara el cele
+		# 12 stive fac o singura linie de creasta si terasa ramane goala.
 		var ridge2 := foot + (ridge - foot) * 0.55
 		var scl2 := clampf((ridge2 - foot) / 47.74, 0.18, 1.0)
-		var p2 := _off(st, 1.0, 8.5 + 8.8 * scl + 15.0)
+		var p2 := _off(st, 1.0, 9.5 + 13.0 + 8.8 * scl)
 		p2.y = foot
 		var n2 := _place("chongqing/structures/hongya_dong", "hongya_jos",
 			p2, _yaw_to_road(st, 1.0) + deg_to_rad(18.0), scl2)
-		_meta(n2, "lumina", "9,20,30|1.8|#FFBF7A")
+		_meta(n2, "lumina", "30|3.4|#FFC98A")
 		_meta(n2, "coliziune", "none")
 
 	# CHEVROANELE pe curbele oarbe. Cornisa e un S larg fara parapet pe

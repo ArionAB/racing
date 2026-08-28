@@ -40,6 +40,7 @@ func _ready() -> void:
 	_fix_hongya()
 	_fix_alee()
 	_fix_pasarela()
+	_fix_shibati()
 	print("")
 	print("===== LINII PENTRU .tscn =====")
 	for l in _out:
@@ -372,3 +373,121 @@ func _fix_pasarela() -> void:
 	# DE-A CURMEZISUL drumului: asta e chiar traversarea.
 	var r: Vector3 = st["right"]
 	_emit("pasarela224", p, atan2(r.x, r.z), SCALE)
+
+
+# -------------------------------------------------------------- 2) SHIBATI
+## PROBLEMA 2: "casele sunt orientate cu spatele la pista, si scarile sunt sub
+## pamant". Amandoua confirmate cu masuratori, si amandoua au cauze diferite.
+##
+## SCARILE. Masurat pe scena: cele 19 bucati au talpa cu 10.2 m SUB terenul de
+## sub ele, iar 13 din 19 stau la peste 8 m sub cota soselei. Nu erau
+## "asezate gresit", erau ingropate.
+##
+## Cauza e in reteta veche: piesele se INLANTUIAU in jos (7 m mai jos si 7.5 m
+## mai in afara la fiecare pas) pe presupunerea ca terenul coboara lateral.
+## Nu coboara: masurat cu raze pe toata coborarea (frac 0.048-0.108), terenul
+## de pe latura -1 e PLAT — intre -0.2 si -1.4 m fata de cota soselei, pana la
+## 44 m lateral. Ce coboara aici e DRUMUL (64.4 -> 56.9 m), si terenul coboara
+## odata cu el. Deci un lant care coboara 7 m pe bucata intra direct in pamant.
+##
+## Reparatia: fiecare bucata sta pe TERENUL EI (raycast), si coborarea o face
+## panta drumului, nu lantul. Piesa coboara deja singura 7.69 m pe 12.61 m de
+## adancime — atat trebuie, si nimic in plus.
+##
+## ORIENTAREA. 13 din 15 pravalii, 6 din 8 pravalii_jos, 8 din 9 rufe si 10
+## din 11 felinare aveau `-Z.dot(spre_sosea)` negativ: exact aceeasi eroare de
+## 180 grade ca in alee. Se verifica acum cu dot la emitere.
+##
+## LATERALA. Erau la 21-33 m, unde o pravalie de 7.6 m e un punct pe camp.
+## Brief 2 B cere ca treptele sa fie "primul lucru sub tine cand te uiti in
+## stanga": scara vine la 12-16 m, pravaliile in spatele ei la 22-26.
+func _fix_shibati() -> void:
+	print("")
+	print("=== 2) COBORAREA SHIBATI ===")
+	var root := _track.get_node("DecorManual/2) Coborarea Shibati")
+	var by_base := {}
+	for ch in root.get_children():
+		var n3 := ch as Node3D
+		if n3 == null:
+			continue
+		var nm := String(n3.name)
+		if nm.ends_with("_col"):
+			continue
+		var base := nm.rstrip("0123456789")
+		if not by_base.has(base):
+			by_base[base] = []
+		(by_base[base] as Array).append(nm)
+	for k in by_base:
+		print("  %s: %d" % [k, (by_base[k] as Array).size()])
+
+	# SCARA: pe terenul ei, la 13 m, cu -Z spre drum (piesa coboara spre -Z,
+	# deci asa coboara DINSPRE drum in jos si o vezi din profil, nu din spate).
+	var stairs: Array = by_base.get("scara", [])
+	var f := 0.048
+	var i := 0
+	while i < stairs.size():
+		var st := _at(f)
+		# Alterneaza doua benzi laterale, ca scara sa aiba latime de scara
+		# uriasa (brief: "trepte late"), nu un sir subtire.
+		var lat := 13.0 + float(i % 2) * 10.5
+		var p := _off_ground(st, -1.0, lat)
+		# ORIENTAREA SE MASOARA, NU SE DEDUCE (probe_fx17, sectiune prin
+		# suprafata calcabila): treptele COBOARA SPRE +Z — y mediu 3.50 la z
+		# mic, 1.42 la z mare — si piesa e lata pe X (10.36 m).
+		#
+		# `_yaw_to_road(-1)` pune -Z spre drum, deci +Z (coborarea) pleaca DE
+		# LA drum in jos: exact ce trebuie. Fara `+PI` si fara tangaj.
+		# Prima incercare le avea pe amandoua si a iesit un gard de panouri de
+		# lemn in picioare pe marginea drumului: `+PI` intorcea coborarea spre
+		# sosea, iar tangajul de -8 grade ridica fata lata pe verticala.
+		var b := Basis(Vector3.UP, _yaw_to_road(st, -1.0))
+		_emit_basis(stairs[i], p, b, 1.0)
+		i += 1
+		f += 6.6 / _path.total
+		if f > 0.112:
+			f = 0.048
+
+	# PRAVALIILE: in spatele scarii, cu fatada VERIFICATA spre drum.
+	_row(by_base.get("pravalie", []), 0.050, 0.110, 22.0, -1.0, 0.0)
+	_row(by_base.get("pravalie_jos", []), 0.054, 0.108, 30.0, -1.0, 0.22)
+	# Rufele intre case, la inaltime de etaj (stau intinse, deci peste teren).
+	_row(by_base.get("rufe", []), 0.056, 0.106, 25.0, -1.0, 0.0, 3.2)
+	# Hamalii pe scara, sub linia camerei.
+	_row(by_base.get("hamal", []), 0.058, 0.100, 15.0, -1.0, 0.7)
+	# Felinarele langa drum, ca sirul de lumini sa insoteasca coborarea.
+	_row(by_base.get("felinar_scara", []), 0.050, 0.110, 9.5, -1.0, 0.0)
+
+
+## Un sir de piese de-a lungul unei fractii, pe teren, cu fatada verificata.
+func _row(names: Array, f0: float, f1: float, lat: float, side: float,
+		yaw_extra: float, lift: float = 0.0) -> void:
+	if names.is_empty():
+		return
+	var n := names.size()
+	var bad := 0
+	for i in n:
+		var f: float = f0 + (f1 - f0) * float(i) / maxf(1.0, float(n - 1))
+		var st := _at(f)
+		var d: float = lat + float(i % 3) * 2.0
+		var p := _off_ground(st, side, d)
+		p.y += lift
+		var yaw := _yaw_to_road(st, side)
+		var b := Basis(Vector3.UP, yaw)
+		var mz := -b.z
+		mz.y = 0.0
+		var rp: Vector3 = st["pos"]
+		var to_road := Vector3(rp.x - p.x, 0.0, rp.z - p.z).normalized()
+		if mz.normalized().dot(to_road) < 0.0:
+			yaw += PI
+			bad += 1
+		_emit(names[i], p, yaw + yaw_extra, 1.0)
+	print("  %s: %d piese, %d intoarse 180" % [String(names[0]).rstrip("0123456789"), n, bad])
+
+
+func _emit_basis(node_name: String, pos: Vector3, basis: Basis,
+		scl: float) -> void:
+	var b := basis.scaled(Vector3(scl, scl, scl))
+	_out.append("# %s" % node_name)
+	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
+		% [b[0].x, b[0].y, b[0].z, b[1].x, b[1].y, b[1].z,
+			b[2].x, b[2].y, b[2].z, pos.x, pos.y, pos.z])

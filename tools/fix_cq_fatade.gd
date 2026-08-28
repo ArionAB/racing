@@ -163,7 +163,24 @@ func _consider(n: Node3D, kit: String) -> void:
 	b = b.scaled(scl)
 	_out.append("# %s  (kit %s, lat %.1f m, dot %+.2f -> %+.2f%s)"
 		% [n.name, kit, lat, d, check, ", ridicat %+.2f m" % (new_y - pos.y) if lifted else ""])
-	_out.append("%s|%s" % [n.name, _tscn_transform(b, Vector3(pos.x, new_y, pos.z))])
+	# ORIGINEA NU E CENTRUL. `stone_stairway` are corpul intins 6.11 m pe -Z
+	# fata de pivot (masurat, `probe_cq_r2r`): e o scara ancorata in capatul de
+	# sus. O rotatie in jurul pivotului ei nu intoarce piesa pe loc, o
+	# PLIMBA — si prima versiune a reparatiei a plimbat 12 scari fix pe
+	# carosabil, unde sonda de cursa le-a gasit imediat (22 de repuneri pe
+	# seed 2, toate intre fractiile 0.039 si 0.078; pe origin/main, zero).
+	#
+	# Deci se roteste in jurul CENTRULUI amprentei, nu al originii: dupa
+	# rotatie originea se muta cu cat s-a deplasat centrul, si corpul ramane
+	# unde era. Pentru piesele centrate (shophouse, restaurant) corectia iese
+	# zero singura, deci regula ramane una pentru toate kiturile.
+	var off := _footprint_offset(n)
+	var origin := Vector3(pos.x, new_y, pos.z)
+	if off.length_squared() > 1e-6:
+		var old_c := n.global_basis * off
+		var new_c := b * off
+		origin -= Vector3(new_c.x - old_c.x, 0.0, new_c.z - old_c.z)
+	_out.append("%s|%s" % [n.name, _tscn_transform(b, origin)])
 	_bump(kit, "lifted" if lifted else "turned")
 
 
@@ -226,3 +243,35 @@ func _tscn_transform(b: Basis, o: Vector3) -> String:
 		b.x.y, b.y.y, b.z.y,
 		b.x.z, b.y.z, b.z.z,
 		o.x, o.y, o.z]
+
+
+## Centrul amprentei unei piese, in spatiul ei local (doar X si Z).
+##
+## Se citeste din mesh-uri o singura data per kit: piesele aceluiasi GLB au
+## aceeasi geometrie, iar altfel parcurgerea ar costa pe fiecare din cele
+## ~250 de piese.
+var _footprints := {}
+
+func _footprint_offset(n: Node3D) -> Vector3:
+	var kit := _kit_of(n)
+	if _footprints.has(kit):
+		return _footprints[kit]
+	var got := false
+	var a := AABB()
+	var st: Array[Node] = [n]
+	while not st.is_empty():
+		var x: Node = st.pop_back()
+		for c in x.get_children():
+			st.append(c)
+		var mi := x as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var rel := n.global_transform.affine_inverse() * mi.global_transform
+		var b := rel * mi.mesh.get_aabb()
+		a = b if not got else a.merge(b)
+		got = true
+	var c2 := Vector3.ZERO
+	if got:
+		c2 = Vector3(a.get_center().x, 0.0, a.get_center().z)
+	_footprints[kit] = c2
+	return c2

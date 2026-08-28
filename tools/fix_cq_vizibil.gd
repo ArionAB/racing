@@ -328,11 +328,7 @@ func _yaw_to_road(st: Dictionary, side: float) -> float:
 
 
 func _emit(node_name: String, pos: Vector3, yaw: float, scl: float) -> void:
-	var b := Basis(Vector3.UP, yaw).scaled(Vector3(scl, scl, scl))
-	_out.append("# %s" % node_name)
-	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
-		% [b[0].x, b[0].y, b[0].z, b[1].x, b[1].y, b[1].z,
-			b[2].x, b[2].y, b[2].z, pos.x, pos.y, pos.z])
+	_emit_basis(node_name, pos, Basis(Vector3.UP, yaw), scl)
 
 
 # --------------------------------------------------------------- 8) PASARELA
@@ -488,6 +484,11 @@ func _emit_basis(node_name: String, pos: Vector3, basis: Basis,
 		scl: float) -> void:
 	var b := basis.scaled(Vector3(scl, scl, scl))
 	_out.append("# %s" % node_name)
+	# ORDINEA E PE LINII, nu pe coloane. Prima versiune scria `b.x, b.y, b.z`
+	# una dupa alta, adica TRANSPUSA — iar pentru rotatii in jurul lui Y
+	# transpusa e rotatia inversa, deci fiecare piesa "reparata" iesea intoarsa
+	# in partea cealalta. Vezi `tools/fix_cq_fatade.gd`.
 	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
-		% [b[0].x, b[0].y, b[0].z, b[1].x, b[1].y, b[1].z,
-			b[2].x, b[2].y, b[2].z, pos.x, pos.y, pos.z])
+		% [b.x.x, b.y.x, b.z.x,
+			b.x.y, b.y.y, b.z.y,
+			b.x.z, b.y.z, b.z.z, pos.x, pos.y, pos.z])

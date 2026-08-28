@@ -1145,10 +1145,16 @@ func _place_basis(model: String, base: String, pos: Vector3, basis: Basis,
 	# 23° si 29° fata de tangenta in loc de cei 3° ceruti, adica aproape
 	# de-a curmezisul bulevardului, si sonda gasea „fanta" pe acostament.
 	#
-	# `b[0]` / `b[1]` / `b[2]` sunt liniile, deci exact ce vrea constructorul.
+	# A DOUA OARA, si de data asta citit inapoi din PackedScene, nu dedus:
+	# `b[0]` NU e prima linie, e prima COLOANA (`b[0] == b.x`). Deci varianta
+	# de mai sus statea tot pe transpusa, doar ca dintr-un motiv diferit.
+	# Adevarul masurat pe un nod existent (felinar1): din literalul
+	# `(a0..a8)` Godot compune `basis.x = (a0, a3, a6)` — adica linia intai a
+	# literalului e X, Y, Z ale PRIMEI componente, nu axa X intreaga.
 	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
-		% [b[0].x, b[0].y, b[0].z, b[1].x, b[1].y, b[1].z,
-			b[2].x, b[2].y, b[2].z, pos.x, pos.y, pos.z])
+		% [b.x.x, b.y.x, b.z.x,
+			b.x.y, b.y.y, b.z.y,
+			b.x.z, b.y.z, b.z.z, pos.x, pos.y, pos.z])
 	_out.append("")
 	return node_name
 

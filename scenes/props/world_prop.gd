@@ -104,6 +104,23 @@ const PROP_COLLISION := {
 	"flowers_orange": "none", "flowers_white": "none",
 	"hibiscus_bush": "none", "sugar_cane_clump": "none",
 	"shrub_snow": "none", "grass_tuft_dry": "none",
+	# --- Chongqing (POI A-D) ----------------------------------------------
+	# Stalpii: lampioanele si firmele au bratul si felinarul latite mult peste
+	# stalp (lamp_lantern_a e 1.40 m lat pe un stalp de ~12 cm). Un hull ar
+	# pune pe trotuar un bloc de un metru si jumatate, la inaltimea capotei.
+	"lamp_lantern_a": "trunk", "lamp_lantern_b": "trunk",
+	"lamp_lantern_c": "trunk",
+	"neon_sign_a": "trunk", "neon_sign_b": "trunk",
+	"neon_sign_c": "trunk", "neon_sign_d": "trunk",
+	"bollard": "trunk", "chevron_post": "trunk",
+	# Rufele stau pe o sarma peste alee, la 2.6 m: hull-ul lor ar fi un tavan
+	# plin exact peste carosabil.
+	"laundry_line": "mesh",
+	# --- figuranti si marunt: nimic care sa opreasca o masina de cursa -----
+	# Hamalii se plimba pe scara, sub linia camerei; mesele si scuterul stau pe
+	# trotuarul din aleea de 6 m, adica la o roata distanta de linia de curs.
+	"porter": "none", "table_stools": "none", "steam_vent": "none",
+	"scooter": "none", "bicycle": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -258,6 +275,7 @@ func _ready() -> void:
 	_split_shutters()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
+	_apply_glow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
 
@@ -338,6 +356,83 @@ func _model_class_material(cls: String) -> Material:
 		return Palette.finish_material(cls.trim_prefix(Palette.FINISH_PREFIX))
 	return Palette.triplanar_class_material(
 		cls.trim_prefix(Palette.TRI_PREFIX))
+
+
+## Numele metadatei prin care o INSTANTA capata LUMINA: sloturile din paleta
+## care ard, si cat de tare. In Inspector: Add Metadata -> `lumina`, valoare
+## `"30"` (un slot), `"30|2.2"` (slot + energie) sau `"28,30|1.6"` (mai multe
+## sloturi cu aceeasi energie).
+##
+## Mai multe sloturi, fiindca "cladire luminata din interior" rareori sta
+## intr-unul singur: pe `hongya_dong.glb` aurul (30) e 0.8% din arie, iar
+## corpul de lemn (28) e 61% — aprins doar 30, hero-ul ramane o silueta
+## neagra.
+##
+## De ce metadata si nu o mapare per model, ca la `CLASSES_BY_MODEL`: aceeasi
+## piesa se foloseste si aprinsa si stinsa. Pe Chongqing, `hongya_dong.glb`
+## agatat sub cornisa ARDE auriu (e hero-ul vizual, brief §2 POI D), dar
+## siluetele aceluiasi kit de peste rau nu trebuie sa arda — daca ar arde, ar
+## trage ochiul de pe hero fix acolo unde ceata trebuie sa le stinga.
+##
+## Costul e UN material per (slot, energie), partajat de toate instantele care
+## cer aceeasi combinatie: `Palette.glow_material` le tine intr-un cache. Un
+## cartier intreg de case aurii aduce +1 la garda, nu +40.
+const GLOW_META := "lumina"
+
+
+## Pune materialul emisiv pe instantele care cer `lumina`.
+##
+## Ruleaza DUPA `_apply_model_classes`, ca sa aiba ultimul cuvant: o piesa care
+## si arde si are o clasa triplanara ar ramane altfel cu clasa, adica stinsa.
+func _apply_glow() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var spec := _glow_spec(model)
+		if spec.is_empty():
+			continue
+		var parts := spec.split("|", false)
+		var slots: Array = []
+		for token in parts[0].split(",", false):
+			slots.append(int(token))
+		var energy := float(parts[1]) if parts.size() > 1 else 1.2
+		# Al treilea camp, optional, e CULOAREA luminii (`#RRGGBB`). Fara el,
+		# fiecare slot arde in propria culoare — bun pentru jar. Cu el, masca
+		# ramane aceeasi dar lumina are o singura nuanta: vezi
+		# `Palette._slots_glow_texture`, unde scrie de ce lemnul lui Hongya
+		# Dong nu se poate lumina cu propria lui culoare.
+		var tint := Color.BLACK
+		var multiply := false
+		if parts.size() > 2:
+			var t := String(parts[2]).strip_edges()
+			# un `*` la coada cere operatorul MULTIPLY: pastreaza relieful
+			# (albedo + AO) si doar il incalzeste. Vezi Palette.
+			if t.ends_with("*"):
+				multiply = true
+				t = t.substr(0, t.length() - 1)
+			tint = Color.html(t)
+		var mat := Palette.glow_material_slots(slots, energy, tint, multiply)
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi != null:
+				mi.material_override = mat
+
+
+## Specificatia de lumina a unei instante: metadata pe model, altfel pe
+## containerul de zona (asa un cartier intreg se aprinde dintr-un singur loc).
+func _glow_spec(model: Node3D) -> String:
+	if model.has_meta(GLOW_META):
+		return String(model.get_meta(GLOW_META))
+	var p: Node = model.get_parent()
+	while p != null and p != self.get_parent():
+		if p.has_meta(GLOW_META):
+			return String(p.get_meta(GLOW_META))
+		p = p.get_parent()
+	return ""
 
 
 func _build_collision() -> void:

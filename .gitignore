@@ -18,3 +18,4 @@ __pycache__/
 # Planse de proba din tools/blender (build_helpers_demo.py). Prefixul `_` le
 # tine in afara lotului de assets: nu sunt modele, sunt capturi pentru PR-uri.
 assets/models/_*.glb
+tools/tmp/

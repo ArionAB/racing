@@ -909,16 +909,46 @@ static func finish_material(name: String) -> StandardMaterial3D:
 static var _glow_mats: Dictionary = {}
 
 static func glow_material(slot: int, energy: float = 1.2) -> StandardMaterial3D:
-	var key := "%d|%.2f" % [slot, energy]
+	return glow_material_slots([slot], energy)
+
+
+## Varianta pe MAI MULTE sloturi, cu aceeasi energie.
+##
+## Exista fiindca „cladirea luminata din interior" nu e un slot, ci doi-trei:
+## pe `hongya_dong.glb`, masurat cu tools/tmp/slot_area, aurul (slot 30) e
+## 0.8% din arie, iar corpul de lemn (slot 28, `#4A3526`) e 61%. Aprins doar
+## slotul 30, hero-ul vizual al Chongqing-ului ramanea o silueta neagra pe o
+## faleza neagra — masurat pe captura: luminanta medie 31 si o dominanta RECE
+## (R-B = -10), fata de 55 si +58 in dioramă de referinta.
+##
+## Un material per (combinatie de sloturi, energie), ca si pana acum: un
+## cartier intreg de case aurii aduce +1 la garda, nu +40.
+static func glow_material_slots(slots: Array, energy: float = 1.2,
+		tint: Color = Color.BLACK, multiply: bool = false) -> StandardMaterial3D:
+	var sorted_slots: Array = slots.duplicate()
+	sorted_slots.sort()
+	var key := "%s|%.2f|%s|%s" % [
+		str(sorted_slots), energy, tint.to_html(false), str(multiply)]
 	if _glow_mats.has(key):
 		return _glow_mats[key]
 	var mat := world_material().duplicate() as StandardMaterial3D
-	# NEGRU + textura de masca, ca la lava: operatorul e ADD, deci o culoare
-	# de emisie alba ar aprinde toata piesa, nu slotul.
+	# NEGRU + textura de masca, ca la lava: cu operatorul ADD o culoare de
+	# emisie alba ar aprinde toata piesa, nu sloturile.
 	mat.emission_enabled = true
 	mat.emission = Color.BLACK
 	mat.emission_energy_multiplier = energy
-	mat.emission_texture = _slot_glow_texture(slot)
+	mat.emission_texture = _slots_glow_texture(sorted_slots, tint)
+	# ADD vs MULTIPLY: ADD ADAUGA lumina peste pixel, deci pe o suprafata mare
+	# stinge relieful — pe `hongya_dong.glb` (95% din arie in sloturile
+	# aprinse) peretii ieseau placi portocalii uniforme la ORICE energie
+	# incercata, fiindca emisia acoperea AO-ul din vertex colors care da
+	# textura lemnului. Masurat pe captura: deviatia de luminanta 15-19, fata
+	# de 30.8 in diorama de referinta.
+	#
+	# MULTIPLY inmulteste, deci pastreaza si albedo-ul si AO-ul si doar le
+	# incalzeste: cladirea ramane o cladire, dar arde.
+	if multiply:
+		mat.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 	_glow_mats[key] = mat
 	return mat
 
@@ -990,9 +1020,34 @@ static func lava_material_phased(phase: float, flow: float = -1.0) -> ShaderMate
 ## cad exact pe centrul texelului, deci filtrarea liniara nu trage din vecini.
 ## Fara mipmap-uri: la distanta ar amesteca tot randul si ar stinge semnalul.
 static func _slot_glow_texture(slot: int) -> ImageTexture:
-	var img := Image.create(HEX.size(), 1, false, Image.FORMAT_RGB8)
+	return _slots_glow_texture([slot])
+
+
+## Masca emisiva pentru mai multe sloturi deodata (vezi `glow_material_slots`).
+## `tint` NEGRU inseamna „aprinde fiecare slot cu propria lui culoare" — bun
+## pentru jar, unde culoarea slotului CHIAR e culoarea luminii.
+##
+## Pentru lumina de INTERIOR nu merge, si asta s-a masurat: pe `hongya_dong.glb`
+## corpul e slotul 28 (`#4A3526`, lemn aproape negru) pe 61% din arie. Adunat
+## peste el insusi, lemnul ramane lemn — captura de pe cornisa a dat luminanta
+## 13.7 cu dominanta RECE (R-B = -4), fata de 60.0 si +49 in diorama de
+## referinta. Ce lumineaza in referinta nu e lemnul, sunt ferestrele DIN
+## SPATELE lui: o lumina calda, aceeasi pentru tot corpul.
+##
+## Deci un `tint` ne-negru inlocuieste culoarea slotului cu culoarea LUMINII,
+## pastrand masca — adica „partile astea ale piesei ard, in nuanta asta".
+static func _slots_glow_texture(slots: Array,
+		tint: Color = Color.BLACK) -> ImageTexture:
+	# LATIMEA E `SLOTS`, NU `HEX.size()`. Sunt 32 de sloturi alocate si doar 31
+	# de culori scrise, iar UV-ul unui slot e `(slot + 0.5) / 32` (vezi `uv()`).
+	# Cu o masca de 31 px, slotul 30 cadea la x = 0.953 * 31 = 29.5 — adica FIX
+	# intre texelul aprins si vecinul lui negru, deci filtrarea liniara statea
+	# la jumatate de emisie si mai si murdarea slotul 29. De aici venea
+	# masuratoarea „slotul 30 singur da o silueta neagra": masca nu-l nimerea.
+	var img := Image.create(SLOTS, 1, false, Image.FORMAT_RGB8)
 	img.fill(Color.BLACK)
-	img.set_pixel(slot, 0, color(slot))
+	for s: int in slots:
+		img.set_pixel(s, 0, color(s) if tint == Color.BLACK else tint)
 	return ImageTexture.create_from_image(img)
 
 static func apply_class_materials(root: Node, mapping: Dictionary) -> void:

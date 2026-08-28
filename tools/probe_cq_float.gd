@@ -18,6 +18,12 @@ func _ready() -> void:
 			continue
 		for child in node.get_children():
 			var nm := str(child.name)
+			# Luminile NU stau pe podea — ala e un felinar, nu o lada. Sonda
+			# cauta decor care pluteste; un OmniLight3D la 5 m deasupra
+			# asfaltului e exact ce trebuie sa fie. Exceptia e pe TIP, nu pe
+			# prefix de nume, ca sa nu depinda de cum botez luminile.
+			if child is Light3D:
+				continue
 			# fundalul e intentionat peste rau; nu are ce sta pe pamant
 			if sec.begins_with("8)") or nm.begins_with("turn") or nm.begins_with("slep") or nm.ends_with("_col") or nm.begins_with("pila") or sec.begins_with("7)"):
 				continue

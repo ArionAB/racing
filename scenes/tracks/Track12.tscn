@@ -496,19 +496,19 @@ transform = Transform3D(0.385382, 0, 1.241564, 0, 3.588388, 0, -1.241564, 0, 0.3
 metadata/coliziune = "hull"
 
 [node name="pila129" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.009236, 0, 1.299967, 0, 1.865450, 0, -1.299967, 0, -0.009236, 133.767822, 5.186288, 181.763000)
+transform = Transform3D(-0.009236, 0, 1.299967, 0, 1.865450, 0, -1.299967, 0, -0.009236, 134.099930, 5.186288, 178.213562)
 metadata/coliziune = "hull"
 
 [node name="pila130" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.009236, 0, 1.299967, 0, 1.865450, 0, -1.299967, 0, -0.009236, 133.767822, 21.676867, 181.763000)
+transform = Transform3D(-0.009236, 0, 1.299967, 0, 1.865450, 0, -1.299967, 0, -0.009236, 134.099930, 21.676867, 178.213562)
 metadata/coliziune = "hull"
 
 [node name="pila131" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(0.304126, 0, 1.263925, 0, 1.896753, 0, -1.263925, 0, 0.304126, 160.581604, 5.725404, 182.798462)
+transform = Transform3D(0.304126, 0, 1.263925, 0, 1.896753, 0, -1.263925, 0, 0.304126, 160.440247, 5.725404, 179.102600)
 metadata/coliziune = "hull"
 
 [node name="pila132" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(0.304126, 0, 1.263925, 0, 1.896753, 0, -1.263925, 0, 0.304126, 160.581604, 22.492702, 182.798462)
+transform = Transform3D(0.304126, 0, 1.263925, 0, 1.896753, 0, -1.263925, 0, 0.304126, 160.440247, 22.492702, 179.102600)
 metadata/coliziune = "hull"
 
 [node name="pila134" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
@@ -516,51 +516,51 @@ transform = Transform3D(0.379525, 0, 1.243367, 0, 1.917028, 0, -1.243367, 0, 0.3
 metadata/coliziune = "hull"
 
 [node name="pila135" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.393705, 0, 1.238950, 0, 1.932842, 0, -1.238950, 0, -0.393705, 207.440903, 6.957470, 191.757507)
+transform = Transform3D(-0.393705, 0, 1.238950, 0, 1.932842, 0, -1.238950, 0, -0.393705, 207.116318, 6.957470, 190.766251)
 metadata/coliziune = "hull"
 
 [node name="pila136" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.393705, 0, 1.238950, 0, 1.932842, 0, -1.238950, 0, -0.393705, 207.440903, 24.043791, 191.757507)
+transform = Transform3D(-0.393705, 0, 1.238950, 0, 1.932842, 0, -1.238950, 0, -0.393705, 207.116318, 24.043791, 190.766251)
 metadata/coliziune = "hull"
 
 [node name="pila137" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.649054, 0, 1.126379, 0, 1.856851, 0, -1.126379, 0, -0.649054, 230.398544, 9.141697, 180.862747)
+transform = Transform3D(-0.649054, 0, 1.126379, 0, 1.856851, 0, -1.126379, 0, -0.649054, 229.486298, 9.141697, 179.236664)
 metadata/coliziune = "hull"
 
 [node name="pila138" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.649054, 0, 1.126379, 0, 1.856851, 0, -1.126379, 0, -0.649054, 230.398544, 25.556261, 180.862747)
+transform = Transform3D(-0.649054, 0, 1.126379, 0, 1.856851, 0, -1.126379, 0, -0.649054, 229.486298, 25.556261, 179.236664)
 metadata/coliziune = "hull"
 
 [node name="pila139" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.940743, 0, 0.897219, 0, 1.845189, 0, -0.897219, 0, -0.940743, 251.587997, 10.165490, 167.266617)
+transform = Transform3D(-0.940743, 0, 0.897219, 0, 1.845189, 0, -0.897219, 0, -0.940743, 250.739624, 10.165490, 166.595139)
 metadata/coliziune = "hull"
 
 [node name="pila140" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.940743, 0, 0.897219, 0, 1.845189, 0, -0.897219, 0, -0.940743, 251.587997, 26.476965, 167.266617)
+transform = Transform3D(-0.940743, 0, 0.897219, 0, 1.845189, 0, -0.897219, 0, -0.940743, 250.739624, 26.476965, 166.595139)
 metadata/coliziune = "hull"
 
 [node name="pila141" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-1.234847, 0, 0.406391, 0, 3.353320, 0, -0.406391, 0, -1.234847, 258.470703, 14.264344, 145.604950)
+transform = Transform3D(-1.234847, 0, 0.406391, 0, 3.353320, 0, -0.406391, 0, -1.234847, 257.101013, 14.264344, 145.280609)
 metadata/coliziune = "hull"
 
 [node name="pila142" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-1.234847, 0, 0.406391, 0, 3.028738, 0, -0.406391, 0, -1.234847, 277.183380, 17.133648, 151.763351)
+transform = Transform3D(-1.234847, 0, 0.406391, 0, 3.028738, 0, -0.406391, 0, -1.234847, 279.789581, 17.133648, 152.654007)
 metadata/coliziune = "hull"
 
 [node name="pila143" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-1.283925, 0, 0.203804, 0, 3.162664, 0, -0.203804, 0, -1.283925, 262.586548, 17.122049, 121.802246)
+transform = Transform3D(-1.283925, 0, 0.203804, 0, 3.162664, 0, -0.203804, 0, -1.283925, 261.469940, 17.122049, 121.869339)
 metadata/coliziune = "hull"
 
 [node name="pila144" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-1.283925, 0, 0.203804, 0, 2.823148, 0, -0.203804, 0, -1.283925, 282.042938, 20.123369, 124.890671)
+transform = Transform3D(-1.283925, 0, 0.203804, 0, 2.823148, 0, -0.203804, 0, -1.283925, 287.534393, 20.123369, 122.228416)
 metadata/coliziune = "hull"
 
 [node name="pila145" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-1.072557, 0, -0.734589, 0, 2.626150, 0, 0.734589, 0, -1.072557, 272.198303, 23.004993, 97.214661)
+transform = Transform3D(-1.072557, 0, -0.734589, 0, 2.626150, 0, 0.734589, 0, -1.072557, 277.700500, 23.004993, 95.739418)
 metadata/coliziune = "hull"
 
 [node name="pila146" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]
-transform = Transform3D(-0.982663, 0, -0.851102, 0, 2.424035, 0, 0.851102, 0, -0.982663, 255.541748, 25.910343, 77.226738)
+transform = Transform3D(-0.982663, 0, -0.851102, 0, 2.424035, 0, 0.851102, 0, -0.982663, 257.142059, 25.910343, 71.005455)
 metadata/coliziune = "hull"
 
 [node name="pila147" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("31_pillar")]

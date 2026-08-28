@@ -822,6 +822,33 @@ const FINISH_PREFIX := "finish:"
 ## verdictul dezvoltatorului pe captura din august 2026).
 const SHADER_PREFIX := "shader:"
 
+## Al patrulea prefix acceptat: "glow:<slot>|<energie>". NU schimba nici
+## textura, nici finisajul: aprinde UN slot din atlas pe o piesa care ramane
+## altfel neatinsa.
+##
+## Exista fiindca pe o pista de NOAPTE (Chongqing) diferenta fata de referinta
+## nu era poligonajul si nici tiparul de suprafata, ci faptul ca nimic nu
+## EMITE. Masurat pe cadrul nodului rutier: deviatie de luminanta 14.4 fata de
+## 28.1 pe bara — jumatate din variatia de valoare, si toata lipsa era
+## contrastul de ferestre calde pe beton rece. Cladirile aveau deja ferestrele,
+## firmele si felinarele pictate pe slotul 30 (`GLOW` in build_chongqing_*.py);
+## le lipsea doar lumina.
+##
+## Se sprijina pe `glow_material`, deci masca de emisie e slotul: betonul
+## ramane beton, ard doar fetele din slotul cerut. Si, esential pentru garda,
+## materialul e cache-uit per (slot, energie) — un cartier intreg de ferestre
+## aprinse costa UN material, nu unul per cladire.
+const GLOW_PREFIX := "glow:"
+
+
+## Materialul cerut de un "glow:<slot>|<energie>". Energia e optionala
+## (implicit 1.2, ca la `glow_material`).
+static func _glow_from_spec(spec: String) -> StandardMaterial3D:
+	var parts := spec.split("|")
+	var slot := int(parts[0])
+	var energy := 1.2 if parts.size() < 2 else float(parts[1])
+	return glow_material(slot, energy)
+
 ## Finisajele disponibile: nume -> [roughness, metallic_specular] sau, pentru
 ## finisajele care ARD, [roughness, metallic_specular, energie, slot].
 const FINISHES := {
@@ -1037,6 +1064,9 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 		elif cls.begins_with(SHADER_PREFIX):
 			mi.material_override = shader_material(
 				cls.trim_prefix(SHADER_PREFIX))
+		elif cls.begins_with(GLOW_PREFIX):
+			mi.material_override = _glow_from_spec(
+				cls.trim_prefix(GLOW_PREFIX))
 		elif cls.begins_with(TRI_PREFIX):
 			mi.material_override = triplanar_class_material(
 				cls.trim_prefix(TRI_PREFIX))
@@ -1069,6 +1099,9 @@ static func apply_object_class_materials(root: Node, mapping: Dictionary,
 		elif cls.begins_with(SHADER_PREFIX):
 			mi.material_override = shader_material(
 				cls.trim_prefix(SHADER_PREFIX))
+		elif cls.begins_with(GLOW_PREFIX):
+			mi.material_override = _glow_from_spec(
+				cls.trim_prefix(GLOW_PREFIX))
 		elif cls.begins_with(TRI_PREFIX):
 			mi.material_override = object_triplanar_class_material(
 				cls.trim_prefix(TRI_PREFIX), world_scale)

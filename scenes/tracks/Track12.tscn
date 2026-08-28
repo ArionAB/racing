@@ -1084,3 +1084,460 @@ metadata/coliziune = "none"
 [node name="casaFmal632" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
 transform = Transform3D(0.771600, 0.000000, -0.636108, 0.000000, 1.000000, 0.000000, 0.636108, 0.000000, 0.771600, 143.203766, 33.564930, 116.777939)
 metadata/coliziune = "none"
+
+[node name="lumina_nod0" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 119.139, 43.710, 193.702)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod1" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 129.684, 44.180, 177.440)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod2" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 139.992, 44.650, 193.800)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod3" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 151.830, 45.090, 178.104)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod4" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158.104, 45.490, 196.161)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod5" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.254, 45.880, 182.969)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod6" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 177.906, 46.260, 201.461)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod7" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 192.046, 46.640, 188.269)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod8" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 199.595, 47.010, 205.812)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod9" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.340, 47.360, 188.781)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod10" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 223.594, 47.680, 199.829)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod11" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 224.308, 48.010, 180.501)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod12" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 241.382, 48.330, 189.599)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod13" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 242.096, 48.650, 170.271)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod14" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 259.547, 48.970, 177.559)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod15" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 253.082, 49.380, 159.461)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_nod16" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 272.245, 49.840, 156.472)
+light_color = Color(1, 0.784, 0.549, 1)
+light_energy = 3.60
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 19.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol0" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 253.466, 54.010, 65.743)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol1" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 251.916, 54.500, 60.952)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol2" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 252.740, 55.020, 57.660)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol3" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 254.051, 55.540, 51.318)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol4" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 254.922, 56.050, 45.033)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol5" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 255.663, 56.580, 36.531)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol6" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 254.466, 57.120, 30.450)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol7" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 245.780, 57.450, 25.930)
+light_color = Color(1, 0.855, 0.678, 1)
+light_energy = 6.00
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 16.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol8" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 244.020, 57.980, 20.060)
+light_color = Color(1, 0.855, 0.678, 1)
+light_energy = 6.00
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 16.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol9" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 242.250, 58.180, 14.190)
+light_color = Color(1, 0.855, 0.678, 1)
+light_energy = 6.00
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 16.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol10" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240.490, 58.180, 8.310)
+light_color = Color(1, 0.855, 0.678, 1)
+light_energy = 6.00
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 16.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol11" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 238.730, 55.490, 2.440)
+light_color = Color(1, 0.855, 0.678, 1)
+light_energy = 6.00
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 16.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol12" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 236.970, 55.720, -3.430)
+light_color = Color(1, 0.855, 0.678, 1)
+light_energy = 6.00
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 16.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol13" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 242.221, 61.170, -12.008)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol14" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240.021, 61.300, -17.738)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol15" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 237.763, 61.760, -23.557)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol16" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 235.483, 62.220, -29.257)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol17" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 233.210, 62.670, -34.950)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol18" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 230.930, 63.130, -40.650)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol19" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 228.643, 63.580, -46.357)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+
+[node name="lumina_hol20" type="OmniLight3D" parent="DecorManual/7) Liziba"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 226.363, 64.050, -52.057)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 3.40
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 17.0
+omni_attenuation = 1.2
+

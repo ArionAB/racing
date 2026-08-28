@@ -168,6 +168,89 @@ const CLASSES_BY_MODEL := {
 	"cane_clump": {
 		"Cane_Clump": Palette.TRI_PREFIX + "macchia",
 	},
+
+	# --- Chongqing: ce ARDE noaptea -----------------------------------------
+	#
+	# Pe o pista de noapte, o fereastra nu e cea mai INCHISA suprafata din
+	# cadru, e cea mai luminoasa. Kiturile picteaza deja ferestrele, firmele,
+	# felinarele si stopurile pe slotul 30 (`GLOW` in build_chongqing_*.py) —
+	# aici capata si lumina.
+	#
+	# DOUA energii, nu una per piesa, si nu fiindca ar arata mai bine: fiecare
+	# energie distincta e un material in plus la garda (`glow_material` e
+	# cache-uit per (slot, energie)). Prima versiune avea cinci trepte reglate
+	# „dupa cat de aproape de camera trece piesa" si costa cinci materiale
+	# pentru o diferenta pe care masuratoarea n-o vedea. Raman:
+	#   2.0 — tot ce ajunge langa carosabil (ferestre, firme, felinare, stopuri)
+	#   1.2 — siluetele de peste rau, care stau in ceata la 150-250 m si n-au
+	#         voie sa concureze cu masinile (style_bible §1)
+	# Cele 22 de modele de mai jos aduc astfel DOUA materiale, nu 22.
+	"shophouse_a": {
+		"ShophouseA": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"shophouse_b": {
+		"ShophouseB": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"shophouse_c": {
+		"ShophouseC": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"restaurant_front": {
+		"RestaurantFront": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"liziba_block": {
+		"LizibaBlock": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"kuixinglou_pavilion": {
+		"Kuixinglou": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"tower_silhouette_a": {
+		"TowerSilhouetteA": Palette.GLOW_PREFIX + "30|1.2",
+	},
+	"tower_silhouette_b": {
+		"TowerSilhouetteB": Palette.GLOW_PREFIX + "30|1.2",
+	},
+	"tower_silhouette_c": {
+		"TowerSilhouetteC": Palette.GLOW_PREFIX + "30|1.2",
+	},
+	"neon_sign_a": {
+		"NeonSignA": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"neon_sign_b": {
+		"NeonSignB": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"neon_sign_c": {
+		"NeonSignC": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"neon_sign_d": {
+		"NeonSignD": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"lamp_lantern_a": {
+		"LampLanternA": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"lamp_lantern_b": {
+		"LampLanternB": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"lamp_lantern_c": {
+		"LampLanternC": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"mini_car_a": {
+		"MiniCarA": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"mini_car_b": {
+		"MiniCarB": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"mini_car_c": {
+		"MiniCarC": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"bus": {
+		"Bus": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"monorail_train": {
+		"MonorailTrain": Palette.GLOW_PREFIX + "30|2.0",
+	},
+	"hongya_dong": {
+		"Hongya": Palette.GLOW_PREFIX + "30|2.0",
+	},
 }
 
 
@@ -235,9 +318,26 @@ func _apply_model_classes() -> void:
 				continue
 			for part: String in mapping:
 				if nm.begins_with(part):
-					mi.material_override = Palette.triplanar_class_material(
-						String(mapping[part]).trim_prefix(Palette.TRI_PREFIX))
+					mi.material_override = _model_class_material(
+						String(mapping[part]))
 					break
+
+
+## Materialul unei clase din `CLASSES_BY_MODEL`, dupa prefix.
+##
+## Pana in august 2026 aici era un apel direct la `triplanar_class_material`:
+## maparea avea un singur client (varul bisericii) si toate valorile ei erau
+## "tri:". Al doilea client — ferestrele aprinse ale Chongqing-ului — e "glow:",
+## iar cu apelul vechi ar fi primit tacut o textura triplanara pe o clasa
+## inexistenta. Prefixele sunt aceleasi ca in `apply_class_materials`, ca o
+## mapare sa insemne acelasi lucru indiferent pe unde intra.
+func _model_class_material(cls: String) -> Material:
+	if cls.begins_with(Palette.GLOW_PREFIX):
+		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
+	if cls.begins_with(Palette.FINISH_PREFIX):
+		return Palette.finish_material(cls.trim_prefix(Palette.FINISH_PREFIX))
+	return Palette.triplanar_class_material(
+		cls.trim_prefix(Palette.TRI_PREFIX))
 
 
 func _build_collision() -> void:

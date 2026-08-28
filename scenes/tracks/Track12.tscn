@@ -114,8 +114,7 @@ entry_at = 0.42
 speed_factor = 0.85
 elevated = true
 label = "Telecabina"
-surface = 1
-tint = Color(0.62, 0.63, 0.66, 1)
+tint = Color(0.42, 0.43, 0.46, 1)
 
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("7_wprop")
@@ -942,7 +941,7 @@ transform = Transform3D(-0.480959, 0, -1.099399, 0, 1.200000, 0, 1.099399, 0, -0
 metadata/coliziune = "none"
 
 [node name="podS242" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
-transform = Transform3D(0.712083, 0, 0.702095, 0, 1.000000, 0, -0.702095, 0, 0.712083, 150.973694, 9.001686, 235.849503)
+transform = Transform3D(0.712083, 0.000000, 0.702095, 0.000000, 1.000000, 0.000000, -0.702095, 0.000000, 0.712083, 122.889694, 9.001686, 207.366503)
 metadata/coliziune = "none"
 
 [node name="podS243" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]

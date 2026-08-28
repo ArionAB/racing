@@ -1558,8 +1558,20 @@ static func themes() -> Dictionary:
 			"lagoon_inner": 1.5,
 			"lagoon_rim": 8.0,
 			"dust_color": Color(0.30, 0.30, 0.34),
-			"branch_tint": Color(0.62, 0.63, 0.66),
-			"branch_surface": "sand",
+			# SCURTATURA E O RAMPA DE BETON PESTE GOLF, nu un banc de nisip.
+			# Implicit temele fara `branch_surface` primesc "sand", reteta
+			# Okinawei: o panglica de o singura culoare, fara marcaje si fara
+			# borduri — chiar prin proiect, fiindca un banc submers nu poarta
+			# marcaje. Pe Chongqing asta a iesit exact reprosul de la volan:
+			# "un drum gri inchis prin care nu vezi nimic". Reteta "gravel" da
+			# in schimb urme batatorite (variatie de valoare pe latime) si
+			# margini care se topesc in ce e langa, adica cele doua lucruri din
+			# care ochiul citeste "suprafata de rulare".
+			"branch_surface": "gravel",
+			# Beton ud de noapte, in familia lui CONCRETE: mai deschis decat
+			# soseaua ca banda sa se distinga de ea cand o vezi de sus, de pe
+			# cornisa, si sa se citeasca drept alegere.
+			"branch_tint": Color(0.42, 0.43, 0.46),
 		},
 	}
 	return _themes_cache

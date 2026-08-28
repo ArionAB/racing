@@ -1541,3 +1541,427 @@ distance_fade_length = 40.0
 omni_range = 17.0
 omni_attenuation = 1.2
 
+[node name="casa_jos400" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(0.038811, 0, -1.108091, 0, 1.108770, 0, 1.108091, 0, 0.038811, 120.300000, 3.630000, 167.530000)
+metadata/coliziune = "none"
+
+[node name="casa_jos401" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(1.029300, 0, -0.247413, 0, 1.058618, 0, 0.247413, 0, 1.029300, 120.920000, 7.240000, 153.540000)
+metadata/coliziune = "none"
+
+[node name="casa_jos402" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(-0.979100, 0, 0.440862, 0, 1.073776, 0, -0.440862, 0, -0.979100, 121.540000, 16.400000, 139.550000)
+metadata/coliziune = "none"
+
+[node name="local_jos403" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
+transform = Transform3D(-0.214191, 0, -0.959687, 0, 0.983299, 0, 0.959687, 0, -0.214191, 127.510000, 0.900000, 160.660000)
+metadata/coliziune = "none"
+
+[node name="casa_jos404" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(-0.888729, 0, 0.753189, 0, 1.164961, 0, -0.753189, 0, -0.888729, 127.410000, 9.910000, 146.660000)
+metadata/coliziune = "none"
+
+[node name="casa_jos405" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(-1.066579, 0, 0.421123, 0, 1.146707, 0, -0.421123, 0, -1.066579, 135.910000, -6.180000, 167.600000)
+metadata/coliziune = "none"
+
+[node name="casa_jos406" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(-1.160302, 0, 0.135331, 0, 1.168167, 0, -0.135331, 0, -1.160302, 135.920000, -3.400000, 153.600000)
+metadata/coliziune = "none"
+
+[node name="local_jos407" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
+transform = Transform3D(0.346267, 0, 1.150282, 0, 1.201270, 0, -1.150282, 0, 0.346267, 135.940000, 11.820000, 139.600000)
+metadata/coliziune = "none"
+
+[node name="casa_jos408" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(-1.143874, 0, 0.083476, 0, 1.146916, 0, -0.083476, 0, -1.143874, 144.120000, -6.600000, 160.610000)
+metadata/coliziune = "none"
+
+[node name="casa_jos409" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(-0.827183, 0, -1.021752, 0, 1.314614, 0, 1.021752, 0, -0.827183, 144.130000, -5.940000, 146.610000)
+metadata/coliziune = "none"
+
+[node name="casa_jos410" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(-0.251617, 0, -0.890475, 0, 0.925342, 0, 0.890475, 0, -0.251617, 155.800000, -6.470000, 168.910000)
+metadata/coliziune = "none"
+
+[node name="local_jos411" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
+transform = Transform3D(0.319243, 0, -0.931940, 0, 0.985103, 0, 0.931940, 0, 0.319243, 158.590000, -6.600000, 155.190000)
+metadata/coliziune = "none"
+
+[node name="casa_jos412" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(0.714314, 0, -1.036537, 0, 1.258830, 0, 1.036537, 0, 0.714314, 161.390000, -6.600000, 141.470000)
+metadata/coliziune = "none"
+
+[node name="casa_jos413" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(-1.045563, 0, 0.616476, 0, 1.213772, 0, -0.616476, 0, -1.045563, 164.870000, -6.500000, 170.850000)
+metadata/coliziune = "none"
+
+[node name="casa_jos414" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(0.444574, 0, -1.055645, 0, 1.145440, 0, 1.055645, 0, 0.444574, 168.490000, -6.600000, 157.330000)
+metadata/coliziune = "none"
+
+[node name="local_jos415" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
+transform = Transform3D(1.124500, 0, 0.404598, 0, 1.195073, 0, -0.404598, 0, 1.124500, 172.110000, -6.600000, 143.800000)
+metadata/coliziune = "none"
+
+[node name="casa_jos416" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(-0.069467, 0, -1.017982, 0, 1.020350, 0, 1.017982, 0, -0.069467, 174.610000, -6.600000, 166.210000)
+metadata/coliziune = "none"
+
+[node name="casa_jos417" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(-0.043055, 0, -1.090700, 0, 1.091550, 0, 1.090700, 0, -0.043055, 178.220000, -6.600000, 152.680000)
+metadata/coliziune = "none"
+
+[node name="casa_jos418" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(-0.842431, 0, -0.686283, 0, 1.086588, 0, 0.686283, 0, -0.842431, 180.730000, -6.600000, 175.100000)
+metadata/coliziune = "none"
+
+[node name="local_jos419" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
+transform = Transform3D(0.653028, 0, 0.621239, 0, 0.901324, 0, -0.621239, 0, 0.653028, 184.360000, -6.600000, 161.570000)
+metadata/coliziune = "none"
+
+[node name="casa_jos420" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(0.230613, 0, 0.989804, 0, 1.016315, 0, -0.989804, 0, 0.230613, 187.990000, -6.600000, 148.050000)
+metadata/coliziune = "none"
+
+[node name="casa_jos421" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(-0.056148, 0, -1.224121, 0, 1.225409, 0, 1.224121, 0, -0.056148, 190.450000, 20.790000, 170.450000)
+metadata/coliziune = "none"
+
+[node name="casa_jos422" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(-1.258928, 0, 0.445560, 0, 1.335449, 0, -0.445560, 0, -1.258928, 194.070000, -6.600000, 156.930000)
+metadata/coliziune = "none"
+
+[node name="local_jos423" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
+transform = Transform3D(-1.292022, 0, -0.165636, 0, 1.302596, 0, 0.165636, 0, -1.292022, 200.180000, 21.360000, 165.810000)
+metadata/coliziune = "none"
+
+[node name="casa_jos424" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(0.832178, 0, -0.522320, 0, 0.982516, 0, 0.522320, 0, 0.832178, 203.800000, 22.090000, 152.290000)
+metadata/coliziune = "none"
+
+[node name="casa_jos425" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(1.073625, 0, -0.136385, 0, 1.082253, 0, 0.136385, 0, 1.073625, 217.700000, -6.600000, 164.920000)
+metadata/coliziune = "none"
+
+[node name="casa_jos426" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(1.021370, 0, 0.583623, 0, 1.176355, 0, -0.583623, 0, 1.021370, 228.310000, -5.870000, 166.890000)
+metadata/coliziune = "none"
+
+[node name="local_jos427" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("52_restaurant")]
+transform = Transform3D(-0.857822, 0, 0.743311, 0, 1.135064, 0, -0.743311, 0, -0.857822, 221.320000, -6.600000, 154.760000)
+metadata/coliziune = "none"
+
+[node name="casa_jos428" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
+transform = Transform3D(1.005617, 0, -0.787920, 0, 1.277531, 0, 0.787920, 0, 1.005617, 214.330000, 22.800000, 142.630000)
+metadata/coliziune = "none"
+
+[node name="casa_jos429" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("50_shopb")]
+transform = Transform3D(1.184751, 0, 0.151313, 0, 1.194375, 0, -0.151313, 0, 1.184751, 231.940000, -6.590000, 156.730000)
+metadata/coliziune = "none"
+
+[node name="casa_jos430" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("51_shopc")]
+transform = Transform3D(0.123505, 0, 1.193172, 0, 1.199547, 0, -1.193172, 0, 0.123505, 224.960000, -6.490000, 144.590000)
+metadata/coliziune = "none"
+
+[node name="lumina_jos0" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 123.104, 8.630, 169.969)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos1" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 125.927, 5.900, 161.592)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos2" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 135.949, 1.600, 154.827)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos3" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 145.844, -0.940, 145.161)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos4" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 161.162, -1.600, 143.591)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos5" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170.510, -1.600, 142.172)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos6" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 179.935, -1.600, 178.083)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos7" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 190.603, 25.790, 170.086)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos8" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 206.418, 27.090, 153.995)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos9" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 218.454, -1.600, 153.488)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_jos10" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 223.622, -1.490, 141.644)
+light_color = Color(1, 0.808, 0.596, 1)
+light_energy = 3.2
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 130.0
+distance_fade_length = 50.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_pasaj0" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.000, 49.500, 183.500)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj1" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.500, 49.500, 190.000)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj2" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 168.000, 49.500, 185.000)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj3" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 168.500, 49.500, 191.000)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj4" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 173.000, 49.500, 185.500)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj5" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 173.500, 49.500, 191.500)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj6" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 178.000, 49.500, 186.500)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj7" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 178.500, 49.500, 192.500)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj8" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158.500, 49.500, 185.000)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj9" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 159.000, 49.500, 190.500)
+light_color = Color(1, 0.788, 0.561, 1)
+light_energy = 4.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 24.0
+omni_attenuation = 1.1
+
+[node name="lumina_pasaj_flanc0" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150.000, 44.600, 181.500)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 2.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 20.0
+omni_attenuation = 1.3
+
+[node name="lumina_pasaj_flanc1" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158.000, 44.800, 182.000)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 2.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 20.0
+omni_attenuation = 1.3
+
+[node name="lumina_pasaj_flanc2" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 166.000, 44.900, 183.000)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 2.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 20.0
+omni_attenuation = 1.3
+
+[node name="lumina_pasaj_flanc3" type="OmniLight3D" parent="DecorManual/6) Nodul Huangjuewan"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 174.000, 45.000, 184.500)
+light_color = Color(1, 0.804, 0.588, 1)
+light_energy = 2.4
+light_specular = 0.3
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+omni_range = 20.0
+omni_attenuation = 1.3
+

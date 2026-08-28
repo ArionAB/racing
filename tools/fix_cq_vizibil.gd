@@ -39,6 +39,7 @@ func _ready() -> void:
 	_fix_piata()
 	_fix_hongya()
 	_fix_alee()
+	_fix_pasarela()
 	print("")
 	print("===== LINII PENTRU .tscn =====")
 	for l in _out:
@@ -331,3 +332,43 @@ func _emit(node_name: String, pos: Vector3, yaw: float, scl: float) -> void:
 	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
 		% [b[0].x, b[0].y, b[0].z, b[1].x, b[1].y, b[1].z,
 			b[2].x, b[2].y, b[2].z, pos.x, pos.y, pos.z])
+
+
+# --------------------------------------------------------------- 8) PASARELA
+## PROBLEMA 8, partea a doua: "pasarela verde sta acolo fara niciun sens".
+##
+## Avea dreptate: statea PARALEL cu drumul, la 19 m lateral, la 0.9075 — adica
+## dupa iesirea din hol, langa el, fara sa lege nimic de nimic. Brief 2 G cere
+## "iesirea pe o pasarela spre piata": o pasarela care nu traverseaza nimic nu
+## e o iesire, e un obiect.
+##
+## De ce statea asa: prima versiune o pusese perpendicular si `probe_cq_hall`
+## a masurat 56 de atingeri — picioarele ei (cadre in V la +/-6.7 m) cadeau fix
+## pe benzile extreme ale unei sosele de 14 m. Concluzia de atunci a fost
+## "deci nu traverseaza"; concluzia corecta e "deci trebuie RIDICATA".
+##
+## Acum traverseaza pe deasupra: tablierul la 9 m peste carosabil, adica peste
+## gabaritul oricarei masini si peste orice saritura de pe rampa dinainte, iar
+## picioarele cad la +/-6.7 * scara. Cu scara 1.45 ajung la +/-9.7 m, in afara
+## semicarosabilului de 7 m plus acostament. Se citeste ca tavan scurt de doua
+## secunde la iesirea din bloc — exact limbajul din brief 2.0 ("burta pasajului
+## cand treci pe sub el").
+func _fix_pasarela() -> void:
+	print("")
+	print("=== 8) PASARELA LIZIBA ===")
+	const FRAC := 0.897
+	const SCALE := 1.30
+	const CLEAR := 8.0
+	var st := _at(FRAC)
+	var road: Vector3 = st["pos"]
+	var half := _half(st)
+	var legs: float = 6.7 * SCALE
+	print("frac %.3f: sosea y=%.1f, semicarosabil %.1f m" % [FRAC, road.y, half])
+	print("picioarele la +/-%.1f m (semicarosabil %.1f) -> %s"
+		% [legs, half, "IN AFARA" if legs > half + 1.5 else "PE DRUM"])
+	print("tablier la %.1f m peste carosabil" % CLEAR)
+	var p := Vector3(road.x, road.y + CLEAR, road.z)
+	# `_yaw_across` pune Z-ul local pe `right`, adica lungimea de 24.3 m
+	# DE-A CURMEZISUL drumului: asta e chiar traversarea.
+	var r: Vector3 = st["right"]
+	_emit("pasarela224", p, atan2(r.x, r.z), SCALE)

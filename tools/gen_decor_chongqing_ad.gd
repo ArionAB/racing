@@ -66,6 +66,8 @@ var _excluded: Array[RID] = []
 var _sampler: TrackSideSampler
 var _path
 var _out: Array[String] = []
+## Directia fatadei per model, masurata o data (vezi `_facade_yaw`).
+var _facade_cache: Dictionary = {}
 var _n := 0
 var _section := ""
 
@@ -881,9 +883,76 @@ func _ground(wx: float, wz: float, hint: float) -> float:
 
 
 ## Yaw-ul care intoarce piesa CU FATA spre ax (pentru fatade si felinare).
+##
+## `side` e latura pe care STA piesa, deci se intoarce spre -right.
 func _yaw_to_road(st: Dictionary, side: float) -> float:
 	var r: Vector3 = st["right"] * side
 	return atan2(-r.x, -r.z)
+
+
+## UNDE E FATADA unei piese, in spatiul ei local (unghi pe Y).
+##
+## Nu se deduce dintr-o conventie. Kit-ul Chongqing pune vitrina, copertina,
+## balconul si ferestrele pe O SINGURA fata, iar fata aia difera de la piesa
+## la piesa: doua deduceri din semne (+Z, apoi -Z) au iesit amandoua pe dos,
+## si 139 din 211 de cladiri isi aratau spatele soselei — adica POI-urile
+## erau coridoare de pereti gri, exact reprosul „drum gri intre acoperisuri".
+##
+## Se MASOARA deci: centroidul ariei triunghiurilor din slotul 30 (ferestrele
+## aprinse) da directia in care se uita fatada. Cifra se calculeaza o data per
+## MODEL si se tine in cache — piesele aceluiasi .glb au aceeasi geometrie.
+func _facade_yaw(model: String) -> float:
+	if _facade_cache.has(model):
+		return _facade_cache[model]
+	# Zero inseamna „nu corecta nimic". E raspunsul corect pentru piesele care
+	# au ferestre pe DOUA fete: la ele centroidul cade langa origine si unghiul
+	# lui e zgomot, nu directie. Se cere deci si o DEPARTARE minima de origine
+	# (masurat: shophouse_a/b/c au |xz| ~ 2.1 m, restaurant_front 0.03 m —
+	# adica primele au fatada, ultima e simetrica si nu trebuie intoarsa).
+	const MIN_OFFSET := 0.5
+	var ang := 0.0
+	var scn := load("res://assets/models/%s.glb" % model) as PackedScene
+	if scn != null:
+		var root := scn.instantiate() as Node3D
+		var centroid := Vector3.ZERO
+		var area := 0.0
+		var stack: Array[Node] = [root]
+		while not stack.is_empty():
+			var x: Node = stack.pop_back()
+			for ch in x.get_children():
+				stack.append(ch)
+			var mi := x as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+				var ix: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+				if uv.is_empty() or ix.is_empty():
+					continue
+				for k in range(0, ix.size(), 3):
+					if int(floor(uv[ix[k]].x * 32.0)) != 30:
+						continue
+					var ar: float = (v[ix[k + 1]] - v[ix[k]]).cross(
+						v[ix[k + 2]] - v[ix[k]]).length() * 0.5
+					centroid += (v[ix[k]] + v[ix[k + 1]] + v[ix[k + 2]]) / 3.0 * ar
+					area += ar
+		root.queue_free()
+		if area > 0.0:
+			centroid /= area
+			centroid.y = 0.0
+			if centroid.length() > MIN_OFFSET:
+				# `_yaw_to_road` intoarce deja -Z-ul piesei spre drum, deci
+				# corectia e fata de -Z (180°), nu fata de +Z. Masurat:
+				# shophouse_a/b/c au fatada la 172-180°, adica sunt DEJA bine
+				# orientate si corectia lor trebuie sa fie ~0 — cu referinta
+				# gresita ar fi fost intoarse cu spatele, si asa am si masurat
+				# 115 din 224 „intoarse de la drum" la prima incercare.
+				ang = atan2(centroid.x, centroid.z) - PI
+				ang = wrapf(ang, -PI, PI)
+	_facade_cache[model] = ang
+	return ang
 
 
 ## Yaw-ul care pune Z-ul LOCAL al piesei pe vectorul `right` — adica piesa sta
@@ -1020,8 +1089,26 @@ const FACADE_SLOTS := "3,11,20,28,29"
 const FACADE_TINT := "#B08050"
 
 
+## Piesele carora li se corecteaza fatada, DUPA NUME, nu dupa „are slot 30".
+##
+## Filtrul pe slot pare mai general si e o capcana masurata: prinde si scarile,
+## si autobuzele nodului de trafic, si pavilionul — toate au ferestre — iar
+## rotite intra in carosabil (57 de repuneri si cursa moarta la 0.09 tururi).
+## Se corecteaza deci doar peretii de strada, unde „fatada spre drum" chiar e
+## intentia.
+const FACADE_NAMES := ["pravalie", "casa_cornisa", "casa_sub_buza",
+	"restaurant", "bloc_sub_piata", "bloc_contrafort"]
+
+
 func _place(model: String, base: String, pos: Vector3, yaw: float,
 		scl: float) -> String:
+	# FATADA SPRE DRUM. `yaw` spune incotro trebuie sa se uite piesa, dar piesa
+	# nu isi tine fatada pe -Z: se scade unghiul MASURAT al fatadei ei
+	# (`_facade_yaw`), altfel jumatate din kit arata soselei spatele de beton.
+	for tag: String in FACADE_NAMES:
+		if base.begins_with(tag):
+			yaw -= _facade_yaw(model)
+			break
 	# Baza se ia de la Godot, nu se scrie de mana. Versiunea scrisa de mana
 	# folosea (c, 0, -s / s, 0, c), adica TRANSPUSA lui `Basis(UP, yaw)` — deci
 	# fiecare piesa iesea rotita in sensul invers fata de unghiul verificat cu

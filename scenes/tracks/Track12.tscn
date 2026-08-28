@@ -491,7 +491,7 @@ transform = Transform3D(-0.993839, 0, -0.110834, 0, 1.000000, 0, 0.110834, 0, -0
 metadata/coliziune = "none"
 
 [node name="slep_chei121" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("20_ship")]
-transform = Transform3D(-0.094803, 0.000000, 0.844697, 0.000000, 0.850000, 0.000000, -0.844697, 0.000000, -0.094803, 84.218300, 1.301686, 206.151581)
+transform = Transform3D(-0.094803, 0.000000, 0.844697, 0.000000, 0.850000, 0.000000, -0.844697, 0.000000, -0.094803, 78.218300, 1.301686, 232.151581)
 metadata/coliziune = "none"
 
 [node name="firmaE122" parent="DecorManual/5) Cheiul Chaotianmen" instance=ExtResource("40_neona")]
@@ -2296,18 +2296,18 @@ omni_attenuation = 1.2
 [node name="1) Piata Kuixinglou" type="Node3D" parent="DecorManual"]
 
 [node name="bloc_sub_piata1" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.438685, 0.000000, -0.898641, 0.000000, 1.000000, 0.000000, 0.898641, 0.000000, -0.438685, 124.049109, 34.579000, -213.777846)
-metadata/lumina = "8,29,30|1.5|#FFC98A*"
+transform = Transform3D(-0.864889, 0.000000, 0.501964, 0.000000, 1.000000, 0.000000, -0.276080, 0.000000, -0.475689, 129.468673, 40.559000, -214.224998)
+metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
 [node name="bloc_sub_piata2" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.209107, 0.000000, -0.977893, 0.000000, 1.000000, 0.000000, 0.977893, 0.000000, -0.209107, 93.970639, 34.580000, -221.938357)
-metadata/lumina = "8,29,30|1.5|#FFC98A*"
+transform = Transform3D(-0.981360, 0.000000, 0.192179, 0.000000, 1.000000, 0.000000, -0.105699, 0.000000, -0.539748, 100.858615, 40.580000, -223.569238)
+metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
 [node name="bloc_sub_piata3" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.187724, 0.000000, -0.982222, 0.000000, 1.000000, 0.000000, 0.982222, 0.000000, -0.187724, 65.058345, 34.240000, -228.493331)
-metadata/lumina = "8,29,30|1.5|#FFC98A*"
+transform = Transform3D(-0.977747, 0.000000, 0.209789, 0.000000, 1.000000, 0.000000, -0.115384, 0.000000, -0.537761, 77.713103, 40.580000, -228.491720)
+metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
 [node name="pavilion4" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("30_pavilion")]

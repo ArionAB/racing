@@ -807,7 +807,7 @@ metadata/lumina = "30|2.2|#FF3FA4"
 [node name="4) Cornisa Hongya Dong" type="Node3D" parent="DecorManual"]
 [node name="hongya_hero215" parent="DecorManual/4) Cornisa Hongya Dong" instance=ExtResource("23_hongya")]
 transform = Transform3D(1.238045, 0.000000, -0.538280, 0.000000, 1.350000, 0.000000, 0.538280, 0.000000, 1.238045, -211.699081, 5.700000, 194.960419)
-metadata/lumina = "30|2.4|#FFC98A"
+metadata/lumina = "30|0.7|#FFA23C"
 metadata/coliziune = "none"
 [node name="bloc_contrafort216" parent="DecorManual/4) Cornisa Hongya Dong" instance=ExtResource("51_liziba")]
 transform = Transform3D(-0.910897, 0.000000, -0.412634, 0.000000, 1.000000, 0.000000, 0.412634, 0.000000, -0.910897, -177.239059, 5.700000, 231.293488)

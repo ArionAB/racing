@@ -108,11 +108,14 @@ func _ready() -> void:
 	var rock_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
+	var hide_node := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
 		elif arg.begins_with("--frac="):
 			zoom_frac = float(arg.trim_prefix("--frac="))
+		elif arg.begins_with("--hide="):
+			hide_node = arg.trim_prefix("--hide=")
 		elif arg.begins_with("--size="):
 			zoom_size = float(arg.trim_prefix("--size="))
 		elif arg.begins_with("--landmark="):
@@ -161,6 +164,13 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
+	if hide_node != "":
+		var h := track.find_child(hide_node, true, false) as Node3D
+		if h != null:
+			h.visible = false
+			print("snapshot: ascuns %s" % hide_node)
+		else:
+			print("snapshot: nu am gasit %s" % hide_node)
 	if "--smooth" in OS.get_cmdline_user_args():
 		_smooth_organics(track)
 	if train_at >= 0.0:

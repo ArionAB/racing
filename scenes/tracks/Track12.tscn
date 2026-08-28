@@ -965,14 +965,14 @@ telegraph_lead = 3.0
 phase = 0.6
 road_half_width = 7.0
 span_length = 11.84
-deck_run = 34.0
+deck_run = 18.0
 deck_rise = 3.0
 deck_parapet = 0.9
-ramp_run = 30.0
+ramp_run = 16.0
 service_side = -1
-service_offset = 24.0
+service_offset = 15.0
 service_width = 5.0
-service_lead = 30.0
+service_lead = 17.0
 
 [node name="casaFmal600" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
 transform = Transform3D(-0.012844, 0.000000, -0.999918, 0.000000, 1.000000, 0.000000, 0.999918, 0.000000, -0.012844, 285.042114, 20.299467, 123.149948)

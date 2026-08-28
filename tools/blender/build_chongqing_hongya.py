@@ -95,7 +95,7 @@ def curved_roof(b, cx, cy, z, w, d, slot=ROOF, rise=None, up_corners=True):
                       rotation=Matrix.Rotation(sy * math.radians(24.0), 3, "X"))
 
 
-def lit_window(b, x, y, z, w=0.62, h=0.78, face=1.0):
+def lit_window(b, x, y, z, w=1.45, h=1.15, face=1.0):
     """Fereastra aprinsa: gol retras + tamplarie. `face` = +1 spre +Y, -1 spre -Y.
 
     Retragerea de 12 cm e ce face pata sa prinda AO si sa citeasca a gol, nu a
@@ -155,12 +155,28 @@ def tier(b, x0, x1, y_front, z_base, height, floors, seed):
         z = z_base + fh * (f + 0.5)
         # galerie pe fatada
         balcony(b, x0 + 0.3, x1 - 0.3, y_front + 0.12, z_base + fh * f + 0.16)
-        # ferestre aprinse: ~65% dintre travei, determinist
-        n = max(int(w / 2.1), 1)
+        # Ferestre aprinse: pe FIECARE travee, si travei mai dese.
+        #
+        # Aici era gaura care facea hero-ul o silueta maro: la 0.62 x 0.78 m,
+        # o travee la 2.1 m si doar 65% aprinse, slotul GLOW iesea 1.9% din
+        # aria piesei. Masurat pe captura --driver: 0.00% pixeli „aprinsi",
+        # fata de 3.92% in diorama de referinta. Ce citeste ochiul ca „lume
+        # locuita" e RAPORTUL fereastra/lemn de pe fatada, iar in referinta
+        # fatada e mai mult geam decat perete.
+        #
+        # Nu se rezolva din emisie: sa aprinzi lemnul (60% din arie) da un
+        # perete portocaliu plat — incercat si masurat, dev 97 si 45% pixeli
+        # aprinsi, adica exact opusul. Lemnul TREBUIE sa ramana inchis;
+        # contrastul e cel care face lumina sa se citeasca.
+        n = max(int(w / 1.75), 1)
         for i in range(n):
-            if rand() > 0.35:
-                lit_window(b, x0 + w * (i + 0.5) / n, y_front + 0.06,
-                           z + 0.12)
+            lit_window(b, x0 + w * (i + 0.5) / n, y_front + 0.06, z + 0.12)
+        # ...si pe capetele laterale, ca silueta sa arda si din trei-sferturi:
+        # camera prinde cornisa in viraj, deci fatada frontala nu e singura
+        # care se vede.
+        for sx, xx in ((-1.0, x0), (1.0, x1)):
+            b.box((xx - sx * 0.12, y_front - depth * 0.42, z + 0.12),
+                  (0.14, 1.30, 1.05), GLOW)
         # lampioane rosii pe streasina galeriei, rar
         if rand() > 0.55:
             lx = x0 + w * (0.2 + 0.6 * rand())

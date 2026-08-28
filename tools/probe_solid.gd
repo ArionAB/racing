@@ -126,14 +126,30 @@ func _report(path: String, track: Node) -> void:
 				hits[col.name] = [frac, String(col.get_meta("mod_coliziune",
 					"hull"))]
 		i += STEP
-	if hits.is_empty():
+	# NODUL DE TRAFIC e singurul decor din joc care sta PE sosea prin proiect
+	# (brief chongqing.md §2 A: bulevardul blocat, cu o singura fanta). Sonda
+	# asta plimba gabaritul pe AXUL soselei, deci il va gasi intotdeauna — si
+	# are dreptate: pe ax chiar nu se trece. Intrebarea corecta pentru el nu e
+	# „e liber axul", ci „exista blocaj SI o fanta trecabila", si pe aia o pune
+	# `tools/probe_fanta.gd`. Se raporteaza deci separat, nu se ascunde.
+	var blockade: Array = []
+	var real: Array = []
+	for name: String in hits.keys():
+		if name.begins_with("masina_") or name.begins_with("autobuz_"):
+			blockade.append(name)
+		else:
+			real.append(name)
+	blockade.sort()
+	real.sort()
+	if not blockade.is_empty():
+		print("nodul de trafic (pe sosea prin proiect — vezi probe_fanta): %s"
+			% ", ".join(blockade))
+	if real.is_empty():
 		print("gabaritul masinii trece liber pe toata linia soselei")
 		return
 	_fail = true
-	print("ATINGE MASINA (%d):" % hits.size())
-	var names: Array = hits.keys()
-	names.sort()
-	for name in names:
+	print("ATINGE MASINA (%d):" % real.size())
+	for name: String in real:
 		var e: Array = hits[name]
 		print("  %-38s frac %.3f  (%s)" % [name, e[0], e[1]])
 

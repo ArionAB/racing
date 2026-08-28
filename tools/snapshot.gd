@@ -270,7 +270,22 @@ func _ready() -> void:
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
-		cam.position = focus - dir * dist + Vector3.UP * cam_h
+		var want := focus - dir * dist + Vector3.UP * cam_h
+		if game_cam:
+			# ANTI-CLIPPING, ca in joc. Fara el captura minte exact acolo unde
+			# conteaza: pe portiunea prin holul blocului Liziba camera de joc e
+			# trasa in fata plafonului (`ChaseCamera._unclip`), dar captura o
+			# lasa in plansee si iese un cadru negru — adica poza arata un
+			# defect pe care jocul nu-l are, sau ascunde unul pe care il are.
+			var look := focus + Vector3.UP * ChaseCamera.LOOK_HEIGHT
+			var space := get_viewport().world_3d.direct_space_state
+			var q := PhysicsRayQueryParameters3D.create(look, want,
+				Track.CAMERA_BLOCKER_LAYER)
+			var hit := space.intersect_ray(q)
+			if not hit.is_empty():
+				want = (hit["position"] as Vector3).move_toward(look,
+					ChaseCamera.CLIP_MARGIN)
+		cam.position = want
 		cam.look_at(focus + dir * look_ahead + Vector3.UP * look_h, Vector3.UP)
 		cam.current = true
 		await get_tree().process_frame

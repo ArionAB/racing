@@ -848,6 +848,7 @@ metadata/coliziune = "hull"
 [node name="bloc_liziba218" parent="DecorManual/7) Liziba" instance=ExtResource("33_liziba")]
 transform = Transform3D(-2.586037, 0, -0.373704, 0, 1.150000, 0, 0.776154, 0, -1.245129, 241.443695, 52.712433, 11.490620)
 metadata/coliziune = "mesh"
+metadata/camera_blocker = true
 
 [node name="hol219" parent="DecorManual/7) Liziba" instance=ExtResource("35_mailbox")]
 transform = Transform3D(-0.269328, 0, 0.963048, 0, 1.000000, 0, -0.963048, 0, -0.269328, 255.791855, 52.927872, 26.927963)

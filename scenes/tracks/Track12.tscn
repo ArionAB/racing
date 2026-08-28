@@ -956,7 +956,7 @@ transform = Transform3D(-0.480959, 0, -1.099399, 0, 1.200000, 0, 1.099399, 0, -0
 metadata/coliziune = "none"
 
 [node name="podS242" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]
-transform = Transform3D(0.712083, 0, 0.702095, 0, 1.000000, 0, -0.702095, 0, 0.712083, 122.889694, 9.001686, 207.366503)
+transform = Transform3D(0.712083, 0.000000, 0.702095, 0.000000, 1.000000, 0.000000, -0.702095, 0.000000, 0.712083, 140.889694, 14.000000, 253.366503)
 metadata/coliziune = "none"
 
 [node name="podS243" parent="DecorManual/8) Fundal" instance=ExtResource("39_baybridge")]

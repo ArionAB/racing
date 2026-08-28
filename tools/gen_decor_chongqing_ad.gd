@@ -728,14 +728,12 @@ func _poi_d_cornisa() -> void:
 		# panou alb (se vede in captura: ferestre arse, fara cadru), fiindca
 		# ADD peste un albedo deja deschis satureaza. MULTIPLY pastreaza
 		# relieful si lasa ramele sa se citeasca.
-		_meta(nw, "lumina", "%s|1.00|%s*" % [FACADE_SLOTS, FACADE_TINT])
 		# Randul din spate: mai departat si rotit, ca sa se vada acoperisuri
 		# peste primul rand (adancime), nu o singura linie de fatade.
 		if wi % 2 == 0:
 			var nb := _place(shopd[(wi + 2) % 3], "casa_cornisa_spate",
 				_off_ground(stw, -1.0, 20.5), _yaw_to_road(stw, -1.0)
 				+ deg_to_rad(22.0), 1.0)
-			_meta(nb, "lumina", "%s|1.00|%s*" % [FACADE_SLOTS, FACADE_TINT])
 		wi += 1
 		wf += 8.6 / _path.total
 
@@ -954,9 +952,28 @@ func _light(node_name: String, energy: float, tint: String = WARM) -> void:
 ## care o reclama comparatia cu bara (R-B -14.5 la noi, +15.7 la ea). In
 ## referinta peretii nu sunt cenusii: sunt spalati de lumina care iese din
 ## pravalii.
-func _wash(node_name: String, slots: String, energy: float,
-		tint: String = WARM) -> void:
-	_meta(node_name, "lumina", "%s|%.2f|%s*" % [slots, energy, tint])
+## SPALAREA DE FATADA E DEZACTIVATA, si de-aia nu se scrie nimic aici.
+##
+## Ideea era buna si masurata: peretii kitului sunt 30% slot 11 (`#7692A8`,
+## gri-albastru) si 19% slot 29 (gri, luminanta 180), adica exact dominanta
+## rece pe care o reclama comparatia cu bara, iar in referinta peretii sunt
+## spalati de lumina care iese din pravalii.
+##
+## Ce lipseste ca sa functioneze e in `palette.gd`, nu aici: cu operatorul
+## MULTIPLY emisia finala e `emission * textura`, iar `emission` e NEGRU
+## (corect pentru ADD, unde tocmai negrul opreste aprinderea intregii piese),
+## deci produsul e zero pe toate sloturile. Verificat: materialul se
+## construieste, se aplica pe 132 de fatade si nu schimba NICIUN pixel.
+##
+## Reparatia (`emission = Color.WHITE` cand `multiply`) a fost incercata si
+## data inapoi: `palette.gd` e infrastructura comuna tuturor pistelor, iar
+## schimbarea semanticii lui MULTIPLY atinge si lava Stromboli, si orice alt
+## material care o foloseste — nu e o decizie care se ia din perimetrul unui
+## POI. Pana se ia, nu punem pe 132 de noduri o metadata despre care STIM ca
+## nu face nimic: ar arata a lucru facut si ar minti urmatorul care citeste.
+func _wash(_node_name: String, _slots: String, _energy: float,
+		_tint: String = WARM) -> void:
+	pass
 
 
 ## Sloturile spalate pe fatadele kitului chinezesc, intr-un singur loc.

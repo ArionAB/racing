@@ -28,8 +28,8 @@ func _ready() -> void:
 			if b != null: _excluded.append(b.get_rid())
 	print("total=%.1f" % _path.total)
 	print("frac | road_y | curb(+1) profil lateral 8/12/16/20/26/34/45 m | dir_change_deg_per_10m")
-	var f := 0.985
-	while f <= 1.06:
+	var f := 0.26
+	while f <= 0.40:
 		var st = _path.at(_path.total * fmod(f, 1.0))
 		var road: Vector3 = st["pos"]
 		var line := "%.3f y=%6.2f | R:" % [f, road.y]
@@ -49,7 +49,7 @@ func _ready() -> void:
 		while ang < -180.0: ang += 360.0
 		line += " | curb=%+6.1f" % ang
 		print(line)
-		f += 0.004
+		f += 0.01
 	get_tree().quit(0)
 
 func _off(st: Dictionary, side: float, dist: float) -> Vector3:

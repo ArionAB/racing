@@ -1558,20 +1558,23 @@ static func themes() -> Dictionary:
 			"lagoon_inner": 1.5,
 			"lagoon_rim": 8.0,
 			"dust_color": Color(0.30, 0.30, 0.34),
-			# SCURTATURA E O RAMPA DE BETON PESTE GOLF, nu un banc de nisip.
-			# Implicit temele fara `branch_surface` primesc "sand", reteta
-			# Okinawei: o panglica de o singura culoare, fara marcaje si fara
-			# borduri — chiar prin proiect, fiindca un banc submers nu poarta
-			# marcaje. Pe Chongqing asta a iesit exact reprosul de la volan:
-			# "un drum gri inchis prin care nu vezi nimic". Reteta "gravel" da
-			# in schimb urme batatorite (variatie de valoare pe latime) si
-			# margini care se topesc in ce e langa, adica cele doua lucruri din
-			# care ochiul citeste "suprafata de rulare".
-			"branch_surface": "gravel",
-			# Beton ud de noapte, in familia lui CONCRETE: mai deschis decat
-			# soseaua ca banda sa se distinga de ea cand o vezi de sus, de pe
-			# cornisa, si sa se citeasca drept alegere.
-			"branch_tint": Color(0.42, 0.43, 0.46),
+			# SCURTATURA E UN TABLIER DE VIADUCT, nu un banc de nisip si nici
+			# un drum de tara. Implicitul "sand" (reteta Okinawei) e prin
+			# proiect fara marcaje si fara borduri, iar "gravel", incercat
+			# inainte, doar a schimbat VALOAREA suprafetei (inchis -> deschis),
+			# nu si CITIREA ei: variatia lui fina de fagas si marginile care se
+			# topesc in teren nu exista noaptea, la 10 m in spatele masinii. De
+			# la volan a ramas exact reprosul dezvoltatorului — "un drum prin
+			# care nu vezi nimic". Reteta "deck" e cea care aduce lucrurile din
+			# care ochiul citeste un drum: asfalt (aceleasi doua treceri ca
+			# soseaua), ax discontinuu si benzi albe pe umeri.
+			"branch_surface": "deck",
+			# Asfalt de noapte, dar mai DESCHIS decat bucla principala
+			# (ROAD_COLOR 0.23/0.24/0.30): tablierul e beton nou, si diferenta
+			# de valoare e ce spune de pe cornisa ca acolo e o alegere, nu
+			# continuarea soselei. Marcajele si bordurile spun ca e drum;
+			# nuanta spune ca e ALT drum.
+			"branch_tint": Color(0.33, 0.34, 0.40),
 		},
 	}
 	return _themes_cache
@@ -4778,6 +4781,8 @@ func _build_branch_surfaces() -> void:
 				_build_branch_dirt(r, true)
 			"gravel":
 				_build_branch_dirt(r, false)
+			"deck":
+				_build_branch_deck(r)
 			_:
 				_build_branch_sand(r)
 		if r.elevated:
@@ -4898,6 +4903,151 @@ func _build_branch_sand(r: TrackRoute) -> void:
 	_add_mesh_with_collision(st.commit(), tint,
 		_tex(String(theme_flag("branch_texture",
 			"res://assets/textures/surface_sand.png"))))
+
+
+## Reteta "deck": banda ASFALTATA — un tablier de viaduct, nu o panglica.
+##
+## De ce exista, cand aveam deja "sand", "dirt_road" si "gravel": toate trei
+## sunt suprafete NEPAVATE, si prin proiect n-au marcaje (un banc de nisip nu
+## poarta linie de mijloc — vezi si _build_center_line, care iese pe
+## `road_is_loose`). Pe Chongqing scurtatura nu e insa o poteca, e o rampa de
+## beton peste golf, iar la volan, noaptea, "gravel" a iesit exact reprosul
+## dezvoltatorului: o panglica de o singura culoare, "un drum prin care nu vezi
+## nimic". Trecerea de la gri inchis la gri deschis n-a rezolvat nimic —
+## VALOAREA se schimbase, CITIREA nu: variatia fina de fagas si marginile care
+## se topesc in teren se sting complet la lumina de noapte si de la 10 m in
+## spatele masinii.
+##
+## Un drum se citeste din trei lucruri, si toate trei sunt AICI, nu in nuanta:
+##   1. SUPRAFATA e asfalt — aceleasi doua treceri de textura ca soseaua
+##      principala (micro 3.5 m + macro 45 m) si aceeasi familie de culoare.
+##      Materialul e cel din cache-ul soselei cand culorile coincid, deci
+##      costul in materiale e ZERO pe soseaua care are deja asfalt.
+##   2. MARCAJ DE AX: linie discontinua, acelasi pas si aceeasi latime ca pe
+##      bucla principala (2.8 m linie / 6.5 m pas / 0.36 m latime), ca ochiul
+##      s-o recunoasca drept acelasi obiect.
+##   3. BORDURI: doua benzi albe continue pe umeri, plus buza de beton care
+##      exista deja din parapet. Astea dau LATIMEA — pe un tablier fara ele nu
+##      stii unde se termina banda pana nu cazi de pe ea.
+##
+## Coliziunea e planul benzii (marcajele stau la 4.5 cm deasupra, ca pe sosea,
+## si sunt pur vizuale).
+func _build_branch_deck(r: TrackRoute) -> void:
+	var n := r.count()
+	var hw := r.half_width
+	var tile := 3.5
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var u_half := hw / tile
+	for i in n - 1:
+		var j := i + 1
+		var l0 := r.baked[i] - r.side_at(i) * hw
+		var r0 := r.baked[i] + r.side_at(i) * hw
+		var l1 := r.baked[j] - r.side_at(j) * hw
+		var r1 := r.baked[j] + r.side_at(j) * hw
+		var v0 := r.dists[i] / tile
+		var v1 := r.dists[j] / tile
+		st.set_uv(Vector2(-u_half, v0)); st.set_uv2(Vector2(-u_half, v0) * 0.078)
+		st.add_vertex(l0)
+		st.set_uv(Vector2(u_half, v0)); st.set_uv2(Vector2(u_half, v0) * 0.078)
+		st.add_vertex(r0)
+		st.set_uv(Vector2(-u_half, v1)); st.set_uv2(Vector2(-u_half, v1) * 0.078)
+		st.add_vertex(l1)
+		st.set_uv(Vector2(u_half, v0)); st.set_uv2(Vector2(u_half, v0) * 0.078)
+		st.add_vertex(r0)
+		st.set_uv(Vector2(u_half, v1)); st.set_uv2(Vector2(u_half, v1) * 0.078)
+		st.add_vertex(r1)
+		st.set_uv(Vector2(-u_half, v1)); st.set_uv2(Vector2(-u_half, v1) * 0.078)
+		st.add_vertex(l1)
+	st.index()
+	st.generate_normals()
+	# Aceeasi impartire la media macro-ului ca pe sosea (_build_road): fara ea
+	# a doua trecere ar intuneca banda cu ~10%.
+	var base: Color = _branch_dirt_color(r)
+	var deck_color := Color(
+		base.r / ASPHALT_MACRO_MEAN,
+		base.g / ASPHALT_MACRO_MEAN,
+		base.b / ASPHALT_MACRO_MEAN)
+	# CULL_DISABLED, nu CULL_BACK ca pe sosea: windingul benzii vine din ordinea
+	# punctelor desenate in .tscn si nu e garantat in sus (masurat — cu
+	# CULL_BACK tablierul dispare complet si raman doar marcajele plutind).
+	_add_mesh_with_collision(st.commit(), deck_color,
+		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
+		BaseMaterial3D.CULL_DISABLED, null,
+		_tex("res://assets/textures/surface_asphalt_macro.png"))
+	_build_branch_markings(r)
+
+
+## Latimea unei linii discontinue de ax pe banda (jumatate, in metri).
+const BRANCH_DASH_HALF_W: float = 0.18
+## Lungimea unei linii si pasul intre inceputurile a doua linii.
+const BRANCH_DASH_LEN: float = 2.8
+const BRANCH_DASH_STEP: float = 6.5
+## Latimea benzii albe continue de pe umar.
+const BRANCH_EDGE_W: float = 0.30
+## Cat de departe de marginea benzii sta banda alba de umar.
+const BRANCH_EDGE_INSET: float = 0.45
+## Inaltimea marcajelor peste planul benzii — aceeasi ca pe sosea.
+const BRANCH_MARK_LIFT: float = 0.045
+
+
+## Marcajele benzii asfaltate: ax discontinuu + doua benzi albe pe umeri.
+##
+## Un singur mesh si o singura culoare (aceeasi vopsea ca `_build_center_line`),
+## deci un singur material — si acela deja in cache daca pista are linie de ax.
+func _build_branch_markings(r: TrackRoute) -> void:
+	var n := r.count()
+	if n < 3:
+		return
+	var total: float = r.dists[n - 1]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var lift := Vector3.UP * BRANCH_MARK_LIFT
+	var emitted := false
+	# 1. AXUL, discontinuu. Se sare peste primii si ultimii metri: acolo banda
+	# se racordeaza la asfaltul buclei, si o linie acolo s-ar bate cu marcajul
+	# soselei.
+	var d := 6.0
+	var idx := 0
+	while d < total - 8.0:
+		while idx + 1 < n and r.dists[idx + 1] < d:
+			idx += 1
+		var i := mini(idx, n - 2)
+		var dir := (r.baked[i + 1] - r.baked[i]).normalized()
+		var side := r.side_at(i)
+		var a := r.baked[i] + dir * (d - r.dists[i]) + lift
+		var b := a + dir * BRANCH_DASH_LEN
+		st.add_vertex(a - side * BRANCH_DASH_HALF_W)
+		st.add_vertex(a + side * BRANCH_DASH_HALF_W)
+		st.add_vertex(b - side * BRANCH_DASH_HALF_W)
+		st.add_vertex(a + side * BRANCH_DASH_HALF_W)
+		st.add_vertex(b + side * BRANCH_DASH_HALF_W)
+		st.add_vertex(b - side * BRANCH_DASH_HALF_W)
+		d += BRANCH_DASH_STEP
+		emitted = true
+	# 2. BENZILE DE UMAR, continue pe ambele parti. Ele dau latimea benzii —
+	# fara ele, la 10 m in spate si noaptea, tablierul se termina in nimic.
+	var inner := r.half_width - BRANCH_EDGE_INSET - BRANCH_EDGE_W
+	var outer := r.half_width - BRANCH_EDGE_INSET
+	if inner > BRANCH_DASH_HALF_W + 0.3:
+		for side_sign: float in [-1.0, 1.0]:
+			for i in n - 1:
+				var j := i + 1
+				if r.dists[i] < 4.0 or total - r.dists[j] < 4.0:
+					continue
+				var s0 := r.side_at(i) * side_sign
+				var s1 := r.side_at(j) * side_sign
+				var a0 := r.baked[i] + s0 * inner + lift
+				var a1 := r.baked[i] + s0 * outer + lift
+				var b0 := r.baked[j] + s1 * inner + lift
+				var b1 := r.baked[j] + s1 * outer + lift
+				st.add_vertex(a0); st.add_vertex(a1); st.add_vertex(b0)
+				st.add_vertex(a1); st.add_vertex(b1); st.add_vertex(b0)
+				emitted = true
+	if not emitted:
+		return
+	st.generate_normals()
+	_add_visual_mesh(st.commit(), Color(0.92, 0.9, 0.78))
 
 
 ## Culoarea pamantului unei benzi: a nodului daca a cerut una, altfel a temei,

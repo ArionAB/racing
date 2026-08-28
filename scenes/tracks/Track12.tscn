@@ -1965,3 +1965,315 @@ distance_fade_length = 40.0
 omni_range = 20.0
 omni_attenuation = 1.3
 
+[node name="lumina_chei0" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.404, 9.070, 211.862)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei1" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.617, 9.150, 195.078)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei2" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.964, 9.220, 210.222)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei3" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.194, 9.280, 193.438)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei4" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.534, 9.350, 208.582)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei5" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.404, 9.440, 191.667)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei6" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 76.387, 9.570, 206.230)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei7" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.861, 9.710, 188.969)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei8" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.856, 9.840, 203.510)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei9" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.329, 9.980, 186.249)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei10" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 125.326, 10.120, 200.790)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei11" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 135.784, 10.240, 183.530)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei12" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 148.558, 10.430, 199.061)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei13" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.098, 10.790, 185.297)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei14" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170.784, 11.240, 203.958)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei15" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 186.856, 11.680, 191.762)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei16" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 195.551, 12.070, 209.833)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei17" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.359, 12.890, 193.346)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei18" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 223.752, 14.090, 204.043)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei19" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 227.394, 15.340, 184.181)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei20" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 245.689, 16.600, 192.628)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei21" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 248.262, 17.840, 172.502)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei22" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 267.059, 19.240, 175.445)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei23" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 257.550, 20.670, 156.964)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei24" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 275.808, 22.120, 149.063)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+
+[node name="lumina_chei25" type="OmniLight3D" parent="DecorManual/5) Cheiul Chaotianmen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.762, 23.570, 133.726)
+light_color = Color(1, 0.812, 0.604, 1)
+light_energy = 3.0
+light_specular = 0.25
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 110.0
+distance_fade_length = 40.0
+omni_range = 18.0
+omni_attenuation = 1.2
+

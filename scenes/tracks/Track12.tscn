@@ -860,7 +860,31 @@ transform = Transform3D(0.269588, 0, -0.962976, 0, 1.000000, 0, 0.962976, 0, 0.2
 metadata/coliziune = "none"
 
 [node name="pasarela224" parent="DecorManual/7) Liziba" instance=ExtResource("34_footbridge")]
-transform = Transform3D(-0.416164, 0.000000, 0.909289, 0.000000, 1.000000, 0.000000, -0.909289, 0.000000, -0.416164, 184.758331, 64.792030, -120.593094)
+transform = Transform3D(-0.416164, 0.000000, 0.909289, 0.000000, 1.000000, 0.000000, -0.909289, 0.000000, -0.416164, 184.758331, 69.140000, -120.593094)
+metadata/coliziune = "none"
+
+[node name="pasarela_palier00" parent="DecorManual/7) Liziba" instance=ExtResource("36_stairs")]
+transform = Transform3D(0.416164, 0.000000, 0.909289, 0.000000, 1.000000, 0.000000, -0.909289, 0.000000, 0.416164, 173.719557, 63.667000, -125.645328)
+metadata/coliziune = "none"
+
+[node name="pasarela_palier01" parent="DecorManual/7) Liziba" instance=ExtResource("36_stairs")]
+transform = Transform3D(0.416164, 0.000000, 0.909289, 0.000000, 1.000000, 0.000000, -0.909289, 0.000000, 0.416164, 173.719557, 66.067000, -125.645328)
+metadata/coliziune = "none"
+
+[node name="pasarela_palier02" parent="DecorManual/7) Liziba" instance=ExtResource("36_stairs")]
+transform = Transform3D(0.416164, 0.000000, 0.909289, 0.000000, 1.000000, 0.000000, -0.909289, 0.000000, 0.416164, 173.719557, 68.467000, -125.645328)
+metadata/coliziune = "none"
+
+[node name="pasarela_palier10" parent="DecorManual/7) Liziba" instance=ExtResource("36_stairs")]
+transform = Transform3D(-0.416164, 0.000000, -0.909289, 0.000000, 1.000000, 0.000000, 0.909289, 0.000000, -0.416164, 195.797105, 62.805000, -115.540860)
+metadata/coliziune = "none"
+
+[node name="pasarela_palier11" parent="DecorManual/7) Liziba" instance=ExtResource("36_stairs")]
+transform = Transform3D(-0.416164, 0.000000, -0.909289, 0.000000, 1.000000, 0.000000, 0.909289, 0.000000, -0.416164, 195.797105, 65.205000, -115.540860)
+metadata/coliziune = "none"
+
+[node name="pasarela_palier12" parent="DecorManual/7) Liziba" instance=ExtResource("36_stairs")]
+transform = Transform3D(-0.416164, 0.000000, -0.909289, 0.000000, 1.000000, 0.000000, 0.909289, 0.000000, -0.416164, 195.797105, 67.605000, -115.540860)
 metadata/coliziune = "none"
 
 [node name="lampaHol225" parent="DecorManual/7) Liziba" instance=ExtResource("53_lampb")]

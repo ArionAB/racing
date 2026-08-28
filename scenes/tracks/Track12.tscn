@@ -2296,17 +2296,17 @@ omni_attenuation = 1.2
 [node name="1) Piata Kuixinglou" type="Node3D" parent="DecorManual"]
 
 [node name="bloc_sub_piata1" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.864889, 0.000000, 0.501964, 0.000000, 1.000000, 0.000000, -0.276080, 0.000000, -0.475689, 129.468673, 40.559000, -214.224998)
+transform = Transform3D(-0.864889, 0.000000, 0.501964, 0.000000, 1.000000, 0.000000, -0.276080, 0.000000, -0.475689, 130.221618, 37.059000, -215.522331)
 metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
 [node name="bloc_sub_piata2" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.981360, 0.000000, 0.192179, 0.000000, 1.000000, 0.000000, -0.105699, 0.000000, -0.539748, 100.858615, 40.580000, -223.569238)
+transform = Transform3D(-0.981360, 0.000000, 0.192179, 0.000000, 1.000000, 0.000000, -0.105699, 0.000000, -0.539748, 101.146884, 37.080000, -225.041278)
 metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
 [node name="bloc_sub_piata3" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.977747, 0.000000, 0.209789, 0.000000, 1.000000, 0.000000, -0.115384, 0.000000, -0.537761, 77.713103, 40.580000, -228.491720)
+transform = Transform3D(-0.977747, 0.000000, 0.209789, 0.000000, 1.000000, 0.000000, -0.115384, 0.000000, -0.537761, 78.027787, 37.080000, -229.958340)
 metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 

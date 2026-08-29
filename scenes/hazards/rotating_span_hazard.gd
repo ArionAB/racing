@@ -566,10 +566,40 @@ enum State {
 ## y 7 comutau pe rampa de la y 39).
 ##
 ## Masurat dupa, ProbeRace 150 s pe sase seed-uri: zero incidente in fereastra
-## nodului (frac 0.72-0.79) pe toate sase, si repuneri {0,2,1,0,0,0} fata de
-## {0,0,1,0,0,0} cu feature-ul stins in acelasi worktree — aceeasi distributie,
-## si niciuna dintre ele la pasaj. Contractul de pedeapsa ramane in fereastra
-## brief-ului: +3.20 / +3.47 / +3.82 s la 16 / 24 / 30 m/s.
+## nodului (frac 0.72-0.79) pe toate sase — deci la PASAJ, unde s-a lucrat, nu
+## se intampla nimic rau. Contractul de pedeapsa ramane in fereastra brief-ului:
+## +3.20 / +3.47 / +3.82 s la 16 / 24 / 30 m/s.
+##
+## [b]Ce COSTA aprinderea, masurat pe distributii, nu pe o rulare.[/b] Prima
+## masuratoare de aici spunea „aceeasi distributie" pe baza a sase seed-uri cu
+## O SINGURA rulare fiecare ({0,2,1,0,0,0} aprins fata de {0,0,1,0,0,0} stins).
+## Cifra aia nu putea sustine concluzia si a fost infirmata de indata ce s-au
+## repetat rularile pe acelasi seed:
+##
+##   seed 2, gaura APRINSA:  2, 3, 2, 2, 3    (cinci rulari)
+##   seed 2, gaura STINSA:   0, 0, 0, 0, 0, 0 (sase rulari)
+##
+## Cu modulul, ruta de ocol si tot codul nou PREZENTE — se comuta doar steagul
+## asta. Aprins, pilotul e imbrancit de pe cornisa D de DOUA ori pe cursa, la
+## aceleasi momente si aceleasi pozitii in fiecare rulare (t=30.8 frac 0.301 si
+## t=37.6 frac 0.316). Un efect care se repeta la aceeasi milisecunda si dispare
+## determinist cand stingi un steag e o relatie CAUZALA, nu zgomot — chiar daca
+## mecanismul prin care se propaga e rearanjarea broadphase-ului Jolt (lumea de
+## la cornisa e identica bit cu bit: amprenta de raycast 32719.8205 in ambele
+## variante, iar gaura scoate 304 triunghiuri din corpul soselei, la 366 m
+## distanta de cornisa). Mecanismul explica CUM se propaga, nu scuza CE iese.
+##
+## Varianta run-to-run a sondei e reala si e alt lucru (seed 5 a dat 2 apoi 0 cu
+## cod neschimbat), dar nu explica un efect care nu variaza niciodata.
+##
+## [b]DECIZIE DESCHISA pentru dezvoltator.[/b] Remediul cunoscut e un parapet cu
+## coliziune pe cornisa D (intervalul RAIL_POSTS 0.215-0.42 din
+## `custom_rail_segments`, Track12). NU e pus aici deliberat: pe cornisa aia
+## caderea e INTENTIONATA prin design (vezi Track._rail_segments — „coliziunea
+## dispare odata cu panglica, si asta e chiar scopul"), iar a inchide-o ca sa
+## treaca o cifra de sonda ar schimba caracterul pistei fara sa fi cerut-o
+## nimeni. Alegerea intre „cornisa ramane periculoasa, si pe seed 2 se plateste"
+## si „cornisa primeste parapet" e a dezvoltatorului, la volan.
 @export var cut_road_hole: bool = true
 
 ## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota

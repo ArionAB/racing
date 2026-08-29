@@ -42,6 +42,19 @@ const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ## frac 0.30 in fiecare rulare — desi lumea de la cornisa e IDENTICA bit cu bit
 ## (amprenta de raycast 32719.8205 in ambele variante).
 ##
+## [b]Dar „e nedeterminism" NU e un verdict, ci o ipoteza care se testeaza.[/b]
+## Exact cazul de mai sus a fost intai declarat zgomot, si masuratoarea l-a
+## infirmat. Testul care decide e pe O SINGURA VARIABILA: stinge doar steagul
+## suspect, lasand tot restul codului la locul lui, si repeta pe acelasi seed.
+## Aici: cu gaura stinsa seed 2 da 0 in sase rulari, cu ea aprinsa 2/3/2/2/3 in
+## cinci, cu aceleasi doua repuneri la aceeasi milisecunda si aceeasi pozitie.
+##
+## Un efect care se repeta identic si se comuta dintr-un steag e CAUZAL, oricat
+## de haotic ar fi mecanismul prin care se propaga. Zgomotul Jolt explica de ce
+## o schimbare departata poate avea efect, nu ca efectul n-ar fi al ei. Cand
+## distributiile difera stabil, raspunsul onest e „cauza e X, remediul ar fi Y,
+## decide tu" — nu „nu e regresie".
+##
 ## Deci: se compara DISTRIBUTII pe mai multe seed-uri si mai multe rulari, nu o
 ## cifra cu alta. Vezi memoria `proberace-nedeterminism`.
 const SEED: int = 20260729

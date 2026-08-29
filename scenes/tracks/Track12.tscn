@@ -827,11 +827,11 @@ transform = Transform3D(-0.135783, 0, 0.990739, 0, 1.000000, 0, -0.990739, 0, -0
 metadata/coliziune = "hull"
 
 [node name="masinuta216" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("44_minib")]
-transform = Transform3D(-0.305016, 0, 0.952347, 0, 1.000000, 0, -0.952347, 0, -0.305016, 195.476639, 30.235125, 71.973053)
+transform = Transform3D(-0.305016, 0, 0.952347, 0, 1.000000, 0, -0.952347, 0, -0.305016, 192.004852, 30.630000, 61.009628)
 metadata/coliziune = "hull"
 
 [node name="masinuta217" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("43_minia")]
-transform = Transform3D(-0.304911, 0, 0.952381, 0, 1.000000, 0, -0.952381, 0, -0.304911, 168.630341, 32.079205, 80.568222)
+transform = Transform3D(-0.304911, 0, 0.952381, 0, 1.000000, 0, -0.952381, 0, -0.304911, 163.498138, 31.920000, 64.361420)
 metadata/coliziune = "hull"
 
 [node name="bloc_liziba218" parent="DecorManual/7) Liziba" instance=ExtResource("33_liziba")]

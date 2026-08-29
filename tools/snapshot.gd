@@ -93,6 +93,7 @@ func _vec3(text: String) -> Vector3:
 func _ready() -> void:
 	var track_index := 0
 	var zoom_frac := -1.0 # >= 0: prim-plan la fractia respectiva din traseu
+	var span_at := -1.0   # >= 0: faza pasajului rotativ (0 = deschis)
 	var zoom_size := 60.0
 	var driver_view := false
 	var game_cam := false
@@ -112,6 +113,8 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
+		elif arg.begins_with("--span-at="):
+			span_at = float(arg.trim_prefix("--span-at="))
 		elif arg.begins_with("--frac="):
 			zoom_frac = float(arg.trim_prefix("--frac="))
 		elif arg.begins_with("--hide="):
@@ -177,6 +180,8 @@ func _ready() -> void:
 		_set_train_phase(track, train_at)
 	if bridge_at >= 0.0:
 		_set_bridge_phase(track, bridge_at)
+	if span_at >= 0.0:
+		_set_span_phase(track, span_at)
 	if typhoon_at >= 0.0:
 		_set_typhoon_phase(track, typhoon_at)
 	if wave_at >= 0.0:
@@ -494,6 +499,23 @@ func _set_wave_phase(root: Node, at: float) -> void:
 ## traveei, vezi LiftBridgeHazard.SHIP_PERIOD), fiindca doar asa se stie care
 ## dintre cele doua corabii e in dreptul golului. Fractia ceruta e din bucla aia:
 ## 0.24 pune traveea sus cu prima corabie in gol, 0.74 la fel cu a doua.
+## Muta pasajul rotativ intr-un punct din ciclul lui. Fara asta capturile ies
+## in ce stare o fi nimerit ceasul — si acceptarea din brief cere anume starea
+## DESCHISA („continua rampa"), care e cea de la faza 0.
+func _set_span_phase(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.get_children():
+		var span := node as RotatingSpanHazard
+		if span == null:
+			continue
+		span.set("clock_running", false)
+		span.set("_started", true)
+		span.set("_time", span.period * clampf(at, 0.0, 0.999))
+		span.call("_apply_cycle", 0.0)
+		found += 1
+	print("--span-at=%.2f: %d pasaje rotative mutate in ciclu" % [at, found])
+
+
 func _set_bridge_phase(root: Node, at: float) -> void:
 	var found := 0
 	for node in root.get_children():

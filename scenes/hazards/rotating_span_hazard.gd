@@ -52,6 +52,23 @@ const SPAN_DECK_Y: float = -0.17
 ## sunt singurul lucru dintre masina si golul de pe langa el (deck-ul are
 ## parapeti, dar peste gol nu se poate construi nimic fix).
 const SPAN_KERB_X: float = 3.25
+## Cat de sus sta foaia de carosabil peste fata tronsonului (m).
+##
+## [b]Se masoara fata de fata MODELULUI, nu fata de pivot.[/b] Modelul isi are
+## carosabilul la `-SPAN_DECK_Y` peste origine, iar prima incercare a pus foaia
+## la 2 cm peste PIVOT — adica sub tabla modelului, care a acoperit-o. Pe
+## captura din starea deschisa se vedea exact asta: un tronson tan, mai deschis
+## si de alta nuanta decat soseaua, ridicat ca o dala peste drum.
+##
+## Cei 2 cm de deasupra fetei modelului sunt sub raza roatei si sub pragul de
+## 0.15 m al acceptarii — masurat, tronsonul ramane la 0.06-0.07 m fata de axa
+## soselei, deci mai jos decat tablierul de langa el (0.09-0.12).
+const SPAN_ROAD_LIFT: float = 0.06
+## Semilatimea planului de rulare din model (m). Masurata pe mesh
+## (`probe_span_face`: planul de 82.7 m2 de la y=0 se intinde pe x in
+## [-3.47, 3.47]), nu luata din `SPAN_KERB_X` — bordurile stau mai inauntru
+## decat marginea tablei, si o foaie taiata dupa ele lasa doua fasii tan.
+const SPAN_DECK_HALF: float = 3.47
 const SPAN_KERB_HEIGHT: float = 0.34
 const SPAN_KERB_WIDTH: float = 0.5
 ## Latimea barierei de santier din GLB, pentru cate bucati intra pe poarta.
@@ -1663,6 +1680,30 @@ func _build_span() -> void:
 		inst.position = Vector3(0.0, -SPAN_DECK_Y * model_scale, 0.0)
 		Palette.apply_object_class_materials(inst, WorldProp.prop_classes(), model_scale)
 		_span.add_child(inst)
+		# [b]Si tronsonul primeste carosabil, din acelasi motiv ca tablierul.[/b]
+		# Materialele de clasa ale GLB-ului il fac cald si palid: masurat pe
+		# captura de la frac 0.750, tronsonul iese la luminanta 0.368 si
+		# rgb(113,90,70) pe o sosea de 0.245 si rgb(72,59,67) — de 1.5 ori mai
+		# luminos si de alta nuanta, deci se citeste ca o DALA pusa peste drum,
+		# nu ca drumul care continua. Criticul a numit exact asta („dala tan").
+		#
+		# Peste fata lui de rulare vine o foaie subtire de carosabil, cu
+		# aceleasi UV/UV2 ca pe restul modulului. Corpul, bordurile si
+		# structura raman ale modelului — se schimba doar ce calca roata.
+		var deck_st := SurfaceTool.new()
+		deck_st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		# Foaia acopera fata de rulare a modelului pe toata latimea dintre
+		# borduri si pe toata lungimea lui — altfel tabla lui tan ramane la
+		# vedere pe margini si tronsonul se citeste tot ca o dala pusa peste.
+		var shw := SPAN_DECK_HALF * model_scale
+		var shl := span_length * 0.5
+		var y := SPAN_ROAD_LIFT
+		_road_face(deck_st,
+			Vector3(-shw, y, -shl), Vector3(shw, y, -shl),
+			Vector3(shw, y, shl), Vector3(-shw, y, shl))
+		var deck_mi := _emit_road(deck_st, "SpanRoad")
+		if deck_mi != null:
+			_span.add_child(deck_mi)
 	else:
 		_span.add_child(PaletteBox.instance(
 			Vector3(hw * 2.0, DECK_THICK, span_length), deck_slot,

@@ -48,16 +48,14 @@ var _fails: int = 0
 
 func _ready() -> void:
 	_track = (load(TRACK_SCENE) as PackedScene).instantiate() as Track
-	# [b]Comutatorul se apasa INAINTE de intrarea in arbore.[/b] Pe Track12
-	# `cut_road_hole` e deocamdata stins (vezi nota lui: pilotul nu poate lua un
-	# ocol care nu e ruta), dar mecanismul trebuie sa ramana pazit — altfel se
-	# strica in tacere pana in ziua in care se aprinde. Aprins aici, pista isi
-	# taie gaura la primul `rebuild()`, iar modulul se construieste o singura
-	# data, ca in joc; o reconstructie facuta DUPA `_ready` lasa in urma corpuri
-	# duplicate si a fost masurata ca atare (prag fals de 0.244 m).
+	# [b]Sonda NU mai apasa comutatorul.[/b] Pana in runda 7 aici statea
+	# `_hazard.cut_road_hole = true`, fiindca pe Track12 gaura era stinsa —
+	# adica sonda pazea o configuratie care NU se livra, si tocmai asta a
+	# ascuns ca pe pista adevarata starea „inchis" nu inchidea nimic. De cand
+	# ocolul e ruta a pistei, comutatorul e aprins in `.tscn` si sonda citeste
+	# ce se livreaza. Daca cineva il stinge, verdictul de mai jos pica — ceea
+	# ce e exact ce trebuie sa faca o garda.
 	_hazard = _find_span(_track)
-	if _hazard != null:
-		_hazard.cut_road_hole = true
 	add_child(_track)
 	await get_tree().physics_frame
 	await get_tree().physics_frame

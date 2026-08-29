@@ -991,6 +991,7 @@ service_width = 6.0
 service_lead = 30.0
 gate_clearance = 1.2
 gate_push = 6.0
+cut_road_hole = true
 
 [node name="casaFmal600" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
 transform = Transform3D(-0.012844, 0.000000, 0.999918, 0.000000, 1.000000, 0.000000, -0.999918, 0.000000, -0.012844, 285.042114, 20.299467, 123.149948)

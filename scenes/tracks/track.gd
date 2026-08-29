@@ -3540,7 +3540,24 @@ const QUAY_STEP: float = 5.0
 ## Cat de departe de linia apei se citeste daca CHIAR e uscat in spate.
 const QUAY_INLAND: float = 20.0
 ## Cat de lata e dala de deasupra zidului.
-const QUAY_DECK: float = 9.0
+##
+## [b]3 m, si latimea asta e chiar reclamatia dezvoltatorului.[/b] La 9 m dala
+## iesea „o banda gri lata cat drumul, lipita de marginea dreapta a soselei pe
+## tot cheiul" — masurat pe scanline la frac 0.48, luminanta 0.31-0.52 langa
+## asfalt la 0.09, adica de patru ori mai deschisa, pe o fasie tot atat de lata
+## cat carosabilul. Din masina nu se citea nici drum, nici mal: o placa.
+##
+## Dala NU e ce face treaba aici — treaba o face fata VERTICALA de sub ea
+## (muchia dintre apa si uscat, si acoperirea treptelor grilei de tarm, vezi
+## antetul lui `_build_quay_wall`). Dala doar acopera panta de mal de imediat
+## in spatele muchiei, si pentru asta 3 m ajung: la 9 m acoperea si tot ce era
+## intre chei si sosea, adica exact suprafata care nu trebuia sa existe.
+##
+## Verificat prin A/B in acelasi worktree, cu `quay_wall` stins: banda dispare
+## complet si cheiul se citeste corect. Deci cauza era dala, nu latimea
+## carosabilului, nu `QUAY_INLAND` (aia spune doar UNDE se considera ca e mal)
+## si nu telecabina — toate incercate si eliminate inainte.
+const QUAY_DECK: float = 3.0
 ## Cat de sus sta muchia cheiului peste apa.
 ##
 ## FIXA, nu citita din teren, si asta e chiar lectia primei incercari: cu
@@ -3635,7 +3652,12 @@ func _quay_quad(st: SurfaceTool, a: Dictionary, b: Dictionary) -> void:
 	# Betonul ud de la linia apei e INCHIS, cel de sus e curat: muchia dintre
 	# ele e chiar ce spune ochiului unde se termina apa.
 	var wet := Color(0.13, 0.14, 0.17)
-	var dry := Color(0.27, 0.28, 0.32)
+	# Betonul de sus sta in aceeasi familie de VALOARE cu asfaltul de langa el
+	# (memoria `rock-dark-nu-pe-bazalt`: variatia de valoare in familie, nu o
+	# culoare noua). La 0.27 dala era cu un ton peste tot ce o inconjoara si
+	# sarea in ochi de la 40 m; muchia dintre ea si apa o da contrastul cu
+	# `wet`, care ramane neschimbat, nu luminozitatea dalei.
+	var dry := Color(0.19, 0.20, 0.23)
 	var pa: Vector2 = a["p"]
 	var pb: Vector2 = b["p"]
 	var fa0 := Vector3(pa.x, a["base"], pa.y)

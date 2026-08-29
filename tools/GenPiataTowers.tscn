@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/gen_piata_towers.gd" id="1"]
+
+[node name="GenPiataTowers" type="Node"]
+script = ExtResource("1")

@@ -167,13 +167,6 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
-	if hide_node != "":
-		var h := track.find_child(hide_node, true, false) as Node3D
-		if h != null:
-			h.visible = false
-			print("snapshot: ascuns %s" % hide_node)
-		else:
-			print("snapshot: nu am gasit %s" % hide_node)
 	if "--smooth" in OS.get_cmdline_user_args():
 		_smooth_organics(track)
 	if train_at >= 0.0:
@@ -206,6 +199,27 @@ func _ready() -> void:
 				while lf.current_stage() < lava_stage:
 					lf.on_lap_completed()
 				print("--lava-stage=%d: %s" % [lava_stage, lf.name])
+	# `--hide` se aplica DUPA doua cadre, nu la `add_child`.
+	#
+	# Hazardele isi construiesc geometria AMANAT (`call_deferred` in
+	# `RotatingSpanHazard._ready`, ca sa apuce pista sa-si coaca rutele), deci
+	# in `_ready`-ul capturii nodurile lor inca nu exista in arbore. Cautate
+	# atunci, `Deck`/`Span`/`SpanRoad` dau „nu am gasit" — si asta a costat o
+	# runda intreaga: A/B-ul care trebuia sa arate CE deseneaza dala tan a
+	# raportat „ascunderea nu schimba nimic", fiindca nu ascunsese nimic.
+	#
+	# `owned=false` din acelasi motiv: mesh-urile construite in cod n-au
+	# `owner`, iar cele din GLB-urile instantiate stau sub radacina scenei lor.
+	if hide_node != "":
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var h := track.find_child(hide_node, true, false) as Node3D
+		if h != null:
+			h.visible = false
+			print("snapshot: ascuns %s (%s)" % [hide_node, h.get_path()])
+		else:
+			print("snapshot: nu am gasit %s" % hide_node)
+
 	# Fara ceata: camera e sus si ceata ar spala imaginea.
 	for child in track.get_children():
 		if child is WorldEnvironment:

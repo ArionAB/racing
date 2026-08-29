@@ -40,36 +40,43 @@ extends Node3D
 const WorldProp = preload("res://scenes/props/world_prop.gd")
 const SPAN_MODEL: String = "res://assets/models/chongqing/structures/rotating_span.glb"
 const BARRIER_MODEL: String = "res://assets/models/chongqing/props/construction_barrier.glb"
-## Cota carosabilului in modelul tronsonului. Nu e ghicita si nu e capatul de
-## sus al modelului: e planul orizontal cu cea mai mare ARIE din banda
-## centrala — 82.7 m2 la y = -0.17, adica exact 6.9 x 12 m de asfalt.
-## Modelul se RIDICA cu atat ca suprafata lui sa cada pe pasajul construit
-## aici. (Prima versiune avea +0.17, cota bordurii, si cu semnul invers:
-## masina ar fi mers la 34 cm deasupra asfaltului desenat.)
-const SPAN_DECK_Y: float = -0.17
+## Cota fetei de SUS a modelului tronsonului (m fata de originea lui).
+##
+## [b]Se masoara cu RAZE, nu cu arii — si asta a costat doua runde.[/b] Aici a
+## stat -0.17, planul cu cea mai mare ARIE din mesh (82.7 m2). Aria a fost
+## criteriul gresit: planul ala exista in geometrie, dar e ACOPERIT. O raza
+## trasa de sus in jos peste toata amprenta (grila de 0.5 m pe x, cinci statii
+## pe z) da in +0.170 pe tot carosabilul, de la x = -3.0 la +3.0, si in +0.135
+## pe cele doua margini. Fata de la -0.17 nu se vede de nicaieri.
+##
+## Cu -0.17 aici, modelul se RIDICA cu 0.17 si tabla lui vizibila ajunge la
+## +0.34 peste pivot, in timp ce foaia de carosabil statea la +0.06: foaia
+## ramanea ingropata 28 cm sub tabla tan si nu desena niciun pixel. Asta era
+## „dala tan" din raportul criticului.
+##
+## Modelul se COBOARA acum cu 0.17, ca fata lui de sus sa cada pe planul
+## pasajului, iar foaia de asfalt sa aiba ce acoperi.
+const SPAN_DECK_Y: float = 0.17
 ## Bordurile modelului: doua praguri la x = +/-3.25, cu 0.34 m peste carosabil.
 ## Intra si in colizor, nu doar in imagine — cand tronsonul e pe pozitie, ele
 ## sunt singurul lucru dintre masina si golul de pe langa el (deck-ul are
 ## parapeti, dar peste gol nu se poate construi nimic fix).
 const SPAN_KERB_X: float = 3.25
-## Cat de sus sta foaia de carosabil peste fata tronsonului (m).
+## Cat de sus sta foaia de carosabil peste fata de sus a modelului (m).
 ##
-## [b]Se masoara fata de fata MODELULUI, nu fata de pivot.[/b] Modelul isi are
-## carosabilul la `-SPAN_DECK_Y` peste origine, iar prima incercare a pus foaia
-## la 2 cm peste PIVOT — adica sub tabla modelului, care a acoperit-o. Pe
-## captura din starea deschisa se vedea exact asta: un tronson tan, mai deschis
-## si de alta nuanta decat soseaua, ridicat ca o dala peste drum.
-##
-## Cei 2 cm de deasupra fetei modelului sunt sub raza roatei si sub pragul de
-## 0.15 m al acceptarii — masurat, tronsonul ramane la 0.06-0.07 m fata de axa
-## soselei, deci mai jos decat tablierul de langa el (0.09-0.12).
-const SPAN_ROAD_LIFT: float = 0.06
+## Doi centimetri: foaia trebuie doar sa castige sortarea de adancime fata de
+## tabla de sub ea, si orice mai mult devine un prag pe care il calca roata.
+## Mult sub raza rotii si sub pragul de 0.15 m al acceptarii.
+const SPAN_ROAD_LIFT: float = 0.02
 ## Semilatimea planului de rulare din model (m). Masurata pe mesh
 ## (`probe_span_face`: planul de 82.7 m2 de la y=0 se intinde pe x in
 ## [-3.47, 3.47]), nu luata din `SPAN_KERB_X` — bordurile stau mai inauntru
 ## decat marginea tablei, si o foaie taiata dupa ele lasa doua fasii tan.
 const SPAN_DECK_HALF: float = 3.47
 const SPAN_KERB_HEIGHT: float = 0.34
+## Peste ce fractie de rotatie tronsonul nu mai e corp solid (vezi
+## `_tick_span_solid`).
+const SPAN_SOLID_MAX_FRAC: float = 0.12
 const SPAN_KERB_WIDTH: float = 0.5
 ## Latimea barierei de santier din GLB, pentru cate bucati intra pe poarta.
 const BARRIER_WIDTH: float = 2.4
@@ -536,6 +543,9 @@ var _deck_road_st: SurfaceTool = null
 var _skirt_st: SurfaceTool = null
 
 var _span: AnimatableBody3D
+## Colizoarele tronsonului (tablier + borduri), ca sa poata fi stinse cat el e
+## rotit din drum. Vezi `_tick_span_solid`.
+var _span_shapes: Array[CollisionShape3D] = []
 var _gate: StaticBody3D
 var _gate_shape: CollisionShape3D
 var _gate_shapes: Array[CollisionShape3D] = []
@@ -814,9 +824,42 @@ func _apply_cycle(delta: float) -> void:
 		_span.transform = Transform3D(
 			_span_rest_basis() * Basis(Vector3.UP, deg_to_rad(closed_angle_deg) * frac),
 			_at(0.0, 0.0))
+	_tick_span_solid(frac)
 	_tick_gate(delta, frac)
 	_push_cars()
 	_tick_lamp(t)
+
+
+## Tronsonul e SOLID cat e drum, si nu mai e nimic de cand s-a intors din el.
+##
+## [b]Asta e diferenta dintre „deviere" si „zid", si a fost un defect real.[/b]
+## Contractul din brief §2 randul F e „inchis -> te trimite pe rampa de
+## serviciu, +3 s". Tronsonul se roteste insa cu 90°, iar colizorul lui e o
+## placa de 14.4 x 11.84 m: intoarsa de-a curmezisul, ea acopera carosabilul
+## pe toata latimea. Masurat cu gabaritul masinii plimbat pe latime (cutie
+## 2.2 x 0.9 x 4.2, din metru in metru, lat -10..+10): in starea inchisa nu mai
+## ramanea NICIO celula libera pe carosabil la frac 0.748 si 0.755.
+##
+## Consecinta pe pista reala, gasita de critic si reprodusa aici: o masina care
+## se strecoara prin poarta la viteza mica se infige in tronson si nu mai iese —
+## ProbeRace o prinde ca „[blocaj] ... atinge: Span", iar sonda cu masina reala
+## masurase o masina care nu termina traversarea nici in 40 s, cu gazul in
+## podea. Pedeapsa promisa e de trei secunde, nu sfarsitul cursei.
+##
+## Reparatia: colizorul tronsonului exista cat tronsonul E pod — adica pana
+## s-a rotit destul cat sa nu mai fie suprafata de rulare — si dispare dupa.
+## Ce ramane sa te tina pe ocol e POARTA, care e facuta pentru asta: linie
+## oblica, lunecoasa, cu ghiont tangential. Tronsonul rotit ramane vizibil (el
+## e semnalul de departe ca pasajul nu se continua), dar nu mai e un perete in
+## banda.
+##
+## Pragul e mic dinadins: la 0.12 din rotatie tronsonul s-a intors cu ~11°,
+## adica destul cat o roata sa nu mai poata urca pe el, si inca destul de
+## devreme cat sa nu apuce nimeni sa fie prins sub muchia lui in miscare.
+func _tick_span_solid(frac: float) -> void:
+	var solid := frac <= SPAN_SOLID_MAX_FRAC
+	for sh in _span_shapes:
+		sh.disabled = not solid
 
 
 ## Poarta e solida de cum tronsonul a plecat din deschis si pana s-a intors.
@@ -1645,6 +1688,7 @@ func _build_span() -> void:
 	shape.shape = box
 	shape.position = Vector3(0.0, -DECK_THICK * 0.5, 0.0)
 	_span.add_child(shape)
+	_span_shapes.append(shape)
 	# [b]Bordurile stau pe MARGINEA carosabilului, nu la cota din GLB.[/b]
 	# `SPAN_KERB_X` e semilatimea MODELULUI (3.25 m). Cand pista cere un pasaj
 	# mai lat decat modelul — Track12 cere `road_half_width` 7.2 — bordurile
@@ -1666,6 +1710,7 @@ func _build_span() -> void:
 		kerb.position = Vector3(kerb_sign * kerb_x,
 			SPAN_KERB_HEIGHT * 0.5 * model_scale, 0.0)
 		_span.add_child(kerb)
+		_span_shapes.append(kerb)
 	if median_collision:
 		var med := CollisionShape3D.new()
 		var mbox := BoxShape3D.new()
@@ -1690,20 +1735,46 @@ func _build_span() -> void:
 		# Peste fata lui de rulare vine o foaie subtire de carosabil, cu
 		# aceleasi UV/UV2 ca pe restul modulului. Corpul, bordurile si
 		# structura raman ale modelului — se schimba doar ce calca roata.
-		var deck_st := SurfaceTool.new()
-		deck_st.begin(Mesh.PRIMITIVE_TRIANGLES)
-		# Foaia acopera fata de rulare a modelului pe toata latimea dintre
-		# borduri si pe toata lungimea lui — altfel tabla lui tan ramane la
-		# vedere pe margini si tronsonul se citeste tot ca o dala pusa peste.
-		var shw := SPAN_DECK_HALF * model_scale
+		# [b]Foaia are latimea PASAJULUI, nu a modelului.[/b] `SPAN_DECK_HALF`
+		# (3.47 m) e semilatimea tablei din GLB, si atat masura foaia pana
+		# acum — dar Track12 cere `road_half_width` 7.2, de doua ori mai lat.
+		# Restul carosabilului ramanea tabla tan a modelului, cu cate o fasie
+		# de 3.7 m de fiecare parte.
+		var shw := maxf(road_half_width, SPAN_DECK_HALF * model_scale)
 		var shl := span_length * 0.5
-		var y := SPAN_ROAD_LIFT
-		_road_face(deck_st,
-			Vector3(-shw, y, -shl), Vector3(shw, y, -shl),
-			Vector3(shw, y, shl), Vector3(-shw, y, shl))
-		var deck_mi := _emit_road(deck_st, "SpanRoad")
-		if deck_mi != null:
-			_span.add_child(deck_mi)
+		# [b]`PlaneMesh`, nu `SurfaceTool` — si nu din gust.[/b] Foaia se
+		# construia pana acum cu `_road_face` + `PaletteBox.emit`, ca tablierul
+		# si ca ocolul. Pe tablier merge; aici mesh-ul iesea valid la orice
+		# verificare din arbore (o suprafata, AABB 14.4 x 11.84, normale in
+		# sus, material de sosea, `visible_in_tree`, in fata camerei la 17 m,
+		# proiectat fix in mijlocul dalei) si tot nu desena NICIUN pixel.
+		# Masurat A/B: cu un material rosu NEUMBRIT pus pe ea, captura are zero
+		# pixeli rosii; un `PlaneMesh` verde in exact acelasi loc si cu aceeasi
+		# marime da 107.048 de pixeli verzi. Diferenta nu e nici pozitia, nici
+		# materialul, nici sortarea — e drumul prin `SurfaceTool`.
+		#
+		# Foaia asta e un dreptunghi plan, adica exact ce stie `PlaneMesh` sa
+		# faca. UV-urile ies din `PlaneMesh` in [0,1], deci se scaleaza din
+		# material (`uv1_scale`) ca dala sa aiba aceeasi marime ca pe sosea si
+		# sa nu se roteasca odata cu tronsonul.
+		var pm := PlaneMesh.new()
+		pm.size = Vector2(shw * 2.0, shl * 2.0)
+		# Un singur cvadrilater: fara subdiviziuni, e o placa plana.
+		pm.subdivide_width = 0
+		pm.subdivide_depth = 0
+		var deck_mi := MeshInstance3D.new()
+		deck_mi.name = "SpanRoad"
+		deck_mi.mesh = pm
+		var track := _find_track()
+		var road_mat: Material = null
+		if track != null and track.has_method("road_material"):
+			road_mat = track.call("road_material")
+		deck_mi.material_override = road_mat if road_mat != null 			else Palette.world_material()
+		# Umbra o arunca modelul de sub ea, nu foaia: ar fi o a doua umbra
+		# pentru aceeasi placa.
+		deck_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_span.add_child(deck_mi)
+		deck_mi.position = Vector3(0.0, SPAN_ROAD_LIFT, 0.0)
 	else:
 		_span.add_child(PaletteBox.instance(
 			Vector3(hw * 2.0, DECK_THICK, span_length), deck_slot,

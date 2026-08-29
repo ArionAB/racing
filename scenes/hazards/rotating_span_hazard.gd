@@ -595,11 +595,14 @@ enum State {
 ## [b]DECIZIE DESCHISA pentru dezvoltator.[/b] Remediul cunoscut e un parapet cu
 ## coliziune pe cornisa D (intervalul RAIL_POSTS 0.215-0.42 din
 ## `custom_rail_segments`, Track12). NU e pus aici deliberat: pe cornisa aia
-## caderea e INTENTIONATA prin design (vezi Track._rail_segments — „coliziunea
-## dispare odata cu panglica, si asta e chiar scopul"), iar a inchide-o ca sa
-## treaca o cifra de sonda ar schimba caracterul pistei fara sa fi cerut-o
-## nimeni. Alegerea intre „cornisa ramane periculoasa, si pe seed 2 se plateste"
-## si „cornisa primeste parapet" e a dezvoltatorului, la volan.
+## caderea e INTENTIONATA prin design, si nu doar in cod: brief-ul §2 randul D
+## scrie cornisa Hongya Dong ca „fara parapet pe dreapta", o numeste „varful
+## emotional al turului" si accepta explicit costul — „Cadere = repunere ~2 s".
+## Vezi si Track._rail_segments („coliziunea dispare odata cu panglica, si asta
+## e chiar scopul"). A inchide cornisa ca sa treaca o cifra de sonda ar schimba
+## caracterul pistei fara sa fi cerut-o nimeni. Alegerea intre „cornisa ramane
+## periculoasa, si pe seed 2 se plateste" si „cornisa primeste parapet" e a
+## dezvoltatorului, la volan.
 @export var cut_road_hole: bool = true
 
 ## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota

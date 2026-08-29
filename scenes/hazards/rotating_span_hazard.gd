@@ -58,6 +58,28 @@ const SPAN_KERB_WIDTH: float = 0.5
 const BARRIER_WIDTH: float = 2.4
 ## Grosimea pasajului si a rampei de serviciu.
 const DECK_THICK: float = 0.55
+## Cat de sus sta carosabilul modulului peste axa citita din ruta, LA MIJLOC (m).
+##
+## [b]De ce e nevoie de el.[/b] Coloana citeste axa rutei, care e linia
+## MEDIANA a soselei, nu fata ei de sus; in plus modulul isi taie placile in
+## coarde de doi metri peste o curba. Suma celor doua a fost masurata: pe
+## jumatatea din aval a modulului tablierul iesea intre 0.00 si 0.18 m SUB
+## asfaltul pistei, deci raza rotii dadea in sosea, iar tablierul construit
+## acolo nu se atingea niciodata — modulul exista pe hartie si nu exista sub
+## roata.
+##
+## [b]De ce e STINS la capete.[/b] O ridicare uniforma muta problema in loc
+## s-o rezolve: masurat, cu 0.22 m pe toata lungimea intrarea pe modul devenea
+## un prag de 0.33 m — adica exact un zid, dupa memoria
+## `suprafete-cu-goluri-si-praguri` (peste 0.3 m). Ridicarea se stinge deci
+## liniar pe ultimii `SPINE_LIFT_FADE` metri de la fiecare capat: la mijloc
+## tablierul e deasupra soselei si e el suprafata de rulare, la capete cade
+## exact pe ea si racordul e o panta de sub un procent, nu o treapta.
+const SPINE_LIFT: float = 0.06
+## Pe cati metri de la fiecare capat al modulului se stinge ridicarea (m).
+## 12 m la 0.20 m inseamna o panta de racord de 1.7% — sub panta soselei
+## insesi (3.7% aici), deci invizibila la volan.
+const SPINE_LIFT_FADE: float = 12.0
 ## Cat de sus sta marcajul peste asfalt (m). Suficient cat sa nu se bata cu
 ## placa (memoria `suprafete-suprapuse-si-valuri`: offsetul se DERIVA, si aici
 ## nu exista valuri, doar o placa plana), prea putin cat sa fie o treapta.
@@ -124,9 +146,25 @@ const GORE_MAX: float = 12.0
 ## sa se mute la 4 m de bariere, cu mutarea abia schitata de estompare: adica
 ## exact blocajul pe care trebuia sa-l repare, doar cu cod in plus.
 ##
-## 30 m e distanta pe care ocolul se desprinde de banda (`service_lead`), adica
-## fereastra in care schimbarea de banda chiar incape.
-const AI_REACH_M: float = 30.0
+## [b]90 m, nu 30, si cifra se deriva din TIMP, nu din geometrie.[/b] 30 m era
+## lungimea pe care ocolul se desprinde de banda (`service_lead`) — corect ca
+## descriere a rampei, gresit ca fereastra de decizie. Pe Track12
+## `bake_interval` e 3 m, deci 30 m inseamna 10 pasi de index, adica [b]1.1 s
+## la 28 m/s[/b]: mai putin decat ii trebuie unei singure masini sa treaca de
+## pe axa pe ocol, si mult mai putin decat ii trebuie unui pluton de sase s-o
+## faca pe rand.
+##
+## Pretul a fost masurat pe pista reala, cu ProbeRace: masinile ajungeau la
+## linia de bariere inca pe axa, se opreau in ea (`lat` 5.0-6.2, adica
+## imbrancite in marginea de afara) si se ingramadeau unele in altele — patru
+## repuneri pe un singur seed, toate in frac 0.733-0.739, plus blocaje in
+## serie pe aceeasi felie.
+##
+## Fereastra se alege deci in secunde: ~3 s la viteza de croaziera a nodului
+## (~30 m/s) inseamna 90 m. Sunt trei secunde in care mutarea e progresiva
+## (`lerp` dupa distanta, ca la gheizere), deci nu smuceste volanul departe si
+## e completa cand conteaza.
+const AI_REACH_M: float = 90.0
 
 ## Grupul din care AI-ul isi ia pasajele, fara sa caute prin arbore.
 ## Conventia de la `fireball_geysers`.
@@ -409,6 +447,38 @@ enum State {
 ## de peste 0.3 m e zid. Se aprinde cand pista chiar vrea doua sensuri.
 @export var median_collision: bool = false
 
+@export_group("Urmarirea traseului")
+## Modulul isi indoaie geometria dupa AXA SOSELEI, in loc s-o intinda plan.
+##
+## [b]De ce exista.[/b] Nodul Huangjuewan e o SPIRALA: pe cei 80 m ai modulului
+## soseaua urca 3 m si se abate lateral cu 5. Un modul plan pus acolo e o
+## coarda peste un arc — la capete iese cu metri intregi langa carosabil, iar
+## la intrare lasa un prag. Prima incercare de reparatie a fost sa se caute un
+## loc PLAN pe spirala; nu exista niciunul (masurat pe tot intervalul F,
+## cel mai bun avea inca 1 m de diferenta pe +/-14 m), si mutatul modulului
+## acolo unde panta e mai mica l-a scos de pe etajul 3 cerut de brief.
+##
+## Cu urmarirea pornita, cotele si abaterea laterala se citesc din ruta la
+## `_ready` si intra intr-o „coloana" (`_spine`): tot ce construieste nodul —
+## tablier, ocol, marcaj, parapete, poarta, lampi — se aseaza pe ea. Frameul
+## local ramane cel drept (z de-a lungul drumului, x lateral), deci NICIUNA
+## din formulele de geometrie (arcele ocolului, pana pavata, fereastra portii)
+## nu se schimba: ele lucreaza mai departe in (x, z), iar coloana le duce la
+## locul lor in lume.
+##
+## Stins, modulul ramane plan — asa il vrea sonda, care il pune pe o
+## sosea-test dreapta si orizontala.
+@export var follow_route: bool = false
+## Ruta pistei pe care se muleaza modulul (0 = banda principala).
+@export_range(0, 4) var follow_route_index: int = 0
+
+## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota
+## soselei, in coordonatele nodului. Goala = modul plan.
+var _spine: PackedVector2Array = PackedVector2Array()
+## Pasul si capatul din amonte al coloanei (m, z local).
+var _spine_step: float = 2.0
+var _spine_z0: float = 0.0
+
 var _span: AnimatableBody3D
 var _gate: StaticBody3D
 var _gate_shape: CollisionShape3D
@@ -417,6 +487,11 @@ var _gate_zone: Area3D
 var _gate_meshes: Array[Node3D] = []
 var _lamp: HazardLamp
 var _service_points: PackedVector3Array = PackedVector3Array()
+## Departarea de axa (m) si z-ul local ale fiecarui punct de ocol, in frameul
+## DREPT — singurele care mai raspund la „cat de departe de sosea e asta" dupa
+## ce `_at` a indoit punctele. Vezi nota din `_build_service`.
+var _service_mags: PackedFloat32Array = PackedFloat32Array()
+var _service_zs: PackedFloat32Array = PackedFloat32Array()
 var _time: float = 0.0
 var _started: bool = false
 var _state: State = State.OPEN
@@ -425,6 +500,23 @@ var _gate_hold: float = 0.0
 
 func _ready() -> void:
 	add_to_group(AI_GROUP)
+	if follow_route and not Engine.is_editor_hint():
+		# [b]Asteapta pista, si asta nu e o precautie.[/b] Nodul e COPIL al
+		# pistei, iar in Godot copiii primesc `_ready` INAINTEA parintelui —
+		# adica inainte ca `Track._ready` sa fi apelat `rebuild()`, deci
+		# inainte sa existe rutele coapte. Masurat: construit in `_ready`,
+		# coloana iesea goala (`spine_size=0`), modulul se aseza plan si
+		# jumatatea lui din aval ateriza cu un metru peste sosea.
+		#
+		# Un cadru de fizica intarziere e invizibil: pana la primul cadru
+		# nimeni nu conduce inca prin nod.
+		call_deferred("_build_module")
+	else:
+		_build_module()
+
+
+func _build_module() -> void:
+	_build_spine()
 	_build_decks()
 	_build_service()
 	_build_span()
@@ -433,6 +525,152 @@ func _ready() -> void:
 	# DUPA `_build_service()`: sirul de pe ocol se aseaza pe punctele lui.
 	_build_work_lights()
 	_apply_cycle(0.0)
+
+
+# ---------------------------------------------------------------- coloana
+
+## Citeste axa soselei si o pastreaza ca abatere fata de frameul drept al
+## nodului, pe toata amprenta modulului.
+##
+## [b]Se face O DATA, la `_ready`, si nu la fiecare cadru.[/b] Geometria
+## modulului e statica: singurul lucru care se misca e tronsonul rotitor, si
+## el se roteste in jurul pivotului lui. Ce se schimba aici e doar unde sunt
+## asezate placile.
+##
+## Esantionarea merge pe INDECSII rutei, nu pe o cautare de proiectie: ruta e
+## o spirala care trece de patru ori peste aceeasi amprenta xz, iar o cautare
+## dupa cel mai apropiat punct ar putea sari pe alt etaj (memoria
+## `pista-peste-pista`). Se pleaca de la indexul nodului si se merge in sus si
+## in jos pe lista, exact ca masina.
+func _build_spine() -> void:
+	_spine = PackedVector2Array()
+	if not follow_route or Engine.is_editor_hint():
+		return
+	var track := _find_track()
+	if track == null:
+		return
+	var route := track.route_at(follow_route_index)
+	if route == null or route.count() < 8:
+		return
+	var n := route.count()
+	var here := route.closest_index_global(global_position)
+	# Sensul rutei fata de sensul modulului: modulul merge spre -Z local.
+	var fwd_local := -global_transform.basis.z
+	var route_fwd := route.baked[(here + 1) % n] - route.baked[here]
+	var forward_sign := 1.0 if route_fwd.dot(fwd_local) >= 0.0 else -1.0
+	# Cat de departe trebuie sa ajunga coloana: capatul cel mai indepartat al
+	# oricarei placi pe care o pune nodul.
+	var reach := _lip_near() + maxf(deck_run, service_lead) + ramp_run + 8.0
+	var step := 2.0
+	var count := int(ceil(reach / step))
+	var inv := global_transform.affine_inverse()
+	var samples: Array[Vector2] = []
+	# De la amonte (z pozitiv) spre aval (z negativ), ca `_spine_z0` sa fie
+	# capatul de start si indexarea sa iasa crescatoare.
+	for k in range(count, -count - 1, -1):
+		var target_z := float(k) * step
+		var p := _route_point_at(route, here, forward_sign, -target_z)
+		var local := inv * p
+		samples.append(Vector2(local.x, local.y))
+	_spine_z0 = float(count) * step
+	_spine_step = step
+	var out := PackedVector2Array()
+	for v in samples:
+		out.append(v)
+	_spine = out
+
+
+## Pista de sub nod. URCA prin arbore, nu `get_parent()`: modulul poate sta
+## sub un nod de organizare (tiparul de la `FireballGeyser._road_half`).
+func _find_track() -> Track:
+	var t: Track = null
+	var n := get_parent()
+	while n != null and t == null:
+		t = n as Track
+		n = n.get_parent()
+	return t
+
+
+## Punctul de pe ruta aflat la `along` metri IN FATA (pe sensul de mers) fata
+## de indexul de plecare. Interpoleaza intre doi indecsi vecini.
+func _route_point_at(route: TrackRoute, from_index: int, forward_sign: float,
+		along: float) -> Vector3:
+	var n := route.count()
+	var spacing := route.length() / float(maxi(n, 1))
+	var steps := along * forward_sign / maxf(spacing, 0.001)
+	var base := int(floor(steps))
+	var t := steps - float(base)
+	var i0 := ((from_index + base) % n + n) % n
+	var i1 := (i0 + 1) % n
+	return route.baked[i0].lerp(route.baked[i1], t)
+
+
+## Abaterea coloanei la un z local: (lateral, cota). Fara coloana, (0, 0).
+func _spine_at(z: float) -> Vector2:
+	if _spine.is_empty():
+		return Vector2.ZERO
+	var u := (_spine_z0 - z) / _spine_step
+	var i0 := clampi(int(floor(u)), 0, _spine.size() - 1)
+	var i1 := clampi(i0 + 1, 0, _spine.size() - 1)
+	var t := clampf(u - float(i0), 0.0, 1.0)
+	return _spine[i0].lerp(_spine[i1], t)
+
+
+## Directia coloanei la un z local, in planul XZ al nodului (unitara).
+## Pe modulul plan e chiar -Z.
+func _spine_dir(z: float) -> Vector3:
+	var d := 0.5
+	var a := _spine_at(z + d)
+	var b := _spine_at(z - d)
+	var v := Vector3(b.x - a.x, 0.0, -2.0 * d)
+	return v.normalized() if v.length_squared() > 1e-9 else Vector3.FORWARD
+
+
+## Un punct al modulului, dus de pe frameul drept pe coloana.
+##
+## [b]`x` e o abatere PERPENDICULARA pe axa drumului, nu pe axa nodului.[/b]
+## Pe un modul plan cele doua coincid; pe unul care urmeaza o curba, diferenta
+## e chiar ce tine latimea benzii constanta prin viraj — masurat cu abaterea
+## laterala pe amprenta modulului, care fara asta se ingusteaza cu cosinusul
+## unghiului.
+func _at(x: float, z: float) -> Vector3:
+	if _spine.is_empty():
+		return Vector3(x, deck_rise, z)
+	var s := _spine_at(z)
+	var dir := _spine_dir(z)
+	var lat := Vector3(-dir.z, 0.0, dir.x)
+	var p := Vector3(s.x, 0.0, z) + lat * x
+	# [b]Cota se citeste de la statia PUNCTULUI, nu de la cea de plecare.[/b]
+	# Pe o coloana curba, un punct impins cu `x` metri in lateral aluneca si
+	# de-a lungul drumului — cu atat mai mult cu cat `x` e mai mare. Ocolul
+	# iese 24 m in lateral, si masurat asa: cota lui venea de la statia
+	# nedeplasata si iesea cu pana la 0.64 m PESTE tablier. Consecinta se
+	# vedea in sonda transversala ca un prag de 0.98 m la frac 0.7345, offset
+	# +1 m — un zid in mijlocul benzii, in care masina chiar s-a oprit
+	# (13 -> 0.1 m/s in 1.5 s).
+	#
+	# `p.z` e chiar statia unde a ajuns punctul: coloana e parametrizata pe z
+	# local, deci proiectia e gratuita.
+	var s2 := _spine_at(p.z)
+	return Vector3(p.x, deck_rise + s2.y + _spine_lift(p.z), p.z)
+
+
+## Ridicarea tablierului la un z local: plina la mijloc, stinsa la capete.
+##
+## Capatul fata de care se stinge e cel mai APROPIAT capat de suprafata
+## carosabila, nu capatul tablierului: ocolul se desprinde si se reintoarce cu
+## `service_lead`, adica mai devreme decat se termina tablierul, iar masurat pe
+## `deck_run` singur reintrarea pe ocol ramanea un prag de 0.21 m. Cu capatul
+## ocolului luat in calcul, si el se aseaza pe sosea acolo unde o atinge.
+func _spine_lift(z: float) -> float:
+	if _spine.is_empty():
+		return 0.0
+	var lip := _lip_near()
+	var end_z := lip + deck_run
+	if service_offset > 0.01:
+		end_z = minf(end_z, lip + service_lead)
+	var d := end_z - absf(z)
+	return SPINE_LIFT * clampf(d / SPINE_LIFT_FADE, 0.0, 1.0)
 
 
 # --------------------------------------------------------------- ceasuri
@@ -483,6 +721,8 @@ func seconds_to_turn(t: float) -> float:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	if _span == null:
+		return # modulul se construieste amanat (vezi `_ready`)
 	if not _started:
 		_started = true
 		_time = phase * period
@@ -499,8 +739,8 @@ func _apply_cycle(delta: float) -> void:
 		# O SINGURA scriere de transform pe cadru (Jolt + sync_to_physics,
 		# memoria `jolt-sync-transform-o-singura-scriere`).
 		_span.transform = Transform3D(
-			Basis(Vector3.UP, deg_to_rad(closed_angle_deg) * frac),
-			Vector3(0.0, deck_rise, 0.0))
+			_span_rest_basis() * Basis(Vector3.UP, deg_to_rad(closed_angle_deg) * frac),
+			_at(0.0, 0.0))
 	_tick_gate(delta, frac)
 	_push_cars()
 	_tick_lamp(t)
@@ -720,7 +960,15 @@ func _merge_window() -> Array[float]:
 	if service_offset <= 0.01:
 		return []
 	var z_in := _lip_near() + service_lead
-	var lim := road_half_width + 0.2
+	# [b]Limita e marginea PARAPETULUI, nu a carosabilului.[/b] Fereastra
+	# spune „de aici incolo ocolul s-a departat destul cat parapetul benzii sa
+	# nu-l mai incurce" — deci se compara cu locul unde chiar sta parapetul
+	# (`road_half_width + 0.18`), plus latimea lui (0.35) si o marja de masina.
+	# Cu vechiul `+0.2` fereastra se inchidea cu 2.5 m mai devreme decat
+	# trebuia, iar in acei metri parapetul crestea EXACT peste gura devierii:
+	# ProbeRace a gasit masinile oprite acolo, la `lat` 5.9-6.4, cu ocolul
+	# vizibil la 8 m si un perete de 0.6 m intre ele.
+	var lim := road_half_width + 0.18 + 0.35 + 1.2
 	var n := 400
 	for i in n + 1:
 		var u := 0.5 * float(i) / float(n)
@@ -767,8 +1015,7 @@ func _build_decks() -> void:
 	for sign_z: float in [1.0, -1.0]:
 		var z0 := sign_z * lip
 		var z1 := sign_z * (lip + deck_run)
-		_slab(st, body, Vector3(-hw, deck_rise, z0), Vector3(hw, deck_rise, z0),
-			Vector3(hw, deck_rise, z1), Vector3(-hw, deck_rise, z1))
+		_deck_strip(st, body, hw, z0, z1)
 		_deck_parapets(st, body, absf(z0), absf(z1), sign_z, deck_rise, deck_rise)
 		if deck_rise <= 0.01:
 			continue
@@ -858,11 +1105,18 @@ func _service_markings(st: SurfaceTool, pts: PackedVector3Array,
 ## O banda de marcaj de-a lungul lui Z local, la x dat.
 func _mark_strip(st: SurfaceTool, x: float, z0: float, z1: float,
 		width: float, slot: int) -> void:
-	var y := deck_rise + MARK_LIFT
 	var hwm := width * 0.5
-	PaletteBox.quad_slab(st,
-		Vector3(x - hwm, y, z0), Vector3(x + hwm, y, z0),
-		Vector3(x + hwm, y, z1), Vector3(x - hwm, y, z1), 0.01, slot)
+	var lift := Vector3.UP * MARK_LIFT
+	# Pe coloana banda se segmenteaza: o liniuta lunga intinsa drept peste o
+	# curba ar iesi de pe carosabil la capete, exact defectul pe care coloana
+	# il repara.
+	var n := maxi(int(ceil(absf(z1 - z0) / 2.0)), 1)
+	for i in n:
+		var za := lerpf(z0, z1, float(i) / float(n))
+		var zb := lerpf(z0, z1, float(i + 1) / float(n))
+		PaletteBox.quad_slab(st,
+			_at(x - hwm, za) + lift, _at(x + hwm, za) + lift,
+			_at(x + hwm, zb) + lift, _at(x - hwm, zb) + lift, 0.01, slot)
 
 
 ## Rampa de serviciu: un cot care iese lateral inainte de buza, trece pe langa
@@ -887,15 +1141,30 @@ func _build_service() -> void:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := maxi(int(ceil((z_in - z_out) / SERVICE_STEP)), 4)
 	var pts := PackedVector3Array()
+	# [b]Departarea de axa se TINE MINTE, nu se reciteste din punct.[/b] Pe
+	# modulul plan „cat de departe de axa e punctul asta" era chiar `p.x`, si
+	# tot codul de mai jos (pana pavata, parapetele) asa il afla. Pe modulul
+	# indoit `_at` amesteca in `.x` si abaterea coloanei, deci `p.x` nu mai
+	# raspunde la intrebarea aia — iar consecinta a fost masurata pe pista:
+	# pana pavata nu se mai construia, si intre marginea soselei si ocol
+	# ramanea o GAURA cu un parapet de 0.7 m in fata ei. ProbeRace a gasit
+	# masinile exact acolo, imbrancite de poarta la `lat` 5.0-6.3, oprite in
+	# perete si intrate una in alta.
+	var mags := PackedFloat32Array()
 	for i in n + 1:
 		var u := float(i) / float(n)
 		var z := lerpf(z_in, z_out, u)
 		# Cotul: o singura functie CONTINUA IN PANTA intre cele doua racorduri
 		# (`_profile`), deci nicio imbinare de portiuni care sa lase prag sau
 		# frantura (memoria `suprafete-din-placi-plane`).
-		var x := side * (road_half_width * 0.45 + service_offset * _profile(u))
-		pts.append(Vector3(x, deck_rise, z))
+		var mag := road_half_width * 0.45 + service_offset * _profile(u)
+		mags.append(mag)
+		pts.append(_at(side * mag, z))
 	_service_points = pts
+	_service_mags = mags
+	_service_zs = PackedFloat32Array()
+	for i in n + 1:
+		_service_zs.append(lerpf(z_in, z_out, float(i) / float(n)))
 	var half_w := service_width * 0.5
 	_service_markings(st, pts, half_w)
 	# Pana pavata dintre pasaj si ocol (vezi `GORE_MAX`): tot pe lungimea ei
@@ -912,20 +1181,26 @@ func _build_service() -> void:
 			continue
 		var lat := Vector3(-dir.z, 0.0, dir.x).normalized() * half_w
 		_slab(st, body, a - lat, a + lat, b + lat, b - lat, service_slot)
-		_gore_slab(st, body, a, b, half_w, edge, gore)
+		var mag_a := mags[i]
+		var mag_b := mags[i + 1]
+		var za := _service_zs[i]
+		var zb := _service_zs[i + 1]
+		_gore_slab(st, body, mag_a, mag_b, za, zb, half_w, edge, gore)
 		# Parapetul creste doar unde marginea a IESIT de pe pasaj: peste
 		# carosabil ar fi un zid fix pe banda directa, iar in consola e
 		# singurul lucru care tine masina pe ocol.
 		for edge_sign: float in [-1.0, 1.0]:
 			var ea := a + lat * edge_sign
 			var eb := b + lat * edge_sign
-			var outer := absf(ea.x) > absf(a.x)
-			var z_mid := absf((ea.z + eb.z) * 0.5)
+			var outer := edge_sign > 0.0 if side > 0.0 else edge_sign < 0.0
+			var mag_e_a := mag_a + edge_sign * side * half_w
+			var mag_e_b := mag_b + edge_sign * side * half_w
+			var z_mid := absf((za + zb) * 0.5)
 			var inner_free: float = gore[0] if gore.size() == 2 else _lip_near() + 2.0
 			if outer:
 				# Marginea dinspre gol: parapet peste tot unde a IESIT de pe pasaj.
 				# Peste carosabil ar fi un zid fix pe banda directa.
-				if absf(ea.x) <= edge and absf(eb.x) <= edge:
+				if mag_e_a <= edge and mag_e_b <= edge:
 					continue
 			else:
 				# Marginea dinspre axa drumului e cea pe care se INTRA pe ocol, si
@@ -964,28 +1239,25 @@ func _build_service() -> void:
 ## o portiune de ocol. Nu face nimic acolo unde ocolul e inca peste pasaj (n-au
 ## ce sa lege) sau unde s-a departat prea mult (acolo e gol, si primeste
 ## parapet, nu beton).
-func _gore_slab(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
-		half_w: float, edge: float, gore: Array[float]) -> void:
+func _gore_slab(st: SurfaceTool, body: StaticBody3D, center_mag_a: float,
+		center_mag_b: float, za: float, zb: float, half_w: float, edge: float,
+		gore: Array[float]) -> void:
 	if gore.size() != 2:
 		return
 	var side := signf(float(service_side))
-	var mag_a := absf(a.x) - half_w
-	var mag_b := absf(b.x) - half_w
+	# Marginea dinspre drum a ocolului, ca DEPARTARE de axa (nu ca `.x`).
+	var mag_a := center_mag_a - half_w
+	var mag_b := center_mag_b - half_w
 	if mag_a <= edge and mag_b <= edge:
 		return # ocolul e inca peste carosabil
-	var z_mid := absf((a.z + b.z) * 0.5)
+	var z_mid := absf((za + zb) * 0.5)
 	if z_mid < gore[0] or z_mid > gore[1]:
 		return
 	var ia := maxf(mag_a, edge)
 	var ib := maxf(mag_b, edge)
-	# Colturile in ordinea „de la x mic la x mare" pe capatul dinspre venire,
-	# ca fata de sus sa iasa cu normala in sus (acelasi tipar ca la placile
-	# ocolului).
-	var lo_a := Vector3(minf(side * ia, side * edge), a.y, a.z)
-	var hi_a := Vector3(maxf(side * ia, side * edge), a.y, a.z)
-	var lo_b := Vector3(minf(side * ib, side * edge), b.y, b.z)
-	var hi_b := Vector3(maxf(side * ib, side * edge), b.y, b.z)
-	_slab(st, body, lo_a, hi_a, hi_b, lo_b)
+	# Fiecare colt trece prin coloana, ca pana sa se indoaie odata cu drumul.
+	_slab(st, body, _at(side * edge, za), _at(side * ia, za),
+		_at(side * ib, zb), _at(side * edge, zb))
 
 
 ## Botul de beton din capatul penei pavate, pe amandoua jumatatile.
@@ -1012,8 +1284,8 @@ func _gore_nose(st: SurfaceTool, body: StaticBody3D, gore: Array[float],
 		# 14.6 la 6.8 m/s, adica pretul ocolului incepea sa fie dat de un colt de
 		# beton. Metrul lasat liber nu deschide nicio scurtatura — pe langa bot se
 		# intra tot pe ocol.
-		_parapet(st, body, Vector3(side * edge, deck_rise, z),
-			Vector3(side * (inner - 1.0), deck_rise, z))
+		_parapet(st, body, _at(side * edge, z),
+			_at(side * (inner - 1.0), z))
 
 
 ## Parapetii unei portiuni de pasaj, pe amandoua marginile, in pasi de ~2 m
@@ -1053,9 +1325,11 @@ func _deck_parapets(st: SurfaceTool, body: StaticBody3D, za: float, zb: float,
 			# chiar iese ocolul; cealalta ramane inchisa peste tot.
 			if in_window and is_equal_approx(edge_sign, side):
 				continue
-			_parapet(st, body,
-				Vector3(edge_sign * hw, y_a, sign_z * z_a),
-				Vector3(edge_sign * hw, y_b, sign_z * z_b), deck_parapet)
+			# Pe coloana, cotele vin din ea; `ya`/`yb` raman pentru rampele de
+			# racord ale sondei, care coboara la cota soselei-test.
+			var pa := _at(edge_sign * hw, sign_z * z_a) 				if _spine.is_empty() == false and is_equal_approx(y_a, deck_rise) 				else Vector3(edge_sign * hw, y_a, sign_z * z_a)
+			var pb := _at(edge_sign * hw, sign_z * z_b) 				if _spine.is_empty() == false and is_equal_approx(y_b, deck_rise) 				else Vector3(edge_sign * hw, y_b, sign_z * z_b)
+			_parapet(st, body, pa, pb, deck_parapet)
 
 
 ## Un tronson de parapet intre doua puncte de pe marginea ocolului.
@@ -1085,6 +1359,49 @@ func _parapet(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
 	body.add_child(shape)
 
 
+## Carosabilul tablierului intre doua cote z, segmentat pe coloana.
+##
+## O singura placa intinsa peste 34 m de spirala ar fi chiar coarda peste arc
+## pe care coloana o repara — deci se taie in bucati de doi metri, la fel ca
+## ocolul (`SERVICE_STEP`), si fiecare bucata isi ia colturile din `_at`.
+func _deck_strip(st: SurfaceTool, body: StaticBody3D, hw: float,
+		z0: float, z1: float) -> void:
+	var n := maxi(int(ceil(absf(z1 - z0) / 2.0)), 1)
+	for i in n:
+		var za := lerpf(z0, z1, float(i) / float(n))
+		var zb := lerpf(z0, z1, float(i + 1) / float(n))
+		_slab(st, body, _at(-hw, za), _at(hw, za), _at(hw, zb), _at(-hw, zb))
+
+
+## Directia laterala a coloanei la un z local (unitara, spre +x).
+func _lat_at(z: float) -> Vector3:
+	var dir := _spine_dir(z)
+	return Vector3(-dir.z, 0.0, dir.x)
+
+
+## Orientarea de repaus a tronsonului rotitor: aliniat cu coloana in dreptul
+## golului, nu cu axa nodului. Pe modulul plan e identitatea.
+##
+## [b]Are si TANGAJ, nu doar directie.[/b] Tronsonul e o placa rigida de 12 m
+## asezata pe o rampa care urca 3.7%: tinut orizontal, un capat al lui iese cu
+## 0.44 m peste asfalt si celalalt intra sub el — masurat exact asa inainte de
+## a fi inclinat. Cu tangajul soselei, placa se aseaza pe drum si pragul de la
+## capete scade la sub 0.1 m.
+##
+## Inclinarea se pune INAINTEA rotatiei de inchidere (`rest * turn`), deci
+## tronsonul se roteste in jurul verticalei LUI, ca un pod rotitor adevarat pe
+## o rampa inclinata — nu in jurul verticalei lumii, care l-ar face sa se
+## infiga cu un colt in tablier cat se intoarce.
+func _span_rest_basis() -> Basis:
+	if _spine.is_empty():
+		return Basis.IDENTITY
+	var lip := _lip_near()
+	var a := _at(0.0, lip)
+	var b := _at(0.0, -lip)
+	var fwd := (b - a).normalized()
+	return Basis.looking_at(fwd, Vector3.UP)
+
+
 ## O placa: mesh pe atlas + colizor convex cu talpa sub ea.
 func _slab(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
 		c: Vector3, d: Vector3, slot: int = -1) -> void:
@@ -1105,7 +1422,7 @@ func _build_span() -> void:
 	_span.name = "Span"
 	_span.sync_to_physics = true
 	add_child(_span)
-	_span.transform = Transform3D(Basis.IDENTITY, Vector3(0.0, deck_rise, 0.0))
+	_span.transform = Transform3D(_span_rest_basis(), _at(0.0, 0.0))
 	var hw := road_half_width
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
@@ -1168,7 +1485,9 @@ func _build_gate() -> void:
 		# marginea lui, ca gura devierii sa ramana mai lata decat masina.
 		near_x = side * maxf(inner - gate_clearance, -road_half_width)
 	var center_x := (far_x + near_x) * 0.5
-	_gate.transform = Transform3D(basis, Vector3(center_x, deck_rise, gz))
+	var g_dir := _spine_dir(gz)
+	var g_yaw := atan2(-g_dir.x, -g_dir.z)
+	_gate.transform = Transform3D(Basis(Vector3.UP, g_yaw + skew), _at(center_x, gz))
 	# Linia oblica trebuie sa fie o PANTA, nu un zid: cu frecarea implicita
 	# masina se agata de ea si se opreste (masurat de critic: 18.33 s pana la
 	# desprindere). Materialul se pune pe corp, nu pe forma — colizorul portii
@@ -1206,7 +1525,7 @@ func _build_gate() -> void:
 		_gate.add_child(piece)
 		_gate_meshes.append(piece)
 
-	_build_gate_taper(basis, center_x, gz, scene)
+	_build_gate_taper(gz, scene)
 
 	# Zona senzorului: mai groasa decat poarta, ca sa vada masina care tocmai
 	# o strabate.
@@ -1235,8 +1554,7 @@ func _build_gate() -> void:
 ## E al PORTII, nu al pasajului: se aprinde si se stinge odata cu ea. De-aia
 ## are voie sa taie banda directa — cand tronsonul e la locul lui, peretele nu
 ## exista, si drumul e drum.
-func _build_gate_taper(basis: Basis, center_x: float, gz: float,
-		scene: PackedScene) -> void:
+func _build_gate_taper(gz: float, scene: PackedScene) -> void:
 	var win := _merge_window()
 	if win.size() != 2:
 		return
@@ -1245,13 +1563,17 @@ func _build_gate_taper(basis: Basis, center_x: float, gz: float,
 	if gz - z_end < 1.0:
 		return
 	var steps := maxi(int(ceil((gz - z_end) / 4.0)), 1)
-	var prev := Vector3(side * (_service_inner_mag(gz) - gate_clearance), 0.0, gz)
+	# Punctele se iau de pe COLOANA, apoi se aduc in coordonatele corpului
+	# portii cu inversa transformului lui — nu prin scaderea unei origini
+	# drepte, care pe o curba n-ar mai fi originea portii.
+	var to_gate := _gate.transform.affine_inverse()
+	var prev := _at(side * (_service_inner_mag(gz) - gate_clearance), gz)
 	for i in steps:
 		var z := lerpf(gz, z_end, float(i + 1) / float(steps))
 		var inner := _service_inner_mag(z)
 		if is_inf(inner):
 			break
-		var cur := Vector3(side * (inner - gate_clearance), 0.0, z)
+		var cur := _at(side * (inner - gate_clearance), z)
 		var seg := cur - prev
 		var length := seg.length()
 		if length < 0.2:
@@ -1261,13 +1583,13 @@ func _build_gate_taper(basis: Basis, center_x: float, gz: float,
 		var right := Vector3.UP.cross(fwd).normalized()
 		var mid := (prev + cur) * 0.5
 		# In coordonatele corpului portii (care e deja rotit cu skew).
-		var local := basis.inverse() * (mid - Vector3(center_x, 0.0, gz))
+		var local := to_gate * mid
 		var shape := CollisionShape3D.new()
 		var box := BoxShape3D.new()
 		box.size = Vector3(0.5, 1.3, length + 0.2)
 		shape.shape = box
 		shape.transform = Transform3D(
-			basis.inverse() * Basis(right, Vector3.UP, fwd),
+			to_gate.basis * Basis(right, Vector3.UP, fwd),
 			local + Vector3.UP * 0.65)
 		shape.disabled = true
 		_gate.add_child(shape)
@@ -1288,8 +1610,8 @@ func _build_gate_taper(basis: Basis, center_x: float, gz: float,
 					Vector3(BARRIER_WIDTH * 0.95, 1.35, 0.3),
 					Palette.KERB_RED, Vector3(0.0, 0.68, 0.0))
 			piece.transform = Transform3D(
-				basis.inverse() * Basis(right, Vector3.UP, fwd),
-				basis.inverse() * (at - Vector3(center_x, 0.0, gz)))
+				to_gate.basis * Basis(right, Vector3.UP, fwd),
+				to_gate * at)
 			_gate.add_child(piece)
 			_gate_meshes.append(piece)
 		prev = cur
@@ -1318,16 +1640,16 @@ func _build_work_lights() -> void:
 	for sign_z: float in [1.0, -1.0]:
 		var z := lip + 6.0
 		while z < lip + deck_run:
-			spots.append(Vector3(-side * (road_half_width - 1.0),
-				deck_rise + WORK_LIGHT_HEIGHT, sign_z * z))
+			spots.append(_at(-side * (road_half_width - 1.0), sign_z * z)
+				+ Vector3.UP * WORK_LIGHT_HEIGHT)
 			z += WORK_LIGHT_STEP
 	# Si pe ocol, unde e chiar suprafata care umple cadrul pe apropiere.
 	if service_offset > 0.01 and _service_points.size() > 2:
 		var i := 0
 		while i < _service_points.size():
 			var p := _service_points[i]
-			spots.append(Vector3(p.x + side * (service_width * 0.5 + 0.8),
-				deck_rise + WORK_LIGHT_HEIGHT, p.z))
+			spots.append(p + Vector3.UP * WORK_LIGHT_HEIGHT
+				+ _lat_at(p.z) * side * (service_width * 0.5 + 0.8))
 			i += int(WORK_LIGHT_STEP / SERVICE_STEP)
 	for k in spots.size():
 		var l := OmniLight3D.new()
@@ -1350,7 +1672,7 @@ func _build_work_lights() -> void:
 ## Semaforul de santier, pe marginea dinspre ocol, inaintea portii.
 func _build_lamp() -> void:
 	var side := signf(float(service_side))
-	var at := Vector3(side * (road_half_width + 1.2), deck_rise, _gate_z() + 8.0)
+	var at := _at(side * (road_half_width + 1.2), _gate_z() + 8.0)
 	var post := PaletteBox.instance(Vector3(0.24, 3.2, 0.24),
 		Palette.PAINTED_METAL, at + Vector3.UP * 1.6)
 	post.name = "SignalPost"
@@ -1362,6 +1684,34 @@ func _build_lamp() -> void:
 
 
 # ---------------------------------------------------------- pentru sonde
+
+func gore_window() -> Array[float]:
+	return _gore_window()
+
+
+func gate_z_pub() -> float:
+	return _gate_z()
+
+
+func service_points_local() -> PackedVector3Array:
+	return _service_points
+
+
+func spine_dump() -> PackedVector2Array:
+	return _spine
+
+
+func spine_z0() -> float:
+	return _spine_z0
+
+
+func spine_step() -> float:
+	return _spine_step
+
+
+func at_dump(x: float, z: float) -> Vector3:
+	return _at(x, z)
+
 
 func state() -> State:
 	return _state
@@ -1445,7 +1795,7 @@ func direct_waypoints() -> Array[Vector3]:
 	var n := 12
 	for i in n + 1:
 		var z := lerpf(z0, -z0, float(i) / float(n))
-		out.append(to_global(Vector3(0.0, deck_rise, z)))
+		out.append(to_global(_at(0.0, z)))
 	return out
 
 
@@ -1499,4 +1849,4 @@ func ai_line_offset() -> float:
 ## masoara pilotul, nu originea nodului (care e la mijlocul golului, cu zeci
 ## de metri mai in aval). Vezi `AI_REACH_M`.
 func ai_decision_point() -> Vector3:
-	return to_global(Vector3(0.0, deck_rise, _gate_z()))
+	return to_global(_at(0.0, _gate_z()))

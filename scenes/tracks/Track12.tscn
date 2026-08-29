@@ -972,17 +972,18 @@ transform = Transform3D(0.712083, 0, 0.702095, 0, 1.000000, 0, -0.702095, 0, 0.7
 metadata/coliziune = "none"
 
 [node name="PasajRotativ" type="Node3D" parent="."]
-transform = Transform3D(-0.301894, 0.062990, 0.951258, 0.000000, 0.997815, -0.066072, -0.953341, -0.019947, -0.301234, 182.967712, 31.688076, 89.628563)
+transform = Transform3D(0.245357, 0.000000, -0.969433, -0.036673, 0.999284, -0.009282, 0.968739, 0.037829, 0.245182, 161.091843, 40.929417, 188.423935)
 script = ExtResource("11_span")
 period = 25.0
 turn_time = 4.0
 telegraph_lead = 3.0
 phase = 0.6
-road_half_width = 6.0
+road_half_width = 7.2
 span_length = 11.84
 deck_run = 34.0
 deck_rise = 0.0
-deck_parapet = 0.0
+deck_parapet = 0.9
+follow_route = true
 ramp_run = 30.0
 service_side = 1
 service_offset = 24.0

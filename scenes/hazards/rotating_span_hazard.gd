@@ -1180,7 +1180,8 @@ func _build_service() -> void:
 		if dir.length_squared() < 1e-6:
 			continue
 		var lat := Vector3(-dir.z, 0.0, dir.x).normalized() * half_w
-		_slab(st, body, a - lat, a + lat, b + lat, b - lat, service_slot)
+		_slab(st, body, a - lat, a + lat, b + lat, b - lat, service_slot,
+			i == 0 or i == n - 1)
 		var mag_a := mags[i]
 		var mag_b := mags[i + 1]
 		var za := _service_zs[i]
@@ -1370,7 +1371,10 @@ func _deck_strip(st: SurfaceTool, body: StaticBody3D, hw: float,
 	for i in n:
 		var za := lerpf(z0, z1, float(i) / float(n))
 		var zb := lerpf(z0, z1, float(i + 1) / float(n))
-		_slab(st, body, _at(-hw, za), _at(hw, za), _at(hw, zb), _at(-hw, zb))
+		# Peretii de capat doar la capetele SIRULUI: intre bucati ei ies prin
+		# fata vecinei si se vad ca dungi negre (vezi `PaletteBox.quad_slab`).
+		_slab(st, body, _at(-hw, za), _at(hw, za), _at(hw, zb), _at(-hw, zb),
+			-1, i == 0 or i == n - 1)
 
 
 ## Directia laterala a coloanei la un z local (unitara, spre +x).
@@ -1404,9 +1408,9 @@ func _span_rest_basis() -> Basis:
 
 ## O placa: mesh pe atlas + colizor convex cu talpa sub ea.
 func _slab(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
-		c: Vector3, d: Vector3, slot: int = -1) -> void:
+		c: Vector3, d: Vector3, slot: int = -1, caps: bool = true) -> void:
 	PaletteBox.quad_slab(st, a, b, c, d, DECK_THICK,
-		road_slot if slot < 0 else slot)
+		road_slot if slot < 0 else slot, caps)
 	var shape := CollisionShape3D.new()
 	var hull := ConvexPolygonShape3D.new()
 	hull.points = PackedVector3Array([a, b, c, d,

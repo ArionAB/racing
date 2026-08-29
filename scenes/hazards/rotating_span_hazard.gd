@@ -77,6 +77,18 @@ const SPAN_KERB_HEIGHT: float = 0.34
 ## Peste ce fractie de rotatie tronsonul nu mai e corp solid (vezi
 ## `_tick_span_solid`).
 const SPAN_SOLID_MAX_FRAC: float = 0.12
+## Cati metri de asfalt raman sub fiecare buza a tablierului cand pista isi
+## taie gaura (vezi `road_hole_span`).
+##
+## [b]Mic dinadins, si cifra e masurata.[/b] Buza trebuie doar sa se sprijine
+## pe sosea in loc sa stea peste capatul ei deschis — dar gaura se taie pe
+## INDICI, iar pe Track12 pasul e ~2.8 m, deci rotunjirea singura lasa deja
+## intre 0 si 1.4 m de reazem la fiecare capat. Cu un metru de buza cerut pe
+## deasupra, capatul din amonte al gaurii cadea la z = +3.0 in loc de +3.9 si
+## sub tronsonul rotit ramanea o limba de asfalt lata cat drumul: sonda a
+## gasit-o exact asa, 4 statii din 35 inca solide la z = +3.4. Ce tine masina sa
+## nu cada peste buza nu e limba aia, e `_build_lip_barrier`.
+const HOLE_LIP: float = 0.35
 const SPAN_KERB_WIDTH: float = 0.5
 ## Latimea barierei de santier din GLB, pentru cate bucati intra pe poarta.
 const BARRIER_WIDTH: float = 2.4
@@ -509,6 +521,46 @@ enum State {
 @export var follow_route: bool = false
 ## Ruta pistei pe care se muleaza modulul (0 = banda principala).
 @export_range(0, 4) var follow_route_index: int = 0
+## Pista isi taie o gaura in carosabil sub tronson (si isi lasa peretele
+## deschis peste gura devierii).
+##
+## [b]De ce e un comutator si nu pur si simplu pornit.[/b] Gaura e reparatia
+## corecta si e MASURATA ca atare: fara ea, sub tronsonul rotit ramanea
+## asfaltul pistei, deci starea „inchis" nu trimitea pe nimeni nicaieri — masina
+## se strecura prin bariere, se abatea 5.4 m de la axa (ocolul e la 24) si
+## continua drept, cu +1.7/+2.8 s din frecare in loc de pretul unui ocol.
+## Contractul din brief §2 randul F („inchis -> te trimite pe rampa de
+## serviciu") era rupt, si nicio sonda nu putea sa-l vada: `ProbeRotatingSpan`
+## ruleaza pe o sosea-test peste care modulul e RIDICAT, deci acolo golul e gol
+## prin constructie. `ProbeSpanOnTrack` exista tocmai ca sa-l vada, si cu
+## comutatorul asta aprins il vede: golul e gol pe toata amprenta, iar profilul
+## pe axa in stare deschisa ramane fara prag (0.084 m, plafon 0.15).
+##
+## [b]Si de ce e STINS pe Track12 deocamdata.[/b] Cu gaura reala, pilotul nu
+## poate lua ocolul. Masurat cu ProbeRace pe pista reala, 150 s, doua seed-uri:
+## de la 0 repuneri se trece la 1-2 pe seed, toate la frac 0.740-0.748, cu
+## masinile ingramadite in gura devierii — plus 3.2-3.5% offroad in loc de 2.1%.
+## Cauza e una singura si e in amonte de nodul asta: [b]rampa de serviciu nu e
+## o ruta[/b] ([TrackRoute]). Pentru codul de progres ea e teren de langa drum,
+## exact ce descrie documentatia lui `TrackRoute`: „masina de pe el mergea la
+## 45% viteza, isi pierdea checkpoint-ul, iar AI-ul se credea blocat si dadea
+## cu spatele". Iar linia pilotului (`ai_line_offset`) e o FRACTIE din
+## semilatimea soselei, plafonata la `AiController.LINE_MAX` (0.8, adica 5.6 m
+## aici): cu ea nu se poate exprima un ocol care iese 24 m lateral. Doua
+## incercari de a ridica plafonul au fost masurate si aruncate — una a dus
+## repunerile la 7, cealalta la 12 cu 22.7% offroad, fiindca tinta iesea de pe
+## orice asfalt.
+##
+## Deci reparatia care ramane e sa se declare ocolul ca ruta secundara, cu
+## `entry_frac`/`exit_frac` in dreptul buzelor — si atunci si pilotul, si
+## progresul, si penalizarea de offroad il vad ca pe drum. Nu incape in runda
+## asta: rutele se coc in `Track._build_routes()`, care ruleaza inaintea
+## modulului (el se construieste amanat, ca sa aiba rutele coapte de citit).
+##
+## Pana atunci: mecanismul e construit, masurat si pazit de sonda, dar nu e
+## aprins pe pista — un hazard care costa repuneri e mai rau decat unul care
+## costa doar secunde.
+@export var cut_road_hole: bool = false
 
 ## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota
 ## soselei, in coordonatele nodului. Goala = modul plan.
@@ -1849,6 +1901,7 @@ func _build_gate() -> void:
 		_gate_meshes.append(piece)
 
 	_build_gate_taper(gz, scene)
+	_build_lip_barrier(scene)
 
 	# Zona senzorului: mai groasa decat poarta, ca sa vada masina care tocmai
 	# o strabate.
@@ -1862,6 +1915,87 @@ func _build_gate() -> void:
 	zs.position = Vector3(0.0, 1.3, 0.0)
 	_gate_zone.add_child(zs)
 	_gate.add_child(_gate_zone)
+
+
+## Bariera de la BUZA golului: ultimul lucru dintre banda directa si cadere.
+##
+## [b]De ce nu ajungea poarta.[/b] Odata ce pista isi taie gaura in asfalt
+## (`road_hole_span`), golul e un gol adevarat de 20 m — si atunci linia de
+## bariere de la `_gate_z()` nu mai e destula. Masurat cu gabaritul masinii
+## plimbat pe latime, in stare inchisa: poarta si peretele ei lateral inchid
+## banda directa de la z = +30 pana la z = +18 (capatul ferestrei de
+## desprindere), dar de la +18 pana la buza, la +5.9, tablierul e liber pe toata
+## latimea. O masina care s-a strecurat pe langa poarta la 1-2 m de axa are deci
+## doisprezece metri de asfalt liber in fata ei si cade in gol — sonda a
+## masurat-o exact asa, y cu 20.8 m sub cota drumului.
+##
+## Contractul din brief §2 randul F e „+3 s", nu abandon: golul deschis nu are
+## voie sa fie o capcana mortala. Peretele asta e ce transforma caderea intr-o
+## ciocnire — te opresti in el, si de acolo iesi pe ocol, care e la un viraj
+## distanta si e SINGURA cale mai departe.
+##
+## E al PORTII, ca si peretele lateral: apare si dispare cu ciclul. Cand
+## tronsonul e la locul lui, buza nu e o buza — e mijlocul drumului — si un
+## perete fix acolo ar fi un zid permanent pe pista.
+##
+## Se pune pe AMANDOUA buzele: golul se vede si dinspre aval (masina scoasa de
+## pe ocol, o repunere, o imbranceala), si o buza pazita si una libera ar fi
+## exact felul de asimetrie pe care nimeni n-o observa pana cade in ea.
+func _build_lip_barrier(scene: PackedScene) -> void:
+	# Fara gaura in carosabil nu exista buza de pazit: tronsonul rotit sta pe
+	# asfaltul pistei, si un perete de-a curmezisul benzii ar fi doar un zid in
+	# plus pe drum. Vezi `cut_road_hole`.
+	if road_hole_span() <= 0.1:
+		return
+	var lip := _lip_near()
+	var side := signf(float(service_side))
+	for sign_z: float in [1.0, -1.0]:
+		var z := sign_z * (lip + 0.6)
+		# Peretele acopera banda directa pana la marginea dinspre drum a
+		# ocolului, acolo unde ocolul mai exista; unde nu (buza din aval e
+		# dincolo de reintrare), pe toata latimea. Restul ramane liber: pe
+		# acolo se intra pe deviere.
+		var inner := _service_inner_mag(z)
+		var near_x := road_half_width + 0.3
+		if not is_inf(inner) and inner < road_half_width:
+			near_x = maxf(inner - gate_clearance, -road_half_width)
+		var far_x := -(road_half_width + 0.3)
+		if near_x - far_x < 1.0:
+			continue
+		var width := near_x - far_x
+		var dir := _spine_dir(z)
+		var yaw := atan2(-dir.x, -dir.z)
+		var basis := Basis(Vector3.UP, yaw)
+		var at := _at(side * (far_x + near_x) * 0.5, z)
+		var xf := Transform3D(basis, at + Vector3.UP * 0.65)
+		var shape := CollisionShape3D.new()
+		shape.name = "LipWall"
+		var box := BoxShape3D.new()
+		# Adancimea peretelui: aceeasi conditie de tunelare ca la poarta
+		# (`gate_depth`) — la 30 m/s masina face 0.5 m intre doua cadre.
+		box.size = Vector3(width, 1.3, gate_depth)
+		shape.shape = box
+		shape.transform = _gate.transform.affine_inverse() * xf
+		shape.disabled = true
+		_gate.add_child(shape)
+		_gate_shapes.append(shape)
+		var count := maxi(int(ceil(width / BARRIER_WIDTH)), 1)
+		for i in count:
+			var off := -width * 0.5 + BARRIER_WIDTH * (float(i) + 0.5)
+			var piece: Node3D = null
+			if scene != null:
+				piece = scene.instantiate() as Node3D
+			if piece != null:
+				piece.scale = Vector3.ONE * model_scale
+				Palette.apply_object_class_materials(piece,
+					WorldProp.prop_classes(), model_scale)
+			else:
+				piece = PaletteBox.instance(
+					Vector3(BARRIER_WIDTH * 0.95, 1.35, 0.3),
+					Palette.KERB_RED, Vector3(0.0, 0.68, 0.0))
+			piece.transform = _gate.transform.affine_inverse() 				* Transform3D(basis, at + basis.x * off)
+			_gate.add_child(piece)
+			_gate_meshes.append(piece)
 
 
 ## Peretele lateral al portii: linia de bariere nu se opreste unde se termina
@@ -2047,6 +2181,65 @@ func _build_lamp() -> void:
 	_lamp.position = at + Vector3.UP * 3.2
 
 
+## Cati metri de carosabil trebuie sa scoata PISTA de sub modul (0 = niciunul).
+##
+## [b]Asta e a doua jumatate a hazardului, si a lipsit trei runde.[/b] Modulul
+## construieste golul si ocolul, dar el se aseaza PESTE soseaua pistei — iar
+## soseaua trecea mai departe pe dedesubt, la un lat de palma sub tablier.
+## Consecinta, masurata cu masina reala pe pista reala in stare inchisa: nimic
+## nu trimitea pe rampa de serviciu. Masina se strecura prin linia de bariere
+## cu 3.2-4.5 m/s, se abatea 5.4 m de la axa (ocolul e la 24 m) si revenea, cu
+## +1.7/+2.6/+2.8 s la 16/24/30 m/s — pretul frecarii prin bariere, nu al unui
+## ocol. Contractul din brief §2 randul F („inchis -> te trimite pe rampa de
+## serviciu") era rupt, si nicio sonda nu putea sa vada: `ProbeRotatingSpan`
+## ruleaza pe o sosea-test peste care modulul e RIDICAT (`deck_rise` > 0), deci
+## acolo golul e gol prin constructie.
+##
+## Pista intreaba prin `has_method`, deci nu exista nicio dependenta in sens
+## invers: un modul pus intr-o scena fara `Track` (sonda) raspunde si nu il
+## aude nimeni. Vezi `Track._resolve_span_holes`.
+##
+## [b]Gaura e mai SCURTA decat tronsonul, cu `HOLE_LIP` de fiecare parte.[/b]
+## Buzele tablierului stau exact la `+/-span_length/2` si se sprijina pe
+## asfaltul pistei; o gaura de fix atat ar lasa cele doua buze in aer peste
+## capetele deschise ale soselei, iar punctele coapte oricum nu cad la
+## milimetru pe ele. Cu buza de sprijin, tablierul acopera capatul soselei si
+## racordul ramane suprafata continua — profilul masurat pe axa are prag maxim
+## sub 0.15 m.
+##
+## Zero cand modulul nu e pe traseu (`follow_route` stins, adica sonda): acolo
+## nu exista sosea de gaurit, si o gaura ceruta ar fi o cerere fara obiect.
+## Pe cati metri pista nu are voie sa-si emita peretele de margine (0 = fara
+## cerere).
+##
+## [b]Peretele pistei bara chiar gura devierii.[/b] Rampa de serviciu se
+## desprinde din banda cu `service_lead` inainte de buza — dar peretele soselei
+## trece drept peste locul ala. ProbeRace a masurat consecinta pe pista reala,
+## de indata ce golul a devenit gol: masinile care incercau devierea se opreau
+## la 5.7-6.0 m lateral, cu `atinge: @StaticBody3D@617` (peretele pistei) in
+## fata lor, si se ingramadeau unele in altele.
+##
+## Problema si reparatia sunt identice cu cele de la gura unei scurtaturi, unde
+## pista are deja `JUNCTION_CLEARANCE_M` — o cifra despre care comentariul ei
+## spune ca „a costat o cursa intreaga". Devierea e o bifurcatie: are gura, are
+## reintrare, si peretele trebuie sa lipseasca pe amandoua.
+##
+## Lungimea e a devierii, nu o marja: de la desprindere pana la reintrare, plus
+## poarta, care sta cu `gate_lead` mai in amonte.
+func wall_clear_span() -> float:
+	if not cut_road_hole or service_offset <= 0.01:
+		return 0.0
+	if not follow_route or deck_rise > 0.01:
+		return 0.0
+	return 2.0 * (_lip_near() + service_lead + gate_lead + 6.0)
+
+
+func road_hole_span() -> float:
+	if not cut_road_hole or not follow_route or deck_rise > 0.01:
+		return 0.0
+	return maxf(span_length - 2.0 * HOLE_LIP, 1.0)
+
+
 # ---------------------------------------------------------- pentru sonde
 
 func gore_window() -> Array[float]:
@@ -2207,6 +2400,8 @@ func ai_line_offset() -> float:
 	if is_inf(c):
 		return 0.0
 	return clampf(c / road_half_width, 0.0, 1.0)
+
+
 
 
 ## Unde sta linia de bariere, in coordonate globale: reperul fata de care

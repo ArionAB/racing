@@ -2489,6 +2489,9 @@ func rebuild() -> void:
 	# Canalele INAINTEA samplerului: el sapa dupa ele, iar restul generatorilor
 	# intreaba tot de aici unde e golul din sosea.
 	_resolve_channels()
+	# Gaurile cerute de pasajele rotitoare, din acelasi motiv si in acelasi loc:
+	# tot ce emite carosabil intreaba mai jos `_road_gap`.
+	_resolve_span_holes()
 	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
 	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
 	#
@@ -5485,6 +5488,46 @@ func _side_at(i: int) -> Vector3:
 var _channels: Array[Dictionary] = []
 
 
+## Gaurile din carosabil cerute de pasajele rotitoare, ca perechi
+## (primul index scos, cate indici) pe curba coapta.
+##
+## [b]De ce exista, si de ce nu se putea altfel.[/b] `RotatingSpanHazard` isi
+## construieste singur tot ce are nevoie — tablier, ocol, poarta — dar
+## contractul lui din brief (§2 randul F: „inchis -> te trimite pe rampa de
+## serviciu") cere ca sub tronsonul rotitor sa fie GOL. Nodul nu poate scoate
+## asfaltul pistei: el se aseaza PESTE el. Cat timp soseaua a trecut mai
+## departe pe dedesubt, hazardul a fost pe jumatate — deschis mergea, inchis
+## era doar o incetinire, fiindca masina cobora un lat de palma pe carosabilul
+## pistei si continua drept.
+##
+## Masurat pe pista reala, in stare inchisa fortata: masina se strecura prin
+## linia de bariere cu 3.2-4.5 m/s, se abatea cu 5.4 m de la axa (ocolul e la
+## 24) si revenea — +1.7/+2.6/+2.8 s, adica pretul frecarii, nu al unui ocol.
+## Sonda `ProbeRotatingSpan` nu putea sa vada asta: ea ruleaza pe o sosea-test
+## peste care modulul e RIDICAT (`deck_rise`), deci acolo golul e gol prin
+## constructie.
+##
+## Gaura o declara nodul insusi (`RotatingSpanHazard.road_hole_span()`) si se
+## rezolva ca la canale — pe INDICI, nu pe metri, ca sa cada pe aceleasi puncte
+## coapte pe care se aseaza si buzele tablierului.
+var _span_holes: Array[Vector2i] = []
+
+## Cati indici de o parte si de alta a fiecarei gauri raman FARA peretele
+## pistei, ca sa se poata intra pe rampa de serviciu a pasajului.
+##
+## [b]Aceeasi problema ca la gura unei scurtaturi, si aceeasi reparatie.[/b]
+## Peretele soselei trece drept peste locul in care rampa de serviciu se
+## desprinde din banda; masurat pe Track12, masinile care incercau devierea se
+## opreau la 5.7-6.0 m lateral cu peretele pistei in fata lor (ProbeRace:
+## `atinge: @StaticBody3D@617`), adica exact ce s-a intamplat prima data si la
+## bifurcatii — vezi `JUNCTION_CLEARANCE_M`, o cifra despre care comentariul ei
+## spune ca „a costat o cursa intreaga".
+##
+## Nu e o degajare aleasa: e lungimea DEVIERII, ceruta de nodul insusi prin
+## `RotatingSpanHazard.wall_clear_span()`.
+var _span_wall_free: Array[Vector2i] = []
+
+
 ## Traduce fractiile declarate in indici, versori si cote.
 ##
 ## Golul din sosea NU poate avea lungimea ceruta la centimetru: soseaua se emite
@@ -5499,6 +5542,69 @@ var _channels: Array[Dictionary] = []
 ## segmentele sunt la 2.5. Impartirea la medie a cerut 3 pasi si a livrat un gol
 ## de 15.0 m in loc de 12 — cu 25% mai mult, adica pragul de viteza urcat de la
 ## 71% la 79% din viteza de varf, fara ca nimeni sa fi cerut asta.
+## Traduce pasajele rotitoare din scena in gauri de carosabil.
+##
+## Indexul se cauta in 3D (`distance_squared_to`), nu in plan: nodul
+## Huangjuewan e o SPIRALA care trece de patru ori peste aceeasi amprenta xz,
+## iar `_closest_baked_index` — care compara doar x si z — ar putea sa taie
+## gaura pe alt etaj (memoria `pista-peste-pista`). Cota separa etajele.
+func _resolve_span_holes() -> void:
+	_span_holes.clear()
+	_span_wall_free.clear()
+	var n := baked.size()
+	if n < 8:
+		return
+	var nodes: Array[Node] = []
+	_collect_span_holes(self, nodes)
+	for node in nodes:
+		var want: float = float(node.call("road_hole_span"))
+		if want <= 0.1:
+			continue
+		var p := to_local(node.global_position)
+		var ci := 0
+		var best := INF
+		for i in n:
+			var d := p.distance_squared_to(baked[i])
+			if d < best:
+				best = d
+				ci = i
+		# Cati pasi de o parte si de alta acopera lungimea ceruta. Se cauta, ca
+		# la canale: `bake_interval` e un MAXIM, iar punctele coapte se indesesc
+		# in viraje — o impartire ar da alta lungime decat cea reala.
+		var steps := 1
+		var err := INF
+		for k in range(1, 16):
+			var a := baked[((ci - k) % n + n) % n]
+			var b := baked[(ci + k) % n]
+			var e := absf(a.distance_to(b) - want)
+			if e < err:
+				err = e
+				steps = k
+		_span_holes.append(Vector2i(((ci - steps) % n + n) % n, 2 * steps))
+		# Degajarea de perete, pe aceeasi metoda: cati pasi acopera lungimea
+		# devierii de o parte si de alta.
+		var free: float = float(node.call("wall_clear_span"))
+		if free <= 0.1:
+			continue
+		var fsteps := 1
+		var ferr := INF
+		for k in range(1, 80):
+			var a := baked[((ci - k) % n + n) % n]
+			var b := baked[(ci + k) % n]
+			var e := absf(a.distance_to(b) - free)
+			if e < ferr:
+				ferr = e
+				fsteps = k
+		_span_wall_free.append(Vector2i(((ci - fsteps) % n + n) % n, 2 * fsteps))
+
+
+func _collect_span_holes(node: Node, out: Array[Node]) -> void:
+	for child in node.get_children():
+		if child.has_method("road_hole_span"):
+			out.append(child)
+		_collect_span_holes(child, out)
+
+
 func _resolve_channels() -> void:
 	_channels.clear()
 	var n := baked.size()
@@ -5580,9 +5686,14 @@ func _road_ice(i: int, j: int = -1) -> bool:
 
 
 func _road_gap(i: int, j: int = -1) -> bool:
+	var n := baked.size()
+	for h in _span_holes:
+		if ((i - h.x) % n + n) % n < h.y:
+			return true
+		if j >= 0 and ((j - h.x) % n + n) % n < h.y:
+			return true
 	if _channels.is_empty():
 		return false
-	var n := baked.size()
 	for ch in _channels:
 		var span: int = 2 * int(ch["steps"])
 		var near_i: int = ch["near"]
@@ -6207,6 +6318,11 @@ func _junction_indices() -> PackedInt32Array:
 
 
 func _near_junction(i: int, junctions: PackedInt32Array, n: int) -> bool:
+	# Gura devierii unui pasaj rotativ e o bifurcatie ca oricare alta: peretele
+	# soselei nu are voie sa treaca peste ea. Vezi `_span_wall_free`.
+	for w in _span_wall_free:
+		if ((i - w.x) % n + n) % n < w.y:
+			return true
 	if junctions.is_empty():
 		return false
 	var spacing := _dists[n] / float(n)

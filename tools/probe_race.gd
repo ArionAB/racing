@@ -22,8 +22,28 @@ extends Node
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
-## Seed fix: doua rulari ale aceleiasi versiuni trebuie sa dea aceleasi cifre,
-## altfel comparatia "inainte / dupa" nu inseamna nimic.
+## Seed fix: fixeaza ZARURILE (rocket start, variatia de viteza, linia
+## fiecarui AI), ca "inainte / dupa" sa porneasca din aceeasi cursa.
+##
+## [b]NU fixeaza si fizica, si asta trebuie stiut inainte de a citi o cifra ca
+## pe o regresie.[/b] Jolt ruleaza pe mai multe fire, iar ordinea in care
+## rezolva insulele de contact depinde de cum arata arborele de broadphase —
+## deci de cate corpuri si cate triunghiuri de coliziune sunt in lume. Doua
+## rulari ale ACELUIASI cod, cu ACELASI seed, pot da rezultate diferite, si
+## masurat chiar dau: pe Track12 seed 3 a dat 2 repuneri intr-o rulare si
+## 0/0/0 in urmatoarele trei, fara nicio schimbare de cod intre ele.
+##
+## Consecinta practica, verificata pe pasajul rotativ din Chongqing: orice
+## schimbare care taie sau adauga geometrie de coliziune rearanjeaza arborele
+## si perturba contactele pe TOATA pista, inclusiv la 366 m de locul schimbat
+## si la 20 s inainte ca vreo masina sa ajunga acolo. Gaura din carosabilul de
+## sub tronson scoate 304 triunghiuri din corpul soselei (76108 -> 75804), si
+## atat a fost de ajuns ca pe seed 2 pilotul sa fie imbrancit de pe cornisa la
+## frac 0.30 in fiecare rulare — desi lumea de la cornisa e IDENTICA bit cu bit
+## (amprenta de raycast 32719.8205 in ambele variante).
+##
+## Deci: se compara DISTRIBUTII pe mai multe seed-uri si mai multe rulari, nu o
+## cifra cu alta. Vezi memoria `proberace-nedeterminism`.
 const SEED: int = 20260729
 ## Suprascris cu --seed=N: acelasi cod, seed-uri diferite = mai multe curse
 ## independente. Un blocaj care apare la 1 din 5 seed-uri e tot un blocaj.

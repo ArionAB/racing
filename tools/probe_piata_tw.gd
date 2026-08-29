@@ -134,14 +134,19 @@ func _ready() -> void:
 		pos.y = want_top - mh * sy
 		var top_final: float = want_top
 		# fata cu ferestre spre drum: +Z al piesei spre -right (spre sosea)
-		# Fata cu ferestre (Z al piesei) spre DRUM. `right` arata spre rapa
-		# (dreapta drumului, unde stau blocurile), deci drumul e la -right din
-		# pozitia blocului: Z al piesei merge pe -right.
-		# Coloanele lui Basis() sunt exact axele piesei in lume, deci se pune
-		# directia dorita direct pe coloana, fara sa se ghiceasca semnul.
-		var bz := -right * sc
+		# Fata cu ferestre (Z al piesei) spre CAMERA, nu perpendicular pe drum.
+		# Camera de joc nu sta pe verticala blocului: e cu 12.5 m mai in SPATE
+		# pe traseu si cu 10 m mai sus. Un bloc intors perpendicular pe drum
+		# isi arata fatada aprinsa in unghi de 38-68 grade — masurat cu
+		# probe_liz_yaw.gd — si ferestrele se sting in muchie. Se tinteste
+		# direct pozitia camerei din dreptul blocului, proiectata in plan.
+		var cam_pos: Vector3 = p - fwd * 12.5 + Vector3.UP * 10.0
+		var to_cam := (cam_pos - (p + right * d))
+		to_cam.y = 0.0
+		to_cam = to_cam.normalized()
+		var bz := to_cam * sc
 		var by := Vector3.UP * sy
-		var bx := fwd * sc
+		var bx := to_cam.cross(Vector3.UP).normalized() * sc
 		# baza trebuie sa ramana dreapta (determinant pozitiv), altfel piesa e
 		# oglindita si Godot o culleaza (vezi nota despre scale.x negativ)
 		if bx.cross(by).dot(bz) < 0.0:

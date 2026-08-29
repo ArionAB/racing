@@ -95,7 +95,7 @@ custom_ravines = Array[Vector4]([Vector4(0.215, 0.42, 30, 1), Vector4(0.475, 0.5
 custom_cornice_ravines = Array[int]([0, 2, 3, 4])
 custom_viaduct_ravines = Array[int]([1])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.676, 0.878)])
-custom_width_segments = Array[Vector3]([Vector3(0.963, 0.053, 9.0), Vector3(0.082, 0.151, 8.0), Vector3(0.18, 0.209, 6.0), Vector3(0.358, 0.477, 9.0)])
+custom_width_segments = Array[Vector3]([Vector3(0.963, 0.053, 7.0), Vector3(0.082, 0.151, 8.0), Vector3(0.18, 0.209, 6.0), Vector3(0.358, 0.477, 9.0)])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 6.0), Vector2(2, 6.0), Vector2(3, 22.0), Vector2(4, 36.0)])
 custom_rail_segments = Array[Vector4]([Vector4(0.215, 0.42, 1, 1), Vector4(0.545, 0.62, 1, -1), Vector4(0.955, 0.048, 1, 1)])
 custom_lagoon = Array[Vector2]([Vector2(-300, -45), Vector2(-283, 25), Vector2(-317, 85), Vector2(-287, 150), Vector2(-225, 235), Vector2(-110, 223), Vector2(45, 221), Vector2(72, 206), Vector2(150, 198), Vector2(190, 209), Vector2(205, 219), Vector2(222, 190), Vector2(228, 177), Vector2(252, 162), Vector2(254, 135), Vector2(242, 108), Vector2(215, 97), Vector2(180, 112), Vector2(158, 122), Vector2(136, 138), Vector2(127, 160), Vector2(122, 172), Vector2(122, 182), Vector2(150, 182), Vector2(190, 192), Vector2(204, 196), Vector2(212, 212), Vector2(230, 300), Vector2(330, 320), Vector2(900, 400), Vector2(900, 900), Vector2(-900, 900), Vector2(-900, -45)])
@@ -2296,17 +2296,17 @@ omni_attenuation = 1.2
 [node name="1) Piata Kuixinglou" type="Node3D" parent="DecorManual"]
 
 [node name="bloc_sub_piata1" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.864889, 0.000000, 0.501964, 0.000000, 1.000000, 0.000000, -0.276080, 0.000000, -0.475689, 130.221618, 37.059000, -215.522331)
+transform = Transform3D(-0.864889, 0.000000, 0.501964, 0.000000, 1.600000, 0.000000, -0.276080, 0.000000, -0.475689, 126.206000, 27.200000, -208.602600)
 metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
 [node name="bloc_sub_piata2" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.981360, 0.000000, 0.192179, 0.000000, 1.000000, 0.000000, -0.105699, 0.000000, -0.539748, 101.146884, 37.080000, -225.041278)
+transform = Transform3D(-0.981360, 0.000000, 0.192179, 0.000000, 1.600000, 0.000000, -0.105699, 0.000000, -0.539748, 99.609800, 27.220000, -217.190400)
 metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
 [node name="bloc_sub_piata3" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("51_liziba")]
-transform = Transform3D(-0.977747, 0.000000, 0.209789, 0.000000, 1.000000, 0.000000, -0.115384, 0.000000, -0.537761, 78.027787, 37.080000, -229.958340)
+transform = Transform3D(-0.977747, 0.000000, 0.209789, 0.000000, 1.600000, 0.000000, -0.115384, 0.000000, -0.537761, 76.349200, 27.220000, -222.137000)
 metadata/lumina = "30|2.6|#FFC98A"
 metadata/coliziune = "none"
 
@@ -2315,52 +2315,52 @@ transform = Transform3D(-0.968125, 0.000000, -0.250469, 0.000000, 1.000000, 0.00
 metadata/lumina = "30|1.6|#FFC98A"
 
 [node name="parapet5" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.681998, 0.000000, -0.731354, 0.000000, 1.000000, 0.000000, 0.731354, 0.000000, -0.681998, 133.410000, 63.420000, -199.624000)
+transform = Transform3D(-0.681998, 0.000000, -0.731354, 0.000000, 1.000000, 0.000000, 0.731354, 0.000000, -0.681998, 132.182200, 63.390000, -198.307300)
 
 [node name="parapet6" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.501964, 0.000000, -0.864889, 0.000000, 1.000000, 0.000000, 0.864889, 0.000000, -0.501964, 124.951000, 63.509000, -206.441000)
+transform = Transform3D(-0.501964, 0.000000, -0.864889, 0.000000, 1.000000, 0.000000, 0.864889, 0.000000, -0.501964, 124.047600, 63.480000, -204.884100)
 
 [node name="parapet7" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.316311, 0.000000, -0.948655, 0.000000, 1.000000, 0.000000, 0.948655, 0.000000, -0.316311, 117.186000, 63.540000, -210.270000)
+transform = Transform3D(-0.316311, 0.000000, -0.948655, 0.000000, 1.000000, 0.000000, 0.948655, 0.000000, -0.316311, 116.617200, 63.510200, -208.562100)
 
 [node name="parapet8" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.233785, 0.000000, -0.972288, 0.000000, 1.000000, 0.000000, 0.972288, 0.000000, -0.233785, 111.263000, 63.533000, -211.987000)
+transform = Transform3D(-0.233785, 0.000000, -0.972288, 0.000000, 1.000000, 0.000000, 0.972288, 0.000000, -0.233785, 110.842700, 63.503400, -210.236600)
 
 [node name="parapet9" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.204325, 0.000000, -0.978903, 0.000000, 1.000000, 0.000000, 0.978903, 0.000000, -0.204325, 104.440000, 63.530000, -213.680000)
+transform = Transform3D(-0.204325, 0.000000, -0.978903, 0.000000, 1.000000, 0.000000, 0.978903, 0.000000, -0.204325, 104.071900, 63.500000, -211.918300)
 
 [node name="parapet10" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.192179, 0.000000, -0.981360, 0.000000, 1.000000, 0.000000, 0.981360, 0.000000, -0.192179, 99.129000, 63.530000, -214.737000)
+transform = Transform3D(-0.192179, 0.000000, -0.981360, 0.000000, 1.000000, 0.000000, 0.981360, 0.000000, -0.192179, 98.783400, 63.500000, -212.970500)
 
 [node name="parapet11" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.209107, 0.000000, -0.977893, 0.000000, 1.000000, 0.000000, 0.977893, 0.000000, -0.209107, 92.716000, 63.530000, -216.071000)
+transform = Transform3D(-0.209107, 0.000000, -0.977893, 0.000000, 1.000000, 0.000000, 0.977893, 0.000000, -0.209107, 92.339700, 63.500000, -214.311200)
 
 [node name="parapet12" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.209448, 0.000000, -0.977820, 0.000000, 1.000000, 0.000000, 0.977820, 0.000000, -0.209448, 87.559000, 63.530000, -217.175000)
+transform = Transform3D(-0.209448, 0.000000, -0.977820, 0.000000, 1.000000, 0.000000, 0.977820, 0.000000, -0.209448, 87.182200, 63.500000, -215.414500)
 
 [node name="parapet13" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.210131, 0.000000, -0.977673, 0.000000, 1.000000, 0.000000, 0.977673, 0.000000, -0.210131, 80.994000, 63.530000, -218.582000)
+transform = Transform3D(-0.210131, 0.000000, -0.977673, 0.000000, 1.000000, 0.000000, 0.977673, 0.000000, -0.210131, 80.615800, 63.500000, -216.822100)
 
 [node name="parapet14" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.209789, 0.000000, -0.977747, 0.000000, 1.000000, 0.000000, 0.977747, 0.000000, -0.209789, 75.825000, 63.530000, -219.692000)
+transform = Transform3D(-0.209789, 0.000000, -0.977747, 0.000000, 1.000000, 0.000000, 0.977747, 0.000000, -0.209789, 75.447200, 63.500000, -217.932400)
 
 [node name="parapet15" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.230729, 0.000000, -0.973018, 0.000000, 1.000000, 0.000000, 0.973018, 0.000000, -0.230729, 69.467000, 63.601000, -221.089000)
+transform = Transform3D(-0.230729, 0.000000, -0.973018, 0.000000, 1.000000, 0.000000, 0.973018, 0.000000, -0.230729, 69.051500, 63.503100, -219.337300)
 
 [node name="parapet16" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.187724, 0.000000, -0.982222, 0.000000, 1.000000, 0.000000, 0.982222, 0.000000, -0.187724, 63.932000, 63.190000, -222.600000)
+transform = Transform3D(-0.187724, 0.000000, -0.982222, 0.000000, 1.000000, 0.000000, 0.982222, 0.000000, -0.187724, 63.546800, 63.509300, -220.586500)
 
 [node name="parapet17" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.160570, 0.000000, -0.987024, 0.000000, 1.000000, 0.000000, 0.987024, 0.000000, -0.160570, 57.047000, 63.375000, -223.818000)
+transform = Transform3D(-0.160570, 0.000000, -0.987024, 0.000000, 1.000000, 0.000000, 0.987024, 0.000000, -0.160570, 56.717600, 63.490600, -221.794400)
 
 [node name="parapet18" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(-0.049896, 0.000000, -0.998754, 0.000000, 1.000000, 0.000000, 0.998754, 0.000000, -0.049896, 50.698000, 63.089000, -224.884000)
+transform = Transform3D(-0.049896, 0.000000, -0.998754, 0.000000, 1.000000, 0.000000, 0.998754, 0.000000, -0.049896, 50.583300, 63.458900, -222.586900)
 
 [node name="parapet19" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(0.106611, 0.000000, -0.994301, 0.000000, 1.000000, 0.000000, 0.994301, 0.000000, 0.106611, 42.359000, 62.972000, -225.108000)
+transform = Transform3D(0.106611, 0.000000, -0.994301, 0.000000, 1.000000, 0.000000, 0.994301, 0.000000, 0.106611, 42.630600, 63.315800, -222.572600)
 
 [node name="parapet20" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("31_railing")]
-transform = Transform3D(0.137445, 0.000000, -0.990509, 0.000000, 1.000000, 0.000000, 0.990509, 0.000000, 0.137445, 36.706000, 62.749000, -224.888000)
+transform = Transform3D(0.137445, 0.000000, -0.990509, 0.000000, 1.000000, 0.000000, 0.990509, 0.000000, 0.137445, 37.124900, 63.121300, -221.866900)
 
 [node name="felinar_piata21" parent="DecorManual/1) Piata Kuixinglou" instance=ExtResource("21_lamp")]
 transform = Transform3D(0.824590, 0.000000, 0.565731, 0.000000, 1.000000, 0.000000, -0.565731, 0.000000, 0.824590, 129.577896, 64.641708, -207.545593)

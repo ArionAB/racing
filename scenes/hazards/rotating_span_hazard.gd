@@ -164,6 +164,13 @@ const GORE_MAX: float = 12.0
 ## (~30 m/s) inseamna 90 m. Sunt trei secunde in care mutarea e progresiva
 ## (`lerp` dupa distanta, ca la gheizere), deci nu smuceste volanul departe si
 ## e completa cand conteaza.
+## Cat de larg trebuie sa ramana culoarul dintre peretele de bariere si buza
+## pasajului ca palnia sa mai aiba voie sa continue (m).
+##
+## O masina are ~2.2 m; 4.0 lasa peste un metru de fiecare parte, adica loc de
+## trecut virand, nu de manevrat. Sub atat palnia nu mai deviaza, ci prinde.
+const GATE_MIN_LANE: float = 4.0
+
 const AI_REACH_M: float = 90.0
 
 ## Grupul din care AI-ul isi ia pasajele, fara sa caute prin arbore.
@@ -835,11 +842,31 @@ func _push_cars() -> void:
 	if dir.length_squared() < 0.01:
 		return
 	dir = dir.normalized()
+	# Ghiontul se OPRESTE la gura ocolului, nu impinge mai departe.
+	#
+	# Masurat cu ProbeRace pe pista reala: masinile scoase de poarta ajungeau
+	# la `lat` 5.3-6.2 si se opreau acolo, in serie, unele in altele — iar
+	# scanarea transversala arata de ce: culoarul e drum pana la 8 m, dar la
+	# 8.5 m e parapetul si dincolo de el golul. Ghiontul aluneca de-a lungul
+	# barierelor si, cat masina statea in zona, o ducea pana in perete.
+	#
+	# Tinta lui e axa ocolului in dreptul portii (`_service_center_mag`, 4.05 m
+	# aici) — exact linia pe care o tine si pilotul (`ai_line_offset`). Odata
+	# ajunsa acolo, masina e pe ocol si n-are de ce sa mai fie impinsa in afara.
+	var target_mag := _service_center_mag(_gate_z())
+	if is_inf(target_mag):
+		target_mag = road_half_width * 0.5
 	for b in _gate_zone.get_overlapping_bodies():
 		var car := b as Car
 		if car == null:
 			continue
 		if car.horizontal_speed() > gate_push_speed_max:
+			continue
+		# Cat de departe de axa e masina, in frameul DREPT al nodului (`.x` de
+		# pe punctul indoit nu mai raspunde la intrebarea asta — vezi nota din
+		# `_build_service`).
+		var local := global_transform.affine_inverse() * car.global_position
+		if signf(float(service_side)) * local.x >= target_mag:
 			continue
 		# Se ADUCE la o viteza de alunecare, nu se ADUNA un impuls.
 		#
@@ -1737,6 +1764,33 @@ func _build_gate_taper(gz: float, scene: PackedScene) -> void:
 		return
 	var side := signf(float(service_side))
 	var z_end := win[0]
+	if gz - z_end < 1.0:
+		return
+	# [b]Palnia se opreste cand culoarul dintre ea si buza pasajului se
+	# ingusteaza sub o masina.[/b]
+	#
+	# Peretele urmeaza `_service_inner_mag(z) - gate_clearance`, care se
+	# departeaza repede de axa: masurat pe Track12, culoarul ramas pana la buza
+	# pasajului scade de la 7.35 m in dreptul portii la 2.45 m la 9 m in aval —
+	# adica sub gabaritul unei masini plus jocul de manevra. Cine intra acolo se
+	# opreste intre perete si buza, si urmatorul intra in el: exact ambuteiajul
+	# repetabil pe care l-a masurat criticul (13 blocaje la frac 0.736-0.739,
+	# masinile la `lat` 5.3-6.2, deci fix in gatul palniei).
+	#
+	# Palnia are voie sa inchida banda directa doar cat timp mai are pe unde sa
+	# te scoata. Dincolo de asta rolul ei l-a preluat oricum ocolul, care de
+	# acolo incolo E drumul.
+	var z_narrow := z_end
+	var zc := gz
+	while zc > z_end:
+		var inner_c := _service_inner_mag(zc)
+		if is_inf(inner_c):
+			break
+		if road_half_width - (inner_c - gate_clearance) < GATE_MIN_LANE:
+			z_narrow = zc
+			break
+		zc -= 0.5
+	z_end = maxf(z_end, z_narrow)
 	if gz - z_end < 1.0:
 		return
 	var steps := maxi(int(ceil((gz - z_end) / 4.0)), 1)

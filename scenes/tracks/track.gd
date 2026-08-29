@@ -5462,6 +5462,7 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.elevated = elevated
 	route.no_surface = bool(spec.get("no_surface", false))
 	route.detour = bool(spec.get("detour", false))
+	route.own_ends = bool(spec.get("own_ends", false))
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
 	return route

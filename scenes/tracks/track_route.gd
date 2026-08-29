@@ -93,6 +93,17 @@ var no_surface: bool = false
 ## ea. Fara asta, exact masina care a facut ce trebuia ar fi fost pedepsita ca
 ## si cum ar fi iesit de pe sosea.
 var detour: bool = false
+## Banda si-a pus SINGURA capetele, pe axa benzii directe, in loc sa le
+## primeasca de la [code]Track._branch_end[/code].
+##
+## Conteaza pentru cine VERIFICA racordul, nu pentru cine il construieste. O
+## banda `elevated` obisnuita e o pasarela care se lipeste de BORDURA, deci
+## acolo racordul corect se masoara fata de marginea soselei; ocolul pasajului
+## rotativ pleaca de pe axa si se intoarce tot pe ea. Fara steagul asta,
+## `tools/probe_layout.gd` masura al doilea caz cu regula primului si raporta
+## o treapta de ~6 m (adica exact o semilatime) acolo unde capetele erau de
+## fapt pe axa la 0.00 m.
+var own_ends: bool = false
 
 
 func count() -> int:

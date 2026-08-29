@@ -2483,25 +2483,38 @@ func detour_route_spec(track: Track) -> Dictionary:
 	# soselei — acolo incepe pana pavata. Fara racord, primul segment al benzii
 	# ar sari lateral 3.2 m intr-un singur pas de 1.2 m, adica un unghi de 70°
 	# pe care niciun pilot nu-l poate lua.
+	#
+	# [b]Capetele se iau din RUTA, nu din coloana.[/b] `_at(0.0, z)` da axa
+	# COLOANEI, iar coloana e netezita cu sase treceri binomiale
+	# (`SPINE_SMOOTH_PASSES`) tocmai ca rampa sa nu iasa din placi suprapuse.
+	# Netezirea trage insa axa spre coarda oriunde soseaua e in viraj, si acolo
+	# capatul benzii ramane pe langa asfalt: masurat pe Track12, capatul din
+	# amonte (in curba) iesea la 1.01 m de axa, cel din aval (aproape drept) la
+	# 0.04 m — de unde si pragul de 1.0 m al lui ProbeLayout depasit la un
+	# singur capat. Un metru nu e o treapta care sa opreasca o masina, dar e o
+	# treapta pe care garda o vede, si nu are de ce sa existe: punctul de
+	# racord al unei benzi E un punct de pe banda directa, deci se citeste de
+	# acolo. Restul ocolului ramane pe coloana — el chiar are nevoie de axa
+	# neteda.
+	var here := route.closest_index_global(global_position)
+	var fwd_local := -global_transform.basis.z
+	var route_fwd := route.baked[(here + 1) % route.count()] - route.baked[here]
+	var forward_sign := 1.0 if route_fwd.dot(fwd_local) >= 0.0 else -1.0
 	var n := maxi(int(ceil((z_in - z_out) / SERVICE_STEP)), 4)
 	var pts: Array[Vector3] = []
-	pts.append(to_global(_at(0.0, z_in + DETOUR_TAIL)))
+	pts.append(_route_point_at(route, here, forward_sign, -(z_in + DETOUR_TAIL)))
 	for i in n + 1:
 		var u := float(i) / float(n)
 		var z := lerpf(z_in, z_out, u)
 		var mag := road_half_width * 0.45 + service_offset * _profile(u)
 		pts.append(to_global(_at(side * mag, z)))
-	pts.append(to_global(_at(0.0, z_out - DETOUR_TAIL)))
+	pts.append(_route_point_at(route, here, forward_sign, -(z_out - DETOUR_TAIL)))
 	# [b]Capetele se DECLARA pe indecsi, nu se deduc.[/b] `_make_branch` deduce
 	# capatul nedeclarat cu `_closest_baked_index`, care cauta in 2D pe TOATA
 	# bucla — iar nodul asta sta pe o spirala care trece de patru ori peste
 	# aceeasi amprenta xz (memoria `pista-peste-pista`). Deducerea ar putea
 	# agata ocolul de etajul de dedesubt. Aici indecsii ies din aceeasi
 	# plimbare pe lista pe care o face si coloana, deci raman pe etajul corect.
-	var here := route.closest_index_global(global_position)
-	var fwd_local := -global_transform.basis.z
-	var route_fwd := route.baked[(here + 1) % route.count()] - route.baked[here]
-	var forward_sign := 1.0 if route_fwd.dot(fwd_local) >= 0.0 else -1.0
 	return {
 		"points": pts,
 		"own_ends": true,

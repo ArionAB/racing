@@ -171,6 +171,13 @@ const GORE_MAX: float = 12.0
 ## trecut virand, nu de manevrat. Sub atat palnia nu mai deviaza, ci prinde.
 const GATE_MIN_LANE: float = 4.0
 
+
+## Cat din lungimea palniei trebuie sa ramana in picioare oricum. Taierea de
+## mai sus are voie sa scurteze peretele doar cu restul: pe un pasaj ingust,
+## unde culoarul e stramt pe toata lungimea, palnia ramane astfel intreaga si
+## devierea isi pastreaza contractul.
+const GATE_KEEP: float = 0.6
+
 const AI_REACH_M: float = 90.0
 
 ## Grupul din care AI-ul isi ia pasajele, fara sa caute prin arbore.
@@ -1780,17 +1787,31 @@ func _build_gate_taper(gz: float, scene: PackedScene) -> void:
 	# Palnia are voie sa inchida banda directa doar cat timp mai are pe unde sa
 	# te scoata. Dincolo de asta rolul ei l-a preluat oricum ocolul, care de
 	# acolo incolo E drumul.
-	var z_narrow := z_end
-	var zc := gz
-	while zc > z_end:
-		var inner_c := _service_inner_mag(zc)
-		if is_inf(inner_c):
-			break
-		if road_half_width - (inner_c - gate_clearance) < GATE_MIN_LANE:
-			z_narrow = zc
-			break
-		zc -= 0.5
-	z_end = maxf(z_end, z_narrow)
+	# [b]Peretele se opreste unde culoarul lui s-a stramtat sub o masina.[/b]
+	#
+	# Palnia strange masina intre barierele ei si buza pasajului, si pe Track12
+	# strangerea merge prea departe: culoarul scade de la 7.35 m in dreptul
+	# portii la 2.45 m dupa 9 m — sub gabaritul unei masini (2.2 m) plus jocul
+	# de manevra. Cine intra acolo se opreste, si urmatorul intra in el:
+	# ProbeRace a gasit 13 blocaje pe doua seed-uri, masinile la `lat` 5.3-6.2.
+	#
+	# `GATE_MIN_LANE` e in metri, deci pe un pasaj INGUST (soseaua-test a sondei,
+	# semilatime 3.4) ar taia palnia inca de la inceput si ar strica devierea —
+	# masurat, +30 s in loc de +7.98. De aceea taierea se aplica doar cat timp
+	# ea mai lasa in picioare cea mai mare parte a palniei: sub `GATE_KEEP` din
+	# lungimea ei, peretele ramane intreg, fiindca acolo el E devierea.
+	var full := gz - z_end
+	if full > 1.0:
+		var zc := gz
+		while zc > z_end:
+			var inner_c := _service_inner_mag(zc)
+			if is_inf(inner_c):
+				break
+			if road_half_width - (inner_c - gate_clearance) < GATE_MIN_LANE:
+				if (zc - z_end) < full * (1.0 - GATE_KEEP):
+					z_end = zc
+				break
+			zc -= 0.5
 	if gz - z_end < 1.0:
 		return
 	var steps := maxi(int(ceil((gz - z_end) / 4.0)), 1)

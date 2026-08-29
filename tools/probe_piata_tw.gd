@@ -15,16 +15,18 @@ func _ready() -> void:
 	var L := c.get_baked_length()
 	# model, inaltime nescalata, fractie, lateral, scara
 	var plan := [
-		{"m": "c", "h": 31.1, "f": 0.0025, "d": 26.0, "s": 0.95},
-		{"m": "a", "h": 38.1, "f": 0.0055, "d": 40.0, "s": 1.00},
-		{"m": "b", "h": 48.1, "f": 0.0085, "d": 30.0, "s": 0.85},
-		{"m": "c", "h": 31.1, "f": 0.0115, "d": 52.0, "s": 1.05},
-		{"m": "a", "h": 38.1, "f": 0.0145, "d": 34.0, "s": 0.95},
-		{"m": "b", "h": 48.1, "f": 0.0180, "d": 62.0, "s": 0.90},
-		{"m": "c", "h": 31.1, "f": 0.0210, "d": 38.0, "s": 1.00},
-		{"m": "a", "h": 38.1, "f": 0.0245, "d": 74.0, "s": 1.00},
-		{"m": "b", "h": 48.1, "f": 0.0280, "d": 44.0, "s": 0.90},
-		{"m": "c", "h": 31.1, "f": 0.0320, "d": 88.0, "s": 1.05},
+		{"m": "c", "h": 31.1, "f": 0.0025, "d": 22.0, "s": 0.95},
+		{"m": "a", "h": 38.1, "f": 0.0050, "d": 36.0, "s": 1.00},
+		{"m": "b", "h": 48.1, "f": 0.0080, "d": 25.0, "s": 0.85},
+		{"m": "c", "h": 31.1, "f": 0.0110, "d": 48.0, "s": 1.05},
+		{"m": "a", "h": 38.1, "f": 0.0135, "d": 27.0, "s": 0.95},
+		{"m": "b", "h": 48.1, "f": 0.0165, "d": 60.0, "s": 0.90},
+		{"m": "c", "h": 31.1, "f": 0.0190, "d": 24.0, "s": 1.00},
+		{"m": "a", "h": 38.1, "f": 0.0215, "d": 40.0, "s": 1.00},
+		{"m": "b", "h": 48.1, "f": 0.0245, "d": 28.0, "s": 0.90},
+		{"m": "c", "h": 31.1, "f": 0.0275, "d": 72.0, "s": 1.05},
+		{"m": "a", "h": 38.1, "f": 0.0305, "d": 33.0, "s": 0.95},
+		{"m": "b", "h": 48.1, "f": 0.0340, "d": 90.0, "s": 0.90},
 	]
 	var i := 0
 	for e: Dictionary in plan:
@@ -46,7 +48,7 @@ func _ready() -> void:
 		pos.y = ground
 		# Varful ramane SUB cota soselei: asa privesti in JOS peste ele si
 		# citesti caderea. Un turn care trece de sosea sta LANGA drum, nu sub el.
-		var top_cap: float = p.y - 4.0
+		var top_cap: float = p.y - 1.5
 		if ground + mh * sc > top_cap:
 			pos.y = top_cap - mh * sc
 		# fata spre drum: rotim turnul cu +X spre inainte, Z spre -right

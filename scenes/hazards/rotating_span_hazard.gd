@@ -58,10 +58,29 @@ const SPAN_KERB_WIDTH: float = 0.5
 const BARRIER_WIDTH: float = 2.4
 ## Grosimea pasajului si a rampei de serviciu.
 const DECK_THICK: float = 0.55
+## Cat de sus sta marcajul peste asfalt (m). Suficient cat sa nu se bata cu
+## placa (memoria `suprafete-suprapuse-si-valuri`: offsetul se DERIVA, si aici
+## nu exista valuri, doar o placa plana), prea putin cat sa fie o treapta.
+const MARK_LIFT: float = 0.03
+## Latimea axei intrerupte si a bordurii de pe marginile carosabilului (m).
+const MARK_WIDTH: float = 0.20
+const KERB_WIDTH: float = 0.45
+## Lungimea unei liniute de ax si a golului dintre ele (m). Aceleasi cifre ca
+## pe soseaua principala, ca modulul sa nu se citeasca drept alt drum.
+const DASH_ON: float = 3.0
+const DASH_OFF: float = 4.0
 ## Cat de des se esantioneaza rampa de serviciu (m). Sub un metru cotul ei e
 ## neted; peste doi, imbinarile dintre placi devin praguri (memoria
 ## `suprafete-din-placi-plane`).
 const SERVICE_STEP: float = 1.2
+## Lampile de lucru ale modulului: cat de sus, la ce interval, cat de departe
+## bat si cu ce culoare. Aceleasi cifre ca felinarele nodului din `.tscn`
+## (energie 3.6, raza 19), ca modulul sa nu se citeasca drept alta lume.
+const WORK_LIGHT_HEIGHT: float = 6.5
+const WORK_LIGHT_STEP: float = 12.0
+const WORK_LIGHT_RANGE: float = 19.0
+const WORK_LIGHT_ENERGY: float = 3.6
+const WORK_LIGHT_COLOR: Color = Color(1.0, 0.784, 0.549)
 ## Cati metri de pasaj mai raman fara parapet DUPA capatul ocolului, pe partea
 ## pe care el se intoarce in banda directa.
 ##
@@ -316,8 +335,56 @@ enum State {
 @export var span_model: PackedScene = null
 @export var barrier_model: PackedScene = null
 @export_range(0.2, 3.0, 0.05) var model_scale: float = 1.0
-## Slotul de paleta al pasajului si al rampei de serviciu.
+## Slotul de paleta al STRUCTURII: parapete, borduri, grinzi.
 @export_range(0, 31) var deck_slot: int = Palette.CONCRETE
+## Slotul de paleta al SUPRAFETEI PE CARE SE CONDUCE — tablierul si ocolul.
+##
+## [b]De ce e separat de `deck_slot`.[/b] Amandoua stateau pe CONCRETE, si de
+## pe traseu iesea exact reclamatia dezvoltatorului: „ce e gri inchis pare sa
+## pluteasca deasupra soselei". Masurat pe apropiere (frac 0.74, sonda de
+## proiectie): `ServiceMesh` umple [b]34.5% din ecran la 35 m[/b] — adica in
+## dreptul nodului o treime din cadru e o placa de beton palida, fara marcaj,
+## fara bordura, care nu se citeste nici ca drum, nici ca teren, ci ca o masa
+## suspendata. Iar ocolul E DRUM: e ruta pe care mergi cand pasajul e inchis.
+##
+## Beton ramane ce chiar e beton (parapetele, grinzile). Ce se conduce primeste
+## asfalt, cu bordura si axa peste el (`_deck_markings`), fiindca „e drum" se
+## citeste din marcaj, nu din culoare.
+##
+## [b]Nu ASPHALT (5), si asta e o cifra, nu un gust.[/b] Prima incercare a pus
+## tablierul pe slotul soselei si a schimbat un defect cu opusul lui: pe o
+## pista de NOAPTE, cu tablierul sub cota drumului si fara felinar deasupra
+## lui, luminanta 0.295 se citeste ca o gaura, nu ca o banda (captura
+## `mark2_0.74`, jumatatea dreapta a cadrului neagra). Si nu e putin din el in
+## cadru: razele trase prin pixelii din dreapta-jos (sonda `probe_cq_r2h`) dau
+## in [b]Deck la 18-22 m[/b] — tablierul E masa care umple sfertul ala de
+## ecran, nu terenul, cum aratase intai o sonda pe AABB (camera statea in
+## cutia terenului, deci raspunsul ei era „terenul" oriunde ai fi tintit).
+##
+## ASPHALT_EDGE (0.405) sta in aceeasi familie — tot drum — dar cu un ton
+## peste, cat sa se vada unde e placa; bordura de CONCRETE (0.745) da muchia,
+## iar axul alb citirea de banda. Aceeasi unealta ca pe Stromboli (memoria
+## `rock-dark-nu-pe-bazalt`): variatia de VALOARE in familie, nu o culoare
+## noua si nu un slot in plus.
+@export_range(0, 31) var road_slot: int = Palette.ASPHALT_EDGE
+## Slotul suprafetei OCOLULUI.
+##
+## Nu acelasi cu al tablierului, si nu din estetica: pe o pista de noapte doua
+## suprafete pe acelasi slot inchis se contopesc intr-o singura pata neagra —
+## prima incercare a mutat exact asa placa de beton in gaura de intuneric
+## (captura `mark_0.74`). Ocolul e drum, deci ramane in familia asfaltului, dar
+## pe varianta TOCITA: mai deschis cu un ton, deci se citeste ca alta banda,
+## nu ca un gol. Aceeasi unealta ca la Stromboli (memoria
+## `rock-dark-nu-pe-bazalt`): variatia de VALOARE in aceeasi familie, nu o
+## culoare noua.
+##
+## Ocolul ramane pe acelasi ton cu tablierul: sunt aceeasi suprafata de
+## condus, iar ce le desparte sunt CHEVRONII de pe ocol si axul de pe tablier —
+## marcaj, nu culoare. Doua tonuri diferite ar fi spus „alt material", cand de
+## fapt e acelasi drum care se bifurca.
+@export_range(0, 31) var service_slot: int = Palette.ASPHALT_EDGE
+## Slotul bordurii de pe marginile suprafetei carosabile a modulului.
+@export_range(0, 31) var kerb_slot: int = Palette.CONCRETE
 ## Coliziune si pe separatorul de pe mijlocul tronsonului (0.43 m inaltime in
 ## GLB). Stins implicit: pe un carosabil de 6.8 m ar taia pasajul in doua
 ## benzi de 3 m, iar memoria `suprafete-cu-goluri-si-praguri` spune ca un prag
@@ -344,6 +411,8 @@ func _ready() -> void:
 	_build_span()
 	_build_gate()
 	_build_lamp()
+	# DUPA `_build_service()`: sirul de pe ocol se aseaza pe punctele lui.
+	_build_work_lights()
 	_apply_cycle(0.0)
 
 
@@ -688,9 +757,93 @@ func _build_decks() -> void:
 		_slab(st, body, Vector3(-hw, deck_rise, z1), Vector3(hw, deck_rise, z1),
 			Vector3(hw, 0.0, z2), Vector3(-hw, 0.0, z2))
 		_deck_parapets(st, body, absf(z1), absf(z2), sign_z, deck_rise, 0.0)
+	_deck_markings(st)
 	var mi := PaletteBox.emit(st, "DeckMesh")
 	if mi != null:
 		body.add_child(mi)
+
+
+## Marcajul de pe tablier: bordura pe margini si axa intrerupta pe mijloc.
+##
+## [b]Asta e ce transforma o placa intr-un drum.[/b] Fara el modulul e o dala
+## de beton de 14 x 80 m langa sosea, si de la volan se citeste exact cum a
+## spus dezvoltatorul — „ce e gri inchis pare sa pluteasca deasupra soselei".
+## Cu bordura si axa, aceeasi geometrie se citeste ca o continuare a
+## carosabilului, si atunci [b]golul din mijlocul ei devine informatie[/b]: nu
+## mai e o margine de platou, e o banda care se opreste.
+##
+## Marcajul se opreste in dreptul golului: acolo chiar nu mai e drum.
+func _deck_markings(st: SurfaceTool) -> void:
+	var hw := road_half_width
+	var lip := _lip_near()
+	# DOAR portiunea ORIZONTALA. Rampele de racord coboara la cota nodului,
+	# iar o banda plana intinsa peste ele ar pluti la capat cu tot atatia metri
+	# cat coboara rampa — adica ar adauga chiar defectul pe care il repara.
+	var far := lip + deck_run
+	for sign_z: float in [1.0, -1.0]:
+		# Bordura pe amandoua marginile, pe toata lungimea tablierului.
+		for edge_sign: float in [-1.0, 1.0]:
+			var x := edge_sign * (hw - KERB_WIDTH * 0.5)
+			_mark_strip(st, x, sign_z * lip, sign_z * far, KERB_WIDTH, kerb_slot)
+		# Axa intrerupta, pe mijloc.
+		var z := lip
+		while z < far:
+			var z_end := minf(z + DASH_ON, far)
+			_mark_strip(st, 0.0, sign_z * z, sign_z * z_end, MARK_WIDTH,
+				Palette.FOAM_WHITE)
+			z += DASH_ON + DASH_OFF
+
+
+## Marcajul de pe ocol: bordura pe amandoua marginile.
+##
+## Axa de mijloc lipseste deliberat — ocolul e o banda ingusta cu un singur
+## sens de mers, iar o axa pe ea ar spune „doua benzi" pe 5 m latime. In locul
+## ei merg CHEVRONI: liniute scurte, transversale, la interval fix. Ele fac
+## doua lucruri deodata — dau suprafetei textura care lipseste (fara ea placa
+## e o pata uniforma, oricat de deschisa ar fi) si spun „deviere", care e chiar
+## ce e ocolul.
+func _service_markings(st: SurfaceTool, pts: PackedVector3Array,
+		half_w: float) -> void:
+	var run := 0.0
+	for i in pts.size() - 1:
+		var seg := pts[i].distance_to(pts[i + 1])
+		var prev := run
+		run += seg
+		if int(prev / (DASH_ON + DASH_OFF)) != int(run / (DASH_ON + DASH_OFF)):
+			var a2 := pts[i]
+			var b2 := pts[i + 1]
+			var d2 := b2 - a2
+			d2.y = 0.0
+			if d2.length_squared() > 1e-6:
+				var lat2 := Vector3(-d2.z, 0.0, d2.x).normalized() 					* (half_w - KERB_WIDTH)
+				var fw2 := d2.normalized() * (MARK_WIDTH * 0.5)
+				var mid := (a2 + b2) * 0.5 + Vector3.UP * MARK_LIFT
+				PaletteBox.quad_slab(st, mid - lat2 - fw2, mid + lat2 - fw2,
+					mid + lat2 + fw2, mid - lat2 + fw2, 0.01, Palette.FOAM_WHITE)
+	for i in pts.size() - 1:
+		var a := pts[i]
+		var b := pts[i + 1]
+		var dir := b - a
+		dir.y = 0.0
+		if dir.length_squared() < 1e-6:
+			continue
+		var lat := Vector3(-dir.z, 0.0, dir.x).normalized() 			* (half_w - KERB_WIDTH * 0.5)
+		for edge_sign: float in [-1.0, 1.0]:
+			var ea := a + lat * edge_sign + Vector3.UP * MARK_LIFT
+			var eb := b + lat * edge_sign + Vector3.UP * MARK_LIFT
+			var w := Vector3(-dir.z, 0.0, dir.x).normalized() * (KERB_WIDTH * 0.5)
+			PaletteBox.quad_slab(st, ea - w, ea + w, eb + w, eb - w,
+				0.01, kerb_slot)
+
+
+## O banda de marcaj de-a lungul lui Z local, la x dat.
+func _mark_strip(st: SurfaceTool, x: float, z0: float, z1: float,
+		width: float, slot: int) -> void:
+	var y := deck_rise + MARK_LIFT
+	var hwm := width * 0.5
+	PaletteBox.quad_slab(st,
+		Vector3(x - hwm, y, z0), Vector3(x + hwm, y, z0),
+		Vector3(x + hwm, y, z1), Vector3(x - hwm, y, z1), 0.01, slot)
 
 
 ## Rampa de serviciu: un cot care iese lateral inainte de buza, trece pe langa
@@ -725,6 +878,7 @@ func _build_service() -> void:
 		pts.append(Vector3(x, deck_rise, z))
 	_service_points = pts
 	var half_w := service_width * 0.5
+	_service_markings(st, pts, half_w)
 	# Pana pavata dintre pasaj si ocol (vezi `GORE_MAX`): tot pe lungimea ei
 	# marginea dinspre drum a ocolului da in beton, nu in gol, deci nici acolo
 	# nu primeste parapet.
@@ -738,7 +892,7 @@ func _build_service() -> void:
 		if dir.length_squared() < 1e-6:
 			continue
 		var lat := Vector3(-dir.z, 0.0, dir.x).normalized() * half_w
-		_slab(st, body, a - lat, a + lat, b + lat, b - lat)
+		_slab(st, body, a - lat, a + lat, b + lat, b - lat, service_slot)
 		_gore_slab(st, body, a, b, half_w, edge, gore)
 		# Parapetul creste doar unde marginea a IESIT de pe pasaj: peste
 		# carosabil ar fi un zid fix pe banda directa, iar in consola e
@@ -914,8 +1068,9 @@ func _parapet(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
 
 ## O placa: mesh pe atlas + colizor convex cu talpa sub ea.
 func _slab(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
-		c: Vector3, d: Vector3) -> void:
-	PaletteBox.quad_slab(st, a, b, c, d, DECK_THICK, deck_slot)
+		c: Vector3, d: Vector3, slot: int = -1) -> void:
+	PaletteBox.quad_slab(st, a, b, c, d, DECK_THICK,
+		road_slot if slot < 0 else slot)
 	var shape := CollisionShape3D.new()
 	var hull := ConvexPolygonShape3D.new()
 	hull.points = PackedVector3Array([a, b, c, d,
@@ -1119,6 +1274,58 @@ func _build_gate_taper(basis: Basis, center_x: float, gz: float,
 			_gate.add_child(piece)
 			_gate_meshes.append(piece)
 		prev = cur
+
+
+## Lampile de lucru de deasupra tablierului si a ocolului.
+##
+## [b]De ce a fost nevoie de ele, si de ce nu s-a rezolvat din culoare.[/b]
+## Reclamatia era ca modulul „pare sa pluteasca deasupra soselei", si prima
+## banuiala a fost slotul de paleta. Masurat, banuiala era gresita: geometria
+## tablierului sta deja in majoritate pe CONCRETE (luminanta 0.745, cel mai
+## deschis slot de suprafata), cu normalele in sus, si TOT iesea neagra in
+## captura. Explicatia e tema: Chongqing e o pista de NOAPTE, cu soare 0.35 si
+## ambiental 0.40, iar soseaua principala se vede doar fiindca are felinare pe
+## ea. Modulul n-avea niciunul — cele 17 lumini ale nodului sunt la 30-40 m,
+## adica dincolo de `omni_range`-ul lor de 19 m.
+##
+## Deci lipsa nu era de albedo, era de LUMINA. Un santier de noapte are lampi
+## de lucru; astea sunt ele. Fara umbre (tema le tine stinse) si cu stingere
+## la distanta, ca sa nu coste nimic cand modulul nu e in cadru.
+func _build_work_lights() -> void:
+	var lip := _lip_near()
+	var side := signf(float(service_side))
+	var spots: Array[Vector3] = []
+	# Doua siruri pe tablier, de o parte si de alta a golului.
+	for sign_z: float in [1.0, -1.0]:
+		var z := lip + 6.0
+		while z < lip + deck_run:
+			spots.append(Vector3(-side * (road_half_width - 1.0),
+				deck_rise + WORK_LIGHT_HEIGHT, sign_z * z))
+			z += WORK_LIGHT_STEP
+	# Si pe ocol, unde e chiar suprafata care umple cadrul pe apropiere.
+	if service_offset > 0.01 and _service_points.size() > 2:
+		var i := 0
+		while i < _service_points.size():
+			var p := _service_points[i]
+			spots.append(Vector3(p.x + side * (service_width * 0.5 + 0.8),
+				deck_rise + WORK_LIGHT_HEIGHT, p.z))
+			i += int(WORK_LIGHT_STEP / SERVICE_STEP)
+	for k in spots.size():
+		var l := OmniLight3D.new()
+		l.name = "WorkLight%d" % k
+		l.position = spots[k]
+		l.light_color = WORK_LIGHT_COLOR
+		l.light_energy = WORK_LIGHT_ENERGY
+		l.light_specular = 0.25
+		# Tema Chongqing ruleaza fara umbre; o lampa care le-ar aprinde ar
+		# incalca si constrangerea mobila („o singura lumina care arunca").
+		l.shadow_enabled = false
+		l.omni_range = WORK_LIGHT_RANGE
+		l.omni_attenuation = 1.2
+		l.distance_fade_enabled = true
+		l.distance_fade_begin = 130.0
+		l.distance_fade_length = 40.0
+		add_child(l)
 
 
 ## Semaforul de santier, pe marginea dinspre ocol, inaintea portii.

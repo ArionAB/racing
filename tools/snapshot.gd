@@ -108,11 +108,14 @@ func _ready() -> void:
 	var rock_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
+	var hide_node := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
 		elif arg.begins_with("--frac="):
 			zoom_frac = float(arg.trim_prefix("--frac="))
+		elif arg.begins_with("--hide="):
+			hide_node = arg.trim_prefix("--hide=")
 		elif arg.begins_with("--size="):
 			zoom_size = float(arg.trim_prefix("--size="))
 		elif arg.begins_with("--landmark="):
@@ -161,6 +164,13 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
+	if hide_node != "":
+		var h := track.find_child(hide_node, true, false) as Node3D
+		if h != null:
+			h.visible = false
+			print("snapshot: ascuns %s" % hide_node)
+		else:
+			print("snapshot: nu am gasit %s" % hide_node)
 	if "--smooth" in OS.get_cmdline_user_args():
 		_smooth_organics(track)
 	if train_at >= 0.0:
@@ -260,7 +270,22 @@ func _ready() -> void:
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
-		cam.position = focus - dir * dist + Vector3.UP * cam_h
+		var want := focus - dir * dist + Vector3.UP * cam_h
+		if game_cam:
+			# ANTI-CLIPPING, ca in joc. Fara el captura minte exact acolo unde
+			# conteaza: pe portiunea prin holul blocului Liziba camera de joc e
+			# trasa in fata plafonului (`ChaseCamera._unclip`), dar captura o
+			# lasa in plansee si iese un cadru negru — adica poza arata un
+			# defect pe care jocul nu-l are, sau ascunde unul pe care il are.
+			var look := focus + Vector3.UP * ChaseCamera.LOOK_HEIGHT
+			var space := get_viewport().world_3d.direct_space_state
+			var q := PhysicsRayQueryParameters3D.create(look, want,
+				Track.CAMERA_BLOCKER_LAYER)
+			var hit := space.intersect_ray(q)
+			if not hit.is_empty():
+				want = (hit["position"] as Vector3).move_toward(look,
+					ChaseCamera.CLIP_MARGIN)
+		cam.position = want
 		cam.look_at(focus + dir * look_ahead + Vector3.UP * look_h, Vector3.UP)
 		cam.current = true
 		await get_tree().process_frame

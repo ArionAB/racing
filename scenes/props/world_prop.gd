@@ -458,6 +458,19 @@ func _build_collision() -> void:
 		# Modul ramane lipit de corp, ca sonda (tools/probe_solid.gd) sa poata
 		# separa piesele care stau peste sosea PRIN PROIECT de accidente.
 		body.set_meta("mod_coliziune", mode)
+		# CAMERA: o piesa PRIN CARE SE TRECE trebuie sa opreasca si camera.
+		#
+		# Implicit decorul nu intra pe `CAMERA_BLOCKER_LAYER` — si e corect:
+		# altfel camera s-ar smuci la fiecare felinar de pe margine. Dar blocul
+		# Liziba e o cladire prin al carei parter trece SOSEAUA, iar camera de
+		# joc zboara la 10 m inaltime: masurat la fractia 0.89, camera ajungea
+		# in plansee, iar cadrul era o placa neagra cu o dunga de lume sus —
+		# masina disparea cu totul pe trei fractii. Cu piesa pe layerul de
+		# blocare, `ChaseCamera._unclip` o trage in fata plafonului si intra in
+		# hol odata cu masina, adica exact ce cerea dezvoltatorul: „sa ne vedem
+		# masina inauntru".
+		if bool(model.get_meta("camera_blocker", false)) 				or bool(get_meta("camera_blocker", false)):
+			body.collision_layer |= Track.CAMERA_BLOCKER_LAYER
 		# FRATE, nu parinte: `add_hull_collision` scrie formele in spatiul
 		# PARINTELUI modelului (porneste din `model.transform`), iar
 		# reparentarea ar muta nodul asezat de mana — adica exact ce n-are voie

@@ -69,6 +69,30 @@ var elevated: bool = false
 var tint: Color = Color(0.0, 0.0, 0.0, 0.0)
 ## Smocuri de iarba pe margini si pe brazda (doar "dirt_road").
 var tufts: bool = true
+## Banda isi aduce singura carosabilul: pista NU ii mai construieste o
+## suprafata.
+##
+## Exista pentru rampa de serviciu a pasajului rotativ (Chongqing): geometria
+## ei — asfalt, marcaje, parapeti, pana pavata dinspre pasaj — o emite chiar
+## nodul de hazard, fiindca ea se muleaza pe golul din carosabil pe care tot
+## el il cere. Ce ii lipsea era doar sa fie CUNOSCUTA ca drum. O a doua foaie
+## pusa de `Track._build_branch_surfaces` peste cea existenta ar fi z-fighting
+## pe toata lungimea si un al doilea rand de parapeti.
+var no_surface: bool = false
+## Banda e o PEDEAPSA, nu o scurtatura: pilotul nu are voie sa fie atras spre
+## ea de la sine ([code]Track.branch_lure[/code]).
+##
+## Toate benzile secundare de pana acum au fost scurtaturi — le iei ca sa
+## castigi — deci momeala era mereu corecta. Ocolul pasajului rotativ e pe dos:
+## il iei doar cand banda directa e inchisa, si costa +3 s cand o faci. Un AI
+## momit pe el cu pasajul deschis ar plati pedeapsa degeaba, iar cine decide
+## chiar e `AiController._span_line`, care citeste CEASUL hazardului.
+##
+## Ce ramane neschimbat e [code]Track.resolve_route[/code]: cine ajunge fizic
+## pe banda (imbrancit de poarta, sau mutat acolo de pilot) primeste progres pe
+## ea. Fara asta, exact masina care a facut ce trebuia ar fi fost pedepsita ca
+## si cum ar fi iesit de pe sosea.
+var detour: bool = false
 
 
 func count() -> int:

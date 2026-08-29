@@ -4749,6 +4749,32 @@ func _build_routes() -> void:
 		var branch := _make_branch(spec)
 		if branch != null:
 			routes.append(branch)
+	# Ocolurile hazardelor, DUPA benzile declarate: ordinea rutelor ramane
+	# stabila pentru sonde, iar un pasaj rotativ adaugat in scena nu
+	# renumeroteaza scurtaturile de dinaintea lui.
+	#
+	# Vin de la nod, nu din `_node_branches()`, fiindca punctele lor nu sunt
+	# desenate: se CALCULEAZA din geometria hazardului, care se muleaza la
+	# randul ei pe ruta 0 — deci trebuie cerute dupa ce ruta 0 e in lista.
+	# Vezi `RotatingSpanHazard.detour_route_spec`.
+	for spec in _span_detours():
+		var detour := _make_branch(spec)
+		if detour != null:
+			routes.append(detour)
+
+
+## Ocolurile cerute de pasajele rotitoare, ca specificatii de banda.
+func _span_detours() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var nodes: Array[Node] = []
+	_collect_span_holes(self, nodes)
+	for node in nodes:
+		if not node.has_method("detour_route_spec"):
+			continue
+		var spec: Dictionary = node.call("detour_route_spec", self)
+		if not spec.is_empty():
+			out.append(spec)
+	return out
 
 
 ## Toate punctele coapte ale benzilor SECUNDARE, intr-o singura lista.
@@ -4800,6 +4826,11 @@ func _build_branch_surfaces() -> void:
 		var r := routes[bi]
 		var n := r.count()
 		if n < 2:
+			continue
+		# Banda care isi aduce carosabilul (rampa de serviciu a pasajului
+		# rotativ) nu primeste nici foaie, nici parapeti — le are deja de la
+		# nodul care a construit-o. Vezi `TrackRoute.no_surface`.
+		if r.no_surface:
 			continue
 		match r.surface:
 			"dirt_road":
@@ -5396,9 +5427,22 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 					+ "punctul de racord e ales arbitrar")
 					% [lbl, String(pair[2]), d, BRANCH_END_NEAR_M])
 	var elevated := bool(spec.get("elevated", false))
-	var pts: Array[Vector3] = [_branch_end(i_entry, mid[0], elevated)]
-	pts.append_array(mid)
-	pts.append(_branch_end(i_exit, mid[mid.size() - 1], elevated))
+	# [b]`own_ends`: banda isi pune singura capetele.[/b] `_branch_end` alege
+	# capatul unei benzi `elevated` pe MARGINEA soselei, pe partea din care vine
+	# banda — ce trebuie pentru o pasarela care se lipeste de bordura. Ocolul
+	# pasajului rotativ pleaca insa de pe AXA, in unghi mic, si masurat cu
+	# capatul mutat pe margine iesea o cotitura: banda facea 7 m in lateral, se
+	# intorcea, si ultimele patru puncte mergeau INAPOI, in aer, pe langa drum
+	# (masurat: coada de la z 199.6 la 204.5 in sens invers). Pe ea, pilotul
+	# intorcea volanul si ProbeRace numara 28 de repuneri, cu 20 s de mers in
+	# marsarier pe masina.
+	var pts: Array[Vector3] = []
+	if bool(spec.get("own_ends", false)):
+		pts.assign(mid)
+	else:
+		pts.append(_branch_end(i_entry, mid[0], elevated))
+		pts.append_array(mid)
+		pts.append(_branch_end(i_exit, mid[mid.size() - 1], elevated))
 	var route := TrackRoute.from_points(pts, false, curve.bake_interval)
 	route.half_width = float(spec.get("half_width", half_width))
 	route.entry_frac = frac_at(i_entry)
@@ -5416,6 +5460,8 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.speed_factor = clampf(float(spec.get("speed_factor", 1.0)), 0.3, 1.0)
 	route.tufts = bool(spec.get("tufts", true))
 	route.elevated = elevated
+	route.no_surface = bool(spec.get("no_surface", false))
+	route.detour = bool(spec.get("detour", false))
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
 	return route
@@ -9997,9 +10043,18 @@ const BRANCH_LURE_RANGE: float = 70.0
 func branch_lure(pos: Vector3, ahead_m: float) -> Vector3:
 	for bi in range(1, routes.size()):
 		var b := routes[bi]
+		# Un ocol de pedeapsa nu se momeste niciodata: se ia doar cand banda
+		# directa e inchisa, si atunci decide ceasul hazardului prin
+		# `AiController._span_line`. Vezi `TrackRoute.detour`.
+		if b.detour:
+			continue
 		if pos.distance_to(b.baked[0]) > BRANCH_LURE_RANGE:
 			continue
 		var bidx := b.closest_index_global(pos)
+		# Acelasi test de etaj ca la `resolve_route`, si din acelasi motiv:
+		# raza de momeala e 3D, dar 70 m acopera doua etaje de spirala.
+		if b.is_other_level(bidx, pos):
+			continue
 		return b.lookahead_point(bidx, ahead_m, 0.0, curve.bake_interval)
 	return Vector3.INF
 
@@ -10025,6 +10080,17 @@ func resolve_route(route: int, index: int, pos: Vector3) -> Vector2i:
 			var bidx := b.closest_index_global(pos)
 			if bidx == 0:
 				continue # inca inainte de despicare
+			# [b]Si la ACELASI ETAJ.[/b] `lateral_distance` e 2D prin proiect
+			# (o banda urca, deci cota difera de la un capat la altul), iar
+			# raza de comutare e 3D — dar 45 m de raza acopera doua etaje ale
+			# unei spirale. Rampa de serviciu a pasajului rotativ sta la y 39
+			# fix peste cheiul de la y 7, si masurat pe ProbeRace masinile de
+			# pe chei comutau pe ea: 2-3 repuneri pe cursa la frac 0.50, cu
+			# masina „pe o banda" aflata la 32 m deasupra ei. Memoria
+			# `pista-peste-pista` — de fiecare data cand pista trece peste ea
+			# insasi, testul care lipseste e cel vertical.
+			if b.is_other_level(bidx, pos):
+				continue
 			if b.lateral_distance(bidx, pos) + BRANCH_HYSTERESIS \
 					< routes[0].lateral_distance(index, pos):
 				return Vector2i(bi, bidx)

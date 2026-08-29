@@ -114,6 +114,24 @@ const MERGE_RUNOUT: float = 0.0
 ## parapetul — botul de beton dintre banda si rampa, ca in realitate.
 const GORE_MAX: float = 12.0
 
+## De la cati metri INAINTEA PORTII incepe pilotul sa mute linia.
+##
+## [b]Se masoara de la poarta, nu de la nod, si asta a fost chiar bugul.[/b]
+## Prima versiune copia cifra de la gheizere (34 m) si o masura fata de
+## `global_position` — dar la gheizere nodul E hazardul, pe cand aici nodul e
+## la mijlocul golului, iar linia de bariere sta cu `_lip_near() + service_lead`
+## (42 m masurati pe Track12) mai in amonte. Cu 46 m de la nod, pilotul incepea
+## sa se mute la 4 m de bariere, cu mutarea abia schitata de estompare: adica
+## exact blocajul pe care trebuia sa-l repare, doar cu cod in plus.
+##
+## 30 m e distanta pe care ocolul se desprinde de banda (`service_lead`), adica
+## fereastra in care schimbarea de banda chiar incape.
+const AI_REACH_M: float = 30.0
+
+## Grupul din care AI-ul isi ia pasajele, fara sa caute prin arbore.
+## Conventia de la `fireball_geysers`.
+const AI_GROUP: StringName = &"rotating_spans"
+
 enum State {
 	OPEN,           ## tronsonul continua pasajul
 	TURNING_SHUT,   ## se roteste spre inchis
@@ -406,6 +424,7 @@ var _gate_hold: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group(AI_GROUP)
 	_build_decks()
 	_build_service()
 	_build_span()
@@ -1428,3 +1447,56 @@ func direct_waypoints() -> Array[Vector3]:
 		var z := lerpf(z0, -z0, float(i) / float(n))
 		out.append(to_global(Vector3(0.0, deck_rise, z)))
 	return out
+
+
+# ------------------------------------------------------------ pentru AI
+
+## Pe ce parte se trece peste `ahead` secunde: 0 = pe axa (pasajul e deschis),
+## `service_side` = pe ocol (e inchis, sau se va fi inchis pana ajungem).
+##
+## [b]Exista din acelasi motiv ca `FireballGeyser.safe_side`, si costul lipsei
+## lui a fost masurat la fel.[/b] Cat timp modulul a plutit la 3 m deasupra
+## soselei (`deck_rise` de sonda ramas in pista), niciun pilot n-a dat vreodata
+## peste el, deci nimeni n-a observat ca AI-ul nu stie sa-l citeasca. Prima
+## rulare cu modulul CHIAR pe traseu a aratat ce inseamna: plutonul mergea pe
+## axa direct in linia de bariere si se opreau unii in altii — blocaje in serie
+## la frac 0.638-0.644, cu masini oprite pe axa (lat +/-0.4 m) la 3-5 m INAINTE
+## de poarta, adica exact in fata ei, fara sa fi incercat vreodata ocolul.
+## `gate_push` scoate O masina din bariere; nu poate desface un pluton de sase
+## care s-a proptit in ea.
+##
+## Raspunsul e despre momentul SOSIRII, nu despre acum: la 25 m/s, 46 m
+## inseamna ~1.8 s, iar ciclul e de 25 s cu rotatii de 4 s — deci intrebarea
+## „e deschis?" pusa acum poate avea alt raspuns cand ajungi. Se intreaba cu
+## `ahead` fix cum face pilotul la gheizere.
+##
+## Se raspunde „pe ocol" si cat tine ROTATIA, nu doar starea inchisa: un
+## tronson care tocmai a plecat din deschis nu mai e pod, e o placa oblica
+## peste gol.
+func ai_safe_side(ahead: float) -> float:
+	var t := fposmod(_time + ahead, period)
+	return 0.0 if _phase_of(t) == State.OPEN else signf(float(service_side))
+
+
+## Cat de lateral sta linia AI-ului cand raspunsul e „pe ocol", ca fractie din
+## semilatimea soselei (pozitiv spre `service_side`).
+##
+## Se DERIVA din geometria ocolului, nu se alege: tinta e axa rampei de
+## serviciu acolo unde ea se desprinde de banda directa (adica in dreptul
+## portii), fiindca acolo trebuie sa fii deja cand ajungi la linia de bariere.
+## Mai departe pe ocol pilotul urmeaza oricum soseaua — ce ii lipsea era exact
+## mutarea DINAINTEA portii.
+func ai_line_offset() -> float:
+	if service_offset <= 0.01 or road_half_width <= 0.0:
+		return 0.0
+	var c := _service_center_mag(_gate_z())
+	if is_inf(c):
+		return 0.0
+	return clampf(c / road_half_width, 0.0, 1.0)
+
+
+## Unde sta linia de bariere, in coordonate globale: reperul fata de care
+## masoara pilotul, nu originea nodului (care e la mijlocul golului, cu zeci
+## de metri mai in aval). Vezi `AI_REACH_M`.
+func ai_decision_point() -> Vector3:
+	return to_global(Vector3(0.0, deck_rise, _gate_z()))

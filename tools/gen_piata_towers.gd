@@ -81,8 +81,15 @@ func _ready() -> void:
 		var top: float = p.y + top_rel
 		var base: float = top - h
 		var pos: Vector3 = p + right * lat + Vector3.UP * (base - p.y)
-		# yaw: fata cu ferestre (Z) intoarsa spre axa drumului
-		var yaw := atan2(-right.x, -right.z)
+		# Yaw: fata cu ferestre (Z) intoarsa spre CAMERA, nu spre axa drumului.
+		# Camera sta cu 12.5 m in urma masinii, deci o piesa aliniata pe `right`
+		# isi arata COLTUL, si coltul lui tower_silhouette e flancul fara
+		# ferestre — exact placa intunecata vazuta in captura la frac 0.020.
+		var cam_eye: Vector3 = p - fwd * 12.5 + Vector3.UP * 10.0
+		var to_cam := (cam_eye - (p + right * lat))
+		to_cam.y = 0.0
+		to_cam = to_cam.normalized()
+		var yaw := atan2(-to_cam.x, -to_cam.z)
 		var b := Basis(Vector3.UP, yaw).scaled(Vector3(sc, sc, sc))
 		# Rezolv lateralul, nu-l ghicesc: impinge piesa in afara pana cand
 		# amprenta ROTITA reala (4 colturi ai bazei locale prin basis) are cel

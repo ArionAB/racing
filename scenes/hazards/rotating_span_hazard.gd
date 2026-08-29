@@ -1321,10 +1321,26 @@ func _deck_parapets(st: SurfaceTool, body: StaticBody3D, za: float, zb: float,
 		# INTOARCE in banda: acolo fereastra tine cat scurgerea manevrei.
 		var hi := win[1] + (MERGE_RUNOUT if sign_z < 0.0 else 0.0) 			if win.size() == 2 else 0.0
 		var in_window := win.size() == 2 and z_mid > win[0] and z_mid < hi
+		# [b]Si peste PANA PAVATA, unde parapetul n-are ce sa pazeasca.[/b]
+		# Fereastra de desprindere se inchide acolo unde ocolul s-a departat
+		# de banda, dar intre capatul ei si capatul penei mai raman metri in
+		# care pana e asfalt continuu de la sosea pana la ocol — si acolo
+		# parapetul creste FIX peste culoarul de traversare. Masurat pe
+		# pista: banda z 12-18 (frac 0.742-0.745) avea pana pavata la lat
+		# 7.5, un parapet de 0.6 m la lat 8.0 si ocolul de-abia la 8.5;
+		# ProbeRace a gasit acolo masini tarandu-se cu 1.7-3.7 m/s fara sa
+		# atinga nimic, adica frecandu-se de el.
+		#
+		# Pe pana parapetul nu pazeste nicio cadere: sub el e beton, nu gol.
+		var gore_w := _gore_window()
+		var inner_here := _service_inner_mag(sign_z * z_mid)
+		var on_gore := false
+		if gore_w.size() == 2 and not is_inf(inner_here):
+			on_gore = z_mid >= gore_w[0] and z_mid <= gore_w[1] and inner_here > hw
 		for edge_sign: float in [-1.0, 1.0]:
 			# Fereastra de desprindere se taie doar din marginea pe care
 			# chiar iese ocolul; cealalta ramane inchisa peste tot.
-			if in_window and is_equal_approx(edge_sign, side):
+			if (in_window or on_gore) and is_equal_approx(edge_sign, side):
 				continue
 			# Pe coloana, cotele vin din ea; `ya`/`yb` raman pentru rampele de
 			# racord ale sondei, care coboara la cota soselei-test.

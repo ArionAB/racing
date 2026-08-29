@@ -475,6 +475,24 @@ enum State {
 ## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota
 ## soselei, in coordonatele nodului. Goala = modul plan.
 var _spine: PackedVector2Array = PackedVector2Array()
+## Cat coboara axa laterala LOCALA a nodului pe fiecare metru, in lume.
+##
+## [b]Nodul e ROTIT in `.tscn`, si rotatia are si ruliu.[/b] Transformul lui
+## din `Track12.tscn` a fost asezat ca sa urmeze rampa: axa lui lunga are
+## tangajul soselei — corect — dar odata cu el axa LATERALA a iesit din
+## orizontala, cu `y = -0.0367`. Masurat: pe semilatimea de 7.2 m asta
+## inseamna 0.26 m, si pe latimea intreaga 0.53 m.
+##
+## Consecinta e ca `_at` putea sa emita o sectiune transversala perfect plana
+## in coordonate LOCALE (verificat: devers 0.000 pe toata latimea) si tot sa
+## iasa in lume un tablier inclinat cu 0.25-0.27 m — fiindca nodul inclina pe
+## urma tot ce e in el. Sonda de raycast masura lumea, formula masura localul,
+## si de aia cele doua cifre nu se potriveau.
+##
+## Se corecteaza aici, nu in `.tscn`: transformul din scena e cel care aseaza
+## modulul pe rampa (pozitie + tangaj + directie), si e reglat de mana. Ce
+## trebuie sa fie orizontal e SECTIUNEA, iar asta e treaba geometriei.
+var _lat_roll: float = 0.0
 ## Pasul si capatul din amonte al coloanei (m, z local).
 var _spine_step: float = 2.0
 var _spine_z0: float = 0.0
@@ -552,6 +570,9 @@ func _build_spine() -> void:
 	var route := track.route_at(follow_route_index)
 	if route == null or route.count() < 8:
 		return
+	# Ruliul propriu al nodului, citit o data odata cu coloana.
+	var bx := global_transform.basis.x
+	_lat_roll = bx.normalized().y
 	var n := route.count()
 	var here := route.closest_index_global(global_position)
 	# Sensul rutei fata de sensul modulului: modulul merge spre -Z local.
@@ -640,19 +661,33 @@ func _at(x: float, z: float) -> Vector3:
 	var dir := _spine_dir(z)
 	var lat := Vector3(-dir.z, 0.0, dir.x)
 	var p := Vector3(s.x, 0.0, z) + lat * x
-	# [b]Cota se citeste de la statia PUNCTULUI, nu de la cea de plecare.[/b]
-	# Pe o coloana curba, un punct impins cu `x` metri in lateral aluneca si
-	# de-a lungul drumului — cu atat mai mult cu cat `x` e mai mare. Ocolul
-	# iese 24 m in lateral, si masurat asa: cota lui venea de la statia
-	# nedeplasata si iesea cu pana la 0.64 m PESTE tablier. Consecinta se
-	# vedea in sonda transversala ca un prag de 0.98 m la frac 0.7345, offset
-	# +1 m — un zid in mijlocul benzii, in care masina chiar s-a oprit
-	# (13 -> 0.1 m/s in 1.5 s).
+	# [b]Cota se ia PERPENDICULAR pe drum, deci de la statia de plecare.[/b]
 	#
-	# `p.z` e chiar statia unde a ajuns punctul: coloana e parametrizata pe z
-	# local, deci proiectia e gratuita.
-	var s2 := _spine_at(p.z)
-	return Vector3(p.x, deck_rise + s2.y + _spine_lift(p.z), p.z)
+	# Versiunea dinainte recitea coloana la `p.z`, cu explicatia ca „p.z e chiar
+	# statia unde a ajuns punctul". Pe un modul DREPT asa e; pe unul asezat pe
+	# o curba e fals, si a fost chiar defectul principal al rundei trecute.
+	# Coloana e parametrizata pe z LOCAL, dar statiile ei sunt insirate de-a
+	# lungul DRUMULUI: cand drumul face un unghi `yaw` cu axa nodului, un punct
+	# impins lateral cu `x` isi muta `p.z` cu `lat.z * x` fara sa-si schimbe
+	# statia — buza din stanga ajungea sa citeasca cota de mai SUS pe rampa,
+	# cea din dreapta de mai jos.
+	#
+	# Rezultatul era un devers parazit de `x * lat.z * panta`: masurat 0.17-0.29
+	# m pe latimea de 14.4 m a modulului, pe o rampa de 4.5%. El e si buza de
+	# intrare — treapta masurata scadea liniar de la +0.25 m la lat -2.5 pana la
+	# +0.02 m la lat +2.5, adica exact acelasi devers rasturnat pe muchie.
+	#
+	# O sectiune transversala a unui drum e PERPENDICULARA pe axa lui: toate
+	# punctele de pe ea au aceeasi cota de axa. Deci cota vine de la `z`, statia
+	# de plecare, si abaterea laterala n-o mai atinge.
+	#
+	# (Ocolul, care iese 24 m in lateral, nu e afectat: el nu se construieste ca
+	# o sectiune transversala, ci prin `_at` la z-ul LUI — vezi `_build_service`,
+	# care esantioneaza propriul traseu statie cu statie.)
+	# Scade ruliul nodului, ca sectiunea sa iasa orizontala IN LUME (vezi
+	# `_lat_roll`): punctul e la `x` metri pe axa laterala locala, iar aceea
+	# coboara cu `_lat_roll` pe metru.
+	return Vector3(p.x, deck_rise + s.y + _spine_lift(z) - _lat_roll * x, p.z)
 
 
 ## Ridicarea tablierului la un z local: plina la mijloc, stinsa la capete.
@@ -1412,6 +1447,13 @@ func _lat_at(z: float) -> Vector3:
 ## tronsonul se roteste in jurul verticalei LUI, ca un pod rotitor adevarat pe
 ## o rampa inclinata — nu in jurul verticalei lumii, care l-ar face sa se
 ## infiga cu un colt in tablier cat se intoarce.
+## [b]Si ruliul nodului, din acelasi motiv ca la tablier.[/b] `Vector3.UP` de
+## aici e verticala LOCALA, iar nodul e rotit in `.tscn` cu axa laterala
+## coborata (`_lat_roll`). Tronsonul e o placa RIGIDA de 12 x 14 m: cu
+## verticala locala, el mostenea intreg ruliul si iesea cu 0.29 m peste
+## carosabil pe o buza si cu 0.49 m sub el pe cealalta — cele mai mari praguri
+## ramase dupa ce tablierul fusese indreptat. Verticala corecta e cea care face
+## placa orizontala IN LUME.
 func _span_rest_basis() -> Basis:
 	if _spine.is_empty():
 		return Basis.IDENTITY
@@ -1419,7 +1461,11 @@ func _span_rest_basis() -> Basis:
 	var a := _at(0.0, lip)
 	var b := _at(0.0, -lip)
 	var fwd := (b - a).normalized()
-	return Basis.looking_at(fwd, Vector3.UP)
+	# Verticala lumii, exprimata in coordonatele nodului.
+	var up := global_transform.basis.inverse() * Vector3.UP
+	if up.length_squared() < 1e-6 or absf(up.normalized().dot(fwd)) > 0.999:
+		up = Vector3.UP
+	return Basis.looking_at(fwd, up.normalized())
 
 
 ## O placa: mesh pe atlas + colizor convex cu talpa sub ea.
@@ -1450,12 +1496,25 @@ func _build_span() -> void:
 	shape.shape = box
 	shape.position = Vector3(0.0, -DECK_THICK * 0.5, 0.0)
 	_span.add_child(shape)
+	# [b]Bordurile stau pe MARGINEA carosabilului, nu la cota din GLB.[/b]
+	# `SPAN_KERB_X` e semilatimea MODELULUI (3.25 m). Cand pista cere un pasaj
+	# mai lat decat modelul — Track12 cere `road_half_width` 7.2 — bordurile
+	# ramaneau la 3.25 si ajungeau doua praguri de 0.34 m FIX IN BANDA. Sonda
+	# transversala le-a gasit exact asa: tronsonul plan la 40.815 pe toata
+	# latimea, cu doua tepe la lat -3.0 si +3.5, si masina calca in ele la
+	# fiecare trecere. Erau si ultimul prag ramas peste acceptare (0.41 m
+	# masurat pe raza, dupa ce tablierul fusese indreptat).
+	#
+	# Rolul lor e sa fie ultimul lucru dintre masina si gol, deci locul lor e
+	# buza — `road_half_width` — nu o cota mostenita din model.
+	var kerb_x := maxf(road_half_width - SPAN_KERB_WIDTH * 0.5,
+		SPAN_KERB_X * model_scale)
 	for kerb_sign: float in [-1.0, 1.0]:
 		var kerb := CollisionShape3D.new()
 		var kbox := BoxShape3D.new()
 		kbox.size = Vector3(SPAN_KERB_WIDTH, SPAN_KERB_HEIGHT, span_length) 			* model_scale
 		kerb.shape = kbox
-		kerb.position = Vector3(kerb_sign * SPAN_KERB_X * model_scale,
+		kerb.position = Vector3(kerb_sign * kerb_x,
 			SPAN_KERB_HEIGHT * 0.5 * model_scale, 0.0)
 		_span.add_child(kerb)
 	if median_collision:

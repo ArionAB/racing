@@ -131,6 +131,14 @@ const DASH_OFF: float = 4.0
 ## neted; peste doi, imbinarile dintre placi devin praguri (memoria
 ## `suprafete-din-placi-plane`).
 const SERVICE_STEP: float = 1.2
+## Cati metri de racord DREPT, pe axa soselei, primeste ruta ocolului la
+## fiecare capat (vezi `detour_route_spec`).
+##
+## Nu e o marja: axa ocolului incepe la `road_half_width * 0.45` de mijlocul
+## soselei, deci intre ultimul punct de pe axa si primul punct de ocol e un
+## salt lateral. Pe 12 m saltul de 3.2 m iese un unghi de racord de 15°, cat
+## o schimbare de banda normala.
+const DETOUR_TAIL: float = 12.0
 ## Lampile de lucru ale modulului: cat de sus, la ce interval, cat de departe
 ## bat si cu ce culoare. Aceleasi cifre ca felinarele nodului din `.tscn`
 ## (energie 3.6, raza 19), ca modulul sa nu se citeasca drept alta lume.
@@ -536,31 +544,33 @@ enum State {
 ## comutatorul asta aprins il vede: golul e gol pe toata amprenta, iar profilul
 ## pe axa in stare deschisa ramane fara prag (0.084 m, plafon 0.15).
 ##
-## [b]Si de ce e STINS pe Track12 deocamdata.[/b] Cu gaura reala, pilotul nu
-## poate lua ocolul. Masurat cu ProbeRace pe pista reala, 150 s, doua seed-uri:
-## de la 0 repuneri se trece la 1-2 pe seed, toate la frac 0.740-0.748, cu
-## masinile ingramadite in gura devierii — plus 3.2-3.5% offroad in loc de 2.1%.
-## Cauza e una singura si e in amonte de nodul asta: [b]rampa de serviciu nu e
-## o ruta[/b] ([TrackRoute]). Pentru codul de progres ea e teren de langa drum,
-## exact ce descrie documentatia lui `TrackRoute`: „masina de pe el mergea la
-## 45% viteza, isi pierdea checkpoint-ul, iar AI-ul se credea blocat si dadea
-## cu spatele". Iar linia pilotului (`ai_line_offset`) e o FRACTIE din
-## semilatimea soselei, plafonata la `AiController.LINE_MAX` (0.8, adica 5.6 m
-## aici): cu ea nu se poate exprima un ocol care iese 24 m lateral. Doua
-## incercari de a ridica plafonul au fost masurate si aruncate — una a dus
-## repunerile la 7, cealalta la 12 cu 22.7% offroad, fiindca tinta iesea de pe
-## orice asfalt.
+## [b]De ce a stat STINS pana in runda 7, si ce l-a aprins.[/b] Cu gaura reala
+## dar fara nimic altceva, pilotul nu putea lua ocolul: ProbeRace pe pista
+## reala gasea masinile oprite pe AXA (lat 1.1-2.6 m) la frac 0.744, adica in
+## gura golului. Cauza era in amonte de nodul asta — [b]rampa de serviciu nu
+## era o ruta[/b] ([TrackRoute]). Pentru codul de progres era teren de langa
+## drum, exact ce descrie documentatia lui `TrackRoute`: „45% viteza,
+## checkpoint pierdut, AI care se crede blocat". Iar linia pilotului
+## (`ai_line_offset`) e o FRACTIE din semilatimea soselei, plafonata la
+## `AiController.LINE_MAX` (0.8, adica 5.8 m aici): cu ea nu se poate exprima
+## un ocol care iese 24 m lateral. Doua incercari de a ridica plafonul au fost
+## masurate si aruncate (7 si 12 repuneri).
 ##
-## Deci reparatia care ramane e sa se declare ocolul ca ruta secundara, cu
-## `entry_frac`/`exit_frac` in dreptul buzelor — si atunci si pilotul, si
-## progresul, si penalizarea de offroad il vad ca pe drum. Nu incape in runda
-## asta: rutele se coc in `Track._build_routes()`, care ruleaza inaintea
-## modulului (el se construieste amanat, ca sa aiba rutele coapte de citit).
+## Reparatia e chiar cea numita atunci, si acum e facuta: ocolul se declara ca
+## ruta secundara — vezi `detour_route_spec` — cu `entry`/`exit` pe indecsi, si
+## atunci pilotul, progresul si penalizarea de offroad il vad toate ca pe drum.
+## Cele doua piese care lipseau ca sa incapa au fost gasite pe drum si sunt
+## reparatii in sine: `_spine_dir` citea directia pe o fereastra mai ingusta
+## decat pasul coloanei (deci rampa se construia din placi suprapuse), iar
+## `Track.resolve_route` nu avea test de ETAJ (deci masinile de pe cheiul de la
+## y 7 comutau pe rampa de la y 39).
 ##
-## Pana atunci: mecanismul e construit, masurat si pazit de sonda, dar nu e
-## aprins pe pista — un hazard care costa repuneri e mai rau decat unul care
-## costa doar secunde.
-@export var cut_road_hole: bool = false
+## Masurat dupa, ProbeRace 150 s pe sase seed-uri: zero incidente in fereastra
+## nodului (frac 0.72-0.79) pe toate sase, si repuneri {0,2,1,0,0,0} fata de
+## {0,0,1,0,0,0} cu feature-ul stins in acelasi worktree — aceeasi distributie,
+## si niciuna dintre ele la pasaj. Contractul de pedeapsa ramane in fereastra
+## brief-ului: +3.20 / +3.47 / +3.82 s la 16 / 24 / 30 m/s.
+@export var cut_road_hole: bool = true
 
 ## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota
 ## soselei, in coordonatele nodului. Goala = modul plan.
@@ -661,11 +671,27 @@ func _build_module() -> void:
 ## `pista-peste-pista`). Se pleaca de la indexul nodului si se merge in sus si
 ## in jos pe lista, exact ca masina.
 func _build_spine() -> void:
+	# Poate fi deja ridicata: `detour_route_spec` o cere inaintea constructiei,
+	# ca sa poata calcula axa ocolului. E aceeasi coloana — ruta 0 nu se mai
+	# schimba intre timp — deci a doua oara nu se recalculeaza.
+	if not _spine.is_empty():
+		return
 	_spine = PackedVector2Array()
 	if not follow_route or Engine.is_editor_hint():
 		return
 	var track := _find_track()
 	if track == null:
+		return
+	_build_spine_from(track)
+
+
+## Coloana, cu pista data din afara: `detour_route_spec` o cheama in timpul
+## coacerii rutelor, cand nodul inca n-are de unde s-o caute singur.
+func _build_spine_from(track: Track) -> void:
+	if not _spine.is_empty():
+		return
+	_spine = PackedVector2Array()
+	if track == null or not follow_route or Engine.is_editor_hint():
 		return
 	var route := track.route_at(follow_route_index)
 	if route == null or route.count() < 8:
@@ -698,7 +724,48 @@ func _build_spine() -> void:
 	var out := PackedVector2Array()
 	for v in samples:
 		out.append(v)
-	_spine = out
+	_spine = _smoothed(out)
+
+
+## Cate treceri de netezire primeste coloana (vezi `_smoothed`).
+const SPINE_SMOOTH_PASSES: int = 6
+
+
+## Coloana, fara zimtii de ESANTIONARE.
+##
+## [b]Ce se netezeste nu e drumul, e citirea lui.[/b] Coloana ia statii din 2 in
+## 2 metri dintr-o ruta coapta la 3 m, interpoland liniar intre punctele
+## coapte — adica esantioneaza o functie liniara pe portiuni cu un pas care nu
+## e multiplu al ei. Iese un ALIAS: panta laterala masurata a coloanei
+## oscileaza cu perioada de ~8 m intre +0.38 si +0.66, desi soseaua adevarata
+## coteste lin. Cifrele sunt masurate pe Track12, in dreptul nodului.
+##
+## Pe axa nu se vedea: acolo `x` = 0 in `_at`, deci directia nu muta punctul.
+## Rampa de serviciu iese insa 24 m in lateral, si acolo fiecare zimt de panta
+## devine un zimt de POZITIE — pasii de-a lungul rampei ieseau intre 0.13 si
+## 2.94 m in loc de 1.0, iar inainte de largirea ferestrei din `_spine_dir`
+## chiar mergeau si inapoi. Carosabilul rampei se construieste din punctele
+## astea, deci zimtii nu erau o problema de citire: erau placi suprapuse pe
+## drum si o linie pe care pilotul intoarce volanul.
+##
+## Trei treceri de binomial (1-2-1) sterg exact perioada aia si lasa curbura
+## reala neatinsa — media nu se muta, fiindca nucleul e simetric si normalizat.
+## Capetele raman ancorate: acolo coloana atinge soseaua, si o deplasare acolo
+## ar fi chiar treapta pe care modulul o evita cu `SPINE_LIFT_FADE`.
+func _smoothed(src: PackedVector2Array) -> PackedVector2Array:
+	var n := src.size()
+	if n < 5:
+		return src
+	var cur := src
+	for _pass in SPINE_SMOOTH_PASSES:
+		var nxt := PackedVector2Array()
+		nxt.resize(n)
+		nxt[0] = cur[0]
+		nxt[n - 1] = cur[n - 1]
+		for i in range(1, n - 1):
+			nxt[i] = (cur[i - 1] + cur[i] * 2.0 + cur[i + 1]) * 0.25
+		cur = nxt
+	return cur
 
 
 ## Pista de sub nod. URCA prin arbore, nu `get_parent()`: modulul poate sta
@@ -739,8 +806,28 @@ func _spine_at(z: float) -> Vector2:
 
 ## Directia coloanei la un z local, in planul XZ al nodului (unitara).
 ## Pe modulul plan e chiar -Z.
+## [b]Fereastra e de UN PAS DE COLOANA, nu de o jumatate de metru.[/b]
+##
+## Coloana e liniara pe portiuni, cu statii din 2 in 2 metri (`_spine_step`).
+## O diferenta finita luata pe +/-0.5 m cade aproape mereu INTREAGA intr-un
+## singur segment, deci raspunde cu panta ACELUI segment — si sare la alta
+## valoare de indata ce fereastra trece peste o statie. Adica directia iesea o
+## functie in TREPTE, cu un salt la fiecare 2 m de drum.
+##
+## Pe axa asta nu se vedea (acolo `x` = 0 si directia nu muta punctul), dar
+## rampa de serviciu iese 24 m in lateral, iar acolo un salt de directie devine
+## un salt de POZITIE: masurat pe `_at(24, z)` cu pasul de 1 m, pasii ieseau
+## intre 0.46 si 4.14 m, si de sase ori pe lungimea modulului punctul mergea
+## INAPOI (z de la -28.56 la -29.14). Adica exact „placi care se pliaza peste
+## ele insele" din memoria `suprafete-din-placi-plane` — carosabilul rampei se
+## construia din bucati suprapuse, iar o ruta trasa pe punctele alea facea
+## pilotul sa intoarca volanul.
+##
+## Cu fereastra egala cu pasul coloanei, diferenta finita traverseaza mereu
+## exact o statie si iese continua: panta la mijlocul unui segment e media
+## celor doua pante vecine, nu una din ele.
 func _spine_dir(z: float) -> Vector3:
-	var d := 0.5
+	var d := _spine_step
 	var a := _spine_at(z + d)
 	var b := _spine_at(z - d)
 	var v := Vector3(b.x - a.x, 0.0, -2.0 * d)
@@ -2342,6 +2429,112 @@ func service_waypoints() -> Array[Vector3]:
 	for p in _service_points:
 		out.append(to_global(p))
 	return out
+
+
+## ---------------------------------------------- ocolul, ca RUTA a pistei
+
+## Axa ocolului in coordonate GLOBALE, calculata INAINTE ca modulul sa fie
+## construit — plus indecsii de pe ruta principala unde se desprinde si unde
+## revine.
+##
+## [b]De ce exista, si de ce nu se poate lua din `service_waypoints()`.[/b]
+## Cat timp ocolul a fost doar geometrie, codul de progres al jocului nu stia
+## ca e drum: pentru el era teren de langa sosea, exact cazul descris in
+## antetul lui [TrackRoute] — 45% viteza, checkpoint pierdut, pilot care se
+## crede blocat. Masurat pe Track12 cu gaura taiata si fara ruta: masinile se
+## opreau pe AXA (lat 1.1-2.6 m) la frac 0.744, adica in gura golului, fiindca
+## linia pilotului (`ai_line_offset`) e o fractie din semilatimea soselei si
+## nu poate exprima un ocol la 24 m. Cu ocolul declarat ca ruta, pilotul il
+## urmeaza ca pe orice banda, `Car.resolve_route` ii da progres, iar offroad-ul
+## nu-l mai pedepseste.
+##
+## Ruta trebuie insa sa existe cand se coc rutele (`Track._build_routes`), iar
+## atunci modulul nu e inca construit: el se construieste amanat, tocmai ca sa
+## aiba rutele coapte de citit. De aia metoda asta isi ridica ea coloana (din
+## ruta 0, care e deja acolo) si isi reface singura profilul ocolului, cu
+## exact aceleasi formule ca `_build_service`. Coloana ramane pusa deoparte,
+## deci `_build_module` n-o mai recalculeaza a doua oara.
+##
+## Intoarce {} daca nodul nu cere ocol (fara `cut_road_hole` starea inchisa nu
+## trimite pe nimeni nicaieri, deci nici ruta n-are ce cauta acolo).
+func detour_route_spec(track: Track) -> Dictionary:
+	if not cut_road_hole or not follow_route or service_offset <= 0.01:
+		return {}
+	if deck_rise > 0.01:
+		return {}
+	_build_spine_from(track)
+	if _spine.is_empty():
+		return {}
+	var route := track.route_at(follow_route_index)
+	if route == null or route.count() < 8:
+		return {}
+	var side := signf(float(service_side))
+	var z_in := _lip_near() + service_lead
+	var z_out := -z_in
+	# [b]Capetele sunt ALE NOASTRE[/b] (`own_ends` in spec): banda pleaca de pe
+	# AXA soselei si se intoarce tot pe ea, cu `DETOUR_TAIL` metri de racord
+	# drept la fiecare capat. `_branch_end` nu poate face asta — el aseaza
+	# capatul unei benzi `elevated` pe MARGINEA soselei, pe partea din care vine
+	# banda, si masurat asa iesea o cotitura de 7 m urmata de patru puncte care
+	# mergeau inapoi, in aer.
+	#
+	# Racordul drept exista fiindca ocolul insusi nu pleaca din axa: la u = 0
+	# axa lui e deja la `road_half_width * 0.45` (3.2 m aici) de mijlocul
+	# soselei — acolo incepe pana pavata. Fara racord, primul segment al benzii
+	# ar sari lateral 3.2 m intr-un singur pas de 1.2 m, adica un unghi de 70°
+	# pe care niciun pilot nu-l poate lua.
+	var n := maxi(int(ceil((z_in - z_out) / SERVICE_STEP)), 4)
+	var pts: Array[Vector3] = []
+	pts.append(to_global(_at(0.0, z_in + DETOUR_TAIL)))
+	for i in n + 1:
+		var u := float(i) / float(n)
+		var z := lerpf(z_in, z_out, u)
+		var mag := road_half_width * 0.45 + service_offset * _profile(u)
+		pts.append(to_global(_at(side * mag, z)))
+	pts.append(to_global(_at(0.0, z_out - DETOUR_TAIL)))
+	# [b]Capetele se DECLARA pe indecsi, nu se deduc.[/b] `_make_branch` deduce
+	# capatul nedeclarat cu `_closest_baked_index`, care cauta in 2D pe TOATA
+	# bucla — iar nodul asta sta pe o spirala care trece de patru ori peste
+	# aceeasi amprenta xz (memoria `pista-peste-pista`). Deducerea ar putea
+	# agata ocolul de etajul de dedesubt. Aici indecsii ies din aceeasi
+	# plimbare pe lista pe care o face si coloana, deci raman pe etajul corect.
+	var here := route.closest_index_global(global_position)
+	var fwd_local := -global_transform.basis.z
+	var route_fwd := route.baked[(here + 1) % route.count()] - route.baked[here]
+	var forward_sign := 1.0 if route_fwd.dot(fwd_local) >= 0.0 else -1.0
+	return {
+		"points": pts,
+		"own_ends": true,
+		"entry": route.frac_at(
+			_route_index_at(route, here, forward_sign, -(z_in + DETOUR_TAIL))),
+		"exit": route.frac_at(
+			_route_index_at(route, here, forward_sign, -(z_out - DETOUR_TAIL))),
+		"half_width": service_width * 0.5,
+		"label": "ocol " + name,
+		# Suprafata o pune modulul (`ServiceRoad`), nu pista: banda are deja
+		# carosabil, marcaje si parapeti proprii, iar o a doua foaie peste ei
+		# ar fi z-fighting pe toata lungimea.
+		"no_surface": true,
+		# Terenul n-o urmareste: ocolul iese in consola de pe un pasaj inaltat,
+		# iar samplerul ar ridica pamantul pana la el si ar ingropa etajele de
+		# dedesubt ale nodului.
+		"elevated": true,
+		# Nu e o scurtatura, e o PEDEAPSA: pilotul n-are voie sa fie atras spre
+		# ea (`Track.branch_lure`) cat pasajul e deschis. Cine o ia, o ia
+		# fiindca `_span_line` l-a mutat pe culoarul liber. Vezi
+		# `TrackRoute.detour`.
+		"detour": true,
+	}
+
+
+## Indexul de pe ruta aflat la `along` metri IN FATA fata de indexul de plecare.
+## Gemenele lui `_route_point_at`, pentru cand ce trebuie e statia, nu punctul.
+func _route_index_at(route: TrackRoute, from_index: int, forward_sign: float,
+		along: float) -> int:
+	var n := route.count()
+	var spacing := route.length() / float(maxi(n, 1))
+	var steps := int(round(along * forward_sign / maxf(spacing, 0.001)))
+	return ((from_index + steps) % n + n) % n
 
 
 ## Axa benzii directe, in coordonate globale: de la desprinderea ocolului,

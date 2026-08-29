@@ -497,6 +497,13 @@ var _lat_roll: float = 0.0
 var _spine_step: float = 2.0
 var _spine_z0: float = 0.0
 
+## Unealta de suprafata pentru CAROSABILUL ocolului (vezi `_emit_road`).
+var _service_road_st: SurfaceTool = null
+## Idem, pentru tablier.
+var _deck_road_st: SurfaceTool = null
+## Flancurile si talpa placilor de carosabil: raman pe atlas.
+var _skirt_st: SurfaceTool = null
+
 var _span: AnimatableBody3D
 var _gate: StaticBody3D
 var _gate_shape: CollisionShape3D
@@ -1042,6 +1049,12 @@ func _gate_z() -> float:
 func _build_decks() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# A doua unealta, pentru SUPRAFATA DE RULARE. Vezi `_road_material`:
+	# carosabilul poarta materialul soselei, nu pe cel al lumii.
+	_deck_road_st = SurfaceTool.new()
+	_deck_road_st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_skirt_st = st
+	var rd := _deck_road_st
 	var body := StaticBody3D.new()
 	body.name = "Deck"
 	add_child(body)
@@ -1050,15 +1063,18 @@ func _build_decks() -> void:
 	for sign_z: float in [1.0, -1.0]:
 		var z0 := sign_z * lip
 		var z1 := sign_z * (lip + deck_run)
-		_deck_strip(st, body, hw, z0, z1)
+		_deck_strip(rd, body, hw, z0, z1)
 		_deck_parapets(st, body, absf(z0), absf(z1), sign_z, deck_rise, deck_rise)
 		if deck_rise <= 0.01:
 			continue
 		var z2 := sign_z * (lip + deck_run + ramp_run)
-		_slab(st, body, Vector3(-hw, deck_rise, z1), Vector3(hw, deck_rise, z1),
+		_slab(rd, body, Vector3(-hw, deck_rise, z1), Vector3(hw, deck_rise, z1),
 			Vector3(hw, 0.0, z2), Vector3(-hw, 0.0, z2))
 		_deck_parapets(st, body, absf(z1), absf(z2), sign_z, deck_rise, 0.0)
 	_deck_markings(st)
+	var road_mi := _emit_road(rd, "DeckRoad")
+	if road_mi != null:
+		body.add_child(road_mi)
 	var mi := PaletteBox.emit(st, "DeckMesh")
 	if mi != null:
 		body.add_child(mi)
@@ -1174,6 +1190,9 @@ func _build_service() -> void:
 	add_child(body)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_service_road_st = SurfaceTool.new()
+	_service_road_st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_skirt_st = st
 	var n := maxi(int(ceil((z_in - z_out) / SERVICE_STEP)), 4)
 	var pts := PackedVector3Array()
 	# [b]Departarea de axa se TINE MINTE, nu se reciteste din punct.[/b] Pe
@@ -1215,8 +1234,8 @@ func _build_service() -> void:
 		if dir.length_squared() < 1e-6:
 			continue
 		var lat := Vector3(-dir.z, 0.0, dir.x).normalized() * half_w
-		_slab(st, body, a - lat, a + lat, b + lat, b - lat, service_slot,
-			i == 0 or i == n - 1)
+		_slab(_service_road_st, body, a - lat, a + lat, b + lat, b - lat,
+			service_slot, i == 0 or i == n - 1)
 		var mag_a := mags[i]
 		var mag_b := mags[i + 1]
 		var za := _service_zs[i]
@@ -1261,6 +1280,9 @@ func _build_service() -> void:
 					continue
 			_parapet(st, body, ea, eb)
 	_gore_nose(st, body, gore, edge)
+	var road_mi := _emit_road(_service_road_st, "ServiceRoad")
+	if road_mi != null:
+		body.add_child(road_mi)
 	var mi := PaletteBox.emit(st, "ServiceMesh")
 	if mi != null:
 		# Cu 2 cm sub pasaj: capetele ocolului se suprapun peste carosabil, iar
@@ -1468,11 +1490,87 @@ func _span_rest_basis() -> Basis:
 	return Basis.looking_at(fwd, up.normalized())
 
 
+## Emite o suprafata de RULARE cu materialul soselei, nu cu cel al lumii.
+##
+## [b]Asta e reparatia pentru „nu se citeste ca drum".[/b] `PaletteBox.emit`
+## pune `Palette.world_material()` — triplanarul LUMII, adica piatra. Pe
+## captura de la volan tablierul iesea negru si ondulat langa o sosea neteda:
+## la 0.745 dezvoltatorul vedea sosea, apoi o pana aproape neagra, si o citea
+## ca gaura in carosabil. Runda trecuta a diagnosticat gresit (a crezut ca
+## modulul e cel LUMINOS) si a propus mai multa lumina — pe suprafata care nu
+## avea nevoie de ea. Cauza nu era nici lumina, nici slotul: era TEXTURA.
+##
+## Materialul vine de la pista, deci tablierul e literalmente aceeasi suprafata
+## ca soseaua de dinaintea lui. Si nu adauga niciun material la garda: cache-ul
+## din `Track._flat_material` intoarce acelasi obiect (vezi `Track.road_material`).
+##
+## Fara pista deasupra (sonda, cu soseaua ei sintetica) se cade inapoi pe
+## atlas, ca modulul sa arate la fel ca pana acum acolo.
+## Tiparul texturii de sosea: 3.5 m pe dala de micro, 0.078 din ea pe macro.
+## Aceleasi cifre ca `Track._build_road` — daca ar fi altele, imbinarea dintre
+## sosea si modul s-ar vedea ca o schimbare de scara.
+const ROAD_TILE: float = 3.5
+const ROAD_MACRO_TILE: float = 0.078
+
+
+## O fata de CAROSABIL: patru colturi, cu UV in metri si UV2 pentru macro.
+##
+## [b]UV2 nu e un detaliu, e chiar de ce iesea negru.[/b] Materialul soselei
+## inmulteste peste albedo un `detail_albedo` asezat pe [b]UV2[/b]
+## (`DETAIL_UV_2`, blend MUL). Un mesh care nu emite UV2 le lasa pe toate in
+## (0,0): toata suprafata inmulteste cu UN SINGUR texel din coltul macro-ului,
+## si acolo el e aproape negru. Masurat pe captura: tablier 0.009 fata de 0.133
+## pe sosea — de 14 ori mai inchis, cu acelasi material, aceleasi normale
+## (204 fete in sus) si mai multa lumina decat are soseaua (26 vs 0 unitati de
+## omni). Nu era nici lumina, nici slot, nici normale: era UV2 lipsa.
+func _road_face(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3,
+		d: Vector3) -> void:
+	var quad := [a, b, c, d]
+	var n := (b - a).cross(c - a)
+	if n.length_squared() < 1e-9:
+		return
+	n = n.normalized()
+	if n.y < 0.0:
+		n = -n
+		quad = [d, c, b, a]
+	for tri: Array in [[0, 1, 2], [0, 2, 3]]:
+		for k: int in tri:
+			var v: Vector3 = quad[k]
+			# UV in METRI de lume, ca dala sa aiba aceeasi scara ca pe sosea si
+			# sa nu se roteasca odata cu modulul.
+			var uv := Vector2(v.x, v.z) / ROAD_TILE
+			st.set_normal(n)
+			st.set_uv(uv)
+			st.set_uv2(uv * ROAD_MACRO_TILE)
+			st.set_color(Color.WHITE)
+			st.add_vertex(v)
+
+
+func _emit_road(st: SurfaceTool, node_name: String) -> MeshInstance3D:
+	var mi := PaletteBox.emit(st, node_name)
+	if mi == null:
+		return null
+	var track := _find_track()
+	if track != null and track.has_method("road_material"):
+		var mat: Material = track.call("road_material")
+		if mat != null:
+			mi.material_override = mat
+	return mi
+
+
 ## O placa: mesh pe atlas + colizor convex cu talpa sub ea.
 func _slab(st: SurfaceTool, body: StaticBody3D, a: Vector3, b: Vector3,
 		c: Vector3, d: Vector3, slot: int = -1, caps: bool = true) -> void:
-	PaletteBox.quad_slab(st, a, b, c, d, DECK_THICK,
-		road_slot if slot < 0 else slot, caps)
+	if st == _deck_road_st or st == _service_road_st:
+		# Suprafata de rulare: fata de sus pe materialul soselei (cu UV2), iar
+		# flancurile si talpa raman pe atlas, unde erau — sunt beton de pod,
+		# nu carosabil.
+		_road_face(st, a, b, c, d)
+		PaletteBox.quad_slab(_skirt_st, a, b, c, d, DECK_THICK,
+			road_slot if slot < 0 else slot, caps, false)
+	else:
+		PaletteBox.quad_slab(st, a, b, c, d, DECK_THICK,
+			road_slot if slot < 0 else slot, caps)
 	var shape := CollisionShape3D.new()
 	var hull := ConvexPolygonShape3D.new()
 	hull.points = PackedVector3Array([a, b, c, d,

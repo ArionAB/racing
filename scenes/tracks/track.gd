@@ -7532,6 +7532,50 @@ func _build_flyoff_net(idx: int) -> void:
 ## apeluri. Doua mesh-uri de aceeasi culoare = acelasi material = un draw call
 ## in loc de doua. De aceea variatiile aleatoare de nuanta sunt CUANTIFICATE in
 ## cateva trepte peste tot: o nuanta continua per instanta ar face cache-ul inutil.
+## Materialul CAROSABILULUI, pentru suprafetele de condus construite de
+## hazarde (pasajul rotativ isi face singur tablierul si ocolul).
+##
+## [b]De ce exista.[/b] Un hazard care emite prin `PaletteBox` primea
+## `Palette.world_material()` — materialul triplanar al LUMII, adica piatra.
+## Pe Chongqing asta se vedea exact asa cum a raportat dezvoltatorul: tablierul
+## pasajului iesea negru si ondulat langa o sosea neteda albastru-gri, deci se
+## citea ca o gaura in carosabil, nu ca drum. Nicio schimbare de SLOT nu putea
+## sa repare asta: slotul da culoarea, dar tiparul de suprafata venea din alta
+## textura.
+##
+## [b]Nu costa un material in plus[/b] — si asta e conditia ca sa fie voie.
+## `_flat_material` e cache-uit pe (culoare, texturi, finisaj), iar cererea de
+## aici trece exact aceleasi valori ca soseaua: se intoarce ACELASI obiect.
+## Garda numara materiale, si numarul nu se misca.
+func road_material() -> Material:
+	var base := ROAD_COLOR
+	var macro_mean := ASPHALT_MACRO_MEAN
+	if road_surface == "snow":
+		base = SNOW_ROAD_COLOR
+		macro_mean = SNOW_MACRO_MEAN
+	elif road_is_loose():
+		base = dirt_road_color()
+		macro_mean = SAND_MACRO_MEAN
+	var color := Color(base.r / macro_mean, base.g / macro_mean,
+		base.b / macro_mean)
+	var micro := "res://assets/textures/surface_asphalt.png"
+	var macro := "res://assets/textures/surface_asphalt_macro.png"
+	var rough := 0.82
+	var spec := 0.3
+	if road_surface == "snow":
+		micro = "res://assets/textures/surface_snow.png"
+		macro = "res://assets/textures/surface_snow_macro.png"
+		rough = 1.0
+		spec = 0.0
+	elif road_is_loose():
+		micro = "res://assets/textures/surface_sand.png"
+		macro = "res://assets/textures/surface_sand_macro.png"
+		rough = 1.0
+		spec = 0.0
+	return _flat_material(color, _tex(micro), rough, spec,
+		BaseMaterial3D.CULL_BACK, _tex(macro))
+
+
 func _flat_material(color: Color, texture: Texture2D = null,
 		roughness: float = 1.0, specular: float = 0.5,
 		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,

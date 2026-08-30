@@ -19,3 +19,8 @@ __pycache__/
 # tine in afara lotului de assets: nu sunt modele, sunt capturi pentru PR-uri.
 assets/models/_*.glb
 tools/tmp/
+
+# Plansele si decupajele rundelor de critica: unelte de sesiune, nu sursa.
+crop_*.png
+sheet_*.png
+sheet_*.key

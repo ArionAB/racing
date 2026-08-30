@@ -78,6 +78,23 @@ far_rise_m = 1.2
 band_slots = Array[int]([23, 10, 27, 23, 10, 27, 4, 2])
 cap_slots = Array[int]([23, 10, 23, 27])
 
+[node name="TaieturaCornisei" type="Marker3D" parent="Faleze"]
+script = ExtResource("15_cliffface")
+frac_start = 0.322
+frac_end = 0.372
+side = -1.0
+far_wall = true
+far_bank = true
+far_offset_m = 9.0
+far_eye_rise_m = 6.0
+far_over_eye_m = 3.0
+far_depth_m = 14.0
+far_step_m = 6.0
+far_bands = 8
+far_rise_m = 1.2
+band_slots = Array[int]([23, 10, 27, 23, 10, 27, 4, 2])
+cap_slots = Array[int]([23, 10, 23, 27])
+
 [node name="Peaks" type="Node3D" parent="."]
 
 [node name="MasivulDeTuf" type="Marker3D" parent="Peaks"]
@@ -133,6 +150,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 378, 68, -252)
 gizmo_extents = 105
 script = ExtResource("2_peak")
 radius_m = 105
+
+[node name="MasaCornisei" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 283, 62, -163)
+gizmo_extents = 86
+script = ExtResource("2_peak")
+radius_m = 86
 
 [node name="StancaGoala" type="Marker3D" parent="Peaks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -328.800, 62, -2.200)

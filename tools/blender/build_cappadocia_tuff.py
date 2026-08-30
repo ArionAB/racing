@@ -33,8 +33,9 @@ Silueta ramane citibila de la 40 m — asta nu s-a schimbat — dar acum e citib
 ca PIESE DIFERITE, care e tot ce cerea critica.
 
 Buget: brief §6 cere `chimney_*` sub 600 tri fiecare, fiindca sunt ~40 pe
-pista. `segments=9` + 7-8 inele de profil intra fix: 9*7*2 = 126 tri corp +
-palarie. Ferestrele (doar pe `chimney_d`) sunt gauri INFUNDATE (cutii intrate
+pista. Inelele s-au REDISTRIBUIT, nu inmultit: 7 de baza (erau 9) plus trei
+indesate in zona poalei, acolo unde muchia dintre crem si rugina are nevoie de
+ele. Sus, unde profilul e aproape drept, inelele dese nu descriau nimic. Ferestrele (doar pe `chimney_d`) sunt gauri INFUNDATE (cutii intrate
 in corp cu slot intunecat), nu bool-uri — o gaura reala ar cere ca interiorul
 sa fie modelat si ar dubla costul pentru ceva ce se vede de la 15 m ca o pata
 intunecata. Vezi memoria `decor-manual-din-cod`: gaura pictata bate gaura
@@ -93,7 +94,23 @@ FLUTES = 13               # segmente pe circumferinta = canelurile de eroziune
 DOOR_WOOD = WOOD
 
 
-def _profile(kind, height, r_base, r_neck, seed, steps=9):
+def _r_at(profile, z):
+    """Raza profilului la cota z (interpolare liniara intre inele).
+
+    Exista fiindca profilul nu mai e analitic: e o familie de chei interpolate,
+    deci o formula scrisa a doua oara (cum era `t ** CONE_EXP` pentru ferestre)
+    s-ar desincroniza de suprafata la prima modificare de forma.
+    """
+    if z <= profile[0][1]:
+        return profile[0][0]
+    for (r0, z0), (r1, z1) in zip(profile, profile[1:]):
+        if z0 <= z <= z1:
+            u = 0.0 if z1 <= z0 else (z - z0) / (z1 - z0)
+            return r0 + (r1 - r0) * u
+    return profile[-1][0]
+
+
+def _profile(kind, height, r_base, r_neck, seed, steps=7):
     """Profilul (raza, z) al unui corp de tuf, dupa FAMILIE, nu dupa scara.
 
     Aici e reparatia principala a rundei 3. Pana acum toate hornurile ieseau
@@ -147,6 +164,17 @@ def _profile(kind, height, r_base, r_neck, seed, steps=9):
         # refaca inelele orizontale (variatia tare e pe unghi, in `tuff_body`)
         r *= 1.0 + (rand() - 0.5) * 0.05
         prof.append((max(r, 0.05), height * t))
+    # INELE IN PLUS in zona poalei (sub ~0.22H). `retag` coloreaza FETE
+    # intregi, deci marginea dintre crem si rugina poate urma doar muchiile
+    # care exista: cu 9 inele pe toata inaltimea, o fata din zona joasa are
+    # peste un metru si linia iesea o treapta dreptunghiulara — masca de
+    # vopsea, nu contact geologic. Trei inele suplimentare, dese, dau
+    # marginii pe ce sa serpuiasca. Cost: 3 * segments * 2 triunghiuri.
+    extra = []
+    for u in (0.07, 0.14, 0.21):
+        z = height * u
+        extra.append((_r_at(prof, z), z))
+    prof = sorted(prof + extra, key=lambda rz: rz[1])
     return prof
 
 
@@ -228,22 +256,6 @@ def tuff_body(b, profile, slot, seed, segments=FLUTES, origin=(0, 0, 0),
     if rings:
         b.bm.faces.new(tuple(reversed(rings[0])))
     return b._tag(new_verts, slot)
-
-
-def _r_at(profile, z):
-    """Raza profilului la cota z (interpolare liniara intre inele).
-
-    Exista fiindca profilul nu mai e analitic: e o familie de chei interpolate,
-    deci o formula scrisa a doua oara (cum era `t ** CONE_EXP` pentru ferestre)
-    s-ar desincroniza de suprafata la prima modificare de forma.
-    """
-    if z <= profile[0][1]:
-        return profile[0][0]
-    for (r0, z0), (r1, z1) in zip(profile, profile[1:]):
-        if z0 <= z <= z1:
-            u = 0.0 if z1 <= z0 else (z - z0) / (z1 - z0)
-            return r0 + (r1 - r0) * u
-    return profile[-1][0]
 
 
 def basalt_cap(b, z, r_neck, r_cap, thickness, seed=0, segments=9,
@@ -377,7 +389,7 @@ def build_chimney_mushroom():
     H, R_BASE, R_NECK = 11.2, 3.20, 0.62
     # familia "waist": talia stransa E subiectul ciupercii, deci profilul o are
     # deja in chei — nu mai e nevoie de strangularea lipita peste profil.
-    prof = _profile("waist", H, R_BASE, R_NECK, 103, steps=9)
+    prof = _profile("waist", H, R_BASE, R_NECK, 103, steps=7)
     faces = tuff_body(b, prof, TUFF, 103, lean=(-0.42, 0.28), flute=0.17,
                       twist=0.14)
     # aceleasi doua motive ca la `build_chimney`: fara banda de mijloc, si
@@ -496,7 +508,7 @@ def build_rock_church_facade():
     # "tent": fatada trebuie sa aiba un perete aproape drept in care sa incapa
     # portalul, deci cortul indesat, nu spire-ul. Fara `lean`: pe piesa asta se
     # sapa un portal aliniat, iar o axa curbata l-ar aseza stramb.
-    prof = _profile("tent", H, R_BASE, R_NECK, 601, steps=9)
+    prof = _profile("tent", H, R_BASE, R_NECK, 601, steps=7)
     faces = tuff_body(b, prof, TUFF, 601, segments=13, flute=0.10)
     # idem pe fatada bisericii: e tot un con de tuf, langa drum
     b.retag(faces, TUFF_FOOT,

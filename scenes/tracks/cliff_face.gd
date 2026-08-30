@@ -278,6 +278,11 @@ extends Marker3D
 ## Sloturile taieturii, de la coama in jos. Aceleasi strate ca faleza, ca sa se
 ## citeasca drept ACEEASI roca vazuta din partea cealalta a benzii.
 @export var cut_slots: Array[int] = [23, 10, 27, 23, 10, 27, 4]
+## Ce fractie din lungime se duce pe stingerea de la FIECARE capat.
+##
+## Vezi `_cut_column`: fara stingere peretele incepe cu o muchie verticala in
+## aer. 0.18 inseamna ca primii si ultimii ~18% urca din nimic pana la cota.
+@export var cut_taper_frac: float = 0.18
 
 
 ## Toate falezele declarate ca noduri, construite intr-un singur nod-parinte.
@@ -387,13 +392,31 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 	# Se ia cea mai inalta cota pe o fereastra scurta dincolo de talpa. Unde
 	# masivul urca, peretele urca cu el; unde platoul e plat, `rise` iese ~0 si
 	# coloana se intoarce goala — taietura se stinge in loc sa devina zid.
-	var crest := -1e9
+	# Creasta se ia ca MEDIE pe fereastra, nu ca maxim.
+	#
+	# Cu maximul, o singura duna din spate ridica toata coloana: masurat cu
+	# ProbeCutEnd, `rise` sarea 18 -> 13.2 -> 16.9 -> 10.1 intre pasi vecini si
+	# silueta iesea zimtata. Media urmeaza masivul si ignora zgomotul.
+	var crest := 0.0
+	var samples := 0.0
 	var probe := 4.0
 	while probe <= 22.0:
 		var q := foot + sd * probe
-		crest = maxf(crest, surface_y.call(q.x, q.z))
+		crest += surface_y.call(q.x, q.z)
+		samples += 1.0
 		probe += 6.0
+	crest /= maxf(samples, 1.0)
 	var rise: float = minf(crest - foot_y, cut_height_m)
+	# STINGERE la capete, pe `cut_taper_frac` din lungime.
+	#
+	# Fara ea peretele incepea cu o fata de 10 m taiata drept in aer: prima
+	# coloana iesea goala (rise 1.1) si urmatoarea avea deja 10.5 m — masurat cu
+	# ProbeCutEnd. O taietura reala se termina intrand in versant, nu cu o muchie
+	# verticala suspendata.
+	var edge: float = minf(f - frac_start, frac_end - f)
+	var span_f: float = maxf(frac_end - frac_start, 1e-5)
+	var taper: float = clampf(edge / maxf(cut_taper_frac * span_f, 1e-5), 0.0, 1.0)
+	rise *= smoothstep(0.0, 1.0, taper)
 	# Sub 2 m nu e taietura, e prag: acolo nu exista masiv de taiat.
 	if rise < 2.0:
 		return []

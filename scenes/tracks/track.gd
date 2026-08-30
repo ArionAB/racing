@@ -1698,27 +1698,61 @@ static func themes() -> Dictionary:
 			# CONTEAZA IN CE DIRECTIE cade, fata de directia in care privesti.
 			#
 			# -120 (azimut 60) fusese ales "ca umbrele sa cada diagonal pe drum",
-			# fara sa se masoare pe unde chiar trece drumul. Masurat acum, pe
-			# punctele curbei: la POI B banda merge spre +X (fwd = 0.97, 0.25),
-			# iar umbra la -120 cade spre (+0.87, +0.50) — la 16 grade de
-			# directia de mers. Adica umbra fiecarui horn pleaca DIRECT IN
-			# SPATELE lui, in propria ocluzie, si dispare din cadru: soarele era
-			# aproape fix in spatele soferului. Asta explica de ce criticul orb
-			# n-a vazut nicio umbra aruncata desi umbrele erau pornite, si de ce
-			# reglajul de bias din commit-ul precedent, corect in cifra, n-a
-			# schimbat nimic in poza — nu exista umbra vizibila pe care sa o
-			# lipeasca la loc.
+			# fara sa se masoare pe unde chiar trece drumul: umbra pleca la 16 grade
+			# de directia de mers, adica direct in spatele hornului si afara din
+			# cadru. De aceea criticul n-a vazut umbre desi erau pornite.
 			#
-			# -30 (azimut 150) pastreaza acelasi soare de zori la 13 grade, dar
-			# duce umbra spre (+0.50, -0.87): 74 de grade fata de banda, deci o
-			# TAIE aproape perpendicular. Componenta laterala la POI B urca de la
-			# 0.27 la 0.96.
+			# -30 a fost incercarea urmatoare si a fost GRESITA din doua motive,
+			# amandoua masurate acum (tools/ProbeCappAzimut, ProbeCappEst):
 			#
-			# Nu strica restul pistei, masurat pe 13 esantioane de traseu, nu
-			# doar aici: media componentei laterale ramane 0.66 (fata de 0.65 la
-			# -120), iar portiunile cu umbra in lungul benzii scad de la 3 la 2.
-			# Adica pe ansamblu e la fel de bun, si la POI B e alt film.
-			"sun_rotation_deg": Vector3(-13, -30, 0),
+			# 1. PUNEA RASARITUL IN VEST. La -30 soarele vine dinspre (-0.50, +0.87),
+			#    adica vest-sud. Brief §4 cere soare de zori peste vale, la est; asta
+			#    nu e o preferinta, e identitatea pistei. S-a pierdut fiindca alegerea
+			#    s-a facut pe scorul de "taie banda", care e simetric: y si y+180 dau
+			#    exact acelasi scor, si s-a luat jumatatea gresita.
+			# 2. Era mediocru si pe umbre. Masurat pe 40 de esantioane de tur, nu pe
+			#    unul singur: componenta transversala medie 0.638, padurea de hornuri
+			#    0.781, si INCA 8 portiuni cu umbra in lungul benzii. Cifra de 0.96
+			#    din runda trecuta era reala, dar era dintr-un singur punct — de-aia
+			#    captura de la frac 0.10 tot n-avea umbre.
+			#
+			# +25 (soare dinspre (+0.42, +0.91) = est-sud-est) castiga pe amandoua
+			# axele deodata, si e maximul baleiajului din 5 in 5 grade:
+			#   transversala medie 0.787 (cea mai mare de pe tot cercul)
+			#   padurea de hornuri 0.918
+			#   portiuni cu umbra in lungul benzii: 2, de la 8
+			#
+			# COMPROMISUL, explicit: maximul pe padurea de hornuri singura ar fi la
+			# y=+5 (0.969), dar acolo media pe tur scade la 0.757 si soarele ajunge
+			# aproape plin din sud, deci estul se subtiaza la +0.09. +25 cedeaza 0.05
+			# pe hornuri ca sa castige si media pe tur, si un est care se vede. Un tur
+			# intreg are drumul in toate directiile: raman 2 portiuni unde umbra merge
+			# in lungul benzii, si asta se accepta — nu exista azimut care sa le
+			# scoata pe toate (minimul absolut al coloanei e 1, la y=+35/+40, dar
+			# acolo hornurile pica la 0.81-0.85).
+			# ELEVATIA, a doua jumatate a problemei, si cea care chiar lipsea.
+			# Azimutul spune INCOTRO cade umbra; elevatia spune CAT DE DEPARTE.
+			# Masurat cu ProbeCappUmbraCadru (proiecteaza varful umbrei fiecarui
+			# horn si il cauta pe axa benzii, in loc sa numere casteri): la 13 grade
+			# umbrele au 46-83 m si trec pe LANGA drum — varful cade la 12-98 m de
+			# banda, si NICIUNA din cele 39 de umbre nu ajunge pe carosabil. De asta
+			# nu se vedeau umbre desi casterii erau toti in cascada: nu erau taiate,
+			# erau ratate. Bias-ul, pancake-ul si cascada erau reparatii pe alt drum.
+			#
+			# Hornurile stau la 8-30 m de banda, deci umbra trebuie sa aiba atat.
+			# Pentru inaltimile reale (10.6-19.1 m): la 13 grade intra in banda 0
+			# din 21, la 17 grade intra prima treime, la 32 de grade 20 din 21.
+			#
+			# 17 si nu 32, desi 32 ar da cele mai multe umbre pe drum: brief §1 cere
+			# soare de zori la 12-15 grade, iar 32 e soare de dimineata tarzie —
+			# ar sterge lumina razanta si umbrele LUNGI care sunt identitatea
+			# padurii de hornuri (§0). 17 e compromisul: ramane lumina joasa de
+			# zori, umbrele raman lungi (35-62 m), dar se scurteaza cat trebuie ca
+			# hornurile de langa banda sa o prinda — verificat in captura de la
+			# frac 0.10, unde intra o umbra reala din dreapta si taie drumul.
+			# Depaseste §1 cu 2 grade; e o abatere asumata, contra unei sectiuni
+			# care altfel n-are umbre deloc.
+			"sun_rotation_deg": Vector3(-17, 25, 0),
 			# Expunerea urca peste 1 fiindca soarele e slab si ambientul jos,
 			# iar tuful trebuie sa ramana cea mai DESCHISA suprafata mare din
 			# cadru (drumul de pamant e sub el, asfalt nu exista). Se ridica de

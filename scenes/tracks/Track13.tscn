@@ -254,6 +254,60 @@ Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
 
 Cappadocia: 3/6 siluete de orizont
 
+[node name="hornEst1" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.550119, 0, 0.894354, 0, 1.050000, 0, -0.894354, 0, -0.550119, 52, 46.240, 22)
+script = ExtResource("31_shape")
+ovality = 0.671984
+noise_amount = 0.031305
+
+[node name="hornEst2" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.744569, 0, -0.540385, 0, 0.920000, 0, 0.540385, 0, -0.744569, 66, 46.070, 20)
+script = ExtResource("31_shape")
+ovality = 0.703770
+noise_amount = 0.046565
+
+[node name="hornEst3" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.020674, 0, -1.149814, 0, 1.150000, 0, 1.149814, 0, -0.020674, 80, 45.900, 26)
+script = ExtResource("31_shape")
+ovality = 0.762579
+noise_amount = 0.023951
+
+[node name="hornEst4" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.374647, 0, 0.774106, 0, 0.860000, 0, -0.774106, 0, -0.374647, 96, 45.530, 24)
+script = ExtResource("31_shape")
+ovality = 0.987261
+noise_amount = 0.049635
+
+[node name="hornEst5" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.331806, 0, -0.922120, 0, 0.980000, 0, 0.922120, 0, 0.331806, 44, 46.130, 30)
+script = ExtResource("31_shape")
+ovality = 0.710648
+noise_amount = 0.043986
+
+[node name="hornEst6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.677817, 0, 0.762210, 0, 1.020000, 0, -0.762210, 0, 0.677817, 112, 45.450, 34)
+script = ExtResource("31_shape")
+ovality = 0.847253
+noise_amount = 0.035964
+
+[node name="hornEst7" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.509099, 0, 0.617105, 0, 0.800000, 0, -0.617105, 0, -0.509099, 58, 31.380, 74)
+script = ExtResource("31_shape")
+ovality = 0.869681
+noise_amount = 0.033748
+
+[node name="hornEst8" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.619281, 0, -0.367275, 0, 0.720000, 0, 0.367275, 0, 0.619281, 88, 35.190, 76)
+script = ExtResource("31_shape")
+ovality = 0.953727
+noise_amount = 0.037762
+
+[node name="hornEst9" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.017402, 0, 0.899832, 0, 0.900000, 0, -0.899832, 0, -0.017402, 104, 42.280, 70)
+script = ExtResource("31_shape")
+ovality = 0.750833
+noise_amount = 0.045503
+
 [node name="hornSoare1" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(0.994861, 0, 0.312358, 0, 1.042744, 0, -0.312358, 0, 0.994861, -163.961960, 48.976738, 43.241413)
 script = ExtResource("31_shape")

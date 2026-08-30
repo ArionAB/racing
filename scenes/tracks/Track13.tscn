@@ -116,32 +116,32 @@ radius_m = 26.0
 wall_m = 14.0
 
 [node name="CanionRosu2" type="Marker3D" parent="Scobituri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -146.0, 20.0, -12.0)
-gizmo_extents = 41.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -146.0, 20.0, -4.0)
+gizmo_extents = 35.0
 script = ExtResource("3_hollow")
-radius_m = 27.0
-wall_m = 14.0
+radius_m = 26.0
+wall_m = 9.0
 
 [node name="CanionRosu3" type="Marker3D" parent="Scobituri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.0, 19.0, -26.0)
-gizmo_extents = 41.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.0, 19.0, -14.0)
+gizmo_extents = 35.0
 script = ExtResource("3_hollow")
-radius_m = 27.0
-wall_m = 14.0
+radius_m = 26.0
+wall_m = 9.0
 
 [node name="CanionRosu4" type="Marker3D" parent="Scobituri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88.0, 19.0, -26.0)
-gizmo_extents = 40.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88.0, 19.0, -14.0)
+gizmo_extents = 35.0
 script = ExtResource("3_hollow")
 radius_m = 26.0
-wall_m = 14.0
+wall_m = 9.0
 
 [node name="CanionRosu5" type="Marker3D" parent="Scobituri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58.0, 20.0, -24.0)
-gizmo_extents = 40.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58.0, 20.0, -8.0)
+gizmo_extents = 35.0
 script = ExtResource("3_hollow")
 radius_m = 26.0
-wall_m = 14.0
+wall_m = 9.0
 
 [node name="CanionRosu6" type="Marker3D" parent="Scobituri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.0, 22.0, -12.0)

@@ -56,6 +56,18 @@ AO_CHIMNEY = dict(samples=20, dist=8.0, gradient="vertical",
                   low=0.42, high=1.00, power=0.85, floor=0.14)
 AO_CLIFF = dict(samples=18, dist=10.0, gradient="vertical",
                 low=0.46, high=1.00, power=0.80, floor=0.16)
+# Masa rosie are AO-ul EI, mult mai adanc, si nu din gust — din masuratoare pe
+# cadru. Paleta n-are un rosu stins: TILE_TERRACOTTA e la saturatie 0.60 si
+# LARCH_RUST la 0.65, iar soarele de zori (13°, portocaliu) se inmulteste peste
+# ele si le duce in cadru la 0.93-1.00. De-aia prima versiune a masei citea
+# "ladite de plastic portocalii" pe captura, desi hexurile erau cuminti.
+#
+# Singura parghie care ramane e vertex color-ul, si el doar INTUNECA
+# (SurfaceTool clampeaza in [0,1] — vezi memoria `surfacetool-clamp-vertex-color`).
+# Deci masa nu se decoloreaza, se BAGA IN UMBRA: `low`/`floor` mult mai jos,
+# ca partea de jos a malului sa fie pamant in umbra, nu vopsea.
+AO_MESA = dict(samples=20, dist=14.0, gradient="vertical",
+               low=0.20, high=0.72, power=1.15, floor=0.08)
 AO_FACADE = dict(samples=26, dist=5.0, gradient="vertical",
                  low=0.40, high=1.00, power=0.90, floor=0.12)
 
@@ -84,7 +96,27 @@ TUFF_SH = SAND_SHADOW      # tuf umbrit, la baza si sub consola palariei
 # de con de santier — captura a aratat o baie de vopsea, nu geologie. Rugina e
 # aceeasi familie de nuanta, dar mai inchisa si mai putin saturata, deci separa
 # de crem fara sa sara din paleta.
-TUFF_FOOT = LARCH_RUST
+# POALA hornului. A FOST rosie (LARCH_RUST) o runda; nu mai e, si motivul e
+# al criticii oarbe, runda 3:
+#
+#   "The rust skirt is applied at a CONSTANT FRACTION of each cone's height, so
+#   the bands align horizontally across neighbouring instances and read as
+#   painted trim. The reference's red is a SEPARATE TERRAIN MASS at a different
+#   depth, not a band on the objects."
+#
+# Si asa e, se vede pe captura: fiecare con purta banda la 0.14-0.17 din corp,
+# deci pe doua conuri vecine de inaltimi diferite muchiile cadeau tot pe o linie
+# citita ca orizontala. Armonicile de pe unghi rupeau muchia PE O PIESA, dar nu
+# puteau rupe alinierea INTRE piese — aia venea din faptul ca inaltimea e
+# referinta, si e o eroare de concept, nu de calibrare.
+#
+# Rosul se muta acolo unde il are referinta: in TEREN, sub cota drumului, vazut
+# peste un gol. Vezi nodul CanionulRosu din Track13.tscn.
+#
+# Aici ramane doar praful de la baza, adica ce era inainte de runda cu rugina:
+# aceeasi calcare de VALOARE pe acelasi crem, care aseaza conul in pamant fara
+# sa-i deseneze o dunga.
+TUFF_FOOT = TUFF_SH
 CAP = VOLCANIC_BLACK       # palaria de bazalt
 BAND_RED = TILE_TERRACOTTA  # banda lata rosie (Valea Rosie)
 BAND_RUST = LARCH_RUST     # banda ingusta ruginie
@@ -495,6 +527,80 @@ def build_cliff_band_module():
     return b.to_object("Cliff_Band_Module")
 
 
+def build_red_mesa():
+    """MASA ROSIE de teren — malul de Valea Rosie vazut PESTE gol, de la 100 m.
+
+    De ce nu `cliff_band_module` reasezat, desi exista deja: acolo rosul e in
+    straturi de 1.2-1.5 m dintr-un corp de 12 m, adica o dunga. Piesa e autorata
+    sa fie privita de aproape, de pe cornisa. Cufundata intr-un bazin ca sa se
+    vada peste o rapa, ii ies din pamant exact straturile de sus, care sunt
+    creme — masurat pe captura: rosu in cadru 0.01%, adica nimic. Aceeasi
+    eroare ca "gardul pana la orizont" din runda 2, doar cu alta cota.
+
+    Aici rosul E corpul: un platou lat si scund, cu doar o cornisa crem
+    deasupra, ca in referinta unde masa rosie e PAMANTUL de dincolo de rapa,
+    nu un obiect asezat pe el. Proportia e inversata fata de modulul de faleza —
+    ~75% rosu, restul crem — fiindca de la 100 m si prin ceata numai masa
+    citeste, nu straturile.
+
+    Lat si jos dinadins (90 x 26 m la 15 m inaltime): trebuie sa umple o felie
+    de orizont, nu sa fie o silueta. O forma inalta ar fi devenit inca un horn.
+    """
+    b = Builder()
+    L, D, H = 90.0, 26.0, 15.0
+    rand = _lcg(733)
+
+    # Corpul rosu, in trepte largi: fiecare treapta e mai scurta si retrasa,
+    # deci profilul e de mal erodat, nu de cutie. Slotul alterneaza intre rosul
+    # lat si ruginiul mai inchis, ca masa sa nu fie o singura pata.
+    # DOMINANTA E RUGINA, nu terracotta. Prima versiune punea BAND_RED
+    # (TILE_TERRACOTTA #C4784F, slot de OLANE) pe majoritatea corpului si pe
+    # captura iesea portocaliu de ladita de plastic — aceeasi capcana pe care
+    # poala hornului o avusese cu un slot mai devreme. LARCH_RUST (#A8683A) e
+    # mai inchis si mai putin saturat: terracotta ramane doar ca strat de accent.
+    steps = [(0.00, 1.00, BAND_RUST), (0.30, 0.94, BAND_RUST),
+             (0.55, 0.87, BAND_RED), (0.74, 0.82, BAND_RUST),
+             (0.88, 0.76, BAND_RUST)]
+    for (z0, shrink, slot) in steps:
+        z1 = z0 + 0.26
+        jitter = (rand() - 0.5) * 2.2
+        # Fiecare strat e taiat in 3 bucati de latimi inegale, usor decalate pe
+        # adancime si pe cota: asa muchia de sus a masei nu mai e o dreapta
+        # continua pe toata lungimea, care citea ca lada, ci o linie franta de
+        # mal erodat. Costa fete pe geometrie care oricum exista.
+        seg = 3
+        for j in range(seg):
+            frac_w = (0.26 + 0.16 * rand())
+            cxs = (-0.5 + (j + 0.5) / seg) * L * shrink
+            b.box((jitter + cxs + (rand() - 0.5) * 3.0,
+                   (1.0 - shrink) * D * 0.22 + (rand() - 0.5) * 1.4,
+                   (z0 + z1) * 0.5 * H + (rand() - 0.5) * H * 0.05),
+                  (L * shrink * frac_w * 1.15, D * shrink, (z1 - z0) * H),
+                  slot)
+
+    # CORNISA crem de deasupra: linia care spune ca masa rosie e PAMANT cu
+    # platou pe el, nu o stanca rosie. Subtire — 12% din inaltime.
+    b.box((0.0, D * 0.10, H * 1.06), (L * 0.78, D * 0.72, H * 0.12), TUFF)
+
+    # Pinteni la capete, ca marginile sa nu fie doua colturi drepte de cutie.
+    for sx in (-1.0, 1.0):
+        for i in range(3):
+            t = 0.20 + 0.26 * i
+            w = L * (0.10 + 0.05 * rand())
+            b.box((sx * L * (0.42 + 0.04 * i), D * 0.10 * rand(), H * t),
+                  (w, D * 0.55, H * 0.20),
+                  BAND_RED if i == 1 else BAND_RUST)
+
+    # Moloz cazut la baza — leaga masa de fundul vaii.
+    for i in range(9):
+        fx = -L * 0.5 + L * (rand() * 0.94 + 0.03)
+        sc = 0.9 + rand() * 1.6
+        b.rock((fx, D * 0.5 + rand() * 1.6, 0.0),
+               (sc * 2.4, sc * 1.9, sc * 1.1), BAND_RUST,
+               seed=int(rand() * 900), segments=6, rings=3, taper=0.55)
+    return b.to_object("Red_Mesa")
+
+
 def build_rock_church_facade():
     """Fatada de biserica rupestra: con de tuf cu portal sapat si cruce incizata.
 
@@ -550,6 +656,7 @@ emit(build_chimney_mushroom(), "rocks/chimney_mushroom.glb", AO_CHIMNEY)
 emit(build_chimney_triple(), "rocks/chimney_triple.glb", AO_CHIMNEY)
 emit(build_cliff_band_module(), "rocks/cliff_band_module.glb", AO_CLIFF,
      origin="base_axis", bevel=0.06)
+emit(build_red_mesa(), "rocks/red_mesa.glb", AO_MESA)
 emit(build_rock_church_facade(), "rocks/rock_church_facade.glb", AO_FACADE)
 
 print()

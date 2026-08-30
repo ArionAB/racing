@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -17,6 +17,8 @@
 [ext_resource type="PackedScene" uid="uid://d03bamk3vjvaj" path="res://assets/models/cappadocia/rocks/rock_church_facade.glb" id="20_church"]
 [ext_resource type="PackedScene" uid="uid://bje1dm73vhvnu" path="res://assets/models/cappadocia/plants/pigeon.glb" id="21_pigeon"]
 [ext_resource type="PackedScene" uid="uid://djus2nj2trqub" path="res://assets/models/cappadocia/plants/shrub_dry.glb" id="22_shrub"]
+[ext_resource type="PackedScene" uid="uid://dpe8qhxsugqgd" path="res://assets/models/cappadocia/rocks/cliff_band_module.glb" id="23_cliff"]
+[ext_resource type="PackedScene" uid="uid://b65i8c0jcym3n" path="res://assets/models/cappadocia/rocks/red_mesa.glb" id="24_mesa"]
 
 [sub_resource type="Curve3D" id="Curve3D_cappadocia"]
 closed = true

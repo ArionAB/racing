@@ -48,6 +48,7 @@ script = ExtResource("15_cliffface")
 frac_start = 0.175
 frac_end = 0.40
 side = 1.0
+far_wall = false
 lip_offset_m = 0.2
 depth_m = 30.0
 step_m = 4.0
@@ -59,6 +60,23 @@ ledge_offset_m = 9.38
 ledge_drop_m = 8.0
 ledge_depth_m = 3.2
 ledge_len_m = 9.0
+
+[node name="MalulOpusVaiiRosii" type="Marker3D" parent="Faleze"]
+script = ExtResource("15_cliffface")
+frac_start = 0.175
+frac_end = 0.40
+side = 1.0
+far_wall = true
+far_bank = true
+far_offset_m = 105.0
+far_rise_m = 5.0
+far_depth_m = 34.0
+far_step_m = 9.0
+far_bands = 8
+batter_m = 0.55
+foot_bite_m = 3.0
+band_slots = Array[int]([19, 23, 10, 27, 23, 10, 27, 4, 2])
+cap_slots = Array[int]([19, 23, 27, 4])
 
 [node name="Peaks" type="Node3D" parent="."]
 
@@ -99,19 +117,19 @@ script = ExtResource("2_peak")
 radius_m = 130
 
 [node name="ValeaRosieMalulOpus1" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 248, 52, 40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 232, 78, -78)
 gizmo_extents = 92
 script = ExtResource("2_peak")
 radius_m = 92
 
 [node name="ValeaRosieMalulOpus2" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 330, 50, -30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 372, 74, -108)
 gizmo_extents = 95
 script = ExtResource("2_peak")
 radius_m = 95
 
 [node name="ValeaRosieMalulOpus3" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 400, 46, -170)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 378, 68, -252)
 gizmo_extents = 105
 script = ExtResource("2_peak")
 radius_m = 105

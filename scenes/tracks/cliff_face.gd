@@ -186,6 +186,19 @@ extends Marker3D
 ## vaii e la ~13 m rulaj), ca muchia sa ramana muchie si stanca sa se vada peste
 ## ea, nu in locul ei.
 @export var far_offset_m: float = 15.0
+## MALUL DE DINCOLO in loc de pinten langa banda.
+##
+## Cu el, masa nu mai atarna de cota soselei: se aseaza pe terenul de la
+## `far_offset_m` si urca peste creasta LUI. Are sens doar impreuna cu o rapa
+## care are latime (Track._ravine_widths) — altfel dincolo de buza nu exista
+## teren mai inalt, si masa n-are pe ce sta.
+##
+## De ce e nevoie de el, cu masuratoarea in fata: pintenul de la 15 m, legat de
+## cota drumului, e o DUNGA de stanca de-a lungul benzii. Cum a spus critica
+## oarba dupa runda 3, „un perete paralel cu drumul pe care mergi nu poate
+## prezenta o fata unei camere indreptate pe drum". Malul opus sta TRANSVERSAL
+## pe privire, deci se vede in plin — si e chiar compozitia referintei.
+@export var far_bank: bool = false
 ## Cat urca coama pintenului fata de cota soselei.
 ##
 ## Pozitiv = peste drum. Se tine mic: peste ~3 m ar face un zid care ascunde
@@ -219,9 +232,15 @@ static func build_all(track: Node3D, sampler: TrackSideSampler,
 	var faces: Array[CliffFace] = []
 	_collect(track, faces)
 	for f in faces:
-		var mesh_node := f._build(sampler, surface_y)
-		if mesh_node != null:
-			root.add_child(mesh_node)
+		# Un nod de MAL OPUS nu construieste si panza de buza: buza si-o face
+		# nodul cornisei. Fara asta, nodul de mal dubla peretele de langa banda
+		# (masurat cu ProbeBankPos: doua panze la 42 si 45 m rulaj, adica in
+		# acelasi loc) si nu se vedea nicio schimbare in captura — geometrie
+		# noua, aceeasi silueta.
+		if not f.far_bank:
+			var mesh_node := f._build(sampler, surface_y)
+			if mesh_node != null:
+				root.add_child(mesh_node)
 		if f.far_wall:
 			var far_node := f._build_far(sampler, surface_y)
 			if far_node != null:
@@ -397,11 +416,43 @@ func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
 	var p := sampler.baked_point(i)
 	var sd := sampler.side_at(i) * signf(side)
-	var base := p + sd * far_offset_m
+	var base: Vector3 = p + sd * far_offset_m
 	var floor_y: float = surface_y.call(base.x, base.z)
 	# Coama: la cota soselei plus `far_rise_m`. Peste orizontul marginii (-59 gr)
 	# prin constructie, deci vizibila — vezi nota de la `far_wall`.
 	var top_y := p.y + far_rise_m
+	if far_bank:
+		# MALUL DE DINCOLO: masa nu mai e legata de cota soselei, ci sta pe
+		# terenul de acolo — rapa are acum latime, deci dincolo de ea terenul
+		# chiar urca. Coama se ridica peste creasta LUI, nu peste drum.
+		#
+		# Diferenta nu e cosmetica: un pinten legat de cota drumului si asezat la
+		# 15 m e o dunga langa roata (exact ce a picat in runda 3), pe cand o masa
+		# asezata pe malul opus umple partea dreapta a cadrului asa cum o face
+		# referinta, cu valea intre ea si privitor.
+		#
+		# Rulajul NU se ia din `far_offset_m`: masurat cu ProbeBank, creasta
+		# malului sta la 60 m pe o fractie si la 110 m pe alta, fiindca valea nu
+		# are latime constanta. Un offset fix nimereste malul intr-un punct si
+		# fundul in rest, si atunci masa fie dispare (culeasa de pragul de mai
+		# jos), fie se lipeste de buza — chiar defectul din prima incercare. Deci
+		# creasta se CAUTA, iar `far_offset_m` ramane doar limita de cautare.
+		var crest_y := -1e9
+		var crest_off := far_offset_m
+		var probe := far_offset_m * 0.35
+		while probe <= far_offset_m * 1.6:
+			var q := p + sd * probe
+			var qy: float = surface_y.call(q.x, q.z)
+			if qy > crest_y:
+				crest_y = qy
+				crest_off = probe
+			probe += 6.0
+		base = p + sd * crest_off
+		top_y = crest_y + far_rise_m
+		# Talpa se cauta INSPRE vale, ca fata sa aiba de unde urca din fund.
+		var toe := base - sd * far_depth_m
+		floor_y = minf(surface_y.call(base.x, base.z),
+			surface_y.call(toe.x, toe.z))
 	# Daca terenul de sub pinten e deja la cota drumului, nu exista vale aici si
 	# pintenul n-are ce sprijini: se sare peste, ca sa nu iasa o lespede plutind
 	# pe platou.
@@ -431,9 +482,25 @@ func _far_cap(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array
 	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
 	var p := sampler.baked_point(i)
 	var sd := sampler.side_at(i) * signf(side)
-	var base := p + sd * far_offset_m
+	var base: Vector3 = p + sd * far_offset_m
 	var floor_y: float = surface_y.call(base.x, base.z)
 	var top_y := p.y + far_rise_m
+	if far_bank:
+		# Aceeasi cautare de creasta ca in `_far_column`: coama trebuie sa plece
+		# din acelasi punct ca fata, altfel se despart.
+		var crest_y := -1e9
+		var crest_off := far_offset_m
+		var probe := far_offset_m * 0.35
+		while probe <= far_offset_m * 1.6:
+			var q := p + sd * probe
+			var qy: float = surface_y.call(q.x, q.z)
+			if qy > crest_y:
+				crest_y = qy
+				crest_off = probe
+			probe += 6.0
+		base = p + sd * crest_off
+		top_y = crest_y + far_rise_m
+		floor_y = surface_y.call(base.x, base.z)
 	if floor_y > top_y - 3.0:
 		return []
 	var out: Array = []

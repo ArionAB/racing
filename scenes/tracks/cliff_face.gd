@@ -289,6 +289,88 @@ extends Marker3D
 @export var cut_tuck_m: float = 9.0
 
 
+## BUZA EXTERIOARA: pragul de roca de pe umarul dinspre vale.
+##
+## De ce exista, cu masuratoarea in fata. Verdictul rundei 6, spus la fel de
+## amandoi criticii: „exista un perete taiat pe STANGA, dar latura EXTERIOARA a
+## drumului — chiar aia care face dintr-o cornisa o cornisa — n-are nicio
+## muchie". Panzele existau si erau mari (`ProbeCappBrow`: FalezaVaiiRosii are
+## 5778 de vertecsi si 33 m inaltime), deci nu lipsea geometria.
+##
+## Ce lipsea e UNGHIUL. Aceeasi sonda, din ochiul soferului (1.5 m peste asfalt):
+## cel mai INALT punct de dincolo de buza sta la [b]-15 grade[/b] pe TOATE
+## fractiile cornisei (0.20, 0.26, 0.32, 0.38). Adica tot exteriorul e sub linia
+## privirii. O cadere pe care o privesti de SUS n-are silueta pe cer si nu poate
+## desena o muchie: ochiul vede umarul rotunjit al drumului si, dincolo de el,
+## direct fundul vaii. De-aia „nicio muchie" si „un plan cu conuri pe el" descriu
+## aceeasi poza.
+##
+## Referinta rezolva exact invers: buza e aproape si SUS — un prag de roca pe
+## marginea exterioara, cu caderea ASCUNSA in spatele lui. Muchia care taie
+## cadrul e a pragului, nu a rapei.
+##
+## Deci nodul asta construieste pragul: o panglica joasa de stanca pe umarul
+## dinspre vale, care iese peste linia ochiului si da cornisei muchia ei.
+## Zero materiale in plus — tot [method Palette.world_material].
+@export var brow: bool = false
+## La ce rulaj lateral fata de ax incepe pragul.
+##
+## Chiar dupa marginea asfaltului: sub `half_width` ar musca din carosabil, iar
+## mult peste el pragul se desprinde de banda si redevine o dunga in peisaj.
+@export var brow_offset_m: float = 7.2
+## Cat de LAT e pragul, de la talpa spre vale.
+@export var brow_width_m: float = 3.4
+## Cat de sus urca pragul peste cota asfaltului.
+##
+## [b]Corectie platita cu o captura.[/b] Prima valoare a fost 2.2 m, derivata
+## din linia privirii (ochiul e la ~1.5 m, deci pragul trebuie sa treaca peste
+## el ca sa taie cerul). Logica era buna si rezultatul, gresit: la 2.2 m pe
+## toata lungimea, cornisa a iesit un SANT — perete la stanga, perete la
+## dreapta, iar Valea Rosie si baloanele, adica tot subiectul POI-ului,
+## dispareau complet din cadru (vezi `snapshots/r7_brow_0.32.png`).
+##
+## Un prag de cornisa nu trebuie sa fie mai INALT decat ochiul, trebuie sa fie
+## APROAPE. La 0.85 m sta sub linia privirii, deci lasa valea deschisa, dar e la
+## 7 m lateral: proiectat, ocupa o banda groasa jos in cadru si desparte net
+## banda de gol. Muchia vine din CONTRAST si din intreruperi (`brow_gap_*`), nu
+## din inaltime — asa o face si referinta, unde pragul e o dantelura joasa de
+## roca, nu un parapet.
+@export var brow_rise_m: float = 0.85
+## Pasul de esantionare pe lungime.
+@export var brow_step_m: float = 3.0
+## Ce fractie din lungime se duce pe stingerea de la FIECARE capat.
+##
+## Ca la taietura: fara stingere pragul incepe cu o muchie verticala in aer.
+@export var brow_taper_frac: float = 0.10
+## Cat de neregulata e creasta pragului, in metri.
+##
+## Un prag de roca erodata nu e o bordura: fara variatie, panglica citeste ca
+## parapet turnat. Zgomotul e determinist (functie de fractie), ca regenerarea
+## sa dea acelasi prag.
+@export var brow_jitter_m: float = 0.55
+## Sloturile pragului: coama, fata dinspre drum, fata dinspre vale.
+##
+## Aceeasi roca ca faleza si taietura — pragul e capatul de sus al ACELUIASI
+## strat, deci ia sloturile de coama ale falezei.
+@export var brow_slots: Array[int] = [19, 23, 10]
+## Cat de jos coboara fusta pragului sub cota drumului.
+##
+## Scurta INTENTIONAT: pragul e o muchie, nu un al doilea perete. Vezi
+## `_brow_profile` — fara limita, talpa exterioara cadea pana la fundul rapei si
+## AABB-ul pragului iesea de 31 m, adica exact peretele pe care il avea deja
+## faleza. 2.5 m ajung ca fusta sa inchida contactul cu versantul.
+@export var brow_skirt_m: float = 2.5
+## Cat de des se RUPE pragul, in metri de traseu (0 = prag continuu).
+##
+## O cornisa erodata n-are bordura turnata: roca e mancata pe portiuni, si prin
+## spartura se vede valea. Fara rupturi panglica citeste ca parapet de beton —
+## si, la inaltime mare, chiar inchidea cadrul. Rupturile sunt si ce face pragul
+## sa arate SAPAT: ochiul completeaza singur muchia continua din bucatile ramase.
+@export var brow_gap_every_m: float = 26.0
+## Ce fractie dintr-o perioada e ruptura.
+@export var brow_gap_frac: float = 0.28
+
+
 ## Toate falezele declarate ca noduri, construite intr-un singur nod-parinte.
 ## Se cheama din [method Track.rebuild], dupa ce terenul exista: talpa se coase
 ## pe suprafata LUI.
@@ -304,7 +386,11 @@ static func build_all(track: Node3D, sampler: TrackSideSampler,
 		# (masurat cu ProbeBankPos: doua panze la 42 si 45 m rulaj, adica in
 		# acelasi loc) si nu se vedea nicio schimbare in captura — geometrie
 		# noua, aceeasi silueta.
-		if not f.far_bank:
+		# Un nod de BUZA sau de TAIETURA nu construieste si panza de cadere:
+		# `FalezaVaiiRosii` o face deja pe aceleasi fractii, si o a doua panza
+		# identica peste ea nu se vede in poza, doar in numaratoare (masurat:
+		# acelasi AABB, 5778 de vertecsi degeaba).
+		if not f.far_bank and not f.brow and not f.cut_wall:
 			var mesh_node := f._build(sampler, surface_y)
 			if mesh_node != null:
 				root.add_child(mesh_node)
@@ -319,6 +405,12 @@ static func build_all(track: Node3D, sampler: TrackSideSampler,
 			var cut_node := f._build_cut(sampler, surface_y)
 			if cut_node != null:
 				root.add_child(cut_node)
+		# BUZA e independenta de toate celelalte: un nod poate declara NUMAI
+		# pragul exterior. Vezi `brow` — e latura care lipsea din poza.
+		if f.brow:
+			var brow_node := f._build_brow(sampler, surface_y)
+			if brow_node != null:
+				root.add_child(brow_node)
 	return root
 
 
@@ -444,6 +536,113 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		var q: Vector3 = p + sd * (cut_offset_m + back + tuck)
 		out.append(Vector3(q.x, y, q.z))
 	return out
+
+
+## PRAGUL de pe umarul dinspre vale — muchia care face cornisa.
+##
+## Vezi `brow` pentru motivul si masuratoarea (-15 grade pe toata cornisa).
+## Aici doar forma: pentru fiecare pas se ridica un profil cu patru puncte —
+## talpa dinspre drum, creasta dinspre drum, creasta dinspre vale, talpa dinspre
+## vale — si profilele vecine se leaga in trei benzi de quad-uri (fata interioara,
+## coama, fata exterioara). Nu e un zid: are latime, deci prinde lumina pe coama
+## si ramane in umbra pe fata dinspre vale.
+func _build_brow(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
+	var total := sampler.total_length()
+	if total <= 0.0 or brow_slots.size() < 3:
+		return null
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var span := (frac_end - frac_start) * total
+	var steps := maxi(int(round(span / maxf(brow_step_m, 0.5))), 2)
+	var cols: Array = []
+	for si in steps + 1:
+		var f := frac_start + (frac_end - frac_start) * (float(si) / float(steps))
+		cols.append(_brow_profile(sampler, f, surface_y, float(si) / float(steps)))
+	var built := 0
+	for si in steps:
+		var a: Array = cols[si]
+		var b: Array = cols[si + 1]
+		if a.is_empty() or b.is_empty():
+			continue
+		built += 1
+		# 0=talpa drum, 1=creasta drum, 2=creasta vale, 3=talpa vale.
+		# Fata dinspre DRUM: se vede din masina, deci ia slotul cel mai tare.
+		_quad(st, b[0], a[0], a[1], b[1], Palette.uv(brow_slots[1]),
+			_shade(0.85), _shade(0.85), _shade(0.15), _shade(0.15))
+		# COAMA: prinde soarele razant, slotul cel mai deschis.
+		_quad(st, b[1], a[1], a[2], b[2], Palette.uv(brow_slots[0]),
+			_shade(0.05), _shade(0.05), _shade(0.10), _shade(0.10))
+		# Fata dinspre VALE: cade in umbra, slotul inchis. Ordine inversa,
+		# fiindca normala trebuie sa bata spre vale (vezi nota de la `_quad`).
+		_quad(st, a[2], b[2], b[3], a[3], Palette.uv(brow_slots[2]),
+			_shade(0.20), _shade(0.20), _shade(0.90), _shade(0.90))
+	if built == 0:
+		return null
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Buza " + name
+	mi.mesh = st.commit()
+	mi.material_override = Palette.world_material()
+	# Pragul sta pe umarul dinspre vale: la soare de zori umbra lui cade inapoi
+	# pe carosabil si e cel mai ieftin semn ca banda are o margine ridicata.
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	return mi
+
+
+## Profilul pragului la o fractie: patru puncte, de la drum spre vale.
+##
+## Intoarce lista goala pe capetele stinse, ca pragul sa nu inceapa cu o muchie
+## verticala in aer.
+func _brow_profile(sampler: TrackSideSampler, f: float, surface_y: Callable,
+		t_along: float) -> Array:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	var sd := sampler.side_at(i) * signf(side)
+	var hw := sampler.half_width_at(i)
+	# STINGEREA la capete: pragul creste din nimic si se intoarce in nimic.
+	var taper := 1.0
+	if brow_taper_frac > 0.0:
+		taper = minf(t_along / brow_taper_frac,
+			(1.0 - t_along) / brow_taper_frac)
+		taper = clampf(taper, 0.0, 1.0)
+	if taper <= 0.01:
+		return []
+	# RUPTURILE: pe portiunile mancate pragul lipseste de tot, si prin ele se
+	# vede valea. Se calculeaza pe distanta REALA in lungul pistei, nu pe
+	# fractie, ca ruptura sa aiba aceeasi lungime pe orice pista.
+	if brow_gap_every_m > 0.5 and brow_gap_frac > 0.0:
+		var along_m := f * sampler.total_length()
+		var ph := fposmod(along_m, brow_gap_every_m) / brow_gap_every_m
+		# Faza se plimba incet, ca rupturile sa nu cada la intervale de metronom.
+		var wob := 0.5 + 0.5 * sin(f * 91.0)
+		if ph < brow_gap_frac * wob:
+			return []
+	# Creasta neregulata, dar DETERMINISTA: aceeasi fractie da mereu acelasi
+	# prag, deci regenerarea nu misca peisajul.
+	var jit := sin(f * 137.0) * 0.6 + sin(f * 311.0) * 0.4
+	var rise := (brow_rise_m + jit * brow_jitter_m) * taper
+	# Talpa se leaga de cota ASFALTULUI, nu de teren: pragul e umarul drumului
+	# ridicat, si trebuie sa porneasca exact de unde se termina banda. Luata din
+	# teren, ar pluti pe portiunile unde campul a fost deja sapat de rapa.
+	var foot_y := p.y
+	var inner: Vector3 = p + sd * (hw + (brow_offset_m - hw))
+	var outer: Vector3 = p + sd * (brow_offset_m + brow_width_m)
+	# Talpa exterioara se coase in teren — dar cu O LIMITA, si asta e o corectie
+	# platita cu o masuratoare. Fara ea, `surface_y` de dincolo de buza intoarce
+	# chiar fundul rapei (13.7 m sub un drum la 27 m), deci fusta pragului se
+	# intindea 31 m in jos: AABB-ul iesea inalt cat faleza, iar „pragul" era un
+	# alt perete, nu o muchie. Se coboara cel mult `brow_skirt_m` sub talpa, si
+	# restul caderii ramane treaba falezei — care exact asta face.
+	var ground_out: float = surface_y.call(outer.x, outer.z)
+	var out_y: float = maxf(minf(ground_out, foot_y) - 0.4,
+		foot_y - brow_skirt_m)
+	return [
+		Vector3(inner.x, foot_y - 0.15, inner.z),
+		Vector3(inner.x, foot_y + rise, inner.z),
+		Vector3(outer.x, foot_y + rise * 0.82, outer.z),
+		Vector3(outer.x, out_y, outer.z),
+	]
 
 
 static func _collect(node: Node, out: Array[CliffFace]) -> void:

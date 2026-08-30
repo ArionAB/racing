@@ -97,6 +97,16 @@ func _ready() -> void:
 	var zoom_size := 60.0
 	var driver_view := false
 	var game_cam := false
+	## --cave: aplica presetul si intunericul celei mai apropiate [CameraZone].
+	##
+	## Fara el, orice captura din subteran MINTE. Zona se aprinde cand masina
+	## jucatorului intra in ea, iar Snapshot nu instantiaza nicio masina — deci
+	## sala apare cu ambientul si ceata de la suprafata, adica luminata de
+	## soarele de zori. Exact asa a iesit prima runda a POI-ului F: o hala
+	## portocalie in loc de o caverna. Acelasi motiv pentru care exista
+	## `--train-at` si `--rock-at`: ce are ceas sau declansator trebuie ADUS in
+	## starea in care il vede jucatorul, altfel poza arata alt joc.
+	var cave_view := false
 	var free_cam := false
 	var eye_pos := Vector3.ZERO
 	var look_pos := Vector3.ZERO
@@ -139,6 +149,8 @@ func _ready() -> void:
 			lava_stage = int(arg.trim_prefix("--lava-stage="))
 		elif arg.begins_with("--route="):
 			route_idx = int(arg.trim_prefix("--route="))
+		elif arg == "--cave":
+			cave_view = true
 		elif arg.begins_with("--eye="):
 			eye_pos = _vec3(arg.trim_prefix("--eye="))
 			free_cam = true
@@ -284,6 +296,24 @@ func _ready() -> void:
 		var n := pts.size()
 		var idx := int(zoom_frac * float(n)) % n
 		var focus: Vector3 = pts[idx]
+		if cave_view:
+			# Presetul de camera si intunericul zonei, aplicate MANUAL: vezi
+			# `cave_view` pentru de ce o captura din subteran fara ele minte.
+			var zone := _nearest_cave_zone(track, focus)
+			if zone != null:
+				var solved := ChaseCamera.solve_preset(
+					zone.height, zone.look_height, dist, look_ahead,
+					fov + zone.fov_bonus, zone.ceiling, zone.ceiling_dist)
+				cam_h = solved[0]
+				fov = solved[1]
+				look_h = zone.look_height
+				cam.fov = fov
+				zone.force_dark()
+				await get_tree().process_frame
+				print("--cave: zona %s, tavan %.1f m -> h %.2f fov %.1f"
+					% [zone.name, zone.ceiling, cam_h, fov])
+			else:
+				print("--cave: nicio CameraZone langa frac %.3f" % zoom_frac)
 		var ahead: Vector3 = pts[route.wrap_index(idx + 12)]
 		var dir := (ahead - focus).normalized()
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
@@ -598,3 +628,23 @@ func _smoothed(mesh: Mesh) -> ArrayMesh:
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return out
 
+
+
+## Cea mai apropiata [CameraZone] de un punct de pe traseu, sau null.
+##
+## Cauta pe TOT arborele pistei fiindca zonele stau grupate intr-un nod propriu
+## in .tscn (ZoneCamera/...), nu direct sub radacina.
+func _nearest_cave_zone(track: Node, at: Vector3) -> CameraZone:
+	var best: CameraZone = null
+	var best_d := INF
+	for node in track.find_children("*", "Area3D", true, false):
+		var z := node as CameraZone
+		if z == null:
+			continue
+		var d := z.global_position.distance_to(at)
+		if d < best_d:
+			best_d = d
+			best = z
+	# Prea departe inseamna „nu esti in caverna": zonele au ~14 m adancime, deci
+	# peste 120 m e alt POI si presetul ar fi o minciuna in alta directie.
+	return best if best_d <= 120.0 else null

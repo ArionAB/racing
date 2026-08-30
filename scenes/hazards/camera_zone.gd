@@ -27,6 +27,17 @@ extends Area3D
 ## de adancime, o masina cu 30 m/s ar termina tranzitia in 3 m si ar citi ca un
 ## pocnet; legata de timp, orice viteza primeste aceeasi jumatate de secunda.
 ##
+## [b]Presetul e o CERINTA, nu trei numere.[/b] Cotele 6.5 / 1.4 / +6 sunt
+## solutia pe camera implicita; ce cere briefu e insa geometric ("tavanul de
+## 15 m se vede de la 25 m"), iar cele doua coincid doar cu sliderele pe 1.0.
+## Prima versiune trimitea doar numerele, si atunci presetul se aduna peste
+## preferinta jucatorului: cu `cam_fov_scale` la minimul legal (0.7) tavanul
+## intra abia de la 45.6 m in loc de 22.4, iar cu camera trasa la 0.5 nici FOV-ul
+## implicit nu ajungea. Pe grila legala a sliderelor pica aproape jumatate din
+## spatiu — adica pentru o buna parte din reglajele permise POI-ul subteran era
+## un tavan negru. Acum zona trimite si CERINTA (`ceiling`, `ceiling_dist`), iar
+## [ChaseCamera.solve_preset] rezolva cotele pentru sliderele reale.
+##
 ## [b]Cost zero.[/b] Fara masca de coliziune si fara `monitorable`: zona
 ## raporteaza cine e inauntru, nu opreste si nu imbranceste pe nimeni. Se uita
 ## doar dupa masina jucatorului (`is_player`) — camera e una singura, deci un
@@ -45,10 +56,24 @@ extends Area3D
 ## Inaltimea TINTEI pe masina (m). Implicit 0.40 afara. Ridicarea ei e ce
 ## inclina efectiv privirea in sus — vezi `ChaseCamera._aim_point`.
 @export_range(0.0, 5.0, 0.05) var look_height: float = 1.4
-## Cat se adauga la FOV (grade).
+## Cat se adauga la FOV (grade). E o PREFERINTA, nu o garantie: cerinta de mai
+## jos poate cere mai mult, si atunci castiga ea (vezi `ChaseCamera.solve_preset`).
 @export_range(-20.0, 20.0, 0.5) var fov_bonus: float = 6.0
 ## Durata tranzitiei, la intrare si la iesire (s).
 @export_range(0.05, 3.0, 0.05) var blend_time: float = 0.5
+
+@export_group("Cerinta geometrica")
+## Inaltimea tavanului care TREBUIE sa se vada (m). 0 = fara garantie, presetul
+## ramane pur aditiv.
+##
+## Asta e diferenta intre un preset si o garantie. Cotele de mai sus (6.5 / 1.4
+## / +6) sunt solutia gasita pe camera IMPLICITA; cerinta din brief (§2.0) e
+## insa geometrica — "tavanul de 15 m se vede de la 25 m" — si cele doua se
+## suprapun doar cand sliderele jucatorului sunt pe 1.0. Cu ele declarate aici,
+## camera REZOLVA cotele pentru sliderele reale, in loc sa le copieze.
+@export_range(0.0, 40.0, 0.5) var ceiling: float = 15.0
+## De la ce distanta trebuie sa se vada tavanul (m).
+@export_range(0.0, 200.0, 1.0) var ceiling_dist: float = 25.0
 
 var _shape: CollisionShape3D
 
@@ -73,7 +98,13 @@ func _rebuild() -> void:
 
 
 func preset() -> Dictionary:
-	return {"height": height, "look_height": look_height, "fov_bonus": fov_bonus}
+	return {
+		"height": height,
+		"look_height": look_height,
+		"fov_bonus": fov_bonus,
+		"ceiling": ceiling,
+		"ceiling_dist": ceiling_dist,
+	}
 
 
 func _physics_process(_delta: float) -> void:

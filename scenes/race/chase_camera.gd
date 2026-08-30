@@ -174,6 +174,11 @@ var _body_length: float = REFERENCE_LENGTH
 var _zone_preset: Dictionary = {}
 var _zone_amount: float = 0.0
 var _zone_blend: float = 0.5
+## Rezultatul lui `solve_preset` pentru cadrul curent (inaltime, FOV), tinut ca
+## `eff_*` sa nu refaca cautarea binara de cateva ori pe cadru. Recalculat in
+## `_physics_process` si oriunde se schimba o intrare (setari, preset nou).
+var _solved_h: float = 0.0
+var _solved_fov: float = 0.0
 ## Cine a cerut presetul. Doua zone suprapuse nu trebuie sa se stearga una pe
 ## alta la iesirea din prima: doar proprietarul curent poate anula.
 var _zone_owner: int = 0
@@ -207,6 +212,10 @@ func apply_settings_for(body_length: float) -> void:
 	height = height_for(body_length) * GameState.cam_height_scale
 	base_fov = BASE_FOV * GameState.cam_fov_scale
 	follow_speed = DEFAULT_FOLLOW_SPEED * GameState.cam_follow_scale
+	# Presetul de zona se recalculeaza ODATA CU setarile: `solve_preset` citeste
+	# `distance` si `base_fov`, deci un slider miscat in timpul cursei (panoul
+	# face exact asta) ar lasa altfel solutia veche pe o baza noua.
+	_resolve_preset()
 
 
 ## Reia setarile pe vehiculul curent. Chemata prin grup, din panoul de setari si
@@ -229,6 +238,7 @@ func set_zone_preset(preset: Dictionary, blend_time: float, owner_id: int) -> vo
 		return
 	_zone_preset = preset
 	_zone_owner = owner_id
+	_resolve_preset()
 
 
 ## Valorile EFECTIVE ale camerei: setarile jucatorului, cu presetul de zona
@@ -238,7 +248,9 @@ func set_zone_preset(preset: Dictionary, blend_time: float, owner_id: int) -> vo
 ## Trei functii, nu un Dictionary: se cheama de cateva ori pe cadru, si un
 ## dictionar alocat de fiecare data ar fi gunoi pe bugetul de 60 fps.
 func eff_height() -> float:
-	return _blend(height, "height")
+	if _zone_amount <= 0.0001 or _zone_preset.is_empty():
+		return height
+	return lerpf(height, _solved_h, _zone_amount)
 
 
 func eff_look_height() -> float:
@@ -248,13 +260,36 @@ func eff_look_height() -> float:
 func eff_fov() -> float:
 	if _zone_amount <= 0.0001 or _zone_preset.is_empty():
 		return base_fov
-	return base_fov + float(_zone_preset.get("fov_bonus", 0.0)) * _zone_amount
+	return lerpf(base_fov, _solved_fov, _zone_amount)
 
 
 func _blend(base: float, key: String) -> float:
 	if _zone_amount <= 0.0001 or _zone_preset.is_empty():
 		return base
 	return lerpf(base, float(_zone_preset.get(key, base)), _zone_amount)
+
+
+## Recalculeaza tinta presetului (inaltime + FOV) din cerinta lui geometrica.
+##
+## Se cheama cand se schimba o INTRARE, nu in fiecare cadru degeaba: preset nou,
+## setari noi. Rezultatul e capatul rampei — `_zone_amount` interpoleaza spre el,
+## deci tranzitia ramane cea de 0.5 s, doar ca acum are un capat corect.
+##
+## Fara `ceiling`/`ceiling_dist` in preset, solverul nu face nimic si presetul
+## se comporta ca inainte (aditiv): o zona care nu declara ce trebuie sa se vada
+## n-are ce garanta.
+func _resolve_preset() -> void:
+	if _zone_preset.is_empty():
+		return
+	var want_h := float(_zone_preset.get("height", height))
+	var want_lh := float(_zone_preset.get("look_height", look_height))
+	var bonus := float(_zone_preset.get("fov_bonus", 0.0))
+	var solved := solve_preset(want_h, want_lh, distance, look_ahead,
+		base_fov + bonus,
+		float(_zone_preset.get("ceiling", 0.0)),
+		float(_zone_preset.get("ceiling_dist", 0.0)))
+	_solved_h = float(solved[0])
+	_solved_fov = float(solved[1])
 
 
 ## Marginea de sus a frustumului fata de orizontala (grade), pentru inaltimea
@@ -265,6 +300,90 @@ func _blend(base: float, key: String) -> float:
 static func top_edge_deg(h: float, lh: float, d: float, la: float,
 		fov: float) -> float:
 	return -rad_to_deg(atan((h - lh) / (d + la))) + fov * 0.5
+
+
+## Cat de jos are voie sa coboare camera de cavern cand geometria o cere.
+##
+## Nu e o valoare de gust, e o limita de coliziune: sub ~3 m bratul incepe sa
+## intre in masina la orice denivelare, iar `_unclip` il scurteaza si mai mult.
+## E prima parghie cheltuita (vezi `solve_preset`) fiindca e GRATUITA — coborarea
+## camerei ridica marginea de sus SI scurteaza drumul pana la tavan, pe cand
+## largirea FOV-ului costa distorsiune la margini (vezi antetul, punctul 1).
+const CAVE_MIN_HEIGHT: float = 3.0
+
+## FOV-ul minim care face un tavan de `ceiling` vizibil de la `dist`, cu camera
+## la `h`. Inversa lui `ceiling_entry_distance`: acolo intrebi "de la ce
+## distanta intra tavanul", aici "ce FOV imi trebuie ca sa intre de la X".
+static func fov_for_ceiling(ceiling: float, dist: float, h: float, lh: float,
+		d: float, la: float) -> float:
+	var need_top := rad_to_deg(atan((ceiling - h) / dist))
+	var pitch := rad_to_deg(atan((h - lh) / (d + la)))
+	return 2.0 * (need_top + pitch)
+
+
+## Rezolva presetul de cavern ca sa TINA CERINTA GEOMETRICA, oricare ar fi
+## sliderele jucatorului. Intoarce [height, fov] efective.
+##
+## [b]De ce exista.[/b] Presetul, asa cum a fost construit prima data, era
+## ADITIV: `base_fov * cam_fov_scale + 6`. Dar cerinta din brief (§2.0) nu e
+## "cu 6° mai larg", e GEOMETRICA — "tavanul de 15 m se vede de la 25 m". Cele
+## doua coincid doar la sliderele pe 1.0. Masurat pe grila legala a sliderelor
+## (0.5–2.0 pe distanta x 0.7–1.3 pe FOV), varianta aditiva pica pe aproape
+## JUMATATE din spatiu: la `cam_fov_scale` 0.7 tavanul intra abia de la 45.6 m
+## in loc de 22.4, iar la distanta scurtata la 0.5 nici macar FOV-ul implicit
+## nu ajunge (38 m). Adica pentru o buna parte din reglajele legale subteranul —
+## POI-ul pistei — era un tavan negru pe care jucatorul nu-l vedea niciodata.
+##
+## [b]Ordinea parghiilor, si de ce asta.[/b] Intai coboara INALTIMEA pana la
+## `CAVE_MIN_HEIGHT`, si abia daca nici acolo nu ajunge urca FOV-ul. Inaltimea
+## e gratuita si lucreaza de doua ori (ridica marginea de sus si scurteaza
+## `ceiling - h`); FOV-ul larg aplatizeaza si distorsioneaza marginile — exact
+## ce spune antetul ca strica senzatia de viteza. Cu ordinea asta, FOV-ul cerut
+## in coltul cel mai greu (distanta 0.5, FOV 0.7) scade de la 86.3° la 67.5°.
+##
+## [b]Cine pierde, si unde.[/b] Preferinta de FOV a jucatorului e respectata
+## PESTE podea, niciodata sub: FOV-ul iese `max(preferinta + bonus, podea)`.
+## Podeaua se ridica peste preferinta doar in coltul "FOV stramt + camera
+## aproape" — la `cam_fov_scale` 0.7 peste tot (+3.8° la distanta 2.0, pana la
+## +13.9° la 0.5), la 0.8 doar sub distanta 1.2, si deloc de la 0.9 in sus.
+## Restul spatiului legal isi pastreaza reglajul neatins. Pierderea e asumata
+## si are un motiv care nu se poate negocia: sub un FOV vertical de ~57° un
+## tavan de 15 m NU INCAPE in cadru de la 25 m la NICIO inaltime si NICIO
+## distanta — 13.6 m de urcare la 25 m cer o jumatate de unghi de 28.5°, iar
+## 47.6° (adica 0.7) ofera 23.8°. Nu e o alegere de design, e trigonometrie:
+## ori se largeste FOV-ul acolo, ori POI-ul nu exista pentru acei jucatori.
+##
+## `cam_height_scale` nu apare nicaieri fiindca presetul da inaltimea ABSOLUT
+## (o inghite complet), iar `cam_distance_scale` intra prin `d`, care e chiar
+## parametrul.
+static func solve_preset(want_h: float, lh: float, d: float, la: float,
+		player_fov: float, ceiling: float, dist: float) -> Array:
+	if ceiling <= 0.0 or dist <= 0.0:
+		return [want_h, player_fov]
+	# Parghia 1: inaltimea. Cat de sus poate sta camera si cerinta sa tina inca?
+	var h := want_h
+	if ceiling_entry_distance(ceiling, h,
+			top_edge_deg(h, lh, d, la, player_fov)) > dist:
+		var lo := CAVE_MIN_HEIGHT
+		var hi := want_h
+		if ceiling_entry_distance(ceiling, lo,
+				top_edge_deg(lo, lh, d, la, player_fov)) <= dist:
+			# Cerinta se rezolva DOAR din inaltime: cauta cea mai INALTA cota
+			# care o tine, ca sa cobori camera cat mai putin.
+			for _i in 40:
+				var mid := (lo + hi) * 0.5
+				if ceiling_entry_distance(ceiling, mid,
+						top_edge_deg(mid, lh, d, la, player_fov)) <= dist:
+					lo = mid
+				else:
+					hi = mid
+			h = lo
+		else:
+			# Nici jos de tot nu ajunge: coboara complet si plateste in FOV.
+			h = CAVE_MIN_HEIGHT
+	# Parghia 2: FOV-ul, doar cat lipseste. `max` = preferinta jucatorului e
+	# respectata peste podea.
+	return [h, maxf(player_fov, fov_for_ceiling(ceiling, dist, h, lh, d, la))]
 
 
 ## De la ce distanta intra in cadru un tavan aflat la `ceiling` metri, cu

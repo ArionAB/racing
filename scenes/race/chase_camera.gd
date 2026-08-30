@@ -165,6 +165,19 @@ var _aim_dir: Vector3 = Vector3.FORWARD
 ## recalcula incadrarea fara sa mai intrebe cine e la volan.
 var _body_length: float = REFERENCE_LENGTH
 
+## Presetul de zona (cavern) ca DATE, plus cat de mult e aplicat (0..1).
+##
+## Nu se scrie niciodata in `height`/`look_height`/`base_fov`: alea sunt
+## rezultatul lui `apply_settings_for`, adica al setarilor jucatorului, si
+## panoul le recalculeaza in timpul cursei. Presetul se aplica PESTE ele, in
+## fiecare cadru, in `_physics_process`. Vezi [CameraZone].
+var _zone_preset: Dictionary = {}
+var _zone_amount: float = 0.0
+var _zone_blend: float = 0.5
+## Cine a cerut presetul. Doua zone suprapuse nu trebuie sa se stearga una pe
+## alta la iesirea din prima: doar proprietarul curent poate anula.
+var _zone_owner: int = 0
+
 
 func _ready() -> void:
 	# Prinde exact divergenta de care am suferit: cine schimba coeficientii fara
@@ -203,6 +216,67 @@ func refresh_from_settings() -> void:
 	apply_settings_for(_body_length)
 
 
+## Primeste (sau anuleaza) presetul unei [CameraZone]. Chemata prin grup.
+##
+## `preset` gol inseamna "iesi din zona". Anularea o poate cere doar zona care
+## a pus presetul: cand doua zone se suprapun (gura cavernei si sala), iesirea
+## din prima n-are voie sa stearga presetul celei in care tocmai ai intrat.
+func set_zone_preset(preset: Dictionary, blend_time: float, owner_id: int) -> void:
+	_zone_blend = maxf(blend_time, 0.01)
+	if preset.is_empty():
+		if owner_id == _zone_owner:
+			_zone_owner = 0
+		return
+	_zone_preset = preset
+	_zone_owner = owner_id
+
+
+## Valorile EFECTIVE ale camerei: setarile jucatorului, cu presetul de zona
+## amestecat peste. Astea sunt cele pe care le foloseste `_physics_process` —
+## `height`/`look_height`/`base_fov` raman curate, ale setarilor.
+##
+## Trei functii, nu un Dictionary: se cheama de cateva ori pe cadru, si un
+## dictionar alocat de fiecare data ar fi gunoi pe bugetul de 60 fps.
+func eff_height() -> float:
+	return _blend(height, "height")
+
+
+func eff_look_height() -> float:
+	return _blend(look_height, "look_height")
+
+
+func eff_fov() -> float:
+	if _zone_amount <= 0.0001 or _zone_preset.is_empty():
+		return base_fov
+	return base_fov + float(_zone_preset.get("fov_bonus", 0.0)) * _zone_amount
+
+
+func _blend(base: float, key: String) -> float:
+	if _zone_amount <= 0.0001 or _zone_preset.is_empty():
+		return base
+	return lerpf(base, float(_zone_preset.get(key, base)), _zone_amount)
+
+
+## Marginea de sus a frustumului fata de orizontala (grade), pentru inaltimea
+## si FOV-ul date. Pozitiv = camera vede deasupra orizontalei.
+##
+## `fov` din Godot e cel VERTICAL (`keep_aspect` implicit pastreaza inaltimea),
+## deci jumatatea de cadru pe verticala e chiar fov/2 — nu se trece prin raport.
+static func top_edge_deg(h: float, lh: float, d: float, la: float,
+		fov: float) -> float:
+	return -rad_to_deg(atan((h - lh) / (d + la))) + fov * 0.5
+
+
+## De la ce distanta intra in cadru un tavan aflat la `ceiling` metri, cu
+## camera la `cam_h`. INF daca marginea de sus nu urca peste orizontala:
+## atunci tavanul nu intra niciodata, oricat de departe ar fi.
+static func ceiling_entry_distance(ceiling: float, cam_h: float,
+		top_deg: float) -> float:
+	if top_deg <= 0.01 or ceiling <= cam_h:
+		return INF
+	return (ceiling - cam_h) / tan(deg_to_rad(top_deg))
+
+
 func add_trauma(amount: float) -> void:
 	trauma = minf(trauma + amount, 1.0)
 
@@ -210,7 +284,7 @@ func add_trauma(amount: float) -> void:
 ## Panta camerei in pozitia de repaus. Ridicarea la viteza o pastreaza (vezi
 ## `_physics_process`), deci asta e UNGHIUL camerei, nu doar o valoare de start.
 func _pitch_tan() -> float:
-	return (height - look_height) / (distance + look_ahead)
+	return (eff_height() - eff_look_height()) / (distance + look_ahead)
 
 
 ## Acelasi unghi, in grade — cifra cu care se compara doua camere intre ele.
@@ -221,6 +295,14 @@ func pitch_degrees() -> float:
 func _physics_process(delta: float) -> void:
 	if target == null:
 		return
+	# Presetul de zona urca/coboara liniar, ca `blend_time` sa insemne chiar
+	# durata ceruta. Restul netezirilor camerei sunt exponentiale fiindca
+	# urmaresc o tinta care se misca; asta e o rampa cu capete, si un exp ar
+	# lasa-o mereu "aproape" de preset, niciodata pe el.
+	var zone_target := 1.0 if _zone_owner != 0 else 0.0
+	_zone_amount = move_toward(_zone_amount, zone_target, delta / _zone_blend)
+	if _zone_amount <= 0.0 and _zone_owner == 0:
+		_zone_preset = {}
 	var fwd := -target.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()
@@ -244,20 +326,21 @@ func _physics_process(delta: float) -> void:
 	# — de asta vechea pereche (0.18 / 0.10) aplatiza cadrul cu 0.6° la viteza
 	# maxima, exact invers decat pretindea comentariul de langa ea. Asa nu mai
 	# poate putrezi: schimbi SPEED_PULLBACK si unghiul ramane.
-	var h := look_height + (d + look_ahead) * _pitch_tan()
+	var h := eff_look_height() + (d + look_ahead) * _pitch_tan()
 
 	var desired := target.global_position - anchor * d + Vector3.UP * h
 	var t := 1.0 - exp(-follow_speed * delta) # urmarire independenta de fps
 	global_position = global_position.lerp(desired, t)
 	# Anti-clipping DUPA lerp, nu inainte: camera n-are voie sa fie niciodata in
 	# perete, iar `desired` o impinge afara oricum, deci iesirea e lina de la sine.
-	global_position = _unclip(target.global_position + Vector3.UP * LOOK_HEIGHT,
+	global_position = _unclip(
+		target.global_position + Vector3.UP * eff_look_height(),
 		global_position)
 	_look_at_point(_aim_point(_aim_dir))
 
 	# FOV: viteza + kick suplimentar cat tine boost-ul.
 	var boost_kick := 6.0 if target.is_boosting else 0.0
-	var fov_target := base_fov + fov_speed_kick * speed_frac + boost_kick
+	var fov_target := eff_fov() + fov_speed_kick * speed_frac + boost_kick
 	# exp, nu delta simplu: altfel viteza de tranzitie depinde de framerate
 	# (pozitia era deja corecta, FOV-ul nu era).
 	_cam.fov = lerpf(_cam.fov, fov_target, 1.0 - exp(-3.0 * delta))
@@ -292,8 +375,24 @@ func snap_behind() -> void:
 
 ## Punctul spre care priveste camera, pentru o directie data.
 ## Exista ca functie ca cele doua cai (mers si snap) sa nu poata diverge.
+##
+## Foloseste `look_height`/`look_ahead` EXPORTATE, nu constantele. Inainte erau
+## constantele, si asta facea `look_height` o parghie pe jumatate moarta: muta
+## pozitia rig-ului (prin `_pitch_tan`), dar nu si TINTA, deci camera cobora
+## fara sa-si ridice privirea. Pentru presetul de cavern ([CameraZone]) exact
+## ridicarea privirii e tot rostul — cu tinta lasata la butuc, panta ar fi iesit
+## 19.22° in loc de 16.25°, marginea de sus +17.78° in loc de +20.75°, iar
+## tavanul de 15 m ar fi intrat in cadru abia de la 26.5 m in loc de 22.4:
+## adica exact peste pragul de 25 m cerut de brief, deci presetul ar fi ratat
+## tinta cu tot cu cifrele lui corecte.
+##
+## Pe camera implicita nu schimba nimic: exporturile pornesc chiar de la
+## constante (`look_height = LOOK_HEIGHT`, `look_ahead = LOOK_AHEAD`), si
+## singurul care le mai misca e `tools/probe_cam.gd`, unde diferenta e chiar
+## scopul.
 func _aim_point(dir: Vector3) -> Vector3:
-	return target.global_position + Vector3.UP * LOOK_HEIGHT + dir * LOOK_AHEAD
+	return target.global_position + Vector3.UP * eff_look_height() \
+		+ dir * look_ahead
 
 
 ## look_at cu garda: Godot da eroare daca tinta coincide cu pozitia camerei, iar

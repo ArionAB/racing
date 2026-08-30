@@ -232,6 +232,54 @@ extends Marker3D
 @export var cap_slots: Array[int] = [23, 10, 23, 27]
 
 
+## TAIETURA DIN INTERIORUL VIRAJULUI: peretele in care e SAPAT drumul.
+##
+## De ce exista, cu masuratoarea in fata. Verdictul rundei 4: „in referinta
+## drumul e TAIAT in stanca — o polita cu o fata taiata in interior si o cadere
+## in exterior. La noi drumul e PICTAT pe o duna, lipit in stanga, fara
+## taietura, fara bordura." Cauza NU e ca lipseste masa de stanca: ProbeInboard
+## masoara pe interior +47 m la fractia 0.28, deci muntele chiar e acolo.
+## Cauza e CE E INTRE el si asfalt — terenul ramane PLAT (0..+1 m) pana la 14 m
+## de ax, adica o banda goala de 7 m dincolo de marginea benzii.
+##
+## Banda aia e chiar [constant Track.TERRAIN_CELL] (7.92 m): campul de inaltime
+## nu POATE urca in interiorul unei celule lipite de drum, exact motivul pentru
+## care faleza de la buza e geometrie construita si nu rapa ceruta campului.
+## Deci si taietura din interior trebuie CONSTRUITA, din acelasi motiv si cu
+## acelasi pret: zero materiale, e tot [method Palette.world_material].
+##
+## Forma: invers fata de `_build` — coloana urca de la talpa (in umarul
+## drumului) pana la coama, si fata se uita SPRE drum. Cu ea, banda are perete
+## intr-o parte si gol in cealalta, adica citeste ca polita, nu ca duna.
+@export var cut_wall: bool = false
+## La ce rulaj lateral incepe talpa taieturii, fata de axul benzii.
+##
+## Se pune chiar dupa marginea asfaltului (half_width 7.0 la POI C) plus umarul:
+## daca peretele nu e LANGA banda, ramane duna intre el si roata si nu s-a
+## rezolvat nimic. Sub half_width ar musca din carosabil.
+@export var cut_offset_m: float = 8.2
+## Cati metri urca fata, de la talpa in sus.
+##
+## 18 m taie orizontul din vederea soferului (ochiul e la ~6 m peste asfalt),
+## deci peretele se citeste ca masa, nu ca bordura inalta.
+@export var cut_height_m: float = 18.0
+## Retragerea laterala TOTALA a fetei, de la talpa la coama.
+##
+## Mica: o taietura de drum e aproape verticala (asa se sapa), spre deosebire de
+## un versant natural. 2.5 m pe 18 m inseamna ~8 grade fata de verticala.
+@export var cut_batter_m: float = 2.5
+## Pasul de esantionare pe lungime.
+@export var cut_step_m: float = 4.0
+## Cate benzi orizontale de strat are taietura.
+@export var cut_bands: int = 7
+## Cat de adanc intra talpa in teren, ca sa nu ramana fanta luminoasa pe linia
+## in care ochiul cauta contactul dintre perete si umar.
+@export var cut_foot_bite_m: float = 1.2
+## Sloturile taieturii, de la coama in jos. Aceleasi strate ca faleza, ca sa se
+## citeasca drept ACEEASI roca vazuta din partea cealalta a benzii.
+@export var cut_slots: Array[int] = [23, 10, 27, 23, 10, 27, 4]
+
+
 ## Toate falezele declarate ca noduri, construite intr-un singur nod-parinte.
 ## Se cheama din [method Track.rebuild], dupa ce terenul exista: talpa se coase
 ## pe suprafata LUI.
@@ -255,7 +303,111 @@ static func build_all(track: Node3D, sampler: TrackSideSampler,
 			var far_node := f._build_far(sampler, surface_y)
 			if far_node != null:
 				root.add_child(far_node)
+		# TAIETURA e independenta de celelalte doua: un nod poate fi NUMAI
+		# taietura (perete pe interior, fara gol pe exterior), fiindca cele doua
+		# maluri ale unei polite sunt lucruri diferite si se declara separat.
+		if f.cut_wall:
+			var cut_node := f._build_cut(sampler, surface_y)
+			if cut_node != null:
+				root.add_child(cut_node)
 	return root
+
+
+## Peretele in care e SAPAT drumul, pe latura dinspre INTERIORUL virajului.
+##
+## Vezi `cut_wall` pentru motivul si masuratoarea. Aici doar forma: pentru
+## fiecare pas se ridica o coloana de la talpa (infipta in umar) pana la coama,
+## fata privind SPRE banda. Ordinea vertecsilor din `_quad` e inversa fata de
+## `_build`, fiindca normala trebuie sa bata inspre drum, nu dinspre el.
+##
+## Coama urmeaza TERENUL de deasupra, nu o cota fixa: acolo unde masivul chiar
+## urca (fractiile 0.26-0.30, +47 m masurat) peretele se inalta cu el, iar unde
+## platoul se aplatizeaza taietura se stinge singura — asa se opreste sa fie un
+## zid continuu care ar ascunde tot ce e dincolo de viraj.
+func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
+	var total := sampler.total_length()
+	if total <= 0.0 or cut_bands < 1 or cut_slots.is_empty():
+		return null
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var span := (frac_end - frac_start) * total
+	var steps := maxi(int(round(span / maxf(cut_step_m, 0.5))), 2)
+	var cols: Array = []
+	for si in steps + 1:
+		var f := frac_start + (frac_end - frac_start) * (float(si) / float(steps))
+		cols.append(_cut_column(sampler, f, surface_y))
+	var built := 0
+	for si in steps:
+		var a: Array = cols[si]
+		var b: Array = cols[si + 1]
+		if a.is_empty() or b.is_empty():
+			continue
+		built += 1
+		var rows: int = mini(a.size(), b.size())
+		for r in rows - 1:
+			var slot: int = cut_slots[mini(r, cut_slots.size() - 1)]
+			var uvv := Palette.uv(slot)
+			# AO invers fata de faleza: la o taietura, talpa sta in umbra
+			# peretelui si coama prinde soarele. Randul 0 e COAMA.
+			var t0 := float(r) / float(rows - 1)
+			var t1 := float(r + 1) / float(rows - 1)
+			var c0 := _shade(t0)
+			var c1 := _shade(t1)
+			# Ordine inversa fata de `_build`: fata priveste spre banda.
+			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1)
+	if built == 0:
+		return null
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Taietura " + name
+	mi.mesh = st.commit()
+	mi.material_override = Palette.world_material()
+	# Peretele sta LANGA banda si la est de ea pe portiunea cornisei: la soare de
+	# zori umbra lui cade chiar pe carosabil, si e cel mai ieftin semn ca drumul
+	# e sapat in ceva solid.
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	return mi
+
+
+## O coloana din taietura: de la coama in jos pana in talpa, infipta in umar.
+##
+## Intoarce lista goala cand nu e in ce sapa — vezi mai jos.
+func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	# Interiorul e latura OPUSA golului: nodul declara `side` pentru cadere.
+	var sd := sampler.side_at(i) * -signf(side)
+	var foot: Vector3 = p + sd * cut_offset_m
+	var foot_y: float = surface_y.call(foot.x, foot.z)
+	# Talpa se infige sub suprafata umarului, ca sa nu ramana fanta.
+	foot_y = minf(foot_y, p.y) - cut_foot_bite_m
+	# CAT DE SUS: se cere terenului de dincolo, nu unei cote fixe.
+	#
+	# Se ia cea mai inalta cota pe o fereastra scurta dincolo de talpa. Unde
+	# masivul urca, peretele urca cu el; unde platoul e plat, `rise` iese ~0 si
+	# coloana se intoarce goala — taietura se stinge in loc sa devina zid.
+	var crest := -1e9
+	var probe := 4.0
+	while probe <= 22.0:
+		var q := foot + sd * probe
+		crest = maxf(crest, surface_y.call(q.x, q.z))
+		probe += 6.0
+	var rise: float = minf(crest - foot_y, cut_height_m)
+	# Sub 2 m nu e taietura, e prag: acolo nu exista masiv de taiat.
+	if rise < 2.0:
+		return []
+	var out: Array = []
+	for r in cut_bands + 1:
+		var t := float(r) / float(cut_bands)
+		# r = 0 e COAMA (sus), deci inaltimea scade cu t.
+		var y := foot_y + rise * (1.0 - t)
+		# Retragerea: coama sta mai in spate decat talpa (taietura e batuta usor
+		# in spate, ca orice sapatura care nu se surpa).
+		var back := cut_batter_m * (1.0 - t)
+		var q: Vector3 = p + sd * (cut_offset_m + back)
+		out.append(Vector3(q.x, y, q.z))
+	return out
 
 
 static func _collect(node: Node, out: Array[CliffFace]) -> void:

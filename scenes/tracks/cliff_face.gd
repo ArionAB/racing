@@ -62,6 +62,17 @@ extends Marker3D
 ## Cat iese in afara peretele, ca fata sa nu fie un plan perfect. Fiecare banda
 ## primeste retragerea ei, deci stratele ies in relief ca la o roca sedimentara.
 @export var band_relief_m: float = 0.9
+## Evazarea fetei: metri de rulaj lateral pentru fiecare METRU de cadere.
+##
+## Zero ar insemna perete perfect vertical — si perfect ascuns de marginea
+## drumului din camera de joc, care e chiar modul in care s-a pierdut runda 2.
+##
+## Valoarea nu e de gust, e citita din ProbeReach: frontiera dintre „se vede" si
+## „nu se vede", masurata cu raze din ochiul real, cere ~4 m de rulaj la fiecare
+## ~6 m de adancime, adica 0.66. Se merge putin peste, la 0.72, ca banda sa fie
+## vizibila cu marja si pe fractiile unde drumul se inclina spre vale.
+@export var batter_m: float = 0.72
+
 ## Cat de adanc intra talpa panzei in teren, ca sa nu ramana fanta la contact.
 ##
 ## Grila de teren are 7.92 m, deci intre doi vertecsi ai ei suprafata reala se
@@ -218,7 +229,7 @@ func _ledge_body(sampler: TrackSideSampler, lf: float) -> StaticBody3D:
 	var i := clampi(int(round(lf * float(n))) % n, 0, n - 1)
 	var p := sampler.baked_point(i)
 	var sd := sampler.side_at(i) * signf(side)
-	var lip_y := p.y - Track.ROAD_THICKNESS * 0.72
+	var lip_y := p.y
 	var q := p + sd * ledge_offset_m
 	var body := StaticBody3D.new()
 	body.name = "Polita %.3f" % lf
@@ -264,14 +275,22 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 	var sd := sampler.side_at(i) * signf(side)
 	var hw := sampler.half_width_at(i)
 	var lip := p + sd * (hw + lip_offset_m)
-	# Cota BUZEI: sub FUSTA soselei, nu la cota asfaltului.
+	# Cota BUZEI: la COTA ASFALTULUI, nu sub fusta.
 	#
-	# Tablierul isi are fusta lui de `Track.ROAD_THICKNESS` (3 m) atarnata sub
-	# margine, si ea e opaca. Cu buza pusa la umarul asfaltului, primele benzi
-	# ale falezei cadeau chiar in spatele fustei: din camera de joc se vedea o
-	# dunga bej de beton exact acolo unde trebuia sa inceapa rosul, iar faleza
-	# parea sa inceapa cu doi metri mai jos decat drumul. Se incepe sub ea.
-	var lip_y := p.y - Track.ROAD_THICKNESS * 0.72
+	# Aici a fost pierduta runda 2, si corectia merita scrisa intreaga fiindca
+	# rationamentul vechi suna bine si era gresit. Vechea versiune cobora buza
+	# cu `ROAD_THICKNESS * 0.72` (2.16 m) ca sa nu se vada fusta de beton intre
+	# asfalt si prima banda rosie. Efectul real, masurat cu ProbeOccl: panza
+	# intreaga ajungea sub silueta propriului tablier, iar paravanul dominant
+	# devenea chiar trimesh-ul soselei (`@StaticBody3D@84`, 336 din 556 de
+	# vertecsi in cadru la fractia 0.28, peste TerrainBody). Din camera de
+	# urmarire — 10 m deasupra masinii, privind usor in jos — marginea drumului
+	# trecea exact peste faleza. De-aia criticul vedea „un fileu convex neted":
+	# ala nu era un perete palid, era drumul stand in fata peretelui.
+	#
+	# Deci buza urca la cota asfaltului. Fusta nu mai e o problema fiindca prima
+	# banda o ACOPERA acum, in loc sa inceapa sub ea.
+	var lip_y := p.y
 
 	# CAT DE ADANC cade fata. Se CITESTE fundul vaii, nu se presupune.
 	var floor_y := lip_y - depth_m
@@ -318,7 +337,26 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 		# Iesirea in trepte, banda cu banda: muchiile prind lumina razanta de
 		# zori si stratele se citesc si de la 100 m.
 		var stepi := float(int(t * float(bands)))
-		var proud := band_relief_m * stepi
+		# EVAZAREA: fata se departeaza de drum pe masura ce coboara.
+		#
+		# Fara ea, o faleza verticala lipita de marginea benzii e ascunsa de
+		# propriul tablier pentru un ochi care vine din spate si de sus (vezi
+		# nota de la `lip_y`). Cu ea, fiecare banda de mai jos iese cu
+		# `batter_m` in lateral fata de cea de deasupra, deci intra in campul
+		# vizual pe sub muchia soselei in loc sa stea in umbra ei geometrica.
+		#
+		# E si forma corecta: un versant de tuf erodat se deschide in jos, nu
+		# atarna. Ramane sub limita din brief — evazarea totala
+		# (`batter_m * bands`) plus retragerea benzilor nu are voie sa depaseasca
+		# `ledge_offset_m`, altfel peretele s-ar apleca peste coloana pe care
+		# urca balonul ancorat.
+		# `batter_m` e per METRU DE CADERE, nu per banda: masurat cu ProbeReach,
+		# frontiera vizibilitatii din camera de joc e o diagonala aproape
+		# constanta — la fiecare ~6 m de adancime e nevoie de ~4 m de rulaj ca
+		# punctul sa iasa de sub muchia soselei. Deci evazarea trebuie legata de
+		# ADANCIME, altfel benzile de jos raman in umbra geometrica a drumului
+		# indiferent cate sunt.
+		var proud := band_relief_m * stepi + batter_m * (drop * t)
 		# Sub cota politei, fata se retrage cu adancimea treptei: asa polita e o
 		# treapta reala in perete, nu un raft lipit peste el.
 		if ledge_y < INF and y < ledge_y:

@@ -1,0 +1,621 @@
+<title>Cappadocia Recon</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --torch:#B8741F; --torch-deep:#8C5612; --terra:#B5573A; --rose:#D9A08C; --basalt:#3A3532;
+  --ground:#EFE6D2; --panel:#FBF7EE; --sunk:#E6DCC6;
+  --ink:#2B2419; --ink-soft:#6B5F4E; --hair:#D6CBB3;
+  --grid:rgba(43,36,25,.09); --plateau:#EADFC5; --valley:#E3BFA8; --valley-deep:#D6A38A; --cave:#C9B89A;
+  --accent-title:#B5573A; --glow:rgba(181,87,58,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --torch:#F2A840; --torch-deep:#C9822A; --terra:#E0895E; --rose:#B47A66; --basalt:#8A817A;
+    --ground:#1C1611; --panel:#26201A; --sunk:#151110;
+    --ink:#EDE4D2; --ink-soft:#A89A84; --hair:#3A3129;
+    --grid:rgba(242,168,64,.07); --plateau:#2E2720; --valley:#3D2A22; --valley-deep:#4A2F25; --cave:#221C17;
+    --accent-title:#F2A840; --glow:rgba(242,168,64,.2);
+  }
+}
+:root[data-theme="dark"]{
+  --torch:#F2A840; --torch-deep:#C9822A; --terra:#E0895E; --rose:#B47A66; --basalt:#8A817A;
+  --ground:#1C1611; --panel:#26201A; --sunk:#151110;
+  --ink:#EDE4D2; --ink-soft:#A89A84; --hair:#3A3129;
+  --grid:rgba(242,168,64,.07); --plateau:#2E2720; --valley:#3D2A22; --valley-deep:#4A2F25; --cave:#221C17;
+  --accent-title:#F2A840; --glow:rgba(242,168,64,.2);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif; font-size:15px; line-height:1.55}
+.mono{font-family:ui-monospace,"Cascadia Mono","Consolas",monospace}
+.wrap{max-width:1180px; margin:0 auto; padding:28px 22px 64px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 28px; margin-bottom:8px}
+h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif; font-size:clamp(34px,5vw,54px);
+  line-height:.98; margin:0; font-weight:700; letter-spacing:.01em; text-transform:uppercase; text-wrap:balance}
+h1 small{display:block; font-family:"Source Sans 3",sans-serif; font-size:.26em; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--accent-title); margin-bottom:8px}
+.facts{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+.fact{display:flex; flex-direction:column}
+.fact b{font-family:"Barlow Condensed",sans-serif; font-size:24px; font-variant-numeric:tabular-nums; font-weight:700; line-height:1}
+.fact span{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-soft); margin-top:3px}
+.lede{color:var(--ink-soft); max-width:72ch; margin:14px 0 26px}
+.lede b{color:var(--ink)}
+.layout{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr); gap:22px; align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel); border:1px solid var(--hair); border-radius:3px}
+.card h2{margin:0; padding:11px 15px; font-size:11px; font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-soft); border-bottom:1px solid var(--hair);
+  display:flex; justify-content:space-between; align-items:center; gap:10px}
+.plan{padding:6px}
+canvas{display:block; width:100%; height:auto; border-radius:2px; cursor:crosshair}
+.legend{display:flex; flex-wrap:wrap; gap:5px 16px; padding:10px 15px; border-top:1px solid var(--hair);
+  font-size:11.5px; color:var(--ink-soft)}
+.legend i{display:inline-block; width:16px; height:3px; vertical-align:middle; margin-right:6px; border-radius:2px}
+.detail{padding:15px; min-height:150px}
+.detail .tag{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px; background:var(--torch-deep); color:#1A1206; margin-bottom:9px}
+.detail h3{margin:0 0 3px; font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700; letter-spacing:.01em}
+.detail .coord{font-size:12px; color:var(--ink-soft); margin-bottom:11px}
+.detail p{margin:0 0 13px; font-size:14px}
+.detail .assets{font-size:12.5px; line-height:1.7; color:var(--ink-soft); border-top:1px dashed var(--hair); padding-top:11px}
+.detail .assets b{display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); margin-bottom:5px}
+.hint{color:var(--ink-soft); font-size:13px; font-style:italic}
+.clocks{padding:13px 15px; display:flex; flex-direction:column; gap:10px}
+.clock{display:grid; grid-template-columns:96px 1fr 44px; gap:10px; align-items:center; font-size:13px}
+.clock .nm{font-weight:600}
+.clock .bar{height:8px; border-radius:2px; background:var(--sunk); position:relative; overflow:hidden}
+.clock .bar i{position:absolute; top:0; bottom:0; left:0; background:var(--torch); border-radius:2px}
+.clock .bar em{position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--terra)}
+.clock .s{font-family:"Barlow Condensed",sans-serif; font-size:16px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums}
+.clocks .note{padding:8px 0 0; border-top:1px dashed var(--hair); font-size:12.5px}
+table{width:100%; border-collapse:collapse; font-size:13px}
+.scroll{overflow-x:auto}
+th,td{text-align:left; padding:8px 15px; border-bottom:1px solid var(--hair); vertical-align:top}
+th{font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-soft); font-weight:700}
+td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.grp td{font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-title);
+  background:var(--sunk); padding-top:9px; padding-bottom:9px}
+tr.row:hover{background:var(--sunk); cursor:pointer}
+tr.row.on{background:var(--glow)}
+.pill{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:9px; white-space:nowrap}
+.pill.hero{background:var(--glow); color:var(--accent-title)}
+.pill.kit{background:rgba(107,95,78,.18); color:var(--ink-soft)}
+.pill.cls{background:rgba(110,138,60,.2); color:#4F6A2A}
+:root[data-theme="dark"] .pill.cls{color:#A9C46E}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .pill.cls{color:#A9C46E} }
+.gaps{margin-top:22px}
+.note{padding:13px 15px; font-size:13.5px; color:var(--ink-soft); border-top:1px solid var(--hair)}
+.note b{color:var(--ink)}
+.prompt-body{padding:15px}
+.prompt-body pre{margin:0; max-height:440px; overflow:auto; white-space:pre-wrap;
+  font-family:ui-monospace,"Cascadia Mono","Consolas",monospace; font-size:12px; line-height:1.6; color:var(--ink-soft);
+  background:var(--sunk); border:1px solid var(--hair); border-radius:3px; padding:14px}
+.copy{font:inherit; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  border:1px solid var(--hair); background:var(--panel); color:var(--ink); padding:5px 12px; border-radius:2px; cursor:pointer}
+.copy:hover,.copy:focus-visible{border-color:var(--torch); outline:none; box-shadow:0 0 0 2px var(--glow)}
+label.chk{font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); cursor:pointer}
+label.chk input{vertical-align:middle; margin-right:4px}
+.rules{padding:13px 15px; font-size:13.5px}
+.rules p{margin:0 0 9px}
+.rules b{color:var(--accent-title)}
+</style>
+
+<div class="wrap">
+<header>
+  <h1><small>Track13 &middot; tem&#259; cappadocia &middot; propunere v0.1</small>Cappadocia Recon</h1>
+  <div class="facts">
+    <div class="fact"><b id="f-len">&mdash;</b><span>lungime desenat&#259;</span></div>
+    <div class="fact"><b>2 000 m</b><span>&#539;int&#259; brief</span></div>
+    <div class="fact"><b>50 m</b><span>platou &rarr; subteran 12 m</span></div>
+    <div class="fact"><b id="f-inst">&mdash;</b><span>piese propuse</span></div>
+    <div class="fact"><b>4 + 1</b><span>ceasuri de hazard</span></div>
+  </div>
+</header>
+
+<p class="lede"><b>O lume s&#259;pat&#259; &#238;n piatr&#259; moale, cu baloanele sub tine.</b> Camera vede ~5&deg; &#238;n sus &#537;i ~63&deg; &#238;n jos,
+deci baloanele <b>nu coboar&#259; din cer, urc&#259; din vale</b>: pornim din satul s&#259;pat &#238;n tuf (50 m), ne strecur&#259;m printre hornurile de z&#226;n&#259;,
+ie&#537;im pe corni&#537;a V&#259;ii Ro&#537;ii cu valea plin&#259; de baloane 30 m mai jos, cobor&#226;m &#238;n canion pe l&#226;ng&#259; hornul care se pr&#259;bu&#537;e&#537;te &#238;n ramp&#259;,
+intr&#259;m <b>sub p&#259;m&#226;nt</b> (caverne &ge; 15 m, preset de camer&#259;) &#537;i ie&#537;im &#238;n spiral&#259; prin interiorul unei st&#226;nci goale, cu salt pe platou.
+Sens <b>antiorar, valea pe dreapta</b> (&#238;n afara buclei, ca apa la Chongqing).
+Harta e <b>propunerea din brief, nu geometrie m&#259;surat&#259;</b>: <code>Track13.tscn</code> nu exist&#259; &#238;nc&#259;;
+dup&#259; desen, pantele se m&#259;soar&#259; cu ProbeLayout. Dreptunghiurile arat&#259; c&#226;t loc cere fiecare lot de assets, la scar&#259;.</p>
+
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Plan &middot; vedere de sus <span class="mono" id="cursor">&mdash;</span></h2>
+      <div class="plan"><canvas id="plan" width="1000" height="860"></canvas></div>
+      <div class="legend">
+        <span><i style="background:#C9B28A"></i>p&#259;m&#226;nt b&#259;tut (platou, vale)</span>
+        <span><i style="background:#8A7A62"></i>canion</span>
+        <span><i style="background:#4A3A2E"></i>subteran (sub platou)</span>
+        <span><i style="background:#B8741F"></i>spirala din st&#226;nca goal&#259;</span>
+        <span><i style="background:#E8D9B8"></i>hornuri de z&#226;n&#259;</span>
+        <span><i style="background:#B5573A"></i>faleza &#238;n benzi</span>
+        <span><i style="background:#2E5FA8"></i>baloane (&#238;n vale, SUB band&#259;)</span>
+        <span><i style="background:#E0453A"></i>hazard</span>
+        <span style="margin-left:auto"><label class="chk"><input type="checkbox" id="lots" checked>loturi</label></span>
+      </div>
+    </div>
+    <div class="card gaps">
+      <h2>Profil de eleva&#539;ie &middot; un tur</h2>
+      <div class="plan"><canvas id="elev" width="1000" height="200"></canvas></div>
+      <div class="note">Cobor&#226;re &#238;n dou&#259; trepte (corni&#537;a 46&rarr;33, canionul 33&rarr;15), urcare &#238;ntr-una: spirala 12&rarr;50 m pe ~350 m
+        (2 ture, raz&#259; 28 m) &asymp; <b>11%</b>, sub media de 13% (v&#226;rf sub 16%, precedent Baikal 15,4%). O elice &#238;ntr-un horn de 24 m ar fi ie&#537;it la 42% &mdash; de-aia st&#226;nca e de 70 m la baz&#259;.</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:22px">
+    <div class="card">
+      <h2>POI selectat</h2>
+      <div class="detail" id="detail"><p class="hint">Alege un POI pe hart&#259; sau un r&#226;nd din tabel.</p></div>
+    </div>
+    <div class="card">
+      <h2>Ceasurile de hazard <span class="mono">tur ~75 s</span></h2>
+      <div class="clocks" id="clocks"></div>
+    </div>
+    <div class="card">
+      <h2>Reguli care au decis harta</h2>
+      <div class="rules">
+        <p><b>Frustumul, &#238;ntors pe dos.</b> La distan&#539;a <i>d</i> vezi &#238;n sus cel mult 10 + 0,093&middot;<i>d</i> m. Baloanele urc&#259; din vale p&#226;n&#259; la band&#259;; hornurile de l&#226;ng&#259; drum au 10&ndash;18 m; U&ccedil;hisar &#537;i Erciyes sunt siluete la 200+ m.</p>
+        <p><b>Cavern&#259;, nu tunel.</b> Camera st&#259; la 10 m &#537;i <code>_unclip</code> o &#238;mpinge din pere&#539;i: tavan &ge; 15 m &#238;n s&#259;li, g&#226;turi &le; 10 m doar pe &le; 15 m lungime. Preset &bdquo;cavern&#259;&rdquo;: height 6,5 / look_height 1,4 / FOV +6 &rarr; marginea de sus la ~+21&deg;.</p>
+        <p><b>Hazard ciclic, &#238;nv&#259;&#539;abil.</b> Patru ceasuri, niciunul divizor al turului. Hornul-ramp&#259; e excep&#539;ia de decis: o dat&#259; pe curs&#259;, la moment fix.</p>
+        <p><b>F&#259;r&#259; slot nou.</b> Slotul 31 s-a dus la Chongqing. Rozul iese din CORAL_SAND + TILE_TERRACOTTA sau paleta trece la 64 &mdash; decizie explicit&#259;.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card gaps">
+  <h2>Lista de assets <span class="mono" id="a-count">&mdash;</span></h2>
+  <div class="scroll"><table id="asset-tbl"></table></div>
+  <div class="note"><b>Materiale:</b> atlas + ~6 clase (tuff_banded, tuff_plain, cave_wall, dirt_road, vine_row, balloon_fabric) + emisivul de lav&#259; refolosit pentru tor&#539;e/arz&#259;tor + decal &rarr; &#539;int&#259; &le; 22. Hornurile de l&#226;ng&#259; drum sunt ~40: sub 600 tri fiecare, cu <code>radial_segments</code> setat. St&#226;nca goal&#259; &#537;i s&#259;lile sunt piesele grele.</div>
+</div>
+
+<div class="card gaps">
+  <h2>Prompt pentru inventarul de assets (ChatGPT) &middot; toate piesele &#238;ntr-o singur&#259; foaie, cu numele de fi&#537;ier scrise <button class="copy" id="copy-assets" type="button">Copiaz&#259; tot</button></h2>
+  <div class="prompt-body"><pre id="asset-prompts">═══════════ VARIANTA A · FOAIA COMPLETĂ (toate assets-urile într-un singur fișier) ═══════════
+
+Create a single tall REFERENCE SHEET of low-poly game assets for a sunrise racing track in Cappadocia, Turkey, in the same style as the attached low-poly diorama: faceted flat-shaded meshes, no fine surface texture, chunky tabletop-miniature proportions, soft baked ambient occlusion, muted cream-and-rose colors (~45% saturation), torches and burner flames as simple warm emissive shapes. Plain neutral grey background, assets organized in numbered titled panels, each panel with its own 1 m scale bar. EVERY panel and every piece inside a kit panel MUST carry a small caption with its exact file name written below it, e.g. "hollow_rock.glb", "chimney_a.glb" — these names are how we will identify the pieces. Captions and view labels (FRONT / SIDE / TOP / 3/4 / CUTAWAY) are the ONLY text allowed: no lettering on the objects themselves (frescoes are abstract shapes, no readable words).
+
+1. hollow_rock.glb — HERO. A giant hollow castle-rock (like Uçhisar/Ortahisar), 45 m tall, 70 m wide at the base tapering to 30 m at the top, cream tuff honeycombed with small carved windows, a dark basalt cap; inside it a 6 m wide spiral road carved into the wall climbs 2 full turns (radius 28 m) from the floor to an opening at the top, exiting through the cap onto a short jump ramp; six rough windows through the wall at different heights; a 10 m arched entrance at the base. Views: exterior front, exterior side, top, and a CUTAWAY (half removed) showing the full spiral road. Use a car silhouette for scale.
+2. underground_hall_kit (modular pieces, one panel, same scale): hall_column.glb (a 3 m thick carved tuff column, 16 m tall, rough and slightly tapered), hall_arch.glb (a 10 m wide, 12 m tall carved arch), hall_ceiling_module.glb (a 20×20 m slab of rough carved ceiling with tool marks), hall_alcove.glb (a 4 m wide carved storage alcove with clay jars), church_arch.glb (an 8 m rock-church arch with abstract fresco panels in ochre and red — no readable text), torch.glb (a 1 m wall torch on an iron bracket with a flame). Each piece labeled.
+3. millstone_door.glb + millstone_slot.glb — a round tuff millstone door 3 m in diameter, 0.6 m thick, with a hole in the centre, shown in its slot (a carved recess in a wall that the stone rolls out of to block a 4 m passage). Show closed, half, open. Front, side, 3/4.
+4. cracked_chimney.glb (three states, one panel) — a 16 m fairy chimney with a visible crack: (a) standing, (b) toppled and lying as a rock ramp about 20 m long rising 3 m, (c) a heap of rubble. Side and 3/4 for each.
+5. balloon_kit (one panel, same scale): balloon_envelope_a.glb / _b.glb / _c.glb (three inflated hot-air balloon envelopes 12 m tall × 9 m wide — one plain, one with vertical panels of two colors, one with a horizontal striped band), balloon_basket.glb (a 2×2×1.2 m wicker basket with a burner frame and a visible burner flame above it), balloon_landed.glb (a deflated envelope spread flat and crumpled on the ground, 20 m long × 8 m wide, striped), balloon_tether.glb (a ground stake with a coiled cable). Each piece labeled.
+6. twin_chimney_gate.glb — two fairy chimneys 15 m tall leaning together so their caps touch and form a gate with 12 m of clearance and an 8 m opening. Front, side, 3/4.
+7. cave_entrance.glb — a 10 m wide, 12 m tall arched opening carved into a cliff face, with a stepped frame, two torches, a carved sun symbol above (abstract, no letters). Front, side, 3/4.
+8. vent_shaft.glb — a vertical ventilation shaft: a 5 m diameter tube 20 m tall in cutaway, with a low carved rim at the top opening and a sand floor. Side cutaway, top.
+9. TUFF KIT A — rock formations, one row, same scale, each piece labeled: chimney_a.glb / chimney_b.glb / chimney_c.glb / chimney_d.glb (single cream cones 10, 13, 16, 18 m tall with dark basalt caps — one with two tiny carved windows), chimney_mushroom.glb (a 12 m cone with a wide flat cap), chimney_triple.glb (three cones sharing one base, 14 m), cliff_band_module.glb (a 20 m long, 15 m tall slice of banded cliff — rose, red and cream layers, rounded top), rock_church_facade.glb (a 10 m cliff face with a carved church doorway and two windows).
+10. TUFF KIT B — the cave village, one row, same scale, each piece labeled: cave_house_a.glb / cave_house_b.glb / cave_house_c.glb (inhabited cones 8, 10, 12 m tall with a wooden door, carved windows, one with a stair and a small balcony), dovecote.glb (a 6 m rock face with rows of pigeon holes and white-painted geometric marks), carpet_terrace.glb (a 6×4 m terrace with carpets, cushions and a low table), farmhouse.glb (a 10×6 m flat-roofed stone farmhouse with a wooden door), pottery_cart.glb (a 3 m wooden cart loaded with clay pots), pot_stack.glb (a 1.5 m stack of clay pots and amphorae).
+11. VEGETATION KIT — one row, same scale, each piece labeled: poplar_a.glb / poplar_b.glb (slender poplar trees 12 and 16 m tall), vine_row.glb (a 10 m row of grape vines on wooden stakes, 1.5 m tall), shrub_dry.glb (a 1 m dry shrub), pigeon.glb (a single 0.3 m pigeon, for a flock).
+12. BACKGROUND — one row: uchisar_castle.glb (a 60 m tall honeycombed rock castle with tiny carved windows and a village of small cube houses on its flanks — simple, it is only seen from 200 m), erciyes.glb (a very simple 3 km wide volcano silhouette with a snow cap, for the far horizon), balloon_far.glb (a very simple 8-sided balloon with basket, under 60 triangles, for a far crowd).
+13. chevron_post.glb — reuse: 1.2 m post with red-and-white chevron plate (include for completeness).
+
+═══════════ VARIANTA B · BLOCURI INDIVIDUALE (regenerare punctuală) ═══════════
+
+STYLE HEADER — începe FIECARE prompt cu blocul ăsta:
+
+Same low-poly flat-shaded style as the Cappadocia sunrise diorama reference (faceted meshes, no fine surface texture, chunky tabletop-miniature proportions, soft baked ambient occlusion, muted cream-and-rose colors ~45% saturation, torches and flames as simple warm emissive shapes). Turnaround sheet on a plain neutral grey background, no scene, no ground clutter: front view, side view, top view and one 3/4 view, all orthographic, same scale, with a 1 m scale bar. Show only this object. The only text allowed is the caption with the file name under the object.
+
+──────────── 1 · hollow_rock.glb (primul: e gimmick-ul, interiorul e pistă) ────────────
+Sheet of a giant hollow castle-rock, 45 m tall, 70 m wide at the base tapering to 30 m at the top, cream tuff honeycombed with small carved windows and a dark basalt cap; inside, a 6 m wide spiral road carved into the wall climbs 2 full turns (radius 28 m) from the floor to an opening at the top through the cap, ending in a short jump ramp; six rough windows through the wall at different heights; a 10 m arched entrance at the base. Add a CUTAWAY view with half the rock removed showing the whole spiral, with a small car for scale.
+
+──────────── 2 · underground_hall_kit (o singură planșă, aceeași scară) ────────────
+Sheet of a matched kit of carved-cave pieces lined up on one row, each labeled: hall_column.glb (3 m thick carved tuff column, 16 m tall, slightly tapered), hall_arch.glb (10 m wide, 12 m tall carved arch), hall_ceiling_module.glb (20×20 m slab of rough carved ceiling with tool marks), hall_alcove.glb (4 m carved storage alcove with clay jars), church_arch.glb (8 m rock-church arch with abstract ochre-and-red fresco panels, no text), torch.glb (1 m wall torch on an iron bracket with a flame).
+
+──────────── 3 · millstone_door.glb + millstone_slot.glb ────────────
+Sheet of a round tuff millstone door 3 m in diameter and 0.6 m thick with a central hole, in its carved wall slot, shown closed, half and open across a 4 m passage.
+
+──────────── 4 · cracked_chimney.glb (trei stări) ────────────
+Sheet of a 16 m fairy chimney with a visible crack in three states side by side: standing; toppled and lying as a rock ramp about 20 m long rising 3 m; a heap of rubble.
+
+──────────── 5 · balloon_kit (o planșă) ────────────
+Sheet of a matched hot-air balloon kit, same scale, each labeled: balloon_envelope_a/b/c.glb (three inflated envelopes 12 m tall × 9 m wide — plain, two-color vertical panels, horizontal striped band), balloon_basket.glb (2×2×1.2 m wicker basket with burner frame and a visible flame), balloon_landed.glb (deflated striped envelope crumpled flat on the ground, 20×8 m), balloon_tether.glb (ground stake with coiled cable).
+
+──────────── 6 · twin_chimney_gate.glb · cave_entrance.glb · vent_shaft.glb (o planșă) ────────────
+Sheet with three pieces, same scale, each labeled: two 15 m fairy chimneys leaning together with caps touching, 12 m clearance, 8 m opening; a 10 m wide, 12 m tall arched cave opening in a cliff face with a stepped frame, two torches and an abstract carved sun above; a 5 m diameter, 20 m tall ventilation shaft in cutaway with a carved rim at the top and a sand floor.
+
+──────────── 7 · tuff kit A (formațiuni, o planșă) ────────────
+Sheet of a matched kit lined up on one row, same scale, each labeled: chimney_a/b/c/d.glb (single cream cones 10, 13, 16, 18 m with dark basalt caps, one with two tiny carved windows), chimney_mushroom.glb (12 m cone with a wide flat cap), chimney_triple.glb (three cones on one base, 14 m), cliff_band_module.glb (20 m long, 15 m tall slice of banded cliff — rose, red, cream — rounded top), rock_church_facade.glb (10 m cliff face with a carved church doorway and two windows).
+
+──────────── 8 · tuff kit B (satul, o planșă) ────────────
+Sheet of a matched kit lined up on one row, same scale, each labeled: cave_house_a/b/c.glb (inhabited cones 8, 10, 12 m with wooden door, carved windows, one with a stair and balcony), dovecote.glb (6 m rock face with rows of pigeon holes and white geometric marks), carpet_terrace.glb (6×4 m terrace with carpets, cushions, low table), farmhouse.glb (10×6 m flat-roofed stone farmhouse), pottery_cart.glb (3 m wooden cart loaded with clay pots), pot_stack.glb (1.5 m stack of clay pots and amphorae).
+
+──────────── 9 · vegetation kit + background (o planșă) ────────────
+Sheet of two rows, same scale, each labeled. Row 1: poplar_a/b.glb (slender poplars 12 and 16 m), vine_row.glb (10 m row of vines on stakes, 1.5 m), shrub_dry.glb (1 m dry shrub), pigeon.glb (0.3 m pigeon). Row 2 (own scale bar): uchisar_castle.glb (60 m honeycombed rock castle with tiny windows and small cube houses on its flanks — simple), erciyes.glb (very simple volcano silhouette with snow cap), balloon_far.glb (8-sided balloon with basket, under 60 triangles).</pre></div>
+  <div class="note">Ata&#537;eaz&#259; imaginea dioramei generate ca referin&#539;&#259; de stil. <b>Numele de fi&#537;ier de pe foaie sunt contractul</b> cu <code>docs/asset_briefs/</code> &#537;i cu <code>tools/blender/build_*.py</code> (categoria <code>assets/models/cappadocia/</code>) &mdash; verific&#259; la primire c&#259; fiecare panou are caption-ul lui &#537;i c&#259; obiectele n-au litere pe ele. Varianta B regenereaz&#259; o singur&#259; pies&#259; f&#259;r&#259; s&#259; strici foaia.</div>
+</div>
+<div class="card gaps">
+  <h2>Prompt pentru dioram&#259; (ChatGPT) <button class="copy" id="copy-btn">Copiaz&#259; promptul</button></h2>
+  <div class="prompt-body"><pre id="prompt-text">Create a stylized low-poly tabletop diorama of a toy-car racing track in Cappadocia, Turkey, at sunrise — the land of fairy chimneys, cave villages, underground cities and hot-air balloons. Use the attached top-down plan as the layout: same loop shape, same positions of the landmarks.
+
+STYLE (strict): faceted, flat-shaded low-poly meshes like a Blender viewport render — no fine surface texture, no painterly brushwork, no photorealism. Chunky toy proportions: cars are stubby and ~1.3× wider than real cars; rock formations are simplified into big smooth cones and banded cliffs. Soft baked ambient occlusion in the crevices. Muted cream-and-rose environment colors (~45% saturation) with only three saturated accents: the hot-air balloons, the orange torch light in the caves, and the toy cars. Lighting: a low warm sun from the right (about 13° above the horizon) casting long soft shadows from every chimney; the sky is a plain gradient from pale orange at the horizon to pale blue above, no clouds. Thin golden haze in the far distance. Show the diorama on a thin dark rounded-rectangle table base, from a raised 3/4 view.
+
+THE LAND: the whole diorama is a cream-colored tuff plateau on the left/top that drops ~35 m into a red-and-rose banded valley on the right and bottom. The plateau is covered in fairy chimneys — tall cream cones 10–18 m high, many with a dark basalt cap, some with tiny carved windows and doors. The valley floor is where the balloons take off: 20–30 hot-air balloons in every phase (lying flat, half-inflated, lifting off, in the air below the cliff edge), in red, blue, yellow, white and striped. The underground city is cut away so it can be seen: a section of the plateau on the left is removed like a slice of cake, revealing two big carved halls with columns and arches, torch-lit, and a huge hollow castle-rock with a spiral road inside it.
+
+THE ROUTE — a single closed loop of about 2 km, counter-clockwise, the valley always on the right:
+1. Start/finish in the cave village square (plateau, top): tuff paving, three cone houses with doors, windows and a balcony carved into them, a carpet terrace with cushions, one poplar tree, a white-painted dovecote with pigeon holes. At the exit a cart loaded with clay pots half blocks the road.
+2. The fairy-chimney forest: the road snakes tightly BETWEEN dense cream cones 10–18 m tall with black basalt caps — some mushroom-shaped, some triple — standing 2–4 m from the road; two twin chimneys lean together and form a gate over the road; long shadows stripe the road.
+3. The cliff cornice above the red valley — the biggest feature: the road comes out onto the cliff edge with no railing on the right; the cliff face below is banded rose-red-cream; on the valley floor 30 m below dozens of balloons are inflating and lifting off, and three balloons are rising up the cliff face on tether cables, their wicker baskets reaching road level — one basket is right in the lane. At the hairpin at the end of the cornice, a tethered balloon sits right next to the outside of the bend with its burner firing a big flame.
+4. The red canyon descent: the road drops into a narrow canyon between banded red cliffs; in the middle of the road stands a cracked fairy chimney that has toppled over and now lies as a rock ramp — a car is jumping off it over the bend; the long way round the fallen chimney is still visible.
+5. The vineyard and the landed balloon (valley floor, bottom): rows of vines on wooden stakes, poplars, a small farmhouse; a landed balloon with its deflated striped envelope spread right across the road and its basket on the verge, tiny crew folding it.
+6. The underground city (cut-away, left): the road enters an arched cave mouth with torches into a big carved hall (16 m ceiling, columns, alcoves) lit by a shaft of daylight falling from a ventilation shaft in the ceiling; in a narrow neck a round millstone door 3 m across is rolling out of its slot to block the short passage, the long passage beside it stays open; then a second hall with rock-church arches and abstract frescoes.
+7. The hollow castle-rock — the race gimmick: from the second hall the road climbs in a spiral inside a huge hollow honeycombed rock (45 m tall, 70 m wide, cut away so the helix road is visible, 2 turns), windows in the rock wall looking out over the balloon valley, and bursts out of the top on a jump ramp back onto the plateau, landing near the village.
+
+Details that matter: the road is pale dirt with tyre ruts on the plateau and in the valley, darker packed earth in the caves; red-and-white chevron posts only on the cornice bends; the valley is BELOW the road and the balloons are mostly BELOW road level, with only the three tethered ones and the burner balloon reaching it; the elevation must read — plateau at the top, cornice, canyon, valley floor at the bottom, caves below that, and the hollow rock climbing back up; chimneys near the road are 10–18 m, the tall castle-rock of Uçhisar and the volcano are far away.
+
+Background: the castle-rock of Uçhisar (a 60 m honeycombed rock with a village on its flanks) far on the plateau, the snow-capped cone of Mount Erciyes very far away in the haze, a few more balloons high up and far off.
+
+Toy cars: 4–6 chunky low-poly racing cars in saturated red, blue, yellow, white — one squeezing between chimneys, one drifting on the cornice with a basket rising beside it, one jumping off the fallen chimney, one inside the hollow rock spiral, one bursting out of the top.
+
+PROP INVENTORY — every item below must appear at least once, in its zone:
+- village square: three cone houses, carpet terrace, poplar, dovecote, pottery cart with pots, tuff paving.
+- chimney forest: cone chimneys with basalt caps (single, mushroom, triple), the twin-chimney gate, a dovecote with pigeons bursting out.
+- cornice: banded cliff face, three tethered rising balloons with baskets, the burner balloon at the hairpin, chevron posts, the valley full of balloons below.
+- canyon: banded red cliffs, the toppled cracked chimney as a ramp, rubble.
+- valley floor: vine rows on stakes, poplars, farmhouse, the landed balloon with deflated envelope on the road, the basket, tiny crew.
+- underground city: arched cave mouth with torches, hall with columns and alcoves, ventilation shaft with light column, millstone door and its slot, rock-church arches with frescoes, torches.
+- hollow rock: the cut-away castle-rock with the spiral road, windows, the exit ramp at the top.
+- background: Uçhisar castle rock, Mount Erciyes with snow, far balloons.
+
+Colors: tuff cream #E8D9B8, tuff shadow #C9B48E, rose band #D9A08C, red band #B5573A, basalt cap #3A3532, cave dark #5A4636, torch orange #F2A840 (emissive), dirt road #C9B28A, vine green #6E8A3C, poplar green #4F7A5A, balloon red #C8322B, balloon blue #2E5FA8, balloon yellow #E8B830, balloon white #F1EEE6, one striped balloon with pink #FF3FA4, sky horizon #F2B27A, sky top #B9CCE0.
+
+Deliver: (a) one wide 3/4 overview of the entire diorama matching the attached plan — plateau on the left/top, valley on the right and bottom, the cut-away underground city and hollow rock on the left; (b) one driver's-eye shot ON THE CORNICE — the banded cliff dropping away on the right, the balloon valley below, one basket rising into the lane ahead, the burner balloon at the hairpin; (c) one shot INSIDE the first underground hall from a low camera behind a car — the 16 m ceiling with columns, the shaft of daylight, torches, the millstone door rolling across the short passage ahead.</pre></div>
+  <div class="note">Ata&#537;eaz&#259; la prompt o captur&#259; a planului de mai sus (click dreapta pe hart&#259; &rarr; salveaz&#259; imaginea). Dac&#259; generatorul pune baloanele deasupra pistei sau face subteranul tunel &#238;ngust, reafirm&#259; &bdquo;balloons BELOW road level, rising from the valley&rdquo; &#537;i &bdquo;halls with 16 m ceilings&rdquo;.</div>
+</div>
+</div>
+
+<script>
+"use strict";
+// ---- date (metri) -------------------------------------------------------------
+// Bucla principala, ANTIORAR, valea pe dreapta (in afara). [x, y, cota, zona]
+// zona coloreaza segmentul care pleaca din punct.
+const SPIRAL_C = [-270, 70], SPIRAL_R = 28, SPIRAL_TURNS = 2;
+const PTS = [
+  [-100,180,50,"pamant"],[-40,190,50,"pamant"],                                              // A satul
+  [20,195,50,"pamant"],[60,170,49,"pamant"],[95,190,48,"pamant"],[130,160,47,"pamant"],      // B hornurile, S-uri
+  [165,120,46,"pamant"],[200,60,43,"pamant"],[195,0,40,"pamant"],[225,-60,36,"pamant"],[240,-100,33,"pamant"], // C cornisa, hairpin
+  [195,-135,27,"canion"],[150,-160,22,"canion"],[100,-185,17,"canion"],                     // D canionul, hornul-rampa
+  [40,-195,15,"pamant"],[-40,-200,14,"pamant"],[-120,-195,14,"pamant"],                     // E via, balonul aterizat
+  [-180,-165,12,"pestera"],[-225,-115,12,"pestera"],[-235,-60,12,"pestera"],[-215,-15,12,"pestera"] // F sala 1, gatul, sala 2
+];
+// G: spirala in stanca goala — generata: 2 ture, raza 28, 12 → 50 m
+(function(){
+  // intrarea din sala 2 vine dinspre sud-est, tangent la cerc la 30°; elicea urca in sens trigonometric
+  const n = 8*SPIRAL_TURNS, a0 = Math.PI/6;
+  for (let k=0;k<=n;k++){ const a = a0 + k*(Math.PI/4);
+    PTS.push([SPIRAL_C[0]+SPIRAL_R*Math.cos(a), SPIRAL_C[1]+SPIRAL_R*Math.sin(a), 12+38*k/n, "spirala"]); }
+  PTS.push([-258,108,50,"pamant"],[-262,150,50,"pamant"],[-190,178,50,"pamant"]); // kicker de iesire + aterizare
+})();
+
+// relieful
+const PLATEAU = [[-340,260],[330,260],[300,150],[215,110],[245,40],[235,-30],[265,-100],[210,-150],[165,-175],[-60,-160],[-150,-140],[-340,-120]];
+const VALLEY  = [[330,260],[430,260],[430,-300],[-340,-300],[-340,-120],[-150,-140],[-60,-160],[165,-175],[210,-150],[265,-100],[235,-30],[245,40],[215,110],[300,150]];
+const CLIFF   = [[300,150],[215,110],[245,40],[235,-30],[265,-100],[210,-150]];           // buza in benzi
+const CANYON  = [[165,-175],[210,-150],[265,-100],[300,-60],[300,-200],[120,-215],[60,-190]];
+const CAVE_CUT = [[-340,-120],[-150,-140],[-170,-40],[-200,20],[-340,20]];                // felia taiata (subteranul)
+const HALLS = [[-225,-115,28],[-215,-15,30]];                                             // sali [x,y,raza]
+const SHAFTS = [[-215,-100],[-205,-5]];
+const CHIMNEYS = [];                                                                       // hornurile de langa drum
+(function(){ const seed=[[-10,215],[10,178],[45,200],[40,150],[80,208],[75,160],[110,185],[115,140],[145,180],[150,120],[-70,205],[-60,168],
+  [0,225],[30,140],[100,225],[170,150],[130,215],[-120,215],[-140,160],[-30,160],[185,95],[175,45],[220,20],[-90,150],[-190,200],[-230,215]];
+  seed.forEach((p,i)=>CHIMNEYS.push([p[0],p[1],10+((i*7)%9)])); })();
+const GATE = [130,160];
+const BALLOONS_VALLEY = [[300,120,"#C8322B"],[350,80,"#2E5FA8"],[330,20,"#E8B830"],[380,-20,"#F1EEE6"],[310,-60,"#C8322B"],[360,-110,"#2E5FA8"],
+  [340,-170,"#E8B830"],[400,-200,"#F1EEE6"],[260,-230,"#C8322B"],[180,-250,"#2E5FA8"],[90,-250,"#E8B830"],[10,-245,"#F1EEE6"],[-80,-250,"#C8322B"],
+  [-180,-240,"#2E5FA8"],[-260,-230,"#E8B830"],[395,60,"#FF3FA4"],[300,-140,"#F1EEE6"],[130,-235,"#C8322B"],[-230,-190,"#F1EEE6"],[410,-120,"#C8322B"]];
+const BALLOONS_RISING = [[262,50],[258,-10],[275,-70]];   // ancorate la baza falezei, urca la banda
+const BURNER = [262,-115];                                  // balonul arzatorului, exteriorul hairpinului
+const LANDED = [-40,-200];
+const RAMP = [150,-160];
+const VINES = [[-10,-215],[-70,-220],[-130,-215],[30,-220]];
+const UCHISAR = [-300,230]; const ERCIYES = [420,240];
+
+const SURF = {pamant:"#C9B28A", canion:"#8A7A62", pestera:"#4A3A2E", spirala:"#B8741F"};
+
+const POI = [
+  {k:"A", x:-100, y:180, frac:"0.00", name:"Piața din Göreme — START",
+   w:"9 m · dale de tuf · platou 50 m",
+   desc:"Conuri locuite cu ferestre și uși, terasă cu covoare, un plop, porumbar. La ieșire, căruța cu oale: decor static cu coliziune, o fantă de 4 m pe lângă ea. Primul horn e la 6 m de bandă, ca să-i vezi pălăria.",
+   lot:["cave_house ×3","carpet_terrace","poplar","dovecote","pottery_cart + pot_stack ×3","tuf (clasă tuff_plain)"]},
+  {k:"B", x:90, y:180, frac:"0.05–0.16", name:"Pădurea de hornuri (Paşabağ)",
+   w:"6–7 m · S-uri între conuri la 2–4 m de bandă",
+   desc:"Drumul șerpuiește PRINTRE conuri de 10–18 m; două hornuri gemene se ating deasupra drumului = poarta (tavan 12 m pe 8 m lungime — clip < 1 s). Porumbeii țâșnesc din porumbar la trecere (decor). Umbrele lungi taie drumul: identitatea de zori.",
+   lot:["chimney_a/b/c/d ×~25","chimney_mushroom ×4","chimney_triple ×3","twin_chimney_gate","dovecote","pigeon_flock (billboard)"]},
+  {k:"C", x:215, y:-20, frac:"0.18–0.36", name:"Cornișa Văii Roșii",
+   w:"7 m · 46 → 33 m · fără parapet pe dreapta · vârful vizual",
+   desc:"Buza văii; sub tine, 30 m mai jos, 20–30 de baloane în toate fazele. Trei baloane ancorate URCĂ pe ciclu (~28 s, defazate) până la bandă: coșul îți intră în drum 4 s (platformă — poți ateriza pe el). La hairpin, balonul arzătorului: flacăra (1 s telegraph) → suflul te împinge spre gol (~17 s).",
+   lot:["cliff_band_module ×12 (clasă tuff_banded)","balloon_envelope + basket + tether ×3 (BalloonHazard)","balloon arzător (Area3D + forță)","chevron_post ×6","balloon_far ×30 în vale (MultiMesh)"]},
+  {k:"D", x:150, y:-160, frac:"0.38–0.50", name:"Canionul roșu — hornul-rampă",
+   w:"6–7 m · 33 → 15 m · transformare de pistă",
+   desc:"Coborâre în S între faleze în benzi. Un horn de 16 m stă în mijlocul drumului (ocolul pe stânga, 6 m). Telegraph: pietricele + praf + trosnet 2 s → se prăbușește spre dreapta și devine rampă: sari peste un S întreg (~3 s). Ratezi → în moloz, grip 0,8×. Regula de ciclu: DECIZIE (o dată pe cursă la moment fix, sau strict ciclic ~40 s).",
+   lot:["cracked_chimney (3 stări)","cliff_band_module ×8","rockfall_hazard (moloz)","flyoff_kicker pe rampă"]},
+  {k:"E", x:-40, y:-200, frac:"0.52–0.64", name:"Via și balonul aterizat",
+   w:"8 m · 15 → 14 m · fâșia de viteză",
+   desc:"Fundul văii: rânduri de vie (iarbă lentă cu geometrie — scurtătură lentă, sigură), plopi, o fermă. Pe ciclu (~45 s) un balon aterizează pe drum: coșul pe bandă, pânza se întinde 20 m peste drum (grip 0,6×), apoi echipajul o strânge și decolează. Decizia: prin vie sau pe drum.",
+   lot:["vine_row ×16 (clasă vine_row)","poplar ×8","farmhouse","balloon_landed (3 stări) + basket","shrub_dry ×20"]},
+  {k:"F", x:-225, y:-65, frac:"0.66–0.82", name:"Orașul subteran",
+   w:"6–8 m · 12 m cotă · tavan 16–18 m · preset cameră cavernă",
+   desc:"Gura săpată (arc, torțe) → preset cameră (height 6,5 / look_height 1,4 / FOV +6, lerp 0,5 s). Sala 1: coloane, alcove, puț de ventilație cu coloană de lumină. Gâtul: culoar scurt (4 m) închis pe ciclu de piatra de moară (~23 s, SlidingHazard rulant, contact = împins înapoi) sau culoar lung (+2,5 s, mereu liber). Sala 2: arce de biserică rupestră, fresce abstracte, al doilea puț. Puțurile sunt și scurtături de pe platou (sari în ele → sala 1).",
+   lot:["cave_entrance","hall_column ×10, hall_arch ×4, hall_ceiling ×6, hall_alcove ×6 (clasă cave_wall)","millstone_door + slot","church_arch ×3","vent_shaft ×2","torch ×16 (emisiv lavă)"]},
+  {k:"G", x:-270, y:70, frac:"0.84–0.98", name:"Stânca goală — spirala + saltul",
+   w:"6 m · 12 → 50 m pe ~350 m (2 ture, r 28) ≈ 11%",
+   desc:"Din sala 2 drumul urcă în elice pe interiorul unei stânci-castel goale (70 m bază, 45 m înaltă): ferestre spre vale la fiecare tură (vezi baloanele iar, tot mai de sus), lumina crește. La vârf, kickerul: sari prin gura stâncii pe platou, în lumină plină. Pistă peste pistă (custom_overpass_ranges, PR #353), separare ≥ 12 m între ture — ProbeOverpass înainte de decor.",
+   lot:["hollow_rock (hero, interiorul e pistă)","flyoff_kicker la gură","torch ×8","preset cameră revine la ieșire"]},
+  {k:"S", x:-300, y:230, frac:"fundal", name:"Uçhisar și Erciyes",
+   w:"200+ m · sub fog_end 300 · doar siluete",
+   desc:"Stânca-castel Uçhisar (60 m) pe platou, la 200+ m — de la 5° în sus n-o vezi lângă drum. Erciyes cu zăpadă, departe în ceața aurie. Zece baloane sus, în ceață, ca fundal.",
+   lot:["uchisar_castle","erciyes (siluetă)","balloon_far ×10 (sus, în ceață)","hornuri-siluetă ×20"]}
+];
+
+const LOTS = [ // amprente [x, y, w, h, poi]
+  [-100,180,50,30,"A"],[-40,205,20,10,"A"],[90,180,150,80,"B"],[262,-20,30,140,"C"],[262,-115,14,14,"C"],
+  [150,-160,30,24,"D"],[-40,-215,180,30,"E"],[-225,-65,70,110,"F"],[-270,70,72,72,"G"],[-300,230,50,30,"S"]
+];
+
+const ASSETS = [
+  ["Hero (unice)", null],
+  ["hollow_rock.glb","70 m bază, 45 m înalt, elice 2 ture r 28 m",1,"G","interiorul e pistă — cea mai grea piesă; ProbeOverpass pe elice"],
+  ["underground_hall_kit","coloană 16 m, arc, tavan 20×20, alcovă, arc de biserică, torță",30,"F","săli ≥ 15 m tavan; clasa cave_wall + AO din vertex"],
+  ["millstone_door.glb + slot","Ø 3 m × 0,6 m",1,"F","SlidingHazard cu rotație; închis = zid"],
+  ["cracked_chimney.glb","16 m, 3 stări",1,"D","transformare de pistă — regula de ciclu e decizie"],
+  ["balloon_kit","pânză 12×9 m, coș 2×2, pânză aterizată 20×8, țăruș",8,"C/E","3 care urcă (BalloonHazard) + arzătorul + aterizatul"],
+  ["twin_chimney_gate.glb","15 m, 12 m sub arc, 8 m deschidere",1,"B","clip de cameră < 1 s"],
+  ["cave_entrance.glb","arc 10×12 m",1,"F","Area3D preset cameră la gură"],
+  ["vent_shaft.glb","Ø 5 m × 20 m",2,"F","coloană de lumină (con alpha) + scurtătură în jos"],
+  ["Kit de tuf (statistice)", null],
+  ["chimney_a/b/c/d.glb","10–18 m, pălărie de bazalt",25,"B/A/S","sub 600 tri fiecare; plafon derivat 10 + 0,093·d"],
+  ["chimney_mushroom / triple.glb","12–14 m",7,"B","VOLCANIC_BLACK pe pălării"],
+  ["cave_house_a/b/c.glb","8–12 m, uși, ferestre, balcon",5,"A","CORAL_SAND dominant"],
+  ["cliff_band_module.glb","20 m felie de faleză în benzi",20,"C/D","benzile în textura de clasă tuff_banded, nu în geometrie"],
+  ["dovecote.glb","6 m",3,"A/B","porumbeii țâșnesc (decor)"],
+  ["rock_church_facade.glb","10 m",2,"B/C","fațadă săpată"],
+  ["carpet_terrace / farmhouse / pottery_cart / pot_stack","—",6,"A/E","căruța = world_prop cu coliziune"],
+  ["torch.glb","1 m, flacără emisivă",24,"F/G","reuse shader lavă (LAVA_ORANGE)"],
+  ["chevron_post.glb","1.2 m",6,"C","reuse Stromboli"],
+  ["Vegetație", null],
+  ["poplar_a/b.glb","12–16 m",9,"A/E","TROPICAL_GREEN"],
+  ["vine_row.glb","10 m pe araci",16,"E","iarbă lentă cu geometrie (clasa vine_row)"],
+  ["shrub_dry.glb","1 m",20,"E/C","DRY_VEGETATION"],
+  ["pigeon (billboard)","0.3 m",6,"B","quad-uri pe Area3D, zero gameplay"],
+  ["Fundal", null],
+  ["uchisar_castle.glb","60 m",1,"S","200+ m, horizon_class"],
+  ["erciyes.glb","siluetă cu zăpadă",1,"S","sub fog_end 300"],
+  ["balloon_far.glb","< 60 tri",40,"C/S","MultiMesh, 30 în vale + 10 sus"],
+  ["Texturi de clasă (din cod)", null],
+  ["tuff_banded","dală, benzi roz-roșu-crem",1,"C/D","faleze și cornișă"],
+  ["tuff_plain","dală",1,"A/B/G","hornuri, sat, stânca goală"],
+  ["cave_wall","dală, urme de daltă",1,"F","subteranul"],
+  ["dirt_road","dală",1,"toate","pământ bătut + decal wheel_ruts"],
+  ["vine_row","suprafață lentă cu geometrie",1,"E","0,45× ca iarba"],
+  ["balloon_fabric","dungi, comutată pe stări",1,"E","pânza aterizată, grip 0,6×"]
+];
+
+// ---- proiectie ---------------------------------------------------------------
+const plan = document.getElementById("plan"), pcx = plan.getContext("2d");
+const allp = PLATEAU.concat(VALLEY);
+const minx = Math.min(...allp.map(p=>p[0]))-10, maxx = Math.max(...allp.map(p=>p[0]))+10;
+const miny = Math.min(...allp.map(p=>p[1]))-10, maxy = Math.max(...allp.map(p=>p[1]))+10;
+const S = Math.min(plan.width/(maxx-minx), plan.height/(maxy-miny));
+const ox = (plan.width-(maxx-minx)*S)/2, oy = (plan.height-(maxy-miny)*S)/2;
+const X = x => ox+(x-minx)*S, Y = y => oy+(maxy-y)*S;
+
+function sampleLoop(pts, per){
+  const n = pts.length, out = [];
+  for (let i=0;i<n;i++){
+    const p0=pts[(i-1+n)%n], p1=pts[i], p2=pts[(i+1)%n], p3=pts[(i+2)%n];
+    for (let t=0;t<per;t++){
+      const u=t/per, u2=u*u, u3=u2*u;
+      const c = k => 0.5*((2*p1[k]) + (-p0[k]+p2[k])*u +
+        (2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*u2 + (-p0[k]+3*p1[k]-3*p2[k]+p3[k])*u3);
+      out.push([c(0), c(1), c(2), p1[3]]);
+    }
+  }
+  return out;
+}
+const LOOP = sampleLoop(PTS, 10);
+let LEN = 0; const CUM = [0];
+for (let i=1;i<=LOOP.length;i++){
+  const a=LOOP[i-1], b=LOOP[i%LOOP.length];
+  LEN += Math.hypot(b[0]-a[0], b[1]-a[1]); CUM.push(LEN);
+}
+document.getElementById("f-len").textContent = Math.round(LEN).toLocaleString("ro-RO")+" m";
+document.getElementById("f-inst").textContent = ASSETS.filter(a=>a[1]!==null).reduce((s,a)=>s+a[2],0);
+
+const css = getComputedStyle(document.documentElement);
+const col = v => css.getPropertyValue(v).trim();
+let showLots = true, sel = null;
+
+function poly(ctx, pts, close){
+  ctx.beginPath();
+  pts.forEach((p,i)=> i? ctx.lineTo(X(p[0]),Y(p[1])) : ctx.moveTo(X(p[0]),Y(p[1])));
+  if (close) ctx.closePath();
+}
+function draw(){
+  const c = pcx; c.clearRect(0,0,plan.width,plan.height);
+  c.fillStyle = col("--valley"); c.fillRect(0,0,plan.width,plan.height);
+  // valea (mai adanca spre est/sud), platoul
+  poly(c, VALLEY, true); c.fillStyle = col("--valley-deep"); c.globalAlpha=.6; c.fill(); c.globalAlpha=1;
+  poly(c, PLATEAU, true); c.fillStyle = col("--plateau"); c.fill();
+  // canionul (taietura in faleza)
+  poly(c, CANYON, true); c.fillStyle = col("--valley"); c.fill();
+  // grila
+  c.strokeStyle = col("--grid"); c.lineWidth = 1;
+  for (let gx=Math.ceil(minx/100)*100; gx<maxx; gx+=100){ c.beginPath(); c.moveTo(X(gx),0); c.lineTo(X(gx),plan.height); c.stroke(); }
+  for (let gy=Math.ceil(miny/100)*100; gy<maxy; gy+=100){ c.beginPath(); c.moveTo(0,Y(gy)); c.lineTo(plan.width,Y(gy)); c.stroke(); }
+  // felia taiata: subteranul sub platou
+  poly(c, CAVE_CUT, true); c.fillStyle = col("--cave"); c.fill();
+  c.setLineDash([5,4]); c.strokeStyle = col("--ink-soft"); c.lineWidth=1; c.stroke(); c.setLineDash([]);
+  HALLS.forEach(h=>{ c.beginPath(); c.arc(X(h[0]),Y(h[1]),h[2]*S,0,7); c.fillStyle="#4A3A2E"; c.globalAlpha=.35; c.fill(); c.globalAlpha=1; });
+  SHAFTS.forEach(s=>{ c.beginPath(); c.arc(X(s[0]),Y(s[1]),2.5*S,0,7); c.fillStyle="#F2A840"; c.fill(); });
+  // stanca goala
+  c.beginPath(); c.arc(X(SPIRAL_C[0]),Y(SPIRAL_C[1]),35*S,0,7); c.fillStyle="#E8D9B8"; c.globalAlpha=.7; c.fill(); c.globalAlpha=1;
+  c.strokeStyle="#3A3532"; c.lineWidth=1.2; c.stroke();
+  // faleza in benzi (3 linii paralele)
+  [["#B5573A",6,0],["#D9A08C",3,0],["#E8D9B8",1.2,0]].forEach(([cl,w])=>{
+    c.strokeStyle=cl; c.lineWidth=w; c.lineJoin="round";
+    c.beginPath(); CLIFF.forEach((p,i)=> i? c.lineTo(X(p[0]),Y(p[1])) : c.moveTo(X(p[0]),Y(p[1]))); c.stroke(); });
+  // via
+  c.strokeStyle="#6E8A3C"; c.lineWidth=1.5;
+  VINES.forEach(v=>{ for(let k=0;k<4;k++){ c.beginPath(); c.moveTo(X(v[0]-15),Y(v[1]-k*5)); c.lineTo(X(v[0]+15),Y(v[1]-k*5)); c.stroke(); } });
+  // hornurile de zana: con = cerc crem cu punct negru (palaria)
+  CHIMNEYS.forEach(h=>{ const r=(h[2]/4)*S;
+    c.beginPath(); c.arc(X(h[0]),Y(h[1]),r,0,7); c.fillStyle="#E8D9B8"; c.fill(); c.strokeStyle="#C9B48E"; c.lineWidth=1; c.stroke();
+    c.beginPath(); c.arc(X(h[0]),Y(h[1]),r*.35,0,7); c.fillStyle="#3A3532"; c.fill();
+    // umbra lunga spre vest (soarele rasare din est)
+    c.strokeStyle="rgba(58,53,50,.25)"; c.lineWidth=r*.8; c.beginPath(); c.moveTo(X(h[0])-r,Y(h[1])); c.lineTo(X(h[0])-r-h[2]*1.6*S,Y(h[1])+h[2]*.3*S); c.stroke(); });
+  // poarta de hornuri gemene
+  c.strokeStyle="#3A3532"; c.lineWidth=2; c.beginPath(); c.moveTo(X(GATE[0]-8),Y(GATE[1]+6)); c.lineTo(X(GATE[0]+8),Y(GATE[1]-6)); c.stroke();
+  // baloanele din vale (sub banda)
+  BALLOONS_VALLEY.forEach(b=>{ c.beginPath(); c.arc(X(b[0]),Y(b[1]),4.5*S,0,7); c.fillStyle=b[2]; c.globalAlpha=.85; c.fill(); c.globalAlpha=1;
+    c.strokeStyle="rgba(0,0,0,.25)"; c.lineWidth=1; c.stroke(); });
+  // bucla: intai cotele joase, apoi cele inalte (ca sa se citeasca spirala)
+  const segs = [];
+  for (let i=0;i<LOOP.length;i++){ const a=LOOP[i], b=LOOP[(i+1)%LOOP.length]; segs.push([a,b,(a[2]+b[2])/2]); }
+  segs.sort((p,q)=>p[2]-q[2]);
+  segs.forEach(([a,b,e])=>{
+    if (a[3]==="spirala" && e>20){ c.strokeStyle="rgba(0,0,0,.35)"; c.lineWidth=10; c.lineCap="butt";
+      c.beginPath(); c.moveTo(X(a[0]),Y(a[1])); c.lineTo(X(b[0]),Y(b[1])); c.stroke(); }
+    c.strokeStyle = SURF[a[3]]; c.lineWidth = a[3]==="pestera"?9:7; c.lineCap="round";
+    c.beginPath(); c.moveTo(X(a[0]),Y(a[1])); c.lineTo(X(b[0]),Y(b[1])); c.stroke();
+  });
+  // baloanele care urca (ancorate la baza falezei), arzatorul, aterizatul
+  BALLOONS_RISING.forEach(b=>{ c.setLineDash([2,3]); c.strokeStyle="#2B2419"; c.lineWidth=1;
+    c.beginPath(); c.moveTo(X(b[0]),Y(b[1])); c.lineTo(X(b[0]-30),Y(b[1])); c.stroke(); c.setLineDash([]);
+    c.beginPath(); c.arc(X(b[0]),Y(b[1]),5*S,0,7); c.fillStyle="#2E5FA8"; c.fill(); c.strokeStyle="#E0453A"; c.lineWidth=2; c.stroke(); });
+  c.beginPath(); c.arc(X(BURNER[0]),Y(BURNER[1]),5*S,0,7); c.fillStyle="#E8B830"; c.fill(); c.strokeStyle="#E0453A"; c.lineWidth=2; c.stroke();
+  c.beginPath(); c.arc(X(BURNER[0]),Y(BURNER[1]),2*S,0,7); c.fillStyle="#F2A840"; c.fill();
+  c.fillStyle="#C8322B"; c.globalAlpha=.8; c.fillRect(X(LANDED[0]-10),Y(LANDED[1]+4),20*S,8*S); c.globalAlpha=1;
+  c.strokeStyle="#F1EEE6"; c.lineWidth=1; for(let k=1;k<4;k++){ c.beginPath(); c.moveTo(X(LANDED[0]-10+k*5),Y(LANDED[1]+4)); c.lineTo(X(LANDED[0]-10+k*5),Y(LANDED[1]-4)); c.stroke(); }
+  // hornul-rampa
+  c.beginPath(); c.arc(X(RAMP[0]),Y(RAMP[1]),4*S,0,7); c.fillStyle="#E8D9B8"; c.fill(); c.strokeStyle="#E0453A"; c.lineWidth=2; c.stroke();
+  // hazarduri punctuale
+  const dot=(x,y,cl,r)=>{ c.beginPath(); c.arc(X(x),Y(y),r||5,0,7); c.fillStyle=cl; c.fill(); };
+  dot(-40,205,"#E0453A",4);   // caruta cu oale
+  dot(-230,-88,"#E0453A",5);  // piatra de moara (gatul)
+  dot(-246,84,"#E0453A",4);   // kicker de iesire (gura stancii)
+  // fundal
+  c.fillStyle="#C9B48E"; c.beginPath(); c.moveTo(X(UCHISAR[0]-14),Y(UCHISAR[1]-8)); c.lineTo(X(UCHISAR[0]),Y(UCHISAR[1]+14)); c.lineTo(X(UCHISAR[0]+14),Y(UCHISAR[1]-8)); c.closePath(); c.fill();
+  c.fillStyle="#8A817A"; c.beginPath(); c.moveTo(X(ERCIYES[0]-20),Y(ERCIYES[1]-6)); c.lineTo(X(ERCIYES[0]),Y(ERCIYES[1]+14)); c.lineTo(X(ERCIYES[0]+20),Y(ERCIYES[1]-6)); c.closePath(); c.fill();
+  c.fillStyle="#F1EEE6"; c.beginPath(); c.moveTo(X(ERCIYES[0]-6),Y(ERCIYES[1]+8)); c.lineTo(X(ERCIYES[0]),Y(ERCIYES[1]+14)); c.lineTo(X(ERCIYES[0]+6),Y(ERCIYES[1]+8)); c.closePath(); c.fill();
+  // linia de start
+  const a0=LOOP[0]; c.fillStyle="#2B2419"; c.fillRect(X(a0[0])-2, Y(a0[1])-7, 4, 14);
+  c.fillStyle = col("--ink-soft"); c.font = "11px 'Source Sans 3',system-ui";
+  c.fillText("← antiorar (valea pe dreapta)", X(-60), Y(245));
+  c.fillText("Valea Roșie · baloanele decolează", X(290), Y(-270));
+  c.fillText("subteran (sub platou)", X(-330), Y(-105));
+  c.fillText("Uçhisar", X(-330), Y(205)); c.fillText("Erciyes", X(395), Y(215));
+  c.fillText("☀ soarele răsare de aici", X(340), Y(200));
+  // loturi
+  if (showLots){
+    c.setLineDash([4,3]);
+    LOTS.forEach(l=>{ const on = sel && sel.k===l[4];
+      c.strokeStyle = on ? "#B5573A" : col("--ink-soft"); c.lineWidth = on ? 2 : 1;
+      c.strokeRect(X(l[0]-l[2]/2), Y(l[1]+l[3]/2), l[2]*S, l[3]*S); });
+    c.setLineDash([]);
+  }
+  POI.forEach(p=>{
+    const on = sel && sel.k===p.k;
+    c.beginPath(); c.arc(X(p.x),Y(p.y),on?12:10,0,7);
+    c.fillStyle = on ? "#F2A840" : col("--panel"); c.fill();
+    c.strokeStyle = on ? "#B5573A" : col("--ink-soft"); c.lineWidth=1.5; c.stroke();
+    c.fillStyle = on ? "#1A1206" : col("--ink");
+    c.font = "bold 11px 'Source Sans 3',system-ui"; c.textAlign="center"; c.textBaseline="middle";
+    c.fillText(p.k, X(p.x), Y(p.y)); c.textAlign="left"; c.textBaseline="alphabetic";
+  });
+}
+
+// ---- profil ------------------------------------------------------------------
+const ev = document.getElementById("elev"), ec = ev.getContext("2d");
+function drawElev(){
+  ec.clearRect(0,0,ev.width,ev.height);
+  const pad=26, w=ev.width-2*pad, h=ev.height-2*pad, emax=60;
+  ec.strokeStyle = col("--grid");
+  for (let m=0;m<=emax;m+=10){ const y = pad+h-(m/emax)*h;
+    ec.beginPath(); ec.moveTo(pad,y); ec.lineTo(pad+w,y); ec.stroke();
+    ec.fillStyle = col("--ink-soft"); ec.font="10px system-ui"; ec.fillText(m+" m", 2, y+3); }
+  // banda subterana (F-G pana la iesire): hasura
+  let f0=-1,f1=-1; LOOP.forEach((p,i)=>{ if(p[3]==="pestera"&&f0<0)f0=i; if(p[3]==="spirala")f1=i; });
+  if (f0>=0){ ec.fillStyle="#4A3A2E"; ec.globalAlpha=.12; ec.fillRect(pad+(CUM[f0]/LEN)*w, pad, ((CUM[f1]-CUM[f0])/LEN)*w, h); ec.globalAlpha=1; }
+  ec.beginPath();
+  LOOP.forEach((p,i)=>{ const x = pad+(CUM[i]/LEN)*w, y = pad+h-(p[2]/emax)*h; i? ec.lineTo(x,y) : ec.moveTo(x,y); });
+  ec.strokeStyle = "#B5573A"; ec.lineWidth = 2; ec.stroke();
+  ec.lineTo(pad+w,pad+h); ec.lineTo(pad,pad+h); ec.closePath();
+  ec.fillStyle = "#B5573A"; ec.globalAlpha=.12; ec.fill(); ec.globalAlpha=1;
+  POI.filter(p=>p.k!=="S").forEach(p=>{
+    let best=0,bd=1e9;
+    LOOP.forEach((q,i)=>{const d=Math.hypot(q[0]-p.x,q[1]-p.y); if(d<bd){bd=d;best=i;}});
+    const x = pad+(CUM[best]/LEN)*w, y = pad+h-(LOOP[best][2]/emax)*h;
+    ec.beginPath(); ec.arc(x,y,3.5,0,7); ec.fillStyle=col("--panel"); ec.fill();
+    ec.strokeStyle=col("--ink-soft"); ec.stroke();
+    ec.fillStyle=col("--ink"); ec.font="bold 10px system-ui"; ec.fillText(p.k, x-3, y-8);
+  });
+  ec.fillStyle=col("--ink-soft"); ec.font="10px system-ui"; ec.fillText("sub pământ (tavan 16–18 m, preset cameră)", pad+(CUM[f0]/LEN)*w+4, pad+12);
+}
+
+// ---- ceasuri -----------------------------------------------------------------
+const LAP = 75;
+const CLOCKS = [["coșurile ×3",28,"urcă din vale la bandă, defazate 1/3"],["arzătorul",17,"flacără 1 s → suflu spre gol"],
+  ["piatra de moară",23,"închide culoarul scurt"],["balonul aterizat",45,"pânza pe drum ~15 s, grip 0,6×"]];
+document.getElementById("clocks").innerHTML = CLOCKS.map(([n,s,d])=>
+  '<div class="clock"><span class="nm">'+n+'</span><span class="bar"><i style="width:'+(s/LAP*100)+'%"></i><em style="left:'+(s/LAP*100)+'%"></em></span><span class="s">'+s+' s</span></div>'
+).join("") + '<div class="clock"><span class="nm">hornul-rampă</span><span class="bar" style="background:repeating-linear-gradient(90deg,var(--sunk) 0 6px,var(--hair) 6px 8px)"></span><span class="s">1×</span></div>'
+ + '<div class="note">Niciun ceas nu împarte turul (~75 s): faza se mută de la tur la tur. Bara = perioada față de tur. Hornul-rampă e set piece o dată pe cursă, la moment fix — decizia de ciclu e a dezvoltatorului (§3 în brief).</div>';
+
+// ---- interactiune ------------------------------------------------------------
+const detail = document.getElementById("detail");
+function select(p){
+  sel = p; draw();
+  document.querySelectorAll("#asset-tbl tr.row").forEach(tr=>
+    tr.classList.toggle("on", tr.dataset.poi && p && tr.dataset.poi.includes(p.k)));
+  if (!p){ detail.innerHTML = '<p class="hint">Alege un POI pe hartă sau un rând din tabel.</p>'; return; }
+  detail.innerHTML = '<span class="tag">POI '+p.k+' · frac '+p.frac+'</span><h3>'+p.name+'</h3>'+
+    '<div class="coord">'+p.w+'</div><p>'+p.desc+'</p>'+
+    '<div class="assets"><b>Lotul de assets</b>'+p.lot.join(" · ")+'</div>';
+}
+plan.addEventListener("click", e=>{
+  const r = plan.getBoundingClientRect();
+  const mx = (e.clientX-r.left)*(plan.width/r.width), my = (e.clientY-r.top)*(plan.height/r.height);
+  let best=null, bd=24;
+  POI.forEach(p=>{ const d=Math.hypot(X(p.x)-mx, Y(p.y)-my); if (d<bd){bd=d;best=p;} });
+  select(best);
+});
+plan.addEventListener("mousemove", e=>{
+  const r = plan.getBoundingClientRect();
+  const wx = minx+((e.clientX-r.left)*(plan.width/r.width)-ox)/S;
+  const wy = maxy-((e.clientY-r.top)*(plan.height/r.height)-oy)/S;
+  document.getElementById("cursor").textContent = Math.round(wx)+", "+Math.round(wy)+" m";
+});
+document.getElementById("lots").addEventListener("change", e=>{ showLots = e.target.checked; draw(); });
+
+const tbl = document.getElementById("asset-tbl");
+let html = "<thead><tr><th>piesă</th><th>dimensiuni</th><th class='num'>buc.</th><th>POI</th><th>notă</th></tr></thead><tbody>";
+let grp = "";
+ASSETS.forEach(a=>{
+  if (a[1]===null){ grp=a[0].includes("Hero")?"hero":a[0].includes("clas")?"cls":"kit";
+    html += '<tr class="grp"><td colspan="5">'+a[0]+'</td></tr>'; return; }
+  html += '<tr class="row" data-poi="'+a[3]+'"><td class="mono">'+a[0]+'</td><td>'+a[1]+'</td><td class="num">'+a[2]+
+    '</td><td><span class="pill '+grp+'">'+a[3]+'</span></td><td style="color:var(--ink-soft)">'+a[4]+'</td></tr>';
+});
+tbl.innerHTML = html + "</tbody>";
+document.getElementById("a-count").textContent = ASSETS.filter(a=>a[1]!==null).length + " tipuri";
+tbl.addEventListener("click", e=>{
+  const tr = e.target.closest("tr.row"); if (!tr) return;
+  const k = tr.dataset.poi.split("/")[0];
+  select(POI.find(p=>p.k===k) || null);
+});
+function copyFrom(btnId, preId, label){
+  document.getElementById(btnId).addEventListener("click", async e=>{
+    const txt = document.getElementById(preId).textContent;
+    try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copiat ✓"; }
+    catch(_) { const rng = document.createRange(); rng.selectNodeContents(document.getElementById(preId));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(rng); e.target.textContent = "Selectat — Ctrl+C"; }
+    setTimeout(()=>{ e.target.textContent = label; }, 2200);
+  });
+}
+copyFrom("copy-btn","prompt-text","Copiază promptul");
+copyFrom("copy-assets","asset-prompts","Copiază tot");
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{draw();drawElev();});
+draw(); drawElev();
+</script>

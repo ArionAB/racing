@@ -1668,6 +1668,36 @@ static func themes() -> Dictionary:
 			# peste acelasi slot. SAND_MID/SAND_SHADOW raman pentru piese care
 			# chiar au nevoie de alta NUANTA, nu de alta valoare.
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			# VALEA ROSIE, a doua nuanta a pistei — si singurul lucru care rupe
+			# cadrul din "tan monocrom". Criticul orb, runda 4: separarea de
+			# culoare la adancime "face treaba de a stabili trei planuri de
+			# distanta si toata gama de valoare" in referinta, iar fara ea
+			# raman doar variatii de acelasi crem.
+			#
+			# Cota: soseaua merge intre 11.9 si 49.9 (medie 31.5), iar terenul
+			# coboara pana la 3.6. Masurat cu ProbeCappStrat: 28% din vertecsi
+			# stau sub 25, cu lobul mare la 10-20 m. `strata_line` la 26 prinde
+			# fix masa aia — adica ce se vede PESTE buza, sub nivelul drumului —
+			# si lasa neatins platoul pe care se conduce (30-35, 33% din teren).
+			# Cu 10 m de degrade, tranzitia tine cat inaltimea unei faleze, deci
+			# se citeste ca strat geologic, nu ca linie de nivel.
+			#
+			# Nuanta vine din slotul de olane (TILE_TERRACOTTA, 23), nu dintr-un
+			# slot nou: e singurul rosu-caramiziu din atlas, si e deja folosit pe
+			# pista. Se ia inchisa cu 12% ca sa stea SUB cremul de tuf in
+			# valoare — separarea trebuie sa fie si de valoare, nu doar de
+			# nuanta, altfel la ceata cele doua mase se topesc una in alta.
+			"strata_tint": Palette.color(Palette.TILE_TERRACOTTA).darkened(0.12),
+			"strata_line": 30.0,
+			# 18 m de degrade, nu 10. Atentie ce NU rezolva: muchia dreapta
+			# dintre crem si rosu din captura de la frac 0.20 NU e o tranzitie
+			# de culoare prea scurta, e SILUETA ruperii de panta vazuta din
+			# muchie — terenul cade sub buza drumului, si linia aia e geometrie,
+			# nu degrade. Latirea de la 10 la 18 n-a schimbat-o cu nimic in
+			# captura, si asta e in regula: exact asa arata si in referinta,
+			# buza unei faleze. 18 ramane fiindca ajuta pe pantele line, unde
+			# tranzitia chiar se vede ca strat.
+			"strata_fade": 18.0,
 			# Cer de zori, hexurile din brief §9. NU e cerul de desert
 			# (albastru adanc 0.25/0.52/0.92 cu orizont auriu tare): la 13 grade
 			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.
@@ -3730,6 +3760,13 @@ func _build_terrain() -> void:
 	var rock_tint: Variant = theme_flag("rock_band_tint", null)
 	var rock_line := float(theme_flag("rock_line", 0.0))
 	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
+	# STRATUL DE JOS, oglinda lui rock_band: acela tinteaza PESTE o cota
+	# (etaj de munte), asta SUB ea (masa de teren de sub nivelul soselei).
+	# Null pe orice tema care nu-l cere, deci restul pistelor nu se schimba cu
+	# un pixel. Vezi "strata_tint" in themes().
+	var strata_tint: Variant = theme_flag("strata_tint", null)
+	var strata_line := float(theme_flag("strata_line", 0.0))
+	var strata_fade := maxf(float(theme_flag("strata_fade", 1.0)), 0.001)
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
 	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
@@ -3806,6 +3843,34 @@ func _build_terrain() -> void:
 					# limita de vegetatie pe munte, nu o proprietate a pistei.
 					# Se aplica INAINTE de zapada, ca albul sa ramana ultimul
 					# strat — pe creasta e zapada peste piatra, nu invers.
+					# STRATUL ROSU DE SUB SOSEA (Valea Rosie, brief §1).
+					# Se aplica PRIMUL, ca orice etaj de deasupra sa ramana
+					# peste el, si merge INVERS fata de rock/snow: greutatea
+					# creste cu cat COBORI sub `strata_line`, nu cu cat urci.
+					#
+					# De ce prin teren si nu prin geometrie noua: rosul trebuie
+					# sa fie a doua masa de TEREN vazuta peste un gol, sub
+					# nivelul drumului — nu o banda pictata pe conuri (aia s-a
+					# incercat si s-a scos, fiindca rosul pe silueta se citeste
+					# ca murdarie, nu ca distanta). Terenul de sub sosea exista
+					# deja: masurat, 28% din vertecsi stau sub cota 25, cu
+					# lobul mare la 10-20 m, adica 12-22 m sub soseaua medie.
+					# Deci nu e nevoie de mesh nou si nici de plasare: culoarea
+					# se aseaza pe relieful care e deja acolo.
+					#
+					# Marginea se zdrentuieste cu ACELASI zgomot ca celelalte
+					# etaje: o linie de nivel curata se citeste ca desen tehnic,
+					# iar aici ar taia un inel perfect in jurul pistei.
+					if strata_tint != null:
+						var strata_w := clampf(
+							(strata_line - v.y) / strata_fade, 0.0, 1.0)
+						strata_w = clampf(strata_w + dirt_noise.get_noise_2d(
+							v.x * 0.45, v.z * 0.45) * 0.20, 0.0, 1.0)
+						strata_w = smoothstep(0.0, 1.0, strata_w)
+						if strata_w > 0.0:
+							tint = tint.lerp(strata_tint as Color, strata_w)
+							# Pe faleza rosie nu creste iarba, ca si pe piatra.
+							grass_w *= 1.0 - strata_w
 					if rock_tint != null:
 						var rock_w := clampf(
 							(v.y - rock_line) / rock_fade, 0.0, 1.0)

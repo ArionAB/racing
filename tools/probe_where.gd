@@ -30,6 +30,6 @@ func _ready() -> void:
 
 func _walk(n: Node, out: Array[Node]) -> void:
 	for c in n.get_children():
-		if c is MeshInstance3D and (String(c.name).begins_with("Faleza") or String(c.name).contains("Cliff")):
+		if c is MeshInstance3D and (String(c.name).begins_with("Faleza")):
 			out.append(c)
 		_walk(c, out)

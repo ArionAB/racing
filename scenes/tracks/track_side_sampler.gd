@@ -222,6 +222,17 @@ var _scarps: Array[int] = []
 ## rapa se masoara de la cota drumului si, pe o coborare de 30 m, capatul de
 ## jos iesea sub apa: lac direct sub buza. Vezi _carve_ravines.
 var _floors: Dictionary = {}
+## PANTA podelei, in metri de cadere la fiecare 100 m dincolo de buza (indice de
+## rapa -> metri). Zero = podea plata, comportamentul dinainte.
+##
+## O podea absoluta e o MASA: tine aceeasi cota de la buza pana la marginea
+## rapei. Masurat din ochiul soferului pe cornisa Cappadociei, exact asta se
+## vedea — o treapta mica dupa umar, apoi podea pana la orizont, si baloanele
+## pareau ca plutesc peste un ses, nu ca urca dintr-o vale. Ochiul citeste
+## adancimea din faptul ca terenul CONTINUA sa coboare, nu din cifra de la buza.
+## Cu panta, fundul se duce mai jos cu cat e mai departe, deci silueta coboara
+## monoton pana in ceata.
+var _floor_slopes: Dictionary = {}
 ## LATIMEA unei rape, in metri de la buza (indice de rapa -> metri). Fara ea,
 ## saparea se intinde lateral la infinit: `lat` satureaza la RAVINE_RIM metri
 ## dincolo de buza si ramane 1 pana la marginea hartii, iar `_smin` nu poate
@@ -315,12 +326,15 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		hollows: Array[Vector4] = [],
 		hollow_walls: PackedFloat32Array = PackedFloat32Array(),
 		scarps: Array[int] = [],
-		ravine_widths: Array[Vector2] = []) -> void:
+		ravine_widths: Array[Vector2] = [],
+		floor_slopes: Array[Vector2] = []) -> void:
 	_baked = baked
 	for fl in floors:
 		_floors[int(fl.x)] = fl.y
 	for rw in ravine_widths:
 		_ravine_widths[int(rw.x)] = rw.y
+	for fs in floor_slopes:
+		_floor_slopes[int(fs.x)] = fs.y
 	_dists = dists
 	_half_width = half_width
 	_widths = widths
@@ -970,7 +984,14 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		if _floors.has(ri):
 			# Podeaua e absoluta, nu relativa la drum: cheiul sta la aceeasi
 			# cota pe toata lungimea cornisei, oricat coboara soseaua.
-			target = maxf(target, float(_floors[ri]))
+			var floor_y := float(_floors[ri])
+			if _floor_slopes.has(ri):
+				# ...dar poate sa CADA cu departarea de buza. Vezi
+				# _floor_slopes: o podea plata citeste ca masa, si atunci
+				# adancimea de la buza nu se mai vede din ochiul soferului.
+				var out := maxf(dist - half_width_at(near_i) - inner, 0.0)
+				floor_y -= float(_floor_slopes[ri]) * out * 0.01
+			target = maxf(target, floor_y)
 		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
 		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
 		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).

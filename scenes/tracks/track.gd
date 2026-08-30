@@ -2353,6 +2353,13 @@ func _ravine_floors() -> Array[Vector2]:
 func _ravine_widths() -> Array[Vector2]:
 	return []
 
+## PANTA podelei unei rape: (indice in [method _ravines], metri de cadere la
+## fiecare 100 m dincolo de buza). Fara ea podeaua e o masa plata si, din ochiul
+## soferului, valea citeste ca o treapta urmata de ses — vezi
+## TrackSideSampler._floor_slopes.
+func _ravine_floor_slopes() -> Array[Vector2]:
+	return []
+
 ## PASAJE PE PILONI: intervale de tur (fractii, x..y, cu wrap peste 1.0) in care
 ## soseaua trece IN AER peste un alt tronson al aceleiasi piste — nodul rutier
 ## din Chongqing, sau orice „pista peste pista".
@@ -2808,7 +2815,8 @@ func rebuild() -> void:
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
 		_viaduct_ravines(), _overpass_ranges(), _ravine_floors(),
-		hollows, hollow_walls, _scarp_ravines(), _ravine_widths())
+		hollows, hollow_walls, _scarp_ravines(), _ravine_widths(),
+		_ravine_floor_slopes())
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",

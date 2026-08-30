@@ -117,6 +117,8 @@ extends Track
 ## Track._ravine_widths. Fara ea saparea se intinde lateral la infinit si valea
 ## n-are mal opus — faleza citeste ca bordura de sant.
 @export var custom_ravine_widths: Array[Vector2] = []
+## Vezi [method Track._ravine_floor_slopes].
+@export var custom_ravine_floor_slopes: Array[Vector2] = []
 ## PARAPET DECLARAT: (frac_start, frac_end, regim RAIL_*, latura +-1 sau 0).
 ## Vezi Track._rail_segments — pe o pista fara gard (`walls: false`) singurul
 ## regim cu efect e RAIL_POSTS: stalpi rari pe buza, fara coliziune.
@@ -242,6 +244,11 @@ func _ravine_floors() -> Array[Vector2]:
 
 func _ravine_widths() -> Array[Vector2]:
 	return custom_ravine_widths
+
+
+func _ravine_floor_slopes() -> Array[Vector2]:
+	return custom_ravine_floor_slopes
+
 
 func _lagoon_points() -> Array[Vector2]:
 	if custom_lagoon.is_empty():

@@ -162,6 +162,7 @@ func _detail_textures() -> void:
 	# accentele de masina NIMIC (style_bible §1: masinile raman cele mai curate
 	# suprafete din cadru, ca sa se desprinda de fundal).
 	_write_detail_mask("res://assets/textures/detail_mask.png")
+	_detail_tuff()
 
 
 ## Trim sheet-ul de ROCA — prima textura COLOR de clasa (upgrade grafic, val 4b).
@@ -369,6 +370,59 @@ func _write_detail_mask(path: String) -> void:
 ##
 ## Media conteaza: textura se INMULTESTE peste albedo, deci o medie de 0.86
 ## intuneca toata lumea cu 14% si cere recalibrarea expunerii (style_bible §5).
+
+## Stratul de detaliu al TUFULUI — varianta cu caneluri VERTICALE (Cappadocia).
+##
+## De ce exista o a doua textura de detaliu, si nu un retus pe prima:
+## detail_rock.png are STRATE ORIZONTALE (benzi pe Y), fiindca a fost autorata
+## pentru faleze sedimentare — Baikal, Stromboli, Chongqing traiesc din ea si nu
+## se atinge. Pe Cappadocia insa e exact defectul pe care critica oarba l-a
+## numit de doua ori: "tight, evenly-spaced horizontal contour lines ... that is
+## not stratigraphy, that is a topographic map or a lathe finish".
+##
+## Diagnosticul care a costat doua runde: dungile NU veneau din `Builder.revolve`.
+## Se vad identice pe buiandrugul arcadei — o CUTIE, deci nicio suprafata de
+## revolutie — fiindca stratul de detaliu se aplica TRIPLANAR peste toata lumea.
+## Rundele 1 si 2 au reparat mesh-ul, care nu era bolnav de asta.
+##
+## Hornul de tuf se erodeaza prin SIROIRE: apa curge in jos si sapa santuri
+## verticale, deci frecventa dominanta trebuie sa fie pe X (canelura), nu pe Y
+## (banda). Aici nu e o rotatie a texturii vechi: o textura rotita ar da benzi
+## verticale perfect paralele, adica acelasi tapet intors pe 90°. Canelura reala
+## are latimi INEGALE si se STINGE pe verticala (santul e adanc la baza, unde
+## apa s-a adunat, si se pierde spre varf).
+##
+## Media ramane ~0.93, ca la sora ei: expunerea temei si WATER_GAIN sunt
+## calibrate pe media stratului de detaliu (style_bible §14), deci o textura cu
+## alta medie ar clatina toata pista, nu doar roca.
+func _detail_tuff() -> void:
+	_write_tileable_n("res://assets/textures/detail_tuff.png", 256,
+		func(x: int, y: int) -> float:
+			var fx := float(x) / 256.0
+			var fy := float(y) / 256.0
+			# Canelurile: frecventa dominanta pe X. Faza e modulata de Y, deci
+			# santul SERPUIESTE in jos in loc sa fie o rigla — apa nu curge pe
+			# linie dreapta pe un con.
+			var meander := sin(fy * TAU * 1.3) * 0.55 + sin(fy * TAU * 3.1) * 0.18
+			# Doua frecvente necomensurabile => santuri de LATIMI diferite. Cu una
+			# singura ar iesi o roata dintata, adica exact greseala texturii
+			# orizontale, doar intoarsa pe 90°.
+			var flute := smoothstep(-0.40, 0.40,
+				sin(fx * TAU * 7.0 + meander)) * -0.46
+			var fine := smoothstep(-0.6, 0.6,
+				sin(fx * TAU * 17.0 + meander * 1.6)) * -0.15
+			# Santul se ADANCESTE spre baza dalei: siroirea e cumulativa in jos.
+			var depth := 1.0 - 0.40 * fy
+			# Pete lente, ca sa nu se vada dala repetata.
+			var macro := sin(float(x) * 0.019) * cos(float(y) * 0.023) * 0.10
+			# Rupturi orizontale RARE: tuful are un plan de cedare din loc in loc.
+			# Rare si scurte — dese, am fi reinventat banda pe care tocmai o scoatem.
+			var ledge := -0.22 * pow(maxf(0.0,
+				sin(fy * TAU * 2.0 + sin(fx * TAU * 1.7) * 1.2)), 40.0)
+			var grain := -rng.randf() * 0.24
+			return (flute + fine) * depth + macro + ledge + grain + 0.415)
+
+
 func _write_tileable_n(path: String, n: int, noise: Callable) -> void:
 	var img := Image.create(n, n, true, Image.FORMAT_RGB8)
 	var lo := 1.0

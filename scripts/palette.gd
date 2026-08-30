@@ -160,6 +160,33 @@ static func uv(slot: int) -> Vector2:
 ## draw call-uri: toate prop-urile arata spre acelasi material).
 static var _shared: StandardMaterial3D
 
+## Calea stratului de detaliu ACTIV. Tema o poate schimba (`detail_texture`).
+##
+## Exista fiindca detail_rock.png are STRATE ORIZONTALE — corect pentru faleze
+## sedimentare (Baikal, Stromboli, Chongqing), gresit pentru tuful din
+## Cappadocia, care se erodeaza prin siroire: santurile coboara CU apa. Fiind
+## aplicat triplanar peste TOATA lumea, defectul nu se putea repara in mesh:
+## benzile ieseau identice si pe o cutie (buiandrugul arcadei), nu doar pe
+## corpurile de revolutie. Doua runde de critica oarba s-au pierdut cautand
+## vinovatul in `Builder.revolve`.
+##
+## NU adauga material: se schimba doar textura din `detail_albedo`, deci
+## numaratoarea din tools/probe_decor.gd nu se misca.
+static var _detail_path: String = DETAIL_PATH
+
+
+## Schimba stratul de detaliu al lumii. Se apeleaza INAINTE de prima cerere de
+## material (Track.apply_theme), fiindca `_shared` e construit lenes o data.
+## Daca materialul exista deja, i se schimba textura pe loc — altfel o pista
+## incarcata a doua oara in aceeasi sesiune ar ramane cu detaliul precedentei.
+static func set_detail_texture(path: String) -> void:
+	var want := path if path != "" else DETAIL_PATH
+	if want == _detail_path and _shared != null:
+		return
+	_detail_path = want
+	if _shared != null:
+		_shared.detail_albedo = load(_detail_path)
+
 ## Materialul comun al lumii. Vertex color = AO copt, inmultit peste atlas.
 ##
 ## Filtrarea: LINEAR cu mipmap-uri, nu NEAREST. Cat timp sloturile erau patrate
@@ -205,7 +232,7 @@ static func world_material() -> StandardMaterial3D:
 		# centrul slotului — asa slotul din paleta devine si canal de intensitate:
 		# roca primeste tot, masinile nimic.
 		_shared.detail_enabled = true
-		_shared.detail_albedo = load(DETAIL_PATH)
+		_shared.detail_albedo = load(_detail_path)
 		_shared.detail_mask = load(DETAIL_MASK_PATH)
 		_shared.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 		_shared.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2

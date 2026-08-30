@@ -1600,6 +1600,18 @@ static func themes() -> Dictionary:
 		#    canale de cremul cerut in brief (#E8D9B8): sub pragul de 12 din
 		#    style_bible §5, deci cea mai buna potrivire din paleta existenta.
 		"cappadocia": {
+			# Stratul de detaliu al lumii: CANELURI VERTICALE, nu strate
+			# orizontale. Singura tema care si-l schimba, si e o reparatie, nu
+			# un gust: detail_rock.png (implicit) are benzi pe Y, autorate
+			# pentru faleze sedimentare. Aplicat triplanar peste tot, pe
+			# hornurile de tuf citea exact ce a numit critica oarba de doua ori
+			# — "topographic map or a lathe finish". Doua runde s-au dus pe
+			# reparat mesh-ul; dungile se vedeau insa identice si pe
+			# buiandrugul arcadei, care e o CUTIE, deci nu veneau din
+			# `Builder.revolve`, ci din textura. Tuful se erodeaza prin
+			# siroire: santurile coboara CU apa. Vezi _detail_tuff() din
+			# tools/generate_palette_atlas.gd.
+			"detail_texture": "res://assets/textures/detail_tuff.png",
 			# TUF CREM, nu nisip de desert. SAND_MID (#D4994D) e ocru saturat —
 			# pe el hornurile ar fi iesit dune, adica exact "desert cu stanci",
 			# lucrul pe care brief-ul §0.1 il interzice explicit. CORAL_SAND
@@ -1896,6 +1908,11 @@ func apply_theme(theme: String) -> void:
 	# tema de NOAPTE nu are ce umbri: soarele e o luna palida aproape verticala,
 	# iar o umbra dura ar contrazice lumina. "shadows": false le stinge pe tema.
 	theme_shadows = bool(_theme.get("shadows", true))
+	# Stratul de detaliu triplanar al lumii: implicit strate orizontale, dar
+	# Cappadocia cere caneluri verticale (vezi cheia `detail_texture`). Se
+	# aseaza AICI, inainte ca decorul sa ceara primul material — `_shared` din
+	# Palette se construieste lenes, o singura data.
+	Palette.set_detail_texture(String(_theme.get("detail_texture", "")))
 
 var curve: Curve3D
 var baked: PackedVector3Array

@@ -1691,15 +1691,34 @@ static func themes() -> Dictionary:
 			#
 			# Conventia repo-ului: azimut = rotation_degrees.y + 180. Se citeste
 			# din SUN_ROTATION_DEG, unde y = 135 e documentat ca azimut 315.
-			# Est curat ar fi y = -90; s-a luat -120 (azimut 60) ca umbrele sa
-			# cada DIAGONAL pe drum. Cu soarele exact pe axa, pe portiunile care
-			# merg est-vest umbrele hornurilor s-ar fi intins IN LUNGUL benzii
-			# si n-ar mai fi taiat-o — adica fix identitatea vizuala pierduta.
 			#
-			# Unghiul e derivat, nu ales: la 13 grade umbra unui horn de 14 m
-			# are 14 / tan(13) = 60.6 m. Hornurile din §2 B stau la 2-4 m de
-			# banda, deci umbra trece peste tot drumul si inca 50 m dincolo.
-			"sun_rotation_deg": Vector3(-13, -120, 0),
+			# Lungimea umbrei era deja socotita: la 13 grade un horn de 14 m
+			# arunca 14 / tan(13) = 60.6 m, deci trece peste toata banda. Dar
+			# lungimea nu e vizibilitate, si aici s-a pierdut runda trecuta —
+			# CONTEAZA IN CE DIRECTIE cade, fata de directia in care privesti.
+			#
+			# -120 (azimut 60) fusese ales "ca umbrele sa cada diagonal pe drum",
+			# fara sa se masoare pe unde chiar trece drumul. Masurat acum, pe
+			# punctele curbei: la POI B banda merge spre +X (fwd = 0.97, 0.25),
+			# iar umbra la -120 cade spre (+0.87, +0.50) — la 16 grade de
+			# directia de mers. Adica umbra fiecarui horn pleaca DIRECT IN
+			# SPATELE lui, in propria ocluzie, si dispare din cadru: soarele era
+			# aproape fix in spatele soferului. Asta explica de ce criticul orb
+			# n-a vazut nicio umbra aruncata desi umbrele erau pornite, si de ce
+			# reglajul de bias din commit-ul precedent, corect in cifra, n-a
+			# schimbat nimic in poza — nu exista umbra vizibila pe care sa o
+			# lipeasca la loc.
+			#
+			# -30 (azimut 150) pastreaza acelasi soare de zori la 13 grade, dar
+			# duce umbra spre (+0.50, -0.87): 74 de grade fata de banda, deci o
+			# TAIE aproape perpendicular. Componenta laterala la POI B urca de la
+			# 0.27 la 0.96.
+			#
+			# Nu strica restul pistei, masurat pe 13 esantioane de traseu, nu
+			# doar aici: media componentei laterale ramane 0.66 (fata de 0.65 la
+			# -120), iar portiunile cu umbra in lungul benzii scad de la 3 la 2.
+			# Adica pe ansamblu e la fel de bun, si la POI B e alt film.
+			"sun_rotation_deg": Vector3(-13, -30, 0),
 			# Expunerea urca peste 1 fiindca soarele e slab si ambientul jos,
 			# iar tuful trebuie sa ramana cea mai DESCHISA suprafata mare din
 			# cadru (drumul de pamant e sub el, asfalt nu exista). Se ridica de
@@ -1769,6 +1788,12 @@ static func themes() -> Dictionary:
 			# fiindca celelalte piste cu soare mai jos de 42 (Okinawa 33, Baikal
 			# 24, Stromboli 46) arata bine acum si nu se ating fara capturi.
 			"shadow_bias_from_sun": true,
+			# FARA PANCAKE. Implicitul de 20 m taia din adancime chiar casterii
+			# ale caror umbre sunt subiectul pistei: la 13 grade umbra are 60 m,
+			# deci hornul cadea in afara feliei pastrate si nu arunca NIMIC.
+			# Verificat pe captura cu un cub de control peste banda: 20 -> nicio
+			# umbra, 0 -> umbra taie tot drumul. Vezi nota din _build_environment.
+			"shadow_pancake": 0.0,
 			"fog_depth": true,
 			# 140 -> 300, si inceputul e departe DIN MECANICA, nu din gust: de
 			# pe cornisa (POI C) trebuie sa se vada fundul vaii cu baloanele in
@@ -3192,6 +3217,31 @@ func _build_environment() -> void:
 			sun.shadow_normal_bias = _shadow_normal_bias_for_sun()
 		else:
 			sun.shadow_normal_bias = SHADOW_NORMAL_BIAS_REF
+		# PANCAKE-UL, si asta e cauza reala a "nu se vede nicio umbra aruncata".
+		#
+		# Godot trage planul near al camerei de umbra pana la casterul cel mai
+		# apropiat si il tine la cel mult `pancake_size` metri — un truc de
+		# precizie in depth buffer, care presupune tacit ca umbra e SCURTA fata
+		# de cutia cascadei. La soare de amiaza asa si e.
+		#
+		# La 13 grade nu mai e: umbra unui horn de 14 m are 14 / tan(13) = 60 m,
+		# de trei ori pancake-ul implicit de 20 m. Casterul iese din felia de
+		# adancime pastrata si umbra lui pur si simplu nu se deseneaza — nu
+		# slaba, nu dezlipita, ci ABSENTA. De aia trei runde de reglaje pe
+		# casteri (bias, cascada, azimut, ambient) n-au schimbat nimic in poza:
+		# lucrau pe o umbra care nu ajungea niciodata sa fie randata.
+		#
+		# Dovada e o captura cu un CUB de 8 m suspendat peste banda: cu pancake
+		# 20 nu are umbra deloc, cu pancake 0 arunca peste tot drumul. Cubul a
+		# fost sonda de control — obiect propriu, la coordonata camerei, exact
+		# ca sa nu depinda verdictul de conurile pistei.
+		#
+		# 0 = fara clamp. Se plateste in precizie de depth, si se vede: la
+		# elevatii mari ar da peter-panning. De aia e derivat, nu global —
+		# pistele cu soare normal isi pastreaza cei 20 m.
+		var pancake: Variant = theme_flag("shadow_pancake", null)
+		if pancake != null:
+			sun.directional_shadow_pancake_size = float(pancake)
 	add_child(sun)
 
 	# _build_terrain() NU se cheama de aici: are nevoie de pozitiile falezelor ca

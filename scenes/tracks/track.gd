@@ -2382,7 +2382,9 @@ func _peak_specs() -> Array[Vector4]:
 ## comentariul din `rebuild`. Un grup gol NU e protejat: daca l-ai golit de
 ## declaratii, e un nod generat ca oricare altul.
 func _holds_declarations(node: Node) -> bool:
-	if node is TerrainPeak or node is TrackChannel or node is HazardMarker:
+	if node is TerrainPeak or node is TerrainHollow:
+		return true
+	if node is TrackChannel or node is HazardMarker:
 		return true
 	for child in node.get_children():
 		if _holds_declarations(child):
@@ -2410,6 +2412,24 @@ func _collect_peaks(node: Node, out: Array[Vector4]) -> void:
 			var p := to_local(pk.global_position)
 			out.append(Vector4(p.x, p.z, pk.radius_m, p.y))
 		_collect_peaks(child, out)
+
+
+## Volumele scobite plasate ca noduri [TerrainHollow] — perechea pe MINUS a lui
+## `_collect_peaks`, cu aceeasi cautare recursiva si aceleasi coordonate de pista.
+##
+## Umple DOUA liste paralele fiindca declaratia are cinci numere (axa, raza,
+## podea, grosimea peretelui) si Vector4 tine patru. Grosimea sta intr-un
+## PackedFloat32Array, nu intr-un Dictionary, ca `ground_y` sa nu ajunga sa
+## caute pe cheie in bucla lui interioara.
+func _collect_hollows(node: Node, out: Array[Vector4],
+		walls: PackedFloat32Array) -> void:
+	for child in node.get_children():
+		if child is TerrainHollow:
+			var hl := child as TerrainHollow
+			var p := to_local(hl.global_position)
+			out.append(Vector4(p.x, p.z, hl.radius_m, p.y))
+			walls.append(hl.wall_m)
+		_collect_hollows(child, out, walls)
 
 
 ## Scurtaturile desenate ca noduri [TrackBranch] — se ADUNA la cele declarate in
@@ -2730,12 +2750,18 @@ func rebuild() -> void:
 	# protectie a asfaltului, buza rapelor, malul lagunei, sloturile de decor.
 	# Pe o pista fara profil declarat lista e goala, deci samplerul raspunde
 	# exact ca inainte.
+	# Scobiturile se aduna INAINTE: constructorul le cere, iar o cautare de
+	# noduri n-are ce cauta in lista de argumente.
+	var hollows: Array[Vector4] = []
+	var hollow_walls := PackedFloat32Array()
+	_collect_hollows(self, hollows, hollow_walls)
 	_sampler = TrackSideSampler.new(baked, _dists, _points(), half_width,
 		float(_world_seed() % 1000) * 0.01, _ravines(),
 		theme_flag("seabed_drop", 0.0), _branch_corridor_points(),
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
-		_viaduct_ravines(), _overpass_ranges(), _ravine_floors())
+		_viaduct_ravines(), _overpass_ranges(), _ravine_floors(),
+		hollows, hollow_walls)
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",

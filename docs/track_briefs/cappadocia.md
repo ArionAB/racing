@@ -137,8 +137,21 @@ bază, nu un horn.
 | **D** | 0.38–0.50 | **Canionul roșu** — coborâre în S între faleze în benzi, 7 m lățime; la mijloc **hornul crăpat**: un horn de 16 m stă în mijlocul drumului (ocolul e pe stânga, lung, 6 m); telegraph: pietricele + praf + trosnet (2 s), apoi **se prăbușește spre dreapta și devine rampă** — de pe ea sari peste un S întreg al ocolului (câștig ~3 s, aterizare pe canion; ratezi → în moloz, grip 0,8×) | **transformare de pistă**, vezi §3 pentru regula de ciclu | 6–7 m |
 | **E** | 0.52–0.64 | **Via și balonul aterizat** — fundul văii: rânduri de vie (iarbă lentă cu geometrie, se trece prin ele = scurtătură lentă), plopi, o fermă; **un balon aterizează pe drum** pe ciclu (~45 s): coșul se pune pe bandă, pânza se dezumflă și **se întinde 20 m peste drum** (suprafață lentă 0,6×, culoare tare), apoi echipajul o „strânge" și balonul decolează | fâșia de viteză; decizia: prin vie (lent, sigur) sau pe drum (rapid, dacă pânza nu e jos) | 8 m |
 | **F** | 0.66–0.82 | **Orașul subteran** — gura săpată în faleză (arc, torțe); **preset cameră cavernă** la intrare. **Sala 1** (tavan 16 m, coloane, alcove, un **puț de ventilație** cu coloană de lumină care cade pe drum); **gâtul cu piatra de moară**: două culoare — scurt (4 m, o **ușă de piatră de moară** de 3 m diametru se rostogolește în lăcaș pe ciclu ~23 s: închis = zid) și lung (+2,5 s, mereu liber); **Sala 2** (tavan 18 m, biserică rupestră cu arce, fresce abstracte, puțul al doilea) | opoziție de fază între culoare nu e nevoie (lungul e mereu deschis); contact cu piatra în mișcare = ești împins înapoi cu masă, nu distrus | 6–8 m |
-| **G** | 0.84–0.98 | **Stânca goală** — din sala 2 drumul urcă **în spirală pe interiorul unei stânci-castel goale** (70 m la bază, 45 m înaltă, găurită ca Uçhisar; rampă elicoidală săpată, 2 ture cu raza 28 m, urcare 12 → 50 m), lumina de sus crește la fiecare tură, ferestre spre vale prin perete (vezi baloanele iar, tot mai de sus); la vârf **kickerul de ieșire**: sari prin gura stâncii pe platou, cu airtime, în lumină plină | urcare tehnică ~11%; interiorul e „pistă peste pistă" (spirala trece deasupra ei) → `custom_overpass_ranges` (PR #353), separare ≥ 12 m între ture (pas de 19 m/tură) | 6 m |
+| **G** | 0.84–0.98 | **Stânca goală** — din sala 2 drumul urcă **în spirală pe interiorul unei stânci-castel goale** (70 m la bază, 45 m înaltă, găurită ca Uçhisar; rampă elicoidală săpată, 2 ture cu raza 28 m, urcare 12 → 50 m), lumina de sus crește la fiecare tură, ferestre spre vale prin perete (vezi baloanele iar, tot mai de sus); la vârf **kickerul de ieșire**: sari prin gura stâncii pe platou, cu airtime, în lumină plină | urcare tehnică **9,5 % măsurat** (`ProbeHelix`: arc 375,6 m, 2,13 ture, pas 16,7 m/tură); interiorul e „pistă peste pistă" (spirala trece deasupra ei) → `custom_overpass_ranges`, măsurat **17,1 m între ture** (`ProbeCappCoils`, bara 14 m). **Stânca e goală printr-o declarație, nu prin noroc:** nodul `TerrainHollow` din `Scobituri/StancaGoalaInterior` (axă −302,0 / 6,0, podea 11 m, rază 34 m, perete 12 m) — fără el drumul de ieșire, care traversează gura stâncii pe deasupra, umple hornul cu tuf până la 48 m | 6 m |
 | **A′** | 1.00 | aterizare pe platou, 40 m până la linie | camera revine la preset normal la ieșirea din stâncă | 9 m |
+
+> **De ce stânca goală cere un nod nou.** Terenul URMEAZĂ șoseaua peste tot
+> (`TrackSideSampler.ground_y`), deci orice bucată de drum care trece pe
+> deasupra unui gol îl umple cu piatră până la cota ei. Aici drumul de ieșire
+> de pe platou (frac 0,96+, y ≈ 48 m) taie exact peste gura hornului, iar
+> lacătul local (`GROUND_LOCK_LEN`) ridica terenul la 48 m în mijlocul
+> spiralei: **196 din 984 de puncte coapte îngropate, cel mai adânc +38,40 m**.
+> `custom_overpass_ranges` nu rezolvă asta — el scoate punctele elicei din
+> media terenului (corect, altfel cele două ture s-ar media între ele), dar nu
+> spune nimic despre ce e SUB drum, iar câmpul se umple din ALT drum. Golul se
+> declară ca gol: [TerrainHollow]. Măsurat după: **0 puncte îngropate**,
+> interiorul la podea (11 m) până la r = 32 m, creasta masivului la 49–65 m
+> începând de la r = 40 m — plin pe dinafară, gol pe dinăuntru.
 
 **Ritmul turului:** sat (respiro) → hornuri (strângere + umbre) → cornișă
 (vârful vizual + coșurile + suflul + frica de gol) → canion (hornul-rampă,

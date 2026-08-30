@@ -1783,12 +1783,32 @@ static func themes() -> Dictionary:
 			# loc unde se schimba, si trebuie sa fie vizibil ca sunt doua.
 			"rockfall_class": "coral_rock",
 			# DRUM DE PAMANT BATATORIT PALID, nu nisipul auriu implicit
-			# (DIRT_ROAD_COLOR #CCA86E, nisipul Dunelor). Brief §9 cere #C9B28A:
-			# mai palid si mult mai putin saturat, fiindca pe un platou de tuf
+			# (DIRT_ROAD_COLOR #CCA86E, nisipul Dunelor): pe un platou de tuf
 			# praful de pe drum E tuf macinat, nu nisip de desert. Pista declara
 			# `custom_road_surface = "dirt"`; cheia asta ii da culoarea, la fel
 			# cum `ice_road_tint` o da pe Baikal.
-			"dirt_road_tint": Color.html("C9B28A"),
+			#
+			# Brief §9 cerea #C9B28A, si masurat era prea saturat: 0.31, adica
+			# de doua ori terenul crem din jur (CORAL_SAND 0.18) si de patru ori
+			# hornurile (CONCRETE 0.07 dupa remapare). Iesea cel mai saturat
+			# element din cadru — banda tragea privirea de pe formatiuni, adica
+			# exact pe dos fata de POI, unde subiectul sunt conurile. Nu e o
+			# chestiune de gust: dupa ce hornurile s-au dus pe crem, drumul a
+			# ramas singurul lucru portocaliu, deci referinta din brief tinea de
+			# o paleta care intre timp s-a schimbat.
+			#
+			# Corectia se masoara PE CADRU, nu pe hex: soarele de zori (13°) e
+			# portocaliu si se inmulteste peste albedo, iar `road_material`
+			# imparte culoarea la SAND_MACRO_MEAN (0.85), ceea ce mai ridica o
+			# data saturatia. Cu #C9B28A banda iesea la 0.76 in cadru, langa un
+			# teren de 0.56 — de doua ori distanta pe care o arata hexurile.
+			# #CDC0A8 a coborat-o la 0.65, tot peste teren.
+			#
+			# #D3CBBD inchide restul: masurat in cadru da ~0.57, adica exact
+			# terenul de langa ea, si ramane cu ~25 de luminanta sub tuful din
+			# hornuri — banda se citeste in continuare ca drum, prin VALOARE, nu
+			# prin croma. Schimbarea e pe TEMA, deci pe toata pista.
+			"dirt_road_tint": Color.html("D3CBBD"),
 			# Praful ridicat de roti: acelasi tuf, doar mai inchis (umbra din
 			# interiorul norului). SAND_SHADOW ar fi fost #915D27, maro ars —
 			# praf de pamant arat, nu de piatra moale macinata.

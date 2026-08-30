@@ -53,11 +53,17 @@ const RES := {
 
 ## Raza la baza pentru fiecare model, ca sa se poata calcula degajarea fata de
 ## muchia asfaltului. Din AABB-ul masurat (ProbeCappB), jumatate din latime.
+## Razele sunt CITITE din AABB-ul .glb-urilor (max pe X si Z), nu estimate.
+## Dupa trecerea hornurilor de la fus la con (build_cappadocia_tuff.py) bazele
+## s-au latit cu 1-2 m, si tabelul vechi le-ar fi asezat ca si cum ar fi
+## ramas subtiri: piesele intrau in carosabil, iar camera de captura ajungea in
+## spatele lor. Cine mai atinge proportiile in Blender REGENEREAZA si cifrele
+## astea — garda de mai jos se bazeaza pe ele.
 const BASE_R := {
-	"rocks/chimney_a": 2.18, "rocks/chimney_b": 2.03, "rocks/chimney_c": 2.70,
-	"rocks/chimney_d": 2.35, "rocks/chimney_mushroom": 2.03,
-	"rocks/chimney_triple": 3.80, "buildings/dovecote": 2.34,
-	"buildings/cave_house_a": 3.15, "buildings/cave_house_b": 3.97,
+	"rocks/chimney_a": 3.24, "rocks/chimney_b": 3.61, "rocks/chimney_c": 4.35,
+	"rocks/chimney_d": 3.71, "rocks/chimney_mushroom": 3.09,
+	"rocks/chimney_triple": 5.79, "buildings/dovecote": 2.34,
+	"buildings/cave_house_a": 3.15, "buildings/cave_house_b": 3.96,
 	"rocks/rock_church_facade": 4.73,
 }
 

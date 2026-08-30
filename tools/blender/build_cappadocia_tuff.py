@@ -9,13 +9,15 @@
 De ce hornul NU e un simplu con (brief §0.1, 55% din pista e geologie de tuf):
 silueta reala are TREI parti, si toate trei se vad de la 40 m —
 
-  1. **gatul** care se subtiaza neuniform (tuful se erodeaza in trepte, nu
-     liniar), deci `revolve` cu un profil in care raza scade cu paliere;
-  2. **palaria de bazalt**, mereu MAI LATA decat gatul de sub ea si cu buza
-     care iese in consola — asta e ce face conul sa citeasca drept "horn de
-     zana" si nu drept "movila de nisip". `VOLCANIC_BLACK` peste crem;
+  1. **conul** care se subtiaza CONTINUU, ca un cort: fara umar la baza si
+     fara portiune dreapta la mijloc (vezi `CONE_EXP`). Prima versiune avea
+     exponent subunitar, si asta o facea sa citeasca drept cos de fabrica;
+  2. **palaria de bazalt**, putin mai lata decat gatul (1.3x) si ASCUTITA,
+     ca sa continue linia conului. Peste ~2x cu fata plata redevine palarie
+     de cos de fum. `VOLCANIC_BLACK` peste crem;
   3. **umbra proprie lunga** la soare de 13° — vine din geometrie, nu din
-     asset, dar de-aia gatul e inalt si subtire.
+     asset, si e singura variatie de valoare de pe corp: benzile orizontale
+     pictate faceau piesa sa iasa vargata.
 
 Buget: brief §6 cere `chimney_*` sub 600 tri fiecare, fiindca sunt ~40 pe
 pista. `segments=9` + 7-8 inele de profil intra fix: 9*7*2 = 126 tri corp +
@@ -50,43 +52,68 @@ CAP = VOLCANIC_BLACK       # palaria de bazalt
 BAND_RED = TILE_TERRACOTTA  # banda lata rosie (Valea Rosie)
 BAND_RUST = LARCH_RUST     # banda ingusta ruginie
 HOLE = ROCK_DARK           # ferestre si usi sapate (gaura "pictata")
+
+# Exponentul siluetei conului. >1 = raza tine latimea jos si cedeaza spre varf
+# (con continuu); <1 = fus cu piciorul evazat, adica silueta de cos industrial.
+# Constanta fiindca `build_chimney` are nevoie de ea si ca sa aseze ferestrele
+# pe suprafata: scrisa de doua ori, se desincronizeaza.
+CONE_EXP = 1.35
 DOOR_WOOD = WOOD
 
 
 def chimney_profile(height, r_base, r_neck, seed, steps=7):
-    """Profilul (raza, z) al gatului: scade cu PALIERE, nu liniar.
+    """Profilul (raza, z) al gatului: CON continuu, cu paliere de eroziune.
 
-    Tuful se erodeaza in trepte fiindca straturile au duritati diferite; un
-    taper liniar da un con de brad. Perturbatia e determinista din `seed`
-    (aceeasi regula ca `Builder.rock`: build-urile nu au voie sa se schimbe
-    intre rulari).
+    Exponentul e ce decide daca piesa citeste "horn de zana" sau "cos de
+    fabrica", si prima versiune l-a pus pe dos. Cu `t ** 0.62` raza pierde 25%
+    in primul sfert de inaltime si pe urma sta aproape pe loc — masurat pe
+    chimney_b: 100% -> 74% -> 60% -> 48% -> 38%. Adica un FUS aproape cilindric
+    cu piciorul evazat, exact silueta unui cos industrial. Critica oarba a
+    numit-o din prima ("machined smokestacks") si avea dreptate: retusul de
+    culoare din prima runda a rezolvat nuanta si a lasat silueta neatinsa.
+
+    Referinta (v3, grupul B) are conuri care se subtiaza CONTINUU, ca niste
+    corturi: fara umar la baza si fara portiune dreapta la mijloc. Aia cere
+    exponent SUPRAUNITAR — raza tine latimea jos si cedeaza tot mai repede spre
+    varf. Cu 1.35: 100% -> 90% -> 76% -> 58% -> 38%, deci fiecare sfert ia mai
+    mult decat cel de dinainte si conturul e o curba, nu o linie franta.
+
+    Palierele raman (tuful chiar se erodeaza in trepte), dar la jumatate din
+    amplitudine: pe un con continuu perturbatia de +-13% redevenea o serie de
+    umeri orizontali — al doilea motiv pentru care piesa iesea in dungi.
     """
     rand = _lcg(seed)
     prof = []
     for i in range(steps):
         t = i / (steps - 1.0)
-        # baza: raza scade repede jos, apoi aproape deloc (silueta de horn)
-        r = r_base + (r_neck - r_base) * (t ** 0.62)
-        r *= 1.0 + (rand() - 0.5) * 0.13      # paliere de eroziune
+        r = r_base + (r_neck - r_base) * (t ** CONE_EXP)
+        r *= 1.0 + (rand() - 0.5) * 0.065     # paliere de eroziune, discrete
         prof.append((r, height * t))
     return prof
 
 
 def basalt_cap(b, z, r_neck, r_cap, thickness, seed=0, segments=9):
-    """Palaria de bazalt: disc mai LAT decat gatul, cu buza in consola.
+    """Palaria de bazalt: con TURTIT asezat pe gat, cu consola mica.
 
-    Consola e tot ce conteaza: fara ea palaria citeste ca un varf de con si
-    hornul dispare in "stanca oarecare". Doua inele (buza dreapta + varf
-    tesit) ca sa se vada si din profil, si de sus.
+    A treia cauza pentru care piesa citea industrial. Consola exista in
+    natura, dar prima versiune o umflase la 2.05x raza gatului si o pusese ca
+    DISC cu fata dreapta — adica fix profilul unei palarii de cos de fum. Pe
+    referinta palaria sta pe con ca o caciula: iese putin (1.2-1.4x), si e
+    ascutita, nu plata, deci varful continua linia conului in loc s-o taie.
+
+    De-aia inelul de sus se stange acum la 0.30 din raza (era 0.74, adica un
+    disc cu buza teszita) si consola vine din apelanti, nu de aici.
+    `chimney_mushroom` isi pastreaza palaria enorma: acolo consola larga e
+    chiar subiectul piesei (Pasabag), nu un accident.
     """
     rand = _lcg(seed + 91)
     wob = 1.0 + (rand() - 0.5) * 0.10
-    # gatul subtire imediat sub palarie (partea protejata de eroziune)
-    b.frustum((0.0, 0.0, z - thickness * 0.30), r_neck * 1.02, r_cap * wob,
-              thickness * 0.60, CAP, segments=segments)
-    # corpul palariei + tesitura de sus
-    b.frustum((0.0, 0.0, z + thickness * 0.35), r_cap * wob, r_cap * 0.74 * wob,
-              thickness * 0.75, CAP, segments=segments)
+    # buza: iese peste gat, dar putin — inel scurt, nu disc
+    b.frustum((0.0, 0.0, z - thickness * 0.22), r_neck * 1.02, r_cap * wob,
+              thickness * 0.44, CAP, segments=segments)
+    # corpul palariei: se stange spre varf, ca sa continue conul
+    b.frustum((0.0, 0.0, z + thickness * 0.30), r_cap * wob, r_cap * 0.30 * wob,
+              thickness * 0.85, CAP, segments=segments)
     return r_cap * wob
 
 
@@ -114,27 +141,48 @@ def build_chimney(variant):
     silueta e singurul lucru care se citeste."""
     b = Builder()
     # (inaltime, raza baza, raza gat, grosime palarie, seed)
+    # Bazele s-au LATIT: la 2*r/H = 0.30-0.44 piesele erau turnuri, iar pe
+    # referinta conurile sunt indesate (corturi). Inaltimea ramane in
+    # 10-18 m ceruta de brief §2.0 si de plafonul derivat din camera.
     spec = [
-        (10.5, 2.30, 0.95, 1.25, 7),      # a — scund si indesat
-        (13.8, 2.05, 0.78, 1.15, 23),     # b — clasicul zvelt
-        (16.4, 2.60, 0.86, 1.45, 41),     # c — inalt, palarie grea
-        (12.6, 2.45, 1.05, 1.20, 59),     # d — locuit, cu ferestre
+        (10.5, 3.35, 0.62, 1.05, 7),      # a — scund si indesat
+        (13.8, 3.65, 0.58, 1.00, 23),     # b — clasicul zvelt
+        (16.4, 4.30, 0.66, 1.20, 41),     # c — inalt, palarie grea
+        (12.6, 3.80, 0.72, 1.05, 59),     # d — locuit, cu ferestre
     ][variant]
     H, R_BASE, R_NECK, CAP_T, SEED = spec
 
     prof = chimney_profile(H, R_BASE, R_NECK, SEED)
     faces = b.revolve(prof, TUFF, segments=9)
 
-    # Variatie de valoare fara niciun triunghi: fetele de sub 35% din inaltime
-    # primesc tuf umbrit, o banda de mijloc primeste tuf mediu. style_bible §4
-    # ("fetele de sus decolorate") aplicat invers — jos e mai murdar.
-    b.retag(faces, TUFF_SH, where=lambda c, n: c.z < H * 0.22)
-    b.retag(faces, TUFF_MID, where=lambda c, n: H * 0.45 < c.z < H * 0.63)
+    # O SINGURA calcare de valoare, jos, si fara muchie orizontala.
+    #
+    # Prima versiune punea doua benzi (sub 0.22H umbrit, intre 0.45H si 0.63H
+    # mediu). Pe un fus aproape drept aia dadea exact ce a numit critica:
+    # dungi orizontale echidistante, adica santier, nu geologie. Nici retusul
+    # de nuanta din runda 1 n-avea cum s-o repare — problema era ca sunt
+    # DUNGI, nu ce culoare au dungile.
+    #
+    # Ramane doar praful de la baza, si acela taiat pe o cota NEregulata
+    # (variaza cu unghiul in jurul axei) ca sa nu iasa un inel perfect. Banda
+    # de mijloc dispare complet: pe un con continuu variatia de valoare o face
+    # deja lumina razanta de 13°, care e chiar identitatea POI-ului.
+    # Praga NEregulata pe circumferinta: `revolve` da inele de fete, deci un
+    # prag CONSTANT coloreaza un inel intreg si iese exact dunga pe care o
+    # eliminam. O armonica pe unghi rupe marginea si se citeste ca poala de
+    # praf. A doua armonica s-a incercat si s-a scos: cu amplitudine mare
+    # pragul sarea peste un inel intreg pe un sector, si in loc de dunga iesea
+    # un PETIC dreptunghiular pe fata conului — mai rau decat banda.
+    b.retag(faces, TUFF_SH,
+            where=lambda c, n, h=H: c.z < h * (0.15 + 0.055 * math.sin(
+                math.atan2(c.y, c.x) * 3.0)))
 
-    r_cap = basalt_cap(b, H, R_NECK, R_NECK * 2.05, CAP_T, seed=SEED)
-    # umbra proprie sub consola: inel de tuf umbrit imediat sub palarie
-    b.frustum((0.0, 0.0, H - 0.55), R_NECK * 1.06, R_NECK * 1.02, 1.0,
-              TUFF_SH, segments=9)
+    # Palarie stransa: 1.30x gatul, nu 2.05x (vezi `basalt_cap`).
+    r_cap = basalt_cap(b, H, R_NECK, R_NECK * 1.30, CAP_T, seed=SEED)
+    # Inelul de umbra de sub consola a fost SCOS. Era un cilindru de 1 m de
+    # TUFF_SH lipit sub palarie, adica inca o dunga orizontala — si cea mai
+    # vizibila, fiind pe muchia de silueta. Cu consola stransa la 1.30x nu mai
+    # are ce sa umbreasca: ocluzia de sub buza o face acum AO_CHIMNEY.
 
     if variant == 3:
         # hornul locuit: usa la baza + trei ferestre pe fata (spre +Y = -Z Godot)
@@ -144,7 +192,10 @@ def build_chimney(variant):
         for (fz, fa, fw) in ((4.4, 8.0, 0.62), (6.9, -34.0, 0.55),
                              (8.8, 26.0, 0.50)):
             t = fz / H
-            r = (R_BASE + (R_NECK - R_BASE) * (t ** 0.62)) * 0.94
+            # Exponentul TREBUIE sa fie cel din `chimney_profile`: era scris de
+            # mana ca 0.62 si, dupa trecerea la con, ferestrele ar fi plutit
+            # langa piesa (la 8.8 m raza reala e cu ~0.5 m mai mare).
+            r = (R_BASE + (R_NECK - R_BASE) * (t ** CONE_EXP)) * 0.94
             a = math.radians(90.0 + fa)
             carve_window(b, r * math.cos(a), r * math.sin(a), fz,
                          fw, fw * 1.25, 0.45, (math.cos(a), math.sin(a), 0))
@@ -161,13 +212,19 @@ def build_chimney_mushroom():
     reper de POI.
     """
     b = Builder()
-    H, R_BASE, R_NECK = 11.2, 2.15, 0.62
+    # baza latita ca la restul familiei (vezi `build_chimney`): ciuperca statea
+    # pe 2.15 m si iesea un pai cu palarie, langa conuri de 3.3-4.3 m
+    H, R_BASE, R_NECK = 11.2, 3.20, 0.62
     prof = chimney_profile(H, R_BASE, R_NECK, 103, steps=8)
     # gatul se stranguleaza suplimentar in treimea de sus (eroziunea reala)
     prof = [(r * (0.80 if 0.62 * H < z < 0.93 * H else 1.0), z) for r, z in prof]
     faces = b.revolve(prof, TUFF, segments=9)
-    b.retag(faces, TUFF_SH, where=lambda c, n: c.z < H * 0.20)
-    b.retag(faces, TUFF_MID, where=lambda c, n: H * 0.50 < c.z < H * 0.70)
+    # aceleasi doua motive ca la `build_chimney`: fara banda de mijloc, si
+    # praful de la baza taiat pe o cota neregulata (ciuperca e cea mai numeroasa
+    # piesa de langa banda, deci dungile ei se vedeau cel mai des)
+    b.retag(faces, TUFF_SH,
+            where=lambda c, n, h=H: c.z < h * (0.14 + 0.050 * math.sin(
+                math.atan2(c.y, c.x) * 3.0 + 0.9)))
     basalt_cap(b, H, R_NECK * 0.80, R_NECK * 3.10, 1.55, seed=103, segments=10)
     return b.to_object("Chimney_Mushroom")
 
@@ -181,25 +238,28 @@ def build_chimney_triple():
     """
     b = Builder()
     # soclul comun, o movila joasa
-    b.rock((0.0, 0.0, 0.0), (8.0, 6.2, 3.2), TUFF_SH, seed=311, segments=9,
+    # Soclul s-a LATIT odata cu gaturile: cu bazele conice de 2.1-2.7 m raza,
+    # cel mai departat ajunge la x=+5.7, deci pe 8 m latime picioarele ar fi
+    # atarnat in aer. Masurat pe extentele reale ale celor trei, nu pe AABB.
+    b.rock((0.0, 0.0, 0.0), (12.4, 8.4, 3.2), TUFF_SH, seed=311, segments=9,
            rings=3, flat_top=True, taper=0.30)
 
-    stems = [(-1.85, -0.45, 12.8, 1.55, 0.62, 1.05, 17),
-             (0.95, 0.75, 15.6, 1.70, 0.70, 1.20, 53),
-             (2.55, -1.15, 9.4, 1.35, 0.58, 0.90, 89)]
+    stems = [(-2.60, -0.60, 12.8, 2.45, 0.48, 0.95, 17),
+             (1.35, 1.05, 15.6, 2.70, 0.52, 1.05, 53),
+             (3.60, -1.60, 9.4, 2.10, 0.44, 0.82, 89)]
     for (x, y, h, rb, rn, ct, seed) in stems:
         prof = chimney_profile(h, rb, rn, seed)
         base_z = 2.15
         faces = b.revolve(prof, TUFF, segments=8, origin=(x, y, base_z))
-        b.retag(faces, TUFF_MID,
-                where=lambda c, n, h=h, bz=base_z: bz + h * 0.45 < c.z < bz + h * 0.65)
+        # fara banda de mijloc: aceeasi dunga orizontala ca la `build_chimney`
         # palaria, mutata pe axa fiecarui gat
         rand = _lcg(seed + 91)
         wob = 1.0 + (rand() - 0.5) * 0.10
-        r_cap = rn * 2.00 * wob
-        b.frustum((x, y, base_z + h - ct * 0.30), rn * 1.02, r_cap, ct * 0.60,
+        # aceeasi proportie ca la `basalt_cap`: consola stransa, varf ascutit
+        r_cap = rn * 1.30 * wob
+        b.frustum((x, y, base_z + h - ct * 0.22), rn * 1.02, r_cap, ct * 0.44,
                   CAP, segments=8)
-        b.frustum((x, y, base_z + h + ct * 0.35), r_cap, r_cap * 0.74, ct * 0.75,
+        b.frustum((x, y, base_z + h + ct * 0.30), r_cap, r_cap * 0.30, ct * 0.85,
                   CAP, segments=8)
     return b.to_object("Chimney_Triple")
 
@@ -259,8 +319,10 @@ def build_rock_church_facade():
     H, R_BASE, R_NECK = 14.0, 4.20, 1.55
     prof = chimney_profile(H, R_BASE, R_NECK, 601, steps=8)
     faces = b.revolve(prof, TUFF, segments=11)
-    b.retag(faces, TUFF_SH, where=lambda c, n: c.z < H * 0.18)
-    b.retag(faces, TUFF_MID, where=lambda c, n: H * 0.42 < c.z < H * 0.58)
+    # idem pe fatada bisericii: e tot un con de tuf, langa drum
+    b.retag(faces, TUFF_SH,
+            where=lambda c, n, h=H: c.z < h * (0.13 + 0.045 * math.sin(
+                math.atan2(c.y, c.x) * 3.0 + 2.4)))
     basalt_cap(b, H, R_NECK, R_NECK * 1.95, 1.45, seed=601, segments=10)
 
     y = R_BASE * 0.86

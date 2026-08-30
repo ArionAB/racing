@@ -1576,6 +1576,235 @@ static func themes() -> Dictionary:
 			# nuanta spune ca e ALT drum.
 			"branch_tint": Color(0.33, 0.34, 0.40),
 		},
+		# --- Zori de vara in Cappadocia (Track13, docs/track_briefs/cappadocia.md)
+		#
+		# OPUSUL EXACT AL LUI CHONGQING, si asta e alegerea temei: acolo noapte
+		# cu burnita, fara umbre, lumina venita de jos din oras; aici zori de
+		# vara, soare RAZANT, si prima pista din joc pe care umbrele lungi sunt
+		# IDENTITATE, nu doar contact cu solul. Cheile care conteaza si de ce:
+		#
+		# 1. Soare la 13 grade elevatie, dinspre EST (valea). Toate celelalte
+		#    teme de zi stau la 24-46 grade; la 13 grade umbra unui horn de
+		#    14 m se intinde 60 m, adica taie drumul de-a curmezisul de cateva
+		#    ori pe portiunea B (padurea de hornuri). Aia e imaginea pistei.
+		# 2. `shadows: true` explicit — nu fiindca ar fi altceva decat
+		#    implicitul (nu e), ci fiindca aici e o DECIZIE si trebuie sa aiba
+		#    unde sta motivul. Vezi brief §6: daca testul pe device nu tine
+		#    60 fps, se sting intai in SUBTERAN, unde oricum nu se vad, nu
+		#    peste tot ca pe celelalte piste.
+		# 3. Ceata calda pana la 300 m: Erciyes si Uchisar stau IN ea. Cotele
+		#    raman legate (memoria `efecte-de-fundal-cote-legate`): inele
+		#    orizont 190-290 < fog_end 300 < FAR_PLANE 380.
+		# 4. Fara slot nou de paleta — slotul 31 s-a consumat la Chongqing
+		#    (brief §4). Tuful e CORAL_SAND 19 (crem, #E9DCC0), la 1/3/8 pe
+		#    canale de cremul cerut in brief (#E8D9B8): sub pragul de 12 din
+		#    style_bible §5, deci cea mai buna potrivire din paleta existenta.
+		"cappadocia": {
+			# TUF CREM, nu nisip de desert. SAND_MID (#D4994D) e ocru saturat —
+			# pe el hornurile ar fi iesit dune, adica exact "desert cu stanci",
+			# lucrul pe care brief-ul §0.1 il interzice explicit. CORAL_SAND
+			# (#E9DCC0) e crem palid si e chiar culoarea din brief §9.
+			#
+			# Tuful UMBRIT (#C9B48E din brief) NU cheltuie un al doilea slot:
+			# vertex color poate doar sa INTUNECE (memoria
+			# `surfacetool-clamp-vertex-color`), iar #C9B48E e chiar #E9DCC0
+			# inmultit cu (0.86, 0.85, 0.74) — deci se coboara din vertecsi
+			# peste acelasi slot. SAND_MID/SAND_SHADOW raman pentru piese care
+			# chiar au nevoie de alta NUANTA, nu de alta valoare.
+			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			# Cer de zori, hexurile din brief §9. NU e cerul de desert
+			# (albastru adanc 0.25/0.52/0.92 cu orizont auriu tare): la 13 grade
+			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.
+			# Un zenit saturat langa un orizont portocaliu ar fi citit amiaza cu
+			# filtru, nu rasarit.
+			"sky_top": Color.html("B9CCE0"),
+			"sky_horizon": Color.html("F2B27A"),
+			# Ceata din familia orizontului, dar cu o idee mai putin portocaliu:
+			# la 300 m ea e ce vopseste Erciyes, iar cu #F2B27A curat muntele cu
+			# zapada iesea silueta de caramida.
+			"fog": Color(0.92, 0.79, 0.63),
+			"hill_color": Color(0.82, 0.70, 0.56),
+			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
+			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade
+			# lumina directa cade razant — cu energie de amiaza, fetele insorite
+			# de tuf crem s-ar fi ars in alb si ar fi pierdut desenul.
+			"sun_color": Color(1.0, 0.82, 0.63),
+			"sun_energy": 0.85,
+			# ELEVATIE 13 grade (brief §4 cere 12-15), azimut 60 (ENE, dinspre
+			# vale).
+			#
+			# Conventia repo-ului: azimut = rotation_degrees.y + 180. Se citeste
+			# din SUN_ROTATION_DEG, unde y = 135 e documentat ca azimut 315.
+			# Est curat ar fi y = -90; s-a luat -120 (azimut 60) ca umbrele sa
+			# cada DIAGONAL pe drum. Cu soarele exact pe axa, pe portiunile care
+			# merg est-vest umbrele hornurilor s-ar fi intins IN LUNGUL benzii
+			# si n-ar mai fi taiat-o — adica fix identitatea vizuala pierduta.
+			#
+			# Unghiul e derivat, nu ales: la 13 grade umbra unui horn de 14 m
+			# are 14 / tan(13) = 60.6 m. Hornurile din §2 B stau la 2-4 m de
+			# banda, deci umbra trece peste tot drumul si inca 50 m dincolo.
+			"sun_rotation_deg": Vector3(-13, -120, 0),
+			# Expunerea urca peste 1 fiindca soarele e slab si ambientul jos,
+			# iar tuful trebuie sa ramana cea mai DESCHISA suprafata mare din
+			# cadru (drumul de pamant e sub el, asfalt nu exista). Se ridica de
+			# aici, nu din `sun_energy`: expunerea muta tot cadrul, energia ar
+			# fi ars doar fetele insorite. Lectia calibrarii de la Okinawa, in
+			# oglinda.
+			#
+			# DE REVERIFICAT dupa ce exista teren si decor: masoara tuful
+			# insorit contra #E9DCC0 cu
+			#   godot --headless --path . res://tools/Snapshot.tscn -- --track=6
+			# si corecteaza de aici, ca la desert si la insula.
+			"exposure": 1.15,
+			# Ambient portocaliu-pal (brief §4), din CULOARE, nu din cer. La
+			# zori cerul e palid-RECE sus, iar bounce-ul real vine de pe tuful
+			# crem si de pe faleza rosie de sub cornisa. Ambient din cer ar fi
+			# repetat capcana masurata pe Okinawa: nisip coraligen iesit
+			# albastru-cenusiu.
+			"ambient_color": Color.html("F0C79A"),
+			# 0.30, nu 0.22 ca desertul. Pista are canion cu faleze in benzi si
+			# subteran, adica multe fete intoarse de la un soare care bate
+			# oricum razant. Lectia Stromboli (0.18 -> 0.34): prapastia care
+			# exista in geometrie dar iese pata neagra plata pe ecran nu se
+			# citeste. Umbra o fac AO-ul copt si contrastul cu soarele, nu
+			# lipsa luminii.
+			"ambient_energy": 0.30,
+			# UMBRE PORNITE, si e prima pista pe care sunt IDENTITATE, nu doar
+			# contact cu solul. Implicitul e deja `true`, deci cheia nu schimba
+			# comportamentul — exista ca sa aiba unde sta motivul pentru care NU
+			# se stinge prima cand pica fps-ul, spre deosebire de restul
+			# jocului (CLAUDE.md o da ca prima setare de stins). Pe Chongqing
+			# `"shadows": false` e economie gratuita: o luna la 0.35 n-are ce
+			# umbri. Aici stingerea ar sterge chiar imaginea din §0 — conurile
+			# de piatra care taie drumul cu umbra lor. Ordinea de sacrificiu e
+			# in brief §6: intai in subteran, unde nu se vad.
+			"shadows": true,
+			"fog_depth": true,
+			# 140 -> 300, si inceputul e departe DIN MECANICA, nu din gust: de
+			# pe cornisa (POI C) trebuie sa se vada fundul vaii cu baloanele in
+			# el, la 30-40 m sub banda si 60-150 m in fata. Cu ceata pornita de
+			# la 90 m (implicitul de desert), hazardul-semnatura al pistei ar fi
+			# fost o pata calda. Capatul e 300, ca pe Stromboli, fiindca Erciyes
+			# si Uchisar trebuie sa fie IN ceata, nu dincolo de ea.
+			"fog_begin": 140.0,
+			"fog_end": 300.0,
+			# ERCIYES pe orizont: vulcanul cu zapada care se vede din toata
+			# Cappadocia. Modelul e din kitul propriu (PR #364), nu imprumutat
+			# de la alta tema — spre deosebire de Baikal si Stromboli, care au
+			# stat pe siluete de imprumut pana le-a venit kitul.
+			#
+			# `horizon_class: ""` = pastreaza ATLASUL modelului, nu-i intinde o
+			# clasa triplanara peste el. Verificat in GLB, nu presupus: UV-urile
+			# lui erciyes.glb cad pe sloturile 2 / 22 / 29 (SAND_SHADOW la poale,
+			# FOAM_WHITE zapada, MARBLE_GREY roca) — exact randul "Erciyes cu
+			# zapada" din brief §4. O clasa de roca peste ele ar sterge calota,
+			# capcana masurata pe varful alpin (crestele ieseau portocalii ca
+			# dunele).
+			"horizon_model": "res://assets/models/cappadocia/rocks/erciyes.glb",
+			"horizon_picks": [["Erciyes"], ["Erciyes"]],
+			"horizon_class": "",
+			# Doua inele, nu trei, si amandoua sub fog_end 300 (vezi mai sus).
+			# Erciyes e un masiv, nu un butte de desert: inelul departat il ia la
+			# 1.35, cel apropiat la 0.95, ca sa existe adancime intre ele.
+			# Degajarea (110 / 135 m) e mai mare decat implicitul de desert
+			# (95 m) fiindca piesa e lata — aceeasi socoteala ca la varful alpin.
+			# Numarul e mic (3 + 3) fiindca Erciyes e UN munte real, nu un lant:
+			# saisprezece copii ale lui ar fi mintit despre unde esti.
+			"horizon_rings": [
+				{"near": 190.0, "far": 240.0, "count": 3, "scale": 0.95,
+					"clear": 110.0, "picks": ["Erciyes"]},
+				{"near": 240.0, "far": 290.0, "count": 3, "scale": 1.35,
+					"clear": 135.0, "picks": ["Erciyes"]},
+			],
+			# FARA GARD, ca pe Alpi si pe Stromboli — dar aici e chiar mecanica
+			# pistei, nu doar tonul ei: brief §2 POI C cere cornisa Vaii Rosii
+			# "fara parapet pe dreapta". O panglica rosie pe buza vaii ar fi
+			# taiat exact frica de gol pe care o vinde portiunea. `walls: false`
+			# scoate SI coliziunea, deliberat; riscul ramane declarat in teren
+			# (`custom_ravines` + RespawnZone), ca pe Alpi.
+			"walls": false,
+			# Nici borduri rosu-alb: satul sapat in tuf si drumul de pamant bat
+			# spun "drum", nu "circuit". Aceeasi decizie ca pe Alpi si Stromboli.
+			"kerbs": false,
+			# Falezele in benzi ale canionului (POI D) sunt TEREN modelat plus
+			# module de kit (`cliff_band_module.glb`), nu falezele procedurale
+			# de canion ale desertului: alea vin intr-o singura culoare si ar fi
+			# ascuns chiar benzile roz/rosii care sunt subiectul portiunii.
+			"cliffs": false,
+			# Decorul se aseaza de MANA (DecorManual), ca pe Chongqing: satul,
+			# padurea de hornuri, via si salile subterane sunt compozitii, nu
+			# statistica de benzi. Cand apare un kit "cappadocia" in TrackDecor,
+			# aici se pune "bands" si cheia de mai jos incepe sa conteze.
+			"decor": "none",
+			# Numele CORECT al kitului, desi el nu exista inca in TrackDecor.
+			# Cu `"decor": "none"` cheia nu se citeste, deci nu se poate ajunge
+			# pe ramura implicita de desert din `_place_band_prop`. Se scrie asa
+			# ca sa nu trebuiasca schimbata cand vine kitul — Chongqing a facut
+			# invers (a imprumutat "stromboli") si cheia a ramas o minciuna in
+			# fisier.
+			"props": "cappadocia",
+			# TUF, adica roca MOALE si PALIDA. Alegerea e PROVIZORIE si vine cu
+			# masuratoarea ei, fiindca NICIO clasa existenta nu ajunge singura
+			# pe cremul cerut — si mai bine sta scris aici decat descoperit din
+			# nou pe o captura.
+			#
+			# Masurat direct in dale (media RGB a PNG-ului de clasa):
+			#   "rock"        (141,  97,  58)  gresie calda de canion
+			#   "coral_rock"  ( 91,  89,  90)  gri neutru INCHIS
+			#   tinta, CORAL_SAND #E9DCC0 = (233, 220, 192)
+			# Raportul tinta/dala e PESTE 1 pe toate canalele la amandoua
+			# (rock: 1.65/2.27/3.31), iar `albedo_color` poate doar sa
+			# INTUNECE — deci nici `rock_class` gol cu `rock_tint` nu ajunge
+			# acolo. E exact cazul `village_plaster`, care s-a rezolvat cu o
+			# intrare in `CLASS_LIFT` (ridici DALA, apoi corectezi nuanta).
+			#
+			# Dintre cele doua, `coral_rock` e alegerea, si tot din masuratoare:
+			# fiind gri NEUTRU, dupa o ridicare la luminanta 0.87 iese
+			# (224, 220, 222) si tenta care ramane de aplicat e (1.04, 1.00,
+			# 0.87) — practic doar o taiere de albastru, realizabila. `rock`
+			# ridicat la aceeasi luminanta iese (255, 207, 124) si ar cere 1.55
+			# pe albastru, adica ar ramane piersica. Contraintuitiv, dar asta
+			# spun cifrele: dala CALDA e cea care nu poate ajunge crem.
+			#
+			# ATENTIE la ce e `coral_rock` azi: e gradata spre VOLCANIC_BLACK
+			# cu lift NEGATIV (tools/process_class_textures.gd), adica e
+			# deliberat partea INCHISA a paletei insulare — bazalt de recif, nu
+			# calcar. Pana cand primeste "coral_rock"/"tuff" o intrare in
+			# `CLASS_LIFT`, hornurile vor iesi gri, nu creme. De facut la pasul
+			# de teren si decor, nu aici: e o schimbare in pipeline-ul de
+			# texturi, si atinge si Okinawa daca se face pe clasa existenta —
+			# deci probabil o clasa "tuff" NOUA pe acelasi PNG, mecanica prin
+			# care `volcanic_rock` a rezolvat bazaltul fara sa atinga desertul.
+			"rock_class": "coral_rock",
+			# Molozul hornului-rampa (POI D) e din acelasi tuf cu hornul. Fara
+			# steag ar fi mostenit oricum `rock_class`, deci cheia e redundanta
+			# ca efect — se scrie fiindca hornul-rampa e explicit moloz de TUF
+			# in brief, si cand vine clasa de tuf de mai sus aici e al doilea
+			# loc unde se schimba, si trebuie sa fie vizibil ca sunt doua.
+			"rockfall_class": "coral_rock",
+			# DRUM DE PAMANT BATATORIT PALID, nu nisipul auriu implicit
+			# (DIRT_ROAD_COLOR #CCA86E, nisipul Dunelor). Brief §9 cere #C9B28A:
+			# mai palid si mult mai putin saturat, fiindca pe un platou de tuf
+			# praful de pe drum E tuf macinat, nu nisip de desert. Pista declara
+			# `custom_road_surface = "dirt"`; cheia asta ii da culoarea, la fel
+			# cum `ice_road_tint` o da pe Baikal.
+			"dirt_road_tint": Color.html("C9B28A"),
+			# Praful ridicat de roti: acelasi tuf, doar mai inchis (umbra din
+			# interiorul norului). SAND_SHADOW ar fi fost #915D27, maro ars —
+			# praf de pamant arat, nu de piatra moale macinata.
+			"dust_color": Color(0.78, 0.70, 0.56),
+			# Scurtaturile (via de la POI E, ocolul lung din canion) sunt tot
+			# pamant batut, cu o idee mai inchis decat banda principala: nu sunt
+			# calcate de sase masini pe fiecare tur.
+			"branch_tint": Color(0.72, 0.63, 0.48),
+			"branch_surface": "dirt_road",
+			# FARA APA, si cheia se scrie explicit tocmai fiindca ultimele trei
+			# teme au avut. Cappadocia e platou uscat: valea de sub cornisa e
+			# GOALA — in ea urca baloanele. Fara steag, `_build_water` ar fi
+			# citit implicitul si "vale adanca langa drum" e chiar tiparul in
+			# care Baikal, Stromboli si Chongqing aveau mare.
+			"water": false,
+		},
 	}
 	return _themes_cache
 

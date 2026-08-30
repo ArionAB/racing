@@ -26,7 +26,7 @@ func _ready() -> void:
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mi.material_override = mat
 	var vp := SubViewport.new()
-	vp.size = Vector2i(640, 360)
+	vp.size = Vector2i(1280, 720)
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(vp)
 	var cam := Camera3D.new()
@@ -50,13 +50,25 @@ func _ready() -> void:
 				var c := img.get_pixel(x, y)
 				if c.r > 0.6 and c.g < 0.4 and c.b > 0.6:
 					hit += 1
+		img.save_png("res://snapshots/marcat_%d.png" % int(f * 100.0))
 		var pct := 100.0 * float(hit) / float(img.get_width() * img.get_height())
-		print("frac %.2f — malul opus ocupa %5.2f%% din cadru" % [f, pct])
+		print("frac %.2f — panzele aterizate ocupa %5.2f%% din cadru" % [f, pct])
 	get_tree().quit()
 
 
+## Panza aterizata: nodul GLB se cheama Balloon_Landed, dar instanta din .tscn
+## poarta numele de acolo (balonN_panza), deci se cauta pe lantul de parinti.
+func _is_landed(n: Node) -> bool:
+	var q: Node = n
+	while q != null:
+		if (q.name as String).contains("panza") 				or (q.name as String).contains("Landed"):
+			return true
+		q = q.get_parent()
+	return false
+
+
 func _walk(n: Node, out: Array[Node]) -> void:
-	if n is MeshInstance3D and (n.name as String).contains("pinten"):
+	if n is MeshInstance3D and _is_landed(n):
 		out.append(n)
 	for c in n.get_children():
 		_walk(c, out)

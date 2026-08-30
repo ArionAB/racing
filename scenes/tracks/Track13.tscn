@@ -45,9 +45,10 @@ curve = SubResource("Curve3D_cappadocia")
 
 [node name="FalezaVaiiRosii" type="Marker3D" parent="Faleze"]
 script = ExtResource("15_cliffface")
-frac_start = 0.175
+frac_start = 0.196
 frac_end = 0.40
 side = 1.0
+far_wall = false
 lip_offset_m = 0.2
 depth_m = 30.0
 step_m = 4.0
@@ -69,8 +70,8 @@ far_wall = true
 far_bank = true
 far_offset_m = 9.0
 far_eye_rise_m = 6.0
-far_over_eye_m = 18.0
-far_depth_m = 26.0
+far_over_eye_m = 2.0
+far_depth_m = 14.0
 far_step_m = 6.0
 far_bands = 8
 far_rise_m = 1.2

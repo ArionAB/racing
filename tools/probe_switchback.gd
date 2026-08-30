@@ -21,14 +21,14 @@ func _ready() -> void:
 	var s: TrackSideSampler = t.get("_sampler")
 	var n := s.point_count()
 	var space := get_viewport().world_3d.direct_space_state
-	print("\n=== STANGA buclei de jos: teren fata de cota drumului ===")
-	for f: float in [0.26, 0.28, 0.30, 0.32, 0.34]:
+	print("\n=== DREAPTA (vale): teren fata de cota drumului ===")
+	for f: float in [0.175, 0.185, 0.195, 0.205, 0.215, 0.225, 0.235]:
 		var i := int(f * float(n)) % n
 		var p := s.baked_point(i)
 		# side_at da DREAPTA; stanga e semnul opus.
-		var sd := -s.side_at(i)
+		var sd := s.side_at(i)
 		var line := "frac %.2f  drum_y %6.2f | " % [f, p.y]
-		for off: float in [7.0, 9.0, 11.0, 13.0, 15.0, 17.0, 19.0, 21.0]:
+		for off: float in [7.0, 10.0, 14.0, 18.0, 24.0, 32.0, 44.0]:
 			var q := p + sd * off
 			var pr := PhysicsRayQueryParameters3D.create(
 				Vector3(q.x, p.y + 300.0, q.z), Vector3(q.x, p.y - 300.0, q.z))

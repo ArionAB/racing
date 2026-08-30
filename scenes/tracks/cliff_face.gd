@@ -224,6 +224,12 @@ extends Marker3D
 @export var far_step_m: float = 7.0
 ## Cate benzi orizontale are pintenul.
 @export var far_bands: int = 7
+## Cat de mult poate cobori talpa pintenului sub terenul de la baza lui.
+##
+## Vezi `_far_column`: fara limita, cautarea inspre vale gaseste fundul rapei si
+## masa ajunge sa pluteasca (masurat: 10.8 m de cer pe sub lespede). 3 m ajung
+## ca fata sa se infiga in versant fara sa se desprinda de el.
+@export var far_foot_max_m: float = 3.0
 ## Sloturile coamei, dinspre buza spre vale. Masurate cu ProbeSlots:
 ##   23 #c0754d H21 S.60  rosu de corp
 ##   27 #9c6131 H27 S.69  ocru-rosu
@@ -862,10 +868,29 @@ func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		# privitor — compozitia referintei.
 		var eye_y := p.y + far_eye_rise_m
 		top_y = maxf(top_y, eye_y + far_over_eye_m)
-		# Talpa se cauta INSPRE vale, ca fata sa aiba de unde urca din fund.
-		var toe := base - sd * far_depth_m
-		floor_y = minf(surface_y.call(base.x, base.z),
-			surface_y.call(toe.x, toe.z))
+		# TALPA se cauta INSPRE vale, ca fata sa aiba de unde urca din fund —
+		# dar pe TERENUL DE SUB MASA, nu dincolo de el.
+		#
+		# Corectie masurata (runda 7). Varianta veche lua
+		# `minf(surface_y(base), surface_y(toe))` cu degetul la `far_depth_m`
+		# (14 m) spre vale, adica deja PESTE rapa. Cand malul coboara, minimul
+		# apuca fundul vaii si trage talpa acolo desi masa sta pe creasta:
+		# masurat cu ProbeCappSpur, talpa atarna pana la 10.8 m sub terenul de
+		# sub ea, iar din masina se vedea CER PE SUB lespede — chiar „geometria
+		# rupta la inaltimea soferului" reclamata de critic.
+		#
+		# Acum se ia cea mai joasa cota de pe segmentul care chiar e ACOPERIT de
+		# masa (0..far_depth_m, esantionat), deci fata are tot de unde urca din
+		# fund, dar talpa nu mai poate cobori sub pamantul pe care sta. Limita
+		# `far_foot_max_m` prinde cazul in care si segmentul ala cade in rapa.
+		var y_base: float = surface_y.call(base.x, base.z)
+		var low: float = y_base
+		var k := 1.0
+		while k <= 4.0:
+			var q2: Vector3 = base - sd * (far_depth_m * (k / 4.0))
+			low = minf(low, float(surface_y.call(q2.x, q2.z)))
+			k += 1.0
+		floor_y = maxf(low, y_base - far_foot_max_m)
 	# Daca terenul de sub pinten e deja la cota drumului, nu exista vale aici si
 	# pintenul n-are ce sprijini: se sare peste, ca sa nu iasa o lespede plutind
 	# pe platou.
@@ -1034,11 +1059,27 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 	# glazura peste panta) si singura care da SUPRAFATA rosie in cadru.
 	# POLITA, daca fractia asta cade pe una: peretele iese pe orizontala la cota
 	# ei, deci coloana de deasupra ramane libera pe toata cursa balonului.
+	# POLITA se stinge la capete, nu se APRINDE.
+	#
+	# Corectie masurata (runda 7). Varianta cu prag — „in fereastra, polita
+	# exista; in afara, nu" — scotea fata in afara cu `ledge_depth_m` intreg
+	# intre doua coloane vecine: masurat cu ProbeCappLedge, 3.87 m de rulaj
+	# castigati intr-un singur pas de 4 m, la toate cele trei polite. Din masina
+	# aia nu citeste ca polita, ci ca o LESPEDE ROSIE PLUTIND cu cer pe sub ea —
+	# chiar „geometria rupta la inaltimea soferului" pe care a numit-o criticul.
+	#
+	# Cu stingerea, adancimea creste de la 0 la maxim pe jumatatea dinspre
+	# margine, deci polita iese din perete ca o treapta erodata si are pe ce sta.
 	var ledge_y := INF
+	var ledge_mix := 0.0
 	for lf in ledge_fracs:
 		var half_frac := (ledge_len_m * 0.5) / maxf(sampler.total_length(), 1.0)
-		if absf(f - lf) <= half_frac:
+		var d := absf(f - lf)
+		if d <= half_frac:
 			ledge_y = lip_y - ledge_drop_m
+			# 1 in mijloc, 0 chiar pe margine: smoothstep, ca racordul sa fie
+			# neted si la capete (o rampa liniara lasa tot o muchie in plan).
+			ledge_mix = smoothstep(1.0, 0.0, d / maxf(half_frac, 1e-6))
 			break
 
 	var out: Array = []
@@ -1072,7 +1113,7 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 		# Sub cota politei, fata se retrage cu adancimea treptei: asa polita e o
 		# treapta reala in perete, nu un raft lipit peste el.
 		if ledge_y < INF and y < ledge_y:
-			proud += ledge_depth_m
+			proud += ledge_depth_m * ledge_mix
 		out.append(lip + sd * proud + Vector3(0, y - lip_y, 0))
 	# TALPA intra in teren, ca sa nu ramana fanta la contact.
 	var last: Vector3 = out[rows - 1]

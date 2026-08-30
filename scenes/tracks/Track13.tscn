@@ -58,8 +58,8 @@ foot_bite_m = 2.5
 ledge_fracs = Array[float]([0.213, 0.276, 0.333])
 ledge_offset_m = 9.38
 ledge_drop_m = 8.0
-ledge_depth_m = 3.2
-ledge_len_m = 9.0
+ledge_depth_m = 1.8
+ledge_len_m = 34.0
 
 [node name="TaieturaSerpentinei" type="Marker3D" parent="Faleze"]
 script = ExtResource("15_cliffface")

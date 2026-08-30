@@ -1710,11 +1710,31 @@ static func themes() -> Dictionary:
 			# (95 m) fiindca piesa e lata — aceeasi socoteala ca la varful alpin.
 			# Numarul e mic (3 + 3) fiindca Erciyes e UN munte real, nu un lant:
 			# saisprezece copii ale lui ar fi mintit despre unde esti.
+			# ERCIYES E DEJA CAT UN MUNTE IN .GLB, si asta a fost o
+			# masuratoare, nu o presupunere. Modelul are 288,2 m latime la
+			# scara 1 (raza 144,1 m); inelele cereau scale 0,95 si 1,35, adica
+			# raze de 116-164 si 165-233 m. Degajarile declarate (110 si 135 m)
+			# erau sub JUMATATE din raza, iar testul de degajare din
+			# `_build_horizon` compara doar CENTRUL candidatului cu soseaua —
+			# nu stie nimic despre gabaritul modelului. Rezultatul, vazut in
+			# captura de la frac 0,015: flancul muntelui statea peste piata din
+			# Goreme ca un perete maro pe jumatate de cadru, cu centrul cuminte
+			# la 110 m de drum.
+			#
+			# Se corecteaza pe amandoua axele, ca sa ramana coerent:
+			#   - `scale` coboara la 0,42 si 0,60 -> raza 51-73 m si 73-104 m,
+			#     adica o silueta de munte, nu un masiv care intra in sat;
+			#   - `clear` urca peste raza MAXIMA a inelului (110 si 150 m),
+			#     deci chiar si tragerea cea mai mare a lui randf_range ramane
+			#     afara din drum.
+			# Inaltimea nu se pierde: la 0,60 varful are 108 m si sta la 240+ m,
+			# deci se ridica pe cer bine peste `fog_end` 300 — exact rolul cerut
+			# in brief §5.4 (silueta cu zapada, sub ceata).
 			"horizon_rings": [
-				{"near": 190.0, "far": 240.0, "count": 3, "scale": 0.95,
-					"clear": 110.0, "picks": ["Erciyes"]},
-				{"near": 240.0, "far": 290.0, "count": 3, "scale": 1.35,
-					"clear": 135.0, "picks": ["Erciyes"]},
+				{"near": 190.0, "far": 240.0, "count": 3, "scale": 0.42,
+					"clear": 120.0, "picks": ["Erciyes"]},
+				{"near": 240.0, "far": 290.0, "count": 3, "scale": 0.60,
+					"clear": 150.0, "picks": ["Erciyes"]},
 			],
 			# FARA GARD, ca pe Alpi si pe Stromboli — dar aici e chiar mecanica
 			# pistei, nu doar tonul ei: brief §2 POI C cere cornisa Vaii Rosii

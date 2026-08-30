@@ -1,8 +1,22 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://dxvqq0y23t7vu" path="res://scenes/tracks/terrain_hollow.gd" id="3_hollow"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="4_prop"]
+[ext_resource type="PackedScene" uid="uid://bgo4fqdk865g4" path="res://assets/models/cappadocia/rocks/chimney_a.glb" id="10_ch_a"]
+[ext_resource type="PackedScene" uid="uid://ca8722676klcl" path="res://assets/models/cappadocia/rocks/chimney_b.glb" id="11_ch_b"]
+[ext_resource type="PackedScene" uid="uid://cvxwabqi2esjd" path="res://assets/models/cappadocia/rocks/chimney_c.glb" id="12_ch_c"]
+[ext_resource type="PackedScene" uid="uid://dgr7dn0vi8a3s" path="res://assets/models/cappadocia/rocks/chimney_d.glb" id="13_ch_d"]
+[ext_resource type="PackedScene" uid="uid://jbkkivyp6l6x" path="res://assets/models/cappadocia/rocks/chimney_mushroom.glb" id="14_ch_mush"]
+[ext_resource type="PackedScene" uid="uid://05e12j6mlcl5" path="res://assets/models/cappadocia/rocks/chimney_triple.glb" id="15_ch_tri"]
+[ext_resource type="PackedScene" uid="uid://bhcfs41rvlrnf" path="res://assets/models/cappadocia/structures/twin_chimney_gate.glb" id="16_gate"]
+[ext_resource type="PackedScene" uid="uid://bcpedh2ud33hp" path="res://assets/models/cappadocia/buildings/dovecote.glb" id="17_dovecote"]
+[ext_resource type="PackedScene" uid="uid://cg5l2lldjm52l" path="res://assets/models/cappadocia/buildings/cave_house_a.glb" id="18_house_a"]
+[ext_resource type="PackedScene" uid="uid://bwn2mglah5cub" path="res://assets/models/cappadocia/buildings/cave_house_b.glb" id="19_house_b"]
+[ext_resource type="PackedScene" uid="uid://d03bamk3vjvaj" path="res://assets/models/cappadocia/rocks/rock_church_facade.glb" id="20_church"]
+[ext_resource type="PackedScene" uid="uid://bje1dm73vhvnu" path="res://assets/models/cappadocia/plants/pigeon.glb" id="21_pigeon"]
+[ext_resource type="PackedScene" uid="uid://djus2nj2trqub" path="res://assets/models/cappadocia/plants/shrub_dry.glb" id="22_shrub"]
 
 [sub_resource type="Curve3D" id="Curve3D_cappadocia"]
 closed = true
@@ -80,3 +94,301 @@ gizmo_extents = 46
 script = ExtResource("3_hollow")
 radius_m = 34.0
 wall_m = 12.0
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("4_prop")
+
+[node name="ZoneB_PadureaHornurilor" type="Node3D" parent="DecorManual"]
+
+[node name="hornSoare1" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
+transform = Transform3D(0.692675, 0, 0.867758, 0, 1.110316, 0, -0.867758, 0, 0.692675, -163.695038, 48.978340, 45.263462)
+
+[node name="hornSoare2" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(0.468974, 0, -0.975820, 0, 1.082664, 0, 0.975820, 0, 0.468974, -153.433777, 48.825443, 43.733635)
+
+[node name="hornUmbra3" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.894715, 0, -0.557448, 0, 1.054165, 0, 0.557448, 0, -0.894715, -143.945999, 48.790203, 67.440262)
+
+[node name="hornSpate4" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.886403, 0, -0.403050, 0, 0.973734, 0, 0.403050, 0, 0.886403, -138.487289, 48.741833, 75.708549)
+
+[node name="hornSoare5" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.811269, 0, -0.733299, 0, 1.093565, 0, 0.733299, 0, -0.811269, -142.201035, 48.679321, 42.311207)
+
+[node name="hornFund6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.447092, 0, 0.725189, 0, 0.851934, 0, -0.725189, 0, -0.447092, -134.207199, 48.702026, 80.229347)
+
+[node name="hornSoare7" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-1.081212, 0, -0.128051, 0, 1.088769, 0, 0.128051, 0, -1.081212, -129.459839, 48.510361, 37.794090)
+
+[node name="hornUmbra8" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.445716, 0, -0.827511, 0, 0.939913, 0, 0.827511, 0, 0.445716, -120.524834, 48.485218, 58.183746)
+
+[node name="hornSoare9" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.627552, 0, -0.862831, 0, 1.066911, 0, 0.862831, 0, -0.627552, -119.437149, 48.364273, 33.968716)
+
+[node name="hornSpate10" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(-0.739054, 0, 0.455530, 0, 0.868164, 0, -0.455530, 0, -0.739054, -118.426231, 48.311008, 17.891447)
+
+[node name="hornSoare11" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.899754, 0, 0.237654, 0, 0.930611, 0, -0.237654, 0, -0.899754, -105.724411, 48.183670, 30.112642)
+
+[node name="hornUmbra12" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.007702, 0, 1.074660, 0, 1.074687, 0, -1.074660, 0, -0.007702, -97.974648, 48.114647, 52.627129)
+
+[node name="hornFund13" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.774861, 0, 0.370881, 0, 0.859047, 0, -0.370881, 0, 0.774861, -95.829712, 48.090561, 72.021591)
+
+[node name="hornSpate14" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(1.020845, 0, 0.035062, 0, 1.021447, 0, -0.035062, 0, 1.020845, -83.920242, 47.872250, 69.316833)
+
+[node name="hornSoare15" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.957344, 0, 0.514822, 0, 1.086991, 0, -0.514822, 0, 0.957344, -62.539864, 47.663460, 36.199116)
+
+[node name="hornSoare16" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.371586, 0, 1.039290, 0, 1.103721, 0, -1.039290, 0, -0.371586, -51.196899, 47.544270, 39.770344)
+
+[node name="hornUmbra17" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.277183, 0, 0.937245, 0, 0.977373, 0, -0.937245, 0, 0.277183, -52.855717, 47.494022, 62.393524)
+
+[node name="hornSoare18" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.928549, 0, -0.146571, 0, 0.940046, 0, 0.146571, 0, -0.928549, -38.877434, 47.417542, 43.500496)
+
+[node name="hornSpate19" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(-0.289623, 0, -0.969624, 0, 1.011955, 0, 0.969624, 0, -0.289623, -31.141180, 47.344021, 32.512680)
+
+[node name="hornFund20" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.604057, 0, 0.733738, 0, 0.950397, 0, -0.733738, 0, -0.604057, -56.602032, 47.479301, 81.805656)
+
+[node name="hornSoare21" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.854851, 0, -0.354185, 0, 0.925321, 0, 0.354185, 0, 0.854851, -26.079557, 47.267773, 48.457817)
+
+[node name="hornUmbra22" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.774997, 0, -0.536150, 0, 0.942379, 0, 0.536150, 0, 0.774997, -31.199242, 47.248356, 69.437370)
+
+[node name="hornSoare23" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
+transform = Transform3D(0.741443, 0, -0.730391, 0, 1.040773, 0, 0.730391, 0, 0.741443, -13.997494, 47.089111, 50.304226)
+
+[node name="hornSoare24" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(0.616746, 0, -0.824423, 0, 1.029587, 0, 0.824423, 0, 0.616746, -5.040883, 46.921116, 51.795708)
+
+[node name="hornUmbra25" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.383932, 0, -0.996385, 0, 1.067795, 0, 0.996385, 0, 0.383932, -2.961710, 46.877102, 76.182381)
+
+[node name="hornSpate26" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.927663, 0, -0.105497, 0, 0.933642, 0, 0.105497, 0, -0.927663, 1.067760, 47.024235, 91.407410)
+
+[node name="hornFund27" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.815144, 0, -0.415527, 0, 0.914943, 0, 0.415527, 0, 0.815144, 5.513417, 47.682152, 97.273605)
+
+[node name="hornSoare28" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.147558, 0, -0.954073, 0, 0.965416, 0, 0.954073, 0, -0.147558, 28.004560, 46.453781, 47.004826)
+
+[node name="hornSpate29" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(-0.150960, 0, -0.879515, 0, 0.892376, 0, 0.879515, 0, -0.150960, 30.217218, 46.448540, 34.268028)
+
+[node name="hornSoare30" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.683995, 0, 0.641199, 0, 0.937542, 0, -0.641199, 0, -0.683995, 40.102112, 46.366055, 45.060093)
+
+[node name="hornUmbra31" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.600355, 0, -0.851901, 0, 1.042191, 0, 0.851901, 0, -0.600355, 49.649250, 46.338551, 67.584877)
+
+[node name="hornSoare32" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.807031, 0, -0.754809, 0, 1.105005, 0, 0.754809, 0, -0.807031, 77.928413, 46.062252, 36.484924)
+
+[node name="hornSoare33" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.504586, 0, 0.822973, 0, 0.965346, 0, -0.822973, 0, 0.504586, 90.022728, 45.846741, 34.925003)
+
+[node name="hornUmbra34" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.030862, 0, 0.987102, 0, 0.987584, 0, -0.987102, 0, -0.030862, 97.018684, 45.789776, 56.874672)
+
+[node name="hornSpate35" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(-0.831378, 0, -0.442699, 0, 0.941898, 0, 0.442699, 0, -0.831378, 102.635155, 45.280399, 19.732954)
+
+[node name="hornFund36" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.012494, 0, 0.982961, 0, 0.983040, 0, -0.982961, 0, 0.012494, 105.422905, 45.610104, 74.157745)
+
+[node name="poarta_hornuri_gemene37" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("16_gate")]
+transform = Transform3D(0.979048, 0, -0.203630, 0, 1.000000, 0, 0.203630, 0, 0.979048, 57.158070, 46.288628, 53.071163)
+metadata/coliziune = "mesh"
+metadata/camera_blocker = true
+
+[node name="porumbar38" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("17_dovecote")]
+transform = Transform3D(0.946007, 0, 0.324147, 0, 1.000000, 0, -0.324147, 0, 0.946007, -27.507509, 47.288006, 46.668594)
+
+[node name="porumbel39" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
+transform = Transform3D(0.921061, 0, -0.389418, 0, 1.000000, 0, 0.389418, 0, 0.921061, -27.747377, 54.890060, 47.368637)
+metadata/coliziune = "none"
+
+[node name="porumbel40" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
+transform = Transform3D(0.267499, 0, -0.963558, 0, 1.000000, 0, 0.963558, 0, 0.267499, -25.209929, 56.259045, 45.912529)
+metadata/coliziune = "none"
+
+[node name="porumbel41" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
+transform = Transform3D(-0.588501, 0, -0.808496, 0, 1.000000, 0, 0.808496, 0, -0.588501, -21.531364, 57.605797, 44.830551)
+metadata/coliziune = "none"
+
+[node name="porumbel42" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
+transform = Transform3D(-0.999135, 0, -0.041581, 0, 1.000000, 0, 0.041581, 0, -0.999135, -21.224892, 59.000549, 49.530079)
+metadata/coliziune = "none"
+
+[node name="porumbel43" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
+transform = Transform3D(-0.653644, 0, 0.756802, 0, 1.000000, 0, -0.756802, 0, -0.653644, -16.352903, 54.726212, 48.557877)
+metadata/coliziune = "none"
+
+[node name="porumbel44" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
+transform = Transform3D(0.186512, 0, 0.982453, 0, 1.000000, 0, -0.982453, 0, 0.186512, -11.050991, 56.040527, 47.669350)
+metadata/coliziune = "none"
+
+[node name="porumbel45" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
+transform = Transform3D(0.885520, 0, 0.464602, 0, 1.000000, 0, -0.464602, 0, 0.885520, -10.531821, 57.433273, 52.362366)
+metadata/coliziune = "none"
+
+[node name="casa_con46" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("18_house_a")]
+transform = Transform3D(-0.948035, 0, 0.318166, 0, 1.000000, 0, -0.318166, 0, -0.948035, -117.705635, 48.453182, 60.695824)
+
+[node name="casa_con47" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("19_house_b")]
+transform = Transform3D(-1.025157, 0, 0.227055, 0, 1.050000, 0, -0.227055, 0, -1.025157, 10.520842, 46.719410, 78.558899)
+
+[node name="biserica_rupestra48" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("20_church")]
+transform = Transform3D(0.954967, 0, 0.296712, 0, 1.000000, 0, -0.296712, 0, 0.954967, -58.089691, 47.646523, 29.327759)
+
+[node name="tufa49" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.158895, 0, -0.581649, 0, 1.296670, 0, 0.581649, 0, -1.158895, -160.552017, 48.935566, 48.666538)
+metadata/coliziune = "none"
+
+[node name="tufa50" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.343156, 0, 0.266547, 0, 1.369349, 0, -0.266547, 0, 1.343156, -160.865997, 48.919178, 41.511051)
+metadata/coliziune = "none"
+
+[node name="tufa51" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.260893, 0, 0.305477, 0, 1.297369, 0, -0.305477, 0, -1.260893, -144.088135, 48.790718, 66.973404)
+metadata/coliziune = "none"
+
+[node name="tufa52" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.572609, 0, 0.759375, 0, 0.951068, 0, -0.759375, 0, 0.572609, -141.615891, 48.678688, 43.885643)
+metadata/coliziune = "none"
+
+[node name="tufa53" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.544356, 0, 0.760695, 0, 0.935404, 0, -0.760695, 0, 0.544356, -124.073174, 48.532642, 58.738590)
+metadata/coliziune = "none"
+
+[node name="tufa54" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.098948, 0, 0.306223, 0, 1.140815, 0, -0.306223, 0, -1.098948, -121.069771, 48.502068, 61.966858)
+metadata/coliziune = "none"
+
+[node name="tufa55" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.569014, 0, 1.106761, 0, 1.244466, 0, -1.106761, 0, 0.569014, -122.956421, 48.431446, 38.022068)
+metadata/coliziune = "none"
+
+[node name="tufa56" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.738967, 0, -0.529463, 0, 0.909067, 0, 0.529463, 0, 0.738967, -106.770615, 48.278938, 50.880596)
+metadata/coliziune = "none"
+
+[node name="tufa57" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.321713, 0, 0.409792, 0, 1.383783, 0, -0.409792, 0, -1.321713, -99.623260, 48.109715, 32.199253)
+metadata/coliziune = "none"
+
+[node name="tufa58" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.166930, 0, -1.291644, 0, 1.302386, 0, 1.291644, 0, 0.166930, -94.397339, 48.048187, 23.387651)
+metadata/coliziune = "none"
+
+[node name="tufa59" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.603605, 0, 0.830680, 0, 1.026824, 0, -0.830680, 0, 0.603605, -90.907036, 47.978352, 50.910587)
+metadata/coliziune = "none"
+
+[node name="tufa60" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.359491, 0, 0.881944, 0, 0.952396, 0, -0.881944, 0, -0.359491, -75.053543, 47.810585, 33.621014)
+metadata/coliziune = "none"
+
+[node name="tufa61" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.474019, 0, -0.977656, 0, 1.086511, 0, 0.977656, 0, 0.474019, -70.720131, 47.689381, 54.041771)
+metadata/coliziune = "none"
+
+[node name="tufa62" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.714218, 0, -0.443459, 0, 0.840692, 0, 0.443459, 0, -0.714218, -69.710274, 47.668972, 59.437698)
+metadata/coliziune = "none"
+
+[node name="tufa63" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.026795, 0, 0.514889, 0, 1.148659, 0, -0.514889, 0, 1.026795, -55.819389, 47.583691, 40.797604)
+metadata/coliziune = "none"
+
+[node name="tufa64" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.147774, 0, 0.890721, 0, 1.452848, 0, -0.890721, 0, -1.147774, -50.416809, 47.472706, 61.922386)
+metadata/coliziune = "none"
+
+[node name="tufa65" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.418823, 0, -1.001157, 0, 1.085232, 0, 1.001157, 0, -0.418823, -35.398277, 47.376114, 46.195702)
+metadata/coliziune = "none"
+
+[node name="tufa66" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.180750, 0, -0.673623, 0, 1.359389, 0, 0.673623, 0, 1.180750, -32.001003, 47.342381, 44.238979)
+metadata/coliziune = "none"
+
+[node name="tufa67" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.545717, 0, -0.716572, 0, 0.900712, 0, 0.716572, 0, -0.545717, -30.658394, 47.249599, 67.792381)
+metadata/coliziune = "none"
+
+[node name="tufa68" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.902142, 0, 1.005709, 0, 1.351040, 0, -1.005709, 0, -0.902142, -14.498447, 47.094486, 52.172539)
+metadata/coliziune = "none"
+
+[node name="tufa69" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.111357, 0, 0.915474, 0, 1.439864, 0, -0.915474, 0, 1.111357, -8.509571, 46.949780, 73.688606)
+metadata/coliziune = "none"
+
+[node name="tufa70" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.097509, 0, -0.828714, 0, 0.834431, 0, 0.828714, 0, 0.097509, -6.151684, 46.913422, 80.244102)
+metadata/coliziune = "none"
+
+[node name="tufa71" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.633506, 0, -0.746842, 0, 0.979338, 0, 0.746842, 0, 0.633506, 2.135684, 46.779659, 55.557152)
+metadata/coliziune = "none"
+
+[node name="tufa72" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.327566, 0, -0.181329, 0, 1.339892, 0, 0.181329, 0, 1.327566, 13.237332, 46.666832, 73.097946)
+metadata/coliziune = "none"
+
+[node name="tufa73" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.431007, 0, -1.308891, 0, 1.378029, 0, 1.308891, 0, 0.431007, 19.761871, 46.533466, 49.923363)
+metadata/coliziune = "none"
+
+[node name="tufa74" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.152875, 0, 0.630306, 0, 1.313928, 0, -0.630306, 0, 1.152875, 22.330610, 46.517082, 43.960930)
+metadata/coliziune = "none"
+
+[node name="tufa75" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.156417, 0, -0.843555, 0, 1.431393, 0, 0.843555, 0, -1.156417, 34.610138, 46.426079, 66.135544)
+metadata/coliziune = "none"
+
+[node name="tufa76" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.908638, 0, 0.575244, 0, 1.075420, 0, -0.575244, 0, 0.908638, 40.339561, 46.364902, 46.201672)
+metadata/coliziune = "none"
+
+[node name="tufa77" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.456819, 0, -0.139125, 0, 1.463447, 0, 0.139125, 0, 1.456819, 55.680851, 46.303551, 63.711071)
+metadata/coliziune = "none"
+
+[node name="tufa78" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.195776, 0, 0.039989, 0, 1.196444, 0, -0.039989, 0, 1.195776, 58.746193, 46.284267, 69.577942)
+metadata/coliziune = "none"
+
+[node name="tufa79" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.891250, 0, 0.224536, 0, 0.919099, 0, -0.224536, 0, 0.891250, 61.706604, 46.244648, 42.066601)
+metadata/coliziune = "none"
+
+[node name="tufa80" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.274106, 0, -0.481919, 0, 1.362201, 0, 0.481919, 0, -1.274106, 75.643211, 46.163246, 58.459053)
+metadata/coliziune = "none"
+
+[node name="tufa81" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.528933, 0, -0.813601, 0, 0.970421, 0, 0.813601, 0, 0.528933, 83.405197, 46.007515, 39.284168)
+metadata/coliziune = "none"
+
+[node name="tufa82" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.200815, 0, 0.681891, 0, 1.380917, 0, -0.681891, 0, 1.200815, 83.735466, 45.907246, 31.152668)
+metadata/coliziune = "none"
+
+[node name="tufa83" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.897100, 0, 0.769134, 0, 1.181675, 0, -0.769134, 0, -0.897100, 96.259033, 45.806900, 53.408035)
+metadata/coliziune = "none"

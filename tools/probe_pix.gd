@@ -10,6 +10,12 @@ extends Node
 ## Diferenta dintre cele doua randari e, prin definitie, exact suprafata pe care
 ## faleza o pune pe ecran. Daca e zero, faleza nu e in cadru, oricat ar spune
 ## orice alta sonda.
+## CE NU MASOARA sonda asta, ca sa nu fie citita gresit a treia oara:
+## numara doar pixelii celor doua PANZE (`Faleza*`). Dupa ce pintenul s-a mutat
+## la 15 m, o buna parte din efectul vizual il face BUZA DE TEREN de la 8 m
+## (masurata cu ProbeBrow: cadere de 77-85 grade), care nu e o panza si deci nu
+## intra in cifra. Numarul de aici e un PLANSEU, nu nota finala — verdictul se
+## da pe capturile --gamecam, cu ochiul, fata de referinta.
 const TRACK_SCENE: String = "res://scenes/tracks/Track13.tscn"
 
 func _ready() -> void:

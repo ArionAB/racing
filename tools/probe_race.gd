@@ -80,6 +80,21 @@ const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ## triunghiuri de coliziune al soselei (304 scoase, 76108 -> 75804), prin
 ## ordinea in care Jolt isi imparte arborele de broadphase.
 ##
+## Acelasi comutator da si perechea cea mai stransa care se poate face —
+## acelasi binar, acelasi cod, un singur steag — pe 16 seed-uri x 150 s:
+##
+##   seed:        1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
+##   cu gaura:    0  2  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+##   fara gaura:  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+##
+## Un singur seed din 16 se misca, si acela e chiar cel pe care s-a construit
+## acuzatia. Restul de 15 sunt identici cu gaura pornita.
+##
+## [b]Si cat de „determinist" e seed 2 de fapt.[/b] Pe starea finala, cu ZERO
+## linii de cod runtime schimbate (`scenes/` neatins, doar comentarii aici),
+## noua rulari consecutive au dat 2, 2, 3, 2, 2, 2, 2, 2, 2. Chiar si cifra
+## „stabila" fluctueaza intre rulari ale aceluiasi binar.
+##
 ## [b]Regula care ramane in picioare.[/b] O repunere pe o muchie expusa e o
 ## proprietate a MUCHIEI, nu a schimbarii care a reasezat zarurile. Ca sa
 ## acuzi o schimbare de o regresie iti trebuie ori (a) o cauza care se poate
@@ -88,16 +103,17 @@ const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ## multe seed-uri. Un singur seed nu e o masuratoare, oricat de repetabil ar
 ## fi: e o realizare a zarurilor, si zarurile se schimba de la orice.
 ##
-## Masurat pe 16 seed-uri x 150 s pe fiecare parte, Track12:
+## Tot pe 16 seed-uri, dar comparand cu `origin/main` — deci o pereche mai
+## slaba decat cea de mai sus, fiindca difera mai multe lucruri deodata:
 ##
 ##   seed:      1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16   TOTAL
 ##   baseline:  0  0  1  0  0  0  0  0  0  0  0  1  0  0  0  0   2
 ##   ramura:    0  2  1  0  0  0  0  0  0  0  0  0  0  0  0  0   3
 ##
-## 14 din 16 seed-uri curate pe amandoua, si baseline are un seed (12) pe care
-## ramura e curata. Tabelul se citeste insa cu grija, fiindca e o singura
-## rulare per seed: seed 3, trecut cu 1 aici, a dat 2,0,0,2 pe patru rulari ale
-## ACELUIASI cod. Totalurile 2 si 3 stau amandoua in zgomotul metodei.
+## Se citeste cu grija: e o singura rulare per seed, iar seed 3 — trecut cu 1
+## aici — a dat 2,0,0,2 pe patru rulari ale ACELUIASI cod. Totalurile 2 si 3
+## stau amandoua in zgomotul metodei; perechea cu un singur steag de mai sus e
+## cea care spune ceva.
 ##
 ## Toate caderile de pe cornisa, pe ambele parti, cad intre frac 0.301 si 0.316,
 ## la aceeasi pozitie (-250..-237, y 34).

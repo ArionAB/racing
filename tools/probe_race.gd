@@ -42,32 +42,43 @@ const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ## frac 0.30 in fiecare rulare — desi lumea de la cornisa e IDENTICA bit cu bit
 ## (amprenta de raycast 32719.8205 in ambele variante).
 ##
-## [b]„Determinist + se comuta dintr-un steag" NU inseamna cauzal[/b] — si asta
-## nu e o opinie, e masurat cu un brat de control. Tentatia e mare: doua
-## repuneri care apar la ACEEASI milisecunda si in ACEEASI pozitie in fiecare
-## rulare, si care dispar cand stingi un steag, arata exact ca o relatie
-## cauzala. Doua runde la rand au tras concluzia asta despre gaura din
-## carosabil.
+## [b]„Determinist + se comuta dintr-un steag” NU inseamna cauzal[/b] — si
+## asta nu e o opinie, e masurat. Tentatia e mare: doua repuneri care apar la
+## ACEEASI milisecunda si in ACEEASI pozitie in fiecare rulare, si care dispar
+## cand stingi un steag, arata exact ca o relatie cauzala. Trei runde la rand
+## au tras concluzia asta despre gaura din carosabilul pasajului rotativ.
 ##
-## Contra-experimentul care o darama, rulat pe cod de baseline NEATINS (nicio
-## linie din ramura), cu 2 m cutii de coliziune INERTE ingropate la 60 m SUB
-## pista, unde nicio masina nu ajunge vreodata — lumea in care se conduce e
-## bit cu bit aceeasi in toate variantele:
+## [b]Cat de mica e perturbatia care ajunge.[/b] Doua apeluri `print` adaugate
+## in `race.gd`, pe ramuri care nu se executa NICIODATA in rularea masurata
+## (nu s-a tiparit nimic), au mutat repunerile de pe seed 2 de la t=30.8/37.6 s
+## la t=42.2/59.4 s, si numarul de la 2,2,2 la 2,2,3. Cod mort, zero schimbari
+## in lume, alt rezultat.
 ##
-##   seed 2, 0 cutii:    0, 0, 0
-##   seed 2, 25 cutii:   1  (frac 0.611)
-##   seed 2, 40 cutii:   0
-##   seed 2, 50 cutii:   2, 2, 2  — DETERMINIST, aceeasi milisecunda, aceeasi
-##                       pozitie, aceleasi doua masini, in trei rulari
-##   seed 2, 60 cutii:   0
+## [b]De UNDE pleaca diferenta.[/b] Cu trasoare IDENTICE pe amandoua partile
+## (acelasi seed, acelasi numar de print-uri, deci acelasi cost), pozitia
+## fiecarei masini comparata cadru cu cadru se despica asa:
 ##
-## Deci geometrie pe care n-o atinge nimeni produce exact aceeasi semnatura
-## „determinista si comutabila" ca steagul suspectat, iar cifra nu e nici macar
-## monotona in cantitatea de geometrie. Explicatia e ordinea in care Jolt
-## imparte arborele de broadphase: ea se schimba la ORICE atingere a
-## inventarului de corpuri, iar de acolo diferenta creste haotic pana cand,
-## 30 s mai tarziu, o imbranceala pe o muchie fara parapet cade pe o parte sau
-## pe alta.
+##   t =  6.70 s   prima diferenta: 1 CENTIMETRU, pe car2 (un AI), la frac
+##                 0.018 — dreapta de start, y 65, ruta 0, viteza constanta,
+##                 fara niciun hazard, la un sfert de tur de cornisa
+##   t =  8.05 s   1.25 m          t =  9.05 s    9.7 m
+##   t = 10.05 s     31 m          t = 13.05 s     68 m
+##   t = 29.40 s   ~50 m           <- abia ACUM masina cade de pe cornisa
+##
+## Adica la momentul caderii cele doua rulari au masinile la zeci de metri una
+## de alta: nu se compara acelasi eveniment in doua variante, se compara doua
+## curse diferite. Nici cauza caderii nu e o imbranceala — masina intra pe
+## cornisa cu 5 m mai la stanga (x -250.9 fata de -246.0 la acelasi index) si
+## deja incetinind (24.8 fata de 31.4 m/s).
+##
+## [b]Izolarea care inchide subiectul.[/b] Pe ramura INTREAGA — rutele noi,
+## testul de etaj din `resolve_route`, ocolul, codul nou de AI, tot — cu
+## `PROBE_NO_ROAD_HOLE=1`, adica singura variabila stinsa fiind gaura din
+## carosabil, seed 2 da 0, 0, 0. Deci cele 261 de linii noi din `track.gd`
+## (indexare, progres, `closest_index_global`, ordinea rutelor) NU sunt cauza:
+## sunt toate active cand cifra e 0. Ce misca seed 2 e strict inventarul de
+## triunghiuri de coliziune al soselei (304 scoase, 76108 -> 75804), prin
+## ordinea in care Jolt isi imparte arborele de broadphase.
 ##
 ## [b]Regula care ramane in picioare.[/b] O repunere pe o muchie expusa e o
 ## proprietate a MUCHIEI, nu a schimbarii care a reasezat zarurile. Ca sa
@@ -84,14 +95,23 @@ const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ##   ramura:    0  2  1  0  0  0  0  0  0  0  0  0  0  0  0  0   3
 ##
 ## 14 din 16 seed-uri curate pe amandoua, si baseline are un seed (12) pe care
-## ramura e curata. Comparatia pe seed 2 singur — 0,0,0 fata de 2,2,2 — arata
-## ca o regresie zdrobitoare si nu e decat realizarea zarurilor pe acel seed.
-## TOATE caderile de pe cornisa, pe ambele parti, cad in intervalul
-## frac 0.301-0.316, la aceeasi pozitie (-250..-237, y 34). Cornisa Hongya Dong
-## e fragila si pe `origin/main`; care seed o nimereste tine de ultimul bit.
+## ramura e curata. Tabelul se citeste insa cu grija, fiindca e o singura
+## rulare per seed: seed 3, trecut cu 1 aici, a dat 2,0,0,2 pe patru rulari ale
+## ACELUIASI cod. Totalurile 2 si 3 stau amandoua in zgomotul metodei.
+##
+## Toate caderile de pe cornisa, pe ambele parti, cad intre frac 0.301 si 0.316,
+## la aceeasi pozitie (-250..-237, y 34).
+##
+## [b]Pentru „e cornisa mai periculoasa acum?" nu se mai foloseste sonda asta.[/b]
+## `tools/ProbeCornice.tscn` masoara GEOMETRIA marginii — latimea politei,
+## pragul lateral, panta de dupa buza — deci nu depinde nici de seed, nici de
+## ordinea contactelor. Pe ramura si pe `origin/main` da acelasi rezultat pana
+## la a treia zecimala: polita 6.75 m, prag 2.438 m, panta 2.59 m/m. Cornisa e
+## neatinsa de ramura; ce s-a schimbat e care seed o nimereste.
 ##
 ## Deci: se compara DISTRIBUTII pe mai multe seed-uri si mai multe rulari, nu o
-## cifra cu alta. Vezi memoria `proberace-nedeterminism`.
+## cifra cu alta, iar pentru o proprietate a LUMII se cauta o sonda de lume.
+## Vezi memoria `proberace-nedeterminism`.
 const SEED: int = 20260729
 ## Suprascris cu --seed=N: acelasi cod, seed-uri diferite = mai multe curse
 ## independente. Un blocaj care apare la 1 din 5 seed-uri e tot un blocaj.

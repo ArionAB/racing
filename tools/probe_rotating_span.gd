@@ -595,8 +595,21 @@ func _run_barrier(ref: float) -> void:
 	# la 24: altfel cifra ar amesteca pretul barierelor cu diferenta dintre
 	# doua viteze de intrare.
 	var barrier_cost: float = t_total - float(ref)
-	print("--- cost total cu barierele: %.2f - %.2f = %+.2f s (plafon %+.2f)"
+	# ATENTIE la ce e cifra asta, fiindca a fost citita gresit o data: e pretul
+	# platit de cine INTRA IN BARIERE, nu pedeapsa ocolului din brief. Cele doua
+	# se masoara pe drumuri diferite si au plafoane diferite (PENALTY_MIN/MAX =
+	# 2.5-4.0 s pentru ocol, BARRIER_COST_MAX = 10 s pentru bariere), fiindca
+	# sunt doua contracte diferite: „ocolul costa ~3 s" si „cine ignora
+	# semaforul plateste o pedeapsa de cursa, nu un abandon".
+	#
+	# Pedeapsa ocolului pe geometria REALA a Track12 (offset 24, lead 30,
+	# width 6) e +3.27 s, masurata cu `--quick` — adica exact contractul din
+	# brief §3. Sonda asta ruleaza pe o sosea-test cu modulul RIDICAT
+	# (`deck_rise` = 3 m) si cu latimea ei implicita, deci cifra ei nu e
+	# pedeapsa de pe pista si nu are voie sa fie comparata cu cei „+3 s".
+	print("--- cost total cu barierele (NU pedeapsa ocolului): %.2f - %.2f = %+.2f s (plafon %+.2f)"
 		% [t_total, ref, barrier_cost, BARRIER_COST_MAX])
+	print("    (pedeapsa ocolului pe geometria Track12: +3.27 s, vezi --quick)")
 	_verdict(escaped and barrier_cost <= BARRIER_COST_MAX,
 		"barierele costa %+.2f s, nu cursa" % barrier_cost)
 	_hazard.clock_running = true

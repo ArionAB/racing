@@ -253,6 +253,18 @@ transform = Transform3D(0.7960, 0, -0.6053, 0, 1.0000, 0, 0.6053, 0, 0.7960, 315
 [node name="balon11_panza" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("11_landed")]
 transform = Transform3D(-0.3594, 0, 0.9332, 0, 1.0000, 0, -0.9332, 0, -0.3594, 325.836, 13.700, -45.374)
 
+[node name="balon3_cos_jos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
+transform = Transform3D(-0.9218, 0, 0.3877, 0, 1.0000, 0, -0.3877, 0, -0.9218, 205.900, 13.700, 13.150)
+
+[node name="balon9_cos_jos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
+transform = Transform3D(-0.7587, 0, -0.6515, 0, 1.0000, 0, 0.6515, 0, -0.7587, 306.100, 13.700, -60.200)
+
+[node name="balon10_cos_jos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
+transform = Transform3D(0.7960, 0, -0.6053, 0, 1.0000, 0, 0.6053, 0, 0.7960, 318.500, 13.700, -50.400)
+
+[node name="balon15_cos_jos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
+transform = Transform3D(0.5000, 0, 0.8660, 0, 1.0000, 0, -0.8660, 0, 0.5000, 349.700, 13.700, -139.500)
+
 [node name="balon12_sus" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("8_env_a")]
 transform = Transform3D(0.5713, 0, 0.8207, 0, 1.0000, 0, -0.8207, 0, 0.5713, 333.366, 22.650, -117.245)
 

@@ -48,6 +48,6 @@ func _ready() -> void:
 
 func _walk(n: Node, out: Array[Node]) -> void:
 	for c in n.get_children():
-		if String(c.name).begins_with("Balon") or String(c.name).begins_with("Balonul"):
+		if String(c.name).begins_with("balon"):
 			out.append(c)
 		_walk(c, out)

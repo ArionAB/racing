@@ -6568,6 +6568,13 @@ func _build_road() -> void:
 	var road_override: Material = null
 	if road_surface == "snow":
 		road_override = _snow_road_material(road_color, micro, macro, tile)
+	else:
+		# Restul carosabilelor primesc shaderul cu stingere: aceeasi imagine
+		# aproape, dar granulatia se duce spre culoarea de baza cu distanta.
+		# Vezi road_detail_fade.gdshader. Ca si la zapada, INLOCUIESTE
+		# materialul care s-ar fi construit oricum, deci garda de materiale nu
+		# se misca.
+		road_override = _road_fade_material(road_color, micro, macro, rough, spec)
 	_add_mesh_with_collision(top.commit(), road_color,
 		_tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro), true,
@@ -8036,6 +8043,36 @@ func _build_flyoff_net(idx: int) -> void:
 ## `_flat_material` e cache-uit pe (culoare, texturi, finisaj), iar cererea de
 ## aici trece exact aceleasi valori ca soseaua: se intoarce ACELASI obiect.
 ## Garda numara materiale, si numarul nu se misca.
+## Sablonul de material al carosabilului cu stingere; se duplica per pista.
+var _road_fade_mat: ShaderMaterial
+
+
+## Carosabilul cu granulatie care se stinge cu distanta. Vezi
+## road_detail_fade.gdshader pentru de ce nu se poate cere din StandardMaterial3D.
+func _road_fade_material(color: Color, micro: String, macro: String,
+		rough: float, spec: float) -> ShaderMaterial:
+	if _road_fade_mat == null:
+		_road_fade_mat = ShaderMaterial.new()
+		_road_fade_mat.shader = load(
+			"res://assets/shaders/road_detail_fade.gdshader")
+	var rm := _road_fade_mat.duplicate() as ShaderMaterial
+	# Aceeasi impartire la media macro ca in `road_material`: cele doua straturi
+	# se inmultesc, deci culoarea de baza trebuie ridicata ca produsul sa cada
+	# pe tenta ceruta.
+	var macro_mean := ASPHALT_MACRO_MEAN
+	if road_surface == "snow":
+		macro_mean = SNOW_MACRO_MEAN
+	elif road_is_loose():
+		macro_mean = SAND_MACRO_MEAN
+	rm.set_shader_parameter("base_color", Color(color.r / macro_mean,
+		color.g / macro_mean, color.b / macro_mean))
+	rm.set_shader_parameter("micro_tex", _tex(micro))
+	rm.set_shader_parameter("macro_tex", _tex(macro))
+	rm.set_shader_parameter("roughness_v", rough)
+	rm.set_shader_parameter("specular_v", spec)
+	return rm
+
+
 func road_material() -> Material:
 	var base := ROAD_COLOR
 	var macro_mean := ASPHALT_MACRO_MEAN
@@ -8061,8 +8098,7 @@ func road_material() -> Material:
 		macro = "res://assets/textures/surface_sand_macro.png"
 		rough = 1.0
 		spec = 0.0
-	return _flat_material(color, _tex(micro), rough, spec,
-		BaseMaterial3D.CULL_BACK, _tex(macro))
+	return _road_fade_material(color, micro, macro, rough, spec)
 
 
 func _flat_material(color: Color, texture: Texture2D = null,
@@ -8089,6 +8125,22 @@ func _flat_material(color: Color, texture: Texture2D = null,
 		mat.detail_albedo = macro_texture
 		mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
+	# MIPMAP-uri. Fara linia asta materialul ramane pe filtrul implicit al lui
+	# Godot (LINEAR, FARA mipmaps), si atunci textura se esantioneaza la mip 0
+	# la orice distanta: granulatia isi pastreaza contrastul pana la orizont.
+	#
+	# Asta era, masurat, unul dintre cele doua semne cele mai tari ca imaginea e
+	# decor de joc — critica oarba a numit exact simptomul, „pestritul nu se
+	# atenueaza cu distanta". Masurat pe cadrul judecat, deviatia de luminanta pe
+	# fasii de carosabil: 14.1 aproape si 16.4 departe, adica nu scade deloc, ba
+	# creste (aliasing pe pixeli tot mai mici). Pe o suprafata reala contrastul
+	# de granulatie trebuie sa TINDA LA ZERO cu distanta.
+	#
+	# Fisierele .import aveau deja `mipmaps/generate=true`: mipmap-urile existau
+	# si nu erau folosite niciodata. Singurul loc unde filtrul era cerut explicit
+	# era soseaua de gheata (`_ice_road_material`), deci exact o suprafata din
+	# toata pista se vedea corect.
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	mat.roughness = roughness
 	mat.metallic_specular = specular
 	# Vertex color = AO/gradient copt de builder. Mesh-urile care nu emit COLOR

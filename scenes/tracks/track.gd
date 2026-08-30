@@ -1668,36 +1668,13 @@ static func themes() -> Dictionary:
 			# peste acelasi slot. SAND_MID/SAND_SHADOW raman pentru piese care
 			# chiar au nevoie de alta NUANTA, nu de alta valoare.
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
-			# VALEA ROSIE, a doua nuanta a pistei — si singurul lucru care rupe
-			# cadrul din "tan monocrom". Criticul orb, runda 4: separarea de
-			# culoare la adancime "face treaba de a stabili trei planuri de
-			# distanta si toata gama de valoare" in referinta, iar fara ea
-			# raman doar variatii de acelasi crem.
-			#
-			# Cota: soseaua merge intre 11.9 si 49.9 (medie 31.5), iar terenul
-			# coboara pana la 3.6. Masurat cu ProbeCappStrat: 28% din vertecsi
-			# stau sub 25, cu lobul mare la 10-20 m. `strata_line` la 26 prinde
-			# fix masa aia — adica ce se vede PESTE buza, sub nivelul drumului —
-			# si lasa neatins platoul pe care se conduce (30-35, 33% din teren).
-			# Cu 10 m de degrade, tranzitia tine cat inaltimea unei faleze, deci
-			# se citeste ca strat geologic, nu ca linie de nivel.
-			#
-			# Nuanta vine din slotul de olane (TILE_TERRACOTTA, 23), nu dintr-un
-			# slot nou: e singurul rosu-caramiziu din atlas, si e deja folosit pe
-			# pista. Se ia inchisa cu 12% ca sa stea SUB cremul de tuf in
-			# valoare — separarea trebuie sa fie si de valoare, nu doar de
-			# nuanta, altfel la ceata cele doua mase se topesc una in alta.
-			"strata_tint": Palette.color(Palette.TILE_TERRACOTTA).darkened(0.12),
-			"strata_line": 30.0,
-			# 18 m de degrade, nu 10. Atentie ce NU rezolva: muchia dreapta
-			# dintre crem si rosu din captura de la frac 0.20 NU e o tranzitie
-			# de culoare prea scurta, e SILUETA ruperii de panta vazuta din
-			# muchie — terenul cade sub buza drumului, si linia aia e geometrie,
-			# nu degrade. Latirea de la 10 la 18 n-a schimbat-o cu nimic in
-			# captura, si asta e in regula: exact asa arata si in referinta,
-			# buza unei faleze. 18 ramane fiindca ajuta pe pantele line, unde
-			# tranzitia chiar se vede ca strat.
-			"strata_fade": 18.0,
+			# VALEA ROSIE (strata_tint / strata_line / strata_fade) NU sta aici,
+			# ci ca noduri editabile pe Track13 — la fel si unghiul soarelui. Sunt
+			# reglaje de PISTA, nu de lume: depind de cotele si de directiile chiar
+			# ale traseului asta, iar traseul se muta din editor. Exact asa s-a
+			# pierdut azimutul o data deja, ramas pe traseul vechi dupa ce curba a
+			# fost redesenata. Mecanismul de teren e in _build_terrain, valorile in
+			# scenes/tracks/Track13.tscn, iar hook-ul in track_from_path.gd.
 			# Cer de zori, hexurile din brief §9. NU e cerul de desert
 			# (albastru adanc 0.25/0.52/0.92 cu orizont auriu tare): la 13 grade
 			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.
@@ -1727,62 +1704,12 @@ static func themes() -> Dictionary:
 			# lungimea nu e vizibilitate, si aici s-a pierdut runda trecuta —
 			# CONTEAZA IN CE DIRECTIE cade, fata de directia in care privesti.
 			#
-			# -120 (azimut 60) fusese ales "ca umbrele sa cada diagonal pe drum",
-			# fara sa se masoare pe unde chiar trece drumul: umbra pleca la 16 grade
-			# de directia de mers, adica direct in spatele hornului si afara din
-			# cadru. De aceea criticul n-a vazut umbre desi erau pornite.
-			#
-			# -30 a fost incercarea urmatoare si a fost GRESITA din doua motive,
-			# amandoua masurate acum (tools/ProbeCappAzimut, ProbeCappEst):
-			#
-			# 1. PUNEA RASARITUL IN VEST. La -30 soarele vine dinspre (-0.50, +0.87),
-			#    adica vest-sud. Brief §4 cere soare de zori peste vale, la est; asta
-			#    nu e o preferinta, e identitatea pistei. S-a pierdut fiindca alegerea
-			#    s-a facut pe scorul de "taie banda", care e simetric: y si y+180 dau
-			#    exact acelasi scor, si s-a luat jumatatea gresita.
-			# 2. Era mediocru si pe umbre. Masurat pe 40 de esantioane de tur, nu pe
-			#    unul singur: componenta transversala medie 0.638, padurea de hornuri
-			#    0.781, si INCA 8 portiuni cu umbra in lungul benzii. Cifra de 0.96
-			#    din runda trecuta era reala, dar era dintr-un singur punct — de-aia
-			#    captura de la frac 0.10 tot n-avea umbre.
-			#
-			# +25 (soare dinspre (+0.42, +0.91) = est-sud-est) castiga pe amandoua
-			# axele deodata, si e maximul baleiajului din 5 in 5 grade:
-			#   transversala medie 0.787 (cea mai mare de pe tot cercul)
-			#   padurea de hornuri 0.918
-			#   portiuni cu umbra in lungul benzii: 2, de la 8
-			#
-			# COMPROMISUL, explicit: maximul pe padurea de hornuri singura ar fi la
-			# y=+5 (0.969), dar acolo media pe tur scade la 0.757 si soarele ajunge
-			# aproape plin din sud, deci estul se subtiaza la +0.09. +25 cedeaza 0.05
-			# pe hornuri ca sa castige si media pe tur, si un est care se vede. Un tur
-			# intreg are drumul in toate directiile: raman 2 portiuni unde umbra merge
-			# in lungul benzii, si asta se accepta — nu exista azimut care sa le
-			# scoata pe toate (minimul absolut al coloanei e 1, la y=+35/+40, dar
-			# acolo hornurile pica la 0.81-0.85).
-			# ELEVATIA, a doua jumatate a problemei, si cea care chiar lipsea.
-			# Azimutul spune INCOTRO cade umbra; elevatia spune CAT DE DEPARTE.
-			# Masurat cu ProbeCappUmbraCadru (proiecteaza varful umbrei fiecarui
-			# horn si il cauta pe axa benzii, in loc sa numere casteri): la 13 grade
-			# umbrele au 46-83 m si trec pe LANGA drum — varful cade la 12-98 m de
-			# banda, si NICIUNA din cele 39 de umbre nu ajunge pe carosabil. De asta
-			# nu se vedeau umbre desi casterii erau toti in cascada: nu erau taiate,
-			# erau ratate. Bias-ul, pancake-ul si cascada erau reparatii pe alt drum.
-			#
-			# Hornurile stau la 8-30 m de banda, deci umbra trebuie sa aiba atat.
-			# Pentru inaltimile reale (10.6-19.1 m): la 13 grade intra in banda 0
-			# din 21, la 17 grade intra prima treime, la 32 de grade 20 din 21.
-			#
-			# 17 si nu 32, desi 32 ar da cele mai multe umbre pe drum: brief §1 cere
-			# soare de zori la 12-15 grade, iar 32 e soare de dimineata tarzie —
-			# ar sterge lumina razanta si umbrele LUNGI care sunt identitatea
-			# padurii de hornuri (§0). 17 e compromisul: ramane lumina joasa de
-			# zori, umbrele raman lungi (35-62 m), dar se scurteaza cat trebuie ca
-			# hornurile de langa banda sa o prinda — verificat in captura de la
-			# frac 0.10, unde intra o umbra reala din dreapta si taie drumul.
-			# Depaseste §1 cu 2 grade; e o abatere asumata, contra unei sectiuni
-			# care altfel n-are umbre deloc.
-			"sun_rotation_deg": Vector3(-17, 25, 0),
+			# UNGHIUL SOARELUI e pe nodul Track13 (custom_sun_rotation_deg), nu
+			# aici. Motivul, pe scurt, fiindca a costat patru runde: azimutul din
+			# tema fusese ales pe un traseu care intre timp a fost redesenat, si
+			# nimeni nu l-a remasurat — umbrele bateau in spatele camerei. Un reglaj
+			# care depinde de forma curbei trebuie sa stea langa curba, in scena, ca
+			# sa se mute odata cu ea. Cifrele si compromisul sunt in .tscn.
 			# Expunerea urca peste 1 fiindca soarele e slab si ambientul jos,
 			# iar tuful trebuie sa ramana cea mai DESCHISA suprafata mare din
 			# cadru (drumul de pamant e sub el, asfalt nu exista). Se ridica de
@@ -3763,7 +3690,9 @@ func _build_terrain() -> void:
 	# STRATUL DE JOS, oglinda lui rock_band: acela tinteaza PESTE o cota
 	# (etaj de munte), asta SUB ea (masa de teren de sub nivelul soselei).
 	# Null pe orice tema care nu-l cere, deci restul pistelor nu se schimba cu
-	# un pixel. Vezi "strata_tint" in themes().
+	# un pixel. Valorile NU vin dintr-o tema, ci de pe nodul pistei
+	# (custom_strata_* pe Track13), prin _theme_overrides din
+	# track_from_path.gd — vezi motivul acolo.
 	var strata_tint: Variant = theme_flag("strata_tint", null)
 	var strata_line := float(theme_flag("strata_line", 0.0))
 	var strata_fade := maxf(float(theme_flag("strata_fade", 1.0)), 0.001)

@@ -26,6 +26,25 @@ extends Track
 @export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing",
 	"cappadocia") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
+## Unghiul soarelui pentru pista asta, cand tema nu-l nimereste.
+##
+## (0,0,0) = lasa tema in pace, deci pistele care nu-l ating nu se schimba.
+## x = elevatia (negativ), y = azimutul. Sta AICI, ca nod editabil, si nu doar
+## in tema, fiindca e reglaj de PISTA: depinde de directia in care merge chiar
+## traseul asta, si traseul se muta din editor. Cand s-a mutat ultima data,
+## azimutul din tema a ramas pe traseul vechi si umbrele au iesit din cadru.
+## Se masoara cu tools/ProbeCappAzimut (baleiaza cercul pe tot turul) si cu
+## tools/ProbeCappUmbraCadru (duce varful umbrei si il cauta pe banda).
+@export var custom_sun_rotation_deg: Vector3 = Vector3.ZERO
+## Stratul de culoare de SUB drum (Valea Rosie pe Cappadocia).
+##
+## Alpha 0 = stins, deci restul pistelor nu se schimba. Tinteaza terenul de sub
+## `custom_strata_line`, cu `custom_strata_fade` metri de cota pentru degrade.
+## E oglinda lui rock_band_tint din teme, care tinteaza PESTE o cota.
+## Cotele se aleg din histograma terenului, nu din ochi: tools/ProbeCappStrat.
+@export var custom_strata_tint: Color = Color(0, 0, 0, 0)
+@export var custom_strata_line: float = 0.0
+@export var custom_strata_fade: float = 12.0
 ## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
 ## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).
 @export_enum("asphalt", "dirt", "snow") var custom_road_surface: String = "asphalt"
@@ -163,6 +182,22 @@ func _apply_custom() -> void:
 	apply_theme(custom_theme)
 	# DUPA apply_theme: aici e suprascrierea pistei peste ce cere tema.
 	gate_model = custom_gate_model
+
+## Abaterile pistei de la tema ei, din nodurile editabile de mai sus.
+##
+## Se construieste doar ce e chiar setat: un dictionar gol inseamna "tema
+## nemodificata", si `_with_overrides` intoarce atunci baza neatinsa. Asa
+## pistele care nu ating cheile astea raman bit-identice.
+func _theme_overrides() -> Dictionary:
+	var over := {}
+	if custom_sun_rotation_deg != Vector3.ZERO:
+		over["sun_rotation_deg"] = custom_sun_rotation_deg
+	if custom_strata_tint.a > 0.0:
+		over["strata_tint"] = custom_strata_tint
+		over["strata_line"] = custom_strata_line
+		over["strata_fade"] = custom_strata_fade
+	return over
+
 
 func _ramp_fracs() -> Array[float]:
 	return custom_ramp_fracs

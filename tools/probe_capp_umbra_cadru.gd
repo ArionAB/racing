@@ -56,34 +56,6 @@ func _ready() -> void:
 
 	# Pentru fiecare caster din apropiere: lungimea umbrei si unde cade varful.
 	var tan_e: float = tan(deg_to_rad(elev))
-	if true:
-		print("")
-		print("=== baleiaj elevatie x azimut: cate umbre cad PE banda ===")
-		print("  (varf de umbra la mai putin de 8 m de axa benzii)")
-		print("  elev\y   0    10    20    25    30    40    50")
-		for ev in [13, 16, 19, 22, 25, 28, 32, 36, 40]:
-			var line := "  %4d " % ev
-			for yy in [0, 10, 20, 25, 30, 40, 50]:
-				var bb := Basis.from_euler(Vector3(deg_to_rad(-float(ev)), deg_to_rad(float(yy)), 0.0))
-				var dd2 := -bb.z
-				var sh2 := Vector2(dd2.x, dd2.z).normalized()
-				var te: float = tan(deg_to_rad(float(ev)))
-				var cnt := 0
-				for c in casters:
-					var pp: Vector3 = c["p"]
-					var dcam: float = Vector2(pp.x - cam.x, pp.z - cam.z).length()
-					if dcam > 90.0: continue
-					var hh: float = c["h"]
-					if hh < 3.0: continue
-					var tp := Vector2(pp.x, pp.z) + sh2 * (hh / maxf(0.05, te))
-					var bst := 1e9
-					for k in range(0, n_pts, 3):
-						var qq: Vector3 = pts[k]
-						var d3: float = Vector2(qq.x - tp.x, qq.z - tp.y).length()
-						if d3 < bst: bst = d3
-					if bst < 8.0: cnt += 1
-				line += "%5d " % cnt
-			print(line)
 	var in_lane := 0
 	var in_box := 0
 	var out_box := 0

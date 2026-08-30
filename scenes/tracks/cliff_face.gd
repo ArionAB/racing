@@ -176,9 +176,16 @@ extends Marker3D
 @export var far_wall: bool = true
 ## La ce rulaj lateral incepe pintenul (marginea dinspre drum).
 ##
-## 9 m: destul de departe cat sa ramana buza de pamant si senzatia de margine
-## intre asfalt si stanca, destul de aproape cat masa sa umple dreapta cadrului.
-@export var far_offset_m: float = 9.0
+## MASURAT cu ProbeBrow, nu ales: terenul are deja o BUZA adevarata — caderea
+## incepe la 8.0 m de ax (1 m dupa asfalt) si merge la 77-85 grade, la toate
+## cele trei fractii. Nu era niciodata un „fileu convex", cum parea din capturi.
+##
+## De-aia pintenul pus la 9 m facea rau: umplea exact golul in care cadea buza,
+## si transforma muchia intr-o rampa continua — adica producea chiar defectul
+## reclamat, cu geometria corecta dedesubt. Se muta DINCOLO de cadere (fundul
+## vaii e la ~13 m rulaj), ca muchia sa ramana muchie si stanca sa se vada peste
+## ea, nu in locul ei.
+@export var far_offset_m: float = 15.0
 ## Cat urca coama pintenului fata de cota soselei.
 ##
 ## Pozitiv = peste drum. Se tine mic: peste ~3 m ar face un zid care ascunde
@@ -199,7 +206,7 @@ extends Marker3D
 ##   27 #9c6131 H27 S.69  ocru-rosu
 ##    4 #70481b H32 S.76  umbra de strat
 ## Nu contine 19 (#f1e3c8, saturatie 0.17): pe coama, cremul face lespede palida.
-@export var cap_slots: Array[int] = [23, 27, 4, 4]
+@export var cap_slots: Array[int] = [23, 10, 23, 27]
 
 
 ## Toate falezele declarate ca noduri, construite intr-un singur nod-parinte.
@@ -470,9 +477,17 @@ func _ledge_body(sampler: TrackSideSampler, lf: float) -> StaticBody3D:
 ## partea ei de sus, ca stratele sa se citeasca ca strate si de la 100 m, unde
 ## relieful de 0.9 m nu se mai vede.
 func _shade(t: float) -> Color:
-	var base := lerpf(1.0, 0.62, clampf(t, 0.0, 1.0))
+	# Plaja e ingusta DELIBERAT (1.0 -> 0.78, cusatura 0.92).
+	#
+	# Vertex color poate doar sa INTUNECE (memoria
+	# `surfacetool-clamp-vertex-color`), deci fiecare zecime scoasa aici iese
+	# direct din saturatia rosului: cu 0.62 la talpa si 0.88 pe cusatura, cele
+	# doua se inmulteau si faceau fata sa cada la ~0.55, adica maro. Referinta
+	# tine TOATA fata la saturatie 0.47-0.65 — stratele se citesc din culoare si
+	# din relief, nu dintr-un gradient adanc.
+	var base := lerpf(1.0, 0.78, clampf(t, 0.0, 1.0))
 	var seam := absf(sin(t * float(bands) * PI))
-	base *= lerpf(0.88, 1.0, seam)
+	base *= lerpf(0.92, 1.0, seam)
 	return Color(base, base, base)
 
 

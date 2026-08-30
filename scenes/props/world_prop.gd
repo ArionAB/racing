@@ -78,6 +78,17 @@ const PROP_COLLISION := {
 	# reconstruieste colizorul (trimesh — poarta de 4 m trebuie sa ramana
 	# libera) la fiecare schimbare de stadiu.
 	"lava_flow": "none",
+	# Hornul crapat (Cappadocia, POI D): aceeasi capcana ca la lava, din
+	# acelasi motiv. Cele trei stari stau in scena una langa alta, iar
+	# `world_prop` construieste corpurile O DATA, la `_ready`, pentru
+	# mesh-urile vizibile ATUNCI — adica pentru toate trei, fiindca instantele
+	# GLB isi fac `_ready` inaintea hazardului care le stinge. Rampa si molozul
+	# ar fi existat ca ziduri invizibile pe mijlocul drumului inca dinainte ca
+	# hornul sa cada. Colizorul si-l face [CrackedChimneyHazard], la fiecare
+	# schimbare de stare.
+	"cracked_chimney_a": "none",
+	"cracked_chimney_b": "none",
+	"cracked_chimney_c": "none",
 	# --- copaci si stalpi: cilindru pe trunchi ----------------------------
 	"larch_winter_a": "trunk", "larch_winter_b": "trunk",
 	"larch_winter_c": "trunk", "birch_winter_a": "trunk",

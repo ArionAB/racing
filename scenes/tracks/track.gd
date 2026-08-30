@@ -1612,6 +1612,13 @@ static func themes() -> Dictionary:
 			# peste acelasi slot. SAND_MID/SAND_SHADOW raman pentru piese care
 			# chiar au nevoie de alta NUANTA, nu de alta valoare.
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			# MOLOZUL hornului cazut (POI D, brief §2): 0.8x din asfaltul de 8,
+			# adica 6.4. Ceva mai putin decat cenusa Stromboli (6.8) fiindca
+			# aici sunt bolovani de tuf pe drum, nu nisip afanat — dar tot
+			# SUPRAFATA, nu hazard: pedeapsa e ca aluneci, nu ca te opresti.
+			# Intervalul e declarat in scena (`custom_loose_ranges`), ca sa se
+			# poata muta odata cu molozul fara sa se umble in cod.
+			"loose_grip": 6.4,
 			# Cer de zori, hexurile din brief §9. NU e cerul de desert
 			# (albastru adanc 0.25/0.52/0.92 cu orizont auriu tare): la 13 grade
 			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.

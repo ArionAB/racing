@@ -185,15 +185,21 @@ extends Marker3D
 ## valea si baloanele care urca din ea, adica exact povestea POI-ului.
 @export var far_rise_m: float = 1.2
 ## Cat de departe pe rulaj se intinde coama pintenului (latimea masei).
-@export var far_depth_m: float = 17.0
+## Ingusta deliberat: coama e suprafata pe care camera o vede cel mai bine
+## (in unghi mic), deci cu cat e mai lata, cu atat ascunde mai mult din fata
+## verticala — adica exact partea cu strate. 9 m ajunge ca masa sa nu fie lama.
+@export var far_depth_m: float = 9.0
 ## Pasul pe lungime pentru peretele opus. Mai mare decat la buza: e departe,
 ## deci nu are nevoie de aceeasi rezolutie.
 @export var far_step_m: float = 7.0
 ## Cate benzi orizontale are pintenul.
 @export var far_bands: int = 7
-## Slotul coamei pintenului (fata de sus, vazuta din masina in unghi mic).
-## 23 = TILE_TERRACOTTA, masurat #c0754d, H21 S.60 — rosu de corp, nu crem.
-@export var cap_slot: int = 23
+## Sloturile coamei, dinspre buza spre vale. Masurate cu ProbeSlots:
+##   23 #c0754d H21 S.60  rosu de corp
+##   27 #9c6131 H27 S.69  ocru-rosu
+##    4 #70481b H32 S.76  umbra de strat
+## Nu contine 19 (#f1e3c8, saturatie 0.17): pe coama, cremul face lespede palida.
+@export var cap_slots: Array[int] = [23, 27, 4, 4]
 
 
 ## Toate falezele declarate ca noduri, construite intr-un singur nod-parinte.
@@ -345,9 +351,16 @@ func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 			# mare suprafata din silueta, si exact asta facea ca pintenul sa iasa
 			# o creasta de nisip palid in loc de stanca — captura arata pale, cu
 			# numarul de pixeli deja urcat. Coama ia rosul de corp.
-			var cuv := Palette.uv(cap_slot)
 			var crows: int = mini(ca.size(), cb.size())
 			for r in crows - 1:
+				# Coama primeste si ea STRATE, nu o singura culoare.
+				#
+				# Cu un singur slot, din camera de joc (care o vede in unghi mic,
+				# deci pe suprafata mare) iesea o lespede portocalie plata si
+				# stergea benzile de pe fata verticala de sub ea. Fasiile de coama
+				# merg de la rosul de corp spre umbra, dinspre buza spre vale.
+				var cs: int = cap_slots[mini(r, cap_slots.size() - 1)]
+				var cuv := Palette.uv(cs)
 				var s0 := _shade(0.10 + 0.5 * float(r) / float(crows - 1))
 				var s1 := _shade(0.10 + 0.5 * float(r + 1) / float(crows - 1))
 				_quad(st, cb[r], ca[r], ca[r + 1], cb[r + 1], cuv, s0, s0, s1, s1)

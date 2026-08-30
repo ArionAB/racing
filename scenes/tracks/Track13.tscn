@@ -136,7 +136,7 @@ script = ExtResource("4_wprop")
 [node name="C) Cornisa Vaii Rosii" type="Node3D" parent="DecorManual"]
 
 [node name="Balon ancorat 1" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 200.195, 32.700, 0.278)
+transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 205.855, 32.700, 9.476)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
@@ -146,14 +146,14 @@ phase = 0.0000
 height = 10.96
 basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("8_env_a")
-model_scale = 2.2
+model_scale = 1.15
 envelope_scale = 1.0
 
 [node name="Tarus 1" parent="DecorManual/C) Cornisa Vaii Rosii" instance=ExtResource("12_tether")]
-transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 201.557, 32.700, 2.492)
+transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 205.855, 32.700, 9.476)
 
 [node name="Balon ancorat 2" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 294.676, 28.040, -84.719)
+transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 303.233, 28.040, -78.130)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
@@ -163,14 +163,14 @@ phase = 0.3333
 height = 10.96
 basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("9_env_b")
-model_scale = 2.2
+model_scale = 1.15
 envelope_scale = 1.0
 
 [node name="Tarus 2" parent="DecorManual/C) Cornisa Vaii Rosii" instance=ExtResource("12_tether")]
-transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 296.736, 28.040, -83.133)
+transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 303.233, 28.040, -78.130)
 
 [node name="Balon ancorat 3" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 335.591, 25.340, -159.453)
+transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 346.199, 25.340, -157.427)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
@@ -180,14 +180,14 @@ phase = 0.6667
 height = 10.96
 basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("10_env_c")
-model_scale = 2.2
+model_scale = 1.15
 envelope_scale = 1.0
 
 [node name="Tarus 3" parent="DecorManual/C) Cornisa Vaii Rosii" instance=ExtResource("12_tether")]
-transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 338.145, 25.340, -158.965)
+transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 346.199, 25.340, -157.427)
 
 [node name="Balonul arzatorului (hairpin)" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.1431, 0, 0.9897, 0, 1.0000, 0, -0.9897, 0, 0.1431, 333.936, 33.808, -220.004)
+transform = Transform3D(0.1431, 0, 0.9897, 0, 1.0000, 0, -0.9897, 0, 0.1431, 345.318, 33.808, -221.650)
 script = ExtResource("6_burner")
 period = 17.0
 telegraph = 1.0
@@ -197,7 +197,7 @@ accel = 9.0
 radius = 12.0
 basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("10_env_c")
-model_scale = 2.2
+model_scale = 1.15
 envelope_scale = 1.0
 
 [node name="Multimea din vale" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]

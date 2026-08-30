@@ -35,6 +35,19 @@ extends Track
 ## azimutul din tema a ramas pe traseul vechi si umbrele au iesit din cadru.
 ## Se masoara cu tools/ProbeCappAzimut (baleiaza cercul pe tot turul) si cu
 ## tools/ProbeCappUmbraCadru (duce varful umbrei si il cauta pe banda).
+##
+## Pe Cappadocia (-17, 25) compromisul e masurat pe POZA, ca abatere de
+## luminanta pe carosabil, si NU e curat pe toate fractiile:
+##                  frac 0.06   frac 0.10
+##   azimut vechi      34.52       23.99
+##   azimut nou        24.32       25.05
+## 0.06 pierde mai mult decat castiga 0.10. Se accepta fiindca benzile de la
+## 0.06 erau facute de un soare de VEST care raka in lungul drumului — adica de
+## chiar greseala care muta rasaritul din vale. Izolat prin rulare cu azimutul
+## nou si elevatia veche: la 0.06 cifra e 24.15 la orice elevatie, deci
+## pierderea vine din azimut, nu din inaltarea soarelui. Elevatia (13 -> 17)
+## aduce singurul castig real: la 0.10, 20.34 -> 25.05, fiindca scurteaza
+## umbrele cat sa cada PE banda in loc sa treaca pe langa ea.
 @export var custom_sun_rotation_deg: Vector3 = Vector3.ZERO
 ## Stratul de culoare de SUB drum (Valea Rosie pe Cappadocia).
 ##

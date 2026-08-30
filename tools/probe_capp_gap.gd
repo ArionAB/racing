@@ -66,3 +66,18 @@ func _ground_y(track: Node3D, at: Vector3) -> float:
 	if hit.is_empty():
 		return -999.0
 	return float((hit["position"] as Vector3).y)
+
+
+## MASURATOAREA CARE A CONFIRMAT UMBRELE (runda 4), pastrata ca nota fiindca e
+## singura din sesiunea asta care NU s-a certat cu poza:
+##
+##   sigma luminantei pe fasia de carosabil (y 62-92%, x 25-75% din cadru)
+##     frac 0.06:  13.1 -> 25.1
+##     frac 0.10:  13.0 -> 22.1
+##     frac 0.14:  18.6 -> 15.9   <-- SCADE
+##
+## Primele doua cresc, si acolo se si VAD umbre lungi taind drumul. A treia
+## scade, si acolo captura chiar nu arata umbre — sunt putini casteri langa
+## banda la 0.14. Cifra care da si verdictul negativ e cifra in care se poate
+## avea incredere; una care iesea verde peste tot ar fi fost al patrulea fals
+## pozitiv al pistei.

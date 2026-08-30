@@ -580,29 +580,38 @@ enum State {
 ##   seed 2, gaura STINSA:   0, 0, 0, 0, 0, 0 (sase rulari)
 ##
 ## Cu modulul, ruta de ocol si tot codul nou PREZENTE — se comuta doar steagul
-## asta. Aprins, pilotul e imbrancit de pe cornisa D de DOUA ori pe cursa, la
-## aceleasi momente si aceleasi pozitii in fiecare rulare (t=30.8 frac 0.301 si
-## t=37.6 frac 0.316). Un efect care se repeta la aceeasi milisecunda si dispare
-## determinist cand stingi un steag e o relatie CAUZALA, nu zgomot — chiar daca
-## mecanismul prin care se propaga e rearanjarea broadphase-ului Jolt (lumea de
-## la cornisa e identica bit cu bit: amprenta de raycast 32719.8205 in ambele
-## variante, iar gaura scoate 304 triunghiuri din corpul soselei, la 366 m
-## distanta de cornisa). Mecanismul explica CUM se propaga, nu scuza CE iese.
+## asta. Efectul se repeta la aceeasi milisecunda in fiecare rulare, deci nu e
+## zgomot de rulare. [b]Dar nu inseamna ca gaura strica ceva la cornisa[/b], si
+## asta a fost masurat, nu presupus — vezi `ProbeSolverDrift`:
 ##
-## Varianta run-to-run a sondei e reala si e alt lucru (seed 5 a dat 2 apoi 0 cu
-## cod neschimbat), dar nu explica un efect care nu variaza niciodata.
+##   * traiectoriile sunt IDENTICE bit cu bit pana la t=4.02 s, cand se despart
+##     cu 1.0 mm, cu tot plutonul inca pe grila de start — la 600 m de gaura si
+##     cu 26 s inainte ca vreo masina sa ajunga la ea (la t=30.8 s, cand cade
+##     pilotul, liderul e la 0.53 tururi, deci gaura n-a fost inca atinsa de
+##     nimeni). Sub un centimetru nu exista geometrie de pista: e ultimul bit al
+##     unei sume de contacte, amplificat pe urma de haos (56 m la t=10 s).
+##   * lumea de la cornisa e identica: 1550 de raycast-uri pe frac 0.28-0.34 dau
+##     aceeasi amprenta de cote (46044.5171) si 0 raze in gol in ambele variante.
+##   * nu e nici „numarul de triunghiuri": 304 si apoi 20.000 de triunghiuri
+##     inerte adaugate pe baseline lasa seed 2 la 0/0/0, si nici 104 puse in
+##     chiar corpul soselei nu reproduc efectul. Conteaza CARE triunghiuri
+##     dispar — ele schimba partitionarea arborelui — nu cate sunt.
 ##
-## [b]DECIZIE DESCHISA pentru dezvoltator.[/b] Remediul cunoscut e un parapet cu
-## coliziune pe cornisa D (intervalul RAIL_POSTS 0.215-0.42 din
-## `custom_rail_segments`, Track12). NU e pus aici deliberat: pe cornisa aia
-## caderea e INTENTIONATA prin design, si nu doar in cod: brief-ul §2 randul D
-## scrie cornisa Hongya Dong ca „fara parapet pe dreapta", o numeste „varful
-## emotional al turului" si accepta explicit costul — „Cadere = repunere ~2 s".
-## Vezi si Track._rail_segments („coliziunea dispare odata cu panglica, si asta
-## e chiar scopul"). A inchide cornisa ca sa treaca o cifra de sonda ar schimba
-## caracterul pistei fara sa fi cerut-o nimeni. Alegerea intre „cornisa ramane
-## periculoasa, si pe seed 2 se plateste" si „cornisa primeste parapet" e a
-## dezvoltatorului, la volan.
+## Deci steagul nu creeaza caderea, ci doar schimba zarurile. Cifra care o arata
+## cel mai limpede: cornisa D cade si pe `origin/main`, doar pe alt seed —
+## baseline seed 3 da o repunere la frac 0.309, poz (-243,34,123), t=31.0 s,
+## exact aceeasi bucata de drum. Pe seed-urile 2-9, curse cu repunere pe
+## cornisa: 1 pe baseline, 1 pe ramura.
+##
+## [b]Ce ramane deschis e cornisa, nu steagul.[/b] Cornisa D e o margine fara
+## parapet pe care AI-ul se imbranceste, si care seed o nimereste tine de
+## ultimul bit. Brief-ul §2 randul D o vrea asa: „fara parapet pe dreapta",
+## „varful emotional al turului", cu costul acceptat explicit — „Cadere =
+## repunere ~2 s". Vezi si Track._rail_segments („coliziunea dispare odata cu
+## panglica, si asta e chiar scopul"). Daca la volan caderea se dovedeste prea
+## frecventa, remediul e un parapet cu coliziune pe intervalul RAIL_POSTS
+## 0.215-0.42 din `custom_rail_segments` (Track12) — dar aia e o schimbare de
+## caracter al pistei, decisa de dezvoltator, nu o tunare ca sa treaca o sonda.
 @export var cut_road_hole: bool = true
 
 ## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota

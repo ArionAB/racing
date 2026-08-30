@@ -323,8 +323,13 @@ const TUFF_UV_MODELS := [
 	# abia la runda 6 — fara ele aici, un horn cazut ar fi fost singurul obiect
 	# portocaliu dintr-o padure crem.
 	"cracked_chimney_a", "cracked_chimney_b", "cracked_chimney_c",
-	"red_mesa",
 ]
+
+## `red_mesa` NU intra in lista de mai sus, desi e din acelasi kit si are
+## aceleasi sloturi in .glb. Acolo rosul e INTENTIA: masa e stratul rosu al
+## vaii, singura suprafata mare non-crem a pistei (vezi `custom_strata_tint` pe
+## Track13). Trecuta prin remapare ar fi iesit crem ca tot restul, adica exact
+## culoarea pe care pista o cauta ca sa nu fie monocroma.
 
 
 func _ready() -> void:

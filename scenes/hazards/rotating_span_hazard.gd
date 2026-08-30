@@ -2354,7 +2354,21 @@ func wall_clear_span() -> float:
 	return 2.0 * (_lip_near() + service_lead + gate_lead + 6.0)
 
 
+## Stinge gaura din carosabil pentru o singura rulare, fara sa se atinga scena.
+##
+## Exista pentru A/B-ul cu `ProbeSolverDrift`: intrebarea „diferenta asta vine
+## din taietura sau din ordinea contactelor?" se pune de fiecare data cand se
+## adauga sau se scoate geometrie de coliziune, si raspunsul ei cere aceeasi
+## pista rulata de doua ori, cu si fara. Un steag de mediu tine A/B-ul in afara
+## fisierului de scena — care altfel ar trebui editat si pus la loc, adica exact
+## felul in care se uita un steag comutat pe pozitia gresita.
+static func _hole_muted() -> bool:
+	return OS.get_environment("PROBE_NO_ROAD_HOLE") != ""
+
+
 func road_hole_span() -> float:
+	if _hole_muted():
+		return 0.0
 	if not cut_road_hole or not follow_route or deck_rise > 0.01:
 		return 0.0
 	return maxf(span_length - 2.0 * HOLE_LIP, 1.0)

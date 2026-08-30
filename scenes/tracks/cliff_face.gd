@@ -1033,7 +1033,12 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 	var floor_y := lip_y - depth_m
 	var far := hw + 4.0
 	var prev := lip_y
-	while far < hw + 60.0:
+	# Cat de departe se cauta fundul. 60 m ajungeau cat timp valea avea o podea
+	# plata la 95 m; cu podeaua in panta fundul e mult mai afara, iar cautarea
+	# se oprea la primul palier si lasa panza sa se termine la 16 m DEASUPRA
+	# terenului — lespede plutind, cu cer pe sub ea (masurat la frac 0.36:
+	# panza la -6.2, terenul la -45.9).
+	while far < hw + 200.0:
 		var q := lip + sd * (far - hw - lip_offset_m)
 		var gy: float = surface_y.call(q.x, q.z)
 		if gy > prev - 0.15 and far > hw + 8.0:

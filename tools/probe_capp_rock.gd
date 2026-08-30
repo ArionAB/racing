@@ -27,12 +27,25 @@ extends Node
 ## ea, deci nu are nevoie de exceptie si a fost scoasa. O scutire care acopera
 ## un perete existent ascunde exact spartura pe care ar trebui s-o prinda.
 ##
-## In schimb usa de intrare e mai LATA decat pare din desen (205-258 grade, nu
-## 210-240): pe azimuturile 245-255 masca de protectie a asfaltului se INCHIDE
-## pe masura ce creste raza (masurat: 0.21 la r=46, 0.00 la r=70), fiindca chiar
-## pe directia aia pleaca drumul de apropiere din orasul subteran. Acolo nu e o
-## spartura care se poate carpi cu teren — e coridorul de intrare, si un masiv
-## pus peste el ar ingropa soseaua.
+## In schimb usa de intrare e mai LATA decat pare din desen (205-262 grade, nu
+## 210-240): pe azimuturile 245-260 masca de protectie a asfaltului ramane
+## partiala oricat de departe ai merge pe raza, fiindca chiar pe directia aia
+## pleaca drumul de apropiere din orasul subteran. Acolo nu e o spartura care se
+## poate carpi cu teren — e coridorul de intrare, si un masiv pus peste el ar
+## ingropa soseaua.
+##
+## Cat de larga e usa s-a MASURAT, nu s-a rotunjit. Masca `_lift_peaks` e
+## `smoothstep(6, 32, dist - semi_latime)`, si maximul ei pe raza, azimut cu
+## azimut, iese asa:
+##   250 deg: 0.22   255 deg: 0.43   260 deg: 0.61   265 deg: 0.81   270 deg: 0.97
+## De la 265 in sus terenul are voie sa urce si chiar urca (creasta masurata
+## 40 m la 270). Sub 262 nu are: drumul trece prea aproape pe toata raza. Deci
+## granita usii cade intre 260 si 265, si e pusa la 262 — nu „cu o margine de
+## siguranta", ci acolo unde se schimba raspunsul mastii.
+##
+## Un `TerrainPeak` pus special pe umarul de la 260 (UmarGura260) a fost
+## incercat: a adus +0.9 m, de la 17.1 la 18.0. Confirmarea ca nu e o lipsa de
+## teren, ci masca — varful exista, dar e stins de sosea.
 
 const AXIS := Vector2(-302.02, 6.00)
 ## Raza pana la care terenul TREBUIE sa ramana jos (elicea + carosabil).
@@ -49,7 +62,7 @@ const CREST_R1: float = 72.0
 ## Sectoarele in care drumul insusi strapunge masivul, deci peretele lipseste
 ## din constructie. Numele e obligatoriu: o exceptie fara motiv scris e o gaura.
 const DOORWAYS: Array = [
-	{"name": "gura de intrare (din orasul subteran, y~12)", "a0": 205.0, "a1": 258.0},
+	{"name": "gura de intrare (din orasul subteran, y~12)", "a0": 205.0, "a1": 262.0},
 ]
 
 

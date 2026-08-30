@@ -177,6 +177,22 @@ const CLASSES_BY_MODEL := {
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},
+	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
+	#
+	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
+	# exact ce se intampla atunci — „absentele arata cer, nu camere". Referinta
+	# (Uchisar in sectiune) castiga tocmai prin deschideri LUMINATE cu interior
+	# in spatele lor. `_remap_model_slots` a pus deja fundul firidei pe slotul
+	# 30; aici capata emisia care il face lumina de torta, nu vopsea portocalie.
+	#
+	# Energia 2.0 nu e aleasa pe gust: e FIX cea folosita de ferestrele
+	# Chongqing-ului, si `glow_material` e cache-uit per (slot, energie) — deci
+	# firidele astea intra pe un material care exista deja in joc si garda de
+	# materiale nu se misca. O energie noua, „reglata pentru zori", ar fi fost
+	# un material in plus pentru o diferenta pe care captura n-o arata.
+	"hall_alcove": {
+		"Hall_Alcove": Palette.GLOW_PREFIX + "30|2.0",
+	},
 	# Trestia de pe Stromboli, pe frunzisul mediteranean. Aici si nu in
 	# STROMBOLI_CLASSES fiindca numele nodului ei (`Cane_Clump`) e PREFIX
 	# pentru `Cane_Clump_A/B/C` din `props/sugar_cane.glb`, lanul Okinawei:
@@ -271,13 +287,113 @@ const CLASSES_BY_MODEL := {
 }
 
 
+## Sloturi de paleta rescrise PER MODEL, inainte de orice material.
+##
+## Un GLB isi aduce sloturile din Blender, si uneori sunt sloturile gresite
+## pentru pista pe care ajunge. Cazul masurat: `hollow_rock` (Cappadocia, POI G)
+## e desenat pe sloturi generice de stanca — dominant ROCK_DARK (4), plus
+## ASPHALT_EDGE (6) si TILE_TERRACOTTA (23). ROCK_DARK e MARO-PORTOCALIU, si pe
+## el coaja iesea cu o banda de rugina lata cat stanca: exact reprosul
+## „conul portocaliu/crem" din verdict, si aceeasi capcana pe care o descrie
+## memoria `rock-dark-nu-pe-bazalt` (pe Stromboli ROCK_DARK iesea rugina).
+##
+## Se rescrie UV-ul, nu paleta: atlasul e 32x1, deci slotul unui vertex e
+## `floor(u * 32)` si mutarea lui inseamna doar alt `u`. Asa NU se atinge niciun
+## slot global (l-ar schimba pe toate pistele) si nu se cheltuie unul nou —
+## slotul 31 s-a consumat la Chongqing, brief §4.
+##
+## Tinta e CORAL_SAND (19), cremul de tuf pe care il declara deja tema
+## (`ground_tint`), plus SAND_SHADOW (2) pentru partile care trebuie sa ramana
+## mai INCHISE decat restul: fara o a doua valoare coaja ar iesi o silueta plata
+## de o singura culoare, si tot din verdict venea „culori plate".
+const SLOT_REMAP_BY_MODEL := {
+	"hollow_rock": {
+		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
+		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)
+		23: Palette.CORAL_SAND,    # TILE_TERRACOTTA rosu -> crem
+		0: Palette.CORAL_SAND,     # SAND_LIGHT galbui -> acelasi crem
+		1: Palette.CORAL_SAND,     # SAND_MID ocru saturat -> crem
+	},
+	# Firidele din peretele stancii. Aceeasi poveste ca la coaja: piesa vine
+	# desenata pentru sala subterana, deci pe stanca maro (2/4) si pe metal
+	# ruginit (10) — pe zidul crem ieseau niste cutii maro lipite pe el.
+	#
+	# Fundul firidei ramane pe slotul 30 (`LAVA_ORANGE`), care e portocaliul
+	# incandescent al paletei, si primeste emisie prin `CLASSES_BY_MODEL`. Asta
+	# e chiar reprosul din verdict: „absentele arata cer, nu camere" — o
+	# fereastra citeste ca incapere doar daca are un FUND si pe fund cade
+	# lumina. Slotul nu e nou: e cel al lavei de pe Stromboli, refolosit ca
+	# lumina de torta, exact rolul de accent care ARDE pentru care exista.
+	# Care slot e FUNDUL s-a masurat, nu s-a ghicit (tools, z mediu pe triunghi):
+	#   slot  2  z +0.162  -> cel mai in SPATE: fundul firidei
+	#   slot  4  z +0.001  -> centrat: rama/glaful
+	#   slot 10  z +0.094  -> feroneria
+	# Prima incercare aprinsese slotul 4 si a iesit exact pe dos pe captura: o
+	# RAMA portocalie in jurul unei gauri negre, adica o reclama luminoasa, nu
+	# o incapere. Fundul se aprinde, rama ramane piatra.
+	"hall_alcove": {
+		2: Palette.LAVA_ORANGE,    # fundul: portocaliu de torta, cu emisie
+		4: Palette.CORAL_SAND,     # rama firidei -> crem, ca peretele
+		10: Palette.CORAL_SAND,    # feroneria ruginita -> tot piatra
+	},
+}
+
+
 func _ready() -> void:
+	_remap_model_slots()
 	_split_shutters()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
 	_apply_glow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
+
+
+## Muta vertecsii unui model de pe un slot de atlas pe altul (vezi
+## [constant SLOT_REMAP_BY_MODEL]).
+##
+## Mesh-ul se DUPLICA inainte de scriere: resursa importata din .glb e partajata
+## intre toate instantele modelului si e tinuta in cache de ResourceLoader, deci
+## o scriere pe loc ar schimba piesa pentru toata lumea si ar reaplica mutarea
+## la fiecare instanta noua (crem -> si mai crem), inclusiv pe alte piste.
+func _remap_model_slots() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not SLOT_REMAP_BY_MODEL.has(stem):
+			continue
+		var remap: Dictionary = SLOT_REMAP_BY_MODEL[stem]
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			mi.mesh = _mesh_with_slots_moved(mi.mesh, remap)
+
+
+## Copia unui mesh cu UV-urile mutate pe alte sloturi de atlas.
+static func _mesh_with_slots_moved(src: Mesh, remap: Dictionary) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := src.surface_get_arrays(s)
+		var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+		if not uv.is_empty():
+			for i in uv.size():
+				var slot := int(floor(uv[i].x * float(Palette.SLOTS)))
+				if remap.has(slot):
+					# Centrul slotului tinta: la margine s-ar lua jumatate din
+					# culoarea vecinului la prima filtrare bilineara.
+					uv[i].x = (float(int(remap[slot])) + 0.5) / float(Palette.SLOTS)
+			arr[Mesh.ARRAY_TEX_UV] = uv
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
 
 
 ## Rupe accentele pictate de pe partile din ACCENT_SPLIT, ca ele sa poata primi

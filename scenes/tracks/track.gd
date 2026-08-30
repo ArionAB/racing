@@ -197,6 +197,11 @@ var theme_glow: bool = true
 ## ale intregii scene.
 const SHADOW_DISTANCE: float = 110.0
 
+## `shadow_normal_bias` la soarele standard de 42 de grade. Gasit prin iterare
+## pe falezele de canion; nu se citeste direct nicaieri, ci prin
+## `_shadow_normal_bias_for_sun()`, care il reface pentru alte elevatii.
+const SHADOW_NORMAL_BIAS_REF: float = 1.6
+
 ## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
 ## nu inline: o citesc si lumina din _build_environment, si glint-ul apei din
 ## _water_material — scanteierea trebuie sa cada din acelasi soare.
@@ -208,6 +213,37 @@ const SUN_ROTATION_DEG: Vector3 = Vector3(-42, 135, 0)
 func _sun_rotation_deg() -> Vector3:
 	var v: Variant = theme_flag("sun_rotation_deg", SUN_ROTATION_DEG)
 	return v if v is Vector3 else SUN_ROTATION_DEG
+
+## `shadow_normal_bias` potrivit cu inaltimea soarelui — DOAR pentru temele care
+## cer explicit derivarea (`shadow_bias_from_sun: true`).
+##
+## `normal_bias` impinge punctul de esantionare pe NORMALA suprafetei inainte de
+## proiectie — asa se scapa de shadow acne pe fete inclinate. Pe teren aproape
+## orizontal insa, cat din impingerea aia ajunge decalaj LATERAL al umbrei
+## creste cu 1/sin(elevatie): la soare razant, aceeasi valoare care la amiaza
+## tinea umbra lipita o dezlipeste de obiect.
+##
+## Referinta e soarele standard al repo-ului (42 grade, style_bible §5), unde
+## 1.6 e valoarea gasita prin iterare. Formula pastreaza acelasi DECALAJ, nu
+## aceeasi cifra:
+##
+##   bias(e) = 1.6 * sin(e) / sin(42)
+##
+## DE CE NU E PORNITA PESTE TOT, desi matematica e la fel de valabila si acolo:
+## fiindca ar schimba trei piste care arata bine acum (Okinawa 33 -> 1.302,
+## Baikal 24 -> 0.973, Stromboli 46 -> 1.720), iar corectitudinea unei umbre se
+## judeca pe captura, nu pe formula. Cine vrea sa le porneasca si pe alea pune
+## cheia in tema si compara doua capturi --driver, ca de obicei. Aici e pornita
+## doar pe Cappadocia, unde 1.6 dezlipea vizibil umbra (1.14 m decalaj lateral).
+##
+## Podeaua de 0.35 exista fiindca `normal_bias` are si treaba lui de baza (acne
+## pe falezele inclinate), iar sub atat reapare pe peretii de canion.
+func _shadow_normal_bias_for_sun() -> float:
+	var elev := absf(_sun_rotation_deg().x)
+	var ref := absf(SUN_ROTATION_DEG.x)
+	var s := sin(deg_to_rad(clampf(elev, 1.0, 89.0)))
+	var s_ref := sin(deg_to_rad(clampf(ref, 1.0, 89.0)))
+	return maxf(SHADOW_NORMAL_BIAS_REF * s / s_ref, 0.35)
 
 ## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
 ##
@@ -1699,6 +1735,40 @@ static func themes() -> Dictionary:
 			# de piatra care taie drumul cu umbra lor. Ordinea de sacrificiu e
 			# in brief §6: intai in subteran, unde nu se vad.
 			"shadows": true,
+			# CASCADA MAI SCURTA, ca umbrele sa fie mai ASCUTITE — nu a doua
+			# cascada. CLAUDE.md interzice explicit a doua (ar dubla draw
+			# call-urile de umbra ale scenei); asta face invers, ingusteaza
+			# caseta celei existente, si costa ZERO draw call-uri: se deseneaza
+			# aceiasi casteri (mai putini, chiar), doar intr-o cutie mai mica.
+			#
+			# Socoteala, fiindca altfel pare gust: Godot potriveste caseta
+			# ortografica pe o sfera in jurul feliei de frustum [near,
+			# max_dist]. La FOV 68 si 110 m sfera are raza 159 m, deci caseta
+			# 318 m — de trei ori cascada — si pe atlasul implicit de mobil
+			# (2048) un texel are 15.5 cm. La 75 m: raza 108 m, caseta 217 m,
+			# texel 10.6 cm. Cu o treime mai fin, pe gratis.
+			#
+			# 75 si nu mai putin, fiindca hornurile inalte trebuie sa arunce si
+			# de la departare, iar ceata abia incepe la 140 m. Sub 60 m umbra
+			# hornului urmator apare in fata masinii cat se conduce spre ea, si
+			# se vede popping.
+			"shadow_distance": 75.0,
+			# Muchie ceva mai stransa decat implicitul de 1.4: la 13 grade umbra
+			# e oricum lunga si subtire, iar blur-ul de amiaza o topea intr-o
+			# pata. Contrastul dintre tuful insorit si umbra lui E imaginea
+			# pistei (brief §0), deci muchia trebuie sa se vada.
+			"shadow_blur": 1.0,
+			# UMBRA LIPITA DE OBIECT. `normal_bias` fix (1.6, calibrat la 42 de
+			# grade) impinge umbra lateral cu 1.6 * texel / sin(elevatie): 38 cm
+			# la 42 de grade, dar 1.14 m la 13. Adica hornul si umbra lui nu se
+			# mai ating, si exact asta reclama criticul orb ("conurile par
+			# lipite peste fundal", "solul e o spoiala plata").
+			#
+			# Cheia deriva valoarea din elevatie si pastreaza DECALAJUL de la 42
+			# de grade, nu cifra: aici iese 0.538. E pornita doar pe tema asta,
+			# fiindca celelalte piste cu soare mai jos de 42 (Okinawa 33, Baikal
+			# 24, Stromboli 46) arata bine acum si nu se ating fara capturi.
+			"shadow_bias_from_sun": true,
 			"fog_depth": true,
 			# 140 -> 300, si inceputul e departe DIN MECANICA, nu din gust: de
 			# pe cornisa (POI C) trebuie sa se vada fundul vaii cu baloanele in
@@ -3085,14 +3155,43 @@ func _build_environment() -> void:
 	if theme_shadows:
 		sun.directional_shadow_mode = \
 			DirectionalLight3D.SHADOW_ORTHOGONAL
-		sun.directional_shadow_max_distance = SHADOW_DISTANCE
+		sun.directional_shadow_max_distance = float(
+			theme_flag("shadow_distance", SHADOW_DISTANCE))
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
-		sun.shadow_blur = 1.4
+		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))
 		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
 		# acne pe fetele orientate spre soare.
-		sun.shadow_bias = 0.06
-		sun.shadow_normal_bias = 1.6
+		sun.shadow_bias = float(theme_flag("shadow_bias", 0.06))
+		# NORMAL_BIAS SE SCALEAZA CU UNGHIUL SOARELUI, si asta e miezul
+		# problemei de pe Cappadocia — nu "rezolutia intinsa pe umbre lungi",
+		# cum arata prima ipoteza. Sunt doua lucruri diferite, si doar unul
+		# depinde de soare:
+		#
+		# 1. Volumul umbrei NU depinde de soare. Godot potriveste caseta
+		#    ortografica pe o SFERA in jurul feliei de frustum [near, max_dist],
+		#    deci la FOV 68 si 110 m iese o sfera de raza 159 m — o caseta de
+		#    318 m, adica de trei ori cascada. Pe atlasul implicit de mobil
+		#    (2048) un texel de umbra are 16 cm. Cifra e ACEEASI la 42 si la 13
+		#    grade; nu soarele razant o strica.
+		# 2. Ce depinde de soare e cat de departe impinge `normal_bias` umbra
+		#    LATERAL. Offsetul se ia pe normala suprafetei, iar pe teren aproape
+		#    orizontal componenta utila creste cu 1/sin(elevatie):
+		#      42 grade -> 1.6 * 0.16 / sin(42) = 0.38 m
+		#      13 grade -> 1.6 * 0.16 / sin(13) = 1.14 m
+		#    Un metru si un sfert intre obiect si umbra lui = umbra dezlipita,
+		#    adica exact "conurile par lipite peste fundal".
+		#
+		# Temele care cer `shadow_bias_from_sun` isi DERIVA valoarea din elevatie
+		# (vezi `_shadow_normal_bias_for_sun`), ca sa pastreze decalajul de la 42
+		# de grade in loc de cifra. Restul raman pe cifra fixa.
+		var forced: Variant = theme_flag("shadow_normal_bias", null)
+		if forced != null:
+			sun.shadow_normal_bias = float(forced)
+		elif bool(theme_flag("shadow_bias_from_sun", false)):
+			sun.shadow_normal_bias = _shadow_normal_bias_for_sun()
+		else:
+			sun.shadow_normal_bias = SHADOW_NORMAL_BIAS_REF
 	add_child(sun)
 
 	# _build_terrain() NU se cheama de aici: are nevoie de pozitiile falezelor ca

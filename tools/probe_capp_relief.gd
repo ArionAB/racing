@@ -47,15 +47,26 @@ const LAT_MAX: float = 60.0
 
 ## Cat de mult poate cobori solidul fata de cota axei si sa mai fie POLITA.
 const SHELF_DROP_M: float = 1.0
+## Pana la cati metri de axa se mai cere teren RULABIL.
+##
+## Dincolo de banda asta incepe peisajul, si peisajul are voie sa fie abrupt:
+## un perete de canion la 30 m e chiar ce cere runda. Garda de treapta intreaba
+## „poate roata sa iasa de pe asfalt fara sa se izbeasca", nu „e lumea neteda".
+## 18 m = semilatimea (6-7 m) plus doua latimi de masina de margine iertatoare.
+const MARGIN_M: float = 18.0
 ## Treapta laterala maxima admisa PE polita (rulabil, nu zid).
 ##
-## Idealul e 0.30 m (memoria `suprafete-cu-goluri-si-praguri`). Masurat INAINTE
-## de orice sapatura, terenul livrat avea deja 0.364 m la frac 0.120, pe flancul
-## lui `MasivulDeTuf` — datorie mostenita, nu ceva adus de taietura. Pragul e
-## pus la 0.45 ca sa prinda o INRAUTATIRE aduse de sapat; pus la 0.30 ar fi rosu
-## din prima rulare si n-ar spune nimic (vezi discutia despre plafoane care se
-## muta din CLAUDE.md). Cand se plateste datoria, coboara la 0.30.
-const STEP_MAX: float = 0.45
+## Idealul e 0.30 m (memoria `suprafete-cu-goluri-si-praguri`).
+##
+## [b]De ce se masoara de la MARGINEA asfaltului, nu de la axa.[/b] Prima
+## versiune pornea profilul din axa si raporta o treapta de 0.75 m la un metru
+## lateral. Masurata si pe cornisa LIVRATA (frac 0.25, nemodificata de runda
+## asta), aceeasi treapta iese 0.70 m — adica e racordul teren-asfalt de pe
+## toata pista, nu ceva adus de sapatura. Sub asfalt terenul coboara cu
+## `GROUND_DROP`, si primul metru de langa axa e inca sub carosabil: acolo nu
+## calca nicio roata. Intrebarea corecta incepe de la `half_width`, unde masina
+## chiar paraseste banda.
+const STEP_MAX: float = 0.30
 ## Polita conducibila minima de la axa, in metri.
 const SHELF_MIN_M: float = 6.0
 
@@ -169,11 +180,14 @@ func _check() -> void:
 			prev_slope = s
 		cross_sum += float(crossings)
 		# GARDA: treapta laterala pe polita + latimea politei, ambele parti.
+		# Pornim de la marginea asfaltului: intre axa si `half_width` terenul e
+		# sub carosabil, deci o "treapta" de acolo nu e sub nicio roata.
+		var hw := _sampler.half_width_at(idx)
 		for sgn: float in [-1.0, 1.0]:
-			var prev_y := road_y
+			var prev_y := _ground_at(axis + side * sgn * hw)
 			var shelf := LAT_MAX
-			var d2 := LAT_STEP
-			while d2 <= LAT_MAX:
+			var d2 := hw + LAT_STEP
+			while d2 <= MARGIN_M:
 				var y := _ground_at(axis + side * sgn * d2)
 				if is_inf(y) or road_y - y > SHELF_DROP_M:
 					shelf = d2 - LAT_STEP

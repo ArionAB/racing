@@ -1612,6 +1612,33 @@ static func themes() -> Dictionary:
 			# peste acelasi slot. SAND_MID/SAND_SHADOW raman pentru piese care
 			# chiar au nevoie de alta NUANTA, nu de alta valoare.
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			# VALEA ROSIE, ca ETAJ DE CULOARE pe teren (vezi `valley_tint` in
+			# _build_terrain). Brief §2 POI C cere „benzile roz-rosu ale falezei
+			# sub banda", iar POI C e varful vizual al pistei.
+			#
+			# Cotele nu sunt alese, sunt masurate pe geometria reala a cornisei:
+			# fundul vaii sta la 13.7 m, buza soselei coboara de la 44.1 (frac
+			# 0.20) la 33.5 (frac 0.36). Cu plinul sub 21 m si stingerea pe 11 m,
+			# rosul umple fundul vaii si moare inainte de buza — deci platoul si
+			# satul raman crem, cum cere §0.1 („aceeasi paleta, alta proportie").
+			#
+			# Tenta e slotul 27 (#A8683A, H25 S.65): masurat pe referinta
+			# (`img/v3_crops/C_cornice.png`) stratele stau la H 5-30, S 0.47-0.65
+			# — deci nuanta e in fereastra, nu langa ea. Se aplica prin lerp in
+			# vertex color, care poate doar sa INTUNECE (memoria
+			# `surfacetool-clamp-vertex-color`): cremul #E9DCC0 inmultit spre
+			# #A8683A da chiar caramiziul cerut, fara slot nou si fara material
+			# nou.
+			"valley_tint": Palette.color(Palette.LARCH_RUST),
+			# 26, nu 21: cornisa COBOARA (44.1 m la frac 0.20 -> 33.5 la 0.36), si
+			# odata cu ea fundul vaii de sub ea (13.7 -> 17.1). Cu pragul pus pe
+			# capatul de sus, jumatatea dinspre hairpin ramanea in afara etajului
+			# si iesea crem — masurat pe captura de la 0.36, unde valea era bej
+			# desi la 0.20 era rosie. Pragul se ia pe capatul de JOS al cornisei,
+			# nu pe cel de sus, iar stingerea de 13 m il duce sub buza pe toata
+			# lungimea ei.
+			"valley_line": 26.0,
+			"valley_fade": 13.0,
 			# Cer de zori, hexurile din brief §9. NU e cerul de desert
 			# (albastru adanc 0.25/0.52/0.92 cu orizont auriu tare): la 13 grade
 			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.
@@ -2396,6 +2423,8 @@ func _holds_declarations(node: Node) -> bool:
 	if node is TerrainPeak or node is TerrainHollow:
 		return true
 	if node is TrackChannel or node is HazardMarker:
+		return true
+	if node is CliffFace:
 		return true
 	for child in node.get_children():
 		if _holds_declarations(child):
@@ -3513,6 +3542,18 @@ func _build_terrain() -> void:
 	var rock_tint: Variant = theme_flag("rock_band_tint", null)
 	var rock_line := float(theme_flag("rock_line", 0.0))
 	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
+	# ETAJUL DE JOS, oglinda pe minus a lui `rock_band_tint`: unde acela vopseste
+	# creasta PESTE o cota, asta vopseste fundul de vale SUB una.
+	#
+	# Nu e simetrie de dragul simetriei. Pe Cappadocia, Valea Rosie e o vale:
+	# rosul ei traieste sub buza cornisei, iar `rock_band_tint` nu putea sa-l
+	# puna acolo — el urca. Fara etajul de jos, singura suprafata rosie din cadru
+	# ramanea faleza de sub banda, care din camera de urmarire se vede din
+	# muchie; fundul vaii, care ocupa jumatate de cadru, ramanea crem si
+	# spunea „desert", nu „Valea Rosie".
+	var valley_tint: Variant = theme_flag("valley_tint", null)
+	var valley_line := float(theme_flag("valley_line", 0.0))
+	var valley_fade := maxf(float(theme_flag("valley_fade", 1.0)), 0.001)
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
 	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
@@ -3600,6 +3641,18 @@ func _build_terrain() -> void:
 							# Pe piatra nu creste iarba: greutatea coboara spre
 							# textura de nisip/roca, exact ca sub zapada.
 							grass_w *= 1.0 - rock_w
+					if valley_tint != null:
+						# Sub linie = plin, peste ea = zero. Marginea se
+						# zdrentuieste cu acelasi zgomot ca celelalte etaje, ca
+						# sa nu iasa o linie de nivel trasa cu rigla.
+						var val_w := clampf(
+							(valley_line - v.y) / valley_fade, 0.0, 1.0)
+						val_w = clampf(val_w + dirt_noise.get_noise_2d(
+							v.x * 0.45, v.z * 0.45) * 0.28, 0.0, 1.0)
+						val_w = smoothstep(0.0, 1.0, val_w)
+						if val_w > 0.0:
+							tint = tint.lerp(valley_tint as Color, val_w)
+							grass_w *= 1.0 - val_w
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)
@@ -8626,6 +8679,16 @@ func _build_world_decor() -> void:
 		_world_seed(), _cliff_clearings(), _gorge_ranges())
 	add_child(cliffs)
 	_decor_roots.append(cliffs)
+	# FALEZELE DECLARATE ca noduri [CliffFace]: geometrie reala, nu versant de
+	# camp. Grila de teren are 7.92 m de celula, deci o faleza ceruta campului
+	# iese panta oricat de vertical ar fi cerutul (masurat pe cornisa Cappadociei:
+	# campul cade 25 m in 2 m, mesh-ul intinde caderea pe 6 m si greseste cu
+	# 13.8 m). Se construiesc DUPA teren, fiindca talpa lor se coase pe
+	# suprafata LUI.
+	var faces := CliffFace.build_all(self, _sampler,
+		Callable(self, "_terrain_mesh_y"))
+	add_child(faces)
+	_decor_roots.append(faces)
 	# Decorul primeste amprentele falezelor deja asezate. De asta ordinea celor
 	# doua apeluri nu mai e doar o conventie: falezele TREBUIE construite intai.
 	# Nuanta de roca a lumii, INAINTE de build: se aplica pe fiecare stanca la

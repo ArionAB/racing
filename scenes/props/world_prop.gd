@@ -337,6 +337,7 @@ func _ready() -> void:
 	_retint_tuff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
+	_fade_tuff_detail()
 	_apply_glow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
@@ -551,6 +552,43 @@ func _build_collision() -> void:
 ## Lucreaza pe o COPIE a mesh-ului (`ArrayMesh` nou), nu pe resursa incarcata:
 ## un `.glb` e partajat intre toate instantele si intre piste, deci scrisul in el
 ## ar fi vopsit si ce nu trebuie, iar in editor s-ar fi salvat in import.
+## Trece kitul de tuf pe materialul cu pete care SE STING CU DISTANTA.
+##
+## Runda 7, numit independent de amandoi criticii: pe hornuri petele au aceeasi
+## marime si acelasi contrast de la 3 m la 90 m. Pe carosabil si pe teren
+## stingerea exista din runda 6 (shadere proprii); prop-urile ramasesera pe
+## `world_material`, care e StandardMaterial3D si nu poate stinge UN STRAT —
+## `distance_fade` de acolo stinge obiectul intreg.
+##
+## Ruleaza DUPA `_apply_model_classes` ca sa aiba ultimul cuvant, dar sare
+## peste orice parte care si-a primit deja o clasa proprie (palaria pe clasa
+## de roca, accentele rupte): alea au material din alt motiv, si nu au voie
+## sa-l piarda aici.
+##
+## Costa UN material pe toata pista, nu unul per horn — vezi
+## `Palette.faded_detail_material`. Verificat cu tools/probe_decor.gd.
+func _fade_tuff_detail() -> void:
+	var mat := Palette.faded_detail_material()
+	var world := Palette.world_material()
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if not TUFF_UV_MODELS.has(model.scene_file_path.get_file().get_basename()):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null:
+				continue
+			# Doar piesele ramase pe materialul LUMII: o parte care si-a luat
+			# deja o clasa (tri:, glow:, finish:) o pastreaza.
+			if mi.material_override == world:
+				mi.material_override = mat
+
+
 func _retint_tuff() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)

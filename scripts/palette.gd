@@ -186,6 +186,10 @@ static func set_detail_texture(path: String) -> void:
 	_detail_path = want
 	if _shared != null:
 		_shared.detail_albedo = load(_detail_path)
+	# Si varianta cu stingere pe distanta, din acelasi motiv: altfel o pista
+	# incarcata dupa alta ar pastra detaliul precedentei pe prop-uri.
+	if _faded_detail != null:
+		_faded_detail.set_shader_parameter("detail_tex", load(_detail_path))
 
 ## Materialul comun al lumii. Vertex color = AO copt, inmultit peste atlas.
 ##
@@ -1030,8 +1034,58 @@ static func lava_material() -> ShaderMaterial:
 ## Un singur nume azi; e o functie ca sa existe UN loc unde se adauga al doilea,
 ## nu un `if` strecurat in dispatcher.
 static func shader_material(name: String) -> ShaderMaterial:
+	if name == "faded_detail":
+		return faded_detail_material()
 	assert(name == "lava", "shader necunoscut: " + name)
 	return lava_material()
+
+
+## Materialul lumii, dar cu stratul de pete care SE STINGE CU DISTANTA.
+##
+## Runda 6 a stins pestritul pe carosabil si pe teren; prop-urile au ramas pe
+## `world_material`, care e StandardMaterial3D. Runda 7, amandoi criticii,
+## despre hornuri: aceeasi marime si acelasi contrast al petelor de la 3 m la
+## 90 m. Nu e o impresie — se vede pe captura, conul din marginea cadrului si
+## cel de la 90 m poarta caneluri identice.
+##
+## De ce nu se putea repara pe materialul existent: `distance_fade` din
+## StandardMaterial3D stinge OBIECTUL (alfa), nu un strat, iar mipmap-urile
+## netezesc tiparul fara sa-i scada contrastul — la incidenta razanta
+## selectorul de mip ramane pe nivelele ascutite (nota lunga din
+## terrain_splat.gdshader).
+##
+## Shaderul reproduce exact ce facea materialul comun (atlas pe UV1, vertex
+## color ca AO, detaliu triplanar prin masca de slot) si adauga stingerea spre
+## 1.0 — identitatea inmultirii — intre `detail_near_m` si `detail_far_m`.
+##
+## UN material pentru toate piesele care il cer, ca la `lava_material`: garda
+## numara materialele, deci o padure intreaga de hornuri aduce +1, nu +41.
+static var _faded_detail: ShaderMaterial
+
+static func faded_detail_material() -> ShaderMaterial:
+	if _faded_detail != null:
+		return _faded_detail
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/prop_detail_fade.gdshader")
+	# Aceleasi obiecte de textura ca `world_material`: nimic nu se dubleaza in
+	# memoria GPU.
+	mat.set_shader_parameter("albedo_atlas", load(ATLAS_PATH))
+	mat.set_shader_parameter("detail_tex", load(_detail_path))
+	mat.set_shader_parameter("detail_mask_tex", load(DETAIL_MASK_PATH))
+	mat.set_shader_parameter("detail_scale", DETAIL_SCALE)
+	# Fereastra de stingere e MAI SCURTA decat pe teren (26->130 m). Nu din
+	# gust: terenul se vede razant si se intinde pana in ceata, deci are nevoie
+	# de o tranzitie lunga ca sa nu apara un inel. Un horn e un obiect cu
+	# silueta, pe care il vezi intre 3 si 90 m, si tocmai intervalul ala trebuie
+	# sa arate diferenta. Masurat pe captura de la frac 0.045, deviatia de
+	# luminanta in corpul unui con, departe/aproape:
+	#   world_material (fara stingere)  1.01  — identic la 8 m si la 70 m
+	#   26 -> 130 m                     0.94
+	#   14 ->  70 m                     vezi commit
+	mat.set_shader_parameter("detail_near_m", 14.0)
+	mat.set_shader_parameter("detail_far_m", 70.0)
+	_faded_detail = mat
+	return mat
 
 
 static func lava_material_phased(phase: float, flow: float = -1.0) -> ShaderMaterial:

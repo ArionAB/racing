@@ -61,6 +61,29 @@ AO_FACADE = dict(samples=26, dist=5.0, gradient="vertical",
 TUFF = CORAL_SAND          # crem de tuf in soare — dominanta pistei
 TUFF_MID = SAND_MID        # tuf mediu, banda de variatie de valoare
 TUFF_SH = SAND_SHADOW      # tuf umbrit, la baza si sub consola palariei
+# POALA ROSIE a hornului — singura separare de nuanta din cadru.
+#
+# Al patrulea punct al criticii oarbe: "B is monochrome tan. Rock, ground,
+# distance and haze are all the same yellow-beige. Zero cream-vs-red
+# separation." Masurat pe captura, si cifra confirma ochiul: peretele si solul
+# dadeau saturatie 0.589 vs 0.580 si nuanta 37° vs 32° — practic acelasi corp.
+#
+# Prima incercare a fost un MAL de canion din cliff_band_module, adica rosul de
+# la referinta pus intr-un obiect separat. A picat de doua ori la captura: in
+# rand continuu citea gard de caramida pana la orizont, iar in pinteni scurti
+# devenea zid de blocuri care umple cadrul si taie drumul. Modulul e autorat ca
+# buza de canion vazuta DE SUS (brief §5.1), nu ca perete langa care treci la 2 m.
+#
+# Rosul trebuie sa fie pe silueta care oricum e in cadru, nu langa ea. Valea
+# Rosie chiar asa arata: tuful crem sta pe o poala de ocru-rosu, iar linia
+# dintre ele e la o treime de inaltime. Costa ZERO — slotul inlocuieste doar
+# `TUFF_SH` la baza, pe fetele care existau deja.
+# LARCH_RUST (#A8683A), nu TILE_TERRACOTTA (#C4784F): terracotta e slot de
+# OLANE, autorat pentru acoperisuri, si la 0.30 din inaltime a iesit portocaliu
+# de con de santier — captura a aratat o baie de vopsea, nu geologie. Rugina e
+# aceeasi familie de nuanta, dar mai inchisa si mai putin saturata, deci separa
+# de crem fara sa sara din paleta.
+TUFF_FOOT = LARCH_RUST
 CAP = VOLCANIC_BLACK       # palaria de bazalt
 BAND_RED = TILE_TERRACOTTA  # banda lata rosie (Valea Rosie)
 BAND_RUST = LARCH_RUST     # banda ingusta ruginie
@@ -312,9 +335,10 @@ def build_chimney(variant):
     # verticale marginea se rupe si mai bine: pragul cade pe fete aflate la
     # raze diferite, deci nu mai exista un inel de fete la aceeasi cota pe
     # care sa se aseze o dunga.
-    b.retag(faces, TUFF_SH,
-            where=lambda c, n, h=H: c.z < h * (0.15 + 0.055 * math.sin(
-                math.atan2(c.y, c.x) * 3.0)))
+    b.retag(faces, TUFF_FOOT,
+            where=lambda c, n, h=H: c.z < h * (0.17 + 0.055 * math.sin(
+                math.atan2(c.y, c.x) * 3.0)
+                + 0.035 * math.sin(math.atan2(c.y, c.x) * 7.0 + 1.1)))
 
     # varful conului DUPA inclinare: palaria trebuie sa stea PE el
     basalt_cap(b, H, R_NECK, R_NECK * 1.30, CAP_T, seed=SEED, tilt=TILT,
@@ -359,9 +383,10 @@ def build_chimney_mushroom():
     # aceleasi doua motive ca la `build_chimney`: fara banda de mijloc, si
     # praful de la baza taiat pe o cota neregulata (ciuperca e cea mai numeroasa
     # piesa de langa banda, deci dungile ei se vedeau cel mai des)
-    b.retag(faces, TUFF_SH,
-            where=lambda c, n, h=H: c.z < h * (0.14 + 0.050 * math.sin(
-                math.atan2(c.y, c.x) * 3.0 + 0.9)))
+    b.retag(faces, TUFF_FOOT,
+            where=lambda c, n, h=H: c.z < h * (0.15 + 0.050 * math.sin(
+                math.atan2(c.y, c.x) * 3.0 + 0.9)
+                + 0.032 * math.sin(math.atan2(c.y, c.x) * 7.0 + 2.3)))
     # palaria enorma sta pe varful DEPLASAT si e inclinata mai tare decat la
     # restul familiei: consola larga inclinata e chiar silueta din Pasabag
     basalt_cap(b, H, R_NECK * 0.80, R_NECK * 3.10, 1.55, seed=103, segments=10,
@@ -398,7 +423,14 @@ def build_chimney_triple():
         faces = tuff_body(b, prof, TUFF, seed, segments=11,
                           origin=(x, y, base_z), lean=lean, flute=0.16,
                           twist=0.12 if seed % 2 else -0.11)
-        _ = faces
+        # poala rosie si pe gaturile hornului triplu: piesa e cea mai vizibila
+        # din familie (trei siluete deodata), deci daca ei ii lipseste separarea
+        # de nuanta, lipseste din cadru.
+        b.retag(faces, TUFF_FOOT,
+                where=lambda c, n, bz=base_z, hh=h, px=x, py=y:
+                    c.z < bz + hh * (0.16 + 0.05 * math.sin(
+                        math.atan2(c.y - py, c.x - px) * 3.0)
+                        + 0.03 * math.sin(math.atan2(c.y - py, c.x - px) * 7.0)))
         if not cap:
             continue
         basalt_cap(b, base_z + h, rn, rn * 1.30, ct, seed=seed, segments=9,
@@ -467,9 +499,10 @@ def build_rock_church_facade():
     prof = _profile("tent", H, R_BASE, R_NECK, 601, steps=9)
     faces = tuff_body(b, prof, TUFF, 601, segments=13, flute=0.10)
     # idem pe fatada bisericii: e tot un con de tuf, langa drum
-    b.retag(faces, TUFF_SH,
-            where=lambda c, n, h=H: c.z < h * (0.13 + 0.045 * math.sin(
-                math.atan2(c.y, c.x) * 3.0 + 2.4)))
+    b.retag(faces, TUFF_FOOT,
+            where=lambda c, n, h=H: c.z < h * (0.14 + 0.045 * math.sin(
+                math.atan2(c.y, c.x) * 3.0 + 2.4)
+                + 0.030 * math.sin(math.atan2(c.y, c.x) * 7.0 + 0.4)))
     basalt_cap(b, H, R_NECK, R_NECK * 1.95, 1.45, seed=601, segments=10)
 
     y = R_BASE * 0.86

@@ -1612,6 +1612,14 @@ static func themes() -> Dictionary:
 			# siroire: santurile coboara CU apa. Vezi _detail_tuff() din
 			# tools/generate_palette_atlas.gd.
 			"detail_texture": "res://assets/textures/detail_tuff.png",
+			# ACOSTAMENT LAT: 3.1 m, nu minimul de 1.3. Vezi _shoulder_width —
+			# pe platoul plat umarul se calcula din caderea terenului, care e
+			# ~0, deci banda de praf ramanea o dunga si drumul se termina intr-o
+			# muchie de culoare. Cu 3.1 m exista o zona de tranzitie citibila
+			# intre carosabil si desert, si tot ea da si "camera" pe care o
+			# cerea critica: umarul e ingropat cu SHOULDER_SINK sub teren, deci
+			# marginea drumului coboara, nu se taie.
+			"shoulder_min_width": 3.1,
 			# TUF CREM, nu nisip de desert. SAND_MID (#D4994D) e ocru saturat —
 			# pe el hornurile ar fi iesit dune, adica exact "desert cu stanci",
 			# lucrul pe care brief-ul §0.1 il interzice explicit. CORAL_SAND
@@ -8342,11 +8350,20 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 	var base: Vector3 = baked[i]
 	var lat := _side_at(i) * side_sign
 	var max_tan := tan(deg_to_rad(SHOULDER_MAX_SLOPE_DEG))
-	var w := SHOULDER_WIDTH
+	# Latimea minima poate veni din tema. Formula de mai jos deriva umarul din
+	# CADEREA terenului de langa banda — corect cat timp drumul taie o panta,
+	# dar pe un platou plat (Cappadocia) caderea e ~0 si banda ramane la minimul
+	# de 1.3 m, adica invizibila. Criticul orb a citit exact asta: "a wide flat
+	# featureless apron ... no edge, no camber, no shoulder, nothing marking
+	# where road stops and desert starts". Nu e un bug de calcul: pe drumul de
+	# pamant din Cappadocia acostamentul de pietris CHIAR e lat, si atunci
+	# latimea e o proprietate a drumului, nu una dedusa din relief.
+	var w_min: float = float(theme_flag("shoulder_min_width", SHOULDER_WIDTH))
+	var w := w_min
 	for _pass in 2:
 		var p := base + lat * (width_at_index(i) + w)
 		var drop := base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK
-		w = clampf(drop / max_tan, SHOULDER_WIDTH, SHOULDER_MAX_WIDTH)
+		w = clampf(drop / max_tan, w_min, SHOULDER_MAX_WIDTH)
 	return w
 
 

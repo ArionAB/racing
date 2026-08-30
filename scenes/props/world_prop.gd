@@ -121,6 +121,16 @@ const PROP_COLLISION := {
 	# trotuarul din aleea de 6 m, adica la o roata distanta de linia de curs.
 	"porter": "none", "table_stools": "none", "steam_vent": "none",
 	"scooter": "none", "bicycle": "none",
+	# --- Cappadocia -------------------------------------------------------
+	# Plopii: aceeasi problema ca laricele — hull-ul unei coroane de 12 m e un
+	# con care te opreste in aer, la trei metri de trunchi.
+	"poplar_a": "trunk", "poplar_b": "trunk",
+	# Via si tufele: sub linia capotei, pe acostament. Un corp solid acolo ar
+	# transforma iesirea de pe banda in zid.
+	"vine_row": "none", "shrub_dry": "none",
+	# Molozul hornului cazut (0.98 m inaltime) e o dara de pietre pe nisip:
+	# hull-ul lui ar fi o lespede de 10 m pe care masina s-ar urca.
+	"cracked_chimney_c": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -308,6 +318,12 @@ const TUFF_UV_MODELS := [
 	"chimney_mushroom", "chimney_triple", "twin_chimney_gate",
 	"cave_house_a", "cave_house_b", "cave_house_c",
 	"dovecote", "rock_church_facade",
+	# Hornurile PRABUSITE si masa rosie: acelasi kit, aceleasi sloturi gresite
+	# in .glb (masurat: u 0.047..0.641, adica tot 1 si 2). Intrasera in scena
+	# abia la runda 6 — fara ele aici, un horn cazut ar fi fost singurul obiect
+	# portocaliu dintr-o padure crem.
+	"cracked_chimney_a", "cracked_chimney_b", "cracked_chimney_c",
+	"red_mesa",
 ]
 
 

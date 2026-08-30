@@ -2037,6 +2037,9 @@ var _terr_heights: PackedFloat32Array = PackedFloat32Array()
 ## draw call-uri, exact ce nu ne permitem pe mobil (CLAUDE.md, constrangeri 3D).
 ## Se goleste la fiecare rebuild(), ca schimbarea de tema sa nu lase gunoi.
 var _mat_cache: Dictionary = {}
+## Materialul drumului AFANAT (shader, nu StandardMaterial3D — vezi
+## `road_material`). Unul singur pe pista, cache-uit ca `_mat_cache`.
+var _loose_road_mat: ShaderMaterial = null
 
 # --- API pentru subclase ---
 
@@ -6259,7 +6262,17 @@ const ROAD_CROWN: float = 0.03
 ## trecerea mid->edge se intampla intr-o singura fasie si iese o dunga, nu
 ## un degrade. Costul: un inel de vertecsi in plus pe toata bucla, masurat
 ## sub 1% din pista.
-const ROAD_PROFILE: Array[float] = [-1.0, -0.85, -0.5, 0.0, 0.5, 0.85, 1.0]
+## Pozitiile transversale ale profilului soselei, in [-1, 1].
+##
+## Punctele de la +-0.34 si +-0.62 au fost adaugate in runda 6 pentru URMELE DE
+## CAUCIUC (vezi `_wear_shade`): un fagas are ~0.9 m latime pe o banda de 6 m,
+## adica 0.15 in unitati de profil. Cu vechea grila (0, +-0.5, +-0.85) fagasul
+## ar fi fost interpolat Gouraud intre doua puncte aflate la 0.35 unul de altul
+## si ar fi iesit un degrade lat pe toata jumatatea de banda, nu o urma. Aceeasi
+## lectie ca la benzile din vertex color (memoria `benzi-vertex-color-bisect`):
+## tenta se intinde pe toata fata, deci fata trebuie sa fie de latimea tentei.
+const ROAD_PROFILE: Array[float] = [-1.0, -0.85, -0.62, -0.5, -0.34, 0.0,
+	0.34, 0.5, 0.62, 0.85, 1.0]
 
 ## Culoarea asfaltului, INAINTE de compensarea trecerii macro. Racoroasa-inchisa
 ## ca masinile saturate sa "sara" din ecran (style_bible §1: asfaltul e cea mai
@@ -6345,6 +6358,90 @@ const WET_FADE: float = 0.015
 ## lasa deci mijlocul alb si trage marginile spre ocru: inchide albastrul mai
 ## mult decat rosul, ca marginea sa iasa calda, nu murdara.
 const DIRT_EDGE_SHADE: Color = Color(0.87, 0.78, 0.66)
+
+## --- UZURA DRUMULUI DE PAMANT ----------------------------------------------
+##
+## Cererea (3) a criticii, runda 6: drumul "are granulatie dar n-are UZURA: fara
+## banda centrala mai inchisa, fara urme de cauciuc, fara praf pe margini".
+##
+## De ce NU RoadWear (scenes/tracks/road_wear.gd): acela e o foaie de urme care
+## se ACUMULEAZA in timpul cursei, desenata de masini intr-un SubViewport, si e
+## legata de `road_surface == "snow"`. Rezolva alta problema — istoria cursei —
+## si nu poate rezolva asta: intr-o captura la fractia 0.10, la secunda zero,
+## foaia e goala. Ce lipseste in poza e uzura ISTORICA a drumului, care exista
+## inainte sa porneasca cineva motorul. Aia se coace in geometrie, nu se deseneaza
+## la rulare. (Foaia ramane utila si aici mai tarziu, peste asta.)
+##
+## Trei componente, toate functii de pozitia transversala `t` in [-1, 1]:
+##
+##   1. FAGASELE — doua urme la +-`WEAR_TRACK_POS`, unde calca rotile. Pe un drum
+##      de pamant sunt mai DESCHISE decat restul: praful fin e maturat si ramane
+##      pamantul batatorit, palid. (Pe asfalt ar fi invers — de aia se aplica
+##      doar pe `road_is_loose()`.)
+##   2. AXUL — banda dintre fagase, unde nu calca nimeni: acolo se aduna praf si
+##      pietris, deci e mai INCHISA si mai calda. Asta e "banda centrala mai
+##      inchisa" ceruta explicit.
+##   3. PRAFUL DE MARGINE — deja exista prin `DIRT_EDGE_SHADE`, dar pornea de la
+##      0.45 si urca lent; acum incepe de la 0.66, adica DUPA fagas, ca sa se
+##      citeasca drept acostament, nu drept sfarsit al benzii.
+##
+## Toate sunt INTUNECARI sau valori sub 1.0 aplicate ca vertex color, deci
+## respecta clamp-ul [0,1] (memoria `surfacetool-clamp-vertex-color`): albul cel
+## mai deschis din schema, fagasul, e chiar `Color.WHITE`, iar restul coboara.
+
+## Unde calca rotile, in unitati de profil. 0.48 pe o semilatime de 6 m = 2.9 m
+## intre fagase, adica ecartamentul unei masini de curse plus imprastierea
+## liniilor de curs.
+const WEAR_TRACK_POS: float = 0.48
+## Cat de lat e un fagas, in unitati de profil.
+const WEAR_TRACK_HALF: float = 0.15
+## Cat de palid iese pamantul batatorit din fagas (0 = neatins).
+##
+## MASURAT, nu ales: prima valoare (0.10) a dat pe mesh un interval de numai
+## 0.129 intre cel mai deschis si cel mai inchis vertex al soselei (sonda de
+## culori de vertex, 12125 vertecsi, 4 valori distincte). Pe un drum a carui
+## textura are ea insasi pete de +-0.15, un gradient de 0.13 e SUB zgomotul de
+## suprafata — codul rula, cifra iesea, si in poza nu era nimic. Exact capcana
+## din instructiunile rundei: sonda masoara o proprietate, imaginea judeca.
+##
+## 0.10 -> 0.16 pe fagas si 0.88 -> 0.74 pe ax duc intervalul la ~0.30, adica
+## peste amplitudinea petelor. Mai mult de atat ar fi citit ca marcaj pictat.
+const WEAR_TRACK_LIFT: float = 0.16
+## Cat de inchis e axul dintre fagase.
+const WEAR_CENTER_DARK: Color = Color(0.74, 0.66, 0.56)
+
+
+## Nuanta de UZURA pentru pozitia transversala `t`. Vezi blocul de mai sus.
+##
+## `base` e nuanta deja calculata (mijloc -> margine); functia o modifica, nu o
+## inlocuieste, ca gradientul de praf de la margine sa ramana.
+func _wear_shade(base: Color, t: float) -> Color:
+	if not road_is_loose():
+		return base
+	var a := absf(t)
+	# 1. Fagasul: o gaussiana in jurul lui WEAR_TRACK_POS.
+	var d := (a - WEAR_TRACK_POS) / WEAR_TRACK_HALF
+	var rut := exp(-d * d)
+	# 2. Axul: se stinge acolo unde incepe fagasul, ca sa nu se anuleze reciproc.
+	var mid := 1.0 - smoothstep(0.0, WEAR_TRACK_POS - WEAR_TRACK_HALF, a)
+	var c := base.lerp(WEAR_CENTER_DARK, mid * 0.85)
+	# FAGASUL SE OBTINE INTUNECAND RESTUL, nu luminand fagasul.
+	#
+	# Prima versiune aduna `lift` peste fagas si taia la 1.0 — si masurat pe mesh
+	# fix asta se intampla: la +-0.34, +-0.50 si +-0.62 suma trecea de 1.0 si toate
+	# TREI se taiau la alb. Fagasele nu ieseau doua urme, ci un PLATOU alb lat de
+	# la -0.62 la +0.62, adica exact drumul uniform pe care il reparam. Sonda
+	# arata 4 valori distincte pe 11 puncte de profil si aia era dovada.
+	#
+	# Vertex color poate doar sa INTUNECE (memoria `surfacetool-clamp-vertex-color`):
+	# deci partea NEcalcata coboara cu `WEAR_TRACK_LIFT`, iar fagasul ramane sus.
+	# Acelasi contrast, fara clamp, si urmele redevin doua.
+	var unworn := WEAR_TRACK_LIFT * (1.0 - rut)
+	return Color(
+		maxf(c.r - unworn, 0.0),
+		maxf(c.g - unworn, 0.0),
+		maxf(c.b - unworn, 0.0),
+		c.a)
 
 ## Culoarea drumului de ZAPADA BATATORITA (road_surface == "snow"), inainte de
 ## compensarea trecerii macro. Sub albul zapezii proaspete din paleta
@@ -6458,6 +6555,16 @@ func _build_road() -> void:
 		mid_shade = SNOW_MID_SHADE
 	elif road_is_loose():
 		edge_shade = DIRT_EDGE_SHADE
+	# Nuanta drumului afanat, impartita la media macro-ului ca a doua trecere de
+	# textura sa n-o intunece — aceeasi compensare pe care o facea `road_material`
+	# cand culoarea statea in material.
+	var _loose_road_tint := Color.WHITE
+	if road_is_loose():
+		var drc := dirt_road_color()
+		_loose_road_tint = Color(
+			minf(drc.r / SAND_MACRO_MEAN, 1.0),
+			minf(drc.g / SAND_MACRO_MEAN, 1.0),
+			minf(drc.b / SAND_MACRO_MEAN, 1.0))
 	# Peticele de zapada de pe asfalt (vezi "road_snow_low" in themes()). Null pe
 	# orice tema fara munte, deci restul pistelor nu se schimba cu un pixel.
 	var snow_tint: Variant = theme_flag("road_snow_tint", null)
@@ -6534,8 +6641,29 @@ func _build_road() -> void:
 		for k in ROAD_PROFILE.size() - 1:
 			var ta: float = ROAD_PROFILE[k]
 			var tb: float = ROAD_PROFILE[k + 1]
-			var ca := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(ta)))
-			var cb := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(tb)))
+			# Praful de margine incepe mai tarziu pe pamant (0.66 in loc de
+			# 0.45): intre fagas si acostament trebuie sa ramana drum curat,
+			# altfel banda de rulare se termina direct in praf si drumul se
+			# ingusteaza optic.
+			var edge_lo := 0.66 if road_is_loose() else 0.45
+			var ca := _wear_shade(
+				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(ta))),
+				ta)
+			var cb := _wear_shade(
+				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(tb))),
+				tb)
+			# Pe drumul AFANAT culoarea nu mai vine din material: shader-ul de
+			# teren (vezi `road_material`) n-are `albedo_color`, deci nuanta
+			# drumului se inmulteste AICI, in vertex color. Se compune peste
+			# uzura, adica exact ordinea de dinainte — materialul inmultea si el
+			# peste nuanta de profil.
+			#
+			# Se incadreaza in clamp-ul [0,1] prin constructie: tenta temei e
+			# #D3CBBD (0.83, 0.80, 0.74), toate sub 1. O tema care ar cere un
+			# drum mai deschis decat alb ar trebui sa ridice textura, nu asta.
+			if road_is_loose():
+				ca *= _loose_road_tint
+				cb *= _loose_road_tint
 			# UV-ul urmareste latimea LOCALA, ca dala sa ramana patrata si acolo
 			# unde drumul se ingusteaza — altfel textura s-ar intinde in strangere.
 			var ua := ta * (hw0 / tile)
@@ -8212,6 +8340,38 @@ func road_material() -> Material:
 		macro = "res://assets/textures/surface_sand_macro.png"
 		rough = 1.0
 		spec = 0.0
+	# DRUMUL DE PAMANT trece pe shader-ul terenului, ca sa capete ATENUAREA
+	# petelor cu distanta. Runda 6, cererea (4): dala "nu se atenueaza cu
+	# distanta si e aceeasi pe nisip, pe drum si pe acostament".
+	#
+	# Nisipul de langa drum o primise deja (terrain_splat ruleaza acolo), dar
+	# soseaua e StandardMaterial3D — si StandardMaterial3D nu are cum: nu exista
+	# knob de "slabeste detaliul cu distanta", iar `distance_fade` stinge
+	# OBIECTUL, nu stratul. Rezultatul, vazut in captura de dupa prima reparatie:
+	# nisipul se linistea spre orizont si drumul ramanea la fel de patat pana in
+	# punctul de fuga, deci defectul se muta, nu disparea — si iesea si o
+	# NEPOTRIVIRE intre doua suprafete care inainte macar se potriveau.
+	#
+	# Acelasi shader, deci ZERO materiale in plus la numaratoare pe axa care
+	# conteaza (`probe_decor` numara materiale distincte; asta e unul singur,
+	# partajat de toate segmentele de sosea). Perechea "iarba" primeste tot
+	# texturile de nisip: `COLOR.a` e 0 pe sosea, deci a doua pereche nu e
+	# niciodata amestecata — exista doar fiindca shader-ul cere patru uniforme.
+	if road_is_loose():
+		if _loose_road_mat == null:
+			var sm := ShaderMaterial.new()
+			sm.shader = load("res://assets/shaders/terrain_splat.gdshader")
+			var mt := _tex(micro)
+			var mc := _tex(macro)
+			sm.set_shader_parameter("sand_micro", mt)
+			sm.set_shader_parameter("sand_macro", mc)
+			sm.set_shader_parameter("grass_micro", mt)
+			sm.set_shader_parameter("grass_macro", mc)
+			# Culoarea nu mai vine din `albedo_color` (shader-ul n-are asa ceva),
+			# ci se INMULTESTE in vertex color. Vertecsii soselei poarta deja
+			# nuanta de uzura, deci se compune acolo — vezi `_road_tint`.
+			_loose_road_mat = sm
+		return _loose_road_mat
 	return _flat_material(color, _tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, _tex(macro))
 

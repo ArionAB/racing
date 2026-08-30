@@ -283,6 +283,10 @@ extends Marker3D
 ## Vezi `_cut_column`: fara stingere peretele incepe cu o muchie verticala in
 ## aer. 0.18 inseamna ca primii si ultimii ~18% urca din nimic pana la cota.
 @export var cut_taper_frac: float = 0.18
+## Cat se retrage lateral capatul stins al taieturii, spre interiorul malului.
+##
+## Vezi `_cut_column`: fara retragere capatul ramane o pana detasata in nisip.
+@export var cut_tuck_m: float = 9.0
 
 
 ## Toate falezele declarate ca noduri, construite intr-un singur nod-parinte.
@@ -416,7 +420,16 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 	var edge: float = minf(f - frac_start, frac_end - f)
 	var span_f: float = maxf(frac_end - frac_start, 1e-5)
 	var taper: float = clampf(edge / maxf(cut_taper_frac * span_f, 1e-5), 0.0, 1.0)
-	rise *= smoothstep(0.0, 1.0, taper)
+	taper = smoothstep(0.0, 1.0, taper)
+	rise *= taper
+	# La capete peretele se RETRAGE si lateral, nu doar in inaltime.
+	#
+	# Cu stingerea doar pe verticala, capatul ramanea la acelasi rulaj de 8.2 m
+	# in timp ce inaltimea scadea: iesea o pana rosie DETASATA de versant, cu
+	# nisip vizibil intre ea si deal (vazut in captura la frac 0.245). O
+	# taietura care se stinge intra inapoi in mal, deci talpa pleaca spre teren
+	# pe masura ce fata scade.
+	var tuck: float = (1.0 - taper) * cut_tuck_m
 	# Sub 2 m nu e taietura, e prag: acolo nu exista masiv de taiat.
 	if rise < 2.0:
 		return []
@@ -428,7 +441,7 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		# Retragerea: coama sta mai in spate decat talpa (taietura e batuta usor
 		# in spate, ca orice sapatura care nu se surpa).
 		var back := cut_batter_m * (1.0 - t)
-		var q: Vector3 = p + sd * (cut_offset_m + back)
+		var q: Vector3 = p + sd * (cut_offset_m + back + tuck)
 		out.append(Vector3(q.x, y, q.z))
 	return out
 

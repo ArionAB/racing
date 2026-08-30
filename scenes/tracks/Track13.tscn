@@ -114,8 +114,8 @@ brow_slots = Array[int]([19, 23, 10])
 
 [node name="TaieturaInterioara" type="Marker3D" parent="Faleze"]
 script = ExtResource("15_cliffface")
-frac_start = 0.238
-frac_end = 0.345
+frac_start = 0.200
+frac_end = 0.392
 side = 1.0
 far_wall = false
 cut_wall = true

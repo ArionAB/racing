@@ -222,6 +222,18 @@ var _scarps: Array[int] = []
 ## rapa se masoara de la cota drumului si, pe o coborare de 30 m, capatul de
 ## jos iesea sub apa: lac direct sub buza. Vezi _carve_ravines.
 var _floors: Dictionary = {}
+## LATIMEA unei rape, in metri de la buza (indice de rapa -> metri). Fara ea,
+## saparea se intinde lateral la infinit: `lat` satureaza la RAVINE_RIM metri
+## dincolo de buza si ramane 1 pana la marginea hartii, iar `_smin` nu poate
+## decat sa coboare. Consecinta masurata pe cornisa Cappadociei (ProbeValley):
+## fundul statea la 14 m pe 200 m de raza, o masa perfect plata, si CELE TREI
+## noduri de mal opus n-aveau niciun efect — rapa le stergea. O faleza fara mal
+## de dincolo citeste ca bordura de sant, fiindca ochiul n-are cu ce compara
+## adancimea: un canion are DOI pereti.
+##
+## Cu latimea data, saparea se stinge dupa atatia metri si terenul de dincolo
+## (varfuri, dune) redevine liber sa urce.
+var _ravine_widths: Dictionary = {}
 ## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
 ## padure); > 0 = fund de mare (insula). Vezi ground_y.
 var _far_drop: float = 0.0
@@ -302,10 +314,13 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		floors: Array[Vector2] = [],
 		hollows: Array[Vector4] = [],
 		hollow_walls: PackedFloat32Array = PackedFloat32Array(),
-		scarps: Array[int] = []) -> void:
+		scarps: Array[int] = [],
+		ravine_widths: Array[Vector2] = []) -> void:
 	_baked = baked
 	for fl in floors:
 		_floors[int(fl.x)] = fl.y
+	for rw in ravine_widths:
+		_ravine_widths[int(rw.x)] = rw.y
 	_dists = dists
 	_half_width = half_width
 	_widths = widths
@@ -941,6 +956,16 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 			rim = RAVINE_VIADUCT_RIM
 		var lat := smoothstep(0.0, 1.0,
 			clampf((dist - half_width_at(near_i) - inner) / rim, 0.0, 1.0))
+		if _ravine_widths.has(ri):
+			# MALUL DE DINCOLO: saparea se stinge dupa latimea ceruta, ca
+			# terenul de peste vale sa poata urca inapoi. Racordul se ia egal
+			# cu latimea peretelui (`rim`), ca fundul sa nu se termine cu o
+			# treapta — un mal care sare vertical din fund arata ca un zid de
+			# piscina, nu ca versantul opus.
+			var w := float(_ravine_widths[ri])
+			var edge := half_width_at(near_i) + inner + w
+			lat *= 1.0 - smoothstep(0.0, 1.0,
+				clampf((dist - edge) / maxf(rim, 1.0), 0.0, 1.0))
 		var target := road_level - r.z * along * lat
 		if _floors.has(ri):
 			# Podeaua e absoluta, nu relativa la drum: cheiul sta la aceeasi

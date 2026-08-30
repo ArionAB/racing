@@ -33,6 +33,7 @@ custom_ravines = Array[Vector4]([Vector4(0.175, 0.40, 30, 1), Vector4(0.42, 0.55
 custom_cornice_ravines = Array[int]([0, 1])
 custom_scarp_ravines = Array[int]([0])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 14.0), Vector2(1, 12.0)])
+custom_ravine_widths = Array[Vector2]([Vector2(0, 95.0), Vector2(1, 70.0)])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.769, 0.962)])
 custom_width_segments = Array[Vector3]([Vector3(0.962, 0.04, 9.0), Vector3(0.04, 0.16, 6.5), Vector3(0.175, 0.40, 7.0), Vector3(0.42, 0.55, 6.5), Vector3(0.57, 0.70, 8.0), Vector3(0.70, 0.765, 7.0), Vector3(0.765, 0.962, 6.0)])
 custom_rail_segments = Array[Vector4]([Vector4(0.175, 0.40, 1, 1)])

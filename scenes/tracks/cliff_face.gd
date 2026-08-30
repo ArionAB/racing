@@ -199,6 +199,16 @@ extends Marker3D
 ## prezenta o fata unei camere indreptate pe drum". Malul opus sta TRANSVERSAL
 ## pe privire, deci se vede in plin — si e chiar compozitia referintei.
 @export var far_bank: bool = false
+## Cat de sus sta ochiul soferului fata de asfalt (metri). Nu se alege: e
+## inaltimea camerei de urmarire, si serveste la a ridica malul pana la linia
+## privirii — vezi `far_over_eye_m`.
+@export var far_eye_rise_m: float = 6.0
+## Cu cati metri trece coama malului PESTE linia ochiului.
+##
+## Peste 0 inseamna ca masa taie orizontul, deci se citeste ca perete de vale si
+## nu ca dungă la baza cerului. Masurat: cu coama pe creasta terenului (sub ochi
+## cu 28 de grade) malul dadea 0.00% din cadru.
+@export var far_over_eye_m: float = 12.0
 ## Cat urca coama pintenului fata de cota soselei.
 ##
 ## Pozitiv = peste drum. Se tine mic: peste ~3 m ar face un zid care ascunde
@@ -431,24 +441,40 @@ func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		# asezata pe malul opus umple partea dreapta a cadrului asa cum o face
 		# referinta, cu valea intre ea si privitor.
 		#
-		# Rulajul NU se ia din `far_offset_m`: masurat cu ProbeBank, creasta
-		# malului sta la 60 m pe o fractie si la 110 m pe alta, fiindca valea nu
-		# are latime constanta. Un offset fix nimereste malul intr-un punct si
-		# fundul in rest, si atunci masa fie dispare (culeasa de pragul de mai
-		# jos), fie se lipeste de buza — chiar defectul din prima incercare. Deci
-		# creasta se CAUTA, iar `far_offset_m` ramane doar limita de cautare.
+		# Rulajul e FIX, si asta e o corectie platita cu o incercare.
+		#
+		# Varianta dinainte cauta creasta terenului la fiecare pas, fiindca
+		# ProbeBank aratase ca malul sta la 60 m pe o fractie si la 110 m pe
+		# alta. Cautarea gasea insa si zgomotul dunelor: offsetul sarea 37 ->
+		# 109 -> 37 -> 49 -> 163 m intre coloane vecine, iar panza iesea o
+		# panglica sifonata in zig-zag, nu un perete. Se vede in ansamblul de
+		# sus, si explica de ce ridicarea coamei n-a schimbat nimic in pixeli:
+		# coloane care se departeaza una de alta nu formeaza suprafata, ci
+		# fatete rasucite care se vad pe muchie.
+		#
+		# Un mal de vale e o LINIE, deci se cere ca linie: rulaj constant, si
+		# cota luata din cea mai inalta valoare pe o fereastra scurta in jurul
+		# lui, ca sa urmeze relieful fara sa sara dupa fiecare dună.
 		var crest_y := -1e9
-		var crest_off := far_offset_m
-		var probe := far_offset_m * 0.35
-		while probe <= far_offset_m * 1.6:
-			var q := p + sd * probe
-			var qy: float = surface_y.call(q.x, q.z)
-			if qy > crest_y:
-				crest_y = qy
-				crest_off = probe
+		var probe := -12.0
+		while probe <= 12.0:
+			var q := p + sd * (far_offset_m + probe)
+			crest_y = maxf(crest_y, surface_y.call(q.x, q.z))
 			probe += 6.0
-		base = p + sd * crest_off
+		base = p + sd * far_offset_m
 		top_y = crest_y + far_rise_m
+		# INALTIMEA nu e de gust, se DERIVA din linia privirii.
+		#
+		# Masurat cu ProbeBank: cu coama pe creasta terenului, malul sta la -28
+		# grade sub ochi la fractia 0.22, si ProbePixBank confirma consecinta —
+		# 0.00% din cadru. O masa care nu urca pana la linia ochiului nu intra in
+		# poza, oricat de lata ar fi (AABB-ul ei masura 370 m).
+		#
+		# Deci coama se ridica pana cel putin la cota ochiului, plus marja: asa
+		# masa taie orizontul in loc sa stea sub el, si valea ramane intre ea si
+		# privitor — compozitia referintei.
+		var eye_y := p.y + far_eye_rise_m
+		top_y = maxf(top_y, eye_y + far_over_eye_m)
 		# Talpa se cauta INSPRE vale, ca fata sa aiba de unde urca din fund.
 		var toe := base - sd * far_depth_m
 		floor_y = minf(surface_y.call(base.x, base.z),
@@ -486,20 +512,19 @@ func _far_cap(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array
 	var floor_y: float = surface_y.call(base.x, base.z)
 	var top_y := p.y + far_rise_m
 	if far_bank:
-		# Aceeasi cautare de creasta ca in `_far_column`: coama trebuie sa plece
-		# din acelasi punct ca fata, altfel se despart.
+		# Aceeasi linie ca in `_far_column`: acelasi rulaj fix, aceeasi fereastra
+		# de cota. Coama trebuie sa plece din acelasi punct ca fata, altfel se
+		# despart.
 		var crest_y := -1e9
-		var crest_off := far_offset_m
-		var probe := far_offset_m * 0.35
-		while probe <= far_offset_m * 1.6:
-			var q := p + sd * probe
-			var qy: float = surface_y.call(q.x, q.z)
-			if qy > crest_y:
-				crest_y = qy
-				crest_off = probe
+		var probe := -12.0
+		while probe <= 12.0:
+			var q := p + sd * (far_offset_m + probe)
+			crest_y = maxf(crest_y, surface_y.call(q.x, q.z))
 			probe += 6.0
-		base = p + sd * crest_off
+		base = p + sd * far_offset_m
 		top_y = crest_y + far_rise_m
+		var eye_y := p.y + far_eye_rise_m
+		top_y = maxf(top_y, eye_y + far_over_eye_m)
 		floor_y = surface_y.call(base.x, base.z)
 	if floor_y > top_y - 3.0:
 		return []

@@ -1,13 +1,11 @@
 extends Node
-## UNDE se termina taietura, si CUM.
+## Silueta REALA a taieturii: se citeste din mesh-ul construit, nu se recalculeaza.
 ##
-## In captura peretele se opreste la mijlocul cadrului cu o muchie verticala in
-## aer, in loc sa intre in teren. Cauza posibila: `rise` cade sub pragul de 2 m
-## brusc (coloana se intoarce goala dintr-un pas in altul), deci panza se taie
-## drept in loc sa coboare.
-##
-## Se tipareste `rise` pe fiecare pas al taieturii, ca sa se vada daca scade
-## lin sau cade in gol.
+## Prima versiune isi facea propria copie a formulei de creasta si a ramas sa
+## raporteze cifrele VECHI dupa ce logica din CliffFace s-a schimbat — o sonda
+## care masoara altceva decat ce se randeaza. Acum ia mesh-ul „Taietura ..." si
+## masoara inaltimea lui pe felii, plus distanta pe orizontala pana la terenul
+## din spate (ca sa prinda cazul „lespede detasata in nisip").
 const TRACK_SCENE: String = "res://scenes/tracks/Track13.tscn"
 
 
@@ -16,32 +14,58 @@ func _ready() -> void:
 	add_child(t)
 	await get_tree().process_frame
 	await get_tree().physics_frame
-	var s: TrackSideSampler = t.get("_sampler")
-	var n := s.point_count()
+	var mi := _find(t)
+	if mi == null:
+		print("NU EXISTA mesh de taietura — ce exista sub CliffFaces:")
+		_dump(t, 0)
+		get_tree().quit()
+		return
+	var aabb := mi.get_aabb()
+	print("mesh %s: marime=(%.1f, %.1f, %.1f)" % [mi.name, aabb.size.x, aabb.size.y, aabb.size.z])
+	var verts := (mi.mesh as ArrayMesh).surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	print("vertecsi: %d" % verts.size())
+	# Inaltimea panzei pe felii de-a lungul axei lungi.
+	var axis := 0 if aabb.size.x >= aabb.size.z else 2
+	var lo: float = aabb.position[axis]
+	var hi: float = lo + aabb.size[axis]
 	var space := get_viewport().world_3d.direct_space_state
-	var off := 8.2
-	for k in 30:
-		var f: float = 0.238 + (0.345 - 0.238) * float(k) / 29.0
-		var i := int(round(f * float(n))) % n
-		var p := s.baked_point(i)
-		var sd := s.side_at(i) * -1.0
-		var foot := p + sd * off
-		var fy := _ground(space, foot, p.y)
-		fy = minf(fy, p.y) - 1.2
-		var crest := -1e9
-		var probe := 4.0
-		while probe <= 22.0:
-			var q := foot + sd * probe
-			crest = maxf(crest, _ground(space, q, p.y))
-			probe += 6.0
-		var rise: float = minf(crest - fy, 18.0)
-		print("frac %.3f  talpa %6.1f  creasta %6.1f  rise %6.1f  %s" % [
-			f, fy, crest, rise, "GOL" if rise < 2.0 else ""])
+	for k in 14:
+		var a := lo + (hi - lo) * float(k) / 14.0
+		var b := lo + (hi - lo) * float(k + 1) / 14.0
+		var ymin := 1e9
+		var ymax := -1e9
+		var cx := 0.0
+		var cz := 0.0
+		var cnt := 0
+		for v in verts:
+			var g: Vector3 = mi.global_transform * v
+			if g[axis] < a or g[axis] >= b:
+				continue
+			ymin = minf(ymin, g.y)
+			ymax = maxf(ymax, g.y)
+			cx += g.x
+			cz += g.z
+			cnt += 1
+		if cnt == 0:
+			print("  felie %2d: goala" % k)
+			continue
+		print("  felie %2d: inaltime %5.1f m  (%d vertecsi)" % [k, ymax - ymin, cnt])
 	get_tree().quit()
 
 
-func _ground(space: PhysicsDirectSpaceState3D, q: Vector3, ry: float) -> float:
-	var pr := PhysicsRayQueryParameters3D.create(
-		Vector3(q.x, ry + 300.0, q.z), Vector3(q.x, ry - 400.0, q.z))
-	var hit := space.intersect_ray(pr)
-	return (hit["position"] as Vector3).y if not hit.is_empty() else ry
+func _dump(n: Node, d: int) -> void:
+	for c in n.get_children():
+		var nm := String(c.name)
+		if nm.contains("Faleza") or nm.contains("Cliff") or nm.contains("Taietura"):
+			print("   %s%s (%s)" % ["  ".repeat(d), nm, c.get_class()])
+		_dump(c, d + 1)
+
+
+func _find(n: Node) -> MeshInstance3D:
+	if n is MeshInstance3D and String(n.name).begins_with("Taietura"):
+		return n as MeshInstance3D
+	for c in n.get_children():
+		var m := _find(c)
+		if m != null:
+			return m
+	return null

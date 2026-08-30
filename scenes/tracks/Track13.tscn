@@ -95,6 +95,21 @@ far_rise_m = 1.2
 band_slots = Array[int]([23, 10, 27, 23, 10, 27, 4, 2])
 cap_slots = Array[int]([23, 10, 23, 27])
 
+[node name="TaieturaInterioara" type="Marker3D" parent="Faleze"]
+script = ExtResource("15_cliffface")
+frac_start = 0.238
+frac_end = 0.345
+side = 1.0
+far_wall = false
+cut_wall = true
+cut_offset_m = 8.2
+cut_height_m = 18.0
+cut_batter_m = 2.5
+cut_step_m = 4.0
+cut_bands = 7
+cut_foot_bite_m = 1.2
+cut_taper_frac = 0.18
+
 [node name="Peaks" type="Node3D" parent="."]
 
 [node name="MasivulDeTuf" type="Marker3D" parent="Peaks"]

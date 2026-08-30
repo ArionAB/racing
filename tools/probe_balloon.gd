@@ -31,8 +31,9 @@ extends Node
 ##        soseste sus deasupra tarusului — care sta dincolo de faleza in panta.
 ##  (vii) INCAPE masina pe cos? Cifra e AMPATAMENTUL (patru raycast-uri din
 ##        colturi), nu lungimea colizerului. Brief §5 cere 2 x 2 m.
-##  (viii) E LIBER culoarul de urcare? Faleza unei cornise se apleaca peste
-##        vale, deci coloana de deasupra tarusului nu e goala.
+##  (viii) E LIBER culoarul de urcare de pe FUNDUL VAII (amplasarea ceruta de
+##        brief §2 POI C)? Faleza unei cornise se apleaca peste vale, deci
+##        coloana de deasupra acelui tarus nu e goala.
 ##
 ## (vi) si (viii) sunt ROSII deliberat: ele spun ce trebuie sa faca Track13 cu
 ## geometria cornisei inainte ca hazardul asta sa poata fi pus pe ea.
@@ -108,6 +109,11 @@ var _anchor_xz := Vector2.ZERO
 var _lane_i: int = 0
 ## Cat de departe de axul benzii a trebuit sa se aseze tarusul (verdictul vi).
 var _pick_offset: float = 0.0
+## Unde ar sta tarusul dupa BRIEF: primul punct in care terenul e deja pe
+## podeaua rapei, adica „fundul vaii" din §2 POI C. NU e acelasi lucru cu
+## `_pick_offset` (care e primul punct cu si coloana libera) — pe asta il
+## masoara verdictul (viii), fiindca asta e amplasarea pe care o cere brief-ul.
+var _floor_offset: float = 0.0
 var _side: float = 1.0
 ## Al doilea balon, ancorat pe o POLITA a falezei, ca sa ajunga chiar in banda
 ## (vezi (vi)): pe el se masoara impingerea (iv).
@@ -283,6 +289,7 @@ func _balloon_xz(side: float) -> Vector2:
 	print("    prima podea de rapa la %.1f m de ax; primul culoar LIBER de urcare la %.1f m"
 		% [on_floor, clear])
 	_pick_offset = clear
+	_floor_offset = on_floor
 	print("    tarusul se aseaza la %.1f m de ax" % clear)
 	return Vector2(p.x + sd.x * clear, p.z + sd.z * clear)
 
@@ -429,11 +436,16 @@ func _check_reach() -> void:
 ## tarus de pe fundul vaii intalneste teren. Masurat aici, nu presupus: sonda
 ## trage o raza in fiecare metru de cursa si spune la ce cota se infunda.
 ##
+## SE MASOARA AMPLASAREA DIN BRIEF (fundul vaii, `_floor_offset`), nu cea aleasa
+## de `_balloon_xz`. Distinctia nu e pedanterie: `_balloon_xz` alege primul punct
+## cu coloana libera, deci pe ACEL punct verdictul ar fi verde prin constructie —
+## un test care nu poate pica nu e un test. Aici poate pica, si pica.
+##
 ## Asta a fost cauza reala a caderilor din runda 1: masina statea perfect pe
 ## cos pana la ~9 m de urcare, apoi cosul ajungea in faleza si ea era razuita
 ## de pe el (masurat: cadea la -43.5 m, cu `TerrainBody` in raze).
 func _check_column() -> void:
-	print("--- (viii) e liber culoarul de urcare? (coloana de deasupra tarusului)")
+	print("--- (viii) e liber culoarul de urcare de pe FUNDUL VAII? (amplasarea din brief)")
 	var space := get_viewport().world_3d.direct_space_state
 	var blocked_at := INF
 	var blocker := "-"
@@ -441,10 +453,21 @@ func _check_column() -> void:
 	# Se verifica si colturile cosului, nu doar axul: cosul e lat de 4.8 m.
 	var sampler: TrackSideSampler = _track.get("_sampler")
 	var sd: Vector3 = sampler.side_at(_lane_i) * _side
+	# PUNCTUL MASURAT E CEL DIN BRIEF, nu cel ales de sonda. `_balloon_xz` alege
+	# `_pick_offset` CHIAR PENTRU CA acolo coloana e libera, deci a re-masura
+	# acel punct ar fi o tautologie: verdictul ar fi verde prin constructie si
+	# n-ar putea pica niciodata. (Asa era pana acum, si trecea degeaba.)
+	# Brief-ul §2 POI C cere „3 baloane ancorate pe fundul vaii", deci punctul
+	# de adevar e `_floor_offset` — prima podea de rapa. Acolo verdictul CHIAR
+	# poate pica, si pica: faleza in panta se apleaca peste vale.
+	var p: Vector3 = _track.baked[_lane_i]
+	var base := p + sd * _floor_offset
+	print("    tarusul BRIEF-ului: prima podea de rapa, la %.1f m de ax (sonda si-a ales %.1f m)"
+		% [_floor_offset, _pick_offset])
 	for k in int(RISE) + 1:
 		var y := LANE_Y - RISE + float(k)
 		for lat: float in [-half, 0.0, half]:
-			var c := Vector3(_anchor_xz.x, y, _anchor_xz.y) + sd * lat
+			var c := Vector3(base.x, y, base.z) + sd * lat
 			var q := PhysicsRayQueryParameters3D.create(
 				c + Vector3.UP * 0.5, c - Vector3.UP * 0.5)
 			# Cosul insusi nu e obstacol pentru el (verificarea ruleaza dupa ce
@@ -460,8 +483,8 @@ func _check_column() -> void:
 		print("    coloana se INFUNDA la y=%.2f (%s) — adica dupa %.1f m din cei %.0f de cursa"
 			% [blocked_at, blocker, blocked_at - (LANE_Y - RISE), RISE])
 	_verdict(blocked_at == INF,
-		"culoarul de urcare e liber (primul obstacol la y=%s)"
-		% ("-" if blocked_at == INF else "%.2f" % blocked_at))
+		"culoarul de urcare de pe fundul vaii (%.1f m de ax) e liber (primul obstacol la y=%s)"
+		% [_floor_offset, "-" if blocked_at == INF else "%.2f" % blocked_at])
 	print("    NOTA: faleza unei cornise sapate cu `custom_ravines` e in PANTA, nu")
 	print("    verticala (profilul de mai sus: 7 m de asfalt, 7 m de panta, apoi")
 	print("    podeaua). Un balon pe fundul vaii urca DIRECT in ea. Consecinta de")

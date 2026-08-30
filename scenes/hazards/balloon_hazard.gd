@@ -385,8 +385,14 @@ func _on_state_changed(_from: State, to: State) -> void:
 	# nu vede noul etaj si nu exista aterizare de raportat (rotile n-au parasit
 	# podeaua). El a mutat-o, el o anunta (nota 5 din antet).
 	for key in _aboard.keys():
+		# `is_instance_valid` PRIMUL, si pe cheia bruta: `key as Car` pe un obiect
+		# deja eliberat arunca el insusi („Trying to cast a freed object"), deci o
+		# garda de dupa cast n-apuca sa apere nimic. Vezi nota din `_hold_aboard`.
+		if not is_instance_valid(key):
+			_aboard.erase(key)
+			continue
 		var car := key as Car
-		if car == null or not is_instance_valid(car) or car.track == null:
+		if car == null or car.track == null:
 			continue
 		car.road_index = car.track.closest_index_global(
 			car.global_position, car.route)
@@ -414,8 +420,18 @@ func _hold_aboard() -> void:
 			continue
 		_aboard[car] = _body.to_local(car.global_position)
 	for key in _aboard.keys():
+		# ORDINEA CONTEAZA, si a fost gresita: in GDScript `key as Car` pe un
+		# obiect eliberat arunca „Trying to cast a freed object" — eroarea vine
+		# DIN cast, deci un `is_instance_valid` de dupa el nu mai are ce salva.
+		# Cum bucla asta ruleaza in `_physics_process`, o masina eliberata cat e
+		# la bord (respawn, sfarsit de cursa, `queue_free` din sonde) o repeta la
+		# 60 Hz: masurat, 3007 erori si ~1 MB de stderr intr-o singura rulare de
+		# sonda. Cheia bruta se verifica INTAI, si abia pe urma se caste.
+		if not is_instance_valid(key):
+			_aboard.erase(key)
+			continue
 		var car := key as Car
-		if car == null or not is_instance_valid(car) or not overlapping.has(car):
+		if car == null or not overlapping.has(car):
 			_aboard.erase(key)
 			continue
 		_pull_to(car, _aboard[key] as Vector3, hold_max_accel)

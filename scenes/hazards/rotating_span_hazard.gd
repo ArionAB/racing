@@ -580,38 +580,67 @@ enum State {
 ##   seed 2, gaura STINSA:   0, 0, 0, 0, 0, 0 (sase rulari)
 ##
 ## Cu modulul, ruta de ocol si tot codul nou PREZENTE — se comuta doar steagul
-## asta. Efectul se repeta la aceeasi milisecunda in fiecare rulare, deci nu e
-## zgomot de rulare. [b]Dar nu inseamna ca gaura strica ceva la cornisa[/b], si
-## asta a fost masurat, nu presupus — vezi `ProbeSolverDrift`:
+## asta. Efectul se repeta la aceeasi milisecunda in fiecare rulare.
 ##
-##   * traiectoriile sunt IDENTICE bit cu bit pana la t=4.02 s, cand se despart
-##     cu 1.0 mm, cu tot plutonul inca pe grila de start — la 600 m de gaura si
-##     cu 26 s inainte ca vreo masina sa ajunga la ea (la t=30.8 s, cand cade
-##     pilotul, liderul e la 0.53 tururi, deci gaura n-a fost inca atinsa de
-##     nimeni). Sub un centimetru nu exista geometrie de pista: e ultimul bit al
-##     unei sume de contacte, amplificat pe urma de haos (56 m la t=10 s).
-##   * lumea de la cornisa e identica: 1550 de raycast-uri pe frac 0.28-0.34 dau
-##     aceeasi amprenta de cote (46044.5171) si 0 raze in gol in ambele variante.
-##   * nu e nici „numarul de triunghiuri": 304 si apoi 20.000 de triunghiuri
-##     inerte adaugate pe baseline lasa seed 2 la 0/0/0, si nici 104 puse in
-##     chiar corpul soselei nu reproduc efectul. Conteaza CARE triunghiuri
-##     dispar — ele schimba partitionarea arborelui — nu cate sunt.
+## [b]Si totusi steagul nu e cauza — asta e concluzia la care s-a ajuns greu,
+## dupa doua runde care au crezut contrariul.[/b] Ce lipsea de fiecare data era
+## un BRAT DE CONTROL: nimeni nu masurase ce raspunde metoda cand NU e nimic de
+## gasit. Prima aparare s-a sprijinit pe `ProbeSolverDrift`, si aia s-a
+## daramat singura cand i s-au dat doua rulari IDENTICE ca setare: sonda a
+## tiparit acelasi verdict „deriva de solver" ca pe A/B-ul real, iar A/B-ul
+## real diverge mai PUTIN (36.7 m la t=20 s) decat controlul cu setare
+## identica (132.2 m). O sonda care da acelasi raspuns si cand s-a schimbat
+## ceva, si cand nu s-a schimbat nimic, nu e dovada pentru nimic.
 ##
-## Deci steagul nu creeaza caderea, ci doar schimba zarurile. Cifra care o arata
-## cel mai limpede: cornisa D cade si pe `origin/main`, doar pe alt seed —
-## baseline seed 3 da o repunere la frac 0.309, poz (-243,34,123), t=31.0 s,
-## exact aceeasi bucata de drum. Pe seed-urile 2-9, curse cu repunere pe
-## cornisa: 1 pe baseline, 1 pe ramura.
+## Controlul care chiar decide, rulat pe cod de baseline NEATINS (nicio linie
+## din ramura), cu cutii de coliziune INERTE de 2 m ingropate la 60 m SUB
+## pista — geometrie pe care nicio masina n-o atinge vreodata, deci lumea in
+## care se conduce e bit cu bit aceeasi in toate variantele:
 ##
-## [b]Ce ramane deschis e cornisa, nu steagul.[/b] Cornisa D e o margine fara
-## parapet pe care AI-ul se imbranceste, si care seed o nimereste tine de
-## ultimul bit. Brief-ul §2 randul D o vrea asa: „fara parapet pe dreapta",
-## „varful emotional al turului", cu costul acceptat explicit — „Cadere =
-## repunere ~2 s". Vezi si Track._rail_segments („coliziunea dispare odata cu
-## panglica, si asta e chiar scopul"). Daca la volan caderea se dovedeste prea
-## frecventa, remediul e un parapet cu coliziune pe intervalul RAIL_POSTS
-## 0.215-0.42 din `custom_rail_segments` (Track12) — dar aia e o schimbare de
-## caracter al pistei, decisa de dezvoltator, nu o tunare ca sa treaca o sonda.
+##   seed 2,  0 cutii:   0, 0, 0
+##   seed 2, 25 cutii:   1  (frac 0.611)
+##   seed 2, 40 cutii:   0
+##   seed 2, 50 cutii:   2, 2, 2  — DETERMINIST: aceeasi milisecunda, aceeasi
+##                       pozitie, aceleasi doua masini, in trei rulari
+##   seed 2, 60 cutii:   0
+##
+## Deci semnatura pe care s-a construit acuzatia — „determinist, si se comuta
+## dintr-un steag" — o produce si geometria pe care n-o atinge nimeni, iar
+## cifra nu e nici macar monotona in cantitatea de geometrie. Mecanismul e
+## ordinea in care Jolt imparte arborele de broadphase: se schimba la ORICE
+## atingere a inventarului de corpuri, si de acolo diferenta creste haotic
+## pana cand, 30 s mai tarziu, o imbranceala pe o muchie fara parapet cade
+## intr-o parte sau in alta.
+##
+## Ce se poate spune despre lumea de la cornisa, si s-a masurat: e identica —
+## 1550 de raycast-uri pe frac 0.28-0.34 dau aceeasi amprenta de cote
+## (46044.5171) si 0 raze in gol in ambele variante. Iar codul nou de AI nu
+## ajunge acolo nici teoretic: `_span_line` filtreaza pe `AI_REACH_M` = 90 m,
+## si de la poarta pasajului (frac 0.73) pana la cornisa (frac 0.301) sunt
+## 887 m pe axa drumului — un factor de zece.
+##
+## [b]Ce ramane deschis e cornisa, nu steagul.[/b] Masurat pe 8 seed-uri x 150 s,
+## pe ambele parti, TOATE caderile de pe cornisa cad in acelasi interval
+## frac 0.301-0.316, la aceeasi pozitie (-250..-237, y 34) — inclusiv pe
+## `origin/main`, unde seed 3 arunca Vex (Politia) la frac 0.309. Totalul pe
+## cele 8 seed-uri: 1 repunere pe baseline, 3 pe ramura, toate acolo. Cornisa
+## Hongya Dong e fragila pe amandoua; care seed o nimereste si care masina
+## plateste tine de ultimul bit.
+##
+## Brief-ul §2 randul D o vrea asa: „fara parapet pe dreapta", „varful
+## emotional al turului", cu costul acceptat explicit — „Cadere = repunere
+## ~2 s". Vezi si Track._rail_segments („coliziunea dispare odata cu panglica,
+## si asta e chiar scopul").
+##
+## [b]Atentie daca se ajunge la remediu:[/b] „pune parapet cu coliziune pe
+## 0.215-0.42" NU e o reglare, e cod nou. Intervalul ala EXISTA deja in
+## `custom_rail_segments` din Track12, dar cele doua regimuri implementate
+## sunt `RAIL_NONE` si `RAIL_POSTS`, si NICIUNUL nu are coliziune — pe o pista
+## cu `walls: false` panglica nu se construieste deloc. Un parapet care chiar
+## opreste masina cere un regim nou in `Track._build_rails`. Brief-ul §2
+## randul D lasa loc pentru el („parapet doar pe exteriorul unui viraj —
+## punctuatie"), deci nu e impotriva caracterului pistei; e doar munca de
+## facut, si o decizie de luat la volan, nu o cifra de sonda de trecut.
 @export var cut_road_hole: bool = true
 
 ## Coloana: pentru fiecare z local esantionat, abaterea laterala si cota

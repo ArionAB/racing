@@ -42,18 +42,46 @@ const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ## frac 0.30 in fiecare rulare — desi lumea de la cornisa e IDENTICA bit cu bit
 ## (amprenta de raycast 32719.8205 in ambele variante).
 ##
-## [b]Dar „e nedeterminism" NU e un verdict, ci o ipoteza care se testeaza.[/b]
-## Exact cazul de mai sus a fost intai declarat zgomot, si masuratoarea l-a
-## infirmat. Testul care decide e pe O SINGURA VARIABILA: stinge doar steagul
-## suspect, lasand tot restul codului la locul lui, si repeta pe acelasi seed.
-## Aici: cu gaura stinsa seed 2 da 0 in sase rulari, cu ea aprinsa 2/3/2/2/3 in
-## cinci, cu aceleasi doua repuneri la aceeasi milisecunda si aceeasi pozitie.
+## [b]„Determinist + se comuta dintr-un steag" NU inseamna cauzal[/b] — si asta
+## nu e o opinie, e masurat cu un brat de control. Tentatia e mare: doua
+## repuneri care apar la ACEEASI milisecunda si in ACEEASI pozitie in fiecare
+## rulare, si care dispar cand stingi un steag, arata exact ca o relatie
+## cauzala. Doua runde la rand au tras concluzia asta despre gaura din
+## carosabil.
 ##
-## Un efect care se repeta identic si se comuta dintr-un steag e CAUZAL, oricat
-## de haotic ar fi mecanismul prin care se propaga. Zgomotul Jolt explica de ce
-## o schimbare departata poate avea efect, nu ca efectul n-ar fi al ei. Cand
-## distributiile difera stabil, raspunsul onest e „cauza e X, remediul ar fi Y,
-## decide tu" — nu „nu e regresie".
+## Contra-experimentul care o darama, rulat pe cod de baseline NEATINS (nicio
+## linie din ramura), cu 2 m cutii de coliziune INERTE ingropate la 60 m SUB
+## pista, unde nicio masina nu ajunge vreodata — lumea in care se conduce e
+## bit cu bit aceeasi in toate variantele:
+##
+##   seed 2, 0 cutii:    0, 0, 0
+##   seed 2, 25 cutii:   1  (frac 0.611)
+##   seed 2, 40 cutii:   0
+##   seed 2, 50 cutii:   2, 2, 2  — DETERMINIST, aceeasi milisecunda, aceeasi
+##                       pozitie, aceleasi doua masini, in trei rulari
+##   seed 2, 60 cutii:   0
+##
+## Deci geometrie pe care n-o atinge nimeni produce exact aceeasi semnatura
+## „determinista si comutabila" ca steagul suspectat, iar cifra nu e nici macar
+## monotona in cantitatea de geometrie. Explicatia e ordinea in care Jolt
+## imparte arborele de broadphase: ea se schimba la ORICE atingere a
+## inventarului de corpuri, iar de acolo diferenta creste haotic pana cand,
+## 30 s mai tarziu, o imbranceala pe o muchie fara parapet cade pe o parte sau
+## pe alta.
+##
+## [b]Regula care ramane in picioare.[/b] O repunere pe o muchie expusa e o
+## proprietate a MUCHIEI, nu a schimbarii care a reasezat zarurile. Ca sa
+## acuzi o schimbare de o regresie iti trebuie ori (a) o cauza care se poate
+## urmari in lume — geometrie mutata, o cota schimbata, o linie de AI care
+## chiar ajunge acolo — ori (b) o diferenta care supravietuieste MEDIERII pe
+## multe seed-uri. Un singur seed nu e o masuratoare, oricat de repetabil ar
+## fi: e o realizare a zarurilor, si zarurile se schimba de la orice.
+##
+## Masurat pe 8 seed-uri, 150 s fiecare, Track12: baseline 1 repunere totala,
+## ramura 3 — si TOATE caderile de pe cornisa, pe ambele parti, cad in acelasi
+## interval frac 0.301-0.316, la aceeasi pozitie (-250..-237, y 34). Cornisa
+## Hongya Dong e fragila si pe `origin/main`; care seed o nimereste si care
+## masina plateste tine de ultimul bit.
 ##
 ## Deci: se compara DISTRIBUTII pe mai multe seed-uri si mai multe rulari, nu o
 ## cifra cu alta. Vezi memoria `proberace-nedeterminism`.

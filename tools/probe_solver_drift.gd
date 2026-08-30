@@ -23,6 +23,31 @@ extends Node
 ## inainte, la sute de metri distanta si cu abateri de milimetri, e (b) — o
 ## diferenta de ultim bit amplificata de haos, nu un defect local.
 ##
+## [b]LIMITA, si trebuie citita INAINTE de verdict: sonda asta nu are brat de
+## control, deci nu poate singura sa DEMONSTREZE (b).[/b] Verificat dandu-i
+## doua rulari identice ca setare, fara sa se comute nimic intre ele:
+##
+##   C1 vs C2 (setare IDENTICA):        t=4.02 s, 0.0060 m -> t=20 s: 132.2 m
+##   C1 vs C3 (setare IDENTICA):        t=4.02 s, 0.0060 m -> t=20 s:  48.1 m
+##   B1 vs B2 (identice, gaura stinsa): t=4.02 s, 0.0007 m -> t=20 s:  39.3 m
+##   C1 vs B1 (A/B-ul REAL):            t=4.02 s, 0.0060 m -> t=20 s:  36.7 m
+##
+## Toate patru tiparesc „DERIVA DE SOLVER" — inclusiv perechile in care nu s-a
+## schimbat absolut nimic — iar A/B-ul real diverge mai PUTIN decat controlul.
+## Pragul de 1 cm nu separa nimic: pe pista asta orice doua rulari se despart
+## cu milimetri la t=4.02 s, inca pe grila de start. Sonda masoara corect CAND
+## si CU CAT, dar „identice pana la 4.02 s, apoi haos" e comportamentul de baza
+## al motorului, nu un fapt despre schimbarea testata.
+##
+## Deci foloseste-o ca sa EXCLUZI (a) — daca divergenta incepe dupa ce o roata
+## a atins zona schimbata, ai gasit ceva real — dar nu ca sa confirmi (b).
+## Pentru (b) trebuie un brat de control care nu depinde de sonda: adauga
+## geometrie de coliziune INERTA pe baseline (cutii ingropate sub pista, pe
+## care nu le atinge nimeni) si vezi daca produce aceeasi semnatura. Pe
+## Chongqing chiar o produce — 50 de cutii dau 2 repuneri deterministe pe seed
+## 2, in trei rulari, pe cod de baseline neatins. Vezi antetul lui
+## `cut_road_hole` din `rotating_span_hazard.gd`.
+##
 ## Verdictul masurat pe Chongqing, seed 2: primele 4.0 secunde sunt IDENTICE
 ## bit cu bit; la t=4.02 s apare o abatere de 1.0 mm, cu tot plutonul inca pe
 ## grila de start (x~130, z~-192, y~65) — la 600 m de gaura si cu 26 s inainte

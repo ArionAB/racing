@@ -123,6 +123,12 @@ var _avoid_side: float = 0.0
 ## deci masina smucea stanga-dreapta in loc sa treaca prin culoarul liber.
 var _fb_pair: Node = null
 var _fb_side: float = 0.0
+## Pasajul rotativ pe care suntem angajati acum, si pe ce parte l-am luat.
+## Se tine minte din acelasi motiv ca `_fb_pair`: raspunsul „deschis / inchis"
+## chiar se schimba sub masina (rotatia tine 4 s), iar un culoar ales si tinut
+## bate unul recalculat impecabil in fiecare cadru si niciodata urmat.
+var _span_node: Node = null
+var _span_side: float = 0.0
 
 func configure(race_track: Track, rng: RandomNumberGenerator,
 		cars: Array[Car] = []) -> void:
@@ -175,6 +181,11 @@ func update(delta: float) -> void:
 	# devine ambuteiaj. Cu linia de mai jos + gurile departate: 2 pereti, 14
 	# repuneri, masini care termina tururi.
 	line = _fireball_line(speed, line)
+	# Pasajul rotativ (Chongqing, brief §2 POI F): la fel ca gheizerele, culoarul
+	# liber se schimba IN TIMP — deschis se trece pe axa, inchis pe rampa de
+	# serviciu — deci nici aici `lane_bias_at` nu ajuta (aia tine pilotul pe o
+	# parte fixa). Vezi `RotatingSpanHazard.ai_safe_side`.
+	line = _span_line(speed, line)
 	# Cineva mai lent pe culoarul nostru? Linia se muta pe langa el.
 	line = _avoid_line(idx, speed, line, keep_off)
 	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
@@ -310,6 +321,65 @@ func _fireball_line(speed: float, line: float) -> float:
 	var t := clampf(1.0 - best_d / FireballGeyser.AI_REACH_M, 0.0, 1.0)
 	return lerpf(line, target, t)
 
+
+
+## Muta linia pe culoarul pe care pasajul rotativ va fi TRECABIL cand ajungem
+## noi acolo: pe axa cat e deschis, pe rampa de serviciu cat e inchis.
+##
+## Aceeasi forma ca `_fireball_line`, si din acelasi motiv (vezi
+## `RotatingSpanHazard.ai_safe_side` pentru ce s-a masurat fara ea): distanta pe
+## AXA DRUMULUI, nu pe directia botului, fiindca nodul e pe o spirala si o
+## proiectie pe bot ar raporta metri gresiti exact in curba; intrebarea se pune
+## cu timpul nostru de sosire; iar culoarul ales se TINE, nu se recalculeaza.
+##
+## Mutarea e progresiva ca la gheizere: departe abia schitata, aproape completa.
+## Un salt direct pe tinta a fost deja masurat ca fiind mai rau decat nimic pe
+## craterul Stromboli — volanul smucit scotea masina de pe sosea inainte sa
+## ajunga la hazard.
+func _span_line(speed: float, line: float) -> float:
+	var spans := get_tree().get_nodes_in_group(RotatingSpanHazard.AI_GROUP)
+	if spans.is_empty():
+		return line
+	var n_pts: int = track.route_at(car.route).count()
+	var my_idx: int = car.road_index
+	var bake: float = track.curve.bake_interval
+	var best: RotatingSpanHazard = null
+	var best_d := INF
+	for node in spans:
+		var sp := node as RotatingSpanHazard
+		if sp == null:
+			continue
+		# Fata de POARTA, nu fata de originea nodului: aia sta la mijlocul
+		# golului, cu ~42 m mai in aval decat linia de bariere. Vezi
+		# `RotatingSpanHazard.AI_REACH_M`.
+		var s_idx: int = track.closest_index_global(sp.ai_decision_point(), car.route)
+		var d_idx := s_idx - my_idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		if along < 0.0 or along > RotatingSpanHazard.AI_REACH_M:
+			continue
+		if along < best_d:
+			best_d = along
+			best = sp
+	if best == null:
+		_span_node = null
+		return line
+	var ahead := clampf(best_d / maxf(speed, 6.0), 0.0, 6.0)
+	var side := 0.0
+	if _span_node == best and absf(_span_side) > 0.01:
+		side = _span_side
+	else:
+		side = best.ai_safe_side(ahead)
+		_span_node = best
+		_span_side = side
+	if absf(side) < 0.01:
+		return line
+	var target := clampf(side * best.ai_line_offset(), -LINE_MAX, LINE_MAX)
+	var t := clampf(1.0 - best_d / RotatingSpanHazard.AI_REACH_M, 0.0, 1.0)
+	return lerpf(line, target, t)
 
 func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	if traffic.is_empty():

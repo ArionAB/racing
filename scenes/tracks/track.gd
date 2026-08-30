@@ -2489,6 +2489,9 @@ func rebuild() -> void:
 	# Canalele INAINTEA samplerului: el sapa dupa ele, iar restul generatorilor
 	# intreaba tot de aici unde e golul din sosea.
 	_resolve_channels()
+	# Gaurile cerute de pasajele rotitoare, din acelasi motiv si in acelasi loc:
+	# tot ce emite carosabil intreaba mai jos `_road_gap`.
+	_resolve_span_holes()
 	# Dupa coacerea curbei (deci si a rutelor), inainte de orice generator care
 	# aseaza ceva langa drum: toti citesc sloturi SI cota terenului de aici.
 	#
@@ -3540,7 +3543,24 @@ const QUAY_STEP: float = 5.0
 ## Cat de departe de linia apei se citeste daca CHIAR e uscat in spate.
 const QUAY_INLAND: float = 20.0
 ## Cat de lata e dala de deasupra zidului.
-const QUAY_DECK: float = 9.0
+##
+## [b]3 m, si latimea asta e chiar reclamatia dezvoltatorului.[/b] La 9 m dala
+## iesea „o banda gri lata cat drumul, lipita de marginea dreapta a soselei pe
+## tot cheiul" — masurat pe scanline la frac 0.48, luminanta 0.31-0.52 langa
+## asfalt la 0.09, adica de patru ori mai deschisa, pe o fasie tot atat de lata
+## cat carosabilul. Din masina nu se citea nici drum, nici mal: o placa.
+##
+## Dala NU e ce face treaba aici — treaba o face fata VERTICALA de sub ea
+## (muchia dintre apa si uscat, si acoperirea treptelor grilei de tarm, vezi
+## antetul lui `_build_quay_wall`). Dala doar acopera panta de mal de imediat
+## in spatele muchiei, si pentru asta 3 m ajung: la 9 m acoperea si tot ce era
+## intre chei si sosea, adica exact suprafata care nu trebuia sa existe.
+##
+## Verificat prin A/B in acelasi worktree, cu `quay_wall` stins: banda dispare
+## complet si cheiul se citeste corect. Deci cauza era dala, nu latimea
+## carosabilului, nu `QUAY_INLAND` (aia spune doar UNDE se considera ca e mal)
+## si nu telecabina — toate incercate si eliminate inainte.
+const QUAY_DECK: float = 3.0
 ## Cat de sus sta muchia cheiului peste apa.
 ##
 ## FIXA, nu citita din teren, si asta e chiar lectia primei incercari: cu
@@ -3635,7 +3655,12 @@ func _quay_quad(st: SurfaceTool, a: Dictionary, b: Dictionary) -> void:
 	# Betonul ud de la linia apei e INCHIS, cel de sus e curat: muchia dintre
 	# ele e chiar ce spune ochiului unde se termina apa.
 	var wet := Color(0.13, 0.14, 0.17)
-	var dry := Color(0.27, 0.28, 0.32)
+	# Betonul de sus sta in aceeasi familie de VALOARE cu asfaltul de langa el
+	# (memoria `rock-dark-nu-pe-bazalt`: variatia de valoare in familie, nu o
+	# culoare noua). La 0.27 dala era cu un ton peste tot ce o inconjoara si
+	# sarea in ochi de la 40 m; muchia dintre ea si apa o da contrastul cu
+	# `wet`, care ramane neschimbat, nu luminozitatea dalei.
+	var dry := Color(0.19, 0.20, 0.23)
 	var pa: Vector2 = a["p"]
 	var pb: Vector2 = b["p"]
 	var fa0 := Vector3(pa.x, a["base"], pa.y)
@@ -4724,6 +4749,32 @@ func _build_routes() -> void:
 		var branch := _make_branch(spec)
 		if branch != null:
 			routes.append(branch)
+	# Ocolurile hazardelor, DUPA benzile declarate: ordinea rutelor ramane
+	# stabila pentru sonde, iar un pasaj rotativ adaugat in scena nu
+	# renumeroteaza scurtaturile de dinaintea lui.
+	#
+	# Vin de la nod, nu din `_node_branches()`, fiindca punctele lor nu sunt
+	# desenate: se CALCULEAZA din geometria hazardului, care se muleaza la
+	# randul ei pe ruta 0 — deci trebuie cerute dupa ce ruta 0 e in lista.
+	# Vezi `RotatingSpanHazard.detour_route_spec`.
+	for spec in _span_detours():
+		var detour := _make_branch(spec)
+		if detour != null:
+			routes.append(detour)
+
+
+## Ocolurile cerute de pasajele rotitoare, ca specificatii de banda.
+func _span_detours() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var nodes: Array[Node] = []
+	_collect_span_holes(self, nodes)
+	for node in nodes:
+		if not node.has_method("detour_route_spec"):
+			continue
+		var spec: Dictionary = node.call("detour_route_spec", self)
+		if not spec.is_empty():
+			out.append(spec)
+	return out
 
 
 ## Toate punctele coapte ale benzilor SECUNDARE, intr-o singura lista.
@@ -4775,6 +4826,11 @@ func _build_branch_surfaces() -> void:
 		var r := routes[bi]
 		var n := r.count()
 		if n < 2:
+			continue
+		# Banda care isi aduce carosabilul (rampa de serviciu a pasajului
+		# rotativ) nu primeste nici foaie, nici parapeti — le are deja de la
+		# nodul care a construit-o. Vezi `TrackRoute.no_surface`.
+		if r.no_surface:
 			continue
 		match r.surface:
 			"dirt_road":
@@ -5371,9 +5427,22 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 					+ "punctul de racord e ales arbitrar")
 					% [lbl, String(pair[2]), d, BRANCH_END_NEAR_M])
 	var elevated := bool(spec.get("elevated", false))
-	var pts: Array[Vector3] = [_branch_end(i_entry, mid[0], elevated)]
-	pts.append_array(mid)
-	pts.append(_branch_end(i_exit, mid[mid.size() - 1], elevated))
+	# [b]`own_ends`: banda isi pune singura capetele.[/b] `_branch_end` alege
+	# capatul unei benzi `elevated` pe MARGINEA soselei, pe partea din care vine
+	# banda — ce trebuie pentru o pasarela care se lipeste de bordura. Ocolul
+	# pasajului rotativ pleaca insa de pe AXA, in unghi mic, si masurat cu
+	# capatul mutat pe margine iesea o cotitura: banda facea 7 m in lateral, se
+	# intorcea, si ultimele patru puncte mergeau INAPOI, in aer, pe langa drum
+	# (masurat: coada de la z 199.6 la 204.5 in sens invers). Pe ea, pilotul
+	# intorcea volanul si ProbeRace numara 28 de repuneri, cu 20 s de mers in
+	# marsarier pe masina.
+	var pts: Array[Vector3] = []
+	if bool(spec.get("own_ends", false)):
+		pts.assign(mid)
+	else:
+		pts.append(_branch_end(i_entry, mid[0], elevated))
+		pts.append_array(mid)
+		pts.append(_branch_end(i_exit, mid[mid.size() - 1], elevated))
 	var route := TrackRoute.from_points(pts, false, curve.bake_interval)
 	route.half_width = float(spec.get("half_width", half_width))
 	route.entry_frac = frac_at(i_entry)
@@ -5391,6 +5460,9 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.speed_factor = clampf(float(spec.get("speed_factor", 1.0)), 0.3, 1.0)
 	route.tufts = bool(spec.get("tufts", true))
 	route.elevated = elevated
+	route.no_surface = bool(spec.get("no_surface", false))
+	route.detour = bool(spec.get("detour", false))
+	route.own_ends = bool(spec.get("own_ends", false))
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
 	return route
@@ -5463,6 +5535,46 @@ func _side_at(i: int) -> Vector3:
 var _channels: Array[Dictionary] = []
 
 
+## Gaurile din carosabil cerute de pasajele rotitoare, ca perechi
+## (primul index scos, cate indici) pe curba coapta.
+##
+## [b]De ce exista, si de ce nu se putea altfel.[/b] `RotatingSpanHazard` isi
+## construieste singur tot ce are nevoie — tablier, ocol, poarta — dar
+## contractul lui din brief (§2 randul F: „inchis -> te trimite pe rampa de
+## serviciu") cere ca sub tronsonul rotitor sa fie GOL. Nodul nu poate scoate
+## asfaltul pistei: el se aseaza PESTE el. Cat timp soseaua a trecut mai
+## departe pe dedesubt, hazardul a fost pe jumatate — deschis mergea, inchis
+## era doar o incetinire, fiindca masina cobora un lat de palma pe carosabilul
+## pistei si continua drept.
+##
+## Masurat pe pista reala, in stare inchisa fortata: masina se strecura prin
+## linia de bariere cu 3.2-4.5 m/s, se abatea cu 5.4 m de la axa (ocolul e la
+## 24) si revenea — +1.7/+2.6/+2.8 s, adica pretul frecarii, nu al unui ocol.
+## Sonda `ProbeRotatingSpan` nu putea sa vada asta: ea ruleaza pe o sosea-test
+## peste care modulul e RIDICAT (`deck_rise`), deci acolo golul e gol prin
+## constructie.
+##
+## Gaura o declara nodul insusi (`RotatingSpanHazard.road_hole_span()`) si se
+## rezolva ca la canale — pe INDICI, nu pe metri, ca sa cada pe aceleasi puncte
+## coapte pe care se aseaza si buzele tablierului.
+var _span_holes: Array[Vector2i] = []
+
+## Cati indici de o parte si de alta a fiecarei gauri raman FARA peretele
+## pistei, ca sa se poata intra pe rampa de serviciu a pasajului.
+##
+## [b]Aceeasi problema ca la gura unei scurtaturi, si aceeasi reparatie.[/b]
+## Peretele soselei trece drept peste locul in care rampa de serviciu se
+## desprinde din banda; masurat pe Track12, masinile care incercau devierea se
+## opreau la 5.7-6.0 m lateral cu peretele pistei in fata lor (ProbeRace:
+## `atinge: @StaticBody3D@617`), adica exact ce s-a intamplat prima data si la
+## bifurcatii — vezi `JUNCTION_CLEARANCE_M`, o cifra despre care comentariul ei
+## spune ca „a costat o cursa intreaga".
+##
+## Nu e o degajare aleasa: e lungimea DEVIERII, ceruta de nodul insusi prin
+## `RotatingSpanHazard.wall_clear_span()`.
+var _span_wall_free: Array[Vector2i] = []
+
+
 ## Traduce fractiile declarate in indici, versori si cote.
 ##
 ## Golul din sosea NU poate avea lungimea ceruta la centimetru: soseaua se emite
@@ -5477,6 +5589,69 @@ var _channels: Array[Dictionary] = []
 ## segmentele sunt la 2.5. Impartirea la medie a cerut 3 pasi si a livrat un gol
 ## de 15.0 m in loc de 12 — cu 25% mai mult, adica pragul de viteza urcat de la
 ## 71% la 79% din viteza de varf, fara ca nimeni sa fi cerut asta.
+## Traduce pasajele rotitoare din scena in gauri de carosabil.
+##
+## Indexul se cauta in 3D (`distance_squared_to`), nu in plan: nodul
+## Huangjuewan e o SPIRALA care trece de patru ori peste aceeasi amprenta xz,
+## iar `_closest_baked_index` — care compara doar x si z — ar putea sa taie
+## gaura pe alt etaj (memoria `pista-peste-pista`). Cota separa etajele.
+func _resolve_span_holes() -> void:
+	_span_holes.clear()
+	_span_wall_free.clear()
+	var n := baked.size()
+	if n < 8:
+		return
+	var nodes: Array[Node] = []
+	_collect_span_holes(self, nodes)
+	for node in nodes:
+		var want: float = float(node.call("road_hole_span"))
+		if want <= 0.1:
+			continue
+		var p := to_local(node.global_position)
+		var ci := 0
+		var best := INF
+		for i in n:
+			var d := p.distance_squared_to(baked[i])
+			if d < best:
+				best = d
+				ci = i
+		# Cati pasi de o parte si de alta acopera lungimea ceruta. Se cauta, ca
+		# la canale: `bake_interval` e un MAXIM, iar punctele coapte se indesesc
+		# in viraje — o impartire ar da alta lungime decat cea reala.
+		var steps := 1
+		var err := INF
+		for k in range(1, 16):
+			var a := baked[((ci - k) % n + n) % n]
+			var b := baked[(ci + k) % n]
+			var e := absf(a.distance_to(b) - want)
+			if e < err:
+				err = e
+				steps = k
+		_span_holes.append(Vector2i(((ci - steps) % n + n) % n, 2 * steps))
+		# Degajarea de perete, pe aceeasi metoda: cati pasi acopera lungimea
+		# devierii de o parte si de alta.
+		var free: float = float(node.call("wall_clear_span"))
+		if free <= 0.1:
+			continue
+		var fsteps := 1
+		var ferr := INF
+		for k in range(1, 80):
+			var a := baked[((ci - k) % n + n) % n]
+			var b := baked[(ci + k) % n]
+			var e := absf(a.distance_to(b) - free)
+			if e < ferr:
+				ferr = e
+				fsteps = k
+		_span_wall_free.append(Vector2i(((ci - fsteps) % n + n) % n, 2 * fsteps))
+
+
+func _collect_span_holes(node: Node, out: Array[Node]) -> void:
+	for child in node.get_children():
+		if child.has_method("road_hole_span"):
+			out.append(child)
+		_collect_span_holes(child, out)
+
+
 func _resolve_channels() -> void:
 	_channels.clear()
 	var n := baked.size()
@@ -5558,9 +5733,14 @@ func _road_ice(i: int, j: int = -1) -> bool:
 
 
 func _road_gap(i: int, j: int = -1) -> bool:
+	var n := baked.size()
+	for h in _span_holes:
+		if ((i - h.x) % n + n) % n < h.y:
+			return true
+		if j >= 0 and ((j - h.x) % n + n) % n < h.y:
+			return true
 	if _channels.is_empty():
 		return false
-	var n := baked.size()
 	for ch in _channels:
 		var span: int = 2 * int(ch["steps"])
 		var near_i: int = ch["near"]
@@ -6185,6 +6365,11 @@ func _junction_indices() -> PackedInt32Array:
 
 
 func _near_junction(i: int, junctions: PackedInt32Array, n: int) -> bool:
+	# Gura devierii unui pasaj rotativ e o bifurcatie ca oricare alta: peretele
+	# soselei nu are voie sa treaca peste ea. Vezi `_span_wall_free`.
+	for w in _span_wall_free:
+		if ((i - w.x) % n + n) % n < w.y:
+			return true
 	if junctions.is_empty():
 		return false
 	var spacing := _dists[n] / float(n)
@@ -7510,6 +7695,50 @@ func _build_flyoff_net(idx: int) -> void:
 ## apeluri. Doua mesh-uri de aceeasi culoare = acelasi material = un draw call
 ## in loc de doua. De aceea variatiile aleatoare de nuanta sunt CUANTIFICATE in
 ## cateva trepte peste tot: o nuanta continua per instanta ar face cache-ul inutil.
+## Materialul CAROSABILULUI, pentru suprafetele de condus construite de
+## hazarde (pasajul rotativ isi face singur tablierul si ocolul).
+##
+## [b]De ce exista.[/b] Un hazard care emite prin `PaletteBox` primea
+## `Palette.world_material()` — materialul triplanar al LUMII, adica piatra.
+## Pe Chongqing asta se vedea exact asa cum a raportat dezvoltatorul: tablierul
+## pasajului iesea negru si ondulat langa o sosea neteda albastru-gri, deci se
+## citea ca o gaura in carosabil, nu ca drum. Nicio schimbare de SLOT nu putea
+## sa repare asta: slotul da culoarea, dar tiparul de suprafata venea din alta
+## textura.
+##
+## [b]Nu costa un material in plus[/b] — si asta e conditia ca sa fie voie.
+## `_flat_material` e cache-uit pe (culoare, texturi, finisaj), iar cererea de
+## aici trece exact aceleasi valori ca soseaua: se intoarce ACELASI obiect.
+## Garda numara materiale, si numarul nu se misca.
+func road_material() -> Material:
+	var base := ROAD_COLOR
+	var macro_mean := ASPHALT_MACRO_MEAN
+	if road_surface == "snow":
+		base = SNOW_ROAD_COLOR
+		macro_mean = SNOW_MACRO_MEAN
+	elif road_is_loose():
+		base = dirt_road_color()
+		macro_mean = SAND_MACRO_MEAN
+	var color := Color(base.r / macro_mean, base.g / macro_mean,
+		base.b / macro_mean)
+	var micro := "res://assets/textures/surface_asphalt.png"
+	var macro := "res://assets/textures/surface_asphalt_macro.png"
+	var rough := 0.82
+	var spec := 0.3
+	if road_surface == "snow":
+		micro = "res://assets/textures/surface_snow.png"
+		macro = "res://assets/textures/surface_snow_macro.png"
+		rough = 1.0
+		spec = 0.0
+	elif road_is_loose():
+		micro = "res://assets/textures/surface_sand.png"
+		macro = "res://assets/textures/surface_sand_macro.png"
+		rough = 1.0
+		spec = 0.0
+	return _flat_material(color, _tex(micro), rough, spec,
+		BaseMaterial3D.CULL_BACK, _tex(macro))
+
+
 func _flat_material(color: Color, texture: Texture2D = null,
 		roughness: float = 1.0, specular: float = 0.5,
 		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
@@ -9815,9 +10044,18 @@ const BRANCH_LURE_RANGE: float = 70.0
 func branch_lure(pos: Vector3, ahead_m: float) -> Vector3:
 	for bi in range(1, routes.size()):
 		var b := routes[bi]
+		# Un ocol de pedeapsa nu se momeste niciodata: se ia doar cand banda
+		# directa e inchisa, si atunci decide ceasul hazardului prin
+		# `AiController._span_line`. Vezi `TrackRoute.detour`.
+		if b.detour:
+			continue
 		if pos.distance_to(b.baked[0]) > BRANCH_LURE_RANGE:
 			continue
 		var bidx := b.closest_index_global(pos)
+		# Acelasi test de etaj ca la `resolve_route`, si din acelasi motiv:
+		# raza de momeala e 3D, dar 70 m acopera doua etaje de spirala.
+		if b.is_other_level(bidx, pos):
+			continue
 		return b.lookahead_point(bidx, ahead_m, 0.0, curve.bake_interval)
 	return Vector3.INF
 
@@ -9843,6 +10081,17 @@ func resolve_route(route: int, index: int, pos: Vector3) -> Vector2i:
 			var bidx := b.closest_index_global(pos)
 			if bidx == 0:
 				continue # inca inainte de despicare
+			# [b]Si la ACELASI ETAJ.[/b] `lateral_distance` e 2D prin proiect
+			# (o banda urca, deci cota difera de la un capat la altul), iar
+			# raza de comutare e 3D — dar 45 m de raza acopera doua etaje ale
+			# unei spirale. Rampa de serviciu a pasajului rotativ sta la y 39
+			# fix peste cheiul de la y 7, si masurat pe ProbeRace masinile de
+			# pe chei comutau pe ea: 2-3 repuneri pe cursa la frac 0.50, cu
+			# masina „pe o banda" aflata la 32 m deasupra ei. Memoria
+			# `pista-peste-pista` — de fiecare data cand pista trece peste ea
+			# insasi, testul care lipseste e cel vertical.
+			if b.is_other_level(bidx, pos):
+				continue
 			if b.lateral_distance(bidx, pos) + BRANCH_HYSTERESIS \
 					< routes[0].lateral_distance(index, pos):
 				return Vector2i(bi, bidx)

@@ -164,12 +164,14 @@ func _check_route(track: Track, ri: int) -> int:
 		# altfel n-are niciun rost.
 		# O banda `elevated` se racordeaza la MARGINEA soselei, nu la axa
 		# (Track._branch_end): acolo distanta corecta e fata de margine.
+		# Exceptie: banda care si-a pus singura capetele (`own_ends`) le-a pus
+		# pe AXA, si atunci fata de axa se si masoara — vezi TrackRoute.own_ends.
 		var main := track.routes[0]
 		var i_in := main.closest_index_global(r.baked[0])
 		var i_out := main.closest_index_global(r.baked[n - 1])
 		var d_in := main.lateral_distance(i_in, r.baked[0])
 		var d_out := main.lateral_distance(i_out, r.baked[n - 1])
-		if r.elevated:
+		if r.elevated and not r.own_ends:
 			d_in = absf(d_in - track.width_at_index(i_in))
 			d_out = absf(d_out - track.width_at_index(i_out))
 		var span := r.exit_frac - r.entry_frac
@@ -177,7 +179,20 @@ func _check_route(track: Track, ri: int) -> int:
 			span += 1.0
 		var bypassed := main.length() * span
 		var gain := bypassed - length
-		var flag_gain := "" if gain > 0.0 else "  <-- MAI LUNGA decat ocolul"
+		# [b]O banda de PEDEAPSA e mai lunga prin contract.[/b] Toate benzile
+		# secundare de pana acum au fost scurtaturi — le iei ca sa castigi —
+		# deci „mai lunga decat portiunea ocolita" insemna o banda fara rost.
+		# Ocolul unui pasaj rotativ e pe dos: il iei doar cand banda directa e
+		# INCHISA, si brief-ul ii cere explicit un cost (+3 s). A pretinde
+		# castig pozitiv acolo ar fi a cere ca pedeapsa sa nu existe.
+		#
+		# Scutirea e strict pe steagul `TrackRoute.detour`, pus de banda insasi:
+		# o banda fara el ramane cazuta daca e mai lunga, exact ca inainte.
+		var flag_gain := ""
+		if r.detour:
+			flag_gain = "  (ocol de PEDEAPSA: mai lung prin contract)"
+		elif gain <= 0.0:
+			flag_gain = "  <-- MAI LUNGA decat ocolul"
 		print("      racord intrare  %7.2f m  iesire %.2f m" % [d_in, d_out])
 		print("      capete: (%.0f, %.1f, %.0f) -> (%.0f, %.1f, %.0f)"
 			% [r.baked[0].x, r.baked[0].y, r.baked[0].z,
@@ -187,7 +202,7 @@ func _check_route(track: Track, ri: int) -> int:
 		print("      ocoleste %.0f m, are %.0f m -> castig %.0f m (%.0f%%)%s"
 			% [bypassed, length, gain, gain / maxf(bypassed, 1.0) * 100.0,
 				flag_gain])
-		if d_in > 1.0 or d_out > 1.0 or gain <= 0.0:
+		if d_in > 1.0 or d_out > 1.0 or (gain <= 0.0 and not r.detour):
 			problems += 1
 	return problems
 

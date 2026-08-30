@@ -50,20 +50,36 @@ static func add(st: SurfaceTool, xf: Transform3D, size: Vector3, slot: int) -> v
 ## (tabliera asezata ca AABB) si din memoria `suprafete-cu-goluri-si-praguri`
 ## — o suprafata inclinata construita din cutii orizontale lasa praguri
 ## verticale pe linia de rulare.
+## `caps` = false lasa afara cele doua fete de CAPAT (a-b si c-d), pentru placi
+## insirate cap la cap.
+##
+## [b]De ce e nevoie.[/b] O suprafata lunga taiata in bucati de doi metri —
+## cum e tablierul care urmeaza o spirala — emitea pana acum peretele de capat
+## al FIECAREI bucati. Pe o suprafata inclinata si curba, peretele unei bucati
+## iese prin fata de sus a vecinei: masurat in captura de la frac 0.760, dungi
+## la luminanta 0.037-0.05 pe un tablier de 0.18-0.26, adica de cinci ori mai
+## intunecate decat suprafata pe care stau.
+## `with_top = false` lasa fata de SUS afara: o folosesc suprafetele de rulare,
+## care isi emit fata de deasupra pe materialul soselei (cu UV2), si pastreaza
+## pe atlas doar flancurile si talpa. Vezi `RotatingSpanHazard._road_face`.
 static func quad_slab(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3,
-		d: Vector3, thick: float, slot: int) -> void:
+		d: Vector3, thick: float, slot: int, caps: bool = true,
+		with_top: bool = true) -> void:
 	var down := Vector3.DOWN * thick
 	var top := [a, b, c, d]
 	var bot := [a + down, b + down, c + down, d + down]
 	var uv := Palette.uv(slot)
-	var quads := [
-		[top[0], top[1], top[2], top[3]],
+	var quads := []
+	if with_top:
+		quads.append([top[0], top[1], top[2], top[3]])
+	quads.append_array([
 		[bot[3], bot[2], bot[1], bot[0]],
 		[top[0], top[3], bot[3], bot[0]],
 		[top[2], top[1], bot[1], bot[2]],
-		[top[1], top[0], bot[0], bot[1]],
-		[top[3], top[2], bot[2], bot[3]],
-	]
+	])
+	if caps:
+		quads.append([top[1], top[0], bot[0], bot[1]])
+		quads.append([top[3], top[2], bot[2], bot[3]])
 	for q: Array in quads:
 		var n: Vector3 = ((q[1] as Vector3) - (q[0] as Vector3)).cross(
 			(q[2] as Vector3) - (q[0] as Vector3))

@@ -827,11 +827,11 @@ transform = Transform3D(-0.135783, 0, 0.990739, 0, 1.000000, 0, -0.990739, 0, -0
 metadata/coliziune = "hull"
 
 [node name="masinuta216" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("44_minib")]
-transform = Transform3D(-0.305016, 0, 0.952347, 0, 1.000000, 0, -0.952347, 0, -0.305016, 195.476639, 30.235125, 71.973053)
+transform = Transform3D(-0.305016, 0, 0.952347, 0, 1.000000, 0, -0.952347, 0, -0.305016, 192.004852, 30.630000, 61.009628)
 metadata/coliziune = "hull"
 
 [node name="masinuta217" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("43_minia")]
-transform = Transform3D(-0.304911, 0, 0.952381, 0, 1.000000, 0, -0.952381, 0, -0.304911, 168.630341, 32.079205, 80.568222)
+transform = Transform3D(-0.304911, 0, 0.952381, 0, 1.000000, 0, -0.952381, 0, -0.304911, 163.498138, 31.920000, 64.361420)
 metadata/coliziune = "hull"
 
 [node name="bloc_liziba218" parent="DecorManual/7) Liziba" instance=ExtResource("33_liziba")]
@@ -972,22 +972,26 @@ transform = Transform3D(0.712083, 0, 0.702095, 0, 1.000000, 0, -0.702095, 0, 0.7
 metadata/coliziune = "none"
 
 [node name="PasajRotativ" type="Node3D" parent="."]
-transform = Transform3D(0.255783, 0.000000, -0.966734, 0.000000, 1.000000, 0.000000, 0.966734, 0.000000, 0.255783, 159.330002, 40.860000, 188.000000)
+transform = Transform3D(0.245357, 0.000000, -0.969433, -0.036673, 0.999284, -0.009282, 0.968739, 0.037829, 0.245182, 161.091843, 40.929417, 188.423935)
 script = ExtResource("11_span")
 period = 25.0
 turn_time = 4.0
 telegraph_lead = 3.0
 phase = 0.6
-road_half_width = 7.0
+road_half_width = 7.2
 span_length = 11.84
 deck_run = 34.0
-deck_rise = 3.0
+deck_rise = 0.0
 deck_parapet = 0.9
+follow_route = true
 ramp_run = 30.0
-service_side = -1
+service_side = 1
 service_offset = 24.0
-service_width = 5.0
+service_width = 6.0
 service_lead = 30.0
+gate_clearance = 1.2
+gate_push = 6.0
+cut_road_hole = true
 
 [node name="casaFmal600" parent="DecorManual/6) Nodul Huangjuewan" instance=ExtResource("49_shopa")]
 transform = Transform3D(-0.012844, 0.000000, 0.999918, 0.000000, 1.000000, 0.000000, -0.999918, 0.000000, -0.012844, 285.042114, 20.299467, 123.149948)

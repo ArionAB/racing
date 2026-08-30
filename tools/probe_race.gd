@@ -77,11 +77,18 @@ const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ## multe seed-uri. Un singur seed nu e o masuratoare, oricat de repetabil ar
 ## fi: e o realizare a zarurilor, si zarurile se schimba de la orice.
 ##
-## Masurat pe 8 seed-uri, 150 s fiecare, Track12: baseline 1 repunere totala,
-## ramura 3 — si TOATE caderile de pe cornisa, pe ambele parti, cad in acelasi
-## interval frac 0.301-0.316, la aceeasi pozitie (-250..-237, y 34). Cornisa
-## Hongya Dong e fragila si pe `origin/main`; care seed o nimereste si care
-## masina plateste tine de ultimul bit.
+## Masurat pe 16 seed-uri x 150 s pe fiecare parte, Track12:
+##
+##   seed:      1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16   TOTAL
+##   baseline:  0  0  1  0  0  0  0  0  0  0  0  1  0  0  0  0   2
+##   ramura:    0  2  1  0  0  0  0  0  0  0  0  0  0  0  0  0   3
+##
+## 14 din 16 seed-uri curate pe amandoua, si baseline are un seed (12) pe care
+## ramura e curata. Comparatia pe seed 2 singur — 0,0,0 fata de 2,2,2 — arata
+## ca o regresie zdrobitoare si nu e decat realizarea zarurilor pe acel seed.
+## TOATE caderile de pe cornisa, pe ambele parti, cad in intervalul
+## frac 0.301-0.316, la aceeasi pozitie (-250..-237, y 34). Cornisa Hongya Dong
+## e fragila si pe `origin/main`; care seed o nimereste tine de ultimul bit.
 ##
 ## Deci: se compara DISTRIBUTII pe mai multe seed-uri si mai multe rulari, nu o
 ## cifra cu alta. Vezi memoria `proberace-nedeterminism`.

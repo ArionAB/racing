@@ -619,11 +619,22 @@ enum State {
 ## si de la poarta pasajului (frac 0.73) pana la cornisa (frac 0.301) sunt
 ## 887 m pe axa drumului — un factor de zece.
 ##
-## [b]Ce ramane deschis e cornisa, nu steagul.[/b] Masurat pe 8 seed-uri x 150 s,
-## pe ambele parti, TOATE caderile de pe cornisa cad in acelasi interval
+## [b]Ce ramane deschis e cornisa, nu steagul.[/b] Masurat pe 16 seed-uri x 150 s
+## pe FIECARE parte — vreo 40 de minute de cursa simulata de fiecare — exact
+## fiindca un seed nu e o masuratoare:
+##
+##   seed:      1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16   TOTAL
+##   baseline:  0  0  1  0  0  0  0  0  0  0  0  1  0  0  0  0   2
+##   ramura:    0  2  1  0  0  0  0  0  0  0  0  0  0  0  0  0   3
+##
+## Doua repuneri pe baseline, trei pe ramura, si 14 din 16 seed-uri curate pe
+## amandoua. Baseline are chiar un seed (12) pe care ramura e curata. Diferenta
+## de o repunere pe 32 de curse nu sustine o regresie — mai ales cu bratul de
+## control de mai sus, care arata ca 50 de cutii ingropate misca cifra la fel.
+##
+## Iar caderile de pe cornisa, pe AMBELE parti, cad in acelasi interval
 ## frac 0.301-0.316, la aceeasi pozitie (-250..-237, y 34) — inclusiv pe
-## `origin/main`, unde seed 3 arunca Vex (Politia) la frac 0.309. Totalul pe
-## cele 8 seed-uri: 1 repunere pe baseline, 3 pe ramura, toate acolo. Cornisa
+## `origin/main`, unde seed 3 arunca Vex (Politia) la frac 0.309. Cornisa
 ## Hongya Dong e fragila pe amandoua; care seed o nimereste si care masina
 ## plateste tine de ultimul bit.
 ##

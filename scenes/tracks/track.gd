@@ -2292,6 +2292,17 @@ func _ravines() -> Array[Vector4]:
 func _cornice_ravines() -> Array[int]:
 	return []
 
+## Care CORNISE sunt taiate VERTICAL (indici in [method _ravines]): peretele
+## de sub buza cade drept, in loc sa se lase in panta.
+##
+## Se cere doar acolo unde ceva trebuie sa URCE pe langa faleza. Panta unei
+## cornise obisnuite se apleaca peste gol, iar un balon ancorat pe podeaua vaii
+## urca DREPT si intra in ea (masurat in ProbeBalloon: se infunda dupa 1 m din
+## cei 30 de cursa, si ar ajunge sus la 9.6 m in afara asfaltului). Vezi
+## TrackSideSampler.RAVINE_SCARP_RIM.
+func _scarp_ravines() -> Array[int]:
+	return []
+
 ## Care dintre rape sunt VIADUCTE (indici in [method _ravines]): golul e si
 ## SUB sosea, tablierul ramane in aer pe fusta lui, iar dedesubt se aseaza
 ## pilele si arcadele din kit (DecorManual). O cornisa pe ambele parti fara
@@ -2761,7 +2772,7 @@ func rebuild() -> void:
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
 		_viaduct_ravines(), _overpass_ranges(), _ravine_floors(),
-		hollows, hollow_walls)
+		hollows, hollow_walls, _scarp_ravines())
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",

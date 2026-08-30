@@ -145,6 +145,30 @@ const RAVINE_CORNICE_RIM: float = 6.0
 const RAVINE_VIADUCT_OVERHANG: float = 1.5
 const RAVINE_VIADUCT_RIM: float = 2.5
 
+## Cornisa TAIATA VERTICAL (scarp): acelasi gol, dar peretele cade drept.
+##
+## O cornisa obisnuita (0.5 + 6) e o buza urmata de o PANTA: masurat pe
+## geometria reala (ProbeBalloon, profilul falezei), terenul tine cota soselei
+## pana la 7 m de ax, coboara pe inca 6-7 m si abia la ~13 m se aseaza pe
+## podea. Pentru un drum de munte e exact bine — cazi de pe el.
+##
+## Nu si cand ceva trebuie sa URCE pe langa faleza. Un balon ancorat pe podeaua
+## vaii se ridica DREPT si intra in peretele care se apleaca peste el: masurat
+## pe colturile cosului de 4.8 m, se infunda dupa 1 m din cei 30 de cursa, si
+## ar ajunge sus la 9.6 m in afara asfaltului. Panta nu e un detaliu de stil
+## acolo, e ce face hazardul imposibil.
+##
+## Cu racordul strans la 1.2 m, peretele de sub buza cade drept: podeaua incepe
+## la ~2 m de marginea asfaltului, deci coloana de deasupra tarusului e libera
+## si cosul chiar ajunge in banda. Se cere PER RAPA (`custom_scarp_ravines`),
+## nu se schimba implicitul: celelalte cornise (Baikal, Stromboli, Chongqing)
+## sunt bune cu panta lor.
+const RAVINE_SCARP_RIM: float = 1.2
+## Racordul neted al taieturii verticale. `SMOOTH_RAVINE_K` (3 m) ar rotunji
+## inapoi chiar muchia pe care o cerem — la o taietura de 1.2 m, un racord de
+## 3 m e mai lat decat peretele.
+const SMOOTH_SCARP_K: float = 0.4
+
 # --- masivele declarate (ruda pe PLUS a rapelor) ---
 ## Banda de protectie a asfaltului: sub PEAK_ROAD_CLEAR de la marginea soselei
 ## muntele e stins complet, la PEAK_ROAD_FULL e la putere plina. NU e cosmetica:
@@ -189,6 +213,9 @@ var _cornices: Array[int] = []
 ## Care rape sunt VIADUCTE: terenul coboara si SUB sosea, nu doar langa ea.
 ## Vezi _carve_ravines.
 var _viaducts: Array[int] = []
+## Care CORNISE sunt taiate VERTICAL (indici de rapa). Vezi RAVINE_SCARP_RIM:
+## peretele cade drept, ca sa ramana liber culoarul pe care urca ceva de jos.
+var _scarps: Array[int] = []
 ## PODEAUA unei rape, cota ABSOLUTA (indice de rapa -> y): sapatura nu coboara
 ## sub ea. O cornisa cu podea e o faleza cu un chei la picior — terasa uscata
 ## dintre faleza si apa (Chongqing, D: Hongya Dong sta pe ea). Fara podea,
@@ -274,7 +301,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		overpasses: Array[Vector2] = [],
 		floors: Array[Vector2] = [],
 		hollows: Array[Vector4] = [],
-		hollow_walls: PackedFloat32Array = PackedFloat32Array()) -> void:
+		hollow_walls: PackedFloat32Array = PackedFloat32Array(),
+		scarps: Array[int] = []) -> void:
 	_baked = baked
 	for fl in floors:
 		_floors[int(fl.x)] = fl.y
@@ -294,6 +322,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_hollow_walls = hollow_walls
 	_cornices = cornices
 	_viaducts = viaducts
+	_scarps = scarps
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_bake_overpass_mask(overpasses)
 	_loop_poly = PackedVector2Array()
@@ -893,6 +922,12 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		var cornice := _cornices.has(ri)
 		var inner := RAVINE_CORNICE_INNER if cornice else RAVINE_INNER
 		var rim := RAVINE_CORNICE_RIM if cornice else RAVINE_RIM
+		# Taietura verticala: acelasi inner (buza lipita de asfalt), dar
+		# racordul strans, ca peretele sa cada drept. Vezi RAVINE_SCARP_RIM —
+		# se cere doar unde ceva trebuie sa urce pe langa faleza.
+		var scarp := _scarps.has(ri)
+		if scarp:
+			rim = RAVINE_SCARP_RIM
 		if _viaducts.has(ri):
 			# VIADUCT: golul e si sub asfalt. O rapa obisnuita lasa terenul de
 			# sub sosea la cota ei (lacatul de langa drum), deci o cornisa pe
@@ -914,7 +949,9 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
 		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
 		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).
-		y = _smin(y, target, SMOOTH_RAVINE_K)
+		# Racordul: la o taietura de 1.2 m, cei 3 m impliciti ar rotunji inapoi
+		# chiar muchia ceruta (racordul ar fi mai lat decat peretele).
+		y = _smin(y, target, SMOOTH_SCARP_K if scarp else SMOOTH_RAVINE_K)
 	return y
 
 

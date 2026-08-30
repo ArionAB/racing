@@ -102,6 +102,11 @@ extends Track
 ## din kit se pun sub el (Baikal, viaductul Circum-Baikal). Se combina cu
 ## `custom_cornice_ravines` (cazi de pe margine). Vezi Track._viaduct_ravines.
 @export var custom_viaduct_ravines: Array[int] = []
+## Care dintre CORNISE sunt taiate VERTICAL (indici in `custom_ravines`):
+## peretele de sub buza cade drept, nu in panta. Se cere doar unde ceva urca pe
+## langa faleza — baloanele ancorate de sub cornisa Vaii Rosii. Vezi
+## Track._scarp_ravines.
+@export var custom_scarp_ravines: Array[int] = []
 ## PODELE de rapa: (indice in `custom_ravines`, cota ABSOLUTA y). Sapatura nu
 ## coboara sub cota — o cornisa cu podea e o faleza cu un chei uscat la picior
 ## (Chongqing D: Hongya Dong sta pe el, apa incepe dincolo). Vezi
@@ -222,6 +227,9 @@ func _cornice_ravines() -> Array[int]:
 
 func _viaduct_ravines() -> Array[int]:
 	return custom_viaduct_ravines
+
+func _scarp_ravines() -> Array[int]:
+	return custom_scarp_ravines
 
 func _ravine_floors() -> Array[Vector2]:
 	return custom_ravine_floors

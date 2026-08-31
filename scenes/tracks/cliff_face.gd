@@ -56,6 +56,16 @@ extends Marker3D
 @export var depth_m: float = 30.0
 ## Cat de departe se cauta fundul vaii, de la marginea asfaltului.
 const FLOOR_SEARCH_M: float = 140.0
+## Cat spatiu ramane intre carosabil si orice masa de faleza construita prin
+## offset lateral. Vezi `_on_any_road`: pe o serpentina, lateralul unei fractii
+## cade peste soseaua alteia. 9 m = jumatatea de banda cea mai lata (9.0) plus
+## marja de camera.
+const ROAD_CLEAR_M: float = 9.0
+## Cat din tur se considera "tronsonul local" si se sare la testul de mai sus.
+## 4% dintr-un tur de ~2.6 km inseamna ~100 m in fata si in spate: destul cat un
+## pinten sa se lipeasca de propria lui curba, prea putin ca sa mascheze bratul
+## opus al unei serpentine.
+const NEAR_WINDOW_FRAC: float = 0.04
 ## Cat poate depasi caderea reala `depth_m`, ca panza sa ajunga la fund pe o
 ## vale mai adanca decat cea declarata fara sa fie nevoie de doua reglaje.
 const DEPTH_SLACK: float = 1.8
@@ -953,6 +963,37 @@ func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 ## (partea pe care o vede soferul, cu stratele in benzi), apoi COAMA, care pleaca
 ## orizontal spre vale pe `far_depth_m` si se termina cazand inapoi in teren.
 ## Fara coama, masa ar fi o lama de un triunghi grosime vazuta din masina.
+## Cade punctul in gabaritul soselei, ORIUNDE pe tur?
+##
+## Vezi nota din `_far_column`. Doar 2D: o panza care trece pe deasupra sau pe
+## dedesubtul unui tronson e legitima (pasaj), cea care sta la cota lui nu — dar
+## malul opus urca de la fundul vaii pana peste cota drumului, deci acopera
+## oricum toata plaja verticala si testul 2D e cel corect aici.
+## Cade punctul in gabaritul soselei pe ALT tronson decat cel local?
+##
+## Fereastra de indici e esentiala, si e aceeasi capcana ca la pasaje (memoria
+## `pista-peste-pista`): un pinten cerut la 9 m de ax e LEGITIM lipit de propriul
+## lui tronson — aia e chiar taietura in care e sapat drumul. Ce nu e legitim e
+## sa cada peste soseaua de la o cu totul alta fractie, cum face malul opus pe
+## serpentina. Deci punctele vecine pe tur se sar, si se testeaza restul buclei.
+func _on_any_road(sampler: TrackSideSampler, p: Vector3, home_i: int) -> bool:
+	var n := sampler.point_count()
+	var skip := int(round(float(n) * NEAR_WINDOW_FRAC))
+	for i in n:
+		# distanta pe INEL intre indici (traseul e inchis)
+		var di := absi(i - home_i)
+		di = mini(di, n - di)
+		if di <= skip:
+			continue
+		var q := sampler.baked_point(i)
+		var dx := q.x - p.x
+		var dz := q.z - p.z
+		var clear := sampler.half_width_at(i) + ROAD_CLEAR_M
+		if dx * dx + dz * dz < clear * clear:
+			return true
+	return false
+
+
 func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 	var n := sampler.point_count()
 	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
@@ -1034,6 +1075,22 @@ func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 	# pintenul n-are ce sprijini: se sare peste, ca sa nu iasa o lespede plutind
 	# pe platou.
 	if floor_y > top_y - 3.0:
+		return []
+	# ...si nici peste ALT TRONSON al pistei.
+	#
+	# Bug masurat in runda 11 (ProbeCappBody): malul opus ajungea la 0.2 m de
+	# axul drumului la fractia 0.193, adica panza statea CHIAR PE SOSEA, iar
+	# captura de sofer de acolo era un perete rosu pe tot cadrul — camera era
+	# in interiorul masei. Cauza nu e offsetul (se intampla si la 46, si la 78
+	# m): cornisa e o SERPENTINA, deci lateralul de la o fractie trece peste
+	# carosabilul altei fractii. Offsetul lateral e orb la asta — e aceeasi
+	# lectie ca la pasajele pe piloni (memoria `pista-peste-pista`): apropierea
+	# se cere fata de TOT traseul, nu fata de punctul local.
+	#
+	# Deci coloana se cauta fata de toate punctele bakeuite, si se renunta la ea
+	# daca baza ei cade in gabaritul soselei. `_build_far` sare deja peste
+	# coloanele goale, deci masa se intrerupe curat acolo si continua dincolo.
+	if _on_any_road(sampler, base, i):
 		return []
 	var out: Array = []
 	var rows := far_bands + 1

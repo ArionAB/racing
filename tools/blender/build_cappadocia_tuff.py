@@ -644,8 +644,17 @@ clear_built()
 results = []
 
 
-def emit(obj, path, ao, origin="base", bevel=0.05):
-    st = finish(obj, bevel=bevel, ao=ao, origin=origin)
+# FATETE, nu bloburi (runda 12). Criticul orb, dupa ce a vazut cadrul bun de la
+# frac 0.05, a numit mecanismul: "conurile smooth-shaded transforma roca low-poly
+# in bloburi moi; fatetele vizibile ale referintei sunt ce o face sa citeasca drept
+# diorama stilizata". `finish` are smooth_angle=55 implicit, deci un horn cu 7 inele
+# isi pierdea exact muchiile care il fac sa arate ca roca sculptata: lumina curgea
+# uniform pe suprafata de revolutie si ramanea doar dunga pictata.
+# Nu contrazice apply_smooth (netezirea a scos aspectul "Minecraft", #113) — acolo
+# vorbim de cladiri si de curburi organice. Roca vrea invers: fiecare fateta o
+# fatetare de sapa. De-aia e per-piesa, nu global.
+def emit(obj, path, ao, origin="base", bevel=0.05, smooth=None):
+    st = finish(obj, bevel=bevel, ao=ao, origin=origin, smooth_angle=smooth)
     _, sz = export_glb([obj], "cappadocia/" + path)
     results.append((path, st["tris"], sz / 1024.0))
 

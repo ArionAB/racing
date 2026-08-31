@@ -80,6 +80,11 @@ const DOOR_DARK_SLOT: int = 26
 ## Raportul dintre razele celor doua axe orizontale. 1.0 = cerc (revolutie);
 ## 0.62 = elipsa vizibil turtita. Peste ~0.5 incepe sa citeasca a perete, nu a
 ## horn.
+## Shading FATETAT pe corpul hornului: fiecare triunghi cu normala lui, in
+## loc de normale mediate pe vertecsi. Roca sculptata are muchii care prind
+## lumina; un con low-poly smooth-shaded citeste a blob. Vezi `_deform_mesh`.
+@export var faceted: bool = true
+
 @export_range(0.35, 1.0, 0.01) var ovality: float = 1.0
 
 ## Pe ce azimut sta axa lunga a elipsei, in grade. Conteaza fiindca perechea
@@ -540,6 +545,22 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 	for s in out.get_surface_count():
 		st.clear()
 		st.create_from(out, s)
+		# FATETE (runda 12). `generate_normals()` pe un mesh INDEXAT mediaza
+		# normala pe vertecsii impartiti de mai multe fete, deci iese shading
+		# neted - indiferent ce normale aducea GLB-ul, fiindca aici mesh-ul se
+		# reface. De-aia regenerarea kitului cu `smooth_angle=None` n-a schimbat
+		# nimic in captura: fixul trebuie sa fie AICI, unde se scriu normalele.
+		# `deindex()` rupe vertecsii comuni, deci fiecare triunghi isi primeste
+		# propria normala si lumina sare in trepte peste muchii. Acelasi truc
+		# pe care il foloseste deja `_build_talus` (SurfaceTool fara index).
+		# De ce contrazice apply_smooth din dio_lib (netezirea a scos aspectul
+		# "Minecraft", #113): acolo e vorba de cladiri si curburi organice. Roca
+		# vrea invers - criticul orb, pe cadrul bun de la frac 0.05: conurile
+		# smooth-shaded citesc a bloburi moi, iar fatetele vizibile sunt ce face
+		# referinta sa arate a DIORAMA STILIZATA, nu a geometrie saraca.
+		# Cost: zero materiale, zero triunghiuri. Doar vertecsii se despart.
+		if faceted:
+			st.deindex()
 		st.generate_normals()
 		var m := st.commit()
 		fixed.add_surface_from_arrays(
@@ -1145,6 +1166,9 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 	for s in out.get_surface_count():
 		st.clear()
 		st.create_from(out, s)
+		# Fatete, ca in `_deform_mesh`: deindexat = normale pe fata.
+		if faceted:
+			st.deindex()
 		st.generate_normals()
 		var m := st.commit()
 		fixed.add_surface_from_arrays(

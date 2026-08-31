@@ -346,6 +346,7 @@ func _ready() -> void:
 	_split_shutters()
 	_retint_tuff()
 	_warm_tuff()
+	_redden_cliff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
 	_fade_tuff_detail()
@@ -710,6 +711,75 @@ func _warm_tuff() -> void:
 						1.0 - (0.15 + hue_shift) * k,
 						1.0 - (0.26 + hue_shift * 2.0) * k)
 					cols[i] = cols[i] * warm
+				arr[Mesh.ARRAY_COLOR] = cols
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			mi.mesh = out
+
+
+## Peretele Vaii Rosii: mai ROSU si mai LUMINOS decat il da .glb-ul.
+##
+## De ce. Zidul de pe umarul exterior (ZidulValeiRosii) e construit din
+## `cliff_band_module`, si in captura iesea cenusiu — panouri de beton intr-un
+## desert cald. Prima banuiala, ca sloturile din .glb sunt gresite, e FALSA:
+## masurat cu ProbeCappZidUV, piesa foloseste 1/2/19/23/27, adica D4994D,
+## 915D27, E9DCC0, C4784F, A8683A — toate calde. Cenusiul vine din LUMINA:
+## fata dinspre drum e intoarsa de la soarele de 13 grade, iar AO-ul copt in
+## vertecsi o mai coboara o data.
+##
+## Masurat pe pixeli, zidul fata de canionul din referinta:
+##   al nostru    nuanta 29.2  luminanta  88.9
+##   referinta    nuanta 14.6  luminanta 110.7
+## Adica prea INCHIS cu 22 de puncte si prea putin rosu cu 15 grade. Un perete
+## de vale rosie care nu e rosu nu spune ca acolo e Valea Rosie; ramane un zid.
+##
+## Se corecteaza pe vertex color, ca si caldura tufului. Multiplicatorul poate
+## doar sa intunece, deci luminanta NU se poate urca de aici — se urca stingand
+## AO-ul copt (culorile existente se duc catre alb) si abia apoi se aplica
+## tenta rosie. Asta e si motivul pentru care functia e separata de
+## `_warm_tuff`: acolo AO-ul trebuie PASTRAT, aici e chiar ce incurca.
+func _redden_cliff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if model.scene_file_path.get_file().get_basename() != "cliff_band_module":
+			continue
+		if not String(model.name).begins_with("zidValea"):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var out := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
+				var cols := PackedColorArray()
+				if raw_cols is PackedColorArray:
+					cols = raw_cols
+				if cols.size() != verts.size():
+					cols = PackedColorArray()
+					cols.resize(verts.size())
+					cols.fill(Color.WHITE)
+				for i in verts.size():
+					# AO-ul copt se stinge pe jumatate: peretele e departat si
+					# in ceata, iar ocluzia lui de aproape doar il inchide.
+					var c := cols[i]
+					# AO-ul copt se stinge aproape complet. 0.55 nu ajungea:
+					# masurat pe pixeli, luminanta zidului urcase doar de la
+					# 88.9 la 92.5, fata de 110.7 in referinta. Peretele e
+					# departat si in ceata — ocluzia lui de contact nu se vede
+					# de la 60 m, dar il inchide cat sa citeasca a beton.
+					c = c.lerp(Color.WHITE, 0.88)
+					# Tenta: taie din verde si mai ales din albastru, rosul
+					# neatins, ca nuanta sa coboare de la ~29 catre ~16 grade.
+					c.g *= 0.72
+					c.b *= 0.42
+					cols[i] = c
 				arr[Mesh.ARRAY_COLOR] = cols
 				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			mi.mesh = out

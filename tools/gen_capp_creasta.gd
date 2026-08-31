@@ -162,8 +162,13 @@ func _wall() -> void:
 		# Doua randuri suprapuse pe verticala + un rest. Piesa are 12.4 m; se
 		# scaleaza pe Y ca suma sa dea exact `want`, si pe X cu putin peste 1
 		# ca sa acopere pasul.
-		var rows := int(ceil(want / 12.4))
-		rows = maxi(rows, 2)
+		# Numarul de randuri variaza pe coloana. Cu acelasi numar peste tot,
+		# rosturile orizontale cad la aceeasi cota pe toata lungimea si ochiul
+		# citeste CURSURI DE ZIDARIE — reprosul cel mai probabil la un perete
+		# facut din module. Variatia se face pe INALTIMEA modulului (2 sau 3
+		# randuri pentru aceeasi inaltime totala), nu pe pozitie, deci
+		# suprapunerea laterala ramane neatinsa si nu se deschid fante.
+		var rows := 2 if (col % 3) == 1 else 3
 		var sy := (want / float(rows)) / 12.4
 		for r in rows:
 			# Fiecare rand e putin retras fata de cel de dedesubt: o faleza

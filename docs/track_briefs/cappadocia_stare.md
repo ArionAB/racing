@@ -45,9 +45,37 @@ Toate pleaca din `feat/cappadocia-assets` (kitul de 45 GLB, PR #364).
   pe traseul VECHI: umbrele bat la 133-169 grade fata de mers, adica inapoi
   peste camera. Vezi `azimutul-soarelui-fata-de-drum`.
 
-## 4. Ce urmeaza (runda 10 era in curs la pauza)
+## 4. Ce urmeaza (runda 10 s-a INCHEIAT; asta e punctul de reluare)
 
-Amandoi criticii orbi au cerut ACELASI lucru, si e primul de facut:
+**Runda 10 s-a facut si s-a judecat: tot pierdem (B 3/10, C pierdut).** Peretele
+care taie orizontul a fost construit pe amandoua ramurile, dar criticii spun ca a
+introdus defecte noi cat cele reparate. Cele trei corectii de la runda 10, care
+sunt punctul de plecare al rundei 11:
+
+1. **"Blocarea cerului nu face o cornisa; TERMINAREA pamantului o face."** Criticul
+   C: metrica de acoperire peste orizont (26% -> 44%) masoara axa gresita —
+   lipsa e SUB orizont, unde terenul exterior continua pe trei-patru polite in loc
+   sa se termine. Si consecinta practica: daca terenul exterior e taiat la o muchie
+   dura, peretele indepartat **nu mai are nevoie sa fie inalt deloc** — orice
+   inaltime citeste ca mal opus odata ce nu mai e nimic intre ochi si el.
+2. **O treapta se vede doar daca fata ei de SUS e luminata altfel decat fata
+   verticala.** Corbelul de 2.71 m/banda exista in mesh (masurat, monoton) si nu se
+   vede, fiindca benzile sunt separate doar prin nuanta, cu gradient moale — deci
+   citesc ca dungi pictate. Geometria masurata nu dovedeste ca o vede cineva.
+3. **Silueta conului, item unic al criticului B:** conurile sunt suprafete de
+   revolutie netede cu palaria lipita pe taper, deci conturul e o singura curba
+   neintrerupta. Asta produce trei defecte deodata (fara strate care ies, fara
+   scara, si citirea "tesatura"). Remediul: **largeste trunchiul sub palarie ca
+   palaria sa iasa in consola vizibil de la 60 m**, si fa deschiderile mai LATE
+   decat inalte (ferestre patrate, usi 1:2, distribuite pe inaltime) — acum sunt
+   fante verticale care citesc ca metereze.
+
+Si o capcana de metoda, tot din runda 10: constructorul C a ales o captura DIN LAT
+(nu din pozitia soferului) fiindca acolo "se citesc stratele" — si exact unghiul ala
+a scos la iveala doua defecte mai scumpe pe care conul ingust al vederii de sofer le
+ascundea. Alegerea cadrului nu repara lumea.
+
+Contextul care ramane valabil:
 
 > **Ridica un perete care TAIE ORIZONTUL pe partea exterioara**, la 30-60 m,
 > in benzi orizontale care ies in trepte. Nu mai sapa in jos — pamantul e sapat.

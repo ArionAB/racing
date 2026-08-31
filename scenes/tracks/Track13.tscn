@@ -78,5 +78,5 @@ radius_m = 92
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.02, 11, 6)
 gizmo_extents = 46
 script = ExtResource("3_hollow")
-radius_m = 34.0
+radius_m = 42.0
 wall_m = 12.0

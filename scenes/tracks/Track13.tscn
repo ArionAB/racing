@@ -1178,7 +1178,7 @@ collar_span = 0.120
 cap_flare = 0.33
 cap_from = 0.78
 cap_cone = 0.70
-cap_tuck = 0.34
+cap_tuck = 0.44
 window_rows = 1
 window_per_row = 2
 window_height_m = 1.59
@@ -1361,7 +1361,7 @@ collar_span = 0.106
 cap_flare = 0.31
 cap_from = 0.76
 cap_cone = 0.70
-cap_tuck = 0.34
+cap_tuck = 0.44
 window_rows = 2
 window_per_row = 2
 window_height_m = 1.40
@@ -1685,7 +1685,7 @@ collar_span = 0.110
 cap_flare = 0.35
 cap_from = 0.78
 cap_cone = 0.70
-cap_tuck = 0.34
+cap_tuck = 0.44
 window_rows = 1
 window_per_row = 2
 window_height_m = 1.55
@@ -1732,7 +1732,7 @@ collar_span = 0.132
 cap_flare = 0.32
 cap_from = 0.71
 cap_cone = 0.70
-cap_tuck = 0.34
+cap_tuck = 0.44
 window_rows = 2
 window_per_row = 2
 window_height_m = 1.42
@@ -1962,7 +1962,7 @@ collar_span = 0.106
 cap_flare = 0.39
 cap_from = 0.77
 cap_cone = 0.70
-cap_tuck = 0.34
+cap_tuck = 0.44
 window_rows = 2
 window_per_row = 2
 window_height_m = 1.43
@@ -2386,7 +2386,7 @@ collar_span = 0.134
 cap_flare = 0.48
 cap_from = 0.74
 cap_cone = 0.70
-cap_tuck = 0.34
+cap_tuck = 0.44
 talus_spread = 0.33
 talus_height = 0.34
 talus_sides = 12
@@ -2851,7 +2851,7 @@ collar_span = 0.108
 cap_flare = 0.38
 cap_from = 0.77
 cap_cone = 0.70
-cap_tuck = 0.34
+cap_tuck = 0.44
 talus_spread = 0.26
 talus_height = 0.38
 talus_sides = 14
@@ -3748,4 +3748,186 @@ metadata/coliziune = "none"
 
 [node name="molozMargine99" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
 transform = Transform3D(-0.198829, 0, -0.104069, 0, 0.224418, 0, 0.104069, 0, -0.198829, -33.882, 55.714, 71.655)
+metadata/coliziune = "none"
+
+[node name="UmarulBenzii" type="Node3D" parent="DecorManual"]
+
+[node name="piatraUmar0" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.075143, 0, 0.425889, 0, 0.432468, 0, -0.425889, 0, -0.075143, -221.230, 49.476, 36.732)
+metadata/coliziune = "none"
+
+[node name="piatraUmar1" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.164451, 0, 0.226519, 0, 0.279919, 0, -0.226519, 0, 0.164451, -225.142, 49.710, 38.655)
+metadata/coliziune = "none"
+
+[node name="conUmar2" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.094663, 0, -0.492557, 0, 0.501571, 0, 0.492557, 0, 0.094663, -227.959, 49.556, 56.319)
+metadata/coliziune = "none"
+
+[node name="tufaUmar3" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.103727, 0, -0.823297, 0, 1.376965, 0, 0.823297, 0, -1.103727, -227.412, 49.496, 54.320)
+metadata/coliziune = "none"
+
+[node name="piatraUmar4" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.274831, 0, -0.148967, 0, 0.312608, 0, 0.148967, 0, 0.274831, -210.866, 49.444, 39.340)
+metadata/coliziune = "none"
+
+[node name="tufaUmar5" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.546883, 0, 1.396008, 0, 2.083671, 0, -1.396008, 0, -1.546883, -213.782, 49.103, 60.088)
+metadata/coliziune = "none"
+
+[node name="piatraUmar6" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.018162, 0, -0.417286, 0, 0.417681, 0, 0.417286, 0, 0.018162, -209.226, 49.572, 58.148)
+metadata/coliziune = "none"
+
+[node name="conUmar7" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.107454, 0, -0.508277, 0, 0.519512, 0, 0.508277, 0, 0.107454, -191.434, 49.535, 46.055)
+metadata/coliziune = "none"
+
+[node name="piatraUmar8" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.373033, 0, -0.022501, 0, 0.373711, 0, 0.022501, 0, 0.373033, -196.692, 49.242, 63.454)
+metadata/coliziune = "none"
+
+[node name="conUmar9" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.495791, 0, 0.316574, 0, 0.588241, 0, -0.316574, 0, -0.495791, -195.788, 48.399, 65.077)
+metadata/coliziune = "none"
+
+[node name="conUmar10" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.249123, 0, -0.406901, 0, 0.477107, 0, 0.406901, 0, 0.249123, -186.022, 49.492, 47.717)
+metadata/coliziune = "none"
+
+[node name="piatraUmar11" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.322713, 0, 0.216385, 0, 0.388544, 0, -0.216385, 0, 0.322713, -176.888, 49.359, 49.859)
+metadata/coliziune = "none"
+
+[node name="tufaUmar12" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.894985, 0, -0.859255, 0, 2.080694, 0, 0.859255, 0, -1.894985, -184.002, 49.072, 65.154)
+metadata/coliziune = "none"
+
+[node name="tufaUmar13" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.719498, 0, 1.672938, 0, 1.821098, 0, -1.672938, 0, -0.719498, -171.992, 49.027, 53.083)
+metadata/coliziune = "none"
+
+[node name="piatraUmar14" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.009554, 0, 0.228231, 0, 0.228431, 0, -0.228231, 0, 0.009554, -169.908, 49.302, 67.577)
+metadata/coliziune = "none"
+
+[node name="piatraUmar15" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.102314, 0, 0.324269, 0, 0.340027, 0, -0.324269, 0, -0.102314, -165.174, 49.227, 67.282)
+metadata/coliziune = "none"
+
+[node name="conUmar16" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.184606, 0, -0.401029, 0, 0.441478, 0, 0.401029, 0, -0.184606, -172.886, 48.772, 69.038)
+metadata/coliziune = "none"
+
+[node name="piatraUmar17" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.305215, 0, -0.133300, 0, 0.333054, 0, 0.133300, 0, -0.305215, -157.095, 49.048, 50.262)
+metadata/coliziune = "none"
+
+[node name="conUmar18" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.136531, 0, -0.583601, 0, 0.599358, 0, 0.583601, 0, 0.136531, -155.350, 48.964, 49.389)
+metadata/coliziune = "none"
+
+[node name="piatraUmar19" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.304143, 0, 0.188853, 0, 0.358007, 0, -0.188853, 0, 0.304143, -156.499, 47.984, 68.707)
+metadata/coliziune = "none"
+
+[node name="tufaUmar20" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.572747, 0, 1.159799, 0, 1.293512, 0, -1.159799, 0, 0.572747, -138.156, 45.599, 61.446)
+metadata/coliziune = "none"
+
+[node name="piatraUmar21" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.324664, 0, -0.320952, 0, 0.456527, 0, 0.320952, 0, -0.324664, -122.740, 47.612, 55.071)
+metadata/coliziune = "none"
+
+[node name="tufaUmar22" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.202671, 0, -0.121993, 0, 1.208843, 0, 0.121993, 0, 1.202671, -110.000, 46.853, 52.211)
+metadata/coliziune = "none"
+
+[node name="tufaUmar23" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.125880, 0, -1.700329, 0, 1.704982, 0, 1.700329, 0, -0.125880, -96.989, 47.821, 32.064)
+metadata/coliziune = "none"
+
+[node name="piatraUmar24" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.028812, 0, 0.315792, 0, 0.317104, 0, -0.315792, 0, -0.028812, -97.940, 48.101, 32.188)
+metadata/coliziune = "none"
+
+[node name="piatraUmar25" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.167338, 0, 0.115501, 0, 0.203328, 0, -0.115501, 0, -0.167338, -99.337, 47.730, 47.361)
+metadata/coliziune = "none"
+
+[node name="conUmar26" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.099938, 0, -0.366828, 0, 0.380198, 0, 0.366828, 0, -0.099938, -85.697, 47.902, 31.111)
+metadata/coliziune = "none"
+
+[node name="conUmar27" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.474061, 0, 0.290978, 0, 0.556239, 0, -0.290978, 0, 0.474061, -84.516, 47.873, 29.602)
+metadata/coliziune = "none"
+
+[node name="tufaUmar28" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.807929, 0, -0.311101, 0, 1.834500, 0, 0.311101, 0, -1.807929, -88.034, 45.155, 50.368)
+metadata/coliziune = "none"
+
+[node name="tufaUmar29" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.005763, 0, 2.090877, 0, 2.090885, 0, -2.090877, 0, -0.005763, -86.245, 45.146, 51.018)
+metadata/coliziune = "none"
+
+[node name="piatraUmar30" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.212705, 0, 0.152264, 0, 0.261587, 0, -0.152264, 0, 0.212705, -88.252, 46.317, 48.343)
+metadata/coliziune = "none"
+
+[node name="tufaUmar31" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.386351, 0, 1.763427, 0, 1.805254, 0, -1.763427, 0, 0.386351, -69.174, 47.378, 35.627)
+metadata/coliziune = "none"
+
+[node name="tufaUmar32" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.882954, 0, 1.073524, 0, 1.389987, 0, -1.073524, 0, -0.882954, -73.580, 44.953, 54.853)
+metadata/coliziune = "none"
+
+[node name="piatraUmar33" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.165075, 0, -0.244082, 0, 0.294662, 0, 0.244082, 0, 0.165075, -71.911, 47.476, 52.406)
+metadata/coliziune = "none"
+
+[node name="piatraUmar34" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.366763, 0, 0.002823, 0, 0.366774, 0, -0.002823, 0, -0.366763, -37.857, 47.519, 48.278)
+metadata/coliziune = "none"
+
+[node name="conUmar35" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.346892, 0, -0.193920, 0, 0.397415, 0, 0.193920, 0, 0.346892, -44.107, 44.738, 64.102)
+metadata/coliziune = "none"
+
+[node name="conUmar36" parent="DecorManual/UmarulBenzii" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.071921, 0, 0.569860, 0, 0.574380, 0, -0.569860, 0, 0.071921, -26.738, 46.383, 68.871)
+metadata/coliziune = "none"
+
+[node name="tufaUmar37" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.063976, 0, 1.732997, 0, 1.734178, 0, -1.732997, 0, 0.063976, -25.706, 46.228, 67.624)
+metadata/coliziune = "none"
+
+[node name="tufaUmar38" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.613621, 0, 1.016320, 0, 1.907008, 0, -1.016320, 0, -1.613621, -32.995, 46.117, 65.481)
+metadata/coliziune = "none"
+
+[node name="piatraUmar39" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.309574, 0, 0.098116, 0, 0.324751, 0, -0.098116, 0, 0.309574, -11.193, 46.987, 54.795)
+metadata/coliziune = "none"
+
+[node name="tufaUmar40" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.209637, 0, -0.317568, 0, 1.250628, 0, 0.317568, 0, -1.209637, -11.818, 47.052, 56.464)
+metadata/coliziune = "none"
+
+[node name="tufaUmar41" parent="DecorManual/UmarulBenzii" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.078788, 0, -0.571845, 0, 1.220979, 0, 0.571845, 0, 1.078788, -17.696, 44.682, 71.334)
+metadata/coliziune = "none"
+
+[node name="piatraUmar42" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.012675, 0, 0.254014, 0, 0.254330, 0, -0.254014, 0, 0.012675, -13.900, 44.267, 72.484)
+metadata/coliziune = "none"
+
+[node name="piatraUmar43" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(-0.169330, 0, -0.226734, 0, 0.282986, 0, 0.226734, 0, -0.169330, -15.299, 45.852, 70.110)
+metadata/coliziune = "none"
+
+[node name="piatraUmar44" parent="DecorManual/UmarulBenzii" instance=ExtResource("27_crk_c")]
+transform = Transform3D(0.452155, 0, -0.064092, 0, 0.456675, 0, 0.064092, 0, 0.452155, -0.052, 46.677, 54.107)
 metadata/coliziune = "none"

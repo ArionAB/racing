@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bgencappfgat1"]
+
+[ext_resource type="Script" path="res://tools/gen_capp_f_gat.gd" id="1"]
+
+[node name="GenCappFGat" type="Node"]
+script = ExtResource("1")

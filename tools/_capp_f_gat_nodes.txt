@@ -1,0 +1,731 @@
+[node name="tavangat_500" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.847889, 0.000000, -0.530173, 0.000000, 1.000000, 0.000000, 0.530173, 0.000000, 0.847889, -319.482269, 21.924911, -126.825302)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_501" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.847889, 0.000000, -0.530173, 0.000000, 1.000000, 0.000000, 0.530173, 0.000000, 0.847889, -309.307587, 21.924911, -120.463226)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_502" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.847889, 0.000000, -0.530173, 0.000000, 1.000000, 0.000000, 0.530173, 0.000000, 0.847889, -299.132904, 21.924911, -114.101151)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_503" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.852557, 0.000000, -0.522634, 0.000000, 1.000000, 0.000000, 0.522634, 0.000000, 0.852557, -324.593079, 21.852139, -118.663315)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_504" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.852557, 0.000000, -0.522634, 0.000000, 1.000000, 0.000000, 0.522634, 0.000000, 0.852557, -314.362396, 21.852139, -112.391708)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_505" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.852557, 0.000000, -0.522634, 0.000000, 1.000000, 0.000000, 0.522634, 0.000000, 0.852557, -304.131714, 21.852139, -106.120102)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_506" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -329.669373, 21.784868, -109.931763)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_507" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -319.222870, 21.784868, -104.026642)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_508" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -308.776367, 21.784868, -98.121521)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_509" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.865752, 0.000000, -0.500473, 0.000000, 1.000000, 0.000000, 0.500473, 0.000000, 0.865752, -334.230743, 21.720833, -101.993446)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_510" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.865752, 0.000000, -0.500473, 0.000000, 1.000000, 0.000000, 0.500473, 0.000000, 0.865752, -323.841705, 21.720833, -95.987778)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_511" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.865752, 0.000000, -0.500473, 0.000000, 1.000000, 0.000000, 0.500473, 0.000000, 0.865752, -313.452667, 21.720833, -89.982109)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_512" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.899612, 0.000000, -0.436691, 0.000000, 1.000000, 0.000000, 0.436691, 0.000000, 0.899612, -338.283264, 21.667976, -94.414124)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_513" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.899612, 0.000000, -0.436691, 0.000000, 1.000000, 0.000000, 0.436691, 0.000000, 0.899612, -327.487915, 21.667976, -89.173828)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_514" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.899612, 0.000000, -0.436691, 0.000000, 1.000000, 0.000000, 0.436691, 0.000000, 0.899612, -316.692566, 21.667976, -83.933533)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_515" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.917792, 0.000000, -0.397062, 0.000000, 1.000000, 0.000000, 0.397062, 0.000000, 0.917792, -342.382324, 21.602503, -85.545158)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_516" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.917792, 0.000000, -0.397062, 0.000000, 1.000000, 0.000000, 0.397062, 0.000000, 0.917792, -331.368835, 21.602503, -80.780418)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_517" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.917792, 0.000000, -0.397062, 0.000000, 1.000000, 0.000000, 0.397062, 0.000000, 0.917792, -320.355347, 21.602503, -76.015678)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_518" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.955185, 0.000000, -0.296009, 0.000000, 1.000000, 0.000000, 0.296009, 0.000000, 0.955185, -345.484253, 21.546560, -77.087242)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_519" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.955185, 0.000000, -0.296009, 0.000000, 1.000000, 0.000000, 0.296009, 0.000000, 0.955185, -334.022034, 21.546560, -73.535141)
+metadata/coliziune = "mesh"
+
+[node name="tavangat_520" parent="DecorManual/F3_Gat" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.955185, 0.000000, -0.296009, 0.000000, 1.000000, 0.000000, 0.296009, 0.000000, 0.955185, -322.559814, 21.546560, -69.983040)
+metadata/coliziune = "mesh"
+
+[node name="peretegat_521" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.378450, 0.000000, -2.204512, 0.000000, 2.600000, 0.000000, 2.204512, 0.000000, -1.378450, -320.330139, 12.924911, -127.355476)
+metadata/coliziune = "hull"
+
+[node name="peretegat_522" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.378450, 0.000000, -2.204512, 0.000000, 2.600000, 0.000000, 2.204512, 0.000000, -1.378450, -320.330139, 20.724911, -127.355476)
+metadata/coliziune = "hull"
+
+[node name="poalagat_523" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.378450, 0.000000, -2.204512, 0.000000, 2.600000, 0.000000, 2.204512, 0.000000, -1.378450, -315.709137, 12.924911, -124.466034)
+metadata/coliziune = "hull"
+
+[node name="peretegat_524" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.378450, 0.000000, 2.204512, 0.000000, 2.600000, 0.000000, -2.204512, 0.000000, 1.378450, -298.285034, 12.924911, -113.570976)
+metadata/coliziune = "hull"
+
+[node name="peretegat_525" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.378450, 0.000000, 2.204512, 0.000000, 2.600000, 0.000000, -2.204512, 0.000000, 1.378450, -298.285034, 20.724911, -113.570976)
+metadata/coliziune = "hull"
+
+[node name="poalagat_526" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.378450, 0.000000, 2.204512, 0.000000, 2.600000, 0.000000, -2.204512, 0.000000, 1.378450, -302.906036, 12.924911, -116.460419)
+metadata/coliziune = "hull"
+
+[node name="peretegat_527" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.378773, 0.000000, -2.204311, 0.000000, 2.600000, 0.000000, 2.204311, 0.000000, -1.378773, -324.231262, 12.868400, -121.146103)
+metadata/coliziune = "hull"
+
+[node name="peretegat_528" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.378773, 0.000000, -2.204311, 0.000000, 2.600000, 0.000000, 2.204311, 0.000000, -1.378773, -324.231262, 20.668400, -121.146103)
+metadata/coliziune = "hull"
+
+[node name="poalagat_529" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.378773, 0.000000, -2.204311, 0.000000, 2.600000, 0.000000, 2.204311, 0.000000, -1.378773, -319.610687, 12.868400, -118.255989)
+metadata/coliziune = "hull"
+
+[node name="peretegat_530" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.378772, 0.000000, 2.204311, 0.000000, 2.600000, 0.000000, -2.204311, 0.000000, 1.378772, -302.188171, 12.868400, -107.358383)
+metadata/coliziune = "hull"
+
+[node name="peretegat_531" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.378772, 0.000000, 2.204311, 0.000000, 2.600000, 0.000000, -2.204311, 0.000000, 1.378772, -302.188171, 20.668400, -107.358383)
+metadata/coliziune = "hull"
+
+[node name="poalagat_532" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.378772, 0.000000, 2.204311, 0.000000, 2.600000, 0.000000, -2.204311, 0.000000, 1.378772, -306.808746, 12.868400, -110.248497)
+metadata/coliziune = "hull"
+
+[node name="peretegat_533" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.311568, 0.000000, -2.244948, 0.000000, 2.600000, 0.000000, 2.244948, 0.000000, -1.311568, -327.508911, 12.825520, -115.738350)
+metadata/coliziune = "hull"
+
+[node name="peretegat_534" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.311568, 0.000000, -2.244948, 0.000000, 2.600000, 0.000000, 2.244948, 0.000000, -1.311568, -327.508911, 20.625519, -115.738350)
+metadata/coliziune = "hull"
+
+[node name="poalagat_535" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.311568, 0.000000, -2.244948, 0.000000, 2.600000, 0.000000, 2.244948, 0.000000, -1.311568, -322.803162, 12.825520, -112.989105)
+metadata/coliziune = "hull"
+
+[node name="peretegat_536" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.311568, 0.000000, 2.244947, 0.000000, 2.600000, 0.000000, -2.244947, 0.000000, 1.311568, -305.059448, 12.825520, -102.622673)
+metadata/coliziune = "hull"
+
+[node name="peretegat_537" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.311568, 0.000000, 2.244947, 0.000000, 2.600000, 0.000000, -2.244947, 0.000000, 1.311568, -305.059448, 20.625519, -102.622673)
+metadata/coliziune = "hull"
+
+[node name="poalagat_538" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.311568, 0.000000, 2.244947, 0.000000, 2.600000, 0.000000, -2.244947, 0.000000, 1.311568, -309.765198, 12.825520, -105.371918)
+metadata/coliziune = "hull"
+
+[node name="peretegat_539" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.279442, 0.000000, -2.263411, 0.000000, 2.600000, 0.000000, 2.263411, 0.000000, -1.279442, -330.539917, 12.784868, -110.423851)
+metadata/coliziune = "hull"
+
+[node name="peretegat_540" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.279442, 0.000000, -2.263411, 0.000000, 2.600000, 0.000000, 2.263411, 0.000000, -1.279442, -330.539917, 20.584869, -110.423851)
+metadata/coliziune = "hull"
+
+[node name="poalagat_541" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.279442, 0.000000, -2.263411, 0.000000, 2.600000, 0.000000, 2.263411, 0.000000, -1.279442, -325.795471, 12.784868, -107.741943)
+metadata/coliziune = "hull"
+
+[node name="peretegat_542" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.279442, 0.000000, 2.263411, 0.000000, 2.600000, 0.000000, -2.263411, 0.000000, 1.279442, -307.905823, 12.784868, -97.629433)
+metadata/coliziune = "hull"
+
+[node name="peretegat_543" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.279442, 0.000000, 2.263411, 0.000000, 2.600000, 0.000000, -2.263411, 0.000000, 1.279442, -307.905823, 20.584869, -97.629433)
+metadata/coliziune = "hull"
+
+[node name="poalagat_544" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.279442, 0.000000, 2.263411, 0.000000, 2.600000, 0.000000, -2.263411, 0.000000, 1.279442, -312.650269, 12.784868, -100.311340)
+metadata/coliziune = "hull"
+
+[node name="peretegat_545" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.301229, 0.000000, -2.250956, 0.000000, 2.600000, 0.000000, 2.250956, 0.000000, -1.301229, -335.096497, 12.720834, -102.493919)
+metadata/coliziune = "hull"
+
+[node name="peretegat_546" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.301229, 0.000000, -2.250956, 0.000000, 2.600000, 0.000000, 2.250956, 0.000000, -1.301229, -335.096497, 20.520834, -102.493919)
+metadata/coliziune = "hull"
+
+[node name="poalagat_547" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.301229, 0.000000, -2.250956, 0.000000, 2.600000, 0.000000, 2.250956, 0.000000, -1.301229, -330.378143, 12.720834, -99.766350)
+metadata/coliziune = "hull"
+
+[node name="peretegat_548" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.301229, 0.000000, 2.250956, 0.000000, 2.600000, 0.000000, -2.250956, 0.000000, 1.301229, -312.586914, 12.720834, -89.481636)
+metadata/coliziune = "hull"
+
+[node name="peretegat_549" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.301229, 0.000000, 2.250956, 0.000000, 2.600000, 0.000000, -2.250956, 0.000000, 1.301229, -312.586914, 20.520834, -89.481636)
+metadata/coliziune = "hull"
+
+[node name="poalagat_550" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.301229, 0.000000, 2.250956, 0.000000, 2.600000, 0.000000, -2.250956, 0.000000, 1.301229, -317.305267, 12.720834, -92.209206)
+metadata/coliziune = "hull"
+
+[node name="peretegat_551" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.183305, 0.000000, -2.315122, 0.000000, 2.600000, 0.000000, 2.315122, 0.000000, -1.183305, -338.090179, 12.683100, -97.043823)
+metadata/coliziune = "hull"
+
+[node name="peretegat_552" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.183305, 0.000000, -2.315122, 0.000000, 2.600000, 0.000000, 2.315122, 0.000000, -1.183305, -338.090179, 20.483101, -97.043823)
+metadata/coliziune = "hull"
+
+[node name="poalagat_553" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.183305, 0.000000, -2.315122, 0.000000, 2.600000, 0.000000, 2.315122, 0.000000, -1.183305, -333.237305, 12.683100, -94.563438)
+metadata/coliziune = "hull"
+
+[node name="peretegat_554" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.183305, 0.000000, 2.315122, 0.000000, 2.600000, 0.000000, -2.315122, 0.000000, 1.183305, -314.938934, 12.683100, -85.210785)
+metadata/coliziune = "hull"
+
+[node name="peretegat_555" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.183305, 0.000000, 2.315122, 0.000000, 2.600000, 0.000000, -2.315122, 0.000000, 1.183305, -314.938934, 20.483101, -85.210785)
+metadata/coliziune = "hull"
+
+[node name="poalagat_556" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.183305, 0.000000, 2.315122, 0.000000, 2.600000, 0.000000, -2.315122, 0.000000, 1.183305, -319.791809, 12.683100, -87.691170)
+metadata/coliziune = "hull"
+
+[node name="peretegat_557" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.092062, 0.000000, -2.359534, 0.000000, 2.600000, 0.000000, 2.359534, 0.000000, -1.092062, -341.464630, 12.631871, -89.995735)
+metadata/coliziune = "hull"
+
+[node name="peretegat_558" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.092062, 0.000000, -2.359534, 0.000000, 2.600000, 0.000000, 2.359534, 0.000000, -1.092062, -341.464630, 20.431871, -89.995735)
+metadata/coliziune = "hull"
+
+[node name="poalagat_559" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.092062, 0.000000, -2.359534, 0.000000, 2.600000, 0.000000, 2.359534, 0.000000, -1.092062, -336.518677, 12.631871, -87.706604)
+metadata/coliziune = "hull"
+
+[node name="peretegat_560" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.092062, 0.000000, 2.359534, 0.000000, 2.600000, 0.000000, -2.359534, 0.000000, 1.092062, -317.869293, 12.631871, -79.075111)
+metadata/coliziune = "hull"
+
+[node name="peretegat_561" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.092062, 0.000000, 2.359534, 0.000000, 2.600000, 0.000000, -2.359534, 0.000000, 1.092062, -317.869293, 20.431871, -79.075111)
+metadata/coliziune = "hull"
+
+[node name="poalagat_562" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.092062, 0.000000, 2.359534, 0.000000, 2.600000, 0.000000, -2.359534, 0.000000, 1.092062, -322.815247, 12.631871, -81.364243)
+metadata/coliziune = "hull"
+
+[node name="peretegat_563" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.970183, 0.000000, -2.412207, 0.000000, 2.600000, 0.000000, 2.412207, 0.000000, -0.970183, -344.128632, 12.589495, -83.964348)
+metadata/coliziune = "hull"
+
+[node name="peretegat_564" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.970183, 0.000000, -2.412207, 0.000000, 2.600000, 0.000000, 2.412207, 0.000000, -0.970183, -344.128632, 20.389496, -83.964348)
+metadata/coliziune = "hull"
+
+[node name="poalagat_565" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.970183, 0.000000, -2.412207, 0.000000, 2.600000, 0.000000, 2.412207, 0.000000, -0.970183, -339.072266, 12.589495, -81.930695)
+metadata/coliziune = "hull"
+
+[node name="peretegat_566" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.970183, 0.000000, 2.412207, 0.000000, 2.600000, 0.000000, -2.412207, 0.000000, 0.970183, -320.006561, 12.589495, -74.262520)
+metadata/coliziune = "hull"
+
+[node name="peretegat_567" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.970183, 0.000000, 2.412207, 0.000000, 2.600000, 0.000000, -2.412207, 0.000000, 0.970183, -320.006561, 20.389496, -74.262520)
+metadata/coliziune = "hull"
+
+[node name="poalagat_568" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.970183, 0.000000, 2.412207, 0.000000, 2.600000, 0.000000, -2.412207, 0.000000, 0.970183, -325.062927, 12.589495, -76.296173)
+metadata/coliziune = "hull"
+
+[node name="peretegat_569" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.769622, 0.000000, -2.483482, 0.000000, 2.600000, 0.000000, 2.483482, 0.000000, -0.769622, -346.439453, 12.546560, -77.383255)
+metadata/coliziune = "hull"
+
+[node name="peretegat_570" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.769622, 0.000000, -2.483482, 0.000000, 2.600000, 0.000000, 2.483482, 0.000000, -0.769622, -346.439453, 20.346561, -77.383255)
+metadata/coliziune = "hull"
+
+[node name="poalagat_571" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.769622, 0.000000, -2.483482, 0.000000, 2.600000, 0.000000, 2.483482, 0.000000, -0.769622, -341.233673, 12.546560, -75.770004)
+metadata/coliziune = "hull"
+
+[node name="peretegat_572" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.769622, 0.000000, 2.483482, 0.000000, 2.600000, 0.000000, -2.483482, 0.000000, 0.769622, -321.604614, 12.546560, -69.687027)
+metadata/coliziune = "hull"
+
+[node name="peretegat_573" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.769622, 0.000000, 2.483482, 0.000000, 2.600000, 0.000000, -2.483482, 0.000000, 0.769622, -321.604614, 20.346561, -69.687027)
+metadata/coliziune = "hull"
+
+[node name="poalagat_574" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.769622, 0.000000, 2.483482, 0.000000, 2.600000, 0.000000, -2.483482, 0.000000, 0.769622, -326.810394, 12.546560, -71.300278)
+metadata/coliziune = "hull"
+
+[node name="tavangura_575" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.318117, 0.000000, -0.948052, 0.000000, 1.000000, 0.000000, 0.948052, 0.000000, 0.318117, -214.010254, 25.907904, -192.421387)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_576" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.318117, 0.000000, -0.948052, 0.000000, 1.000000, 0.000000, 0.948052, 0.000000, 0.318117, -210.192856, 25.907904, -181.044769)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_577" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.318117, 0.000000, -0.948052, 0.000000, 1.000000, 0.000000, 0.948052, 0.000000, 0.318117, -206.375458, 25.907904, -169.668152)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_578" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.359976, 0.000000, -0.932962, 0.000000, 1.000000, 0.000000, 0.932962, 0.000000, 0.359976, -225.315735, 25.809530, -188.438705)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_579" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.359976, 0.000000, -0.932962, 0.000000, 1.000000, 0.000000, 0.932962, 0.000000, 0.359976, -220.996033, 25.809530, -177.243164)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_580" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.359976, 0.000000, -0.932962, 0.000000, 1.000000, 0.000000, 0.932962, 0.000000, 0.359976, -216.676331, 25.809530, -166.047623)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_581" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.364458, 0.000000, -0.931220, 0.000000, 1.000000, 0.000000, 0.931220, 0.000000, 0.364458, -232.560913, 25.756298, -185.551819)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_582" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.364458, 0.000000, -0.931220, 0.000000, 1.000000, 0.000000, 0.931220, 0.000000, 0.364458, -228.187408, 25.756298, -174.377182)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_583" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.364458, 0.000000, -0.931220, 0.000000, 1.000000, 0.000000, 0.931220, 0.000000, 0.364458, -223.813904, 25.756298, -163.202545)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_584" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.354005, 0.000000, -0.935243, 0.000000, 1.000000, 0.000000, 0.935243, 0.000000, 0.354005, -242.783890, 25.686089, -181.660370)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_585" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.354005, 0.000000, -0.935243, 0.000000, 1.000000, 0.000000, 0.935243, 0.000000, 0.354005, -238.535828, 25.686089, -170.437454)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_586" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.354005, 0.000000, -0.935243, 0.000000, 1.000000, 0.000000, 0.935243, 0.000000, 0.354005, -234.287766, 25.686089, -159.214539)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_587" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.356138, 0.000000, -0.934433, 0.000000, 1.000000, 0.000000, 0.934433, 0.000000, 0.356138, -253.141235, 25.616970, -177.673218)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_588" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.356138, 0.000000, -0.934433, 0.000000, 1.000000, 0.000000, 0.934433, 0.000000, 0.356138, -248.867584, 25.616970, -166.460022)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_589" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.356138, 0.000000, -0.934433, 0.000000, 1.000000, 0.000000, 0.934433, 0.000000, 0.356138, -244.593933, 25.616970, -155.246826)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_590" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.370507, 0.000000, -0.928829, 0.000000, 1.000000, 0.000000, 0.928829, 0.000000, 0.370507, -260.556915, 25.564375, -174.869308)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_591" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.370507, 0.000000, -0.928829, 0.000000, 1.000000, 0.000000, 0.928829, 0.000000, 0.370507, -256.110840, 25.564375, -163.723358)
+metadata/coliziune = "mesh"
+
+[node name="tavangura_592" parent="DecorManual/F1_Gura" instance=ExtResource("hall_ceiling_module")]
+transform = Transform3D(0.370507, 0.000000, -0.928829, 0.000000, 1.000000, 0.000000, 0.928829, 0.000000, 0.370507, -251.664749, 25.564375, -152.577408)
+metadata/coliziune = "mesh"
+
+[node name="peretegura_593" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.473153, 0.000000, -0.802194, 0.000000, 2.600000, 0.000000, 0.802194, 0.000000, -2.473153, -212.672409, 13.926319, -194.971848)
+metadata/coliziune = "hull"
+
+[node name="peretegura_594" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.473153, 0.000000, -0.802194, 0.000000, 2.600000, 0.000000, 0.802194, 0.000000, -2.473153, -212.672409, 21.726318, -194.971848)
+metadata/coliziune = "hull"
+
+[node name="poalagura_595" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.473153, 0.000000, -0.802194, 0.000000, 2.600000, 0.000000, 0.802194, 0.000000, -2.473153, -210.990891, 13.926319, -189.787750)
+metadata/coliziune = "hull"
+
+[node name="peretegura_596" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.473153, 0.000000, 0.802193, 0.000000, 2.600000, 0.000000, -0.802193, 0.000000, 2.473153, -204.033401, 13.926319, -168.337906)
+metadata/coliziune = "hull"
+
+[node name="peretegura_597" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.473153, 0.000000, 0.802193, 0.000000, 2.600000, 0.000000, -0.802193, 0.000000, 2.473153, -204.033401, 21.726318, -168.337906)
+metadata/coliziune = "hull"
+
+[node name="poalagura_598" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.473153, 0.000000, 0.802193, 0.000000, 2.600000, 0.000000, -0.802193, 0.000000, 2.473153, -205.714920, 13.926319, -173.522003)
+metadata/coliziune = "hull"
+
+[node name="peretegura_599" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.459289, 0.000000, -0.843740, 0.000000, 2.600000, 0.000000, 0.843740, 0.000000, -2.459289, -219.246216, 13.865000, -192.755325)
+metadata/coliziune = "hull"
+
+[node name="peretegura_600" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.459289, 0.000000, -0.843740, 0.000000, 2.600000, 0.000000, 0.843740, 0.000000, -2.459289, -219.246216, 21.665001, -192.755325)
+metadata/coliziune = "hull"
+
+[node name="poalagura_601" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.459289, 0.000000, -0.843740, 0.000000, 2.600000, 0.000000, 0.843740, 0.000000, -2.459289, -217.477615, 13.865000, -187.600281)
+metadata/coliziune = "hull"
+
+[node name="peretegura_602" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.459289, 0.000000, 0.843741, 0.000000, 2.600000, 0.000000, -0.843741, 0.000000, 2.459289, -210.159790, 13.865000, -166.270676)
+metadata/coliziune = "hull"
+
+[node name="peretegura_603" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.459289, 0.000000, 0.843741, 0.000000, 2.600000, 0.000000, -0.843741, 0.000000, 2.459289, -210.159790, 21.665001, -166.270676)
+metadata/coliziune = "hull"
+
+[node name="poalagura_604" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.459289, 0.000000, 0.843741, 0.000000, 2.600000, 0.000000, -0.843741, 0.000000, 2.459289, -211.928391, 13.865000, -171.425720)
+metadata/coliziune = "hull"
+
+[node name="peretegura_605" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.416037, 0.000000, -0.960608, 0.000000, 2.600000, 0.000000, 0.960608, 0.000000, -2.416037, -227.850418, 13.796308, -189.591003)
+metadata/coliziune = "hull"
+
+[node name="peretegura_606" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.416037, 0.000000, -0.960608, 0.000000, 2.600000, 0.000000, 0.960608, 0.000000, -2.416037, -227.850418, 21.596308, -189.591003)
+metadata/coliziune = "hull"
+
+[node name="poalagura_607" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.416037, 0.000000, -0.960608, 0.000000, 2.600000, 0.000000, 0.960608, 0.000000, -2.416037, -225.836838, 13.796308, -184.526611)
+metadata/coliziune = "hull"
+
+[node name="peretegura_608" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.416037, 0.000000, 0.960608, 0.000000, 2.600000, 0.000000, -0.960608, 0.000000, 2.416037, -217.505417, 13.796308, -163.572144)
+metadata/coliziune = "hull"
+
+[node name="peretegura_609" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.416037, 0.000000, 0.960608, 0.000000, 2.600000, 0.000000, -0.960608, 0.000000, 2.416037, -217.505417, 21.596308, -163.572144)
+metadata/coliziune = "hull"
+
+[node name="poalagura_610" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.416037, 0.000000, 0.960608, 0.000000, 2.600000, 0.000000, -0.960608, 0.000000, 2.416037, -219.518997, 13.796308, -168.636536)
+metadata/coliziune = "hull"
+
+[node name="peretegura_611" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.421171, 0.000000, -0.947592, 0.000000, 2.600000, 0.000000, 0.947592, 0.000000, -2.421171, -233.289825, 13.756298, -187.414261)
+metadata/coliziune = "hull"
+
+[node name="peretegura_612" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.421171, 0.000000, -0.947592, 0.000000, 2.600000, 0.000000, 0.947592, 0.000000, -2.421171, -233.289825, 21.556297, -187.414261)
+metadata/coliziune = "hull"
+
+[node name="poalagura_613" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.421171, 0.000000, -0.947592, 0.000000, 2.600000, 0.000000, 0.947592, 0.000000, -2.421171, -231.303528, 13.756298, -182.339111)
+metadata/coliziune = "hull"
+
+[node name="peretegura_614" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.421171, 0.000000, 0.947592, 0.000000, 2.600000, 0.000000, -0.947592, 0.000000, 2.421171, -223.084991, 13.756298, -161.340103)
+metadata/coliziune = "hull"
+
+[node name="peretegura_615" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.421171, 0.000000, 0.947592, 0.000000, 2.600000, 0.000000, -0.947592, 0.000000, 2.421171, -223.084991, 21.556297, -161.340103)
+metadata/coliziune = "hull"
+
+[node name="poalagura_616" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.421171, 0.000000, 0.947592, 0.000000, 2.600000, 0.000000, -0.947592, 0.000000, 2.421171, -225.071289, 13.756298, -166.415253)
+metadata/coliziune = "hull"
+
+[node name="peretegura_617" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.431928, 0.000000, -0.919634, 0.000000, 2.600000, 0.000000, 0.919634, 0.000000, -2.431928, -239.988205, 13.708146, -184.853760)
+metadata/coliziune = "hull"
+
+[node name="peretegura_618" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.431928, 0.000000, -0.919634, 0.000000, 2.600000, 0.000000, 0.919634, 0.000000, -2.431928, -239.988205, 21.508146, -184.853760)
+metadata/coliziune = "hull"
+
+[node name="poalagura_619" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.431928, 0.000000, -0.919634, 0.000000, 2.600000, 0.000000, 0.919634, 0.000000, -2.431928, -238.060516, 13.708146, -179.756058)
+metadata/coliziune = "hull"
+
+[node name="peretegura_620" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.431928, 0.000000, 0.919634, 0.000000, 2.600000, 0.000000, -0.919634, 0.000000, 2.431928, -230.084457, 13.708146, -158.663757)
+metadata/coliziune = "hull"
+
+[node name="peretegura_621" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.431928, 0.000000, 0.919634, 0.000000, 2.600000, 0.000000, -0.919634, 0.000000, 2.431928, -230.084457, 21.508146, -158.663757)
+metadata/coliziune = "hull"
+
+[node name="poalagura_622" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.431928, 0.000000, 0.919634, 0.000000, 2.600000, 0.000000, -0.919634, 0.000000, 2.431928, -232.012146, 13.708146, -163.761459)
+metadata/coliziune = "hull"
+
+[node name="peretegura_623" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.429653, 0.000000, -0.925628, 0.000000, 2.600000, 0.000000, 0.925628, 0.000000, -2.429653, -245.208923, 13.675673, -182.879425)
+metadata/coliziune = "hull"
+
+[node name="peretegura_624" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.429653, 0.000000, -0.925628, 0.000000, 2.600000, 0.000000, 0.925628, 0.000000, -2.429653, -245.208923, 21.475674, -182.879425)
+metadata/coliziune = "hull"
+
+[node name="poalagura_625" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.429653, 0.000000, -0.925628, 0.000000, 2.600000, 0.000000, 0.925628, 0.000000, -2.429653, -243.268677, 13.675673, -177.786499)
+metadata/coliziune = "hull"
+
+[node name="peretegura_626" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.429653, 0.000000, 0.925628, 0.000000, 2.600000, 0.000000, -0.925628, 0.000000, 2.429653, -235.240631, 13.675673, -156.713928)
+metadata/coliziune = "hull"
+
+[node name="peretegura_627" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.429653, 0.000000, 0.925628, 0.000000, 2.600000, 0.000000, -0.925628, 0.000000, 2.429653, -235.240631, 21.475674, -156.713928)
+metadata/coliziune = "hull"
+
+[node name="poalagura_628" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.429653, 0.000000, 0.925628, 0.000000, 2.600000, 0.000000, -0.925628, 0.000000, 2.429653, -237.180878, 13.675673, -161.806854)
+metadata/coliziune = "hull"
+
+[node name="peretegura_629" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.424392, 0.000000, -0.939320, 0.000000, 2.600000, 0.000000, 0.939320, 0.000000, -2.424392, -251.525879, 13.634000, -180.439423)
+metadata/coliziune = "hull"
+
+[node name="peretegura_630" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.424392, 0.000000, -0.939320, 0.000000, 2.600000, 0.000000, 0.939320, 0.000000, -2.424392, -251.525879, 21.434000, -180.439423)
+metadata/coliziune = "hull"
+
+[node name="poalagura_631" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.424392, 0.000000, -0.939320, 0.000000, 2.600000, 0.000000, 0.939320, 0.000000, -2.424392, -249.556915, 13.634000, -175.357513)
+metadata/coliziune = "hull"
+
+[node name="peretegura_632" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.424392, 0.000000, 0.939320, 0.000000, 2.600000, 0.000000, -0.939320, 0.000000, 2.424392, -241.410126, 13.634000, -154.330566)
+metadata/coliziune = "hull"
+
+[node name="peretegura_633" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.424392, 0.000000, 0.939320, 0.000000, 2.600000, 0.000000, -0.939320, 0.000000, 2.424392, -241.410126, 21.434000, -154.330566)
+metadata/coliziune = "hull"
+
+[node name="poalagura_634" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.424392, 0.000000, 0.939320, 0.000000, 2.600000, 0.000000, -0.939320, 0.000000, 2.424392, -243.379089, 13.634000, -159.412476)
+metadata/coliziune = "hull"
+
+[node name="peretegura_635" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.435537, 0.000000, -0.910032, 0.000000, 2.600000, 0.000000, 0.910032, 0.000000, -2.435537, -257.633728, 13.589585, -178.128433)
+metadata/coliziune = "hull"
+
+[node name="peretegura_636" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.435537, 0.000000, -0.910032, 0.000000, 2.600000, 0.000000, 0.910032, 0.000000, -2.435537, -257.633728, 21.389585, -178.128433)
+metadata/coliziune = "hull"
+
+[node name="poalagura_637" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.435537, 0.000000, -0.910032, 0.000000, 2.600000, 0.000000, 0.910032, 0.000000, -2.435537, -255.726166, 13.589585, -173.023178)
+metadata/coliziune = "hull"
+
+[node name="peretegura_638" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.435537, 0.000000, 0.910032, 0.000000, 2.600000, 0.000000, -0.910032, 0.000000, 2.435537, -247.833389, 13.589585, -151.899582)
+metadata/coliziune = "hull"
+
+[node name="peretegura_639" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.435537, 0.000000, 0.910032, 0.000000, 2.600000, 0.000000, -0.910032, 0.000000, 2.435537, -247.833389, 21.389585, -151.899582)
+metadata/coliziune = "hull"
+
+[node name="poalagura_640" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.435537, 0.000000, 0.910032, 0.000000, 2.600000, 0.000000, -0.910032, 0.000000, 2.435537, -249.740967, 13.589585, -157.004837)
+metadata/coliziune = "hull"
+
+[node name="peretegura_641" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.396935, 0.000000, -1.007325, 0.000000, 2.600000, 0.000000, 1.007325, 0.000000, -2.396935, -263.323669, 13.550066, -175.899200)
+metadata/coliziune = "hull"
+
+[node name="peretegura_642" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.396935, 0.000000, -1.007325, 0.000000, 2.600000, 0.000000, 1.007325, 0.000000, -2.396935, -263.323669, 21.350067, -175.899200)
+metadata/coliziune = "hull"
+
+[node name="poalagura_643" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-2.396935, 0.000000, -1.007325, 0.000000, 2.600000, 0.000000, 1.007325, 0.000000, -2.396935, -261.212158, 13.550066, -170.874863)
+metadata/coliziune = "hull"
+
+[node name="peretegura_644" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.396935, 0.000000, 1.007325, 0.000000, 2.600000, 0.000000, -1.007325, 0.000000, 2.396935, -252.475540, 13.550066, -150.086060)
+metadata/coliziune = "hull"
+
+[node name="peretegura_645" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.396935, 0.000000, 1.007325, 0.000000, 2.600000, 0.000000, -1.007325, 0.000000, 2.396935, -252.475540, 21.350067, -150.086060)
+metadata/coliziune = "hull"
+
+[node name="poalagura_646" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.396935, 0.000000, 1.007325, 0.000000, 2.600000, 0.000000, -1.007325, 0.000000, 2.396935, -254.587051, 13.550066, -155.110397)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_647" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -337.525330, 21.924911, -138.107391)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_648" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -330.470917, 21.924911, -133.696350)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_649" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -323.416473, 21.924911, -129.285309)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_650" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -316.362030, 21.924911, -124.874268)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_651" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -309.307587, 21.924911, -120.463226)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_652" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -302.253143, 21.924911, -116.052185)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_653" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -295.198700, 21.924911, -111.641144)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_654" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -288.144257, 21.924911, -107.230103)
+metadata/coliziune = "hull"
+
+[node name="frontongat1_655" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.204512, 0.000000, -1.378450, 0.000000, 2.600000, 0.000000, 1.378450, 0.000000, 2.204512, -281.089844, 21.924911, -102.819061)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_656" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -365.810608, 21.546560, -83.386307)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_657" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -357.863464, 21.546560, -80.923515)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_658" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -349.916321, 21.546560, -78.460724)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_659" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -341.969177, 21.546560, -75.997932)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_660" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -334.022034, 21.546560, -73.535141)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_661" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -326.074890, 21.546560, -71.072350)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_662" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -318.127747, 21.546560, -68.609558)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_663" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -310.180603, 21.546560, -66.146767)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_664" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -302.233459, 21.546560, -63.683979)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_665" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -365.810608, 29.346560, -83.386307)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_666" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -357.863464, 29.346560, -80.923515)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_667" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -349.916321, 29.346560, -78.460724)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_668" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -341.969177, 29.346560, -75.997932)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_669" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -334.022034, 29.346560, -73.535141)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_670" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -326.074890, 29.346560, -71.072350)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_671" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -318.127747, 29.346560, -68.609558)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_672" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -310.180603, 29.346560, -66.146767)
+metadata/coliziune = "hull"
+
+[node name="frontongat2_673" parent="DecorManual/F3_Gat" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.483482, 0.000000, -0.769622, 0.000000, 2.600000, 0.000000, 0.769622, 0.000000, 2.483482, -302.233459, 29.346560, -63.683979)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_674" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -270.793365, 25.550066, -193.673401)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_675" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -267.569916, 25.550066, -186.003204)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_676" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -264.346466, 25.550066, -178.333008)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_677" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -261.123047, 25.550066, -170.662827)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_678" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -257.899597, 25.550066, -162.992630)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_679" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -254.676163, 25.550066, -155.322433)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_680" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -251.452713, 25.550066, -147.652252)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_681" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -248.229279, 25.550066, -139.982056)
+metadata/coliziune = "hull"
+
+[node name="frontongura1_682" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.007325, 0.000000, -2.396935, 0.000000, 2.600000, 0.000000, 2.396935, 0.000000, 1.007325, -245.005829, 25.550066, -132.311859)
+metadata/coliziune = "hull"

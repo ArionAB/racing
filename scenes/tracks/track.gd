@@ -1682,10 +1682,26 @@ static func themes() -> Dictionary:
 			# filtru, nu rasarit.
 			"sky_top": Color.html("B9CCE0"),
 			"sky_horizon": Color.html("F2B27A"),
-			# Ceata din familia orizontului, dar cu o idee mai putin portocaliu:
-			# la 300 m ea e ce vopseste Erciyes, iar cu #F2B27A curat muntele cu
-			# zapada iesea silueta de caramida.
-			"fog": Color(0.92, 0.79, 0.63),
+			# CEATA RECE, si asta e o schimbare deliberata fata de versiunea
+			# calda (0.92, 0.79, 0.63) — care era in familia orizontului.
+			#
+			# De ce se schimba. Criticul, punctul 5: "cadrul e o singura nuanta
+			# pe toate adancimile". Avea dreptate din numere: tuful e crem cald,
+			# drumul e pamant cald, iar ceata era (0.92, 0.79, 0.63), adica tot
+			# un bej. Cu ceata din aceeasi familie cu subiectul, departarea nu
+			# se mai desprinde de prim-plan — toate cele trei planuri cad pe
+			# acelasi ton si cadrul se aplatizeaza.
+			#
+			# Perspectiva aeriana reala merge invers: aerul imprastie albastrul,
+			# deci departarea se RACESTE si se desatureaza, oricat de calda ar
+			# fi lumina. E si mecanismul prin care un desert citeste adanc intr-o
+			# fotografie de dimineata. Aici ceata mai are o treaba: la 300 m ea
+			# vopseste Erciyes, si un munte cu zapada vazut prin bej iesea
+			# silueta de caramida — o ceata rece il lasa sa fie munte.
+			#
+			# Nu e gri: pastreaza o urma de roz de zori (rosul putin peste
+			# verde), ca sa nu contrazica cerul de rasarit de deasupra.
+			"fog": Color(0.72, 0.74, 0.80),
 			"hill_color": Color(0.82, 0.70, 0.56),
 			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
 			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade

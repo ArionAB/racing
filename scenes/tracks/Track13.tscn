@@ -125,17 +125,17 @@ brow_slots = Array[int]([19, 23, 10])
 
 [node name="MalulOpusAlVaiiRosii" type="Marker3D" parent="Faleze"]
 script = ExtResource("15_cliffface")
-frac_start = 0.185
-frac_end = 0.400
+frac_start = 0.170
+frac_end = 0.420
 side = 1.0
 far_wall = true
 far_bank = true
-far_offset_m = 45.0
+far_offset_m = 42.0
 far_eye_rise_m = 6.0
-far_over_eye_m = 9.0
-far_depth_m = 26.0
+far_over_eye_m = 13.0
+far_depth_m = 30.0
 far_step_m = 8.0
-far_bands = 9
+far_bands = 10
 far_relief_m = 1.1
 far_rise_m = 1.2
 far_foot_max_m = 26.0

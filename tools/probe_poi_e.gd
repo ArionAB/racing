@@ -18,7 +18,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	var baked: PackedVector3Array = track.route_at(0).points
+	var baked: PackedVector3Array = track.route_at(0).baked
 	var n: int = baked.size()
 	print("puncte coapte: %d" % n)
 	for f: float in FRACS:

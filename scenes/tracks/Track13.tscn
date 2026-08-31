@@ -293,307 +293,407 @@ script = ExtResource("4_prop")
 [node name="ZidulValeiRosii" type="Node3D" parent="DecorManual"]
 
 [node name="zidValea1" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.070598, 0, 0.252627, 0, 0.874581, 0, -0.252627, 0, -1.070598, -143.881470, 26.850782, 119.313911)
+transform = Transform3D(3.000000, 0.001581, 0.000000, 0.000000, 0.000000, 0.000000, -0.000126, 0.239060, 2.990460, -1.046953, -143.521469, 26.056056)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea2" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.041400, 0, 0.245737, 0, 0.874581, 0, -0.245737, 0, -1.041400, -143.628845, 37.695591, 120.384506)
+transform = Transform3D(2.999328, 0.063475, 0.000000, 0.000000, 0.000000, 0.000000, -0.003677, 0.173729, 2.994963, -0.928282, -143.345472, 37.791214)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea3" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.012201, 0, 0.238848, 0, 0.874581, 0, -0.238848, 0, -1.012201, -143.376221, 48.540398, 121.455109)
+transform = Transform3D(2.995271, 0.168373, 0.000000, 0.000000, 0.000000, 0.000000, 0.008127, -0.144567, 2.996504, -0.510149, -143.289700, 48.020266)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea4" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.052310, 0, 0.320381, 0, 1.321791, 0, -0.320381, 0, -1.052310, -129.330765, 26.705181, 115.444809)
+transform = Transform3D(2.990036, -0.244311, 0.000000, 0.000000, 0.000000, 0.000000, -0.005843, -0.071512, 2.999142, -0.418787, -129.381110, 27.334706)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea5" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.023610, 0, 0.311644, 0, 1.321791, 0, -0.311644, 0, -1.023610, -129.010376, 43.095394, 116.497116)
+transform = Transform3D(2.997883, 0.112687, 0.000000, 0.000000, 0.000000, 0.000000, 0.004369, -0.116240, 2.997744, -1.603161, -129.258863, 44.055219)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea6" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.031092, 0, 0.383210, 0, 0.883859, 0, -0.383210, 0, -1.031092, -116.660706, 26.525414, 111.031769)
+transform = Transform3D(2.993876, 0.191592, 0.000000, 0.000000, 0.000000, 0.000000, 0.017204, -0.268835, 2.987881, -0.031780, -116.647118, 25.678054)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea7" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.002971, 0, 0.372759, 0, 0.883859, 0, -0.372759, 0, -1.002971, -116.277496, 37.485271, 112.062859)
+transform = Transform3D(2.999783, 0.036096, 0.000000, 0.000000, 0.000000, 0.000000, -0.001206, 0.100257, 2.998324, -1.418727, -116.320048, 38.238221)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea8" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.974850, 0, 0.362308, 0, 0.883859, 0, -0.362308, 0, -0.974850, -115.894287, 48.445129, 113.093948)
+transform = Transform3D(2.999606, 0.048644, 0.000000, 0.000000, 0.000000, 0.000000, 0.002077, -0.128106, 2.997263, -1.925371, -115.683425, 48.172213)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea9" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.039184, 0, 0.360688, 0, 0.906543, 0, -0.360688, 0, -1.039184, -105.414612, 26.314388, 107.071175)
+transform = Transform3D(2.999326, -0.063598, 0.000000, 0.000000, 0.000000, 0.000000, 0.001036, 0.048859, 2.999602, -0.867748, -105.416157, 25.547284)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea10" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.010843, 0, 0.350851, 0, 0.906543, 0, -0.350851, 0, -1.010843, -105.053925, 37.555519, 108.110359)
+transform = Transform3D(2.995884, 0.157100, 0.000000, 0.000000, 0.000000, 0.000000, 0.000209, -0.003990, 2.999997, -0.810513, -105.062894, 38.389028)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea11" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.982502, 0, 0.341014, 0, 0.906543, 0, -0.341014, 0, -0.982502, -104.693237, 48.796650, 109.149544)
+transform = Transform3D(2.999579, -0.050284, 0.000000, 0.000000, 0.000000, 0.000000, 0.002541, 0.151563, 2.996168, -0.130036, -104.714047, 48.832624)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea12" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.027739, 0, 0.392113, 0, 1.195214, 0, -0.392113, 0, -1.027739, -93.152290, 26.048372, 102.861984)
+transform = Transform3D(2.995008, -0.172990, 0.000000, 0.000000, 0.000000, 0.000000, 0.017168, 0.297229, 2.985190, -1.769741, -93.603402, 26.457697)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea13" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.999710, 0, 0.381419, 0, 1.195214, 0, -0.381419, 0, -0.999710, -92.760178, 40.869030, 103.889725)
+transform = Transform3D(2.989614, -0.249420, 0.000000, 0.000000, 0.000000, 0.000000, -0.020185, -0.241943, 2.990160, -0.755091, -92.790138, 40.833256)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea14" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.073631, 0, 0.239408, 0, 0.789711, 0, -0.239408, 0, -1.073631, -92.583313, 26.035919, 102.109238)
+transform = Transform3D(2.990206, 0.242218, 0.000000, 0.000000, 0.000000, 0.000000, -0.013744, 0.169673, 2.995166, -0.820290, -92.626517, 25.974731)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea15" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.044350, 0, 0.232879, 0, 0.789711, 0, -0.232879, 0, -1.044350, -92.343903, 35.828335, 103.182869)
+transform = Transform3D(2.984394, 0.305602, 0.000000, 0.000000, 0.000000, 0.000000, 0.027451, -0.268075, 2.987873, -0.953085, -92.284107, 36.167843)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea16" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.015069, 0, 0.226349, 0, 0.789711, 0, -0.226349, 0, -1.015069, -92.104500, 45.620754, 104.256500)
+transform = Transform3D(2.994088, 0.188247, 0.000000, 0.000000, 0.000000, 0.000000, -0.007583, 0.120601, 2.997565, -1.011270, -92.125607, 46.389654)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea17" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.096107, 0, -0.092462, 0, 0.817309, 0, 0.092462, 0, -1.096107, -98.263786, 26.158981, 102.027618)
+transform = Transform3D(2.997218, -0.129159, 0.000000, 0.000000, 0.000000, 0.000000, 0.001811, 0.042015, 2.999705, -1.558035, -98.730677, 26.470266)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea18" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.066213, 0, -0.089940, 0, 0.817309, 0, 0.089940, 0, -1.066213, -98.356247, 36.293606, 103.123726)
+transform = Transform3D(2.999885, -0.026246, 0.000000, 0.000000, 0.000000, 0.000000, -0.000535, -0.061112, 2.999377, -1.020435, -98.366729, 37.136625)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea19" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.036319, 0, -0.087419, 0, 0.817309, 0, 0.087419, 0, -1.036319, -98.448708, 46.428234, 104.219833)
+transform = Transform3D(2.999986, -0.009067, 0.000000, 0.000000, 0.000000, 0.000000, 0.000455, 0.150663, 2.996214, -1.013785, -98.122534, 47.044153)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea20" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.070368, 0, -0.253601, 0, 1.201168, 0, 0.253601, 0, -1.070368, -96.417320, 26.119232, 102.208664)
+transform = Transform3D(2.989093, 0.255583, 0.000000, 0.000000, 0.000000, 0.000000, 0.003096, -0.036208, 2.999780, -0.407562, -96.600663, 26.952855)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea21" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.041176, 0, -0.246684, 0, 1.201168, 0, 0.246684, 0, -1.041176, -96.670921, 41.013718, 103.279030)
+transform = Transform3D(2.997642, 0.118930, 0.000000, 0.000000, 0.000000, 0.000000, -0.009992, 0.251853, 2.989393, -0.471008, -96.655748, 40.919559)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea22" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.038637, 0, -0.362261, 0, 0.901215, 0, 0.362261, 0, -1.038637, -93.299179, 26.051645, 103.320930)
+transform = Transform3D(2.985645, 0.293125, 0.000000, 0.000000, 0.000000, 0.000000, 0.028519, -0.290478, 2.985768, -0.353757, -93.320033, 25.180235)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea23" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.010310, 0, -0.352381, 0, 0.901215, 0, 0.352381, 0, -1.010310, -93.661438, 37.226707, 104.359566)
+transform = Transform3D(3.000000, -0.000992, 0.000000, 0.000000, 0.000000, 0.000000, 0.000049, 0.146675, 2.996412, -1.816985, -93.413887, 37.049329)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea24" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.981984, 0, -0.342502, 0, 0.901215, 0, 0.342502, 0, -0.981984, -94.023705, 48.401772, 105.398201)
+transform = Transform3D(2.984474, -0.304815, 0.000000, 0.000000, 0.000000, 0.000000, 0.003231, 0.031631, 2.999832, -1.981556, -93.943065, 49.266129)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea25" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.049601, 0, -0.329147, 0, 0.901478, 0, 0.329147, 0, -1.049601, -78.776291, 25.746120, 107.963799)
+transform = Transform3D(2.994323, 0.184465, 0.000000, 0.000000, 0.000000, 0.000000, -0.016087, 0.261140, 2.988569, -1.553926, -78.655216, 26.249830)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea26" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.020976, 0, -0.320170, 0, 0.901478, 0, 0.320170, 0, -1.020976, -79.105438, 36.924450, 109.013397)
+transform = Transform3D(2.998133, 0.105835, 0.000000, 0.000000, 0.000000, 0.000000, 0.010100, -0.286129, 2.986307, -0.750159, -79.450677, 36.551335)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea27" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.992350, 0, -0.311194, 0, 0.901478, 0, 0.311194, 0, -0.992350, -79.434586, 48.102779, 110.063004)
+transform = Transform3D(2.995221, 0.169259, 0.000000, 0.000000, 0.000000, 0.000000, 0.002944, -0.052106, 2.999546, -0.092479, -79.442597, 48.543724)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea28" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.050351, 0, -0.326746, 0, 1.251064, 0, 0.326746, 0, -1.050351, -68.072281, 25.557751, 111.308403)
+transform = Transform3D(2.994950, -0.173992, 0.000000, 0.000000, 0.000000, 0.000000, 0.013293, 0.228812, 2.991232, -0.874482, -67.614004, 26.309739)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea29" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.021705, 0, -0.317835, 0, 1.251064, 0, 0.317835, 0, -1.021705, -68.399025, 41.070938, 112.358757)
+transform = Transform3D(2.988644, -0.260779, 0.000000, 0.000000, 0.000000, 0.000000, -0.000258, -0.002955, 2.999999, -0.684595, -67.963969, 41.637814)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea30" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.050342, 0, -0.326773, 0, 0.847079, 0, 0.326773, 0, -1.050342, -58.841331, 25.424118, 114.180031)
+transform = Transform3D(2.997524, -0.121858, 0.000000, 0.000000, 0.000000, 0.000000, -0.010579, -0.260219, 2.988674, -1.226264, -58.533336, 25.464180)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea31" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.021697, 0, -0.317861, 0, 0.847079, 0, 0.317861, 0, -1.021697, -59.168106, 35.927898, 115.230377)
+transform = Transform3D(2.984481, -0.304753, 0.000000, 0.000000, 0.000000, 0.000000, 0.019346, 0.189458, 2.993949, -1.809429, -58.780335, 35.030649)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea32" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.993051, 0, -0.308949, 0, 0.847079, 0, 0.308949, 0, -0.993051, -59.494877, 46.431679, 116.280716)
+transform = Transform3D(2.998586, -0.092095, 0.000000, 0.000000, 0.000000, 0.000000, 0.002950, 0.096060, 2.998460, -0.453984, -59.969087, 46.452455)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea33" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.040922, 0, -0.355643, 0, 0.767969, 0, 0.355643, 0, -1.040922, -49.555336, 25.309393, 117.168343)
+transform = Transform3D(2.997464, -0.123322, 0.000000, 0.000000, 0.000000, 0.000000, 0.004448, 0.108107, 2.998048, -1.388837, -49.933963, 26.206957)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea34" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.012533, 0, -0.345944, 0, 0.767969, 0, 0.345944, 0, -1.012533, -49.910980, 34.832207, 118.209267)
+transform = Transform3D(2.993884, 0.191468, 0.000000, 0.000000, 0.000000, 0.000000, 0.002872, -0.044906, 2.999663, -1.704752, -49.891366, 34.699422)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea35" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.984144, 0, -0.336245, 0, 0.767969, 0, 0.336245, 0, -0.984144, -50.266624, 44.355022, 119.250183)
+transform = Transform3D(2.999365, 0.061709, 0.000000, 0.000000, 0.000000, 0.000000, -0.002114, 0.102739, 2.998240, -0.627147, -50.697116, 44.153336)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea36" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.062470, 0, -0.284882, 0, 1.171781, 0, 0.284882, 0, -1.062470, -33.211952, 25.137796, 121.964813)
+transform = Transform3D(2.988320, 0.264465, 0.000000, 0.000000, 0.000000, 0.000000, -0.016855, 0.190453, 2.993901, -1.971997, -33.167186, 25.815757)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea37" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.033494, 0, -0.277112, 0, 1.171781, 0, 0.277112, 0, -1.033494, -33.496834, 39.667877, 123.027283)
+transform = Transform3D(2.995732, 0.159963, 0.000000, 0.000000, 0.000000, 0.000000, -0.001614, 0.030228, 2.999847, -1.656435, -33.285889, 40.423511)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea38" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.095901, 0, -0.094868, 0, 0.876495, 0, 0.094868, 0, -1.095901, -13.035439, 24.954983, 125.970604)
+transform = Transform3D(2.999941, 0.018810, 0.000000, 0.000000, 0.000000, 0.000000, -0.001460, 0.232780, 2.990955, -0.525083, -13.018586, 25.868158)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea39" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.066013, 0, -0.092281, 0, 0.876495, 0, 0.092281, 0, -1.066013, -13.130307, 35.823517, 127.066505)
+transform = Transform3D(2.992200, 0.216189, 0.000000, 0.000000, 0.000000, 0.000000, -0.015364, 0.212649, 2.992414, -1.286070, -13.204953, 35.651691)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea40" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.036125, 0, -0.089694, 0, 0.876495, 0, 0.089694, 0, -1.036125, -13.225175, 46.692051, 128.162415)
+transform = Transform3D(2.997496, -0.122545, 0.000000, 0.000000, 0.000000, 0.000000, 0.010800, 0.264172, 2.988327, -1.347993, -13.461731, 46.687256)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea41" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.084326, 0, 0.185032, 0, 0.860022, 0, -0.185032, 0, -1.084326, 14.028036, 24.727268, 125.248886)
+transform = Transform3D(2.999533, -0.052941, 0.000000, 0.000000, 0.000000, 0.000000, -0.003106, -0.175957, 2.994834, -1.148925, 13.853825, 24.691374)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea42" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.054754, 0, 0.179986, 0, 0.860022, 0, -0.179986, 0, -1.054754, 14.213068, 35.391537, 126.333214)
+transform = Transform3D(2.994213, 0.186241, 0.000000, 0.000000, 0.000000, 0.000000, -0.014803, 0.237983, 2.990509, -0.461330, 14.529220, 36.087277)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea43" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.025181, 0, 0.174939, 0, 0.860022, 0, -0.174939, 0, -1.025181, 14.398100, 46.055809, 127.417542)
+transform = Transform3D(2.986468, 0.284623, 0.000000, 0.000000, 0.000000, 0.000000, -0.016007, 0.167957, 2.995252, -0.267939, 14.543779, 45.871814)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea44" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.080101, 0, 0.208283, 0, 1.354048, 0, -0.208283, 0, -1.080101, 28.043764, 24.700001, 122.516312)
+transform = Transform3D(2.991967, 0.219397, 0.000000, 0.000000, 0.000000, 0.000000, 0.013011, -0.177431, 2.994720, -0.739303, 28.504963, 24.403901)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea45" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.050644, 0, 0.202603, 0, 1.354048, 0, -0.202603, 0, -1.050644, 28.252047, 41.490200, 123.596413)
+transform = Transform3D(2.999747, 0.038956, 0.000000, 0.000000, 0.000000, 0.000000, -0.002798, 0.215461, 2.992251, -0.905980, 28.290426, 40.709587)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea46" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.074482, 0, 0.235558, 0, 0.880061, 0, -0.235558, 0, -1.074482, 39.043610, 24.700001, 120.196167)
+transform = Transform3D(2.999795, 0.035059, 0.000000, 0.000000, 0.000000, 0.000000, 0.001586, -0.135669, 2.996930, -0.938399, 38.758045, 24.289401)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea47" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.045178, 0, 0.229134, 0, 0.880061, 0, -0.229134, 0, -1.045178, 39.279167, 35.612759, 121.270653)
+transform = Transform3D(2.999796, 0.035018, 0.000000, 0.000000, 0.000000, 0.000000, -0.001700, 0.145639, 2.996462, -1.842267, 39.042880, 36.522510)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea48" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.015874, 0, 0.222709, 0, 0.880061, 0, -0.222709, 0, -1.015874, 39.514725, 46.525520, 122.345131)
+transform = Transform3D(2.997759, 0.115926, 0.000000, 0.000000, 0.000000, 0.000000, -0.007975, 0.206227, 2.992893, -0.497649, 39.737083, 45.896510)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea49" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.076949, 0, 0.224012, 0, 0.770444, 0, -0.224012, 0, -1.076949, 49.602737, 24.700001, 117.969589)
+transform = Transform3D(2.999997, 0.004164, 0.000000, 0.000000, 0.000000, 0.000000, 0.000113, -0.081726, 2.998887, -1.523377, 49.940128, 24.282073)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea50" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.047577, 0, 0.217902, 0, 0.770444, 0, -0.217902, 0, -1.047577, 49.826748, 34.253510, 119.046539)
+transform = Transform3D(2.996238, -0.150194, 0.000000, 0.000000, 0.000000, 0.000000, 0.005831, 0.116314, 2.997739, -1.921819, 49.738390, 35.049618)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea51" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.018206, 0, 0.211793, 0, 0.770444, 0, -0.211793, 0, -1.018206, 50.050762, 43.807018, 120.123489)
+transform = Transform3D(2.999519, -0.053701, 0.000000, 0.000000, 0.000000, 0.000000, -0.003111, -0.173780, 2.994961, -1.987346, 49.647212, 42.852973)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea52" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.076952, 0, 0.223994, 0, 1.197842, 0, -0.223994, 0, -1.076952, 62.209648, 24.700001, 115.347321)
+transform = Transform3D(2.997728, 0.116729, 0.000000, 0.000000, 0.000000, 0.000000, -0.009207, 0.236438, 2.990654, -0.923990, 62.645759, 24.400615)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea53" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.047581, 0, 0.217886, 0, 1.197842, 0, -0.217886, 0, -1.047581, 62.433643, 39.553238, 116.424271)
+transform = Transform3D(2.999243, 0.067385, 0.000000, 0.000000, 0.000000, 0.000000, 0.003946, -0.175631, 2.994852, -0.738147, 62.548788, 40.402726)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea54" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.076952, 0, 0.223996, 0, 0.786514, 0, -0.223996, 0, -1.076952, 70.747826, 24.700001, 108.912415)
+transform = Transform3D(2.994681, -0.178565, 0.000000, 0.000000, 0.000000, 0.000000, 0.006877, 0.115337, 2.997774, -1.151612, 71.226938, 25.456807)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea55" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.047581, 0, 0.217887, 0, 0.786514, 0, -0.217887, 0, -1.047581, 70.971825, 34.452774, 109.989365)
+transform = Transform3D(2.991415, 0.226795, 0.000000, 0.000000, 0.000000, 0.000000, 0.008855, -0.116793, 2.997713, -0.684774, 71.395557, 34.230869)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea56" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.018209, 0, 0.211778, 0, 0.786514, 0, -0.211778, 0, -1.018209, 71.195816, 44.205551, 111.066322)
+transform = Transform3D(2.998642, -0.090264, 0.000000, 0.000000, 0.000000, 0.000000, -0.008439, -0.280361, 2.986859, -0.547435, 71.132557, 43.252878)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea57" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.076948, 0, 0.224017, 0, 0.850026, 0, -0.224017, 0, -1.076948, 80.937737, 23.000000, 101.650436)
+transform = Transform3D(2.997087, -0.132183, 0.000000, 0.000000, 0.000000, 0.000000, -0.005405, -0.122558, 2.997491, -0.160380, 81.237580, 22.244630)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea58" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.047576, 0, 0.217907, 0, 0.850026, 0, -0.217907, 0, -1.047576, 81.161751, 33.540329, 102.727386)
+transform = Transform3D(2.997842, -0.113772, 0.000000, 0.000000, 0.000000, 0.000000, -0.006380, -0.168113, 2.995279, -0.241655, 81.203908, 33.225297)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea59" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.018205, 0, 0.211798, 0, 0.850026, 0, -0.211798, 0, -1.018205, 81.385773, 44.080658, 103.804329)
+transform = Transform3D(2.996767, 0.139235, 0.000000, 0.000000, 0.000000, 0.000000, 0.001775, -0.038199, 2.999756, -1.793010, 81.504743, 43.317224)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea60" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.077914, 0, 0.219320, 0, 1.428296, 0, -0.219320, 0, -1.077914, 92.318954, 23.000000, 94.144150)
+transform = Transform3D(2.998598, -0.091695, 0.000000, 0.000000, 0.000000, 0.000000, 0.007181, 0.234840, 2.990786, -0.782127, 92.474754, 22.057588)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea61" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.048516, 0, 0.213339, 0, 1.428296, 0, -0.213339, 0, -1.048516, 92.538277, 40.710869, 95.222061)
+transform = Transform3D(2.998635, -0.090482, 0.000000, 0.000000, 0.000000, 0.000000, -0.001480, -0.049064, 2.999598, -1.280304, 92.277583, 40.552840)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea62" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.075618, 0, 0.230318, 0, 0.964167, 0, -0.230318, 0, -1.075618, 101.213699, 20.684671, 87.188484)
+transform = Transform3D(2.990762, -0.235247, 0.000000, 0.000000, 0.000000, 0.000000, 0.013809, 0.175559, 2.994827, -0.989764, 101.375262, 21.554002)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea63" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.046283, 0, 0.224036, 0, 0.964167, 0, -0.224036, 0, -1.046283, 101.444016, 32.640343, 88.264099)
+transform = Transform3D(2.999300, -0.064801, 0.000000, 0.000000, 0.000000, 0.000000, -0.002493, -0.115399, 2.997779, -1.536334, 101.091699, 31.687067)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea64" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.016948, 0, 0.217755, 0, 0.964167, 0, -0.217755, 0, -1.016948, 101.674332, 44.596012, 89.339722)
+transform = Transform3D(2.999971, -0.013293, 0.000000, 0.000000, 0.000000, 0.000000, 0.000621, 0.140168, 2.996724, -1.489316, 101.489077, 45.484468)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea65" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.079443, 0, 0.211669, 0, 0.940805, 0, -0.211669, 0, -1.079443, 110.759102, 20.385103, 80.062729)
+transform = Transform3D(2.992417, 0.213168, 0.000000, 0.000000, 0.000000, 0.000000, 0.004181, -0.058690, 2.999423, -0.973479, 110.909315, 21.307714)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea66" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.050003, 0, 0.205896, 0, 0.940805, 0, -0.205896, 0, -1.050003, 110.970772, 32.051079, 81.142174)
+transform = Transform3D(2.996374, -0.147455, 0.000000, 0.000000, 0.000000, 0.000000, -0.000434, -0.008815, 2.999987, -0.783990, 111.225304, 31.686075)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea67" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.020564, 0, 0.200123, 0, 0.940805, 0, -0.200123, 0, -1.020564, 111.182442, 43.717056, 82.221611)
+transform = Transform3D(2.984306, -0.306455, 0.000000, 0.000000, 0.000000, 0.000000, -0.010131, -0.098654, 2.998360, -0.064307, 111.152987, 44.657443)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea68" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.042128, 0, 0.352091, 0, 1.153723, 0, -0.352091, 0, -1.042128, 124.427818, 25.991652, 73.111244)
+transform = Transform3D(2.991377, 0.227301, 0.000000, 0.000000, 0.000000, 0.000000, 0.008526, -0.112209, 2.997889, -0.187669, 124.833863, 25.789801)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea69" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-1.013707, 0, 0.342489, 0, 1.153723, 0, -0.342489, 0, -1.013707, 124.779907, 40.297821, 74.153374)
+transform = Transform3D(2.986627, 0.282950, 0.000000, 0.000000, 0.000000, 0.000000, 0.028172, -0.297360, 2.985094, -1.548682, 125.108959, 39.985197)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea70" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.981562, 0, 0.496524, 0, 0.663684, 0, -0.496524, 0, -0.981562, 140.222244, 26.000000, 66.673805)
+transform = Transform3D(2.998694, -0.088512, 0.000000, 0.000000, 0.000000, 0.000000, 0.005540, 0.187676, 2.994119, -0.707539, 140.271040, 25.948125)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea71" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.954792, 0, 0.482983, 0, 0.663684, 0, -0.482983, 0, -0.954792, 140.718765, 34.229675, 67.655365)
+transform = Transform3D(2.999573, 0.050627, 0.000000, 0.000000, 0.000000, 0.000000, 0.003059, -0.181215, 2.994520, -1.578987, 140.846782, 33.537234)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea72" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.928022, 0, 0.469441, 0, 0.663684, 0, -0.469441, 0, -0.928022, 141.215286, 42.459351, 68.636932)
+transform = Transform3D(2.986660, 0.282602, 0.000000, 0.000000, 0.000000, 0.000000, 0.023282, -0.246051, 2.989802, -0.300514, 141.550346, 42.864048)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea73" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.934353, 0, 0.580504, 0, 0.658609, 0, -0.580504, 0, -0.934353, 152.892715, 28.016397, 59.815830)
+transform = Transform3D(2.998727, 0.087397, 0.000000, 0.000000, 0.000000, 0.000000, 0.005403, -0.185387, 2.994262, -1.765938, 152.765509, 28.478414)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea74" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.908870, 0, 0.564672, 0, 0.658609, 0, -0.564672, 0, -0.908870, 153.473221, 36.183151, 60.750183)
+transform = Transform3D(2.996226, 0.150432, 0.000000, 0.000000, 0.000000, 0.000000, -0.011396, 0.226972, 2.991380, 0.088753, 152.991573, 35.617396)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea75" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.883388, 0, 0.548840, 0, 0.658609, 0, -0.548840, 0, -0.883388, 154.053726, 44.349907, 61.684536)
+transform = Transform3D(2.999553, 0.051764, 0.000000, 0.000000, 0.000000, 0.000000, 0.003777, -0.218875, 2.992003, -0.738129, 154.509269, 44.111071)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea76" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.939433, 0, 0.572246, 0, 1.314087, 0, -0.572246, 0, -0.939433, 161.369629, 21.515251, 54.463017)
+transform = Transform3D(2.999982, 0.010428, 0.000000, 0.000000, 0.000000, 0.000000, 0.001010, -0.290544, 2.985897, -0.651339, 161.027673, 21.532774)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea77" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.913812, 0, 0.556640, 0, 1.314087, 0, -0.556640, 0, -0.913812, 161.941879, 37.809925, 55.402451)
+transform = Transform3D(2.996442, 0.146074, 0.000000, 0.000000, 0.000000, 0.000000, -0.012664, 0.259780, 2.988704, -1.246592, 161.703323, 36.893102)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea78" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.935762, 0, 0.578230, 0, 1.067923, 0, -0.578230, 0, -0.935762, 171.982285, 13.908582, 47.939301)
+transform = Transform3D(2.994573, 0.180372, 0.000000, 0.000000, 0.000000, 0.000000, 0.003503, -0.058150, 2.999434, -1.611341, 171.775198, 13.990913)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea79" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.910241, 0, 0.562460, 0, 1.067923, 0, -0.562460, 0, -0.910241, 172.560516, 27.150831, 48.875061)
+transform = Transform3D(2.985307, 0.296555, 0.000000, 0.000000, 0.000000, 0.000000, -0.008867, 0.089257, 2.998659, -1.532847, 172.807519, 26.169729)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea80" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.884720, 0, 0.546690, 0, 1.067923, 0, -0.546690, 0, -0.884720, 173.138748, 40.393082, 49.810825)
+transform = Transform3D(2.999974, -0.012559, 0.000000, 0.000000, 0.000000, 0.000000, -0.000279, -0.066565, 2.999261, -1.039414, 173.450876, 41.197336)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea81" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.936828, 0, 0.576500, 0, 1.139136, 0, -0.576500, 0, -0.936828, 181.681213, 13.720661, 41.964199)
+transform = Transform3D(2.983775, 0.311592, 0.000000, 0.000000, 0.000000, 0.000000, 0.031208, -0.298849, 2.984915, -1.595058, 181.697403, 13.079907)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea82" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.911278, 0, 0.560778, 0, 1.139136, 0, -0.560778, 0, -0.911278, 182.257721, 27.845953, 42.901028)
+transform = Transform3D(2.992572, -0.210980, 0.000000, 0.000000, 0.000000, 0.000000, -0.001728, -0.024504, 2.999899, -0.136893, 182.272713, 28.610601)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea83" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.885729, 0, 0.545055, 0, 1.139136, 0, -0.545055, 0, -0.885729, 182.834213, 41.971245, 43.837856)
+transform = Transform3D(2.983696, -0.312340, 0.000000, 0.000000, 0.000000, 0.000000, -0.009380, -0.089601, 2.998647, -1.136614, 182.702210, 41.403628)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea84" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.936828, 0, 0.576501, 0, 1.602447, 0, -0.576501, 0, -0.936828, 190.459137, 13.700000, 36.562492)
+transform = Transform3D(2.999204, 0.069121, 0.000000, 0.000000, 0.000000, 0.000000, -0.005001, 0.217009, 2.992137, -1.683779, 190.944170, 13.669130)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea85" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.911278, 0, 0.560779, 0, 1.602447, 0, -0.560779, 0, -0.911278, 191.035645, 33.570347, 37.499321)
+transform = Transform3D(2.996621, 0.142339, 0.000000, 0.000000, 0.000000, 0.000000, 0.011137, -0.234472, 2.990802, -1.148881, 191.152600, 33.865438)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea86" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.936828, 0, 0.576501, 0, 0.997744, 0, -0.576501, 0, -0.936828, 200.884003, 13.700000, 30.147301)
+transform = Transform3D(2.988973, 0.256981, 0.000000, 0.000000, 0.000000, 0.000000, -0.008190, 0.095263, 2.998476, -1.694951, 200.902949, 14.357286)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea87" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.911278, 0, 0.560778, 0, 0.997744, 0, -0.560778, 0, -0.911278, 201.460510, 26.072021, 31.084129)
+transform = Transform3D(2.999872, -0.027687, 0.000000, 0.000000, 0.000000, 0.000000, -0.001064, -0.115285, 2.997784, -0.740648, 201.043059, 26.630113)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea88" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.885728, 0, 0.545056, 0, 0.997744, 0, -0.545056, 0, -0.885728, 202.037003, 38.444042, 32.020958)
+transform = Transform3D(2.999998, -0.003259, 0.000000, 0.000000, 0.000000, 0.000000, 0.000281, 0.258629, 2.988831, -1.261676, 202.290295, 37.896138)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea89" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.936833, 0, 0.576493, 0, 1.024497, 0, -0.576493, 0, -0.936833, 210.639038, 13.700000, 24.144348)
+transform = Transform3D(2.999997, 0.003941, 0.000000, 0.000000, 0.000000, 0.000000, -0.000144, 0.109930, 2.997985, -1.273408, 211.046144, 14.147697)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea90" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.911283, 0, 0.560770, 0, 1.024497, 0, -0.560770, 0, -0.911283, 211.215530, 26.403757, 25.081181)
+transform = Transform3D(2.999382, -0.060899, 0.000000, 0.000000, 0.000000, 0.000000, -0.004552, -0.224212, 2.991606, -1.557796, 211.521908, 25.844099)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea91" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.885733, 0, 0.545047, 0, 1.024497, 0, -0.545047, 0, -0.885733, 211.792023, 39.107513, 26.018015)
+transform = Transform3D(2.998491, -0.095145, 0.000000, 0.000000, 0.000000, 0.000000, -0.003768, -0.118763, 2.997646, -0.311365, 211.701723, 39.713993)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea92" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.936817, 0, 0.576519, 0, 1.467413, 0, -0.576519, 0, -0.936817, 219.417694, 13.700000, 18.742157)
+transform = Transform3D(2.992144, -0.216971, 0.000000, 0.000000, 0.000000, 0.000000, 0.005379, 0.074173, 2.999078, -0.450758, 219.574535, 12.955168)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea93" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.911267, 0, 0.560796, 0, 1.467413, 0, -0.560796, 0, -0.911267, 219.994217, 31.895918, 19.678974)
+transform = Transform3D(2.992590, 0.210719, 0.000000, 0.000000, 0.000000, 0.000000, -0.010251, 0.145585, 2.996448, -1.271198, 220.335397, 31.784816)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea94" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.936813, 0, 0.576525, 0, 1.042146, 0, -0.576525, 0, -0.936813, 229.841980, 13.700000, 12.326838)
+transform = Transform3D(2.998941, 0.079710, 0.000000, 0.000000, 0.000000, 0.000000, -0.005915, 0.222542, 2.991729, -1.468227, 230.314230, 13.822600)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea95" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.911264, 0, 0.560802, 0, 1.042146, 0, -0.560802, 0, -0.911264, 230.418503, 26.622608, 13.263651)
+transform = Transform3D(2.997194, -0.129727, 0.000000, 0.000000, 0.000000, 0.000000, 0.010226, 0.236261, 2.990665, -0.995136, 230.319748, 25.666050)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea96" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.885714, 0, 0.545079, 0, 1.042146, 0, -0.545079, 0, -0.885714, 230.995026, 39.545216, 14.200463)
+transform = Transform3D(2.998005, 0.109377, 0.000000, 0.000000, 0.000000, 0.000000, 0.004957, -0.135870, 2.996918, -1.212040, 231.174201, 40.391004)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea97" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.946031, 0, 0.561271, 0, 1.108467, 0, -0.561271, 0, -0.946031, 239.164352, 13.700000, 6.665964)
+transform = Transform3D(2.992065, 0.218058, 0.000000, 0.000000, 0.000000, 0.000000, 0.018635, -0.255703, 2.989025, -0.040576, 239.331980, 13.792822)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea98" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.920230, 0, 0.545963, 0, 1.108467, 0, -0.545963, 0, -0.920230, 239.725616, 27.444986, 7.611995)
+transform = Transform3D(2.998562, -0.092875, 0.000000, 0.000000, 0.000000, 0.000000, 0.005639, 0.182067, 2.994465, -1.259339, 240.148507, 27.893858)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea99" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.894430, 0, 0.530656, 0, 1.108467, 0, -0.530656, 0, -0.894430, 240.286896, 41.189972, 8.558026)
+transform = Transform3D(2.999772, 0.037021, 0.000000, 0.000000, 0.000000, 0.000000, -0.003789, 0.306990, 2.984249, -1.390082, 240.120910, 41.478705)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea100" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.917560, 0, 0.606698, 0, 1.563156, 0, -0.606698, 0, -0.917560, 249.307495, 13.700000, 0.326956)
+transform = Transform3D(2.994909, 0.174700, 0.000000, 0.000000, 0.000000, 0.000000, -0.003124, 0.053550, 2.999520, -0.965674, 249.696680, 13.377493)
 metadata/coliziune = "niciuna"
+
 [node name="zidValea101" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
-transform = Transform3D(-0.892536, 0, 0.590152, 0, 1.563156, 0, -0.590152, 0, -0.892536, 249.914200, 33.083130, 1.244516)
+transform = Transform3D(2.994838, -0.175909, 0.000000, 0.000000, 0.000000, 0.000000, 0.017013, 0.289647, 2.985936, -1.650856, 250.266092, 32.620418)
 metadata/coliziune = "niciuna"
 
 [node name="ZoneB_PadureaHornurilor" type="Node3D" parent="DecorManual"]
@@ -603,164 +703,281 @@ transform = Transform3D(-0.550119, 0, 0.894354, 0, 1.050000, 0, -0.894354, 0, -0
 script = ExtResource("31_shape")
 ovality = 0.671984
 noise_amount = 0.031305
-talus_spread = 0.60
-talus_rocks = 20
-talus_rock_max = 0.351325
-talus_height = 0.56
-talus_sides = 14
-door_count = 2
-door_height_m = 2.2
-door_dir_deg = 14
-door_arc_deg = 120
-door_depth_m = 0.75
 strata_step = 0.072
 strata_count = 7
 strata_sharp = 0.85
-door_aspect = 0.63
+collar_pinch = 0.313
+collar_at = 0.679
+collar_span = 0.124
+cap_flare = 0.60
+cap_from = 0.77
+talus_spread = 0.60
+talus_height = 0.56
+talus_sides = 14
+talus_rocks = 20
+talus_rock_max = 0.351325
+door_count = 2
+door_height_m = 2.2
+door_aspect = 0.90
+door_depth_m = 0.75
+door_dir_deg = 14
+door_arc_deg = 120
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.37
+window_aspect = 1.93
+window_from = 0.33
+window_to = 0.65
+window_dir_deg = 99
+window_arc_deg = 73
 
 [node name="hornEst2" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(-0.744569, 0, -0.540385, 0, 0.920000, 0, 0.540385, 0, -0.744569, 66, 46.070, 20)
 script = ExtResource("31_shape")
 ovality = 0.703770
 noise_amount = 0.046565
-talus_spread = 0.60
-talus_rocks = 23
-talus_rock_max = 0.437466
-talus_height = 0.44
-talus_sides = 14
 strata_step = 0.058
 strata_count = 7
 strata_sharp = 0.69
+collar_pinch = 0.303
+collar_at = 0.702
+collar_span = 0.121
+cap_flare = 0.56
+cap_from = 0.77
+talus_spread = 0.60
+talus_height = 0.44
+talus_sides = 14
+talus_rocks = 23
+talus_rock_max = 0.437466
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.37
+window_aspect = 1.70
+window_from = 0.29
+window_to = 0.67
+window_dir_deg = 81
+window_arc_deg = 89
 
 [node name="hornEst3" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(-0.020674, 0, -1.149814, 0, 1.150000, 0, 1.149814, 0, -0.020674, 80, 45.900, 26)
 script = ExtResource("31_shape")
 ovality = 0.762579
 noise_amount = 0.023951
-talus_spread = 0.66
-talus_rocks = 19
-talus_rock_max = 0.337039
-talus_height = 0.56
-talus_sides = 14
 strata_step = 0.072
 strata_count = 6
 strata_sharp = 0.84
+collar_pinch = 0.323
+collar_at = 0.668
+collar_span = 0.148
+cap_flare = 0.67
+cap_from = 0.71
+talus_spread = 0.66
+talus_height = 0.56
+talus_sides = 14
+talus_rocks = 19
+talus_rock_max = 0.337039
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.32
+window_aspect = 1.72
+window_from = 0.31
+window_to = 0.70
+window_dir_deg = 94
+window_arc_deg = 103
 
 [node name="hornEst4" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(-0.374647, 0, 0.774106, 0, 0.860000, 0, -0.774106, 0, -0.374647, 96, 45.530, 24)
 script = ExtResource("31_shape")
 ovality = 0.987261
 noise_amount = 0.049635
-talus_spread = 0.69
-talus_rocks = 22
-talus_rock_max = 0.364159
-talus_height = 0.61
-talus_sides = 14
-door_count = 3
-door_height_m = 2.1
-door_dir_deg = 15
-door_arc_deg = 100
-door_depth_m = 0.60
-door_sill_m = 3.4
 strata_step = 0.039
 strata_count = 4
 strata_sharp = 0.65
-door_aspect = 0.66
+collar_pinch = 0.397
+collar_at = 0.693
+collar_span = 0.148
+cap_flare = 0.73
+cap_from = 0.73
+talus_spread = 0.69
+talus_height = 0.61
+talus_sides = 14
+talus_rocks = 22
+talus_rock_max = 0.364159
+door_count = 3
+door_height_m = 2.1
+door_aspect = 0.83
+door_depth_m = 0.60
+door_sill_m = 3.4
+door_dir_deg = 15
+door_arc_deg = 100
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.53
+window_aspect = 1.73
+window_from = 0.33
+window_to = 0.61
+window_dir_deg = 97
+window_arc_deg = 97
 
 [node name="hornEst5" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.331806, 0, -0.922120, 0, 0.980000, 0, 0.922120, 0, 0.331806, 44, 46.130, 30)
 script = ExtResource("31_shape")
 ovality = 0.710648
 noise_amount = 0.043986
-talus_spread = 0.54
-talus_rocks = 21
-talus_rock_max = 0.449526
-talus_height = 0.41
-talus_sides = 16
-door_count = 2
-door_height_m = 2.2
-door_dir_deg = 205
-door_arc_deg = 120
-door_depth_m = 0.89
 strata_step = 0.069
 strata_count = 4
 strata_sharp = 0.65
-door_aspect = 0.65
+collar_pinch = 0.307
+collar_at = 0.643
+collar_span = 0.147
+cap_flare = 0.62
+cap_from = 0.73
+talus_spread = 0.54
+talus_height = 0.41
+talus_sides = 16
+talus_rocks = 21
+talus_rock_max = 0.449526
+door_count = 2
+door_height_m = 2.2
+door_aspect = 0.86
+door_depth_m = 0.89
+door_dir_deg = 205
+door_arc_deg = 120
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.55
+window_aspect = 1.51
+window_from = 0.29
+window_to = 0.62
+window_dir_deg = 117
+window_arc_deg = 93
 
 [node name="hornEst6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.677817, 0, 0.762210, 0, 1.020000, 0, -0.762210, 0, 0.677817, 112, 45.450, 34)
 script = ExtResource("31_shape")
 ovality = 0.847253
 noise_amount = 0.035964
-talus_spread = 0.68
-talus_rocks = 23
-talus_rock_max = 0.305030
-talus_height = 0.61
-talus_sides = 12
-door_count = 2
-door_height_m = 2.0
-door_dir_deg = 109
-door_arc_deg = 100
-door_depth_m = 0.63
-door_sill_m = 3.9
 strata_step = 0.040
 strata_count = 4
 strata_sharp = 0.67
-door_aspect = 0.68
+collar_pinch = 0.373
+collar_at = 0.668
+collar_span = 0.148
+cap_flare = 0.79
+cap_from = 0.77
+talus_spread = 0.68
+talus_height = 0.61
+talus_sides = 12
+talus_rocks = 23
+talus_rock_max = 0.305030
+door_count = 2
+door_height_m = 2.0
+door_aspect = 0.90
+door_depth_m = 0.63
+door_sill_m = 3.9
+door_dir_deg = 109
+door_arc_deg = 100
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.32
+window_aspect = 1.54
+window_from = 0.26
+window_to = 0.61
+window_dir_deg = 83
+window_arc_deg = 93
 
 [node name="hornEst7" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(-0.509099, 0, 0.617105, 0, 0.800000, 0, -0.617105, 0, -0.509099, 58, 31.380, 74)
 script = ExtResource("31_shape")
 ovality = 0.869681
 noise_amount = 0.033748
-talus_spread = 0.73
-talus_rocks = 21
-talus_rock_max = 0.333909
-talus_height = 0.49
-talus_sides = 14
-door_count = 2
-door_height_m = 2.0
-door_dir_deg = 64
-door_arc_deg = 100
-door_depth_m = 0.84
 strata_step = 0.064
 strata_count = 4
 strata_sharp = 0.62
-door_aspect = 0.65
+collar_pinch = 0.365
+collar_at = 0.622
+collar_span = 0.136
+cap_flare = 0.60
+cap_from = 0.73
+talus_spread = 0.73
+talus_height = 0.49
+talus_sides = 14
+talus_rocks = 21
+talus_rock_max = 0.333909
+door_count = 2
+door_height_m = 2.0
+door_aspect = 0.80
+door_depth_m = 0.84
+door_dir_deg = 64
+door_arc_deg = 100
+window_rows = 2
+window_per_row = 3
+window_height_m = 1.59
+window_aspect = 1.65
+window_from = 0.28
+window_to = 0.65
+window_dir_deg = 116
+window_arc_deg = 105
 
 [node name="hornEst8" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(0.619281, 0, -0.367275, 0, 0.720000, 0, 0.367275, 0, 0.619281, 88, 35.190, 76)
 script = ExtResource("31_shape")
 ovality = 0.953727
 noise_amount = 0.037762
-talus_spread = 0.53
-talus_rocks = 16
-talus_rock_max = 0.338844
-talus_height = 0.47
-talus_sides = 12
 strata_step = 0.061
 strata_count = 4
 strata_sharp = 0.74
+collar_pinch = 0.342
+collar_at = 0.684
+collar_span = 0.123
+cap_flare = 0.73
+cap_from = 0.70
+talus_spread = 0.53
+talus_height = 0.47
+talus_sides = 12
+talus_rocks = 16
+talus_rock_max = 0.338844
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.62
+window_aspect = 1.71
+window_from = 0.29
+window_to = 0.61
+window_dir_deg = 79
+window_arc_deg = 89
 
 [node name="hornEst9" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(-0.017402, 0, 0.899832, 0, 0.900000, 0, -0.899832, 0, -0.017402, 104, 42.280, 70)
 script = ExtResource("31_shape")
 ovality = 0.750833
 noise_amount = 0.045503
-talus_spread = 0.50
-talus_rocks = 16
-talus_rock_max = 0.374205
-talus_height = 0.49
-talus_sides = 12
-door_count = 2
-door_height_m = 2.0
-door_dir_deg = 123
-door_arc_deg = 120
-door_depth_m = 0.59
 strata_step = 0.047
 strata_count = 5
 strata_sharp = 0.72
-door_aspect = 0.72
+collar_pinch = 0.336
+collar_at = 0.647
+collar_span = 0.108
+cap_flare = 0.87
+cap_from = 0.79
+talus_spread = 0.50
+talus_height = 0.49
+talus_sides = 12
+talus_rocks = 16
+talus_rock_max = 0.374205
+door_count = 2
+door_height_m = 2.0
+door_aspect = 0.86
+door_depth_m = 0.59
+door_dir_deg = 123
+door_arc_deg = 120
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.42
+window_aspect = 1.57
+window_from = 0.28
+window_to = 0.68
+window_dir_deg = 103
+window_arc_deg = 99
 
 [node name="hornSoare1" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(0.994861, 0, 0.312358, 0, 1.042744, 0, -0.312358, 0, 0.994861, -163.961960, 48.976738, 43.241413)
@@ -777,6 +994,19 @@ flute_count = 9
 flute_top = 0.730400
 shape_seed = 33174
 noise_amount = 0.022377
+collar_pinch = 0.326
+collar_at = 0.645
+collar_span = 0.124
+cap_flare = 0.78
+cap_from = 0.73
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.39
+window_aspect = 1.54
+window_from = 0.26
+window_to = 0.66
+window_dir_deg = 85
+window_arc_deg = 91
 
 [node name="hornSoare2" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.058093, 0, -0.955084, 0, 0.956849, 0, 0.955084, 0, -0.058093, -154.057739, 48.828373, 41.453499)
@@ -793,6 +1023,19 @@ flute_count = 10
 flute_top = 0.775631
 shape_seed = 99847
 noise_amount = 0.045709
+collar_pinch = 0.378
+collar_at = 0.679
+collar_span = 0.108
+cap_flare = 0.66
+cap_from = 0.75
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.58
+window_aspect = 1.67
+window_from = 0.30
+window_to = 0.67
+window_dir_deg = 67
+window_arc_deg = 100
 
 [node name="hornUmbra3" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(-0.701705, 0, 0.751563, 0, 1.028220, 0, -0.751563, 0, -0.701705, -143.853485, 48.789837, 67.744118)
@@ -809,6 +1052,19 @@ flute_count = 7
 flute_top = 0.736067
 shape_seed = 79212
 noise_amount = 0.016699
+collar_pinch = 0.358
+collar_at = 0.693
+collar_span = 0.121
+cap_flare = 0.67
+cap_from = 0.76
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.32
+window_aspect = 1.92
+window_from = 0.31
+window_to = 0.60
+window_dir_deg = 115
+window_arc_deg = 70
 
 [node name="hornSpate4" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(-0.348020, 0, 0.973377, 0, 1.033721, 0, -0.973377, 0, -0.348020, -137.803543, 48.737953, 77.736511)
@@ -825,6 +1081,19 @@ flute_count = 10
 flute_top = 0.757066
 shape_seed = 22183
 noise_amount = 0.030367
+collar_pinch = 0.345
+collar_at = 0.623
+collar_span = 0.120
+cap_flare = 0.60
+cap_from = 0.78
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.59
+window_aspect = 1.59
+window_from = 0.26
+window_to = 0.58
+window_dir_deg = 65
+window_arc_deg = 85
 
 [node name="hornSoare5" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(-0.765320, 0, 0.608180, 0, 1.114415, 0, -0.608180, 0, -0.765320, -142.667099, 48.680241, 41.057205)
@@ -841,6 +1110,19 @@ flute_count = 13
 flute_top = 0.753989
 shape_seed = 54503
 noise_amount = 0.022138
+collar_pinch = 0.399
+collar_at = 0.654
+collar_span = 0.121
+cap_flare = 0.63
+cap_from = 0.71
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.45
+window_aspect = 1.72
+window_from = 0.30
+window_to = 0.66
+window_dir_deg = 69
+window_arc_deg = 90
 
 [node name="hornFund6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(-0.295128, 0, 0.893778, 0, 0.941244, 0, -0.893778, 0, -0.295128, -132.938110, 48.693501, 83.702377)
@@ -857,6 +1139,19 @@ flute_count = 14
 flute_top = 0.914667
 shape_seed = 98056
 noise_amount = 0.027416
+collar_pinch = 0.365
+collar_at = 0.635
+collar_span = 0.130
+cap_flare = 0.66
+cap_from = 0.70
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.38
+window_aspect = 1.96
+window_from = 0.31
+window_to = 0.60
+window_dir_deg = 120
+window_arc_deg = 97
 
 [node name="hornSoare7" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(-0.761155, 0, -0.711902, 0, 0.727500, 0, 0.711902, 0, -0.761155, -130.246475, 48.509777, 35.527699)
@@ -873,6 +1168,19 @@ flute_count = 7
 flute_top = 0.754327
 shape_seed = 88901
 noise_amount = 0.031588
+collar_pinch = 0.352
+collar_at = 0.638
+collar_span = 0.126
+cap_flare = 0.73
+cap_from = 0.72
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.31
+window_aspect = 1.84
+window_from = 0.31
+window_to = 0.59
+window_dir_deg = 96
+window_arc_deg = 98
 
 [node name="hornUmbra8" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(-0.985839, 0, -0.494792, 0, 1.103040, 0, 0.494792, 0, -0.985839, -120.119530, 48.483200, 59.369537)
@@ -889,6 +1197,19 @@ flute_count = 11
 flute_top = 0.915639
 shape_seed = 6267
 noise_amount = 0.022979
+collar_pinch = 0.377
+collar_at = 0.699
+collar_span = 0.106
+cap_flare = 0.57
+cap_from = 0.76
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.67
+window_aspect = 1.80
+window_from = 0.28
+window_to = 0.69
+window_dir_deg = 70
+window_arc_deg = 71
 
 [node name="hornGemen9" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.448262, 0, 0.871893, 0, 0.872226, 0, -0.871893, 0, 0.448262, -121.482063, 48.505226, 60.778984)
@@ -905,6 +1226,19 @@ flute_count = 13
 flute_top = 0.785874
 shape_seed = 56278
 noise_amount = 0.046667
+collar_pinch = 0.306
+collar_at = 0.681
+collar_span = 0.118
+cap_flare = 0.89
+cap_from = 0.76
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.52
+window_aspect = 1.94
+window_from = 0.28
+window_to = 0.67
+window_dir_deg = 82
+window_arc_deg = 80
 
 [node name="hornGemen10" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.684909, 0, -0.006611, 0, 0.867817, 0, 0.006611, 0, 0.684909, -120.816429, 48.499813, 62.696751)
@@ -921,6 +1255,19 @@ flute_count = 11
 flute_top = 0.861737
 shape_seed = 35944
 noise_amount = 0.052249
+collar_pinch = 0.382
+collar_at = 0.695
+collar_span = 0.130
+cap_flare = 0.57
+cap_from = 0.79
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.43
+window_aspect = 1.66
+window_from = 0.27
+window_to = 0.59
+window_dir_deg = 118
+window_arc_deg = 105
 
 [node name="hornSoare11" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(0.991099, 0, -0.007392, 0, 0.991127, 0, 0.007392, 0, 0.991099, -120.035492, 48.365749, 32.400452)
@@ -937,6 +1284,19 @@ flute_count = 14
 flute_top = 0.781140
 shape_seed = 43101
 noise_amount = 0.000432
+collar_pinch = 0.336
+collar_at = 0.668
+collar_span = 0.110
+cap_flare = 0.86
+cap_from = 0.73
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.56
+window_aspect = 1.84
+window_from = 0.27
+window_to = 0.68
+window_dir_deg = 106
+window_arc_deg = 79
 
 [node name="hornSpate12" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(0.315693, 0, -0.958703, 0, 1.009343, 0, 0.958703, 0, 0.315693, -119.981705, 48.320400, 13.488955)
@@ -953,6 +1313,19 @@ flute_count = 8
 flute_top = 0.898442
 shape_seed = 29573
 noise_amount = 0.043522
+collar_pinch = 0.379
+collar_at = 0.673
+collar_span = 0.133
+cap_flare = 0.70
+cap_from = 0.74
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.59
+window_aspect = 1.67
+window_from = 0.28
+window_to = 0.68
+window_dir_deg = 74
+window_arc_deg = 95
 
 [node name="hornSoare13" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(1.020268, 0, 0.257040, 0, 1.052148, 0, -0.257040, 0, 1.020268, -106.022285, 48.183857, 28.245773)
@@ -969,6 +1342,19 @@ flute_count = 13
 flute_top = 0.767670
 shape_seed = 74642
 noise_amount = 0.053887
+collar_pinch = 0.359
+collar_at = 0.687
+collar_span = 0.106
+cap_flare = 0.74
+cap_from = 0.72
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.49
+window_aspect = 1.86
+window_from = 0.33
+window_to = 0.61
+window_dir_deg = 109
+window_arc_deg = 88
 
 [node name="hornUmbra14" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(-0.832557, 0, -0.428741, 0, 0.562729, 0, 0.428741, 0, -0.832557, -97.957199, 48.114609, 52.843349)
@@ -985,6 +1371,19 @@ flute_count = 11
 flute_top = 0.912551
 shape_seed = 76216
 noise_amount = 0.046054
+collar_pinch = 0.357
+collar_at = 0.694
+collar_span = 0.115
+cap_flare = 0.56
+cap_from = 0.77
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.48
+window_aspect = 1.54
+window_from = 0.32
+window_to = 0.63
+window_dir_deg = 89
+window_arc_deg = 97
 
 [node name="hornFund15" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(-0.097861, 0, -0.934136, 0, 0.939247, 0, 0.934136, 0, -0.097861, -95.763847, 48.090702, 74.187820)
@@ -1001,6 +1400,19 @@ flute_count = 12
 flute_top = 0.853499
 shape_seed = 58508
 noise_amount = 0.022528
+collar_pinch = 0.346
+collar_at = 0.631
+collar_span = 0.110
+cap_flare = 0.63
+cap_from = 0.78
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.55
+window_aspect = 1.58
+window_from = 0.29
+window_to = 0.68
+window_dir_deg = 93
+window_arc_deg = 75
 
 [node name="hornSpate16" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(-0.360642, 0, 0.788343, 0, 0.866918, 0, -0.788343, 0, -0.360642, -83.236092, 47.861614, 67.443039)
@@ -1017,6 +1429,19 @@ flute_count = 13
 flute_top = 0.727959
 shape_seed = 91168
 noise_amount = 0.041191
+collar_pinch = 0.331
+collar_at = 0.697
+collar_span = 0.132
+cap_flare = 0.58
+cap_from = 0.71
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.45
+window_aspect = 1.56
+window_from = 0.29
+window_to = 0.62
+window_dir_deg = 83
+window_arc_deg = 102
 
 [node name="hornSoare17" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.731486, 0, 0.833324, 0, 0.773778, 0, -0.833324, 0, 0.731486, -62.203613, 47.664604, 35.109364)
@@ -1033,6 +1458,19 @@ flute_count = 13
 flute_top = 0.949219
 shape_seed = 21470
 noise_amount = 0.054923
+collar_pinch = 0.355
+collar_at = 0.625
+collar_span = 0.139
+cap_flare = 0.67
+cap_from = 0.77
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.31
+window_aspect = 1.61
+window_from = 0.31
+window_to = 0.60
+window_dir_deg = 104
+window_arc_deg = 110
 
 [node name="hornGemen18" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.961715, 0, -0.130386, 0, 0.970993, 0, 0.130386, 0, 0.961715, -61.883606, 47.665779, 34.072262)
@@ -1049,6 +1487,19 @@ flute_count = 14
 flute_top = 0.933542
 shape_seed = 30885
 noise_amount = 0.046091
+collar_pinch = 0.328
+collar_at = 0.637
+collar_span = 0.104
+cap_flare = 0.64
+cap_from = 0.75
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.43
+window_aspect = 1.59
+window_from = 0.26
+window_to = 0.66
+window_dir_deg = 93
+window_arc_deg = 72
 
 [node name="hornGemen19" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.610671, 0, -0.292905, 0, 0.879935, 0, 0.292905, 0, 0.610671, -61.285084, 47.667973, 32.132500)
@@ -1065,6 +1516,19 @@ flute_count = 11
 flute_top = 0.728877
 shape_seed = 23782
 noise_amount = 0.029443
+collar_pinch = 0.309
+collar_at = 0.660
+collar_span = 0.129
+cap_flare = 0.89
+cap_from = 0.75
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.53
+window_aspect = 1.73
+window_from = 0.27
+window_to = 0.63
+window_dir_deg = 97
+window_arc_deg = 83
 
 [node name="hornSoare20" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(-1.036359, 0, 0.369115, 0, 1.100130, 0, -0.369115, 0, -1.036359, -50.466061, 47.544315, 37.425934)
@@ -1081,6 +1545,19 @@ flute_count = 12
 flute_top = 0.814717
 shape_seed = 77238
 noise_amount = 0.001150
+collar_pinch = 0.335
+collar_at = 0.644
+collar_span = 0.134
+cap_flare = 0.89
+cap_from = 0.71
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.49
+window_aspect = 1.61
+window_from = 0.30
+window_to = 0.63
+window_dir_deg = 92
+window_arc_deg = 90
 
 [node name="hornUmbra21" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(-1.072488, 0, 0.067270, 0, 1.341913, 0, -0.067270, 0, -1.072488, -53.175625, 47.494034, 63.421898)
@@ -1097,6 +1574,19 @@ flute_count = 14
 flute_top = 0.788207
 shape_seed = 43169
 noise_amount = 0.048540
+collar_pinch = 0.326
+collar_at = 0.652
+collar_span = 0.106
+cap_flare = 0.70
+cap_from = 0.77
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.32
+window_aspect = 1.68
+window_from = 0.32
+window_to = 0.65
+window_dir_deg = 96
+window_arc_deg = 101
 
 [node name="hornSoare22" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(-0.978301, 0, 0.338424, 0, 1.035183, 0, -0.338424, 0, -0.978301, -38.416603, 47.415291, 42.019226)
@@ -1113,6 +1603,19 @@ flute_count = 7
 flute_top = 0.946956
 shape_seed = 2021
 noise_amount = 0.032254
+collar_pinch = 0.376
+collar_at = 0.630
+collar_span = 0.107
+cap_flare = 0.64
+cap_from = 0.76
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.32
+window_aspect = 1.98
+window_from = 0.29
+window_to = 0.62
+window_dir_deg = 112
+window_arc_deg = 91
 
 [node name="hornSpate23" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.306098, 0, 0.909675, 0, 0.959794, 0, -0.909675, 0, -0.306098, -29.940434, 47.336758, 28.653278)
@@ -1129,6 +1632,19 @@ flute_count = 9
 flute_top = 0.783106
 shape_seed = 99281
 noise_amount = 0.036253
+collar_pinch = 0.364
+collar_at = 0.688
+collar_span = 0.109
+cap_flare = 0.82
+cap_from = 0.73
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.55
+window_aspect = 1.54
+window_from = 0.34
+window_to = 0.68
+window_dir_deg = 73
+window_arc_deg = 102
 
 [node name="hornFund24" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(-0.711199, 0, 0.408361, 0, 0.820099, 0, -0.408361, 0, -0.711199, -56.507610, 47.479019, 81.502121)
@@ -1145,6 +1661,19 @@ flute_count = 8
 flute_top = 0.852480
 shape_seed = 77956
 noise_amount = 0.014784
+collar_pinch = 0.335
+collar_at = 0.625
+collar_span = 0.141
+cap_flare = 0.59
+cap_from = 0.74
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.33
+window_aspect = 1.54
+window_from = 0.33
+window_to = 0.62
+window_dir_deg = 116
+window_arc_deg = 106
 
 [node name="hornSoare25" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(-0.608353, 0, -0.738464, 0, 0.956777, 0, 0.738464, 0, -0.608353, -25.135277, 47.258083, 45.694035)
@@ -1161,21 +1690,34 @@ flute_count = 11
 flute_top = 0.865323
 shape_seed = 26137
 noise_amount = 0.036364
-talus_spread = 0.74
-talus_rocks = 16
-talus_rock_max = 0.343743
-talus_height = 0.58
-talus_sides = 12
-door_count = 3
-door_height_m = 2.0
-door_dir_deg = 292
-door_arc_deg = 100
-door_depth_m = 0.82
-door_sill_m = 3.6
 strata_step = 0.060
 strata_count = 5
 strata_sharp = 0.68
-door_aspect = 0.67
+collar_pinch = 0.390
+collar_at = 0.653
+collar_span = 0.129
+cap_flare = 0.89
+cap_from = 0.74
+talus_spread = 0.74
+talus_height = 0.58
+talus_sides = 12
+talus_rocks = 16
+talus_rock_max = 0.343743
+door_count = 3
+door_height_m = 2.0
+door_aspect = 0.85
+door_depth_m = 0.82
+door_sill_m = 3.6
+door_dir_deg = 292
+door_arc_deg = 100
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.33
+window_aspect = 1.60
+window_from = 0.34
+window_to = 0.66
+window_dir_deg = 64
+window_arc_deg = 107
 
 [node name="hornUmbra26" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.737319, 0, -0.804326, 0, 1.091137, 0, 0.804326, 0, 0.737319, -31.821363, 47.246567, 71.329559)
@@ -1192,20 +1734,33 @@ flute_count = 10
 flute_top = 0.771981
 shape_seed = 27895
 noise_amount = 0.005313
-talus_spread = 0.70
-talus_rocks = 25
-talus_rock_max = 0.458246
-talus_height = 0.50
-talus_sides = 12
-door_count = 2
-door_height_m = 1.9
-door_dir_deg = 277
-door_arc_deg = 100
-door_depth_m = 0.84
 strata_step = 0.040
 strata_count = 7
 strata_sharp = 0.85
-door_aspect = 0.66
+collar_pinch = 0.393
+collar_at = 0.667
+collar_span = 0.101
+cap_flare = 0.68
+cap_from = 0.76
+talus_spread = 0.70
+talus_height = 0.50
+talus_sides = 12
+talus_rocks = 25
+talus_rock_max = 0.458246
+door_count = 2
+door_height_m = 1.9
+door_aspect = 0.84
+door_depth_m = 0.84
+door_dir_deg = 277
+door_arc_deg = 100
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.65
+window_aspect = 1.52
+window_from = 0.32
+window_to = 0.63
+window_dir_deg = 107
+window_arc_deg = 110
 
 [node name="hornSoare27" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(0.532941, 0, 0.824495, 0, 1.168864, 0, -0.824495, 0, 0.532941, -13.433457, 47.080200, 48.200642)
@@ -1222,20 +1777,33 @@ flute_count = 13
 flute_top = 0.864262
 shape_seed = 34991
 noise_amount = 0.037746
-talus_spread = 0.58
-talus_rocks = 24
-talus_rock_max = 0.439411
-talus_height = 0.42
-talus_sides = 14
-door_count = 2
-door_height_m = 1.9
-door_dir_deg = 115
-door_arc_deg = 80
-door_depth_m = 0.91
 strata_step = 0.040
 strata_count = 5
 strata_sharp = 0.75
-door_aspect = 0.63
+collar_pinch = 0.379
+collar_at = 0.666
+collar_span = 0.103
+cap_flare = 0.71
+cap_from = 0.77
+talus_spread = 0.58
+talus_height = 0.42
+talus_sides = 14
+talus_rocks = 24
+talus_rock_max = 0.439411
+door_count = 2
+door_height_m = 1.9
+door_aspect = 0.88
+door_depth_m = 0.91
+door_dir_deg = 115
+door_arc_deg = 80
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.52
+window_aspect = 1.64
+window_from = 0.32
+window_to = 0.65
+window_dir_deg = 88
+window_arc_deg = 104
 
 [node name="hornSoare28" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.907520, 0, -0.236896, 0, 0.661449, 0, 0.236896, 0, -0.907520, -4.961630, 46.922104, 49.765991)
@@ -1252,20 +1820,33 @@ flute_count = 9
 flute_top = 0.899490
 shape_seed = 44242
 noise_amount = 0.022584
-talus_spread = 0.57
-talus_rocks = 21
-talus_rock_max = 0.401155
-talus_height = 0.49
-talus_sides = 16
-door_count = 2
-door_height_m = 1.9
-door_dir_deg = 341
-door_arc_deg = 100
-door_depth_m = 0.58
 strata_step = 0.062
 strata_count = 6
 strata_sharp = 0.86
-door_aspect = 0.67
+collar_pinch = 0.366
+collar_at = 0.693
+collar_span = 0.124
+cap_flare = 0.74
+cap_from = 0.76
+talus_spread = 0.57
+talus_height = 0.49
+talus_sides = 16
+talus_rocks = 21
+talus_rock_max = 0.401155
+door_count = 2
+door_height_m = 1.9
+door_aspect = 0.83
+door_depth_m = 0.58
+door_dir_deg = 341
+door_arc_deg = 100
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.37
+window_aspect = 1.80
+window_from = 0.29
+window_to = 0.62
+window_dir_deg = 108
+window_arc_deg = 71
 
 [node name="hornUmbra29" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.387814, 0, 1.021130, 0, 1.092294, 0, -1.021130, 0, 0.387814, -2.959398, 46.877102, 76.837349)
@@ -1282,21 +1863,34 @@ flute_count = 9
 flute_top = 0.931046
 shape_seed = 4528
 noise_amount = 0.037171
-talus_spread = 0.44
-talus_rocks = 18
-talus_rock_max = 0.443741
-talus_height = 0.56
-talus_sides = 14
-door_count = 3
-door_height_m = 2.0
-door_dir_deg = 139
-door_arc_deg = 120
-door_depth_m = 0.69
-door_sill_m = 2.7
 strata_step = 0.036
 strata_count = 4
 strata_sharp = 0.66
-door_aspect = 0.68
+collar_pinch = 0.351
+collar_at = 0.696
+collar_span = 0.105
+cap_flare = 0.57
+cap_from = 0.71
+talus_spread = 0.44
+talus_height = 0.56
+talus_sides = 14
+talus_rocks = 18
+talus_rock_max = 0.443741
+door_count = 3
+door_height_m = 2.0
+door_aspect = 0.87
+door_depth_m = 0.69
+door_sill_m = 2.7
+door_dir_deg = 139
+door_arc_deg = 120
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.65
+window_aspect = 1.63
+window_from = 0.28
+window_to = 0.60
+window_dir_deg = 110
+window_arc_deg = 70
 
 [node name="hornSpate30" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(0.528682, 0, -0.903762, 0, 1.047039, 0, 0.903762, 0, 0.528682, 1.076405, 47.043091, 91.558548)
@@ -1313,14 +1907,27 @@ flute_count = 14
 flute_top = 0.947256
 shape_seed = 20995
 noise_amount = 0.016937
-talus_spread = 0.60
-talus_rocks = 19
-talus_rock_max = 0.327126
-talus_height = 0.55
-talus_sides = 12
 strata_step = 0.071
 strata_count = 6
 strata_sharp = 0.70
+collar_pinch = 0.323
+collar_at = 0.644
+collar_span = 0.134
+cap_flare = 0.87
+cap_from = 0.74
+talus_spread = 0.60
+talus_height = 0.55
+talus_sides = 12
+talus_rocks = 19
+talus_rock_max = 0.327126
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.39
+window_aspect = 1.95
+window_from = 0.27
+window_to = 0.64
+window_dir_deg = 93
+window_arc_deg = 95
 
 [node name="hornGemen31" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.691435, 0, 0.752140, 0, 0.947610, 0, -0.752140, 0, 0.691435, -6.046700, 46.913101, 77.555397)
@@ -1337,20 +1944,33 @@ flute_count = 8
 flute_top = 0.864339
 shape_seed = 30680
 noise_amount = 0.051003
-talus_spread = 0.43
-talus_rocks = 22
-talus_rock_max = 0.361133
-talus_height = 0.43
-talus_sides = 12
-door_count = 3
-door_height_m = 2.1
-door_dir_deg = 163
-door_arc_deg = 80
-door_depth_m = 0.88
 strata_step = 0.063
 strata_count = 7
 strata_sharp = 0.80
-door_aspect = 0.69
+collar_pinch = 0.361
+collar_at = 0.684
+collar_span = 0.105
+cap_flare = 0.67
+cap_from = 0.73
+talus_spread = 0.43
+talus_height = 0.43
+talus_sides = 12
+talus_rocks = 22
+talus_rock_max = 0.361133
+door_count = 3
+door_height_m = 2.1
+door_aspect = 0.83
+door_depth_m = 0.88
+door_dir_deg = 163
+door_arc_deg = 80
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.34
+window_aspect = 1.69
+window_from = 0.34
+window_to = 0.59
+window_dir_deg = 76
+window_arc_deg = 107
 
 [node name="hornGemen32" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.607215, 0, 0.390315, 0, 0.705370, 0, -0.390315, 0, 0.607215, -6.125904, 46.913311, 79.583847)
@@ -1367,21 +1987,34 @@ flute_count = 11
 flute_top = 0.851016
 shape_seed = 38679
 noise_amount = 0.032871
-talus_spread = 0.51
-talus_rocks = 19
-talus_rock_max = 0.449057
-talus_height = 0.41
-talus_sides = 16
-door_count = 2
-door_height_m = 2.1
-door_dir_deg = 180
-door_arc_deg = 120
-door_depth_m = 0.78
-door_sill_m = 2.6
 strata_step = 0.056
 strata_count = 5
 strata_sharp = 0.69
-door_aspect = 0.67
+collar_pinch = 0.398
+collar_at = 0.699
+collar_span = 0.133
+cap_flare = 0.62
+cap_from = 0.77
+talus_spread = 0.51
+talus_height = 0.41
+talus_sides = 16
+talus_rocks = 19
+talus_rock_max = 0.449057
+door_count = 2
+door_height_m = 2.1
+door_aspect = 0.85
+door_depth_m = 0.78
+door_sill_m = 2.6
+door_dir_deg = 180
+door_arc_deg = 120
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.35
+window_aspect = 1.75
+window_from = 0.34
+window_to = 0.67
+window_dir_deg = 81
+window_arc_deg = 71
 
 [node name="hornFund33" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.215595, 0, 0.832597, 0, 0.860058, 0, -0.832597, 0, 0.215595, 5.703475, 48.132381, 98.908676)
@@ -1398,14 +2031,27 @@ flute_count = 11
 flute_top = 0.886374
 shape_seed = 5206
 noise_amount = 0.037258
-talus_spread = 0.47
-talus_rocks = 20
-talus_rock_max = 0.406540
-talus_height = 0.62
-talus_sides = 12
 strata_step = 0.071
 strata_count = 5
 strata_sharp = 0.69
+collar_pinch = 0.347
+collar_at = 0.694
+collar_span = 0.123
+cap_flare = 0.63
+cap_from = 0.75
+talus_spread = 0.47
+talus_height = 0.62
+talus_sides = 12
+talus_rocks = 20
+talus_rock_max = 0.406540
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.66
+window_aspect = 1.64
+window_from = 0.30
+window_to = 0.68
+window_dir_deg = 103
+window_arc_deg = 87
 
 [node name="hornSoare34" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(-0.680084, 0, 0.657122, 0, 0.945686, 0, -0.657122, 0, -0.680084, 27.591257, 46.460754, 45.017784)
@@ -1422,20 +2068,33 @@ flute_count = 11
 flute_top = 0.796803
 shape_seed = 7936
 noise_amount = 0.053032
-talus_spread = 0.67
-talus_rocks = 18
-talus_rock_max = 0.327990
-talus_height = 0.43
-talus_sides = 14
-door_count = 2
-door_height_m = 2.1
-door_dir_deg = 357
-door_arc_deg = 120
-door_depth_m = 0.80
 strata_step = 0.060
 strata_count = 5
 strata_sharp = 0.84
-door_aspect = 0.64
+collar_pinch = 0.381
+collar_at = 0.671
+collar_span = 0.146
+cap_flare = 0.67
+cap_from = 0.71
+talus_spread = 0.67
+talus_height = 0.43
+talus_sides = 14
+talus_rocks = 18
+talus_rock_max = 0.327990
+door_count = 2
+door_height_m = 2.1
+door_aspect = 0.81
+door_depth_m = 0.80
+door_dir_deg = 357
+door_arc_deg = 120
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.41
+window_aspect = 1.65
+window_from = 0.27
+window_to = 0.58
+window_dir_deg = 61
+window_arc_deg = 84
 
 [node name="hornSpate35" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.011997, 0, -0.946505, 0, 0.946581, 0, 0.946505, 0, -0.011997, 30.108677, 46.449333, 33.746208)
@@ -1452,21 +2111,34 @@ flute_count = 16
 flute_top = 0.777119
 shape_seed = 50094
 noise_amount = 0.053600
-talus_spread = 0.75
-talus_rocks = 19
-talus_rock_max = 0.402865
-talus_height = 0.42
-talus_sides = 12
-door_count = 2
-door_height_m = 1.9
-door_dir_deg = 214
-door_arc_deg = 100
-door_depth_m = 0.71
-door_sill_m = 3.8
 strata_step = 0.062
 strata_count = 7
 strata_sharp = 0.87
-door_aspect = 0.67
+collar_pinch = 0.311
+collar_at = 0.690
+collar_span = 0.123
+cap_flare = 0.60
+cap_from = 0.75
+talus_spread = 0.75
+talus_height = 0.42
+talus_sides = 12
+talus_rocks = 19
+talus_rock_max = 0.402865
+door_count = 2
+door_height_m = 1.9
+door_aspect = 0.90
+door_depth_m = 0.71
+door_sill_m = 3.8
+door_dir_deg = 214
+door_arc_deg = 100
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.61
+window_aspect = 1.55
+window_from = 0.30
+window_to = 0.59
+window_dir_deg = 95
+window_arc_deg = 71
 
 [node name="hornSoare36" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.574664, 0, 0.932734, 0, 1.366328, 0, -0.932734, 0, 0.574664, 39.800884, 46.367935, 43.611897)
@@ -1483,21 +2155,34 @@ flute_count = 10
 flute_top = 0.837058
 shape_seed = 81933
 noise_amount = 0.024454
-talus_spread = 0.57
-talus_rocks = 21
-talus_rock_max = 0.424162
-talus_height = 0.54
-talus_sides = 14
-door_count = 2
-door_height_m = 2.2
-door_dir_deg = 88
-door_arc_deg = 120
-door_depth_m = 0.87
-door_sill_m = 2.5
 strata_step = 0.052
 strata_count = 5
 strata_sharp = 0.76
-door_aspect = 0.65
+collar_pinch = 0.397
+collar_at = 0.632
+collar_span = 0.118
+cap_flare = 0.80
+cap_from = 0.73
+talus_spread = 0.57
+talus_height = 0.54
+talus_sides = 14
+talus_rocks = 21
+talus_rock_max = 0.424162
+door_count = 2
+door_height_m = 2.2
+door_aspect = 0.87
+door_depth_m = 0.87
+door_sill_m = 2.5
+door_dir_deg = 88
+door_arc_deg = 120
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.51
+window_aspect = 1.69
+window_from = 0.27
+window_to = 0.65
+window_dir_deg = 114
+window_arc_deg = 92
 
 [node name="hornUmbra37" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(-0.818336, 0, -0.670554, 0, 1.057977, 0, 0.670554, 0, -0.818336, 49.739971, 46.338741, 68.021042)
@@ -1514,20 +2199,33 @@ flute_count = 9
 flute_top = 0.816505
 shape_seed = 46036
 noise_amount = 0.033268
-talus_spread = 0.78
-talus_rocks = 15
-talus_rock_max = 0.341147
-talus_height = 0.55
-talus_sides = 12
-door_count = 2
-door_height_m = 2.2
-door_dir_deg = 329
-door_arc_deg = 80
-door_depth_m = 0.63
 strata_step = 0.065
 strata_count = 7
 strata_sharp = 0.84
-door_aspect = 0.71
+collar_pinch = 0.301
+collar_at = 0.644
+collar_span = 0.115
+cap_flare = 0.72
+cap_from = 0.71
+talus_spread = 0.78
+talus_height = 0.55
+talus_sides = 12
+talus_rocks = 15
+talus_rock_max = 0.341147
+door_count = 2
+door_height_m = 2.2
+door_aspect = 0.83
+door_depth_m = 0.63
+door_dir_deg = 329
+door_arc_deg = 80
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.55
+window_aspect = 1.86
+window_from = 0.26
+window_to = 0.66
+window_dir_deg = 98
+window_arc_deg = 97
 
 [node name="hornSoare38" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.151346, 0, 1.027060, 0, 1.038151, 0, -1.027060, 0, 0.151346, 77.617874, 46.049881, 34.980461)
@@ -1544,14 +2242,27 @@ flute_count = 11
 flute_top = 0.886911
 shape_seed = 12405
 noise_amount = 0.046453
-talus_spread = 0.59
-talus_rocks = 25
-talus_rock_max = 0.401041
-talus_height = 0.53
-talus_sides = 12
 strata_step = 0.053
 strata_count = 4
 strata_sharp = 0.70
+collar_pinch = 0.387
+collar_at = 0.709
+collar_span = 0.147
+cap_flare = 0.74
+cap_from = 0.72
+talus_spread = 0.59
+talus_height = 0.53
+talus_sides = 12
+talus_rocks = 25
+talus_rock_max = 0.401041
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.42
+window_aspect = 1.68
+window_from = 0.29
+window_to = 0.65
+window_dir_deg = 66
+window_arc_deg = 110
 
 [node name="hornSoare39" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(0.935129, 0, 0.436308, 0, 1.031906, 0, -0.436308, 0, 0.935129, 89.628983, 45.829659, 33.086174)
@@ -1568,20 +2279,33 @@ flute_count = 9
 flute_top = 0.806818
 shape_seed = 49952
 noise_amount = 0.049710
-talus_spread = 0.49
-talus_rocks = 18
-talus_rock_max = 0.412320
-talus_height = 0.53
-talus_sides = 16
-door_count = 3
-door_height_m = 2.0
-door_dir_deg = 109
-door_arc_deg = 80
-door_depth_m = 0.57
 strata_step = 0.075
 strata_count = 5
 strata_sharp = 0.68
-door_aspect = 0.64
+collar_pinch = 0.312
+collar_at = 0.639
+collar_span = 0.133
+cap_flare = 0.75
+cap_from = 0.76
+talus_spread = 0.49
+talus_height = 0.53
+talus_sides = 16
+talus_rocks = 18
+talus_rock_max = 0.412320
+door_count = 3
+door_height_m = 2.0
+door_aspect = 0.84
+door_depth_m = 0.57
+door_dir_deg = 109
+door_arc_deg = 80
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.32
+window_aspect = 1.98
+window_from = 0.26
+window_to = 0.63
+window_dir_deg = 110
+window_arc_deg = 86
 
 [node name="hornUmbra40" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(0.850150, 0, 0.401438, 0, 0.940163, 0, -0.401438, 0, 0.850150, 96.911667, 45.793079, 56.386292)
@@ -1598,20 +2322,33 @@ flute_count = 12
 flute_top = 0.765538
 shape_seed = 30305
 noise_amount = 0.009239
-talus_spread = 0.48
-talus_rocks = 23
-talus_rock_max = 0.395617
-talus_height = 0.61
-talus_sides = 14
-door_count = 2
-door_height_m = 2.1
-door_dir_deg = 171
-door_arc_deg = 80
-door_depth_m = 0.59
 strata_step = 0.037
 strata_count = 5
 strata_sharp = 0.71
-door_aspect = 0.63
+collar_pinch = 0.364
+collar_at = 0.680
+collar_span = 0.108
+cap_flare = 0.69
+cap_from = 0.77
+talus_spread = 0.48
+talus_height = 0.61
+talus_sides = 14
+talus_rocks = 23
+talus_rock_max = 0.395617
+door_count = 2
+door_height_m = 2.1
+door_aspect = 0.84
+door_depth_m = 0.59
+door_dir_deg = 171
+door_arc_deg = 80
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.56
+window_aspect = 1.69
+window_from = 0.30
+window_to = 0.62
+window_dir_deg = 92
+window_arc_deg = 95
 
 [node name="hornSpate41" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.832835, 0, 0.344630, 0, 0.901324, 0, -0.344630, 0, -0.832835, 101.528000, 45.262272, 15.817749)
@@ -1628,20 +2365,33 @@ flute_count = 14
 flute_top = 0.939497
 shape_seed = 41630
 noise_amount = 0.045924
-talus_spread = 0.68
-talus_rocks = 18
-talus_rock_max = 0.420023
-talus_height = 0.51
-talus_sides = 16
-door_count = 2
-door_height_m = 1.9
-door_dir_deg = 332
-door_arc_deg = 80
-door_depth_m = 0.63
 strata_step = 0.072
 strata_count = 5
 strata_sharp = 0.85
-door_aspect = 0.64
+collar_pinch = 0.348
+collar_at = 0.681
+collar_span = 0.138
+cap_flare = 0.84
+cap_from = 0.71
+talus_spread = 0.68
+talus_height = 0.51
+talus_sides = 16
+talus_rocks = 18
+talus_rock_max = 0.420023
+door_count = 2
+door_height_m = 1.9
+door_aspect = 0.84
+door_depth_m = 0.63
+door_dir_deg = 332
+door_arc_deg = 80
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.64
+window_aspect = 1.68
+window_from = 0.31
+window_to = 0.61
+window_dir_deg = 68
+window_arc_deg = 77
 
 [node name="hornFund42" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.612620, 0, -0.575096, 0, 0.840261, 0, 0.575096, 0, 0.612620, 106.416199, 45.609467, 79.189285)
@@ -1658,22 +2408,43 @@ flute_count = 7
 flute_top = 0.793103
 shape_seed = 98089
 noise_amount = 0.025140
-talus_spread = 0.54
-talus_rocks = 15
-talus_rock_max = 0.391060
-talus_height = 0.55
-talus_sides = 16
 strata_step = 0.064
 strata_count = 5
 strata_sharp = 0.84
+collar_pinch = 0.318
+collar_at = 0.640
+collar_span = 0.111
+cap_flare = 0.85
+cap_from = 0.78
+talus_spread = 0.54
+talus_height = 0.55
+talus_sides = 16
+talus_rocks = 15
+talus_rock_max = 0.391060
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.58
+window_aspect = 1.65
+window_from = 0.33
+window_to = 0.62
+window_dir_deg = 113
+window_arc_deg = 109
 
 [node name="poarta_hornuri_gemene43" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("16_gate")]
 transform = Transform3D(0.979048, 0, -0.203630, 0, 1.000000, 0, 0.203630, 0, 0.979048, 57.158070, 46.288628, 53.071163)
+script = ExtResource("31_shape")
+shape_seed = 20418
+arch_erode = 0.55
+arch_span_at = 0.66
 metadata/coliziune = "mesh"
 metadata/camera_blocker = true
 
 [node name="arcada_roca44" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("16_gate")]
 transform = Transform3D(-0.167673, 0, -0.802674, 0, 0.820000, 0, 0.802674, 0, -0.167673, 84.683609, 45.743938, 18.551163)
+script = ExtResource("31_shape")
+shape_seed = 51207
+arch_erode = 0.85
+arch_span_at = 0.60
 metadata/coliziune = "mesh"
 
 [node name="hornCiot45" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("25_crk_a")]
@@ -1691,6 +2462,19 @@ flute_count = 14
 flute_top = 0.795393
 shape_seed = 85593
 noise_amount = 0.026878
+collar_pinch = 0.334
+collar_at = 0.695
+collar_span = 0.117
+cap_flare = 0.89
+cap_from = 0.74
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.46
+window_aspect = 1.64
+window_from = 0.33
+window_to = 0.61
+window_dir_deg = 112
+window_arc_deg = 106
 
 [node name="hornCiot46" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("25_crk_a")]
 transform = Transform3D(0.894122, 0, -0.216672, 0, 0.420000, 0, 0.216672, 0, 0.894122, 35.789448, 46.437206, 71.805206)
@@ -1707,20 +2491,33 @@ flute_count = 9
 flute_top = 0.916492
 shape_seed = 47039
 noise_amount = 0.041501
-talus_spread = 0.69
-talus_rocks = 25
-talus_rock_max = 0.301831
-talus_height = 0.43
-talus_sides = 14
-door_count = 2
-door_height_m = 2.1
-door_dir_deg = 214
-door_arc_deg = 80
-door_depth_m = 0.90
 strata_step = 0.044
 strata_count = 7
 strata_sharp = 0.89
-door_aspect = 0.63
+collar_pinch = 0.310
+collar_at = 0.661
+collar_span = 0.120
+cap_flare = 0.74
+cap_from = 0.76
+talus_spread = 0.69
+talus_height = 0.43
+talus_sides = 14
+talus_rocks = 25
+talus_rock_max = 0.301831
+door_count = 2
+door_height_m = 2.1
+door_aspect = 0.80
+door_depth_m = 0.90
+door_dir_deg = 214
+door_arc_deg = 80
+window_rows = 1
+window_per_row = 2
+window_height_m = 1.56
+window_aspect = 1.75
+window_from = 0.26
+window_to = 0.64
+window_dir_deg = 91
+window_arc_deg = 90
 
 [node name="hornCazut47" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("26_crk_b")]
 transform = Transform3D(-0.824389, 0, -0.566023, 0, 1.000000, 0, 0.566023, 0, -0.824389, -88.178658, 47.987179, 16.646290)

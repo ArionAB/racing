@@ -236,6 +236,133 @@ const DOOR_DARK_SLOT: int = 26
 @export_range(0.0, 360.0, 5.0) var door_arc_deg: float = 90.0
 
 
+## --- Umarul de sub palarie ---------------------------------------------------
+
+## Cat de tare se STRANGE gatul sub palarie, ca fractiune din raza de acolo.
+##
+## De ce exista. Critica oarba, runda 10, singurul ei punct: "the cones are
+## smooth surfaces of revolution whose dark cap sits FLUSH on the taper, so the
+## outline is one unbroken curve from tip to base". Si e adevarat MASURAT, nu
+## impresionist — profilul mesh-urilor din kit, citit pe 20 de felii:
+##
+##   chimney_b:        gat 1.59 -> palarie 1.93   = depasire 1.21x
+##   chimney_mushroom: gat 1.81 -> palarie 2.29   = depasire 1.27x
+##   chimney_a:        gat 1.80 -> palarie 1.24   = palaria e mai INGUSTA
+##   chimney_c:        gat 1.33 -> palarie 1.04   = idem
+##
+## Adica jumatate din kit n-are deloc palarie iesita in afara, iar cealalta
+## jumatate are 21-27% — sub pragul la care ochiul vede o TREAPTA si nu o
+## simpla curbura. In referinta (B_chimneys.png) depasirea e pe la 1.6-2.0x:
+## palaria e o farfurie lata pe un gat vizibil mai subtire, si tocmai umbra
+## aruncata de buza ei pe gat e ce rupe silueta in doua.
+##
+## Ce face: strange raza pe o banda de sub palarie. Nu latim palaria (ar fi
+## crescut si AABB-ul, si palaria e chiar geometria care da forma de ciuperca);
+## SUBTIEM gatul, ceea ce da acelasi contrast de silueta pe gratis.
+##
+## Margine de citire, calculata: hornul tipic are gat de ~1.7 unitati de mesh la
+## scara ~1.0, deci ~1.7 m raza. La 0.30 strangere, buza iese cu ~0.5 m peste
+## gat. La 60 m distanta si FOV 75 pe 1280 px, un metru subintinde ~14 px, deci
+## depasirea are ~7 px de fiecare parte. Se vede. La valoarea veche (0.21x din
+## geometrie, adica ~0.35 m) erau ~5 px, dar FARA muchie orizontala care sa-i
+## dea contur — de-aia critica a citit "one unbroken curve".
+@export_range(0.0, 0.45, 0.01) var collar_pinch: float = 0.0
+
+## Unde incepe gatul, ca fractiune din inaltime. Sub palarie, deci sus.
+@export_range(0.40, 0.95, 0.01) var collar_at: float = 0.72
+
+## Cat de inalta e banda de strangere, ca fractiune din inaltime. Ingusta =
+## treapta brusca; lata = gat lung de clepsidra.
+@export_range(0.05, 0.40, 0.01) var collar_span: float = 0.14
+
+## Cat se LATESTE palaria peste gat, ca fractiune din raza ei.
+##
+## De ce nu ajunge doar strangerea gatului. Masuratoarea de profil a aratat ca
+## jumatate din kit are palaria mai INGUSTA decat gatul (chimney_a: gat 1.80,
+## palarie 1.24; chimney_c: 1.33 -> 1.04). Pe alea, oricat ai strange gatul,
+## palaria ramane un varf ascutit — si asta s-a si vazut in prima captura de
+## verificare: conurile capatasera gat, dar deasupra lui statea un cui, nu o
+## farfurie. Un cui nu proiecteaza umbra pe gat, deci silueta tot nu se rupe.
+##
+## Palaria trebuie sa fie o CONSOLA. Se lateste banda de deasupra gatului,
+## descrescator spre varf, ca sa iasa o palarie de ciuperca si nu un cilindru.
+@export_range(0.0, 1.20, 0.05) var cap_flare: float = 0.0
+
+## De la ce fractiune din inaltime in sus se lateste palaria. Implicit imediat
+## deasupra gatului.
+@export_range(0.50, 0.98, 0.01) var cap_from: float = 0.80
+
+
+## --- Modul ARCADA -------------------------------------------------------------
+
+## Cat de tare se erodeaza o arcada ca sa nu mai citeasca a poarta construita.
+## 0 = stins (implicit: hornurile obisnuite nu-l folosesc).
+##
+## De ce exista. Critica oarba, runda 10, ultimul punct: arcada e "a plain
+## rectangular lintel on two rectangular posts" si "reads as architecture and
+## fights the geology". Are dreptate literal — mesh-ul `twin_chimney_gate` are
+## 354 de triunghiuri pe un gabarit de 26 x 21.6 x 6 m, adica fete mari si
+## plane cu muchii drepte. Langa hornuri erodate, un dreptunghi citeste ca facut
+## de mana omului, si atunci intreaga zona devine ruina, nu relief.
+##
+## Ce face, si de ce NU e `_deform_mesh` obisnuit: deformarile de horn sunt
+## RADIALE fata de o axa, iar arcada n-are axa — are doi stalpi si o grinda.
+## Aplicata pe ea, ovalizarea ar fi tras cei doi stalpi unul in altul.
+##
+## Trei operatii, toate functie de pozitie si niciuna radiala:
+##   - stalpii se INGROASA la baza si se subtiaza spre grinda (o stanca ramasa
+##     in picioare e mai lata jos, un stalp construit e paralel);
+##   - grinda se LASA la mijloc (o grinda de piatra care si-a pierdut sprijinul
+##     se incovoaie; o buiandruga taiata e dreapta);
+##   - toata suprafata primeste un zgomot de eroziune pe trei axe, ca fetele
+##     plane sa nu mai fie plane si muchiile drepte sa nu mai fie drepte.
+@export_range(0.0, 1.0, 0.05) var arch_erode: float = 0.0
+
+## La ce cota se termina stalpii si incepe grinda, ca fractiune din inaltime.
+## Se citeste din geometrie daca ramane 0.
+@export_range(0.0, 0.95, 0.01) var arch_span_at: float = 0.62
+
+
+## --- Randuri de ferestre ------------------------------------------------------
+
+## Cate RANDURI de deschideri mai mici se sapa peste inaltimea hornului, deasupra
+## usilor de la baza. 0 = niciunul.
+##
+## De ce exista. Aceeasi critica: deschiderile trebuie sa fie "WIDER THAN THEY
+## ARE TALL — square-ish windows and 1:2 doors distributed over the height, not
+## single full-height slits". Sistemul de usi vechi punea `door_count` niste
+## deschideri pe UN singur rand, la baza, cu `door_aspect` sub 1 (mai inalte
+## decat late). Doua consecinte, amandoua vizibile in captura de la 0.10:
+## deschiderile citeau a CRAPATURI verticale (adica a eroziune, nu a locuinta),
+## si toate stateau pe acelasi nivel, deci nu spuneau nimic despre INALTIMEA
+## hornului — doar despre a lor.
+##
+## Un rand de ferestre patrate la trei sferturi din inaltime spune, singur, cat
+## de inalt e hornul: ochiul stie cat e o fereastra, numara etajele si obtine
+## metrii. Asta e cheia de scara pe care usa de la baza n-o poate da, fiindca
+## usa e mereu jos si nu masoara decat primii doi metri.
+@export_range(0, 5, 1) var window_rows: int = 0
+
+## Cate ferestre pe rand.
+@export_range(1, 6, 1) var window_per_row: int = 3
+
+## Inaltimea unei ferestre in metri de lume.
+@export_range(0.6, 2.0, 0.1) var window_height_m: float = 1.1
+
+## Latimea ca fractiune din inaltime. PESTE 1 — asta e tot rostul: fereastra e
+## mai LATA decat inalta, ceea ce o desparte de o crapatura de eroziune, care e
+## intotdeauna verticala.
+@export_range(0.8, 2.4, 0.05) var window_aspect: float = 1.45
+
+## Intre ce fractiuni din inaltime se distribuie randurile.
+@export_range(0.10, 0.90, 0.01) var window_from: float = 0.30
+@export_range(0.15, 0.95, 0.01) var window_to: float = 0.68
+
+## Pe ce azimut e centrat peretele cu ferestre, si pe ce arc se raspandesc.
+@export_range(0.0, 360.0, 5.0) var window_dir_deg: float = 0.0
+@export_range(20.0, 200.0, 5.0) var window_arc_deg: float = 85.0
+
+
 func _ready() -> void:
 	_deform()
 
@@ -243,8 +370,8 @@ func _ready() -> void:
 func _deform() -> void:
 	# Fara munca daca instanta e lasata pe valorile neutre: hornurile care chiar
 	# trebuie sa ramana drepte nu platesc duplicarea mesh-ului.
-	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step)
-	var extras_off := is_zero_approx(talus_spread) and door_count == 0
+	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step) 			and is_zero_approx(collar_pinch) 			and is_zero_approx(cap_flare) 			and is_zero_approx(arch_erode)
+	var extras_off := is_zero_approx(talus_spread) and door_count == 0 			and window_rows == 0
 	if shapes_off and extras_off:
 		return
 	var meshes: Array[MeshInstance3D] = []
@@ -253,7 +380,10 @@ func _deform() -> void:
 		return
 	if not shapes_off:
 		for mi in meshes:
-			_deform_mesh(mi)
+			if not is_zero_approx(arch_erode):
+				_erode_arch(mi)
+			else:
+				_deform_mesh(mi)
 	# Poala si deschiderile se ataseaza O SINGURA DATA, pe mesh-ul cel mai mare:
 	# la hornul triplu, trei poale concentrice s-ar fi intersectat intr-o stea,
 	# iar trei randuri de usi ar fi spus trei scari diferite.
@@ -360,6 +490,27 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 					var prev := 0.5 + 0.5 * sin((band - 1.0) * 2.399963 + ph1)
 					scale *= 1.0 + strata_step * lerpf(prev, hard, edge)
 
+				# --- 6. GATUL de sub palarie ------------------------------
+				# Strangere pe o banda de cota, deci ramane orizontala oricat
+				# de ovalizat/inclinat ar fi hornul — la fel ca straturile.
+				# Gaussiana si nu treapta: o taietura brusca ar fi lasat o
+				# muchie de poligon care se vede ca defect de mesh, pe cand
+				# ce vrem e o SCOBITURA din care palaria iese in consola.
+				if not is_zero_approx(collar_pinch):
+					var dc := (t - collar_at) / maxf(collar_span, 0.01)
+					scale *= 1.0 - collar_pinch * exp(-dc * dc)
+
+				# --- 7. PALARIA in consola --------------------------------
+				# Se lateste doar deasupra lui cap_from, si se stinge spre
+				# varf: la t = cap_from latirea e maxima (acolo e BUZA, care
+				# arunca umbra pe gat), la t = 1 e zero (varful ramane varf).
+				# Fara stingere ar fi iesit o palarie cilindrica, adica o
+				# palarie de joben — citeste a obiect fabricat, nu a stanca
+				# dura ramasa dupa ce cea moale de sub ea s-a dus.
+				if not is_zero_approx(cap_flare) and t > cap_from:
+					var ct := (t - cap_from) / maxf(1.0 - cap_from, 0.01)
+					scale *= 1.0 + cap_flare * (1.0 - ct) * (1.0 - ct * 0.35)
+
 				# --- contur neregulat -------------------------------------
 				if not is_zero_approx(noise_amount):
 					scale *= 1.0 + noise_amount * (
@@ -450,6 +601,40 @@ func _add_extras(mi: MeshInstance3D) -> void:
 				Mesh.PRIMITIVE_TRIANGLES, m.surface_get_arrays(0))
 			out.surface_set_material(out.get_surface_count() - 1, mat)
 
+	# --- RANDURI DE FERESTRE ------------------------------------------------
+	# Se pun INAINTE de usi, pe cotele lor proprii, fiindca fiecare rand isi
+	# masoara singur raza peretelui la inaltimea lui: hornul e un con, deci o
+	# fereastra pusa la raza bazei ar fi plutit in fata peretelui cu cativa
+	# metri la trei sferturi din inaltime. Aceeasi capcana care a lovit usile
+	# in runda trecuta, doar ca de sase ori mai sus si deci de sase ori mai
+	# vizibila.
+	if window_rows > 0:
+		var stw := SurfaceTool.new()
+		stw.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var any_win := false
+		for row in window_rows:
+			var rf := window_from
+			if window_rows > 1:
+				rf = lerpf(window_from, window_to,
+					float(row) / float(window_rows - 1))
+			var rr := _radius_at(src, cx, cz, y0, h, rf)
+			if rr <= 0.001:
+				continue
+			# Randurile de sus au mai putine ferestre: hornul se ingusteaza, si
+			# tot atatea deschideri pe o circumferinta mai mica s-ar fi
+			# suprapus intr-un gratar continuu. Un gratar citeste a aerisire
+			# industriala, exact reprosul din runda trecuta despre usi.
+			var per := maxi(1, window_per_row - row)
+			_build_windows(stw, cx, cz, y0 + rf * h, rr, world_scale, per, row)
+			any_win = true
+		if any_win:
+			stw.generate_normals()
+			var mw := stw.commit()
+			if mw != null and mw.get_surface_count() > 0:
+				out.add_surface_from_arrays(
+					Mesh.PRIMITIVE_TRIANGLES, mw.surface_get_arrays(0))
+				out.surface_set_material(out.get_surface_count() - 1, mat)
+
 	if door_count > 0:
 		# Pragul urca PESTE creasta poalei. Fara asta, usa e ingropata in
 		# grohotis pe doua treimi din inaltime — s-a si vazut in captura de la
@@ -459,7 +644,13 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		# (wob maxim = 1.44), plus o palma de degajare.
 		var sill := door_sill_m
 		if not is_zero_approx(talus_spread):
-			var crest := base_r * talus_height * (0.75 + 0.35 * 1.44)
+			# Creasta MAXIMA a poalei: wob la varf (1.44) inmultit cu limba de
+			# moloz cea mai inalta (climb la varf = 1 + 0.55 + 0.25 = 1.80).
+			# De cand poala urca inegal pe perete, un prag calculat pe creasta
+			# MEDIE ar fi lasat usile ingropate exact acolo unde molozul s-a
+			# ingramadit — adica pe fata cea mai spectaculoasa, care e si cea
+			# dinspre drum.
+			var crest := base_r * talus_height * (0.75 + 0.35 * 1.44) * 1.80
 			sill = maxf(sill, (crest + base_r * 0.05) * world_scale)
 		# Raza SE MASOARA LA COTA PRAGULUI, nu la baza: altfel nisa sta in
 		# aer, in fata unui perete care s-a subtiat sub ea.
@@ -516,9 +707,7 @@ func _radius_at(src: Mesh, cx: float, cz: float, y0: float, h: float,
 ## inca o piesa.
 func _build_talus(st: SurfaceTool, cx: float, cz: float, y0: float,
 		base_r: float) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = shape_seed + 7717
-	var ph := rng.randf() * TAU
+	var ph := _talus_phase(shape_seed)
 	var n := talus_sides
 	# Poala coboara putin SUB baza mesh-ului, ca sa nu ramana o fanta intre ea
 	# si teren pe pantele unde hornul sta oblic.
@@ -535,8 +724,28 @@ func _build_talus(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# ce da senzatia de material unghiular.
 		var lobe := 1.0 + 0.22 * (1.0 if i % 2 == 0 else -1.0) 			* (0.6 + 0.4 * sin(float(i) * 1.7 + ph))
 		var r_out := base_r * (1.0 + talus_spread * wob * lobe)
-		var r_in := base_r * 0.98
-		var y_top := y0 + base_r * talus_height * (0.75 + 0.35 * wob)
+		# BUZA DE SUS URCA PE PERETE, si urca INEGAL.
+		#
+		# De ce. Critica oarba, runda 10: poala e "a ring of flat faceted plates
+		# (...) meeting the cone at a hard line — the cones do not emerge from
+		# the ground, they are placed on it and the skirt is a rug". Avea
+		# dreptate din geometrie: buza interioara statea la raza 0.98*base_r,
+		# adica LIPITA de perete pe un cerc de cota aproape constanta. Un cerc
+		# de cota constanta pe un con e o LINIE — si o linie inchisa la
+		# intersectia a doua suprafete e chiar definitia unui obiect asezat
+		# peste altul.
+		#
+		# Un con de grohotis real n-are linie de contact: molozul se ingramadeste
+		# in limbi care urca pe perete acolo unde a cazut mai mult si coboara
+		# intre ele. Buza devine ondulata pe VERTICALA, deci nu mai exista nicio
+		# cota unica la care sa se vada muchia — si atunci hornul iese din
+		# gramada in loc sa stea pe ea.
+		#
+		# Amplitudinea (pana la 0.55 din inaltimea poalei) e aleasa ca urcarea sa
+		# fie de ordinul metrilor pe hornurile mari: sub asta, ondulatia exista
+		# in geometrie dar se pierde in latimea unui poligon.
+		var r_in := base_r * (0.99 + 0.02 * wob)
+		var y_top := y0 + base_r * talus_height * _talus_lift(a, ph)
 		inner.append(Vector3(cx + cos(a) * r_in, y_top, cz + sin(a) * r_in))
 		outer.append(Vector3(cx + cos(a) * r_out, y_foot, cz + sin(a) * r_out))
 	var uv := Palette.uv(TALUS_SLOT)
@@ -554,6 +763,29 @@ func _build_talus(st: SurfaceTool, cx: float, cz: float, y0: float,
 		st.set_uv(uv); st.add_vertex(inner[i])
 		st.set_uv(uv); st.add_vertex(outer[j])
 		st.set_uv(uv); st.add_vertex(inner[j])
+
+
+## Faza zgomotului de poala. O SINGURA sursa de adevar.
+##
+## Bug gasit in runda 11: `_build_talus` isi lua faza din seed-ul +7717, iar
+## `_build_talus_rocks` din +3391. Adica poala si bolovanii de pe ea foloseau
+## acelasi `wob` scris identic, dar cu FAZE DIFERITE — deci bolovanii calculau
+## panta unei poale care nu exista. Se vedea putin cat timp singura variatie era
+## raza (0.28 amplitudine), dar limbile de moloz care urca acum pe perete au
+## amplitudine 0.55 pe VERTICALA, si atunci decalajul ar fi ingropat jumatate
+## din bolovani si ar fi lasat cealalta jumatate atarnand in aer.
+static func _talus_phase(sd: int) -> float:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = sd + 7717
+	return rng.randf() * TAU
+
+
+## Inaltimea poalei la un azimut, ca multiplu al inaltimii nominale. Aceeasi
+## formula folosita si de fusta, si de bolovani — vezi `_talus_phase`.
+static func _talus_lift(a: float, ph: float) -> float:
+	var wob := 1.0 + 0.28 * sin(3.0 * a + ph) + 0.16 * sin(5.0 * a + ph * 1.7)
+	var climb := 1.0 + 0.55 * sin(2.0 * a + ph * 2.3) + 0.25 * sin(5.0 * a + ph)
+	return (0.75 + 0.35 * wob) * maxf(climb, 0.25)
 
 
 ## Bolovanii de pe poala: blocuri unghiulare de marimi foarte diferite.
@@ -577,7 +809,9 @@ func _build_talus_rocks(st: SurfaceTool, cx: float, cz: float, y0: float,
 		base_r: float) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = shape_seed + 3391
-	var ph := rng.randf() * TAU
+	# Faza poalei, NU o faza proprie: bolovanii stau pe suprafata construita de
+	# `_build_talus`, deci trebuie sa citeasca exact acelasi zgomot.
+	var ph := _talus_phase(shape_seed)
 	var uv := Palette.uv(TALUS_SLOT)
 	for k in talus_rocks:
 		var a := rng.randf() * TAU
@@ -590,7 +824,7 @@ func _build_talus_rocks(st: SurfaceTool, cx: float, cz: float, y0: float,
 		var r_here := base_r * (1.0 + talus_spread * wob * t)
 		# Cota pe panta poalei: liniara intre creasta si poale, ca bolovanul sa
 		# stea PE panta, nu infipt in ea sau plutind peste.
-		var crest := y0 + base_r * talus_height * (0.75 + 0.35 * wob)
+		var crest := y0 + base_r * talus_height * _talus_lift(a, ph)
 		var y_foot := y0 - base_r * 0.10
 		var y_here := lerpf(crest, y_foot, minf(t, 1.0))
 		# Marimea: lege de putere, cu blocurile mari catre POALE (t mare) —
@@ -755,6 +989,168 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		var sro := Vector3(cx + nx * (pr + so) + tx * hw, yb - jt * 0.5,
 			cz + nz * (pr + so) + tz * hw)
 		_quad(st, slo, sro, sr, sl, frame_uv)
+
+
+## Un rand de ferestre: nise MAI LATE DECAT INALTE, cu buiandrug si solbanc.
+##
+## De ce sunt o functie separata si nu `_build_doors` cu alti parametri: usa are
+## prag iesit in afara (se INTRA prin ea) si sta pe un singur nivel, fereastra
+## are solbanc si vine in randuri. Mai ales, usa e verticala si fereastra e
+## orizontala — iar critica a cerut explicit forma orizontala, fiindca o
+## deschidere verticala intr-o stanca citeste a CRAPATURA, nu a locuinta. O
+## crapatura e eroziune; o fereastra e cineva care a sapat acolo. Diferenta asta
+## e toata cheia de scara.
+##
+## Adancimea e mica intentionat (18 cm): o nisa adanca la 40 m nu se mai citeste
+## ca adanca, se citeste ca o pata neagra. Ce se vede de departe e UMBRA
+## buiandrugului pe pervaz, si aia cere doar cativa centimetri de consola.
+func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
+		r: float, world_scale: float, count: int, row: int) -> void:
+	var wh := window_height_m / world_scale
+	var ww := wh * window_aspect
+	var wd := minf(0.18 / world_scale, r * 0.35)
+	# Latimea nu poate depasi o fractiune din circumferinta, altfel ferestrele
+	# vecine se ating si redevin gratar.
+	ww = minf(ww, r * 0.55)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = shape_seed + 5100 + row * 31
+	var arc := deg_to_rad(window_arc_deg)
+	var dir0 := deg_to_rad(window_dir_deg)
+	# Randurile se decaleaza pe azimut, ca ferestrele sa nu se insiruie pe o
+	# coloana verticala — un sir vertical de goluri ar fi refacut exact fanta
+	# pe care o inlocuim, doar din bucati.
+	dir0 += float(row) * arc * 0.17
+	var dark := Palette.uv(DOOR_DARK_SLOT)
+	var trim := Palette.uv(TALUS_SLOT)
+	for k in count:
+		var f := 0.0
+		if count > 1:
+			f = float(k) / float(count - 1) - 0.5
+		var a := dir0 + f * arc + rng.randf_range(-0.05, 0.05)
+		var nx := cos(a)
+		var nz := sin(a)
+		var tx := -sin(a)
+		var tz := cos(a)
+		var r_face := r * 1.01
+		var r_back := r - wd
+		# Inaltimile variaza putin de la o fereastra la alta: un rand perfect
+		# aliniat citeste a fatada de bloc, nu a stanca locuita.
+		var yb := ybase + rng.randf_range(-0.12, 0.12) * wh
+		var yt := yb + wh * rng.randf_range(0.88, 1.12)
+		var hw := ww * 0.5 * rng.randf_range(0.85, 1.15)
+		var fbl := Vector3(cx + nx * r_face - tx * hw, yb, cz + nz * r_face - tz * hw)
+		var fbr := Vector3(cx + nx * r_face + tx * hw, yb, cz + nz * r_face + tz * hw)
+		var ftl := Vector3(cx + nx * r_face - tx * hw, yt, cz + nz * r_face - tz * hw)
+		var ftr := Vector3(cx + nx * r_face + tx * hw, yt, cz + nz * r_face + tz * hw)
+		var bbl := Vector3(cx + nx * r_back - tx * hw, yb, cz + nz * r_back - tz * hw)
+		var bbr := Vector3(cx + nx * r_back + tx * hw, yb, cz + nz * r_back + tz * hw)
+		var btl := Vector3(cx + nx * r_back - tx * hw, yt, cz + nz * r_back - tz * hw)
+		var btr := Vector3(cx + nx * r_back + tx * hw, yt, cz + nz * r_back + tz * hw)
+		# Golul: fund + obraji + buiandrug, toate pe slotul cel mai inchis.
+		_quad(st, bbl, bbr, btr, btl, dark)
+		_quad(st, fbl, bbl, btl, ftl, dark)
+		_quad(st, bbr, fbr, ftr, btr, dark)
+		_quad(st, btl, btr, ftr, ftl, dark)
+		# SOLBANCUL: o lespede subtire care iese peste gol. E singura piesa care
+		# se vede de la 60 m — arunca o dunga de umbra ORIZONTALA sub fereastra,
+		# iar dunga aia e ce spune ochiului ca deschiderea e lata, nu inalta.
+		var so := 0.14 / world_scale
+		var sy := 0.07 / world_scale
+		var sw := hw + 0.10 / world_scale
+		var sl := Vector3(cx + nx * r_face - tx * sw, yb, cz + nz * r_face - tz * sw)
+		var sr := Vector3(cx + nx * r_face + tx * sw, yb, cz + nz * r_face + tz * sw)
+		var slo := Vector3(cx + nx * (r_face + so) - tx * sw, yb - sy,
+			cz + nz * (r_face + so) - tz * sw)
+		var sro := Vector3(cx + nx * (r_face + so) + tx * sw, yb - sy,
+			cz + nz * (r_face + so) + tz * sw)
+		_quad(st, slo, sro, sr, sl, trim)
+		# Muchia frontala a solbancului, ca sa aiba grosime si deci umbra.
+		var sld := Vector3(cx + nx * (r_face + so) - tx * sw, yb - sy * 2.4,
+			cz + nz * (r_face + so) - tz * sw)
+		var srd := Vector3(cx + nx * (r_face + so) + tx * sw, yb - sy * 2.4,
+			cz + nz * (r_face + so) + tz * sw)
+		_quad(st, sld, srd, sro, slo, trim)
+		# BUIANDRUGUL: aceeasi consola deasupra, care pune golul in umbra
+		# proprie chiar cand soarele bate din fata.
+		var ll := Vector3(cx + nx * r_face - tx * sw, yt, cz + nz * r_face - tz * sw)
+		var lr := Vector3(cx + nx * r_face + tx * sw, yt, cz + nz * r_face + tz * sw)
+		var llo := Vector3(cx + nx * (r_face + so) - tx * sw, yt + sy,
+			cz + nz * (r_face + so) - tz * sw)
+		var lro := Vector3(cx + nx * (r_face + so) + tx * sw, yt + sy,
+			cz + nz * (r_face + so) + tz * sw)
+		_quad(st, ll, lr, lro, llo, trim)
+		_quad(st, llo, lro, lr, ll, trim)
+
+
+## Erodeaza o ARCADA, ca sa citeasca a stanca ramasa si nu a poarta zidita.
+## Vezi `arch_erode` pentru motiv. Nu foloseste nimic radial.
+func _erode_arch(mi: MeshInstance3D) -> void:
+	var src := mi.mesh
+	var ab := src.get_aabb()
+	var h := maxf(ab.size.y, 0.001)
+	var y0 := ab.position.y
+	var cx := ab.position.x + ab.size.x * 0.5
+	var cz := ab.position.z + ab.size.z * 0.5
+	var half_w := maxf(ab.size.x * 0.5, 0.001)
+	var k := arch_erode
+	var rng := RandomNumberGenerator.new()
+	rng.seed = shape_seed + 991
+	var p1 := rng.randf() * TAU
+	var p2 := rng.randf() * TAU
+
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arrays := src.surface_get_arrays(s)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for i in verts.size():
+			var v := verts[i]
+			var t := clampf((v.y - y0) / h, 0.0, 1.0)
+			var dx := v.x - cx
+			var dz := v.z - cz
+			# --- 1. stalpii se ingroasa la baza --------------------------
+			# Doar sub nasterea arcului, si doar pe latime/adancime: grinda de
+			# deasupra trebuie sa ramana dreapta ca sa se vada lasarea ei.
+			if t < arch_span_at:
+				var f := 1.0 - t / maxf(arch_span_at, 0.01)
+				var swell := 1.0 + k * 0.30 * f * f
+				# Departarea de axa proprie a stalpului, nu de centrul arcadei:
+				# altfel ingrosarea ar fi impins cei doi stalpi in afara ca un
+				# tot, in loc sa-i ingroase pe fiecare.
+				var post_c := half_w * 0.62 * signf(dx) if absf(dx) > half_w * 0.25 else 0.0
+				v.x = cx + post_c + (dx - post_c) * swell
+				v.z = cz + dz * swell
+			# --- 2. grinda se lasa la mijloc ------------------------------
+			else:
+				var span := (t - arch_span_at) / maxf(1.0 - arch_span_at, 0.01)
+				# Sageata maxima in ax, zero la stalpi.
+				var mid := 1.0 - minf(absf(dx) / (half_w * 0.62), 1.0)
+				v.y -= k * h * 0.055 * mid * mid * span
+			# --- 3. eroziune pe toata suprafata ---------------------------
+			# Trei armonici necorelate: fetele plane capata unduire, muchiile
+			# drepte capata zimti. Amplitudinea e in metri de mesh (h * 0.02),
+			# deci ~0.4 m pe o arcada de 21 m — se vede la 60 m, nu destrama
+			# forma.
+			var e := h * 0.02 * k
+			v.x += e * sin(v.y * 0.9 + p1) * 0.9
+			v.z += e * sin(v.y * 1.3 + p2) * 0.9
+			v.y += e * (sin(v.x * 0.7 + p2) + sin(v.z * 1.1 + p1)) * 0.45
+			verts[i] = v
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		arrays[Mesh.ARRAY_NORMAL] = null
+		arrays[Mesh.ARRAY_TANGENT] = null
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		out.surface_set_material(s, src.surface_get_material(s))
+	var st := SurfaceTool.new()
+	var fixed := ArrayMesh.new()
+	for s in out.get_surface_count():
+		st.clear()
+		st.create_from(out, s)
+		st.generate_normals()
+		var m := st.commit()
+		fixed.add_surface_from_arrays(
+			Mesh.PRIMITIVE_TRIANGLES, m.surface_get_arrays(0))
+		fixed.surface_set_material(s, out.surface_get_material(s))
+	mi.mesh = fixed
 
 
 ## Un patrulater ca doua triunghiuri, cu UV-ul COLAPSAT pe centrul slotului.

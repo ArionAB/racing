@@ -101,14 +101,32 @@ func _fmt(v: float) -> String:
 	return "%.3f" % v
 
 
-## Transform3D in forma pe care o scrie Godot in .tscn: basis pe coloane, apoi
-## originea.
+## Transform3D in forma pe care o scrie Godot in .tscn.
+##
+## [b]Atentie la ordine — aici s-a rupt runda trecuta.[/b] In .tscn cele noua
+## numere sunt AXELE bazei (X, apoi Y, apoi Z) date pe componente in spatiul
+## lumii. In GDScript `b.x` ESTE chiar axa X, dar `b.x.z` nu e componenta pe
+## care o astepta fisierul: indexarea `b[rand][coloana]` si accesul pe axe se
+## transpun una pe alta. Versiunea veche scria randurile bazei acolo unde Godot
+## citeste coloanele, adica TRANSPUSA — pentru o rotatie in jurul lui Y asta e
+## exact rotatia INVERSA (yaw -> -yaw).
+##
+## Nu era o greseala vizibila din arbore: nodurile aveau originile corecte, la
+## r=38.8, si sonda de layout trecea. Dar panourile de zid erau intoarse pe dos,
+## si fata lor de 20 m matura spre AXA in loc sa priveasca spre ea: masurat,
+## geometria ajungea la r=28.5, adica 5.5 m PESTE marginea asfaltului (34.0), pe
+## banda pe care urca masina. Se vedea si pe captura din joc (frac 0.90) ca un
+## perete lipit de parbriz.
+##
+## Se scrie explicit pe componente, ca sa nu mai depinda de care convenție isi
+## aminteste cititorul. Memoria `rotatii-in-builder-semnul` spune acelasi lucru:
+## semnul se DERIVA, nu se ghiceste.
 func _xf(basis: Basis, o: Vector3) -> String:
 	var b := basis
 	return "Transform3D(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % [
-		_fmt(b.x.x), _fmt(b.x.y), _fmt(b.x.z),
-		_fmt(b.y.x), _fmt(b.y.y), _fmt(b.y.z),
-		_fmt(b.z.x), _fmt(b.z.y), _fmt(b.z.z),
+		_fmt(b.x.x), _fmt(b.y.x), _fmt(b.z.x),
+		_fmt(b.x.y), _fmt(b.y.y), _fmt(b.z.y),
+		_fmt(b.x.z), _fmt(b.y.z), _fmt(b.z.z),
 		_fmt(o.x), _fmt(o.y), _fmt(o.z)]
 
 

@@ -29,10 +29,10 @@ func _ready() -> void:
 		print("=== frac %.3f  idx %d  drum la (%.1f, %.1f, %.1f)  fwd=(%.2f,%.2f)  side=(%.2f,%.2f)" % [
 			f0, i0, p0.x, p0.y, p0.z, fwd.x, fwd.z, sid.x, sid.z])
 		# conul: distanta in fata x unghi lateral (dreapta pozitiv = valea)
-		print("  dist |  -20deg   -0deg   +15deg   +30deg   +45deg   +60deg  (cote fata de drum)")
+		print("  dist |  -20deg   -0deg   +15deg   +30deg   +45deg   +60deg   +75deg   +90deg")
 		for dist in [40.0, 70.0, 110.0, 160.0, 220.0]:
 			var row := "  %4.0f |" % dist
-			for ang in [-20.0, 0.0, 15.0, 30.0, 45.0, 60.0]:
+			for ang in [-20.0, 0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0]:
 				var d2: Vector3 = fwd.rotated(Vector3.UP, -deg_to_rad(ang))
 				var q: Vector3 = p0 + d2 * dist
 				var ry := PhysicsRayQueryParameters3D.create(
@@ -44,10 +44,10 @@ func _ready() -> void:
 					row += "     gol"
 			print(row)
 		# coordonatele XZ ale conului, ca sa stiu unde sa sap
-		print("  XZ ale conului (dist @ +30deg / +45deg):")
+		print("  XZ ale conului (dist @ +45 / +60 / +75):")
 		for dist in [70.0, 110.0, 160.0, 220.0]:
 			var s := "   %4.0f m:" % dist
-			for ang in [30.0, 45.0]:
+			for ang in [45.0, 60.0, 75.0]:
 				var d2: Vector3 = fwd.rotated(Vector3.UP, -deg_to_rad(ang))
 				var q: Vector3 = p0 + d2 * dist
 				s += "  (%.0f, %.0f)" % [q.x, q.z]

@@ -194,7 +194,7 @@ const DOOR_DARK_SLOT: int = 26
 ## Cat de mare e cel mai MARE bolovan, ca fractiune din raza hornului la sol.
 ## Restul coboara de aici pe o lege de putere, ca distributia sa aiba cateva
 ## blocuri mari si multe aschii — asa arata un con de grohotis real.
-@export_range(0.04, 0.40, 0.01) var talus_rock_max: float = 0.16
+@export_range(0.04, 0.70, 0.01) var talus_rock_max: float = 0.16
 
 
 ## --- Usi si ferestre sapate in baza -----------------------------------------
@@ -597,9 +597,23 @@ func _build_talus_rocks(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# grohotisul se sorteaza singur, fragmentele grele se rostogolesc cel
 		# mai departe. E si adevarat fizic, si citeste corect: blocul mare de
 		# jos e cheia de scara, langa care aschiile de sus par mici.
+		# Legea de marime. Prima varianta folosea pow(u, 2.2) pe tot intervalul
+		# si a iesit invizibila: MASURAT pe trei hornuri din scena, bolovanul
+		# tipic ajungea la 0.1-0.3 m diametru si chiar si cel mai mare la ~1 m.
+		# Adica pietricele — de la volan, poala ramanea o duna neteda, exact
+		# reprosul care trebuia reparat. Exponentul mare face ca aproape toate
+		# esantioanele sa cada langa zero; "cateva mari si multe mici" cere ca
+		# ALEA cateva sa fie chiar mari, nu ca toate sa fie mici.
+		#
+		# Acum: o parte din fragmente sunt BLOCURI declarate (u in 0.75..1.0),
+		# restul aschii, si exponentul e mai bland. Un bloc de 1.5-3 m e ce
+		# spune "asta a cazut de acolo" — sub un metru nu se citeste nici macar
+		# la 20 m.
 		var u := rng.randf()
-		var size := base_r * talus_rock_max * pow(u, 2.2) * (0.45 + 0.75 * minf(t, 1.0))
-		if size < base_r * 0.012:
+		if k % 4 == 0:
+			u = rng.randf_range(0.75, 1.0)
+		var size := base_r * talus_rock_max * pow(u, 1.35) * (0.55 + 0.85 * minf(t, 1.0))
+		if size < base_r * 0.02:
 			continue
 		var cxr := cx + cos(a) * r_here
 		var czr := cz + sin(a) * r_here

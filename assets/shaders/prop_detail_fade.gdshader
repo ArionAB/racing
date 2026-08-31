@@ -35,22 +35,22 @@ uniform float detail_mean = 0.850;
 // In cate trepte se rupe stratul de detaliu. 0 = continuu (comportamentul de
 // dinainte de runda 14). Vezi nota de la `det` in fragment().
 uniform float detail_steps = 16.0;
-// PIVOTUL cuantizarii. NU e `detail_mean`, si diferenta conteaza: `detail_mean`
-// (0.850) e valoarea catre care se stinge stratul la distanta, o conventie din
-// style_bible §4. Media REALA a texturii, masurata pe toti texelii, e 0.927
-// pentru detail_tuff.png si 0.903 pentru detail_rock.png. Cuantizand in jurul lui
-// 0.850, suprafata obisnuita cadea deja peste pivot si se amplifica in sus, iar
-// santurile ajungeau mult sub el — de-aia primele incercari au scos "dungi de
-// tigru" in loc de tuf. Se pivoteaza pe media adevarata; stingerea cu distanta
-// ramane pe `detail_mean`, ca sa nu se mute expunerea.
-uniform float detail_pivot = 0.927;
-// Cat de tare se desface fiecare treapta fata de medie. Peste 1 = placile se
+// PIVOTUL cuantizarii, si NU e `detail_mean`. Diferenta a costat cateva
+// incercari, deci merita scrisa: `detail_mean` (0.850) e valoarea catre care se
+// stinge stratul la distanta, o conventie din style_bible §4 — nu media reala a
+// vreunei texturi. Masurate pe toti texelii: 0.920 detail_tuff.png (dupa
+// redesenarea din runda 14) si 0.903 detail_rock.png. Cuantizand in jurul lui
+// 0.850, suprafata obisnuita cadea deja PESTE pivot si se amplifica in sus, iar
+// santurile treceau mult sub el — asimetria aia scotea "dungi de tigru" in loc
+// de tuf. Se pivoteaza pe media adevarata a dalei; stingerea cu distanta ramane
+// pe `detail_mean`, ca sa nu se mute expunerea.
+//
+// Daca se schimba textura de detaliu, se remasoara media si se scrie aici.
+uniform float detail_pivot = 0.920;
+// Cat de tare se desface fiecare treapta fata de pivot. Peste 1 = placile se
 // separa mai mult decat o face textura, ca saltul de pe margine sa treaca pragul
-// de vizibilitate.
-uniform float detail_gain = 3.4;
-// Cat din castig primeste partea INTUNECATA (sub medie). Sub 1 = santurile se
-// adancesc mai putin decat se ridica crestele — vezi nota de la cuantizare.
-uniform float detail_dark_ratio = 1.0;
+// de vizibilitate al sondei de muchii (8 din 255).
+uniform float detail_gain = 2.8;
 uniform float roughness_v = 0.9;
 uniform float specular_v = 0.15;
 
@@ -135,9 +135,12 @@ void fragment() {
 	// geometrice). E regula rundei aplicata la litera — semnalul pictat nu se
 	// sterge, se cuantizeaza.
 	//
-	// `detail_mean` e media pe care sunt normalizate texturile (style_bible §4):
-	// se cuantizeaza ABATEREA fata de ea, ca treptele sa fie simetrice si sa nu
-	// mute expunerea.
+	// Se cuantizeaza ABATEREA fata de `detail_pivot` (media REALA a dalei, vezi
+	// nota de la uniforma), ca treptele sa fie simetrice si sa nu mute expunerea.
+	//
+	// Si a fost nevoie si de o dala noua: textura veche avea opt caneluri late si
+	// nimic intre ele, deci amplificarea nu putea produce decat zebra. Detaliul
+	// fin trebuie sa EXISTE in textura — vezi `tools/gen_detail_tuff.gd`.
 	if (detail_steps >= 2.0) {
 		vec3 dev = det - vec3(detail_pivot);
 		dev = round(dev * detail_steps) / detail_steps;
@@ -154,9 +157,7 @@ void fragment() {
 		// Deci partea de peste medie se desface mai mult decat cea de sub ea:
 		// muchiile raman (saltul dintre trepte nu depinde de sens), dar valoarea
 		// nu se mai prabuseste in negru.
-		float gain_dn = detail_gain * detail_dark_ratio;
-		dev = mix(dev * gain_dn, dev * detail_gain, step(0.0, dev.r));
-		det = vec3(detail_pivot) + dev;
+		det = vec3(detail_pivot) + dev * detail_gain;
 	}
 
 	// VERTEX e in spatiul camerei, deci lungimea lui e chiar distanta.

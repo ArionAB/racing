@@ -176,6 +176,26 @@ const DOOR_DARK_SLOT: int = 26
 ## distanta de condus; nu se urca fiindca poala se vede mereu de departe.
 @export_range(6, 24, 1) var talus_sides: int = 14
 
+## Cati BOLOVANI se presara pe si in jurul poalei. 0 = niciunul.
+##
+## De ce exista. Critica oarba, runda 9, despre poala construita in runda
+## anterioara: "a single smooth lobed cone with no boulder at any size, so
+## there is no fragment to say 'this fell off that'" — si, in acelasi loc,
+## "the chimney and its skirt look moulded in a single pour". Amandoua
+## observatiile arata acelasi lucru: o panta neteda nu e grohotis, e o DUNA.
+## Grohotisul se recunoaste dupa FRAGMENTE de marimi diferite, nu dupa panta.
+##
+## Se pun blocuri unghiulare (nu sfere: sfera citeste a bila, iar tuful se
+## rupe in colturi) pe o gama larga de dimensiuni — de la bolovani cat un om
+## la sfaramaturi de zeci de centimetri. Gama larga e chiar poanta: ea da si
+## cheia de scara, si dovada ca materialul a cazut si s-a spart.
+@export_range(0, 40, 1) var talus_rocks: int = 0
+
+## Cat de mare e cel mai MARE bolovan, ca fractiune din raza hornului la sol.
+## Restul coboara de aici pe o lege de putere, ca distributia sa aiba cateva
+## blocuri mari si multe aschii — asa arata un con de grohotis real.
+@export_range(0.04, 0.40, 0.01) var talus_rock_max: float = 0.16
+
 
 ## --- Usi si ferestre sapate in baza -----------------------------------------
 
@@ -419,6 +439,10 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 		_build_talus(st, cx, cz, y0, base_r)
+		# Bolovanii merg in ACEEASI suprafata cu poala: acelasi material, deci
+		# zero draw call-uri in plus si zero materiale in plus la numaratoare.
+		if talus_rocks > 0:
+			_build_talus_rocks(st, cx, cz, y0, base_r)
 		st.generate_normals()
 		var m := st.commit()
 		if m != null and m.get_surface_count() > 0:
@@ -532,6 +556,87 @@ func _build_talus(st: SurfaceTool, cx: float, cz: float, y0: float,
 		st.set_uv(uv); st.add_vertex(inner[j])
 
 
+## Bolovanii de pe poala: blocuri unghiulare de marimi foarte diferite.
+##
+## Forma e un octaedru NEREGULAT — opt fete plane, cu fiecare varf impins
+## aleator. De ce nu o sfera: o sfera cu putine segmente citeste a bila de
+## piatra slefuita, iar tuful crapa in colturi. De ce nu o cutie: o cutie are
+## trei perechi de fete paralele si citeste a bloc taiat de om. Octaedrul
+## deformat n-are nicio pereche paralela, deci fiecare fata prinde alta valoare
+## de lumina si bolovanul se citeste ca fragment rupt.
+##
+## Marimile urmeaza o lege de putere (t^2.2): cateva blocuri mari si multe
+## aschii. Distributia CONTEAZA — daca toate ar fi la fel de mari, ar citi a
+## pietriș decorativ imprastiat, nu a stanca sfaramata. Gama larga e ce da
+## "there is no fragment to say this fell off that" raspunsul lui.
+##
+## Asezarea: pe panta poalei (intre buza si poale), plus un inel de fugari
+## dincolo de ea — pietrele care s-au rostogolit mai departe. Fara fugari,
+## conturul poalei ar fi ramas o linie curata, adica tot un con.
+func _build_talus_rocks(st: SurfaceTool, cx: float, cz: float, y0: float,
+		base_r: float) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = shape_seed + 3391
+	var ph := rng.randf() * TAU
+	var uv := Palette.uv(TALUS_SLOT)
+	for k in talus_rocks:
+		var a := rng.randf() * TAU
+		var wob := 1.0 + 0.28 * sin(3.0 * a + ph) + 0.16 * sin(5.0 * a + ph * 1.7)
+		# t = 0 la perete, 1 la poale, >1 = fugar rostogolit dincolo de con.
+		var t := rng.randf()
+		var runaway := rng.randf() < 0.22
+		if runaway:
+			t = 1.0 + rng.randf() * 0.55
+		var r_here := base_r * (1.0 + talus_spread * wob * t)
+		# Cota pe panta poalei: liniara intre creasta si poale, ca bolovanul sa
+		# stea PE panta, nu infipt in ea sau plutind peste.
+		var crest := y0 + base_r * talus_height * (0.75 + 0.35 * wob)
+		var y_foot := y0 - base_r * 0.10
+		var y_here := lerpf(crest, y_foot, minf(t, 1.0))
+		# Marimea: lege de putere, cu blocurile mari catre POALE (t mare) —
+		# grohotisul se sorteaza singur, fragmentele grele se rostogolesc cel
+		# mai departe. E si adevarat fizic, si citeste corect: blocul mare de
+		# jos e cheia de scara, langa care aschiile de sus par mici.
+		var u := rng.randf()
+		var size := base_r * talus_rock_max * pow(u, 2.2) * (0.45 + 0.75 * minf(t, 1.0))
+		if size < base_r * 0.012:
+			continue
+		var cxr := cx + cos(a) * r_here
+		var czr := cz + sin(a) * r_here
+		# Bolovanul sta pe jumatate ingropat: centrul coboara cu jumatate din
+		# raza, altfel pietrele plutesc pe panta ca niste baloane.
+		_octa_rock(st, Vector3(cxr, y_here + size * 0.35, czr), size, rng, uv)
+
+
+## Un bloc unghiular: octaedru cu varfurile impinse aleator, deci fara nicio
+## pereche de fete paralele.
+func _octa_rock(st: SurfaceTool, c: Vector3, r: float,
+		rng: RandomNumberGenerator, uv: Vector2) -> void:
+	# Cele sase varfuri, fiecare impins pe toate axele. Turtirea pe Y (0.62-0.9)
+	# exista fiindca un fragment cazut se aseaza pe fata lui cea mai lata, nu pe
+	# varf — pietrele perfect izotrope citesc a bile.
+	var flat := rng.randf_range(0.62, 0.90)
+	var v: Array[Vector3] = []
+	for d: Vector3 in [Vector3.RIGHT, Vector3.LEFT, Vector3.UP, Vector3.DOWN,
+			Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+		var jitter := Vector3(rng.randf_range(0.62, 1.35),
+			rng.randf_range(0.62, 1.35), rng.randf_range(0.62, 1.35))
+		var p := d * r
+		p.x *= jitter.x
+		p.y *= jitter.y * flat
+		p.z *= jitter.z
+		v.append(c + p)
+	# Cele opt fete ale octaedrului: fiecare combinatie (±x, ±y, ±z).
+	var faces := [
+		[0, 2, 4], [4, 2, 1], [1, 2, 5], [5, 2, 0],
+		[0, 4, 3], [4, 1, 3], [1, 5, 3], [5, 0, 3],
+	]
+	for f: Array in faces:
+		st.set_uv(uv); st.add_vertex(v[f[0]])
+		st.set_uv(uv); st.add_vertex(v[f[1]])
+		st.set_uv(uv); st.add_vertex(v[f[2]])
+
+
 ## Nisele de usa/fereastra: un chenar impins in perete.
 ##
 ## Nu se taie gaura in mesh — un boolean pe geometrie deformata ar fi cerut o
@@ -587,6 +692,55 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		_quad(st, bbr, fbr, ftr, btr, Palette.uv(DOOR_DARK_SLOT))
 		# Buiandrugul (tavanul nisei).
 		_quad(st, btl, btr, ftr, ftl, Palette.uv(DOOR_DARK_SLOT))
+
+		# --- CHENARUL IN RELIEF ------------------------------------------
+		#
+		# De ce exista. Critica oarba, runda 9: usile sunt "flat black
+		# rectangles with no jamb, lintel, threshold or interior, so they read
+		# as much like unlit windows or decals as like doors". Nisa CHIAR avea
+		# adancime — fund, pereti laterali, buiandrug — dar de la volan nu se
+		# vedea niciunul: peretele hornului e aproape neumbrit, deci fata din
+		# jurul gaurii si fundul gaurii primesc lumina asemanatoare, iar
+		# conturul dintre ele ramane o simpla schimbare de culoare. Exact ce
+		# face un decal.
+		#
+		# Ce repara: un CADRU care iese in AFARA peretelui, cu 6 cm. Muchia lui
+		# exterioara prinde lumina razanta (soarele temei e la 13 grade) si
+		# arunca o dunga de umbra pe perete, iar muchia interioara pune o linie
+		# clara intre piatra si gol. Adancimea nu se mai deduce din interiorul
+		# intunecat, se vede pe RELIEFUL din jur — si asta se citeste si cand
+		# gaura e prea mica in cadru ca sa i se vada fundul.
+		var pr := base_r * 1.01 + 0.06 / world_scale
+		var jw := hw + 0.16 / world_scale      # cat iese cadrul lateral
+		var jt := 0.20 / world_scale           # cat iese peste buiandrug
+		var pbl := Vector3(cx + nx * pr - tx * jw, yb, cz + nz * pr - tz * jw)
+		var pbr := Vector3(cx + nx * pr + tx * jw, yb, cz + nz * pr + tz * jw)
+		var ptl := Vector3(cx + nx * pr - tx * jw, yt + jt, cz + nz * pr - tz * jw)
+		var ptr := Vector3(cx + nx * pr + tx * jw, yt + jt, cz + nz * pr + tz * jw)
+		# Fata cadrului, ca patru benzi in jurul golului (nu un dreptunghi
+		# plin: golul trebuie sa ramana gol).
+		var fbl2 := Vector3(cx + nx * pr - tx * hw, yb, cz + nz * pr - tz * hw)
+		var fbr2 := Vector3(cx + nx * pr + tx * hw, yb, cz + nz * pr + tz * hw)
+		var ftl2 := Vector3(cx + nx * pr - tx * hw, yt, cz + nz * pr - tz * hw)
+		var ftr2 := Vector3(cx + nx * pr + tx * hw, yt, cz + nz * pr + tz * hw)
+		var frame_uv := Palette.uv(TALUS_SLOT)
+		# Stalpul din stanga, cel din dreapta, si buiandrugul deasupra.
+		_quad(st, pbl, fbl2, ftl2, ptl, frame_uv)
+		_quad(st, fbr2, pbr, ptr, ftr2, frame_uv)
+		_quad(st, ptl, ftl2, ftr2, ptr, frame_uv)
+		# Grosimea cadrului catre perete: fara ea cadrul e o foaie fara muchie,
+		# si tocmai muchia arunca umbra care spune ca iese in afara.
+		_quad(st, ftl, ftl2, ptl, ftl, frame_uv)
+		# PRAGUL: o lespede care iese din perete la baza golului. E piesa care
+		# spune ca prin gaura aia se INTRA — o fereastra n-are prag iesit.
+		var sl := Vector3(cx + nx * pr - tx * hw, yb, cz + nz * pr - tz * hw)
+		var sr := Vector3(cx + nx * pr + tx * hw, yb, cz + nz * pr + tz * hw)
+		var so := 0.22 / world_scale
+		var slo := Vector3(cx + nx * (pr + so) - tx * hw, yb - jt * 0.5,
+			cz + nz * (pr + so) - tz * hw)
+		var sro := Vector3(cx + nx * (pr + so) + tx * hw, yb - jt * 0.5,
+			cz + nz * (pr + so) + tz * hw)
+		_quad(st, slo, sro, sr, sl, frame_uv)
 
 
 ## Un patrulater ca doua triunghiuri, cu UV-ul COLAPSAT pe centrul slotului.

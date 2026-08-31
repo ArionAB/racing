@@ -294,10 +294,20 @@ const CLASSES_BY_MODEL := {
 ## iar regula de arta din brief §0.1 cere ~45% saturatie pe tot mediul.
 ##
 ## Se corecteaza aici, la incarcare, mutand UV-urile pe sloturile crem care CHIAR
-## sunt variatie de valoare: CONCRETE #C8BDA9 (sat 0,16, luminanta 190) pentru
-## banda medie si MARBLE_GREY #B8B4AC (sat 0,07, luminanta 180) pentru umbra.
-## Amandoua sunt sub CORAL_SAND (221) in valoare si aproape de el in saturatie,
-## adica exact ce voia scriptul de build sa ceara.
+## sunt variatie de valoare: CONCRETE #C8BDA9 (sat 0,22, luminanta 184) pentru
+## banda medie si MARBLE_GREY #B8B4AC (sat 0,08, luminanta 178) pentru umbra.
+##
+## ATENTIE la cine mai umbla aici: sloturile astea NU se schimba pe unele mai
+## calde. S-a incercat (runda 10, ROCK_LIGHT + LARCH_RUST, ca raspuns la
+## "chalk-white" din critica) si a iesit mai rau decat punctul de plecare:
+## benzile din .glb sunt SUPRAFETE LATI, nu foi subtiri de strat, deci orice
+## slot cu saturatie 0,5 le transforma in dungi portocalii — cos de fabrica,
+## exact defectul din runda 6. Culoarea a doua benzi late nu poate fi si calda,
+## si discreta; e o problema de SUPRAFATA, nu de slot.
+##
+## Caldura ceruta de critica se pune in schimb din VERTEX COLOR, in
+## `_warm_tuff()` de mai jos: acolo se inmulteste tot conul cu o tenta calda,
+## deci se muta nuanta fara sa se schimbe raportul dintre benzi.
 ##
 ## De ce aici si nu in .glb: piesele sunt de KIT, folosite de toate POI-urile
 ## pistei, iar un re-export atinge sase scripturi de build si toate cele 45 de
@@ -335,6 +345,7 @@ const TUFF_UV_MODELS := [
 func _ready() -> void:
 	_split_shutters()
 	_retint_tuff()
+	_warm_tuff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
 	_fade_tuff_detail()
@@ -617,6 +628,91 @@ func _retint_tuff() -> void:
 				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			if changed:
 				mi.mesh = out
+
+
+## Caldura tufului, din VERTEX COLOR.
+##
+## De ce nu din sloturi: vezi nota lunga de la TUFF_UV_REMAP. Benzile din .glb
+## sunt suprafete late; schimbarea slotului le face dungi portocalii. Tenta pe
+## vertecsi se aplica in schimb pe TOT conul, deci muta nuanta fara sa atinga
+## raportul dintre benzi — si asta e chiar ce cerea critica: "a warm pinkish
+## buff", nu "benzi mai colorate".
+##
+## Multiplicatorul poate DOAR sa intunece (memoria
+## `surfacetool-clamp-vertex-color`), ceea ce pica bine aici: reprosul era ca
+## rocile sunt prea ALBE, deci coborarea e chiar directia ceruta. Se taie din
+## verde si mai ales din albastru, si aproape deloc din rosu — asa un crem
+## acromatic (212, 189, 169 la CORAL_SAND) ajunge roz-caramiziu fara sa fie
+## nevoie de un slot nou.
+##
+## Gradientul pe inaltime: baza mai calda si mai inchisa, varful aproape
+## neatins. Doua motive. In referinta conurile chiar sunt mai roz jos, unde
+## sta stratul de tuf mai vechi. Si, mai practic, palaria inchisa are nevoie de
+## contrast cu ce e sub ea — daca varful se intuneca odata cu baza, silueta se
+## aplatizeaza.
+##
+## `hue_shift` per instanta rupe uniformitatea: critica cerea explicit "hue
+## variation between neighbouring cones", iar cu o singura tenta pe tot kitul
+## padurea ar fi ramas monocroma, doar de alta culoare decat inainte.
+func _warm_tuff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not TUFF_UV_MODELS.has(stem):
+			continue
+		# Seed stabil per instanta: acelasi horn primeste aceeasi nuanta la
+		# fiecare incarcare, altfel padurea ar palpai intre rulari.
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash(model.name) & 0x7fffffff
+		var hue_shift := rng.randf_range(-0.035, 0.035)
+		var strength := rng.randf_range(0.82, 1.0)
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var aabb := mi.mesh.get_aabb()
+			var y0 := aabb.position.y
+			var h := maxf(aabb.size.y, 0.001)
+			var out := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				# ARRAY_COLOR e `null`, nu un vector gol, cand mesh-ul n-are
+				# culori de vertex — atribuirea directa intr-un
+				# PackedColorArray tipat pica la rulare. Se citeste ca Variant
+				# si se materializeaza alb daca lipseste.
+				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
+				var cols := PackedColorArray()
+				if raw_cols is PackedColorArray:
+					cols = raw_cols
+				if cols.size() != verts.size():
+					cols = PackedColorArray()
+					cols.resize(verts.size())
+					cols.fill(Color.WHITE)
+				for i in verts.size():
+					# 1 la baza, 0 la varf.
+					var t := 1.0 - clampf((verts[i].y - y0) / h, 0.0, 1.0)
+					# Plancherul de 0.62 (nu 0.35) e o corectie MASURATA, nu o
+					# preferinta. Cu 0.35, treimea de sus a conului ramanea la
+					# luminanta 158 fata de 138 in referinta — adica exact
+					# "chalk-white in its upper two-thirds" ramanea nereparat,
+					# chiar daca media pe tot conul cadea bine. Media pe toata
+					# suprafata poate sa fie corecta cu varful gresit; se
+					# masoara pe FASII de inaltime, nu global.
+					var k := strength * (0.62 + 0.38 * t)
+					var warm := Color(
+						1.0 - 0.06 * k,
+						1.0 - (0.15 + hue_shift) * k,
+						1.0 - (0.26 + hue_shift * 2.0) * k)
+					cols[i] = cols[i] * warm
+				arr[Mesh.ARRAY_COLOR] = cols
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			mi.mesh = out
 
 
 func _collect_models(node: Node, out: Array[Node3D]) -> void:

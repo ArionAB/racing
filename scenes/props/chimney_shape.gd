@@ -49,6 +49,34 @@ extends Node3D
 ## ramane al modelului) si zero triunghiuri noi. Mesh-ul se duplica pe instanta
 ## — de aceea rezolutia hornurilor din kit conteaza, nu se subdivideaza aici.
 
+## Slotul de paleta pentru grohotis: ACELASI tuf ca hornul, nu un brun mai
+## saturat.
+##
+## Prima incercare a folosit slotul 9 (835C34, luminanta 97, saturatie 0.60)
+## alaturi de corpul hornului, care e slotul 8 (C8BDA9, luminanta 190, saturatie
+## 0.15). In captura, poalele au iesit portocalii: nu citeau a moloz cazut din
+## stanca, ci a inel de alt material pus la baza — adica exact greseala pe care
+## trebuiau s-o repare, cu inca o piesa de decor in plus.
+##
+## Grohotisul e stanca sfaramata, deci are CULOAREA stancii. Se citeste din
+## forma si din umbra proprie a pantei, nu dintr-o tenta. Slotul 8 e chiar
+## corpul hornului; diferenta de valoare o face unghiul, gratis.
+const TALUS_SLOT: int = 8
+
+## Slotul pentru interiorul nisei.
+##
+## 4 (67421F, luminanta 71) parea destul de inchis pe hartie, dar in cadru usile
+## au iesit ca niste dreptunghiuri maro LIPITE pe perete, nu ca deschideri:
+## materialul lumii e aproape neumbrit, deci o nisa nu-si face singura umbra, iar
+## 71 pe langa 190 (corpul hornului) inca citeste a suprafata luminata.
+##
+## 26 (1A2A33, luminanta 39) e cel mai inchis din atlas. Nu e maro, e albastru
+## foarte inchis — si tocmai de aia merge: o gura de pestera nu are culoarea
+## rocii, are culoarea umbrei, iar umbra sub cer senin bate in albastru. Acelasi
+## motiv pentru care umbrele din referinta nu sunt gri-maro.
+const DOOR_DARK_SLOT: int = 26
+
+
 ## Raportul dintre razele celor doua axe orizontale. 1.0 = cerc (revolutie);
 ## 0.62 = elipsa vizibil turtita. Peste ~0.5 incepe sa citeasca a perete, nu a
 ## horn.
@@ -90,6 +118,37 @@ extends Node3D
 
 ## Cat de tare musca zgomotul de contur din raza (fractiune).
 @export_range(0.0, 0.14, 0.005) var noise_amount: float = 0.0
+
+
+## --- Straturi ORIZONTALE, in trepte ----------------------------------------
+
+## Cat de mult iese stratul DUR in afara, ca fractiune din raza. 0 = stins.
+##
+## De ce exista. Critica oarba, runda 9: benzile noastre "wrap the form
+## diagonally like fabric" — se infasoara pe forma ca o tesatura. Un strat
+## geologic real e depus ORIZONTAL: cand peretele coteste, banda coteste cu el
+## si RAMANE LA NIVEL. Iar straturile nu sunt egale — cele dure ies in afara,
+## cele moi se retrag, si treapta aia e ce face o faleza sa citeasca a stanca
+## SAPATA si nu a tapiterie.
+##
+## Se aplica pe raza ca functie DOAR de inaltime (nu de azimut), deci treapta e
+## un inel perfect orizontal oricat de strambat ar fi hornul de ovality/lean.
+## Asta e chiar definitia lui "nivel": deformarile de silueta lucreaza pe
+## azimut, straturile lucreaza pe cota, si nu se amesteca.
+@export_range(0.0, 0.14, 0.005) var strata_step: float = 0.0
+
+## Cate straturi pe inaltimea hornului. Grosimile nu sunt egale — un depozit
+## real alterneaza bancuri groase cu foi subtiri.
+@export_range(2, 14, 1) var strata_count: int = 5
+
+## Cat de brusca e treapta: 0 = degrade neted (nu se vede treapta), 1 = prag
+## taiat. Se tine sus, fiindca tot rostul e sa se VADA muchia.
+@export_range(0.05, 1.0, 0.05) var strata_sharp: float = 0.75
+
+## Cat de tare se inclina straturile fata de orizontala, in grade. Aproape mereu
+## 0 — exista doar fiindca in Cappadocia chiar sunt zone cu depozite basculate,
+## si un horn-doua inclinate cu 3-4° rup regularitatea fara sa strice citirea.
+@export_range(-8.0, 8.0, 0.5) var strata_tilt_deg: float = 0.0
 
 
 ## --- Poalele de moloz (talus) ----------------------------------------------
@@ -164,7 +223,7 @@ func _ready() -> void:
 func _deform() -> void:
 	# Fara munca daca instanta e lasata pe valorile neutre: hornurile care chiar
 	# trebuie sa ramana drepte nu platesc duplicarea mesh-ului.
-	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount)
+	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step)
 	var extras_off := is_zero_approx(talus_spread) and door_count == 0
 	if shapes_off and extras_off:
 		return
@@ -259,6 +318,28 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 						* (1.0 - smoothstep(flute_top - 0.12, flute_top, t))
 					scale *= 1.0 - flute_depth * fade \
 						* (0.5 - 0.5 * cos(float(flute_count) * ang + ph1))
+				# --- 5. straturi ORIZONTALE, in trepte --------------------
+				# Functie DOAR de cota, niciodata de azimut: asa inelul ramane
+				# la nivel cand peretele coteste, in loc sa se infasoare pe
+				# forma. `floor` da treapta, iar amestecul cu partea fractionara
+				# lasa muchia sa fie moale cand strata_sharp scade.
+				if not is_zero_approx(strata_step):
+					var ys := t
+					if not is_zero_approx(strata_tilt_deg):
+						# Basculare: cota efectiva depinde putin de pozitia
+						# orizontala, deci inelul se inclina ca un plan.
+						ys += (dx * cos(ph2) + dz * sin(ph2)) 							* tan(deg_to_rad(strata_tilt_deg)) / h
+					var u := ys * float(strata_count)
+					var band: float = floor(u)
+					var frac: float = u - band
+					# Grosimi inegale: bancuri groase alternand cu foi subtiri.
+					var hard := 0.5 + 0.5 * sin(band * 2.399963 + ph1)
+					# Muchia: prag cand strata_sharp -> 1, degrade cand -> 0.
+					var edge := smoothstep(0.5 - strata_sharp * 0.5,
+						0.5 + strata_sharp * 0.5, frac)
+					var prev := 0.5 + 0.5 * sin((band - 1.0) * 2.399963 + ph1)
+					scale *= 1.0 + strata_step * lerpf(prev, hard, edge)
+
 				# --- contur neregulat -------------------------------------
 				if not is_zero_approx(noise_amount):
 					scale *= 1.0 + noise_amount * (
@@ -316,7 +397,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 	# e cat palaria, iar poala pusa dupa palarie ar fi plutit in jurul unui gat
 	# subtire, la un metru de piatra. Se citesc vertecsii din prima felie de
 	# inaltime si se ia raza mediana pe azimut.
-	var base_r := _base_radius(src, cx, cz, y0, h)
+	var base_r := _radius_at(src, cx, cz, y0, h, 0.02)
 	if base_r <= 0.001:
 		return
 
@@ -346,30 +427,57 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	if door_count > 0:
-		var st2 := SurfaceTool.new()
-		st2.begin(Mesh.PRIMITIVE_TRIANGLES)
-		_build_doors(st2, cx, cz, y0, base_r, world_scale)
-		st2.generate_normals()
-		var m2 := st2.commit()
-		if m2 != null and m2.get_surface_count() > 0:
-			out.add_surface_from_arrays(
-				Mesh.PRIMITIVE_TRIANGLES, m2.surface_get_arrays(0))
-			out.surface_set_material(out.get_surface_count() - 1, mat)
+		# Pragul urca PESTE creasta poalei. Fara asta, usa e ingropata in
+		# grohotis pe doua treimi din inaltime — s-a si vazut in captura de la
+		# fractia 0.13: din usi ramaneau doua aschii intunecate la baza, adica
+		# tocmai cheia de scara disparea sub cealalta reparatie. Creasta se
+		# calculeaza cu ACEEASI formula ca in _build_talus, la varful armonicii
+		# (wob maxim = 1.44), plus o palma de degajare.
+		var sill := door_sill_m
+		if not is_zero_approx(talus_spread):
+			var crest := base_r * talus_height * (0.75 + 0.35 * 1.44)
+			sill = maxf(sill, (crest + base_r * 0.05) * world_scale)
+		# Raza SE MASOARA LA COTA PRAGULUI, nu la baza: altfel nisa sta in
+		# aer, in fata unui perete care s-a subtiat sub ea.
+		var sill_frac := clampf((sill / world_scale) / h, 0.0, 0.95)
+		var door_r := _radius_at(src, cx, cz, y0, h, sill_frac)
+		if door_r > 0.001:
+			var st2 := SurfaceTool.new()
+			st2.begin(Mesh.PRIMITIVE_TRIANGLES)
+			_build_doors(st2, cx, cz, y0, door_r, world_scale, sill)
+			st2.generate_normals()
+			var m2 := st2.commit()
+			if m2 != null and m2.get_surface_count() > 0:
+				out.add_surface_from_arrays(
+					Mesh.PRIMITIVE_TRIANGLES, m2.surface_get_arrays(0))
+				out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	mi.mesh = out
 
 
-## Raza hornului la nivelul solului. Se ia mediana razelor din felia de jos
-## (primii 8% din inaltime) ca sa nu o strice nici palaria de deasupra, nici un
-## vertex ratacit.
-func _base_radius(src: Mesh, cx: float, cz: float, y0: float, h: float) -> float:
+## Raza hornului LA O COTA DATA. Se ia mediana razelor dintr-o felie subtire in
+## jurul cotei cerute, ca sa n-o strice nici palaria, nici un vertex ratacit.
+##
+## Parametrizata pe inaltime, si nu doar "la baza", fiindca hornul e un CON:
+## la 3 m deasupra solului e vizibil mai subtire decat la sol. Prima versiune
+## aseza nisele la raza de la baza, dupa ce pragul fusese urcat peste poala —
+## si usile au iesit plutind in fata peretelui, ca niste lespezi sprijinite de
+## el. Se vede in captura de la 0.13: una dintre ele nu mai atingea deloc hornul.
+func _radius_at(src: Mesh, cx: float, cz: float, y0: float, h: float,
+		frac: float) -> float:
 	var radii: PackedFloat32Array = []
-	for sfc in src.get_surface_count():
-		var arrays := src.surface_get_arrays(sfc)
-		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		for v in verts:
-			if v.y - y0 < h * 0.08:
-				radii.append(Vector2(v.x - cx, v.z - cz).length())
+	# Fereastra creste daca felia iese goala (hornurile n-au inele de vertecsi
+	# la orice cota), ca sa returnam mereu o raza reala.
+	for win in [0.06, 0.12, 0.25, 0.5]:
+		radii.clear()
+		for sfc in src.get_surface_count():
+			var arrays := src.surface_get_arrays(sfc)
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				if absf((v.y - y0) / h - frac) < win:
+					radii.append(Vector2(v.x - cx, v.z - cz).length())
+		if radii.size() >= 6:
+			break
 	if radii.is_empty():
 		return 0.0
 	radii.sort()
@@ -397,20 +505,31 @@ func _build_talus(st: SurfaceTool, cx: float, cz: float, y0: float,
 		var a := TAU * float(i) / float(n)
 		# Neregularitate pe azimut: doua armonici, ca la conturul hornului.
 		var wob := 1.0 + 0.28 * sin(3.0 * a + ph) + 0.16 * sin(5.0 * a + ph * 1.7)
-		var r_out := base_r * (1.0 + talus_spread * wob)
+		# Lobi de grohotis: fiecare a doua latura iese mai mult, ca poala sa aiba
+		# limbi si scobituri in loc de un con neted. Un trunchi de con perfect
+		# citea a DUNA — nisip suflat, nu piatra sfaramata; muchia dintre lobi e
+		# ce da senzatia de material unghiular.
+		var lobe := 1.0 + 0.22 * (1.0 if i % 2 == 0 else -1.0) 			* (0.6 + 0.4 * sin(float(i) * 1.7 + ph))
+		var r_out := base_r * (1.0 + talus_spread * wob * lobe)
 		var r_in := base_r * 0.98
 		var y_top := y0 + base_r * talus_height * (0.75 + 0.35 * wob)
 		inner.append(Vector3(cx + cos(a) * r_in, y_top, cz + sin(a) * r_in))
 		outer.append(Vector3(cx + cos(a) * r_out, y_foot, cz + sin(a) * r_out))
+	var uv := Palette.uv(TALUS_SLOT)
 	for i in n:
 		var j := (i + 1) % n
 		# Fusta: de la buza de sus (lipita de perete) la poalele de jos.
-		st.add_vertex(inner[i])
-		st.add_vertex(outer[i])
-		st.add_vertex(outer[j])
-		st.add_vertex(inner[i])
-		st.add_vertex(outer[j])
-		st.add_vertex(inner[j])
+		# Triunghiurile NU se impart cu vecinii (SurfaceTool fara index), deci
+		# generate_normals() da normale PE FATA: fiecare lob isi primeste propria
+		# valoare de lumina si muchia dintre ei se vede. Cu normale netezite,
+		# lobii ar fi existat in geometrie dar ar fi disparut la iluminare —
+		# exact tipul de efect care trece o sonda si nu se vede in cadru.
+		st.set_uv(uv); st.add_vertex(inner[i])
+		st.set_uv(uv); st.add_vertex(outer[i])
+		st.set_uv(uv); st.add_vertex(outer[j])
+		st.set_uv(uv); st.add_vertex(inner[i])
+		st.set_uv(uv); st.add_vertex(outer[j])
+		st.set_uv(uv); st.add_vertex(inner[j])
 
 
 ## Nisele de usa/fereastra: un chenar impins in perete.
@@ -420,7 +539,7 @@ func _build_talus(st: SurfaceTool, cx: float, cz: float, y0: float,
 ## capac frontal, cu fundul impins spre AXA hornului: peretii laterali si fundul
 ## sunt in umbra proprie, deci de la volan gaura citeste ca gaura.
 func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
-		base_r: float, world_scale: float) -> void:
+		base_r: float, world_scale: float, sill_m: float) -> void:
 	# Din metri de lume in unitati de mesh.
 	var dh := door_height_m / world_scale
 	var dw := dh * door_aspect
@@ -430,7 +549,7 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 	# peretii s-ar autointersecta.
 	dd = minf(dd, base_r * 0.5)
 	dw = minf(dw, base_r * 1.4)
-	var sill := door_sill_m / world_scale
+	var sill := sill_m / world_scale
 	var arc := deg_to_rad(door_arc_deg)
 	var dir0 := deg_to_rad(door_dir_deg)
 	for k in door_count:
@@ -459,20 +578,28 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		var bbr := Vector3(cx + nx * r_back + tx * hw, yb, cz + nz * r_back + tz * hw)
 		var btl := Vector3(cx + nx * r_back - tx * hw, yt, cz + nz * r_back - tz * hw)
 		var btr := Vector3(cx + nx * r_back + tx * hw, yt, cz + nz * r_back + tz * hw)
-		# Fundul nisei, privit dinspre exterior.
-		_quad(st, bbl, bbr, btr, btl)
+		# Fundul nisei, privit dinspre exterior. Slotul cel mai INCHIS din
+		# familia de tuf: gura pesterii trebuie sa citeasca a gaura, iar umbra
+		# proprie singura nu ajunge cand soarele bate din fata.
+		_quad(st, bbl, bbr, btr, btl, Palette.uv(DOOR_DARK_SLOT))
 		# Peretele din stanga si cel din dreapta.
-		_quad(st, fbl, bbl, btl, ftl)
-		_quad(st, bbr, fbr, ftr, btr)
+		_quad(st, fbl, bbl, btl, ftl, Palette.uv(DOOR_DARK_SLOT))
+		_quad(st, bbr, fbr, ftr, btr, Palette.uv(DOOR_DARK_SLOT))
 		# Buiandrugul (tavanul nisei).
-		_quad(st, btl, btr, ftr, ftl)
+		_quad(st, btl, btr, ftr, ftl, Palette.uv(DOOR_DARK_SLOT))
 
 
-## Un patrulater ca doua triunghiuri, in ordinea data.
-func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> void:
-	st.add_vertex(a)
-	st.add_vertex(b)
-	st.add_vertex(c)
-	st.add_vertex(a)
-	st.add_vertex(c)
-	st.add_vertex(d)
+## Un patrulater ca doua triunghiuri, cu UV-ul COLAPSAT pe centrul slotului.
+##
+## UV-ul nu e optional. Contractul atlasului (palette.gd) cere o fata = un texel;
+## un vertex fara UV pica pe (0,0), adica pe coltul din stanga-sus al atlasului
+## — iar rezerva 24..31 de acolo e MAGENTA intentionat, ca greseala de UV sa sara
+## in ochi. A si sarit: prima captura a iesit cu poale roz-neon la fiecare horn.
+func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
+		uv: Vector2) -> void:
+	st.set_uv(uv); st.add_vertex(a)
+	st.set_uv(uv); st.add_vertex(b)
+	st.set_uv(uv); st.add_vertex(c)
+	st.set_uv(uv); st.add_vertex(a)
+	st.set_uv(uv); st.add_vertex(c)
+	st.set_uv(uv); st.add_vertex(d)

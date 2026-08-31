@@ -304,11 +304,15 @@ noise_amount = 0.031305
 talus_spread = 0.60
 talus_height = 0.56
 talus_sides = 14
-door_count = 2
+door_count = 3
 door_height_m = 2.2
 door_dir_deg = 14
-door_arc_deg = 50
-door_depth_m = 0.54
+door_arc_deg = 120
+door_depth_m = 0.75
+strata_step = 0.072
+strata_count = 7
+strata_sharp = 0.85
+door_aspect = 0.48
 
 [node name="hornEst2" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(-0.744569, 0, -0.540385, 0, 0.920000, 0, 0.540385, 0, -0.744569, 66, 46.070, 20)
@@ -318,6 +322,9 @@ noise_amount = 0.046565
 talus_spread = 0.60
 talus_height = 0.44
 talus_sides = 14
+strata_step = 0.058
+strata_count = 7
+strata_sharp = 0.69
 
 [node name="hornEst3" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(-0.020674, 0, -1.149814, 0, 1.150000, 0, 1.149814, 0, -0.020674, 80, 45.900, 26)
@@ -327,6 +334,9 @@ noise_amount = 0.023951
 talus_spread = 0.66
 talus_height = 0.56
 talus_sides = 14
+strata_step = 0.072
+strata_count = 6
+strata_sharp = 0.84
 
 [node name="hornEst4" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(-0.374647, 0, 0.774106, 0, 0.860000, 0, -0.774106, 0, -0.374647, 96, 45.530, 24)
@@ -336,12 +346,16 @@ noise_amount = 0.049635
 talus_spread = 0.69
 talus_height = 0.61
 talus_sides = 14
-door_count = 2
+door_count = 4
 door_height_m = 2.1
 door_dir_deg = 15
-door_arc_deg = 70
-door_depth_m = 0.59
+door_arc_deg = 100
+door_depth_m = 0.60
 door_sill_m = 3.4
+strata_step = 0.039
+strata_count = 4
+strata_sharp = 0.65
+door_aspect = 0.42
 
 [node name="hornEst5" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.331806, 0, -0.922120, 0, 0.980000, 0, 0.922120, 0, 0.331806, 44, 46.130, 30)
@@ -351,11 +365,15 @@ noise_amount = 0.043986
 talus_spread = 0.54
 talus_height = 0.41
 talus_sides = 16
-door_count = 2
+door_count = 3
 door_height_m = 2.2
 door_dir_deg = 205
-door_arc_deg = 50
-door_depth_m = 0.35
+door_arc_deg = 120
+door_depth_m = 0.89
+strata_step = 0.069
+strata_count = 4
+strata_sharp = 0.65
+door_aspect = 0.51
 
 [node name="hornEst6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.677817, 0, 0.762210, 0, 1.020000, 0, -0.762210, 0, 0.677817, 112, 45.450, 34)
@@ -365,12 +383,16 @@ noise_amount = 0.035964
 talus_spread = 0.68
 talus_height = 0.61
 talus_sides = 12
-door_count = 3
+door_count = 5
 door_height_m = 2.0
 door_dir_deg = 109
-door_arc_deg = 50
-door_depth_m = 0.37
+door_arc_deg = 100
+door_depth_m = 0.63
 door_sill_m = 3.9
+strata_step = 0.040
+strata_count = 4
+strata_sharp = 0.67
+door_aspect = 0.41
 
 [node name="hornEst7" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(-0.509099, 0, 0.617105, 0, 0.800000, 0, -0.617105, 0, -0.509099, 58, 31.380, 74)
@@ -380,11 +402,15 @@ noise_amount = 0.033748
 talus_spread = 0.73
 talus_height = 0.49
 talus_sides = 14
-door_count = 3
+door_count = 4
 door_height_m = 2.0
 door_dir_deg = 64
-door_arc_deg = 70
-door_depth_m = 0.63
+door_arc_deg = 100
+door_depth_m = 0.84
+strata_step = 0.064
+strata_count = 4
+strata_sharp = 0.62
+door_aspect = 0.50
 
 [node name="hornEst8" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(0.619281, 0, -0.367275, 0, 0.720000, 0, 0.367275, 0, 0.619281, 88, 35.190, 76)
@@ -394,6 +420,9 @@ noise_amount = 0.037762
 talus_spread = 0.53
 talus_height = 0.47
 talus_sides = 12
+strata_step = 0.061
+strata_count = 4
+strata_sharp = 0.74
 
 [node name="hornEst9" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(-0.017402, 0, 0.899832, 0, 0.900000, 0, -0.899832, 0, -0.017402, 104, 42.280, 70)
@@ -403,11 +432,15 @@ noise_amount = 0.045503
 talus_spread = 0.50
 talus_height = 0.49
 talus_sides = 12
-door_count = 2
+door_count = 4
 door_height_m = 2.0
 door_dir_deg = 123
-door_arc_deg = 50
-door_depth_m = 0.38
+door_arc_deg = 120
+door_depth_m = 0.59
+strata_step = 0.047
+strata_count = 5
+strata_sharp = 0.72
+door_aspect = 0.44
 
 [node name="hornSoare1" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(0.994861, 0, 0.312358, 0, 1.042744, 0, -0.312358, 0, 0.994861, -163.961960, 48.976738, 43.241413)
@@ -811,12 +844,16 @@ noise_amount = 0.036364
 talus_spread = 0.74
 talus_height = 0.58
 talus_sides = 12
-door_count = 1
+door_count = 4
 door_height_m = 2.0
 door_dir_deg = 292
-door_arc_deg = 0
-door_depth_m = 0.68
+door_arc_deg = 100
+door_depth_m = 0.82
 door_sill_m = 3.6
+strata_step = 0.060
+strata_count = 5
+strata_sharp = 0.68
+door_aspect = 0.47
 
 [node name="hornUmbra26" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.737319, 0, -0.804326, 0, 1.091137, 0, 0.804326, 0, 0.737319, -31.821363, 47.246567, 71.329559)
@@ -836,11 +873,15 @@ noise_amount = 0.005313
 talus_spread = 0.70
 talus_height = 0.50
 talus_sides = 12
-door_count = 2
+door_count = 3
 door_height_m = 1.9
 door_dir_deg = 277
-door_arc_deg = 90
-door_depth_m = 0.53
+door_arc_deg = 100
+door_depth_m = 0.84
+strata_step = 0.040
+strata_count = 7
+strata_sharp = 0.85
+door_aspect = 0.51
 
 [node name="hornSoare27" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(0.532941, 0, 0.824495, 0, 1.168864, 0, -0.824495, 0, 0.532941, -13.433457, 47.080200, 48.200642)
@@ -860,11 +901,15 @@ noise_amount = 0.037746
 talus_spread = 0.58
 talus_height = 0.42
 talus_sides = 14
-door_count = 1
+door_count = 3
 door_height_m = 1.9
 door_dir_deg = 115
-door_arc_deg = 0
-door_depth_m = 0.69
+door_arc_deg = 80
+door_depth_m = 0.91
+strata_step = 0.040
+strata_count = 5
+strata_sharp = 0.75
+door_aspect = 0.51
 
 [node name="hornSoare28" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.907520, 0, -0.236896, 0, 0.661449, 0, 0.236896, 0, -0.907520, -4.961630, 46.922104, 49.765991)
@@ -884,11 +929,15 @@ noise_amount = 0.022584
 talus_spread = 0.57
 talus_height = 0.49
 talus_sides = 16
-door_count = 2
+door_count = 4
 door_height_m = 1.9
 door_dir_deg = 341
-door_arc_deg = 90
-door_depth_m = 0.53
+door_arc_deg = 100
+door_depth_m = 0.58
+strata_step = 0.062
+strata_count = 6
+strata_sharp = 0.86
+door_aspect = 0.44
 
 [node name="hornUmbra29" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.387814, 0, 1.021130, 0, 1.092294, 0, -1.021130, 0, 0.387814, -2.959398, 46.877102, 76.837349)
@@ -908,12 +957,16 @@ noise_amount = 0.037171
 talus_spread = 0.44
 talus_height = 0.56
 talus_sides = 14
-door_count = 2
+door_count = 4
 door_height_m = 2.0
 door_dir_deg = 139
-door_arc_deg = 50
-door_depth_m = 0.36
+door_arc_deg = 120
+door_depth_m = 0.69
 door_sill_m = 2.7
+strata_step = 0.036
+strata_count = 4
+strata_sharp = 0.66
+door_aspect = 0.44
 
 [node name="hornSpate30" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(0.528682, 0, -0.903762, 0, 1.047039, 0, 0.903762, 0, 0.528682, 1.076405, 47.043091, 91.558548)
@@ -933,6 +986,9 @@ noise_amount = 0.016937
 talus_spread = 0.60
 talus_height = 0.55
 talus_sides = 12
+strata_step = 0.071
+strata_count = 6
+strata_sharp = 0.70
 
 [node name="hornGemen31" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.691435, 0, 0.752140, 0, 0.947610, 0, -0.752140, 0, 0.691435, -6.046700, 46.913101, 77.555397)
@@ -952,11 +1008,15 @@ noise_amount = 0.051003
 talus_spread = 0.43
 talus_height = 0.43
 talus_sides = 12
-door_count = 1
+door_count = 4
 door_height_m = 2.1
 door_dir_deg = 163
-door_arc_deg = 0
-door_depth_m = 0.52
+door_arc_deg = 80
+door_depth_m = 0.88
+strata_step = 0.063
+strata_count = 7
+strata_sharp = 0.80
+door_aspect = 0.40
 
 [node name="hornGemen32" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.607215, 0, 0.390315, 0, 0.705370, 0, -0.390315, 0, 0.607215, -6.125904, 46.913311, 79.583847)
@@ -976,12 +1036,16 @@ noise_amount = 0.032871
 talus_spread = 0.51
 talus_height = 0.41
 talus_sides = 16
-door_count = 1
+door_count = 4
 door_height_m = 2.1
 door_dir_deg = 180
-door_arc_deg = 0
-door_depth_m = 0.39
+door_arc_deg = 120
+door_depth_m = 0.78
 door_sill_m = 2.6
+strata_step = 0.056
+strata_count = 5
+strata_sharp = 0.69
+door_aspect = 0.43
 
 [node name="hornFund33" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.215595, 0, 0.832597, 0, 0.860058, 0, -0.832597, 0, 0.215595, 5.703475, 48.132381, 98.908676)
@@ -1001,6 +1065,9 @@ noise_amount = 0.037258
 talus_spread = 0.47
 talus_height = 0.62
 talus_sides = 12
+strata_step = 0.071
+strata_count = 5
+strata_sharp = 0.69
 
 [node name="hornSoare34" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
 transform = Transform3D(-0.680084, 0, 0.657122, 0, 0.945686, 0, -0.657122, 0, -0.680084, 27.591257, 46.460754, 45.017784)
@@ -1020,11 +1087,15 @@ noise_amount = 0.053032
 talus_spread = 0.67
 talus_height = 0.43
 talus_sides = 14
-door_count = 2
+door_count = 4
 door_height_m = 2.1
 door_dir_deg = 357
-door_arc_deg = 50
-door_depth_m = 0.44
+door_arc_deg = 120
+door_depth_m = 0.80
+strata_step = 0.060
+strata_count = 5
+strata_sharp = 0.84
+door_aspect = 0.46
 
 [node name="hornSpate35" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.011997, 0, -0.946505, 0, 0.946581, 0, 0.946505, 0, -0.011997, 30.108677, 46.449333, 33.746208)
@@ -1044,12 +1115,16 @@ noise_amount = 0.053600
 talus_spread = 0.75
 talus_height = 0.42
 talus_sides = 12
-door_count = 2
+door_count = 4
 door_height_m = 1.9
 door_dir_deg = 214
-door_arc_deg = 90
-door_depth_m = 0.56
+door_arc_deg = 100
+door_depth_m = 0.71
 door_sill_m = 3.8
+strata_step = 0.062
+strata_count = 7
+strata_sharp = 0.87
+door_aspect = 0.48
 
 [node name="hornSoare36" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.574664, 0, 0.932734, 0, 1.366328, 0, -0.932734, 0, 0.574664, 39.800884, 46.367935, 43.611897)
@@ -1069,12 +1144,16 @@ noise_amount = 0.024454
 talus_spread = 0.57
 talus_height = 0.54
 talus_sides = 14
-door_count = 1
+door_count = 4
 door_height_m = 2.2
 door_dir_deg = 88
-door_arc_deg = 0
-door_depth_m = 0.46
+door_arc_deg = 120
+door_depth_m = 0.87
 door_sill_m = 2.5
+strata_step = 0.052
+strata_count = 5
+strata_sharp = 0.76
+door_aspect = 0.50
 
 [node name="hornUmbra37" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(-0.818336, 0, -0.670554, 0, 1.057977, 0, 0.670554, 0, -0.818336, 49.739971, 46.338741, 68.021042)
@@ -1094,11 +1173,15 @@ noise_amount = 0.033268
 talus_spread = 0.78
 talus_height = 0.55
 talus_sides = 12
-door_count = 2
+door_count = 3
 door_height_m = 2.2
 door_dir_deg = 329
-door_arc_deg = 70
-door_depth_m = 0.36
+door_arc_deg = 80
+door_depth_m = 0.63
+strata_step = 0.065
+strata_count = 7
+strata_sharp = 0.84
+door_aspect = 0.48
 
 [node name="hornSoare38" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.151346, 0, 1.027060, 0, 1.038151, 0, -1.027060, 0, 0.151346, 77.617874, 46.049881, 34.980461)
@@ -1118,6 +1201,9 @@ noise_amount = 0.046453
 talus_spread = 0.59
 talus_height = 0.53
 talus_sides = 12
+strata_step = 0.053
+strata_count = 4
+strata_sharp = 0.70
 
 [node name="hornSoare39" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
 transform = Transform3D(0.935129, 0, 0.436308, 0, 1.031906, 0, -0.436308, 0, 0.935129, 89.628983, 45.829659, 33.086174)
@@ -1137,11 +1223,15 @@ noise_amount = 0.049710
 talus_spread = 0.49
 talus_height = 0.53
 talus_sides = 16
-door_count = 2
+door_count = 5
 door_height_m = 2.0
 door_dir_deg = 109
-door_arc_deg = 90
-door_depth_m = 0.65
+door_arc_deg = 80
+door_depth_m = 0.57
+strata_step = 0.075
+strata_count = 5
+strata_sharp = 0.68
+door_aspect = 0.46
 
 [node name="hornUmbra40" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
 transform = Transform3D(0.850150, 0, 0.401438, 0, 0.940163, 0, -0.401438, 0, 0.850150, 96.911667, 45.793079, 56.386292)
@@ -1161,11 +1251,15 @@ noise_amount = 0.009239
 talus_spread = 0.48
 talus_height = 0.61
 talus_sides = 14
-door_count = 2
+door_count = 3
 door_height_m = 2.1
 door_dir_deg = 171
-door_arc_deg = 70
-door_depth_m = 0.66
+door_arc_deg = 80
+door_depth_m = 0.59
+strata_step = 0.037
+strata_count = 5
+strata_sharp = 0.71
+door_aspect = 0.42
 
 [node name="hornSpate41" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
 transform = Transform3D(-0.832835, 0, 0.344630, 0, 0.901324, 0, -0.344630, 0, -0.832835, 101.528000, 45.262272, 15.817749)
@@ -1185,11 +1279,15 @@ noise_amount = 0.045924
 talus_spread = 0.68
 talus_height = 0.51
 talus_sides = 16
-door_count = 2
+door_count = 4
 door_height_m = 1.9
 door_dir_deg = 332
-door_arc_deg = 90
-door_depth_m = 0.55
+door_arc_deg = 80
+door_depth_m = 0.63
+strata_step = 0.072
+strata_count = 5
+strata_sharp = 0.85
+door_aspect = 0.42
 
 [node name="hornFund42" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
 transform = Transform3D(0.612620, 0, -0.575096, 0, 0.840261, 0, 0.575096, 0, 0.612620, 106.416199, 45.609467, 79.189285)
@@ -1209,6 +1307,9 @@ noise_amount = 0.025140
 talus_spread = 0.54
 talus_height = 0.55
 talus_sides = 16
+strata_step = 0.064
+strata_count = 5
+strata_sharp = 0.84
 
 [node name="poarta_hornuri_gemene43" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("16_gate")]
 transform = Transform3D(0.979048, 0, -0.203630, 0, 1.000000, 0, 0.203630, 0, 0.979048, 57.158070, 46.288628, 53.071163)
@@ -1253,11 +1354,15 @@ noise_amount = 0.041501
 talus_spread = 0.69
 talus_height = 0.43
 talus_sides = 14
-door_count = 2
+door_count = 3
 door_height_m = 2.1
 door_dir_deg = 214
-door_arc_deg = 70
-door_depth_m = 0.43
+door_arc_deg = 80
+door_depth_m = 0.90
+strata_step = 0.044
+strata_count = 7
+strata_sharp = 0.89
+door_aspect = 0.44
 
 [node name="hornCazut47" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("26_crk_b")]
 transform = Transform3D(-0.824389, 0, -0.566023, 0, 1.000000, 0, 0.566023, 0, -0.824389, -88.178658, 47.987179, 16.646290)
@@ -1267,6 +1372,9 @@ transform = Transform3D(0.803165, 0, -0.307452, 0, 0.860000, 0, 0.307452, 0, 0.8
 talus_spread = 0.43
 talus_height = 0.47
 talus_sides = 14
+strata_step = 0.042
+strata_count = 5
+strata_sharp = 0.66
 
 [node name="moloz49" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("27_crk_c")]
 transform = Transform3D(0.889926, 0, 0.083254, 0, 0.893812, 0, -0.083254, 0, 0.889926, -126.848701, 48.459641, 33.452320)
@@ -1282,6 +1390,9 @@ metadata/coliziune = "none"
 talus_spread = 0.47
 talus_height = 0.46
 talus_sides = 14
+strata_step = 0.044
+strata_count = 7
+strata_sharp = 0.67
 
 [node name="moloz52" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("27_crk_c")]
 transform = Transform3D(0.413068, 0, 0.595230, 0, 0.724517, 0, -0.595230, 0, 0.413068, 38.465984, 46.426956, 73.924866)
@@ -1289,6 +1400,9 @@ metadata/coliziune = "none"
 talus_spread = 0.77
 talus_height = 0.40
 talus_sides = 12
+strata_step = 0.056
+strata_count = 5
+strata_sharp = 0.76
 
 [node name="moloz53" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("27_crk_c")]
 transform = Transform3D(0.583397, 0, 0.646701, 0, 0.870961, 0, -0.646701, 0, 0.583397, 70.219437, 46.105457, 32.383888)
@@ -1296,6 +1410,9 @@ metadata/coliziune = "none"
 talus_spread = 0.67
 talus_height = 0.41
 talus_sides = 14
+strata_step = 0.073
+strata_count = 4
+strata_sharp = 0.78
 
 [node name="plop54" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
 transform = Transform3D(0.894005, 0, 0.322398, 0, 0.950360, 0, -0.322398, 0, 0.894005, -138.595657, 48.618736, 37.308300)

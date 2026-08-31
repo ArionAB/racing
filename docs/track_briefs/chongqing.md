@@ -198,6 +198,28 @@ lor în asfalt ud. Accent, sub 1% din pixeli. Restul e reutilizat:
 `facade_night` (toate fațadele), decal `puddle` (bălți statice cu reflexie
 falsă a neonului), `neon_emissive` (clasă emisivă partajată).
 
+> **Ce s-a construit de fapt (aug 2026).** Două clase, nu cinci, și amândouă
+> refolosesc un PNG existent — atât a cerut măsurătoarea
+> (`tools/probe_cq_slots.gd`):
+>
+> - **`city_concrete`** ține și `concrete_wet` și `facade_night`. Nu sunt două
+>   suprafețe: pe fațade, sloturile 8 (etaje) și 29 (parter) sunt același
+>   perete de beton tăiat pe orizontală, iar rampele și cheiul stau tot pe 8.
+> - **`old_stone`** e `stone_stairs`. Ținta NU e slotul pe care stau treptele
+>   azi (3, `ROCK_LIGHT`): ăla e gresie caldă de deșert și ar fi făcut scara
+>   portocalie într-un oraș de beton ud.
+> - `granite_tiles` și `puddle` n-au intrat: piața și bălțile n-au fost încă
+>   măsurate, iar o clasă adăugată „fiindcă e în listă" costă un material fără
+>   să știm ce acoperă.
+> - `neon_emissive` exista deja, ca `Palette.glow_material_slots` (slotul 30).
+>
+> Fațadele au cerut și o mecanică, nu doar o clasă: **ruptura de accente cu
+> două sloturi păstrate** (`Palette.split_accents` acceptă acum un Array).
+> Corpul ia betonul, copilul `_Accente` păstrează acoperișul și firmele și
+> continuă să ardă — altfel alegerea era între o fațadă plată și niște firme
+> stinse. Cost: `probe_decor` 24 → 29 materiale (plafon 38), restul pistelor
+> neatinse.
+
 ### 5.2 Hero (unice)
 | asset | note |
 |---|---|

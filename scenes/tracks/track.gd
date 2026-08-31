@@ -1004,9 +1004,15 @@ static func themes() -> Dictionary:
 			"kerbs": false,
 			"cliffs": false,
 			# Fara decor procedural: orasul se aseaza de mana (DecorManual), nu
-			# din benzi de vegetatie. Kitul "chongqing" nu exista inca in
-			# TrackDecor; cand apare, aici se pune "bands" + "props".
+			# din benzi de vegetatie.
 			"decor": "none",
+			# INERT cat timp "decor" e "none": `props` ajunge in
+			# TrackDecor.build, care cu "none" nu aseaza nimic. Ramane
+			# "stromboli" fiindca ala e ce s-a masurat, nu fiindca orasul ar
+			# imprumuta ceva de pe vulcan — kitul Chongqing isi ia clasele din
+			# `TrackDecor.CHONGQING_CLASSES`, pe nume de nod, nu prin cheia
+			# asta. Daca pista capata vreodata benzi procedurale, aici se pune
+			# un set propriu.
 			"props": "stromboli",
 			"rock_class": "volcanic_rock",
 			# Doua rauri de culori diferite (Jialing verde, Yangtze brun) — dar

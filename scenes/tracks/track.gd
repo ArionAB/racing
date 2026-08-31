@@ -986,7 +986,14 @@ static func themes() -> Dictionary:
 			# stinsi: la 0.35 stratul de nori ADUNAT peste gradientul intunecat
 			# facea o pata alburie la zenit.
 			"sky_sun_disc": false,
-			"sky_cover_alpha": 0.08,
+			# ORASUL DIN FUNDAL, pictat (tools/paint_sky_city.py). Vezi
+			# `sky_cover_tex` in _build_environment pentru de ce nu e geometrie.
+			# Alfa mult peste 0.08 al norilor: silueta TREBUIE sa se citeasca,
+			# nu doar sa fie sugerata — dar stratul se ADUNA peste gradient,
+			# deci valorile din textura sunt mici (max ~46 din 255) ca sa nu
+			# spele cerul de noapte.
+			"sky_cover_tex": "res://assets/textures/sky_city_chongqing.png",
+			"sky_cover_alpha": 0.85,
 			"sun_color": Color(0.78, 0.84, 1.0),
 			"sun_energy": 0.35,
 			"sun_rotation_deg": Vector3(-78, 200, 0),
@@ -1004,9 +1011,15 @@ static func themes() -> Dictionary:
 			"kerbs": false,
 			"cliffs": false,
 			# Fara decor procedural: orasul se aseaza de mana (DecorManual), nu
-			# din benzi de vegetatie. Kitul "chongqing" nu exista inca in
-			# TrackDecor; cand apare, aici se pune "bands" + "props".
+			# din benzi de vegetatie.
 			"decor": "none",
+			# INERT cat timp "decor" e "none": `props` ajunge in
+			# TrackDecor.build, care cu "none" nu aseaza nimic. Ramane
+			# "stromboli" fiindca ala e ce s-a masurat, nu fiindca orasul ar
+			# imprumuta ceva de pe vulcan — kitul Chongqing isi ia clasele din
+			# `TrackDecor.CHONGQING_CLASSES`, pe nume de nod, nu prin cheia
+			# asta. Daca pista capata vreodata benzi procedurale, aici se pune
+			# un set propriu.
 			"props": "stromboli",
 			"rock_class": "volcanic_rock",
 			# Doua rauri de culori diferite (Jialing verde, Yangtze brun) — dar
@@ -1221,7 +1234,10 @@ static func themes() -> Dictionary:
 			# (0.56 -> 0.66) si `facet_gate` (0.42 -> 0.60). Glint-ul e mai
 			# puternic acum, deci pragul urca cat sa tina acoperirea acolo unde
 			# o are diorama (4.7%): masurat, 3.1-4.9% pe vederile de cursa.
-			"water_glint_cut": 0.66,
+			# RUNDA 13: 0.66 -> 0.58, ca sa compenseze petele pierdute prin
+			# latirea rampei (`water_glint_soft`). Pragul deschide aria, rampa
+			# o tine moale — cele doua se regleaza impreuna.
+			"water_glint_cut": 0.58,
 			# Cat de lungite. 3.2 (incercat intai) trage petele in fasii de zeci
 			# de metri; la 1.4 ies limbi de flacara pe cheiul E. 0.9 le lasa
 			# pete cu coada — alungite pe verticala, dar tot pete.
@@ -1475,8 +1491,32 @@ static func themes() -> Dictionary:
 			# 0.75 face intensitatea sa creasca cu adancimea fisurii, adica tot
 			# halou. Cioburile din diorama au margine scurta si miez aproape
 			# plat. Aria medie a petei scade de la 411 px la 16-22 (diorama 21).
-			"water_glint_soft": 0.09,
-			"water_glint_body": 0.30,
+			# RUNDA 13 (verdict pe captura din JOC, nu de sus): petele „par ca
+			# plutesc". Masurat pe vederea de la volan, de pe cornisa:
+			#
+			#   raport pata/apa ........ 2.43x   (tinta din diorama: 1.8-2.8x) OK
+			#   gradient la margine .... p90 = 50, max = 131 pe UN pixel     NU
+			#   deviatie in interior ... 15.1 (deci miezul NU e plat)        OK
+			#
+			# Deci nu luminozitatea e problema si nici interiorul — e MARGINEA:
+			# un salt de 130 intr-un pixel citeste ca hartie taiata, adica exact
+			# „obiect lipit pe suprafata" din nota de la `glint_soft` in shader.
+			#
+			# 0.09 venise din calibrarea pe diorama VAZUTA DE SUS, unde petele
+			# trebuiau sa fie cioburi mici si distincte. De la volan, aceeasi
+			# taietura e ce face pata sa nu apartina apei. Se lateste tranzitia
+			# si se lasa intensitatea sa CREASCA cu adancimea fisurii, in loc sa
+			# sara la maxim imediat dupa prag — aria petei ramane data de
+			# `glint_cut`/`facet_gate`, care nu se ating.
+			# Latirea tranzitiei subtiaza si petele — aria galbena scade
+			# 4.4% -> 1.7%, fiindca o pata slaba nu mai apuca sa ajunga la
+			# valoare plina inainte sa se stinga rampa. (Verificat ca NU e de
+			# la `glint_body`: la 0.70 si la 0.50 aria e aceeasi, 1.5 vs 1.7%.)
+			# Compensarea se face din prag, nu din intensitate: `glint_cut`
+			# 0.66 -> 0.58 lasa mai multe fisuri sa treaca, iar rampa lata le
+			# tine tot moi.
+			"water_glint_soft": 0.28,
+			"water_glint_body": 0.50,
 			"water_cell": 4.0,
 			# Aurul lampilor de sodiu, INTREG. La 0.75 (tras spre alb, ca sa nu
 			# iasa neon) reflexiile ieseau crem — pe o apa verde-inchisa asta e
@@ -2649,7 +2689,15 @@ func _build_environment() -> void:
 	# sky_cover se ADUNA peste gradient, nu se inmulteste — cu modulate alb si
 	# textura gri deschis, cerul iesea complet alb. Modulate-ul e deci foarte
 	# scazut: norii trebuie doar sugerati, nu sa acopere albastrul.
-	var clouds := _tex("res://assets/textures/sky_cover.png")
+	# Stratul de cer poate fi ales de TEMA. Implicit sunt norii; Chongqing cere
+	# o SILUETA DE ORAS, fiindca brief-ul §2.0 spune ca turnurile nu se pot
+	# construi in 3D langa drum (camera vede doar ~10 + 0.093*d metri in sus,
+	# deci dintr-un zgarie-nori de 100 m se vede un perete de 12-15 m). Pictate
+	# in cer, exista la orizont in ORICE directie si costa zero draw calls si
+	# zero triunghiuri — singurul mod in care un oras vertical incape intr-un
+	# buget de mobil.
+	var clouds := _tex(String(theme_flag("sky_cover_tex",
+		"res://assets/textures/sky_cover.png")))
 	if clouds != null:
 		sky_mat.sky_cover = clouds
 		# Alfa din tema: noaptea norii nu sunt luminati de nimic, iar la 0.35

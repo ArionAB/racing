@@ -895,6 +895,86 @@ const STROMBOLI_CLASSES := {
 	"Boat_Rollers": Palette.TRI_PREFIX + "wood",
 }
 
+
+## Maparea de clase pentru Chongqing: BETONUL orasului, plus piatra si rugina.
+##
+## Pana acum Track12 folosea `"props": "stromboli"` in tema, adica imprumuta
+## maparea unei insule vulcanice pentru un oras — iar cele 49 de GLB-uri ale
+## kitului propriu (652 de instante asezate in Track12.tscn) stateau integral
+## pe atlasul comun. Exact situatia descrisa in STROMBOLI_CLASSES inainte de
+## partea de suprafete, si aceeasi masuratoare o rezolva.
+##
+## Trei cifre au decis lista de mai jos (tools/probe_cq_slots.gd):
+##
+## 1. UV-urile kitului sunt COLAPSATE, ca pe Stromboli: `v` e 0.5000 pe TOATE
+##    cele 51 de noduri, iar `u` are cate o valoare per slot maturat (2..12
+##    valori distincte). Deci nicio clasa nu poate merge pe UV-uri reale —
+##    `class_material` ar citi un singur texel. Toate intrarile sunt triplanare.
+##
+## 2. Ce se vede de fapt: cele trei `shophouse_` sunt 35% din instantele
+##    asezate (84+74+73 din 652), iar felinarele si `cliff_railing` inca 18%.
+##    Fatadele NU sunt un detaliu de fundal, sunt peretii coridorului prin care
+##    se conduce — adica exact suprafata pe care „culoare plata" se vede cel
+##    mai mult (style_bible §4).
+##
+## 3. Unde sta aria pe fatade, masurat pe inaltime: slotul 29 tine parterul
+##    (y 0..3.1), slotul 8 etajele (y 2.9..5.8), slotul 20 acoperisul
+##    (y 5.75..7.6) si slotul 30 firmele aprinse. Sloturile 8 si 29 nu sunt
+##    doua materiale, sunt ACELASI perete de beton taiat pe orizontala din
+##    motive de compozitie — impreuna 83-90% din arie pe cele trei case.
+##
+## De aceea fatadele merg prin RUPTURA DE ACCENTE cu doua sloturi pastrate
+## (`WorldProp.ACCENT_SPLIT`, vezi `Palette.split_accents`), nu prin maparea de
+## aici: o clasa pusa pe tot corpul ar fi sters si acoperisul si firmele, adica
+## fix semnalul de noapte al pistei. Aici raman piesele MONOCROME, unde clasa
+## nu acopera nimic.
+##
+## `Chevron_Post` NU e in lista, desi kitul Chongqing are si el o piesa cu
+## numele asta: `chevron_post.glb` de pe Stromboli poarta acelasi nume de nod,
+## iar maparea e GLOBALA si potrivirea pe PREFIX (aceeasi capcana ca la
+## `Church_Body` si `Cane_Clump`). Oricum ar pica testul: 44/42/15 pe trei
+## sloturi nu e un accent pe un fond.
+const CHONGQING_CLASSES := {
+	# --- Betonul infrastructurii: `city_concrete` -------------------------
+	#
+	# Piesele care matura UN SINGUR slot de beton, deci n-au ce pierde. Sunt
+	# si cele mai apropiate de ochi: pilonii si parapetul marginesc carosabilul.
+	"ParapetModule": Palette.TRI_PREFIX + "city_concrete",   # 94% slot 8
+	"PrefabSlab": Palette.TRI_PREFIX + "city_concrete",      # 91% slot 8
+	"PillarRound": Palette.TRI_PREFIX + "city_concrete",     # 84% slot 8
+	# --- Piatra scarilor Shibati: `stone_wall` ----------------------------
+	#
+	# 90% pe slotul 3, si e coborarea-semnatura a pistei (brief §1): treptele
+	# se vad de foarte aproape, in cadere. `stone_wall` si nu `city_concrete`
+	# fiindca sursa lui e o scanare de zidarie — randuri de piatra, ce e chiar
+	# subiectul unei strazi-scara vechi (acelasi argument ca la `cut_stone`
+	# pe viaductul Circum-Baikal).
+	"StoneStairway": Palette.TRI_PREFIX + "old_stone",       # 90% slot 3
+	# `Bollard` (84% slot 3) NU intra, desi trece pragul de arie: masurat,
+	# stalpul are 0.40 m latime. E fix banda ingusta din style_bible §4 — la
+	# latimea aia ii revin ~15 texeli pe pixel, GPU-ul alege un mip mic si
+	# textura iese PLATA oricat de corecta ar fi maparea. Aceeasi lectie ca
+	# pietrisul umarului si ca `Jib`-ul de mai jos. Variatia pe piese inguste
+	# trebuie sa vina din vertex colors, nu din dala.
+	# --- Metalul santierului: `rust_metal` --------------------------------
+	#
+	# Macaraua e reperul vertical al pistei si containerele stau pe chei, in
+	# gramezi. Amandoua pe slotul 10 in proportie dominanta; restul (slot 8 la
+	# macara, 29 la container) e acelasi gri de beton, deci ruginirea lui nu
+	# schimba citirea piesei.
+	"TowerCrane": Palette.TRI_PREFIX + "rust_metal",         # 76% slot 10
+	# `Container` (73% slot 10) NU e aici, desi ar merita clasa: numele se
+	# cioneste cu `Container_A` din `props/props_junk.glb`, gunoiul comun
+	# TUTUROR pistelor, iar maparea asta e GLOBALA si potrivirea pe PREFIX.
+	# Verificat pe fisier, nu presupus. Sta in `WorldProp.CLASSES_BY_MODEL`,
+	# care se cheie pe numele GLB-ului. Aceeasi capcana ca la `Church_Body`,
+	# `Cane_Clump` si `House_`.
+	# `Jib` (bratul macaralei, 61% slot 10) NU intra: e la 22 m inaltime
+	# (vezi kitul, memoria „Kit assets Chongqing"), deci pe ecran are latimea
+	# unei zabrele — exact banda ingusta pe care granulatia se pierde in
+	# mipmap si textura nu ajunge niciodata sa se vada (style_bible §4).
+}
+
 ## Fractiile pe care creste trestia de zahar (sectorul 7, `Track05.SECTORS`).
 ##
 ## Ratele de aparitie (0.32/0.38/0.34 pe cele trei benzi) sunt reglate pe

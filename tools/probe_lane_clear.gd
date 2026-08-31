@@ -14,6 +14,16 @@ extends Node
 ## roti si se ignora dupa nume; orice ALTCEVA care intersecteaza cutia caroseriei
 ## ridicata peste asfalt e un zid in mijlocul drumului.
 ##
+## Sonda are DOUA intrebari, si a doua e cea care a prins blocajul real:
+##
+##   (a) e ceva solid IN gabaritul masinii, pe axa si pe doua fire laterale;
+##   (b) e ceva solid INAINTEA masinii, pe directia de mers, la cotele
+##       caroseriei — chiar daca in punctul curent e loc.
+##
+## (b) exista fiindca pe Cappadocia perdeaua de umeri statea DE-A CURMEZISUL
+## drumului: in punctul masurat era aer, iar zidul la 2 m in fata. Cu numai (a),
+## sonda iesea verde peste un drum inchis. Vezi memoria `masoara-inainte-nu-langa`.
+##
 ## Limite: se testeaza axa si doua fire laterale la +-1/3 din semilatime, nu
 ## toata banda. Nu judeca pantele — o rampa cinstita pe care o urci nu apare
 ## fiindca e in lista de suprafete de rulare.
@@ -26,6 +36,10 @@ const LIFT: float = 1.0
 ## Pasul pe fractie. 0.005 pe un tur de ~2 km inseamna o proba la ~10 m.
 const STEP: float = 0.005
 ## Corpurile pe care se RULEAZA: contactul cu ele e normal, nu blocaj.
+## Cat de departe in fata se intreaba. 6 m: mai mult decat lungimea masinii,
+## destul cat un zid sa fie vazut inainte sa fie atins, si destul de putin cat
+## un viraj normal sa nu iasa raportat ca obstacol.
+const AHEAD_M: float = 6.0
 const DRIVABLE := [
 	"RoadTop", "RoadSides", "RoadOverpassDeck", "Shoulders",
 	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails",
@@ -102,5 +116,22 @@ func _sweep(space: PhysicsDirectSpaceState3D, track: Track,
 					continue
 				print("    %.3f lat=%+.1f | %s" % [f, lat, nm])
 				bad += 1
+		# (b) coridorul din FATA, pe axa. Nu se filtreaza dupa lista de
+		# suprafete de rulare: un carosabil perpendicular pe directia de mers
+		# e tot un zid, oricum l-ar chema.
+		for h in [0.4, 1.0, 1.6]:
+			var origin: Vector3 = p + Vector3.UP * h
+			var rq := PhysicsRayQueryParameters3D.create(
+				origin, origin + fwd * AHEAD_M)
+			var hit := space.intersect_ray(rq)
+			if hit.is_empty():
+				continue
+			var body := hit.get("collider") as Node
+			if body == null:
+				continue
+			var d: float = (hit["position"] as Vector3).distance_to(origin)
+			print("    %.3f INAINTE h=%.1f | %s la %.2f m"
+				% [f, h, String(body.name), d])
+			bad += 1
 		f += STEP
 	return bad

@@ -112,8 +112,24 @@ func _sweep(space: PhysicsDirectSpaceState3D, track: Track,
 				if body == null:
 					continue
 				var nm := String(body.name)
+				# Lista de suprafete de rulare scuza numele, NU orice forma cu
+				# numele ala. `Shoulders` e chiar corpul care a blocat elicea
+				# (o perdea de 38 m atarnata peste gura stancii): daca l-am
+				# scuza pe nume, garda ar tace exact la defectul pentru care a
+				# fost scrisa. Deci se scuza doar cat timp sta JOS — o suprafata
+				# pe care calci, nu un zid. Cutia e ridicata cu LIFT, deci orice
+				# atinge peste ~1 m fata de asfalt nu mai e podea.
 				if DRIVABLE.has(nm):
-					continue
+					var top: float = -1e9
+					var aabb_ok := false
+					for ch in body.get_children():
+						if ch is CollisionShape3D and ch.shape != null:
+							var g: Vector3 = (ch as Node3D).global_position
+							top = maxf(top, g.y)
+							aabb_ok = true
+					if not aabb_ok or top <= p.y + 1.0:
+						continue
+					nm += " (ridicat la +%.1f m fata de asfalt)" % (top - p.y)
 				print("    %.3f lat=%+.1f | %s" % [f, lat, nm])
 				bad += 1
 		# (b) coridorul din FATA, pe axa. Nu se filtreaza dupa lista de

@@ -35,6 +35,16 @@ def analyse(path, box, rows=5):
         # obtine innegrind roca: runda 14 a atins 41.6% muchii cu 23.9% pixeli
         # inchisi, iar conurile citeau a funingine. Referinta are 6.6%.
         dark = sum(1 for v in row if v < 70) / len(row) * 100.0
+        # ATENTIE la citirea lui `dark` (runda 15): caseta implicita nu contine
+        # numai piatra. Masurat pe captura de la frac 0.06, ea prinde fereastra
+        # neagra a conului mare (y~223), palaria de bazalt (y~86) si solul umbrit
+        # cu poala de moloz (y~360) — 17.5% din pixelii randurilor sunt lucruri
+        # care TREBUIE sa fie inchise. Randurile curate de piatra dau 0.0-6.0%,
+        # adica exact cat are referinta (5.7%).
+        #
+        # Deci un `inchis` de ~17% pe caseta asta NU inseamna funingine; se
+        # verifica pe o banda numai de piatra inainte de a acuza pigmentul.
+        # Aceeasi lectie ca la muchii: caseta masoara ce e in ea, nu ce crezi.
         out.append((y, edges, grad, flat, max(row) - min(row), dark))
     return out
 

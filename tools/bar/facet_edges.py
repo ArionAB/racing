@@ -31,7 +31,11 @@ def analyse(path, box, rows=5):
         edges = sum(1 for v in d if v >= 8) / n * 100.0
         grad = sum(1 for v in d if 1 <= v < 8) / n * 100.0
         flat = sum(1 for v in d if v == 0) / n * 100.0
-        out.append((y, edges, grad, flat, max(row) - min(row)))
+        # Cate procente din piatra sunt INCHISE. Fara garda asta, muchiile se pot
+        # obtine innegrind roca: runda 14 a atins 41.6% muchii cu 23.9% pixeli
+        # inchisi, iar conurile citeau a funingine. Referinta are 6.6%.
+        dark = sum(1 for v in row if v < 70) / len(row) * 100.0
+        out.append((y, edges, grad, flat, max(row) - min(row), dark))
     return out
 
 
@@ -51,20 +55,26 @@ def main():
             return 0.0, 0.0
         print("%s  (%s)" % (label, path))
         me = ms = 0.0
-        for y, e, g, f, sp in rows:
+        md = 0.0
+        for y, e, g, f, sp, dk in rows:
             print("   y=%4d  muchii=%5.1f%%  gradient=%5.1f%%  plat=%5.1f%%  "
-                  "amplitudine=%3d" % (y, e, g, f, sp))
-            me += e; ms += sp
-        return me / len(rows), ms / len(rows)
+                  "amplitudine=%3d  inchis=%4.1f%%" % (y, e, g, f, sp, dk))
+            me += e; ms += sp; md += dk
+        return me / len(rows), ms / len(rows), md / len(rows)
 
-    e, s = report(a.image, "AL NOSTRU")
+    e, s, dk = report(a.image, "AL NOSTRU")
     if a.ref:
         report(a.ref, "REFERINTA")
     print("")
-    print("MEDIA noastra: muchii %.1f%%  amplitudine %.0f" % (e, s))
-    ok = e >= 40.0 and s >= 140.0
-    print("VERDICT: %s (tinta: muchii >= 40%%, amplitudine >= 140)"
-          % ("OK" if ok else "PICAT"))
+    print("MEDIA noastra: muchii %.1f%%  amplitudine %.0f  inchis %.1f%%"
+          % (e, s, dk))
+    ok = e >= 40.0 and s >= 140.0 and dk <= 12.0
+    print("VERDICT: %s (tinta: muchii >= 40%%, amplitudine >= 140, "
+          "inchis <= 12%% — referinta are 6.6%%)" % ("OK" if ok else "PICAT"))
+    if e >= 40.0 and dk > 12.0:
+        print("  ATENTIE: muchiile sunt luate prin INNEGRIREA rocii, nu prin "
+              "fatetare. Tuful e piatra PALIDA; contrastul se ia din lumina, "
+              "nu din funingine.")
     return 0 if ok else 1
 
 

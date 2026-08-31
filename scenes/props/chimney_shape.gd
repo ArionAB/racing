@@ -78,7 +78,7 @@ const DOOR_DARK_SLOT: int = 26
 
 ## Cat de intunecata e poala de grohotis fata de corpul hornului. Vezi
 ## `TALUS_SLOT` pentru de ce separarea NU se face din culoare.
-const TALUS_SHADE: float = 0.80
+const TALUS_SHADE: float = 0.72
 
 
 ## Raportul dintre razele celor doua axe orizontale. 1.0 = cerc (revolutie);
@@ -1051,7 +1051,7 @@ func _build_talus_rocks(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# plafon, o lege de putere blanda pastreaza "cateva mari, multe mici".
 		var u := rng.randf()
 		var ceiling := 0.22 + 0.78 * pow(minf(t, 1.0), 1.6)
-		var size := base_r * talus_rock_max * ceiling * pow(u, 0.85)
+		var size := base_r * talus_rock_max * ceiling * pow(u, 0.70)
 		if size < base_r * 0.015:
 			continue
 		var cxr := cx + cos(a) * r_here

@@ -1796,9 +1796,37 @@ static func themes() -> Dictionary:
 			# repetat capcana masurata pe Okinawa: nisip coraligen iesit
 			# albastru-cenusiu.
 			"ambient_color": Color.html("F0C79A"),
-			# 0.20, coborat de la 0.30 (runda 13). Perechea lui sun_energy 1.15 de
-			# mai sus — motivul intreg si socoteala sunt acolo; aici doar de ce
-			# argumentul original nu mai tine.
+			# 0.38, URCAT inapoi in runda 15 de la 0.22. Motivul e masurat, si
+			# rastoarna decizia rundei 13 documentata mai jos.
+			#
+			# Runda 13 a coborat ambientul ca sa scoata contrast pe fatete. A
+			# functionat, dar a cumparat contrastul cu INTUNERIC — exact eroarea
+			# pe care lead-ul a prins-o mai tarziu in textura, doar ca ea statea
+			# si aici, cu o runda inainte. Socoteala, pe albedoul de tuf
+			# (202,166,133 dupa `_warm_tuff`), sun_energy 1.15, expunere 1.15:
+			#
+			#   ambient   fata spre soare   fata intoarsa   saltul
+			#   0.22           239                44          195
+			#   0.30           249                60          189
+			#   0.38           251                76          175
+			#
+			# La 0.22 o fata intoarsa de la soare iese la 44 din 255. Aia nu e
+			# "crem mai inchis", e negru — si nicio textura nu o poate salva,
+			# fiindca albedoul se INMULTESTE cu lumina: unde lumina e 0.25,
+			# orice pigment palid ajunge oricum jos. De-aia captura citea a
+			# funingine chiar si dupa ce dala a fost redesenata palida.
+			#
+			# Ce NU se pierde urcand: saltul dintre o fata luminata si una
+			# intoarsa ramane 175 din 255, cand referinta cere ~16 pentru o
+			# muchie citibila. Fatetele nu depind de infometarea umbrei — mai era
+			# de zece ori marja necesara. Se plateste doar intunericul, nu
+			# contrastul.
+			#
+			# Soarele e la 22 de grade elevatie: la un soare atat de jos multe
+			# fete ale unui con primesc aproape numai ambient, deci ambientul NU
+			# e lumina de umplere de fundal aici, e principala sursa de valoare
+			# pe jumatate din padure. Nota de mai jos, de la 0.30, ramane ca
+			# istoric.
 			#
 			# Argumentul de la 0.30 era: "pista are canion cu faleze in benzi si
 			# SUBTERAN, adica multe fete intoarse de la un soare razant", cu
@@ -1823,7 +1851,7 @@ static func themes() -> Dictionary:
 			# desertul e o pista tot cu faleze si tot cu soare jos. La 0.20 fata
 			# intoarsa iese 95 din 255 dupa tonemap — inchisa, dar inca departe
 			# de pata neagra plata de care se temea nota de la 0.30.
-			"ambient_energy": 0.22,
+			"ambient_energy": 0.38,
 			# UMBRE PORNITE, si e prima pista pe care sunt IDENTITATE, nu doar
 			# contact cu solul. Implicitul e deja `true`, deci cheia nu schimba
 			# comportamentul — exista ca sa aiba unde sta motivul pentru care NU

@@ -38,19 +38,35 @@ uniform float detail_steps = 16.0;
 // PIVOTUL cuantizarii, si NU e `detail_mean`. Diferenta a costat cateva
 // incercari, deci merita scrisa: `detail_mean` (0.850) e valoarea catre care se
 // stinge stratul la distanta, o conventie din style_bible §4 — nu media reala a
-// vreunei texturi. Masurate pe toti texelii: 0.920 detail_tuff.png (dupa
-// redesenarea din runda 14) si 0.903 detail_rock.png. Cuantizand in jurul lui
+// vreunei texturi. Masurate pe toti texelii: 0.833 detail_tuff.png (dupa
+// redesenarea din runda 15) si 0.903 detail_rock.png. Cuantizand in jurul lui
 // 0.850, suprafata obisnuita cadea deja PESTE pivot si se amplifica in sus, iar
 // santurile treceau mult sub el — asimetria aia scotea "dungi de tigru" in loc
 // de tuf. Se pivoteaza pe media adevarata a dalei; stingerea cu distanta ramane
 // pe `detail_mean`, ca sa nu se mute expunerea.
 //
 // Daca se schimba textura de detaliu, se remasoara media si se scrie aici.
-uniform float detail_pivot = 0.920;
-// Cat de tare se desface fiecare treapta fata de pivot. Peste 1 = placile se
-// separa mai mult decat o face textura, ca saltul de pe margine sa treaca pragul
-// de vizibilitate al sondei de muchii (8 din 255).
-uniform float detail_gain = 2.8;
+uniform float detail_pivot = 0.833;
+// Cat de tare se desface fiecare treapta fata de pivot.
+//
+// RUNDA 15: 2.8 -> 1.15. Castigul mare era a doua jumatate a funinginii, si se
+// vede in cifre: dala veche cobora pana la 36 din 255, iar 2.8 in jurul
+// pivotului o ducea la -321, adica 2% din texeli clampati pe NEGRU si
+// percentila 5 prabusita de la 172 la 59. Un castig care taie in clamp nu mai
+// separa trepte, doar arde capatul intunecat al histogramei.
+//
+// Acum dala e deasa si putin adanca (min 152, mediana 213, 62% tranzitii pe
+// rand — mai multe decat avea dala veche la 42.7%), deci detaliul fin EXISTA in
+// textura si nu mai trebuie fabricat prin amplificare.
+//
+// 2.0 e ales prin masuratoare, si diferenta fata de runda 14 nu e cifra, e DALA
+// pe care se aplica. Pe o piatra luminata la 200 din 255:
+//   dala veche, gain 2.8 -> 2.00% din texeli sub 70 (clamp pe negru): funingine
+//   dala noua,  gain 2.0 -> 0.00% din texeli sub 70, minim 111: relief
+// Acelasi castig mare pe o dala palida si deasa nu mai poate produce negru,
+// fiindca nu mai exista coada intunecata pe care sa o amplifice. De-aia
+// contrastul e acum sigur: e marginit de textura, nu de disciplina.
+uniform float detail_gain = 2.0;
 uniform float roughness_v = 0.9;
 uniform float specular_v = 0.15;
 

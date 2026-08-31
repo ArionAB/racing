@@ -96,18 +96,37 @@ const CAP_SLOT: int = 20
 ## Cat de tare separa fatetele. 0 = doar normale per-fata (invizibil pe
 ## hornuri, vezi `_shade_facets`); 0.30 = muchii citibile de la volan.
 ##
-## Urcat la 0.46 in runda 14. Cu 12 trepte in loc de 5, un pas valoreaza mai
-## putin (contrast/trepte), deci contrastul TOTAL trebuie sa creasca ca saltul de
-## pe o muchie sa ramana peste pragul de vizibilitate. Cele doua cifre se citesc
-## impreuna: 0.30/5 dadea un pas mare pe putine muchii, 0.46/12 da un pas destul
-## de mare pe MULTE muchii — si muchiile sunt ce se masoara.
-@export_range(0.0, 0.6, 0.01) var facet_contrast: float = 0.46
+## Urcat la 0.46 in runda 14, COBORAT la 0.17 in runda 15.
+##
+## De ce se poate cobora atat: pana in runda 14 umbrirea pictata trebuia sa
+## suplineasca lumina, fiindca ambientul era la 0.22 si o fata intoarsa de la
+## soare iesea oricum la 44 din 255 (vezi nota de la `ambient_energy` din
+## track.gd). Cu ambientul la 0.38 lumina reala face saltul, iar `k` poate sta
+## aproape de 1.0 — adica exact ce inseamna "fatete din LUMINA, nu din pigment".
+##
+## Si cat trebuie de fapt, masurat pe referinta: saltul MEDIAN de pe o muchie
+## acolo e 16 din 255, iar distributia noastra era deja aproape identica cu a ei
+## (mediana 14; 50% din muchii sub 16 la ea, 58% la noi). Nu contrastul lipsea.
+## Pe un ton de piatra de 200 din 255, un salt de 16 cere un delta de k de doar
+## 0.080 — deci 0.46 impartit la 12 trepte dadea un pas de ~4x peste ce cere
+## referinta, si aia se vedea ca desen pictat peste piatra, nu ca sculptura.
+##
+## 0.17 pe 12 trepte da ~0.014 per treapta, iar `facet_plate` adauga saltul de
+## pe placa; impreuna ies muchii de 10..20 din 255 pe tonurile reale ale
+## conului — in intervalul referintei.
+@export_range(0.0, 0.6, 0.01) var facet_contrast: float = 0.17
 
 ## Cat de mult difera doua PLACI vecine cu orientari apropiate. Vezi
 ## `_shade_facets`: fara asta, fetele laterale ale unui con cad pe aceeasi
 ## treapta de unghi si muchia dintre ele are salt zero (masurat: salturi de 1..6
 ## din 255, sub pragul de 8 al sondei de muchii). 0 = doar umbrire dupa soare.
-@export_range(0.0, 0.35, 0.01) var facet_plate: float = 0.16
+##
+## RUNDA 15: 0.16 -> 0.09. Acelasi motiv ca la `facet_contrast` — jitterul e
+## simetric in jurul lui zero, deci jumatate din placi erau INTUNECATE cu pana
+## la 0.08 peste umbrirea de fata. Pe piatra palida asta se aduna in exact
+## pigmentul inchis pe care runda asta il scoate. 0.09 tine placile vecine
+## despartite (salt de ~9 din 255 pe un ton de 200) fara sa scobeasca.
+@export_range(0.0, 0.35, 0.01) var facet_plate: float = 0.09
 
 @export_range(0.35, 1.0, 0.01) var ovality: float = 1.0
 
@@ -1053,7 +1072,23 @@ func _shade_facets(arr: Array) -> Array:
 		var cell := (roundf(nn.x * 7.0) * 13.0 + roundf(nn.y * 7.0) * 29.0
 				+ roundf(nn.z * 7.0) * 47.0)
 		var jitter := fposmod(cell * 0.61803398875, 1.0) - 0.5
-		var k := 1.0 - facet_contrast * (1.0 - q) - facet_plate * jitter
+		# CENTRAT PE 1.0, nu tras numai in jos (runda 15).
+		#
+		# Vertex color se inmulteste si e clampat la 1, deci nu se poate lumina
+		# peste alb (memoria `surfacetool-clamp-vertex-color`) — de-aia forma
+		# veche scadea mereu. Consecinta masurata: fata cea mai luminata primea
+		# k = 1.0 doar cand q era exact 1.0, adica aproape niciodata; in rest TOT
+		# conul era inmultit sub 1, si media aluneca in jos cu fiecare semnal
+		# adaugat peste ea. Pe o piatra palida asta e chiar defectul rundei.
+		#
+		# Se scade acum fata de MEDIA lui q (0.5), nu fata de maxim: fetele mai
+		# luminate decat media raman la 1.0 (nu se pot lumina, dar nici nu mai
+		# sunt intunecate degeaba), iar cele sub medie coboara cu jumatate din
+		# interval. Saltul de pe muchie ramane acelasi — el depinde de DIFERENTA
+		# dintre doua fete vecine, nu de nivelul absolut — dar conul nu mai
+		# pierde valoare pe toata suprafata.
+		var k := 1.0 - facet_contrast * (0.5 - q) - facet_plate * jitter
+		k = minf(k, 1.0)
 		for j in 3:
 			cols[i + j] = Color(cols[i + j].r * k, cols[i + j].g * k,
 					cols[i + j].b * k, cols[i + j].a)

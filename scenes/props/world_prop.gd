@@ -731,11 +731,19 @@ func _warm_tuff() -> void:
 						# chiar daca media pe tot conul cadea bine. Media pe toata
 						# suprafata poate sa fie corecta cu varful gresit; se
 						# masoara pe FASII de inaltime, nu global.
+						# RUNDA 15: tenta slabita (0.06/0.15/0.26 ->
+						# 0.03/0.09/0.16). Masurat pe captura, saturatia rocii
+						# era 0.62-0.67 fata de 0.46 in referinta — tuful iesea
+						# caramiziu-portocaliu, nu crem cald. Taind mai ales din
+						# albastru, tenta muta nuanta dar SCADE si luminanta
+						# (albastrul e 11% din ea, verdele 59%): cu 0.15 pe verde
+						# se pierdeau ~10 unitati din valoare degeaba. Plancherul
+						# ramane 0.62, deci gradientul baza-varf se pastreaza.
 						var k := strength * (0.62 + 0.38 * t)
 						var warm := Color(
-							1.0 - 0.06 * k,
-							1.0 - (0.15 + hue_shift) * k,
-							1.0 - (0.26 + hue_shift * 2.0) * k)
+							1.0 - 0.03 * k,
+							1.0 - (0.09 + hue_shift) * k,
+							1.0 - (0.16 + hue_shift * 2.0) * k)
 						for j in 3:
 							cols[i + j] = cols[i + j] * warm
 				else:
@@ -743,9 +751,9 @@ func _warm_tuff() -> void:
 						var t := 1.0 - clampf((verts[i].y - y0) / h, 0.0, 1.0)
 						var k := strength * (0.62 + 0.38 * t)
 						cols[i] = cols[i] * Color(
-							1.0 - 0.06 * k,
-							1.0 - (0.15 + hue_shift) * k,
-							1.0 - (0.26 + hue_shift * 2.0) * k)
+							1.0 - 0.03 * k,
+							1.0 - (0.09 + hue_shift) * k,
+							1.0 - (0.16 + hue_shift * 2.0) * k)
 				arr[Mesh.ARRAY_COLOR] = cols
 				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			mi.mesh = out

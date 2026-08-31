@@ -85,6 +85,10 @@ const DOOR_DARK_SLOT: int = 26
 ## lumina; un con low-poly smooth-shaded citeste a blob. Vezi `_deform_mesh`.
 @export var faceted: bool = true
 
+## Cat de tare separa fatetele. 0 = doar normale per-fata (invizibil pe
+## hornuri, vezi `_shade_facets`); 0.30 = muchii citibile de la volan.
+@export_range(0.0, 0.6, 0.01) var facet_contrast: float = 0.30
+
 @export_range(0.35, 1.0, 0.01) var ovality: float = 1.0
 
 ## Pe ce azimut sta axa lunga a elipsei, in grade. Conteaza fiindca perechea
@@ -563,11 +567,63 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 			st.deindex()
 		st.generate_normals()
 		var m := st.commit()
-		fixed.add_surface_from_arrays(
-			Mesh.PRIMITIVE_TRIANGLES, m.surface_get_arrays(0))
+		var fa := m.surface_get_arrays(0)
+		if faceted:
+			fa = _shade_facets(fa)
+		fixed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fa)
 		fixed.surface_set_material(s, out.surface_get_material(s))
 	mi.mesh = fixed
 
+
+## Contrast PE FATA, in vertex color. Fara asta, deindexarea e corecta si
+## invizibila: masurat intre capturi, doar 0,054% din pixeli se schimbau.
+##
+## Motivul e ca pe hornuri lumina aproape nu face umbrirea. UV-urile prop-urilor
+## sunt colapsate pe un punct (`dio_lib.assign_uvs`), deci fiecare fata ia o
+## culoare PLATA de slot; peste ea `world_prop._warm_tuff` inmulteste un gradient
+## VERTICAL, iar AO-ul e copt tot in vertecsi. Cu sun_energy 0.85 si
+## ambient_energy 0.30 (ambientul e independent de directie), felia difuza pe
+## care ar modula-o normala per-fata e prea subtire ca sa se vada.
+##
+## Deci contrastul se pune pe canalul care CHIAR picteaza conul. Mesh-ul e deja
+## deindexat, deci cei 3 vertecsi ai unui triunghi sunt numai ai lui: o valoare
+## per triunghi da fatete adevarate, nu un gradient.
+##
+## Factorul e orientarea fatei fata de soare (azimut fix, ~135°), cuantizata:
+## fatete vecine cu unghiuri apropiate cad pe aceeasi treapta, deci apar
+## suprafete plane care se intalnesc pe muchie — sculptura, nu zgomot. Doar
+## INTUNECA (vertex color se inmulteste si e clampat la 1, vezi memoria
+## `surfacetool-clamp-vertex-color`).
+func _shade_facets(arr: Array) -> Array:
+	var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var norms: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+	if norms.size() != verts.size() or verts.size() % 3 != 0:
+		return arr
+	var raw: Variant = arr[Mesh.ARRAY_COLOR]
+	var cols := PackedColorArray()
+	if raw is PackedColorArray:
+		cols = raw
+	if cols.size() != verts.size():
+		cols = PackedColorArray()
+		cols.resize(verts.size())
+		cols.fill(Color.WHITE)
+	# Soarele temei bate cam din spate-dreapta; nu se citeste din scena fiindca
+	# deformarea se face inainte ca nodul sa aiba lumina langa el.
+	var sun := Vector3(0.62, 0.55, -0.56).normalized()
+	for t in verts.size() / 3:
+		var i := t * 3
+		var n := norms[i] + norms[i + 1] + norms[i + 2]
+		if n.length_squared() < 0.0001:
+			continue
+		var d := n.normalized().dot(sun) * 0.5 + 0.5
+		# 5 trepte: destul cat sa se vada muchia, putin cat sa nu granuleze.
+		var q := roundf(d * 4.0) / 4.0
+		var k := 1.0 - facet_contrast * (1.0 - q)
+		for j in 3:
+			cols[i + j] = Color(cols[i + j].r * k, cols[i + j].g * k,
+					cols[i + j].b * k, cols[i + j].a)
+	arr[Mesh.ARRAY_COLOR] = cols
+	return arr
 
 ## Adauga poala de moloz si nisele de usa la mesh-ul gazda, ca SUPRAFETE NOI pe
 ## acelasi ArrayMesh, cu MATERIALUL suprafetei 0.
@@ -1171,8 +1227,10 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 			st.deindex()
 		st.generate_normals()
 		var m := st.commit()
-		fixed.add_surface_from_arrays(
-			Mesh.PRIMITIVE_TRIANGLES, m.surface_get_arrays(0))
+		var fa := m.surface_get_arrays(0)
+		if faceted:
+			fa = _shade_facets(fa)
+		fixed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fa)
 		fixed.surface_set_material(s, out.surface_get_material(s))
 	mi.mesh = fixed
 

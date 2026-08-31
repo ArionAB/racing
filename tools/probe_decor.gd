@@ -470,6 +470,7 @@ func _source_of(mi: Node, track: Node) -> String:
 		# cine a adus un material in plus.
 		"chimney", "twin_chimney_gate", "cave_house", "dovecote",
 		"rock_church_facade", "shrub_dry", "pigeon",
+		"poplar", "carpet_terrace", "pottery_cart", "pot_stack",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "canyon_rocks", "desert_scatter", "butte",
 		"wood_fence", "train"]

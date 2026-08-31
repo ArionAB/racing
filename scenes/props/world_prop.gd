@@ -695,22 +695,57 @@ func _warm_tuff() -> void:
 					cols = PackedColorArray()
 					cols.resize(verts.size())
 					cols.fill(Color.WHITE)
-				for i in verts.size():
-					# 1 la baza, 0 la varf.
-					var t := 1.0 - clampf((verts[i].y - y0) / h, 0.0, 1.0)
-					# Plancherul de 0.62 (nu 0.35) e o corectie MASURATA, nu o
-					# preferinta. Cu 0.35, treimea de sus a conului ramanea la
-					# luminanta 158 fata de 138 in referinta — adica exact
-					# "chalk-white in its upper two-thirds" ramanea nereparat,
-					# chiar daca media pe tot conul cadea bine. Media pe toata
-					# suprafata poate sa fie corecta cu varful gresit; se
-					# masoara pe FASII de inaltime, nu global.
-					var k := strength * (0.62 + 0.38 * t)
-					var warm := Color(
-						1.0 - 0.06 * k,
-						1.0 - (0.15 + hue_shift) * k,
-						1.0 - (0.26 + hue_shift * 2.0) * k)
-					cols[i] = cols[i] * warm
+				# PE TRIUNGHI, nu pe vertex (runda 14).
+				#
+				# Aici se pierdea, masurat, umbrirea pe fata a hornurilor.
+				# `_shade_facets` scrie o valoare PLATA per triunghi (mesh
+				# deindexat, cei 3 vertecsi sunt numai ai fetei), dar bucla asta
+				# rula dupa el si recalcula `t` din Y-ul FIECARUI vertex: pe o
+				# fata inclinata cei trei vertecsi au cote diferite, deci primeau
+				# trei valori diferite si rasterizatorul le interpola inapoi intr-un
+				# degrade. Sonda `probe_capp_vcol` a gasit 1489 din 1637 de fete cu
+				# culoare neplata pe triunghi — adica umbrirea pe fata era ca si
+				# stearsa pe 91% din horn, oricat de fin ar fi fost cuantizata in
+				# `_shade_facets`. (De-aia urcarea la 12 trepte n-a miscat captura:
+				# repara treapta, nu ce o netezea la loc.)
+				#
+				# Se ia cota CENTROIDULUI si se aplica aceeasi valoare pe cei trei
+				# vertecsi: gradientul cald ramane (conul e tot mai cald la baza),
+				# dar se rotunjeste la treapta fetei pe care sta, in loc sa curga
+				# peste ea. Exact regula ceruta: un semnal pictat peste fatete ori
+				# se cuantizeaza pe fata, ori sterge fatetele.
+				#
+				# Fallback pe vertex daca surface-ul nu e triunghiuri intregi:
+				# functia atinge tot kitul de tuf, nu doar hornurile deindexate.
+				if verts.size() % 3 == 0:
+					for tri in verts.size() / 3:
+						var i := tri * 3
+						var cy := (verts[i].y + verts[i + 1].y
+								+ verts[i + 2].y) / 3.0
+						# 1 la baza, 0 la varf.
+						var t := 1.0 - clampf((cy - y0) / h, 0.0, 1.0)
+						# Plancherul de 0.62 (nu 0.35) e o corectie MASURATA, nu
+						# o preferinta. Cu 0.35, treimea de sus a conului ramanea
+						# la luminanta 158 fata de 138 in referinta — adica exact
+						# "chalk-white in its upper two-thirds" ramanea nereparat,
+						# chiar daca media pe tot conul cadea bine. Media pe toata
+						# suprafata poate sa fie corecta cu varful gresit; se
+						# masoara pe FASII de inaltime, nu global.
+						var k := strength * (0.62 + 0.38 * t)
+						var warm := Color(
+							1.0 - 0.06 * k,
+							1.0 - (0.15 + hue_shift) * k,
+							1.0 - (0.26 + hue_shift * 2.0) * k)
+						for j in 3:
+							cols[i + j] = cols[i + j] * warm
+				else:
+					for i in verts.size():
+						var t := 1.0 - clampf((verts[i].y - y0) / h, 0.0, 1.0)
+						var k := strength * (0.62 + 0.38 * t)
+						cols[i] = cols[i] * Color(
+							1.0 - 0.06 * k,
+							1.0 - (0.15 + hue_shift) * k,
+							1.0 - (0.26 + hue_shift * 2.0) * k)
 				arr[Mesh.ARRAY_COLOR] = cols
 				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			mi.mesh = out

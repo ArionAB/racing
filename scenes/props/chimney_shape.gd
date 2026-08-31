@@ -95,7 +95,19 @@ const CAP_SLOT: int = 20
 
 ## Cat de tare separa fatetele. 0 = doar normale per-fata (invizibil pe
 ## hornuri, vezi `_shade_facets`); 0.30 = muchii citibile de la volan.
-@export_range(0.0, 0.6, 0.01) var facet_contrast: float = 0.30
+##
+## Urcat la 0.46 in runda 14. Cu 12 trepte in loc de 5, un pas valoreaza mai
+## putin (contrast/trepte), deci contrastul TOTAL trebuie sa creasca ca saltul de
+## pe o muchie sa ramana peste pragul de vizibilitate. Cele doua cifre se citesc
+## impreuna: 0.30/5 dadea un pas mare pe putine muchii, 0.46/12 da un pas destul
+## de mare pe MULTE muchii — si muchiile sunt ce se masoara.
+@export_range(0.0, 0.6, 0.01) var facet_contrast: float = 0.46
+
+## Cat de mult difera doua PLACI vecine cu orientari apropiate. Vezi
+## `_shade_facets`: fara asta, fetele laterale ale unui con cad pe aceeasi
+## treapta de unghi si muchia dintre ele are salt zero (masurat: salturi de 1..6
+## din 255, sub pragul de 8 al sondei de muchii). 0 = doar umbrire dupa soare.
+@export_range(0.0, 0.35, 0.01) var facet_plate: float = 0.16
 
 @export_range(0.35, 1.0, 0.01) var ovality: float = 1.0
 
@@ -888,13 +900,79 @@ func _shade_facets(arr: Array) -> Array:
 		cos(sun_elev) * cos(sun_azim)).normalized()
 	for t in verts.size() / 3:
 		var i := t * 3
+		# AO-UL COPT SE APLATIZEAZA PE FATA, INAINTE DE ORICE (runda 14).
+		#
+		# Aici a stat cauza reala, si e alta decat s-a banuit trei runde. Sonda
+		# `probe_capp_ao` a citit .glb-ul de kit direct: vertex color-ul din
+		# fisier merge de la 0.137 la 1.000 — un AO copt in Blender, PE VERTEX.
+		# Functia asta doar INMULTESTE cu un k plat per fata, iar inmultirea
+		# pastreaza variatia care intra: cei trei vertecsi ai unei fete aveau
+		# deja valori diferite, deci rasterizatorul le interpola inapoi intr-un
+		# degrade neted. Masurat pe mesh-ul final din scena
+		# (`probe_capp_vcol`): 1489 din 1637 de fete cu culoare NEPLATA pe
+		# triunghi. Umbrirea "pe fata" era, in fapt, un gradient inmultit cu o
+		# constanta — de-aia nici cuantizarea mai fina (5 -> 12 trepte) nu misca
+		# captura: repara treapta, cand ce o stergea era altceva.
+		#
+		# AO-ul nu se poate pastra neted PESTE fatete si in acelasi timp sa se
+		# vada fatetele; regula rundei e explicita — un semnal care nu se poate
+		# cuantiza pe fata e mai bine cuantizat decat lasat neted. Se ia MEDIA
+		# celor trei vertecsi: contactul si adancitura pe care le da AO-ul raman
+		# (fetele din scobituri sunt in continuare mai inchise decat cele
+		# expuse), dar valoarea devine constanta pe triunghi, deci sare pe muchie
+		# in loc sa curga peste ea.
+		var ao := (cols[i].r + cols[i + 1].r + cols[i + 2].r) / 3.0
+		var ag := (cols[i].g + cols[i + 1].g + cols[i + 2].g) / 3.0
+		var ab := (cols[i].b + cols[i + 1].b + cols[i + 2].b) / 3.0
+		for j in 3:
+			cols[i + j] = Color(ao, ag, ab, cols[i + j].a)
 		var n := norms[i] + norms[i + 1] + norms[i + 2]
 		if n.length_squared() < 0.0001:
 			continue
 		var d := n.normalized().dot(sun) * 0.5 + 0.5
-		# 5 trepte: destul cat sa se vada muchia, putin cat sa nu granuleze.
-		var q := roundf(d * 4.0) / 4.0
-		var k := 1.0 - facet_contrast * (1.0 - q)
+		# TREPTELE, masurate (runda 14, `probe_capp_facetd`).
+		#
+		# Erau 5 (`round(d*4)/4`), alese "destul cat sa se vada muchia, putin cat
+		# sa nu granuleze". Masurat pe 1074 de fete de horn din scena reala, alea
+		# 5 trepte puneau 71,7% din perechile de fete VECINE pe aceeasi treapta —
+		# adica la aproape trei sferturi din muchii saltul pictat era exact zero.
+		# De-aia, dupa ce stratul de detaliu a fost cuantizat pe fata si degradeul
+		# a disparut (gradient 66% -> 9%), muchiile au scazut in loc sa creasca:
+		# fetele erau plate, dar plate la ACEEASI valoare.
+		#
+		# Cauza e geometrica, nu de gust: fetele laterale ale unui con privesc in
+		# afara pe unghiuri apropiate, deci `d` se aglomereaza (166/210/221/161
+		# de fete in benzile 0.5..0.9). O cuantizare mai grosolana decat imprastie-
+		# rea normalelor sterge tocmai diferenta pe care vrea sa o arate.
+		#
+		# 12 trepte separa fetele vecine fara sa devina zgomot: pasul ramane
+		# vizibil (contrast 0.46 / 12 trepte = ~0.038 din valoare, adica ~9 din
+		# 255 pe un ton de 230 — peste pragul de 8 al sondei), si suprafetele
+		# vecine cu normale apropiate cad totusi pe trepte diferite.
+		var q := roundf(d * 12.0) / 12.0
+		# VARIATIA PE PLACA, ca fetele vecine sa nu cada niciodata la fel.
+		#
+		# Cuantizarea dupa unghi, singura, nu ajunge — si asta e masurat, nu
+		# presupus. Pe fetele laterale ale unui con normalele sunt apropiate,
+		# deci `d` se aglomereaza si vecinele pica pe aceeasi treapta; dupa ce
+		# vertex color-ul a ajuns perfect plat pe fata (1489 -> 0 fete neplate),
+		# benzile citite in captura erau intr-adevar plate, dar cu salturi de
+		# 1..6 din 255 intre ele — sub pragul de 8 la care ochiul (si sonda)
+		# citesc o MUCHIE. O fatetare care nu sare pe muchie nu e o fatetare.
+		#
+		# Se adauga o treapta proprie fiecarei fete, derivata din ORIENTAREA ei
+		# (normala cuantizata), nu dintr-un contor: fete cu aceeasi orientare
+		# primesc aceeasi valoare, deci suprafetele plane raman unitare si nu
+		# apare zgomot per-triunghi. Doua fete vecine care se despart cu doar
+		# cateva grade cad insa pe celule diferite, deci primesc un salt care se
+		# vede. Roca tufoasa e neomogena — placi cu duritati diferite lasate de
+		# eroziune — deci variatia asta e si corecta ca material, nu doar utila
+		# la masuratoare.
+		var nn := n.normalized()
+		var cell := (roundf(nn.x * 7.0) * 13.0 + roundf(nn.y * 7.0) * 29.0
+				+ roundf(nn.z * 7.0) * 47.0)
+		var jitter := fposmod(cell * 0.61803398875, 1.0) - 0.5
+		var k := 1.0 - facet_contrast * (1.0 - q) - facet_plate * jitter
 		for j in 3:
 			cols[i + j] = Color(cols[i + j].r * k, cols[i + j].g * k,
 					cols[i + j].b * k, cols[i + j].a)

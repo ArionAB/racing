@@ -263,6 +263,16 @@ var _grid_span: float = 4.0
 @export var far_step_m: float = 7.0
 ## Cate benzi orizontale are pintenul.
 @export var far_bands: int = 7
+## Cat IESE fiecare strat peste cel de sub el, pe orizontala (metri).
+##
+## Diferenta fata de `batter_m`, si de-aia sunt doua: batter e o evazare LINIARA
+## in inaltime (un con), care nu produce nicio muchie orizontala. Asta e un pas
+## PE BANDA — fiecare strat sta in consola peste vecinul de dedesubt, deci are o
+## muchie proprie si o linie de umbra sub ea. Numai a doua se mai citeste la 40+
+## metri si prin ceata, cand culoarea benzilor s-a spalat.
+##
+## Zero pastreaza comportamentul dinainte (fata neteda).
+@export var far_relief_m: float = 0.0
 ## Cat de mult poate cobori talpa pintenului sub terenul de la baza lui.
 ##
 ## Vezi `_far_column`: fara limita, cautarea inspre vale gaseste fundul rapei si
@@ -1034,7 +1044,19 @@ func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		var stepi := float(int(t * float(far_bands)))
 		# fata se evazeaza in jos (versant de tuf, nu perete atarnat)
 		var flare := batter_m * (top_y - y) * 0.45
-		out.append(base + sd * flare + Vector3(0, y - base.y, 0))
+		# STRATELE IES IN TREPTE, nu pe o panta continua.
+		#
+		# `stepi` se calcula aici de la inceput si nu se folosea nicaieri: fata
+		# departata iesea doar cu `flare`, care e LINIAR in y, adica un con lin.
+		# Un con lin nu are muchii orizontale, deci la 40+ m si in ceata benzile
+		# raman doar dungi de culoare — exact ce a reclamat criticul, „strate care
+		# n-au unde sa se citeasca". Un STRAT adevarat iese in consola peste cel
+		# de sub el si isi arunca propria linie de umbra; asta se vede la distanta
+		# chiar si cand culoarea s-a spalat in ceata.
+		#
+		# Pasul e pe rand intreg (stepi), nu pe t continuu, ca sa iasa muchie.
+		var proud := far_relief_m * stepi
+		out.append(base + sd * (flare + proud) + Vector3(0, y - base.y, 0))
 	# TALPA in teren, fara fanta la contact.
 	var last: Vector3 = out[rows - 1]
 	var gy: float = surface_y.call(last.x, last.z)

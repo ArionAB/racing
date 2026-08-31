@@ -59,6 +59,10 @@ level_bands = true
 band_datum_y = 46.0
 band_span_m = 5.0
 foot_bite_m = 2.5
+talus_m = 7.0
+talus_rise_ratio = 0.62
+talus_rows = 2
+talus_slot = 23
 ledge_fracs = Array[float]([0.213, 0.276, 0.333])
 ledge_offset_m = 9.38
 ledge_drop_m = 8.0
@@ -129,7 +133,15 @@ cut_batter_m = 2.5
 cut_step_m = 4.0
 cut_bands = 7
 cut_foot_bite_m = 1.2
+cut_step_out_m = 0.45
 cut_taper_frac = 0.18
+level_bands = true
+band_datum_y = 46.0
+band_span_m = 5.0
+talus_m = 1.1
+talus_rise_ratio = 0.62
+talus_rows = 2
+talus_slot = 23
 
 [node name="Peaks" type="Node3D" parent="."]
 

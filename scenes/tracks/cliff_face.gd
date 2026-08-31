@@ -83,6 +83,31 @@ const DEPTH_SLACK: float = 1.8
 ## vizibila cu marja si pe fractiile unde drumul se inclina spre vale.
 @export var batter_m: float = 0.72
 
+## TALUZ: cati metri de moloz se aduna la piciorul peretelui, masurat pe
+## orizontala de la talpa fetei spre exterior. Zero = fara poale (comportamentul
+## dinainte).
+##
+## Verdictul rundei 9, si e o observatie despre FIZICA, nu despre decor: „rock
+## that eroded leaves the material it shed lying at its foot. Ours sheds
+## nothing, so it never eroded, so it isn't rock — it's a flat." Un perete care
+## intalneste podeaua intr-o imbinare curata cap-la-cap se citeste ca o piesa de
+## decor pusa pe masa, fiindca nimic din natura nu se termina asa: ce cade din
+## fata se aduna la baza intr-o poala.
+##
+## Poala e si CHEIE DE SCARA — o panta la unghiul de taluz natural (~34 grade)
+## are aceeasi forma la orice marime, dar latimea ei fata de perete spune
+## ochiului cat de inalt e peretele.
+@export var talus_m: float = 0.0
+## Cat de sus urca poala pe fata peretelui, ca metrii de moloz de mai sus.
+## Raportul dintre cele doua da UNGHIUL taluzului: la 0.62 x latime ies ~32
+## grade, adica exact plaja in care se opreste moloz uscat.
+@export var talus_rise_ratio: float = 0.62
+## Cate randuri are poala. Doua ajung pentru silueta si tin grila jos; al
+## treilea se simte doar in prim-plan.
+@export var talus_rows: int = 2
+## Slotul de paleta al molozului. Implicit -1 = ia slotul ultimei benzi, ca
+## poala sa fie din ACEEASI roca din care s-a desprins.
+@export var talus_slot: int = -1
 ## Cat de adanc intra talpa panzei in teren, ca sa nu ramana fanta la contact.
 ##
 ## Grila de teren are 7.92 m, deci intre doi vertecsi ai ei suprafata reala se
@@ -116,6 +141,10 @@ const DEPTH_SLACK: float = 1.8
 ## Deci cremul (19) ramane un singur rand, sus, iar corpul falezei e rosu:
 ## 23 roz-caramiziu, 10 rosu de caramida, 27 ocru-rosu, cu 3 ca repriza deschisa.
 @export var band_slots: Array[int] = [23, 10, 27, 23, 10, 27, 4, 2, 2]
+## Pasul EFECTIV de grila al ultimei coloane construite (vezi nota din
+## `_column`: se stange cand peretele e mai scund decat `bands * band_span_m`).
+## Slotul si relieful trebuie sa se citeasca pe acelasi pas ca geometria.
+var _grid_span: float = 4.0
 
 ## POLITELE din perete: fractiile la care faleza are un prag pe care se poate
 ## ancora ceva (metri de la ax se deriva, vezi `ledge_offset_m`).
@@ -298,6 +327,13 @@ const DEPTH_SLACK: float = 1.8
 ##
 ## Vezi `_cut_column`: fara stingere peretele incepe cu o muchie verticala in
 ## aer. 0.18 inseamna ca primii si ultimii ~18% urca din nimic pana la cota.
+## Cat IESE IN AFARA un strat dur fata de vecinii lui moi, pe fata taieturii.
+##
+## Zero = fata plana (comportamentul dinainte). Verdictul rundei 9: „harder
+## layers step OUT slightly so softer ones recede — that stepping is what makes
+## a cliff read as carved rather than upholstered". Se tine mic fata de
+## `cut_offset_m`: peretele nu trebuie sa muste din umarul soselei.
+@export var cut_step_out_m: float = 0.0
 @export var cut_taper_frac: float = 0.18
 ## Cat se retrage lateral capatul stins al taieturii, spre interiorul malului.
 ##
@@ -441,6 +477,24 @@ static func build_all(track: Node3D, sampler: TrackSideSampler,
 ## urca (fractiile 0.26-0.30, +47 m masurat) peretele se inalta cu el, iar unde
 ## platoul se aplatizeaza taietura se stinge singura — asa se opreste sa fie un
 ## zid continuu care ar ascunde tot ce e dincolo de viraj.
+## Slotul de paleta al unui rand din taietura, pe grila ABSOLUTA de strate cand
+## benzile sunt orizontale. Oglinda lui `_row_slot`, si din acelasi motiv: daca
+## doar GEOMETRIA e orizontala iar CULOAREA ramane pe numarul randului, dunga
+## colorata pleaca in continuare in diagonala peste forma.
+func _cut_row_slot(col: Array, r: int) -> int:
+	if cut_slots.is_empty():
+		return 0
+	if talus_m > 0.0 and r >= col.size() - talus_rows:
+		if talus_slot >= 0:
+			return talus_slot
+		return cut_slots[cut_slots.size() - 1]
+	if not level_bands or r >= col.size():
+		return cut_slots[mini(r, cut_slots.size() - 1)]
+	var idx := int(floorf((band_datum_y + 1e-4 - float(col[r].y))
+		/ maxf(band_span_m, 1.0)))
+	return cut_slots[clampi(idx, 0, cut_slots.size() - 1)]
+
+
 func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var total := sampler.total_length()
 	if total <= 0.0 or cut_bands < 1 or cut_slots.is_empty():
@@ -462,7 +516,7 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 		built += 1
 		var rows: int = mini(a.size(), b.size())
 		for r in rows - 1:
-			var slot: int = cut_slots[mini(r, cut_slots.size() - 1)]
+			var slot: int = _cut_row_slot(a, r)
 			var uvv := Palette.uv(slot)
 			# AO invers fata de faleza: la o taietura, talpa sta in umbra
 			# peretelui si coama prinde soarele. Randul 0 e COAMA.
@@ -542,15 +596,60 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 	if rise < 2.0:
 		return []
 	var out: Array = []
+	var crown := foot_y + rise
 	for r in cut_bands + 1:
 		var t := float(r) / float(cut_bands)
 		# r = 0 e COAMA (sus), deci inaltimea scade cu t.
 		var y := foot_y + rise * (1.0 - t)
+		if level_bands:
+			# STRATELE TAIETURII STAU ORIZONTAL, ca la panza de faleza.
+			#
+			# Varianta de mai sus masoara banda de la talpa LOCALA si o scaleaza
+			# cu inaltimea LOCALA. Cum si talpa (umarul soselei, care coboara) si
+			# `rise` (media crestei de dincolo) se schimba de la o coloana la
+			# alta, banda `r` ajunge la alta altitudine la fiecare pas si dunga
+			# pleaca in DIAGONALA peste forma. Peretele asta umple jumatatea
+			# stanga a cadrului la 0.26-0.30, deci exact el e „strata wrap the
+			# form diagonally like fabric" din verdict — panza de la buza avea
+			# deja `level_bands`, taietura nu.
+			#
+			# Un strat sedimentar s-a depus orizontal: cota lui nu stie nimic
+			# despre umarul sapat in el mai tarziu. Se taie deci din aceeasi
+			# grila absoluta (`band_datum_y` + `band_span_m`) ca faleza, ca
+			# stratul sa fie CONTINUU intre cele doua fete — altfel taietura si
+			# panza ar arata doua roci diferite pe acelasi versant.
+			var span := maxf(band_span_m, 1.0)
+			var top_band := ceilf((crown - band_datum_y) / span)
+			y = band_datum_y + (top_band - float(r)) * span
+			y = clampf(y, foot_y, crown)
 		# Retragerea: coama sta mai in spate decat talpa (taietura e batuta usor
 		# in spate, ca orice sapatura care nu se surpa).
 		var back := cut_batter_m * (1.0 - t)
+		# STRATUL DUR IESE, cel moale se retrage.
+		#
+		# Fara asta fata e un plan inclinat cu dungi de culoare pe el, si
+		# criticul are dreptate ca se citeste tapitat, nu sapat. Intr-o roca
+		# stratificata reala eroziunea nu ataca uniform: bancurile dure raman in
+		# consola, cele moi se sapa in firide, si LINIA DE UMBRA de sub fiecare
+		# banc e ce spune ochiului ca sunt straturi, nu vopsea.
+		#
+		# Proeminenta se ia dupa indicele ABSOLUT de strat, nu dupa rand: asa
+		# acelasi banc iese in relief pe toata lungimea peretelui, cum face o
+		# roca reala, in loc sa se plimbe odata cu coloana.
+		if cut_step_out_m > 0.0:
+			var si: int = r
+			if level_bands:
+				si = int(floorf((band_datum_y + 1e-4 - y)
+					/ maxf(band_span_m, 1.0)))
+			# alternanta dur/moale: bancurile pare ies, cele impare se retrag
+			back -= cut_step_out_m * (1.0 if (si % 2) == 0 else 0.0)
 		var q: Vector3 = p + sd * (cut_offset_m + back + tuck)
 		out.append(Vector3(q.x, y, q.z))
+	# Poala de moloz la piciorul taieturii. Aici e cea mai vizibila din tot
+	# cadrul: taietura sta CHIAR langa banda, deci imbinarea ei cu umarul e la
+	# doi metri de roata si nu are cum sa nu fie citita. Sensul e spre drum
+	# (-sd), fiindca molozul cade dinspre perete spre sosea.
+	_append_talus(out, -sd, surface_y)
 	return out
 
 
@@ -682,10 +781,16 @@ static func _collect(node: Node, out: Array[CliffFace]) -> void:
 func _row_slot(col: Array, r: int) -> int:
 	if band_slots.is_empty():
 		return 0
+	# Randurile de POALA nu sunt strate: sunt molozul cazut din ele. Iau slotul
+	# ultimei benzi (aceeasi roca) sau `talus_slot` daca se cere altul.
+	if talus_m > 0.0 and r >= col.size() - talus_rows:
+		if talus_slot >= 0:
+			return talus_slot
+		return band_slots[band_slots.size() - 1]
 	if not level_bands or r >= col.size():
 		return band_slots[mini(r, band_slots.size() - 1)]
 	var idx := int(floorf((band_datum_y + 1e-4 - float(col[r].y))
-		/ maxf(band_span_m, 1.0)))
+		/ maxf(_grid_span, 1.0)))
 	return band_slots[clampi(idx, 0, band_slots.size() - 1)]
 
 
@@ -1133,10 +1238,31 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 		var y: float
 		if level_bands:
 			var span := maxf(band_span_m, 1.0)
+			# PASUL DE GRILA SE STRANGE CA SA INCAPA IN PERETE.
+			#
+			# Bug masurat cu ProbeCappBandY: pe faleza vaii benzile ieseau cu
+			# plaja de 67.0 m si 61.6 m, adica orice numai orizontale nu, desi
+			# `level_bands` era pornit. Cauza nu era grila, ci CLAMP-ul de sub
+			# ea: cu `bands = 9` si `band_span_m = 5`, cele 10 randuri cer 45 m
+			# de perete, dar faleza are 25-30 m. Randurile care cad sub podea se
+			# strang TOATE pe `lip_y - drop`, deci mai multe benzi se suprapun pe
+			# talpa — si cum talpa coboara odata cu soseaua, dunga rezultata
+			# pleaca in diagonala. (Se vede si in numarul de UV-uri distincte:
+			# 5 in loc de 8, adica benzi topite una in alta.)
+			#
+			# Deci pasul se ia cel mult atat cat incape: peretele isi imparte
+			# inaltimea la numarul de benzi. Stratele raman ORIZONTALE — cheia e
+			# ca `top_band` se calculeaza pe grila absoluta, deci cota unei benzi
+			# nu depinde de cat de jos a ajuns soseaua — dar niciuna nu mai cade
+			# sub podea, deci niciuna nu se mai striveste pe clamp.
+			var fit := drop / float(maxi(bands, 1))
+			span = minf(span, maxf(fit, 0.5))
 			var top_band := ceilf((lip_y - band_datum_y) / span)
 			y = band_datum_y + (top_band - float(r)) * span
 			# Coloana nu poate iesi din propriul perete.
 			y = clampf(y, lip_y - drop, lip_y)
+			# indicele de strat se ia pe ACEEASI grila stransa
+			_grid_span = span
 		else:
 			y = lip_y - drop * t
 		# Iesirea in trepte, banda cu banda: muchiile prind lumina razanta de
@@ -1147,7 +1273,7 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 		# pe toata cornisa, cum face o roca reala.
 		var stepi: float
 		if level_bands:
-			stepi = floorf((band_datum_y + 1e-4 - y) / maxf(band_span_m, 1.0))
+			stepi = floorf((band_datum_y + 1e-4 - y) / maxf(_grid_span, 1.0))
 			stepi = maxf(stepi, 0.0)
 		else:
 			stepi = float(int(t * float(bands)))
@@ -1180,7 +1306,43 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 	var last: Vector3 = out[rows - 1]
 	var gy2: float = surface_y.call(last.x, last.z)
 	out[rows - 1] = Vector3(last.x, minf(last.y, gy2) - foot_bite_m, last.z)
+	# POALA DE MOLOZ, daca se cere: vezi `talus_m`. Se adauga DUPA talpa, deci
+	# randurile de perete raman exact unde erau — poala nu misca faleza, doar
+	# ii da picior.
+	_append_talus(out, sd, surface_y)
 	return out
+
+
+## Adauga randurile de poala sub ultimul rand al unei coloane.
+##
+## Forma: din talpa fetei se pleaca in jos SI in afara, pe o curba care se
+## aplatizeaza (exponentul 1.6) — un con de grohotis e abrupt langa perete si se
+## intinde la baza, fiindca bolovanii mari se opresc sus si pietrisul curge mai
+## departe. Ultimul rand se infige in teren, ca sa nu ramana fanta acolo unde
+## tocmai am adaugat contactul.
+##
+## Coloana intra si iese ca lista de puncte de sus in jos, deci consumatorii
+## (cusatura in quad-uri, AO-ul, slotul) merg mai departe neschimbati.
+func _append_talus(col: Array, sd: Vector3, surface_y: Callable) -> void:
+	if talus_m <= 0.0 or talus_rows < 1 or col.is_empty():
+		return
+	var foot: Vector3 = col[col.size() - 1]
+	# Varful poalei sta pe fata, cu `talus_rise_ratio` din latime mai sus decat
+	# talpa: de aici iese unghiul de taluz.
+	var top_y: float = foot.y + talus_m * talus_rise_ratio
+	for k in talus_rows:
+		var u := float(k + 1) / float(talus_rows)
+		# afara pe orizontala, si in jos pe curba care se aplatizeaza
+		var q: Vector3 = foot + sd * (talus_m * u)
+		var y: float = lerpf(top_y, foot.y, pow(u, 1.6))
+		var gy: float = surface_y.call(q.x, q.z)
+		if k == talus_rows - 1:
+			# ultimul rand se coase in teren
+			y = minf(y, gy) - foot_bite_m * 0.5
+		else:
+			# molozul sta PESTE teren, nu sub el
+			y = maxf(y, gy - 0.4)
+		col.append(Vector3(q.x, y, q.z))
 
 
 ## Un quad ca doua triunghiuri, cu UV constant (culoarea slotului) si vertex

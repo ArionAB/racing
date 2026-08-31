@@ -54,6 +54,11 @@ extends Marker3D
 @export var lip_offset_m: float = 0.2
 ## Cati metri coboara fata, de la buza in jos.
 @export var depth_m: float = 30.0
+## Cat de departe se cauta fundul vaii, de la marginea asfaltului.
+const FLOOR_SEARCH_M: float = 140.0
+## Cat poate depasi caderea reala `depth_m`, ca panza sa ajunga la fund pe o
+## vale mai adanca decat cea declarata fara sa fie nevoie de doua reglaje.
+const DEPTH_SLACK: float = 1.8
 ## Pasul de esantionare pe lungimea benzii. 4 m tine curba fara sa umple grila:
 ## pe 200 m de cornisa ies ~50 de coloane.
 @export var step_m: float = 4.0
@@ -62,6 +67,11 @@ extends Marker3D
 ## Cat iese in afara peretele, ca fata sa nu fie un plan perfect. Fiecare banda
 ## primeste retragerea ei, deci stratele ies in relief ca la o roca sedimentara.
 @export var band_relief_m: float = 0.9
+## Stratele la cote ABSOLUTE (orizontale), nu proportionale cu caderea locala.
+@export var level_bands: bool = false
+## Cota de referinta a grilei de strate, si grosimea unui strat.
+@export var band_datum_y: float = 0.0
+@export var band_span_m: float = 4.0
 ## Evazarea fetei: metri de rulaj lateral pentru fiecare METRU de cadere.
 ##
 ## Zero ar insemna perete perfect vertical — si perfect ascuns de marginea
@@ -668,6 +678,17 @@ static func _collect(node: Node, out: Array[CliffFace]) -> void:
 ## Ce NU face: nu atinge terenul si nu atinge campul. E geometrie asezata PESTE
 ## ele, exact ca un prop — de aceea nu poate strica nici ProbeBuried (care
 ## intreaba campul despre drum), nici ProbeLayout (care masoara traseul).
+## Slotul de paleta al unui rand, pe grila absoluta de strate cand se poate.
+func _row_slot(col: Array, r: int) -> int:
+	if band_slots.is_empty():
+		return 0
+	if not level_bands or r >= col.size():
+		return band_slots[mini(r, band_slots.size() - 1)]
+	var idx := int(floorf((band_datum_y + 1e-4 - float(col[r].y))
+		/ maxf(band_span_m, 1.0)))
+	return band_slots[clampi(idx, 0, band_slots.size() - 1)]
+
+
 func _build(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var total := sampler.total_length()
 	if total <= 0.0 or bands < 1 or band_slots.is_empty():
@@ -690,7 +711,10 @@ func _build(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 		for r in rows - 1:
 			# Slotul benzii: randul 0 e coama. Culoarea vine din UV (atlas), nu
 			# dintr-un material — de asta faleza costa zero materiale.
-			var slot: int = band_slots[mini(r, band_slots.size() - 1)]
+			# Slotul se ia dupa indicele ABSOLUT de strat cand benzile sunt
+			# orizontale (`_row_slot`), ca aceeasi roca sa aiba aceeasi culoare
+			# pe toata lungimea, si nu dupa numarul randului din coloana.
+			var slot: int = _row_slot(a, r)
 			var uvv := Palette.uv(slot)
 			# AO copt in vertex color: fata se intuneca in jos, fiindca vertex
 			# color poate DOAR sa intunece (memoria
@@ -1030,22 +1054,23 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 	var lip_y := p.y
 
 	# CAT DE ADANC cade fata. Se CITESTE fundul vaii, nu se presupune.
+	# Fundul se ia ca MINIM pe o fereastra, nu la primul palier.
+	#
+	# Cautarea „primul loc unde terenul nu mai coboara" mergea cat timp valea
+	# avea podea plata la 95 m. Cu podeaua in panta, ea se opreste pe cate o
+	# treapta diferita de la o coloana la alta, si panza iese din plane
+	# rasucite in loc de strate — aceeasi instabilitate descrisa mai jos la
+	# malul de dincolo, din acelasi motiv: un mal e o LINIE, deci se cere ca
+	# linie. Minimul pe fereastra e neted intre coloane vecine.
 	var floor_y := lip_y - depth_m
-	var far := hw + 4.0
-	var prev := lip_y
-	# Cat de departe se cauta fundul. 60 m ajungeau cat timp valea avea o podea
-	# plata la 95 m; cu podeaua in panta fundul e mult mai afara, iar cautarea
-	# se oprea la primul palier si lasa panza sa se termine la 16 m DEASUPRA
-	# terenului — lespede plutind, cu cer pe sub ea (masurat la frac 0.36:
-	# panza la -6.2, terenul la -45.9).
-	while far < hw + 200.0:
+	var far := hw + 6.0
+	while far < hw + FLOOR_SEARCH_M:
 		var q := lip + sd * (far - hw - lip_offset_m)
-		var gy: float = surface_y.call(q.x, q.z)
-		if gy > prev - 0.15 and far > hw + 8.0:
-			floor_y = gy
-			break
-		prev = gy
-		far += 1.5
+		floor_y = minf(floor_y, surface_y.call(q.x, q.z))
+		far += 4.0
+	# Nu mai adanc decat cere silueta: o panza de 60 m pe o vale de 40 ar
+	# ingropa talpa degeaba si ar umple grila.
+	floor_y = maxf(floor_y, lip_y - depth_m * DEPTH_SLACK)
 	var drop := maxf(lip_y - floor_y, 6.0)
 
 	# FATA CADE APROAPE VERTICAL, la un rulaj lateral propriu — nu urmareste
@@ -1091,10 +1116,41 @@ func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
 	var rows := bands + 1
 	for r in rows:
 		var t := float(r) / float(bands)
-		var y := lip_y - drop * t
+		# STRATELE STAU ORIZONTAL, la cote ABSOLUTE.
+		#
+		# Varianta veche masura banda de la buza locala si o scala cu caderea
+		# locala (`lip_y - drop * t`). Cum buza coboara odata cu soseaua, banda
+		# `r` ajungea la alta altitudine la fiecare coloana, si dunga se ducea
+		# in DIAGONALA peste forma — exact reprosul criticului: „real
+		# sedimentary banding is level; when the wall turns, the band turns
+		# with it and stays horizontal".
+		#
+		# Un strat sedimentar s-a depus orizontal, deci cota lui nu stie nimic
+		# despre drumul sapat in el mai tarziu. Grila de benzi se ia pe cote
+		# fixe (`band_datum_y` + pasul), iar coloana se taie din ea: banda ramane
+		# la aceeasi altitudine cand peretele coteste, si se INGUSTEAZA in
+		# perspectiva acolo unde faleza e mai joasa, cum face si referinta.
+		var y: float
+		if level_bands:
+			var span := maxf(band_span_m, 1.0)
+			var top_band := ceilf((lip_y - band_datum_y) / span)
+			y = band_datum_y + (top_band - float(r)) * span
+			# Coloana nu poate iesi din propriul perete.
+			y = clampf(y, lip_y - drop, lip_y)
+		else:
+			y = lip_y - drop * t
 		# Iesirea in trepte, banda cu banda: muchiile prind lumina razanta de
 		# zori si stratele se citesc si de la 100 m.
-		var stepi := float(int(t * float(bands)))
+		# Indicele de strat: pe grila ABSOLUTA cand benzile sunt orizontale,
+		# altfel dupa rand. De el atarna si culoarea, si iesirea in relief —
+		# deci pe grila absoluta un strat isi pastreaza culoarea si proeminenta
+		# pe toata cornisa, cum face o roca reala.
+		var stepi: float
+		if level_bands:
+			stepi = floorf((band_datum_y + 1e-4 - y) / maxf(band_span_m, 1.0))
+			stepi = maxf(stepi, 0.0)
+		else:
+			stepi = float(int(t * float(bands)))
 		# EVAZAREA: fata se departeaza de drum pe masura ce coboara.
 		#
 		# Fara ea, o faleza verticala lipita de marginea benzii e ascunsa de

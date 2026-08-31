@@ -30,8 +30,8 @@ custom_overpass_ranges = Array[Vector2]([Vector2(0.769, 0.962)])
 custom_width_segments = Array[Vector3]([Vector3(0.962, 0.04, 9.0), Vector3(0.04, 0.16, 6.5), Vector3(0.185, 0.38, 7.0), Vector3(0.40, 0.53, 5.5), Vector3(0.55, 0.68, 8.0), Vector3(0.68, 0.757, 7.0), Vector3(0.757, 0.962, 6.0)])
 custom_rail_segments = Array[Vector4]([Vector4(0.185, 0.38, 1, 1)])
 # Molozul hornului cazut (POI D): cine rateaza rampa aterizeaza in el.
-# 0.8x grip din brief §2 se da prin `loose_grip` al temei, ca cenusa de pe
-# Stromboli — o proprietate a SOSELEI, tunata in acelasi loc cu restul.
+# 0.8x grip din brief Â§2 se da prin `loose_grip` al temei, ca cenusa de pe
+# Stromboli â€” o proprietate a SOSELEI, tunata in acelasi loc cu restul.
 custom_loose_ranges = Array[Vector2]([Vector2(0.462, 0.476)])
 
 [node name="Path" type="Path3D" parent="."]
@@ -101,7 +101,7 @@ script = ExtResource("5_chim")
 fall_side = 1
 
 [node name="Cracked_Chimney_A" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("6_cca")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0000, -0.3500, -1.2000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0000, -1.1500, -1.2000)
 
 [node name="Cracked_Chimney_B" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("7_ccb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0000, -2.6000, 2.4000)

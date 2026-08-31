@@ -76,6 +76,10 @@ const TALUS_SLOT: int = 8
 ## motiv pentru care umbrele din referinta nu sunt gri-maro.
 const DOOR_DARK_SLOT: int = 26
 
+## Cat de intunecata e poala de grohotis fata de corpul hornului. Vezi
+## `TALUS_SLOT` pentru de ce separarea NU se face din culoare.
+const TALUS_SHADE: float = 0.80
+
 
 ## Raportul dintre razele celor doua axe orizontale. 1.0 = cerc (revolutie);
 ## 0.62 = elipsa vizibil turtita. Peste ~0.5 incepe sa citeasca a perete, nu a
@@ -158,6 +162,24 @@ const DOOR_DARK_SLOT: int = 26
 ## 0 — exista doar fiindca in Cappadocia chiar sunt zone cu depozite basculate,
 ## si un horn-doua inclinate cu 3-4° rup regularitatea fara sa strice citirea.
 @export_range(-8.0, 8.0, 0.5) var strata_tilt_deg: float = 0.0
+
+## Cat de tare se lumineaza FATA DE SUS a treptei fata de fata verticala.
+##
+## De ce exista. Criticul, runda 12, punctul 6: straturile noastre citesc a
+## "dungi pictate", iar motivul e formulat exact — "o treapta e legibila abia
+## cand fata ei de SUS e luminata altfel decat fata verticala". Aveam deja
+## treapta in GEOMETRIE (`strata_step` misca raza), dar pe hornurile astea
+## lumina nu o scoate: UV-urile sunt colapsate pe un punct, deci fiecare fata
+## ia o culoare plata de slot, si difuza ramane subtire fata de ambient (vezi
+## `_shade_facets`, aceeasi cauza). Geometria exista si nu se vede — iar un
+## inel de raza mai mare fara diferenta de valoare arata fix ca o dunga.
+##
+## Se rezolva pe canalul care chiar picteaza conul: vertecsii care stau imediat
+## DEASUPRA unei muchii de strat (banda de calcare proaspat expusa, care prinde
+## soarele razant) se lumineaza, cei de sub muchie se intuneca. Vertex color e
+## clampat la 1 (memoria `surfacetool-clamp-vertex-color`), deci "luminarea" e
+## de fapt o intunecare mai mica — se scade contrastul de sub muchie.
+@export_range(0.0, 0.5, 0.01) var strata_light: float = 0.0
 
 
 ## --- Poalele de moloz (talus) ----------------------------------------------
@@ -570,9 +592,85 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 		var fa := m.surface_get_arrays(0)
 		if faceted:
 			fa = _shade_facets(fa)
+		if not is_zero_approx(strata_light) and not is_zero_approx(strata_step):
+			fa = _shade_strata(fa, y0, h, ph1, ph2)
 		fixed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fa)
 		fixed.surface_set_material(s, out.surface_get_material(s))
 	mi.mesh = fixed
+
+
+## Inmulteste toate culorile de vertex cu un factor. Vertex color e clampat la
+## [0,1], deci asta poate doar INTUNECA (memoria `surfacetool-clamp-vertex-color`).
+func _darken(arr: Array, k: float) -> Array:
+	var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var raw: Variant = arr[Mesh.ARRAY_COLOR]
+	var cols := PackedColorArray()
+	if raw is PackedColorArray:
+		cols = raw
+	if cols.size() != verts.size():
+		cols = PackedColorArray()
+		cols.resize(verts.size())
+		cols.fill(Color.WHITE)
+	for i in cols.size():
+		cols[i] = Color(cols[i].r * k, cols[i].g * k, cols[i].b * k, cols[i].a)
+	arr[Mesh.ARRAY_COLOR] = cols
+	return arr
+
+
+## Fata de SUS a treptei de strat, luminata altfel decat fata verticala.
+##
+## Treapta exista deja in geometrie - `strata_step` misca raza, deci inelul dur
+## chiar iese in afara. Dar pe hornurile astea geometria nu se traduce in
+## valoare: UV colapsat pe un punct + difuza subtire fata de ambient (aceeasi
+## cauza explicata la `_shade_facets`). Rezultatul e ce a numit criticul "dungi
+## pictate" - un relief real care citeste plat.
+##
+## Se reface aici, pe canalul care picteaza: se recalculeaza in ce parte a
+## bancului cade fiecare TRIUNGHI (aceeasi formula de cota ca in `_deform_mesh`,
+## ca muchiile sa cada exact peste cele din geometrie), si:
+##   - imediat DEASUPRA muchiei = fata proaspat expusa care prinde soarele
+##     razant -> se lasa deschisa;
+##   - imediat SUB muchia urmatoare = fata verticala, in umbra proprie a
+##     bancului de deasupra -> se intuneca.
+## Vertex color e clampat la 1, deci nu se poate lumina peste alb: se intuneca
+## doar partea de jos, iar contrastul iese din diferenta (memoria
+## `surfacetool-clamp-vertex-color`).
+##
+## Per TRIUNGHI si cuantizat in trei trepte, nu un degrade continuu: un degrade
+## ar fi dat inapoi exact banding-ul moale de la care am plecat. Ce vrem e o
+## MUCHIE.
+func _shade_strata(arr: Array, y0: float, h: float, _ph1: float,
+		ph2: float) -> Array:
+	var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	if verts.size() % 3 != 0:
+		return arr
+	var raw: Variant = arr[Mesh.ARRAY_COLOR]
+	var cols := PackedColorArray()
+	if raw is PackedColorArray:
+		cols = raw
+	if cols.size() != verts.size():
+		cols = PackedColorArray()
+		cols.resize(verts.size())
+		cols.fill(Color.WHITE)
+	var tilt := tan(deg_to_rad(strata_tilt_deg)) / h
+	for tri in verts.size() / 3:
+		var i := tri * 3
+		var c := (verts[i] + verts[i + 1] + verts[i + 2]) / 3.0
+		var ys := (c.y - y0) / h
+		if not is_zero_approx(strata_tilt_deg):
+			ys += (c.x * cos(ph2) + c.z * sin(ph2)) * tilt
+		var u := ys * float(strata_count)
+		var frac: float = u - floor(u)
+		var k := 1.0
+		if frac > 0.62:
+			k = 1.0 - strata_light
+		elif frac > 0.34:
+			k = 1.0 - strata_light * 0.45
+		for j in 3:
+			cols[i + j] = Color(cols[i + j].r * k, cols[i + j].g * k,
+					cols[i + j].b * k, cols[i + j].a)
+	arr[Mesh.ARRAY_COLOR] = cols
+	return arr
 
 
 ## Contrast PE FATA, in vertex color. Fara asta, deindexarea e corecta si
@@ -674,8 +772,24 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		st.generate_normals()
 		var m := st.commit()
 		if m != null and m.get_surface_count() > 0:
-			out.add_surface_from_arrays(
-				Mesh.PRIMITIVE_TRIANGLES, m.surface_get_arrays(0))
+			# ACELASI contrast per-fata ca pe horn. Fara asta poala ramanea
+			# neteda langa un con fatetat — si atunci grohotisul citea a
+			# pamant modelat, nu a piatra sparta. Vezi `_shade_facets`: pe
+			# aceste prop-uri lumina difuza e prea subtire ca sa scoata
+			# fatetele singura, deci contrastul se scrie in vertex color.
+			var ta := m.surface_get_arrays(0)
+			if faceted:
+				ta = _shade_facets(ta)
+			# Poala se INTUNECA fata de horn. Nu cu alta culoare — runda 9 a
+			# incercat slotul 9 si poalele au iesit portocalii, adica un inel
+			# de alt material lipit la baza (vezi `TALUS_SLOT`). Grohotisul are
+			# culoarea stancii; ce il separa in realitate e ca sta la PICIORUL
+			# unui perete care il umbreste aproape toata ziua. Aici lumina nu
+			# face umbra aia singura (difuza subtire, ambient nedirectional),
+			# deci se scrie: o poala de aceeasi valoare cu hornul citea a
+			# prelungire a conului, nu a material cazut LANGA el.
+			ta = _darken(ta, TALUS_SHADE)
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, ta)
 			out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	# --- RANDURI DE FERESTRE ------------------------------------------------
@@ -890,6 +1004,8 @@ func _build_talus_rocks(st: SurfaceTool, cx: float, cz: float, y0: float,
 	# `_build_talus`, deci trebuie sa citeasca exact acelasi zgomot.
 	var ph := _talus_phase(shape_seed)
 	var uv := Palette.uv(TALUS_SLOT)
+	# Centrele si razele blocurilor deja puse, pentru testul de intersectie.
+	var placed: Array[Plane] = []
 	for k in talus_rocks:
 		var a := rng.randf() * TAU
 		var wob := 1.0 + 0.28 * sin(3.0 * a + ph) + 0.16 * sin(5.0 * a + ph * 1.7)
@@ -920,17 +1036,45 @@ func _build_talus_rocks(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# restul aschii, si exponentul e mai bland. Un bloc de 1.5-3 m e ce
 		# spune "asta a cazut de acolo" — sub un metru nu se citeste nici macar
 		# la 20 m.
+		# SORTAREA E LEGEA, nu o inclinatie. Un grohotis real e sortat pe
+		# verticala: aschiile raman sus, langa perete, unde s-au desprins, iar
+		# blocurile mari se rostogolesc pana jos. Prima versiune trata `u`
+		# (marimea) si `t` (pozitia pe panta) ca INDEPENDENTE si corecta abia
+		# la urma cu un factor de 2.5x — deci un bloc mare putea sa apara
+		# lipit de perete, si atunci panta n-avea nicio directie de citit.
+		# Criticul a numit exact rezultatul: "a dozen large flat-faced slabs of
+		# near-identical size". Marimile aproape egale vin din interval prea
+		# ingust, iar "large" din blocurile ajunse sus.
+		#
+		# Acum plafonul de marime CRESTE cu t: langa perete (t=0) niciun
+		# fragment nu trece de 22% din maxim, la poale ajunge la maxim. Sub
+		# plafon, o lege de putere blanda pastreaza "cateva mari, multe mici".
 		var u := rng.randf()
-		if k % 4 == 0:
-			u = rng.randf_range(0.75, 1.0)
-		var size := base_r * talus_rock_max * pow(u, 1.35) * (0.55 + 0.85 * minf(t, 1.0))
-		if size < base_r * 0.02:
+		var ceiling := 0.22 + 0.78 * pow(minf(t, 1.0), 1.6)
+		var size := base_r * talus_rock_max * ceiling * pow(u, 0.85)
+		if size < base_r * 0.015:
 			continue
 		var cxr := cx + cos(a) * r_here
 		var czr := cz + sin(a) * r_here
+		# SE INTERSECTEAZA? Criticul: "several passing through each other".
+		# Doua blocuri care se strapung citesc a eroare de motor, nu a moloz.
+		# Se tine minte centrul si raza fiecarui bloc pus, si se sare peste cel
+		# care ar intra in altul mai mult de un sfert din raza — nu se cauta
+		# impachetare perfecta, doar se scot suprapunerile care se VAD.
+		var c_here := Vector3(cxr, y_here + size * 0.35, czr)
+		var clash := false
+		for prev: Plane in placed:
+			# Plane tine centrul in normal si raza in d — un Vector4 deghizat.
+			var pc := Vector3(prev.x, prev.y, prev.z)
+			if pc.distance_to(c_here) < (size + prev.d) * 0.75:
+				clash = true
+				break
+		if clash:
+			continue
+		placed.append(Plane(c_here.x, c_here.y, c_here.z, size))
 		# Bolovanul sta pe jumatate ingropat: centrul coboara cu jumatate din
 		# raza, altfel pietrele plutesc pe panta ca niste baloane.
-		_octa_rock(st, Vector3(cxr, y_here + size * 0.35, czr), size, rng, uv)
+		_octa_rock(st, c_here, size, rng, uv)
 
 
 ## Un bloc unghiular: octaedru cu varfurile impinse aleator, deci fara nicio

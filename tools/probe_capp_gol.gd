@@ -87,6 +87,15 @@ func _ready() -> void:
 						groups[hit]["ab"] = ab3.expand(pa).expand(pb).expand(pc)
 		if groups.is_empty():
 			continue
+		# Cea mai JOASA deschidere si cea mai inalta, separat: media peste usa
+		# si ferestre ascunde exact ce se intreaba — daca RANDUL cade la aceeasi
+		# cota de la un horn la altul.
+		var ylo := 1e9
+		var yhi := -1e9
+		for g in groups:
+			var abq: AABB = g["ab"]
+			ylo = minf(ylo, abq.position.y - base_y)
+			yhi = maxf(yhi, abq.position.y - base_y)
 		var wsum := 0.0
 		var hsum := 0.0
 		var ysum := 0.0
@@ -96,9 +105,9 @@ func _ready() -> void:
 			hsum += ab4.size.y
 			ysum += ab4.position.y - base_y
 		var n := float(groups.size())
-		print("  %-16s %5d     %5.2f x %5.2f      %5.2f    %6.2f" % [
+		print("  %-16s %5d     %5.2f x %5.2f      %5.2f    %6.2f   jos %5.2f  sus %5.2f" % [
 			n3.name, groups.size(), wsum / n, hsum / n,
-			(wsum / n) / maxf(hsum / n, 0.01), ysum / n])
+			(wsum / n) / maxf(hsum / n, 0.01), ysum / n, ylo, yhi])
 	get_tree().quit()
 
 

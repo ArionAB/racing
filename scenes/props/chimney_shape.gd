@@ -1442,8 +1442,21 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		var po := 0.06 / world_scale
 		var pr_b := rf_b + po
 		var pr_t := rf_t + po
-		var jw := hw + 0.16 / world_scale      # cat iese cadrul lateral
-		var jt := 0.20 / world_scale           # cat iese peste buiandrug
+		# Cat iese cadrul, PROPORTIONAL cu golul si nu in metri absoluti.
+		#
+		# Valorile fixe (0.16 lateral, 0.20 sus) fusesera alese cand usa era
+		# lata si scunda. Pe usa 1:2 de acum, latimea a scazut la ~1.05 m, deci
+		# un cadru de 0.16 m pe fiecare parte inseamna o treime din deschidere
+		# adaugata de jur imprejur: de la volan iese un guler gros de piatra cu
+		# o gaura mica in mijloc, si tocmai gulerul devine obiectul care se
+		# vede — o lespede palida infipta in perete, nu o intrare.
+		#
+		# Un ancadrament citeste corect cand e o FRACTIUNE din gol, nu o
+		# constanta: la 12% din latime ramane o dunga care da umbra, si creste
+		# odata cu usa in loc s-o inghita. Plafonat totusi in metri, ca sa nu
+		# devina un portal pe hornurile mari.
+		var jw := hw + minf(hw * 0.12, 0.10 / world_scale)
+		var jt := minf(hw * 0.22, 0.13 / world_scale)
 		var pbl := Vector3(cx + nx * pr_b - tx * jw, yb, cz + nz * pr_b - tz * jw)
 		var pbr := Vector3(cx + nx * pr_b + tx * jw, yb, cz + nz * pr_b + tz * jw)
 		var ptl := Vector3(cx + nx * pr_t - tx * jw, yt + jt, cz + nz * pr_t - tz * jw)
@@ -1468,14 +1481,39 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		_quad(st, ftr2, ftr, ptr, ptr, frame_uv)
 		# PRAGUL: o lespede care iese din perete la baza golului. E piesa care
 		# spune ca prin gaura aia se INTRA — o fereastra n-are prag iesit.
+		#
+		# ARE GROSIME, si iese mai putin (runda 14). Varianta veche era UN
+		# SINGUR patrulater, adica o foaie fara muchie, si iesea 0.22 m dintr-un
+		# perete inclinat. De la volan — camera e la 2.6 m, deci aproape la
+		# nivelul pragului — foaia se vedea din cant: o lama palida infipta
+		# lateral in stanca, exact "un pene de plan de roca strapungand". Un
+		# obiect fara grosime nu se citeste ca lespede la unghi razant, indiferent
+		# ce lat e.
+		#
+		# Deci: iesire injumatatita (0.11), plus fata de dedesubt si muchia
+		# frontala. Muchia e cea care da lespezii o umbra proprie si o desparte
+		# de perete; fara ea, orice grosime ai pune, silueta ramane o linie.
+		var so := 0.11 / world_scale
+		var sth := jt * 0.35
 		var sl := Vector3(cx + nx * pr_b - tx * hw, yb, cz + nz * pr_b - tz * hw)
 		var sr := Vector3(cx + nx * pr_b + tx * hw, yb, cz + nz * pr_b + tz * hw)
-		var so := 0.22 / world_scale
-		var slo := Vector3(cx + nx * (pr_b + so) - tx * hw, yb - jt * 0.5,
+		var slo := Vector3(cx + nx * (pr_b + so) - tx * hw, yb,
 			cz + nz * (pr_b + so) - tz * hw)
-		var sro := Vector3(cx + nx * (pr_b + so) + tx * hw, yb - jt * 0.5,
+		var sro := Vector3(cx + nx * (pr_b + so) + tx * hw, yb,
 			cz + nz * (pr_b + so) + tz * hw)
+		# Fata de sus a lespezii.
 		_quad(st, slo, sro, sr, sl, frame_uv)
+		# Muchia frontala si fata de dedesubt, ca sa aiba cant si umbra.
+		var sld := Vector3(cx + nx * (pr_b + so) - tx * hw, yb - sth,
+			cz + nz * (pr_b + so) - tz * hw)
+		var srd := Vector3(cx + nx * (pr_b + so) + tx * hw, yb - sth,
+			cz + nz * (pr_b + so) + tz * hw)
+		var slb := Vector3(cx + nx * pr_b - tx * hw, yb - sth,
+			cz + nz * pr_b - tz * hw)
+		var srb := Vector3(cx + nx * pr_b + tx * hw, yb - sth,
+			cz + nz * pr_b + tz * hw)
+		_quad(st, sld, srd, sro, slo, frame_uv)
+		_quad(st, slb, srb, srd, sld, frame_uv)
 
 
 ## Un rand de ferestre: nise MAI LATE DECAT INALTE, cu buiandrug si solbanc.
@@ -1547,9 +1585,13 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		# SOLBANCUL: o lespede subtire care iese peste gol. E singura piesa care
 		# se vede de la 60 m — arunca o dunga de umbra ORIZONTALA sub fereastra,
 		# iar dunga aia e ce spune ochiului ca deschiderea e lata, nu inalta.
-		var so := 0.14 / world_scale
+		# Iesire mica: solbancul se vede de la volan din cant, deci o consola
+		# lata ar fi iesit tot lama. Vezi pragul usii, aceeasi lectie.
+		var so := 0.09 / world_scale
 		var sy := 0.07 / world_scale
-		var sw := hw + 0.10 / world_scale
+		# Proportional cu golul, ca la usi: un solbanc in metri absoluti
+		# inghitea ferestrele mici.
+		var sw := hw + minf(hw * 0.14, 0.07 / world_scale)
 		var sl := Vector3(cx + nx * r_face - tx * sw, yb, cz + nz * r_face - tz * sw)
 		var sr := Vector3(cx + nx * r_face + tx * sw, yb, cz + nz * r_face + tz * sw)
 		var slo := Vector3(cx + nx * (r_face + so) - tx * sw, yb - sy,

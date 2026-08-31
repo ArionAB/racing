@@ -151,6 +151,12 @@ const PROP_COLLISION := {
 const SPLIT_MODELS := {
 	"aeolian_house_a": true, "aeolian_house_b": true, "aeolian_house_c": true,
 	"stromboli_church": true,
+	# Fatadele Chongqing: 35% din instantele asezate pe Track12 (231 din 652),
+	# adica peretii coridorului prin care se conduce. Corpul ia betonul, iar
+	# acoperisul (slot 20) si firmele aprinse (slot 30) raman pictate — pe o
+	# pista de noapte firmele sunt chiar semnalul, deci o clasa pusa pe tot
+	# corpul ar fi sters exact ce trebuie sa se vada.
+	"shophouse_a": true, "shophouse_b": true, "shophouse_c": true,
 }
 
 const ACCENT_SPLIT := {
@@ -159,6 +165,14 @@ const ACCENT_SPLIT := {
 	"House_C": Palette.FOAM_WHITE,
 	"Church_Body": Palette.FOAM_WHITE,
 	"Church_Tower": Palette.FOAM_WHITE,
+	# Chongqing: DOUA sloturi pastrate, nu unul. Masurat pe inaltime, slotul 29
+	# tine parterul (y 0..3.1) si slotul 8 etajele (y 2.9..5.8) — acelasi perete
+	# de beton, taiat pe orizontala din motive de compozitie, nu doua materiale.
+	# Cu un singur slot pastrat, jumatate din fatada ramanea plata langa
+	# jumatatea texturata, adica exact cusatura pe care ruptura o evita.
+	"ShophouseA": [Palette.CONCRETE, Palette.MARBLE_GREY],
+	"ShophouseB": [Palette.CONCRETE, Palette.MARBLE_GREY],
+	"ShophouseC": [Palette.CONCRETE, Palette.MARBLE_GREY],
 }
 
 
@@ -202,14 +216,41 @@ const CLASSES_BY_MODEL := {
 	#   1.2 — siluetele de peste rau, care stau in ceata la 150-250 m si n-au
 	#         voie sa concureze cu masinile (style_bible §1)
 	# Cele 22 de modele de mai jos aduc astfel DOUA materiale, nu 22.
+	# Containerele de pe cheiul Chaotianmen: 73% pe slotul 10 (rugina), deci
+	# monocrome. Aici si nu in CHONGQING_CLASSES fiindca `props_junk.glb` —
+	# gunoiul comun TUTUROR pistelor — are un `Container_A`, iar maparea aia e
+	# globala si potriveste pe PREFIX: butoaiele si lazile de pe Dunele si
+	# Okinawa ar fi capatat si ele clasa, plus un material in plus pe fiecare
+	# pista. Verificat pe fisier. Aceeasi capcana ca la `Church_Body`.
+	"container": {
+		"Container": Palette.TRI_PREFIX + "rust_metal",
+	},
 	"shophouse_a": {
-		"ShophouseA": Palette.GLOW_PREFIX + "30|2.0",
+		# Doua roluri pe aceeasi casa, de cand fatada e rupta in doua
+		# (ACCENT_SPLIT): CORPUL — parterul si etajele, sloturile 29 si 8 —
+		# ia betonul, iar copilul `_Accente`, care tine acoperisul (slot 20)
+		# si firmele (slot 30), ramane pe atlas si CONTINUA sa arda.
+		#
+		"ShophouseA": Palette.TRI_PREFIX + "city_concrete",
+		"ShophouseA_Accente": Palette.GLOW_PREFIX + "30|2.0",
 	},
 	"shophouse_b": {
-		"ShophouseB": Palette.GLOW_PREFIX + "30|2.0",
+		# Doua roluri pe aceeasi casa, de cand fatada e rupta in doua
+		# (ACCENT_SPLIT): CORPUL — parterul si etajele, sloturile 29 si 8 —
+		# ia betonul, iar copilul `_Accente`, care tine acoperisul (slot 20)
+		# si firmele (slot 30), ramane pe atlas si CONTINUA sa arda.
+		#
+		"ShophouseB": Palette.TRI_PREFIX + "city_concrete",
+		"ShophouseB_Accente": Palette.GLOW_PREFIX + "30|2.0",
 	},
 	"shophouse_c": {
-		"ShophouseC": Palette.GLOW_PREFIX + "30|2.0",
+		# Doua roluri pe aceeasi casa, de cand fatada e rupta in doua
+		# (ACCENT_SPLIT): CORPUL — parterul si etajele, sloturile 29 si 8 —
+		# ia betonul, iar copilul `_Accente`, care tine acoperisul (slot 20)
+		# si firmele (slot 30), ramane pe atlas si CONTINUA sa arda.
+		#
+		"ShophouseC": Palette.TRI_PREFIX + "city_concrete",
+		"ShophouseC_Accente": Palette.GLOW_PREFIX + "30|2.0",
 	},
 	"restaurant_front": {
 		"RestaurantFront": Palette.GLOW_PREFIX + "30|2.0",
@@ -305,7 +346,7 @@ func _split_shutters() -> void:
 				continue
 			for prefix: String in ACCENT_SPLIT:
 				if String(mi.name).begins_with(prefix):
-					Palette.split_accents(mi, int(ACCENT_SPLIT[prefix]))
+					Palette.split_accents(mi, ACCENT_SPLIT[prefix])
 					break
 
 
@@ -332,13 +373,27 @@ func _apply_model_classes() -> void:
 			if mi == null:
 				continue
 			var nm := String(mi.name)
-			if nm.ends_with(Palette.ACCENT_SUFFIX):
-				continue
+			# Prefixul cel mai LUNG castiga, ca in `Palette._class_for`, si nu
+			# e un detaliu de stil: `ShophouseA_Accente` incepe si cu
+			# `ShophouseA`, deci cu prima potrivire din dictionar rezultatul ar
+			# fi depins de ordinea cheilor — o mapare corecta ar fi devenit
+			# gresita la o reordonare inocenta.
+			var cls := ""
+			var best := -1
 			for part: String in mapping:
-				if nm.begins_with(part):
-					mi.material_override = _model_class_material(
-						String(mapping[part]))
-					break
+				if nm.begins_with(part) and part.length() > best:
+					best = part.length()
+					cls = String(mapping[part])
+			if cls.is_empty():
+				continue
+			# Nodurile de accente exista tocmai ca sa RAMANA pe atlas, deci o
+			# clasa de suprafata nu are ce cauta pe ele. LUMINA insa da: pe
+			# fatadele Chongqing accentele SUNT partea care arde, si dupa
+			# ruptura sunt singurul nod care mai poarta slotul 30.
+			var is_accent := nm.ends_with(Palette.ACCENT_SUFFIX)
+			if is_accent and not cls.begins_with(Palette.GLOW_PREFIX):
+				continue
+			mi.material_override = _model_class_material(cls)
 
 
 ## Materialul unei clase din `CLASSES_BY_MODEL`, dupa prefix.
@@ -412,14 +467,27 @@ func _apply_glow() -> void:
 				t = t.substr(0, t.length() - 1)
 			tint = Color.html(t)
 		var mat := Palette.glow_material_slots(slots, energy, tint, multiply)
+		# Modelele RUPTE de `_split_shutters` isi impart rolurile: corpul
+		# pastreaza clasa primita mai devreme (betonul fatadei), iar copilul
+		# `_Accente` — care tine acoperisul si firmele de pe slotul 30 — ia
+		# emisia. Fara distinctia asta lumina ar cadea si pe corp, adica
+		# exact peste clasa, si fatadele Chongqing ar fi ramas la fel de plate.
+		#
+		# Pe modelele NErupte nu se schimba nimic: `split` e fals, deci lumina
+		# cade pe tot arborele ca pana acum.
+		var split: bool = SPLIT_MODELS.has(
+			model.scene_file_path.get_file().get_basename())
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
 			var node: Node = stack.pop_back()
 			for c in node.get_children():
 				stack.append(c)
 			var mi := node as MeshInstance3D
-			if mi != null:
-				mi.material_override = mat
+			if mi == null:
+				continue
+			if split and not String(mi.name).ends_with(Palette.ACCENT_SUFFIX):
+				continue
+			mi.material_override = mat
 
 
 ## Specificatia de lumina a unei instante: metadata pe model, altfel pe
@@ -574,6 +642,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.ISLAND_CLASSES)
 	out.merge(TrackDecor.BAIKAL_CLASSES)
 	out.merge(TrackDecor.STROMBOLI_CLASSES)
+	out.merge(TrackDecor.CHONGQING_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

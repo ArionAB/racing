@@ -435,6 +435,33 @@ const CLASS_TEXTURES := {
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
 	"wood": "res://assets/textures/classes/wood.png",
 	"concrete": "res://assets/textures/classes/concrete.png",
+	# BETONUL ORASULUI (Chongqing). ACELASI PNG ca "concrete" — nu se dubleaza
+	# in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica pe care
+	# o folosesc volcanic_rock, village_plaster si macchia_dry).
+	#
+	# Nu se putea folosi "concrete" direct: ancora lui e dana portului Okinawa,
+	# ridicata cu `lift` 0.20 in process_class_textures.gd ca sa ramana mai
+	# RECE si mai INCHISA decat varul de deasupra ei. Aici clasa cade pe
+	# peretele de beton al fatadelor, care in atlas sta pe sloturile 8 si 29
+	# (media (192,184,170), luminanta 0.726) — cu dala netentata (169,161,145,
+	# luminanta 0.634) fatadele s-ar fi INTUNECAT cu ~13% fata de ce e azi pe
+	# ecran. Tinta e deliberat culoarea de ACUM, nu una „de noapte": lumina
+	# temei racește si coboara ea suprafata (masurat: slotul palid ajunge la
+	# (83,84,92), R-B = -9, adica deja rece), deci o clasa care ar mai raci o
+	# data ar face-o de doua ori.
+	"city_concrete": "res://assets/textures/classes/concrete.png",
+	# PIATRA VECHE a scarilor Shibati. ACELASI PNG ca "stone_wall" — doar alta
+	# tenta, ca la city_concrete/volcanic_rock/village_plaster.
+	#
+	# Nu se putea folosi `stone_wall` direct fiindca dala lui e comuna cu
+	# Okinawa si Alpii, iar o tenta pusa pe clasa ar fi revopsit si acolo.
+	# Si nu se putea tinti slotul pe care stau treptele azi (3, ROCK_LIGHT,
+	# #C18446): ala e gresie CALDA de desert — raportul catre el e
+	# (1.26, 0.89, 0.51), adica ar fi cerut si o ridicare, si ar fi facut
+	# scara Shibati portocalie in mijlocul unui oras de beton ud. Brief-ul
+	# cere piatra veche uzata („treptele sunt geometrie, textura da uzura"),
+	# deci tinta e piatra CENUSIE la luminanta dalei.
+	"old_stone": "res://assets/textures/classes/stone_wall.png",
 	# Insula (Okinawa): calcar coraligen si scoarta tropicala.
 	"coral_rock": "res://assets/textures/classes/coral_rock.png",
 	"bark": "res://assets/textures/classes/bark.png",
@@ -521,6 +548,17 @@ const CLASS_TINT := {
 	# taie de aici, iar rosul ramane aproape neatins. Asa iese galben-oliv
 	# dintr-o dala verde, fara un al doilea PNG.
 	"macchia_dry": Color(1.0, 0.66, 0.54),
+	# Betonul orasului: dupa ridicarea de mai sus dala e (198,189,170), iar
+	# tinta (192,184,170). Tenta doar corecteaza restul, si e aproape 1.0 pe
+	# toate canalele — asta E rezultatul dorit: clasa schimba TEXTURA, nu
+	# culoarea. Fatada ramane exact griul care e azi pe ecran, dar capata
+	# granulatie de beton in loc de suprafata plata.
+	"city_concrete": Color(0.969, 0.975, 1.0),
+	# Piatra veche: dala (153,149,137) coborata pe (137,139,137) — cenusiu
+	# neutru. Ancorata pe canalul ALBASTRU, singurul mod in care tenta ramane
+	# <= 1 pe toate canalele si nu mai e nevoie de nicio ridicare. Sub lumina
+	# temei iese (59,63,74), R-B = -15: piatra rece de oras noaptea.
+	"old_stone": Color(0.895, 0.933, 1.0),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -542,6 +580,11 @@ const CLASS_LIFT := {
 	# tinta se atinge DUPA tenta de mai sus, care coboara doua canale din trei.
 	# Calculata, nu aleasa — k = max(slot_c / dala_c) pe canale.
 	"macchia_dry": 0.82,
+	# Betonul orasului: dala lui `concrete` are luminanta 0.634 si trebuie sa
+	# ajunga pe media sloturilor 8/29 (0.726). Ridicarea e k = max(tinta_c /
+	# dala_c) pe canale = 1.1724, adica exact cat sa NU mai trebuiasca sa urce
+	# nimic din tenta — calculata, nu aleasa, ca la macchia_dry.
+	"city_concrete": 0.743,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -648,6 +691,17 @@ const CLASS_TRIPLANAR_SCALE := {
 	# (vezi process_class_textures.gd): dana trebuie sa ramana mai rece si mai
 	# inchisa decat varul de deasupra ei, altfel portul devine o singura pata.
 	"concrete": 0.5,
+	# Betonul orasului: aceeasi scara ca `concrete` — e aceeasi dala, si cade
+	# pe acelasi fel de suprafata. La 2 m/repetitie un perete de fatada de
+	# 5.8 m prinde ~2.9 repetitii: destul cat granulatia sa se citeasca la
+	# viteza, prea putin cat sa devina tapet (style_bible §4).
+	"city_concrete": 0.5,
+	# Zidaria scarilor Shibati. `stone_wall` avea textura si ancora, dar NU si
+	# o scara triplanara — se folosea doar pe UV-uri reale. Kitul Chongqing are
+	# UV-urile colapsate (ca Stromboli), deci ii trebuie una.
+	# 0.35 = o repetitie la 2.86 m: pe scara de 10x12 m intra ~4 randuri de
+	# zidarie pe latime, adica se citeste ca zidarie si nu ca tapet.
+	"old_stone": 0.35,
 	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
 	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
 	# la scara reala pe piese de 1-3 m.
@@ -1169,8 +1223,16 @@ const ACCENT_SUFFIX: String = "_Accente"
 ## se ating) si ZERO materiale — copilul foloseste `world_material()`, care era
 ## deja numarat.
 ##
+## `keep_slot` poate fi un slot sau un Array de sloturi. Varianta cu mai multe
+## exista pentru fatadele Chongqing, unde peretele de beton e pictat pe DOUA
+## sloturi din motive de compozitie, nu de material: masurat pe cele trei
+## shophouse-uri, slotul 29 tine parterul (y 0..3.1) si slotul 8 etajele
+## (y 2.9..5.8) — acelasi perete, taiat pe orizontala. Cu un singur slot pastrat,
+## jumatate din fatada ramanea plata langa cealalta jumatate texturata, adica
+## exact cusatura pe care ruptura de accente ar trebui s-o evite.
+##
 ## Intoarce `true` daca a rupt ceva.
-static func split_accents(mi: MeshInstance3D, keep_slot: int) -> bool:
+static func split_accents(mi: MeshInstance3D, keep_slot) -> bool:
 	if mi.mesh == null or mi.mesh.get_surface_count() == 0:
 		return false
 	if mi.has_node(NodePath(String(mi.name) + ACCENT_SUFFIX)):
@@ -1180,6 +1242,12 @@ static func split_accents(mi: MeshInstance3D, keep_slot: int) -> bool:
 	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
 	if uvs.is_empty() or idx.is_empty():
 		return false
+	var keep_slots: Dictionary = {}
+	if keep_slot is Array:
+		for s: int in keep_slot:
+			keep_slots[s] = true
+	else:
+		keep_slots[int(keep_slot)] = true
 	var keep: PackedInt32Array = PackedInt32Array()
 	var move: PackedInt32Array = PackedInt32Array()
 	var i: int = 0
@@ -1188,7 +1256,7 @@ static func split_accents(mi: MeshInstance3D, keep_slot: int) -> bool:
 		# centrul slotului, deci toate trei cad in acelasi loc prin constructie.
 		var slot: int = clampi(int(uvs[idx[i]].x * float(SLOTS)), 0, SLOTS - 1)
 		var tri := PackedInt32Array([idx[i], idx[i + 1], idx[i + 2]])
-		if slot == keep_slot:
+		if keep_slots.has(slot):
 			keep.append_array(tri)
 		else:
 			move.append_array(tri)

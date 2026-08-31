@@ -339,6 +339,43 @@ const CAP_SLOT: int = 20
 ## deasupra gatului.
 @export_range(0.50, 0.98, 0.01) var cap_from: float = 0.80
 
+## Cat se STRANGE palaria inapoi spre gat. 0 = neatins, 1 = palaria ajunge la
+## raza gatului (adica dispare).
+##
+## De ce era nevoie de un parametru NOU si nu de `cap_flare` mai mic. Lead-ul:
+## "palariile sunt prea mari si prea ciuperca; in referinta sunt palarii conice
+## mai stranse, asezate pe umar". Masurat pe silueta de pe cer, cu
+## `tools/bar/cap_silhouette.py`, pe hornul din dreapta capturii de la 0.05:
+## palaria 89 px pe un gat de 41 px, adica **2.17x**. O farfurie.
+##
+## Prima incercare a fost sa scad `cap_flare` (0.41 -> 0.16) si sa strang gatul
+## mai putin (`collar_pinch` 0.377 -> 0.170). Captura n-a miscat, si asta e
+## informatia: consola construita din cod NU e ce se vede. Profilul GLB-ului
+## brut (`probe_capp_glbprof`) arata de ce — `chimney_mushroom` isi are palaria
+## COAPTA in model: raza scade la 1.90 pe la 4/5 din inaltime, apoi urca inapoi
+## la 2.29. `cap_flare` doar adauga peste asta, deci scazandu-l ramai cu
+## farfuria din fisier. Ca sa strangi ce vine din GLB iti trebuie un factor
+## SUBUNITAR pe raza, si `cap_flare` e prin constructie supraunitar (@export_range
+## porneste de la 0).
+##
+## Se aplica pe aceeasi banda cu `cap_flare` si cu aceeasi anvelopa, deci cele
+## doua se pot folosi impreuna: strangi farfuria din fisier si adaugi inapoi
+## exact cata consola vrei.
+@export_range(0.0, 0.60, 0.01) var cap_tuck: float = 0.0
+
+## Cat de CONICA e anvelopa consolei, in loc de plata. 0 = anvelopa veche
+## (maximul fix pe buza, deci consola iese lateral si se termina imediat), 1 =
+## maximul urca in palarie, deci latimea creste si apoi scade si iese o palarie
+## cu inaltime.
+##
+## Sonda de silueta desparte acuzatia in doua cifre, si ele nu se misca la fel:
+##   depasire = latimea palariei / latimea gatului -> 2.17x, defectul principal
+##   zveltete = inaltimea palariei / latimea ei    -> 0.37, aproape acceptabil
+## Deci `cap_tuck` face treaba grea (strange), iar `cap_cone` are grija ca
+## strangerea sa nu lase in urma o clatita: o palarie ingusta si PLATA e tot
+## farfurie, doar mai mica.
+@export_range(0.0, 1.0, 0.05) var cap_cone: float = 0.0
+
 ## Cat de mult din palarie primeste CULOAREA DE BAZALT. 0 = stins.
 ##
 ## REGULA DE SILUETA, si de ce e a treia oara cand se atinge palaria fara s-o
@@ -624,15 +661,20 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 					scale *= 1.0 - collar_pinch * exp(-dc * dc)
 
 				# --- 7. PALARIA in consola --------------------------------
-				# Se lateste doar deasupra lui cap_from, si se stinge spre
-				# varf: la t = cap_from latirea e maxima (acolo e BUZA, care
-				# arunca umbra pe gat), la t = 1 e zero (varful ramane varf).
-				# Fara stingere ar fi iesit o palarie cilindrica, adica o
-				# palarie de joben — citeste a obiect fabricat, nu a stanca
-				# dura ramasa dupa ce cea moale de sub ea s-a dus.
-				if not is_zero_approx(cap_flare) and t > cap_from:
+				# Anvelopa e in `_cap_env`, fiindca forma ei e chiar diferenta
+				# dintre o palarie conica si o farfurie zburatoare (runda 15).
+				if t > cap_from and (not is_zero_approx(cap_flare)
+						or not is_zero_approx(cap_tuck)):
 					var ct := (t - cap_from) / maxf(1.0 - cap_from, 0.01)
-					scale *= 1.0 + cap_flare * (1.0 - ct) * (1.0 - ct * 0.35)
+					var env := _cap_env(ct)
+					# Strangerea are ALTA anvelopa decat consola, si asta e
+					# esential. Consola se adauga la BUZA (ct mic). Farfuria
+					# coapta in GLB e insa mai sus: pe `chimney_mushroom` raza
+					# atinge minimul pe la 4/5 din inaltime si abia deasupra
+					# creste inapoi. Cu anvelopa consolei, `cap_tuck` ar fi
+					# ciupit chiar buza si ar fi lasat discul de deasupra
+					# neatins — adica ar fi mutat problema, nu rezolvat-o.
+					scale *= (1.0 - cap_tuck * _tuck_env(ct)) 						* (1.0 + cap_flare * env)
 
 				# --- contur neregulat -------------------------------------
 				if not is_zero_approx(noise_amount):
@@ -698,6 +740,45 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 
 ## Cota la care incepe bazaltul, ca fractiune din inaltime. O SINGURA sursa de
 ## adevar, fiindca o folosesc si UV-urile, si testul de "e palaria in cadru".
+## Anvelopa palariei: cat se lateste raza la fractiunea `ct` din palarie
+## (0 = buza, imediat deasupra gatului; 1 = varful hornului).
+##
+## `cap_cone` = 0 pastreaza anvelopa veche, ca hornurile care aratau bine sa nu
+## se schimbe sub picioare. Peste 0 maximul se muta la `pk` (o treime din
+## palarie) si forma devine un arc: creste de la buza, apoi scade la 0 in varf.
+## Cele doua ramuri se leaga la 1.0 in `pk`, deci nu e treapta la imbinare.
+## Anvelopa STRANGERII. Plina pe partea de sus a palariei, unde sta discul din
+## GLB, si stinsa la buza si in varf: la buza ca sa nu dispara muchia care rupe
+## silueta, in varf ca sa nu ciupeasca ascutisul intr-o bila.
+func _tuck_env(ct: float) -> float:
+	# Fereastra pe [0,1] cu maximul pe la 0.62 — unde `probe_capp_glbprof` a
+	# gasit reintoarcerea de raza pe chimney_mushroom (t 0.85..0.95 dintr-o
+	# palarie care incepe pe la 0.76).
+	const PK: float = 0.62
+	if ct < PK:
+		return smoothstep(0.0, PK, ct)
+	return 1.0 - smoothstep(PK, 1.0, ct) * 0.55
+
+
+func _cap_env(ct: float) -> float:
+	var flat := (1.0 - ct) * (1.0 - ct * 0.35)
+	if is_zero_approx(cap_cone):
+		return flat
+	const PK: float = 0.34
+	var cone: float
+	if ct < PK:
+		# Sub maxim: buza porneste de la 0.62 si urca. Nu de la 0 — buza TREBUIE
+		# sa iasa peste gat, altfel dispare muchia care rupe silueta in doua si
+		# ne intoarcem la "one unbroken curve" din runda 12.
+		cone = lerpf(0.62, 1.0, ct / PK)
+	else:
+		# Deasupra maximului: scadere la patrat, deci laturile palariei sunt
+		# concave — profilul unei stanci ramase, nu al unui con turnat.
+		var u := (ct - PK) / (1.0 - PK)
+		cone = (1.0 - u) * (1.0 - u * 0.45)
+	return lerpf(flat, cone, cap_cone)
+
+
 func _cap_basalt_start() -> float:
 	return clampf(cap_from + cap_basalt_drop, 0.05, 0.99)
 

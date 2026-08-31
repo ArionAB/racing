@@ -54,13 +54,27 @@ const RES := {
 ## Tot in ceata scurta (fog_end ~250 m), deci benzile raman citibile.
 const DIST := 62.0
 
-## Cat de sus urca creasta peste cota SOSELEI. Pozitiv = taie orizontul.
+## Cat de sus urca creasta peste cota SOSELEI.
 ##
-## 2.5 m, nu 6: creasta trebuie sa treaca PESTE linia orizontului (altfel nu
-## taie nimic), dar cu cat urca mai mult cu atat inghite mai mult din cerul in
-## care se ridica baloanele — iar baloanele sunt gimmick-ul pistei. 2.5 m e
-## minimul care se vede clar peste linie la 62 m distanta.
-const CREST_ABOVE_ROAD := 2.5
+## 9 m, si cifra e DERIVATA, nu aleasa. "Peste cota soselei" nu inseamna "peste
+## linia orizontului": camera sta cu ~2.6 m PESTE banda, deci linia orizontului
+## trece prin ochiul soferului, nu prin asfalt. Unghiul la care se vede creasta
+## e atan((creasta - 2.6) / distanta).
+##
+## Prima varianta a pus 2.5 m si a picat exact aici: la 62 m distanta,
+## atan((2.5 - 2.6)/62) = -0.09 grade — adica peretele aterizeaza FIX pe linia
+## orizontului si n-o taie deloc. Masurat pe capturi cu un scanner de cer
+## (cea mai de jos coloana neintrerupta de cer), inaltimea cerului pe jumatatea
+## dreapta nu se schimbase practic: 204 -> 204 px la fractia 0.10, 208 -> 208 la
+## 0.13. Peretele exista in cadru, umple partea de jos, si nu face treaba
+## pentru care fusese cerut.
+##
+## Cu 9 m: atan((9 - 2.6)/62) = +5.9 grade. La FOV vertical de 60 grade pe 720 px
+## inseamna ~71 px peste linie — se vede fara dubiu, si tot raman ~30 m pana la
+## plafonul de cadru (38-40 m la distanta asta), deci creasta nu iese din poza.
+## Mai sus nu se urca fiindca peretele ar incepe sa inghita cerul in care se
+## ridica baloanele, si baloanele sunt gimmick-ul pistei.
+const CREST_ABOVE_ROAD := 9.0
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -100,13 +114,36 @@ func _wall() -> void:
 	for i in n:
 		total += _track.baked[i].distance_to(_track.baked[(i + 1) % n])
 	var step_frac := 11.0 / total
-	var f := 0.062
+	# Intervalul acopera POI B cu MARJA IN FATA. Prima varianta se oprea la
+	# 0.196 si in captura de la fractia 0.16 peretele se termina in mijlocul
+	# cadrului, cu orizontul gol dincolo de el — camera priveste INAINTE, deci
+	# la fractia f se vede decorul de pe 0.02-0.03 mai departe, nu cel de sub
+	# roti. Capetele se prelungesc in ambele sensuri pana unde valea mai are
+	# fund plat (masurat cu ProbeCappLinie: pana pe la 0.21 terenul la 62 m
+	# ramane pe la +20..26, dupa care urca).
+	var f := 0.045
 	var col := 0
-	while f <= 0.196:
+	while f <= 0.245:
 		var i := int(f * float(n)) % n
 		var p := _track.baked[i]
 		var s := _track._side_at(i)
-		var q := p + s * DIST
+		# Distanta nu e constanta pe tot POI-ul. Masurat cu ProbeCappCadru
+		# (raze prin sfertul drept al cadrului), zidul umplea 40% din banda la
+		# fractia 0.10 si 51% la 0.13, dar numai 11% la 0.16 — iar unghiurile
+		# arata de ce: la 0.16 modulele cad la -75..-86 grade fata de axa
+		# privirii, cand semiunghiul de cadru e 46. Adica exista in lume,
+		# lateral de sofer, si in POZA nu intra deloc.
+		#
+		# Cauza e ca soseaua coteste iar zidul e trasat pe `side`-ul LOCAL: pe
+		# un viraj, perpendiculara pe banda se roteste mai repede decat
+		# directia in care se uita camera. Reparatia e sa se APROPIE zidul pe
+		# portiunea aia — la 34 m in loc de 62, acelasi modul intra in con.
+		var dist := DIST
+		if f > 0.148:
+			# Tranzitie lina, ca sa nu apara o treapta in perete acolo unde
+			# distanta se schimba.
+			dist = lerpf(DIST, 34.0, clampf((f - 0.148) / 0.030, 0.0, 1.0))
+		var q := p + s * dist
 		var g := _sampler.ground_y(q.x, q.z)
 		# Inaltimea CERUTA: de la teren pana la creasta, unde creasta sta cu
 		# CREST_ABOVE_ROAD peste sosea. Se recalculeaza la fiecare modul,

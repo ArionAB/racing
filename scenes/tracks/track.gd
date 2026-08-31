@@ -1703,12 +1703,64 @@ static func themes() -> Dictionary:
 			# verde), ca sa nu contrazica cerul de rasarit de deasupra.
 			"fog": Color(0.72, 0.74, 0.80),
 			"hill_color": Color(0.82, 0.70, 0.56),
-			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
-			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade
-			# lumina directa cade razant — cu energie de amiaza, fetele insorite
-			# de tuf crem s-ar fi ars in alb si ar fi pierdut desenul.
+			# ZORI: soare CALD, si mai TARE decat pana acum — 0.95, urcat de la
+			# 0.85 impreuna cu coborarea ambientului la 0.26 (runda 13).
+			#
+			# De ce se schimba, dupa ce 12 runde au construit geometrie care nu
+			# se vedea. Criticul orb al rundei 12: "un model FATETAT randat CA SI
+			# CUM ar fi neted — are poligoanele, dar nu are VALORILE: fatetele
+			# vecine difera cu 2-3%". Cauza nu era in mesh. Raportul soare/ambient
+			# masurat pe toate temele ne dadea printre cele mai PLATE din joc:
+			#     stromboli 2.79 | CAPPADOCIA 2.83 | baikal 3.12
+			#     desert 3.64    | island 5.00
+			# Ambientul e independent de directie: cu cat cantareste mai mult din
+			# total, cu atat mai putin are normala unei fete de MODULAT. La 0.85
+			# contra 0.30, o fata intoarsa complet de la soare primea deja 28% din
+			# cat primea una insorita — deci fatetele n-aveau cum sa iasa trepte.
+			#
+			# Perechea 0.26/0.95 e aleasa dintre echivalentele de raport (~3.65)
+			# fiindca e SINGURA care nu muta media cadrului. Socotit pe modelul
+			# Lambert cu soarele real al pistei (elevatie 22, azimut 205), pe trei
+			# fete — insorita, oblica la 70 de grade, intoarsa:
+			# Prima incercare a fost 0.95/0.26, adica exact raportul desertului
+			# (3.65). NU A AJUNS: A/B pe acelasi cadru, conurile ramaneau la fel
+			# de plate. Masurand pixelii pe corpul unui horn, tot conul statea
+			# intre 64 si 107 din 255 — vreo 40 de puncte — desi lambert-ul
+			# GEOMETRIC pe fetele lui, calculat din .glb, acopera tot 0..1.
+			#
+			# Lipsa era in TONEMAPPER, si e chiar capcana pe care tema desertului
+			# o are deja scrisa (vezi "exposure": 1.30 acolo): FILMIC comprima
+			# capatul de sus, iar tuful crem palid, la expunere 1.15, sta fix in
+			# rolloff. Socotit prin tonemapper, de la fata insorita la cea
+			# intoarsa:
+			#   0.85/0.30  ->  189  171  145  115   ecart  73 din 255
+			#   0.95/0.26  ->  191  172  143  108   ecart  84
+			#   1.05/0.24  ->  194  174  144  104   ecart  91
+			#   1.15/0.20  ->  197  176  142   95   ecart 102
+			#   1.35/0.16  ->  202  180  143   84   ecart 118
+			# Adica raportul desertului cumpara doar 11 puncte de ecart, fiindca
+			# jumatatea de sus a scarii e strivita oricum. Ce se vede pe ecran nu
+			# e raportul, e ECARTUL DUPA TONEMAP.
+			#
+			# Expunerea NU e parghia potrivita aici: coborata, aluneca toata rampa
+			# in jos deodata (la exp 0.80 ecartul ramane 83) — intuneca pista fara
+			# sa desparta fetele. Ce desparte fetele e distanta dintre soare si
+			# ambient, fiindca doar soarele depinde de normala.
+			#
+			# ALES 1.15/0.20, raport 5.75 — teritoriul insulei, nu al desertului.
+			# Ecart 102, cu 39% peste cele 73 de la care s-a plecat, iar media
+			# cadrului ramane 152 fata de 155. Nu mai departe: la 1.35/0.16 fata
+			# intoarsa cade la 84 si canionul umbrit ar incepe sa se inchida in
+			# pata, exact ce a costat Stromboli patru runde.
+			#
+			# Energia, NU expunerea: expunerea muta tot cadrul deodata (cerul si
+			# ceata inclusiv) si n-ar fi schimbat niciun raport intre fete. Aici
+			# ne trebuie fix diferenta dintre o fata si vecina ei.
+			#
+			# CULOAREA si AZIMUTUL raman neatinse: duc zorii si estul din brief §4,
+			# iar azimutul a fost masurat contra traseului (vezi mai jos).
 			"sun_color": Color(1.0, 0.82, 0.63),
-			"sun_energy": 0.85,
+			"sun_energy": 1.15,
 			# ELEVATIE 13 grade (brief §4 cere 12-15), azimut 60 (ENE, dinspre
 			# vale).
 			#
@@ -1744,13 +1796,34 @@ static func themes() -> Dictionary:
 			# repetat capcana masurata pe Okinawa: nisip coraligen iesit
 			# albastru-cenusiu.
 			"ambient_color": Color.html("F0C79A"),
-			# 0.30, nu 0.22 ca desertul. Pista are canion cu faleze in benzi si
-			# subteran, adica multe fete intoarse de la un soare care bate
-			# oricum razant. Lectia Stromboli (0.18 -> 0.34): prapastia care
-			# exista in geometrie dar iese pata neagra plata pe ecran nu se
-			# citeste. Umbra o fac AO-ul copt si contrastul cu soarele, nu
-			# lipsa luminii.
-			"ambient_energy": 0.30,
+			# 0.20, coborat de la 0.30 (runda 13). Perechea lui sun_energy 1.15 de
+			# mai sus — motivul intreg si socoteala sunt acolo; aici doar de ce
+			# argumentul original nu mai tine.
+			#
+			# Argumentul de la 0.30 era: "pista are canion cu faleze in benzi si
+			# SUBTERAN, adica multe fete intoarse de la un soare razant", cu
+			# lectia Stromboli (0.18 -> 0.34) — prapastia care exista in geometrie
+			# dar iese pata neagra plata nu se citeste. Decizie corecta la
+			# momentul ei, luata insa INAINTE sa existe padurea de hornuri, si
+			# niciodata remasurata dupa (aceeasi capcana ca azimutul).
+			#
+			# Ce s-a schimbat intre timp: pista are acum 60 de conuri fatetate cu
+			# trepte de strat si taluz in prim-plan, iar ele sunt subiectul
+			# cadrului. Ambientul care salva o prapastie de la a fi pata neagra
+			# stergea, pe aceleasi puncte procentuale, singura sursa de valoare a
+			# lor. Cine plateste mai mult: hornurile, si se vad in fiecare cadru.
+			#
+			# SUBTERANUL nu pierde nimic acum: pe Track13 salile subterane inca nu
+			# sunt construite (StancaGoalaInterior e o scobitura de teren, nu o
+			# caverna), deci nu exista nici geometrie, nici torte pe care 0.30 sa
+			# le apere. Cand se construiesc, lumina lor se pune LOCAL — torte
+			# OmniLight3D si CameraZone la gura pesterii, ca pe Chongqing — nu
+			# aplatizand toata pista pentru un singur POI. Falezele umbrite ale
+			# canionului raman acoperite: 0.26 pe langa 0.22 al desertului, iar
+			# desertul e o pista tot cu faleze si tot cu soare jos. La 0.20 fata
+			# intoarsa iese 95 din 255 dupa tonemap — inchisa, dar inca departe
+			# de pata neagra plata de care se temea nota de la 0.30.
+			"ambient_energy": 0.22,
 			# UMBRE PORNITE, si e prima pista pe care sunt IDENTITATE, nu doar
 			# contact cu solul. Implicitul e deja `true`, deci cheia nu schimba
 			# comportamentul — exista ca sa aiba unde sta motivul pentru care NU

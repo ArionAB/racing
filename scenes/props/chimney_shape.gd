@@ -705,9 +705,31 @@ func _shade_facets(arr: Array) -> Array:
 		cols = PackedColorArray()
 		cols.resize(verts.size())
 		cols.fill(Color.WHITE)
-	# Soarele temei bate cam din spate-dreapta; nu se citeste din scena fiindca
-	# deformarea se face inainte ca nodul sa aiba lumina langa el.
-	var sun := Vector3(0.62, 0.55, -0.56).normalized()
+	# SOARELE REAL AL PISTEI, nu unul inventat. Runda 13.
+	#
+	# Aici a stat, patru runde, motivul pentru care fatetele nu se vedeau desi
+	# erau construite. Vectorul de dinainte era (0.62, 0.55, -0.56), comentat
+	# "cam din spate-dreapta, ~135°". Masurat, el inseamna elevatie 33 si azimut
+	# 132. Soarele lui Track13 (custom_sun_rotation_deg = (-22, 25, 0), deci
+	# azimut y+180) e la elevatie 22 si azimut 205 — la 64 de grade departare.
+	#
+	# Consecinta e mai rea decat "nu ajuta": fetele pe care vertex color-ul le
+	# picta INSORITE erau, o buna parte, chiar cele pe care soarele real le lasa
+	# in umbra, si invers. Cele doua semnale se anulau reciproc, si de-aia conul
+	# iesea uniform oricat de mult se urca `facet_contrast`. Un contrast pictat
+	# dupa un soare gresit nu e contrast mai slab, e contrast care se scade.
+	#
+	# Aceeasi capcana ca la azimutul temei (memoria `azimutul-soarelui-fata-de-
+	# drum`): o directie de lumina scrisa o data si niciodata remasurata dupa ce
+	# soarele s-a mutat. De-aia se DERIVA acum din aceleasi grade ca lumina
+	# scenei, in loc sa fie un vector literal — daca soarele se muta, se muta si
+	# umbrirea pictata, fara sa mai depinda de cineva care isi aduce aminte.
+	var sun_elev := deg_to_rad(22.0)
+	var sun_azim := deg_to_rad(205.0)
+	var sun := Vector3(
+		cos(sun_elev) * sin(sun_azim),
+		sin(sun_elev),
+		cos(sun_elev) * cos(sun_azim)).normalized()
 	for t in verts.size() / 3:
 		var i := t * 3
 		var n := norms[i] + norms[i + 1] + norms[i + 2]

@@ -3436,6 +3436,11 @@ func _build_horizon(centroid: Vector3) -> void:
 	# RAPORTEAZA, nu dispare in tacere.
 	var missed := 0
 	var placed := 0
+	# Cate siluete au incaput doar dupa ce li s-a relaxat degajarea. Se
+	# raporteaza separat de `missed`: una relaxata E pe cer (deci arcul nu mai e
+	# gol), dar sta mai aproape de sosea decat ar vrea tema, si daca numarul
+	# creste inseamna ca inelul cere prea mult pentru forma pistei.
+	var relaxed := 0
 	# Inelele pot veni din TEMA, ca si numele siluetelor.
 	#
 	# Cele implicite sunt calibrate pe butte-uri de desert (25-60 m, degajare
@@ -3472,14 +3477,47 @@ func _build_horizon(centroid: Vector3) -> void:
 			# niciodata. Acum plafonul urmeaza inelul CERUT, cu marja de
 			# cautare — cine declara un inel departat primeste unde sa-l puna.
 			var limit: float = maxf(float(ring["far"]) + 90.0, 355.0)
-			var dist: float = float(ring["near"])
-			while dist <= limit:
-				var cand := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
-				if _road_distance_xz(cand) >= clear:
-					pos = cand
-					found = true
+			# DEGAJAREA E O PREFERINTA, NU O CONDITIE — si asta e un bug de
+			# orizont gol, nu o reglare de numere.
+			#
+			# Sectorul cerea `clear` si atat: daca pe toata raza nu gasea niciun
+			# punct destul de departe de sosea, slotul se sarea. Rezultatul e
+			# CER GOL pe arcul ala, adica exact defectul pe care sectoarele
+			# echidistante trebuiau sa-l repare — acoperirea era garantata ca
+			# unghi, dar nu si ca prezenta. Masurat pe Cappadocia: 3 din 6
+			# siluete, deci jumatate de orizont fara nimic pe el, si criticul a
+			# citit 49.6% din partea de sus a cadrului drept cer gol (8.5% in
+			# referinta).
+			#
+			# De ce nu se repara coborand `clear` in tema: degajarea e reala, ea
+			# tine o mesa de 200 m latime sa nu aterizeze pe drum. Pe o pista
+			# care se auto-intersecteaza pur si simplu NU exista, pe unele
+			# azimuturi, niciun punct care sa o satisfaca — nicio cifra unica nu
+			# poate fi si generoasa pe directiile stramte si sigura pe celelalte.
+			# Coborand-o global s-ar apropia siluetele de sosea pe TOATE
+			# directiile, inclusiv pe cele care aveau loc.
+			#
+			# Se cauta deci in trepte: intai la degajarea ceruta, apoi relaxand-o
+			# progresiv, si se ia PRIMA care incape. Un sector stramt primeste o
+			# silueta mai apropiata de drum (dar cat mai departe cu putinta pe
+			# directia lui), unul larg ramane exact cum era. Podeaua e la 55% din
+			# degajarea ceruta: sub ea silueta ar intra in campul de joc, si
+			# atunci e chiar mai bine sa lipseasca.
+			var relaxari: Array[float] = [1.0, 0.85, 0.7, 0.55]
+			for relax in relaxari:
+				var prag := clear * relax
+				var dist: float = float(ring["near"])
+				while dist <= limit:
+					var cand := centroid 						+ Vector3(cos(angle), 0, sin(angle)) * dist
+					if _road_distance_xz(cand) >= prag:
+						pos = cand
+						found = true
+						break
+					dist += 6.0
+				if found:
+					if relax < 1.0:
+						relaxed += 1
 					break
-				dist += 6.0
 			if not found:
 				missed += 1
 				continue
@@ -3560,8 +3598,8 @@ func _build_horizon(centroid: Vector3) -> void:
 			else:
 				Palette.apply_triplanar_class(model, horizon_class)
 			placed += 1
-	print("%s: %d/%d siluete de orizont" % [track_name, placed,
-		placed + missed])
+	print("%s: %d/%d siluete de orizont (%d cu degajare relaxata)"
+		% [track_name, placed, placed + missed, relaxed])
 	if missed > 0:
 		# Fara linia asta, un orizont pe jumatate gol arata ca o alegere de
 		# design. E exact bug-ul pe care l-a avut versiunea anterioara.

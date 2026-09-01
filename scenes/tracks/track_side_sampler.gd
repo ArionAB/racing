@@ -213,6 +213,11 @@ var _channels: Array[Dictionary] = []
 ## soseaua peste tot, deci interiorul unei bucle care URCA ramane o campie —
 ## muntele pe care pista pretinde ca se catara nu exista pana nu e declarat.
 var _peaks: Array[Vector4] = []
+## Volumele SCOBITE declarate: (x, z, raza, podea), plus grosimea peretelui in
+## lista paralela [member _hollow_walls] — Vector4 e deja plin.
+## Vezi [TerrainHollow] si [method _carve_hollows].
+var _hollows: Array[Vector4] = []
+var _hollow_walls: PackedFloat32Array = PackedFloat32Array()
 
 
 ## PASAJE PE PILONI: intervalele de tur (fractii, ca la rape) in care soseaua
@@ -267,7 +272,9 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		carve_corridors: PackedVector3Array = PackedVector3Array(),
 		viaducts: Array[int] = [],
 		overpasses: Array[Vector2] = [],
-		floors: Array[Vector2] = []) -> void:
+		floors: Array[Vector2] = [],
+		hollows: Array[Vector4] = [],
+		hollow_walls: PackedFloat32Array = PackedFloat32Array()) -> void:
 	_baked = baked
 	for fl in floors:
 		_floors[int(fl.x)] = fl.y
@@ -283,6 +290,8 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_lagoon_depth = lagoon_depth
 	_channels = channels
 	_peaks = peaks
+	_hollows = hollows
+	_hollow_walls = hollow_walls
 	_cornices = cornices
 	_viaducts = viaducts
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
@@ -461,8 +470,12 @@ func ground_y(wx: float, wz: float) -> float:
 	y = _carve_branches(y, wx, wz, dist, near_i)
 	y = _carve_lagoon(y, dist, wx, wz, near_i)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
-	# ULTIMA taietura, si singura care nu ocoleste asfaltul. Vezi _carve_channel.
-	return _carve_channel(y, wx, wz)
+	y = _carve_channel(y, wx, wz)
+	# ULTIMA, si un PLAFON, nu inca un camp: scobitura trebuie sa bata tot ce
+	# ridica teren (media soselei, lacatul local, masivele, benzile), altfel un
+	# singur drum care trece pe deasupra golului il umple la loc. Vezi
+	# _carve_hollows — pe pistele fara scobituri declarate nu se schimba nimic.
+	return _carve_hollows(y, wx, wz)
 
 
 ## Distanta perpendiculara pana la axa soselei si cota drumului acolo, ca
@@ -523,6 +536,51 @@ func _lift_peaks(y: float, wx: float, wz: float, dist: float,
 		return y
 	peak += _dunes(wx, wz) * 0.5
 	return lerpf(y, _smax(y, peak, SMOOTH_PEAK_K), mask)
+
+
+## Scobeste volumele declarate — vezi [TerrainHollow].
+##
+## Oglinda lui [method _lift_peaks], dar cu doua diferente care nu sunt de
+## simetrie:
+##
+## 1. E un PLAFON, nu un camp amestecat. Un masiv se compune cu terenul prin
+##    `_smax` fiindca amandoua sunt oferte de inaltime; o scobitura e o
+##    interdictie: [b]aici nu are voie sa fie piatra peste cota asta[/b]. Cu un
+##    lerp, orice camp destul de puternic (lacatul local al unui drum de
+##    deasupra — vezi GROUND_LOCK_LEN) ar fi umplut golul inapoi.
+##
+## 2. NU are banda de protectie a asfaltului. La masive banda exista ca muntele
+##    sa nu treaca peste drumul care il traverseaza; aici ar fi exact pe dos —
+##    drumul care traverseaza golul (kickerul de iesire de pe Cappadocia,
+##    frac 0.96+) e chiar cel care il umplea. Protectia soselei o face podeaua:
+##    scobitura nu coboara NICIODATA sub `floor`, iar podeaua se pune sub cota
+##    celei mai joase bucati de drum dinauntru.
+##
+## `minf`, nu `_smin`: tinta e o suprafata deja C1 in plan (smoothstep pe perete)
+## si constanta pe verticala, deci nu apare cuta pe care o rezolva _smin — iar un
+## _smin ar fi coborat podeaua cu k/4 uniform, adica ar fi sapat sub drum.
+func _carve_hollows(y: float, wx: float, wz: float) -> float:
+	if _hollows.is_empty():
+		return y
+	for hi in _hollows.size():
+		var h: Vector4 = _hollows[hi]
+		var wall := _hollow_walls[hi] if hi < _hollow_walls.size() else 0.0
+		var d := Vector2(wx - h.x, wz - h.y).length()
+		var outer := h.z + wall
+		if d >= outer:
+			continue
+		# 1 in ax, 0 dincolo de perete. Peretele isi pastreaza grosimea: pana la
+		# raza nominala golul e plin, si abia dupa incepe sa se inchida.
+		var mix := 1.0 - smoothstep(h.z, outer, d)
+		if mix <= 0.0:
+			continue
+		# Plafonul urca de la podea (in ax) la infinit (in perete): la mix=1
+		# terenul nu poate depasi podeaua, la mix->0 nu e limitat deloc.
+		# Interpolarea e pe PLAFON, nu pe rezultat, ca peretele sa iasa o palnie
+		# neteda in loc de o treapta la raza.
+		var ceiling := lerpf(y, h.w, mix)
+		y = minf(y, ceiling)
+	return y
 
 
 ## Cat de departe de axa unei benzi secundare terenul mai sta la cota ei.

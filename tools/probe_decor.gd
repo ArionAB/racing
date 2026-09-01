@@ -463,6 +463,20 @@ func _source_of(mi: Node, track: Node) -> String:
 	"boulder_roller", "dino_bones", "pipe_leak", "rusted_digger",
 	"rock_arch", "mine_portal",
 		"water_tower", "windmill", "gas_station", "route66",
+		# kitul de tuf al Cappadociei (POI B si mai departe). Fara numele astea
+		# cele 83 de piese asezate de mana se raportau ca "procedural
+		# (track.gd)" — intrau corect in TOTALURI (prop-uri, desene, materiale),
+		# dar linia pe surse minte, si exact linia aia se citeste cand cauti
+		# cine a adus un material in plus.
+		"chimney", "twin_chimney_gate", "cave_house", "dovecote",
+		"rock_church_facade", "shrub_dry", "pigeon",
+		"poplar", "carpet_terrace", "pottery_cart", "pot_stack",
+		# Stratul uman al piatei din Goreme. Aceeasi capcana ca mai sus, a doua
+		# oara: piesele intrau in totaluri dar linia pe surse le arunca in
+		# "procedural (track.gd)", care iesea cu 39 de prop-uri si 89k tris —
+		# adica mai mult decat poate face geometria din track.gd.
+		"farmhouse", "church_arch", "cave_entrance", "vine_row", "torch",
+		"cracked_chimney",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "canyon_rocks", "desert_scatter", "butte",
 		"wood_fence", "train"]

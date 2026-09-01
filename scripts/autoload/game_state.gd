@@ -26,9 +26,17 @@ const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track10.tscn",
 	"res://scenes/tracks/Track11.tscn",
 	"res://scenes/tracks/Track12.tscn",
+	# Track13 = INDEXUL 6, nu 13. Cele doua conventii traiesc alaturi si
+	# `resolve_track_index` de mai jos le impaca; nota e aici fiindca de aici
+	# se citeste lista, si fiindca de fiecare data cand s-a adaugat o pista
+	# cineva a scris --track= cu numarul scenei (memoria
+	# `indici-de-pista-intre-unelte`). `snapshot`/`probe_race` vor 6,
+	# `probe_decor`/`survey_terrain` vor 13.
+	"res://scenes/tracks/Track13.tscn",
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
+	"Cappadocia",
 ]
 const CHAMP_ROUNDS: int = 3
 

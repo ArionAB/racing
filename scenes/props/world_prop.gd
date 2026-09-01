@@ -88,6 +88,9 @@ const PROP_COLLISION := {
 	"serge_pole_a": "trunk", "serge_pole_b": "trunk", "serge_pole_c": "trunk",
 	"village_signpost": "trunk", "power_pylon_soviet": "trunk",
 	"well_crane": "trunk",
+	# Plopii Cappadociei: un plop de 12-15 m e o coloana ingusta, dar hull-ul
+	# ei tot ar prinde coroana. Trunchi, ca la orice copac.
+	"poplar_a": "trunk", "poplar_b": "trunk",
 	# --- fantome ----------------------------------------------------------
 	# Sina zace PE sosea: traversele au 27 cm cu tot cu sina, adica praguri
 	# pe linia de curs, si sunt 34 de bucati una dupa alta.
@@ -312,8 +315,79 @@ const CLASSES_BY_MODEL := {
 }
 
 
+## Kitul de tuf (Cappadocia) si-a ales sloturile DUPA NUME, nu dupa culoare.
+##
+## `build_cappadocia_tuff.py` scrie `TUFF_MID = SAND_MID` si
+## `TUFF_SH = SAND_SHADOW`, cu intentia „banda de variatie de VALOARE" pe un con
+## crem. Dar sloturile alea nu sunt cremuri mai inchise, sunt portocaliul
+## desertului: masurat, SAND_MID e #D4994D (saturatie 0,64) si SAND_SHADOW e
+## #915D27 (0,73), pe langa CORAL_SAND #E9DCC0 (0,18). Rezultatul, vazut in
+## captura de sofer de la fractia 0,06: hornurile ies in dungi late portocalii
+## si ruginii — cosuri de fabrica, nu conuri de tuf. Referinta v3
+## (`img/v3_crops/B_chimneys.png`) le are crem UNIFORM, cu doar palaria inchisa,
+## iar regula de arta din brief §0.1 cere ~45% saturatie pe tot mediul.
+##
+## Se corecteaza aici, la incarcare, mutand UV-urile pe sloturile crem care CHIAR
+## sunt variatie de valoare: CONCRETE #C8BDA9 (sat 0,16, luminanta 190) pentru
+## banda medie si MARBLE_GREY #B8B4AC (sat 0,07, luminanta 180) pentru umbra.
+## Amandoua sunt sub CORAL_SAND (221) in valoare si aproape de el in saturatie,
+## adica exact ce voia scriptul de build sa ceara.
+##
+## De ce aici si nu in .glb: piesele sunt de KIT, folosite de toate POI-urile
+## pistei, iar un re-export atinge sase scripturi de build si toate cele 45 de
+## modele. Remaparea nu adauga niciun material si niciun slot — muta doar u-ul
+## pe centrul altui slot din acelasi atlas.
+##
+## Cheia e pe FISIER, nu pe numele partii: maparile pe nume sunt globale in tot
+## proiectul (lectia `nume-noduri-nu-sunt-unice`), iar „Chimney_A" n-are voie sa
+## atinga alta pista.
+const TUFF_UV_REMAP := {
+	1: Palette.CONCRETE,
+	2: Palette.MARBLE_GREY,
+}
+
+## Modelele pe care se aplica remaparea de mai sus: kitul de tuf al Cappadociei.
+##
+## Lista a crescut cand piata din Goreme a primit stratul uman. Piesele acelea
+## existau in kit dar nu fusesera asezate niciodata, deci nimeni nu observase
+## ca stau pe portocaliul desertului. Masurat pe ARIE (ProbeCappSlot, nou —
+## aria spune CAT, hexul spune CE): `farmhouse` era 37% SAND_MID #D4994D,
+## `cracked_chimney_c` 67% SAND_SHADOW #915D27, `cracked_chimney_b` 38%.
+## In captura de la frac 0,02 ieseau lazi portocalii langa conuri crem, adica
+## exact accidentul pe care remaparea asta il repara la hornuri.
+##
+## `church_arch` cere in plus ROCK_DARK -> ARCH_SHADOW: e singura piesa cu 35%
+## din arie pe slotul 4 (#67421F, maro inchis), fiindca arcada are un intrados
+## adanc. Lasat asa, arcul citea ca lemn ars. Vezi `ARCH_UV_REMAP`.
+##
+## Ce NU intra, si de ce: `vine_row` e 91% CACTUS_GREEN si `torch` 66%
+## RUST_METAL + 34% flacara — nu sunt tuf, si trecerea lor pe crem ar sterge
+## exact cele doua pete de culoare pe care le aduc in piata.
+const TUFF_UV_MODELS := [
+	"chimney_a", "chimney_b", "chimney_c", "chimney_d",
+	"chimney_mushroom", "chimney_triple", "twin_chimney_gate",
+	"cave_house_a", "cave_house_b", "cave_house_c",
+	"dovecote", "rock_church_facade",
+	"farmhouse", "cave_entrance", "church_arch",
+	"cracked_chimney_a", "cracked_chimney_b", "cracked_chimney_c",
+]
+
+## Remapare SUPLIMENTARA, doar pentru arcada: maroul inchis al intradosului.
+## Se tine separat fiindca ROCK_DARK e legitim pe restul kitului (crapaturi,
+## interior de faleza) — mutat global, ar aplatiza fiecare umbra sapata din
+## pista. MARBLE_GREY e deja folosit de umbra de tuf, deci arcul ramane in
+## aceeasi familie de valoare fara sa ceara un slot nou.
+const ARCH_UV_REMAP := {
+	4: Palette.MARBLE_GREY,
+}
+
+## Piesele care primesc si `ARCH_UV_REMAP`, pe langa cea de tuf.
+const ARCH_UV_MODELS := ["church_arch"]
+
+
 func _ready() -> void:
 	_split_shutters()
+	_retint_tuff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
 	_apply_glow()
@@ -551,6 +625,47 @@ func _build_collision() -> void:
 ## StaticBody-urile puse de mana dupa reteta veche din docs, cat si peste
 ## modelele purtate de un [PathMover], care sunt copiii unui AnimatableBody3D si
 ## se MISCA: un colizor static lasat in urma lor ar fi un zid fantoma.
+## Muta UV-urile de pe sloturile portocalii pe cele crem, pe modelele din
+## `TUFF_UV_MODELS`. Vezi comentariul de la `TUFF_UV_REMAP` pentru masuratoare.
+##
+## Lucreaza pe o COPIE a mesh-ului (`ArrayMesh` nou), nu pe resursa incarcata:
+## un `.glb` e partajat intre toate instantele si intre piste, deci scrisul in el
+## ar fi vopsit si ce nu trebuie, iar in editor s-ar fi salvat in import.
+func _retint_tuff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not TUFF_UV_MODELS.has(stem):
+			continue
+		# Arcada duce si maroul de intrados pe cenusiu; restul kitului nu.
+		var remap := TUFF_UV_REMAP.duplicate()
+		if ARCH_UV_MODELS.has(stem):
+			remap.merge(ARCH_UV_REMAP)
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var out := ArrayMesh.new()
+			var changed := false
+			for s in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(s)
+				var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+				for i in uv.size():
+					var slot := int(floor(uv[i].x * float(Palette.SLOTS)))
+					if remap.has(slot):
+						uv[i] = Palette.uv(int(remap[slot]))
+						changed = true
+				arr[Mesh.ARRAY_TEX_UV] = uv
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			if changed:
+				mi.mesh = out
+
+
 func _collect_models(node: Node, out: Array[Node3D]) -> void:
 	for c in node.get_children():
 		var spatial := c as Node3D

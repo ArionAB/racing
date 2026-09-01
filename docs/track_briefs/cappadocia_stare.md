@@ -45,9 +45,37 @@ Toate pleaca din `feat/cappadocia-assets` (kitul de 45 GLB, PR #364).
   pe traseul VECHI: umbrele bat la 133-169 grade fata de mers, adica inapoi
   peste camera. Vezi `azimutul-soarelui-fata-de-drum`.
 
-## 4. Ce urmeaza (runda 10 era in curs la pauza)
+## 4. Ce urmeaza (runda 10 s-a INCHEIAT; asta e punctul de reluare)
 
-Amandoi criticii orbi au cerut ACELASI lucru, si e primul de facut:
+**Runda 10 s-a facut si s-a judecat: tot pierdem (B 3/10, C pierdut).** Peretele
+care taie orizontul a fost construit pe amandoua ramurile, dar criticii spun ca a
+introdus defecte noi cat cele reparate. Cele trei corectii de la runda 10, care
+sunt punctul de plecare al rundei 11:
+
+1. **"Blocarea cerului nu face o cornisa; TERMINAREA pamantului o face."** Criticul
+   C: metrica de acoperire peste orizont (26% -> 44%) masoara axa gresita —
+   lipsa e SUB orizont, unde terenul exterior continua pe trei-patru polite in loc
+   sa se termine. Si consecinta practica: daca terenul exterior e taiat la o muchie
+   dura, peretele indepartat **nu mai are nevoie sa fie inalt deloc** — orice
+   inaltime citeste ca mal opus odata ce nu mai e nimic intre ochi si el.
+2. **O treapta se vede doar daca fata ei de SUS e luminata altfel decat fata
+   verticala.** Corbelul de 2.71 m/banda exista in mesh (masurat, monoton) si nu se
+   vede, fiindca benzile sunt separate doar prin nuanta, cu gradient moale — deci
+   citesc ca dungi pictate. Geometria masurata nu dovedeste ca o vede cineva.
+3. **Silueta conului, item unic al criticului B:** conurile sunt suprafete de
+   revolutie netede cu palaria lipita pe taper, deci conturul e o singura curba
+   neintrerupta. Asta produce trei defecte deodata (fara strate care ies, fara
+   scara, si citirea "tesatura"). Remediul: **largeste trunchiul sub palarie ca
+   palaria sa iasa in consola vizibil de la 60 m**, si fa deschiderile mai LATE
+   decat inalte (ferestre patrate, usi 1:2, distribuite pe inaltime) — acum sunt
+   fante verticale care citesc ca metereze.
+
+Si o capcana de metoda, tot din runda 10: constructorul C a ales o captura DIN LAT
+(nu din pozitia soferului) fiindca acolo "se citesc stratele" — si exact unghiul ala
+a scos la iveala doua defecte mai scumpe pe care conul ingust al vederii de sofer le
+ascundea. Alegerea cadrului nu repara lumea.
+
+Contextul care ramane valabil:
 
 > **Ridica un perete care TAIE ORIZONTUL pe partea exterioara**, la 30-60 m,
 > in benzi orizontale care ies in trepte. Nu mai sapa in jos — pamantul e sapat.
@@ -71,3 +99,43 @@ masurata: `CameraZone.ceiling` e implicit 15.0, dar salile sunt de 16 si 18 m �
 se pune pe fiecare zona cota REALA, altfel tavanul intra in cadru dupa pragul
 de 25 m. Pentru cornisa: `ProbeBalloon` e ROSU intentionat pana cand tarusul
 primeste o polita la <= 9.4 m de axul benzii.
+
+## 5. Blocajul de drivabilitate (rezolvat, 1 sep 2026)
+
+ProbeRace a fost rulat abia dupa 15 runde de arta, si a aratat ca **pista nu se
+putea termina**: toate masinile se ingramadeau la frac ~0.80 (elicea), viteza
+30 -> 2.1 -> 0.0 m/s, 50 izbituri in pereti, 0.80 tururi.
+
+CAUZA (gasita cu numele puse pe corpurile generate): marginea exterioara a
+umarului se punea neconditionat la cota terenului. Peste un GOL, "terenul" e
+podeaua scobiturii — cu ~38 m mai jos. Umarul platoului de iesire cobora 38 m pe
+4 m orizontali (~84 grade): **o perdea de pietris atarnata peste gura stancii**,
+prin care treceau amandoua spirele. Contractul umarului e rampa de reintrare
+(max 4 m, max 25 grade), deci era o incalcare a propriului contract, nu o
+decizie de design. Fix: `SHOULDER_MAX_DROP = 2.5` in `track.gd`.
+Al doilea defect: `TerrainHollow.radius_m` era 34 = raza spiralei (28) +
+semilatimea (6), exact pe muchie, iar palnia `wall_m` incepe DUPA raza nominala;
+punctele de intrare cadeau in palnie (+35 m de tuf peste asfalt). Acum 42.
+
+DUPA FIX, verificat de doi agenti si de lead pe rulari separate:
+  0 repuneri si 0 izbituri pe 6+ rulari cu seed-uri explicite
+  0.80 tururi -> 2.31 tururi
+  elicea curge la 22 m/s acolo unde era 0.0
+Scaderea de viteza care RAMANE pe 0.75-1.00 (30 -> 22 -> 15.9) nu e blocaj: e
+elicea, care chiar e stramta si abrupta (raza min 8.8 m, panta 13%), cu 0% in
+afara soselei.
+
+`SHOULDER_MAX_DROP` e cod PARTAJAT, deci s-a masurat si regresia, cu seed-uri
+identice pe Stromboli (track 4), 4 seed-uri pe brat:
+  cu plafon:   17, 12, 15, 13 repuneri (media 14.3), tururi 1.59-1.62
+  fara plafon: 15, 19, 12, 16 repuneri (media 15.5), tururi 1.61-1.63
+Nu e regresie — usor mai bine la repuneri, identic la ritm. Ingrijorarea din
+raportul agentului (11 vs 20) venea dintr-o singura rulare per brat, adica
+zgomot Jolt (memoria `proberace-nedeterminism`).
+
+GARDA NOUA: `tools/ProbeLaneClear.tscn` intreaba si lateral, si INAINTE pe
+directia de mers — capcana care a facut sonda lead-ului sa rateze obstacolul
+(statea 2-5 m in fata, nu in punctul curent). Lista de suprafete de rulare scuza
+acum un nume doar cat timp forma sta JOS (sub +1 m fata de asfalt), fiindca
+altfel ar fi scuzat chiar `Shoulders`. Sabotaj verificat: cu plafonul scos,
+PROBLEMA si 13 probe blocate.

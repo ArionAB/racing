@@ -78,6 +78,17 @@ const PROP_COLLISION := {
 	# reconstruieste colizorul (trimesh — poarta de 4 m trebuie sa ramana
 	# libera) la fiecare schimbare de stadiu.
 	"lava_flow": "none",
+	# Hornul crapat (Cappadocia, POI D): aceeasi capcana ca la lava, din
+	# acelasi motiv. Cele trei stari stau in scena una langa alta, iar
+	# `world_prop` construieste corpurile O DATA, la `_ready`, pentru
+	# mesh-urile vizibile ATUNCI — adica pentru toate trei, fiindca instantele
+	# GLB isi fac `_ready` inaintea hazardului care le stinge. Rampa si molozul
+	# ar fi existat ca ziduri invizibile pe mijlocul drumului inca dinainte ca
+	# hornul sa cada. Colizorul si-l face [CrackedChimneyHazard], la fiecare
+	# schimbare de stare.
+	"cracked_chimney_a": "none",
+	"cracked_chimney_b": "none",
+	"cracked_chimney_c": "none",
 	# --- copaci si stalpi: cilindru pe trunchi ----------------------------
 	"larch_winter_a": "trunk", "larch_winter_b": "trunk",
 	"larch_winter_c": "trunk", "birch_winter_a": "trunk",
@@ -128,9 +139,6 @@ const PROP_COLLISION := {
 	# Via si tufele: sub linia capotei, pe acostament. Un corp solid acolo ar
 	# transforma iesirea de pe banda in zid.
 	"vine_row": "none", "shrub_dry": "none",
-	# Molozul hornului cazut (0.98 m inaltime) e o dara de pietre pe nisip:
-	# hull-ul lui ar fi o lespede de 10 m pe care masina s-ar urca.
-	"cracked_chimney_c": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -198,6 +206,20 @@ const ACCENT_SPLIT := {
 ## Cheia e numele fisierului .glb (fara extensie); valoarea, o mapare
 ## nume-de-parte -> clasa, aplicata DOAR instantelor modelului aluia.
 const CLASSES_BY_MODEL := {
+	# --- Cappadocia: faleza in benzi a canionului rosu (POI D) --------------
+	#
+	# Modulul vine din kit cu UV-uri pe atlas si matura sloturile 19/23/27/2/1
+	# — masurat cu tools/ProbeCappSlots: 31% CREM (19, #E9DCC0) si ZERO rosu.
+	# Pe el, canionul "rosu" din brief §2 iesea crem, ca restul pistei.
+	#
+	# Clasa il imbraca in sisturi stratificate tentate spre caramiziu (vezi
+	# `red_valley_tuff` in palette.gd, unde multiplicatorul e masurat din
+	# crop-ul de referinta). E un material in plus la garda, cheltuit
+	# DELIBERAT pe o CLASA de assets, nu pe o piesa — regula din CLAUDE.md.
+	"cliff_band_module": {
+		"Cliff_Band_Module": Palette.TRI_PREFIX + "red_valley_tuff",
+	},
+
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},
@@ -1244,6 +1266,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.BAIKAL_CLASSES)
 	out.merge(TrackDecor.STROMBOLI_CLASSES)
 	out.merge(TrackDecor.CHONGQING_CLASSES)
+	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

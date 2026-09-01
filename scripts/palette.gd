@@ -535,6 +535,19 @@ const CLASS_TEXTURES := {
 	"bark": "res://assets/textures/classes/bark.png",
 	# Muntele (Alpii): sisturi stratificate si zapada avalansei.
 	"alpine_granite": "res://assets/textures/classes/alpine_granite.png",
+	# TUFUL IN BENZI AL VAII ROSII (Cappadocia, POI D). ACEEASI dala ca
+	# "alpine_granite" — nu se dubleaza in memorie, se schimba doar tenta
+	# (aceeasi mecanica ca volcanic_rock / village_plaster / macchia_dry).
+	#
+	# De ce sisturile alpine si nu "rock": dala lor e STRATIFICATA, adica
+	# are chiar desenul de sedimente orizontale pe care il cere faleza in
+	# benzi. Dala de "rock" e gresie fara asezare, iar pe un perete de 20 m
+	# ar fi iesit o pata uniforma — exact reprosul "banda pictata pe panta
+	# neteda arata a panza".
+	#
+	# Nu se putea tenta "alpine_granite" direct: e clasa stancilor de pe
+	# Alpi (Track09) si le-ar fi facut rosii.
+	"red_valley_tuff": "res://assets/textures/classes/alpine_granite.png",
 	"snow": "res://assets/textures/classes/snow.png",
 	# Coroana coniferelor (pictata, vezi tools/paint_pine_needles.py).
 	"pine_needles": "res://assets/textures/classes/pine_needles.png",
@@ -627,6 +640,12 @@ const CLASS_TINT := {
 	# <= 1 pe toate canalele si nu mai e nevoie de nicio ridicare. Sub lumina
 	# temei iese (59,63,74), R-B = -15: piatra rece de oras noaptea.
 	"old_stone": Color(0.895, 0.933, 1.0),
+	# Valea Rosie: dala alpine_granite (166, 156, 137) impinsa pe rosul
+	# caramiziu al referintei. Multiplicatorul NU e ales din ochi — e
+	# masurat din docs/track_briefs/img/v3_crops/D_canyon.png (media zonei
+	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
+	# canale ies SUB 1, deci nu cere CLASS_LIFT.
+	"red_valley_tuff": Color(0.822, 0.568, 0.479),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -674,6 +693,13 @@ const CLASS_TRIPLANAR_SCALE := {
 	# strat de piatra citeste cat un strat pe o stanca de 2-4 m, exact ca la
 	# `rock` — aceeasi familie de geologie, alta piatra.
 	"alpine_granite": 0.16,
+	# Valea Rosie: dala se intinde de DOUA ori mai mult decat pe Alpi
+	# (0.08 fata de 0.16). Modulul are 12.4 m inaltime: la scara alpina ar
+	# fi incaput ~2 randuri de sedimente pe toata faleza, adica desen prea
+	# mare ca sa citeasca a straturi. La 0.08 intra de doua ori mai multe
+	# benzi, deci fiecare treapta de 12 m arata ca un teanc de straturi,
+	# nu ca doua dungi.
+	"red_valley_tuff": 0.08,
 	# Masa avalansei. Sursa e o scanare de teren de ~2 m; la 0.3 (o repetitie
 	# la 3.3 m) un corp de 7 m prinde ~2 repetitii — destul cat crustele si
 	# urmele sa se citeasca la rostogolire, prea putin cat sa devina tapet.

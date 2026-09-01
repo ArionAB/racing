@@ -197,14 +197,14 @@ var theme_glow: bool = true
 ## ale intregii scene.
 const SHADOW_DISTANCE: float = 110.0
 
+## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
+## nu inline: o citesc si lumina din _build_environment, si glint-ul apei din
+## _water_material — scanteierea trebuie sa cada din acelasi soare.
 ## `shadow_normal_bias` la soarele standard de 42 de grade. Gasit prin iterare
 ## pe falezele de canion; nu se citeste direct nicaieri, ci prin
 ## `_shadow_normal_bias_for_sun()`, care il reface pentru alte elevatii.
 const SHADOW_NORMAL_BIAS_REF: float = 1.6
 
-## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
-## nu inline: o citesc si lumina din _build_environment, si glint-ul apei din
-## _water_material — scanteierea trebuie sa cada din acelasi soare.
 const SUN_ROTATION_DEG: Vector3 = Vector3(-42, 135, 0)
 
 
@@ -1732,6 +1732,58 @@ static func themes() -> Dictionary:
 			# pierdut azimutul o data deja, ramas pe traseul vechi dupa ce curba a
 			# fost redesenata. Mecanismul de teren e in _build_terrain, valorile in
 			# scenes/tracks/Track13.tscn, iar hook-ul in track_from_path.gd.
+			# ETAJUL INALT AL TERENULUI, cu o culoare PROPRIE. Asta e reparatia
+			# defectului pe care l-au numit toti patru criticii: "o singura
+			# nuanta pe toata adancimea cadrului".
+			#
+			# Diagnostic MASURAT, nu presupus. Conul palid care umple coltul
+			# din dreapta capturii la frac 0.48 NU e Erciyes (ala e la 453 m,
+			# dincolo si de fog_end 300 si de FAR_PLANE 380). Sunt varfurile de
+			# TEREN: UmarulCornisei si PeretelHairpinului au marginea la 40-50
+			# m de camera, MasivulDeTuf la 110 m. Adica sunt in prim-plan, unde
+			# ceata n-are ce sa le faca — de-aia mutarea cetii de la tan la
+			# albastru a schimbat pixelii cu 2/255, sub pragul de 4%.
+			#
+			# Ele erau vopsite integral in `ground_tint` (CORAL_SAND), variate
+			# DOAR ca luminozitate: `shade` in [0.86, 1.10], adica ±12% pe o
+			# singura nuanta. O masa de 50 m inaltime cu aceeasi tenta ca berma
+			# de sub roata nu are cum sa citeasca drept alt plan.
+			#
+			# Culoarea e derivata, nu aleasa: se pleaca de la CORAL_SAND si se
+			# merge spre gri-albastru, ca departarea sa se raceasca. E aceeasi
+			# perspectiva aeriana pe care o face ceata, aplicata insa acolo
+			# unde ceata nu ajunge. Saturatia cade la ~40% fata de sol, si cade
+			# si VALOAREA: un plan mai departe e mai inchis decat prim-planul
+			# insorit, altfel sare in fata in loc sa stea in spate.
+			"rock_band_tint": Color(0.46, 0.47, 0.55),
+			# Linia porneste la 34 m, adica 10 m PESTE cota soselei (~24 m), ca
+			# berma pe care merge masina sa ramana integral calda si zona sa
+			# prinda numai masele de fundal. Fade-ul de 22 m e larg deliberat:
+			# `rock_line` e o cota ABSOLUTA, si cu o trecere scurta ar aparea o
+			# linie de nivel orizontala pe toate conurile deodata — exact
+			# "dunga pictata" pentru care a picat peretele. Codul adauga peste
+			# greutate si un zgomot de ±0.25, deci marginea iese zdrentuita.
+			# RETUNAT LA INTEGRARE (30 -> 50, fade 26 -> 22). Cifra lui D era
+			# masurata pe traseul lui D ("10 m peste cota soselei ~24 m"), dar
+			# dupa ce traseul lui C a intrat, cotele nu mai sunt aceleasi: A
+			# merge la 49.3 si B la 47.5, deci o linie la 30 punea cenusiul
+			# rece pe terenul din PIATA GOREME si din PADUREA HORNURILOR, cu
+			# greutate 0.74 si 0.67 — exact cele doua POI-uri a caror identitate
+			# e tuful CREM CALD (vezi `_warm_tuff` din world_prop.gd, rundele lui
+			# B). Regula lui D se pastreaza, doar ca se aplica pe cotele reale:
+			# masele pe care le voia racite sunt varfurile de teren
+			# (MasivulDeTuf 78, CanionMalDrept 58-60, PlatoulGoreme 66), toate
+			# peste 58 m; drumurile sunt sub 50. La 50/22 varfurile se racesc
+			# (0.36-1.00) si TOATE soselele raman la 0.00.
+			"rock_line": 50.0,
+			"rock_fade": 22.0,
+			# MOLOZUL hornului cazut (POI D, brief §2): 0.8x din asfaltul de 8,
+			# adica 6.4. Ceva mai putin decat cenusa Stromboli (6.8) fiindca
+			# aici sunt bolovani de tuf pe drum, nu nisip afanat — dar tot
+			# SUPRAFATA, nu hazard: pedeapsa e ca aluneci, nu ca te opresti.
+			# Intervalul e declarat in scena (`custom_loose_ranges`), ca sa se
+			# poata muta odata cu molozul fara sa se umble in cod.
+			"loose_grip": 6.4,
 			# Cer de zori, hexurile din brief §9. NU e cerul de desert
 			# (albastru adanc 0.25/0.52/0.92 cu orizont auriu tare): la 13 grade
 			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.
@@ -2041,7 +2093,18 @@ static func themes() -> Dictionary:
 			# la 90 m (implicitul de desert), hazardul-semnatura al pistei ar fi
 			# fost o pata calda. Capatul e 300, ca pe Stromboli, fiindca Erciyes
 			# si Uchisar trebuie sa fie IN ceata, nu dincolo de ea.
-			"fog_begin": 140.0,
+			# Inceputul coboara 140 -> 95. Motivul e tot reprosul de adancime:
+			# cu ceata pornita de la 140 m, TOT ce se vede dintr-un canion —
+			# peretele de vizavi la 40 m, coada rapei la 90 — cadea inaintea
+			# ei, deci primea zero gradatie. Ceata exista, dar numai pentru
+			# munte. Ca sa existe planuri, gradientul trebuie sa inceapa in
+			# interiorul scenei jucate, nu dincolo de ea.
+			#
+			# Baloanele din vale (POI C, 60-150 m sub banda) raman clare:
+			# fog_depth_curve e 1.4, deci la 95-150 m ceata a acumulat sub 15%
+			# — o racire abia perceptibila pe silueta, nu o pata. Ce inghite ea
+			# de fapt e intervalul 200-300, unde oricum nu e nimic jucabil.
+			"fog_begin": 95.0,
 			"fog_end": 300.0,
 			# ERCIYES pe orizont: vulcanul cu zapada care se vede din toata
 			# Cappadocia. Modelul e din kitul propriu (PR #364), nu imprumutat
@@ -3501,11 +3564,10 @@ func _build_environment() -> void:
 	if theme_shadows:
 		sun.directional_shadow_mode = \
 			DirectionalLight3D.SHADOW_ORTHOGONAL
-		sun.directional_shadow_max_distance = float(
-			theme_flag("shadow_distance", SHADOW_DISTANCE))
+		sun.directional_shadow_max_distance = SHADOW_DISTANCE
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
-		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))
+		sun.shadow_blur = 1.4
 		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
 		# acne pe fetele orientate spre soare.
 		sun.shadow_bias = float(theme_flag("shadow_bias", 0.06))
@@ -9423,13 +9485,8 @@ func _build_shoulders() -> void:
 			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
 			var outer0 := inner0 + s0 * w0 * side_sign
 			var outer1 := inner1 + s1 * w1 * side_sign
-			# Coborarea e PLAFONATA (vezi SHOULDER_MAX_DROP): peste un gol,
-			# cota terenului e podeaua golului, iar umarul ar deveni o perdea
-			# verticala de zeci de metri de-a curmezisul drumului de dedesubt.
-			outer0.y = maxf(_terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK,
-				inner0.y - SHOULDER_MAX_DROP)
-			outer1.y = maxf(_terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK,
-				inner1.y - SHOULDER_MAX_DROP)
+			outer0.y = _terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK
+			outer1.y = _terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK
 			# U-ul urmeaza latimea REALA, altfel textura se intinde exact acolo
 			# unde banda se lateste.
 			var u_shoulder := maxf(w0, w1) / tile
@@ -9495,7 +9552,7 @@ func _build_shoulders() -> void:
 	# CU COLIZIUNE: banda e rampa de reintrare pe sosea, nu doar o culoare.
 	_add_mesh_with_collision(st.commit(), dust,
 		_tex("res://assets/textures/surface_gravel.png"), 1.0, 0.5,
-		BaseMaterial3D.CULL_BACK, null, null, true, null, "Shoulders")
+		BaseMaterial3D.CULL_BACK)
 
 
 ## Cat de lat trebuie sa fie umarul intr-un punct ca panta lui sa ramana sub

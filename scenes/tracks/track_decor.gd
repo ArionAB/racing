@@ -716,6 +716,25 @@ const BAIKAL_CLASSES := {
 ##
 ## AO-ul din vertex colors ramane dedesubt in toate cazurile (SurfaceTool il
 ## pastreaza, iar materialele de clasa au `vertex_color_use_as_albedo`).
+## Clasele pieselor construite DIRECT IN SCENA pe Cappadocia (POI D).
+##
+## Modulul de faleza vine din kit si isi ia clasa prin CLASSES_BY_MODEL, care e
+## cheiat pe numele FISIERULUI .glb. Treptele de strat si grohotisul din runda 3
+## nu sunt insa GLB-uri: sunt `BoxMesh`-uri scrise in .tscn, fiindca profilul
+## modulului NU are trepte de scobit (masurat cu ProbeCappProf2: fata merge
+## neted de la z=-3.82 la z=-1.20 pe 12.4 m, deci „benzile" de pe captura sunt
+## exclusiv textura). Un mesh fara fisier .glb nu are `scene_file_path`, deci
+## nu poate fi prins de CLASSES_BY_MODEL — ii trebuie o intrare pe NUME.
+##
+## Zero materiale in plus: `red_valley_tuff` e deja pe pista, purtata de cele
+## 148 de module de faleza. Treptele se grupeaza in ACELASI material, deci intra
+## in acelasi draw call ca peretele din care ies.
+const CAPPADOCIA_CLASSES := {
+	"Treapta_": Palette.TRI_PREFIX + "red_valley_tuff",
+	"Buza_Strat": Palette.TRI_PREFIX + "red_valley_tuff",
+	"Talus_": Palette.TRI_PREFIX + "red_valley_tuff",
+}
+
 const STROMBOLI_CLASSES := {
 	# --- Incandescentele --------------------------------------------------
 	#

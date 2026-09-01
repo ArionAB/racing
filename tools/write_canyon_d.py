@@ -13,6 +13,7 @@ import sys
 TSCN = "scenes/tracks/Track13.tscn"
 ROWS = "canyon_d_rows.txt"
 RUBBLE = "canyon_d_rubble.txt"
+STRATA = "canyon_d_strata.txt"
 BASE = "DecorManual/D) Canionul rosu"
 
 
@@ -31,6 +32,22 @@ def basis_pitch(yaw: float, pitch: float, sc: float) -> str:
     z = (sy * cp, -sp, cy * cp)
     v = [c * sc for c in (x + y + z)]
     return ", ".join("%.5f" % c for c in v)
+
+
+def basis_box(yaw: float, sx: float, sy: float, sz: float) -> str:
+    """Basis pentru o treapta de strat: rotatie in jurul lui Y, scalare
+    NEUNIFORMA pe cele trei axe.
+
+    Cutia e un `BoxMesh` unitar (1x1x1) instantiat o singura data ca
+    sub-resursa; lungimea benzii, buza de 0.3 m si adancimea intra prin scara,
+    deci 184 de trepte nu aduc 184 de mesh-uri.
+
+    Coloanele sunt scrise ca la `basis` (verificat pe un nod real), doar ca
+    fiecare coloana isi ia propriul factor.
+    """
+    c, s_ = math.cos(yaw), math.sin(yaw)
+    return "%.5f, 0.00000, %.5f, 0.00000, %.5f, 0.00000, %.5f, 0.00000, %.5f" % (
+        c * sx, s_ * sx, sy, -s_ * sz, c * sz)
 
 
 def basis(yaw: float, sc: float) -> str:
@@ -70,6 +87,17 @@ def main() -> int:
                        "yaw": float(p[3]), "pitch": float(p[4]),
                        "sc": float(p[5])})
 
+    # Treptele de strat: cutii, nu instante de GLB (vezi gen_strata_d.gd).
+    strata = []
+    for line in open(STRATA, encoding="utf-8"):
+        if not line.strip():
+            continue
+        p = line.split("	")
+        strata.append({"x": float(p[0]), "y": float(p[1]), "z": float(p[2]),
+                       "yaw": float(p[3]), "len": float(p[4]),
+                       "lip": float(p[5]), "depth": float(p[6])})
+
+
     text = open(TSCN, encoding="utf-8").read()
     cut = text.index('[node name="Faleza" type="Node3D"')
     head = text[:cut]
@@ -105,10 +133,28 @@ def main() -> int:
             r["x"], r["y"], r["z"]))
         out.append("")
 
+    # --- TREPTELE DE STRAT (runda 3) ---------------------------------------
+    #
+    # `BoxMesh` unitar, scalat: cutii reale scoase din fata modulului, fiindca
+    # modulul NU are trepte in profil (ProbeCappProf2: fata merge neted de la
+    # z=-3.82 la z=-1.20 pe 12.4 m, deci benzile de pe captura erau exclusiv
+    # textura). Numele incepe cu `Treapta_`, deci `prop_classes()` ii da
+    # `red_valley_tuff` — acelasi material ca al peretelui, zero in plus.
+    out.append('[node name="Strate" type="Node3D" parent="%s"]' % BASE)
+    out.append("")
+    for i, r in enumerate(strata, 1):
+        out.append('[node name="Treapta_%03d" type="MeshInstance3D" '
+                   'parent="%s/Strate"]' % (i, BASE))
+        out.append('mesh = SubResource("BoxMesh_strat")')
+        out.append("transform = Transform3D(%s, %.3f, %.3f, %.3f)" % (
+            basis_box(r["yaw"], r["len"], r["lip"], r["depth"]),
+            r["x"], r["y"], r["z"]))
+        out.append("")
+
     open(TSCN, "w", encoding="utf-8", newline="\n").write(head + "\n".join(out))
-    print("faleza=%d buza=%d grohotis=%d total=%d" % (
-        n_fal, n_bz, len(rubble), n_fal + n_bz + len(rubble)))
-    return 0
+    print("faleza=%d buza=%d grohotis=%d strate=%d total=%d" % (
+        n_fal, n_bz, len(rubble), len(strata),
+        n_fal + n_bz + len(rubble) + len(strata)))
 
 
 if __name__ == "__main__":

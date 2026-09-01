@@ -64,6 +64,30 @@ func _ready() -> void:
 			"hw": track.width_at(f),
 		}
 
+	# Cat de sus e liber deasupra unui punct din lume, pana la ORICE carosabil
+	# care trece pe deasupra. Exista fiindca traseul se suprapune cu el insusi:
+	# spirala stancii goale (POI G) se intoarce peste sala 2 la ~15 m
+	# (`ProbeLayout`: separare minima 15.1 m la frac 0.75). O lespede de tavan
+	# pusa orbeste la 18 m ajunge deci PESTE drumul de sus, si masurat lasa 4.41 m
+	# degajare la frac 0.845 — sub minimul de 4.5 m, adica un zid pe carosabil.
+	# Defectul era si inainte de runda asta; se repara aici fiindca aici se pun
+	# lespezile.
+	var headroom := func(pos: Vector3) -> float:
+		var best := 1e9
+		for j in range(n):
+			var q: Vector3 = r.baked[j]
+			if Vector2(q.x - pos.x, q.z - pos.z).length() > 8.5:
+				continue
+			# Se masoara in AMANDOUA sensurile, si asta a fost greseala primei
+			# variante: ea cerea `q.y > pos.y`, adica se uita doar la drumul de
+			# DEASUPRA lespezii. Dar lespedea vinovata statea la y=30.1 peste un
+			# carosabil la y=26.6 — drumul trecea pe DEDESUBT, iar lespedea
+			# atarna in el de sus. Testul corect e distanta pe verticala, fara
+			# semn: orice carosabil mai apropiat de 4.5 m e o problema, fie ca e
+			# peste sau sub piesa.
+			best = minf(best, absf(q.y - pos.y))
+		return best
+
 	# Emite un nod. `col` = metadata de coliziune ("" = implicitul hull).
 	# `roll` inclina piesa in jurul axei ei de INAINTARE (dupa yaw), ca o
 	# lespede de tavan sa poata deveni panou de perete fara o piesa noua.
@@ -105,7 +129,7 @@ func _ready() -> void:
 			"none", 1.0, 0.0, TORCH_GLOW)
 
 	# ------------------------------------------------------------- SALA 1
-	_hall(at, emit, 0.664, 0.698, CEIL_H1, "F2_Sala1", "s1", false)
+	_hall(at, emit, headroom, 0.664, 0.698, CEIL_H1, "F2_Sala1", "s1", false)
 	# Putul de ventilatie: coloana de lumina care cade PE DRUM (brief §2 POI F).
 	# Se aseaza IN tavan, cu axul putin lateral, ca fasciculul sa taie banda in
 	# diagonala in loc s-o urmeze.
@@ -130,11 +154,42 @@ func _ready() -> void:
 
 	# ------------------------------------------------------------- SALA 2
 	# Biserica rupestra: acelasi schelet, dar cu arcade de biserica si fresce.
-	_hall(at, emit, 0.720, 0.753, CEIL_H2, "F4_Sala2", "s2", true)
+	#
+	# CAPATUL RAMANE LA 0.753, si asta e o concluzie, nu inertie.
+	#
+	# Masurat, briefu NU INCAPE aici. El cere sala 2 pe 0.66-0.82, dar de la 0.76
+	# drumul urca spre spirala stancii goale (11.9 m la 0.76 -> 27.5 la 0.85) SI
+	# spirala se intoarce PE DEASUPRA salii (memoria `pista-peste-pista`): la
+	# frac 0.750 drumul e in (-335, 12.2, -16.0), la 0.845 in (-319, 26.6, -16.0)
+	# — acelasi z, 14.9 m mai sus. `_sep.gd` masoara degajarea pana la bucla, iar
+	# `ProbeLayout` o confirma independent: "separare verticala minima 15.1 m la
+	# frac 0.75 (prag 14)". Intr-un spatiu de 15 m nu incape o sala de 18 m plus
+	# degajare — dus la 0.800, tavanul lasa 3.88 si 1.99 m peste carosabil, adica
+	# ziduri, si `_ceil.gd` le-a prins.
+	#
+	# Incercarea de a TAIA sala mai devreme (0.745) ca sa scape de coliziune a
+	# fost si mai rea, si captura a spus-o: la frac 0.74 cadrul se termina in cer
+	# deschis si munte cenusiu, adica exact defectul de la 0.76 mutat cu 20 m mai
+	# aproape. Am revenit. O sala mai scurta nu rezolva o sala care se termina
+	# prea devreme.
+	#
+	# Concluzia onesta: intervalul 0.76-0.82 din brief nu poate fi caverna cu
+	# geometria actuala a traseului. Ori se coboara tavanul salii 2 sub 14 m (si
+	# atunci `CameraZone.ceiling` nu mai are ce arata), ori se muta bucla elicei —
+	# amandoua sunt decizii de TRASEU, nu de decor, si nu se iau intr-o runda de
+	# arta. Ce tine de runda asta e ca sala existenta sa arate ca o sala.
+	_hall(at, emit, headroom, 0.720, 0.753, CEIL_H2, "F4_Sala2", "s2", true)
 	var v2: Dictionary = at.call(0.737)
 	emit.call("F4_Sala2", "putSala2", "vent_shaft",
 		(v2["c"] as Vector3) - (v2["side"] as Vector3) * 2.4
 			+ Vector3.UP * CEIL_H2, v2["yaw"] as float, "none", 1.0)
+	# Al doilea put, catre capatul salii: cu unul singur (la 0.737) toata a doua
+	# jumatate ramanea fara nicio gura de lumina. La 0.748 — mai incolo ar intra
+	# sub bucla de intoarcere a elicei si ar iesi prin carosabilul de deasupra.
+	var v3: Dictionary = at.call(0.748)
+	emit.call("F4_Sala2", "putSala3", "vent_shaft",
+		(v3["c"] as Vector3) + (v3["side"] as Vector3) * 2.4
+			+ Vector3.UP * CEIL_H2, v3["yaw"] as float, "none", 1.0)
 
 	var fa := FileAccess.open(OUT, FileAccess.WRITE)
 	fa.store_string("\n".join(lines))
@@ -145,7 +200,7 @@ func _ready() -> void:
 
 ## O sala: tavan din lespezi, coloane si alcove pe pereti, arcade transversale,
 ## torte. `church` schimba arcada cu cea de biserica (fresce) — sala 2.
-func _hall(at: Callable, emit: Callable, f0: float, f1: float, ceil_h: float,
+func _hall(at: Callable, emit: Callable, headroom: Callable, f0: float, f1: float, ceil_h: float,
 		group: String, tag: String, church: bool) -> void:
 	var span := f1 - f0
 	# Lungimea salii se ia din pozitii REALE, nu din fractie: pe fractie pasul
@@ -164,9 +219,19 @@ func _hall(at: Callable, emit: Callable, f0: float, f1: float, ceil_h: float,
 		# Trei lespezi in latime: caverna e mai lata decat banda (brief §2.0 —
 		# camera sta la 10 m si `_unclip` o impinge afara din pereti).
 		for k: int in [-1, 0, 1]:
+			var at_pos := c + side * (CEIL_TILE * float(k)) + Vector3.UP * ceil_h
+			# Lespedea are 1.99 m si creste IN SUS de la origine, deci ocupa pana
+			# la +2 m. Sub carosabilul de deasupra trebuie sa ramana degajarea de
+			# 4.5 m ceruta de `ProbeBuried`: daca nu incape, lespedea se SARE.
+			# Gaura ramasa da chiar in masivul de teren de deasupra, deci nu se
+			# vede cer — s-a verificat pe captura, nu doar pe cifra.
+			# Lespedea ocupa [y, y+2]. Sub ea trebuie sa ramana degajarea de 4.5 m
+			# ceruta de `ProbeBuried`; deasupra ei, la fel — daca drumul de
+			# intoarcere al elicei trece pe acolo, lespedea intra in el.
+			if (headroom.call(at_pos) as float) < 6.5:
+				continue
 			emit.call(group, "tavan%s" % tag, "hall_ceiling_module",
-				c + side * (CEIL_TILE * float(k)) + Vector3.UP * ceil_h,
-				d["yaw"] as float, "mesh", 1.0)
+				at_pos, d["yaw"] as float, "mesh", 1.0)
 
 	# --- COLOANELE: perechi la ~11 m, scalate pe inaltimea salii.
 	# Scara e pe inaltime: coloana e ce a RAMAS din stanca, deci se ingroasa la
@@ -191,11 +256,21 @@ func _hall(at: Callable, emit: Callable, f0: float, f1: float, ceil_h: float,
 				(da["c"] as Vector3)
 					- (da["side"] as Vector3) * ((da["hw"] as float) + 1.2),
 				(da["yaw"] as float) + PI * 0.5, "hull", 1.0)
-		# Torta pe peretele din dreapta: lumina care face modelarea sub pamant.
-		if s % 2 == 0:
-			emit.call(group, "torta%s" % tag, "torch",
-				c + side * (hw + 0.6), d["yaw"] as float - PI * 0.5,
-				"none", 1.0, 0.0, TORCH_GLOW)
+		# Torta: lumina care face modelarea sub pamant.
+		#
+		# UNA PE FIECARE PAS, alternand malul — inainte era `s % 2 == 0`, adica o
+		# flacara la ~22 m, si captura arata de ce e prea putin: la 0.68 nu se
+		# vedea NICIUNA, iar la 0.72 doua atat de departe incat citeau ca litere
+		# "T", nu ca foc. Referinta (`v3_crops/F_underground.png`) e chiar pe dos:
+		# vreo douasprezece flacari, si tot ce e cald in cadru vine din ele.
+		# Cu ambientul la 0.30 tortele nu sunt accent, sunt SINGURA sursa; una la
+		# 22 m lasa jumatate din sala fara nimic care s-o modeleze.
+		# Alternarea malului da si ritm lateral: pe un sir de coloane simetrice,
+		# lumina care sare stanga-dreapta e ce arata ca sala are LATIME.
+		emit.call(group, "torta%s" % tag, "torch",
+			c + side * (hw + 0.6) * (1.0 if s % 2 == 0 else -1.0),
+			(d["yaw"] as float) + (-PI * 0.5 if s % 2 == 0 else PI * 0.5),
+			"none", 1.0, 0.0, TORCH_GLOW)
 
 	# --- PERETII. Fara ei sala e o pergola: prima captura la frac 0.68 a iesit
 	# cu cer si dune pe amandoua partile, adica exact "desert cu stalpi".
@@ -248,11 +323,35 @@ func _hall(at: Callable, emit: Callable, f0: float, f1: float, ceil_h: float,
 				# stau la `hw + COL_OUT`; peretele trece cu inca 3.4 m in spatele
 				# lor, deci raman intre banda si piatra, vizibile pe toata
 				# inaltimea. Acostamentul il inchide poala peretelui de jos.
+				#
+				# VARIATIA. Cu toate piesele la aceeasi scara si acelasi offset,
+				# captura de la 0.68 iesea un sir de firide IDENTICE care marsaluia
+				# spre punctul de fuga — cel mai artificial lucru din cadru, si
+				# singurul pe care ochiul il prinde inaintea oricarui detaliu:
+				# 268 de exemplare ale aceleiasi piese, aliniate la milimetru.
+				# Peretele e SAPAT cu tarnacopul, deci nu are cum sa fie regulat.
+				# Se clatina deci scara (±12%) si adancimea (±0.9 m) dupa un hash
+				# al pozitiei — determinist (aceeasi pista la fiecare regenerare,
+				# ca sonda sa poata compara A/B), dar necorelat intre vecini.
+				# Nu costa niciun material si nicio piesa in plus: aceleasi
+				# instante, doar ca nu mai sunt stantate.
+				# Jitterul e DOAR SPRE INTERIOR (0 .. +0.9), niciodata spre
+				# afara. Prima varianta il facea simetric (±0.9) si captura de la
+				# 0.76 a aratat de ce e gresit: panourile impinse in afara ies
+				# din masivul de teren, iar prin rosturile ramase intra stanca
+				# CENUSIE de exterior — pete palide de-a lungul intregului sir,
+				# adica taman lumina de afara pe care peretii exista s-o
+				# opreasca. Peretele sapat poate avansa in sala (mai multa
+				# piatra), dar nu poate da inapoi in munte fara sa-l gaureasca.
+				var h := float((col * 73 + lvl * 149 + int(sgn) * 37) % 100) / 100.0
+				var h2 := float((col * 31 + lvl * 211 + int(sgn) * 17) % 100) / 100.0
+				var ws := wall_scale * (0.94 + 0.18 * h)
+				var depth := (hw + COL_OUT + 3.4) - h2 * 0.9
 				emit.call(group, "perete%s" % tag, "hall_alcove",
-					c + side * (hw + COL_OUT + 3.4) * sgn
+					c + side * depth * sgn
 						+ Vector3.UP * (wall_h * float(lvl)),
 					yaw + (PI * 0.5 if sgn > 0.0 else -PI * 0.5), "hull",
-					wall_scale)
+					ws)
 
 	# --- POALA de la marginea benzii. Peretele inalt sta in spatele coloanelor
 	# (ca sala sa aiba latime), si intre el si asfalt ramanea o fasie de

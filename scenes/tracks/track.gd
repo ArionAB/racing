@@ -1681,6 +1681,38 @@ static func themes() -> Dictionary:
 		#    canale de cremul cerut in brief (#E8D9B8): sub pragul de 12 din
 		#    style_bible §5, deci cea mai buna potrivire din paleta existenta.
 		"cappadocia": {
+			# Stratul de detaliu al lumii: CANELURI VERTICALE, nu strate
+			# orizontale. Singura tema care si-l schimba, si e o reparatie, nu
+			# un gust: detail_rock.png (implicit) are benzi pe Y, autorate
+			# pentru faleze sedimentare. Aplicat triplanar peste tot, pe
+			# hornurile de tuf citea exact ce a numit critica oarba de doua ori
+			# — "topographic map or a lathe finish". Doua runde s-au dus pe
+			# reparat mesh-ul; dungile se vedeau insa identice si pe
+			# buiandrugul arcadei, care e o CUTIE, deci nu veneau din
+			# `Builder.revolve`, ci din textura. Tuful se erodeaza prin
+			# siroire: santurile coboara CU apa. Vezi _detail_tuff() din
+			# tools/generate_palette_atlas.gd.
+			"detail_texture": "res://assets/textures/detail_tuff.png",
+			# DOUA PALIERE DE LUMINA pe hornuri, in loc de rampa Lambert.
+			# Vezi nota lunga din prop_detail_fade.gdshader: bimodalitatea nu se
+			# putea obtine din vertex color (semnal de 8%, inecat de AO-ul copt
+			# 0.06-0.98), fiindca albedoul se INMULTESTE. Intervalul complet e
+			# in raspunsul de lumina, si acolo se cuantizeaza.
+			"prop_light_steps": true,
+			"prop_light_split": 0.34,
+			"prop_light_low": 0.22,
+			# Hornurile integral in umbra nu trec prin `light()` deloc (masurat:
+			# cu ambientul stins cad la negru absolut), deci pentru ele treapta
+			# se aplica pe albedo, dupa orientarea fata de soare.
+			"prop_ambient_split": 0.34,
+			# ACOSTAMENT LAT: 3.1 m, nu minimul de 1.3. Vezi _shoulder_width —
+			# pe platoul plat umarul se calcula din caderea terenului, care e
+			# ~0, deci banda de praf ramanea o dunga si drumul se termina intr-o
+			# muchie de culoare. Cu 3.1 m exista o zona de tranzitie citibila
+			# intre carosabil si desert, si tot ea da si "camera" pe care o
+			# cerea critica: umarul e ingropat cu SHOULDER_SINK sub teren, deci
+			# marginea drumului coboara, nu se taie.
+			"shoulder_min_width": 3.1,
 			# TUF CREM, nu nisip de desert. SAND_MID (#D4994D) e ocru saturat —
 			# pe el hornurile ar fi iesit dune, adica exact "desert cu stanci",
 			# lucrul pe care brief-ul §0.1 il interzice explicit. CORAL_SAND
@@ -1693,51 +1725,136 @@ static func themes() -> Dictionary:
 			# peste acelasi slot. SAND_MID/SAND_SHADOW raman pentru piese care
 			# chiar au nevoie de alta NUANTA, nu de alta valoare.
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			# VALEA ROSIE (strata_tint / strata_line / strata_fade) NU sta aici,
+			# ci ca noduri editabile pe Track13 — la fel si unghiul soarelui. Sunt
+			# reglaje de PISTA, nu de lume: depind de cotele si de directiile chiar
+			# ale traseului asta, iar traseul se muta din editor. Exact asa s-a
+			# pierdut azimutul o data deja, ramas pe traseul vechi dupa ce curba a
+			# fost redesenata. Mecanismul de teren e in _build_terrain, valorile in
+			# scenes/tracks/Track13.tscn, iar hook-ul in track_from_path.gd.
 			# Cer de zori, hexurile din brief §9. NU e cerul de desert
 			# (albastru adanc 0.25/0.52/0.92 cu orizont auriu tare): la 13 grade
 			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.
 			# Un zenit saturat langa un orizont portocaliu ar fi citit amiaza cu
 			# filtru, nu rasarit.
-			"sky_top": Color.html("B9CCE0"),
-			"sky_horizon": Color.html("F2B27A"),
-			# Ceata din familia orizontului, dar cu o idee mai putin portocaliu:
-			# la 300 m ea e ce vopseste Erciyes, iar cu #F2B27A curat muntele cu
-			# zapada iesea silueta de caramida.
-			# CEATA E RECE, desi zorii sunt calzi — si asta e o decizie, nu o
-			# scapare. Masurat pe capturi de patru critici orbi, pe patru POI-uri
-			# diferite, primul defect numit peste tot a fost "o singura nuanta pe
-			# toata adancimea cadrului". Cauza, masurata: ceata veche
-			# (0.92, 0.79, 0.63) era la 8 GRADE de nuanta fata de teren si MAI
-			# saturata decat el (0.32 fata de 0.18). Distanta adauga deci
-			# saturatie in loc s-o scada — exact pe dos fata de perspectiva
-			# aeriana. Criticul de pe canion a masurat rezultatul: intre peretele
-			# de aproape si cel de la 400 m, 3/255 pe rosu si 0.05 saturatie.
-			# Aerul imprastie albastru; departarea trebuie sa devina mai RECE si
-			# mai PALIDA decat solul, chiar la rasarit. Caldura zorilor ramane
-			# unde ii e locul: in lumina directa si in cerul de la orizont
-			# (sky_horizon F2B27A, neatins).
-			"fog": Color(0.74, 0.79, 0.86),
+			# COBORATE fata de hexurile din brief (B9CCE0 / F2B27A), si nu din
+			# gust. Masurat pe cadrul de la frac 0.06: cerul randat avea mediana
+			# 239 fata de 149 pe solul luminat — cu 90 de trepte peste ORICE
+			# altceva din cadru. Consecinta se vede la planul mijlociu: siluetele
+			# departate nu se retrag in ceata, se dizolva intr-un alb care e mai
+			# luminos decat ele.
+			#
+			# Doua cauze, amandoua reparate aici. Hexurile insele sunt palide
+			# (luminanta ~200 si ~190), iar peste ele `sky_cover` se ADUNA (vezi
+			# nota din _build_environment) cu alfa 0.35 — implicitul, pe care
+			# tema nu si-l cobora. Adunarea mai punea ~40 de trepte, deci zenitul
+			# iesea 232-251 in loc de ~200.
+			"sky_top": Color.html("6E88A8"),
+			"sky_horizon": Color.html("C08752"),
+			# Norii doar sugerati: la 0.35 stratul adunat spala tot gradientul.
+			"sky_cover_alpha": 0.10,
+			# CEATA RECE, si asta e o schimbare deliberata fata de versiunea
+			# calda (0.92, 0.79, 0.63) — care era in familia orizontului.
+			#
+			# De ce se schimba. Criticul, punctul 5: "cadrul e o singura nuanta
+			# pe toate adancimile". Avea dreptate din numere: tuful e crem cald,
+			# drumul e pamant cald, iar ceata era (0.92, 0.79, 0.63), adica tot
+			# un bej. Cu ceata din aceeasi familie cu subiectul, departarea nu
+			# se mai desprinde de prim-plan — toate cele trei planuri cad pe
+			# acelasi ton si cadrul se aplatizeaza.
+			#
+			# Perspectiva aeriana reala merge invers: aerul imprastie albastrul,
+			# deci departarea se RACESTE si se desatureaza, oricat de calda ar
+			# fi lumina. E si mecanismul prin care un desert citeste adanc intr-o
+			# fotografie de dimineata. Aici ceata mai are o treaba: la 300 m ea
+			# vopseste Erciyes, si un munte cu zapada vazut prin bej iesea
+			# silueta de caramida — o ceata rece il lasa sa fie munte.
+			#
+			# Nu e gri: pastreaza o urma de roz de zori (rosul putin peste
+			# verde), ca sa nu contrazica cerul de rasarit de deasupra.
+			"fog": Color(0.72, 0.74, 0.80),
 			"hill_color": Color(0.82, 0.70, 0.56),
-			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
-			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade
-			# lumina directa cade razant — cu energie de amiaza, fetele insorite
-			# de tuf crem s-ar fi ars in alb si ar fi pierdut desenul.
+			# ZORI: soare CALD, si mai TARE decat pana acum — 0.95, urcat de la
+			# 0.85 impreuna cu coborarea ambientului la 0.26 (runda 13).
+			#
+			# De ce se schimba, dupa ce 12 runde au construit geometrie care nu
+			# se vedea. Criticul orb al rundei 12: "un model FATETAT randat CA SI
+			# CUM ar fi neted — are poligoanele, dar nu are VALORILE: fatetele
+			# vecine difera cu 2-3%". Cauza nu era in mesh. Raportul soare/ambient
+			# masurat pe toate temele ne dadea printre cele mai PLATE din joc:
+			#     stromboli 2.79 | CAPPADOCIA 2.83 | baikal 3.12
+			#     desert 3.64    | island 5.00
+			# Ambientul e independent de directie: cu cat cantareste mai mult din
+			# total, cu atat mai putin are normala unei fete de MODULAT. La 0.85
+			# contra 0.30, o fata intoarsa complet de la soare primea deja 28% din
+			# cat primea una insorita — deci fatetele n-aveau cum sa iasa trepte.
+			#
+			# Perechea 0.26/0.95 e aleasa dintre echivalentele de raport (~3.65)
+			# fiindca e SINGURA care nu muta media cadrului. Socotit pe modelul
+			# Lambert cu soarele real al pistei (elevatie 22, azimut 205), pe trei
+			# fete — insorita, oblica la 70 de grade, intoarsa:
+			# Prima incercare a fost 0.95/0.26, adica exact raportul desertului
+			# (3.65). NU A AJUNS: A/B pe acelasi cadru, conurile ramaneau la fel
+			# de plate. Masurand pixelii pe corpul unui horn, tot conul statea
+			# intre 64 si 107 din 255 — vreo 40 de puncte — desi lambert-ul
+			# GEOMETRIC pe fetele lui, calculat din .glb, acopera tot 0..1.
+			#
+			# Lipsa era in TONEMAPPER, si e chiar capcana pe care tema desertului
+			# o are deja scrisa (vezi "exposure": 1.30 acolo): FILMIC comprima
+			# capatul de sus, iar tuful crem palid, la expunere 1.15, sta fix in
+			# rolloff. Socotit prin tonemapper, de la fata insorita la cea
+			# intoarsa:
+			#   0.85/0.30  ->  189  171  145  115   ecart  73 din 255
+			#   0.95/0.26  ->  191  172  143  108   ecart  84
+			#   1.05/0.24  ->  194  174  144  104   ecart  91
+			#   1.15/0.20  ->  197  176  142   95   ecart 102
+			#   1.35/0.16  ->  202  180  143   84   ecart 118
+			# Adica raportul desertului cumpara doar 11 puncte de ecart, fiindca
+			# jumatatea de sus a scarii e strivita oricum. Ce se vede pe ecran nu
+			# e raportul, e ECARTUL DUPA TONEMAP.
+			#
+			# Expunerea NU e parghia potrivita aici: coborata, aluneca toata rampa
+			# in jos deodata (la exp 0.80 ecartul ramane 83) — intuneca pista fara
+			# sa desparta fetele. Ce desparte fetele e distanta dintre soare si
+			# ambient, fiindca doar soarele depinde de normala.
+			#
+			# ALES ATUNCI 1.15/0.20, raport 5.75 — teritoriul insulei, nu al
+			# desertului. Ecart 102, cu 39% peste cele 73 de la care s-a plecat.
+			#
+			# ISTORIC, si de citit impreuna cu nota de la `ambient_energy`:
+			# perechea asta a fost desfacuta de commit-ul 1612352, care a urcat
+			# ambientul la 0.38 pentru hornuri si a lasat soarele pe loc — raport
+			# 3.03, cu textul de aici ramas sa descrie 0.20. Runda 30 a refacut
+			# raportul, mutand ambele: 1.70/0.20, tot 5.75 lit-pe-ambient, dar cu
+			# nivelul urcat, ca sa nu se piarda ce castigase 1612352 pe piatra.
+			#
+			# Energia, NU expunerea: expunerea muta tot cadrul deodata (cerul si
+			# ceata inclusiv) si n-ar fi schimbat niciun raport intre fete. Aici
+			# ne trebuie fix diferenta dintre o fata si vecina ei.
+			#
+			# CULOAREA si AZIMUTUL raman neatinse: duc zorii si estul din brief §4,
+			# iar azimutul a fost masurat contra traseului (vezi mai jos).
 			"sun_color": Color(1.0, 0.82, 0.63),
-			"sun_energy": 0.85,
+			# 1.15 -> 1.70: vezi nota de la `ambient_energy` mai jos. Nu se
+			# atinge separat — perechea soare/ambient e o singura decizie.
+			"sun_energy": 1.70,
 			# ELEVATIE 13 grade (brief §4 cere 12-15), azimut 60 (ENE, dinspre
 			# vale).
 			#
 			# Conventia repo-ului: azimut = rotation_degrees.y + 180. Se citeste
 			# din SUN_ROTATION_DEG, unde y = 135 e documentat ca azimut 315.
-			# Est curat ar fi y = -90; s-a luat -120 (azimut 60) ca umbrele sa
-			# cada DIAGONAL pe drum. Cu soarele exact pe axa, pe portiunile care
-			# merg est-vest umbrele hornurilor s-ar fi intins IN LUNGUL benzii
-			# si n-ar mai fi taiat-o — adica fix identitatea vizuala pierduta.
 			#
-			# Unghiul e derivat, nu ales: la 13 grade umbra unui horn de 14 m
-			# are 14 / tan(13) = 60.6 m. Hornurile din §2 B stau la 2-4 m de
-			# banda, deci umbra trece peste tot drumul si inca 50 m dincolo.
-			"sun_rotation_deg": Vector3(-13, -120, 0),
+			# Lungimea umbrei era deja socotita: la 13 grade un horn de 14 m
+			# arunca 14 / tan(13) = 60.6 m, deci trece peste toata banda. Dar
+			# lungimea nu e vizibilitate, si aici s-a pierdut runda trecuta —
+			# CONTEAZA IN CE DIRECTIE cade, fata de directia in care privesti.
+			#
+			# UNGHIUL SOARELUI e pe nodul Track13 (custom_sun_rotation_deg), nu
+			# aici. Motivul, pe scurt, fiindca a costat patru runde: azimutul din
+			# tema fusese ales pe un traseu care intre timp a fost redesenat, si
+			# nimeni nu l-a remasurat — umbrele bateau in spatele camerei. Un reglaj
+			# care depinde de forma curbei trebuie sa stea langa curba, in scena, ca
+			# sa se mute odata cu ea. Cifrele si compromisul sunt in .tscn.
 			# Expunerea urca peste 1 fiindca soarele e slab si ambientul jos,
 			# iar tuful trebuie sa ramana cea mai DESCHISA suprafata mare din
 			# cadru (drumul de pamant e sub el, asfalt nu exista). Se ridica de
@@ -1756,13 +1873,117 @@ static func themes() -> Dictionary:
 			# repetat capcana masurata pe Okinawa: nisip coraligen iesit
 			# albastru-cenusiu.
 			"ambient_color": Color.html("F0C79A"),
-			# 0.30, nu 0.22 ca desertul. Pista are canion cu faleze in benzi si
-			# subteran, adica multe fete intoarse de la un soare care bate
-			# oricum razant. Lectia Stromboli (0.18 -> 0.34): prapastia care
-			# exista in geometrie dar iese pata neagra plata pe ecran nu se
-			# citeste. Umbra o fac AO-ul copt si contrastul cu soarele, nu
-			# lipsa luminii.
-			"ambient_energy": 0.30,
+			# 0.38, URCAT inapoi in runda 15 de la 0.22. Motivul e masurat, si
+			# rastoarna decizia rundei 13 documentata mai jos.
+			#
+			# Runda 13 a coborat ambientul ca sa scoata contrast pe fatete. A
+			# functionat, dar a cumparat contrastul cu INTUNERIC — exact eroarea
+			# pe care lead-ul a prins-o mai tarziu in textura, doar ca ea statea
+			# si aici, cu o runda inainte. Socoteala, pe albedoul de tuf
+			# (202,166,133 dupa `_warm_tuff`), sun_energy 1.15, expunere 1.15:
+			#
+			#   ambient   fata spre soare   fata intoarsa   saltul
+			#   0.22           239                44          195
+			#   0.30           249                60          189
+			#   0.38           251                76          175
+			#
+			# La 0.22 o fata intoarsa de la soare iese la 44 din 255. Aia nu e
+			# "crem mai inchis", e negru — si nicio textura nu o poate salva,
+			# fiindca albedoul se INMULTESTE cu lumina: unde lumina e 0.25,
+			# orice pigment palid ajunge oricum jos. De-aia captura citea a
+			# funingine chiar si dupa ce dala a fost redesenata palida.
+			#
+			# Ce NU se pierde urcand: saltul dintre o fata luminata si una
+			# intoarsa ramane 175 din 255, cand referinta cere ~16 pentru o
+			# muchie citibila. Fatetele nu depind de infometarea umbrei — mai era
+			# de zece ori marja necesara. Se plateste doar intunericul, nu
+			# contrastul.
+			#
+			# Soarele e la 22 de grade elevatie: la un soare atat de jos multe
+			# fete ale unui con primesc aproape numai ambient, deci ambientul NU
+			# e lumina de umplere de fundal aici, e principala sursa de valoare
+			# pe jumatate din padure. Nota de mai jos, de la 0.30, ramane ca
+			# istoric.
+			#
+			# Argumentul de la 0.30 era: "pista are canion cu faleze in benzi si
+			# SUBTERAN, adica multe fete intoarse de la un soare razant", cu
+			# lectia Stromboli (0.18 -> 0.34) — prapastia care exista in geometrie
+			# dar iese pata neagra plata nu se citeste. Decizie corecta la
+			# momentul ei, luata insa INAINTE sa existe padurea de hornuri, si
+			# niciodata remasurata dupa (aceeasi capcana ca azimutul).
+			#
+			# Ce s-a schimbat intre timp: pista are acum 60 de conuri fatetate cu
+			# trepte de strat si taluz in prim-plan, iar ele sunt subiectul
+			# cadrului. Ambientul care salva o prapastie de la a fi pata neagra
+			# stergea, pe aceleasi puncte procentuale, singura sursa de valoare a
+			# lor. Cine plateste mai mult: hornurile, si se vad in fiecare cadru.
+			#
+			# SUBTERANUL nu pierde nimic acum: pe Track13 salile subterane inca nu
+			# sunt construite (StancaGoalaInterior e o scobitura de teren, nu o
+			# caverna), deci nu exista nici geometrie, nici torte pe care 0.30 sa
+			# le apere. Cand se construiesc, lumina lor se pune LOCAL — torte
+			# OmniLight3D si CameraZone la gura pesterii, ca pe Chongqing — nu
+			# aplatizand toata pista pentru un singur POI. Falezele umbrite ale
+			# canionului raman acoperite: 0.26 pe langa 0.22 al desertului, iar
+			# desertul e o pista tot cu faleze si tot cu soare jos. La 0.20 fata
+			# intoarsa iese 95 din 255 dupa tonemap — inchisa, dar inca departe
+			# de pata neagra plata de care se temea nota de la 0.30.
+			# AMBIENT 0.38 -> 0.20, IMPREUNA cu soarele 1.15 -> 1.70. Se schimba
+			# amandoua sau niciuna: raportul e marimea care conteaza, nivelul se
+			# pastreaza mutand ce ia ambientul inapoi la soare.
+			#
+			# DE UNDE VENEA. Doi critici orbi, independent, au raportat "soseaua
+			# n-are nicio umbra — pete difuze, fara margine, fara directie".
+			# A/B-ul cu umbre ON/OFF arata insa 29.7% pixeli schimbati: umbrele
+			# existau. Ce lipsea era ADANCIMEA lor. Masurat pe carosabil, cu
+			# ProbeEcartSol (sonda rundei asta):
+			#     umbra / soare = 0.606  — o umbra care lasa 61% din lumina nu
+			# se citeste ca umbra, se citeste ca murdarie pe asfalt. De aia
+			# ecartul de luminanta iesea 76 fata de 115 in referinta.
+			#
+			# CAUZA, si e o jumatate-de-schimbare ca la rundele 28 si 29.
+			# Perechea 1.15/0.20 (raport 5.75) fusese ALEASA si masurata — nota
+			# lunga de mai sus, cu tabelul prin tonemapper, o argumenteaza pe
+			# larg si o descrie ca fiind in vigoare. Apoi commit-ul 1612352
+			# ("Funinginea venea din lumina, nu din pigment") a urcat ambientul
+			# 0.22 -> 0.38 ca sa scoata din carbune fetele intoarse ale
+			# HORNURILOR, si a lasat soarele pe loc. Raportul a cazut 5.75 ->
+			# 3.03 fara ca nota care il justifica sa fie atinsa: textul spunea
+			# 0.20, codul spunea 0.38.
+			#
+			# Decizia aceea NU era gresita — masuratorile ei erau toate pe
+			# PIATRA, si acolo problema era reala. Era doar aplicata global, iar
+			# solul are alt material (`world_material`), alt AO copt si alta
+			# problema: pe el ambientul nu salva nimic, doar spala umbra.
+			#
+			# DE CE MERGE SOARELE IN SUS ODATA CU AMBIENTUL IN JOS: ca sa nu se
+			# repete eroarea rundei 13, care cumparase contrast cu intuneric.
+			# Coborand doar ambientul, ecartul urca (98.6 la 0.15) dar cadrul se
+			# inchide. Cu perechea, NIVELUL ramane: mediana carosabilului 150 ->
+			# 155, iar pe hornuri fata insorita URCA (150 -> 163 pe hornSoare11).
+			# Masurat, la frac 0.06:
+			#     amb / soare      ecart sosea   umbra/soare   mediana sosea
+			#     0.38 / 1.15  (vechi)    77.0        0.606         150
+			#     0.20 / 1.55             107.2         —           150
+			#     0.20 / 1.70  (ales)     112.1        0.443         155
+			#     0.15 / 1.75             121.7          —           154
+			# 0.20/1.70 si nu 0.15/1.75: la 0.15 p10 cade la 58.7, sub cei 80 ai
+			# referintei, adica exact inchiderea de care se temea 1612352.
+			#
+			# Si pe HORNURI, cu ProbeCappLumina (delta fata luminata/intoarsa):
+			# toate cele opt cu destui pixeli urca, 56..76 -> 78..100, iar doua
+			# dintre cele marcate PLAT trec OK. Nu se plateste nimic pe piatra.
+			#
+			# CE SE PLATESTE, si e platit CONSTIENT: scobitura de la frac ~0.75
+			# (StancaGoalaInterior) traieste numai din ambient, deci se
+			# intuneca odata cu el — carosabilul in prim-plan cade de la mediana
+			# 109 la 75 din 255. Se conduce inca (captura: banda si peretii se
+			# citesc, minimul e 22), dar e limita.
+			# NU se repara urcand ambientul inapoi: asta ar aplatiza toata pista
+			# pentru un singur POI, exact ce refuza si nota de la 0.30 mai sus.
+			# Cand se construiesc salile, lumina lor se pune LOCAL — torte
+			# OmniLight3D si CameraZone la gura, ca pe Chongqing.
+			"ambient_energy": 0.20,
 			# UMBRE PORNITE, si e prima pista pe care sunt IDENTITATE, nu doar
 			# contact cu solul. Implicitul e deja `true`, deci cheia nu schimba
 			# comportamentul — exista ca sa aiba unde sta motivul pentru care NU
@@ -1807,6 +2028,12 @@ static func themes() -> Dictionary:
 			# fiindca celelalte piste cu soare mai jos de 42 (Okinawa 33, Baikal
 			# 24, Stromboli 46) arata bine acum si nu se ating fara capturi.
 			"shadow_bias_from_sun": true,
+			# FARA PANCAKE. Implicitul de 20 m taia din adancime chiar casterii
+			# ale caror umbre sunt subiectul pistei: la 13 grade umbra are 60 m,
+			# deci hornul cadea in afara feliei pastrate si nu arunca NIMIC.
+			# Verificat pe captura cu un cub de control peste banda: 20 -> nicio
+			# umbra, 0 -> umbra taie tot drumul. Vezi nota din _build_environment.
+			"shadow_pancake": 0.0,
 			"fog_depth": true,
 			# 140 -> 300, si inceputul e departe DIN MECANICA, nu din gust: de
 			# pe cornisa (POI C) trebuie sa se vada fundul vaii cu baloanele in
@@ -1946,12 +2173,32 @@ static func themes() -> Dictionary:
 			# loc unde se schimba, si trebuie sa fie vizibil ca sunt doua.
 			"rockfall_class": "coral_rock",
 			# DRUM DE PAMANT BATATORIT PALID, nu nisipul auriu implicit
-			# (DIRT_ROAD_COLOR #CCA86E, nisipul Dunelor). Brief §9 cere #C9B28A:
-			# mai palid si mult mai putin saturat, fiindca pe un platou de tuf
+			# (DIRT_ROAD_COLOR #CCA86E, nisipul Dunelor): pe un platou de tuf
 			# praful de pe drum E tuf macinat, nu nisip de desert. Pista declara
 			# `custom_road_surface = "dirt"`; cheia asta ii da culoarea, la fel
 			# cum `ice_road_tint` o da pe Baikal.
-			"dirt_road_tint": Color.html("C9B28A"),
+			#
+			# Brief §9 cerea #C9B28A, si masurat era prea saturat: 0.31, adica
+			# de doua ori terenul crem din jur (CORAL_SAND 0.18) si de patru ori
+			# hornurile (CONCRETE 0.07 dupa remapare). Iesea cel mai saturat
+			# element din cadru — banda tragea privirea de pe formatiuni, adica
+			# exact pe dos fata de POI, unde subiectul sunt conurile. Nu e o
+			# chestiune de gust: dupa ce hornurile s-au dus pe crem, drumul a
+			# ramas singurul lucru portocaliu, deci referinta din brief tinea de
+			# o paleta care intre timp s-a schimbat.
+			#
+			# Corectia se masoara PE CADRU, nu pe hex: soarele de zori (13°) e
+			# portocaliu si se inmulteste peste albedo, iar `road_material`
+			# imparte culoarea la SAND_MACRO_MEAN (0.85), ceea ce mai ridica o
+			# data saturatia. Cu #C9B28A banda iesea la 0.76 in cadru, langa un
+			# teren de 0.56 — de doua ori distanta pe care o arata hexurile.
+			# #CDC0A8 a coborat-o la 0.65, tot peste teren.
+			#
+			# #D3CBBD inchide restul: masurat in cadru da ~0.57, adica exact
+			# terenul de langa ea, si ramane cu ~25 de luminanta sub tuful din
+			# hornuri — banda se citeste in continuare ca drum, prin VALOARE, nu
+			# prin croma. Schimbarea e pe TEMA, deci pe toata pista.
+			"dirt_road_tint": Color.html("D3CBBD"),
 			# Praful ridicat de roti: acelasi tuf, doar mai inchis (umbra din
 			# interiorul norului). SAND_SHADOW ar fi fost #915D27, maro ars —
 			# praf de pamant arat, nu de piatra moale macinata.
@@ -2039,6 +2286,23 @@ func apply_theme(theme: String) -> void:
 	# tema de NOAPTE nu are ce umbri: soarele e o luna palida aproape verticala,
 	# iar o umbra dura ar contrazice lumina. "shadows": false le stinge pe tema.
 	theme_shadows = bool(_theme.get("shadows", true))
+	# Stratul de detaliu triplanar al lumii: implicit strate orizontale, dar
+	# Cappadocia cere caneluri verticale (vezi cheia `detail_texture`). Se
+	# aseaza AICI, inainte ca decorul sa ceara primul material — `_shared` din
+	# Palette se construieste lenes, o singura data.
+	Palette.set_detail_texture(String(_theme.get("detail_texture", "")))
+	# Raspunsul de lumina pe prop-uri: rampa Lambert continua (implicit) sau doua
+	# paliere (Cappadocia). Vezi `Palette.set_prop_light_steps` si nota lunga din
+	# prop_detail_fade.gdshader — patru runde au incercat sa scoata separarea din
+	# vertex color si masuratoarea le-a inchis pe toate; intervalul complet exista
+	# doar in lumina. Unghiul soarelui se ia din ACELASI loc ca lumina scenei
+	# (`_sun_rotation_deg`), nu scris de mana.
+	Palette.set_prop_light_steps(
+			bool(_theme.get("prop_light_steps", false)),
+			_sun_rotation_deg(),
+			float(_theme.get("prop_light_split", 0.34)),
+			float(_theme.get("prop_light_low", 0.30)),
+			float(_theme.get("prop_ambient_split", 0.0)))
 
 var curve: Curve3D
 var baked: PackedVector3Array
@@ -2069,6 +2333,9 @@ var _terr_heights: PackedFloat32Array = PackedFloat32Array()
 ## draw call-uri, exact ce nu ne permitem pe mobil (CLAUDE.md, constrangeri 3D).
 ## Se goleste la fiecare rebuild(), ca schimbarea de tema sa nu lase gunoi.
 var _mat_cache: Dictionary = {}
+## Materialul drumului AFANAT (shader, nu StandardMaterial3D — vezi
+## `road_material`). Unul singur pe pista, cache-uit ca `_mat_cache`.
+var _loose_road_mat: ShaderMaterial = null
 
 # --- API pentru subclase ---
 
@@ -3015,6 +3282,9 @@ func rebuild() -> void:
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
+	# Umbrele de contact DUPA teren: fiecare disc isi citeste cota din sampler,
+	# si trebuie sa cada peste asfalt/nisip, nu sub ele.
+	_build_prop_contact()
 	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
 	_build_water()
 	_build_world_bounds()
@@ -3240,6 +3510,31 @@ func _build_environment() -> void:
 			sun.shadow_normal_bias = _shadow_normal_bias_for_sun()
 		else:
 			sun.shadow_normal_bias = SHADOW_NORMAL_BIAS_REF
+		# PANCAKE-UL, si asta e cauza reala a "nu se vede nicio umbra aruncata".
+		#
+		# Godot trage planul near al camerei de umbra pana la casterul cel mai
+		# apropiat si il tine la cel mult `pancake_size` metri — un truc de
+		# precizie in depth buffer, care presupune tacit ca umbra e SCURTA fata
+		# de cutia cascadei. La soare de amiaza asa si e.
+		#
+		# La 13 grade nu mai e: umbra unui horn de 14 m are 14 / tan(13) = 60 m,
+		# de trei ori pancake-ul implicit de 20 m. Casterul iese din felia de
+		# adancime pastrata si umbra lui pur si simplu nu se deseneaza — nu
+		# slaba, nu dezlipita, ci ABSENTA. De aia trei runde de reglaje pe
+		# casteri (bias, cascada, azimut, ambient) n-au schimbat nimic in poza:
+		# lucrau pe o umbra care nu ajungea niciodata sa fie randata.
+		#
+		# Dovada e o captura cu un CUB de 8 m suspendat peste banda: cu pancake
+		# 20 nu are umbra deloc, cu pancake 0 arunca peste tot drumul. Cubul a
+		# fost sonda de control — obiect propriu, la coordonata camerei, exact
+		# ca sa nu depinda verdictul de conurile pistei.
+		#
+		# 0 = fara clamp. Se plateste in precizie de depth, si se vede: la
+		# elevatii mari ar da peter-panning. De aia e derivat, nu global —
+		# pistele cu soare normal isi pastreaza cei 20 m.
+		var pancake: Variant = theme_flag("shadow_pancake", null)
+		if pancake != null:
+			sun.directional_shadow_pancake_size = float(pancake)
 	add_child(sun)
 
 	# _build_terrain() NU se cheama de aici: are nevoie de pozitiile falezelor ca
@@ -3323,6 +3618,11 @@ func _build_horizon(centroid: Vector3) -> void:
 	# RAPORTEAZA, nu dispare in tacere.
 	var missed := 0
 	var placed := 0
+	# Cate siluete au incaput doar dupa ce li s-a relaxat degajarea. Se
+	# raporteaza separat de `missed`: una relaxata E pe cer (deci arcul nu mai e
+	# gol), dar sta mai aproape de sosea decat ar vrea tema, si daca numarul
+	# creste inseamna ca inelul cere prea mult pentru forma pistei.
+	var relaxed := 0
 	# Inelele pot veni din TEMA, ca si numele siluetelor.
 	#
 	# Cele implicite sunt calibrate pe butte-uri de desert (25-60 m, degajare
@@ -3359,33 +3659,96 @@ func _build_horizon(centroid: Vector3) -> void:
 			# niciodata. Acum plafonul urmeaza inelul CERUT, cu marja de
 			# cautare — cine declara un inel departat primeste unde sa-l puna.
 			var limit: float = maxf(float(ring["far"]) + 90.0, 355.0)
-			# Cautarea era TOT-SAU-NIMIC: o raza care nu atinge niciodata
-			# `clear` nu dadea nimic, desi pe ea exista un punct la 100 m de
-			# sosea — perfect bun pentru o silueta de orizont. Pe Cappadocia
-			# pista se auto-intersecteaza, deci doua raze din sase aveau
-			# maximul sub prag si orizontul ramanea gaurit oricat coborai
-			# pragul (masurat cu ProbeCappHorizon: maxime de 100,2 si 145,5 m).
-			# Acum se retine si CEL MAI BUN punct de pe raza, si se cade pe el
-			# cand pragul nu se atinge. Se renunta la slot doar daca nici
-			# maximul nu tine silueta afara din drum — `clear * 0.6`, adica
-			# tot peste raza modelului, nu o capitulare.
-			var best_pos := Vector3.ZERO
-			var best_clear := -1.0
-			var dist: float = float(ring["near"])
-			while dist <= limit:
-				var cand := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
-				var road_d := _road_distance_xz(cand)
-				if road_d > best_clear:
-					best_clear = road_d
-					best_pos = cand
-				if road_d >= clear:
-					pos = cand
-					found = true
+			# DEGAJAREA E O PREFERINTA, NU O CONDITIE — si asta e un bug de
+			# orizont gol, nu o reglare de numere.
+			#
+			# Sectorul cerea `clear` si atat: daca pe toata raza nu gasea niciun
+			# punct destul de departe de sosea, slotul se sarea. Rezultatul e
+			# CER GOL pe arcul ala, adica exact defectul pe care sectoarele
+			# echidistante trebuiau sa-l repare — acoperirea era garantata ca
+			# unghi, dar nu si ca prezenta. Masurat pe Cappadocia: 3 din 6
+			# siluete, deci jumatate de orizont fara nimic pe el, si criticul a
+			# citit 49.6% din partea de sus a cadrului drept cer gol (8.5% in
+			# referinta).
+			#
+			# De ce nu se repara coborand `clear` in tema: degajarea e reala, ea
+			# tine o mesa de 200 m latime sa nu aterizeze pe drum. Pe o pista
+			# care se auto-intersecteaza pur si simplu NU exista, pe unele
+			# azimuturi, niciun punct care sa o satisfaca — nicio cifra unica nu
+			# poate fi si generoasa pe directiile stramte si sigura pe celelalte.
+			# Coborand-o global s-ar apropia siluetele de sosea pe TOATE
+			# directiile, inclusiv pe cele care aveau loc.
+			#
+			# Se cauta deci in trepte: intai la degajarea ceruta, apoi relaxand-o
+			# progresiv, si se ia PRIMA care incape. Un sector stramt primeste o
+			# silueta mai apropiata de drum (dar cat mai departe cu putinta pe
+			# directia lui), unul larg ramane exact cum era. Podeaua e la 55% din
+			# degajarea ceruta: sub ea silueta ar intra in campul de joc, si
+			# atunci e chiar mai bine sa lipseasca.
+			# PODEAUA RELAXARII CRESTE CU PIESA (runda 25).
+			#
+			# Runda 24 a pus podeaua la 55% din degajare, la fel pentru toate
+			# siluetele, si a umplut 6/6 sloturi. Captura de la volan arata insa
+			# ca pretul nu e uniform: cele doua masive Erciyes aduse mai aproape
+			# nu se citesc ca fundal, ci ca GEOMETRIE APROPIATA — doua triunghiuri
+			# palide care umplu centrul cadrului si mananca exact planul median pe
+			# care ar fi trebuit sa-l sugereze. Un butte mic la aceeasi degajare
+			# relaxata nu face raul asta.
+			#
+			# Cauza e ca podeaua se masura in procente din `clear`, adica dintr-o
+			# cifra de TEMA, fara sa stie cat de lata e piesa pe care o aseaza.
+			# Erciyes intra la scara 1.35 pe un inel cu scara proprie: la 55% din
+			# degajare, o cutie de sute de metri ajunge sa subintinda un unghi de
+			# obiect din prim-plan.
+			#
+			# Se leaga deci podeaua de SCARA inelului, nu de un procent fix: cu cat
+			# piesa e mai mare, cu atat i se permite mai putina relaxare. Un slot
+			# stramt cu o piesa mare ramane gol — si asta e alegerea corecta, o
+			# spune si captura: cer gol pe un arc e mai putin rau decat un munte
+			# care se preface ca e aproape. Sloturile cu piese mici se umplu in
+			# continuare, deci castigul rundei 24 nu se pierde tot.
+			#
+			# PRIMA INCERCARE A FOST PE SCARA INELULUI, SI N-A PRINS NIMIC.
+			# Masurat cu un print pe fiecare relaxare, pe Cappadocia:
+			#   RELAX inel scale=0.95 clear=110 -> 0.55 dist=190
+			#   RELAX inel scale=0.95 clear=110 -> 0.85 dist=352
+			# Amandoua relaxarile sunt pe inelul APROPIAT (scara 0.95), nu pe cel
+			# de 1.35 pe care il banuiam. O podea calculata din `ring["scale"]` le
+			# lasa pe amandoua sa treaca, fiindca scara lor e sub 1.
+			#
+			# Ce le desparte e DISTANTA, si acolo e si raul: una sta la 352 m
+			# (fundal curat, nimeni nu se plange de ea) si una la 190 m, adica pe
+			# muchia interioara a inelului. Aia e silueta pe care criticul o
+			# citeste ca geometrie apropiata — o piesa de sute de metri asezata la
+			# 190 m subintinde un unghi de obiect din prim-plan, oricat de
+			# "orizont" ar fi in intentie.
+			#
+			# Deci degajarea se negociaza doar in schimbul DEPARTARII: cu cat
+			# silueta e mai aproape, cu atat i se cere mai mult `clear`. La 190 m
+			# nu se relaxeaza deloc, spre 320 m se relaxeaza complet. Un slot
+			# stramt care nu-si permite nici asa ramane gol — si captura spune ca
+			# asa e mai bine: cer gol pe un arc e mai putin rau decat un munte
+			# care se preface ca e in fata ta.
+			var relaxari: Array[float] = [1.0, 0.85, 0.7, 0.55]
+			for relax in relaxari:
+				var dist: float = float(ring["near"])
+				while dist <= limit:
+					var cand := centroid 						+ Vector3(cos(angle), 0, sin(angle)) * dist
+					# Cat de mult are voie sa se relaxeze AICI: 0 la 190 m (adica
+					# `clear` intreg, fara negociere) si 1 de la 320 m in sus.
+					# Intre ele liniar, ca sa nu existe o raza pe care o silueta
+					# sare brusc mai aproape de drum.
+					var voie := clampf((dist - 190.0) / 130.0, 0.0, 1.0)
+					var prag: float = clear * (1.0 - (1.0 - relax) * voie)
+					if _road_distance_xz(cand) >= prag:
+						pos = cand
+						found = true
+						break
+					dist += 6.0
+				if found:
+					if relax < 1.0:
+						relaxed += 1
 					break
-				dist += 6.0
-			if not found and best_clear >= clear * 0.6:
-				pos = best_pos
-				found = true
 			if not found:
 				missed += 1
 				continue
@@ -3417,6 +3780,34 @@ func _build_horizon(centroid: Vector3) -> void:
 			# zero coliziune, sub 180 tris fiecare.
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
 			model.scale = Vector3.ONE * s
+			# SILUETELE DE ORIZONT NU ARUNCA UMBRA, si asta nu e o economie de
+			# draw calls — e cauza platoului de luminanta de pe Cappadocia,
+			# masurata in runda 22.
+			#
+			# Ce se intampla. Godot potriveste caseta ortografica a cascadei pe
+			# felia de frustum, dar intervalul de ADANCIME al hartii de umbra
+			# trebuie sa cuprinda toti casterii care pot arunca in ea. Scalate
+			# 25-60x, siluetele astea ajung cutii de 345, 426 si 630 m (masurat
+			# pe Erciyes, inelele Cappadociei), asezate la 190-290 m. Ele intind
+			# intervalul de adancime al cascadei de cateva ori, iar precizia
+			# ramasa pe obiectele din prim-plan se prabuseste: hornurile se
+			# auto-umbresc pe toata fata dinspre soare.
+			#
+			# Cifrele, cu ambientul stins ca sa ramana doar directionala,
+			# hornSoare11 la 24.9 m (fata luminata / fata umbrita):
+			#   siluetele arunca umbra:  2.7 / 9.5   -> DELTA  -6.8
+			#   siluetele NU arunca:   119.7 / 20.0  -> DELTA +99.7
+			# Adica lumina directionala nu murise nicaieri intre normale si
+			# pixel: era stinsa de harta de umbra a unui munte de fundal.
+			# Explica de ce sase runde de contur (16-21) au fost invizibile si
+			# de ce `sun_energy` 3.0 nu ardea fata insorita — era in umbra.
+			#
+			# De ce e sigur sa le stingem: sunt fundal pur, dincolo de ceata,
+			# fara coliziune. Umbra unui munte de la 250 m nu cade niciodata in
+			# cadru — dar harta ei costa toata pista. Se aplica pe TOATE
+			# temele: aceleasi inele scalate exista pe desert, Baikal si
+			# Stromboli, deci si acolo mananca aceeasi precizie.
+			_fara_umbra_aruncata(model)
 			# Clasa triplanara a temei: proiectia in spatiul lumii tine
 			# straturile la scara reala si pe siluetele scalate 25-60x.
 			# Era `apply_rock_material` fix, adica gresia rosiatica a canionului
@@ -3438,13 +3829,24 @@ func _build_horizon(centroid: Vector3) -> void:
 			else:
 				Palette.apply_triplanar_class(model, horizon_class)
 			placed += 1
-	print("%s: %d/%d siluete de orizont" % [track_name, placed,
-		placed + missed])
+	print("%s: %d/%d siluete de orizont (%d cu degajare relaxata)"
+		% [track_name, placed, placed + missed, relaxed])
 	if missed > 0:
 		# Fara linia asta, un orizont pe jumatate gol arata ca o alegere de
 		# design. E exact bug-ul pe care l-a avut versiunea anterioara.
 		push_warning("%s: %d siluete de orizont n-au incaput (degajare fata de sosea)"
 			% [track_name, missed])
+
+
+## Stinge aruncarea de umbra pe tot subarborele. Vezi motivul la apelul din
+## _build_horizon: un caster imens si departat fura precizia hartii de umbra de
+## la tot ce e in prim-plan.
+func _fara_umbra_aruncata(n: Node) -> void:
+	var mi := n as MeshInstance3D
+	if mi != null:
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for c in n.get_children():
+		_fara_umbra_aruncata(c)
 
 
 ## Distanta pe orizontala pana la cel mai apropiat punct de sosea.
@@ -3492,6 +3894,11 @@ func _build_horizon_fallback(centroid: Vector3) -> void:
 		# nuanta in 4 trepte, nu continua: dealurile de fundal impart 4 materiale
 		var tint := float(rng.randi_range(0, 3)) / 3.0 * 0.15
 		hill.material_override = _flat_material(theme_hill_color.lightened(tint))
+		# Nici movilele de fundal nu arunca umbra, din acelasi motiv ca
+		# siluetele de la _build_horizon: raza 60-140 m la 240-480 m distanta
+		# intinde intervalul de adancime al cascadei si fura precizia din
+		# prim-plan. Vezi nota lunga de acolo (runda 22).
+		hill.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(hill)
 
 
@@ -3700,6 +4107,7 @@ func _build_terrain() -> void:
 	var heights := _terr_heights
 	# Pozitiile falezelor, pentru umbra coapta de la baza lor.
 	var cliff_xz := _cliff_positions()
+	# Discurile de contact ale decorului manual — vezi _prop_contact_discs.
 	# Vegetatia de uscat: vezi "inland_tint" in themes(). Null pe pistele fara
 	# tema de insula, deci restul lumii nu se schimba cu un pixel.
 	var inland: Variant = theme_flag("inland_tint", null)
@@ -3713,6 +4121,15 @@ func _build_terrain() -> void:
 	var rock_tint: Variant = theme_flag("rock_band_tint", null)
 	var rock_line := float(theme_flag("rock_line", 0.0))
 	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
+	# STRATUL DE JOS, oglinda lui rock_band: acela tinteaza PESTE o cota
+	# (etaj de munte), asta SUB ea (masa de teren de sub nivelul soselei).
+	# Null pe orice tema care nu-l cere, deci restul pistelor nu se schimba cu
+	# un pixel. Valorile NU vin dintr-o tema, ci de pe nodul pistei
+	# (custom_strata_* pe Track13), prin _theme_overrides din
+	# track_from_path.gd — vezi motivul acolo.
+	var strata_tint: Variant = theme_flag("strata_tint", null)
+	var strata_line := float(theme_flag("strata_line", 0.0))
+	var strata_fade := maxf(float(theme_flag("strata_fade", 1.0)), 0.001)
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
 	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
@@ -3789,6 +4206,34 @@ func _build_terrain() -> void:
 					# limita de vegetatie pe munte, nu o proprietate a pistei.
 					# Se aplica INAINTE de zapada, ca albul sa ramana ultimul
 					# strat — pe creasta e zapada peste piatra, nu invers.
+					# STRATUL ROSU DE SUB SOSEA (Valea Rosie, brief §1).
+					# Se aplica PRIMUL, ca orice etaj de deasupra sa ramana
+					# peste el, si merge INVERS fata de rock/snow: greutatea
+					# creste cu cat COBORI sub `strata_line`, nu cu cat urci.
+					#
+					# De ce prin teren si nu prin geometrie noua: rosul trebuie
+					# sa fie a doua masa de TEREN vazuta peste un gol, sub
+					# nivelul drumului — nu o banda pictata pe conuri (aia s-a
+					# incercat si s-a scos, fiindca rosul pe silueta se citeste
+					# ca murdarie, nu ca distanta). Terenul de sub sosea exista
+					# deja: masurat, 28% din vertecsi stau sub cota 25, cu
+					# lobul mare la 10-20 m, adica 12-22 m sub soseaua medie.
+					# Deci nu e nevoie de mesh nou si nici de plasare: culoarea
+					# se aseaza pe relieful care e deja acolo.
+					#
+					# Marginea se zdrentuieste cu ACELASI zgomot ca celelalte
+					# etaje: o linie de nivel curata se citeste ca desen tehnic,
+					# iar aici ar taia un inel perfect in jurul pistei.
+					if strata_tint != null:
+						var strata_w := clampf(
+							(strata_line - v.y) / strata_fade, 0.0, 1.0)
+						strata_w = clampf(strata_w + dirt_noise.get_noise_2d(
+							v.x * 0.45, v.z * 0.45) * 0.20, 0.0, 1.0)
+						strata_w = smoothstep(0.0, 1.0, strata_w)
+						if strata_w > 0.0:
+							tint = tint.lerp(strata_tint as Color, strata_w)
+							# Pe faleza rosie nu creste iarba, ca si pe piatra.
+							grass_w *= 1.0 - strata_w
 					if rock_tint != null:
 						var rock_w := clampf(
 							(v.y - rock_line) / rock_fade, 0.0, 1.0)
@@ -5112,12 +5557,240 @@ const CLIFF_AO_RADIUS: float = 14.0
 ## fin si omniprezent, umbra dinamica face directia si forma.
 const CLIFF_AO_STRENGTH: float = 0.22
 
+## UMBRA DE CONTACT la baza prop-urilor asezate de mana (runda 31).
+##
+## Criticul orb, doua runde la rand: "fara ele obiectul citeste ca plutind chiar
+## si asezat corect". Verificat pe captura de la frac 0.06 — baza hornurilor
+## intalnea umarul soselei printr-o simpla linie, fara nicio inchidere de
+## valoare, iar smocul de iarba de langa ea la fel.
+##
+## Mecanismul exista deja (`_cliff_shadow`), dar primea DOAR nodurile din
+## "Cliffs". Pe Cappadocia hornurile stau in DecorManual, deci nu intra niciunul
+## — de-aia pista n-avea contact nicaieri langa drum.
+##
+## Raza nu poate fi cea a falezei (14 m): un horn de 3 m diametru ar fi pus o
+## pata de 28 m peste tot carosabilul. Se deriva din GABARITUL fiecarei piese
+## (AABB-ul ei in spatiul lumii), plafonata ca o piesa uriasa sa nu spele zona.
+const PROP_AO_RADIUS_SCALE: float = 0.9
+const PROP_AO_RADIUS_MAX: float = 6.0
+const PROP_AO_RADIUS_MIN: float = 0.8
+## Mai slaba decat la faleze: sunt multe si se suprapun langa drum.
+const PROP_AO_STRENGTH: float = 0.26
+
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
 ##
 ## Se citesc din arbore, nu se recalculeaza: TrackCliffs are propriile filtre
 ## (ferestre libere, gol in jurul landmark-urilor, sloturi respinse), iar o a doua
 ## implementare a acelorasi reguli ar diverge la prima ajustare.
+## Discurile de contact ale prop-urilor din DecorManual: (x, z, raza, cota bazei).
+##
+## Se merge pe TOT subarborele, nu doar pe copiii directi: decorul manual e
+## grupat pe zone ("ZoneB_PadureaHornurilor"), deci copiii directi ai lui
+## DecorManual sunt grupuri, nu piese.
+##
+## Raza vine din AABB-ul vizual al piesei, transformat in lumea. Piesele fara
+## mesh (marker-e, noduri de organizare) nu produc disc.
+func _prop_contact_discs() -> PackedVector4Array:
+	var out := PackedVector4Array()
+	var root := get_node_or_null("DecorManual")
+	if root == null:
+		return out
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		var n3 := n as Node3D
+		if n3 == null or n3 == root or not n3.visible:
+			continue
+		var aabb := _visual_aabb(n3)
+		if aabb.size == Vector3.ZERO:
+			continue
+		var gp := n3.global_position
+		# Raza din jumatatea diagonalei ORIZONTALE a gabaritului.
+		var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		var r := clampf(half * PROP_AO_RADIUS_SCALE,
+				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
+		# memoria "Kit assets Cappadocia"), deci originea unui horn poate fi la
+		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
+		var base_y := gp.y + aabb.position.y
+		out.append(Vector4(gp.x, gp.z, r, base_y))
+	return out
+
+
+## AABB-ul vizual al unui nod, in metri de lume, adunat din mesh-urile lui.
+##
+## `visible` se testeaza pe fiecare mesh: GLB-urile multi-varianta isi tin
+## variantele stinse in acelasi arbore (vezi CLAUDE.md), iar o varianta stinsa
+## n-are voie sa puna umbra.
+func _visual_aabb(n: Node3D) -> AABB:
+	var acc := AABB()
+	var have := false
+	# Piesele cu scara ZERO pe o axa (variante turtite, placeholder-e) au
+	# baza singulara, iar `affine_inverse()` pe ea logheaza "det == 0" la
+	# fiecare apel. Nu au gabarit, deci nici disc.
+	var base := n.global_transform.basis
+	if absf(base.determinant()) < 0.000001:
+		return acc
+	var inv := n.global_transform.affine_inverse()
+	var stack: Array[Node] = [n]
+	while not stack.is_empty():
+		var cur: Node = stack.pop_back()
+		var cur3 := cur as Node3D
+		if cur3 != null and not cur3.visible:
+			continue
+		for c in cur.get_children():
+			stack.append(c)
+		var mi := cur as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		# In spatiul lui `n`, ca raza sa nu depinda de unde e pista in lume.
+		if absf(mi.global_transform.basis.determinant()) < 0.000001:
+			continue
+		var rel := inv * mi.global_transform
+		var box := rel * mi.mesh.get_aabb()
+		if have:
+			acc = acc.merge(box)
+		else:
+			acc = box
+			have = true
+	return acc if have else AABB()
+
+
+## Umbra de contact a prop-urilor, ca factor multiplicativ (1.0 = neatins).
+##
+## Aceeasi cadere patratica ca la faleze, dar cu raza PER DISC: un horn subtire
+## inchide 2 m in jurul lui, un zid de vale inchide 6.
+## Umbrele de contact, ca GEOMETRIE pe sol — un disc sub fiecare prop.
+##
+## DE CE NU IN CULOAREA DE VERTEX A TERENULUI, unde sta deja AO-ul falezelor:
+## masurat, si e o limita structurala, nu o reglare. Grila de teren are pasul de
+## 7.88 m (`_terrain_grid`: 900 m impartit la TERRAIN_CELL, dimensionat pe
+## bugetul de triunghiuri), iar razele de contact sunt de 0.8-6 m. Umbra cade
+## INTRE varfuri, deci nu exista purtator care s-o tina: prima varianta a rulat
+## cu 728 de discuri corect calculate si a schimbat imaginea cu maximum 10/255
+## pe un singur pixel (medie 0.03) — adica un efect care se numara si nu se vede,
+## exact capcana din CLAUDE.md. Terenul nu poate fi indesit: pasul lui e ales de
+## bugetul de triunghiuri, nu de umbre.
+##
+## Deci discurile se emit ca geometrie proprie, cu alfa in culoarea de vertex:
+## rezolutia lor nu mai depinde de grila. UN singur mesh si UN singur material
+## pentru toata pista — garda numara materiale, si asta aduce +1.
+const PROP_AO_SEGMENTS: int = 10
+## Cat de sus deasupra solului sta discul, ca sa nu intre in z-fighting cu el.
+const PROP_AO_LIFT: float = 0.04
+## Cat de sus fata de terenul samplerului mai poate sta baza unei piese ca sa
+## primeasca totusi disc. Peste atat, piesa sta pe decor (mal, stanca, pod) si
+## un disc pe teren ar pluti in aer sub ea.
+const PROP_AO_SEAT_TOL: float = 1.2
+
+func _build_prop_contact() -> void:
+	var discs := _prop_contact_discs()
+	if discs.is_empty():
+		return
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for d in discs:
+		var cx: float = d.x
+		var cz: float = d.y
+		var r: float = d.z
+		# Evantai de triunghiuri: centrul opac, marginea complet transparenta.
+		# Culoarea e NEAGRA peste tot, doar alfa variaza — asa discul intuneca
+		# orice suprafata pe care cade (nisip, asfalt, kerb) fara sa-i schimbe
+		# nuanta.
+		var gy := _sampler.ground_y(cx, cz)
+		# DISCUL SE EMITE DOAR DACA PIESA CHIAR STA PE TERENUL SAMPLERULUI.
+		#
+		# Prima varianta le emitea pentru toate cele 728: pe malul din dreapta,
+		# unde hornurile stau pe decor (nu pe teren), discul iesea din panta si
+		# se vedea din lateral ca o LIMBA NEAGRA — o umbra privita pe muchie e
+		# o silueta, nu un contact. Se vedea pe captura, nu in cifre: diferenta
+		# fata de cadrul precedent era deja "reala" (max 235) si complet gresita.
+		#
+		# Testul e pe cota: daca baza piesei e mai sus decat terenul de sub ea cu
+		# mai mult decat toleranta, piesa nu se sprijina pe teren si nu primeste
+		# disc. Pasarile si baloanele cad tot aici, gratis.
+		if absf(d.w - gy) > PROP_AO_SEAT_TOL:
+			continue
+		var cy := gy + PROP_AO_LIFT
+		var dark := 1.0 - PROP_AO_STRENGTH
+		for i in PROP_AO_SEGMENTS:
+			var a0 := TAU * float(i) / float(PROP_AO_SEGMENTS)
+			var a1 := TAU * float(i + 1) / float(PROP_AO_SEGMENTS)
+			var p0 := Vector2(cos(a0), sin(a0)) * r
+			var p1 := Vector2(cos(a1), sin(a1)) * r
+			# Fiecare vertex isi ia cota LUI din sampler, dar LIMITATA la un
+			# plafon fata de centru. Fara limita, pe malurile abrupte de langa
+			# drum discul se ridica odata cu panta si ajunge aproape vertical —
+			# adica se vede din lateral ca o pata neagra, nu ca un contact.
+			var v0 := Vector3(cx, cy, cz)
+			var v1 := Vector3(cx + p0.x,
+					_rim_y(cx + p0.x, cz + p0.y, cy), cz + p0.y)
+			var v2 := Vector3(cx + p1.x,
+					_rim_y(cx + p1.x, cz + p1.y, cy), cz + p1.y)
+			# CENTRUL E GRI, NU NEGRU, si asta e o reparatie masurata, nu un
+			# gust. Cu BLEND_MODE_MUL un vertex negru inmulteste pixelul cu
+			# zero; un disc prins pe muchie in golul dintre sosea si teren
+			# picta atunci o PANA NEAGRA peste umar (se vedea pe captura, in
+			# stanga jos). Cu gri, cel mai intunecat caz ramane o umbra.
+			st.set_color(Color(dark, dark, dark, 1.0))
+			st.set_normal(Vector3.UP)
+			st.add_vertex(v0)
+			st.set_color(Color.WHITE)
+			st.set_normal(Vector3.UP)
+			st.add_vertex(v1)
+			st.set_color(Color.WHITE)
+			st.set_normal(Vector3.UP)
+			st.add_vertex(v2)
+	var mesh := st.commit()
+	if mesh == null or mesh.get_surface_count() == 0:
+		return
+	var inst := MeshInstance3D.new()
+	inst.name = "PropContact"
+	inst.mesh = mesh
+	inst.material_override = _prop_contact_material()
+	# Nu arunca umbra: e deja o umbra.
+	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(inst)
+
+
+## Cota unui vertex de pe marginea discului: urmareste terenul, dar nu se
+## departeaza de centru mai mult decat PROP_AO_RELIEF. Asa discul ramane o pata
+## intinsa pe sol si pe teren frant, in loc sa devina o panza verticala.
+const PROP_AO_RELIEF: float = 0.6
+
+func _rim_y(wx: float, wz: float, center_y: float) -> float:
+	var y := _sampler.ground_y(wx, wz) + PROP_AO_LIFT
+	return clampf(y, center_y - PROP_AO_RELIEF, center_y + PROP_AO_RELIEF)
+
+
+var _prop_ao_mat: StandardMaterial3D
+
+func _prop_contact_material() -> StandardMaterial3D:
+	if _prop_ao_mat != null:
+		return _prop_ao_mat
+	var m := StandardMaterial3D.new()
+	# NEILUMINAT: o umbra nu se lumineaza de la soare. Fara asta discul primea
+	# lumina directionala si se DESCHIDEA exact acolo unde bate soarele, adica
+	# fix unde trebuia sa fie mai inchis.
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	# MUL fara canal alfa: intunecarea e in CULOARE (gri spre alb la margine),
+	# nu in transparenta. Alb = 1.0 = identitatea inmultirii, deci marginea
+	# discului dispare exact ca inainte, dar fara ca alfa sa mai poata scoate
+	# un contur.
+	m.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+	m.vertex_color_use_as_albedo = true
+	m.albedo_color = Color.WHITE
+	# Fara scriere in adancime: sunt suprafete transparente lipite de sol.
+	m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	m.cull_mode = BaseMaterial3D.CULL_BACK
+	_prop_ao_mat = m
+	return _prop_ao_mat
+
+
 func _cliff_positions() -> PackedVector2Array:
 	var out := PackedVector2Array()
 	var cliffs := get_node_or_null("Cliffs")
@@ -5370,8 +6043,8 @@ func _build_branch_rails(r: TrackRoute) -> void:
 		return
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Palette.color(Palette.CONCRETE),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
-		"BranchRails")
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "TunnelShell")
 
 
 ## Are voie sa stea un parapet de banda in punctul asta?
@@ -5426,8 +6099,8 @@ func _build_branch_sand(r: TrackRoute) -> void:
 	_add_mesh_with_collision(st.commit(), tint,
 		_tex(String(theme_flag("branch_texture",
 			"res://assets/textures/surface_sand.png"))),
-		1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
-		"BranchSand")
+		1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "BranchSand")
 
 
 ## Reteta "deck": banda ASFALTATA — un tablier de viaduct, nu o panglica.
@@ -5499,8 +6172,8 @@ func _build_branch_deck(r: TrackRoute) -> void:
 	_add_mesh_with_collision(st.commit(), deck_color,
 		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
 		BaseMaterial3D.CULL_DISABLED, null,
-		_tex("res://assets/textures/surface_asphalt_macro.png"), true, null,
-		"BranchDeck")
+		_tex("res://assets/textures/surface_asphalt_macro.png"),
+		true, null, "BranchDeck")
 	_build_branch_markings(r)
 
 
@@ -5766,8 +6439,8 @@ func _build_branch_dirt(r: TrackRoute, with_ruts: bool) -> void:
 		_tex(String(theme_flag("branch_texture",
 			"res://assets/textures/surface_gravel.png"))),
 		1.0, 0.0, BaseMaterial3D.CULL_DISABLED, col_mesh,
-		_tex("res://assets/textures/surface_sand_macro.png"), true, null,
-		"BranchDirt")
+		_tex("res://assets/textures/surface_sand_macro.png"),
+		true, null, "BranchDirt")
 	if with_ruts and r.tufts:
 		_build_branch_tufts(r, rc - rw, grass_c)
 
@@ -6253,7 +6926,17 @@ const ROAD_CROWN: float = 0.03
 ## trecerea mid->edge se intampla intr-o singura fasie si iese o dunga, nu
 ## un degrade. Costul: un inel de vertecsi in plus pe toata bucla, masurat
 ## sub 1% din pista.
-const ROAD_PROFILE: Array[float] = [-1.0, -0.85, -0.5, 0.0, 0.5, 0.85, 1.0]
+## Pozitiile transversale ale profilului soselei, in [-1, 1].
+##
+## Punctele de la +-0.34 si +-0.62 au fost adaugate in runda 6 pentru URMELE DE
+## CAUCIUC (vezi `_wear_shade`): un fagas are ~0.9 m latime pe o banda de 6 m,
+## adica 0.15 in unitati de profil. Cu vechea grila (0, +-0.5, +-0.85) fagasul
+## ar fi fost interpolat Gouraud intre doua puncte aflate la 0.35 unul de altul
+## si ar fi iesit un degrade lat pe toata jumatatea de banda, nu o urma. Aceeasi
+## lectie ca la benzile din vertex color (memoria `benzi-vertex-color-bisect`):
+## tenta se intinde pe toata fata, deci fata trebuie sa fie de latimea tentei.
+const ROAD_PROFILE: Array[float] = [-1.0, -0.85, -0.62, -0.5, -0.34, 0.0,
+	0.34, 0.5, 0.62, 0.85, 1.0]
 
 ## Culoarea asfaltului, INAINTE de compensarea trecerii macro. Racoroasa-inchisa
 ## ca masinile saturate sa "sara" din ecran (style_bible §1: asfaltul e cea mai
@@ -6339,6 +7022,90 @@ const WET_FADE: float = 0.015
 ## lasa deci mijlocul alb si trage marginile spre ocru: inchide albastrul mai
 ## mult decat rosul, ca marginea sa iasa calda, nu murdara.
 const DIRT_EDGE_SHADE: Color = Color(0.87, 0.78, 0.66)
+
+## --- UZURA DRUMULUI DE PAMANT ----------------------------------------------
+##
+## Cererea (3) a criticii, runda 6: drumul "are granulatie dar n-are UZURA: fara
+## banda centrala mai inchisa, fara urme de cauciuc, fara praf pe margini".
+##
+## De ce NU RoadWear (scenes/tracks/road_wear.gd): acela e o foaie de urme care
+## se ACUMULEAZA in timpul cursei, desenata de masini intr-un SubViewport, si e
+## legata de `road_surface == "snow"`. Rezolva alta problema — istoria cursei —
+## si nu poate rezolva asta: intr-o captura la fractia 0.10, la secunda zero,
+## foaia e goala. Ce lipseste in poza e uzura ISTORICA a drumului, care exista
+## inainte sa porneasca cineva motorul. Aia se coace in geometrie, nu se deseneaza
+## la rulare. (Foaia ramane utila si aici mai tarziu, peste asta.)
+##
+## Trei componente, toate functii de pozitia transversala `t` in [-1, 1]:
+##
+##   1. FAGASELE — doua urme la +-`WEAR_TRACK_POS`, unde calca rotile. Pe un drum
+##      de pamant sunt mai DESCHISE decat restul: praful fin e maturat si ramane
+##      pamantul batatorit, palid. (Pe asfalt ar fi invers — de aia se aplica
+##      doar pe `road_is_loose()`.)
+##   2. AXUL — banda dintre fagase, unde nu calca nimeni: acolo se aduna praf si
+##      pietris, deci e mai INCHISA si mai calda. Asta e "banda centrala mai
+##      inchisa" ceruta explicit.
+##   3. PRAFUL DE MARGINE — deja exista prin `DIRT_EDGE_SHADE`, dar pornea de la
+##      0.45 si urca lent; acum incepe de la 0.66, adica DUPA fagas, ca sa se
+##      citeasca drept acostament, nu drept sfarsit al benzii.
+##
+## Toate sunt INTUNECARI sau valori sub 1.0 aplicate ca vertex color, deci
+## respecta clamp-ul [0,1] (memoria `surfacetool-clamp-vertex-color`): albul cel
+## mai deschis din schema, fagasul, e chiar `Color.WHITE`, iar restul coboara.
+
+## Unde calca rotile, in unitati de profil. 0.48 pe o semilatime de 6 m = 2.9 m
+## intre fagase, adica ecartamentul unei masini de curse plus imprastierea
+## liniilor de curs.
+const WEAR_TRACK_POS: float = 0.48
+## Cat de lat e un fagas, in unitati de profil.
+const WEAR_TRACK_HALF: float = 0.15
+## Cat de palid iese pamantul batatorit din fagas (0 = neatins).
+##
+## MASURAT, nu ales: prima valoare (0.10) a dat pe mesh un interval de numai
+## 0.129 intre cel mai deschis si cel mai inchis vertex al soselei (sonda de
+## culori de vertex, 12125 vertecsi, 4 valori distincte). Pe un drum a carui
+## textura are ea insasi pete de +-0.15, un gradient de 0.13 e SUB zgomotul de
+## suprafata — codul rula, cifra iesea, si in poza nu era nimic. Exact capcana
+## din instructiunile rundei: sonda masoara o proprietate, imaginea judeca.
+##
+## 0.10 -> 0.16 pe fagas si 0.88 -> 0.74 pe ax duc intervalul la ~0.30, adica
+## peste amplitudinea petelor. Mai mult de atat ar fi citit ca marcaj pictat.
+const WEAR_TRACK_LIFT: float = 0.16
+## Cat de inchis e axul dintre fagase.
+const WEAR_CENTER_DARK: Color = Color(0.74, 0.66, 0.56)
+
+
+## Nuanta de UZURA pentru pozitia transversala `t`. Vezi blocul de mai sus.
+##
+## `base` e nuanta deja calculata (mijloc -> margine); functia o modifica, nu o
+## inlocuieste, ca gradientul de praf de la margine sa ramana.
+func _wear_shade(base: Color, t: float) -> Color:
+	if not road_is_loose():
+		return base
+	var a := absf(t)
+	# 1. Fagasul: o gaussiana in jurul lui WEAR_TRACK_POS.
+	var d := (a - WEAR_TRACK_POS) / WEAR_TRACK_HALF
+	var rut := exp(-d * d)
+	# 2. Axul: se stinge acolo unde incepe fagasul, ca sa nu se anuleze reciproc.
+	var mid := 1.0 - smoothstep(0.0, WEAR_TRACK_POS - WEAR_TRACK_HALF, a)
+	var c := base.lerp(WEAR_CENTER_DARK, mid * 0.85)
+	# FAGASUL SE OBTINE INTUNECAND RESTUL, nu luminand fagasul.
+	#
+	# Prima versiune aduna `lift` peste fagas si taia la 1.0 — si masurat pe mesh
+	# fix asta se intampla: la +-0.34, +-0.50 si +-0.62 suma trecea de 1.0 si toate
+	# TREI se taiau la alb. Fagasele nu ieseau doua urme, ci un PLATOU alb lat de
+	# la -0.62 la +0.62, adica exact drumul uniform pe care il reparam. Sonda
+	# arata 4 valori distincte pe 11 puncte de profil si aia era dovada.
+	#
+	# Vertex color poate doar sa INTUNECE (memoria `surfacetool-clamp-vertex-color`):
+	# deci partea NEcalcata coboara cu `WEAR_TRACK_LIFT`, iar fagasul ramane sus.
+	# Acelasi contrast, fara clamp, si urmele redevin doua.
+	var unworn := WEAR_TRACK_LIFT * (1.0 - rut)
+	return Color(
+		maxf(c.r - unworn, 0.0),
+		maxf(c.g - unworn, 0.0),
+		maxf(c.b - unworn, 0.0),
+		c.a)
 
 ## Culoarea drumului de ZAPADA BATATORITA (road_surface == "snow"), inainte de
 ## compensarea trecerii macro. Sub albul zapezii proaspete din paleta
@@ -6452,6 +7219,16 @@ func _build_road() -> void:
 		mid_shade = SNOW_MID_SHADE
 	elif road_is_loose():
 		edge_shade = DIRT_EDGE_SHADE
+	# Nuanta drumului afanat, impartita la media macro-ului ca a doua trecere de
+	# textura sa n-o intunece — aceeasi compensare pe care o facea `road_material`
+	# cand culoarea statea in material.
+	var _loose_road_tint := Color.WHITE
+	if road_is_loose():
+		var drc := dirt_road_color()
+		_loose_road_tint = Color(
+			minf(drc.r / SAND_MACRO_MEAN, 1.0),
+			minf(drc.g / SAND_MACRO_MEAN, 1.0),
+			minf(drc.b / SAND_MACRO_MEAN, 1.0))
 	# Peticele de zapada de pe asfalt (vezi "road_snow_low" in themes()). Null pe
 	# orice tema fara munte, deci restul pistelor nu se schimba cu un pixel.
 	var snow_tint: Variant = theme_flag("road_snow_tint", null)
@@ -6528,8 +7305,29 @@ func _build_road() -> void:
 		for k in ROAD_PROFILE.size() - 1:
 			var ta: float = ROAD_PROFILE[k]
 			var tb: float = ROAD_PROFILE[k + 1]
-			var ca := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(ta)))
-			var cb := mid_shade.lerp(edge_shade, smoothstep(0.45, 1.0, absf(tb)))
+			# Praful de margine incepe mai tarziu pe pamant (0.66 in loc de
+			# 0.45): intre fagas si acostament trebuie sa ramana drum curat,
+			# altfel banda de rulare se termina direct in praf si drumul se
+			# ingusteaza optic.
+			var edge_lo := 0.66 if road_is_loose() else 0.45
+			var ca := _wear_shade(
+				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(ta))),
+				ta)
+			var cb := _wear_shade(
+				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(tb))),
+				tb)
+			# Pe drumul AFANAT culoarea nu mai vine din material: shader-ul de
+			# teren (vezi `road_material`) n-are `albedo_color`, deci nuanta
+			# drumului se inmulteste AICI, in vertex color. Se compune peste
+			# uzura, adica exact ordinea de dinainte — materialul inmultea si el
+			# peste nuanta de profil.
+			#
+			# Se incadreaza in clamp-ul [0,1] prin constructie: tenta temei e
+			# #D3CBBD (0.83, 0.80, 0.74), toate sub 1. O tema care ar cere un
+			# drum mai deschis decat alb ar trebui sa ridice textura, nu asta.
+			if road_is_loose():
+				ca *= _loose_road_tint
+				cb *= _loose_road_tint
 			# UV-ul urmareste latimea LOCALA, ca dala sa ramana patrata si acolo
 			# unde drumul se ingusteaza — altfel textura s-ar intinde in strangere.
 			var ua := ta * (hw0 / tile)
@@ -6716,10 +7514,10 @@ func _build_road() -> void:
 	_add_mesh_with_collision(top.commit(), road_color,
 		_tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro), true,
-		road_override, "RoadTop")
+		road_override, "RoadTop", true)
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
-		"RoadSides")
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "RoadSides")
 	if has_ice:
 		ice_top.index()
 		ice_top.generate_normals()
@@ -6734,8 +7532,8 @@ func _build_road() -> void:
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
 			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE),
-				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
-				true, null, "RoadOverpassDeck")
+				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+				null, null, true, null, "ChannelDeckSides")
 
 
 ## Cat de alba e zapada de pe asfalt, ca greutate 0..1 pentru un vertex.
@@ -6958,13 +7756,13 @@ func _build_walls() -> void:
 			# din citirea podului, nu o margine artificiala.
 			_add_mesh_with_collision(st.commit(), Color(0.9, 0.25, 0.2),
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
-				bool(theme_flag("wall_visible", true)), null, "Walls")
+				bool(theme_flag("wall_visible", true)), null, "OuterWall")
 		if deck_emitted:
 			deck.generate_normals()
 			_add_mesh_with_collision(deck.commit(),
 				Palette.color(Palette.CONCRETE),
-				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
-				true, null, "WallsOverpassSkirt")
+				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+				null, null, true, null, "WallDeck")
 	_build_rail_posts(post_spots)
 
 
@@ -7045,8 +7843,8 @@ func _build_ramp(frac: float) -> void:
 	st.add_vertex(fr); st.add_vertex(br_low); st.add_vertex(br)
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
-		"Ramp")
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "Ramp")
 
 ## TOROS (Baikal): creasta de gheata impinsa de vant peste culoar — un
 ## kicker natural, mic. Prisma asimetrica pe TOATA latimea benzii (+1 m de
@@ -7096,7 +7894,6 @@ func _build_hummock(frac: float) -> void:
 	inst.material_override = Palette.triplanar_class_material("snow")
 	add_child(inst)
 	var body := StaticBody3D.new()
-	body.name = "HummockBody"
 	var shape := CollisionShape3D.new()
 	var tri := mesh.create_trimesh_shape() as ConcavePolygonShape3D
 	tri.backface_collision = true
@@ -7874,8 +8671,8 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
 	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
 	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
-		"ChannelKicker")
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "ChannelKicker")
 
 	var kicker := FlyoffKicker.new()
 	kicker.name = "Trambulina_%s" % String(ch.get("label", "canal"))
@@ -8069,8 +8866,8 @@ func _build_flyoff(frac: float) -> void:
 	st.generate_normals()
 	# Portocaliul rampelor: jucatorul stie deja ca portocaliu = sari.
 	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
-		"FlyoffRamp")
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "FlyoffRamp")
 	_build_flyoff_kicker(last)
 	_build_flyoff_net(idx)
 
@@ -8219,6 +9016,38 @@ func road_material() -> Material:
 		macro = "res://assets/textures/surface_sand_macro.png"
 		rough = 1.0
 		spec = 0.0
+	# DRUMUL DE PAMANT trece pe shader-ul terenului, ca sa capete ATENUAREA
+	# petelor cu distanta. Runda 6, cererea (4): dala "nu se atenueaza cu
+	# distanta si e aceeasi pe nisip, pe drum si pe acostament".
+	#
+	# Nisipul de langa drum o primise deja (terrain_splat ruleaza acolo), dar
+	# soseaua e StandardMaterial3D — si StandardMaterial3D nu are cum: nu exista
+	# knob de "slabeste detaliul cu distanta", iar `distance_fade` stinge
+	# OBIECTUL, nu stratul. Rezultatul, vazut in captura de dupa prima reparatie:
+	# nisipul se linistea spre orizont si drumul ramanea la fel de patat pana in
+	# punctul de fuga, deci defectul se muta, nu disparea — si iesea si o
+	# NEPOTRIVIRE intre doua suprafete care inainte macar se potriveau.
+	#
+	# Acelasi shader, deci ZERO materiale in plus la numaratoare pe axa care
+	# conteaza (`probe_decor` numara materiale distincte; asta e unul singur,
+	# partajat de toate segmentele de sosea). Perechea "iarba" primeste tot
+	# texturile de nisip: `COLOR.a` e 0 pe sosea, deci a doua pereche nu e
+	# niciodata amestecata — exista doar fiindca shader-ul cere patru uniforme.
+	if road_is_loose():
+		if _loose_road_mat == null:
+			var sm := ShaderMaterial.new()
+			sm.shader = load("res://assets/shaders/terrain_splat.gdshader")
+			var mt := _tex(micro)
+			var mc := _tex(macro)
+			sm.set_shader_parameter("sand_micro", mt)
+			sm.set_shader_parameter("sand_macro", mc)
+			sm.set_shader_parameter("grass_micro", mt)
+			sm.set_shader_parameter("grass_macro", mc)
+			# Culoarea nu mai vine din `albedo_color` (shader-ul n-are asa ceva),
+			# ci se INMULTESTE in vertex color. Vertecsii soselei poarta deja
+			# nuanta de uzura, deci se compune acolo — vezi `_road_tint`.
+			_loose_road_mat = sm
+		return _loose_road_mat
 	return _flat_material(color, _tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, _tex(macro))
 
@@ -8226,10 +9055,14 @@ func road_material() -> Material:
 func _flat_material(color: Color, texture: Texture2D = null,
 		roughness: float = 1.0, specular: float = 0.5,
 		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
-		macro_texture: Texture2D = null) -> StandardMaterial3D:
-	var key := "%s|%s|%.2f|%.2f|%d|%s" % [color.to_html(true),
+		macro_texture: Texture2D = null,
+		grazing: bool = false) -> StandardMaterial3D:
+	# `grazing` intra in CHEIE: altfel prima varianta ceruta a unei combinatii
+	# ramane in cache si a doua o primeste pe a ei, tacut.
+	var key := "%s|%s|%.2f|%.2f|%d|%s|%d" % [color.to_html(true),
 		texture.resource_path if texture != null else "", roughness, specular,
-		cull, macro_texture.resource_path if macro_texture != null else ""]
+		cull, macro_texture.resource_path if macro_texture != null else "",
+		1 if grazing else 0]
 	if _mat_cache.has(key):
 		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
@@ -8249,6 +9082,33 @@ func _flat_material(color: Color, texture: Texture2D = null,
 		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
 	mat.roughness = roughness
 	mat.metallic_specular = specular
+	# FILTRARE ANIZOTROPA pe suprafetele mari privite RAZANT (runda 31).
+	#
+	# Masurat, nu presupus. Metrica `umbre_silueta` raporta pe carosabil muchii
+	# 8.2% pe orizontala fata de 19.7% pe verticala, iar nota rundei punea vina
+	# pe "dungile verticale ale dalei". Captura arata insa exact pe dos: dala e
+	# izotropa la sursa (surface_sand 0.002, surface_asphalt 0.022, detail_rock
+	# 0.01, detail_tuff 0.03 — toate masurate), iar granulatia de pe ecran e
+	# intinsa ORIZONTAL. Deci nu venea nici din textura, nici din UV (care sunt
+	# deja patrate: `tile` 3.5 m pe ambele axe, vezi _build_road).
+	#
+	# Vine din MIP-uri. La incidenta razanta un texel acopera multi pixeli pe
+	# verticala si putini pe orizontala; filtrarea trilineara alege un singur
+	# nivel de mip pentru ambele axe, deci netezeste de-a lungul directiei
+	# comprimate si lasa detaliu pe cealalta — adica intinde un tipar izotrop in
+	# dungi orizontale. E aceeasi familie de fenomen cu nota din
+	# terrain_splat.gdshader despre selectorul de mip la incidenta razanta.
+	#
+	# Cu filtrare anizotropa GPU-ul esantioneaza de-a lungul axei comprimate:
+	# masurat pe acelasi cadru, cu umbrele stinse ca sa izolam suprafata,
+	# anizotropia 0.55 -> 0.30; cu umbrele aprinse 0.41 -> 0.26.
+	#
+	# Se pune DOAR unde textura chiar se vede razant (sosea, teren, umeri): pe
+	# mobil esantionarea anizotropa costa banda de memorie, si n-are ce cauta pe
+	# fete privite frontal.
+	if grazing:
+		mat.texture_filter = \
+			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	# Vertex color = AO/gradient copt de builder. Mesh-urile care nu emit COLOR
 	# raman pe alb (1,1,1), deci inmultirea e identitate — zero regresie pe
 	# apelantii care nu stiu de el.
@@ -8270,7 +9130,8 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		macro_texture: Texture2D = null,
 		visible_mesh: bool = true,
 		override_material: Material = null,
-		body_name: String = "") -> void:
+		body_name: String = "",
+		grazing: bool = false) -> void:
 	# visible_mesh = false: doar fizica, fara desen. Zidul exterior pe pistele
 	# care nu vor panglica vizibila ramane totusi zid — altfel se deschide
 	# marginea buclei (pe Okinawa, direct in mare).
@@ -8282,9 +9143,15 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		# standard din cache.
 		inst.material_override = override_material if override_material != null \
 			else _flat_material(color, texture, roughness,
-				specular, cull, macro_texture)
+				specular, cull, macro_texture, grazing)
 		add_child(inst)
 	var body := StaticBody3D.new()
+	# NUMELE nu e cosmetica: ProbeLaneClear raporteaza blocajele pe nume, iar un
+	# "@StaticBody3D@248" costa de fiecare data o sonda separata ca sa afli ce
+	# constructor l-a facut — si indicele se SCHIMBA la orice geometrie adaugata
+	# inaintea lui, deci nici notat intr-un raport nu ramane valabil.
+	if body_name != "":
+		body.name = body_name
 	var shape := CollisionShape3D.new()
 	# collision_mesh separat cand vizualul nu trebuie sa fie si fizica: soseaua
 	# cambrata ruleaza pe fasia plata veche, ca feel-ul sa ramana identic.
@@ -8295,11 +9162,6 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 	tri.backface_collision = true
 	shape.shape = tri
 	body.add_child(shape)
-	# NUME pe corpurile generate. Erau toate anonime (`@StaticBody3D@34`), iar
-	# cand unul dintre ele a intrat in banda pe Cappadocia a fost nevoie de o
-	# ora ca sa afli CARE. Un nume face urmatorul blocaj gasibil in minute.
-	if not body_name.is_empty():
-		body.name = body_name
 	add_child(body)
 
 ## Linia de start in sah: doua randuri de patrate alb/negru peste asfalt.
@@ -8374,6 +9236,15 @@ const SHOULDER_SINK: float = 0.10
 ## 2.5 m lasa loc treptei reale masurate pe Dunele (1.1 m) plus marja, si taie
 ## perdeaua inainte sa devina zid. Ce ramane dedesubt e treaba terenului sau a
 ## fustei de sosea, nu a umarului.
+##
+## A DOUA OARA. Plafonul a fost pus in 8c20fdb, pe ramura de traseu, si a fost
+## PIERDUT la merge-ul f1b04e9: rezolvarea a luat track.gd intreg de pe ramura de
+## arta, care era mai veche decat reparatia. Celelalte doua bucati ale aceleiasi
+## reparatii (raza lui TerrainHollow in Track13.tscn si documentatia din
+## terrain_hollow.gd) au supravietuit, fiind in alte fisiere — de aia pista arata
+## reparata si tot nu se conducea. Nicio runda de arta nu a atins constanta asta;
+## a sters-o un merge. Daca dispare iar, cauta intai in rezolvarile de merge, nu
+## in commit-urile de arta, si ruleaza ProbeLaneClear inainte de merge, nu dupa.
 const SHOULDER_MAX_DROP: float = 2.5
 
 
@@ -8566,14 +9437,23 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 	var base: Vector3 = baked[i]
 	var lat := _side_at(i) * side_sign
 	var max_tan := tan(deg_to_rad(SHOULDER_MAX_SLOPE_DEG))
-	var w := SHOULDER_WIDTH
+	# Latimea minima poate veni din tema. Formula de mai jos deriva umarul din
+	# CADEREA terenului de langa banda — corect cat timp drumul taie o panta,
+	# dar pe un platou plat (Cappadocia) caderea e ~0 si banda ramane la minimul
+	# de 1.3 m, adica invizibila. Criticul orb a citit exact asta: "a wide flat
+	# featureless apron ... no edge, no camber, no shoulder, nothing marking
+	# where road stops and desert starts". Nu e un bug de calcul: pe drumul de
+	# pamant din Cappadocia acostamentul de pietris CHIAR e lat, si atunci
+	# latimea e o proprietate a drumului, nu una dedusa din relief.
+	var w_min: float = float(theme_flag("shoulder_min_width", SHOULDER_WIDTH))
+	var w := w_min
 	for _pass in 2:
 		var p := base + lat * (width_at_index(i) + w)
 		# Acelasi plafon ca la emitere: latimea se calculeaza pentru caderea
 		# pe care umarul chiar o construieste, nu pentru fundul unui gol.
 		var drop := minf(base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK,
 			SHOULDER_MAX_DROP)
-		w = clampf(drop / max_tan, SHOULDER_WIDTH, SHOULDER_MAX_WIDTH)
+		w = clampf(drop / max_tan, w_min, SHOULDER_MAX_WIDTH)
 	return w
 
 
@@ -10514,27 +11394,13 @@ func stamp_wear(index: int, pos: Vector3, strength: float = 1.0) -> void:
 ## profil, marginea trebuie sa fie cea LOCALA — altfel o portiune largita ar
 ## penaliza masina care merge pe asfaltul ei propriu, iar una stramta ar lasa-o
 ## sa taie prin iarba la viteza plina.
-##
-## Si LATERAL, si VERTICAL — pe amandoua ramurile. Ramura cu profil de latime
-## a fost scrisa inainte de pistele care trec peste ele insele si compara doar
-## 2D; cand a venit pasajul de la Chongqing, testul vertical a intrat in
-## [method TrackRoute.is_on_road], adica numai pe ramura CEALALTA. Pe un pasaj
-## drept nu s-a vazut, fiindca acolo etajele nu stau unul peste altul decat
-## cateva zeci de metri. Pe elicea Cappadociei (POI G: doua ture cu aceeasi
-## raza, una la 17 m peste cealalta) axele se suprapun pe toata lungimea, si
-## masurat cu ProbeHelix un punct aflat FIX deasupra spirei de jos, la
-## +17.33 m, raspundea „sunt pe drumul asta". Cu asta, checkpoint-ul de la
-## [code]Car._physics_process[/code] se innoia pe spira de jos in timp ce
-## masina urca pe cea de sus, iar repunerea urmatoare era un cadou de o tura.
 func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	var r := route_at(route)
 	if r == null:
 		return false
 	if route != 0 or _width_profile().is_empty():
 		return r.is_on_road(index, pos)
-	if r.lateral_distance(index, pos) > width_at_index(index) + 0.5:
-		return false
-	return not r.is_other_level(index, pos)
+	return r.lateral_distance(index, pos) <= width_at_index(index) + 0.5
 
 func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
 		route: int = 0) -> Vector3:

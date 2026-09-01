@@ -160,6 +160,74 @@ static func uv(slot: int) -> Vector2:
 ## draw call-uri: toate prop-urile arata spre acelasi material).
 static var _shared: StandardMaterial3D
 
+## Calea stratului de detaliu ACTIV. Tema o poate schimba (`detail_texture`).
+##
+## Exista fiindca detail_rock.png are STRATE ORIZONTALE — corect pentru faleze
+## sedimentare (Baikal, Stromboli, Chongqing), gresit pentru tuful din
+## Cappadocia, care se erodeaza prin siroire: santurile coboara CU apa. Fiind
+## aplicat triplanar peste TOATA lumea, defectul nu se putea repara in mesh:
+## benzile ieseau identice si pe o cutie (buiandrugul arcadei), nu doar pe
+## corpurile de revolutie. Doua runde de critica oarba s-au pierdut cautand
+## vinovatul in `Builder.revolve`.
+##
+## NU adauga material: se schimba doar textura din `detail_albedo`, deci
+## numaratoarea din tools/probe_decor.gd nu se misca.
+static var _detail_path: String = DETAIL_PATH
+
+
+## Schimba stratul de detaliu al lumii. Se apeleaza INAINTE de prima cerere de
+## material (Track.apply_theme), fiindca `_shared` e construit lenes o data.
+## Daca materialul exista deja, i se schimba textura pe loc — altfel o pista
+## incarcata a doua oara in aceeasi sesiune ar ramane cu detaliul precedentei.
+static func set_detail_texture(path: String) -> void:
+	var want := path if path != "" else DETAIL_PATH
+	if want == _detail_path and _shared != null:
+		return
+	_detail_path = want
+	if _shared != null:
+		_shared.detail_albedo = load(_detail_path)
+	# Si varianta cu stingere pe distanta, din acelasi motiv: altfel o pista
+	# incarcata dupa alta ar pastra detaliul precedentei pe prop-uri.
+	if _faded_detail != null:
+		_faded_detail.set_shader_parameter("detail_tex", load(_detail_path))
+
+
+## Cuantizarea raspunsului de lumina pe prop-uri, ceruta de TEMA (runda 25).
+##
+## De ce e un setter si nu o valoare in `faded_detail_material`: shaderul e
+## PARTAJAT de toate pistele care au prop-uri pe UV de tuf, iar cuantizarea o
+## cere doar Cappadocia. Implicitul din shader e 0 (Lambert continuu), deci o
+## pista care nu apeleaza functia asta ramane bit-identica cu inainte.
+##
+## Se apeleaza din Track.apply_theme, langa `set_detail_texture`, si din acelasi
+## motiv: materialul e lenes, iar o pista incarcata dupa alta ar mosteni altfel
+## reglajul precedentei. De-aia ramura `else` STINGE explicit, in loc sa nu faca
+## nimic — fara ea, o cursa pe Cappadocia urmata de una pe Baikal ar fi fatetat
+## si stancile de la Baikal.
+##
+## `sun_deg` sunt ACELEASI grade ca rotatia luminii scenei, nu un vector scris
+## de mana. Motivul e o capcana deja platita o data in proiectul asta (vezi nota
+## lunga din `_shade_facets` si memoria `azimutul-soarelui-fata-de-drum`): o
+## directie de lumina scrisa literal si neremasurata dupa ce soarele s-a mutat
+## ajunge sa picteze umbra exact pe fata pe care soarele o lumineaza, adica doua
+## semnale care se scad. Derivata din grade, se misca odata cu soarele.
+static func set_prop_light_steps(on: bool, sun_deg: Vector3 = Vector3.ZERO,
+		split: float = 0.34, low: float = 0.30, ambient: float = 0.0) -> void:
+	var mat := faded_detail_material()
+	mat.set_shader_parameter("light_steps", 1.0 if on else 0.0)
+	if not on:
+		mat.set_shader_parameter("ambient_split", 0.0)
+		return
+	mat.set_shader_parameter("light_split", split)
+	mat.set_shader_parameter("light_low", low)
+	mat.set_shader_parameter("ambient_split", ambient)
+	# Directia CATRE soare, in spatiul lumii. Un DirectionalLight3D lumineaza pe
+	# -Z local, deci vectorul catre sursa e +Z rotit — exact ce compara `light()`
+	# cu normala.
+	var b := Basis.from_euler(Vector3(
+			deg_to_rad(sun_deg.x), deg_to_rad(sun_deg.y), deg_to_rad(sun_deg.z)))
+	mat.set_shader_parameter("ambient_sun_dir", b * Vector3(0.0, 0.0, 1.0))
+
 ## Materialul comun al lumii. Vertex color = AO copt, inmultit peste atlas.
 ##
 ## Filtrarea: LINEAR cu mipmap-uri, nu NEAREST. Cat timp sloturile erau patrate
@@ -205,7 +273,7 @@ static func world_material() -> StandardMaterial3D:
 		# centrul slotului — asa slotul din paleta devine si canal de intensitate:
 		# roca primeste tot, masinile nimic.
 		_shared.detail_enabled = true
-		_shared.detail_albedo = load(DETAIL_PATH)
+		_shared.detail_albedo = load(_detail_path)
 		_shared.detail_mask = load(DETAIL_MASK_PATH)
 		_shared.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 		_shared.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
@@ -1057,8 +1125,58 @@ static func lava_material() -> ShaderMaterial:
 ## Un singur nume azi; e o functie ca sa existe UN loc unde se adauga al doilea,
 ## nu un `if` strecurat in dispatcher.
 static func shader_material(name: String) -> ShaderMaterial:
+	if name == "faded_detail":
+		return faded_detail_material()
 	assert(name == "lava", "shader necunoscut: " + name)
 	return lava_material()
+
+
+## Materialul lumii, dar cu stratul de pete care SE STINGE CU DISTANTA.
+##
+## Runda 6 a stins pestritul pe carosabil si pe teren; prop-urile au ramas pe
+## `world_material`, care e StandardMaterial3D. Runda 7, amandoi criticii,
+## despre hornuri: aceeasi marime si acelasi contrast al petelor de la 3 m la
+## 90 m. Nu e o impresie — se vede pe captura, conul din marginea cadrului si
+## cel de la 90 m poarta caneluri identice.
+##
+## De ce nu se putea repara pe materialul existent: `distance_fade` din
+## StandardMaterial3D stinge OBIECTUL (alfa), nu un strat, iar mipmap-urile
+## netezesc tiparul fara sa-i scada contrastul — la incidenta razanta
+## selectorul de mip ramane pe nivelele ascutite (nota lunga din
+## terrain_splat.gdshader).
+##
+## Shaderul reproduce exact ce facea materialul comun (atlas pe UV1, vertex
+## color ca AO, detaliu triplanar prin masca de slot) si adauga stingerea spre
+## 1.0 — identitatea inmultirii — intre `detail_near_m` si `detail_far_m`.
+##
+## UN material pentru toate piesele care il cer, ca la `lava_material`: garda
+## numara materialele, deci o padure intreaga de hornuri aduce +1, nu +41.
+static var _faded_detail: ShaderMaterial
+
+static func faded_detail_material() -> ShaderMaterial:
+	if _faded_detail != null:
+		return _faded_detail
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/prop_detail_fade.gdshader")
+	# Aceleasi obiecte de textura ca `world_material`: nimic nu se dubleaza in
+	# memoria GPU.
+	mat.set_shader_parameter("albedo_atlas", load(ATLAS_PATH))
+	mat.set_shader_parameter("detail_tex", load(_detail_path))
+	mat.set_shader_parameter("detail_mask_tex", load(DETAIL_MASK_PATH))
+	mat.set_shader_parameter("detail_scale", DETAIL_SCALE)
+	# Fereastra de stingere e MAI SCURTA decat pe teren (26->130 m). Nu din
+	# gust: terenul se vede razant si se intinde pana in ceata, deci are nevoie
+	# de o tranzitie lunga ca sa nu apara un inel. Un horn e un obiect cu
+	# silueta, pe care il vezi intre 3 si 90 m, si tocmai intervalul ala trebuie
+	# sa arate diferenta. Masurat pe captura de la frac 0.045, deviatia de
+	# luminanta in corpul unui con, departe/aproape:
+	#   world_material (fara stingere)  1.01  — identic la 8 m si la 70 m
+	#   26 -> 130 m                     0.94
+	#   14 ->  70 m                     vezi commit
+	mat.set_shader_parameter("detail_near_m", 14.0)
+	mat.set_shader_parameter("detail_far_m", 70.0)
+	_faded_detail = mat
+	return mat
 
 
 static func lava_material_phased(phase: float, flow: float = -1.0) -> ShaderMaterial:

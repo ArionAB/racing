@@ -20,3 +20,20 @@ __pycache__/
 assets/models/_*.glb
 tools/tmp/
 .scratch/
+
+# Plansele si decupajele rundelor de critica: unelte de sesiune, nu sursa.
+crop_*.png
+sheet_*.png
+sheet_*.key
+
+# Capturi de lucru pentru rundele de critica. Se fac cu zecile la fiecare runda
+# (o captura = ~1 MB), sunt intermediare prin definitie, si Godot le genereaza
+# si cate un .import langa fiecare. In istorie n-au ce cauta: ce ramane dintr-o
+# runda e codul si mesajul de commit, nu poza intermediara nr. 7.
+r[0-9]*/
+z[A-Z]_*.png
+zoom_*.png
+p[AB].png
+[AB]_*.png
+stamp_*.png
+_*.png

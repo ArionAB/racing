@@ -1,43 +1,67 @@
-extends Node3D
-## Sonda de teren pentru POI E (via + balonul aterizat), fractiile 0.50-0.68.
+extends Node
+## Da coordonatele reale pentru POI E (via + balonul aterizat, 0.52-0.64):
+## pozitie pe ax, tangenta, normala laterala si cota terenului la distante
+## laterale. Fara ele, orice asezare de decor e ghicita — iar ghicitul a produs
+## deja "moloz la scara 0.45-1.40" = coridor de coloane de 16 m.
 ##
-## Raspunde la intrebarile de care depinde asezarea, si pe care ochiul nu le
-## poate da: unde e axul benzii in lume, incotro merge, ce latime are, cat de
-## sus e terenul la 15/30/60 m lateral, si care e plafonul de inaltime al
-## camerei la distanta aia (10 + 0.093*d).
-
-const FRACS := [0.50, 0.53, 0.56, 0.58, 0.60, 0.62, 0.64, 0.66, 0.68]
-const SIDES := [12.0, 20.0, 35.0, 55.0, 80.0]
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbePoiE.tscn
 
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var scene := load(GameState.TRACK_SCENES[6]) as PackedScene
+	var scene := load("res://scenes/tracks/Track13.tscn") as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	var baked: PackedVector3Array = track.route_at(0).baked
-	var n: int = baked.size()
-	print("puncte coapte: %d" % n)
-	for f: float in FRACS:
-		var i: int = int(round(f * float(n))) % n
+	var baked: PackedVector3Array = track.baked
+	var n := baked.size()
+	print("")
+	print("=== POI E: geometria vaii ===")
+	print("puncte baked: %d, half_width: %s" % [n, str(track.get("road_half_width"))])
+
+	# cotele din MESH-ul de teren (raycast-ul cere lume fizica pornita)
+	var tv := PackedVector3Array()
+	for m in _terrain_meshes(track):
+		var arrays := m.mesh.surface_get_arrays(0)
+		var xf := m.global_transform
+		for v in (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+			tv.append(xf * v)
+	print("vertecsi de teren: %d" % tv.size())
+	for m in _terrain_meshes(track):
+		print("  mesh: %s (%d surf)" % [m.name, m.mesh.get_surface_count()])
+	for f: float in [0.50, 0.52, 0.54, 0.56, 0.58, 0.60, 0.62, 0.64, 0.66]:
+		var i := int(round(f * float(n))) % n
 		var p: Vector3 = baked[i]
-		var nx: Vector3 = baked[(i + 4) % n]
-		var fwd := (nx - p)
+		var q: Vector3 = baked[(i + 3) % n]
+		var fwd := (q - p)
 		fwd.y = 0.0
 		fwd = fwd.normalized()
-		var right := Vector3(-fwd.z, 0.0, fwd.x)
-		var w := track.width_at(f)
-		print("\nfrac %.2f  pos=(%.1f, %.2f, %.1f)  fwd=(%.2f,%.2f)  half_w=%.1f"
-			% [f, p.x, p.y, p.z, fwd.x, fwd.z, w])
-		for s: float in SIDES:
-			var l: Vector3 = p + right * -s
-			var r: Vector3 = p + right * s
-			var ly := track._terrain_mesh_y(l.x, l.z)
-			var ry := track._terrain_mesh_y(r.x, r.z)
-			var cap: float = 10.0 + 0.093 * s
-			print("   ±%4.0f m  stanga y=%7.2f (dy %+6.2f)  dreapta y=%7.2f (dy %+6.2f)  plafon camera %.1f m"
-				% [s, ly, ly - p.y, ry, ry - p.y, cap])
+		var rgt := Vector3(-fwd.z, 0.0, fwd.x)
+		var line := "frac %.2f  pos(%.1f, %.1f, %.1f)  fwd(%.2f,%.2f)  " % [f, p.x, p.y, p.z, fwd.x, fwd.z]
+		# cota terenului la stanga/dreapta
+		for d: float in [-34.0, -26.0, -20.0, -14.0, -9.0, 9.0, 14.0, 20.0, 26.0]:
+			var probe_pos: Vector3 = p + rgt * d
+			var best := 36.0  # (6 m)^2 — altfel "cel mai apropiat" ia un varf de departe
+			var gy := NAN
+			for v in tv:
+				var dd := Vector2(v.x - probe_pos.x, v.z - probe_pos.z).length_squared()
+				if dd < best:
+					best = dd
+					gy = v.y
+			line += "%+.0f:%.1f " % [d, gy]
+		print(line)
+	print("")
 	get_tree().quit()
+
+
+func _terrain_meshes(root: Node) -> Array[MeshInstance3D]:
+	var out: Array[MeshInstance3D] = []
+	for c in root.get_children():
+		if c is MeshInstance3D and (c as MeshInstance3D).mesh != null:
+			var nm := String(c.name).to_lower()
+			if not (nm.contains("road") or nm.contains("asfalt") or nm.contains("sosea")):
+				out.append(c)
+		out.append_array(_terrain_meshes(c))
+	return out

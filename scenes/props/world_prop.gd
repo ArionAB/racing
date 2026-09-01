@@ -121,6 +121,21 @@ const PROP_COLLISION := {
 	# trotuarul din aleea de 6 m, adica la o roata distanta de linia de curs.
 	"porter": "none", "table_stools": "none", "steam_vent": "none",
 	"scooter": "none", "bicycle": "none",
+	# --- Cappadocia (POI E: via si balonul aterizat) ----------------------
+	# Panza dezumflata ZACE PESTE drum, pe toata latimea lui (20,7 x 8,0 m,
+	# groasa de 50 cm). Implicitul "hull" ar fi exact ce descrie brief-ul ca
+	# fiind gresit: un zid de 20 m fix pe linia de curs, care inchide pista.
+	# Panza e o SUPRAFATA, nu un obstacol — treci peste ea (incetinit).
+	"balloon_landed": "none",
+	# Randul de vie e scurtatura lenta prin care se TRECE (brief POI E:
+	# "iarba lenta cu geometrie"). Aracii au 4 cm: un hull per rand ar fi un
+	# gard de 10 m, si sunt zeci de randuri.
+	"vine_row": "none",
+	"shrub_dry": "none", "pigeon": "none",
+	# Plopii: cilindru pe trunchi, ca toti copacii — hull-ul unui plop de
+	# 15 m e o coloana de 2,5 m latime care te opreste in aer.
+	"poplar_a": "trunk", "poplar_b": "trunk",
+	# Cosul balonului e mic si solid; ferma e o casa: hull implicit, corect.
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.

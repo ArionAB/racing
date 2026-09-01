@@ -173,3 +173,26 @@ jobs:
             exit 1
           fi
           echo "OK — se poate reintra de peste tot."
+
+      # Subteranul Cappadociei e un POI: o sala de 15 m in care trebuie sa SE
+      # VADA tavanul, altfel e un tunel negru. Cerinta din brief (§2.0) e
+      # geometrica — "tavanul de 15 m se vede de la 25 m" — si NU e acelasi
+      # lucru cu "+6° la FOV": presetul aditiv o tinea doar cu sliderele de
+      # camera pe 1.0, iar pe 18 din 49 de combinatii legale pica (la fov_scale
+      # 0.7 tavanul intra abia de la 45.6 m in loc de 22.4). Proba matura acum
+      # intervalele reale ale sliderelor, deci exact regresia asta o prinde.
+      - name: Presetul de camera in cavern tine pe tot intervalul de slidere
+        run: |
+          set -uo pipefail
+          ~/godot-bin/godot --headless --fixed-fps 60 \
+            res://tools/ProbeCavecam.tscn 2>&1 | tee cavecam.log
+          STATUS=${PIPESTATUS[0]}
+          if ! grep -qE 'TOATE OK|PICAT:' cavecam.log; then
+            echo "::error::Proba de camera in cavern nu a rulat pana la capat."
+            exit 1
+          fi
+          if [ "$STATUS" -ne 0 ]; then
+            echo "::error::Tavanul cavernei nu se vede pe tot intervalul legal de slidere — vezi tabelul (vi.a)."
+            exit 1
+          fi
+          echo "OK — tavanul se vede de la 25 m pe toate setarile legale."

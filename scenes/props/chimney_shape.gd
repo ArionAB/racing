@@ -141,6 +141,56 @@ const CAP_SLOT: int = 20
 ## Incotro se apleaca, in grade (azimut local).
 @export_range(0.0, 360.0, 1.0) var lean_dir_deg: float = 0.0
 
+## Cat de tare se INDREAPTA profilul spre un con drept. 0 = forma din GLB
+## neatinsa, 1 = silueta liniara de la baza la gat.
+##
+## De ce era nevoie de asta, si de ce nu se putea rezolva cu `bulge`.
+##
+## Lead-ul, runda 16: hornurile citesc a sticle si a pere, nu a conuri.
+## Verificat pe captura cu `tools/bar/cone_profile.py` (latimea siluetei la 7
+## cote, raportata la baza, de la varf spre baza), pe hornul izolat pe cer din
+## cadrul de livrare:
+##     masurat   0.04  0.22  0.30  0.53  0.78  0.90  1.00
+##     tinta     0.25  0.38  0.50  0.62  0.75  0.88  1.00
+## Defectul NU e in treimea de jos, cum parea din cifra lead-ului: acolo
+## silueta urca cuminte (0.78 0.90 1.00). E in treimea de SUS, unde hornul e
+## de doua ori mai subtire decat ar trebui. Profilul e CONCAV — un tepus care
+## se umfla brusc jos — si de-aia ochiul citeste gat de sticla.
+##
+## Prima incercare a mers pe pista gresita si merita scrisa, ca sa nu se
+## repete: presupunerea a fost ca umflatura vine din poala de grohotis, care
+## chiar ajunge la ~1.9x raza bazei (`talus_spread` 0.58 cu armonicile din
+## `_build_talus`). Masurat cu poala STINSA pe toata pista, profilul s-a mutat
+## cu 0.06 in total — deci nu ea era. Si a doua presupunere, ca umflatura e in
+## GLB: profilul brut al mesh-urilor e intr-adevar cu palier jos (chimney_a:
+## 0.44 0.62 0.76 0.86 0.92 0.97 1.00), dar corpul masurat PE PISTA, dupa toate
+## deformarile, iesea deja aproape liniar. Ce nu se vedea din niciuna dintre
+## sondele de mesh e ca silueta include si palaria: inaltimea de la care se
+## normalizeaza incepe din varful palariei, deci esantioanele de sus cad pe
+## palarie si pe gatul de sub ea, nu pe corp. De-aia masuratoarea corecta e pe
+## PIXELI, si de-aia sonda de mesh a dat de doua ori verde pe o poza gresita.
+##
+## Ce face: masoara profilul REAL al mesh-ului sursa (`_source_profile`, raza
+## mediana pe inele de cota) si inmulteste fiecare vertex cu raportul dintre
+## conul-tinta si raza masurata la cota lui. Factorul e SUPRAUNITAR pe treimea
+## de sus (1.6-1.7 acolo unde tepusul e prea subtire) si aproape 1 jos, deci
+## operatia ingrasa varful in loc sa rada baza — inversul a ce parea nevoie
+## inainte de masuratoarea pe pixeli.
+##
+## Baza ramane pinuita la 1.0: hornul nu se desprinde din teren si nici nu-si
+## pierde poala de grohotis, care e desenata dupa raza de la sol.
+@export_range(0.0, 1.0, 0.05) var cone_rectify: float = 0.0
+
+## Raza gatului conului-tinta, ca fractiune din raza bazei — capatul de sus al
+## rampei pe care o impune `cone_rectify`, masurat SUB palarie.
+##
+## 0.42 si nu 0.25: cifra lead-ului (0.25) e citita pe silueta INTREAGA, care
+## incepe din varful palariei, iar rampa de aici se opreste la `cap_from`, adica
+## sub ea. Un gat de 0.25 la cota aia lasa palaria pe un ac si silueta masurata
+## pe pixeli ramane concava — s-a si masurat: cu 0.25 esantioanele de sus au
+## cazut de la 0.22/0.30 la 0.13/0.20, adica exact pe dos.
+@export_range(0.10, 0.75, 0.01) var cone_neck: float = 0.42
+
 ## Umflatura de profil. Pozitiv = burta (horn indesat), negativ = gat subtiat.
 @export_range(-0.45, 0.60, 0.01) var bulge: float = 0.0
 
@@ -612,6 +662,13 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 	# Deplasarea laterala a varfului, in metri.
 	var lean_amt := tan(deg_to_rad(lean_deg)) * h
 
+	# Profilul REAL al mesh-ului sursa, o singura data: `cone_rectify` are nevoie
+	# de raza masurata la fiecare cota ca sa stie cat sa rada. Se citeste inainte
+	# de bucla, fiindca e o proprietate a piesei, nu a vertexului.
+	var src_prof := PackedFloat32Array()
+	if not is_zero_approx(cone_rectify):
+		src_prof = _source_profile(src, cx, cz, y0, h)
+
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
 		var arrays := src.surface_get_arrays(s)
@@ -626,6 +683,17 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 			if r > 0.0001:
 				var ang := atan2(dz, dx)
 				var scale := 1.0
+				# --- 0. INDREPTAREA CONULUI --------------------------------
+				# Prima operatie, si prima cu intentie: toate celelalte
+				# (ovalizare, burta, caneluri, gat) sunt retusuri PESTE profil,
+				# iar aici se stabileste chiar profilul. Daca ar rula dupa
+				# `bulge`, ar rade si burta autorata deliberat pe cateva piese,
+				# fiindca ar vedea-o ca abatere de la con.
+				if not is_zero_approx(cone_rectify) and src_prof.size() > 1:
+					var want := _cone_target(t)
+					var have := _prof_at(src_prof, t)
+					if have > 0.0001:
+						scale *= lerpf(1.0, want / have, cone_rectify)
 				# --- 1. ovalizare: raza depinde de azimut ------------------
 				if not is_equal_approx(ovality, 1.0):
 					var a := ang - oval_dir
@@ -769,6 +837,108 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 ## Anvelopa STRANGERII. Plina pe partea de sus a palariei, unde sta discul din
 ## GLB, si stinsa la buza si in varf: la buza ca sa nu dispara muchia care rupe
 ## silueta, in varf ca sa nu ciupeasca ascutisul intr-o bila.
+## Cate esantioane are profilul masurat al sursei. 24 pe inaltime: destul ca sa
+## prinda umflatura si gatul (GLB-urile au 17-35 de inele), destul de putin cat
+## sa nu copieze zgomotul de pe fiecare inel.
+const PROF_N: int = 24
+
+## Pana la ce cota se INDREAPTA profilul. Peste `cap_from` incepe palaria, care
+## e prin definitie mai lata decat gatul si NU trebuie rasa — altfel indreptarea
+## ar sterge exact silueta pe care runda 15 a castigat-o (palarie inchisa pe con
+## palid). Sub ea, corpul.
+func _rect_top() -> float:
+	return clampf(cap_from, 0.45, 0.95)
+
+
+## Raza-tinta a conului drept la cota `t`, ca fractiune din raza bazei.
+##
+## Liniar de la 1.0 la baza pana la `cone_neck` sub palarie, apoi CONSTANT peste
+## gat: acolo mai departe decide palaria (`cap_flare`/`cap_tuck`), si o rampa
+## continuata pana la 1.0 ar fi ascutit varful intr-un ac.
+func _cone_target(t: float) -> float:
+	var top := _rect_top()
+	if t >= top:
+		return cone_neck
+	return lerpf(1.0, cone_neck, t / maxf(top, 0.01))
+
+
+## Profilul mesh-ului SURSA: raza mediana la `PROF_N` cote, normalizata la baza.
+##
+## Mediana si nu maxim/medie: canelurile verticale coapte in GLB (`tuff_body`
+## cu `flute`) fac raza sa oscileze pe azimut cu ~13%, iar maximul ar fi citit
+## doar creasta canelurii si ar fi crezut hornul mai gros decat e.
+##
+## Vertecsii se pun in cel mai apropiat esantion, apoi golurile se umplu prin
+## interpolare intre vecinii plini: un mesh cu 17 inele lasa goale cam o treime
+## din cele 24 de cote, si un zero acolo ar fi dat un factor de rectificare
+## infinit exact intre doua inele.
+func _source_profile(src: Mesh, cx: float, cz: float, y0: float,
+		h: float) -> PackedFloat32Array:
+	var buckets: Array = []
+	for i in PROF_N:
+		buckets.append(PackedFloat32Array())
+	for sfc in src.get_surface_count():
+		var arrays := src.surface_get_arrays(sfc)
+		var vs: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for v in vs:
+			var t := clampf((v.y - y0) / h, 0.0, 1.0)
+			var dx := v.x - cx
+			var dz := v.z - cz
+			var idx := clampi(int(round(t * float(PROF_N - 1))), 0, PROF_N - 1)
+			buckets[idx].append(sqrt(dx * dx + dz * dz))
+	var prof := PackedFloat32Array()
+	prof.resize(PROF_N)
+	for i in PROF_N:
+		var arr: PackedFloat32Array = buckets[i]
+		if arr.size() == 0:
+			prof[i] = -1.0
+			continue
+		var lst := Array(arr)
+		lst.sort()
+		prof[i] = float(lst[lst.size() / 2])
+	# goluri: interpolare intre vecinii plini, ca sa nu ramana -1 in mijloc
+	var first := -1
+	var last := -1
+	for i in PROF_N:
+		if prof[i] > 0.0:
+			if first < 0:
+				first = i
+			last = i
+	if first < 0:
+		return PackedFloat32Array()
+	for i in range(0, first):
+		prof[i] = prof[first]
+	for i in range(last + 1, PROF_N):
+		prof[i] = prof[last]
+	var i2 := first
+	while i2 <= last:
+		if prof[i2] > 0.0:
+			i2 += 1
+			continue
+		var lo := i2 - 1
+		var hi := i2
+		while hi <= last and prof[hi] <= 0.0:
+			hi += 1
+		for j in range(i2, hi):
+			var u := float(j - lo) / float(hi - lo)
+			prof[j] = lerpf(prof[lo], prof[hi], u)
+		i2 = hi
+	# normalizare la BAZA, ca factorul sa fie adimensional si scara sa nu conteze
+	var base := prof[0]
+	if base <= 0.0001:
+		return PackedFloat32Array()
+	for i in PROF_N:
+		prof[i] = prof[i] / base
+	return prof
+
+
+## Raza sursei la cota `t`, interpolata intre esantioanele profilului masurat.
+func _prof_at(prof: PackedFloat32Array, t: float) -> float:
+	var u := clampf(t, 0.0, 1.0) * float(PROF_N - 1)
+	var i := clampi(int(floor(u)), 0, PROF_N - 2)
+	return lerpf(prof[i], prof[i + 1], u - float(i))
+
+
 func _tuck_env(ct: float) -> float:
 	# Fereastra pe [0,1] cu maximul pe la 0.62 — unde `probe_capp_glbprof` a
 	# gasit reintoarcerea de raza pe chimney_mushroom (t 0.85..0.95 dintr-o

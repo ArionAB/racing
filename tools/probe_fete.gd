@@ -240,6 +240,17 @@ func _aplica_variante(track: Node, sun: DirectionalLight3D, env: Environment,
 			"noambient":
 				if env != null:
 					env.ambient_light_energy = 0.0
+			# Contributia efectiva a ambientului nu e , ci
+			# luminanta_culorii * energie * expunere. Lead-ul a comparat 0.38 cu
+			# 0.22 lasand pe loc si culoarea calda (F0C79A, luminanta 0.80) si
+			# expunerea 1.15 -> de-aia n-a miscat nimic. Variantele astea
+			# egaleaza CONTRIBUTIA cu a pistelor de referinta, nu cifra.
+			"amb_ca_chongqing":
+				if env != null:
+					env.ambient_light_energy = 0.176
+			"amb_ca_stromboli":
+				if env != null:
+					env.ambient_light_energy = 0.251
 			_:
 				push_warning("varianta necunoscuta: %s" % v)
 

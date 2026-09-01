@@ -1707,6 +1707,41 @@ static func themes() -> Dictionary:
 			# de piatra care taie drumul cu umbra lor. Ordinea de sacrificiu e
 			# in brief §6: intai in subteran, unde nu se vad.
 			"shadows": true,
+			# ETAJUL INALT AL TUFULUI, rece — mecanismul alpin (`rock_band_tint`),
+			# si e raspunsul la DEFECTUL 1 al rundei 2: o singura nuanta pe toata
+			# adancimea cadrului.
+			#
+			# Masurat pe captura de sofer la 0.56, pe regiuni: drumul hue 31 deg,
+			# dealul din stanga 41, CONUL din dreapta 31, podeaua bazinului 30,
+			# iar cerul 29. Douasprezece grade intre cel mai cald si cel mai rece
+			# lucru din cadru, cerul inclus — adica tot cadrul e o singura
+			# familie, si singura separare ramasa era luminanta (0.21 conul fata
+			# de 0.29 drumul, sub pragul de vizibilitate din lectiile rundei 1).
+			#
+			# Prima incercare a fost ceata, si N-A FACUT NIMIC: `fog_begin` e la
+			# 140 m din MECANICA (POI C trebuie sa vada baloanele din vale la
+			# 60-150 m), iar tot ce se vede la POI E e mai aproape de atat.
+			# Masurat pixel cu pixel inainte/dupa: cifre IDENTICE la octet, si pe
+			# racirea cetii, si pe coborarea lui fog_end la 235. Perspectiva
+			# aeriana nu poate colora ce nu atinge — separarea trebuie sa vina
+			# din SUPRAFETE.
+			#
+			# #9FA3A6 e hue 206 fata de hue 41 al lui CORAL_SAND: 165 de grade,
+			# nu 12. Si e legal ca vertex color (memoria
+			# `surfacetool-clamp-vertex-color`): raportul fata de sol e
+			# 0.68/0.74/0.87, adica sub 1 pe toate canalele — INTUNECA, si
+			# intuneca rosul cel mai tare si albastrul cel mai putin, care e
+			# chiar definitia racirii.
+			#
+			# Cota 26 m nu e aleasa, e derivata: soseaua trece prin POI E la
+			# 14-18 m, conul din dreapta urca la 44 (FalezaCanionului). Cu
+			# `rock_line` 26 si `rock_fade` 16 racirea incepe la 8 m deasupra
+			# benzii si e completa pe la 42 — deci coridorul de condus ramane
+			# cald, si numai masele care fac FUNDALUL se racesc. Zero materiale:
+			# e culoare de vertex peste terenul care are deja textura.
+			"rock_line": 18.0,
+			"rock_fade": 5.0,
+			"rock_band_tint": Color.html("7E8896"),
 			"fog_depth": true,
 			# 140 -> 300, si inceputul e departe DIN MECANICA, nu din gust: de
 			# pe cornisa (POI C) trebuie sa se vada fundul vaii cu baloanele in
@@ -1738,11 +1773,29 @@ static func themes() -> Dictionary:
 			# (95 m) fiindca piesa e lata — aceeasi socoteala ca la varful alpin.
 			# Numarul e mic (3 + 3) fiindca Erciyes e UN munte real, nu un lant:
 			# saisprezece copii ale lui ar fi mintit despre unde esti.
+			# Degajarea urca 110/135 -> 210/240, si e o CORECTIE masurata, nu o
+			# rotunjire. Erciyes de pe inelul apropiat ajunsese la 147 m de
+			# sosea la POI E — trecea de degajarea de 110, dar un masiv scalat
+			# 0.95-1.35 la 147 m nu mai e fundal, e un PERETE: umplea jumatatea
+			# dreapta a cadrului de sofer la fractia 0.56.
+			#
+			# Si era invizibil pentru orice reglaj de tema: cu `horizon_class`
+			# gol silueta isi pastreaza atlasul propriu, deci nu raspunde nici la
+			# `ground_tint`, nici la `rock_band_tint`. Dovada, testul de control
+			# cu ground_tint MAGENTA: dealul din stanga s-a schimbat cu pana la
+			# 145/255, conul cu 1/255. Patru reglaje la rand dadusera capturi
+			# identice la octet fiindca toate bateau in geometria gresita — de
+			# aia se face testul de control, nu inca o reglare.
+			#
+			# 210 e derivat: la scara 0.95 Erciyes are ~90 m de baza, si ca sa
+			# citeasca fundal trebuie sa stea la peste doua ori latimea lui de
+			# sosea. Inelul departat primeste 240, adica sub `near`-ul lui, ca
+			# sa nu se retraga in ceata (fog_end 300).
 			"horizon_rings": [
 				{"near": 190.0, "far": 240.0, "count": 3, "scale": 0.95,
-					"clear": 110.0, "picks": ["Erciyes"]},
+					"clear": 210.0, "picks": ["Erciyes"]},
 				{"near": 240.0, "far": 290.0, "count": 3, "scale": 1.35,
-					"clear": 135.0, "picks": ["Erciyes"]},
+					"clear": 240.0, "picks": ["Erciyes"]},
 			],
 			# FARA GARD, ca pe Alpi si pe Stromboli — dar aici e chiar mecanica
 			# pistei, nu doar tonul ei: brief §2 POI C cere cornisa Vaii Rosii

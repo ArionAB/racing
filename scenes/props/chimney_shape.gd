@@ -761,7 +761,17 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 				# amestec intre trepte ar fi refacut panta pe care terasele o
 				# inlocuiesc.
 				if not levels.is_empty():
-					scale *= _terrace_scale(t, levels)
+					# Iesirea treptei VARIAZA PE AZIMUT. Fara asta fiecare
+					# terasa e un cilindru perfect si stiva citeste a
+					# arhitectura — masurat pe captura: hornul din
+					# stanga-aproape iesise "lespezi suprapuse cu colturi
+					# drepte", nu roca erodata. Aceleasi doua armonici ca la
+					# `noise_amount` si la buza poalei: o linie inchisa care
+					# doar suie si coboara, deci treapta ramane o treapta dar
+					# nu mai e un inel de compas.
+					var ta := 1.0 + 0.28 * (sin(2.0 * ang + ph2)
+						+ 0.55 * sin(3.0 * ang + ph1 * 1.7))
+					scale *= 1.0 + (_terrace_scale(t, levels) - 1.0) * ta
 
 				# --- 6. GATUL de sub palarie ------------------------------
 				# Strangere pe o banda de cota, deci ramane orizontala oricat
@@ -1702,6 +1712,11 @@ func _add_extras(mi: MeshInstance3D) -> void:
 	var base_r := _radius_at(src, cx, cz, y0, h, 0.02)
 	if base_r <= 0.001:
 		return
+	# Cotele buzelor de terasa: deschiderile trebuie sa le ocoleasca (vezi
+	# `_clear_of_lips`). Se recalculeaza din aceleasi valori ca in `_deform_mesh`
+	# — `_terrace_levels` e deterministic pe (shape_seed, nume, inaltime), deci
+	# cele doua apeluri dau aceleasi plane.
+	var xlev := _terrace_levels(h)
 
 	# Scara nodului conteaza: `door_height_m` e in METRI DE LUME, dar geometria
 	# se scrie in spatiul local al mesh-ului, care e scalat de transformul
@@ -1771,6 +1786,9 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			if window_rows > 1:
 				rf = lerpf(wf0, maxf(window_to, wf0 + 0.08),
 					float(row) / float(window_rows - 1))
+			# Deschiderea trebuie sa incapa INTREAGA intr-un segment de
+			# terasa, altfel `_radius_at` mediaza peste prag si rama se rupe.
+			rf = _clear_of_lips(rf, (window_height_m / world_scale) / h, xlev)
 			var rr := _radius_at(src, cx, cz, y0, h, rf)
 			if rr <= 0.001:
 				continue
@@ -1789,7 +1807,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			if rr_top > 0.001:
 				taper = clampf(1.0 - rr_top / rr, -0.25, 0.45)
 			_build_windows(stw, cx, cz, y0 + rf * h, rr, world_scale, per, row,
-				taper)
+				taper, src, y0, h, rf)
 			any_win = true
 		if any_win:
 			stw.generate_normals()
@@ -1819,6 +1837,8 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		# Raza SE MASOARA LA COTA PRAGULUI, nu la baza: altfel nisa sta in
 		# aer, in fata unui perete care s-a subtiat sub ea.
 		var sill_frac := clampf((sill / world_scale) / h, 0.0, 0.95)
+		sill_frac = _clear_of_lips(sill_frac,
+			(door_height_m / world_scale) / h, xlev)
 		var door_r := _radius_at(src, cx, cz, y0, h, sill_frac)
 		if door_r > 0.001:
 			# Raza la COTA BUIANDRUGULUI, ca fata usii sa urmeze conul.
@@ -1829,7 +1849,8 @@ func _add_extras(mi: MeshInstance3D) -> void:
 				door_top_r = door_r
 			var st2 := SurfaceTool.new()
 			st2.begin(Mesh.PRIMITIVE_TRIANGLES)
-			_build_doors(st2, cx, cz, y0, door_r, door_top_r, world_scale, sill)
+			_build_doors(st2, cx, cz, y0, door_r, door_top_r, world_scale, sill,
+				src, y0, h, sill_frac, top_frac)
 			st2.generate_normals()
 			var m2 := st2.commit()
 			if m2 != null and m2.get_surface_count() > 0:
@@ -1840,6 +1861,49 @@ func _add_extras(mi: MeshInstance3D) -> void:
 	mi.mesh = out
 
 
+## Muta o cota de deschidere (usa/fereastra) departe de o buza de terasa.
+##
+## De ce e nevoie, si de ce nu se vedea inainte de terase. Cutiile de usa si de
+## fereastra se ingroapa in perete la o raza citita din mesh cu `_radius_at`,
+## care ia MEDIANA razelor dintr-o fereastra de cota. Pe un perete neted
+## mediana e raza peretelui si cutia intra curat. Peste un prag de terasa,
+## aceeasi fereastra de cota contine si raze de pe segmentul lat si raze de pe
+## cel ingust: mediana cade intre ele, deci cutia iese pe jumatate din perete si
+## rama se rupe. Se vede in captura rundei 18 pe hornul din stanga-aproape, unde
+## doua ferestre au ajuns niste taieturi plate si o usa un pervaz plutitor.
+##
+## Reparatia nu e in `_radius_at` — o mediana pe o felie mai ingusta ar fi cazut
+## in gol pe cotele fara inele. E in AMPLASARE: o deschidere trebuie sa incapa
+## INTREAGA intr-un singur segment. Functia cauta segmentul care contine cota
+## ceruta si o impinge, cu inaltimea deschiderii cu tot, intre buzele lui.
+func _clear_of_lips(frac: float, span: float,
+		levels: PackedFloat32Array) -> float:
+	if levels.is_empty():
+		return frac
+	# Marginile segmentului care contine `frac`: buza de sub ea si buza de
+	# deasupra ei (0 si 1 daca nu exista).
+	var lo := 0.0
+	var hi := 1.0
+	for i in range(1, levels.size(), 2):
+		var bot: float = levels[i - 1]
+		var top: float = levels[i]
+		if top <= frac and top > lo:
+			lo = top
+		if bot >= frac + span and bot < hi:
+			hi = bot
+		elif bot < frac + span and bot > frac and bot < hi:
+			# Deschiderea traverseaza buza de deasupra: segmentul se termina
+			# acolo, chiar daca cota de start e sub ea.
+			hi = bot
+	var pad := span * 0.18 + 0.012
+	if hi - lo < span + pad * 2.0:
+		# Segmentul e prea scurt pentru deschidere: se centreaza in el si
+		# `_build_windows` o va aseza oricum pe o raza consistenta, fiindca
+		# felia lui `_radius_at` ramane pe o singura parte a pragului.
+		return clampf((lo + hi) * 0.5 - span * 0.5, 0.0, 0.97)
+	return clampf(frac, lo + pad, hi - span - pad)
+
+
 ## Raza hornului LA O COTA DATA. Se ia mediana razelor dintr-o felie subtire in
 ## jurul cotei cerute, ca sa n-o strice nici palaria, nici un vertex ratacit.
 ##
@@ -1848,9 +1912,21 @@ func _add_extras(mi: MeshInstance3D) -> void:
 ## aseza nisele la raza de la baza, dupa ce pragul fusese urcat peste poala —
 ## si usile au iesit plutind in fata peretelui, ca niste lespezi sprijinite de
 ## el. Se vede in captura de la 0.13: una dintre ele nu mai atingea deloc hornul.
+## `azim` peste TAU inseamna "toate directiile" (comportamentul dinainte).
+## Altfel se citesc doar vertecsii dintr-un sector de +-35 grade in jurul lui.
+##
+## De ce a devenit obligatoriu (runda 18). Cat timp terasele erau inele
+## perfecte, raza depindea doar de cota si o mediana pe toata circumferinta era
+## raza peretelui. De cand iesirea treptei variaza pe AZIMUT — ca stiva sa nu
+## mai citeasca a arhitectura — peretele nu mai are o singura raza la o cota
+## data: intre fata dinspre soare si cea din spate poate fi jumatate de metru.
+## Cutiile de fereastra, asezate toate pe mediana globala, au inceput sa iasa
+## prin perete pe partea groasa si sa pluteasca pe cea subtire; in captura se
+## vedeau ca niste taieturi negre cu rama rupta pe hornul din dreapta.
 func _radius_at(src: Mesh, cx: float, cz: float, y0: float, h: float,
-		frac: float) -> float:
+		frac: float, azim: float = 9.0) -> float:
 	var radii: PackedFloat32Array = []
+	var sector := azim <= TAU
 	# Fereastra creste daca felia iese goala (hornurile n-au inele de vertecsi
 	# la orice cota), ca sa returnam mereu o raza reala.
 	for win in [0.06, 0.12, 0.25, 0.5]:
@@ -1859,8 +1935,14 @@ func _radius_at(src: Mesh, cx: float, cz: float, y0: float, h: float,
 			var arrays := src.surface_get_arrays(sfc)
 			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 			for v in verts:
-				if absf((v.y - y0) / h - frac) < win:
-					radii.append(Vector2(v.x - cx, v.z - cz).length())
+				if absf((v.y - y0) / h - frac) >= win:
+					continue
+				if sector:
+					var da := absf(fposmod(
+						atan2(v.z - cz, v.x - cx) - azim + PI, TAU) - PI)
+					if da > 0.61:
+						continue
+				radii.append(Vector2(v.x - cx, v.z - cz).length())
 		if radii.size() >= 6:
 			break
 	if radii.is_empty():
@@ -2147,7 +2229,9 @@ func _octa_rock(st: SurfaceTool, c: Vector3, r: float,
 ## varianta veche fiindca la 2 m inaltime greseala inca incapea in grosimea unui
 ## poligon — pana cand usa a ajuns 1:2 si deci mai INALTA.
 func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
-		base_r: float, top_r: float, world_scale: float, sill_m: float) -> void:
+		base_r: float, top_r: float, world_scale: float, sill_m: float,
+		src: Mesh = null, ymesh: float = 0.0, h: float = 1.0,
+		sill_frac: float = 0.0, top_frac: float = 0.0) -> void:
 	# Din metri de lume in unitati de mesh.
 	var dh := door_height_m / world_scale
 	var dw := dh * door_aspect
@@ -2174,9 +2258,20 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# el), fundul intra cu `dd`.
 		# Doua raze, una la prag si una la buiandrug: fata nisei se INCLINA
 		# odata cu peretele conului. Vezi comentariul functiei.
-		var rf_b := base_r * 1.01
-		var rf_t := top_r * 1.01
-		var r_back := base_r - dd
+		# Ca la ferestre: razele se citesc PE DIRECTIA acestei usi, fiindca
+		# terasele variaza pe azimut si peretele n-are o singura raza la o cota.
+		var br := base_r
+		var tr := top_r
+		if src != null:
+			var q1 := _radius_at(src, cx, cz, ymesh, h, sill_frac, a)
+			if q1 > 0.001:
+				br = q1
+			var q2 := _radius_at(src, cx, cz, ymesh, h, top_frac, a)
+			if q2 > 0.001:
+				tr = q2
+		var rf_b := br * 1.01
+		var rf_t := tr * 1.01
+		var r_back := br - dd
 		var yb := y0 + sill
 		var yt := yb + dh
 		var hw := dw * 0.5
@@ -2309,7 +2404,8 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 ## buiandrugului pe pervaz, si aia cere doar cativa centimetri de consola.
 func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		r: float, world_scale: float, count: int, row: int,
-		taper: float) -> void:
+		taper: float, src: Mesh = null, y0: float = 0.0, h: float = 1.0,
+		frac: float = 0.0) -> void:
 	var wh := window_height_m / world_scale
 	var ww := wh * window_aspect
 	var wd := minf(0.18 / world_scale, r * 0.35)
@@ -2331,6 +2427,15 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		if count > 1:
 			f = float(k) / float(count - 1) - 0.5
 		var a := dir0 + f * arc + rng.randf_range(-0.05, 0.05)
+		# RAZA PE DIRECTIA ACESTEI ferestre, nu mediana pe tot hornul: cu
+		# terasele variind pe azimut, peretele are raze diferite la aceeasi
+		# cota, iar o valoare unica ar aseza jumatate din nise in aer si
+		# jumatate ingropate (vezi nota de la `_radius_at`).
+		var r_here := r
+		if src != null:
+			var rq := _radius_at(src, cx, cz, y0, h, frac, a)
+			if rq > 0.001:
+				r_here = rq
 		var nx := cos(a)
 		var nz := sin(a)
 		var tx := -sin(a)
@@ -2339,9 +2444,9 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		# inclina odata cu el. Panta se ia din raza randului curent fata de cea
 		# a randului (`taper` e cat se strange peretele pe inaltimea ferestrei),
 		# ca sa nu mai fie nevoie de inca o citire de mesh per fereastra.
-		var r_face := r * 1.01
+		var r_face := r_here * 1.01
 		var r_face_t := r_face * (1.0 - taper)
-		var r_back := r - wd
+		var r_back := r_here - wd
 		# Inaltimile variaza putin de la o fereastra la alta: un rand perfect
 		# aliniat citeste a fatada de bloc, nu a stanca locuita.
 		var yb := ybase + rng.randf_range(-0.12, 0.12) * wh

@@ -354,17 +354,43 @@ func _ready() -> void:
 	# stantate"). Alternanta inalt/jos da colturi de masiv.
 	var tops: Array = [0.50, 1.35, 0.75, 2.05, 0.95, 1.60,
 		0.60, 2.25, 1.10, 0.85, 1.85, 0.70]
+	# [b]Si nu paralele.[/b] Odata cerul deschis, silueta se vede — si pe prima
+	# captura de dupa, bucatile ieseau LESPEZI DREPTUNGHIULARE cu varf drept si
+	# colturi patrate pe cer, fiindca toate aveau acelasi yaw (tangent la inel),
+	# aceeasi raza si aceeasi latime. Cat timp cerul era inchis nu conta; acum e
+	# primul lucru pe care il vezi.
+	#
+	# Lectia lui POI F, aplicata aici: variatia trebuie sa fie in METRI si in
+	# ROTATIE NE-PARALELA, nu un procent pe aceeasi placa paralela. Deci fiecare
+	# colt primeste abaterea lui de yaw (pana la +-22 grade fata de tangenta),
+	# raza lui (42-47 m) si latimea lui. Trei axe de variatie pe 12 piese, din
+	# aceeasi piatra — nu piese noi, nu mai multe piese.
+	var yaws: Array = [14.0, -9.0, 21.0, -17.0, 6.0, -22.0,
+		11.0, -4.0, 18.0, -13.0, 2.0, -19.0]
+	# Razele stau intre 44 si 48: sub 44 fata panoului (care e cu 3.82 m
+	# inaintea originii, si mai aproape inca la latimi mari) se apropie prea
+	# tare de marginea asfaltului (34.0). Masurat cu ProbeGWall pe o varianta cu
+	# raza minima 42.0: Colt02 ajungea la 34.75, adica 0.75 m de banda — trecea
+	# garda, dar cu o marja pe care n-o vrea nimeni pe o pista pe care se intra
+	# in derapaj. La 44 minim, marja se intoarce peste 4 m.
+	var radii: Array = [45.0, 47.0, 44.0, 46.0, 44.5, 48.0,
+		45.5, 44.0, 47.5, 45.0, 46.5, 44.5]
+	var widths: Array = [1.15, 0.85, 1.40, 1.00, 1.25, 0.75,
+		1.10, 1.50, 0.95, 1.30, 0.80, 1.20]
 	for k in 12:
 		var az := float(k) * 30.0 + 14.0
 		var a := deg_to_rad(az)
-		var p := Vector3(AXIS.x + 44.0 * cos(a), 34.0,
-			AXIS.y + 44.0 * sin(a))
-		var yaw := PI * 0.5 - a
+		var rr := float(radii[k])
+		var p := Vector3(AXIS.x + rr * cos(a), 34.0, AXIS.y + rr * sin(a))
+		# Tangenta la inel, plus abaterea proprie: coltul nu mai sta "cu fata la
+		# centru" ca un panou de gard, ci intors cum s-a rupt.
+		var yaw := PI * 0.5 - a + deg_to_rad(float(yaws[k]))
 		# Scara pe verticala urmeaza treapta: bucata mai inalta e si mai masiva,
 		# altfel ar iesi o placa intinsa, nu un colt de stanca.
 		var sy := float(tops[k % tops.size()])
+		var sxz := float(widths[k])
 		out += _node("Colt%02d" % k, "DecorManual/G) Stanca goala/Creasta",
-			"40_cliff", p, yaw, Vector3(1.15, sy, 1.15), "none")
+			"40_cliff", p, yaw, Vector3(sxz, sy, sxz), "none")
 		ridge += 1
 
 	# --- 4. Ferestrele, ca ALCOVURI ---------------------------------------

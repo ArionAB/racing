@@ -1,7 +1,14 @@
 extends Node
 ## Panta MEDIE a spiralei din stanca goala (Cappadocia, POI G).
 ##
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeHelix.tscn -- --track=6
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeHelixGrade.tscn ##       -- --track=6 --center=-302.02,6
+##
+## ATENTIE: `--center` NU e optional pe Track13, desi sonda porneste si fara el.
+## Fara centru cauta elicea intr-un inel in jurul originii, nu gaseste nimic,
+## tipareste "nu am gasit elicea (0 puncte in inel)" si IESE CU 0 — adica trece
+## tacut fara sa masoare. Centrul e pozitia nodului `StancaGoalaInterior` din
+## Track13.tscn (azi -302.02, 6). Daca stanca se muta, se muta si aici.
+## Cifra corecta, verificata: PANTA MEDIE 9.52 % (bara 13.00), arc 375.6 m.
 ##
 ## De ce exista, separat de ProbeLayout: ProbeLayout tipareste panta MAXIMA
 ## intre doua puncte coapte vecine, care pe o elice e zgomot de esantionare

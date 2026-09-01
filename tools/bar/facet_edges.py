@@ -35,6 +35,24 @@ def analyse(path, box, rows=5):
         # obtine innegrind roca: runda 14 a atins 41.6% muchii cu 23.9% pixeli
         # inchisi, iar conurile citeau a funingine. Referinta are 6.6%.
         dark = sum(1 for v in row if v < 70) / len(row) * 100.0
+        # Cat CER e in rand. Nu e un criteriu, e avertismentul de mai sus facut
+        # cifra: peste ~20% inseamna ca `muchii` masoara si aer, deci caseta nu
+        # mai e comparabila cu cea de dinaintea schimbarii de geometrie.
+        sky = sum(1 for v in row if v > 195) / len(row) * 100.0
+        # ATENTIE si la CER (runda 16). Caseta e in fractiuni din cadru, deci e
+        # fixa pe ecran, nu pe obiect: cand silueta hornului se schimba, caseta
+        # ajunge sa contina alt continut. Dupa indreptarea conurilor
+        # (`cone_rectify`) caseta implicita prindea 25-56% CER pe trei din cele
+        # cinci randuri, fata de 0-42% inainte — iar cerul e perfect plat, deci
+        # scade `muchii` fara ca piatra sa fi pierdut nimic: 25.5% -> 20.2% in
+        # caseta implicita, in timp ce pe o caseta numai de piatra
+        # (--box 0.15,0.26,0.20,0.45) aceeasi schimbare da 35.4% -> 37.0%,
+        # amplitudine 121 -> 158 si inchis 3.6% -> 1.7%.
+        #
+        # Deci: la orice A/B care MISCA geometria, verifica intai cat cer si cat
+        # pamant intra in caseta, sau muta caseta pe piatra. `cer` de mai jos e
+        # tiparit chiar pentru asta.
+        #
         # ATENTIE la citirea lui `dark` (runda 15): caseta implicita nu contine
         # numai piatra. Masurat pe captura de la frac 0.06, ea prinde fereastra
         # neagra a conului mare (y~223), palaria de bazalt (y~86) si solul umbrit
@@ -45,7 +63,7 @@ def analyse(path, box, rows=5):
         # Deci un `inchis` de ~17% pe caseta asta NU inseamna funingine; se
         # verifica pe o banda numai de piatra inainte de a acuza pigmentul.
         # Aceeasi lectie ca la muchii: caseta masoara ce e in ea, nu ce crezi.
-        out.append((y, edges, grad, flat, max(row) - min(row), dark))
+        out.append((y, edges, grad, flat, max(row) - min(row), dark, sky))
     return out
 
 
@@ -66,11 +84,18 @@ def main():
         print("%s  (%s)" % (label, path))
         me = ms = 0.0
         md = 0.0
-        for y, e, g, f, sp, dk in rows:
+        msky = 0.0
+        for y, e, g, f, sp, dk, sk in rows:
             print("   y=%4d  muchii=%5.1f%%  gradient=%5.1f%%  plat=%5.1f%%  "
-                  "amplitudine=%3d  inchis=%4.1f%%" % (y, e, g, f, sp, dk))
-            me += e; ms += sp; md += dk
-        return me / len(rows), ms / len(rows), md / len(rows)
+                  "amplitudine=%3d  inchis=%4.1f%%  cer=%4.1f%%"
+                  % (y, e, g, f, sp, dk, sk))
+            me += e; ms += sp; md += dk; msky += sk
+        n = len(rows)
+        if msky / n > 20.0:
+            print("   ATENTIE: %.1f%% din caseta e CER — `muchii` masoara aer,"
+                  " deci cifra NU e comparabila cu una dinaintea unei"
+                  " schimbari de geometrie. Muta caseta pe piatra." % (msky / n))
+        return me / n, ms / n, md / n
 
     e, s, dk = report(a.image, "AL NOSTRU")
     if a.ref:

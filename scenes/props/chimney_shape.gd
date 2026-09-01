@@ -217,6 +217,43 @@ const CAP_SLOT: int = 20
 @export_range(0.0, 0.5, 0.01) var strata_light: float = 0.0
 
 
+## --- PROFIL MONOTON: conul trebuie sa fie con -------------------------------
+
+## Cat de mult trebuie sa fie baza mai lata decat ORICE punct de deasupra ei.
+## 0 = stins (silueta ramane cum o lasa celelalte operatii).
+##
+## De ce exista, si de ce e o operatie SEPARATA si nu inca un parametru de tunat
+## (runda 19). Criticul, dupa cinci runde in care s-a lucrat la banding, palarie
+## si terase: "pana cand conturul e corect, benzile sunt vopsea pe un pion".
+## Sonda `tools/bar/skyline_cones.py`, pe cadrul de la frac 0.06, conul din
+## stanga-fata, de la varf spre baza:
+##
+##     0.26  0.30  0.32  0.38  0.55  0.68  0.83  1.07  1.00
+##
+## Se umfla PESTE baza la 87% din inaltime si apoi se strange inapoi. Asta nu e
+## un con, e o sticla — si 4 din 5 conuri masurate aveau acelasi profil.
+##
+## Motivul pentru care nu se putea repara din valorile instantelor: fiecare
+## operatie de mai sus e local corecta si toate impreuna sparg monotonia.
+## `collar_pinch` e prin DEFINITIE o strangere pe o banda de cota, adica un gat;
+## `bulge` pozitiv e prin definitie o burta; `terrace_scale` ingroasa in jos, dar
+## se aplica doar pana la `terrace_to`, deci deasupra lui corpul ramane lat.
+## Niciuna nu stie de celelalte. Un invariant care trebuie sa tina pe SUMA lor
+## nu poate fi obtinut tunand termenii unul cate unul — a fost incercat in
+## rundele 15-18, cu 53 de instante reglate de mana, si profilul a ramas sticla.
+##
+## Deci se impune la sfarsit, pe raza FINALA: se construieste o anvelopa
+## monoton descrescatoare din profilul deja deformat si raza se taie la ea.
+## Taiere, nu scalare — un punct care respecta deja anvelopa nu se misca, deci
+## caneluri, fatete si zgomotul de contur raman neatinse. Se pierde doar ce
+## iesea in afara plicului, adica exact umarul si burta.
+@export_range(0.0, 0.60, 0.01) var taper_min: float = 0.0
+
+## Cate felii de cota are anvelopa. Mai multe = plic mai stramt pe forma, dar
+## sub ~16 muchia de taiere se vede ca fateta.
+@export_range(8, 48, 1) var taper_slices: int = 24
+
+
 ## --- TERASE: silueta ca o scara cu praguri ---------------------------------
 
 ## Cate segmente cilindrice discrete are hornul. 0 = stins (silueta neteda).
@@ -615,7 +652,7 @@ func _ready() -> void:
 func _deform() -> void:
 	# Fara munca daca instanta e lasata pe valorile neutre: hornurile care chiar
 	# trebuie sa ramana drepte nu platesc duplicarea mesh-ului.
-	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step) 			and is_zero_approx(collar_pinch) 			and is_zero_approx(cap_flare) and is_zero_approx(cap_basalt) 			and is_zero_approx(arch_erode)  			and terrace_count < 2
+	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step) 			and is_zero_approx(collar_pinch) 			and is_zero_approx(cap_flare) and is_zero_approx(cap_basalt) 			and is_zero_approx(arch_erode) and is_zero_approx(taper_min) 			and terrace_count < 2
 	var extras_off := is_zero_approx(talus_spread) and door_count == 0 			and window_rows == 0
 	if shapes_off and extras_off:
 		return
@@ -834,6 +871,16 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 			Mesh.PRIMITIVE_TRIANGLES, arrays)
 		out.surface_set_material(s, src.surface_get_material(s))
 
+	# PROFILUL MONOTON, dupa toate deformarile si dupa cusatura buzelor.
+	#
+	# Aici si nu inauntrul buclei de vertecsi, din doua motive practice:
+	# anvelopa se construieste din raza MAXIMA pe felie, deci are nevoie de
+	# toti vertecsii deja mutati (inclusiv buzele de terasa, care sunt cele mai
+	# late puncte ale fiecarui prag si tocmai ele decid plicul); si taierea
+	# trebuie sa vada raza FINALA, nu un `scale` intermediar dintre operatii.
+	if not is_zero_approx(taper_min):
+		out = _taper_monotone(out, cx, cz, y0, h)
+
 	var st := SurfaceTool.new()
 	var fixed := ArrayMesh.new()
 	for s in out.get_surface_count():
@@ -887,6 +934,110 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 ## Anvelopa STRANGERII. Plina pe partea de sus a palariei, unde sta discul din
 ## GLB, si stinsa la buza si in varf: la buza ca sa nu dispara muchia care rupe
 ## silueta, in varf ca sa nu ciupeasca ascutisul intr-o bila.
+## Taie raza la o anvelopa MONOTON DESCRESCATOARE pe inaltime.
+##
+## Contractul, in cuvintele criticului: "baza cu cel putin 15% mai lata decat
+## orice punct de deasupra ei, si gatul sters". Ambele sunt afirmatii despre
+## profilul razei pe TOATA inaltimea, deci se impun pe profil, nu pe termenii
+## care il compun.
+##
+## Cum: se imparte inaltimea in felii, se ia raza maxima din fiecare felie, si
+## se parcurge de JOS in SUS tinand un plafon care nu are voie sa creasca. Felia
+## k primeste `min(raza_k, plafon)`, iar plafonul coboara cu factorul cerut de
+## `taper_min` pe toata inaltimea. Vertecsii se scaleaza radial catre axa numai
+## daca depasesc plafonul feliei lor.
+##
+## De ce TAIERE si nu rescalare a intregului profil. Un factor aplicat peste tot
+## ar fi subtiat si canelurile, si fatetele, si zgomotul de contur — adica
+## tocmai detaliul de suprafata pentru care s-a lucrat cinci runde. Taierea
+## atinge doar ce iese in afara plicului: un punct deja sub plafon nu se misca
+## deloc. Pe conul din stanga-fata asta inseamna ca dispare umflatura de la 87%
+## si gatul de sub palarie, si nu se pierde nimic din restul.
+##
+## Interpolarea plafonului intre centrele feliilor e liniara si nu in trepte:
+## un plafon constant pe felie ar fi lasat o muchie orizontala la fiecare
+## granita, adica exact banding-ul geometric pe care terasele il fac deliberat
+## si controlat — nu-l vrem si ca efect secundar al unei taieri.
+func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
+		y0: float, h: float) -> ArrayMesh:
+	var n := taper_slices
+	var rmax := PackedFloat32Array()
+	rmax.resize(n)
+	rmax.fill(0.0)
+	for sfc in src.get_surface_count():
+		var arrays := src.surface_get_arrays(sfc)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for v in verts:
+			var t := clampf((v.y - y0) / h, 0.0, 0.9999)
+			var k := int(t * float(n))
+			var r := Vector2(v.x - cx, v.z - cz).length()
+			if r > rmax[k]:
+				rmax[k] = r
+	# Felii goale (hornul nu are vertecsi la orice cota): mostenesc plafonul de
+	# dedesubt, altfel un zero ar strangula mesh-ul intr-un inel de grosime 0.
+	for k in n:
+		if rmax[k] <= 0.0 and k > 0:
+			rmax[k] = rmax[k - 1]
+	# Plafonul: nu creste niciodata de jos in sus, si coboara cel putin cat
+	# cere `taper_min` pe toata inaltimea. Panta minima e ce transforma
+	# "monoton" in "vizibil conic" — un profil de cilindru e si el monoton.
+	var cap := PackedFloat32Array()
+	cap.resize(n)
+	# Raza de referinta e a BAZEI, si se ia ca mediana a primelor felii, nu
+	# `rmax[0]`. Felia de la sol contine si poala de grohotis si buza celei mai
+	# de jos terase, deci maximul ei e un pinten, iar o rampa pornita din pinten
+	# lasa tot corpul sub plafon — adica plafonul nu mai taie nimic. Exact asta
+	# s-a intamplat cand terasele au devenit neregulate: envelope-ul se ridicase
+	# pe umflatura lor si conul a redevenit sticla (1.76 latime la 87% fata de
+	# baza), desi codul de taiere era neschimbat.
+	var lows := PackedFloat32Array()
+	for k in mini(n / 4, 6):
+		lows.append(rmax[k])
+	lows.sort()
+	var base := lows[lows.size() / 2] if not lows.is_empty() else rmax[0]
+	for k in n:
+		var frac := float(k) / float(n - 1)
+		# Rampa LINIARA. Incercata si cea concava (`sqrt(frac)`), ca sa strange
+		# mai devreme si sa scoata umarul de la 30%: cifra de baza a urcat
+		# (1.26 -> 1.57 pe conul din stanga-fata) dar a doua diferenta s-a
+		# inrautatit (+0.109 -> +0.289) si in captura conul se intorcea spre
+		# clopot — radicalul musca din corpul de SUS si lasa fusta de jos
+		# neatinsa, adica muta umarul in loc sa-l scoata. Liniar, si umarul se
+		# rezolva unde e chiar cauza lui: poala de grohotis.
+		var ramp := base * (1.0 - taper_min * frac)
+		cap[k] = minf(rmax[k], ramp)
+		if k > 0:
+			cap[k] = minf(cap[k], cap[k - 1])
+	var out := ArrayMesh.new()
+	for sfc in src.get_surface_count():
+		var arrays := src.surface_get_arrays(sfc)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for i in verts.size():
+			var v := verts[i]
+			var dx := v.x - cx
+			var dz := v.z - cz
+			var r := sqrt(dx * dx + dz * dz)
+			if r <= 0.0001:
+				continue
+			var t := clampf((v.y - y0) / h, 0.0, 0.9999)
+			# Plafonul se citeste interpolat intre CENTRELE feliilor.
+			var u := t * float(n) - 0.5
+			var k0 := clampi(int(floor(u)), 0, n - 1)
+			var k1 := clampi(k0 + 1, 0, n - 1)
+			var lim := lerpf(cap[k0], cap[k1], clampf(u - float(k0), 0.0, 1.0))
+			if r > lim:
+				var f := lim / r
+				v.x = cx + dx * f
+				v.z = cz + dz * f
+				verts[i] = v
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		arrays[Mesh.ARRAY_NORMAL] = null
+		arrays[Mesh.ARRAY_TANGENT] = null
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		out.surface_set_material(sfc, src.surface_get_material(sfc))
+	return out
+
+
 ## Cotele (in fractiune de inaltime) la care se taie mesh-ul pentru terase.
 ##
 ## Pentru `terrace_count` = n ies 2*(n-1) plane: pentru fiecare prag, planul
@@ -961,13 +1112,42 @@ func _terrace_levels(h: float) -> PackedFloat32Array:
 func _terrace_scale(t: float, levels: PackedFloat32Array) -> float:
 	if levels.is_empty():
 		return 1.0
-	# Cate praguri sunt DEASUPRA cotei `t`: atatea ingrosari se aduna.
-	var above := 0
+	# Se ADUNA ingrosarea fiecarui prag aflat deasupra cotei `t` — dar nu toate
+	# la fel de tare.
+	#
+	# De ce nu `pow(1 + drop, above)` (runda 19). Cu un pas identic pe fiecare
+	# treapta, si acelasi `terrace_drop` pe toate cele 53 de instante, conurile
+	# citeau ca TORTURI ETAJATE: aceeasi treapta, aceeasi adancime, pe toata
+	# inaltimea si pe toate hornurile. Un horn erodat are trepte NEEGALE, si
+	# unele lipsesc de tot — roca moale s-a dus intreaga intre doua bancuri
+	# dure, si acolo peretele merge drept pe doua etaje.
+	#
+	# Factorul per prag e pseudoaleator dar DETERMINIST (indicele pragului plus
+	# samanta nodului, aceeasi ca la `_terrace_levels`), in [0, 1.45]: sub 0.15
+	# treapta dispare practic, deci una din sase-sapte chiar lipseste. Ramane
+	# monoton crescator in jos — fiecare termen e pozitiv — deci invariantul de
+	# profil pe care terasele il respecta nu se strica.
+	var f := 1.0
+	var idx := 0
 	for i in range(1, levels.size(), 2):
 		if t < levels[i] - 0.0005:
-			above += 1
-	# Peste ultima terasa (gatul, unde sta palaria) nu se mai adauga nimic.
-	return pow(1.0 + terrace_drop, float(above))
+			# Media ponderilor trebuie sa ramana ~1, altfel terasarea slabeste
+			# in loc sa devina neregulata: prima varianta folosea `w*w`
+			# (medie 0.33 pe un `w` uniform), deci pasul efectiv scadea la o
+			# treime si in captura treptele s-au topit intr-un clopot neted.
+			# Acum ponderea e in [0.15, 1.85] cu media exact 1: unele trepte
+			# aproape lipsesc, altele sunt aproape duble, si adancimea medie e
+			# chiar `terrace_drop`.
+			var w := sin(float(idx) * 2.399963 + _terrace_phase())
+			f *= 1.0 + terrace_drop * (1.0 + 0.85 * w)
+		idx += 1
+	return f
+
+
+## Faza care decide care trepte sunt groase si care lipsesc. Din numele nodului,
+## la fel ca la cote: doua hornuri vecine nu au voie sa aiba aceeasi scara.
+func _terrace_phase() -> float:
+	return float(int(hash(name) + shape_seed) % 1000) * 0.006283
 
 
 ## Sparge un mesh indexat in triunghiuri independente, pastrand atributele.

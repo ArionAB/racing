@@ -619,9 +619,31 @@ func _cine_e_in_cadru(track: Node, cam: Camera3D) -> void:
 	_proiecteaza(track, cam, rows)
 	rows.sort_custom(func(a, b): return a[1] < b[1])
 	print("CINE: obiecte cu peste 40 px inaltime, sortate pe coloana:")
+	var spans: Array = []
 	for r in rows:
 		print("  x=%5d  h=%4d px  d=%5.1f m  %-24s %s"
 			% [r[1], r[2], r[4], r[0], r[3]])
+		var b: Rect2 = r[5]
+		spans.append({
+			"nume": r[0], "script": r[3], "x": r[1], "h_px": r[2],
+			"d": snappedf(r[4], 0.1),
+			"x0": int(floor(b.position.x)), "x1": int(ceil(b.end.x)),
+			"y0": int(floor(b.position.y)), "y1": int(ceil(b.end.y)),
+		})
+	# Sidecar cu intervalele de coloane, ca sonda de pixeli sa poata masura
+	# profilul DOAR inauntrul hornului numit. Fara el orice cifra de contur e
+	# neatribuibila: runda 20 a demonstrat ca cel mai mare con din cadru e
+	# TEREN de la 380 m, nu horn.
+	var jdir := ProjectSettings.globalize_path("res://snapshots")
+	DirAccess.make_dir_recursive_absolute(jdir)
+	var jout := "%s/cine_spans.json" % jdir
+	var f := FileAccess.open(jout, FileAccess.WRITE)
+	if f != null:
+		f.store_string(JSON.stringify({
+			"view": [get_viewport().size.x, get_viewport().size.y],
+			"obiecte": spans}, "  "))
+		f.close()
+		print("CINE-SPANS: ", jout)
 
 
 func _proiecteaza(n: Node, cam: Camera3D, out: Array) -> void:
@@ -646,7 +668,34 @@ func _proiecteaza(n: Node, cam: Camera3D, out: Array) -> void:
 					if own != null:
 						scr = String(own.get_script().resource_path.get_file())
 						nm = String(own.name)
+					var box := _cutie_ecran(ab, cam)
 					out.append([nm, int(p.x), hpx, scr,
-						cam.global_position.distance_to(ctr)])
+						cam.global_position.distance_to(ctr), box])
 	for c in n.get_children():
 		_proiecteaza(c, cam, out)
+
+
+## Cutia pe ecran a unui AABB din lume: TOATE cele 8 colturi proiectate.
+##
+## De ce 8 colturi si nu centrul. Coloana de ecran a unui obiect e ce trebuie sa
+## stie sonda de silueta ca sa masoare NUMAI hornul si nu vecinul; un singur
+## punct (centrul) da o coloana, nu un interval, si atunci sonda tot ghiceste
+## unde se termina obiectul. Un colt in spatele camerei ar da o proiectie
+## intoarsa, deci se sare peste el si cutia ramane a colturilor vizibile.
+func _cutie_ecran(ab: AABB, cam: Camera3D) -> Rect2:
+	var r := Rect2()
+	var first := true
+	for i in 8:
+		var c := ab.position + Vector3(
+			ab.size.x if (i & 1) != 0 else 0.0,
+			ab.size.y if (i & 2) != 0 else 0.0,
+			ab.size.z if (i & 4) != 0 else 0.0)
+		if cam.is_position_behind(c):
+			continue
+		var q := cam.unproject_position(c)
+		if first:
+			r = Rect2(q, Vector2.ZERO)
+			first = false
+		else:
+			r = r.expand(q)
+	return r

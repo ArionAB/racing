@@ -133,7 +133,7 @@ bază, nu un horn.
 |---|---|---|---|---|
 | **A** | 0.00 | **Start în piața din Göreme** — dale de tuf, conuri locuite cu ferestre și uși, o terasă cu covoare, un plop, porumbar; la ieșire **căruța cu oale** (decor static cu coliziune, o fantă de 4 m pe lângă ea) | grilă pe piață; primul horn de lângă drum e la 6 m de bandă, ca să-i vezi pălăria | 9 m |
 | **B** | 0.05–0.16 | **Pădurea de hornuri (Paşabağ)** — drumul șerpuiește **printre** conuri de 10–18 m la 2–4 m de bandă; două hornuri gemene se ating deasupra drumului = **poarta** (tavan scurt, 12 m, 8 m lungime); porumbeii țâșnesc dintr-un porumbar când treci (decor) | strângere tehnică 6 m în S-uri; umbrele lungi ale conurilor taie drumul (identitate vizuală) | 6–7 m |
-| **C** | 0.18–0.36 | **Cornișa Văii Roșii** — drumul iese pe buza văii, **fără parapet pe dreapta**: sub tine, 30 m mai jos, fundul văii cu **20–30 de baloane** în diverse faze (pe pământ, umflându-se, în aer); benzile roz-roșu ale falezei sub bandă. **Coșurile care urcă**: 3 baloane ancorate pe fundul văii se ridică pe ciclu (~28 s, defazate) până la nivelul benzii și **coșul îți intră în bandă** 4 s, apoi coboară. La hairpinul din capăt, **balonul arzătorului**: un balon ancorat la 6 m de exteriorul curbei; pe ciclu (~17 s) arzătorul pornește (flacără vizibilă în frustum, 1 s telegraph) și **suflul te împinge spre exterior** — spre gol | **vârful vizual + hazardul-semnătură**. Cădere = repunere ~2 s. Coșul e platformă (`platform_velocity`): poți ateriza pe el la o săritură și te duce sus 2 s (câștig mic, spectaculos) | 7 m |
+| **C** | 0.18–0.36 | **Cornișa Văii Roșii** — drumul iese pe buza văii, **fără parapet pe dreapta**: sub tine, 30 m mai jos, fundul văii cu **20–30 de baloane** în diverse faze (pe pământ, umflându-se, în aer); benzile roz-roșu ale falezei sub bandă. **Coșurile care urcă**: 3 baloane ancorate pe **polițe săpate în faleză** (**NU pe fundul văii** — măsurat: de jos coșul urcă direct în panta falezei și se înfundă după 1 m din 30; vezi corecțiile din §5.2) se ridică pe ciclu (~28 s, defazate) până la nivelul benzii și **coșul îți intră în bandă** 4 s, apoi coboară. La hairpinul din capăt, **balonul arzătorului**: un balon ancorat la 6 m de exteriorul curbei; pe ciclu (~17 s) arzătorul pornește (flacără vizibilă în frustum, 1 s telegraph) și **suflul te împinge spre exterior** — spre gol | **vârful vizual + hazardul-semnătură**. Cădere = repunere ~2 s. Coșul e platformă (`platform_velocity`): poți ateriza pe el la o săritură și te duce sus 2 s (câștig mic, spectaculos). **Cerință de teren (măsurată):** polița trebuie să fie la **≤ 9,4 m** de axul benzii, cu coloana liberă pe toți cei 30 m de urcare — altfel coșul ajunge sus în afara asfaltului (9,6 m de gol) sau se înfundă în faleză. Alternativă: faleza tăiată **vertical** acolo. | 7 m |
 | **D** | 0.38–0.50 | **Canionul roșu** — coborâre în S între faleze în benzi, 7 m lățime; la mijloc **hornul crăpat**: un horn de 16 m stă în mijlocul drumului (ocolul e pe stânga, lung, 6 m); telegraph: pietricele + praf + trosnet (2 s), apoi **se prăbușește spre dreapta și devine rampă** — de pe ea sari peste un S întreg al ocolului (câștig ~3 s, aterizare pe canion; ratezi → în moloz, grip 0,8×) | **transformare de pistă**, vezi §3 pentru regula de ciclu | 6–7 m |
 | **E** | 0.52–0.64 | **Via și balonul aterizat** — fundul văii: rânduri de vie (iarbă lentă cu geometrie, se trece prin ele = scurtătură lentă), plopi, o fermă; **un balon aterizează pe drum** pe ciclu (~45 s): coșul se pune pe bandă, pânza se dezumflă și **se întinde 20 m peste drum** (suprafață lentă 0,6×, culoare tare), apoi echipajul o „strânge" și balonul decolează | fâșia de viteză; decizia: prin vie (lent, sigur) sau pe drum (rapid, dacă pânza nu e jos) | 8 m |
 | **F** | 0.66–0.82 | **Orașul subteran** — gura săpată în faleză (arc, torțe); **preset cameră cavernă** la intrare. **Sala 1** (tavan 16 m, coloane, alcove, un **puț de ventilație** cu coloană de lumină care cade pe drum); **gâtul cu piatra de moară**: două culoare — scurt (4 m, o **ușă de piatră de moară** de 3 m diametru se rostogolește în lăcaș pe ciclu ~23 s: închis = zid) și lung (+2,5 s, mereu liber); **Sala 2** (tavan 18 m, biserică rupestră cu arce, fresce abstracte, puțul al doilea) | opoziție de fază între culoare nu e nevoie (lungul e mereu deschis); contact cu piatra în mișcare = ești împins înapoi cu masă, nu distrus | 6–8 m |
@@ -231,10 +231,46 @@ dungi).
 | `underground_hall_a.glb` / `_b.glb` | sala 1 (16 m tavan, coloane, alcove, puț) și sala 2 (18 m, arce de biserică rupestră, fresce abstracte) — pot fi kit de bucăți (coloană, arc, alcovă, tavan) |
 | `millstone_door.glb` + `millstone_slot.glb` | ușa de piatră de 3 m diametru × 0,6 m + lăcașul din perete |
 | `cracked_chimney.glb` (3 stări) | în picioare / căzut ca rampă / moloz |
-| `balloon_kit` | `balloon_envelope_a/b/c.glb` (3 forme, 12 m înalt umflat), `balloon_basket.glb` (2×2 m răchită, arzător), `balloon_landed.glb` (pânză dezumflată 20×8 m), `balloon_tether.glb` (cablu + țăruș) |
+| `balloon_kit` | `balloon_envelope_a/b/c.glb` (3 forme, 12 m înalt umflat), **`balloon_basket.glb` (4,8 × 4,8 × 1,2 m** răchită, arzător — **MĂSURAT, corectat de la 2×2 m**, vezi caseta de sub tabel), `balloon_landed.glb` (pânză dezumflată 20×8 m), `balloon_tether.glb` (cablu + țăruș) |
 | `twin_chimney_gate.glb` | poarta de hornuri gemene, 12 m sub arc |
 | `cave_entrance.glb` | gura subteranului: arc săpat de 10 m, torțe |
 | `vent_shaft.glb` | puțul de ventilație: cilindru de 5 m, gură la suprafață cu bordură |
+
+> #### ⚠ Corecții MĂSURATE la kitul de baloane (`ProbeBalloon`, 30 aug 2026)
+>
+> Trei cifre din v0.1 sunt greșite. Nu sunt păreri: ies din `tools/probe_balloon.gd`
+> pe geometria reală (cornișă cu `half_width` 7 m, râpă 34 m). **Cine
+> construiește assetul citește cifra corectată de aici, nu pe cea din tabel.**
+>
+> **1. Coșul: 4,8 × 4,8 m, nu 2 × 2 m.** Coșul e *platformă* — mașina stă pe el
+> prin patru raycast-uri din colțuri, deci cifra care contează e **ampatamentul**
+> (distanța dintre axe), nu „cât de mare arată mașinuța". Măsurat pe tot garajul:
+> Taxi 2,94 · Muscle/Poliția 3,19 · Pompierii 3,70 · **Autobuzul 4,15 m**. Pe un
+> coș de 2 m nu încape **nici măcar o axă** a celei mai scurte mașini. La 4,8 m
+> rămâne 0,33 m marjă pe capăt la autobuz. `balloon_hazard.gd` avertizează în
+> `_ready` dacă cineva îl micșorează sub ampatamentul maxim.
+>
+> **2. Un balon de pe fundul văii NU ajunge în bandă.** Faleza săpată cu
+> `custom_ravines` e în **pantă**, nu verticală. Profil măsurat de la axul benzii:
+> asfalt până la 7 m → pantă între 8 și 13 m → podeaua râpei (−34,3 m) abia de la
+> 13 m. Prima podea de râpă e la **13 m** de ax, iar primul culoar **liber** de
+> urcare abia la **19 m**. Coșul (4,8 m lat) ajunge sus cu marginea dinspre drum
+> la 16,6 m de ax: între el și asfalt rămân **9,6 m de gol**. Ca să intre în
+> bandă, țărușul ar trebui la cel mult **9,4 m** de ax.
+>
+> **3. Mai rău: coloana de deasupra țărușului nu e liberă.** Panta se apleacă
+> *peste* vale, deci un coș pornit de pe fundul văii urcă **direct în faleză**:
+> măsurat la amplasarea cerută de §2 POI C (13 m de ax), coloana se înfundă în
+> `TerrainBody` la **y = −29**, adică după **1 m** din cei 30 de cursă. Asta a
+> fost cauza reală a primelor eșecuri — mașina stătea perfect pe coș, apoi era
+> răzuită de teren și cădea la −43,5 m.
+>
+> **Consecința pentru Track13 — de PROIECTARE, nu de cod:** țărușul trebuie să
+> stea pe o **poliță (ledge) în faleză**, la ≤ 9,4 m de ax și cu coloana liberă
+> pe toți cei 30 m, **sau** faleza de sub cornișă trebuie **tăiată vertical**
+> exact acolo. Până când geometria pistei rezolvă asta, verdictele (vi) și (viii)
+> din `ProbeBalloon` rămân **roșii deliberat** — sonda nu are voie să treacă
+> înainte, altfel hazardul se pune pe o pistă pe care nu funcționează.
 
 ### 5.3 Kit de tuf (modular, statistice)
 `chimney_a/b/c/d.glb` (conuri 10–18 m cu pălărie de bazalt, unul cu ferestre),
@@ -475,7 +511,7 @@ Create a single tall REFERENCE SHEET of low-poly game assets for a sunrise racin
 2. underground_hall_kit (modular pieces, one panel, same scale): hall_column.glb (a 3 m thick carved tuff column, 16 m tall, rough and slightly tapered), hall_arch.glb (a 10 m wide, 12 m tall carved arch), hall_ceiling_module.glb (a 20×20 m slab of rough carved ceiling with tool marks), hall_alcove.glb (a 4 m wide carved storage alcove with clay jars), church_arch.glb (an 8 m rock-church arch with abstract fresco panels in ochre and red — no readable text), torch.glb (a 1 m wall torch on an iron bracket with a flame). Each piece labeled.
 3. millstone_door.glb + millstone_slot.glb — a round tuff millstone door 3 m in diameter, 0.6 m thick, with a hole in the centre, shown in its slot (a carved recess in a wall that the stone rolls out of to block a 4 m passage). Show closed, half, open. Front, side, 3/4.
 4. cracked_chimney.glb (three states, one panel) — a 16 m fairy chimney with a visible crack: (a) standing, (b) toppled and lying as a rock ramp about 20 m long rising 3 m, (c) a heap of rubble. Side and 3/4 for each.
-5. balloon_kit (one panel, same scale): balloon_envelope_a.glb / _b.glb / _c.glb (three inflated hot-air balloon envelopes 12 m tall × 9 m wide — one plain, one with vertical panels of two colors, one with a horizontal striped band), balloon_basket.glb (a 2×2×1.2 m wicker basket with a burner frame and a visible burner flame above it), balloon_landed.glb (a deflated envelope spread flat and crumpled on the ground, 20 m long × 8 m wide, striped), balloon_tether.glb (a ground stake with a coiled cable). Each piece labeled.
+5. balloon_kit (one panel, same scale): balloon_envelope_a.glb / _b.glb / _c.glb (three inflated hot-air balloon envelopes 12 m tall × 9 m wide — one plain, one with vertical panels of two colors, one with a horizontal striped band), balloon_basket.glb (a 4.8×4.8×1.2 m wicker basket with a burner frame and a visible burner flame above it — NOTE: 4.8 m, corrected from 2 m; the basket is a drivable platform and must fit a 4.15 m car wheelbase), balloon_landed.glb (a deflated envelope spread flat and crumpled on the ground, 20 m long × 8 m wide, striped), balloon_tether.glb (a ground stake with a coiled cable). Each piece labeled.
 6. twin_chimney_gate.glb — two fairy chimneys 15 m tall leaning together so their caps touch and form a gate with 12 m of clearance and an 8 m opening. Front, side, 3/4.
 7. cave_entrance.glb — a 10 m wide, 12 m tall arched opening carved into a cliff face, with a stepped frame, two torches, a carved sun symbol above (abstract, no letters). Front, side, 3/4.
 8. vent_shaft.glb — a vertical ventilation shaft: a 5 m diameter tube 20 m tall in cutaway, with a low carved rim at the top opening and a sand floor. Side cutaway, top.
@@ -504,7 +540,7 @@ Sheet of a round tuff millstone door 3 m in diameter and 0.6 m thick with a cent
 Sheet of a 16 m fairy chimney with a visible crack in three states side by side: standing; toppled and lying as a rock ramp about 20 m long rising 3 m; a heap of rubble.
 
 ──────────── 5 · balloon_kit (o planșă) ────────────
-Sheet of a matched hot-air balloon kit, same scale, each labeled: balloon_envelope_a/b/c.glb (three inflated envelopes 12 m tall × 9 m wide — plain, two-color vertical panels, horizontal striped band), balloon_basket.glb (2×2×1.2 m wicker basket with burner frame and a visible flame), balloon_landed.glb (deflated striped envelope crumpled flat on the ground, 20×8 m), balloon_tether.glb (ground stake with coiled cable).
+Sheet of a matched hot-air balloon kit, same scale, each labeled: balloon_envelope_a/b/c.glb (three inflated envelopes 12 m tall × 9 m wide — plain, two-color vertical panels, horizontal striped band), balloon_basket.glb (4.8×4.8×1.2 m wicker basket with burner frame and a visible flame — NOTE: 4.8 m, corrected from 2 m; it is a drivable platform, must fit a 4.15 m wheelbase), balloon_landed.glb (deflated striped envelope crumpled flat on the ground, 20×8 m), balloon_tether.glb (ground stake with coiled cable).
 
 ──────────── 6 · twin_chimney_gate.glb · cave_entrance.glb · vent_shaft.glb (o planșă) ────────────
 Sheet with three pieces, same scale, each labeled: two 15 m fairy chimneys leaning together with caps touching, 12 m clearance, 8 m opening; a 10 m wide, 12 m tall arched cave opening in a cliff face with a stepped frame, two torches and an abstract carved sun above; a 5 m diameter, 20 m tall ventilation shaft in cutaway with a carved rim at the top and a sand floor.
@@ -521,6 +557,13 @@ Sheet of two rows, same scale, each labeled. Row 1: poplar_a/b.glb (slender popl
 
 ## Istoric
 
+- **v0.1a (30 aug 2026) — corecții MĂSURATE din `ProbeBalloon`:** coșul
+  `balloon_basket.glb` **2×2 m → 4,8×4,8 m** (e platformă: contează
+  ampatamentul, iar autobuzul are 4,15 m); baloanele-hazard ancorate pe
+  **polițe în faleză**, nu pe fundul văii (de jos coșul urcă în panta falezei
+  și se înfundă la y=−29, după 1 m din 30); cerință nouă de teren pe POI C:
+  polița la **≤ 9,4 m** de ax, altfel coșul ajunge sus la 9,6 m de asfalt.
+  Detaliile și profilul falezei: caseta din §5.2.
 - **v0.1 (30 aug 2026):** concept extern integrat — trei acte, hornul-rampă,
   pânza aterizată, suflul arzătorului, rampa din stânca goală; baloanele
   întoarse „de jos în sus" după frustum; respinse porumbei/oi/olărie/vânt.

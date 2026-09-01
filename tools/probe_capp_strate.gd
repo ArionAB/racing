@@ -61,6 +61,29 @@ func _ready() -> void:
 		print("%6.1f %5.2f  %4d..%4d %4d..%4d  %6.1f..%6.1f  %s (%s)" % [
 			r["d"], r["area"], r["x0"], r["x1"], r["y0"], r["y1"],
 			r["ymin"], r["ymax"], r["path"], r["model"]])
+	# LINIILE DE SOL: criticul orb spune ca cele 17 hornuri din banda mediana
+	# "impart acelasi prag de sol si aceeasi clasa de marime aparenta, deci se
+	# compun intr-un singur plan indiferent de Z-ul lor real". Masura potrivita
+	# nu e distanta, ci INALTIMEA PE ECRAN A BAZEI: doua obiecte la 40 si la 80 m
+	# care isi pun talpa pe acelasi rand de pixeli chiar sunt un singur plan,
+	# oricat de departe ar fi unul de celalalt.
+	print("")
+	print("=== LINII DE SOL in banda 60-160 m (y-ul BAZEI pe ecran) ===")
+	var baze: Array = []
+	for r in rows:
+		if r["d"] < 60.0 or r["d"] > 160.0:
+			continue
+		if r["area"] < 0.3:
+			continue
+		baze.append({"y": r["y1"], "d": r["d"], "n": r["path"]})
+	baze.sort_custom(func(a, b): return a["y"] < b["y"])
+	for b in baze:
+		print("   baza la y=%4d   dist %6.1f   %s" % [b["y"], b["d"], b["n"]])
+	if baze.size() >= 2:
+		var lo: int = baze[0]["y"]
+		var hi: int = baze[-1]["y"]
+		print("   -> %d piese, baze intre y=%d si y=%d (raspandire %d px)"
+				% [baze.size(), lo, hi, hi - lo])
 	get_tree().quit()
 
 

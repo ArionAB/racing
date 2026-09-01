@@ -1,7 +1,8 @@
 extends Node
-const PATH := "res://assets/models/cappadocia/rocks/cliff_band_module.glb"
+const PATHS := ["res://assets/models/rocks/rock_medium.glb", "res://assets/models/rocks/rock_small.glb"]
 func _ready() -> void:
-	var inst := (load(PATH) as PackedScene).instantiate()
-	for mi in inst.find_children("*", "MeshInstance3D", true, false):
-		print("  mesh node: '", mi.name, "'")
+	for pth in PATHS:
+		var inst := (load(pth) as PackedScene).instantiate()
+		for mi in inst.find_children("*", "MeshInstance3D", true, false):
+			print("  ", pth.get_file(), " mesh node: '", mi.name, "'")
 	get_tree().quit(0)

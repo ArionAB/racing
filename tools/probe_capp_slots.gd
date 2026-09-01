@@ -2,7 +2,7 @@ extends Node
 ## Ce SLOTURI de paleta matura modulul de faleza, si cu ce arie. Fara asta,
 ## "e prea crem" ramane o parere: aria spune CAT, hexul spune CE.
 
-const PATH := "res://assets/models/cappadocia/rocks/cliff_band_module.glb"
+const PATH := "res://assets/models/rocks/rock_medium.glb"
 
 func _ready() -> void:
 	var ps := load(PATH) as PackedScene

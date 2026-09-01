@@ -126,7 +126,33 @@ func _ready() -> void:
 			# Distanta se ia ca MINIM pe o fereastra de indici, nu pe cel mai
 			# apropiat index singur (traseul e un S aici — memoria
 			# `pista-peste-pista`).
-			var need: float = hw + 2.4 + want_m * 0.7
+						# 3.2, nu 2.4: cu blocuri de pana la 3.1 m (marite in runda asta),
+			# marja veche lasa un colt pe banda — ProbeRace a oprit masini pe
+			# Bloc_130/164/171 la frac 0.459, iar ProbeClearD a gasit Bloc_172
+			# la 5.49 m lateral. Garda masoara CENTRUL, deci marja trebuie sa
+			# acopere jumatatea de bloc plus rotatia lui.
+			# 3.2, nu 2.4: cu blocuri de pana la 3.1 m (marite in runda asta),
+			# marja veche lasa un colt pe banda — ProbeClearD gasise Bloc_172
+			# la 5.49 m lateral pe o banda de 5.5. Garda masoara CENTRUL, deci
+			# marja acopera jumatatea de bloc plus rotatia lui.
+			#
+			# NU mai mult de atat, si asta e o concluzie corectata pe date.
+			# O vreme am crezut ca poala provoaca blocajele de la frac 0.458 si
+			# am urcat marja la 5.6, am rarit blocurile de la 330 la 119 si am
+			# coborat conul — niciuna n-a miscat cifra (32-33 de repuneri de
+			# fiecare data). Masuratoarea care a lamurit: pe RAMURA DE BAZA,
+			# fara nimic din runda 3, ProbeRace da 34 de repuneri, de trei ori
+			# la rand. Cu treptele si poala noua da 29-32. Blocajul de la gura
+			# hornului e VECHI (masinile sunt impinse de `state_col`, colizorul
+			# hornului crapat, la 144,23,-174), iar geometria rundei 3 nu-l
+			# inrautateste — il imbunatateste marginal.
+			#
+			# Primul meu A/B spusese contrariul si era GRESIT: taiase fisierul
+			# de la grupul Grohotis incolo, adica scosese si tot ce urma dupa
+			# el, nu doar cele doua grupuri. Comparatia corecta se face fata de
+			# ramura de baza, si pe mai multe rulari (memoria
+			# `proberace-nedeterminism`: Jolt e multithread, o rulare nu decide).
+			var need: float = hw + 3.2 + want_m * 0.85
 			var guard := 0
 			while guard < 24:
 				var lat := 1e9

@@ -194,6 +194,35 @@ func _ready() -> void:
 			# masuratoare, nu ales: la 3.0 m treceau tot 8 din 72 in aer, la
 			# 2.0 m ramaneau doar 26 de trepte pe tot peretele (prea putine ca
 			# sa faca strate). 2.3 m e compromisul masurat.
+			# GARDA DE CAROSABIL. Treptele primesc corp fizic automat
+			# (`world_prop` sta pe DecorManual), deci una cazuta pe banda nu e
+			# decor, e zid: ProbeRace a prins masini oprite la frac 0.459 pe
+			# `state_col`, si ProbeClearD a numit piesele — Treapta_029 la 6.68
+			# m si Treapta_031 la 6.21 m lateral, pe o banda de 6 m jumatate.
+			#
+			# Nu s-a pus garda de la inceput fiindca treptele se ancoreaza pe
+			# fata peretelui si s-a presupus ca fata e departe de drum. Nu e
+			# peste tot: peretele are pinteni, iar o consola de 2.6 m scoasa
+			# dintr-un pinten ajunge pe carosabil. Se masoara pe COLTURILE
+			# reale ale cutiei, cu lateralul minim pe o fereastra de indici
+			# (traseul e un S aici — memoria `pista-peste-pista`).
+			var fwd_b := Vector3(sin(yaw), 0.0, cos(yaw))
+			var nrm_b := Vector3(cos(yaw), 0.0, -sin(yaw))
+			var lat_min := 1e9
+			for tx in [-0.5, 0.0, 0.5]:
+				for tz in [-0.5, 0.5]:
+					var corner: Vector3 = pos + fwd_b * (blen * tx) 						+ nrm_b * (depth * tz)
+					var cci: int = track.closest_index_global(corner)
+					for cw in range(-40, 41, 4):
+						var ciw: int = ((cci + cw) % n + n) % n
+						lat_min = minf(lat_min,
+							absf(track.lateral_distance(ciw, corner)))
+			# hw + 1.6: banda plus o marja. Treapta nu se IMPINGE ca modulele —
+			# ea trebuie sa ramana lipita de fata peretelui, iar una impinsa in
+			# afara ar pluti. Se arunca.
+			if lat_min < track.width_at(f) + 1.6:
+				continue
+
 			var ok_rock := true
 			for tt in [-0.3, 0.3]:
 				var back: Vector3 = pos + sv * (depth * 0.35) 					+ d * (blen * tt)

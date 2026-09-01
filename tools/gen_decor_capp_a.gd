@@ -332,13 +332,26 @@ func _chimneys() -> void:
 	# 11,6 m acolo, iar piesa are 11,41 m).
 	_place("rocks/chimney_a", "hornulDeSase", 0.0060, -1.0, 6.0,
 		0.6, 1.0, "hull")
+	# CE PIESA, si de ce nu la intamplare. Masurat cu ProbeCappTaper
+	# (conicitate = raza la 85% din inaltime / raza la 10%):
+	#   chimney_c 0.48, chimney_d 0.48, chimney_b 0.54, chimney_a 0.58,
+	#   chimney_triple 0.82, chimney_mushroom 1.11.
+	# Referinta v3 are conuri care se subtiaza continuu spre varf; sub 0.6 asta
+	# se citeste, peste 0.8 arata a stalp. `chimney_mushroom` e mai LAT sus
+	# decat jos si are palarie de 17% — o lampa, nu un con — si era a doua
+	# piesa ca frecventa in piata (37 din 120). De aici veneau "ciupercile"
+	# din captura, nu din numarul de hornuri.
+	#
+	# Ramane in kit, dar ca EXCEPTIE, nu ca umplutura: cateva bucati adevarate
+	# de ciuperca exista si in Cappadocia reala, si turtit face bolovani buni
+	# (vezi `_rubble`). Umplutura trece pe conurile care chiar se subtiaza.
 	var small: Array[String] = [
-		"rocks/chimney_a", "rocks/chimney_mushroom", "rocks/chimney_d",
-		"rocks/chimney_b", "rocks/chimney_mushroom", "rocks/chimney_a",
+		"rocks/chimney_a", "rocks/chimney_d", "rocks/chimney_c",
+		"rocks/chimney_b", "rocks/chimney_a", "rocks/chimney_d",
 	]
 	var mid: Array[String] = [
-		"rocks/chimney_d", "rocks/chimney_b", "rocks/chimney_a",
-		"rocks/chimney_mushroom",
+		"rocks/chimney_d", "rocks/chimney_b", "rocks/chimney_c",
+		"rocks/chimney_a",
 	]
 	var hero: Array[String] = [
 		"rocks/chimney_c", "rocks/chimney_triple", "rocks/chimney_b",
@@ -385,7 +398,10 @@ func _chimneys() -> void:
 				_place(mdl, "conUmar", fw, sgn,
 					_rng.randf_range(0.6, 2.0), _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, _rng.randf_range(1.8, 3.2)), "hull")
-				var m2: String = small[(k * 2 + int(sgn) + 3) % small.size()]
+				# O ciuperca adevarata la fiecare al saptelea pas: exista si in
+				# Cappadocia reala, dar ca accent, nu ca padure.
+				var m2: String = ("rocks/chimney_mushroom" if k % 7 == 3
+					else small[(k * 2 + int(sgn) + 3) % small.size()])
 				_place(m2, "conMic", fw, sgn,
 					_rng.randf_range(2.5, 7.0), _rng.randf_range(0.0, TAU),
 					_scale_for(m2, _rng.randf_range(3.0, 5.5)), "hull")

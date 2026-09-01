@@ -156,7 +156,30 @@ func _ready() -> void:
 			# sus stau PE moloz, nu pe teren — asta e ce face gramada sa aiba
 			# volum in loc de contur.
 			var y: float = g + cone - want_m * rng.randf_range(0.20, 0.45)
-			rows.append({"x": q.x, "y": y, "z": q.z,
+			# ANTI Z-FIGHTING, prin DISTANTA, nu prin scara.
+			#
+			# Blocurile sunt acelasi mesh; doua care se intrepatrund adanc au
+			# fete COPLANARE care se bat pe adancime, si pe captura ies pete
+			# negre pe toata poala (vizibil la 1:1 pe zz/foot_step7.png).
+			# Masurat cu ProbeZFight pe versiunea densa: 167 de perechi
+			# intrepatrunse adanc, 55 dintre ele cu scari aproape egale.
+			#
+			# Generatorul vechi incerca sa scape cu scari CLAR diferite
+			# (0.62..1.45), dar densitatea noua a depasit trucul ala: la 406 de
+			# blocuri se ating oricum. Se refuza direct plasarea prea aproape
+			# de un bloc deja pus — se cere ca centrele sa fie la peste 62% din
+			# suma razelor, adica blocurile se ating si se sprijina, dar nu se
+			# trec unul prin altul.
+			var too_close := false
+			for prev in rows:
+				var pr: Vector3 = Vector3(prev["x"], prev["y"], prev["z"])
+				var rr: float = (want_m + float(prev["m"])) * 0.5
+				if Vector3(q.x, y, q.z).distance_to(pr) < rr * 0.62:
+					too_close = true
+					break
+			if too_close:
+				continue
+			rows.append({"m": want_m, "x": q.x, "y": y, "z": q.z,
 				"yaw": rng.randf_range(0.0, TAU),
 				"pitch": rng.randf_range(-0.6, 0.6),
 				"sc": sc})

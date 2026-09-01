@@ -115,6 +115,19 @@ extends Track
 @export var custom_deflector_fracs: Array[float] = []
 ## Creasta de fly-off: te arunca in aer, cu plasa de respawn dedesubt.
 @export var custom_flyoff_fracs: Array[float] = []
+## [b]ATENTIE la comentarii in .tscn.[/b] O linie care incepe cu `#` INTRE
+## proprietatile unui nod TAIE TACUT tot ce urmeaza: parserul se opreste acolo
+## si restul proprietatilor raman pe implicit, fara nicio eroare. S-a masurat
+## pe Track13: un bloc de 8 randuri de comentariu inaintea lui
+## `custom_loose_ranges` a facut ca acela sa ajunga `[]` — adica grip-ul de
+## 0.8x de pe molozul POI D nu s-a aplicat niciodata, desi valoarea era scrisa
+## in fisier. Documentatia unei valori se pune AICI, langa export, nu in .tscn.
+##
+## Culoare cu o SINGURA trecere: (frac_start, frac_end, linie cu semn -1..1).
+## Pentru blocajele de decor care inchid soseaua si lasa o fanta pe o parte
+## anume — pilotii sunt trimisi acolo, in loc sa aleaga malul dupa
+## personalitate ca la `_lane_bias`. Vezi Track.lane_forced_at.
+@export var custom_lane_corridors: Array[Vector3] = []
 ## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
 ## _LANDMARKS). Desert: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
 ## 4=ecran drive-in, 5=stalp GAS, 12=baraca minerului.
@@ -266,6 +279,9 @@ func _deflector_fracs() -> Array[float]:
 
 func _flyoff_fracs() -> Array[float]:
 	return custom_flyoff_fracs
+
+func _lane_corridors() -> Array[Vector3]:
+	return custom_lane_corridors
 
 func _landmark_spots() -> Array[Vector3]:
 	return custom_landmarks

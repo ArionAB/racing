@@ -3337,6 +3337,9 @@ func rebuild() -> void:
 	_lane_bias.clear()
 	for frac in _train_along_fracs():
 		_build_train_along(frac)
+	_lane_lane.clear()
+	for seg in _lane_corridors():
+		_lane_lane.append(seg)
 	for frac in _avalanche_fracs():
 		_build_avalanche(frac)
 	for rg in _ice_field_ranges():
@@ -8591,6 +8594,36 @@ func _smooth_dir(idx: int, span_m: float) -> Vector3:
 ## pe sens). Vezi AIController.
 var _lane_bias: Array[Vector3] = []
 
+## Sectoare in care culoarul liber e pe o parte ANUME: frac -> (frac_start,
+## frac_end, linie CU SEMN). Diferit de `_lane_bias`, care da doar o marime si
+## lasa pilotul sa aleaga malul dupa personalitate.
+##
+## De ce nu ajungea `_lane_bias`. Trenul de pe Baikal ocupa axa si lasa liber
+## pe AMANDOUA partile, deci acolo alegerea malului chiar e libera. Blocajul de
+## oale din piata Goreme (Cappadocia, POI A) e altceva: e un zid continuu de la
+## -9.0 pana la +5.6, cu o SINGURA fanta, in dreapta. Un pilot trimis pe malul
+## lui de personalitate intra in zid in jumatate din cazuri — masurat, exact
+## asta se intampla: 25 de repuneri pe 3 seed-uri la frac 0.030.
+var _lane_lane: Array[Vector3] = []
+
+
+## Linia CU SEMN impusa de un blocaj cu culoar unic, sau 0.0 daca nu e niciunul.
+## Semnul e partea pe care se trece (pozitiv = dreapta soselei, ca `_side_at`).
+func lane_forced_at(index: int) -> float:
+	if _lane_lane.is_empty():
+		return 0.0
+	var f := frac_at(index)
+	var out := 0.0
+	for seg in _lane_lane:
+		var inside: bool
+		if seg.x <= seg.y:
+			inside = f >= seg.x and f <= seg.y
+		else:
+			inside = f >= seg.x or f <= seg.y
+		if inside and absf(seg.z) > absf(out):
+			out = seg.z
+	return out
+
 func lane_bias_at(index: int) -> float:
 	if _lane_bias.is_empty():
 		return 0.0
@@ -8608,6 +8641,12 @@ func lane_bias_at(index: int) -> float:
 
 
 func _train_along_fracs() -> Array[float]:
+	return []
+
+
+## Culoarele cu o singura trecere: (frac_start, frac_end, linie cu semn).
+## Vezi `lane_forced_at` si `custom_lane_corridors`.
+func _lane_corridors() -> Array[Vector3]:
 	return []
 
 
@@ -9487,8 +9526,29 @@ func _build_shoulders() -> void:
 			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
 			var outer0 := inner0 + s0 * w0 * side_sign
 			var outer1 := inner1 + s1 * w1 * side_sign
-			outer0.y = _terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK
-			outer1.y = _terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK
+			# PLAFONUL DE CADERE, si de ce e chiar AICI. Latimea umarului se
+			# calculeaza deja cu `SHOULDER_MAX_DROP` (vezi `_shoulder_width`,
+			# care spune "acelasi plafon ca la emitere") — dar la emitere nu era
+			# niciunul: cota exterioara mergea unde o ducea `_terrain_mesh_y`,
+			# oricat de jos. Jumatatea asta a reparatiei lipsea.
+			#
+			# Ce iese fara plafon, masurat pe Cappadocia in elice (0.788-0.962,
+			# unde soseaua trece de trei ori peste acelasi teren): `_terrain_mesh_y`
+			# extrapoleaza si intoarce cota ALTUI etaj, deci umarul sare in sus
+			# sau in jos cu metri intre doi indecsi vecini. La 0.905 asta facea o
+			# treapta de +2.52 m pe carosabil — un zid, nu un umar — si
+			# ProbeLaneClear il raporta ca `Shoulders` de-a curmezisul drumului.
+			#
+			# Se plafoneaza in AMANDOUA sensurile: sub asfalt e caderea (plafon
+			# vechi), peste asfalt umarul n-are ce cauta deloc — buza interioara
+			# e chiar la cota soselei, deci un exterior mai SUS decat ea e
+			# intotdeauna un artefact de extrapolare.
+			var road0 := inner0.y
+			var road1 := inner1.y
+			outer0.y = clampf(_terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK,
+				road0 - SHOULDER_MAX_DROP, road0)
+			outer1.y = clampf(_terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK,
+				road1 - SHOULDER_MAX_DROP, road1)
 			# U-ul urmeaza latimea REALA, altfel textura se intinde exact acolo
 			# unde banda se lateste.
 			var u_shoulder := maxf(w0, w1) / tile

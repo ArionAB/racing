@@ -90,15 +90,8 @@ custom_ravine_floor_slopes = Array[Vector2]([Vector2(0, 34.0)])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.788, 0.962)])
 custom_width_segments = Array[Vector3]([Vector3(0.962, 0.04, 9.0), Vector3(0.04, 0.16, 6.5), Vector3(0.175, 0.394, 7.0), Vector3(0.410, 0.557, 5.5), Vector3(0.580, 0.708, 8.0), Vector3(0.708, 0.772, 7.0), Vector3(0.772, 0.962, 6.0)])
 custom_rail_segments = Array[Vector4]([])
-# Molozul hornului cazut (POI D): cine rateaza rampa aterizeaza in el.
-# 0.8x grip din brief §2 se da prin `loose_grip` al temei, ca cenusa de pe
-# Stromboli — o proprietate a SOSELEI, tunata in acelasi loc cu restul.
-# INTERVALUL E DEPLASAT, si deplasarea e MASURATA pe pozitia din LUME, nu
-# estimata: capetele lui D (0.462 / 0.476) cad la (161.1, -171.9) si
-# (132.9, -178.5); aceleasi puncte pe traseul combinat sunt la 0.4712 si
-# 0.4953 (drift +0.0092 si +0.0193 — nu e constant, fiindca turul s-a
-# lungit de la 2070.4 m la 2128.0 m si D si-a mutat si el punctele 53-59).
 custom_loose_ranges = Array[Vector2]([Vector2(0.471, 0.495)])
+custom_lane_corridors = Array[Vector3]([Vector3(0.012, 0.036, 0.71)])
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_cappadocia")
@@ -11066,7 +11059,7 @@ metadata/coliziune = "hull"
 
 [node name="coloanas2_418" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_column")]
 transform = Transform3D(3.260288, 0.000000, 0.564656, 0.000000, 3.308824, 0.000000, -0.564656, 0.000000, 3.260288, -325.950806, 12.156378, -17.628325)
-metadata/coliziune = "hull"
+metadata/coliziune = "none"
 
 [node name="alcovas2_419" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
 transform = Transform3D(-0.160091, 0.000000, 0.987102, 0.000000, 1.000000, 0.000000, -0.987102, 0.000000, -0.160091, -344.280243, 12.184000, -19.382256)
@@ -11297,13 +11290,7 @@ metadata/coliziune = "hull"
 transform = Transform3D(-0.276011, 0.000000, 2.527253, 0.000000, 2.542280, 0.000000, -2.527253, 0.000000, -0.276011, -324.439484, 12.184000, -22.600080)
 metadata/coliziune = "hull"
 
-[node name="peretes2_474" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.873912, 0.000000, 2.630218, 0.000000, 2.771600, 0.000000, -2.630218, 0.000000, -0.873912, -327.005951, 19.984001, -22.183844)
-metadata/coliziune = "hull"
 
-[node name="peretes2_475" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.335340, 0.000000, 2.510623, 0.000000, 2.532920, 0.000000, -2.510623, 0.000000, -0.335340, -326.018860, 27.784000, -22.343935)
-metadata/coliziune = "hull"
 
 [node name="peretes2_476" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
 transform = Transform3D(0.074018, 0.000000, -2.536520, 0.000000, 2.537600, 0.000000, 2.536520, 0.000000, 0.074018, -346.774353, 12.145374, -11.932456)
@@ -11321,13 +11308,7 @@ metadata/coliziune = "hull"
 transform = Transform3D(-0.337143, 0.000000, 2.864145, 0.000000, 2.883920, 0.000000, -2.864145, 0.000000, -0.337143, -324.937714, 12.145374, -15.932518)
 metadata/coliziune = "hull"
 
-[node name="peretes2_480" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.855100, 0.000000, 2.503217, 0.000000, 2.645240, 0.000000, -2.503217, 0.000000, -0.855100, -322.773712, 19.945374, -16.328920)
-metadata/coliziune = "hull"
 
-[node name="peretes2_481" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.404462, 0.000000, 2.845963, 0.000000, 2.874560, 0.000000, -2.845963, 0.000000, -0.404462, -321.790070, 27.745375, -16.509104)
-metadata/coliziune = "hull"
 
 [node name="poalas2_482" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
 transform = Transform3D(-0.826361, 0.000000, -2.465183, 0.000000, 2.600000, 0.000000, 2.465183, 0.000000, -0.826361, -340.513763, 12.562407, -78.008705)

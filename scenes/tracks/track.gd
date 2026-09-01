@@ -7188,7 +7188,7 @@ func _build_road() -> void:
 	_add_mesh_with_collision(top.commit(), road_color,
 		_tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro), true,
-		road_override, "RoadTop")
+		road_override, "RoadTop", true)
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 		null, null, true, null, "RoadSides")
@@ -8729,10 +8729,14 @@ func road_material() -> Material:
 func _flat_material(color: Color, texture: Texture2D = null,
 		roughness: float = 1.0, specular: float = 0.5,
 		cull: BaseMaterial3D.CullMode = BaseMaterial3D.CULL_DISABLED,
-		macro_texture: Texture2D = null) -> StandardMaterial3D:
-	var key := "%s|%s|%.2f|%.2f|%d|%s" % [color.to_html(true),
+		macro_texture: Texture2D = null,
+		grazing: bool = false) -> StandardMaterial3D:
+	# `grazing` intra in CHEIE: altfel prima varianta ceruta a unei combinatii
+	# ramane in cache si a doua o primeste pe a ei, tacut.
+	var key := "%s|%s|%.2f|%.2f|%d|%s|%d" % [color.to_html(true),
 		texture.resource_path if texture != null else "", roughness, specular,
-		cull, macro_texture.resource_path if macro_texture != null else ""]
+		cull, macro_texture.resource_path if macro_texture != null else "",
+		1 if grazing else 0]
 	if _mat_cache.has(key):
 		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
@@ -8752,6 +8756,33 @@ func _flat_material(color: Color, texture: Texture2D = null,
 		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
 	mat.roughness = roughness
 	mat.metallic_specular = specular
+	# FILTRARE ANIZOTROPA pe suprafetele mari privite RAZANT (runda 31).
+	#
+	# Masurat, nu presupus. Metrica `umbre_silueta` raporta pe carosabil muchii
+	# 8.2% pe orizontala fata de 19.7% pe verticala, iar nota rundei punea vina
+	# pe "dungile verticale ale dalei". Captura arata insa exact pe dos: dala e
+	# izotropa la sursa (surface_sand 0.002, surface_asphalt 0.022, detail_rock
+	# 0.01, detail_tuff 0.03 — toate masurate), iar granulatia de pe ecran e
+	# intinsa ORIZONTAL. Deci nu venea nici din textura, nici din UV (care sunt
+	# deja patrate: `tile` 3.5 m pe ambele axe, vezi _build_road).
+	#
+	# Vine din MIP-uri. La incidenta razanta un texel acopera multi pixeli pe
+	# verticala si putini pe orizontala; filtrarea trilineara alege un singur
+	# nivel de mip pentru ambele axe, deci netezeste de-a lungul directiei
+	# comprimate si lasa detaliu pe cealalta — adica intinde un tipar izotrop in
+	# dungi orizontale. E aceeasi familie de fenomen cu nota din
+	# terrain_splat.gdshader despre selectorul de mip la incidenta razanta.
+	#
+	# Cu filtrare anizotropa GPU-ul esantioneaza de-a lungul axei comprimate:
+	# masurat pe acelasi cadru, cu umbrele stinse ca sa izolam suprafata,
+	# anizotropia 0.55 -> 0.30; cu umbrele aprinse 0.41 -> 0.26.
+	#
+	# Se pune DOAR unde textura chiar se vede razant (sosea, teren, umeri): pe
+	# mobil esantionarea anizotropa costa banda de memorie, si n-are ce cauta pe
+	# fete privite frontal.
+	if grazing:
+		mat.texture_filter = \
+			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	# Vertex color = AO/gradient copt de builder. Mesh-urile care nu emit COLOR
 	# raman pe alb (1,1,1), deci inmultirea e identitate — zero regresie pe
 	# apelantii care nu stiu de el.
@@ -8773,7 +8804,8 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		macro_texture: Texture2D = null,
 		visible_mesh: bool = true,
 		override_material: Material = null,
-		body_name: String = "") -> void:
+		body_name: String = "",
+		grazing: bool = false) -> void:
 	# visible_mesh = false: doar fizica, fara desen. Zidul exterior pe pistele
 	# care nu vor panglica vizibila ramane totusi zid — altfel se deschide
 	# marginea buclei (pe Okinawa, direct in mare).
@@ -8785,7 +8817,7 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		# standard din cache.
 		inst.material_override = override_material if override_material != null \
 			else _flat_material(color, texture, roughness,
-				specular, cull, macro_texture)
+				specular, cull, macro_texture, grazing)
 		add_child(inst)
 	var body := StaticBody3D.new()
 	# NUMELE nu e cosmetica: ProbeLaneClear raporteaza blocajele pe nume, iar un

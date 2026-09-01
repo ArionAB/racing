@@ -1658,7 +1658,20 @@ static func themes() -> Dictionary:
 			# Ceata din familia orizontului, dar cu o idee mai putin portocaliu:
 			# la 300 m ea e ce vopseste Erciyes, iar cu #F2B27A curat muntele cu
 			# zapada iesea silueta de caramida.
-			"fog": Color(0.92, 0.79, 0.63),
+			# CEATA E RECE, desi zorii sunt calzi — si asta e o decizie, nu o
+			# scapare. Masurat pe capturi de patru critici orbi, pe patru POI-uri
+			# diferite, primul defect numit peste tot a fost "o singura nuanta pe
+			# toata adancimea cadrului". Cauza, masurata: ceata veche
+			# (0.92, 0.79, 0.63) era la 8 GRADE de nuanta fata de teren si MAI
+			# saturata decat el (0.32 fata de 0.18). Distanta adauga deci
+			# saturatie in loc s-o scada — exact pe dos fata de perspectiva
+			# aeriana. Criticul de pe canion a masurat rezultatul: intre peretele
+			# de aproape si cel de la 400 m, 3/255 pe rosu si 0.05 saturatie.
+			# Aerul imprastie albastru; departarea trebuie sa devina mai RECE si
+			# mai PALIDA decat solul, chiar la rasarit. Caldura zorilor ramane
+			# unde ii e locul: in lumina directa si in cerul de la orizont
+			# (sky_horizon F2B27A, neatins).
+			"fog": Color(0.74, 0.79, 0.86),
 			"hill_color": Color(0.82, 0.70, 0.56),
 			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
 			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade

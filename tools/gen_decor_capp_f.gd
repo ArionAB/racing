@@ -411,7 +411,18 @@ func _hall(at: Callable, emit: Callable, headroom: Callable, torch_light: Callab
 				var ws := wall_scale * (0.94 + 0.18 * h)
 				# Trei trepte de adancime: 0 / 1.6 / 3.2 m spre interior.
 				var step := float(int(h2 * 3.0)) * 1.6
-				var depth := (hw + COL_OUT + 3.4) - step
+				# BANDA ALTERNANTA pe verticala (+-0.5 m), peste treapta.
+				#
+				# Treapta de mai sus e trasa dintr-un hash, deci doi vecini pe
+				# VERTICALA nimeresc des aceeasi valoare si atunci coloana iese
+				# un plan continuu pe toata inaltimea — exact silueta neteda pe
+				# care criticii au cerut-o taiata. Alternanta pe `lvl` e
+				# DETERMINISTA, nu trasa: etajul par iese cu 0.5 m in sala,
+				# cel impar intra cu 0.5, deci FIECARE etaj are consola peste
+				# cel de dedesubt si o linie de umbra proprie. E cifra ceruta
+				# (0.4-0.6 m), si e pe profil, nu pe textura.
+				var band := 0.5 if lvl % 2 == 0 else -0.5
+				var depth := (hw + COL_OUT + 3.4) - step + band
 				# ROTATIE NE-PARALELA, cererea explicita a criticului. Fara ea,
 				# oricat ai varia adancimea, toate fetele raman pe acelasi plan
 				# si prind exact aceeasi lumina — de acolo venea „placa paralela".
@@ -440,6 +451,68 @@ func _hall(at: Callable, emit: Callable, headroom: Callable, torch_light: Callab
 			emit.call(group, "poala%s" % tag, "hall_alcove",
 				c + side * (hw + 0.55) * sgn,
 				yaw + (PI * 0.5 if sgn > 0.0 else -PI * 0.5), "hull", wall_scale)
+
+	# --- GROHOTISUL de la piciorul peretelui, si de ce e cerut explicit.
+	#
+	# Criticul D: "talpa peretelui e o curba desenata cu rigla". Are dreptate si
+	# se vede pe orice captura din sala: peretele (chiar si sapat, chiar si in
+	# trepte) se termina intr-o linie continua acolo unde intalneste podeaua,
+	# fiindca ambele urmaresc aceeasi curba a benzii. Ochiul citeste linia aia
+	# inaintea oricarui relief de deasupra ei — o sala reala are conul de
+	# darâmatura care INGROAPA imbinarea, nu o muchie.
+	#
+	# Ce se pune, in cifrele cerute: gradient de marime de la blocuri de ~1 m
+	# la baza pana la pietris spre acostament. Trei randuri, fiecare mai mic si
+	# mai spre banda decat cel dinapoia lui, cu rotatie si ruliu trase din hash
+	# (determinist) ca sa nu se vada ca sir.
+	#
+	# Piesa e tot `hall_alcove`, la scara mica: e in acelasi kit, cade in
+	# aceleasi sloturi intunecate si se stinge odata cu peretele, deci nu aduce
+	# NICIUN material nou (garda: 10/38, cu 22 unice). Un bolovan din
+	# `assets/models/rocks/` ar fi adus alt atlas si alta croma — exact piatra
+	# CENUSIE de exterior pe care peretii exista s-o opreasca.
+	# UNDE se pune, si greseala care a costat o captura. Prima varianta masura
+	# `back` de la POALA spre AFARA (`hw + 0.55 + back`), adica dinspre banda
+	# catre munte. Sonda a numarat 834 de blocuri, toate "vizibile", toate la
+	# cota buna — si captura a iesit IDENTICA cu baza (diferenta medie 0.100
+	# din 255). Motivul, masurat: blocurile cadeau la 7.7-13.3 m de axa, iar
+	# peretele sta la hw+6; erau deci IN SPATELE peretelui, ascunse de el.
+	# Exact capcana "efectele nu se verifica numarand": nodul poate exista,
+	# fi vizibil si la cota corecta, si sa nu ajunga in niciun pixel.
+	# Conul de grohotis sta INTRE marginea benzii si piciorul peretelui, deci
+	# se masoara de la `hw` spre INTERIOR: randul fin ajunge chiar pe
+	# acostament (`hw - 0.35 + 0.1`), cel gros se reazema de poala.
+	var talus_rows := [
+		{"back": 0.9, "sc": 0.90, "dy": -0.55},
+		{"back": 0.0, "sc": 0.58, "dy": -0.80},
+		{"back": -0.9, "sc": 0.34, "dy": -1.00},
+	]
+	# Pasul DES, si de ce: primul incercat (3.4 m) a iesit pe captura o rana de
+	# bolovani razleti, nu un con — cu blocuri de ~2.9 m si pas de 3.4 raman
+	# rosturi prin care linia de imbinare se vede mai departe. La 1.9 m piesele
+	# se suprapun si talpa devine continua, adica INGROAPA muchia (cererea).
+	var tal_cols := int(ceil(road_len / 1.9)) + 1
+	for col in tal_cols:
+		var f: float = f0 + span * (float(col) + 0.5) / float(tal_cols)
+		var d: Dictionary = at.call(f)
+		var c: Vector3 = d["c"]
+		var side: Vector3 = d["side"]
+		var hw: float = d["hw"]
+		for sgn: float in [-1.0, 1.0]:
+			for ri in talus_rows.size():
+				var row: Dictionary = talus_rows[ri]
+				var g1 := float((col * 41 + ri * 167 + int(sgn) * 23) % 100) / 100.0
+				var g2 := float((col * 89 + ri * 43 + int(sgn) * 71) % 100) / 100.0
+				var g3 := float((col * 13 + ri * 197 + int(sgn) * 59) % 100) / 100.0
+				# Jitter pe LUNGUL benzii, ca randul sa nu fie un pieptene.
+				var along := (g1 - 0.5) * 2.6
+				var back: float = float(row["back"]) + (g2 - 0.5) * 0.5
+				var sc: float = float(row["sc"]) * (0.72 + 0.56 * g3)
+				emit.call(group, "grohotis%s" % tag, "hall_alcove",
+					c + (d["fw"] as Vector3) * along
+						+ side * (hw - 0.35 + back) * sgn
+						+ Vector3.UP * float(row["dy"]),
+					g1 * TAU, "hull", sc, (g3 - 0.5) * 0.9)
 
 	# --- ARCADELE transversale: doua pe sala, la treimi. Ele dau scara verticala
 	# din mers — se vad venind, iar bolta lor citeste cota tavanului.

@@ -4,6 +4,11 @@ extends Node
 ## Intrebarea concreta: la frac 0.74 lumina de afara ocupa 1.8x luminanta
 ## peretelui apropiat. E defect (o gaura in tavan) sau e chiar iesirea salii,
 ## vazuta legitim din interior? Raspunsul schimba complet ce e de facut.
+##
+## MASURAT (runda 3): 0.68 -> 145.2 m pana la gura, 0.72 -> 68.6 m, 0.74 -> 27.3 m.
+## Deci la 0.74 soferul chiar iese peste 27 de metri, si lumina de zi din capatul
+## cadrului e ce TREBUIE sa se vada. Sonda asta a oprit o "reparatie" care ar fi
+## astupat iesirea unei sali de care jucatorul se apropie.
 
 
 func _ready() -> void:

@@ -10402,13 +10402,27 @@ func stamp_wear(index: int, pos: Vector3, strength: float = 1.0) -> void:
 ## profil, marginea trebuie sa fie cea LOCALA — altfel o portiune largita ar
 ## penaliza masina care merge pe asfaltul ei propriu, iar una stramta ar lasa-o
 ## sa taie prin iarba la viteza plina.
+##
+## Si LATERAL, si VERTICAL — pe amandoua ramurile. Ramura cu profil de latime
+## a fost scrisa inainte de pistele care trec peste ele insele si compara doar
+## 2D; cand a venit pasajul de la Chongqing, testul vertical a intrat in
+## [method TrackRoute.is_on_road], adica numai pe ramura CEALALTA. Pe un pasaj
+## drept nu s-a vazut, fiindca acolo etajele nu stau unul peste altul decat
+## cateva zeci de metri. Pe elicea Cappadociei (POI G: doua ture cu aceeasi
+## raza, una la 17 m peste cealalta) axele se suprapun pe toata lungimea, si
+## masurat cu ProbeHelix un punct aflat FIX deasupra spirei de jos, la
+## +17.33 m, raspundea „sunt pe drumul asta". Cu asta, checkpoint-ul de la
+## [code]Car._physics_process[/code] se innoia pe spira de jos in timp ce
+## masina urca pe cea de sus, iar repunerea urmatoare era un cadou de o tura.
 func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	var r := route_at(route)
 	if r == null:
 		return false
 	if route != 0 or _width_profile().is_empty():
 		return r.is_on_road(index, pos)
-	return r.lateral_distance(index, pos) <= width_at_index(index) + 0.5
+	if r.lateral_distance(index, pos) > width_at_index(index) + 0.5:
+		return false
+	return not r.is_other_level(index, pos)
 
 func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
 		route: int = 0) -> Vector3:

@@ -76,6 +76,23 @@ const TALUS_SLOT: int = 8
 ## motiv pentru care umbrele din referinta nu sunt gri-maro.
 const DOOR_DARK_SLOT: int = 26
 
+## Cat de tare se intuneca INTERIORUL nisei din vertex color.
+##
+## Nu e gust, e compensarea unei asimetrii reale: peretele hornului vine cu AO
+## copt in GLB, iar geometria adaugata la runtime nu are niciunul. Fara asta,
+## gaura e cea mai LUMINOASA suprafata de pe con — vezi `_quad`.
+##
+## 0.30 pe fund si obraji: cu materialul lumii (soare 1.15, ambient 0.38) asta
+## duce interiorul pe la 35-45 din 255 langa un perete de ~105, adica raportul
+## pe care il are o gura de pestera reala la lumina de dimineata.
+const NICHE_DARK := Color(0.30, 0.30, 0.32)
+
+## Buiandrugul si obrajii primesc putin mai multa lumina decat fundul: o nisa
+## complet uniforma citeste a autocolant negru, nu a volum. Diferenta e mica —
+## ce spune "adancime" e gradientul, nu contrastul.
+const NICHE_SIDE := Color(0.44, 0.44, 0.46)
+
+
 ## Cat de intunecata e poala de grohotis fata de corpul hornului. Vezi
 ## `TALUS_SLOT` pentru de ce separarea NU se face din culoare.
 const TALUS_SHADE: float = 0.72
@@ -351,6 +368,27 @@ const CAP_SLOT: int = 20
 ## toate pe aceeasi fata — ce se vede de pe drum.
 @export_range(0.0, 360.0, 5.0) var door_arc_deg: float = 90.0
 
+## Catre ce punct din LUME se intoarce fatada. Cand e setat, azimuturile de usi
+## si de ferestre se recalculeaza ca sa priveasca punctul asta, iar
+## `door_dir_deg` / `window_dir_deg` devin doar decalaje fata de el.
+##
+## De ce a fost nevoie. Comentariul de la `door_arc_deg` spune "toate pe aceeasi
+## fata — ce se vede de pe drum", dar nimic nu garanta asta: azimutul e in
+## spatiul LOCAL al mesh-ului, iar hornurile sunt puse in scena cu rotatii
+## arbitrare pe Y (`Transform3D` cu yaw aleator, ca sa nu se repete silueta).
+## Deci "90 de grade" inseamna alta directie pe fiecare instanta. Masurat pe
+## cadrul de la fractia 0.06: pe conurile din prim-plan usa cadea pe partea
+## OPUSA drumului, si de-aia treimea de jos a fiecarui con era piatra goala —
+## deschiderile existau, dar se uitau in desert.
+##
+## Cu punctul dat, orientarea se deriva din transformul REAL al instantei, deci
+## ramane corecta si daca hornul se muta sau se roteste din editor.
+@export var facade_target: Vector3 = Vector3.ZERO
+
+## Comuta orientarea de mai sus. Separat de vector fiindca `Vector3.ZERO` e o
+## pozitie valida in lume.
+@export var facade_face_target: bool = false
+
 
 ## --- Umarul de sub palarie ---------------------------------------------------
 
@@ -593,6 +631,15 @@ const CAP_SLOT: int = 20
 
 
 func _ready() -> void:
+	# AMANAT CU UN CADRU cand fatada trebuie orientata spre sosea.
+	#
+	# In Godot copiii primesc `_ready` INAINTEA parintelui, iar traseul pistei
+	# se bakuieste in `_ready`-ul Track-ului (`rebuild`). Deci un horn care
+	# cauta soseaua la propriul `_ready` gaseste `routes` gol si cade pe
+	# pozitia proprie — masurat, `tgt == pos` pe toate cele 39 de noduri, adica
+	# orientarea nu se aplica deloc, tacut.
+	if facade_face_target and Engine.is_editor_hint() == false:
+		await get_tree().process_frame
 	_deform()
 
 
@@ -625,6 +672,41 @@ func _deform() -> void:
 				best = vol
 				host = mi
 		_add_extras(host)
+
+
+## Cel mai apropiat punct de pe soseaua pistei, cautat in poli-linia bakuita.
+##
+## Cauta in sus pe arbore un nod care are `routes` (adica Track-ul), fiindca
+## hornul e adanc in `DecorManual/ZoneB_...` si nu vrem o referinta rigida la o
+## cale de scena — se muta grupurile des pe pista asta.
+##
+## Daca nu gaseste soseaua (piesa deschisa singura in editor, sau pusa in afara
+## unei piste), intoarce propria pozitie: `to_t` iese zero, `facade_a` ramane 0
+## si comportamentul cade inapoi pe azimuturile scrise in .tscn.
+func _nearest_road_point(from: Vector3) -> Vector3:
+	var node: Node = get_parent()
+	var track: Node = null
+	while node != null:
+		if node.get("routes") != null:
+			track = node
+			break
+		node = node.get_parent()
+	if track == null:
+		return from
+	var routes: Array = track.get("routes")
+	if routes.is_empty():
+		return from
+	var pts: PackedVector3Array = routes[0].baked
+	if pts.is_empty():
+		return from
+	var best := pts[0]
+	var best_d := INF
+	for p in pts:
+		var d := Vector2(p.x - from.x, p.z - from.z).length_squared()
+		if d < best_d:
+			best_d = d
+			best = p
+	return best
 
 
 func _collect(node: Node, out: Array[MeshInstance3D]) -> void:
@@ -1296,6 +1378,27 @@ func _add_extras(mi: MeshInstance3D) -> void:
 	# adica exact cheia de scara ar fi mintit.
 	var world_scale := maxf(global_basis.get_scale().y, 0.001)
 
+	# Azimutul LOCAL care priveste `facade_target`. Se obtine ducand directia
+	# din lume inapoi prin baza instantei: asa yaw-ul aleator al hornului nu
+	# mai conteaza, fatada iese tot spre drum.
+	var facade_a := 0.0
+	if facade_face_target:
+		# Tinta implicita e CEL MAI APROPIAT PUNCT DE PE SOSEA, cautat in
+		# traseul pistei. Asa nu trebuie scrise 39 de vectori de mana, iar daca
+		# traseul se redeseneaza (se intampla des pe pista asta) fatadele se
+		# reorienteaza singure. `facade_target` explicit bate cautarea, pentru
+		# hornurile care trebuie sa priveasca un POI anume.
+		var tgt := facade_target
+		if tgt == Vector3.ZERO:
+			tgt = _nearest_road_point(global_position)
+		if OS.get_environment("HORN_PROBE") != "":
+			print("FACADE %s tgt=%s pos=%s" % [name, str(tgt.round()), str(global_position.round())])
+		var to_t := tgt - global_position
+		to_t.y = 0.0
+		if to_t.length_squared() > 0.0001:
+			var loc := global_basis.inverse() * to_t
+			facade_a = rad_to_deg(atan2(loc.z, loc.x))
+
 	var out := ArrayMesh.new()
 	for sfc in src.get_surface_count():
 		out.add_surface_from_arrays(
@@ -1349,9 +1452,18 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		# fractiunea veche. Vezi `window_base_m` — o fractiune comuna pe hornuri
 		# de inaltimi diferite da cote DIFERITE, si de-aia sirul nu cadea de
 		# acord asupra unui plan al solului.
-		var wf0 := window_from
-		if window_base_m > 0.0:
-			wf0 = clampf((window_base_m / world_scale) / h, 0.05, 0.90)
+		# METRII SUNT REGULA, fractiunea e doar rezerva.
+		#
+		# 35 din cele 53 de hornuri din ZoneB n-au `window_base_m` setat, deci
+		# cadeau pe `window_from` ~0.29 din inaltime. Pe un horn de 10 m asta e
+		# 2.9 m, pe unul de 21 m e 6.1 m — sirul nu cade de acord pe niciun
+		# plan comun, si atunci randul de ferestre nu mai citeste ca "etajul
+		# unui sat", ci ca niste gauri imprastiate la intamplare pe inaltime.
+		# Cand nu se cere o cota anume, primul rand sta la 2.6 m: imediat
+		# deasupra usii, adica exact unde il pune un om care sapa un al doilea
+		# nivel.
+		var base_m := window_base_m if window_base_m > 0.0 else 2.6
+		var wf0 := clampf((base_m / world_scale) / h, 0.05, 0.90)
 		for row in window_rows:
 			var rf := wf0
 			if window_rows > 1:
@@ -1375,7 +1487,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			if rr_top > 0.001:
 				taper = clampf(1.0 - rr_top / rr, -0.25, 0.45)
 			_build_windows(stw, cx, cz, y0 + rf * h, rr, world_scale, per, row,
-				taper)
+				taper, facade_a, src, y0, h, rf)
 			any_win = true
 		if any_win:
 			stw.generate_normals()
@@ -1393,15 +1505,6 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		# calculeaza cu ACEEASI formula ca in _build_talus, la varful armonicii
 		# (wob maxim = 1.44), plus o palma de degajare.
 		var sill := door_sill_m
-		if not is_zero_approx(talus_spread):
-			# Creasta MAXIMA a poalei: wob la varf (1.44) inmultit cu limba de
-			# moloz cea mai inalta (climb la varf = 1 + 0.55 + 0.25 = 1.80).
-			# De cand poala urca inegal pe perete, un prag calculat pe creasta
-			# MEDIE ar fi lasat usile ingropate exact acolo unde molozul s-a
-			# ingramadit — adica pe fata cea mai spectaculoasa, care e si cea
-			# dinspre drum.
-			var crest := base_r * talus_height * (0.75 + 0.35 * 1.44) * 1.80
-			sill = maxf(sill, (crest + base_r * 0.05) * world_scale)
 		# Raza SE MASOARA LA COTA PRAGULUI, nu la baza: altfel nisa sta in
 		# aer, in fata unui perete care s-a subtiat sub ea.
 		var sill_frac := clampf((sill / world_scale) / h, 0.0, 0.95)
@@ -1415,7 +1518,8 @@ func _add_extras(mi: MeshInstance3D) -> void:
 				door_top_r = door_r
 			var st2 := SurfaceTool.new()
 			st2.begin(Mesh.PRIMITIVE_TRIANGLES)
-			_build_doors(st2, cx, cz, y0, door_r, door_top_r, world_scale, sill)
+			_build_doors(st2, cx, cz, y0, door_r, door_top_r, world_scale, sill,
+				facade_a, src, h)
 			st2.generate_normals()
 			var m2 := st2.commit()
 			if m2 != null and m2.get_surface_count() > 0:
@@ -1451,6 +1555,51 @@ func _radius_at(src: Mesh, cx: float, cz: float, y0: float, h: float,
 			break
 	if radii.is_empty():
 		return 0.0
+	radii.sort()
+	return radii[radii.size() / 2]
+
+
+## Raza LA O COTA SI LA UN AZIMUT. Mediana pe felie, dar numai peste vertecsii
+## dintr-un sector ingust in jurul directiei cerute.
+##
+## De ce nu ajunge `_radius_at`. Aceea intoarce mediana pe TOATE azimuturile,
+## adica raza unui cerc echivalent — dar peretele nu e cerc: `ovality` merge
+## pana la 0.62 (elipsa vizibil turtita) si peste ea vin canelurile. Pe axa
+## lunga a elipsei peretele e cu zeci de centimetri IN AFARA medianei, pe axa
+## scurta tot atat INAUNTRU. O nisa asezata pe mediana iese deci:
+##   - pe azimuturile late: fundul nisei ramane in fata peretelui, si prin gol
+##     se vede piatra — exact "chenar palid gol", fereastra fara fund;
+##   - pe cele stramte: fata nisei intra in perete si golul dispare pe jumatate,
+##     de unde usa cu dreptunghiul intunecat doar pe o parte.
+## Amandoua se vad in captura de la fractia 0.06 pe conul din stanga.
+##
+## Sectorul e larg (±25°) fiindca hornurile n-au vertecsi pe orice azimut: cu
+## 13 caneluri, un sector prea ingust ar iesi gol. Se largeste pana gaseste.
+func _radius_at_dir(src: Mesh, cx: float, cz: float, y0: float, h: float,
+		frac: float, ang: float) -> float:
+	var dir := Vector2(cos(ang), sin(ang))
+	var radii: PackedFloat32Array = []
+	for cone_deg in [25.0, 40.0, 60.0, 90.0]:
+		var lim := cos(deg_to_rad(cone_deg))
+		radii.clear()
+		for win in [0.06, 0.12, 0.25, 0.5]:
+			radii.clear()
+			for sfc in src.get_surface_count():
+				var arrays := src.surface_get_arrays(sfc)
+				var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+				for v in verts:
+					if absf((v.y - y0) / h - frac) >= win:
+						continue
+					var d := Vector2(v.x - cx, v.z - cz)
+					var l := d.length()
+					if l > 0.001 and d.normalized().dot(dir) >= lim:
+						radii.append(l)
+			if radii.size() >= 4:
+				break
+		if radii.size() >= 4:
+			break
+	if radii.is_empty():
+		return _radius_at(src, cx, cz, y0, h, frac)
 	radii.sort()
 	return radii[radii.size() / 2]
 
@@ -1733,38 +1882,179 @@ func _octa_rock(st: SurfaceTool, c: Vector3, r: float,
 ## varianta veche fiindca la 2 m inaltime greseala inca incapea in grosimea unui
 ## poligon — pana cand usa a ajuns 1:2 si deci mai INALTA.
 func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
-		base_r: float, top_r: float, world_scale: float, sill_m: float) -> void:
+		base_r: float, top_r: float, world_scale: float, sill_m: float,
+		facade_a: float, src: Mesh, h: float) -> void:
 	# Din metri de lume in unitati de mesh.
 	var dh := door_height_m / world_scale
-	var dw := dh * door_aspect
+	# 1:2, adica vizibil INALTA. Nodurile din ZoneB au `door_aspect` median
+	# 0.80 (pana la 0.90), ceea ce da o deschidere de 2.2 x 2.0 m — practic
+	# patrata, si o gaura patrata intr-o stanca citeste a intrare de pestera,
+	# nu a usa de casa. Cheia de scara vine din PROPORTIE, nu din marime: usa
+	# e recunoscuta fiindca e de doua ori mai inalta decat lata.
+	var dw := dh * clampf(door_aspect, 0.40, 0.62)
 	var dd := door_depth_m / world_scale
 	# Nisa nu poate fi mai adanca decat jumatate din raza si nici mai lata decat
 	# raza intreaga: altfel fundul ei ar iesi pe partea cealalta a hornului, iar
 	# peretii s-ar autointersecta.
 	dd = minf(dd, base_r * 0.5)
 	dw = minf(dw, base_r * 1.4)
+	# USA NU POATE FI MAI INALTA DECAT CONUL CARE O TINE.
+	#
+	# `dh` se obtine impartind metrii la scara nodului, si pe hornurile MICI
+	# scara e subunitara: `hornCiot45` are scale_y 0.34, deci o usa de 2.11 m
+	# devine 6.21 unitati de mesh — masurat pe sonda. Pe un ciot inalt de ~8
+	# unitati asta e trei sferturi din piesa, iar peretele se subtiaza de la
+	# raza 4.44 la 2.10 pe inaltimea ei: nisa iese o pana uriasa care taie
+	# conul dintr-o parte in alta. Se vedea in cadru ca un romb intunecat la
+	# baza, jos de tot.
+	#
+	# Plafonul e o fractiune din inaltimea PIESEI, nu o constanta: o usa are
+	# voie sa fie mare pe un horn mic (asa si trebuie, ea da scara), dar nu are
+	# voie sa-l inghita. O treime lasa loc de perete deasupra buiandrugului.
+	dh = minf(dh, h * 0.33)
+	dw = minf(dw, dh * 0.62)
 	var sill := sill_m / world_scale
 	var arc := deg_to_rad(door_arc_deg)
-	var dir0 := deg_to_rad(door_dir_deg)
+	# `door_dir_deg` devine DECALAJ fata de fatada cand aceasta e orientata.
+	# Valorile din .tscn merg pana la 112 grade — folosite ca decalaj ar duce
+	# usa inapoi pe partea cealalta, adica exact ce reparam. Cand fatada e
+	# orientata, decalajul se strange la un sfert, deci ramane variatie intre
+	# hornuri fara ca vreunul sa se intoarca cu spatele la drum.
+	var dir0 := deg_to_rad(door_dir_deg + facade_a)
+	if facade_face_target:
+		dir0 = deg_to_rad(facade_a + wrapf(door_dir_deg, -180.0, 180.0) * 0.25)
+	# Faza poalei, ca sa stim CAT DE SUS urca molozul la fiecare azimut. Vezi
+	# bucla: pragul se ia local, nu pe creasta maxima.
+	var ph := _talus_phase(shape_seed)
 	for k in door_count:
 		var f := 0.0
 		if door_count > 1:
 			f = float(k) / float(door_count - 1) - 0.5
 		var a := dir0 + f * arc
+		# USA CAUTA SCOBITURA DINTRE LIMBILE DE MOLOZ.
+		#
+		# Pana acum pragul TUTUROR usilor se ridica peste creasta MAXIMA a
+		# poalei (`0.75 + 0.35*1.44` inmultit cu `climb` la varf = 1.80).
+		# Masurat pe nodurile din ZoneB, asta inseamna un prag la 1.8-3.1 m
+		# deasupra solului — adica o usa de 2 m al carei prag e mai sus decat
+		# usa e inalta. Nimic nu mai atingea pamantul, si exact aia era treaba
+		# usii: sa dea cheia de scara. Un con cu o gaura care pluteste la 3 m
+		# citeste a peștera, nu a locuinta.
+		#
+		# Poala NU e la fel de inalta peste tot: `_talus_lift` variaza cu
+		# azimutul intre ~0.25 si 1.80 din inaltimea nominala. Deci nu trebuie
+		# ridicata usa, trebuie MUTATA acolo unde molozul e jos — cum si-o pune
+		# un om, in scobitura dintre doua limbi de grohotis. Se cauta minimul
+		# lui `_talus_lift` intr-o fereastra in jurul azimutului cerut.
+		if not is_zero_approx(talus_spread):
+			var best := a
+			var best_lift := _talus_lift(a, ph)
+			for probe in 24:
+				var pa := a + (float(probe) / 24.0 - 0.5) * deg_to_rad(70.0)
+				var lift := _talus_lift(pa, ph)
+				if lift < best_lift:
+					best_lift = lift
+					best = pa
+			a = best
 		var nx := cos(a)
 		var nz := sin(a)
 		# Tangenta: latimea usii se masoara pe circumferinta.
 		var tx := -sin(a)
 		var tz := cos(a)
+		# RAZA LA AZIMUTUL ASTA, nu mediana pe tot conturul. Vezi
+		# `_radius_at_dir`: peretele e elipsa plus caneluri, deci mediana
+		# greseste in ambele sensuri si nisa fie pluteste, fie se ingroapa.
 		# Fata nisei sta PUTIN in afara peretelui (ca sa nu faca z-fighting cu
 		# el), fundul intra cu `dd`.
 		# Doua raze, una la prag si una la buiandrug: fata nisei se INCLINA
 		# odata cu peretele conului. Vezi comentariul functiei.
-		var rf_b := base_r * 1.01
-		var rf_t := top_r * 1.01
-		var r_back := base_r - dd
+		# Pragul, LOCAL: doar cat sa iasa din molozul de la azimutul asta, nu
+		# de pe creasta cea mai inalta a poalei. In scobitura aleasa mai sus
+		# `_talus_lift` e pe la 0.25-0.5, deci ridicarea iese de ordinul a
+		# 20-50 cm — o treapta, nu un etaj.
 		var yb := y0 + sill
+		if not is_zero_approx(talus_spread):
+			var local_crest := base_r * talus_height * _talus_lift(a, ph)
+			yb = maxf(yb, y0 + local_crest * 0.85)
 		var yt := yb + dh
+		# Razele se masoara ABIA ACUM, fiindca depind de cota pragului.
+		var sill_frac_d := clampf((yb - y0) / h, 0.0, 0.95)
+		var br := _radius_at_dir(src, cx, cz, y0, h, sill_frac_d, a)
+		if br <= 0.001:
+			br = base_r
+		var tr := _radius_at_dir(src, cx, cz, y0, h,
+			clampf((yt - y0) / h, 0.0, 0.97), a)
+		if tr <= 0.001:
+			tr = top_r
+		# FUNDUL TREBUIE SA TREACA DE CANELURA CEA MAI ADANCA din dreptul
+		# golului. `flute_depth` sapa in raza ca functie de azimut, iar `dd`
+		# masurat din raza MEDIE a sectorului lasa varful canelurii in fata
+		# fundului: prin gol se vede piatra, si nisa redevine chenar gol —
+		# exact ce se vedea pe usa de la baza conului din stanga.
+		# PERETELE NU E PLAN PE LATIMEA USII, iar nisa e.
+		#
+		# Masurat pe `hornUmbra8` (azimut 112°), esantionand raza reala pe cele
+		# cinci coloane ale golului, la jumatatea inaltimii lui:
+		#     2.48  2.48  3.01  3.01  3.01
+		# adica o diferenta de 0.53 unitati pe latimea unei singure usi — e
+		# canelura de eroziune (`flute_depth`), care sapa raza ca functie de
+		# azimut. Fata nisei era un patrulater PLAN asezat la raza medie 2.93:
+		# pe jumatate din latime peretele (3.01) iesea IN FATA ei. Ce se vedea
+		# prin "gol" nu era fundul nisei, era piatra conului care strapunge
+		# gaura — cu striatiile ei mergand mai departe neintrerupt, exact cum
+		# arata la lupa in cadru.
+		#
+		# De-aia nici innegrirea fundului n-a schimbat nimic: fundul chiar era
+		# desenat, si chiar era intunecat, dar statea IN SPATELE peretelui.
+		#
+		# Reparatia. Fata golului se aseaza pe raza MAXIMA de pe latimea lui
+		# (deci nicio umflatura de perete nu mai iese prin ea), iar fundul pe
+		# raza MINIMA minus adancimea (deci nicio scobitura de canelura nu-l
+		# descopera). Intre ele nisa are peste tot cel putin `dd` de piatra.
+		#
+		# Doua limite separate, fiindca peretele variaza in AMBELE sensuri pe
+		# latimea unei usi: masurat pe `hornUmbra8`, coloanele golului dadeau
+		# 2.48 / 2.48 / 3.01 / 3.01 / 3.01. O singura raza — medie, minima sau
+		# maxima — greseste jumatate din coloane. Cu maximul pe fata gaura ramane
+		# vizibila pe toata latimea; cu minimul pe fund nu se vede piatra prin ea.
+		var y_lo := clampf((yb - y0) / h, 0.0, 0.95)
+		var y_hi := clampf((yt - y0) / h, 0.0, 0.97)
+		var r_min := minf(br, tr)
+		var r_max := maxf(br, tr)
+		for probe in 7:
+			var pa := a + (float(probe) / 6.0 - 0.5) * (dw / maxf(br, 0.01))
+			var s_lo := _radius_at_dir(src, cx, cz, y0, h, y_lo, pa)
+			var s_hi := _radius_at_dir(src, cx, cz, y0, h, y_hi, pa)
+			r_min = minf(r_min, minf(s_lo, s_hi))
+			r_max = maxf(r_max, maxf(s_lo, s_hi))
+		var r_back := r_min - dd
+		# Fata golului iese cu O JUMATATE DE AMPLITUDINE DE CANELURA peste
+		# maximul MASURAT, si asta nu e o marja de siguranta pusa din ochi.
+		#
+		# `_radius_at_dir` citeste VERTECSI, dar piatra care strapungea golul e
+		# o FATA dintre doi vertecsi: cu 13 caneluri pe circumferinta, o usa de
+		# ~1 m acopera mai putin de un sector, deci intre esantioane peretele
+		# poate fi mai in afara decat orice vertex masurat. Proba cu rama scoasa
+		# a aratat exact asta: din nisa ramanea o singura LINIE neagra (obrazul
+		# din dreapta vazut din cant), fiindca fundul si obrazul stang erau in
+		# spatele peretelui.
+		#
+		# Amplitudinea e cea reala a canelurii pe raza locala, deci marja creste
+		# pe hornurile mari si scade pe cele mici, in loc sa fie un centimetru
+		# fix care ajunge intr-un loc si nu in altul.
+		# PLAFONATA. Fara plafon, pe hornurile mici (`hornCiot45`, scara 0.34)
+		# raza locala e mare in unitati de mesh iar `r_max - r_min` prinde si
+		# saltul dintre doua cote foarte diferite: marja iesea de ordinul razei
+		# si nisa se desfacea in foi uriase care traversau terenul — se vedea in
+		# cadru ca niste lespezi negre zburand peste drum. O buza de gaura n-are
+		# ce cauta mai in afara de un sfert din raza peretelui.
+		# Plafonata pe ADANCIMEA nisei, nu pe raza. O buza care iese mai mult
+		# decat e nisa de adanca nu mai e buza, e o lespede lipita pe perete —
+		# si pe hornurile mici (`hornCiot45`, scara 0.34) exact asa ieseau, foi
+		# uriase care traversau terenul.
+		var flute_amp := minf(maxf(r_max - r_min, r_max * flute_depth * 0.5), dd)
+		var rf_b := r_max + flute_amp
+		var rf_t := (r_max + flute_amp) * (tr / maxf(br, 0.001))
 		var hw := dw * 0.5
 		# Cele opt colturi: 4 pe fata (jos pe raza pragului, sus pe cea de la
 		# buiandrug), 4 pe fund.
@@ -1779,12 +2069,12 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# Fundul nisei, privit dinspre exterior. Slotul cel mai INCHIS din
 		# familia de tuf: gura pesterii trebuie sa citeasca a gaura, iar umbra
 		# proprie singura nu ajunge cand soarele bate din fata.
-		_quad(st, bbl, bbr, btr, btl, Palette.uv(DOOR_DARK_SLOT))
+		_quad(st, bbl, bbr, btr, btl, Palette.uv(DOOR_DARK_SLOT), NICHE_DARK)
 		# Peretele din stanga si cel din dreapta.
-		_quad(st, fbl, bbl, btl, ftl, Palette.uv(DOOR_DARK_SLOT))
-		_quad(st, bbr, fbr, ftr, btr, Palette.uv(DOOR_DARK_SLOT))
+		_quad(st, fbl, bbl, btl, ftl, Palette.uv(DOOR_DARK_SLOT), NICHE_SIDE)
+		_quad(st, bbr, fbr, ftr, btr, Palette.uv(DOOR_DARK_SLOT), NICHE_SIDE)
 		# Buiandrugul (tavanul nisei).
-		_quad(st, btl, btr, ftr, ftl, Palette.uv(DOOR_DARK_SLOT))
+		_quad(st, btl, btr, ftr, ftl, Palette.uv(DOOR_DARK_SLOT), NICHE_DARK)
 
 		# --- CHENARUL IN RELIEF ------------------------------------------
 		#
@@ -1895,9 +2185,24 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 ## buiandrugului pe pervaz, si aia cere doar cativa centimetri de consola.
 func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		r: float, world_scale: float, count: int, row: int,
-		taper: float) -> void:
+		taper: float, facade_a: float, src: Mesh, y0: float, h: float,
+		rf: float) -> void:
 	var wh := window_height_m / world_scale
-	var ww := wh * window_aspect
+	# APROAPE PATRATA, cu forta.
+	#
+	# `window_aspect` are @export_range(0.75, 1.35), dar valorile din
+	# Track13.tscn au fost scrise direct in fisier si trec de plafon: median
+	# 1.59, maxim 1.98 pe cele 53 de noduri din ZoneB. Range-ul nu clampeaza
+	# nimic la incarcare, e doar pentru Inspector — deci ferestrele ieseau
+	# 1.4 m inaltime x 2.7 m latime. La scara aia nu mai e fereastra, e o gura
+	# de garaj sapata in stanca, si de-aia conurile citeau a formatiune goala
+	# in loc de casa: nicio deschidere nu avea marimea unui om.
+	#
+	# Referinta are ferestre mici, aproape patrate, si MULTE. Clampam aici
+	# fiindca .tscn-ul e sursa de adevar si se editeaza de mana (vezi memoria
+	# `tscn-editat-de-mana-nu-se-rescrie`): o valoare veche nu are voie sa
+	# produca geometrie gresita.
+	var ww := wh * clampf(window_aspect, 0.75, 1.20)
 	var wd := minf(0.18 / world_scale, r * 0.35)
 	# Latimea nu poate depasi o fractiune din circumferinta, altfel ferestrele
 	# vecine se ating si redevin gratar.
@@ -1905,7 +2210,9 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 	var rng := RandomNumberGenerator.new()
 	rng.seed = shape_seed + 5100 + row * 31
 	var arc := deg_to_rad(window_arc_deg)
-	var dir0 := deg_to_rad(window_dir_deg)
+	var dir0 := deg_to_rad(window_dir_deg + facade_a)
+	if facade_face_target:
+		dir0 = deg_to_rad(facade_a + wrapf(window_dir_deg, -180.0, 180.0) * 0.25)
 	# Randurile se decaleaza pe azimut, ca ferestrele sa nu se insiruie pe o
 	# coloana verticala — un sir vertical de goluri ar fi refacut exact fanta
 	# pe care o inlocuim, doar din bucati.
@@ -1925,9 +2232,36 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		# inclina odata cu el. Panta se ia din raza randului curent fata de cea
 		# a randului (`taper` e cat se strange peretele pe inaltimea ferestrei),
 		# ca sa nu mai fie nevoie de inca o citire de mesh per fereastra.
-		var r_face := r * 1.01
-		var r_face_t := r_face * (1.0 - taper)
-		var r_back := r - wd
+		# Raza LA AZIMUTUL FERESTREI. Cu `ovality` pana la 0.62 si caneluri
+		# peste, mediana pe contur (`r`) greseste cu zeci de centimetri in
+		# ambele sensuri — de acolo ieseau ferestrele "chenar palid fara fund"
+		# (fundul ramas in fata peretelui, deci prin gol se vede piatra).
+		var rr_a := _radius_at_dir(src, cx, cz, y0, h, rf, a)
+		if rr_a <= 0.001:
+			rr_a = r
+		var rf_t2 := clampf(rf + wh / h, 0.0, 0.97)
+		var rr_a_t := _radius_at_dir(src, cx, cz, y0, h, rf_t2, a)
+		if rr_a_t <= 0.001:
+			rr_a_t = rr_a * (1.0 - taper)
+		# Ca la usi: buza gaurii trebuie sa treaca de canelura, altfel peretele
+		# iese prin gol si fereastra redevine chenar palid. Vezi nota lunga din
+		# `_build_doors` — cauza a fost gasita cu rama scoasa, cand din nisa
+		# ramanea doar o linie neagra.
+		var w_min := minf(rr_a, rr_a_t)
+		var w_max := maxf(rr_a, rr_a_t)
+		for q in 5:
+			var qa := a + (float(q) / 4.0 - 0.5) * (ww / maxf(rr_a, 0.01))
+			var v_lo := _radius_at_dir(src, cx, cz, y0, h, rf, qa)
+			var v_hi := _radius_at_dir(src, cx, cz, y0, h, rf_t2, qa)
+			w_min = minf(w_min, minf(v_lo, v_hi))
+			w_max = maxf(w_max, maxf(v_lo, v_hi))
+		var w_amp := minf(maxf(w_max - w_min, w_max * flute_depth * 0.5), wd)
+		var r_face := w_max + w_amp
+		var r_face_t := (w_max + w_amp) * (rr_a_t / maxf(rr_a, 0.001))
+		# Adancimea trebuie sa treaca de peretele cel mai INTRAT din dreptul
+		# golului, nu doar `wd`: altfel canelura taie fundul nisei si gaura
+		# redevine chenar gol.
+		var r_back := w_min - wd
 		# Inaltimile variaza putin de la o fereastra la alta: un rand perfect
 		# aliniat citeste a fatada de bloc, nu a stanca locuita.
 		var yb := ybase + rng.randf_range(-0.12, 0.12) * wh
@@ -1942,10 +2276,10 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		var btl := Vector3(cx + nx * r_back - tx * hw, yt, cz + nz * r_back - tz * hw)
 		var btr := Vector3(cx + nx * r_back + tx * hw, yt, cz + nz * r_back + tz * hw)
 		# Golul: fund + obraji + buiandrug, toate pe slotul cel mai inchis.
-		_quad(st, bbl, bbr, btr, btl, dark)
-		_quad(st, fbl, bbl, btl, ftl, dark)
-		_quad(st, bbr, fbr, ftr, btr, dark)
-		_quad(st, btl, btr, ftr, ftl, dark)
+		_quad(st, bbl, bbr, btr, btl, dark, NICHE_DARK)
+		_quad(st, fbl, bbl, btl, ftl, dark, NICHE_SIDE)
+		_quad(st, bbr, fbr, ftr, btr, dark, NICHE_SIDE)
+		_quad(st, btl, btr, ftr, ftl, dark, NICHE_DARK)
 		# SOLBANCUL: o lespede subtire care iese peste gol. E singura piesa care
 		# se vede de la 60 m — arunca o dunga de umbra ORIZONTALA sub fereastra,
 		# iar dunga aia e ce spune ochiului ca deschiderea e lata, nu inalta.
@@ -2101,11 +2435,22 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 ## un vertex fara UV pica pe (0,0), adica pe coltul din stanga-sus al atlasului
 ## — iar rezerva 24..31 de acolo e MAGENTA intentionat, ca greseala de UV sa sara
 ## in ochi. A si sarit: prima captura a iesit cu poale roz-neon la fiecare horn.
+## `col` e culoarea de VERTEX, si nu e un ornament: materialul lumii are
+## `vertex_color_use_as_albedo`, deci albedo-ul din atlas se INMULTESTE cu ea.
+##
+## Corpul hornului isi primeste culorile din AO-ul copt in GLB (vezi `_darken`),
+## dar geometria adaugata aici cu SurfaceTool nu setase NICIODATA vreo culoare,
+## iar implicitul e alb. Consecinta, masurata pe cadru: interiorul nisei iesea
+## la luminanta ~114, adica MAI DESCHIS decat peretele din jur (~105), desi
+## slotul lui e 26 (1A2A33, luminanta 39) — cel mai inchis din atlas. Golul era
+## acolo, cu fund si obraji, dar lumina il facea sa citeasca drept o placa
+## palida cu rama, si de-aia sase runde de critici au numit deschiderile
+## "dreptunghiuri plate": ce se vedea din ele era rama, nu gaura.
 func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
-		uv: Vector2) -> void:
-	st.set_uv(uv); st.add_vertex(a)
-	st.set_uv(uv); st.add_vertex(b)
-	st.set_uv(uv); st.add_vertex(c)
-	st.set_uv(uv); st.add_vertex(a)
-	st.set_uv(uv); st.add_vertex(c)
-	st.set_uv(uv); st.add_vertex(d)
+		uv: Vector2, col: Color = Color.WHITE) -> void:
+	st.set_color(col); st.set_uv(uv); st.add_vertex(a)
+	st.set_color(col); st.set_uv(uv); st.add_vertex(b)
+	st.set_color(col); st.set_uv(uv); st.add_vertex(c)
+	st.set_color(col); st.set_uv(uv); st.add_vertex(a)
+	st.set_color(col); st.set_uv(uv); st.add_vertex(c)
+	st.set_color(col); st.set_uv(uv); st.add_vertex(d)

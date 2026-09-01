@@ -139,6 +139,12 @@ const PROP_COLLISION := {
 	# hull per bucata ar adauga 72 de corpuri convexe pe o coama pe care
 	# masina n-are ce cauta. Daca vreodata ajunge acolo, terenul o opreste.
 	"cracked_chimney_c": "none",
+	# Grohotisul de sub perete (POI E, runda 3): bolovani de 0.3-1.6 m, zeci de
+	# bucati, TOATE la peste 13 m lateral de banda (generatorul le respinge mai
+	# aproape). Ca si molozul de mai sus: sunt gradient de contact intre stanca
+	# si sol, nu obstacole, iar un hull per bucata ar pune zeci de corpuri
+	# convexe pe teren pe care masina n-are ce cauta.
+	"talus_block": "none", "talus_cobble": "none", "talus_gravel": "none",
 	# Plopii: cilindru pe trunchi, ca toti copacii — hull-ul unui plop de
 	# 15 m e o coloana de 2,5 m latime care te opreste in aer.
 	"poplar_a": "trunk", "poplar_b": "trunk",

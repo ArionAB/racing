@@ -53,22 +53,61 @@ HOLE = ROCK_DARK           # ferestre si usi sapate (gaura "pictata")
 DOOR_WOOD = WOOD
 
 
-def chimney_profile(height, r_base, r_neck, seed, steps=7):
-    """Profilul (raza, z) al gatului: scade cu PALIERE, nu liniar.
+def chimney_profile(height, r_base, r_neck, seed, steps=5):
+    """Profilul (raza, z) al gatului: o SCARA CRESTATA, nu un taper neted.
 
-    Tuful se erodeaza in trepte fiindca straturile au duritati diferite; un
-    taper liniar da un con de brad. Perturbatia e determinista din `seed`
-    (aceeasi regula ca `Builder.rock`: build-urile nu au voie sa se schimbe
-    intre rulari).
+    Runda 2 a picat aici la trei critici din patru, in aceleasi cuvinte:
+    taperul neted cu jitter de +-6.5% pe raza e INVIZIBIL la 40 m (masurat:
+    orice perturbatie sub ~10% dispare in silueta). Un strat de tuf se citeste
+    doar daca arunca propria linie de umbra, adica daca are o fata de sus
+    ORIZONTALA care iese in consola peste stratul de dedesubt.
+
+    Deci profilul e construit din `steps` segmente stivuite, fiecare cu 8-12%
+    mai ingust decat cel de sub el. Fiecare imbinare emite DOUA inele la
+    ACEEASI cota: raza larga, apoi raza ingusta. Perechea aia nu e o risipa de
+    geometrie — e exact fata orizontala tare de 0.30 m adancime (diferenta de
+    raza) pe care cade lumina razanta de zori. `revolve` interpoleaza intre
+    inele, deci fara perechea la aceeasi cota treapta redevine o tesitura.
+
+    Nu se tesesc buzele: o consola tesita citeste tot ca taper (capcana rundei
+    17 — detaliul care nu taie silueta nu exista).
     """
     rand = _lcg(seed)
+    # Buza are adancime FIXA de 0.30 m (cifra din verdicte). Restul ingustarii
+    # o face peretele segmentului, ca profilul sa ajunga totusi la `r_neck`:
+    # din caderea totala de raza, `steps-1` buze iau 0.30 m fiecare, iar ce
+    # ramane se imparte pe pereti. Daca buzele ar lua tot, gatul ar iesi gros.
+    LIP = 0.30
+    drop = r_base - r_neck
+    lip_total = LIP * (steps - 1)
+    # peretii preiau restul; daca buzele depasesc caderea totala, hornul e prea
+    # scurt pentru 5 trepte de 0.30 — atunci se reduce numarul de trepte.
+    while lip_total > drop * 0.80 and steps > 3:
+        steps -= 1
+        lip_total = LIP * (steps - 1)
+    wall_drop = (drop - lip_total) / float(steps)
+
     prof = []
+    r = r_base
     for i in range(steps):
-        t = i / (steps - 1.0)
-        # baza: raza scade repede jos, apoi aproape deloc (silueta de horn)
-        r = r_base + (r_neck - r_base) * (t ** 0.62)
-        r *= 1.0 + (rand() - 0.5) * 0.13      # paliere de eroziune
-        prof.append((r, height * t))
+        z0 = height * (i / float(steps))
+        z1 = height * ((i + 1) / float(steps))
+        # peretele: aproape vertical, cu o pierdere mica de raza; jitterul
+        # determinist ramane doar ca sa nu fie toate treptele identice, dar el
+        # NU mai poarta citirea — buza o poarta.
+        wob = 1.0 + (rand() - 0.5) * 0.10
+        r_top = max(r_neck, r - wall_drop * wob)
+        prof.append((r, z0))
+        prof.append((r_top, z1 - 0.001))
+        if i < steps - 1:
+            # BUZA: doua inele la ACEEASI cota => fata orizontala tare de
+            # 0.30 m, in consola peste segmentul de deasupra.
+            prof.append((r_top, z1))
+            r = max(r_neck, r_top - LIP)
+            prof.append((r, z1))
+        else:
+            r = r_top
+    prof.append((r, height))
     return prof
 
 

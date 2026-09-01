@@ -241,6 +241,40 @@ const CLASSES_BY_MODEL := {
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},
+	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
+	#
+	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
+	# exact ce se intampla atunci — „absentele arata cer, nu camere". Referinta
+	# (Uchisar in sectiune) castiga tocmai prin deschideri LUMINATE cu interior
+	# in spatele lor. `_remap_model_slots` a pus deja fundul firidei pe slotul
+	# 30; aici primeste materialul care il face gura de pestera.
+	#
+	# [b]NU mai are emisie, si asta e reparatia rundei 3.[/b] Nota veche spunea
+	# ca energia 2.0 e "fix cea folosita de ferestrele Chongqing-ului", deci
+	# gratis la garda. Adevarat, si irelevant: Chongqing e o pista de NOAPTE,
+	# unde o fereastra chiar e cea mai luminoasa suprafata din cadru. Cappadocia
+	# e la RASARIT, si firida asta nu e o camera cu lumina aprinsa — e o gura de
+	# pestera sapata intr-un perete pe care bate soarele.
+	#
+	# Masurat pe captura (frac 0.80, decupaj 1:1):
+	#   interiorul firidei     luminanta 151.7
+	#   zidul insorit langa ea luminanta  85.1   -> firida e de 1.78 ori mai
+	#   zidul in umbra         luminanta  81.4      luminoasa decat zidul INSORIT
+	#
+	# O suprafata aflata in umbra, intr-o scobitura, care emite mai multa lumina
+	# decat una batuta direct de soare: exact de aia citea RECLAMA si nu camera
+	# sapata. Criticul orb a numit-o fara sa aiba cifra ("panouri luminoase"),
+	# si e a doua oara cand piesa asta produce acelasi repros — prima data s-a
+	# tratat marimea (scara 1.6 -> 0.7), care era doar jumatate din cauza.
+	#
+	# Acum fundul sta pe SAND_SHADOW, cel mai inchis tuf din paleta deja
+	# folosit pe pista, fara emisie. Firida devine ce trebuia sa fie: o PATA
+	# INTUNECATA in perete, adica singurul indiciu ca peretele are grosime.
+	# Zero materiale in plus (slotul e pe atlasul comun, nu mai cere `glow`).
+	# Nicio clasa si nicio emisie: firida ramane pe atlas, cu sloturile
+	# corectate in SLOT_REMAP_BY_MODEL. Intrarea se pastreaza scrisa explicit
+	# ca sa nu fie reintrodus `GLOW` din reflex — vezi nota de acolo.
+	"hall_alcove": {},
 	# Trestia de pe Stromboli, pe frunzisul mediteranean. Aici si nu in
 	# STROMBOLI_CLASSES fiindca numele nodului ei (`Cane_Clump`) e PREFIX
 	# pentru `Cane_Clump_A/B/C` din `props/sugar_cane.glb`, lanul Okinawei:
@@ -447,8 +481,133 @@ const ARCH_UV_MODELS := ["church_arch"]
 ## Track13). Trecuta prin remapare ar fi iesit crem ca tot restul, adica exact
 ## culoarea pe care pista o cauta ca sa nu fie monocroma.
 
+## Sloturi de paleta rescrise PER MODEL, inainte de orice material.
+##
+## Un GLB isi aduce sloturile din Blender, si uneori sunt sloturile gresite
+## pentru pista pe care ajunge. Cazul masurat: `hollow_rock` (Cappadocia, POI G)
+## e desenat pe sloturi generice de stanca — dominant ROCK_DARK (4), plus
+## ASPHALT_EDGE (6) si TILE_TERRACOTTA (23). ROCK_DARK e MARO-PORTOCALIU, si pe
+## el coaja iesea cu o banda de rugina lata cat stanca: exact reprosul
+## „conul portocaliu/crem" din verdict, si aceeasi capcana pe care o descrie
+## memoria `rock-dark-nu-pe-bazalt` (pe Stromboli ROCK_DARK iesea rugina).
+##
+## Se rescrie UV-ul, nu paleta: atlasul e 32x1, deci slotul unui vertex e
+## `floor(u * 32)` si mutarea lui inseamna doar alt `u`. Asa NU se atinge niciun
+## slot global (l-ar schimba pe toate pistele) si nu se cheltuie unul nou —
+## slotul 31 s-a consumat la Chongqing, brief §4.
+##
+## Tinta e CORAL_SAND (19), cremul de tuf pe care il declara deja tema
+## (`ground_tint`), plus SAND_SHADOW (2) pentru partile care trebuie sa ramana
+## mai INCHISE decat restul: fara o a doua valoare coaja ar iesi o silueta plata
+## de o singura culoare, si tot din verdict venea „culori plate".
+const SLOT_REMAP_BY_MODEL := {
+	"hollow_rock": {
+		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
+		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)
+		23: Palette.CORAL_SAND,    # TILE_TERRACOTTA rosu -> crem
+		0: Palette.CORAL_SAND,     # SAND_LIGHT galbui -> acelasi crem
+		1: Palette.CORAL_SAND,     # SAND_MID ocru saturat -> crem
+	},
+	# Firidele din peretele stancii. Aceeasi poveste ca la coaja: piesa vine
+	# desenata pentru sala subterana, deci pe stanca maro (2/4) si pe metal
+	# ruginit (10) — pe zidul crem ieseau niste cutii maro lipite pe el.
+	#
+	# Fundul firidei ramane pe slotul 30 (`LAVA_ORANGE`), care e portocaliul
+	# incandescent al paletei, si primeste emisie prin `CLASSES_BY_MODEL`. Asta
+	# e chiar reprosul din verdict: „absentele arata cer, nu camere" — o
+	# fereastra citeste ca incapere doar daca are un FUND si pe fund cade
+	# lumina. Slotul nu e nou: e cel al lavei de pe Stromboli, refolosit ca
+	# lumina de torta, exact rolul de accent care ARDE pentru care exista.
+	# Care slot e FUNDUL s-a masurat, nu s-a ghicit (tools, z mediu pe triunghi):
+	#   slot  2  z +0.162  -> cel mai in SPATE: fundul firidei
+	#   slot  4  z +0.001  -> centrat: rama/glaful
+	#   slot 10  z +0.094  -> feroneria
+	# Prima incercare aprinsese slotul 4 si a iesit exact pe dos pe captura: o
+	# RAMA portocalie in jurul unei gauri negre, adica o reclama luminoasa, nu
+	# o incapere. Fundul se aprinde, rama ramane piatra.
+	# [b]Runda 3: fundul nu mai ARDE, se INTUNECA.[/b] Vezi nota lunga din
+	# CLASSES_BY_MODEL. Pe scurt: la rasarit, o scobitura in perete e cea mai
+	# inchisa suprafata din cadru, nu cea mai deschisa. Masurat, firida
+	# portocalie era de 1.78 ori mai luminoasa decat zidul INSORIT de langa ea.
+	#
+	# Fundul trece pe SAND_SHADOW (slotul 2), cel mai inchis tuf din paleta.
+	# Rama ramane pe CORAL_SAND, ca peretele — asta nu se schimba: prima
+	# incercare de acum doua runde aprinsese RAMA si iesise o reclama cu
+	# contur, iar lectia aia ramane valabila.
+	# [b]Runda 3, si nota veche identifica GRESIT partile.[/b] Ea zicea
+	# "slot 2 z +0.162 -> cel mai in SPATE: fundul firidei". Semnul e invers:
+	# in piesa +Z arata spre privitor, deci z-ul cel mai MARE e cel mai in
+	# FATA. Remasurat pe GLB-ul original (z mediu si interval pe slot):
+	#   slot  4  z +0.013, -0.750 .. +0.750  -> CORPUL firidei, toata adancimea
+	#   slot 10  z +0.100, -0.179 .. +0.379  -> glaful, spre gura
+	#   slot  2  z +0.156, -0.500 .. +0.750  -> buza, cel mai in fata
+	# Adica slotul 4 nu e "rama", e chiar suprafata mare care se vede prin
+	# deschidere — si el era remapat pe CORAL_SAND, cel mai PALID slot din
+	# paleta (luminanta 221, fata de 100 al lui SAND_SHADOW).
+	#
+	# Asta era cauza reala a reprosului "panouri luminoase", nu emisia: masurat
+	# pe captura, interiorul firidei avea luminanta 151.7 langa un zid insorit
+	# la 85.1, adica de 1.78 ori mai luminos decat zidul BATUT DE SOARE. O
+	# scobitura mai deschisa decat fata pe care bate soarele nu poate citi decat
+	# ca suprafata care emite.
+	#
+	# Acum corpul si glaful trec pe SAND_SHADOW si firida devine ce trebuia sa
+	# fie: o pata INTUNECATA, adica singurul indiciu ca peretele are grosime.
+	# Buza (slotul 2) ramane crem: ea e piatra taiata a deschiderii, batuta de
+	# soare ca restul peretelui, si e cea care da pragul.
+	# [b]Si umbra se alege pe SATURATIE, nu dupa numele slotului.[/b] Prima
+	# corectie a pus corpul pe SAND_SHADOW, care se numeste "nisip umbrit" si
+	# pare alegerea evidenta. Pe captura a iesit o RAMA ROSIATICA in jurul
+	# fiecarei deschideri, masurata rgb(97, 40, 6) — adica exact defectul din
+	# memoria `rock-dark-nu-pe-bazalt`, pe alta piesa.
+	#
+	# Cauza, masurata pe paleta: SAND_SHADOW (#915D27) are saturatia 0.73. Nu e
+	# o umbra, e un MARO SATURAT. Umbra unei pietre creme trebuie sa fie aceeasi
+	# nuanta, doar mai inchisa si mai SPALATA — o suprafata la umbra pierde
+	# saturatie, nu castiga:
+	#   CORAL_SAND (peretele)  nuanta 41, saturatie 0.18, luminanta 221
+	#   SAND_SHADOW            nuanta 31, saturatie 0.73, luminanta 100  <- rugina
+	#   ASPHALT_EDGE           nuanta 30, saturatie 0.04, luminanta 103  <- umbra
+	# ASPHALT_EDGE e la 11 grade de nuanta fata de perete, aproape nesaturat, si
+	# la 47% din luminanta lui. Numele lui vine din alt rol, dar dala e exact ce
+	# trebuie aici — memoria `slot-ales-dupa-nume` spune sa masori dala, nu sa
+	# alegi eticheta. Slot deja folosit pe pista, deci zero materiale in plus.
+	"hall_alcove": {
+		2: Palette.CORAL_SAND,     # buza deschiderii: piatra taiata, la soare
+		4: Palette.ASPHALT_EDGE,   # corpul firidei: umbra spalata, nu maro
+		10: Palette.ASPHALT_EDGE,  # glaful: aceeasi umbra, nu al doilea ton
+	},
+	# Arcul de fereastra din peretele stancii goale. Aceeasi poveste ca la
+	# coaja si la firide, a treia oara: piesa e desenata pentru sala subterana,
+	# unde ruginiul citeste piatra la lumina de torta. Pe zidul crem al hornului
+	# iesea o potcoava RUGINIE lipita pe perete - exact reprosul "rama
+	# portocalie in jurul unei gauri", si exact capcana din memoria
+	# `rock-dark-nu-pe-bazalt`.
+	#
+	# Masurat pe GLB (histograma de sloturi): 378 vertecsi pe slotul 2, 249 pe 4
+	# (ROCK_DARK, maro), 96 pe 20 (VOLCANIC_BLACK) - deci ruginiul vine de pe 4
+	# si 20, nu din lumina. Peretele pe care sta e tot pe 2 (SAND_SHADOW), deci
+	# arcul se muta pe aceeasi familie. Zero sloturi noi, zero materiale noi.
+	"church_arch": {
+		# Valorile se dau dupa ADANCIME, masurata pe mesh (z mediu pe slot), nu
+		# dupa ce culoare avea piesa in sala subterana. Prima incercare a pus 4 si
+		# 20 pe doua valori diferite si arcul a iesit in DUNGI de bomboana:
+		# bolzarii vecini cadeau alternativ pe crem si pe umbrit.
+		#   slot  2  z +0.005  fata dinspre drum -> crem (nemutat, e deja bine)
+		#   slot  4  z -0.241  cordonul/rama     -> crem, aceeasi valoare ca fata
+		#   slot 23  z -0.733  glaful            -> umbrit: aici incepe adancimea
+		#   slot 20  z -1.185  fundul            -> umbrit: partea cea mai retrasa
+		#   slot 27  z -1.135  detaliul inchis   -> umbrit, tot in familia tufului
+		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem, ca fata arcului
+		23: Palette.SAND_SHADOW,   # TILE_TERRACOTTA rosu -> tuf umbrit (glaful)
+		20: Palette.SAND_SHADOW,   # VOLCANIC_BLACK -> acelasi umbrit (fundul)
+		27: Palette.SAND_SHADOW,   # detaliul ruginit -> tot tuf umbrit
+	},
+}
+
 
 func _ready() -> void:
+	_remap_model_slots()
 	_split_shutters()
 	_retint_tuff()
 	_warm_tuff()
@@ -461,6 +620,53 @@ func _ready() -> void:
 	_apply_glow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
+
+
+## Muta vertecsii unui model de pe un slot de atlas pe altul (vezi
+## [constant SLOT_REMAP_BY_MODEL]).
+##
+## Mesh-ul se DUPLICA inainte de scriere: resursa importata din .glb e partajata
+## intre toate instantele modelului si e tinuta in cache de ResourceLoader, deci
+## o scriere pe loc ar schimba piesa pentru toata lumea si ar reaplica mutarea
+## la fiecare instanta noua (crem -> si mai crem), inclusiv pe alte piste.
+func _remap_model_slots() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not SLOT_REMAP_BY_MODEL.has(stem):
+			continue
+		var remap: Dictionary = SLOT_REMAP_BY_MODEL[stem]
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			mi.mesh = _mesh_with_slots_moved(mi.mesh, remap)
+
+
+## Copia unui mesh cu UV-urile mutate pe alte sloturi de atlas.
+static func _mesh_with_slots_moved(src: Mesh, remap: Dictionary) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := src.surface_get_arrays(s)
+		var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+		if not uv.is_empty():
+			for i in uv.size():
+				var slot := int(floor(uv[i].x * float(Palette.SLOTS)))
+				if remap.has(slot):
+					# Centrul slotului tinta: la margine s-ar lua jumatate din
+					# culoarea vecinului la prima filtrare bilineara.
+					uv[i].x = (float(int(remap[slot])) + 0.5) / float(Palette.SLOTS)
+			arr[Mesh.ARRAY_TEX_UV] = uv
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
 
 
 ## Rupe accentele pictate de pe partile din ACCENT_SPLIT, ca ele sa poata primi

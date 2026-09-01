@@ -115,211 +115,186 @@ visible = false
 [node name="Faleza" type="Node3D" parent="DecorManual/D) Canionul rosu"]
 
 [node name="Strat0_01" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.71590, 0.00000, 1.07432, 0.00000, 1.29100, 0.00000, -1.07432, 0.00000, -0.71590, 215.303, 26.641, -175.697)
+transform = Transform3D(-0.70858, 0.00000, -1.07916, 0.00000, 1.29100, 0.00000, 1.07916, 0.00000, -0.70858, 215.370, 27.274, -175.652)
 
 [node name="Strat0_02" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.16269, 0.00000, 0.50091, 0.00000, 1.26600, 0.00000, -0.50091, 0.00000, -1.16269, 200.443, 25.980, -155.423)
+transform = Transform3D(-1.21072, 0.00000, -0.41848, 0.00000, 1.28100, 0.00000, 0.41848, 0.00000, -1.21072, 201.155, 26.543, -153.293)
 
 [node name="Strat0_03" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.20826, 0.00000, -0.10708, 0.00000, 1.21300, 0.00000, 0.10708, 0.00000, -1.20826, 178.207, 25.404, -149.028)
+transform = Transform3D(-1.02628, 0.00000, 0.39592, 0.00000, 1.10000, 0.00000, -0.39592, 0.00000, -1.02628, 178.026, 25.007, -147.564)
 
 [node name="Strat0_04" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.03327, 0.00000, -0.28930, 0.00000, 1.07300, 0.00000, 0.28930, 0.00000, -1.03327, 164.390, 24.985, -151.671)
+transform = Transform3D(-1.18972, 0.00000, 0.25146, 0.00000, 1.21600, 0.00000, -0.25146, 0.00000, -1.18972, 163.965, 25.531, -150.026)
 
 [node name="Strat0_05" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.17750, 0.00000, -0.30354, 0.00000, 1.21600, 0.00000, 0.30354, 0.00000, -1.17750, 152.271, 24.473, -152.748)
+transform = Transform3D(-1.13248, 0.00000, 0.26026, 0.00000, 1.16200, 0.00000, -0.26026, 0.00000, -1.13248, 152.381, 23.200, -153.150)
 
 [node name="Strat0_06" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.02776, 0.00000, -0.26352, 0.00000, 1.06100, 0.00000, 0.26352, 0.00000, -1.02776, 139.091, 23.805, -158.004)
+transform = Transform3D(-1.12061, 0.00000, 0.38220, 0.00000, 1.18400, 0.00000, -0.38220, 0.00000, -1.12061, 138.835, 24.226, -156.962)
 
 [node name="Strat0_07" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.08513, 0.00000, -0.11303, 0.00000, 1.09100, 0.00000, 0.11303, 0.00000, -1.08513, 129.958, 23.167, -159.775)
+transform = Transform3D(-1.05538, 0.00000, 0.28810, 0.00000, 1.09400, 0.00000, -0.28810, 0.00000, -1.05538, 129.997, 23.502, -160.263)
 
 [node name="Strat0_08" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.03502, 0.00000, 0.47305, 0.00000, 1.13800, 0.00000, -0.47305, 0.00000, -1.03502, 128.124, 23.029, -160.210)
+transform = Transform3D(-1.13190, 0.00000, -0.38630, 0.00000, 1.19600, 0.00000, 0.38630, 0.00000, -1.13190, 128.514, 24.512, -159.298)
 
 [node name="Strat0_09" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.59450, 0.00000, 0.91837, 0.00000, 1.09400, 0.00000, -0.91837, 0.00000, -0.59450, 135.100, 23.709, -162.952)
+transform = Transform3D(-0.87579, 0.00000, -0.91281, 0.00000, 1.26500, 0.00000, 0.91281, 0.00000, -0.87579, 146.416, 25.058, -156.585)
 
 [node name="Strat0_10" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.06656, 0.00000, 1.24522, 0.00000, 1.24700, 0.00000, -1.24522, 0.00000, -0.06656, 120.785, 22.738, -165.469)
+transform = Transform3D(0.04868, 0.00000, -1.18100, 0.00000, 1.18200, 0.00000, 1.18100, 0.00000, 0.04868, 119.294, 23.379, -165.573)
 
 [node name="Strat0_11" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.05994, 0.00000, 1.27159, 0.00000, 1.27300, 0.00000, -1.27159, 0.00000, -0.05994, 117.315, 21.879, -156.693)
+transform = Transform3D(0.09338, 0.00000, -1.05487, 0.00000, 1.05900, 0.00000, 1.05487, 0.00000, 0.09338, 115.201, 22.703, -156.624)
 
 [node name="Strat0_12" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.73490, 0.00000, 0.77771, 0.00000, 1.07000, 0.00000, -0.77771, 0.00000, -0.73490, 111.247, 20.616, -129.416)
+transform = Transform3D(-0.89107, 0.00000, -0.58328, 0.00000, 1.06500, 0.00000, 0.58328, 0.00000, -0.89107, 113.948, 21.409, -126.629)
 
 [node name="Strat0_13" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.15294, 0.00000, 0.26048, 0.00000, 1.18200, 0.00000, -0.26048, 0.00000, -1.15294, 97.697, 20.135, -113.722)
+transform = Transform3D(-1.19447, 0.00000, -0.16637, 0.00000, 1.20600, 0.00000, 0.16637, 0.00000, -1.19447, 97.674, 20.769, -113.844)
 
 [node name="Strat0_14" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.17003, 0.00000, 0.12791, 0.00000, 1.17700, 0.00000, -0.12791, 0.00000, -1.17003, 85.827, 19.783, -111.413)
+transform = Transform3D(-0.97767, 0.00000, -0.46589, 0.00000, 1.08300, 0.00000, 0.46589, 0.00000, -0.97767, 85.655, 18.491, -112.256)
 
 [node name="Strat0_15" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.21163, 0.00000, 0.26839, 0.00000, 1.24100, 0.00000, -0.26839, 0.00000, -1.21163, 73.400, 19.284, -108.803)
+transform = Transform3D(-1.17684, 0.00000, 0.01931, 0.00000, 1.17700, 0.00000, -0.01931, 0.00000, -1.17684, 73.323, 20.169, -109.397)
 
 [node name="Strat0_16" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.09537, 0.00000, -0.03703, 0.00000, 1.09600, 0.00000, 0.03703, 0.00000, -1.09537, 54.454, 18.450, -107.947)
+transform = Transform3D(-1.09644, 0.00000, 0.10015, 0.00000, 1.10100, 0.00000, -0.10015, 0.00000, -1.09644, 54.455, 19.985, -107.953)
 
 [node name="Strat0_17" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.16208, 0.00000, -0.32248, 0.00000, 1.20600, 0.00000, 0.32248, 0.00000, -1.16208, 37.982, 17.726, -107.703)
+transform = Transform3D(-1.18594, 0.00000, 0.01233, 0.00000, 1.18600, 0.00000, -0.01233, 0.00000, -1.18594, 37.834, 16.539, -107.135)
 
 [node name="Strat0_18" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.93741, 0.00000, -0.47746, 0.00000, 1.05200, 0.00000, 0.47746, 0.00000, -0.93741, 21.896, 17.020, -113.298)
+transform = Transform3D(-1.07716, 0.00000, 0.54458, 0.00000, 1.20700, 0.00000, -0.54458, 0.00000, -1.07716, 20.886, 16.325, -110.889)
 
 [node name="Strat1_19" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.49121, 0.00000, 0.80027, 0.00000, 0.93900, 0.00000, -0.80027, 0.00000, -0.49121, 214.554, 36.791, -176.200)
+transform = Transform3D(-0.68856, 0.00000, -0.78474, 0.00000, 1.04400, 0.00000, 0.78474, 0.00000, -0.68856, 214.892, 36.589, -175.973)
 
 [node name="Strat1_20" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.90012, 0.00000, 0.34787, 0.00000, 0.96500, 0.00000, -0.34787, 0.00000, -0.90012, 199.939, 36.155, -156.934)
+transform = Transform3D(-0.91544, 0.00000, -0.13947, 0.00000, 0.92600, 0.00000, 0.13947, 0.00000, -0.91544, 199.407, 37.346, -158.527)
 
 [node name="Strat1_21" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.94307, 0.00000, -0.12252, 0.00000, 0.95100, 0.00000, 0.12252, 0.00000, -0.94307, 178.371, 35.588, -150.360)
+transform = Transform3D(-1.01162, 0.00000, 0.26986, 0.00000, 1.04700, 0.00000, -0.26986, 0.00000, -1.01162, 178.489, 35.610, -151.315)
 
 [node name="Strat1_22" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.02666, 0.00000, -0.25559, 0.00000, 1.05800, 0.00000, 0.25559, 0.00000, -1.02666, 164.180, 35.140, -150.859)
+transform = Transform3D(-0.96138, 0.00000, 0.29286, 0.00000, 1.00500, 0.00000, -0.29286, 0.00000, -0.96138, 164.560, 35.993, -152.330)
 
 [node name="Strat1_23" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.92457, 0.00000, -0.20490, 0.00000, 0.94700, 0.00000, 0.20490, 0.00000, -0.92457, 152.671, 34.678, -154.208)
+transform = Transform3D(-1.04408, 0.00000, 0.35878, 0.00000, 1.10400, 0.00000, -0.35878, 0.00000, -1.04408, 152.607, 35.894, -153.974)
 
 [node name="Strat1_24" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.95691, 0.00000, -0.27267, 0.00000, 0.99500, 0.00000, 0.27267, 0.00000, -0.95691, 139.259, 34.006, -158.687)
+transform = Transform3D(-0.91282, 0.00000, 0.42284, 0.00000, 1.00600, 0.00000, -0.42284, 0.00000, -0.91282, 139.334, 37.100, -158.993)
 
 [node name="Strat1_25" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.11461, 0.00000, -0.07310, 0.00000, 1.11700, 0.00000, 0.07310, 0.00000, -1.11461, 129.932, 33.318, -159.461)
+transform = Transform3D(-1.09452, 0.00000, 0.26008, 0.00000, 1.12500, 0.00000, -0.26008, 0.00000, -1.09452, 129.958, 36.090, -159.773)
 
 [node name="Strat1_26" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.84522, 0.00000, 0.38794, 0.00000, 0.93000, 0.00000, -0.38794, 0.00000, -0.84522, 127.083, 33.250, -162.646)
+transform = Transform3D(-0.64959, 0.00000, -0.64725, 0.00000, 0.91700, 0.00000, 0.64725, 0.00000, -0.64959, 136.068, 34.231, -162.407)
 
 [node name="Strat1_27" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.49931, 0.00000, 0.77985, 0.00000, 0.92600, 0.00000, -0.77985, 0.00000, -0.49931, 131.689, 33.721, -164.871)
+transform = Transform3D(-0.06475, 0.00000, -1.11312, 0.00000, 1.11500, 0.00000, 1.11312, 0.00000, -0.06475, 119.075, 34.386, -165.589)
 
 [node name="Strat1_28" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.14458, 0.00000, 1.10155, 0.00000, 1.11100, 0.00000, -1.10155, 0.00000, -0.14458, 119.505, 32.816, -165.558)
+transform = Transform3D(-0.53121, 0.00000, -0.80323, 0.00000, 0.96300, 0.00000, 0.80323, 0.00000, -0.53121, 111.375, 33.611, -129.285)
 
 [node name="Strat1_29" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.03068, 0.00000, 0.96751, 0.00000, 0.96800, 0.00000, -0.96751, 0.00000, -0.03068, 114.377, 31.783, -156.597)
+transform = Transform3D(-1.07003, 0.00000, -0.14642, 0.00000, 1.08000, 0.00000, 0.14642, 0.00000, -1.07003, 97.498, 31.781, -114.788)
 
 [node name="Strat1_30" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.75264, 0.00000, 0.70608, 0.00000, 1.03200, 0.00000, -0.70608, 0.00000, -0.75264, 110.617, 30.768, -130.067)
+transform = Transform3D(-1.09335, 0.00000, -0.20279, 0.00000, 1.11200, 0.00000, 0.20279, 0.00000, -1.09335, 85.693, 30.083, -112.068)
 
 [node name="Strat1_31" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.96481, 0.00000, 0.25913, 0.00000, 0.99900, 0.00000, -0.25913, 0.00000, -0.96481, 97.685, 30.304, -113.785)
+transform = Transform3D(-0.99364, 0.00000, -0.25964, 0.00000, 1.02700, 0.00000, 0.25964, 0.00000, -0.99364, 73.134, 29.043, -110.876)
 
 [node name="Strat1_32" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.08607, 0.00000, 0.19818, 0.00000, 1.10400, 0.00000, -0.19818, 0.00000, -1.08607, 85.681, 29.960, -112.127)
+transform = Transform3D(-1.05327, 0.00000, -0.22484, 0.00000, 1.07700, 0.00000, 0.22484, 0.00000, -1.05327, 54.416, 31.163, -107.419)
 
 [node name="Strat1_33" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.95753, 0.00000, 0.11983, 0.00000, 0.96500, 0.00000, -0.11983, 0.00000, -0.95753, 73.007, 29.467, -111.869)
+transform = Transform3D(-0.92119, 0.00000, 0.15414, 0.00000, 0.93400, 0.00000, -0.15414, 0.00000, -0.92119, 38.517, 30.242, -109.754)
 
 [node name="Strat1_34" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.94471, 0.00000, 0.02344, 0.00000, 0.94500, 0.00000, -0.02344, 0.00000, -0.94471, 54.530, 28.622, -108.994)
+transform = Transform3D(-1.00622, 0.00000, 0.11704, 0.00000, 1.01300, 0.00000, -0.11704, 0.00000, -1.00622, 21.658, 26.783, -112.731)
 
-[node name="Strat1_35" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.92169, 0.00000, -0.16305, 0.00000, 0.93600, 0.00000, 0.16305, 0.00000, -0.92169, 38.606, 27.897, -110.094)
+[node name="Strat2_35" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
+transform = Transform3D(-1.09497, 0.00000, -0.08150, 0.00000, 1.09800, 0.00000, 0.08150, 0.00000, -1.09497, 199.071, 46.527, -159.532)
 
-[node name="Strat1_36" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.00439, 0.00000, -0.50678, 0.00000, 1.12500, 0.00000, 0.50678, 0.00000, -1.00439, 21.602, 27.190, -112.596)
+[node name="Strat2_36" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
+transform = Transform3D(-1.11425, 0.00000, 0.22632, 0.00000, 1.13700, 0.00000, -0.22632, 0.00000, -1.11425, 178.344, 46.956, -150.142)
 
 [node name="Strat2_37" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.63406, 0.00000, 0.78746, 0.00000, 1.01100, 0.00000, -0.78746, 0.00000, -0.63406, 217.454, 47.029, -174.254)
+transform = Transform3D(-0.90388, 0.00000, 0.39145, 0.00000, 0.98500, 0.00000, -0.39145, 0.00000, -0.90388, 164.702, 47.125, -152.880)
 
 [node name="Strat2_38" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.88944, 0.00000, 0.37175, 0.00000, 0.96400, 0.00000, -0.37175, 0.00000, -0.88944, 200.681, 46.311, -154.712)
+transform = Transform3D(-0.97643, 0.00000, 0.54041, 0.00000, 1.11600, 0.00000, -0.54041, 0.00000, -0.97643, 139.136, 42.898, -158.185)
 
 [node name="Strat2_39" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.10712, 0.00000, -0.13236, 0.00000, 1.11500, 0.00000, 0.13236, 0.00000, -1.10712, 177.974, 45.722, -147.150)
+transform = Transform3D(-0.90451, 0.00000, -0.02969, 0.00000, 0.90500, 0.00000, 0.02969, 0.00000, -0.90451, 130.119, 42.856, -161.770)
 
 [node name="Strat2_40" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.87902, 0.00000, -0.21529, 0.00000, 0.90500, 0.00000, 0.21529, 0.00000, -0.87902, 163.487, 45.266, -148.176)
+transform = Transform3D(-0.56293, 0.00000, -0.85658, 0.00000, 1.02500, 0.00000, 0.85658, 0.00000, -0.56293, 133.967, 43.661, -163.589)
 
 [node name="Strat2_41" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.94479, 0.00000, -0.18640, 0.00000, 0.96300, 0.00000, 0.18640, 0.00000, -0.94479, 152.301, 44.811, -152.858)
+transform = Transform3D(-0.18586, 0.00000, -0.94897, 0.00000, 0.96700, 0.00000, 0.94897, 0.00000, -0.18586, 117.698, 42.508, -165.685)
 
 [node name="Strat2_42" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.94816, 0.00000, -0.22720, 0.00000, 0.97500, 0.00000, 0.22720, 0.00000, -0.94816, 138.250, 43.986, -154.581)
+transform = Transform3D(-0.06373, 0.00000, -0.95688, 0.00000, 0.95900, 0.00000, 0.95688, 0.00000, -0.06373, 113.748, 43.547, -156.577)
 
 [node name="Strat2_43" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.00264, 0.00000, -0.06888, 0.00000, 1.00500, 0.00000, 0.06888, 0.00000, -1.00264, 129.783, 43.396, -157.613)
+transform = Transform3D(-0.93340, 0.00000, 0.06977, 0.00000, 0.93600, 0.00000, -0.06977, 0.00000, -0.93340, 97.248, 42.642, -116.120)
 
 [node name="Strat2_44" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.85514, 0.00000, 0.43847, 0.00000, 0.96100, 0.00000, -0.43847, 0.00000, -0.85514, 128.164, 43.363, -160.116)
+transform = Transform3D(-1.04568, 0.00000, -0.02574, 0.00000, 1.04600, 0.00000, 0.02574, 0.00000, -1.04568, 54.476, 37.738, -108.247)
 
 [node name="Strat2_45" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.46541, 0.00000, 0.83048, 0.00000, 0.95200, 0.00000, -0.83048, 0.00000, -0.46541, 131.214, 43.867, -165.138)
+transform = Transform3D(-0.81636, 0.00000, 0.38362, 0.00000, 0.90200, 0.00000, -0.38362, 0.00000, -0.81636, 38.911, 36.687, -111.263)
 
 [node name="Strat2_46" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.02804, 0.00000, 1.02662, 0.00000, 1.02700, 0.00000, -1.02662, 0.00000, -0.02804, 119.613, 42.992, -165.551)
-
-[node name="Strat2_47" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.06104, 0.00000, 1.06225, 0.00000, 1.06400, 0.00000, -1.06225, 0.00000, -0.06104, 116.568, 42.153, -156.669)
-
-[node name="Strat2_48" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.76394, 0.00000, 0.85021, 0.00000, 1.14300, 0.00000, -0.85021, 0.00000, -0.76394, 113.580, 41.006, -127.009)
-
-[node name="Strat2_49" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.05730, 0.00000, 0.11923, 0.00000, 1.06400, 0.00000, -0.11923, 0.00000, -1.05730, 98.449, 40.429, -109.708)
-
-[node name="Strat2_50" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.06414, 0.00000, 0.27058, 0.00000, 1.09800, 0.00000, -0.27058, 0.00000, -1.06414, 86.169, 40.106, -109.743)
-
-[node name="Strat2_51" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.98832, 0.00000, 0.22225, 0.00000, 1.01300, 0.00000, -0.22225, 0.00000, -0.98832, 73.389, 39.620, -108.889)
-
-[node name="Strat2_52" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-0.97299, 0.00000, -0.07653, 0.00000, 0.97600, 0.00000, 0.07653, 0.00000, -0.97299, 54.339, 38.779, -106.357)
-
-[node name="Strat2_53" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.03599, 0.00000, -0.36378, 0.00000, 1.09800, 0.00000, 0.36378, 0.00000, -1.03599, 37.431, 38.055, -105.586)
-
-[node name="Strat2_54" parent="DecorManual/D) Canionul rosu/Faleza" instance=ExtResource("9_band")]
-transform = Transform3D(-1.03459, 0.00000, -0.33345, 0.00000, 1.08700, 0.00000, 0.33345, 0.00000, -1.03459, 20.660, 37.356, -110.352)
+transform = Transform3D(-1.08432, 0.00000, 0.22296, 0.00000, 1.10700, 0.00000, -0.22296, 0.00000, -1.08432, 21.398, 39.330, -112.111)
 
 [node name="BuzaRapei" type="Node3D" parent="DecorManual/D) Canionul rosu"]
 
 [node name="Buza_01" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(0.52377, 0.00000, -0.86475, 0.00000, 1.01100, 0.00000, 0.86475, 0.00000, 0.52377, 181.390, 16.388, -198.466)
+transform = Transform3D(0.52416, 0.00000, 0.93052, 0.00000, 1.06800, 0.00000, -0.93052, 0.00000, 0.52416, 180.886, 15.684, -198.805)
 
 [node name="Buza_02" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(1.12718, 0.00000, -0.14129, 0.00000, 1.13600, 0.00000, 0.14129, 0.00000, 1.12718, 181.885, 14.196, -223.777)
+transform = Transform3D(0.99619, 0.00000, 0.22821, 0.00000, 1.02200, 0.00000, -0.22821, 0.00000, 0.99619, 182.225, 15.618, -221.708)
 
 [node name="Buza_03" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(1.10004, 0.00000, 0.34874, 0.00000, 1.15400, 0.00000, -0.34874, 0.00000, 1.10004, 178.166, 13.253, -189.015)
+transform = Transform3D(1.03885, 0.00000, -0.17202, 0.00000, 1.05300, 0.00000, 0.17202, 0.00000, 1.03885, 177.595, 14.509, -186.264)
 
 [node name="Buza_04" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(0.98688, 0.00000, 0.17907, 0.00000, 1.00300, 0.00000, -0.17907, 0.00000, 0.98688, 161.997, 14.482, -188.287)
+transform = Transform3D(1.18498, 0.00000, -0.18285, 0.00000, 1.19900, 0.00000, 0.18285, 0.00000, 1.18498, 161.874, 12.048, -187.836)
 
 [node name="Buza_05" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(0.89578, 0.00000, 0.18653, 0.00000, 0.91500, 0.00000, -0.18653, 0.00000, 0.89578, 147.277, 14.990, -191.319)
+transform = Transform3D(0.88771, 0.00000, -0.25642, 0.00000, 0.92400, 0.00000, 0.25642, 0.00000, 0.88771, 147.623, 14.867, -192.729)
 
 [node name="Buza_06" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(0.90401, 0.00000, -0.06002, 0.00000, 0.90600, 0.00000, 0.06002, 0.00000, 0.90401, 126.929, 14.357, -197.032)
+transform = Transform3D(0.93464, 0.00000, 0.02599, 0.00000, 0.93500, 0.00000, -0.02599, 0.00000, 0.93464, 126.912, 14.000, -197.844)
 
 [node name="Buza_07" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(0.65695, 0.00000, -0.63258, 0.00000, 0.91200, 0.00000, 0.63258, 0.00000, 0.65695, 99.424, 13.464, -193.966)
+transform = Transform3D(0.65240, 0.00000, 0.80992, 0.00000, 1.04000, 0.00000, -0.80992, 0.00000, 0.65240, 99.416, 11.869, -193.974)
 
 [node name="Buza_08" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(0.24397, 0.00000, -1.02126, 0.00000, 1.05000, 0.00000, 1.02126, 0.00000, 0.24397, 81.256, 10.849, -176.897)
+transform = Transform3D(0.24657, 0.00000, 1.08329, 0.00000, 1.11100, 0.00000, -1.08329, 0.00000, 0.24657, 81.965, 10.098, -176.748)
 
 [node name="Buza_09" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(-0.07817, 0.00000, -1.14433, 0.00000, 1.14700, 0.00000, 1.14433, 0.00000, -0.07817, 78.877, 9.048, -156.751)
+transform = Transform3D(0.04061, 0.00000, 1.03020, 0.00000, 1.03100, 0.00000, -1.03020, 0.00000, 0.04061, 78.726, 10.483, -156.742)
 
 [node name="Buza_10" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(0.83276, 0.00000, -0.53166, 0.00000, 0.98800, 0.00000, 0.53166, 0.00000, 0.83276, 79.906, 10.678, -166.607)
+transform = Transform3D(0.84228, 0.00000, 0.69658, 0.00000, 1.09300, 0.00000, -0.69658, 0.00000, 0.84228, 79.221, 9.382, -167.568)
 
 [node name="Buza_11" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(1.01092, 0.00000, -0.09092, 0.00000, 1.01500, 0.00000, 0.09092, 0.00000, 1.01092, 81.518, 9.800, -177.314)
+transform = Transform3D(0.94837, 0.00000, 0.07069, 0.00000, 0.95100, 0.00000, -0.07069, 0.00000, 0.94837, 81.706, 10.595, -176.088)
 
 [node name="Buza_12" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(1.14229, 0.00000, -0.07871, 0.00000, 1.14500, 0.00000, 0.07871, 0.00000, 1.14229, 71.673, 7.629, -146.156)
+transform = Transform3D(1.12447, 0.00000, 0.11169, 0.00000, 1.13000, 0.00000, -0.11169, 0.00000, 1.12447, 71.669, 7.808, -146.180)
 
 [node name="Buza_13" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(1.09682, 0.00000, 0.10673, 0.00000, 1.10200, 0.00000, -0.10673, 0.00000, 1.09682, 60.122, 7.395, -144.903)
+transform = Transform3D(1.10534, 0.00000, -0.10164, 0.00000, 1.11000, 0.00000, 0.10164, 0.00000, 1.10534, 60.112, 7.292, -144.000)
 
 [node name="Buza_14" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(1.12645, 0.00000, 0.35810, 0.00000, 1.18200, 0.00000, -0.35810, 0.00000, 1.12645, 47.122, 5.407, -142.758)
+transform = Transform3D(1.04730, 0.00000, -0.28354, 0.00000, 1.08500, 0.00000, 0.28354, 0.00000, 1.04730, 47.543, 6.604, -144.371)
 
 [node name="Buza_15" parent="DecorManual/D) Canionul rosu/BuzaRapei" instance=ExtResource("9_band")]
-transform = Transform3D(1.03814, 0.00000, 0.43086, 0.00000, 1.12400, 0.00000, -0.43086, 0.00000, 1.03814, 35.196, 5.329, -145.007)
-
+transform = Transform3D(0.92777, 0.00000, -0.30941, 0.00000, 0.97800, 0.00000, 0.30941, 0.00000, 0.92777, 35.704, 7.144, -146.217)

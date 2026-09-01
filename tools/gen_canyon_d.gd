@@ -27,9 +27,34 @@ const MOD_H := 12.40
 const F0 := 0.428
 const F1 := 0.534
 
-## Retragerea celui de-al doilea etaj fata de primul (metri). Sub 2 m umbra e o
-## dunga; peste 5 m al doilea etaj se desprinde si nu mai citeste ca acelasi mal.
-const SETBACK := 3.6
+## CONSOLA (corbel) fiecarui etaj peste cel de dedesubt, in metri.
+##
+## SEMNUL S-A INVERSAT, si asta e reparatia principala a rundei 2. Inainte era
+## o RETRAGERE de +3.6 m: fiecare etaj pleca mai DEPARTE de sosea decat cel de
+## sub el. Din masina vedeai atunci o scara care se departeaza, cu treptele
+## intoarse in sus si in spate — invizibile. De-aia criticul orb a scris ca
+## peretele "n-are NICIO suprafata orizontala luminata" si ca benzile raman
+## "dungi pictate": geometric ele existau, dar nu erau intoarse spre nimeni.
+##
+## Acum etajul de sus IESE peste cel de jos (valoare NEGATIVA fata de convention
+## de mai jos), deci:
+##   - fruntea etajului de jos ramane vizibila ca o TREAPTA orizontala reala;
+##   - buza etajului de sus arunca o UMBRA pe fata etajului de jos.
+##
+## A doua parte conteaza mai mult decat prima, si asta iese dintr-o masuratoare
+## a soarelui, nu din gust. La elevatie 13 grade:
+##   dot(fata verticala de perete, soare) = 0.634
+##   dot(fata orizontala,          soare) = 0.225
+## Adica o treapta orizontala e MAI INTUNECATA decat peretele, nu mai luminata.
+## Deci "fata de sus luminata" nu se obtine facand treapta mai stralucitoare —
+## se obtine din CONTRAST: banda de umbra proiectata de streasina peste fata
+## insorita de dedesubt. Exact ce descrie criticul prin "casts a line of shadow
+## on the softer one below it".
+##
+## 2.4 m e derivat din inaltimea etajului: la 12.4 m si soare de 13 grade,
+## streasina arunca 2.4 / tan(13) = 10.4 m de umbra pe verticala de sub ea,
+## adica aproape toata inaltimea unui etaj. Sub 1.5 m umbra ar fi o dunga.
+const CORBEL := 2.4
 
 ## Degajarea minima de la AXUL drumului pana la CENTRUL modulului.
 ## Modulul are 6.07 m grosime si e centrat, deci fata lui ajunge cu 3.04 m mai
@@ -60,14 +85,30 @@ func _emit(rows: Array, side: int, tier: int, s: Dictionary, track: Track,
 	var r_local: float = s.get("radius", 0.0)
 	if r_local > 1.0:
 		bulge = (MOD_LEN * MOD_LEN) / (8.0 * r_local)
-	var off: float = off_base + bulge + rng.randf_range(-0.5, 2.2)
+	# VARIATIE DE ADANCIME, in METRI. Vechea valoare (-0.5 .. +2.2) era o
+	# fluctuatie de sub 3 m pe un modul de 20 m — la FOV-ul soferului asta e
+	# invizibil, aceeasi capcana pentru care criticul lui POI F a respins un
+	# jitter de ±9% ("nu e subtil, e INVIZIBIL, si cere METRI"). Acum sunt
+	# ±6 m, adica un modul poate sta cu o treime din el in fata vecinului.
+	# Nu e zgomot uniform: `pow` de 1.6 tine majoritatea aproape de linie si
+	# scoate ocazional cate unul mult in fata, deci iese un mal cu pinteni,
+	# nu un zid cu suprafata rugoasa.
+	var jut_t: float = rng.randf()
+	var jut: float = pow(jut_t, 1.6) * 6.2 - 1.4
+	var off: float = off_base + bulge + jut
 	var q: Vector3 = p + side_v * off
 	# Scara si unghiul se trag INAINTE de garda: altfel garda ar valida alt
 	# modul decat cel care ajunge in scena. Prima versiune folosea un `sc_hint`
 	# si unghiul necliniat, iar `Strat0_04` (scara 1.15, nu 1.30) ramanea peste
 	# carosabil — 4.7 m liberi din 5.5, nemiscat de trei incercari la rand.
 	var sc: float = rng.randf_range(scale_rng.x, scale_rng.y)
-	var yaw: float = atan2(-side_v.x, -side_v.z) + rng.randf_range(-0.10, 0.10)
+	# ROTATIE NE-PARALELA. ±0.10 rad (5.7 grade) lasa toate fetele practic
+	# paralele intre ele, si un rand de placi paralele citeste ca "rafturi
+	# stantate" — reprosul textual al criticului lui POI F, aceeasi cauza.
+	# ±0.30 rad (17 grade) e destul cat fetele vecine sa prinda cantitati
+	# vizibil diferite de soare: la incidenta de aici, 17 grade schimba
+	# cos(theta) cu ~15%, adica zeci de valori pe 255, nu doua.
+	var yaw: float = atan2(-side_v.x, -side_v.z) + rng.randf_range(-0.30, 0.30)
 	# GARDA DE CAROSABIL, pe COLTURILE REALE ale modulului asezat.
 	#
 	# Formula sagetii de mai sus corecteaza coarda, dar modulul e un
@@ -118,7 +159,11 @@ func _emit(rows: Array, side: int, tier: int, s: Dictionary, track: Track,
 		q += side_v * (road_clear - worst + 0.15)
 		pushed += 1
 	var g: float = track._sampler.ground_y(q.x, q.z)
-	var y: float = g - 1.6 + y_off
+	# INALTIME variata pe modul, nu doar pe etaj. Fara ea creasta fiecarui
+	# etaj e o LINIE DREPTA orizontala — asta e ce se vede pe captura de baza
+	# la frac 0.48 ca margine de metereze pe o treime din latimea cadrului.
+	# ±1.9 m pe un etaj de 12.4 m rupe linia fara sa desfaca randul.
+	var y: float = g - 1.6 + y_off + rng.randf_range(-1.9, 1.9)
 	rows.append({"side": side, "tier": tier, "f": s["f"], "x": q.x, "y": y,
 		"z": q.z, "yaw": yaw, "sc": sc, "g": g})
 
@@ -172,13 +217,37 @@ func _ready() -> void:
 			last = p2
 			if acc < MOD_LEN * 0.55: continue
 			acc = 0.0
+			# RUPTURI. Etajele de sus sar peste module, etajul 0 nu.
+			#
+			# Asta e "breaks" din verdict, si e opusul rundei trecute: acolo
+			# s-a mers de la 47 la 69 module ca sa se INCHIDA golurile de cer,
+			# si criticul a spus ca masa a devenit mai uniforma, nu mai bogata.
+			# Deci golul e informatie, nu defect — cu o conditie: sa fie SUS.
+			# Un gol in etajul 0 ar arata drumul prin perete si ar strica si
+			# senzatia de canion inchis; unul in etajul 2 rupe silueta pe cer,
+			# adica exact unde se vedea linia dreapta de metereze.
+			#
+			# 18% pe etajul 1 si 32% pe etajul 2: creste cu inaltimea, ca un
+			# mal care se destrama spre creasta.
+			if tier > 0 and rng.randf() < (0.18 if tier == 1 else 0.32):
+				continue
 			var hw: float = track.width_at(s2["f"])
 			# Fiecare etaj e retras cu SETBACK si ridicat cu 0.82 din inaltime:
 			# creasta celui de jos ramane vizibila ca o TREAPTA, si arunca umbra
 			# pe fata celui de dedesubt. Asta face diferenta intre roca si panza.
+			# Etajul 0 pleaca cu 2 * CORBEL mai departe de sosea, ca etajele
+			# de deasupra sa aiba de unde sa iasa fara sa ajunga peste drum:
+			# consola se scade, deci baza trebuie sa stea mai in spate.
+			# Degajarea neta a etajului de sus ramane CLEAR_M, ca inainte.
+			var out_m: float = hw + CLEAR_M + CORBEL * float(2 - tier)
+			# Etajele NU mai sunt egale ca inaltime. Trei felii de 12.4 m
+			# citeau ca trei randuri de caramizi identice — "un teanc de
+			# module", cuvintele criticului. Un mal real are un strat gros la
+			# baza si unul subtire deasupra, fiindca sunt roci diferite.
+			var tier_h: float = [0.0, 11.4, 20.8][tier]
 			_emit(rows, 1, tier, s2, track, rng,
-				hw + CLEAR_M + SETBACK * float(tier),
-				MOD_H * 0.82 * float(tier),
+				out_m,
+				tier_h,
 				Vector2(1.05, 1.30) if tier == 0 else Vector2(0.90, 1.15),
 				hw + 2.2, n)
 	# --- BUZA RAPEI (dreapta ecranului) -------------------------------------

@@ -197,6 +197,11 @@ var theme_glow: bool = true
 ## ale intregii scene.
 const SHADOW_DISTANCE: float = 110.0
 
+## `shadow_normal_bias` la soarele standard de 42 de grade. Gasit prin iterare
+## pe falezele de canion; nu se citeste direct nicaieri, ci prin
+## `_shadow_normal_bias_for_sun()`, care il reface pentru alte elevatii.
+const SHADOW_NORMAL_BIAS_REF: float = 1.6
+
 ## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
 ## nu inline: o citesc si lumina din _build_environment, si glint-ul apei din
 ## _water_material — scanteierea trebuie sa cada din acelasi soare.
@@ -208,6 +213,37 @@ const SUN_ROTATION_DEG: Vector3 = Vector3(-42, 135, 0)
 func _sun_rotation_deg() -> Vector3:
 	var v: Variant = theme_flag("sun_rotation_deg", SUN_ROTATION_DEG)
 	return v if v is Vector3 else SUN_ROTATION_DEG
+
+## `shadow_normal_bias` potrivit cu inaltimea soarelui — DOAR pentru temele care
+## cer explicit derivarea (`shadow_bias_from_sun: true`).
+##
+## `normal_bias` impinge punctul de esantionare pe NORMALA suprafetei inainte de
+## proiectie — asa se scapa de shadow acne pe fete inclinate. Pe teren aproape
+## orizontal insa, cat din impingerea aia ajunge decalaj LATERAL al umbrei
+## creste cu 1/sin(elevatie): la soare razant, aceeasi valoare care la amiaza
+## tinea umbra lipita o dezlipeste de obiect.
+##
+## Referinta e soarele standard al repo-ului (42 grade, style_bible §5), unde
+## 1.6 e valoarea gasita prin iterare. Formula pastreaza acelasi DECALAJ, nu
+## aceeasi cifra:
+##
+##   bias(e) = 1.6 * sin(e) / sin(42)
+##
+## DE CE NU E PORNITA PESTE TOT, desi matematica e la fel de valabila si acolo:
+## fiindca ar schimba trei piste care arata bine acum (Okinawa 33 -> 1.302,
+## Baikal 24 -> 0.973, Stromboli 46 -> 1.720), iar corectitudinea unei umbre se
+## judeca pe captura, nu pe formula. Cine vrea sa le porneasca si pe alea pune
+## cheia in tema si compara doua capturi --driver, ca de obicei. Aici e pornita
+## doar pe Cappadocia, unde 1.6 dezlipea vizibil umbra (1.14 m decalaj lateral).
+##
+## Podeaua de 0.35 exista fiindca `normal_bias` are si treaba lui de baza (acne
+## pe falezele inclinate), iar sub atat reapare pe peretii de canion.
+func _shadow_normal_bias_for_sun() -> float:
+	var elev := absf(_sun_rotation_deg().x)
+	var ref := absf(SUN_ROTATION_DEG.x)
+	var s := sin(deg_to_rad(clampf(elev, 1.0, 89.0)))
+	var s_ref := sin(deg_to_rad(clampf(ref, 1.0, 89.0)))
+	return maxf(SHADOW_NORMAL_BIAS_REF * s / s_ref, 0.35)
 
 ## Layer-ul 8 = "geometrie care n-are voie sa stea intre camera si masina".
 ##
@@ -1679,6 +1715,40 @@ static func themes() -> Dictionary:
 			# de piatra care taie drumul cu umbra lor. Ordinea de sacrificiu e
 			# in brief §6: intai in subteran, unde nu se vad.
 			"shadows": true,
+			# CASCADA MAI SCURTA, ca umbrele sa fie mai ASCUTITE — nu a doua
+			# cascada. CLAUDE.md interzice explicit a doua (ar dubla draw
+			# call-urile de umbra ale scenei); asta face invers, ingusteaza
+			# caseta celei existente, si costa ZERO draw call-uri: se deseneaza
+			# aceiasi casteri (mai putini, chiar), doar intr-o cutie mai mica.
+			#
+			# Socoteala, fiindca altfel pare gust: Godot potriveste caseta
+			# ortografica pe o sfera in jurul feliei de frustum [near,
+			# max_dist]. La FOV 68 si 110 m sfera are raza 159 m, deci caseta
+			# 318 m — de trei ori cascada — si pe atlasul implicit de mobil
+			# (2048) un texel are 15.5 cm. La 75 m: raza 108 m, caseta 217 m,
+			# texel 10.6 cm. Cu o treime mai fin, pe gratis.
+			#
+			# 75 si nu mai putin, fiindca hornurile inalte trebuie sa arunce si
+			# de la departare, iar ceata abia incepe la 140 m. Sub 60 m umbra
+			# hornului urmator apare in fata masinii cat se conduce spre ea, si
+			# se vede popping.
+			"shadow_distance": 75.0,
+			# Muchie ceva mai stransa decat implicitul de 1.4: la 13 grade umbra
+			# e oricum lunga si subtire, iar blur-ul de amiaza o topea intr-o
+			# pata. Contrastul dintre tuful insorit si umbra lui E imaginea
+			# pistei (brief §0), deci muchia trebuie sa se vada.
+			"shadow_blur": 1.0,
+			# UMBRA LIPITA DE OBIECT. `normal_bias` fix (1.6, calibrat la 42 de
+			# grade) impinge umbra lateral cu 1.6 * texel / sin(elevatie): 38 cm
+			# la 42 de grade, dar 1.14 m la 13. Adica hornul si umbra lui nu se
+			# mai ating, si exact asta reclama criticul orb ("conurile par
+			# lipite peste fundal", "solul e o spoiala plata").
+			#
+			# Cheia deriva valoarea din elevatie si pastreaza DECALAJUL de la 42
+			# de grade, nu cifra: aici iese 0.538. E pornita doar pe tema asta,
+			# fiindca celelalte piste cu soare mai jos de 42 (Okinawa 33, Baikal
+			# 24, Stromboli 46) arata bine acum si nu se ating fara capturi.
+			"shadow_bias_from_sun": true,
 			"fog_depth": true,
 			# 140 -> 300, si inceputul e departe DIN MECANICA, nu din gust: de
 			# pe cornisa (POI C) trebuie sa se vada fundul vaii cu baloanele in
@@ -3040,14 +3110,43 @@ func _build_environment() -> void:
 	if theme_shadows:
 		sun.directional_shadow_mode = \
 			DirectionalLight3D.SHADOW_ORTHOGONAL
-		sun.directional_shadow_max_distance = SHADOW_DISTANCE
+		sun.directional_shadow_max_distance = float(
+			theme_flag("shadow_distance", SHADOW_DISTANCE))
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
-		sun.shadow_blur = 1.4
+		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))
 		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
 		# acne pe fetele orientate spre soare.
-		sun.shadow_bias = 0.06
-		sun.shadow_normal_bias = 1.6
+		sun.shadow_bias = float(theme_flag("shadow_bias", 0.06))
+		# NORMAL_BIAS SE SCALEAZA CU UNGHIUL SOARELUI, si asta e miezul
+		# problemei de pe Cappadocia — nu "rezolutia intinsa pe umbre lungi",
+		# cum arata prima ipoteza. Sunt doua lucruri diferite, si doar unul
+		# depinde de soare:
+		#
+		# 1. Volumul umbrei NU depinde de soare. Godot potriveste caseta
+		#    ortografica pe o SFERA in jurul feliei de frustum [near, max_dist],
+		#    deci la FOV 68 si 110 m iese o sfera de raza 159 m — o caseta de
+		#    318 m, adica de trei ori cascada. Pe atlasul implicit de mobil
+		#    (2048) un texel de umbra are 16 cm. Cifra e ACEEASI la 42 si la 13
+		#    grade; nu soarele razant o strica.
+		# 2. Ce depinde de soare e cat de departe impinge `normal_bias` umbra
+		#    LATERAL. Offsetul se ia pe normala suprafetei, iar pe teren aproape
+		#    orizontal componenta utila creste cu 1/sin(elevatie):
+		#      42 grade -> 1.6 * 0.16 / sin(42) = 0.38 m
+		#      13 grade -> 1.6 * 0.16 / sin(13) = 1.14 m
+		#    Un metru si un sfert intre obiect si umbra lui = umbra dezlipita,
+		#    adica exact "conurile par lipite peste fundal".
+		#
+		# Temele care cer `shadow_bias_from_sun` isi DERIVA valoarea din elevatie
+		# (vezi `_shadow_normal_bias_for_sun`), ca sa pastreze decalajul de la 42
+		# de grade in loc de cifra. Restul raman pe cifra fixa.
+		var forced: Variant = theme_flag("shadow_normal_bias", null)
+		if forced != null:
+			sun.shadow_normal_bias = float(forced)
+		elif bool(theme_flag("shadow_bias_from_sun", false)):
+			sun.shadow_normal_bias = _shadow_normal_bias_for_sun()
+		else:
+			sun.shadow_normal_bias = SHADOW_NORMAL_BIAS_REF
 	add_child(sun)
 
 	# _build_terrain() NU se cheama de aici: are nevoie de pozitiile falezelor ca
@@ -5159,7 +5258,8 @@ func _build_branch_rails(r: TrackRoute) -> void:
 		return
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Palette.color(Palette.CONCRETE),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED)
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
+		"BranchRails")
 
 
 ## Are voie sa stea un parapet de banda in punctul asta?
@@ -5213,7 +5313,9 @@ func _build_branch_sand(r: TrackRoute) -> void:
 	var tint: Color = _branch_dirt_color(r)
 	_add_mesh_with_collision(st.commit(), tint,
 		_tex(String(theme_flag("branch_texture",
-			"res://assets/textures/surface_sand.png"))))
+			"res://assets/textures/surface_sand.png"))),
+		1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
+		"BranchSand")
 
 
 ## Reteta "deck": banda ASFALTATA — un tablier de viaduct, nu o panglica.
@@ -5285,7 +5387,8 @@ func _build_branch_deck(r: TrackRoute) -> void:
 	_add_mesh_with_collision(st.commit(), deck_color,
 		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
 		BaseMaterial3D.CULL_DISABLED, null,
-		_tex("res://assets/textures/surface_asphalt_macro.png"))
+		_tex("res://assets/textures/surface_asphalt_macro.png"), true, null,
+		"BranchDeck")
 	_build_branch_markings(r)
 
 
@@ -5551,7 +5654,8 @@ func _build_branch_dirt(r: TrackRoute, with_ruts: bool) -> void:
 		_tex(String(theme_flag("branch_texture",
 			"res://assets/textures/surface_gravel.png"))),
 		1.0, 0.0, BaseMaterial3D.CULL_DISABLED, col_mesh,
-		_tex("res://assets/textures/surface_sand_macro.png"))
+		_tex("res://assets/textures/surface_sand_macro.png"), true, null,
+		"BranchDirt")
 	if with_ruts and r.tufts:
 		_build_branch_tufts(r, rc - rw, grass_c)
 
@@ -6500,8 +6604,10 @@ func _build_road() -> void:
 	_add_mesh_with_collision(top.commit(), road_color,
 		_tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro), true,
-		road_override)
-	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
+		road_override, "RoadTop")
+	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
+		"RoadSides")
 	if has_ice:
 		ice_top.index()
 		ice_top.generate_normals()
@@ -6515,7 +6621,9 @@ func _build_road() -> void:
 	if not _channels.is_empty():
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
-			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE))
+			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE),
+				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
+				true, null, "RoadOverpassDeck")
 
 
 ## Cat de alba e zapada de pe asfalt, ca greutate 0..1 pentru un vertex.
@@ -6738,11 +6846,13 @@ func _build_walls() -> void:
 			# din citirea podului, nu o margine artificiala.
 			_add_mesh_with_collision(st.commit(), Color(0.9, 0.25, 0.2),
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
-				bool(theme_flag("wall_visible", true)))
+				bool(theme_flag("wall_visible", true)), null, "Walls")
 		if deck_emitted:
 			deck.generate_normals()
 			_add_mesh_with_collision(deck.commit(),
-				Palette.color(Palette.CONCRETE))
+				Palette.color(Palette.CONCRETE),
+				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
+				true, null, "WallsOverpassSkirt")
 	_build_rail_posts(post_spots)
 
 
@@ -6822,7 +6932,9 @@ func _build_ramp(frac: float) -> void:
 	st.add_vertex(fl); st.add_vertex(bl); st.add_vertex(bl_low)
 	st.add_vertex(fr); st.add_vertex(br_low); st.add_vertex(br)
 	st.generate_normals()
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
+		"Ramp")
 
 ## TOROS (Baikal): creasta de gheata impinsa de vant peste culoar — un
 ## kicker natural, mic. Prisma asimetrica pe TOATA latimea benzii (+1 m de
@@ -6872,6 +6984,7 @@ func _build_hummock(frac: float) -> void:
 	inst.material_override = Palette.triplanar_class_material("snow")
 	add_child(inst)
 	var body := StaticBody3D.new()
+	body.name = "HummockBody"
 	var shape := CollisionShape3D.new()
 	var tri := mesh.create_trimesh_shape() as ConcavePolygonShape3D
 	tri.backface_collision = true
@@ -7648,7 +7761,9 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	st.generate_normals()
 	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
 	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
+		"ChannelKicker")
 
 	var kicker := FlyoffKicker.new()
 	kicker.name = "Trambulina_%s" % String(ch.get("label", "canal"))
@@ -7841,7 +7956,9 @@ func _build_flyoff(frac: float) -> void:
 	st.add_vertex(top_r); st.add_vertex(lip_r); st.add_vertex(lip_l)
 	st.generate_normals()
 	# Portocaliul rampelor: jucatorul stie deja ca portocaliu = sari.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null, true, null,
+		"FlyoffRamp")
 	_build_flyoff_kicker(last)
 	_build_flyoff_net(idx)
 
@@ -8040,7 +8157,8 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		collision_mesh: ArrayMesh = null,
 		macro_texture: Texture2D = null,
 		visible_mesh: bool = true,
-		override_material: Material = null) -> void:
+		override_material: Material = null,
+		body_name: String = "") -> void:
 	# visible_mesh = false: doar fizica, fara desen. Zidul exterior pe pistele
 	# care nu vor panglica vizibila ramane totusi zid — altfel se deschide
 	# marginea buclei (pe Okinawa, direct in mare).
@@ -8065,6 +8183,11 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 	tri.backface_collision = true
 	shape.shape = tri
 	body.add_child(shape)
+	# NUME pe corpurile generate. Erau toate anonime (`@StaticBody3D@34`), iar
+	# cand unul dintre ele a intrat in banda pe Cappadocia a fost nevoie de o
+	# ora ca sa afli CARE. Un nume face urmatorul blocaj gasibil in minute.
+	if not body_name.is_empty():
+		body.name = body_name
 	add_child(body)
 
 ## Linia de start in sah: doua randuri de patrate alb/negru peste asfalt.
@@ -8119,6 +8242,27 @@ const SHOULDER_MAX_WIDTH: float = 4.0
 ## un prag. Ingropata, cele doua suprafete se INTERSECTEAZA: masina merge pe cea
 ## de deasupra, care se schimba continuu, deci nu exista treapta nicaieri.
 const SHOULDER_SINK: float = 0.10
+
+## Cat poate cobori marginea exterioara a umarului SUB cota asfaltului.
+##
+## Umarul e prin contract o RAMPA de reintrare pe drum: maxim 4 m lat, maxim 25°
+## (vezi SHOULDER_MAX_SLOPE_DEG). La 4 m si 25° coborarea maxima cinstita e
+## ~1.9 m; peste atat suprafata nu mai e rampa, e o perdea aproape verticala.
+##
+## Pana aici marginea exterioara se punea NECONDITIONAT la cota terenului. Acolo
+## unde drumul trece peste un GOL — gura stancii scobite de pe Cappadocia —
+## "terenul" e podeaua scobiturii, cu 38 m mai jos: umarul platoului de iesire
+## (y~49) cobora pana la ~11 m pe 4 m orizontali, adica un zid de pietris de 38 m
+## atarnat peste gura stancii. Prin el treceau AMANDOUA spirele elicei (y=19 si
+## y=37), iar masinile intrau frontal in el la frac ~0.80: 50+ izbituri in
+## pereti, viteza de la 30 m/s la 2, cursa nu se termina. Sondele laterale nu-l
+## vedeau — se masura langa masina, nu INAINTEA ei (vezi memoria
+## `masoara-inainte-nu-langa`).
+##
+## 2.5 m lasa loc treptei reale masurate pe Dunele (1.1 m) plus marja, si taie
+## perdeaua inainte sa devina zid. Ce ramane dedesubt e treaba terenului sau a
+## fustei de sosea, nu a umarului.
+const SHOULDER_MAX_DROP: float = 2.5
 
 
 ## Cati metri de sosea acopera o repetitie a texturii de umar.
@@ -8215,8 +8359,13 @@ func _build_shoulders() -> void:
 			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
 			var outer0 := inner0 + s0 * w0 * side_sign
 			var outer1 := inner1 + s1 * w1 * side_sign
-			outer0.y = _terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK
-			outer1.y = _terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK
+			# Coborarea e PLAFONATA (vezi SHOULDER_MAX_DROP): peste un gol,
+			# cota terenului e podeaua golului, iar umarul ar deveni o perdea
+			# verticala de zeci de metri de-a curmezisul drumului de dedesubt.
+			outer0.y = maxf(_terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK,
+				inner0.y - SHOULDER_MAX_DROP)
+			outer1.y = maxf(_terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK,
+				inner1.y - SHOULDER_MAX_DROP)
 			# U-ul urmeaza latimea REALA, altfel textura se intinde exact acolo
 			# unde banda se lateste.
 			var u_shoulder := maxf(w0, w1) / tile
@@ -8282,7 +8431,7 @@ func _build_shoulders() -> void:
 	# CU COLIZIUNE: banda e rampa de reintrare pe sosea, nu doar o culoare.
 	_add_mesh_with_collision(st.commit(), dust,
 		_tex("res://assets/textures/surface_gravel.png"), 1.0, 0.5,
-		BaseMaterial3D.CULL_BACK)
+		BaseMaterial3D.CULL_BACK, null, null, true, null, "Shoulders")
 
 
 ## Cat de lat trebuie sa fie umarul intr-un punct ca panta lui sa ramana sub
@@ -8308,7 +8457,10 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 	var w := SHOULDER_WIDTH
 	for _pass in 2:
 		var p := base + lat * (width_at_index(i) + w)
-		var drop := base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK
+		# Acelasi plafon ca la emitere: latimea se calculeaza pentru caderea
+		# pe care umarul chiar o construieste, nu pentru fundul unui gol.
+		var drop := minf(base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK,
+			SHOULDER_MAX_DROP)
 		w = clampf(drop / max_tan, SHOULDER_WIDTH, SHOULDER_MAX_WIDTH)
 	return w
 

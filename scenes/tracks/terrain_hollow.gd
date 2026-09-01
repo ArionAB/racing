@@ -39,9 +39,22 @@ extends Marker3D
 
 ## Raza cilindrului scobit (metri), masurata de la nod in plan XZ.
 ##
-## Se da cel putin cat raza spiralei PLUS jumatatea de latime a carosabilului:
-## cu 28 + 6 pe Cappadocia inseamna 34 m. Sub atat, peretele incepe sa se inchida
-## peste banda si terenul iese din nou peste asfalt.
+## Se da cel putin cat raza spiralei PLUS jumatatea de latime a carosabilului —
+## dar NU exact atat, fiindca marginea nominala nu e marginea reala.
+##
+## Cifra exacta (28 + 6 = 34 pe Cappadocia) a fost masurata gresita: la raza
+## nominala scobitura e inca plina, si abia dupa ea incepe palnia de `wall_m`
+## (vezi `_carve_hollows`: `mix = 1 - smoothstep(raza, raza+perete, d)`, deci
+## mix=1 doar SUB raza). Cu 34 fix, punctele de INTRARE in elice — care vin din
+## afara spre interior, la r intre 43 si 33 m, si sunt inca late de 7 m, nu 6 —
+## cadeau in palnie. Acolo terenul nu mai era plafonat la podea, iar campul il
+## ridica din drumul de deasupra: masurat +35 m de tuf peste asfalt, intrand
+## pana la 1.7 m de AXA benzii. Masinile intrau cu jumatatea dreapta in stanca
+## si se opreau — cursa nu se termina (ProbeRace: 0.80 tururi, 35 de repuneri).
+##
+## Regula, deci: raza acopera si APROPIEREA, cu latimea de acolo, plus o marja
+## care sa tina intrarea in afara palniei. Pe Cappadocia 42 m — intrarea la
+## r=33.9 ramane cu 8 m sub raza. Se verifica cu tools/ProbeLaneClear.tscn.
 @export var radius_m: float = 30.0:
 	set(value):
 		radius_m = maxf(value, 1.0)

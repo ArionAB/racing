@@ -352,7 +352,9 @@ func _ready() -> void:
 			# aliniaza in evantai; cu ea, poala e imprastiata in doua axe.
 			var along: float = rng.randf_range(-7.0, 7.0)
 			var q4: Vector3 = p4 + sv * off4 + d4 * along
-			var g4: float = track._sampler.ground_y(q4.x, q4.z)
+			# Marimea se trage INAINTE de garda, ca garda sa masoare piesa care
+			# chiar ajunge in scena (aceeasi capcana ca la module, unde un
+			# `sc_hint` gresit lasase Strat0_04 peste carosabil).
 			# Marimea creste cu distanta: 1.4 m langa perete, pana la 4.6 m
 			# afara. Modulul are 20.3 m, deci scara e metri / 20.3 — derivata
 			# din marimea reala a GLB-ului, nu un factor ghicit.
@@ -364,6 +366,37 @@ func _ready() -> void:
 			# adanc). Cu scari clar diferite, fetele nu mai cad in acelasi plan.
 			var want_m: float = lerpf(2.6, 6.4, t) * rng.randf_range(0.62, 1.45)
 			var sc4: float = want_m / MOD_LEN
+			# GARDA DE CAROSABIL, obligatorie: blocurile primesc corp fizic
+			# automat (`world_prop`), deci unul cazut pe banda nu e decor, e
+			# zid. ProbeRace a prins exact asta — `Bloc_42_col` oprea masina
+			# la frac 0.469 cu lateral 3.6 m, adica in plin carosabil (half
+			# width 6). Se impinge in afara pana iese, ca la module.
+			# Distanta se ia ca MINIM pe o fereastra de indici, nu pe cel mai
+			# apropiat singur index: traseul e un S aici, si `closest_index`
+			# poate intoarce o bucla vecina fata de care blocul pare departe.
+			# Exact capcana documentata la module (memoria `pista-peste-pista`)
+			# — prima versiune a garzii folosea un singur index si ProbeRace a
+			# gasit tot un bloc pe banda (`Bloc_46_col`, lateral 4.8 m).
+			# 2.4 m peste jumatatea de banda, plus 0.7 din marimea blocului.
+			# S-au incercat si 4.0 (grohotisul mai departe) si CLEAR_M 9.6
+			# (tot peretele mai departe): banda 0.45-0.50 a ramas la 13.1-13.4
+			# m/s in toate trei. AMANDOUA S-AU REVENIT — nu platesti degajare
+			# pentru un efect care nu se masoara. Incetinirea nu vine de la
+			# degajare: in banda sunt 0 blocaje si 0 repuneri, iar "peretii"
+			# numarati acolo sunt treceri pe langa perete, nu izbituri.
+			var need4: float = hw4 + 2.4 + want_m * 0.7
+			var guard4 := 0
+			while guard4 < 24:
+				var lat4 := 1e9
+				var ci4: int = track.closest_index_global(q4)
+				for w4 in range(-40, 41, 4):
+					var iw4: int = ((ci4 + w4) % n + n) % n
+					lat4 = minf(lat4, absf(track.lateral_distance(iw4, q4)))
+				if lat4 >= need4:
+					break
+				q4 += sv * (need4 - lat4 + 0.25)
+				guard4 += 1
+			var g4: float = track._sampler.ground_y(q4.x, q4.z)
 			# INGROPAT pe un sfert: un bloc desprins se aseaza in pamant, nu
 			# sta pe el. Asta e si ce sterge muchia dintre perete si sol.
 			rubble.append({"x": q4.x, "y": g4 - want_m * rng.randf_range(0.16, 0.40), "z": q4.z,

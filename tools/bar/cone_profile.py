@@ -91,3 +91,21 @@ def main():
 
 
 main()
+
+def convexity(prof):
+    """Criteriul care separa "con drept" de "sticla" — si monotonia NU o face.
+
+    Criticul orb, runda 16: "monotonia nu e invariantul care conteaza.
+    Invariantul e CONVEXITATEA: punctul cel mai lat trebuie sa fie la contactul
+    cu solul, iar a doua diferenta a razei nu are voie sa devina pozitiva. O
+    sonda care raporteaza abaterea-de-la-liniar ca un singur scalar nu poate
+    deosebi «con drept» de «umar plus gat care se mediaza la drept»."
+
+    Verificat: doua profile monotone, unul con si unul sticla, au abateri medii
+    de 0.009 si 0.054 — dar a doua diferenta arata +0.08 pe umarul sticlei acolo
+    unde conul e plat.
+    """
+    d2 = [prof[i + 1] - 2.0 * prof[i] + prof[i - 1]
+          for i in range(1, len(prof) - 1)]
+    worst = max(d2) if d2 else 0.0
+    return d2, worst

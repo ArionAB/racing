@@ -8774,6 +8774,36 @@ const SHOULDER_MAX_WIDTH: float = 4.0
 ## de deasupra, care se schimba continuu, deci nu exista treapta nicaieri.
 const SHOULDER_SINK: float = 0.10
 
+## Cat poate cobori marginea exterioara a umarului SUB cota asfaltului.
+##
+## Umarul e prin contract o RAMPA de reintrare pe drum: maxim 4 m lat, maxim 25°
+## (vezi SHOULDER_MAX_SLOPE_DEG). La 4 m si 25° coborarea maxima cinstita e
+## ~1.9 m; peste atat suprafata nu mai e rampa, e o perdea aproape verticala.
+##
+## Pana aici marginea exterioara se punea NECONDITIONAT la cota terenului. Acolo
+## unde drumul trece peste un GOL — gura stancii scobite de pe Cappadocia —
+## "terenul" e podeaua scobiturii, cu 38 m mai jos: umarul platoului de iesire
+## (y~49) cobora pana la ~11 m pe 4 m orizontali, adica un zid de pietris de 38 m
+## atarnat peste gura stancii. Prin el treceau AMANDOUA spirele elicei (y=19 si
+## y=37), iar masinile intrau frontal in el la frac ~0.80: 50+ izbituri in
+## pereti, viteza de la 30 m/s la 2, cursa nu se termina. Sondele laterale nu-l
+## vedeau — se masura langa masina, nu INAINTEA ei (vezi memoria
+## `masoara-inainte-nu-langa`).
+##
+## 2.5 m lasa loc treptei reale masurate pe Dunele (1.1 m) plus marja, si taie
+## perdeaua inainte sa devina zid. Ce ramane dedesubt e treaba terenului sau a
+## fustei de sosea, nu a umarului.
+##
+## A DOUA OARA. Plafonul a fost pus in 8c20fdb, pe ramura de traseu, si a fost
+## PIERDUT la merge-ul f1b04e9: rezolvarea a luat track.gd intreg de pe ramura de
+## arta, care era mai veche decat reparatia. Celelalte doua bucati ale aceleiasi
+## reparatii (raza lui TerrainHollow in Track13.tscn si documentatia din
+## terrain_hollow.gd) au supravietuit, fiind in alte fisiere — de aia pista arata
+## reparata si tot nu se conducea. Nicio runda de arta nu a atins constanta asta;
+## a sters-o un merge. Daca dispare iar, cauta intai in rezolvarile de merge, nu
+## in commit-urile de arta, si ruleaza ProbeLaneClear inainte de merge, nu dupa.
+const SHOULDER_MAX_DROP: float = 2.5
+
 
 ## Cati metri de sosea acopera o repetitie a texturii de umar.
 ##
@@ -8869,8 +8899,13 @@ func _build_shoulders() -> void:
 			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
 			var outer0 := inner0 + s0 * w0 * side_sign
 			var outer1 := inner1 + s1 * w1 * side_sign
-			outer0.y = _terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK
-			outer1.y = _terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK
+			# Coborarea e PLAFONATA (vezi SHOULDER_MAX_DROP): peste un gol,
+			# cota terenului e podeaua golului, iar umarul ar deveni o perdea
+			# verticala de zeci de metri de-a curmezisul drumului de dedesubt.
+			outer0.y = maxf(_terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK,
+				inner0.y - SHOULDER_MAX_DROP)
+			outer1.y = maxf(_terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK,
+				inner1.y - SHOULDER_MAX_DROP)
 			# U-ul urmeaza latimea REALA, altfel textura se intinde exact acolo
 			# unde banda se lateste.
 			var u_shoulder := maxf(w0, w1) / tile
@@ -8971,7 +9006,10 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 	var w := w_min
 	for _pass in 2:
 		var p := base + lat * (width_at_index(i) + w)
-		var drop := base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK
+		# Acelasi plafon ca la emitere: latimea se calculeaza pentru caderea
+		# pe care umarul chiar o construieste, nu pentru fundul unui gol.
+		var drop := minf(base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK,
+			SHOULDER_MAX_DROP)
 		w = clampf(drop / max_tan, w_min, SHOULDER_MAX_WIDTH)
 	return w
 

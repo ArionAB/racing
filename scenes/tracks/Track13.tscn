@@ -913,7 +913,7 @@ terrace_to = 0.82
 terrace_shade = 0.24
 
 [node name="hornEst6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.677817, 0, 0.762210, 0, 1.020000, 0, -0.762210, 0, 0.677817, 112, 45.450, 34)
+transform = Transform3D(0.677817, 0, 0.762210, 0, 1.020000, 0, -0.762210, 0, 0.677817, 110.280, 45.450, 29.205)
 script = ExtResource("31_shape")
 taper_min = 0.555
 taper_straighten = 0.0
@@ -3278,7 +3278,7 @@ terrace_to = 0.76
 terrace_shade = 0.24
 
 [node name="poarta_hornuri_gemene43" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("16_gate")]
-transform = Transform3D(0.979048, 0, -0.203630, 0, 1.000000, 0, 0.203630, 0, 0.979048, 57.158070, 46.288628, 53.071163)
+transform = Transform3D(0.203630, 0, 0.979048, 0, 1.000000, 0, -0.979048, 0, 0.203630, 57.158070, 46.288628, 53.071163)
 script = ExtResource("31_shape")
 taper_min = 0.489
 taper_straighten = 0.0

@@ -183,16 +183,34 @@ const CLASSES_BY_MODEL := {
 	# exact ce se intampla atunci — „absentele arata cer, nu camere". Referinta
 	# (Uchisar in sectiune) castiga tocmai prin deschideri LUMINATE cu interior
 	# in spatele lor. `_remap_model_slots` a pus deja fundul firidei pe slotul
-	# 30; aici capata emisia care il face lumina de torta, nu vopsea portocalie.
+	# 30; aici primeste materialul care il face gura de pestera.
 	#
-	# Energia 2.0 nu e aleasa pe gust: e FIX cea folosita de ferestrele
-	# Chongqing-ului, si `glow_material` e cache-uit per (slot, energie) — deci
-	# firidele astea intra pe un material care exista deja in joc si garda de
-	# materiale nu se misca. O energie noua, „reglata pentru zori", ar fi fost
-	# un material in plus pentru o diferenta pe care captura n-o arata.
-	"hall_alcove": {
-		"Hall_Alcove": Palette.GLOW_PREFIX + "30|2.0",
-	},
+	# [b]NU mai are emisie, si asta e reparatia rundei 3.[/b] Nota veche spunea
+	# ca energia 2.0 e "fix cea folosita de ferestrele Chongqing-ului", deci
+	# gratis la garda. Adevarat, si irelevant: Chongqing e o pista de NOAPTE,
+	# unde o fereastra chiar e cea mai luminoasa suprafata din cadru. Cappadocia
+	# e la RASARIT, si firida asta nu e o camera cu lumina aprinsa — e o gura de
+	# pestera sapata intr-un perete pe care bate soarele.
+	#
+	# Masurat pe captura (frac 0.80, decupaj 1:1):
+	#   interiorul firidei     luminanta 151.7
+	#   zidul insorit langa ea luminanta  85.1   -> firida e de 1.78 ori mai
+	#   zidul in umbra         luminanta  81.4      luminoasa decat zidul INSORIT
+	#
+	# O suprafata aflata in umbra, intr-o scobitura, care emite mai multa lumina
+	# decat una batuta direct de soare: exact de aia citea RECLAMA si nu camera
+	# sapata. Criticul orb a numit-o fara sa aiba cifra ("panouri luminoase"),
+	# si e a doua oara cand piesa asta produce acelasi repros — prima data s-a
+	# tratat marimea (scara 1.6 -> 0.7), care era doar jumatate din cauza.
+	#
+	# Acum fundul sta pe SAND_SHADOW, cel mai inchis tuf din paleta deja
+	# folosit pe pista, fara emisie. Firida devine ce trebuia sa fie: o PATA
+	# INTUNECATA in perete, adica singurul indiciu ca peretele are grosime.
+	# Zero materiale in plus (slotul e pe atlasul comun, nu mai cere `glow`).
+	# Nicio clasa si nicio emisie: firida ramane pe atlas, cu sloturile
+	# corectate in SLOT_REMAP_BY_MODEL. Intrarea se pastreaza scrisa explicit
+	# ca sa nu fie reintrodus `GLOW` din reflex — vezi nota de acolo.
+	"hall_alcove": {},
 	# Trestia de pe Stromboli, pe frunzisul mediteranean. Aici si nu in
 	# STROMBOLI_CLASSES fiindca numele nodului ei (`Cane_Clump`) e PREFIX
 	# pentru `Cane_Clump_A/B/C` din `props/sugar_cane.glb`, lanul Okinawei:
@@ -331,10 +349,57 @@ const SLOT_REMAP_BY_MODEL := {
 	# Prima incercare aprinsese slotul 4 si a iesit exact pe dos pe captura: o
 	# RAMA portocalie in jurul unei gauri negre, adica o reclama luminoasa, nu
 	# o incapere. Fundul se aprinde, rama ramane piatra.
+	# [b]Runda 3: fundul nu mai ARDE, se INTUNECA.[/b] Vezi nota lunga din
+	# CLASSES_BY_MODEL. Pe scurt: la rasarit, o scobitura in perete e cea mai
+	# inchisa suprafata din cadru, nu cea mai deschisa. Masurat, firida
+	# portocalie era de 1.78 ori mai luminoasa decat zidul INSORIT de langa ea.
+	#
+	# Fundul trece pe SAND_SHADOW (slotul 2), cel mai inchis tuf din paleta.
+	# Rama ramane pe CORAL_SAND, ca peretele — asta nu se schimba: prima
+	# incercare de acum doua runde aprinsese RAMA si iesise o reclama cu
+	# contur, iar lectia aia ramane valabila.
+	# [b]Runda 3, si nota veche identifica GRESIT partile.[/b] Ea zicea
+	# "slot 2 z +0.162 -> cel mai in SPATE: fundul firidei". Semnul e invers:
+	# in piesa +Z arata spre privitor, deci z-ul cel mai MARE e cel mai in
+	# FATA. Remasurat pe GLB-ul original (z mediu si interval pe slot):
+	#   slot  4  z +0.013, -0.750 .. +0.750  -> CORPUL firidei, toata adancimea
+	#   slot 10  z +0.100, -0.179 .. +0.379  -> glaful, spre gura
+	#   slot  2  z +0.156, -0.500 .. +0.750  -> buza, cel mai in fata
+	# Adica slotul 4 nu e "rama", e chiar suprafata mare care se vede prin
+	# deschidere — si el era remapat pe CORAL_SAND, cel mai PALID slot din
+	# paleta (luminanta 221, fata de 100 al lui SAND_SHADOW).
+	#
+	# Asta era cauza reala a reprosului "panouri luminoase", nu emisia: masurat
+	# pe captura, interiorul firidei avea luminanta 151.7 langa un zid insorit
+	# la 85.1, adica de 1.78 ori mai luminos decat zidul BATUT DE SOARE. O
+	# scobitura mai deschisa decat fata pe care bate soarele nu poate citi decat
+	# ca suprafata care emite.
+	#
+	# Acum corpul si glaful trec pe SAND_SHADOW si firida devine ce trebuia sa
+	# fie: o pata INTUNECATA, adica singurul indiciu ca peretele are grosime.
+	# Buza (slotul 2) ramane crem: ea e piatra taiata a deschiderii, batuta de
+	# soare ca restul peretelui, si e cea care da pragul.
+	# [b]Si umbra se alege pe SATURATIE, nu dupa numele slotului.[/b] Prima
+	# corectie a pus corpul pe SAND_SHADOW, care se numeste "nisip umbrit" si
+	# pare alegerea evidenta. Pe captura a iesit o RAMA ROSIATICA in jurul
+	# fiecarei deschideri, masurata rgb(97, 40, 6) — adica exact defectul din
+	# memoria `rock-dark-nu-pe-bazalt`, pe alta piesa.
+	#
+	# Cauza, masurata pe paleta: SAND_SHADOW (#915D27) are saturatia 0.73. Nu e
+	# o umbra, e un MARO SATURAT. Umbra unei pietre creme trebuie sa fie aceeasi
+	# nuanta, doar mai inchisa si mai SPALATA — o suprafata la umbra pierde
+	# saturatie, nu castiga:
+	#   CORAL_SAND (peretele)  nuanta 41, saturatie 0.18, luminanta 221
+	#   SAND_SHADOW            nuanta 31, saturatie 0.73, luminanta 100  <- rugina
+	#   ASPHALT_EDGE           nuanta 30, saturatie 0.04, luminanta 103  <- umbra
+	# ASPHALT_EDGE e la 11 grade de nuanta fata de perete, aproape nesaturat, si
+	# la 47% din luminanta lui. Numele lui vine din alt rol, dar dala e exact ce
+	# trebuie aici — memoria `slot-ales-dupa-nume` spune sa masori dala, nu sa
+	# alegi eticheta. Slot deja folosit pe pista, deci zero materiale in plus.
 	"hall_alcove": {
-		2: Palette.LAVA_ORANGE,    # fundul: portocaliu de torta, cu emisie
-		4: Palette.CORAL_SAND,     # rama firidei -> crem, ca peretele
-		10: Palette.CORAL_SAND,    # feroneria ruginita -> tot piatra
+		2: Palette.CORAL_SAND,     # buza deschiderii: piatra taiata, la soare
+		4: Palette.ASPHALT_EDGE,   # corpul firidei: umbra spalata, nu maro
+		10: Palette.ASPHALT_EDGE,  # glaful: aceeasi umbra, nu al doilea ton
 	},
 	# Arcul de fereastra din peretele stancii goale. Aceeasi poveste ca la
 	# coaja si la firide, a treia oara: piesa e desenata pentru sala subterana,

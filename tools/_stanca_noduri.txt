@@ -1,5 +1,5 @@
 [node name="Coaja" parent="DecorManual/G) Stanca goala" instance=ExtResource("43_hollow")]
-transform = Transform3D(2.500, 0.000, 0.000, 0.000, 1.600, 0.000, 0.000, 0.000, 2.500, -302.020, 11.000, 6.000)
+transform = Transform3D(2.500, 0.000, 0.000, 0.000, 0.780, 0.000, 0.000, 0.000, 2.500, -302.020, 11.000, 6.000)
 metadata/coliziune = "none"
 
 [node name="PereteInterior" type="Node3D" parent="DecorManual/G) Stanca goala"]
@@ -175,92 +175,92 @@ metadata/coliziune = "none"
 [node name="Creasta" type="Node3D" parent="DecorManual/G) Stanca goala"]
 
 [node name="Colt00" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(0.278, 0.000, 1.116, 0.000, 1.600, 0.000, -1.116, 0.000, 0.278, -259.327, 62.000, 16.645)
+transform = Transform3D(0.278, 0.000, 1.116, 0.000, 0.500, 0.000, -1.116, 0.000, 0.278, -259.327, 34.000, 16.645)
 metadata/coliziune = "none"
 
 [node name="Colt01" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(0.799, 0.000, 0.827, 0.000, 1.850, 0.000, -0.827, 0.000, 0.799, -270.369, 71.000, 36.565)
+transform = Transform3D(0.799, 0.000, 0.827, 0.000, 1.350, 0.000, -0.827, 0.000, 0.799, -270.369, 34.000, 36.565)
 metadata/coliziune = "none"
 
 [node name="Colt02" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(1.105, 0.000, 0.317, 0.000, 2.100, 0.000, -0.317, 0.000, 1.105, -289.892, 66.000, 48.296)
+transform = Transform3D(1.105, 0.000, 0.317, 0.000, 0.750, 0.000, -0.317, 0.000, 1.105, -289.892, 34.000, 48.296)
 metadata/coliziune = "none"
 
 [node name="Colt03" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(1.116, 0.000, -0.278, 0.000, 1.600, 0.000, 0.278, 0.000, 1.116, -312.665, 62.000, 48.693)
+transform = Transform3D(1.116, 0.000, -0.278, 0.000, 2.050, 0.000, 0.278, 0.000, 1.116, -312.665, 34.000, 48.693)
 metadata/coliziune = "none"
 
 [node name="Colt04" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(0.827, 0.000, -0.799, 0.000, 1.850, 0.000, 0.799, 0.000, 0.827, -332.585, 71.000, 37.651)
+transform = Transform3D(0.827, 0.000, -0.799, 0.000, 0.950, 0.000, 0.799, 0.000, 0.827, -332.585, 34.000, 37.651)
 metadata/coliziune = "none"
 
 [node name="Colt05" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(0.317, 0.000, -1.105, 0.000, 2.100, 0.000, 1.105, 0.000, 0.317, -344.315, 66.000, 18.128)
+transform = Transform3D(0.317, 0.000, -1.105, 0.000, 1.600, 0.000, 1.105, 0.000, 0.317, -344.315, 34.000, 18.128)
 metadata/coliziune = "none"
 
 [node name="Colt06" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(-0.278, 0.000, -1.116, 0.000, 1.600, 0.000, 1.116, 0.000, -0.278, -344.713, 62.000, -4.645)
+transform = Transform3D(-0.278, 0.000, -1.116, 0.000, 0.600, 0.000, 1.116, 0.000, -0.278, -344.713, 34.000, -4.645)
 metadata/coliziune = "none"
 
 [node name="Colt07" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(-0.799, 0.000, -0.827, 0.000, 1.850, 0.000, 0.827, 0.000, -0.799, -333.671, 71.000, -24.565)
+transform = Transform3D(-0.799, 0.000, -0.827, 0.000, 2.250, 0.000, 0.827, 0.000, -0.799, -333.671, 34.000, -24.565)
 metadata/coliziune = "none"
 
 [node name="Colt08" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(-1.105, 0.000, -0.317, 0.000, 2.100, 0.000, 0.317, 0.000, -1.105, -314.148, 66.000, -36.296)
+transform = Transform3D(-1.105, 0.000, -0.317, 0.000, 1.100, 0.000, 0.317, 0.000, -1.105, -314.148, 34.000, -36.296)
 metadata/coliziune = "none"
 
 [node name="Colt09" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(-1.116, 0.000, 0.278, 0.000, 1.600, 0.000, -0.278, 0.000, -1.116, -291.375, 62.000, -36.693)
+transform = Transform3D(-1.116, 0.000, 0.278, 0.000, 0.850, 0.000, -0.278, 0.000, -1.116, -291.375, 34.000, -36.693)
 metadata/coliziune = "none"
 
 [node name="Colt10" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(-0.827, 0.000, 0.799, 0.000, 1.850, 0.000, -0.799, 0.000, -0.827, -271.455, 71.000, -25.651)
+transform = Transform3D(-0.827, 0.000, 0.799, 0.000, 1.850, 0.000, -0.799, 0.000, -0.827, -271.455, 34.000, -25.651)
 metadata/coliziune = "none"
 
 [node name="Colt11" parent="DecorManual/G) Stanca goala/Creasta" instance=ExtResource("40_cliff")]
-transform = Transform3D(-0.317, 0.000, 1.105, 0.000, 2.100, 0.000, -1.105, 0.000, -0.317, -259.724, 66.000, -6.128)
+transform = Transform3D(-0.317, 0.000, 1.105, 0.000, 0.700, 0.000, -1.105, 0.000, -0.317, -259.724, 34.000, -6.128)
 metadata/coliziune = "none"
 
 [node name="Ferestre" type="Node3D" parent="DecorManual/G) Stanca goala"]
 
 [node name="Alcov00" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.530, 0.000, -0.468, 0.000, 1.600, 0.000, 0.468, 0.000, 1.530, -312.598, 17.000, 40.599)
+transform = Transform3D(0.547, 0.000, 0.436, 0.000, 0.700, 0.000, -0.436, 0.000, 0.547, -279.696, 18.000, 33.993)
 metadata/coliziune = "none"
 
 [node name="Alcov01" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.559, 0.000, 0.360, 0.000, 1.600, 0.000, -0.360, 0.000, 1.559, -293.881, 18.400, 41.253)
+transform = Transform3D(-0.603, 0.000, -0.356, 0.000, 0.700, 0.000, 0.356, 0.000, -0.603, -320.231, 30.000, -24.828)
 metadata/coliziune = "none"
 
 [node name="Alcov02" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.170, 0.000, 1.091, 0.000, 1.600, 0.000, -1.091, 0.000, 1.170, -277.345, 19.900, 32.460)
+transform = Transform3D(0.213, 0.000, -0.667, 0.000, 0.700, 0.000, 0.667, 0.000, 0.213, -336.127, 30.000, 16.894)
 metadata/coliziune = "none"
 
 [node name="Alcov03" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(0.468, 0.000, 1.530, 0.000, 1.600, 0.000, -1.530, 0.000, 0.468, -267.421, 21.400, 16.578)
+transform = Transform3D(0.603, 0.000, 0.356, 0.000, 0.700, 0.000, -0.356, 0.000, 0.603, -283.809, 30.000, 36.828)
 metadata/coliziune = "none"
 
 [node name="Alcov04" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.530, 0.000, -0.468, 0.000, 1.600, 0.000, 0.468, 0.000, 1.530, -312.598, 34.700, 40.599)
+transform = Transform3D(-0.699, 0.000, 0.038, 0.000, 0.700, 0.000, -0.038, 0.000, -0.699, -300.057, 42.000, -29.751)
 metadata/coliziune = "none"
 
 [node name="Alcov05" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.559, 0.000, 0.360, 0.000, 1.600, 0.000, -0.360, 0.000, 1.559, -293.881, 36.200, 41.253)
+transform = Transform3D(0.646, 0.000, 0.269, 0.000, 0.700, 0.000, -0.269, 0.000, 0.646, -288.277, 42.000, 39.062)
 metadata/coliziune = "none"
 
 [node name="Alcov06" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.170, 0.000, 1.091, 0.000, 1.600, 0.000, -1.091, 0.000, 1.170, -277.345, 37.700, 32.460)
+transform = Transform3D(0.682, 0.000, 0.156, 0.000, 0.700, 0.000, -0.156, 0.000, 0.682, -294.053, 18.000, 40.907)
 metadata/coliziune = "none"
 
 [node name="Alcov07" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(0.468, 0.000, 1.530, 0.000, 1.600, 0.000, -1.530, 0.000, 0.468, -267.421, 39.100, 16.578)
+transform = Transform3D(-0.697, 0.000, -0.059, 0.000, 0.700, 0.000, 0.059, 0.000, -0.697, -305.052, 30.000, -29.676)
 metadata/coliziune = "none"
 
 [node name="Alcov08" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.091, 0.000, -1.170, 0.000, 1.600, 0.000, 1.170, 0.000, 1.091, -328.480, 33.200, 30.675)
+transform = Transform3D(0.699, 0.000, -0.038, 0.000, 0.700, 0.000, 0.038, 0.000, 0.699, -303.983, 42.000, 41.751)
 metadata/coliziune = "none"
 
 [node name="Alcov09" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.091, 0.000, -1.170, 0.000, 1.600, 0.000, 1.170, 0.000, 1.091, -328.480, 15.500, 30.675)
+transform = Transform3D(-0.646, 0.000, -0.269, 0.000, 0.700, 0.000, 0.269, 0.000, -0.646, -315.763, 42.000, -27.062)
 metadata/coliziune = "none"
 

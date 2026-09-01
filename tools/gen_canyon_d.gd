@@ -170,7 +170,7 @@ func _ready() -> void:
 			if first: first = false
 			else: acc += p2.distance_to(last)
 			last = p2
-			if acc < MOD_LEN * 0.86: continue
+			if acc < MOD_LEN * 0.55: continue
 			acc = 0.0
 			var hw: float = track.width_at(s2["f"])
 			# Fiecare etaj e retras cu SETBACK si ridicat cu 0.82 din inaltime:
@@ -194,7 +194,7 @@ func _ready() -> void:
 		if first2: first2 = false
 		else: acc2 += p3.distance_to(last2)
 		last2 = p3
-		if acc2 < MOD_LEN * 0.95: continue
+		if acc2 < MOD_LEN * 0.70: continue
 		acc2 = 0.0
 		var hw3: float = track.width_at(s3["f"])
 		var side_v := Vector3(s3["d"].z, 0.0, -s3["d"].x) * -1.0

@@ -1658,7 +1658,20 @@ static func themes() -> Dictionary:
 			# Ceata din familia orizontului, dar cu o idee mai putin portocaliu:
 			# la 300 m ea e ce vopseste Erciyes, iar cu #F2B27A curat muntele cu
 			# zapada iesea silueta de caramida.
-			"fog": Color(0.92, 0.79, 0.63),
+			# CEATA E RECE, desi zorii sunt calzi — si asta e o decizie, nu o
+			# scapare. Masurat pe capturi de patru critici orbi, pe patru POI-uri
+			# diferite, primul defect numit peste tot a fost "o singura nuanta pe
+			# toata adancimea cadrului". Cauza, masurata: ceata veche
+			# (0.92, 0.79, 0.63) era la 8 GRADE de nuanta fata de teren si MAI
+			# saturata decat el (0.32 fata de 0.18). Distanta adauga deci
+			# saturatie in loc s-o scada — exact pe dos fata de perspectiva
+			# aeriana. Criticul de pe canion a masurat rezultatul: intre peretele
+			# de aproape si cel de la 400 m, 3/255 pe rosu si 0.05 saturatie.
+			# Aerul imprastie albastru; departarea trebuie sa devina mai RECE si
+			# mai PALIDA decat solul, chiar la rasarit. Caldura zorilor ramane
+			# unde ii e locul: in lumina directa si in cerul de la orizont
+			# (sky_horizon F2B27A, neatins).
+			"fog": Color(0.74, 0.79, 0.86),
 			"hill_color": Color(0.82, 0.70, 0.56),
 			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
 			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade
@@ -10402,13 +10415,27 @@ func stamp_wear(index: int, pos: Vector3, strength: float = 1.0) -> void:
 ## profil, marginea trebuie sa fie cea LOCALA — altfel o portiune largita ar
 ## penaliza masina care merge pe asfaltul ei propriu, iar una stramta ar lasa-o
 ## sa taie prin iarba la viteza plina.
+##
+## Si LATERAL, si VERTICAL — pe amandoua ramurile. Ramura cu profil de latime
+## a fost scrisa inainte de pistele care trec peste ele insele si compara doar
+## 2D; cand a venit pasajul de la Chongqing, testul vertical a intrat in
+## [method TrackRoute.is_on_road], adica numai pe ramura CEALALTA. Pe un pasaj
+## drept nu s-a vazut, fiindca acolo etajele nu stau unul peste altul decat
+## cateva zeci de metri. Pe elicea Cappadociei (POI G: doua ture cu aceeasi
+## raza, una la 17 m peste cealalta) axele se suprapun pe toata lungimea, si
+## masurat cu ProbeHelix un punct aflat FIX deasupra spirei de jos, la
+## +17.33 m, raspundea „sunt pe drumul asta". Cu asta, checkpoint-ul de la
+## [code]Car._physics_process[/code] se innoia pe spira de jos in timp ce
+## masina urca pe cea de sus, iar repunerea urmatoare era un cadou de o tura.
 func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	var r := route_at(route)
 	if r == null:
 		return false
 	if route != 0 or _width_profile().is_empty():
 		return r.is_on_road(index, pos)
-	return r.lateral_distance(index, pos) <= width_at_index(index) + 0.5
+	if r.lateral_distance(index, pos) > width_at_index(index) + 0.5:
+		return false
+	return not r.is_other_level(index, pos)
 
 func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
 		route: int = 0) -> Vector3:

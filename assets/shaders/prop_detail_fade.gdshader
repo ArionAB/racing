@@ -70,6 +70,65 @@ uniform float detail_gain = 2.0;
 uniform float roughness_v = 0.9;
 uniform float specular_v = 0.15;
 
+// ============================================================================
+// CUANTIZAREA TERMENULUI DE LUMINA (runda 25).
+//
+// De ce AICI, si nu inca o data in vertex color. Patru runde au incercat sa
+// scoata bimodalitatea din albedo (`facet_contrast`, `ao_steps`, `ao_gamma`,
+// `term_drop`), si masuratoarea le-a inchis pe toate: `facet_contrast` nici
+// macar nu e scris in Track13.tscn, iar ridicat de 5x muta histograma cu UN
+// punct. Motivul e structural, nu de reglaj — orice k pictat pe vertex
+// INMULTESTE albedoul, iar peste el curge AO-ul copt din .glb (interval
+// 0.06-0.98, mediana 0.45). Un semnal de 8% inmultit sub unul care acopera tot
+// intervalul nu poate desface o histograma in doua.
+//
+// Singurul loc unde exista intervalul complet e raspunsul de LUMINA. Lambert
+// da `dot(N, L)` continuu intre 0 si 1: exact rampa care umple mijlocul
+// histogramei. Cuantizata in doua paliere, aceeasi lumina da doua moduri —
+// nu fiindca se picteaza mai mult contrast, ci fiindca nu se mai picteaza
+// nimic INTRE cele doua fete.
+//
+// MASURAT INAINTE de a scrie asta (varianta `--var=noambient` din
+// ProbeBimodal), si a schimbat forma solutiei: cu ambientul stins, hornUmbra8
+// si hornGemen9 cad la NEGRU absolut (p10/p50/p90 = 0/0/0). Ele nu primesc
+// DELOC soare direct — tot ce se vede pe ele e ambient. Deci o functie
+// `light()`, care ruleaza numai pentru luminile directe, nu le-ar fi atins:
+// hornurile din umbra ar fi ramas exact la fel de plate. De-aia treapta se
+// aplica pe DOUA cai (vezi mai jos): `light()` pentru fetele cu soare, si un
+// termen de expunere in fragment pentru cele fara. Fara masuratoarea aia,
+// jumatate din conurile din cadru nu s-ar fi miscat.
+//
+// 0 = stins, adica Lambert continuu, comportamentul de dinainte. E stins
+// implicit fiindca shaderul e PARTAJAT de toate pistele (Baikal, Stromboli,
+// Chongqing folosesc acelasi material) si nici una nu a cerut fatetare; se
+// aprinde doar de pe tema, deci celelalte piste raman bit-identice.
+uniform float light_steps = 0.0;
+// UNDE cade granita dintre cele doua paliere, pe `dot(N, L)`.
+// 0.5 ar taia la 60 de grade de soare; masurat pe hornurile din cadru, prea
+// multe fete stau sub el si intreg conul cadea pe palierul de jos. Se taie mai
+// jos, ca sa ramana fete pe amandoua palierele — asta e chiar `BALANS`-ul din
+// sonda, si o treapta care pune 95% din fete intr-un palier trece GAP-ul dar
+// pica balansul.
+uniform float light_split = 0.34;
+// Cat de jos sta palierul intunecat (fractie din lumina plina) si cat de sus
+// cel luminat. Diferenta dintre ele E ecartul din histograma; nu se citeste ca
+// pictura, fiindca amandoua palierele sunt PLATE — ce vede ochiul e o muchie,
+// nu un degrade.
+uniform float light_low = 0.30;
+uniform float light_high = 1.0;
+// Cat de moale e trecerea, in unitati de `dot`. Zero ar da alias pe muchia
+// dintre paliere (o linie zimtata care se plimba de la un cadru la altul);
+// o banda ingusta o netezeste FARA sa reumple valea, fiindca latimea ei
+// (0.03) e mult sub latimea benzii de vale masurate de sonda (30% din GAP).
+uniform float light_knee = 0.03;
+// AMBIENTUL, pe fetele fara soare direct. Vezi nota de sus: doua dintre
+// hornurile din cadru sunt integral in umbra, si `light()` nu ruleaza pentru
+// ele. Aici se aplica aceeasi treapta pe orientarea fata de soare, ca fetele
+// intoarse sa nu primeasca acelasi ambient plat ca cele expuse — adica exact
+// separarea care le lipsea.
+uniform float ambient_split = 0.0;
+uniform vec3 ambient_sun_dir = vec3(-0.38, 0.37, -0.85);
+
 // PE FATA, nu pe pixel (runda 14). `flat` face ca amandoua sa ia valoarea
 // vertexului provocator, adica UNA per triunghi — deci si coordonata triplanara,
 // si ponderile ei sunt constante pe toata fata.
@@ -189,8 +248,80 @@ void fragment() {
 	// rezultatul e 1.0 (identitatea inmultirii), adica material curat.
 	det = mix(vec3(1.0), det, mask);
 
-	ALBEDO = base.rgb * COLOR.rgb * det;
+	vec3 alb = base.rgb * COLOR.rgb * det;
+
+	// TREAPTA PE FETELE FARA SOARE DIRECT.
+	//
+	// `light()` de mai jos ruleaza numai pentru luminile directe, deci nu atinge
+	// un horn care sta integral in umbra — si masuratoarea (vezi nota de la
+	// `light_steps`) arata ca doua dintre conurile din cadru sunt exact asa:
+	// cu ambientul stins cad la negru absolut. Pentru ele, singura sursa de
+	// separare e cat de intoarsa e fata fata de soare, aplicata pe albedo
+	// INAINTE de iluminare.
+	//
+	// Se foloseste normala GEOMETRICA a fetei (`v_obj_nrm` e deja `flat`, deci
+	// constanta pe triunghi) — dar ea e `abs()`, deci nu are semn. Se ia deci
+	// NORMAL, cu treapta calculata din acelasi `smoothstep` ca in `light()`, ca
+	// cele doua cai sa dea acelasi salt si sa nu apara o cusatura vizibila intre
+	// un horn insorit si vecinul lui din umbra.
+	if (ambient_split > 0.0) {
+		float nl_a = dot(normalize(NORMAL), normalize(ambient_sun_dir));
+		float q_a = smoothstep(light_split - light_knee,
+				light_split + light_knee, nl_a);
+		// PIVOTAT, nu doar coborat. Prima varianta inmultea cu
+		// `mix(1 - split, 1, q)`, adica scadea din fata intoarsa si lasa cealalta
+		// neatinsa. Masurat, asta cere valori uriase ca sa desparta histograma
+		// (la 0.90 hornUmbra8 chiar trece: GAP 60, vale 4%) — dar acolo p50 cade
+		// la 18 din 255, adica hornul e negru. E fix capcana descrisa la
+		// `detail_gain`: un castig care taie in clamp nu separa moduri, arde
+		// capatul intunecat.
+		//
+		// Se pivoteaza deci in jurul lui 1.0: fata intoarsa coboara cu `split`,
+		// cea expusa URCA cu `split`. Acelasi ecart intre paliere, dar media
+		// ramane pe loc, deci separarea se plateste din contrast, nu din
+		// expunere. Se cere `light_high` mai mic decat 1.0 ca sa existe loc de
+		// urcat fara sa se arda albul.
+		alb *= mix(1.0 - ambient_split, 1.0 + ambient_split, q_a);
+	}
+
+	ALBEDO = alb;
 	ROUGHNESS = roughness_v;
 	SPECULAR = specular_v;
 	METALLIC = 0.0;
+}
+
+
+// LUMINA IN DOUA PALIERE, in loc de rampa Lambert continua.
+//
+// Contractul lui `light()` in Godot 4: se apeleaza o data per lumina, iar ce
+// scrii in DIFFUSE_LIGHT se ADUNA peste ambient. `ATTENUATION` poarta si umbra
+// (0 in umbra), deci inmultirea cu el pastreaza umbrele proiectate — daca s-ar
+// fi omis, hornurile ar fi fost luminate prin munte.
+//
+// De ce `smoothstep` si nu `step`: vezi `light_knee`. Banda e de 0.03 pe `dot`,
+// adica sub un grad si jumatate de arc — mult prea ingusta ca sa reumple valea
+// masurata de sonda (30% din GAP), dar suficienta cat muchia dintre paliere sa
+// nu zimtuiasca de la un cadru la altul.
+//
+// `LIGHT_COLOR` si `ATTENUATION` raman in produs, deci culoarea soarelui si
+// energia din tema continua sa functioneze: se cuantizeaza FORMA raspunsului,
+// nu intensitatea lui.
+void light() {
+	float nl = dot(NORMAL, LIGHT);
+	// Lambert, exact ca inainte: ramura care ruleaza pe toate pistele in afara
+	// de Cappadocia.
+	float lambert = clamp(nl, 0.0, 1.0);
+	// Doua paliere PLATE. Intre ele nu exista valori decat pe latimea
+	// genunchiului, si asta e chiar golirea vaii pe care o masoara ProbeBimodal.
+	// Fetele intoarse complet de la soare raman negre (`step`): fara asta,
+	// palierul de jos ar lumina si spatele conului, adica un obiect fara silueta.
+	float q = smoothstep(light_split - light_knee, light_split + light_knee, nl);
+	float stepped = mix(light_low, light_high, q) * step(0.0, nl);
+	// FARA `return` si fara `if` pe ramura: `light()` e o functie de procesor, iar
+	// Godot refuza `return` in ea ("Using 'return' in the 'light' processor
+	// function is incorrect" — eroare de compilare, materialul cade inapoi pe
+	// unul alb si tot cadrul iese spalat). Se alege deci prin `mix`, ceea ce e
+	// oricum mai bine pe GPU: fara divergenta intre fragmente.
+	float term = mix(lambert, stepped, step(1.0, light_steps));
+	DIFFUSE_LIGHT += term * ATTENUATION * LIGHT_COLOR / PI;
 }

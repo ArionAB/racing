@@ -1648,6 +1648,18 @@ static func themes() -> Dictionary:
 			# siroire: santurile coboara CU apa. Vezi _detail_tuff() din
 			# tools/generate_palette_atlas.gd.
 			"detail_texture": "res://assets/textures/detail_tuff.png",
+			# DOUA PALIERE DE LUMINA pe hornuri, in loc de rampa Lambert.
+			# Vezi nota lunga din prop_detail_fade.gdshader: bimodalitatea nu se
+			# putea obtine din vertex color (semnal de 8%, inecat de AO-ul copt
+			# 0.06-0.98), fiindca albedoul se INMULTESTE. Intervalul complet e
+			# in raspunsul de lumina, si acolo se cuantizeaza.
+			"prop_light_steps": true,
+			"prop_light_split": 0.34,
+			"prop_light_low": 0.22,
+			# Hornurile integral in umbra nu trec prin `light()` deloc (masurat:
+			# cu ambientul stins cad la negru absolut), deci pentru ele treapta
+			# se aplica pe albedo, dupa orientarea fata de soare.
+			"prop_ambient_split": 0.34,
 			# ACOSTAMENT LAT: 3.1 m, nu minimul de 1.3. Vezi _shoulder_width —
 			# pe platoul plat umarul se calcula din caderea terenului, care e
 			# ~0, deci banda de praf ramanea o dunga si drumul se termina intr-o
@@ -2124,6 +2136,18 @@ func apply_theme(theme: String) -> void:
 	# aseaza AICI, inainte ca decorul sa ceara primul material — `_shared` din
 	# Palette se construieste lenes, o singura data.
 	Palette.set_detail_texture(String(_theme.get("detail_texture", "")))
+	# Raspunsul de lumina pe prop-uri: rampa Lambert continua (implicit) sau doua
+	# paliere (Cappadocia). Vezi `Palette.set_prop_light_steps` si nota lunga din
+	# prop_detail_fade.gdshader — patru runde au incercat sa scoata separarea din
+	# vertex color si masuratoarea le-a inchis pe toate; intervalul complet exista
+	# doar in lumina. Unghiul soarelui se ia din ACELASI loc ca lumina scenei
+	# (`_sun_rotation_deg`), nu scris de mana.
+	Palette.set_prop_light_steps(
+			bool(_theme.get("prop_light_steps", false)),
+			_sun_rotation_deg(),
+			float(_theme.get("prop_light_split", 0.34)),
+			float(_theme.get("prop_light_low", 0.30)),
+			float(_theme.get("prop_ambient_split", 0.0)))
 
 var curve: Curve3D
 var baked: PackedVector3Array

@@ -191,6 +191,43 @@ static func set_detail_texture(path: String) -> void:
 	if _faded_detail != null:
 		_faded_detail.set_shader_parameter("detail_tex", load(_detail_path))
 
+
+## Cuantizarea raspunsului de lumina pe prop-uri, ceruta de TEMA (runda 25).
+##
+## De ce e un setter si nu o valoare in `faded_detail_material`: shaderul e
+## PARTAJAT de toate pistele care au prop-uri pe UV de tuf, iar cuantizarea o
+## cere doar Cappadocia. Implicitul din shader e 0 (Lambert continuu), deci o
+## pista care nu apeleaza functia asta ramane bit-identica cu inainte.
+##
+## Se apeleaza din Track.apply_theme, langa `set_detail_texture`, si din acelasi
+## motiv: materialul e lenes, iar o pista incarcata dupa alta ar mosteni altfel
+## reglajul precedentei. De-aia ramura `else` STINGE explicit, in loc sa nu faca
+## nimic — fara ea, o cursa pe Cappadocia urmata de una pe Baikal ar fi fatetat
+## si stancile de la Baikal.
+##
+## `sun_deg` sunt ACELEASI grade ca rotatia luminii scenei, nu un vector scris
+## de mana. Motivul e o capcana deja platita o data in proiectul asta (vezi nota
+## lunga din `_shade_facets` si memoria `azimutul-soarelui-fata-de-drum`): o
+## directie de lumina scrisa literal si neremasurata dupa ce soarele s-a mutat
+## ajunge sa picteze umbra exact pe fata pe care soarele o lumineaza, adica doua
+## semnale care se scad. Derivata din grade, se misca odata cu soarele.
+static func set_prop_light_steps(on: bool, sun_deg: Vector3 = Vector3.ZERO,
+		split: float = 0.34, low: float = 0.30, ambient: float = 0.0) -> void:
+	var mat := faded_detail_material()
+	mat.set_shader_parameter("light_steps", 1.0 if on else 0.0)
+	if not on:
+		mat.set_shader_parameter("ambient_split", 0.0)
+		return
+	mat.set_shader_parameter("light_split", split)
+	mat.set_shader_parameter("light_low", low)
+	mat.set_shader_parameter("ambient_split", ambient)
+	# Directia CATRE soare, in spatiul lumii. Un DirectionalLight3D lumineaza pe
+	# -Z local, deci vectorul catre sursa e +Z rotit — exact ce compara `light()`
+	# cu normala.
+	var b := Basis.from_euler(Vector3(
+			deg_to_rad(sun_deg.x), deg_to_rad(sun_deg.y), deg_to_rad(sun_deg.z)))
+	mat.set_shader_parameter("ambient_sun_dir", b * Vector3(0.0, 0.0, 1.0))
+
 ## Materialul comun al lumii. Vertex color = AO copt, inmultit peste atlas.
 ##
 ## Filtrarea: LINEAR cu mipmap-uri, nu NEAREST. Cat timp sloturile erau patrate

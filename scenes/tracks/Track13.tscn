@@ -98,13 +98,13 @@ script = ExtResource("3_prop")
 transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 10.399, 17.900, -126.277)
 
 [node name="VineRow02" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 1.228, 17.900, -130.264)
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 1.228, 17.551, -130.264)
 
 [node name="VineRow03" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 8.006, 17.900, -120.775)
 
 [node name="VineRow04" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, -1.164, 17.900, -124.762)
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, -1.164, 17.644, -124.762)
 
 [node name="VineRow05" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 5.614, 17.900, -115.272)
@@ -125,7 +125,7 @@ transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311,
 transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -17.238, 17.200, -139.281)
 
 [node name="VineRow11" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -10.802, 17.200, -129.556)
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -10.802, 17.495, -129.556)
 
 [node name="VineRow12" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -19.825, 17.200, -133.867)
@@ -149,19 +149,19 @@ transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108,
 transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -35.872, 16.700, -147.981)
 
 [node name="VineRow19" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -29.219, 16.700, -138.402)
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -29.219, 16.951, -138.402)
 
 [node name="VineRow20" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -38.337, 16.700, -142.510)
 
 [node name="VineRow21" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -31.684, 16.700, -132.932)
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -31.684, 16.951, -132.932)
 
 [node name="VineRow22" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -40.801, 16.700, -137.040)
 
 [node name="VineRow23" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -34.149, 16.700, -127.462)
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -34.149, 17.016, -127.462)
 
 [node name="VineRow24" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -43.266, 16.700, -131.569)
@@ -185,34 +185,34 @@ transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903,
 transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -59.285, 16.300, -145.736)
 
 [node name="VineRow31" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -52.420, 16.300, -136.309)
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -52.420, 16.594, -136.309)
 
 [node name="VineRow32" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -61.627, 16.300, -140.212)
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -61.627, 17.457, -140.212)
 
 [node name="VineRow33" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -64.172, 15.600, -159.915)
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -64.172, 15.851, -159.915)
 
 [node name="VineRow34" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -73.765, 15.600, -162.742)
 
 [node name="VineRow35" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -65.869, 15.600, -154.160)
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -65.869, 16.044, -154.160)
 
 [node name="VineRow36" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -75.461, 15.600, -156.987)
 
 [node name="VineRow37" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -67.565, 15.600, -148.404)
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -67.565, 16.044, -148.404)
 
 [node name="VineRow38" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -77.157, 15.600, -151.231)
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -77.157, 17.368, -151.231)
 
 [node name="VineRow39" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -69.261, 15.600, -142.649)
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -69.261, 19.983, -142.649)
 
 [node name="VineRow40" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -78.853, 15.600, -145.476)
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -78.853, 23.028, -145.476)
 
 [node name="VineRow41" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -84.029, 15.000, -165.169)
@@ -221,10 +221,10 @@ transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498,
 transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -93.917, 15.000, -166.668)
 
 [node name="VineRow43" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -84.928, 15.000, -159.237)
+transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -84.928, 15.323, -159.237)
 
 [node name="VineRow44" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -94.815, 15.000, -160.735)
+transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -94.815, 15.523, -160.735)
 
 [node name="VineRow45" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -102.739, 14.800, -168.337)
@@ -233,7 +233,7 @@ transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595,
 transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -112.611, 14.800, -169.932)
 
 [node name="VineRow47" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -103.697, 14.800, -162.414)
+transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -103.697, 16.088, -162.414)
 
 [node name="VineRow48" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -113.568, 14.800, -164.009)
@@ -245,10 +245,10 @@ transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692,
 transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -133.105, 14.500, -173.198)
 
 [node name="VineRow51" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -124.265, 14.500, -165.592)
+transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -124.265, 17.462, -165.592)
 
 [node name="VineRow52" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -134.120, 14.500, -167.284)
+transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -134.120, 14.886, -167.284)
 
 [node name="VineRow53" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9901, 0.0000, 0.1400, 0.0000, 1.0000, 0.0000, -0.1400, 0.0000, 0.9901, -144.419, 14.200, -175.203)
@@ -269,7 +269,7 @@ transform = Transform3D(0.6820, 0.0000, -0.7314, 0.0000, 1.0000, 0.0000, 0.7314,
 transform = Transform3D(-0.0698, 0.0000, -0.9976, 0.0000, 1.0000, 0.0000, 0.9976, 0.0000, -0.0698, -12.295, 17.200, -138.028)
 
 [node name="Poplar03" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popa")]
-transform = Transform3D(-0.7771, 0.0000, -0.6293, 0.0000, 1.0000, 0.0000, 0.6293, 0.0000, -0.7771, -49.217, 16.300, -156.674)
+transform = Transform3D(-0.7771, 0.0000, -0.6293, 0.0000, 1.0000, 0.0000, 0.6293, 0.0000, -0.7771, -49.217, 16.690, -156.674)
 
 [node name="Poplar04" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popb")]
 transform = Transform3D(-0.9903, 0.0000, 0.1392, 0.0000, 1.0000, 0.0000, -0.1392, 0.0000, -0.9903, -68.544, 15.600, -162.767)
@@ -281,7 +281,7 @@ transform = Transform3D(-0.5736, 0.0000, 0.8192, 0.0000, 1.0000, 0.0000, -0.8192
 transform = Transform3D(0.2079, 0.0000, 0.9781, 0.0000, 1.0000, 0.0000, -0.9781, 0.0000, 0.2079, -128.008, 14.500, -173.337)
 
 [node name="Poplar07" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popa")]
-transform = Transform3D(0.8572, 0.0000, 0.5150, 0.0000, 1.0000, 0.0000, -0.5150, 0.0000, 0.8572, -169.330, 14.000, -179.402)
+transform = Transform3D(0.8572, 0.0000, 0.5150, 0.0000, 1.0000, 0.0000, -0.5150, 0.0000, 0.8572, -169.330, 14.424, -179.402)
 
 [node name="Poplar08" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popb")]
 transform = Transform3D(0.9613, 0.0000, -0.2756, 0.0000, 1.0000, 0.0000, 0.2756, 0.0000, 0.9613, -188.462, 13.800, -176.632)
@@ -290,25 +290,25 @@ transform = Transform3D(0.9613, 0.0000, -0.2756, 0.0000, 1.0000, 0.0000, 0.2756,
 transform = Transform3D(0.4540, 0.0000, -0.8910, 0.0000, 1.0000, 0.0000, 0.8910, 0.0000, 0.4540, -39.323, 16.700, -128.148)
 
 [node name="Poplar10" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popa")]
-transform = Transform3D(-0.3420, 0.0000, -0.9397, 0.0000, 1.0000, 0.0000, 0.9397, 0.0000, -0.3420, -74.764, 15.600, -141.665)
+transform = Transform3D(-0.3420, 0.0000, -0.9397, 0.0000, 1.0000, 0.0000, 0.9397, 0.0000, -0.3420, -74.764, 19.983, -141.665)
 
 [node name="Poplar11" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popb")]
-transform = Transform3D(-0.9205, 0.0000, -0.3907, 0.0000, 1.0000, 0.0000, 0.3907, 0.0000, -0.9205, -110.786, 14.800, -149.884)
+transform = Transform3D(-0.9205, 0.0000, -0.3907, 0.0000, 1.0000, 0.0000, 0.3907, 0.0000, -0.9205, -110.786, 25.709, -149.884)
 
 [node name="Farmhouse" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("6_farm")]
-transform = Transform3D(-0.3903, 0.0000, 0.9207, 0.0000, 1.0000, 0.0000, -0.9207, 0.0000, -0.3903, -56.438, 16.300, -139.641)
+transform = Transform3D(-0.3903, 0.0000, 0.9207, 0.0000, 1.0000, 0.0000, -0.9207, 0.0000, -0.3903, -56.438, 17.587, -139.641)
 
 [node name="BalloonFabric" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("7_fabric")]
-transform = Transform3D(0.1692, 0.0000, -0.9856, 0.0000, 4.0000, 0.0000, 0.9856, 0.0000, 0.1692, -126.400, 14.500, -182.700)
+transform = Transform3D(0.1692, 0.0000, -0.9856, 0.0000, 4.0000, 0.0000, 0.9856, 0.0000, 0.1692, -126.400, 14.886, -182.700)
 
 [node name="BalloonBasket" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("8_basket")]
 transform = Transform3D(-0.9840, 0.0000, 0.1781, 0.0000, 1.0000, 0.0000, -0.1781, 0.0000, -0.9840, -126.206, 14.500, -172.013)
 
 [node name="BalloonStanding1" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("9_env")]
-transform = Transform3D(1.0000, 0.0000, -0.0000, 0.0000, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000, -75.612, 15.600, -138.787)
+transform = Transform3D(1.0000, 0.0000, -0.0000, 0.0000, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000, -150.560, 15.966, -167.487)
 
 [node name="BalloonStanding2" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("9_env")]
-transform = Transform3D(0.0000, 0.0000, -1.0000, 0.0000, 1.0000, 0.0000, 1.0000, 0.0000, 0.0000, -112.063, 14.800, -141.987)
+transform = Transform3D(0.0000, 0.0000, -1.0000, 0.0000, 1.0000, 0.0000, 1.0000, 0.0000, 0.0000, -185.898, 24.529, -161.853)
 
 [node name="VineRow57" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -183.279, 13.800, -176.009)
@@ -317,10 +317,10 @@ transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709,
 transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -193.132, 13.800, -174.300)
 
 [node name="VineRow59" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -182.253, 13.800, -170.097)
+transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -182.253, 15.684, -170.097)
 
 [node name="VineRow60" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -192.106, 13.800, -168.388)
+transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -192.106, 14.770, -168.388)
 
 [node name="VineRow61" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -202.110, 13.500, -172.645)
@@ -329,7 +329,7 @@ transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192,
 transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -211.587, 13.500, -169.453)
 
 [node name="VineRow63" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
-transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -200.194, 13.500, -166.959)
+transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -200.194, 13.983, -166.959)
 
 [node name="VineRow64" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("4_vine")]
 transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -209.671, 13.500, -163.767)
@@ -353,4 +353,4 @@ transform = Transform3D(-0.9135, 0.0000, 0.4067, 0.0000, 1.0000, 0.0000, -0.4067
 transform = Transform3D(-0.3256, 0.0000, 0.9455, 0.0000, 1.0000, 0.0000, -0.9455, 0.0000, -0.3256, -207.327, 13.500, -172.471)
 
 [node name="Poplar14" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popa")]
-transform = Transform3D(0.4695, 0.0000, 0.8829, 0.0000, 1.0000, 0.0000, -0.8829, 0.0000, 0.4695, -245.934, 13.300, -158.534)
+transform = Transform3D(0.4695, 0.0000, 0.8829, 0.0000, 1.0000, 0.0000, -0.8829, 0.0000, 0.4695, -245.934, 13.617, -158.534)

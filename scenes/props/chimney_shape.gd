@@ -1009,7 +1009,26 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 	# silueta pe cea mai mare parte a azimutului. Buzele raman proportional mai
 	# late decat peretele, adica exact terasele pentru care s-a lucrat runda 18,
 	# in loc sa fie rase la linie.
-	var buckets: Array = []
+	#
+	# ATENTIE la felul in care se umplu cosurile. Prima versiune scria
+	# `(buckets[k] as PackedFloat32Array).append(r)`, si asta NU SCRIE NIMIC:
+	# un PackedFloat32Array scos dintr-un `Array` netipizat vine ca VALOARE, deci
+	# `append` se duce intr-o copie temporara care se arunca imediat. Verificat
+	# izolat: dupa 10 append-uri prin indexare, cele trei cosuri raman `[]`.
+	#
+	# Consecinta era ca INTREG mecanismul de indreptare a siluetei era mort, tacut:
+	# toate medianele ieseau 0, fallback-ul "felie goala mosteneste vecinul de
+	# dedesubt" propaga zeroul de la `rmed[0]` in sus, dreapta potrivita iesea
+	# panta 0 / intercept 0, iar garda per vertex (`if rm > 0.0001`) nu se
+	# adeverea niciodata — deci `f` ramanea 1.0 si NICIUN vertex nu se misca.
+	# Asta explica exact ce s-a masurat de doua ori si nu s-a putut explica:
+	# `taper_min = 0` pe toate cele 55 de hornuri (runda 20) si
+	# `taper_straighten = 1.0` pe cele 8 din prim-plan (runda 21) au dat cifre
+	# IDENTICE LA BIT. Nu era sonda gresita si nu era parametrul prost ales:
+	# codul nu rula.
+	#
+	# Se scrie deci intr-un array LOCAL tipizat, si abia apoi se pune inapoi.
+	var buckets: Array[PackedFloat32Array] = []
 	buckets.resize(n)
 	for k in n:
 		buckets[k] = PackedFloat32Array()
@@ -1022,7 +1041,9 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 			var r := Vector2(v.x - cx, v.z - cz).length()
 			if r > rmax[k]:
 				rmax[k] = r
-			(buckets[k] as PackedFloat32Array).append(r)
+			var b := buckets[k]
+			b.append(r)
+			buckets[k] = b
 	var rmed := PackedFloat32Array()
 	rmed.resize(n)
 	for k in n:

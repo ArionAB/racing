@@ -40,6 +40,38 @@ const COL_OUT: float = 2.6
 ## mai e nimic care sa lumineze.
 const TORCH_GLOW := "30|4.5|#FFB061"
 
+## --- RACIREA PIETREI: drum masurat si INFUNDAT, ca sa nu se reia -----------
+##
+## Peretii cavernei masoara pe captura nuanta 8.4 / saturatie 0.506 (rosu
+## saturat), unde referinta cere gri-bej rece — stanca de EXTERIOR din acelasi
+## cadru, la frac 0.74, da nuanta 30.1. Umplerea rece (`metadata/racire`) pare
+## unealta potrivita si CHIAR nimereste croma, dar costa modelarea.
+##
+## Directia de tint se CALCULEAZA, nu se cauta: piatra e (72,41,36), tinta bej
+## (84,76,66), deci umplerea trebuie sa ridice G si B si aproape deloc R —
+## adica un tint spre cian. Sase variante masurate pe captura:
+##   0.50 #39445C -> nuanta 269 (violet)   0.38 #46464E -> nuanta 356 (roz)
+##   0.30 #6FA89B -> nuanta 155 (verde)    0.10 #6FA89B -> nuanta  91 (verde)
+##   0.16 #7A8C99 -> nuanta 322 (mov)      0.16 #8A9088 -> nuanta 27.7 CORECT
+##
+## Si totusi s-a RETRAS. Contrastul relativ (deviatie/medie) pe aceeasi felie
+## de perete, la frac 0.68:
+##   baza portocalie                    0.111
+##   dupa strate in trepte + grohotis    0.171   (+54%, castigul rundei)
+##   dupa racire 0.16 #8A9088            0.066   (SUB baza)
+##   dupa racire 0.12 #8A9088            0.083
+## Umplerea aditiva ridica la fel luminile si umbrele, deci racirea plateste
+## exact in relief ce castiga in croma: captura arata piatra corecta la culoare
+## si carton cetos ca relief.
+##
+## CAUZA REALA, pentru cine reia: peretii n-au lumina cu DIRECTIE. Tortele sunt
+## OmniLight cu raza 13 m intr-un coridor de 85 m, deci cea mai mare parte a
+## peretelui nu primeste de la nimeni o fata luminata diferit de alta. Iar
+## portocaliul vine din SLOTURI (2 si 4 sunt brunuri la saturatie 0.73/0.71),
+## nu din iluminare. Se repara schimband sloturile piesei sau adaugand surse cu
+## directie — nu din umplerea aditiva, care e acum masurata de doua ori ca
+## fundatura.
+
 
 func _ready() -> void:
 	await get_tree().process_frame

@@ -1745,7 +1745,7 @@ static func themes() -> Dictionary:
 			# de la departare, iar ceata abia incepe la 140 m. Sub 60 m umbra
 			# hornului urmator apare in fata masinii cat se conduce spre ea, si
 			# se vede popping.
-			"shadow_distance": 75.0,
+			"shadow_distance": 130.0,
 			# Muchie ceva mai stransa decat implicitul de 1.4: la 13 grade umbra
 			# e oricum lunga si subtire, iar blur-ul de amiaza o topea intr-o
 			# pata. Contrastul dintre tuful insorit si umbra lui E imaginea

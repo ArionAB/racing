@@ -3511,6 +3511,34 @@ func _build_horizon(centroid: Vector3) -> void:
 			# zero coliziune, sub 180 tris fiecare.
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
 			model.scale = Vector3.ONE * s
+			# SILUETELE DE ORIZONT NU ARUNCA UMBRA, si asta nu e o economie de
+			# draw calls — e cauza platoului de luminanta de pe Cappadocia,
+			# masurata in runda 22.
+			#
+			# Ce se intampla. Godot potriveste caseta ortografica a cascadei pe
+			# felia de frustum, dar intervalul de ADANCIME al hartii de umbra
+			# trebuie sa cuprinda toti casterii care pot arunca in ea. Scalate
+			# 25-60x, siluetele astea ajung cutii de 345, 426 si 630 m (masurat
+			# pe Erciyes, inelele Cappadociei), asezate la 190-290 m. Ele intind
+			# intervalul de adancime al cascadei de cateva ori, iar precizia
+			# ramasa pe obiectele din prim-plan se prabuseste: hornurile se
+			# auto-umbresc pe toata fata dinspre soare.
+			#
+			# Cifrele, cu ambientul stins ca sa ramana doar directionala,
+			# hornSoare11 la 24.9 m (fata luminata / fata umbrita):
+			#   siluetele arunca umbra:  2.7 / 9.5   -> DELTA  -6.8
+			#   siluetele NU arunca:   119.7 / 20.0  -> DELTA +99.7
+			# Adica lumina directionala nu murise nicaieri intre normale si
+			# pixel: era stinsa de harta de umbra a unui munte de fundal.
+			# Explica de ce sase runde de contur (16-21) au fost invizibile si
+			# de ce `sun_energy` 3.0 nu ardea fata insorita — era in umbra.
+			#
+			# De ce e sigur sa le stingem: sunt fundal pur, dincolo de ceata,
+			# fara coliziune. Umbra unui munte de la 250 m nu cade niciodata in
+			# cadru — dar harta ei costa toata pista. Se aplica pe TOATE
+			# temele: aceleasi inele scalate exista pe desert, Baikal si
+			# Stromboli, deci si acolo mananca aceeasi precizie.
+			_fara_umbra_aruncata(model)
 			# Clasa triplanara a temei: proiectia in spatiul lumii tine
 			# straturile la scara reala si pe siluetele scalate 25-60x.
 			# Era `apply_rock_material` fix, adica gresia rosiatica a canionului
@@ -3539,6 +3567,17 @@ func _build_horizon(centroid: Vector3) -> void:
 		# design. E exact bug-ul pe care l-a avut versiunea anterioara.
 		push_warning("%s: %d siluete de orizont n-au incaput (degajare fata de sosea)"
 			% [track_name, missed])
+
+
+## Stinge aruncarea de umbra pe tot subarborele. Vezi motivul la apelul din
+## _build_horizon: un caster imens si departat fura precizia hartii de umbra de
+## la tot ce e in prim-plan.
+func _fara_umbra_aruncata(n: Node) -> void:
+	var mi := n as MeshInstance3D
+	if mi != null:
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for c in n.get_children():
+		_fara_umbra_aruncata(c)
 
 
 ## Distanta pe orizontala pana la cel mai apropiat punct de sosea.
@@ -3586,6 +3625,11 @@ func _build_horizon_fallback(centroid: Vector3) -> void:
 		# nuanta in 4 trepte, nu continua: dealurile de fundal impart 4 materiale
 		var tint := float(rng.randi_range(0, 3)) / 3.0 * 0.15
 		hill.material_override = _flat_material(theme_hill_color.lightened(tint))
+		# Nici movilele de fundal nu arunca umbra, din acelasi motiv ca
+		# siluetele de la _build_horizon: raza 60-140 m la 240-480 m distanta
+		# intinde intervalul de adancime al cascadei si fura precizia din
+		# prim-plan. Vezi nota lunga de acolo (runda 22).
+		hill.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(hill)
 
 

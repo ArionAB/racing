@@ -137,6 +137,14 @@ extends Area3D
 ## amandoua, copiata — doua locuri din care se putea schimba doar unul.
 const CAVE_FOG := Color(0.055, 0.062, 0.085)
 
+## De unde INCEPE ceata in caverna, ca fractie din `cave_fog_end`.
+##
+## 0.25 = ceata se ingroasa pe ultimele trei sferturi ale distantei vizibile.
+## Sub pamant asta e corect fizic (praf si fum de torta au densitate mare), si
+## e chiar ce inchide capatul salii: fara ea, gura opusa ramane un petec
+## luminos de 1.8x luminanta peretelui de langa tine.
+const CAVE_FOG_BEGIN_RATIO: float = 0.25
+
 var _shape: CollisionShape3D
 var _env: Environment
 ## Valorile pistei, luate O DATA si puse la loc de fiecare data.
@@ -200,6 +208,7 @@ func _darken(inside: bool, delta: float) -> void:
 			"amb_color": _env.ambient_light_color,
 			"amb_energy": _env.ambient_light_energy,
 			"amb_sky": _env.ambient_light_sky_contribution,
+			"fog_begin": _env.fog_depth_begin,
 			"fog_end": _env.fog_depth_end,
 			"fog_color": _env.fog_light_color,
 			"fog_enabled": _env.fog_enabled,
@@ -214,6 +223,15 @@ func _darken(inside: bool, delta: float) -> void:
 	# facea sala sa arate ca o pergola in soare.
 	_env.ambient_light_sky_contribution = lerpf(_base["amb_sky"], 0.0, k)
 	_env.fog_enabled = true
+	# INCEPUTUL cetei, si aici era bug-ul tacut: se scria doar capatul, iar
+	# inceputul ramanea al pistei (140 m, ales ca sa se vada baloanele din vale).
+	# Cu begin 140 > end 90 curba e degenerata, deci ceata de caverna nu se
+	# aplica DELOC — de-aia scurtarea lui `cave_fog_end` de la 100 la 52 nu
+	# schimbase nimic pe captura (8/255 pe petecul de iesire, adica sub prag).
+	# Inceputul se ia ca fractie din capat: ceata trebuie sa se stranga in jurul
+	# tau in sala, nu sa inceapa dupa ce sala s-a terminat.
+	_env.fog_depth_begin = lerpf(
+		_base["fog_begin"], cave_fog_end * CAVE_FOG_BEGIN_RATIO, k)
 	_env.fog_depth_end = lerpf(_base["fog_end"], cave_fog_end, k)
 	# Ceata inchisa, in culoarea pietrei: ea inghite capetele salilor si opreste
 	# cerul sa se vada prin gura de la celalalt capat.
@@ -221,6 +239,7 @@ func _darken(inside: bool, delta: float) -> void:
 		CAVE_FOG, k)
 	if _amount <= 0.0:
 		_env.fog_enabled = _base["fog_enabled"]
+		_env.fog_depth_begin = _base["fog_begin"]
 
 
 ## Aduce intunericul direct la plin, fara lerp — pentru capturi (`Snapshot
@@ -237,6 +256,7 @@ func force_dark() -> void:
 			"amb_color": _env.ambient_light_color,
 			"amb_energy": _env.ambient_light_energy,
 			"amb_sky": _env.ambient_light_sky_contribution,
+			"fog_begin": _env.fog_depth_begin,
 			"fog_end": _env.fog_depth_end,
 			"fog_color": _env.fog_light_color,
 			"fog_enabled": _env.fog_enabled,
@@ -247,6 +267,15 @@ func force_dark() -> void:
 	_env.ambient_light_energy = lerpf(_base["amb_energy"], cave_ambient_energy, k)
 	_env.ambient_light_sky_contribution = lerpf(_base["amb_sky"], 0.0, k)
 	_env.fog_enabled = true
+	# INCEPUTUL cetei, si aici era bug-ul tacut: se scria doar capatul, iar
+	# inceputul ramanea al pistei (140 m, ales ca sa se vada baloanele din vale).
+	# Cu begin 140 > end 90 curba e degenerata, deci ceata de caverna nu se
+	# aplica DELOC — de-aia scurtarea lui `cave_fog_end` de la 100 la 52 nu
+	# schimbase nimic pe captura (8/255 pe petecul de iesire, adica sub prag).
+	# Inceputul se ia ca fractie din capat: ceata trebuie sa se stranga in jurul
+	# tau in sala, nu sa inceapa dupa ce sala s-a terminat.
+	_env.fog_depth_begin = lerpf(
+		_base["fog_begin"], cave_fog_end * CAVE_FOG_BEGIN_RATIO, k)
 	_env.fog_depth_end = lerpf(_base["fog_end"], cave_fog_end, k)
 	_env.fog_light_color = (_base["fog_color"] as Color).lerp(
 		CAVE_FOG, k)

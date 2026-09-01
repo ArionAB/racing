@@ -294,407 +294,407 @@ script = ExtResource("4_prop")
 
 [node name="zidValea1" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(3.000000, 0.001581, 0.000000, 0.000000, 0.000000, 0.000000, -0.000126, 0.239060, 2.990460, -1.046953, -143.521469, 26.056056)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea2" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999328, 0.063475, 0.000000, 0.000000, 0.000000, 0.000000, -0.003677, 0.173729, 2.994963, -0.928282, -143.345472, 37.791214)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea3" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.995271, 0.168373, 0.000000, 0.000000, 0.000000, 0.000000, 0.008127, -0.144567, 2.996504, -0.510149, -143.289700, 48.020266)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea4" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.990036, -0.244311, 0.000000, 0.000000, 0.000000, 0.000000, -0.005843, -0.071512, 2.999142, -0.418787, -129.381110, 27.334706)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea5" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997883, 0.112687, 0.000000, 0.000000, 0.000000, 0.000000, 0.004369, -0.116240, 2.997744, -1.603161, -129.258863, 44.055219)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea6" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.993876, 0.191592, 0.000000, 0.000000, 0.000000, 0.000000, 0.017204, -0.268835, 2.987881, -0.031780, -116.647118, 25.678054)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea7" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999783, 0.036096, 0.000000, 0.000000, 0.000000, 0.000000, -0.001206, 0.100257, 2.998324, -1.418727, -116.320048, 38.238221)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea8" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999606, 0.048644, 0.000000, 0.000000, 0.000000, 0.000000, 0.002077, -0.128106, 2.997263, -1.925371, -115.683425, 48.172213)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea9" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999326, -0.063598, 0.000000, 0.000000, 0.000000, 0.000000, 0.001036, 0.048859, 2.999602, -0.867748, -105.416157, 25.547284)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea10" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.995884, 0.157100, 0.000000, 0.000000, 0.000000, 0.000000, 0.000209, -0.003990, 2.999997, -0.810513, -105.062894, 38.389028)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea11" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999579, -0.050284, 0.000000, 0.000000, 0.000000, 0.000000, 0.002541, 0.151563, 2.996168, -0.130036, -104.714047, 48.832624)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea12" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.995008, -0.172990, 0.000000, 0.000000, 0.000000, 0.000000, 0.017168, 0.297229, 2.985190, -1.769741, -93.603402, 26.457697)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea13" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.989614, -0.249420, 0.000000, 0.000000, 0.000000, 0.000000, -0.020185, -0.241943, 2.990160, -0.755091, -92.790138, 40.833256)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea14" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.990206, 0.242218, 0.000000, 0.000000, 0.000000, 0.000000, -0.013744, 0.169673, 2.995166, -0.820290, -92.626517, 25.974731)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea15" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.984394, 0.305602, 0.000000, 0.000000, 0.000000, 0.000000, 0.027451, -0.268075, 2.987873, -0.953085, -92.284107, 36.167843)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea16" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994088, 0.188247, 0.000000, 0.000000, 0.000000, 0.000000, -0.007583, 0.120601, 2.997565, -1.011270, -92.125607, 46.389654)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea17" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997218, -0.129159, 0.000000, 0.000000, 0.000000, 0.000000, 0.001811, 0.042015, 2.999705, -1.558035, -98.730677, 26.470266)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea18" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999885, -0.026246, 0.000000, 0.000000, 0.000000, 0.000000, -0.000535, -0.061112, 2.999377, -1.020435, -98.366729, 37.136625)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea19" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999986, -0.009067, 0.000000, 0.000000, 0.000000, 0.000000, 0.000455, 0.150663, 2.996214, -1.013785, -98.122534, 47.044153)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea20" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.989093, 0.255583, 0.000000, 0.000000, 0.000000, 0.000000, 0.003096, -0.036208, 2.999780, -0.407562, -96.600663, 26.952855)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea21" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997642, 0.118930, 0.000000, 0.000000, 0.000000, 0.000000, -0.009992, 0.251853, 2.989393, -0.471008, -96.655748, 40.919559)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea22" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.985645, 0.293125, 0.000000, 0.000000, 0.000000, 0.000000, 0.028519, -0.290478, 2.985768, -0.353757, -93.320033, 25.180235)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea23" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(3.000000, -0.000992, 0.000000, 0.000000, 0.000000, 0.000000, 0.000049, 0.146675, 2.996412, -1.816985, -93.413887, 37.049329)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea24" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.984474, -0.304815, 0.000000, 0.000000, 0.000000, 0.000000, 0.003231, 0.031631, 2.999832, -1.981556, -93.943065, 49.266129)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea25" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994323, 0.184465, 0.000000, 0.000000, 0.000000, 0.000000, -0.016087, 0.261140, 2.988569, -1.553926, -78.655216, 26.249830)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea26" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998133, 0.105835, 0.000000, 0.000000, 0.000000, 0.000000, 0.010100, -0.286129, 2.986307, -0.750159, -79.450677, 36.551335)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea27" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.995221, 0.169259, 0.000000, 0.000000, 0.000000, 0.000000, 0.002944, -0.052106, 2.999546, -0.092479, -79.442597, 48.543724)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea28" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994950, -0.173992, 0.000000, 0.000000, 0.000000, 0.000000, 0.013293, 0.228812, 2.991232, -0.874482, -67.614004, 26.309739)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea29" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.988644, -0.260779, 0.000000, 0.000000, 0.000000, 0.000000, -0.000258, -0.002955, 2.999999, -0.684595, -67.963969, 41.637814)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea30" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997524, -0.121858, 0.000000, 0.000000, 0.000000, 0.000000, -0.010579, -0.260219, 2.988674, -1.226264, -58.533336, 25.464180)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea31" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.984481, -0.304753, 0.000000, 0.000000, 0.000000, 0.000000, 0.019346, 0.189458, 2.993949, -1.809429, -58.780335, 35.030649)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea32" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998586, -0.092095, 0.000000, 0.000000, 0.000000, 0.000000, 0.002950, 0.096060, 2.998460, -0.453984, -59.969087, 46.452455)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea33" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997464, -0.123322, 0.000000, 0.000000, 0.000000, 0.000000, 0.004448, 0.108107, 2.998048, -1.388837, -49.933963, 26.206957)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea34" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.993884, 0.191468, 0.000000, 0.000000, 0.000000, 0.000000, 0.002872, -0.044906, 2.999663, -1.704752, -49.891366, 34.699422)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea35" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999365, 0.061709, 0.000000, 0.000000, 0.000000, 0.000000, -0.002114, 0.102739, 2.998240, -0.627147, -50.697116, 44.153336)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea36" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.988320, 0.264465, 0.000000, 0.000000, 0.000000, 0.000000, -0.016855, 0.190453, 2.993901, -1.971997, -33.167186, 25.815757)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea37" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.995732, 0.159963, 0.000000, 0.000000, 0.000000, 0.000000, -0.001614, 0.030228, 2.999847, -1.656435, -33.285889, 40.423511)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea38" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999941, 0.018810, 0.000000, 0.000000, 0.000000, 0.000000, -0.001460, 0.232780, 2.990955, -0.525083, -13.018586, 25.868158)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea39" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.992200, 0.216189, 0.000000, 0.000000, 0.000000, 0.000000, -0.015364, 0.212649, 2.992414, -1.286070, -13.204953, 35.651691)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea40" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997496, -0.122545, 0.000000, 0.000000, 0.000000, 0.000000, 0.010800, 0.264172, 2.988327, -1.347993, -13.461731, 46.687256)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea41" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999533, -0.052941, 0.000000, 0.000000, 0.000000, 0.000000, -0.003106, -0.175957, 2.994834, -1.148925, 13.853825, 24.691374)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea42" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994213, 0.186241, 0.000000, 0.000000, 0.000000, 0.000000, -0.014803, 0.237983, 2.990509, -0.461330, 14.529220, 36.087277)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea43" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.986468, 0.284623, 0.000000, 0.000000, 0.000000, 0.000000, -0.016007, 0.167957, 2.995252, -0.267939, 14.543779, 45.871814)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea44" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.991967, 0.219397, 0.000000, 0.000000, 0.000000, 0.000000, 0.013011, -0.177431, 2.994720, -0.739303, 28.504963, 24.403901)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea45" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999747, 0.038956, 0.000000, 0.000000, 0.000000, 0.000000, -0.002798, 0.215461, 2.992251, -0.905980, 28.290426, 40.709587)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea46" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999795, 0.035059, 0.000000, 0.000000, 0.000000, 0.000000, 0.001586, -0.135669, 2.996930, -0.938399, 38.758045, 24.289401)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea47" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999796, 0.035018, 0.000000, 0.000000, 0.000000, 0.000000, -0.001700, 0.145639, 2.996462, -1.842267, 39.042880, 36.522510)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea48" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997759, 0.115926, 0.000000, 0.000000, 0.000000, 0.000000, -0.007975, 0.206227, 2.992893, -0.497649, 39.737083, 45.896510)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea49" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999997, 0.004164, 0.000000, 0.000000, 0.000000, 0.000000, 0.000113, -0.081726, 2.998887, -1.523377, 49.940128, 24.282073)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea50" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.996238, -0.150194, 0.000000, 0.000000, 0.000000, 0.000000, 0.005831, 0.116314, 2.997739, -1.921819, 49.738390, 35.049618)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea51" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999519, -0.053701, 0.000000, 0.000000, 0.000000, 0.000000, -0.003111, -0.173780, 2.994961, -1.987346, 49.647212, 42.852973)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea52" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997728, 0.116729, 0.000000, 0.000000, 0.000000, 0.000000, -0.009207, 0.236438, 2.990654, -0.923990, 62.645759, 24.400615)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea53" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999243, 0.067385, 0.000000, 0.000000, 0.000000, 0.000000, 0.003946, -0.175631, 2.994852, -0.738147, 62.548788, 40.402726)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea54" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994681, -0.178565, 0.000000, 0.000000, 0.000000, 0.000000, 0.006877, 0.115337, 2.997774, -1.151612, 71.226938, 25.456807)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea55" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.991415, 0.226795, 0.000000, 0.000000, 0.000000, 0.000000, 0.008855, -0.116793, 2.997713, -0.684774, 71.395557, 34.230869)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea56" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998642, -0.090264, 0.000000, 0.000000, 0.000000, 0.000000, -0.008439, -0.280361, 2.986859, -0.547435, 71.132557, 43.252878)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea57" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997087, -0.132183, 0.000000, 0.000000, 0.000000, 0.000000, -0.005405, -0.122558, 2.997491, -0.160380, 81.237580, 22.244630)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea58" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997842, -0.113772, 0.000000, 0.000000, 0.000000, 0.000000, -0.006380, -0.168113, 2.995279, -0.241655, 81.203908, 33.225297)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea59" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.996767, 0.139235, 0.000000, 0.000000, 0.000000, 0.000000, 0.001775, -0.038199, 2.999756, -1.793010, 81.504743, 43.317224)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea60" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998598, -0.091695, 0.000000, 0.000000, 0.000000, 0.000000, 0.007181, 0.234840, 2.990786, -0.782127, 92.474754, 22.057588)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea61" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998635, -0.090482, 0.000000, 0.000000, 0.000000, 0.000000, -0.001480, -0.049064, 2.999598, -1.280304, 92.277583, 40.552840)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea62" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.990762, -0.235247, 0.000000, 0.000000, 0.000000, 0.000000, 0.013809, 0.175559, 2.994827, -0.989764, 101.375262, 21.554002)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea63" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999300, -0.064801, 0.000000, 0.000000, 0.000000, 0.000000, -0.002493, -0.115399, 2.997779, -1.536334, 101.091699, 31.687067)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea64" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999971, -0.013293, 0.000000, 0.000000, 0.000000, 0.000000, 0.000621, 0.140168, 2.996724, -1.489316, 101.489077, 45.484468)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea65" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.992417, 0.213168, 0.000000, 0.000000, 0.000000, 0.000000, 0.004181, -0.058690, 2.999423, -0.973479, 110.909315, 21.307714)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea66" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.996374, -0.147455, 0.000000, 0.000000, 0.000000, 0.000000, -0.000434, -0.008815, 2.999987, -0.783990, 111.225304, 31.686075)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea67" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.984306, -0.306455, 0.000000, 0.000000, 0.000000, 0.000000, -0.010131, -0.098654, 2.998360, -0.064307, 111.152987, 44.657443)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea68" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.991377, 0.227301, 0.000000, 0.000000, 0.000000, 0.000000, 0.008526, -0.112209, 2.997889, -0.187669, 124.833863, 25.789801)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea69" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.986627, 0.282950, 0.000000, 0.000000, 0.000000, 0.000000, 0.028172, -0.297360, 2.985094, -1.548682, 125.108959, 39.985197)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea70" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998694, -0.088512, 0.000000, 0.000000, 0.000000, 0.000000, 0.005540, 0.187676, 2.994119, -0.707539, 140.271040, 25.948125)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea71" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999573, 0.050627, 0.000000, 0.000000, 0.000000, 0.000000, 0.003059, -0.181215, 2.994520, -1.578987, 140.846782, 33.537234)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea72" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.986660, 0.282602, 0.000000, 0.000000, 0.000000, 0.000000, 0.023282, -0.246051, 2.989802, -0.300514, 141.550346, 42.864048)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea73" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998727, 0.087397, 0.000000, 0.000000, 0.000000, 0.000000, 0.005403, -0.185387, 2.994262, -1.765938, 152.765509, 28.478414)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea74" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.996226, 0.150432, 0.000000, 0.000000, 0.000000, 0.000000, -0.011396, 0.226972, 2.991380, 0.088753, 152.991573, 35.617396)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea75" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999553, 0.051764, 0.000000, 0.000000, 0.000000, 0.000000, 0.003777, -0.218875, 2.992003, -0.738129, 154.509269, 44.111071)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea76" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999982, 0.010428, 0.000000, 0.000000, 0.000000, 0.000000, 0.001010, -0.290544, 2.985897, -0.651339, 161.027673, 21.532774)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea77" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.996442, 0.146074, 0.000000, 0.000000, 0.000000, 0.000000, -0.012664, 0.259780, 2.988704, -1.246592, 161.703323, 36.893102)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea78" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994573, 0.180372, 0.000000, 0.000000, 0.000000, 0.000000, 0.003503, -0.058150, 2.999434, -1.611341, 171.775198, 13.990913)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea79" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.985307, 0.296555, 0.000000, 0.000000, 0.000000, 0.000000, -0.008867, 0.089257, 2.998659, -1.532847, 172.807519, 26.169729)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea80" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999974, -0.012559, 0.000000, 0.000000, 0.000000, 0.000000, -0.000279, -0.066565, 2.999261, -1.039414, 173.450876, 41.197336)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea81" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.983775, 0.311592, 0.000000, 0.000000, 0.000000, 0.000000, 0.031208, -0.298849, 2.984915, -1.595058, 181.697403, 13.079907)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea82" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.992572, -0.210980, 0.000000, 0.000000, 0.000000, 0.000000, -0.001728, -0.024504, 2.999899, -0.136893, 182.272713, 28.610601)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea83" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.983696, -0.312340, 0.000000, 0.000000, 0.000000, 0.000000, -0.009380, -0.089601, 2.998647, -1.136614, 182.702210, 41.403628)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea84" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999204, 0.069121, 0.000000, 0.000000, 0.000000, 0.000000, -0.005001, 0.217009, 2.992137, -1.683779, 190.944170, 13.669130)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea85" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.996621, 0.142339, 0.000000, 0.000000, 0.000000, 0.000000, 0.011137, -0.234472, 2.990802, -1.148881, 191.152600, 33.865438)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea86" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.988973, 0.256981, 0.000000, 0.000000, 0.000000, 0.000000, -0.008190, 0.095263, 2.998476, -1.694951, 200.902949, 14.357286)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea87" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999872, -0.027687, 0.000000, 0.000000, 0.000000, 0.000000, -0.001064, -0.115285, 2.997784, -0.740648, 201.043059, 26.630113)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea88" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999998, -0.003259, 0.000000, 0.000000, 0.000000, 0.000000, 0.000281, 0.258629, 2.988831, -1.261676, 202.290295, 37.896138)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea89" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999997, 0.003941, 0.000000, 0.000000, 0.000000, 0.000000, -0.000144, 0.109930, 2.997985, -1.273408, 211.046144, 14.147697)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea90" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999382, -0.060899, 0.000000, 0.000000, 0.000000, 0.000000, -0.004552, -0.224212, 2.991606, -1.557796, 211.521908, 25.844099)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea91" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998491, -0.095145, 0.000000, 0.000000, 0.000000, 0.000000, -0.003768, -0.118763, 2.997646, -0.311365, 211.701723, 39.713993)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea92" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.992144, -0.216971, 0.000000, 0.000000, 0.000000, 0.000000, 0.005379, 0.074173, 2.999078, -0.450758, 219.574535, 12.955168)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea93" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.992590, 0.210719, 0.000000, 0.000000, 0.000000, 0.000000, -0.010251, 0.145585, 2.996448, -1.271198, 220.335397, 31.784816)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea94" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998941, 0.079710, 0.000000, 0.000000, 0.000000, 0.000000, -0.005915, 0.222542, 2.991729, -1.468227, 230.314230, 13.822600)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea95" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.997194, -0.129727, 0.000000, 0.000000, 0.000000, 0.000000, 0.010226, 0.236261, 2.990665, -0.995136, 230.319748, 25.666050)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea96" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998005, 0.109377, 0.000000, 0.000000, 0.000000, 0.000000, 0.004957, -0.135870, 2.996918, -1.212040, 231.174201, 40.391004)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea97" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.992065, 0.218058, 0.000000, 0.000000, 0.000000, 0.000000, 0.018635, -0.255703, 2.989025, -0.040576, 239.331980, 13.792822)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea98" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.998562, -0.092875, 0.000000, 0.000000, 0.000000, 0.000000, 0.005639, 0.182067, 2.994465, -1.259339, 240.148507, 27.893858)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea99" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.999772, 0.037021, 0.000000, 0.000000, 0.000000, 0.000000, -0.003789, 0.306990, 2.984249, -1.390082, 240.120910, 41.478705)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea100" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994909, 0.174700, 0.000000, 0.000000, 0.000000, 0.000000, -0.003124, 0.053550, 2.999520, -0.965674, 249.696680, 13.377493)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="zidValea101" parent="DecorManual/ZidulValeiRosii" instance=ExtResource("23_cliff")]
 transform = Transform3D(2.994838, -0.175909, 0.000000, 0.000000, 0.000000, 0.000000, 0.017013, 0.289647, 2.985936, -1.650856, 250.266092, 32.620418)
-metadata/coliziune = "niciuna"
+metadata/coliziune = "none"
 
 [node name="ZoneB_PadureaHornurilor" type="Node3D" parent="DecorManual"]
 

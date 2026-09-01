@@ -214,5 +214,10 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float,
 		% [c, -s, scl_y, s, c, pos.x, pos.y, pos.z])
 	# Departe de banda si sub nivelul ei: nu are nevoie de corp fizic. Masina
 	# n-ajunge acolo, iar un hull per modul ar fi zeci de corpuri degeaba.
-	_out.append('metadata/coliziune = "niciuna"')
+	#
+	# "none", NU "niciuna": world_prop compara sirul cu un tabel englezesc, iar
+	# ce nu se potriveste cade pe ramura implicita, adica HULL. Scris romaneste,
+	# randul asta obtinea exact contrariul a ce spune comentariul de deasupra —
+	# 101 corpuri convexe, masurate. Vezi `COLLISION_MODES` in world_prop.gd.
+	_out.append('metadata/coliziune = "none"')
 	_out.append("")

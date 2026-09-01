@@ -237,6 +237,13 @@ func _aplica_variante(track: Node, sun: DirectionalLight3D, env: Environment,
 			"amb22":
 				if env != null:
 					env.ambient_light_energy = 0.22
+			"cand":
+				# Perechea rundei 30: ambient 0.20 cu soare 1.70. Ambientul
+				# coborat scoate umbra de pe carosabil din spoiala; soarele
+				# urcat pune la loc NIVELUL pe care ambientul il tinea.
+				if env != null:
+					env.ambient_light_energy = 0.20
+				sun.light_energy = 1.70
 			"noglow":
 				if env != null:
 					env.glow_enabled = false

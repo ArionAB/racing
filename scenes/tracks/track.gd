@@ -1759,11 +1759,15 @@ static func themes() -> Dictionary:
 			# sa desparta fetele. Ce desparte fetele e distanta dintre soare si
 			# ambient, fiindca doar soarele depinde de normala.
 			#
-			# ALES 1.15/0.20, raport 5.75 — teritoriul insulei, nu al desertului.
-			# Ecart 102, cu 39% peste cele 73 de la care s-a plecat, iar media
-			# cadrului ramane 152 fata de 155. Nu mai departe: la 1.35/0.16 fata
-			# intoarsa cade la 84 si canionul umbrit ar incepe sa se inchida in
-			# pata, exact ce a costat Stromboli patru runde.
+			# ALES ATUNCI 1.15/0.20, raport 5.75 — teritoriul insulei, nu al
+			# desertului. Ecart 102, cu 39% peste cele 73 de la care s-a plecat.
+			#
+			# ISTORIC, si de citit impreuna cu nota de la `ambient_energy`:
+			# perechea asta a fost desfacuta de commit-ul 1612352, care a urcat
+			# ambientul la 0.38 pentru hornuri si a lasat soarele pe loc — raport
+			# 3.03, cu textul de aici ramas sa descrie 0.20. Runda 30 a refacut
+			# raportul, mutand ambele: 1.70/0.20, tot 5.75 lit-pe-ambient, dar cu
+			# nivelul urcat, ca sa nu se piarda ce castigase 1612352 pe piatra.
 			#
 			# Energia, NU expunerea: expunerea muta tot cadrul deodata (cerul si
 			# ceata inclusiv) si n-ar fi schimbat niciun raport intre fete. Aici
@@ -1772,7 +1776,9 @@ static func themes() -> Dictionary:
 			# CULOAREA si AZIMUTUL raman neatinse: duc zorii si estul din brief §4,
 			# iar azimutul a fost masurat contra traseului (vezi mai jos).
 			"sun_color": Color(1.0, 0.82, 0.63),
-			"sun_energy": 1.15,
+			# 1.15 -> 1.70: vezi nota de la `ambient_energy` mai jos. Nu se
+			# atinge separat — perechea soare/ambient e o singura decizie.
+			"sun_energy": 1.70,
 			# ELEVATIE 13 grade (brief §4 cere 12-15), azimut 60 (ENE, dinspre
 			# vale).
 			#
@@ -1863,7 +1869,52 @@ static func themes() -> Dictionary:
 			# desertul e o pista tot cu faleze si tot cu soare jos. La 0.20 fata
 			# intoarsa iese 95 din 255 dupa tonemap — inchisa, dar inca departe
 			# de pata neagra plata de care se temea nota de la 0.30.
-			"ambient_energy": 0.38,
+			# AMBIENT 0.38 -> 0.20, IMPREUNA cu soarele 1.15 -> 1.70. Se schimba
+			# amandoua sau niciuna: raportul e marimea care conteaza, nivelul se
+			# pastreaza mutand ce ia ambientul inapoi la soare.
+			#
+			# DE UNDE VENEA. Doi critici orbi, independent, au raportat "soseaua
+			# n-are nicio umbra — pete difuze, fara margine, fara directie".
+			# A/B-ul cu umbre ON/OFF arata insa 29.7% pixeli schimbati: umbrele
+			# existau. Ce lipsea era ADANCIMEA lor. Masurat pe carosabil, cu
+			# ProbeEcartSol (sonda rundei asta):
+			#     umbra / soare = 0.606  — o umbra care lasa 61% din lumina nu
+			# se citeste ca umbra, se citeste ca murdarie pe asfalt. De aia
+			# ecartul de luminanta iesea 76 fata de 115 in referinta.
+			#
+			# CAUZA, si e o jumatate-de-schimbare ca la rundele 28 si 29.
+			# Perechea 1.15/0.20 (raport 5.75) fusese ALEASA si masurata — nota
+			# lunga de mai sus, cu tabelul prin tonemapper, o argumenteaza pe
+			# larg si o descrie ca fiind in vigoare. Apoi commit-ul 1612352
+			# ("Funinginea venea din lumina, nu din pigment") a urcat ambientul
+			# 0.22 -> 0.38 ca sa scoata din carbune fetele intoarse ale
+			# HORNURILOR, si a lasat soarele pe loc. Raportul a cazut 5.75 ->
+			# 3.03 fara ca nota care il justifica sa fie atinsa: textul spunea
+			# 0.20, codul spunea 0.38.
+			#
+			# Decizia aceea NU era gresita — masuratorile ei erau toate pe
+			# PIATRA, si acolo problema era reala. Era doar aplicata global, iar
+			# solul are alt material (`world_material`), alt AO copt si alta
+			# problema: pe el ambientul nu salva nimic, doar spala umbra.
+			#
+			# DE CE MERGE SOARELE IN SUS ODATA CU AMBIENTUL IN JOS: ca sa nu se
+			# repete eroarea rundei 13, care cumparase contrast cu intuneric.
+			# Coborand doar ambientul, ecartul urca (98.6 la 0.15) dar cadrul se
+			# inchide. Cu perechea, NIVELUL ramane: mediana carosabilului 150 ->
+			# 155, iar pe hornuri fata insorita URCA (150 -> 163 pe hornSoare11).
+			# Masurat, la frac 0.06:
+			#     amb / soare      ecart sosea   umbra/soare   mediana sosea
+			#     0.38 / 1.15  (vechi)    77.0        0.606         150
+			#     0.20 / 1.55             107.2         —           150
+			#     0.20 / 1.70  (ales)     112.1        0.443         155
+			#     0.15 / 1.75             121.7          —           154
+			# 0.20/1.70 si nu 0.15/1.75: la 0.15 p10 cade la 58.7, sub cei 80 ai
+			# referintei, adica exact inchiderea de care se temea 1612352.
+			#
+			# Si pe HORNURI, cu ProbeCappLumina (delta fata luminata/intoarsa):
+			# toate cele opt cu destui pixeli urca, 56..76 -> 78..100, iar doua
+			# dintre cele marcate PLAT trec OK. Nu se plateste nimic pe piatra.
+			"ambient_energy": 0.20,
 			# UMBRE PORNITE, si e prima pista pe care sunt IDENTITATE, nu doar
 			# contact cu solul. Implicitul e deja `true`, deci cheia nu schimba
 			# comportamentul — exista ca sa aiba unde sta motivul pentru care NU

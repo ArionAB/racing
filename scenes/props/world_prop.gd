@@ -1046,9 +1046,30 @@ func _collect_models(node: Node, out: Array[Node3D]) -> void:
 		_collect_models(spatial, out)
 
 
+## Cele patru moduri valide. Exista ca sa poata fi VERIFICATA metadata scrisa
+## de mana sau de un generator: `match` de mai jos are ramura implicita `_`, deci
+## o valoare scrisa gresit nu cade in gol, ci face HULL — adica exact pe dos
+## fata de intentie, si in tacere.
+const COLLISION_MODES := ["hull", "trunk", "mesh", "none"]
+
 func _collision_mode(model: Node3D) -> String:
 	if model.has_meta(COLLISION_META):
-		return String(model.get_meta(COLLISION_META))
+		var m := String(model.get_meta(COLLISION_META))
+		if COLLISION_MODES.has(m):
+			return m
+		# NU se ghiceste ce a vrut sa spuna: se striga, si se cade pe implicit.
+		#
+		# Cazul care a cerut verificarea asta: `tools/gen_capp_creasta.gd` scria
+		# `coliziune = "niciuna"` (romaneste) pe cele 101 module ale zidului
+		# Vaii Rosii, cu comentariul lui explicit — „departe de banda si sub
+		# nivelul ei: nu are nevoie de corp fizic, un hull per modul ar fi zeci
+		# de corpuri degeaba". Valoarea nu e in tabel, deci pica pe ramura `_`
+		# si producea fix cele zeci de corpuri: masurat, 101 corpuri cu 101
+		# forme convexe. Doua runde au trecut pe langa ea fiindca nimic nu se
+		# plangea.
+		push_warning(("world_prop: `%s = \"%s\"` pe %s nu e un mod valid " +
+			"(%s). Se aplica implicitul \"hull\".")
+			% [COLLISION_META, m, model.name, ", ".join(COLLISION_MODES)])
 	var stem := model.scene_file_path.get_file().get_basename()
 	return String(PROP_COLLISION.get(stem, "hull"))
 

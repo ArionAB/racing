@@ -427,45 +427,140 @@ metadata/coliziune = "none"
 
 [node name="Ferestre" type="Node3D" parent="DecorManual/G) Stanca goala"]
 
-[node name="Alcov00" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.530, 0.000, -0.468, 0.000, 1.600, 0.000, 0.468, 0.000, 1.530, -312.598, 17.000, 40.599)
+[node name="Fereastra00" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(-0.887, 0.000, -0.951, 0.000, 1.300, 0.000, 0.951, 0.000, -0.887, -327.873, 19.500, 30.109)
 metadata/coliziune = "none"
 
-[node name="Alcov01" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.559, 0.000, 0.360, 0.000, 1.600, 0.000, -0.360, 0.000, 1.559, -293.881, 18.400, 41.253)
+[node name="Fereastra01" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(-1.299, 0.000, 0.045, 0.000, 1.300, 0.000, -0.045, 0.000, -1.299, -300.786, 21.950, 41.328)
 metadata/coliziune = "none"
 
-[node name="Alcov02" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.170, 0.000, 1.091, 0.000, 1.600, 0.000, -1.091, 0.000, 1.170, -277.345, 19.900, 32.460)
+[node name="Fereastra02" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(-0.818, 0.000, 1.010, 0.000, 1.300, 0.000, -1.010, 0.000, -0.818, -274.548, 24.400, 28.246)
 metadata/coliziune = "none"
 
-[node name="Alcov03" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(0.468, 0.000, 1.530, 0.000, 1.600, 0.000, -1.530, 0.000, 0.468, -267.421, 21.400, 16.578)
+[node name="Fereastra03" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(0.226, 0.000, 1.280, 0.000, 1.300, 0.000, -1.280, 0.000, 0.226, -267.207, 26.850, -0.138)
 metadata/coliziune = "none"
 
-[node name="Alcov04" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.530, 0.000, -0.468, 0.000, 1.600, 0.000, 0.468, 0.000, 1.530, -312.598, 34.700, 40.599)
+[node name="Fereastra04" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(1.114, 0.000, 0.670, 0.000, 1.300, 0.000, -0.670, 0.000, 1.114, -283.813, 29.300, -24.301)
 metadata/coliziune = "none"
 
-[node name="Alcov05" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.559, 0.000, 0.360, 0.000, 1.600, 0.000, -0.360, 0.000, 1.559, -293.881, 36.200, 41.253)
+[node name="Fereastra05" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(1.236, 0.000, -0.402, 0.000, 1.300, 0.000, 0.402, 0.000, 1.236, -312.944, 31.750, -27.620)
 metadata/coliziune = "none"
 
-[node name="Alcov06" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.170, 0.000, 1.091, 0.000, 1.600, 0.000, -1.091, 0.000, 1.170, -277.345, 37.700, 32.460)
+[node name="Fereastra06" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(-0.708, 0.000, -1.090, 0.000, 1.300, 0.000, 1.090, 0.000, -0.708, -331.667, 37.000, 25.253)
 metadata/coliziune = "none"
 
-[node name="Alcov07" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(0.468, 0.000, 1.530, 0.000, 1.600, 0.000, -1.530, 0.000, 0.468, -267.421, 39.100, 16.578)
+[node name="Fereastra07" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(-1.287, 0.000, -0.181, 0.000, 1.300, 0.000, 0.181, 0.000, -1.287, -306.940, 39.450, 41.006)
 metadata/coliziune = "none"
 
-[node name="Alcov08" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.091, 0.000, -1.170, 0.000, 1.600, 0.000, 1.170, 0.000, 1.091, -328.480, 33.200, 30.675)
+[node name="Fereastra08" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(-0.981, 0.000, 0.853, 0.000, 1.300, 0.000, -0.853, 0.000, -0.981, -278.828, 41.900, 32.679)
 metadata/coliziune = "none"
 
-[node name="Alcov09" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
-transform = Transform3D(1.091, 0.000, -1.170, 0.000, 1.600, 0.000, 1.170, 0.000, 1.091, -328.480, 15.500, 30.675)
+[node name="Fereastra09" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(-0.000, 0.000, 1.300, 0.000, 1.300, 0.000, -1.300, 0.000, -0.000, -266.670, 44.350, 6.000)
 metadata/coliziune = "none"
+
+[node name="Fereastra10" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(0.981, 0.000, 0.853, 0.000, 1.300, 0.000, -0.853, 0.000, 0.981, -278.828, 46.800, -20.679)
+metadata/coliziune = "none"
+
+[node name="Fereastra11" parent="DecorManual/G) Stanca goala/Ferestre" instance=ExtResource("44_alcove")]
+transform = Transform3D(1.287, 0.000, -0.181, 0.000, 1.300, 0.000, 0.181, 0.000, 1.287, -306.940, 49.250, -29.006)
+metadata/coliziune = "none"
+
+[node name="Lumina" type="Node3D" parent="DecorManual/G) Stanca goala"]
+
+[node name="Sonda00" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 30.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 0.60
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 26.0
+omni_attenuation = 1.6
+
+[node name="Sonda01" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 38.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 1.80
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 34.0
+omni_attenuation = 1.6
+
+[node name="Sonda02" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 45.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 3.60
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 42.0
+omni_attenuation = 1.6
+
+[node name="Sonda03" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 51.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 5.60
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 50.0
+omni_attenuation = 1.6
+
+[node name="Sonda04" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 57.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 6.80
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 56.0
+omni_attenuation = 1.6
+
+
+[node name="Lumina" type="Node3D" parent="DecorManual/G) Stanca goala"]
+
+[node name="Sonda00" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 34.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 0.45
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 30.0
+omni_attenuation = 1.7
+
+[node name="Sonda01" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 41.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 0.95
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 38.0
+omni_attenuation = 1.7
+
+[node name="Sonda02" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 48.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 1.60
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 46.0
+omni_attenuation = 1.7
+
+[node name="Sonda03" type="OmniLight3D" parent="DecorManual/G) Stanca goala/Lumina"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020, 55.000, 6.000)
+light_color = Color(1, 0.867, 0.71, 1)
+light_energy = 2.10
+light_specular = 0.1
+shadow_enabled = false
+omni_range = 52.0
+omni_attenuation = 1.7
+
 
 [node name="Hazarduri" type="Node3D" parent="."]
 

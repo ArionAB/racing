@@ -336,6 +336,32 @@ const SLOT_REMAP_BY_MODEL := {
 		4: Palette.CORAL_SAND,     # rama firidei -> crem, ca peretele
 		10: Palette.CORAL_SAND,    # feroneria ruginita -> tot piatra
 	},
+	# Arcul de fereastra din peretele stancii goale. Aceeasi poveste ca la
+	# coaja si la firide, a treia oara: piesa e desenata pentru sala subterana,
+	# unde ruginiul citeste piatra la lumina de torta. Pe zidul crem al hornului
+	# iesea o potcoava RUGINIE lipita pe perete - exact reprosul "rama
+	# portocalie in jurul unei gauri", si exact capcana din memoria
+	# `rock-dark-nu-pe-bazalt`.
+	#
+	# Masurat pe GLB (histograma de sloturi): 378 vertecsi pe slotul 2, 249 pe 4
+	# (ROCK_DARK, maro), 96 pe 20 (VOLCANIC_BLACK) - deci ruginiul vine de pe 4
+	# si 20, nu din lumina. Peretele pe care sta e tot pe 2 (SAND_SHADOW), deci
+	# arcul se muta pe aceeasi familie. Zero sloturi noi, zero materiale noi.
+	"church_arch": {
+		# Valorile se dau dupa ADANCIME, masurata pe mesh (z mediu pe slot), nu
+		# dupa ce culoare avea piesa in sala subterana. Prima incercare a pus 4 si
+		# 20 pe doua valori diferite si arcul a iesit in DUNGI de bomboana:
+		# bolzarii vecini cadeau alternativ pe crem si pe umbrit.
+		#   slot  2  z +0.005  fata dinspre drum -> crem (nemutat, e deja bine)
+		#   slot  4  z -0.241  cordonul/rama     -> crem, aceeasi valoare ca fata
+		#   slot 23  z -0.733  glaful            -> umbrit: aici incepe adancimea
+		#   slot 20  z -1.185  fundul            -> umbrit: partea cea mai retrasa
+		#   slot 27  z -1.135  detaliul inchis   -> umbrit, tot in familia tufului
+		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem, ca fata arcului
+		23: Palette.SAND_SHADOW,   # TILE_TERRACOTTA rosu -> tuf umbrit (glaful)
+		20: Palette.SAND_SHADOW,   # VOLCANIC_BLACK -> acelasi umbrit (fundul)
+		27: Palette.SAND_SHADOW,   # detaliul ruginit -> tot tuf umbrit
+	},
 }
 
 

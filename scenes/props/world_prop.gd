@@ -346,6 +346,7 @@ func _ready() -> void:
 	_split_shutters()
 	_retint_tuff()
 	_warm_tuff()
+	_strata_tuff()
 	_redden_cliff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
@@ -757,6 +758,210 @@ func _warm_tuff() -> void:
 				arr[Mesh.ARRAY_COLOR] = cols
 				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			mi.mesh = out
+
+
+## STRATUL DE MINERAL ROSU pe tuful din PRIM-PLAN si PLAN MEDIAN.
+##
+## De ce exista. Masurat pe captura de sofer (frac 0.06, --driver), cadrul
+## nostru era MONOCROM: IQR de nuanta 2.86 grade, cu 90.9% din pixelii saturati
+## intr-un SINGUR interval de 15 grade. Referinta are IQR 5.2-7. Iar singura a
+## doua nuanta pe care o aveam statea la ORIZONT (`red_mesa`, masurata la 114 m
+## de camera) — adica la adancimea la care nu separa nimic.
+##
+## De ce nuanta era blocata, si asta e cauza reala: SURSELE DE LUMINA sunt
+## amandoua portocalii. `sun_color` (1.0, 0.82, 0.63) are nuanta 30.8 grade,
+## `ambient_color` F0C79A are 31.4. Mediana cadrului nostru era 32.4. Cu alte
+## cuvinte cadrul nu era de culoarea rocilor, era de culoarea LUMINII: orice
+## albedo aproape acromatic (cremul CORAL_SAND, saturatie 0.18) iese din
+## inmultire pe nuanta becului, indiferent ce piesa e.
+##
+## De aici si singura iesire posibila: un albedo care e el insusi SATURAT si mai
+## rosu decat lumina. Socotit inainte de scris, nu dupa:
+##   crem E9DCC0 * soare  ->  nuanta 31.8   (adica exact media cadrului)
+##   ocru C4784F * soare  ->  nuanta 20.0
+##   rosu A8683A * soare  ->  nuanta 22.2
+## Deci un strat ocru chiar muta nuanta cu 10-12 grade. Nimic mai palid n-o face.
+##
+## DE CE PE VERTECSI SI NU PE SLOTURI. S-a incercat de doua ori (rundele 6 si
+## 10) sa se mute UV-urile hornurilor pe sloturi calde, si de fiecare data a
+## iesit "cos de fabrica": benzile din .glb sunt SUPRAFETE LATE, si orice slot
+## saturat pe ele da dungi de un metru si jumatate. Nota de la `TUFF_UV_REMAP`
+## spune concluzia: culoarea a doua benzi late nu poate fi si calda, si
+## discreta. Aici banda NU e cea din .glb — se taie dupa COTA DE LUME, deci
+## grosimea ei o aleg eu, si o aleg SUBTIRE (STRAT_H = 2.2 m pe hornuri de
+## 11-18 m, adica 12-20% din inaltime).
+##
+## SE TAIE PE COTA DE LUME, NU PE FRACTIE DIN PIESA, si asta e chiar ce face
+## diferenta dintre geologie si decoratie: un strat la aceeasi cota pe toate
+## piesele care impart solul citeste ca un STRAT MINERAL care traverseaza
+## padurea; acelasi strat la "20% din inaltimea fiecarei piese" ar sui si ar
+## cobori cu palaria si ar citi ca vopsea per obiect.
+##
+## Masurat cu ProbeCappCote, bazele celor 130 de piese de tuf de pe Track13:
+##   p5 44.3   p25 46.4   p50 47.7   p75 48.8   p95 51.6   (extreme 31.4 si 101.4)
+## Deci 90% din kit sta intr-o felie de 7 metri, si acolo o cota fixa chiar e
+## un strat comun. Extremele nu sunt insa neglijabile: la piesa de la 101 m un
+## strat fix la 49 ar cadea sub pamant, iar la cea de la 31.4 ar trece pe
+## deasupra palariei. Pentru ele banda se MUTA in treimea de jos a piesei —
+## stratul ramane vizibil, doar ca inceteaza sa mai fie acelasi strat, ceea ce
+## e adevarat si geologic: o piesa la 50 m diferenta de cota chiar e din alt
+## bazin.
+##
+## Cuantizarea pe TRIUNGHI e obligatorie, aceeasi lectie ca la `_warm_tuff`:
+## pe o fata inclinata cei trei vertecsi au cote diferite, deci o taiere pe
+## vertex ar interpola marginea stratului intr-un degrade care sterge exact
+## fatetarea. Se ia cota centroidului. Rezolutia asta e si limita reala a
+## grosimii: masurat cu probe_capp_geo, `chimney_a` are 11.26 m si numai 18
+## cote distincte de vertex, adica un inel la ~0.6 m. Sub un metru banda ar
+## cadea intre inele si ar aparea si dispare de la piesa la piesa.
+##
+## DOUA STRATE, NU UNUL, si asta e chiar afirmatia structurala a referintei:
+## singurul lucru din cadrul ei care spune ca roca are ISTORIE e ca peretele are
+## STRATE de mineral diferit, la plural. Cu un singur strat masuratoarea urcase
+## doar la 3.47 (de la 2.86, tinta ~7): o banda pe un horn de 15 m e un accent,
+## doua benzi la cote diferite sunt o stratigrafie. Al doilea e mai SUS si mai
+## SUBTIRE, ca sa nu iasa doua dungi gemene — in roca reala stratele nu au
+## grosimi egale.
+##
+## Cotele nu sunt alese la intamplare: 49.6 e la ~1 m deasupra soselei (focus
+## Y 48.8 la fractia 0.06, masurat cu ProbeCappStrate), deci stratul de jos
+## trece exact prin banda de imagine pe care o umple prim-planul; 53.4 cade in
+## treimea mijlocie a hornurilor de 11-18 m, adica se vede si pe piesele din
+## planul median, care in cadru intra doar cu partea de sus.
+const STRAT_COTA: float = 49.6
+const STRAT_COTA_SUS: float = 53.4
+## Grosimea stratului. 2.2 m = 3-4 inele de fatete pe un horn, adica o muchie
+## care se vede, nu o dunga de un texel. Cel de sus e mai subtire (1.4 m):
+## doua benzi de aceeasi latime ar citi ca un tipar, nu ca geologie.
+const STRAT_H: float = 2.2
+const STRAT_H_SUS: float = 1.4
+## Peste cat se stinge stratul la margini. Fara topire, marginea de sus a
+## benzii ar fi o linie perfect orizontala pe toata padurea — desen tehnic, nu
+## strat de roca. Cu 0.9 m ea se pierde intr-un inel-doua de fatete.
+const STRAT_FADE: float = 0.9
+## Tenta stratului, SOCOTITA CA SA NIMEREASCA PERETELE DIN REFERINTA, nu aleasa
+## din ochi. Masurat pe `docs/track_briefs/img/cappadocia_v3.jpeg`:
+##   peretele rosu al canionului   RGB(156, 97, 72)  nuanta 14.1  sat 0.56
+##   hornurile crem de langa el    RGB(176,132, 96)  nuanta 27.2  sat 0.46
+## Adica referinta tine intre roca rosie si roca crem o distanta de 13 grade de
+## nuanta, la saturatii APROPIATE. Aia e stratigrafia; nu un accent portocaliu.
+##
+## SI DE CE SE COBOARA SI ROSUL, desi asta pare invers fata de "vrem mai rosu".
+## Prima incercare taia numai G si B (0.62 / 0.30). Nuanta iesea 21.4 — bine —
+## dar saturatia sarea la 0.85 fata de 0.56 in referinta, adica exact
+## portocaliul aprins pentru care au picat rundele 6 si 10 ("cos de fabrica").
+## Rosul referintei e INCHIS si STINS, nu aprins. Ca sa scada saturatia fara sa
+## urce nuanta la loc trebuie coborat si canalul rosu — un multiplicator poate
+## doar sa taie (memoria `surfacetool-clamp-vertex-color`), deci "mai putin
+## saturat" se obtine taind din TOATE canalele, doar inegal.
+##
+## Valorile de mai jos sunt rezultatul unei cautari pe grila peste cele trei
+## canale, cu eroarea calculata fata de nuanta 15.5, saturatia 0.56 si luminanta
+## 108 ale peretelui din referinta. Ies:
+##   crem (212,189,169) * (0.72, 0.58, 0.64) = (153, 110, 108)
+##   sub soarele (1.0, 0.82, 0.63):  nuanta 15.4  sat 0.55  luminanta 106
+## fata de 14.1 / 0.56 / 111 in referinta. Sub un grad si sub o unitate de
+## saturatie — nu mai e nimic de reglat din ochi aici.
+const STRAT_R: float = 0.72
+const STRAT_G: float = 0.58
+const STRAT_B: float = 0.64
+## Stratul de sus e mai SLAB, nu doar mai subtire. Doua benzi la fel de
+## saturate ar avea aceeasi greutate in cadru si s-ar citi ca doua accente
+## puse; una tare jos si una stinsa sus citesc ca un profil care se estompeaza
+## in sus — exact cum arata un perete stratificat pe care partea de jos e
+## stratul vechi. Aceiasi multiplicatori, trasi ~40% catre alb.
+const STRAT_R_SUS: float = 0.88
+const STRAT_G_SUS: float = 0.82
+const STRAT_B_SUS: float = 0.85
+
+
+## Aplica stratul rosu. Rulat DUPA `_warm_tuff`, ca sa se inmulteasca peste
+## caldura lui, nu in locul ei: gradientul baza-varf al conului trebuie sa
+## ramana, stratul doar il taie pe o felie.
+func _strata_tuff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if not TUFF_UV_MODELS.has(model.scene_file_path.get_file().get_basename()):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			# Cota de LUME a piesei, si inaltimea ei reala. Ambele din
+			# transformarea globala, nu din AABB-ul local: piesele sunt scalate
+			# si rotite in .tscn, deci un AABB local ar da metri de model, nu
+			# metri de lume.
+			var xf := mi.global_transform
+			var wa := xf * mi.mesh.get_aabb()
+			var baza := wa.position.y
+			var h := maxf(wa.size.y, 0.001)
+			# Unde cade banda pe piesa ASTA. Implicit la cota comuna; daca
+			# piesa nu o intersecteaza (vezi nota lunga de mai sus), banda
+			# coboara in treimea ei de jos.
+			var cota := STRAT_COTA
+			var cota_sus := STRAT_COTA_SUS
+			if cota < baza + 0.3 or cota > baza + h - 0.5:
+				cota = baza + h * 0.28
+			if cota_sus < baza + 0.3 or cota_sus > baza + h - 0.5:
+				cota_sus = baza + h * 0.55
+			var out := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
+				var cols := PackedColorArray()
+				if raw_cols is PackedColorArray:
+					cols = raw_cols
+				if cols.size() != verts.size():
+					cols = PackedColorArray()
+					cols.resize(verts.size())
+					cols.fill(Color.WHITE)
+				if verts.size() % 3 != 0:
+					arr[Mesh.ARRAY_COLOR] = cols
+					out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+					continue
+				for tri in verts.size() / 3:
+					var i := tri * 3
+					# Cota CENTROIDULUI, in metri de lume. Pe triunghi, nu pe
+					# vertex: vezi nota de la `_warm_tuff` despre cele 1489 de
+					# fete carora interpolarea le stersese umbrirea.
+					var cy: float = (xf * verts[i]).y
+					cy += (xf * verts[i + 1]).y
+					cy += (xf * verts[i + 2]).y
+					cy /= 3.0
+					var t := Color.WHITE
+					var wj := _pondere_strat(cy, cota, STRAT_H)
+					if wj > 0.0:
+						t.r *= 1.0 - (1.0 - STRAT_R) * wj
+						t.g *= 1.0 - (1.0 - STRAT_G) * wj
+						t.b *= 1.0 - (1.0 - STRAT_B) * wj
+					var ws := _pondere_strat(cy, cota_sus, STRAT_H_SUS)
+					if ws > 0.0:
+						t.r *= 1.0 - (1.0 - STRAT_R_SUS) * ws
+						t.g *= 1.0 - (1.0 - STRAT_G_SUS) * ws
+						t.b *= 1.0 - (1.0 - STRAT_B_SUS) * ws
+					if wj <= 0.0 and ws <= 0.0:
+						continue
+					for j in 3:
+						cols[i + j] = cols[i + j] * t
+				arr[Mesh.ARRAY_COLOR] = cols
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			mi.mesh = out
+
+
+## Ponderea unui strat la cota data: 1 in miez, topita liniar peste STRAT_FADE
+## la margini, 0 in afara. Scoasa in functie fiindca o foloseau amandoua benzile
+## si copierea ei ar fi insemnat doua locuri de reglat cand se muta topirea.
+func _pondere_strat(cy: float, cota: float, gros: float) -> float:
+	var d := absf(cy - cota)
+	if d > gros * 0.5 + STRAT_FADE:
+		return 0.0
+	return 1.0 - clampf((d - gros * 0.5) / STRAT_FADE, 0.0, 1.0)
 
 
 ## Peretele Vaii Rosii: mai ROSU si mai LUMINOS decat il da .glb-ul.

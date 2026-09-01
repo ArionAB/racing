@@ -85,6 +85,8 @@ func _dump(idx: int, track: Track) -> void:
 		print("  sun.energy           %.4f" % sun.light_energy)
 		print("  sun.shadow           %s  max_dist %.1f"
 			% [sun.shadow_enabled, sun.directional_shadow_max_distance])
+		print("  sun.shadow_bias      %.3f  normal_bias %.3f  blur %.2f"
+			% [sun.shadow_bias, sun.shadow_normal_bias, sun.shadow_blur])
 	# Numaratori de noduri per tip: prind "peretii au disparut" fara pixeli.
 	var counts := {}
 	_count(track, counts)

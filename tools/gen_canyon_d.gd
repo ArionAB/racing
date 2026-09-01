@@ -300,32 +300,30 @@ func _ready() -> void:
 		rows.append({"side": -1, "tier": 0, "f": s3["f"], "x": q.x,
 			"y": y, "z": q.z, "yaw": yaw, "sc": sc, "g": p3.y})
 
-	# --- MOLOZ la piciorul falezei — GENERAT, DAR NEFOLOSIT IN SCENA ---------
+	# --- POALA DE GROHOTIS la piciorul falezei ------------------------------
 	#
-	# NU e in Track13.tscn, si e o decizie luata pe captura, nu pe cifra.
-	# Bolovanii au fost pusi (snapshots/poid/w5_*.png), priviti la 1:1 si
-	# SCOSI: `rock_medium`/`rock_small` stau 71% pe slotul 3 (#C18446, masurat
-	# cu ProbeCappSlots) — portocaliu deschis. Langa un perete acum ROSU ei
-	# citesc a saci de nisip, nu a roca desprinsa din faleza. Jonctiunea
-	# curata perete-pamant arata mai bine decat o poala de pete portocalii.
+	# Defectul 3 din verdictul comun: "obiecte care se infig intr-un plan".
+	# Peretele se termina intr-o muchie matematica pe pamant neted, si asta e
+	# ce face un prop sa citeasca drept prop asezat pe podea, nu roca crescuta
+	# din teren.
 	#
-	# Ce ar rezolva: o piesa de moloz din kitul cappadocia, care sa poata primi
-	# clasa `red_valley_tuff` fara sa vopseasca rosu stancile de pe Track08 si
-	# scatterul din track_decor (maparea din CLASSES_BY_MODEL e GLOBALA, iar
-	# `Rock_Medium`/`Rock_Small` sunt nume comune — memoria
-	# `nume-noduri-nu-sunt-unice`). Pana atunci, generatorul ramane aici cu
-	# cifrele masurate, ca urmatoarea incercare sa nu porneasca de la zero.
-	# --- (generarea de mai jos scrie fisierul, dar nimeni nu-l consuma) ------
+	# PIESA E ACELASI `cliff_band_module.glb`, la scara mica si rotit aiurea.
+	# Runda trecuta generase molozul din `rock_medium`/`rock_small` si l-a
+	# ARUNCAT dintr-un motiv corect (alea stau 71% pe slotul 3, portocaliu
+	# deschis, si langa un perete rosu citeau a saci de nisip), dar concluzia
+	# de atunci — "ne trebuie o piesa noua in kit" — sarea peste solutia
+	# ieftina. Maparea din CLASSES_BY_MODEL e pe NUMELE FISIERULUI .glb, deci
+	# modulul de faleza vine deja imbracat in `red_valley_tuff`: acelasi rosu,
+	# ACELASI material, zero materiale in plus la garda.
 	#
-	# In referinta, jonctiunea perete-pamant NU e o linie: e o poala de
-	# bolovani. Fara ea peretele se termina intr-o muchie matematica si se
-	# vede ca primitiva asezata pe teren (exact reprosul de pe prima captura).
+	# Costul e in triunghiuri (1208 per piesa), si e acceptat constient:
+	# CLAUDE.md spune ca triunghiurile se raporteaza si nu pica build-ul, iar
+	# axa care doare pe mobil — materialele — ramane neatinsa.
 	#
-	# Mesh-uri MICI pentru obiecte mici: rock_small/medium au 80 de triunghiuri
-	# fiecare (masurate cu ProbeCappModule). Un bolovan de 1,5 m nu are voie sa
-	# instantieze un mesh de mii de triunghiuri — lectia din CLAUDE.md.
-	# Scara e in METRI derivati din marimea reala a GLB-ului, nu un factor
-	# ghicit: rock_small are 1.63 m, rock_medium 3.04 m.
+	# GRADIENTUL cerut de verdict: "dense and small against the base, sparser
+	# and larger outward". Deci nu un sir de bolovani egali: cele de langa
+	# perete sunt multe si mici, cele de departe rare si mari. `t` e distanta
+	# normalizata de la picior, si conduce si marimea, si probabilitatea.
 	var rubble: Array = []
 	var f2 := F0
 	while f2 < F1:
@@ -335,32 +333,49 @@ func _ready() -> void:
 		var d4 := (ahead2 - p4); d4.y = 0.0; d4 = d4.normalized()
 		var sv := Vector3(d4.z, 0.0, -d4.x)
 		var hw4: float = track.width_at(f2)
-		# 2-3 pietre pe pas, la piciorul falezei (stanga ecranului).
-		for j in range(rng.randi_range(3, 5)):
-			# LIPIT de piciorul falezei, nu imprastiat pe berma. Pe captura
-			# w4_044 pietrele ieseau pietricele portocalii pe pietris fiindca
-			# stateau in mijlocul bermei, departe de perete. Poala de grohotis
-			# se sprijina PE perete.
-			var off4: float = hw4 + 4.2 + rng.randf_range(0.0, 3.4)
-			var q4: Vector3 = p4 + sv * off4
+		# 4-7, nu 7-11. Cu 11 ieseau 224 de blocuri si 396k triunghiuri: garda
+		# trece (materialele raman 8 din 22, fiindca e ACELASI GLB), dar 285 de
+		# desene pentru o poala de moloz e fix capcana din CLAUDE.md — un chip
+		# de 2.6 m care instantiaza un mesh de 1208 triunghiuri. Seama se rupe
+		# la fel de bine cu jumatate din piese, fiindca ce o rupe e neregula
+		# conturului, nu numarul de blocuri (aceeasi lectie ca "mai mult zid nu
+		# e mai mult canion").
+		for j in range(rng.randi_range(4, 7)):
+			# t = 0 lipit de perete, t = 1 la 9 m in fata lui.
+			var t: float = pow(rng.randf(), 0.55)
+			# Rarire spre exterior: departe, jumatate din incercari cad.
+			if rng.randf() < t * 0.55:
+				continue
+			var off4: float = hw4 + CLEAR_M - 3.4 + t * 8.0
+			# Deplasare mica IN LUNGUL drumului, pe langa cea laterala. Fara
+			# ea toate blocurile de pe un pas stau pe aceeasi normala si se
+			# aliniaza in evantai; cu ea, poala e imprastiata in doua axe.
+			var along: float = rng.randf_range(-7.0, 7.0)
+			var q4: Vector3 = p4 + sv * off4 + d4 * along
 			var g4: float = track._sampler.ground_y(q4.x, q4.z)
-			# Cele mai multe mici, cateva medii: o poala de grohotis, nu un
-			# sir de bolovani egali.
-			# Bolovani, nu pietris: referinta are blocuri de 2-4 m cazute din
-			# perete. La 0.45-1.15 m ieseau pietricele — sub pragul la care
-			# ochiul le mai citeste ca roca desprinsa.
-			var big: bool = rng.randf() < 0.45
-			var base_m: float = 3.04 if big else 1.63
-			var want_m: float = rng.randf_range(2.4, 4.2) if big else rng.randf_range(1.1, 2.1)
-			rubble.append({"big": big, "x": q4.x, "y": g4 - want_m * 0.22,
-				"z": q4.z, "yaw": rng.randf_range(0.0, TAU),
-				"sc": want_m / base_m})
-		f2 += 0.0055
+			# Marimea creste cu distanta: 1.4 m langa perete, pana la 4.6 m
+			# afara. Modulul are 20.3 m, deci scara e metri / 20.3 — derivata
+			# din marimea reala a GLB-ului, nu un factor ghicit.
+			# Marimea variaza LARG (0.62..1.45), nu 0.8..1.25, si asta e o
+			# reparatie de artefact, nu de compozitie. Blocurile sunt acelasi
+			# mesh; cand doua ajung la scari apropiate si se intrepatrund, au
+			# fete COPLANARE care se bat pe adancime — pe captura ieseau pete
+			# negre pe grohotis (masurat: 69 de perechi din 93 se intrepatrund
+			# adanc). Cu scari clar diferite, fetele nu mai cad in acelasi plan.
+			var want_m: float = lerpf(2.6, 6.4, t) * rng.randf_range(0.62, 1.45)
+			var sc4: float = want_m / MOD_LEN
+			# INGROPAT pe un sfert: un bloc desprins se aseaza in pamant, nu
+			# sta pe el. Asta e si ce sterge muchia dintre perete si sol.
+			rubble.append({"x": q4.x, "y": g4 - want_m * rng.randf_range(0.16, 0.40), "z": q4.z,
+				"yaw": rng.randf_range(0.0, TAU),
+				"pitch": rng.randf_range(-0.5, 0.5),
+				"sc": sc4})
+		f2 += 0.0040
 	var rtxt := ""
 	for r2 in rubble:
-		rtxt += "%d	%.3f	%.3f	%.3f	%.4f	%.4f
+		rtxt += "%.3f	%.3f	%.3f	%.4f	%.4f	%.5f
 " % [
-			1 if r2["big"] else 0, r2["x"], r2["y"], r2["z"], r2["yaw"], r2["sc"]]
+			r2["x"], r2["y"], r2["z"], r2["yaw"], r2["pitch"], r2["sc"]]
 	var fr := FileAccess.open("res://canyon_d_rubble.txt", FileAccess.WRITE)
 	fr.store_string(rtxt)
 	fr.close()

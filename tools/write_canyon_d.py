@@ -12,7 +12,25 @@ import sys
 
 TSCN = "scenes/tracks/Track13.tscn"
 ROWS = "canyon_d_rows.txt"
+RUBBLE = "canyon_d_rubble.txt"
 BASE = "DecorManual/D) Canionul rosu"
+
+
+def basis_pitch(yaw: float, pitch: float, sc: float) -> str:
+    """Ca `basis`, dar cu o inclinare in jurul axei X inainte de yaw.
+
+    Bolovanii de grohotis nu stau drepti: fara pitch, 61 de blocuri cu aceeasi
+    axa verticala ar reface exact "randul de placi paralele" pentru care a
+    picat peretele lui POI F.
+    """
+    cy, sy = math.cos(yaw), math.sin(yaw)
+    cp, sp = math.cos(pitch), math.sin(pitch)
+    # Ry * Rx, pe coloane.
+    x = (cy, 0.0, -sy)
+    y = (sy * sp, cp, cy * sp)
+    z = (sy * cp, -sp, cy * cp)
+    v = [c * sc for c in (x + y + z)]
+    return ", ".join("%.5f" % c for c in v)
 
 
 def basis(yaw: float, sc: float) -> str:
@@ -43,6 +61,15 @@ def main() -> int:
                      "y": float(p[4]), "z": float(p[5]), "yaw": float(p[6]),
                      "sc": float(p[7])})
 
+    rubble = []
+    for line in open(RUBBLE, encoding="utf-8"):
+        if not line.strip():
+            continue
+        p = line.split("	")
+        rubble.append({"x": float(p[0]), "y": float(p[1]), "z": float(p[2]),
+                       "yaw": float(p[3]), "pitch": float(p[4]),
+                       "sc": float(p[5])})
+
     text = open(TSCN, encoding="utf-8").read()
     cut = text.index('[node name="Faleza" type="Node3D"')
     head = text[:cut]
@@ -68,8 +95,19 @@ def main() -> int:
             basis(r["yaw"], r["sc"]), r["x"], r["y"], r["z"]))
         out.append("")
 
+    out.append('[node name="Grohotis" type="Node3D" parent="%s"]' % BASE)
+    out.append("")
+    for i, r in enumerate(rubble, 1):
+        out.append('[node name="Bloc_%02d" parent="%s/Grohotis" '
+                   'instance=ExtResource("9_band")]' % (i, BASE))
+        out.append("transform = Transform3D(%s, %.3f, %.3f, %.3f)" % (
+            basis_pitch(r["yaw"], r["pitch"], r["sc"]),
+            r["x"], r["y"], r["z"]))
+        out.append("")
+
     open(TSCN, "w", encoding="utf-8", newline="\n").write(head + "\n".join(out))
-    print("faleza=%d buza=%d total=%d" % (n_fal, n_bz, n_fal + n_bz))
+    print("faleza=%d buza=%d grohotis=%d total=%d" % (
+        n_fal, n_bz, len(rubble), n_fal + n_bz + len(rubble)))
     return 0
 
 

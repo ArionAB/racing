@@ -3188,6 +3188,9 @@ func rebuild() -> void:
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
+	# Umbrele de contact DUPA teren: fiecare disc isi citeste cota din sampler,
+	# si trebuie sa cada peste asfalt/nisip, nu sub ele.
+	_build_prop_contact()
 	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
 	_build_water()
 	_build_world_bounds()
@@ -4010,6 +4013,7 @@ func _build_terrain() -> void:
 	var heights := _terr_heights
 	# Pozitiile falezelor, pentru umbra coapta de la baza lor.
 	var cliff_xz := _cliff_positions()
+	# Discurile de contact ale decorului manual — vezi _prop_contact_discs.
 	# Vegetatia de uscat: vezi "inland_tint" in themes(). Null pe pistele fara
 	# tema de insula, deci restul lumii nu se schimba cu un pixel.
 	var inland: Variant = theme_flag("inland_tint", null)
@@ -5459,12 +5463,240 @@ const CLIFF_AO_RADIUS: float = 14.0
 ## fin si omniprezent, umbra dinamica face directia si forma.
 const CLIFF_AO_STRENGTH: float = 0.22
 
+## UMBRA DE CONTACT la baza prop-urilor asezate de mana (runda 31).
+##
+## Criticul orb, doua runde la rand: "fara ele obiectul citeste ca plutind chiar
+## si asezat corect". Verificat pe captura de la frac 0.06 — baza hornurilor
+## intalnea umarul soselei printr-o simpla linie, fara nicio inchidere de
+## valoare, iar smocul de iarba de langa ea la fel.
+##
+## Mecanismul exista deja (`_cliff_shadow`), dar primea DOAR nodurile din
+## "Cliffs". Pe Cappadocia hornurile stau in DecorManual, deci nu intra niciunul
+## — de-aia pista n-avea contact nicaieri langa drum.
+##
+## Raza nu poate fi cea a falezei (14 m): un horn de 3 m diametru ar fi pus o
+## pata de 28 m peste tot carosabilul. Se deriva din GABARITUL fiecarei piese
+## (AABB-ul ei in spatiul lumii), plafonata ca o piesa uriasa sa nu spele zona.
+const PROP_AO_RADIUS_SCALE: float = 0.9
+const PROP_AO_RADIUS_MAX: float = 6.0
+const PROP_AO_RADIUS_MIN: float = 0.8
+## Mai slaba decat la faleze: sunt multe si se suprapun langa drum.
+const PROP_AO_STRENGTH: float = 0.26
+
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
 ##
 ## Se citesc din arbore, nu se recalculeaza: TrackCliffs are propriile filtre
 ## (ferestre libere, gol in jurul landmark-urilor, sloturi respinse), iar o a doua
 ## implementare a acelorasi reguli ar diverge la prima ajustare.
+## Discurile de contact ale prop-urilor din DecorManual: (x, z, raza, cota bazei).
+##
+## Se merge pe TOT subarborele, nu doar pe copiii directi: decorul manual e
+## grupat pe zone ("ZoneB_PadureaHornurilor"), deci copiii directi ai lui
+## DecorManual sunt grupuri, nu piese.
+##
+## Raza vine din AABB-ul vizual al piesei, transformat in lumea. Piesele fara
+## mesh (marker-e, noduri de organizare) nu produc disc.
+func _prop_contact_discs() -> PackedVector4Array:
+	var out := PackedVector4Array()
+	var root := get_node_or_null("DecorManual")
+	if root == null:
+		return out
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		var n3 := n as Node3D
+		if n3 == null or n3 == root or not n3.visible:
+			continue
+		var aabb := _visual_aabb(n3)
+		if aabb.size == Vector3.ZERO:
+			continue
+		var gp := n3.global_position
+		# Raza din jumatatea diagonalei ORIZONTALE a gabaritului.
+		var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		var r := clampf(half * PROP_AO_RADIUS_SCALE,
+				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
+		# memoria "Kit assets Cappadocia"), deci originea unui horn poate fi la
+		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
+		var base_y := gp.y + aabb.position.y
+		out.append(Vector4(gp.x, gp.z, r, base_y))
+	return out
+
+
+## AABB-ul vizual al unui nod, in metri de lume, adunat din mesh-urile lui.
+##
+## `visible` se testeaza pe fiecare mesh: GLB-urile multi-varianta isi tin
+## variantele stinse in acelasi arbore (vezi CLAUDE.md), iar o varianta stinsa
+## n-are voie sa puna umbra.
+func _visual_aabb(n: Node3D) -> AABB:
+	var acc := AABB()
+	var have := false
+	# Piesele cu scara ZERO pe o axa (variante turtite, placeholder-e) au
+	# baza singulara, iar `affine_inverse()` pe ea logheaza "det == 0" la
+	# fiecare apel. Nu au gabarit, deci nici disc.
+	var base := n.global_transform.basis
+	if absf(base.determinant()) < 0.000001:
+		return acc
+	var inv := n.global_transform.affine_inverse()
+	var stack: Array[Node] = [n]
+	while not stack.is_empty():
+		var cur: Node = stack.pop_back()
+		var cur3 := cur as Node3D
+		if cur3 != null and not cur3.visible:
+			continue
+		for c in cur.get_children():
+			stack.append(c)
+		var mi := cur as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		# In spatiul lui `n`, ca raza sa nu depinda de unde e pista in lume.
+		if absf(mi.global_transform.basis.determinant()) < 0.000001:
+			continue
+		var rel := inv * mi.global_transform
+		var box := rel * mi.mesh.get_aabb()
+		if have:
+			acc = acc.merge(box)
+		else:
+			acc = box
+			have = true
+	return acc if have else AABB()
+
+
+## Umbra de contact a prop-urilor, ca factor multiplicativ (1.0 = neatins).
+##
+## Aceeasi cadere patratica ca la faleze, dar cu raza PER DISC: un horn subtire
+## inchide 2 m in jurul lui, un zid de vale inchide 6.
+## Umbrele de contact, ca GEOMETRIE pe sol — un disc sub fiecare prop.
+##
+## DE CE NU IN CULOAREA DE VERTEX A TERENULUI, unde sta deja AO-ul falezelor:
+## masurat, si e o limita structurala, nu o reglare. Grila de teren are pasul de
+## 7.88 m (`_terrain_grid`: 900 m impartit la TERRAIN_CELL, dimensionat pe
+## bugetul de triunghiuri), iar razele de contact sunt de 0.8-6 m. Umbra cade
+## INTRE varfuri, deci nu exista purtator care s-o tina: prima varianta a rulat
+## cu 728 de discuri corect calculate si a schimbat imaginea cu maximum 10/255
+## pe un singur pixel (medie 0.03) — adica un efect care se numara si nu se vede,
+## exact capcana din CLAUDE.md. Terenul nu poate fi indesit: pasul lui e ales de
+## bugetul de triunghiuri, nu de umbre.
+##
+## Deci discurile se emit ca geometrie proprie, cu alfa in culoarea de vertex:
+## rezolutia lor nu mai depinde de grila. UN singur mesh si UN singur material
+## pentru toata pista — garda numara materiale, si asta aduce +1.
+const PROP_AO_SEGMENTS: int = 10
+## Cat de sus deasupra solului sta discul, ca sa nu intre in z-fighting cu el.
+const PROP_AO_LIFT: float = 0.04
+## Cat de sus fata de terenul samplerului mai poate sta baza unei piese ca sa
+## primeasca totusi disc. Peste atat, piesa sta pe decor (mal, stanca, pod) si
+## un disc pe teren ar pluti in aer sub ea.
+const PROP_AO_SEAT_TOL: float = 1.2
+
+func _build_prop_contact() -> void:
+	var discs := _prop_contact_discs()
+	if discs.is_empty():
+		return
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for d in discs:
+		var cx: float = d.x
+		var cz: float = d.y
+		var r: float = d.z
+		# Evantai de triunghiuri: centrul opac, marginea complet transparenta.
+		# Culoarea e NEAGRA peste tot, doar alfa variaza — asa discul intuneca
+		# orice suprafata pe care cade (nisip, asfalt, kerb) fara sa-i schimbe
+		# nuanta.
+		var gy := _sampler.ground_y(cx, cz)
+		# DISCUL SE EMITE DOAR DACA PIESA CHIAR STA PE TERENUL SAMPLERULUI.
+		#
+		# Prima varianta le emitea pentru toate cele 728: pe malul din dreapta,
+		# unde hornurile stau pe decor (nu pe teren), discul iesea din panta si
+		# se vedea din lateral ca o LIMBA NEAGRA — o umbra privita pe muchie e
+		# o silueta, nu un contact. Se vedea pe captura, nu in cifre: diferenta
+		# fata de cadrul precedent era deja "reala" (max 235) si complet gresita.
+		#
+		# Testul e pe cota: daca baza piesei e mai sus decat terenul de sub ea cu
+		# mai mult decat toleranta, piesa nu se sprijina pe teren si nu primeste
+		# disc. Pasarile si baloanele cad tot aici, gratis.
+		if absf(d.w - gy) > PROP_AO_SEAT_TOL:
+			continue
+		var cy := gy + PROP_AO_LIFT
+		var dark := 1.0 - PROP_AO_STRENGTH
+		for i in PROP_AO_SEGMENTS:
+			var a0 := TAU * float(i) / float(PROP_AO_SEGMENTS)
+			var a1 := TAU * float(i + 1) / float(PROP_AO_SEGMENTS)
+			var p0 := Vector2(cos(a0), sin(a0)) * r
+			var p1 := Vector2(cos(a1), sin(a1)) * r
+			# Fiecare vertex isi ia cota LUI din sampler, dar LIMITATA la un
+			# plafon fata de centru. Fara limita, pe malurile abrupte de langa
+			# drum discul se ridica odata cu panta si ajunge aproape vertical —
+			# adica se vede din lateral ca o pata neagra, nu ca un contact.
+			var v0 := Vector3(cx, cy, cz)
+			var v1 := Vector3(cx + p0.x,
+					_rim_y(cx + p0.x, cz + p0.y, cy), cz + p0.y)
+			var v2 := Vector3(cx + p1.x,
+					_rim_y(cx + p1.x, cz + p1.y, cy), cz + p1.y)
+			# CENTRUL E GRI, NU NEGRU, si asta e o reparatie masurata, nu un
+			# gust. Cu BLEND_MODE_MUL un vertex negru inmulteste pixelul cu
+			# zero; un disc prins pe muchie in golul dintre sosea si teren
+			# picta atunci o PANA NEAGRA peste umar (se vedea pe captura, in
+			# stanga jos). Cu gri, cel mai intunecat caz ramane o umbra.
+			st.set_color(Color(dark, dark, dark, 1.0))
+			st.set_normal(Vector3.UP)
+			st.add_vertex(v0)
+			st.set_color(Color.WHITE)
+			st.set_normal(Vector3.UP)
+			st.add_vertex(v1)
+			st.set_color(Color.WHITE)
+			st.set_normal(Vector3.UP)
+			st.add_vertex(v2)
+	var mesh := st.commit()
+	if mesh == null or mesh.get_surface_count() == 0:
+		return
+	var inst := MeshInstance3D.new()
+	inst.name = "PropContact"
+	inst.mesh = mesh
+	inst.material_override = _prop_contact_material()
+	# Nu arunca umbra: e deja o umbra.
+	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(inst)
+
+
+## Cota unui vertex de pe marginea discului: urmareste terenul, dar nu se
+## departeaza de centru mai mult decat PROP_AO_RELIEF. Asa discul ramane o pata
+## intinsa pe sol si pe teren frant, in loc sa devina o panza verticala.
+const PROP_AO_RELIEF: float = 0.6
+
+func _rim_y(wx: float, wz: float, center_y: float) -> float:
+	var y := _sampler.ground_y(wx, wz) + PROP_AO_LIFT
+	return clampf(y, center_y - PROP_AO_RELIEF, center_y + PROP_AO_RELIEF)
+
+
+var _prop_ao_mat: StandardMaterial3D
+
+func _prop_contact_material() -> StandardMaterial3D:
+	if _prop_ao_mat != null:
+		return _prop_ao_mat
+	var m := StandardMaterial3D.new()
+	# NEILUMINAT: o umbra nu se lumineaza de la soare. Fara asta discul primea
+	# lumina directionala si se DESCHIDEA exact acolo unde bate soarele, adica
+	# fix unde trebuia sa fie mai inchis.
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	# MUL fara canal alfa: intunecarea e in CULOARE (gri spre alb la margine),
+	# nu in transparenta. Alb = 1.0 = identitatea inmultirii, deci marginea
+	# discului dispare exact ca inainte, dar fara ca alfa sa mai poata scoate
+	# un contur.
+	m.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+	m.vertex_color_use_as_albedo = true
+	m.albedo_color = Color.WHITE
+	# Fara scriere in adancime: sunt suprafete transparente lipite de sol.
+	m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	m.cull_mode = BaseMaterial3D.CULL_BACK
+	_prop_ao_mat = m
+	return _prop_ao_mat
+
+
 func _cliff_positions() -> PackedVector2Array:
 	var out := PackedVector2Array()
 	var cliffs := get_node_or_null("Cliffs")

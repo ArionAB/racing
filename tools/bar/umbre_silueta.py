@@ -72,6 +72,19 @@ def main():
         ok = an_o <= 0.15
         print("VERDICT: %s (tinta: anizotropie <= 0.15 — muchii din FORME, nu "
               "dungi de dala)" % ("OK" if ok else "PICAT"))
+        print("")
+        print("ATENTIE (runda 31): pragul 0.15 NU e comparabil intre cele doua")
+        print("imagini, fiindca banda masurata nu contine acelasi TIP de lucru.")
+        print("Referinta B_chimneys e o vedere AERIANA: in banda ei de jos intra")
+        print("zeci de hornuri, un canion in strate, copaci si bolovani — deci")
+        print("muchiile ei vin din siluete si ies izotrope (0.02). Cadrul nostru")
+        print("de la --driver are in aceeasi banda CAROSABIL gol, care n-are")
+        print("siluete de proiectat. Masurat pe un petic de sol GOL al")
+        print("referintei insesi (x 300..470, y 95..150): anizotropie 0.30 —")
+        print("adica referinta ar PICA propriul prag pe suprafata ei de sol.")
+        print("Cifra ramane utila ca A/B pe ACELASI cadru (a prins filtrarea")
+        print("razanta: 0.55 -> 0.30 cu umbrele stinse), dar 0.15 nu se atinge")
+        print("mutand umbre — se atinge punand FORME in banda.")
         return 0 if ok else 1
     return 0
 

@@ -184,7 +184,7 @@ func _ready() -> void:
 	acc.sort_custom(func(a, b): return a[0] > b[0])
 	print("")
 	print("LUMINANTA pe fata, per obiect (imagine randata):")
-	print("  nume                 d_m   px_lum  L_lum   px_umb  L_umb    DELTA   px_tot  script")
+	print("  nume                                d_m   px_lum  L_lum   px_umb  L_umb    DELTA   px_tot  script")
 	var shown := 0
 	for r in acc:
 		if shown >= top:
@@ -196,7 +196,7 @@ func _ready() -> void:
 			flag = "  OK" if absf(delta) >= 60.0 else "  PLAT"
 		else:
 			flag = "  (prea putini pixeli pe o fata)"
-		print("  %-18s %5.1f  %6d  %6.1f  %6d  %6.1f  %+7.1f  %6d  %-22s%s"
+		print("  %-33s %5.1f  %6d  %6.1f  %6d  %6.1f  %+7.1f  %6d  %-22s%s"
 				% [r[1], r[2], r[3], r[4], r[5], r[6], delta, r[0], r[7], flag])
 	print("")
 	print("  tinta criticului: |DELTA| >= 60/255")
@@ -249,6 +249,13 @@ func _aplica_variante(track: Node, sun: DirectionalLight3D, env: Environment,
 ## StandardMaterial3D (`world_material`) si ShaderMaterial
 ## (`faded_detail_material`). Materialele sunt obiecte PARTAJATE pe toata pista,
 ## deci o singura atingere le schimba peste tot — exact ce vrem la un control.
+## Nu ajunge `vertex_color_use_as_albedo = false`: aia e cheie de
+## StandardMaterial3D, iar prop-urile care conteaza poarta ShaderMaterial
+## (`prop_detail_fade`), unde vertex color-ul intra neconditionat prin
+## `ALBEDO = base.rgb * COLOR.rgb * det`, fara uniforma care sa-l stinga.
+## Un control care ar fi umblat doar pe material ar fi raportat "vcol stins"
+## lasandu-l aprins exact pe obiectele masurate. Se albeste deci CHIAR
+## atributul de culoare al mesh-ului: alb = identitatea inmultirii.
 func _fara_vcol(n: Node) -> void:
 	var mi := n as MeshInstance3D
 	if mi != null:
@@ -256,11 +263,28 @@ func _fara_vcol(n: Node) -> void:
 			var sm := m as StandardMaterial3D
 			if sm != null:
 				sm.vertex_color_use_as_albedo = false
-			var shm := m as ShaderMaterial
-			if shm != null:
-				shm.set_shader_parameter("vcol_amount", 0.0)
+		if mi.mesh is ArrayMesh:
+			mi.mesh = _mesh_alb(mi.mesh as ArrayMesh)
 	for c in n.get_children():
 		_fara_vcol(c)
+
+
+func _mesh_alb(src: ArrayMesh) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr: Array = src.surface_get_arrays(s)
+		var cols: PackedColorArray = PackedColorArray()
+		if arr[Mesh.ARRAY_COLOR] != null:
+			cols = arr[Mesh.ARRAY_COLOR]
+		if cols.is_empty():
+			out.add_surface_from_arrays(src.surface_get_primitive_type(s), arr)
+		else:
+			for i in cols.size():
+				cols[i] = Color.WHITE
+			arr[Mesh.ARRAY_COLOR] = cols
+			out.add_surface_from_arrays(src.surface_get_primitive_type(s), arr)
+		out.surface_set_material(s, src.surface_get_material(s))
+	return out
 
 
 func _fara_detaliu(n: Node) -> void:
@@ -334,7 +358,15 @@ func _rasterizeaza(n: Node) -> void:
 		var scr := "-"
 		if own != null:
 			scr = String(own.get_script().resource_path.get_file())
-			nm = String(own.name)
+			# NUMELE MESH-ULUI, nu al nodului cu script. Pe Chongqing si
+			# Stromboli tot decorul manual atarna de UN singur `DecorManual`
+			# cu script, deci numele proprietarului iese identic pe zeci de
+			# obiecte si raportul devine ilizibil — exact capcana din memoria
+			# `nume-noduri-nu-sunt-unice`. Se pastreaza numele mesh-ului, care
+			# e distinctiv, si se prefixeaza cu al parintelui cand exista.
+			var par := mi.get_parent()
+			if par != null and String(par.name) != String(mi.name):
+				nm = String(par.name) + "/" + String(mi.name)
 		var ab: AABB = mi.global_transform * mi.mesh.get_aabb()
 		var id := _nume.size()
 		_nume.append(nm)

@@ -132,8 +132,10 @@ func _ready() -> void:
 		if float(m["suma"]) > 0.08 or float(m["d2max"]) > 0.05:
 			flag = "  CURB"
 			rele += 1
-		if bool(m["taiat"]):
-			flag += " (taiat de cadru)"
+		if bool(m["taiat_sus"]):
+			flag += " (VARF taiat de cadru - profil incomplet)"
+		elif bool(m["taiat_jos"]):
+			flag += " (baza taiata de cadru)"
 		print("  %-18s %5.1f  %6d   %4d   %s  %+.3f  %.3f%s"
 				% [_nume[i], _dist[i], r[0], int(m["h_px"]), linie,
 					float(m["d2max"]), float(m["suma"]), flag])
@@ -352,7 +354,13 @@ func _masoara(id: int) -> Dictionary:
 	var hcorp := ybase - top + 1
 	if hcorp < 40 or wmax < 8:
 		return {}
-	var taiat := bot >= H - 1
+	# Marginile cadrului. Conteaza SUS mai mult decat jos: un horn caruia poza
+	# ii taie varful nu are esantionul de la varf, deci profilul lui incepe de
+	# la mijlocul corpului si nu e comparabil cu al unuia intreg. Cele doua
+	# siluete cele mai mari din cadru (hornUmbra8, hornSoare11) sunt exact in
+	# situatia asta — top = 0 la amandoua.
+	var taiat_sus := top <= 0
+	var taiat_jos := bot >= H - 1
 	var rat := PackedFloat32Array()
 	var raw := PackedFloat32Array()
 	for i in SAMPLES:
@@ -372,4 +380,5 @@ func _masoara(id: int) -> Dictionary:
 		suma += absf(v)
 		mx = maxf(mx, v)
 	return {"rat": rat, "suma": suma, "d2max": mx, "h_px": hcorp,
-		"top": top, "taiat": taiat, "poala": hpx - hcorp}
+		"top": top, "taiat_sus": taiat_sus, "taiat_jos": taiat_jos,
+		"poala": hpx - hcorp}

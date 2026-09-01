@@ -3527,12 +3527,61 @@ func _build_horizon(centroid: Vector3) -> void:
 			# directia lui), unul larg ramane exact cum era. Podeaua e la 55% din
 			# degajarea ceruta: sub ea silueta ar intra in campul de joc, si
 			# atunci e chiar mai bine sa lipseasca.
+			# PODEAUA RELAXARII CRESTE CU PIESA (runda 25).
+			#
+			# Runda 24 a pus podeaua la 55% din degajare, la fel pentru toate
+			# siluetele, si a umplut 6/6 sloturi. Captura de la volan arata insa
+			# ca pretul nu e uniform: cele doua masive Erciyes aduse mai aproape
+			# nu se citesc ca fundal, ci ca GEOMETRIE APROPIATA — doua triunghiuri
+			# palide care umplu centrul cadrului si mananca exact planul median pe
+			# care ar fi trebuit sa-l sugereze. Un butte mic la aceeasi degajare
+			# relaxata nu face raul asta.
+			#
+			# Cauza e ca podeaua se masura in procente din `clear`, adica dintr-o
+			# cifra de TEMA, fara sa stie cat de lata e piesa pe care o aseaza.
+			# Erciyes intra la scara 1.35 pe un inel cu scara proprie: la 55% din
+			# degajare, o cutie de sute de metri ajunge sa subintinda un unghi de
+			# obiect din prim-plan.
+			#
+			# Se leaga deci podeaua de SCARA inelului, nu de un procent fix: cu cat
+			# piesa e mai mare, cu atat i se permite mai putina relaxare. Un slot
+			# stramt cu o piesa mare ramane gol — si asta e alegerea corecta, o
+			# spune si captura: cer gol pe un arc e mai putin rau decat un munte
+			# care se preface ca e aproape. Sloturile cu piese mici se umplu in
+			# continuare, deci castigul rundei 24 nu se pierde tot.
+			#
+			# PRIMA INCERCARE A FOST PE SCARA INELULUI, SI N-A PRINS NIMIC.
+			# Masurat cu un print pe fiecare relaxare, pe Cappadocia:
+			#   RELAX inel scale=0.95 clear=110 -> 0.55 dist=190
+			#   RELAX inel scale=0.95 clear=110 -> 0.85 dist=352
+			# Amandoua relaxarile sunt pe inelul APROPIAT (scara 0.95), nu pe cel
+			# de 1.35 pe care il banuiam. O podea calculata din `ring["scale"]` le
+			# lasa pe amandoua sa treaca, fiindca scara lor e sub 1.
+			#
+			# Ce le desparte e DISTANTA, si acolo e si raul: una sta la 352 m
+			# (fundal curat, nimeni nu se plange de ea) si una la 190 m, adica pe
+			# muchia interioara a inelului. Aia e silueta pe care criticul o
+			# citeste ca geometrie apropiata — o piesa de sute de metri asezata la
+			# 190 m subintinde un unghi de obiect din prim-plan, oricat de
+			# "orizont" ar fi in intentie.
+			#
+			# Deci degajarea se negociaza doar in schimbul DEPARTARII: cu cat
+			# silueta e mai aproape, cu atat i se cere mai mult `clear`. La 190 m
+			# nu se relaxeaza deloc, spre 320 m se relaxeaza complet. Un slot
+			# stramt care nu-si permite nici asa ramane gol — si captura spune ca
+			# asa e mai bine: cer gol pe un arc e mai putin rau decat un munte
+			# care se preface ca e in fata ta.
 			var relaxari: Array[float] = [1.0, 0.85, 0.7, 0.55]
 			for relax in relaxari:
-				var prag := clear * relax
 				var dist: float = float(ring["near"])
 				while dist <= limit:
 					var cand := centroid 						+ Vector3(cos(angle), 0, sin(angle)) * dist
+					# Cat de mult are voie sa se relaxeze AICI: 0 la 190 m (adica
+					# `clear` intreg, fara negociere) si 1 de la 320 m in sus.
+					# Intre ele liniar, ca sa nu existe o raza pe care o silueta
+					# sare brusc mai aproape de drum.
+					var voie := clampf((dist - 190.0) / 130.0, 0.0, 1.0)
+					var prag: float = clear * (1.0 - (1.0 - relax) * voie)
 					if _road_distance_xz(cand) >= prag:
 						pos = cand
 						found = true

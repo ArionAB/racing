@@ -242,12 +242,40 @@ const CAP_SLOT: int = 20
 ## nu poate fi obtinut tunand termenii unul cate unul — a fost incercat in
 ## rundele 15-18, cu 53 de instante reglate de mana, si profilul a ramas sticla.
 ##
-## Deci se impune la sfarsit, pe raza FINALA: se construieste o anvelopa
-## monoton descrescatoare din profilul deja deformat si raza se taie la ea.
-## Taiere, nu scalare — un punct care respecta deja anvelopa nu se misca, deci
-## caneluri, fatete si zgomotul de contur raman neatinse. Se pierde doar ce
-## iesea in afara plicului, adica exact umarul si burta.
+## Deci se impune la sfarsit, pe raza FINALA: se construieste o DREAPTA din
+## profilul deja deformat si raza se trage catre ea.
+##
+## De ce DREAPTA si nu plafon (corectia rundei 20). Pana acum anvelopa era un
+## plafon: `min(raza_feliei, rampa)`. Un plafon e o inegalitate intr-o singura
+## directie, deci impune "nicio raza de deasupra nu o depaseste pe cea de la
+## baza" — dar ASTA E SATISFACUT SI DE O CEAPA. Unde forma era deja sub rampa,
+## curbura ei proprie supravietuia neatinsa, fiindca `min` nu urca niciodata
+## nimic. Rezultatul masurat in runda 19: silueta a incetat sa aiba gat, dar a
+## devenit dom — cea mai lata pe la 62% din inaltime, aproape verticala sub ea.
+##
+## Un profil de con nu e "monoton descrescator", e LINIAR: pasul de latire
+## trebuie sa fie ACELASI la fiecare cota. Pe hornEst2 pasii masurati erau
+## .07 .07 .19 .16 .05 .04 .06 .05 — latirea se ingramadea la mijloc si se
+## oprea aproape complet in jumatatea de jos. Un con drept i-ar vrea pe toti
+## 0.086. Inegalitatea nu putea vedea diferenta; egalitatea o vede.
+##
+## Deci: se potriveste o dreapta prin profil (cele mai mici patrate, ponderat cu
+## raza, ca varful subtire sa nu traga panta) si fiecare vertex se muta catre
+## raza dreptei la cota lui. `taper_min` ramane panta MINIMA ceruta — dreapta
+## potrivita nu are voie sa fie mai plata decat atat, altfel un horn aproape
+## cilindric ar ramane cilindru drept.
 @export_range(0.0, 0.60, 0.01) var taper_min: float = 0.0
+
+## Cat de tare se trage profilul pe dreapta. 1.0 = con matematic (si canelurile
+## dispar odata cu burta); 0 = forma nemiscata.
+##
+## Nu e un buton de gust, e echilibrul dintre cele doua lucruri pentru care s-a
+## lucrat: silueta dreapta si detaliul de suprafata. Tragerea muta raza MEDIE a
+## feliei pe dreapta, iar abaterile din interiorul feliei (caneluri, fatete,
+## zgomot de contur, buzele teraselor) se pastreaza scalate — deci silueta se
+## indreapta fara ca peretele sa devina neted. La 1.0 curbura masurata e sub
+## 0.02 pe toate hornurile, dar felia devine un cerc perfect.
+@export_range(0.0, 1.0, 0.05) var taper_straighten: float = 0.0
 
 ## Cate felii de cota are anvelopa. Mai multe = plic mai stramt pe forma, dar
 ## sub ~16 muchia de taiere se vede ca fateta.
@@ -652,7 +680,7 @@ func _ready() -> void:
 func _deform() -> void:
 	# Fara munca daca instanta e lasata pe valorile neutre: hornurile care chiar
 	# trebuie sa ramana drepte nu platesc duplicarea mesh-ului.
-	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step) 			and is_zero_approx(collar_pinch) 			and is_zero_approx(cap_flare) and is_zero_approx(cap_basalt) 			and is_zero_approx(arch_erode) and is_zero_approx(taper_min) 			and terrace_count < 2
+	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step) 			and is_zero_approx(collar_pinch) 			and is_zero_approx(cap_flare) and is_zero_approx(cap_basalt) 			and is_zero_approx(arch_erode) and is_zero_approx(taper_min) and is_zero_approx(taper_straighten) 			and terrace_count < 2
 	var extras_off := is_zero_approx(talus_spread) and door_count == 0 			and window_rows == 0
 	if shapes_off and extras_off:
 		return
@@ -878,7 +906,7 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 	# toti vertecsii deja mutati (inclusiv buzele de terasa, care sunt cele mai
 	# late puncte ale fiecarui prag si tocmai ele decid plicul); si taierea
 	# trebuie sa vada raza FINALA, nu un `scale` intermediar dintre operatii.
-	if not is_zero_approx(taper_min):
+	if not is_zero_approx(taper_min) or not is_zero_approx(taper_straighten):
 		out = _taper_monotone(out, cx, cz, y0, h)
 
 	var st := SurfaceTool.new()
@@ -964,6 +992,27 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 	var rmax := PackedFloat32Array()
 	rmax.resize(n)
 	rmax.fill(0.0)
+	# Raza REPREZENTATIVA a feliei, pe langa maxim: mediana razelor din felie.
+	#
+	# De ce nu ajunge maximul, si de ce asta a fost defectul rundei 20. Factorul
+	# de scalare e `tinta / referinta`. Cu referinta = MAXIM, felia in care cade
+	# o buza de terasa isi ia factorul de la buza: buza ajunge exact pe dreapta,
+	# iar PERETELE din aceeasi felie, care era mai ingust, se strange cu acelasi
+	# factor si ramane in urma. Buza devine silueta si peretele se retrage in
+	# spatele ei — adica un PRAG ORIZONTAL. In captura, conul din stanga-fata a
+	# capatat o polita la ~55% din inaltime si curbura masurata pe pixeli a
+	# URCAT de la 0.287 la 0.751, desi in spatiul mesh-ului toate hornurile se
+	# imbunatatisera (0.451 -> 0.300 pe hornEst1). Mesh-ul se indrepta, silueta
+	# se stirbea.
+	#
+	# Cu mediana, referinta e peretele — partea din felie care chiar formeaza
+	# silueta pe cea mai mare parte a azimutului. Buzele raman proportional mai
+	# late decat peretele, adica exact terasele pentru care s-a lucrat runda 18,
+	# in loc sa fie rase la linie.
+	var buckets: Array = []
+	buckets.resize(n)
+	for k in n:
+		buckets[k] = PackedFloat32Array()
 	for sfc in src.get_surface_count():
 		var arrays := src.surface_get_arrays(sfc)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -973,6 +1022,19 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 			var r := Vector2(v.x - cx, v.z - cz).length()
 			if r > rmax[k]:
 				rmax[k] = r
+			(buckets[k] as PackedFloat32Array).append(r)
+	var rmed := PackedFloat32Array()
+	rmed.resize(n)
+	for k in n:
+		var b: PackedFloat32Array = buckets[k]
+		if b.is_empty():
+			rmed[k] = 0.0
+			continue
+		b.sort()
+		rmed[k] = b[b.size() / 2]
+	for k in n:
+		if rmed[k] <= 0.0 and k > 0:
+			rmed[k] = rmed[k - 1]
 	# Felii goale (hornul nu are vertecsi la orice cota): mostenesc plafonul de
 	# dedesubt, altfel un zero ar strangula mesh-ul intr-un inel de grosime 0.
 	for k in n:
@@ -995,19 +1057,57 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 		lows.append(rmax[k])
 	lows.sort()
 	var base := lows[lows.size() / 2] if not lows.is_empty() else rmax[0]
+	# DREAPTA POTRIVITA pe profil, cele mai mici patrate ponderate.
+	#
+	# Ponderea e raza insasi. Fara ea, feliile subtiri de sub palarie (raza mica,
+	# dar tot atatea felii cate are corpul gros) trag panta la fel de tare ca
+	# baza, si dreapta iese prea plata — exact invers decat vrem. Cu ponderea,
+	# dreapta urmareste corpul care se vede, iar varful ascutit ramane ce e.
+	var sw := 0.0
+	var sx := 0.0
+	var sy := 0.0
+	var sxx := 0.0
+	var sxy := 0.0
 	for k in n:
 		var frac := float(k) / float(n - 1)
-		# Rampa LINIARA. Incercata si cea concava (`sqrt(frac)`), ca sa strange
-		# mai devreme si sa scoata umarul de la 30%: cifra de baza a urcat
-		# (1.26 -> 1.57 pe conul din stanga-fata) dar a doua diferenta s-a
-		# inrautatit (+0.109 -> +0.289) si in captura conul se intorcea spre
-		# clopot — radicalul musca din corpul de SUS si lasa fusta de jos
-		# neatinsa, adica muta umarul in loc sa-l scoata. Liniar, si umarul se
-		# rezolva unde e chiar cauza lui: poala de grohotis.
-		var ramp := base * (1.0 - taper_min * frac)
-		cap[k] = minf(rmax[k], ramp)
-		if k > 0:
-			cap[k] = minf(cap[k], cap[k - 1])
+		var wgt := rmed[k]
+		sw += wgt
+		sx += wgt * frac
+		sy += wgt * rmed[k]
+		sxx += wgt * frac * frac
+		sxy += wgt * frac * rmed[k]
+	var det := sw * sxx - sx * sx
+	var slope := 0.0
+	var icept := base
+	if absf(det) > 0.000001:
+		slope = (sw * sxy - sx * sy) / det
+		icept = (sy - slope * sx) / sw
+	# Panta MINIMA ceruta de `taper_min`, ca un horn deja aproape cilindric sa
+	# nu ramana cilindru (drept, dar nu con). Se pastreaza raza la mijloc cand
+	# se corecteaza panta, ca hornul sa nu-si schimbe volumul, doar conicitatea.
+	var min_slope := -taper_min * icept
+	if slope > min_slope:
+		var mid := icept + slope * 0.5
+		slope = min_slope
+		icept = mid - slope * 0.5
+	# Tinta pe felie: dreapta, interpolata cu forma proprie dupa `straighten`.
+	#
+	# AICI NU SE MAI APLICA NICI PLAFONUL `ramp`, NICI CLAMPUL MONOTON, si asta
+	# e chiar corectia rundei 20. Amandoua sunt inegalitati intr-o singura
+	# directie: pot doar sa COBOARE raza. Cu ele peste dreapta, o felie prea
+	# INGUSTA — peretele aproape vertical de sub burta, adica jumatatea de jos a
+	# domului — nu putea fi largita niciodata, fiindca `min` nu urca nimic. Se
+	# taia burta si atat, iar silueta ramanea o ceapa cu umerii rasi.
+	# Prima versiune a rundei 20 le pastrase pe amandoua "ca sa nu creasca
+	# umflatura la loc" si de-aia media abia s-a miscat (1.581 -> 1.450 la
+	# straighten 1.0, cand tinta era 0.08): dreapta era calculata corect si apoi
+	# aruncata de plafon. Umflatura nu revine fiindca dreapta e o EGALITATE —
+	# trage in jos ce iese in afara si in sus ce intra, ea insasi monotona cand
+	# panta e negativa, deci n-are nevoie de paznic.
+	for k in n:
+		var frac := float(k) / float(n - 1)
+		var lin := maxf(icept + slope * frac, 0.0)
+		cap[k] = lerpf(rmed[k], lin, taper_straighten)
 	var out := ArrayMesh.new()
 	for sfc in src.get_surface_count():
 		var arrays := src.surface_get_arrays(sfc)
@@ -1025,8 +1125,27 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 			var k0 := clampi(int(floor(u)), 0, n - 1)
 			var k1 := clampi(k0 + 1, 0, n - 1)
 			var lim := lerpf(cap[k0], cap[k1], clampf(u - float(k0), 0.0, 1.0))
-			if r > lim:
-				var f := lim / r
+			# Doua efecte, si ordinea conteaza.
+			#
+			# 1. SCALAREA catre dreapta. `cap` e acum o tinta, nu doar un
+			#    plafon, deci felia trebuie sa se poata si LATI — un plafon nu
+			#    putea repara o felie prea ingusta, si tocmai feliile prea
+			#    inguste de la baza faceau peretele vertical de sub burta.
+			#    Se scaleaza raportat la raza MAXIMA a feliei, deci abaterile
+			#    din interiorul feliei (caneluri, fatete, zgomot) se pastreaza
+			#    proportional: peretele se muta, nu se netezeste.
+			# 2. TAIEREA, dupa. Ce iese in continuare peste plafon se taie ca
+			#    inainte, fiindca scalarea unei felii cu o buza de terasa foarte
+			#    lata ar putea sa lase buza deasupra dreptei.
+			var rm := lerpf(rmed[k0], rmed[k1], clampf(u - float(k0), 0.0, 1.0))
+			var f := 1.0
+			if rm > 0.0001:
+				f = lerpf(1.0, lim / rm, taper_straighten)
+			# Fara taiere la `lim` dupa scalare: taierea ar fi ras exact buzele
+			# de terasa la dreapta si le-ar fi transformat inapoi in dungi
+			# pictate. Ce iese peste dreapta iese proportional, deci treapta
+			# ramane treapta, doar ca pe un corp drept.
+			if not is_equal_approx(f, 1.0):
 				v.x = cx + dx * f
 				v.z = cz + dz * f
 				verts[i] = v

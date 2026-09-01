@@ -96,6 +96,9 @@ func _ready() -> void:
 	var span_at := -1.0   # >= 0: faza pasajului rotativ (0 = deschis)
 	var zoom_size := 60.0
 	var driver_view := false
+	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
+	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
+	var cine := false
 	var game_cam := false
 	var free_cam := false
 	var eye_pos := Vector3.ZERO
@@ -144,6 +147,9 @@ func _ready() -> void:
 			free_cam = true
 		elif arg.begins_with("--look="):
 			look_pos = _vec3(arg.trim_prefix("--look="))
+		elif arg == "--cine":
+			cine = true
+			driver_view = true
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
@@ -319,6 +325,8 @@ func _ready() -> void:
 			"" if route_idx == 0 else "_ruta%d" % route_idx]
 		dimg.save_png(dout)
 		print("SNAPSHOT: ", dout)
+		if cine:
+			_cine_e_in_cadru(track, cam)
 		get_tree().quit()
 		return
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -598,3 +606,47 @@ func _smoothed(mesh: Mesh) -> ArrayMesh:
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return out
 
+
+
+## Ce obiect cade pe fiecare coloana din cadru, cu aceeasi camera ca poza.
+##
+## De ce e nevoie. `skyline_cones.py` raporteaza siluete dupa coloana X si
+## atat. Cand reglezi un parametru de horn si cifra conului din stanga-fata nu
+## se misca, sunt doua explicatii — parametrul n-are efect, sau conul ala nu e
+## un horn. Fara lista asta se poate itera la nesfarsit pe prima.
+func _cine_e_in_cadru(track: Node, cam: Camera3D) -> void:
+	var rows: Array = []
+	_proiecteaza(track, cam, rows)
+	rows.sort_custom(func(a, b): return a[1] < b[1])
+	print("CINE: obiecte cu peste 40 px inaltime, sortate pe coloana:")
+	for r in rows:
+		print("  x=%5d  h=%4d px  d=%5.1f m  %-24s %s"
+			% [r[1], r[2], r[4], r[0], r[3]])
+
+
+func _proiecteaza(n: Node, cam: Camera3D, out: Array) -> void:
+	var mi := n as MeshInstance3D
+	if mi != null and mi.mesh != null and mi.is_visible_in_tree():
+		var ab: AABB = mi.global_transform * mi.mesh.get_aabb()
+		var ctr := ab.get_center()
+		if not cam.is_position_behind(ctr):
+			var p := cam.unproject_position(ctr)
+			if p.x > -300.0 and p.x < 1580.0:
+				var top := cam.unproject_position(
+					Vector3(ctr.x, ab.position.y + ab.size.y, ctr.z))
+				var bot := cam.unproject_position(
+					Vector3(ctr.x, ab.position.y, ctr.z))
+				var hpx := int(absf(bot.y - top.y))
+				if hpx > 40:
+					var own := n
+					while own != null and own.get_script() == null:
+						own = own.get_parent()
+					var scr := "-"
+					var nm := String(mi.name)
+					if own != null:
+						scr = String(own.get_script().resource_path.get_file())
+						nm = String(own.name)
+					out.append([nm, int(p.x), hpx, scr,
+						cam.global_position.distance_to(ctr)])
+	for c in n.get_children():
+		_proiecteaza(c, cam, out)

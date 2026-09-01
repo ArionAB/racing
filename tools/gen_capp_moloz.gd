@@ -20,6 +20,18 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 60318
 	var space = get_tree().root.world_3d.direct_space_state
+	# Panza de teren, singura pe care are voie sa stea o aschie. Scena
+	# instantiata AICI contine deja padurea de hornuri, deci o raza care ia
+	# prima lovitura poate ateriza pe hull-ul unui horn si aseaza piatra la 20 m
+	# in aer (masurat: 8 piese intre 5.3 si 54.8 m in runda 29).
+	var terrain_rid := RID()
+	for c in t.get_children():
+		if str(c.name) == "TerrainBody":
+			terrain_rid = (c as StaticBody3D).get_rid()
+	var sus_y := -INF
+	for bp in r.baked:
+		sus_y = maxf(sus_y, bp.y)
+	sus_y += 120.0
 	var out := PackedStringArray()
 	out.append('[node name="MolozDeMargine" type="Node3D" parent="DecorManual"]\n')
 	var k := 0
@@ -39,10 +51,18 @@ func _ready() -> void:
 				var off: float = side * rng.randf_range(7.5, 15.0)
 				var along := rng.randf_range(-6.0, 6.0)
 				var xz: Vector3 = p + right * off + dir * along
+				# De sus de tot, si numai terenul conteaza: +60 m pornea din
+				# INTERIORUL panzei pe portiunile inalte (creasta trece de 100 m).
 				var q := PhysicsRayQueryParameters3D.create(
-					xz + Vector3.UP * 60.0, xz - Vector3.UP * 60.0)
+					Vector3(xz.x, sus_y, xz.z), Vector3(xz.x, sus_y - 900.0, xz.z))
+				q.collide_with_areas = false
 				var hit: Dictionary = space.intersect_ray(q)
-				if hit.is_empty():
+				var garda := 0
+				while not hit.is_empty() and hit["rid"] != terrain_rid and garda < 24:
+					q.exclude = q.exclude + [hit["rid"]]
+					hit = space.intersect_ray(q)
+					garda += 1
+				if hit.is_empty() or hit["rid"] != terrain_rid:
 					continue
 				var gy: float = hit["position"].y
 				# marimi mici: astea sunt aschii de margine, nu bolovani —

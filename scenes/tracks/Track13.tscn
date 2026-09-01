@@ -913,7 +913,7 @@ terrace_to = 0.82
 terrace_shade = 0.24
 
 [node name="hornEst6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.677817, 0, 0.762210, 0, 1.020000, 0, -0.762210, 0, 0.677817, 110.280, 45.450, 29.205)
+transform = Transform3D(0.677817, 0, 0.762210, 0, 1.020000, 0, -0.762210, 0, 0.677817, 110.280000, 45.192200, 29.205000)
 script = ExtResource("31_shape")
 taper_min = 0.555
 taper_straighten = 0.0
@@ -1004,7 +1004,7 @@ terrace_to = 0.82
 terrace_shade = 0.24
 
 [node name="hornEst8" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.619281, 0, -0.367275, 0, 0.720000, 0, 0.367275, 0, 0.619281, 88, 35.190, 76)
+transform = Transform3D(0.619281, 0, -0.367275, 0, 0.720000, 0, 0.367275, 0, 0.619281, 88, 23.746000, 76)
 script = ExtResource("31_shape")
 taper_min = 0.457
 taper_straighten = 0.0
@@ -1043,7 +1043,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornEst9" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.017402, 0, 0.899832, 0, 0.900000, 0, -0.899832, 0, -0.017402, 104, 42.280, 70)
+transform = Transform3D(-0.017402, 0, 0.899832, 0, 0.900000, 0, -0.899832, 0, -0.017402, 104, 25.076000, 70)
 script = ExtResource("31_shape")
 taper_min = 0.512
 taper_straighten = 0.0
@@ -1136,7 +1136,7 @@ terrace_to = 0.78
 terrace_shade = 0.26
 
 [node name="hornSoare2" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
-transform = Transform3D(-0.058093, 0, -0.955084, 0, 0.956849, 0, 0.955084, 0, -0.058093, -154.057739, 48.828373, 41.453499)
+transform = Transform3D(-0.058093, 0, -0.955084, 0, 0.956849, 0, 0.955084, 0, -0.058093, -154.057739, 48.235329, 41.453499)
 script = ExtResource("31_shape")
 taper_min = 0.552
 taper_straighten = 0.0
@@ -1184,7 +1184,7 @@ terrace_to = 0.82
 terrace_shade = 0.22
 
 [node name="hornUmbra3" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.701705, 0, 0.751563, 0, 1.028220, 0, -0.751563, 0, -0.701705, -143.853485, 48.789837, 67.744118)
+transform = Transform3D(-0.701705, 0, 0.751563, 0, 1.028220, 0, -0.751563, 0, -0.701705, -143.853485, 45.889641, 67.744118)
 script = ExtResource("31_shape")
 taper_min = 0.444
 taper_straighten = 0.0
@@ -1237,7 +1237,7 @@ terrace_to = 0.80
 terrace_shade = 0.24
 
 [node name="hornSpate4" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.348020, 0, 0.973377, 0, 1.033721, 0, -0.973377, 0, -0.348020, -137.803543, 48.737953, 77.736511)
+transform = Transform3D(-0.348020, 0, 0.973377, 0, 1.033721, 0, -0.973377, 0, -0.348020, -137.803543, 29.204681, 77.736511)
 script = ExtResource("31_shape")
 taper_min = 0.442
 taper_straighten = 0.0
@@ -1285,7 +1285,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornSoare5" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.765320, 0, 0.608180, 0, 1.114415, 0, -0.608180, 0, -0.765320, -142.667099, 48.680241, 41.057205)
+transform = Transform3D(-0.765320, 0, 0.608180, 0, 1.114415, 0, -0.608180, 0, -0.765320, -142.667099, 47.028214, 41.057205)
 script = ExtResource("31_shape")
 taper_min = 0.524
 taper_straighten = 0.0
@@ -1338,7 +1338,7 @@ terrace_to = 0.78
 terrace_shade = 0.20
 
 [node name="hornFund6" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.295128, 0, 0.893778, 0, 0.941244, 0, -0.893778, 0, -0.295128, -132.938110, 48.693501, 83.702377)
+transform = Transform3D(-0.295128, 0, 0.893778, 0, 0.941244, 0, -0.893778, 0, -0.295128, -132.938110, 26.695587, 83.702377)
 script = ExtResource("31_shape")
 taper_min = 0.480
 taper_straighten = 0.0
@@ -1386,7 +1386,7 @@ terrace_to = 0.78
 terrace_shade = 0.20
 
 [node name="hornSoare7" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.761155, 0, -0.711902, 0, 0.727500, 0, 0.711902, 0, -0.761155, -130.246475, 48.509777, 35.527699)
+transform = Transform3D(-0.761155, 0, -0.711902, 0, 0.727500, 0, 0.711902, 0, -0.761155, -130.246475, 46.283607, 35.527699)
 script = ExtResource("31_shape")
 taper_min = 0.512
 taper_straighten = 0.0
@@ -1439,7 +1439,7 @@ terrace_to = 0.78
 terrace_shade = 0.20
 
 [node name="hornUmbra8" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.985839, 0, -0.494792, 0, 1.103040, 0, 0.494792, 0, -0.985839, -120.119530, 48.483200, 59.369537)
+transform = Transform3D(-0.985839, 0, -0.494792, 0, 1.103040, 0, 0.494792, 0, -0.985839, -120.119530, 46.085754, 59.369537)
 script = ExtResource("31_shape")
 taper_min = 0.554
 taper_straighten = 0.0
@@ -1492,7 +1492,7 @@ terrace_to = 0.78
 terrace_shade = 0.26
 
 [node name="hornGemen9" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.448262, 0, 0.871893, 0, 0.872226, 0, -0.871893, 0, 0.448262, -121.482063, 48.505226, 60.778984)
+transform = Transform3D(0.448262, 0, 0.871893, 0, 0.872226, 0, -0.871893, 0, 0.448262, -121.482063, 45.718491, 60.778984)
 script = ExtResource("31_shape")
 taper_min = 0.561
 taper_straighten = 0.0
@@ -1545,7 +1545,7 @@ terrace_to = 0.78
 terrace_shade = 0.22
 
 [node name="hornGemen10" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(0.684909, 0, -0.006611, 0, 0.867817, 0, 0.006611, 0, 0.684909, -120.816429, 48.499813, 62.696751)
+transform = Transform3D(0.684909, 0, -0.006611, 0, 0.867817, 0, 0.006611, 0, 0.684909, -120.816429, 43.527901, 62.696751)
 script = ExtResource("31_shape")
 taper_min = 0.569
 taper_straighten = 0.0
@@ -1598,7 +1598,7 @@ terrace_to = 0.80
 terrace_shade = 0.20
 
 [node name="hornSoare11" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.991099, 0, -0.007392, 0, 0.991127, 0, 0.007392, 0, 0.991099, -120.035492, 48.365749, 32.400452)
+transform = Transform3D(0.991099, 0, -0.007392, 0, 0.991127, 0, 0.007392, 0, 0.991099, -120.035492, 46.126740, 32.400452)
 script = ExtResource("31_shape")
 taper_min = 0.565
 taper_straighten = 0.0
@@ -1651,7 +1651,7 @@ terrace_to = 0.80
 terrace_shade = 0.22
 
 [node name="hornSpate12" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
-transform = Transform3D(0.315693, 0, -0.958703, 0, 1.009343, 0, 0.958703, 0, 0.315693, -119.981705, 48.320400, 13.488955)
+transform = Transform3D(0.315693, 0, -0.958703, 0, 1.009343, 0, 0.958703, 0, 0.315693, -119.981705, 20.941589, 13.488955)
 script = ExtResource("31_shape")
 taper_min = 0.484
 taper_straighten = 0.0
@@ -1704,7 +1704,7 @@ terrace_to = 0.78
 terrace_shade = 0.20
 
 [node name="hornSoare13" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(1.020268, 0, 0.257040, 0, 1.052148, 0, -0.257040, 0, 1.020268, -106.022285, 48.183857, 28.245773)
+transform = Transform3D(1.020268, 0, 0.257040, 0, 1.052148, 0, -0.257040, 0, 1.020268, -106.022285, 47.840858, 28.245773)
 script = ExtResource("31_shape")
 taper_min = 0.443
 taper_straighten = 0.0
@@ -1757,7 +1757,7 @@ terrace_to = 0.80
 terrace_shade = 0.22
 
 [node name="hornUmbra14" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.832557, 0, -0.428741, 0, 0.562729, 0, 0.428741, 0, -0.832557, -97.957199, 48.114609, 52.843349)
+transform = Transform3D(-0.832557, 0, -0.428741, 0, 0.562729, 0, 0.428741, 0, -0.832557, -97.957199, 45.212883, 52.843349)
 script = ExtResource("31_shape")
 taper_min = 0.423
 taper_straighten = 0.0
@@ -1810,7 +1810,7 @@ terrace_to = 0.76
 terrace_shade = 0.24
 
 [node name="hornFund15" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.097861, 0, -0.934136, 0, 0.939247, 0, 0.934136, 0, -0.097861, -95.763847, 48.090702, 74.187820)
+transform = Transform3D(-0.097861, 0, -0.934136, 0, 0.939247, 0, 0.934136, 0, -0.097861, -95.763847, 26.090790, 74.187820)
 script = ExtResource("31_shape")
 taper_min = 0.517
 taper_straighten = 0.0
@@ -1858,7 +1858,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornSpate16" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.360642, 0, 0.788343, 0, 0.866918, 0, -0.788343, 0, -0.360642, -83.236092, 47.861614, 67.443039)
+transform = Transform3D(-0.360642, 0, 0.788343, 0, 0.866918, 0, -0.788343, 0, -0.360642, -83.236092, 28.325150, 67.443039)
 script = ExtResource("31_shape")
 taper_min = 0.510
 taper_straighten = 0.0
@@ -1911,7 +1911,7 @@ terrace_to = 0.78
 terrace_shade = 0.26
 
 [node name="hornSoare17" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.731486, 0, 0.833324, 0, 0.773778, 0, -0.833324, 0, 0.731486, -62.203613, 47.664604, 35.109364)
+transform = Transform3D(0.731486, 0, 0.833324, 0, 0.773778, 0, -0.833324, 0, 0.731486, -62.203613, 47.056740, 35.109364)
 script = ExtResource("31_shape")
 taper_min = 0.557
 taper_straighten = 0.0
@@ -1964,7 +1964,7 @@ terrace_to = 0.80
 terrace_shade = 0.24
 
 [node name="hornGemen18" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.961715, 0, -0.130386, 0, 0.970993, 0, 0.130386, 0, 0.961715, -61.883606, 47.665779, 34.072262)
+transform = Transform3D(0.961715, 0, -0.130386, 0, 0.970993, 0, 0.130386, 0, 0.961715, -61.883606, 46.969315, 34.072262)
 script = ExtResource("31_shape")
 taper_min = 0.550
 taper_straighten = 0.0
@@ -2017,7 +2017,7 @@ terrace_to = 0.82
 terrace_shade = 0.26
 
 [node name="hornGemen19" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(0.610671, 0, -0.292905, 0, 0.879935, 0, 0.292905, 0, 0.610671, -61.285084, 47.667973, 32.132500)
+transform = Transform3D(0.610671, 0, -0.292905, 0, 0.879935, 0, 0.292905, 0, 0.610671, -61.285084, 46.809723, 32.132500)
 script = ExtResource("31_shape")
 taper_min = 0.424
 taper_straighten = 0.0
@@ -2065,7 +2065,7 @@ terrace_to = 0.78
 terrace_shade = 0.22
 
 [node name="hornSoare20" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-1.036359, 0, 0.369115, 0, 1.100130, 0, -0.369115, 0, -1.036359, -50.466061, 47.544315, 37.425934)
+transform = Transform3D(-1.036359, 0, 0.369115, 0, 1.100130, 0, -0.369115, 0, -1.036359, -50.466061, 45.507294, 37.425934)
 script = ExtResource("31_shape")
 taper_min = 0.450
 taper_straighten = 0.0
@@ -2118,7 +2118,7 @@ terrace_to = 0.80
 terrace_shade = 0.22
 
 [node name="hornUmbra21" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-1.072488, 0, 0.067270, 0, 1.341913, 0, -0.067270, 0, -1.072488, -53.175625, 47.494034, 63.421898)
+transform = Transform3D(-1.072488, 0, 0.067270, 0, 1.341913, 0, -0.067270, 0, -1.072488, -53.175625, 43.856194, 63.421898)
 script = ExtResource("31_shape")
 taper_min = 0.565
 taper_straighten = 0.0
@@ -2171,7 +2171,7 @@ terrace_to = 0.76
 terrace_shade = 0.22
 
 [node name="hornSoare22" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-0.978301, 0, 0.338424, 0, 1.035183, 0, -0.338424, 0, -0.978301, -38.416603, 47.415291, 42.019226)
+transform = Transform3D(-0.978301, 0, 0.338424, 0, 1.035183, 0, -0.338424, 0, -0.978301, -38.416603, 47.066139, 42.019226)
 script = ExtResource("31_shape")
 taper_min = 0.495
 taper_straighten = 0.0
@@ -2224,7 +2224,7 @@ terrace_to = 0.80
 terrace_shade = 0.22
 
 [node name="hornSpate23" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
-transform = Transform3D(-0.306098, 0, 0.909675, 0, 0.959794, 0, -0.909675, 0, -0.306098, -29.940434, 47.336758, 28.653278)
+transform = Transform3D(-0.306098, 0, 0.909675, 0, 0.959794, 0, -0.909675, 0, -0.306098, -29.940434, 44.458870, 28.653278)
 script = ExtResource("31_shape")
 taper_min = 0.549
 taper_straighten = 0.0
@@ -2277,7 +2277,7 @@ terrace_to = 0.78
 terrace_shade = 0.20
 
 [node name="hornFund24" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.711199, 0, 0.408361, 0, 0.820099, 0, -0.408361, 0, -0.711199, -56.507610, 47.479019, 81.502121)
+transform = Transform3D(-0.711199, 0, 0.408361, 0, 0.820099, 0, -0.408361, 0, -0.711199, -56.507610, 25.568085, 81.502121)
 script = ExtResource("31_shape")
 taper_min = 0.549
 taper_straighten = 0.0
@@ -2325,7 +2325,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornSoare25" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.608353, 0, -0.738464, 0, 0.956777, 0, 0.738464, 0, -0.608353, -25.135277, 47.258083, 45.694035)
+transform = Transform3D(-0.608353, 0, -0.738464, 0, 0.956777, 0, 0.738464, 0, -0.608353, -25.135277, 46.573380, 45.694035)
 script = ExtResource("31_shape")
 taper_min = 0.488
 taper_straighten = 0.0
@@ -2380,7 +2380,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornUmbra26" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.737319, 0, -0.804326, 0, 1.091137, 0, 0.804326, 0, 0.737319, -31.821363, 47.246567, 71.329559)
+transform = Transform3D(0.737319, 0, -0.804326, 0, 1.091137, 0, 0.804326, 0, 0.737319, -31.821363, 43.358231, 71.329559)
 script = ExtResource("31_shape")
 taper_min = 0.568
 taper_straighten = 0.0
@@ -2434,7 +2434,7 @@ terrace_to = 0.80
 terrace_shade = 0.20
 
 [node name="hornSoare27" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.532941, 0, 0.824495, 0, 1.168864, 0, -0.824495, 0, 0.532941, -13.433457, 47.080200, 48.200642)
+transform = Transform3D(0.532941, 0, 0.824495, 0, 1.168864, 0, -0.824495, 0, 0.532941, -13.433457, 45.477310, 48.200642)
 script = ExtResource("31_shape")
 taper_min = 0.530
 taper_straighten = 0.0
@@ -2488,7 +2488,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornSoare28" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
-transform = Transform3D(-0.907520, 0, -0.236896, 0, 0.661449, 0, 0.236896, 0, -0.907520, -4.961630, 46.922104, 49.765991)
+transform = Transform3D(-0.907520, 0, -0.236896, 0, 0.661449, 0, 0.236896, 0, -0.907520, -4.961630, 46.930061, 49.765991)
 script = ExtResource("31_shape")
 taper_min = 0.573
 taper_straighten = 0.0
@@ -2542,7 +2542,7 @@ terrace_to = 0.82
 terrace_shade = 0.24
 
 [node name="hornUmbra29" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(0.387814, 0, 1.021130, 0, 1.092294, 0, -1.021130, 0, 0.387814, -2.959398, 46.877102, 76.837349)
+transform = Transform3D(0.387814, 0, 1.021130, 0, 1.092294, 0, -1.021130, 0, 0.387814, -2.959398, 43.913528, 76.837349)
 script = ExtResource("31_shape")
 taper_min = 0.502
 taper_straighten = 0.0
@@ -2597,7 +2597,7 @@ terrace_to = 0.78
 terrace_shade = 0.24
 
 [node name="hornSpate30" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(0.528682, 0, -0.903762, 0, 1.047039, 0, 0.903762, 0, 0.528682, 1.076405, 47.043091, 91.558548)
+transform = Transform3D(0.528682, 0, -0.903762, 0, 1.047039, 0, 0.903762, 0, 0.528682, 1.076405, 25.620422, 91.558548)
 script = ExtResource("31_shape")
 taper_min = 0.432
 taper_straighten = 0.0
@@ -2645,7 +2645,7 @@ terrace_to = 0.78
 terrace_shade = 0.20
 
 [node name="hornGemen31" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.691435, 0, 0.752140, 0, 0.947610, 0, -0.752140, 0, 0.691435, -6.046700, 46.913101, 77.555397)
+transform = Transform3D(0.691435, 0, 0.752140, 0, 0.947610, 0, -0.752140, 0, 0.691435, -6.046700, 42.807922, 77.555397)
 script = ExtResource("31_shape")
 taper_min = 0.434
 taper_straighten = 0.0
@@ -2699,7 +2699,7 @@ terrace_to = 0.76
 terrace_shade = 0.24
 
 [node name="hornGemen32" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(0.607215, 0, 0.390315, 0, 0.705370, 0, -0.390315, 0, 0.607215, -6.125904, 46.913311, 79.583847)
+transform = Transform3D(0.607215, 0, 0.390315, 0, 0.705370, 0, -0.390315, 0, 0.607215, -6.125904, 39.684647, 79.583847)
 script = ExtResource("31_shape")
 taper_min = 0.559
 taper_straighten = 0.0
@@ -2754,7 +2754,7 @@ terrace_to = 0.80
 terrace_shade = 0.20
 
 [node name="hornFund33" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("10_ch_a")]
-transform = Transform3D(0.215595, 0, 0.832597, 0, 0.860058, 0, -0.832597, 0, 0.215595, 5.703475, 48.132381, 98.908676)
+transform = Transform3D(0.215595, 0, 0.832597, 0, 0.860058, 0, -0.832597, 0, 0.215595, 5.703475, 24.789505, 98.908676)
 script = ExtResource("31_shape")
 taper_min = 0.451
 taper_straighten = 0.0
@@ -2802,7 +2802,7 @@ terrace_to = 0.76
 terrace_shade = 0.26
 
 [node name="hornSoare34" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-0.680084, 0, 0.657122, 0, 0.945686, 0, -0.657122, 0, -0.680084, 27.591257, 46.460754, 45.017784)
+transform = Transform3D(-0.680084, 0, 0.657122, 0, 0.945686, 0, -0.657122, 0, -0.680084, 27.591257, 45.156059, 45.017784)
 script = ExtResource("31_shape")
 taper_min = 0.446
 taper_straighten = 0.0
@@ -2856,7 +2856,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornSpate35" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("15_ch_tri")]
-transform = Transform3D(-0.011997, 0, -0.946505, 0, 0.946581, 0, 0.946505, 0, -0.011997, 30.108677, 46.449333, 33.746208)
+transform = Transform3D(-0.011997, 0, -0.946505, 0, 0.946581, 0, 0.946505, 0, -0.011997, 30.108677, 42.900002, 33.746208)
 script = ExtResource("31_shape")
 taper_min = 0.539
 taper_straighten = 0.0
@@ -2966,7 +2966,7 @@ terrace_to = 0.76
 terrace_shade = 0.20
 
 [node name="hornUmbra37" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.818336, 0, -0.670554, 0, 1.057977, 0, 0.670554, 0, -0.818336, 49.739971, 46.338741, 68.021042)
+transform = Transform3D(-0.818336, 0, -0.670554, 0, 1.057977, 0, 0.670554, 0, -0.818336, 49.739971, 43.818283, 68.021042)
 script = ExtResource("31_shape")
 taper_min = 0.509
 taper_straighten = 0.0
@@ -3020,7 +3020,7 @@ terrace_to = 0.80
 terrace_shade = 0.20
 
 [node name="hornSoare38" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.151346, 0, 1.027060, 0, 1.038151, 0, -1.027060, 0, 0.151346, 77.617874, 46.049881, 34.980461)
+transform = Transform3D(0.151346, 0, 1.027060, 0, 1.038151, 0, -1.027060, 0, 0.151346, 77.617874, 46.044716, 34.980461)
 script = ExtResource("31_shape")
 taper_min = 0.508
 taper_straighten = 0.0
@@ -3068,7 +3068,7 @@ terrace_to = 0.78
 terrace_shade = 0.20
 
 [node name="hornSoare39" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.935129, 0, 0.436308, 0, 1.031906, 0, -0.436308, 0, 0.935129, 89.628983, 45.829659, 33.086174)
+transform = Transform3D(0.935129, 0, 0.436308, 0, 1.031906, 0, -0.436308, 0, 0.935129, 89.628983, 45.813950, 33.086174)
 script = ExtResource("31_shape")
 taper_min = 0.440
 taper_straighten = 0.0
@@ -3122,7 +3122,7 @@ terrace_to = 0.82
 terrace_shade = 0.24
 
 [node name="hornUmbra40" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(0.850150, 0, 0.401438, 0, 0.940163, 0, -0.401438, 0, 0.850150, 96.911667, 45.793079, 56.386292)
+transform = Transform3D(0.850150, 0, 0.401438, 0, 0.940163, 0, -0.401438, 0, 0.850150, 96.911667, 42.944374, 56.386292)
 script = ExtResource("31_shape")
 taper_min = 0.553
 taper_straighten = 0.0
@@ -3230,7 +3230,7 @@ terrace_to = 0.78
 terrace_shade = 0.22
 
 [node name="hornFund42" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.612620, 0, -0.575096, 0, 0.840261, 0, 0.575096, 0, 0.612620, 106.416199, 45.609467, 79.189285)
+transform = Transform3D(0.612620, 0, -0.575096, 0, 0.840261, 0, 0.575096, 0, 0.612620, 106.416199, 22.746124, 79.189285)
 script = ExtResource("31_shape")
 taper_min = 0.477
 taper_straighten = 0.0
@@ -3311,7 +3311,7 @@ terrace_to = 0.82
 terrace_shade = 0.22
 
 [node name="hornCiot45" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("25_crk_a")]
-transform = Transform3D(-0.988671, 0, 0.382270, 0, 0.340000, 0, -0.382270, 0, -0.988671, -128.303528, 48.485619, 35.425484)
+transform = Transform3D(-0.988671, 0, 0.382270, 0, 0.340000, 0, -0.382270, 0, -0.988671, -128.303528, 46.437180, 35.425484)
 script = ExtResource("31_shape")
 taper_min = 0.524
 taper_straighten = 0.0
@@ -3363,7 +3363,7 @@ terrace_to = 0.82
 terrace_shade = 0.22
 
 [node name="hornCiot46" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("25_crk_a")]
-transform = Transform3D(0.894122, 0, -0.216672, 0, 0.420000, 0, 0.216672, 0, 0.894122, 35.789448, 46.437206, 71.805206)
+transform = Transform3D(0.894122, 0, -0.216672, 0, 0.420000, 0, 0.216672, 0, 0.894122, 35.789448, 42.131035, 71.805206)
 script = ExtResource("31_shape")
 taper_min = 0.539
 taper_straighten = 0.0
@@ -3416,10 +3416,10 @@ terrace_to = 0.78
 terrace_shade = 0.26
 
 [node name="hornCazut47" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("26_crk_b")]
-transform = Transform3D(-0.824389, 0, -0.566023, 0, 1.000000, 0, 0.566023, 0, -0.824389, -88.178658, 47.987179, 16.646290)
+transform = Transform3D(-0.824389, 0, -0.566023, 0, 1, 0, 0.566023, 0, -0.824389, -88.178658, 31.521866, 16.646290)
 
 [node name="hornCazut48" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("26_crk_b")]
-transform = Transform3D(0.803165, 0, -0.307452, 0, 0.860000, 0, 0.307452, 0, 0.803165, 75.652206, 46.120346, 76.240540)
+transform = Transform3D(0.803165, 0, -0.307452, 0, 0.860000, 0, 0.307452, 0, 0.803165, 75.652206, 28.578552, 76.240540)
 talus_spread = 0.132
 talus_rocks = 20
 talus_rock_max = 0.454194
@@ -3431,15 +3431,15 @@ strata_sharp = 0.66
 strata_light = 0.24
 
 [node name="moloz49" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.889926, 0, 0.083254, 0, 0.893812, 0, -0.083254, 0, 0.889926, -126.848701, 48.459641, 33.452320)
+transform = Transform3D(0.889926, 0, 0.083254, 0, 0.893812, 0, -0.083254, 0, 0.889926, -126.848701, 46.122795, 33.452320)
 metadata/coliziune = "none"
 
 [node name="moloz50" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("27_crk_c")]
-transform = Transform3D(-0.423960, 0, 0.641360, 0, 0.768820, 0, -0.641360, 0, -0.423960, -91.571030, 47.993076, 55.167915)
+transform = Transform3D(-0.423960, 0, 0.641360, 0, 0.768820, 0, -0.641360, 0, -0.423960, -91.571030, 41.846619, 55.167915)
 metadata/coliziune = "none"
 
 [node name="moloz51" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("27_crk_c")]
-transform = Transform3D(-0.292548, 0, -0.483880, 0, 0.565442, 0, 0.483880, 0, -0.292548, -7.926610, 46.984493, 46.168800)
+transform = Transform3D(-0.292548, 0, -0.483880, 0, 0.565442, 0, 0.483880, 0, -0.292548, -7.926610, 45.307724, 46.168800)
 metadata/coliziune = "none"
 talus_spread = 0.143
 talus_rocks = 21
@@ -3452,7 +3452,7 @@ strata_sharp = 0.67
 strata_light = 0.24
 
 [node name="moloz52" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.413068, 0, 0.595230, 0, 0.724517, 0, -0.595230, 0, 0.413068, 38.465984, 46.426956, 73.924866)
+transform = Transform3D(0.413068, 0, 0.595230, 0, 0.724517, 0, -0.595230, 0, 0.413068, 38.465984, 37.924408, 73.924866)
 metadata/coliziune = "none"
 talus_spread = 0.231
 talus_rocks = 21
@@ -3478,27 +3478,27 @@ strata_sharp = 0.78
 strata_light = 0.28
 
 [node name="plop54" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(0.269211, 0, 0.097084, 0, 0.286182, 0, -0.097084, 0, 0.269211, -138.595657, 45.612116, 37.308300)
+transform = Transform3D(0.269211, 0, 0.097084, 0, 0.286182, 0, -0.097084, 0, 0.269211, -138.595657, 45.873497, 37.308300)
 metadata/coliziune = "trunk"
 
 [node name="plop55" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(0.065994, 0, 0.220130, 0, 0.229810, 0, -0.220130, 0, 0.065994, -136.759521, 45.065832, 34.901836)
+transform = Transform3D(0.065994, 0, 0.220130, 0, 0.229810, 0, -0.220130, 0, 0.065994, -136.759521, 45.686707, 34.901836)
 metadata/coliziune = "trunk"
 
 [node name="plop56" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(-0.188331, 0, -0.215480, 0, 0.286182, 0, 0.215480, 0, -0.188331, -135.363617, 45.000000, 32.360222)
+transform = Transform3D(-0.188331, 0, -0.215480, 0, 0.286182, 0, 0.215480, 0, -0.188331, -135.363617, 45.434967, 32.360222)
 metadata/coliziune = "trunk"
 
 [node name="plop57" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(-0.265017, 0, -0.108008, 0, 0.286182, 0, 0.108008, 0, -0.265017, -56.449852, 43.916480, 65.290604)
+transform = Transform3D(-0.265017, 0, -0.108008, 0, 0.286182, 0, 0.108008, 0, -0.265017, -56.449852, 41.641022, 65.290604)
 metadata/coliziune = "trunk"
 
 [node name="plop58" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.225702, 0, -0.043257, 0, 0.229810, 0, 0.043257, 0, -0.225702, -52.494083, 40.332515, 68.600082)
+transform = Transform3D(-0.225702, 0, -0.043257, 0, 0.229810, 0, 0.043257, 0, -0.225702, -52.494083, 39.863190, 68.600082)
 metadata/coliziune = "trunk"
 
 [node name="plop59" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(0.117033, 0, 0.261157, 0, 0.286182, 0, -0.261157, 0, 0.117033, -50.981831, 37.873693, 70.248528)
+transform = Transform3D(0.117033, 0, 0.261157, 0, 0.286182, 0, -0.261157, 0, 0.117033, -50.981831, 38.563858, 70.248528)
 metadata/coliziune = "trunk"
 
 [node name="plop60" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
@@ -3510,19 +3510,19 @@ transform = Transform3D(-0.125396, 0, 0.192583, 0, 0.229810, 0, -0.192583, 0, -0
 metadata/coliziune = "trunk"
 
 [node name="plop62" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(-0.280981, 0, -0.054312, 0, 0.286182, 0, 0.054312, 0, -0.280981, 14.741268, 46.225304, 43.192017)
+transform = Transform3D(-0.280981, 0, -0.054312, 0, 0.286182, 0, 0.054312, 0, -0.280981, 14.741268, 45.972107, 43.192017)
 metadata/coliziune = "trunk"
 
 [node name="plop63" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(0.084644, 0, -0.273378, 0, 0.286182, 0, 0.273378, 0, 0.084644, 87.904083, 42.931293, 61.592773)
+transform = Transform3D(0.084644, 0, -0.273378, 0, 0.286182, 0, 0.273378, 0, 0.084644, 87.904083, 42.742073, 61.592773)
 metadata/coliziune = "trunk"
 
 [node name="plop64" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.092770, 0, 0.210253, 0, 0.229810, 0, -0.210253, 0, -0.092770, 90.078606, 42.799999, 62.575790)
+transform = Transform3D(-0.092770, 0, 0.210253, 0, 0.229810, 0, -0.210253, 0, -0.092770, 90.078606, 41.718399, 62.575790)
 metadata/coliziune = "trunk"
 
 [node name="plop65" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(0.244785, 0, -0.148257, 0, 0.286182, 0, 0.148257, 0, 0.244785, 94.305397, 35.900238, 64.612030)
+transform = Transform3D(0.244785, 0, -0.148257, 0, 0.286182, 0, 0.148257, 0, 0.244785, 94.305397, 34.900726, 64.612030)
 metadata/coliziune = "trunk"
 
 [node name="plopMediu66" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
@@ -3582,15 +3582,15 @@ transform = Transform3D(-0.219415, 0, -0.183731, 0, 0.286182, 0, 0.183731, 0, -0
 metadata/coliziune = "trunk"
 
 [node name="plopMediu80" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(0.159128, 0, 0.165803, 0, 0.229810, 0, -0.165803, 0, 0.159128, 41.883759, 46.270870, 6.872040)
+transform = Transform3D(0.159128, 0, 0.165803, 0, 0.229810, 0, -0.165803, 0, 0.159128, 41.883759, 46.256905, 6.872040)
 metadata/coliziune = "trunk"
 
 [node name="plopMediu81" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(0.122761, 0, 0.258514, 0, 0.286182, 0, -0.258514, 0, 0.122761, 43.045055, 46.151577, 2.957188)
+transform = Transform3D(0.122761, 0, 0.258514, 0, 0.286182, 0, -0.258514, 0, 0.122761, 43.045055, 46.127571, 2.957188)
 metadata/coliziune = "trunk"
 
 [node name="plopMediu82" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(0.068556, 0, -0.219346, 0, 0.229810, 0, 0.219346, 0, 0.068556, 102.648376, 22.498988, 82.565514)
+transform = Transform3D(0.068556, 0, -0.219346, 0, 0.229810, 0, 0.219346, 0, 0.068556, 102.648376, 22.401947, 82.565514)
 metadata/coliziune = "trunk"
 
 [node name="plopMediu83" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
@@ -3606,27 +3606,27 @@ transform = Transform3D(0.076728, 0, -0.275704, 0, 0.286182, 0, 0.275704, 0, 0.0
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte86" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(-0.241973, 0, -0.152804, 0, 0.286182, 0, 0.152804, 0, -0.241973, -140.310059, 19.000000, -23.594002)
+transform = Transform3D(-0.241973, 0, -0.152804, 0, 0.286182, 0, 0.152804, 0, -0.241973, -140.310059, 19.039764, -23.594002)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte87" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.046844, 0, -0.224985, 0, 0.229810, 0, 0.224985, 0, -0.046844, -140.254593, 19.170641, -30.248444)
+transform = Transform3D(-0.046844, 0, -0.224985, 0, 0.229810, 0, 0.224985, 0, -0.046844, -140.254593, 21.603302, -30.248444)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte88" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.003701, 0, -0.229780, 0, 0.229810, 0, 0.229780, 0, -0.003701, -135.964188, 19.000000, -31.746643)
+transform = Transform3D(-0.003701, 0, -0.229780, 0, 0.229810, 0, 0.229780, 0, -0.003701, -135.964188, 19.049271, -31.746643)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte89" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(-0.277828, 0, -0.068640, 0, 0.286182, 0, 0.068640, 0, -0.277828, -132.161682, 41.767076, -40.913704)
+transform = Transform3D(-0.277828, 0, -0.068640, 0, 0.286182, 0, 0.068640, 0, -0.277828, -132.161682, 44.367867, -40.913704)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte90" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(0.021975, 0, 0.228756, 0, 0.229810, 0, -0.228756, 0, 0.021975, -125.991577, 65.930351, -47.710999)
+transform = Transform3D(0.021975, 0, 0.228756, 0, 0.229810, 0, -0.228756, 0, 0.021975, -125.991577, 58.906319, -47.710999)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte91" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.194438, 0, 0.122500, 0, 0.229810, 0, -0.122500, 0, -0.194438, -127.022064, 67.651756, -52.332222)
+transform = Transform3D(-0.194438, 0, 0.122500, 0, 0.229810, 0, -0.122500, 0, -0.194438, -127.022064, 67.547607, -52.332222)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte92" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
@@ -3654,35 +3654,35 @@ transform = Transform3D(-0.219005, 0, 0.069637, 0, 0.229810, 0, -0.069637, 0, -0
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte98" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(0.229497, 0, -0.170971, 0, 0.286182, 0, 0.170971, 0, 0.229497, 25.364876, 24.185389, -16.294231)
+transform = Transform3D(0.229497, 0, -0.170971, 0, 0.286182, 0, 0.170971, 0, 0.229497, 25.364876, 26.929245, -16.294231)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte99" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.176940, 0, -0.146645, 0, 0.229810, 0, 0.146645, 0, -0.176940, 27.127449, 26.069555, -17.317566)
+transform = Transform3D(-0.176940, 0, -0.146645, 0, 0.229810, 0, 0.146645, 0, -0.176940, 27.127449, 28.596100, -17.317566)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte100" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.213105, 0, -0.086015, 0, 0.229810, 0, 0.086015, 0, -0.213105, 27.550999, 33.264780, -26.030670)
+transform = Transform3D(-0.213105, 0, -0.086015, 0, 0.229810, 0, 0.086015, 0, -0.213105, 27.550999, 33.327530, -26.030670)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte101" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("28_poplar_a")]
-transform = Transform3D(0.041294, 0, 0.283187, 0, 0.286182, 0, -0.283187, 0, 0.041294, 29.337469, 37.662475, -30.069633)
+transform = Transform3D(0.041294, 0, 0.283187, 0, 0.286182, 0, -0.283187, 0, 0.041294, 29.337469, 35.449966, -30.069633)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte102" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.213947, 0, -0.083898, 0, 0.229810, 0, 0.083898, 0, -0.213947, 28.801657, 36.567856, -32.645691)
+transform = Transform3D(-0.213947, 0, -0.083898, 0, 0.229810, 0, 0.083898, 0, -0.213947, 28.801657, 34.796097, -32.645691)
 metadata/coliziune = "trunk"
 
 [node name="plopDeparte103" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("29_poplar_b")]
-transform = Transform3D(-0.205979, 0, 0.101908, 0, 0.229810, 0, -0.101908, 0, -0.205979, 30.034977, 30.095959, -39.346645)
+transform = Transform3D(-0.205979, 0, 0.101908, 0, 0.229810, 0, -0.101908, 0, -0.205979, 30.034977, 30.059891, -39.346645)
 metadata/coliziune = "trunk"
 
 [node name="vie104" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(-0.335591, 0, -0.878662, 0, 0.940568, 0, 0.878662, 0, -0.335591, -136.355774, 48.709869, 68.432365)
+transform = Transform3D(-0.335591, 0, -0.878662, 0, 0.940568, 0, 0.878662, 0, -0.335591, -136.355774, 42.704651, 68.432365)
 metadata/coliziune = "none"
 
 [node name="vie105" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(-0.342753, 0, -0.897413, 0, 0.960640, 0, 0.897413, 0, -0.342753, -132.821182, 48.670807, 72.537735)
+transform = Transform3D(-0.342753, 0, -0.897413, 0, 0.960640, 0, 0.897413, 0, -0.342753, -132.821182, 34.172684, 72.537735)
 metadata/coliziune = "none"
 
 [node name="vie106" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
@@ -3690,19 +3690,19 @@ transform = Transform3D(-0.080139, 0, -0.992998, 0, 0.996227, 0, 0.992998, 0, -0
 metadata/coliziune = "none"
 
 [node name="vie107" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(-0.088263, 0, -1.093662, 0, 1.097218, 0, 1.093662, 0, -0.088263, -97.425964, 48.082371, 19.524767)
+transform = Transform3D(-0.088263, 0, -1.093662, 0, 1.097218, 0, 1.093662, 0, -0.088263, -97.425964, 42.261711, 19.524767)
 metadata/coliziune = "none"
 
 [node name="vie108" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(0.296504, 0, -0.953075, 0, 0.998132, 0, 0.953075, 0, 0.296504, -46.885983, 47.414452, 69.242973)
+transform = Transform3D(0.296504, 0, -0.953075, 0, 0.998132, 0, 0.953075, 0, 0.296504, -46.885983, 42.048515, 69.242973)
 metadata/coliziune = "none"
 
 [node name="vie109" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(0.303508, 0, -0.975587, 0, 1.021708, 0, 0.975587, 0, 0.303508, -46.584366, 47.389988, 74.782639)
+transform = Transform3D(0.303508, 0, -0.975587, 0, 1.021708, 0, 0.975587, 0, 0.303508, -46.584366, 32.193192, 74.782639)
 metadata/coliziune = "none"
 
 [node name="vie110" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(-0.163324, 0, -0.957115, 0, 0.970950, 0, 0.957115, 0, -0.163324, 0.984974, 46.808372, 48.813744)
+transform = Transform3D(-0.163324, 0, -0.957115, 0, 0.970950, 0, 0.957115, 0, -0.163324, 0.984974, 46.817284, 48.813744)
 metadata/coliziune = "none"
 
 [node name="vie111" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
@@ -3710,15 +3710,15 @@ transform = Transform3D(-0.182285, 0, -1.068227, 0, 1.083668, 0, 1.068227, 0, -0
 metadata/coliziune = "none"
 
 [node name="vie112" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(-0.223632, 0, -1.075147, 0, 1.098159, 0, 1.075147, 0, -0.223632, 45.571228, 46.371166, 71.353722)
+transform = Transform3D(-0.223632, 0, -1.075147, 0, 1.098159, 0, 1.075147, 0, -0.223632, 45.571228, 40.293854, 71.353722)
 metadata/coliziune = "none"
 
 [node name="vie113" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(-0.216134, 0, -1.039098, 0, 1.061338, 0, 1.039098, 0, -0.216134, 48.773041, 46.360397, 75.999039)
+transform = Transform3D(-0.216134, 0, -1.039098, 0, 1.061338, 0, 1.039098, 0, -0.216134, 48.773041, 30.905594, 75.999039)
 metadata/coliziune = "none"
 
 [node name="vie114" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
-transform = Transform3D(-0.193637, 0, -0.904315, 0, 0.924814, 0, 0.904315, 0, -0.193637, 89.162506, 45.803753, 30.907654)
+transform = Transform3D(-0.193637, 0, -0.904315, 0, 0.924814, 0, 0.904315, 0, -0.193637, 89.162506, 45.793541, 30.907654)
 metadata/coliziune = "none"
 
 [node name="vie115" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("30_vine")]
@@ -3726,47 +3726,47 @@ transform = Transform3D(-0.208205, 0, -0.972347, 0, 0.994389, 0, 0.972347, 0, -0
 metadata/coliziune = "none"
 
 [node name="porumbar116" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("17_dovecote")]
-transform = Transform3D(0.946007, 0, 0.324147, 0, 1.000000, 0, -0.324147, 0, 0.946007, -27.507509, 47.288006, 46.668594)
+transform = Transform3D(0.946007, 0, 0.324147, 0, 1, 0, -0.324147, 0, 0.946007, -27.507509, 46.784416, 46.668594)
 
 [node name="porumbel117" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
-transform = Transform3D(0.921061, 0, -0.389418, 0, 1.000000, 0, 0.389418, 0, 0.921061, -27.747377, 54.890060, 47.368637)
+transform = Transform3D(0.921061, 0, -0.389418, 0, 1, 0, 0.389418, 0, 0.921061, -27.747377, 54.407440, 47.368637)
 metadata/coliziune = "none"
 
 [node name="porumbel118" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
-transform = Transform3D(0.267499, 0, -0.963558, 0, 1.000000, 0, 0.963558, 0, 0.267499, -25.209929, 56.259045, 45.912529)
+transform = Transform3D(0.267499, 0, -0.963558, 0, 1, 0, 0.963558, 0, 0.267499, -25.209929, 55.593857, 45.912529)
 metadata/coliziune = "none"
 
 [node name="porumbel119" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
-transform = Transform3D(-0.588501, 0, -0.808496, 0, 1.000000, 0, 0.808496, 0, -0.588501, -21.531364, 57.605797, 44.830551)
+transform = Transform3D(-0.588501, 0, -0.808496, 0, 1, 0, 0.808496, 0, -0.588501, -21.531364, 55.770035, 44.830551)
 metadata/coliziune = "none"
 
 [node name="porumbel120" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
-transform = Transform3D(-0.999135, 0, -0.041581, 0, 1.000000, 0, 0.041581, 0, -0.999135, -21.224892, 59.000549, 49.530079)
+transform = Transform3D(-0.999135, 0, -0.041581, 0, 1, 0, 0.041581, 0, -0.999135, -21.224892, 57.541439, 49.530079)
 metadata/coliziune = "none"
 
 [node name="porumbel121" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
-transform = Transform3D(-0.653644, 0, 0.756802, 0, 1.000000, 0, -0.756802, 0, -0.653644, -16.352903, 54.726212, 48.557877)
+transform = Transform3D(-0.653644, 0, 0.756802, 0, 1, 0, -0.756802, 0, -0.653644, -16.352903, 52.964882, 48.557877)
 metadata/coliziune = "none"
 
 [node name="porumbel122" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
-transform = Transform3D(0.186512, 0, 0.982453, 0, 1.000000, 0, -0.982453, 0, 0.186512, -11.050991, 56.040527, 47.669350)
+transform = Transform3D(0.186512, 0, 0.982453, 0, 1, 0, -0.982453, 0, 0.186512, -11.050991, 54.406525, 47.669350)
 metadata/coliziune = "none"
 
 [node name="porumbel123" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("21_pigeon")]
-transform = Transform3D(0.885520, 0, 0.464602, 0, 1.000000, 0, -0.464602, 0, 0.885520, -10.531821, 57.433273, 52.362366)
+transform = Transform3D(0.885520, 0, 0.464602, 0, 1, 0, -0.464602, 0, 0.885520, -10.531821, 57.202469, 52.362366)
 metadata/coliziune = "none"
 
 [node name="casa_con124" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("18_house_a")]
-transform = Transform3D(-0.948035, 0, 0.318166, 0, 1.000000, 0, -0.318166, 0, -0.948035, -117.705635, 48.453182, 60.695824)
+transform = Transform3D(-0.948035, 0, 0.318166, 0, 1, 0, -0.318166, 0, -0.948035, -117.705635, 44.922897, 60.695824)
 
 [node name="casa_con125" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("19_house_b")]
-transform = Transform3D(-1.025157, 0, 0.227055, 0, 1.050000, 0, -0.227055, 0, -1.025157, 10.518679, 46.719414, 78.549133)
+transform = Transform3D(-1.025157, 0, 0.227055, 0, 1.050000, 0, -0.227055, 0, -1.025157, 10.518679, 40.538818, 78.549133)
 
 [node name="biserica_rupestra126" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("20_church")]
-transform = Transform3D(0.954967, 0, 0.296712, 0, 1.000000, 0, -0.296712, 0, 0.954967, -58.089691, 47.646523, 29.327759)
+transform = Transform3D(0.954967, 0, 0.296712, 0, 1, 0, -0.296712, 0, 0.954967, -58.089691, 45.633194, 29.327759)
 
 [node name="tufa127" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.416633, 0, -0.486562, 0, 1.497863, 0, 0.486562, 0, 1.416633, -160.482040, 48.935333, 48.963070)
+transform = Transform3D(1.416633, 0, -0.486562, 0, 1.497863, 0, 0.486562, 0, 1.416633, -160.482040, 48.929993, 48.963070)
 metadata/coliziune = "none"
 
 [node name="tufa128" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
@@ -3774,27 +3774,27 @@ transform = Transform3D(-0.171270, 0, -0.841484, 0, 0.858737, 0, 0.841484, 0, -0
 metadata/coliziune = "none"
 
 [node name="tufa129" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.535266, 0, 0.862325, 0, 1.014945, 0, -0.862325, 0, -0.535266, -144.472717, 48.791851, 65.710236)
+transform = Transform3D(-0.535266, 0, 0.862325, 0, 1.014945, 0, -0.862325, 0, -0.535266, -144.472717, 46.284019, 65.710236)
 metadata/coliziune = "none"
 
 [node name="tufa130" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.063794, 0, 1.044901, 0, 1.046846, 0, -1.044901, 0, 0.063794, -141.769806, 48.678806, 43.471527)
+transform = Transform3D(0.063794, 0, 1.044901, 0, 1.046846, 0, -1.044901, 0, 0.063794, -141.769806, 48.113838, 43.471527)
 metadata/coliziune = "none"
 
 [node name="tufa131" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.081777, 0, 1.413206, 0, 1.415570, 0, -1.413206, 0, 0.081777, -123.873329, 48.531944, 59.309311)
+transform = Transform3D(0.081777, 0, 1.413206, 0, 1.415570, 0, -1.413206, 0, 0.081777, -123.873329, 46.063728, 59.309311)
 metadata/coliziune = "none"
 
 [node name="tufa132" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.966786, 0, 0.308268, 0, 1.014744, 0, -0.308268, 0, -0.966786, -120.085335, 48.492245, 64.803131)
+transform = Transform3D(-0.966786, 0, 0.308268, 0, 1.014744, 0, -0.308268, 0, -0.966786, -120.085335, 39.378677, 64.803131)
 metadata/coliziune = "none"
 
 [node name="tufa133" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.732902, 0, -0.620393, 0, 0.960225, 0, 0.620393, 0, -0.732902, -123.505714, 48.430832, 36.356140)
+transform = Transform3D(-0.732902, 0, -0.620393, 0, 0.960225, 0, 0.620393, 0, -0.732902, -123.505714, 46.906052, 36.356140)
 metadata/coliziune = "none"
 
 [node name="tufa134" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.195596, 0, -1.448952, 0, 1.462094, 0, 1.448952, 0, -0.195596, -106.642151, 48.278534, 51.244198)
+transform = Transform3D(-0.195596, 0, -1.448952, 0, 1.462094, 0, 1.448952, 0, -0.195596, -106.642151, 46.489334, 51.244198)
 metadata/coliziune = "none"
 
 [node name="tufa135" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
@@ -3806,7 +3806,7 @@ transform = Transform3D(-1.117010, 0, -0.039498, 0, 1.117708, 0, 0.039498, 0, -1
 metadata/coliziune = "none"
 
 [node name="tufa137" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.205342, 0, 0.551237, 0, 1.325410, 0, -0.551237, 0, 1.205342, -90.559303, 47.974350, 48.681004)
+transform = Transform3D(1.205342, 0, 0.551237, 0, 1.325410, 0, -0.551237, 0, 1.205342, -90.559303, 45.769966, 48.681004)
 metadata/coliziune = "none"
 
 [node name="tufa138" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
@@ -3814,19 +3814,19 @@ transform = Transform3D(-0.391848, 0, -0.819431, 0, 0.908301, 0, 0.819431, 0, -0
 metadata/coliziune = "none"
 
 [node name="tufa139" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.819423, 0, 1.055888, 0, 1.336545, 0, -1.055888, 0, 0.819423, -71.357742, 47.691727, 56.121952)
+transform = Transform3D(0.819423, 0, 1.055888, 0, 1.336545, 0, -1.055888, 0, 0.819423, -71.357742, 45.384476, 56.121952)
 metadata/coliziune = "none"
 
 [node name="tufa140" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.825384, 0, 0.915080, 0, 1.232327, 0, -0.915080, 0, 0.825384, -69.381538, 47.666344, 58.372295)
+transform = Transform3D(0.825384, 0, 0.915080, 0, 1.232327, 0, -0.915080, 0, 0.825384, -69.381538, 44.440926, 58.372295)
 metadata/coliziune = "none"
 
 [node name="tufa141" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-1.131908, 0, -0.060604, 0, 1.133529, 0, 0.060604, 0, -1.131908, -55.670921, 47.583824, 40.324287)
+transform = Transform3D(-1.131908, 0, -0.060604, 0, 1.133529, 0, 0.060604, 0, -1.131908, -55.670921, 47.246803, 40.324287)
 metadata/coliziune = "none"
 
 [node name="tufa142" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.232967, 0, 0.468499, 0, 1.318976, 0, -0.468499, 0, 1.232967, -50.259453, 47.472782, 61.416542)
+transform = Transform3D(1.232967, 0, 0.468499, 0, 1.318976, 0, -0.468499, 0, 1.232967, -50.259453, 46.238640, 61.416542)
 metadata/coliziune = "none"
 
 [node name="tufa143" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
@@ -3834,43 +3834,43 @@ transform = Transform3D(-1.173508, 0, 0.043811, 0, 1.174326, 0, -0.043811, 0, -1
 metadata/coliziune = "none"
 
 [node name="tufa144" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.628735, 0, 0.608735, 0, 0.875138, 0, -0.608735, 0, -0.628735, -30.915819, 47.331135, 40.837032)
+transform = Transform3D(-0.628735, 0, 0.608735, 0, 0.875138, 0, -0.608735, 0, -0.628735, -30.915819, 46.500542, 40.837032)
 metadata/coliziune = "none"
 
 [node name="tufa145" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.388214, 0, 0.104666, 0, 1.392154, 0, -0.104666, 0, 1.388214, -30.486954, 47.249893, 67.270935)
+transform = Transform3D(1.388214, 0, 0.104666, 0, 1.392154, 0, -0.104666, 0, 1.388214, -30.486954, 46.468422, 67.270935)
 metadata/coliziune = "none"
 
 [node name="tufa146" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.818111, 0, 0.688200, 0, 1.069076, 0, -0.688200, 0, -0.818111, -14.469349, 47.094238, 52.064011)
+transform = Transform3D(-0.818111, 0, 0.688200, 0, 1.069076, 0, -0.688200, 0, -0.818111, -14.469349, 46.772156, 52.064011)
 metadata/coliziune = "none"
 
 [node name="tufa147" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.275000, 0, 0.425650, 0, 1.344174, 0, -0.425650, 0, 1.275000, -8.433029, 46.949837, 72.804420)
+transform = Transform3D(1.275000, 0, 0.425650, 0, 1.344174, 0, -0.425650, 0, 1.275000, -8.433029, 44.138741, 72.804420)
 metadata/coliziune = "none"
 
 [node name="tufa148" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.792985, 0, -0.305373, 0, 0.849751, 0, 0.305373, 0, -0.792985, -5.971494, 46.913120, 75.629318)
+transform = Transform3D(-0.792985, 0, -0.305373, 0, 0.849751, 0, 0.305373, 0, -0.792985, -5.971494, 44.007225, 75.629318)
 metadata/coliziune = "none"
 
 [node name="tufa149" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.028719, 0, -0.211472, 0, 1.050230, 0, 0.211472, 0, 1.028719, 2.002950, 46.781166, 54.779305)
+transform = Transform3D(1.028719, 0, -0.211472, 0, 1.050230, 0, 0.211472, 0, 1.028719, 2.002950, 46.729897, 54.779305)
 metadata/coliziune = "none"
 
 [node name="tufa150" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.904119, 0, -0.903183, 0, 1.277956, 0, 0.903183, 0, 0.904119, 13.180997, 46.666489, 72.799995)
+transform = Transform3D(0.904119, 0, -0.903183, 0, 1.277956, 0, 0.903183, 0, 0.904119, 13.180997, 44.374809, 72.799995)
 metadata/coliziune = "none"
 
 [node name="tufa151" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.068880, 0, -1.149779, 0, 1.151840, 0, 1.149779, 0, -0.068880, 19.932089, 46.531307, 50.685951)
+transform = Transform3D(-0.068880, 0, -1.149779, 0, 1.151840, 0, 1.149779, 0, -0.068880, 19.932089, 46.056129, 50.685951)
 metadata/coliziune = "none"
 
 [node name="tufa152" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-1.049711, 0, 0.763704, 0, 1.298128, 0, -0.763704, 0, -1.049711, 22.577452, 46.510963, 45.086884)
+transform = Transform3D(-1.049711, 0, 0.763704, 0, 1.298128, 0, -0.763704, 0, -1.049711, 22.577452, 44.925133, 45.086884)
 metadata/coliziune = "none"
 
 [node name="tufa153" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.936343, 0, 0.396080, 0, 1.016670, 0, -0.396080, 0, -0.936343, 35.020687, 46.428463, 68.109314)
+transform = Transform3D(-0.936343, 0, 0.396080, 0, 1.016670, 0, -0.396080, 0, -0.936343, 35.020687, 45.597916, 68.109314)
 metadata/coliziune = "none"
 
 [node name="tufa154" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
@@ -3878,11 +3878,11 @@ transform = Transform3D(1.008494, 0, -0.239932, 0, 1.036643, 0, 0.239932, 0, 1.0
 metadata/coliziune = "none"
 
 [node name="tufa155" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.670593, 0, -0.980860, 0, 1.188184, 0, 0.980860, 0, -0.670593, 55.385818, 46.304264, 62.292542)
+transform = Transform3D(-0.670593, 0, -0.980860, 0, 1.188184, 0, 0.980860, 0, -0.670593, 55.385818, 45.028732, 62.292542)
 metadata/coliziune = "none"
 
 [node name="tufa156" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.246610, 0, -0.909508, 0, 0.942349, 0, 0.909508, 0, -0.246610, 58.229671, 46.289654, 67.094528)
+transform = Transform3D(-0.246610, 0, -0.909508, 0, 0.942349, 0, 0.909508, 0, -0.246610, 58.229671, 42.098183, 67.094528)
 metadata/coliziune = "none"
 
 [node name="tufa157" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
@@ -3890,11 +3890,11 @@ transform = Transform3D(-0.084831, 0, -1.146074, 0, 1.149209, 0, 1.146074, 0, -0
 metadata/coliziune = "none"
 
 [node name="tufa158" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-1.271658, 0, -0.131898, 0, 1.278480, 0, 0.131898, 0, -1.271658, 75.906906, 46.158829, 59.726799)
+transform = Transform3D(-1.271658, 0, -0.131898, 0, 1.278480, 0, 0.131898, 0, -1.271658, 75.906906, 45.288132, 59.726799)
 metadata/coliziune = "none"
 
 [node name="tufa159" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.144694, 0, 1.436272, 0, 1.443542, 0, -1.436272, 0, -0.144694, 82.870476, 45.995117, 36.632641)
+transform = Transform3D(-0.144694, 0, 1.436272, 0, 1.443542, 0, -1.436272, 0, -0.144694, 82.870476, 45.987289, 36.632641)
 metadata/coliziune = "none"
 
 [node name="tufa160" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
@@ -3902,7 +3902,7 @@ transform = Transform3D(-0.936747, 0, -0.793619, 0, 1.227733, 0, 0.793619, 0, -0
 metadata/coliziune = "none"
 
 [node name="tufa161" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.686805, 0, -0.962765, 0, 1.182631, 0, 0.962765, 0, -0.686805, 96.503456, 45.803078, 54.523445)
+transform = Transform3D(-0.686805, 0, -0.962765, 0, 1.182631, 0, 0.962765, 0, -0.686805, 96.503456, 43.133965, 54.523445)
 metadata/coliziune = "none"
 
 [node name="ZidulRosuDeDeparte" type="Node3D" parent="DecorManual"]
@@ -4011,11 +4011,11 @@ transform = Transform3D(-0.146322, 0, 0.208556, 0, 0.254766, 0, -0.208556, 0, -0
 metadata/coliziune = "none"
 
 [node name="molozMargine39" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.284732, 0, 0.041776, 0, 0.287780, 0, -0.041776, 0, 0.284732, -146.075, 52.131, 40.586)
+transform = Transform3D(0.284732, 0.000000, 0.041776, 0.000000, 0.287780, 0.000000, -0.041776, 0.000000, 0.284732, -146.075000, 46.641032, 40.586000)
 metadata/coliziune = "none"
 
 [node name="molozMargine42" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(-0.150627, 0, -0.155856, 0, 0.216748, 0, 0.155856, 0, -0.150627, -140.613, 52.999, 66.580)
+transform = Transform3D(-0.150627, 0.000000, -0.155856, 0.000000, 0.216748, 0.000000, 0.155856, 0.000000, -0.150627, -140.613000, 45.295451, 66.580000)
 metadata/coliziune = "none"
 
 [node name="molozMargine45" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
@@ -4027,11 +4027,11 @@ transform = Transform3D(-0.204741, 0, -0.122969, 0, 0.238831, 0, 0.122969, 0, -0
 metadata/coliziune = "none"
 
 [node name="molozMargine51" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.236197, 0, -0.013677, 0, 0.236592, 0, 0.013677, 0, 0.236197, -126.061, 50.412, 38.193)
+transform = Transform3D(0.236197, 0.000000, -0.013677, 0.000000, 0.236592, 0.000000, 0.013677, 0.000000, 0.236197, -126.061000, 47.017745, 38.193000)
 metadata/coliziune = "none"
 
 [node name="molozMargine54" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.120201, 0, -0.074037, 0, 0.141173, 0, 0.074037, 0, 0.120201, -118.766, 62.770, 31.460)
+transform = Transform3D(0.120201, 0.000000, -0.074037, 0.000000, 0.141173, 0.000000, 0.074037, 0.000000, 0.120201, -118.766000, 46.008996, 31.460000)
 metadata/coliziune = "none"
 
 [node name="molozMargine57" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
@@ -4051,7 +4051,7 @@ transform = Transform3D(0.128547, 0, 0.172900, 0, 0.215450, 0, -0.172900, 0, 0.1
 metadata/coliziune = "none"
 
 [node name="molozMargine69" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(-0.138155, 0, -0.195807, 0, 0.239639, 0, 0.195807, 0, -0.138155, -95.525, 51.637, 54.107)
+transform = Transform3D(-0.138155, 0.000000, -0.195807, 0.000000, 0.239639, 0.000000, 0.195807, 0.000000, -0.138155, -95.525000, 43.406017, 54.107000)
 metadata/coliziune = "none"
 
 [node name="molozMargine72" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
@@ -4075,11 +4075,11 @@ transform = Transform3D(0.155070, 0, -0.089230, 0, 0.178910, 0, 0.089230, 0, 0.1
 metadata/coliziune = "none"
 
 [node name="molozMargine87" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.065882, 0, 0.141532, 0, 0.156115, 0, -0.141532, 0, 0.065882, -41.881, 53.767, 43.070)
+transform = Transform3D(0.065882, 0.000000, 0.141532, 0.000000, 0.156115, 0.000000, -0.141532, 0.000000, 0.065882, -41.881000, 46.623931, 43.070000)
 metadata/coliziune = "none"
 
 [node name="molozMargine90" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.089988, 0, -0.186352, 0, 0.206941, 0, 0.186352, 0, 0.089988, -53.092, 63.862, 64.461)
+transform = Transform3D(0.089988, 0.000000, -0.186352, 0.000000, 0.206941, 0.000000, 0.186352, 0.000000, 0.089988, -53.092000, 42.436635, 64.461000)
 metadata/coliziune = "none"
 
 [node name="molozMargine93" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
@@ -4087,11 +4087,11 @@ transform = Transform3D(0.119844, 0, -0.252421, 0, 0.279426, 0, 0.252421, 0, 0.1
 metadata/coliziune = "none"
 
 [node name="molozMargine96" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(-0.065411, 0, -0.076555, 0, 0.100693, 0, 0.076555, 0, -0.065411, -20.720, 101.429, 51.670)
+transform = Transform3D(-0.065411, 0.000000, -0.076555, 0.000000, 0.100693, 0.000000, 0.076555, 0.000000, -0.065411, -20.720000, 46.545484, 51.670000)
 metadata/coliziune = "none"
 
 [node name="molozMargine99" parent="DecorManual/MolozDeMargine" instance=ExtResource("27_crk_c")]
-transform = Transform3D(-0.198829, 0, -0.104069, 0, 0.224418, 0, 0.104069, 0, -0.198829, -33.882, 55.714, 71.655)
+transform = Transform3D(-0.198829, 0.000000, -0.104069, 0.000000, 0.224418, 0.000000, 0.104069, 0.000000, -0.198829, -33.882000, 42.135249, 71.655000)
 metadata/coliziune = "none"
 
 [node name="UmarulBenzii" type="Node3D" parent="DecorManual"]

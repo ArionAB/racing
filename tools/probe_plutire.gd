@@ -14,6 +14,8 @@ const MAX_GOL := 4.0   ## metri de aer tolerati sub baza unui prop
 ## si explicita, ca sa nu devina o portita — orice adaugat aici trebuie sa aiba un
 ## motiv de lume, nu de convenienta.
 const ZBURATOARE := ["Pigeon", "Balloon", "Balon", "Cabina", "Porumbel"]
+## Grupuri care sunt STRUCTURA, nu obiecte asezate pe sol — vezi mai jos.
+const ZIDURI := ["ZidulValeiRosii"]
 
 func _ready() -> void:
 	call_deferred("_go")
@@ -28,6 +30,16 @@ func _go() -> void:
 	for i in 12:
 		await get_tree().process_frame
 	var space: PhysicsDirectSpaceState3D = t.get_world_3d().direct_space_state
+	# Panza de teren: singurul lucru pe care are voie sa stea un prop. Cutia
+	# plata de la -27.6 e plasa de siguranta a lumii, nu sol (vezi track.gd).
+	var terrain_rid := RID()
+	for c in t.get_children():
+		if str(c.name) == "TerrainBody":
+			terrain_rid = (c as StaticBody3D).get_rid()
+	if terrain_rid == RID():
+		print("EROARE: nu am gasit TerrainBody, verdictul n-ar insemna nimic")
+		get_tree().quit(1)
+		return
 	var bad := 0
 	var checked := 0
 	var stack: Array[Node] = [t]
@@ -42,13 +54,31 @@ func _go() -> void:
 			continue
 		# doar prop-uri din decor, nu carosabil/teren
 		var owner_nm := ""
+		var grup := ""
+		var ascuns := false
 		var up: Node = n
 		while up != null:
+			# `mi.visible` e doar steagul PROPRIU: un grup intreg stins
+			# (`ZidulRosuDeDeparte`, mesele ascunse in runda 28) lasa copiii cu
+			# visible = true, desi pe ecran nu e nimic. Ce nu se randeaza nu
+			# poate sa pluteasca in cadru.
+			if up is Node3D and not (up as Node3D).visible:
+				ascuns = true
 			if str(up.name).begins_with("DecorManual"):
 				owner_nm = str(n.name)
 				break
+			if up.get_parent() != null and str(up.get_parent().name).begins_with("DecorManual"):
+				grup = str(up.name)
 			up = up.get_parent()
-		if owner_nm == "":
+		if owner_nm == "" or ascuns:
+			continue
+		# ZIDURILE nu stau pe sol, sunt sol. `ZidulValeiRosii` e peretele Vaii
+		# Rosii, construit ca stiva de module de faleza (y de la -143 la +250 prin
+		# constructie); a-l cere "asezat pe teren" n-are inteles — modulul de
+		# deasupra sta pe cel de dedesubt, nu pe nisip. Lista e explicita, ca sa
+		# nu devina o portita: orice grup adaugat aici trebuie sa fie o
+		# STRUCTURA, nu un obiect pus in lume.
+		if grup in ZIDURI:
 			continue
 		var aabb := mi.get_aabb()
 		var base: Vector3 = mi.global_transform * (aabb.position + Vector3(
@@ -61,21 +91,34 @@ func _go() -> void:
 		if zboara:
 			continue
 		checked += 1
-		var q := PhysicsRayQueryParameters3D.create(
-			base + Vector3.UP * 1.0, base + Vector3.DOWN * 200.0)
+		# Raza porneste DE SUS DE TOT si accepta DOAR panza de teren.
+		#
+		# Prima versiune pornea de la baza + 1 m si lua prima lovitura. Pentru
+		# cele 55 de piese cu hull de coliziune asta inseamna ca raza pleca din
+		# INTERIORUL piesei, ii iesea prin fund (trimesh-urile noastre au
+		# backface_collision) si cadea pe plasa de siguranta de la -27.6 —
+		# terenul dintre ele nici nu era intrebat. Rezultatul: 17 piese asezate
+		# corect in runda 29 erau raportate "in afara panzei", si numarul crestea
+		# tocmai cand asezarea se imbunatatea. Cine sta pe teren se decide fata de
+		# TEREN, deci se sare peste orice altceva.
+		var sus := base + Vector3.UP * 300.0
+		var q := PhysicsRayQueryParameters3D.create(sus, base + Vector3.DOWN * 400.0)
+		q.collide_with_areas = false
 		var hit: Dictionary = space.intersect_ray(q)
-		if hit.is_empty():
-			print("  %s: NIMIC dedesubt (baza y=%.1f)" % [owner_nm, base.y])
+		var guard := 0
+		while not hit.is_empty() and hit["rid"] != terrain_rid and guard < 32:
+			q.exclude = q.exclude + [hit["rid"]]
+			hit = space.intersect_ray(q)
+			guard += 1
+		if hit.is_empty() or hit["rid"] != terrain_rid:
+			print("  %s: FARA TEREN dedesubt (baza y=%.1f)" % [owner_nm, base.y])
 			bad += 1
 		else:
 			var sol: float = float(hit["position"].y)
-			# In afara panzei de teren, `_terrain_mesh_y` extrapoleaza si intoarce
-			# o cota fixa (masurat: -27.6 pe Track13). Prop-urile de acolo nu sunt
-			# "plutitoare", sunt in afara lumii — se raporteaza separat.
 			var gol: float = base.y - sol
 			if gol > MAX_GOL:
 				print("  %s: pluteste %.1f m (baza y=%.1f, sol y=%.1f)" % [
-					owner_nm, gol, base.y, float(hit["position"].y)])
+					owner_nm, gol, base.y, sol])
 				bad += 1
 	print("")
 	print("prop-uri verificate: %d | care plutesc: %d" % [checked, bad])

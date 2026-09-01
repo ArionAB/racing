@@ -110,6 +110,9 @@ var _out: Array[String] = []
 var _n := 0
 var _rng := RandomNumberGenerator.new()
 var _warn := 0
+## Panza de teren si cota de pornire a razelor de asezare — vezi _sol_real.
+var _terrain_rid: RID = RID()
+var _sus_y := 0.0
 
 
 func _ready() -> void:
@@ -119,6 +122,12 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_sampler = _track._sampler
+	# Razele pornesc de deasupra celui mai INALT punct de teren din zona, nu de
+	# la o cota fixa: sub varf ar porni din interiorul panzei si n-ar lovi nimic.
+	var hi := -INF
+	for bp in _track.baked:
+		hi = maxf(hi, bp.y)
+	_sus_y = hi + 120.0
 	_rng.seed = 130804
 	_forest()
 	_gate()
@@ -456,7 +465,7 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var r: float = BASE_R.get(model, 0.6)
 	var d := half + gap + r
 	var q := p + s * d
-	var g := _sampler.ground_y(q.x, q.z)
+	var g := _sol_real(q.x, q.z)
 	# Garda: piatra n-are voie sa intre in carosabil. Se masoara distanta de la
 	# ax pana la MARGINEA piesei, nu pana la centru — capcana din
 	# `decor-manual-coliziune`.
@@ -474,6 +483,52 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 		# Fatada se uita spre drum: -s este directia catre ax.
 		a = atan2(-s.x, -s.z)
 	_raw(model, base, Vector3(q.x, y, q.z), a, scl, mode, false, shape, scl_y)
+
+
+## Cota SOLULUI REAL sub (x, z), pentru asezarea unei piese.
+##
+## NU `_sampler.ground_y`: acela e CAMPUL neted, iar suprafata care se randeaza
+## si de care se lovesc rotile e grila de teren — intre noduri o coarda dreapta,
+## care pe taieturi taie mult pe dedesubt. Si nu `_terrain_mesh_y`: acela e
+## CLAMPAT la marginea grilei, deci in afara panzei extrapoleaza si intoarce o
+## cota fixa (masurat: 27.5 unde solul real e la -27.6).
+##
+## Se trage o raza IN JOS prin coliziunea reala a panzei de teren, adica exact
+## prin ce ating rotile. Porneste deasupra celui mai inalt punct al traseului
+## (+120 m), ca sa nu plece din interiorul panzei pe portiunile inalte, si
+## accepta DOAR lovitura in TerrainBody — vezi mai jos de ce.
+##
+## Runda 29: 38 de piese pluteau intre 4.2 si 27.8 m fiindca `ground_y` fusese
+## citit INAINTE ca rapa 0.022-0.178 (adancime 22 m) sa fie sapata pe cealalta
+## ramura; merge-ul a adus taietura, nu si reasezarea. Vezi docs/decor_manual.md.
+func _sol_real(x: float, z: float) -> float:
+	if _terrain_rid == RID():
+		for c in _track.get_children():
+			if str(c.name) == "TerrainBody":
+				_terrain_rid = (c as StaticBody3D).get_rid()
+	var space := _track.get_world_3d().direct_space_state
+	var sus := Vector3(x, _sus_y, z)
+	var jos := Vector3(x, _sus_y - 900.0, z)
+	var q := PhysicsRayQueryParameters3D.create(sus, jos)
+	q.collide_with_areas = false
+	# DOAR panza de teren. Cu raza libera, cea trasa de la +200 m lovea plafonul
+	# lumii (baloane / cupola) si asaza piesa la 240 m — masurat pe 15 piese la
+	# prima incercare. Terenul e singurul lucru pe care are voie sa stea o piesa.
+	if _terrain_rid != RID():
+		q.collide_with_bodies = true
+		q.exclude = []
+		var hit_t: Dictionary = space.intersect_ray(q)
+		var guard := 0
+		while not hit_t.is_empty() and hit_t["rid"] != _terrain_rid and guard < 24:
+			q.exclude = q.exclude + [hit_t["rid"]]
+			hit_t = space.intersect_ray(q)
+			guard += 1
+		if not hit_t.is_empty() and hit_t["rid"] == _terrain_rid:
+			return float(hit_t["position"].y)
+	# In afara panzei de teren raza nu prinde nimic. Campul ramane singura
+	# cota disponibila, si se raporteaza — o piesa de acolo nu se vede oricum.
+	print("; ATENTIE fara sol la (%.1f, %.1f): se cade pe camp" % [x, z])
+	return _sampler.ground_y(x, z)
 
 
 func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,

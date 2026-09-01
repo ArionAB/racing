@@ -185,6 +185,20 @@ const ACCENT_SPLIT := {
 ## Cheia e numele fisierului .glb (fara extensie); valoarea, o mapare
 ## nume-de-parte -> clasa, aplicata DOAR instantelor modelului aluia.
 const CLASSES_BY_MODEL := {
+	# --- Cappadocia: faleza in benzi a canionului rosu (POI D) --------------
+	#
+	# Modulul vine din kit cu UV-uri pe atlas si matura sloturile 19/23/27/2/1
+	# — masurat cu tools/ProbeCappSlots: 31% CREM (19, #E9DCC0) si ZERO rosu.
+	# Pe el, canionul "rosu" din brief §2 iesea crem, ca restul pistei.
+	#
+	# Clasa il imbraca in sisturi stratificate tentate spre caramiziu (vezi
+	# `red_valley_tuff` in palette.gd, unde multiplicatorul e masurat din
+	# crop-ul de referinta). E un material in plus la garda, cheltuit
+	# DELIBERAT pe o CLASA de assets, nu pe o piesa — regula din CLAUDE.md.
+	"cliff_band_module": {
+		"Cliff_Band_Module": Palette.TRI_PREFIX + "red_valley_tuff",
+	},
+
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},

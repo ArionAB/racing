@@ -73,6 +73,7 @@ func _ready() -> void:
 	var f_nume: Array[String] = []
 	var minpx := 200
 	var top := 8
+	var variante: Array[String] = []
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
@@ -86,6 +87,10 @@ func _ready() -> void:
 			minpx = int(arg.trim_prefix("--minpx="))
 		elif arg.begins_with("--top="):
 			top = int(arg.trim_prefix("--top="))
+		elif arg.begins_with("--var="):
+			for v in arg.trim_prefix("--var=").split(","):
+				if not v.is_empty() and v != "base":
+					variante.append(v)
 
 	await get_tree().process_frame
 	var track := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
@@ -96,6 +101,25 @@ func _ready() -> void:
 	_cam = Camera3D.new()
 	add_child(_cam)
 	_aseaza_camera(track, frac)
+	# Variante de CONTROL. Nu tuning — intrebari despre cine face gradientul.
+	# `--var=noambient` raspunde la "poate vertex color-ul, oricat de bimodal ar
+	# fi, sa produca doua moduri cat timp ambientul lumineaza si fata intoarsa?"
+	if not variante.is_empty():
+		var env := _gaseste_mediu(track)
+		var sun := _gaseste_soare(track)
+		for v in variante:
+			match v:
+				"noambient":
+					if env != null:
+						env.ambient_light_energy = 0.0
+				"noshadow":
+					if sun != null:
+						sun.shadow_enabled = false
+				"novcol":
+					_fara_vcol(track)
+				_:
+					push_warning("varianta necunoscuta: %s" % v)
+		print("VARIANTE [%s]" % ", ".join(variante))
 	for i in 4:
 		await get_tree().process_frame
 
@@ -222,6 +246,49 @@ func _ready() -> void:
 	print("  (un gradient uniform da VALE ~= %.0f prin constructie)"
 			% (VALE_FRAC * 100.0))
 	get_tree().quit(0)
+
+
+func _gaseste_soare(n: Node) -> DirectionalLight3D:
+	if n is DirectionalLight3D:
+		return n as DirectionalLight3D
+	for c in n.get_children():
+		var r := _gaseste_soare(c)
+		if r != null:
+			return r
+	return null
+
+
+func _gaseste_mediu(n: Node) -> Environment:
+	if n is WorldEnvironment:
+		return (n as WorldEnvironment).environment
+	for c in n.get_children():
+		var r := _gaseste_mediu(c)
+		if r != null:
+			return r
+	return null
+
+
+## Vertex color complet alb. Nu ajunge `vertex_color_use_as_albedo = false`:
+## prop-urile poarta ShaderMaterial (`prop_detail_fade`), unde COLOR intra
+## neconditionat. Se albeste chiar atributul mesh-ului.
+func _fara_vcol(n: Node) -> void:
+	var mi := n as MeshInstance3D
+	if mi != null and mi.mesh is ArrayMesh:
+		var src := mi.mesh as ArrayMesh
+		var out := ArrayMesh.new()
+		for si in src.get_surface_count():
+			var a: Array = src.surface_get_arrays(si)
+			var cl: Variant = a[Mesh.ARRAY_COLOR]
+			if cl is PackedColorArray and not (cl as PackedColorArray).is_empty():
+				var pc: PackedColorArray = cl
+				for ci in pc.size():
+					pc[ci] = Color.WHITE
+				a[Mesh.ARRAY_COLOR] = pc
+			out.add_surface_from_arrays(src.surface_get_primitive_type(si), a)
+			out.surface_set_material(si, src.surface_get_material(si))
+		mi.mesh = out
+	for c in n.get_children():
+		_fara_vcol(c)
 
 
 ## k-means 1D cu doua centre pe un vector DEJA SORTAT. Initializare pe p10/p90

@@ -158,6 +158,15 @@ const CAP_SLOT: int = 20
 ## care umple mijlocul histogramei — nu `facet_contrast`, care misca 8%.
 @export_range(0.0, 16.0, 1.0) var ao_steps: float = 0.0
 
+## Cat din intervalul AO-ului copt se pastreaza. 1 = neatins; 0.35 = adancitura
+## cea mai adanca ajunge la 0.67 in loc de 0.06.
+## NU e "mai putin AO": adancitura ramane mai inchisa decat proeminenta, deci
+## contactul se pastreaza. Scade doar CAT DIN INTERVAL ocupa AO-ul, ca deasupra
+## lui sa incapa un semnal aliniat cu SOARELE (`term_drop`). Vezi nota din
+## `_shade_facets` — masurat cu `probe_k`, AO-ul acopera 0.06..0.98 si de-aia
+## era el semnalul dominant, nu fatetarea.
+@export_range(0.1, 1.0, 0.05) var ao_keep: float = 1.0
+
 ## Cum se repartizeaza fetele intre treptele de AO. 1 = neschimbat; peste 1
 ## impinge valorile in jos, deci mijlocul se goleste si fetele se aduna in
 ## capete. Vezi `_cuantizeaza_ao`.
@@ -2000,6 +2009,32 @@ func _shade_facets(arr: Array) -> Array:
 		# sa umple continuu histograma. `ao_gamma` inclina apoi repartitia intre
 		# trepte: peste 1 goleste mijlocul si impinge fetele spre capete, adica
 		# taman ce cere bimodalitatea.
+		# COMPRIMAREA AO-ULUI, si de ce ea vine INAINTE de cuantizare.
+		#
+		# Cuantizarea singura a esuat, masurat: `ao_steps` 2 a facut hornSoare11
+		# p50 122 -> 101 si VALE 16.4 -> 18.7, adica a intunecat conul fara sa-l
+		# separe. Motivul se vede in cifrele lui `probe_k`: AO-ul se intinde de
+		# la 0.06 la 0.98, deci rupandu-l in 2 trepte, fetele cad la 0.0 sau 0.5
+		# sau 1.0 — moduri exista, dar sunt moduri de AO, adica de CAVITATE, si
+		# se distribuie peste orientarea fata de soare in loc sa se alinieze cu
+		# ea. Doua moduri pe axa gresita nu citesc a doua fete, citesc a pete.
+		#
+		# Ce trebuie de fapt: AO-ul sa nu mai fie semnalul dominant, ca sa poata
+		# fi cel al LUMINII. Se comprima deci spre 1.0 (identitatea inmultirii):
+		# `ao_keep` 0.35 inseamna ca un AO de 0.06 devine 0.67 in loc de 0.06.
+		# Adancitura ramane mai inchisa decat proeminenta — ordinea si contactul
+		# se pastreaza, deci nu se sterge semnal — dar intervalul lui scade de la
+		# 0.92 la 0.32, si peste el `term_drop` (care lucreaza pe orientarea fata
+		# de soare, nu pe cavitate) devine parghia mare.
+		#
+		# Asta e diferenta fata de "mai putin AO": nu se scade AO-ul, se scade
+		# CAT DE MULT DIN INTERVAL ocupa el, ca sa incapa deasupra un semnal
+		# aliniat cu soarele. Piatra nu se intuneca — se muta contrastul de pe o
+		# axa pe alta.
+		if ao_keep < 1.0:
+			ao = 1.0 - (1.0 - ao) * ao_keep
+			ag = 1.0 - (1.0 - ag) * ao_keep
+			ab = 1.0 - (1.0 - ab) * ao_keep
 		if ao_steps >= 2.0:
 			ao = _cuantizeaza_ao(ao)
 			ag = _cuantizeaza_ao(ag)

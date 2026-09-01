@@ -139,10 +139,34 @@ func _material() -> StandardMaterial3D:
 	# inmultind chiar RGB-ul.
 	mat.albedo_color = Color(tint.r * strength, tint.g * strength,
 		tint.b * strength, 1.0)
-	# Mai transparenta la margini decat in ax: fara asta conul are o MUCHIE, iar
-	# o raza cu muchie e un obiect solid. Rim-ul e cel mai ieftin fel de a topi
-	# conturul — nu cere shader propriu.
-	mat.rim_enabled = false
+	# --- TOPIREA CONTURULUI, si de ce nu era facuta ---------------------------
+	#
+	# Comentariul de aici cerea deja „mai transparenta la margini decat in ax",
+	# dar linia de sub el era `rim_enabled = false` — adica intentia era scrisa,
+	# nu implementata. Si nici n-avea cum: `rim` e un termen de iluminare, iar
+	# materialul e `SHADING_MODE_UNSHADED`, deci rim-ul nu se evalueaza deloc.
+	#
+	# Asta e chiar „valul translucid" pe care criticul l-a vazut peste jumatatea
+	# stanga a capturilor R3_068/072 (si care lipsea din 074 doar fiindca acolo
+	# raza cadea in afara cadrului). Nu era o problema de intensitate: masurat
+	# geometric, un con de 16 m inaltime si 3 m raza, privit de la 10 m, acopera
+	# 77° pe verticala intr-un FOV de 74° — adica NU e o raza in cadru, e o folie
+	# peste tot cadrul, cu muchii verticale drepte fiindca cilindrul are 12 laturi
+	# si `CULL_DISABLED` deseneaza si fata din spate. De-aia scaderea lui
+	# `strength` de la 0.24 la 0.085 „a iesit identica": micsora valoarea, nu
+	# suprafata acoperita.
+	#
+	# `proximity_fade` stinge pixelii unde geometria transparenta se APROPIE de
+	# ce e in spate — deci exact cusaturile: podeaua, peretii, si camera cand
+	# treci prin raza. Silueta se topeste in loc sa taie.
+	mat.proximity_fade_enabled = true
+	mat.proximity_fade_distance = 2.5
+	# Si o stingere la DISTANTA MICA: cand camera intra in con, pixelii de langa
+	# ochi sunt cei care spala tot cadrul. Fade-ul ii scoate inainte sa devina
+	# perdea, si lasa raza sa se vada de departe, unde ea CHIAR citeste ca raza.
+	mat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
+	mat.distance_fade_min_distance = 4.0
+	mat.distance_fade_max_distance = 1.5
 	mat.disable_receive_shadows = true
 	_shared = mat
 	_shared_key = key

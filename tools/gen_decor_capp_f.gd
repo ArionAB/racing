@@ -115,6 +115,49 @@ func _ready() -> void:
 		lines.append("")
 		counter[0] += 1
 
+	# O TORTA CARE CHIAR LUMINEAZA: prop-ul plus un OmniLight in flacara.
+	#
+	# [b]De ce, si de ce abia acum.[/b] Pana aici tortele erau DOAR emisive
+	# (`metadata/lumina`): ardeau, dar nu iluminau nimic — masurat, in toata
+	# Track13 erau ZERO noduri de lumina. De aceea criticul rundei 2 a scris ca
+	# „16 torte se citesc ca un singur jar", si tot de aceea peretii ies plati:
+	# singura lumina din sala era ambientul, care e uniform prin definitie, deci
+	# nicio suprafata nu putea avea o fata luminata diferit de alta. Asta e chiar
+	# defectul comun #2 al rundei („suprafete fara fata de sus luminata"), doar ca
+	# la noi cauza nu era geometria treptelor, ci lipsa unei surse cu DIRECTIE.
+	#
+	# Racirea pietrei (`metadata/racire`) rezolva croma, dar singura NU putea
+	# rezolva modelarea: masurat pe captura, orice umplere aditiva plata scade
+	# contrastul relativ al peretelui de la 0.31 la ~0.13, fiindca ridica la fel
+	# si luminile si umbrele. Caldura si relieful trebuie sa vina din acelasi loc
+	# — flacara.
+	#
+	# [b]Cost.[/b] Nu incalca „o singura lumina" din CLAUDE.md: acolo e vorba de
+	# lumina DIRECTIONALA (cascada de umbre a soarelui), iar caverna e exact locul
+	# in care soarele nu ajunge. Tiparul e cel deja livrat pe Chongqing, care are
+	# 89 de OmniLight: `shadow_enabled = false` (umbrele dinamice sunt scumpe si
+	# aici n-au ce arata — piatra e deja cu AO copt) si `distance_fade`, ca o sala
+	# prin care nu treci sa nu coste nimic.
+	var torch_light := func(group: String, pos: Vector3) -> void:
+		lines.append('[node name="focTorta_%d" type="OmniLight3D" parent="DecorManual/%s"]'
+			% [counter[0], group])
+		# Flacara sta la ~2.1 m pe piesa; lumina se pune IN ea, nu la origine.
+		lines.append('transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.6f, %.6f, %.6f)'
+			% [pos.x, pos.y + 2.1, pos.z])
+		lines.append('light_color = Color(1, 0.706, 0.42, 1)')
+		# Energie mare, raza mica: o torta lumineaza puternic UN petec de perete.
+		# Raza mare ar fi facut exact mocirla uniforma pe care o inlocuim.
+		lines.append('light_energy = 4.20')
+		lines.append('omni_range = 13.0')
+		lines.append('omni_attenuation = 1.6')
+		lines.append('light_specular = 0.20')
+		lines.append('shadow_enabled = false')
+		lines.append('distance_fade_enabled = true')
+		lines.append('distance_fade_begin = 70.0')
+		lines.append('distance_fade_length = 25.0')
+		lines.append("")
+		counter[0] += 1
+
 	# ---------------------------------------------------------------- GURA
 	# Arcul sapat in faleza: 15 m lat, 12.5 m inalt (masurat), deci acopera banda
 	# de 8 m si lasa buiandrug deasupra. Coliziune "mesh": hull-ul unui arc e un
@@ -127,9 +170,10 @@ func _ready() -> void:
 		emit.call("F1_Gura", "tortaGura", "torch", p,
 			(g["yaw"] as float) + (PI * 0.5 if sgn > 0.0 else -PI * 0.5),
 			"none", 1.0, 0.0, TORCH_GLOW)
+		torch_light.call("F1_Gura", p)
 
 	# ------------------------------------------------------------- SALA 1
-	_hall(at, emit, headroom, 0.664, 0.698, CEIL_H1, "F2_Sala1", "s1", false)
+	_hall(at, emit, headroom, torch_light, 0.664, 0.698, CEIL_H1, "F2_Sala1", "s1", false)
 	# Putul de ventilatie: coloana de lumina care cade PE DRUM (brief §2 POI F).
 	# Se aseaza IN tavan, cu axul putin lateral, ca fasciculul sa taie banda in
 	# diagonala in loc s-o urmeze.
@@ -151,6 +195,7 @@ func _ready() -> void:
 		var tp: Vector3 = (t["c"] as Vector3) - (t["side"] as Vector3) * ((t["hw"] as float) - 0.4)
 		emit.call("F3_Gat", "tortaGat", "torch", tp,
 			(t["yaw"] as float) + PI * 0.5, "none", 1.0, 0.0, TORCH_GLOW)
+		torch_light.call("F3_Gat", tp)
 
 	# ------------------------------------------------------------- SALA 2
 	# Biserica rupestra: acelasi schelet, dar cu arcade de biserica si fresce.
@@ -178,7 +223,7 @@ func _ready() -> void:
 	# atunci `CameraZone.ceiling` nu mai are ce arata), ori se muta bucla elicei —
 	# amandoua sunt decizii de TRASEU, nu de decor, si nu se iau intr-o runda de
 	# arta. Ce tine de runda asta e ca sala existenta sa arate ca o sala.
-	_hall(at, emit, headroom, 0.720, 0.753, CEIL_H2, "F4_Sala2", "s2", true)
+	_hall(at, emit, headroom, torch_light, 0.720, 0.753, CEIL_H2, "F4_Sala2", "s2", true)
 	var v2: Dictionary = at.call(0.737)
 	emit.call("F4_Sala2", "putSala2", "vent_shaft",
 		(v2["c"] as Vector3) - (v2["side"] as Vector3) * 2.4
@@ -200,7 +245,8 @@ func _ready() -> void:
 
 ## O sala: tavan din lespezi, coloane si alcove pe pereti, arcade transversale,
 ## torte. `church` schimba arcada cu cea de biserica (fresce) — sala 2.
-func _hall(at: Callable, emit: Callable, headroom: Callable, f0: float, f1: float, ceil_h: float,
+func _hall(at: Callable, emit: Callable, headroom: Callable, torch_light: Callable,
+		f0: float, f1: float, ceil_h: float,
 		group: String, tag: String, church: bool) -> void:
 	var span := f1 - f0
 	# Lungimea salii se ia din pozitii REALE, nu din fractie: pe fractie pasul
@@ -267,10 +313,11 @@ func _hall(at: Callable, emit: Callable, headroom: Callable, f0: float, f1: floa
 		# 22 m lasa jumatate din sala fara nimic care s-o modeleze.
 		# Alternarea malului da si ritm lateral: pe un sir de coloane simetrice,
 		# lumina care sare stanga-dreapta e ce arata ca sala are LATIME.
-		emit.call(group, "torta%s" % tag, "torch",
-			c + side * (hw + 0.6) * (1.0 if s % 2 == 0 else -1.0),
+		var torch_pos := c + side * (hw + 0.6) * (1.0 if s % 2 == 0 else -1.0)
+		emit.call(group, "torta%s" % tag, "torch", torch_pos,
 			(d["yaw"] as float) + (-PI * 0.5 if s % 2 == 0 else PI * 0.5),
 			"none", 1.0, 0.0, TORCH_GLOW)
+		torch_light.call(group, torch_pos)
 
 	# --- PERETII. Fara ei sala e o pergola: prima captura la frac 0.68 a iesit
 	# cu cer si dune pe amandoua partile, adica exact "desert cu stalpi".
@@ -335,23 +382,47 @@ func _hall(at: Callable, emit: Callable, headroom: Callable, f0: float, f1: floa
 				# ca sonda sa poata compara A/B), dar necorelat intre vecini.
 				# Nu costa niciun material si nicio piesa in plus: aceleasi
 				# instante, doar ca nu mai sunt stantate.
-				# Jitterul e DOAR SPRE INTERIOR (0 .. +0.9), niciodata spre
-				# afara. Prima varianta il facea simetric (±0.9) si captura de la
-				# 0.76 a aratat de ce e gresit: panourile impinse in afara ies
-				# din masivul de teren, iar prin rosturile ramase intra stanca
+				# Jitterul e DOAR SPRE INTERIOR, niciodata spre afara. Prima
+				# varianta il facea simetric (±0.9) si captura de la 0.76 a
+				# aratat de ce e gresit: panourile impinse in afara ies din
+				# masivul de teren, iar prin rosturile ramase intra stanca
 				# CENUSIE de exterior — pete palide de-a lungul intregului sir,
 				# adica taman lumina de afara pe care peretii exista s-o
 				# opreasca. Peretele sapat poate avansa in sala (mai multa
 				# piatra), dar nu poate da inapoi in munte fara sa-l gaureasca.
+				#
+				# [b]CAT DE MULT, si de ce cifra veche nu se vedea.[/b] Runda
+				# trecuta clatina scara cu ±12% si adancimea cu 0.9 m, si
+				# criticul orb a raspuns ca sirul citeste „rafturi stantate" —
+				# nu „prea subtil", ci INVIZIBIL. Are dreptate aritmetic: pe o
+				# piesa de 8.3 m, 12% inseamna 1 m pe o suprafata privita din
+				# capat, adica sub un pixel de deplasare la punctul de fuga.
+				# Regula platita deja de proiect (10/255 luminanta, ±9% pe
+				# lespezi paralele) spune ca variatia trebuie sa fie in METRI,
+				# nu in procente.
+				#
+				# Deci: adancimea se clatina cu pana la 3.2 m (de la 0.9), pe
+				# trei trepte discrete in loc de continuu — un perete sapat are
+				# nise si pinteni, nu o unda lina. Treptele sunt ce da UMBRA
+				# proprie: doi vecini la aceeasi adancime nu se ocultau niciodata.
 				var h := float((col * 73 + lvl * 149 + int(sgn) * 37) % 100) / 100.0
 				var h2 := float((col * 31 + lvl * 211 + int(sgn) * 17) % 100) / 100.0
+				var h3 := float((col * 97 + lvl * 53 + int(sgn) * 61) % 100) / 100.0
 				var ws := wall_scale * (0.94 + 0.18 * h)
-				var depth := (hw + COL_OUT + 3.4) - h2 * 0.9
+				# Trei trepte de adancime: 0 / 1.6 / 3.2 m spre interior.
+				var step := float(int(h2 * 3.0)) * 1.6
+				var depth := (hw + COL_OUT + 3.4) - step
+				# ROTATIE NE-PARALELA, cererea explicita a criticului. Fara ea,
+				# oricat ai varia adancimea, toate fetele raman pe acelasi plan
+				# si prind exact aceeasi lumina — de acolo venea „placa paralela".
+				# ±0.20 rad (11.5°) e destul cat fata sa-si schimbe valoarea fata
+				# de vecina, si prea putin cat sa deschida rosturi spre munte.
+				var skew := (h3 - 0.5) * 0.40
 				emit.call(group, "perete%s" % tag, "hall_alcove",
 					c + side * depth * sgn
 						+ Vector3.UP * (wall_h * float(lvl)),
-					yaw + (PI * 0.5 if sgn > 0.0 else -PI * 0.5), "hull",
-					ws)
+					yaw + (PI * 0.5 if sgn > 0.0 else -PI * 0.5) + skew,
+					"hull", ws)
 
 	# --- POALA de la marginea benzii. Peretele inalt sta in spatele coloanelor
 	# (ca sala sa aiba latime), si intre el si asfalt ramanea o fasie de

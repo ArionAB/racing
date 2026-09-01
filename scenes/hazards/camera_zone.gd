@@ -120,6 +120,23 @@ extends Area3D
 ## cealalta directie. 0.30 lasa relieful si AO-ul copt sa se citeasca.
 @export_range(0.0, 2.0, 0.01) var cave_ambient_energy: float = 0.30
 
+## Culoarea cetei din caverna — adica CE CULOARE AU DEPARTARILE.
+##
+## Era `(0.10, 0.07, 0.06)`, un brun cald, si asta a fost chiar defectul pe care
+## l-au numit independent toti cei patru critici ai rundei 2: „o singura nuanta
+## pe toata adancimea cadrului". Ceata e ce vopseste tot ce e departe, iar in
+## familia pietrei ea sterge tocmai separarea de plan. Perspectiva aeriana merge
+## invers: departarile se RACESC.
+##
+## Masurat pe capturile de baza (`R4base_*`): peretele apropiat avea luminanta
+## 23.5 si capatul salii 38.4 — adica departarea era mai LUMINOASA si la fel de
+## calda, exact pe dos fata de referinta. Cu ceata rece si mai inchisa,
+## adancimea se citeste din nuanta, nu doar din marime.
+##
+## Se declara O SINGURA data fiindca `_darken` si `force_dark` o foloseau
+## amandoua, copiata — doua locuri din care se putea schimba doar unul.
+const CAVE_FOG := Color(0.055, 0.062, 0.085)
+
 var _shape: CollisionShape3D
 var _env: Environment
 ## Valorile pistei, luate O DATA si puse la loc de fiecare data.
@@ -201,7 +218,7 @@ func _darken(inside: bool, delta: float) -> void:
 	# Ceata inchisa, in culoarea pietrei: ea inghite capetele salilor si opreste
 	# cerul sa se vada prin gura de la celalalt capat.
 	_env.fog_light_color = (_base["fog_color"] as Color).lerp(
-		Color(0.10, 0.07, 0.06), k)
+		CAVE_FOG, k)
 	if _amount <= 0.0:
 		_env.fog_enabled = _base["fog_enabled"]
 
@@ -232,7 +249,7 @@ func force_dark() -> void:
 	_env.fog_enabled = true
 	_env.fog_depth_end = lerpf(_base["fog_end"], cave_fog_end, k)
 	_env.fog_light_color = (_base["fog_color"] as Color).lerp(
-		Color(0.10, 0.07, 0.06), k)
+		CAVE_FOG, k)
 
 
 func _find_env() -> Environment:

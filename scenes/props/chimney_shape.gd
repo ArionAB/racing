@@ -1611,6 +1611,36 @@ func _radius_at_dir(src: Mesh, cx: float, cz: float, y0: float, h: float,
 	return radii[radii.size() / 2]
 
 
+## Raza MAXIMA intr-un sector, nu mediana lui.
+##
+## `_radius_at_dir` intoarce mediana pe un sector de +/-25 grade, si asta e
+## exact ce NU trebuie cand intrebi "cat de mult iese peretele aici": pe un con
+## ovalizat (`ovality` coboara pana la 0.62) mediana pe un sector lat netezeste
+## chiar bombarea, deci raspunde mai mic decat peretele real. In cadru se vedea
+## ca o pana palida care taie oblic prin fereastra, de jos in sus — peretele
+## trecand PRIN FATA nisei. Proba: cu ancadramentul stins, pana ramanea si se
+## vedea ca trece si sub gol, deci nu era nici solbanc, nici buiandrug.
+func _radius_max_dir(src: Mesh, cx: float, cz: float, y0: float, h: float,
+		frac: float, ang: float, half_deg: float) -> float:
+	var dir := Vector2(cos(ang), sin(ang))
+	var lim := cos(deg_to_rad(half_deg))
+	var best := 0.0
+	for win in [0.10, 0.20, 0.35]:
+		for sfc in src.get_surface_count():
+			var arrays := src.surface_get_arrays(sfc)
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				if absf((v.y - y0) / h - frac) >= win:
+					continue
+				var d := Vector2(v.x - cx, v.z - cz)
+				var l := d.length()
+				if l > 0.001 and d.normalized().dot(dir) >= lim:
+					best = maxf(best, l)
+		if best > 0.001:
+			break
+	return best
+
+
 ## Inelul de grohotis: un trunchi de con jos si larg, lipit de perete.
 ##
 ## Nu e un con neted — raza exterioara si inaltimea variaza pe azimut cu acelasi
@@ -2052,14 +2082,20 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		var lo_max := br
 		var hi_min := tr
 		var hi_max := tr
+		# Semi-unghiul golului: cat de larg e sectorul in care peretele are voie
+		# sa bombeze prin fata nisei.
+		var half_a := rad_to_deg(atan2(dw * 0.5, maxf(br, 0.01))) + 6.0
 		for probe in 7:
 			var pa := a + (float(probe) / 6.0 - 0.5) * (dw / maxf(br, 0.01))
 			var s_lo := _radius_at_dir(src, cx, cz, y0, h, y_lo, pa)
 			var s_hi := _radius_at_dir(src, cx, cz, y0, h, y_hi, pa)
 			lo_min = minf(lo_min, s_lo)
-			lo_max = maxf(lo_max, s_lo)
 			hi_min = minf(hi_min, s_hi)
-			hi_max = maxf(hi_max, s_hi)
+		# Maximul se ia cu interogarea de MAXIM pe sectorul golului, nu din
+		# medianele de mai sus: mediana neteaza chiar bombarea pe care trebuie
+		# s-o depasim (vezi `_radius_max_dir`).
+		lo_max = maxf(lo_max, _radius_max_dir(src, cx, cz, y0, h, y_lo, a, half_a))
+		hi_max = maxf(hi_max, _radius_max_dir(src, cx, cz, y0, h, y_hi, a, half_a))
 		var r_min := lo_min
 		var r_max := lo_max
 		# FUNDUL NU ARE VOIE SA TREACA DE AXA. `dd` e in unitati de mesh, iar pe
@@ -2105,11 +2141,15 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# peretele iesea prin gol.
 		# Se ridica direct la creasta: r_max impartit la (1 - flute_depth), plus
 		# un fir pentru z-fighting. Nu mai depinde de unde au picat vertecsii.
-		# Nu doar canelura: `strata_step` ridica si el trepte pe raza, iar
-		# `noise_amount` mai adauga. Toate trei sunt fractiuni din raza si toate
-		# pot cadea intre vertecsii pe care ii masuram, deci degajarea le insumeaza.
-		var crest_k := 1.0 / maxf(1.0 - flute_depth - strata_step
-			- noise_amount, 0.5)
+		# Fiecare deformare intra CU SEMNUL EI, iar semnele nu sunt aceleasi:
+		#   canelura   `scale *= 1 - flute_depth * (...)`   => doar SCADE raza
+		#   straturile `scale *= 1 + strata_step * (...)`   => doar CRESC raza
+		#   conturul   `scale *= 1 + noise_amount * (...)`  => in ambele sensuri
+		# Prima versiune le-a scazut pe toate din acelasi numitor, ceea ce e
+		# gresit pentru straturi: ele urca peretele PESTE raza masurata, deci
+		# maresc degajarea necesara, nu o micsoreaza.
+		# Creasta maxima fata de raza nominala e produsul capetelor de sus.
+		var crest_k := (1.0 + strata_step) * (1.0 + noise_amount) 			/ maxf(1.0 - flute_depth, 0.5)
 		# Plafonul era `dd * 0.6` si el era cel care lega, nu calculul: pe
 		# `hornUmbra8` degajarea ceruta iesea 0.699 si se taia la 0.378, iar in
 		# gol ramanea o pana ascutita de perete impinsa de jos in sus — se vede
@@ -2317,16 +2357,18 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		# ramanea doar o linie neagra.
 		var w_min := minf(rr_a, rr_a_t)
 		var w_max := maxf(rr_a, rr_a_t)
+		var half_w := rad_to_deg(atan2(ww * 0.5, maxf(rr_a, 0.01))) + 6.0
 		for q in 5:
 			var qa := a + (float(q) / 4.0 - 0.5) * (ww / maxf(rr_a, 0.01))
-			var v_lo := _radius_at_dir(src, cx, cz, y0, h, rf, qa)
-			var v_hi := _radius_at_dir(src, cx, cz, y0, h, rf_t2, qa)
-			w_min = minf(w_min, minf(v_lo, v_hi))
-			w_max = maxf(w_max, maxf(v_lo, v_hi))
+			w_min = minf(w_min, minf(_radius_at_dir(src, cx, cz, y0, h, rf, qa),
+				_radius_at_dir(src, cx, cz, y0, h, rf_t2, qa)))
+		# Ca la usi: maximul din interogarea de maxim, nu din mediane.
+		w_max = maxf(w_max, maxf(
+			_radius_max_dir(src, cx, cz, y0, h, rf, a, half_w),
+			_radius_max_dir(src, cx, cz, y0, h, rf_t2, a, half_w)))
 		# Ca la usi: creasta canelurii se CALCULEAZA din `flute_depth`, fiindca
 		# vertecsii pot sa nu cada pe ea. Vezi nota din `_build_doors`.
-		var crest_w := 1.0 / maxf(1.0 - flute_depth - strata_step
-			- noise_amount, 0.5)
+		var crest_w := (1.0 + strata_step) * (1.0 + noise_amount) 			/ maxf(1.0 - flute_depth, 0.5)
 		var w_amp := minf(w_max * (crest_w - 1.0) + w_max * 0.015, wd)
 		var r_face := w_max + w_amp
 		var r_face_t := (w_max + w_amp) * (rr_a_t / maxf(rr_a, 0.001))

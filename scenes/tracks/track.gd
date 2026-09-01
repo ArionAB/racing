@@ -1612,6 +1612,39 @@ static func themes() -> Dictionary:
 			# peste acelasi slot. SAND_MID/SAND_SHADOW raman pentru piese care
 			# chiar au nevoie de alta NUANTA, nu de alta valoare.
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
+			# ETAJUL INALT AL TERENULUI, cu o culoare PROPRIE. Asta e reparatia
+			# defectului pe care l-au numit toti patru criticii: "o singura
+			# nuanta pe toata adancimea cadrului".
+			#
+			# Diagnostic MASURAT, nu presupus. Conul palid care umple coltul
+			# din dreapta capturii la frac 0.48 NU e Erciyes (ala e la 453 m,
+			# dincolo si de fog_end 300 si de FAR_PLANE 380). Sunt varfurile de
+			# TEREN: UmarulCornisei si PeretelHairpinului au marginea la 40-50
+			# m de camera, MasivulDeTuf la 110 m. Adica sunt in prim-plan, unde
+			# ceata n-are ce sa le faca — de-aia mutarea cetii de la tan la
+			# albastru a schimbat pixelii cu 2/255, sub pragul de 4%.
+			#
+			# Ele erau vopsite integral in `ground_tint` (CORAL_SAND), variate
+			# DOAR ca luminozitate: `shade` in [0.86, 1.10], adica ±12% pe o
+			# singura nuanta. O masa de 50 m inaltime cu aceeasi tenta ca berma
+			# de sub roata nu are cum sa citeasca drept alt plan.
+			#
+			# Culoarea e derivata, nu aleasa: se pleaca de la CORAL_SAND si se
+			# merge spre gri-albastru, ca departarea sa se raceasca. E aceeasi
+			# perspectiva aeriana pe care o face ceata, aplicata insa acolo
+			# unde ceata nu ajunge. Saturatia cade la ~40% fata de sol, si cade
+			# si VALOAREA: un plan mai departe e mai inchis decat prim-planul
+			# insorit, altfel sare in fata in loc sa stea in spate.
+			"rock_band_tint": Color(0.46, 0.47, 0.55),
+			# Linia porneste la 34 m, adica 10 m PESTE cota soselei (~24 m), ca
+			# berma pe care merge masina sa ramana integral calda si zona sa
+			# prinda numai masele de fundal. Fade-ul de 22 m e larg deliberat:
+			# `rock_line` e o cota ABSOLUTA, si cu o trecere scurta ar aparea o
+			# linie de nivel orizontala pe toate conurile deodata — exact
+			# "dunga pictata" pentru care a picat peretele. Codul adauga peste
+			# greutate si un zgomot de ±0.25, deci marginea iese zdrentuita.
+			"rock_line": 30.0,
+			"rock_fade": 26.0,
 			# MOLOZUL hornului cazut (POI D, brief §2): 0.8x din asfaltul de 8,
 			# adica 6.4. Ceva mai putin decat cenusa Stromboli (6.8) fiindca
 			# aici sunt bolovani de tuf pe drum, nu nisip afanat — dar tot
@@ -1626,10 +1659,27 @@ static func themes() -> Dictionary:
 			# filtru, nu rasarit.
 			"sky_top": Color.html("B9CCE0"),
 			"sky_horizon": Color.html("F2B27A"),
-			# Ceata din familia orizontului, dar cu o idee mai putin portocaliu:
-			# la 300 m ea e ce vopseste Erciyes, iar cu #F2B27A curat muntele cu
-			# zapada iesea silueta de caramida.
-			"fog": Color(0.92, 0.79, 0.63),
+			# CEATA RECE, desi cerul e cald. Nu e o inconsecventa, e perspectiva
+			# aeriana: aerul imprastie albastrul, deci departarea se raceste si
+			# se desatureaza indiferent ce culoare are lumina. Valoarea veche
+			# (0.92, 0.79, 0.63) era un tan din FAMILIA SOLULUI, si asta e exact
+			# ce a produs reprosul comun al celor patru critici — "o singura
+			# nuanta de la cauciuc pana la cer". Cu ceata calda, un perete rosu
+			# la 40 m si un munte la 250 m ajungeau in acelasi maro: departarea
+			# nu mai era departare, era acelasi lucru mai palid.
+			#
+			# Derivata din cele doua capete ale cerului, nu aleasa: se ia
+			# `sky_top` (#B9CCE0, cerul rece de zori) si se trage 20% spre
+			# `sky_horizon` cald, ca sa nu fie un gri albastru lipit peste un
+			# rasarit portocaliu. Iese (0.78, 0.82, 0.86) — fata de sol
+			# (0.85, 0.66, 0.42) e cu 0.10 mai putin rosu si cu 0.44 mai mult
+			# albastru, adica METRI de separare, nu procente invizibile.
+			#
+			# Efect secundar cerut de criticul lui POI D: Erciyes, care iesea
+			# "un con verde-gri din alta biome", se spala acum in ceata si
+			# devine SILUETA. Nu s-a scos muntele — e o alegere corecta, un
+			# stratovulcan real din Cappadocia — ci a fost impins in planul lui.
+			"fog": Color(0.78, 0.82, 0.86),
 			"hill_color": Color(0.82, 0.70, 0.56),
 			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
 			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade
@@ -1693,7 +1743,18 @@ static func themes() -> Dictionary:
 			# la 90 m (implicitul de desert), hazardul-semnatura al pistei ar fi
 			# fost o pata calda. Capatul e 300, ca pe Stromboli, fiindca Erciyes
 			# si Uchisar trebuie sa fie IN ceata, nu dincolo de ea.
-			"fog_begin": 140.0,
+			# Inceputul coboara 140 -> 95. Motivul e tot reprosul de adancime:
+			# cu ceata pornita de la 140 m, TOT ce se vede dintr-un canion —
+			# peretele de vizavi la 40 m, coada rapei la 90 — cadea inaintea
+			# ei, deci primea zero gradatie. Ceata exista, dar numai pentru
+			# munte. Ca sa existe planuri, gradientul trebuie sa inceapa in
+			# interiorul scenei jucate, nu dincolo de ea.
+			#
+			# Baloanele din vale (POI C, 60-150 m sub banda) raman clare:
+			# fog_depth_curve e 1.4, deci la 95-150 m ceata a acumulat sub 15%
+			# — o racire abia perceptibila pe silueta, nu o pata. Ce inghite ea
+			# de fapt e intervalul 200-300, unde oricum nu e nimic jucabil.
+			"fog_begin": 95.0,
 			"fog_end": 300.0,
 			# ERCIYES pe orizont: vulcanul cu zapada care se vede din toata
 			# Cappadocia. Modelul e din kitul propriu (PR #364), nu imprumutat

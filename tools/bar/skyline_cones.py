@@ -176,7 +176,8 @@ def main():
         # Umarul de sticla: a doua diferenta pozitiva.
         d2 = [rat[i + 1] - 2.0 * rat[i] + rat[i - 1]
               for i in range(1, SAMPLES - 1)]
-        cones.append((len(ws), x, ytop, rat, widen, neck, max(d2)))
+        cones.append((len(ws), x, ytop, rat, widen, neck, max(d2),
+                      sum(abs(v) for v in d2)))
 
     if not cones:
         print("niciun con gasit (cer %.0f, prag %.0f)" % (sky, thr))
@@ -187,9 +188,9 @@ def main():
     print("cer %.0f, prag %.0f — %d conuri" % (sky, thr, len(cones)))
     print("")
     print("  x   h_px  profil VARF->BAZA (raportat la baza)"
-          "                        baza/max  gat   d2max")
-    bad_w = bad_n = 0
-    for hpx, x, ytop, rat, widen, neck, d2m in cones:
+          "                        baza/max  gat   d2max  suma|d2|")
+    bad_w = bad_n = bad_c = 0
+    for hpx, x, ytop, rat, widen, neck, d2m, d2s in cones:
         flag = ""
         if widen < 1.15:
             flag += " LAT"
@@ -197,15 +198,19 @@ def main():
         if neck > 0.02:
             flag += " GAT"
             bad_n += 1
-        print("%4d %5d  %s   %.2f  %+.3f %+.3f%s"
+        if d2s > 0.08 or d2m > 0.05:
+            flag += " CURB"
+            bad_c += 1
+        print("%4d %5d  %s   %.2f  %+.3f %+.3f  %.3f%s"
               % (x, hpx, " ".join("%.2f" % r for r in rat),
-                 widen, neck, d2m, flag))
+                 widen, neck, d2m, d2s, flag))
     print("")
     print("baza/max: cat e baza mai lata decat cel mai lat punct de deasupra "
           "(tinta >= 1.15)")
     print("gat:      cea mai mare STRANGERE de sus in jos (tinta <= 0.02)")
-    print("VERDICT: %d/%d prea inguste la baza, %d/%d cu gat"
-          % (bad_w, len(cones), bad_n, len(cones)))
+    print("suma|d2|: curbura TOTALA a siluetei (tinta < 0.08); d2max <= +0.05")
+    print("VERDICT: %d/%d prea inguste la baza, %d/%d cu gat, %d/%d curbate"
+          % (bad_w, len(cones), bad_n, len(cones), bad_c, len(cones)))
 
 
 main()

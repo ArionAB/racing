@@ -22,7 +22,45 @@ func _ready() -> void:
 		if mi == null or mi.mesh == null:
 			print("%s: fara mesh" % nm)
 			continue
+		# NORMALA din atribut fata de normala GEOMETRICA (produsul vectorial al
+		# colturilor). Daca cele doua nu sunt de acord, atributul minte si orice
+		# sonda care il citeste (inclusiv _shade_facets) numeste "spre soare" o
+		# fata pe care randarea o lasa in umbra.
 		var arr: Array = mi.mesh.surface_get_arrays(0)
+		var vv: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var nn: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+		var idxx: Variant = arr[Mesh.ARRAY_INDEX]
+		var acord := 0
+		var contra := 0
+		if nn.size() == vv.size() and (idxx == null):
+			for t in vv.size() / 3:
+				var i3 := t * 3
+				var gn := (vv[i3 + 1] - vv[i3]).cross(vv[i3 + 2] - vv[i3])
+				if gn.length_squared() < 1e-12:
+					continue
+				if gn.normalized().dot(nn[i3].normalized()) > 0.0:
+					acord += 1
+				else:
+					contra += 1
+			print("  %s: normale in acord %d, INVERSE %d" % [nm, acord, contra])
+		# Cate fete privesc spre soarele real (elev 22, azimut 205), pe mesh in
+		# spatiul GLOBAL.
+		var e := deg_to_rad(22.0)
+		var az := deg_to_rad(205.0)
+		var sund := Vector3(cos(e) * sin(az), sin(e), cos(e) * cos(az)).normalized()
+		var nb := mi.global_transform.basis.inverse().transposed()
+		var spre := 0
+		var dinspre := 0
+		for i3 in nn.size():
+			var wn: Vector3 = nb * nn[i3]
+			if wn.length_squared() < 1e-12:
+				continue
+			if wn.normalized().dot(sund) > 0.1:
+				spre += 1
+			else:
+				dinspre += 1
+		print("  %s: vertecsi cu normala spre soare %d, intoarsa %d"
+				% [nm, spre, dinspre])
 		var cols: PackedColorArray = arr[Mesh.ARRAY_COLOR]
 		if cols.is_empty():
 			print("%s: fara vertex color" % nm)

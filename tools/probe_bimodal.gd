@@ -120,6 +120,13 @@ func _ready() -> void:
 				_:
 					push_warning("varianta necunoscuta: %s" % v)
 		print("VARIANTE [%s]" % ", ".join(variante))
+		if sun != null:
+			print("  soare: energie %.3f  umbre %s  rot %s"
+					% [sun.light_energy, sun.shadow_enabled,
+						sun.rotation_degrees.snappedf(0.1)])
+		if env != null:
+			print("  mediu: amb_energie %.3f  expunere %.3f"
+					% [env.ambient_light_energy, env.tonemap_exposure])
 	for i in 4:
 		await get_tree().process_frame
 

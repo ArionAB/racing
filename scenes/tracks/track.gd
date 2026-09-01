@@ -5656,7 +5656,8 @@ func _build_branch_rails(r: TrackRoute) -> void:
 		return
 	st.generate_normals()
 	_add_mesh_with_collision(st.commit(), Palette.color(Palette.CONCRETE),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED)
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "TunnelShell")
 
 
 ## Are voie sa stea un parapet de banda in punctul asta?
@@ -5710,7 +5711,9 @@ func _build_branch_sand(r: TrackRoute) -> void:
 	var tint: Color = _branch_dirt_color(r)
 	_add_mesh_with_collision(st.commit(), tint,
 		_tex(String(theme_flag("branch_texture",
-			"res://assets/textures/surface_sand.png"))))
+			"res://assets/textures/surface_sand.png"))),
+		1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "BranchSand")
 
 
 ## Reteta "deck": banda ASFALTATA — un tablier de viaduct, nu o panglica.
@@ -5782,7 +5785,8 @@ func _build_branch_deck(r: TrackRoute) -> void:
 	_add_mesh_with_collision(st.commit(), deck_color,
 		_tex("res://assets/textures/surface_asphalt.png"), 0.82, 0.3,
 		BaseMaterial3D.CULL_DISABLED, null,
-		_tex("res://assets/textures/surface_asphalt_macro.png"))
+		_tex("res://assets/textures/surface_asphalt_macro.png"),
+		true, null, "BranchDeck")
 	_build_branch_markings(r)
 
 
@@ -6048,7 +6052,8 @@ func _build_branch_dirt(r: TrackRoute, with_ruts: bool) -> void:
 		_tex(String(theme_flag("branch_texture",
 			"res://assets/textures/surface_gravel.png"))),
 		1.0, 0.0, BaseMaterial3D.CULL_DISABLED, col_mesh,
-		_tex("res://assets/textures/surface_sand_macro.png"))
+		_tex("res://assets/textures/surface_sand_macro.png"),
+		true, null, "BranchDirt")
 	if with_ruts and r.tufts:
 		_build_branch_tufts(r, rc - rw, grass_c)
 
@@ -7122,8 +7127,10 @@ func _build_road() -> void:
 	_add_mesh_with_collision(top.commit(), road_color,
 		_tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro), true,
-		road_override)
-	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2))
+		road_override, "RoadTop")
+	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "RoadSides")
 	if has_ice:
 		ice_top.index()
 		ice_top.generate_normals()
@@ -7137,7 +7144,9 @@ func _build_road() -> void:
 	if not _channels.is_empty():
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
-			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE))
+			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE),
+				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+				null, null, true, null, "ChannelDeckSides")
 
 
 ## Cat de alba e zapada de pe asfalt, ca greutate 0..1 pentru un vertex.
@@ -7360,11 +7369,13 @@ func _build_walls() -> void:
 			# din citirea podului, nu o margine artificiala.
 			_add_mesh_with_collision(st.commit(), Color(0.9, 0.25, 0.2),
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED, null, null,
-				bool(theme_flag("wall_visible", true)))
+				bool(theme_flag("wall_visible", true)), null, "OuterWall")
 		if deck_emitted:
 			deck.generate_normals()
 			_add_mesh_with_collision(deck.commit(),
-				Palette.color(Palette.CONCRETE))
+				Palette.color(Palette.CONCRETE),
+				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+				null, null, true, null, "WallDeck")
 	_build_rail_posts(post_spots)
 
 
@@ -7444,7 +7455,9 @@ func _build_ramp(frac: float) -> void:
 	st.add_vertex(fl); st.add_vertex(bl); st.add_vertex(bl_low)
 	st.add_vertex(fr); st.add_vertex(br_low); st.add_vertex(br)
 	st.generate_normals()
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "Ramp")
 
 ## TOROS (Baikal): creasta de gheata impinsa de vant peste culoar — un
 ## kicker natural, mic. Prisma asimetrica pe TOATA latimea benzii (+1 m de
@@ -8270,7 +8283,9 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	st.generate_normals()
 	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
 	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "ChannelKicker")
 
 	var kicker := FlyoffKicker.new()
 	kicker.name = "Trambulina_%s" % String(ch.get("label", "canal"))
@@ -8463,7 +8478,9 @@ func _build_flyoff(frac: float) -> void:
 	st.add_vertex(top_r); st.add_vertex(lip_r); st.add_vertex(lip_l)
 	st.generate_normals()
 	# Portocaliul rampelor: jucatorul stie deja ca portocaliu = sari.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1))
+	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "FlyoffRamp")
 	_build_flyoff_kicker(last)
 	_build_flyoff_net(idx)
 
@@ -8694,7 +8711,8 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 		collision_mesh: ArrayMesh = null,
 		macro_texture: Texture2D = null,
 		visible_mesh: bool = true,
-		override_material: Material = null) -> void:
+		override_material: Material = null,
+		body_name: String = "") -> void:
 	# visible_mesh = false: doar fizica, fara desen. Zidul exterior pe pistele
 	# care nu vor panglica vizibila ramane totusi zid — altfel se deschide
 	# marginea buclei (pe Okinawa, direct in mare).
@@ -8709,6 +8727,12 @@ func _add_mesh_with_collision(mesh: ArrayMesh, color: Color,
 				specular, cull, macro_texture)
 		add_child(inst)
 	var body := StaticBody3D.new()
+	# NUMELE nu e cosmetica: ProbeLaneClear raporteaza blocajele pe nume, iar un
+	# "@StaticBody3D@248" costa de fiecare data o sonda separata ca sa afli ce
+	# constructor l-a facut — si indicele se SCHIMBA la orice geometrie adaugata
+	# inaintea lui, deci nici notat intr-un raport nu ramane valabil.
+	if body_name != "":
+		body.name = body_name
 	var shape := CollisionShape3D.new()
 	# collision_mesh separat cand vizualul nu trebuie sa fie si fizica: soseaua
 	# cambrata ruleaza pe fasia plata veche, ca feel-ul sa ramana identic.
@@ -8971,7 +8995,7 @@ func _build_shoulders() -> void:
 	# CU COLIZIUNE: banda e rampa de reintrare pe sosea, nu doar o culoare.
 	_add_mesh_with_collision(st.commit(), dust,
 		_tex("res://assets/textures/surface_gravel.png"), 1.0, 0.5,
-		BaseMaterial3D.CULL_BACK)
+		BaseMaterial3D.CULL_BACK, null, null, true, null, "Shoulders")
 
 
 ## Cat de lat trebuie sa fie umarul intr-un punct ca panta lui sa ramana sub

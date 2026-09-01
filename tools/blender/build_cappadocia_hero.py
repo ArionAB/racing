@@ -402,11 +402,20 @@ def build_cave_entrance():
         b.revolve([(0.26, 0.0), (0.20, 0.55), (0.0, 1.05)], FLAME, segments=7,
                   origin=(x, D * 0.5 + 1.15, 4.52))
 
-    # moloz la baza pragului
+    # Moloz la baza pragului. `b.rock` CENTREAZA elipsoidul pe punctul dat, deci
+    # z-ul lui e jumatatea inaltimii, nu talpa. Cu z=0.0 piesa cobora la -s/2
+    # (masurat: -0.482), iar `emit(..., origin="base")` ridica TOT portalul cu
+    # atat ca sa aduca cel mai jos punct la zero. Consecinta, masurata cu
+    # ProbeRace: cei sase bolovani ajungeau la 0.0-0.96 m, adica FIX in usa, la
+    # inaltimea barei de protectie — 27-42 de repuneri pe seed, toate la frac
+    # 0.653-0.657, si pragul frontal ajungea la 0.47 m (peste limita de 0.3 m
+    # din `suprafete-cu-goluri-si-praguri`). Molozul se aseaza deci cu TALPA la
+    # zero, si atunci `origin="base"` nu mai are ce ridica.
     rand = _lcg(4409)
     for k in range(6):
         s = 0.4 + rand() * 0.6
-        b.rock((-W * 0.42 + W * 0.84 * rand(), D * 0.5 + 0.4 + rand() * 0.7, 0.0),
+        b.rock((-W * 0.42 + W * 0.84 * rand(), D * 0.5 + 0.4 + rand() * 0.7,
+                s * 0.5),
                (s * 2.0, s * 1.7, s), TUFF_SH, seed=int(rand() * 900),
                segments=6, rings=3, taper=0.50)
     return b.to_object("Cave_Entrance")

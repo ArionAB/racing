@@ -1391,8 +1391,6 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		var tgt := facade_target
 		if tgt == Vector3.ZERO:
 			tgt = _nearest_road_point(global_position)
-		if OS.get_environment("HORN_PROBE") != "":
-			print("FACADE %s tgt=%s pos=%s" % [name, str(tgt.round()), str(global_position.round())])
 		var to_t := tgt - global_position
 		to_t.y = 0.0
 		if to_t.length_squared() > 0.0001:
@@ -1897,7 +1895,18 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 	# raza intreaga: altfel fundul ei ar iesi pe partea cealalta a hornului, iar
 	# peretii s-ar autointersecta.
 	dd = minf(dd, base_r * 0.5)
-	dw = minf(dw, base_r * 1.4)
+	# LATIMEA E O COARDA, deci nu poate depasi diametrul — si cu mult inainte de
+	# el nisa inceteaza sa mai fie o gaura in perete.
+	#
+	# Plafonul vechi (1.4 * raza) lasa golul sa acopere aproape toata jumatatea
+	# dinspre privitor: obrajii nisei se desfaceau spre exterior ca doua foi
+	# mari, cu fundul de lemn intors spre camera. In cadru ieseau exact
+	# lespezile late si maro de langa conurile din stanga.
+	#
+	# 0.7 * raza inseamna o coarda de ~40 de grade: destul cat usa sa fie o
+	# deschidere adevarata la scara omului, destul de putin cat peretele sa
+	# ramana perete de-o parte si de alta a ei.
+	dw = minf(dw, base_r * 0.70)
 	# USA NU POATE FI MAI INALTA DECAT CONUL CARE O TINE.
 	#
 	# `dh` se obtine impartind metrii la scara nodului, si pe hornurile MICI
@@ -2019,15 +2028,40 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# vizibila pe toata latimea; cu minimul pe fund nu se vede piatra prin ea.
 		var y_lo := clampf((yb - y0) / h, 0.0, 0.95)
 		var y_hi := clampf((yt - y0) / h, 0.0, 0.97)
-		var r_min := minf(br, tr)
-		var r_max := maxf(br, tr)
+		# Amplitudinea canelurii se masoara PE O SINGURA COTA, nu pe amandoua.
+		#
+		# Conul se subtiaza cu inaltimea, deci amestecand esantioane de la prag
+		# si de la buiandrug se aduna DOUA lucruri diferite: canelura (ce ne
+		# trebuie) plus conicitatea pe inaltimea usii (care n-are treaba cu
+		# ea). Masurat pe `hornUmbra8`, asa iesea rmin 2.34 / rmax 3.41 — o
+		# imprastiere de 1.07 din care doar ~0.5 era canelura — si fata nisei
+		# ajungea la 4.05, adica un metru IN FATA peretelui: de acolo veneau
+		# lespezile care pluteau langa conuri.
+		# Fiecare cota isi cauta propriul minim si maxim, si se pastreaza cea
+		# mai mica imprastiere dintre ele.
+		var lo_min := br
+		var lo_max := br
+		var hi_min := tr
+		var hi_max := tr
 		for probe in 7:
 			var pa := a + (float(probe) / 6.0 - 0.5) * (dw / maxf(br, 0.01))
 			var s_lo := _radius_at_dir(src, cx, cz, y0, h, y_lo, pa)
 			var s_hi := _radius_at_dir(src, cx, cz, y0, h, y_hi, pa)
-			r_min = minf(r_min, minf(s_lo, s_hi))
-			r_max = maxf(r_max, maxf(s_lo, s_hi))
-		var r_back := r_min - dd
+			lo_min = minf(lo_min, s_lo)
+			lo_max = maxf(lo_max, s_lo)
+			hi_min = minf(hi_min, s_hi)
+			hi_max = maxf(hi_max, s_hi)
+		var r_min := lo_min
+		var r_max := lo_max
+		# FUNDUL NU ARE VOIE SA TREACA DE AXA. `dd` e in unitati de mesh, iar pe
+		# hornurile mici raza peretelui e comparabila cu ea: masurat,
+		# `hornSoare25` si `hornGemen32` ieseau cu fundul la -0.08, -0.37 si
+		# -0.63. O raza NEGATIVA rastoarna nisa prin axa conului si o scoate pe
+		# partea cealalta — de acolo veneau foile lungi care traversau terenul,
+		# nu din marja de degajare.
+		# Se pastreaza cel putin un sfert din raza ca perete in spatele nisei.
+		var r_shell := minf(r_min, hi_min)
+		var r_back := maxf(r_shell - dd, r_shell * 0.25)
 		# Fata golului iese cu O JUMATATE DE AMPLITUDINE DE CANELURA peste
 		# maximul MASURAT, si asta nu e o marja de siguranta pusa din ochi.
 		#
@@ -2052,9 +2086,16 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# decat e nisa de adanca nu mai e buza, e o lespede lipita pe perete —
 		# si pe hornurile mici (`hornCiot45`, scara 0.34) exact asa ieseau, foi
 		# uriase care traversau terenul.
-		var flute_amp := minf(maxf(r_max - r_min, r_max * flute_depth * 0.5), dd)
+		# Doar o DEGAJARE, nu inca o amplitudine. `r_max` e deja cel mai iesit
+		# vertex de pe latimea golului; peste el mai trebuie doar cat sa nu se
+		# bata fata nisei cu fata peretelui (z-fighting) si cat sa acopere
+		# bombarea dintre doi vertecsi. Adunand amplitudinea INTREAGA, fata
+		# ajungea la 4.05 pe `hornUmbra8` unde peretele e la 3.41 — o palma in
+		# aer, si de acolo lespezile plutitoare.
+		var flute_amp := minf(r_max * 0.02 + (r_max - r_min) * 0.25, dd * 0.6)
+		var top_amp := minf(hi_max * 0.02 + (hi_max - hi_min) * 0.25, dd * 0.6)
 		var rf_b := r_max + flute_amp
-		var rf_t := (r_max + flute_amp) * (tr / maxf(br, 0.001))
+		var rf_t := hi_max + top_amp
 		var hw := dw * 0.5
 		# Cele opt colturi: 4 pe fata (jos pe raza pragului, sus pe cea de la
 		# buiandrug), 4 pe fund.
@@ -2206,7 +2247,9 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 	var wd := minf(0.18 / world_scale, r * 0.35)
 	# Latimea nu poate depasi o fractiune din circumferinta, altfel ferestrele
 	# vecine se ating si redevin gratar.
-	ww = minf(ww, r * 0.55)
+	# Aceeasi limita de coarda ca la usi (vezi `_build_doors`): peste ~0.45 din
+	# raza, obrajii ferestrei se intorc spre camera in loc sa priveasca golul.
+	ww = minf(ww, r * 0.45)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = shape_seed + 5100 + row * 31
 	var arc := deg_to_rad(window_arc_deg)
@@ -2261,7 +2304,7 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 		# Adancimea trebuie sa treaca de peretele cel mai INTRAT din dreptul
 		# golului, nu doar `wd`: altfel canelura taie fundul nisei si gaura
 		# redevine chenar gol.
-		var r_back := w_min - wd
+		var r_back := maxf(w_min - wd, w_min * 0.25)
 		# Inaltimile variaza putin de la o fereastra la alta: un rand perfect
 		# aliniat citeste a fatada de bloc, nu a stanca locuita.
 		var yb := ybase + rng.randf_range(-0.12, 0.12) * wh

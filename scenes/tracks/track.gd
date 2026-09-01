@@ -1736,6 +1736,11 @@ static func themes() -> Dictionary:
 			# de piatra care taie drumul cu umbra lor. Ordinea de sacrificiu e
 			# in brief §6: intai in subteran, unde nu se vad.
 			"shadows": true,
+			# Cascada acopera pana unde se VAD casterii, nu doar lungimea unei
+			# umbre: la 22 grade un horn de 14 m arunca 34.7 m, iar padurea se
+			# intinde dincolo de 75 m. Masurat pe POI B: solul din planul mijlociu
+			# s-a intunecat de la 137 la 110 si au aparut dare lungi peste drum.
+			"shadow_distance": 130.0,
 			"fog_depth": true,
 			# 140 -> 300, si inceputul e departe DIN MECANICA, nu din gust: de
 			# pe cornisa (POI C) trebuie sa se vada fundul vaii cu baloanele in

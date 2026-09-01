@@ -2044,6 +2044,31 @@ func _shade_facets(arr: Array) -> Array:
 		var n := norms[i] + norms[i + 1] + norms[i + 2]
 		if n.length_squared() < 0.0001:
 			continue
+		# SEMNUL NORMALEI SE DERIVA DIN INFASURARE, nu se ia pe incredere.
+		#
+		# Masurat cu `probe_k` pe mesh-ul final din scena: atributul de normala e
+		# INVERS fata de normala geometrica (produsul vectorial al colturilor) pe
+		# ~98% din fete — hornUmbra8 29 in acord / 1310 inverse, hornSoare11
+		# 53/1482, hornGemen9 27/1783. Consecinta: `dot(n, sun)` intoarce semnul
+		# gresit, deci functia asta picteaza INTUNECAT chiar fata pe care soarele
+		# o lumineaza, si deschis pe cea din umbra. Cele doua semnale se scad —
+		# acelasi tipar pe care comentariul rundei 13 il descrie pentru un soare
+		# gresit, doar ca atunci s-a reparat directia soarelui si a ramas
+		# nereparata normala.
+		#
+		# Se vedea in contradictia dintre doua sonde: la azimut 205 ProbeSunFace
+		# raporta 94% din pixelii vizibili ai lui hornUmbra8 "spre soare" (citind
+		# atributul), in timp ce randarea reala cu ambientul SI umbrele stinse
+		# dadea acelasi con negru (p50 = 0). Fetele priveau soarele doar in
+		# atribut.
+		#
+		# Nu se inverseaza orbeste, fiindca infasurarea depinde de suprafata si o
+		# constanta ar strica exact ce repara acum: se compara cu produsul
+		# vectorial al triunghiului si se ia semnul care iese. Pe fetele unde cele
+		# doua sunt de acord nu se schimba nimic.
+		var geo := (verts[i + 1] - verts[i]).cross(verts[i + 2] - verts[i])
+		if geo.length_squared() > 1.0e-12 and geo.dot(n) < 0.0:
+			n = -n
 		var d := n.normalized().dot(sun) * 0.5 + 0.5
 		# TREPTELE, masurate (runda 14, `probe_capp_facetd`).
 		#

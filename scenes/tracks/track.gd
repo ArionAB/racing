@@ -1692,8 +1692,22 @@ static func themes() -> Dictionary:
 			# elevatie lumina joasa spala TOT cerul, deci si zenitul e palid.
 			# Un zenit saturat langa un orizont portocaliu ar fi citit amiaza cu
 			# filtru, nu rasarit.
-			"sky_top": Color.html("B9CCE0"),
-			"sky_horizon": Color.html("F2B27A"),
+			# COBORATE fata de hexurile din brief (B9CCE0 / F2B27A), si nu din
+			# gust. Masurat pe cadrul de la frac 0.06: cerul randat avea mediana
+			# 239 fata de 149 pe solul luminat — cu 90 de trepte peste ORICE
+			# altceva din cadru. Consecinta se vede la planul mijlociu: siluetele
+			# departate nu se retrag in ceata, se dizolva intr-un alb care e mai
+			# luminos decat ele.
+			#
+			# Doua cauze, amandoua reparate aici. Hexurile insele sunt palide
+			# (luminanta ~200 si ~190), iar peste ele `sky_cover` se ADUNA (vezi
+			# nota din _build_environment) cu alfa 0.35 — implicitul, pe care
+			# tema nu si-l cobora. Adunarea mai punea ~40 de trepte, deci zenitul
+			# iesea 232-251 in loc de ~200.
+			"sky_top": Color.html("6E88A8"),
+			"sky_horizon": Color.html("C08752"),
+			# Norii doar sugerati: la 0.35 stratul adunat spala tot gradientul.
+			"sky_cover_alpha": 0.10,
 			# CEATA RECE, si asta e o schimbare deliberata fata de versiunea
 			# calda (0.92, 0.79, 0.63) — care era in familia orizontului.
 			#

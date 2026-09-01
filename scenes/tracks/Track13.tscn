@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=30 format=3]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -20,6 +20,14 @@
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/plants/poplar_b.glb" id="35_poplar_b"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/plants/pigeon.glb" id="21_pigeon"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/plants/shrub_dry.glb" id="22_shrub"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/buildings/farmhouse.glb" id="36_farmhouse"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/structures/church_arch.glb" id="37_arch"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/structures/cave_entrance.glb" id="38_cave_entr"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/plants/vine_row.glb" id="39_vine"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/props/torch.glb" id="40_torch"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/cracked_chimney_b.glb" id="41_crack_b"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/cracked_chimney_c.glb" id="42_crack_c"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/chimney_triple.glb" id="43_ch_triple"]
 
 [sub_resource type="Curve3D" id="Curve3D_cappadocia"]
 closed = true
@@ -105,373 +113,613 @@ script = ExtResource("4_prop")
 [node name="ZoneA_PiataGoreme" type="Node3D" parent="DecorManual"]
 
 [node name="casaCon1" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("19_house_b")]
-transform = Transform3D(0.939916, 0, 0.341405, 0, 1.000000, 0, -0.341405, 0, 0.939916, -255.022476, 49.233135, 20.825230)
+transform = Transform3D(0.939916, 0, 0.341405, 0, 1.000000, 0, -0.341405, 0, 0.939916, -255.124893, 49.235825, 21.107204)
 
 [node name="casaCon2" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("18_house_a")]
-transform = Transform3D(0.967931, 0, 0.251215, 0, 1.000000, 0, -0.251215, 0, 0.967931, -228.792099, 49.495590, 29.839842)
+transform = Transform3D(0.968986, 0, 0.247117, 0, 1.000000, 0, -0.247117, 0, 0.968986, -231.642792, 49.518635, 30.351109)
 
 [node name="casaCon3" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("30_house_c")]
-transform = Transform3D(-0.972071, 0, -0.234688, 0, 1.000000, 0, 0.234688, 0, -0.972071, -242.909180, 49.529385, 58.676502)
+transform = Transform3D(-0.971876, 0, -0.235494, 0, 1.000000, 0, 0.235494, 0, -0.971876, -244.443619, 49.555035, 57.275761)
 
-[node name="casaSpate4" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("18_house_a")]
-transform = Transform3D(1.014867, 0, 0.269341, 0, 1.050000, 0, -0.269341, 0, 1.014867, -193.486160, 49.290787, 29.682051)
+[node name="casaCon4" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("18_house_a")]
+transform = Transform3D(-0.919690, 0, -0.238054, 0, 0.950000, 0, 0.238054, 0, -0.919690, -213.204330, 49.385670, 64.139923)
 
-[node name="casaSpate5" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("30_house_c")]
-transform = Transform3D(0.919692, 0, 0.238049, 0, 0.950000, 0, -0.238049, 0, 0.919692, -206.874054, 49.379856, 23.230995)
+[node name="casaCon5" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("30_house_c")]
+transform = Transform3D(0.871375, 0, 0.225181, 0, 0.900000, 0, -0.225181, 0, 0.871375, -218.757019, 49.450714, 32.139217)
 
-[node name="casaSpate6" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("19_house_b")]
-transform = Transform3D(-0.919746, 0, -0.237839, 0, 0.950000, 0, 0.237839, 0, -0.919746, -232.617249, 49.435497, 71.317162)
+[node name="casaCon6" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("19_house_b")]
+transform = Transform3D(0.884751, 0, 0.252220, 0, 0.920000, 0, -0.252220, 0, 0.884751, -190.815399, 49.284298, 39.306664)
 
-[node name="casaCon7" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("18_house_a")]
-transform = Transform3D(-0.919690, 0, -0.238056, 0, 0.950000, 0, 0.238056, 0, -0.919690, -211.806534, 49.373833, 65.947868)
+[node name="casaSpate7" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("18_house_a")]
+transform = Transform3D(1.016500, 0, 0.263112, 0, 1.050000, 0, -0.263112, 0, 1.016500, -198.488220, 49.328266, 29.419796)
 
-[node name="casaCon8" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("30_house_c")]
-transform = Transform3D(0.871349, 0, 0.225278, 0, 0.900000, 0, -0.225278, 0, 0.871349, -216.582535, 49.438732, 31.461725)
+[node name="casaSpate8" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("30_house_c")]
+transform = Transform3D(0.919692, 0, 0.238048, 0, 0.950000, 0, -0.238048, 0, 0.919692, -209.613983, 49.393837, 23.554758)
 
-[node name="terasaCovoare9" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("31_carpet")]
+[node name="casaSpate9" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("19_house_b")]
+transform = Transform3D(-0.919681, 0, -0.238089, 0, 0.950000, 0, 0.238089, 0, -0.919681, -234.245651, 49.441677, 69.862633)
+
+[node name="casaSpate10" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("18_house_a")]
+transform = Transform3D(-0.947275, 0, -0.320421, 0, 1.000000, 0, 0.320421, 0, -0.947275, -262.516022, 49.283436, 59.154060)
+
+[node name="ferma11" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("36_farmhouse")]
+transform = Transform3D(0.966952, 0, 0.254960, 0, 1.000000, 0, -0.254960, 0, 0.966952, -240.683502, 49.566715, 27.144526)
+
+[node name="ferma12" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("36_farmhouse")]
+transform = Transform3D(-0.968192, 0, -0.250210, 0, 1.000000, 0, 0.250210, 0, -0.968192, -228.067200, 49.461166, 60.946014)
+
+[node name="ferma13" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("36_farmhouse")]
+transform = Transform3D(0.919690, 0, 0.238055, 0, 0.950000, 0, -0.238055, 0, 0.919690, -198.416504, 49.337692, 37.877609)
+
+[node name="arcada14" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("37_arch")]
+transform = Transform3D(0.943142, 0, 0.332389, 0, 1.000000, 0, -0.332389, 0, 0.943142, -252.070587, 49.355366, 23.235538)
+
+[node name="arcada15" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("37_arch")]
+transform = Transform3D(-0.919692, 0, -0.238048, 0, 0.950000, 0, 0.238048, 0, -0.919692, -219.897659, 49.419392, 63.285454)
+
+[node name="gura16" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("38_cave_entr")]
+transform = Transform3D(-0.972071, 0, -0.234688, 0, 1.000000, 0, 0.234688, 0, -0.972071, -244.143631, 49.462296, 63.789597)
+
+[node name="vita17" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("39_vine")]
+transform = Transform3D(0.242738, 0, -0.970092, 0, 1.000000, 0, 0.970092, 0, 0.242738, -246.549713, 49.543381, 57.780037)
+metadata/coliziune = "none"
+
+[node name="vita18" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("39_vine")]
+transform = Transform3D(0.250919, 0, -0.968008, 0, 1.000000, 0, 0.968008, 0, 0.250919, -225.833435, 49.476807, 28.655109)
+metadata/coliziune = "none"
+
+[node name="vita19" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("39_vine")]
+transform = Transform3D(0.250480, 0, -0.968122, 0, 1.000000, 0, 0.968122, 0, 0.250480, -222.696259, 49.430065, 63.842209)
+metadata/coliziune = "none"
+
+[node name="vita20" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("39_vine")]
+transform = Transform3D(0.250587, 0, -0.968094, 0, 1.000000, 0, 0.968094, 0, 0.250587, -201.891281, 49.358269, 34.850296)
+metadata/coliziune = "none"
+
+[node name="torta21" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("40_torch")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -253.626160, 49.397442, 27.649445)
+metadata/coliziune = "none"
+
+[node name="torta22" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("40_torch")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -249.415543, 49.611378, 51.075829)
+metadata/coliziune = "none"
+
+[node name="torta23" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("40_torch")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -236.628922, 49.575302, 32.663891)
+metadata/coliziune = "none"
+
+[node name="torta24" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("40_torch")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -232.748779, 49.495556, 55.333412)
+metadata/coliziune = "none"
+
+[node name="torta25" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("40_torch")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -219.988007, 49.457756, 36.902729)
+metadata/coliziune = "none"
+
+[node name="torta26" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("40_torch")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -214.166809, 49.398941, 60.141159)
+metadata/coliziune = "none"
+
+[node name="torta27" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("40_torch")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -201.653076, 49.358078, 41.646839)
+metadata/coliziune = "none"
+
+[node name="terasaCovoare28" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("31_carpet")]
 transform = Transform3D(-0.966952, 0, -0.254960, 0, 1.000000, 0, 0.254960, 0, -0.966952, -247.919266, 49.594074, 54.586609)
 
-[node name="porumbar10" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("17_dovecote")]
-transform = Transform3D(-0.968192, 0, -0.250210, 0, 1.000000, 0, 0.250210, 0, -0.968192, -227.832001, 49.462997, 60.035915)
+[node name="porumbar29" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("17_dovecote")]
+transform = Transform3D(-0.968154, 0, -0.250357, 0, 1.000000, 0, 0.250357, 0, -0.968154, -229.507828, 49.471901, 59.292694)
 
-[node name="porumbel11" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
-transform = Transform3D(0.955336, 0, -0.295520, 0, 1.000000, 0, 0.295520, 0, 0.955336, -227.181458, 56.866165, 57.518616)
+[node name="porumbel30" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
+transform = Transform3D(0.955336, 0, -0.295520, 0, 1.000000, 0, 0.295520, 0, 0.955336, -228.932007, 56.874821, 57.065941)
 metadata/coliziune = "none"
 
-[node name="porumbel12" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
-transform = Transform3D(0.169967, 0, -0.985450, 0, 1.000000, 0, 0.985450, 0, 0.169967, -225.832703, 58.055889, 59.519741)
+[node name="porumbel31" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
+transform = Transform3D(0.169967, 0, -0.985450, 0, 1.000000, 0, 0.985450, 0, 0.169967, -227.581787, 58.064541, 59.067726)
 metadata/coliziune = "none"
 
-[node name="porumbel13" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
-transform = Transform3D(-0.801144, 0, -0.598472, 0, 1.000000, 0, 0.598472, 0, -0.801144, -224.362137, 59.244286, 61.552322)
+[node name="porumbel32" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
+transform = Transform3D(-0.801144, 0, -0.598472, 0, 1.000000, 0, 0.598472, 0, -0.801144, -226.233017, 59.253441, 61.068851)
 metadata/coliziune = "none"
 
-[node name="porumbel14" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
+[node name="porumbel33" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
 transform = Transform3D(-0.896758, 0, 0.442520, 0, 1.000000, 0, -0.442520, 0, -0.896758, -221.443848, 60.436699, 59.001598)
 metadata/coliziune = "none"
 
-[node name="porumbel15" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
-transform = Transform3D(-0.012389, 0, 0.999923, 0, 1.000000, 0, -0.999923, 0, -0.012389, -216.867096, 56.808811, 61.838684)
+[node name="porumbel34" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
+transform = Transform3D(-0.012389, 0, 0.999923, 0, 1.000000, 0, -0.999923, 0, -0.012389, -219.356415, 56.822182, 61.194363)
 metadata/coliziune = "none"
 
-[node name="porumbel16" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
-transform = Transform3D(0.885520, 0, 0.464602, 0, 1.000000, 0, -0.464602, 0, 0.885520, -215.149094, 57.995464, 63.936092)
+[node name="porumbel35" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("21_pigeon")]
+transform = Transform3D(0.885520, 0, 0.464602, 0, 1.000000, 0, -0.464602, 0, 0.885520, -217.268021, 58.006924, 63.387638)
 metadata/coliziune = "none"
 
-[node name="plop17" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("35_poplar_b")]
+[node name="plop36" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("35_poplar_b")]
 transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -237.991226, 49.529030, 55.244347)
 metadata/coliziune = "trunk"
 
-[node name="plopSpate18" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("34_poplar_a")]
+[node name="plopSpate37" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("34_poplar_a")]
 transform = Transform3D(0.950000, 0, -0.000000, 0, 0.950000, 0, 0.000000, 0, 0.950000, -234.123810, 49.483250, 60.638096)
 metadata/coliziune = "trunk"
 
-[node name="plopSpate19" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("34_poplar_a")]
+[node name="plopSpate38" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("34_poplar_a")]
 transform = Transform3D(1.050000, 0, -0.000000, 0, 1.050000, 0, 0.000000, 0, 1.050000, -220.398804, 49.415752, 65.221649)
 metadata/coliziune = "trunk"
 
-[node name="tufa20" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.147231, 0, -1.090609, 0, 1.100502, 0, 1.090609, 0, 0.147231, -256.629639, 49.262928, 25.249908)
+[node name="tufa39" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.147231, 0, -1.090609, 0, 1.100502, 0, 1.090609, 0, 0.147231, -258.926331, 49.196495, 25.032240)
 metadata/coliziune = "none"
 
-[node name="tufa21" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.176044, 0, 0.374474, 0, 1.234224, 0, -0.374474, 0, 1.176044, -261.277771, 49.388046, 49.360600)
+[node name="tufa40" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.176044, 0, 0.374474, 0, 1.234224, 0, -0.374474, 0, 1.176044, -262.828918, 49.330399, 48.042976)
 metadata/coliziune = "none"
 
-[node name="tufa22" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.435069, 0, -1.420578, 0, 1.485708, 0, 1.420578, 0, 0.435069, -248.352585, 49.548824, 29.213821)
+[node name="tufa41" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.435069, 0, -1.420578, 0, 1.485708, 0, 1.420578, 0, 0.435069, -252.103470, 49.453899, 28.370975)
 metadata/coliziune = "none"
 
-[node name="tufa23" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.748029, 0, -1.250931, 0, 1.457524, 0, 1.250931, 0, -0.748029, -247.650269, 49.607769, 53.566414)
+[node name="tufa42" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.748029, 0, -1.250931, 0, 1.457524, 0, 1.250931, 0, -0.748029, -252.366928, 49.586002, 51.482433)
 metadata/coliziune = "none"
 
-[node name="tufa24" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.047001, 0, 1.014253, 0, 1.015342, 0, -1.014253, 0, -0.047001, -236.646332, 49.575520, 32.736034)
+[node name="tufa43" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.047001, 0, 1.014253, 0, 1.015342, 0, -1.014253, 0, -0.047001, -241.896606, 49.624264, 31.745293)
 metadata/coliziune = "none"
 
-[node name="tufa25" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.744892, 0, 0.595537, 0, 0.953692, 0, -0.595537, 0, -0.744892, -238.001358, 49.528919, 55.284058)
+[node name="tufa44" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.744892, 0, 0.595537, 0, 0.953692, 0, -0.595537, 0, -0.744892, -243.493301, 49.595547, 53.353828)
 metadata/coliziune = "none"
 
-[node name="tufa26" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.941670, 0, -0.681045, 0, 1.162138, 0, 0.681045, 0, -0.941670, -224.628937, 49.480663, 32.715462)
+[node name="tufa45" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.941670, 0, -0.681045, 0, 1.162138, 0, 0.681045, 0, -0.941670, -231.994476, 49.525345, 31.730122)
 metadata/coliziune = "none"
 
-[node name="tufa27" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.522819, 0, -1.242566, 0, 1.348077, 0, 1.242566, 0, 0.522819, -226.022522, 49.454849, 60.254326)
+[node name="tufa46" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.522819, 0, -1.242566, 0, 1.348077, 0, 1.242566, 0, 0.522819, -233.290359, 49.492908, 57.422775)
 metadata/coliziune = "none"
 
-[node name="tufa28" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.613997, 0, 0.957497, 0, 1.137450, 0, -0.957497, 0, 0.613997, -213.111282, 49.422737, 37.066437)
+[node name="tufa47" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.613997, 0, 0.957497, 0, 1.137450, 0, -0.957497, 0, 0.613997, -221.504318, 49.465946, 35.550831)
 metadata/coliziune = "none"
 
-[node name="tufa29" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-1.069262, 0, 0.764509, 0, 1.314456, 0, -0.764509, 0, -1.069262, -214.578629, 49.397976, 61.732201)
+[node name="tufa48" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.069262, 0, 0.764509, 0, 1.314456, 0, -0.764509, 0, -1.069262, -223.629913, 49.447788, 58.720158)
 metadata/coliziune = "none"
 
-[node name="tufa30" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-1.138738, 0, 0.441510, 0, 1.221334, 0, -0.441510, 0, -1.138738, -203.389465, 49.368816, 40.638252)
+[node name="tufa49" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.138738, 0, 0.441510, 0, 1.221334, 0, -0.441510, 0, -1.138738, -213.477615, 49.423672, 38.481800)
 metadata/coliziune = "none"
 
-[node name="tufa31" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.667674, 0, 1.120654, 0, 1.304475, 0, -1.120654, 0, -0.667674, -202.832550, 49.326859, 64.898933)
+[node name="tufa50" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.667674, 0, 1.120654, 0, 1.304475, 0, -1.120654, 0, -0.667674, -212.568863, 49.388290, 61.684902)
 metadata/coliziune = "none"
 
-[node name="tufa32" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-1.309625, 0, 0.222530, 0, 1.328396, 0, -0.222530, 0, -1.309625, -190.072662, 49.280354, 43.741425)
+[node name="tufa51" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.309625, 0, 0.222530, 0, 1.328396, 0, -0.222530, 0, -1.309625, -203.410904, 49.368874, 40.721046)
 metadata/coliziune = "none"
 
-[node name="tufa33" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.888103, 0, -0.210724, 0, 0.912761, 0, 0.210724, 0, 0.888103, -193.057358, 49.250729, 68.818474)
+[node name="tufa52" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.888103, 0, -0.210724, 0, 0.912761, 0, 0.210724, 0, 0.888103, -205.319443, 49.342598, 64.546097)
 metadata/coliziune = "none"
 
-[node name="tufa34" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-0.435470, 0, 0.790642, 0, 0.902635, 0, -0.790642, 0, -0.435470, -180.501373, 49.193310, 44.641796)
+[node name="tufa53" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.435470, 0, 0.790642, 0, 0.902635, 0, -0.790642, 0, -0.435470, -191.753632, 49.293400, 42.597832)
 metadata/coliziune = "none"
 
-[node name="tufa35" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(1.159627, 0, -0.504945, 0, 1.264794, 0, 0.504945, 0, 1.159627, -179.036819, 49.132111, 69.975990)
+[node name="tufa54" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(1.159627, 0, -0.504945, 0, 1.264794, 0, 0.504945, 0, 1.159627, -194.361969, 49.268383, 65.853706)
 metadata/coliziune = "none"
 
-[node name="tufa36" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(0.575481, 0, -0.837436, 0, 1.016109, 0, 0.837436, 0, 0.575481, -170.452881, 49.082443, 46.994064)
+[node name="tufa55" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.575481, 0, -0.837436, 0, 1.016109, 0, 0.837436, 0, 0.575481, -185.138672, 49.239040, 44.620567)
 metadata/coliziune = "none"
 
-[node name="tufa37" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
-transform = Transform3D(-1.247639, 0, 0.630026, 0, 1.397689, 0, -0.630026, 0, -1.247639, -166.047089, 49.020287, 73.495117)
+[node name="tufa56" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-1.247639, 0, 0.630026, 0, 1.397689, 0, -0.630026, 0, -1.247639, -183.589996, 49.172794, 70.265785)
 metadata/coliziune = "none"
 
-[node name="hornulDeSase38" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+[node name="tufa57" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.758332, 0, 0.788727, 0, 1.094148, 0, -0.788727, 0, -0.758332, -174.299530, 49.132774, 47.670357)
+metadata/coliziune = "none"
+
+[node name="tufa58" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.958258, 0, -0.721923, 0, 1.199763, 0, 0.721923, 0, -0.958258, -174.471252, 49.091869, 71.541206)
+metadata/coliziune = "none"
+
+[node name="tufa59" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(0.793159, 0, -0.867815, 0, 1.175671, 0, 0.867815, 0, 0.793159, -166.890442, 49.029381, 47.550762)
+metadata/coliziune = "none"
+
+[node name="tufa60" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("22_shrub")]
+transform = Transform3D(-0.725741, 0, -0.738219, 0, 1.035214, 0, 0.738219, 0, -0.725741, -160.238022, 48.968517, 71.451172)
+metadata/coliziune = "none"
+
+[node name="hornulDeSase61" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
 transform = Transform3D(0.825336, 0, -0.564642, 0, 1.000000, 0, 0.564642, 0, 0.825336, -235.063553, 49.511761, 26.180180)
 
-[node name="hornFund39" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.714493, 0, 0.743131, 0, 1.030895, 0, -0.743131, 0, -0.714493, -253.770630, 48.725246, -5.870270)
+[node name="conUmar62" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.109572, 0, -0.167431, 0, 0.200098, 0, 0.167431, 0, 0.109572, -258.426422, 49.192810, 23.639225)
 
-[node name="hornFund40" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.858530, 0, -0.646791, 0, 1.074901, 0, 0.646791, 0, -0.858530, -283.741272, 52.085388, 80.491402)
+[node name="conMic63" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.143745, 0, -0.346226, 0, 0.374880, 0, 0.346226, 0, 0.143745, -258.065765, 49.188656, 22.634354)
 
-[node name="hornMijloc41" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.682665, 0, -0.746921, 0, 1.011890, 0, 0.746921, 0, 0.682665, -253.729630, 49.096718, 10.552031)
+[node name="conUmar64" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.200324, 0, -0.060689, 0, 0.209315, 0, 0.060689, 0, 0.200324, -266.804169, 49.191353, 46.983242)
 
-[node name="hornFund42" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-0.705499, 0, -0.717628, 0, 1.006339, 0, 0.717628, 0, -0.705499, -245.693390, 48.733250, -11.840355)
+[node name="conMic65" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.121747, 0, 0.326431, 0, 0.348396, 0, -0.326431, 0, 0.121747, -268.300110, 49.168079, 51.151543)
 
-[node name="hornFund43" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.567454, 0, -0.867095, 0, 1.036271, 0, 0.867095, 0, 0.567454, -242.852921, 49.045975, -7.238171)
+[node name="conMijloc66" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.720575, 0, 0.148295, 0, 0.735676, 0, -0.148295, 0, 0.720575, -253.316788, 49.182484, 16.129332)
 
-[node name="hornFund44" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.426331, 0, -1.026867, 0, 1.111852, 0, 1.026867, 0, 0.426331, -269.725403, 49.165569, 67.128136)
+[node name="conErou67" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.851435, 0, -0.360062, 0, 0.924438, 0, 0.360062, 0, -0.851435, -247.574692, 49.078949, 0.320869)
 
-[node name="hornMijloc45" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(1.019865, 0, -0.308972, 0, 1.065639, 0, 0.308972, 0, 1.019865, -261.820099, 49.317551, 57.096729)
+[node name="conMijloc68" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.188375, 0, -0.612314, 0, 0.640635, 0, 0.612314, 0, -0.188375, -259.889465, 49.345520, 58.344204)
 
-[node name="hornFund46" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.366056, 0, 0.981479, 0, 1.047520, 0, -0.981479, 0, 0.366056, -240.136475, 49.103642, -7.007584)
+[node name="conMijloc69" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.244339, 0, 0.769976, 0, 0.807815, 0, -0.769976, 0, 0.244339, -237.685974, 49.378616, 15.776241)
 
-[node name="hornFund47" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(1.160856, 0, 0.238905, 0, 1.185184, 0, -0.238905, 0, 1.160856, -241.429581, 49.265175, 6.705994)
+[node name="conUmar70" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.120039, 0, -0.248796, 0, 0.276241, 0, 0.248796, 0, -0.120039, -237.824219, 49.582970, 29.957766)
 
-[node name="hornFund48" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.973134, 0, -0.411528, 0, 1.056572, 0, 0.411528, 0, -0.973134, -262.613129, 49.283745, 75.577148)
+[node name="conMic71" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.340430, 0, -0.020167, 0, 0.341027, 0, 0.020167, 0, -0.340430, -237.022644, 49.535477, 26.649643)
 
-[node name="hornMijloc49" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.275073, 0, -0.894127, 0, 0.935483, 0, 0.894127, 0, -0.275073, -241.373428, 49.452766, 22.297140)
+[node name="conUmar72" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.215931, 0, 0.003822, 0, 0.215965, 0, -0.003822, 0, 0.215931, -243.990448, 49.578693, 55.405502)
 
-[node name="hornFund50" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.343157, 0, 1.081375, 0, 1.134517, 0, -1.081375, 0, 0.343157, -234.017517, 49.256416, -4.025936)
+[node name="conMic73" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.356468, 0, -0.292997, 0, 0.461429, 0, 0.292997, 0, -0.356468, -244.554214, 49.548306, 57.732178)
 
-[node name="hornAproape51" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.466324, 0, -0.966515, 0, 1.073130, 0, 0.966515, 0, -0.466324, -244.743057, 49.536179, 58.511505)
+[node name="conErou74" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("43_ch_triple")]
+transform = Transform3D(-0.584696, 0, -0.665461, 0, 0.885838, 0, 0.665461, 0, -0.584696, -252.871124, 49.229759, 92.055679)
 
-[node name="hornFund52" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-1.068272, 0, -0.063284, 0, 1.070145, 0, 0.063284, 0, -1.068272, -229.878326, 49.309349, -2.834644)
+[node name="conUmar75" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.200400, 0, 0.028962, 0, 0.202482, 0, -0.028962, 0, -0.200400, -234.191208, 49.542362, 31.071451)
 
-[node name="hornFund53" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(1.147865, 0, 0.020316, 0, 1.148045, 0, -0.020316, 0, 1.147865, -253.568451, 49.154404, 94.933533)
+[node name="conMic76" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.253101, 0, 0.216976, 0, 0.333375, 0, -0.216976, 0, 0.253101, -233.467896, 49.519108, 28.137146)
 
-[node name="hornAproape54" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.819803, 0, -0.673833, 0, 1.061192, 0, 0.673833, 0, -0.819803, -233.665863, 49.526783, 28.940231)
+[node name="conUmar77" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.140202, 0, 0.043318, 0, 0.146742, 0, -0.043318, 0, -0.140202, -240.066910, 49.546886, 54.907795)
 
-[node name="hornMijloc55" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.673100, 0, -0.766075, 0, 1.019772, 0, 0.766075, 0, -0.673100, -244.024368, 49.432281, 70.962250)
+[node name="conMic78" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.258362, 0, 0.104484, 0, 0.278690, 0, -0.104484, 0, -0.258362, -241.023041, 49.520184, 58.786545)
 
-[node name="hornFund56" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-1.062989, 0, 0.153625, 0, 1.074032, 0, -0.153625, 0, -1.062989, -225.354706, 49.264347, -4.776188)
+[node name="conMijloc79" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.267589, 0, 0.689405, 0, 0.739515, 0, -0.689405, 0, -0.267589, -244.484207, 49.426395, 72.827736)
 
-[node name="hornAproape57" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(0.716924, 0, 0.614598, 0, 0.944304, 0, -0.614598, 0, 0.716924, -236.351959, 49.498604, 58.967995)
+[node name="conUmar80" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.089860, 0, -0.125071, 0, 0.154005, 0, 0.125071, 0, 0.089860, -229.292404, 49.503368, 31.767532)
 
-[node name="hornFund58" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.966838, 0, 0.298722, 0, 1.011934, 0, -0.298722, 0, -0.966838, -223.548340, 49.402519, 9.635628)
+[node name="conMic81" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.384866, 0, -0.078410, 0, 0.392772, 0, 0.078410, 0, -0.384866, -228.041748, 49.477955, 26.948709)
 
-[node name="hornFund59" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.950604, 0, 0.384432, 0, 1.025395, 0, -0.384432, 0, -0.950604, -243.249374, 49.407146, 85.543732)
+[node name="conUmar82" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.010447, 0, 0.221959, 0, 0.222205, 0, -0.221959, 0, 0.010447, -235.719208, 49.506493, 56.530014)
 
-[node name="hornAproape60" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.371998, 0, 0.958401, 0, 1.028064, 0, -0.958401, 0, -0.371998, -223.779007, 49.469818, 29.432388)
+[node name="conMic83" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.255467, 0, 0.304756, 0, 0.397668, 0, -0.304756, 0, -0.255467, -236.060135, 49.502884, 57.843590)
 
-[node name="hornMijloc61" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.559682, 0, -0.778995, 0, 0.959207, 0, 0.778995, 0, 0.559682, -221.200821, 49.429565, 19.473482)
+[node name="conUmar84" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.121355, 0, -0.022725, 0, 0.123464, 0, 0.022725, 0, 0.121355, -227.122177, 49.493984, 33.626884)
 
-[node name="hornFund62" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-1.155331, 0, -0.235378, 0, 1.179065, 0, 0.235378, 0, -1.155331, -214.188126, 49.009560, -7.614964)
+[node name="conMic85" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.341035, 0, 0.043702, 0, 0.343824, 0, -0.043702, 0, 0.341035, -225.736710, 49.474819, 28.281956)
 
-[node name="hornAproape63" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(0.047670, 0, 1.012816, 0, 1.013937, 0, -1.012816, 0, 0.047670, -228.192612, 49.460037, 61.431343)
+[node name="conUmar86" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.259261, 0, 0.092845, 0, 0.275384, 0, -0.092845, 0, -0.259261, -233.199982, 49.493538, 57.074131)
 
-[node name="hornFund64" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.732305, 0, 0.873592, 0, 1.139927, 0, -0.873592, 0, -0.732305, -216.169250, 49.410351, 14.906662)
+[node name="conMic87" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.172679, 0, -0.271156, 0, 0.321471, 0, 0.271156, 0, -0.172679, -233.787064, 49.487988, 59.338966)
 
-[node name="hornFund65" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.934872, 0, -0.175062, 0, 0.951122, 0, 0.175062, 0, 0.934872, -233.356949, 49.414845, 81.414833)
+[node name="conMijloc88" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.457091, 0, -0.585197, 0, 0.742555, 0, 0.585197, 0, 0.457091, -224.962997, 49.457245, 25.297108)
 
-[node name="hornAproape66" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.970933, 0, 0.124422, 0, 0.978873, 0, -0.124422, 0, 0.970933, -216.521515, 49.438065, 31.225718)
+[node name="conUmar89" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.156117, 0, 0.013623, 0, 0.156711, 0, -0.013623, 0, 0.156117, -222.894485, 49.472748, 33.718258)
 
-[node name="hornMijloc67" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-1.046643, 0, 0.374818, 0, 1.111733, 0, -0.374818, 0, -1.046643, -226.495575, 49.423328, 69.804214)
+[node name="conMic90" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.065420, 0, 0.265917, 0, 0.273847, 0, -0.265917, 0, -0.065420, -221.761505, 49.459988, 29.336933)
 
-[node name="hornFund68" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-0.546174, 0, -0.857655, 0, 1.016799, 0, 0.857655, 0, -0.546174, -211.466858, 49.393177, 11.674904)
+[node name="conUmar91" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.041235, 0, -0.194290, 0, 0.198617, 0, 0.194290, 0, -0.041235, -229.078186, 49.474300, 57.631233)
 
-[node name="hornAproape69" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(0.660612, 0, -0.845758, 0, 1.073179, 0, 0.845758, 0, 0.660612, -219.450165, 49.421803, 61.556602)
+[node name="conMic92" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.243734, 0, -0.107228, 0, 0.266278, 0, 0.107228, 0, -0.243734, -230.620422, 49.459583, 63.595249)
 
-[node name="hornFund70" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.969650, 0, 0.084616, 0, 0.973335, 0, -0.084616, 0, 0.969650, -202.834473, 49.121666, -2.637737)
+[node name="conUmar93" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.057914, 0, -0.273965, 0, 0.280019, 0, 0.273965, 0, 0.057914, -219.386719, 49.455578, 34.575958)
 
-[node name="hornFund71" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.229926, 0, 0.934591, 0, 0.962459, 0, -0.934591, 0, -0.229926, -229.180862, 49.193192, 99.150848)
+[node name="conMic94" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.123078, 0, -0.296174, 0, 0.320729, 0, 0.296174, 0, -0.123078, -218.405426, 49.446857, 30.778692)
 
-[node name="hornAproape72" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.196525, 0, -0.925978, 0, 0.946603, 0, 0.925978, 0, -0.196525, -208.201218, 49.396584, 37.093884)
+[node name="conUmar95" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.070792, 0, 0.226621, 0, 0.237421, 0, -0.226621, 0, -0.070792, -225.589355, 49.456913, 58.578102)
 
-[node name="hornMijloc73" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.885076, 0, -0.389379, 0, 0.966941, 0, 0.389379, 0, -0.885076, -204.502045, 49.366745, 22.802622)
+[node name="conMic96" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.330422, 0, -0.126272, 0, 0.353728, 0, 0.126272, 0, -0.330422, -226.765472, 49.448730, 63.129257)
 
-[node name="hornFund74" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.248003, 0, -1.173184, 0, 1.199111, 0, 1.173184, 0, 0.248003, -198.516418, 49.159698, -0.322052)
+[node name="conMijloc97" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.678666, 0, 0.341226, 0, 0.759620, 0, -0.341226, 0, 0.678666, -229.898941, 49.420658, 75.254730)
 
-[node name="hornAproape75" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.378227, 0, -0.910157, 0, 0.985618, 0, 0.910157, 0, -0.378227, -211.864487, 49.373425, 66.171791)
+[node name="conErou98" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(1.255622, 0, 0.327851, 0, 1.297718, 0, -0.327851, 0, 1.255622, -211.057678, 49.376469, 2.345364)
 
-[node name="hornFund76" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.343164, 0, 1.098545, 0, 1.150897, 0, -1.098545, 0, -0.343164, -199.016357, 49.332714, 16.535187)
+[node name="conUmar99" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.152237, 0, -0.095365, 0, 0.179641, 0, 0.095365, 0, 0.152237, -215.538315, 49.435749, 36.176392)
 
-[node name="hornFund77" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-1.014254, 0, -0.387600, 0, 1.085793, 0, 0.387600, 0, -1.014254, -219.901123, 49.318707, 97.219955)
+[node name="conMic100" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.316599, 0, -0.256970, 0, 0.407761, 0, 0.256970, 0, 0.316599, -215.038391, 49.433052, 34.244102)
 
-[node name="hornAproape78" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(0.860696, 0, 0.432748, 0, 0.963363, 0, -0.432748, 0, 0.860696, -200.210464, 49.348648, 36.073460)
+[node name="conUmar101" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.108766, 0, 0.113108, 0, 0.156919, 0, -0.113108, 0, 0.108766, -221.806137, 49.435562, 60.401848)
 
-[node name="hornMijloc79" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(1.083112, 0, 0.282808, 0, 1.119425, 0, -0.282808, 0, 1.083112, -210.993225, 49.336193, 77.731300)
+[node name="conMic102" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.405976, 0, -0.166317, 0, 0.438723, 0, 0.166317, 0, -0.405976, -222.524200, 49.431412, 63.177238)
 
-[node name="hornFund80" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.842869, 0, -0.527995, 0, 0.994589, 0, 0.527995, 0, 0.842869, -193.898987, 49.295517, 11.689861)
+[node name="conUmar103" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.177265, 0, 0.125404, 0, 0.217139, 0, -0.125404, 0, 0.177265, -210.699753, 49.409595, 38.011429)
 
-[node name="hornFund81" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.894732, 0, -0.726217, 0, 1.152361, 0, 0.726217, 0, 0.894732, -190.591660, 49.267132, 18.775661)
+[node name="conMic104" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.338141, 0, 0.322435, 0, 0.467230, 0, -0.322435, 0, 0.338141, -210.147781, 49.407127, 35.878906)
 
-[node name="hornFund82" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.697309, 0, 0.725142, 0, 1.006017, 0, -0.725142, 0, 0.697309, -210.749786, 49.305946, 94.730812)
+[node name="conUmar105" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.066366, 0, -0.123841, 0, 0.140502, 0, 0.123841, 0, -0.066366, -216.571426, 49.409771, 60.696396)
 
-[node name="hornMijloc83" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.999818, 0, -0.409599, 0, 1.080467, 0, 0.409599, 0, -0.999818, -188.729019, 49.250824, 31.987940)
+[node name="conMic106" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.229868, 0, 0.001780, 0, 0.229875, 0, -0.001780, 0, 0.229868, -217.306519, 49.406708, 63.536400)
 
-[node name="hornFund84" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.903130, 0, 0.638908, 0, 1.106276, 0, -0.638908, 0, 0.903130, -185.742020, 49.221035, 21.510014)
+[node name="conMijloc107" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.150285, 0, 0.875893, 0, 0.888692, 0, -0.875893, 0, -0.150285, -207.928482, 49.386410, 27.304741)
 
-[node name="hornFund85" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.856232, 0, 0.816464, 0, 1.183109, 0, -0.816464, 0, 0.856232, -182.764175, 49.189980, 23.452095)
+[node name="conUmar108" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.164643, 0, -0.002327, 0, 0.164659, 0, 0.002327, 0, 0.164643, -206.413925, 49.386826, 37.906101)
 
-[node name="hornFund86" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.470285, 0, -0.877565, 0, 0.995634, 0, 0.877565, 0, -0.470285, -199.802872, 49.254501, 85.745651)
+[node name="conMic109" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.066833, 0, 0.251248, 0, 0.259985, 0, -0.251248, 0, 0.066833, -205.664078, 49.381622, 35.009216)
 
-[node name="hornMijloc87" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(0.927685, 0, 0.007184, 0, 0.927713, 0, -0.007184, 0, 0.927685, -192.558487, 49.223736, 76.375092)
+[node name="conUmar110" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.114797, 0, -0.212034, 0, 0.241116, 0, 0.212034, 0, -0.114797, -212.888535, 49.387184, 62.919884)
 
-[node name="hornFund88" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-0.202387, 0, 1.179556, 0, 1.196793, 0, -1.179556, 0, -0.202387, -179.199966, 49.147068, 19.204773)
+[node name="conMic111" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.252960, 0, 0.367282, 0, 0.445965, 0, -0.367282, 0, -0.252960, -213.889557, 49.381134, 66.787224)
 
-[node name="hornFund89" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(1.024533, 0, -0.014483, 0, 1.024635, 0, 0.014483, 0, 1.024533, -173.240921, 49.042225, 10.916454)
+[node name="conUmar112" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.148967, 0, -0.079454, 0, 0.168832, 0, 0.079454, 0, -0.148967, -203.043762, 49.367531, 39.302700)
 
-[node name="hornFund90" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.257117, 0, 0.966587, 0, 1.000200, 0, -0.966587, 0, 0.257117, -192.188782, 49.187965, 98.930679)
+[node name="conMic113" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.143589, 0, -0.352003, 0, 0.380163, 0, 0.352003, 0, -0.143589, -201.905563, 49.358421, 34.905441)
 
-[node name="hornAproape91" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.498591, 0, -0.920912, 0, 1.047221, 0, 0.920912, 0, -0.498591, -173.124207, 49.108936, 42.136269)
+[node name="conUmar114" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.246701, 0, 0.116296, 0, 0.272738, 0, -0.116296, 0, -0.246701, -209.180130, 49.368179, 63.009327)
 
-[node name="hornMijloc92" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.635025, 0, 0.922020, 0, 1.119543, 0, -0.922020, 0, -0.635025, -171.156509, 49.053738, 32.871326)
+[node name="conMic115" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.340220, 0, 0.019170, 0, 0.340760, 0, -0.019170, 0, -0.340220, -209.675552, 49.365898, 64.923325)
 
-[node name="hornFund93" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(-0.943792, 0, -0.503385, 0, 1.069645, 0, 0.503385, 0, -0.943792, -167.062393, 48.968151, 13.594009)
+[node name="conMijloc116" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.161558, 0, 0.517080, 0, 0.541731, 0, -0.517080, 0, -0.161558, -213.988083, 49.344856, 81.583954)
 
-[node name="hornAproape94" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(-0.383251, 0, -0.939527, 0, 1.014689, 0, 0.939527, 0, -0.383251, -174.918289, 49.089104, 75.444870)
+[node name="conUmar117" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.128981, 0, 0.128917, 0, 0.182362, 0, -0.128917, 0, -0.128981, -198.988464, 49.341969, 40.087303)
 
-[node name="hornFund95" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-1.071219, 0, 0.504975, 0, 1.184276, 0, -0.504975, 0, -1.071219, -168.988312, 49.013603, 23.662144)
+[node name="conMic118" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.193039, 0, 0.212251, 0, 0.286905, 0, -0.212251, 0, 0.193039, -198.551376, 49.338890, 38.398666)
 
-[node name="hornFund96" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-1.037162, 0, 0.058439, 0, 1.038807, 0, -0.058439, 0, -1.037162, -176.828064, 49.088120, 92.121796)
+[node name="conUmar119" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.091651, 0, -0.134727, 0, 0.162945, 0, 0.134727, 0, -0.091651, -205.154755, 49.343224, 63.909851)
 
-[node name="hornAproape97" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.266869, 0, 0.854136, 0, 0.894856, 0, -0.854136, 0, -0.266869, -168.902695, 49.043793, 42.672539)
+[node name="conMic120" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.117617, 0, 0.295293, 0, 0.317855, 0, -0.295293, 0, 0.117617, -206.001419, 49.338799, 67.180809)
 
-[node name="hornMijloc98" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(-0.695835, 0, 0.695488, 0, 0.983814, 0, -0.695488, 0, -0.695835, -169.202408, 49.033340, 86.773674)
+[node name="conErou121" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
+transform = Transform3D(0.824145, 0, 0.407956, 0, 0.919589, 0, -0.407956, 0, 0.824145, -211.499146, 49.319744, 88.420471)
 
-[node name="hornFund99" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(0.657598, 0, 0.723046, 0, 0.977359, 0, -0.723046, 0, 0.657598, -168.775208, 49.010830, 23.915146)
+[node name="conUmar122" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.156399, 0, 0.027704, 0, 0.158834, 0, -0.027704, 0, 0.156399, -196.602890, 49.326210, 41.425770)
 
-[node name="hornAproape100" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
-transform = Transform3D(-0.499727, 0, -0.734596, 0, 0.888458, 0, 0.734596, 0, -0.499727, -162.925995, 48.988941, 73.112160)
+[node name="conMic123" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.194507, 0, -0.173495, 0, 0.260640, 0, 0.173495, 0, -0.194507, -196.014999, 49.322166, 39.210636)
 
-[node name="hornFund101" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.398953, 0, 1.001620, 0, 1.078150, 0, -1.001620, 0, 0.398953, -166.941467, 48.980911, 21.368347)
+[node name="conUmar124" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.249533, 0, 0.018098, 0, 0.250189, 0, -0.018098, 0, 0.249533, -202.998383, 49.326191, 65.523781)
 
-[node name="hornFund102" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.943119, 0, 0.466849, 0, 1.052341, 0, -0.466849, 0, 0.943119, -161.162155, 48.970306, 95.841278)
+[node name="conMic125" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.086964, 0, -0.430083, 0, 0.438787, 0, 0.430083, 0, 0.086964, -204.027679, 49.319931, 69.402161)
 
-[node name="hornAproape103" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
-transform = Transform3D(0.868240, 0, 0.153798, 0, 0.881757, 0, -0.153798, 0, 0.868240, -162.339127, 48.952160, 46.368893)
+[node name="conMijloc126" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.214138, 0, 0.603403, 0, 0.640274, 0, -0.603403, 0, 0.214138, -193.688400, 49.292465, 30.444084)
 
-[node name="hornMijloc104" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(-0.717061, 0, -0.639598, 0, 0.960866, 0, 0.639598, 0, -0.717061, -163.486572, 48.957523, 40.281891)
+[node name="conUmar127" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.145936, 0, -0.061143, 0, 0.158227, 0, 0.061143, 0, 0.145936, -191.656387, 49.292744, 42.256760)
 
-[node name="hornFund105" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
-transform = Transform3D(1.175898, 0, 0.085287, 0, 1.178987, 0, -0.085287, 0, 1.175898, -169.960327, 48.878120, 5.939781)
+[node name="conMic128" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.199135, 0, -0.311153, 0, 0.369419, 0, 0.311153, 0, 0.199135, -190.245255, 49.275753, 37.306702)
 
-[node name="hornAproape106" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.212554, 0, -1.051194, 0, 1.072468, 0, 1.051194, 0, 0.212554, -152.388718, 48.892540, 73.482353)
+[node name="conUmar129" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.104268, 0, -0.161151, 0, 0.191941, 0, 0.161151, 0, 0.104268, -198.485306, 49.295288, 66.211594)
 
-[node name="hornFund107" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
-transform = Transform3D(0.367207, 0, 1.034724, 0, 1.097950, 0, -1.034724, 0, 0.367207, -166.084167, 48.968758, 21.831165)
+[node name="conMic130" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.187964, 0, 0.308930, 0, 0.361619, 0, -0.308930, 0, 0.187964, -199.647675, 49.289799, 70.289009)
 
-[node name="hornFund108" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
-transform = Transform3D(0.877091, 0, -0.367473, 0, 0.950960, 0, 0.367473, 0, 0.877091, -145.439102, 48.842236, 99.692238)
+[node name="conMijloc131" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.465702, 0, -0.561615, 0, 0.729582, 0, 0.561615, 0, -0.465702, -197.106781, 49.255352, 75.888733)
 
-[node name="carutaCuOale109" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("32_cart")]
+[node name="conUmar132" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.187107, 0, 0.064600, 0, 0.197944, 0, -0.064600, 0, -0.187107, -180.729568, 49.195465, 45.701813)
+
+[node name="conMic133" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.326196, 0, 0.280106, 0, 0.429958, 0, -0.280106, 0, -0.326196, -179.875778, 49.183212, 41.735836)
+
+[node name="conUmar134" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.075310, 0, -0.262049, 0, 0.272656, 0, 0.262049, 0, -0.075310, -185.844620, 49.194599, 69.461571)
+
+[node name="conMic135" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.060701, 0, -0.307182, 0, 0.313122, 0, 0.307182, 0, 0.060701, -186.262756, 49.192421, 71.403900)
+
+[node name="conMijloc136" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.499879, 0, 0.472507, 0, 0.687853, 0, -0.472507, 0, -0.499879, -177.317734, 49.129967, 29.853525)
+
+[node name="conErou137" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("12_ch_c")]
+transform = Transform3D(0.261565, 0, 0.847996, 0, 0.887420, 0, -0.847996, 0, 0.261565, -172.387772, 48.905922, 6.953499)
+
+[node name="conUmar138" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.114534, 0, 0.131025, 0, 0.174027, 0, -0.131025, 0, 0.114534, -175.744934, 49.147659, 46.225727)
+
+[node name="conMic139" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.260547, 0, 0.236830, 0, 0.352099, 0, -0.236830, 0, -0.260547, -174.727158, 49.127045, 41.853226)
+
+[node name="conUmar140" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.149771, 0, 0.189950, 0, 0.241893, 0, -0.189950, 0, 0.149771, -181.307083, 49.153187, 70.121422)
+
+[node name="conMic141" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.182286, 0, 0.244428, 0, 0.304915, 0, -0.244428, 0, -0.182286, -182.159683, 49.151245, 73.784271)
+
+[node name="conUmar142" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.141254, 0, -0.134975, 0, 0.195374, 0, 0.134975, 0, -0.141254, -172.763123, 49.116753, 46.755581)
+
+[node name="conMic143" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.305092, 0, 0.164474, 0, 0.346602, 0, -0.164474, 0, -0.305092, -172.252441, 49.104671, 43.755684)
+
+[node name="conUmar144" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.142033, 0, 0.099338, 0, 0.173325, 0, -0.099338, 0, -0.142033, -176.873886, 49.114784, 70.903549)
+
+[node name="conMic145" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.238776, 0, -0.226309, 0, 0.328982, 0, 0.226309, 0, -0.238776, -177.533310, 49.112492, 74.777161)
+
+[node name="conMijloc146" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.297682, 0, 0.441810, 0, 0.532739, 0, -0.441810, 0, -0.297682, -179.876587, 49.112839, 88.542290)
+
+[node name="conUmar147" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.222744, 0, 0.021911, 0, 0.223819, 0, -0.021911, 0, -0.222744, -171.733398, 49.097031, 47.633236)
+
+[node name="conMic148" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.320290, 0, -0.083949, 0, 0.331109, 0, 0.083949, 0, -0.320290, -171.040131, 49.075233, 41.579414)
+
+[node name="conUmar149" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(-0.107778, 0, 0.107148, 0, 0.151976, 0, -0.107148, 0, -0.107778, -174.565796, 49.091309, 72.366760)
+
+[node name="conMic150" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.310537, 0, -0.153784, 0, 0.346530, 0, 0.153784, 0, -0.310537, -174.946625, 49.088936, 75.692383)
+
+[node name="conUmar151" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.012094, 0, -0.219615, 0, 0.219948, 0, 0.219615, 0, 0.012094, -168.932388, 49.052162, 47.041775)
+
+[node name="conMic152" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.302621, 0, -0.337684, 0, 0.453442, 0, 0.337684, 0, 0.302621, -168.914871, 49.048065, 44.465603)
+
+[node name="conUmar153" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.141114, 0, 0.152191, 0, 0.207546, 0, -0.152191, 0, 0.141114, -169.104507, 49.046665, 72.367889)
+
+[node name="conMic154" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.293573, 0, -0.263999, 0, 0.394817, 0, 0.263999, 0, 0.293573, -169.142303, 49.039829, 77.930481)
+
+[node name="conMijloc155" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.502088, 0, -0.296864, 0, 0.583284, 0, 0.296864, 0, -0.502088, -168.818405, 49.018921, 30.270958)
+
+[node name="conUmar156" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.149715, 0, 0.077323, 0, 0.168504, 0, -0.077323, 0, 0.149715, -164.888596, 48.996784, 47.821873)
+
+[node name="conMic157" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.204224, 0, -0.106974, 0, 0.230544, 0, 0.106974, 0, 0.204224, -165.216919, 48.993267, 43.591045)
+
+[node name="conUmar158" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.061360, 0, -0.146471, 0, 0.158804, 0, 0.146471, 0, 0.061360, -163.049057, 48.990395, 71.526299)
+
+[node name="conMic159" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.426429, 0, -0.102819, 0, 0.438649, 0, 0.102819, 0, -0.426429, -162.712845, 48.985641, 75.858795)
+
+[node name="conErou160" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("43_ch_triple")]
+transform = Transform3D(0.817812, 0, -0.444276, 0, 0.930698, 0, 0.444276, 0, 0.817812, -159.945480, 48.790035, 111.519440)
+
+[node name="conUmar161" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.006154, 0, 0.151246, 0, 0.151371, 0, -0.151246, 0, 0.006154, -162.190125, 48.951794, 47.159325)
+
+[node name="conMic162" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.432986, 0, 0.012882, 0, 0.433178, 0, -0.012882, 0, 0.432986, -163.050995, 48.954926, 42.592522)
+
+[node name="conUmar163" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.001063, 0, 0.254568, 0, 0.254570, 0, -0.254568, 0, -0.001063, -157.754379, 48.942532, 70.690102)
+
+[node name="conMic164" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.121575, 0, 0.245816, 0, 0.274238, 0, -0.245816, 0, -0.121575, -156.877350, 48.934261, 75.342613)
+
+[node name="conMijloc165" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.469513, 0, 0.449625, 0, 0.650081, 0, -0.449625, 0, -0.469513, -155.400589, 48.918518, 83.176498)
+
+[node name="conUmar166" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.107236, 0, -0.150471, 0, 0.184773, 0, 0.150471, 0, -0.107236, -159.121475, 48.907303, 48.090389)
+
+[node name="conMic167" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.064637, 0, -0.262919, 0, 0.270748, 0, 0.262919, 0, 0.064637, -160.240723, 48.913147, 43.869255)
+
+[node name="conUmar168" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.223141, 0, 0.073539, 0, 0.234947, 0, -0.073539, 0, -0.223141, -153.581268, 48.901947, 68.984756)
+
+[node name="conMic169" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("13_ch_d")]
+transform = Transform3D(0.300728, 0, -0.162071, 0, 0.341620, 0, 0.162071, 0, 0.300728, -152.825775, 48.896900, 71.834053)
+
+[node name="lespede170" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(0.775880, 0, 0.691349, 0, 1.039208, 0, -0.691349, 0, 0.775880, -253.688751, 49.304497, 22.748646)
+metadata/coliziune = "none"
+
+[node name="lespede171" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(0.679805, 0, -1.014402, 0, 1.221124, 0, 1.014402, 0, 0.679805, -256.536469, 49.453186, 55.820976)
+metadata/coliziune = "none"
+
+[node name="lespede172" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(-0.859790, 0, 0.787603, 0, 1.166001, 0, -0.787603, 0, -0.859790, -236.870544, 49.524208, 26.021954)
+metadata/coliziune = "none"
+
+[node name="lespede173" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(0.091795, 0, -1.561104, 0, 1.563800, 0, 1.561104, 0, 0.091795, -236.635132, 49.493450, 60.059032)
+metadata/coliziune = "none"
+
+[node name="lespede174" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(-0.687957, 0, 1.085779, 0, 1.285380, 0, -1.085779, 0, -0.687957, -220.389328, 49.457581, 31.236357)
+metadata/coliziune = "none"
+
+[node name="lespede175" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(-1.380955, 0, -0.820059, 0, 1.606092, 0, 0.820059, 0, -1.380955, -217.898117, 49.402729, 65.822029)
+metadata/coliziune = "none"
+
+[node name="lespede176" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(-0.408299, 0, 1.064042, 0, 1.139690, 0, -1.064042, 0, -0.408299, -201.939743, 49.358791, 35.037533)
+metadata/coliziune = "none"
+
+[node name="lespede177" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(-0.059465, 0, -1.191278, 0, 1.192761, 0, 1.191278, 0, -0.059465, -201.474182, 49.304970, 69.103012)
+metadata/coliziune = "none"
+
+[node name="lespede178" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("42_crack_c")]
+transform = Transform3D(-0.745173, 0, 0.775367, 0, 1.075396, 0, -0.775367, 0, -0.745173, -184.418259, 49.230717, 41.537453)
+metadata/coliziune = "none"
+
+[node name="pinten179" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("41_crack_b")]
+transform = Transform3D(0.526268, 0, -0.443269, 0, 0.688073, 0, 0.443269, 0, 0.526268, -223.692444, 49.404190, 10.190834)
+
+[node name="pinten180" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("41_crack_b")]
+transform = Transform3D(-0.277897, 0, -0.475161, 0, 0.550459, 0, 0.475161, 0, -0.277897, -200.299698, 49.254826, 87.562042)
+
+[node name="carutaCuOale181" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("32_cart")]
 transform = Transform3D(0.968967, 0, 0.247191, 0, 1.000000, 0, -0.247191, 0, 0.968967, -188.118057, 49.254787, 49.456795)
 
-[node name="teancOale110" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
+[node name="teancOale182" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
 transform = Transform3D(0.968967, 0, 0.247191, 0, 1.000000, 0, -0.247191, 0, 0.968967, -188.430771, 49.250538, 52.705307)
 
-[node name="teancOale111" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
+[node name="teancOale183" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
 transform = Transform3D(0.994982, 0, -0.100052, 0, 1.000000, 0, 0.100052, 0, 0.994982, -189.671127, 49.257698, 53.926601)
 
-[node name="teancOale112" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
+[node name="teancOale184" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
 transform = Transform3D(0.900351, 0, -0.435164, 0, 1.000000, 0, 0.435164, 0, 0.900351, -189.167404, 49.250340, 55.592827)
 
-[node name="teancOale113" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
+[node name="teancOale185" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
 transform = Transform3D(0.968967, 0, 0.247191, 0, 1.000000, 0, -0.247191, 0, 0.968967, -190.407761, 49.257496, 56.814121)
 
-[node name="teancOale114" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
+[node name="teancOale186" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
 transform = Transform3D(0.994982, 0, -0.100052, 0, 1.000000, 0, 0.100052, 0, 0.994982, -189.904037, 49.250137, 58.480350)
 
-[node name="teancOale115" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
+[node name="teancOale187" parent="DecorManual/ZoneA_PiataGoreme" instance=ExtResource("33_pots")]
 transform = Transform3D(0.900351, 0, -0.435164, 0, 1.000000, 0, 0.435164, 0, 0.900351, -191.144394, 49.257298, 59.701645)

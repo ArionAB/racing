@@ -17,6 +17,12 @@ const MODELS: Array[String] = [
 	"plants/poplar_a", "plants/poplar_b", "plants/shrub_dry", "plants/pigeon",
 	"rocks/chimney_a", "rocks/chimney_b", "rocks/chimney_c", "rocks/chimney_d",
 	"rocks/chimney_mushroom",
+	# Piesele de STRAT UMAN si de silueta, nefolosite in prima runda a piatei:
+	# fara ele satul sare de la tufe direct la conuri de 12 m.
+	"rocks/chimney_triple", "rocks/cracked_chimney_a", "rocks/cracked_chimney_b",
+	"rocks/cracked_chimney_c", "rocks/rock_church_facade",
+	"buildings/farmhouse", "plants/vine_row", "props/torch",
+	"structures/cave_entrance", "structures/church_arch",
 ]
 
 

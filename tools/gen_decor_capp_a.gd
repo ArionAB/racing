@@ -75,6 +75,17 @@ const RES := {
 	"rocks/chimney_c": "12_ch_c",
 	"rocks/chimney_d": "13_ch_d",
 	"rocks/chimney_mushroom": "14_ch_mush",
+	# Piesele de STRAT UMAN, cerute de comparatia cu referinta: satul sarea de
+	# la tufe (0.9 m) direct la conuri de 12 m, adica exact peste inaltimea
+	# ochiului soferului. Toate erau deja in kit, doar nu fusesera asezate.
+	"buildings/farmhouse": "36_farmhouse",
+	"structures/church_arch": "37_arch",
+	"structures/cave_entrance": "38_cave_entr",
+	"plants/vine_row": "39_vine",
+	"props/torch": "40_torch",
+	"rocks/cracked_chimney_b": "41_crack_b",
+	"rocks/cracked_chimney_c": "42_crack_c",
+	"rocks/chimney_triple": "43_ch_triple",
 }
 
 ## Raza la baza, din AABB-ul masurat de ProbeCappA (jumatate din latura mare).
@@ -86,7 +97,44 @@ const BASE_R := {
 	"plants/poplar_b": 1.24, "plants/shrub_dry": 0.52, "plants/pigeon": 0.24,
 	"rocks/chimney_a": 2.19, "rocks/chimney_b": 2.03, "rocks/chimney_c": 2.70,
 	"rocks/chimney_d": 2.43, "rocks/chimney_mushroom": 2.04,
+	"buildings/farmhouse": 4.38, "structures/church_arch": 4.70,
+	"structures/cave_entrance": 7.50, "plants/vine_row": 5.04,
+	"props/torch": 0.42, "rocks/cracked_chimney_b": 10.45,
+	"rocks/cracked_chimney_c": 4.95, "rocks/chimney_triple": 3.80,
 }
+
+## Inaltimea reala a fiecarei piese (masurata, ProbeCappA). E aici fiindca
+## SCARA SE DERIVA DIN METRI, nu se alege din burta: `_scale_for` primeste
+## inaltimea dorita si intoarce factorul. Lectia de pe POI B — acolo s-a cerut
+## "moloz la scara 0.45-1.40" si a iesit un coridor de coloane de 16,84 m,
+## fiindca exact atat are `cracked_chimney_a` in .glb.
+const HEIGHT := {
+	"buildings/cave_house_a": 10.95, "buildings/cave_house_b": 13.45,
+	"buildings/cave_house_c": 12.15, "buildings/dovecote": 7.08,
+	"buildings/farmhouse": 4.36, "structures/church_arch": 8.04,
+	"structures/cave_entrance": 12.50, "plants/vine_row": 1.50,
+	"props/torch": 2.22, "rocks/cracked_chimney_b": 6.54,
+	"rocks/cracked_chimney_c": 0.98, "rocks/chimney_triple": 18.62,
+	"rocks/chimney_a": 11.41, "rocks/chimney_b": 14.63, "rocks/chimney_c": 17.45,
+	"rocks/chimney_d": 13.47, "rocks/chimney_mushroom": 12.32,
+	"plants/poplar_a": 12.23, "plants/poplar_b": 15.23,
+	"props/carpet_terrace": 0.99, "props/pottery_cart": 1.72,
+	"props/pot_stack": 1.63, "plants/shrub_dry": 0.90, "plants/pigeon": 0.37,
+}
+
+
+## Scara care aduce piesa la `meters` inaltime. Se cere in METRI peste tot in
+## generator; nicio scara nu se scrie de mana.
+func _scale_for(model: String, meters: float) -> float:
+	var h: float = HEIGHT.get(model, 1.0)
+	return meters / h if h > 0.001 else 1.0
+
+
+## Plafonul de cadru la `d` metri de ax: ce inaltime mai incape in frustumul
+## lui ChaseCamera. Peste el, varful piesei iese din poza — acceptabil pentru
+## fundal, gresit pentru o piesa care trebuie CITITA (o casa cu usa).
+func _ceiling(d: float) -> float:
+	return 10.0 + 0.093 * d
 
 ## Lungimea carutei pe X local (masurata, ProbeCappA).
 const CART_LEN: float = 4.96
@@ -117,8 +165,10 @@ func _ready() -> void:
 	_sampler = _track._sampler
 	_rng.seed = 100301
 	_houses()
+	_human_layer()
 	_terrace_and_life()
 	_chimneys()
+	_rubble()
 	_cart()
 	print("")
 	for line in _out:
@@ -129,161 +179,256 @@ func _ready() -> void:
 
 # ------------------------------------------------------------------ compozitia
 
-## Cele TREI case-con din brief §2 A: conuri locuite cu usi, ferestre si un
-## balcon. Sunt piesa principala a piatei, deci stau APROAPE (4-6 m de muchie)
-## si cu fatada spre drum — usile si ferestrele sapate sunt tot ce desparte
-## „sat sapat in tuf" de „camp de conuri".
+## SATUL, si de ce compozitia s-a rescris dupa comparatia cu referinta.
 ##
-## Doua pe partea insorita (-side), ca soarele razant sa le sape fatada in
-## relief, si una pe partea opusa ca piata sa aiba doua maluri, nu un decor
-## pe o singura parte.
+## Prima runda a asezat 71 de hornuri si 8 case, si a iesit o padure de piatra
+## cu satul ascuns in spate. Comparatia cu `img/v3_crops/A_village.png` a
+## aratat ca diagnosticul "prea multe hornuri" era doar jumatate adevarat, si
+## ca partea cealalta conta mai mult:
 ##
-## Verificare de frustum: casa_b are 13.45 m si sta la 4.5 m de muchie, adica
-## centrul la ~17.5 m de ax -> plafonul e 10 + 0.093*17.5 = 11.6 m. Deci varful
-## casei iese din cadru cand esti langa ea — corect si dorit: la o casa de
-## langa drum vezi USA si BALCONUL, nu acoperisul. Ce trebuie sa incapa intreg
-## e HORNUL de la 6 m (nota 2 din antet), si ala e chimney_a.
+## 1. IN REFERINTA, CONUL *E* CASA. Conurile mari au usi, ferestre si arcade
+##    sapate in ele — nu sunt decor intre case, sunt locuintele. Ale noastre
+##    erau conuri OARBE, deci oricat de multe, nu citeau ca sat. De aceea
+##    conurile de langa drum se amesteca acum cu `cave_house_*` (aceleasi
+##    conuri, dar cu fatada sapata) in loc sa stea pe randuri separate.
+##
+## 2. IERARHIE DE MARIME, nu un singur calibru. Referinta are cateva conuri
+##    EROU cat o casa, si sub ele un covor DES de conuri MICI, de 2-5 m, care
+##    umple primul plan. Ale noastre erau toate 11-17 m: masurat, `chimney_a`
+##    are 11,41 m, adica mai inalt decat `cave_house_a` (10,95 m). Cu totul la
+##    acelasi calibru nu exista nici prim-plan, nici fundal, doar un gard.
+##    Acum conurile mici se cer IN METRI (2,5-5 m) prin `_scale_for`.
+##
+## 3. STRATUL UMAN LIPSEA CU DESAVARSIRE. Intre tufa de 0,9 m si conul de 12 m
+##    nu era nimic — exact la inaltimea ochiului. Kitul avea deja piesele si
+##    nu fusesera folosite niciodata: `farmhouse` (4,36 m), `church_arch`
+##    (8,04 m), `cave_entrance` (12,50 m dar LATA de 15 m, deci se citeste ca
+##    poarta, nu ca turn), `vine_row` (1,50 m), `torch` (2,22 m).
+##
+## 4. DENSITATEA E INVERSA. In referinta primul plan e plin si fundalul se
+##    rareste in ceata. La noi fundalul avea doua conuri pe pas si primul plan
+##    era gol pe lungimi intregi.
 func _houses() -> void:
-	# DEGAJAREA E O FEREASTRA, NU UN MINIM. Doua runde au ratat-o pe rand:
-	#   - la 4.5 m de muchie casele stau la 17.5 m de AX (piata are 18 m
-	#     latime!) si captura de la 0.02 iesea fara sat, doar geologie;
-	#   - la 1.5 m, captura de la 0.00 iesea cu o fatada maro peste jumatate
-	#     de cadru: camera de urmarire zboara la 12.5 m IN SPATELE masinii, deci
-	#     o casa langa frac 0.999 e exact acolo unde sta camera la pornire.
-	# Fereastra care tine amandoua: 3-4 m de muchie (12-13 m de ax pentru o
-	# casa de 4 m raza), si NIMIC sub 3 m pe ultimele doua sutimi dinaintea
-	# liniei, unde e camera.
-	_place("buildings/cave_house_b", "casaCon", 0.9945, -1.0, 3.5,
+	# CASELE VIN LA DRUM. Masurat pe versiunea anterioara: cea mai apropiata
+	# statea la 15,2 m de ax, adica dincolo de linia de hornuri, si in captura
+	# de la 0,00 nu se vedea niciuna intreaga. Fereastra utila e 1,5-3,5 m de
+	# MUCHIE (10,5-13 m de ax), unde plafonul de cadru e 11,0-11,2 m: o casa de
+	# 10,95 m intra intreaga, una de 13,45 isi pierde varful — corect, la o
+	# casa de langa drum vrei usa si balconul, nu acoperisul.
+	#
+	# Ce ramane in picioare din runda trecuta: pe ultimele doua sutimi
+	# dinaintea liniei NU se pune nimic sub 3 m de muchie, fiindca acolo sta
+	# camera la pornire (zboara 12,5 m in spatele masinii). Aia n-a fost o
+	# preferinta, a fost o captura cu o fatada maro peste jumatate de cadru.
+	_place("buildings/cave_house_b", "casaCon", 0.9945, -1.0, 3.2,
 		0.0, 1.0, "hull", "toward")
-	_place("buildings/cave_house_a", "casaCon", 0.0090, -1.0, 3.0,
+	_place("buildings/cave_house_a", "casaCon", 0.0075, -1.0, 1.8,
 		0.0, 1.0, "hull", "toward")
-	# A treia pe malul opus, dupa linie, ca sa inchida piata fara sa intre in
-	# cadrul de pornire.
-	_place("buildings/cave_house_c", "casaCon", 0.0055, 1.0, 3.2,
+	_place("buildings/cave_house_c", "casaCon", 0.0042, 1.0, 2.2,
 		0.0, 1.0, "hull", "toward")
-	# Un al doilea rand, mai departe si mai rar: satul trebuie sa aiba
-	# ADANCIME. In referinta v3 casele urca in trepte in spatele piatei; un
-	# singur rand ar citi ca fatada de teatru.
-	_place("buildings/cave_house_a", "casaSpate", 0.0250, -1.0, 12.0,
-		0.5, 1.05, "hull", "toward")
-	_place("buildings/cave_house_c", "casaSpate", 0.0180, -1.0, 14.0,
-		-0.4, 0.95, "hull", "toward")
-	_place("buildings/cave_house_b", "casaSpate", 0.0115, 1.0, 13.0,
-		0.3, 0.95, "hull", "toward")
-	# Inca doua case spre iesire, ca satul sa continue pana la caruta in loc
-	# sa se termine la jumatatea piatei.
-	_place("buildings/cave_house_a", "casaCon", 0.0210, 1.0, 3.4,
+	_place("buildings/cave_house_a", "casaCon", 0.0195, 1.0, 2.0,
 		0.0, 0.95, "hull", "toward")
-	_place("buildings/cave_house_c", "casaCon", 0.0150, -1.0, 3.6,
+	_place("buildings/cave_house_c", "casaCon", 0.0142, -1.0, 2.4,
 		0.0, 0.9, "hull", "toward")
+	_place("buildings/cave_house_b", "casaCon", 0.0265, -1.0, 2.6,
+		0.0, 0.92, "hull", "toward")
+	# Al doilea rand: satul urca in trepte in spate, ca in referinta. Mai rar
+	# si mai inalt, ca sa se vada PESTE primul rand, nu prin golurile lui.
+	_place("buildings/cave_house_a", "casaSpate", 0.0225, -1.0, 11.0,
+		0.5, 1.05, "hull", "toward")
+	_place("buildings/cave_house_c", "casaSpate", 0.0165, -1.0, 13.0,
+		-0.4, 0.95, "hull", "toward")
+	_place("buildings/cave_house_b", "casaSpate", 0.0105, 1.0, 12.0,
+		0.3, 0.95, "hull", "toward")
+	_place("buildings/cave_house_a", "casaSpate", 0.9975, 1.0, 10.0,
+		0.2, 1.0, "hull", "toward")
 
 
-## Terasa cu covoare, porumbarul, plopul si viata marunta.
+## STRATUL UMAN: 1,5-8 m inaltime, lipit de banda, cu fatade care se citesc.
 ##
-## Terasa e PLATA (0.99 m inalta): daca sta departe nu se vede deloc de la
-## nivelul soferului, deci sta la 2.5 m de muchie, chiar langa banda, pe
-## partea umbrita — covoarele sunt singura pata SATURATA din piata (KERB_RED)
-## si trebuie sa cada in cadru, nu in fundal.
+## Astea sunt piesele care lipseau. Se aseaza APROAPE (1,1-3,5 m de muchie)
+## fiindca la inaltimea lor, de la 8 m incolo nu mai citesc nimic — o ferma de
+## 4,36 m la 20 m de ax e un cub in fundal, iar rostul ei e sa aiba usa la
+## nivelul ochiului cand treci pe langa ea.
+func _human_layer() -> void:
+	# Ferma joasa: acoperis plat, 4,36 m — exact silueta ORIZONTALA care rupe
+	# sirul de verticale. Doua pe partea insorita, ca soarele razant sa-i sape
+	# fatada, una pe cealalta.
+	_place("buildings/farmhouse", "ferma", 0.0022, -1.0, 1.5, 0.0, 1.0,
+		"hull", "toward")
+	_place("buildings/farmhouse", "ferma", 0.0128, 1.0, 1.4, 0.0, 1.0,
+		"hull", "toward")
+	_place("buildings/farmhouse", "ferma", 0.0238, -1.0, 1.6, 0.0, 0.95,
+		"hull", "toward")
+	# Arcada: semnatura vizuala a referintei (arcade sapate in tuf, la drum).
+	# 8,04 m la 1,5 m de muchie -> plafonul e 11,0 m, deci intra intreaga.
+	_place("structures/church_arch", "arcada", 0.9962, -1.0, 1.5, 0.0, 1.0,
+		"hull", "toward")
+	_place("structures/church_arch", "arcada", 0.0172, 1.0, 1.3, 0.0, 0.95,
+		"hull", "toward")
+	# Intrarea in stanca: LATA de 15 m, deci e un perete cu gura, nu un turn.
+	# Se pune ca fundal de piata pe partea umbrita, la 5 m — inchide compozitia
+	# in loc s-o lase sa curga in desert.
+	_place("structures/cave_entrance", "gura", 0.0058, 1.0, 5.0, 0.0, 1.0,
+		"hull", "toward")
+	# Randul de vita: 10 m lungime, 1,50 m inaltime — culcat pe langa banda, e
+	# singurul element ORIZONTAL de la nivelul solului si leaga piesele intre
+	# ele. Yaw pe directia benzii, nu de-a curmezisul.
+	for j in 4:
+		var f := 0.0035 + 0.0062 * float(j)
+		var sgn := 1.0 if j % 2 == 0 else -1.0
+		_place("plants/vine_row", "vita", f, sgn, 2.2 + 0.8 * float(j % 2),
+			0.0, 1.0, "none", "along")
+	# Torte pe marginea piatei: 2,22 m, adica fix la inaltimea ochiului.
+	# Punctatie verticala marunta — in referinta rolul asta il fac stalpii si
+	# semnele. Fara coliziune: n-au ce cauta in traiectorie.
+	for j in 7:
+		var f := 0.9968 + 0.0043 * float(j)
+		if f > 1.0:
+			f -= 1.0
+		_place("props/torch", "torta", f, -1.0 if j % 2 == 0 else 1.0,
+			1.1, 0.0, 1.0, "none")
+
+
+## Terasa cu covoare, porumbarul, plopii si viata marunta.
 func _terrace_and_life() -> void:
 	_place("props/carpet_terrace", "terasaCovoare", 0.0030, 1.0, 1.5,
 		0.0, 1.0, "hull", "toward")
-	# Porumbarul VOPSIT IN ALB, cu gauri de porumbei (brief §2 A). Sta pe
-	# partea umbrita, langa terasa, ca varul sa citeasca pe fundalul de tuf.
-	_place("buildings/dovecote", "porumbar", 0.0125, 1.0, 2.5,
+	_place("buildings/dovecote", "porumbar", 0.0118, 1.0, 2.2,
 		0.0, 1.0, "hull", "toward")
-	# Porumbei in evantai deasupra porumbarului: decor fantoma, zero gameplay.
 	for j in 6:
-		_place("plants/pigeon", "porumbel", 0.0125 + 0.0012 * float(j),
+		_place("plants/pigeon", "porumbel", 0.0118 + 0.0012 * float(j),
 			1.0, 2.0 + 1.6 * float(j % 3), float(j) * 1.1 + 0.3, 1.0,
 			"none", "", 7.4 + 1.2 * float(j % 4))
-	# UN plop (brief §2 A: „one poplar tree"). Cel inalt, pe partea umbrita,
-	# langa terasa: verticala lui subtire e singurul accent care rupe conurile,
-	# si verdele e a doua pata de culoare din piata.
 	_place("plants/poplar_b", "plop", 0.0072, 1.0, 1.5, 0.0, 1.0, "trunk")
-	# Inca doi plopi in spate, ca sa nu para plantat singur (in referinta
-	# plopii vin in palcuri langa case).
 	_place("plants/poplar_a", "plopSpate", 0.0098, 1.0, 6.0, 0.0, 0.95, "trunk")
 	_place("plants/poplar_a", "plopSpate", 0.0165, 1.0, 7.0, 0.0, 1.05, "trunk")
-	# Tufe uscate la piciorul pieselor: rup linia de contact dintre piatra si
-	# pamant, care altfel e o taietura curata si citeste ca decupaj (lectia POI B).
-	for j in 18:
-		var f := 0.9940 + 0.0028 * float(j)
+	# Tufe la piciorul pieselor: rup linia de contact dintre piatra si pamant,
+	# care altfel e o taietura curata si citeste ca decupaj (lectia POI B).
+	for j in 22:
+		var f := 0.9930 + 0.0024 * float(j)
 		if f > 1.0:
 			f -= 1.0
 		var sgn := -1.0 if j % 2 == 0 else 1.0
 		_place("plants/shrub_dry", "tufa", f, sgn,
-			_rng.randf_range(0.8, 4.5), _rng.randf_range(0.0, TAU),
+			_rng.randf_range(0.5, 3.5), _rng.randf_range(0.0, TAU),
 			_rng.randf_range(0.9, 1.5), "none")
 
 
-## Hornurile care inconjoara piata — SATUL, nu trei conuri pe un camp.
+## CONURILE, pe trei calibre — asta e schimbarea de fond fata de runda trecuta.
 ##
-## Prima runda a pus 12 conuri la 7-30 m de muchie si captura de la 0.02 a
-## iesit un drum de desert cu trei cosuri de fabrica pe orizont. Referinta v3
-## (`img/v3_crops/A_village.png`) are conurile LIPITE: umplu cadrul de la
-## marginea benzii pana in ceata, in trei-patru straturi care se suprapun, si
-## nu se vede pamant gol intre ele. Diferenta nu e de stil, e de NUMAR.
+## Numarul scade de la 71 la ~46, dar cifra conteaza mai putin decat REPARTITIA
+## pe inaltimi. Toate scarile se cer in METRI si trec prin `_scale_for`.
 ##
-## Compozitia de acum, pe straturi, cu pasul injumatatit (0.0021 ~ 4.3 m):
-##   - inelul 1 (2-6 m de muchie): conuri MICI si medii, pe ambele parti, la
-##     fiecare pas. Astea sunt cele care trec pe langa geam.
-##   - inelul 2 (8-18 m): conuri medii si inalte, la doi pasi.
-##   - inelul 3 (20-45 m): conurile inalte, care inchid fundalul si dau
-##     silueta satului. Acolo plafonul frustumului e 10 + 0.093*50 = 14.7 m,
-##     deci un chimney_c de 17.45 m isi pierde doar varful — corect pentru
-##     fundal, unde silueta conteaza mai mult decat palaria.
-##
-## PRIMUL HORN ramane cerinta explicita a briefului §2 A: la 6 m de banda,
-## chimney_a (11.41 m), fiindca la distanta aia plafonul e 11.6 m si palaria
-## se vede INTREAGA — care e tot rostul cerintei.
+##   - covorul de prim-plan (2,5-5 m, la 1,5-7 m de muchie): DES, pe fiecare
+##     pas, pe ambele parti. Astea sunt ce trece pe langa geam si ce da
+##     senzatia de vale plina. In referinta primul plan e numai din astea.
+##   - conurile de mijloc (7-11 m, la 9-20 m): rare, doar la doi pasi.
+##   - conurile EROU (14-19 m, la 22-40 m): patru, nu patruzeci. Sunt reperele
+##     care se vad de departe; daca sunt multe, nu mai e niciunul.
 func _chimneys() -> void:
+	# Hornul de la 6 m ramane cerinta explicita a briefului §2 A: chimney_a la
+	# 6 m de banda, la scara 1, ca sa i se vada palaria intreaga (plafonul e
+	# 11,6 m acolo, iar piesa are 11,41 m).
 	_place("rocks/chimney_a", "hornulDeSase", 0.0060, -1.0, 6.0,
 		0.6, 1.0, "hull")
 	var small: Array[String] = [
 		"rocks/chimney_a", "rocks/chimney_mushroom", "rocks/chimney_d",
-		"rocks/chimney_mushroom", "rocks/chimney_a",
+		"rocks/chimney_b", "rocks/chimney_mushroom", "rocks/chimney_a",
 	]
 	var mid: Array[String] = [
 		"rocks/chimney_d", "rocks/chimney_b", "rocks/chimney_a",
 		"rocks/chimney_mushroom",
 	]
-	var tall: Array[String] = [
-		"rocks/chimney_c", "rocks/chimney_b", "rocks/chimney_c", "rocks/chimney_d",
+	var hero: Array[String] = [
+		"rocks/chimney_c", "rocks/chimney_triple", "rocks/chimney_b",
+		"rocks/chimney_c",
 	]
 	var k := 0
-	var f := 0.9915
+	# Piata incepe la 0.9930, nu mai devreme: pana acolo drumul e inca iesirea
+	# din stanca goala si trece PE DEASUPRA hornului scobit, deci terenul de
+	# dedesubt e podeaua cavernei (masurat: 11,44 m sub sosea la 0.9915).
+	# Nota 3b din antet, pe care prima varianta a acestei bucle o incalca.
+	var f := 0.9930
 	while f < 1.0465:
 		var fw := f if f < 1.0 else f - 1.0
-		var near_cart := absf(fw - CART_FRAC) < 0.0055
-		# Culoarul camerei: ea zboara 12.5 m IN SPATELE masinii, deci la
-		# pornire sta pe frac ~0.994. Inelul 1 (2-6 m de muchie) se opreste
-		# acolo, altfel prima imagine a cursei e o piatra peste jumatate de
-		# cadru — masurat, exact asta s-a intamplat cu o casa la 1.8 m.
-		var on_line := fw > 0.9900 or fw < 0.0030
-		f += 0.0021
+		# Fereastra libera din jurul carutei era de +/-0.0055 (~22 m), si asta
+		# a golit exact CE SE VEDE INAINTE de la frac 0.02: camera priveste in
+		# fata, iar blocajul e la 0.03 (lectia `masoara-inainte-nu-langa`).
+		# Se strange la +/-0.0022 (~9 m), cat sa se citeasca blocajul si fanta,
+		# fara sa se rupa satul pe toata deschiderea din fata soferului.
+		var near_cart := absf(fw - CART_FRAC) < 0.0022
+		# Culoarul camerei: ea zboara 12,5 m IN SPATELE masinii, deci la
+		# pornire sta pe frac ~0.994. Covorul de prim-plan se opreste acolo,
+		# altfel prima imagine a cursei e o piatra peste jumatate de cadru.
+		var on_line := fw > 0.9930 or fw < 0.0025
+		f += 0.0019
 		k += 1
-		# Pe linia de start si langa caruta ramane liber INELUL 1: acolo trebuie
-		# sa se vada grila si blocajul, nu piatra. Inelele 2 si 3 continua —
-		# altfel satul se rupe in doua exact in cadrul de pornire.
+		# COVORUL DE PRIM-PLAN. Doua pe pas (cate unul pe fiecare parte), la
+		# 2,5-5 m inaltime: la calibrul asta pot sta la 1,5 m de muchie fara
+		# sa astupe cadrul, fiindca plafonul la 11 m de ax e 11,0 m si ele au
+		# sub 5. Aici se castiga senzatia de "vale plina de conuri".
 		if not (near_cart or on_line):
-			var sgn := -1.0 if k % 2 == 0 else 1.0
-			_place(small[k % small.size()], "hornAproape", fw, sgn,
-				2.0 + _rng.randf_range(0.0, 4.0), _rng.randf_range(0.0, TAU),
-				_rng.randf_range(0.88, 1.08), "hull")
+			# DOUA RANDURI, si primul e LIPIT DE UMAR. Cu un singur rand la
+			# 1,5-7 m de muchie treimea de jos a cadrului ramanea nisip gol —
+			# comparat cot la cot cu referinta, care are conuri si bolovani
+			# pana in marginea drumului. Piata are 18 m latime, deci soseaua
+			# singura umple jumatate de ecran: orice sta la 5 m de muchie e
+			# deja la 14 m de ax si cade sub linia orizontului.
+			#
+			# Randul de umar sta la 0,6-2,0 m (garda cere marginea piesei la
+			# minimum 0,5 m de asfalt, si `gap` se masoara chiar de la muchie)
+			# si e MARUNT: 1,8-3,2 m, cat sa umple coltul de jos fara sa urce
+			# peste capota.
+			for sgn in [-1.0, 1.0]:
+				var mdl: String = small[(k + int(sgn)) % small.size()]
+				_place(mdl, "conUmar", fw, sgn,
+					_rng.randf_range(0.6, 2.0), _rng.randf_range(0.0, TAU),
+					_scale_for(mdl, _rng.randf_range(1.8, 3.2)), "hull")
+				var m2: String = small[(k * 2 + int(sgn) + 3) % small.size()]
+				_place(m2, "conMic", fw, sgn,
+					_rng.randf_range(2.5, 7.0), _rng.randf_range(0.0, TAU),
+					_scale_for(m2, _rng.randf_range(3.0, 5.5)), "hull")
+		# Conurile de mijloc: rare, si la o distanta unde inca au volum.
 		if k % 2 == 0:
-			_place(mid[(k / 2) % mid.size()], "hornMijloc", fw,
-				1.0 if k % 4 == 0 else -1.0,
-				8.0 + _rng.randf_range(0.0, 10.0), _rng.randf_range(0.0, TAU),
-				_rng.randf_range(0.92, 1.12), "hull")
-		# Fundalul primeste doua conuri pe pas, pe ambele parti: silueta satului
-		# trebuie sa fie CONTINUA pe orizont, nu punctata.
-		_place(tall[k % tall.size()], "hornFund", fw, -1.0,
-			20.0 + _rng.randf_range(0.0, 25.0), _rng.randf_range(0.0, TAU),
-			_rng.randf_range(0.95, 1.20), "hull")
-		if k % 2 == 1:
-			_place(tall[(k + 2) % tall.size()], "hornFund", fw, 1.0,
-				20.0 + _rng.randf_range(0.0, 25.0), _rng.randf_range(0.0, TAU),
-				_rng.randf_range(0.95, 1.20), "hull")
+			var mm: String = mid[(k / 2) % mid.size()]
+			_place(mm, "conMijloc", fw, 1.0 if k % 4 == 0 else -1.0,
+				9.0 + _rng.randf_range(0.0, 11.0), _rng.randf_range(0.0, TAU),
+				_scale_for(mm, _rng.randf_range(7.0, 11.0)), "hull")
+		# Conurile EROU: unul la cinci pasi, alternand malul. Patru in toata
+		# piata. Sunt singurele lasate sa treaca de 14 m.
+		if k % 5 == 2:
+			var hm: String = hero[(k / 5) % hero.size()]
+			_place(hm, "conErou", fw, -1.0 if (k / 5) % 2 == 0 else 1.0,
+				22.0 + _rng.randf_range(0.0, 18.0), _rng.randf_range(0.0, TAU),
+				_scale_for(hm, _rng.randf_range(14.0, 19.0)), "hull")
+
+
+## MOLOZUL DE PRIM-PLAN: bolovani lati si josi, cum e tot solul in referinta.
+##
+## `cracked_chimney_c` are 0,98 m inaltime si 9,90 m latime — o lespede, nu un
+## horn; `cracked_chimney_b` are 6,54 x 20,90 m — un pinten lat. Se cer in
+## METRI (0,6-1,6 m si 3,6-4,5 m), altfel ies coloanele de pe POI B.
+##
+## Sunt scumpe (2528 si 1612 tri), deci sunt PUTINE si numai acolo unde chiar
+## se calca cu privirea: langa banda, in primul plan. Un covor din ele ar fi
+## dublat triunghiurile pistei fara sa se vada nimic in plus.
+func _rubble() -> void:
+	for j in 9:
+		var f := 0.9955 + 0.0044 * float(j)
+		if f > 1.0:
+			f -= 1.0
+		var sgn := -1.0 if j % 2 == 0 else 1.0
+		_place("rocks/cracked_chimney_c", "lespede", f, sgn,
+			_rng.randf_range(0.6, 4.0), _rng.randf_range(0.0, TAU),
+			_scale_for("rocks/cracked_chimney_c", _rng.randf_range(0.6, 1.6)),
+			"none")
+	# Doi pinteni lati, ca maluri ale piatei — dau fundalului o talpa, ca sa nu
+	# para ca toate conurile cresc din nisip gol.
+	_place("rocks/cracked_chimney_b", "pinten", 0.0088, -1.0, 16.0,
+		0.7, _scale_for("rocks/cracked_chimney_b", 4.5), "hull")
+	_place("rocks/cracked_chimney_b", "pinten", 0.0288, 1.0, 14.0,
+		2.1, _scale_for("rocks/cracked_chimney_b", 3.6), "hull")
 
 
 ## CARUTA CU OALE la iesirea din piata, cu fanta de 4 m.
@@ -352,6 +497,10 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var a := yaw
 	if face == "toward":
 		a = atan2(-s.x, -s.z)
+	elif face == "along":
+		# Piesa se aseaza PE LUNGUL benzii (randul de vita), nu cu fata la ea.
+		var dir := (_track.baked[(i + 1) % n] - p).normalized()
+		a = atan2(dir.x, dir.z)
 	_raw(model, base, Vector3(q.x, g + lift, q.z), a, scl, mode, false)
 
 

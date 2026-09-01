@@ -306,12 +306,42 @@ const TUFF_UV_REMAP := {
 }
 
 ## Modelele pe care se aplica remaparea de mai sus: kitul de tuf al Cappadociei.
+##
+## Lista a crescut cand piata din Goreme a primit stratul uman. Piesele acelea
+## existau in kit dar nu fusesera asezate niciodata, deci nimeni nu observase
+## ca stau pe portocaliul desertului. Masurat pe ARIE (ProbeCappSlot, nou —
+## aria spune CAT, hexul spune CE): `farmhouse` era 37% SAND_MID #D4994D,
+## `cracked_chimney_c` 67% SAND_SHADOW #915D27, `cracked_chimney_b` 38%.
+## In captura de la frac 0,02 ieseau lazi portocalii langa conuri crem, adica
+## exact accidentul pe care remaparea asta il repara la hornuri.
+##
+## `church_arch` cere in plus ROCK_DARK -> ARCH_SHADOW: e singura piesa cu 35%
+## din arie pe slotul 4 (#67421F, maro inchis), fiindca arcada are un intrados
+## adanc. Lasat asa, arcul citea ca lemn ars. Vezi `ARCH_UV_REMAP`.
+##
+## Ce NU intra, si de ce: `vine_row` e 91% CACTUS_GREEN si `torch` 66%
+## RUST_METAL + 34% flacara — nu sunt tuf, si trecerea lor pe crem ar sterge
+## exact cele doua pete de culoare pe care le aduc in piata.
 const TUFF_UV_MODELS := [
 	"chimney_a", "chimney_b", "chimney_c", "chimney_d",
 	"chimney_mushroom", "chimney_triple", "twin_chimney_gate",
 	"cave_house_a", "cave_house_b", "cave_house_c",
 	"dovecote", "rock_church_facade",
+	"farmhouse", "cave_entrance", "church_arch",
+	"cracked_chimney_a", "cracked_chimney_b", "cracked_chimney_c",
 ]
+
+## Remapare SUPLIMENTARA, doar pentru arcada: maroul inchis al intradosului.
+## Se tine separat fiindca ROCK_DARK e legitim pe restul kitului (crapaturi,
+## interior de faleza) — mutat global, ar aplatiza fiecare umbra sapata din
+## pista. MARBLE_GREY e deja folosit de umbra de tuf, deci arcul ramane in
+## aceeasi familie de valoare fara sa ceara un slot nou.
+const ARCH_UV_REMAP := {
+	4: Palette.MARBLE_GREY,
+}
+
+## Piesele care primesc si `ARCH_UV_REMAP`, pe langa cea de tuf.
+const ARCH_UV_MODELS := ["church_arch"]
 
 
 func _ready() -> void:
@@ -537,8 +567,13 @@ func _retint_tuff() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
 	for model in models:
-		if not TUFF_UV_MODELS.has(model.scene_file_path.get_file().get_basename()):
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not TUFF_UV_MODELS.has(stem):
 			continue
+		# Arcada duce si maroul de intrados pe cenusiu; restul kitului nu.
+		var remap := TUFF_UV_REMAP.duplicate()
+		if ARCH_UV_MODELS.has(stem):
+			remap.merge(ARCH_UV_REMAP)
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
 			var node: Node = stack.pop_back()
@@ -554,8 +589,8 @@ func _retint_tuff() -> void:
 				var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
 				for i in uv.size():
 					var slot := int(floor(uv[i].x * float(Palette.SLOTS)))
-					if TUFF_UV_REMAP.has(slot):
-						uv[i] = Palette.uv(int(TUFF_UV_REMAP[slot]))
+					if remap.has(slot):
+						uv[i] = Palette.uv(int(remap[slot]))
 						changed = true
 				arr[Mesh.ARRAY_TEX_UV] = uv
 				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)

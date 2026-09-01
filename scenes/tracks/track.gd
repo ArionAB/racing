@@ -1914,6 +1914,16 @@ static func themes() -> Dictionary:
 			# Si pe HORNURI, cu ProbeCappLumina (delta fata luminata/intoarsa):
 			# toate cele opt cu destui pixeli urca, 56..76 -> 78..100, iar doua
 			# dintre cele marcate PLAT trec OK. Nu se plateste nimic pe piatra.
+			#
+			# CE SE PLATESTE, si e platit CONSTIENT: scobitura de la frac ~0.75
+			# (StancaGoalaInterior) traieste numai din ambient, deci se
+			# intuneca odata cu el — carosabilul in prim-plan cade de la mediana
+			# 109 la 75 din 255. Se conduce inca (captura: banda si peretii se
+			# citesc, minimul e 22), dar e limita.
+			# NU se repara urcand ambientul inapoi: asta ar aplatiza toata pista
+			# pentru un singur POI, exact ce refuza si nota de la 0.30 mai sus.
+			# Cand se construiesc salile, lumina lor se pune LOCAL — torte
+			# OmniLight3D si CameraZone la gura, ca pe Chongqing.
 			"ambient_energy": 0.20,
 			# UMBRE PORNITE, si e prima pista pe care sunt IDENTITATE, nu doar
 			# contact cu solul. Implicitul e deja `true`, deci cheia nu schimba

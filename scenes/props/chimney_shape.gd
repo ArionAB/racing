@@ -1462,10 +1462,19 @@ func _add_extras(mi: MeshInstance3D) -> void:
 		# nivel.
 		var base_m := window_base_m if window_base_m > 0.0 else 2.6
 		var wf0 := clampf((base_m / world_scale) / h, 0.05, 0.90)
+		# RANDURILE RAMAN IN CORPUL LOCUIBIL, nu urca pe gat.
+		#
+		# `window_to` merge pana la 0.72 din inaltime, dar acolo hornul e deja
+		# gat subtire sub palarie: o nisa pusa acolo e mai lata decat peretele
+		# si iese in consola ca o foaie — se vedea in cadru, pe umarul conului
+		# din prim-plan, imediat ce randurile s-au inmultit.
+		# Jumatatea de jos e si ce arata referinta: locuintele sunt sapate in
+		# burta conului, iar varful ramane stanca goala.
+		var w_top := minf(window_to, 0.55)
 		for row in window_rows:
 			var rf := wf0
 			if window_rows > 1:
-				rf = lerpf(wf0, maxf(window_to, wf0 + 0.08),
+				rf = lerpf(wf0, maxf(w_top, wf0 + 0.08),
 					float(row) / float(window_rows - 1))
 			var rr := _radius_at(src, cx, cz, y0, h, rf)
 			if rr <= 0.001:

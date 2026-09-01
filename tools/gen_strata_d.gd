@@ -109,7 +109,7 @@ func _ready() -> void:
 		var p: Vector3 = pts[idx]
 		if last_f >= 0.0:
 			var pl: Vector3 = pts[int(last_f * float(n)) % n]
-			if p.distance_to(pl) < 5.0:
+			if p.distance_to(pl) < 3.2:
 				continue
 		last_f = f
 		var ahead: Vector3 = pts[(idx + 10) % n]
@@ -135,16 +135,16 @@ func _ready() -> void:
 		# intamplare din lista, nu la pas fix, deci doua felii vecine n-au
 		# straturile la aceeasi inaltime si linia de curs nu mai trece continuu
 		# prin trei module.
-		var want: int = rng.randi_range(5, 7)
+		var want: int = rng.randi_range(7, 9)
 		var picked: Array = []
 		var tries := 0
-		while picked.size() < want and tries < 40:
+		while picked.size() < want and tries < 60:
 			tries += 1
 			var e: Dictionary = usable[rng.randi() % usable.size()]
 			var ey: float = float(e["y"]) + rng.randf_range(-1.3, 1.3)
 			var dup := false
 			for q in picked:
-				if absf(float(q["y"]) - ey) < 2.2:
+				if absf(float(q["y"]) - ey) < 1.6:
 					dup = true
 					break
 			if dup:
@@ -181,6 +181,28 @@ func _ready() -> void:
 			var pos: Vector3 = p + d * along + sv * cl
 			pos.y = ey
 			var yaw: float = atan2(-sv.x, -sv.z) + rng.randf_range(-0.06, 0.06)
+			# ANTI Z-FIGHTING intre TREPTE. Aceeasi cauza ca la grohotis: sunt
+			# cutii din acelasi mesh, iar doua care se suprapun au fete
+			# coplanare care se bat pe adancime. Masurat cu ProbeLedgeOverlap
+			# dupa indesire: 72 de perechi suprapuse din 99 de trepte, si pe
+			# captura de aproape (zz/ab_near_044.png) treptele erau acoperite
+			# de pete negre — adica indesirea stricase exact piesa pe care o
+			# adaugase.
+			# Se refuza plasarea daca centrul cade prea aproape de o treapta
+			# deja pusa; ele pot sta cap la cap, dar nu una prin alta.
+			var clash := false
+			for prev in rows:
+				var pp: Vector3 = Vector3(prev["x"], prev["y"], prev["z"])
+				var sep: float = (blen + float(prev["len"])) * 0.5 * 0.55
+				# Pragul pe verticala e 2.4 m, nu 1.1: cutiile au buza de 0.85 m
+				# plus corpul, deci doua trepte la 1.5 m una de alta tot se
+				# ating. Masurat: la 1.1 ramaneau 35 de perechi suprapuse din
+				# 80 de trepte.
+				if absf(pos.y - pp.y) < 2.4 						and Vector3(pos.x, pos.y, pos.z).distance_to(pp) < sep:
+					clash = true
+					break
+			if clash:
+				continue
 			# GARDA „IN AER", pe ROCA REALA din spatele cutiei asezate.
 			# Punctul se ia din spatele treptei (spre deal), acolo unde ea
 			# trebuie sa fie ingropata; daca nu e niciun vertex de perete la

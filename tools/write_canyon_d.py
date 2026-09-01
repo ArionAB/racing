@@ -145,7 +145,11 @@ def main() -> int:
     for i, r in enumerate(strata, 1):
         out.append('[node name="Treapta_%03d" type="MeshInstance3D" '
                    'parent="%s/Strate"]' % (i, BASE))
-        out.append('mesh = SubResource("BoxMesh_strat")')
+        # Mesh cu CULORI DE VERTEX (tools/gen_strat_mesh.gd), nu `BoxMesh`:
+        # materialul clasei are vertex_color_use_as_albedo, iar BoxMesh nu
+        # aduce canalul de culoare — de-aia treptele ieseau cu grile de puncte
+        # negre (ProbeBoxVC: BoxMesh COLOR = LIPSA, GLB COLOR = exista).
+        out.append('mesh = ExtResource("10_strat")')
         out.append("transform = Transform3D(%s, %.3f, %.3f, %.3f)" % (
             basis_box(r["yaw"], r["len"], r["lip"], r["depth"]),
             r["x"], r["y"], r["z"]))

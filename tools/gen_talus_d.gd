@@ -120,7 +120,16 @@ func _ready() -> void:
 			# MARIMEA SCADE CU DISTANTA — gradientul din verdict, in ordinea
 			# corecta: blocuri de ~1.6 m lipite de perete, pietris de 0.35 m pe
 			# acostament. (Generatorul vechi il avea inversat.)
-			var want_m: float = lerpf(3.10, 0.42, t) * rng.randf_range(0.70, 1.45)
+						# Minimul e 1.10 m, nu 0.42. Blocurile foarte mici erau cele mai
+			# patate: mesh-ul modulului are 1208 triunghiuri desenate pentru o
+			# faleza de 20 m, iar strans la o jumatate de metru fetele lui
+			# interioare ajung la fractiuni de milimetru una de alta si se bat
+			# pe adancime — grile de puncte negre pe captura de aproape
+			# (zz/vc_crop.png), mult mai dese decat pe ramura de baza
+			# (zz/base_crop_speckle.png), unde blocurile erau mai mari.
+			# „Pietrisul" din verdict nu se poate face din piesa asta; ce se
+			# poate face e sa nu coboare sub pragul la care ea se sparge.
+			var want_m: float = lerpf(3.10, 1.10, t) * rng.randf_range(0.75, 1.35)
 			var sc: float = want_m / MOD_LEN
 			# GARDA DE CAROSABIL, ca la module: blocurile primesc corp fizic.
 			# Distanta se ia ca MINIM pe o fereastra de indici, nu pe cel mai

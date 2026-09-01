@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/plants/poplar_a.glb" id="5_popa"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/plants/poplar_b.glb" id="5_popb"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/buildings/farmhouse.glb" id="6_farm"]
-[ext_resource type="PackedScene" path="res://assets/models/cappadocia/props/balloon_landed.glb" id="7_fabric"]
+[ext_resource type="Script" path="res://scenes/props/fabric_drape.gd" id="10_drape"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/props/balloon_basket.glb" id="8_basket"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/props/balloon_envelope_a.glb" id="9_env"]
 
@@ -298,8 +298,35 @@ transform = Transform3D(-0.9205, 0.0000, -0.3907, 0.0000, 1.0000, 0.0000, 0.3907
 [node name="Farmhouse" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("6_farm")]
 transform = Transform3D(-0.9207, 0.0000, -0.3903, 0.0000, 1.0000, 0.0000, 0.3903, 0.0000, -0.9207, -54.096, 16.431, -145.165)
 
-[node name="BalloonFabric" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("7_fabric")]
-transform = Transform3D(0.1692, 0.0000, -0.9856, 0.0000, 4.0000, 0.0000, 0.9856, 0.0000, 0.1692, -126.400, 14.886, -182.700)
+[node name="BalloonFabric01" type="Node3D" parent="DecorManual/Zone05_Vineyard"]
+transform = Transform3D(-0.9864, 0.0000, -0.1644, 0.0000, 1.0000, 0.0000, 0.1644, 0.0000, -0.9864, -120.191, 14.901, -181.698)
+script = ExtResource("10_drape")
+width_m = 13.0
+pitch_m = 3.4
+arches = 4
+taper = 0.35
+floor_m = 0.45
+slot = 16
+
+[node name="BalloonFabric02" type="Node3D" parent="DecorManual/Zone05_Vineyard"]
+transform = Transform3D(-0.9864, 0.0000, -0.1644, 0.0000, 1.0000, 0.0000, 0.1644, 0.0000, -0.9864, -129.737, 14.847, -183.256)
+script = ExtResource("10_drape")
+width_m = 12.0
+pitch_m = 3.0
+arches = 5
+taper = 0.30
+floor_m = 0.45
+slot = 15
+
+[node name="BalloonFabric03" type="Node3D" parent="DecorManual/Zone05_Vineyard"]
+transform = Transform3D(-0.9842, 0.0000, -0.1771, 0.0000, 1.0000, 0.0000, 0.1771, 0.0000, -0.9842, -139.117, 14.781, -184.895)
+script = ExtResource("10_drape")
+width_m = 12.5
+pitch_m = 3.6
+arches = 4
+taper = 0.40
+floor_m = 0.45
+slot = 22
 
 [node name="BalloonBasket" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("8_basket")]
 transform = Transform3D(-0.9840, 0.0000, 0.1781, 0.0000, 1.0000, 0.0000, -0.1781, 0.0000, -0.9840, -126.206, 14.500, -172.013)

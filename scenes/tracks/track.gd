@@ -1619,11 +1619,39 @@ static func themes() -> Dictionary:
 			# filtru, nu rasarit.
 			"sky_top": Color.html("B9CCE0"),
 			"sky_horizon": Color.html("F2B27A"),
-			# Ceata din familia orizontului, dar cu o idee mai putin portocaliu:
-			# la 300 m ea e ce vopseste Erciyes, iar cu #F2B27A curat muntele cu
-			# zapada iesea silueta de caramida.
-			"fog": Color(0.92, 0.79, 0.63),
-			"hill_color": Color(0.82, 0.70, 0.56),
+			# CEATA RECE, si asta e o CORECTIE, nu gustul initial. Varianta de
+			# mai devreme era (0.92, 0.79, 0.63): R-B = 0.29, adica exact
+			# familia solului (CORAL_SAND are R-B = 0.16, in aceeasi
+			# directie). Consecinta, vazuta pe capturi de sofer la 0.56/0.60/
+			# 0.64 si numita independent de toti cei patru critici orbi ai
+			# rundei 2: o SINGURA nuanta de la cauciuc pana la cer. Muntele de
+			# la 250 m, faleza de la 80 m si drumul de sub roata ieseau toate
+			# acelasi tan, deci cadrul n-avea adancime — nu fiindca lipsea
+			# geometrie, ci fiindca nimic nu-si schimba culoarea cu distanta.
+			#
+			# Perspectiva aeriana reala merge RECE cu distanta: aerul
+			# imprastie albastru, deci ce e departe se apropie de culoarea
+			# CERULUI, nu de a pamantului. Ceata trebuie deci sa fie interpolata
+			# spre `sky_top` (#B9CCE0), nu spre `sky_horizon`.
+			#
+			# Cifra: (0.80, 0.79, 0.79) are R-B = 0.01, adica practic neutra,
+			# cu o urma de caldura ramasa pentru zori. Fata de vechea valoare,
+			# canalul albastru urca 0.63 -> 0.79 (+0.16, adica 41 de trepte pe
+			# 255) si cel rosu coboara 0.92 -> 0.80 (-31 de trepte). Amandoua
+			# peste pragul de vizibilitate de ~10/255 din lectiile rundei 1;
+			# o corectie de 4% n-ar fi facut nimic.
+			#
+			# NU se raceste si `sky_horizon`: zorii sunt calzi la orizont prin
+			# definitie, iar contrastul cald-jos / rece-departe e chiar ce da
+			# adancimea. Se raceste AERUL dintre camera si munte.
+			"fog": Color(0.80, 0.79, 0.79),
+			# Dealurile de fundal coboara odata cu ceata, si mai mult decat ea:
+			# ele sunt geometria care STA in ceata la 200-300 m, deci trebuie sa
+			# se citeasca deja ca "departe" inainte ca ceata sa le atinga.
+			# (0.82, 0.70, 0.56) era iar familia solului; (0.66, 0.68, 0.74) e
+			# rece si cu 0.16 mai INTUNECAT, ca silueta sa se desprinda de cerul
+			# palid in loc sa se topeasca in el.
+			"hill_color": Color(0.66, 0.68, 0.74),
 			# ZORI: soare CALD si SLAB. Energia coboara la 0.85 (desertul e la
 			# 0.8 cu expunere 1.30, amiaza insulara la 1.50) fiindca la 13 grade
 			# lumina directa cade razant — cu energie de amiaza, fetele insorite

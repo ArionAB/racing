@@ -145,6 +145,30 @@ const RAVINE_CORNICE_RIM: float = 6.0
 const RAVINE_VIADUCT_OVERHANG: float = 1.5
 const RAVINE_VIADUCT_RIM: float = 2.5
 
+## Cornisa TAIATA VERTICAL (scarp): acelasi gol, dar peretele cade drept.
+##
+## O cornisa obisnuita (0.5 + 6) e o buza urmata de o PANTA: masurat pe
+## geometria reala (ProbeBalloon, profilul falezei), terenul tine cota soselei
+## pana la 7 m de ax, coboara pe inca 6-7 m si abia la ~13 m se aseaza pe
+## podea. Pentru un drum de munte e exact bine — cazi de pe el.
+##
+## Nu si cand ceva trebuie sa URCE pe langa faleza. Un balon ancorat pe podeaua
+## vaii se ridica DREPT si intra in peretele care se apleaca peste el: masurat
+## pe colturile cosului de 4.8 m, se infunda dupa 1 m din cei 30 de cursa, si
+## ar ajunge sus la 9.6 m in afara asfaltului. Panta nu e un detaliu de stil
+## acolo, e ce face hazardul imposibil.
+##
+## Cu racordul strans la 1.2 m, peretele de sub buza cade drept: podeaua incepe
+## la ~2 m de marginea asfaltului, deci coloana de deasupra tarusului e libera
+## si cosul chiar ajunge in banda. Se cere PER RAPA (`custom_scarp_ravines`),
+## nu se schimba implicitul: celelalte cornise (Baikal, Stromboli, Chongqing)
+## sunt bune cu panta lor.
+const RAVINE_SCARP_RIM: float = 1.2
+## Racordul neted al taieturii verticale. `SMOOTH_RAVINE_K` (3 m) ar rotunji
+## inapoi chiar muchia pe care o cerem — la o taietura de 1.2 m, un racord de
+## 3 m e mai lat decat peretele.
+const SMOOTH_SCARP_K: float = 0.4
+
 # --- masivele declarate (ruda pe PLUS a rapelor) ---
 ## Banda de protectie a asfaltului: sub PEAK_ROAD_CLEAR de la marginea soselei
 ## muntele e stins complet, la PEAK_ROAD_FULL e la putere plina. NU e cosmetica:
@@ -189,12 +213,38 @@ var _cornices: Array[int] = []
 ## Care rape sunt VIADUCTE: terenul coboara si SUB sosea, nu doar langa ea.
 ## Vezi _carve_ravines.
 var _viaducts: Array[int] = []
+## Care CORNISE sunt taiate VERTICAL (indici de rapa). Vezi RAVINE_SCARP_RIM:
+## peretele cade drept, ca sa ramana liber culoarul pe care urca ceva de jos.
+var _scarps: Array[int] = []
 ## PODEAUA unei rape, cota ABSOLUTA (indice de rapa -> y): sapatura nu coboara
 ## sub ea. O cornisa cu podea e o faleza cu un chei la picior — terasa uscata
 ## dintre faleza si apa (Chongqing, D: Hongya Dong sta pe ea). Fara podea,
 ## rapa se masoara de la cota drumului si, pe o coborare de 30 m, capatul de
 ## jos iesea sub apa: lac direct sub buza. Vezi _carve_ravines.
 var _floors: Dictionary = {}
+## PANTA podelei, in metri de cadere la fiecare 100 m dincolo de buza (indice de
+## rapa -> metri). Zero = podea plata, comportamentul dinainte.
+##
+## O podea absoluta e o MASA: tine aceeasi cota de la buza pana la marginea
+## rapei. Masurat din ochiul soferului pe cornisa Cappadociei, exact asta se
+## vedea — o treapta mica dupa umar, apoi podea pana la orizont, si baloanele
+## pareau ca plutesc peste un ses, nu ca urca dintr-o vale. Ochiul citeste
+## adancimea din faptul ca terenul CONTINUA sa coboare, nu din cifra de la buza.
+## Cu panta, fundul se duce mai jos cu cat e mai departe, deci silueta coboara
+## monoton pana in ceata.
+var _floor_slopes: Dictionary = {}
+## LATIMEA unei rape, in metri de la buza (indice de rapa -> metri). Fara ea,
+## saparea se intinde lateral la infinit: `lat` satureaza la RAVINE_RIM metri
+## dincolo de buza si ramane 1 pana la marginea hartii, iar `_smin` nu poate
+## decat sa coboare. Consecinta masurata pe cornisa Cappadociei (ProbeValley):
+## fundul statea la 14 m pe 200 m de raza, o masa perfect plata, si CELE TREI
+## noduri de mal opus n-aveau niciun efect — rapa le stergea. O faleza fara mal
+## de dincolo citeste ca bordura de sant, fiindca ochiul n-are cu ce compara
+## adancimea: un canion are DOI pereti.
+##
+## Cu latimea data, saparea se stinge dupa atatia metri si terenul de dincolo
+## (varfuri, dune) redevine liber sa urce.
+var _ravine_widths: Dictionary = {}
 ## Cat de adanc cade campul DEPARTAT sub media soselei. 0 = uscat (desert,
 ## padure); > 0 = fund de mare (insula). Vezi ground_y.
 var _far_drop: float = 0.0
@@ -274,10 +324,17 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 		overpasses: Array[Vector2] = [],
 		floors: Array[Vector2] = [],
 		hollows: Array[Vector4] = [],
-		hollow_walls: PackedFloat32Array = PackedFloat32Array()) -> void:
+		hollow_walls: PackedFloat32Array = PackedFloat32Array(),
+		scarps: Array[int] = [],
+		ravine_widths: Array[Vector2] = [],
+		floor_slopes: Array[Vector2] = []) -> void:
 	_baked = baked
 	for fl in floors:
 		_floors[int(fl.x)] = fl.y
+	for rw in ravine_widths:
+		_ravine_widths[int(rw.x)] = rw.y
+	for fs in floor_slopes:
+		_floor_slopes[int(fs.x)] = fs.y
 	_dists = dists
 	_half_width = half_width
 	_widths = widths
@@ -294,6 +351,7 @@ func _init(baked: PackedVector3Array, dists: PackedFloat32Array,
 	_hollow_walls = hollow_walls
 	_cornices = cornices
 	_viaducts = viaducts
+	_scarps = scarps
 	_total_len = dists[baked.size()] if dists.size() > baked.size() else 0.0
 	_bake_overpass_mask(overpasses)
 	_loop_poly = PackedVector2Array()
@@ -893,6 +951,12 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		var cornice := _cornices.has(ri)
 		var inner := RAVINE_CORNICE_INNER if cornice else RAVINE_INNER
 		var rim := RAVINE_CORNICE_RIM if cornice else RAVINE_RIM
+		# Taietura verticala: acelasi inner (buza lipita de asfalt), dar
+		# racordul strans, ca peretele sa cada drept. Vezi RAVINE_SCARP_RIM —
+		# se cere doar unde ceva trebuie sa urce pe langa faleza.
+		var scarp := _scarps.has(ri)
+		if scarp:
+			rim = RAVINE_SCARP_RIM
 		if _viaducts.has(ri):
 			# VIADUCT: golul e si sub asfalt. O rapa obisnuita lasa terenul de
 			# sub sosea la cota ei (lacatul de langa drum), deci o cornisa pe
@@ -906,15 +970,34 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 			rim = RAVINE_VIADUCT_RIM
 		var lat := smoothstep(0.0, 1.0,
 			clampf((dist - half_width_at(near_i) - inner) / rim, 0.0, 1.0))
+		if _ravine_widths.has(ri):
+			# MALUL DE DINCOLO: saparea se stinge dupa latimea ceruta, ca
+			# terenul de peste vale sa poata urca inapoi. Racordul se ia egal
+			# cu latimea peretelui (`rim`), ca fundul sa nu se termine cu o
+			# treapta — un mal care sare vertical din fund arata ca un zid de
+			# piscina, nu ca versantul opus.
+			var w := float(_ravine_widths[ri])
+			var edge := half_width_at(near_i) + inner + w
+			lat *= 1.0 - smoothstep(0.0, 1.0,
+				clampf((dist - edge) / maxf(rim, 1.0), 0.0, 1.0))
 		var target := road_level - r.z * along * lat
 		if _floors.has(ri):
 			# Podeaua e absoluta, nu relativa la drum: cheiul sta la aceeasi
 			# cota pe toata lungimea cornisei, oricat coboara soseaua.
-			target = maxf(target, float(_floors[ri]))
+			var floor_y := float(_floors[ri])
+			if _floor_slopes.has(ri):
+				# ...dar poate sa CADA cu departarea de buza. Vezi
+				# _floor_slopes: o podea plata citeste ca masa, si atunci
+				# adancimea de la buza nu se mai vede din ochiul soferului.
+				var out := maxf(dist - half_width_at(near_i) - inner, 0.0)
+				floor_y -= float(_floor_slopes[ri]) * out * 0.01
+			target = maxf(target, floor_y)
 		# min: rapa SAPA, nu ridica. Altfel o rapa pe o portiune joasa ar
 		# construi un dig in loc de o groapa. Neted: buza rapei era o cusatura
 		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).
-		y = _smin(y, target, SMOOTH_RAVINE_K)
+		# Racordul: la o taietura de 1.2 m, cei 3 m impliciti ar rotunji inapoi
+		# chiar muchia ceruta (racordul ar fi mai lat decat peretele).
+		y = _smin(y, target, SMOOTH_SCARP_K if scarp else SMOOTH_RAVINE_K)
 	return y
 
 

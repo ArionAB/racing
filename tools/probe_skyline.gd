@@ -33,6 +33,25 @@ func _ready() -> void:
 				row0 += "  +%.2f:    gol" % df
 		print(row0)
 	print("")
+	print("=== MUCHIA: primii 20 m in afara, din 2 in 2 (aici se ascund politele) ===")
+	for f2 in [0.20, 0.28, 0.32]:
+		var i2 := int(f2 * n)
+		var p2: Vector3 = r.baked[i2]
+		var a2: Vector3 = r.baked[(i2 + 4) % n]
+		var d2: Vector3 = (a2 - p2).normalized()
+		var s2: Vector3 = d2.cross(Vector3.UP).normalized()
+		var row2 := "frac %.2f:" % f2
+		for dd in [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0]:
+			var q2: Vector3 = p2 + s2 * dd
+			var ry2 := PhysicsRayQueryParameters3D.create(
+				Vector3(q2.x, p2.y + 200.0, q2.z), Vector3(q2.x, p2.y - 300.0, q2.z))
+			var h2 := space.intersect_ray(ry2)
+			if h2:
+				row2 += " %.0fm:%.1f" % [dd, float(h2["position"].y) - p2.y]
+			else:
+				row2 += " %.0fm:gol" % dd
+		print(row2)
+	print("")
 	print("frac | cota drum | teren la +15m in afara | +40m | +80m | +150m")
 	for f in [0.20, 0.24, 0.28, 0.32, 0.36]:
 		var i := int(f * n)

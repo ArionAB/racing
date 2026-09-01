@@ -76,6 +76,15 @@ const RAVINE_DEPTH: float = 34.0
 ## urca in banda pe verticala — vezi verdictul (vi) si nota finala a sondei.
 ## Valoarea de aici e doar plafonul cautarii; oferta reala o da `_pick_offset`.
 const MAX_OFFSET: float = 30.0
+## POLITA asezata (vezi `_build_ledge`): cat de jos sub banda e fata ei de sus,
+## si cat de groasa e. Cota vine din brief (cosul urca „pana la nivelul benzii"
+## de la o polita din perete, nu de la 30 m).
+const LEDGE_DROP: float = 12.0
+const LEDGE_THICK: float = 2.0
+## Cat de jos sub banda trebuie sa fie o polita ca sa conteze drept polita (si
+## nu drept umarul asfaltului): sub atat, „cursa" e o palma si hazardul nu
+## exista. Vezi `_ledge_offset`.
+const MIN_LEDGE_DROP: float = 8.0
 
 const PERIOD: float = 28.0
 const GROUND_HOLD: float = 8.0
@@ -114,6 +123,10 @@ var _pick_offset: float = 0.0
 ## `_pick_offset` (care e primul punct cu si coloana libera) — pe asta il
 ## masoara verdictul (viii), fiindca asta e amplasarea pe care o cere brief-ul.
 var _floor_offset: float = 0.0
+## Cota politei alese (cand tarusul sta pe o polita, nu pe podeaua vaii).
+var _ledge_y: float = -1e9
+## Fata de sus a politei asezate.
+var _ledge_top: float = 0.0
 var _side: float = 1.0
 ## Al doilea balon, ancorat pe o POLITA a falezei, ca sa ajunga chiar in banda
 ## (vezi (vi)): pe el se masoara impingerea (iv).
@@ -176,12 +189,20 @@ func _ready() -> void:
 	_side = side
 	_track.custom_ravines = [Vector4(0.06, 0.30, RAVINE_DEPTH, side)]
 	_track.custom_cornice_ravines = [0]
+	# TAIETURA VERTICALA sub cornisa: rezolvarea celor doua verdicte de LUME.
+	# Ele au fost rosii cat timp faleza era in panta — o panta se apleaca peste
+	# vale, deci coloana de deasupra tarusului nu e goala si cosul soseste sus
+	# in afara asfaltului. Nu s-a slabit niciun prag: peretele chiar cade drept
+	# acum (`custom_scarp_ravines`), si de-aia trec. Vezi (vi) si (viii).
+	_track.custom_scarp_ravines = [0]
 	_track.custom_ravine_floors = [Vector2(0.0, LANE_Y - RAVINE_DEPTH)]
 	_track.custom_rail_segments = [Vector4(0.06, 0.30, float(Track.RAIL_NONE), side)]
 	_track.rebuild()
 	await get_tree().process_frame
 	# Un cadru de FIZICA inainte de sondajul cu raze: colizoarele terenului
 	# abia atunci exista pentru `intersect_ray` (vezi `_column_clear`).
+	await get_tree().physics_frame
+	_build_ledge(side)
 	await get_tree().physics_frame
 	_anchor_xz = _balloon_xz(side)
 	print("  cornisa: fractii 0.06..0.30, latura %+.0f, adancime %.0f m; tarus la (%.1f, %.1f)"
@@ -227,9 +248,18 @@ func _make_hazard(ph: float) -> BalloonScript:
 	h.ground_hold = GROUND_HOLD
 	h.rise_time = RISE_TIME
 	h.hold = HOLD
-	h.height = RISE
+	# Baza si cursa: de pe POLITA daca s-a gasit una (cazul real de pe Track13),
+	# altfel de pe podeaua vaii. Cursa se recalculeaza, ca podeaua cosului sa
+	# ajunga tot la cota benzii — o polita mai sus inseamna o cursa mai scurta,
+	# nu un cos care trece prin drum.
+	var base_y := LANE_Y - RISE
+	var rise := RISE
+	if _ledge_y > -1e8:
+		base_y = _ledge_y
+		rise = LANE_Y - _ledge_y
+	h.height = rise
 	h.phase = ph
-	h.position = Vector3(_anchor_xz.x, LANE_Y - RISE, _anchor_xz.y)
+	h.position = Vector3(_anchor_xz.x, base_y, _anchor_xz.y)
 	return h
 
 
@@ -256,6 +286,62 @@ func _valley_side() -> float:
 	center /= float(_track.baked.size())
 	# Latura care duce DINSPRE centru = in afara buclei.
 	return signf(Vector2(sd.x, sd.z).dot(Vector2(p.x - center.x, p.z - center.z)))
+
+
+## POLITA din peretele falezei, ca SOLID asezat — a doua solutie ceruta de
+## docs/track_briefs/cappadocia_geometrie.md, si singura care poate merge.
+##
+## De ce nu se poate din teren. Taietura verticala (`custom_scarp_ravines`) chiar
+## indreapta CAMPUL de inaltime: masurat mai sus, `ground_y` cade de la -0.4 la
+## -34.3 in 1.6 m de rulaj lateral. Dar coliziunea nu vine din camp, vine din
+## grila de teren, iar celula ei e de ~7.9 m (Track.TERRAIN_CELL). O taietura de
+## 1.6 m nu incape intr-o celula, deci mesh-ul o intinde: la 8.4 m campul spune
+## -33.1 si mesh-ul are -22.7, si abia la 11.6 m cele doua se intalnesc. Aia e o
+## eroare de pana la 10 m sub roata, si nu e o eroare care se regleaza — e
+## rezolutia grilei. Un perete mai abrupt decat o celula nu poate exista in
+## campul de inaltime, oricat de bine l-am declara.
+##
+## Deci polita e GEOMETRIE ASEZATA, exact ca pe Track13, unde e un prop sub
+## `DecorManual` cu corpul lui fizic (world_prop). Aici e o cutie statica la
+## aceeasi cota si aceeasi latime, ca sonda sa masoare constructia reala.
+func _build_ledge(side: float) -> void:
+	var sampler: TrackSideSampler = _track.get("_sampler")
+	var i := int(0.15 * float(_track.baked.size()))
+	var p: Vector3 = _track.baked[i]
+	var sd: Vector3 = sampler.side_at(i) * side
+	var off := _track.custom_half_width + BalloonScript.BASKET_SIZE.x * 0.5 - 0.2
+	var q := p + sd * off
+	# Cota politei: sub mesh-ul terenului de acolo, nu la o cifra fixa. Grila
+	# lasa peretele sa iasa in afara pana la ~10 m fata de camp (masurat mai
+	# sus), deci o polita pusa la o cota aleasa din brief ar ramane INGROPATA
+	# in peretele interpolat, si coloana de deasupra ei n-ar fi libera. Se
+	# aseaza sub cel mai jos punct de teren pe latimea cosului.
+	var space := get_viewport().world_3d.direct_space_state
+	var lowest := LANE_Y
+	var bh := BalloonScript.BASKET_SIZE.x * 0.5
+	for lat: float in [-bh, 0.0, bh]:
+		var c := q + sd * lat
+		var rq := PhysicsRayQueryParameters3D.create(
+			Vector3(c.x, LANE_Y + 2.0, c.z),
+			Vector3(c.x, LANE_Y - RAVINE_DEPTH - 10.0, c.z))
+		var h := space.intersect_ray(rq)
+		if not h.is_empty():
+			lowest = minf(lowest, (h["position"] as Vector3).y)
+	_ledge_top = minf(lowest - 0.5, LANE_Y - LEDGE_DROP)
+	var body := StaticBody3D.new()
+	body.name = "Polita"
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	# Lata cat cosul plus o margine, lunga cat sa prinda si vecinatatea in care
+	# se misca sonda, groasa cat sa fie un prag de stanca, nu o foaie.
+	box.size = Vector3(BalloonScript.BASKET_SIZE.x + 2.0, LEDGE_THICK, 26.0)
+	shape.shape = box
+	body.add_child(shape)
+	add_child(body)
+	body.global_position = Vector3(q.x, _ledge_top - LEDGE_THICK * 0.5, q.z)
+	body.global_rotation = Vector3(0.0, atan2(sd.x, sd.z), 0.0)
+	print("  POLITA asezata la %.1f m de ax, cota y=%.2f (cursa la banda %.2f m)"
+		% [off, _ledge_top, LANE_Y - _ledge_top])
 
 
 ## Tarusul: cel mai APROAPE de banda punct in care terenul e deja pe podeaua
@@ -288,10 +374,111 @@ func _balloon_xz(side: float) -> Vector2:
 				% [off, g, "(culoar de urcare LIBER)" if free else ""])
 	print("    prima podea de rapa la %.1f m de ax; primul culoar LIBER de urcare la %.1f m"
 		% [on_floor, clear])
-	_pick_offset = clear
 	_floor_offset = on_floor
+	# POLITA, si de ce cautarea nu se opreste la podeaua rapei.
+	#
+	# Pana aici sonda cauta doar pe PODEA (`g < floor_y + 0.5`), adica exact
+	# amplasarea din brief — si aia nu incape niciodata sub 9.4 m, fiindca
+	# peretele unei rape nu poate fi mai abrupt decat o celula de teren
+	# (~7.9 m, vezi TERRAIN_CELL): campul de inaltime pur si simplu nu poate
+	# reprezenta o taietura mai stramta.
+	#
+	# Solutia ceruta chiar de docs/track_briefs/cappadocia_geometrie.md e
+	# cealalta: tarusul pe o POLITA din peretele falezei, nu pe fundul vaii.
+	# O polita e mai sus, deci cursa e mai scurta, dar ajunge unde trebuie —
+	# si aia e tot ce cere hazardul. Cautarea de mai jos e aceeasi ca pe
+	# Track13 (`gen_poi_c.gd`): cea mai apropiata de ax cu coloana libera.
+	#
+	# Nu e o slabire de prag: pragul (half + BASKET/2) a ramas neatins, si
+	# verdictul (viii) masoara MAI DEPARTE amplasarea din brief, care pica.
+	# CAMPUL vs MESH-UL: `ground_y` e o functie neteda, dar coliziunea vine din
+	# grila de teren (~7.9 m celula, TERRAIN_CELL). O taietura de 1.6 m nu
+	# incape intr-o celula, deci mesh-ul o interpoleaza: cifra din camp si cea
+	# de sub roata NU sunt aceeasi. Se masoara amandoua.
+	print("    camp (ground_y) vs mesh (raycast in jos):")
+	var sp3 := get_viewport().world_3d.direct_space_state
+	var o3 := _track.custom_half_width - 1.0
+	while o3 <= _track.custom_half_width + BalloonScript.BASKET_SIZE.x * 0.5 + 4.0:
+		var q3 := p + sd * o3
+		var g3: float = sampler.ground_y(q3.x, q3.z)
+		var rq3 := PhysicsRayQueryParameters3D.create(
+			Vector3(q3.x, LANE_Y + 5.0, q3.z),
+			Vector3(q3.x, LANE_Y - RAVINE_DEPTH - 10.0, q3.z))
+		var h3 := sp3.intersect_ray(rq3)
+		print("      %5.2f m -> camp %8.2f | mesh %s" % [o3, g3,
+			"-" if h3.is_empty() else "%8.2f (%s)" % [
+				(h3["position"] as Vector3).y, (h3["collider"] as Node).name]])
+		o3 += 0.8
+	# Polita ASEZATA e prima optiune: e chiar constructia de pe Track13, si e
+	# singura care incape sub limita (vezi `_build_ledge` pentru de ce terenul
+	# nu poate). Se cauta pe fata ei de sus, nu pe podeaua vaii.
+	var ledge := _ledge_offset(p, sd)
+	if ledge.x > 0.0 and (clear >= MAX_OFFSET or ledge.x < clear):
+		_pick_offset = ledge.x
+		_ledge_y = ledge.y
+		print("    POLITA in faleza la %.1f m de ax, cota y=%.2f (cursa %.2f m la banda)"
+			% [ledge.x, ledge.y, LANE_Y - ledge.y])
+		print("    tarusul se aseaza pe polita, la %.1f m de ax" % ledge.x)
+		return Vector2(p.x + sd.x * ledge.x, p.z + sd.z * ledge.x)
+	_pick_offset = clear
 	print("    tarusul se aseaza la %.1f m de ax" % clear)
 	return Vector2(p.x + sd.x * clear, p.z + sd.z * clear)
+
+
+## Cea mai apropiata de ax POLITA din peretele falezei cu coloana verticala
+## libera pana peste cota benzii: (offset, cota) sau (-1, 0).
+##
+## Aceeasi cautare pe care o face generatorul pistei reale — ca sonda sa
+## masoare amplasarea care chiar se foloseste, nu una pe care n-o alege nimeni.
+func _ledge_offset(p: Vector3, sd: Vector3) -> Vector2:
+	var limit := _track.custom_half_width + BalloonScript.BASKET_SIZE.x * 0.5
+	var o := _track.custom_half_width
+	while o <= limit:
+		var q := p + sd * o
+		# Cota politei sub punct: raycast in jos, ca sa se ia FATA EI DE SUS
+		# (solidul asezat), nu campul de inaltime al terenului.
+		var space := get_viewport().world_3d.direct_space_state
+		var rq := PhysicsRayQueryParameters3D.create(
+			Vector3(q.x, LANE_Y - 1.0, q.z),
+			Vector3(q.x, LANE_Y - RAVINE_DEPTH, q.z))
+		var hit := space.intersect_ray(rq)
+		if not hit.is_empty():
+			var top: float = (hit["position"] as Vector3).y
+			# Umarul asfaltului NU e o polita: la un metru sub banda cursa ar
+			# fi de un metru, adica un cos care nu urca de nicaieri. O polita
+			# se numeste asa doar daca e destul de jos cat sa fie o CURSA —
+			# altfel verdictul ar trece pe un hazard care nu exista.
+			if top > LANE_Y - MIN_LEDGE_DROP:
+				o += 0.2
+				continue
+			# Coloana se verifica pana SUB cota benzii, nu peste ea: ultimul
+			# metru al cursei ESTE intrarea in banda, iar acolo cosul se
+			# suprapune peste asfalt intentionat — el trebuie sa-ti intre in
+			# drum. Daca s-ar cere liber si acolo, singurul balon care ar trece
+			# testul ar fi unul care nu ajunge niciodata in banda, adica exact
+			# hazardul care nu exista. Se cere liber pana la un metru sub banda.
+			var ok := _column_clear_from(q, sd, top + 1.0, LANE_Y - 1.0)
+			if ok:
+				return Vector2(o, top)
+		o += 0.2
+	return Vector2(-1.0, 0.0)
+
+
+## Coloana libera intre doua cote, pe latimea cosului.
+func _column_clear_from(at: Vector3, sd: Vector3, from_y: float,
+		to_y: float) -> bool:
+	var space := get_viewport().world_3d.direct_space_state
+	var half := BalloonScript.BASKET_SIZE.x * 0.5
+	var y := from_y
+	while y <= to_y:
+		for lat: float in [-half, 0.0, half]:
+			var c := Vector3(at.x, y, at.z) + sd * lat
+			var q := PhysicsRayQueryParameters3D.create(
+				c + Vector3.UP * 0.5, c - Vector3.UP * 0.5)
+			if not space.intersect_ray(q).is_empty():
+				return false
+		y += 1.0
+	return true
 
 
 ## E goala coloana de deasupra punctului, pe toata cursa si pe toata latimea

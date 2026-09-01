@@ -2722,6 +2722,17 @@ func _ravines() -> Array[Vector4]:
 func _cornice_ravines() -> Array[int]:
 	return []
 
+## Care CORNISE sunt taiate VERTICAL (indici in [method _ravines]): peretele
+## de sub buza cade drept, in loc sa se lase in panta.
+##
+## Se cere doar acolo unde ceva trebuie sa URCE pe langa faleza. Panta unei
+## cornise obisnuite se apleaca peste gol, iar un balon ancorat pe podeaua vaii
+## urca DREPT si intra in ea (masurat in ProbeBalloon: se infunda dupa 1 m din
+## cei 30 de cursa, si ar ajunge sus la 9.6 m in afara asfaltului). Vezi
+## TrackSideSampler.RAVINE_SCARP_RIM.
+func _scarp_ravines() -> Array[int]:
+	return []
+
 ## Care dintre rape sunt VIADUCTE (indici in [method _ravines]): golul e si
 ## SUB sosea, tablierul ramane in aer pe fusta lui, iar dedesubt se aseaza
 ## pilele si arcadele din kit (DecorManual). O cornisa pe ambele parti fara
@@ -2736,6 +2747,20 @@ func _viaduct_ravines() -> Array[int]:
 ## adancimea se masoara de la drum, si un drum care coboara 30 m isi duce
 ## rapa sub apa la capatul de jos. Vezi TrackSideSampler._floors.
 func _ravine_floors() -> Array[Vector2]:
+	return []
+
+## LATIMEA unei rape: (indice in [method _ravines], metri de la buza). Fara ea
+## rapa sapa lateral pana la marginea hartii si niciun relief de dincolo nu mai
+## poate urca — vezi TrackSideSampler._ravine_widths. Se cere acolo unde valea
+## trebuie sa aiba un MAL OPUS vizibil, nu un fund infinit.
+func _ravine_widths() -> Array[Vector2]:
+	return []
+
+## PANTA podelei unei rape: (indice in [method _ravines], metri de cadere la
+## fiecare 100 m dincolo de buza). Fara ea podeaua e o masa plata si, din ochiul
+## soferului, valea citeste ca o treapta urmata de ses — vezi
+## TrackSideSampler._floor_slopes.
+func _ravine_floor_slopes() -> Array[Vector2]:
 	return []
 
 ## PASAJE PE PILONI: intervale de tur (fractii, x..y, cu wrap peste 1.0) in care
@@ -2815,6 +2840,8 @@ func _holds_declarations(node: Node) -> bool:
 	if node is TerrainPeak or node is TerrainHollow:
 		return true
 	if node is TrackChannel or node is HazardMarker:
+		return true
+	if node is CliffFace:
 		return true
 	for child in node.get_children():
 		if _holds_declarations(child):
@@ -3191,7 +3218,8 @@ func rebuild() -> void:
 		_lagoon_poly(), lagoon_depth, _channels, _peak_specs() + _node_peaks(),
 		_cornice_ravines(), _baked_widths(), _branch_carve_points(),
 		_viaduct_ravines(), _overpass_ranges(), _ravine_floors(),
-		hollows, hollow_walls)
+		hollows, hollow_walls, _scarp_ravines(), _ravine_widths(),
+		_ravine_floor_slopes())
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",
@@ -7511,6 +7539,13 @@ func _build_road() -> void:
 	var road_override: Material = null
 	if road_surface == "snow":
 		road_override = _snow_road_material(road_color, micro, macro, tile)
+	else:
+		# Restul carosabilelor primesc shaderul cu stingere: aceeasi imagine
+		# aproape, dar granulatia se duce spre culoarea de baza cu distanta.
+		# Vezi road_detail_fade.gdshader. Ca si la zapada, INLOCUIESTE
+		# materialul care s-ar fi construit oricum, deci garda de materiale nu
+		# se misca.
+		road_override = _road_fade_material(road_color, micro, macro, rough, spec)
 	_add_mesh_with_collision(top.commit(), road_color,
 		_tex(micro), rough, spec,
 		BaseMaterial3D.CULL_BACK, col.commit(), _tex(macro), true,
@@ -8991,6 +9026,36 @@ func _build_flyoff_net(idx: int) -> void:
 ## `_flat_material` e cache-uit pe (culoare, texturi, finisaj), iar cererea de
 ## aici trece exact aceleasi valori ca soseaua: se intoarce ACELASI obiect.
 ## Garda numara materiale, si numarul nu se misca.
+## Sablonul de material al carosabilului cu stingere; se duplica per pista.
+var _road_fade_mat: ShaderMaterial
+
+
+## Carosabilul cu granulatie care se stinge cu distanta. Vezi
+## road_detail_fade.gdshader pentru de ce nu se poate cere din StandardMaterial3D.
+func _road_fade_material(color: Color, micro: String, macro: String,
+		rough: float, spec: float) -> ShaderMaterial:
+	if _road_fade_mat == null:
+		_road_fade_mat = ShaderMaterial.new()
+		_road_fade_mat.shader = load(
+			"res://assets/shaders/road_detail_fade.gdshader")
+	var rm := _road_fade_mat.duplicate() as ShaderMaterial
+	# Aceeasi impartire la media macro ca in `road_material`: cele doua straturi
+	# se inmultesc, deci culoarea de baza trebuie ridicata ca produsul sa cada
+	# pe tenta ceruta.
+	var macro_mean := ASPHALT_MACRO_MEAN
+	if road_surface == "snow":
+		macro_mean = SNOW_MACRO_MEAN
+	elif road_is_loose():
+		macro_mean = SAND_MACRO_MEAN
+	rm.set_shader_parameter("base_color", Color(color.r / macro_mean,
+		color.g / macro_mean, color.b / macro_mean))
+	rm.set_shader_parameter("micro_tex", _tex(micro))
+	rm.set_shader_parameter("macro_tex", _tex(macro))
+	rm.set_shader_parameter("roughness_v", rough)
+	rm.set_shader_parameter("specular_v", spec)
+	return rm
+
+
 func road_material() -> Material:
 	var base := ROAD_COLOR
 	var macro_mean := ASPHALT_MACRO_MEAN
@@ -9080,6 +9145,22 @@ func _flat_material(color: Color, texture: Texture2D = null,
 		mat.detail_albedo = macro_texture
 		mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 		mat.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
+	# MIPMAP-uri. Fara linia asta materialul ramane pe filtrul implicit al lui
+	# Godot (LINEAR, FARA mipmaps), si atunci textura se esantioneaza la mip 0
+	# la orice distanta: granulatia isi pastreaza contrastul pana la orizont.
+	#
+	# Asta era, masurat, unul dintre cele doua semne cele mai tari ca imaginea e
+	# decor de joc — critica oarba a numit exact simptomul, „pestritul nu se
+	# atenueaza cu distanta". Masurat pe cadrul judecat, deviatia de luminanta pe
+	# fasii de carosabil: 14.1 aproape si 16.4 departe, adica nu scade deloc, ba
+	# creste (aliasing pe pixeli tot mai mici). Pe o suprafata reala contrastul
+	# de granulatie trebuie sa TINDA LA ZERO cu distanta.
+	#
+	# Fisierele .import aveau deja `mipmaps/generate=true`: mipmap-urile existau
+	# si nu erau folosite niciodata. Singurul loc unde filtrul era cerut explicit
+	# era soseaua de gheata (`_ice_road_material`), deci exact o suprafata din
+	# toata pista se vedea corect.
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	mat.roughness = roughness
 	mat.metallic_specular = specular
 	# FILTRARE ANIZOTROPA pe suprafetele mari privite RAZANT (runda 31).
@@ -9759,6 +9840,16 @@ func _build_world_decor() -> void:
 		_world_seed(), _cliff_clearings(), _gorge_ranges())
 	add_child(cliffs)
 	_decor_roots.append(cliffs)
+	# FALEZELE DECLARATE ca noduri [CliffFace]: geometrie reala, nu versant de
+	# camp. Grila de teren are 7.92 m de celula, deci o faleza ceruta campului
+	# iese panta oricat de vertical ar fi cerutul (masurat pe cornisa Cappadociei:
+	# campul cade 25 m in 2 m, mesh-ul intinde caderea pe 6 m si greseste cu
+	# 13.8 m). Se construiesc DUPA teren, fiindca talpa lor se coase pe
+	# suprafata LUI.
+	var faces := CliffFace.build_all(self, _sampler,
+		Callable(self, "_terrain_mesh_y"))
+	add_child(faces)
+	_decor_roots.append(faces)
 	# Decorul primeste amprentele falezelor deja asezate. De asta ordinea celor
 	# doua apeluri nu mai e doar o conventie: falezele TREBUIE construite intai.
 	# Nuanta de roca a lumii, INAINTE de build: se aplica pe fiecare stanca la

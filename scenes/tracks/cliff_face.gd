@@ -1,0 +1,1449 @@
+@tool
+class_name CliffFace
+extends Marker3D
+## FALEZA ca GEOMETRIE REALA, nu ca versant de camp de inaltime.
+##
+## Verdictul care a cerut nodul asta (critica oarba, runda 2 pe POI C): „nu e o
+## problema de culoare, e ca NU EXISTA nicio fata de stanca — partea dreapta a
+## cadrului e un camp forfecat cu lespezi sprijinite de el". Masurat, avea
+## dreptate, si cauza e structurala:
+##
+##   grila de teren are celula de 7.92 m ([constant Track.TERRAIN_CELL]).
+##
+## O rapa ceruta VERTICALA chiar iese verticala IN CAMP — masurat pe Track13 la
+## fractia 0.28, `ground_y` cade de la 38.80 la 13.70 in 2 m de rulaj lateral.
+## Dar suprafata care se RANDEAZA si de care se lovesc rotile e mesh-ul, iar el
+## poate doar sa interpoleze liniar intre noduri aflate la 7.92 m unul de altul:
+## acolo unde campul spune 13.70, mesh-ul spune 27.51 — o eroare de 13.8 m, si
+## un perete de 25 m intins pe o panta de 6 m. De aceea capturile rundei 1
+## aratau o dună bej: nu se ceruse gresit, pur si simplu campul nu are rezolutie
+## de faleza si nici nu poate capata (o celula mai mica inseamna toata harta mai
+## deasa, adica alt buget).
+##
+## Concluzia care da forma nodului: o faleza nu se poate CERE campului, trebuie
+## CONSTRUITA. Nodul asta genereaza o panza de triunghiuri lipita de buza rapei,
+## cu benzi orizontale de culoare din atlas (Valea Rosie), cu polite reale, si
+## isi coase talpa in teren ca sa nu ramana fanta.
+##
+## [b]De ce nu piese de kit.[/b] `cliff_band_module.glb` exista si a fost
+## incercat in runda 1: lespezi de 15 m sprijinite de versant. Doua motive au
+## picat masurat — (1) versantul se APLEACA peste ele, deci fata rosie ramane in
+## spatele tufului crem si din masina vezi tot crem; (2) o piesa dreapta pe o
+## buza care se curbeaza lasa fisuri sau intra in drum. Panza generata urmeaza
+## curba benzii punct cu punct, deci nici nu se ingroapa, nici nu iese in sosea.
+##
+## [b]Materiale: zero in plus.[/b] Toata faleza e UN mesh cu
+## [method Palette.world_material] — materialul partajat al lumii. Benzile sunt
+## UV-uri pe sloturi diferite din acelasi atlas, plus vertex color pentru AO.
+## Bugetul pistei nu se misca cu o unitate.
+##
+## Ca [TerrainPeak] / [TerrainHollow], nodul e o DECLARATIE editabila: sta in
+## .tscn, il tragi in viewport, apesi Regenerate pe radacina pistei.
+
+## Fractia de traseu la care incepe faleza (0..1).
+@export_range(0.0, 1.0, 0.001) var frac_start: float = 0.185
+## Fractia la care se termina.
+@export_range(0.0, 1.0, 0.001) var frac_end: float = 0.38
+## Latura pe care cade golul: +1 dreapta (sensul de mers), -1 stanga.
+@export_range(-1.0, 1.0, 2.0) var side: float = 1.0
+
+## Cat de departe de marginea asfaltului incepe BUZA falezei.
+##
+## Mic intentionat: POI C e „cornisa fara parapet", deci buza trebuie sa fie la
+## marginea benzii. Sub 0.5 m panza ar musca din umarul drumului.
+@export var lip_offset_m: float = 0.2
+## Cati metri coboara fata, de la buza in jos.
+@export var depth_m: float = 30.0
+## Cat de departe se cauta fundul vaii, de la marginea asfaltului.
+const FLOOR_SEARCH_M: float = 140.0
+## Cat spatiu ramane intre carosabil si orice masa de faleza construita prin
+## offset lateral. Vezi `_on_any_road`: pe o serpentina, lateralul unei fractii
+## cade peste soseaua alteia. 9 m = jumatatea de banda cea mai lata (9.0) plus
+## marja de camera.
+const ROAD_CLEAR_M: float = 9.0
+## Cat din tur se considera "tronsonul local" si se sare la testul de mai sus.
+## 4% dintr-un tur de ~2.6 km inseamna ~100 m in fata si in spate: destul cat un
+## pinten sa se lipeasca de propria lui curba, prea putin ca sa mascheze bratul
+## opus al unei serpentine.
+const NEAR_WINDOW_FRAC: float = 0.04
+## Cat poate depasi caderea reala `depth_m`, ca panza sa ajunga la fund pe o
+## vale mai adanca decat cea declarata fara sa fie nevoie de doua reglaje.
+const DEPTH_SLACK: float = 1.8
+## Pasul de esantionare pe lungimea benzii. 4 m tine curba fara sa umple grila:
+## pe 200 m de cornisa ies ~50 de coloane.
+@export var step_m: float = 4.0
+## Cate benzi orizontale de culoare are fata.
+@export var bands: int = 9
+## Cat iese in afara peretele, ca fata sa nu fie un plan perfect. Fiecare banda
+## primeste retragerea ei, deci stratele ies in relief ca la o roca sedimentara.
+@export var band_relief_m: float = 0.9
+## Stratele la cote ABSOLUTE (orizontale), nu proportionale cu caderea locala.
+@export var level_bands: bool = false
+## Cota de referinta a grilei de strate, si grosimea unui strat.
+@export var band_datum_y: float = 0.0
+@export var band_span_m: float = 4.0
+## Evazarea fetei: metri de rulaj lateral pentru fiecare METRU de cadere.
+##
+## Zero ar insemna perete perfect vertical — si perfect ascuns de marginea
+## drumului din camera de joc, care e chiar modul in care s-a pierdut runda 2.
+##
+## Valoarea nu e de gust, e citita din ProbeReach: frontiera dintre „se vede" si
+## „nu se vede", masurata cu raze din ochiul real, cere ~4 m de rulaj la fiecare
+## ~6 m de adancime, adica 0.66. Se merge putin peste, la 0.72, ca banda sa fie
+## vizibila cu marja si pe fractiile unde drumul se inclina spre vale.
+@export var batter_m: float = 0.72
+
+## TALUZ: cati metri de moloz se aduna la piciorul peretelui, masurat pe
+## orizontala de la talpa fetei spre exterior. Zero = fara poale (comportamentul
+## dinainte).
+##
+## Verdictul rundei 9, si e o observatie despre FIZICA, nu despre decor: „rock
+## that eroded leaves the material it shed lying at its foot. Ours sheds
+## nothing, so it never eroded, so it isn't rock — it's a flat." Un perete care
+## intalneste podeaua intr-o imbinare curata cap-la-cap se citeste ca o piesa de
+## decor pusa pe masa, fiindca nimic din natura nu se termina asa: ce cade din
+## fata se aduna la baza intr-o poala.
+##
+## Poala e si CHEIE DE SCARA — o panta la unghiul de taluz natural (~34 grade)
+## are aceeasi forma la orice marime, dar latimea ei fata de perete spune
+## ochiului cat de inalt e peretele.
+@export var talus_m: float = 0.0
+## Cat de sus urca poala pe fata peretelui, ca metrii de moloz de mai sus.
+## Raportul dintre cele doua da UNGHIUL taluzului: la 0.62 x latime ies ~32
+## grade, adica exact plaja in care se opreste moloz uscat.
+@export var talus_rise_ratio: float = 0.62
+## Cate randuri are poala. Doua ajung pentru silueta si tin grila jos; al
+## treilea se simte doar in prim-plan.
+@export var talus_rows: int = 2
+## Slotul de paleta al molozului. Implicit -1 = ia slotul ultimei benzi, ca
+## poala sa fie din ACEEASI roca din care s-a desprins.
+@export var talus_slot: int = -1
+## Cat de adanc intra talpa panzei in teren, ca sa nu ramana fanta la contact.
+##
+## Grila de teren are 7.92 m, deci intre doi vertecsi ai ei suprafata reala se
+## poate abate cu metri de la camp (masurat pe cornisa: pana la 13.8 m). Talpa
+## se coase pe SUPRAFATA mesh-ului, nu pe camp, si mai coboara atat pe deasupra.
+@export var foot_bite_m: float = 2.5
+
+## Sloturile de paleta ale benzilor, de SUS in jos.
+##
+## Nu sunt alese din ochi: masurat pe referinta (`img/v3_crops/C_cornice.png`,
+## trei coloane prin fata mare de stanca), stratele stau la nuanta 5-30°,
+## saturatie 0.47-0.65, valoare 0.44-0.75. Sloturile de mai jos sunt exact cele
+## din atlas care cad in fereastra aia, plus cremul de coama:
+##   19 CORAL_SAND  #E9DCC0  coama de tuf (aceeasi culoare ca platoul)
+##   23 TILE_TERRACOTTA #C4784F  H21 S.60 V.77  roz-caramiziu
+##   27 LARCH_RUST  #A8683A  H25 S.65 V.66  ocru-rosu
+##   10             #91461E  H21 S.79 V.57  rosu de caramida (banda TARE)
+##    3 ROCK_LIGHT  #C18446  H30 S.64 V.76  reprize deschise intre rosuri
+##    4 ROCK_DARK   #67421F  strat umbrit
+##    2 SAND_SHADOW #915D27  adancul de la picior
+##
+## Ordinea alterneaza deschis/inchis pe scop: benzile se citesc ca STRATE doar
+## daca vecinele difera in VALOARE, nu doar in nuanta.
+## Compozitia e ROSU-DOMINANTA, si asta e o corectie masurata, nu o preferinta.
+## Prima versiune alterna crem/ocru/rosu in parti egale; masurat pe captura
+## rezultata, fata iesea la nuanta 30-33 grade cu saturatie 0.55, adica OCRU —
+## exact culoarea terenului de alaturi, deci faleza nu se citea ca alt material.
+## Referinta sta la nuanta 5-25 si saturatie 0.47-0.65 pe TOATA fata, cu cremul
+## doar ca o cusatura subtire de coama.
+##
+## Deci cremul (19) ramane un singur rand, sus, iar corpul falezei e rosu:
+## 23 roz-caramiziu, 10 rosu de caramida, 27 ocru-rosu, cu 3 ca repriza deschisa.
+@export var band_slots: Array[int] = [23, 10, 27, 23, 10, 27, 4, 2, 2]
+## Pasul EFECTIV de grila al ultimei coloane construite (vezi nota din
+## `_column`: se stange cand peretele e mai scund decat `bands * band_span_m`).
+## Slotul si relieful trebuie sa se citeasca pe acelasi pas ca geometria.
+var _grid_span: float = 4.0
+
+## POLITELE din perete: fractiile la care faleza are un prag pe care se poate
+## ancora ceva (metri de la ax se deriva, vezi `ledge_offset_m`).
+##
+## Exista fiindca `docs/track_briefs/cappadocia_geometrie.md` cere exact asta si
+## masoara de ce nu se poate altfel: un balon ancorat pe fundul vaii urca DREPT
+## si intra in peretele inclinat — pe colturile cosului de 4.8 m se infunda dupa
+## 1 m din cei 30 de cursa. Peretele nu poate fi facut vertical din campul de
+## inaltime (celula grilei e de 7.92 m, deci o taietura de 1.2 m se intinde pe o
+## celula intreaga si mesh-ul greseste cu pana la 10 m sub roata). Dar POATE fi
+## facut vertical in GEOMETRIE ASEZATA — si asta e chiar nodul de fata.
+##
+## Polita e o treapta reala in panza: fata coboara vertical pana la ea, iese pe
+## orizontala `ledge_depth_m`, apoi isi continua caderea. Cu tarusul pe ea,
+## coloana de 30 m de deasupra e libera prin constructie.
+@export var ledge_fracs: Array[float] = []
+## Cat de departe de AXUL benzii sta buza politei.
+##
+## Implicitul nu e rotund din intamplare: cosul are 4.8 m, semilatimea benzii pe
+## cornisa e 7.0 m, deci ca marginea dinspre drum a cosului sa treaca de
+## marginea asfaltului tarusul trebuie la cel mult 7.0 + 2.4 = 9.4 m. Sub atat,
+## cosul chiar intra in banda; peste, ramane gol intre el si drum.
+@export var ledge_offset_m: float = 9.2
+## Cat de jos sub buza sta polita. 12 m e „vizibil de pe drum ca prag, si destul
+## de jos cat cursa sa fie o urcare, nu o ridicare de doi metri".
+@export var ledge_drop_m: float = 12.0
+## Cat de adanca (spre vale) e treapta, si cat de lunga pe traseu.
+@export var ledge_depth_m: float = 3.2
+@export var ledge_len_m: float = 9.0
+
+
+## ############################################################################
+## PERETELE DE DINCOLO — partea care se VEDE de fapt.
+## ############################################################################
+##
+## Masurat cu ProbeFacing: fata de langa banda e vazuta la 83 de grade fata de
+## normala, adica pe muchie, 0% in plin. Asta nu e un reglaj gresit, e
+## geometrie: mergi PARALEL cu ea. Si nu o salveaza niciun viraj, fiindca pe
+## toata cornisa drumul coteste doar spre dreapta (ProbeCurve), deci exact in
+## sensul care duce peretele exterior in spate.
+##
+## Masurat cu ProbeWhere2, jumatatea dreapta a cadrului cade in doua zone:
+## soseaua (0-10 m rulaj, ~35% din raze) si o banda larga la +25..+70 m (~50%).
+## Fasia in care statea panza (10-25 m) primeste 2-4%.
+##
+## Deci stanca rosie se muta acolo unde se UITA camera: versantul DE DINCOLO de
+## vale, care sta cu fata spre drum si se vede in plin. E si compozitia
+## referintei (`img/v3_crops/C_cornice.png`): masa roz-rosie de acolo e peretele
+## din fata, cu drumul si buza in prim-plan — nu marginea de sub roata.
+##
+## Buza de langa banda RAMANE (mai scunda): ea da senzatia de cadere si
+## marginea de care ti-e frica. Dar culoarea si stratele le duce peretele opus.
+
+## Construieste PINTENUL de stanca de langa banda.
+##
+## Numele „far" a ramas din prima incercare (un perete dincolo de vale) si a fost
+## abandonat cu masuratoarea in fata: la 26 m rulaj si coama sub cota drumului,
+## masa cadea sub linia privirii si dadea 1.2% din cadru. Corectia a venit din
+## unghiuri, nu din gust — orizontul REAL al ochiului nu e panta terenului
+## (-36 gr, cum sugera prima citire) ci MARGINEA soselei, la -59 gr. Peste ea,
+## orice stanca tinuta la COTA DRUMULUI e vizibila de la 8 pana la 26 m rulaj,
+## la toate cele trei fractii.
+##
+## Deci masa rosie sta chiar langa banda, la cota drumului: un PINTEN care se
+## ridica din vale pana la nivelul soselei si o insoteste. Asta e si compozitia
+## referintei — stanca umple dreapta cadrului la inaltimea drumului, cu valea
+## dedesubt si dincolo de ea, nu o dunga la orizont.
+@export var far_wall: bool = true
+## La ce rulaj lateral incepe pintenul (marginea dinspre drum).
+##
+## MASURAT cu ProbeBrow, nu ales: terenul are deja o BUZA adevarata — caderea
+## incepe la 8.0 m de ax (1 m dupa asfalt) si merge la 77-85 grade, la toate
+## cele trei fractii. Nu era niciodata un „fileu convex", cum parea din capturi.
+##
+## De-aia pintenul pus la 9 m facea rau: umplea exact golul in care cadea buza,
+## si transforma muchia intr-o rampa continua — adica producea chiar defectul
+## reclamat, cu geometria corecta dedesubt. Se muta DINCOLO de cadere (fundul
+## vaii e la ~13 m rulaj), ca muchia sa ramana muchie si stanca sa se vada peste
+## ea, nu in locul ei.
+@export var far_offset_m: float = 15.0
+## MALUL DE DINCOLO in loc de pinten langa banda.
+##
+## Cu el, masa nu mai atarna de cota soselei: se aseaza pe terenul de la
+## `far_offset_m` si urca peste creasta LUI. Are sens doar impreuna cu o rapa
+## care are latime (Track._ravine_widths) — altfel dincolo de buza nu exista
+## teren mai inalt, si masa n-are pe ce sta.
+##
+## De ce e nevoie de el, cu masuratoarea in fata: pintenul de la 15 m, legat de
+## cota drumului, e o DUNGA de stanca de-a lungul benzii. Cum a spus critica
+## oarba dupa runda 3, „un perete paralel cu drumul pe care mergi nu poate
+## prezenta o fata unei camere indreptate pe drum". Malul opus sta TRANSVERSAL
+## pe privire, deci se vede in plin — si e chiar compozitia referintei.
+@export var far_bank: bool = false
+## Cat de sus sta ochiul soferului fata de asfalt (metri). Nu se alege: e
+## inaltimea camerei de urmarire, si serveste la a ridica malul pana la linia
+## privirii — vezi `far_over_eye_m`.
+@export var far_eye_rise_m: float = 6.0
+## Cu cati metri trece coama malului PESTE linia ochiului.
+##
+## Peste 0 inseamna ca masa taie orizontul, deci se citeste ca perete de vale si
+## nu ca dungă la baza cerului. Masurat: cu coama pe creasta terenului (sub ochi
+## cu 28 de grade) malul dadea 0.00% din cadru.
+@export var far_over_eye_m: float = 12.0
+## Cat urca coama pintenului fata de cota soselei.
+##
+## Pozitiv = peste drum. Se tine mic: peste ~3 m ar face un zid care ascunde
+## valea si baloanele care urca din ea, adica exact povestea POI-ului.
+@export var far_rise_m: float = 1.2
+## Cat de departe pe rulaj se intinde coama pintenului (latimea masei).
+## Ingusta deliberat: coama e suprafata pe care camera o vede cel mai bine
+## (in unghi mic), deci cu cat e mai lata, cu atat ascunde mai mult din fata
+## verticala — adica exact partea cu strate. 9 m ajunge ca masa sa nu fie lama.
+@export var far_depth_m: float = 9.0
+## Pasul pe lungime pentru peretele opus. Mai mare decat la buza: e departe,
+## deci nu are nevoie de aceeasi rezolutie.
+@export var far_step_m: float = 7.0
+## Cate benzi orizontale are pintenul.
+@export var far_bands: int = 7
+## Cat IESE fiecare strat peste cel de sub el, pe orizontala (metri).
+##
+## Diferenta fata de `batter_m`, si de-aia sunt doua: batter e o evazare LINIARA
+## in inaltime (un con), care nu produce nicio muchie orizontala. Asta e un pas
+## PE BANDA — fiecare strat sta in consola peste vecinul de dedesubt, deci are o
+## muchie proprie si o linie de umbra sub ea. Numai a doua se mai citeste la 40+
+## metri si prin ceata, cand culoarea benzilor s-a spalat.
+##
+## Zero pastreaza comportamentul dinainte (fata neteda).
+@export var far_relief_m: float = 0.0
+## Cat de mult poate cobori talpa pintenului sub terenul de la baza lui.
+##
+## Vezi `_far_column`: fara limita, cautarea inspre vale gaseste fundul rapei si
+## masa ajunge sa pluteasca (masurat: 10.8 m de cer pe sub lespede). 3 m ajung
+## ca fata sa se infiga in versant fara sa se desprinda de el.
+@export var far_foot_max_m: float = 3.0
+## Sloturile coamei, dinspre buza spre vale. Masurate cu ProbeSlots:
+##   23 #c0754d H21 S.60  rosu de corp
+##   27 #9c6131 H27 S.69  ocru-rosu
+##    4 #70481b H32 S.76  umbra de strat
+## Nu contine 19 (#f1e3c8, saturatie 0.17): pe coama, cremul face lespede palida.
+@export var cap_slots: Array[int] = [23, 10, 23, 27]
+
+
+## TAIETURA DIN INTERIORUL VIRAJULUI: peretele in care e SAPAT drumul.
+##
+## De ce exista, cu masuratoarea in fata. Verdictul rundei 4: „in referinta
+## drumul e TAIAT in stanca — o polita cu o fata taiata in interior si o cadere
+## in exterior. La noi drumul e PICTAT pe o duna, lipit in stanga, fara
+## taietura, fara bordura." Cauza NU e ca lipseste masa de stanca: ProbeInboard
+## masoara pe interior +47 m la fractia 0.28, deci muntele chiar e acolo.
+## Cauza e CE E INTRE el si asfalt — terenul ramane PLAT (0..+1 m) pana la 14 m
+## de ax, adica o banda goala de 7 m dincolo de marginea benzii.
+##
+## Banda aia e chiar [constant Track.TERRAIN_CELL] (7.92 m): campul de inaltime
+## nu POATE urca in interiorul unei celule lipite de drum, exact motivul pentru
+## care faleza de la buza e geometrie construita si nu rapa ceruta campului.
+## Deci si taietura din interior trebuie CONSTRUITA, din acelasi motiv si cu
+## acelasi pret: zero materiale, e tot [method Palette.world_material].
+##
+## Forma: invers fata de `_build` — coloana urca de la talpa (in umarul
+## drumului) pana la coama, si fata se uita SPRE drum. Cu ea, banda are perete
+## intr-o parte si gol in cealalta, adica citeste ca polita, nu ca duna.
+@export var cut_wall: bool = false
+## La ce rulaj lateral incepe talpa taieturii, fata de axul benzii.
+##
+## Se pune chiar dupa marginea asfaltului (half_width 7.0 la POI C) plus umarul:
+## daca peretele nu e LANGA banda, ramane duna intre el si roata si nu s-a
+## rezolvat nimic. Sub half_width ar musca din carosabil.
+@export var cut_offset_m: float = 8.2
+## Cati metri urca fata, de la talpa in sus.
+##
+## 18 m taie orizontul din vederea soferului (ochiul e la ~6 m peste asfalt),
+## deci peretele se citeste ca masa, nu ca bordura inalta.
+@export var cut_height_m: float = 18.0
+## Retragerea laterala TOTALA a fetei, de la talpa la coama.
+##
+## Mica: o taietura de drum e aproape verticala (asa se sapa), spre deosebire de
+## un versant natural. 2.5 m pe 18 m inseamna ~8 grade fata de verticala.
+@export var cut_batter_m: float = 2.5
+## Pasul de esantionare pe lungime.
+@export var cut_step_m: float = 4.0
+## Cate benzi orizontale de strat are taietura.
+@export var cut_bands: int = 7
+## Cat de adanc intra talpa in teren, ca sa nu ramana fanta luminoasa pe linia
+## in care ochiul cauta contactul dintre perete si umar.
+@export var cut_foot_bite_m: float = 1.2
+## Sloturile taieturii, de la coama in jos. Aceleasi strate ca faleza, ca sa se
+## citeasca drept ACEEASI roca vazuta din partea cealalta a benzii.
+@export var cut_slots: Array[int] = [23, 10, 27, 23, 10, 27, 4]
+## Ce fractie din lungime se duce pe stingerea de la FIECARE capat.
+##
+## Vezi `_cut_column`: fara stingere peretele incepe cu o muchie verticala in
+## aer. 0.18 inseamna ca primii si ultimii ~18% urca din nimic pana la cota.
+## Cat IESE IN AFARA un strat dur fata de vecinii lui moi, pe fata taieturii.
+##
+## Zero = fata plana (comportamentul dinainte). Verdictul rundei 9: „harder
+## layers step OUT slightly so softer ones recede — that stepping is what makes
+## a cliff read as carved rather than upholstered". Se tine mic fata de
+## `cut_offset_m`: peretele nu trebuie sa muste din umarul soselei.
+@export var cut_step_out_m: float = 0.0
+@export var cut_taper_frac: float = 0.18
+## Cat se retrage lateral capatul stins al taieturii, spre interiorul malului.
+##
+## Vezi `_cut_column`: fara retragere capatul ramane o pana detasata in nisip.
+@export var cut_tuck_m: float = 9.0
+
+
+## BUZA EXTERIOARA: pragul de roca de pe umarul dinspre vale.
+##
+## De ce exista, cu masuratoarea in fata. Verdictul rundei 6, spus la fel de
+## amandoi criticii: „exista un perete taiat pe STANGA, dar latura EXTERIOARA a
+## drumului — chiar aia care face dintr-o cornisa o cornisa — n-are nicio
+## muchie". Panzele existau si erau mari (`ProbeCappBrow`: FalezaVaiiRosii are
+## 5778 de vertecsi si 33 m inaltime), deci nu lipsea geometria.
+##
+## Ce lipsea e UNGHIUL. Aceeasi sonda, din ochiul soferului (1.5 m peste asfalt):
+## cel mai INALT punct de dincolo de buza sta la [b]-15 grade[/b] pe TOATE
+## fractiile cornisei (0.20, 0.26, 0.32, 0.38). Adica tot exteriorul e sub linia
+## privirii. O cadere pe care o privesti de SUS n-are silueta pe cer si nu poate
+## desena o muchie: ochiul vede umarul rotunjit al drumului si, dincolo de el,
+## direct fundul vaii. De-aia „nicio muchie" si „un plan cu conuri pe el" descriu
+## aceeasi poza.
+##
+## Referinta rezolva exact invers: buza e aproape si SUS — un prag de roca pe
+## marginea exterioara, cu caderea ASCUNSA in spatele lui. Muchia care taie
+## cadrul e a pragului, nu a rapei.
+##
+## Deci nodul asta construieste pragul: o panglica joasa de stanca pe umarul
+## dinspre vale, care iese peste linia ochiului si da cornisei muchia ei.
+## Zero materiale in plus — tot [method Palette.world_material].
+@export var brow: bool = false
+## La ce rulaj lateral fata de ax incepe pragul.
+##
+## Chiar dupa marginea asfaltului: sub `half_width` ar musca din carosabil, iar
+## mult peste el pragul se desprinde de banda si redevine o dunga in peisaj.
+@export var brow_offset_m: float = 7.2
+## Cat de LAT e pragul, de la talpa spre vale.
+@export var brow_width_m: float = 3.4
+## Cat de sus urca pragul peste cota asfaltului.
+##
+## [b]Corectie platita cu o captura.[/b] Prima valoare a fost 2.2 m, derivata
+## din linia privirii (ochiul e la ~1.5 m, deci pragul trebuie sa treaca peste
+## el ca sa taie cerul). Logica era buna si rezultatul, gresit: la 2.2 m pe
+## toata lungimea, cornisa a iesit un SANT — perete la stanga, perete la
+## dreapta, iar Valea Rosie si baloanele, adica tot subiectul POI-ului,
+## dispareau complet din cadru (vezi `snapshots/r7_brow_0.32.png`).
+##
+## Un prag de cornisa nu trebuie sa fie mai INALT decat ochiul, trebuie sa fie
+## APROAPE. La 0.85 m sta sub linia privirii, deci lasa valea deschisa, dar e la
+## 7 m lateral: proiectat, ocupa o banda groasa jos in cadru si desparte net
+## banda de gol. Muchia vine din CONTRAST si din intreruperi (`brow_gap_*`), nu
+## din inaltime — asa o face si referinta, unde pragul e o dantelura joasa de
+## roca, nu un parapet.
+@export var brow_rise_m: float = 0.85
+## Pasul de esantionare pe lungime.
+@export var brow_step_m: float = 3.0
+## Ce fractie din lungime se duce pe stingerea de la FIECARE capat.
+##
+## Ca la taietura: fara stingere pragul incepe cu o muchie verticala in aer.
+@export var brow_taper_frac: float = 0.10
+## Cat de neregulata e creasta pragului, in metri.
+##
+## Un prag de roca erodata nu e o bordura: fara variatie, panglica citeste ca
+## parapet turnat. Zgomotul e determinist (functie de fractie), ca regenerarea
+## sa dea acelasi prag.
+@export var brow_jitter_m: float = 0.55
+## Sloturile pragului: coama, fata dinspre drum, fata dinspre vale.
+##
+## Aceeasi roca ca faleza si taietura — pragul e capatul de sus al ACELUIASI
+## strat, deci ia sloturile de coama ale falezei.
+@export var brow_slots: Array[int] = [19, 23, 10]
+## Cat de jos coboara fusta pragului sub cota drumului.
+##
+## Scurta INTENTIONAT: pragul e o muchie, nu un al doilea perete. Vezi
+## `_brow_profile` — fara limita, talpa exterioara cadea pana la fundul rapei si
+## AABB-ul pragului iesea de 31 m, adica exact peretele pe care il avea deja
+## faleza. 2.5 m ajung ca fusta sa inchida contactul cu versantul.
+@export var brow_skirt_m: float = 2.5
+## Cat de des se RUPE pragul, in metri de traseu (0 = prag continuu).
+##
+## O cornisa erodata n-are bordura turnata: roca e mancata pe portiuni, si prin
+## spartura se vede valea. Fara rupturi panglica citeste ca parapet de beton —
+## si, la inaltime mare, chiar inchidea cadrul. Rupturile sunt si ce face pragul
+## sa arate SAPAT: ochiul completeaza singur muchia continua din bucatile ramase.
+@export var brow_gap_every_m: float = 26.0
+## Ce fractie dintr-o perioada e ruptura.
+@export var brow_gap_frac: float = 0.28
+
+
+## Toate falezele declarate ca noduri, construite intr-un singur nod-parinte.
+## Se cheama din [method Track.rebuild], dupa ce terenul exista: talpa se coase
+## pe suprafata LUI.
+static func build_all(track: Node3D, sampler: TrackSideSampler,
+		surface_y: Callable) -> Node3D:
+	var root := Node3D.new()
+	root.name = "CliffFaces"
+	var faces: Array[CliffFace] = []
+	_collect(track, faces)
+	for f in faces:
+		# Un nod de MAL OPUS nu construieste si panza de buza: buza si-o face
+		# nodul cornisei. Fara asta, nodul de mal dubla peretele de langa banda
+		# (masurat cu ProbeBankPos: doua panze la 42 si 45 m rulaj, adica in
+		# acelasi loc) si nu se vedea nicio schimbare in captura — geometrie
+		# noua, aceeasi silueta.
+		# Un nod de BUZA sau de TAIETURA nu construieste si panza de cadere:
+		# `FalezaVaiiRosii` o face deja pe aceleasi fractii, si o a doua panza
+		# identica peste ea nu se vede in poza, doar in numaratoare (masurat:
+		# acelasi AABB, 5778 de vertecsi degeaba).
+		if not f.far_bank and not f.brow and not f.cut_wall:
+			var mesh_node := f._build(sampler, surface_y)
+			if mesh_node != null:
+				root.add_child(mesh_node)
+		if f.far_wall:
+			var far_node := f._build_far(sampler, surface_y)
+			if far_node != null:
+				root.add_child(far_node)
+		# TAIETURA e independenta de celelalte doua: un nod poate fi NUMAI
+		# taietura (perete pe interior, fara gol pe exterior), fiindca cele doua
+		# maluri ale unei polite sunt lucruri diferite si se declara separat.
+		if f.cut_wall:
+			var cut_node := f._build_cut(sampler, surface_y)
+			if cut_node != null:
+				root.add_child(cut_node)
+		# BUZA e independenta de toate celelalte: un nod poate declara NUMAI
+		# pragul exterior. Vezi `brow` — e latura care lipsea din poza.
+		if f.brow:
+			var brow_node := f._build_brow(sampler, surface_y)
+			if brow_node != null:
+				root.add_child(brow_node)
+	return root
+
+
+## Peretele in care e SAPAT drumul, pe latura dinspre INTERIORUL virajului.
+##
+## Vezi `cut_wall` pentru motivul si masuratoarea. Aici doar forma: pentru
+## fiecare pas se ridica o coloana de la talpa (infipta in umar) pana la coama,
+## fata privind SPRE banda. Ordinea vertecsilor din `_quad` e inversa fata de
+## `_build`, fiindca normala trebuie sa bata inspre drum, nu dinspre el.
+##
+## Coama urmeaza TERENUL de deasupra, nu o cota fixa: acolo unde masivul chiar
+## urca (fractiile 0.26-0.30, +47 m masurat) peretele se inalta cu el, iar unde
+## platoul se aplatizeaza taietura se stinge singura — asa se opreste sa fie un
+## zid continuu care ar ascunde tot ce e dincolo de viraj.
+## Slotul de paleta al unui rand din taietura, pe grila ABSOLUTA de strate cand
+## benzile sunt orizontale. Oglinda lui `_row_slot`, si din acelasi motiv: daca
+## doar GEOMETRIA e orizontala iar CULOAREA ramane pe numarul randului, dunga
+## colorata pleaca in continuare in diagonala peste forma.
+func _cut_row_slot(col: Array, r: int) -> int:
+	if cut_slots.is_empty():
+		return 0
+	if talus_m > 0.0 and r >= col.size() - talus_rows:
+		if talus_slot >= 0:
+			return talus_slot
+		return cut_slots[cut_slots.size() - 1]
+	if not level_bands or r >= col.size():
+		return cut_slots[mini(r, cut_slots.size() - 1)]
+	var idx := int(floorf((band_datum_y + 1e-4 - float(col[r].y))
+		/ maxf(band_span_m, 1.0)))
+	return cut_slots[clampi(idx, 0, cut_slots.size() - 1)]
+
+
+func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
+	var total := sampler.total_length()
+	if total <= 0.0 or cut_bands < 1 or cut_slots.is_empty():
+		return null
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var span := (frac_end - frac_start) * total
+	var steps := maxi(int(round(span / maxf(cut_step_m, 0.5))), 2)
+	var cols: Array = []
+	for si in steps + 1:
+		var f := frac_start + (frac_end - frac_start) * (float(si) / float(steps))
+		cols.append(_cut_column(sampler, f, surface_y))
+	var built := 0
+	for si in steps:
+		var a: Array = cols[si]
+		var b: Array = cols[si + 1]
+		if a.is_empty() or b.is_empty():
+			continue
+		built += 1
+		var rows: int = mini(a.size(), b.size())
+		for r in rows - 1:
+			var slot: int = _cut_row_slot(a, r)
+			var uvv := Palette.uv(slot)
+			# AO invers fata de faleza: la o taietura, talpa sta in umbra
+			# peretelui si coama prinde soarele. Randul 0 e COAMA.
+			var t0 := float(r) / float(rows - 1)
+			var t1 := float(r + 1) / float(rows - 1)
+			var c0 := _shade(t0)
+			var c1 := _shade(t1)
+			# Ordine inversa fata de `_build`: fata priveste spre banda.
+			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1)
+	if built == 0:
+		return null
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Taietura " + name
+	mi.mesh = st.commit()
+	mi.material_override = Palette.world_material()
+	# Peretele sta LANGA banda si la est de ea pe portiunea cornisei: la soare de
+	# zori umbra lui cade chiar pe carosabil, si e cel mai ieftin semn ca drumul
+	# e sapat in ceva solid.
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	return mi
+
+
+## O coloana din taietura: de la coama in jos pana in talpa, infipta in umar.
+##
+## Intoarce lista goala cand nu e in ce sapa — vezi mai jos.
+func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	# Interiorul e latura OPUSA golului: nodul declara `side` pentru cadere.
+	var sd := sampler.side_at(i) * -signf(side)
+	var foot: Vector3 = p + sd * cut_offset_m
+	var foot_y: float = surface_y.call(foot.x, foot.z)
+	# Talpa se infige sub suprafata umarului, ca sa nu ramana fanta.
+	foot_y = minf(foot_y, p.y) - cut_foot_bite_m
+	# CAT DE SUS: se cere terenului de dincolo, nu unei cote fixe.
+	#
+	# Se ia cea mai inalta cota pe o fereastra scurta dincolo de talpa. Unde
+	# masivul urca, peretele urca cu el; unde platoul e plat, `rise` iese ~0 si
+	# coloana se intoarce goala — taietura se stinge in loc sa devina zid.
+	# Creasta se ia ca MEDIE pe fereastra, nu ca maxim.
+	#
+	# Cu maximul, o singura duna din spate ridica toata coloana: masurat cu
+	# ProbeCutEnd, `rise` sarea 18 -> 13.2 -> 16.9 -> 10.1 intre pasi vecini si
+	# silueta iesea zimtata. Media urmeaza masivul si ignora zgomotul.
+	var crest := 0.0
+	var samples := 0.0
+	var probe := 4.0
+	while probe <= 22.0:
+		var q := foot + sd * probe
+		crest += surface_y.call(q.x, q.z)
+		samples += 1.0
+		probe += 6.0
+	crest /= maxf(samples, 1.0)
+	var rise: float = minf(crest - foot_y, cut_height_m)
+	# STINGERE la capete, pe `cut_taper_frac` din lungime.
+	#
+	# Fara ea peretele incepea cu o fata de 10 m taiata drept in aer: prima
+	# coloana iesea goala (rise 1.1) si urmatoarea avea deja 10.5 m — masurat cu
+	# ProbeCutEnd. O taietura reala se termina intrand in versant, nu cu o muchie
+	# verticala suspendata.
+	var edge: float = minf(f - frac_start, frac_end - f)
+	var span_f: float = maxf(frac_end - frac_start, 1e-5)
+	var taper: float = clampf(edge / maxf(cut_taper_frac * span_f, 1e-5), 0.0, 1.0)
+	taper = smoothstep(0.0, 1.0, taper)
+	rise *= taper
+	# La capete peretele se RETRAGE si lateral, nu doar in inaltime.
+	#
+	# Cu stingerea doar pe verticala, capatul ramanea la acelasi rulaj de 8.2 m
+	# in timp ce inaltimea scadea: iesea o pana rosie DETASATA de versant, cu
+	# nisip vizibil intre ea si deal (vazut in captura la frac 0.245). O
+	# taietura care se stinge intra inapoi in mal, deci talpa pleaca spre teren
+	# pe masura ce fata scade.
+	var tuck: float = (1.0 - taper) * cut_tuck_m
+	# Sub 2 m nu e taietura, e prag: acolo nu exista masiv de taiat.
+	if rise < 2.0:
+		return []
+	var out: Array = []
+	var crown := foot_y + rise
+	for r in cut_bands + 1:
+		var t := float(r) / float(cut_bands)
+		# r = 0 e COAMA (sus), deci inaltimea scade cu t.
+		var y := foot_y + rise * (1.0 - t)
+		if level_bands:
+			# STRATELE TAIETURII STAU ORIZONTAL, ca la panza de faleza.
+			#
+			# Varianta de mai sus masoara banda de la talpa LOCALA si o scaleaza
+			# cu inaltimea LOCALA. Cum si talpa (umarul soselei, care coboara) si
+			# `rise` (media crestei de dincolo) se schimba de la o coloana la
+			# alta, banda `r` ajunge la alta altitudine la fiecare pas si dunga
+			# pleaca in DIAGONALA peste forma. Peretele asta umple jumatatea
+			# stanga a cadrului la 0.26-0.30, deci exact el e „strata wrap the
+			# form diagonally like fabric" din verdict — panza de la buza avea
+			# deja `level_bands`, taietura nu.
+			#
+			# Un strat sedimentar s-a depus orizontal: cota lui nu stie nimic
+			# despre umarul sapat in el mai tarziu. Se taie deci din aceeasi
+			# grila absoluta (`band_datum_y` + `band_span_m`) ca faleza, ca
+			# stratul sa fie CONTINUU intre cele doua fete — altfel taietura si
+			# panza ar arata doua roci diferite pe acelasi versant.
+			var span := maxf(band_span_m, 1.0)
+			var top_band := ceilf((crown - band_datum_y) / span)
+			y = band_datum_y + (top_band - float(r)) * span
+			y = clampf(y, foot_y, crown)
+		# Retragerea: coama sta mai in spate decat talpa (taietura e batuta usor
+		# in spate, ca orice sapatura care nu se surpa).
+		var back := cut_batter_m * (1.0 - t)
+		# STRATUL DUR IESE, cel moale se retrage.
+		#
+		# Fara asta fata e un plan inclinat cu dungi de culoare pe el, si
+		# criticul are dreptate ca se citeste tapitat, nu sapat. Intr-o roca
+		# stratificata reala eroziunea nu ataca uniform: bancurile dure raman in
+		# consola, cele moi se sapa in firide, si LINIA DE UMBRA de sub fiecare
+		# banc e ce spune ochiului ca sunt straturi, nu vopsea.
+		#
+		# Proeminenta se ia dupa indicele ABSOLUT de strat, nu dupa rand: asa
+		# acelasi banc iese in relief pe toata lungimea peretelui, cum face o
+		# roca reala, in loc sa se plimbe odata cu coloana.
+		if cut_step_out_m > 0.0:
+			var si: int = r
+			if level_bands:
+				si = int(floorf((band_datum_y + 1e-4 - y)
+					/ maxf(band_span_m, 1.0)))
+			# alternanta dur/moale: bancurile pare ies, cele impare se retrag
+			back -= cut_step_out_m * (1.0 if (si % 2) == 0 else 0.0)
+		var q: Vector3 = p + sd * (cut_offset_m + back + tuck)
+		out.append(Vector3(q.x, y, q.z))
+	# Poala de moloz la piciorul taieturii. Aici e cea mai vizibila din tot
+	# cadrul: taietura sta CHIAR langa banda, deci imbinarea ei cu umarul e la
+	# doi metri de roata si nu are cum sa nu fie citita. Sensul e spre drum
+	# (-sd), fiindca molozul cade dinspre perete spre sosea.
+	_append_talus(out, -sd, surface_y)
+	return out
+
+
+## PRAGUL de pe umarul dinspre vale — muchia care face cornisa.
+##
+## Vezi `brow` pentru motivul si masuratoarea (-15 grade pe toata cornisa).
+## Aici doar forma: pentru fiecare pas se ridica un profil cu patru puncte —
+## talpa dinspre drum, creasta dinspre drum, creasta dinspre vale, talpa dinspre
+## vale — si profilele vecine se leaga in trei benzi de quad-uri (fata interioara,
+## coama, fata exterioara). Nu e un zid: are latime, deci prinde lumina pe coama
+## si ramane in umbra pe fata dinspre vale.
+func _build_brow(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
+	var total := sampler.total_length()
+	if total <= 0.0 or brow_slots.size() < 3:
+		return null
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var span := (frac_end - frac_start) * total
+	var steps := maxi(int(round(span / maxf(brow_step_m, 0.5))), 2)
+	var cols: Array = []
+	for si in steps + 1:
+		var f := frac_start + (frac_end - frac_start) * (float(si) / float(steps))
+		cols.append(_brow_profile(sampler, f, surface_y, float(si) / float(steps)))
+	var built := 0
+	for si in steps:
+		var a: Array = cols[si]
+		var b: Array = cols[si + 1]
+		if a.is_empty() or b.is_empty():
+			continue
+		built += 1
+		# 0=talpa drum, 1=creasta drum, 2=creasta vale, 3=talpa vale.
+		# Fata dinspre DRUM: se vede din masina, deci ia slotul cel mai tare.
+		_quad(st, b[0], a[0], a[1], b[1], Palette.uv(brow_slots[1]),
+			_shade(0.85), _shade(0.85), _shade(0.15), _shade(0.15))
+		# COAMA: prinde soarele razant, slotul cel mai deschis.
+		_quad(st, b[1], a[1], a[2], b[2], Palette.uv(brow_slots[0]),
+			_shade(0.05), _shade(0.05), _shade(0.10), _shade(0.10))
+		# Fata dinspre VALE: cade in umbra, slotul inchis. Ordine inversa,
+		# fiindca normala trebuie sa bata spre vale (vezi nota de la `_quad`).
+		_quad(st, a[2], b[2], b[3], a[3], Palette.uv(brow_slots[2]),
+			_shade(0.20), _shade(0.20), _shade(0.90), _shade(0.90))
+	if built == 0:
+		return null
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Buza " + name
+	mi.mesh = st.commit()
+	mi.material_override = Palette.world_material()
+	# Pragul sta pe umarul dinspre vale: la soare de zori umbra lui cade inapoi
+	# pe carosabil si e cel mai ieftin semn ca banda are o margine ridicata.
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	return mi
+
+
+## Profilul pragului la o fractie: patru puncte, de la drum spre vale.
+##
+## Intoarce lista goala pe capetele stinse, ca pragul sa nu inceapa cu o muchie
+## verticala in aer.
+func _brow_profile(sampler: TrackSideSampler, f: float, surface_y: Callable,
+		t_along: float) -> Array:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	var sd := sampler.side_at(i) * signf(side)
+	var hw := sampler.half_width_at(i)
+	# STINGEREA la capete: pragul creste din nimic si se intoarce in nimic.
+	var taper := 1.0
+	if brow_taper_frac > 0.0:
+		taper = minf(t_along / brow_taper_frac,
+			(1.0 - t_along) / brow_taper_frac)
+		taper = clampf(taper, 0.0, 1.0)
+	if taper <= 0.01:
+		return []
+	# RUPTURILE: pe portiunile mancate pragul lipseste de tot, si prin ele se
+	# vede valea. Se calculeaza pe distanta REALA in lungul pistei, nu pe
+	# fractie, ca ruptura sa aiba aceeasi lungime pe orice pista.
+	if brow_gap_every_m > 0.5 and brow_gap_frac > 0.0:
+		var along_m := f * sampler.total_length()
+		var ph := fposmod(along_m, brow_gap_every_m) / brow_gap_every_m
+		# Faza se plimba incet, ca rupturile sa nu cada la intervale de metronom.
+		var wob := 0.5 + 0.5 * sin(f * 91.0)
+		if ph < brow_gap_frac * wob:
+			return []
+	# Creasta neregulata, dar DETERMINISTA: aceeasi fractie da mereu acelasi
+	# prag, deci regenerarea nu misca peisajul.
+	var jit := sin(f * 137.0) * 0.6 + sin(f * 311.0) * 0.4
+	var rise := (brow_rise_m + jit * brow_jitter_m) * taper
+	# Talpa se leaga de cota ASFALTULUI, nu de teren: pragul e umarul drumului
+	# ridicat, si trebuie sa porneasca exact de unde se termina banda. Luata din
+	# teren, ar pluti pe portiunile unde campul a fost deja sapat de rapa.
+	var foot_y := p.y
+	var inner: Vector3 = p + sd * (hw + (brow_offset_m - hw))
+	var outer: Vector3 = p + sd * (brow_offset_m + brow_width_m)
+	# Talpa exterioara se coase in teren — dar cu O LIMITA, si asta e o corectie
+	# platita cu o masuratoare. Fara ea, `surface_y` de dincolo de buza intoarce
+	# chiar fundul rapei (13.7 m sub un drum la 27 m), deci fusta pragului se
+	# intindea 31 m in jos: AABB-ul iesea inalt cat faleza, iar „pragul" era un
+	# alt perete, nu o muchie. Se coboara cel mult `brow_skirt_m` sub talpa, si
+	# restul caderii ramane treaba falezei — care exact asta face.
+	var ground_out: float = surface_y.call(outer.x, outer.z)
+	var out_y: float = maxf(minf(ground_out, foot_y) - 0.4,
+		foot_y - brow_skirt_m)
+	return [
+		Vector3(inner.x, foot_y - 0.15, inner.z),
+		Vector3(inner.x, foot_y + rise, inner.z),
+		Vector3(outer.x, foot_y + rise * 0.82, outer.z),
+		Vector3(outer.x, out_y, outer.z),
+	]
+
+
+static func _collect(node: Node, out: Array[CliffFace]) -> void:
+	for child in node.get_children():
+		if child is CliffFace:
+			out.append(child as CliffFace)
+		_collect(child, out)
+
+
+## Panza de faleza pentru ACEST nod.
+##
+## Forma, pe scurt: pentru fiecare pas pe lungimea cornisei se ridica o COLOANA
+## de vertecsi, de la buza (langa asfalt) pana la talpa (in teren). Coloanele
+## vecine se unesc in quad-uri. Fiecare banda isi are retragerea ei laterala,
+## deci peretele iese in trepte de strat, nu ca un plan.
+##
+## Ce NU face: nu atinge terenul si nu atinge campul. E geometrie asezata PESTE
+## ele, exact ca un prop — de aceea nu poate strica nici ProbeBuried (care
+## intreaba campul despre drum), nici ProbeLayout (care masoara traseul).
+## Slotul de paleta al unui rand, pe grila absoluta de strate cand se poate.
+func _row_slot(col: Array, r: int) -> int:
+	if band_slots.is_empty():
+		return 0
+	# Randurile de POALA nu sunt strate: sunt molozul cazut din ele. Iau slotul
+	# ultimei benzi (aceeasi roca) sau `talus_slot` daca se cere altul.
+	if talus_m > 0.0 and r >= col.size() - talus_rows:
+		if talus_slot >= 0:
+			return talus_slot
+		return band_slots[band_slots.size() - 1]
+	if not level_bands or r >= col.size():
+		return band_slots[mini(r, band_slots.size() - 1)]
+	var idx := int(floorf((band_datum_y + 1e-4 - float(col[r].y))
+		/ maxf(_grid_span, 1.0)))
+	return band_slots[clampi(idx, 0, band_slots.size() - 1)]
+
+
+func _build(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
+	var total := sampler.total_length()
+	if total <= 0.0 or bands < 1 or band_slots.is_empty():
+		return null
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var span := (frac_end - frac_start) * total
+	var steps := maxi(int(round(span / maxf(step_m, 0.5))), 2)
+	# Coloanele, calculate o data: fiecare e lista de puncte de sus in jos.
+	var cols: Array = []
+	for s in steps + 1:
+		var f := frac_start + (frac_end - frac_start) * (float(s) / float(steps))
+		cols.append(_column(sampler, f, surface_y))
+
+	for s in steps:
+		var a: Array = cols[s]
+		var b: Array = cols[s + 1]
+		var rows: int = mini(a.size(), b.size())
+		for r in rows - 1:
+			# Slotul benzii: randul 0 e coama. Culoarea vine din UV (atlas), nu
+			# dintr-un material — de asta faleza costa zero materiale.
+			# Slotul se ia dupa indicele ABSOLUT de strat cand benzile sunt
+			# orizontale (`_row_slot`), ca aceeasi roca sa aiba aceeasi culoare
+			# pe toata lungimea, si nu dupa numarul randului din coloana.
+			var slot: int = _row_slot(a, r)
+			var uvv := Palette.uv(slot)
+			# AO copt in vertex color: fata se intuneca in jos, fiindca vertex
+			# color poate DOAR sa intunece (memoria
+			# `surfacetool-clamp-vertex-color`). Coama ramane la 1.0.
+			var t0 := float(r) / float(rows - 1)
+			var t1 := float(r + 1) / float(rows - 1)
+			var c0 := _shade(t0)
+			var c1 := _shade(t1)
+			_quad(st, a[r], b[r], b[r + 1], a[r + 1], uvv, c0, c0, c1, c1)
+
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Faleza " + name
+	mi.mesh = st.commit()
+	mi.material_override = Palette.world_material()
+	# POLITELE primesc CORP FIZIC. Fara el ar fi un desen: tarusul n-ar avea pe
+	# ce sta, iar razele sondei ar trece prin ele si verdictul ar ramane rosu cu
+	# dreptate. O cutie per polita, nu un trimesh pe toata panza — faleza n-are
+	# nevoie de coliziune (peste buza se cade in gol, aia e mecanica POI-ului C),
+	# doar pragul are.
+	for lf in ledge_fracs:
+		var body := _ledge_body(sampler, lf)
+		if body != null:
+			mi.add_child(body)
+	# Umbrele lungi de zori sunt identitatea Cappadociei (tema `shadows: true`),
+	# iar o faleza de 30 m e cel mai mare obiect care arunca pe vale.
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	return mi
+
+
+## Peretele DE DINCOLO de vale: masa de stanca pe care o vede efectiv soferul.
+##
+## Forma: pentru fiecare pas pe lungimea cornisei se ridica o coloana la rulajul
+## `far_offset_m`, de la fundul vaii in sus pana la `far_height_m`. Fata se uita
+## INAPOI spre drum (de aici semnul din `_quad`), deci normala ei bate in
+## privire — opusul panzei de la buza, care sta pe muchie.
+##
+## Se citeste fundul vaii cu `surface_y` in loc sa fie presupus: valea are cota
+## proprie (~13.7 m masurat) si se schimba pe lungime.
+##
+## Talpa intra in teren cu `foot_bite_m`, ca la panza de buza: fara asta ramane
+## o fanta luminoasa exact pe linia in care ochiul cauta contactul.
+func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
+	var total := sampler.total_length()
+	if total <= 0.0 or far_bands < 1 or band_slots.is_empty():
+		return null
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var span := (frac_end - frac_start) * total
+	var steps := maxi(int(round(span / maxf(far_step_m, 1.0))), 2)
+	var cols: Array = []
+	var caps: Array = []
+	for si in steps + 1:
+		var f := frac_start + (frac_end - frac_start) * (float(si) / float(steps))
+		cols.append(_far_column(sampler, f, surface_y))
+		caps.append(_far_cap(sampler, f, surface_y))
+	var built := 0
+	for si in steps:
+		var a: Array = cols[si]
+		var b: Array = cols[si + 1]
+		# Coloanele goale sunt pasii unde nu exista vale de sprijinit (vezi
+		# `_far_column`): acolo pintenul se intrerupe, si asta e corect — o masa
+		# continua ar traversa si portiunile in care drumul merge pe platou.
+		if a.is_empty() or b.is_empty():
+			continue
+		built += 1
+		var rows: int = mini(a.size(), b.size())
+		for r in rows - 1:
+			var slot: int = band_slots[mini(r, band_slots.size() - 1)]
+			var uvv := Palette.uv(slot)
+			# AO: coama prinde soarele razant de zori, talpa intra in umbra ei.
+			var t0 := float(r) / float(rows - 1)
+			var t1 := float(r + 1) / float(rows - 1)
+			var c0 := _shade(t0)
+			var c1 := _shade(t1)
+			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1)
+		# COAMA, in continuarea buzei: acelasi slot ca banda de sus, ca sa se
+		# citeasca drept acelasi bloc de roca vazut de deasupra.
+		var ca: Array = caps[si]
+		var cb: Array = caps[si + 1]
+		if not ca.is_empty() and not cb.is_empty():
+			# Coama NU ia band_slots[0].
+			#
+			# Slotul 0 e cremul de coama (19 CORAL_SAND) si masurat cu ProbeSlots
+			# sta la saturatie 0.17, adica practic alb. Pe fata verticala e o
+			# cusatura subtire si e corect acolo; pe COAMA insa acopera cea mai
+			# mare suprafata din silueta, si exact asta facea ca pintenul sa iasa
+			# o creasta de nisip palid in loc de stanca — captura arata pale, cu
+			# numarul de pixeli deja urcat. Coama ia rosul de corp.
+			var crows: int = mini(ca.size(), cb.size())
+			for r in crows - 1:
+				# Coama primeste si ea STRATE, nu o singura culoare.
+				#
+				# Cu un singur slot, din camera de joc (care o vede in unghi mic,
+				# deci pe suprafata mare) iesea o lespede portocalie plata si
+				# stergea benzile de pe fata verticala de sub ea. Fasiile de coama
+				# merg de la rosul de corp spre umbra, dinspre buza spre vale.
+				var cs: int = cap_slots[mini(r, cap_slots.size() - 1)]
+				var cuv := Palette.uv(cs)
+				var s0 := _shade(0.10 + 0.5 * float(r) / float(crows - 1))
+				var s1 := _shade(0.10 + 0.5 * float(r + 1) / float(crows - 1))
+				_quad(st, cb[r], ca[r], ca[r + 1], cb[r + 1], cuv, s0, s0, s1, s1)
+	if built == 0:
+		return null
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Faleza pinten " + name
+	mi.mesh = st.commit()
+	mi.material_override = Palette.world_material()
+	# Pintenul e langa drum si la cota lui: umbra lui de zori cade CHIAR PE BANDA
+	# si e cel mai ieftin semn ca acolo e o masa solida, nu o textura.
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	return mi
+
+
+## O coloana din PINTEN: fata rosie dinspre drum, plus coama care se intoarce
+## spre vale.
+##
+## Coloana are doua parti, si asta e ce o face sa se citeasca drept stanca si nu
+## panou: intai FATA, care urca aproape vertical din vale pana la cota drumului
+## (partea pe care o vede soferul, cu stratele in benzi), apoi COAMA, care pleaca
+## orizontal spre vale pe `far_depth_m` si se termina cazand inapoi in teren.
+## Fara coama, masa ar fi o lama de un triunghi grosime vazuta din masina.
+## Cade punctul in gabaritul soselei, ORIUNDE pe tur?
+##
+## Vezi nota din `_far_column`. Doar 2D: o panza care trece pe deasupra sau pe
+## dedesubtul unui tronson e legitima (pasaj), cea care sta la cota lui nu — dar
+## malul opus urca de la fundul vaii pana peste cota drumului, deci acopera
+## oricum toata plaja verticala si testul 2D e cel corect aici.
+## Cade punctul in gabaritul soselei pe ALT tronson decat cel local?
+##
+## Fereastra de indici e esentiala, si e aceeasi capcana ca la pasaje (memoria
+## `pista-peste-pista`): un pinten cerut la 9 m de ax e LEGITIM lipit de propriul
+## lui tronson — aia e chiar taietura in care e sapat drumul. Ce nu e legitim e
+## sa cada peste soseaua de la o cu totul alta fractie, cum face malul opus pe
+## serpentina. Deci punctele vecine pe tur se sar, si se testeaza restul buclei.
+func _on_any_road(sampler: TrackSideSampler, p: Vector3, home_i: int) -> bool:
+	var n := sampler.point_count()
+	var skip := int(round(float(n) * NEAR_WINDOW_FRAC))
+	for i in n:
+		# distanta pe INEL intre indici (traseul e inchis)
+		var di := absi(i - home_i)
+		di = mini(di, n - di)
+		if di <= skip:
+			continue
+		var q := sampler.baked_point(i)
+		var dx := q.x - p.x
+		var dz := q.z - p.z
+		var clear := sampler.half_width_at(i) + ROAD_CLEAR_M
+		if dx * dx + dz * dz < clear * clear:
+			return true
+	return false
+
+
+func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	var sd := sampler.side_at(i) * signf(side)
+	var base: Vector3 = p + sd * far_offset_m
+	var floor_y: float = surface_y.call(base.x, base.z)
+	# Coama: la cota soselei plus `far_rise_m`. Peste orizontul marginii (-59 gr)
+	# prin constructie, deci vizibila — vezi nota de la `far_wall`.
+	var top_y := p.y + far_rise_m
+	if far_bank:
+		# MALUL DE DINCOLO: masa nu mai e legata de cota soselei, ci sta pe
+		# terenul de acolo — rapa are acum latime, deci dincolo de ea terenul
+		# chiar urca. Coama se ridica peste creasta LUI, nu peste drum.
+		#
+		# Diferenta nu e cosmetica: un pinten legat de cota drumului si asezat la
+		# 15 m e o dunga langa roata (exact ce a picat in runda 3), pe cand o masa
+		# asezata pe malul opus umple partea dreapta a cadrului asa cum o face
+		# referinta, cu valea intre ea si privitor.
+		#
+		# Rulajul e FIX, si asta e o corectie platita cu o incercare.
+		#
+		# Varianta dinainte cauta creasta terenului la fiecare pas, fiindca
+		# ProbeBank aratase ca malul sta la 60 m pe o fractie si la 110 m pe
+		# alta. Cautarea gasea insa si zgomotul dunelor: offsetul sarea 37 ->
+		# 109 -> 37 -> 49 -> 163 m intre coloane vecine, iar panza iesea o
+		# panglica sifonata in zig-zag, nu un perete. Se vede in ansamblul de
+		# sus, si explica de ce ridicarea coamei n-a schimbat nimic in pixeli:
+		# coloane care se departeaza una de alta nu formeaza suprafata, ci
+		# fatete rasucite care se vad pe muchie.
+		#
+		# Un mal de vale e o LINIE, deci se cere ca linie: rulaj constant, si
+		# cota luata din cea mai inalta valoare pe o fereastra scurta in jurul
+		# lui, ca sa urmeze relieful fara sa sara dupa fiecare dună.
+		var crest_y := -1e9
+		var probe := -12.0
+		while probe <= 12.0:
+			var q := p + sd * (far_offset_m + probe)
+			crest_y = maxf(crest_y, surface_y.call(q.x, q.z))
+			probe += 6.0
+		base = p + sd * far_offset_m
+		top_y = crest_y + far_rise_m
+		# INALTIMEA nu e de gust, se DERIVA din linia privirii.
+		#
+		# Masurat cu ProbeBank: cu coama pe creasta terenului, malul sta la -28
+		# grade sub ochi la fractia 0.22, si ProbePixBank confirma consecinta —
+		# 0.00% din cadru. O masa care nu urca pana la linia ochiului nu intra in
+		# poza, oricat de lata ar fi (AABB-ul ei masura 370 m).
+		#
+		# Deci coama se ridica pana cel putin la cota ochiului, plus marja: asa
+		# masa taie orizontul in loc sa stea sub el, si valea ramane intre ea si
+		# privitor — compozitia referintei.
+		var eye_y := p.y + far_eye_rise_m
+		top_y = maxf(top_y, eye_y + far_over_eye_m)
+		# TALPA se cauta INSPRE vale, ca fata sa aiba de unde urca din fund —
+		# dar pe TERENUL DE SUB MASA, nu dincolo de el.
+		#
+		# Corectie masurata (runda 7). Varianta veche lua
+		# `minf(surface_y(base), surface_y(toe))` cu degetul la `far_depth_m`
+		# (14 m) spre vale, adica deja PESTE rapa. Cand malul coboara, minimul
+		# apuca fundul vaii si trage talpa acolo desi masa sta pe creasta:
+		# masurat cu ProbeCappSpur, talpa atarna pana la 10.8 m sub terenul de
+		# sub ea, iar din masina se vedea CER PE SUB lespede — chiar „geometria
+		# rupta la inaltimea soferului" reclamata de critic.
+		#
+		# Acum se ia cea mai joasa cota de pe segmentul care chiar e ACOPERIT de
+		# masa (0..far_depth_m, esantionat), deci fata are tot de unde urca din
+		# fund, dar talpa nu mai poate cobori sub pamantul pe care sta. Limita
+		# `far_foot_max_m` prinde cazul in care si segmentul ala cade in rapa.
+		var y_base: float = surface_y.call(base.x, base.z)
+		var low: float = y_base
+		var k := 1.0
+		while k <= 4.0:
+			var q2: Vector3 = base - sd * (far_depth_m * (k / 4.0))
+			low = minf(low, float(surface_y.call(q2.x, q2.z)))
+			k += 1.0
+		floor_y = maxf(low, y_base - far_foot_max_m)
+	# Daca terenul de sub pinten e deja la cota drumului, nu exista vale aici si
+	# pintenul n-are ce sprijini: se sare peste, ca sa nu iasa o lespede plutind
+	# pe platou.
+	if floor_y > top_y - 3.0:
+		return []
+	# ...si nici peste ALT TRONSON al pistei.
+	#
+	# Bug masurat in runda 11 (ProbeCappBody): malul opus ajungea la 0.2 m de
+	# axul drumului la fractia 0.193, adica panza statea CHIAR PE SOSEA, iar
+	# captura de sofer de acolo era un perete rosu pe tot cadrul — camera era
+	# in interiorul masei. Cauza nu e offsetul (se intampla si la 46, si la 78
+	# m): cornisa e o SERPENTINA, deci lateralul de la o fractie trece peste
+	# carosabilul altei fractii. Offsetul lateral e orb la asta — e aceeasi
+	# lectie ca la pasajele pe piloni (memoria `pista-peste-pista`): apropierea
+	# se cere fata de TOT traseul, nu fata de punctul local.
+	#
+	# Deci coloana se cauta fata de toate punctele bakeuite, si se renunta la ea
+	# daca baza ei cade in gabaritul soselei. `_build_far` sare deja peste
+	# coloanele goale, deci masa se intrerupe curat acolo si continua dincolo.
+	if _on_any_road(sampler, base, i):
+		return []
+	var out: Array = []
+	var rows := far_bands + 1
+	# FATA: de sus in jos, cu stratele iesind spre drum ca sa prinda lumina.
+	for r in rows:
+		var t := float(r) / float(far_bands)
+		var y := top_y - (top_y - floor_y) * t
+		var stepi := float(int(t * float(far_bands)))
+		# fata se evazeaza in jos (versant de tuf, nu perete atarnat)
+		var flare := batter_m * (top_y - y) * 0.45
+		# STRATELE IES IN TREPTE, nu pe o panta continua.
+		#
+		# `stepi` se calcula aici de la inceput si nu se folosea nicaieri: fata
+		# departata iesea doar cu `flare`, care e LINIAR in y, adica un con lin.
+		# Un con lin nu are muchii orizontale, deci la 40+ m si in ceata benzile
+		# raman doar dungi de culoare — exact ce a reclamat criticul, „strate care
+		# n-au unde sa se citeasca". Un STRAT adevarat iese in consola peste cel
+		# de sub el si isi arunca propria linie de umbra; asta se vede la distanta
+		# chiar si cand culoarea s-a spalat in ceata.
+		#
+		# Pasul e pe rand intreg (stepi), nu pe t continuu, ca sa iasa muchie.
+		var proud := far_relief_m * stepi
+		out.append(base + sd * (flare + proud) + Vector3(0, y - base.y, 0))
+	# TALPA in teren, fara fanta la contact.
+	var last: Vector3 = out[rows - 1]
+	var gy: float = surface_y.call(last.x, last.z)
+	out[rows - 1] = Vector3(last.x, minf(last.y, gy) - foot_bite_m, last.z)
+	return out
+
+
+## Coama pintenului: capacul care il face masa, nu lama. Se construieste ca
+## banda separata, de la buza fetei spre vale, cazand in teren la capat.
+func _far_cap(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	var sd := sampler.side_at(i) * signf(side)
+	var base: Vector3 = p + sd * far_offset_m
+	var floor_y: float = surface_y.call(base.x, base.z)
+	var top_y := p.y + far_rise_m
+	if far_bank:
+		# Aceeasi linie ca in `_far_column`: acelasi rulaj fix, aceeasi fereastra
+		# de cota. Coama trebuie sa plece din acelasi punct ca fata, altfel se
+		# despart.
+		var crest_y := -1e9
+		var probe := -12.0
+		while probe <= 12.0:
+			var q := p + sd * (far_offset_m + probe)
+			crest_y = maxf(crest_y, surface_y.call(q.x, q.z))
+			probe += 6.0
+		base = p + sd * far_offset_m
+		top_y = crest_y + far_rise_m
+		var eye_y := p.y + far_eye_rise_m
+		top_y = maxf(top_y, eye_y + far_over_eye_m)
+		floor_y = surface_y.call(base.x, base.z)
+	if floor_y > top_y - 3.0:
+		return []
+	var out: Array = []
+	var steps := 4
+	for k in steps + 1:
+		var u := float(k) / float(steps)
+		var q := base + sd * (far_depth_m * u)
+		var gy: float = surface_y.call(q.x, q.z)
+		# coama coboara lin spre vale si se infige in teren la capat
+		var y := lerpf(top_y, maxf(gy, floor_y) - foot_bite_m, u * u)
+		out.append(Vector3(q.x, y, q.z))
+	return out
+
+
+## Corpul fizic al unei polite: o cutie la cota si rulajul ei.
+func _ledge_body(sampler: TrackSideSampler, lf: float) -> StaticBody3D:
+	var n := sampler.point_count()
+	var i := clampi(int(round(lf * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	var sd := sampler.side_at(i) * signf(side)
+	var lip_y := p.y
+	var q := p + sd * ledge_offset_m
+	var body := StaticBody3D.new()
+	body.name = "Polita %.3f" % lf
+	# Layer-ul camerei: o polita de 3 m iesita din perete e exact genul de lucru
+	# care nu are voie sa stea intre camera si masina fara sa fie vazut.
+	body.collision_layer |= Track.CAMERA_BLOCKER_LAYER
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(ledge_depth_m * 2.0, 1.6, ledge_len_m)
+	shape.shape = box
+	body.add_child(shape)
+	body.position = Vector3(q.x, lip_y - ledge_drop_m - 0.8, q.z)
+	body.rotation = Vector3(0.0, atan2(sd.x, sd.z), 0.0)
+	return body
+
+
+## Cat de intunecata e fata la adancimea normalizata `t` (0 = coama, 1 = talpa).
+##
+## Nu e doar un gradient: la fiecare banda se adauga o cusatura mai inchisa la
+## partea ei de sus, ca stratele sa se citeasca ca strate si de la 100 m, unde
+## relieful de 0.9 m nu se mai vede.
+func _shade(t: float) -> Color:
+	# Plaja e ingusta DELIBERAT (1.0 -> 0.78, cusatura 0.92).
+	#
+	# Vertex color poate doar sa INTUNECE (memoria
+	# `surfacetool-clamp-vertex-color`), deci fiecare zecime scoasa aici iese
+	# direct din saturatia rosului: cu 0.62 la talpa si 0.88 pe cusatura, cele
+	# doua se inmulteau si faceau fata sa cada la ~0.55, adica maro. Referinta
+	# tine TOATA fata la saturatie 0.47-0.65 — stratele se citesc din culoare si
+	# din relief, nu dintr-un gradient adanc.
+	var base := lerpf(1.0, 0.78, clampf(t, 0.0, 1.0))
+	var seam := absf(sin(t * float(bands) * PI))
+	base *= lerpf(0.92, 1.0, seam)
+	return Color(base, base, base)
+
+
+## O COLOANA de vertecsi la fractia `f`, de la buza in jos pana in teren.
+##
+## Profilul lateral e ce face diferenta intre „faleza" si „panta": fata cade
+## APROAPE vertical (retragere mica per banda), nu in panta de versant. Cifra e
+## derivata din constrangerea masurata a baloanelor, nu aleasa estetic — vezi
+## `docs/track_briefs/cappadocia_geometrie.md`: un balon ancorat jos urca DREPT,
+## deci orice metru cu care peretele se apleaca peste el ii fura din coloana.
+## Cu retragerea totala tinuta sub `band_relief_m * bands` (~8 m pe 30 m de
+## cadere, adica 15° fata de verticala) coloana de deasupra politei ramane
+## libera.
+func _column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	var p := sampler.baked_point(i)
+	var sd := sampler.side_at(i) * signf(side)
+	var hw := sampler.half_width_at(i)
+	var lip := p + sd * (hw + lip_offset_m)
+	# Cota BUZEI: la COTA ASFALTULUI, nu sub fusta.
+	#
+	# Aici a fost pierduta runda 2, si corectia merita scrisa intreaga fiindca
+	# rationamentul vechi suna bine si era gresit. Vechea versiune cobora buza
+	# cu `ROAD_THICKNESS * 0.72` (2.16 m) ca sa nu se vada fusta de beton intre
+	# asfalt si prima banda rosie. Efectul real, masurat cu ProbeOccl: panza
+	# intreaga ajungea sub silueta propriului tablier, iar paravanul dominant
+	# devenea chiar trimesh-ul soselei (`@StaticBody3D@84`, 336 din 556 de
+	# vertecsi in cadru la fractia 0.28, peste TerrainBody). Din camera de
+	# urmarire — 10 m deasupra masinii, privind usor in jos — marginea drumului
+	# trecea exact peste faleza. De-aia criticul vedea „un fileu convex neted":
+	# ala nu era un perete palid, era drumul stand in fata peretelui.
+	#
+	# Deci buza urca la cota asfaltului. Fusta nu mai e o problema fiindca prima
+	# banda o ACOPERA acum, in loc sa inceapa sub ea.
+	var lip_y := p.y
+
+	# CAT DE ADANC cade fata. Se CITESTE fundul vaii, nu se presupune.
+	# Fundul se ia ca MINIM pe o fereastra, nu la primul palier.
+	#
+	# Cautarea „primul loc unde terenul nu mai coboara" mergea cat timp valea
+	# avea podea plata la 95 m. Cu podeaua in panta, ea se opreste pe cate o
+	# treapta diferita de la o coloana la alta, si panza iese din plane
+	# rasucite in loc de strate — aceeasi instabilitate descrisa mai jos la
+	# malul de dincolo, din acelasi motiv: un mal e o LINIE, deci se cere ca
+	# linie. Minimul pe fereastra e neted intre coloane vecine.
+	var floor_y := lip_y - depth_m
+	var far := hw + 6.0
+	while far < hw + FLOOR_SEARCH_M:
+		var q := lip + sd * (far - hw - lip_offset_m)
+		floor_y = minf(floor_y, surface_y.call(q.x, q.z))
+		far += 4.0
+	# Nu mai adanc decat cere silueta: o panza de 60 m pe o vale de 40 ar
+	# ingropa talpa degeaba si ar umple grila.
+	floor_y = maxf(floor_y, lip_y - depth_m * DEPTH_SLACK)
+	var drop := maxf(lip_y - floor_y, 6.0)
+
+	# FATA CADE APROAPE VERTICAL, la un rulaj lateral propriu — nu urmareste
+	# versantul punct cu punct.
+	#
+	# A doua incercare chiar il urmarea (`_reach_for`: la ce rulaj are terenul
+	# cota randului), si a iesit exact pe dos decat suna: masurat cu terenul
+	# stins, panza era o PANGLICA lipita sub marginea drumului, fiindca
+	# versantul e de 73-77 grade — la o cadere aproape verticala, TOATE randurile
+	# nimeresc practic acelasi rulaj, deci fata are latime zero. Sonda de ecran
+	# spunea ca panza acopera 69% din latimea cadrului, si tot nu se vedea rosu:
+	# proiectia era mare, suprafata era o ata.
+	#
+	# Deci fata isi ia rulajul ei si coboara dreapta, cu stratele iesind in
+	# trepte. Asta e si forma corecta fizic (o faleza de tuf e un perete, nu o
+	# glazura peste panta) si singura care da SUPRAFATA rosie in cadru.
+	# POLITA, daca fractia asta cade pe una: peretele iese pe orizontala la cota
+	# ei, deci coloana de deasupra ramane libera pe toata cursa balonului.
+	# POLITA se stinge la capete, nu se APRINDE.
+	#
+	# Corectie masurata (runda 7). Varianta cu prag — „in fereastra, polita
+	# exista; in afara, nu" — scotea fata in afara cu `ledge_depth_m` intreg
+	# intre doua coloane vecine: masurat cu ProbeCappLedge, 3.87 m de rulaj
+	# castigati intr-un singur pas de 4 m, la toate cele trei polite. Din masina
+	# aia nu citeste ca polita, ci ca o LESPEDE ROSIE PLUTIND cu cer pe sub ea —
+	# chiar „geometria rupta la inaltimea soferului" pe care a numit-o criticul.
+	#
+	# Cu stingerea, adancimea creste de la 0 la maxim pe jumatatea dinspre
+	# margine, deci polita iese din perete ca o treapta erodata si are pe ce sta.
+	var ledge_y := INF
+	var ledge_mix := 0.0
+	for lf in ledge_fracs:
+		var half_frac := (ledge_len_m * 0.5) / maxf(sampler.total_length(), 1.0)
+		var d := absf(f - lf)
+		if d <= half_frac:
+			ledge_y = lip_y - ledge_drop_m
+			# 1 in mijloc, 0 chiar pe margine: smoothstep, ca racordul sa fie
+			# neted si la capete (o rampa liniara lasa tot o muchie in plan).
+			ledge_mix = smoothstep(1.0, 0.0, d / maxf(half_frac, 1e-6))
+			break
+
+	var out: Array = []
+	var rows := bands + 1
+	for r in rows:
+		var t := float(r) / float(bands)
+		# STRATELE STAU ORIZONTAL, la cote ABSOLUTE.
+		#
+		# Varianta veche masura banda de la buza locala si o scala cu caderea
+		# locala (`lip_y - drop * t`). Cum buza coboara odata cu soseaua, banda
+		# `r` ajungea la alta altitudine la fiecare coloana, si dunga se ducea
+		# in DIAGONALA peste forma — exact reprosul criticului: „real
+		# sedimentary banding is level; when the wall turns, the band turns
+		# with it and stays horizontal".
+		#
+		# Un strat sedimentar s-a depus orizontal, deci cota lui nu stie nimic
+		# despre drumul sapat in el mai tarziu. Grila de benzi se ia pe cote
+		# fixe (`band_datum_y` + pasul), iar coloana se taie din ea: banda ramane
+		# la aceeasi altitudine cand peretele coteste, si se INGUSTEAZA in
+		# perspectiva acolo unde faleza e mai joasa, cum face si referinta.
+		var y: float
+		if level_bands:
+			var span := maxf(band_span_m, 1.0)
+			# PASUL DE GRILA SE STRANGE CA SA INCAPA IN PERETE.
+			#
+			# Bug masurat cu ProbeCappBandY: pe faleza vaii benzile ieseau cu
+			# plaja de 67.0 m si 61.6 m, adica orice numai orizontale nu, desi
+			# `level_bands` era pornit. Cauza nu era grila, ci CLAMP-ul de sub
+			# ea: cu `bands = 9` si `band_span_m = 5`, cele 10 randuri cer 45 m
+			# de perete, dar faleza are 25-30 m. Randurile care cad sub podea se
+			# strang TOATE pe `lip_y - drop`, deci mai multe benzi se suprapun pe
+			# talpa — si cum talpa coboara odata cu soseaua, dunga rezultata
+			# pleaca in diagonala. (Se vede si in numarul de UV-uri distincte:
+			# 5 in loc de 8, adica benzi topite una in alta.)
+			#
+			# Deci pasul se ia cel mult atat cat incape: peretele isi imparte
+			# inaltimea la numarul de benzi. Stratele raman ORIZONTALE — cheia e
+			# ca `top_band` se calculeaza pe grila absoluta, deci cota unei benzi
+			# nu depinde de cat de jos a ajuns soseaua — dar niciuna nu mai cade
+			# sub podea, deci niciuna nu se mai striveste pe clamp.
+			var fit := drop / float(maxi(bands, 1))
+			span = minf(span, maxf(fit, 0.5))
+			var top_band := ceilf((lip_y - band_datum_y) / span)
+			y = band_datum_y + (top_band - float(r)) * span
+			# Coloana nu poate iesi din propriul perete.
+			y = clampf(y, lip_y - drop, lip_y)
+			# indicele de strat se ia pe ACEEASI grila stransa
+			_grid_span = span
+		else:
+			y = lip_y - drop * t
+		# Iesirea in trepte, banda cu banda: muchiile prind lumina razanta de
+		# zori si stratele se citesc si de la 100 m.
+		# Indicele de strat: pe grila ABSOLUTA cand benzile sunt orizontale,
+		# altfel dupa rand. De el atarna si culoarea, si iesirea in relief —
+		# deci pe grila absoluta un strat isi pastreaza culoarea si proeminenta
+		# pe toata cornisa, cum face o roca reala.
+		var stepi: float
+		if level_bands:
+			stepi = floorf((band_datum_y + 1e-4 - y) / maxf(_grid_span, 1.0))
+			stepi = maxf(stepi, 0.0)
+		else:
+			stepi = float(int(t * float(bands)))
+		# EVAZAREA: fata se departeaza de drum pe masura ce coboara.
+		#
+		# Fara ea, o faleza verticala lipita de marginea benzii e ascunsa de
+		# propriul tablier pentru un ochi care vine din spate si de sus (vezi
+		# nota de la `lip_y`). Cu ea, fiecare banda de mai jos iese cu
+		# `batter_m` in lateral fata de cea de deasupra, deci intra in campul
+		# vizual pe sub muchia soselei in loc sa stea in umbra ei geometrica.
+		#
+		# E si forma corecta: un versant de tuf erodat se deschide in jos, nu
+		# atarna. Ramane sub limita din brief — evazarea totala
+		# (`batter_m * bands`) plus retragerea benzilor nu are voie sa depaseasca
+		# `ledge_offset_m`, altfel peretele s-ar apleca peste coloana pe care
+		# urca balonul ancorat.
+		# `batter_m` e per METRU DE CADERE, nu per banda: masurat cu ProbeReach,
+		# frontiera vizibilitatii din camera de joc e o diagonala aproape
+		# constanta — la fiecare ~6 m de adancime e nevoie de ~4 m de rulaj ca
+		# punctul sa iasa de sub muchia soselei. Deci evazarea trebuie legata de
+		# ADANCIME, altfel benzile de jos raman in umbra geometrica a drumului
+		# indiferent cate sunt.
+		var proud := band_relief_m * stepi + batter_m * (drop * t)
+		# Sub cota politei, fata se retrage cu adancimea treptei: asa polita e o
+		# treapta reala in perete, nu un raft lipit peste el.
+		if ledge_y < INF and y < ledge_y:
+			proud += ledge_depth_m * ledge_mix
+		out.append(lip + sd * proud + Vector3(0, y - lip_y, 0))
+	# TALPA intra in teren, ca sa nu ramana fanta la contact.
+	var last: Vector3 = out[rows - 1]
+	var gy2: float = surface_y.call(last.x, last.z)
+	out[rows - 1] = Vector3(last.x, minf(last.y, gy2) - foot_bite_m, last.z)
+	# POALA DE MOLOZ, daca se cere: vezi `talus_m`. Se adauga DUPA talpa, deci
+	# randurile de perete raman exact unde erau — poala nu misca faleza, doar
+	# ii da picior.
+	_append_talus(out, sd, surface_y)
+	return out
+
+
+## Adauga randurile de poala sub ultimul rand al unei coloane.
+##
+## Forma: din talpa fetei se pleaca in jos SI in afara, pe o curba care se
+## aplatizeaza (exponentul 1.6) — un con de grohotis e abrupt langa perete si se
+## intinde la baza, fiindca bolovanii mari se opresc sus si pietrisul curge mai
+## departe. Ultimul rand se infige in teren, ca sa nu ramana fanta acolo unde
+## tocmai am adaugat contactul.
+##
+## Coloana intra si iese ca lista de puncte de sus in jos, deci consumatorii
+## (cusatura in quad-uri, AO-ul, slotul) merg mai departe neschimbati.
+func _append_talus(col: Array, sd: Vector3, surface_y: Callable) -> void:
+	if talus_m <= 0.0 or talus_rows < 1 or col.is_empty():
+		return
+	var foot: Vector3 = col[col.size() - 1]
+	# Varful poalei sta pe fata, cu `talus_rise_ratio` din latime mai sus decat
+	# talpa: de aici iese unghiul de taluz.
+	var top_y: float = foot.y + talus_m * talus_rise_ratio
+	for k in talus_rows:
+		var u := float(k + 1) / float(talus_rows)
+		# afara pe orizontala, si in jos pe curba care se aplatizeaza
+		var q: Vector3 = foot + sd * (talus_m * u)
+		var y: float = lerpf(top_y, foot.y, pow(u, 1.6))
+		var gy: float = surface_y.call(q.x, q.z)
+		if k == talus_rows - 1:
+			# ultimul rand se coase in teren
+			y = minf(y, gy) - foot_bite_m * 0.5
+		else:
+			# molozul sta PESTE teren, nu sub el
+			y = maxf(y, gy - 0.4)
+		col.append(Vector3(q.x, y, q.z))
+
+
+## Un quad ca doua triunghiuri, cu UV constant (culoarea slotului) si vertex
+## color per colt.
+## Ordinea vertecsilor NU e o conventie de gust: cu winding-ul invers, panza
+## exista, are 5346 de vertecsi si un AABB corect — dar fiecare fata se uita IN
+## stanca. Masurat cu ProbeCliffNormals pe prima versiune: 90 din 90 de fete
+## esantionate aveau normala DINSPRE drum, deci culling-ul le stergea pe toate
+## exact din locul din care faleza trebuie vazuta. Capturile ieseau identice cu
+## cele de dinainte de nod, si e capcana clasica: „nu se vede" arata la fel ca
+## „nu s-a construit", dar se repara in alt loc.
+func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
+		uvv: Vector2, ca: Color, cb: Color, cc: Color, cd: Color) -> void:
+	_vert(st, a, uvv, ca)
+	_vert(st, c, uvv, cc)
+	_vert(st, b, uvv, cb)
+	_vert(st, a, uvv, ca)
+	_vert(st, d, uvv, cd)
+	_vert(st, c, uvv, cc)
+
+
+func _vert(st: SurfaceTool, v: Vector3, uvv: Vector2, col: Color) -> void:
+	st.set_uv(uvv)
+	st.set_color(col)
+	st.add_vertex(v)

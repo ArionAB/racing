@@ -85,6 +85,10 @@ const ENVELOPE_HEIGHT: float = 12.0
 const ENVELOPE_RADIUS: float = 4.5
 ## Cablul de ancorare: o linie de la tarus la cos.
 const TETHER_RADIUS: float = 0.05
+## Cat de sus peste podeaua cosului sta baza panzei (franghiile). Piesa are
+## originea la baza ei (masurat pe GLB), deci cifra asta e chiar inaltimea
+## franghiilor, nu un offset de centru.
+const ENVELOPE_LIFT: float = 2.0
 
 enum State { JOS, URCA, SUS, COBOARA }
 
@@ -119,6 +123,9 @@ enum State { JOS, URCA, SUS, COBOARA }
 @export var basket_model: PackedScene = null
 @export var envelope_model: PackedScene = null
 @export_range(0.2, 3.0, 0.05) var model_scale: float = 1.0
+## Scara PANZEI, separat de a cosului: piesa din kit e deja la cota din brief.
+## Vezi nota din `_build_envelope` pentru de ce nu e acelasi factor.
+@export_range(0.2, 3.0, 0.05) var envelope_scale: float = 1.0
 ## Sloturile de paleta pentru inlocuitoarele desenate in cod (fara model).
 @export_range(0, 31) var basket_slot: int = 9    # WOOD_WEATHERED (rachita)
 @export_range(0, 31) var envelope_slot: int = 14 # CAR_RED (balon saturat)
@@ -213,9 +220,18 @@ func _build_envelope() -> void:
 	if envelope_model != null:
 		var inst := envelope_model.instantiate() as Node3D
 		if inst != null:
-			inst.scale = Vector3.ONE * model_scale
+			# PANZA NU SE SCALEAZA CU COSUL. `model_scale` exista fiindca
+			# `balloon_basket.glb` are 2.16 m, iar colizorul cosului are 4.8 m
+			# (ampatamentul autobuzului, vezi BASKET_SIZE) — deci modelul de cos
+			# trebuie umflat ca sa arate cat e de fapt solid. Panza insa vine
+			# deja la cota ei din brief (12 m inalta, 9 m lata) si e mesh pur
+			# vizual: inmultita cu acelasi factor ajunge un balon de 26 m care
+			# umple tot cadrul si ascunde valea — masurat pe captura de la
+			# frac 0.28. Ea isi pastreaza scara, si sta peste cos, nu in el.
+			inst.scale = Vector3.ONE * envelope_scale
+			inst.position = Vector3(0.0, ENVELOPE_LIFT, 0.0)
 			Palette.apply_object_class_materials(inst,
-				WorldProp.prop_classes(), model_scale)
+				WorldProp.prop_classes(), envelope_scale)
 			_envelope.add_child(inst)
 			return
 	# Inlocuitor: o sfera turtita, desenata in SurfaceTool ca sa aiba toate

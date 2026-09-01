@@ -1,65 +1,29 @@
 extends Node
-## CINE e in cadru la frac 0.06: numele si coloana pe ecran a fiecarui obiect
-## de decor, proiectate cu ACEEASI camera ca Snapshot.
-##
-## Motivul: sonda de silueta raporteaza conuri dupa coloana X, iar eu am reglat
-## `chimney_shape` presupunand ca acele conuri SUNT hornuri. Daca in stanga-fata
-## e de fapt alt asset (mesa, creasta, bolovan), atunci toate rundele care au
-## tunat hornuri au masurat un obiect pe care nu-l atingeau.
+## CINE e aripa portocalie din captura larga? Tipareste, pentru fiecare panza de
+## faleza, AABB-ul global si cota lui de sus/jos — ca sa se vada care sta cu
+## coama PESTE cota drumului (43.8 la frac 0.20) si cat de subtire e.
+
+const TRACK_SCENE: String = "res://scenes/tracks/Track13.tscn"
+
+var _track: Track
+
 
 func _ready() -> void:
-	await get_tree().process_frame
-	var scn: PackedScene = load("res://scenes/tracks/Track13.tscn")
-	var track: Node = scn.instantiate()
-	get_tree().root.add_child(track)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var cam := _find_cam(get_tree().root)
-	if cam == null:
-		print("fara camera")
-		get_tree().quit()
+	_track = (load(TRACK_SCENE) as PackedScene).instantiate() as Track
+	add_child(_track)
+	await get_tree().physics_frame
+	var root := _track.find_child("CliffFaces", true, false)
+	if root == null:
+		print("nu exista CliffFaces")
+		get_tree().quit(0)
 		return
-	var rows: Array = []
-	_walk(track, cam, rows)
-	rows.sort_custom(func(a, b): return a[1] < b[1])
-	print("obiecte proiectate in cadru (x_ecran, nume, script):")
-	for r in rows:
-		print("  x=%4d  h=%4d px  %-26s %s" % [r[1], r[2], r[0], r[3]])
-	get_tree().quit()
-
-
-func _find_cam(n: Node) -> Camera3D:
-	if n is Camera3D and (n as Camera3D).current:
-		return n
-	for c in n.get_children():
-		var r := _find_cam(c)
-		if r != null:
-			return r
-	return null
-
-
-func _walk(n: Node, cam: Camera3D, out: Array) -> void:
-	var mi := n as MeshInstance3D
-	if mi != null and mi.mesh != null and mi.visible:
-		var ab: AABB = mi.global_transform * mi.mesh.get_aabb()
-		var ctr := ab.get_center()
-		if not cam.is_position_behind(ctr):
-			var p := cam.unproject_position(ctr)
-			if p.x > -200.0 and p.x < 1480.0:
-				var top := cam.unproject_position(
-						Vector3(ctr.x, ab.position.y + ab.size.y, ctr.z))
-				var bot := cam.unproject_position(
-						Vector3(ctr.x, ab.position.y, ctr.z))
-				var hpx := int(absf(bot.y - top.y))
-				if hpx > 40:
-					var owner_n := n
-					while owner_n != null and owner_n.get_script() == null:
-						owner_n = owner_n.get_parent()
-					var scr := "-"
-					var nm := mi.name
-					if owner_n != null:
-						scr = owner_n.get_script().resource_path.get_file()
-						nm = owner_n.name
-					out.append([nm, int(p.x), hpx, scr])
-	for c in n.get_children():
-		_walk(c, cam, out)
+	for ch in root.get_children():
+		var mi := ch as MeshInstance3D
+		if mi == null:
+			continue
+		var ab := mi.get_aabb()
+		var o := mi.global_transform * ab.position
+		var e := ab.size
+		print("%-34s  y %7.1f .. %7.1f   x %7.1f..%7.1f  z %7.1f..%7.1f"
+			% [mi.name, o.y, o.y + e.y, o.x, o.x + e.x, o.z, o.z + e.z])
+	get_tree().quit(0)

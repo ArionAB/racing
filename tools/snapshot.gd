@@ -99,6 +99,7 @@ func _ready() -> void:
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
 	var cine := false
+	var hide_terrain := false
 	var game_cam := false
 	var free_cam := false
 	var eye_pos := Vector3.ZERO
@@ -155,6 +156,12 @@ func _ready() -> void:
 		elif arg == "--gamecam":
 			driver_view = true
 			game_cam = true
+		elif arg == "--no-terrain":
+			# Diagnostic: ascunde panza de teren, ca sa se vada ce e SUB ea.
+			# „Exista in scena" si „se vede in cadru" sunt intrebari diferite —
+			# cu terenul stins se afla instant daca o geometrie lipseste sau
+			# doar e acoperita.
+			hide_terrain = true
 	if driver_view and zoom_frac < 0.0:
 		zoom_frac = 0.0
 	# `--track=` accepta si pozitia din lista (Stromboli = 4), si numarul
@@ -173,6 +180,12 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
+	if hide_terrain:
+		var tb := track.get_node_or_null("TerrainBody")
+		if tb != null:
+			for ch in tb.get_children():
+				if ch is MeshInstance3D:
+					(ch as MeshInstance3D).visible = false
 	if "--smooth" in OS.get_cmdline_user_args():
 		_smooth_organics(track)
 	if train_at >= 0.0:

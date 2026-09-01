@@ -1,112 +1,108 @@
 extends Node
-## Profilul de raza al hornurilor, MASURAT PE MESH, nu pe pixeli.
+## PROFILUL unei coloane din peretele opus: y si rulaj, banda cu banda.
 ##
-## Sonda de silueta (skyline_cones.py) vede rezultatul final si e arbitrul, dar
-## nu poate spune UNDE in cod se naste curbura. Asta citeste raza pe cote din
-## mesh-ul construit, deci arata daca profilul e drept in geometrie inainte sa
-## intre camera, ceata si suprapunerile in discutie.
-##
-## Raporteaza aceleasi cifre ca sonda de pixeli (raport la baza, a doua
-## diferenta, suma|d2|) ca sa fie comparabile direct.
+## Capturile arata masa ca pe niste dune netede, desi far_relief_m=1.1 ar trebui
+## sa dea trepte de ~27 px la 42 m. Deci ori treapta nu se aplica, ori se aplica
+## in DIRECTIA GRESITA (fiecare banda de jos iese SPRE drum, si atunci fata e o
+## lespede inclinata care isi ascunde propriile polite, in loc de trepte care
+## urca in retragere). Sonda tipareste coloana reala, sa se vada care.
 
-const N := 9
+const TRACK_SCENE: String = "res://scenes/tracks/Track13.tscn"
+
+var _track: Track
 
 
 func _ready() -> void:
-	# add_child imediat in _ready cade cu "parent is busy setting up children",
-	# si atunci sonda masura un arbore vechi si raporta cifre identice inainte
-	# si dupa schimbare. Se asteapta un cadru INAINTE de instantiere.
-	await get_tree().process_frame
-	var scn: PackedScene = load("res://scenes/tracks/Track13.tscn")
-	var track: Node = scn.instantiate()
-	get_tree().root.add_child(track)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var found: Array = []
-	_collect(track, found)
-	print("hornuri gasite: %d" % found.size())
-	print("")
-	for node in found:
-		_report(node)
-	get_tree().quit()
-
-
-func _collect(n: Node, out: Array) -> void:
-	if n.get_script() != null:
-		var p: String = n.get_script().resource_path
-		if p.ends_with("chimney_shape.gd"):
-			out.append(n)
-	for c in n.get_children():
-		_collect(c, out)
-
-
-func _report(n: Node) -> void:
+	_track = (load(TRACK_SCENE) as PackedScene).instantiate() as Track
+	add_child(_track)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var route := _track.route_at(0)
+	var n := route.count()
+	var root := _track.find_child("CliffFaces", true, false)
 	var mi: MeshInstance3D = null
-	for c in n.get_children():
-		if c is MeshInstance3D:
-			mi = c
-			break
-	if mi == null or mi.mesh == null:
+	for ch in root.get_children():
+		if String(ch.name).contains("MalulOpus"):
+			mi = ch as MeshInstance3D
+	if mi == null:
+		print("nu exista panza malului opus")
+		get_tree().quit(0)
 		return
-	var aabb: AABB = mi.mesh.get_aabb()
-	var y0 := aabb.position.y
-	var h := aabb.size.y
-	if h <= 0.01:
-		return
-	# Centrul axei: media pe XZ a vertecsilor din treimea de jos.
-	var rmax := PackedFloat32Array()
-	rmax.resize(N)
-	rmax.fill(0.0)
-	var cx := aabb.position.x + aabb.size.x * 0.5
-	var cz := aabb.position.z + aabb.size.z * 0.5
-	for s in mi.mesh.get_surface_count():
-		var arrays: Array = mi.mesh.surface_get_arrays(s)
-		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		for v in verts:
-			var t := clampf((v.y - y0) / h, 0.0, 0.9999)
-			var k := int(t * float(N))
-			k = clampi(k, 0, N - 1)
-			var r := Vector2(v.x - cx, v.z - cz).length()
-			if r > rmax[k]:
-				rmax[k] = r
-	# Felii goale: hornurile cu terase au taieturi unde nu cade niciun vertex in
-	# cosul de cota. Un zero acolo nu inseamna raza zero, inseamna "nu stiu" —
-	# se interpoleaza intre vecinii plini, altfel a doua diferenta masoara
-	# gaurile sondei, nu forma hornului.
-	for k in N:
-		if rmax[k] > 0.0001:
+	# ia vertecsii dintr-o felie subtire in jurul fractiei 0.32
+	var idx := 326
+	var c := _track.point_at(idx)
+	var sd: Vector3 = route.side_at(idx)
+	var fwd: Vector3 = (_track.point_at((idx + 1) % n) - c).normalized()
+	var arrs: Array = (mi.mesh as ArrayMesh).surface_get_arrays(0)
+	var vs: PackedVector3Array = arrs[Mesh.ARRAY_VERTEX]
+	# Intai: pe ce interval de fractii exista efectiv coloane?
+	var fr_lo := 1e9
+	var fr_hi := -1e9
+	for k in vs.size():
+		var w: Vector3 = mi.global_transform * vs[k]
+		var bi := 0
+		var bd := 1e9
+		for i in n:
+			var pp := _track.point_at(i)
+			var d2 := (pp.x - w.x) * (pp.x - w.x) + (pp.z - w.z) * (pp.z - w.z)
+			if d2 < bd:
+				bd = d2
+				bi = i
+		var fr := float(bi) / float(n)
+		fr_lo = minf(fr_lo, fr)
+		fr_hi = maxf(fr_hi, fr)
+	print("   panza acopera fractiile %.3f .. %.3f" % [fr_lo, fr_hi])
+	print("   idx cerut = %d (din count()=%d)" % [idx, n])
+	# histograma: cate varfuri cad pe fiecare indice, in jurul lui idx
+	var hist := {}
+	for k in vs.size():
+		var w2: Vector3 = mi.global_transform * vs[k]
+		var bi2 := 0
+		var bd2 := 1e9
+		for i in n:
+			var pp2 := _track.point_at(i)
+			var dd := (pp2.x - w2.x) * (pp2.x - w2.x) + (pp2.z - w2.z) * (pp2.z - w2.z)
+			if dd < bd2:
+				bd2 = dd
+				bi2 = i
+		hist[bi2] = int(hist.get(bi2, 0)) + 1
+	var keys := hist.keys()
+	keys.sort()
+	var shown := 0
+	for kk in keys:
+		if absi(int(kk) - idx) <= 25:
+			print("      idx %d: %d varfuri" % [int(kk), int(hist[kk])])
+			shown += 1
+	if shown == 0:
+		print("      NICIUN varf pe +-25 indici de idx; indici prezenti: %d..%d" % [int(keys[0]), int(keys[keys.size() - 1])])
+	# Selectia pe INDICE DE TRASEU, nu pe proiectie pe tangenta: la 42 m rulaj
+	# lateral pe un viraj, arcul peretelui se departeaza de tangenta drumului,
+	# deci o felie "±4.5 m de-a lungul tangentei" cade intre coloane si iese
+	# goala. Indicele celui mai apropiat punct de traseu nu are problema asta.
+	var rows: Array = []
+	for k in vs.size():
+		var v: Vector3 = mi.global_transform * vs[k]
+		var bi := 0
+		var bd := 1e9
+		for i in n:
+			var pp := _track.point_at(i)
+			var d2 := (pp.x - v.x) * (pp.x - v.x) + (pp.z - v.z) * (pp.z - v.z)
+			if d2 < bd:
+				bd = d2
+				bi = i
+		if absi(bi - idx) > 0:
 			continue
-		var lo := k - 1
-		while lo >= 0 and rmax[lo] <= 0.0001:
-			lo -= 1
-		var hi := k + 1
-		while hi < N and rmax[hi] <= 0.0001:
-			hi += 1
-		if lo < 0 and hi >= N:
+		var cc := _track.point_at(bi)
+		var ss: Vector3 = route.side_at(bi)
+		rows.append(Vector2((v - cc).dot(ss), v.y))
+	rows.sort_custom(func(a, b): return a.y > b.y)
+	print("=== COLOANA MALULUI OPUS la frac 0.32 (ax y=%.1f) ===" % c.y)
+	print("   rulaj[m]   y[m]   (rulaj creste = spre vale)")
+	print("   (%d varfuri in fereastra)" % rows.size())
+	var last := Vector2(-999, -999)
+	for r in rows:
+		if absf(r.y - last.y) < 0.25 and absf(r.x - last.x) < 0.25:
 			continue
-		elif lo < 0:
-			rmax[k] = rmax[hi]
-		elif hi >= N:
-			rmax[k] = rmax[lo]
-		else:
-			var f := float(k - lo) / float(hi - lo)
-			rmax[k] = lerpf(rmax[lo], rmax[hi], f)
-	var base := rmax[0]
-	if base <= 0.0001:
-		return
-	var rat := PackedFloat32Array()
-	for k in N:
-		rat.append(rmax[N - 1 - k] / base)
-	var d2 := PackedFloat32Array()
-	var sum := 0.0
-	var mx := -9.0
-	for i in range(1, N - 1):
-		var v := rat[i + 1] - 2.0 * rat[i] + rat[i - 1]
-		d2.append(v)
-		sum += absf(v)
-		mx = maxf(mx, v)
-	var line := ""
-	for k in N:
-		line += "%.2f " % rat[k]
-	print("%-22s h=%5.1f  %s  d2max %+.3f  suma|d2| %.3f"
-			% [n.name, h, line, mx, sum])
+		print("   %+8.2f  %7.2f" % [r.x, r.y])
+		last = r
+	get_tree().quit(0)

@@ -251,10 +251,20 @@ func _ready() -> void:
 		else:
 			print("snapshot: nu am gasit %s" % hide_node)
 
-	# Fara ceata: camera e sus si ceata ar spala imaginea.
-	for child in track.get_children():
-		if child is WorldEnvironment:
-			(child as WorldEnvironment).environment.fog_enabled = false
+	# Ceata se stinge doar pentru vederile DE SUS (ansamblul ortografic), unde
+	# camera e la sute de metri si ceata ar spala tot intr-o pata uniforma.
+	#
+	# Pentru vederile DE JOC (--driver, --gamecam, --landmark, camera libera)
+	# ceata TREBUIE sa ramana: ea e ce vede jucatorul, si fara ea capturile mint
+	# exact despre fundal — siluetele de orizont stau la 190-300 m, adica in
+	# plina ceata, si pe captura ieseau la contrast plin. Runda 34: 13 runde de
+	# reglaje pe Erciyes s-au judecat pe capturi fara ceata, deci pe o imagine
+	# pe care jucatorul n-o vede niciodata.
+	var keep_fog := driver_view or game_cam or free_cam or landmark_id >= 0
+	if not keep_fog:
+		for child in track.get_children():
+			if child is WorldEnvironment:
+				(child as WorldEnvironment).environment.fog_enabled = false
 
 	# Incadram pista (nu terenul urias): bounds din punctele coapte.
 	var bmin := track.baked[0]

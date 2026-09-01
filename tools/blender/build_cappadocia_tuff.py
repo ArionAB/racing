@@ -6,36 +6,20 @@
   cappadocia/rocks/cliff_band_module.glb   felie de faleza in benzi roz-rosu, 20 m
   cappadocia/rocks/rock_church_facade.glb  fatada de biserica rupestra, sapata in con
 
-De ce hornul NU e un con strunjit (brief §0.1, 55% din pista e geologie de tuf):
+De ce hornul NU e un simplu con (brief §0.1, 55% din pista e geologie de tuf):
+silueta reala are TREI parti, si toate trei se vad de la 40 m —
 
-Runda 1 a retusat culoarea, runda 2 exponentul profilului — si critica oarba
-tot a citit panoul drept "engine output", cu motivul scris exact: *"Kill the
-revolve. Every cone is the same surface of revolution with the same horizontal
-contour banding."* Avea dreptate pe amandoua, si amandoua sunt in MESH:
-
-  1. **un singur con, instantiat.** Cele patru variante ieseau din aceeasi
-     formula la scari diferite, deci profilul NORMALIZAT era identic —
-     masurat: 100-91-80-68-54-35-19 vs 100-91-79-65-50-34-15. Yaw-ul aleator
-     din generator nu schimba nimic pe o suprafata de revolutie. Acum exista o
-     FAMILIE de profile (`_profile`): cort, spire, burta, talie, ciot — forme
-     diferite ca STRUCTURA, cu inflexiuni si subtaieri, nu un exponent reglat.
-  2. **finisaj de strung.** `Builder.revolve` face inele perfect circulare,
-     echidistante pe unghi, pe axa dreapta: de acolo veneau "contour lines
-     running perfectly parallel to the ground". Corpurile trec pe `tuff_body`,
-     care pune canelurile pe VERTICALA (factor de raza fix pe segment, deci
-     muchia coboara cu apa, cum cere referinta) si poate curba axa (`lean`),
-     deci cateva hornuri chiar se apleaca.
-  3. **palaria.** Tot aceeasi lozenga la acelasi unghi pe toate piesele. Acum
-     `basalt_cap` primeste `tilt` si `offset`: sta stramb si iese in consola
-     asimetric, ca o piatra ramasa in echilibru pe un gat erodat.
-
-Silueta ramane citibila de la 40 m — asta nu s-a schimbat — dar acum e citibila
-ca PIESE DIFERITE, care e tot ce cerea critica.
+  1. **gatul** care se subtiaza neuniform (tuful se erodeaza in trepte, nu
+     liniar), deci `revolve` cu un profil in care raza scade cu paliere;
+  2. **palaria de bazalt**, mereu MAI LATA decat gatul de sub ea si cu buza
+     care iese in consola — asta e ce face conul sa citeasca drept "horn de
+     zana" si nu drept "movila de nisip". `VOLCANIC_BLACK` peste crem;
+  3. **umbra proprie lunga** la soare de 13° — vine din geometrie, nu din
+     asset, dar de-aia gatul e inalt si subtire.
 
 Buget: brief §6 cere `chimney_*` sub 600 tri fiecare, fiindca sunt ~40 pe
-pista. Inelele s-au REDISTRIBUIT, nu inmultit: 7 de baza (erau 9) plus trei
-indesate in zona poalei, acolo unde muchia dintre crem si rugina are nevoie de
-ele. Sus, unde profilul e aproape drept, inelele dese nu descriau nimic. Ferestrele (doar pe `chimney_d`) sunt gauri INFUNDATE (cutii intrate
+pista. `segments=9` + 7-8 inele de profil intra fix: 9*7*2 = 126 tri corp +
+palarie. Ferestrele (doar pe `chimney_d`) sunt gauri INFUNDATE (cutii intrate
 in corp cu slot intunecat), nu bool-uri — o gaura reala ar cere ca interiorul
 sa fie modelat si ar dubla costul pentru ceva ce se vede de la 15 m ca o pata
 intunecata. Vezi memoria `decor-manual-din-cod`: gaura pictata bate gaura
@@ -56,270 +40,92 @@ AO_CHIMNEY = dict(samples=20, dist=8.0, gradient="vertical",
                   low=0.42, high=1.00, power=0.85, floor=0.14)
 AO_CLIFF = dict(samples=18, dist=10.0, gradient="vertical",
                 low=0.46, high=1.00, power=0.80, floor=0.16)
-# Masa rosie are AO-ul EI, mult mai adanc, si nu din gust — din masuratoare pe
-# cadru. Paleta n-are un rosu stins: TILE_TERRACOTTA e la saturatie 0.60 si
-# LARCH_RUST la 0.65, iar soarele de zori (13°, portocaliu) se inmulteste peste
-# ele si le duce in cadru la 0.93-1.00. De-aia prima versiune a masei citea
-# "ladite de plastic portocalii" pe captura, desi hexurile erau cuminti.
-#
-# Singura parghie care ramane e vertex color-ul, si el doar INTUNECA
-# (SurfaceTool clampeaza in [0,1] — vezi memoria `surfacetool-clamp-vertex-color`).
-# Deci masa nu se decoloreaza, se BAGA IN UMBRA: `low`/`floor` mult mai jos,
-# ca partea de jos a malului sa fie pamant in umbra, nu vopsea.
-AO_MESA = dict(samples=20, dist=14.0, gradient="vertical",
-               low=0.20, high=0.72, power=1.15, floor=0.08)
 AO_FACADE = dict(samples=26, dist=5.0, gradient="vertical",
                  low=0.40, high=1.00, power=0.90, floor=0.12)
 
 TUFF = CORAL_SAND          # crem de tuf in soare — dominanta pistei
 TUFF_MID = SAND_MID        # tuf mediu, banda de variatie de valoare
 TUFF_SH = SAND_SHADOW      # tuf umbrit, la baza si sub consola palariei
-# POALA ROSIE a hornului — singura separare de nuanta din cadru.
-#
-# Al patrulea punct al criticii oarbe: "B is monochrome tan. Rock, ground,
-# distance and haze are all the same yellow-beige. Zero cream-vs-red
-# separation." Masurat pe captura, si cifra confirma ochiul: peretele si solul
-# dadeau saturatie 0.589 vs 0.580 si nuanta 37° vs 32° — practic acelasi corp.
-#
-# Prima incercare a fost un MAL de canion din cliff_band_module, adica rosul de
-# la referinta pus intr-un obiect separat. A picat de doua ori la captura: in
-# rand continuu citea gard de caramida pana la orizont, iar in pinteni scurti
-# devenea zid de blocuri care umple cadrul si taie drumul. Modulul e autorat ca
-# buza de canion vazuta DE SUS (brief §5.1), nu ca perete langa care treci la 2 m.
-#
-# Rosul trebuie sa fie pe silueta care oricum e in cadru, nu langa ea. Valea
-# Rosie chiar asa arata: tuful crem sta pe o poala de ocru-rosu, iar linia
-# dintre ele e la o treime de inaltime. Costa ZERO — slotul inlocuieste doar
-# `TUFF_SH` la baza, pe fetele care existau deja.
-# LARCH_RUST (#A8683A), nu TILE_TERRACOTTA (#C4784F): terracotta e slot de
-# OLANE, autorat pentru acoperisuri, si la 0.30 din inaltime a iesit portocaliu
-# de con de santier — captura a aratat o baie de vopsea, nu geologie. Rugina e
-# aceeasi familie de nuanta, dar mai inchisa si mai putin saturata, deci separa
-# de crem fara sa sara din paleta.
-# POALA hornului. A FOST rosie (LARCH_RUST) o runda; nu mai e, si motivul e
-# al criticii oarbe, runda 3:
-#
-#   "The rust skirt is applied at a CONSTANT FRACTION of each cone's height, so
-#   the bands align horizontally across neighbouring instances and read as
-#   painted trim. The reference's red is a SEPARATE TERRAIN MASS at a different
-#   depth, not a band on the objects."
-#
-# Si asa e, se vede pe captura: fiecare con purta banda la 0.14-0.17 din corp,
-# deci pe doua conuri vecine de inaltimi diferite muchiile cadeau tot pe o linie
-# citita ca orizontala. Armonicile de pe unghi rupeau muchia PE O PIESA, dar nu
-# puteau rupe alinierea INTRE piese — aia venea din faptul ca inaltimea e
-# referinta, si e o eroare de concept, nu de calibrare.
-#
-# Rosul se muta acolo unde il are referinta: in TEREN, sub cota drumului, vazut
-# peste un gol. Vezi nodul CanionulRosu din Track13.tscn.
-#
-# Aici ramane doar praful de la baza, adica ce era inainte de runda cu rugina:
-# aceeasi calcare de VALOARE pe acelasi crem, care aseaza conul in pamant fara
-# sa-i deseneze o dunga.
-TUFF_FOOT = TUFF_SH
 CAP = VOLCANIC_BLACK       # palaria de bazalt
 BAND_RED = TILE_TERRACOTTA  # banda lata rosie (Valea Rosie)
 BAND_RUST = LARCH_RUST     # banda ingusta ruginie
 HOLE = ROCK_DARK           # ferestre si usi sapate (gaura "pictata")
-
-FLUTES = 13               # segmente pe circumferinta = canelurile de eroziune
 DOOR_WOOD = WOOD
 
 
-def _r_at(profile, z):
-    """Raza profilului la cota z (interpolare liniara intre inele).
+def chimney_profile(height, r_base, r_neck, seed, steps=5):
+    """Profilul (raza, z) al gatului: o SCARA CRESTATA, nu un taper neted.
 
-    Exista fiindca profilul nu mai e analitic: e o familie de chei interpolate,
-    deci o formula scrisa a doua oara (cum era `t ** CONE_EXP` pentru ferestre)
-    s-ar desincroniza de suprafata la prima modificare de forma.
+    Runda 2 a picat aici la trei critici din patru, in aceleasi cuvinte:
+    taperul neted cu jitter de +-6.5% pe raza e INVIZIBIL la 40 m (masurat:
+    orice perturbatie sub ~10% dispare in silueta). Un strat de tuf se citeste
+    doar daca arunca propria linie de umbra, adica daca are o fata de sus
+    ORIZONTALA care iese in consola peste stratul de dedesubt.
+
+    Deci profilul e construit din `steps` segmente stivuite, fiecare cu 8-12%
+    mai ingust decat cel de sub el. Fiecare imbinare emite DOUA inele la
+    ACEEASI cota: raza larga, apoi raza ingusta. Perechea aia nu e o risipa de
+    geometrie — e exact fata orizontala tare de 0.30 m adancime (diferenta de
+    raza) pe care cade lumina razanta de zori. `revolve` interpoleaza intre
+    inele, deci fara perechea la aceeasi cota treapta redevine o tesitura.
+
+    Nu se tesesc buzele: o consola tesita citeste tot ca taper (capcana rundei
+    17 — detaliul care nu taie silueta nu exista).
     """
-    if z <= profile[0][1]:
-        return profile[0][0]
-    for (r0, z0), (r1, z1) in zip(profile, profile[1:]):
-        if z0 <= z <= z1:
-            u = 0.0 if z1 <= z0 else (z - z0) / (z1 - z0)
-            return r0 + (r1 - r0) * u
-    return profile[-1][0]
-
-
-def _profile(kind, height, r_base, r_neck, seed, steps=7):
-    """Profilul (raza, z) al unui corp de tuf, dupa FAMILIE, nu dupa scara.
-
-    Aici e reparatia principala a rundei 3. Pana acum toate hornurile ieseau
-    din aceeasi formula (`r_base + (r_neck-r_base) * t**1.35`), deci profilul
-    NORMALIZAT era identic pe toate patru — masurat: a/b/c/d dadeau
-    100-91-80-68-54-35-19 vs 100-91-79-65-50-34-15. Adica un singur con, scalat
-    de patru ori. Critica oarba a numit exact asta ("one cone, instanced";
-    "every formation is the same isoceles triangle at a different scale"), si
-    avea dreptate in cifre, nu doar in impresie: yaw-ul aleator din generator nu
-    schimba nimic pe o suprafata de revolutie, iar scara uniforma cu atat mai
-    putin.
-
-    Deci profilul devine o FAMILIE cu forme diferite ca STRUCTURA:
-
-      "spire"   zvelt, umar jos si gat lung — silueta ascutita
-      "tent"    indesat, aproape drept de la poala la varf — cortul lat
-      "belly"   burta la mijloc (r > r_base pe la 0.22H), apoi strangulare —
-                asta da subtaierea pe care referinta o are si noi n-o aveam
-      "stub"    ciot: se opreste scurt si gros, fara gat
-      "waist"   talie stransa la mijloc si evazare din nou spre palarie
-
-    Nu sunt exponenti diferiti pe aceeasi curba: sunt chei (t, factor)
-    interpolate liniar, fiindca doar asa poti pune r > r_base la mijloc (burta)
-    sau o inflexiune (talie). O singura formula analitica nu are inflexiuni.
-    """
-    keys = {
-        # (t, raza ca fractie din r_base) — r_neck da capatul de sus
-        "spire": [(0.0, 1.00), (0.18, 0.86), (0.42, 0.62), (0.68, 0.38), (1.0, 0.0)],
-        "tent":  [(0.0, 1.00), (0.30, 0.90), (0.60, 0.72), (0.85, 0.44), (1.0, 0.0)],
-        "belly": [(0.0, 0.88), (0.22, 1.02), (0.45, 0.96), (0.72, 0.52), (1.0, 0.0)],
-        "stub":  [(0.0, 1.00), (0.35, 0.93), (0.70, 0.80), (0.92, 0.66), (1.0, 0.0)],
-        "waist": [(0.0, 1.00), (0.26, 0.74), (0.52, 0.60), (0.78, 0.66), (1.0, 0.0)],
-    }[kind]
     rand = _lcg(seed)
+    # Buza are adancime FIXA de 0.30 m (cifra din verdicte). Restul ingustarii
+    # o face peretele segmentului, ca profilul sa ajunga totusi la `r_neck`:
+    # din caderea totala de raza, `steps-1` buze iau 0.30 m fiecare, iar ce
+    # ramane se imparte pe pereti. Daca buzele ar lua tot, gatul ar iesi gros.
+    LIP = 0.30
+    drop = r_base - r_neck
+    lip_total = LIP * (steps - 1)
+    # peretii preiau restul; daca buzele depasesc caderea totala, hornul e prea
+    # scurt pentru 5 trepte de 0.30 — atunci se reduce numarul de trepte.
+    while lip_total > drop * 0.80 and steps > 3:
+        steps -= 1
+        lip_total = LIP * (steps - 1)
+    wall_drop = (drop - lip_total) / float(steps)
+
     prof = []
+    r = r_base
     for i in range(steps):
-        t = i / (steps - 1.0)
-        # interpolare liniara intre cheile familiei
-        f = keys[-1][1]
-        for (t0, f0), (t1, f1) in zip(keys, keys[1:]):
-            if t0 <= t <= t1:
-                u = 0.0 if t1 <= t0 else (t - t0) / (t1 - t0)
-                f = f0 + (f1 - f0) * u
-                break
-        # capatul de sus se aduce pe r_neck, ca palaria sa aiba pe ce sta
-        r = r_base * f
-        if t > 0.80:
-            u = (t - 0.80) / 0.20
-            r = r * (1.0 - u) + r_neck * u
-        # neregularitate MICA pe verticala: pastreaza ideea de eroziune fara sa
-        # refaca inelele orizontale (variatia tare e pe unghi, in `tuff_body`)
-        r *= 1.0 + (rand() - 0.5) * 0.05
-        prof.append((max(r, 0.05), height * t))
-    # INELE IN PLUS in zona poalei (sub ~0.22H). `retag` coloreaza FETE
-    # intregi, deci marginea dintre crem si rugina poate urma doar muchiile
-    # care exista: cu 9 inele pe toata inaltimea, o fata din zona joasa are
-    # peste un metru si linia iesea o treapta dreptunghiulara — masca de
-    # vopsea, nu contact geologic. Trei inele suplimentare, dese, dau
-    # marginii pe ce sa serpuiasca. Cost: 3 * segments * 2 triunghiuri.
-    extra = []
-    for u in (0.07, 0.14, 0.21):
-        z = height * u
-        extra.append((_r_at(prof, z), z))
-    prof = sorted(prof + extra, key=lambda rz: rz[1])
+        z0 = height * (i / float(steps))
+        z1 = height * ((i + 1) / float(steps))
+        # peretele: aproape vertical, cu o pierdere mica de raza; jitterul
+        # determinist ramane doar ca sa nu fie toate treptele identice, dar el
+        # NU mai poarta citirea — buza o poarta.
+        wob = 1.0 + (rand() - 0.5) * 0.10
+        r_top = max(r_neck, r - wall_drop * wob)
+        prof.append((r, z0))
+        prof.append((r_top, z1 - 0.001))
+        if i < steps - 1:
+            # BUZA: doua inele la ACEEASI cota => fata orizontala tare de
+            # 0.30 m, in consola peste segmentul de deasupra.
+            prof.append((r_top, z1))
+            r = max(r_neck, r_top - LIP)
+            prof.append((r, z1))
+        else:
+            r = r_top
+    prof.append((r, height))
     return prof
 
 
-def tuff_body(b, profile, slot, seed, segments=FLUTES, origin=(0, 0, 0),
-              lean=(0.0, 0.0), flute=0.13, twist=0.0):
-    """Corpul de tuf: loft cu CANELURI VERTICALE si axa care poate fi inclinata.
+def basalt_cap(b, z, r_neck, r_cap, thickness, seed=0, segments=9):
+    """Palaria de bazalt: disc mai LAT decat gatul, cu buza in consola.
 
-    Inlocuieste `Builder.revolve` pe toata familia de hornuri, si asta e a doua
-    jumatate a reparatiei din runda 3. `revolve` face exact ce spune numele:
-    inele PERFECT circulare, echidistante pe unghi, pe o axa DREAPTA. Din ea nu
-    poate iesi decat un obiect strunjit, si critica a citit-o din prima ("that
-    is not stratigraphy, that is a topographic map or a lathe finish"; "exposes
-    the shape as a revolve"). Nicio retusare de culoare sau de exponent nu
-    scoate asta din mesh, fiindca problema E mesh-ul.
-
-    Trei lucruri pe care `revolve` nu le poate face si care sunt aici:
-
-    1. **Caneluri VERTICALE.** Fiecare segment de pe circumferinta primeste un
-       factor de raza propriu, CONSTANT pe toata inaltimea (`fl[]` se calculeaza
-       o singura data, in afara buclei pe inele). Asa iese o muchie care coboara
-       de sus pana jos — santurile de siroire pe care le are referinta ("the
-       marks run *down* the cone with the water, not around it"). Daca factorul
-       s-ar recalcula pe fiecare inel, ar iesi zgomot, adica exact inelele
-       orizontale pe care le scoatem.
-    2. **Axa inclinata / curbata.** `lean` = deplasarea (dx, dy) a varfului fata
-       de baza, aplicata cu t**1.6 ca sa iasa o curba (piesa se apleaca tot mai
-       tare spre varf), nu o piesa dreapta pusa strambа. Cateva hornuri aplecate
-       rup imediat citirea de "sir de conuri identice".
-    3. **Rasucire.** `twist` roteste inelele cu inaltimea, deci canelurile ies
-       usor spiralate, ca la formatiunile reale scobite de vant.
-
-    Costul e acelasi ca la `revolve` (segments*(steps-1)*2 triunghiuri): nu se
-    adauga geometrie, doar se aseaza altfel vertecsii care oricum existau.
-    """
-    ox, oy, oz = origin
-    rand = _lcg(seed + 17)
-    # factorii de canelura: FIXATI pe segment, deci muchia e verticala
-    fl = []
-    for i in range(segments):
-        # doua armonici pe unghi + zgomot: santuri de latimi diferite, altfel
-        # canelura devine ea insasi un motiv regulat (o "roata dintata")
-        a = 2.0 * math.pi * i / segments
-        w = (math.sin(a * 3.0 + seed * 0.7) * 0.55
-             + math.sin(a * 5.0 + seed * 1.3) * 0.30
-             + (rand() - 0.5) * 1.10)
-        fl.append(1.0 + flute * w)
-
-    top_z = profile[-1][1] if profile[-1][1] > 1e-6 else 1.0
-    rings, apex = [], None
-    for (r, z) in profile:
-        t = z / top_z
-        # axa: deplasare progresiva (t**1.6), deci CURBA, nu inclinare rigida
-        cx = ox + lean[0] * (t ** 1.6)
-        cy = oy + lean[1] * (t ** 1.6)
-        if r <= 1e-6:
-            apex = b.bm.verts.new((cx, cy, oz + z))
-            break
-        # canelurile se sting spre varf: sus piesa e subtire si santurile ar
-        # inghiti-o (raza ar trece prin zero pe segmentele negative)
-        damp = 1.0 - 0.55 * t
-        ring = []
-        for i in range(segments):
-            a = 2.0 * math.pi * i / segments + twist * t
-            rr = r * (1.0 + (fl[i] - 1.0) * damp)
-            ring.append(b.bm.verts.new((cx + rr * math.cos(a),
-                                        cy + rr * math.sin(a), oz + z)))
-        rings.append(ring)
-
-    new_verts = [v for ring in rings for v in ring] + ([apex] if apex else [])
-    for lo, hi in zip(rings, rings[1:]):
-        for i in range(segments):
-            j = (i + 1) % segments
-            b.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
-    if apex and rings:
-        top = rings[-1]
-        for i in range(segments):
-            j = (i + 1) % segments
-            b.bm.faces.new((top[i], top[j], apex))
-    if rings:
-        b.bm.faces.new(tuple(reversed(rings[0])))
-    return b._tag(new_verts, slot)
-
-
-def basalt_cap(b, z, r_neck, r_cap, thickness, seed=0, segments=9,
-               tilt=0.0, offset=(0.0, 0.0), center=(0.0, 0.0)):
-    """Palaria de bazalt: con TURTIT asezat pe gat, cu consola mica.
-
-    `tilt`, `offset` si `center` sunt noi in runda 3, si sunt jumatate din
-    raspunsul la "every cap is the same dark lozenge at the same angle".
-    Palaria reala e o bucata de bazalt ramasa in echilibru pe un gat care s-a
-    erodat sub ea: sta STRAMB si iese in consola pe o parte. Cu toate palariile
-    orizontale si centrate, cele ~40 de piese de pe pista aveau acelasi accent
-    negru identic, repetat.
-
-    `tilt` e in radiani si deplaseaza cele doua frustumuri pe arcul de bascula;
-    `offset` mai si muta palaria in lateral, deci consola devine asimetrica;
-    `center` o aseaza peste varful unui corp INCLINAT (`lean` din `tuff_body`).
+    Consola e tot ce conteaza: fara ea palaria citeste ca un varf de con si
+    hornul dispare in "stanca oarecare". Doua inele (buza dreapta + varf
+    tesit) ca sa se vada si din profil, si de sus.
     """
     rand = _lcg(seed + 91)
     wob = 1.0 + (rand() - 0.5) * 0.10
-    cx, cy = center
-    dx, dy = offset
-
-    def _put(zc, rb, rt, th):
-        # frustum-ul e pe axa Z; inclinarea se face mutand centrul pe arcul de
-        # bascula. Piesele au 1-1.5 m, deci fata inclinata nu se citeste de la
-        # 15 m — dar DEPLASAREA se citeste imediat pe silueta.
-        px = cx + dx + (zc - z) * math.sin(tilt)
-        py = cy + dy
-        b.frustum((px, py, zc), rb, rt, th, CAP, segments=segments)
-
-    _put(z - thickness * 0.22, r_neck * 1.02, r_cap * wob, thickness * 0.44)
-    _put(z + thickness * 0.30, r_cap * wob, r_cap * 0.30 * wob, thickness * 0.85)
+    # gatul subtire imediat sub palarie (partea protejata de eroziune)
+    b.frustum((0.0, 0.0, z - thickness * 0.30), r_neck * 1.02, r_cap * wob,
+              thickness * 0.60, CAP, segments=segments)
+    # corpul palariei + tesitura de sus
+    b.frustum((0.0, 0.0, z + thickness * 0.35), r_cap * wob, r_cap * 0.74 * wob,
+              thickness * 0.75, CAP, segments=segments)
     return r_cap * wob
 
 
@@ -341,67 +147,45 @@ def carve_window(b, cx, cy, cz, w, h, depth, normal, slot=HOLE):
     b.box(tuple(lip), (depth * 0.9, w * 1.12, 0.10), TUFF_SH, rotation=rot)
 
 
-# Cele patru hornuri de baza. Runda 3: difera prin FAMILIE de profil, prin
-# inclinare si prin palarie, nu doar prin scara.
-#  (kind,   H,    r_base, r_neck, cap_t, lean,          tilt,  seed)
-CHIMNEY_SPEC = [
-    ("tent",  10.5, 3.55, 0.70, 1.05, (0.00, 0.00), 0.16, 7),
-    ("spire", 14.6, 3.10, 0.46, 0.95, (0.95, -0.35), 0.09, 23),
-    ("belly", 16.4, 3.85, 0.62, 1.25, (-0.55, 0.40), -0.21, 41),
-    ("waist", 12.6, 3.70, 0.80, 1.05, (0.30, 0.60), 0.05, 59),
-]
-
-
 def build_chimney(variant):
-    """Un horn din familia de baza.
-
-    Ce s-a schimbat in runda 3 si DE CE (critica oarba, verdict 3/10 pe
-    "geometry is one asset repeated"): pana acum cele patru variante erau
-    acelasi profil normalizat la scari diferite, invelit in inelele orizontale
-    ale lui `revolve`. Acum:
-      - profilul vine din `_profile(kind, ...)`, deci a/b/c/d au forme DIFERITE
-        ca structura (cort, spire, burta, talie), nu doar dimensiuni;
-      - corpul se face cu `tuff_body`: caneluri VERTICALE si axa curbata
-        (`lean`), deci nu mai e suprafata de revolutie;
-      - palaria e inclinata si decentrata (`tilt`/`offset`), diferit pe fiecare.
-    """
+    """Cele patru hornuri de baza. Variantele difera prin PROPORTIE, nu prin
+    detaliu: brief §2.0 cere 10-18 m langa banda, iar la vitezele de acolo
+    silueta e singurul lucru care se citeste."""
     b = Builder()
-    kind, H, R_BASE, R_NECK, CAP_T, LEAN, TILT, SEED = CHIMNEY_SPEC[variant]
+    # (inaltime, raza baza, raza gat, grosime palarie, seed)
+    spec = [
+        (10.5, 2.30, 0.95, 1.25, 7),      # a — scund si indesat
+        (13.8, 2.05, 0.78, 1.15, 23),     # b — clasicul zvelt
+        (16.4, 2.60, 0.86, 1.45, 41),     # c — inalt, palarie grea
+        (12.6, 2.45, 1.05, 1.20, 59),     # d — locuit, cu ferestre
+    ][variant]
+    H, R_BASE, R_NECK, CAP_T, SEED = spec
 
-    prof = _profile(kind, H, R_BASE, R_NECK, SEED)
-    faces = tuff_body(b, prof, TUFF, SEED, lean=LEAN, flute=0.15,
-                      twist=0.10 if variant % 2 else -0.07)
+    prof = chimney_profile(H, R_BASE, R_NECK, SEED)
+    faces = b.revolve(prof, TUFF, segments=9)
 
-    # O SINGURA calcare de valoare, jos, si fara muchie orizontala.
-    #
-    # Ramane doar praful de la baza, taiat pe o cota NEregulata (variaza cu
-    # unghiul in jurul axei) ca sa nu iasa un inel perfect. Cu canelurile
-    # verticale marginea se rupe si mai bine: pragul cade pe fete aflate la
-    # raze diferite, deci nu mai exista un inel de fete la aceeasi cota pe
-    # care sa se aseze o dunga.
-    b.retag(faces, TUFF_FOOT,
-            where=lambda c, n, h=H: c.z < h * (0.17 + 0.055 * math.sin(
-                math.atan2(c.y, c.x) * 3.0)
-                + 0.035 * math.sin(math.atan2(c.y, c.x) * 7.0 + 1.1)))
+    # Variatie de valoare fara niciun triunghi: fetele de sub 35% din inaltime
+    # primesc tuf umbrit, o banda de mijloc primeste tuf mediu. style_bible §4
+    # ("fetele de sus decolorate") aplicat invers — jos e mai murdar.
+    b.retag(faces, TUFF_SH, where=lambda c, n: c.z < H * 0.22)
+    b.retag(faces, TUFF_MID, where=lambda c, n: H * 0.45 < c.z < H * 0.63)
 
-    # varful conului DUPA inclinare: palaria trebuie sa stea PE el
-    basalt_cap(b, H, R_NECK, R_NECK * 1.30, CAP_T, seed=SEED, tilt=TILT,
-               center=(LEAN[0], LEAN[1]),
-               offset=(R_NECK * 0.22, -R_NECK * 0.15))
+    r_cap = basalt_cap(b, H, R_NECK, R_NECK * 2.05, CAP_T, seed=SEED)
+    # umbra proprie sub consola: inel de tuf umbrit imediat sub palarie
+    b.frustum((0.0, 0.0, H - 0.55), R_NECK * 1.06, R_NECK * 1.02, 1.0,
+              TUFF_SH, segments=9)
 
     if variant == 3:
         # hornul locuit: usa la baza + trei ferestre pe fata (spre +Y = -Z Godot)
+        _ = r_cap
         carve_window(b, 0.0, R_BASE * 0.90, 1.05, 1.05, 1.85, 0.55, (0, 1, 0),
                      slot=DOOR_WOOD)
         for (fz, fa, fw) in ((4.4, 8.0, 0.62), (6.9, -34.0, 0.55),
                              (8.8, 26.0, 0.50)):
-            # raza REALA la cota `fz`, citita din profilul construit
-            r = _r_at(prof, fz) * 0.94
             t = fz / H
-            cx = LEAN[0] * (t ** 1.6)
-            cy = LEAN[1] * (t ** 1.6)
+            r = (R_BASE + (R_NECK - R_BASE) * (t ** 0.62)) * 0.94
             a = math.radians(90.0 + fa)
-            carve_window(b, cx + r * math.cos(a), cy + r * math.sin(a), fz,
+            carve_window(b, r * math.cos(a), r * math.sin(a), fz,
                          fw, fw * 1.25, 0.45, (math.cos(a), math.sin(a), 0))
 
     return b.to_object("Chimney_" + "ABCD"[variant])
@@ -416,25 +200,14 @@ def build_chimney_mushroom():
     reper de POI.
     """
     b = Builder()
-    # baza latita ca la restul familiei (vezi `build_chimney`): ciuperca statea
-    # pe 2.15 m si iesea un pai cu palarie, langa conuri de 3.3-4.3 m
-    H, R_BASE, R_NECK = 11.2, 3.20, 0.62
-    # familia "waist": talia stransa E subiectul ciupercii, deci profilul o are
-    # deja in chei — nu mai e nevoie de strangularea lipita peste profil.
-    prof = _profile("waist", H, R_BASE, R_NECK, 103, steps=7)
-    faces = tuff_body(b, prof, TUFF, 103, lean=(-0.42, 0.28), flute=0.17,
-                      twist=0.14)
-    # aceleasi doua motive ca la `build_chimney`: fara banda de mijloc, si
-    # praful de la baza taiat pe o cota neregulata (ciuperca e cea mai numeroasa
-    # piesa de langa banda, deci dungile ei se vedeau cel mai des)
-    b.retag(faces, TUFF_FOOT,
-            where=lambda c, n, h=H: c.z < h * (0.15 + 0.050 * math.sin(
-                math.atan2(c.y, c.x) * 3.0 + 0.9)
-                + 0.032 * math.sin(math.atan2(c.y, c.x) * 7.0 + 2.3)))
-    # palaria enorma sta pe varful DEPLASAT si e inclinata mai tare decat la
-    # restul familiei: consola larga inclinata e chiar silueta din Pasabag
-    basalt_cap(b, H, R_NECK * 0.80, R_NECK * 3.10, 1.55, seed=103, segments=10,
-               tilt=-0.13, center=(-0.42, 0.28), offset=(0.30, 0.12))
+    H, R_BASE, R_NECK = 11.2, 2.15, 0.62
+    prof = chimney_profile(H, R_BASE, R_NECK, 103, steps=8)
+    # gatul se stranguleaza suplimentar in treimea de sus (eroziunea reala)
+    prof = [(r * (0.80 if 0.62 * H < z < 0.93 * H else 1.0), z) for r, z in prof]
+    faces = b.revolve(prof, TUFF, segments=9)
+    b.retag(faces, TUFF_SH, where=lambda c, n: c.z < H * 0.20)
+    b.retag(faces, TUFF_MID, where=lambda c, n: H * 0.50 < c.z < H * 0.70)
+    basalt_cap(b, H, R_NECK * 0.80, R_NECK * 3.10, 1.55, seed=103, segments=10)
     return b.to_object("Chimney_Mushroom")
 
 
@@ -447,40 +220,26 @@ def build_chimney_triple():
     """
     b = Builder()
     # soclul comun, o movila joasa
-    # Soclul s-a LATIT odata cu gaturile: cu bazele conice de 2.1-2.7 m raza,
-    # cel mai departat ajunge la x=+5.7, deci pe 8 m latime picioarele ar fi
-    # atarnat in aer. Masurat pe extentele reale ale celor trei, nu pe AABB.
-    b.rock((0.0, 0.0, 0.0), (12.4, 8.4, 3.2), TUFF_SH, seed=311, segments=9,
+    b.rock((0.0, 0.0, 0.0), (8.0, 6.2, 3.2), TUFF_SH, seed=311, segments=9,
            rings=3, flat_top=True, taper=0.30)
 
-    # Cele trei gaturi au FAMILII diferite si se apleaca in directii diferite —
-    # asta e ce transforma piesa din "furculita" in grup. Al treilea ramane
-    # descoperit (`cap=False`): referinta are conuri fara palarie, si un ciot
-    # tesit langa doua cu caciula citeste imediat ca formatiune, nu ca set.
-    #        x      y     h    rb    rn    ct   lean          kind    cap  seed
-    stems = [(-2.60, -0.60, 12.8, 2.45, 0.48, 0.95, (0.55, 0.30), "spire", True, 17),
-             (1.35, 1.05, 15.6, 2.70, 0.52, 1.05, (-0.40, 0.62), "belly", True, 53),
-             (3.60, -1.60, 9.4, 2.10, 0.44, 0.82, (0.70, -0.45), "stub", False, 89)]
-    for (x, y, h, rb, rn, ct, lean, kind, cap, seed) in stems:
-        prof = _profile(kind, h, rb, rn, seed)
+    stems = [(-1.85, -0.45, 12.8, 1.55, 0.62, 1.05, 17),
+             (0.95, 0.75, 15.6, 1.70, 0.70, 1.20, 53),
+             (2.55, -1.15, 9.4, 1.35, 0.58, 0.90, 89)]
+    for (x, y, h, rb, rn, ct, seed) in stems:
+        prof = chimney_profile(h, rb, rn, seed)
         base_z = 2.15
-        faces = tuff_body(b, prof, TUFF, seed, segments=11,
-                          origin=(x, y, base_z), lean=lean, flute=0.16,
-                          twist=0.12 if seed % 2 else -0.11)
-        # poala rosie si pe gaturile hornului triplu: piesa e cea mai vizibila
-        # din familie (trei siluete deodata), deci daca ei ii lipseste separarea
-        # de nuanta, lipseste din cadru.
-        b.retag(faces, TUFF_FOOT,
-                where=lambda c, n, bz=base_z, hh=h, px=x, py=y:
-                    c.z < bz + hh * (0.16 + 0.05 * math.sin(
-                        math.atan2(c.y - py, c.x - px) * 3.0)
-                        + 0.03 * math.sin(math.atan2(c.y - py, c.x - px) * 7.0)))
-        if not cap:
-            continue
-        basalt_cap(b, base_z + h, rn, rn * 1.30, ct, seed=seed, segments=9,
-                   tilt=0.18 if seed == 17 else -0.15,
-                   center=(x + lean[0], y + lean[1]),
-                   offset=(rn * 0.25, rn * 0.18))
+        faces = b.revolve(prof, TUFF, segments=8, origin=(x, y, base_z))
+        b.retag(faces, TUFF_MID,
+                where=lambda c, n, h=h, bz=base_z: bz + h * 0.45 < c.z < bz + h * 0.65)
+        # palaria, mutata pe axa fiecarui gat
+        rand = _lcg(seed + 91)
+        wob = 1.0 + (rand() - 0.5) * 0.10
+        r_cap = rn * 2.00 * wob
+        b.frustum((x, y, base_z + h - ct * 0.30), rn * 1.02, r_cap, ct * 0.60,
+                  CAP, segments=8)
+        b.frustum((x, y, base_z + h + ct * 0.35), r_cap, r_cap * 0.74, ct * 0.75,
+                  CAP, segments=8)
     return b.to_object("Chimney_Triple")
 
 
@@ -527,80 +286,6 @@ def build_cliff_band_module():
     return b.to_object("Cliff_Band_Module")
 
 
-def build_red_mesa():
-    """MASA ROSIE de teren — malul de Valea Rosie vazut PESTE gol, de la 100 m.
-
-    De ce nu `cliff_band_module` reasezat, desi exista deja: acolo rosul e in
-    straturi de 1.2-1.5 m dintr-un corp de 12 m, adica o dunga. Piesa e autorata
-    sa fie privita de aproape, de pe cornisa. Cufundata intr-un bazin ca sa se
-    vada peste o rapa, ii ies din pamant exact straturile de sus, care sunt
-    creme — masurat pe captura: rosu in cadru 0.01%, adica nimic. Aceeasi
-    eroare ca "gardul pana la orizont" din runda 2, doar cu alta cota.
-
-    Aici rosul E corpul: un platou lat si scund, cu doar o cornisa crem
-    deasupra, ca in referinta unde masa rosie e PAMANTUL de dincolo de rapa,
-    nu un obiect asezat pe el. Proportia e inversata fata de modulul de faleza —
-    ~75% rosu, restul crem — fiindca de la 100 m si prin ceata numai masa
-    citeste, nu straturile.
-
-    Lat si jos dinadins (90 x 26 m la 15 m inaltime): trebuie sa umple o felie
-    de orizont, nu sa fie o silueta. O forma inalta ar fi devenit inca un horn.
-    """
-    b = Builder()
-    L, D, H = 90.0, 26.0, 15.0
-    rand = _lcg(733)
-
-    # Corpul rosu, in trepte largi: fiecare treapta e mai scurta si retrasa,
-    # deci profilul e de mal erodat, nu de cutie. Slotul alterneaza intre rosul
-    # lat si ruginiul mai inchis, ca masa sa nu fie o singura pata.
-    # DOMINANTA E RUGINA, nu terracotta. Prima versiune punea BAND_RED
-    # (TILE_TERRACOTTA #C4784F, slot de OLANE) pe majoritatea corpului si pe
-    # captura iesea portocaliu de ladita de plastic — aceeasi capcana pe care
-    # poala hornului o avusese cu un slot mai devreme. LARCH_RUST (#A8683A) e
-    # mai inchis si mai putin saturat: terracotta ramane doar ca strat de accent.
-    steps = [(0.00, 1.00, BAND_RUST), (0.30, 0.94, BAND_RUST),
-             (0.55, 0.87, BAND_RED), (0.74, 0.82, BAND_RUST),
-             (0.88, 0.76, BAND_RUST)]
-    for (z0, shrink, slot) in steps:
-        z1 = z0 + 0.26
-        jitter = (rand() - 0.5) * 2.2
-        # Fiecare strat e taiat in 3 bucati de latimi inegale, usor decalate pe
-        # adancime si pe cota: asa muchia de sus a masei nu mai e o dreapta
-        # continua pe toata lungimea, care citea ca lada, ci o linie franta de
-        # mal erodat. Costa fete pe geometrie care oricum exista.
-        seg = 3
-        for j in range(seg):
-            frac_w = (0.26 + 0.16 * rand())
-            cxs = (-0.5 + (j + 0.5) / seg) * L * shrink
-            b.box((jitter + cxs + (rand() - 0.5) * 3.0,
-                   (1.0 - shrink) * D * 0.22 + (rand() - 0.5) * 1.4,
-                   (z0 + z1) * 0.5 * H + (rand() - 0.5) * H * 0.05),
-                  (L * shrink * frac_w * 1.15, D * shrink, (z1 - z0) * H),
-                  slot)
-
-    # CORNISA crem de deasupra: linia care spune ca masa rosie e PAMANT cu
-    # platou pe el, nu o stanca rosie. Subtire — 12% din inaltime.
-    b.box((0.0, D * 0.10, H * 1.06), (L * 0.78, D * 0.72, H * 0.12), TUFF)
-
-    # Pinteni la capete, ca marginile sa nu fie doua colturi drepte de cutie.
-    for sx in (-1.0, 1.0):
-        for i in range(3):
-            t = 0.20 + 0.26 * i
-            w = L * (0.10 + 0.05 * rand())
-            b.box((sx * L * (0.42 + 0.04 * i), D * 0.10 * rand(), H * t),
-                  (w, D * 0.55, H * 0.20),
-                  BAND_RED if i == 1 else BAND_RUST)
-
-    # Moloz cazut la baza — leaga masa de fundul vaii.
-    for i in range(9):
-        fx = -L * 0.5 + L * (rand() * 0.94 + 0.03)
-        sc = 0.9 + rand() * 1.6
-        b.rock((fx, D * 0.5 + rand() * 1.6, 0.0),
-               (sc * 2.4, sc * 1.9, sc * 1.1), BAND_RUST,
-               seed=int(rand() * 900), segments=6, rings=3, taper=0.55)
-    return b.to_object("Red_Mesa")
-
-
 def build_rock_church_facade():
     """Fatada de biserica rupestra: con de tuf cu portal sapat si cruce incizata.
 
@@ -611,16 +296,10 @@ def build_rock_church_facade():
     """
     b = Builder()
     H, R_BASE, R_NECK = 14.0, 4.20, 1.55
-    # "tent": fatada trebuie sa aiba un perete aproape drept in care sa incapa
-    # portalul, deci cortul indesat, nu spire-ul. Fara `lean`: pe piesa asta se
-    # sapa un portal aliniat, iar o axa curbata l-ar aseza stramb.
-    prof = _profile("tent", H, R_BASE, R_NECK, 601, steps=7)
-    faces = tuff_body(b, prof, TUFF, 601, segments=13, flute=0.10)
-    # idem pe fatada bisericii: e tot un con de tuf, langa drum
-    b.retag(faces, TUFF_FOOT,
-            where=lambda c, n, h=H: c.z < h * (0.14 + 0.045 * math.sin(
-                math.atan2(c.y, c.x) * 3.0 + 2.4)
-                + 0.030 * math.sin(math.atan2(c.y, c.x) * 7.0 + 0.4)))
+    prof = chimney_profile(H, R_BASE, R_NECK, 601, steps=8)
+    faces = b.revolve(prof, TUFF, segments=11)
+    b.retag(faces, TUFF_SH, where=lambda c, n: c.z < H * 0.18)
+    b.retag(faces, TUFF_MID, where=lambda c, n: H * 0.42 < c.z < H * 0.58)
     basalt_cap(b, H, R_NECK, R_NECK * 1.95, 1.45, seed=601, segments=10)
 
     y = R_BASE * 0.86
@@ -644,17 +323,8 @@ clear_built()
 results = []
 
 
-# FATETE, nu bloburi (runda 12). Criticul orb, dupa ce a vazut cadrul bun de la
-# frac 0.05, a numit mecanismul: "conurile smooth-shaded transforma roca low-poly
-# in bloburi moi; fatetele vizibile ale referintei sunt ce o face sa citeasca drept
-# diorama stilizata". `finish` are smooth_angle=55 implicit, deci un horn cu 7 inele
-# isi pierdea exact muchiile care il fac sa arate ca roca sculptata: lumina curgea
-# uniform pe suprafata de revolutie si ramanea doar dunga pictata.
-# Nu contrazice apply_smooth (netezirea a scos aspectul "Minecraft", #113) — acolo
-# vorbim de cladiri si de curburi organice. Roca vrea invers: fiecare fateta o
-# fatetare de sapa. De-aia e per-piesa, nu global.
-def emit(obj, path, ao, origin="base", bevel=0.05, smooth=None):
-    st = finish(obj, bevel=bevel, ao=ao, origin=origin, smooth_angle=smooth)
+def emit(obj, path, ao, origin="base", bevel=0.05):
+    st = finish(obj, bevel=bevel, ao=ao, origin=origin)
     _, sz = export_glb([obj], "cappadocia/" + path)
     results.append((path, st["tris"], sz / 1024.0))
 
@@ -665,7 +335,6 @@ emit(build_chimney_mushroom(), "rocks/chimney_mushroom.glb", AO_CHIMNEY)
 emit(build_chimney_triple(), "rocks/chimney_triple.glb", AO_CHIMNEY)
 emit(build_cliff_band_module(), "rocks/cliff_band_module.glb", AO_CLIFF,
      origin="base_axis", bevel=0.06)
-emit(build_red_mesa(), "rocks/red_mesa.glb", AO_MESA)
 emit(build_rock_church_facade(), "rocks/rock_church_facade.glb", AO_FACADE)
 
 print()

@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://tools/probe_e_right.gd" id="1_p"]
+[ext_resource type="PackedScene" path="res://scenes/tracks/Track13.tscn" id="2_t"]
+[node name="Root" type="Node3D"]
+[node name="Track13" parent="." instance=ExtResource("2_t")]
+[node name="Probe" type="Node3D" parent="."]
+script = ExtResource("1_p")

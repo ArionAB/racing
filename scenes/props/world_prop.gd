@@ -132,13 +132,31 @@ const PROP_COLLISION := {
 	# trotuarul din aleea de 6 m, adica la o roata distanta de linia de curs.
 	"porter": "none", "table_stools": "none", "steam_vent": "none",
 	"scooter": "none", "bicycle": "none",
-	# --- Cappadocia -------------------------------------------------------
-	# Plopii: aceeasi problema ca laricele — hull-ul unei coroane de 12 m e un
-	# con care te opreste in aer, la trei metri de trunchi.
+	# --- Cappadocia (POI E: via si balonul aterizat) ----------------------
+	# Panza dezumflata ZACE PESTE drum, pe toata latimea lui (20,7 x 8,0 m,
+	# groasa de 50 cm). Implicitul "hull" ar fi exact ce descrie brief-ul ca
+	# fiind gresit: un zid de 20 m fix pe linia de curs, care inchide pista.
+	# Panza e o SUPRAFATA, nu un obstacol — treci peste ea (incetinit).
+	"balloon_landed": "none",
+	# Randul de vie e scurtatura lenta prin care se TRECE (brief POI E:
+	# "iarba lenta cu geometrie"). Aracii au 4 cm: un hull per rand ar fi un
+	# gard de 10 m, si sunt zeci de randuri.
+	"vine_row": "none",
+	"shrub_dry": "none", "pigeon": "none",
+	# (Molozul hornurilor cazute — `cracked_chimney_*` — e declarat mai sus,
+	# la POI D. Motivul lui POI E e acelasi si se adauga: cele 72 de lespezi
+	# de pe coama din dreapta stau la 28-60 m lateral de banda si sunt
+	# gradient de contact intre stanca si sol, nu obstacole.)
+	# Grohotisul de sub perete (POI E, runda 3): bolovani de 0.3-1.6 m, zeci de
+	# bucati, TOATE la peste 13 m lateral de banda (generatorul le respinge mai
+	# aproape). Ca si molozul de mai sus: sunt gradient de contact intre stanca
+	# si sol, nu obstacole, iar un hull per bucata ar pune zeci de corpuri
+	# convexe pe teren pe care masina n-are ce cauta.
+	"talus_block": "none", "talus_cobble": "none", "talus_gravel": "none",
+	# Plopii: cilindru pe trunchi, ca toti copacii — hull-ul unui plop de
+	# 15 m e o coloana de 2,5 m latime care te opreste in aer.
 	"poplar_a": "trunk", "poplar_b": "trunk",
-	# Via si tufele: sub linia capotei, pe acostament. Un corp solid acolo ar
-	# transforma iesirea de pe banda in zid.
-	"vine_row": "none", "shrub_dry": "none",
+	# Cosul balonului e mic si solid; ferma e o casa: hull implicit, corect.
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.

@@ -2046,18 +2046,20 @@ static func themes() -> Dictionary:
 			# de piatra care taie drumul cu umbra lor. Ordinea de sacrificiu e
 			# in brief §6: intai in subteran, unde nu se vad.
 			"shadows": true,
-			# CASCADA MAI SCURTA, ca umbrele sa fie mai ASCUTITE — nu a doua
-			# cascada. CLAUDE.md interzice explicit a doua (ar dubla draw
-			# call-urile de umbra ale scenei); asta face invers, ingusteaza
-			# caseta celei existente, si costa ZERO draw call-uri: se deseneaza
-			# aceiasi casteri (mai putini, chiar), doar intr-o cutie mai mica.
+			# (Cascada e declarata mai jos, cu restul setarilor de umbra.
+			# Masuratoarea lui POI E care confirma 130: la 22 grade un horn de
+			# 14 m arunca 34.7 m, padurea se intinde dincolo de 75 m, iar solul
+			# din planul mijlociu s-a intunecat de la 137 la 110.)
+			# ETAJUL INALT AL TUFULUI, rece — mecanismul alpin (`rock_band_tint`),
+			# si e raspunsul la DEFECTUL 1 al rundei 2: o singura nuanta pe toata
+			# adancimea cadrului.
 			#
-			# Socoteala, fiindca altfel pare gust: Godot potriveste caseta
-			# ortografica pe o sfera in jurul feliei de frustum [near,
-			# max_dist]. La FOV 68 si 110 m sfera are raza 159 m, deci caseta
-			# 318 m — de trei ori cascada — si pe atlasul implicit de mobil
-			# (2048) un texel are 15.5 cm. La 75 m: raza 108 m, caseta 217 m,
-			# texel 10.6 cm. Cu o treime mai fin, pe gratis.
+			# Masurat pe captura de sofer la 0.56, pe regiuni: drumul hue 31 deg,
+			# dealul din stanga 41, CONUL din dreapta 31, podeaua bazinului 30,
+			# iar cerul 29. Douasprezece grade intre cel mai cald si cel mai rece
+			# lucru din cadru, cerul inclus — adica tot cadrul e o singura
+			# familie, si singura separare ramasa era luminanta (0.21 conul fata
+			# de 0.29 drumul, sub pragul de vizibilitate din lectiile rundei 1).
 			#
 			# 75 si nu mai putin, fiindca hornurile inalte trebuie sa arunce si
 			# de la departare, iar ceata abia incepe la 140 m. Sub 60 m umbra

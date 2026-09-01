@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3]
+[gd_scene load_steps=52 format=3]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -46,6 +46,10 @@
 [ext_resource type="Script" path="res://scenes/tracks/cliff_face.gd" id="15_cliffface"]
 [ext_resource type="Script" path="res://scenes/hazards/cracked_chimney_hazard.gd" id="5_chim"]
 [ext_resource type="ArrayMesh" path="res://assets/models/cappadocia/rocks/strat_box.res" id="10_strat"]
+[ext_resource type="Script" path="res://scenes/props/fabric_drape.gd" id="10_drape"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/talus_block.glb" id="30_tblk"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/talus_cobble.glb" id="31_tcob"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/talus_gravel.glb" id="32_tgrv"]
 
 [sub_resource type="Curve3D" id="Curve3D_cappadocia"]
 closed = true
@@ -7971,3 +7975,979 @@ transform = Transform3D(-11.11814, 0.00000, 4.53113, 0.00000, 0.85000, 0.00000, 
 [node name="Treapta_060" type="MeshInstance3D" parent="DecorManual/D) Canionul rosu/Strate"]
 mesh = ExtResource("10_strat")
 transform = Transform3D(-14.04575, 0.00000, 5.55951, 0.00000, 0.85000, 0.00000, -1.68964, 0.00000, -4.26877, 19.910, 16.119, -109.389)
+
+script = ExtResource("4_prop")
+
+[node name="Zone05_Vineyard" type="Node3D" parent="DecorManual"]
+
+[node name="VineRow01" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 10.399, 17.900, -126.277)
+
+[node name="VineRow02" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 1.228, 17.551, -130.264)
+
+[node name="VineRow03" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 8.006, 17.900, -120.775)
+
+[node name="VineRow04" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, -1.164, 17.644, -124.762)
+
+[node name="VineRow05" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 5.614, 17.900, -115.272)
+
+[node name="VineRow06" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, -3.557, 17.900, -119.260)
+
+[node name="VineRow07" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, 3.222, 17.900, -109.770)
+
+[node name="VineRow08" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9171, 0.0000, 0.3987, 0.0000, 1.0000, 0.0000, -0.3987, 0.0000, 0.9171, -5.949, 17.900, -113.757)
+
+[node name="VineRow09" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -8.215, 17.200, -134.970)
+
+[node name="VineRow10" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -17.238, 17.200, -139.281)
+
+[node name="VineRow11" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -10.802, 17.495, -129.556)
+
+[node name="VineRow12" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -19.825, 17.200, -133.867)
+
+[node name="VineRow13" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -13.388, 17.200, -124.143)
+
+[node name="VineRow14" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -22.411, 17.200, -128.454)
+
+[node name="VineRow15" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -15.975, 17.200, -118.729)
+
+[node name="VineRow16" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9023, 0.0000, 0.4311, 0.0000, 1.0000, 0.0000, -0.4311, 0.0000, 0.9023, -24.998, 17.200, -123.040)
+
+[node name="VineRow17" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -26.755, 16.700, -143.873)
+
+[node name="VineRow18" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -35.872, 16.700, -147.981)
+
+[node name="VineRow19" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -29.219, 16.951, -138.402)
+
+[node name="VineRow20" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -38.337, 16.700, -142.510)
+
+[node name="VineRow21" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -31.684, 16.951, -132.932)
+
+[node name="VineRow22" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -40.801, 16.700, -137.040)
+
+[node name="VineRow23" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -34.149, 17.016, -127.462)
+
+[node name="VineRow24" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9117, 0.0000, 0.4108, 0.0000, 1.0000, 0.0000, -0.4108, 0.0000, 0.9117, -43.266, 16.700, -131.569)
+
+[node name="VineRow25" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -45.395, 16.300, -152.881)
+
+[node name="VineRow26" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -54.602, 16.300, -156.784)
+
+[node name="VineRow27" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -47.736, 16.300, -147.357)
+
+[node name="VineRow28" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -56.943, 16.300, -151.260)
+
+[node name="VineRow29" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -50.078, 16.300, -141.833)
+
+[node name="VineRow30" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -59.285, 16.300, -145.736)
+
+[node name="VineRow31" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -52.420, 16.594, -136.309)
+
+[node name="VineRow32" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9207, 0.0000, 0.3903, 0.0000, 1.0000, 0.0000, -0.3903, 0.0000, 0.9207, -61.627, 17.457, -140.212)
+
+[node name="VineRow33" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -64.172, 15.851, -159.915)
+
+[node name="VineRow34" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -73.765, 15.600, -162.742)
+
+[node name="VineRow35" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -65.869, 16.044, -154.160)
+
+[node name="VineRow36" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -75.461, 15.600, -156.987)
+
+[node name="VineRow37" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -67.565, 16.044, -148.404)
+
+[node name="VineRow38" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -77.157, 17.368, -151.231)
+
+[node name="VineRow39" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -69.261, 19.983, -142.649)
+
+[node name="VineRow40" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9592, 0.0000, 0.2827, 0.0000, 1.0000, 0.0000, -0.2827, 0.0000, 0.9592, -78.853, 23.028, -145.476)
+
+[node name="VineRow41" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -84.029, 15.000, -165.169)
+
+[node name="VineRow42" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -93.917, 15.000, -166.668)
+
+[node name="VineRow43" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -84.928, 15.323, -159.237)
+
+[node name="VineRow44" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9887, 0.0000, 0.1498, 0.0000, 1.0000, 0.0000, -0.1498, 0.0000, 0.9887, -94.815, 15.523, -160.735)
+
+[node name="VineRow45" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -102.739, 14.800, -168.337)
+
+[node name="VineRow46" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -112.611, 14.800, -169.932)
+
+[node name="VineRow47" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -103.697, 16.088, -162.414)
+
+[node name="VineRow48" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9872, 0.0000, 0.1595, 0.0000, 1.0000, 0.0000, -0.1595, 0.0000, 0.9872, -113.568, 14.800, -164.009)
+
+[node name="VineRow49" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -123.249, 14.500, -171.505)
+
+[node name="VineRow50" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -133.105, 14.500, -173.198)
+
+[node name="VineRow51" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -124.265, 17.462, -165.592)
+
+[node name="VineRow52" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9856, 0.0000, 0.1692, 0.0000, 1.0000, 0.0000, -0.1692, 0.0000, 0.9856, -134.120, 14.886, -167.284)
+
+[node name="VineRow53" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9901, 0.0000, 0.1400, 0.0000, 1.0000, 0.0000, -0.1400, 0.0000, 0.9901, -144.419, 14.200, -175.203)
+
+[node name="VineRow54" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9901, 0.0000, 0.1400, 0.0000, 1.0000, 0.0000, -0.1400, 0.0000, 0.9901, -154.321, 14.200, -176.604)
+
+[node name="VineRow55" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9998, 0.0000, -0.0200, 0.0000, 1.0000, 0.0000, 0.0200, 0.0000, 0.9998, -164.291, 14.000, -177.502)
+
+[node name="VineRow56" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9998, 0.0000, -0.0200, 0.0000, 1.0000, 0.0000, 0.0200, 0.0000, 0.9998, -174.289, 14.000, -177.302)
+
+[node name="Poplar01" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("28_poplar_a")]
+transform = Transform3D(0.6820, 0.0000, -0.7314, 0.0000, 1.0000, 0.0000, 0.7314, 0.0000, 0.6820, 6.611, 17.900, -130.105)
+
+[node name="Poplar02" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("29_poplar_b")]
+transform = Transform3D(-0.0698, 0.0000, -0.9976, 0.0000, 1.0000, 0.0000, 0.9976, 0.0000, -0.0698, -12.295, 17.200, -138.028)
+
+[node name="Poplar03" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("28_poplar_a")]
+transform = Transform3D(-0.7771, 0.0000, -0.6293, 0.0000, 1.0000, 0.0000, 0.6293, 0.0000, -0.7771, -49.217, 16.690, -156.674)
+
+[node name="Poplar04" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("29_poplar_b")]
+transform = Transform3D(-0.9903, 0.0000, 0.1392, 0.0000, 1.0000, 0.0000, -0.1392, 0.0000, -0.9903, -68.544, 15.600, -162.767)
+
+[node name="Poplar05" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("28_poplar_a")]
+transform = Transform3D(-0.5736, 0.0000, 0.8192, 0.0000, 1.0000, 0.0000, -0.8192, 0.0000, -0.5736, -107.356, 14.800, -171.109)
+
+[node name="Poplar06" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("29_poplar_b")]
+transform = Transform3D(0.2079, 0.0000, 0.9781, 0.0000, 1.0000, 0.0000, -0.9781, 0.0000, 0.2079, -128.008, 14.500, -173.337)
+
+[node name="Poplar07" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("28_poplar_a")]
+transform = Transform3D(0.8572, 0.0000, 0.5150, 0.0000, 1.0000, 0.0000, -0.5150, 0.0000, 0.8572, -169.330, 14.424, -179.402)
+
+[node name="Poplar08" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("29_poplar_b")]
+transform = Transform3D(0.9613, 0.0000, -0.2756, 0.0000, 1.0000, 0.0000, 0.2756, 0.0000, 0.9613, -188.462, 13.800, -176.632)
+
+[node name="Poplar09" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("29_poplar_b")]
+transform = Transform3D(0.4540, 0.0000, -0.8910, 0.0000, 1.0000, 0.0000, 0.8910, 0.0000, 0.4540, -39.323, 16.700, -128.148)
+
+[node name="Poplar10" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("28_poplar_a")]
+transform = Transform3D(-0.3420, 0.0000, -0.9397, 0.0000, 1.0000, 0.0000, 0.9397, 0.0000, -0.3420, -74.764, 19.983, -141.665)
+
+[node name="Poplar11" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("29_poplar_b")]
+transform = Transform3D(-0.9205, 0.0000, -0.3907, 0.0000, 1.0000, 0.0000, 0.3907, 0.0000, -0.9205, -110.786, 25.709, -149.884)
+
+[node name="Farmhouse" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("36_farmhouse")]
+transform = Transform3D(-0.9207, 0.0000, -0.3903, 0.0000, 1.0000, 0.0000, 0.3903, 0.0000, -0.9207, -54.096, 16.431, -145.165)
+
+[node name="BalloonFabric01" type="Node3D" parent="DecorManual/Zone05_Vineyard"]
+transform = Transform3D(-0.9864, 0.0000, -0.1644, 0.0000, 1.0000, 0.0000, 0.1644, 0.0000, -0.9864, -120.191, 14.901, -181.698)
+script = ExtResource("10_drape")
+width_m = 13.5
+pitch_m = 4.4
+arches = 3
+taper = 0.35
+floor_m = 0.45
+slot = 16
+
+[node name="BalloonFabric02" type="Node3D" parent="DecorManual/Zone05_Vineyard"]
+transform = Transform3D(-0.9864, 0.0000, -0.1644, 0.0000, 1.0000, 0.0000, 0.1644, 0.0000, -0.9864, -129.737, 14.847, -183.256)
+script = ExtResource("10_drape")
+width_m = 12.5
+pitch_m = 4.2
+arches = 3
+taper = 0.30
+floor_m = 0.45
+slot = 15
+
+[node name="BalloonFabric03" type="Node3D" parent="DecorManual/Zone05_Vineyard"]
+transform = Transform3D(-0.9842, 0.0000, -0.1771, 0.0000, 1.0000, 0.0000, 0.1771, 0.0000, -0.9842, -139.117, 14.781, -184.895)
+script = ExtResource("10_drape")
+width_m = 13.0
+pitch_m = 4.6
+arches = 3
+taper = 0.40
+floor_m = 0.45
+slot = 22
+
+[node name="BalloonBasket" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("7_basket")]
+transform = Transform3D(-0.9840, 0.0000, 0.1781, 0.0000, 1.0000, 0.0000, -0.1781, 0.0000, -0.9840, -126.206, 14.500, -172.013)
+
+[node name="BalloonStanding1" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("8_env_a")]
+transform = Transform3D(1.0000, 0.0000, -0.0000, 0.0000, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000, -150.560, 15.966, -167.487)
+
+[node name="BalloonStanding2" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("8_env_a")]
+transform = Transform3D(0.0000, 0.0000, -1.0000, 0.0000, 1.0000, 0.0000, 1.0000, 0.0000, 0.0000, -185.898, 24.529, -161.853)
+
+[node name="VineRow57" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -183.279, 13.800, -176.009)
+
+[node name="VineRow58" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -193.132, 13.800, -174.300)
+
+[node name="VineRow59" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -182.253, 15.684, -170.097)
+
+[node name="VineRow60" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9853, 0.0000, -0.1709, 0.0000, 1.0000, 0.0000, 0.1709, 0.0000, 0.9853, -192.106, 14.770, -168.388)
+
+[node name="VineRow61" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -202.110, 13.500, -172.645)
+
+[node name="VineRow62" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -211.587, 13.500, -169.453)
+
+[node name="VineRow63" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -200.194, 13.983, -166.959)
+
+[node name="VineRow64" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9477, 0.0000, -0.3192, 0.0000, 1.0000, 0.0000, 0.3192, 0.0000, 0.9477, -209.671, 13.500, -163.767)
+
+[node name="VineRow65" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9404, 0.0000, -0.3401, 0.0000, 1.0000, 0.0000, 0.3401, 0.0000, 0.9404, -220.727, 13.400, -165.827)
+
+[node name="VineRow66" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9404, 0.0000, -0.3401, 0.0000, 1.0000, 0.0000, 0.3401, 0.0000, 0.9404, -230.130, 13.400, -162.425)
+
+[node name="VineRow67" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9404, 0.0000, -0.3401, 0.0000, 1.0000, 0.0000, 0.3401, 0.0000, 0.9404, -218.686, 13.400, -160.184)
+
+[node name="VineRow68" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("30_vine")]
+transform = Transform3D(0.9404, 0.0000, -0.3401, 0.0000, 1.0000, 0.0000, 0.3401, 0.0000, 0.9404, -228.090, 13.400, -156.783)
+
+[node name="Poplar12" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("28_poplar_a")]
+transform = Transform3D(-0.9135, 0.0000, 0.4067, 0.0000, 1.0000, 0.0000, -0.4067, 0.0000, -0.9135, -188.547, 13.800, -177.125)
+
+[node name="Poplar13" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("29_poplar_b")]
+transform = Transform3D(-0.3256, 0.0000, 0.9455, 0.0000, 1.0000, 0.0000, -0.9455, 0.0000, -0.3256, -207.327, 13.500, -172.471)
+
+[node name="Poplar14" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("28_poplar_a")]
+transform = Transform3D(0.4695, 0.0000, 0.8829, 0.0000, 1.0000, 0.0000, -0.8829, 0.0000, 0.4695, -245.934, 13.617, -158.534)
+
+[node name="Zone05_RightBasin" type="Node3D" parent="DecorManual"]
+
+[node name="Chimney01" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("12_ch_c")]
+transform = Transform3D(0.7924, 0.0000, -0.6889, 0.0000, 1.0500, 0.0000, 0.6889, 0.0000, 0.7924, -53.437, 5.849, -197.136)
+
+[node name="Chimney02" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.6784, 0.0000, 0.4239, 0.0000, 0.8000, 0.0000, -0.4239, 0.0000, -0.6784, -86.291, 5.013, -231.000)
+
+[node name="Chimney03" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(-0.7314, 0.0000, -0.6820, 0.0000, 1.0000, 0.0000, 0.6820, 0.0000, -0.7314, -150.827, 4.280, -240.713)
+
+[node name="Chimney04" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(0.5162, 0.0000, 0.7372, 0.0000, 0.9000, 0.0000, -0.7372, 0.0000, 0.5162, -113.041, 4.666, -211.507)
+
+[node name="Chimney05" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.2287, 0.0000, -1.0760, 0.0000, 1.1000, 0.0000, 1.0760, 0.0000, 0.2287, -167.760, 4.132, -241.912)
+
+[node name="Chimney06" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.2394, 0.0000, 0.6578, 0.0000, 0.7000, 0.0000, -0.6578, 0.0000, -0.2394, -242.382, 4.138, -242.614)
+
+[node name="Chimney07" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("13_ch_d")]
+transform = Transform3D(1.1108, 0.0000, -0.2976, 0.0000, 1.1500, 0.0000, 0.2976, 0.0000, 1.1108, -158.122, 5.190, -212.475)
+
+[node name="Chimney08" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("25_crk_a")]
+transform = Transform3D(-0.9356, 0.0000, 0.1650, 0.0000, 0.9500, 0.0000, -0.1650, 0.0000, -0.9356, -205.349, 3.814, -242.302)
+
+[node name="Chimney09" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("12_ch_c")]
+transform = Transform3D(0.5745, 0.0000, 0.4821, 0.0000, 0.7500, 0.0000, -0.4821, 0.0000, 0.5745, -227.919, 3.580, -215.076)
+
+[node name="Chimney10" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.2084, 0.0000, -1.1818, 0.0000, 1.2000, 0.0000, 1.1818, 0.0000, -0.2084, -277.907, 9.957, -256.135)
+
+[node name="Chimney11" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("11_ch_b")]
+transform = Transform3D(-0.0741, 0.0000, 0.8468, 0.0000, 0.8500, 0.0000, -0.8468, 0.0000, -0.0741, -296.840, 14.266, -212.275)
+
+[node name="Chimney12" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.6023, 0.0000, -0.8601, 0.0000, 1.0500, 0.0000, 0.8601, 0.0000, 0.6023, -288.196, 13.126, -189.489)
+
+[node name="Talus01" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(-0.5670, 0.0000, 0.1594, 0.0000, 0.5890, 0.0000, -0.1594, 0.0000, -0.5670, -63.878, 13.329, -184.387)
+
+[node name="Talus02" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(0.5229, 0.0000, -0.1770, 0.0000, 0.5520, 0.0000, 0.1770, 0.0000, 0.5229, -60.884, 4.145, -210.248)
+
+[node name="Talus03" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(0.8011, 0.0000, 0.0687, 0.0000, 0.8040, 0.0000, -0.0687, 0.0000, 0.8011, -141.140, 2.250, -253.694)
+
+[node name="Talus04" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(-0.6543, 0.0000, 0.6296, 0.0000, 0.9080, 0.0000, -0.6296, 0.0000, -0.6543, -160.429, 1.819, -250.270)
+
+[node name="Talus05" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(-0.6241, 0.0000, -0.1743, 0.0000, 0.6480, 0.0000, 0.1743, 0.0000, -0.6241, -168.372, 2.434, -255.569)
+
+[node name="Talus06" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(-0.5769, 0.0000, 0.2839, 0.0000, 0.6430, 0.0000, -0.2839, 0.0000, -0.5769, -162.804, 2.496, -230.025)
+
+[node name="Talus07" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(-0.2933, 0.0000, -0.5587, 0.0000, 0.6310, 0.0000, 0.5587, 0.0000, -0.2933, -160.934, 11.793, -200.311)
+
+[node name="Talus08" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(0.6345, 0.0000, 0.2474, 0.0000, 0.6810, 0.0000, -0.2474, 0.0000, 0.6345, -165.786, 2.371, -217.246)
+
+[node name="Talus09" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(-0.3424, 0.0000, -0.5654, 0.0000, 0.6610, 0.0000, 0.5654, 0.0000, -0.3424, -212.253, 2.055, -257.666)
+
+[node name="Talus10" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(-0.1803, 0.0000, 0.8133, 0.0000, 0.8330, 0.0000, -0.8133, 0.0000, -0.1803, -196.199, 1.713, -245.251)
+
+[node name="Talus11" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(0.7579, 0.0000, 0.0106, 0.0000, 0.7580, 0.0000, -0.0106, 0.0000, 0.7579, -268.165, 7.106, -253.800)
+
+[node name="Talus12" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("26_crk_b")]
+transform = Transform3D(0.8147, 0.0000, -0.3508, 0.0000, 0.8870, 0.0000, 0.3508, 0.0000, 0.8147, -284.089, 10.836, -246.645)
+
+[node name="Zone05_Talus" type="Node3D" parent="DecorManual"]
+
+[node name="TalusE01" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.58573514, 0, 0.5824714, 0, 0.82605, 0, -0.5824714, 0, 0.58573514, -43.360626, 18.01916, -104.946846)
+
+[node name="TalusE02" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(1.1343731, 0, 0.5415588, 0, 1.2570156, 0, -0.5415588, 0, 1.1343731, -48.31147, 19.6188, -104.32164)
+
+[node name="TalusE03" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.97721136, 0, 0.9449958, 0, 1.3593966, 0, -0.9449958, 0, 0.97721136, -48.272324, 20.022943, -100.555565)
+
+[node name="TalusE04" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(1.1582193, 0, -0.10771211, 0, 1.1632171, 0, 0.10771211, 0, 1.1582193, -47.819042, 20.237299, -97.20156)
+
+[node name="TalusE05" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.76004845, 0, 0.059856266, 0, 0.76240176, 0, -0.059856266, 0, 0.76004845, -51.489277, 22.474909, -95.969635)
+
+[node name="TalusE06" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.17159326, 0, -0.7792219, 0, 0.7978916, 0, 0.7792219, 0, 0.17159326, -47.208054, 17.598444, -119.93909)
+
+[node name="TalusE07" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.10823535, 0, 1.063192, 0, 1.0686871, 0, -1.063192, 0, -0.10823535, -48.47325, 18.126337, -116.8692)
+
+[node name="TalusE08" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.06460743, 0, 1.1416737, 0, 1.1435003, 0, -1.1416737, 0, -0.06460743, -49.684235, 19.076502, -114.13916)
+
+[node name="TalusE09" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.6773689, 0, 0.75020003, 0, 1.0107565, 0, -0.75020003, 0, -0.6773689, -52.721943, 20.931208, -113.71501)
+
+[node name="TalusE10" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.24125153, 0, 0.6580978, 0, 0.7009244, 0, -0.6580978, 0, 0.24125153, -52.180202, 21.05926, -110.713425)
+
+[node name="TalusE11" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.7454871, 0, -0.025604911, 0, 0.7459267, 0, 0.025604911, 0, 0.7454871, -51.577866, 17.668085, -133.05598)
+
+[node name="TalusE12" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.84177625, 0, 0.046800382, 0, 0.8430762, 0, -0.046800382, 0, -0.84177625, -52.82885, 18.298212, -129.66339)
+
+[node name="TalusE13" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(1.2000624, 0, 0.6961286, 0, 1.3873518, 0, -0.6961286, 0, 1.2000624, -53.457726, 19.465631, -124.82517)
+
+[node name="TalusE14" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.5383998, 0, 0.895623, 0, 1.0449952, 0, -0.895623, 0, 0.5383998, -58.190987, 21.325922, -125.722466)
+
+[node name="TalusE15" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.042974908, 0, -0.95243126, 0, 0.9534003, 0, 0.95243126, 0, 0.042974908, -55.388454, 21.041193, -121.104004)
+
+[node name="TalusE16" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.18179645, 0, 0.6908182, 0, 0.71433866, 0, -0.6908182, 0, 0.18179645, -52.394123, 16.185938, -155.3006)
+
+[node name="TalusE17" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.6383499, 0, 0.7236894, 0, 0.9649958, 0, -0.7236894, 0, 0.6383499, -54.35588, 16.201258, -150.54474)
+
+[node name="TalusE18" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.8006385, 0, 1.0596391, 0, 1.3281028, 0, -1.0596391, 0, -0.8006385, -53.93063, 20.670984, -148.36266)
+
+[node name="TalusE19" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.9321622, 0, 0.10242095, 0, 0.9377721, 0, -0.10242095, 0, 0.9321622, -56.397, 20.670984, -145.28836)
+
+[node name="TalusE20" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.3975444, 0, -0.7495327, 0, 0.8484343, 0, 0.7495327, 0, -0.3975444, -54.88376, 20.670984, -142.06047)
+
+[node name="TalusE21" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.71541554, 0, 0.26215386, 0, 0.7619344, 0, -0.26215386, 0, -0.71541554, -61.881405, 16.93194, -146.49097)
+
+[node name="TalusE22" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.98055965, 0, 0.62686956, 0, 1.1638138, 0, -0.62686956, 0, 0.98055965, -65.27466, 17.339289, -145.42375)
+
+[node name="TalusE23" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.96622235, 0, 0.9942896, 0, 1.3864334, 0, -0.9942896, 0, 0.96622235, -65.936554, 19.945063, -140.00565)
+
+[node name="TalusE24" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.0089117605, 0, -0.85445595, 0, 0.8545024, 0, 0.85445595, 0, -0.0089117605, -68.36814, 21.43609, -139.67087)
+
+[node name="TalusE25" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.048119888, 0, -0.72435623, 0, 0.7259528, 0, 0.72435623, 0, 0.048119888, -69.383125, 23.073175, -137.28345)
+
+[node name="TalusE26" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.002140632, 0, 0.69688404, 0, 0.6968873, 0, -0.69688404, 0, -0.002140632, -68.83049, 16.08288, -153.55623)
+
+[node name="TalusE27" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.2543237, 0, 0.8258049, 0, 0.86408, 0, -0.8258049, 0, 0.2543237, -66.89346, 17.146418, -149.39536)
+
+[node name="TalusE28" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.32520056, 0, -1.3936031, 0, 1.4310433, 0, 1.3936031, 0, 0.32520056, -71.200584, 19.07516, -145.60391)
+
+[node name="TalusE29" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.80145836, 0, -0.17909196, 0, 0.8212244, 0, 0.17909196, 0, -0.80145836, -70.68966, 19.256556, -144.40839)
+
+[node name="TalusE30" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.5644012, 0, 0.5771348, 0, 0.80723804, 0, -0.5771348, 0, 0.5644012, -69.47773, 21.112665, -140.80322)
+
+[node name="TalusE31" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.9073027, 0, -0.015381944, 0, 0.9074331, 0, 0.015381944, 0, 0.9073027, -78.50246, 16.12124, -156.4891)
+
+[node name="TalusE32" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-1.0516043, 0, 0.04082013, 0, 1.0523962, 0, -0.04082013, 0, -1.0516043, -75.94835, 16.689814, -152.20605)
+
+[node name="TalusE33" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.3127983, 0, -1.0966996, 0, 1.1404353, 0, 1.0966996, 0, 0.3127983, -77.19907, 19.000544, -148.90984)
+
+[node name="TalusE34" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.39928436, 0, 1.0422817, 0, 1.1161448, 0, -1.0422817, 0, -0.39928436, -80.23583, 20.114527, -147.8768)
+
+[node name="TalusE35" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.16256428, 0, -0.85614985, 0, 0.8714469, 0, 0.85614985, 0, 0.16256428, -81.36817, 23.585108, -143.73701)
+
+[node name="TalusE36" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.270886, 0, -0.6869592, 0, 0.738439, 0, 0.6869592, 0, 0.270886, -83.66856, 15.873195, -158.29836)
+
+[node name="TalusE37" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(1.1429131, 0, 0.11706134, 0, 1.1488924, 0, -0.11706134, 0, 1.1429131, -84.299286, 17.07223, -155.53285)
+
+[node name="TalusE38" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-1.2094595, 0, -0.42343608, 0, 1.2814409, 0, 0.42343608, 0, -1.2094595, -84.00213, 17.73791, -152.69551)
+
+[node name="TalusE39" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.2106984, 0, 0.7579547, 0, 0.78669506, 0, -0.7579547, 0, 0.2106984, -84.03874, 19.06463, -150.6857)
+
+[node name="TalusE40" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.19422995, 0, -0.9782682, 0, 0.9973635, 0, 0.9782682, 0, 0.19422995, -84.76274, 22.768, -146.74834)
+
+[node name="TalusE41" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.99947894, 0, 0.032874472, 0, 1.0000194, 0, -0.032874472, 0, 0.99947894, -93.23116, 15.2521925, -162.2569)
+
+[node name="TalusE42" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.5732877, 0, -0.9916245, 0, 1.145416, 0, 0.9916245, 0, -0.5732877, -92.519066, 15.402827, -159.61568)
+
+[node name="TalusE43" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.43144527, 0, 1.289952, 0, 1.3601917, 0, -1.289952, 0, 0.43144527, -93.20821, 17.901361, -155.80688)
+
+[node name="TalusE44" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.93443984, 0, 0.38819912, 0, 1.0118678, 0, -0.38819912, 0, -0.93443984, -94.12952, 19.355463, -153.55235)
+
+[node name="TalusE45" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.0963011, 0, -0.9241326, 0, 0.9291367, 0, 0.9241326, 0, 0.0963011, -95.742325, 21.07171, -151.35138)
+
+[node name="TalusE46" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.6454202, 0, 0.6808086, 0, 0.9381192, 0, -0.6808086, 0, -0.6454202, -100.79542, 15.43893, -163.25742)
+
+[node name="TalusE47" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.42483604, 0, -0.9943398, 0, 1.0812943, 0, 0.9943398, 0, 0.42483604, -103.3819, 15.84872, -160.52489)
+
+[node name="TalusE48" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.64341754, 0, -1.0862314, 0, 1.2624915, 0, 1.0862314, 0, -0.64341754, -102.18057, 17.584162, -157.78008)
+
+[node name="TalusE49" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.7402617, 0, 0.6809826, 0, 1.0058452, 0, -0.6809826, 0, -0.7402617, -104.459885, 20.22558, -155.14407)
+
+[node name="TalusE50" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.3371269, 0, 0.774565, 0, 0.8447517, 0, -0.774565, 0, 0.3371269, -107.12154, 23.965113, -151.92476)
+
+[node name="TalusE51" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.5907187, 0, 0.6017459, 0, 0.84323585, 0, -0.6017459, 0, 0.5907187, -112.925316, 14.959407, -166.79639)
+
+[node name="TalusE52" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.894294, 0, 0.5135915, 0, 1.0312798, 0, -0.5135915, 0, 0.894294, -111.929115, 16.211023, -162.11516)
+
+[node name="TalusE53" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.96878695, 0, -0.87328297, 0, 1.3042896, 0, 0.87328297, 0, 0.96878695, -111.78859, 19.204706, -157.6474)
+
+[node name="TalusE54" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.25411627, 0, 0.8400971, 0, 0.8776892, 0, -0.8400971, 0, -0.25411627, -114.59765, 21.275995, -156.70287)
+
+[node name="TalusE55" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.5961861, 0, 0.414268, 0, 0.7259861, 0, -0.414268, 0, 0.5961861, -111.454, 23.772272, -153.47736)
+
+[node name="TalusE56" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.8789557, 0, -0.49693155, 0, 1.009705, 0, 0.49693155, 0, 0.8789557, -117.876595, 14.524806, -168.93367)
+
+[node name="TalusE57" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.8452723, 0, 0.90251845, 0, 1.2365375, 0, -0.90251845, 0, 0.8452723, -119.530655, 15.371425, -165.7696)
+
+[node name="TalusE58" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.9904055, 0, 0.38941246, 0, 1.064211, 0, -0.38941246, 0, -0.9904055, -120.4357, 17.782953, -160.8424)
+
+[node name="TalusE59" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.8111278, 0, 0.26430938, 0, 0.85310477, 0, -0.26430938, 0, -0.8111278, -122.63853, 18.816126, -159.67035)
+
+[node name="TalusE60" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.5432889, 0, -0.51501447, 0, 0.7486005, 0, 0.51501447, 0, 0.5432889, -120.37171, 22.776209, -156.41556)
+
+[node name="TalusE61" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.3923299, 0, -0.86983174, 0, 0.95421696, 0, 0.86983174, 0, -0.3923299, -130.41104, 14.582942, -170.36784)
+
+[node name="TalusE62" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.15361513, 0, -1.291681, 0, 1.3007835, 0, 1.291681, 0, 0.15361513, -131.17783, 15.879695, -166.13931)
+
+[node name="TalusE63" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-1.1904459, 0, -0.38561788, 0, 1.2513443, 0, 0.38561788, 0, -1.1904459, -132.67961, 17.955713, -163.69345)
+
+[node name="TalusE64" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.9916294, 0, 0.20720054, 0, 1.0130454, 0, -0.20720054, 0, 0.9916294, -133.26764, 20.760065, -159.88503)
+
+[node name="TalusE65" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.43288004, 0, -0.8697426, 0, 0.97151285, 0, 0.8697426, 0, -0.43288004, -131.21939, 23.895044, -157.60559)
+
+[node name="TalusE66" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.086039424, 0, -0.69317126, 0, 0.6984907, 0, 0.69317126, 0, -0.086039424, -136.23926, 14.667811, -170.65681)
+
+[node name="TalusE67" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.13802522, 0, 0.90699244, 0, 0.91743463, 0, -0.90699244, 0, -0.13802522, -137.94745, 14.911342, -167.84053)
+
+[node name="TalusE68" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.5357323, 0, -1.0935665, 0, 1.2177426, 0, 1.0935665, 0, -0.5357323, -140.54315, 18.391352, -164.39207)
+
+[node name="TalusE69" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.24625616, 0, -0.7481905, 0, 0.78767455, 0, 0.7481905, 0, -0.24625616, -140.71053, 21.008692, -161.7211)
+
+[node name="TalusE70" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.8838923, 0, -0.3306354, 0, 0.9437083, 0, 0.3306354, 0, 0.8838923, -140.0674, 22.628687, -159.66455)
+
+[node name="TalusE71" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.57886463, 0, -0.48824057, 0, 0.7572735, 0, 0.48824057, 0, 0.57886463, -148.45737, 14.263728, -175.52841)
+
+[node name="TalusE72" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.19919126, 0, 1.0308079, 0, 1.0498772, 0, -1.0308079, 0, 0.19919126, -146.11552, 14.950984, -171.95168)
+
+[node name="TalusE73" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.5236226, 0, -0.8827166, 0, 1.0263377, 0, 0.8827166, 0, -0.5236226, -148.12918, 26.083124, -169.66911)
+
+[node name="TalusE74" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.97550684, 0, 0.4586511, 0, 1.0779492, 0, -0.4586511, 0, 0.97550684, -146.97536, 24.616297, -165.29485)
+
+[node name="TalusE75" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.6617325, 0, -0.34794217, 0, 0.747632, 0, 0.34794217, 0, 0.6617325, -148.71501, 25.210474, -163.98734)
+
+[node name="TalusE76" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.6916996, 0, 0.21414585, 0, 0.72409034, 0, -0.21414585, 0, 0.6916996, -156.04762, 14.77975, -173.40866)
+
+[node name="TalusE77" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.3615061, 0, -0.8711895, 0, 0.9432167, 0, 0.8711895, 0, -0.3615061, -154.7402, 23.965815, -169.15889)
+
+[node name="TalusE78" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.41344553, 0, -1.1278319, 0, 1.2012253, 0, 1.1278319, 0, -0.41344553, -155.85626, 17.279596, -166.7506)
+
+[node name="TalusE79" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.9355736, 0, 0.27742943, 0, 0.9758407, 0, -0.27742943, 0, 0.9355736, -154.79333, 21.608057, -163.1908)
+
+[node name="TalusE80" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.7186111, 0, 0.4684544, 0, 0.8578178, 0, -0.4684544, 0, -0.7186111, -157.27695, 22.180231, -162.93307)
+
+[node name="TalusE81" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.72023004, 0, -0.19405273, 0, 0.74591404, 0, 0.19405273, 0, 0.72023004, -165.54358, 14.59228, -173.83356)
+
+[node name="TalusE82" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.42872986, 0, 1.1524513, 0, 1.2296151, 0, -1.1524513, 0, 0.42872986, -161.90121, 15.995265, -169.208)
+
+[node name="TalusE83" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(1.2146614, 0, -0.48663867, 0, 1.308518, 0, 0.48663867, 0, 1.2146614, -162.24355, 17.917292, -166.48828)
+
+[node name="TalusE84" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.16860177, 0, 0.9175991, 0, 0.93296015, 0, -0.9175991, 0, -0.16860177, -161.60709, 22.617548, -162.76602)
+
+[node name="TalusE85" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.6551998, 0, -0.6074993, 0, 0.8935, 0, 0.6074993, 0, -0.6551998, -162.12656, 25.886011, -160.1851)
+
+[node name="TalusE86" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.60346204, 0, -0.53531563, 0, 0.80667794, 0, 0.53531563, 0, -0.60346204, -170.74156, 14.631129, -173.31842)
+
+[node name="TalusE87" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.43379995, 0, 0.840199, 0, 0.9455775, 0, -0.840199, 0, 0.43379995, -171.70311, 15.978053, -168.85278)
+
+[node name="TalusE88" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.031787336, 0, 1.3618554, 0, 1.3622262, 0, -1.3618554, 0, 0.031787336, -170.34366, 18.998072, -165.54622)
+
+[node name="TalusE89" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.5996911, 0, -0.7089929, 0, 0.9286013, 0, 0.7089929, 0, -0.5996911, -172.54544, 20.99624, -163.86302)
+
+[node name="TalusE90" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.7214682, 0, -0.2512342, 0, 0.76396006, 0, 0.2512342, 0, -0.7214682, -172.20247, 25.946466, -159.95415)
+
+[node name="TalusE91" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.83007956, 0, 0.4887965, 0, 0.96330374, 0, -0.4887965, 0, 0.83007956, -177.29297, 14.490474, -172.86919)
+
+[node name="TalusE92" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.7843735, 0, 0.7508057, 0, 1.085795, 0, -0.7508057, 0, -0.7843735, -180.42078, 15.138179, -169.75475)
+
+[node name="TalusE93" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.39261827, 0, -0.912481, 0, 0.9933633, 0, 0.912481, 0, -0.39261827, -180.42584, 17.52389, -166.06592)
+
+[node name="TalusE94" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.7785789, 0, 0.09594977, 0, 0.7844689, 0, -0.09594977, 0, 0.7785789, -176.27661, 21.655176, -163.02728)
+
+[node name="TalusE95" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.42301595, 0, -0.53923386, 0, 0.68535805, 0, 0.53923386, 0, -0.42301595, -179.30727, 23.699915, -160.88046)
+
+[node name="TalusE96" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.7212468, 0, 0.53273976, 0, 0.8966653, 0, -0.53273976, 0, 0.7212468, -187.53336, 14.018519, -173.20158)
+
+[node name="TalusE97" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(1.093687, 0, 0.03967629, 0, 1.0944065, 0, -0.03967629, 0, 1.093687, -188.82582, 14.607081, -168.75632)
+
+[node name="TalusE98" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.6140939, 0, 1.2711736, 0, 1.4117342, 0, -1.2711736, 0, -0.6140939, -186.93071, 32.925655, -166.034)
+
+[node name="TalusE99" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.5367961, 0, 0.85507625, 0, 1.0096066, 0, -0.85507625, 0, -0.5367961, -186.70575, 35.305904, -164.08649)
+
+[node name="TalusE100" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.6171318, 0, 0.3036674, 0, 0.6877976, 0, -0.3036674, 0, 0.6171318, -187.69313, 35.344204, -160.29185)
+
+[node name="TalusE101" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.22205003, 0, 0.7411108, 0, 0.7736611, 0, -0.7411108, 0, -0.22205003, -197.02881, 13.817561, -169.4959)
+
+[node name="TalusE102" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.8476486, 0, -0.3531825, 0, 0.9182843, 0, 0.3531825, 0, 0.8476486, -196.3058, 15.294032, -165.88847)
+
+[node name="TalusE103" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.9198142, 0, 0.26994005, 0, 0.95860624, 0, -0.26994005, 0, 0.9198142, -192.12733, 17.090357, -164.49255)
+
+[node name="TalusE104" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.99144197, 0, 0.38284305, 0, 1.0627916, 0, -0.38284305, 0, 0.99144197, -191.52397, 20.19372, -161.43738)
+
+[node name="TalusE105" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.6761291, 0, -0.37130937, 0, 0.7713762, 0, 0.37130937, 0, -0.6761291, -191.74533, 24.516962, -157.79318)
+
+[node name="TalusE106" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.77840346, 0, 0.65577406, 0, 1.017817, 0, -0.65577406, 0, -0.77840346, -204.61205, 13.560634, -168.02664)
+
+[node name="TalusE107" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.9511555, 0, -0.6739281, 0, 1.1657083, 0, 0.6739281, 0, 0.9511555, -201.84756, 14.638057, -165.2692)
+
+[node name="TalusE108" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.41360542, 0, -1.1075051, 0, 1.182217, 0, 1.1075051, 0, 0.41360542, -201.3486, 16.737848, -162.06807)
+
+[node name="TalusE109" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.97128963, 0, 0.53918177, 0, 1.1109098, 0, -0.53918177, 0, 0.97128963, -199.02122, 19.434809, -159.50235)
+
+[node name="TalusE110" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.6556073, 0, 0.60185, 0, 0.88996875, 0, -0.60185, 0, 0.6556073, -200.74168, 23.248713, -155.9381)
+
+[node name="TalusE111" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.2682835, 0, 0.635264, 0, 0.6895914, 0, -0.635264, 0, 0.2682835, -211.35107, 13.687129, -166.01323)
+
+[node name="TalusE112" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(1.0952166, 0, -0.57618487, 0, 1.2375332, 0, 0.57618487, 0, 1.0952166, -209.01036, 15.377986, -161.15742)
+
+[node name="TalusE113" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(1.055008, 0, 0.7541267, 0, 1.2968227, 0, -0.7541267, 0, 1.055008, -210.86942, 16.893396, -158.00577)
+
+[node name="TalusE114" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.76968265, 0, 0.89188474, 0, 1.1780789, 0, -0.89188474, 0, -0.76968265, -210.34824, 19.665613, -155.06303)
+
+[node name="TalusE115" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.3076289, 0, 0.7832506, 0, 0.8414969, 0, -0.7832506, 0, 0.3076289, -208.95116, 21.41842, -154.21094)
+
+[node name="TalusE116" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.029457841, 0, -0.8708055, 0, 0.8713036, 0, 0.8708055, 0, -0.029457841, -221.49869, 13.467189, -162.31953)
+
+[node name="TalusE117" parent="DecorManual/Zone05_Talus" instance=ExtResource("32_tgrv")]
+transform = Transform3D(0.90684617, 0, -0.79230917, 0, 1.2042109, 0, 0.79230917, 0, 0.90684617, -217.36667, 14.510158, -159.06369)
+
+[node name="TalusE118" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(1.0419998, 0, 0.20637153, 0, 1.0622395, 0, -0.20637153, 0, 1.0419998, -218.16873, 17.190454, -154.38168)
+
+[node name="TalusE119" parent="DecorManual/Zone05_Talus" instance=ExtResource("30_tblk")]
+transform = Transform3D(0.6404542, 0, 0.43021098, 0, 0.77153295, 0, -0.43021098, 0, 0.6404542, -219.1204, 18.672327, -152.03777)
+
+[node name="TalusE120" parent="DecorManual/Zone05_Talus" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.1396054, 0, 0.66902053, 0, 0.68343115, 0, -0.66902053, 0, 0.1396054, -216.5314, 21.02279, -150.94841)
+
+[node name="Zone05_Midfield" type="Node3D" parent="DecorManual"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[node name="MidVine73" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(-0.18977635, 0, -0.9818273, 0, 1, 0, 0.9818273, 0, -0.18977635, -41.03545, 15.783045, -172.02017)
+
+[node name="MidVine74" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(-0.18977635, 0, -0.9818273, 0, 1, 0, 0.9818273, 0, -0.18977635, -39.77059, 15.42071, -175.00873)
+
+[node name="MidVine75" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(-0.022843087, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, -0.022843087, -61.3222, 14.955896, -180.01018)
+
+[node name="MidVine76" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(-0.022843087, 0, -0.99973905, 0, 1, 0, 0.99973905, 0, -0.022843087, -60.551334, 16.741053, -183.2689)
+
+[node name="MidVine77" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.044322703, 0, -0.99901724, 0, 1, 0, 0.99901724, 0, 0.044322703, -81.743454, 14.339136, -184.41518)
+
+[node name="MidVine78" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.044322703, 0, -0.99901724, 0, 1, 0, 0.99901724, 0, 0.044322703, -81.04371, 13.563898, -188.61484)
+
+[node name="MidVine79" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.04427888, 0, -0.9990192, 0, 1, 0, 0.9990192, 0, 0.04427888, -101.73255, 13.845484, -187.97372)
+
+[node name="MidVine80" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.04427888, 0, -0.9990192, 0, 1, 0, 0.9990192, 0, 0.04427888, -101.235855, 13.842249, -190.95395)
+
+[node name="MidVine81" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.044265658, 0, -0.9990198, 0, 1, 0, 0.9990198, 0, 0.044265658, -121.6546, 13.522211, -191.95494)
+
+[node name="MidVine82" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.044265658, 0, -0.9990198, 0, 1, 0, 0.9990198, 0, 0.044265658, -121.19213, 12.875299, -194.72958)
+
+[node name="MidVine83" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.07706143, 0, -0.9970263, 0, 1, 0, 0.9970263, 0, 0.07706143, -142.02173, 13.402338, -195.22035)
+
+[node name="MidVine84" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.07706143, 0, -0.9970263, 0, 1, 0, 0.9970263, 0, 0.07706143, -141.65657, 13.340143, -197.96425)
+
+[node name="MidVine85" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.22282803, 0, -0.97485775, 0, 1, 0, 0.97485775, 0, 0.22282803, -163.62291, 13.824457, -196.34988)
+
+[node name="MidVine86" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.22282803, 0, -0.97485775, 0, 1, 0, 0.97485775, 0, 0.22282803, -163.69257, 12.460566, -200.91)
+
+[node name="MidVine87" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.36897683, 0, -0.9294386, 0, 1, 0, 0.9294386, 0, 0.36897683, -185.39792, 13.02096, -196.54095)
+
+[node name="MidVine88" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.36897683, 0, -0.9294386, 0, 1, 0, 0.9294386, 0, 0.36897683, -185.95844, 12.647028, -199.83656)
+
+[node name="MidVine89" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.4781782, 0, -0.8782628, 0, 1, 0, 0.8782628, 0, 0.4781782, -206.22919, 12.987787, -191.58844)
+
+[node name="MidVine90" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.4781782, 0, -0.8782628, 0, 1, 0, 0.8782628, 0, 0.4781782, -207.3078, 12.207056, -195.21432)
+
+[node name="MidVine91" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.5431219, 0, -0.8396539, 0, 1, 0, 0.8396539, 0, 0.5431219, -226.34987, 12.556849, -185.51372)
+
+[node name="MidVine92" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.5431219, 0, -0.8396539, 0, 1, 0, 0.8396539, 0, 0.5431219, -227.62317, 12.163721, -188.84879)
+
+[node name="MidVine93" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.5431219, 0, -0.8396539, 0, 1, 0, 0.8396539, 0, 0.5431219, -228.80984, 11.29574, -191.95697)
+
+[node name="MidVine94" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.54819804, 0, -0.8363486, 0, 1, 0, 0.8363486, 0, 0.54819804, -244.98138, 12.927729, -177.2356)
+
+[node name="MidVine95" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.54819804, 0, -0.8363486, 0, 1, 0, 0.8363486, 0, 0.54819804, -246.39845, 12.367121, -180.88078)
+
+[node name="MidVine96" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_vine")]
+transform = Transform3D(0.54819804, 0, -0.8363486, 0, 1, 0, 0.8363486, 0, 0.54819804, -247.9493, 11.87771, -184.87015)
+
+[node name="Fill001" parent="DecorManual/Zone05_Midfield" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.047266804, 0, 1.3603711, 0, 1.361192, 0, -1.3603711, 0, -0.047266804, -72.623985, 22.142597, -140.80823)
+
+[node name="Fill002" parent="DecorManual/Zone05_Midfield" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.6415896, 0, -1.1834716, 0, 1.3461955, 0, 1.1834716, 0, -0.6415896, -50.962914, 16.473112, -143.0446)
+
+[node name="Fill003" parent="DecorManual/Zone05_Midfield" instance=ExtResource("12_ch_c")]
+transform = Transform3D(0.24076802, 0, 1.1019107, 0, 1.127908, 0, -1.1019107, 0, 0.24076802, -114.75628, 23.394695, -154.81216)
+
+[node name="Fill004" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.8899923, 0, 1.6462508, 0, 1.8714241, 0, -1.6462508, 0, -0.8899923, -88.54723, 15.161081, -160.44984)
+
+[node name="Fill005" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(0.7201042, 0, 1.4883265, 0, 1.6533802, 0, -1.4883265, 0, 0.7201042, -144.84993, 4.1566625, -276.90472)
+
+[node name="Fill006" parent="DecorManual/Zone05_Midfield" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.37961257, 0, 1.8292027, 0, 1.8681778, 0, -1.8292027, 0, 0.37961257, -175.99481, 4.536111, -317.71814)
+
+[node name="Fill007" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.31381503, 0, -1.2703162, 0, 1.3085042, 0, 1.2703162, 0, -0.31381503, -123.71876, 18.6819, -316.33624)
+
+[node name="Fill008" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(1.0219103, 0, -1.5919111, 0, 1.8916875, 0, 1.5919111, 0, 1.0219103, -142.05942, 20.938059, -161.95874)
+
+[node name="Fill009" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(-1.2693585, 0, 0.9282173, 0, 1.5725324, 0, -0.9282173, 0, -1.2693585, -266.28235, 12.549746, -187.4512)
+
+[node name="Fill010" parent="DecorManual/Zone05_Midfield" instance=ExtResource("11_ch_b")]
+transform = Transform3D(0.7703115, 0, 0.924023, 0, 1.2029955, 0, -0.924023, 0, 0.7703115, -291.3817, 18.492899, -242.76846)
+
+[node name="Fill011" parent="DecorManual/Zone05_Midfield" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-1.0287441, 0, 1.9418347, 0, 2.197507, 0, -1.9418347, 0, -1.0287441, -234.06418, 3.4434772, -239.61171)
+
+[node name="Fill012" parent="DecorManual/Zone05_Midfield" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-1.0051892, 0, 1.15666, 0, 1.5324059, 0, -1.15666, 0, -1.0051892, -266.06717, 9.756952, -296.14725)
+
+[node name="Fill013" parent="DecorManual/Zone05_Midfield" instance=ExtResource("11_ch_b")]
+transform = Transform3D(1.373114, 0, -1.5359719, 0, 2.0602553, 0, 1.5359719, 0, 1.373114, -213.56027, 3.651052, -278.5427)
+
+[node name="Fill014" parent="DecorManual/Zone05_Midfield" instance=ExtResource("32_tgrv")]
+transform = Transform3D(-0.5166751, 0, 1.6220374, 0, 1.7023392, 0, -1.6220374, 0, -0.5166751, -169.23854, 18.972471, -165.57613)
+
+[node name="Fill015" parent="DecorManual/Zone05_Midfield" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-1.4638257, 0, 0.075720035, 0, 1.4657828, 0, -0.075720035, 0, -1.4638257, -361.9749, 13.28142, -146.78978)
+
+[node name="Fill016" parent="DecorManual/Zone05_Midfield" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.98739946, 0, -1.3145657, 0, 1.6440927, 0, 1.3145657, 0, 0.98739946, -303.19458, 12.74148, -156.03908)
+
+[node name="Fill017" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_tblk")]
+transform = Transform3D(1.5230528, 0, 1.1361969, 0, 1.9001666, 0, -1.1361969, 0, 1.5230528, -322.24942, 13.96452, -196.25505)
+
+[node name="Fill018" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_tblk")]
+transform = Transform3D(-0.5369983, 0, 1.5963604, 0, 1.6842606, 0, -1.5963604, 0, -0.5369983, -216.18542, 16.17433, -156.70619)
+
+[node name="Fill019" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(1.3853761, 0, 0.12138805, 0, 1.390684, 0, -0.12138805, 0, 1.3853761, -235.46951, 19.920347, -142.82462)
+
+[node name="Fill020" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_tblk")]
+transform = Transform3D(-1.3420641, 0, -0.2416176, 0, 1.3636404, 0, 0.2416176, 0, -1.3420641, -371.86157, 15.070599, -46.627106)
+
+[node name="Fill021" parent="DecorManual/Zone05_Midfield" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.9117474, 0, -1.0779809, 0, 1.411852, 0, 1.0779809, 0, -0.9117474, -288.95096, 12.610985, -120.89938)
+
+[node name="Fill022" parent="DecorManual/Zone05_Midfield" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.9400791, 0, -0.9281172, 0, 1.3210413, 0, 0.9281172, 0, -0.9400791, -335.55713, 12.282165, -104.19563)
+
+[node name="Fill023" parent="DecorManual/Zone05_Midfield" instance=ExtResource("10_ch_a")]
+transform = Transform3D(1.0045804, 0, 0.6192922, 0, 1.180129, 0, -0.6192922, 0, 1.0045804, -264.46503, 12.993378, -144.71097)
+
+[node name="Fill024" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(-1.1464803, 0, -0.8339048, 0, 1.4176792, 0, 0.8339048, 0, -1.1464803, -386.14172, 12.970903, -102.87309)
+
+[node name="Fill025" parent="DecorManual/Zone05_Midfield" instance=ExtResource("10_ch_a")]
+transform = Transform3D(0.75383586, 0, -1.240719, 0, 1.4517754, 0, 1.240719, 0, 0.75383586, -405.7248, 27.550287, -171.6668)
+
+[node name="Fill026" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(-0.99166167, 0, 1.1417266, 0, 1.5122607, 0, -1.1417266, 0, -0.99166167, -361.8227, 23.378727, -209.1981)
+
+[node name="Fill027" parent="DecorManual/Zone05_Midfield" instance=ExtResource("14_ch_mush")]
+transform = Transform3D(-0.12812603, 0, 1.0254511, 0, 1.0334245, 0, -1.0254511, 0, -0.12812603, -293.6769, 13.493294, -207.49661)
+
+[node name="Fill028" parent="DecorManual/Zone05_Midfield" instance=ExtResource("10_ch_a")]
+transform = Transform3D(1.8549778, 0, 0.5208332, 0, 1.9267097, 0, -0.5208332, 0, 1.8549778, -347.78577, 18.466227, 1.4656372)
+
+[node name="Fill029" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(1.3390115, 0, -1.1726522, 0, 1.7799059, 0, 1.1726522, 0, 1.3390115, -313.00357, 14.646112, -58.13212)
+
+[node name="Fill030" parent="DecorManual/Zone05_Midfield" instance=ExtResource("15_ch_tri")]
+transform = Transform3D(1.1530676, 0, 0.62913805, 0, 1.313537, 0, -0.62913805, 0, 1.1530676, -414.23804, 16.879477, -9.446518)
+
+[node name="Fill031" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(1.3364884, 0, 0.7828453, 0, 1.5488861, 0, -0.7828453, 0, 1.3364884, -424.73517, 18.843744, -70.22895)
+
+[node name="Fill032" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
+transform = Transform3D(-1.576253, 0, 0.025744623, 0, 1.5764632, 0, -0.025744623, 0, -1.576253, -327.8422, 12.475071, -131.43365)
+
+[node name="Fill033" parent="DecorManual/Zone05_Midfield" instance=ExtResource("12_ch_c")]
+transform = Transform3D(-0.098726004, 0, -1.221556, 0, 1.225539, 0, 1.221556, 0, -0.098726004, -432.72998, 25.99658, -113.72319)
+
+[node name="Fill034" parent="DecorManual/Zone05_Midfield" instance=ExtResource("10_ch_a")]
+transform = Transform3D(-0.27195302, 0, -1.8946599, 0, 1.914078, 0, 1.8946599, 0, -0.27195302, -339.33005, 12.713659, -163.3094)

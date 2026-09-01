@@ -986,14 +986,19 @@ static func themes() -> Dictionary:
 			# stinsi: la 0.35 stratul de nori ADUNAT peste gradientul intunecat
 			# facea o pata alburie la zenit.
 			"sky_sun_disc": false,
-			# ORASUL DIN FUNDAL, pictat (tools/paint_sky_city.py). Vezi
-			# `sky_cover_tex` in _build_environment pentru de ce nu e geometrie.
-			# Alfa mult peste 0.08 al norilor: silueta TREBUIE sa se citeasca,
-			# nu doar sa fie sugerata — dar stratul se ADUNA peste gradient,
-			# deci valorile din textura sunt mici (max ~46 din 255) ca sa nu
-			# spele cerul de noapte.
-			"sky_cover_tex": "res://assets/textures/sky_city_chongqing.png",
-			"sky_cover_alpha": 0.85,
+			# FARA oras pictat in cer, si merita spus de ce ca sa nu se
+			# reincerce: s-a construit (PR #365), arata bine din vederile
+			# libere, si NU SE VEDE DE LA VOLAN. Cifra o spunea de la inceput —
+			# `ChaseCamera` vede ~5 grade deasupra orizontalei (brief §2.0),
+			# adica 14 px din cei 256 ai semisferei, iar banda aia e exact
+			# acolo unde stau terenul, cladirile si parapetul. Turnurile
+			# pictate incepeau de la 1.2 grade, deci partea lor vizibila era
+			# integral ACOPERITA de geometrie.
+			#
+			# Adancimea la orizont, daca se mai vrea, trebuie sa vina din ceva
+			# ce intra in frustum: siluete 3D APROAPE (sub 5 grade, deci sub
+			# ~20 m la 250 m distanta) sau nimic. Un strat de cer nu poate.
+			"sky_cover_alpha": 0.08,
 			"sun_color": Color(0.78, 0.84, 1.0),
 			"sun_energy": 0.35,
 			"sun_rotation_deg": Vector3(-78, 200, 0),
@@ -2689,15 +2694,7 @@ func _build_environment() -> void:
 	# sky_cover se ADUNA peste gradient, nu se inmulteste — cu modulate alb si
 	# textura gri deschis, cerul iesea complet alb. Modulate-ul e deci foarte
 	# scazut: norii trebuie doar sugerati, nu sa acopere albastrul.
-	# Stratul de cer poate fi ales de TEMA. Implicit sunt norii; Chongqing cere
-	# o SILUETA DE ORAS, fiindca brief-ul §2.0 spune ca turnurile nu se pot
-	# construi in 3D langa drum (camera vede doar ~10 + 0.093*d metri in sus,
-	# deci dintr-un zgarie-nori de 100 m se vede un perete de 12-15 m). Pictate
-	# in cer, exista la orizont in ORICE directie si costa zero draw calls si
-	# zero triunghiuri — singurul mod in care un oras vertical incape intr-un
-	# buget de mobil.
-	var clouds := _tex(String(theme_flag("sky_cover_tex",
-		"res://assets/textures/sky_cover.png")))
+	var clouds := _tex("res://assets/textures/sky_cover.png")
 	if clouds != null:
 		sky_mat.sky_cover = clouds
 		# Alfa din tema: noaptea norii nu sunt luminati de nimic, iar la 0.35

@@ -24,9 +24,10 @@ const MOD_LEN := 20.30
 const F0 := 0.428
 const F1 := 0.534
 const CLEAR_M := 7.4
+const FACE := "res://canyon_d_face.txt"
 
 ## Inaltimea conului lipit de perete si raza pe care se stinge.
-const CONE_H := 3.5
+const CONE_H := 5.0
 const CONE_R := 12.0
 
 func _ready() -> void:
@@ -43,6 +44,33 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 771
 
+	# PICIORUL PERETELUI, MASURAT (ProbeWallFace), nu presupus.
+	#
+	# Versiunea trecuta punea blocurile la `hw + CLEAR_M - 4.2` de ax, adica
+	# presupunea ca talpa peretelui sta la un offset FIX. Nu sta: fata masurata
+	# variaza intre 2 si 28 m lateral, fiindca modulele au jitter de ±6 m si se
+	# suprapun. Rezultatul masurat cu ProbeTalus: talpa peretelui era acoperita
+	# in proportie de 2%, iar conul iesea INVERS — blocurile stateau cel mai
+	# JOS lipite de perete (+1.20 m) si cel mai SUS la 9-12 m in fata lui
+	# (+3.59 m). Exact „un plint, nu o gramada", cuvintele criticului.
+	#
+	# Se ia cota cea mai de JOS masurata pe fiecare fractie: aia e talpa.
+	var foot := {}
+	var fa := FileAccess.open(FACE, FileAccess.READ)
+	while not fa.eof_reached():
+		var line := fa.get_line()
+		if line.strip_edges().is_empty():
+			continue
+		var pp := line.split("	")
+		var ff := float(pp[0])
+		var yy := float(pp[1])
+		var ll := float(pp[2])
+		if not foot.has(ff) or yy < float(foot[ff]["y"]):
+			foot[ff] = {"y": yy, "lat": ll}
+	fa.close()
+	var fkeys: Array = foot.keys()
+	fkeys.sort()
+
 	var rows: Array = []
 	var f := F0
 	while f < F1:
@@ -52,22 +80,47 @@ func _ready() -> void:
 		var d := (ahead - p); d.y = 0.0; d = d.normalized()
 		var sv := Vector3(d.z, 0.0, -d.x)
 		var hw: float = track.width_at(f)
-		for j in range(rng.randi_range(5, 9)):
+		for j in range(rng.randi_range(9, 14)):
 			# t = 0 lipit de perete, t = 1 la marginea conului.
 			# `pow` sub 1 ingramadeste majoritatea LANGA perete: acolo e masa
 			# conului. Vechea versiune folosea 0.55 pe o distributie care
 			# imprastia uniform, deci iesea un brau, nu o gramada.
-			var t: float = pow(rng.randf(), 0.75)
+			var t: float = pow(rng.randf(), 1.15)
 			# Rarire spre exterior: la coada conului cad doua din trei.
 			if rng.randf() < t * 0.62:
 				continue
-			var off: float = hw + CLEAR_M - 4.2 + t * CONE_R
+			# Talpa peretelui la fractia asta, din masuratoare.
+			var wall_lat: float = hw + CLEAR_M - 4.2
+			var bestd := 1e9
+			for fk: float in fkeys:
+				var dd: float = absf(fk - f)
+				if dd < bestd:
+					bestd = dd
+					wall_lat = float(foot[fk]["lat"])
+			# SEMNUL. `lat` creste DEPARTANDU-SE de sosea, iar peretele e
+			# partea departata — deci conul trebuie sa mearga de la fata
+			# peretelui SPRE SOSEA, adica lateral in SCADERE. Prima versiune
+			# scria `wall_lat - 1.5 + t * CONE_R`, ceea ce ducea molozul si mai
+			# departe, adica IN DEAL: masurat cu ProbeTalus2, 402 din 406 de
+			# blocuri ajunsesera in spatele fetei, invizibile, si poala
+			# disparuse complet de pe captura.
+			# `+1.2` il baga un metru IN perete, ca imbinarea sa fie ingropata
+			# sub moloz, nu aliniata langa ea (cererea din verdict).
+			# Conul nu poate fi mai lat decat spatiul dintre fata peretelui si
+			# linia pana la care garda de carosabil lasa blocurile. Fara
+			# limitarea asta, `t` mare trimitea blocul peste linia garzii,
+			# garda il impingea inapoi IN deal, si molozul ajungea invizibil:
+			# masurat cu ProbeTalus2, 344 din 406 erau tot in spatele fetei
+			# chiar si dupa ce semnul a fost corectat.
+			var room: float = maxf(2.0, (wall_lat + 1.2) - (hw + 3.4))
+			var span: float = minf(CONE_R, room)
+			var off: float = wall_lat + 1.2 - t * span
 			var along: float = rng.randf_range(-8.0, 8.0)
 			var q: Vector3 = p + sv * off + d * along
 			# MARIMEA SCADE CU DISTANTA — gradientul din verdict, in ordinea
 			# corecta: blocuri de ~1.6 m lipite de perete, pietris de 0.35 m pe
 			# acostament. (Generatorul vechi il avea inversat.)
-			var want_m: float = lerpf(1.75, 0.38, t) * rng.randf_range(0.62, 1.5)
+			var want_m: float = lerpf(3.10, 0.42, t) * rng.randf_range(0.70, 1.45)
 			var sc: float = want_m / MOD_LEN
 			# GARDA DE CAROSABIL, ca la module: blocurile primesc corp fizic.
 			# Distanta se ia ca MINIM pe o fereastra de indici, nu pe cel mai
@@ -95,9 +148,10 @@ func _ready() -> void:
 			for w2 in range(-40, 41, 4):
 				var iw2: int = ((ci2 + w2) % n + n) % n
 				lat_now = minf(lat_now, absf(track.lateral_distance(iw2, q)))
-			var from_wall: float = maxf(0.0, lat_now - (hw + CLEAR_M - 4.2))
+			var from_wall: float = maxf(0.0, (wall_lat + 1.2) - lat_now)
+			var cone_span: float = maxf(3.0, span)
 			var cone: float = CONE_H * pow(
-				clampf(1.0 - from_wall / CONE_R, 0.0, 1.0), 1.4)
+				clampf(1.0 - from_wall / cone_span, 0.0, 1.0), 1.4)
 			# Cota: pamant + inaltimea conului, minus ingroparea. Blocurile de
 			# sus stau PE moloz, nu pe teren — asta e ce face gramada sa aiba
 			# volum in loc de contur.
@@ -106,7 +160,7 @@ func _ready() -> void:
 				"yaw": rng.randf_range(0.0, TAU),
 				"pitch": rng.randf_range(-0.6, 0.6),
 				"sc": sc})
-		f += 0.0034
+		f += 0.0022
 	var txt := ""
 	for r in rows:
 		txt += "%.3f\t%.3f\t%.3f\t%.4f\t%.4f\t%.5f\n" % [

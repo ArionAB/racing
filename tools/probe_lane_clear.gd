@@ -41,8 +41,14 @@ const STEP: float = 0.005
 ## un viraj normal sa nu iasa raportat ca obstacol.
 const AHEAD_M: float = 6.0
 const DRIVABLE := [
-	"RoadTop", "RoadSides", "RoadOverpassDeck", "Shoulders",
-	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails",
+	# `ChannelDeckSides` e acelasi tablier ca `RoadOverpassDeck`, redenumit pe
+	# feat/capp-poi-b fara ca lista asta sa fie actualizata. Se tin AMANDOUA:
+	# lista e citita si de pistele mai vechi, iar un nume scos de aici nu
+	# raporteaza un blocaj — raporteaza SOSEAUA ca obstacol.
+	"RoadTop", "RoadSides", "RoadOverpassDeck", "ChannelDeckSides", "Shoulders",
+	# `TunnelShell` e parapetul de banda (`_build_branch_rails`), redenumit tot
+	# pe feat/capp-poi-b. Aceeasi poveste ca `ChannelDeckSides` de mai sus.
+	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails", "TunnelShell",
 	"Ramp", "ChannelKicker", "FlyoffRamp", "HummockBody",
 	"IceSheet",
 ]

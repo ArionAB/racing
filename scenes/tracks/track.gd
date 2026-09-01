@@ -9554,7 +9554,7 @@ func _build_shoulders() -> void:
 	# CU COLIZIUNE: banda e rampa de reintrare pe sosea, nu doar o culoare.
 	_add_mesh_with_collision(st.commit(), dust,
 		_tex("res://assets/textures/surface_gravel.png"), 1.0, 0.5,
-		BaseMaterial3D.CULL_BACK)
+		BaseMaterial3D.CULL_BACK, null, null, true, null, "Shoulders")
 
 
 ## Cat de lat trebuie sa fie umarul intr-un punct ca panta lui sa ramana sub

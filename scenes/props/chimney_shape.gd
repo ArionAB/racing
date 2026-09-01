@@ -2095,14 +2095,30 @@ func _build_doors(st: SurfaceTool, cx: float, cz: float, y0: float,
 		# decat e nisa de adanca nu mai e buza, e o lespede lipita pe perete —
 		# si pe hornurile mici (`hornCiot45`, scara 0.34) exact asa ieseau, foi
 		# uriase care traversau terenul.
-		# Doar o DEGAJARE, nu inca o amplitudine. `r_max` e deja cel mai iesit
-		# vertex de pe latimea golului; peste el mai trebuie doar cat sa nu se
-		# bata fata nisei cu fata peretelui (z-fighting) si cat sa acopere
-		# bombarea dintre doi vertecsi. Adunand amplitudinea INTREAGA, fata
-		# ajungea la 4.05 pe `hornUmbra8` unde peretele e la 3.41 — o palma in
-		# aer, si de acolo lespezile plutitoare.
-		var flute_amp := minf(r_max * 0.02 + (r_max - r_min) * 0.25, dd * 0.6)
-		var top_amp := minf(hi_max * 0.02 + (hi_max - hi_min) * 0.25, dd * 0.6)
+		# DEGAJAREA SE CALCULEAZA, nu se esantioneaza.
+		#
+		# Canelura e `scale *= 1 - flute_depth * fade * (0.5 - 0.5*cos(n*ang))`,
+		# deci raza oscileaza in intervalul [1 - flute_depth*fade, 1] * r: MAXIMUL
+		# e chiar peretele NEcanelat. Vertecsii insa cad pe pozitii discrete pe
+		# azimut, iar cu `flute_count` pana la 24 o usa ingusta poate sa nu prinda
+		# niciun vertex pe creasta canelurii — de-aia esantionarea subestima si
+		# peretele iesea prin gol.
+		# Se ridica direct la creasta: r_max impartit la (1 - flute_depth), plus
+		# un fir pentru z-fighting. Nu mai depinde de unde au picat vertecsii.
+		# Nu doar canelura: `strata_step` ridica si el trepte pe raza, iar
+		# `noise_amount` mai adauga. Toate trei sunt fractiuni din raza si toate
+		# pot cadea intre vertecsii pe care ii masuram, deci degajarea le insumeaza.
+		var crest_k := 1.0 / maxf(1.0 - flute_depth - strata_step
+			- noise_amount, 0.5)
+		# Plafonul era `dd * 0.6` si el era cel care lega, nu calculul: pe
+		# `hornUmbra8` degajarea ceruta iesea 0.699 si se taia la 0.378, iar in
+		# gol ramanea o pana ascutita de perete impinsa de jos in sus — se vede
+		# la lupa pe fereastra din stanga. Muchia aia e creasta canelurii intre
+		# doi vertecsi, exact ce calculul voia sa acopere.
+		# Plafonul ramane, dar pe adancimea INTREAGA: fata nisei tot nu poate
+		# iesi mai mult decat e gaura de adanca, altfel nu mai e gaura.
+		var flute_amp := minf(r_max * (crest_k - 1.0) + r_max * 0.015, dd)
+		var top_amp := minf(hi_max * (crest_k - 1.0) + hi_max * 0.015, dd)
 		var rf_b := r_max + flute_amp
 		var rf_t := hi_max + top_amp
 		var hw := dw * 0.5
@@ -2307,7 +2323,11 @@ func _build_windows(st: SurfaceTool, cx: float, cz: float, ybase: float,
 			var v_hi := _radius_at_dir(src, cx, cz, y0, h, rf_t2, qa)
 			w_min = minf(w_min, minf(v_lo, v_hi))
 			w_max = maxf(w_max, maxf(v_lo, v_hi))
-		var w_amp := minf(maxf(w_max - w_min, w_max * flute_depth * 0.5), wd)
+		# Ca la usi: creasta canelurii se CALCULEAZA din `flute_depth`, fiindca
+		# vertecsii pot sa nu cada pe ea. Vezi nota din `_build_doors`.
+		var crest_w := 1.0 / maxf(1.0 - flute_depth - strata_step
+			- noise_amount, 0.5)
+		var w_amp := minf(w_max * (crest_w - 1.0) + w_max * 0.015, wd)
 		var r_face := w_max + w_amp
 		var r_face_t := (w_max + w_amp) * (rr_a_t / maxf(rr_a, 0.001))
 		# Adancimea trebuie sa treaca de peretele cel mai INTRAT din dreptul

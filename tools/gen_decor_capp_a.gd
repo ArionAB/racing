@@ -48,6 +48,23 @@ extends Node
 ##    +5.0 .. +9.0 = exact 4 m, pe partea dinspre exteriorul curbei care
 ##    urmeaza. Decizia pentru jucator e „strange-te pe dreapta".
 ##
+## 6. CE RAMANE DIFERIT FATA DE REFERINTA, si de ce nu se repara de aici.
+##    Dupa runda de compozitie, comparat cot la cot cu `A_village.png`:
+##
+##    a) LATIMEA DRUMULUI. Referinta e o panglica ingusta prin sat; piata are
+##       18 m si umple jumatatea de jos a fiecarui cadru, deci impinge tot
+##       decorul spre orizont. Nu se schimba de aici: latimea E poanta POI-ului
+##       (nota 1) si pe ea se sprijina aritmetica fantei de 4 m (nota 4). Daca
+##       cineva decide vreodata ca satul bate piata, se schimba `half_width`,
+##       si atunci se refac notele 1 si 4 — nu invers.
+##
+##    b) CONURILE NU SE SUBTIAZA CAT ALE LOR. Masurat (ProbeCappTaper), cea mai
+##       conica piesa din kit are 0.48; referinta e pe la 0.2. Asta e in MESH,
+##       nu in asezare, deci se repara la un re-export al kitului, nu aici.
+##       Ce s-a putut face din generator s-a facut: umplutura a trecut pe
+##       piesele cu conicitate mica, si ciuperca (1.11, mai lata sus decat jos)
+##       a coborat de la 37 de bucati la 12.
+##
 ## 5. CE NU TRAPEAZA O MASINA. Caruta si oalele au coliziune (`hull`), deci un
 ##    contact la viteza trebuie sa te RESPINGA, nu sa te agate. De aceea toate
 ##    piesele blocajului stau pe o SINGURA linie perpendiculara pe banda:

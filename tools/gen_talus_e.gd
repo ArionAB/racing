@@ -14,8 +14,13 @@ extends Node
 ##
 ## Iese pe stdout un fragment de .tscn (memoria `decor-manual-din-cod`).
 
-const FRAC_FROM := 0.545
-const FRAC_TO := 0.670
+## INTERVALUL E DEPLASAT LA INTEGRARE (0.545-0.670 -> 0.564-0.684). Turul s-a
+## lungit de la 2070 la 2128 m dupa ce au intrat serpentina lui C si S-urile lui
+## D, deci ACELASI loc din lume cade acum la alta fractie. Masurat pe pozitia din
+## lume, nu estimat: capetele vechi se regasesc pe traseul combinat la 0.5644 si
+## 0.6842 (drift +0.0194 si +0.0142).
+const FRAC_FROM := 0.564
+const FRAC_TO := 0.684
 const STEP := 0.0045
 
 const RES := {
@@ -88,11 +93,25 @@ func _emit(node_name: String, model: String, pos: Vector3, yaw: float,
 	print("transform = %s" % var_to_str(Transform3D(basis, pos)).replace("\n", " "))
 
 
+## Cota solului sub un punct. DOAR `TerrainBody`, si asta nu e o precautie
+## teoretica: cu prima lovitura acceptata, razele cad pe hull-urile pieselor deja
+## puse in scena (hornuri, module de faleza) si grohotisul ajunge pe acoperisul
+## altcuiva. Aceeasi lectie ca in `gen_decor_capp_b.gd` runda 29, unde 8 aschii
+## de moloz sfarsisera intre 5.3 si 54.8 m in aer.
 func _ground(space: PhysicsDirectSpaceState3D, p: Vector3) -> float:
 	var q := PhysicsRayQueryParameters3D.create(
 		Vector3(p.x, 300.0, p.z), Vector3(p.x, -60.0, p.z))
+	q.collide_with_areas = false
 	var hit := space.intersect_ray(q)
-	return (hit["position"] as Vector3).y if hit.has("position") else NAN
+	var guard := 0
+	while not hit.is_empty() and guard < 24:
+		var col: Object = hit.get("collider")
+		if col != null and str((col as Node).name) == "TerrainBody":
+			return (hit["position"] as Vector3).y
+		q.exclude = q.exclude + [hit["rid"]]
+		hit = space.intersect_ray(q)
+		guard += 1
+	return NAN
 
 
 func _lcg(seed_v: int) -> Callable:

@@ -13,9 +13,40 @@ const MAX_GOL := 4.0   ## metri de aer tolerati sub baza unui prop
 ## Ce ARE VOIE sa pluteasca: pasari, baloane, cabine de telecabina. Lista e scurta
 ## si explicita, ca sa nu devina o portita — orice adaugat aici trebuie sa aiba un
 ## motiv de lume, nu de convenienta.
-const ZBURATOARE := ["Pigeon", "Balloon", "Balon", "Cabina", "Porumbel"]
+const ZBURATOARE := ["Pigeon", "Balloon", "Balon", "Cabina", "Porumbel",
+	# TARUSII baloanelor de pe cornisa (POI C). Nu e o portita: brief §2 POI C
+	# cere explicit ca cele 3 baloane sa fie ancorate pe POLITE SAPATE IN
+	# FALEZA, si scrie de ce — masurat cu tools/probe_balloon.gd, un cos pornit
+	# de pe fundul vaii urca direct in panta si se infunda dupa 1 m din 30.
+	# Deci tarusul STA IN PERETE prin cerinta, la 25-33 m, cu fundul vaii la
+	# -30..-37 sub el. A-l cere "asezat pe teren" ar contrazice brief-ul.
+	"Tarus", "Tether"]
 ## Grupuri care sunt STRUCTURA, nu obiecte asezate pe sol — vezi mai jos.
 const ZIDURI := ["ZidulValeiRosii"]
+## SUBGRUPURI-structura, dupa un fragment din CALEA nodului (nu doar numele
+## grupului de nivel 1, fiindca de la integrare incoace structurile stau in
+## subarbori: `DecorManual/F2_Sala1/...`).
+##
+## Fiecare intrare e o STIVA sau o SAPATURA, adica geometrie care prin
+## constructie nu se sprijina pe teren:
+##   Sala1/Sala2/Gat/Gura  — tavanul, coloanele si alcovele orasului subteran
+##                           (POI F): sunt INTERIORUL unei caverne, deci stau
+##                           deasupra podelei prin definitie;
+##   Chei de scara         — usile si porumbarele SAPATE IN FALEZA (POI C):
+##                           brief §2 le cere pe polite in perete, explicit NU
+##                           pe fundul vaii;
+##   Strate                — benzile de roca ale canionului (POI D): sunt
+##                           straturi in perete, nu obiecte puse jos;
+##   Coroana               — coroana stancii goale (POI G).
+## Tot lista explicita ramane, si tot cere motiv de LUME: ce se adauga aici
+## trebuie sa fie structura, nu un prop care se intampla sa pluteasca.
+const STRUCTURI_CALE := [
+	"F1_Gura", "F2_Sala1", "F3_Gat", "F4_Sala2",
+	"Chei de scara", "Strate", "StancaCoroana",
+	# Peretii si grohotisul canionului (POI D) si interiorul stancii goale
+	# (POI G): tot stive de module de faleza, ca `ZidulValeiRosii`.
+	"BuzaRapei", "Faleza", "Grohotis", "PereteInterior", "Creasta", "Ferestre",
+]
 
 func _ready() -> void:
 	call_deferred("_go")
@@ -55,6 +86,7 @@ func _go() -> void:
 		# doar prop-uri din decor, nu carosabil/teren
 		var owner_nm := ""
 		var grup := ""
+		var cale := ""
 		var ascuns := false
 		var up: Node = n
 		while up != null:
@@ -69,6 +101,7 @@ func _go() -> void:
 				break
 			if up.get_parent() != null and str(up.get_parent().name).begins_with("DecorManual"):
 				grup = str(up.name)
+			cale = str(up.name) + "/" + cale
 			up = up.get_parent()
 		if owner_nm == "" or ascuns:
 			continue
@@ -79,6 +112,13 @@ func _go() -> void:
 		# nu devina o portita: orice grup adaugat aici trebuie sa fie o
 		# STRUCTURA, nu un obiect pus in lume.
 		if grup in ZIDURI:
+			continue
+		var e_structura := false
+		for frag in STRUCTURI_CALE:
+			if cale.contains(frag):
+				e_structura = true
+				break
+		if e_structura:
 			continue
 		var aabb := mi.get_aabb()
 		var base: Vector3 = mi.global_transform * (aabb.position + Vector3(

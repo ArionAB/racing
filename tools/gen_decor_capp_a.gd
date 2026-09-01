@@ -167,6 +167,10 @@ const GAP_TARGET: float = 4.0
 
 var _track: Track
 var _sampler: TrackSideSampler
+## Coliziunea reala a panzei de teren, si cota de pornire a razelor. Vezi
+## `_sol_real`.
+var _terrain_rid: RID = RID()
+var _sus_y := 0.0
 var _out: Array[String] = []
 var _n := 0
 var _rng := RandomNumberGenerator.new()
@@ -180,6 +184,12 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_sampler = _track._sampler
+	# Razele pornesc de deasupra celui mai INALT punct al traseului, nu de la o
+	# cota fixa: sub varf ar porni din interiorul panzei si n-ar lovi nimic.
+	var hi := -INF
+	for bp in _track.baked:
+		hi = maxf(hi, bp.y)
+	_sus_y = hi + 120.0
 	_rng.seed = 100301
 	_houses()
 	_human_layer()
@@ -488,7 +498,7 @@ func _cart() -> void:
 	var p := _track.baked[i]
 	var s := _track._side_at(i)
 	var half := _track.width_at_index(i)
-	var g := _sampler.ground_y(p.x, p.z)
+	var g := _sol_real(p.x, p.z)
 	# Caruta e lunga pe X local, deci X local trebuie sa fie LATERALA benzii.
 	var yaw := atan2(s.x, s.z)
 	var left := -half
@@ -529,7 +539,7 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var r: float = BASE_R.get(model, 0.6)
 	var d := half + gap + r
 	var q := p + s * d
-	var g := _sampler.ground_y(q.x, q.z)
+	var g := _sol_real(q.x, q.z)
 	# Garda: piatra n-are voie sa intre in carosabil. Se masoara distanta de la
 	# ax pana la MARGINEA piesei, nu pana la centru — capcana din
 	# `decor-manual-coliziune`.
@@ -558,7 +568,7 @@ func _at(idx: int, lateral: float, model: String, base: String, yaw: float,
 	var s := _track._side_at(idx)
 	var dir := (_track.baked[(idx + 1) % n] - p).normalized()
 	var q := p + s * lateral + dir * along
-	var g := _sampler.ground_y(q.x, q.z)
+	var g := _sol_real(q.x, q.z)
 	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, "hull", false)
 
 
@@ -576,3 +586,43 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 	if blocker:
 		_out.append("metadata/camera_blocker = true")
 	_out.append("")
+
+
+## Cota SOLULUI, citita din coliziunea reala, nu din campul neted.
+##
+## PORTAT DIN `gen_decor_capp_b.gd` LA INTEGRARE, si pentru exact acelasi motiv
+## pentru care a fost scris acolo (runda 29 a lui B): `_sampler.ground_y` e
+## CAMPUL, iar suprafata care se randeaza si de care se lovesc rotile e GRILA de
+## teren. Intre noduri grila e o coarda, iar pe taieturi coarda trece pe sub camp
+## — masurat de B pana la -6.8 m. Si `_terrain_mesh_y` e la fel de gresit: e
+## clampat la marginea grilei, deci in afara panzei extrapoleaza (memoria
+## `terrain-mesh-y-extrapoleaza`).
+##
+## Aici a fost nevoie de el fiindca satul lui A a fost copt INAINTE ca rapa
+## 0.022-0.178 (adancime 22 m) sa existe pe traseu, si INAINTE ca POI C sa
+## coboare Valea Rosie. Merge-ul a adus taieturile, nu si reasezarea: 21 de piese
+## stateau la y~49 cu solul intre 20 si 45 m sub ele.
+func _sol_real(x: float, z: float) -> float:
+	if _terrain_rid == RID():
+		for c in _track.get_children():
+			if str(c.name) == "TerrainBody":
+				_terrain_rid = (c as StaticBody3D).get_rid()
+	var space := _track.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(x, _sus_y, z), Vector3(x, _sus_y - 900.0, z))
+	q.collide_with_areas = false
+	# DOAR panza de teren: cu raza libera, ce e pus deja in scena (hornuri,
+	# baloane) fura lovitura si piesa ajunge pe acoperisul altei piese.
+	if _terrain_rid != RID():
+		q.collide_with_bodies = true
+		q.exclude = []
+		var hit: Dictionary = space.intersect_ray(q)
+		var guard := 0
+		while not hit.is_empty() and hit["rid"] != _terrain_rid and guard < 24:
+			q.exclude = q.exclude + [hit["rid"]]
+			hit = space.intersect_ray(q)
+			guard += 1
+		if not hit.is_empty() and hit["rid"] == _terrain_rid:
+			return float(hit["position"].y)
+	print("; ATENTIE fara sol la (%.1f, %.1f): se cade pe camp" % [x, z])
+	return _sampler.ground_y(x, z)

@@ -14,10 +14,17 @@ extends Node3D
 ## Densitatea scade cu distanta (piesele apropiate ar acoperi drumul), si se
 ## sare peste tot ce cade pe carosabil sau prea aproape de el.
 
-const FRACS := [0.545, 0.575, 0.605, 0.635, 0.665]
+## DEPLASATE LA INTEGRARE (+0.019..+0.015). Turul s-a lungit de la 2070 la
+## 2128 m dupa serpentina lui C si S-urile lui D, deci aceleasi locuri din lume
+## cad la alte fractii. Masurate pe pozitia din lume, una cate una.
+const FRACS := [0.564, 0.596, 0.620, 0.652, 0.684]
+## ID-urile de ext_resource din Track13.tscn. ACTUALIZATE LA INTEGRARE: la merge
+## resursele s-au unit pe CALE, iar ID-urile lui POI E au fost remapate pe cele
+## existente (11_chA -> 10_ch_a s.a.m.d.). Un generator ramas pe ID-urile vechi
+## scrie noduri cu referinte moarte, si scena nu se mai incarca deloc.
 const RES := {
-	"chimney_a": "11_chA", "chimney_b": "12_chB", "chimney_c": "13_chC",
-	"chimney_mushroom": "15_chM", "chimney_triple": "16_chT",
+	"chimney_a": "10_ch_a", "chimney_b": "11_ch_b", "chimney_c": "12_ch_c",
+	"chimney_mushroom": "14_ch_mush", "chimney_triple": "15_ch_tri",
 	"talus_block": "30_tblk", "talus_cobble": "31_tcob",
 	"talus_gravel": "32_tgrv",
 }
@@ -202,13 +209,20 @@ func _ground(space: PhysicsDirectSpaceState3D, p: Vector3) -> float:
 	var q := PhysicsRayQueryParameters3D.create(
 		Vector3(p.x, p.y + 6.0, p.z), Vector3(p.x, p.y - 300.0, p.z))
 	q.collide_with_areas = false
+	# Se TRECE PRIN ce nu e teren, in loc sa se renunte la prima lovitura
+	# straina. Cu `return NAN` pe prima piesa intalnita, orice punct de sub un
+	# horn deja asezat era respins sau lasat la cota gresita — de-aia ramasesera
+	# piese in aer in bazinul din dreapta dupa integrare.
 	var hit := space.intersect_ray(q)
-	if not hit.has("position"):
-		return NAN
-	var col := hit["collider"] as Node
-	if col == null or not String(col.name).begins_with("TerrainBody"):
-		return NAN
-	return (hit["position"] as Vector3).y
+	var guard := 0
+	while not hit.is_empty() and guard < 24:
+		var col := hit["collider"] as Node
+		if col != null and String(col.name).begins_with("TerrainBody"):
+			return (hit["position"] as Vector3).y
+		q.exclude = q.exclude + [hit["rid"]]
+		hit = space.intersect_ray(q)
+		guard += 1
+	return NAN
 
 
 func _lcg(seed_v: int) -> Callable:

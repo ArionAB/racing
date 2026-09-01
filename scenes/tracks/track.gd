@@ -1730,11 +1730,26 @@ static func themes() -> Dictionary:
 			# Inaltimea nu se pierde: la 0,60 varful are 108 m si sta la 240+ m,
 			# deci se ridica pe cer bine peste `fog_end` 300 — exact rolul cerut
 			# in brief §5.4 (silueta cu zapada, sub ceata).
+			# DEGAJARILE SE MASOARA, NU SE ALEG. Cu 120/150 m doua sloturi din
+			# sase nu incapeau deloc, iar cele care incapeau erau impinse la
+			# 340-354 m — adica inelul „apropiat" de 190 m nu exista in fapt,
+			# si garda striga „3/6 siluete" la fiecare rulare. Masurat cu
+			# ProbeCappHorizon, pe razele disponibile din centroid degajarea
+			# MAXIMA e 100,2 m pe un slot si 145,5 m pe altul: pista se
+			# auto-intersecteaza, deci nicio raza nu se departeaza mai mult.
+			# Pragul nu se putea satisface, oricat de departe ai fi impins.
+			#
+			# Se coboara la ce permite geometria, ramanand peste raza REALA a
+			# piesei (288,2 m latime la scara 1 -> 60,5 m raza la 0,42 si
+			# 86,5 m la 0,60): 100 m tine flancul afara din sosea cu marja pe
+			# amandoua inelele, si toate cele sase siluete se aseaza. Pragul e
+			# egal fiindca slotul cel mai strans (100,2 m) il fixeaza: orice
+			# valoare peste el lasa iar un gol in orizont.
 			"horizon_rings": [
 				{"near": 190.0, "far": 240.0, "count": 3, "scale": 0.42,
-					"clear": 120.0, "picks": ["Erciyes"]},
+					"clear": 100.0, "picks": ["Erciyes"]},
 				{"near": 240.0, "far": 290.0, "count": 3, "scale": 0.60,
-					"clear": 150.0, "picks": ["Erciyes"]},
+					"clear": 100.0, "picks": ["Erciyes"]},
 			],
 			# FARA GARD, ca pe Alpi si pe Stromboli — dar aici e chiar mecanica
 			# pistei, nu doar tonul ei: brief §2 POI C cere cornisa Vaii Rosii
@@ -3187,14 +3202,33 @@ func _build_horizon(centroid: Vector3) -> void:
 			# niciodata. Acum plafonul urmeaza inelul CERUT, cu marja de
 			# cautare — cine declara un inel departat primeste unde sa-l puna.
 			var limit: float = maxf(float(ring["far"]) + 90.0, 355.0)
+			# Cautarea era TOT-SAU-NIMIC: o raza care nu atinge niciodata
+			# `clear` nu dadea nimic, desi pe ea exista un punct la 100 m de
+			# sosea — perfect bun pentru o silueta de orizont. Pe Cappadocia
+			# pista se auto-intersecteaza, deci doua raze din sase aveau
+			# maximul sub prag si orizontul ramanea gaurit oricat coborai
+			# pragul (masurat cu ProbeCappHorizon: maxime de 100,2 si 145,5 m).
+			# Acum se retine si CEL MAI BUN punct de pe raza, si se cade pe el
+			# cand pragul nu se atinge. Se renunta la slot doar daca nici
+			# maximul nu tine silueta afara din drum — `clear * 0.6`, adica
+			# tot peste raza modelului, nu o capitulare.
+			var best_pos := Vector3.ZERO
+			var best_clear := -1.0
 			var dist: float = float(ring["near"])
 			while dist <= limit:
 				var cand := centroid + Vector3(cos(angle), 0, sin(angle)) * dist
-				if _road_distance_xz(cand) >= clear:
+				var road_d := _road_distance_xz(cand)
+				if road_d > best_clear:
+					best_clear = road_d
+					best_pos = cand
+				if road_d >= clear:
 					pos = cand
 					found = true
 					break
 				dist += 6.0
+			if not found and best_clear >= clear * 0.6:
+				pos = best_pos
+				found = true
 			if not found:
 				missed += 1
 				continue

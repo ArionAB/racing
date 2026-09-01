@@ -471,6 +471,12 @@ func _source_of(mi: Node, track: Node) -> String:
 		"chimney", "twin_chimney_gate", "cave_house", "dovecote",
 		"rock_church_facade", "shrub_dry", "pigeon",
 		"poplar", "carpet_terrace", "pottery_cart", "pot_stack",
+		# Stratul uman al piatei din Goreme. Aceeasi capcana ca mai sus, a doua
+		# oara: piesele intrau in totaluri dar linia pe surse le arunca in
+		# "procedural (track.gd)", care iesea cu 39 de prop-uri si 89k tris —
+		# adica mai mult decat poate face geometria din track.gd.
+		"farmhouse", "church_arch", "cave_entrance", "vine_row", "torch",
+		"cracked_chimney",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "canyon_rocks", "desert_scatter", "butte",
 		"wood_fence", "train"]

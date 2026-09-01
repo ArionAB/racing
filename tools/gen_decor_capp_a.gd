@@ -406,23 +406,35 @@ func _chimneys() -> void:
 
 ## MOLOZUL DE PRIM-PLAN: bolovani lati si josi, cum e tot solul in referinta.
 ##
-## `cracked_chimney_c` are 0,98 m inaltime si 9,90 m latime — o lespede, nu un
-## horn; `cracked_chimney_b` are 6,54 x 20,90 m — un pinten lat. Se cer in
-## METRI (0,6-1,6 m si 3,6-4,5 m), altfel ies coloanele de pe POI B.
+## `cracked_chimney_b` are 6,54 x 20,90 m — un pinten lat, si el ridica malurile
+## palide de pe umeri. Se cere IN METRI (3,6-4,5 m), altfel ies coloanele de pe
+## POI B.
 ##
-## Sunt scumpe (2528 si 1612 tri), deci sunt PUTINE si numai acolo unde chiar
-## se calca cu privirea: langa banda, in primul plan. Un covor din ele ar fi
-## dublat triunghiurile pistei fara sa se vada nimic in plus.
+## DE CE NU MAI E `cracked_chimney_c` AICI, desi e lespedea evidenta (0,98 x
+## 9,90 m). Masurat A/B in acelasi worktree, cu si fara cele noua bucati, la
+## frac 0.02: diferenta pe ecran e 1,33% din pixeli, pentru 25 976 de
+## triunghiuri — 13% din toata geometria pistei, a treia sursa ca marime din
+## raportul pe surse. Piesa costa 2528 tri fiindca e un mesh de horn crapat
+## intreg; turtita la un metru, nu se vede din ea decat conturul.
+##
+## Efectul se pastreaza, costul nu: acelasi contur de bolovan iese dintr-un
+## `chimney_mushroom` (478 tri) turtit, care oricum e deja in scena si nu aduce
+## nici material, nici mesh nou. Lectia POI B nu e "nu folosi molozul", e
+## "cere metri si uita-te la ce platesti pentru ei".
 func _rubble() -> void:
-	for j in 9:
-		var f := 0.9955 + 0.0044 * float(j)
+	# Bolovanii de umar: hornuri TURTITE, nu lespezi scumpe. `_place` ia o
+	# singura scara, deci turtirea vine din inaltimea ceruta — un
+	# chimney_mushroom de 12,32 m adus la 1,1-1,9 m e un bolovan lat, exact
+	# silueta din referinta, la 478 tri in loc de 2528.
+	for j in 11:
+		var f := 0.9955 + 0.0036 * float(j)
 		if f > 1.0:
 			f -= 1.0
 		var sgn := -1.0 if j % 2 == 0 else 1.0
-		_place("rocks/cracked_chimney_c", "lespede", f, sgn,
+		var mdl := "rocks/chimney_mushroom" if j % 2 == 0 else "rocks/chimney_a"
+		_place(mdl, "bolovan", f, sgn,
 			_rng.randf_range(0.6, 4.0), _rng.randf_range(0.0, TAU),
-			_scale_for("rocks/cracked_chimney_c", _rng.randf_range(0.6, 1.6)),
-			"none")
+			_scale_for(mdl, _rng.randf_range(1.1, 1.9)), "none")
 	# Doi pinteni lati, ca maluri ale piatei — dau fundalului o talpa, ca sa nu
 	# para ca toate conurile cresc din nisip gol.
 	_place("rocks/cracked_chimney_b", "pinten", 0.0088, -1.0, 16.0,

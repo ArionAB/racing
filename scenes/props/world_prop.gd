@@ -132,6 +132,13 @@ const PROP_COLLISION := {
 	# gard de 10 m, si sunt zeci de randuri.
 	"vine_row": "none",
 	"shrub_dry": "none", "pigeon": "none",
+	# Molozul de la baza hornurilor (POI E, coama din dreapta): lespezi de
+	# ~1 m inaltime si 10 m latime, 72 de bucati, TOATE la 28-60 m lateral de
+	# banda. Sunt gradient de contact intre stanca si sol (defectul 3 al
+	# rundei 2: "obiecte care se infig intr-un plan"), nu obstacole — iar un
+	# hull per bucata ar adauga 72 de corpuri convexe pe o coama pe care
+	# masina n-are ce cauta. Daca vreodata ajunge acolo, terenul o opreste.
+	"cracked_chimney_c": "none",
 	# Plopii: cilindru pe trunchi, ca toti copacii — hull-ul unui plop de
 	# 15 m e o coloana de 2,5 m latime care te opreste in aer.
 	"poplar_a": "trunk", "poplar_b": "trunk",

@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -9,6 +9,14 @@
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/plants/poplar_b.glb" id="5_popb"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/buildings/farmhouse.glb" id="6_farm"]
 [ext_resource type="Script" path="res://scenes/props/fabric_drape.gd" id="10_drape"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/cracked_chimney_b.glb" id="19_crB"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/chimney_a.glb" id="11_chA"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/chimney_b.glb" id="12_chB"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/chimney_c.glb" id="13_chC"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/chimney_d.glb" id="14_chD"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/chimney_mushroom.glb" id="15_chM"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/chimney_triple.glb" id="16_chT"]
+[ext_resource type="PackedScene" path="res://assets/models/cappadocia/rocks/cracked_chimney_a.glb" id="17_crA"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/props/balloon_basket.glb" id="8_basket"]
 [ext_resource type="PackedScene" path="res://assets/models/cappadocia/props/balloon_envelope_a.glb" id="9_env"]
 
@@ -381,3 +389,77 @@ transform = Transform3D(-0.3256, 0.0000, 0.9455, 0.0000, 1.0000, 0.0000, -0.9455
 
 [node name="Poplar14" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("5_popa")]
 transform = Transform3D(0.4695, 0.0000, 0.8829, 0.0000, 1.0000, 0.0000, -0.8829, 0.0000, 0.4695, -245.934, 13.617, -158.534)
+
+[node name="Zone05_RightBasin" type="Node3D" parent="DecorManual"]
+
+[node name="Chimney01" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("13_chC")]
+transform = Transform3D(0.7924, 0.0000, -0.6889, 0.0000, 1.0500, 0.0000, 0.6889, 0.0000, 0.7924, -53.437, 5.849, -197.136)
+
+[node name="Chimney02" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("11_chA")]
+transform = Transform3D(-0.6784, 0.0000, 0.4239, 0.0000, 0.8000, 0.0000, -0.4239, 0.0000, -0.6784, -86.291, 5.013, -231.000)
+
+[node name="Chimney03" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("16_chT")]
+transform = Transform3D(-0.7314, 0.0000, -0.6820, 0.0000, 1.0000, 0.0000, 0.6820, 0.0000, -0.7314, -150.827, 4.280, -240.713)
+
+[node name="Chimney04" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("15_chM")]
+transform = Transform3D(0.5162, 0.0000, 0.7372, 0.0000, 0.9000, 0.0000, -0.7372, 0.0000, 0.5162, -113.041, 4.666, -211.507)
+
+[node name="Chimney05" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("12_chB")]
+transform = Transform3D(0.2287, 0.0000, -1.0760, 0.0000, 1.1000, 0.0000, 1.0760, 0.0000, 0.2287, -167.760, 4.132, -241.912)
+
+[node name="Chimney06" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("11_chA")]
+transform = Transform3D(-0.2394, 0.0000, 0.6578, 0.0000, 0.7000, 0.0000, -0.6578, 0.0000, -0.2394, -242.382, 4.138, -242.614)
+
+[node name="Chimney07" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("14_chD")]
+transform = Transform3D(1.1108, 0.0000, -0.2976, 0.0000, 1.1500, 0.0000, 0.2976, 0.0000, 1.1108, -158.122, 5.190, -212.475)
+
+[node name="Chimney08" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("17_crA")]
+transform = Transform3D(-0.9356, 0.0000, 0.1650, 0.0000, 0.9500, 0.0000, -0.1650, 0.0000, -0.9356, -205.349, 3.814, -242.302)
+
+[node name="Chimney09" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("13_chC")]
+transform = Transform3D(0.5745, 0.0000, 0.4821, 0.0000, 0.7500, 0.0000, -0.4821, 0.0000, 0.5745, -227.919, 3.580, -215.076)
+
+[node name="Chimney10" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("15_chM")]
+transform = Transform3D(-0.2084, 0.0000, -1.1818, 0.0000, 1.2000, 0.0000, 1.1818, 0.0000, -0.2084, -277.907, 9.957, -256.135)
+
+[node name="Chimney11" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("12_chB")]
+transform = Transform3D(-0.0741, 0.0000, 0.8468, 0.0000, 0.8500, 0.0000, -0.8468, 0.0000, -0.0741, -296.840, 14.266, -212.275)
+
+[node name="Chimney12" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("11_chA")]
+transform = Transform3D(0.6023, 0.0000, -0.8601, 0.0000, 1.0500, 0.0000, 0.8601, 0.0000, 0.6023, -288.196, 13.126, -189.489)
+
+[node name="Talus01" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(-0.5670, 0.0000, 0.1594, 0.0000, 0.5890, 0.0000, -0.1594, 0.0000, -0.5670, -63.878, 13.329, -184.387)
+
+[node name="Talus02" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(0.5229, 0.0000, -0.1770, 0.0000, 0.5520, 0.0000, 0.1770, 0.0000, 0.5229, -60.884, 4.145, -210.248)
+
+[node name="Talus03" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(0.8011, 0.0000, 0.0687, 0.0000, 0.8040, 0.0000, -0.0687, 0.0000, 0.8011, -141.140, 2.250, -253.694)
+
+[node name="Talus04" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(-0.6543, 0.0000, 0.6296, 0.0000, 0.9080, 0.0000, -0.6296, 0.0000, -0.6543, -160.429, 1.819, -250.270)
+
+[node name="Talus05" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(-0.6241, 0.0000, -0.1743, 0.0000, 0.6480, 0.0000, 0.1743, 0.0000, -0.6241, -168.372, 2.434, -255.569)
+
+[node name="Talus06" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(-0.5769, 0.0000, 0.2839, 0.0000, 0.6430, 0.0000, -0.2839, 0.0000, -0.5769, -162.804, 2.496, -230.025)
+
+[node name="Talus07" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(-0.2933, 0.0000, -0.5587, 0.0000, 0.6310, 0.0000, 0.5587, 0.0000, -0.2933, -160.934, 11.793, -200.311)
+
+[node name="Talus08" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(0.6345, 0.0000, 0.2474, 0.0000, 0.6810, 0.0000, -0.2474, 0.0000, 0.6345, -165.786, 2.371, -217.246)
+
+[node name="Talus09" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(-0.3424, 0.0000, -0.5654, 0.0000, 0.6610, 0.0000, 0.5654, 0.0000, -0.3424, -212.253, 2.055, -257.666)
+
+[node name="Talus10" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(-0.1803, 0.0000, 0.8133, 0.0000, 0.8330, 0.0000, -0.8133, 0.0000, -0.1803, -196.199, 1.713, -245.251)
+
+[node name="Talus11" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(0.7579, 0.0000, 0.0106, 0.0000, 0.7580, 0.0000, -0.0106, 0.0000, 0.7579, -268.165, 7.106, -253.800)
+
+[node name="Talus12" parent="DecorManual/Zone05_RightBasin" instance=ExtResource("19_crB")]
+transform = Transform3D(0.8147, 0.0000, -0.3508, 0.0000, 0.8870, 0.0000, 0.3508, 0.0000, 0.8147, -284.089, 10.836, -246.645)

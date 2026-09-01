@@ -10,6 +10,10 @@ extends Node
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbePlutire.tscn -- --track=6
 const MAX_GOL := 4.0   ## metri de aer tolerati sub baza unui prop
+## Ce ARE VOIE sa pluteasca: pasari, baloane, cabine de telecabina. Lista e scurta
+## si explicita, ca sa nu devina o portita — orice adaugat aici trebuie sa aiba un
+## motiv de lume, nu de convenienta.
+const ZBURATOARE := ["Pigeon", "Balloon", "Balon", "Cabina", "Porumbel"]
 
 func _ready() -> void:
 	call_deferred("_go")
@@ -49,6 +53,13 @@ func _go() -> void:
 		var aabb := mi.get_aabb()
 		var base: Vector3 = mi.global_transform * (aabb.position + Vector3(
 			aabb.size.x * 0.5, 0.0, aabb.size.z * 0.5))
+		var zboara := false
+		for z in ZBURATOARE:
+			if owner_nm.contains(z):
+				zboara = true
+				break
+		if zboara:
+			continue
 		checked += 1
 		var q := PhysicsRayQueryParameters3D.create(
 			base + Vector3.UP * 1.0, base + Vector3.DOWN * 200.0)
@@ -57,7 +68,11 @@ func _go() -> void:
 			print("  %s: NIMIC dedesubt (baza y=%.1f)" % [owner_nm, base.y])
 			bad += 1
 		else:
-			var gol: float = base.y - float(hit["position"].y)
+			var sol: float = float(hit["position"].y)
+			# In afara panzei de teren, `_terrain_mesh_y` extrapoleaza si intoarce
+			# o cota fixa (masurat: -27.6 pe Track13). Prop-urile de acolo nu sunt
+			# "plutitoare", sunt in afara lumii — se raporteaza separat.
+			var gol: float = base.y - sol
 			if gol > MAX_GOL:
 				print("  %s: pluteste %.1f m (baza y=%.1f, sol y=%.1f)" % [
 					owner_nm, gol, base.y, float(hit["position"].y)])

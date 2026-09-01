@@ -128,6 +128,41 @@ const CAP_SLOT: int = 20
 ## despartite (salt de ~9 din 255 pe un ton de 200) fara sa scobeasca.
 @export_range(0.0, 0.35, 0.01) var facet_plate: float = 0.09
 
+## Cat de tare se strang fetele in DOUA MODURI in loc sa curga pe o rampa.
+## 0 = rampa liniara pe 12 trepte (comportamentul rundelor 12-15).
+## Vezi nota lunga de la `term_hard` din `_shade_facets`: masurat, conul avea
+## ecart de 101 din 255 si tot citea plat, fiindca pixelii umpleau mijlocul
+## histogramei. Asta nu adauga contrast, il muta din mijloc in capete.
+@export_range(0.0, 1.0, 0.05) var term_hard: float = 0.0
+
+## Cat de lata e banda de trecere din jurul terminatorului, in unitati de `d`
+## (unde 0.5 e chiar terminatorul). Mica = doua moduri net separate; mare =
+## inapoi la degrade. Sub ~0.06 fetele aproape tangente incep sa clipeasca intre
+## moduri de la o instanta la alta, fiindca deformarea per instanta le muta
+## normala cu cateva grade.
+@export_range(0.04, 0.5, 0.01) var term_width: float = 0.12
+
+## Cat de mult coboara MODUL UMBRIT sub cel luminat, in vertex color.
+## Asta e parghia care chiar muta pixeli: `term_hard` decide CINE cade in care
+## mod, `term_drop` decide cat de departe stau modurile unul de altul. Vezi nota
+## din `_shade_facets` — cuantizarea singura misca doar 8% dintr-o valoare,
+## fiindca `facet_contrast` e 0.17.
+## Se scade doar pe partea intoarsa de la soare, deci piatra luminata ramane
+## palida (regula rundei 15: fatete din lumina, nu din pigment).
+@export_range(0.0, 0.6, 0.01) var term_drop: float = 0.30
+
+## In cate trepte se rupe AO-ul copt din .glb. 0 = continuu (comportamentul de
+## pana in runda 24).
+## Asta e parghia reala de bimodalitate, si nu era evident: masurat cu `probe_k`,
+## AO-ul are mediana 0.45 si se intinde de la 0.06 la 0.98, adica el e semnalul
+## care umple mijlocul histogramei — nu `facet_contrast`, care misca 8%.
+@export_range(0.0, 16.0, 1.0) var ao_steps: float = 0.0
+
+## Cum se repartizeaza fetele intre treptele de AO. 1 = neschimbat; peste 1
+## impinge valorile in jos, deci mijlocul se goleste si fetele se aduna in
+## capete. Vezi `_cuantizeaza_ao`.
+@export_range(0.3, 3.0, 0.05) var ao_gamma: float = 1.0
+
 @export_range(0.35, 1.0, 0.01) var ovality: float = 1.0
 
 ## Pe ce azimut sta axa lunga a elipsei, in grade. Conteaza fiindca perechea
@@ -1938,6 +1973,37 @@ func _shade_facets(arr: Array) -> Array:
 		var ao := (cols[i].r + cols[i + 1].r + cols[i + 2].r) / 3.0
 		var ag := (cols[i].g + cols[i + 1].g + cols[i + 2].g) / 3.0
 		var ab := (cols[i].b + cols[i + 1].b + cols[i + 2].b) / 3.0
+		# AICI E GRADIENTUL, si abia runda 24 l-a gasit. Masurat cu `probe_k`,
+		# care citeste canalul de vertex color din mesh-ul final, INAINTE de
+		# lumina si de rasterizator:
+		#   hornUmbra8   min 0.122  p10 0.306  p50 0.447  p90 0.678  max 0.984
+		#   hornSoare11  min 0.059  p10 0.282  p50 0.463  p90 0.651  max 0.980
+		# adica exact forma pe care o are si histograma de pixeli: o cocoasa
+		# lata cu mediana chiar la mijloc. AO-ul copt in .glb se intinde peste
+		# tot intervalul, deci el e semnalul dominant de pe con — nu `k`, care
+		# cu `facet_contrast` 0.17 se plimba doar intre ~0.91 si 1.0.
+		#
+		# De-aia n-au "iesit" nici fatetarea rundelor 12-14, nici cuantizarea
+		# bimodala a lui `q` incercata mai jos (masurat separat: hornSoare11 a
+		# facut p50 124 -> 122, GAP 76 -> 76). Se repara un semnal de 8% in timp
+		# ce peste el curge unul care acopera tot intervalul.
+		#
+		# Aplatizarea pe fata (runda 14) a rezolvat doar jumatate: AO-ul nu mai
+		# curge INAUNTRUL unei fete, dar continua sa curga de la o fata la alta,
+		# cu 4000-5600 de valori distincte imprastiate uniform. Un degrade in
+		# trepte de-o fata e tot un degrade.
+		#
+		# Se cuantizeaza deci si el, in `ao_steps` trepte. Nu se sterge (regula:
+		# semnalul pictat nu se sterge, se cuantizeaza) — contactul si
+		# adanciturile raman, fiindca ordinea valorilor se pastreaza — dar
+		# treptele devin putine si late, deci fetele se aduna in grupuri in loc
+		# sa umple continuu histograma. `ao_gamma` inclina apoi repartitia intre
+		# trepte: peste 1 goleste mijlocul si impinge fetele spre capete, adica
+		# taman ce cere bimodalitatea.
+		if ao_steps >= 2.0:
+			ao = _cuantizeaza_ao(ao)
+			ag = _cuantizeaza_ao(ag)
+			ab = _cuantizeaza_ao(ab)
 		for j in 3:
 			cols[i + j] = Color(ao, ag, ab, cols[i + j].a)
 		var n := norms[i] + norms[i + 1] + norms[i + 2]
@@ -1964,6 +2030,45 @@ func _shade_facets(arr: Array) -> Array:
 		# 255 pe un ton de 230 — peste pragul de 8 al sondei), si suprafetele
 		# vecine cu normale apropiate cad totusi pe trepte diferite.
 		var q := roundf(d * 12.0) / 12.0
+		# TREAPTA DE TERMINATOR: doua MODURI, nu un degrade cu 12 opriri.
+		#
+		# Runda 24, si e alta acuzatie decat rundele 12-15. Alea intrebau "cat de
+		# mult difera fata luminata de cea umbrita" si raspundeau cu o cifra.
+		# Masurat corect (`probe_bimodal`, histograma pixelilor unui horn numit),
+		# conul are ecart de 101 din 255 — contrast destul — si tot citeste plat,
+		# fiindca toti pixelii ala stau intre capete: mediana chiar la MIJLOCUL
+		# histogramei, o cocoasa lata. Referinta are doua varfuri separate: o fata
+		# clara si una distinct inchisa, cu putin intre ele.
+		#
+		# Cifrele de pe baza, frac 0.06 (GAP intre centre, VALE = cati pixeli in
+		# banda din mijloc; un gradient uniform da VALE ~30%):
+		#   hornUmbra8   GAP 35  VALE 17.1  — un singur mod
+		#   hornSoare11  GAP 76  VALE 16.2  — k-means taie chiar cocoasa in doua
+		#   hornGemen9   GAP 37  VALE  9.2  — un singur mod
+		#
+		# De aici vine si raspunsul la de ce fatetarea rundelor 12-14 "n-a iesit":
+		# fatetele exista si sunt plate pe triunghi, dar `roundf(d * 12.0)` e o
+		# RAMPA LINIARA — 12 opriri egal distantate intre umbra si lumina, adica
+		# exact definitia unui degrade, doar esantionat. Fetele cad uniform pe
+		# toata rampa, deci umplu mijlocul histogramei. Un con neted si unul
+		# fatetat cu rampa liniara dau aceeasi distributie; se despart abia daca
+		# rampa insasi are o TREAPTA.
+		#
+		# Ce se face: `d` (0..1, cu 0.5 chiar terminatorul) se trage spre capete cu
+		# un smoothstep ingust in jurul lui 0.5. Fetele clar spre soare se aduna
+		# sus, cele clar intoarse se aduna jos, si intre ele ramane o banda
+		# ingusta — adica doua moduri. Nu e mai mult contrast (capetele sunt
+		# aceleasi, deci ecartul nu creste si nici nu se scobeste piatra): e
+		# ACELASI contrast redistribuit, mutat din mijloc in capete.
+		#
+		# Rampa liniara nu se sterge de tot, se pastreaza `1.0 - term_hard` din
+		# ea: fara un rest de rampa, toate fetele dintr-un mod ar avea valoare
+		# identica si conul ar fi doua pete plate, adica exact "citeste a decupaj
+		# de hartie". Muchia dintre doua fete vecine ramane apoi treaba lui
+		# `facet_plate`, care lucreaza in interiorul fiecarui mod.
+		if term_hard > 0.0:
+			var td := smoothstep(0.5 - term_width, 0.5 + term_width, d)
+			q = lerpf(q, roundf(td * 12.0) / 12.0, term_hard)
 		# VARIATIA PE PLACA, ca fetele vecine sa nu cada niciodata la fel.
 		#
 		# Cuantizarea dupa unghi, singura, nu ajunge — si asta e masurat, nu
@@ -2002,12 +2107,43 @@ func _shade_facets(arr: Array) -> Array:
 		# dintre doua fete vecine, nu de nivelul absolut — dar conul nu mai
 		# pierde valoare pe toata suprafata.
 		var k := 1.0 - facet_contrast * (0.5 - q) - facet_plate * jitter
+		# MODUL UMBRIT SE LASA IN JOS, si asta e partea care chiar se vede.
+		#
+		# Cuantizarea bimodala a lui `q`, singura, nu misca aproape nimic in
+		# pixeli — masurat: cu `term_hard` 0.75 si restul neschimbat, hornSoare11
+		# a facut p50 124 -> 122 si GAP 76 -> 76. Motivul e aritmetic, nu de
+		# reglaj: `facet_contrast` e 0.17, deci k se plimba intre ~0.91 si 1.0.
+		# Oricat de curat ai imparti fetele in doua grupuri, cele doua grupuri
+		# ies despartite cu 8% dintr-o valoare — invizibil langa un ecart de
+		# lumina reala de 101 din 255. Vertex color-ul are un singur sens
+		# (inmulteste si e clampat la 1, memoria surfacetool-clamp-vertex-color),
+		# deci singurul mod pe care il poate MUTA e cel intunecat.
+		#
+		# Se aplica deci o intunecare in plus proportionala cu cat de departe de
+		# soare e fata, dar DOAR dincolo de terminator (`1.0 - td` e zero pe
+		# partea insorita). Fata luminata ramane exact unde era — piatra palida
+		# nu se scobeste, asa cum cere runda 15 — iar fata intoarsa coboara,
+		# adica cele doua moduri se despart in valoare, nu doar in eticheta.
+		if term_hard > 0.0:
+			var umbra := smoothstep(0.5 + term_width, 0.5 - term_width, d)
+			k -= term_drop * umbra * term_hard
 		k = minf(k, 1.0)
+		k = maxf(k, 0.05)
 		for j in 3:
 			cols[i + j] = Color(cols[i + j].r * k, cols[i + j].g * k,
 					cols[i + j].b * k, cols[i + j].a)
 	arr[Mesh.ARRAY_COLOR] = cols
 	return arr
+
+
+## O valoare de AO copt, trecuta prin gamma si rotunjita la `ao_steps` trepte.
+## Vezi nota din `_shade_facets`: gamma inclina repartitia (peste 1 = mijlocul se
+## goleste), treptele o rup in platouri. Ordinea valorilor se pastreaza, deci
+## adanciturile raman mai inchise decat proeminentele.
+func _cuantizeaza_ao(v: float) -> float:
+	var g: float = pow(clampf(v, 0.0, 1.0), ao_gamma)
+	return roundf(g * ao_steps) / ao_steps
+
 
 ## Adauga poala de moloz si nisele de usa la mesh-ul gazda, ca SUPRAFETE NOI pe
 ## acelasi ArrayMesh, cu MATERIALUL suprafetei 0.

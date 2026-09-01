@@ -457,6 +457,7 @@ func _ready() -> void:
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
 	_fade_tuff_detail()
+	_apply_tint()
 	_apply_glow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
@@ -574,6 +575,62 @@ func _model_class_material(cls: String) -> Material:
 ## cer aceeasi combinatie: `Palette.glow_material` le tine intr-un cache. Un
 ## cartier intreg de case aurii aduce +1 la garda, nu +40.
 const GLOW_META := "lumina"
+
+
+## Numele metadatei prin care o instanta (sau un container de zona intreg)
+## primeste LUMINA RECE DE UMPLERE pe sloturile ei de piatra. In Inspector:
+## Add Metadata -> `racire`, valoare `"2,4|0.55|#39445C"` — aceeasi gramatica
+## ca `lumina` (sloturi | energie | nuanta).
+##
+## Exista pentru piatra din subteran. Piesele salii stau pe sloturile 2 si 4,
+## amandoua brunuri calde saturate, deci sala avea o singura croma de la cauciuc
+## pana in tavan si cele 16 torte se citeau ca un singur jar. De ce lumina
+## ADITIVA si nu o tenta pe albedo (si de ce corectia de ambient a rundei trecute
+## n-a schimbat nimic): aritmetica e in antetul lui `Palette.cool_fill_material`
+## — pe scurt, tot ce inmulteste pastreaza saturatia brunului, doar adunarea
+## ridica podeaua canalelor mici.
+##
+## E per ZONA, nu per piesa: se pune o data pe `F2_Sala1` si coboara pe tot ce e
+## sub el, exact ca `lumina`.
+##
+## Nu se confunda cu `lumina`: aia aprinde o piesa care ARDE (torta, fereastra),
+## asta e umplerea difuza a incaperii. Cand o piesa cere si una si alta, lumina
+## are ultimul cuvant — vezi ordinea din `_ready`.
+const TINT_META := "racire"
+
+
+## Pune lumina rece de umplere pe instantele care cer `racire`.
+##
+## Ruleaza DUPA clase si INAINTE de `_apply_glow`: o torta care si arde si sta
+## intr-o zona racita trebuie sa ramana aprinsa, deci lumina are ultimul cuvant.
+func _apply_tint() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var spec := _tint_spec(model)
+		if spec.is_empty():
+			continue
+		var parts := spec.split("|", false)
+		var slots: Array = []
+		for token in parts[0].split(",", false):
+			slots.append(int(token))
+		var energy := float(parts[1]) if parts.size() > 1 else 0.55
+		var tint := Color.html(String(parts[2]).strip_edges()) \
+			if parts.size() > 2 else Color.html("39445C")
+		Palette.apply_cool_fill(model, slots, tint, energy)
+
+
+## Racirea unei instante: metadata pe model, altfel pe containerul de zona — asa o
+## sala intreaga se raceste dintr-un singur loc. Acelasi tipar ca `_glow_spec`.
+func _tint_spec(model: Node3D) -> String:
+	if model.has_meta(TINT_META):
+		return String(model.get_meta(TINT_META))
+	var p: Node = model.get_parent()
+	while p != null and p != self.get_parent():
+		if p.has_meta(TINT_META):
+			return String(p.get_meta(TINT_META))
+		p = p.get_parent()
+	return ""
 
 
 ## Pune materialul emisiv pe instantele care cer `lumina`.

@@ -1,0 +1,66 @@
+[node name="MasivulSubteran" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -300, 44, -120)
+gizmo_extents = 150
+script = ExtResource("2_peak")
+radius_m = 150
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("wprop")
+
+[node name="F1_Gura" type="Node3D" parent="DecorManual"]
+
+[node name="F2_Sala1" type="Node3D" parent="DecorManual"]
+
+[node name="F3_Gat" type="Node3D" parent="DecorManual"]
+
+[node name="F4_Sala2" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneCamera" type="Node3D" parent="."]
+
+[node name="CavernaSala1" type="Area3D" parent="ZoneCamera"]
+transform = Transform3D(0.361606, 0, -0.932331, 0, 1, 0, 0.932331, 0, 0.361606, -244.072540, 13.650702, -168.317841)
+script = ExtResource("camzone")
+size = Vector3(26, 14, 60)
+ceiling = 16.0
+darkness = 1.0
+cave_fog_end = 90.0
+
+[node name="CavernaSala2" type="Area3D" parent="ZoneCamera"]
+transform = Transform3D(0.978148, 0, 0.207912, 0, 1, 0, -0.207912, 0, 0.978148, -336.925903, 12.435287, -63.902206)
+script = ExtResource("camzone")
+size = Vector3(26, 14, 60)
+ceiling = 18.0
+darkness = 1.0
+cave_fog_end = 100.0
+
+[node name="Hazarduri" type="Node3D" parent="."]
+
+[node name="PiatraDeMoara" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -319.474, 12.787, -103.593)
+script = ExtResource("hzm")
+kind = 0
+model = ExtResource("millstone_door")
+model_scale = 1.0
+roll = true
+face_travel = true
+motion = 1
+
+[node name="Puturi" type="Node3D" parent="."]
+
+[node name="RazaSala1" type="Node3D" parent="Puturi"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -282.837372, 29.279156, -146.522263)
+script = ExtResource("lshaft")
+top_radius = 2.4
+bottom_radius = 5.0
+length = 16.0
+strength = 0.085
+
+[node name="RazaSala2" type="Node3D" parent="Puturi"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -341.045929, 30.332464, -44.180435)
+script = ExtResource("lshaft")
+top_radius = 2.4
+bottom_radius = 5.4
+length = 18.0
+strength = 0.085
+
+@@NODES@@

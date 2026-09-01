@@ -75,7 +75,81 @@ extends Area3D
 ## De la ce distanta trebuie sa se vada tavanul (m).
 @export_range(0.0, 200.0, 1.0) var ceiling_dist: float = 25.0
 
+@export_group("Intuneric")
+## Cat de mult se stinge lumina lumii inauntru: 0 = nimic, 1 = bezna cu torte.
+##
+## [b]De ce zona asta si nu un nod separat.[/b] Prima constructie a POI-ului F
+## a pus tavan, pereti si coloane, si captura de sofer de la frac 0.68 a iesit
+## tot o hala portocalie, luminata uniform: soarele de zori (energie 0.85,
+## expunere 1.15) intra pe la capete si ambientul pistei lumina la fel de tare
+## sub pamant ca pe platou. Referinta (`img/v3_crops/F_underground.png`) e
+## exact pe dos — un spatiu aproape negru in care singurele pete calde sunt
+## tortele. Adica INCHIDEREA se face din lumina, nu doar din geometrie: cu
+## ambientul pistei aprins, orice sala ramane o pergola, oricat perete i-ai pune.
+##
+## Se pune AICI fiindca zona asta e deja fix conturul cavernei — e nodul care
+## stie ca esti sub pamant, si care are deja lerp-ul de intrare/iesire. Un al
+## doilea nod pe aceleasi coordonate ar fi trebuit tinut sincron de mana, iar
+## la prima mutare a gurii unul din doua ar fi ramas in urma.
+##
+## Tiparul (citit `Environment` o data, pus la loc de fiecare data) e cel din
+## [FogCorridorHazard]: mediul e UNUL pe scena, deci se uita numai dupa masina
+## jucatorului si isi reface valorile la iesire — altfel prima trecere prin
+## caverna ar schimba definitiv atmosfera pistei.
+@export_range(0.0, 1.0, 0.01) var darkness: float = 0.0
+## Culoarea ambientului dinauntru.
+##
+## SLAB SATURATA, si asta e o corectie masurata, nu o preferinta. Prima varianta
+## era portocaliul de torta din brief §4 (1.0, 0.62, 0.34) — dar el se INMULTESTE
+## peste sloturi care sunt deja brune calde (ROCK_DARK #67421F sat 0.54,
+## SAND_SHADOW #915D27 sat 0.58), iar captura de la frac 0.68 a iesit o mocirla
+## rosie uniforma. Referinta (`v3_crops/F_underground.png`) are piatra
+## GRI-BEJ RECE, si tot ce e cald in cadru vine din flacari. Portocaliul apartine
+## deci tortelor (care il au in emisie), nu aerului.
+@export var cave_ambient: Color = Color(0.72, 0.70, 0.72)
+## Cat de departe se mai vede in caverna (m). Ceata inchisa e ce ascunde
+## capetele salilor si opreste cerul sa se vada prin gura de la celalalt capat.
+@export_range(10.0, 400.0, 1.0) var cave_fog_end: float = 95.0
+## Cata lumina ambientala ramane inauntru.
+##
+## Nu zero, si nu din blandete: la 0.10 captura de la frac 0.672 a iesit cu
+## peretii aproape negri, iar coloanele si alcovele — adica tot ce s-a construit
+## — dispareau. Referinta (`v3_crops/F_underground.png`) are piatra CITIBILA
+## peste tot si tortele ca accente peste ea; o pestera in care nu se vede nimic
+## nu e mai apropiata de referinta decat una luminata ca ziua, doar gresita in
+## cealalta directie. 0.30 lasa relieful si AO-ul copt sa se citeasca.
+@export_range(0.0, 2.0, 0.01) var cave_ambient_energy: float = 0.30
+
+## Culoarea cetei din caverna — adica CE CULOARE AU DEPARTARILE.
+##
+## Era `(0.10, 0.07, 0.06)`, un brun cald, si asta a fost chiar defectul pe care
+## l-au numit independent toti cei patru critici ai rundei 2: „o singura nuanta
+## pe toata adancimea cadrului". Ceata e ce vopseste tot ce e departe, iar in
+## familia pietrei ea sterge tocmai separarea de plan. Perspectiva aeriana merge
+## invers: departarile se RACESC.
+##
+## Masurat pe capturile de baza (`R4base_*`): peretele apropiat avea luminanta
+## 23.5 si capatul salii 38.4 — adica departarea era mai LUMINOASA si la fel de
+## calda, exact pe dos fata de referinta. Cu ceata rece si mai inchisa,
+## adancimea se citeste din nuanta, nu doar din marime.
+##
+## Se declara O SINGURA data fiindca `_darken` si `force_dark` o foloseau
+## amandoua, copiata — doua locuri din care se putea schimba doar unul.
+const CAVE_FOG := Color(0.055, 0.062, 0.085)
+
+## De unde INCEPE ceata in caverna, ca fractie din `cave_fog_end`.
+##
+## 0.25 = ceata se ingroasa pe ultimele trei sferturi ale distantei vizibile.
+## Sub pamant asta e corect fizic (praf si fum de torta au densitate mare), si
+## e chiar ce inchide capatul salii: fara ea, gura opusa ramane un petec
+## luminos de 1.8x luminanta peretelui de langa tine.
+const CAVE_FOG_BEGIN_RATIO: float = 0.25
+
 var _shape: CollisionShape3D
+var _env: Environment
+## Valorile pistei, luate O DATA si puse la loc de fiecare data.
+var _base: Dictionary = {}
+var _amount: float = 0.0
 
 
 func _ready() -> void:
@@ -107,10 +181,121 @@ func preset() -> Dictionary:
 	}
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-	_push(_player_inside())
+	var inside := _player_inside()
+	_push(inside)
+	_darken(inside, delta)
+
+
+## Stinge lumina lumii cat esti in caverna, si o pune la loc la iesire.
+##
+## Lerp pe TIMP, cu acelasi `blend_time` ca presetul de camera: intunericul si
+## unghiul camerei sunt acelasi eveniment (pragul gurii), deci daca ar merge pe
+## ceasuri diferite s-ar vedea ca doua schimbari, nu ca una.
+func _darken(inside: bool, delta: float) -> void:
+	if darkness <= 0.0:
+		return
+	if _env == null:
+		_env = _find_env()
+		if _env == null:
+			return
+		# O SINGURA data, si de pe pista curata: daca s-ar reciti in timp ce
+		# zona e activa, "valorile pistei" ar deveni valorile cavernei si
+		# iesirea n-ar mai avea unde sa se intoarca.
+		_base = {
+			"amb_color": _env.ambient_light_color,
+			"amb_energy": _env.ambient_light_energy,
+			"amb_sky": _env.ambient_light_sky_contribution,
+			"fog_begin": _env.fog_depth_begin,
+			"fog_end": _env.fog_depth_end,
+			"fog_color": _env.fog_light_color,
+			"fog_enabled": _env.fog_enabled,
+		}
+	var target := 1.0 if inside else 0.0
+	var speed := 1.0 / maxf(blend_time, 0.05)
+	_amount = move_toward(_amount, target, speed * delta)
+	var k := _amount * darkness
+	_env.ambient_light_color = (_base["amb_color"] as Color).lerp(cave_ambient, k)
+	_env.ambient_light_energy = lerpf(_base["amb_energy"], cave_ambient_energy, k)
+	# Cerul nu are ce cauta sub pamant: contributia lui e chiar lumina care
+	# facea sala sa arate ca o pergola in soare.
+	_env.ambient_light_sky_contribution = lerpf(_base["amb_sky"], 0.0, k)
+	_env.fog_enabled = true
+	# INCEPUTUL cetei, si aici era bug-ul tacut: se scria doar capatul, iar
+	# inceputul ramanea al pistei (140 m, ales ca sa se vada baloanele din vale).
+	# Cu begin 140 > end 90 curba e degenerata, deci ceata de caverna nu se
+	# aplica DELOC — de-aia scurtarea lui `cave_fog_end` de la 100 la 52 nu
+	# schimbase nimic pe captura (8/255 pe petecul de iesire, adica sub prag).
+	# Inceputul se ia ca fractie din capat: ceata trebuie sa se stranga in jurul
+	# tau in sala, nu sa inceapa dupa ce sala s-a terminat.
+	_env.fog_depth_begin = lerpf(
+		_base["fog_begin"], cave_fog_end * CAVE_FOG_BEGIN_RATIO, k)
+	_env.fog_depth_end = lerpf(_base["fog_end"], cave_fog_end, k)
+	# Ceata inchisa, in culoarea pietrei: ea inghite capetele salilor si opreste
+	# cerul sa se vada prin gura de la celalalt capat.
+	_env.fog_light_color = (_base["fog_color"] as Color).lerp(
+		CAVE_FOG, k)
+	if _amount <= 0.0:
+		_env.fog_enabled = _base["fog_enabled"]
+		_env.fog_depth_begin = _base["fog_begin"]
+
+
+## Aduce intunericul direct la plin, fara lerp — pentru capturi (`Snapshot
+## --cave`), unde nu exista masina care sa intre in zona si deci nici cadre in
+## care sa se stinga lumina treptat. Vezi `cave_view` din tools/snapshot.gd.
+func force_dark() -> void:
+	if darkness <= 0.0:
+		return
+	if _env == null:
+		_env = _find_env()
+		if _env == null:
+			return
+		_base = {
+			"amb_color": _env.ambient_light_color,
+			"amb_energy": _env.ambient_light_energy,
+			"amb_sky": _env.ambient_light_sky_contribution,
+			"fog_begin": _env.fog_depth_begin,
+			"fog_end": _env.fog_depth_end,
+			"fog_color": _env.fog_light_color,
+			"fog_enabled": _env.fog_enabled,
+		}
+	_amount = 1.0
+	var k := darkness
+	_env.ambient_light_color = (_base["amb_color"] as Color).lerp(cave_ambient, k)
+	_env.ambient_light_energy = lerpf(_base["amb_energy"], cave_ambient_energy, k)
+	_env.ambient_light_sky_contribution = lerpf(_base["amb_sky"], 0.0, k)
+	_env.fog_enabled = true
+	# INCEPUTUL cetei, si aici era bug-ul tacut: se scria doar capatul, iar
+	# inceputul ramanea al pistei (140 m, ales ca sa se vada baloanele din vale).
+	# Cu begin 140 > end 90 curba e degenerata, deci ceata de caverna nu se
+	# aplica DELOC — de-aia scurtarea lui `cave_fog_end` de la 100 la 52 nu
+	# schimbase nimic pe captura (8/255 pe petecul de iesire, adica sub prag).
+	# Inceputul se ia ca fractie din capat: ceata trebuie sa se stranga in jurul
+	# tau in sala, nu sa inceapa dupa ce sala s-a terminat.
+	_env.fog_depth_begin = lerpf(
+		_base["fog_begin"], cave_fog_end * CAVE_FOG_BEGIN_RATIO, k)
+	_env.fog_depth_end = lerpf(_base["fog_end"], cave_fog_end, k)
+	_env.fog_light_color = (_base["fog_color"] as Color).lerp(
+		CAVE_FOG, k)
+
+
+func _find_env() -> Environment:
+	var we := _first_world_env(get_tree().root)
+	return we.environment if we != null else null
+
+
+func _first_world_env(n: Node) -> WorldEnvironment:
+	if n == null:
+		return null
+	if n is WorldEnvironment:
+		return n as WorldEnvironment
+	for c in n.get_children():
+		var found := _first_world_env(c)
+		if found != null:
+			return found
+	return null
 
 
 func _player_inside() -> bool:

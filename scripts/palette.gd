@@ -1348,6 +1348,55 @@ static func apply_world_material(root: Node) -> void:
 			var mi := node as MeshInstance3D
 			mi.material_override = mat
 
+
+## --- Lumina RECE de umplere, pe sloturile de piatra ------------------------
+
+## [b]De ce nu merge niciun drum multiplicativ.[/b] Sub pamant, piesele salii
+## (`hall_alcove`, `hall_column`, `hall_ceiling_module`, `hall_arch`) stau DOAR
+## pe sloturile 2 (#955f28) si 4 (#774c23) — masurat cu
+## `tools/ProbeCappSlots.tscn`, nu presupus. Amandoua sunt brunuri calde si
+## saturate (0.73 / 0.71), deci toata sala are o singura croma si cele 16 torte
+## se citesc ca un singur jar: n-au nimic RECE langa care sa fie calde.
+## Referinta (`v3_crops/F_underground.png`) are piatra gri-bej rece, cu caldura
+## numai din flacara.
+##
+## Aritmetica, facuta inainte de a scrie codul, spune ca trei din patru lucruri
+## la indemana NU pot ajunge acolo, fiindca toate INMULTESC brunul:
+##   - `albedo_color` (tenta pe material): ca sa ajunga neutru trebuie sa aduca
+##     R si G la nivelul lui B, adica (119,76,35) -> (35,35,35). Saturatie 0,
+##     dar luminanta 82 -> 35: piatra devine gri DEVENIND aproape neagra, exact
+##     ce a respins criticul rundei trecute („piatra CITIBILA peste tot").
+##   - `ambient_light_color`: si el multiplicativ. De-aia corectia rundei
+##     trecute (cave_ambient dus pe gri neutru 0.72/0.70/0.72) NU s-a vazut —
+##     masurat pe hartie, saturatia ramane 0.71 indiferent ce culoare are
+##     ambientul, fiindca inmultirea scaleaza toate canalele proportional.
+##   - `EMISSION_OP_MULTIPLY`: emisia e proportionala cu albedo-ul, deci scaleaza
+##     acelasi brun (sat 0.71 -> 0.58 in cel mai bun caz incercat).
+##
+## Ce ramane, si ce chiar functioneaza, e lumina ADITIVA: un termen ABSOLUT,
+## independent de albedo, care ridica PODEAUA canalelor mici. Masurat pe aceleasi
+## doua sloturi, `#39445C` la energie 0.55 da (73,64,62) — saturatie 0.71 -> 0.15
+## si luminanta 82 -> 66, adica se raceste CRESCAND in citibilitate, nu scazand.
+##
+## Fizic e si corect: intr-o caverna, umplerea rece vine din putul de ventilatie
+## (cer), iar caldura din torte. Aici se declara chiar acea umplere.
+##
+## Costa UN material per (sloturi, energie, nuanta), partajat prin cache-ul din
+## `glow_material_slots` — garda numara materiale, si un cartier intreg de piese
+## racite aduce +1, nu +N.
+static func cool_fill_material(slots: Array, tint: Color,
+		energy: float) -> StandardMaterial3D:
+	return glow_material_slots(slots, energy, tint, false)
+
+
+## Pune umplerea rece pe tot subarborele.
+static func apply_cool_fill(root: Node, slots: Array, tint: Color,
+		energy: float) -> void:
+	var mat := cool_fill_material(slots, tint, energy)
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			(node as MeshInstance3D).material_override = mat
+
 ## --- Ruperea accentelor de pe o parte care primeste clasa ------------------
 
 ## Numele nodului-copil in care ajung triunghiurile pastrate pe atlas.

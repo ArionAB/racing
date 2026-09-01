@@ -296,7 +296,7 @@ transform = Transform3D(-0.3420, 0.0000, -0.9397, 0.0000, 1.0000, 0.0000, 0.9397
 transform = Transform3D(-0.9205, 0.0000, -0.3907, 0.0000, 1.0000, 0.0000, 0.3907, 0.0000, -0.9205, -110.786, 25.709, -149.884)
 
 [node name="Farmhouse" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("6_farm")]
-transform = Transform3D(-0.3903, 0.0000, 0.9207, 0.0000, 1.0000, 0.0000, -0.9207, 0.0000, -0.3903, -56.438, 17.587, -139.641)
+transform = Transform3D(-0.9207, 0.0000, -0.3903, 0.0000, 1.0000, 0.0000, 0.3903, 0.0000, -0.9207, -54.096, 16.431, -145.165)
 
 [node name="BalloonFabric" parent="DecorManual/Zone05_Vineyard" instance=ExtResource("7_fabric")]
 transform = Transform3D(0.1692, 0.0000, -0.9856, 0.0000, 4.0000, 0.0000, 0.9856, 0.0000, 0.1692, -126.400, 14.886, -182.700)

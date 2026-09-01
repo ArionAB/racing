@@ -217,6 +217,72 @@ const CAP_SLOT: int = 20
 @export_range(0.0, 0.5, 0.01) var strata_light: float = 0.0
 
 
+## --- TERASE: silueta ca o scara cu praguri ---------------------------------
+
+## Cate segmente cilindrice discrete are hornul. 0 = stins (silueta neteda).
+##
+## De ce exista, si de ce NU e acelasi lucru cu `strata_step` (runda 18).
+##
+## Criticul orb, dupa ce a comparat capturile cu referinta: "dati hornurilor
+## strate IN TREPTE, nu dungi — taiati silueta fiecarui con astfel incat fiecare
+## banda sa fie un cilindru distinct a carui fata de sus e vizibil MAI LATA
+## decat cea de deasupra ei, si lasati consola aia sa arunce umbra pe banda de
+## dedesubt. Concret: 4-5 segmente suprapuse, fiecare cu ~8-12% mai ingust decat
+## cel de sub el, ca silueta sa devina o SCARA CRESTATA."
+##
+## `strata_step` NU face asta, si diferenta e structurala, nu de magnitudine:
+##
+##   1. E o UMFLATURA, nu o treapta. Modula raza cu `1 + step * hard`, unde
+##      `hard` e o valoare pseudoaleatoare per banda — deci banda 3 putea fi mai
+##      LATA decat banda 2. Un profil care urca si coboara nu e o scara; e o
+##      suprafata ondulata, si in silueta se citeste ca zgomot.
+##   2. Nu avea pe ce sa se aseze. Corpul din GLB are ~10 inele orizontale pe
+##      toata inaltimea (masurat pe chimney_a: 0, 0.04, 0.74, 1.48, 1.76, 2.20,
+##      3.50, 5.26, 7.00, 8.76, 10.04). Doua inele consecutive sunt la 1.75 m
+##      distanta in jumatatea de sus. O saritura de raza intre ele nu poate
+##      produce un PERETE VERTICAL — produce o fata inclinata de 1.75 m
+##      inaltime pe 0.2 m iesire, adica o panta de 6°. Ochiul vede o panta,
+##      nu o treapta, si de-aia efectul iesea la fel de "pictat" oricat de mare
+##      era `strata_step`.
+##
+## Deci terasele fac intai chirurgie de TOPOLOGIE (`_split_at_planes` taie
+## triunghiurile pe planele de terasa, deci apar vertecsi la ACEEASI cota de
+## ambele parti ale pragului) si abia apoi deplaseaza raza. Muchia aia comuna
+## devine buza, si sub ea peretele coboara vertical.
+@export_range(0, 6, 1) var terrace_count: int = 0
+
+## Cu cat se ingusteaza fiecare segment fata de cel de dedesubt, ca fractiune
+## din raza LOCALA. Criticul cere 8-12%.
+##
+## Se aplica CUMULAT si numai in jos: segmentul k se ingroasa cu
+## (1+drop)^(n-1-k) fata de profilul de baza, deci fata de sus a fiecarui
+## segment e mereu mai lata decat cea de deasupra. Asta e chiar invariantul pe
+## care `strata_step` il incalca.
+@export_range(0.0, 0.20, 0.005) var terrace_drop: float = 0.10
+
+## Adancimea PRAGULUI orizontal, in metri de mesh. Buza nu e tesita: se coboara
+## un al doilea inel de vertecsi la `lip` sub planul de terasa, ambele la raza
+## LARGA, deci intre ele exista o fata verticala adevarata de `lip` metri care
+## prinde umbra. Fara ea, buza ar fi o singura muchie si iluminarea ar trece
+## direct de la fata de sus la peretele de dedesubt — o linie, nu o treapta.
+##
+## 0.3 m e magnitudinea ceruta si e peste pragul de vizibilitate: la 25 m, cu
+## FOV 70 pe 1280 px, 0.3 m inseamna ~11 px.
+@export_range(0.0, 0.8, 0.05) var terrace_lip_m: float = 0.30
+
+## Pana la ce fractiune din inaltime merg terasele. Peste ea corpul ramane neted
+## ca palaria (`cap_flare` / `cap_basalt`) sa se aseze pe un gat curat: o buza de
+## terasa taiata chiar sub palarie ar fi concurat cu muchia care rupe silueta.
+@export_range(0.30, 0.95, 0.01) var terrace_to: float = 0.80
+
+## Cat se intuneca peretele vertical de sub o buza, fata de fata de sus a
+## treptei. Consola CHIAR arunca umbra doar daca soarele o prinde razant; pe un
+## horn de 11 m umbra aia e de 0.3 m si intra sub rezolutia hartii de umbre.
+## Deci se picteaza, ca la `strata_light` — dar aici e legitim, fiindca
+## geometria de sub buza EXISTA si e chiar orientata in jos.
+@export_range(0.0, 0.45, 0.01) var terrace_shade: float = 0.22
+
+
 ## --- Poalele de moloz (talus) ----------------------------------------------
 
 ## Cat de departe de baza se intinde poala de grohotis, ca fractiune din raza
@@ -549,7 +615,7 @@ func _ready() -> void:
 func _deform() -> void:
 	# Fara munca daca instanta e lasata pe valorile neutre: hornurile care chiar
 	# trebuie sa ramana drepte nu platesc duplicarea mesh-ului.
-	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step) 			and is_zero_approx(collar_pinch) 			and is_zero_approx(cap_flare) and is_zero_approx(cap_basalt) 			and is_zero_approx(arch_erode)
+	var shapes_off := is_equal_approx(ovality, 1.0) and is_zero_approx(lean_deg) 			and is_zero_approx(bulge) and is_zero_approx(flute_depth) 			and is_zero_approx(noise_amount) and is_zero_approx(strata_step) 			and is_zero_approx(collar_pinch) 			and is_zero_approx(cap_flare) and is_zero_approx(cap_basalt) 			and is_zero_approx(arch_erode)  			and terrace_count < 2
 	var extras_off := is_zero_approx(talus_spread) and door_count == 0 			and window_rows == 0
 	if shapes_off and extras_off:
 		return
@@ -612,9 +678,24 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 	# Deplasarea laterala a varfului, in metri.
 	var lean_amt := tan(deg_to_rad(lean_deg)) * h
 
+	# TERASE: cotele pragurilor, in fractiune de inaltime. Se calculeaza O
+	# SINGURA DATA pe mesh, fiindca si taierea si deplasarea de raza si umbrirea
+	# peretilor trebuie sa vada exact aceleasi plane — daca s-ar recalcula, o
+	# eroare de rotunjire ar aseza umbra langa buza, nu sub ea.
+	var levels := _terrace_levels(h)
+
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
 		var arrays := src.surface_get_arrays(s)
+		# Chirurgia de topologie INAINTEA oricarei deformari: se taie pe cotele
+		# din mesh-ul NEATINS, deci planele sunt orizontale prin constructie.
+		# Dupa inclinarea axei (`lean`) o taietura orizontala ar fi fost oblica
+		# fata de horn.
+		if not levels.is_empty():
+			var pl := PackedFloat32Array()
+			for t in levels:
+				pl.append(y0 + t * h)
+			arrays = _split_at_planes(arrays, pl)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		for i in verts.size():
 			var v := verts[i]
@@ -669,6 +750,19 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 					var prev := 0.5 + 0.5 * sin((band - 1.0) * 2.399963 + ph1)
 					scale *= 1.0 + strata_step * lerpf(prev, hard, edge)
 
+				# --- 5b. TERASE: scara cu praguri -------------------------
+				# Dupa straturi si INAINTE de gat/palarie. Ordinea conteaza:
+				# terasele ingroasa corpul in jos, iar gatul si palaria sunt
+				# operatii de sus care trebuie sa lucreze pe raza deja
+				# terasata, nu invers.
+				#
+				# Nicio interpolare, niciun smoothstep: un `pow` pe un numar
+				# INTREG de praguri aflate deasupra. De aia iese scara — orice
+				# amestec intre trepte ar fi refacut panta pe care terasele o
+				# inlocuiesc.
+				if not levels.is_empty():
+					scale *= _terrace_scale(t, levels)
+
 				# --- 6. GATUL de sub palarie ------------------------------
 				# Strangere pe o banda de cota, deci ramane orizontala oricat
 				# de ovalizat/inclinat ar fi hornul — la fel ca straturile.
@@ -712,6 +806,17 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 				v.z += sin(lean_dir) * k
 			verts[i] = v
 		arrays[Mesh.ARRAY_VERTEX] = verts
+		# BUZA: fata de sus a treptei, cusuta peste crapatura.
+		#
+		# Taierea lasa doi vertecsi la ACEEASI cota si la raze diferite (cel de
+		# sub plan a ramas lat, cel de deasupra a sarit ingust). Intre ei e o
+		# gaura — se vede cerul prin horn. Cusatura umple gaura cu un inel
+		# ORIZONTAL, si inelul ala e chiar ce a cerut criticul: "fata de sus a
+		# fiecarei benzi, vizibil mai lata decat cea de deasupra ei". Fara el,
+		# treapta ar exista in contur dar n-ar avea suprafata care sa prinda
+		# lumina, deci n-ar arunca nimic pe banda de dedesubt.
+		if not levels.is_empty():
+			arrays = _stitch_lips(arrays, cx, cz, y0, h, levels)
 		# Normalele vechi mint dupa deformare; se refac din geometria noua.
 		arrays[Mesh.ARRAY_NORMAL] = null
 		arrays[Mesh.ARRAY_TANGENT] = null
@@ -747,6 +852,9 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 			fa = _shade_facets(fa)
 		if not is_zero_approx(strata_light) and not is_zero_approx(strata_step):
 			fa = _shade_strata(fa, y0, h, ph1, ph2)
+		# Peretii de sub buze, dupa normale (au nevoie de ele) si dupa fatete
+		# (le inmulteste, nu le rescrie).
+		fa = _shade_terraces(fa, y0, h, levels)
 		# PALARIA DE BAZALT, ultima: are nevoie de cotele DE DUPA deformare
 		# (palaria s-a latit, hornul s-a inclinat), si rescrie UV-uri, nu
 		# culori — deci trebuie sa treaca peste orice a scris umbrirea.
@@ -769,6 +877,482 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 ## Anvelopa STRANGERII. Plina pe partea de sus a palariei, unde sta discul din
 ## GLB, si stinsa la buza si in varf: la buza ca sa nu dispara muchia care rupe
 ## silueta, in varf ca sa nu ciupeasca ascutisul intr-o bila.
+## Cotele (in fractiune de inaltime) la care se taie mesh-ul pentru terase.
+##
+## Pentru `terrace_count` = n ies 2*(n-1) plane: pentru fiecare prag, planul
+## buzei si planul de la `terrace_lip_m` sub el. Nu si la t=0 sau t=1 — baza sta
+## in teren si varful e sub palarie.
+##
+## Grosimile NU sunt egale. Un depozit real alterneaza bancuri groase cu foi
+## subtiri, si mai ales: praguri echidistante pe un con citesc a filet de surub.
+##
+## Dar jitterul se pune pe INTERVAL, nu pe cota, si asta a fost un bug real,
+## prins de `probe_capp_terase` inainte de orice captura. Prima versiune facea
+## `t = pas * k * (1 + jitter)`: perturbatia inmultea o cota CUMULATA, deci
+## crestea cu k, iar pe hornEst1 ultimele doua terase au iesit la 0.574 si
+## 0.580 — la 6 milimi una de alta pe o inaltime de 17 m. Doua praguri lipite
+## nu dau doua trepte, dau una singura, si intre 0.30 si 0.57 ramanea o
+## suprafata neteda de 4.6 m. Sonda a raportat "0 praguri" pe trei hornuri din
+## patru, cu terrace_count = 5 pe toate.
+##
+## Cu jitterul pe interval si un minim de separare de patru buze, ordinea e
+## garantata prin constructie: cotele se aduna monoton, deci nu se pot incalca
+## oricat de nefericit ar cadea numerele.
+func _terrace_levels(h: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	if terrace_count < 2 or is_zero_approx(terrace_drop):
+		return out
+	var rng := RandomNumberGenerator.new()
+	# Numele nodului intra in samanta: `shape_seed` e lasat pe 0 pe aproape
+	# toate instantele din .tscn, deci fara asta toate hornurile ar primi
+	# EXACT aceleasi cote de terasa si padurea ar citi ca un singur obiect
+	# repetat — chiar defectul pe care ChimneyShape exista ca sa-l repare.
+	rng.seed = shape_seed + 4127 + int(hash(name))
+	var lip := clampf(terrace_lip_m / maxf(h, 0.001), 0.004, 0.10)
+	# Intervalele se trag intai, apoi se normalizeaza sa umple exact
+	# [prima cota .. terrace_to]. Asa grosimile raman inegale fara ca numarul
+	# de trepte sa depinda de noroc.
+	var gaps := PackedFloat32Array()
+	var total := 0.0
+	for k in terrace_count - 1:
+		var g := 1.0 + (rng.randf() - 0.5) * 0.55
+		gaps.append(g)
+		total += g
+	# Ultima buza se opreste SUB `terrace_to`, nu pe el: un prag chiar la
+	# radacina gatului ar fi concurat cu muchia palariei, singura care are voie
+	# sa rupa silueta acolo (regula de silueta din runda 15).
+	var span := (terrace_to - lip * 2.5) * (1.0 - 1.0 / float(terrace_count))
+	if span <= 0.0:
+		return out
+	var t := lip * 2.5
+	for k in gaps.size():
+		t += span * gaps[k] / total
+		# Nicio buza nu se poate apropia de vecina sub patru grosimi de buza:
+		# altfel peretele vertical al uneia ar taia fata de sus a celeilalte.
+		var top := clampf(t, lip * 2.5, terrace_to)
+		if out.size() >= 2 and top - out[out.size() - 1] < lip * 4.0:
+			continue
+		out.append(top - lip)
+		out.append(top)
+	return out
+
+
+## Factorul de raza al terasei la fractiunea de inaltime `t`.
+##
+## O SCARA MONOTON DESCRESCATOARE, si asta e tot rostul: segmentul cel mai de
+## jos e cel mai gros, fiecare urmator cu `terrace_drop` mai ingust. Punctul cel
+## mai lat ramane la contactul cu solul, deci a doua diferenta a razei nu devine
+## pozitiva — criteriul de convexitate din `cone_profile.convexity()`, care e si
+## motivul pentru care `strata_step` (umflatura cu semn aleator) nu putea trece.
+##
+## Normalizat pe segmentul de sus (factor 1.0 acolo), ca terasarea sa INGROASE
+## conul in jos in loc sa-l subtieze in sus: subtierea ar fi taiat gatul pe care
+## sta palaria.
+func _terrace_scale(t: float, levels: PackedFloat32Array) -> float:
+	if levels.is_empty():
+		return 1.0
+	# Cate praguri sunt DEASUPRA cotei `t`: atatea ingrosari se aduna.
+	var above := 0
+	for i in range(1, levels.size(), 2):
+		if t < levels[i] - 0.0005:
+			above += 1
+	# Peste ultima terasa (gatul, unde sta palaria) nu se mai adauga nimic.
+	return pow(1.0 + terrace_drop, float(above))
+
+
+## Sparge un mesh indexat in triunghiuri independente, pastrand atributele.
+##
+## SurfaceTool ar putea face asta, dar aici e nevoie de array-uri simple (le
+## taie `_split_at_planes`), iar drumul prin SurfaceTool ar fi cerut un commit
+## si o recitire pentru fiecare plan.
+func _deindex(arrays: Array) -> Array:
+	var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var uvs := PackedVector2Array()
+	if arrays[Mesh.ARRAY_TEX_UV] is PackedVector2Array:
+		uvs = arrays[Mesh.ARRAY_TEX_UV]
+	var cols := PackedColorArray()
+	if arrays[Mesh.ARRAY_COLOR] is PackedColorArray:
+		cols = arrays[Mesh.ARRAY_COLOR]
+	var has_uv := uvs.size() == verts.size()
+	var has_col := cols.size() == verts.size()
+	var nv := PackedVector3Array()
+	var nu := PackedVector2Array()
+	var nc := PackedColorArray()
+	for i in idx:
+		nv.append(verts[i])
+		if has_uv:
+			nu.append(uvs[i])
+		if has_col:
+			nc.append(cols[i])
+	var out: Array = []
+	out.resize(Mesh.ARRAY_MAX)
+	out[Mesh.ARRAY_VERTEX] = nv
+	if has_uv:
+		out[Mesh.ARRAY_TEX_UV] = nu
+	if has_col:
+		out[Mesh.ARRAY_COLOR] = nc
+	return out
+
+
+## Taie fiecare triunghi cu planele orizontale date, in spatiul mesh-ului.
+##
+## De ce e necesar, si de ce nu se poate ocoli. Un prag citibil in silueta cere
+## o fata VERTICALA: doi vertecsi la aceeasi raza mare, la doua cote apropiate.
+## Corpul din GLB nu are asa ceva — inelele lui sunt la 1-1.75 m distanta. Daca
+## muti doar raza vertecsilor existenti, saltul se intinde pe distanta dintre
+## inele si iese o panta, nu o treapta. (Masurat pe chimney_a: 0.2 m de iesire
+## pe 1.75 m de inaltime = 6 grade.)
+##
+## Deci se INSEREAZA topologie. Fiecare triunghi taiat de un plan y=const se
+## imparte in 3 triunghiuri (varful singur intr-o parte ca pivot) sau se
+## pastreaza intreg. Vertecsii noi cad EXACT pe plan, deci dupa deplasarea de
+## raza cei de sub plan raman lati si cei de deasupra sar ingust — muchia comuna
+## devine buza.
+##
+## Toate atributele se interpoleaza cu acelasi `u` ca pozitia (UV, culoare),
+## altfel vertecsii noi ar cadea pe alt slot din atlas — capcana din
+## `_cap_basalt_uvs`. Aici interpolarea e CORECTA fiindca ambele capete sunt in
+## acelasi slot: taierea nu traverseaza niciodata granita tuf/bazalt, care e
+## deasupra lui `terrace_to`.
+func _split_at_planes(arrays: Array, planes: PackedFloat32Array) -> Array:
+	if planes.is_empty():
+		return arrays
+	# DEINDEXAREA E OBLIGATORIE, si lipsa ei a fost bug-ul rundei 18.
+	#
+	# Corpurile din kit vin INDEXATE (chimney_a: 1160 vertecsi si o lista de
+	# indici). Prima versiune verifica `verts.size() % 3 != 0` ca sanity check si
+	# se intorcea tacut — iar 1160 si 1231 nu se impart la 3, deci taierea nu
+	# rula deloc pe cele mai multe hornuri. Sonda a aratat exact asta: cote de
+	# terasa perfect calculate si ZERO praguri in geometrie, pe patru hornuri din
+	# cinci. Al cincilea (chimney_d, singurul cu ferestre sapate in GLB) avea din
+	# intamplare un numar divizibil cu 3 si "mergea" — dar grupa vertecsii cate
+	# trei in ordinea din buffer, care pe un mesh indexat nu sunt triunghiuri.
+	# Adica sonda vedea praguri, si erau taieturi in triunghiuri inventate.
+	#
+	# Un test care se poate satisface din intamplare e mai rau decat niciunul.
+	var idx: Variant = arrays[Mesh.ARRAY_INDEX]
+	if idx is PackedInt32Array and (idx as PackedInt32Array).size() > 0:
+		arrays = _deindex(arrays)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	if verts.size() % 3 != 0:
+		push_warning("ChimneyShape: mesh cu %d vertecsi neindexati — terase sarite"
+			% verts.size())
+		return arrays
+	var uvs := PackedVector2Array()
+	if arrays[Mesh.ARRAY_TEX_UV] is PackedVector2Array:
+		uvs = arrays[Mesh.ARRAY_TEX_UV]
+	var cols := PackedColorArray()
+	if arrays[Mesh.ARRAY_COLOR] is PackedColorArray:
+		cols = arrays[Mesh.ARRAY_COLOR]
+	var has_uv := uvs.size() == verts.size()
+	var has_col := cols.size() == verts.size()
+
+	# Triunghiuri ca liste de (pozitie, uv, culoare), procesate plan cu plan.
+	var tris: Array = []
+	for i in range(0, verts.size(), 3):
+		var t: Array = []
+		for j in 3:
+			t.append([verts[i + j],
+				uvs[i + j] if has_uv else Vector2.ZERO,
+				cols[i + j] if has_col else Color.WHITE])
+		tris.append(t)
+
+	for pl in planes:
+		var next: Array = []
+		for t in tris:
+			var below := 0
+			for c in t:
+				if (c[0] as Vector3).y < pl:
+					below += 1
+			if below == 0 or below == 3:
+				next.append(t)
+				continue
+			# Varful IZOLAT: singurul de partea lui. Cu el ca pivot, taierea e
+			# mereu doua muchii, deci mereu 3 triunghiuri — fara cazuri
+			# speciale de patrulater.
+			var lone := 0
+			for k in 3:
+				var a: bool = (t[k][0] as Vector3).y < pl
+				var b: bool = (t[(k + 1) % 3][0] as Vector3).y < pl
+				var c2: bool = (t[(k + 2) % 3][0] as Vector3).y < pl
+				if a != b and a != c2:
+					lone = k
+					break
+			var p0: Array = t[lone]
+			var p1: Array = t[(lone + 1) % 3]
+			var p2: Array = t[(lone + 2) % 3]
+			# CELE DOUA CONTURURI NU POT STA LA ACEEASI COTA, si asta a fost al
+			# doilea bug al rundei. Taierea punea toti vertecsii noi exact pe
+			# `pl`; `_terrace_scale` compara `t` cu cota pragului, deci ii
+			# trimitea pe TOTI in segmentul de sus, cel ingust. Rezultatul:
+			# cusatura exista, inelul avea triunghiuri, dar raza interioara era
+			# egala cu cea exterioara — un inel de latime zero. Sonda raporta
+			# corect "0 fete orizontale" cu 1338 de vertecsi in plus.
+			#
+			# Deci conturul de JOS coboara cu `SEAM` sub plan. E o
+			# zecime de milimetru — nu se vede, dar pune vertexul de partea
+			# cealalta a comparatiei, si abia asa treapta are latime.
+			var m1u := _lerp_vtx(p0, p1, pl)
+			var m2u := _lerp_vtx(p0, p2, pl)
+			var m1d := _drop(m1u)
+			var m2d := _drop(m2u)
+			# `lone` e izolat: daca el e SUB plan, atunci el si perechea lui de
+			# vertecsi noi formeaza partea de jos.
+			var lone_below: bool = (p0[0] as Vector3).y < pl
+			if lone_below:
+				next.append([p0, m1d, m2d])
+				next.append([m1u, p1, p2])
+				next.append([m1u, p2, m2u])
+			else:
+				next.append([p0, m1u, m2u])
+				next.append([m1d, p1, p2])
+				next.append([m1d, p2, m2d])
+		tris = next
+
+	var nv := PackedVector3Array()
+	var nu := PackedVector2Array()
+	var nc := PackedColorArray()
+	for t in tris:
+		for c in t:
+			nv.append(c[0])
+			nu.append(c[1])
+			nc.append(c[2])
+	var out: Array = []
+	out.resize(Mesh.ARRAY_MAX)
+	out[Mesh.ARRAY_VERTEX] = nv
+	if has_uv:
+		out[Mesh.ARRAY_TEX_UV] = nu
+	if has_col:
+		out[Mesh.ARRAY_COLOR] = nc
+	return out
+
+
+## Cat coboara conturul de jos al unei buze sub planul de taiere. Vezi
+## `_split_at_planes`: separa cele doua contururi in comparatia de segment.
+const SEAM: float = 0.0001
+
+
+## Acelasi vertex, coborat cu `SEAM`.
+func _drop(v: Array) -> Array:
+	var p: Vector3 = v[0]
+	p.y -= SEAM
+	return [p, v[1], v[2]]
+
+
+## Vertexul de pe muchia (a,b) la cota `y`. Toate atributele pe acelasi `u`.
+func _lerp_vtx(a: Array, b: Array, y: float) -> Array:
+	var pa: Vector3 = a[0]
+	var pb: Vector3 = b[0]
+	var d := pb.y - pa.y
+	var u := 0.5 if absf(d) < 0.000001 else clampf((y - pa.y) / d, 0.0, 1.0)
+	var p := pa.lerp(pb, u)
+	# Cota se FORTEAZA pe plan: interpolarea in virgula mobila lasa altfel
+	# vertecsii cu cateva micro-metri diferenta, iar `_terrace_scale` (care
+	# compara `t` cu cota pragului) i-ar putea trimite in segmente diferite —
+	# adica exact buza pe care o construim ar iesi crapata.
+	p.y = y
+	return [p, (a[1] as Vector2).lerp(b[1] as Vector2, u),
+		(a[2] as Color).lerp(b[2] as Color, u)]
+
+
+## Coase inelul orizontal al fiecarei buze, peste crapatura lasata de taiere.
+##
+## Cum gaseste conturul, si de ce nu se pot folosi cotele. Dupa deplasarea de
+## raza, la cota unei buze exista DOUA contururi suprapuse: cel de jos (larg) si
+## cel de sus (ingust). Ambele sunt facute din vertecsi la exact aceeasi cota,
+## deci un filtru pe `y` ii aduna la gramada si n-ar sti care merge cu care.
+##
+## Se lucreaza pe MUCHII, nu pe vertecsi. Un triunghi care are exact doi vertecsi
+## pe planul buzei contribuie cu muchia dintre ei — si muchia aia stie de ce
+## parte e, fiindca al treilea vertex al triunghiului e ori sub plan ori deasupra
+## lui. Deci: muchia dintr-un triunghi care coboara e conturul LARG, muchia
+## dintr-un triunghi care urca e conturul INGUST. Le perechem pe azimut si
+## fiecare pereche da un patrulater.
+##
+## Perecherea pe azimut, si nu pe indice, e obligatorie: canelurile si
+## ovalizarea muta vertecsii pe raze diferite, iar ordinea din buffer nu urmeaza
+## conturul.
+func _stitch_lips(arrays: Array, cx: float, cz: float, y0: float, h: float,
+		levels: PackedFloat32Array) -> Array:
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	if verts.size() % 3 != 0:
+		return arrays
+	var uvs := PackedVector2Array()
+	if arrays[Mesh.ARRAY_TEX_UV] is PackedVector2Array:
+		uvs = arrays[Mesh.ARRAY_TEX_UV]
+	var cols := PackedColorArray()
+	if arrays[Mesh.ARRAY_COLOR] is PackedColorArray:
+		cols = arrays[Mesh.ARRAY_COLOR]
+	var has_uv := uvs.size() == verts.size()
+	var has_col := cols.size() == verts.size()
+	# UV-ul buzei e cel al primului vertex gasit pe plan: fata de sus e din
+	# acelasi tuf ca peretele, deci trebuie sa cada pe ACELASI slot din atlas.
+	# Un UV inventat ar fi picat pe (0,0), adica magenta (vezi `_quad`).
+
+	var add_v := PackedVector3Array()
+	var add_u := PackedVector2Array()
+	var add_c := PackedColorArray()
+	const EPS: float = 0.0015
+
+	for li in range(1, levels.size(), 2):
+		var yl := y0 + levels[li] * h
+		# Muchiile de pe plan, separate dupa partea celui de-al treilea vertex.
+		var wide: Array = []   # [azimut, pozitie, uv, culoare] — conturul de jos
+		var narrow: Array = []
+		for tri in verts.size() / 3:
+			var i := tri * 3
+			var on: Array = []
+			var off := -1
+			for j in 3:
+				if absf(verts[i + j].y - yl) < EPS:
+					on.append(i + j)
+				else:
+					off = i + j
+			if on.size() != 2 or off < 0:
+				continue
+			var below := verts[off].y < yl
+			for k in on:
+				var p := verts[k]
+				var a := atan2(p.z - cz, p.x - cx)
+				var rec: Array = [a, p,
+					uvs[k] if has_uv else Vector2.ZERO,
+					cols[k] if has_col else Color.WHITE]
+				if below:
+					wide.append(rec)
+				else:
+					narrow.append(rec)
+		if wide.size() < 3 or narrow.size() < 3:
+			continue
+		wide.sort_custom(func(x, y): return x[0] < y[0])
+		narrow.sort_custom(func(x, y): return x[0] < y[0])
+		# Un vertex apare in mai multe triunghiuri; duplicatele de acelasi azimut
+		# ar fi dat patrulatere degenerate.
+		wide = _dedup_ring(wide)
+		narrow = _dedup_ring(narrow)
+		if wide.size() < 3 or narrow.size() < 3:
+			continue
+		# Pentru fiecare segment al conturului LARG se ia perechea de azimut cea
+		# mai apropiata de pe cel INGUST. Contururile n-au acelasi numar de
+		# puncte (taierea adauga vertecsi doar unde a intersectat), deci o
+		# imperechere unu-la-unu ar fi rasucit inelul.
+		var n := wide.size()
+		for k in n:
+			var w0: Array = wide[k]
+			var w1: Array = wide[(k + 1) % n]
+			var n0: Array = _nearest_az(narrow, w0[0])
+			var n1: Array = _nearest_az(narrow, w1[0])
+			if (n0[1] as Vector3).is_equal_approx(n1[1] as Vector3):
+				continue
+			# Ordinea: normala trebuie sa iasa IN SUS. Fata de sus a treptei e
+			# singura suprafata orizontala de pe horn si `_shade_terraces` o
+			# recunoaste chiar dupa normala — daca ar iesi in jos, ar fi
+			# numarata drept perete si intunecata exact pe dos.
+			_lip_tri(add_v, add_u, add_c, w0, n0, w1, has_uv, has_col)
+			_lip_tri(add_v, add_u, add_c, w1, n0, n1, has_uv, has_col)
+
+	if add_v.is_empty():
+		return arrays
+	verts.append_array(add_v)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	if has_uv:
+		uvs.append_array(add_u)
+		arrays[Mesh.ARRAY_TEX_UV] = uvs
+	if has_col:
+		cols.append_array(add_c)
+		arrays[Mesh.ARRAY_COLOR] = cols
+	return arrays
+
+
+## Scoate punctele prea apropiate ca azimut: raman doar cele care descriu
+## conturul, cate unul pe directie.
+func _dedup_ring(ring: Array) -> Array:
+	var out: Array = []
+	for r in ring:
+		if out.is_empty() or absf(r[0] - out[out.size() - 1][0]) > 0.004:
+			out.append(r)
+	return out
+
+
+## Punctul de pe inel cel mai apropiat ca azimut de `a`, tinand cont de
+## rasucirea la +-PI.
+func _nearest_az(ring: Array, a: float) -> Array:
+	var best: Array = ring[0]
+	var bd := TAU
+	for r in ring:
+		var d: float = absf(fposmod(r[0] - a + PI, TAU) - PI)
+		if d < bd:
+			bd = d
+			best = r
+	return best
+
+
+## Un triunghi de buza, cu normala in sus. Vertecsii vin ca inregistrari
+## [azimut, pozitie, uv, culoare].
+func _lip_tri(av: PackedVector3Array, au: PackedVector2Array,
+		ac: PackedColorArray, a: Array, b: Array, c: Array,
+		has_uv: bool, has_col: bool) -> void:
+	var pa: Vector3 = a[1]
+	var pb: Vector3 = b[1]
+	var pc: Vector3 = c[1]
+	# Semnul ariei in plan XZ da orientarea; se intoarce daca e gresita.
+	var cross := (pb.x - pa.x) * (pc.z - pa.z) - (pb.z - pa.z) * (pc.x - pa.x)
+	var order: Array = [a, b, c] if cross < 0.0 else [a, c, b]
+	for q in order:
+		av.append(q[1])
+		if has_uv:
+			au.append(q[2])
+		if has_col:
+			ac.append(q[3])
+
+
+## Intuneca peretii verticali de sub buze.
+##
+## Se lucreaza PE TRIUNGHI (mesh-ul e deja deindexat), si testul e geometric, nu
+## pe cota: o fata e "perete de sub buza" daca normala ei e aproape orizontala
+## SI centrul ei e in primii `terrace_lip_m` sub un plan de terasa. Fata de SUS a
+## treptei are normala aproape verticala, deci ramane luminoasa — si chiar
+## diferenta asta de valoare intre cele doua fete e ce face treapta sa citeasca
+## a treapta, nu a dunga (aceeasi lectie ca la `strata_light`, runda 12).
+func _shade_terraces(arr: Array, y0: float, h: float,
+		levels: PackedFloat32Array) -> Array:
+	if levels.is_empty() or is_zero_approx(terrace_shade):
+		return arr
+	var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var norms: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+	if norms.size() != verts.size() or verts.size() % 3 != 0:
+		return arr
+	var raw: Variant = arr[Mesh.ARRAY_COLOR]
+	var cols := PackedColorArray()
+	if raw is PackedColorArray:
+		cols = raw
+	if cols.size() != verts.size():
+		cols = PackedColorArray()
+		cols.resize(verts.size())
+		cols.fill(Color.WHITE)
+	var lip := terrace_lip_m / maxf(h, 0.001)
+	for tri in verts.size() / 3:
+		var i := tri * 3
+		var c := (verts[i] + verts[i + 1] + verts[i + 2]) / 3.0
+		var n := (norms[i] + norms[i + 1] + norms[i + 2]) / 3.0
+		# Fata verticala: normala aproape in planul orizontal.
+		if absf(n.normalized().y) > 0.45:
+			continue
+		var t := (c.y - y0) / h
+		var k := 1.0
+		for j in range(1, levels.size(), 2):
+			var top: float = levels[j]
+			if t < top and t > top - lip * 1.35:
+				k = 1.0 - terrace_shade
+				break
+		if k < 1.0:
+			for j in 3:
+				cols[i + j] = Color(cols[i + j].r * k, cols[i + j].g * k,
+						cols[i + j].b * k, cols[i + j].a)
+	arr[Mesh.ARRAY_COLOR] = cols
+	return arr
+
+
 func _tuck_env(ct: float) -> float:
 	# Fereastra pe [0,1] cu maximul pe la 0.62 — unde `probe_capp_glbprof` a
 	# gasit reintoarcerea de raza pe chimney_mushroom (t 0.85..0.95 dintr-o

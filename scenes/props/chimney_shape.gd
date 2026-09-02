@@ -2325,7 +2325,18 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			# la randul care n-are pe ce sta.
 			var acoperire := _wall_coverage(src, cx, cz, y0, h, rf,
 				deg_to_rad(window_dir_deg), deg_to_rad(window_arc_deg) * 0.5)
-			if acoperire < WINDOW_WALL_MIN:
+			# ...si LA CAPATUL DE SUS al deschiderii, nu doar la baza ei.
+			# Fereastra are inaltime: baza poate sta pe perete plin in timp ce
+			# muchia de sus a intrat deja in creasta zdrentuita, si atunci iese
+			# in cer exact jumatatea care se vede mai bine. Sonda ProbeFerestre
+			# numara PUNCTE de deschidere fara roca in spate, deci prinde si
+			# colturile de sus — de aceea ramaneau peste o suta dupa ce baza
+			# fusese rezolvata.
+			var rf_sus := clampf(rf + (window_height_m / world_scale) / h,
+				0.0, 0.97)
+			var acoperire_sus := _wall_coverage(src, cx, cz, y0, h, rf_sus,
+				deg_to_rad(window_dir_deg), deg_to_rad(window_arc_deg) * 0.5)
+			if minf(acoperire, acoperire_sus) < WINDOW_WALL_MIN:
 				continue
 			# Randurile de sus au mai putine ferestre: hornul se ingusteaza, si
 			# tot atatea deschideri pe o circumferinta mai mica s-ar fi
@@ -2455,6 +2466,30 @@ func _clear_of_lips(frac: float, span: float,
 ## fiindca chiar asta vede si camera.
 func _wall_coverage(src: Mesh, cx: float, cz: float, y0: float, h: float,
 		frac: float, azim: float, half_arc: float) -> float:
+	# Raza de referinta: cea de pe axa deschiderii. Peretele conteaza doar daca
+	# e ACOLO UNDE STA fereastra, nu oriunde pe directia aia — un horn ingustat
+	# are in continuare vertecsi la cota ceruta, doar ca mai INAUNTRU decat
+	# rama, si atunci acoperirea iesea 1.00 pe un perete care nu tine nimic.
+	var r_ax := 0.0
+	var n_ax := 0
+	for sfc0 in src.get_surface_count():
+		var arr0 := src.surface_get_arrays(sfc0)
+		var vv0: PackedVector3Array = arr0[Mesh.ARRAY_VERTEX]
+		for v0 in vv0:
+			if absf((v0.y - y0) / h - frac) >= 0.05:
+				continue
+			var d0 := absf(fposmod(
+				atan2(v0.z - cz, v0.x - cx) - azim + PI, TAU) - PI)
+			if d0 > 0.09:
+				continue
+			r_ax += Vector2(v0.x - cx, v0.z - cz).length()
+			n_ax += 1
+	if n_ax > 0:
+		r_ax /= float(n_ax)
+	# Toleranta: 12% sub raza de pe axa. Sub atat peretele s-a retras destul cat
+	# coltul ramei sa iasa in cer.
+	var r_min := r_ax * 0.88
+
 	var probe := 9
 	var hit := 0
 	for i in probe:
@@ -2471,6 +2506,8 @@ func _wall_coverage(src: Mesh, cx: float, cz: float, y0: float, h: float,
 				var da := absf(fposmod(
 					atan2(v.z - cz, v.x - cx) - a + PI, TAU) - PI)
 				if da > 0.09:
+					continue
+				if Vector2(v.x - cx, v.z - cz).length() < r_min:
 					continue
 				found = true
 				break

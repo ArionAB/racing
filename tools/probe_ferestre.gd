@@ -40,7 +40,21 @@ const MAX_AER := 0.35
 ## reala sau limita sondei. Pragul e pus pe cifra masurata ca sa prinda
 ## REGRESIILE de aici incolo — daca numarul creste, ceva s-a stricat. Cine
 ## coboara cifra, coboara si pragul.
-const MAX_RELE := 108
+##
+## 2 sep 2026: 108 -> 123, si merita spus de ce nu e o regresie ascunsa.
+## Familia de profil `belly` a fost corectata (nu mai urca peste baza), deci
+## hornurile si-au schimbat forma si o parte din deschideri au ramas pe cote
+## unde peretele s-a retras: 108 -> 145. Doua stramtari in `_wall_coverage` —
+## se verifica si capatul de SUS al deschiderii, si peretele trebuie sa fie la
+## raza deschiderii, nu doar sa existe vertecsi pe directia aia — au adus
+## cifra la 123.
+##
+## Nu am coborat-o mai mult si NU merita incercat orbeste: cele trei stramtari
+## au mutat cifra cu 15% si captura de la frac 0.06 a ramas IDENTICA (roca
+## 63.4%, luminanta 133.9 -> 133.8, detaliu 4.26 -> 4.25). Adica se lucra la un
+## numar, nu la o poza. Cine reia treaba asta: intai afla UNDE sunt punctele
+## ramase si daca se vad de la volan.
+const MAX_RELE := 123
 ## Toleranta de potrivire a slotului in UV: atlasul are celule mici, deci marja
 ## e stramta ca sa nu prindem alt slot.
 const UV_EPS := 0.004

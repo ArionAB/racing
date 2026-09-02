@@ -96,7 +96,21 @@ func _ready() -> void:
 	var span_at := -1.0   # >= 0: faza pasajului rotativ (0 = deschis)
 	var zoom_size := 60.0
 	var driver_view := false
+	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
+	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
+	var cine := false
+	var hide_terrain := false
 	var game_cam := false
+	## --cave: aplica presetul si intunericul celei mai apropiate [CameraZone].
+	##
+	## Fara el, orice captura din subteran MINTE. Zona se aprinde cand masina
+	## jucatorului intra in ea, iar Snapshot nu instantiaza nicio masina — deci
+	## sala apare cu ambientul si ceata de la suprafata, adica luminata de
+	## soarele de zori. Exact asa a iesit prima runda a POI-ului F: o hala
+	## portocalie in loc de o caverna. Acelasi motiv pentru care exista
+	## `--train-at` si `--rock-at`: ce are ceas sau declansator trebuie ADUS in
+	## starea in care il vede jucatorul, altfel poza arata alt joc.
+	var cave_view := false
 	var free_cam := false
 	var eye_pos := Vector3.ZERO
 	var look_pos := Vector3.ZERO
@@ -139,16 +153,27 @@ func _ready() -> void:
 			lava_stage = int(arg.trim_prefix("--lava-stage="))
 		elif arg.begins_with("--route="):
 			route_idx = int(arg.trim_prefix("--route="))
+		elif arg == "--cave":
+			cave_view = true
 		elif arg.begins_with("--eye="):
 			eye_pos = _vec3(arg.trim_prefix("--eye="))
 			free_cam = true
 		elif arg.begins_with("--look="):
 			look_pos = _vec3(arg.trim_prefix("--look="))
+		elif arg == "--cine":
+			cine = true
+			driver_view = true
 		elif arg == "--driver":
 			driver_view = true
 		elif arg == "--gamecam":
 			driver_view = true
 			game_cam = true
+		elif arg == "--no-terrain":
+			# Diagnostic: ascunde panza de teren, ca sa se vada ce e SUB ea.
+			# „Exista in scena" si „se vede in cadru" sunt intrebari diferite —
+			# cu terenul stins se afla instant daca o geometrie lipseste sau
+			# doar e acoperita.
+			hide_terrain = true
 	if driver_view and zoom_frac < 0.0:
 		zoom_frac = 0.0
 	# `--track=` accepta si pozitia din lista (Stromboli = 4), si numarul
@@ -167,6 +192,12 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
+	if hide_terrain:
+		var tb := track.get_node_or_null("TerrainBody")
+		if tb != null:
+			for ch in tb.get_children():
+				if ch is MeshInstance3D:
+					(ch as MeshInstance3D).visible = false
 	if "--smooth" in OS.get_cmdline_user_args():
 		_smooth_organics(track)
 	if train_at >= 0.0:
@@ -220,10 +251,20 @@ func _ready() -> void:
 		else:
 			print("snapshot: nu am gasit %s" % hide_node)
 
-	# Fara ceata: camera e sus si ceata ar spala imaginea.
-	for child in track.get_children():
-		if child is WorldEnvironment:
-			(child as WorldEnvironment).environment.fog_enabled = false
+	# Ceata se stinge doar pentru vederile DE SUS (ansamblul ortografic), unde
+	# camera e la sute de metri si ceata ar spala tot intr-o pata uniforma.
+	#
+	# Pentru vederile DE JOC (--driver, --gamecam, --landmark, camera libera)
+	# ceata TREBUIE sa ramana: ea e ce vede jucatorul, si fara ea capturile mint
+	# exact despre fundal — siluetele de orizont stau la 190-300 m, adica in
+	# plina ceata, si pe captura ieseau la contrast plin. Runda 34: 13 runde de
+	# reglaje pe Erciyes s-au judecat pe capturi fara ceata, deci pe o imagine
+	# pe care jucatorul n-o vede niciodata.
+	var keep_fog := driver_view or game_cam or free_cam or landmark_id >= 0
+	if not keep_fog:
+		for child in track.get_children():
+			if child is WorldEnvironment:
+				(child as WorldEnvironment).environment.fog_enabled = false
 
 	# Incadram pista (nu terenul urias): bounds din punctele coapte.
 	var bmin := track.baked[0]
@@ -284,6 +325,24 @@ func _ready() -> void:
 		var n := pts.size()
 		var idx := int(zoom_frac * float(n)) % n
 		var focus: Vector3 = pts[idx]
+		if cave_view:
+			# Presetul de camera si intunericul zonei, aplicate MANUAL: vezi
+			# `cave_view` pentru de ce o captura din subteran fara ele minte.
+			var zone := _nearest_cave_zone(track, focus)
+			if zone != null:
+				var solved := ChaseCamera.solve_preset(
+					zone.height, zone.look_height, dist, look_ahead,
+					fov + zone.fov_bonus, zone.ceiling, zone.ceiling_dist)
+				cam_h = solved[0]
+				fov = solved[1]
+				look_h = zone.look_height
+				cam.fov = fov
+				zone.force_dark()
+				await get_tree().process_frame
+				print("--cave: zona %s, tavan %.1f m -> h %.2f fov %.1f"
+					% [zone.name, zone.ceiling, cam_h, fov])
+			else:
+				print("--cave: nicio CameraZone langa frac %.3f" % zoom_frac)
 		var ahead: Vector3 = pts[route.wrap_index(idx + 12)]
 		var dir := (ahead - focus).normalized()
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
@@ -319,6 +378,8 @@ func _ready() -> void:
 			"" if route_idx == 0 else "_ruta%d" % route_idx]
 		dimg.save_png(dout)
 		print("SNAPSHOT: ", dout)
+		if cine:
+			_cine_e_in_cadru(track, cam)
 		get_tree().quit()
 		return
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -598,3 +659,116 @@ func _smoothed(mesh: Mesh) -> ArrayMesh:
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return out
 
+
+
+## Ce obiect cade pe fiecare coloana din cadru, cu aceeasi camera ca poza.
+##
+## De ce e nevoie. `skyline_cones.py` raporteaza siluete dupa coloana X si
+## atat. Cand reglezi un parametru de horn si cifra conului din stanga-fata nu
+## se misca, sunt doua explicatii — parametrul n-are efect, sau conul ala nu e
+## un horn. Fara lista asta se poate itera la nesfarsit pe prima.
+func _cine_e_in_cadru(track: Node, cam: Camera3D) -> void:
+	var rows: Array = []
+	_proiecteaza(track, cam, rows)
+	rows.sort_custom(func(a, b): return a[1] < b[1])
+	print("CINE: obiecte cu peste 40 px inaltime, sortate pe coloana:")
+	var spans: Array = []
+	for r in rows:
+		print("  x=%5d  h=%4d px  d=%5.1f m  %-24s %s"
+			% [r[1], r[2], r[4], r[0], r[3]])
+		var b: Rect2 = r[5]
+		spans.append({
+			"nume": r[0], "script": r[3], "x": r[1], "h_px": r[2],
+			"d": snappedf(r[4], 0.1),
+			"x0": int(floor(b.position.x)), "x1": int(ceil(b.end.x)),
+			"y0": int(floor(b.position.y)), "y1": int(ceil(b.end.y)),
+		})
+	# Sidecar cu intervalele de coloane, ca sonda de pixeli sa poata masura
+	# profilul DOAR inauntrul hornului numit. Fara el orice cifra de contur e
+	# neatribuibila: runda 20 a demonstrat ca cel mai mare con din cadru e
+	# TEREN de la 380 m, nu horn.
+	var jdir := ProjectSettings.globalize_path("res://snapshots")
+	DirAccess.make_dir_recursive_absolute(jdir)
+	var jout := "%s/cine_spans.json" % jdir
+	var f := FileAccess.open(jout, FileAccess.WRITE)
+	if f != null:
+		f.store_string(JSON.stringify({
+			"view": [get_viewport().size.x, get_viewport().size.y],
+			"obiecte": spans}, "  "))
+		f.close()
+		print("CINE-SPANS: ", jout)
+
+
+func _proiecteaza(n: Node, cam: Camera3D, out: Array) -> void:
+	var mi := n as MeshInstance3D
+	if mi != null and mi.mesh != null and mi.is_visible_in_tree():
+		var ab: AABB = mi.global_transform * mi.mesh.get_aabb()
+		var ctr := ab.get_center()
+		if not cam.is_position_behind(ctr):
+			var p := cam.unproject_position(ctr)
+			if p.x > -300.0 and p.x < 1580.0:
+				var top := cam.unproject_position(
+					Vector3(ctr.x, ab.position.y + ab.size.y, ctr.z))
+				var bot := cam.unproject_position(
+					Vector3(ctr.x, ab.position.y, ctr.z))
+				var hpx := int(absf(bot.y - top.y))
+				if hpx > 40:
+					var own := n
+					while own != null and own.get_script() == null:
+						own = own.get_parent()
+					var scr := "-"
+					var nm := String(mi.name)
+					if own != null:
+						scr = String(own.get_script().resource_path.get_file())
+						nm = String(own.name)
+					var box := _cutie_ecran(ab, cam)
+					out.append([nm, int(p.x), hpx, scr,
+						cam.global_position.distance_to(ctr), box])
+	for c in n.get_children():
+		_proiecteaza(c, cam, out)
+
+
+## Cutia pe ecran a unui AABB din lume: TOATE cele 8 colturi proiectate.
+##
+## De ce 8 colturi si nu centrul. Coloana de ecran a unui obiect e ce trebuie sa
+## stie sonda de silueta ca sa masoare NUMAI hornul si nu vecinul; un singur
+## punct (centrul) da o coloana, nu un interval, si atunci sonda tot ghiceste
+## unde se termina obiectul. Un colt in spatele camerei ar da o proiectie
+## intoarsa, deci se sare peste el si cutia ramane a colturilor vizibile.
+func _cutie_ecran(ab: AABB, cam: Camera3D) -> Rect2:
+	var r := Rect2()
+	var first := true
+	for i in 8:
+		var c := ab.position + Vector3(
+			ab.size.x if (i & 1) != 0 else 0.0,
+			ab.size.y if (i & 2) != 0 else 0.0,
+			ab.size.z if (i & 4) != 0 else 0.0)
+		if cam.is_position_behind(c):
+			continue
+		var q := cam.unproject_position(c)
+		if first:
+			r = Rect2(q, Vector2.ZERO)
+			first = false
+		else:
+			r = r.expand(q)
+	return r
+
+
+## Cea mai apropiata [CameraZone] de un punct de pe traseu, sau null.
+##
+## Cauta pe TOT arborele pistei fiindca zonele stau grupate intr-un nod propriu
+## in .tscn (ZoneCamera/...), nu direct sub radacina.
+func _nearest_cave_zone(track: Node, at: Vector3) -> CameraZone:
+	var best: CameraZone = null
+	var best_d := INF
+	for node in track.find_children("*", "Area3D", true, false):
+		var z := node as CameraZone
+		if z == null:
+			continue
+		var d := z.global_position.distance_to(at)
+		if d < best_d:
+			best_d = d
+			best = z
+	# Prea departe inseamna „nu esti in caverna": zonele au ~14 m adancime, deci
+	# peste 120 m e alt POI si presetul ar fi o minciuna in alta directie.
+	return best if best_d <= 120.0 else null

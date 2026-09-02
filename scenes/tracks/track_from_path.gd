@@ -23,8 +23,41 @@ extends Track
 ## POZITIILE punctelor — manerele bezier ale curbei sunt ignorate.
 
 @export var custom_name: String = "Pista noua"
-@export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing") var custom_theme: String = "forest"
+@export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing",
+	"cappadocia") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
+## Unghiul soarelui pentru pista asta, cand tema nu-l nimereste.
+##
+## (0,0,0) = lasa tema in pace, deci pistele care nu-l ating nu se schimba.
+## x = elevatia (negativ), y = azimutul. Sta AICI, ca nod editabil, si nu doar
+## in tema, fiindca e reglaj de PISTA: depinde de directia in care merge chiar
+## traseul asta, si traseul se muta din editor. Cand s-a mutat ultima data,
+## azimutul din tema a ramas pe traseul vechi si umbrele au iesit din cadru.
+## Se masoara cu tools/ProbeCappAzimut (baleiaza cercul pe tot turul) si cu
+## tools/ProbeCappUmbraCadru (duce varful umbrei si il cauta pe banda).
+##
+## Pe Cappadocia (-17, 25) compromisul e masurat pe POZA, ca abatere de
+## luminanta pe carosabil, si NU e curat pe toate fractiile:
+##                  frac 0.06   frac 0.10
+##   azimut vechi      34.52       23.99
+##   azimut nou        24.32       25.05
+## 0.06 pierde mai mult decat castiga 0.10. Se accepta fiindca benzile de la
+## 0.06 erau facute de un soare de VEST care raka in lungul drumului — adica de
+## chiar greseala care muta rasaritul din vale. Izolat prin rulare cu azimutul
+## nou si elevatia veche: la 0.06 cifra e 24.15 la orice elevatie, deci
+## pierderea vine din azimut, nu din inaltarea soarelui. Elevatia (13 -> 17)
+## aduce singurul castig real: la 0.10, 20.34 -> 25.05, fiindca scurteaza
+## umbrele cat sa cada PE banda in loc sa treaca pe langa ea.
+@export var custom_sun_rotation_deg: Vector3 = Vector3.ZERO
+## Stratul de culoare de SUB drum (Valea Rosie pe Cappadocia).
+##
+## Alpha 0 = stins, deci restul pistelor nu se schimba. Tinteaza terenul de sub
+## `custom_strata_line`, cu `custom_strata_fade` metri de cota pentru degrade.
+## E oglinda lui rock_band_tint din teme, care tinteaza PESTE o cota.
+## Cotele se aleg din histograma terenului, nu din ochi: tools/ProbeCappStrat.
+@export var custom_strata_tint: Color = Color(0, 0, 0, 0)
+@export var custom_strata_line: float = 0.0
+@export var custom_strata_fade: float = 12.0
 ## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
 ## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).
 @export_enum("asphalt", "dirt", "snow") var custom_road_surface: String = "asphalt"
@@ -82,6 +115,19 @@ extends Track
 @export var custom_deflector_fracs: Array[float] = []
 ## Creasta de fly-off: te arunca in aer, cu plasa de respawn dedesubt.
 @export var custom_flyoff_fracs: Array[float] = []
+## [b]ATENTIE la comentarii in .tscn.[/b] O linie care incepe cu `#` INTRE
+## proprietatile unui nod TAIE TACUT tot ce urmeaza: parserul se opreste acolo
+## si restul proprietatilor raman pe implicit, fara nicio eroare. S-a masurat
+## pe Track13: un bloc de 8 randuri de comentariu inaintea lui
+## `custom_loose_ranges` a facut ca acela sa ajunga `[]` — adica grip-ul de
+## 0.8x de pe molozul POI D nu s-a aplicat niciodata, desi valoarea era scrisa
+## in fisier. Documentatia unei valori se pune AICI, langa export, nu in .tscn.
+##
+## Culoare cu o SINGURA trecere: (frac_start, frac_end, linie cu semn -1..1).
+## Pentru blocajele de decor care inchid soseaua si lasa o fanta pe o parte
+## anume — pilotii sunt trimisi acolo, in loc sa aleaga malul dupa
+## personalitate ca la `_lane_bias`. Vezi Track.lane_forced_at.
+@export var custom_lane_corridors: Array[Vector3] = []
 ## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
 ## _LANDMARKS). Desert: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
 ## 4=ecran drive-in, 5=stalp GAS, 12=baraca minerului.
@@ -101,11 +147,23 @@ extends Track
 ## din kit se pun sub el (Baikal, viaductul Circum-Baikal). Se combina cu
 ## `custom_cornice_ravines` (cazi de pe margine). Vezi Track._viaduct_ravines.
 @export var custom_viaduct_ravines: Array[int] = []
+## Care dintre CORNISE sunt taiate VERTICAL (indici in `custom_ravines`):
+## peretele de sub buza cade drept, nu in panta. Se cere doar unde ceva urca pe
+## langa faleza — baloanele ancorate de sub cornisa Vaii Rosii. Vezi
+## Track._scarp_ravines.
+@export var custom_scarp_ravines: Array[int] = []
 ## PODELE de rapa: (indice in `custom_ravines`, cota ABSOLUTA y). Sapatura nu
 ## coboara sub cota — o cornisa cu podea e o faleza cu un chei uscat la picior
 ## (Chongqing D: Hongya Dong sta pe el, apa incepe dincolo). Vezi
 ## Track._ravine_floors.
 @export var custom_ravine_floors: Array[Vector2] = []
+
+## LATIMEA rapelor: (indice de rapa, metri de la buza). Vezi
+## Track._ravine_widths. Fara ea saparea se intinde lateral la infinit si valea
+## n-are mal opus — faleza citeste ca bordura de sant.
+@export var custom_ravine_widths: Array[Vector2] = []
+## Vezi [method Track._ravine_floor_slopes].
+@export var custom_ravine_floor_slopes: Array[Vector2] = []
 ## PARAPET DECLARAT: (frac_start, frac_end, regim RAIL_*, latura +-1 sau 0).
 ## Vezi Track._rail_segments — pe o pista fara gard (`walls: false`) singurul
 ## regim cu efect e RAIL_POSTS: stalpi rari pe buza, fara coliziune.
@@ -163,6 +221,22 @@ func _apply_custom() -> void:
 	# DUPA apply_theme: aici e suprascrierea pistei peste ce cere tema.
 	gate_model = custom_gate_model
 
+## Abaterile pistei de la tema ei, din nodurile editabile de mai sus.
+##
+## Se construieste doar ce e chiar setat: un dictionar gol inseamna "tema
+## nemodificata", si `_with_overrides` intoarce atunci baza neatinsa. Asa
+## pistele care nu ating cheile astea raman bit-identice.
+func _theme_overrides() -> Dictionary:
+	var over := {}
+	if custom_sun_rotation_deg != Vector3.ZERO:
+		over["sun_rotation_deg"] = custom_sun_rotation_deg
+	if custom_strata_tint.a > 0.0:
+		over["strata_tint"] = custom_strata_tint
+		over["strata_line"] = custom_strata_line
+		over["strata_fade"] = custom_strata_fade
+	return over
+
+
 func _ramp_fracs() -> Array[float]:
 	return custom_ramp_fracs
 
@@ -206,6 +280,9 @@ func _deflector_fracs() -> Array[float]:
 func _flyoff_fracs() -> Array[float]:
 	return custom_flyoff_fracs
 
+func _lane_corridors() -> Array[Vector3]:
+	return custom_lane_corridors
+
 func _landmark_spots() -> Array[Vector3]:
 	return custom_landmarks
 
@@ -222,8 +299,20 @@ func _cornice_ravines() -> Array[int]:
 func _viaduct_ravines() -> Array[int]:
 	return custom_viaduct_ravines
 
+func _scarp_ravines() -> Array[int]:
+	return custom_scarp_ravines
+
 func _ravine_floors() -> Array[Vector2]:
 	return custom_ravine_floors
+
+
+func _ravine_widths() -> Array[Vector2]:
+	return custom_ravine_widths
+
+
+func _ravine_floor_slopes() -> Array[Vector2]:
+	return custom_ravine_floor_slopes
+
 
 func _lagoon_points() -> Array[Vector2]:
 	if custom_lagoon.is_empty():

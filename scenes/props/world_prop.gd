@@ -78,6 +78,17 @@ const PROP_COLLISION := {
 	# reconstruieste colizorul (trimesh — poarta de 4 m trebuie sa ramana
 	# libera) la fiecare schimbare de stadiu.
 	"lava_flow": "none",
+	# Hornul crapat (Cappadocia, POI D): aceeasi capcana ca la lava, din
+	# acelasi motiv. Cele trei stari stau in scena una langa alta, iar
+	# `world_prop` construieste corpurile O DATA, la `_ready`, pentru
+	# mesh-urile vizibile ATUNCI — adica pentru toate trei, fiindca instantele
+	# GLB isi fac `_ready` inaintea hazardului care le stinge. Rampa si molozul
+	# ar fi existat ca ziduri invizibile pe mijlocul drumului inca dinainte ca
+	# hornul sa cada. Colizorul si-l face [CrackedChimneyHazard], la fiecare
+	# schimbare de stare.
+	"cracked_chimney_a": "none",
+	"cracked_chimney_b": "none",
+	"cracked_chimney_c": "none",
 	# --- copaci si stalpi: cilindru pe trunchi ----------------------------
 	"larch_winter_a": "trunk", "larch_winter_b": "trunk",
 	"larch_winter_c": "trunk", "birch_winter_a": "trunk",
@@ -121,6 +132,31 @@ const PROP_COLLISION := {
 	# trotuarul din aleea de 6 m, adica la o roata distanta de linia de curs.
 	"porter": "none", "table_stools": "none", "steam_vent": "none",
 	"scooter": "none", "bicycle": "none",
+	# --- Cappadocia (POI E: via si balonul aterizat) ----------------------
+	# Panza dezumflata ZACE PESTE drum, pe toata latimea lui (20,7 x 8,0 m,
+	# groasa de 50 cm). Implicitul "hull" ar fi exact ce descrie brief-ul ca
+	# fiind gresit: un zid de 20 m fix pe linia de curs, care inchide pista.
+	# Panza e o SUPRAFATA, nu un obstacol — treci peste ea (incetinit).
+	"balloon_landed": "none",
+	# Randul de vie e scurtatura lenta prin care se TRECE (brief POI E:
+	# "iarba lenta cu geometrie"). Aracii au 4 cm: un hull per rand ar fi un
+	# gard de 10 m, si sunt zeci de randuri.
+	"vine_row": "none",
+	"shrub_dry": "none", "pigeon": "none",
+	# (Molozul hornurilor cazute — `cracked_chimney_*` — e declarat mai sus,
+	# la POI D. Motivul lui POI E e acelasi si se adauga: cele 72 de lespezi
+	# de pe coama din dreapta stau la 28-60 m lateral de banda si sunt
+	# gradient de contact intre stanca si sol, nu obstacole.)
+	# Grohotisul de sub perete (POI E, runda 3): bolovani de 0.3-1.6 m, zeci de
+	# bucati, TOATE la peste 13 m lateral de banda (generatorul le respinge mai
+	# aproape). Ca si molozul de mai sus: sunt gradient de contact intre stanca
+	# si sol, nu obstacole, iar un hull per bucata ar pune zeci de corpuri
+	# convexe pe teren pe care masina n-are ce cauta.
+	"talus_block": "none", "talus_cobble": "none", "talus_gravel": "none",
+	# Plopii: cilindru pe trunchi, ca toti copacii — hull-ul unui plop de
+	# 15 m e o coloana de 2,5 m latime care te opreste in aer.
+	"poplar_a": "trunk", "poplar_b": "trunk",
+	# Cosul balonului e mic si solid; ferma e o casa: hull implicit, corect.
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -188,9 +224,57 @@ const ACCENT_SPLIT := {
 ## Cheia e numele fisierului .glb (fara extensie); valoarea, o mapare
 ## nume-de-parte -> clasa, aplicata DOAR instantelor modelului aluia.
 const CLASSES_BY_MODEL := {
+	# --- Cappadocia: faleza in benzi a canionului rosu (POI D) --------------
+	#
+	# Modulul vine din kit cu UV-uri pe atlas si matura sloturile 19/23/27/2/1
+	# — masurat cu tools/ProbeCappSlots: 31% CREM (19, #E9DCC0) si ZERO rosu.
+	# Pe el, canionul "rosu" din brief §2 iesea crem, ca restul pistei.
+	#
+	# Clasa il imbraca in sisturi stratificate tentate spre caramiziu (vezi
+	# `red_valley_tuff` in palette.gd, unde multiplicatorul e masurat din
+	# crop-ul de referinta). E un material in plus la garda, cheltuit
+	# DELIBERAT pe o CLASA de assets, nu pe o piesa — regula din CLAUDE.md.
+	"cliff_band_module": {
+		"Cliff_Band_Module": Palette.TRI_PREFIX + "red_valley_tuff",
+	},
+
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},
+	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
+	#
+	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
+	# exact ce se intampla atunci — „absentele arata cer, nu camere". Referinta
+	# (Uchisar in sectiune) castiga tocmai prin deschideri LUMINATE cu interior
+	# in spatele lor. `_remap_model_slots` a pus deja fundul firidei pe slotul
+	# 30; aici primeste materialul care il face gura de pestera.
+	#
+	# [b]NU mai are emisie, si asta e reparatia rundei 3.[/b] Nota veche spunea
+	# ca energia 2.0 e "fix cea folosita de ferestrele Chongqing-ului", deci
+	# gratis la garda. Adevarat, si irelevant: Chongqing e o pista de NOAPTE,
+	# unde o fereastra chiar e cea mai luminoasa suprafata din cadru. Cappadocia
+	# e la RASARIT, si firida asta nu e o camera cu lumina aprinsa — e o gura de
+	# pestera sapata intr-un perete pe care bate soarele.
+	#
+	# Masurat pe captura (frac 0.80, decupaj 1:1):
+	#   interiorul firidei     luminanta 151.7
+	#   zidul insorit langa ea luminanta  85.1   -> firida e de 1.78 ori mai
+	#   zidul in umbra         luminanta  81.4      luminoasa decat zidul INSORIT
+	#
+	# O suprafata aflata in umbra, intr-o scobitura, care emite mai multa lumina
+	# decat una batuta direct de soare: exact de aia citea RECLAMA si nu camera
+	# sapata. Criticul orb a numit-o fara sa aiba cifra ("panouri luminoase"),
+	# si e a doua oara cand piesa asta produce acelasi repros — prima data s-a
+	# tratat marimea (scara 1.6 -> 0.7), care era doar jumatate din cauza.
+	#
+	# Acum fundul sta pe SAND_SHADOW, cel mai inchis tuf din paleta deja
+	# folosit pe pista, fara emisie. Firida devine ce trebuia sa fie: o PATA
+	# INTUNECATA in perete, adica singurul indiciu ca peretele are grosime.
+	# Zero materiale in plus (slotul e pe atlasul comun, nu mai cere `glow`).
+	# Nicio clasa si nicio emisie: firida ramane pe atlas, cu sloturile
+	# corectate in SLOT_REMAP_BY_MODEL. Intrarea se pastreaza scrisa explicit
+	# ca sa nu fie reintrodus `GLOW` din reflex — vezi nota de acolo.
+	"hall_alcove": {},
 	# Trestia de pe Stromboli, pe frunzisul mediteranean. Aici si nu in
 	# STROMBOLI_CLASSES fiindca numele nodului ei (`Cane_Clump`) e PREFIX
 	# pentru `Cane_Clump_A/B/C` din `props/sugar_cane.glb`, lanul Okinawei:
@@ -312,13 +396,277 @@ const CLASSES_BY_MODEL := {
 }
 
 
+## Kitul de tuf (Cappadocia) si-a ales sloturile DUPA NUME, nu dupa culoare.
+##
+## `build_cappadocia_tuff.py` scrie `TUFF_MID = SAND_MID` si
+## `TUFF_SH = SAND_SHADOW`, cu intentia „banda de variatie de VALOARE" pe un con
+## crem. Dar sloturile alea nu sunt cremuri mai inchise, sunt portocaliul
+## desertului: masurat, SAND_MID e #D4994D (saturatie 0,64) si SAND_SHADOW e
+## #915D27 (0,73), pe langa CORAL_SAND #E9DCC0 (0,18). Rezultatul, vazut in
+## captura de sofer de la fractia 0,06: hornurile ies in dungi late portocalii
+## si ruginii — cosuri de fabrica, nu conuri de tuf. Referinta v3
+## (`img/v3_crops/B_chimneys.png`) le are crem UNIFORM, cu doar palaria inchisa,
+## iar regula de arta din brief §0.1 cere ~45% saturatie pe tot mediul.
+##
+## Se corecteaza aici, la incarcare, mutand UV-urile pe sloturile crem care CHIAR
+## sunt variatie de valoare: CONCRETE #C8BDA9 (sat 0,22, luminanta 184) pentru
+## banda medie si MARBLE_GREY #B8B4AC (sat 0,08, luminanta 178) pentru umbra.
+##
+## ATENTIE la cine mai umbla aici: sloturile astea NU se schimba pe unele mai
+## calde. S-a incercat (runda 10, ROCK_LIGHT + LARCH_RUST, ca raspuns la
+## "chalk-white" din critica) si a iesit mai rau decat punctul de plecare:
+## benzile din .glb sunt SUPRAFETE LATI, nu foi subtiri de strat, deci orice
+## slot cu saturatie 0,5 le transforma in dungi portocalii — cos de fabrica,
+## exact defectul din runda 6. Culoarea a doua benzi late nu poate fi si calda,
+## si discreta; e o problema de SUPRAFATA, nu de slot.
+##
+## Caldura ceruta de critica se pune in schimb din VERTEX COLOR, in
+## `_warm_tuff()` de mai jos: acolo se inmulteste tot conul cu o tenta calda,
+## deci se muta nuanta fara sa se schimbe raportul dintre benzi.
+##
+## De ce aici si nu in .glb: piesele sunt de KIT, folosite de toate POI-urile
+## pistei, iar un re-export atinge sase scripturi de build si toate cele 45 de
+## modele. Remaparea nu adauga niciun material si niciun slot — muta doar u-ul
+## pe centrul altui slot din acelasi atlas.
+##
+## Cheia e pe FISIER, nu pe numele partii: maparile pe nume sunt globale in tot
+## proiectul (lectia `nume-noduri-nu-sunt-unice`), iar „Chimney_A" n-are voie sa
+## atinga alta pista.
+const TUFF_UV_REMAP := {
+	1: Palette.CONCRETE,
+	2: Palette.MARBLE_GREY,
+}
+
+## Modelele pe care se aplica remaparea de mai sus: kitul de tuf al Cappadociei.
+##
+## Lista a crescut cand piata din Goreme a primit stratul uman. Piesele acelea
+## existau in kit dar nu fusesera asezate niciodata, deci nimeni nu observase
+## ca stau pe portocaliul desertului. Masurat pe ARIE (ProbeCappSlot, nou —
+## aria spune CAT, hexul spune CE): `farmhouse` era 37% SAND_MID #D4994D,
+## `cracked_chimney_c` 67% SAND_SHADOW #915D27, `cracked_chimney_b` 38%.
+## In captura de la frac 0,02 ieseau lazi portocalii langa conuri crem, adica
+## exact accidentul pe care remaparea asta il repara la hornuri.
+##
+## `church_arch` cere in plus ROCK_DARK -> ARCH_SHADOW: e singura piesa cu 35%
+## din arie pe slotul 4 (#67421F, maro inchis), fiindca arcada are un intrados
+## adanc. Lasat asa, arcul citea ca lemn ars. Vezi `ARCH_UV_REMAP`.
+##
+## Ce NU intra, si de ce: `vine_row` e 91% CACTUS_GREEN si `torch` 66%
+## RUST_METAL + 34% flacara — nu sunt tuf, si trecerea lor pe crem ar sterge
+## exact cele doua pete de culoare pe care le aduc in piata.
+const TUFF_UV_MODELS := [
+	"chimney_a", "chimney_b", "chimney_c", "chimney_d",
+	"chimney_mushroom", "chimney_triple", "twin_chimney_gate",
+	"cave_house_a", "cave_house_b", "cave_house_c",
+	"dovecote", "rock_church_facade",
+	"farmhouse", "cave_entrance", "church_arch",
+	"cracked_chimney_a", "cracked_chimney_b", "cracked_chimney_c",
+]
+
+## Remapare SUPLIMENTARA, doar pentru arcada: maroul inchis al intradosului.
+## Se tine separat fiindca ROCK_DARK e legitim pe restul kitului (crapaturi,
+## interior de faleza) — mutat global, ar aplatiza fiecare umbra sapata din
+## pista. MARBLE_GREY e deja folosit de umbra de tuf, deci arcul ramane in
+## aceeasi familie de valoare fara sa ceara un slot nou.
+const ARCH_UV_REMAP := {
+	4: Palette.MARBLE_GREY,
+}
+
+## Piesele care primesc si `ARCH_UV_REMAP`, pe langa cea de tuf.
+const ARCH_UV_MODELS := ["church_arch"]
+
+## `red_mesa` NU intra in lista de mai sus, desi e din acelasi kit si are
+## aceleasi sloturi in .glb. Acolo rosul e INTENTIA: masa e stratul rosu al
+## vaii, singura suprafata mare non-crem a pistei (vezi `custom_strata_tint` pe
+## Track13). Trecuta prin remapare ar fi iesit crem ca tot restul, adica exact
+## culoarea pe care pista o cauta ca sa nu fie monocroma.
+
+## Sloturi de paleta rescrise PER MODEL, inainte de orice material.
+##
+## Un GLB isi aduce sloturile din Blender, si uneori sunt sloturile gresite
+## pentru pista pe care ajunge. Cazul masurat: `hollow_rock` (Cappadocia, POI G)
+## e desenat pe sloturi generice de stanca — dominant ROCK_DARK (4), plus
+## ASPHALT_EDGE (6) si TILE_TERRACOTTA (23). ROCK_DARK e MARO-PORTOCALIU, si pe
+## el coaja iesea cu o banda de rugina lata cat stanca: exact reprosul
+## „conul portocaliu/crem" din verdict, si aceeasi capcana pe care o descrie
+## memoria `rock-dark-nu-pe-bazalt` (pe Stromboli ROCK_DARK iesea rugina).
+##
+## Se rescrie UV-ul, nu paleta: atlasul e 32x1, deci slotul unui vertex e
+## `floor(u * 32)` si mutarea lui inseamna doar alt `u`. Asa NU se atinge niciun
+## slot global (l-ar schimba pe toate pistele) si nu se cheltuie unul nou —
+## slotul 31 s-a consumat la Chongqing, brief §4.
+##
+## Tinta e CORAL_SAND (19), cremul de tuf pe care il declara deja tema
+## (`ground_tint`), plus SAND_SHADOW (2) pentru partile care trebuie sa ramana
+## mai INCHISE decat restul: fara o a doua valoare coaja ar iesi o silueta plata
+## de o singura culoare, si tot din verdict venea „culori plate".
+const SLOT_REMAP_BY_MODEL := {
+	"hollow_rock": {
+		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
+		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)
+		23: Palette.CORAL_SAND,    # TILE_TERRACOTTA rosu -> crem
+		0: Palette.CORAL_SAND,     # SAND_LIGHT galbui -> acelasi crem
+		1: Palette.CORAL_SAND,     # SAND_MID ocru saturat -> crem
+	},
+	# Firidele din peretele stancii. Aceeasi poveste ca la coaja: piesa vine
+	# desenata pentru sala subterana, deci pe stanca maro (2/4) si pe metal
+	# ruginit (10) — pe zidul crem ieseau niste cutii maro lipite pe el.
+	#
+	# Fundul firidei ramane pe slotul 30 (`LAVA_ORANGE`), care e portocaliul
+	# incandescent al paletei, si primeste emisie prin `CLASSES_BY_MODEL`. Asta
+	# e chiar reprosul din verdict: „absentele arata cer, nu camere" — o
+	# fereastra citeste ca incapere doar daca are un FUND si pe fund cade
+	# lumina. Slotul nu e nou: e cel al lavei de pe Stromboli, refolosit ca
+	# lumina de torta, exact rolul de accent care ARDE pentru care exista.
+	# Care slot e FUNDUL s-a masurat, nu s-a ghicit (tools, z mediu pe triunghi):
+	#   slot  2  z +0.162  -> cel mai in SPATE: fundul firidei
+	#   slot  4  z +0.001  -> centrat: rama/glaful
+	#   slot 10  z +0.094  -> feroneria
+	# Prima incercare aprinsese slotul 4 si a iesit exact pe dos pe captura: o
+	# RAMA portocalie in jurul unei gauri negre, adica o reclama luminoasa, nu
+	# o incapere. Fundul se aprinde, rama ramane piatra.
+	# [b]Runda 3: fundul nu mai ARDE, se INTUNECA.[/b] Vezi nota lunga din
+	# CLASSES_BY_MODEL. Pe scurt: la rasarit, o scobitura in perete e cea mai
+	# inchisa suprafata din cadru, nu cea mai deschisa. Masurat, firida
+	# portocalie era de 1.78 ori mai luminoasa decat zidul INSORIT de langa ea.
+	#
+	# Fundul trece pe SAND_SHADOW (slotul 2), cel mai inchis tuf din paleta.
+	# Rama ramane pe CORAL_SAND, ca peretele — asta nu se schimba: prima
+	# incercare de acum doua runde aprinsese RAMA si iesise o reclama cu
+	# contur, iar lectia aia ramane valabila.
+	# [b]Runda 3, si nota veche identifica GRESIT partile.[/b] Ea zicea
+	# "slot 2 z +0.162 -> cel mai in SPATE: fundul firidei". Semnul e invers:
+	# in piesa +Z arata spre privitor, deci z-ul cel mai MARE e cel mai in
+	# FATA. Remasurat pe GLB-ul original (z mediu si interval pe slot):
+	#   slot  4  z +0.013, -0.750 .. +0.750  -> CORPUL firidei, toata adancimea
+	#   slot 10  z +0.100, -0.179 .. +0.379  -> glaful, spre gura
+	#   slot  2  z +0.156, -0.500 .. +0.750  -> buza, cel mai in fata
+	# Adica slotul 4 nu e "rama", e chiar suprafata mare care se vede prin
+	# deschidere — si el era remapat pe CORAL_SAND, cel mai PALID slot din
+	# paleta (luminanta 221, fata de 100 al lui SAND_SHADOW).
+	#
+	# Asta era cauza reala a reprosului "panouri luminoase", nu emisia: masurat
+	# pe captura, interiorul firidei avea luminanta 151.7 langa un zid insorit
+	# la 85.1, adica de 1.78 ori mai luminos decat zidul BATUT DE SOARE. O
+	# scobitura mai deschisa decat fata pe care bate soarele nu poate citi decat
+	# ca suprafata care emite.
+	#
+	# Acum corpul si glaful trec pe SAND_SHADOW si firida devine ce trebuia sa
+	# fie: o pata INTUNECATA, adica singurul indiciu ca peretele are grosime.
+	# Buza (slotul 2) ramane crem: ea e piatra taiata a deschiderii, batuta de
+	# soare ca restul peretelui, si e cea care da pragul.
+	# [b]Si umbra se alege pe SATURATIE, nu dupa numele slotului.[/b] Prima
+	# corectie a pus corpul pe SAND_SHADOW, care se numeste "nisip umbrit" si
+	# pare alegerea evidenta. Pe captura a iesit o RAMA ROSIATICA in jurul
+	# fiecarei deschideri, masurata rgb(97, 40, 6) — adica exact defectul din
+	# memoria `rock-dark-nu-pe-bazalt`, pe alta piesa.
+	#
+	# Cauza, masurata pe paleta: SAND_SHADOW (#915D27) are saturatia 0.73. Nu e
+	# o umbra, e un MARO SATURAT. Umbra unei pietre creme trebuie sa fie aceeasi
+	# nuanta, doar mai inchisa si mai SPALATA — o suprafata la umbra pierde
+	# saturatie, nu castiga:
+	#   CORAL_SAND (peretele)  nuanta 41, saturatie 0.18, luminanta 221
+	#   SAND_SHADOW            nuanta 31, saturatie 0.73, luminanta 100  <- rugina
+	#   ASPHALT_EDGE           nuanta 30, saturatie 0.04, luminanta 103  <- umbra
+	# ASPHALT_EDGE e la 11 grade de nuanta fata de perete, aproape nesaturat, si
+	# la 47% din luminanta lui. Numele lui vine din alt rol, dar dala e exact ce
+	# trebuie aici — memoria `slot-ales-dupa-nume` spune sa masori dala, nu sa
+	# alegi eticheta. Slot deja folosit pe pista, deci zero materiale in plus.
+	"hall_alcove": {
+		2: Palette.CORAL_SAND,     # buza deschiderii: piatra taiata, la soare
+		4: Palette.ASPHALT_EDGE,   # corpul firidei: umbra spalata, nu maro
+		10: Palette.ASPHALT_EDGE,  # glaful: aceeasi umbra, nu al doilea ton
+	},
+	# Arcul de fereastra din peretele stancii goale. Aceeasi poveste ca la
+	# coaja si la firide, a treia oara: piesa e desenata pentru sala subterana,
+	# unde ruginiul citeste piatra la lumina de torta. Pe zidul crem al hornului
+	# iesea o potcoava RUGINIE lipita pe perete - exact reprosul "rama
+	# portocalie in jurul unei gauri", si exact capcana din memoria
+	# `rock-dark-nu-pe-bazalt`.
+	#
+	# Masurat pe GLB (histograma de sloturi): 378 vertecsi pe slotul 2, 249 pe 4
+	# (ROCK_DARK, maro), 96 pe 20 (VOLCANIC_BLACK) - deci ruginiul vine de pe 4
+	# si 20, nu din lumina. Peretele pe care sta e tot pe 2 (SAND_SHADOW), deci
+	# arcul se muta pe aceeasi familie. Zero sloturi noi, zero materiale noi.
+	"church_arch": {
+		# Valorile se dau dupa ADANCIME, masurata pe mesh (z mediu pe slot), nu
+		# dupa ce culoare avea piesa in sala subterana. Prima incercare a pus 4 si
+		# 20 pe doua valori diferite si arcul a iesit in DUNGI de bomboana:
+		# bolzarii vecini cadeau alternativ pe crem si pe umbrit.
+		#   slot  2  z +0.005  fata dinspre drum -> crem (nemutat, e deja bine)
+		#   slot  4  z -0.241  cordonul/rama     -> crem, aceeasi valoare ca fata
+		#   slot 23  z -0.733  glaful            -> umbrit: aici incepe adancimea
+		#   slot 20  z -1.185  fundul            -> umbrit: partea cea mai retrasa
+		#   slot 27  z -1.135  detaliul inchis   -> umbrit, tot in familia tufului
+		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem, ca fata arcului
+		23: Palette.SAND_SHADOW,   # TILE_TERRACOTTA rosu -> tuf umbrit (glaful)
+		20: Palette.SAND_SHADOW,   # VOLCANIC_BLACK -> acelasi umbrit (fundul)
+		27: Palette.SAND_SHADOW,   # detaliul ruginit -> tot tuf umbrit
+	},
+}
+
+
 func _ready() -> void:
+	_remap_model_slots()
 	_split_shutters()
+	_retint_tuff()
+	_warm_tuff()
+	_strata_tuff()
+	_redden_cliff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
+	_fade_tuff_detail()
+	_apply_tint()
 	_apply_glow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
+
+
+## Muta vertecsii unui model de pe un slot de atlas pe altul (vezi
+## [constant SLOT_REMAP_BY_MODEL]).
+##
+## Mesh-ul se DUPLICA inainte de scriere: resursa importata din .glb e partajata
+## intre toate instantele modelului si e tinuta in cache de ResourceLoader, deci
+## o scriere pe loc ar schimba piesa pentru toata lumea si ar reaplica mutarea
+## la fiecare instanta noua (crem -> si mai crem), inclusiv pe alte piste.
+func _remap_model_slots() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not SLOT_REMAP_BY_MODEL.has(stem):
+			continue
+		var remap: Dictionary = SLOT_REMAP_BY_MODEL[stem]
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			mi.mesh = _mesh_with_slots_moved(mi.mesh, remap)
+
+
+## Copia unui mesh cu UV-urile mutate pe alte sloturi de atlas.
+static func _mesh_with_slots_moved(src: Mesh, remap: Dictionary) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := src.surface_get_arrays(s)
+		var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+		if not uv.is_empty():
+			for i in uv.size():
+				var slot := int(floor(uv[i].x * float(Palette.SLOTS)))
+				if remap.has(slot):
+					# Centrul slotului tinta: la margine s-ar lua jumatate din
+					# culoarea vecinului la prima filtrare bilineara.
+					uv[i].x = (float(int(remap[slot])) + 0.5) / float(Palette.SLOTS)
+			arr[Mesh.ARRAY_TEX_UV] = uv
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
 
 
 ## Rupe accentele pictate de pe partile din ACCENT_SPLIT, ca ele sa poata primi
@@ -433,6 +781,62 @@ func _model_class_material(cls: String) -> Material:
 ## cer aceeasi combinatie: `Palette.glow_material` le tine intr-un cache. Un
 ## cartier intreg de case aurii aduce +1 la garda, nu +40.
 const GLOW_META := "lumina"
+
+
+## Numele metadatei prin care o instanta (sau un container de zona intreg)
+## primeste LUMINA RECE DE UMPLERE pe sloturile ei de piatra. In Inspector:
+## Add Metadata -> `racire`, valoare `"2,4|0.55|#39445C"` — aceeasi gramatica
+## ca `lumina` (sloturi | energie | nuanta).
+##
+## Exista pentru piatra din subteran. Piesele salii stau pe sloturile 2 si 4,
+## amandoua brunuri calde saturate, deci sala avea o singura croma de la cauciuc
+## pana in tavan si cele 16 torte se citeau ca un singur jar. De ce lumina
+## ADITIVA si nu o tenta pe albedo (si de ce corectia de ambient a rundei trecute
+## n-a schimbat nimic): aritmetica e in antetul lui `Palette.cool_fill_material`
+## — pe scurt, tot ce inmulteste pastreaza saturatia brunului, doar adunarea
+## ridica podeaua canalelor mici.
+##
+## E per ZONA, nu per piesa: se pune o data pe `F2_Sala1` si coboara pe tot ce e
+## sub el, exact ca `lumina`.
+##
+## Nu se confunda cu `lumina`: aia aprinde o piesa care ARDE (torta, fereastra),
+## asta e umplerea difuza a incaperii. Cand o piesa cere si una si alta, lumina
+## are ultimul cuvant — vezi ordinea din `_ready`.
+const TINT_META := "racire"
+
+
+## Pune lumina rece de umplere pe instantele care cer `racire`.
+##
+## Ruleaza DUPA clase si INAINTE de `_apply_glow`: o torta care si arde si sta
+## intr-o zona racita trebuie sa ramana aprinsa, deci lumina are ultimul cuvant.
+func _apply_tint() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var spec := _tint_spec(model)
+		if spec.is_empty():
+			continue
+		var parts := spec.split("|", false)
+		var slots: Array = []
+		for token in parts[0].split(",", false):
+			slots.append(int(token))
+		var energy := float(parts[1]) if parts.size() > 1 else 0.55
+		var tint := Color.html(String(parts[2]).strip_edges()) \
+			if parts.size() > 2 else Color.html("39445C")
+		Palette.apply_cool_fill(model, slots, tint, energy)
+
+
+## Racirea unei instante: metadata pe model, altfel pe containerul de zona — asa o
+## sala intreaga se raceste dintr-un singur loc. Acelasi tipar ca `_glow_spec`.
+func _tint_spec(model: Node3D) -> String:
+	if model.has_meta(TINT_META):
+		return String(model.get_meta(TINT_META))
+	var p: Node = model.get_parent()
+	while p != null and p != self.get_parent():
+		if p.has_meta(TINT_META):
+			return String(p.get_meta(TINT_META))
+		p = p.get_parent()
+	return ""
 
 
 ## Pune materialul emisiv pe instantele care cer `lumina`.
@@ -551,6 +955,485 @@ func _build_collision() -> void:
 ## StaticBody-urile puse de mana dupa reteta veche din docs, cat si peste
 ## modelele purtate de un [PathMover], care sunt copiii unui AnimatableBody3D si
 ## se MISCA: un colizor static lasat in urma lor ar fi un zid fantoma.
+## Muta UV-urile de pe sloturile portocalii pe cele crem, pe modelele din
+## `TUFF_UV_MODELS`. Vezi comentariul de la `TUFF_UV_REMAP` pentru masuratoare.
+##
+## Lucreaza pe o COPIE a mesh-ului (`ArrayMesh` nou), nu pe resursa incarcata:
+## un `.glb` e partajat intre toate instantele si intre piste, deci scrisul in el
+## ar fi vopsit si ce nu trebuie, iar in editor s-ar fi salvat in import.
+## Trece kitul de tuf pe materialul cu pete care SE STING CU DISTANTA.
+##
+## Runda 7, numit independent de amandoi criticii: pe hornuri petele au aceeasi
+## marime si acelasi contrast de la 3 m la 90 m. Pe carosabil si pe teren
+## stingerea exista din runda 6 (shadere proprii); prop-urile ramasesera pe
+## `world_material`, care e StandardMaterial3D si nu poate stinge UN STRAT —
+## `distance_fade` de acolo stinge obiectul intreg.
+##
+## Ruleaza DUPA `_apply_model_classes` ca sa aiba ultimul cuvant, dar sare
+## peste orice parte care si-a primit deja o clasa proprie (palaria pe clasa
+## de roca, accentele rupte): alea au material din alt motiv, si nu au voie
+## sa-l piarda aici.
+##
+## Costa UN material pe toata pista, nu unul per horn — vezi
+## `Palette.faded_detail_material`. Verificat cu tools/probe_decor.gd.
+func _fade_tuff_detail() -> void:
+	var mat := Palette.faded_detail_material()
+	var world := Palette.world_material()
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if not TUFF_UV_MODELS.has(model.scene_file_path.get_file().get_basename()):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null:
+				continue
+			# Doar piesele ramase pe materialul LUMII: o parte care si-a luat
+			# deja o clasa (tri:, glow:, finish:) o pastreaza.
+			if mi.material_override == world:
+				mi.material_override = mat
+
+
+func _retint_tuff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not TUFF_UV_MODELS.has(stem):
+			continue
+		# Arcada duce si maroul de intrados pe cenusiu; restul kitului nu.
+		var remap := TUFF_UV_REMAP.duplicate()
+		if ARCH_UV_MODELS.has(stem):
+			remap.merge(ARCH_UV_REMAP)
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var out := ArrayMesh.new()
+			var changed := false
+			for s in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(s)
+				var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+				for i in uv.size():
+					var slot := int(floor(uv[i].x * float(Palette.SLOTS)))
+					if remap.has(slot):
+						uv[i] = Palette.uv(int(remap[slot]))
+						changed = true
+				arr[Mesh.ARRAY_TEX_UV] = uv
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			if changed:
+				mi.mesh = out
+
+
+## Caldura tufului, din VERTEX COLOR.
+##
+## De ce nu din sloturi: vezi nota lunga de la TUFF_UV_REMAP. Benzile din .glb
+## sunt suprafete late; schimbarea slotului le face dungi portocalii. Tenta pe
+## vertecsi se aplica in schimb pe TOT conul, deci muta nuanta fara sa atinga
+## raportul dintre benzi — si asta e chiar ce cerea critica: "a warm pinkish
+## buff", nu "benzi mai colorate".
+##
+## Multiplicatorul poate DOAR sa intunece (memoria
+## `surfacetool-clamp-vertex-color`), ceea ce pica bine aici: reprosul era ca
+## rocile sunt prea ALBE, deci coborarea e chiar directia ceruta. Se taie din
+## verde si mai ales din albastru, si aproape deloc din rosu — asa un crem
+## acromatic (212, 189, 169 la CORAL_SAND) ajunge roz-caramiziu fara sa fie
+## nevoie de un slot nou.
+##
+## Gradientul pe inaltime: baza mai calda si mai inchisa, varful aproape
+## neatins. Doua motive. In referinta conurile chiar sunt mai roz jos, unde
+## sta stratul de tuf mai vechi. Si, mai practic, palaria inchisa are nevoie de
+## contrast cu ce e sub ea — daca varful se intuneca odata cu baza, silueta se
+## aplatizeaza.
+##
+## `hue_shift` per instanta rupe uniformitatea: critica cerea explicit "hue
+## variation between neighbouring cones", iar cu o singura tenta pe tot kitul
+## padurea ar fi ramas monocroma, doar de alta culoare decat inainte.
+func _warm_tuff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not TUFF_UV_MODELS.has(stem):
+			continue
+		# Seed stabil per instanta: acelasi horn primeste aceeasi nuanta la
+		# fiecare incarcare, altfel padurea ar palpai intre rulari.
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash(model.name) & 0x7fffffff
+		var hue_shift := rng.randf_range(-0.035, 0.035)
+		var strength := rng.randf_range(0.82, 1.0)
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var aabb := mi.mesh.get_aabb()
+			var y0 := aabb.position.y
+			var h := maxf(aabb.size.y, 0.001)
+			var out := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				# ARRAY_COLOR e `null`, nu un vector gol, cand mesh-ul n-are
+				# culori de vertex — atribuirea directa intr-un
+				# PackedColorArray tipat pica la rulare. Se citeste ca Variant
+				# si se materializeaza alb daca lipseste.
+				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
+				var cols := PackedColorArray()
+				if raw_cols is PackedColorArray:
+					cols = raw_cols
+				if cols.size() != verts.size():
+					cols = PackedColorArray()
+					cols.resize(verts.size())
+					cols.fill(Color.WHITE)
+				# PE TRIUNGHI, nu pe vertex (runda 14).
+				#
+				# Aici se pierdea, masurat, umbrirea pe fata a hornurilor.
+				# `_shade_facets` scrie o valoare PLATA per triunghi (mesh
+				# deindexat, cei 3 vertecsi sunt numai ai fetei), dar bucla asta
+				# rula dupa el si recalcula `t` din Y-ul FIECARUI vertex: pe o
+				# fata inclinata cei trei vertecsi au cote diferite, deci primeau
+				# trei valori diferite si rasterizatorul le interpola inapoi intr-un
+				# degrade. Sonda `probe_capp_vcol` a gasit 1489 din 1637 de fete cu
+				# culoare neplata pe triunghi — adica umbrirea pe fata era ca si
+				# stearsa pe 91% din horn, oricat de fin ar fi fost cuantizata in
+				# `_shade_facets`. (De-aia urcarea la 12 trepte n-a miscat captura:
+				# repara treapta, nu ce o netezea la loc.)
+				#
+				# Se ia cota CENTROIDULUI si se aplica aceeasi valoare pe cei trei
+				# vertecsi: gradientul cald ramane (conul e tot mai cald la baza),
+				# dar se rotunjeste la treapta fetei pe care sta, in loc sa curga
+				# peste ea. Exact regula ceruta: un semnal pictat peste fatete ori
+				# se cuantizeaza pe fata, ori sterge fatetele.
+				#
+				# Fallback pe vertex daca surface-ul nu e triunghiuri intregi:
+				# functia atinge tot kitul de tuf, nu doar hornurile deindexate.
+				if verts.size() % 3 == 0:
+					for tri in verts.size() / 3:
+						var i := tri * 3
+						var cy := (verts[i].y + verts[i + 1].y
+								+ verts[i + 2].y) / 3.0
+						# 1 la baza, 0 la varf.
+						var t := 1.0 - clampf((cy - y0) / h, 0.0, 1.0)
+						# Plancherul de 0.62 (nu 0.35) e o corectie MASURATA, nu
+						# o preferinta. Cu 0.35, treimea de sus a conului ramanea
+						# la luminanta 158 fata de 138 in referinta — adica exact
+						# "chalk-white in its upper two-thirds" ramanea nereparat,
+						# chiar daca media pe tot conul cadea bine. Media pe toata
+						# suprafata poate sa fie corecta cu varful gresit; se
+						# masoara pe FASII de inaltime, nu global.
+						# RUNDA 15: tenta slabita (0.06/0.15/0.26 ->
+						# 0.03/0.09/0.16). Masurat pe captura, saturatia rocii
+						# era 0.62-0.67 fata de 0.46 in referinta — tuful iesea
+						# caramiziu-portocaliu, nu crem cald. Taind mai ales din
+						# albastru, tenta muta nuanta dar SCADE si luminanta
+						# (albastrul e 11% din ea, verdele 59%): cu 0.15 pe verde
+						# se pierdeau ~10 unitati din valoare degeaba. Plancherul
+						# ramane 0.62, deci gradientul baza-varf se pastreaza.
+						var k := strength * (0.62 + 0.38 * t)
+						var warm := Color(
+							1.0 - 0.03 * k,
+							1.0 - (0.09 + hue_shift) * k,
+							1.0 - (0.16 + hue_shift * 2.0) * k)
+						for j in 3:
+							cols[i + j] = cols[i + j] * warm
+				else:
+					for i in verts.size():
+						var t := 1.0 - clampf((verts[i].y - y0) / h, 0.0, 1.0)
+						var k := strength * (0.62 + 0.38 * t)
+						cols[i] = cols[i] * Color(
+							1.0 - 0.03 * k,
+							1.0 - (0.09 + hue_shift) * k,
+							1.0 - (0.16 + hue_shift * 2.0) * k)
+				arr[Mesh.ARRAY_COLOR] = cols
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			mi.mesh = out
+
+
+## STRATUL DE MINERAL ROSU pe tuful din PRIM-PLAN si PLAN MEDIAN.
+##
+## De ce exista. Masurat pe captura de sofer (frac 0.06, --driver), cadrul
+## nostru era MONOCROM: IQR de nuanta 2.86 grade, cu 90.9% din pixelii saturati
+## intr-un SINGUR interval de 15 grade. Referinta are IQR 5.2-7. Iar singura a
+## doua nuanta pe care o aveam statea la ORIZONT (`red_mesa`, masurata la 114 m
+## de camera) — adica la adancimea la care nu separa nimic.
+##
+## De ce nuanta era blocata, si asta e cauza reala: SURSELE DE LUMINA sunt
+## amandoua portocalii. `sun_color` (1.0, 0.82, 0.63) are nuanta 30.8 grade,
+## `ambient_color` F0C79A are 31.4. Mediana cadrului nostru era 32.4. Cu alte
+## cuvinte cadrul nu era de culoarea rocilor, era de culoarea LUMINII: orice
+## albedo aproape acromatic (cremul CORAL_SAND, saturatie 0.18) iese din
+## inmultire pe nuanta becului, indiferent ce piesa e.
+##
+## De aici si singura iesire posibila: un albedo care e el insusi SATURAT si mai
+## rosu decat lumina. Socotit inainte de scris, nu dupa:
+##   crem E9DCC0 * soare  ->  nuanta 31.8   (adica exact media cadrului)
+##   ocru C4784F * soare  ->  nuanta 20.0
+##   rosu A8683A * soare  ->  nuanta 22.2
+## Deci un strat ocru chiar muta nuanta cu 10-12 grade. Nimic mai palid n-o face.
+##
+## DE CE PE VERTECSI SI NU PE SLOTURI. S-a incercat de doua ori (rundele 6 si
+## 10) sa se mute UV-urile hornurilor pe sloturi calde, si de fiecare data a
+## iesit "cos de fabrica": benzile din .glb sunt SUPRAFETE LATE, si orice slot
+## saturat pe ele da dungi de un metru si jumatate. Nota de la `TUFF_UV_REMAP`
+## spune concluzia: culoarea a doua benzi late nu poate fi si calda, si
+## discreta. Aici banda NU e cea din .glb — se taie dupa COTA DE LUME, deci
+## grosimea ei o aleg eu, si o aleg SUBTIRE (STRAT_H = 2.2 m pe hornuri de
+## 11-18 m, adica 12-20% din inaltime).
+##
+## SE TAIE PE COTA DE LUME, NU PE FRACTIE DIN PIESA, si asta e chiar ce face
+## diferenta dintre geologie si decoratie: un strat la aceeasi cota pe toate
+## piesele care impart solul citeste ca un STRAT MINERAL care traverseaza
+## padurea; acelasi strat la "20% din inaltimea fiecarei piese" ar sui si ar
+## cobori cu palaria si ar citi ca vopsea per obiect.
+##
+## Masurat cu ProbeCappCote, bazele celor 130 de piese de tuf de pe Track13:
+##   p5 44.3   p25 46.4   p50 47.7   p75 48.8   p95 51.6   (extreme 31.4 si 101.4)
+## Deci 90% din kit sta intr-o felie de 7 metri, si acolo o cota fixa chiar e
+## un strat comun. Extremele nu sunt insa neglijabile: la piesa de la 101 m un
+## strat fix la 49 ar cadea sub pamant, iar la cea de la 31.4 ar trece pe
+## deasupra palariei. Pentru ele banda se MUTA in treimea de jos a piesei —
+## stratul ramane vizibil, doar ca inceteaza sa mai fie acelasi strat, ceea ce
+## e adevarat si geologic: o piesa la 50 m diferenta de cota chiar e din alt
+## bazin.
+##
+## Cuantizarea pe TRIUNGHI e obligatorie, aceeasi lectie ca la `_warm_tuff`:
+## pe o fata inclinata cei trei vertecsi au cote diferite, deci o taiere pe
+## vertex ar interpola marginea stratului intr-un degrade care sterge exact
+## fatetarea. Se ia cota centroidului. Rezolutia asta e si limita reala a
+## grosimii: masurat cu probe_capp_geo, `chimney_a` are 11.26 m si numai 18
+## cote distincte de vertex, adica un inel la ~0.6 m. Sub un metru banda ar
+## cadea intre inele si ar aparea si dispare de la piesa la piesa.
+##
+## DOUA STRATE, NU UNUL, si asta e chiar afirmatia structurala a referintei:
+## singurul lucru din cadrul ei care spune ca roca are ISTORIE e ca peretele are
+## STRATE de mineral diferit, la plural. Cu un singur strat masuratoarea urcase
+## doar la 3.47 (de la 2.86, tinta ~7): o banda pe un horn de 15 m e un accent,
+## doua benzi la cote diferite sunt o stratigrafie. Al doilea e mai SUS si mai
+## SUBTIRE, ca sa nu iasa doua dungi gemene — in roca reala stratele nu au
+## grosimi egale.
+##
+## Cotele nu sunt alese la intamplare: 49.6 e la ~1 m deasupra soselei (focus
+## Y 48.8 la fractia 0.06, masurat cu ProbeCappStrate), deci stratul de jos
+## trece exact prin banda de imagine pe care o umple prim-planul; 53.4 cade in
+## treimea mijlocie a hornurilor de 11-18 m, adica se vede si pe piesele din
+## planul median, care in cadru intra doar cu partea de sus.
+const STRAT_COTA: float = 49.6
+const STRAT_COTA_SUS: float = 53.4
+## Grosimea stratului. 2.2 m = 3-4 inele de fatete pe un horn, adica o muchie
+## care se vede, nu o dunga de un texel. Cel de sus e mai subtire (1.4 m):
+## doua benzi de aceeasi latime ar citi ca un tipar, nu ca geologie.
+const STRAT_H: float = 2.2
+const STRAT_H_SUS: float = 1.4
+## Peste cat se stinge stratul la margini. Fara topire, marginea de sus a
+## benzii ar fi o linie perfect orizontala pe toata padurea — desen tehnic, nu
+## strat de roca. Cu 0.9 m ea se pierde intr-un inel-doua de fatete.
+const STRAT_FADE: float = 0.9
+## Tenta stratului, SOCOTITA CA SA NIMEREASCA PERETELE DIN REFERINTA, nu aleasa
+## din ochi. Masurat pe `docs/track_briefs/img/cappadocia_v3.jpeg`:
+##   peretele rosu al canionului   RGB(156, 97, 72)  nuanta 14.1  sat 0.56
+##   hornurile crem de langa el    RGB(176,132, 96)  nuanta 27.2  sat 0.46
+## Adica referinta tine intre roca rosie si roca crem o distanta de 13 grade de
+## nuanta, la saturatii APROPIATE. Aia e stratigrafia; nu un accent portocaliu.
+##
+## SI DE CE SE COBOARA SI ROSUL, desi asta pare invers fata de "vrem mai rosu".
+## Prima incercare taia numai G si B (0.62 / 0.30). Nuanta iesea 21.4 — bine —
+## dar saturatia sarea la 0.85 fata de 0.56 in referinta, adica exact
+## portocaliul aprins pentru care au picat rundele 6 si 10 ("cos de fabrica").
+## Rosul referintei e INCHIS si STINS, nu aprins. Ca sa scada saturatia fara sa
+## urce nuanta la loc trebuie coborat si canalul rosu — un multiplicator poate
+## doar sa taie (memoria `surfacetool-clamp-vertex-color`), deci "mai putin
+## saturat" se obtine taind din TOATE canalele, doar inegal.
+##
+## Valorile de mai jos sunt rezultatul unei cautari pe grila peste cele trei
+## canale, cu eroarea calculata fata de nuanta 15.5, saturatia 0.56 si luminanta
+## 108 ale peretelui din referinta. Ies:
+##   crem (212,189,169) * (0.72, 0.58, 0.64) = (153, 110, 108)
+##   sub soarele (1.0, 0.82, 0.63):  nuanta 15.4  sat 0.55  luminanta 106
+## fata de 14.1 / 0.56 / 111 in referinta. Sub un grad si sub o unitate de
+## saturatie — nu mai e nimic de reglat din ochi aici.
+const STRAT_R: float = 0.72
+const STRAT_G: float = 0.58
+const STRAT_B: float = 0.64
+## Stratul de sus e mai SLAB, nu doar mai subtire. Doua benzi la fel de
+## saturate ar avea aceeasi greutate in cadru si s-ar citi ca doua accente
+## puse; una tare jos si una stinsa sus citesc ca un profil care se estompeaza
+## in sus — exact cum arata un perete stratificat pe care partea de jos e
+## stratul vechi. Aceiasi multiplicatori, trasi ~40% catre alb.
+const STRAT_R_SUS: float = 0.88
+const STRAT_G_SUS: float = 0.82
+const STRAT_B_SUS: float = 0.85
+
+
+## Aplica stratul rosu. Rulat DUPA `_warm_tuff`, ca sa se inmulteasca peste
+## caldura lui, nu in locul ei: gradientul baza-varf al conului trebuie sa
+## ramana, stratul doar il taie pe o felie.
+func _strata_tuff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if not TUFF_UV_MODELS.has(model.scene_file_path.get_file().get_basename()):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			# Cota de LUME a piesei, si inaltimea ei reala. Ambele din
+			# transformarea globala, nu din AABB-ul local: piesele sunt scalate
+			# si rotite in .tscn, deci un AABB local ar da metri de model, nu
+			# metri de lume.
+			var xf := mi.global_transform
+			var wa := xf * mi.mesh.get_aabb()
+			var baza := wa.position.y
+			var h := maxf(wa.size.y, 0.001)
+			# Unde cade banda pe piesa ASTA. Implicit la cota comuna; daca
+			# piesa nu o intersecteaza (vezi nota lunga de mai sus), banda
+			# coboara in treimea ei de jos.
+			var cota := STRAT_COTA
+			var cota_sus := STRAT_COTA_SUS
+			if cota < baza + 0.3 or cota > baza + h - 0.5:
+				cota = baza + h * 0.28
+			if cota_sus < baza + 0.3 or cota_sus > baza + h - 0.5:
+				cota_sus = baza + h * 0.55
+			var out := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
+				var cols := PackedColorArray()
+				if raw_cols is PackedColorArray:
+					cols = raw_cols
+				if cols.size() != verts.size():
+					cols = PackedColorArray()
+					cols.resize(verts.size())
+					cols.fill(Color.WHITE)
+				if verts.size() % 3 != 0:
+					arr[Mesh.ARRAY_COLOR] = cols
+					out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+					continue
+				for tri in verts.size() / 3:
+					var i := tri * 3
+					# Cota CENTROIDULUI, in metri de lume. Pe triunghi, nu pe
+					# vertex: vezi nota de la `_warm_tuff` despre cele 1489 de
+					# fete carora interpolarea le stersese umbrirea.
+					var cy: float = (xf * verts[i]).y
+					cy += (xf * verts[i + 1]).y
+					cy += (xf * verts[i + 2]).y
+					cy /= 3.0
+					var t := Color.WHITE
+					var wj := _pondere_strat(cy, cota, STRAT_H)
+					if wj > 0.0:
+						t.r *= 1.0 - (1.0 - STRAT_R) * wj
+						t.g *= 1.0 - (1.0 - STRAT_G) * wj
+						t.b *= 1.0 - (1.0 - STRAT_B) * wj
+					var ws := _pondere_strat(cy, cota_sus, STRAT_H_SUS)
+					if ws > 0.0:
+						t.r *= 1.0 - (1.0 - STRAT_R_SUS) * ws
+						t.g *= 1.0 - (1.0 - STRAT_G_SUS) * ws
+						t.b *= 1.0 - (1.0 - STRAT_B_SUS) * ws
+					if wj <= 0.0 and ws <= 0.0:
+						continue
+					for j in 3:
+						cols[i + j] = cols[i + j] * t
+				arr[Mesh.ARRAY_COLOR] = cols
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			mi.mesh = out
+
+
+## Ponderea unui strat la cota data: 1 in miez, topita liniar peste STRAT_FADE
+## la margini, 0 in afara. Scoasa in functie fiindca o foloseau amandoua benzile
+## si copierea ei ar fi insemnat doua locuri de reglat cand se muta topirea.
+func _pondere_strat(cy: float, cota: float, gros: float) -> float:
+	var d := absf(cy - cota)
+	if d > gros * 0.5 + STRAT_FADE:
+		return 0.0
+	return 1.0 - clampf((d - gros * 0.5) / STRAT_FADE, 0.0, 1.0)
+
+
+## Peretele Vaii Rosii: mai ROSU si mai LUMINOS decat il da .glb-ul.
+##
+## De ce. Zidul de pe umarul exterior (ZidulValeiRosii) e construit din
+## `cliff_band_module`, si in captura iesea cenusiu — panouri de beton intr-un
+## desert cald. Prima banuiala, ca sloturile din .glb sunt gresite, e FALSA:
+## masurat cu ProbeCappZidUV, piesa foloseste 1/2/19/23/27, adica D4994D,
+## 915D27, E9DCC0, C4784F, A8683A — toate calde. Cenusiul vine din LUMINA:
+## fata dinspre drum e intoarsa de la soarele de 13 grade, iar AO-ul copt in
+## vertecsi o mai coboara o data.
+##
+## Masurat pe pixeli, zidul fata de canionul din referinta:
+##   al nostru    nuanta 29.2  luminanta  88.9
+##   referinta    nuanta 14.6  luminanta 110.7
+## Adica prea INCHIS cu 22 de puncte si prea putin rosu cu 15 grade. Un perete
+## de vale rosie care nu e rosu nu spune ca acolo e Valea Rosie; ramane un zid.
+##
+## Se corecteaza pe vertex color, ca si caldura tufului. Multiplicatorul poate
+## doar sa intunece, deci luminanta NU se poate urca de aici — se urca stingand
+## AO-ul copt (culorile existente se duc catre alb) si abia apoi se aplica
+## tenta rosie. Asta e si motivul pentru care functia e separata de
+## `_warm_tuff`: acolo AO-ul trebuie PASTRAT, aici e chiar ce incurca.
+func _redden_cliff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if model.scene_file_path.get_file().get_basename() != "cliff_band_module":
+			continue
+		if not String(model.name).begins_with("zidValea"):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var out := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
+				var cols := PackedColorArray()
+				if raw_cols is PackedColorArray:
+					cols = raw_cols
+				if cols.size() != verts.size():
+					cols = PackedColorArray()
+					cols.resize(verts.size())
+					cols.fill(Color.WHITE)
+				for i in verts.size():
+					# AO-ul copt se stinge pe jumatate: peretele e departat si
+					# in ceata, iar ocluzia lui de aproape doar il inchide.
+					var c := cols[i]
+					# AO-ul copt se stinge aproape complet. 0.55 nu ajungea:
+					# masurat pe pixeli, luminanta zidului urcase doar de la
+					# 88.9 la 92.5, fata de 110.7 in referinta. Peretele e
+					# departat si in ceata — ocluzia lui de contact nu se vede
+					# de la 60 m, dar il inchide cat sa citeasca a beton.
+					c = c.lerp(Color.WHITE, 0.88)
+					# Tenta: taie din verde si mai ales din albastru, rosul
+					# neatins, ca nuanta sa coboare de la ~29 catre ~16 grade.
+					c.g *= 0.72
+					c.b *= 0.42
+					cols[i] = c
+				arr[Mesh.ARRAY_COLOR] = cols
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			mi.mesh = out
+
+
 func _collect_models(node: Node, out: Array[Node3D]) -> void:
 	for c in node.get_children():
 		var spatial := c as Node3D
@@ -564,9 +1447,30 @@ func _collect_models(node: Node, out: Array[Node3D]) -> void:
 		_collect_models(spatial, out)
 
 
+## Cele patru moduri valide. Exista ca sa poata fi VERIFICATA metadata scrisa
+## de mana sau de un generator: `match` de mai jos are ramura implicita `_`, deci
+## o valoare scrisa gresit nu cade in gol, ci face HULL — adica exact pe dos
+## fata de intentie, si in tacere.
+const COLLISION_MODES := ["hull", "trunk", "mesh", "none"]
+
 func _collision_mode(model: Node3D) -> String:
 	if model.has_meta(COLLISION_META):
-		return String(model.get_meta(COLLISION_META))
+		var m := String(model.get_meta(COLLISION_META))
+		if COLLISION_MODES.has(m):
+			return m
+		# NU se ghiceste ce a vrut sa spuna: se striga, si se cade pe implicit.
+		#
+		# Cazul care a cerut verificarea asta: `tools/gen_capp_creasta.gd` scria
+		# `coliziune = "niciuna"` (romaneste) pe cele 101 module ale zidului
+		# Vaii Rosii, cu comentariul lui explicit — „departe de banda si sub
+		# nivelul ei: nu are nevoie de corp fizic, un hull per modul ar fi zeci
+		# de corpuri degeaba". Valoarea nu e in tabel, deci pica pe ramura `_`
+		# si producea fix cele zeci de corpuri: masurat, 101 corpuri cu 101
+		# forme convexe. Doua runde au trecut pe langa ea fiindca nimic nu se
+		# plangea.
+		push_warning(("world_prop: `%s = \"%s\"` pe %s nu e un mod valid " +
+			"(%s). Se aplica implicitul \"hull\".")
+			% [COLLISION_META, m, model.name, ", ".join(COLLISION_MODES)])
 	var stem := model.scene_file_path.get_file().get_basename()
 	return String(PROP_COLLISION.get(stem, "hull"))
 
@@ -643,6 +1547,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.BAIKAL_CLASSES)
 	out.merge(TrackDecor.STROMBOLI_CLASSES)
 	out.merge(TrackDecor.CHONGQING_CLASSES)
+	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

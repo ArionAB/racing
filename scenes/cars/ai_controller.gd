@@ -34,6 +34,10 @@ const CORNER_SPEED_FLOOR: float = 0.44
 ## Cat de mult trage spre interiorul virajului (in half_width).
 const INSIDE_BIAS: float = 0.55
 const LINE_MAX: float = 0.8
+## Cat se poate abate linia de la culoarul impus (`lane_forced_at`), in aceleasi
+## unitati ca `line`: fractie din semilatime. 0.06 pe semilatimea de 9 m a
+## pietei = ±0.54 m, adica jocul dintre doua masini pe aceeasi fanta.
+const FORCED_SLACK: float = 0.06
 ## Depasire. Fara ochi pentru celelalte masini, un AI mai rapid ramanea lipit
 ## de bara autobuzului din fata, pe ACEEASI linie, pana la finalul cursei —
 ## arata prost si transforma orice masina lenta intr-un dop de pluton. Blocajul
@@ -169,6 +173,24 @@ func update(delta: float) -> void:
 	if keep_off > 0.0:
 		var side_pref := signf(line_offset) if absf(line_offset) > 0.02 else 1.0
 		line = side_pref * maxf(absf(line), keep_off)
+	# Blocaj de decor cu o SINGURA fanta (piata din Goreme, Cappadocia POI A):
+	# un zid continuu de oale de la -9.0 la +5.6, cu trecerea doar in dreapta.
+	#
+	# De ce nu se rezolva din `_avoid_line`: aia se uita NUMAI la `traffic`,
+	# adica la celelalte masini. Decorul static nu exista pentru ea, deci
+	# pilotul isi urma linia de curse drept in zid, tur de tur — 25 de repuneri
+	# pe 3 seed-uri, masurat. Si nici `lane_bias_at` nu ajunge: aia da o
+	# MARIME si lasa malul pe seama personalitatii, ceea ce e corect pentru
+	# trenul de pe Baikal (liber pe amandoua partile) si gresit aici, unde
+	# malul ales gresit e zid.
+	#
+	# Se citeste aici, dar se IMPUNE dupa `_avoid_line` (vezi mai jos): altfel
+	# ocolirea unei masini lente muta linia inapoi in zid. Masurat: cu impunerea
+	# doar inainte, seed 4 tinea o masina intr-o bucla de 14 repuneri, lovind
+	# teancurile la lat 3.1-3.7 m — adica taman unde o dusese ocolirea.
+	var forced := track.lane_forced_at(idx)
+	if absf(forced) > 0.001:
+		line = clampf(forced, -LINE_MAX, LINE_MAX)
 	# Gheizerele de foc din craterul Stromboli: culoarul liber se SCHIMBA in
 	# timp, deci nu se poate rezolva cu `lane_bias_at` (aia tine pilotul pe o
 	# parte FIXA, bun pentru un tren pe axa, inutil aici).
@@ -188,6 +210,17 @@ func update(delta: float) -> void:
 	line = _span_line(speed, line)
 	# Cineva mai lent pe culoarul nostru? Linia se muta pe langa el.
 	line = _avoid_line(idx, speed, line, keep_off)
+	# CULOARUL UNIC are ultimul cuvant. Pe restul pistei ocolirea poate folosi
+	# toata latimea; intr-un blocaj cu o singura fanta, orice metru in afara
+	# fantei e zid, deci linia se strange inapoi in ea. Fereastra e ingusta
+	# (+5.75..+7.00 m masurat la 0.0297), asa ca se lasa doar o toleranta mica
+	# in jurul culoarului — destul cat doua masini sa nu se atinga, prea putin
+	# cat sa iasa vreuna din fanta.
+	if absf(forced) > 0.001:
+		var lo := forced - FORCED_SLACK
+		var hi := forced + FORCED_SLACK
+		line = clampf(line, minf(lo, hi), maxf(lo, hi))
+		line = clampf(line, -LINE_MAX, LINE_MAX)
 	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
 	# Bifurcatia: cine a decis ca o ia, tinteste banda cealalta cat timp cele
 	# doua sunt inca lipite. Comutarea propriu-zisa de ruta o face Car, pe

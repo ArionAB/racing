@@ -160,6 +160,74 @@ static func uv(slot: int) -> Vector2:
 ## draw call-uri: toate prop-urile arata spre acelasi material).
 static var _shared: StandardMaterial3D
 
+## Calea stratului de detaliu ACTIV. Tema o poate schimba (`detail_texture`).
+##
+## Exista fiindca detail_rock.png are STRATE ORIZONTALE — corect pentru faleze
+## sedimentare (Baikal, Stromboli, Chongqing), gresit pentru tuful din
+## Cappadocia, care se erodeaza prin siroire: santurile coboara CU apa. Fiind
+## aplicat triplanar peste TOATA lumea, defectul nu se putea repara in mesh:
+## benzile ieseau identice si pe o cutie (buiandrugul arcadei), nu doar pe
+## corpurile de revolutie. Doua runde de critica oarba s-au pierdut cautand
+## vinovatul in `Builder.revolve`.
+##
+## NU adauga material: se schimba doar textura din `detail_albedo`, deci
+## numaratoarea din tools/probe_decor.gd nu se misca.
+static var _detail_path: String = DETAIL_PATH
+
+
+## Schimba stratul de detaliu al lumii. Se apeleaza INAINTE de prima cerere de
+## material (Track.apply_theme), fiindca `_shared` e construit lenes o data.
+## Daca materialul exista deja, i se schimba textura pe loc — altfel o pista
+## incarcata a doua oara in aceeasi sesiune ar ramane cu detaliul precedentei.
+static func set_detail_texture(path: String) -> void:
+	var want := path if path != "" else DETAIL_PATH
+	if want == _detail_path and _shared != null:
+		return
+	_detail_path = want
+	if _shared != null:
+		_shared.detail_albedo = load(_detail_path)
+	# Si varianta cu stingere pe distanta, din acelasi motiv: altfel o pista
+	# incarcata dupa alta ar pastra detaliul precedentei pe prop-uri.
+	if _faded_detail != null:
+		_faded_detail.set_shader_parameter("detail_tex", load(_detail_path))
+
+
+## Cuantizarea raspunsului de lumina pe prop-uri, ceruta de TEMA (runda 25).
+##
+## De ce e un setter si nu o valoare in `faded_detail_material`: shaderul e
+## PARTAJAT de toate pistele care au prop-uri pe UV de tuf, iar cuantizarea o
+## cere doar Cappadocia. Implicitul din shader e 0 (Lambert continuu), deci o
+## pista care nu apeleaza functia asta ramane bit-identica cu inainte.
+##
+## Se apeleaza din Track.apply_theme, langa `set_detail_texture`, si din acelasi
+## motiv: materialul e lenes, iar o pista incarcata dupa alta ar mosteni altfel
+## reglajul precedentei. De-aia ramura `else` STINGE explicit, in loc sa nu faca
+## nimic — fara ea, o cursa pe Cappadocia urmata de una pe Baikal ar fi fatetat
+## si stancile de la Baikal.
+##
+## `sun_deg` sunt ACELEASI grade ca rotatia luminii scenei, nu un vector scris
+## de mana. Motivul e o capcana deja platita o data in proiectul asta (vezi nota
+## lunga din `_shade_facets` si memoria `azimutul-soarelui-fata-de-drum`): o
+## directie de lumina scrisa literal si neremasurata dupa ce soarele s-a mutat
+## ajunge sa picteze umbra exact pe fata pe care soarele o lumineaza, adica doua
+## semnale care se scad. Derivata din grade, se misca odata cu soarele.
+static func set_prop_light_steps(on: bool, sun_deg: Vector3 = Vector3.ZERO,
+		split: float = 0.34, low: float = 0.30, ambient: float = 0.0) -> void:
+	var mat := faded_detail_material()
+	mat.set_shader_parameter("light_steps", 1.0 if on else 0.0)
+	if not on:
+		mat.set_shader_parameter("ambient_split", 0.0)
+		return
+	mat.set_shader_parameter("light_split", split)
+	mat.set_shader_parameter("light_low", low)
+	mat.set_shader_parameter("ambient_split", ambient)
+	# Directia CATRE soare, in spatiul lumii. Un DirectionalLight3D lumineaza pe
+	# -Z local, deci vectorul catre sursa e +Z rotit — exact ce compara `light()`
+	# cu normala.
+	var b := Basis.from_euler(Vector3(
+			deg_to_rad(sun_deg.x), deg_to_rad(sun_deg.y), deg_to_rad(sun_deg.z)))
+	mat.set_shader_parameter("ambient_sun_dir", b * Vector3(0.0, 0.0, 1.0))
+
 ## Materialul comun al lumii. Vertex color = AO copt, inmultit peste atlas.
 ##
 ## Filtrarea: LINEAR cu mipmap-uri, nu NEAREST. Cat timp sloturile erau patrate
@@ -205,7 +273,7 @@ static func world_material() -> StandardMaterial3D:
 		# centrul slotului — asa slotul din paleta devine si canal de intensitate:
 		# roca primeste tot, masinile nimic.
 		_shared.detail_enabled = true
-		_shared.detail_albedo = load(DETAIL_PATH)
+		_shared.detail_albedo = load(_detail_path)
 		_shared.detail_mask = load(DETAIL_MASK_PATH)
 		_shared.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 		_shared.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
@@ -467,6 +535,19 @@ const CLASS_TEXTURES := {
 	"bark": "res://assets/textures/classes/bark.png",
 	# Muntele (Alpii): sisturi stratificate si zapada avalansei.
 	"alpine_granite": "res://assets/textures/classes/alpine_granite.png",
+	# TUFUL IN BENZI AL VAII ROSII (Cappadocia, POI D). ACEEASI dala ca
+	# "alpine_granite" — nu se dubleaza in memorie, se schimba doar tenta
+	# (aceeasi mecanica ca volcanic_rock / village_plaster / macchia_dry).
+	#
+	# De ce sisturile alpine si nu "rock": dala lor e STRATIFICATA, adica
+	# are chiar desenul de sedimente orizontale pe care il cere faleza in
+	# benzi. Dala de "rock" e gresie fara asezare, iar pe un perete de 20 m
+	# ar fi iesit o pata uniforma — exact reprosul "banda pictata pe panta
+	# neteda arata a panza".
+	#
+	# Nu se putea tenta "alpine_granite" direct: e clasa stancilor de pe
+	# Alpi (Track09) si le-ar fi facut rosii.
+	"red_valley_tuff": "res://assets/textures/classes/alpine_granite.png",
 	"snow": "res://assets/textures/classes/snow.png",
 	# Coroana coniferelor (pictata, vezi tools/paint_pine_needles.py).
 	"pine_needles": "res://assets/textures/classes/pine_needles.png",
@@ -559,6 +640,12 @@ const CLASS_TINT := {
 	# <= 1 pe toate canalele si nu mai e nevoie de nicio ridicare. Sub lumina
 	# temei iese (59,63,74), R-B = -15: piatra rece de oras noaptea.
 	"old_stone": Color(0.895, 0.933, 1.0),
+	# Valea Rosie: dala alpine_granite (166, 156, 137) impinsa pe rosul
+	# caramiziu al referintei. Multiplicatorul NU e ales din ochi — e
+	# masurat din docs/track_briefs/img/v3_crops/D_canyon.png (media zonei
+	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
+	# canale ies SUB 1, deci nu cere CLASS_LIFT.
+	"red_valley_tuff": Color(0.822, 0.568, 0.479),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -606,6 +693,13 @@ const CLASS_TRIPLANAR_SCALE := {
 	# strat de piatra citeste cat un strat pe o stanca de 2-4 m, exact ca la
 	# `rock` — aceeasi familie de geologie, alta piatra.
 	"alpine_granite": 0.16,
+	# Valea Rosie: dala se intinde de DOUA ori mai mult decat pe Alpi
+	# (0.08 fata de 0.16). Modulul are 12.4 m inaltime: la scara alpina ar
+	# fi incaput ~2 randuri de sedimente pe toata faleza, adica desen prea
+	# mare ca sa citeasca a straturi. La 0.08 intra de doua ori mai multe
+	# benzi, deci fiecare treapta de 12 m arata ca un teanc de straturi,
+	# nu ca doua dungi.
+	"red_valley_tuff": 0.08,
 	# Masa avalansei. Sursa e o scanare de teren de ~2 m; la 0.3 (o repetitie
 	# la 3.3 m) un corp de 7 m prinde ~2 repetitii — destul cat crustele si
 	# urmele sa se citeasca la rostogolire, prea putin cat sa devina tapet.
@@ -1057,8 +1151,58 @@ static func lava_material() -> ShaderMaterial:
 ## Un singur nume azi; e o functie ca sa existe UN loc unde se adauga al doilea,
 ## nu un `if` strecurat in dispatcher.
 static func shader_material(name: String) -> ShaderMaterial:
+	if name == "faded_detail":
+		return faded_detail_material()
 	assert(name == "lava", "shader necunoscut: " + name)
 	return lava_material()
+
+
+## Materialul lumii, dar cu stratul de pete care SE STINGE CU DISTANTA.
+##
+## Runda 6 a stins pestritul pe carosabil si pe teren; prop-urile au ramas pe
+## `world_material`, care e StandardMaterial3D. Runda 7, amandoi criticii,
+## despre hornuri: aceeasi marime si acelasi contrast al petelor de la 3 m la
+## 90 m. Nu e o impresie — se vede pe captura, conul din marginea cadrului si
+## cel de la 90 m poarta caneluri identice.
+##
+## De ce nu se putea repara pe materialul existent: `distance_fade` din
+## StandardMaterial3D stinge OBIECTUL (alfa), nu un strat, iar mipmap-urile
+## netezesc tiparul fara sa-i scada contrastul — la incidenta razanta
+## selectorul de mip ramane pe nivelele ascutite (nota lunga din
+## terrain_splat.gdshader).
+##
+## Shaderul reproduce exact ce facea materialul comun (atlas pe UV1, vertex
+## color ca AO, detaliu triplanar prin masca de slot) si adauga stingerea spre
+## 1.0 — identitatea inmultirii — intre `detail_near_m` si `detail_far_m`.
+##
+## UN material pentru toate piesele care il cer, ca la `lava_material`: garda
+## numara materialele, deci o padure intreaga de hornuri aduce +1, nu +41.
+static var _faded_detail: ShaderMaterial
+
+static func faded_detail_material() -> ShaderMaterial:
+	if _faded_detail != null:
+		return _faded_detail
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/prop_detail_fade.gdshader")
+	# Aceleasi obiecte de textura ca `world_material`: nimic nu se dubleaza in
+	# memoria GPU.
+	mat.set_shader_parameter("albedo_atlas", load(ATLAS_PATH))
+	mat.set_shader_parameter("detail_tex", load(_detail_path))
+	mat.set_shader_parameter("detail_mask_tex", load(DETAIL_MASK_PATH))
+	mat.set_shader_parameter("detail_scale", DETAIL_SCALE)
+	# Fereastra de stingere e MAI SCURTA decat pe teren (26->130 m). Nu din
+	# gust: terenul se vede razant si se intinde pana in ceata, deci are nevoie
+	# de o tranzitie lunga ca sa nu apara un inel. Un horn e un obiect cu
+	# silueta, pe care il vezi intre 3 si 90 m, si tocmai intervalul ala trebuie
+	# sa arate diferenta. Masurat pe captura de la frac 0.045, deviatia de
+	# luminanta in corpul unui con, departe/aproape:
+	#   world_material (fara stingere)  1.01  — identic la 8 m si la 70 m
+	#   26 -> 130 m                     0.94
+	#   14 ->  70 m                     vezi commit
+	mat.set_shader_parameter("detail_near_m", 14.0)
+	mat.set_shader_parameter("detail_far_m", 70.0)
+	_faded_detail = mat
+	return mat
 
 
 static func lava_material_phased(phase: float, flow: float = -1.0) -> ShaderMaterial:
@@ -1203,6 +1347,55 @@ static func apply_world_material(root: Node) -> void:
 		if node is MeshInstance3D:
 			var mi := node as MeshInstance3D
 			mi.material_override = mat
+
+
+## --- Lumina RECE de umplere, pe sloturile de piatra ------------------------
+
+## [b]De ce nu merge niciun drum multiplicativ.[/b] Sub pamant, piesele salii
+## (`hall_alcove`, `hall_column`, `hall_ceiling_module`, `hall_arch`) stau DOAR
+## pe sloturile 2 (#955f28) si 4 (#774c23) — masurat cu
+## `tools/ProbeCappSlots.tscn`, nu presupus. Amandoua sunt brunuri calde si
+## saturate (0.73 / 0.71), deci toata sala are o singura croma si cele 16 torte
+## se citesc ca un singur jar: n-au nimic RECE langa care sa fie calde.
+## Referinta (`v3_crops/F_underground.png`) are piatra gri-bej rece, cu caldura
+## numai din flacara.
+##
+## Aritmetica, facuta inainte de a scrie codul, spune ca trei din patru lucruri
+## la indemana NU pot ajunge acolo, fiindca toate INMULTESC brunul:
+##   - `albedo_color` (tenta pe material): ca sa ajunga neutru trebuie sa aduca
+##     R si G la nivelul lui B, adica (119,76,35) -> (35,35,35). Saturatie 0,
+##     dar luminanta 82 -> 35: piatra devine gri DEVENIND aproape neagra, exact
+##     ce a respins criticul rundei trecute („piatra CITIBILA peste tot").
+##   - `ambient_light_color`: si el multiplicativ. De-aia corectia rundei
+##     trecute (cave_ambient dus pe gri neutru 0.72/0.70/0.72) NU s-a vazut —
+##     masurat pe hartie, saturatia ramane 0.71 indiferent ce culoare are
+##     ambientul, fiindca inmultirea scaleaza toate canalele proportional.
+##   - `EMISSION_OP_MULTIPLY`: emisia e proportionala cu albedo-ul, deci scaleaza
+##     acelasi brun (sat 0.71 -> 0.58 in cel mai bun caz incercat).
+##
+## Ce ramane, si ce chiar functioneaza, e lumina ADITIVA: un termen ABSOLUT,
+## independent de albedo, care ridica PODEAUA canalelor mici. Masurat pe aceleasi
+## doua sloturi, `#39445C` la energie 0.55 da (73,64,62) — saturatie 0.71 -> 0.15
+## si luminanta 82 -> 66, adica se raceste CRESCAND in citibilitate, nu scazand.
+##
+## Fizic e si corect: intr-o caverna, umplerea rece vine din putul de ventilatie
+## (cer), iar caldura din torte. Aici se declara chiar acea umplere.
+##
+## Costa UN material per (sloturi, energie, nuanta), partajat prin cache-ul din
+## `glow_material_slots` — garda numara materiale, si un cartier intreg de piese
+## racite aduce +1, nu +N.
+static func cool_fill_material(slots: Array, tint: Color,
+		energy: float) -> StandardMaterial3D:
+	return glow_material_slots(slots, energy, tint, false)
+
+
+## Pune umplerea rece pe tot subarborele.
+static func apply_cool_fill(root: Node, slots: Array, tint: Color,
+		energy: float) -> void:
+	var mat := cool_fill_material(slots, tint, energy)
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			(node as MeshInstance3D).material_override = mat
 
 ## --- Ruperea accentelor de pe o parte care primeste clasa ------------------
 

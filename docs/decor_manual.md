@@ -184,3 +184,38 @@ noi scrise de mână, măsoară terenul cu:
 ```
 godot --headless --path . --script res://tools/survey_terrain.gd -- --track=8 --from=0.48 --to=0.64
 ```
+
+## Cota se coace o dată, terenul se mai schimbă după (runda 29)
+
+Un `.tscn` cu decor manual e o **coacere**: fiecare `transform` are y-ul
+terenului de la momentul generării. Dacă terenul se schimbă după aceea, nimic
+nu recoace nodurile — nicio sondă de carosabil nu se uită la decor, așa că
+plutirea rămâne invizibilă până deschide cineva captura.
+
+Pe Cappadocia s-a întâmplat prin **merge**: pădurea de hornuri a fost coaptă pe
+`feat/capp-poi-b`, iar pe `feat/capp-route` s-a săpat între timp o râpă de 22 m
+peste exact același interval (`custom_ravines` += `Vector4(0.022, 0.178, 22, 1)`,
+commit 150c62e). Merge-ul a adus tăietura, nu și reașezarea: 38 de piese au rămas
+la cota de dinainte, până la 27.8 m în aer. Același tipar ca `SHOULDER_MAX_DROP`
+în runda 28 — două jumătăți ale aceleiași schimbări, plecate pe ramuri diferite.
+
+Reguli, din ce a costat:
+
+- **Când muți terenul (râpe, scobituri, masive, traseu), rerulează generatoarele
+  de decor ale pistei** și reașază nodurile. Nu e opțional: cota nu se
+  auto-corectează.
+- **Cota se ia cu rază, nu din câmp.** `_sampler.ground_y` e câmpul neted;
+  suprafața care se randează și de care se lovesc roțile e **grila** de teren,
+  iar între noduri e o coardă care pe tăieturi trece pe sub câmp (măsurat aici
+  până la 6.8 m). `_terrain_mesh_y` nu e nici el bun — e clampat la marginea
+  grilei, deci în afara pânzei extrapolează (27.5 unde solul real e la -27.6).
+- **Raza pornește de deasupra celui mai înalt punct al traseului și acceptă doar
+  `TerrainBody`.** O rază care ia prima lovitură aterizează pe hull-ul unei piese
+  deja așezate (`gen_capp_moloz.gd` punea așchii pe hornuri, la 54 m în aer), iar
+  una care pornește prea jos pleacă din interiorul pânzei.
+- **Garda e `tools/ProbePlutire.tscn`** (`--track=6`). Rulează-o după orice
+  schimbare de teren.
+
+Soluția de fond rămâne promovarea în scenografie descrisă mai sus: acolo y-ul se
+re-derivă la fiecare rebuild, deci clasa asta de accident dispare prin
+construcție. Cappadocia n-a făcut încă pasul.

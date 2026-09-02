@@ -138,7 +138,7 @@ far_step_m = 6.0
 far_bands = 11
 far_rise_m = 1.2
 far_foot_max_m = 58.0
-band_slots = Array[int]([19, 23, 10, 27, 23, 10, 27, 23, 4, 2, 2])
+band_slots = Array[int]([19, 23, 8, 27, 19, 10, 0, 23, 8, 27, 2])
 cap_slots = Array[int]([19, 23, 10, 27])
 
 [node name="TaieturaCornisei" type="Marker3D" parent="Faleze"]

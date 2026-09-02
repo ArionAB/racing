@@ -11290,7 +11290,13 @@ metadata/coliziune = "hull"
 transform = Transform3D(-0.276011, 0.000000, 2.527253, 0.000000, 2.542280, 0.000000, -2.527253, 0.000000, -0.276011, -324.439484, 12.184000, -22.600080)
 metadata/coliziune = "hull"
 
+[node name="peretes2_474" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.873912, 0.000000, 2.630218, 0.000000, 2.771600, 0.000000, -2.630218, 0.000000, -0.873912, -327.005951, 19.984001, -22.183844)
+metadata/coliziune = "none"
 
+[node name="peretes2_475" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.335340, 0.000000, 2.510623, 0.000000, 2.532920, 0.000000, -2.510623, 0.000000, -0.335340, -326.018860, 27.784000, -22.343935)
+metadata/coliziune = "none"
 
 [node name="peretes2_476" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
 transform = Transform3D(0.074018, 0.000000, -2.536520, 0.000000, 2.537600, 0.000000, 2.536520, 0.000000, 0.074018, -346.774353, 12.145374, -11.932456)
@@ -11308,7 +11314,13 @@ metadata/coliziune = "hull"
 transform = Transform3D(-0.337143, 0.000000, 2.864145, 0.000000, 2.883920, 0.000000, -2.864145, 0.000000, -0.337143, -324.937714, 12.145374, -15.932518)
 metadata/coliziune = "hull"
 
+[node name="peretes2_480" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.855100, 0.000000, 2.503217, 0.000000, 2.645240, 0.000000, -2.503217, 0.000000, -0.855100, -322.773712, 19.945374, -16.328920)
+metadata/coliziune = "none"
 
+[node name="peretes2_481" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.404462, 0.000000, 2.845963, 0.000000, 2.874560, 0.000000, -2.845963, 0.000000, -0.404462, -321.790070, 27.745375, -16.509104)
+metadata/coliziune = "none"
 
 [node name="poalas2_482" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_alcove")]
 transform = Transform3D(-0.826361, 0.000000, -2.465183, 0.000000, 2.600000, 0.000000, 2.465183, 0.000000, -0.826361, -340.513763, 12.562407, -78.008705)

@@ -164,6 +164,12 @@ legitimă; assets, nume sau trade dress copiate nu sunt.
   pe raycast, în 6 pași cu sonde (#255–#260, umbrela #261). Decizia: feelingul
   de condus e produsul; verdictul final de feel rămâne al dezvoltatorului, la
   volan, pe cele 3 piste
+- **M3.9 ✔ (sep 2026):** Cappadocia (Track13) — a șaptea pistă, construită cu
+  constructor + critic orb pe fiecare POI. Se conduce cap-coadă (0–5 repuneri
+  pe 16 seed-uri, toate pe molozul intenționat din canionul POI D; mașina
+  jucătorului 0). Lecțiile de metodă sunt în `docs/bara_vizuala.md`, iar
+  garda de bandă (`ProbeLaneClear`) are acum linie de bază per pistă și e
+  verificată prin sabotaj
 - **M4 (amânat — dezvoltatorul nu are device Android):** build Android,
   profilare 60fps pe telefon. Până atunci: dezvoltare pe desktop, cu
   constrângerile mobile respectate în continuare (poly buget, particule

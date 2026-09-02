@@ -188,9 +188,27 @@ func _check_route(track: Track, ri: int) -> int:
 		#
 		# Scutirea e strict pe steagul `TrackRoute.detour`, pus de banda insasi:
 		# o banda fara el ramane cazuta daca e mai lunga, exact ca inainte.
+		# [b]Si ocolul unui HAZARD care INCHIDE banda directa e mai lung prin
+		# contract[/b] — gatul cu piatra de moara din Cappadocia (brief par. 2
+		# POI F): culoarul scurt e o usa pe care piatra o inchide ciclic,
+		# culoarul lung e "mereu liber, +2.5 s". A cere castig pozitiv aici ar
+		# fi a cere ca decizia scurt-cu-risc / lung-sigur sa nu existe.
+		# Scutirea nu e un steag scris de mana: se DERIVA din pista — exista un
+		# hazard declarat pe chiar portiunea pe care banda o ocoleste.
+		var hazard_bypassed := false
+		for hz: Dictionary in track._node_hazards():
+			var hf := fposmod(float(hz.get("frac", -1.0)), 1.0)
+			var rel := hf - r.entry_frac
+			if rel < 0.0:
+				rel += 1.0
+			if rel <= span:
+				hazard_bypassed = true
+				break
 		var flag_gain := ""
 		if r.detour:
 			flag_gain = "  (ocol de PEDEAPSA: mai lung prin contract)"
+		elif hazard_bypassed and gain <= 0.0:
+			flag_gain = "  (ocol de SIGURANTA: hazard pe banda directa, mai lung prin contract)"
 		elif gain <= 0.0:
 			flag_gain = "  <-- MAI LUNGA decat ocolul"
 		print("      racord intrare  %7.2f m  iesire %.2f m" % [d_in, d_out])
@@ -202,7 +220,8 @@ func _check_route(track: Track, ri: int) -> int:
 		print("      ocoleste %.0f m, are %.0f m -> castig %.0f m (%.0f%%)%s"
 			% [bypassed, length, gain, gain / maxf(bypassed, 1.0) * 100.0,
 				flag_gain])
-		if d_in > 1.0 or d_out > 1.0 or (gain <= 0.0 and not r.detour):
+		var longer_bad := gain <= 0.0 and not r.detour and not hazard_bypassed
+		if d_in > 1.0 or d_out > 1.0 or longer_bad:
 			problems += 1
 	return problems
 

@@ -316,6 +316,7 @@ func _start_race() -> void:
 			"slide_hits": 0, "carousel_hits": 0, "deflector_hits": 0,
 			"speed_sum": 0.0, "samples": 0,
 			"stuck_t": 0.0, "stuck_reports": 0,
+			"branch_laps": 0, "branch_s": 0.0, "last_route": 0,
 		})
 		car.respawned.connect(_on_respawn.bind(i))
 		car.wall_hit.connect(_on_wall.bind(i))
@@ -352,6 +353,14 @@ func _tick_race(delta: float) -> void:
 			st.offroad_s = float(st.offroad_s) + delta
 		if speed < 4.0:
 			st.slow_s = float(st.slow_s) + delta
+		# Banda secundara: cine si cat o foloseste. Fara cifra asta, "AI-ul ia
+		# ocolul" ramane o presupunere — pe gatul cu piatra din Cappadocia
+		# bifurcatia exista doar daca macar un pilot chiar trece pe ea.
+		if car.route > 0:
+			st.branch_s = float(st.branch_s) + delta
+			if int(st.last_route) == 0:
+				st.branch_laps = int(st.branch_laps) + 1
+		st.last_route = car.route
 		if car.controller != null and car.controller.get_throttle() < -0.5:
 			st.reverse_s = float(st.reverse_s) + delta
 		# Pe fizica intreaga contactele vin de la solver (contact_monitor e
@@ -481,6 +490,16 @@ func _report_race() -> void:
 		laps[laps.size() - 1], laps[0], laps[laps.size() - 1] - laps[0]])
 	print("--- repuneri totale: %d · cel mai mult in afara soselei: %.1f%%" % [
 		total_respawns, worst_offroad])
+	var branch_total := 0
+	var branch_line := ""
+	for i in cars.size():
+		var st := _stats[i]
+		if int(st.branch_laps) > 0:
+			branch_total += int(st.branch_laps)
+			branch_line += "  %s: %d treceri (%.1fs)" % [
+				st.name, int(st.branch_laps), float(st.branch_s)]
+	print("--- banda secundara: %d treceri%s" % [branch_total,
+		branch_line if branch_total > 0 else " (nimeni n-a luat-o)"])
 	print("\n--- unde se scurge viteza (felie de pista -> v_med, %% lent, pereti)")
 	for b in BUCKETS:
 		var samples := maxi(_bucket_samples[b], 1)

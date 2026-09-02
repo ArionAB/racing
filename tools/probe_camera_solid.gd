@@ -72,6 +72,8 @@ var _track: Track
 var _car: Car
 var _cam: ChaseCamera
 var _verbose: bool = false
+## Ruta maturata acum — vezi nota din `_place`.
+var _route_index: int = 0
 var _sabotage: bool = false
 
 
@@ -277,7 +279,14 @@ func _place(r: TrackRoute, i: int) -> void:
 	# crede ca masina e mereu la start, iar sonda ar masura o lume in care
 	# presetul de cavern nu se aplica NICAIERI — adica ar raporta defecte pe
 	# care jocul nu le are, si ar ascunde ce se intampla cu presetul pornit.
-	_car.route = 0
+	# Pe ce RUTA e masina — nu mereu 0: pe o banda secundara, zonele de camera
+	# citesc fractia prin `route_at(c.route).frac_at(road_index)` (vezi
+	# CameraZone._player_in_frac_span). Cu route=0 fortat, indexul benzii
+	# (0..57 pe ocolul din Cappadocia) s-ar citi ca fractia 0.00-0.05 a buclei
+	# si presetul de cavern nu s-ar aplica NICIODATA pe banda — sonda ar masura
+	# o lume in care camera sta la 10 m sub un tavan de 9, defect pe care jocul
+	# nu il are. Aceeasi capcana ca `road_index`-ul de mai sus, un etaj mai sus.
+	_car.route = _route_index
 	_car.road_index = i
 	_cam.snap_behind()
 
@@ -287,6 +296,7 @@ func _sweep() -> Array:
 	var incidents: Array = []
 	for ri in _track.routes.size():
 		var r: TrackRoute = _track.routes[ri]
+		_route_index = ri
 		var n := r.baked.size()
 		print("")
 		print("  [%s] %d puncte coapte" % [r.label, n])

@@ -100,11 +100,51 @@ func _ready() -> void:
 		var r: TrackRoute = track.routes[ri]
 		hits += _sweep(space, track, r)
 	print("")
-	if hits == 0:
-		print("VERDICT: OK — banda e libera")
+	# LINIE DE BAZA PER PISTA, nu prag zero.
+	#
+	# Sonda nu iese pe zero pe nicio pista si nu are cum: raporteaza si contacte
+	# legitime (parapete la care treci razant, hazarde care CHIAR ingusteaza
+	# banda, piese de decor lipite de margine). Un prag zero ar fi rosu mereu,
+	# deci ignorat in doua saptamani — exact soarta pe care a avut-o pana acum.
+	#
+	# Ce conteaza e CRESTEREA: daca o pista raporta 21 si acum raporteaza 60,
+	# ceva s-a mutat in banda. Cifrele de mai jos sunt masurate pe main la
+	# 2 sep 2026, dupa ce suprafetele de rulare au fost scoase din raportare.
+	# Cand cobori una legitim, actualizeaz-o AICI, in acelasi commit.
+	var base: int = BASELINE.get(GameState.track_label(only), -1)
+	if base < 0:
+		print("VERDICT: %d probe blocate (pista fara linie de baza)" % hits)
+		get_tree().quit(0)
+		return
+	if hits > base:
+		print("VERDICT: REGRESIE — %d probe blocate, linia de baza e %d"
+			% [hits, base])
+		get_tree().quit(1)
+		return
+	if hits < base:
+		print("VERDICT: OK — %d probe blocate, sub linia de baza (%d)."
+			% [hits, base])
+		print("         Coboara linia de baza in probe_lane_clear.gd.")
 	else:
-		print("VERDICT: PROBLEMA — %d probe blocate" % hits)
-	get_tree().quit(1 if hits > 0 else 0)
+		print("VERDICT: OK — %d probe blocate, exact linia de baza" % hits)
+	get_tree().quit(0)
+
+
+## Cate raportari are fiecare pista pe main, dupa ce suprafetele de rulare au
+## fost scoase. NU sunt zerouri si nu trebuie sa fie: o parte din ele sunt
+## contacte legitime (parapete razante, hazarde care ingusteaza banda dinadins).
+## Rostul lor e sa prinda CRESTEREA. Masurat 2 sep 2026.
+## Cheia e eticheta intreaga (`GameState.track_label`), cu numarul scenei in ea:
+## numele scurt s-ar putea repeta, numarul scenei nu.
+const BASELINE := {
+	"Dunele (Track01)": 30,
+	"Okinawa manual (Track08)": 18,
+	"Alpii (Track09)": 21,
+	"Baikal (Track10)": 70,
+	"Stromboli (Track11)": 190,
+	"Chongqing (Track12)": 146,
+	"Cappadocia (Track13)": 15,
+}
 
 
 func _sweep(space: PhysicsDirectSpaceState3D, track: Track,

@@ -17,8 +17,15 @@ const CAR_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/firetruck.tres"),
 ]
 
-## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in
-## cursa rapida — momentan toate trei, deci campionatul le acopera pe toate.
+## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in cursa rapida.
+##
+## ATENTIE, nota de mai jos e VECHE si nu mai e adevarata: zicea „momentan toate
+## trei, deci campionatul le acopera pe toate", scrisa cand chiar erau trei.
+## Acum sunt SAPTE, iar `CHAMP_ROUNDS` a ramas 3 — deci Baikal, Stromboli,
+## Chongqing si Cappadocia sunt doar cursa rapida, nu intra in campionat.
+## Nu e o scapare de reparat in graba: lungimea campionatului e decizie de
+## design (3 curse = burst play, 7 = alt ritm), si se schimba deliberat, cu
+## `CHAMP_ROUNDS`, nu din reflex.
 const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
 	"res://scenes/tracks/Track08.tscn",

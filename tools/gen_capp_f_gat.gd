@@ -37,6 +37,16 @@ const TALUS := [
 	{"back": -0.9, "sc": 0.34, "dy": -1.00},
 ]
 
+## Gabaritul piesei de talus, pentru marja laterala din bucla de emitere.
+##
+## `hall_alcove` masoara 3.2 x 1.5 m in plan (AABB la scara 1), deci raza cea
+## mai mare pe care o poate ocupa cu yaw ALEATOR e semidiagonala,
+## sqrt(1.6^2 + 0.75^2) = 1.767 m. Cifra e derivata din piesa, nu aleasa: daca
+## modelul se schimba, se remasoara.
+const TALUS_HALF_DIAG: float = 1.767
+## Capatul de sus al jitterului de scara (`0.72 + 0.56 * g3`, cu g3 in [0,1)).
+const TALUS_SC_MAX: float = 1.28
+
 ## Intervalele fara tavan, masurate cu `_pf_gap`: gatul si intrarea gurii.
 ## Se suprapun 0.004 peste sali ca sa nu ramana un rost la imbinare.
 ## Imbinarile unde tavanul face TREAPTA, si care raman deschise spre cer daca
@@ -202,9 +212,31 @@ func _ready() -> void:
 					var along := (g1 - 0.5) * 2.6
 					var back: float = float(row["back"]) + (g2 - 0.5) * 0.5
 					var tsc: float = float(row["sc"]) * (0.72 + 0.56 * g3)
+					# CAT DE DEPARTE DE AX, si de ce nu ajunge `hw`.
+					#
+					# `back` se masoara de la ORIGINEA piesei, dar ce blocheaza
+					# masina e GABARITUL ei. Cu yaw aleator, un bloc din randul
+					# gros se intinde `TALUS_HALF_DIAG * 0.90 * 1.28` = 2.03 m
+					# in jurul originii, in orice directie.
+					#
+					# Fara marja, originea randului gros cadea la `hw - 1.25` si
+					# corpul lui ajungea la `hw - 3.3`. Masurat pe pista
+					# livrata: 619 blocuri intrau in banda pe tot subteranul,
+					# median 1.1-1.5 m, maxim 3.89 m — pe un gat de 6 m
+					# (semilatime 3 m) talusul se inchidea aproape complet peste
+					# drum. Ala e „zidul invizibil" din primul tur condus de om
+					# (raport 2 sep 2026, punctul 6): nu un perete, ci un camp
+					# de bolovani prin care nu se trece. `ProbeLaneClear` nu-l
+					# vedea fiindca isi ridica cutia cu 1 m, iar medianul
+					# talusului sta la 0.40 m peste asfalt — pe sub ea.
+					#
+					# Marja se DERIVA din piesa si din scara randului: cine
+					# schimba `sc` sau modelul o muta odata cu ele.
+					var lat_margin: float = TALUS_HALF_DIAG \
+						* float(row["sc"]) * TALUS_SC_MAX
 					emit.call(group, "grohotis%s" % tag, "hall_alcove",
 						c + (d["fw"] as Vector3) * along
-							+ side * (hw - 0.35 + back) * sgn
+							+ side * (hw + lat_margin - 0.35 + back) * sgn
 							+ Vector3.UP * float(row["dy"]),
 						g1 * TAU, "hull", tsc, (g3 - 0.5) * 0.9)
 

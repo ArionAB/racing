@@ -484,8 +484,13 @@ func snap_behind() -> void:
 	var fwd := -target.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()
+	# `eff_height()`, nu `height`: la o repunere INAUNTRUL unei caverne presetul
+	# de zona e deja activ, iar cota bruta e cea de AFARA (10 m, fata de 4,5 m
+	# in gatul de pe Cappadocia). Cu ea, camera se aseza dintr-un cadru in
+	# tavan si abia apoi cobora lin — adica repunerea sub pamant incepea cu
+	# exact cadrul plat pe care presetul exista sa-l previna.
 	global_position = target.global_position - fwd * distance \
-		+ Vector3.UP * height
+		+ Vector3.UP * eff_height()
 	# Aceeasi tinta ca in mers (prin _aim_point), altfel apare un salt de unghi
 	# de un cadru dupa fiecare repunere — versiunea veche omitea lead-ul.
 	_aim_dir = fwd

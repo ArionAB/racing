@@ -25,6 +25,15 @@ const CEIL_H2: float = 18.0
 ## y[0.00 +1.99]). Originea se pune deci la cota tavanului, iar nervurile si
 ## stalactitele atarna sub ea.
 const CEIL_TILE: float = 12.0
+## Gabaritul piesei de talus, pentru marja laterala din bucla de emitere.
+##
+## `hall_alcove` masoara 3.2 x 1.5 m in plan (AABB la scara 1), deci raza cea
+## mai mare pe care o poate ocupa cu yaw ALEATOR e semidiagonala,
+## sqrt(1.6^2 + 0.75^2) = 1.767 m. Cifra e derivata din piesa, nu aleasa: daca
+## modelul se schimba, se remasoara.
+const TALUS_HALF_DIAG: float = 1.767
+## Capatul de sus al jitterului de scara (`0.72 + 0.56 * g3`, cu g3 in [0,1)).
+const TALUS_SC_MAX: float = 1.28
 ## Coloanele: piesa are 5.44 m (masurat), sala are 16-18 m. Se scaleaza pe
 ## inaltimea salii — o coloana "sapata" se ingroasa la ambele capete, deci
 ## scalarea uniforma ramane citibila (spre deosebire de un fus clasic).
@@ -519,6 +528,8 @@ func _hall(at: Callable, emit: Callable, headroom: Callable, torch_light: Callab
 		{"back": 0.0, "sc": 0.58, "dy": -0.80},
 		{"back": -0.9, "sc": 0.34, "dy": -1.00},
 	]
+	# ...si `back` singur nu ajunge, fiindca se masoara de la ORIGINEA piesei,
+	# pe cand ce blocheaza masina e GABARITUL ei. Vezi `TALUS_HALF_DIAG`.
 	# Pasul DES, si de ce: primul incercat (3.4 m) a iesit pe captura o rana de
 	# bolovani razleti, nu un con — cu blocuri de ~2.9 m si pas de 3.4 raman
 	# rosturi prin care linia de imbinare se vede mai departe. La 1.9 m piesele
@@ -540,9 +551,25 @@ func _hall(at: Callable, emit: Callable, headroom: Callable, torch_light: Callab
 				var along := (g1 - 0.5) * 2.6
 				var back: float = float(row["back"]) + (g2 - 0.5) * 0.5
 				var sc: float = float(row["sc"]) * (0.72 + 0.56 * g3)
+				# MARJA LATERALA, derivata din gabaritul piesei.
+				#
+				# Cu yaw aleator, un bloc din randul gros se intinde
+				# `TALUS_HALF_DIAG * 0.90 * 1.28` = 2.03 m in jurul originii.
+				# Fara marja, originea randului gros cadea la `hw - 1.25` si
+				# corpul lui ajungea la `hw - 3.3`. Masurat pe pista livrata:
+				# 619 blocuri intrau in banda pe tot subteranul, median
+				# 1.1-1.5 m, maxim 3.89 m. Ala e „zidul invizibil" din primul
+				# tur condus de om (raport 2 sep 2026, punctul 6): nu un perete,
+				# ci un camp de bolovani prin care nu se trece.
+				#
+				# Comentariul de mai sus („randul fin ajunge chiar pe
+				# acostament") era corect despre ORIGINE si gresit despre corp —
+				# aceeasi capcana ca la prima varianta, doar in cealalta parte.
+				var lat_margin: float = TALUS_HALF_DIAG \
+					* float(row["sc"]) * TALUS_SC_MAX
 				emit.call(group, "grohotis%s" % tag, "hall_alcove",
 					c + (d["fw"] as Vector3) * along
-						+ side * (hw - 0.35 + back) * sgn
+						+ side * (hw + lat_margin - 0.35 + back) * sgn
 						+ Vector3.UP * float(row["dy"]),
 					g1 * TAU, "hull", sc, (g3 - 0.5) * 0.9)
 

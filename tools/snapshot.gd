@@ -328,7 +328,7 @@ func _ready() -> void:
 		if cave_view:
 			# Presetul de camera si intunericul zonei, aplicate MANUAL: vezi
 			# `cave_view` pentru de ce o captura din subteran fara ele minte.
-			var zone := _nearest_cave_zone(track, focus)
+			var zone := _nearest_cave_zone(track, focus, zoom_frac)
 			if zone != null:
 				var solved := ChaseCamera.solve_preset(
 					zone.height, zone.look_height, dist, look_ahead,
@@ -758,17 +758,30 @@ func _cutie_ecran(ab: AABB, cam: Camera3D) -> Rect2:
 ##
 ## Cauta pe TOT arborele pistei fiindca zonele stau grupate intr-un nod propriu
 ## in .tscn (ZoneCamera/...), nu direct sub radacina.
-func _nearest_cave_zone(track: Node, at: Vector3) -> CameraZone:
+func _nearest_cave_zone(track: Node, at: Vector3,
+		frac: float = -1.0) -> CameraZone:
 	var best: CameraZone = null
 	var best_d := INF
 	for node in track.find_children("*", "Area3D", true, false):
 		var z := node as CameraZone
 		if z == null:
 			continue
+		# INTERVALUL DE FRACTIE BATE DISTANTA, cand zona il declara. O zona pe
+		# interval (gatul, elicea) are cutia redusa la un marcaj de 2 m, deci
+		# „cea mai apropiata" ar alege-o aproape niciodata — si mai rau, pe
+		# elice distanta e ambigua prin constructie: cele doua ture trec prin
+		# acelasi loc in plan. Fractia raspunde exact, si e chiar criteriul pe
+		# care il foloseste zona in joc, deci captura si jocul nu pot diverge.
+		if z.frac_to > z.frac_from and frac >= 0.0:
+			var inside := (frac >= z.frac_from and frac <= z.frac_to) 				if z.frac_from <= z.frac_to 				else (frac >= z.frac_from or frac <= z.frac_to)
+			if inside:
+				return z
+			continue
 		var d := z.global_position.distance_to(at)
 		if d < best_d:
 			best_d = d
 			best = z
-	# Prea departe inseamna „nu esti in caverna": zonele au ~14 m adancime, deci
-	# peste 120 m e alt POI si presetul ar fi o minciuna in alta directie.
+	# Prea departe inseamna „nu esti in caverna": zonele pe cutie au ~14 m
+	# adancime, deci peste 120 m e alt POI si presetul ar fi o minciuna in alta
+	# directie.
 	return best if best_d <= 120.0 else null

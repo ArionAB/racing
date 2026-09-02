@@ -50,6 +50,31 @@ extends Area3D
 		size = value
 		_rebuild()
 
+@export_group("Intindere pe traseu")
+## Capetele intervalului de FRACTIE acoperit de zona, pe bucla principala.
+## `frac_to <= frac_from` = mod cutie: apartenenta o decide `Area3D`-ul.
+##
+## [b]De ce exista, si de ce nu ajunge cutia.[/b] O cutie orientata pe axe e
+## potrivita pentru o sala: un volum compact, cu pereti drepti. Un TUNEL care
+## coteste si o ELICE nu sunt asa. Ca sa acopere gatul dintre sali (care face
+## un arc de 60 m) cutia ar trebui ori umflata pana prinde si ce e in afara
+## lui, ori taiata in bucatele, fiecare aliniata de mana. Iar pe elice cutia nu
+## are cum sa fie corecta la NICIO dimensiune: spirala trece de doua ori prin
+## acelasi loc in plan, la 17 m diferenta pe verticala, si o cutie destul de
+## inalta cat sa prinda tura de jos prinde si tura de sus.
+##
+## Fractia nu are problema asta: e monotona pe traseu, deci separa cele doua
+## ture ale elicei fara ambiguitate. Se citeste din `Car.road_index`, pe care
+## masina il tine oricum la zi pentru tururi — zero cost in plus.
+##
+## Masurat pe Cappadocia (2 sep 2026, `tools/probe_camera_solid.gd`): cu numai
+## cele doua cutii de sala, camera intra in geometrie pe 0.718–0.746 (tavanul
+## gatului, la 9,6 m peste asfalt, cu camera la 10,0 m) si pe 0.790–0.880
+## (chiar carosabilul turei de deasupra elicei). Alea sunt cadrele de o singura
+## culoare din turul dezvoltatorului, la 1:04–1:05 si 1:10–1:22.
+@export var frac_from: float = 0.0
+@export var frac_to: float = 0.0
+
 @export_group("Preset")
 ## Inaltimea camerei inauntru (m). Implicit 10.0 afara.
 @export_range(2.0, 20.0, 0.1) var height: float = 6.5
@@ -299,11 +324,61 @@ func _first_world_env(n: Node) -> WorldEnvironment:
 
 
 func _player_inside() -> bool:
+	if frac_to > frac_from:
+		return _player_in_frac_span()
 	for body in get_overlapping_bodies():
 		var car := body as Car
 		if car != null and car.is_player:
 			return true
 	return false
+
+
+## Modul „interval de fractie": jucatorul e inauntru daca pozitia lui pe bucla
+## principala cade intre `frac_from` si `frac_to`.
+##
+## Se ia `Car.road_index` (tinut la zi in fiecare cadru pentru tururi) si se
+## trece prin `TrackRoute.frac_at`, adica exact indexul cu care se socotesc
+## turele — asa zona si clasamentul nu pot ajunge sa creada lucruri diferite
+## despre unde e masina.
+##
+## Masina care merge pe o SCURTATURA nu conteaza aici: `frac_at` o proiecteaza
+## oricum pe bucla principala, deci daca scurtatura trece prin caverna, zona o
+## prinde; daca ocoleste, `route` ei e alta si intervalul raportat e cel al
+## capetelor scurtaturii, ceea ce e chiar raspunsul corect.
+func _player_in_frac_span() -> bool:
+	var track := _track()
+	if track == null:
+		return false
+	# Masina se ia de la CAMERA, nu dintr-un grup de masini: camera e obiectul
+	# al carui cadru il decidem, iar `target` e prin definitie masina incadrata.
+	# Un grup de masini ar fi cerut o a doua sursa de adevar despre „cine e
+	# jucatorul", si exact acolo se strica lucrurile la schimbarea masinii din
+	# cursa (`race._swap_player_car`).
+	for node in get_tree().get_nodes_in_group(ChaseCamera.GROUP):
+		var cam := node as ChaseCamera
+		if cam == null or cam.target == null:
+			continue
+		var c := cam.target
+		var r := track.route_at(c.route)
+		if r == null:
+			continue
+		var f := r.frac_at(c.road_index)
+		# Intervalul care trece peste linia de start se scrie `0.95 -> 0.05`
+		# si se citeste ca reuniune, nu ca interval gol.
+		if frac_from <= frac_to:
+			return f >= frac_from and f <= frac_to
+		return f >= frac_from or f <= frac_to
+	return false
+
+
+func _track() -> Track:
+	var n := get_parent()
+	while n != null:
+		var t := n as Track
+		if t != null:
+			return t
+		n = n.get_parent()
+	return null
 
 
 ## Presetul ajunge la camera prin GRUP, nu prin referinta: zona e pusa in

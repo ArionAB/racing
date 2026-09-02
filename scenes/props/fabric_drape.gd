@@ -91,11 +91,28 @@ extends Node3D
 		seg_arch = clampi(v, 2, 16)
 		_rebuild()
 
+## Cat de departe se cauta solul pe verticala, la asezarea fiecarui varf.
+const GROUND_SEARCH_M: float = 40.0
+
 var _mi: MeshInstance3D
 
 
 func _ready() -> void:
 	_rebuild()
+	# A DOUA constructie, dupa ce lumea exista.
+	#
+	# `_ground_local` are nevoie de teren in spatiul fizic, iar la `_ready`-ul
+	# nodului pista inca se construieste (terenul se coase in `Track.rebuild`,
+	# care ruleaza pe radacina). Prima trecere iese deci cu solul la 0 —
+	# comportamentul vechi, panza in plan. Un cadru mai tarziu terenul e acolo
+	# si foaia se aseaza pe el.
+	#
+	# In editor (@tool) nu se asteapta: acolo `_rebuild` se cheama oricum la
+	# fiecare modificare de parametru.
+	if not Engine.is_editor_hint():
+		await get_tree().process_frame
+		await get_tree().process_frame
+		_rebuild()
 
 
 func _rebuild() -> void:
@@ -107,7 +124,21 @@ func _rebuild() -> void:
 		# fara owner: nu intra in .tscn, ca la corpurile din world_prop
 		add_child(_mi)
 	_mi.mesh = _build()
-	_mi.material_override = Palette.world_material()
+	# DUBLA FATA, si nu din gust: panza e o suprafata DESCHISA, de grosime
+	# zero — semi-cilindri cusuti pe Z, fara fund si fara spate. Cu materialul
+	# obisnuit al lumii (StandardMaterial3D, deci CULL_BACK implicit) fetele
+	# vazute din spate nu se deseneaza deloc, si atunci prin panza se vede
+	# soseaua. Exact asta a raportat dezvoltatorul la primul tur condus
+	# ("balonul cazut e TRANSPARENT", cadrul de la 55 s): din masina, care vine
+	# din spatele cupolelor, jumatate din foaie pur si simplu lipseste.
+	#
+	# Nota de la `apply_foliage_material` spune acelasi lucru de mai demult:
+	# "foile de 0 grosime dispar pe jumatate cu CULL_BACK". Panza e o foaie.
+	#
+	# ZERO materiale in plus: `foliage_material()` e un singleton duplicat FARA
+	# subresurse din `world_material()`, deci textura, masca si detaliul raman
+	# aceleasi obiecte pe GPU, si materialul e deja numarat de probe_decor.
+	_mi.material_override = Palette.foliage_material()
 
 
 ## Mesh-ul: `arches` semicercuri inlantuite pe Z, latite pe X.
@@ -154,7 +185,23 @@ func _build() -> ArrayMesh:
 			# nu se ascute.
 			var edge: float = clampf(minf(tu, 1.0 - tu) / 0.20, 0.0, 1.0)
 			var lat: float = smoothstep(0.0, 1.0, edge)
-			verts.append(Vector3(x, y * fall * lat, z - span * 0.5))
+			var lz: float = z - span * 0.5
+			# COTA TERENULUI SUB FIECARE VARF, nu cota nodului.
+			#
+			# Pana aici panza era construita intr-un plan local orizontal: toti
+			# vertecsii porneau de la y = 0 al nodului, si numai profilul de
+			# cupola ii ridica. Pe teren plat asta merge; pe coasta pe care sta
+			# de fapt POI E, nu. Masurat cu ProbeCappPanzaTalpa: 71-74% din
+			# vertecsi stateau la peste 30 cm deasupra solului, in medie 0.95 m
+			# si pana la 2.35 m — adica exact "panglici colorate care plutesc",
+			# cu pamant si umbre vizibile pe sub foaie. O panza prabusita nu
+			# pluteste; ea IA FORMA a ce e sub ea.
+			#
+			# Deci cota locala a solului intra ca baza, si profilul de cupola se
+			# adauga peste ea. Terenul se citeste o singura data pe varf, la
+			# construire (panza nu se misca), deci nu costa nimic pe cadru.
+			var base: float = _ground_local(x, lz)
+			verts.append(Vector3(x, base + y * fall * lat, lz))
 			var nx: float = 0.0
 			if edge > 0.0 and edge < 1.0:
 				# derivata lui smoothstep(edge) dupa x, cu semnul marginii
@@ -169,6 +216,22 @@ func _build() -> ArrayMesh:
 			var c: int = (j + 1) * w + i
 			var d: int = (j + 1) * w + i + 1
 			idx.append_array([a, c, b, b, c, d])
+			# SI FATA DE DEDESUBT. Panza e o suprafata deschisa de grosime
+			# zero: cu winding-ul intr-un singur sens, tot ce se vede din spate
+			# sau de dedesubt pur si simplu nu se deseneaza, si prin foaie se
+			# vede soseaua — "balonul cazut e TRANSPARENT" din raportul de la
+			# volan (cadrul de la 55 s).
+			#
+			# Se face in GEOMETRIE, nu prin `cull_mode`, dintr-un motiv masurat:
+			# materialul pus aici e rescris mai tarziu (WorldProp reaplica
+			# materialul lumii pe subarbore), deci un CULL_DISABLED pus pe
+			# material nu supravietuieste pana la randare — sonda l-a gasit
+			# inapoi pe CULL_BACK. Triunghiurile intoarse nu pot fi rescrise de
+			# nimeni.
+			#
+			# Costul: 288 -> 576 de triunghiuri pe panza, adica trei panze
+			# ajung cat un sfert de SphereMesh implicit. Zero materiale.
+			idx.append_array([a, b, c, b, d, c])
 	var arr := []
 	arr.resize(Mesh.ARRAY_MAX)
 	arr[Mesh.ARRAY_VERTEX] = verts
@@ -178,6 +241,36 @@ func _build() -> ArrayMesh:
 	var m := ArrayMesh.new()
 	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	return m
+
+
+## Cota terenului sub un punct din spatiul LOCAL al panzei, intoarsa tot in
+## spatiul local (adica: cu cat trebuie coborat/urcat varful fata de planul
+## nodului ca sa stea pe pamant).
+##
+## Se foloseste raycast pe lumea fizica: panza se construieste dupa ce terenul
+## si prop-urile exista, si asa foaia se aseaza si peste un bolovan, nu doar
+## peste campul de inaltimi. Daca raza nu gaseste nimic (panza construita
+## inainte de teren, sau in editor), se intoarce 0 — comportamentul dinainte.
+func _ground_local(lx: float, lz: float) -> float:
+	if not is_inside_tree():
+		return 0.0
+	var world := get_world_3d()
+	if world == null:
+		return 0.0
+	var space := world.direct_space_state
+	if space == null:
+		return 0.0
+	var w: Vector3 = global_transform * Vector3(lx, 0.0, lz)
+	var q := PhysicsRayQueryParameters3D.create(
+		w + Vector3.UP * GROUND_SEARCH_M, w + Vector3.DOWN * GROUND_SEARCH_M)
+	q.collide_with_areas = false
+	var hit := space.intersect_ray(q)
+	if hit.is_empty():
+		return 0.0
+	var gy: float = float(hit["position"].y)
+	# inapoi in local: doar diferenta pe verticala conteaza, nodul nu e rotit
+	# pe alta axa decat Y (vezi antetul).
+	return clampf(gy - global_position.y, -GROUND_SEARCH_M, GROUND_SEARCH_M)
 
 
 ## Ce trebuie sa poata verifica o sonda: cat din panza e fata de sus si cat e

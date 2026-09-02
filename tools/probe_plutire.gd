@@ -157,8 +157,8 @@ func _go() -> void:
 			var sol: float = float(hit["position"].y)
 			var gol: float = base.y - sol
 			if gol > MAX_GOL:
-				print("  %s: pluteste %.1f m (baza y=%.1f, sol y=%.1f)" % [
-					owner_nm, gol, base.y, sol])
+				print("  %s: pluteste %.1f m (baza y=%.1f, sol y=%.1f) | %s" % [
+					owner_nm, gol, base.y, sol, cale])
 				bad += 1
 	print("")
 	print("prop-uri verificate: %d | care plutesc: %d" % [checked, bad])

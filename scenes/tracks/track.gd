@@ -4125,6 +4125,55 @@ func _world_extent() -> float:
 	return clampf(span + margin, TERRAIN_MIN_SIZE, TERRAIN_MAX_SIZE)
 
 
+## CENTRUL panzei de teren: mijlocul CASETEI traseului, nu media punctelor.
+##
+## Diferenta a costat "gaura in lume" de pe Cappadocia (primul tur condus de
+## om, 2 sep 2026). Panza e un PATRAT dimensionat pe anvergura maxima plus
+## marja — si marja e proiectata simetric: 115 m de fiecare parte, exact zona
+## de racord a terenului (GROUND_FLAT_RADIUS 45 + GROUND_BLEND_LEN 70), ca
+## pista sa se termine in tarm si nu in faleza taiata. Comentariul de la
+## [constant TERRAIN_MIN_SIZE] spune fix asta.
+##
+## Dar originea se lua din [method _centroid], adica din MEDIA punctelor de pe
+## traseu. Media nu e mijlocul casetei decat pe un traseu cu punctele
+## distribuite uniform: unde bucla are un capat dens si unul rar, media aluneca
+## spre partea deasa si patratul iese descentrat. Masurat pe Track13: deriva
+## -40.8 m pe x, deci din cei 115 m de marja ramaneau 155.8 m la vest (irositi)
+## si 74.2 m la est. Iar estul e chiar cornisa de la fractia 0.33-0.37, unde
+## drumul sta pe creasta si privirea cade IN vale — acolo cei 74 m nu ajung, si
+## in cadru se vedea marginea panzei ca o scara de muchii taiate cu cer dincolo
+## (sonda: nicio raza nu mai gasea mesh dincolo de ~75 m lateral).
+##
+## Corectia nu costa niciun triunghi: aceeasi panza, doar asezata pe mijloc.
+## [method _centroid] ramane neatins — il folosesc orizontul, cerul si apa,
+## unde media chiar e ce trebuie.
+func _terrain_center() -> Vector3:
+	if baked.is_empty():
+		return _centroid()
+	# DOAR pe temele care au cerut-o, si asta e o decizie de risc, nu de gust.
+	#
+	# Corectia e generala si corecta pe hartie — pe Track01 deriva era +37.3 m,
+	# pe Track09 +43.1 m, si pe amandoua centrarea le aduce la 115 m simetrici.
+	# Dar mutarea panzei schimba cu cativa centimetri cotele terenului sub TOT
+	# decorul asezat de mana, iar prop-urile astea au fost puse pe suprafata de
+	# ACUM. Masurat cu ProbePlutire, in A/B determinist (aceeasi rulare de trei
+	# ori, cifre identice): Track01 33 -> 35 plutitori, Track09 137 -> 145.
+	# Cifrele de baza (33 si 137) sunt dinainte si n-au legatura cu treaba asta;
+	# ce adaug eu sunt 2 si 8.
+	#
+	# Pe Cappadocia castigul e o gaura in lume reparata; pe celelalte n-ar
+	# repara nimic vizibil si ar strica zece asezari. Cand le vine randul, se
+	# scoate conditia si se reaseaza decorul in aceeasi trecere.
+	if theme_decor != "cappadocia":
+		return _centroid()
+	var lo := baked[0]
+	var hi := baked[0]
+	for p in baked:
+		lo = lo.min(p)
+		hi = hi.max(p)
+	return Vector3((lo.x + hi.x) * 0.5, 0.0, (lo.z + hi.z) * 0.5)
+
+
 ## Cat de sus fata de nivelul marii tine plaja, si pe cati metri se pierde in
 ## vegetatie. Vezi "inland_tint" din themes().
 const BEACH_SAND_TOP: float = 1.4
@@ -4150,7 +4199,7 @@ func _terrain_grid() -> void:
 	var size := _world_extent()
 	_terr_cells = int(round(size / TERRAIN_CELL))
 	_terr_step = size / float(_terr_cells)
-	_terr_origin = _centroid() - Vector3(size * 0.5, 0, size * 0.5)
+	_terr_origin = _terrain_center() - Vector3(size * 0.5, 0, size * 0.5)
 	_terr_heights = PackedFloat32Array()
 	_terr_heights.resize((_terr_cells + 1) * (_terr_cells + 1))
 	for gz in _terr_cells + 1:

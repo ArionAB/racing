@@ -105,7 +105,7 @@ frac_end = 0.40
 side = 1.0
 far_wall = false
 lip_offset_m = 0.2
-depth_m = 30.0
+depth_m = 52.0
 step_m = 4.0
 bands = 9
 band_relief_m = 0.9
@@ -4320,7 +4320,7 @@ terrace_shade = 0.26
 transform = Transform3D(-0.824389, 0, -0.566023, 0, 1, 0, 0.566023, 0, -0.824389, -88.178658, 31.521866, 16.646290)
 
 [node name="hornCazut48" parent="DecorManual/ZoneB_PadureaHornurilor" instance=ExtResource("26_crk_b")]
-transform = Transform3D(0.803165, 0, -0.307452, 0, 0.860000, 0, 0.307452, 0, 0.803165, 75.652206, 28.578552, 76.240540)
+transform = Transform3D(0.803165, 0, -0.307452, 0, 0.860000, 0, 0.307452, 0, 0.803165, 75.652206, 24.578552, 76.240540)
 talus_spread = 0.132
 talus_rocks = 20
 talus_rock_max = 0.454194

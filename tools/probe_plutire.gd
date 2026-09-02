@@ -41,7 +41,11 @@ const ZIDURI := ["ZidulValeiRosii"]
 ## Tot lista explicita ramane, si tot cere motiv de LUME: ce se adauga aici
 ## trebuie sa fie structura, nu un prop care se intampla sa pluteasca.
 const STRUCTURI_CALE := [
-	"F1_Gura", "F2_Sala1", "F3_Gat", "F4_Sala2",
+	# F5_Ocol e galeria ocolului pietrei (ruta a doua, brief §2 POI F):
+	# aceeasi clasa de structura ca salile — tavan si pereti care prin
+	# constructie NU ating solul. Fara exceptia asta, sonda a iesit rosie pe
+	# main cu 55 de "plutiri" care erau toate lespezi de tavan la 7.6-9.6 m.
+	"F1_Gura", "F2_Sala1", "F3_Gat", "F4_Sala2", "F5_Ocol",
 	"Chei de scara", "Strate", "StancaCoroana",
 	# Peretii si grohotisul canionului (POI D) si interiorul stancii goale
 	# (POI G): tot stive de module de faleza, ca `ZidulValeiRosii`.

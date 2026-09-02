@@ -159,8 +159,22 @@ def _profile(kind, height, r_base, r_neck, seed, steps=7):
 
       "spire"   zvelt, umar jos si gat lung — silueta ascutita
       "tent"    indesat, aproape drept de la poala la varf — cortul lat
-      "belly"   burta la mijloc (r > r_base pe la 0.22H), apoi strangulare —
-                asta da subtaierea pe care referinta o are si noi n-o aveam
+      "belly"   poala plina care se strange TARZIU: raza sta aproape de r_base
+                pana pe la 0.40H, apoi cade repede. Da masa jos si gat scurt.
+
+                A fost, pana in sep 2026, (0.0, 0.88) -> (0.22, 1.02), adica
+                raza CRESTEA peste r_base la 22% din inaltime. Intentia era
+                subtaierea pe care o are referinta, dar la inaltimea ochiului
+                (10 m) o burta deasupra bazei nu citeste ca eroziune, ci ca UMAR
+                — criticul orb a numit piesa „stupa" doua runde la rand, si
+                masuratoarea de profil confirma: era singurul horn din kit cu
+                urcare (0.93 -> 1.00 la 20% din inaltime).
+
+                Masurat pe referinta (`docs/track_briefs/img/v3_crops`), masa
+                siluetelor e cea mai LATA jos si se ingusteaza in sus. Deci
+                subtaierea reala e la POALA, sub linia unde se uita ochiul, nu
+                un umar peste ea. Cine vrea subtaiere adevarata o face din
+                `tuff_body` (caneluri + inclinare), nu din profil.
       "stub"    ciot: se opreste scurt si gros, fara gat
       "waist"   talie stransa la mijloc si evazare din nou spre palarie
 
@@ -172,7 +186,7 @@ def _profile(kind, height, r_base, r_neck, seed, steps=7):
         # (t, raza ca fractie din r_base) — r_neck da capatul de sus
         "spire": [(0.0, 1.00), (0.18, 0.86), (0.42, 0.62), (0.68, 0.38), (1.0, 0.0)],
         "tent":  [(0.0, 1.00), (0.30, 0.90), (0.60, 0.72), (0.85, 0.44), (1.0, 0.0)],
-        "belly": [(0.0, 0.88), (0.22, 1.02), (0.45, 0.96), (0.72, 0.52), (1.0, 0.0)],
+        "belly": [(0.0, 1.00), (0.16, 0.97), (0.40, 0.88), (0.72, 0.48), (1.0, 0.0)],
         "stub":  [(0.0, 1.00), (0.35, 0.93), (0.70, 0.80), (0.92, 0.66), (1.0, 0.0)],
         "waist": [(0.0, 1.00), (0.26, 0.74), (0.52, 0.60), (0.78, 0.66), (1.0, 0.0)],
     }[kind]

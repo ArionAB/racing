@@ -411,11 +411,22 @@ def build_cave_entrance():
     # 0.653-0.657, si pragul frontal ajungea la 0.47 m (peste limita de 0.3 m
     # din `suprafete-cu-goluri-si-praguri`). Molozul se aseaza deci cu TALPA la
     # zero, si atunci `origin="base"` nu mai are ce ridica.
+    #
+    # Si al doilea motiv, care e cel care chiar inchidea drumul: molozul se
+    # imprastia pe -6.3..+6.3, iar GOLUL e OW=10 m, adica -5..+5. Deci sase
+    # bolovani stateau taman in deschidere, pe unde trec masinile. Masurat cu
+    # ProbeLaneGap: 0.00 m liber pe toti cei 16 m de latime — nu "ingust", ZID.
+    # Molozul ramane (portalul are nevoie de el ca sa nu arate taiat cu cutitul)
+    # dar sta doar pe UMERI, in afara golului, cu o garda de o jumatate de piesa
+    # ca sa nu intre nici cu marginea.
     rand = _lcg(4409)
     for k in range(6):
         s = 0.4 + rand() * 0.6
-        b.rock((-W * 0.42 + W * 0.84 * rand(), D * 0.5 + 0.4 + rand() * 0.7,
-                s * 0.5),
+        # jumatatea stanga sau dreapta, in afara golului
+        side = -1.0 if k % 2 == 0 else 1.0
+        x0 = OW * 0.5 + s * 1.0          # marginea golului + raza piesei
+        x = side * (x0 + rand() * (W * 0.5 - x0))
+        b.rock((x, D * 0.5 + 0.4 + rand() * 0.7, s * 0.5),
                (s * 2.0, s * 1.7, s), TUFF_SH, seed=int(rand() * 900),
                segments=6, rings=3, taper=0.50)
     return b.to_object("Cave_Entrance")

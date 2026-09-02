@@ -51,6 +51,27 @@ const DRIVABLE := [
 	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails", "TunnelShell",
 	"Ramp", "ChannelKicker", "FlyoffRamp", "HummockBody",
 	"IceSheet",
+	# TERENUL. E podeaua de sub tot, deci contactul cu el nu e blocaj — dar
+	# aparea la aproape fiecare proba si de aceea sonda iesea rosie pe TOATE
+	# pistele: 393 din 414 raportari pe Alpi erau el.
+	#
+	# Motivul e o decizie deliberata din `track.gd`: forma lui e un trimesh cu
+	# `backface_collision = true`, fiindca winding-ul mesh-ului de teren e
+	# arbitrar. Un trimesh concav dublu-fatetat raporteaza suprapunere din
+	# AMANDOUA partile, deci cutia care sta CALARE pe suprafata se suprapune cu
+	# el chiar si cand terenul e exact podeaua pe care calci. O raza trasa de
+	# sus in jos nu-l loveste deloc (porneste dinauntru) — confirmarea ca nu e
+	# un deal peste drum.
+	"TerrainBody",
+	# Suprafetele de rulare ale hazardelor: se CALCA pe ele.
+	#   `WaterFloor` / `Plates` — campul de gheata de pe Baikal
+	#     (`ice_field_hazard.gd`): placile pe care treci si apa de sub ele.
+	#   `ServiceRamp` / `Deck` / `Span` / `Gate` / `Load` / `Beam` — travee si
+	#     rampe de pe Chongqing (`rotating_span_hazard.gd`). Lista asta era deja
+	#     scrisa, corect, in `tools/probe_cq_drive.gd`; sonda de fata n-o stia,
+	#     si de aceea raporta 205 blocaje pe o pista care se conduce.
+	"WaterFloor", "Plates",
+	"ServiceRamp", "Deck", "Span", "Gate", "Load", "Beam",
 ]
 
 

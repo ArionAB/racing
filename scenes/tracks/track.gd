@@ -11610,7 +11610,19 @@ func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 		return false
 	if route != 0 or _width_profile().is_empty():
 		return r.is_on_road(index, pos)
-	return r.lateral_distance(index, pos) <= width_at_index(index) + 0.5
+	# Si LATERAL, si VERTICAL — pe AMANDOUA ramurile. Ramura cu profil de latime
+	# a fost scrisa inainte de pistele care trec peste ele insele si compara doar
+	# in plan; cand a venit pasajul de la Chongqing, testul vertical a intrat in
+	# TrackRoute.is_on_road, adica numai pe ramura CEALALTA. Pe un pasaj drept nu
+	# s-a vazut (etajele se suprapun cateva zeci de metri). Pe o elice se vede:
+	# masurat cu ProbeHelix, un punct fix deasupra spirei de jos, la +17.33 m,
+	# raspundea "sunt pe drumul asta" — deci checkpoint-ul se innoia pe spira de
+	# jos in timp ce masina urca pe cea de sus, si repunerea urmatoare era un
+	# cadou de o tura. Track10/11/12 declara toate custom_width_segments, deci
+	# toate trei rulau ramura oarba pe verticala.
+	if r.lateral_distance(index, pos) > width_at_index(index) + 0.5:
+		return false
+	return not r.is_other_level(index, pos)
 
 func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
 		route: int = 0) -> Vector3:

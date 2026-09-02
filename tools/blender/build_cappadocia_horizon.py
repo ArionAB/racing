@@ -16,10 +16,39 @@ inelul de fundal < `fog_end` < `FAR_PLANE` (380 m). Brief §4 pune `fog_end` la
   - dincolo de 300 m nu se pune nimic. Un asset la 320 m e munca aruncata.
 
 Piesele de fundal sunt **siluete**, deci regula lor e inversa fata de restul
-kitului: zero detaliu care nu se vede in profil, si numar de segmente MIC —
-`erciyes` are 12 segmente pe 3.900 m de munte, fiindca la 300 m un segment
-subintinde sub un pixel. Ce conteaza in schimb e **profilul**: linia de creasta
-si linia zapezii. Alea se citesc.
+kitului: zero detaliu care nu se vede in profil. Ce conteaza e **profilul**:
+linia de creasta si linia zapezii. Alea se citesc.
+
+**Numarul de segmente NU se alege "mic fiindca e departe".** Comentariul de
+aici a spus pana in runda 34 ca "la 300 m un segment subintinde sub un pixel",
+si de la cifra aia au iesit 12 segmente si UV-uri colapsate. Cifra e falsa, si
+a costat 13 runde de reglaje de lumina pe un obiect care nu avea geometrie.
+Socoteala, cu camera reala (ChaseCamera.BASE_FOV = 68 VERTICAL, 1280x720, deci
+fov orizontal 100.3 grade => 12.76 px/grad pe orizontala, 10.59 px/grad pe
+verticala):
+
+    erciyes, H=180 R=145, la scara 0.95-1.35 si 190-290 m (`horizon_rings`)
+      inaltime pe ecran ..... 375-480 px din 720   (52-67% din cadru)
+      UN segment din 12 ..... 16.9-23.8 grade = 216-304 PIXELI
+
+Nu sub un pixel: **peste doua sute**. Un segment e a 12-a parte dintr-un con cu
+raza de 145 m, nu un detaliu mic pe ceva departat.
+
+Criteriul corect e eroarea de SILUETA (sagitta): un con cu n laturi se abate de
+la cerc cu R*(1-cos(pi/n)). La 12 segmente asta e 18-20 px de contur zimtat; la
+32 de segmente scade sub 3 px, adica sub pragul vizibil. Al doilea criteriu e
+UMBRIREA: cu 12 segmente flancul vizibil are 6 fatete, deci gradientul de la
+lumina la umbra are 6 trepte de 30 grade — plati. La 32 sunt 16 trepte de 11
+grade.
+
+DAR — si de asta erciyes.glb n-a fost regenerat in runda 34 — geometria nu e
+constrangerea activa pe pista asta. Masurat cu tools/ProbeMunte.tscn din cadrul
+de sofer la POI B: TOTI pixelii de Erciyes din cadru sunt intre 260 si 420 m,
+adica 87-100% inghititi de ceata (`fog_end` 300), iar 24 din 254 de raze cad
+dincolo de ChaseCamera.FAR_PLANE (380 m). Vezi memoria
+`efecte-de-fundal-cote-legate`: inel < fog_end < FAR_PLANE. Pe Cappadocia lantul
+e rupt, si pana nu se repara, orice segment in plus se randeaza in aceeasi
+culoare de ceata.
 
 `balloon_far` e o piesa de **MultiMesh** (30-40 in vale + 10 sus, brief §5.4),
 deci trebuie sa fie sub 100 tri: forma de balon fara cusaturi, fara cos, un
@@ -59,6 +88,20 @@ B_RED, B_BLUE, B_YELLOW = CAR_RED, CAR_BLUE, CAR_YELLOW
 
 def build_uchisar_castle():
     """Stanca-castel de la Uchisar: 60 m, gaurita ca un fagure.
+
+    ATENTIE (runda 34): piesa asta e construita si exportata, dar **nu e
+    instantiata nicaieri**. Zero referinte la `uchisar_castle` in .gd/.tscn/.tres
+    din tot repo-ul: nu e in `horizon_picks` (alea cer doar "Erciyes"), nu e in
+    DecorManual-ul din Track13. 3.986 de triunghiuri care nu ajung pe ecran.
+    Ori se aseaza pe platou (brief §5.4 o cere ca ecou de fundal al gimmick-ului
+    `hollow_rock`), ori se scoate din build.
+
+    Socoteala ei de rezolutie, spre deosebire de cea a lui erciyes, e CORECTA:
+    57 m la 200-250 m subintinde 12.8-15.9 grade = 136-168 px = 19-23% din
+    inaltimea cadrului, adica exact "o cincime" cat zice comentariul de sus.
+    Cu segments=10/9/9 pe raza 25 m, un segment are 46-51 px — mare, dar de
+    zece ori mai mic decat cei 216-304 px ai lui erciyes. Defectul de la linia
+    20 NU se repeta aici.
 
     E ecoul de fundal al gimmick-ului (`hollow_rock`): jucatorul vede de pe
     platou o stanca IDENTICA ca tip la orizont, si intelege ca aia din care a

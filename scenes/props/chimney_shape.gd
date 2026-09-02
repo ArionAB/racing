@@ -75,6 +75,10 @@ const TALUS_SLOT: int = 8
 ## rocii, are culoarea umbrei, iar umbra sub cer senin bate in albastru. Acelasi
 ## motiv pentru care umbrele din referinta nu sunt gri-maro.
 const DOOR_DARK_SLOT: int = 26
+## Cat din arcul unui rand de ferestre trebuie sa aiba perete ca randul sa se
+## deseneze. Sub atat hornul e creasta rupta la cota aia, si orice deschidere
+## pusa acolo iese in cer pe langa silueta — vezi `_wall_coverage`.
+const WINDOW_WALL_MIN: float = 0.70
 
 ## Cat de intunecata e poala de grohotis fata de corpul hornului. Vezi
 ## `TALUS_SLOT` pentru de ce separarea NU se face din culoare.
@@ -2308,6 +2312,21 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			var rr := _radius_at(src, cx, cz, y0, h, rf)
 			if rr <= 0.001:
 				continue
+			# PERETE INTREG, ALTFEL NICIUN RAND (runda 35). Fereastra
+			# plutitoare din captura nu fugise de peretele ei: statea corect pe
+			# raza citita, dar pe o cota la care hornul nu mai ARE perete, doar
+			# o creasta zdrentuita. Masurat pe hornUmbra8, raza pe azimut fin:
+			#   cota 0.36: 3.2 3.2 2.8 3.1 ... 2.4   (perete continuu)
+			#   cota 0.83: 1.5 1.6 1.6 1.2 0 0 0 ... (nu mai e nimic)
+			# iar randul de sus cadea la 0.72-0.83. Toate testele de asezare
+			# treceau — golurile masurau -0.10 m, adica ingropate cum trebuie —
+			# si totusi doua treimi din rama ieseau in cer, fiindca silueta se
+			# termina langa fereastra. Deci nu se muta deschiderea, se renunta
+			# la randul care n-are pe ce sta.
+			var acoperire := _wall_coverage(src, cx, cz, y0, h, rf,
+				deg_to_rad(window_dir_deg), deg_to_rad(window_arc_deg) * 0.5)
+			if acoperire < WINDOW_WALL_MIN:
+				continue
 			# Randurile de sus au mai putine ferestre: hornul se ingusteaza, si
 			# tot atatea deschideri pe o circumferinta mai mica s-ar fi
 			# suprapus intr-un gratar continuu. Un gratar citeste a aerisire
@@ -2418,6 +2437,46 @@ func _clear_of_lips(frac: float, span: float,
 		# felia lui `_radius_at` ramane pe o singura parte a pragului.
 		return clampf((lo + hi) * 0.5 - span * 0.5, 0.0, 0.97)
 	return clampf(frac, lo + pad, hi - span - pad)
+
+
+## CAT DE INTREG e peretele intr-un sector, la o cota. Intoarce fractiunea de
+## directii pe care exista piatra.
+##
+## De ce nu se poate face cu `_radius_at` (runda 35). Aceea foloseste un sector
+## de +-35 de grade SI mediana SI o fereastra de cota care se largeste pana
+## gaseste ceva. Toate trei netezesc exact ce ne intereseaza: o fereastra de un
+## metru pe un horn de trei metri raza incape intreaga in sector, deci citirea
+## "la marginea ferestrei" intoarce practic acelasi numar ca la centru (masurat
+## pe hornUmbra8: raport 1.00 pe ambele margini, pe un perete care de fapt
+## lipsea). Un test de margine construit pe `_radius_at` e orb prin constructie.
+##
+## Aici, dimpotriva: sector INGUST, fara mediana, fara largire pe cota. Daca la
+## cota ceruta nu sunt vertecsi pe directia ceruta, raspunsul e "nu e perete" —
+## fiindca chiar asta vede si camera.
+func _wall_coverage(src: Mesh, cx: float, cz: float, y0: float, h: float,
+		frac: float, azim: float, half_arc: float) -> float:
+	var probe := 9
+	var hit := 0
+	for i in probe:
+		var a := azim + lerpf(-half_arc, half_arc, float(i) / float(probe - 1))
+		var found := false
+		for sfc in src.get_surface_count():
+			if found:
+				break
+			var arrays := src.surface_get_arrays(sfc)
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				if absf((v.y - y0) / h - frac) >= 0.05:
+					continue
+				var da := absf(fposmod(
+					atan2(v.z - cz, v.x - cx) - a + PI, TAU) - PI)
+				if da > 0.09:
+					continue
+				found = true
+				break
+		if found:
+			hit += 1
+	return float(hit) / float(probe)
 
 
 ## Raza hornului LA O COTA DATA. Se ia mediana razelor dintr-o felie subtire in

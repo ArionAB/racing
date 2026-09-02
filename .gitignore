@@ -37,3 +37,14 @@ p[AB].png
 [AB]_*.png
 stamp_*.png
 _*.png
+
+# Capturi de lucru si planse de comparatie. Se fac cu zecile in fiecare runda de
+# arta si nu sunt livrabile: gauntlet-ul Cappadocia a lasat 170 de fisiere si
+# 37 MB in repo, la o tinta de build sub 100 MB. Capturile care CHIAR conteaza
+# stau in docs/ (referinte, crop-uri de brief) sau in assets/.
+/zz/
+/*.png
+/*.png.import
+/.??*.png
+/.??*.png.import
+snapshots/

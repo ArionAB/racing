@@ -1838,7 +1838,7 @@ transform = Transform3D(-0.387947, 0, 1.13556, 0, 1.2, 0, -1.13556, 0, -0.387947
 metadata/coliziune = "none"
 
 [node name="siluetaS239" parent="DecorManual/8) Fundal" unique_id=385479345 instance=ExtResource("37_towerb")]
-transform = Transform3D(-0.949276, 0, 0.448749, 0, 1.05, 0, -0.448749, 0, -0.949276, 210.26457, 12.828353, 342.5756)
+transform = Transform3D(-0.6743969, 0, 0.80479145, 0, 1.0499998, 0, -0.80479145, 0, -0.6743969, 210.26457, 12.828353, 342.5756)
 metadata/coliziune = "none"
 
 [node name="siluetaS240" parent="DecorManual/8) Fundal" unique_id=456155614 instance=ExtResource("38_towerc")]
@@ -2060,7 +2060,7 @@ transform = Transform3D(-0.800889, 0, -0.28474, 0, 0.85, 0, 0.28474, 0, -0.80088
 metadata/coliziune = "none"
 
 [node name="turn46" parent="DecorManual" unique_id=83696085 instance=ExtResource("24_tower")]
-transform = Transform3D(-1.076925, 0, 0.403401, 0, 1.15, 0, -0.403401, 0, -1.076925, -273.24365, 13.148353, 285.43353)
+transform = Transform3D(1.0384212, 0, 0.49414727, 0, 1.15, 0, -0.49414727, 0, 1.0384212, -273.24365, 13.148353, 285.43353)
 metadata/coliziune = "none"
 
 [node name="turn47" parent="DecorManual" unique_id=441286607 instance=ExtResource("24_tower")]
@@ -2080,19 +2080,19 @@ transform = Transform3D(1.149837, 0, -0.019336, 0, 1.15, 0, 0.019336, 0, 1.14983
 metadata/coliziune = "none"
 
 [node name="turn51" parent="DecorManual" unique_id=903659345 instance=ExtResource("24_tower")]
-transform = Transform3D(0.527732, 0, -0.459891, 0, 0.7, 0, 0.459891, 0, 0.527732, 63.11051, 13.148353, 349.7372)
+transform = Transform3D(0.6776062, 0, 0.1756435, 0, 0.7, 0, -0.1756435, 0, 0.6776062, 63.11051, 13.148353, 349.7372)
 metadata/coliziune = "none"
 
 [node name="turn52" parent="DecorManual" unique_id=1224664226 instance=ExtResource("24_tower")]
-transform = Transform3D(0.153374, 0, -0.988168, 0, 1, 0, 0.988168, 0, 0.153374, 134.5106, 13.148353, 346.12317)
+transform = Transform3D(-0.42426443, 0, 0.9055382, 0, 1, 0, -0.9055382, 0, -0.42426443, 134.5106, 13.148353, 346.12317)
 metadata/coliziune = "none"
 
 [node name="turn53" parent="DecorManual" unique_id=115450260 instance=ExtResource("24_tower")]
-transform = Transform3D(-0.441395, 0, -0.726409, 0, 0.85, 0, 0.726409, 0, -0.441395, 209.5106, 13.148353, 336.62317)
+transform = Transform3D(-0.43807372, 0, 0.7284168, 0, 0.84999996, 0, -0.7284168, 0, -0.43807372, 209.5106, 13.148353, 336.62317)
 metadata/coliziune = "none"
 
 [node name="turn54" parent="DecorManual" unique_id=2020279099 instance=ExtResource("24_tower")]
-transform = Transform3D(-1.08988, 0, -0.366963, 0, 1.15, 0, 0.366963, 0, -1.08988, 285.38138, 13.148353, 318.56787)
+transform = Transform3D(0.10170743, 0, 1.1454936, 0, 1.15, 0, -1.1454936, 0, 0.10170743, 285.38138, 13.148353, 318.56787)
 metadata/coliziune = "none"
 
 [node name="turn55" parent="DecorManual" unique_id=54475062 instance=ExtResource("24_tower")]

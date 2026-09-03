@@ -500,6 +500,26 @@ const ARCH_UV_MODELS := ["church_arch"]
 ## (`ground_tint`), plus SAND_SHADOW (2) pentru partile care trebuie sa ramana
 ## mai INCHISE decat restul: fara o a doua valoare coaja ar iesi o silueta plata
 ## de o singura culoare, si tot din verdict venea „culori plate".
+## Rescrieri de sloturi PER GRUP de decor manual, care bat pe cele per model.
+##
+## De ce: `hall_alcove` primeste mai jos o rescriere gandita pentru FIRIDELE
+## din peretele stancii goale (POI G) — corpul firidei pe ASPHALT_EDGE, gri
+## spalat. Dar aceeasi piesa e si zidul oraselului subteran (POI F, 1300 de
+## bucati in F1-F5), desenat in kit pe tuf umbrit (2), stanca bruna (4) si
+## rugina (10) — adica exact piatra calda de sub torte din referinta
+## (`v3_crops/F_underground.png`). Rescrierea globala a facut salile gri ca o
+## parcare: reprosul „orasul subteran arata industrial" din finding_ramase
+## (3 sep 2026). Un dictionar gol inseamna „lasa piesa cum vine din kit".
+##
+## Grupul e copilul direct al nodului DecorManual sub care sta piesa.
+const SLOT_REMAP_BY_GROUP := {
+	"F1_Gura": {"hall_alcove": {}},
+	"F2_Sala1": {"hall_alcove": {}},
+	"F3_Gat": {"hall_alcove": {}},
+	"F4_Sala2": {"hall_alcove": {}},
+	"F5_Ocol": {"hall_alcove": {}},
+}
+
 const SLOT_REMAP_BY_MODEL := {
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
@@ -634,9 +654,16 @@ func _remap_model_slots() -> void:
 	_collect_models(self, models)
 	for model in models:
 		var stem := model.scene_file_path.get_file().get_basename()
-		if not SLOT_REMAP_BY_MODEL.has(stem):
+		var group := _group_of(model)
+		var remap: Dictionary
+		if SLOT_REMAP_BY_GROUP.has(group) and (SLOT_REMAP_BY_GROUP[group] as Dictionary).has(stem):
+			remap = SLOT_REMAP_BY_GROUP[group][stem]
+		elif SLOT_REMAP_BY_MODEL.has(stem):
+			remap = SLOT_REMAP_BY_MODEL[stem]
+		else:
 			continue
-		var remap: Dictionary = SLOT_REMAP_BY_MODEL[stem]
+		if remap.is_empty():
+			continue
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
 			var node: Node = stack.pop_back()
@@ -646,6 +673,15 @@ func _remap_model_slots() -> void:
 			if mi == null or mi.mesh == null:
 				continue
 			mi.mesh = _mesh_with_slots_moved(mi.mesh, remap)
+
+
+## Numele grupului de decor manual (copilul direct al acestui nod) in care sta
+## `node`; "" daca nodul e chiar copil direct sau in afara arborelui.
+func _group_of(node: Node) -> String:
+	var n := node
+	while n != null and n.get_parent() != self:
+		n = n.get_parent()
+	return String(n.name) if n != null and n != self else ""
 
 
 ## Copia unui mesh cu UV-urile mutate pe alte sloturi de atlas.

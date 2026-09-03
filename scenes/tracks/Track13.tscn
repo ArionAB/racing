@@ -14287,16 +14287,8 @@ metadata/coliziune = "hull"
 transform = Transform3D(0.470088, 0.000000, -0.932331, 0.000000, 1.000000, 0.000000, 1.212030, 0.000000, 0.361606, -240.995848, 13.620702, -169.511141)
 metadata/coliziune = "mesh"
 
-[node name="arcgura_1" parent="DecorManual/F1_Gura" instance=ExtResource("hall_arch")]
-transform = Transform3D(0.415847, 0.000000, -1.072181, 0.000000, 1.150000, 0.000000, 1.072181, 0.000000, 0.415847, -248.268030, 13.620000, -166.690614)
-metadata/coliziune = "mesh"
-
-[node name="arcgura_2" parent="DecorManual/F1_Gura" instance=ExtResource("hall_arch")]
-transform = Transform3D(0.506248, 0.000000, -1.305263, 0.000000, 1.400000, 0.000000, 1.305263, 0.000000, 0.506248, -252.929685, 13.580000, -164.882584)
-metadata/coliziune = "mesh"
-
 [node name="focGuraInt_1" type="OmniLight3D" parent="DecorManual/F1_Gura"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -247.335699, 17.150702, -167.052220)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -248.734195, 17.650702, -166.509811)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.00
 omni_range = 12.0
@@ -14308,7 +14300,7 @@ distance_fade_begin = 70.0
 distance_fade_length = 25.0
 
 [node name="focGuraInt_2" type="OmniLight3D" parent="DecorManual/F1_Gura"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -251.997354, 17.650702, -165.244190)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -254.328181, 17.650702, -164.340175)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.00
 omni_range = 12.0
@@ -14335,7 +14327,7 @@ metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="focCoridor_3" type="OmniLight3D" parent="DecorManual/F1_Gura"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -222.031095, 16.580000, -170.056266)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -210.258921, 16.690000, -174.369610)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.00
 omni_range = 12.0
@@ -14352,7 +14344,7 @@ metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="focCoridor_4" type="OmniLight3D" parent="DecorManual/F1_Gura"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -226.688905, 16.580000, -181.763734)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.281079, 16.690000, -186.310390)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.00
 omni_range = 12.0
@@ -14372,6 +14364,138 @@ metadata/lumina = "30|4.5|#FFB061"
 transform = Transform3D(-1.405719, 0.000000, -0.523406, 0.000000, 1.500000, 0.000000, 0.523406, 0.000000, -1.405719, -239.048305, 13.700000, -176.984020)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaGura_1" parent="DecorManual/F1_Gura" instance=ExtResource("hall_column")]
+transform = Transform3D(-0.039288, 0.000000, -1.249382, 0.000000, 1.250000, 0.000000, 1.249382, 0.000000, -0.039288, -249.216910, 13.580000, -159.458075)
+metadata/coliziune = "hull"
+
+[node name="coloanaGura_2" parent="DecorManual/F1_Gura" instance=ExtResource("hall_column")]
+transform = Transform3D(-0.524338, 0.000000, -1.134711, 0.000000, 1.250000, 0.000000, 1.134711, 0.000000, -0.524338, -253.845466, 13.580000, -171.391911)
+metadata/coliziune = "hull"
+
+[node name="coloanaGura_3" parent="DecorManual/F1_Gura" instance=ExtResource("hall_column")]
+transform = Transform3D(-0.926022, 0.000000, -0.839632, 0.000000, 1.250000, 0.000000, 0.839632, 0.000000, -0.926022, -252.946234, 13.580000, -158.011651)
+metadata/coliziune = "hull"
+
+[node name="coloanaGura_4" parent="DecorManual/F1_Gura" instance=ExtResource("hall_column")]
+transform = Transform3D(-1.180479, 0.000000, -0.411060, 0.000000, 1.250000, 0.000000, 0.411060, 0.000000, -1.180479, -257.574790, 13.580000, -169.945487)
+metadata/coliziune = "hull"
+
+[node name="coloanaGura_5" parent="DecorManual/F1_Gura" instance=ExtResource("hall_column")]
+transform = Transform3D(-1.247250, 0.000000, 0.082867, 0.000000, 1.250000, 0.000000, -0.082867, 0.000000, -1.247250, -256.675558, 13.580000, -156.565227)
+metadata/coliziune = "hull"
+
+[node name="coloanaGura_6" parent="DecorManual/F1_Gura" instance=ExtResource("hall_column")]
+transform = Transform3D(-1.115721, 0.000000, 0.563619, 0.000000, 1.250000, 0.000000, -0.563619, 0.000000, -1.115721, -261.304114, 13.580000, -168.499063)
+metadata/coliziune = "hull"
+
+[node name="flacaraGura_1" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(1.398497, 0.000000, 0.542410, 0.000000, 1.500000, 0.000000, -0.542410, 0.000000, 1.398497, -248.246677, 13.580000, -161.657768)
+metadata/coliziune = "none"
+
+[node name="flacaraGura_2" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(1.398497, 0.000000, 0.542410, 0.000000, 1.500000, 0.000000, -0.542410, 0.000000, 1.398497, -251.344281, 13.580000, -160.241841)
+metadata/coliziune = "none"
+
+[node name="flacaraGura_3" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(-1.398497, 0.000000, -0.542410, 0.000000, 1.500000, 0.000000, 0.542410, 0.000000, -1.398497, -251.645774, 13.580000, -170.421679)
+metadata/coliziune = "none"
+
+[node name="flacaraGura_4" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(-1.398497, 0.000000, -0.542410, 0.000000, 1.500000, 0.000000, 0.542410, 0.000000, -1.398497, -254.888020, 13.580000, -169.378685)
+metadata/coliziune = "none"
+
+[node name="flacaraGura_5" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(1.398497, 0.000000, 0.542410, 0.000000, 1.500000, 0.000000, -0.542410, 0.000000, 1.398497, -251.976001, 13.580000, -160.211343)
+metadata/coliziune = "none"
+
+[node name="flacaraGura_6" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(1.398497, 0.000000, 0.542410, 0.000000, 1.500000, 0.000000, -0.542410, 0.000000, 1.398497, -255.073605, 13.580000, -158.795417)
+metadata/coliziune = "none"
+
+[node name="flacaraGura_7" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(-1.398497, 0.000000, -0.542410, 0.000000, 1.500000, 0.000000, 0.542410, 0.000000, -1.398497, -255.375098, 13.580000, -168.975255)
+metadata/coliziune = "none"
+
+[node name="flacaraGura_8" parent="DecorManual/F1_Gura" instance=ExtResource("40_torch")]
+transform = Transform3D(-1.398497, 0.000000, -0.542410, 0.000000, 1.500000, 0.000000, 0.542410, 0.000000, -1.398497, -258.617344, 13.580000, -167.932261)
+metadata/coliziune = "none"
+
+[node name="firidaGura_1" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.499949, 0.000000, -0.011592, 0.000000, 1.300000, 0.000000, 0.012420, 0.000000, 1.399952, -204.401628, 13.940000, -175.143488)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_2" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.002743, 0.000000, -0.890991, 0.000000, 1.600000, 0.000000, 0.827349, 0.000000, -1.079877, -208.858372, 13.940000, -189.256512)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_3" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.498985, 0.000000, 0.775068, 0.000000, 1.200000, 0.000000, -0.996515, 0.000000, 1.165878, -209.907780, 16.890000, -173.327160)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_4" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.391318, 0.000000, 0.155675, 0.000000, 1.400000, 0.000000, -0.155675, 0.000000, -1.391318, -214.632220, 17.290000, -187.352840)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_5" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.183273, 0.000000, -0.232938, 0.000000, 1.700000, 0.000000, 0.199661, 0.000000, 1.380485, -216.607864, 13.820000, -170.995119)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_6" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.435002, 0.000000, -0.750618, 0.000000, 1.200000, 0.000000, 0.911465, 0.000000, -1.181767, -221.772136, 13.820000, -184.864881)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_7" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.028821, 0.000000, 1.018800, 0.000000, 1.500000, 0.000000, -1.091571, 0.000000, 0.960233, -221.624461, 17.380000, -169.034185)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_8" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.291135, 0.000000, -0.163220, 0.000000, 1.300000, 0.000000, 0.151562, 0.000000, -1.390453, -227.095539, 16.980000, -182.785815)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_9" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.579591, 0.000000, 0.222899, 0.000000, 1.400000, 0.000000, -0.254742, 0.000000, 1.382142, -227.918644, 13.740000, -166.548996)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_10" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.915505, 0.000000, -1.059174, 0.000000, 1.800000, 0.000000, 1.059174, 0.000000, -0.915505, -233.261356, 13.740000, -180.351004)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_11" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.989671, 0.000000, 0.907783, 0.000000, 1.300000, 0.000000, -0.842942, 0.000000, 1.065800, -234.267864, 17.100000, -164.145119)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_12" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.599957, 0.000000, -0.010319, 0.000000, 1.500000, 0.000000, 0.011794, 0.000000, -1.399962, -239.432136, 16.700000, -178.014881)
+metadata/coliziune = "hull"
+
+[node name="blocEmblema_1" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.578570, 0.000000, -1.491730, 0.000000, 1.400000, 0.000000, 1.491730, 0.000000, 0.578570, -239.008147, 21.950702, -164.275623)
+metadata/coliziune = "none"
+
+[node name="blocEmblema_2" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.578570, 0.000000, -1.491730, 0.000000, 1.400000, 0.000000, 1.491730, 0.000000, 0.578570, -243.058135, 21.950702, -174.717730)
+metadata/coliziune = "none"
+
+[node name="blocEmblema_3" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.723212, 0.000000, -1.398497, 0.000000, 0.600000, 0.000000, 1.864662, 0.000000, 0.542409, -241.089081, 25.350702, -169.474980)
+metadata/coliziune = "none"
+
+[node name="firidaGura_13" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.318132, 0.000000, 0.884107, 0.000000, 1.100000, 0.000000, -1.073559, 0.000000, 1.085520, -227.918644, 20.340000, -166.548996)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_14" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.398282, 0.000000, 0.069335, 0.000000, 1.500000, 0.000000, -0.069335, 0.000000, -1.398282, -233.261356, 20.640000, -180.351004)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_15" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.296130, 0.000000, 0.107951, 0.000000, 1.600000, 0.000000, -0.100240, 0.000000, 1.395832, -234.267864, 20.100000, -164.145119)
+metadata/coliziune = "hull"
+
+[node name="firidaGura_16" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-1.240807, 0.000000, -1.014217, 0.000000, 1.200000, 0.000000, 1.303993, 0.000000, -0.965072, -239.432136, 20.400000, -178.014881)
+metadata/coliziune = "hull"
 
 [node name="UmarGura196" type="Marker3D" parent="Peaks/StancaCoroana"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -369.308, 52.0, -13.295)

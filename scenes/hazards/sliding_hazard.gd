@@ -31,9 +31,26 @@ extends AnimatableBody3D
 ##
 ## Ritmul difera, si asta e tot rostul: la pendulare inveti o sinusoida, la
 ## traversare PANDESTI O FEREASTRA — ca la tren, dar fara infrastructura lui.
+##
+## USA e piatra de moara din orasul subteran (Cappadocia, brief §2 POI F:
+## „inchis = zid"). E exact inversul TRAVERSARII pe un capat: un capat al
+## cursei e nisa laterala (banda libera), celalalt e PE banda, unde piatra STA
+## cateva secunde ca zid static, apoi se intoarce in nisa. Masurat inainte de
+## a exista modul asta: cu TRAVERSARE, ambele capete de parcare cadeau in afara
+## asfaltului, usa era deschisa ~87% din timp si „inchisa" doar o matura de
+## 0.75 s — adica tot bilantul de decizie al briefului („piatra inchisa
+## ≈ +2,5 s pe ocol") se sprijinea pe o stare care nu exista. Un zid care
+## dureaza e ce face ocolul sa merite: cine vede usa inchizandu-se ia ocolul,
+## cine o prinde deschisa castiga. Nu contrazice regula „un obstacol care STA
+## in drum e mobilier": aia e pentru obstacole fara alternativa; usa are
+## ocolul, deci starea inchisa e o decizie, nu un blocaj.
+##
+## Membrii noi se adauga LA COADA: valorile serializate in .tscn (HazardMarker
+## `motion = 1`) sunt indici, iar scriptul asta e folosit de mai multe piste.
 enum Motion {
 	PENDULARE,  ## du-te-vino sinusoidal, fara oprire
 	TRAVERSARE, ## asteapta, traverseaza intr-un sens, asteapta pe partea cealalta
+	USA,        ## sta in nisa (liber), se rostogoleste PE banda, sta ca zid, se intoarce
 }
 
 ## Cat de repede matura, la maximum (mijlocul cursei). Perioada se DEDUCE din
@@ -53,6 +70,23 @@ const CROSS_WAIT: float = 5.0
 ## vehiculul se pune in miscare vizibil inainte sa ajunga pe carosabil, ca
 ## trecerea sa poata fi anticipata, nu doar incasata.
 const CROSS_TELEGRAPH: float = 1.2
+## USA — cat sta deschisa (parcata in nisa, banda libera) si cat sta INCHISA
+## (pe banda, zid). Cu telegraful si cele doua rostogoliri (cursa de 4.5 m la
+## DOOR_ROLL_SPEED = 2.5 s fiecare) ciclul iese ~23 s, cat cere brieful
+## Cappadocia. Inchisa destul cat sa fie o stare, nu o clipa: la 6 s cine a
+## prins-o inchizandu-se ar fi pierdut mai mult asteptand decat pe ocol
+## (+1.85…+2.36 s masurat), deci ocolul chiar e alegerea corecta.
+const DOOR_OPEN: float = 10.0
+const DOOR_CLOSED: float = 6.0
+## Viteza de rostogolire a usii (m/s). Lenta dinadins: o piatra de 3 m care
+## traverseaza 4.5 m in 2.5 s se CITESTE ca usa care se inchide; la viteza
+## maturarii (12 m/s) ar fi o clipire. Regula din antet („lent = mobilier")
+## nu se aplica: usa nu blocheaza cat se misca, ci cat sta.
+const DOOR_ROLL_SPEED: float = 1.8
+## Grupul din care AI-ul citeste usile (acelasi tipar ca
+## RotatingSpanHazard.AI_GROUP): pilotul intreaba `door_blocks_in()` si alege
+## ocolul cand poarta va fi inchisa la sosire.
+const DOOR_GROUP: StringName = &"door_hazards"
 ## Banda lasata libera langa perete. 0 = fara limitare (cursa exact cat cere
 ## pista). Exista pentru piste inguste, unde maturarea pana in perete ar lasa
 ## banda plina fara iesire.
@@ -118,6 +152,8 @@ var _half_extent: float = 1.3
 var _configured: bool = false
 ## Masina lovita -> secunde pana poate fi imbrancita din nou.
 var _cooldown: Dictionary = {}
+## Viteza reala a corpului la ultimul pas (m/s). USA nu imbranceste cat sta.
+var _speed: float = 0.0
 
 func _ready() -> void:
 	sync_to_physics = true
@@ -136,6 +172,8 @@ func _configure() -> void:
 	_clamp_travel()
 	if period <= 0.0:
 		period = _readable_period()
+	if motion == Motion.USA and not is_in_group(DOOR_GROUP):
+		add_to_group(DOOR_GROUP)
 	# Pozitia de start a defazajului, nu centrul: altfel primul cadru "vede" o
 	# deplasare de toata amplitudinea si roteste mingea brusc.
 	_last_pos = center + travel * _offset_now()
@@ -151,10 +189,14 @@ func _configure() -> void:
 ## pe banda si ar fi un zid pe jumatate de drum — exact ce nu vrem, fiindca un
 ## obstacol care STA in drum e mobilier, nu eveniment (vezi masuratoarea din
 ## antetul clasei: obstacol lent = toata lumea intra in el).
+##
+## USA foloseste aceeasi regula pentru capatul din nisa (-1): piatra parcata
+## trebuie sa elibereze complet banda. Capatul inchis e centrul cursei (0),
+## adica axa soselei, si nu se taie — vezi `_door_offset`.
 func _clamp_travel() -> void:
 	if road_half_width <= 0.0:
 		return
-	if motion == Motion.TRAVERSARE:
+	if motion == Motion.TRAVERSARE or motion == Motion.USA:
 		# Capatul curse: marginea drumului PLUS tot corpul, ca sa se elibereze
 		# complet carosabilul, plus o palma de acostament.
 		var park := road_half_width + _half_extent + 1.0
@@ -180,6 +222,11 @@ func _readable_period() -> float:
 		return 3.2
 	if motion == Motion.TRAVERSARE:
 		return maxf(4.0 * amp / max_sweep_speed, 1.5)
+	if motion == Motion.USA:
+		# O rostogolire (nisa -> axa) acopera amplitudinea A si dureaza
+		# `period * 0.5`, ca la traversare; viteza e cea a usii, nu plafonul
+		# maturarii — vezi DOOR_ROLL_SPEED.
+		return maxf(2.0 * amp / DOOR_ROLL_SPEED, 1.5)
 	return maxf(TAU * amp / max_sweep_speed, 1.5)
 
 func _build_model() -> void:
@@ -216,9 +263,29 @@ func _build_model() -> void:
 		Palette.apply_object_triplanar_class(model, model_tri_class, model_scale)
 	var shape := CollisionShape3D.new()
 	if roll_radius > 0.0:
-		var sphere := SphereShape3D.new()
-		sphere.radius = roll_radius
-		shape.shape = sphere
+		# Un DISC (piatra de moara: 3 m diametru, 0.78 m grosime) primeste un
+		# cilindru, nu o sfera. Sfera de raza 1.5 m centrata la 1.5 m ar avea la
+		# inaltimea barei de protectie (0.5 m) doar 1.12 m raza — o usa cu
+		# colturile rotunjite, prin care o masina se strecoara pe langa zid.
+		# Cilindrul are axa pe normala discului (axa subtire a modelului) si NU
+		# se invarte cu pivotul: rostogolirea e vizuala, forma e aceeasi in
+		# orice faza. Vezi `Track._build_hazard` pentru orientarea usii.
+		var measured := Track.model_aabb(model)
+		var d := maxf(measured.size.x, measured.size.z)
+		var thin := minf(measured.size.x, measured.size.z)
+		if thin < d * 0.5:
+			var cyl := CylinderShape3D.new()
+			cyl.radius = roll_radius
+			cyl.height = thin
+			shape.shape = cyl
+			if measured.size.z < measured.size.x:
+				shape.rotation = Vector3(PI * 0.5, 0.0, 0.0)
+			else:
+				shape.rotation = Vector3(0.0, 0.0, PI * 0.5)
+		else:
+			var sphere := SphereShape3D.new()
+			sphere.radius = roll_radius
+			shape.shape = sphere
 		shape.position = Vector3.UP * roll_radius
 		_half_extent = roll_radius
 	else:
@@ -318,6 +385,7 @@ func _physics_process(delta: float) -> void:
 	_time += delta
 	global_position = center + travel * _offset_now()
 	var moved := global_position - _last_pos
+	_speed = moved.length() / delta if delta > 0.0 else 0.0
 	if _pivot != null and roll_radius > 0.0:
 		# Rostogolire: rotatie in jurul axei perpendiculare pe miscare.
 		var flat := moved
@@ -339,8 +407,13 @@ func _physics_process(delta: float) -> void:
 ## singura functie: un al doilea camp de pozitie ar fi insemnat doua feluri de
 ## a sti unde e obstacolul, care ar fi divergat la prima corectie de mecanica.
 func _offset_now() -> float:
+	return _offset_at(_time)
+
+func _offset_at(time: float) -> float:
 	if motion == Motion.PENDULARE:
-		return sin(TAU * (_time / period + phase))
+		return sin(TAU * (time / period + phase))
+	if motion == Motion.USA:
+		return _door_offset(time)
 	# TRAVERSARE. Ciclul, in ordinea in care il vede jucatorul:
 	#   [parcat] -> [telegraf: se urneste] -> [traverseaza] -> [parcat pe partea
 	#   cealalta] -> ... si inapoi, cu sensul intors.
@@ -349,7 +422,7 @@ func _offset_now() -> float:
 	# la a doua trecere pleaca de unde a ramas.
 	var cross := period * 0.5 # cat dureaza o traversare propriu-zisa
 	var leg := CROSS_WAIT + CROSS_TELEGRAPH + cross # o trecere, cu asteptarea ei
-	var t := fposmod(_time + phase * leg * 2.0, leg * 2.0)
+	var t := fposmod(time + phase * leg * 2.0, leg * 2.0)
 	# A doua jumatate a ciclului e aceeasi trecere, in sens invers.
 	var back := t >= leg
 	if back:
@@ -372,13 +445,77 @@ func _offset_now() -> float:
 	var k := clampf((moving - CROSS_TELEGRAPH) / maxf(cross, 0.001), 0.0, 1.0)
 	return lerpf(from * 0.94, to, k)
 
+## USA. Ciclul, in ordinea in care il vede jucatorul:
+##   [deschisa: parcata in nisa, -1] -> [telegraf] -> [se rostogoleste pe axa]
+##   -> [INCHISA: sta pe axa, 0, zid] -> [telegraf] -> [inapoi in nisa] -> ...
+## Cursa e doar jumatate din axa `travel` (-1..0): capatul +1 nu exista, usa
+## nu trece niciodata pe partea cealalta a soselei.
+func _door_offset(time: float) -> float:
+	var roll := period * 0.5
+	var cycle := door_cycle()
+	var u := fposmod(time + phase * cycle, cycle)
+	if u < DOOR_OPEN:
+		return -1.0
+	u -= DOOR_OPEN
+	if u < CROSS_TELEGRAPH:
+		var warn := u / CROSS_TELEGRAPH
+		return -1.0 + 0.06 * warn * warn
+	u -= CROSS_TELEGRAPH
+	if u < roll:
+		return lerpf(-0.94, 0.0, u / maxf(roll, 0.001))
+	u -= roll
+	if u < DOOR_CLOSED:
+		return 0.0
+	u -= DOOR_CLOSED
+	if u < CROSS_TELEGRAPH:
+		var warn := u / CROSS_TELEGRAPH
+		return -0.06 * warn * warn
+	u -= CROSS_TELEGRAPH
+	return lerpf(-0.06, -1.0, clampf(u / maxf(roll, 0.001), 0.0, 1.0))
+
+## Lungimea unui ciclu complet al usii (s). Doar USA; cere `period` deja
+## dedusa, deci `_configure()` sa fi rulat.
+func door_cycle() -> float:
+	var roll := period * 0.5
+	return DOOR_OPEN + CROSS_TELEGRAPH + roll + DOOR_CLOSED + CROSS_TELEGRAPH + roll
+
+## Peste `seconds` secunde, piatra va fi (macar partial) PE banda? Pentru AI:
+## pilotul isi estimeaza sosirea si alege ocolul cand raspunsul e da.
+## „Pe banda" = marginea pietrei dinspre drum a trecut de marginea asfaltului;
+## o usa pe jumatate inchisa e tot o usa inchisa pentru cine vine cu 25 m/s.
+func door_blocks_in(seconds: float) -> bool:
+	if motion != Motion.USA:
+		return false
+	if not _configured:
+		_configure()
+	var amp := travel.length()
+	var edge := _door_offset(_time + seconds) * amp + _half_extent
+	var hw := road_half_width if road_half_width > 0.0 else amp * 0.5
+	return edge > -hw
+
+## Usa e pe banda ACUM (pentru sonde si pentru snapshot).
+func door_closed_now() -> bool:
+	return door_blocks_in(0.0)
+
+## Unde sta poarta, in lume (axa soselei). Pentru AI, ca la RotatingSpanHazard.
+func ai_decision_point() -> Vector3:
+	return center
+
 ## Contactul te DEZECHILIBREAZA, nu te captureaza. Ghiontul e RADIAL (dinspre
 ## obstacol spre masina) plus un pic inainte, nu in sensul maturarii: impins pe
 ## sensul maturarii, exact masina prinsa intre obstacol si perete — singura care
 ## chiar are nevoie de ajutor — ar fi impinsa si mai tare in perete. Radial +
 ## inainte are mereu unde sa te scoata, fiindca soseaua continua.
+##
+## USA nu imbranceste cat STA: ghiontul e pentru corpuri in miscare, care
+## altfel te tin lipit de perete. O piatra parcata pe axa e zid — te opresti
+## in ea si dai inapoi, ca la orice zid; un zid care te azvarle ar fi alt
+## gimmick. Cat se rostogoleste, ghiontul ramane (contactul cu piatra in
+## miscare a fost masurat corect: impins cu masa, 0 repuneri).
 func _shove_cars(delta: float) -> void:
 	if _area == null:
+		return
+	if motion == Motion.USA and _speed < 0.2:
 		return
 	for key: Variant in _cooldown.keys():
 		_cooldown[key] = maxf(float(_cooldown[key]) - delta, 0.0)

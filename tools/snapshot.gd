@@ -50,6 +50,10 @@ extends Node
 ##   --lava-stage=1            stadiul limbii de lava (Stromboli): 0 = turul 1,
 ##                             1 = poarta, 2 = zid. Implicit 0 — adica exact
 ##                             starea in care gimmick-ul nu se vede.
+##   --door-at=0.70            usa de piatra (SlidingHazard.Motion.USA) la o
+##                             fractie din ciclul ei: 0 = abia deschisa (in
+##                             nisa), ~0.53 = la jumatatea rostogolirii spre
+##                             axa, 0.60-0.84 = INCHISA pe banda.
 ##   --rock-at=3.5             bolovanii cu traseu, la N SECUNDE de la
 ##                             desprindere (nu fractie: traseele au lungimi
 ##                             diferite). Se SIMULEAZA cadru cu cadru de la 0,
@@ -121,6 +125,7 @@ func _ready() -> void:
 	var typhoon_at := -1.0
 	var wave_at := -1.0
 	var rock_at := -1.0
+	var door_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
 	var hide_node := ""
@@ -149,6 +154,8 @@ func _ready() -> void:
 			wave_at = float(arg.trim_prefix("--wave-at="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
+		elif arg.begins_with("--door-at="):
+			door_at = float(arg.trim_prefix("--door-at="))
 		elif arg.begins_with("--lava-stage="):
 			lava_stage = int(arg.trim_prefix("--lava-stage="))
 		elif arg.begins_with("--route="):
@@ -202,6 +209,8 @@ func _ready() -> void:
 		_smooth_organics(track)
 	if train_at >= 0.0:
 		_set_train_phase(track, train_at)
+	if door_at >= 0.0:
+		await _set_door_phase(track, door_at)
 	if bridge_at >= 0.0:
 		_set_bridge_phase(track, bridge_at)
 	if span_at >= 0.0:
@@ -496,6 +505,34 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train._physics_process(0.0)
 		found += 1
 	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+
+
+## Muta usa de piatra la o fractie din ciclul ei (vezi `--door-at` in antet).
+##
+## Cursa si perioada usii se deduc la primul tick, nu in _ready (pista pune
+## `travel` dupa add_child), deci se ruleaza un pas de zero secunde intai, ca
+## `door_cycle()` sa aiba o perioada. `phase` se scade ca 0 sa insemne
+## „inceputul starii deschise", indiferent de defazajul pistei.
+func _set_door_phase(root: Node, at: float) -> void:
+	var found := 0
+	# Un pas de fizica intai: `sync_to_physics` scrie transformul in server
+	# si il citeste inapoi abia dupa un pas, iar cursa usii se taie la primul
+	# tick — fara asteptare, pozitia citita e (0,0,0) si cursa nelimitata.
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	for node in root.get_children():
+		var door := node as SlidingHazard
+		if door == null or door.motion != SlidingHazard.Motion.USA:
+			continue
+		var cycle: float = door.door_cycle()
+		door.set("_time", cycle * (clampf(at, 0.0, 0.999) - door.phase))
+		door._physics_process(0.0)
+		found += 1
+		print("--door-at=%.2f: usa la %s, cursa %.2f m, inchisa=%s" % [at,
+			door.center + door.travel * door.call("_offset_now"),
+			door.travel.length(), door.door_closed_now()])
+	if found == 0:
+		print("--door-at=%.2f: NICIO usa de piatra pe pista asta" % at)
 
 
 ## Aduce bolovanii cu traseu la `seconds` de la desprindere, simuland cadrele.

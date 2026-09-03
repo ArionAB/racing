@@ -120,9 +120,13 @@ enum Kind {
 ## Cum se misca obstacolul: pendulare fara oprire, sau traversare cu sens.
 ##
 ## TRAVERSARE e tractorul din Ignition — asteapta pe acostament, trece, se
-## opreste pe partea cealalta. Pendularea ramane implicitul, deci nimic din ce
-## exista azi nu se schimba. Doar pentru SLIDING.
-@export_enum("Pendulare:0", "Traversare:1") var motion: int = 0
+## opreste pe partea cealalta. USA e piatra de moara din Cappadocia: sta in
+## nisa, se rostogoleste PE banda, sta acolo ca zid cateva secunde, se
+## intoarce (nisa e la capatul -1 al cursei, adica pe partea `-side` a
+## soselei). Pendularea ramane implicitul, deci nimic din ce exista azi nu se
+## schimba. Doar pentru SLIDING. Valorile sunt indici in
+## `SlidingHazard.Motion` — nu le reordona.
+@export_enum("Pendulare:0", "Traversare:1", "Usa:2") var motion: int = 0
 
 ## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
 ##

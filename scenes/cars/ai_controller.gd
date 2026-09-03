@@ -83,6 +83,34 @@ const RECOVER_TIME: float = 0.7
 ## pierdute decat o masina scoasa din cursa pentru totdeauna.
 const MAX_ATTEMPTS: int = 3
 
+## Usa de piatra (`SlidingHazard.Motion.USA`, Cappadocia POI F): singurul
+## obstacol din joc care sta INCHIS pe banda directa cateva secunde, cu un
+## ocol alaturi. Pilotul ii citeste ceasul (`door_blocks_in`) si decide ca un
+## om: daca la sosire poarta va fi inchisa, ia ocolul — indiferent de
+## `prefers_shortcut`, fiindca aici nu e o preferinta de linie, e zid.
+##
+## De ce nu ajunge `_avoid_line` sau `lane_forced_at`: prima vede doar
+## masini, a doua da un culoar FIX; usa n-are culoar liber cand e inchisa,
+## are doar ocolul. Acelasi motiv pentru care pasajul rotativ are `_span_line`.
+##
+## Raza de citire: ocolul se despica INAINTE de poarta, iar momeala
+## (`Track.branch_lure`) lucreaza doar in `BRANCH_LURE_RANGE` de capul benzii,
+## deci decizia trebuie luata cand usa e inca la zeci de metri. 120 m la
+## ~25 m/s = ~5 s, mai putin decat orice stare a usii (deschisa 10 s, inchisa
+## 6 s), deci predictia nu se poate rasuci intre decizie si sosire.
+const DOOR_REACH_M: float = 120.0
+## Marja pe estimarea sosirii: un pilot care franeaza pe viraj ajunge mai
+## tarziu decat `along / speed`; se intreaba si „dar peste inca o secunda?".
+const DOOR_ETA_SLACK: float = 1.0
+## Cine a ratat ocolul (a decis „deschisa" si s-a inselat, sau a fost
+## imbrancit pe langa despicare) franeaza si ASTEAPTA in fata usii inchise,
+## in loc sa intre in ea, sa se deblocheze in marsarier de trei ori si sa
+## ceara repunere. De la distanta asta viteza-tinta coboara liniar spre zero.
+const DOOR_BRAKE_M: float = 30.0
+## Unde se opreste, masurat de la axa usii pana la botul masinii (raza pietrei
+## 1.5 m + o lungime de masina).
+const DOOR_STOP_M: float = 6.0
+
 var track: Track
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
 ## portiunile drepte. Peste ea se adauga tragerea spre interiorul virajului.
@@ -110,6 +138,12 @@ var _last_route: int = 0
 var prefers_shortcut: bool = false
 var _progress_m: float = 0.0
 var _progress_timer: float = 0.0
+## Metri pana la o usa de piatra care VA FI inchisa cand ajungem la ea, pe
+## banda pe care suntem. INF = nicio usa in fata (sau usa deschisa la sosire).
+var _door_block_m: float = INF
+## Indexul de traseu al fiecarei usi, pe ruta 0 — scanare completa o data,
+## nu per cadru (cheie: instance id).
+var _door_index: Dictionary = {}
 var _unstick_timer: float = 0.0
 var _unstick_reversing: bool = false
 var _unstick_steer: float = 0.0
@@ -230,7 +264,13 @@ func update(delta: float) -> void:
 	# de tur). De-asta se intreaba pista de fiecare data, nu doar la start:
 	# fara asta, un AI care a decis la turul 1 "o iau pe scurta" intra in zid
 	# la turul 3.
-	if prefers_shortcut and car.route == 0 and track.branch_is_open(1):
+	_door_block_m = _door_closed_ahead(speed)
+	var take_branch := prefers_shortcut and car.route == 0 and track.branch_is_open(1)
+	# Usa de piatra inchisa la sosire: ocolul nu mai e o preferinta, e singurul
+	# drum. Vezi DOOR_REACH_M.
+	if car.route == 0 and _door_block_m < INF:
+		take_branch = true
+	if take_branch:
 		var lure := track.branch_lure(car.global_position, _lookahead_near(speed))
 		if lure != Vector3.INF:
 			near = lure
@@ -246,11 +286,21 @@ func update(delta: float) -> void:
 	# treaba — ci de sofer care nu se uita la suprafata.
 	if track.route_is_wet(car.route):
 		target *= WET_SPEED_FACTOR
+	# Usa inchisa in fata, fara ocol la indemana: opreste si asteapta sa se
+	# deschida. Vezi DOOR_BRAKE_M.
+	var door_wait := _door_block_m < DOOR_BRAKE_M
+	if door_wait:
+		target = minf(target, maxf(_door_block_m - DOOR_STOP_M, 0.0) * 1.2)
 	if speed > target * 1.06:
 		# Franare proportionala cu depasirea, nu o smucitura fixa.
 		_throttle = clampf(-(speed - target) / 6.0, -1.0, -0.15)
 	else:
 		_throttle = 1.0
+	# Oprit in fata usii: nici gaz, nici marsarier. Fara ramura asta, tinta
+	# zero ar da `_throttle = -0.15` la nesfarsit si masina ar da inapoi pana
+	# in pluton.
+	if door_wait and target < 1.0 and speed < 2.0:
+		_throttle = 0.0
 
 	# --- drift (handbrake) pe viraje sustinute: si vireaza, si umple bara ---
 	if not _drift:
@@ -498,6 +548,39 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 		0.0, 1.0)
 	return lerpf(line, clampf(target, -LINE_MAX, LINE_MAX), t)
 
+## Metri pana la prima usa de piatra de pe banda noastra care va fi INCHISA
+## cand ajungem la ea (INF daca nu e niciuna, sau va fi deschisa). Doar pe
+## ruta 0: ocolul e tocmai banda pe care usa nu exista, iar `closest_index`
+## al usii pe ocol ar cadea la un capat al lui si ar frana degeaba.
+func _door_closed_ahead(speed: float) -> float:
+	if car.route != 0:
+		return INF
+	var doors := get_tree().get_nodes_in_group(SlidingHazard.DOOR_GROUP)
+	if doors.is_empty():
+		return INF
+	var n_pts: int = track.route_at(0).count()
+	var bake: float = track.curve.bake_interval
+	var best := INF
+	for node in doors:
+		var door := node as SlidingHazard
+		if door == null:
+			continue
+		var key := door.get_instance_id()
+		if not _door_index.has(key):
+			_door_index[key] = track.closest_index_global(door.ai_decision_point(), 0)
+		var d_idx: int = int(_door_index[key]) - car.road_index
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		if along < 0.0 or along > DOOR_REACH_M or along >= best:
+			continue
+		var eta := along / maxf(speed, 6.0)
+		if door.door_blocks_in(eta) or door.door_blocks_in(eta + DOOR_ETA_SLACK):
+			best = along
+	return best
+
 func _lookahead_near(speed: float) -> float:
 	return clampf(speed * LOOKAHEAD_NEAR_FACTOR,
 		LOOKAHEAD_NEAR_MIN, LOOKAHEAD_NEAR_MAX)
@@ -520,6 +603,12 @@ func _angle_to(fwd: Vector3, point: Vector3) -> float:
 ## sa avanseze in cursa.
 func _watch_progress(delta: float, speed: float) -> void:
 	if _unstick_timer > 0.0:
+		return
+	# Asteptarea in fata usii de piatra e progres zero DELIBERAT, nu blocaj:
+	# altfel plasa de stall ar porni marsarierul dupa 0.9 s si, dupa trei
+	# incercari, repunerea — adica exact ce evita asteptarea.
+	if _door_block_m < DOOR_BRAKE_M:
+		_reset_progress()
 		return
 	# Plasa rapida: izbitura frontala care opreste masina pe loc.
 	if speed < STALL_SPEED:

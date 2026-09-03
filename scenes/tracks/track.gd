@@ -8149,9 +8149,19 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# La pendulare ramane stins, ca pana acum — o barca targita dus-intors
 		# chiar n-are un "inainte".
 		var crossing := ball.motion == SlidingHazard.Motion.TRAVERSARE
+		var door := ball.motion == SlidingHazard.Motion.USA
 		if bool(kind.get("face_travel",
-				theme_flag("hazard_face_travel", crossing))):
+				theme_flag("hazard_face_travel", crossing or door))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
+			# O USA nu se uita incotro merge, se uita in lungul soselei: fata
+			# discului trebuie sa fie spre masina care vine, ca sa se citeasca
+			# zid, iar rostogolirea (in jurul normalei discului) sa fie a unei
+			# roti care traverseaza, nu a unei monede care se da peste cap.
+			# Verificatorul a vazut-o cu fata pe axa cursei „ca o aschie
+			# inclinata" la mijlocul maturarii. Un sfert de tura: -Z al
+			# corpului ajunge pe `dir` (= (side.z, -side.x)), nu pe `side`.
+			if door:
+				ball.rotation.y += PI * 0.5
 		add_child(ball)
 		ball.center = p
 		ball.travel = side * hw * 0.9

@@ -9280,7 +9280,7 @@ model = ExtResource("millstone_door")
 model_scale = 1.0
 roll = true
 face_travel = true
-motion = 1
+motion = 2
 
 [node name="Puturi" type="Node3D" parent="."]
 

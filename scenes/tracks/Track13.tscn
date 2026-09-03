@@ -9338,88 +9338,88 @@ distance_fade_enabled = true
 distance_fade_begin = 70.0
 distance_fade_length = 25.0
 
-[node name="tavans1_5" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.414089, 0.000000, -0.910237, 0.000000, 1.000000, 0.000000, 0.910237, 0.000000, 0.414089, -267.213043, 29.513000, -171.995834)
+[node name="tavanF2_1" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.552834, 3.640948, 0.000000, 0.000000, -0.000000, 2.000000, 3.413389, -1.656356, 0.000000, -272.674465, 31.013000, -169.511300)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_6" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.414089, 0.000000, -0.910237, 0.000000, 1.000000, 0.000000, 0.910237, 0.000000, 0.414089, -262.243988, 29.513000, -161.072998)
+[node name="tavanF2_2" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.552834, 3.640948, 0.000000, 0.000000, -0.000000, 2.000000, 3.413389, -1.656356, 0.000000, -267.705410, 31.013000, -158.588464)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_7" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.414089, 0.000000, -0.910237, 0.000000, 1.000000, 0.000000, 0.910237, 0.000000, 0.414089, -257.274933, 29.513000, -150.150162)
+[node name="tavanF2_3" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.552834, 3.640948, 0.000000, 0.000000, -0.000000, 2.000000, 3.413389, -1.656356, 0.000000, -262.736355, 31.013000, -147.665628)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_8" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.478009, 0.000000, -0.878355, 0.000000, 1.000000, 0.000000, 0.878355, 0.000000, 0.478009, -277.283173, 29.425678, -167.167480)
+[node name="tavanF2_4" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.792534, 3.513420, 0.000000, 0.000000, -0.000000, 2.000000, 3.293831, -1.912036, 0.000000, -282.553303, 30.925678, -164.299426)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_9" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.478009, 0.000000, -0.878355, 0.000000, 1.000000, 0.000000, 0.878355, 0.000000, 0.478009, -271.547058, 29.425678, -156.627228)
+[node name="tavanF2_5" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.792534, 3.513420, 0.000000, 0.000000, -0.000000, 2.000000, 3.293831, -1.912036, 0.000000, -276.817188, 30.925678, -153.759174)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_10" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.478009, 0.000000, -0.878355, 0.000000, 1.000000, 0.000000, 0.878355, 0.000000, 0.478009, -265.810944, 29.425678, -146.086975)
+[node name="tavanF2_6" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(1.792534, 3.513420, 0.000000, 0.000000, -0.000000, 2.000000, 3.293831, -1.912036, 0.000000, -271.081074, 30.925678, -143.218921)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_11" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.546144, 0.000000, -0.837691, 0.000000, 1.000000, 0.000000, 0.837691, 0.000000, 0.546144, -285.977234, 29.338497, -161.870041)
+[node name="tavanF2_7" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.048040, 3.350764, 0.000000, 0.000000, -0.000000, 2.000000, 3.141341, -2.184576, 0.000000, -291.003380, 30.838497, -158.593177)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_12" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.546144, 0.000000, -0.837691, 0.000000, 1.000000, 0.000000, 0.837691, 0.000000, 0.546144, -279.423492, 29.338497, -151.817749)
+[node name="tavanF2_8" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.048040, 3.350764, 0.000000, 0.000000, -0.000000, 2.000000, 3.141341, -2.184576, 0.000000, -284.449638, 30.838497, -148.540885)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_13" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.546144, 0.000000, -0.837691, 0.000000, 1.000000, 0.000000, 0.837691, 0.000000, 0.546144, -272.869751, 29.338497, -141.765457)
+[node name="tavanF2_9" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.048040, 3.350764, 0.000000, 0.000000, -0.000000, 2.000000, 3.141341, -2.184576, 0.000000, -277.895897, 30.838497, -138.488593)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_14" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.652009, 0.000000, -0.758211, 0.000000, 1.000000, 0.000000, 0.758211, 0.000000, 0.652009, -295.023438, 29.240662, -155.157791)
+[node name="tavanF2_10" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.445034, 3.032844, 0.000000, 0.000000, -0.000000, 2.000000, 2.843291, -2.608036, 0.000000, -299.572704, 30.740662, -151.245737)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_15" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.652009, 0.000000, -0.758211, 0.000000, 1.000000, 0.000000, 0.758211, 0.000000, 0.652009, -287.199341, 29.240662, -146.059265)
+[node name="tavanF2_11" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.445034, 3.032844, 0.000000, 0.000000, -0.000000, 2.000000, 2.843291, -2.608036, 0.000000, -291.748607, 30.740662, -142.147211)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_16" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.652009, 0.000000, -0.758211, 0.000000, 1.000000, 0.000000, 0.758211, 0.000000, 0.652009, -279.375244, 29.240662, -136.960739)
+[node name="tavanF2_12" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.445034, 3.032844, 0.000000, 0.000000, -0.000000, 2.000000, 2.843291, -2.608036, 0.000000, -283.924510, 30.740662, -133.048685)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_17" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.714370, 0.000000, -0.699768, 0.000000, 1.000000, 0.000000, 0.699768, 0.000000, 0.714370, -304.159973, 29.126511, -146.703644)
+[node name="tavanF2_13" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.678887, 2.799072, 0.000000, 0.000000, -0.000000, 2.000000, 2.624130, -2.857480, 0.000000, -308.358581, 30.626511, -142.417424)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_18" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.714370, 0.000000, -0.699768, 0.000000, 1.000000, 0.000000, 0.699768, 0.000000, 0.714370, -295.587524, 29.126511, -138.306427)
+[node name="tavanF2_14" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.678887, 2.799072, 0.000000, 0.000000, -0.000000, 2.000000, 2.624130, -2.857480, 0.000000, -299.786132, 30.626511, -134.020207)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_19" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.714370, 0.000000, -0.699768, 0.000000, 1.000000, 0.000000, 0.699768, 0.000000, 0.714370, -287.015076, 29.126511, -129.909210)
+[node name="tavanF2_15" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.678887, 2.799072, 0.000000, 0.000000, -0.000000, 2.000000, 2.624130, -2.857480, 0.000000, -291.213684, 30.626511, -125.622990)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_20" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.784033, 0.000000, -0.620719, 0.000000, 1.000000, 0.000000, 0.620719, 0.000000, 0.784033, -311.686401, 29.028999, -137.918640)
+[node name="tavanF2_16" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.940124, 2.482876, 0.000000, 0.000000, -0.000000, 2.000000, 2.327696, -3.136132, 0.000000, -315.410715, 30.528999, -133.214442)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_21" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.784033, 0.000000, -0.620719, 0.000000, 1.000000, 0.000000, 0.620719, 0.000000, 0.784033, -302.278015, 29.028999, -130.470001)
+[node name="tavanF2_17" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.940124, 2.482876, 0.000000, 0.000000, -0.000000, 2.000000, 2.327696, -3.136132, 0.000000, -306.002329, 30.528999, -125.765803)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_22" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.784033, 0.000000, -0.620719, 0.000000, 1.000000, 0.000000, 0.620719, 0.000000, 0.784033, -292.869629, 29.028999, -123.021370)
+[node name="tavanF2_18" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(2.940124, 2.482876, 0.000000, 0.000000, -0.000000, 2.000000, 2.327696, -3.136132, 0.000000, -296.593943, 30.528999, -118.317172)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_23" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.835242, 0.000000, -0.549882, 0.000000, 1.000000, 0.000000, 0.549882, 0.000000, 0.835242, -317.319427, 28.954952, -130.228500)
+[node name="tavanF2_19" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(3.132157, 2.199528, 0.000000, 0.000000, -0.000000, 2.000000, 2.062057, -3.340968, 0.000000, -320.618719, 30.454952, -125.217048)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_24" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.835242, 0.000000, -0.549882, 0.000000, 1.000000, 0.000000, 0.549882, 0.000000, 0.835242, -307.296509, 28.954952, -123.629913)
+[node name="tavanF2_20" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(3.132157, 2.199528, 0.000000, 0.000000, -0.000000, 2.000000, 2.062057, -3.340968, 0.000000, -310.595801, 30.454952, -118.618461)
 metadata/coliziune = "mesh"
 
-[node name="tavans1_25" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_ceiling_module")]
-transform = Transform3D(0.835242, 0.000000, -0.549882, 0.000000, 1.000000, 0.000000, 0.549882, 0.000000, 0.835242, -297.273590, 28.954952, -117.031326)
+[node name="tavanF2_21" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(3.132157, 2.199528, 0.000000, 0.000000, -0.000000, 2.000000, 2.062057, -3.340968, 0.000000, -300.572882, 30.454952, -112.019874)
 metadata/coliziune = "mesh"
 
 [node name="tortas1_28" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
@@ -10579,10 +10579,6 @@ metadata/coliziune = "hull"
 transform = Transform3D(0.196418, -0.005305, 0.270445, 0.009025, 0.334166, 0.000000, -0.270346, 0.007301, 0.196490, -303.996399, 11.932044, -118.215446)
 metadata/coliziune = "hull"
 
-[node name="arcadas1_367" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_arch")]
-transform = Transform3D(0.975566, 0.000000, -1.590900, 0.000000, 1.866197, 0.000000, 1.590900, 0.000000, 0.975566, -275.102112, 13.387213, -154.560944)
-metadata/coliziune = "mesh"
-
 [node name="arcadas1_368" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_arch")]
 transform = Transform3D(1.245522, 0.000000, -1.082362, 0.000000, 1.650101, 0.000000, 1.082362, 0.000000, 1.245522, -298.039795, 13.091003, -135.644562)
 metadata/coliziune = "mesh"
@@ -10596,382 +10592,382 @@ transform = Transform3D(0.315239, 0.000000, -0.789382, 0.000000, 2.941176, 0.000
 metadata/coliziune = "hull"
 
 [node name="socluF2_1" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.371474, 0.000000, 0.148348, 0.000000, 0.400000, 0.000000, -0.148348, 0.000000, 0.371474, -227.687027, 13.786175, -185.231598)
+transform = Transform3D(0.371474, 0.000000, 0.148348, 0.000000, 0.400000, 0.000000, -0.148348, 0.000000, 0.371474, -227.279068, 13.786175, -184.210037)
 metadata/coliziune = "hull"
 
 [node name="lumanareF2_2" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.427631, 0.000000, 0.170774, 0.000000, 0.460469, 0.000000, -0.170774, 0.000000, 0.427631, -227.800690, 14.984933, -185.013733)
+transform = Transform3D(0.355200, 0.000000, 0.141849, 0.000000, 0.382477, 0.000000, -0.141849, 0.000000, 0.355200, -227.226349, 14.986716, -184.297272)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_3" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.358253, 0.000000, 0.143068, 0.000000, 0.385764, 0.000000, -0.143068, 0.000000, 0.358253, -227.900101, 14.984373, -185.036377)
+transform = Transform3D(0.445593, 0.000000, 0.177947, 0.000000, 0.479811, 0.000000, -0.177947, 0.000000, 0.445593, -226.942444, 14.988608, -184.351746)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_4" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.395474, 0.000000, 0.157932, 0.000000, 0.425843, 0.000000, -0.157932, 0.000000, 0.395474, -227.379501, 14.987995, -185.198105)
+transform = Transform3D(0.413728, 0.000000, 0.165222, 0.000000, 0.445499, 0.000000, -0.165222, 0.000000, 0.413728, -227.380432, 14.985222, -184.078354)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_5" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.401702, 0.000000, 0.160419, 0.000000, 0.432549, 0.000000, -0.160419, 0.000000, 0.401702, -227.322723, 14.988929, -185.433792)
+transform = Transform3D(0.449718, 0.000000, 0.179595, 0.000000, 0.484252, 0.000000, -0.179595, 0.000000, 0.449718, -227.141525, 14.987322, -184.329803)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_6" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_6" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.372736, 0.000000, 0.148852, 0.000000, 0.401359, 0.000000, -0.148852, 0.000000, 0.372736, -227.461136, 14.984658, -184.052383)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_7" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.315239, 0.000000, -0.789382, 0.000000, 2.941176, 0.000000, 0.789382, 0.000000, 0.315239, -222.776428, 13.770845, -166.733597)
 metadata/coliziune = "hull"
 
-[node name="socluF2_7" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.371474, 0.000000, -0.148348, 0.000000, 0.400000, 0.000000, 0.148348, 0.000000, -0.371474, -224.615646, 13.755516, -165.137665)
+[node name="socluF2_8" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.371474, 0.000000, -0.148348, 0.000000, 0.400000, 0.000000, 0.148348, 0.000000, -0.371474, -225.023605, 13.755516, -166.159225)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_8" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.409087, 0.000000, -0.163369, 0.000000, 0.440502, 0.000000, 0.163369, 0.000000, -0.409087, -224.589035, 14.955354, -165.005493)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_9" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.413329, 0.000000, -0.165063, 0.000000, 0.445069, 0.000000, 0.165063, 0.000000, -0.413329, -224.980942, 14.952769, -164.941223)
+transform = Transform3D(-0.458846, 0.000000, -0.183240, 0.000000, 0.494082, 0.000000, 0.183240, 0.000000, -0.458846, -224.769745, 14.957630, -166.379089)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_10" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.428286, 0.000000, -0.171036, 0.000000, 0.461175, 0.000000, 0.171036, 0.000000, -0.428286, -224.549561, 14.956115, -165.214584)
+transform = Transform3D(-0.432768, 0.000000, -0.172826, 0.000000, 0.466001, 0.000000, 0.172826, 0.000000, -0.432768, -225.401764, 14.953016, -166.094833)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_11" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.443423, 0.000000, -0.177081, 0.000000, 0.477475, 0.000000, 0.177081, 0.000000, -0.443423, -224.402618, 14.956569, -165.030319)
+transform = Transform3D(-0.434487, 0.000000, -0.173512, 0.000000, 0.467851, 0.000000, 0.173512, 0.000000, -0.434487, -225.434982, 14.952711, -166.054459)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_12" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_12" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.371768, 0.000000, -0.148465, 0.000000, 0.400317, 0.000000, 0.148465, 0.000000, -0.371768, -224.671768, 14.958161, -166.348312)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_13" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.301798, 0.000000, -0.794618, 0.000000, 2.941176, 0.000000, 0.794618, 0.000000, 0.301798, -236.220200, 13.721936, -181.041153)
 metadata/coliziune = "hull"
 
-[node name="socluF2_13" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.373938, 0.000000, 0.142023, 0.000000, 0.400000, 0.000000, -0.142023, 0.000000, 0.373938, -234.354141, 13.736843, -182.605621)
+[node name="socluF2_14" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.373938, 0.000000, 0.142023, 0.000000, 0.400000, 0.000000, -0.142023, 0.000000, 0.373938, -233.963577, 13.736843, -181.577301)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_14" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.366684, 0.000000, 0.139267, 0.000000, 0.392241, 0.000000, -0.139267, 0.000000, 0.366684, -234.391205, 14.936170, -182.410828)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_15" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.364947, 0.000000, 0.138608, 0.000000, 0.390383, 0.000000, -0.138608, 0.000000, 0.364947, -234.193176, 14.937872, -182.628815)
+transform = Transform3D(0.413630, 0.000000, 0.157098, 0.000000, 0.442459, 0.000000, -0.157098, 0.000000, 0.413630, -234.212845, 14.935333, -181.577408)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_16" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.394162, 0.000000, 0.149704, 0.000000, 0.421634, 0.000000, -0.149704, 0.000000, 0.394162, -233.950150, 14.939666, -182.768814)
+transform = Transform3D(0.386767, 0.000000, 0.146895, 0.000000, 0.413724, 0.000000, -0.146895, 0.000000, 0.386767, -233.896698, 14.937465, -181.671371)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_17" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.389711, 0.000000, 0.148013, 0.000000, 0.416872, 0.000000, -0.148013, 0.000000, 0.389711, -234.678894, 14.935040, -182.677078)
+transform = Transform3D(0.402124, 0.000000, 0.152728, 0.000000, 0.430151, 0.000000, -0.152728, 0.000000, 0.402124, -233.737839, 14.938254, -181.596237)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_18" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_18" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.417601, 0.000000, 0.158606, 0.000000, 0.446707, 0.000000, -0.158606, 0.000000, 0.417601, -233.634048, 14.939302, -181.778290)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_19" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.301798, 0.000000, -0.794618, 0.000000, 2.941176, 0.000000, 0.794618, 0.000000, 0.301798, -229.758163, 13.721936, -164.026962)
 metadata/coliziune = "hull"
 
-[node name="socluF2_19" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.373938, 0.000000, -0.142023, 0.000000, 0.400000, 0.000000, 0.142023, 0.000000, -0.373938, -231.624222, 13.707029, -162.462494)
+[node name="socluF2_20" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.373938, 0.000000, -0.142023, 0.000000, 0.400000, 0.000000, 0.142023, 0.000000, -0.373938, -232.014786, 13.707029, -163.490814)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_20" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.463541, 0.000000, -0.176054, 0.000000, 0.495848, 0.000000, 0.176054, 0.000000, -0.463541, -231.388580, 14.908692, -162.565018)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_21" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.373058, 0.000000, -0.141688, 0.000000, 0.399058, 0.000000, 0.141688, 0.000000, -0.373058, -231.356842, 14.909156, -162.682831)
+transform = Transform3D(-0.389432, 0.000000, -0.147907, 0.000000, 0.416574, 0.000000, 0.147907, 0.000000, -0.389432, -232.091492, 14.906499, -163.462494)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_22" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.366143, 0.000000, -0.139062, 0.000000, 0.391661, 0.000000, 0.139062, 0.000000, -0.366143, -232.033707, 14.904360, -162.380600)
+transform = Transform3D(-0.424498, 0.000000, -0.161225, 0.000000, 0.454084, 0.000000, 0.161225, 0.000000, -0.424498, -231.740601, 14.909217, -163.719528)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_23" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.453636, 0.000000, -0.172292, 0.000000, 0.485253, 0.000000, 0.172292, 0.000000, -0.453636, -231.532654, 14.908104, -162.688553)
+transform = Transform3D(-0.453861, 0.000000, -0.172377, 0.000000, 0.485493, 0.000000, 0.172377, 0.000000, -0.453861, -232.410919, 14.904523, -163.444794)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_24" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_24" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.459679, 0.000000, -0.174587, 0.000000, 0.491716, 0.000000, 0.174587, 0.000000, -0.459679, -231.910416, 14.908072, -163.669464)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_25" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.302609, 0.000000, -0.794310, 0.000000, 2.941176, 0.000000, 0.794310, 0.000000, 0.302609, -243.464478, 13.675673, -178.300461)
 metadata/coliziune = "hull"
 
-[node name="socluF2_25" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.373793, 0.000000, 0.142404, 0.000000, 0.400000, 0.000000, -0.142404, 0.000000, 0.373793, -241.600006, 13.689112, -179.866867)
+[node name="socluF2_26" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.373793, 0.000000, 0.142404, 0.000000, 0.400000, 0.000000, -0.142404, 0.000000, 0.373793, -241.208389, 13.689112, -178.838928)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_26" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.435499, 0.000000, 0.165913, 0.000000, 0.466033, 0.000000, -0.165913, 0.000000, 0.435499, -242.073624, 14.886487, -179.848633)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_27" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.363113, 0.000000, 0.138336, 0.000000, 0.388572, 0.000000, -0.138336, 0.000000, 0.363113, -241.904495, 14.887028, -179.664505)
+transform = Transform3D(0.464440, 0.000000, 0.176938, 0.000000, 0.497003, 0.000000, -0.176938, 0.000000, 0.464440, -241.485046, 14.887456, -178.769043)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_28" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.397412, 0.000000, 0.151403, 0.000000, 0.425276, 0.000000, -0.151403, 0.000000, 0.397412, -241.795959, 14.887976, -179.835358)
+transform = Transform3D(0.435935, 0.000000, 0.166079, 0.000000, 0.466499, 0.000000, -0.166079, 0.000000, 0.435935, -240.886169, 14.891307, -179.048676)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_29" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.447383, 0.000000, 0.170440, 0.000000, 0.478750, 0.000000, -0.170440, 0.000000, 0.447383, -241.446167, 14.889812, -179.800217)
+transform = Transform3D(0.446476, 0.000000, 0.170095, 0.000000, 0.477779, 0.000000, -0.170095, 0.000000, 0.446476, -241.340546, 14.888141, -178.718903)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_30" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_30" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.431749, 0.000000, 0.164484, 0.000000, 0.462020, 0.000000, -0.164484, 0.000000, 0.431749, -241.344131, 14.888257, -178.784561)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_31" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.302609, 0.000000, -0.794310, 0.000000, 2.941176, 0.000000, 0.794310, 0.000000, 0.302609, -236.985077, 13.675673, -161.292892)
 metadata/coliziune = "hull"
 
-[node name="socluF2_31" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.373793, 0.000000, -0.142404, 0.000000, 0.400000, 0.000000, 0.142404, 0.000000, -0.373793, -238.849548, 13.662233, -159.726486)
+[node name="socluF2_32" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.373793, 0.000000, -0.142404, 0.000000, 0.400000, 0.000000, 0.142404, 0.000000, -0.373793, -239.241165, 13.662233, -160.754425)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_32" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.392840, 0.000000, -0.149661, 0.000000, 0.420383, 0.000000, 0.149661, 0.000000, -0.392840, -238.579773, 14.863924, -159.831009)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_33" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.458653, 0.000000, -0.174734, 0.000000, 0.490810, 0.000000, 0.174734, 0.000000, -0.458653, -239.013657, 14.860985, -159.557129)
+transform = Transform3D(-0.448156, 0.000000, -0.170734, 0.000000, 0.479577, 0.000000, 0.170734, 0.000000, -0.448156, -239.253311, 14.862206, -160.773285)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_34" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.443678, 0.000000, -0.169029, 0.000000, 0.474786, 0.000000, 0.169029, 0.000000, -0.443678, -238.789474, 14.862611, -159.750443)
+transform = Transform3D(-0.378810, 0.000000, -0.144316, 0.000000, 0.405369, 0.000000, 0.144316, 0.000000, -0.378810, -239.062805, 14.863295, -160.796722)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_35" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.378651, 0.000000, -0.144255, 0.000000, 0.405198, 0.000000, 0.144255, 0.000000, -0.378651, -238.535873, 14.864587, -160.034500)
+transform = Transform3D(-0.374316, 0.000000, -0.142604, 0.000000, 0.400560, 0.000000, 0.142604, 0.000000, -0.374316, -238.798431, 14.864764, -160.808884)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_36" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_36" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.376429, 0.000000, -0.143408, 0.000000, 0.402821, 0.000000, 0.143408, 0.000000, -0.376429, -239.369843, 14.861728, -160.849091)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_37" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.390635, 0.000000, -0.148821, 0.000000, 0.418023, 0.000000, 0.148821, 0.000000, -0.390635, -239.595215, 14.859891, -160.557999)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_38" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.302717, 0.000000, -0.794268, 0.000000, 2.941176, 0.000000, 0.794268, 0.000000, 0.302717, -252.108444, 13.616971, -174.963364)
 metadata/coliziune = "hull"
 
-[node name="socluF2_37" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.373773, 0.000000, 0.142455, 0.000000, 0.400000, 0.000000, -0.142455, 0.000000, 0.373773, -250.244202, 13.632182, -176.529999)
+[node name="socluF2_39" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.373773, 0.000000, 0.142455, 0.000000, 0.400000, 0.000000, -0.142455, 0.000000, 0.373773, -249.852448, 13.632182, -175.502121)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_38" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.422243, 0.000000, 0.160928, 0.000000, 0.451871, 0.000000, -0.160928, 0.000000, 0.422243, -250.071259, 14.832965, -176.408478)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_39" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.455698, 0.000000, 0.173679, 0.000000, 0.487673, 0.000000, -0.173679, 0.000000, 0.455698, -250.429825, 14.830414, -176.266327)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_40" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.389107, 0.000000, 0.148299, 0.000000, 0.416410, 0.000000, -0.148299, 0.000000, 0.389107, -250.604980, 14.829700, -176.423065)
+transform = Transform3D(0.424564, 0.000000, 0.161813, 0.000000, 0.454355, 0.000000, -0.161813, 0.000000, 0.424564, -249.655670, 14.833320, -175.468689)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_41" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.457774, 0.000000, 0.174470, 0.000000, 0.489895, 0.000000, -0.174470, 0.000000, 0.457774, -250.163071, 14.832503, -176.453415)
+transform = Transform3D(0.377396, 0.000000, 0.143836, 0.000000, 0.403877, 0.000000, -0.143836, 0.000000, 0.377396, -249.612503, 14.834116, -175.693680)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_42" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_42" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.437578, 0.000000, 0.166773, 0.000000, 0.468281, 0.000000, -0.166773, 0.000000, 0.437578, -249.719406, 14.832750, -175.394226)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_43" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.372480, 0.000000, 0.141962, 0.000000, 0.398616, 0.000000, -0.141962, 0.000000, 0.372480, -249.896194, 14.831602, -175.370697)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_44" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.302717, 0.000000, -0.794268, 0.000000, 2.941176, 0.000000, 0.794268, 0.000000, 0.302717, -245.626724, 13.616971, -157.956680)
 metadata/coliziune = "hull"
 
-[node name="socluF2_43" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.373773, 0.000000, -0.142455, 0.000000, 0.400000, 0.000000, 0.142455, 0.000000, -0.373773, -247.490967, 13.601760, -156.390045)
+[node name="socluF2_45" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.373773, 0.000000, -0.142455, 0.000000, 0.400000, 0.000000, 0.142455, 0.000000, -0.373773, -247.882721, 13.601760, -157.417923)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_44" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.393167, 0.000000, -0.149847, 0.000000, 0.420755, 0.000000, 0.149847, 0.000000, -0.393167, -247.376053, 14.802663, -156.472122)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_45" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.436470, 0.000000, -0.166351, 0.000000, 0.467096, 0.000000, 0.166351, 0.000000, -0.436470, -247.268570, 14.803801, -156.673126)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_46" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.422823, 0.000000, -0.161149, 0.000000, 0.452491, 0.000000, 0.161149, 0.000000, -0.422823, -247.555618, 14.801312, -156.369675)
+transform = Transform3D(-0.381155, 0.000000, -0.145269, 0.000000, 0.407900, 0.000000, 0.145269, 0.000000, -0.381155, -248.238632, 14.799419, -157.358292)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_47" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.360235, 0.000000, -0.137295, 0.000000, 0.385511, 0.000000, 0.137295, 0.000000, -0.360235, -247.365784, 14.802353, -156.313263)
+transform = Transform3D(-0.398115, 0.000000, -0.151732, 0.000000, 0.426050, 0.000000, 0.151732, 0.000000, -0.398115, -248.025711, 14.800808, -157.389008)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_48" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.420869, 0.000000, -0.160405, 0.000000, 0.450401, 0.000000, 0.160405, 0.000000, -0.420869, -247.112289, 14.804313, -156.480499)
+transform = Transform3D(-0.418522, 0.000000, -0.159510, 0.000000, 0.447888, 0.000000, 0.159510, 0.000000, -0.418522, -247.892883, 14.801508, -157.337524)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_49" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_49" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.424149, 0.000000, -0.161655, 0.000000, 0.453911, 0.000000, 0.161655, 0.000000, -0.424149, -247.875214, 14.801566, -157.316132)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_50" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.418692, 0.000000, -0.159575, 0.000000, 0.448070, 0.000000, 0.159575, 0.000000, -0.418692, -248.061310, 14.800321, -157.275421)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_51" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.303431, 0.000000, -0.793996, 0.000000, 2.941176, 0.000000, 0.793996, 0.000000, 0.303431, -257.675110, 13.577211, -172.878418)
 metadata/coliziune = "hull"
 
-[node name="socluF2_50" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.373645, 0.000000, 0.142791, 0.000000, 0.400000, 0.000000, -0.142791, 0.000000, 0.373645, -255.812286, 13.593248, -174.446732)
+[node name="socluF2_52" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.373645, 0.000000, 0.142791, 0.000000, 0.400000, 0.000000, -0.142791, 0.000000, 0.373645, -255.419617, 13.593248, -173.419220)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_51" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.377170, 0.000000, 0.144138, 0.000000, 0.403774, 0.000000, -0.144138, 0.000000, 0.377170, -255.707489, 14.793962, -174.459076)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_52" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.446109, 0.000000, 0.170484, 0.000000, 0.477575, 0.000000, -0.170484, 0.000000, 0.446109, -255.564484, 14.795391, -174.659348)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_53" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.374248, 0.000000, 0.143021, 0.000000, 0.400645, 0.000000, -0.143021, 0.000000, 0.374248, -255.706299, 14.793922, -174.440292)
+transform = Transform3D(0.395838, 0.000000, 0.151272, 0.000000, 0.423758, 0.000000, -0.151272, 0.000000, 0.395838, -255.191727, 14.794937, -173.501404)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_54" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.427178, 0.000000, 0.163249, 0.000000, 0.457309, 0.000000, -0.163249, 0.000000, 0.427178, -256.039337, 14.791594, -174.375961)
+transform = Transform3D(0.399728, 0.000000, 0.152759, 0.000000, 0.427923, 0.000000, -0.152759, 0.000000, 0.399728, -255.033463, 14.796045, -173.532486)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_55" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_55" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.408372, 0.000000, 0.156062, 0.000000, 0.437176, 0.000000, -0.156062, 0.000000, 0.408372, -255.832153, 14.790219, -173.282028)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_56" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.444175, 0.000000, 0.169745, 0.000000, 0.475505, 0.000000, -0.169745, 0.000000, 0.444175, -255.369461, 14.793440, -173.364960)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_57" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.303431, 0.000000, -0.793996, 0.000000, 2.941176, 0.000000, 0.793996, 0.000000, 0.303431, -251.178116, 13.577211, -155.877563)
 metadata/coliziune = "hull"
 
-[node name="socluF2_56" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.373645, 0.000000, -0.142791, 0.000000, 0.400000, 0.000000, 0.142791, 0.000000, -0.373645, -253.040939, 13.561174, -154.309250)
+[node name="socluF2_58" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.373645, 0.000000, -0.142791, 0.000000, 0.400000, 0.000000, 0.142791, 0.000000, -0.373645, -253.433624, 13.561174, -155.336761)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_57" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.425232, 0.000000, -0.162506, 0.000000, 0.455226, 0.000000, 0.162506, 0.000000, -0.425232, -253.317581, 14.759475, -154.350601)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_58" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.437570, 0.000000, -0.167221, 0.000000, 0.468434, 0.000000, 0.167221, 0.000000, -0.437570, -252.943314, 14.761839, -154.320877)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_59" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.358797, 0.000000, -0.137117, 0.000000, 0.384105, 0.000000, 0.137117, 0.000000, -0.358797, -253.083038, 14.761172, -154.418488)
+transform = Transform3D(-0.452822, 0.000000, -0.173049, 0.000000, 0.484761, 0.000000, 0.173049, 0.000000, -0.452822, -253.478806, 14.760775, -155.294662)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_60" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.357528, 0.000000, -0.136632, 0.000000, 0.382746, 0.000000, 0.136632, 0.000000, -0.357528, -252.684372, 14.764277, -154.622940)
+transform = Transform3D(-0.400027, 0.000000, -0.152873, 0.000000, 0.428243, 0.000000, 0.152873, 0.000000, -0.400027, -253.780365, 14.758867, -155.317200)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_61" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_61" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.449176, 0.000000, -0.171656, 0.000000, 0.480858, 0.000000, 0.171656, 0.000000, -0.449176, -253.455780, 14.761337, -155.460251)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_62" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.369861, 0.000000, -0.141345, 0.000000, 0.395949, 0.000000, 0.141345, 0.000000, -0.369861, -253.202698, 14.762863, -155.410919)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_63" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.351975, 0.000000, -0.773701, 0.000000, 2.941176, 0.000000, 0.773701, 0.000000, 0.351975, -266.012207, 13.513000, -169.356155)
 metadata/coliziune = "hull"
 
-[node name="socluF2_62" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.364095, 0.000000, 0.165635, 0.000000, 0.400000, 0.000000, -0.165635, 0.000000, 0.364095, -264.250000, 13.531351, -171.036713)
+[node name="socluF2_64" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.364095, 0.000000, 0.165635, 0.000000, 0.400000, 0.000000, -0.165635, 0.000000, 0.364095, -263.794495, 13.531351, -170.035461)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_63" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.451416, 0.000000, 0.205360, 0.000000, 0.495932, 0.000000, -0.205360, 0.000000, 0.451416, -264.089905, 14.733255, -171.261169)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_64" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.440269, 0.000000, 0.200289, 0.000000, 0.483686, 0.000000, -0.200289, 0.000000, 0.440269, -264.469025, 14.729000, -170.806625)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_65" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.391950, 0.000000, 0.178308, 0.000000, 0.430602, 0.000000, -0.178308, 0.000000, 0.391950, -264.337830, 14.729978, -170.814163)
+transform = Transform3D(0.440081, 0.000000, 0.200203, 0.000000, 0.483480, 0.000000, -0.200203, 0.000000, 0.440081, -263.412903, 14.734450, -170.134872)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_66" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.408598, 0.000000, 0.185881, 0.000000, 0.448892, 0.000000, -0.185881, 0.000000, 0.408598, -264.384247, 14.730357, -171.031052)
+transform = Transform3D(0.364912, 0.000000, 0.166007, 0.000000, 0.400898, 0.000000, -0.166007, 0.000000, 0.364912, -263.536041, 14.734159, -170.317383)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_67" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.397953, 0.000000, 0.181038, 0.000000, 0.437197, 0.000000, -0.181038, 0.000000, 0.397953, -264.566498, 14.729264, -171.100815)
+transform = Transform3D(0.361677, 0.000000, 0.164536, 0.000000, 0.397344, 0.000000, -0.164536, 0.000000, 0.361677, -264.029785, 14.728847, -169.794739)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_68" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_68" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.408939, 0.000000, 0.186036, 0.000000, 0.449267, 0.000000, -0.186036, 0.000000, 0.408939, -264.086975, 14.728289, -169.751511)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_69" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.414217, 0.000000, 0.188437, 0.000000, 0.455065, 0.000000, -0.188437, 0.000000, 0.414217, -263.720886, 14.732100, -170.100266)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_70" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.351975, 0.000000, -0.773701, 0.000000, 2.941176, 0.000000, 0.773701, 0.000000, 0.351975, -258.475769, 13.513000, -152.789841)
 metadata/coliziune = "hull"
 
-[node name="socluF2_69" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.364095, 0.000000, -0.165635, 0.000000, 0.400000, 0.000000, 0.165635, 0.000000, -0.364095, -260.237976, 13.494648, -151.109283)
+[node name="socluF2_71" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.364095, 0.000000, -0.165635, 0.000000, 0.400000, 0.000000, 0.165635, 0.000000, -0.364095, -260.693481, 13.494648, -152.110535)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_70" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.372109, 0.000000, -0.169281, 0.000000, 0.408804, 0.000000, 0.169281, 0.000000, -0.372109, -260.368073, 14.694229, -151.268417)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_71" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.431329, 0.000000, -0.196222, 0.000000, 0.473865, 0.000000, 0.196222, 0.000000, -0.431329, -259.853790, 14.697468, -151.118362)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_72" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.400553, 0.000000, -0.182221, 0.000000, 0.440054, 0.000000, 0.182221, 0.000000, -0.400553, -260.426544, 14.692518, -150.879181)
+transform = Transform3D(-0.404957, 0.000000, -0.184225, 0.000000, 0.444892, 0.000000, 0.184225, 0.000000, -0.404957, -260.979034, 14.691750, -151.860931)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_73" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.425534, 0.000000, -0.193586, 0.000000, 0.467498, 0.000000, 0.193586, 0.000000, -0.425534, -260.444855, 14.693415, -151.190781)
+transform = Transform3D(-0.384073, 0.000000, -0.174724, 0.000000, 0.421948, 0.000000, 0.174724, 0.000000, -0.384073, -260.771637, 14.694356, -152.194061)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_74" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.407240, 0.000000, -0.185263, 0.000000, 0.447400, 0.000000, 0.185263, 0.000000, -0.407240, -260.282257, 14.694761, -151.241135)
+transform = Transform3D(-0.425328, 0.000000, -0.193492, 0.000000, 0.467272, 0.000000, 0.193492, 0.000000, -0.425328, -260.275085, 14.697863, -152.163940)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_75" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_75" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.449652, 0.000000, -0.204558, 0.000000, 0.493995, 0.000000, 0.204558, 0.000000, -0.449652, -260.636993, 14.695007, -152.095337)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_76" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.385124, 0.000000, -0.757746, 0.000000, 2.941176, 0.000000, 0.757746, 0.000000, 0.385124, -274.070007, 13.442042, -165.579437)
 metadata/coliziune = "hull"
 
-[node name="socluF2_76" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.356586, 0.000000, 0.181235, 0.000000, 0.400000, 0.000000, -0.181235, 0.000000, 0.356586, -272.382172, 13.462534, -167.334656)
+[node name="socluF2_77" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.356586, 0.000000, 0.181235, 0.000000, 0.400000, 0.000000, -0.181235, 0.000000, 0.356586, -271.883759, 13.462534, -166.354050)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_77" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.414293, 0.000000, 0.210564, 0.000000, 0.464732, 0.000000, -0.210564, 0.000000, 0.414293, -272.634094, 14.660339, -167.286804)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_78" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.338982, 0.000000, 0.172287, 0.000000, 0.380252, 0.000000, -0.172287, 0.000000, 0.338982, -272.231842, 14.664821, -167.605392)
+transform = Transform3D(0.383298, 0.000000, 0.194811, 0.000000, 0.429963, 0.000000, -0.194811, 0.000000, 0.383298, -271.646393, 14.664417, -166.353607)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_79" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.430539, 0.000000, 0.218821, 0.000000, 0.482956, 0.000000, -0.218821, 0.000000, 0.430539, -272.102295, 14.665820, -167.598007)
+transform = Transform3D(0.443965, 0.000000, 0.225645, 0.000000, 0.498017, 0.000000, -0.225645, 0.000000, 0.443965, -272.031860, 14.661331, -166.347458)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_80" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.402614, 0.000000, 0.204628, 0.000000, 0.451631, 0.000000, -0.204628, 0.000000, 0.402614, -271.978149, 14.666078, -167.417664)
+transform = Transform3D(0.405969, 0.000000, 0.206333, 0.000000, 0.455394, 0.000000, -0.206333, 0.000000, 0.405969, -272.299622, 14.658689, -166.219971)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_81" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.346789, 0.000000, 0.176255, 0.000000, 0.389010, 0.000000, -0.176255, 0.000000, 0.346789, -272.253143, 14.662951, -167.184372)
+transform = Transform3D(0.374893, 0.000000, 0.190539, 0.000000, 0.420535, 0.000000, -0.190539, 0.000000, 0.374893, -271.721375, 14.663718, -166.327835)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
@@ -10980,26 +10976,26 @@ transform = Transform3D(0.385124, 0.000000, -0.757746, 0.000000, 2.941176, 0.000
 metadata/coliziune = "hull"
 
 [node name="socluF2_83" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.356586, 0.000000, -0.181235, 0.000000, 0.400000, 0.000000, 0.181235, 0.000000, -0.356586, -267.511627, 13.421551, -147.599518)
+transform = Transform3D(-0.356586, 0.000000, -0.181235, 0.000000, 0.400000, 0.000000, 0.181235, 0.000000, -0.356586, -268.010040, 13.421551, -148.580124)
 metadata/coliziune = "hull"
 
 [node name="lumanareF2_84" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.434398, 0.000000, -0.220783, 0.000000, 0.487285, 0.000000, 0.220783, 0.000000, -0.434398, -267.092224, 14.625360, -147.717911)
+transform = Transform3D(-0.375503, 0.000000, -0.190849, 0.000000, 0.421219, 0.000000, 0.190849, 0.000000, -0.375503, -268.088898, 14.620363, -148.441299)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_85" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.423269, 0.000000, -0.215126, 0.000000, 0.474801, 0.000000, 0.215126, 0.000000, -0.423269, -267.740631, 14.618949, -147.405594)
+transform = Transform3D(-0.390308, 0.000000, -0.198374, 0.000000, 0.437828, 0.000000, 0.198374, 0.000000, -0.390308, -268.295807, 14.618151, -148.300247)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_86" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.430717, 0.000000, -0.218911, 0.000000, 0.483155, 0.000000, 0.218911, 0.000000, -0.430717, -267.413025, 14.622027, -147.523727)
+transform = Transform3D(-0.351969, 0.000000, -0.178888, 0.000000, 0.394820, 0.000000, 0.178888, 0.000000, -0.351969, -267.893707, 14.622679, -148.630646)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_87" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.404571, 0.000000, -0.205623, 0.000000, 0.453826, 0.000000, 0.205623, 0.000000, -0.404571, -267.353241, 14.623691, -147.817963)
+transform = Transform3D(-0.359948, 0.000000, -0.182943, 0.000000, 0.403770, 0.000000, 0.182943, 0.000000, -0.359948, -268.068390, 14.620590, -148.457016)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
@@ -11008,64 +11004,64 @@ transform = Transform3D(0.444343, 0.000000, -0.724610, 0.000000, 2.941176, 0.000
 metadata/coliziune = "hull"
 
 [node name="socluF2_89" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.340993, 0.000000, 0.209102, 0.000000, 0.400000, 0.000000, -0.209102, 0.000000, 0.340993, -278.228607, 13.408932, -164.059021)
+transform = Transform3D(0.340993, 0.000000, 0.209102, 0.000000, 0.400000, 0.000000, -0.209102, 0.000000, 0.340993, -277.653564, 13.408932, -163.121292)
 metadata/coliziune = "hull"
 
 [node name="lumanareF2_90" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.359853, 0.000000, 0.220668, 0.000000, 0.422123, 0.000000, -0.220668, 0.000000, 0.359853, -277.838287, 14.613016, -164.249939)
+transform = Transform3D(0.359010, 0.000000, 0.220150, 0.000000, 0.421134, 0.000000, -0.220150, 0.000000, 0.359010, -277.797974, 14.607901, -163.147919)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_91" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.423761, 0.000000, 0.259857, 0.000000, 0.497091, 0.000000, -0.259857, 0.000000, 0.423761, -278.090240, 14.611504, -164.354385)
+transform = Transform3D(0.375391, 0.000000, 0.230196, 0.000000, 0.440350, 0.000000, -0.230196, 0.000000, 0.375391, -277.624390, 14.608871, -163.061523)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_92" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.390413, 0.000000, 0.239408, 0.000000, 0.457972, 0.000000, -0.239408, 0.000000, 0.390413, -278.069550, 14.611326, -164.284821)
+transform = Transform3D(0.417765, 0.000000, 0.256180, 0.000000, 0.490057, 0.000000, -0.256180, 0.000000, 0.417765, -277.370483, 14.612439, -163.370300)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_93" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.405735, 0.000000, 0.248803, 0.000000, 0.475946, 0.000000, -0.248803, 0.000000, 0.405735, -278.487335, 14.605614, -163.808823)
+transform = Transform3D(0.331784, 0.000000, 0.203456, 0.000000, 0.389198, 0.000000, -0.203456, 0.000000, 0.331784, -277.332916, 14.612425, -163.306107)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_94" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_94" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.426003, 0.000000, 0.261232, 0.000000, 0.499720, 0.000000, -0.261232, 0.000000, 0.426003, -277.497406, 14.610633, -163.211349)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_95" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.444343, 0.000000, -0.724610, 0.000000, 2.941176, 0.000000, 0.724610, 0.000000, 0.444343, -270.433197, 13.387213, -146.947128)
 metadata/coliziune = "hull"
 
-[node name="socluF2_95" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.340993, 0.000000, -0.209102, 0.000000, 0.400000, 0.000000, 0.209102, 0.000000, -0.340993, -271.975616, 13.365494, -145.062866)
+[node name="socluF2_96" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.340993, 0.000000, -0.209102, 0.000000, 0.400000, 0.000000, 0.209102, 0.000000, -0.340993, -272.550659, 13.365494, -146.000595)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_96" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.346380, 0.000000, -0.212406, 0.000000, 0.406320, 0.000000, 0.212406, 0.000000, -0.346380, -271.711853, 14.568753, -145.293076)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_97" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.365159, 0.000000, -0.223921, 0.000000, 0.428348, 0.000000, 0.223921, 0.000000, -0.365159, -271.895813, 14.566278, -145.091797)
+transform = Transform3D(-0.403437, 0.000000, -0.247394, 0.000000, 0.473250, 0.000000, 0.247394, 0.000000, -0.403437, -272.922363, 14.562119, -145.923187)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_98" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.325010, 0.000000, -0.199301, 0.000000, 0.381251, 0.000000, 0.199301, 0.000000, -0.325010, -271.812958, 14.567939, -145.293045)
+transform = Transform3D(-0.415028, 0.000000, -0.254502, 0.000000, 0.486846, 0.000000, 0.254502, 0.000000, -0.415028, -272.618073, 14.563933, -145.794479)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_99" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.332836, 0.000000, -0.204101, 0.000000, 0.390432, 0.000000, 0.204101, 0.000000, -0.332836, -272.381104, 14.561589, -144.933243)
+transform = Transform3D(-0.349653, 0.000000, -0.214413, 0.000000, 0.410159, 0.000000, 0.214413, 0.000000, -0.349653, -272.655304, 14.564023, -145.873352)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_100" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.363796, 0.000000, -0.223086, 0.000000, 0.426749, 0.000000, 0.223086, 0.000000, -0.363796, -272.056824, 14.565493, -145.195129)
+transform = Transform3D(-0.423846, 0.000000, -0.259909, 0.000000, 0.497190, 0.000000, 0.259909, 0.000000, -0.423846, -272.296143, 14.568970, -146.289581)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="focF2_101" type="OmniLight3D" parent="DecorManual/F2_Sala1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -271.975616, 15.365494, -145.062866)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -272.550659, 15.365494, -146.000595)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.0
 omni_range = 12.0
@@ -11081,31 +11077,36 @@ transform = Transform3D(0.494662, 0.000000, -0.691237, 0.000000, 2.941176, 0.000
 metadata/coliziune = "hull"
 
 [node name="socluF2_103" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.325288, 0.000000, 0.232782, 0.000000, 0.400000, 0.000000, -0.232782, 0.000000, 0.325288, -286.270660, 13.320910, -158.254410)
+transform = Transform3D(0.325288, 0.000000, 0.232782, 0.000000, 0.400000, 0.000000, -0.232782, 0.000000, 0.325288, -285.630493, 13.320910, -157.359879)
 metadata/coliziune = "hull"
 
 [node name="lumanareF2_104" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.394977, 0.000000, 0.282653, 0.000000, 0.485695, 0.000000, -0.282653, 0.000000, 0.394977, -286.120148, 14.522861, -158.375519)
+transform = Transform3D(0.332330, 0.000000, 0.237821, 0.000000, 0.408659, 0.000000, -0.237821, 0.000000, 0.332330, -285.567169, 14.521640, -157.395294)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_105" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.314091, 0.000000, 0.224769, 0.000000, 0.386231, 0.000000, -0.224769, 0.000000, 0.314091, -286.554504, 14.516430, -157.889938)
+transform = Transform3D(0.336616, 0.000000, 0.240889, 0.000000, 0.413929, 0.000000, -0.240889, 0.000000, 0.336616, -285.826721, 14.517987, -157.137619)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_106" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.350549, 0.000000, 0.250859, 0.000000, 0.431063, 0.000000, -0.250859, 0.000000, 0.350549, -286.494171, 14.516968, -157.897003)
+transform = Transform3D(0.332988, 0.000000, 0.238293, 0.000000, 0.409469, 0.000000, -0.238293, 0.000000, 0.332988, -285.536224, 14.521373, -157.306625)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_107" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.356428, 0.000000, 0.255066, 0.000000, 0.438292, 0.000000, -0.255066, 0.000000, 0.356428, -286.624329, 14.516420, -157.985916)
+transform = Transform3D(0.378671, 0.000000, 0.270984, 0.000000, 0.465644, 0.000000, -0.270984, 0.000000, 0.378671, -285.697357, 14.520850, -157.443146)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="focF2_108" type="OmniLight3D" parent="DecorManual/F2_Sala1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -286.270660, 15.320910, -158.254410)
+[node name="lumanareF2_108" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.401879, 0.000000, 0.287592, 0.000000, 0.494182, 0.000000, -0.287592, 0.000000, 0.401879, -285.463013, 14.523261, -157.525131)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="focF2_109" type="OmniLight3D" parent="DecorManual/F2_Sala1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -285.630493, 15.320910, -157.359879)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.0
 omni_range = 12.0
@@ -11116,97 +11117,102 @@ distance_fade_enabled = true
 distance_fade_begin = 70.0
 distance_fade_length = 25.0
 
-[node name="coloanaF2_109" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="coloanaF2_110" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.494662, 0.000000, -0.691237, 0.000000, 2.941176, 0.000000, 0.691237, 0.000000, 0.494662, -278.000519, 13.297647, -142.745819)
 metadata/coliziune = "hull"
 
-[node name="socluF2_110" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.325288, 0.000000, -0.232782, 0.000000, 0.400000, 0.000000, 0.232782, 0.000000, -0.325288, -279.405243, 13.274384, -140.756821)
+[node name="socluF2_111" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.325288, 0.000000, -0.232782, 0.000000, 0.400000, 0.000000, 0.232782, 0.000000, -0.325288, -280.045410, 13.274384, -141.651352)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_111" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.384183, 0.000000, -0.274929, 0.000000, 0.472422, 0.000000, 0.274929, 0.000000, -0.384183, -279.476837, 14.473329, -140.677521)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_112" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.311610, 0.000000, -0.222994, 0.000000, 0.383180, 0.000000, 0.222994, 0.000000, -0.311610, -279.775513, 14.470800, -140.665451)
+transform = Transform3D(-0.364911, 0.000000, -0.261137, 0.000000, 0.448723, 0.000000, 0.261137, 0.000000, -0.364911, -279.839172, 14.476500, -141.722534)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_113" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.351749, 0.000000, -0.251718, 0.000000, 0.432538, 0.000000, 0.251718, 0.000000, -0.351749, -279.404846, 14.474603, -140.793350)
+transform = Transform3D(-0.386664, 0.000000, -0.276704, 0.000000, 0.475472, 0.000000, 0.276704, 0.000000, -0.386664, -279.904846, 14.477099, -141.916122)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_114" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.339538, 0.000000, -0.242980, 0.000000, 0.417523, 0.000000, 0.242980, 0.000000, -0.339538, -279.845001, 14.469984, -140.623917)
+transform = Transform3D(-0.316299, 0.000000, -0.226350, 0.000000, 0.388947, 0.000000, 0.226350, 0.000000, -0.316299, -279.990387, 14.474850, -141.653580)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_115" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_115" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.401919, 0.000000, -0.287621, 0.000000, 0.494231, 0.000000, 0.287621, 0.000000, -0.401919, -280.138245, 14.473342, -141.604004)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_116" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.565357, 0.000000, -0.634722, 0.000000, 2.941176, 0.000000, 0.634722, 0.000000, 0.565357, -293.888519, 13.218513, -150.281601)
 metadata/coliziune = "hull"
 
-[node name="socluF2_116" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.298693, 0.000000, 0.266050, 0.000000, 0.400000, 0.000000, -0.266050, 0.000000, 0.298693, -292.703217, 13.241606, -152.408691)
+[node name="socluF2_117" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.298693, 0.000000, 0.266050, 0.000000, 0.400000, 0.000000, -0.266050, 0.000000, 0.298693, -291.971588, 13.241606, -151.587280)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_117" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.340192, 0.000000, 0.303014, 0.000000, 0.455575, 0.000000, -0.303014, 0.000000, 0.340192, -292.451416, 14.443699, -152.439484)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_118" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.317592, 0.000000, 0.282884, 0.000000, 0.425309, 0.000000, -0.282884, 0.000000, 0.317592, -292.902466, 14.437215, -151.974930)
+transform = Transform3D(0.325994, 0.000000, 0.290368, 0.000000, 0.436562, 0.000000, -0.290368, 0.000000, 0.325994, -292.152313, 14.437930, -151.239838)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_119" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.297701, 0.000000, 0.265167, 0.000000, 0.398672, 0.000000, -0.265167, 0.000000, 0.297701, -292.887756, 14.438928, -152.214844)
+transform = Transform3D(0.366879, 0.000000, 0.326784, 0.000000, 0.491313, 0.000000, -0.326784, 0.000000, 0.366879, -291.889709, 14.441538, -151.485168)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_120" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.300862, 0.000000, 0.267983, 0.000000, 0.402905, 0.000000, -0.267983, 0.000000, 0.300862, -292.500916, 14.444733, -152.649780)
+transform = Transform3D(0.368732, 0.000000, 0.328435, 0.000000, 0.493794, 0.000000, -0.328435, 0.000000, 0.368732, -291.996216, 14.441725, -151.632736)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="coloanaF2_121" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="lumanareF2_121" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.296991, 0.000000, 0.264534, 0.000000, 0.397721, 0.000000, -0.264534, 0.000000, 0.296991, -291.840424, 14.442049, -151.506454)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_122" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.365495, 0.000000, 0.325552, 0.000000, 0.489460, 0.000000, -0.325552, 0.000000, 0.365495, -292.163483, 14.437852, -151.240570)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="coloanaF2_123" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.565357, 0.000000, -0.634722, 0.000000, 2.941176, 0.000000, 0.634722, 0.000000, 0.565357, -283.796661, 13.218513, -138.951523)
 metadata/coliziune = "hull"
 
-[node name="socluF2_122" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.298693, 0.000000, -0.266050, 0.000000, 0.400000, 0.000000, 0.266050, 0.000000, -0.298693, -284.981964, 13.195421, -136.824432)
+[node name="socluF2_124" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.298693, 0.000000, -0.266050, 0.000000, 0.400000, 0.000000, 0.266050, 0.000000, -0.298693, -285.713593, 13.195421, -137.645844)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_123" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.301706, 0.000000, -0.268734, 0.000000, 0.404035, 0.000000, 0.268734, 0.000000, -0.301706, -285.351624, 14.391899, -136.712006)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_124" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.305476, 0.000000, -0.272092, 0.000000, 0.409083, 0.000000, 0.272092, 0.000000, -0.305476, -285.292267, 14.391588, -136.598862)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_125" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.308603, 0.000000, -0.274878, 0.000000, 0.413272, 0.000000, 0.274878, 0.000000, -0.308603, -284.759369, 14.399410, -137.171844)
+transform = Transform3D(-0.292298, 0.000000, -0.260354, 0.000000, 0.391436, 0.000000, 0.260354, 0.000000, -0.292298, -285.498077, 14.397319, -137.688004)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_126" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.368700, 0.000000, -0.328407, 0.000000, 0.493752, 0.000000, 0.328407, 0.000000, -0.368700, -284.634216, 14.399014, -136.972015)
+transform = Transform3D(-0.284140, 0.000000, -0.253088, 0.000000, 0.380512, 0.000000, 0.253088, 0.000000, -0.284140, -285.738556, 14.396328, -137.809677)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_127" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.364792, 0.000000, -0.324926, 0.000000, 0.488518, 0.000000, 0.324926, 0.000000, -0.364792, -285.250793, 14.392467, -136.683945)
+transform = Transform3D(-0.295368, 0.000000, -0.263089, 0.000000, 0.395547, 0.000000, 0.263089, 0.000000, -0.295368, -285.408417, 14.399662, -137.938293)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="focF2_128" type="OmniLight3D" parent="DecorManual/F2_Sala1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -284.981964, 15.195421, -136.824432)
+[node name="lumanareF2_128" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.337050, 0.000000, -0.300216, 0.000000, 0.451367, 0.000000, 0.300216, 0.000000, -0.337050, -285.904602, 14.393949, -137.639816)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_129" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.296478, 0.000000, -0.264078, 0.000000, 0.397034, 0.000000, 0.264078, 0.000000, -0.296478, -285.376343, 14.399682, -137.905197)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="focF2_130" type="OmniLight3D" parent="DecorManual/F2_Sala1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -285.713593, 15.195421, -137.645844)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.0
 omni_range = 12.0
@@ -11217,36 +11223,36 @@ distance_fade_enabled = true
 distance_fade_begin = 70.0
 distance_fade_length = 25.0
 
-[node name="coloanaF2_129" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="coloanaF2_131" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.591228, 0.000000, -0.610696, 0.000000, 2.941176, 0.000000, 0.610696, 0.000000, 0.591228, -299.173187, 13.145812, -144.790558)
 metadata/coliziune = "hull"
 
-[node name="socluF2_130" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(0.287386, 0.000000, 0.278225, 0.000000, 0.400000, 0.000000, -0.278225, 0.000000, 0.287386, -298.077271, 13.168764, -146.965042)
+[node name="socluF2_132" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.287386, 0.000000, 0.278225, 0.000000, 0.400000, 0.000000, -0.278225, 0.000000, 0.287386, -297.312164, 13.168764, -146.174728)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_131" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.329015, 0.000000, 0.318527, 0.000000, 0.457942, 0.000000, -0.318527, 0.000000, 0.329015, -297.869812, 14.371973, -147.213104)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_132" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.315970, 0.000000, 0.305898, 0.000000, 0.439785, 0.000000, -0.305898, 0.000000, 0.315970, -297.978485, 14.369194, -146.924927)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_133" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.326733, 0.000000, 0.316318, 0.000000, 0.454765, 0.000000, -0.316318, 0.000000, 0.326733, -297.903564, 14.369312, -146.864655)
+transform = Transform3D(0.322188, 0.000000, 0.311917, 0.000000, 0.448439, 0.000000, -0.311917, 0.000000, 0.322188, -297.499359, 14.366956, -146.107559)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_134" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(0.332792, 0.000000, 0.322183, 0.000000, 0.463198, 0.000000, -0.322183, 0.000000, 0.332792, -298.252258, 14.368237, -147.069992)
+transform = Transform3D(0.281852, 0.000000, 0.272867, 0.000000, 0.392297, 0.000000, -0.272867, 0.000000, 0.281852, -296.981384, 14.372775, -146.410934)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
-[node name="focF2_135" type="OmniLight3D" parent="DecorManual/F2_Sala1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -298.077271, 15.168764, -146.965042)
+[node name="lumanareF2_135" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.357560, 0.000000, 0.346162, 0.000000, 0.497672, 0.000000, -0.346162, 0.000000, 0.357560, -297.256866, 14.369634, -146.242981)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_136" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.332382, 0.000000, 0.321787, 0.000000, 0.462628, 0.000000, -0.321787, 0.000000, 0.332382, -297.176086, 14.370683, -146.310547)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="focF2_137" type="OmniLight3D" parent="DecorManual/F2_Sala1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -297.312164, 15.168764, -146.174728)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.0
 omni_range = 12.0
@@ -11257,33 +11263,588 @@ distance_fade_enabled = true
 distance_fade_begin = 70.0
 distance_fade_length = 25.0
 
-[node name="coloanaF2_136" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
+[node name="coloanaF2_138" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_column")]
 transform = Transform3D(0.591228, 0.000000, -0.610696, 0.000000, 2.941176, 0.000000, 0.610696, 0.000000, 0.591228, -289.256012, 13.145812, -134.546814)
 metadata/coliziune = "hull"
 
-[node name="socluF2_137" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
-transform = Transform3D(-0.287386, 0.000000, -0.278225, 0.000000, 0.400000, 0.000000, 0.278225, 0.000000, -0.287386, -290.351929, 13.122860, -132.372330)
+[node name="socluF2_139" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.287386, 0.000000, -0.278225, 0.000000, 0.400000, 0.000000, 0.278225, 0.000000, -0.287386, -291.117035, 13.122860, -133.162643)
 metadata/coliziune = "hull"
 
-[node name="lumanareF2_138" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.273352, 0.000000, -0.264638, 0.000000, 0.380466, 0.000000, 0.264638, 0.000000, -0.273352, -290.339539, 14.322944, -132.371613)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
-[node name="lumanareF2_139" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.318847, 0.000000, -0.308683, 0.000000, 0.443789, 0.000000, 0.308683, 0.000000, -0.318847, -290.374756, 14.323012, -132.417969)
-metadata/coliziune = "none"
-metadata/lumina = "30|4.5|#FFB061"
-
 [node name="lumanareF2_140" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.308251, 0.000000, -0.298425, 0.000000, 0.429041, 0.000000, 0.298425, 0.000000, -0.308251, -290.400024, 14.320480, -132.079178)
+transform = Transform3D(-0.317662, 0.000000, -0.307536, 0.000000, 0.442140, 0.000000, 0.307536, 0.000000, -0.317662, -290.797943, 14.326835, -133.405640)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="lumanareF2_141" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
-transform = Transform3D(-0.319531, 0.000000, -0.309345, 0.000000, 0.444740, 0.000000, 0.309345, 0.000000, -0.319531, -290.492523, 14.320668, -132.201889)
+transform = Transform3D(-0.332611, 0.000000, -0.322008, 0.000000, 0.462946, 0.000000, 0.322008, 0.000000, -0.332611, -291.312714, 14.319727, -132.913361)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_142" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.358974, 0.000000, -0.347531, 0.000000, 0.499640, 0.000000, 0.347531, 0.000000, -0.358974, -291.134125, 14.322744, -133.163651)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_143" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.347064, 0.000000, -0.336001, 0.000000, 0.483063, 0.000000, 0.336001, 0.000000, -0.347064, -291.192505, 14.321136, -132.992264)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_144" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.373435, 0.000000, 0.143340, 0.000000, 0.400000, 0.000000, -0.143340, 0.000000, 0.373435, -234.673050, 13.732320, -181.306229)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_145" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.417185, 0.000000, 0.160133, 0.000000, 0.446863, 0.000000, -0.160133, 0.000000, 0.417185, -234.428741, 14.933806, -181.290787)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_146" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.457933, 0.000000, 0.175774, 0.000000, 0.490509, 0.000000, -0.175774, 0.000000, 0.457933, -234.813324, 14.931433, -181.301407)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_147" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.362915, 0.000000, 0.139302, 0.000000, 0.388732, 0.000000, -0.139302, 0.000000, 0.362915, -234.715378, 14.931635, -181.130539)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_148" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.369090, 0.000000, 0.141673, 0.000000, 0.395347, 0.000000, -0.141673, 0.000000, 0.369090, -234.677307, 14.932514, -181.398605)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_149" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.373435, 0.000000, -0.143340, 0.000000, 0.400000, 0.000000, 0.143340, 0.000000, -0.373435, -226.498947, 13.745681, -165.591782)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_150" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.373149, 0.000000, -0.143230, 0.000000, 0.399694, 0.000000, 0.143230, 0.000000, -0.373149, -226.866470, 14.942901, -165.388153)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_151" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.452490, 0.000000, -0.173685, 0.000000, 0.484679, 0.000000, 0.173685, 0.000000, -0.452490, -226.427887, 14.946067, -165.567993)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_152" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.375141, 0.000000, -0.143995, 0.000000, 0.401827, 0.000000, 0.143995, 0.000000, -0.375141, -226.832047, 14.943449, -165.527634)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_153" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.464820, 0.000000, -0.178418, 0.000000, 0.497886, 0.000000, 0.178418, 0.000000, -0.464820, -226.603394, 14.944968, -165.566284)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_154" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.446324, 0.000000, -0.171318, 0.000000, 0.478074, 0.000000, 0.171318, 0.000000, -0.446324, -226.361725, 14.947015, -165.791428)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_155" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.374215, 0.000000, 0.141292, 0.000000, 0.400000, 0.000000, -0.141292, 0.000000, 0.374215, -240.889725, 13.690658, -178.955185)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_156" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.379033, 0.000000, 0.143111, 0.000000, 0.405150, 0.000000, -0.143111, 0.000000, 0.379033, -241.114273, 14.889314, -178.904648)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_157" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.359734, 0.000000, 0.135825, 0.000000, 0.384521, 0.000000, -0.135825, 0.000000, 0.359734, -240.669800, 14.892195, -179.111008)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_158" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.374246, 0.000000, 0.141304, 0.000000, 0.400034, 0.000000, -0.141304, 0.000000, 0.374246, -240.588806, 14.892746, -179.160751)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_159" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.458584, 0.000000, 0.173147, 0.000000, 0.490183, 0.000000, -0.173147, 0.000000, 0.458584, -240.955505, 14.890450, -179.030167)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_160" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.374215, 0.000000, -0.141292, 0.000000, 0.400000, 0.000000, 0.141292, 0.000000, -0.374215, -232.801834, 13.702451, -163.196182)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_161" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.458298, 0.000000, -0.173040, 0.000000, 0.489878, 0.000000, 0.173040, 0.000000, -0.458298, -232.856293, 14.902281, -163.259064)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_162" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.419379, 0.000000, -0.158345, 0.000000, 0.448277, 0.000000, 0.158345, 0.000000, -0.419379, -232.861267, 14.902255, -163.259674)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_163" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.400819, 0.000000, -0.151337, 0.000000, 0.428438, 0.000000, 0.151337, 0.000000, -0.400819, -232.594879, 14.903476, -163.140381)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_164" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.390289, 0.000000, -0.147361, 0.000000, 0.417182, 0.000000, 0.147361, 0.000000, -0.390289, -232.871414, 14.902035, -163.180908)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_165" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.379745, 0.000000, -0.143380, 0.000000, 0.405912, 0.000000, 0.143380, 0.000000, -0.379745, -233.121994, 14.900206, -162.966339)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_166" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.372932, 0.000000, 0.144642, 0.000000, 0.400000, 0.000000, -0.144642, 0.000000, 0.372932, -248.186981, 13.644350, -176.160751)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_167" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.387271, 0.000000, 0.150204, 0.000000, 0.415379, 0.000000, -0.150204, 0.000000, 0.387271, -248.124237, 14.844425, -176.031921)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_168" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.435831, 0.000000, 0.169038, 0.000000, 0.467464, 0.000000, -0.169038, 0.000000, 0.435831, -247.877335, 14.846222, -176.177139)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_169" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.389266, 0.000000, 0.150978, 0.000000, 0.417520, 0.000000, -0.150978, 0.000000, 0.389266, -247.933228, 14.845912, -176.186569)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_170" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.418350, 0.000000, 0.162258, 0.000000, 0.448714, 0.000000, -0.162258, 0.000000, 0.418350, -248.312866, 14.843562, -176.142380)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_171" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.372932, 0.000000, -0.144642, 0.000000, 0.400000, 0.000000, 0.144642, 0.000000, -0.372932, -239.958099, 13.657055, -160.474930)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_172" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.366079, 0.000000, -0.141984, 0.000000, 0.392649, 0.000000, 0.141984, 0.000000, -0.366079, -239.958786, 14.857196, -160.537949)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_173" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.413505, 0.000000, -0.160378, 0.000000, 0.443517, 0.000000, 0.160378, 0.000000, -0.413505, -240.226105, 14.855186, -160.352600)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_174" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.382670, 0.000000, -0.148419, 0.000000, 0.410445, 0.000000, 0.148419, 0.000000, -0.382670, -239.944229, 14.857322, -160.555450)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_175" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.364338, 0.000000, -0.141309, 0.000000, 0.390782, 0.000000, 0.141309, 0.000000, -0.364338, -239.971634, 14.856686, -160.349274)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_176" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.426043, 0.000000, -0.165241, 0.000000, 0.456965, 0.000000, 0.165241, 0.000000, -0.426043, -239.661346, 14.859031, -160.570129)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_177" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.374698, 0.000000, 0.140005, 0.000000, 0.400000, 0.000000, -0.140005, 0.000000, 0.374698, -256.750397, 13.582832, -172.907364)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_178" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.410095, 0.000000, 0.153231, 0.000000, 0.437787, 0.000000, -0.153231, 0.000000, 0.410095, -256.545135, 14.784660, -173.131653)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_179" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.465900, 0.000000, 0.174082, 0.000000, 0.497361, 0.000000, -0.174082, 0.000000, 0.465900, -256.881165, 14.782094, -172.944992)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_180" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.366343, 0.000000, 0.136883, 0.000000, 0.391081, 0.000000, -0.136883, 0.000000, 0.366343, -257.047089, 14.780996, -172.924683)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_181" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.356165, 0.000000, 0.133080, 0.000000, 0.380216, 0.000000, -0.133080, 0.000000, 0.356165, -256.604675, 14.783897, -172.968262)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_182" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.411668, 0.000000, 0.153819, 0.000000, 0.439467, 0.000000, -0.153819, 0.000000, 0.411668, -257.080261, 14.780825, -172.940964)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_183" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.374698, 0.000000, -0.140005, 0.000000, 0.400000, 0.000000, 0.140005, 0.000000, -0.374698, -248.716736, 13.596338, -157.120651)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_184" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.423875, 0.000000, -0.158380, 0.000000, 0.452498, 0.000000, 0.158380, 0.000000, -0.423875, -248.783844, 14.796157, -157.223663)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_185" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.400499, 0.000000, -0.149645, 0.000000, 0.427543, 0.000000, 0.149645, 0.000000, -0.400499, -248.672440, 14.796753, -157.177811)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_186" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.382157, 0.000000, -0.142792, 0.000000, 0.407963, 0.000000, 0.142792, 0.000000, -0.382157, -248.546158, 14.797445, -157.132660)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_187" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.384567, 0.000000, -0.143693, 0.000000, 0.410536, 0.000000, 0.143693, 0.000000, -0.384567, -248.269623, 14.799336, -157.192780)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_188" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.386902, 0.000000, -0.144565, 0.000000, 0.413029, 0.000000, 0.144565, 0.000000, -0.386902, -248.964935, 14.794315, -156.929062)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_189" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.368759, 0.000000, 0.154973, 0.000000, 0.400000, 0.000000, -0.154973, 0.000000, 0.368759, -262.230865, 13.542513, -170.717911)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_190" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.400917, 0.000000, 0.168487, 0.000000, 0.434882, 0.000000, -0.168487, 0.000000, 0.400917, -262.320313, 14.742222, -170.831406)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_191" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.392351, 0.000000, 0.164888, 0.000000, 0.425591, 0.000000, -0.164888, 0.000000, 0.392351, -261.812408, 14.745779, -170.838425)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_192" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.446838, 0.000000, 0.187786, 0.000000, 0.484694, 0.000000, -0.187786, 0.000000, 0.446838, -261.938049, 14.744795, -170.801132)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_193" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.449278, 0.000000, 0.188812, 0.000000, 0.487340, 0.000000, -0.188812, 0.000000, 0.449278, -262.375488, 14.740938, -170.524170)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_194" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.368759, 0.000000, -0.154973, 0.000000, 0.400000, 0.000000, 0.154973, 0.000000, -0.368759, -253.568314, 13.557619, -155.267349)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_195" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.433652, 0.000000, -0.182245, 0.000000, 0.470390, 0.000000, 0.182245, 0.000000, -0.433652, -253.716125, 14.756030, -155.076294)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_196" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.390381, 0.000000, -0.164060, 0.000000, 0.423453, 0.000000, 0.164060, 0.000000, -0.390381, -253.676529, 14.756463, -155.129761)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_197" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.401171, 0.000000, -0.168594, 0.000000, 0.435157, 0.000000, 0.168594, 0.000000, -0.401171, -253.195999, 14.760326, -155.306488)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_198" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.447044, 0.000000, -0.187873, 0.000000, 0.484917, 0.000000, 0.187873, 0.000000, -0.447044, -253.907547, 14.754452, -154.992355)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_199" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.362862, 0.000000, 0.168319, 0.000000, 0.400000, 0.000000, -0.168319, 0.000000, 0.362862, -271.179047, 13.465971, -166.651413)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_200" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.359239, 0.000000, 0.166638, 0.000000, 0.396006, 0.000000, -0.166638, 0.000000, 0.359239, -270.869232, 14.668431, -166.684769)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_201" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.397277, 0.000000, 0.184282, 0.000000, 0.437937, 0.000000, -0.184282, 0.000000, 0.397277, -271.331787, 14.665123, -166.739075)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_202" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.414575, 0.000000, 0.192306, 0.000000, 0.457005, 0.000000, -0.192306, 0.000000, 0.414575, -271.248291, 14.665863, -166.769974)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_203" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.426401, 0.000000, 0.197792, 0.000000, 0.470042, 0.000000, -0.197792, 0.000000, 0.426401, -271.478088, 14.663725, -166.656067)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_204" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.362862, 0.000000, -0.168319, 0.000000, 0.400000, 0.000000, 0.168319, 0.000000, -0.362862, -261.958771, 13.482647, -151.527023)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_205" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.386141, 0.000000, -0.179117, 0.000000, 0.425662, 0.000000, 0.179117, 0.000000, -0.386141, -261.828949, 14.684222, -151.696213)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_206" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.404893, 0.000000, -0.187815, 0.000000, 0.446333, 0.000000, 0.187815, 0.000000, -0.404893, -262.162140, 14.680643, -151.394363)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_207" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.408377, 0.000000, -0.189431, 0.000000, 0.450173, 0.000000, 0.189431, 0.000000, -0.408377, -262.256378, 14.680433, -151.537933)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_208" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.348786, 0.000000, -0.161789, 0.000000, 0.384484, 0.000000, 0.161789, 0.000000, -0.348786, -261.748718, 14.684526, -151.609863)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_209" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.419899, 0.000000, -0.194776, 0.000000, 0.462874, 0.000000, 0.194776, 0.000000, -0.419899, -261.833405, 14.683639, -151.539276)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_210" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.351342, 0.000000, 0.191204, 0.000000, 0.400000, 0.000000, -0.191204, 0.000000, 0.351342, -276.623932, 13.416505, -163.864182)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_211" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.352624, 0.000000, 0.191901, 0.000000, 0.401460, 0.000000, -0.191901, 0.000000, 0.352624, -276.807037, 14.615330, -163.932770)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_212" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.418676, 0.000000, 0.227847, 0.000000, 0.476659, 0.000000, -0.227847, 0.000000, 0.418676, -276.495636, 14.617394, -163.831284)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_213" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.384245, 0.000000, 0.209110, 0.000000, 0.437459, 0.000000, -0.209110, 0.000000, 0.384245, -276.250183, 14.619843, -163.938614)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_214" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.381890, 0.000000, 0.207828, 0.000000, 0.434779, 0.000000, -0.207828, 0.000000, 0.381890, -276.994080, 14.613335, -163.821487)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_215" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.423329, 0.000000, 0.230380, 0.000000, 0.481957, 0.000000, -0.230380, 0.000000, 0.423329, -276.442474, 14.618403, -163.963821)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_216" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.351342, 0.000000, -0.191204, 0.000000, 0.400000, 0.000000, 0.191204, 0.000000, -0.351342, -266.470184, 13.434852, -149.390274)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_217" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.351545, 0.000000, -0.191314, 0.000000, 0.400231, 0.000000, 0.191314, 0.000000, -0.351545, -266.725128, 14.631878, -149.180649)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_218" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.431192, 0.000000, -0.234659, 0.000000, 0.490908, 0.000000, 0.234659, 0.000000, -0.431192, -266.563354, 14.633653, -149.288071)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_219" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.366985, 0.000000, -0.199717, 0.000000, 0.417809, 0.000000, 0.199717, 0.000000, -0.366985, -266.730042, 14.631929, -149.201370)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_220" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.434241, 0.000000, -0.236318, 0.000000, 0.494379, 0.000000, 0.236318, 0.000000, -0.434241, -266.447296, 14.635817, -149.568359)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_221" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.335077, 0.000000, 0.218458, 0.000000, 0.400000, 0.000000, -0.218458, 0.000000, 0.335077, -284.826202, 13.328822, -158.273651)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_222" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.391781, 0.000000, 0.255427, 0.000000, 0.467691, 0.000000, -0.255427, 0.000000, 0.391781, -284.749146, 14.529665, -158.315033)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_223" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.367477, 0.000000, 0.239581, 0.000000, 0.438678, 0.000000, -0.239581, 0.000000, 0.367477, -284.705322, 14.530409, -158.388626)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_224" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.340559, 0.000000, 0.222032, 0.000000, 0.406545, 0.000000, -0.222032, 0.000000, 0.340559, -284.915344, 14.527700, -158.198074)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_225" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.321799, 0.000000, 0.209801, 0.000000, 0.384150, 0.000000, -0.209801, 0.000000, 0.321799, -284.753540, 14.530103, -158.404602)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_226" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.415100, 0.000000, 0.270630, 0.000000, 0.495528, 0.000000, -0.270630, 0.000000, 0.415100, -284.490936, 14.533114, -158.571808)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_227" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.335077, 0.000000, -0.218458, 0.000000, 0.400000, 0.000000, 0.218458, 0.000000, -0.335077, -274.020782, 13.348170, -145.361847)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_228" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.374014, 0.000000, -0.243843, 0.000000, 0.446482, 0.000000, 0.243843, 0.000000, -0.374014, -273.973083, 14.547793, -145.217453)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_229" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.383676, 0.000000, -0.250142, 0.000000, 0.458015, 0.000000, 0.250142, 0.000000, -0.383676, -274.051147, 14.547235, -145.231445)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_230" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.374114, 0.000000, -0.243908, 0.000000, 0.446601, 0.000000, 0.243908, 0.000000, -0.374114, -274.067657, 14.547953, -145.392609)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_231" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.332561, 0.000000, -0.216818, 0.000000, 0.396998, 0.000000, 0.216818, 0.000000, -0.332561, -274.252869, 14.545086, -145.134186)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_232" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.371437, 0.000000, -0.242163, 0.000000, 0.443406, 0.000000, 0.242163, 0.000000, -0.371437, -273.760315, 14.550957, -145.489700)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_233" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.309929, 0.000000, 0.252872, 0.000000, 0.400000, 0.000000, -0.252872, 0.000000, 0.309929, -291.320374, 13.250248, -152.592026)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_234" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.359104, 0.000000, 0.292994, 0.000000, 0.463467, 0.000000, -0.292994, 0.000000, 0.359104, -291.227142, 14.451795, -152.716095)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_235" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.361219, 0.000000, 0.294720, 0.000000, 0.466197, 0.000000, -0.294720, 0.000000, 0.361219, -291.598785, 14.446401, -152.340714)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_236" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.376003, 0.000000, 0.306782, 0.000000, 0.485276, 0.000000, -0.306782, 0.000000, 0.376003, -291.256470, 14.450902, -152.614517)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_237" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.307776, 0.000000, 0.251115, 0.000000, 0.397221, 0.000000, -0.251115, 0.000000, 0.307776, -291.365601, 14.449542, -152.538666)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_238" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.309929, 0.000000, -0.252872, 0.000000, 0.400000, 0.000000, 0.252872, 0.000000, -0.309929, -280.112000, 13.270786, -142.018082)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_239" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.365186, 0.000000, -0.297957, 0.000000, 0.471316, 0.000000, 0.297957, 0.000000, -0.365186, -280.339874, 14.467119, -141.732590)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_240" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.372732, 0.000000, -0.304113, 0.000000, 0.481055, 0.000000, 0.304113, 0.000000, -0.372732, -280.278870, 14.468823, -141.920242)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_241" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.385127, 0.000000, -0.314226, 0.000000, 0.497052, 0.000000, 0.314226, 0.000000, -0.385127, -279.856110, 14.474688, -142.305450)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_242" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.382168, 0.000000, -0.311812, 0.000000, 0.493233, 0.000000, 0.311812, 0.000000, -0.382168, -280.085175, 14.472046, -142.179291)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_243" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(0.295831, 0.000000, 0.269228, 0.000000, 0.400000, 0.000000, -0.269228, 0.000000, 0.295831, -296.195465, 13.183057, -147.406494)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_244" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.335644, 0.000000, 0.305461, 0.000000, 0.453832, 0.000000, -0.305461, 0.000000, 0.335644, -296.465881, 14.379388, -147.155426)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_245" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.302442, 0.000000, 0.275245, 0.000000, 0.408939, 0.000000, -0.275245, 0.000000, 0.302442, -296.435913, 14.379795, -147.183304)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_246" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.294629, 0.000000, 0.268134, 0.000000, 0.398375, 0.000000, -0.268134, 0.000000, 0.294629, -296.359222, 14.380989, -147.277542)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_247" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.301209, 0.000000, 0.274122, 0.000000, 0.407271, 0.000000, -0.274122, 0.000000, 0.301209, -296.090759, 14.383664, -147.382233)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_248" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(0.295541, 0.000000, 0.268964, 0.000000, 0.399607, 0.000000, -0.268964, 0.000000, 0.295541, -296.182190, 14.382639, -147.329544)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="socluF2_249" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_alcove")]
+transform = Transform3D(-0.295831, 0.000000, -0.269228, 0.000000, 0.400000, 0.000000, 0.269228, 0.000000, -0.295831, -285.292511, 13.202943, -138.397491)
+metadata/coliziune = "hull"
+
+[node name="lumanareF2_250" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.366681, 0.000000, -0.333707, 0.000000, 0.495797, 0.000000, 0.333707, 0.000000, -0.366681, -285.102661, 14.404687, -138.449539)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_251" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.331666, 0.000000, -0.301840, 0.000000, 0.448453, 0.000000, 0.301840, 0.000000, -0.331666, -285.239868, 14.403999, -138.497559)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_252" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.284473, 0.000000, -0.258891, 0.000000, 0.384642, 0.000000, 0.258891, 0.000000, -0.284473, -285.414276, 14.402254, -138.428375)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_253" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.352586, 0.000000, -0.320879, 0.000000, 0.476740, 0.000000, 0.320879, 0.000000, -0.352586, -285.484344, 14.401169, -138.343201)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanareF2_254" parent="DecorManual/F2_Sala1" instance=ExtResource("40_torch")]
+transform = Transform3D(-0.294582, 0.000000, -0.268091, 0.000000, 0.398311, 0.000000, 0.268091, 0.000000, -0.294582, -285.231903, 14.402641, -138.285904)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="arcF2_255" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_arch")]
+transform = Transform3D(0.717587, 0.000000, -1.889371, 0.000000, 1.950000, 0.000000, 1.889371, 0.000000, 0.717587, -232.989182, 13.721936, -172.534058)
+metadata/coliziune = "mesh"
+
+[node name="arcF2_256" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_arch")]
+transform = Transform3D(0.719773, 0.000000, -1.888539, 0.000000, 1.950000, 0.000000, 1.888539, 0.000000, 0.719773, -248.867584, 13.616971, -166.460022)
+metadata/coliziune = "mesh"
+
+[node name="arcF2_257" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_arch")]
+transform = Transform3D(0.836895, 0.000000, -1.839636, 0.000000, 1.950000, 0.000000, 1.839636, 0.000000, 0.836895, -262.243988, 13.513000, -161.072998)
+metadata/coliziune = "mesh"
+
+[node name="arcF2_258" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_arch")]
+transform = Transform3D(1.037955, 0.000000, -1.692642, 0.000000, 1.950000, 0.000000, 1.692642, 0.000000, 1.037955, -275.102112, 13.387213, -154.560944)
+metadata/coliziune = "mesh"
+
+[node name="arcF2_259" parent="DecorManual/F2_Sala1" instance=ExtResource("hall_arch")]
+transform = Transform3D(1.132315, 0.000000, -1.271242, 0.000000, 1.950000, 0.000000, 1.271242, 0.000000, 1.132315, -288.842590, 13.218513, -144.616562)
+metadata/coliziune = "mesh"
 
 [node name="lacasPiatra_370" parent="DecorManual/F3_Gat" instance=ExtResource("millstone_slot")]
 transform = Transform3D(-0.492093, 0.000000, -0.870543, 0.000000, 1.000000, 0.000000, 0.870543, 0.000000, -0.492093, -315.85, 12.784868, -102.05)

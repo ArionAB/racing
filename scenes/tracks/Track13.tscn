@@ -9251,7 +9251,7 @@ cave_ambient_energy = 0.12
 [node name="CavernaGat" type="Area3D" parent="ZoneCamera"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -319.474000, 12.787000, -103.593000)
 script = ExtResource("camzone")
-frac_from = 0.700
+frac_from = 0.691
 frac_to = 0.748
 size = Vector3(2, 2, 2)
 height = 4.5
@@ -16886,7 +16886,7 @@ transform = Transform3D(-1.240807, 0.000000, -1.014217, 0.000000, 1.200000, 0.00
 metadata/coliziune = "hull"
 
 [node name="arcgura_0" parent="DecorManual/F1_Gura" instance=ExtResource("37_arch")]
-transform = Transform3D(0.578570, 0.000000, -1.398497, 0.000000, 1.000000, 0.000000, 1.491730, 0.000000, 0.542409, -240.902615, 13.620702, -169.547301)
+transform = Transform3D(0.578570, 0.000000, -1.398497, 0.000000, 1.450000, 0.000000, 1.491730, 0.000000, 0.542409, -240.902615, 13.620702, -169.547301)
 metadata/coliziune = "mesh"
 
 [node name="tocGura_1" parent="DecorManual/F1_Gura" instance=ExtResource("hall_alcove")]

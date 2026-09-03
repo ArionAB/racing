@@ -83,6 +83,56 @@ HR_TURNS = 3.0
 HR_Z0 = 3.0                # cota de intrare a rampei (fata de baza piesei)
 HR_RISE = 38.0             # urcarea totala a elicei
 
+# --- capacul, gura de iesire si intrarea salii (3 sep 2026) ------------------
+#
+# Piesa se aseaza pe Track13 la scara (2.5, 0.97, 2.5) pe axa (-302.02, 6.0),
+# baza la 11 m. Cifrele de mai jos sunt LOCALE; in lume se inmultesc cu scara.
+# Toate au fost masurate pe pista (tools/probe_g_profile_tmp), nu alese:
+#   - drumul real al elicei e la r = 28 m in lume (11.2 local), ultima tura
+#     urca pana la 47.2 m si dupa kicker (frac 0.972, r 15, y 48) drumul de
+#     iesire traverseaza inelul peretelui la azimut 44° -> 36° (r 35 -> 53),
+#     la cota 49; cu coronamentul la 47.2 masina trecea PESTE buza, iar camera
+#     (10 m peste sosea) vedea de sus fata plata de 20 m a zidului si satul
+#     de dincolo — adica stanca se citea groapa, nu stanca (brief §2 POI G:
+#     "capac de bazalt intunecat", "sari prin gura stancii pe platou").
+#   - Sala 2 (POI F) intra in stanca pe la azimut 205-245°, cu coridorul la
+#     cota 12-32 in lume; coaja ii traversa coridorul cu ambele fete.
+#
+# Conventie de azimut: in Blender unghiul `a` e in planul XY; exportul glTF
+# (Y-up) duce +Y din Blender pe -Z in Godot, deci azimutul din lume
+# (atan2(z, x) in Godot) e -a. `_local_az` face conversia intr-un singur loc;
+# s-a verificat pe GLB-ul exportat (tools/probe_glb_tmp: y_max pe azimut).
+HR_NOTCH_Z = 37.3          # pragul gurii de iesire: 11 + 37.3 * 0.97 = 47.2 m
+HR_EXIT_AZ = (22.0, 60.0)  # azimut LUME al gurii de iesire (grade)
+HR_ENTR_Z = 25.0           # tavanul intrarii salii: 11 + 25 * 0.97 = 35 m
+HR_ENTR_AZ = (200.0, 245.0)  # azimut LUME al intrarii (coridorul salii 2)
+HR_MOUTH_R = 9.6           # gura din capac: 9.6 * 2.5 = 24 m raza in lume
+HR_CAP_T = 1.5             # grosimea capacului
+# Rampa elicoidala din GLB (r 14.5-21.5 local = 36-54 m in lume) NU e drumul
+# real (acela e la 22-34 m, generat din Curve3D) — e o consola decorativa pe
+# perete. Cu coliziune pe coaja, ultima ei tura (z ~39.5 local = 49.3 m in
+# lume, chiar cota drumului de iesire) taia drumul in gura de iesire, iar
+# prima tura (z 7-8.5 = 18-19 m) traversa coridorul salii 2 intre masina si
+# camera. Masurat cu ProbeLaneClear (15 -> 19) si ProbeCameraSolid (1 -> 2)
+# pe 3 sep 2026. Rampa lipseste deci in cele doua sectoare, sub/peste cotele
+# de mai jos.
+HR_RAMP_CUT_EXIT_Z = 30.0  # in gura de iesire: fara rampa peste cota asta
+
+
+def _local_az(world_deg):
+    return -world_deg
+
+
+def _in_sector(a_rad, sector_world):
+    """Unghiul local `a_rad` cade in sectorul dat in azimut de LUME?"""
+    lo, hi = sector_world
+    w = (-math.degrees(a_rad)) % 360.0
+    lo %= 360.0
+    hi %= 360.0
+    if lo <= hi:
+        return lo <= w <= hi
+    return w >= lo or w <= hi
+
 
 def _hr_radius(z, r_base=HR_R_BASE, r_top=HR_R_TOP):
     """Raza exterioara la cota z — conul trunchiat al stancii."""
@@ -102,7 +152,10 @@ def hollow_shell(b, segments=28):
     """
     rings_out, rings_in = [], []
     rand = _lcg(1301)
-    zs = [i * HR_H / 9.0 for i in range(10)]
+    # Inelele de baza (10, ca la prima versiune) plus DOUA cote de contract:
+    # pragul gurii de iesire si tavanul intrarii. Fara ele taietura ar fi
+    # cazut pe cel mai apropiat inel (35 sau 40), adica sub sau peste drum.
+    zs = sorted(set([i * HR_H / 9.0 for i in range(10)] + [HR_NOTCH_Z, HR_ENTR_Z]))
     for z in zs:
         r_o = _hr_radius(z)
         wall = HR_WALL + (HR_WALL_TOP - HR_WALL) * (z / HR_H)
@@ -119,26 +172,83 @@ def hollow_shell(b, segments=28):
         rings_out.append(ring_o)
         rings_in.append(ring_i)
 
+    def seg_mid(i):
+        return 2.0 * math.pi * (i + 0.5) / segments
+
+    def skipped(i, z_lo, z_hi):
+        """Fata dintre inelele z_lo..z_hi a segmentului i lipseste? Gura de
+        iesire scoate tot ce e peste prag in sectorul ei; intrarea scoate tot
+        ce e sub tavanul ei in sectorul ei."""
+        a = seg_mid(i)
+        if _in_sector(a, HR_EXIT_AZ) and z_lo >= HR_NOTCH_Z - 1e-6:
+            return True
+        if _in_sector(a, HR_ENTR_AZ) and z_hi <= HR_ENTR_Z + 1e-6:
+            return True
+        return False
+
     faces_out, faces_in = [], []
-    for lo, hi in zip(rings_out, rings_out[1:]):
+    for (z_lo, lo), (z_hi, hi) in zip(zip(zs, rings_out), zip(zs[1:], rings_out[1:])):
         for i in range(segments):
+            if skipped(i, z_lo, z_hi):
+                continue
             j = (i + 1) % segments
             faces_out.append(b.bm.faces.new((lo[i], lo[j], hi[j], hi[i])))
-    for lo, hi in zip(rings_in, rings_in[1:]):
+    for (z_lo, lo), (z_hi, hi) in zip(zip(zs, rings_in), zip(zs[1:], rings_in[1:])):
         for i in range(segments):
+            if skipped(i, z_lo, z_hi):
+                continue
             j = (i + 1) % segments
             faces_in.append(b.bm.faces.new((lo[j], lo[i], hi[i], hi[j])))
-    # coronamentul: inelul care leaga exteriorul de interior sus
-    top_o, top_i = rings_out[-1], rings_in[-1]
-    crown = []
+    # coronamentul: inelul care leaga exteriorul de interior sus — la cota
+    # varfului in rest, la cota PRAGULUI in gura de iesire (acolo e o sa, nu
+    # un zid), si tavanul intrarii (fata in jos) in sectorul salii.
+    k_notch = zs.index(HR_NOTCH_Z)
+    k_entr = zs.index(HR_ENTR_Z)
+    crown, sills, lintels = [], [], []
     for i in range(segments):
         j = (i + 1) % segments
-        crown.append(b.bm.faces.new((top_o[i], top_o[j], top_i[j], top_i[i])))
-    # talpa: inelul de jos, ca piesa sa nu fie deschisa pe dedesubt
+        a = seg_mid(i)
+        if _in_sector(a, HR_EXIT_AZ):
+            o, n = rings_out[k_notch], rings_in[k_notch]
+            sills.append(b.bm.faces.new((o[i], o[j], n[j], n[i])))
+        else:
+            o, n = rings_out[-1], rings_in[-1]
+            crown.append(b.bm.faces.new((o[i], o[j], n[j], n[i])))
+        if _in_sector(a, HR_ENTR_AZ):
+            o, n = rings_out[k_entr], rings_in[k_entr]
+            lintels.append(b.bm.faces.new((o[j], o[i], n[i], n[j])))
+    # talpa: inelul de jos, ca piesa sa nu fie deschisa pe dedesubt (nu si in
+    # intrare, unde nu e perete)
     bot_o, bot_i = rings_out[0], rings_in[0]
     for i in range(segments):
+        if _in_sector(seg_mid(i), HR_ENTR_AZ):
+            continue
         j = (i + 1) % segments
         b.bm.faces.new((bot_o[j], bot_o[i], bot_i[i], bot_i[j]))
+    # usciorii: fetele verticale de la marginile celor doua taieturi, altfel
+    # peretele s-ar vedea gol pe dinauntru (doua foi fara grosime)
+    jambs = []
+    for i in range(segments):
+        a_here = seg_mid(i)
+        a_prev = seg_mid(i - 1)
+        for sector, k_lo, k_hi in ((HR_EXIT_AZ, k_notch, len(zs) - 1),
+                                   (HR_ENTR_AZ, 0, k_entr)):
+            inside = _in_sector(a_here, sector)
+            was = _in_sector(a_prev, sector)
+            if inside == was:
+                continue
+            # muchia comuna dintre segmentul i-1 si i e vertexul i
+            for k in range(k_lo, k_hi):
+                o0, o1 = rings_out[k][i], rings_out[k + 1][i]
+                n0, n1 = rings_in[k][i], rings_in[k + 1][i]
+                if inside:
+                    jambs.append(b.bm.faces.new((o0, n0, n1, o1)))
+                else:
+                    jambs.append(b.bm.faces.new((n0, o0, o1, n1)))
+    for f in sills + jambs:
+        f[b.slot] = TUFF_MID
+    for f in lintels:
+        f[b.slot] = CAVE
 
     for f in faces_out:
         f[b.slot] = TUFF
@@ -151,7 +261,57 @@ def hollow_shell(b, segments=28):
     b.retag(faces_out, BAND_RED, where=lambda c, n: HR_H * 0.16 < c.z < HR_H * 0.27)
     b.retag(faces_out, BAND_RUST, where=lambda c, n: HR_H * 0.40 < c.z < HR_H * 0.46)
     b.retag(faces_out, TUFF_MID, where=lambda c, n: HR_H * 0.62 < c.z < HR_H * 0.74)
+    hollow_cap(b, segments)
     return faces_out, faces_in
+
+
+def hollow_cap(b, segments=28):
+    """Capacul de bazalt: un disc cu gura in mijloc, peste coronament, lipsa
+    in sectorul gurii de iesire (acolo lumina intra prin sa).
+
+    Un inel plin de la gura (r 9.6 = 24 m in lume) pana la marginea
+    exterioara a varfului. Drumul elicei e la 11.2 local (28 m), deci ultima
+    tura e SUB capac, cu marginea gurii la 4 m spre interior: de pe sosea nu
+    mai e cer drept deasupra, dar lumina de sus ramane si creste cu fiecare
+    tura (ProbeGSky). Kickerul (r 6 local) sare prin gura, cum cere brieful.
+    """
+    z0 = HR_H
+    z1 = HR_H + HR_CAP_T
+    r_out = _hr_radius(HR_H) * 1.03
+    r_in = HR_MOUTH_R
+    rings = {}
+    for tag, r, z in (("ob", r_out, z0), ("ot", r_out, z1),
+                      ("ib", r_in, z0), ("it", r_in, z1)):
+        ring = []
+        for k in range(segments):
+            a = 2.0 * math.pi * k / segments
+            ring.append(b.bm.verts.new((r * math.cos(a), r * math.sin(a), z)))
+        rings[tag] = ring
+    faces = []
+    for i in range(segments):
+        a = 2.0 * math.pi * (i + 0.5) / segments
+        if _in_sector(a, HR_EXIT_AZ):
+            continue
+        j = (i + 1) % segments
+        ob, ot, ib, it = rings["ob"], rings["ot"], rings["ib"], rings["it"]
+        faces.append(b.bm.faces.new((ot[i], ot[j], it[j], it[i])))   # fata de sus
+        faces.append(b.bm.faces.new((ib[i], ib[j], ob[j], ob[i])))   # dedesubt
+        faces.append(b.bm.faces.new((it[i], it[j], ib[j], ib[i])))   # buza gurii
+        faces.append(b.bm.faces.new((ob[i], ob[j], ot[j], ot[i])))   # marginea
+    # capetele radiale ale capacului, la marginile gurii de iesire
+    for i in range(segments):
+        a_here = 2.0 * math.pi * (i + 0.5) / segments
+        a_prev = 2.0 * math.pi * (i - 0.5) / segments
+        inside = _in_sector(a_here, HR_EXIT_AZ)
+        if inside == _in_sector(a_prev, HR_EXIT_AZ):
+            continue
+        ob, ot, ib, it = rings["ob"][i], rings["ot"][i], rings["ib"][i], rings["it"][i]
+        if inside:
+            faces.append(b.bm.faces.new((ib, it, ot, ob)))
+        else:
+            faces.append(b.bm.faces.new((ob, ot, it, ib)))
+    for f in faces:
+        f[b.slot] = CAP
 
 
 def helix_ramp(b, steps=96):
@@ -165,6 +325,15 @@ def helix_ramp(b, steps=96):
     r_in = HR_RAMP_R - HR_RAMP_W * 0.5
     r_out = HR_RAMP_R + HR_RAMP_W * 0.5
     T = 0.55                                  # grosimea placii
+
+    def ramp_cut(a, z):
+        """Rampa lipseste aici? Vezi HR_RAMP_CUT_EXIT_Z."""
+        if _in_sector(a, HR_EXIT_AZ) and z > HR_RAMP_CUT_EXIT_Z:
+            return True
+        if _in_sector(a, HR_ENTR_AZ) and z < HR_ENTR_Z:
+            return True
+        return False
+
     verts = []
     for i in range(steps + 1):
         t = i / steps
@@ -178,7 +347,10 @@ def helix_ramp(b, steps=96):
             b.bm.verts.new((r_out * ca, r_out * sa, z - T)),
         ))
     top, side_in, side_out, bottom = [], [], [], []
-    for (a_in, a_out, a_ind, a_outd), (b_in, b_out, b_ind, b_outd) in zip(verts, verts[1:]):
+    for k, ((a_in, a_out, a_ind, a_outd), (b_in, b_out, b_ind, b_outd)) in enumerate(zip(verts, verts[1:])):
+        t_mid = (k + 0.5) / steps
+        if ramp_cut(2.0 * math.pi * HR_TURNS * t_mid, HR_Z0 + HR_RISE * t_mid):
+            continue
         top.append(b.bm.faces.new((a_in, a_out, b_out, b_in)))
         bottom.append(b.bm.faces.new((a_ind, b_ind, b_outd, a_outd)))
         side_in.append(b.bm.faces.new((a_in, b_in, b_ind, a_ind)))
@@ -198,6 +370,8 @@ def helix_ramp(b, steps=96):
         t = i / steps
         a = 2.0 * math.pi * HR_TURNS * t
         z = HR_Z0 + HR_RISE * t
+        if ramp_cut(a, z):
+            continue
         ca, sa = math.cos(a), math.sin(a)
         step_a = 2.0 * math.pi * HR_TURNS * (2.0 / steps)
         ln = r_in * step_a
@@ -212,10 +386,15 @@ def helix_ramp(b, steps=96):
         t = k / float(n_brace)
         a = 2.0 * math.pi * HR_TURNS * t
         z = HR_Z0 + HR_RISE * t
+        if ramp_cut(a, z):
+            continue
         ca, sa = math.cos(a), math.sin(a)
         wall_r = _hr_radius(z) - (HR_WALL + (HR_WALL_TOP - HR_WALL) * (z / HR_H))
         b.beam((r_out * ca, r_out * sa, z - T),
                (wall_r * ca, wall_r * sa, max(z - 4.2, 0.4)), 0.85, TUFF_SH)
+    loose = [v for v in b.bm.verts if not v.link_faces]
+    if loose:
+        bmesh.ops.delete(b.bm, geom=loose, context="VERTS")
 
 
 def rock_windows(b, count=16):
@@ -255,18 +434,10 @@ def build_hollow_rock():
     helix_ramp(b)
     rock_windows(b)
 
-    # gura de sus: taietura in coronament prin care iesi cu kickerul (POI G).
-    # E un prag COBORAT, nu o gaura: rampa ajunge la 41 m, coronamentul e la
-    # 45 m, deci lipsesc 4 m — se taie o sa in perete pe ~34° de arc.
-    a_exit = 2.0 * math.pi * HR_TURNS          # unde se termina elicea
-    for k in range(6):
-        a = a_exit + math.radians(-17.0 + k * 6.8)
-        z = HR_H - 2.0
-        r_o = _hr_radius(z)
-        ca, sa = math.cos(a), math.sin(a)
-        rot = Matrix.Rotation(a, 3, "Z")
-        b.box(((r_o - 1.6) * ca, (r_o - 1.6) * sa, z + 1.4),
-              (4.6, 5.2, 4.0), CAVE, rotation=rot)
+    # Gura de iesire e acum o taietura REALA in perete si in capac
+    # (`hollow_shell`, HR_EXIT_AZ): prima versiune punea sase cutii pe
+    # coronament la capatul elicei din GLB, dar elicea din GLB nu e drumul —
+    # drumul real iese la alt azimut, masurat pe pista.
 
     # fagurele de la Uchisar: gauri mici de porumbar pe fata exterioara,
     # doar in treimea de sus (unde le vezi de pe platou, nu de pe rampa)

@@ -823,11 +823,19 @@ func _nearest_cave_zone(track: Node, at: Vector3,
 			if inside:
 				return z
 			continue
+		# Zona pe CUTIE: se ia doar daca punctul e chiar in cutia ei (cu o
+		# marja de 3 m), exact cum o decide `Area3D`-ul in joc. Prima versiune
+		# lua „cea mai apropiata sub 120 m", si la frac 0.93 pe elice (40 m de
+		# Sala 2, dar in afara cutiei ei) captura primea presetul salii cu
+		# tavan de 18 m — o camera care in joc nu exista acolo. Masurat pe
+		# 3 sep 2026; captura fusese citita ca „butoi inchis".
+		var lp := z.to_local(at)
+		var half := z.size * 0.5
+		var inside_box := absf(lp.x) <= half.x + 3.0 and absf(lp.z) <= half.z + 3.0 			and lp.y >= -3.0 and lp.y <= z.size.y + 3.0
+		if not inside_box:
+			continue
 		var d := z.global_position.distance_to(at)
 		if d < best_d:
 			best_d = d
 			best = z
-	# Prea departe inseamna „nu esti in caverna": zonele pe cutie au ~14 m
-	# adancime, deci peste 120 m e alt POI si presetul ar fi o minciuna in alta
-	# directie.
-	return best if best_d <= 120.0 else null
+	return best

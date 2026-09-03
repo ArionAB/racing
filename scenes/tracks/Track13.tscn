@@ -9251,7 +9251,7 @@ cave_ambient_energy = 0.12
 [node name="CavernaGat" type="Area3D" parent="ZoneCamera"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -319.474000, 12.787000, -103.593000)
 script = ExtResource("camzone")
-frac_from = 0.690
+frac_from = 0.700
 frac_to = 0.748
 size = Vector3(2, 2, 2)
 height = 4.5

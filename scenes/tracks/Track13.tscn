@@ -9256,7 +9256,9 @@ height = 4.5
 ceiling = 9.5
 ceiling_dist = 18.0
 darkness = 1.0
-cave_fog_end = 80.0
+cave_fog_end = 95.0
+cave_ambient = Color(0.85, 0.74, 0.58, 1)
+cave_ambient_energy = 0.36
 
 [node name="StancaSpirala" type="Area3D" parent="ZoneCamera"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -302.020000, 12.000000, 6.000000)
@@ -10692,12 +10694,12 @@ transform = Transform3D(-0.492093, 0.000000, -0.870543, 0.000000, 1.000000, 0.00
 metadata/coliziune = "hull"
 
 [node name="tortaGat_371" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
-transform = Transform3D(0.522634, 0.000000, 0.852557, 0.000000, 1.000000, 0.000000, -0.852557, 0.000000, 0.522634, -319.989288, 12.852139, -115.841087)
+transform = Transform3D(0.522634, 0.000000, 0.852557, 0.000000, 1.000000, 0.000000, -0.852557, 0.000000, 0.522634, -291.62, 13.05, -134.19)
 metadata/coliziune = "none"
 metadata/lumina = "30|4.5|#FFB061"
 
 [node name="focTorta_372" type="OmniLight3D" parent="DecorManual/F3_Gat"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -319.989288, 14.952139, -115.841087)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -291.62, 15.15, -134.19)
 light_color = Color(1, 0.706, 0.42, 1)
 light_energy = 4.20
 omni_range = 13.0
@@ -10725,6 +10727,103 @@ distance_fade_enabled = true
 distance_fade_begin = 70.0
 distance_fade_length = 25.0
 
+
+[node name="lacasDreapta_3001" parent="DecorManual/F3_Gat" instance=ExtResource("millstone_slot")]
+transform = Transform3D(0.492093, 0.000000, 0.870543, 0.000000, 1.000000, 0.000000, -0.870543, 0.000000, 0.492093, -322.5422, 12.7800, -107.0848)
+metadata/coliziune = "hull"
+
+[node name="tortaFata_3002" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -313.8832, 12.7800, -106.5066)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="focFata_3003" type="OmniLight3D" parent="DecorManual/F3_Gat"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -313.8832, 14.8800, -106.5066)
+light_color = Color(1, 0.706, 0.42, 1)
+light_energy = 4.0
+omni_range = 12.0
+omni_attenuation = 1.6
+light_specular = 0.20
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 70.0
+distance_fade_length = 25.0
+
+[node name="tortaFata_3004" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -319.7856, 12.7800, -109.8862)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="focFata_3005" type="OmniLight3D" parent="DecorManual/F3_Gat"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -319.7856, 14.8800, -109.8862)
+light_color = Color(1, 0.706, 0.42, 1)
+light_energy = 4.0
+omni_range = 12.0
+omni_attenuation = 1.6
+light_specular = 0.20
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 70.0
+distance_fade_length = 25.0
+
+[node name="tortaZid_3006" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -303.9608, 12.9100, -118.9899)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="focZid_3007" type="OmniLight3D" parent="DecorManual/F3_Gat"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -303.9608, 15.0100, -118.9899)
+light_color = Color(1, 0.706, 0.42, 1)
+light_energy = 4.0
+omni_range = 12.0
+omni_attenuation = 1.6
+light_specular = 0.20
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 70.0
+distance_fade_length = 25.0
+
+[node name="tortaZid_3008" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -308.3998, 12.9700, -131.8466)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="focZid_3009" type="OmniLight3D" parent="DecorManual/F3_Gat"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -308.3998, 15.0700, -131.8466)
+light_color = Color(1, 0.706, 0.42, 1)
+light_energy = 4.0
+omni_range = 12.0
+omni_attenuation = 1.6
+light_specular = 0.20
+shadow_enabled = false
+distance_fade_enabled = true
+distance_fade_begin = 70.0
+distance_fade_length = 25.0
+
+[node name="lumanare_3010" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -304.7410, 13.0500, -137.0010)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanare_3011" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -301.6678, 12.9700, -122.5042)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanare_3012" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -316.1264, 12.9100, -119.5637)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanare_3013" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -308.6589, 12.8400, -111.6585)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
+
+[node name="lumanare_3014" parent="DecorManual/F3_Gat" instance=ExtResource("40_torch")]
+transform = Transform3D(0.870543, 0.000000, -0.492093, 0.000000, 1.000000, 0.000000, 0.492093, 0.000000, 0.870543, -296.6190, 13.0500, -127.9390)
+metadata/coliziune = "none"
+metadata/lumina = "30|4.5|#FFB061"
 [node name="tavans2_375" parent="DecorManual/F4_Sala2" instance=ExtResource("hall_ceiling_module")]
 transform = Transform3D(0.955185, 0.000000, -0.296009, 0.000000, 1.000000, 0.000000, 0.296009, 0.000000, 0.955185, -345.484253, 30.546560, -77.087242)
 metadata/coliziune = "mesh"

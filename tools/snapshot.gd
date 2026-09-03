@@ -328,7 +328,16 @@ func _ready() -> void:
 		if cave_view:
 			# Presetul de camera si intunericul zonei, aplicate MANUAL: vezi
 			# `cave_view` pentru de ce o captura din subteran fara ele minte.
-			var zone := _nearest_cave_zone(track, focus, zoom_frac)
+			#
+			# Fractia se trece prin `frac_at`, nu se da bruta: pe o banda
+			# secundara `zoom_frac` e din lungimea EI (0.25 din ocol), dar
+			# zonele pe interval lucreaza cu fractia BUCLEI (0.718 acolo) —
+			# exact cum o citeste jocul din `Car.road_index` in
+			# `CameraZone._player_in_frac_span`. Cu fractia bruta, captura de
+			# pe ocol alegea zona dupa distanta (Sala2, alt tavan, alt preset)
+			# si masura o camera care nu exista in joc. Pe ruta 0 `frac_at`
+			# intoarce chiar `zoom_frac`, deci nimic nu se schimba acolo.
+			var zone := _nearest_cave_zone(track, focus, route.frac_at(idx))
 			if zone != null:
 				var solved := ChaseCamera.solve_preset(
 					zone.height, zone.look_height, dist, look_ahead,

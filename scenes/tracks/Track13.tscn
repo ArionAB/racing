@@ -114,31 +114,6 @@ tufts = false
 
 [node name="Faleze" type="Node3D" parent="."]
 
-[node name="FalezaVaiiRosii" type="Marker3D" parent="Faleze"]
-script = ExtResource("15_cliffface")
-frac_start = 0.196
-frac_end = 0.40
-side = 1.0
-far_wall = false
-lip_offset_m = 0.2
-depth_m = 32.0
-step_m = 4.0
-bands = 9
-band_relief_m = 0.9
-level_bands = true
-band_datum_y = 46.0
-band_span_m = 5.0
-foot_bite_m = 2.5
-talus_m = 7.0
-talus_rise_ratio = 0.62
-talus_rows = 2
-talus_slot = 23
-ledge_fracs = Array[float]([0.213, 0.276, 0.333])
-ledge_offset_m = 9.38
-ledge_drop_m = 8.0
-ledge_depth_m = 1.8
-ledge_len_m = 34.0
-
 [node name="TaieturaSerpentinei" type="Marker3D" parent="Faleze"]
 script = ExtResource("15_cliffface")
 frac_start = 0.252
@@ -174,23 +149,6 @@ far_rise_m = 1.2
 far_foot_max_m = 68.0
 band_slots = Array[int]([19, 23, 10, 27, 23, 10, 27, 23, 3, 4, 2, 2])
 cap_slots = Array[int]([19, 23, 10, 27])
-
-[node name="BuzaCornisei" type="Marker3D" parent="Faleze"]
-script = ExtResource("15_cliffface")
-frac_start = 0.196
-frac_end = 0.40
-side = 1.0
-far_wall = false
-brow = true
-brow_offset_m = 7.2
-brow_width_m = 3.4
-brow_rise_m = 0.35
-brow_gap_every_m = 26.0
-brow_gap_frac = 0.28
-brow_step_m = 3.0
-brow_taper_frac = 0.10
-brow_jitter_m = 0.55
-brow_slots = Array[int]([19, 23, 10])
 
 [node name="TaieturaInterioara" type="Marker3D" parent="Faleze"]
 script = ExtResource("15_cliffface")

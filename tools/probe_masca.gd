@@ -35,7 +35,17 @@ func _ready() -> void:
 	var groups: Array[String] = []
 	var no_shadow := false
 	var caster := ""
+	var eye_pos := Vector3.ZERO
+	var look_pos := Vector3.ZERO
+	var free_eye := false
 	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--eye="):
+			var e := arg.trim_prefix("--eye=").split(",")
+			eye_pos = Vector3(float(e[0]), float(e[1]), float(e[2]))
+			free_eye = true
+		elif arg.begins_with("--look="):
+			var l := arg.trim_prefix("--look=").split(",")
+			look_pos = Vector3(float(l[0]), float(l[1]), float(l[2]))
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
 		elif arg.begins_with("--frac="):
@@ -73,6 +83,12 @@ func _ready() -> void:
 	cam.position = focus - dir * MEASURE_DIST + Vector3.UP * MEASURE_HEIGHT
 	cam.look_at(focus + dir * MEASURE_LOOK_AHEAD
 		+ Vector3.UP * MEASURE_LOOK_HEIGHT, Vector3.UP)
+	if free_eye:
+		# --eye=x,y,z --look=x,y,z: camera libera, ca in Snapshot — pentru
+		# atribuirea unui obiect vazut dintr-un unghi pe care camera de joc
+		# nu-l da la fractia ceruta (masina oprita, camera ridicata).
+		cam.position = eye_pos
+		cam.look_at(look_pos, Vector3.UP)
 	cam.current = true
 	await get_tree().process_frame
 	await get_tree().process_frame

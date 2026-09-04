@@ -6439,14 +6439,14 @@ script = ExtResource("4_prop")
 [node name="C) Cornisa Vaii Rosii" type="Node3D" parent="DecorManual"]
 
 [node name="Balon ancorat 1" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 205.855, 32.700, 9.476)
+transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 179.947, 31.079, -9.375)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
 rise_time = 8.0
 hold = 4.0
 phase = 0.0000
-height = 10.96
+height = 8.00
 basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("8_env_a")
 model_scale = 1.15
@@ -6456,14 +6456,14 @@ envelope_scale = 1.0
 transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 205.855, 32.700, 9.476)
 
 [node name="Balon ancorat 2" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 303.233, 28.040, -78.130)
+transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 260.412, 17.953, -52.008)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
 rise_time = 8.0
 hold = 4.0
 phase = 0.3333
-height = 10.96
+height = 8.00
 basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("9_env_b")
 model_scale = 1.15
@@ -6473,14 +6473,14 @@ envelope_scale = 1.0
 transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 303.233, 28.040, -78.130)
 
 [node name="Balon ancorat 3" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 346.199, 25.340, -157.427)
+transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 335.209, 28.750, -153.683)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
 rise_time = 8.0
 hold = 4.0
 phase = 0.6667
-height = 10.96
+height = 8.00
 basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("10_env_c")
 model_scale = 1.15
@@ -6751,19 +6751,19 @@ script = ExtResource("4_prop")
 [node name="D) Canionul rosu" type="Node3D" parent="DecorManual"]
 
 [node name="HornulCrapat" type="Node3D" parent="DecorManual/D) Canionul rosu"]
-transform = Transform3D(0.964557, 0, 0.263873, 0, 1, 0, -0.263873, 0, 0.964557, 143.540000, 25.980000, -176.090000)
+transform = Transform3D(0.9916, 0, 0.1231, 0, 1, 0, -0.1231, 0, 0.9916, 169.013, 27.009, -169.559)
 script = ExtResource("5_chim")
-fall_side = 1
+fall_side = -1
 
 [node name="Cracked_Chimney_A" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("25_crk_a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0000, -1.1500, -1.2000)
 
 [node name="Cracked_Chimney_B" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("26_crk_b")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0000, -2.6000, 2.4000)
+transform = Transform3D(0.860742, 0, -0.509041, 0, 1, 0, 0.509041, 0, 0.860742, -0.0000, -2.6000, 0.4000)
 visible = false
 
 [node name="Cracked_Chimney_C" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("27_crk_c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.0000, -0.5500, 5.8000)
+transform = Transform3D(0.860742, 0, -0.509041, 0, 1, 0, 0.509041, 0, 0.860742, 9.0000, -0.5500, 3.8000)
 visible = false
 
 [node name="Faleza" type="Node3D" parent="DecorManual/D) Canionul rosu"]

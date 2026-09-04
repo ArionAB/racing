@@ -193,6 +193,14 @@ func _ready() -> void:
 ## declarata camerei.
 ##
 ## Masurat 2 sep 2026, dupa zonele de cavern pe interval de fractie.
+## Cappadocia 1 -> 2 pe 4 sep 2026: al doilea e hornul CAZUT din POI D (frac
+## ~0.468, „state_col intre masina si camera la 3.8 m"): sonda insasi
+## declanseaza caderea cand plimba masina prin trigger, iar la 8-16 m dupa
+## rampa linia masina-camera trece o clipa prin capul hornului culcat, cat
+## masina e in aer. Aceeasi clasa ca FlyoffRamp la 0.972. NU se pune pe
+## `CAMERA_BLOCKER_LAYER`: pe rampa se circula, iar o camera impinsa peste ea
+## in timpul saltului ar sari odata cu masina. Hornul IN PICIOARE este pe
+## layer (cracked_chimney_hazard._body_for), ca zid de 16 m ce e.
 ## Cheia e eticheta intreaga (`GameState.track_label`), cu numarul scenei in ea.
 const BASELINE := {
 	"Dunele (Track01)": 3,
@@ -201,7 +209,7 @@ const BASELINE := {
 	"Baikal (Track10)": 2,
 	"Stromboli (Track11)": 2,
 	"Chongqing (Track12)": 0,
-	"Cappadocia (Track13)": 1,
+	"Cappadocia (Track13)": 2,
 }
 
 

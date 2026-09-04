@@ -216,6 +216,14 @@ func _body_for(model: Node3D, mode: String, want: bool) -> void:
 		if not ok:
 			body.free()
 			return
+		# Hornul in picioare e un zid de 16 m PE drum: camera de urmarire
+		# trebuie sa-l ocoleasca (`ChaseCamera._unclip` asculta doar layer-ul
+		# asta), altfel cadrul trece prin el cand masina l-a depasit cu 3-12 m
+		# — masurat cu ProbeCameraSolid (4 sep 2026): `state_col` intre masina
+		# si camera la 3.8 m. Rampa si molozul raman fara: pe ele se CIRCULA,
+		# iar o camera care sare peste rampa cand masina o urca ar fi mai rau.
+		if mode == "hull":
+			body.collision_layer |= Track.CAMERA_BLOCKER_LAYER
 		model.add_child(body)
 	elif not want and body != null:
 		body.queue_free()

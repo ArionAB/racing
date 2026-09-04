@@ -50,6 +50,10 @@ extends Node
 ##   --lava-stage=1            stadiul limbii de lava (Stromboli): 0 = turul 1,
 ##                             1 = poarta, 2 = zid. Implicit 0 — adica exact
 ##                             starea in care gimmick-ul nu se vede.
+##   --balloon-at=0.62         cosurile care urca (BalloonHazard) la o fractie
+##                             din ciclul lor (toate la aceeasi faza): ~0.29-0.57
+##                             urca, ~0.60-0.64 MATURA banda, ~0.64-0.68 urca
+##                             sa elibereze.
 ##   --burner-at=0.05          arzatorul balonului (BurnerHazard) la o fractie
 ##                             din ciclul lui: 0.00-0.06 = telegraf (flacara),
 ##                             0.06-0.10 = sufla (praf), restul = stins.
@@ -130,6 +134,7 @@ func _ready() -> void:
 	var rock_at := -1.0
 	var door_at := -1.0
 	var burner_at := -1.0
+	var balloon_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
 	var hide_node := ""
@@ -162,6 +167,8 @@ func _ready() -> void:
 			door_at = float(arg.trim_prefix("--door-at="))
 		elif arg.begins_with("--burner-at="):
 			burner_at = float(arg.trim_prefix("--burner-at="))
+		elif arg.begins_with("--balloon-at="):
+			balloon_at = float(arg.trim_prefix("--balloon-at="))
 		elif arg.begins_with("--lava-stage="):
 			lava_stage = int(arg.trim_prefix("--lava-stage="))
 		elif arg.begins_with("--route="):
@@ -219,6 +226,8 @@ func _ready() -> void:
 		await _set_door_phase(track, door_at)
 	if burner_at >= 0.0:
 		await _set_burner_phase(track, burner_at)
+	if balloon_at >= 0.0:
+		await _set_balloon_phase(track, balloon_at)
 	if bridge_at >= 0.0:
 		_set_bridge_phase(track, bridge_at)
 	if span_at >= 0.0:
@@ -513,6 +522,20 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train._physics_process(0.0)
 		found += 1
 	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+
+
+## Muta cosurile care urca la o fractie din ciclul lor (toate la aceeasi faza,
+## ca sa poti fotografia unul anume in maturare fara sa-i calculezi defazajul).
+func _set_balloon_phase(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.find_children("*", "BalloonHazard", true, false):
+		var b := node as BalloonHazard
+		b.set("_started", true)
+		b.set("_time", b.period * clampf(at, 0.0, 0.999))
+		found += 1
+	for i in 4:
+		await get_tree().physics_frame
+	print("--balloon-at=%.2f: %d cosuri mutate in ciclu" % [at, found])
 
 
 ## Muta arzatorul la o fractie din ciclul lui si lasa cateva cadre sa treaca,

@@ -1,6 +1,19 @@
 extends Node
 ## SONDA COSULUI CARE URCA (Cappadocia, brief §7.1c / §3 „hazardul-semnatura").
 ##
+## ############################################################################
+## CONTRACT RETRAS (4 sep 2026). Sonda asta dovedeste contractul de PLATFORMA:
+## masina sta pe cos, urca cu el, nu e aruncata la capete. Dupa turul 2 de la
+## volan cosul a fost reproiectat (balloon_hazard.gd, „Maturare"): la varf nu
+## mai sta, MATURA banda cu 13.6 m/s si IMPINGE ce prinde. Deci verdictele
+## (0), (i)-(iv), (vi), (viii) pica PRIN DESIGN — nu sunt regresii — iar (vi)/(viii)
+## masoara si amplasarea veche din brief (fundul vaii), nu politele. Ramane
+## valabila doar (v) defazarea. Sonda pentru contractul nou (traverseaza banda
+## pe hw intreg, la cota drumului, ghiont <= SWEEP_PUSH + sensul maturarii, fara
+## repuneri pe 5 seed-uri) e de scris; pana atunci, ProbeRace + captura cu
+## `Snapshot --balloon-at=0.615` sunt masuratoarea.
+## ############################################################################
+##
 ## Intrebarea: poate o masina REALA (Car.tscn, RigidBody3D cu suspensie pe
 ## raycast, Jolt) sa stea pe un cos de balon care urca 30 m PUR VERTICAL si sa
 ## fie dusa sus fara sa alunece, sa cada prin podea sau sa fie aruncata la
@@ -146,22 +159,24 @@ class ProbeDriver extends CarController:
 ## nu ca optiune de productie: o treapta de acceleratie la capete e chiar ce
 ## arunca masina, si asta trebuie sa se VADA in cifre, nu sa fie afirmat.
 class TrapezBalloon extends BalloonScript:
-	func _progress(t: float) -> float:
+	# Aceeasi semnatura ca parintele (offset local: y = urcarea). Martorul
+	# n-are maturare: compara doar profilul vertical, ca la inceput.
+	func _progress(t: float) -> Vector3:
 		var t_rise := ground_hold
 		var t_top := t_rise + rise_time
 		var t_fall := t_top + hold
 		var fall_time := maxf(period - t_fall, 0.5)
 		if t < t_rise:
 			_state = State.JOS
-			return 0.0
+			return Vector3.ZERO
 		if t < t_top:
 			_state = State.URCA
-			return (t - t_rise) / rise_time
+			return Vector3(0.0, height * (t - t_rise) / rise_time, 0.0)
 		if t < t_fall:
 			_state = State.SUS
-			return 1.0
+			return Vector3(0.0, height, 0.0)
 		_state = State.COBOARA
-		return 1.0 - clampf((t - t_fall) / fall_time, 0.0, 1.0)
+		return Vector3(0.0, height * (1.0 - clampf((t - t_fall) / fall_time, 0.0, 1.0)), 0.0)
 
 
 func _ready() -> void:

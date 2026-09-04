@@ -90,7 +90,18 @@ const TETHER_RADIUS: float = 0.05
 ## franghiilor, nu un offset de centru.
 const ENVELOPE_LIFT: float = 2.0
 
-enum State { JOS, URCA, SUS, COBOARA }
+## Membrii noi LA COADA (probele compara `state()` cu numele, nu cu indici,
+## dar regula proiectului e aceeasi ca la SlidingHazard.Motion).
+enum State { JOS, URCA, SUS, COBOARA, MATURA, RIDICA }
+
+## Ghiontul dat masinii lovite de cosul in MATURARE (m/s) — acelasi rol ca
+## `SlidingHazard.SWEEP_PUSH`: te DEZECHILIBREAZA, nu te captureaza. Vezi nota
+## de la `_shove_cars`.
+const SWEEP_PUSH: float = 6.0
+## Cat tremura camera cand cosul iti trece prin fata (trauma, 0..1).
+const SWEEP_TRAUMA: float = 0.45
+## Sub distanta asta de cos (m), la maturare, camera primeste trauma.
+const SWEEP_TRAUMA_RANGE: float = 9.0
 
 @export_group("Ritm")
 ## Ciclul complet (s). Brief: ~28, si NU divizor al turului — faza se muta de
@@ -105,6 +116,29 @@ enum State { JOS, URCA, SUS, COBOARA }
 ## Decalajul ciclului (0..1 din period). Trei noduri la 0, 1/3, 2/3 fac ritmul
 ## cornisei — vezi verdictul (iv) al sondei pentru fereastra reala de blocare.
 @export_range(0.0, 1.0, 0.01) var phase: float = 0.0
+
+@export_group("Maturare")
+## Turul 2 de la volan (4 sep 2026) a schimbat contractul cosului. Cosul care
+## URCA si STA la cota drumului, 1 m in banda, era „un zid invizibil": masina
+## care il atingea intra in zona de bord si ancora o tinea pe loc (18 s la
+## 2-21 km/h in filmare). Un obstacol static la marginea benzii nu e un
+## hazard, e mobilier — aceeasi lectie ca la SlidingHazard.
+##
+## Acum cosul TRAVERSEAZA banda: urca de pe polita (telegraf: panza de 12 m
+## rasare de sub buza, 8 s), sta o clipa la margine, apoi matura banda pe
+## -Z local (spre drum) cu ~14 m/s, urca sa elibereze banda si se intoarce pe
+## polita. Cine il prinde in banda e IMPINS (ghiont radial + sensul maturarii),
+## nu ancorat; camera tremura cand trece prin fata ta. Decizia jucatorului:
+## franez si il las sa treaca, sau accelerez si trec inaintea lui. Contractul
+## de platforma (ride up) ramane doar cat cosul sta pe loc (JOS/SUS/COBOARA) si
+## doar pentru masina al carei CENTRU e pe podea — nu pentru cine il atinge.
+## Cat traverseaza cosul lateral pe -Z local, din varful urcarii (m).
+@export_range(0.0, 40.0, 0.5) var sweep_m: float = 15.0
+## Cat dureaza traversarea (s). 15 m in 1.1 s = 13.6 m/s: se citeste, nu e clipire.
+@export_range(0.3, 5.0, 0.1) var sweep_time: float = 1.1
+## Cat urca dupa maturare ca sa elibereze banda (m), si in cat timp.
+@export_range(0.0, 40.0, 0.5) var clear_rise_m: float = 10.0
+@export_range(0.3, 5.0, 0.1) var clear_time: float = 1.2
 
 @export_group("Cursa")
 ## Cat urca podeaua cosului fata de pozitia nodului. Brief: ~30 m, din vale
@@ -143,6 +177,10 @@ var _velocity: Vector3 = Vector3.ZERO
 var _prev_pos: Vector3 = Vector3.ZERO
 ## Car -> ancora (pozitia locala pe podea) pentru masinile de la bord.
 var _aboard: Dictionary = {}
+## Masina lovita -> secunde pana poate fi imbrancita din nou (ca la SlidingHazard).
+var _cooldown: Dictionary = {}
+## Camera a primit deja trauma in maturarea curenta.
+var _kicked: bool = false
 
 
 func _ready() -> void:
@@ -157,7 +195,7 @@ func _ready() -> void:
 	_build_body()
 	_build_envelope()
 	_build_tether()
-	_place(0.0)
+	_place(Vector3.ZERO)
 	_prev_pos = _body.global_position
 
 
@@ -354,14 +392,20 @@ func _physics_process(delta: float) -> void:
 		_time = phase * period
 	_time += delta
 	var prev_state := _state
-	var s := _progress(fposmod(_time, period))
-	_place(s)
+	var off := _progress(fposmod(_time, period))
+	_place(off)
 	_velocity = (_body.global_position - _prev_pos) / maxf(delta, 0.0001)
 	_prev_pos = _body.global_position
 	_body.set_meta(&"platform_velocity", _velocity)
 	if _state != prev_state:
 		_on_state_changed(prev_state, _state)
-	_hold_aboard()
+	if _state == State.MATURA or _state == State.RIDICA:
+		_aboard.clear()
+		_shove_cars(delta)
+		_kick_camera()
+	else:
+		_kicked = false
+		_hold_aboard()
 
 
 ## Fractia de cursa (0 = jos, 1 = sus) la momentul t din ciclu; seteaza starea.
@@ -369,29 +413,91 @@ func _physics_process(delta: float) -> void:
 ## Capetele sunt smoothstep pe TOATA cursa, deliberat: acceleratia porneste si
 ## se stinge de la zero, deci nu exista treapta care sa desprinda masina de
 ## podea (nota 3 din antet). Varful de acceleratie e 6*H/T².
-func _progress(t: float) -> float:
+## Pozitia cosului in ciclu, ca OFFSET LOCAL fata de ancora: y = urcarea,
+## z = maturarea (negativ = pe -Z local, spre drum). Starile, in ordinea in
+## care le vede jucatorul: JOS -> URCA -> SUS (o clipa la margine) -> MATURA
+## (traverseaza banda) -> RIDICA (urca si revine deasupra ancorei) -> COBOARA.
+func _progress(t: float) -> Vector3:
 	var t_rise := ground_hold
 	var t_top := t_rise + rise_time
-	var t_fall := t_top + hold
+	var t_sweep := t_top + hold
+	var t_clear := t_sweep + sweep_time
+	var t_fall := t_clear + clear_time
 	var fall_time := maxf(period - t_fall, 0.5)
 	if t < t_rise:
 		_state = State.JOS
-		return 0.0
+		return Vector3.ZERO
 	if t < t_top:
 		_state = State.URCA
-		return smoothstep(0.0, 1.0, (t - t_rise) / rise_time)
-	if t < t_fall:
+		return Vector3(0.0, height * smoothstep(0.0, 1.0, (t - t_rise) / rise_time), 0.0)
+	if t < t_sweep:
 		_state = State.SUS
-		return 1.0
+		return Vector3(0.0, height, 0.0)
+	if t < t_clear:
+		_state = State.MATURA
+		# Viteza constanta, ca la val si la tren: o traversare care accelereaza
+		# nu se poate anticipa, si atunci fereastra devine ghicitoare.
+		var k := (t - t_sweep) / sweep_time
+		return Vector3(0.0, height, -sweep_m * k)
+	if t < t_fall:
+		_state = State.RIDICA
+		var k := smoothstep(0.0, 1.0, (t - t_clear) / clear_time)
+		return Vector3(0.0, height + clear_rise_m * k, -sweep_m * (1.0 - k))
 	_state = State.COBOARA
-	return 1.0 - smoothstep(0.0, 1.0, clampf((t - t_fall) / fall_time, 0.0, 1.0))
+	var k := smoothstep(0.0, 1.0, clampf((t - t_fall) / fall_time, 0.0, 1.0))
+	return Vector3(0.0, (height + clear_rise_m) * (1.0 - k), 0.0)
 
 
 ## O SINGURA scriere de transform pe cadru (Jolt + sync_to_physics).
-func _place(s: float) -> void:
-	var p := global_position
+func _place(off: Vector3) -> void:
+	var p := global_position + global_transform.basis * Vector3(off.x, 0.0, off.z)
 	_body.global_transform = Transform3D(Basis.IDENTITY,
-		Vector3(p.x, _base_y + height * s, p.z))
+		Vector3(p.x, _base_y + off.y, p.z))
+
+
+## Directia maturarii in lume (-Z local), pentru sonde.
+func sweep_dir() -> Vector3:
+	var d := -global_transform.basis.z
+	d.y = 0.0
+	return d.normalized()
+
+
+## Cosul in maturare IMPINGE, nu ancoreaza. Radial + putin in sensul in care
+## matura, ca masina prinsa intre cos si perete sa aiba unde iesi — aceeasi
+## geometrie ca `SlidingHazard._shove_cars`, si acelasi cooldown per masina.
+func _shove_cars(delta: float) -> void:
+	for key: Variant in _cooldown.keys():
+		_cooldown[key] = maxf(float(_cooldown[key]) - delta, 0.0)
+	for b in _deck.get_overlapping_bodies():
+		var car := b as Car
+		if car == null or float(_cooldown.get(car, 0.0)) > 0.0:
+			continue
+		_cooldown[car] = 0.35
+		var away := car.global_position - _body.global_position
+		away.y = 0.0
+		if away.length() < 0.05:
+			continue
+		var along := _velocity
+		along.y = 0.0
+		var push := away.normalized() * SWEEP_PUSH + Vector3.UP * 1.0
+		if along.length() > 0.5:
+			push += along.normalized() * SWEEP_PUSH * 0.5
+		car.apply_sweep(push)
+
+
+## Camera tremura o data pe maturare, cand cosul trece la sub 9 m de masina
+## jucatorului — „bine ca l-am evitat". Doar jucatorul: camera e a lui.
+func _kick_camera() -> void:
+	if _kicked:
+		return
+	for node in get_tree().get_nodes_in_group(ChaseCamera.GROUP):
+		var cam := node as ChaseCamera
+		if cam == null or cam.target == null:
+			continue
+		if cam.target.global_position.distance_to(_body.global_position) <= SWEEP_TRAUMA_RANGE:
+			cam.add_trauma(SWEEP_TRAUMA)
+			_kicked = true
+			return
 
 
 func _on_state_changed(_from: State, to: State) -> void:
@@ -432,9 +538,15 @@ func _hold_aboard() -> void:
 			continue
 		if car.wheels_on_ground < 3:
 			continue
-		if absf(_body.to_local(car.global_position).y) > 1.0:
+		var lp := _body.to_local(car.global_position)
+		if absf(lp.y) > 1.0:
 			continue
-		_aboard[car] = _body.to_local(car.global_position)
+		# Doar masina al carei CENTRU e pe podea. Zona de bord e cat cosul, iar
+		# o masina care doar il ATINGEA la marginea benzii intra in ea si era
+		# tinuta pe loc de ancora: „zidul invizibil" din turul 2 de la volan.
+		if absf(lp.x) > BASKET_SIZE.x * 0.4 or absf(lp.z) > BASKET_SIZE.z * 0.4:
+			continue
+		_aboard[car] = lp
 	for key in _aboard.keys():
 		# ORDINEA CONTEAZA, si a fost gresita: in GDScript `key as Car` pe un
 		# obiect eliberat arunca „Trying to cast a freed object" — eroarea vine

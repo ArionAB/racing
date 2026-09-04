@@ -545,7 +545,7 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 			var c0 := _shade(t0)
 			var c1 := _shade(t1)
 			# Ordine inversa fata de `_build`: fata priveste spre banda.
-			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1)
+			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1, true)
 	if built == 0:
 		return null
 	st.generate_normals()
@@ -1441,13 +1441,27 @@ func _append_talus(col: Array, sd: Vector3, surface_y: Callable) -> void:
 ## cele de dinainte de nod, si e capcana clasica: „nu se vede" arata la fel ca
 ## „nu s-a construit", dar se repara in alt loc.
 func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
-		uvv: Vector2, ca: Color, cb: Color, cc: Color, cd: Color) -> void:
+		uvv: Vector2, ca: Color, cb: Color, cc: Color, cd: Color,
+		two_sided: bool = false) -> void:
 	_vert(st, a, uvv, ca)
 	_vert(st, c, uvv, cc)
 	_vert(st, b, uvv, cb)
 	_vert(st, a, uvv, ca)
 	_vert(st, d, uvv, cd)
 	_vert(st, c, uvv, cc)
+	if two_sided:
+		# Aceeasi fata, cu winding-ul invers: se vede si din spate. Panza
+		# falezei de langa banda priveste VALEA, iar camera de urmarire sta pe
+		# drum, 10 m deasupra, si se uita peste buza in jos — adica din spatele
+		# ei. Cu o singura fata, culling-ul o stergea si prin „deal" se vedea
+		# fundul vaii: „dealul e transparent" din turul 2 (4 sep 2026).
+		# Dubleaza triunghiurile panzei, zero materiale.
+		_vert(st, a, uvv, ca)
+		_vert(st, b, uvv, cb)
+		_vert(st, c, uvv, cc)
+		_vert(st, a, uvv, ca)
+		_vert(st, c, uvv, cc)
+		_vert(st, d, uvv, cd)
 
 
 func _vert(st: SurfaceTool, v: Vector3, uvv: Vector2, col: Color) -> void:

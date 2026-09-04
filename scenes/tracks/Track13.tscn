@@ -6445,12 +6445,12 @@ script = ExtResource("4_prop")
 [node name="C) Cornisa Vaii Rosii" type="Node3D" parent="DecorManual"]
 
 [node name="Balon ancorat 1" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 179.947, 31.079, -9.375)
+transform = Transform3D(-0.1467, 0, 0.9892, 0, 1, 0, -0.9892, 0, -0.1467, 179.947, 31.079, -9.375)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
 rise_time = 8.0
-hold = 4.0
+hold = 0.8
 phase = 0.0000
 height = 8.00
 basket_model = ExtResource("7_basket")
@@ -6462,12 +6462,12 @@ envelope_scale = 1.0
 transform = Transform3D(0.8517, 0, -0.5241, 0, 1.0000, 0, 0.5241, 0, 0.8517, 205.855, 32.700, 9.476)
 
 [node name="Balon ancorat 2" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 260.412, 17.953, -52.008)
+transform = Transform3D(0.4641, 0, 0.8858, 0, 1, 0, -0.8858, 0, 0.4641, 260.412, 17.953, -52.008)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
 rise_time = 8.0
-hold = 4.0
+hold = 0.8
 phase = 0.3333
 height = 8.00
 basket_model = ExtResource("7_basket")
@@ -6479,12 +6479,12 @@ envelope_scale = 1.0
 transform = Transform3D(0.6101, 0, -0.7923, 0, 1.0000, 0, 0.7923, 0, 0.6101, 303.233, 28.040, -78.130)
 
 [node name="Balon ancorat 3" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 335.209, 28.750, -153.683)
+transform = Transform3D(0.1787, 0, 0.9839, 0, 1, 0, -0.9839, 0, 0.1787, 335.209, 28.75, -153.683)
 script = ExtResource("5_balloon")
 period = 28.0
 ground_hold = 8.0
 rise_time = 8.0
-hold = 4.0
+hold = 0.8
 phase = 0.6667
 height = 8.00
 basket_model = ExtResource("7_basket")
@@ -6496,7 +6496,7 @@ envelope_scale = 1.0
 transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 346.199, 25.340, -157.427)
 
 [node name="Balonul arzatorului (hairpin)" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.1592, 0, 0.9872, 0, 1, 0, -0.9872, 0, 0.1592, 339.348, 33.808, -221.001)
+transform = Transform3D(0.1592, 0, -0.9872, 0, 1, 0, 0.9872, 0, 0.1592, 339.348, 33.808, -221.001)
 script = ExtResource("6_burner")
 period = 17.0
 telegraph = 1.0
@@ -6729,28 +6729,28 @@ transform = Transform3D(-0.5645, 0, 0.2034, 0, 0.2200, 0, -0.2034, 0, -0.5645, 3
 [node name="Chei de scara (usi in faleza)" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
 
 [node name="Locuinta sapata 1" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("18_house_a")]
-transform = Transform3D(-0.8930, 0, -0.4500, 0, 1, 0, 0.4500, 0, -0.8930, 196.843, 21.000, -14.438)
+transform = Transform3D(0.1467, 0, -0.9892, 0, 1, 0, 0.9892, 0, 0.1467, 183.134, 32.143, 1.208)
 
 [node name="Porumbar 1" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("17_dovecote")]
 transform = Transform3D(-0.8930, 0, -0.4500, 0, 1, 0, 0.4500, 0, -0.8930, 192.644, 15.000, -6.106)
 
 [node name="Locuinta sapata 2" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("18_house_a")]
-transform = Transform3D(-0.6159, 0, 0.7878, 0, 1, 0, -0.7878, 0, -0.6159, 252.862, 16.700, -17.606)
+transform = Transform3D(-0.4641, 0, -0.8858, 0, 1, 0, 0.8858, 0, -0.4641, 256.28, 17.097, -40.674)
 
 [node name="Locuinta sapata 5" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("18_house_a")]
-transform = Transform3D(-0.3949, 0, 0.9187, 0, 1, 0, -0.9187, 0, -0.3949, 274.031, 17.100, -49.147)
+transform = Transform3D(-0.4641, 0, -0.8858, 0, 1, 0, 0.8858, 0, -0.4641, 267.39, 18.81, -61.879)
 
 [node name="Porumbar 2" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("17_dovecote")]
 transform = Transform3D(-0.3949, 0, 0.9187, 0, 1, 0, -0.9187, 0, -0.3949, 282.606, 11.100, -45.462)
 
 [node name="Locuinta sapata 3" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("19_house_b")]
-transform = Transform3D(-0.3990, 0, 0.9170, 0, 1, 0, -0.9170, 0, -0.3990, 286.487, 20.700, -79.760)
+transform = Transform3D(-0.1787, 0, -0.9839, 0, 1, 0, 0.9839, 0, -0.1787, 334.65, 29.353, -141.659)
 
 [node name="Porumbar 3" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("17_dovecote")]
 transform = Transform3D(-0.3990, 0, 0.9170, 0, 1, 0, -0.9170, 0, -0.3990, 295.043, 14.700, -76.037)
 
 [node name="Locuinta sapata 4" parent="DecorManual/C) Cornisa Vaii Rosii/Chei de scara (usi in faleza)" instance=ExtResource("18_house_a")]
-transform = Transform3D(-0.6960, 0, 0.7180, 0, 1, 0, -0.7180, 0, -0.6960, 298.328, 24.700, -100.454)
+transform = Transform3D(-0.1787, 0, -0.9839, 0, 1, 0, 0.9839, 0, -0.1787, 338.934, 28.148, -165.243)
 
 script = ExtResource("4_prop")
 

@@ -32,6 +32,7 @@ func _ready() -> void:
 	var track_index := 13
 	var frac := 0.27
 	var matches: Array[String] = []
+	var groups: Array[String] = []
 	var no_shadow := false
 	var caster := ""
 	for arg in OS.get_cmdline_user_args():
@@ -45,6 +46,8 @@ func _ready() -> void:
 			no_shadow = true
 		elif arg.begins_with("--match="):
 			matches.append(arg.trim_prefix("--match="))
+		elif arg.begins_with("--group="):
+			groups.append(arg.trim_prefix("--group="))
 	if matches.is_empty():
 		matches.append("Taietura")
 
@@ -145,6 +148,25 @@ func _ready() -> void:
 	for k in order.slice(0, 12):
 		print("  %7d px  %5.2f%%  %s" % [per[k],
 			100.0 * float(per[k]) / float(_w * _h), all[k].name])
+
+	# --group=<nume parinte>: aduna pixelii pe COPILUL direct al acelui parinte
+	# (nodul-obiect din DecorManual), nu pe mesh-ul din GLB — ca sa se vada
+	# care obiecte ajung in cadru si care nu ajung niciodata.
+	if not groups.is_empty():
+		var by_node := {}
+		for k in per.keys():
+			var nd: Node = all[k]
+			while nd != null and nd != track:
+				var pn: Node = nd.get_parent()
+				if pn != null and groups.has(pn.name):
+					by_node[pn.name + "/" + nd.name] = int(by_node.get(pn.name + "/" + nd.name, 0)) + int(per[k])
+					break
+				nd = pn
+		var keys: Array = by_node.keys()
+		keys.sort_custom(func(x, y): return int(by_node[x]) > int(by_node[y]))
+		print("--- pe obiect (grupuri: %s) ---" % ", ".join(groups))
+		for kk in keys:
+			print("  GRUP %7d px  %s" % [by_node[kk], kk])
 
 	for m in matches:
 		for k in all.size():

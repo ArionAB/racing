@@ -80,6 +80,7 @@ point_count = 129
 
 [node name="Track13" type="Node3D"]
 script = ExtResource("1_track")
+terrain_pad_m = 200.0
 custom_name = "Cappadocia"
 custom_theme = "cappadocia"
 custom_half_width = 6.0
@@ -92,9 +93,9 @@ custom_gate_model = "none"
 custom_ravines = Array[Vector4]([Vector4(0.175, 0.394, 72, 1), Vector4(0.410, 0.557, 16, 1), Vector4(0.580, 0.708, 10, 1), Vector4(0.024, 0.176, 22, 1)])
 custom_cornice_ravines = Array[int]([0, 1])
 custom_scarp_ravines = Array[int]([0])
-custom_ravine_floors = Array[Vector2]([Vector2(0, -26.0), Vector2(1, 8.0), Vector2(3, 25.0)])
-custom_ravine_widths = Array[Vector2]([Vector2(0, 230.0), Vector2(1, 70.0)])
-custom_ravine_floor_slopes = Array[Vector2]([Vector2(0, 34.0)])
+custom_ravine_floors = Array[Vector2]([Vector2(0, 10.0), Vector2(1, 8.0), Vector2(3, 25.0)])
+custom_ravine_widths = Array[Vector2]([Vector2(0, 110.0), Vector2(1, 70.0)])
+custom_ravine_floor_slopes = Array[Vector2]([Vector2(0, 8.0)])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.788, 0.962)])
 custom_width_segments = Array[Vector3]([Vector3(0.962, 0.04, 9.0), Vector3(0.04, 0.16, 6.5), Vector3(0.175, 0.394, 7.0), Vector3(0.410, 0.557, 5.5), Vector3(0.580, 0.690, 8.0), Vector3(0.7185, 0.727, 2.0), Vector3(0.7555, 0.772, 7.0), Vector3(0.772, 0.962, 6.0)])
 custom_rail_segments = Array[Vector4]([])
@@ -120,7 +121,7 @@ frac_end = 0.40
 side = 1.0
 far_wall = false
 lip_offset_m = 0.2
-depth_m = 52.0
+depth_m = 32.0
 step_m = 4.0
 bands = 9
 band_relief_m = 0.9
@@ -190,27 +191,6 @@ brow_step_m = 3.0
 brow_taper_frac = 0.10
 brow_jitter_m = 0.55
 brow_slots = Array[int]([19, 23, 10])
-
-[node name="MalulOpusAlVaiiRosii" type="Marker3D" parent="Faleze"]
-script = ExtResource("15_cliffface")
-frac_start = 0.170
-frac_end = 0.420
-side = 1.0
-far_wall = true
-far_bank = true
-far_offset_m = 78.0
-far_eye_rise_m = 6.0
-far_over_eye_m = 50.0
-far_depth_m = 130.0
-far_step_m = 8.0
-far_bands = 16
-far_relief_m = 1.1
-far_rise_m = 1.2
-far_foot_max_m = 130.0
-batter_m = 0.55
-foot_bite_m = 3.0
-band_slots = Array[int]([19, 23, 10, 27, 23, 3, 10, 27, 23, 4, 2, 2, 19, 23, 10, 27])
-cap_slots = Array[int]([19, 19, 8, 23])
 
 [node name="TaieturaInterioara" type="Marker3D" parent="Faleze"]
 script = ExtResource("15_cliffface")
@@ -292,22 +272,22 @@ script = ExtResource("2_peak")
 radius_m = 130
 
 [node name="ValeaRosieMalulOpus1" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 470, 30, 100)
-gizmo_extents = 150
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 400, 70, 60)
+gizmo_extents = 130
 script = ExtResource("2_peak")
-radius_m = 150
+radius_m = 130
 
 [node name="ValeaRosieMalulOpus2" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 500, 26, 75)
-gizmo_extents = 150
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 430, 75, -60)
+gizmo_extents = 140
 script = ExtResource("2_peak")
-radius_m = 150
+radius_m = 140
 
 [node name="ValeaRosieMalulOpus3" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 560, 24, -215)
-gizmo_extents = 160
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 440, 70, -200)
+gizmo_extents = 130
 script = ExtResource("2_peak")
-radius_m = 160
+radius_m = 130
 
 [node name="StancaGoala" type="Marker3D" parent="Peaks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -328.800, 62, -2.200)
@@ -6541,12 +6521,6 @@ transform = Transform3D(-0.7028, 0, 0.5297, 0, 0.88, 0, -0.5297, 0, -0.7028, 345
 [node name="balon4_cos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
 transform = Transform3D(-0.7986, 0, 0.6019, 0, 1.0000, 0, -0.6019, 0, -0.7986, 345, 30.7, -150)
 
-[node name="balon5_sus" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("10_env_c")]
-transform = Transform3D(0.7729, 0, -0.8516, 0, 1.15, 0, 0.8516, 0, 0.7729, 224.358, 24.895, 46.439)
-
-[node name="balon5_cos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
-transform = Transform3D(0.6721, 0, -0.7405, 0, 1.0000, 0, 0.7405, 0, 0.6721, 224.358, 21.895, 46.439)
-
 [node name="balon6_sus" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("8_env_a")]
 transform = Transform3D(0.4934, 0, -0.8698, 0, 1, 0, 0.8698, 0, 0.4934, 254.308, 29.937, -17.605)
 
@@ -6559,20 +6533,8 @@ transform = Transform3D(-0.0246, 0, 0.9497, 0, 0.95, 0, -0.9497, 0, -0.0246, 380
 [node name="balon8_cos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
 transform = Transform3D(-0.0259, 0, 0.9997, 0, 1.0000, 0, -0.9997, 0, -0.0259, 380, 37.5, -120)
 
-[node name="balon9_panza" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("11_landed")]
-transform = Transform3D(-0.7587, 0, -0.6515, 0, 1.0000, 0, 0.6515, 0, -0.7587, 303.438, 13.700, -62.573)
-
-[node name="balon10_panza" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("11_landed")]
-transform = Transform3D(0.7960, 0, -0.6053, 0, 1.0000, 0, 0.6053, 0, 0.7960, 329.969, 13.7, -40.951)
-
 [node name="balon11_panza" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("11_landed")]
-transform = Transform3D(-0.3594, 0, 0.9332, 0, 1.0000, 0, -0.9332, 0, -0.3594, 349.836, 13.7, -25.374)
-
-[node name="balon9_cos_jos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
-transform = Transform3D(-0.7587, 0, -0.6515, 0, 1.0000, 0, 0.6515, 0, -0.7587, 306.100, 13.700, -60.200)
-
-[node name="balon10_cos_jos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
-transform = Transform3D(0.7960, 0, -0.6053, 0, 1.0000, 0, 0.6053, 0, 0.7960, 332.5, 13.7, -38.4)
+transform = Transform3D(-0.3594, 0, 0.9332, 0, 1.0000, 0, -0.9332, 0, -0.3594, 349.836, 2.2, -25.374)
 
 [node name="balon12_sus" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("8_env_a")]
 transform = Transform3D(0.657, 0, 0.9438, 0, 1.15, 0, -0.9438, 0, 0.657, 333.366, 22.65, -117.245)
@@ -6580,17 +6542,11 @@ transform = Transform3D(0.657, 0, 0.9438, 0, 1.15, 0, -0.9438, 0, 0.657, 333.366
 [node name="balon12_cos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
 transform = Transform3D(0.5713, 0, 0.8207, 0, 1.0000, 0, -0.8207, 0, 0.5713, 333.366, 19.650, -117.245)
 
-[node name="balon13_umfla" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.6665, 0, -0.7455, 0, 0.4500, 0, 0.7455, 0, -0.6665, 354.272, 13.700, -105.761)
-
 [node name="balon17_sus" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("10_env_c")]
 transform = Transform3D(1.1876, 0, -0.2794, 0, 1.22, 0, 0.2794, 0, 1.1876, 388.494, 28.809, -182.232)
 
 [node name="balon17_cos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("7_basket")]
 transform = Transform3D(0.9734, 0, -0.2290, 0, 1.0000, 0, 0.2290, 0, 0.9734, 388.494, 25.809, -182.232)
-
-[node name="balon20_panza" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("11_landed")]
-transform = Transform3D(-0.1111, 0, 0.9938, 0, 1.0000, 0, -0.9938, 0, -0.1111, 356.758, 22.454, -291.436)
 
 [node name="Baloane departate" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
 
@@ -6630,41 +6586,14 @@ transform = Transform3D(0.7475, 0, 0.6642, 0, 1.0000, 0, -0.6642, 0, 0.7475, 372
 [node name="departe11" parent="DecorManual/C) Cornisa Vaii Rosii/Baloane departate" instance=ExtResource("13_far")]
 transform = Transform3D(0.9740, 0, 0.2265, 0, 1.0000, 0, -0.2265, 0, 0.9740, 436, 105, -255)
 
-[node name="balon9_panza_umflatura0" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.1612, 0, -0.7836, 0, 0.3400, 0, 0.7836, 0, -0.1612, 307.990, 12.500, -58.664)
-
-[node name="balon9_panza_umflatura1" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.7011, 0, -0.1640, 0, 0.3000, 0, 0.1640, 0, -0.7011, 303.059, 12.500, -62.899)
-
-[node name="balon9_panza_umflatura2" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.5147, 0, -0.3084, 0, 0.2200, 0, 0.3084, 0, -0.5147, 298.734, 12.500, -66.612)
-
-[node name="balon10_panza_umflatura0" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(0.7842, 0, -0.1581, 0, 0.3400, 0, 0.1581, 0, 0.7842, 325.193, 12.5, -37.319)
-
-[node name="balon10_panza_umflatura1" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(0.3571, 0, -0.6252, 0, 0.3000, 0, 0.6252, 0, 0.3571, 330.367, 12.5, -41.254)
-
-[node name="balon10_panza_umflatura2" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(0.5964, 0, -0.0657, 0, 0.2200, 0, 0.0657, 0, 0.5964, 334.904, 12.5, -44.704)
-
 [node name="balon11_panza_umflatura0" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.6017, 0, 0.5272, 0, 0.3400, 0, -0.5272, 0, -0.6017, 351.992, 12.5, -30.973)
+transform = Transform3D(-0.6017, 0, 0.5272, 0, 0.3400, 0, -0.5272, 0, -0.6017, 351.992, 2.2, -30.973)
 
 [node name="balon11_panza_umflatura1" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(0.0669, 0, 0.7169, 0, 0.3000, 0, -0.7169, 0, 0.0669, 349.656, 12.5, -24.907)
+transform = Transform3D(0.0669, 0, 0.7169, 0, 0.3000, 0, -0.7169, 0, 0.0669, 349.656, 2.2, -24.907)
 
 [node name="balon11_panza_umflatura2" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.4512, 0, 0.3956, 0, 0.2200, 0, -0.3956, 0, -0.4512, 347.608, 12.5, -19.588)
-
-[node name="balon20_panza_umflatura0" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(0.5635, 0, 0.5678, 0, 0.3400, 0, -0.5678, 0, 0.5635, 357.425, 21.254, -297.399)
-
-[node name="balon20_panza_umflatura1" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.3366, 0, 0.6365, 0, 0.3000, 0, -0.6365, 0, -0.3366, 356.702, 21.254, -290.939)
-
-[node name="balon20_panza_umflatura2" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" instance=ExtResource("9_env_b")]
-transform = Transform3D(-0.5645, 0, 0.2034, 0, 0.2200, 0, -0.2034, 0, -0.5645, 356.069, 21.254, -285.274)
+transform = Transform3D(-0.4512, 0, 0.3956, 0, 0.2200, 0, -0.3956, 0, -0.4512, 347.608, 2.2, -19.588)
 
 [node name="Chei de scara (usi in faleza)" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
 
@@ -8872,10 +8801,10 @@ transform = Transform3D(0.37961257, 0, 1.8292027, 0, 1.8681778, 0, -1.8292027, 0
 transform = Transform3D(-0.31381503, 0, -1.2703162, 0, 1.3085042, 0, 1.2703162, 0, -0.31381503, -54.226425, 6.7005363, -195.22739)
 
 [node name="Fill009" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
-transform = Transform3D(1.0219103, 0, -1.5919111, 0, 1.8916875, 0, 1.5919111, 0, 1.0219103, -152.7024, 19.217379, -319.9408)
+transform = Transform3D(1.0219103, 0, -1.5919111, 0, 1.8916875, 0, 1.5919111, 0, 1.0219103, -152.7024, 12.317, -319.9408)
 
 [node name="Fill010" parent="DecorManual/Zone05_Midfield" instance=ExtResource("31_tcob")]
-transform = Transform3D(-1.2693585, 0, 0.9282173, 0, 1.5725324, 0, -0.9282173, 0, -1.2693585, -108.64372, 10.852381, -307.859)
+transform = Transform3D(-1.2693585, 0, 0.9282173, 0, 1.5725324, 0, -0.9282173, 0, -1.2693585, -108.64372, 4.552, -307.859)
 
 [node name="Fill011" parent="DecorManual/Zone05_Midfield" instance=ExtResource("30_tblk")]
 transform = Transform3D(-1.204275, 0, 0.8075066, 0, 1.4499466, 0, -0.8075066, 0, -1.204275, -106.51808, 14.915989, -165.06013)

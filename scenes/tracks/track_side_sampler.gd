@@ -970,6 +970,8 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 			rim = RAVINE_VIADUCT_RIM
 		var lat := smoothstep(0.0, 1.0,
 			clampf((dist - half_width_at(near_i) - inner) / rim, 0.0, 1.0))
+		# Cat din sapatura se mai aplica AICI (1 in rapa, 0 dincolo de latime).
+		var fade := 1.0
 		if _ravine_widths.has(ri):
 			# MALUL DE DINCOLO: saparea se stinge dupa latimea ceruta, ca
 			# terenul de peste vale sa poata urca inapoi. Racordul se ia egal
@@ -978,8 +980,9 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 			# piscina, nu ca versantul opus.
 			var w := float(_ravine_widths[ri])
 			var edge := half_width_at(near_i) + inner + w
-			lat *= 1.0 - smoothstep(0.0, 1.0,
+			fade = 1.0 - smoothstep(0.0, 1.0,
 				clampf((dist - edge) / maxf(rim, 1.0), 0.0, 1.0))
+			lat *= fade
 		var target := road_level - r.z * along * lat
 		if _floors.has(ri):
 			# Podeaua e absoluta, nu relativa la drum: cheiul sta la aceeasi
@@ -997,7 +1000,16 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		# C0 trasa cu rigla peste RAVINE_RIM (16 m ~ doua celule de grila).
 		# Racordul: la o taietura de 1.2 m, cei 3 m impliciti ar rotunji inapoi
 		# chiar muchia ceruta (racordul ar fi mai lat decat peretele).
-		y = _smin(y, target, SMOOTH_SCARP_K if scarp else SMOOTH_RAVINE_K)
+		#
+		# DINCOLO de latime sapatura nu se aplica deloc (lerp cu `fade`), nu
+		# doar "sapa zero": cu lat = 0 tinta e chiar road_level, si min-ul de
+		# mai jos RETEZA la cota drumului orice relief de peste vale. Masurat pe
+		# Cappadocia, POI C: trei TerrainPeak de 70-75 m declarate ca mal opus
+		# dadeau teren plat la 30.3 (= cota drumului) chiar in centrul lor, si
+		# singurul "mal" ramanea o panza de faleza. Fara latime declarata, fade
+		# e 1 si comportamentul e cel dinainte.
+		var carved := _smin(y, target, SMOOTH_SCARP_K if scarp else SMOOTH_RAVINE_K)
+		y = lerpf(y, carved, fade)
 	return y
 
 

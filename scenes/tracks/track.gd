@@ -4111,9 +4111,19 @@ const TERRAIN_MAX_SIZE: float = 1400.0
 ## acoperite (garda la 300k; Jolt duce trimesh static de ordinul asta lejer).
 const TERRAIN_CELL: float = 760.0 / 96.0
 
+## Metri ADAUGATI la latura panzei de teren, peste caseta traseului.
+##
+## Caseta traseului plus marja de racord da o panza care se termina la ~100 m
+## de cel mai departat tronson. O vale cu mal opus (rapa de 110 m + un masiv
+## dincolo de ea) nu incape: pe Cappadocia, POI C, malul opus cadea peste
+## marginea lumii (raycast la +140 m lateral lovea podeaua de -70 m, nu teren)
+## si singurul "mal" era o panza de faleza. Costul e in celule (pasul ramane
+## TERRAIN_CELL): +200 m pe 760 inseamna ~1.6x triunghiuri de teren.
+@export var terrain_pad_m: float = 0.0
+
 func _world_extent() -> float:
 	if baked.is_empty():
-		return TERRAIN_MIN_SIZE
+		return TERRAIN_MIN_SIZE + terrain_pad_m
 	var lo := baked[0]
 	var hi := baked[0]
 	for p in baked:
@@ -4122,7 +4132,7 @@ func _world_extent() -> float:
 	var span := maxf(hi.x - lo.x, hi.z - lo.z)
 	var margin := 2.0 * (TrackSideSampler.GROUND_FLAT_RADIUS
 		+ TrackSideSampler.GROUND_BLEND_LEN)
-	return clampf(span + margin, TERRAIN_MIN_SIZE, TERRAIN_MAX_SIZE)
+	return clampf(span + margin + terrain_pad_m, TERRAIN_MIN_SIZE, TERRAIN_MAX_SIZE)
 
 
 ## CENTRUL panzei de teren: mijlocul CASETEI traseului, nu media punctelor.

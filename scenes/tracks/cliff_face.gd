@@ -922,7 +922,7 @@ func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 			var t1 := float(r + 1) / float(rows - 1)
 			var c0 := _shade(t0)
 			var c1 := _shade(t1)
-			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1)
+			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1, true)
 		# COAMA, in continuarea buzei: acelasi slot ca banda de sus, ca sa se
 		# citeasca drept acelasi bloc de roca vazut de deasupra.
 		var ca: Array = caps[si]
@@ -948,7 +948,7 @@ func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 				var cuv := Palette.uv(cs)
 				var s0 := _shade(0.10 + 0.5 * float(r) / float(crows - 1))
 				var s1 := _shade(0.10 + 0.5 * float(r + 1) / float(crows - 1))
-				_quad(st, cb[r], ca[r], ca[r + 1], cb[r + 1], cuv, s0, s0, s1, s1)
+				_quad(st, cb[r], ca[r], ca[r + 1], cb[r + 1], cuv, s0, s0, s1, s1, true)
 	if built == 0:
 		return null
 	st.generate_normals()
@@ -956,6 +956,13 @@ func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	mi.name = "Faleza pinten " + name
 	mi.mesh = st.commit()
 	mi.material_override = Palette.world_material()
+	# Pintenul e SOLID: fata si coama au coliziune (trimesh), altfel masina
+	# trece prin peretele de langa banda ca printr-o perdea — verdictul de la
+	# volan din 4 sep 2026, pe TaieturaSerpentinei ("zidul din stanga e
+	# transparent si poti trece prin el"). Fetele sunt emise pe ambele parti
+	# din acelasi motiv: de pe platou, in spatele pintenului, o panza
+	# single-sided se vede prin ea.
+	mi.create_trimesh_collision()
 	# Pintenul e langa drum si la cota lui: umbra lui de zori cade CHIAR PE BANDA
 	# si e cel mai ieftin semn ca acolo e o masa solida, nu o textura.
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON

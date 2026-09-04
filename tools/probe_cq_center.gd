@@ -35,7 +35,7 @@ func _ready() -> void:
 	# 2. unde e axa traseului fata de nodul modulului
 	print()
 	print("axa traseului fata de nod (x local pe cateva fractii):")
-	var inv := span.global_transform.affine_inverse()
+	var inv: Transform3D = (span as Node3D).global_transform.affine_inverse()
 	for f: float in [0.470, 0.480, 0.4905, 0.500, 0.510]:
 		var i := int(round(f * float(n))) % n
 		var l: Vector3 = inv * r.baked[i]

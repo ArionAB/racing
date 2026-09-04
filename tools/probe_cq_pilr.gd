@@ -12,7 +12,7 @@ func _ready() -> void:
 		var node := decor.find_child(nm, true, false) as Node3D
 		if node == null:
 			continue
-		var body := node.find_child("*_col", "", true, false)
+		var body := node.find_child("*_col", true, false)
 		if body == null:
 			for ch in node.get_children():
 				if ch is StaticBody3D:

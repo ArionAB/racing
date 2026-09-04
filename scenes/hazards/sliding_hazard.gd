@@ -77,7 +77,7 @@ const CROSS_TELEGRAPH: float = 1.2
 ## prins-o inchizandu-se ar fi pierdut mai mult asteptand decat pe ocol
 ## (+1.85…+2.36 s masurat), deci ocolul chiar e alegerea corecta.
 const DOOR_OPEN: float = 10.0
-const DOOR_CLOSED: float = 6.0
+const DOOR_CLOSED: float = 3.0
 ## Viteza de rostogolire a usii (m/s). Lenta dinadins: o piatra de 3 m care
 ## traverseaza 4.5 m in 2.5 s se CITESTE ca usa care se inchide; la viteza
 ## maturarii (12 m/s) ar fi o clipire. Regula din antet („lent = mobilier")

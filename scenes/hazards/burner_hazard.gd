@@ -32,8 +32,25 @@ const WorldProp = preload("res://scenes/props/world_prop.gd")
 ## Flacara: un con emisiv scurt peste cos. `LAVA_ORANGE` prin `glow_material`,
 ## adica exact materialul lavei — nu unul nou (bugetul de materiale al pistei).
 const FLAME_SLOT: int = 30
-const FLAME_RADIUS: float = 0.55
-const FLAME_HEIGHT: float = 1.8
+## Flacara se vede de pe drum, nu doar de langa cos: balonul sta la 13-19 m de
+## axa, iar la 0.55 x 1.8 m era un chibrit intr-un colt de cadru — verdictul de
+## la volan (4 sep 2026): „nu se intampla nimic vizual, se simte ca un zid
+## invizibil". 1.4 x 4.5 m e o limba de foc cat cosul.
+const FLAME_RADIUS: float = 1.4
+const FLAME_HEIGHT: float = 4.5
+## Suflul se VEDE: dare de aer cald care traverseaza toata zona de suflu pe
+## directia lui, cat tine telegraful si suflul. Fara asta, o acceleratie
+## laterala fara nicio imagine e exact „zidul invizibil" (verdictul de la
+## volan, 4 sep 2026). Sunt MESH-uri miscate din cod, nu GPUParticles: prima
+## varianta cu particule pe materialul lumii n-a randat nimic (ProbeMasca nu
+## vede particule, captura n-a aratat nimic), iar un lucru pe care nici sonda
+## nici poza nu-l vad nu exista. Culoarea e cea a flacarii (acelasi
+## `glow_material`, deci ZERO materiale noi): aerul care iese din arzator e
+## fierbinte, si asa se citeste si de unde vine suflul. Dungile umplu o cutie
+## cat sfera de suflu, nu un jet din cos: jucatorul trebuie sa vada ZONA.
+const GUST_COUNT: int = 28
+const GUST_SPEED: float = 14.0
+const GUST_LEN: float = 2.2
 
 @export_group("Ritm")
 ## Ciclul complet. Brief: ~17 s, si NU divizor al turului (lectia Stromboli) —
@@ -65,6 +82,8 @@ const FLAME_HEIGHT: float = 1.8
 
 var _area: Area3D
 var _flame: MeshInstance3D
+var _gust: Node3D
+var _gust_t: Array[float] = []
 var _time: float = 0.0
 var _started: bool = false
 var _blowing: bool = false
@@ -73,6 +92,7 @@ var _blowing: bool = false
 func _ready() -> void:
 	_build_models()
 	_build_flame()
+	_build_gust()
 	_build_area()
 	set_physics_process(not Engine.is_editor_hint())
 
@@ -82,8 +102,12 @@ func _ready() -> void:
 ## deja la cota din brief, 12 m. Acelasi factor pe amandoua da un balon de 26 m
 ## care umple cadrul — masurat pe captura de la frac 0.28.
 func _build_models() -> void:
+	# Panza sta la 5 m peste cos (nu la 2, ca la cosurile care urca): intre
+	# ele sta FLACARA, de 4.5 m, si trebuie sa se vada — la 2 m conul era
+	# inauntrul panzei si arzatorul n-a avut niciodata telegraf vizibil
+	# (verdictul de la volan, 4 sep 2026).
 	for spec: Array in [[basket_model, 0.0, model_scale],
-			[envelope_model, 2.0, envelope_scale]]:
+			[envelope_model, 5.6, envelope_scale]]:
 		var scene: PackedScene = spec[0]
 		if scene == null:
 			continue
@@ -111,10 +135,48 @@ func _build_flame() -> void:
 	_flame.name = "Flame"
 	_flame.mesh = cone
 	_flame.material_override = Palette.glow_material(FLAME_SLOT, 2.4)
-	_flame.position = Vector3(0.0, 2.6, 0.0)
+	_flame.position = Vector3(0.0, 1.2 + FLAME_HEIGHT * 0.5, 0.0)
 	_flame.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_flame.visible = false
 	add_child(_flame)
+
+
+## Darele de aer cald. Fiecare e o placuta orizontala subtire, asezata pe -Z
+## LOCAL (= `blow_dir()`), care aluneca pe -Z si se reia de la capatul din
+## spate cand iese din zona. Pozitiile laterale (x local) si fazele sunt
+## deterministe (fara RNG: doua rulari, aceeasi imagine — sondele compara).
+func _build_gust() -> void:
+	_gust = Node3D.new()
+	_gust.name = "Gust"
+	_gust.visible = false
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(0.6, GUST_LEN)
+	mesh.orientation = PlaneMesh.FACE_Y
+	var mat := Palette.glow_material(FLAME_SLOT, 2.4)
+	for k in GUST_COUNT:
+		var mi := MeshInstance3D.new()
+		mi.mesh = mesh
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# x local: raspandite pe latimea zonei; y: la 0.5-1.6 m, cat sa treaca
+		# prin dreptul masinii; faza: unde pe cursa porneste fiecare.
+		var u := float(k) / float(GUST_COUNT)
+		mi.position = Vector3(
+			(fmod(u * 7.0, 1.0) * 2.0 - 1.0) * radius * 0.9,
+			0.5 + fmod(u * 3.0, 1.0) * 1.1,
+			0.0)
+		_gust.add_child(mi)
+		_gust_t.append(fmod(u * 5.0, 1.0))
+	add_child(_gust)
+
+
+## Muta darele pe -Z cat sufla; `z` de la +raza (spate) la -raza (capatul
+## zonei), cu reluare — adica un curent continuu prin toata sfera de suflu.
+func _animate_gust(delta: float) -> void:
+	for k in _gust.get_child_count():
+		_gust_t[k] = fmod(_gust_t[k] + delta * GUST_SPEED / (2.0 * radius), 1.0)
+		var mi := _gust.get_child(k) as Node3D
+		mi.position.z = radius - _gust_t[k] * 2.0 * radius
 
 
 func _build_area() -> void:
@@ -138,6 +200,10 @@ func _physics_process(delta: float) -> void:
 	var t := fposmod(_time, period)
 	var lit := t < telegraph + blow
 	_blowing = t >= telegraph and t < telegraph + blow
+	if _gust != null:
+		_gust.visible = lit
+		if lit:
+			_animate_gust(delta)
 	if _flame != null:
 		_flame.visible = lit
 		# Flacara pulsa: mai lunga cat sufla, ca telegraful si suflul sa nu

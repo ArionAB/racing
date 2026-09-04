@@ -718,6 +718,13 @@ func _build_brow(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	mi.name = "Buza " + name
 	mi.mesh = st.commit()
 	mi.material_override = Palette.world_material()
+	# Pragul are COLIZIUNE, ca sa fie ce arata. Fara ea, corpul de sub buza
+	# era umarul soselei, cu 1.9 m mai jos (masurat la 0.30: lat 7 RoadTop
+	# 0.0, lat 8 Shoulders -1.9), deci masina care iesea pe prag se scufunda
+	# prin el — „o banda prin care poti sa cazi" (verdictul de la volan,
+	# 4 sep 2026). Cu trimesh pe cele trei fete, masina sta PE prag si cade
+	# abia dincolo de coama lui, cum spune si nota de mai sus.
+	mi.create_trimesh_collision()
 	# Pragul sta pe umarul dinspre vale: la soare de zori umbra lui cade inapoi
 	# pe carosabil si e cel mai ieftin semn ca banda are o margine ridicata.
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON

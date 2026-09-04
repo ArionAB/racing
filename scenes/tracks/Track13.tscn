@@ -98,7 +98,7 @@ custom_ravine_floor_slopes = Array[Vector2]([Vector2(0, 34.0)])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.788, 0.962)])
 custom_width_segments = Array[Vector3]([Vector3(0.962, 0.04, 9.0), Vector3(0.04, 0.16, 6.5), Vector3(0.175, 0.394, 7.0), Vector3(0.410, 0.557, 5.5), Vector3(0.580, 0.690, 8.0), Vector3(0.7185, 0.727, 2.0), Vector3(0.7555, 0.772, 7.0), Vector3(0.772, 0.962, 6.0)])
 custom_rail_segments = Array[Vector4]([])
-custom_loose_ranges = Array[Vector2]([Vector2(0.471, 0.495)])
+custom_loose_ranges = Array[Vector2]([])
 custom_lane_corridors = Array[Vector3]([Vector3(0.012, 0.036, 0.71)])
 
 [node name="Path" type="Path3D" parent="."]
@@ -254,6 +254,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 62, 130)
 gizmo_extents = 120
 script = ExtResource("2_peak")
 radius_m = 120
+
+[node name="SpateleTaieturii" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 250.2, 90, -183.9)
+gizmo_extents = 70
+script = ExtResource("2_peak")
+radius_m = 70
 
 [node name="PeretelHairpinului" type="Marker3D" parent="Peaks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 250, 50, -215)
@@ -6490,7 +6496,7 @@ envelope_scale = 1.0
 transform = Transform3D(0.1876, 0, -0.9822, 0, 1.0000, 0, 0.9822, 0, 0.1876, 346.199, 25.340, -157.427)
 
 [node name="Balonul arzatorului (hairpin)" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii"]
-transform = Transform3D(0.1431, 0, 0.9897, 0, 1.0000, 0, -0.9897, 0, 0.1431, 345.318, 33.808, -221.650)
+transform = Transform3D(0.1592, 0, 0.9872, 0, 1, 0, -0.9872, 0, 0.1592, 339.348, 33.808, -221.001)
 script = ExtResource("6_burner")
 period = 17.0
 telegraph = 1.0
@@ -6749,22 +6755,6 @@ transform = Transform3D(-0.6960, 0, 0.7180, 0, 1, 0, -0.7180, 0, -0.6960, 298.32
 script = ExtResource("4_prop")
 
 [node name="D) Canionul rosu" type="Node3D" parent="DecorManual"]
-
-[node name="HornulCrapat" type="Node3D" parent="DecorManual/D) Canionul rosu"]
-transform = Transform3D(0.9916, 0, 0.1231, 0, 1, 0, -0.1231, 0, 0.9916, 169.013, 27.009, -169.559)
-script = ExtResource("5_chim")
-fall_side = -1
-
-[node name="Cracked_Chimney_A" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("25_crk_a")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0000, -1.1500, -1.2000)
-
-[node name="Cracked_Chimney_B" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("26_crk_b")]
-transform = Transform3D(0.860742, 0, -0.509041, 0, 1, 0, 0.509041, 0, 0.860742, -0.0000, -2.6000, 0.4000)
-visible = false
-
-[node name="Cracked_Chimney_C" parent="DecorManual/D) Canionul rosu/HornulCrapat" instance=ExtResource("27_crk_c")]
-transform = Transform3D(0.860742, 0, -0.509041, 0, 1, 0, 0.509041, 0, 0.860742, 9.0000, -0.5500, 3.8000)
-visible = false
 
 [node name="Faleza" type="Node3D" parent="DecorManual/D) Canionul rosu"]
 

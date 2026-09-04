@@ -50,6 +50,9 @@ extends Node
 ##   --lava-stage=1            stadiul limbii de lava (Stromboli): 0 = turul 1,
 ##                             1 = poarta, 2 = zid. Implicit 0 — adica exact
 ##                             starea in care gimmick-ul nu se vede.
+##   --burner-at=0.05          arzatorul balonului (BurnerHazard) la o fractie
+##                             din ciclul lui: 0.00-0.06 = telegraf (flacara),
+##                             0.06-0.10 = sufla (praf), restul = stins.
 ##   --door-at=0.70            usa de piatra (SlidingHazard.Motion.USA) la o
 ##                             fractie din ciclul ei: 0 = abia deschisa (in
 ##                             nisa), ~0.53 = la jumatatea rostogolirii spre
@@ -126,6 +129,7 @@ func _ready() -> void:
 	var wave_at := -1.0
 	var rock_at := -1.0
 	var door_at := -1.0
+	var burner_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
 	var hide_node := ""
@@ -156,6 +160,8 @@ func _ready() -> void:
 			rock_at = float(arg.trim_prefix("--rock-at="))
 		elif arg.begins_with("--door-at="):
 			door_at = float(arg.trim_prefix("--door-at="))
+		elif arg.begins_with("--burner-at="):
+			burner_at = float(arg.trim_prefix("--burner-at="))
 		elif arg.begins_with("--lava-stage="):
 			lava_stage = int(arg.trim_prefix("--lava-stage="))
 		elif arg.begins_with("--route="):
@@ -211,6 +217,8 @@ func _ready() -> void:
 		_set_train_phase(track, train_at)
 	if door_at >= 0.0:
 		await _set_door_phase(track, door_at)
+	if burner_at >= 0.0:
+		await _set_burner_phase(track, burner_at)
 	if bridge_at >= 0.0:
 		_set_bridge_phase(track, bridge_at)
 	if span_at >= 0.0:
@@ -505,6 +513,26 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train._physics_process(0.0)
 		found += 1
 	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+
+
+## Muta arzatorul la o fractie din ciclul lui si lasa cateva cadre sa treaca,
+## ca particulele de praf sa apuce sa se nasca (GPUParticles nu are „salt in
+## timp": se emit de la zero).
+func _set_burner_phase(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.find_children("*", "BurnerHazard", true, false):
+		var b := node as BurnerHazard
+		b.set("_started", true)
+		# `_time` al arzatorului include deja defazajul (porneste din
+		# phase*period), deci fractia se pune direct, fara sa se scada phase.
+		b.set("_time", b.period * clampf(at, 0.0, 0.999))
+		found += 1
+	# Putine cadre: fereastra aprinsa e de 1.8 s din 17 (0.00-0.106 din ciclu),
+	# iar 30 de cadre (0.5 s) dupa un --burner-at=0.08 o depaseau — captura
+	# iesea cu arzatorul STINS si a fost citita ca „nu se vede nimic".
+	for i in 4:
+		await get_tree().physics_frame
+	print("--burner-at=%.2f: %d arzatoare mutate in ciclu" % [at, found])
 
 
 ## Muta usa de piatra la o fractie din ciclul ei (vezi `--door-at` in antet).

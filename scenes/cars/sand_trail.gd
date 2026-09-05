@@ -43,14 +43,13 @@ const CAPACITY: int = 160
 ## nisipul nederanjat.
 const MARK_SIZE: Vector2 = Vector2(0.46, 2.4)
 
-## Unde incepe stingerea laterala, in fractii din jumatatea de latime. 0.62 din
-## 0.23 m = miez plin de 0.28 m (cat anvelopa) si 0.09 m de trecere pe fiecare
-## parte.
-const EDGE_FRAC: float = 0.62
+## Textura cu modelul de anvelopa (chevron), autorata tileabil pe lungime.
+const TREAD_TEX: String = "res://assets/textures/tire_tread.png"
 
-## Cat de lata e BUZA fata de jumatatea de latime a fagasului. Buza e materialul
-## impins in lateral care se aduna si prinde lumina — vezi Track.trail_lip_color.
-const LIP_FRAC: float = 0.26
+## De cate ori se repeta modelul pe lungimea unei placute. La MARK_SIZE.y = 2.4 m
+## si 3 repetari, un pas de model iese ~0.8 m — cam cat circumferinta unei roti
+## de jucarie, deci ritmul citeste ca rulare, nu ca dungi.
+const TREAD_REPEATS: float = 3.0
 
 ## Cat de opaca e urma in miez. Valoarea implicita; pista o suprascrie prin
 ## `Track.trail_profile()`, fiindca adancimea urmei tine de suprafata.
@@ -105,6 +104,11 @@ func _ready() -> void:
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	# Date per instanta: canalul R poarta VARSTA placutei (0 proaspata, 1
+	# stearsa), citit in shader din INSTANCE_CUSTOM. Fara ele toate urmele au
+	# aceeasi opacitate, deci cea de acum zece secunde arata la fel de proaspata
+	# ca cea de sub roata — si inelul se vede cand se recicleaza.
+	mm.use_custom_data = true
 	mm.mesh = _shared_mesh()
 	mm.instance_count = CAPACITY
 	# Anvelopa MultiMesh-ului, nu doar a nodului: culling-ul se uita la amandoua.
@@ -127,7 +131,31 @@ func stamp(origin: Vector3, orientation: Basis) -> void:
 	if multimesh == null:
 		return
 	multimesh.set_instance_transform(_next, Transform3D(orientation, origin))
+	# Momentul depunerii, in secunde de la pornire: shaderul scade din `now` si
+	# obtine varsta. Vezi _process pentru de ce nu imbatranim instantele.
+	multimesh.set_instance_custom_data(_next,
+		Color(float(Time.get_ticks_msec()) * 0.001, 0.0, 0.0, 0.0))
 	_next = (_next + 1) % CAPACITY
+
+
+## Cat traieste o urma pana se stinge de tot, in secunde. Nu e o durata de
+## "disparitie" — inelul oricum recicleaza — ci panta lui NEW -> FADED din
+## referinta: urma de sub roata e plina, cea din urma cu jumatate de minut abia
+## se ghiceste.
+const FADE_SECONDS: float = 26.0
+
+
+## Ceasul cursei, impins in shader o data pe cadru.
+##
+## Imbatranirea NU se face rescriind cele 160 de instante in fiecare cadru: la
+## sase masini ar fi ~960 de apeluri pe cadru, exact genul de cheltuiala pe care
+## bugetul mobil n-o iarta. In schimb, fiecare placuta isi tine MOMENTUL
+## depunerii in datele ei per instanta, iar shaderul scade din ceasul asta —
+## deci varsta iese din doua scaderi, nu din o mie de scrieri.
+func _process(_delta: float) -> void:
+	var m := _shared_material()
+	if m != null:
+		m.set_shader_parameter("now", float(Time.get_ticks_msec()) * 0.001)
 
 
 ## Placuta unei urme: patru coloane pe latime, cu alfa in VERTECSI.
@@ -150,50 +178,30 @@ func stamp(origin: Vector3, orientation: Basis) -> void:
 static func _shared_mesh() -> Mesh:
 	if _mesh != null:
 		return _mesh
+	# Un patrulater simplu cu UV — forma nu mai vine din vertecsi, ci din
+	# shader (bazin + model de anvelopa). Versiunea de dinainte cosea in plasa
+	# si o BUZA ridicata pe margini; referinta o arata insa ca sectiune de
+	# bazin lina, fara umar, deci coloanele alea au disparut.
 	var hw := _width * 0.5
 	var hl := MARK_SIZE.y * 0.5
-	# Buza: o fasie in AFARA fagasului, cat 26% din jumatatea de latime.
-	var lip := hw * LIP_FRAC
-	# Sase coloane, nu patru: intre solul nederanjat si fagasul inchis se
-	# interpune BUZA — materialul impins in lateral, care e mai DESCHIS decat
-	# imprejurimile. Fara ea profilul e o treapta simpla si ochiul citeste
-	# vopsea; cu ea citeste adancitura. Canalul R marcheaza fagasul, G buza;
-	# shaderul (assets/shaders/sand_trail.gdshader) alege culoarea dupa ele.
-	# (x, alfa, cat de "buza" e). Buza are VARFUL la marginea fagasului si se
-	# stinge in afara lui — nu e o fasie plina.
-	#
-	# Greseala din prima versiune: vertexul de la x = ±hw avea alfa 1.0 SI buza
-	# 1.0, adica placuta iesea plina pe toata latimea de dinainte si abia apoi
-	# se stingea. Pe nisip trecea neobservat; pe zapada, unde culoarea buzei e
-	# aproape alba, dara acoperea soseaua ca un strat de vopsea.
-	var cols := [
-		[-hw - lip, 0.0, 1.0], # marginea de afara: stinsa complet
-		[-hw, 0.55, 1.0], # varful buzei, la marginea fagasului
-		[-hw * EDGE_FRAC, 1.0, 0.0], # intra in fagas: plin, fara buza
-		[hw * EDGE_FRAC, 1.0, 0.0],
-		[hw, 0.55, 1.0],
-		[hw + lip, 0.0, 1.0],
-	]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_normal(Vector3.UP)
-	for k in cols.size() - 1:
-		var xa: float = cols[k][0]
-		var xb: float = cols[k + 1][0]
-		# RGB poarta CINE e vertexul (rosu = fagas, verde = buza), alfa poarta
-		# cat de tare. Materialul le combina — vezi _shared_material.
-		var ca := Color(1.0 - cols[k][2], cols[k][2], 0.0, cols[k][1])
-		var cb := Color(1.0 - cols[k + 1][2], cols[k + 1][2], 0.0,
-			cols[k + 1][1])
-		# Ordinea conteaza: cu winding-ul intors, placutele exista in scena si sunt
-		# invizibile PRIVITE DE SUS — adica din singurul unghi din care se uita
-		# cineva la ele — fiindca materialul taie fetele din spate (cull_mode).
-		st.set_color(ca); st.add_vertex(Vector3(xa, 0.0, -hl))
-		st.set_color(cb); st.add_vertex(Vector3(xb, 0.0, -hl))
-		st.set_color(ca); st.add_vertex(Vector3(xa, 0.0, hl))
-		st.set_color(cb); st.add_vertex(Vector3(xb, 0.0, -hl))
-		st.set_color(cb); st.add_vertex(Vector3(xb, 0.0, hl))
-		st.set_color(ca); st.add_vertex(Vector3(xa, 0.0, hl))
+	# Ordinea conteaza: cu winding-ul intors, placutele exista in scena si sunt
+	# invizibile PRIVITE DE SUS — adica din singurul unghi din care se uita
+	# cineva la ele — fiindca materialul taie fetele din spate (cull_mode).
+	var quad := [
+		[Vector3(-hw, 0.0, -hl), Vector2(0.0, 0.0)],
+		[Vector3(hw, 0.0, -hl), Vector2(1.0, 0.0)],
+		[Vector3(-hw, 0.0, hl), Vector2(0.0, 1.0)],
+		[Vector3(hw, 0.0, -hl), Vector2(1.0, 0.0)],
+		[Vector3(hw, 0.0, hl), Vector2(1.0, 1.0)],
+		[Vector3(-hw, 0.0, hl), Vector2(0.0, 1.0)],
+	]
+	for v in quad:
+		st.set_color(Color(1, 1, 1, 1))
+		st.set_uv(v[1] as Vector2)
+		st.add_vertex(v[0] as Vector3)
 	_mesh = st.commit()
 	return _mesh
 
@@ -213,13 +221,13 @@ static func _shared_mesh() -> Mesh:
 ## Se cheama o data per cursa, inainte ca vreo masina sa depuna ceva — trebuie
 ## sa fie inainte, fiindca latimea intra in plasa, iar plasa se coace o singura
 ## data si e partajata de toate masinile.
-static func set_surface(mark: Color, lip: Color, profile: Dictionary) -> void:
+static func set_surface(mark: Color, profile: Dictionary) -> void:
 	_width = profile.get("width", MARK_SIZE.x)
 	var m := _shared_material()
 	m.set_shader_parameter("core_color", Color(mark.r, mark.g, mark.b))
-	m.set_shader_parameter("lip_color", Color(lip.r, lip.g, lip.b))
 	m.set_shader_parameter("core_alpha", profile.get("core", MARK_ALPHA))
-	m.set_shader_parameter("lip_alpha", profile.get("lip", 0.28))
+	m.set_shader_parameter("basin", profile.get("basin", 0.45))
+	m.set_shader_parameter("tread_amount", profile.get("tread", 0.65))
 
 
 static func _shared_material() -> ShaderMaterial:
@@ -234,6 +242,7 @@ static func _shared_material() -> ShaderMaterial:
 	# traiesc acum in render_mode-ul shaderului.
 	_mat = ShaderMaterial.new()
 	_mat.shader = load(SHADER_PATH) as Shader
+	_mat.set_shader_parameter("tread_tex", load(TREAD_TEX) as Texture2D)
 	# Urmele proaspete se deseneaza DUPA celelalte straturi transparente de pe
 	# sol (urme de drift, decal-uri de pista). Fara prioritate, sortarea depinde
 	# de distanta la camera si palpaie cand treci peste ele.

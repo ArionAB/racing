@@ -247,6 +247,14 @@ var _fire_particles: CPUParticles3D
 ## Praf de sub roti cand esti pe nisip. Separat de fumul de drift: fumul iese
 ## din cauciuc si e gri, praful e ridicat din SOL si ia culoarea temei.
 var _dust_particles: CPUParticles3D
+## Pietricelele si bulgarii aruncati de roata pe sol afanat.
+##
+## Al doilea strat al efectului, si singurul care are MUCHII: in referinta
+## (Beach Buggy Racing 2, secventele pe pamant) se vad puncte deslusite care
+## sar in urma rotilor, peste ceata joasa. Norul singur da atmosfera, dar nu
+## spune ca solul e granular — bucatile fac asta. De aceea aici e corect ce era
+## gresit la praf: geometrie mica, opaca, cu gravitatie reala.
+var _debris_particles: CPUParticles3D
 var _engine_audio: AudioStreamPlayer3D
 var _skid_audio: AudioStreamPlayer3D
 var _turbo_full_latch: bool = false
@@ -1289,6 +1297,11 @@ func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 		_dust_road_color = track.road_dust_color().lightened(0.18)
 	var live := loose and horizontal_speed() > DUST_MIN_SPEED
 	_dust_particles.emitting = live
+	if _debris_particles != null:
+		# Pietricelele cer mai multa viteza decat praful: la limita de jos roata
+		# ridica spulber, dar nu arunca bucati. Fara pragul separat, o masina
+		# care abia se misca ar imprastia pietre.
+		_debris_particles.emitting = live 			and horizontal_speed() > DUST_MIN_SPEED * 1.6
 	if not live:
 		return
 	var src := 1 if on_road else (2 if on_branch else 0)
@@ -1301,6 +1314,10 @@ func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 			# trebuie sa fie mai luminos decat suprafata de sub el ca sa se vada).
 			tint = track.route_dust_color(route).lightened(0.18)
 		_dust_particles.color = tint
+		# Bucatile sunt din acelasi sol, dar se citesc ca material solid, nu ca
+		# ceata: mai inchise si mai saturate decat norul.
+		if _debris_particles != null:
+			_debris_particles.color = tint.darkened(0.28)
 		# Si fumul de drift: pe pamant nu arde cauciucul, se ridica solul. Gri de
 		# anvelopa peste o dara rosie ar fi singurul lucru din cadru care spune
 		# ca dedesubt e tot asfalt.
@@ -1405,6 +1422,54 @@ func _drop_trail(delta: float, loose: bool) -> void:
 		if route == 0:
 			track.stamp_wear(road_index, wheel)
 
+## Textura de fum, incarcata o singura data pentru toate masinile.
+##
+## Regula de texturi din CLAUDE.md e "materiale de CLASA, nu per asset": asta e
+## exact o clasa — un singur material partajat de tot ce e fum sau praf pe orice
+## masina din cursa, deci un material, nu unul per masina.
+const SMOKE_TEX: String = "res://assets/textures/smoke_puff.png"
+static var _puff_material: StandardMaterial3D = null
+
+
+## Panza cu textura moale, orientata spre camera — corpul oricarei particule de
+## fum sau praf.
+##
+## Inlocuieste SphereMesh-ul de dinainte. Motivul e masurat, nu de gust: o sfera
+## cu 6 segmente are silueta cu muchii si o margine care se termina brusc, deci
+## se citeste ca un OBIECT. Masurat cu ProbeDustLook pe Okinawa, la ~97 km/h, o
+## taietura orizontala prin nor gasea 45 de trepte dure (|dL| pana la 181);
+## acum 0 (|dL| max 7). In referinta (Beach Buggy Racing 2) sunt 0-3, cu |dL|
+## intre 2.5 si 11.8. Diferenta nu e in numarul de particule, e in faptul ca
+## norul lor se termina intr-o cadere continua, iar al nostru intr-o muchie de
+## poligon.
+##
+## `size` e latura panzei in metri. Billboard-ul e PARTICLES, nu ENABLED: asa
+## fiecare particula isi pastreaza rotatia proprie (angle_min/max) in timp ce
+## sta cu fata la camera.
+func _puff_mesh(size: float) -> QuadMesh:
+	if _puff_material == null:
+		var m := StandardMaterial3D.new()
+		m.albedo_texture = load(SMOKE_TEX) as Texture2D
+		m.vertex_color_use_as_albedo = true
+		# Culorile noastre sunt autorate ca sRGB (Color.html, Palette). Fara
+		# steagul asta, Godot le citeste ca LINIARE si le scoate cu ~1.5 trepte
+		# mai deschise: #BB8744 randa (241,218,177) — crem pal, masurat cu
+		# ProbeFx. De-aia praful parea alb oricat il inchideam la sursa.
+		m.vertex_color_is_srgb = true
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		# Fara scriere in depth: norii se suprapun fara sa se taie unul pe altul.
+		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+		m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		# Panza e plata: fara asta ar disparea cand camera o prinde din muchie.
+		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_puff_material = m
+	var q := QuadMesh.new()
+	q.size = Vector2(size, size)
+	q.material = _puff_material
+	return q
+
+
 ## Fum de cauciuc ars. Pe drum de pamant se inlocuieste cu praful solului —
 ## vezi _update_dust.
 const DRIFT_SMOKE_COLOR: Color = Color(0.78, 0.78, 0.8)
@@ -1412,6 +1477,9 @@ const DRIFT_SMOKE_COLOR: Color = Color(0.78, 0.78, 0.8)
 func _build_effects() -> void:
 	# Fum de drift, colorat dupa nivelul de boost incarcat.
 	_drift_particles = CPUParticles3D.new()
+	# Nume propriu, ca la "Dust"/"Debris": pana acum singurul mod de a deosebi
+	# fumul de praf dintr-o sonda era sa te iei dupa `amount`.
+	_drift_particles.name = "DriftSmoke"
 	_drift_particles.position = Vector3(0, 0.4, 1.9) # spatele masinii (+Z)
 	_drift_particles.emitting = false
 	_drift_particles.amount = 24
@@ -1424,20 +1492,25 @@ func _build_effects() -> void:
 	_drift_particles.scale_amount_min = 0.6
 	_drift_particles.scale_amount_max = 1.4
 	_drift_particles.color = DRIFT_SMOKE_COLOR
-	# Sfera cu putine laturi, nu cub: particulele-cuburi erau una din cele trei
-	# cauze ale lui "parca am facut racing in Minecraft" (feedback direct).
-	# 24 de triunghiuri bucata, cu segmentele setate — vezi regula din CLAUDE.md.
-	var smoke := SphereMesh.new()
-	smoke.radius = 0.14
-	smoke.height = 0.28
-	smoke.radial_segments = 6
-	smoke.rings = 3
-	var smoke_mat := StandardMaterial3D.new()
-	smoke_mat.vertex_color_use_as_albedo = true # ia culoarea din particula
-	smoke_mat.vertex_color_is_srgb = true # altfel gri 0.78 citit liniar = alb
-	smoke_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	smoke.material = smoke_mat
-	_drift_particles.mesh = smoke
+	# Fumul de drift nu avea deloc rampa de opacitate: iesea opac si disparea
+	# brusc la 0.5 s. Acum se naste, se ingroasa si se stinge, ca praful.
+	var smoke_fade := Gradient.new()
+	smoke_fade.set_offsets(PackedFloat32Array([0.0, 0.18, 1.0]))
+	smoke_fade.set_colors(PackedColorArray([
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.42), Color(1, 1, 1, 0.0)]))
+	_drift_particles.color_ramp = smoke_fade
+	_drift_particles.angle_min = -180.0
+	_drift_particles.angle_max = 180.0
+	# Fumul se destrama crescand, ca norul de praf.
+	var smoke_grow := Curve.new()
+	smoke_grow.add_point(Vector2(0.0, 0.5))
+	smoke_grow.add_point(Vector2(1.0, 1.0))
+	_drift_particles.scale_amount_curve = smoke_grow
+	# Panza orientata spre camera cu textura moale, nu sfera low-poly: vezi
+	# _puff_mesh. Sferele aveau exact defectul cuburilor de dinaintea lor,
+	# doar cu mai multe fete — o silueta cu muchii, nu un nor.
+	_drift_particles.mesh = _puff_mesh(0.30)
+	_drift_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_drift_particles)
 
 	# Praf ridicat de sub roti pe off-road. Emite din SPATELE masinii, la nivelul
@@ -1453,48 +1526,100 @@ func _build_effects() -> void:
 	_dust_particles.name = "Dust"
 	_dust_particles.position = Vector3(0, 0.12, 1.7)
 	_dust_particles.emitting = false
-	_dust_particles.amount = 26
+	# Multe particule mici si palide, nu putine mari si opace. Masuratoarea
+	# fata de referinta (Beach Buggy Racing 2) a aratat de ce conteaza: la 26
+	# de blob-uri mari fiecare se citeste individual, si o taietura orizontala
+	# prin nor gasea 45 de trepte dure fata de 0-3 la ei. Densitatea trebuie sa
+	# vina din suprapunere, nu din marimea bucatii.
+	_dust_particles.amount = 64
 	_dust_particles.lifetime = 1.15
 	_dust_particles.direction = Vector3(0, 1, 0.6)
 	_dust_particles.spread = 45.0
 	_dust_particles.initial_velocity_min = 1.5
 	_dust_particles.initial_velocity_max = 4.0
+	# Norul iese de pe TOATA latimea puntii spate, nu dintr-un punct: in
+	# referinta dara e mai lata decat masina, fiindca sursa sunt cele doua pete
+	# de contact. Emitatorul-punct era motivul pentru care al nostru iesea ca o
+	# pana ingusta din mijlocul barei.
+	_dust_particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	_dust_particles.emission_box_extents = Vector3(0.62, 0.06, 0.12)
 	# Gravitatie usor negativa: praful se ridica si se lasa, nu tasneste ca fumul.
 	_dust_particles.gravity = Vector3(0, -1.2, 0)
 	_dust_particles.damping_min = 1.5
 	_dust_particles.damping_max = 3.0
-	_dust_particles.scale_amount_min = 1.2
-	_dust_particles.scale_amount_max = 3.0
+	# Particula creste cat traieste — asa se destrama un nor real. Cu scara
+	# fixa, fiecare puf ramane un disc de aceeasi marime pana dispare.
+	_dust_particles.scale_amount_min = 1.1
+	_dust_particles.scale_amount_max = 2.4
+	var grow := Curve.new()
+	grow.add_point(Vector2(0.0, 0.45))
+	grow.add_point(Vector2(1.0, 1.0))
+	_dust_particles.scale_amount_curve = grow
+	# Rotatie proprie per particula: fara ea, 64 de exemplare din ACEEASI
+	# textura arata ca 64 de stampile identice.
+	_dust_particles.angle_min = -180.0
+	_dust_particles.angle_max = 180.0
 	# Se stinge in transparenta pe durata vietii; fara asta, norul dispare brusc.
 	# CPUParticles3D vrea un Gradient direct, nu un GradientTexture1D — ala e
 	# pentru varianta GPU.
+	# Praful e o TENTA peste sol, nu un obiect care il acopera. La 0.72 norul
+	# nostru muta luminanta solului cu 55 in medie si pana la 212; in referinta
+	# textura de dedesubt se vede prin praf tot timpul. Varful coboara la 0.30,
+	# iar densitatea o dau cele 64 de particule suprapuse.
 	var fade := Gradient.new()
-	fade.set_color(0, Color(1, 1, 1, 0.72))
-	fade.set_color(1, Color(1, 1, 1, 0.0))
+	fade.set_offsets(PackedFloat32Array([0.0, 0.15, 1.0]))
+	fade.set_colors(PackedColorArray([
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.46), Color(1, 1, 1, 0.0)]))
 	_dust_particles.color_ramp = fade
 	# Culoare provizorie; cea reala vine din tema, in _update_dust, de indata ce
 	# masina stie pe ce pista e. Praf nisipiu pe iarba ar fi exact genul de
 	# detaliu care se observa fara sa stii de ce te deranjeaza.
 	_dust_particles.color = Palette.color(Palette.SAND_MID).darkened(0.12)
-	var puff := SphereMesh.new()
-	puff.radius = 0.26
-	puff.height = 0.52
-	puff.radial_segments = 6
-	puff.rings = 3
-	var puff_mat := StandardMaterial3D.new()
-	puff_mat.vertex_color_use_as_albedo = true
-	# Culorile noastre sunt autorate ca sRGB (Color.html, Palette). Fara steagul
-	# asta, Godot le citeste ca LINIARE si le scoate cu ~1.5 trepte mai deschise:
-	# #BB8744 randa (241,218,177) — crem pal, masurat cu ProbeFx. De-aia praful
-	# parea alb oricat il inchideam la sursa.
-	puff_mat.vertex_color_is_srgb = true
-	puff_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	puff_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	# Fara scriere in depth: norii se suprapun fara sa se taie unul pe altul.
-	puff_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
-	puff.material = puff_mat
-	_dust_particles.mesh = puff
+	_dust_particles.mesh = _puff_mesh(0.78)
+	# Nicio particula nu arunca umbra. Inainte fumul de drift si flacara erau
+	# opace si o aruncau chiar — iar acum, fiind panze orientate spre camera,
+	# umbra lor ar fi un dreptunghi care se roteste dupa privitor.
+	_dust_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_dust_particles)
+
+	# Pietricele aruncate de roata. Contrapunctul prafului: bucati MICI si
+	# opace, cu gravitatie adevarata, care cad inapoi pe sol. Norul da
+	# atmosfera, astea dau materialul — fara ele solul afanat arata ca fum, nu
+	# ca pamant.
+	_debris_particles = CPUParticles3D.new()
+	_debris_particles.name = "Debris"
+	_debris_particles.position = Vector3(0, 0.10, 1.7)
+	_debris_particles.emitting = false
+	_debris_particles.amount = 14
+	_debris_particles.lifetime = 0.7
+	_debris_particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	_debris_particles.emission_box_extents = Vector3(0.62, 0.04, 0.10)
+	_debris_particles.direction = Vector3(0, 0.7, 1)
+	_debris_particles.spread = 22.0
+	_debris_particles.initial_velocity_min = 3.5
+	_debris_particles.initial_velocity_max = 8.0
+	# Gravitatie plina: bucata urca, cade si se opreste — arcul e chiar ce o
+	# deosebeste de praf.
+	_debris_particles.gravity = Vector3(0, -14.0, 0)
+	_debris_particles.scale_amount_min = 0.5
+	_debris_particles.scale_amount_max = 1.0
+	_debris_particles.angular_velocity_min = -420.0
+	_debris_particles.angular_velocity_max = 420.0
+	# 8 triunghiuri bucata, cu segmentele setate — regula din CLAUDE.md. La 14
+	# particule inseamna 112 triunghiuri per masina.
+	var grit := SphereMesh.new()
+	grit.radius = 0.05
+	grit.height = 0.10
+	grit.radial_segments = 4
+	grit.rings = 2
+	var grit_mat := StandardMaterial3D.new()
+	grit_mat.vertex_color_use_as_albedo = true
+	grit_mat.vertex_color_is_srgb = true
+	grit_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	grit.material = grit_mat
+	_debris_particles.mesh = grit
+	_debris_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_debris_particles)
 
 	# Flacara de boost.
 	_boost_particles = CPUParticles3D.new()
@@ -1509,17 +1634,33 @@ func _build_effects() -> void:
 	_boost_particles.scale_amount_min = 0.4
 	_boost_particles.scale_amount_max = 0.9
 	_boost_particles.color = Color(1.0, 0.55, 0.1)
-	var flame := SphereMesh.new()
-	flame.radius = 0.11
-	flame.height = 0.22
-	flame.radial_segments = 6
-	flame.rings = 3
+	# Flacara se stinge in fum, nu dispare intreaga la 0.25 s.
+	var flame_fade := Gradient.new()
+	flame_fade.set_offsets(PackedFloat32Array([0.0, 0.35, 1.0]))
+	flame_fade.set_colors(PackedColorArray([
+		Color(1.0, 0.92, 0.60, 0.95),
+		Color(1.0, 0.48, 0.10, 0.75),
+		Color(0.55, 0.20, 0.06, 0.0)]))
+	_boost_particles.color_ramp = flame_fade
+	_boost_particles.angle_min = -180.0
+	_boost_particles.angle_max = 180.0
+	# Foc ADITIV pe panza moale: 30 de bile portocalii opace erau exact aceeasi
+	# greseala ca la praf, doar ca la evacuare. Focul e lumina — se aduna peste
+	# ce e in spatele lui, nu il acopera.
+	var flame_q := _puff_mesh(0.26)
 	var flame_mat := StandardMaterial3D.new()
+	flame_mat.albedo_texture = load(SMOKE_TEX) as Texture2D
 	flame_mat.vertex_color_use_as_albedo = true
 	flame_mat.vertex_color_is_srgb = true
 	flame_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	flame.material = flame_mat
-	_boost_particles.mesh = flame
+	flame_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	flame_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	flame_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	flame_mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	flame_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	flame_q.material = flame_mat
+	_boost_particles.mesh = flame_q
+	_boost_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_boost_particles)
 
 	# Flacarile de pe capota, cat masina arde (vezi `ignite`).

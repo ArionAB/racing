@@ -1405,8 +1405,7 @@ func _drop_trail(delta: float, loose: bool) -> void:
 		# sunt partajate, deci o singura urma pe pista (vezi
 		# SandTrail.set_surface). Se pune INAINTE de add_child, fiindca latimea
 		# intra in plasa, iar plasa se coace la primul _ready.
-		SandTrail.set_surface(track.trail_mark_color(), track.trail_lip_color(),
-			track.trail_profile())
+		SandTrail.set_surface(track.trail_mark_color(), track.trail_profile())
 		add_child(_trail)
 	var half_track_w := data.body_width * 0.38 if data != null else 0.85
 	var rear_z := data.body_length * 0.34 if data != null else 1.3
@@ -1434,43 +1433,50 @@ const SMOKE_TEX: String = "res://assets/textures/smoke_puff.png"
 static var _puff_material: StandardMaterial3D = null
 
 
-## Panza cu textura moale, orientata spre camera — corpul oricarei particule de
-## fum sau praf.
+## Puf fatetat, luminat — corpul oricarei particule de fum sau praf.
 ##
-## Inlocuieste SphereMesh-ul de dinainte. Motivul e masurat, nu de gust: o sfera
-## cu 6 segmente are silueta cu muchii si o margine care se termina brusc, deci
-## se citeste ca un OBIECT. Masurat cu ProbeDustLook pe Okinawa, la ~97 km/h, o
-## taietura orizontala prin nor gasea 45 de trepte dure (|dL| pana la 181);
-## acum 0 (|dL| max 7). In referinta (Beach Buggy Racing 2) sunt 0-3, cu |dL|
-## intre 2.5 si 11.8. Diferenta nu e in numarul de particule, e in faptul ca
-## norul lor se termina intr-o cadere continua, iar al nostru intr-o muchie de
-## poligon.
+## Directia vine din ghidul vizual al proiectului (TOY RACER — TRACKS &
+## PARTICLES): puf-uri fatetate cu volum, cu o latura in lumina si una in umbra,
+## nu ceata. E o alegere DIFERITA de referinta Beach Buggy Racing 2, unde praful
+## e atmosferic si moale — si a fost luata explicit de dezvoltator.
 ##
-## `size` e latura panzei in metri. Billboard-ul e PARTICLES, nu ENABLED: asa
-## fiecare particula isi pastreaza rotatia proprie (angle_min/max) in timp ce
-## sta cu fata la camera.
-func _puff_mesh(size: float) -> QuadMesh:
+## Consecinta masurata, ca sa fie scrisa undeva: silueta fatetata are muchii,
+## deci pe o taietura prin nor apar iar trepte dure (billboard-urile moi dadeau
+## 0, sferele ~45). Aici nu mai e un defect, e chiar efectul cerut — dar
+## inseamna ca marimea si numarul trebuie tinute in frau, altfel norul se
+## citeste ca un morman de bile.
+##
+## `size` e diametrul sferei, in metri.
+func _puff_mesh(size: float) -> Mesh:
 	if _puff_material == null:
 		var m := StandardMaterial3D.new()
-		m.albedo_texture = load(SMOKE_TEX) as Texture2D
 		m.vertex_color_use_as_albedo = true
 		# Culorile noastre sunt autorate ca sRGB (Color.html, Palette). Fara
 		# steagul asta, Godot le citeste ca LINIARE si le scoate cu ~1.5 trepte
 		# mai deschise: #BB8744 randa (241,218,177) — crem pal, masurat cu
 		# ProbeFx. De-aia praful parea alb oricat il inchideam la sursa.
 		m.vertex_color_is_srgb = true
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		# LUMINAT, nu unshaded — asta e alegerea de directie: guide-ul cere
+		# puf-uri cu volum, cu o latura in lumina si una in umbra. Un billboard
+		# unshaded n-are cum sa aiba fete, deci n-are cum sa aiba volum.
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+		# Difuz plat si fara specular: praful nu straluceste, doar prinde
+		# directia soarelui. Fara asta, sferele ies ca niste bile de plastic.
+		m.roughness = 1.0
+		m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		# Fara scriere in depth: norii se suprapun fara sa se taie unul pe altul.
 		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
-		m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-		# Panza e plata: fara asta ar disparea cand camera o prinde din muchie.
-		m.cull_mode = BaseMaterial3D.CULL_DISABLED
 		_puff_material = m
-	var q := QuadMesh.new()
-	q.size = Vector2(size, size)
-	q.material = _puff_material
-	return q
+	# Sfera FATETATA, cu putine segmente: fetele sunt chiar rostul ei. 8x4 = 64
+	# de triunghiuri bucata — cu segmentele setate, dupa regula din CLAUDE.md.
+	var sph := SphereMesh.new()
+	sph.radius = size * 0.5
+	sph.height = size
+	sph.radial_segments = 8
+	sph.rings = 4
+	sph.material = _puff_material
+	return sph
 
 
 ## Fum de cauciuc ars. Pe drum de pamant se inlocuieste cu praful solului —
@@ -1534,7 +1540,10 @@ func _build_effects() -> void:
 	# de blob-uri mari fiecare se citeste individual, si o taietura orizontala
 	# prin nor gasea 45 de trepte dure fata de 0-3 la ei. Densitatea trebuie sa
 	# vina din suprapunere, nu din marimea bucatii.
-	_dust_particles.amount = 64
+	# Mai PUTINE si mai mari decat la varianta de ceata: in ghid se numara
+	# puf-urile din cadru (cinci-sase), fiindca fiecare are volum propriu. La 64
+	# de sfere fatetate nu se mai vede niciuna, doar un morman.
+	_dust_particles.amount = 22
 	_dust_particles.lifetime = 1.15
 	_dust_particles.direction = Vector3(0, 1, 0.6)
 	_dust_particles.spread = 45.0
@@ -1552,8 +1561,8 @@ func _build_effects() -> void:
 	_dust_particles.damping_max = 3.0
 	# Particula creste cat traieste — asa se destrama un nor real. Cu scara
 	# fixa, fiecare puf ramane un disc de aceeasi marime pana dispare.
-	_dust_particles.scale_amount_min = 1.1
-	_dust_particles.scale_amount_max = 2.4
+	_dust_particles.scale_amount_min = 0.55
+	_dust_particles.scale_amount_max = 1.35
 	var grow := Curve.new()
 	grow.add_point(Vector2(0.0, 0.45))
 	grow.add_point(Vector2(1.0, 1.0))
@@ -1572,13 +1581,13 @@ func _build_effects() -> void:
 	var fade := Gradient.new()
 	fade.set_offsets(PackedFloat32Array([0.0, 0.15, 1.0]))
 	fade.set_colors(PackedColorArray([
-		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.46), Color(1, 1, 1, 0.0)]))
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.62), Color(1, 1, 1, 0.0)]))
 	_dust_particles.color_ramp = fade
 	# Culoare provizorie; cea reala vine din tema, in _update_dust, de indata ce
 	# masina stie pe ce pista e. Praf nisipiu pe iarba ar fi exact genul de
 	# detaliu care se observa fara sa stii de ce te deranjeaza.
 	_dust_particles.color = Palette.color(Palette.SAND_MID).darkened(0.12)
-	_dust_particles.mesh = _puff_mesh(0.78)
+	_dust_particles.mesh = _puff_mesh(0.30)
 	# Nicio particula nu arunca umbra. Inainte fumul de drift si flacara erau
 	# opace si o aruncau chiar — iar acum, fiind panze orientate spre camera,
 	# umbra lor ar fi un dreptunghi care se roteste dupa privitor.

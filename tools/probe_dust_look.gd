@@ -113,9 +113,10 @@ func _physics_process(_delta: float) -> void:
 			# captura), iar `Engine.time_scale = 0` opreste si particulele, deci
 			# norul nu mai apucase sa creasca. Viteza zero e de ajuns: intre
 			# cele doua randari nimic nu se mai muta.
-			for c: Car in (_race.get("cars") as Array):
-				c.linear_velocity = Vector3.ZERO
-				c.angular_velocity = Vector3.ZERO
+			if not _trail_only:
+				for c: Car in (_race.get("cars") as Array):
+					c.linear_velocity = Vector3.ZERO
+					c.angular_velocity = Vector3.ZERO
 			RenderingServer.force_draw()
 			_shot("dust_%s_on" % _tag)
 			_report()
@@ -152,8 +153,14 @@ func _physics_process(_delta: float) -> void:
 ## Camera joasa, in spate, ca in referinta.
 func _place_cam() -> void:
 	var back := _car.global_basis.z
-	_cam.global_position = _car.global_position + back * 9.5 + Vector3.UP * 3.0
-	_cam.look_at(_car.global_position + Vector3.UP * 0.4, Vector3.UP)
+	if _trail_only:
+		# Privire in URMA masinii, de sus: camera de joc se uita inainte, deci
+		# nu vede niciodata dara pe care tocmai a lasat-o.
+		_cam.global_position = _car.global_position + back * 5.0 + Vector3.UP * 4.5
+		_cam.look_at(_car.global_position + back * 22.0, Vector3.UP)
+	else:
+		_cam.global_position = _car.global_position + back * 9.5 + Vector3.UP * 3.0
+		_cam.look_at(_car.global_position + Vector3.UP * 0.4, Vector3.UP)
 	_cam.make_current()
 
 func _report() -> void:
@@ -166,6 +173,30 @@ func _report() -> void:
 	if d != null:
 		print("  praf emite  : %s  amount=%d  culoare=%s"
 			% [d.emitting, d.amount, d.color])
+	for ch in _car.get_children():
+		var tr := ch as SandTrail
+		if tr == null:
+			continue
+		var used := 0
+		for i in tr.multimesh.instance_count:
+			if tr.multimesh.get_instance_transform(i).basis.determinant() != 0.0:
+				used += 1
+		var sm := tr.material_override as ShaderMaterial
+		if sm != null:
+			print("    shader now=%s core_alpha=%s basin=%s tread=%s tex=%s"
+				% [sm.get_shader_parameter("now"),
+				sm.get_shader_parameter("core_alpha"),
+				sm.get_shader_parameter("basin"),
+				sm.get_shader_parameter("tread_amount"),
+				sm.get_shader_parameter("tread_tex")])
+		print("  DARA: %d/%d instante  vizibil=%s  mat=%s  custom=%s"
+			% [used, tr.multimesh.instance_count, tr.visible,
+			tr.material_override, tr.multimesh.use_custom_data])
+		var mm := tr.multimesh
+		if used > 0:
+			print("    prima instanta: %s  custom=%s"
+				% [mm.get_instance_transform(0).origin,
+				mm.get_instance_custom_data(0)])
 
 func _shot(n: String) -> void:
 	var img := get_viewport().get_texture().get_image()

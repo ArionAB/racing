@@ -78,6 +78,13 @@ _data = {
 }
 point_count = 9
 
+[sub_resource type="Curve3D" id="Curve3D_bolovan_canion"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 236, 46.4, -208, 0, 0, 0, 0, 0, 0, 228.2, 40.8, -206.5, 0, 0, 0, 0, 0, 0, 222, 38.6, -198, 0, 0, 0, 0, 0, 0, 218, 34.4, -193, 0, 0, 0, 0, 0, 0, 215, 31, -191, 0, 0, 0, 0, 0, 0, 211, 28.8, -189, 0, 0, 0, 0, 0, 0, 206, 28.4, -187.5, 0, 0, 0, 0, 0, 0, 197.9, 28.6, -187.2, 0, 0, 0, 0, 0, 0, 190, 22.1, -188.9, 0, 0, 0, 0, 0, 0, 182, 12.4, -191),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 10
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qs2el"]
 vertex_color_use_as_albedo = true
 albedo_color = Color(0.822, 0.568, 0.479, 1)
@@ -17619,6 +17626,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -317.9, 47.9, 16.8)
 gizmo_extents = 3.0
 script = ExtResource("hzm")
 kind = 6
+
+[node name="BolovanulCanionului" type="Marker3D" parent="Hazarduri" unique_id=1471003952]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 197.9, 28.57, -187.2)
+gizmo_extents = 3.0
+script = ExtResource("hzm")
+kind = 1
+rock_speed = 9.0
+rock_pause = 12.5
+
+[node name="Path3D" type="Path3D" parent="Hazarduri/BolovanulCanionului" unique_id=1471003953]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -197.9, -28.57, 187.2)
+curve = SubResource("Curve3D_bolovan_canion")
 
 [node name="Puturi" type="Node3D" parent="." unique_id=628803430]
 

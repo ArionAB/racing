@@ -256,6 +256,23 @@ static func classes() -> Dictionary:
 		"macchia": {"src": "macchia_src.png",
 			"anchor": Palette.color(Palette.TROPICAL_GREEN), "gain": 1.20,
 			"lift": 0.10},
+		# Frescele bisericii rupestre din orasul subteran (Cappadocia, POI F).
+		# A treia clasa PICTATA (tools/paint_fresco.py) — vezi antetul de acolo
+		# pentru ce contine si de ce nu e o fotografie.
+		#
+		# Ancora e TILE_TERRACOTTA fiindca acolo statea deja pictura in kit
+		# (`FRESCO_RED` din build_cappadocia_underground.py), deci gradarea
+		# aterizeaza textura pe EXACT culoarea pe care arcada o avea inainte:
+		# clasa schimba tiparul, nu culoarea — acelasi rezultat urmarit la
+		# `city_concrete`.
+		#
+		# `gain` 1.0 si zero `lift`, spre deosebire de acele si macchia: sursa e
+		# desenata, nu fotografiata, deci nu vine subexpusa si nu are nevoie de
+		# punch. Masurat pe dala pictata: media 183.3, sigma 27.5 — deja peste
+		# media familiei (rock 103.7, stone_wall 148.6, alpine_granite 156.8) si
+		# in interval la deviatie. Orice ridicare ar fi scos-o din familie.
+		"fresco": {"src": "fresco_src.png",
+			"anchor": Palette.color(Palette.TILE_TERRACOTTA)},
 	}
 	# NU exista clasa "chalet_wood", si e o decizie, nu o omisiune.
 	#

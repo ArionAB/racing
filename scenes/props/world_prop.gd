@@ -193,6 +193,21 @@ const SPLIT_MODELS := {
 	# pista de noapte firmele sunt chiar semnalul, deci o clasa pusa pe tot
 	# corpul ar fi sters exact ce trebuie sa se vada.
 	"shophouse_a": true, "shophouse_b": true, "shophouse_c": true,
+	# Arcada de biserica rupestra (Cappadocia, POI F). Aici ruptura merge in
+	# sens INVERS fata de casele de mai sus: acolo CORPUL ia clasa si accentul
+	# ramane pictat pe atlas, aici accentul — frescele — ia clasa si corpul de
+	# piatra ramane pe atlas, ca sa pastreze valoarea de tuf pe care i-o da
+	# `_retint_tuff`. Mecanica e aceeasi, doar rolurile sunt schimbate.
+	#
+	# Si e prima intrare LIMITATA LA GRUPURI, nu `true`. Aceeasi piesa e si
+	# arcada din piata Goreme si arcul de fereastra din stanca goala, unde
+	# `SLOT_REMAP_BY_MODEL["church_arch"]` a mutat deja frescele pe tuf. Acolo
+	# ruptura pe [2, 4] nu gaseste frescele — le gaseste MUTATE, deci taia
+	# intradosul (slotul 4, ajuns pe 19) si ii dadea textura de pictura.
+	# Masurat inainte de garda: 33 de noduri `_Accente`, adica TOATE arcadele
+	# pistei, inclusiv cele doua din sat. Exact capcana `House_` de mai sus,
+	# a doua oara: o mapare pe model e globala pe pista.
+	"church_arch": ["F1_Gura", "F2_Sala1", "F3_Gat", "F4_Sala2", "F5_Ocol"],
 }
 
 const ACCENT_SPLIT := {
@@ -209,6 +224,35 @@ const ACCENT_SPLIT := {
 	"ShophouseA": [Palette.CONCRETE, Palette.MARBLE_GREY],
 	"ShophouseB": [Palette.CONCRETE, Palette.MARBLE_GREY],
 	"ShophouseC": [Palette.CONCRETE, Palette.MARBLE_GREY],
+	# Arcada de biserica rupestra: se PASTREAZA piatra (SAND_SHADOW 2 pentru
+	# fetele care prind lumina de torta, ROCK_DARK 4 pentru intrados), si se
+	# rup frescele — TILE_TERRACOTTA 23, LARCH_RUST 27 si VOLCANIC_BLACK 20,
+	# adica exact `FRESCO_RED` / `FRESCO_RUST` / `FRESCO_DARK` din
+	# `build_cappadocia_underground.py`.
+	#
+	# Masurat pe .glb (tools/probe_fresco_tmp.gd): 515 tri pe slotul 2, 283 pe
+	# 4, 278 pe 23, 156 pe 20 si 64 pe 27 — frescele sunt 498 din 1296 de
+	# triunghiuri, dar doar 10,7% din ARIE, fiindca sunt benzi si medalioane
+	# subtiri pe o arcada de 255 m². De aia nu se putea pune clasa pe toata
+	# piesa: ar fi imbracat 89% piatra intr-o textura de pictura.
+	"Church_Arch": [Palette.SAND_SHADOW, Palette.ROCK_DARK],
+}
+
+## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
+## corp.
+##
+## Conventia din Chongqing (`shophouse_*`) e ca accentul e partea care ARDE, si
+## de aia `_apply_glow` si `_apply_tint` isi pun materialul DOAR pe accent cand
+## modelul e rupt. Pe arcada de biserica e exact pe dos: accentul tine frescele
+## (clasa `fresco`) si corpul e piatra care poate primi lumina de torta.
+##
+## Fara lista asta frescele erau invizibile si nu se vedea de ce: clasa se
+## aplica corect pe toate cele 31 de arcade (verificat cu un print), si abia
+## `_apply_glow` — F4_Sala2 are 135 de noduri cu `metadata/lumina` — o inlocuia
+## cu materialul emisiv doua apeluri mai tarziu. Un `material_override` scris
+## de doua ori nu lasa nicio urma in log si nicio garda nu-l prinde.
+const ACCENT_HOLDS_CLASS := {
+	"church_arch": true,
 }
 
 
@@ -275,6 +319,23 @@ const CLASSES_BY_MODEL := {
 	# corectate in SLOT_REMAP_BY_MODEL. Intrarea se pastreaza scrisa explicit
 	# ca sa nu fie reintrodus `GLOW` din reflex — vezi nota de acolo.
 	"hall_alcove": {},
+	# Arcada de biserica rupestra: dupa ruptura de accente (ACCENT_SPLIT),
+	# copilul `Church_Arch_Accente` tine numai benzile, medalioanele si crucile
+	# — adica exact suprafata pictata — si primeste clasa `fresco`.
+	#
+	# TRIPLANAR, nu pe UV-uri, si nu e o alegere de gust: masurat pe .glb,
+	# piesa are CINCI valori distincte de `u` si UNA singura de `v`, adica
+	# UV-uri colapsate pe centrele sloturilor de atlas (memoria
+	# `uv-colapsat-nu-e-un-interval`). Pusa pe UV-urile alea, orice textura ar
+	# fi iesit o singura culoare — culoarea unui texel.
+	#
+	# Corpul NU e in mapare, deci ramane pe materialul lumii si isi pastreaza
+	# valoarea de tuf de la `_retint_tuff`. Un `tri:` pe toata piesa ar fi
+	# sters si frescele, si distinctia fata-intrados — memoria
+	# `clase-pe-piese-de-kit`.
+	"church_arch": {
+		"Church_Arch_Accente": Palette.TRI_PREFIX + "fresco",
+	},
 	# Trestia de pe Stromboli, pe frunzisul mediteranean. Aici si nu in
 	# STROMBOLI_CLASSES fiindca numele nodului ei (`Cane_Clump`) e PREFIX
 	# pentru `Cane_Clump_A/B/C` din `props/sugar_cane.glb`, lanul Okinawei:
@@ -512,12 +573,34 @@ const ARCH_UV_MODELS := ["church_arch"]
 ## (3 sep 2026). Un dictionar gol inseamna „lasa piesa cum vine din kit".
 ##
 ## Grupul e copilul direct al nodului DecorManual sub care sta piesa.
+##
+## `church_arch` are ACEEASI poveste, gasita in sep 2026 cand s-a cerut o
+## textura de fresca pentru Sala 2. Rescrierea de mai jos (SLOT_REMAP_BY_MODEL)
+## e gandita pentru ARCUL DE FEREASTRA din peretele stancii goale (POI G), unde
+## rosul si negrul kitului citeau „potcoava ruginie" pe zid crem. Dar aceeasi
+## piesa e si ARCADA DE BISERICA RUPESTRA din subteran, unde exact sloturile
+## alea SUNT frescele: `build_cappadocia_underground.py` picteaza benzile de pe
+## pilastri, medalionul si crucea pe FRESCO_RED = TILE_TERRACOTTA (23),
+## FRESCO_RUST = LARCH_RUST (27) si FRESCO_DARK = VOLCANIC_BLACK (20).
+##
+## Masurat (tools/probe_fresco_px_tmp.gd, sonda temporara): pe `.glb` arcul are
+## 278 tri pe 23, 156 pe 20 si 64 pe 27 — 10,7% din arie. In scena, INAINTE de
+## fixul asta, histograma de sloturi pe acelasi arc era `19:283, 29:1013`:
+## ZERO triunghiuri de fresca, fiindca 23/20/27 fusesera mutate pe SAND_SHADOW
+## si de acolo, prin `TUFF_UV_REMAP`, pe MARBLE_GREY. Arcada de biserica era
+## un arc de piatra cenusie, si asta e motivul pentru care patru critici orbi au
+## cerut „fresce pictate" pe o piesa care le AVEA in kit.
+##
+## Deci frescele nu cer o textura de clasa si un material in plus: cer sa nu li
+## se mai stearga sloturile in sala. `_retint_tuff` ramane activ pe restul
+## piesei (2 -> 29), asa ca arcul isi pastreaza valoarea de tuf; doar accentele
+## pictate se intorc.
 const SLOT_REMAP_BY_GROUP := {
-	"F1_Gura": {"hall_alcove": {}},
-	"F2_Sala1": {"hall_alcove": {}},
-	"F3_Gat": {"hall_alcove": {}},
-	"F4_Sala2": {"hall_alcove": {}},
-	"F5_Ocol": {"hall_alcove": {}},
+	"F1_Gura": {"hall_alcove": {}, "church_arch": {}},
+	"F2_Sala1": {"hall_alcove": {}, "church_arch": {}},
+	"F3_Gat": {"hall_alcove": {}, "church_arch": {}},
+	"F4_Sala2": {"hall_alcove": {}, "church_arch": {}},
+	"F5_Ocol": {"hall_alcove": {}, "church_arch": {}},
 }
 
 const SLOT_REMAP_BY_MODEL := {
@@ -718,7 +801,14 @@ func _split_shutters() -> void:
 		# inofensiva vizual, dar adauga un nod si un desen pe o pista pe care
 		# task-ul asta n-are ce cauta — iar diferentele „inofensive" fata de
 		# `main` sunt exact cele care se acumuleaza netestate.
-		if not SPLIT_MODELS.has(model.scene_file_path.get_file().get_basename()):
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not SPLIT_MODELS.has(stem):
+			continue
+		# Valoarea poate fi `true` (peste tot) sau o lista de GRUPURI de decor
+		# manual in care ruptura are voie sa se faca — vezi nota de la
+		# `church_arch` in SPLIT_MODELS.
+		var where: Variant = SPLIT_MODELS[stem]
+		if where is Array and not (where as Array).has(_group_of(model)):
 			continue
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
@@ -771,11 +861,20 @@ func _apply_model_classes() -> void:
 			if cls.is_empty():
 				continue
 			# Nodurile de accente exista tocmai ca sa RAMANA pe atlas, deci o
-			# clasa de suprafata nu are ce cauta pe ele. LUMINA insa da: pe
-			# fatadele Chongqing accentele SUNT partea care arde, si dupa
-			# ruptura sunt singurul nod care mai poarta slotul 30.
+			# clasa de suprafata nu are ce cauta pe ele PRIN LACOMIA UNUI
+			# PREFIX. LUMINA insa da: pe fatadele Chongqing accentele SUNT
+			# partea care arde, si dupa ruptura sunt singurul nod care mai
+			# poarta slotul 30.
+			#
+			# Regula de aici nu e „accentele n-au voie sa aiba clasa", e „nu
+			# mostenesc clasa corpului": pe `ShophouseA_Accente` prefixul
+			# `ShophouseA` se potriveste, deci fara garda acoperisul ar fi luat
+			# betonul fatadei. Cand maparea NUMESTE accentul pe numele lui
+			# intreg, alegerea e explicita si se respecta — asa ia
+			# `Church_Arch_Accente` clasa `fresco`, care e chiar motivul
+			# pentru care s-a facut ruptura pe arcada.
 			var is_accent := nm.ends_with(Palette.ACCENT_SUFFIX)
-			if is_accent and not cls.begins_with(Palette.GLOW_PREFIX):
+			if is_accent and not cls.begins_with(Palette.GLOW_PREFIX) 					and not mapping.has(nm):
 				continue
 			mi.material_override = _model_class_material(cls)
 
@@ -859,7 +958,13 @@ func _apply_tint() -> void:
 		var energy := float(parts[1]) if parts.size() > 1 else 0.55
 		var tint := Color.html(String(parts[2]).strip_edges()) \
 			if parts.size() > 2 else Color.html("39445C")
-		Palette.apply_cool_fill(model, slots, tint, energy)
+		# Racirea sare peste partea care poarta o clasa, exact ca lumina de mai
+		# jos: `apply_cool_fill` scria pana acum pe TOT subarborele, deci pe o
+		# piesa rupta ar fi sters clasa fara sa se vada nicaieri.
+		var skip := ""
+		if ACCENT_HOLDS_CLASS.has(model.scene_file_path.get_file().get_basename()):
+			skip = Palette.ACCENT_SUFFIX
+		Palette.apply_cool_fill(model, slots, tint, energy, skip)
 
 
 ## Racirea unei instante: metadata pe model, altfel pe containerul de zona — asa o
@@ -915,8 +1020,9 @@ func _apply_glow() -> void:
 		#
 		# Pe modelele NErupte nu se schimba nimic: `split` e fals, deci lumina
 		# cade pe tot arborele ca pana acum.
-		var split: bool = SPLIT_MODELS.has(
-			model.scene_file_path.get_file().get_basename())
+		var stem_g := model.scene_file_path.get_file().get_basename()
+		var split: bool = SPLIT_MODELS.has(stem_g)
+		var inverted: bool = ACCENT_HOLDS_CLASS.has(stem_g)
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
 			var node: Node = stack.pop_back()
@@ -925,7 +1031,12 @@ func _apply_glow() -> void:
 			var mi := node as MeshInstance3D
 			if mi == null:
 				continue
-			if split and not String(mi.name).ends_with(Palette.ACCENT_SUFFIX):
+			# Pe modelele rupte lumina cade pe O SINGURA parte, si care anume
+			# depinde de cine poarta clasa: la fatadele Chongqing accentul arde
+			# si corpul are betonul, la arcada de biserica accentul are frescele
+			# si corpul e piatra pe care bate torta (`ACCENT_HOLDS_CLASS`).
+			var is_acc := String(mi.name).ends_with(Palette.ACCENT_SUFFIX)
+			if split and is_acc == inverted:
 				continue
 			mi.material_override = mat
 

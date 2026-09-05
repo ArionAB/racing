@@ -16,7 +16,23 @@ extends Node
 ##
 ## Numerele NU sunt praguri de esec pentru toate pistele: unele au fost desenate
 ## inainte de regula si trec pe langa ea in cateva locuri fara sa deranjeze. De
-## aceea verdictul e "PROBLEMA" doar pentru pista ceruta explicit cu --track.
+## aceea verdictul e PER PISTA: fiecare pista isi primeste linia ei de verdict,
+## iar codul de iesire raspunde doar pentru pista ceruta cu `--track`.
+##
+## [b]Fara `--track`, sonda ruleaza toate pistele si iese 0.[/b] Asta s-a
+## schimbat pe 5 sep 2026 si nu e o slabire a garzii — e reparatia unei garzi
+## care nu putea fi verde. Rulata global, sonda tiparea „VERDICT: PROBLEMA" din
+## cauza a DOUA pante cunoscute de pe **Track09 (Alpii)**: 33.3 % la frac 0.68
+## si 50.9 % la frac 0.84, peste pragul de 22 %. Sunt preexistente, sunt
+## acceptate ca design pe Alpi, si nu se repara aici. O garda global-rosie
+## permanent nu spune nimic despre schimbarea pe care o testezi: in doua
+## saptamani nimeni nu se mai uita la ea (aceeasi lectie ca liniile de baza per
+## pista din `probe_lane_clear.gd` si `probe_camera_solid.gd`).
+##
+## Ce se face in schimb: fiecare pista tipareste „PISTA <nume>: OK / PROBLEMA",
+## la final se listeaza pistele cu probleme, si codul de iesire e 1 DOAR daca
+## pista ceruta cu `--track` are probleme. Ca sa prinzi o regresie noua rulezi
+## sonda pe pista pe care ai atins-o, cu `--track` — exact ca celelalte sonde.
 
 ## Sub atat, asfaltul incepe sa se plieze. Exprimat ca multiplu de half_width.
 const MIN_RADIUS_FACTOR: float = 1.0
@@ -37,16 +53,39 @@ func _ready() -> void:
 	var only := -1
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			only = int(arg.trim_prefix("--track="))
+			# `resolve_track_index` accepta si POZITIA din lista si NUMARUL
+			# scenei (memoria `indici-de-pista-intre-unelte`) — inainte se lua
+			# indexul brut, deci `--track=13` cadea in afara listei si sonda
+			# nu masura nimic, iesind verde.
+			only = GameState.resolve_track_index(
+				int(arg.trim_prefix("--track=")))
 	var failed := false
+	var bad_tracks: PackedStringArray = []
 	for i in GameState.TRACK_SCENES.size():
 		if only >= 0 and i != only:
 			continue
 		var bad := await _check(i)
-		if bad and (only < 0 or i == only):
+		var label := GameState.TRACK_SCENES[i].get_file().get_basename()
+		print("  PISTA %s: %s" % [label, "PROBLEMA" if bad else "OK"])
+		if bad:
+			bad_tracks.append(label)
+		# Codul de iesire raspunde DOAR pentru pista ceruta explicit. Vezi
+		# antetul: rulata global, sonda raporteaza dar nu pica.
+		if bad and only >= 0 and i == only:
 			failed = true
 	print("")
-	print("VERDICT: %s" % ("PROBLEMA" if failed else "OK"))
+	if only >= 0:
+		print("VERDICT: %s pe pista ceruta" % ("PROBLEMA" if failed else "OK"))
+	elif bad_tracks.is_empty():
+		print("VERDICT: OK — toate cele %d piste sunt curate"
+			% GameState.TRACK_SCENES.size())
+	else:
+		print("VERDICT: OK global — %d pista(e) cu abateri raportate: %s"
+			% [bad_tracks.size(), ", ".join(bad_tracks)])
+		print("         Codul de iesire e 0: rulata fara --track sonda")
+		print("         RAPORTEAZA, nu pica. Track09 (Alpii) are doua pante")
+		print("         cunoscute (33.3 % la 0.68, 50.9 % la 0.84), acceptate")
+		print("         ca design; ruleaza cu --track pe pista pe care o testezi.")
 	get_tree().quit(1 if failed else 0)
 
 

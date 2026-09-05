@@ -3,6 +3,7 @@ extends Node
 ## raporteaza CE corp solid il atinge, pe nume.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeLaneClear.tscn -- --track=6
+##   ... -- --track=6 --sabotaj   (autotest: pune un zid pe axa benzii si cere sa pice)
 ##
 ## De ce exista. Pe Cappadocia toate masinile se ingramadeau la frac ~0.80 si
 ## cursa nu se termina. Cauza: un corp solid pe AXA benzii, in elice. Toate
@@ -40,6 +41,15 @@ const STEP: float = 0.005
 ## destul cat un zid sa fie vazut inainte sa fie atins, si destul de putin cat
 ## un viraj normal sa nu iasa raportat ca obstacol.
 const AHEAD_M: float = 6.0
+## Sabotajul: un stalp solid PE AXA benzii, la fractia asta. Nu e decor — e
+## martorul care arata ca garda chiar poate sa pice. O linie de baza care nu
+## poate fi depasita nu masoara nimic, iar bazele de aici au fost coborate de
+## doua ori (Cappadocia 15 -> 11 pe 5 sep 2026); fiecare coborare cere dovada
+## ca pragul nou tot musca. Handoff §6: „un horn pe axa duce Cappadocia la 41,
+## verdict REGRESIE, cod de iesire 1" — asta e mecanismul, scris in sonda.
+const SABOTAGE_FRAC: float = 0.55
+const SABOTAGE_SIZE := Vector3(6.0, 12.0, 6.0)
+
 const DRIVABLE := [
 	# `ChannelDeckSides` e acelasi tablier ca `RoadOverpassDeck`, redenumit pe
 	# feat/capp-poi-b fara ca lista asta sa fie actualizata. Se tin AMANDOUA:
@@ -78,10 +88,13 @@ const DRIVABLE := [
 func _ready() -> void:
 	await get_tree().process_frame
 	var only := -1
+	var sabotage := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = GameState.resolve_track_index(
 				int(arg.trim_prefix("--track=")))
+		elif arg == "--sabotaj":
+			sabotage = true
 	if only < 0:
 		push_error("ProbeLaneClear: cere --track=N")
 		get_tree().quit(1)
@@ -93,7 +106,11 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	print("=== %s ===" % GameState.track_label(only))
+	print("=== %s%s ===" % [GameState.track_label(only),
+		" [SABOTAJ]" if sabotage else ""])
+	if sabotage:
+		_plant_wall(track)
+		await get_tree().physics_frame
 	var space := track.get_world_3d().direct_space_state
 	var hits := 0
 	for ri in track.routes.size():
@@ -136,6 +153,18 @@ func _ready() -> void:
 ## Rostul lor e sa prinda CRESTEREA. Masurat 2 sep 2026.
 ## Cheia e eticheta intreaga (`GameState.track_label`), cu numarul scenei in ea:
 ## numele scurt s-ar putea repeta, numarul scenei nu.
+##
+## [b]Cappadocia: 15 -> 11 pe 5 sep 2026.[/b] Hornul crapat din POI D a fost
+## SCOS din scena la turul 2 al dezvoltatorului (handoff §4.7), iar celelalte
+## corpuri din banda au fost mutate in aceeasi sesiune. Masurat de 3 ori pe
+## 5 sep, identic: **9** raportari — 6 la frac 0.030 (teancurile de oale din
+## POI A, gimmick cu fanta de 4 m: `obstacol-pe-drum-poate-fi-gimmick`), 1 la
+## 0.030 pe testul INAINTE si 2 la 0.970 pe buza `FlyoffRamp`. Baza e pusa la
+## 11, adica 9 + marja 2: sub 9 nu se poate coborî fara sa scoti gimmickul, iar
+## marja lasa loc unei singure piese noi pe margine fara alarma falsa.
+## Verificat prin sabotaj (`--sabotaj`) pe 5 sep 2026: un stalp de 6x12x6 pe
+## axa la frac 0.55 duce cifra de la 9 la 12 (trei fire laterale il vad, pe
+## nume), verdict REGRESIE, cod de iesire 1.
 const BASELINE := {
 	"Dunele (Track01)": 30,
 	"Okinawa manual (Track08)": 18,
@@ -143,8 +172,29 @@ const BASELINE := {
 	"Baikal (Track10)": 70,
 	"Stromboli (Track11)": 190,
 	"Chongqing (Track12)": 146,
-	"Cappadocia (Track13)": 15,
+	"Cappadocia (Track13)": 11,
 }
+
+
+## Un stalp solid FIX PE AXA benzii principale — clasa de defect vanata:
+## un corp de decor (layer implicit, nu suprafata de rulare) plantat in drum.
+## Numele iese in raportare, deci se vede in log ca sonda l-a gasit pe nume.
+func _plant_wall(track: Track) -> void:
+	var r: TrackRoute = track.routes[0]
+	var n := r.baked.size()
+	var i := int(SABOTAGE_FRAC * float(n)) % n
+	var p: Vector3 = r.baked[i]
+	var body := StaticBody3D.new()
+	body.name = "STALP_DE_SABOTAJ"
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = SABOTAGE_SIZE
+	shape.shape = box
+	body.add_child(shape)
+	get_tree().root.add_child(body)
+	body.global_position = p + Vector3.UP * (SABOTAGE_SIZE.y * 0.5)
+	print("  [sabotaj] stalp %s la frac %.3f, %s"
+		% [str(SABOTAGE_SIZE), SABOTAGE_FRAC, str(body.global_position)])
 
 
 func _sweep(space: PhysicsDirectSpaceState3D, track: Track,

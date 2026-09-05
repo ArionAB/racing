@@ -58,6 +58,29 @@ extends Track
 @export var custom_strata_tint: Color = Color(0, 0, 0, 0)
 @export var custom_strata_line: float = 0.0
 @export var custom_strata_fade: float = 12.0
+## BENZILE ORIZONTALE de deasupra stratului de baza (Valea Rosie, brief §1:
+## "faleze in benzi roz-crem-rosu"). Lista goala = stins, deci restul pistelor
+## nu se schimba cu un pixel.
+##
+## Fiecare Vector4 e (cota_de_jos, cota_de_sus, fade_in_metri, rezervat), cu
+## tenta de pe aceeasi pozitie din `custom_strata_band_tints`. Se aplica de jos
+## in sus, dupa `custom_strata_tint`: o banda de sus acopera coada celei de
+## dedesubt — stratigrafie, nu amestec.
+##
+## Cotele NU se aleg din ochi, si nici latimile. Doua masuratori sunt
+## obligatorii inainte (amandoua au rasturnat planul initial pe Cappadocia, vezi
+## nota din Track._build_terrain):
+##   1. Cate randuri de vertecsi are suprafata tintita pe VERTICALA. Sub un rand
+##      la ~5 m de cota, o banda nu poate avea muchie — Gouraud o intinde pe
+##      toata fata (memoria `benzi-vertex-color-bisect`). Scarpul rapei 0 de pe
+##      Cappadocia are ZERO randuri intermediare (o celula de 7.9 m pentru 15-33
+##      m de cadere), deci acolo benzile sunt imposibile, nu doar nereglate.
+##   2. La ce DISTANTA DE CAMERA ajunge suprafata in cadrele reale de joc, fata
+##      de `fog_begin`/`fog_end` ale temei. Malul opus al Vaii Rosii e la
+##      225-300 m, cu ceata 90 -> 250 m: 97% ceata la frac 0.27. Vertecsii se
+##      coloreaza corect si pe ecran nu ajunge nimic.
+@export var custom_strata_bands: Array[Vector4] = []
+@export var custom_strata_band_tints: Array[Color] = []
 ## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
 ## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).
 @export_enum("asphalt", "dirt", "snow") var custom_road_surface: String = "asphalt"
@@ -234,6 +257,9 @@ func _theme_overrides() -> Dictionary:
 		over["strata_tint"] = custom_strata_tint
 		over["strata_line"] = custom_strata_line
 		over["strata_fade"] = custom_strata_fade
+	if not custom_strata_bands.is_empty():
+		over["strata_bands"] = custom_strata_bands
+		over["strata_band_tints"] = custom_strata_band_tints
 	return over
 
 

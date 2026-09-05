@@ -3531,8 +3531,13 @@ func _build_environment() -> void:
 		env.glow_intensity = 0.25
 		env.glow_bloom = 0.04
 		env.glow_hdr_threshold = 1.1
+		# ATENTIE la indexare: set_glow_level() ia indici 0..6, dar proprietatile
+		# din inspector se cheama glow_levels/1..7. Deci nivelurile 2 si 3 din
+		# comentariul de mai sus sunt indicii 1 si 2. Bucla mergea pana la 7 si
+		# arunca "Index p_level = 7 is out of bounds" la fiecare incarcare de
+		# pista, iar nivelurile active erau de fapt 3 si 4.
 		for level in range(7):
-			env.set_glow_level(level, 1.0 if level in [2, 3] else 0.0)
+			env.set_glow_level(level, 1.0 if level in [1, 2] else 0.0)
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env
 	add_child(world_env)

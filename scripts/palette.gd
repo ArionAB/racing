@@ -548,6 +548,21 @@ const CLASS_TEXTURES := {
 	# Nu se putea tenta "alpine_granite" direct: e clasa stancilor de pe
 	# Alpi (Track09) si le-ar fi facut rosii.
 	"red_valley_tuff": "res://assets/textures/classes/alpine_granite.png",
+	# TUFUL CREM al Cappadociei: hornurile, poarta geamana, gura de pestera si
+	# fatada bisericii rupestre. ACEEASI dala ca `red_valley_tuff` — nu se
+	# dubleaza in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica
+	# ca volcanic_rock / ice_bloc / macchia_dry).
+	#
+	# Clasa separata fiindca `red_valley_tuff` e tentat spre CARAMIZIU pentru
+	# canionul rosu (POI D), si aterizeaza pe (0.523, 0.339, 0.249) — masurat.
+	# Pus pe hornuri, ar fi facut rosu exact ce brief-ul §0.1 cere crem, adica
+	# ar fi repetat defectul „cosuri de fabrica" pe care `TUFF_UV_REMAP` din
+	# world_prop.gd tocmai l-a reparat mutand sloturile pe cremuri.
+	#
+	# De ce dala STRATIFICATA si aici: hornul de tuf E un corp sedimentar, cu
+	# straturi orizontale de cenusa sudata — acelasi argument ca la faleza in
+	# benzi, la alta culoare.
+	"tuff_cream": "res://assets/textures/classes/alpine_granite.png",
 	"snow": "res://assets/textures/classes/snow.png",
 	# Coroana coniferelor (pictata, vezi tools/paint_pine_needles.py).
 	"pine_needles": "res://assets/textures/classes/pine_needles.png",
@@ -617,6 +632,13 @@ const CLASS_TEXTURES := {
 ## alt multiplicator pe material.
 const CLASS_TINT := {
 	"ice_bloc": Color(0.65, 0.87, 0.88),
+	# Tuful crem: tenta aproape neutra, fiindca RIDICAREA face aproape toata
+	# treaba (vezi CLASS_LIFT). Calculata, nu aleasa — dupa ridicarea la
+	# k = 1.3140 dala sta pe (0.838, 0.787, 0.684), iar tinta ponderata pe arie
+	# e (0.790, 0.754, 0.684), deci raportul pe canale da exact valorile de mai
+	# jos. Albastrul ramane 1.0: pe el ridicarea a nimerit din prima, si orice
+	# valoare peste 1 ar fi fost oricum imposibila (`albedo_color` doar coboara).
+	"tuff_cream": Color(0.943, 0.958, 1.000),
 	# `olkhon_marble` NU are tenta: dala lui e gradata direct spre slotul
 	# MARBLE_GREY in pipeline, deci aterizeaza singura pe culoarea corecta.
 	# Zidaria caii ferate e gradata spre CORAL_SAND (crem de insula, slotul
@@ -684,6 +706,19 @@ const CLASS_LIFT := {
 	# dala_c) pe canale = 1.1724, adica exact cat sa NU mai trebuiasca sa urce
 	# nimic din tenta — calculata, nu aleasa, ca la macchia_dry.
 	"city_concrete": 0.743,
+	# Tuful crem: dala alpina are luminanta 0.600 si trebuie sa ajunga pe media
+	# PONDERATA PE ARIE a sloturilor pe care stau hornurile DUPA `TUFF_UV_REMAP`
+	# — 52.5% CORAL_SAND (19), 31.2% MARBLE_GREY (29), 9.5% slot 20 si 6.8%
+	# CONCRETE (8), adica (0.790, 0.754, 0.684), luminanta 0.757.
+	#
+	# Ridicarea e la 0.791, nu la 0.757, si din acelasi motiv ca la macchia_dry:
+	# tinta se atinge DUPA tenta, care coboara doua canale din trei. Calculata
+	# ca k = max(tinta_c / dala_c) pe canale = 1.3140.
+	#
+	# Ponderea pe ARIE si nu un slot ales cu ochiul: hornurile nu sunt „crem",
+	# sunt crem SI gri-cald in benzi de valoare, iar o clasa care aterizeaza pe
+	# slotul 19 curat le-ar fi facut cu 15% mai palide decat sunt azi.
+	"tuff_cream": 0.791,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -720,6 +755,14 @@ const CLASS_TRIPLANAR_SCALE := {
 	# benzi, deci fiecare treapta de 12 m arata ca un teanc de straturi,
 	# nu ca doua dungi.
 	"red_valley_tuff": 0.08,
+	# ACEEASI scara ca faleza rosie, si nu din lene: hornurile masoara 11-18 m
+	# pe verticala (masurat pe cele 12 .glb-uri — chimney_a 11.3, chimney_c 17.3,
+	# triple 18.5, twin_gate 21.6), adica exact plaja modulului de faleza de
+	# 12.4 m pentru care s-a reglat 0.08. Un horn si peretele de langa el sunt
+	# acelasi corp sedimentar; daca stratele ar avea alta densitate pe fiecare,
+	# s-ar citi ca doua geologii lipite — chiar defectul pe care proiectia de
+	# LUME il evita facand benzile sa curga continuu dintr-o piesa in vecina.
+	"tuff_cream": 0.08,
 	# Masa avalansei. Sursa e o scanare de teren de ~2 m; la 0.3 (o repetitie
 	# la 3.3 m) un corp de 7 m prinde ~2 repetitii — destul cat crustele si
 	# urmele sa se citeasca la rostogolire, prea putin cat sa devina tapet.

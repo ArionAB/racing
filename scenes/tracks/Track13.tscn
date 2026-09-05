@@ -6192,8 +6192,9 @@ basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("8_env_a")
 model_scale = 1.15
 
+sweep_m = 19.0
 [node name="Balon ancorat 2" type="Node3D" parent="DecorManual/C) Cornisa Vaii Rosii" unique_id=212046926]
-transform = Transform3D(0.7975965, 0, 0.6032165, 0, 1, 0, -0.6032165, 0, 0.7975965, 263.86127, 17.953, -52.008)
+transform = Transform3D(0.453, 0, 0.891, 0, 1, 0, -0.891, 0, 0.453, 263.86127, 17.953, -52.008)
 script = ExtResource("5_balloon")
 hold = 0.8
 phase = 0.3333
@@ -6202,6 +6203,7 @@ basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("9_env_b")
 model_scale = 1.15
 
+sweep_m = 19.0
 [node name="Tarus 2" parent="DecorManual/C) Cornisa Vaii Rosii" unique_id=453136228 instance=ExtResource("12_tether")]
 transform = Transform3D(0.6101, 0, -0.7923, 0, 1, 0, 0.7923, 0, 0.6101, 303.233, 28.04, -78.13)
 
@@ -6215,6 +6217,7 @@ basket_model = ExtResource("7_basket")
 envelope_model = ExtResource("10_env_c")
 model_scale = 1.15
 
+sweep_m = 19.0
 [node name="Tarus 3" parent="DecorManual/C) Cornisa Vaii Rosii" unique_id=1306225895 instance=ExtResource("12_tether")]
 transform = Transform3D(0.1876, 0, -0.9822, 0, 1, 0, 0.9822, 0, 0.1876, 344.80887, 9.363693, -150.9925)
 
@@ -6248,10 +6251,10 @@ transform = Transform3D(0.4934, 0, -0.8698, 0, 1, 0, 0.8698, 0, 0.4934, 254.308,
 transform = Transform3D(0.4934, 0, -0.8698, 0, 1, 0, 0.8698, 0, 0.4934, 254.308, 26.937, -17.605)
 
 [node name="balon8_sus" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" unique_id=418761988 instance=ExtResource("10_env_c")]
-transform = Transform3D(-0.0246, 0, 0.9497, 0, 0.95, 0, -0.9497, 0, -0.0246, 380, 13.134983, -120)
+transform = Transform3D(-0.0246, 0, 0.9497, 0, 0.95, 0, -0.9497, 0, -0.0246, 380.4, 13.135, -120)
 
 [node name="balon8_cos" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" unique_id=96826529 instance=ExtResource("7_basket")]
-transform = Transform3D(-0.0259, 0, 0.9997, 0, 1, 0, -0.9997, 0, -0.0259, 380, 10.134983, -120)
+transform = Transform3D(-0.0259, 0, 0.9997, 0, 1, 0, -0.9997, 0, -0.0259, 380.4, 10.135, -120)
 
 [node name="balon11_panza" parent="DecorManual/C) Cornisa Vaii Rosii/Multimea din vale" unique_id=1361437216 instance=ExtResource("11_landed")]
 transform = Transform3D(-0.3594, 0, 0.9332, 0, 1, 0, -0.9332, 0, -0.3594, 296.53635, 6.0655613, -25.374)
@@ -6307,7 +6310,7 @@ transform = Transform3D(0.8426, 0, -0.5385, 0, 1, 0, 0.5385, 0, 0.8426, 317.6350
 transform = Transform3D(-0.987, 0, -0.1606, 0, 1, 0, 0.1606, 0, -0.987, 317.66046, 49.523575, -83.590126)
 
 [node name="departe9" parent="DecorManual/C) Cornisa Vaii Rosii/Baloane departate" unique_id=759383139 instance=ExtResource("13_far")]
-transform = Transform3D(-0.7854, 0, -0.619, 0, 1, 0, 0.619, 0, -0.7854, 359.17633, 10.798817, -198.808)
+transform = Transform3D(-0.7854, 0, -0.619, 0, 1, 0, 0.619, 0, -0.7854, 332, 24, -105)
 
 [node name="departe10" parent="DecorManual/C) Cornisa Vaii Rosii/Baloane departate" unique_id=1694193665 instance=ExtResource("13_far")]
 transform = Transform3D(0.7475, 0, 0.6642, 0, 1, 0, -0.6642, 0, 0.7475, 347.83832, 23.156807, -110)

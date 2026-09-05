@@ -48,8 +48,17 @@ const MARK_SIZE: Vector2 = Vector2(0.46, 2.4)
 ## parte.
 const EDGE_FRAC: float = 0.62
 
-## Cat de opaca e urma in miez.
+## Cat de lata e BUZA fata de jumatatea de latime a fagasului. Buza e materialul
+## impins in lateral care se aduna si prinde lumina — vezi Track.trail_lip_color.
+const LIP_FRAC: float = 0.26
+
+## Cat de opaca e urma in miez. Valoarea implicita; pista o suprascrie prin
+## `Track.trail_profile()`, fiindca adancimea urmei tine de suprafata.
 const MARK_ALPHA: float = 0.6
+
+## Latimea efectiva a fagasului, pusa de pista inainte de construirea plasei.
+## Nisipul afanat da brazda cea mai lata, pamantul tare cea mai ingusta.
+static var _width: float = MARK_SIZE.x
 
 
 ## Anvelopa (AABB) declarata a darei: toata lumea, cu mult peste orice pista.
@@ -59,13 +68,15 @@ const MARK_ALPHA: float = 0.6
 ## Godot nu mai are ce recalcula la fiecare depunere (de ~16 ori pe secunda, per
 ## masina). E o economie, nu o reparatie: fara ea urmele se vad la fel — masurat,
 ## nu presupus.
+const SHADER_PATH: String = "res://assets/shaders/sand_trail.gdshader"
+
 const WORLD_AABB: AABB = AABB(
 	Vector3(-2000, -500, -2000), Vector3(4000, 1000, 4000))
 
 # Partajate de toate masinile: un material, un mesh — deci un singur desen per
 # masina, nu unul per urma.
 static var _mesh: Mesh
-static var _mat: StandardMaterial3D
+static var _mat: ShaderMaterial
 
 var _next: int = 0
 
@@ -139,11 +150,29 @@ func stamp(origin: Vector3, orientation: Basis) -> void:
 static func _shared_mesh() -> Mesh:
 	if _mesh != null:
 		return _mesh
-	var hw := MARK_SIZE.x * 0.5
+	var hw := _width * 0.5
 	var hl := MARK_SIZE.y * 0.5
-	# (x, alfa) pe latime: stins pe margini, plin pe miez.
+	# Buza: o fasie in AFARA fagasului, cat 26% din jumatatea de latime.
+	var lip := hw * LIP_FRAC
+	# Sase coloane, nu patru: intre solul nederanjat si fagasul inchis se
+	# interpune BUZA — materialul impins in lateral, care e mai DESCHIS decat
+	# imprejurimile. Fara ea profilul e o treapta simpla si ochiul citeste
+	# vopsea; cu ea citeste adancitura. Canalul R marcheaza fagasul, G buza;
+	# shaderul (assets/shaders/sand_trail.gdshader) alege culoarea dupa ele.
+	# (x, alfa, cat de "buza" e). Buza are VARFUL la marginea fagasului si se
+	# stinge in afara lui — nu e o fasie plina.
+	#
+	# Greseala din prima versiune: vertexul de la x = ±hw avea alfa 1.0 SI buza
+	# 1.0, adica placuta iesea plina pe toata latimea de dinainte si abia apoi
+	# se stingea. Pe nisip trecea neobservat; pe zapada, unde culoarea buzei e
+	# aproape alba, dara acoperea soseaua ca un strat de vopsea.
 	var cols := [
-		[-hw, 0.0], [-hw * EDGE_FRAC, 1.0], [hw * EDGE_FRAC, 1.0], [hw, 0.0],
+		[-hw - lip, 0.0, 1.0], # marginea de afara: stinsa complet
+		[-hw, 0.55, 1.0], # varful buzei, la marginea fagasului
+		[-hw * EDGE_FRAC, 1.0, 0.0], # intra in fagas: plin, fara buza
+		[hw * EDGE_FRAC, 1.0, 0.0],
+		[hw, 0.55, 1.0],
+		[hw + lip, 0.0, 1.0],
 	]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -151,8 +180,11 @@ static func _shared_mesh() -> Mesh:
 	for k in cols.size() - 1:
 		var xa: float = cols[k][0]
 		var xb: float = cols[k + 1][0]
-		var ca := Color(1, 1, 1, cols[k][1])
-		var cb := Color(1, 1, 1, cols[k + 1][1])
+		# RGB poarta CINE e vertexul (rosu = fagas, verde = buza), alfa poarta
+		# cat de tare. Materialul le combina — vezi _shared_material.
+		var ca := Color(1.0 - cols[k][2], cols[k][2], 0.0, cols[k][1])
+		var cb := Color(1.0 - cols[k + 1][2], cols[k + 1][2], 0.0,
+			cols[k + 1][1])
 		# Ordinea conteaza: cu winding-ul intors, placutele exista in scena si sunt
 		# invizibile PRIVITE DE SUS — adica din singurul unghi din care se uita
 		# cineva la ele — fiindca materialul taie fetele din spate (cull_mode).
@@ -175,26 +207,33 @@ static func _shared_mesh() -> Mesh:
 ## partajat de toate, iar toate sunt pe aceeasi pista. Culoarea nu poate fi o
 ## constanta — aceeasi placuta cade si pe drumul de nisip al Okinawei, si pe
 ## nisipul coraligen de langa el, si pe zapada Baikalului.
-static func set_mark_color(mark: Color) -> void:
-	_shared_material().albedo_color = Color(mark, MARK_ALPHA)
+## Pune pe material profilul brazdei asa cum il vrea PISTA: cele doua culori
+## (fagas si buza) si cele doua opacitati.
+##
+## Se cheama o data per cursa, inainte ca vreo masina sa depuna ceva — trebuie
+## sa fie inainte, fiindca latimea intra in plasa, iar plasa se coace o singura
+## data si e partajata de toate masinile.
+static func set_surface(mark: Color, lip: Color, profile: Dictionary) -> void:
+	_width = profile.get("width", MARK_SIZE.x)
+	var m := _shared_material()
+	m.set_shader_parameter("core_color", Color(mark.r, mark.g, mark.b))
+	m.set_shader_parameter("lip_color", Color(lip.r, lip.g, lip.b))
+	m.set_shader_parameter("core_alpha", profile.get("core", MARK_ALPHA))
+	m.set_shader_parameter("lip_alpha", profile.get("lip", 0.28))
 
 
-static func _shared_material() -> StandardMaterial3D:
+static func _shared_material() -> ShaderMaterial:
 	if _mat != null:
 		return _mat
-	_mat = StandardMaterial3D.new()
 	# FARA textura: alfa ei nu supravietuieste mipmap-ului (vezi _shared_mesh).
-	# Forma vine din vertecsi, culoarea din set_mark_color.
-	_mat.albedo_color = Color(0.35, 0.28, 0.18, MARK_ALPHA)
-	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	# UNSHADED, ca poteca de dinainte (Track._path_material): culoarea scrisa e
-	# chiar culoarea de pe ecran. O suprafata luminata proprie s-ar spala in
-	# ambianta albastra a cerului tropical exact acolo unde vrem sa se inchida.
-	_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	# Alfa din vertecsi inmulteste alfa din albedo; RGB-ul lor e alb, deci nu
-	# atinge nuanta.
-	_mat.vertex_color_use_as_albedo = true
-	_mat.cull_mode = BaseMaterial3D.CULL_BACK
+	# Forma vine din vertecsi, culorile din set_surface.
+	#
+	# Shader propriu, nu StandardMaterial3D: placuta poarta DOUA culori (fagas
+	# si buza), iar un material standard poate inmulti vertex color-ul cu una
+	# singura. Restul setarilor (nelit, alpha, fara depth write, cull back)
+	# traiesc acum in render_mode-ul shaderului.
+	_mat = ShaderMaterial.new()
+	_mat.shader = load(SHADER_PATH) as Shader
 	# Urmele proaspete se deseneaza DUPA celelalte straturi transparente de pe
 	# sol (urme de drift, decal-uri de pista). Fara prioritate, sortarea depinde
 	# de distanta la camera si palpaie cand treci peste ele.

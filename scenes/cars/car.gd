@@ -1401,9 +1401,12 @@ func _drop_trail(delta: float, loose: bool) -> void:
 	var right := fwd.cross(up).normalized()
 	if _trail == null:
 		_trail = SandTrail.new()
-		# Nuanta brazdei tine de suprafata, nu de masina: materialul e partajat,
-		# deci o singura culoare pe pista (vezi SandTrail.set_mark_color).
-		SandTrail.set_mark_color(track.trail_mark_color())
+		# Profilul brazdei tine de SUPRAFATA, nu de masina: materialul si plasa
+		# sunt partajate, deci o singura urma pe pista (vezi
+		# SandTrail.set_surface). Se pune INAINTE de add_child, fiindca latimea
+		# intra in plasa, iar plasa se coace la primul _ready.
+		SandTrail.set_surface(track.trail_mark_color(), track.trail_lip_color(),
+			track.trail_profile())
 		add_child(_trail)
 	var half_track_w := data.body_width * 0.38 if data != null else 0.85
 	var rear_z := data.body_length * 0.34 if data != null else 1.3

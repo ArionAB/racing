@@ -31,6 +31,7 @@ var _frames: int = 0
 var _cam: Camera3D = null
 var _tag: String = "okinawa"
 var _drift: bool = false
+var _trail_only: bool = false
 var _taken: bool = false
 var _hold: int = 0
 
@@ -44,6 +45,8 @@ func _ready() -> void:
 			_tag = arg.trim_prefix("--tag=")
 		elif arg == "--drift":
 			_drift = true
+		elif arg == "--trail":
+			_trail_only = true
 	GameState.selected_car = 0
 	GameState.champ_active = false
 	GameState.total_laps = 99
@@ -77,6 +80,16 @@ func _physics_process(_delta: float) -> void:
 		var sm := _car.get_node_or_null("DriftSmoke") as CPUParticles3D
 		if sm != null:
 			sm.emitting = true
+	if _trail_only:
+		# Fara praf in cadru: altfel diferenta on/off amesteca norul (care
+		# LUMINEAZA) cu buza brazdei (care lumineaza si ea) si nu se poate
+		# masura niciuna.
+		for c: Car in (_race.get("cars") as Array):
+			for nm in ["Dust", "Debris", "DriftSmoke"]:
+				var n := c.get_node_or_null(nm) as CPUParticles3D
+				if n != null:
+					n.emitting = false
+					n.visible = false
 	_place_cam()
 	# La 220 de cadre masina e la viteza si pe sosea de destul timp cat sa fi
 	# ridicat un nor stabil.
@@ -88,7 +101,7 @@ func _physics_process(_delta: float) -> void:
 		var t0 := _race.track as Track
 		var fast: bool = _car.horizontal_speed() > 20.0
 		var onroad: bool = t0.is_on_road(_car.road_index, _car.global_position)
-		if d0 != null and d0.emitting and fast and onroad:
+		if (d0 != null and (d0.emitting or _trail_only)) and fast and onroad:
 			_taken = true
 			_hold = _frames
 			# Fizica STOP inainte de pereche. RenderingServer.force_draw()
@@ -120,6 +133,12 @@ func _physics_process(_delta: float) -> void:
 					var n := c.get_node_or_null(nm) as CPUParticles3D
 					if n != null:
 						n.visible = false
+				# Si dara de rulare: ca sa se poata masura profilul brazdei
+				# (fagas vs buza) izolat de textura drumului de sub ea.
+				for ch in c.get_children():
+					var tr := ch as SandTrail
+					if tr != null:
+						tr.visible = false
 			RenderingServer.force_draw()
 			_shot("dust_%s_off" % _tag)
 			get_tree().quit(0)

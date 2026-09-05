@@ -114,6 +114,61 @@ func trail_surface_color() -> Color:
 ## afanata; culoarea brazdei e insa a PISTEI, ca si cea a prafului.)
 const TRAIL_MARK_DARKEN: float = 0.42
 
+## Cat de LUMINATA e buza brazdei fata de suprafata din jur.
+##
+## Asta e ce transforma o dunga intr-o adancitura. Materialul rascolit nu doar
+## se inchide in fagas — se si ADUNA pe margini, iar mormanul acela prinde
+## lumina, deci buza iese mai deschisa decat nisipul nederanjat. Masurat in
+## referinta (Beach Buggy Racing 2, nisip): fagasul coboara ~31 sub nivelul
+## suprafetei, iar buza urca ~8-20 peste el. Fara buza, ochiul nu are din ce
+## deduce adancimea si citeste o pata de vopsea — exact ce aveam.
+##
+## Per suprafata, fiindca fizica difera: nisipul afanat se surpa si face buza
+## cea mai groasa, pamantul batatorit aproape deloc, zapada tine muchia cel mai
+## bine dintre toate.
+func trail_lip_color() -> Color:
+	if road_surface == "snow":
+		# Zapada impinsa lateral ramane zapada: se lumineaza, nu se coloreaza.
+		# Foarte putin insa: zapada e deja aproape de alb, deci orice deschidere
+		# se vede de zece ori mai tare decat pe nisip. Masurat, 0.30 dadea un
+		# raport buza/fagas de 7.1 (fagasul disparea sub buza); pe nisip acelasi
+		# reglaj da 0.56, cat are si referinta.
+		return SNOW_ROAD_COLOR.lightened(0.06)
+	return trail_surface_color().lightened(TRAIL_LIP_LIGHTEN)
+
+## Cat se deschide buza fata de suprafata. Mai mic decat inchiderea fagasului
+## (0.42): in referinta buza e vizibil mai slaba decat miezul.
+const TRAIL_LIP_LIGHTEN: float = 0.13
+
+## Profilul brazdei per suprafata: latime (m), opacitatea miezului, opacitatea
+## buzei. Astea sunt cele trei numere care fac diferenta intre "urma pe nisip"
+## si "urma pe pamant batatorit".
+##
+## - nisip/pamant afanat: brazda cea mai lata si mai adanca, buza cea mai tare
+##   — boabele se surpa si se aduna pe margini.
+## - zapada: fagas ingust si compact, buza clara (zapada tine muchia).
+## - restul (pamant tare): urma abia se vede, buza aproape zero.
+func trail_profile() -> Dictionary:
+	if road_surface == "snow":
+		# Zapada primeste brazda cea mai DISCRETA, si nu din motive de stil:
+		# drumul de zapada are deja sistemul lui de uzura (RoadWear +
+		# `wear_tex` din road_snow.gdshader), care intuneca banda pe unde s-a
+		# calcat. Brazda de aici e al doilea strat peste el.
+		#
+		# ATENTIE — DEFECT PREEXISTENT, DOAR TINUT IN FRAU AICI: pe Baikal
+		# `road_surface` e "snow" pe tot turul, dar soseaua e vizibil MARO pe
+		# portiuni intregi (vezi capturile de la POI-ul de start). Culoarea
+		# brazdei vine insa din SNOW_ROAD_COLOR, care e cvasi-alba, deci acolo
+		# dara picteaza alb peste pamant. Verificat prin A/B: cu buza stinsa de
+		# tot, banda deschisa ramane (+46), deci vinovat e MIEZUL, nu buza.
+		# Reparatia adevarata e ca nuanta sa vina din solul de sub roata, nu
+		# dintr-o constanta pe pista — dar aia e alta schimbare, pe Baikal.
+		# Pana atunci: opacitate mica, ca stratul sa nu domine.
+		return {"width": 0.52, "core": 0.34, "lip": 0.12}
+	if road_surface == "dirt":
+		return {"width": 0.60, "core": 0.58, "lip": 0.16}
+	return {"width": 0.46, "core": 0.50, "lip": 0.10}
+
 ## Culoarea FINALA a brazdei de rulare (SandTrail o pune direct pe material).
 ##
 ## Pe nisip e suprafata intunecata cu TRAIL_MARK_DARKEN. Pe zapada, aceeasi

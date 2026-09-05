@@ -282,6 +282,85 @@ const CLASSES_BY_MODEL := {
 		"Cliff_Band_Module": Palette.TRI_PREFIX + "red_valley_tuff",
 	},
 
+	# --- Cappadocia: tuful CREM (hornurile si rudele lor) -------------------
+	#
+	# Pana aici, din cele 44 de .glb-uri ale kitului doar modulul de faleza de
+	# mai sus avea textura. Hornurile — piesa cea mai repetata a pistei si
+	# subiectul ei — stateau pe atlas curat, adica pe culoare plata: exact
+	# diferenta pe care style_bible §4 o masoara fata de Reckless Racing 3 /
+	# Beach Buggy Racing.
+	#
+	# TRIPLANAR, obligatoriu, nu o alegere de gust: masurat pe toate cele 44 de
+	# fisiere (tools/probe_capp_kit_slots.gd), UV-urile kitului sunt COLAPSATE
+	# pe centrele sloturilor — multi `u` distincti si un singur `v`. Pe UV-urile
+	# alea orice textura ar citi un texel, deci fata ar ramane la fel de plata
+	# (memoria `uv-colapsat-nu-e-un-interval`). Proiectia e in spatiul LUMII:
+	# piesele stau pe loc, si stratele curg continuu dintr-un horn in faleza de
+	# langa el, ca la `volcanic_rock` pe Stromboli.
+	#
+	# CINE intra, si pe ce cifra. Regula (#313) e ca o clasa STERGE culorile din
+	# sloturi, deci primesc textura doar piesele monocrome. Aici „monocrom" a
+	# cerut o masuratoare in DOI pasi, fiindca .glb-ul brut minte: `_retint_tuff`
+	# muta la incarcare slotul 1 pe CONCRETE si 2 pe MARBLE_GREY (vezi
+	# TUFF_UV_REMAP). Masurat DUPA remapare (tools/probe_capp_familie.gd),
+	# hornurile stau pe 19/29/8/20 — nuante 0.114, 0.111, 0.108 si saturatii
+	# 0.18, 0.07, 0.16, 0.08. Adica O SINGURA familie de culoare, despartita
+	# doar prin VALOARE: n-au ce pierde.
+	#
+	# Pe .glb brut aceleasi piese arata un ecart de saturatie de 0.63, ceea ce
+	# le-ar fi descalificat pe toate — si asta e chiar motivul pentru care
+	# masuratoarea se face dupa remapare, nu pe fisier.
+	#
+	# CINE NU intra, desi e din acelasi kit si pare la fel:
+	#   `cave_house_a/b/c`, `dovecote`  — ecart de saturatie 0.63: au usi si
+	#       obloane pictate (sloturile 9 si 3, saturatie 0.60-0.64). Textura
+	#       ar fi costat exact accentul pentru care exista piesa. Aceeasi
+	#       decizie ca la `House_A/B/C` de pe Stromboli.
+	#   `rock_church_facade`            — 0.63, are slotul 4 (#67421F) pe
+	#       deschiderile sapate; alea sunt adancimea fatadei, nu suprafata ei.
+	#   `farmhouse`                     — 0.57, acoperisul pe slotul 3.
+	#   `red_mesa`                      — acolo rosul e INTENTIA (vezi nota de
+	#       la TUFF_UV_MODELS), si oricum e `red_valley_tuff`, nu crem.
+	#   `erciyes`, siluetele de orizont — sunt cer, nu roca de prim-plan
+	#       (memoria `caster-departat-fura-umbra`).
+	#
+	# Zero materiale in plus la garda peste unul singur: `tuff_cream` refoloseste
+	# dala lui `red_valley_tuff`, deci nu se dubleaza nicio imagine in memorie —
+	# se schimba doar ridicarea si tenta, ca la volcanic_rock / macchia_dry.
+	# Track13 era la 20/38 materiale inainte.
+	"chimney_a": {"Chimney_A": Palette.TRI_PREFIX + "tuff_cream"},
+	"chimney_b": {"Chimney_B": Palette.TRI_PREFIX + "tuff_cream"},
+	"chimney_c": {"Chimney_C": Palette.TRI_PREFIX + "tuff_cream"},
+	"chimney_d": {"Chimney_D": Palette.TRI_PREFIX + "tuff_cream"},
+	"chimney_mushroom": {
+		"Chimney_Mushroom": Palette.TRI_PREFIX + "tuff_cream",
+	},
+	"chimney_triple": {"Chimney_Triple": Palette.TRI_PREFIX + "tuff_cream"},
+	"cracked_chimney_a": {
+		"Cracked_Chimney_A": Palette.TRI_PREFIX + "tuff_cream",
+	},
+	"cracked_chimney_b": {
+		"Cracked_Chimney_B": Palette.TRI_PREFIX + "tuff_cream",
+	},
+	"cracked_chimney_c": {
+		"Cracked_Chimney_C": Palette.TRI_PREFIX + "tuff_cream",
+	},
+	# Poarta geamana (POI A) si gura de pestera: acelasi tuf, si sunt piesele
+	# prin care se TRECE, deci se vad de la un metru.
+	"twin_chimney_gate": {
+		"Twin_Chimney_Gate": Palette.TRI_PREFIX + "tuff_cream",
+	},
+	"cave_entrance": {"Cave_Entrance": Palette.TRI_PREFIX + "tuff_cream"},
+	# Grohotisul: 100% pe slotul 19, cel mai monocrom din kit. Nu intra insa tot,
+	# fiindca sub banda ingusta din style_bible §4 granulatia cade in mipmap si
+	# textura iese plata oricat de corecta ar fi maparea. Masurat pe gabarit:
+	# `talus_block` 2.18 x 1.30 x 1.73 m — intra; `talus_cobble` 1.81 x 0.56 —
+	# la limita, si e piesa cea mai marunta din campul de moloz; `talus_gravel`
+	# 3.72 x 0.23 x 2.40 m — o FOAIE de pietris de 23 cm grosime, vazuta razant
+	# de la inaltimea ochiului, deci lata pe hartie si subtire pe ecran.
+	# Aceeasi lectie ca `Bollard` si `Jib` pe Chongqing.
+	"talus_block": {"Talus_Block": Palette.TRI_PREFIX + "tuff_cream"},
+
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},

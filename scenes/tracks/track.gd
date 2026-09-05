@@ -4284,6 +4284,45 @@ func _build_terrain() -> void:
 	var strata_tint: Variant = theme_flag("strata_tint", null)
 	var strata_line := float(theme_flag("strata_line", 0.0))
 	var strata_fade := maxf(float(theme_flag("strata_fade", 1.0)), 0.001)
+	# BENZILE ORIZONTALE ale Vaii Rosii (brief §1: "faleze in benzi
+	# roz-crem-rosu"). Acelasi mecanism ca `strata_tint` de mai sus — greutate
+	# din COTA, margine zdrentuita cu acelasi zgomot — dar cu mai multe
+	# intervale in loc de o singura rampa: un `strata_tint` unic da un degrade
+	# neted crem -> rosu pe 13 m de cota, adica o SPALARE, nu benzi.
+	#
+	# CE POATE SI CE NU POATE, masurat (5 sep, item 2b) — citeste inainte sa
+	# muti cotele, fiindca doua treimi din intentia initiala sunt imposibile:
+	#
+	# 1. SCARPUL de sub drum (rapa 0, buza -> podea) NU poate purta benzi.
+	#    Grila e TERRAIN_CELL = 7.917 m, si scarpul cade 15-33 m intr-o SINGURA
+	#    celula: 141 de triunghiuri de teren cu spread median de 22.3 m de cota
+	#    (max 34.9), deci intre buza si podea nu exista niciun rand de vertecsi
+	#    care sa poarte o muchie. Gouraud intinde tenta pe toata fata — vezi
+	#    memoria `benzi-vertex-color-bisect`. Nicio cota nu repara asta; ar
+	#    trebui indesita grila (buget de triunghiuri) sau geometrie proprie.
+	# 2. MALUL OPUS are randuri (12-14 pe 68 m de cota, unul la ~5 m), deci
+	#    benzile chiar se aseaza pe vertecsi — VERIFICAT: la frac 0.27 cotele
+	#    33-44 au trecut de la crem (0.94,0.88,0.77) la rosu (0.74,0.46,0.30).
+	#    Numai ca in cadrele de pe cornisa malul e la 225-300 m de camera, iar
+	#    ceata temei merge 90 -> 250 m: la frac 0.27 e 97% CEATA (masurat pe
+	#    histograma de distanta, 1902 raze), la 0.31 52%. Deci acolo culoarea
+	#    nu mai ajunge pe ecran — aceeasi clasa de eroare ca "muntele Erciyes e
+	#    CER in joc" (handoff §5.1). Confirmat prin A/B: cu ceata impinsa la
+	#    900 m, benzile se vad; cu ceata reala, deviatia de muchii orizontale pe
+	#    masca de teren nu se misca (0.956 -> 0.952).
+	#
+	# Ce ramane si de ce merita: efectul REAL e pe terenul din prim-plan si
+	# planul mijlociu, unde ceata inca nu inghite nimic — la frac 0.22
+	# saturatia pe masca de teren urca 0.247 -> 0.308 (+25%), si acolo se vede
+	# tuf cald in loc de crem spalat. E o TENTA pe cote, nu benzi citibile.
+	#
+	# Formatul: Array[Vector4] de (cota_de_jos, cota_de_sus, fade, rezervat)
+	# + o paleta paralela de tente. Se aplica de jos in sus, ca stratigrafia
+	# reala; ultimul scris castiga la suprapunere.
+	var strata_bands: Variant = theme_flag("strata_bands", null)
+	var strata_band_tints: Variant = theme_flag("strata_band_tints", null)
+	var has_bands: bool = strata_bands != null and strata_band_tints != null \
+		and (strata_bands as Array).size() > 0
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
 	# Peticele de pamant din camp (#206): zgomot world-space, doar unde e
 	# iarba. Referinta nu are un covor verde uniform — are pete de pamant
@@ -4388,6 +4427,40 @@ func _build_terrain() -> void:
 							tint = tint.lerp(strata_tint as Color, strata_w)
 							# Pe faleza rosie nu creste iarba, ca si pe piatra.
 							grass_w *= 1.0 - strata_w
+					# BENZILE de deasupra stratului de baza (vezi nota lunga de
+					# la declararea lui `strata_bands`).
+					if has_bands:
+						var bands: Array = strata_bands as Array
+						var btints: Array = strata_band_tints as Array
+						# Zgomotul e MIC aici, si asta e o cifra masurata, nu un
+						# gust. Etajele snow/rock isi permit ±0.22-0.25 de
+						# GREUTATE fiindca banda lor de trecere e de 22 m de cota
+						# si vertecsii cad des in ea. Aici o banda are 10-14 m,
+						# iar malul opus are un rand de vertecsi la fiecare ~5 m:
+						# cu ±2.5 m de zgomot doi vertecsi vecini cad in faze
+						# diferite ale ACELEIASI benzi. Masurat pe malul opus la
+						# frac 0.27, prima incercare: y 33 rosu, 41 palid, 48
+						# ruginiu inchis, 53 crem — alternanta, nu stratigrafie.
+						# La ±0.8 m marginea ramane neregulata fara sa sara peste
+						# un rand intreg.
+						var jitter := dirt_noise.get_noise_2d(
+							v.x * 0.45, v.z * 0.45) * 0.8
+						for bi in bands.size():
+							if bi >= btints.size():
+								break
+							var band: Vector4 = bands[bi]
+							var lo := band.x + jitter
+							var hi := band.y + jitter
+							var bfade := maxf(band.z, 0.001)
+							# Trapez: urca pe `bfade` la baza, coboara pe `bfade`
+							# la varf. Fara asta o banda ar avea muchii C0 si
+							# s-ar citi ca decal, nu ca strat de roca.
+							var w_up := clampf((v.y - lo) / bfade, 0.0, 1.0)
+							var w_dn := clampf((hi - v.y) / bfade, 0.0, 1.0)
+							var bw := smoothstep(0.0, 1.0, minf(w_up, w_dn))
+							if bw > 0.0:
+								tint = tint.lerp(btints[bi] as Color, bw)
+								grass_w *= 1.0 - bw
 					if rock_tint != null:
 						var rock_w := clampf(
 							(v.y - rock_line) / rock_fade, 0.0, 1.0)
@@ -4429,6 +4502,11 @@ func _build_terrain() -> void:
 	st.index()
 	st.generate_normals()
 	var inst := MeshInstance3D.new()
+	# Nume STABIL: fara el nodul ia un `@MeshInstance3D@2309` care se schimba de
+	# la o rulare la alta, si `ProbeMasca --match=` nu poate tinti terenul de
+	# doua ori la rand (masuratoarea inainte/dupa nu se mai face pe acelasi
+	# obiect). Garzile cheie pe `TerrainBody` (corpul, copilul), nu pe mesh.
+	inst.name = "Terrain"
 	inst.mesh = st.commit()
 	# Doua perechi de texturi gri (nisip pe plaja, iarba pe camp), amestecate
 	# per-vertex prin COLOR.a in shader-ul de teren — vezi antetul lui

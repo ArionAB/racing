@@ -595,6 +595,18 @@ const CLASS_TEXTURES := {
 	# ancora de insula) s-a incercat prima si citea beton turnat pe captura
 	# din galerie — netedul ei nu are randuri.
 	"cut_stone": "res://assets/textures/classes/alpine_granite.png",
+	# FRESCELE bisericii rupestre din orasul subteran (Cappadocia, POI F).
+	# A treia clasa PICTATA (tools/paint_fresco.py, dupa pine_needles si
+	# macchia): motive bizantine ABSTRACTE — registre, medalioane, arcaturi
+	# oarbe, cruci inscrise — pe var cojit. Nicio figura si niciun text, ca in
+	# brief §5.2 si in prompt-ul de kit ("frescoes are abstract shapes").
+	#
+	# Dala PROPRIE, nu una refolosita cu alta tenta, si asta e diferenta fata
+	# de volcanic_rock / village_plaster / macchia_dry: acelea reutilizeaza o
+	# dala fiindca sunt tot SUPRAFETE (piatra, var, frunzis) si difera doar prin
+	# culoare. O fresca nu e o suprafata cu alta culoare, e un DESEN — nicio
+	# tenta pusa peste gresie sau peste tencuiala nu produce un medalion.
+	"fresco": "res://assets/textures/classes/fresco.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -685,6 +697,14 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Aceeasi scara ca "rock": e aceeasi dala, doar alta tenta.
 	"volcanic_rock": 0.14,
 	"rust_metal": 0.45, # o repetitie la ~2.2 m — panouri, nu strate
+	# Frescele: o repetitie la ~3.2 m. Dala tine DOUA registre pe inaltime
+	# (tools/paint_fresco.py §2), deci un registru masoara 1.6 m — inaltimea
+	# unui panou pictat real, si aproape exact inaltimea benzii de pe pilastrul
+	# arcadei (0.55 m x scara 2.3 = 1.27 m in lume la `arcadas2_*`). La o scara
+	# mai mare motivele ar fi cazut sub un pixel de la 12 m, distanta camerei de
+	# joc; la una mai mica un singur medalion ar fi acoperit tot pilastrul si
+	# textura ar fi citit ca o pata, nu ca o pictura.
+	"fresco": 0.31,
 	# Sursa e o scanare de 1.1 m; la 1.18 m/repetitie scobiturile de calcar cad
 	# aproape la scara reala, iar o stanca de recif de 1.6-4 m prinde 1.5-3.5
 	# repetitii — destul cat tiparul sa nu se citeasca ca tapet.
@@ -1390,11 +1410,17 @@ static func cool_fill_material(slots: Array, tint: Color,
 
 
 ## Pune umplerea rece pe tot subarborele.
+## `skip_suffix`, daca e dat, lasa neatinse nodurile al caror nume se termina
+## asa. Exista pentru piesele rupte de accente la care CLASA sta pe accent
+## (`WorldProp.ACCENT_HOLDS_CLASS`): fara el racirea trecea peste tot subarborele
+## si stergea clasa doua apeluri dupa ce fusese pusa.
 static func apply_cool_fill(root: Node, slots: Array, tint: Color,
-		energy: float) -> void:
+		energy: float, skip_suffix: String = "") -> void:
 	var mat := cool_fill_material(slots, tint, energy)
 	for node in _walk(root):
 		if node is MeshInstance3D:
+			if skip_suffix != "" and String(node.name).ends_with(skip_suffix):
+				continue
 			(node as MeshInstance3D).material_override = mat
 
 ## --- Ruperea accentelor de pe o parte care primeste clasa ------------------

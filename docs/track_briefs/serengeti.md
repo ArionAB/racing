@@ -149,7 +149,10 @@ cireada) → serpentine (coborâre tehnică, bolovani) → fund de crater (vitez
 elefanți, vârtej) → spărtură (salt în lumină) → camp.
 
 **Ceasuri care nu împart durata turului** (lecția Stromboli): pulsul turmei
-**~14 s** (8 s animale + 6 s culoar liber, pe 3 benzi defazate cu 1/3),
+**~15 s** (8 s animale + 7 s culoar liber; cele 3 benzi sunt decalate cu
+0,6 s, front oblic — **măsurat** de `ProbeSerengeti`: fereastra reală cu tot
+culoarul liber e **3,7 s**; „defazate cu 1/3", cum scria v0.1, nu lăsa nicio
+clipă cu tot culoarul liber),
 hipopotamii **~20 s** (3, defazați), cireada **~26 s**, bolovanii **~33 s**,
 elefanții rute de **~30 / 37 / 44 s**, vârtejul neciclic (rătăcește pe
 Lissajous, mereu vizibil de la 60 m). Faza fiecăruia se mută de la tur la tur.
@@ -169,7 +172,7 @@ le are pe toate, și prima cu **sabotajul de control**:
 
 | mecanică | pe scurt | ce cere în cod |
 |---|---|---|
-| **Râul de gnu** (B) | culoar de 24 m; animalele curg perpendicular pe drum în pulsuri de 8 s (spațiere 1,5–2 m, 6–7 m/s, 3 benzi defazate), apoi 6 s culoar liber; contact = deviere după masă + curent lateral cât ești în puls | **nou:** `HerdHazard`. **NU boids** (150 de agenți cu vecinătate pe cadru = CPU pe mobil): un **câmp de curgere pe spline** — fiecare instanță are o fază pe spline + jitter lateral fix + variație de viteză ±15% + animație `Gallop` cu offset; e O(n) și determinist. Vizual: **MultiMesh** cu 150–200 instanțe (gnu:zebră 4:1), animația pe MultiMesh = **vertex animation în shader** (2 cadre de galop interpolate din `custom_data`), nu 150 de `AnimationPlayer`. Coliziune: **bazin de 12 `AnimatableBody3D`** (masă efectivă 200, ca Muscle) atașate instanțelor aflate la < 15 m de bandă și returnate când ies; contactul dă ghiontul din `SlidingHazard` + `platform_velocity`-ul turmei ca curent (reuse telecabină). Un gnu lovit de o masă mai mare (Autobuz 260, Pompieri 200) **se rostogolește** (instanța trece 1,5 s pe animația `Tumble`, apoi se ridică și fuge) — nu ragdoll |
+| **Râul de gnu** (B) | culoar de 24 m; animalele curg perpendicular pe drum în pulsuri de 8 s (spațiere 2,5 m, 6,5 m/s, 3 benzi decalate cu 0,6 s), apoi 7 s culoar liber; contact = deviere după masă + frânare; **măsurat** (`ProbeSerengeti`): sportul 6 lovituri, 6,1 m deviere, 18 → 12,5 m/s; autobuzul 4 lovituri, 0,9 m, 13,7 m/s; prin fereastră zero contact | **nou:** `HerdHazard`. **NU boids** (150 de agenți cu vecinătate pe cadru = CPU pe mobil): un **câmp de curgere pe spline** — fiecare instanță are o fază pe spline + jitter lateral fix + variație de viteză ±15% + animație `Gallop` cu offset; e O(n) și determinist. Vizual: **MultiMesh** cu 150–200 instanțe (gnu:zebră 4:1), animația pe MultiMesh = **vertex animation în shader** (2 cadre de galop interpolate din `custom_data`), nu 150 de `AnimationPlayer`. Coliziune: **bazin de 16 `AnimatableBody3D`** atașate animalelor celor mai apropiate de vreo mașină — dar **niciodată sub 3,2 m de ea** (măsurat: un corp cinematic apărut într-o mașină a azvârlit-o cu 282 m/s la −6 m sub sol). **Contactul e geometric**, în spațiul mașinii: animalul lovit se rostogolește (își pierde corpul 1,5 s), mașina primește ghiont în sensul curgerii scalat cu **pătratul** raportului de masă (200 / masa mașinii) și pierde 25% × raport din viteza înainte. Corpurile rămân pentru izbitura de la distanță și pentru mașinile oprite în culoar. Un gnu lovit de o masă mai mare (Autobuz 260, Pompieri 200) **se rostogolește** (instanța trece 1,5 s pe animația `Tumble`, apoi se ridică și fuge) — nu ragdoll |
 | **Hipopotamii** (C) | 3 spinări sub bandă; ciclu ~20 s defazat: 1 s bule (telegraph) → se ridică 1,2 m în 0,4 s → stă 2 s → coboară | reuse mișcarea verticală din `BalloonHazard`/`LiftBridgeHazard` cu un mesh-movilă; te aruncă fiindcă e rampă care apare sub roți, nu impuls scriptat — fizica întreagă face restul. Se verifică cu ProbeBumpRigid că nu te înfige în apă |
 | **Kopje-kicker** (C) | rampă de granit de 8 m, săritură de 30 m peste râu | reuse `FlyoffKicker` + `RespawnZone` pe apa adâncă (Okinawa) |
 | **Cireada Ankole** (E) | 5 vaci cu coarne lungi traversează pe ciclu ~26 s, în șir | reuse `SlidingHazard` `TRAVERSARE` + `cow.glb` (PR #270) cu coarne = mesh copil; **zero cod** |
@@ -304,12 +307,14 @@ start (o dată, atmosferă).
 
 ## 7. Ordinea de construcție
 
-1. **Sonde tehnice înaintea traseului:** (a) `ProbeHerd` — 200 de instanțe
-   pe câmp de curgere, cu bazin de 12 corpuri, pe o dreaptă-test: mașina
-   e purtată lateral? un gnu lovit se rostogolește? costul pe cadru?
-   (b) hipopotamul ca rampă care apare (`ProbeBumpRigid` pe movilă
-   verticală); (c) vârtejul: `apply_torque_impulse` dă 180° fără să
-   răstoarne mașina (centrul de masă e la −0,15)?
+1. **Sonde tehnice înaintea traseului ✔** (`tools/ProbeSerengeti.tscn`,
+   TRECUT, 22 de verdicte): (a) turma — 120 de animale pe câmp de curgere,
+   bazin de 16 corpuri, tick 159 µs; deviere și frânare după masă; (b)
+   hipopotamul ca movilă pe ciclu vertical — sus ridică mașina la 1,19 m cu
+   27 de cadre de aer, scufundat trecerea e plată; (c) vârtejul — **nu**
+   `apply_torque_impulse` (yaw-ul e rescris în fiecare tick din direcție),
+   ci `Car.apply_yaw_kick` (termen separat, neplafonat de `bump_yaw_max`):
+   149° măsurate la 1 s din 180° comandate, fără răsturnare.
 2. `Track14.tscn` din `TrackFromPath`, temă `serengeti` (furtună, fog 300,
    umbre pornite), traseul din §2. ProbeLayout pe pante (urcare < 13%).
 3. **ProbeRace la început, nu la final** (memoria

@@ -68,6 +68,19 @@ extends Node
 ##                             sunt stare, nu functie de timp. Ceasul din
 ##                             hazard (`_cross_time`) spune cand e piatra
 ##                             deasupra soselei; sonda il tipareste.
+##   --herd-at=4.0             RAUL DE GNU (HerdHazard, Serengeti) la N SECUNDE
+##                             in ciclul pulsului (puls 8 s + gol 7 s = 15 s;
+##                             `_time` absolut, fara `phase`). Capul pulsului
+##                             e pe axa soselei la 0; blocul de 52 m vine din
+##                             spate, deci 3-8 = drumul PLIN pe toate benzile,
+##                             9-14 = culoar liber. Turma se calculeaza in
+##                             _physics_process, iar captura o ingheata —
+##                             fara asta pozele arata pozitia de la _ready.
+##   --hippo-at=0.12           hipopotamii (HippoHazard) la o fractie din ciclul
+##                             lor (20 s implicit; `phase` ignorat, toti la
+##                             aceeasi faza): 0.05-0.07 = urca, 0.07-0.17 =
+##                             SUS pe banda, 0.17-0.21 = se scufunda, restul
+##                             = sub albie, invizibili.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -133,6 +146,8 @@ func _ready() -> void:
 	var wave_at := -1.0
 	var rock_at := -1.0
 	var door_at := -1.0
+	var herd_at := -1.0
+	var hippo_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
 	var lava_stage := -1
@@ -165,6 +180,10 @@ func _ready() -> void:
 			rock_at = float(arg.trim_prefix("--rock-at="))
 		elif arg.begins_with("--door-at="):
 			door_at = float(arg.trim_prefix("--door-at="))
+		elif arg.begins_with("--herd-at="):
+			herd_at = float(arg.trim_prefix("--herd-at="))
+		elif arg.begins_with("--hippo-at="):
+			hippo_at = float(arg.trim_prefix("--hippo-at="))
 		elif arg.begins_with("--burner-at="):
 			burner_at = float(arg.trim_prefix("--burner-at="))
 		elif arg.begins_with("--balloon-at="):
@@ -224,6 +243,10 @@ func _ready() -> void:
 		_set_train_phase(track, train_at)
 	if door_at >= 0.0:
 		await _set_door_phase(track, door_at)
+	if herd_at >= 0.0:
+		await _set_herd_time(track, herd_at)
+	if hippo_at >= 0.0:
+		await _set_hippo_phase(track, hippo_at)
 	if burner_at >= 0.0:
 		await _set_burner_phase(track, burner_at)
 	if balloon_at >= 0.0:
@@ -584,6 +607,59 @@ func _set_door_phase(root: Node, at: float) -> void:
 			door.travel.length(), door.door_closed_now()])
 	if found == 0:
 		print("--door-at=%.2f: NICIO usa de piatra pe pista asta" % at)
+
+
+## Aduce turma de gnu la `seconds` in ciclul pulsului (vezi `--herd-at`).
+##
+## Turma e un camp de curgere: pozitia fiecarui animal e FUNCTIE de `_time`,
+## deci nu trebuie simulata cadru cu cadru (spre deosebire de bolovani) — se
+## pune ceasul si se cere o plasare vizuala. Apoi se INGHEATA: pana la captura
+## mai trec cadre si pulsul ar fugi de pe drum. Hazardele stau sub `Hazarduri`,
+## nu direct sub pista, deci cautarea e recursiva.
+func _set_herd_time(root: Node, seconds: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "HerdHazard", true, false):
+		var herd := node as HerdHazard
+		herd.set("_time", seconds)
+		herd.call("_advance_animals", 0.0)
+		herd.call("_place_visuals")
+		herd.set_physics_process(false)
+		found += 1
+		var on_road := 0
+		var pos: PackedVector3Array = herd.get("_pos")
+		for p in pos:
+			var rel: Vector3 = p - herd.global_position
+			if absf(rel.dot(herd.flow_dir)) < HerdHazard.ROAD_ZONE:
+				on_road += 1
+		print("--herd-at=%.2f: %s, %d animale, %d in zona drumului, culoar liber=%s, perioada %.1f s"
+			% [seconds, herd.name, herd.count(), on_road, herd.window_open_now(), herd.period()])
+		for lot: Variant in [herd.get("_mmi"), herd.get("_mmi_zebra")]:
+			var mmi := lot as MultiMeshInstance3D
+			print("  lot %s: %d instante, cutie %s" % [mmi.name,
+				mmi.multimesh.instance_count, str(mmi.get_aabb())])
+	if found == 0:
+		print("--herd-at=%.2f: NICIO turma pe pista asta" % seconds)
+
+
+## Muta hipopotamii la o fractie din ciclul lor (vezi `--hippo-at`). Toti la
+## aceeasi faza, ca in captura sa se vada starea, nu defazajul. Un cadru de
+## fizica intai, ca `_rest` sa fie citit din pozitia reala (sync_to_physics).
+func _set_hippo_phase(root: Node, at: float) -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "HippoHazard", true, false):
+		var hippo := node as HippoHazard
+		hippo.set("_time", clampf(at, 0.0, 0.999) * hippo.period)
+		hippo._physics_process(0.0)
+		hippo.set_physics_process(false)
+		found += 1
+		print("--hippo-at=%.2f: %s la y=%.2f (ridicare %.2f m din %.2f), sus=%s"
+			% [at, hippo.name, hippo.global_position.y, hippo.lift_at(hippo.get("_time")),
+			hippo.rise_m, hippo.is_up()])
+	if found == 0:
+		print("--hippo-at=%.2f: NICIUN hipopotam pe pista asta" % at)
 
 
 ## Aduce bolovanii cu traseu la `seconds` de la desprindere, simuland cadrele.

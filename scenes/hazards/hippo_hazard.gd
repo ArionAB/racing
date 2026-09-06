@@ -27,6 +27,22 @@ signal surfacing(hippo: HippoHazard)
 ## Fara fisier (alt worktree, kit neimportat) se vede elipsoidul, ca sondele
 ## sa nu pice din cauza unui asset.
 const HIPPO_GLB := "res://assets/models/serengeti/animals/hippo_back.glb"
+## Sloturile de atlas ale spinarii, mutate INAINTE de material. Masurat pe
+## .glb (arie pe slot, sonda temporara): CORPUL e slotul 4 (ROCK_DARK #67421F,
+## 1074 tri, 27,8 m2), iar 23 (TILE_TERRACOTTA, 136 tri, 2,6 m2, y mediu 0,54
+## — jos, la bot) e GURA. Pe captura, sub soarele cald, corpul maro iesea
+## portocaliu-teracota, exact culoarea drumului de laterit (rgb 190,100,19,
+## saturatie 0.90). Brief-ul (§4) cere MARBLE_GREY 29 pe corp si KERB_RED 7 pe
+## gura; SAND_SHADOW 2 („praf") nu are slot propriu in GLB, deci nu se pune.
+## Prima incercare a mutat invers (23 -> 29, 4 -> 2) pe presupunerea ca
+## spinarea e pe 23: corpul a ramas portocaliu — masoara aria, nu ghici.
+## HippoHazard nu trece prin WorldProp, deci SLOT_REMAP_BY_MODEL nu-l atinge:
+## mutarea se face aici, cu aceeasi unealta (`WorldProp._mesh_with_slots_moved`,
+## care duplica mesh-ul, nu scrie in resursa partajata).
+const HIPPO_SLOT_REMAP := {
+	Palette.ROCK_DARK: Palette.MARBLE_GREY,      # corpul: gri
+	Palette.TILE_TERRACOTTA: Palette.KERB_RED,   # gura: rosu
+}
 
 @export_group("Ritm")
 @export_range(4.0, 120.0, 0.5) var period: float = 20.0
@@ -143,6 +159,10 @@ func _build_from_kit() -> bool:
 	# Varful spinarii la rest_top: modelul are originea la baza, deci coboara
 	# cu toata inaltimea lui. Sub albie ramane si cand e sus (1,35 > rise_m).
 	model.position = Vector3(0.0, rest_top - aabb.end.y, 0.0)
+	for mi in meshes:
+		var m := mi as MeshInstance3D
+		if m.mesh != null:
+			m.mesh = WorldProp._mesh_with_slots_moved(m.mesh, HIPPO_SLOT_REMAP)
 	Palette.apply_world_material(model)
 	add_child(model)
 	_mesh = meshes[0] as MeshInstance3D

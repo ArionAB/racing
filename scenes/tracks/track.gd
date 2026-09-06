@@ -158,9 +158,9 @@ func trail_profile() -> Dictionary:
 	var lip_scale := clampf(road_l / 0.62, 0.06, 1.0)
 	if road_surface == "dirt":
 		# Pamantul afanat tine cel mai bine amprenta: bazin adanc, model clar.
-		return {"width": 0.60, "core": 0.66, "basin": 0.34, "tread": 0.48, "lip": 1.55 * lip_scale}
+		return {"width": 0.60, "core": 0.66, "basin": 0.34, "tread": 0.48, "lip": 2 * lip_scale}
 	# Pamant tare: urma abia se vede, si nu retine modelul anvelopei.
-	return {"width": 0.46, "core": 0.40, "basin": 0.18, "tread": 0.24, "lip": 1.15 * lip_scale}
+	return {"width": 0.46, "core": 0.40, "basin": 0.18, "tread": 0.24, "lip": 1.7 * lip_scale}
 
 
 ## Culoarea FINALA a brazdei de rulare (SandTrail o pune direct pe material).

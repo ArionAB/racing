@@ -68,7 +68,23 @@ void fragment() {
 	// de departe ramane brazda. Altfel mipmap-ul face din el o pasta gri.
 	float dist = length(VERTEX);
 	float near = 1.0 - smoothstep(tread_fade_start, tread_fade_end, dist);
-	float tread = texture(tread_tex, vec2(UV.x, UV.y * tread_repeats)).a;
+	// ####################################################################
+	// MODELUL SE ESANTIONEAZA PE LUNGIME, NU PE LATIMEA PLACUTEI
+	//
+	// Doua defecte veneau din `vec2(UV.x, ...)`:
+	//
+	//  1. GOLURI intre urme. Textura are ~20% latime goala (canalul din mijloc
+	//     si cele doua margini). Intinse pe placuta de 0.46 m, canalele alea
+	//     deveneau gauri dreptunghiulare — se vedeau la viteza, ca niste
+	//     intreruperi in dara.
+	//  2. CHEVRONUL DISPARUT. Modelul in V variaza pe lungime; luat pe latimea
+	//     unei placute scurte, iesea intins in benzi drepte.
+	//
+	// Acum latimea foloseste doar MIEZUL texturii (fara canale) si e legata de
+	// pozitia pe latimea BRAZDEI, iar lungimea se repeta dupa metri parcursi.
+	// Placuta ramane o fereastra peste un model continuu, nu o stampila.
+	float u = 0.18 + UV.x * 0.64;
+	float tread = texture(tread_tex, vec2(u, UV.y * tread_repeats)).a;
 
 	// ####################################################################
 	// UMBRIREA CARE FACE ADANCIMEA
@@ -123,6 +139,14 @@ void fragment() {
 	// buza ramane o LUMINARE a solului, nu o vopsea peste el.
 	float lip = max(toward, 0.0) * band * lip_light;
 	shade *= 1.0 + lip;
+	// Blocurile de anvelopa se apasa in fundul santului: acolo unde calca
+	// cauciucul, solul e mai batatorit, deci mai inchis.
+	//
+	// Linia asta se PIERDUSE cand am rescris blocul de relief: modelul ramasese
+	// doar ca un plus de 17% pe alfa, adica invizibil — exact ce s-a raportat ca
+	// "au disparut chevron-ele". Simulat pe placuta, variatia pe lungime era
+	// 0.0016, practic zero.
+	shade *= 1.0 - tread_amount * near * tread * 0.75;
 	ALBEDO = core_color * shade;
 
 	// Stingerea cu varsta: urma proaspata e plina, cea veche abia se ghiceste.

@@ -419,9 +419,17 @@ static func themes() -> Dictionary:
 			# (soarele sub nori). E cel mai ieftin element de identitate de
 			# pe pista: cu +5 grade peste orizontala, cerul e banda de sus a
 			# ecranului pe orice dreapta (brief §2.0).
-			"sky_top": Color.html("3A3548"),
-			"sky_horizon": Color.html("9C8A80"),
+			"sky_top": Color.html("2C2838"),
+			"sky_horizon": Color.html("443C52"),
 			"sky_cover_alpha": 0.0,
+			# Ceata de adancime acopera TOT cerul cand `fog_sky_affect` sta pe
+			# implicitul 1.0 (cerul e la adancime infinita): masurat pe captura
+			# --gamecam la 0.08, banda de cer iesea (218,204,168) — culoarea
+			# cetii, nu a cerului — oricat de inchise erau sky_top/sky_horizon.
+			# Cu 0.08 cerul de furtuna se vede (banda de sus masurata
+			# violet-gri, nu crem), iar ceata calda ramane pe teren si lasa
+			# doar banda calda de la orizont (brief §4).
+			"fog_sky_affect": 0.08,
 			# Ceata IN FAMILIA SOLULUI (memoria `ceata-in-familia-solului`):
 			# gri-cald desaturat, sub saturatia ierbii, ca departarea sa se
 			# spele, nu sa se coloreze.
@@ -467,11 +475,14 @@ static func themes() -> Dictionary:
 			# DRUM DE LATERIT ROSU (brief §4: TILE_TERRACOTTA pe banda, nu
 			# asfalt si nu nisipul auriu implicit #CCA86E). Pista declara
 			# `custom_road_surface = "dirt"`; cheia asta ii da culoarea, ca pe
-			# Cappadocia. Sub slotul 23 (#C4784F) fiindca `road_material`
-			# imparte la SAND_MACRO_MEAN (0.85) si soarele cald mai ridica o
-			# data rosul; aici saturatia E intentia (brief §9: drumul rosu e
-			# unul din cele trei accente), deci se tine, nu se spala.
-			"dirt_road_tint": Color.html("B06A45"),
+			# Cappadocia. MULT sub slotul 23 (#C4784F, saturatie 0.60):
+			# tenta se imparte la SAND_MACRO_MEAN (0.85), se inmulteste cu
+			# macro-ul de nisip si soarele cald mai ridica o data rosul.
+			# Masurat pe captura --gamecam la 0.08 (caseta din banda):
+			# B06A45 -> (201,64,3), saturatie 0.98 = lava, nu laterit;
+			# 94807A -> (153,97,58), saturatie 0.62, adica exact registrul
+			# slotului 23. Regleaza pe captura, nu pe hex.
+			"dirt_road_tint": Color.html("94807A"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,
@@ -3620,6 +3631,11 @@ func _build_environment() -> void:
 		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)
+	# Cat din cer acopera ceata (1.0 = tot, implicitul Godot si al temelor
+	# vechi). Ceata de ADANCIME vede cerul la infinit, deci cu 1.0 sky_top si
+	# sky_horizon nu ajung niciodata pe ecran — orice cer de tema e de fapt
+	# culoarea cetii. Serengeti (cer de furtuna) e prima tema care il coboara.
+	env.fog_sky_affect = float(theme_flag("fog_sky_affect", 1.0))
 	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	# Expunerea: SINGURA parghie globala de luminozitate a scenei.

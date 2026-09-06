@@ -16,39 +16,39 @@
 [ext_resource type="Script" uid="uid://dxvqq0y23t7vu" path="res://scenes/tracks/terrain_hollow.gd" id="hollow"]
 [ext_resource type="Script" uid="uid://c4avlqtdcpl6o" path="res://scenes/tracks/cliff_face.gd" id="cliffface"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="prop"]
-[ext_resource type="PackedScene" uid="uid://bo4aa02tv2xb8" path="res://assets/models/serengeti\animals\crocodile.glb" id="s_crocodile"]
-[ext_resource type="PackedScene" uid="uid://cff1ikosfpoah" path="res://assets/models/serengeti\animals\elephant.glb" id="s_elephant"]
-[ext_resource type="PackedScene" uid="uid://dnl36hbti5p0t" path="res://assets/models/serengeti\animals\hippo_back.glb" id="s_hippo_back"]
-[ext_resource type="PackedScene" uid="uid://c0gh6ywylrl4c" path="res://assets/models/serengeti\animals\wildebeest.glb" id="s_wildebeest"]
-[ext_resource type="PackedScene" uid="uid://c0jrb64x4ua2e" path="res://assets/models/serengeti\animals\zebra.glb" id="s_zebra"]
-[ext_resource type="PackedScene" uid="uid://d12gpee1jjr7j" path="res://assets/models/serengeti\buildings\maasai_boma.glb" id="s_maasai_boma"]
-[ext_resource type="PackedScene" uid="uid://bvy6sdt0lwxxe" path="res://assets/models/serengeti\plants\acacia_umbrella_a.glb" id="s_acacia_umbrella_a"]
-[ext_resource type="PackedScene" uid="uid://bguj5vhea55dg" path="res://assets/models/serengeti\plants\acacia_umbrella_b.glb" id="s_acacia_umbrella_b"]
-[ext_resource type="PackedScene" uid="uid://3uwh582u5qf1" path="res://assets/models/serengeti\plants\acacia_umbrella_c.glb" id="s_acacia_umbrella_c"]
-[ext_resource type="PackedScene" uid="uid://deua51lfipps1" path="res://assets/models/serengeti\plants\baobab.glb" id="s_baobab"]
-[ext_resource type="PackedScene" uid="uid://csbtg3fjvjgeh" path="res://assets/models/serengeti\plants\dead_tree.glb" id="s_dead_tree"]
-[ext_resource type="PackedScene" uid="uid://bbdi3qxoabxj7" path="res://assets/models/serengeti\plants\euphorbia.glb" id="s_euphorbia"]
-[ext_resource type="PackedScene" uid="uid://ch56th6viy88d" path="res://assets/models/serengeti\plants\fever_tree.glb" id="s_fever_tree"]
-[ext_resource type="PackedScene" uid="uid://du0cuajn4rogm" path="res://assets/models/serengeti\plants\fig_tree.glb" id="s_fig_tree"]
-[ext_resource type="PackedScene" uid="uid://bro6toqhnjp6t" path="res://assets/models/serengeti\plants\flamingo.glb" id="s_flamingo"]
-[ext_resource type="PackedScene" uid="uid://bh6koivjf12xs" path="res://assets/models/serengeti\plants\flamingo_wings.glb" id="s_flamingo_wings"]
-[ext_resource type="PackedScene" uid="uid://c8dfirm8gdjl8" path="res://assets/models/serengeti\props\ankole_horns.glb" id="s_ankole_horns"]
-[ext_resource type="PackedScene" uid="uid://bmc86ytc0e6tp" path="res://assets/models/serengeti\props\campfire.glb" id="s_campfire"]
-[ext_resource type="PackedScene" uid="uid://dix86kxrtolty" path="res://assets/models/serengeti\props\land_rover.glb" id="s_land_rover"]
-[ext_resource type="PackedScene" uid="uid://3bq78ug6i676" path="res://assets/models/serengeti\props\safari_balloon_landed.glb" id="s_safari_balloon_landed"]
-[ext_resource type="PackedScene" uid="uid://d1h00pf2nuqda" path="res://assets/models/serengeti\props\safari_tent.glb" id="s_safari_tent"]
-[ext_resource type="PackedScene" uid="uid://i5663i5qklvy" path="res://assets/models/serengeti\rocks\carcass_vultures.glb" id="s_carcass_vultures"]
-[ext_resource type="PackedScene" uid="uid://crlsmn4bpeg3w" path="res://assets/models/serengeti\rocks\crater_far_wall.glb" id="s_crater_far_wall"]
-[ext_resource type="PackedScene" uid="uid://bxqqbjd8f5dc2" path="res://assets/models/serengeti\rocks\crater_gap.glb" id="s_crater_gap"]
-[ext_resource type="PackedScene" uid="uid://c2ha54emw740v" path="res://assets/models/serengeti\rocks\kopje_boulder_a.glb" id="s_kopje_boulder_a"]
-[ext_resource type="PackedScene" uid="uid://47aek131axr6" path="res://assets/models/serengeti\rocks\kopje_boulder_b.glb" id="s_kopje_boulder_b"]
-[ext_resource type="PackedScene" uid="uid://bofd72lo18usb" path="res://assets/models/serengeti\rocks\kopje_boulder_c.glb" id="s_kopje_boulder_c"]
-[ext_resource type="PackedScene" uid="uid://b4tx318shits" path="res://assets/models/serengeti\rocks\kopje_camp.glb" id="s_kopje_camp"]
-[ext_resource type="PackedScene" uid="uid://c21yqmhvvjtfa" path="res://assets/models/serengeti\rocks\kopje_kicker.glb" id="s_kopje_kicker"]
-[ext_resource type="PackedScene" uid="uid://csjrrvbhs38ic" path="res://assets/models/serengeti\rocks\lengai.glb" id="s_lengai"]
-[ext_resource type="PackedScene" uid="uid://c411k1qupis5n" path="res://assets/models/serengeti\rocks\lion_kopje.glb" id="s_lion_kopje"]
-[ext_resource type="PackedScene" uid="uid://bqv3awmvjxiny" path="res://assets/models/serengeti\rocks\termite_mound_a.glb" id="s_termite_mound_a"]
-[ext_resource type="PackedScene" uid="uid://bpsboaw7arspf" path="res://assets/models/serengeti\rocks\termite_mound_b.glb" id="s_termite_mound_b"]
+[ext_resource type="PackedScene" uid="uid://bo4aa02tv2xb8" path="res://assets/models/serengeti/animals/crocodile.glb" id="s_crocodile"]
+[ext_resource type="PackedScene" uid="uid://cff1ikosfpoah" path="res://assets/models/serengeti/animals/elephant.glb" id="s_elephant"]
+[ext_resource type="PackedScene" uid="uid://dnl36hbti5p0t" path="res://assets/models/serengeti/animals/hippo_back.glb" id="s_hippo_back"]
+[ext_resource type="PackedScene" uid="uid://c0gh6ywylrl4c" path="res://assets/models/serengeti/animals/wildebeest.glb" id="s_wildebeest"]
+[ext_resource type="PackedScene" uid="uid://c0jrb64x4ua2e" path="res://assets/models/serengeti/animals/zebra.glb" id="s_zebra"]
+[ext_resource type="PackedScene" uid="uid://d12gpee1jjr7j" path="res://assets/models/serengeti/buildings/maasai_boma.glb" id="s_maasai_boma"]
+[ext_resource type="PackedScene" uid="uid://bvy6sdt0lwxxe" path="res://assets/models/serengeti/plants/acacia_umbrella_a.glb" id="s_acacia_umbrella_a"]
+[ext_resource type="PackedScene" uid="uid://bguj5vhea55dg" path="res://assets/models/serengeti/plants/acacia_umbrella_b.glb" id="s_acacia_umbrella_b"]
+[ext_resource type="PackedScene" uid="uid://3uwh582u5qf1" path="res://assets/models/serengeti/plants/acacia_umbrella_c.glb" id="s_acacia_umbrella_c"]
+[ext_resource type="PackedScene" uid="uid://deua51lfipps1" path="res://assets/models/serengeti/plants/baobab.glb" id="s_baobab"]
+[ext_resource type="PackedScene" uid="uid://csbtg3fjvjgeh" path="res://assets/models/serengeti/plants/dead_tree.glb" id="s_dead_tree"]
+[ext_resource type="PackedScene" uid="uid://bbdi3qxoabxj7" path="res://assets/models/serengeti/plants/euphorbia.glb" id="s_euphorbia"]
+[ext_resource type="PackedScene" uid="uid://ch56th6viy88d" path="res://assets/models/serengeti/plants/fever_tree.glb" id="s_fever_tree"]
+[ext_resource type="PackedScene" uid="uid://du0cuajn4rogm" path="res://assets/models/serengeti/plants/fig_tree.glb" id="s_fig_tree"]
+[ext_resource type="PackedScene" uid="uid://bro6toqhnjp6t" path="res://assets/models/serengeti/plants/flamingo.glb" id="s_flamingo"]
+[ext_resource type="PackedScene" uid="uid://bh6koivjf12xs" path="res://assets/models/serengeti/plants/flamingo_wings.glb" id="s_flamingo_wings"]
+[ext_resource type="PackedScene" uid="uid://c8dfirm8gdjl8" path="res://assets/models/serengeti/props/ankole_horns.glb" id="s_ankole_horns"]
+[ext_resource type="PackedScene" uid="uid://bmc86ytc0e6tp" path="res://assets/models/serengeti/props/campfire.glb" id="s_campfire"]
+[ext_resource type="PackedScene" uid="uid://dix86kxrtolty" path="res://assets/models/serengeti/props/land_rover.glb" id="s_land_rover"]
+[ext_resource type="PackedScene" uid="uid://3bq78ug6i676" path="res://assets/models/serengeti/props/safari_balloon_landed.glb" id="s_safari_balloon_landed"]
+[ext_resource type="PackedScene" uid="uid://d1h00pf2nuqda" path="res://assets/models/serengeti/props/safari_tent.glb" id="s_safari_tent"]
+[ext_resource type="PackedScene" uid="uid://i5663i5qklvy" path="res://assets/models/serengeti/rocks/carcass_vultures.glb" id="s_carcass_vultures"]
+[ext_resource type="PackedScene" uid="uid://crlsmn4bpeg3w" path="res://assets/models/serengeti/rocks/crater_far_wall.glb" id="s_crater_far_wall"]
+[ext_resource type="PackedScene" uid="uid://bxqqbjd8f5dc2" path="res://assets/models/serengeti/rocks/crater_gap.glb" id="s_crater_gap"]
+[ext_resource type="PackedScene" uid="uid://c2ha54emw740v" path="res://assets/models/serengeti/rocks/kopje_boulder_a.glb" id="s_kopje_boulder_a"]
+[ext_resource type="PackedScene" uid="uid://47aek131axr6" path="res://assets/models/serengeti/rocks/kopje_boulder_b.glb" id="s_kopje_boulder_b"]
+[ext_resource type="PackedScene" uid="uid://bofd72lo18usb" path="res://assets/models/serengeti/rocks/kopje_boulder_c.glb" id="s_kopje_boulder_c"]
+[ext_resource type="PackedScene" uid="uid://b4tx318shits" path="res://assets/models/serengeti/rocks/kopje_camp.glb" id="s_kopje_camp"]
+[ext_resource type="PackedScene" uid="uid://c21yqmhvvjtfa" path="res://assets/models/serengeti/rocks/kopje_kicker.glb" id="s_kopje_kicker"]
+[ext_resource type="PackedScene" uid="uid://csjrrvbhs38ic" path="res://assets/models/serengeti/rocks/lengai.glb" id="s_lengai"]
+[ext_resource type="PackedScene" uid="uid://c411k1qupis5n" path="res://assets/models/serengeti/rocks/lion_kopje.glb" id="s_lion_kopje"]
+[ext_resource type="PackedScene" uid="uid://bqv3awmvjxiny" path="res://assets/models/serengeti/rocks/termite_mound_a.glb" id="s_termite_mound_a"]
+[ext_resource type="PackedScene" uid="uid://bpsboaw7arspf" path="res://assets/models/serengeti/rocks/termite_mound_b.glb" id="s_termite_mound_b"]
 [ext_resource type="PackedScene" uid="uid://dqktlvdud8lp1" path="res://assets/models/chongqing/props/chevron_post.glb" id="s_chevron_post"]
 [ext_resource type="PackedScene" uid="uid://w4kptwkt5aly" path="res://assets/models/props/cow.glb" id="s_cow"]
 
@@ -108,16 +108,22 @@ road_dir = Vector3(-1, 0, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.0, -1.5, 163.0)
 script = ExtResource("4_hippo")
 phase = 0.0
+rise_m = 1.5
+rest_top = -0.05
 
 [node name="Hipopotam2" type="AnimatableBody3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75.0, -1.5, 167.5)
 script = ExtResource("4_hippo")
 phase = 0.33
+rise_m = 1.5
+rest_top = -0.05
 
 [node name="Hipopotam3" type="AnimatableBody3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -69.0, -1.5, 163.5)
 script = ExtResource("4_hippo")
 phase = 0.66
+rise_m = 1.5
+rest_top = -0.05
 
 [node name="VartejDePraf" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55, 2.0, 40)

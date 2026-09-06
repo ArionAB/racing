@@ -622,6 +622,17 @@ const CLASS_TEXTURES := {
 	# culoare. O fresca nu e o suprafata cu alta culoare, e un DESEN — nicio
 	# tenta pusa peste gresie sau peste tencuiala nu produce un medalion.
 	"fresco": "res://assets/textures/classes/fresco.png",
+	# GRANITUL kopje-urilor din Serengeti (Track14). ACEEASI dala ca
+	# `olkhon_marble` — nu se dubleaza in memorie, se schimba doar tenta
+	# (mecanica volcanic_rock / tuff_cream). Sursa (marble_cliff_04, 12,7 m)
+	# e o faleza NATURALA la scara kopje-ului de 14 m; `alpine_granite` e un
+	# zid de piatra de 2 m si pe stanca naturala a iesit cetate de doua ori
+	# (memoria `clase-pe-piese-de-kit`), iar `rock` e gresie calda de canion
+	# (141,97,58) — granitul de aici sta pe MARBLE_GREY / ROCK_LIGHT.
+	# Masurat: dala olkhon are media (178,165,150), la 3-9% de tinta pe
+	# canal, deci nu cere CLASS_LIFT. Clasa separata fiindca o tenta pe
+	# `olkhon_marble` ar fi revopsit Stanca Samanului de pe Baikal.
+	"granite": "res://assets/textures/classes/olkhon_marble.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -680,6 +691,10 @@ const CLASS_TINT := {
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
+	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
+	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
+	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
+	"granite": Color(0.95, 0.97, 1.0),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -815,6 +830,9 @@ const CLASS_TRIPLANAR_SCALE := {
 	# repetitie — vinele si stratele fotografiei se citesc ca geologie, nu ca
 	# tipar care se repeta.
 	"olkhon_marble": 0.09,
+	# Granitul Serengeti: aceeasi dala ca olkhon_marble, aceeasi scara —
+	# world triplanar, ca stratele sa curga din bolovan in kopje.
+	"granite": 0.09,
 	# Zidaria taiata: 0.5 = o repetitie la 2 m, adica SCARA REALA a sursei.
 	# Blocurile din fotografie ies atunci la 20-40 cm, randurile din geometrie
 	# sunt la 0.9 m: doua scari de zidarie care se sprijina una pe alta, exact

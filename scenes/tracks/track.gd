@@ -450,11 +450,28 @@ static func themes() -> Dictionary:
 			"kerbs": false,
 			"cliffs": false,
 			"decor": "none",
-			"props": "desert",
+			# Numele CORECT al kitului (assets/models/serengeti/, PR #376), ca
+			# la Cappadocia: cu `decor: "none"` cheia nu ajunge in TrackDecor
+			# (build() se opreste inainte s-o citeasca), deci nu exista un set
+			# "serengeti" de inregistrat acolo — decorul se pune de mana, pe
+			# POI, sub DecorManual. Dar cheia NU e doar o eticheta: cat era
+			# "desert", `_build_fences` punea gardul de ranch texan pe toata
+			# pista (masurat cu probe_decor: 69 de bucati de `wooden_fence`).
+			"props": "serengeti",
 			"hazard_model": "res://assets/models/rocks/boulder_roller.glb",
-			"hazard_class": "rock",
-			"rockfall_class": "rock",
+			# Bolovanii rostogoliti de pe serpentine (POI F) sunt GRANIT, ca
+			# kopje-urile (clasa din palette.gd) — nu gresia de canion.
+			"hazard_class": "granite",
+			"rockfall_class": "granite",
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			# DRUM DE LATERIT ROSU (brief §4: TILE_TERRACOTTA pe banda, nu
+			# asfalt si nu nisipul auriu implicit #CCA86E). Pista declara
+			# `custom_road_surface = "dirt"`; cheia asta ii da culoarea, ca pe
+			# Cappadocia. Sub slotul 23 (#C4784F) fiindca `road_material`
+			# imparte la SAND_MACRO_MEAN (0.85) si soarele cald mai ridica o
+			# data rosul; aici saturatia E intentia (brief §9: drumul rosu e
+			# unul din cele trei accente), deci se tine, nu se spala.
+			"dirt_road_tint": Color.html("B06A45"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,

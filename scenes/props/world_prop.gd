@@ -157,6 +157,40 @@ const PROP_COLLISION := {
 	# 15 m e o coloana de 2,5 m latime care te opreste in aer.
 	"poplar_a": "trunk", "poplar_b": "trunk",
 	# Cosul balonului e mic si solid; ferma e o casa: hull implicit, corect.
+	# --- Serengeti (kitul din assets/models/serengeti/, PR #376) -----------
+	# Prin ele se TRECE: spartura Lerai are 12 m liber intre cele doua fete
+	# (hull-ul ar fi un bloc plin peste drum), iar kopje-ul-rampa e chiar
+	# rampa pe care se urca (8 x 6 x 2,8 m, 19°) — pe un hull convex masina
+	# s-ar fi urcat pe un capac plan peste bolovanii de langa rampa.
+	# Saltul il face un HazardMarker kind=FLYOFF pus pe buza (POI C), ca
+	# `KickerulDinGura` pe Cappadocia; mesh-ul nu arunca nimic singur.
+	"crater_gap": "mesh",
+	"kopje_kicker": "mesh",
+	# Copacii: cilindru pe trunchi. Coroana acaciei-umbrela e lata cat
+	# inaltimea (8,9 x 7 m), deci hull-ul ei ar fi un cort care te opreste la
+	# 4 m de trunchi; baobabul de 22 m ar fi o coloana de 13 m latime.
+	"acacia_umbrella_a": "trunk", "acacia_umbrella_b": "trunk",
+	"acacia_umbrella_c": "trunk", "fever_tree": "trunk", "fig_tree": "trunk",
+	"baobab": "trunk", "dead_tree": "trunk", "euphorbia": "trunk",
+	# Fantome: flamingii stau pe lac (sub banda), hoitul cu vulturi e o
+	# lespede de 1 m in iarba, focul e 80 cm, panza balonului aterizat ZACE
+	# pe sol (16,6 x 9 m, 1,8 m) exact ca `balloon_landed` de mai sus, iar
+	# Lengai (300 m) si peretele opus al craterului (210 m) sunt orizont,
+	# la 200-300 m de banda: un hull pe ele ar fi un corp cat o pista.
+	"flamingo": "none", "flamingo_wings": "none",
+	"carcass_vultures": "none", "campfire": "none",
+	"safari_balloon_landed": "none",
+	"lengai": "none", "crater_far_wall": "none",
+	# Leul de pe kopje: sta pe platoul de la 13 m, nimeni nu ajunge la el.
+	"lion_kopje": "none",
+	# Coarnele Ankole se parenteaza pe capul vacii (PathMover/SlidingHazard),
+	# deci n-au corp propriu — si oricum `_collect_models` sare peste ce e
+	# sub un corp fizic.
+	"ankole_horns": "none",
+	# Hull implicit, corect, pentru restul: kopje_camp, kopje_boulder_a/b/c,
+	# termite_mound_a/b, maasai_boma, safari_tent, land_rover, crocodile,
+	# hippo_back (ca decor static pe mal), elephant (ca decor static),
+	# wildebeest, zebra (figuranti statici in afara turmei).
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -208,6 +242,18 @@ const SPLIT_MODELS := {
 	# pistei, inclusiv cele doua din sat. Exact capcana `House_` de mai sus,
 	# a doua oara: o mapare pe model e globala pe pista.
 	"church_arch": ["F1_Gura", "F2_Sala1", "F3_Gat", "F4_Sala2", "F5_Ocol"],
+	# Serengeti: kopje-ul de start si spartura Lerai au IARBA pe platou
+	# (slotul 13, DRY_VEGETATION — masurat pe .glb cu tools/_tmp_probe_serkit:
+	# kopje_camp pe [3, 4, 13, 29], crater_gap pe [3, 4, 13, 29]). Granitul
+	# (clasa triplanara) ar fi sters-o; ruptura o lasa pe atlas, ca la case.
+	# Bolovanii si kopje-ul-rampa sunt pe [3, 4, 29] curat: nu se rup.
+	"kopje_camp": true,
+	"crater_gap": true,
+	# Orizontul: Lengai are varful alb (22) pe [2, 22, 29], peretele opus are
+	# padurea de pe creasta (12, 21) pe [3, 12, 21]. Aceeasi ruptura, ca
+	# granitul sa nu stearga exact benzile care le fac lizibile de la 200 m.
+	"lengai": true,
+	"crater_far_wall": true,
 }
 
 const ACCENT_SPLIT := {
@@ -236,6 +282,14 @@ const ACCENT_SPLIT := {
 	# subtiri pe o arcada de 255 m². De aia nu se putea pune clasa pe toata
 	# piesa: ar fi imbracat 89% piatra intr-o textura de pictura.
 	"Church_Arch": [Palette.SAND_SHADOW, Palette.ROCK_DARK],
+	# Serengeti: lista e ce ramane in CORP (sloturile de granit, 3/4/29), ca
+	# la `House_A` unde ramane varul; tot restul — iarba de pe platou (13) —
+	# trece in `_Accente` si ramane pe atlas. Corpul ia granitul din
+	# CLASSES_BY_MODEL.
+	"Kopje_Camp": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	"Crater_Gap": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	"Lengai": [Palette.SAND_SHADOW, Palette.MARBLE_GREY],
+	"Crater_Far_Wall": [Palette.ROCK_LIGHT],
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -533,6 +587,51 @@ const CLASSES_BY_MODEL := {
 	"hongya_dong": {
 		"Hongya": Palette.GLOW_PREFIX + "30|2.0",
 	},
+
+	# --- Serengeti: GRANITUL kopje-urilor si al spartturii -------------------
+	#
+	# Clasa `granite` (palette.gd) refoloseste dala `olkhon_marble` — o faleza
+	# naturala de 12,7 m, la scara kopje-ului de 14 m — cu o tenta usor
+	# racita. Nu `alpine_granite` (zid de piatra de 2 m: pe stanca naturala a
+	# iesit cetate de doua ori, memoria `clase-pe-piese-de-kit`) si nu `rock`
+	# (gresie calda de canion, medie (141,97,58), pe cand granitul de aici sta
+	# pe MARBLE_GREY/ROCK_LIGHT). Masurat: dala olkhon (178,165,150) e la
+	# 3-9% de tinta pe fiecare canal, deci ajunge o tenta sub 1 — fara
+	# CLASS_LIFT si fara PNG nou.
+	#
+	# Proiectia e in spatiul LUMII (world triplanar), ca stratele sa curga
+	# continuu din bolovanul de 2 m in kopje-ul de langa el — aceeasi scara
+	# pe toate piesele, deliberat: bolovanul mic prinde o fractiune din dala,
+	# ceea ce pe o roca ROTUNJITA e corect (e un bulgare din acelasi corp).
+	# UV-urile kitului sunt colapsate pe centrele sloturilor (verify_glb),
+	# deci pe UV-uri orice textura ar fi citit un texel.
+	#
+	# kopje_camp si crater_gap au iarba pe platou (slot 13) si sunt RUPTE
+	# intai (SPLIT_MODELS/ACCENT_SPLIT): corpul de aici e doar granitul.
+	# lion_kopje NU intra: e leul (blana pe 0/27), nu stanca.
+	# UN material in plus la garda pentru toata clasa (Track14: 15 -> 16).
+	"kopje_camp": {"Kopje_Camp": Palette.TRI_PREFIX + "granite"},
+	"kopje_kicker": {"Kopje_Kicker": Palette.TRI_PREFIX + "granite"},
+	"kopje_boulder_a": {"Kopje_Boulder_A": Palette.TRI_PREFIX + "granite"},
+	"kopje_boulder_b": {"Kopje_Boulder_B": Palette.TRI_PREFIX + "granite"},
+	"kopje_boulder_c": {"Kopje_Boulder_C": Palette.TRI_PREFIX + "granite"},
+	"crater_gap": {"Crater_Gap": Palette.TRI_PREFIX + "granite"},
+	# Orizontul (Lengai, peretele opus) sta la 200-300 m, in ceata: acolo
+	# textura nu se mai citeste (mip-ul cel mai mic), dar clasa NU costa
+	# nimic in plus (acelasi material) si scoate piesele de pe atlasul plat
+	# — siluetele raman in familia de culoare a kopje-urilor din prim-plan.
+	"lengai": {"Lengai": Palette.TRI_PREFIX + "granite"},
+	"crater_far_wall": {"Crater_Far_Wall": Palette.TRI_PREFIX + "granite"},
+}
+
+## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
+## 200-300 m. Un caster de 300 m care intra in cascada de umbre ii prabuseste
+## precizia pentru prim-plan (memoria `caster-departat-fura-umbra`: hornurile
+## Cappadociei se auto-umbreau pe fata dinspre soare din cauza inelelor de
+## orizont). `_build_horizon` din track.gd face acelasi lucru pe siluetele
+## procedurale; aici e varianta pentru orizontul asezat de mana.
+const NO_SHADOW_MODELS := {
+	"lengai": true, "crater_far_wall": true,
 }
 
 
@@ -800,8 +899,24 @@ func _ready() -> void:
 	_fade_tuff_detail()
 	_apply_tint()
 	_apply_glow()
+	_apply_no_shadow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
+
+
+## Stinge umbra pe modelele din `NO_SHADOW_MODELS` (orizontul asezat de mana).
+## Ruleaza DUPA rupturi (`_split_shutters`), ca sa prinda si copiii `_Accente`.
+func _apply_no_shadow() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not NO_SHADOW_MODELS.has(stem):
+			continue
+		for node in Palette._walk(model):
+			if node is GeometryInstance3D:
+				(node as GeometryInstance3D).cast_shadow = \
+					GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## Muta vertecsii unui model de pe un slot de atlas pe altul (vezi

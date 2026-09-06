@@ -402,6 +402,68 @@ static func themes() -> Dictionary:
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
 			"water": false,
 		},
+		"serengeti": {
+			# SAVANA SUB CER DE FURTUNA (docs/track_briefs/serengeti.md §4).
+			# Prima trecere: doar lumina, cerul, solul si apa; kitul de
+			# savana si clasele de textura vin cu POI-urile. `props` cade pe
+			# kitul de desert (acacii/kopje-uri nu exista inca), `decor` e
+			# stins ca la Cappadocia — decorul se pune de mana, pe POI.
+			#
+			# Iarba aurie: DRY_VEGETATION (#AF9F4E) e ocru-oliv, nu nisip —
+			# exact registrul „auriu de iarba uscata" din brief, si diferit
+			# de SAND_MID-ul Dunelor. Verdele de altitudine (buza, crater)
+			# vine mai tarziu, ca banda de teren peste o cota (rock_band_tint
+			# ca la Cappadocia), nu ca alt slot.
+			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
+			# Cerul de furtuna: violet-gri inchis sus, o banda calda jos
+			# (soarele sub nori). E cel mai ieftin element de identitate de
+			# pe pista: cu +5 grade peste orizontala, cerul e banda de sus a
+			# ecranului pe orice dreapta (brief §2.0).
+			"sky_top": Color.html("3A3548"),
+			"sky_horizon": Color.html("9C8A80"),
+			"sky_cover_alpha": 0.0,
+			# Ceata IN FAMILIA SOLULUI (memoria `ceata-in-familia-solului`):
+			# gri-cald desaturat, sub saturatia ierbii, ca departarea sa se
+			# spele, nu sa se coloreze.
+			"fog": Color(0.66, 0.63, 0.58),
+			"hill_color": Color(0.62, 0.56, 0.40),
+			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
+			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
+			# — cerul intunecat tenteaza la ambient mare, si atunci savana
+			# iese plata. Azimutul se masoara pe traseul real (brief §4) si
+			# se pune pe scena (custom_sun_rotation_deg), nu aici.
+			"sun_color": Color(1.0, 0.90, 0.72),
+			"sun_energy": 1.70,
+			"exposure": 1.10,
+			"sun_rotation_deg": Vector3(-35, 135, 0),
+			"ambient_color": Color.html("8E8598"),
+			"ambient_energy": 0.22,
+			"shadows": true,
+			"shadow_distance": 130.0,
+			"shadow_blur": 1.0,
+			"fog_depth": true,
+			"fog_begin": 95.0,
+			"fog_end": 300.0,
+			"horizon_model": "",
+			"horizon_class": "",
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "none",
+			"props": "desert",
+			"hazard_model": "res://assets/models/rocks/boulder_roller.glb",
+			"hazard_class": "rock",
+			"rockfall_class": "rock",
+			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
+			# fara mare deschisa in exteriorul buclei.
+			"water": true,
+			"seabed_drop": 0.0,
+			"lagoon_band_in": 10.0,
+			"lagoon_band_out": 6.0,
+			"lagoon_inner": 1.5,
+			"lagoon_rim": 8.0,
+		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
 			"sky_top": Color(0.22, 0.48, 0.9),

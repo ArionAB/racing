@@ -40,10 +40,11 @@ const TRACK_SCENES: Array[String] = [
 	# `indici-de-pista-intre-unelte`). `snapshot`/`probe_race` vor 6,
 	# `probe_decor`/`survey_terrain` vor 13.
 	"res://scenes/tracks/Track13.tscn",
+	"res://scenes/tracks/Track14.tscn", # Serengeti = INDEXUL 7
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
-	"Cappadocia",
+	"Cappadocia", "Serengeti",
 ]
 const CHAMP_ROUNDS: int = 3
 

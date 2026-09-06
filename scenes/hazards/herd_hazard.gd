@@ -33,7 +33,9 @@ signal animal_hit(car: Car, mass_ratio: float)
 
 enum State { RUN, TUMBLE }
 
-const CAR_GROUP: StringName = &"cars"
+## Masinile nu stau intr-un grup (verificat: niciun add_to_group in Car/Race),
+## deci turma le gaseste ca toate hazardele: printr-o Area3D peste culoar.
+const CATCH_MARGIN: float = 30.0
 ## Lungimea unui animal (de-a lungul curgerii) si latimea lui.
 const ANIMAL_LEN: float = 1.7
 const ANIMAL_WIDTH: float = 0.7
@@ -100,8 +102,9 @@ const HIT_HALF_Z: float = 2.8
 @export_range(0.0, 1.0, 0.05) var zebra_ratio: float = 0.2
 ## Sol plat implicit; pe pista se da un Callable(Vector3) -> float.
 var ground_y_at: Callable = Callable()
-## Masinile urmarite; gol = grupul "cars" din arbore.
+## Masinile urmarite (sondele le dau explicit); gol = cele din zona de prindere.
 var cars: Array[Car] = []
+var _catch: Area3D
 
 var _time: float = 0.0
 var _count: int = 0
@@ -142,7 +145,21 @@ func _ready() -> void:
 	_build_flow()
 	_build_visual()
 	_build_pool()
+	_build_catch()
 	_time = phase * period()
+
+
+## Zona din care se citesc masinile: culoarul plus o margine, pe toata bucla.
+func _build_catch() -> void:
+	_catch = Area3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(_loop_len + CATCH_MARGIN, 12.0, corridor_m + CATCH_MARGIN * 2.0)
+	shape.shape = box
+	shape.position = Vector3.UP * 4.0
+	_catch.add_child(shape)
+	_catch.transform = Transform3D(Basis.looking_at(-flow_dir, Vector3.UP), Vector3.ZERO)
+	add_child(_catch)
 
 
 func period() -> float:
@@ -435,7 +452,13 @@ func _place_visuals() -> void:
 func _cars() -> Array:
 	if not cars.is_empty():
 		return cars
-	return get_tree().get_nodes_in_group(CAR_GROUP)
+	if _catch == null:
+		return []
+	var found: Array = []
+	for body in _catch.get_overlapping_bodies():
+		if body is Car:
+			found.append(body)
+	return found
 
 
 ## Corpurile merg la animalele care ALEARGA cel mai aproape de vreo masina.

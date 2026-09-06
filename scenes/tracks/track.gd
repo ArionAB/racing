@@ -430,10 +430,17 @@ static func themes() -> Dictionary:
 			# violet-gri, nu crem), iar ceata calda ramane pe teren si lasa
 			# doar banda calda de la orizont (brief §4).
 			"fog_sky_affect": 0.08,
-			# Ceata IN FAMILIA SOLULUI (memoria `ceata-in-familia-solului`):
-			# gri-cald desaturat, sub saturatia ierbii, ca departarea sa se
-			# spele, nu sa se coloreze.
-			"fog": Color(0.66, 0.63, 0.58),
+			# Ceata IN FAMILIA CERULUI, nu a solului. Masurat pe --gamecam la
+			# 0.08 (runda 2, fog gri-cald 0.66/0.63/0.58): cerul propriu-zis e
+			# doar banda de 3-6% de sus (relieful craterului urca pana la
+			# 0.06 din cadru), iar tot ce e sub ea, pana la iarba, e teren
+			# inghitit de ceata la 250-300 m -> (222,205,156), crem luminos =
+			# zi insorita. Ce vede jucatorul ca „cer" e de fapt ceata, deci
+			# ceata trebuie sa fie violet-gri ca cerul de furtuna. Saturatia
+			# ramane SUB cea a ierbii (memoria `ceata-in-familia-solului` e
+			# despre saturatie: ceata nu are voie sa ADAUGE saturatie cu
+			# distanta), doar nuanta trece in familia cerului.
+			"fog": Color(0.46, 0.43, 0.50),
 			"hill_color": Color(0.62, 0.56, 0.40),
 			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
 			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
@@ -450,8 +457,9 @@ static func themes() -> Dictionary:
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
 			"fog_depth": true,
-			"fog_begin": 95.0,
-			"fog_end": 300.0,
+			"fog_begin": 60.0,
+			"fog_end": 260.0,
+			"fog_curve": 1.0,
 			"horizon_model": "",
 			"horizon_class": "",
 			"walls": false,
@@ -3628,7 +3636,12 @@ func _build_environment() -> void:
 		# alpin distanta mare e chiar subiectul; intr-un canion, ceata care
 		# taie la 250 m e ce ascunde marginea lumii.
 		env.fog_depth_end = float(theme_flag("fog_end", 250.0))
-		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
+		# Implicit se ingroasa spre final (1.4), nu liniar: aerul limpede
+		# pana departe, ceata doar la marginea lumii. O tema cu aer INCARCAT
+		# (furtuna pe savana) o cere liniara (1.0): la 60/260 m ceata la
+		# 180 m urca de la 46% la 60% si relieful de la orizont se spala
+		# in culoarea ceatii, nu ramane sol luminat de soare.
+		env.fog_depth_curve = float(theme_flag("fog_curve", 1.4))
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)
 	# Cat din cer acopera ceata (1.0 = tot, implicitul Godot si al temelor

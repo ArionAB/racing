@@ -1,0 +1,666 @@
+<title>Serengeti Recon</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --laterite:#B4462B; --laterite-deep:#8C3620; --grass:#D9C25C; --grass-deep:#B9A23E; --storm:#4A4460; --flamingo:#E86C95;
+  --soda:#BFE1DA; --wall:#9A7A55; --hazard:#E0453A;
+  --ground:#EFE7D0; --panel:#FBF7EA; --sunk:#E4DAC0;
+  --ink:#23201C; --ink-soft:#6A6152; --hair:#D4CAB0;
+  --grid:rgba(35,32,28,.09); --plain:#E6D89A; --plain-deep:#D6C67E; --crater:#D9C3A0; --crater-deep:#C4A77C; --forest:#A9B06E;
+  --accent-title:#B4462B; --glow:rgba(180,70,43,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --laterite:#E27A57; --laterite-deep:#B85A3A; --grass:#8F8240; --grass-deep:#6E6430; --storm:#6D6488; --flamingo:#F08AB0;
+    --soda:#3F6F6A; --wall:#6C5238; --hazard:#F06A5C;
+    --ground:#191622; --panel:#221E2C; --sunk:#14111B;
+    --ink:#ECE4D0; --ink-soft:#A79E8C; --hair:#3A3446;
+    --grid:rgba(226,122,87,.07); --plain:#3A3426; --plain-deep:#2F2A1E; --crater:#2E2822; --crater-deep:#241E19; --forest:#2F3A27;
+    --accent-title:#E27A57; --glow:rgba(226,122,87,.2);
+  }
+}
+:root[data-theme="dark"]{
+  --laterite:#E27A57; --laterite-deep:#B85A3A; --grass:#8F8240; --grass-deep:#6E6430; --storm:#6D6488; --flamingo:#F08AB0;
+  --soda:#3F6F6A; --wall:#6C5238; --hazard:#F06A5C;
+  --ground:#191622; --panel:#221E2C; --sunk:#14111B;
+  --ink:#ECE4D0; --ink-soft:#A79E8C; --hair:#3A3446;
+  --grid:rgba(226,122,87,.07); --plain:#3A3426; --plain-deep:#2F2A1E; --crater:#2E2822; --crater-deep:#241E19; --forest:#2F3A27;
+  --accent-title:#E27A57; --glow:rgba(226,122,87,.2);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif; font-size:15px; line-height:1.55}
+.mono{font-family:ui-monospace,"Cascadia Mono","Consolas",monospace}
+.wrap{max-width:1180px; margin:0 auto; padding:28px 22px 64px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 28px; margin-bottom:8px}
+h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif; font-size:clamp(34px,5vw,54px);
+  line-height:.98; margin:0; font-weight:700; letter-spacing:.01em; text-transform:uppercase; text-wrap:balance}
+h1 small{display:block; font-family:"Source Sans 3",sans-serif; font-size:.26em; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--accent-title); margin-bottom:8px}
+.facts{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+.fact{display:flex; flex-direction:column}
+.fact b{font-family:"Barlow Condensed",sans-serif; font-size:24px; font-variant-numeric:tabular-nums; font-weight:700; line-height:1}
+.fact span{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-soft); margin-top:3px}
+.fact.ok b{color:#4F7A2A}
+:root[data-theme="dark"] .fact.ok b{color:#9CC66A}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .fact.ok b{color:#9CC66A} }
+.lede{color:var(--ink-soft); max-width:72ch; margin:14px 0 26px}
+.lede b{color:var(--ink)}
+.layout{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr); gap:22px; align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel); border:1px solid var(--hair); border-radius:3px}
+.card h2{margin:0; padding:11px 15px; font-size:11px; font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-soft); border-bottom:1px solid var(--hair);
+  display:flex; justify-content:space-between; align-items:center; gap:10px}
+.plan{padding:6px}
+canvas{display:block; width:100%; height:auto; border-radius:2px; cursor:crosshair}
+.legend{display:flex; flex-wrap:wrap; gap:5px 16px; padding:10px 15px; border-top:1px solid var(--hair);
+  font-size:11.5px; color:var(--ink-soft)}
+.legend i{display:inline-block; width:16px; height:3px; vertical-align:middle; margin-right:6px; border-radius:2px}
+.detail{padding:15px; min-height:150px}
+.detail .tag{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px; background:var(--laterite); color:#FBF3E6; margin-bottom:9px}
+.detail h3{margin:0 0 3px; font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700; letter-spacing:.01em}
+.detail .coord{font-size:12px; color:var(--ink-soft); margin-bottom:11px}
+.detail p{margin:0 0 13px; font-size:14px}
+.detail .assets{font-size:12.5px; line-height:1.7; color:var(--ink-soft); border-top:1px dashed var(--hair); padding-top:11px}
+.detail .assets b{display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); margin-bottom:5px}
+.hint{color:var(--ink-soft); font-size:13px; font-style:italic}
+.clocks{padding:13px 15px; display:flex; flex-direction:column; gap:10px}
+.clock{display:grid; grid-template-columns:96px 1fr 44px; gap:10px; align-items:center; font-size:13px}
+.clock .nm{font-weight:600}
+.clock .bar{height:8px; border-radius:2px; background:var(--sunk); position:relative; overflow:hidden}
+.clock .bar i{position:absolute; top:0; bottom:0; left:0; background:var(--grass-deep); border-radius:2px}
+.clock .bar i.on{background:var(--laterite)}
+.clock .bar em{position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--storm)}
+.clock .s{font-family:"Barlow Condensed",sans-serif; font-size:16px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums}
+.clocks .note{padding:8px 0 0; border-top:1px dashed var(--hair); font-size:12.5px}
+table{width:100%; border-collapse:collapse; font-size:13px}
+.scroll{overflow-x:auto}
+th,td{text-align:left; padding:8px 15px; border-bottom:1px solid var(--hair); vertical-align:top}
+th{font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-soft); font-weight:700}
+td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.grp td{font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-title);
+  background:var(--sunk); padding-top:9px; padding-bottom:9px}
+tr.row:hover{background:var(--sunk); cursor:pointer}
+tr.row.on{background:var(--glow)}
+.pill{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:9px; white-space:nowrap}
+.pill.hero{background:var(--glow); color:var(--accent-title)}
+.pill.kit{background:rgba(106,97,82,.18); color:var(--ink-soft)}
+.pill.cls{background:rgba(110,138,60,.2); color:#4F6A2A}
+.pill.anim{background:rgba(232,108,149,.18); color:#B03A66}
+:root[data-theme="dark"] .pill.cls{color:#A9C46E}
+:root[data-theme="dark"] .pill.anim{color:#F08AB0}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .pill.cls{color:#A9C46E} :root:not([data-theme="light"]) .pill.anim{color:#F08AB0} }
+.gaps{margin-top:22px}
+.note{padding:13px 15px; font-size:13.5px; color:var(--ink-soft); border-top:1px solid var(--hair)}
+.note b{color:var(--ink)}
+.prompt-body{padding:15px}
+.prompt-body pre{margin:0; max-height:440px; overflow:auto; white-space:pre-wrap;
+  font-family:ui-monospace,"Cascadia Mono","Consolas",monospace; font-size:12px; line-height:1.6; color:var(--ink-soft);
+  background:var(--sunk); border:1px solid var(--hair); border-radius:3px; padding:14px}
+.copy{font:inherit; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  border:1px solid var(--hair); background:var(--panel); color:var(--ink); padding:5px 12px; border-radius:2px; cursor:pointer}
+.copy:hover,.copy:focus-visible{border-color:var(--laterite); outline:none; box-shadow:0 0 0 2px var(--glow)}
+label.chk{font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); cursor:pointer}
+label.chk input{vertical-align:middle; margin-right:4px}
+.rules{padding:13px 15px; font-size:13.5px}
+.rules p{margin:0 0 9px}
+.rules b{color:var(--accent-title)}
+.guards{padding:6px 15px 10px}
+.guard{display:grid; grid-template-columns:120px 1fr; gap:10px; padding:7px 0; border-bottom:1px dashed var(--hair); font-size:13px}
+.guard:last-child{border-bottom:0}
+.guard .k{font-weight:700; font-family:"Barlow Condensed",sans-serif; font-size:15px; letter-spacing:.02em}
+.guard .v{color:var(--ink-soft)}
+.guard .v b{color:var(--ink); font-variant-numeric:tabular-nums}
+</style>
+
+<div class="wrap">
+<header>
+  <h1><small>Track14 &middot; tem&#259; serengeti &middot; traseu m&#259;surat v0</small>Serengeti Recon</h1>
+  <div class="facts">
+    <div class="fact"><b id="f-len">&mdash;</b><span>lungime m&#259;surat&#259;</span></div>
+    <div class="fact"><b>2 100 m</b><span>&#539;int&#259; brief</span></div>
+    <div class="fact"><b>0 &rarr; 45 &rarr; 2 m</b><span>c&#226;mpie &middot; buz&#259; &middot; fund</span></div>
+    <div class="fact"><b id="f-inst">&mdash;</b><span>piese propuse</span></div>
+    <div class="fact ok"><b>4 / 4</b><span>g&#259;rzi verzi</span></div>
+  </div>
+</header>
+
+<p class="lede"><b>O c&#226;mpie aurie, vie, sub un cer de furtun&#259;.</b> Camera vede ~5&deg; &#238;n sus &#537;i ~63&deg; &#238;n jos,
+deci craterul <b>nu se prive&#537;te, se urc&#259; &#537;i se coboar&#259;</b>: pornim din campul de safari de sub kopje, prindem vitez&#259; pe c&#226;mpie unde
+<b>r&#226;ul de gnu taie drumul &#238;n pulsuri</b>, trecem vadul Mara cu hipopotamii care se ridic&#259; sub band&#259;, urc&#259;m prin p&#259;durea de cea&#539;&#259; pe buza craterului
+Ngorongoro &mdash; lacul roz de flamingi 43 m mai jos, pe dreapta &mdash; cobor&#226;m &#238;n serpentine printre elefan&#539;i &#537;i v&#226;rtejul de praf, &#537;i ie&#537;im prin sp&#259;rtura Lerai.
+Sens <b>antiorar, craterul pe dreapta</b> (&#238;n interiorul buclei &mdash; prima pist&#259; cu golul &#238;n&#259;untru).
+Spre deosebire de h&#259;r&#539;ile Recon de p&#226;n&#259; acum, <b>traseul de aici e cel din <code>Track14.tscn</code></b>, trecut prin ProbeLayout &#537;i ProbeRace;
+relieful din jurul lui (bolul craterului, dealurile de sud, p&#259;durea) e &#238;nc&#259; schematic &mdash; se construie&#537;te pe POI. Dreptunghiurile arat&#259; c&#226;t loc cere fiecare lot de assets, la scar&#259;.</p>
+
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Plan &middot; vedere de sus &middot; x est, y nord <span class="mono" id="cursor">&mdash;</span></h2>
+      <div class="plan"><canvas id="plan" width="1000" height="820"></canvas></div>
+      <div class="legend">
+        <span><i style="background:#D9C25C"></i>savan&#259; (iarb&#259; aurie)</span>
+        <span><i style="background:#A9B06E"></i>p&#259;durea de cea&#539;&#259; / buz&#259;</span>
+        <span><i style="background:#C4A77C"></i>bolul craterului (izolinii schematice)</span>
+        <span><i style="background:#BFE1DA"></i>ap&#259;: lacul Magadi, vadul Mara</span>
+        <span><i style="background:#E86C95"></i>flamingi</span>
+        <span><i style="background:#B4462B"></i>drum de laterit</span>
+        <span><i style="background:#4A4460"></i>frontul de furtun&#259;</span>
+        <span><i style="background:#E0453A"></i>hazard</span>
+        <span style="margin-left:auto"><label class="chk"><input type="checkbox" id="lots" checked>loturi</label></span>
+      </div>
+    </div>
+    <div class="card gaps">
+      <h2>Profil de eleva&#539;ie &middot; un tur &middot; din curba real&#259;</h2>
+      <div class="plan"><canvas id="elev" width="1000" height="200"></canvas></div>
+      <div class="note">Urcare &#238;ntr-o treapt&#259; (D: 0 &rarr; 45 m pe ~400 m, <b>11,3 % m&#259;surat</b>), cobor&#226;re &#238;n serpentine (F: 45 &rarr; 3 m, <b>9,4 %</b>), ie&#537;ire prin sp&#259;rtur&#259; aproape plat&#259;.
+        Acele de p&#259;r sunt semicercuri explicite (3 puncte, r 15 m): un v&#226;rf cu fillet la 165&deg; consuma tot bra&#539;ul &#537;i d&#259;dea 16,8 % medie / 27,9 % v&#226;rf.</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:22px">
+    <div class="card">
+      <h2>POI selectat</h2>
+      <div class="detail" id="detail"><p class="hint">Alege un POI pe hart&#259; sau un r&#226;nd din tabel.</p></div>
+    </div>
+    <div class="card">
+      <h2>G&#259;rzile, &#238;nainte de orice decor</h2>
+      <div class="guards">
+        <div class="guard"><span class="k">ProbeLayout</span><span class="v">raz&#259; minim&#259; <b>7,5 m</b> (half_width 6,5) &middot; pant&#259; maxim&#259; <b>13,6 %</b></span></div>
+        <div class="guard"><span class="k">ProbeRace</span><span class="v">150 s, 6 ma&#537;ini, hazarduri active: <b>0 repuneri</b>, 0 % offroad, tur &asymp; <b>70 s</b></span></div>
+        <div class="guard"><span class="k">probe_decor</span><span class="v"><b>15</b> materiale din 38 &middot; 92k triunghiuri</span></div>
+        <div class="guard"><span class="k">ProbeBuried</span><span class="v"><b>0</b> puncte de carosabil &#238;ngropate</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Ceasurile de hazard <span class="mono">tur ~70 s</span></h2>
+      <div class="clocks" id="clocks"></div>
+    </div>
+    <div class="card">
+      <h2>Reguli care au decis harta</h2>
+      <div class="rules">
+        <p><b>Frustumul, aplicat.</b> Un perete de crater de 45 m v&#259;zut din c&#226;mpie e vizibil p&#226;n&#259; la ~20 m &mdash; un zid. De pe buz&#259; camera vede 63&deg; &#238;n jos: lacul &#537;i p&#259;durea Lerai umplu cadrul. Vulturii stau pe hoit, nu pe cer.</p>
+        <p><b>Orientarea e derivat&#259;.</b> &#206;n Godot <i>dreapta = f &times; up</i>; pe un cerc parcurs cu unghiul cresc&#259;tor, dreapta arat&#259; spre centru. Deci bucla se parcurge antiorar pe hart&#259; &#537;i craterul r&#259;m&#226;ne &#238;n interior.</p>
+        <p><b>Turma nu e boids.</b> C&#226;mp de curgere pe puls (8 s turm&#259; / 7 s liber, benzi decalate cu 0,6 s), MultiMesh animat &#238;n shader, bazin de 16 corpuri care nu apar niciodat&#259; sub 3,2 m de o ma&#537;in&#259; &mdash; un corp cinematic ap&#259;rut &#238;n ma&#537;in&#259; a azv&#226;rlit-o cu 282 m/s.</p>
+        <p><b>Sabotaj de control, nu cuplu.</b> Yaw-ul ma&#537;inii e rescris la fiecare tick din direc&#539;ie; v&#226;rtejul intr&#259; prin <code>Car.apply_yaw_kick</code>: 149&deg; m&#259;surate la 1 s din 180&deg; comandate.</p>
+        <p><b>F&#259;r&#259; slot nou.</b> <code>NEON_PINK</code> 31 face flamingii, <code>DRY_VEGETATION</code> 13 iarba, drum de laterit f&#259;r&#259; asfalt.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card gaps">
+  <h2>Lista de assets <span class="mono" id="a-count">&mdash;</span></h2>
+  <div class="scroll"><table id="asset-tbl"></table></div>
+  <div class="note"><b>Materiale:</b> atlas + ~8 clase (savanna_grass, highland_grass, laterite_road, soda_crust, mud_bank, granite, zebra_stripes, decal hoofprints) + shader-ul turmei + ap&#259; + emisiv (foc/fulger, reuse lav&#259;) &rarr; &#539;int&#259; &le; 22.
+    <b>Gnu-ul e piesa care se multiplic&#259;</b> (200 pe ecran): sub 400 tri, LOD la 60 m. Un singur rig nou &#238;n cod (elefantul); gnu/zebr&#259; din pack-ul Quaternius sau vaca re-propor&#539;ionat&#259;.</div>
+</div>
+
+<div class="card gaps">
+  <h2>Prompt pentru inventarul de assets (ChatGPT) &middot; toate piesele &#238;ntr-o singur&#259; foaie, cu numele de fi&#537;ier scrise <button class="copy" id="copy-assets" type="button">Copiaz&#259; tot</button></h2>
+  <div class="prompt-body"><pre id="asset-prompts">Create a single tall REFERENCE SHEET of low-poly game assets for a toy-car racing track in the Serengeti and the Ngorongoro Crater (Tanzania, short rainy season), in the same style as the attached low-poly diorama: faceted flat-shaded meshes, no fine surface texture, chunky tabletop-miniature proportions, soft baked ambient occlusion, muted golden-and-olive colors (~45% saturation) with only three saturated accents (flamingo pink, Maasai red cloth / red dirt, toy cars). Neutral light grey background, one 10 m scale bar per row, every piece LABELED with its exact file name written under it. Rows, top to bottom:
+
+1. wildebeest.glb — HERO, the most important piece. A toy wildebeest 1.4 m at the shoulder: low head, dark grey-brown body, a pale beard, curved horns, thin legs. Show FOUR poses side by side: Gallop, Walk, Tumble (on its side), Idle. Origin at the ground, facing -Z (forward), legs below 0.55 m so a shader can swing them. Under 400 triangles.
+2. zebra.glb — same skeleton and pose set as the wildebeest, a short stocky zebra with black-and-white stripes (stripes are a texture, the mesh is plain).
+3. elephant.glb — a bull elephant 3.2 m at the shoulder with long ivory tusks and big ears, dusty grey; two poses: Walk and Trumpet (ears spread, trunk raised).
+4. hippo_back.glb — the back and head of a hippo as it surfaces: 4 × 2.5 m, no legs (it never leaves the water), grey-pink, small ears, an open pink mouth variant.
+5. lion_kopje.glb + kopje_camp.glb — a 14 m granite kopje (rounded boulder pile) with a flat top and a lion lying on it, tawny with a dark mane; the lion is a separate piece with its head on its own pivot.
+6. kopje_kicker.glb — a 25 m long granite kopje whose face toward the road is cut into an 8 m rock ramp; and crater_gap.glb — two 40 m long granite cliff faces 12 m apart, open to the sky, a road passing between them (show as a cutaway).
+7. maasai_boma.glb — four round mud huts with thatched roofs inside a ring of thorn fence, one Maasai figure in a red shuka cloth holding a spear; ankole_horns.glb — a pair of long Ankole cattle horns (1.2 m span) to fit on an existing cow model.
+8. SAVANNA KIT — one row, same scale: acacia_umbrella_a/b/c.glb (umbrella acacias 7, 8.5, 10 m tall, flat wide olive crowns, thin dark trunks), fever_tree.glb (a 10 m acacia with a pale yellow-green trunk), fig_tree.glb (a 14 m dense dark-green fig with hanging lichen), euphorbia.glb (a 4 m candelabra euphorbia), baobab.glb (a 22 m baobab silhouette, very simple, seen from 150 m), dead_tree.glb (a 6 m bare tree).
+9. GROUND KIT — one row: termite_mound_a/b.glb (red-brown mounds 1.5 and 3 m), kopje_boulder_a/b/c.glb (rounded granite boulders 2, 4, 6 m), carcass_vultures.glb (a carcass on the ground with three vultures standing on it — they do NOT fly), crocodile.glb (a 4 m crocodile lying on a bank).
+10. CAMP KIT — one row: safari_tent.glb (a canvas tent with a fly sheet), land_rover.glb (a green safari Land Rover with a raised roof, toy proportions), campfire.glb (a ring of stones with a small flame), safari_balloon_landed.glb (a landed hot-air balloon with its envelope spread on the ground and its basket beside it).
+11. BACKGROUND — one row, own scale bar: lengai.glb (a very simple white-grey volcanic cone, Ol Doinyo Lengai), crater_far_wall.glb (a long curved crater wall segment with forest as bands of color, seen from 200 m).
+12. chevron_post.glb — reuse: 1.2 m post with a red-and-white chevron plate (include for completeness).
+
+Colors: golden grass #D9C25C, red laterite road #B4462B, acacia olive #5B7C34, fever-tree yellow-green #C9C26A, fig dark green #3F7A3C, granite #B8B4AC with #6A6560 shadows, soda lake #BFE1DA with white crust #F1EEE6, flamingo pink #E86C95, wildebeest #3A2F28, zebra #F1EEE6 / #1E1B18, elephant #8A8580, hippo #5A5556, Maasai red #C8322B, mud #915D27. Storm sky is NOT part of the sheet.
+</pre></div>
+  <div class="note">Ata&#537;eaz&#259; imaginea dioramei generate ca referin&#539;&#259; de stil. <b>Numele de fi&#537;ier de pe foaie sunt contractul</b> cu <code>docs/asset_briefs/</code> &#537;i cu <code>tools/blender/build_*.py</code> (categoria <code>assets/models/serengeti/</code>). Conven&#539;iile pentru animale: origine la sol, &minus;Z &#238;nainte, picioarele sub y = 0,55 m (shader-ul turmei le leag&#259;n&#259;).</div>
+</div>
+<div class="card gaps">
+  <h2>Prompt pentru dioram&#259; (ChatGPT) <button class="copy" id="copy-btn" type="button">Copiaz&#259; promptul</button></h2>
+  <div class="prompt-body"><pre id="prompt-text">Create a stylized low-poly tabletop diorama of a toy-car racing track
+in the Serengeti and the Ngorongoro Crater, Tanzania, during the short
+rainy season — golden savanna under a dark storm sky, the Great
+Migration, and a huge crater with a pink flamingo lake at the bottom. Use
+the attached top-down plan as the layout: same loop shape, same positions
+of the landmarks.
+
+STYLE (strict): faceted, flat-shaded low-poly meshes like a Blender
+viewport render — no fine surface texture, no painterly brushwork, no
+photorealism. Chunky toy proportions: cars are stubby and ~1.3× wider
+than real cars; animals are simplified into big smooth blocks with a few
+facets. Soft baked ambient occlusion under every tree and animal. Muted
+golden-and-olive environment colors (~45% saturation) with only three
+saturated accents: the pink flamingos on the lake, the red Maasai
+cloth and the red dirt road, and the toy cars. Lighting: a warm sun about
+35° above the horizon coming from the left-back, lighting the golden grass
+brightly and casting a crisp umbrella-shaped shadow under each acacia;
+the sky is a dark violet-grey storm wall with a thin warm band right at
+the horizon (sun under the clouds) and one small lightning bolt far away —
+no rain on the diorama itself. Thin grey haze in the far distance. Show the
+diorama on a thin dark rounded-rectangle table base, from a raised 3/4
+view.
+
+THE LAND [!]: the diorama is a flat golden savanna on the left/top
+that rises through a dark misty forest to a crater rim ~45 m high, and
+the crater bowl occupies the right/bottom — a huge shallow bowl with a
+milky white-turquoise soda lake in the middle, a pink crust of thousands of
+flamingos along its shore, a yellow-green fever-tree forest on one side,
+and a few grey elephants as tiny blocks on the white floor. The savanna is
+dotted with umbrella acacias, red termite mounds and grey granite kopjes
+(rounded boulder piles). A river with muddy banks cuts across the savanna.
+
+THE ROUTE — a single closed loop of about 2 km, counter-clockwise, the
+crater always on the right [!]:
+1. Start/finish at a safari camp under a granite kopje (savanna, top):
+   a red dirt road, canvas tents, two green safari Land Rovers, a campfire,
+   and a lion lying on top of the kopje looking at the cars.
+2. The migration crossing [!] — the biggest feature on the plain: the
+   long straight of red dirt road is cut by a river of wildebeest and
+   zebras 24 m wide, galloping across the road perpendicular to it in a
+   dense dark stream with a gap in it; the rest of the herd — hundreds of
+   tiny dark blocks — stretches across the golden plain to the horizon.
+   One car is being pushed sideways in the stream; another is jumping
+   through the gap.
+3. The Mara river ford: the road drops down a muddy bank into shallow
+   brown water and up the other side; three hippo backs are surfacing
+   right in the road, one lifting a car on its back; crocodiles lie on
+   the bank. Just before the ford, a granite kopje with a ramp-like face
+   sits at the bend, and a car is flying off it over the river.
+4. The misty highland forest: the road climbs in tight S-bends through
+   dark green fig trees hung with lichen, low grey-green mist between the
+   trunks, ravines on the left; the grass turns green.
+5. The crater rim [!] — the second biggest feature: the road runs
+   along the knife-edge rim with no railing on the right; the whole
+   crater bowl is below — the pink-edged white lake, the fever-tree
+   forest, tiny elephants. On the left, far below, the golden plain with
+   the herd. On the rim a Maasai boma (round mud huts inside a thorn
+   fence, a Maasai figure in a red cloth with a spear) and a line of
+   long-horned Ankole cattle crossing the road.
+6. The switchbacks down the crater wall: four hairpins cut into grey
+   granite, the lake getting closer at every turn, a few rolling boulders
+   on the road.
+7. The crater floor: a fast flat road along the white soda crust at
+   the lake shore; three big grey elephants with long tusks walking across
+   the road; a dust devil — a tall thin spinning column of sand-colored
+   dust — wandering on the white flat; a landed safari balloon with its
+   envelope spread on the ground; a wave of flamingos taking off from the
+   shore.
+8. The gap in the crater wall: the road exits the crater through a
+   narrow cut between two granite faces, over a small bump, back onto the
+   red dirt road and the golden plain to the finish.
+
+CARS: 6–8 chunky toy cars in saturated colors (red, blue, yellow, a
+white police car, a big red fire truck, a long yellow bus), spread around
+the loop, one drifting with dust at the crater floor. Nothing else on the
+diorama is saturated except the flamingos and the red cloth/road.</pre></div>
+  <div class="note">Ata&#537;eaz&#259; la prompt o captur&#259; a planului de mai sus (click dreapta pe hart&#259; &rarr; salveaz&#259; imaginea). Dac&#259; generatorul pune craterul &#238;n fa&#539;a ma&#537;inii ca un munte sau turma la orizont, reafirm&#259; &bdquo;the crater is BELOW the rim road&rdquo; &#537;i &bdquo;the herd crosses THE ROAD&rdquo;.</div>
+</div>
+</div>
+
+<script>
+"use strict";
+// ---- date (metri, harta: x est, y nord) — traseul REAL din Track14.tscn -------
+const DATA = {"route": [[-230.0, -165.0, 0.0], [-218.0, -165.0, 0.0], [-206.0, -165.0, 0.0], [-194.0, -165.0, 0.0], [-182.0, -165.0, 0.0], [-170.0, -165.0, 0.0], [-158.0, -165.0, 0.0], [-146.0, -165.0, 0.0], [-134.0, -165.0, 0.0], [-122.0, -165.0, 0.0], [-110.0, -165.0, 0.0], [-98.0, -165.0, 0.0], [-86.0, -165.0, 0.0], [-74.0, -165.0, 0.0], [-62.0, -165.0, 0.0], [-50.0, -165.0, 0.0], [-38.0, -165.0, 0.0], [-26.0, -165.0, 0.0], [-14.0, -165.0, 0.0], [-2.0, -165.0, 0.0], [10.0, -165.0, 0.0], [22.0, -165.0, 0.0], [34.0, -165.0, -0.3], [46.0, -165.0, -0.6], [58.0, -165.0, -1.0], [70.0, -165.0, -1.4], [82.0, -164.3, -1.3], [93.9, -163.1, -0.9], [105.8, -161.9, -0.6], [117.8, -160.7, -0.2], [129.1, -157.1, 0.3], [139.2, -150.6, 0.9], [149.1, -143.9, 1.6], [159.1, -137.2, 2.3], [169.0, -130.5, 2.9], [177.0, -121.6, 4.4], [184.7, -112.3, 6.0], [192.4, -103.1, 7.5], [200.1, -93.9, 9.0], [205.3, -83.3, 10.6], [204.7, -71.6, 12.1], [198.0, -61.7, 13.7], [188.9, -54.0, 15.2], [179.7, -46.3, 16.7], [172.0, -37.2, 18.2], [169.9, -25.6, 19.8], [174.1, -14.6, 21.2], [182.5, -6.1, 22.7], [191.5, 1.9, 24.2], [200.0, 10.3, 25.7], [204.7, 21.1, 27.2], [203.1, 32.8, 28.6], [196.0, 42.4, 30.0], [188.1, 51.5, 31.4], [180.2, 60.5, 32.7], [172.2, 69.5, 34.1], [166.6, 80.0, 35.4], [162.0, 91.1, 36.8], [157.3, 102.1, 38.1], [151.6, 112.6, 39.4], [143.6, 121.6, 40.7], [135.6, 130.5, 42.1], [127.5, 139.4, 43.4], [119.3, 148.1, 44.8], [109.0, 154.1, 45.0], [98.1, 159.1, 45.0], [87.2, 164.1, 45.0], [76.2, 168.8, 45.0], [64.4, 170.0, 45.0], [52.7, 167.7, 45.0], [41.0, 164.8, 45.0], [29.1, 164.2, 45.0], [17.9, 168.4, 45.0], [7.4, 174.1, 45.0], [-3.2, 179.7, 45.0], [-14.5, 183.4, 45.0], [-26.4, 182.1, 45.0], [-37.7, 178.3, 45.0], [-49.1, 174.4, 45.0], [-60.4, 170.5, 45.0], [-71.6, 166.2, 45.0], [-82.7, 161.7, 45.0], [-93.9, 157.2, 45.0], [-105.0, 152.8, 45.0], [-116.4, 149.1, 44.9], [-128.2, 146.6, 44.8], [-139.9, 144.1, 44.6], [-151.5, 141.2, 44.3], [-162.3, 135.9, 43.7], [-172.4, 129.7, 43.0], [-168.8, 119.6, 42.3], [-157.6, 116.0, 41.3], [-145.6, 116.0, 40.2], [-133.6, 116.0, 39.0], [-121.6, 116.0, 37.8], [-109.6, 116.0, 36.7], [-97.6, 116.0, 35.5], [-86.5, 112.3, 34.4], [-79.6, 102.8, 33.3], [-83.8, 92.2, 32.1], [-94.0, 86.3, 31.0], [-106.0, 86.0, 29.8], [-118.0, 86.0, 28.7], [-130.0, 86.0, 27.6], [-142.0, 86.0, 26.5], [-154.0, 86.0, 25.3], [-165.7, 84.2, 24.2], [-174.3, 76.0, 23.1], [-173.4, 64.8, 22.0], [-164.3, 57.2, 20.8], [-152.5, 56.0, 19.7], [-140.5, 56.0, 18.5], [-128.5, 56.0, 17.4], [-116.5, 56.0, 16.3], [-104.5, 56.0, 15.1], [-92.5, 55.5, 14.0], [-82.8, 48.8, 12.9], [-80.0, 37.8, 11.8], [-87.7, 28.8, 10.6], [-99.1, 26.0, 9.5], [-111.1, 26.0, 8.3], [-123.1, 26.0, 7.1], [-135.0, 25.3, 5.9], [-139.0, 15.3, 4.8], [-130.9, 6.5, 3.7], [-120.5, 0.9, 2.9], [-108.7, -0.9, 2.8], [-96.7, -1.5, 2.6], [-84.8, -2.1, 2.5], [-72.8, -2.8, 2.3], [-60.8, -3.4, 2.1], [-48.8, -4.1, 2.0], [-36.9, -5.3, 2.0], [-24.9, -6.5, 2.0], [-13.0, -7.7, 2.0], [-1.1, -8.9, 2.0], [10.6, -11.3, 2.0], [21.0, -17.3, 2.0], [31.0, -24.0, 2.0], [40.5, -31.2, 2.0], [47.4, -40.9, 2.0], [49.5, -52.5, 2.0], [46.9, -64.2, 2.0], [43.1, -75.6, 2.0], [36.9, -85.7, 2.0], [27.2, -92.7, 1.7], [16.9, -98.9, 1.5], [6.6, -105.0, 1.3], [-3.7, -111.2, 1.1], [-14.6, -115.9, 0.9], [-26.4, -118.1, 0.8], [-38.2, -120.2, 0.6], [-50.0, -122.4, 0.4], [-61.8, -124.6, 0.3], [-73.6, -126.8, 0.1], [-85.6, -127.0, 0.0], [-97.4, -124.9, 0.0], [-109.2, -122.8, 0.0], [-121.0, -120.7, 0.0], [-132.8, -118.6, 0.0], [-144.7, -116.5, 0.0], [-156.5, -114.4, 0.0], [-168.3, -112.6, 0.0], [-180.2, -113.7, 0.0], [-192.1, -115.6, 0.0], [-203.9, -117.5, 0.0], [-215.8, -119.4, 0.0], [-227.6, -121.4, 0.0], [-239.3, -123.9, 0.0], [-249.8, -129.4, 0.0], [-257.4, -138.5, 0.0], [-262.8, -149.2, 0.0], [-260.4, -160.4, 0.0], [-249.8, -165.0, 0.0], [-237.8, -165.0, 0.0]], "frac": {"A start camp": 0.0, "B campie": 0.04, "B traversarea turmei": 0.075, "C mal vest": 0.121, "C vadul Mara": 0.144, "C mal est": 0.173, "D padurea in": 0.196, "D S1": 0.224, "D S2": 0.253, "D S3": 0.287, "D S4": 0.316, "D iesire padure": 0.339, "E buza NE (dezvaluire)": 0.362, "E buza S1 in": 0.391, "E buza S1 apex (spre crater)": 0.408, "E buza S2": 0.431, "E boma Maasai": 0.454, "E buza NV": 0.482, "F intrare": 0.5, "F ac 1 apex": 0.511, "F ac 1 out": 0.516, "F ac 2 in": 0.551, "F ac 2 apex": 0.562, "F ac 2 out": 0.573, "F ac 3 in": 0.608, "F ac 3 apex": 0.613, "F ac 3 out": 0.624, "F ac 4 in": 0.659, "F ac 4 apex": 0.67, "F ac 4 out": 0.676, "F ultimul brat": 0.699, "F iesire pe fund": 0.715, "G malul lacului": 0.75, "G elefanti / vartej": 0.778, "G campul de soda": 0.801, "G spre spartura": 0.824, "H spartura Lerai": 0.853, "H iesire in campie": 0.887, "A2 ocolul campului": 0.928, "A2 in spatele kopje-ului": 0.962, "A2 intoarcere spre linie": 0.985}, "total": 2084, "lagoon": [[-52.0, 68.0], [-48.0, 52.1], [-36.8, 38.6], [-19.9, 29.6], [-0.0, 26.4], [19.9, 29.6], [36.8, 38.6], [48.0, 52.1], [52.0, 68.0], [48.0, 83.9], [36.8, 97.4], [19.9, 106.4], [0.0, 109.6], [-19.9, 106.4], [-36.8, 97.4], [-48.0, 83.9]], "crater": [0.0, 60.0], "wpts": [[-230, -165, 0.0, "A start camp"], [-140, -165, 0.0, "B campie"], [-70, -165, 0.0, "B traversarea turmei"], [25, -165, 0.0, "C mal vest"], [75, -165, -1.5, "C vadul Mara"], [125, -160, 0.0, "C mal est"], [170, -130, 3.0, "D padurea in"], [215, -76, 11.0, "D S1"], [158, -28, 19.0, "D S2"], [214, 22, 27.0, "D S3"], [170, 72, 34.5, "D S4"], [154, 110, 39.0, "D iesire padure"], [118, 150, 45.0, "E buza NE (dezvaluire)"], [70, 172, 45.0, "E buza S1 in"], [30, 162, 45.0, "E buza S1 apex (spre crater)"], [-15, 186, 45.0, "E buza S2"], [-62, 170, 45.0, "E boma Maasai"], [-112, 150, 45.0, "E buza NV"], [-150, 142, 44.5, "F intrare"], [-178, 128, 43.0, "F ac 1 apex"], [-165, 116, 42.0, "F ac 1 out"], [-90, 116, 35.0, "F ac 2 in"], [-75, 101, 33.3, "F ac 2 apex"], [-90, 86, 31.5, "F ac 2 out"], [-165, 86, 24.5, "F ac 3 in"], [-180, 71, 22.8, "F ac 3 apex"], [-165, 56, 21.0, "F ac 3 out"], [-90, 56, 14.0, "F ac 4 in"], [-75, 41, 12.3, "F ac 4 apex"], [-90, 26, 10.5, "F ac 4 out"], [-150, 26, 5.5, "F ultimul brat"], [-125, 0, 3.0, "F iesire pe fund"], [-50, -4, 2.0, "G malul lacului"], [10, -10, 2.0, "G elefanti / vartej"], [55, -40, 2.0, "G campul de soda"], [40, -85, 2.0, "G spre spartura"], [-10, -115, 1.0, "H spartura Lerai"], [-80, -128, 0.0, "H iesire in campie"], [-170, -112, 0.0, "A2 ocolul campului"], [-250, -125, 0.0, "A2 in spatele kopje-ului"], [-272, -165, 0.0, "A2 intoarcere spre linie"]]};
+const CRATER = DATA.crater;
+// zona per punct de control, dupa fractia pe tur (culoarea segmentului care pleaca din punct)
+const FR = DATA.frac;
+function zoneAt(f){
+  if (f < FR["D padurea in"]) return "savana";
+  if (f < FR["E buza NE (dezvaluire)"]) return "padure";
+  if (f < FR["F intrare"]) return "buza";
+  if (f < FR["F iesire pe fund"]) return "perete";
+  if (f < FR["H spartura Lerai"]) return "crater";
+  if (f < FR["H iesire in campie"]) return "spartura";
+  return "savana";
+}
+const N = DATA.route.length;
+const PTS = DATA.route.map((p,i)=>[p[0], p[1], p[2], zoneAt(i/N)]);
+const LAGOON = DATA.lagoon;
+const SOUTH_HILLS = [[75,-125,48],[-95,-75,45]];      // TerrainPeak-urile din scena [x,y,raza]
+const CORRIDOR = {x:-70, y:-165, w:24, len:98};       // culoarul turmei: 24 m pe drum, bucla de 98 m pe curgere (N->S)
+const FORD = {x:75, y:-165, w:26, h:14};
+const KOPJE_CAMP = [-250,-138]; const KOPJE_KICK = [40,-138];
+const BOMA = [-62,182]; const LENGAI = [330,262]; const CARCASS = [-120,-120];
+const ELEPHANTS = [[-20,-16],[35,-30],[10,-52]];
+const ACACIAS = [];
+(function(){ const seed=[[-200,-195],[-150,-135],[-110,-195],[-40,-135],[-20,-195],[10,-140],[45,-200],[-260,-195],[-300,-150],[-190,-80],[-230,-70],[-130,-230],[110,-200],[150,-190],[-280,-100],[-60,-90],[-20,-230],[95,-120]];
+  seed.forEach((p,i)=>ACACIAS.push([p[0],p[1],7+((i*5)%4)])); })();
+const HERD_FAR = [];
+(function(){ let s=7; const rnd=()=>{ s=(s*16807)%2147483647; return s/2147483647; };
+  for (let i=0;i<140;i++){ const x=-70+(rnd()-.5)*60, y=-165+(rnd()>.5?1:-1)*(35+rnd()*95); HERD_FAR.push([x,y]); } })();
+
+const SURF = {savana:"#B4462B", padure:"#8C3620", buza:"#B4462B", perete:"#8C3620", crater:"#C46A3F", spartura:"#8C3620"};
+
+const POI = [
+  {k:"A", x:-230, y:-165, frac:"0.00", name:"Campul de safari — START",
+   w:"9 m · laterit · câmpie 0 m",
+   desc:"Sub un kopje de granit de 14 m cu un leu culcat pe vârf (capul urmărește liderul). Corturi, două Land Rover-uri, un foc. De lângă kopje vârful nu se vede (10 + 0,093·8 ≈ 10,7 m < 14); intră în cadru de la 43 m, exact pe cei 60 m dintre spărtură și linie — recompensa fiecărui tur, nu a grilei.",
+   lot:["kopje_camp (hero)","lion_kopje","safari_tent ×3","land_rover ×2","campfire (emisiv)","acacia_umbrella ×2"]},
+  {k:"B", x:-70, y:-165, frac:"0.04–0.17", name:"Câmpia și râul de gnu",
+   w:"10 m · dreaptă de 290 m · viteză",
+   desc:"Culoar de migrație de 24 m taie drumul perpendicular. Pulsuri: 8 s turmă deasă (spațiere 2,5 m, 6,5 m/s, 3 benzi decalate 0,6 s), apoi 7 s culoar liber — fereastra reală măsurată: 3,7 s. Contact: sportul e deviat 6,1 m și frânat 18 → 12,5 m/s; autobuzul 0,9 m și 13,7 m/s. Prin fereastră: zero contact. Restul turmei (300+ instanțe) pe câmpie la 35–130 m de drum.",
+   lot:["wildebeest (animat, 200 pe ecran, <400 tri)","zebra (același schelet)","herd_far (MultiMesh 6 tri)","acacia_umbrella ×8","termite_mound ×6","decal hoofprints"]},
+  {k:"C", x:75, y:-165, frac:"0.12–0.17", name:"Vadul Mara — hipopotamii",
+   w:"8 m · drumul coboară la −1,5 m · apă 30 cm",
+   desc:"Maluri de noroi (grip 0,7×), 25 m de apă mică. Trei spinări se ridică sub bandă pe ciclu ~20 s (bule 1 s → 1,2 m în 0,4 s → 2 s → se scufundă): măsurat, ridică mașina la 1,19 m cu 27 de cadre de aer și o lasă pe roți. Scurtătura: kopje-kicker în cot, săritură de 30 m peste râu — cere turbo; scurt = apă adâncă = repunere.",
+   lot:["hippo_back ×3 (HippoHazard)","kopje_kicker (hero, rampă 8 m)","crocodile ×2 (mal, static)","mud_bank (clasă)","dead_tree ×2"]},
+  {k:"D", x:190, y:-25, frac:"0.20–0.36", name:"Pădurea de ceață — urcarea",
+   w:"6,5 m · 0 → 45 m pe ~400 m · 11,3 % măsurat",
+   desc:"Flancul craterului: smochini și acacii galbene cu licheni, ceață joasă verde-gri, iarba se face verde. Patru S-uri cu ravene pe stânga, fără parapet. La ieșirea din pădure prima dezvăluire: câmpia cu turma rămâne sub tine.",
+   lot:["fig_tree ×12 (14 m)","fever_tree ×8","euphorbia ×6","highland_grass (clasă)","fog_corridor local (verde-gri)"]},
+  {k:"E", x:30, y:172, frac:"0.36–0.48", name:"Buza craterului — vârful vizual",
+   w:"7 m · 45 m · fără parapet pe dreapta · rapa 175 m lată, podea 2 m",
+   desc:"Creasta cu lume pe ambele părți: pe dreapta lacul Magadi alb-roz cu flamingi (un val decolează la trecere), pădurea Lerai, elefanții ca puncte; pe stânga câmpia. Două S-uri cu concavitatea spre crater, ca lacul să intre în cadru prin față, nu lateral. Boma Maasai la 0.454: colibe, gard de spini, un Maasai cu shuka roșie; cireada Ankole traversează pe ciclu ~26 s (reuse cow.glb + coarne).",
+   lot:["maasai_boma (hero)","ankole_horns pe cow.glb ×5 (TRAVERSARE)","flamingo (billboard MultiMesh ×200)","crater_far_wall (fundal)","fever_tree ×6"]},
+  {k:"F", x:-128, y:80, frac:"0.50–0.72", name:"Serpentinele Seneto — coborârea",
+   w:"6 m · 45 → 3 m pe ~440 m · 9,4 % · 4 ace de păr r 15",
+   desc:"Coborârea pe peretele craterului: peretele pe stânga, golul pe dreapta, lacul tot mai aproape. Bolovani de granit rostogoliți (reuse rockfall pe Path3D, telegraph 2 s, ciclu ~33 s). Acele sunt semicercuri explicite: r 12 ieșea 5,9 m în ProbeLayout din strângerea Catmull-Rom.",
+   lot:["kopje_boulder ×10 (rockfall)","granite (clasă triplanară pe perete)","euphorbia ×8","chevron_post ×8"]},
+  {k:"G", x:10, y:-14, frac:"0.72–0.85", name:"Fundul craterului — elefanți și vârtej",
+   w:"9 m · 2 m · crustă de sodă (grip lateral 0,9×)",
+   desc:"Cea mai rapidă porțiune înainte de linie. Trei elefanți (masă 2000, SlidingHazard TRAVERSARE, trâmbiță + urechi 1,5 s telegraph) taie drumul pe rute de 30/37/44 s. Vârtejul de praf rătăcește pe Lissajous (14 × 26 m, 4 m/s): trecerea te rotește ~150–180° în 0,8 s fără să te răstoarne — clasa „sabotaj de control”. Un balon de safari aterizat, decor.",
+   lot:["elephant ×3 (animat, rig în cod)","dust_devil (DustDevilHazard)","soda_crust (clasă)","safari_balloon_landed","fever_tree ×10 (Lerai)"]},
+  {k:"H", x:-10, y:-115, frac:"0.85–0.89", name:"Spărtura Lerai — ieșirea",
+   w:"7 m · 2 → 0 m · tăietură de 12 m în granit, 40 m lungime",
+   desc:"Două fețe de granit, tavan deschis, un kicker mic la ieșire te aruncă pe lateritul câmpiei. Contrast: din albul lacului în auriul câmpiei prin gri de granit. Acum e doar culoarul dintre două dealuri (TerrainPeak-uri); tăietura vine cu assetul.",
+   lot:["crater_gap (hero, 2 fețe × 40 m)","flyoff_kicker mic","kopje_boulder ×4"]},
+  {k:"S", x:330, y:262, frac:"fundal", name:"Ol Doinyo Lengai și peretele opus",
+   w:"200+ m · sub fog_end 300 · cast_shadow OFF",
+   desc:"Con vulcanic alb-gri (fără lavă: e vulcanul cu lavă neagră, nu dublăm Stromboli). Peretele opus al craterului la 200 m, cu pădure ca benzi de culoare. Frontul de furtună e cer, nu geometrie: sky_horizon violet-gri, fulgere ca pâlpâire de 0,1 s.",
+   lot:["lengai (siluetă)","crater_far_wall","baobab ×5 (siluete)","StormCycle (fulgere, zero geometrie)"]}
+];
+
+const LOTS = [ // amprente [x, y, w, h, poi]
+  [-235,-150,60,36,"A"],[-70,-165,40,120,"B"],[75,-165,40,30,"C"],[40,-138,20,20,"C"],[190,-25,80,200,"D"],
+  [30,172,240,40,"E"],[-62,184,26,18,"E"],[-128,80,110,110,"F"],[10,-25,110,60,"G"],[-10,-115,24,44,"H"],[330,262,60,36,"S"]
+];
+
+const ASSETS = [
+  ["Hero (unice)", null],
+  ["wildebeest.glb","1,4 m greabăn · Gallop/Walk/Tumble/Idle",1,"B","cea mai importantă piesă: <400 tri, 200 pe ecran; 2 cadre de galop coapte în shader"],
+  ["zebra.glb","cal scurt, dungi din clasă",1,"B","același schelet ca gnu; MultiMesh-ul le amestecă 4:1"],
+  ["elephant.glb","3,2 m umăr · Walk/Trumpet",1,"G","rig în cod peste Builder (rețeta țestoasei): 4 picioare + trompă + urechi"],
+  ["hippo_back.glb","4 × 2,5 m spinare + cap",1,"C","mesh rigid pe traiectorie verticală (HippoHazard)"],
+  ["lion_kopje.glb","leu culcat, cap pe os separat",1,"A","look_at pe lider; zero gameplay"],
+  ["kopje_kicker.glb","25 m, față-rampă de 8 m",1,"C","FlyoffKicker + RespawnZone pe apă"],
+  ["kopje_camp.glb","14 m, platou pentru leu",1,"A","de la 43 m intră în cadru"],
+  ["crater_gap.glb","2 fețe × 40 m, 12 m între ele",1,"H","tavan deschis"],
+  ["maasai_boma.glb","4 colibe + gard de spini + figură",1,"E","respiro pe buză"],
+  ["safari_balloon_landed.glb","pânză întinsă, coș",1,"G","decor, fără coliziune pe pânză"],
+  ["Kit de savană (statistice)", null],
+  ["acacia_umbrella_a/b/c.glb","7–10 m, coroană plată",40,"A/B/C","sub 500 tri; umbra pe drum e identitatea"],
+  ["fever_tree.glb","acacia galbenă 10 m",24,"D/E/G","SAND_LIGHT pe trunchi"],
+  ["fig_tree.glb","14 m, licheni",12,"D","pădurea de ceață"],
+  ["euphorbia.glb","candelabru 4 m",14,"D/F","buză și perete"],
+  ["termite_mound_a/b.glb","1,5–3 m, roșii",10,"B","TILE_TERRACOTTA"],
+  ["kopje_boulder_a/b/c.glb","granit 2–6 m",24,"F/H/A","și bolovanii rostogoliți"],
+  ["dead_tree.glb","6 m",4,"C","mal"],
+  ["carcass_vultures.glb","hoit + 3 vulturi pe pământ",1,"B","vulturii NU zboară (frustum)"],
+  ["crocodile.glb","4 m, static",2,"C","mal"],
+  ["safari_tent / land_rover / campfire","—",6,"A","campfire emisiv LAVA_ORANGE"],
+  ["ankole_horns.glb","coarne pe cow.glb",5,"E","reuse rig vacă, TRAVERSARE"],
+  ["chevron_post.glb","1,2 m",8,"F","reuse Stromboli"],
+  ["Animate / mecanici", null],
+  ["herd_far","gnu 6 tri, MultiMesh",300,"B","fundal viu la 35–130 m"],
+  ["flamingo (billboard)","MultiMesh, val de decolare",200,"E","NEON_PINK 31"],
+  ["dust_devil","con de praf 12 m, textură derulată",1,"G","particule cu count mic; muchia, nu numărul"],
+  ["Fundal", null],
+  ["lengai.glb","con vulcanic alb-gri",1,"S","sub fog_end 300"],
+  ["crater_far_wall","peretele opus, benzi de culoare",1,"S/E","la 200 m"],
+  ["baobab.glb","20+ m siluetă",5,"S","150+ m"],
+  ["Texturi de clasă (din cod)", null],
+  ["savanna_grass","iarbă aurie cu smocuri, benzi de valoare",1,"A/B/C","dominant"],
+  ["highland_grass","verde de altitudine",1,"D/E/F","buză + crater"],
+  ["laterite_road","drum roșu cu urme",1,"toate","înlocuiește asfaltul pe toată pista"],
+  ["soda_crust","crustă albă crăpată",1,"G","grip lateral 0,9×"],
+  ["mud_bank","noroi cu urme de copite",1,"C","grip 0,7×"],
+  ["granite","triplanar",1,"F/H","kopje, perete, spărtură"],
+  ["zebra_stripes","clasă pe kitul de animale",1,"B","dungile în textură, nu în geometrie"]
+];
+
+// ---- proiectie ---------------------------------------------------------------
+const plan = document.getElementById("plan"), pcx = plan.getContext("2d");
+const minx = -330, maxx = 380, miny = -270, maxy = 300;
+const S = Math.min(plan.width/(maxx-minx), plan.height/(maxy-miny));
+const ox = (plan.width-(maxx-minx)*S)/2, oy = (plan.height-(maxy-miny)*S)/2;
+const X = x => ox+(x-minx)*S, Y = y => oy+(maxy-y)*S;
+
+function sampleLoop(pts, per){
+  const n = pts.length, out = [];
+  for (let i=0;i<n;i++){
+    const p0=pts[(i-1+n)%n], p1=pts[i], p2=pts[(i+1)%n], p3=pts[(i+2)%n];
+    for (let t=0;t<per;t++){
+      const u=t/per, u2=u*u, u3=u2*u;
+      const c = k => 0.5*((2*p1[k]) + (-p0[k]+p2[k])*u +
+        (2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*u2 + (-p0[k]+3*p1[k]-3*p2[k]+p3[k])*u3);
+      out.push([c(0), c(1), c(2), p1[3]]);
+    }
+  }
+  return out;
+}
+const LOOP = sampleLoop(PTS, 4);
+let LEN = 0; const CUM = [0];
+for (let i=1;i<=LOOP.length;i++){
+  const a=LOOP[i-1], b=LOOP[i%LOOP.length];
+  LEN += Math.hypot(b[0]-a[0], b[1]-a[1]); CUM.push(LEN);
+}
+document.getElementById("f-len").textContent = Math.round(LEN).toLocaleString("ro-RO")+" m";
+document.getElementById("f-inst").textContent = ASSETS.filter(a=>a[1]!==null).reduce((s,a)=>s+a[2],0);
+
+const css = getComputedStyle(document.documentElement);
+const col = v => css.getPropertyValue(v).trim();
+let showLots = true, sel = null;
+
+function poly(ctx, pts, close){
+  ctx.beginPath();
+  pts.forEach((p,i)=> i? ctx.lineTo(X(p[0]),Y(p[1])) : ctx.moveTo(X(p[0]),Y(p[1])));
+  if (close) ctx.closePath();
+}
+// distanta de la un punct la bucla (pentru bolul craterului, schematic)
+function draw(){
+  const c = pcx; c.clearRect(0,0,plan.width,plan.height);
+  c.fillStyle = col("--plain"); c.fillRect(0,0,plan.width,plan.height);
+  // frontul de furtuna: banda de nord, gradient spre cer
+  const g = c.createLinearGradient(0, Y(300), 0, Y(200));
+  g.addColorStop(0, col("--storm")); g.addColorStop(1, "rgba(74,68,96,0)");
+  c.fillStyle = g; c.fillRect(0, Y(300), plan.width, Y(200)-Y(300));
+  // bolul craterului: izolinii schematice de la buza (45) la lac (-0.5), centrate pe crater
+  const rings = [[150,"--crater"],[125,"--crater-deep"],[100,"--crater"],[78,"--crater-deep"]];
+  rings.forEach(([r,cl])=>{ c.beginPath(); c.ellipse(X(CRATER[0]),Y(CRATER[1]), r*S, r*0.9*S, 0, 0, 7); c.fillStyle=col(cl); c.fill(); });
+  c.strokeStyle = col("--ink-soft"); c.globalAlpha=.35; c.lineWidth=1; c.setLineDash([3,4]);
+  rings.forEach(([r])=>{ c.beginPath(); c.ellipse(X(CRATER[0]),Y(CRATER[1]), r*S, r*0.9*S, 0, 0, 7); c.stroke(); });
+  c.setLineDash([]); c.globalAlpha=1;
+  // padurea de ceata pe flancul de est + buza (verde)
+  c.fillStyle = col("--forest"); c.globalAlpha=.55;
+  c.beginPath(); c.moveTo(X(140),Y(-140)); c.lineTo(X(250),Y(-90)); c.lineTo(X(250),Y(120)); c.lineTo(X(180),Y(190)); c.lineTo(X(-150),Y(200)); c.lineTo(X(-140),Y(150)); c.lineTo(X(140),Y(125)); c.lineTo(X(140),Y(60)); c.lineTo(X(190),Y(-30)); c.closePath(); c.fill();
+  c.globalAlpha=1;
+  // dealurile de sud (TerrainPeak)
+  SOUTH_HILLS.forEach(h=>{ c.beginPath(); c.arc(X(h[0]),Y(h[1]),h[2]*S,0,7); c.fillStyle=col("--wall"); c.globalAlpha=.3; c.fill(); c.globalAlpha=1;
+    c.strokeStyle=col("--wall"); c.lineWidth=1; c.setLineDash([2,3]); c.stroke(); c.setLineDash([]); });
+  // grila
+  c.strokeStyle = col("--grid"); c.lineWidth = 1;
+  for (let gx=Math.ceil(minx/100)*100; gx<maxx; gx+=100){ c.beginPath(); c.moveTo(X(gx),0); c.lineTo(X(gx),plan.height); c.stroke(); }
+  for (let gy=Math.ceil(miny/100)*100; gy<maxy; gy+=100){ c.beginPath(); c.moveTo(0,Y(gy)); c.lineTo(plan.width,Y(gy)); c.stroke(); }
+  // lacul Magadi + bordura de flamingi
+  poly(c, LAGOON, true); c.fillStyle=col("--soda"); c.fill();
+  c.strokeStyle="#E86C95"; c.lineWidth=3; c.setLineDash([2,5]); c.stroke(); c.setLineDash([]);
+  // vadul
+  c.fillStyle=col("--soda"); c.fillRect(X(FORD.x-FORD.w/2), Y(FORD.y+FORD.h/2+40), FORD.w*S, (FORD.h+80)*S);
+  // culoarul turmei: hasura + sageti spre sud
+  c.save(); c.beginPath(); c.rect(X(CORRIDOR.x-CORRIDOR.w/2), Y(CORRIDOR.y+CORRIDOR.len/2), CORRIDOR.w*S, CORRIDOR.len*S); c.clip();
+  c.strokeStyle="rgba(35,32,28,.22)"; c.lineWidth=1;
+  for (let k=-120;k<120;k+=6){ c.beginPath(); c.moveTo(X(CORRIDOR.x-40),Y(CORRIDOR.y+k)); c.lineTo(X(CORRIDOR.x+40),Y(CORRIDOR.y+k-40)); c.stroke(); }
+  c.restore();
+  c.strokeStyle=col("--ink"); c.lineWidth=1.5; c.beginPath(); c.moveTo(X(CORRIDOR.x),Y(CORRIDOR.y+44)); c.lineTo(X(CORRIDOR.x),Y(CORRIDOR.y-44)); c.stroke();
+  c.beginPath(); c.moveTo(X(CORRIDOR.x-4),Y(CORRIDOR.y-38)); c.lineTo(X(CORRIDOR.x),Y(CORRIDOR.y-46)); c.lineTo(X(CORRIDOR.x+4),Y(CORRIDOR.y-38)); c.stroke();
+  // turma de fundal
+  c.fillStyle="#3A2F28"; HERD_FAR.forEach(p=>{ c.fillRect(X(p[0])-1.2, Y(p[1])-0.8, 2.4, 1.6); });
+  // acaciile: cerc oliv cu umbra spre est (soarele din vest-sud-vest)
+  ACACIAS.forEach(a=>{ const r=(a[2]/2)*S;
+    c.fillStyle="rgba(58,53,50,.22)"; c.beginPath(); c.ellipse(X(a[0])+r*1.3, Y(a[1])+r*.4, r*1.1, r*.5, 0, 0, 7); c.fill();
+    c.beginPath(); c.arc(X(a[0]),Y(a[1]),r,0,7); c.fillStyle="#5B7C34"; c.fill(); c.strokeStyle="#3F5A22"; c.lineWidth=1; c.stroke(); });
+  // bucla, cotele joase intai
+  const segs = [];
+  for (let i=0;i<LOOP.length;i++){ const a=LOOP[i], b=LOOP[(i+1)%LOOP.length]; segs.push([a,b,(a[2]+b[2])/2]); }
+  segs.sort((p,q)=>p[2]-q[2]);
+  segs.forEach(([a,b])=>{
+    c.strokeStyle = "rgba(0,0,0,.18)"; c.lineWidth = 9; c.lineCap="round";
+    c.beginPath(); c.moveTo(X(a[0]),Y(a[1])); c.lineTo(X(b[0]),Y(b[1])); c.stroke();
+    c.strokeStyle = SURF[a[3]]; c.lineWidth = 6.5;
+    c.beginPath(); c.moveTo(X(a[0]),Y(a[1])); c.lineTo(X(b[0]),Y(b[1])); c.stroke();
+  });
+  // hazarduri punctuale
+  const dot=(x,y,cl,r,ring)=>{ c.beginPath(); c.arc(X(x),Y(y),r||5,0,7); c.fillStyle=cl; c.fill(); if(ring){ c.strokeStyle="#E0453A"; c.lineWidth=2; c.stroke(); } };
+  [[70,-168],[75,-163],[80,-167]].forEach(h=>dot(h[0],h[1],"#5A5556",4,true));   // hipopotamii
+  dot(KOPJE_KICK[0],KOPJE_KICK[1],"#B8B4AC",6,true);                             // kopje-kicker
+  dot(KOPJE_CAMP[0],KOPJE_CAMP[1],"#B8B4AC",7,false);                            // kopje-ul campului
+  dot(KOPJE_CAMP[0],KOPJE_CAMP[1]+1,"#C9A44A",2.5,false);                        // leul
+  ELEPHANTS.forEach(e=>dot(e[0],e[1],"#8A8580",5,true));                         // elefantii
+  // vartejul: figura Lissajous punctata
+  c.setLineDash([2,3]); c.strokeStyle="#B8A070"; c.lineWidth=1.2; c.beginPath();
+  for (let t=0;t<=1.001;t+=0.01){ const x=55+14*Math.sin(2*Math.PI*3*t), y=-40+26*Math.sin(2*Math.PI*2*t+1.2); t? c.lineTo(X(x),Y(y)) : c.moveTo(X(x),Y(y)); }
+  c.stroke(); c.setLineDash([]); dot(55,-40,"#C9B58A",5,true);
+  // cireada Ankole pe buza, bolovanii pe serpentine, boma
+  dot(-62,170,"#7A5A3A",4,true); dot(-100,105,"#8F8A82",4,true);
+  c.fillStyle="#7A5A3A"; c.beginPath(); c.arc(X(BOMA[0]),Y(BOMA[1]),7*S,0,7); c.fill(); c.strokeStyle="#4A3A2E"; c.lineWidth=1; c.stroke();
+  // hoitul cu vulturi
+  dot(CARCASS[0],CARCASS[1],"#6A5A4A",3,false);
+  // fundal: Lengai
+  c.fillStyle="#B8B4AC"; c.beginPath(); c.moveTo(X(LENGAI[0]-22),Y(LENGAI[1]-8)); c.lineTo(X(LENGAI[0]),Y(LENGAI[1]+18)); c.lineTo(X(LENGAI[0]+22),Y(LENGAI[1]-8)); c.closePath(); c.fill();
+  c.fillStyle="#F1EEE6"; c.beginPath(); c.moveTo(X(LENGAI[0]-6),Y(LENGAI[1]+10)); c.lineTo(X(LENGAI[0]),Y(LENGAI[1]+18)); c.lineTo(X(LENGAI[0]+6),Y(LENGAI[1]+10)); c.closePath(); c.fill();
+  // fulger
+  c.strokeStyle="#F2E9B0"; c.lineWidth=2; c.beginPath(); c.moveTo(X(-250),Y(292)); c.lineTo(X(-256),Y(270)); c.lineTo(X(-248),Y(268)); c.lineTo(X(-258),Y(246)); c.stroke();
+  // linia de start
+  const a0=LOOP[0]; c.fillStyle=col("--ink"); c.fillRect(X(a0[0])-2, Y(a0[1])-7, 4, 14);
+  c.fillStyle = col("--ink-soft"); c.font = "11px 'Source Sans 3',system-ui";
+  c.fillText("→ antiorar (craterul pe dreapta, în interior)", X(-300), Y(-190));
+  c.fillText("lacul Magadi · flamingi", X(CRATER[0]-40), Y(CRATER[1]+62));
+  c.fillText("frontul de furtună · fulgere la orizont", X(-120), Y(290));
+  c.fillText("Ol Doinyo Lengai", X(300), Y(240));
+  c.fillText("☀ soarele din SV, sub nori", X(-320), Y(-255));
+  c.fillText("Mara", X(88), Y(-135));
+  c.fillText("N", X(-320), Y(288));
+  // loturi
+  if (showLots){
+    c.setLineDash([4,3]);
+    LOTS.forEach(l=>{ const on = sel && sel.k===l[4];
+      c.strokeStyle = on ? "#B4462B" : col("--ink-soft"); c.lineWidth = on ? 2 : 1;
+      c.strokeRect(X(l[0]-l[2]/2), Y(l[1]+l[3]/2), l[2]*S, l[3]*S); });
+    c.setLineDash([]);
+  }
+  POI.forEach(p=>{
+    const on = sel && sel.k===p.k;
+    c.beginPath(); c.arc(X(p.x),Y(p.y),on?12:10,0,7);
+    c.fillStyle = on ? "#E27A57" : col("--panel"); c.fill();
+    c.strokeStyle = on ? "#B4462B" : col("--ink-soft"); c.lineWidth=1.5; c.stroke();
+    c.fillStyle = on ? "#1A1206" : col("--ink");
+    c.font = "bold 11px 'Source Sans 3',system-ui"; c.textAlign="center"; c.textBaseline="middle";
+    c.fillText(p.k, X(p.x), Y(p.y)); c.textAlign="left"; c.textBaseline="alphabetic";
+  });
+}
+
+// ---- profil ------------------------------------------------------------------
+const ev = document.getElementById("elev"), ec = ev.getContext("2d");
+function drawElev(){
+  ec.clearRect(0,0,ev.width,ev.height);
+  const pad=26, w=ev.width-2*pad, h=ev.height-2*pad, emin=-5, emax=50;
+  const yOf = e => pad+h-((e-emin)/(emax-emin))*h;
+  ec.strokeStyle = col("--grid");
+  for (let m=0;m<=emax;m+=10){ const y = yOf(m);
+    ec.beginPath(); ec.moveTo(pad,y); ec.lineTo(pad+w,y); ec.stroke();
+    ec.fillStyle = col("--ink-soft"); ec.font="10px system-ui"; ec.fillText(m+" m", 2, y+3); }
+  // apa la -0,5
+  ec.strokeStyle=col("--soda"); ec.lineWidth=2; ec.beginPath(); ec.moveTo(pad,yOf(-0.5)); ec.lineTo(pad+w,yOf(-0.5)); ec.stroke();
+  // portiunile: padure (D) si crater (F-G) hasurate
+  const band=(z,cl,al)=>{ let f0=-1,f1=-1; LOOP.forEach((p,i)=>{ if(p[3]===z){ if(f0<0)f0=i; f1=i; } });
+    if(f0>=0){ ec.fillStyle=cl; ec.globalAlpha=al; ec.fillRect(pad+(CUM[f0]/LEN)*w, pad, ((CUM[f1]-CUM[f0])/LEN)*w, h); ec.globalAlpha=1; } return [f0,f1]; };
+  const dB = band("padure", col("--forest"), .35);
+  band("perete", col("--wall"), .18); const gB = band("crater", col("--crater-deep"), .3);
+  ec.beginPath();
+  LOOP.forEach((p,i)=>{ const x = pad+(CUM[i]/LEN)*w, y = yOf(p[2]); i? ec.lineTo(x,y) : ec.moveTo(x,y); });
+  ec.strokeStyle = "#B4462B"; ec.lineWidth = 2; ec.stroke();
+  ec.lineTo(pad+w,pad+h); ec.lineTo(pad,pad+h); ec.closePath();
+  ec.fillStyle = "#B4462B"; ec.globalAlpha=.12; ec.fill(); ec.globalAlpha=1;
+  POI.filter(p=>p.k!=="S").forEach(p=>{
+    let best=0,bd=1e9;
+    LOOP.forEach((q,i)=>{const d=Math.hypot(q[0]-p.x,q[1]-p.y); if(d<bd){bd=d;best=i;}});
+    const x = pad+(CUM[best]/LEN)*w, y = yOf(LOOP[best][2]);
+    ec.beginPath(); ec.arc(x,y,3.5,0,7); ec.fillStyle=col("--panel"); ec.fill();
+    ec.strokeStyle=col("--ink-soft"); ec.stroke();
+    ec.fillStyle=col("--ink"); ec.font="bold 10px system-ui"; ec.fillText(p.k, x-3, y-8);
+  });
+  ec.fillStyle=col("--ink-soft"); ec.font="10px system-ui";
+  ec.fillText("pădurea de ceață · 11,3 %", pad+(CUM[dB[0]]/LEN)*w+4, pad+12);
+  ec.fillText("fundul craterului · 2 m", pad+(CUM[gB[0]]/LEN)*w+4, pad+12);
+  ec.fillText("apa −0,5 m", pad+w-60, yOf(-0.5)-4);
+}
+
+// ---- ceasuri -----------------------------------------------------------------
+const LAP = 70;
+const CLOCKS = [["pulsul turmei",15,8,"8 s turmă + 7 s liber; fereastra reală 3,7 s"],["hipopotamii ×3",20,3.4,"bule 1 s → sus 2 s, defazați 1/3"],
+  ["cireada Ankole",26,6,"traversare pe buză"],["elefanții ×3",30,8,"rute de 30 / 37 / 44 s"],["bolovanii",33,4,"telegraph 2 s pe serpentine"]];
+document.getElementById("clocks").innerHTML = CLOCKS.map(([n,s,on,d])=>
+  '<div class="clock" title="'+d+'"><span class="nm">'+n+'</span><span class="bar"><i style="width:'+(s/LAP*100)+'%"></i><i class="on" style="width:'+(on/LAP*100)+'%"></i><em style="left:'+(s/LAP*100)+'%"></em></span><span class="s">'+s+' s</span></div>'
+).join("") + '<div class="clock"><span class="nm">vârtejul</span><span class="bar" style="background:repeating-linear-gradient(90deg,var(--sunk) 0 6px,var(--hair) 6px 8px)"></span><span class="s">∞</span></div>'
+ + '<div class="note">Niciun ceas nu împarte turul (~70 s): faza se mută de la tur la tur. Bara = perioada față de tur, porțiunea închisă = cât e hazardul ACTIV. Vârtejul nu e ciclic: rătăcește pe Lissajous, mereu vizibil de la 60 m.</div>';
+
+// ---- interactiune ------------------------------------------------------------
+const detail = document.getElementById("detail");
+function select(p){
+  sel = p; draw();
+  document.querySelectorAll("#asset-tbl tr.row").forEach(tr=>
+    tr.classList.toggle("on", tr.dataset.poi && p && tr.dataset.poi.includes(p.k)));
+  if (!p){ detail.innerHTML = '<p class="hint">Alege un POI pe hartă sau un rând din tabel.</p>'; return; }
+  detail.innerHTML = '<span class="tag">POI '+p.k+' · frac '+p.frac+'</span><h3>'+p.name+'</h3>'+
+    '<div class="coord">'+p.w+'</div><p>'+p.desc+'</p>'+
+    '<div class="assets"><b>Lotul de assets</b>'+p.lot.join(" · ")+'</div>';
+}
+plan.addEventListener("click", e=>{
+  const r = plan.getBoundingClientRect();
+  const mx = (e.clientX-r.left)*(plan.width/r.width), my = (e.clientY-r.top)*(plan.height/r.height);
+  let best=null, bd=24;
+  POI.forEach(p=>{ const d=Math.hypot(X(p.x)-mx, Y(p.y)-my); if (d<bd){bd=d;best=p;} });
+  select(best);
+});
+plan.addEventListener("mousemove", e=>{
+  const r = plan.getBoundingClientRect();
+  const wx = minx+((e.clientX-r.left)*(plan.width/r.width)-ox)/S;
+  const wy = maxy-((e.clientY-r.top)*(plan.height/r.height)-oy)/S;
+  document.getElementById("cursor").textContent = Math.round(wx)+", "+Math.round(wy)+" m";
+});
+document.getElementById("lots").addEventListener("change", e=>{ showLots = e.target.checked; draw(); });
+
+const tbl = document.getElementById("asset-tbl");
+let html = "<thead><tr><th>piesă</th><th>dimensiuni</th><th class='num'>buc.</th><th>POI</th><th>notă</th></tr></thead><tbody>";
+let grp = "";
+ASSETS.forEach(a=>{
+  if (a[1]===null){ grp=a[0].includes("Hero")?"hero":a[0].includes("clas")?"cls":a[0].includes("Animate")?"anim":"kit";
+    html += '<tr class="grp"><td colspan="5">'+a[0]+'</td></tr>'; return; }
+  html += '<tr class="row" data-poi="'+a[3]+'"><td class="mono">'+a[0]+'</td><td>'+a[1]+'</td><td class="num">'+a[2]+
+    '</td><td><span class="pill '+grp+'">'+a[3]+'</span></td><td style="color:var(--ink-soft)">'+a[4]+'</td></tr>';
+});
+tbl.innerHTML = html + "</tbody>";
+document.getElementById("a-count").textContent = ASSETS.filter(a=>a[1]!==null).length + " tipuri";
+tbl.addEventListener("click", e=>{
+  const tr = e.target.closest("tr.row"); if (!tr) return;
+  const k = tr.dataset.poi.split("/")[0];
+  select(POI.find(p=>p.k===k) || null);
+});
+function copyFrom(btnId, preId, label){
+  document.getElementById(btnId).addEventListener("click", async e=>{
+    const txt = document.getElementById(preId).textContent;
+    try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copiat ✓"; }
+    catch(_) { const rng = document.createRange(); rng.selectNodeContents(document.getElementById(preId));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(rng); e.target.textContent = "Selectat — Ctrl+C"; }
+    setTimeout(()=>{ e.target.textContent = label; }, 2200);
+  });
+}
+copyFrom("copy-btn","prompt-text","Copiază promptul");
+copyFrom("copy-assets","asset-prompts","Copiază tot");
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{draw();drawElev();});
+draw(); drawElev();
+</script>

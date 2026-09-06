@@ -30,8 +30,10 @@ uniform float basin : hint_range(0.0, 1.0) = 0.45;
 // Cat de tare se vede modelul de anvelopa peste brazda neteda.
 uniform float tread_amount : hint_range(0.0, 1.0) = 0.65;
 // De la ce distanta (m) modelul incepe sa se topeasca in brazda neteda.
-uniform float tread_fade_start = 14.0;
-uniform float tread_fade_end = 34.0;
+// De cate ori se repeta modelul pe lungimea placutei.
+uniform float tread_repeats = 3.0;
+uniform float tread_fade_start = 22.0;
+uniform float tread_fade_end = 55.0;
 // Ceasul cursei (secunde), impins de SandTrail o data pe cadru. Varsta unei
 // placute = now - momentul depunerii (INSTANCE_CUSTOM.r).
 uniform float now = 0.0;
@@ -49,31 +51,53 @@ void vertex() {
 void fragment() {
 	// UV.x traverseaza latimea placutei, UV.y merge pe lungimea ei.
 	float across = UV.x * 2.0 - 1.0;           // -1 la +1 pe latime
-	// Bazin: plin in mijloc, stins spre margini. Fara umar, fara buza.
-	// Bazinul modeleaza opacitatea, dar nu o duce la zero pe margini: fagasul
-	// se subtiaza spre buza nederanjata, nu dispare. Fara podeaua asta,
-	// produsul bazin x model x varsta taia 0.58 la ~0.15 si urma nu se vedea.
-	float basin_mask = 1.0 - across * across;
-	basin_mask = mix(0.45, 1.0, clamp(basin_mask, 0.0, 1.0));
+	// BAZINUL. `across` merge de la -1 (marginea stanga) la +1 (dreapta), deci
+	// `1 - across^2` e 1 pe mijloc si 0 pe margini — adica exact adancimea
+	// santului, normalizata.
+	float dip = clamp(1.0 - across * across, 0.0, 1.0);
+	// Muchie moale, nu abrupta: "soft sloped edges" din ghid. smoothstep pe
+	// adancime taluzeaza malurile.
+	dip = smoothstep(0.0, 1.0, dip);
 
 	// Modelul de anvelopa se topeste cu distanta: de aproape se vad blocurile,
 	// de departe ramane brazda. Altfel mipmap-ul face din el o pasta gri.
 	float dist = length(VERTEX);
 	float near = 1.0 - smoothstep(tread_fade_start, tread_fade_end, dist);
-	float tread = texture(tread_tex, vec2(UV.x, UV.y)).a;
-	// La fel pentru model: blocurile sunt mai OPACE decat canalele dintre ele,
-	// dar canalul tot e sant, nu nisip curat.
-	float tread_lift = mix(0.35, 1.0, tread);
-	float pattern = mix(1.0, tread_lift, tread_amount * near);
+	float tread = texture(tread_tex, vec2(UV.x, UV.y * tread_repeats)).a;
 
-	// Adancimea vine din umbrire: mijlocul bazinului mai inchis decat marginea.
-	float depth = mix(1.0 - basin, 1.0, basin_mask);
-	ALBEDO = core_color * depth;
+	// ####################################################################
+	// UMBRIREA CARE FACE ADANCIMEA
+	//
+	// Un sant se citeste fiindca FUNDUL lui e mai intunecat decat marginile:
+	// primeste mai putina lumina din cer. Deci albedo-ul trebuie sa scada spre
+	// centru, nu sa creasca.
+	//
+	// Prima versiune facea exact invers — `depth = mix(1-basin, 1, basin_mask)`
+	// dadea 1.00 pe mijloc si 0.45 pe margine, adica un sant cu fundul mai
+	// LUMINOS decat malul. De-aia urma arata ca o banda pictata oricat se
+	// urcau valorile din trail_profile: gradientul avea semnul gresit.
+	// ####################################################################
+	float shade = 1.0 - basin * dip;
+	// Blocurile de anvelopa se apasa in fundul santului: acolo unde calca
+	// cauciucul, solul e si mai batatorit, deci si mai inchis.
+	// 0.75, nu 0.45: blocurile trebuie sa se VADA ca amprenta, nu sa fie o
+	// nuanta peste sant. Fara asta, modelul de anvelopa se ghicea doar la doi
+	// metri de bara si intreaga textura era degeaba.
+	shade *= 1.0 - tread_amount * near * tread * 0.75;
+	ALBEDO = core_color * shade;
 
 	// Stingerea cu varsta: urma proaspata e plina, cea veche abia se ghiceste.
 	float age = 1.0 - smoothstep(0.55, 1.0, v_age);
 	// Fara COLOR: intr-un MultiMesh, COLOR vine din culoarea PER INSTANTA, iar
 	// noi am pornit doar `use_custom_data`, nu si `use_colors` — deci ar fi
 	// zero si ar stinge tot. (Asta a facut urmele sa dispara complet o data.)
-	ALPHA = core_alpha * basin_mask * pattern * age;
+	//
+	// Alfa urmeaza si ea santul: plina pe fund, stinsa lin spre maluri. Fara
+	// podelele de dinainte (0.45 si 0.35), care faceau placuta sa se vada la
+	// fel de tare pe toata latimea si ii stergeau forma.
+	// Blocul apasa mai tare decat canalul dintre ele: unde a calcat cauciucul
+	// santul e mai adanc, deci si mai opac. Asa amprenta se citeste si prin
+	// alfa, nu doar prin umbrire.
+	float press = 1.0 + tread_amount * near * tread * 0.35;
+	ALPHA = clamp(core_alpha * dip * age * press, 0.0, 1.0);
 }

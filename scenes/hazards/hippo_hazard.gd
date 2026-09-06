@@ -39,8 +39,19 @@ const HIPPO_GLB := "res://assets/models/serengeti/animals/hippo_back.glb"
 ## HippoHazard nu trece prin WorldProp, deci SLOT_REMAP_BY_MODEL nu-l atinge:
 ## mutarea se face aici, cu aceeasi unealta (`WorldProp._mesh_with_slots_moved`,
 ## care duplica mesh-ul, nu scrie in resursa partajata).
+##
+## De ce PAINTED_METAL 11 (#7692A8, gri-albastrui) si nu MARBLE_GREY 29 cum
+## scrie brief-ul §4: sub soarele cald al temei (sun_color 1.0/0.90/0.72) plus
+## saturatia 1.18 din post-procesare, orice gri NEUTRU iese crem sau maro.
+## Masurat pe aceeasi captura (--eye=-45,3,165 --look=-75,-1.5,165
+## --hippo-at=0.12 --hide=Sea, caseta din mijlocul spinarii), corp:
+##   29 MARBLE_GREY  #B8B4AC -> (191,166,125) HSV(36,0.34,0.75) crem
+##    6 ASPHALT_EDGE #696765 -> (119, 96, 67) HSV(32,0.44,0.47) maro
+##   11 PAINTED_METAL #7692A8 -> (127,139,126) HSV(115,0.09,0.55) GRI
+## Slotul rece anuleaza caldura soarelui (un slot e o CULOARE, nu o
+## eticheta); gri-ul iesit are o urma verde-albastruie, ca hipopotamul ud.
 const HIPPO_SLOT_REMAP := {
-	Palette.ROCK_DARK: Palette.MARBLE_GREY,      # corpul: gri
+	Palette.ROCK_DARK: Palette.PAINTED_METAL,    # corpul: gri
 	Palette.TILE_TERRACOTTA: Palette.KERB_RED,   # gura: rosu
 }
 

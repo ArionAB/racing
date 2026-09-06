@@ -55,6 +55,13 @@ const NO_BODY_RADIUS: float = 3.2
 ## masina + jumatate de animal.
 const HIT_HALF_X: float = 1.5
 const HIT_HALF_Z: float = 2.8
+## Kitul de savana (PR #376). Amandoua STATICE, in poza de repaus, cu
+## contractul shader-ului de galop: origine la sol, -Z inainte, ~30% din
+## varfuri sub `leg_top` (0,55 m) — masurat in docs/asset_briefs/serengeti_inventory.md.
+## Daca un fisier lipseste (sonda pe alt worktree, kit neimportat), turma cade
+## pe placeholder-ul din cutii, ca sa nu pice sondele din cauza unui asset.
+const WILDEBEEST_GLB := "res://assets/models/serengeti/animals/wildebeest.glb"
+const ZEBRA_GLB := "res://assets/models/serengeti/animals/zebra.glb"
 
 @export_group("Geometrie")
 ## Directia in care alearga turma (taie drumul). Orizontala, normalizata.
@@ -128,7 +135,14 @@ var _body_of: Dictionary = {}   # animal -> index corp
 var _animal_of: PackedInt32Array # corp -> animal sau -1
 var _pending: PackedInt32Array  # corp -> animal de plasat cadrul urmator
 var _cooldown: Dictionary = {}  # car -> secunde
+## DOUA MultiMesh-uri, un singur material: gnu-ul si zebra sunt mesh-uri
+## diferite (un MultiMesh are UN mesh), deci fiecare specie isi are lotul ei,
+## iar `_slot` spune ce instanta din lotul ei e animalul `i`. Ales in locul
+## instantelor alternate fiindca nu cere niciun mesh combinat si costa exact
+## un desen in plus (2 in loc de 1) la acelasi material.
 var _mmi: MultiMeshInstance3D
+var _mmi_zebra: MultiMeshInstance3D
+var _slot: PackedInt32Array
 var _rng := RandomNumberGenerator.new()
 ## Statistici pentru sonde.
 var hits: int = 0
@@ -281,20 +295,102 @@ func _ground(p: Vector3) -> float:
 
 
 func _build_visual() -> void:
+	var gnu_mesh := _animal_mesh_from(WILDEBEEST_GLB)
+	var zebra_mesh := _animal_mesh_from(ZEBRA_GLB)
+	var from_kit := gnu_mesh != null
+	if gnu_mesh == null:
+		push_warning("HerdHazard: %s nu se incarca; turma ramane pe cutii" % WILDEBEEST_GLB)
+		gnu_mesh = _animal_mesh()
+	if zebra_mesh == null:
+		zebra_mesh = gnu_mesh
+	var mat := _herd_material(from_kit)
+	_slot.resize(_count)
+	var n_zebra := 0
+	for i in _count:
+		if _is_zebra[i] == 1:
+			_slot[i] = n_zebra
+			n_zebra += 1
+	var n_gnu := 0
+	for i in _count:
+		if _is_zebra[i] == 0:
+			_slot[i] = n_gnu
+			n_gnu += 1
+	_mmi = _make_lot("Herd", gnu_mesh, n_gnu, mat)
+	_mmi_zebra = _make_lot("HerdZebra", zebra_mesh, n_zebra, mat)
+	for i in _count:
+		_set_custom(i, Color(_rng.randf(), 0.0, float(_is_zebra[i]), 0.0))
+
+
+func _make_lot(lot_name: String, mesh: Mesh, n: int, mat: Material) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_custom_data = true
-	mm.mesh = _animal_mesh()
-	mm.instance_count = _count
-	for i in _count:
-		mm.set_instance_custom_data(i, Color(_rng.randf(), 0.0,
-			1.0 if _is_zebra[i] == 1 else 0.0, 0.0))
-	_mmi = MultiMeshInstance3D.new()
-	_mmi.name = "Herd"
-	_mmi.multimesh = mm
-	_mmi.material_override = _herd_material()
-	_mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	add_child(_mmi)
+	mm.mesh = mesh
+	mm.instance_count = n
+	var mmi := MultiMeshInstance3D.new()
+	mmi.name = lot_name
+	mmi.multimesh = mm
+	# Transformurile instantelor sunt in spatiul LUMII (`_animal_transform`
+	# pleaca din `_pos`, care e global, ca si corpurile din bazin). Un
+	# MultiMesh le interpreteaza fata de nodul lui, deci fara `top_level`
+	# turma se desena deplasata cu pozitia nodului: pe Track14 (nodul la
+	# (70, 0, 165)) animalele vizibile stateau la 130 m in campie, in timp ce
+	# corpurile loveau pe drum. Invizibil pe ProbeSerengeti (nodul la origine)
+	# si in snapshot (care nu arata turma fara --herd-at).
+	mmi.top_level = true
+	mmi.transform = Transform3D.IDENTITY
+	mmi.material_override = mat
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	add_child(mmi)
+	return mmi
+
+
+func _lot_of(i: int) -> MultiMesh:
+	return (_mmi_zebra if _is_zebra[i] == 1 else _mmi).multimesh
+
+
+func _set_custom(i: int, c: Color) -> void:
+	_lot_of(i).set_instance_custom_data(_slot[i], c)
+
+
+## Mesh-ul unui animal din GLB, cu transformul nodului COPT in varfuri: un
+## MultiMesh nu stie de transformul nodului din care a venit mesh-ul, deci un
+## GLB cu rotatie pe nod ar fi iesit culcat. Intoarce null daca fisierul
+## lipseste sau nu are niciun MeshInstance3D.
+static func _animal_mesh_from(path: String) -> Mesh:
+	if not ResourceLoader.exists(path):
+		return null
+	var ps := load(path) as PackedScene
+	if ps == null:
+		return null
+	var root := ps.instantiate()
+	var found: MeshInstance3D = null
+	var stack: Array[Node] = [root]
+	while not stack.is_empty() and found == null:
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		if n is MeshInstance3D:
+			found = n as MeshInstance3D
+	var mesh: Mesh = null
+	if found != null and found.mesh != null:
+		var xf := Transform3D.IDENTITY
+		var cur: Node = found
+		while cur != null and cur != root:
+			if cur is Node3D:
+				xf = (cur as Node3D).transform * xf
+			cur = cur.get_parent()
+		if xf.is_equal_approx(Transform3D.IDENTITY):
+			mesh = found.mesh
+		else:
+			var out: ArrayMesh = null
+			for sidx in found.mesh.get_surface_count():
+				var st := SurfaceTool.new()
+				st.append_from(found.mesh, sidx, xf)
+				out = st.commit(out)
+			mesh = out
+	root.free()
+	return mesh
 
 
 ## Placeholder de gnu din cutii, cu fata spre -Z (inainte in Godot). Kitul
@@ -340,23 +436,30 @@ func _add_box(st: SurfaceTool, c: Vector3, size: Vector3, col: Color) -> void:
 		st.add_vertex(p[0]); st.add_vertex(p[2]); st.add_vertex(p[3])
 
 
-func _herd_material() -> ShaderMaterial:
+## Galopul in vertex shader + culoarea din ATLASUL de paleta (nu material alb
+## si nu vertex color pur): mesh-urile din kit au UV-urile colapsate pe centrul
+## slotului si AO-ul in vertex colors, exact contractul `Palette.world_material`.
+## Stratul de detaliu triplanar lipseste deliberat: pe un animal de 2 m, la 15+
+## m, mip-ul ales e oricum sub un texel — si masca de detaliu e ~0 pe sloturile
+## de blana. Un singur material pentru ambele loturi (gnu + zebra).
+## `from_kit` = false pastreaza placeholder-ul din cutii (fara UV-uri: ar citi
+## slotul 0 din atlas) pe culoarea de vertex.
+func _herd_material(from_kit: bool) -> ShaderMaterial:
 	var sh := Shader.new()
 	sh.code = """
 shader_type spatial;
 render_mode cull_back;
 // Galopul e in vertex shader: picioarele (y < leg_top) se leagana in
 // antifaza fata/spate, corpul salta. Faza per instanta in INSTANCE_CUSTOM.r,
-// rostogolit (fara animatie) in .g, zebra in .b.
+// rostogolit (fara animatie) in .g, zebra in .b (nefolosit de shader de cand
+// zebra e propriul ei mesh; ramane pentru sonde).
+uniform sampler2D albedo_atlas : source_color, filter_linear_mipmap;
+uniform float use_atlas = 1.0;
 uniform float gallop_hz = 2.4;
 uniform float leg_top = 0.55;
 uniform float swing = 0.32;
 uniform float bob = 0.09;
-varying float zebra_k;
-varying float model_z;
 void vertex() {
-	zebra_k = INSTANCE_CUSTOM.b;
-	model_z = VERTEX.z;
 	float ph = INSTANCE_CUSTOM.r * 6.2831853;
 	float still = INSTANCE_CUSTOM.g;
 	float leg = clamp((leg_top - VERTEX.y) / leg_top, 0.0, 1.0);
@@ -366,16 +469,16 @@ void vertex() {
 	VERTEX.y += abs(s) * bob * (1.0 - leg);
 }
 void fragment() {
-	vec3 base = COLOR.rgb;
-	// zebra: deschisa, cu dungi pe corp dupa pozitia pe -Z
-	float stripe = step(0.5, fract(model_z * 3.0));
-	vec3 zebra = mix(vec3(0.85, 0.83, 0.78), vec3(0.12, 0.11, 0.1), stripe);
-	ALBEDO = mix(base, zebra, zebra_k);
+	vec3 atlas = texture(albedo_atlas, UV).rgb;
+	ALBEDO = mix(COLOR.rgb, atlas * COLOR.rgb, use_atlas);
 	ROUGHNESS = 0.9;
+	SPECULAR = 0.15;
 }
 """
 	var mat := ShaderMaterial.new()
 	mat.shader = sh
+	mat.set_shader_parameter("albedo_atlas", load(Palette.ATLAS_PATH))
+	mat.set_shader_parameter("use_atlas", 1.0 if from_kit else 0.0)
 	return mat
 
 
@@ -423,8 +526,7 @@ func _advance_animals(delta: float) -> void:
 			_lag[i] += speed * delta # pulsul merge mai departe fara el
 			if _tumble_left[i] <= 0.0:
 				_state[i] = State.RUN
-				_mmi.multimesh.set_instance_custom_data(i,
-					Color(_wobble_ph[i] / TAU, 0.0, float(_is_zebra[i]), 0.0))
+				_set_custom(i, Color(_wobble_ph[i] / TAU, 0.0, float(_is_zebra[i]), 0.0))
 		elif _lag[i] > 0.0:
 			_lag[i] = maxf(_lag[i] - CATCH_UP * delta, 0.0)
 		var along := _along_of(i, _time)
@@ -444,9 +546,8 @@ func _animal_transform(i: int) -> Transform3D:
 
 
 func _place_visuals() -> void:
-	var mm := _mmi.multimesh
 	for i in _count:
-		mm.set_instance_transform(i, _animal_transform(i))
+		_lot_of(i).set_instance_transform(_slot[i], _animal_transform(i))
 
 
 func _cars() -> Array:
@@ -578,8 +679,7 @@ func _hit(a: int, car: Car) -> void:
 	_state[a] = State.TUMBLE
 	_tumble_left[a] = tumble_time
 	_tumble_roll[a] = PI * 0.5 * (1.0 if _rng.randf() < 0.5 else -1.0)
-	_mmi.multimesh.set_instance_custom_data(a,
-		Color(_wobble_ph[a] / TAU, 1.0, float(_is_zebra[a]), 0.0))
+	_set_custom(a, Color(_wobble_ph[a] / TAU, 1.0, float(_is_zebra[a]), 0.0))
 	if _body_of.has(a):
 		_release(int(_body_of[a]))
 	hits += 1

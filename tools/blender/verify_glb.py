@@ -173,7 +173,7 @@ def uv_kind(uv_count, exact_count):
 
 
 def verify(path, budget=None, front=None, origin="base", class_parts=(),
-           allow_car=()):
+           allow_car=(), allow_slots=()):
     gltf, blob, total, version = load_glb(path)
     print("=" * 74)
     print("%s  —  %d B, glTF v%d" % (os.path.basename(path), total, version))
@@ -304,6 +304,8 @@ def verify(path, budget=None, front=None, origin="base", class_parts=(),
                          else "slot%d" % slot)
                 names.append(label)
                 why = slot_problem(slot)
+                if why and slot in allow_slots:
+                    why = None  # exceptie declarata cu --allow-slots
                 if why and not (14 <= slot <= 16
                                 and _name_matches(name, allow_car)):
                     illegal.append((slot, label, why))
@@ -475,8 +477,14 @@ if __name__ == "__main__":
     origin = "base"
     class_parts = ()
     allow_car = ()
+    allow_slots = ()
     for f in flags:
-        if f.startswith("--class-parts="):
+        if f.startswith("--allow-slots="):
+            # Exceptie DECLARATA pentru sloturile din rezerva (24-31) pe care
+            # o pista le-a definit intre timp in scripts/palette.gd: 31 e
+            # NEON_PINK din Chongqing si e rozul flamingilor din Serengeti.
+            allow_slots = tuple(int(x) for x in f.split("=", 1)[1].split(",") if x.strip())
+        elif f.startswith("--class-parts="):
             class_parts = tuple(p.strip()
                                 for p in f.split("=", 1)[1].split(",")
                                 if p.strip())
@@ -504,4 +512,4 @@ if __name__ == "__main__":
     target = args[0]
     budget = int(args[1]) if len(args) > 1 else None
     sys.exit(0 if verify(target, budget, front, origin, class_parts,
-                         allow_car) else 1)
+                         allow_car, allow_slots) else 1)

@@ -154,8 +154,33 @@ const FADE_SECONDS: float = 26.0
 ## deci varsta iese din doua scaderi, nu din o mie de scrieri.
 func _process(_delta: float) -> void:
 	var m := _shared_material()
-	if m != null:
-		m.set_shader_parameter("now", float(Time.get_ticks_msec()) * 0.001)
+	if m == null:
+		return
+	m.set_shader_parameter("now", float(Time.get_ticks_msec()) * 0.001)
+	# Directia REALA a soarelui, nu una presupusa: malul luminat e cel dinspre
+	# soare, iar azimutul difera de la pista la pista (si s-a mai si remasurat
+	# cand s-a redesenat un traseu). O buza luminata simetric arata fals exact
+	# cand soarele bate oblic.
+	if _sun == null:
+		_sun = _find_sun()
+	if _sun != null:
+		m.set_shader_parameter("sun_dir", -_sun.global_basis.z)
+
+
+var _sun: DirectionalLight3D = null
+
+
+## Singura directionala din scena (constrangerea mobila din CLAUDE.md: o singura
+## lumina). Cautata o data, la prima urma depusa.
+func _find_sun() -> DirectionalLight3D:
+	var stack: Array[Node] = [get_tree().current_scene]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is DirectionalLight3D:
+			return n as DirectionalLight3D
+		for c in n.get_children():
+			stack.append(c)
+	return null
 
 
 ## Placuta unei urme: patru coloane pe latime, cu alfa in VERTECSI.
@@ -232,6 +257,7 @@ static func set_surface(mark: Color, profile: Dictionary) -> void:
 	# constanta exista, dar nu ajungea niciodata la shader, deci modelul se
 	# intindea o singura data pe 2.4 m — adica un bloc lung cat masina.
 	m.set_shader_parameter("tread_repeats", TREAD_REPEATS)
+	m.set_shader_parameter("lip_light", profile.get("lip", 0.55))
 
 
 static func _shared_material() -> ShaderMaterial:

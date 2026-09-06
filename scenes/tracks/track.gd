@@ -108,11 +108,17 @@ func trail_surface_color() -> Color:
 ## Cat de INCHISA e brazda fata de suprafata pe care e lasata, pe drumurile de
 ## pamant/nisip. Tinta e o brazda, nu vopsea: nisipul rascolit isi pierde din
 ## lumina fiindca boabele stau altfel si pentru ca sub crusta uscata e material
-## mai umed. 0.42 e cat s-a masurat pe drumul de nisip (#D3A855 curat ->
-## #9E7A45 pe brazda) — se citeste din masina, dar nu face din urma o dara de
-## pacura. (Constanta a stat in SandTrail cat timp exista o singura suprafata
-## afanata; culoarea brazdei e insa a PISTEI, ca si cea a prafului.)
-const TRAIL_MARK_DARKEN: float = 0.42
+## mai umed.
+##
+## 0.42 a stat aici cat timp umbrirea din shader avea semnul INVERSAT si LUMINA
+## mijlocul brazdei — cele doua se anulau, deci cifra parea potrivita. Dupa ce
+## gradientul a fost reparat, ele se ADUNA: numai DARKEN-ul dadea o dara cu 78
+## de trepte sub sol, iar cu basin/tread peste el se ajungea la -116 (masurat pe
+## imagine), adica pacura. Referinta (Beach Buggy Racing 2, nisip) sta la -31.
+##
+## Acum inchiderea vine din shader, unde e MODELATA — fund inchis, maluri
+## deschise — nu dintr-o scadere uniforma pe toata placuta.
+const TRAIL_MARK_DARKEN: float = 0.26
 
 ## Profilul brazdei per suprafata: latime (m), opacitatea miezului, opacitatea
 ## buzei. Astea sunt cele trei numere care fac diferenta intre "urma pe nisip"
@@ -122,6 +128,13 @@ const TRAIL_MARK_DARKEN: float = 0.42
 ##   — boabele se surpa si se aduna pe margini.
 ## - zapada: fagas ingust si compact, buza clara (zapada tine muchia).
 ## - restul (pamant tare): urma abia se vede, buza aproape zero.
+## ATENTIE la `basin` si `tread`: se INMULTESC in shader, si amandoua taie din
+## albedo. Valorile de dinainte (0.50 / 0.70) fusesera reglate cat timp umbrirea
+## avea semnul INVERSAT — adica pe o matematica in care nu inchideau nimic. Dupa
+## ce gradientul a fost reparat, aceleasi cifre lasau fundul brazdei la 0.24 din
+## culoare: masurat pe imagine, media darei era -116 fata de sol, cu 75% din ea
+## sub -60. Adica pacura, nu nisip rascolit. Referinta (Beach Buggy Racing 2, pe
+## nisip) sta la -31.
 func trail_profile() -> Dictionary:
 	if road_surface == "snow":
 		# Zapada primeste brazda cea mai DISCRETA, si nu din motive de stil:
@@ -135,12 +148,12 @@ func trail_profile() -> Dictionary:
 		# e cvasi-alba, deci acolo dara picteaza alb peste pamant. Reparatia
 		# adevarata e ca nuanta sa vina din solul de sub roata, nu dintr-o
 		# constanta pe pista — dar aia e alta schimbare, pe Baikal.
-		return {"width": 0.52, "core": 0.34, "basin": 0.30, "tread": 0.35}
+		return {"width": 0.52, "core": 0.34, "basin": 0.16, "tread": 0.22}
 	if road_surface == "dirt":
 		# Pamantul afanat tine cel mai bine amprenta: bazin adanc, model clar.
-		return {"width": 0.60, "core": 0.58, "basin": 0.50, "tread": 0.70}
+		return {"width": 0.60, "core": 0.66, "basin": 0.34, "tread": 0.48}
 	# Pamant tare: urma abia se vede, si nu retine modelul anvelopei.
-	return {"width": 0.46, "core": 0.44, "basin": 0.35, "tread": 0.30}
+	return {"width": 0.46, "core": 0.40, "basin": 0.18, "tread": 0.24}
 
 
 ## Culoarea FINALA a brazdei de rulare (SandTrail o pune direct pe material).

@@ -183,6 +183,9 @@ func _report() -> void:
 				used += 1
 		var sm := tr.material_override as ShaderMaterial
 		if sm != null:
+			print("    core_color=%s  core_alpha=%s"
+				% [sm.get_shader_parameter("core_color"),
+				sm.get_shader_parameter("core_alpha")])
 			print("    shader now=%s core_alpha=%s basin=%s tread=%s tex=%s"
 				% [sm.get_shader_parameter("now"),
 				sm.get_shader_parameter("core_alpha"),

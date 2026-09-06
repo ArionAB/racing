@@ -24,7 +24,7 @@ extends Track
 
 @export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing",
-	"cappadocia") var custom_theme: String = "forest"
+	"cappadocia", "serengeti") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
 ## Unghiul soarelui pentru pista asta, cand tema nu-l nimereste.
 ##

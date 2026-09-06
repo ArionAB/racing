@@ -290,6 +290,14 @@ var _bump_pairs: Dictionary = {}
 ## Rotatia (rad/s) primita dintr-o lovitura excentrica; se stinge singura si
 ## se ADUNA peste comanda de directie (care altfel ar sterge-o).
 var _impact_yaw: float = 0.0
+## Rotatia de SABOTAJ (rad/s) — vartejul de praf din Serengeti (brief §3,
+## clasa „sabotaj de control" din ref_notes/sisteme.md). Spre deosebire de
+## _impact_yaw, nu e plafonata de bump_yaw_max si nu se stinge exponential:
+## tine exact `_yaw_kick_left` secunde, ca sa livreze un unghi precis
+## (180° in 0,8 s), apoi dispare. Directia jucatorului ramane activa peste ea
+## — sabotajul iti ia orientarea, nu comenzile.
+var _yaw_kick: float = 0.0
+var _yaw_kick_left: float = 0.0
 
 # --- Suspensia pe raycast (fizica intreaga) ---
 ## Compresia curenta a fiecarui arc [0, suspension_rest], ordinea FL FR RL RR.
@@ -707,8 +715,9 @@ func _apply_driving(steer: float, throttle: float,
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
 	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
 	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
+	var kick := _yaw_kick if _yaw_kick_left > 0.0 else 0.0
 	angular_velocity = Vector3(
-		angular_velocity.x, yaw_rate + _impact_yaw, angular_velocity.z)
+		angular_velocity.x, yaw_rate + _impact_yaw + kick, angular_velocity.z)
 
 
 ## Bilantul contactelor raportate de solver: izbituri cu alte masini (plafon,
@@ -818,6 +827,10 @@ func _process_contacts(delta: float) -> void:
 	_impact_yaw *= exp(-4.0 * delta)
 	if absf(_impact_yaw) < 0.05:
 		_impact_yaw = 0.0
+	if _yaw_kick_left > 0.0:
+		_yaw_kick_left -= delta
+		if _yaw_kick_left <= 0.0:
+			_yaw_kick = 0.0
 
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.
@@ -1030,6 +1043,16 @@ func spin_body(rate_rad_s: float, duration: float) -> void:
 	_spin_left = duration
 
 
+## Sabotaj de control: masina e ROTITA REAL in jurul verticalei cu
+## `rate_rad_s`, timp de `seconds` (vartejul de praf: PI / 0,8 s). Spre
+## deosebire de spin_body, aici se schimba chiar orientarea: viteza isi
+## pastreaza directia din lume, deci dupa 180° mergi cu spatele si trebuie
+## sa te aduni singur. Nu se aduna peste un sabotaj in curs — il inlocuieste.
+func apply_yaw_kick(rate_rad_s: float, seconds: float) -> void:
+	_yaw_kick = rate_rad_s
+	_yaw_kick_left = maxf(seconds, 0.0)
+
+
 ## Aruncat in aer de o creasta de fly-off. SETAM velocity.y, nu adunam: pe sol
 ## el e mereu readus la ~0 de move_and_slide, deci o adunare s-ar pierde.
 func launch(up_speed: float) -> void:
@@ -1102,6 +1125,8 @@ func respawn(backoff_m: float = 14.0) -> void:
 	is_drifting = false
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
+	_yaw_kick_left = 0.0 # si nici in vartej
+	_yaw_kick = 0.0
 	burn_time = 0.0 # repusa pe sosea, nu mai arde
 	_forced_boost = 0.0
 	slip_time = 0.0

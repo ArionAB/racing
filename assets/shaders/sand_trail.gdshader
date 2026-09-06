@@ -32,6 +32,11 @@ uniform float tread_amount : hint_range(0.0, 1.0) = 0.65;
 // De la ce distanta (m) modelul incepe sa se topeasca in brazda neteda.
 // De cate ori se repeta modelul pe lungimea placutei.
 uniform float tread_repeats = 3.0;
+// Cat de tare se lumineaza malul dinspre soare. Fara el, dara e o pata inchisa:
+// vezi blocul RELIEFUL de mai jos.
+uniform float lip_light : hint_range(0.0, 2.0) = 0.55;
+// Directia soarelui in spatiul lumii, impinsa de SandTrail din DirectionalLight3D.
+uniform vec3 sun_dir = vec3(0.0, -1.0, 0.0);
 uniform float tread_fade_start = 22.0;
 uniform float tread_fade_end = 55.0;
 // Ceasul cursei (secunde), impins de SandTrail o data pe cadru. Varsta unei
@@ -78,12 +83,46 @@ void fragment() {
 	// urcau valorile din trail_profile: gradientul avea semnul gresit.
 	// ####################################################################
 	float shade = 1.0 - basin * dip;
-	// Blocurile de anvelopa se apasa in fundul santului: acolo unde calca
-	// cauciucul, solul e si mai batatorit, deci si mai inchis.
-	// 0.75, nu 0.45: blocurile trebuie sa se VADA ca amprenta, nu sa fie o
-	// nuanta peste sant. Fara asta, modelul de anvelopa se ghicea doar la doi
-	// metri de bara si intreaga textura era degeaba.
-	shade *= 1.0 - tread_amount * near * tread * 0.75;
+
+	// ####################################################################
+	// RELIEFUL: umbra SINGURA nu se vede ca adancitura
+	//
+	// Un sant se citeste fiindca are DOUA lucruri — umbra in fund SI lumina pe
+	// malul dinspre soare. Ochiul deduce forma din perechea asta.
+	//
+	// Masurat pe ghidul vizual (panoul TRACKS CLOSE-UP): 30.7% din pixeli sunt
+	// mai inchisi decat fundalul, dar 20.8% sunt mai DESCHISI — raport 0.68.
+	// Varianta cu umbra singura, care a stat pe main, avea raport 0.04: 96% din
+	// dara doar intuneca. De la volan nu avea nicio adancime, oricat de bine
+	// era modelat bazinul. Garda e tools/ProbeRelief.tscn.
+	//
+	// Panta malului pe latime e derivata lui `dip`: d/dx(1 - x^2) = -2x. Malul
+	// a carui panta urca spre soare primeste lumina, celalalt ramane in umbra —
+	// de-aia trebuie directia REALA a soarelui, nu o buza simetrica. O buza
+	// luminata pe amandoua partile arata fals exact cand soarele bate oblic.
+	// ####################################################################
+	vec3 sun_w = normalize(sun_dir);
+	// Normala placutei in lume e Y; malul inclina normala pe latimea urmei.
+	// `slope` e +1 pe malul din dreapta, -1 pe cel din stanga, 0 pe fund.
+	float slope = -2.0 * across;
+	// Latimea urmei in lume, ca sa stim in ce directie "cade" malul.
+	vec3 side_w = normalize(vec3(MODEL_MATRIX[0].xyz));
+	// Cat de mult priveste malul spre soare (soarele bate DINSPRE -sun_dir).
+	float toward = dot(side_w * slope, -sun_w);
+	// Buza traieste pe TALUZ, nu pe muchia de afara. `dip * (1 - dip)` are
+	// varful la jumatatea pantei, adica exact unde malul urca — iar acolo alfa
+	// placutei inca exista. Prima varianta punea varful la `across = ±1`, unde
+	// `dip` (si deci alfa) e zero: buza se desena fix unde placuta e invizibila,
+	// si de-aia raportul urcase doar de la 0.04 la 0.12.
+	float band = dip * (1.0 - dip) * 4.0;
+	// Buza se adauga PROPORTIONAL cu cat de deschis e solul, nu absolut. Pe
+	// nisip luminos un plus de 0.5 se pierde in stralucire; pe soseaua
+	// vulcanica a Strombolilui acelasi plus e o dunga alba, fiindca porneste
+	// de la aproape negru. Masurat: aceeasi buza dadea raport 0.36 pe Okinawa
+	// si peste 3 pe Stromboli. Inmultind cu `shade` (deci cu culoarea locala),
+	// buza ramane o LUMINARE a solului, nu o vopsea peste el.
+	float lip = max(toward, 0.0) * band * lip_light;
+	shade *= 1.0 + lip;
 	ALBEDO = core_color * shade;
 
 	// Stingerea cu varsta: urma proaspata e plina, cea veche abia se ghiceste.

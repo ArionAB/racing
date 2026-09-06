@@ -228,6 +228,10 @@ static func set_surface(mark: Color, profile: Dictionary) -> void:
 	m.set_shader_parameter("core_alpha", profile.get("core", MARK_ALPHA))
 	m.set_shader_parameter("basin", profile.get("basin", 0.45))
 	m.set_shader_parameter("tread_amount", profile.get("tread", 0.65))
+	# Cate amprente de anvelopa intra pe lungimea unei placute. Pana acum
+	# constanta exista, dar nu ajungea niciodata la shader, deci modelul se
+	# intindea o singura data pe 2.4 m — adica un bloc lung cat masina.
+	m.set_shader_parameter("tread_repeats", TREAD_REPEATS)
 
 
 static func _shared_material() -> ShaderMaterial:

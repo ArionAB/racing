@@ -107,8 +107,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 0.0, 165)
 script = ExtResource("3_herd")
 flow_dir = Vector3(0, 0, 1)
 road_dir = Vector3(-1, 0, 0)
-files_per_strip = 3
-spacing = 2.2
+files_per_strip = 2
+spacing = 2.0
 
 [node name="Hipopotam1" type="AnimatableBody3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.0, -1.5, 163.0)
@@ -1212,6 +1212,7 @@ count = 620
 half_x = 15.0
 band_near = 13.0
 band_far = 110.0
+min_gap = 2.0
 
 [node name="TurmaFundalDreapta" type="Node3D" parent="DecorManual/ZoneB_RaulDeGnu"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, -0.299973, 165)
@@ -1222,7 +1223,34 @@ band_near = 13.0
 band_far = 32.0
 far_side = false
 near_side = true
+min_gap = 2.0
 seed = 2711
+
+[node name="TurmaAproapeStanga" type="Node3D" parent="DecorManual/ZoneB_RaulDeGnu"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, -0.299973, 165)
+script = ExtResource("herdbg")
+count = 26
+half_x = 16.0
+band_near = 8.0
+band_far = 24.0
+zebra_ratio = 0.25
+heading_spread = 0.45
+min_gap = 3.2
+seed = 5501
+
+[node name="TurmaAproapeDreapta" type="Node3D" parent="DecorManual/ZoneB_RaulDeGnu"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, -0.299973, 165)
+script = ExtResource("herdbg")
+count = 20
+half_x = 16.0
+band_near = 9.0
+band_far = 23.0
+far_side = false
+near_side = true
+zebra_ratio = 0.25
+heading_spread = 0.45
+min_gap = 3.2
+seed = 5502
 
 [node name="ZoneC_VadulMara" type="Node3D" parent="DecorManual"]
 

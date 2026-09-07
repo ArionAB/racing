@@ -40,6 +40,11 @@ extends Node3D
 @export_range(0.0, 1.0, 0.05) var gallop_ratio: float = 0.0
 ## Toti cu fata in directia curgerii (+Z local), cu abaterea asta in radiani.
 @export_range(0.0, 3.14, 0.05) var heading_spread: float = 0.6
+## Distanta minima intre doua animale, in metri. Fara ea instantele cad una
+## peste alta (siluete contopite — exact defectul „masa bruna continua"):
+## uniformul nu se fereste de el insusi. Se respinge si se reincearca de
+## cateva ori; 0 stinge mecanismul.
+@export_range(0.0, 6.0, 0.1) var min_gap: float = 0.0
 @export var seed: int = 1403
 
 var _mmi_gnu: MultiMeshInstance3D
@@ -89,15 +94,34 @@ func _build() -> void:
 	var xf_zebra: Array[Transform3D] = []
 	var space := get_world_3d().direct_space_state
 	var top := global_position.y + 150.0
+	var placed: Array[Vector2] = []
+	var gap2 := min_gap * min_gap
 	for i in count:
 		var sgn: float = sides[i % sides.size()]
-		var lx := rng.randf_range(-half_x, half_x)
-		# Mai desi aproape de drum decat departe (t patrat pe uniform: jumatate
-		# din animale in primul sfert al benzii), ca in referinta, unde primul
-		# rand e compact si fundalul se rareste.
-		var t := rng.randf()
-		t = t * t
-		var lz := sgn * lerpf(band_near, band_far, t)
+		var lx := 0.0
+		var lz := 0.0
+		# Pana la 12 incercari sa cada la cel putin `min_gap` de vecini; daca
+		# nu reuseste, se accepta ultima (mai bine un animal in plus decat un
+		# gol, si oricum banda e finita).
+		for _try in 12:
+			lx = rng.randf_range(-half_x, half_x)
+			# Mai desi aproape de drum decat departe (t patrat pe uniform:
+			# jumatate din animale in primul sfert al benzii), ca in referinta,
+			# unde primul rand e compact si fundalul se rareste.
+			var t := rng.randf()
+			t = t * t
+			lz = sgn * lerpf(band_near, band_far, t)
+			if gap2 <= 0.0:
+				break
+			var ok := true
+			for q in placed:
+				if Vector2(lx, lz).distance_squared_to(q) < gap2:
+					ok = false
+					break
+			if ok:
+				break
+		if gap2 > 0.0:
+			placed.append(Vector2(lx, lz))
 		var wp := global_transform * Vector3(lx, 0.0, lz)
 		var gy := global_position.y
 		var q := PhysicsRayQueryParameters3D.create(

@@ -81,6 +81,14 @@ extends Track
 ##      coloreaza corect si pe ecran nu ajunge nimic.
 @export var custom_strata_bands: Array[Vector4] = []
 @export var custom_strata_band_tints: Array[Color] = []
+## ETAJUL DE PESTE O COTA, de pe nodul pistei (mecanismul alpin `rock_band_tint`
+## / `rock_line` / `rock_fade` din Track.themes(), fara sa fie in tema): pe
+## Serengeti e iarba VERDE de altitudine — padurea de ceata (POI D), buza si
+## craterul —, adica o proprietate a MUNTELUI (cota absoluta), nu a fractiei.
+## Alpha 0 = nesetat, tema ramane bit-identica.
+@export var custom_rock_band_tint: Color = Color(0, 0, 0, 0)
+@export var custom_rock_line: float = 0.0
+@export var custom_rock_fade: float = 12.0
 ## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
 ## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).
 @export_enum("asphalt", "dirt", "snow") var custom_road_surface: String = "asphalt"
@@ -260,6 +268,10 @@ func _theme_overrides() -> Dictionary:
 	if not custom_strata_bands.is_empty():
 		over["strata_bands"] = custom_strata_bands
 		over["strata_band_tints"] = custom_strata_band_tints
+	if custom_rock_band_tint.a > 0.0:
+		over["rock_band_tint"] = custom_rock_band_tint
+		over["rock_line"] = custom_rock_line
+		over["rock_fade"] = custom_rock_fade
 	return over
 
 

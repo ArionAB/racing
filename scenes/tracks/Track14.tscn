@@ -73,6 +73,9 @@ custom_ravines = Array[Vector4]([Vector4(0.358, 0.486, 45, 1)])
 custom_cornice_ravines = Array[int]([0])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 2.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 175)])
+custom_rock_band_tint = Color(0.357, 0.486, 0.204, 1)
+custom_rock_line = 6.0
+custom_rock_fade = 10.0
 custom_width_segments = Array[Vector3]([Vector3(0.985, 0.04, 9.0), Vector3(0.04, 0.121, 10.0), Vector3(0.121, 0.173, 8.0), Vector3(0.196, 0.362, 6.5), Vector3(0.362, 0.482, 7.0), Vector3(0.482, 0.715, 6.0), Vector3(0.715, 0.853, 9.0), Vector3(0.853, 0.887, 7.0)])
 custom_lagoon = Array[Vector2]([Vector2(52.0, -68.0), Vector2(48.0, -52.1), Vector2(36.8, -38.6), Vector2(19.9, -29.6), Vector2(0.0, -26.4), Vector2(-19.9, -29.6), Vector2(-36.8, -38.6), Vector2(-48.0, -52.1), Vector2(-52.0, -68.0), Vector2(-48.0, -83.9), Vector2(-36.8, -97.4), Vector2(-19.9, -106.4), Vector2(-0.0, -109.6), Vector2(19.9, -106.4), Vector2(36.8, -97.4), Vector2(48.0, -83.9)])
 sea_level_offset = -16.26
@@ -140,6 +143,945 @@ script = ExtResource("prop")
 [node name="ZoneC_VadulMara" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneD_PadureaDeCeata" type="Node3D" parent="DecorManual"]
+
+[node name="euforbie1" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.724514, 0, -0.795871, 0, 1.076258, 0, 0.795871, 0, -0.724514, -185.827271, 4.565811, 124.497139)
+metadata/coliziune = "trunk"
+
+[node name="euforbie2" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.495011, 0, 0.672275, 0, 0.834859, 0, -0.672275, 0, -0.495011, -177.049850, 5.451111, 108.343971)
+metadata/coliziune = "trunk"
+
+[node name="euforbie3" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.737325, 0, 0.106078, 0, 0.744917, 0, -0.106078, 0, 0.737325, -192.567780, 5.897354, 116.528152)
+metadata/coliziune = "trunk"
+
+[node name="euforbie4" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.971965, 0, -0.059893, 0, 0.973809, 0, 0.059893, 0, 0.971965, -195.885635, 6.443222, 113.845184)
+metadata/coliziune = "trunk"
+
+[node name="euforbie5" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.426267, 0, -0.904483, 0, 0.999897, 0, 0.904483, 0, 0.426267, -182.619278, 6.889801, 99.337204)
+metadata/coliziune = "trunk"
+
+[node name="euforbie6" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.418266, 0, 1.026772, 0, 1.108697, 0, -1.026772, 0, 0.418266, -184.891663, 7.309784, 96.681923)
+metadata/coliziune = "trunk"
+
+[node name="euforbie7" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.721131, 0, 0.606858, 0, 0.942500, 0, -0.606858, 0, -0.721131, -201.948700, 7.570862, 107.384460)
+metadata/coliziune = "trunk"
+
+[node name="euforbie8" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.193112, 0, -1.000616, 0, 1.019080, 0, 1.000616, 0, -0.193112, -205.166443, 8.353226, 101.855049)
+metadata/coliziune = "trunk"
+
+[node name="euforbie9" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.130830, 0, -0.919277, 0, 0.928540, 0, 0.919277, 0, 0.130830, -193.317200, 9.093277, 87.159607)
+metadata/coliziune = "trunk"
+
+[node name="euforbie10" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.927646, 0, 0.047749, 0, 0.928875, 0, -0.047749, 0, -0.927646, -211.383408, 9.551590, 92.452797)
+metadata/coliziune = "trunk"
+
+[node name="euforbie11" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.601480, 0, 0.856669, 0, 1.046738, 0, -0.856669, 0, -0.601480, -213.934494, 10.091339, 87.108109)
+metadata/coliziune = "trunk"
+
+[node name="euforbie12" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.134248, 0, 0.947397, 0, 0.956862, 0, -0.947397, 0, -0.134248, -196.820892, 10.689072, 79.741249)
+metadata/coliziune = "trunk"
+
+[node name="euforbie13" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.190988, 0, -1.066646, 0, 1.083609, 0, 1.066646, 0, 0.190988, -213.887039, 11.659286, 70.454269)
+metadata/coliziune = "trunk"
+
+[node name="euforbie14" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.130012, 0, 0.810953, 0, 0.821309, 0, -0.810953, 0, -0.130012, -194.818039, 12.020828, 74.096214)
+metadata/coliziune = "trunk"
+
+[node name="euforbie15" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.809422, 0, 0.107962, 0, 0.816590, 0, -0.107962, 0, 0.809422, -195.718124, 12.426941, 71.556915)
+metadata/coliziune = "trunk"
+
+[node name="euforbie16" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.790841, 0, -0.275817, 0, 0.837559, 0, 0.275817, 0, 0.790841, -205.066284, 13.391068, 55.118050)
+metadata/coliziune = "trunk"
+
+[node name="euforbie17" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.813306, 0, -0.051578, 0, 0.814939, 0, 0.051578, 0, 0.813306, -185.908981, 14.350937, 63.411903)
+metadata/coliziune = "trunk"
+
+[node name="euforbie18" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.793712, 0, 0.348626, 0, 0.866902, 0, -0.348626, 0, 0.793712, -196.185333, 14.685440, 47.893570)
+metadata/coliziune = "trunk"
+
+[node name="euforbie19" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-1.040823, 0, 0.125266, 0, 1.048334, 0, -0.125266, 0, -1.040823, -192.696320, 15.150543, 46.250645)
+metadata/coliziune = "trunk"
+
+[node name="euforbie20" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.974038, 0, 0.310462, 0, 1.022319, 0, -0.310462, 0, -0.974038, -174.331573, 16.188156, 54.358940)
+metadata/coliziune = "trunk"
+
+[node name="euforbie21" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.494659, 0, 0.645789, 0, 0.813469, 0, -0.645789, 0, -0.494659, -183.481384, 16.984863, 37.460323)
+metadata/coliziune = "trunk"
+
+[node name="euforbie22" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.681039, 0, -0.358202, 0, 0.769495, 0, 0.358202, 0, 0.681039, -165.918533, 17.486359, 44.772884)
+metadata/coliziune = "trunk"
+
+[node name="euforbie23" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.257838, 0, 0.888556, 0, 0.925209, 0, -0.888556, 0, 0.257838, -164.094315, 17.907104, 40.816391)
+metadata/coliziune = "trunk"
+
+[node name="euforbie24" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.619323, 0, 0.864284, 0, 1.063272, 0, -0.864284, 0, -0.619323, -178.719437, 18.473938, 30.664936)
+metadata/coliziune = "trunk"
+
+[node name="euforbie25" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.634918, 0, -0.783193, 0, 1.008223, 0, 0.783193, 0, 0.634918, -161.205963, 19.267609, 26.673716)
+metadata/coliziune = "trunk"
+
+[node name="euforbie26" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.838876, 0, -0.203234, 0, 0.863144, 0, 0.203234, 0, 0.838876, -160.934021, 19.711151, 22.186428)
+metadata/coliziune = "trunk"
+
+[node name="euforbie27" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.735995, 0, 0.633180, 0, 0.970878, 0, -0.633180, 0, -0.735995, -180.308899, 20.311584, 22.326485)
+metadata/coliziune = "trunk"
+
+[node name="euforbie28" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.337436, 0, 0.951727, 0, 1.009776, 0, -0.951727, 0, -0.337436, -169.742371, 21.463760, 5.704909)
+metadata/coliziune = "trunk"
+
+[node name="euforbie29" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.095865, 0, 0.816215, 0, 0.821825, 0, -0.816215, 0, 0.095865, -187.263229, 22.124680, 13.941050)
+metadata/coliziune = "trunk"
+
+[node name="euforbie30" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.833213, 0, -0.144296, 0, 0.845615, 0, 0.144296, 0, 0.833213, -177.248123, 22.769623, -2.437519)
+metadata/coliziune = "trunk"
+
+[node name="euforbie31" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(1.030612, 0, 0.158859, 0, 1.042783, 0, -0.158859, 0, 1.030612, -181.594559, 23.314987, -4.166014)
+metadata/coliziune = "trunk"
+
+[node name="euforbie32" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.956700, 0, 0.295492, 0, 1.001295, 0, -0.295492, 0, -0.956700, -197.187439, 23.871460, 4.428411)
+metadata/coliziune = "trunk"
+
+[node name="euforbie33" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.665764, 0, 0.805383, 0, 1.044932, 0, -0.805383, 0, -0.665764, -190.505234, 25.143112, -13.994238)
+metadata/coliziune = "trunk"
+
+[node name="euforbie34" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.006243, 0, -1.133673, 0, 1.133690, 0, 1.133673, 0, 0.006243, -208.157669, 25.625610, -7.090068)
+metadata/coliziune = "trunk"
+
+[node name="euforbie35" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.764810, 0, 0.550115, 0, 0.942104, 0, -0.550115, 0, 0.764810, -196.138107, 26.732208, -20.690941)
+metadata/coliziune = "trunk"
+
+[node name="euforbie36" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.740696, 0, -0.646169, 0, 0.982937, 0, 0.646169, 0, -0.740696, -213.330597, 27.332855, -24.712416)
+metadata/coliziune = "trunk"
+
+[node name="euforbie37" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.886364, 0, 0.494559, 0, 1.015002, 0, -0.494559, 0, 0.886364, -194.461960, 27.775253, -26.370722)
+metadata/coliziune = "trunk"
+
+[node name="euforbie38" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.988038, 0, 0.065224, 0, 0.990188, 0, -0.065224, 0, 0.988038, -195.624359, 28.364243, -29.461309)
+metadata/coliziune = "trunk"
+
+[node name="euforbie39" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.809934, 0, 0.079801, 0, 0.813856, 0, -0.079801, 0, 0.809934, -210.728760, 28.550842, -39.047447)
+metadata/coliziune = "trunk"
+
+[node name="euforbie40" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.817947, 0, 0.351109, 0, 0.890121, 0, -0.351109, 0, -0.817947, -206.911713, 29.067154, -44.087795)
+metadata/coliziune = "trunk"
+
+[node name="euforbie41" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.423851, 0, 0.623187, 0, 0.753665, 0, -0.623187, 0, -0.423851, -192.040161, 29.228836, -34.276543)
+metadata/coliziune = "trunk"
+
+[node name="euforbie42" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.741068, 0, -0.734047, 0, 1.043075, 0, 0.734047, 0, -0.741068, -188.342407, 29.672073, -36.177155)
+metadata/coliziune = "trunk"
+
+[node name="euforbie43" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.861548, 0, -0.310249, 0, 0.915707, 0, 0.310249, 0, 0.861548, -197.510834, 30.681351, -55.471500)
+metadata/coliziune = "trunk"
+
+[node name="euforbie44" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.390156, 0, -0.810199, 0, 0.899247, 0, 0.810199, 0, 0.390156, -181.822083, 30.805527, -43.462109)
+metadata/coliziune = "trunk"
+
+[node name="euforbie45" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.901778, 0, -0.103551, 0, 0.907704, 0, 0.103551, 0, -0.901778, -180.659607, 31.246140, -47.337460)
+metadata/coliziune = "trunk"
+
+[node name="euforbie46" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.817768, 0, 0.481639, 0, 0.949063, 0, -0.481639, 0, -0.817768, -187.956284, 32.224899, -64.908928)
+metadata/coliziune = "trunk"
+
+[node name="euforbie47" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.540781, 0, 0.945163, 0, 1.088933, 0, -0.945163, 0, 0.540781, -171.905411, 32.775620, -57.130165)
+metadata/coliziune = "trunk"
+
+[node name="euforbie48" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.939181, 0, -0.306239, 0, 0.987848, 0, 0.306239, 0, 0.939181, -181.135666, 33.399139, -72.239998)
+metadata/coliziune = "trunk"
+
+[node name="euforbie49" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.386791, 0, 0.899993, 0, 0.979589, 0, -0.899993, 0, 0.386791, -179.160049, 33.782730, -74.129349)
+metadata/coliziune = "trunk"
+
+[node name="euforbie50" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.345506, 0, -0.839699, 0, 0.908003, 0, 0.839699, 0, -0.345506, -164.077744, 34.031235, -66.499786)
+metadata/coliziune = "trunk"
+
+[node name="euforbie51" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.803958, 0, -0.336433, 0, 0.871513, 0, 0.336433, 0, -0.803958, -161.752808, 34.500641, -71.086838)
+metadata/coliziune = "trunk"
+
+[node name="euforbie52" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.944010, 0, 0.212819, 0, 0.967702, 0, -0.212819, 0, 0.944010, -176.210983, 34.948181, -82.509613)
+metadata/coliziune = "trunk"
+
+[node name="euforbie53" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.304691, 0, -1.038635, 0, 1.082404, 0, 1.038635, 0, 0.304691, -174.320450, 35.343140, -85.429382)
+metadata/coliziune = "trunk"
+
+[node name="euforbie54" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-1.000684, 0, 0.218325, 0, 1.024224, 0, -0.218325, 0, -1.000684, -155.188873, 36.111038, -84.725395)
+metadata/coliziune = "trunk"
+
+[node name="euforbie55" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.957733, 0, -0.391360, 0, 1.034609, 0, 0.391360, 0, 0.957733, -170.747070, 36.438766, -94.714302)
+metadata/coliziune = "trunk"
+
+[node name="euforbie56" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.346159, 0, -0.973670, 0, 1.033373, 0, 0.973670, 0, -0.346159, -168.357010, 36.803024, -97.216339)
+metadata/coliziune = "trunk"
+
+[node name="euforbie57" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.334678, 0, 0.794014, 0, 0.861666, 0, -0.794014, 0, 0.334678, -149.673782, 37.585312, -96.545326)
+metadata/coliziune = "trunk"
+
+[node name="euforbie58" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.359147, 0, -0.827231, 0, 0.901830, 0, 0.827231, 0, -0.359147, -164.532288, 37.943008, -107.499367)
+metadata/coliziune = "trunk"
+
+[node name="euforbie59" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.162149, 0, 1.112436, 0, 1.124192, 0, -1.112436, 0, -0.162149, -163.158859, 38.422173, -112.273216)
+metadata/coliziune = "trunk"
+
+[node name="febra60" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.907332, 0, 0.202166, 0, 0.929582, 0, -0.202166, 0, -0.907332, -178.960510, 3.003632, 138.003143)
+metadata/coliziune = "trunk"
+
+[node name="febra61" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.566720, 0, -0.852793, 0, 1.023928, 0, 0.852793, 0, 0.566720, -191.091705, 5.265167, 121.940475)
+metadata/coliziune = "trunk"
+
+[node name="smochin62" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.858182, 0, 0.395558, 0, 0.944956, 0, -0.395558, 0, 0.858182, -202.083511, 7.377502, 109.406662)
+metadata/coliziune = "trunk"
+
+[node name="febra63" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.397564, 0, 0.916006, 0, 0.998561, 0, -0.916006, 0, 0.397564, -207.221283, 8.356247, 103.389839)
+metadata/coliziune = "trunk"
+
+[node name="smochin64" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.147090, 0, -0.962510, 0, 0.973684, 0, 0.962510, 0, -0.147090, -214.106354, 9.525360, 93.693169)
+metadata/coliziune = "trunk"
+
+[node name="smochin65" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.409737, 0, 0.846471, 0, 0.940424, 0, -0.846471, 0, 0.409737, -217.194412, 10.541107, 83.234161)
+metadata/coliziune = "trunk"
+
+[node name="febra66" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.871495, 0, -0.237652, 0, 0.903317, 0, 0.237652, 0, -0.871495, -216.497375, 11.672806, 69.623329)
+metadata/coliziune = "trunk"
+
+[node name="smochin67" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.345495, 0, 0.944395, 0, 1.005609, 0, -0.944395, 0, 0.345495, -212.202850, 12.812637, 57.897385)
+metadata/coliziune = "trunk"
+
+[node name="smochin68" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.139995, 0, 0.852380, 0, 0.863800, 0, -0.852380, 0, -0.139995, -203.661423, 14.010498, 49.679447)
+metadata/coliziune = "trunk"
+
+[node name="febra69" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.986520, 0, 0.025539, 0, 0.986851, 0, -0.025539, 0, 0.986520, -196.870132, 15.041702, 44.293026)
+metadata/coliziune = "trunk"
+
+[node name="smochin70" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.873187, 0, -0.277165, 0, 0.916120, 0, 0.277165, 0, 0.873187, -189.786438, 16.380356, 38.451145)
+metadata/coliziune = "trunk"
+
+[node name="smochin71" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.745111, 0, 0.708416, 0, 1.028126, 0, -0.708416, 0, 0.745111, -183.185028, 17.633911, 34.092510)
+metadata/coliziune = "trunk"
+
+[node name="febra72" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.283453, 0, -1.010965, 0, 1.049950, 0, 1.010965, 0, -0.283453, -182.627884, 18.294601, 30.706491)
+metadata/coliziune = "trunk"
+
+[node name="smochin73" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.538958, 0, 0.759608, 0, 0.931386, 0, -0.759608, 0, -0.538958, -182.421494, 19.509293, 26.076292)
+metadata/coliziune = "trunk"
+
+[node name="smochin74" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.077115, 0, -1.002059, 0, 1.005022, 0, 1.002059, 0, -0.077115, -184.119034, 20.399506, 23.170929)
+metadata/coliziune = "trunk"
+
+[node name="febra75" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.913835, 0, 0.295420, 0, 0.960400, 0, -0.295420, 0, 0.913835, -186.293365, 20.989700, 19.874928)
+metadata/coliziune = "trunk"
+
+[node name="smochin76" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.840391, 0, 0.136260, 0, 0.851366, 0, -0.136260, 0, 0.840391, -192.280884, 22.407867, 14.177942)
+metadata/coliziune = "trunk"
+
+[node name="smochin77" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.635713, 0, -0.690025, 0, 0.938224, 0, 0.690025, 0, -0.635713, -199.918671, 23.801102, 7.452008)
+metadata/coliziune = "trunk"
+
+[node name="febra78" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.715652, 0, 0.633722, 0, 0.955908, 0, -0.633722, 0, 0.715652, -208.073166, 24.952408, 0.765147)
+metadata/coliziune = "trunk"
+
+[node name="smochin79" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.891444, 0, -0.199374, 0, 0.913468, 0, 0.199374, 0, -0.891444, -217.258896, 26.565414, -14.946882)
+metadata/coliziune = "trunk"
+
+[node name="smochin80" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.509040, 0, 0.888724, 0, 1.024184, 0, -0.888724, 0, -0.509040, -216.809784, 27.315155, -24.865255)
+metadata/coliziune = "trunk"
+
+[node name="febra81" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.687237, 0, 0.831821, 0, 1.078991, 0, -0.831821, 0, 0.687237, -215.086731, 28.362946, -38.193771)
+metadata/coliziune = "trunk"
+
+[node name="smochin82" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.570802, 0, 0.628019, 0, 0.848659, 0, -0.628019, 0, -0.570802, -208.205399, 29.388733, -48.861629)
+metadata/coliziune = "trunk"
+
+[node name="smochin83" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.948040, 0, 0.148672, 0, 0.959626, 0, -0.148672, 0, 0.948040, -203.203644, 30.095215, -53.313343)
+metadata/coliziune = "trunk"
+
+[node name="febra84" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.807274, 0, 0.613737, 0, 1.014083, 0, -0.613737, 0, -0.807274, -196.455826, 31.282623, -61.263386)
+metadata/coliziune = "trunk"
+
+[node name="smochin85" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.502050, 0, -0.747752, 0, 0.900659, 0, 0.747752, 0, 0.502050, -191.065918, 32.257721, -67.643608)
+metadata/coliziune = "trunk"
+
+[node name="smochin86" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.449039, 0, -0.836912, 0, 0.949767, 0, 0.836912, 0, 0.449039, -184.081818, 33.448120, -74.559334)
+metadata/coliziune = "trunk"
+
+[node name="febra87" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.197842, 0, 1.061495, 0, 1.079774, 0, -1.061495, 0, -0.197842, -179.827042, 34.384247, -79.613411)
+metadata/coliziune = "trunk"
+
+[node name="smochin88" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.822657, 0, 0.376898, 0, 0.904885, 0, -0.376898, 0, -0.822657, -177.824478, 35.288132, -86.989716)
+metadata/coliziune = "trunk"
+
+[node name="smochin89" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.002996, 0, -0.863762, 0, 0.863767, 0, 0.863762, 0, -0.002996, -172.963959, 36.418060, -95.632240)
+metadata/coliziune = "trunk"
+
+[node name="febra90" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.851244, 0, -0.502403, 0, 0.988446, 0, 0.502403, 0, 0.851244, -165.287964, 38.426880, -113.464478)
+metadata/coliziune = "trunk"
+
+[node name="smochin91" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.573757, 0, -0.667626, 0, 0.880297, 0, 0.667626, 0, -0.573757, -182.994308, 7.392380, 95.055031)
+metadata/coliziune = "trunk"
+
+[node name="smochin92" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.947715, 0, -0.150746, 0, 0.959629, 0, 0.150746, 0, -0.947715, -188.348846, 8.693695, 89.293747)
+metadata/coliziune = "trunk"
+
+[node name="febra93" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.121179, 0, -0.927972, 0, 0.935851, 0, 0.927972, 0, -0.121179, -192.386871, 9.415405, 85.103928)
+metadata/coliziune = "trunk"
+
+[node name="smochin94" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.137320, 0, -0.879028, 0, 0.889689, 0, 0.879028, 0, -0.137320, -193.650360, 10.445450, 81.094139)
+metadata/coliziune = "trunk"
+
+[node name="smochin95" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.897633, 0, -0.194109, 0, 0.918381, 0, 0.194109, 0, 0.897633, -193.477798, 11.050095, 77.917931)
+metadata/coliziune = "trunk"
+
+[node name="febra96" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.517426, 0, -0.871140, 0, 1.013221, 0, 0.871140, 0, 0.517426, -191.985657, 11.899216, 74.649704)
+metadata/coliziune = "trunk"
+
+[node name="smochin97" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.794050, 0, 0.397922, 0, 0.888176, 0, -0.397922, 0, 0.794050, -187.976547, 13.413361, 68.796486)
+metadata/coliziune = "trunk"
+
+[node name="smochin98" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.824616, 0, -0.419460, 0, 0.925169, 0, 0.419460, 0, -0.824616, -180.432297, 14.588058, 64.217339)
+metadata/coliziune = "trunk"
+
+[node name="febra99" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.845709, 0, -0.374149, 0, 0.924776, 0, 0.374149, 0, 0.845709, -171.853180, 16.056854, 56.909950)
+metadata/coliziune = "trunk"
+
+[node name="smochin100" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.690865, 0, -0.736931, 0, 1.010130, 0, 0.736931, 0, -0.690865, -164.709320, 17.045395, 50.636600)
+metadata/coliziune = "trunk"
+
+[node name="smochin101" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.794863, 0, 0.493980, 0, 0.935855, 0, -0.493980, 0, 0.794863, -158.613419, 18.322449, 37.640770)
+metadata/coliziune = "trunk"
+
+[node name="febra102" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.565667, 0, -0.741830, 0, 0.932893, 0, 0.741830, 0, -0.565667, -157.040741, 19.266525, 26.369377)
+metadata/coliziune = "trunk"
+
+[node name="smochin103" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.411565, 0, -0.910197, 0, 0.998922, 0, 0.910197, 0, 0.411565, -161.040207, 20.666306, 10.471703)
+metadata/coliziune = "trunk"
+
+[node name="smochin104" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.662036, 0, -0.797987, 0, 1.036858, 0, 0.797987, 0, -0.662036, -166.482513, 21.622604, 2.475168)
+metadata/coliziune = "trunk"
+
+[node name="febra105" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.114558, 0, -0.969065, 0, 0.975812, 0, 0.969065, 0, -0.114558, -175.399933, 22.884583, -4.480294)
+metadata/coliziune = "trunk"
+
+[node name="smochin106" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.248025, 0, -0.819355, 0, 0.856072, 0, 0.819355, 0, 0.248025, -183.638443, 24.167923, -10.570966)
+metadata/coliziune = "trunk"
+
+[node name="smochin107" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.929535, 0, 0.284158, 0, 0.971998, 0, -0.284158, 0, -0.929535, -188.414490, 25.402573, -16.578081)
+metadata/coliziune = "trunk"
+
+[node name="febra108" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.321523, 0, -0.927138, 0, 0.981306, 0, 0.927138, 0, -0.321523, -192.299652, 26.212769, -19.260748)
+metadata/coliziune = "trunk"
+
+[node name="smochin109" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.595735, 0, 0.649760, 0, 0.881526, 0, -0.649760, 0, 0.595735, -192.804138, 26.958817, -22.491730)
+metadata/coliziune = "trunk"
+
+[node name="smochin110" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.357185, 0, 0.905141, 0, 0.973068, 0, -0.905141, 0, -0.357185, -191.740402, 27.544830, -25.445202)
+metadata/coliziune = "trunk"
+
+[node name="febra111" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(1.066415, 0, -0.177401, 0, 1.081070, 0, 0.177401, 0, 1.066415, -190.553497, 28.397629, -29.162346)
+metadata/coliziune = "trunk"
+
+[node name="smochin112" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.589215, 0, -0.786357, 0, 0.982615, 0, 0.786357, 0, -0.589215, -185.087158, 29.902786, -37.242531)
+metadata/coliziune = "trunk"
+
+[node name="smochin113" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.410326, 0, 0.740330, 0, 0.846437, 0, -0.740330, 0, -0.410326, -179.567627, 31.001984, -43.960991)
+metadata/coliziune = "trunk"
+
+[node name="febra114" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.798463, 0, 0.567772, 0, 0.979749, 0, -0.567772, 0, 0.798463, -173.094223, 31.987442, -49.774200)
+metadata/coliziune = "trunk"
+
+[node name="smochin115" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.694889, 0, -0.611503, 0, 0.925639, 0, 0.611503, 0, 0.694889, -168.810913, 32.711609, -54.113861)
+metadata/coliziune = "trunk"
+
+[node name="smochin116" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.891792, 0, 0.397403, 0, 0.976331, 0, -0.397403, 0, -0.891792, -160.116470, 34.025879, -64.024315)
+metadata/coliziune = "trunk"
+
+[node name="febra117" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.736557, 0, 0.528042, 0, 0.906280, 0, -0.528042, 0, 0.736557, -156.514984, 34.960205, -73.289116)
+metadata/coliziune = "trunk"
+
+[node name="smochin118" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.538662, 0, 0.764029, 0, 0.934825, 0, -0.764029, 0, 0.538662, -152.151123, 36.135696, -83.502716)
+metadata/coliziune = "trunk"
+
+[node name="smochin119" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.854833, 0, -0.249467, 0, 0.890490, 0, 0.249467, 0, 0.854833, -148.088501, 36.930725, -89.218994)
+metadata/coliziune = "trunk"
+
+[node name="febra120" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.884413, 0, 0.380486, 0, 0.962785, 0, -0.380486, 0, 0.884413, -145.327393, 37.830383, -96.461716)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate121" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.523483, 0, 1.113366, 0, 1.230292, 0, -1.113366, 0, 0.523483, -206.865891, 6.752243, 119.563980)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate122" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.305419, 0, -1.098479, 0, 1.140147, 0, 1.098479, 0, 0.305419, -214.842514, 8.173355, 109.082253)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate123" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.994338, 0, -0.579625, 0, 1.150944, 0, 0.579625, 0, -0.994338, -220.832306, 9.443985, 96.757019)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate124" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.124926, 0, 1.140198, 0, 1.147021, 0, -1.140198, 0, -0.124926, -223.882339, 10.498184, 84.193718)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate125" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.993527, 0, -0.456792, 0, 1.093506, 0, 0.456792, 0, -0.993527, -223.602997, 12.331100, 61.112846)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate126" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.702598, 0, -0.952702, 0, 1.183759, 0, 0.952702, 0, -0.702598, -209.079422, 14.122833, 47.610901)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate127" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.042754, 0, 1.107526, 0, 1.108351, 0, -1.107526, 0, 0.042754, -197.748215, 15.861115, 39.890862)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate128" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.023518, 0, -0.646266, 0, 1.210475, 0, 0.646266, 0, -1.023518, -191.589478, 18.207352, 30.863541)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate129" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.518398, 0, 1.115606, 0, 1.230168, 0, -1.115606, 0, -0.518398, -193.031738, 19.087631, 27.702333)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate130" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.152009, 0, -1.117657, 0, 1.127946, 0, 1.117657, 0, -0.152009, -187.582672, 19.309723, 27.010618)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate131" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.603501, 0, -0.970142, 0, 1.142536, 0, 0.970142, 0, -0.603501, -188.043839, 20.296066, 23.510592)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate132" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.749606, 0, 1.004813, 0, 1.253618, 0, -1.004813, 0, 0.749606, -196.309677, 20.932266, 20.810497)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate133" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.894556, 0, 0.601802, 0, 1.078144, 0, -0.601802, 0, -0.894556, -207.574371, 22.710312, 14.265548)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate134" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.196139, 0, 1.200221, 0, 1.216142, 0, -1.200221, 0, -0.196139, -216.522324, 24.618835, 3.970638)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate135" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.975278, 0, 0.307418, 0, 1.022582, 0, -0.307418, 0, 0.975278, -222.009811, 26.465668, -13.886328)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate136" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.921371, 0, -0.662740, 0, 1.134966, 0, 0.662740, 0, 0.921371, -225.253464, 28.075241, -36.841999)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate137" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.991233, 0, 0.463144, 0, 1.094096, 0, -0.463144, 0, 0.991233, -214.585541, 29.760483, -55.689064)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate138" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.334639, 0, -1.071688, 0, 1.122719, 0, 1.071688, 0, -0.334639, -207.303040, 30.571274, -60.927574)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate139" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.698084, 0, 0.916180, 0, 1.151828, 0, -0.916180, 0, -0.698084, -202.888107, 31.618011, -69.002274)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate140" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.685284, 0, 1.052719, 0, 1.256118, 0, -1.052719, 0, 0.685284, -188.419067, 33.328613, -75.953140)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate141" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.157082, 0, -0.566757, 0, 1.288430, 0, 0.566757, 0, -1.157082, -189.393265, 33.976471, -82.654381)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate142" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.249485, 0, -1.171281, 0, 1.197556, 0, 1.171281, 0, -0.249485, -185.239441, 34.929382, -88.699509)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate143" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.146471, 0, -1.066087, 0, 1.076102, 0, 1.066087, 0, 0.146471, -176.871277, 36.355301, -97.250137)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate144" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.696559, 0, -0.942410, 0, 1.171892, 0, 0.942410, 0, 0.696559, -177.421631, 37.425331, -109.608772)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate145" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.144680, 0, 1.106345, 0, 1.115765, 0, -1.106345, 0, 0.144680, -160.760590, 3.844116, 112.647339)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate146" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.413134, 0, -1.067444, 0, 1.144604, 0, 1.067444, 0, -0.413134, -167.042618, 5.595963, 102.162132)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate147" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.094251, 0, -0.426314, 0, 1.174363, 0, 0.426314, 0, -1.094251, -182.438629, 9.504089, 84.879311)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate148" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.013193, 0, 0.820747, 0, 1.303912, 0, -0.820747, 0, -1.013193, -183.069534, 10.853836, 79.727806)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate149" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(1.172018, 0, 0.068143, 0, 1.173997, 0, -0.068143, 0, 1.172018, -187.167191, 10.672836, 80.152863)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate150" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.264543, 0, -0.216598, 0, 1.282959, 0, 0.216598, 0, 1.264543, -183.354141, 10.875061, 79.629776)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate151" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.210941, 0, 0.331187, 0, 1.255413, 0, -0.331187, 0, -1.210941, -181.376358, 12.315155, 74.309837)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate152" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.545178, 0, 1.030772, 0, 1.166066, 0, -1.030772, 0, 0.545178, -172.595078, 13.723160, 69.443176)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate153" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.470340, 0, -0.898107, 0, 1.013813, 0, 0.898107, 0, -0.470340, -166.110199, 16.468750, 55.440163)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate154" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.156035, 0, 1.076463, 0, 1.087713, 0, -1.076463, 0, -0.156035, -152.819412, 17.967697, 43.100101)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate155" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.021540, 0, 0.493336, 0, 1.134427, 0, -0.493336, 0, -1.021540, -148.489075, 19.517136, 23.057360)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate156" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.159371, 0, 0.429384, 0, 1.236330, 0, -0.429384, 0, 1.159371, -158.946930, 20.931320, 6.942260)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate157" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.034341, 0, -1.000053, 0, 1.000642, 0, 1.000053, 0, -0.034341, -165.984451, 23.305237, -9.204531)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate158" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.029792, 0, 1.258740, 0, 1.259093, 0, -1.258740, 0, -0.029792, -178.604874, 24.542694, -13.178834)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate159" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.116897, 0, 0.223665, 0, 1.139072, 0, -0.223665, 0, 1.116897, -183.197037, 26.039948, -20.134085)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate160" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.905991, 0, 0.598358, 0, 1.085749, 0, -0.598358, 0, 0.905991, -183.813812, 26.597046, -22.271097)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate161" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.433505, 0, 0.960878, 0, 1.054140, 0, -0.960878, 0, 0.433505, -186.655823, 26.865540, -22.910744)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate162" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.950623, 0, 0.883555, 0, 1.297827, 0, -0.883555, 0, -0.950623, -186.834900, 27.293518, -24.750954)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate163" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.161482, 0, -0.400121, 0, 1.228469, 0, 0.400121, 0, -1.161482, -176.948090, 28.446152, -30.022522)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate164" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.825069, 0, 0.701452, 0, 1.082947, 0, -0.701452, 0, -0.825069, -175.364258, 30.625183, -40.258011)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate165" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.505744, 0, -0.882843, 0, 1.017443, 0, 0.882843, 0, 0.505744, -163.671661, 31.785751, -45.581375)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate166" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.067027, 0, 1.266241, 0, 1.268014, 0, -1.266241, 0, 0.067027, -156.460983, 33.401245, -55.901237)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate167" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.254465, 0, -0.309999, 0, 1.292201, 0, 0.309999, 0, 1.254465, -150.445297, 35.217514, -72.480103)
+metadata/coliziune = "trunk"
+
+[node name="smochinSpate168" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.148710, 0, -0.292588, 0, 1.185388, 0, 0.292588, 0, -1.148710, -146.305252, 36.393509, -82.622673)
+metadata/coliziune = "trunk"
+
+[node name="febraSpate169" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-1.026441, 0, 0.493980, 0, 1.139121, 0, -0.493980, 0, -1.026441, -142.039871, 37.695038, -92.951347)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund170" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.296440, 0, -1.221155, 0, 1.256621, 0, 1.221155, 0, -0.296440, -214.169327, 5.799881, 136.897614)
+metadata/coliziune = "trunk"
+
+[node name="febraFund171" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.776333, 0, 0.707699, 0, 1.050491, 0, -0.707699, 0, -0.776333, -224.388733, 7.052338, 128.226807)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund172" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.590383, 0, 0.860630, 0, 1.043665, 0, -0.860630, 0, 0.590383, -228.205795, 8.802979, 107.556519)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund173" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.190507, 0, 0.104452, 0, 1.195081, 0, -0.104452, 0, 1.190507, -246.196808, 11.883453, 63.917694)
+metadata/coliziune = "trunk"
+
+[node name="febraFund174" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.500117, 0, -1.040170, 0, 1.154154, 0, 1.040170, 0, -0.500117, -229.356674, 16.439774, 35.738083)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund175" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.908577, 0, -0.688743, 0, 1.140122, 0, 0.688743, 0, 0.908577, -204.410645, 18.742935, 28.497963)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund176" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.899194, 0, 0.491627, 0, 1.024815, 0, -0.491627, 0, -0.899194, -201.123596, 20.413574, 22.996420)
+metadata/coliziune = "trunk"
+
+[node name="febraFund177" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-1.048667, 0, 0.067069, 0, 1.050810, 0, -0.067069, 0, -1.048667, -210.495697, 18.155045, 30.315243)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund178" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.174902, 0, 0.366792, 0, 1.230825, 0, -0.366792, 0, 1.174902, -201.557480, 16.420364, 37.226158)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund179" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.099145, 0, 0.146373, 0, 1.108848, 0, -0.146373, 0, -1.099145, -206.003159, 20.107483, 24.141294)
+metadata/coliziune = "trunk"
+
+[node name="febraFund180" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-1.024870, 0, 0.081998, 0, 1.028145, 0, -0.081998, 0, -1.024870, -219.108109, 23.675247, 10.035954)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund181" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.040816, 0, -0.105349, 0, 1.046134, 0, 0.105349, 0, 1.040816, -236.923920, 26.544739, -14.134760)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund182" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.086242, 0, -1.235318, 0, 1.238325, 0, 1.235318, 0, -0.086242, -241.795700, 28.641479, -50.177677)
+metadata/coliziune = "trunk"
+
+[node name="febraFund183" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.460087, 0, 1.092051, 0, 1.185013, 0, -1.092051, 0, 0.460087, -220.310822, 30.990356, -72.848671)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund184" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.367637, 0, -1.131910, 0, 1.190116, 0, 1.131910, 0, 0.367637, -202.661407, 32.527863, -77.840958)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund185" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.414145, 0, 1.014642, 0, 1.095908, 0, -1.014642, 0, -0.414145, -194.881531, 33.924164, -85.749641)
+metadata/coliziune = "trunk"
+
+[node name="febraFund186" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.799720, 0, 0.652154, 0, 1.031919, 0, -0.652154, 0, 0.799720, -199.211044, 35.092255, -99.346786)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund187" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-1.177630, 0, 0.363493, 0, 1.232452, 0, -0.363493, 0, -1.177630, -153.173828, 5.306000, 98.962479)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund188" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.883473, 0, -0.572460, 0, 1.052728, 0, 0.572460, 0, 0.883473, -160.477402, 9.453094, 84.303787)
+metadata/coliziune = "trunk"
+
+[node name="febraFund189" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.252935, 0, 1.005249, 0, 1.036581, 0, -1.005249, 0, -0.252935, -175.521332, 11.060562, 79.365479)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund190" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(-0.043056, 0, 1.038332, 0, 1.039225, 0, -1.038332, 0, -0.043056, -164.886230, 12.231308, 75.661621)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund191" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.357375, 0, -1.134402, 0, 1.189363, 0, 1.134402, 0, 0.357375, -169.965958, 9.338501, 85.305664)
+metadata/coliziune = "trunk"
+
+[node name="febraFund192" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.386132, 0, 1.105308, 0, 1.170813, 0, -1.105308, 0, -0.386132, -173.472198, 9.061600, 86.474663)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund193" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.477264, 0, -0.895712, 0, 1.014928, 0, 0.895712, 0, 0.477264, -154.955017, 12.625519, 74.303337)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund194" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.119323, 0, -0.265901, 0, 1.150473, 0, 0.265901, 0, 1.119323, -136.263916, 17.913849, 44.094284)
+metadata/coliziune = "trunk"
+
+[node name="febraFund195" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.233389, 0, -1.086416, 0, 1.111202, 0, 1.086416, 0, 0.233389, -141.798172, 21.634079, -1.366678)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund196" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.780734, 0, 0.791128, 0, 1.111498, 0, -0.791128, 0, 0.780734, -156.012909, 25.710617, -20.050880)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund197" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.001661, 0, -0.274309, 0, 1.038542, 0, 0.274309, 0, 1.001661, -174.331024, 27.176422, -24.922024)
+metadata/coliziune = "trunk"
+
+[node name="febraFund198" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.619776, 0, 0.948138, 0, 1.132735, 0, -0.948138, 0, -0.619776, -170.896927, 27.244415, -25.296345)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund199" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.089283, 0, -0.691700, 0, 1.290343, 0, 0.691700, 0, 1.089283, -173.648621, 25.552246, -18.439770)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund200" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(0.627352, 0, 0.999021, 0, 1.179667, 0, -0.999021, 0, 0.627352, -163.534073, 25.990921, -20.815130)
+metadata/coliziune = "trunk"
+
+[node name="febraFund201" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.913132, 0, -0.559077, 0, 1.070690, 0, 0.559077, 0, -0.913132, -157.668884, 31.109711, -40.161346)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund202" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.078500, 0, 0.189468, 0, 1.095016, 0, -0.189468, 0, 1.078500, -140.912170, 34.660141, -61.255215)
+metadata/coliziune = "trunk"
+
+[node name="smochinFund203" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fig_tree")]
+transform = Transform3D(1.200310, 0, -0.241297, 0, 1.224324, 0, 0.241297, 0, 1.200310, -129.297150, 36.767624, -75.574257)
+metadata/coliziune = "trunk"
+
+[node name="febraFund204" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.001711, 0, 1.089407, 0, 1.089408, 0, -1.089407, 0, 0.001711, -126.023727, 38.491173, -89.575241)
+metadata/coliziune = "trunk"
+
+[node name="granit205" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(-0.313155, 0, 1.129976, 0, 1.172566, 0, -1.129976, 0, -0.313155, -180.677551, 9.427963, 85.194519)
+
+[node name="granit206" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.592175, 0, -1.189795, 0, 1.329016, 0, 1.189795, 0, 0.592175, -183.862946, 8.242172, 90.586388)
+
+[node name="granit207" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.896601, 0, -0.156641, 0, 0.910181, 0, 0.156641, 0, 0.896601, -187.425980, 8.938751, 87.466423)
+
+[node name="granit208" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(1.011590, 0, 0.781805, 0, 1.278489, 0, -0.781805, 0, 1.011590, -188.759827, 9.680344, 84.081230)
+
+[node name="granit209" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(-0.947576, 0, -0.826218, 0, 1.257194, 0, 0.826218, 0, -0.947576, -217.935608, 12.525482, 59.682957)
+
+[node name="granit210" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(-0.227208, 0, -0.902413, 0, 0.930577, 0, 0.902413, 0, -0.227208, -209.245331, 13.072189, 56.115044)
+
+[node name="granit211" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.936604, 0, 0.782987, 0, 1.220777, 0, -0.782987, 0, -0.936604, -208.434662, 13.583633, 51.948582)
+
+[node name="granit212" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(1.216419, 0, 0.219655, 0, 1.236092, 0, -0.219655, 0, 1.216419, -211.698929, 13.247803, 53.886642)
+
+[node name="granit213" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(1.146870, 0, -0.621138, 0, 1.304271, 0, 0.621138, 0, 1.146870, -217.017853, 12.121307, 64.083054)
+
+[node name="granit214" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(-1.330794, 0, -0.059101, 0, 1.332106, 0, 0.059101, 0, -1.330794, -190.235031, 18.323853, 30.470041)
+
+[node name="granit215" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.485602, 0, 1.028515, 0, 1.137389, 0, -1.028515, 0, 0.485602, -185.665329, 17.571533, 33.616112)
+
+[node name="granit216" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-1.076003, 0, -0.115093, 0, 1.082140, 0, 0.115093, 0, -1.076003, -185.451736, 17.764847, 32.690414)
+
+[node name="granit217" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(-1.475818, 0, 0.612443, 0, 1.597851, 0, -0.612443, 0, -1.475818, -160.084122, 21.185577, 4.865532)
+
+[node name="granit218" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(1.032414, 0, -0.113953, 0, 1.038684, 0, 0.113953, 0, 1.032414, -163.346741, 21.436722, 3.720821)
+
+[node name="granit219" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.570425, 0, 1.005684, 0, 1.156194, 0, -1.005684, 0, 0.570425, -160.388382, 20.677109, 10.070683)
+
+[node name="granit220" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.898516, 0, -0.146766, 0, 0.910424, 0, 0.146766, 0, 0.898516, -168.978973, 21.970642, -0.373152)
+
+[node name="granit221" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(-0.618299, 0, -1.157086, 0, 1.311923, 0, 1.157086, 0, -0.618299, -182.203201, 25.569550, -18.352980)
+
+[node name="granit222" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(-0.953386, 0, 0.750234, 0, 1.213176, 0, -0.750234, 0, -0.953386, -186.399185, 25.142441, -15.856312)
+
+[node name="granit223" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.914378, 0, 1.162921, 0, 1.479349, 0, -1.162921, 0, 0.914378, -181.357071, 24.554001, -13.096541)
+
+[node name="granit224" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.564996, 0, -1.011324, 0, 1.158446, 0, 1.011324, 0, 0.564996, -186.305832, 25.149353, -15.952511)
+
+[node name="granit225" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(1.347982, 0, -0.459813, 0, 1.424249, 0, 0.459813, 0, 1.347982, -185.213226, 24.519806, -12.093981)
+
+[node name="granit226" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(0.658516, 0, -1.232121, 0, 1.397056, 0, 1.232121, 0, 0.658516, -185.535553, 26.939835, -23.357231)
+
+[node name="granit227" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.901993, 0, -0.575757, 0, 1.070088, 0, 0.575757, 0, 0.901993, -191.489182, 27.153702, -23.752922)
+
+[node name="granit228" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.680532, 0, 0.510096, 0, 0.850483, 0, -0.510096, 0, -0.680532, -192.239029, 27.188049, -23.785864)
+
+[node name="granit229" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(1.061493, 0, 0.643738, 0, 1.241437, 0, -0.643738, 0, 1.061493, -200.453995, 31.554077, -66.855057)
+
+[node name="granit230" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(-0.978257, 0, 0.826715, 0, 1.280798, 0, -0.826715, 0, -0.978257, -198.125305, 31.075775, -60.309448)
+
+[node name="granit231" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.190691, 0, -1.476042, 0, 1.488308, 0, 1.476042, 0, -0.190691, -196.075043, 31.277878, -60.927689)
+
+[node name="granit232" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.511862, 0, 0.929554, 0, 1.061166, 0, -0.929554, 0, 0.511862, -199.087479, 30.868698, -58.822914)
+
+[node name="granit233" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(1.332303, 0, -0.532990, 0, 1.434960, 0, 0.532990, 0, 1.332303, -148.961624, 35.233612, -71.788490)
+
+[node name="granit234" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(-0.350740, 0, 1.063345, 0, 1.119697, 0, -1.063345, 0, -0.350740, -154.260361, 35.367905, -76.496689)
+
+[node name="granit235" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.447413, 0, 1.022336, 0, 1.115952, 0, -1.022336, 0, 0.447413, -155.967331, 34.966248, -73.032730)
+
+[node name="granit236" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(-0.518600, 0, -1.225464, 0, 1.330680, 0, 1.225464, 0, -0.518600, -153.606506, 35.561234, -78.243156)
+
+[node name="granit237" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.921529, 0, 0.638902, 0, 1.121343, 0, -0.638902, 0, -0.921529, -154.517487, 35.554962, -78.621391)
+
+[node name="acacieIntrare238" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_acacia_umbrella_a")]
+transform = Transform3D(-0.419106, 0, 0.907937, 0, 1.000000, 0, -0.907937, 0, -0.419106, -166.304688, 2.070068, 145.312256)
+metadata/coliziune = "trunk"
+
+[node name="febraIesire239" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(0.905498, 0, 0.247584, 0, 0.938735, 0, -0.247584, 0, 0.905498, -138.087280, 40.009720, -111.509819)
+metadata/coliziune = "trunk"
+
+[node name="acacieIntrare240" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_acacia_umbrella_a")]
+transform = Transform3D(-0.384282, 0, -0.923216, 0, 1.000000, 0, 0.923216, 0, -0.384282, -143.100861, 1.322556, 134.821075)
+metadata/coliziune = "trunk"
+
+[node name="febraIesire241" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.075369, 0, -0.935705, 0, 0.938735, 0, 0.935705, 0, -0.075369, -147.158722, 41.545219, -138.471893)
+metadata/coliziune = "trunk"
+
+[node name="acacieIntrare242" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_acacia_umbrella_a")]
+transform = Transform3D(-0.341526, 0, 0.939872, 0, 1.000000, 0, -0.939872, 0, -0.341526, -144.207443, 0.554825, 161.198029)
+metadata/coliziune = "trunk"
+
+[node name="febraIesire243" parent="DecorManual/ZoneD_PadureaDeCeata" instance=ExtResource("s_fever_tree")]
+transform = Transform3D(-0.033136, 0, -0.938150, 0, 0.938735, 0, 0.938150, 0, -0.033136, -119.291824, 42.839020, -132.025574)
+metadata/coliziune = "trunk"
 
 [node name="ZoneE_Buza" type="Node3D" parent="DecorManual"]
 

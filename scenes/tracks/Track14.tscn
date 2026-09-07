@@ -514,7 +514,7 @@ transform = Transform3D(0.453596, 0, -0.891207, 0, 1.000000, 0, 0.891207, 0, 0.4
 metadata/coliziune = "none"
 
 [node name="KickerVad119" parent="DecorManual/ZoneC_VadulMara" instance=ExtResource("s_kopje_kicker")]
-transform = Transform3D(0.000000, 0, -1.000000, 0, 1.000000, 0, 1.000000, 0, 0.000000, -25.359999, -0.392792, 178.500000)
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1.000000, 0, 1.000000, 0, 0.000000, -25.359999, -0.531891, 191.000000)
 metadata/coliziune = "mesh"
 
 [node name="ZoneD_PadureaDeCeata" type="Node3D" parent="DecorManual"]

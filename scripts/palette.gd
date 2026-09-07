@@ -691,10 +691,22 @@ const CLASS_TINT := {
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
-	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
-	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
-	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
-	"granite": Color(0.95, 0.97, 1.0),
+	# Granitul Serengeti. Prima valoare (0.95, 0.97, 1.0) era o CORECTIE DE
+	# NUANTA pe o dala deja deschisa, si de aia bolovanii ieseau creta: masurat
+	# pe C_r1_decor1.png, un bolovan de mal e (211,178,129) S0.39 V0.83, pe
+	# cand in referinta stanca e (134,116,110) S0.18 V0.53 — a noastra e cu
+	# 60 % mai luminoasa si de doua ori mai saturata. Sub soarele cald al temei
+	# (1.0, 0.90, 0.72) plus saturatia 1.18 din post, orice tenta aproape de
+	# alb iese crem; granitul cere o tenta care si COBOARA valoarea, si taie
+	# caldura pe rosu/verde ca albastrul sa nu mai fie ultimul canal.
+	# Tinta luata din referinta, nu din tabel: V ~0.53, S ~0.18.
+	# RUNDA 1, a doua masuratoare: cu (0.60, 0.605, 0.655) valoarea a cazut la
+	# tinta (V 0.57 fata de 0.53) dar saturatia a ramas 0.46 fata de 0.18 —
+	# adica piatra MARO, nu granit gri. O tenta multiplicativa nu desatureaza
+	# singura: scaleaza canalele, nu le apropie. Ce le departeaza e soarele
+	# (1.0, 0.90, 0.72), deci tenta trebuie sa fie INVERSUL lui, normalizat ca
+	# sa nu urce valoarea: (1, 1/0.90, 1/0.72) = (1, 1.11, 1.39) scalat cu 0.52.
+	"granite": Color(0.520, 0.578, 0.723),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

@@ -246,9 +246,14 @@ func _trees() -> void:
 ## HazardMarker kind=6 pus separat in Track14.tscn.
 func _kicker() -> void:
 	var i := _idx(0.1225)
-	# Pe latura sudica (lateral negativ), langa muchie: intri pe ea daca
-	# taxezi interiorul cotului.
-	_at(i, -13.5, 0.0, "kopje_kicker", "KickerVad", _yaw_along(i), 1.0,
+	# Pe latura sudica (lateral negativ). Degajarea NU e cea din brief:
+	# AABB-ul masurat al piesei e 20 x 5.9 x 18 m (probe_kicker_shape), nu
+	# 8 x 6 x 2.8 cum spunea brief-ul, iar originea nu e in centrul rampei —
+	# corpul se intinde pana la x = -16 local. La 13.5 m de ax ProbeLaneClear
+	# a raportat 19 probe blocate, toate pe KickerVad, unele chiar pe axa
+	# (lat = 0.0). Cu 26 m coliziunea iese complet din banda si rampa ramane
+	# o scurtatura pe care intri deliberat, nu un zid pe drum.
+	_at(i, -26.0, 0.0, "kopje_kicker", "KickerVad", _yaw_along(i), 1.0,
 		"mesh")
 
 

@@ -292,12 +292,12 @@ func _lake_shore() -> void:
 	# conturul intre 5 si 282 grade, la 0,775 intre 21 si 243, la 0,780 intre
 	# 41 si 186. Miezul mereu vizibil e 40-190, deci acolo pun inelul cel mai
 	# dens, si intind cozi mai rare pe restul arcului vazut de la intrare.
-	_ring(0.780, 1.0, 22.0, 40.0, 190.0, 900, 0.20, 6.0, 3.5, 2.8)
-	_ring(0.780, 1.0, 22.0, 186.0, 250.0, 260, 0.24, 5.0, 3.0, 2.6)
-	_ring(0.780, 1.0, 22.0, 350.0, 42.0, 300, 0.24, 5.0, 3.0, 2.6)
+	_ring(0.780, 1.0, 22.0, 40.0, 190.0, 2000, 0.20, 11.0, 7.0, 2.2)
+	_ring(0.780, 1.0, 22.0, 186.0, 252.0, 500, 0.24, 8.0, 5.0, 2.2)
+	_ring(0.780, 1.0, 22.0, 348.0, 42.0, 600, 0.24, 8.0, 5.0, 2.2)
 	# Grupuri revarsate in apa mica, ca in referinta (pasari izolate dincolo de
 	# inel, pe luciu): banda mutata spre apa, densitate mica.
-	_ring(0.780, 1.0, 22.0, 55.0, 175.0, 220, 0.34, 13.0, -1.0, 1.3, 1.6)
+	_ring(0.780, 1.0, 22.0, 55.0, 175.0, 420, 0.34, 17.0, -2.0, 1.3, 1.6)
 	# Elefantii de pe crusta (referinta: trei siluete gri pe alb). DOI stau ca
 	# decor, mergand spre lac; al treilea si al patrulea TRAVERSEAZA drumul
 	# (HazardMarker G_Elefant1/2 in Track14.tscn). Trei hazarduri pe acelasi

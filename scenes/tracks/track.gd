@@ -474,6 +474,17 @@ static func themes() -> Dictionary:
 			# "desert", `_build_fences` punea gardul de ranch texan pe toata
 			# pista (masurat cu probe_decor: 69 de bucati de `wooden_fence`).
 			"props": "serengeti",
+			# IARBA DENSA pe marginea drumului (TrackGrass). Masurat pe
+			# captura --gamecam la 0.97 fata de ref_A.png: solul nostru era
+			# nisip PLAT (o singura nuanta pe toata adancimea), iar referinta
+			# are iarba fir cu fir pana la buza lateritului. Un singur
+			# material partajat, fara coliziune si fara umbre — cheia costa
+			# zero draw call-uri noi pe pista (probe_decor, materiale 15).
+			"dense_grass": true,
+			# Varful firului, cerut EXPLICIT: derivarea implicita a
+			# TrackGrass e de pajiste alpina (verde x1.18, albastru /2) si pe
+			# ocru dadea lime acid. Savana e pai auriu — masurat pe captura.
+			"dense_grass_tip": Color.html("A08A4A"),
 			"hazard_model": "res://assets/models/rocks/boulder_roller.glb",
 			# Bolovanii rostogoliti de pe serpentine (POI F) sunt GRANIT, ca
 			# kopje-urile (clasa din palette.gd) — nu gresia de canion.
@@ -10310,7 +10321,8 @@ func _build_world_decor() -> void:
 	# coacere (e deja MultiMesh pe celule). Vezi TrackGrass.
 	if bool(theme_flag("dense_grass", false)):
 		var grass := TrackGrass.build(_sampler, _world_seed(), theme_ground_tint,
-			float(theme_flag("dense_grass_max_y", 1e9)))
+			float(theme_flag("dense_grass_max_y", 1e9)),
+			theme_flag("dense_grass_tip", Color(0, 0, 0, 0)) as Color)
 		add_child(grass)
 
 

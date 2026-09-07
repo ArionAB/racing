@@ -121,13 +121,14 @@ void fragment() {
 ## `max_y`: plafonul de altitudine (in lume) peste care iarba nu mai creste —
 ## pe Alpi pajistea se opreste unde incepe etajul de stanca. 1e9 = fara plafon.
 static func build(sampler: TrackSideSampler, world_seed: int,
-		ground_tint: Color, max_y: float = 1e9) -> Node3D:
+		ground_tint: Color, max_y: float = 1e9,
+		tip_override: Color = Color(0, 0, 0, 0)) -> Node3D:
 	var root := Node3D.new()
 	root.name = "DenseGrass"
 	var rng := RandomNumberGenerator.new()
 	rng.seed = world_seed ^ 0x6772A55  # sa nu repete sirul rng al decorului
 
-	var mesh := _patch_mesh(rng, ground_tint)
+	var mesh := _patch_mesh(rng, ground_tint, tip_override)
 
 	# Benzile secundare (scurtatura prin iarba, poteci), intr-un cos spatial:
 	# verificarea "sunt pe poteca?" per smoc devine O(1), nu O(n).
@@ -325,7 +326,14 @@ static func _emit_cells(root: Node3D, cells: Dictionary, mesh: Mesh) -> void:
 ## lata, varf ciupit, aplecat intr-o directie proprie. Vertex colors: gradient
 ## baza intunecata -> varf deschis (culoarea vine de aici, nu din textura),
 ## alpha = fractia de inaltime (greutatea vantului in shader).
-static func _patch_mesh(rng: RandomNumberGenerator, tint: Color) -> ArrayMesh:
+## `tip_override`: culoarea varfului, ceruta explicit de tema. Implicitul
+## (alpha 0) pastreaza derivarea de pajiste alpina de mai jos — verde saturat.
+## Serengeti o foloseste fiindca savana e IARBA USCATA: derivarea inmulteste
+## verdele cu 1.18 si taie albastrul la jumatate, si pe un ground_tint ocru
+## (#AF9F4E) iese lime acid, exact contrariul referintei (ref_A.png: pai auriu
+## si tufe verde-inchis SEPARATE). Masurat pe captura --gamecam 0.97.
+static func _patch_mesh(rng: RandomNumberGenerator, tint: Color,
+		tip_override: Color = Color(0, 0, 0, 0)) -> ArrayMesh:
 	# Mai SATURAT decat solul, nu doar mai inchis/deschis: firele stau PESTE
 	# textura pictata a terenului, iar daca au aceeasi croma se pierd in ea —
 	# prima incercare (varfuri spre galben-pai) iesea buruieni uscate, invizibile
@@ -333,6 +341,10 @@ static func _patch_mesh(rng: RandomNumberGenerator, tint: Color) -> ArrayMesh:
 	var base_col := Color(tint.r * 0.28, tint.g * 0.46, tint.b * 0.28, 0.0)
 	var tip_col := Color(tint.r * 0.85, minf(tint.g * 1.18 + 0.03, 1.0),
 		tint.b * 0.50, 1.0)
+	if tip_override.a > 0.0:
+		tip_col = Color(tip_override.r, tip_override.g, tip_override.b, 1.0)
+		base_col = Color(tip_override.r * 0.45, tip_override.g * 0.42,
+			tip_override.b * 0.38, 0.0)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for _b in BLADES:

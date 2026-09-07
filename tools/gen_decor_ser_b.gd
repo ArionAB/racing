@@ -85,6 +85,7 @@ func _ready() -> void:
 	_report_route()
 	_roadside_acacias()
 	_bushes()
+	_grass_tufts()
 	_termites()
 	_boulders_and_kopje()
 	_mid_acacias()
@@ -100,6 +101,7 @@ func _measure_kit() -> void:
 	for m in ["plants/acacia_umbrella_a", "plants/acacia_umbrella_b",
 			"plants/acacia_umbrella_c", "plants/euphorbia", "plants/dead_tree",
 			"plants/tropical_shrub",
+			"plants/grass_tuft_large", "plants/grass_tuft_small",
 			"rocks/termite_mound_a", "rocks/termite_mound_b",
 			"rocks/kopje_boulder_a", "rocks/kopje_boulder_b", "rocks/kopje_boulder_c"]:
 		var ps := load(KIT + m + ".glb") as PackedScene
@@ -164,28 +166,59 @@ func _roadside_acacias() -> void:
 			f += step * _rng.randf_range(0.85, 1.15)
 
 
-## Tufe rotunde de savana (tropical_shrub, 2,5 m, remapat pe verdele
-## acaciilor) la 1-4,5 m de muchie, pe ambele parti, la ~4,5 m una de alta:
-## e etajul de la inaltimea rotii, cel care in referinta umple colturile de
-## jos ale cadrului (memoria `patru-defecte-de-diorama`: „obiecte infipte in
-## plan" e defectul cand lipseste tocmai etajul asta). Fara corp: se trece
-## prin ele. Un al doilea rand, mai rar, la 7-16 m, leaga tufele de coroane.
+## Etajul de la inaltimea rotii, RUNDA 2. In runda 1 era un rand continuu de
+## `tropical_shrub` de la 1 la 4,5 m pe ambele parti, la ~4,5 m unul de altul:
+## pe captura de la volan iesea un GARD verde neintrerupt intre banda si turma,
+## exact acolo unde referinta are SOL de savana (iarba aurie joasa, pete de
+## pamant, termitiere, o acacie izolata). Verdictul criticului, cuvant cu
+## cuvant: „animalele nu stau PE un camp, ci apar peste o bordura verde".
+##
+## Reparatia are doua jumatati, si a doua e cea care conteaza:
+##   (a) tufele ies COMPLET din banda 2-6 m si se raresc la ~1/3 (pasul urca
+##       de la 0.0022 la 0.0068, adica de la ~4,6 m la ~14 m; ele raman doar
+##       de la 6 m in sus, ca etaj care leaga solul de coroane);
+##   (b) banda 1,5-6 m se umple cu SMOCURI de iarba aurie — `grass_tuft_large`
+##       (1,20 m) si `grass_tuft_small` (0,62 m), remapate pe slotul 13
+##       DRY_VEGETATION in `world_prop.SLOT_REMAP_BY_MODEL` (masurat: veneau pe
+##       7 KERB_RED si 8 CONCRETE). Sub 1,2 m nu ascund nimic, dar rup planul
+##       de iarba in smocuri, ca in referinta.
+## Amandoua clasele exista deja pe alte piste => zero materiale in plus.
 func _bushes() -> void:
 	for sgn in [1.0, -1.0]:
-		var f := F0 + (0.0011 if sgn > 0.0 else 0.0)
-		var j := 0
+		var f := F0 + (0.0034 if sgn > 0.0 else 0.0)
 		while f < F1:
 			var x := _x_at(f)
 			var in_herd := x > HERD_X0 - 4.0 and x < HERD_X1 + 4.0
-			var gap := _rng.randf_range(5.0, 10.0) if in_herd else _rng.randf_range(1.0, 4.5)
+			var gap := _rng.randf_range(9.0, 16.0) if in_herd else _rng.randf_range(6.0, 13.0)
 			_place("plants/tropical_shrub", "tufa", f, sgn, gap,
-				_rng.randf_range(0.0, TAU), _rng.randf_range(1.2, 2.2), "none")
-			if j % 3 == 1:
-				_place("plants/tropical_shrub", "tufa", f + 0.0008, sgn,
-					_rng.randf_range(7.0, 16.0), _rng.randf_range(0.0, TAU),
-					_rng.randf_range(1.3, 2.0), "none")
+				_rng.randf_range(0.0, TAU), _rng.randf_range(1.2, 2.0), "none")
+			f += 0.0068 * _rng.randf_range(0.8, 1.2)
+
+
+## Smocurile de iarba aurie din banda de la muchie (1,5-6 m), dense: pasul de
+## 0.0011 pe frac ~ 2,3 m, plus un al doilea smoc din trei la 5-9 m. Sunt
+## piesa care inlocuieste gardul de tufe, deci trebuie sa fie MULTE si JOASE.
+## Culoarul turmei ramane liber ca inainte (nu punem iarba unde calca 620 de
+## animale — ar iesi smocuri prin picioarele lor).
+func _grass_tufts() -> void:
+	for sgn in [1.0, -1.0]:
+		var f := F0 + (0.0006 if sgn > 0.0 else 0.0)
+		var j := 0
+		while f < F1:
+			var x := _x_at(f)
+			var in_herd := x > HERD_X0 - 3.0 and x < HERD_X1 + 3.0
+			if not in_herd:
+				var big := j % 3 != 2
+				var mdl := "plants/grass_tuft_large" if big else "plants/grass_tuft_small"
+				_place(mdl, "smoc", f, sgn, _rng.randf_range(1.5, 6.0),
+					_rng.randf_range(0.0, TAU),
+					_rng.randf_range(1.1, 1.9) if big else _rng.randf_range(1.4, 2.4), "none")
+				if j % 3 == 0:
+					_place("plants/grass_tuft_small", "smoc", f + 0.0004, sgn,
+						_rng.randf_range(5.0, 9.0), _rng.randf_range(0.0, TAU),
+						_rng.randf_range(1.3, 2.2), "none")
 			j += 1
-			f += 0.0022 * _rng.randf_range(0.75, 1.25)
+			f += 0.0011 * _rng.randf_range(0.8, 1.2)
 
 
 ## Termitiere rosii la 2,5-5 m de muchie, alternand partile.
@@ -198,7 +231,7 @@ func _termites() -> void:
 		_place(mdl, "termitiera", f, sgn, _rng.randf_range(2.5, 5.0),
 			_rng.randf_range(0.0, TAU), _rng.randf_range(1.0, 1.35), "hull")
 		j += 1
-		f += 0.0105 * _rng.randf_range(0.8, 1.2)
+		f += 0.0068 * _rng.randf_range(0.8, 1.2)
 
 
 ## Bolovani de granit pe alocuri + KOPJE-ul de la mijlocul cadrului.

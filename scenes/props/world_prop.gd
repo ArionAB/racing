@@ -190,6 +190,9 @@ const PROP_COLLISION := {
 	# Tufele de savana (POI B): `tropical_shrub` din kitul comun, la 1,5-5 m de
 	# banda, zeci de bucati — vegetatie moale prin care se trece, nu obstacol.
 	"tropical_shrub": "none",
+	# Smocurile de iarba (POI B): la 1,5-6 m de banda, sute de bucati sub 1,2 m
+	# — prin ele se trece, ca prin iarba campiei.
+	"grass_tuft_large": "none", "grass_tuft_small": "none",
 	# Hull implicit, corect, pentru restul: kopje_camp, kopje_boulder_a/b/c,
 	# termite_mound_a/b, maasai_boma, safari_tent, land_rover, crocodile,
 	# hippo_back (ca decor static pe mal), elephant (ca decor static),
@@ -801,6 +804,16 @@ const SLOT_REMAP_BY_MODEL := {
 	# referintei (92,93,34), doar mai deschis. Se pastreaza 12: nuanta e a
 	# slotului, valoarea e a luminii.
 	"tropical_shrub": {21: Palette.CACTUS_GREEN},
+	# Smocurile de iarba (POI B, runda 2). Slotul unei piese se citeste din
+	# UV.x * 32, nu din vertex color — prima incercare a remapat sloturile 7 si
+	# 8 (citite gresit din culoarea vertecsilor) si smocurile au ramas VERZI pe
+	# captura. Masurat corect (UV): `grass_tuft_large` e pe 12 CACTUS_GREEN +
+	# 21 TROPICAL_GREEN, `grass_tuft_small` pe 13 + 12. Pe savana toate merg pe
+	# 13 DRY_VEGETATION (#AF9F4E) — acelasi slot ca iarba campiei, ca smocul sa
+	# fie campia RIDICATA, nu un obiect verde asezat peste ea. Verdele ramane
+	# doar pe coroanele acaciilor, unde referinta il are.
+	"grass_tuft_large": {12: Palette.DRY_VEGETATION, 21: Palette.DRY_VEGETATION},
+	"grass_tuft_small": {12: Palette.DRY_VEGETATION},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)

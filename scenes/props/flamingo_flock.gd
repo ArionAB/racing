@@ -28,7 +28,7 @@ const GLB_WINGS := "res://assets/models/serengeti/plants/flamingo_wings.glb"
 ## Fereastra de cota fata de apa in care sta o pasare: de la `depth_max` sub
 ## apa (apa mica, picioarele in apa) pana la `crust_max` peste apa (pe crusta).
 @export_range(0.0, 3.0, 0.05) var depth_max: float = 0.6
-@export_range(0.0, 5.0, 0.05) var crust_max: float = 1.6
+@export_range(0.0, 8.0, 0.05) var crust_max: float = 2.6
 ## Fractia cu aripile deschise (a doua stare din kit).
 @export_range(0.0, 1.0, 0.05) var wings_fraction: float = 0.25
 ## Samanta: aceeasi asezare la fiecare rulare (capturile trebuie sa fie
@@ -88,7 +88,10 @@ func _build() -> void:
 		var yaw := rng.randf() * TAU
 		var scl := rng.randf_range(0.9, 1.1)
 		var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scl)
-		var xf := Transform3D(basis, Vector3(x, g, z))
+		# In apa mica pasarea sta pe FUND, dar corpul (1,27 m) trebuie sa
+		# ramana deasupra suprafetei ca sa se vada: sub apa se ridica la
+		# linia apei, ca picioarele sa fie ce se scufunda, nu tot corpul.
+		var xf := Transform3D(basis, Vector3(x, maxf(g, sea_y - 0.15), z))
 		if rng.randf() < wings_fraction:
 			wings_xf.append(xf)
 		else:
@@ -112,8 +115,6 @@ func _make_lot(lot_name: String, mesh: Mesh, xfs: Array[Transform3D]) -> void:
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = mesh
 	mm.instance_count = xfs.size()
-	for i in xfs.size():
-		mm.set_instance_transform(i, xfs[i])
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = lot_name
 	mmi.multimesh = mm
@@ -124,6 +125,14 @@ func _make_lot(lot_name: String, mesh: Mesh, xfs: Array[Transform3D]) -> void:
 	mmi.material_override = Palette.world_material()
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	add_child(mmi)
+	# SCRISUL VINE DUPA add_child, si nu e cosmetica: pe un MultiMesh care nu e
+	# inca legat de un MultiMeshInstance3D din arbore, `set_instance_transform`
+	# se pierde TACUT — masurat, prima transformare scrisa se citea inapoi ca
+	# identitate, si toate cele 580 de pasari stateau in origine, la 30 m sub
+	# lac. Asa scrie si HerdHazard (`_lot_of(i).set_instance_transform`), din
+	# acelasi motiv.
+	for i in xfs.size():
+		mm.set_instance_transform(i, xfs[i])
 
 
 ## Cota solului dintr-o raza pe TerrainBody; NAN daca nu exista teren acolo.

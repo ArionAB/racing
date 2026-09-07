@@ -260,6 +260,14 @@ func _build_model() -> void:
 	# locul atlasului — dar in spatiul OBIECTULUI, ca sa se rostogoleasca odata
 	# cu el. `model_scale` intra in socoteala ca pietrele pictate sa masoare in
 	# lume cat cele de pe falezele din care s-a desprins.
+	# REMAP-UL DE SLOTURI, inainte de material. Un hazard care isi incarca
+	# singur GLB-ul nu trece prin WorldProp, deci nu primea corectiile din
+	# `SLOT_REMAP_BY_MODEL` (handoff §5.9, aceeasi capcana ca la hipopotam):
+	# elefantul din Serengeti sta pe sloturi gri NEUTRE, care sub soarele cald
+	# al temei ies albe — masurat, hazardul era alb langa decorul gri corect,
+	# adica acelasi animal in doua culori. Tabela ramane una singura, in
+	# WorldProp; aici doar se aplica.
+	_remap_model_slots(model)
 	if not model_classes.is_empty():
 		Palette.apply_class_materials(model, model_classes)
 	elif model_tri_class.is_empty():
@@ -550,3 +558,20 @@ func _shove_cars(delta: float) -> void:
 		fwd.y = 0.0
 		car.apply_sweep(away.normalized() * SWEEP_PUSH
 			+ fwd.normalized() * SWEEP_PUSH * 0.5 + Vector3.UP * 0.8)
+
+
+## Muta sloturile modelului dupa `WorldProp.SLOT_REMAP_BY_MODEL`, daca stem-ul
+## GLB-ului are o intrare acolo. Fara intrare nu se atinge nimic, deci niciun
+## hazard de pe alta pista nu se schimba.
+func _remap_model_slots(model: Node3D) -> void:
+	if model.scene_file_path.is_empty():
+		return
+	var stem := model.scene_file_path.get_file().get_basename()
+	var remap: Variant = WorldProp.SLOT_REMAP_BY_MODEL.get(stem, null)
+	if remap == null or not (remap is Dictionary) or (remap as Dictionary).is_empty():
+		return
+	for node in Palette._walk(model):
+		var mi := node as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		mi.mesh = WorldProp._mesh_with_slots_moved(mi.mesh, remap as Dictionary)

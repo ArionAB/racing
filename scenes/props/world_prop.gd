@@ -782,6 +782,28 @@ const SLOT_REMAP_BY_GROUP := {
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# Elefantul: pe .glb corpul sta pe [2, 22, 29] — SAND_SHADOW, FOAM_WHITE si
+	# MARBLE_GREY, adica trei griuri NEUTRE. Sub soarele cald al temei
+	# (1.0, 0.90, 0.72) plus saturatia 1.18 din post, orice gri neutru iese
+	# crem: masurat pe G_r1_lac.png, elefantii citeau ca bolovani albi, nu ca
+	# animale. Aceeasi capcana ca la hipopotam (handoff §5.13): singurul gri
+	# care ramane gri e un slot RECE. Pielea pe PAINTED_METAL (11, gri-albastrui,
+	# masurat sat 0.09 pe hipopotam), fildesii raman pe FOAM_WHITE 22 ca sa
+	# citeasca in contrast.
+	"elephant": {
+		2: Palette.PAINTED_METAL,
+		29: Palette.PAINTED_METAL,
+	},
+	# Flamingii: pe .glb stau pe [4, 20, 31] — dar atlasul are 31 de sloturi
+	# (HEX 0..30), deci slotul 31 nu exista si iesea MAGENTA fluorescent
+	# (masurat pe G_r1_lac4.png). TILE_TERRACOTTA 23 a fost prima incercare
+	# si a iesit portocaliu-caramida sub soarele cald (G_r1_hero.png), deci
+	# corpul trece pe CAR_RED 14 (#E54839) — rosu deschis care, spalat de
+	# lumina calda si vazut de la 20 m, citeste ca banda roz din referinta —
+	# iar picioarele (4, ROCK_DARK maro) pe SAND_LIGHT, ca sa nu ancoreze
+	# pasarea intr-un maro care o face bat infipt in crusta.
+	"flamingo": {31: Palette.CAR_RED, 4: Palette.SAND_LIGHT},
+	"flamingo_wings": {31: Palette.CAR_RED, 4: Palette.SAND_LIGHT},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)

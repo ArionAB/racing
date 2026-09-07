@@ -194,9 +194,27 @@ func _approach() -> void:
 ## aproape (se citesc individual), doua pe malul din departare, ca banda roz.
 ## Hoitul cu vulturi sta la 9 m de banda, ca in referinta.
 func _lake_shore() -> void:
-	_flock(0.762, 1.0, 24.0, 34.0, 150, 0.30)
-	_flock(0.772, 1.0, 30.0, 40.0, 170, 0.22)
-	_flock(0.752, 1.0, 26.0, 30.0, 110, 0.35)
+	# Stoluri DESE si APROAPE: la 34-40 m raza, 150 de pasari de 1,27 m se
+	# imprastie pe 3600 m2 si dispar in crusta (masurat pe G_r1_lac.png: 430
+	# de flamingi asezati, zero vizibili). Referinta are o BANDA roz continua
+	# pe mal — deci raza mica si numar mare, plus un stol chiar langa banda.
+	# Un rand de flamingi MODELATI langa banda, ca sa se vada individual la
+	# 8-14 m (stolurile MultiMesh de pe mal sunt la 25-40 m si citesc doar ca
+	# banda roz). Sunt fantome (world_prop: "none"), deci nu ating masina.
+	var ff := 0.7515
+	while ff < 0.7815:
+		var d := 10.0 + _rng.randf_range(0.0, 12.0)
+		_put("s_flamingo" if _rng.randf() > 0.28 else "s_flamingo_wings",
+			ff, 1.0, d, _rng.randf_range(0.95, 1.15), _rng.randf() * TAU)
+		_put("s_flamingo" if _rng.randf() > 0.30 else "s_flamingo_wings",
+			ff + 0.0008, 1.0, d + _rng.randf_range(2.0, 6.0),
+			_rng.randf_range(0.95, 1.15), _rng.randf() * TAU)
+		ff += 0.0011
+	_flock(0.756, 1.0, 14.0, 14.0, 130, 0.30)
+	_flock(0.762, 1.0, 22.0, 16.0, 190, 0.26)
+	_flock(0.768, 1.0, 26.0, 16.0, 190, 0.22)
+	_flock(0.774, 1.0, 30.0, 18.0, 200, 0.20)
+	_flock(0.750, 1.0, 20.0, 15.0, 150, 0.34)
 	# Elefantii de pe crusta (referinta: trei siluete gri pe alb). DOI stau ca
 	# decor, mergand spre lac; al treilea si al patrulea TRAVERSEAZA drumul
 	# (HazardMarker G_Elefant1/2 in Track14.tscn). Trei hazarduri pe acelasi

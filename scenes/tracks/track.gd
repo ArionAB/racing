@@ -462,15 +462,15 @@ static func themes() -> Dictionary:
 			# iese plata. Azimutul se masoara pe traseul real (brief §4) si
 			# se pune pe scena (custom_sun_rotation_deg), nu aici.
 			"sun_color": Color(1.0, 0.90, 0.72),
-			"sun_energy": 1.70,
+			"sun_energy": 1.95,
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
-			"ambient_color": Color.html("8E8598"),
+			"ambient_color": Color.html("B9A88C"),
 			# POI B: umbrele acaciilor pe drum ieseau (41,11,1) — negre; in
 			# referinta umbra pe iarba e la 1,3x sub lumina. 0.32 pastreaza
 			# raportul soare/ambient la 5,3 (>= 3,5, memoria
 			# `geometria-fara-lumina-e-invizibila`).
-			"ambient_energy": 0.32,
+			"ambient_energy": 0.68,
 			"shadows": true,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,

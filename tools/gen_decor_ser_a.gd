@@ -247,6 +247,36 @@ func _camp() -> void:
 		_yaw_to(Vector2(281.5, 155.0), vatra), 0.85)
 	_world("ankole_horns", "coarne", 277.5, 151.0, 5.0, 0.9)
 
+	# --- GRUPUL DIN INTERIORUL BUCLEI (19-28 m, -19..-25 grade).
+	# Masurat pe camera REALA a capturii (nu pe tangenta locala: snapshot.gd
+	# priveste catre punctul baked idx+12, adica pe COARDA acului de par, si
+	# inclina 29 grade in jos):
+	#   frac 0.97 -> focus (251.2, 130.6), camera (244.9, 10.0, 119.7),
+	#   directia privirii (0.44, -0.48, 0.76) => axa pe sol (0.50, 0.87).
+	# Consecinta care a rasturnat planul rundei: TOATA tabara de pe buza
+	# exterioara sta la +21..+33 grade fata de axa, adica lipita de marginea
+	# STANGA a cadrului (jumatatea de latime e 49 grade), in timp ce centrul
+	# si dreapta raman drum gol. Iar axa insasi trece pe DEASUPRA soselei la
+	# 20-30 m, deci nu exista pozitie care sa fie si aproape, si centrata, si
+	# in afara carosabilului — acul de par ocupa el centrul cadrului.
+	#
+	# Deci tabara nu se muta, se DUBLEAZA: al doilea grup pe interiorul buclei
+	# incadreaza drumul din partea cealalta, ca in referinta unde vehiculele
+	# si focul flancheaza panglica de laterit. Masurat la fel:
+	#   land_rover la (246.5, 139.5)  d=19.9  ang=-25.5  => 9.4 % din latime
+	#   land_rover la (248.0, 143.5)  d=24.0  ang=-21.8  => 7.9 %
+	# adica peste pragul de 3 % cerut de critic, si de aceeasi marime cu
+	# perechea de pe buza exterioara.
+	var vatra_int := Vector2(248.0, 145.5)
+	_world("land_rover", "landRover", 246.5, 139.5,
+		_yaw_to(Vector2(246.5, 139.5), Vector2(249.5, 144.0)), 1.0)
+	_world("land_rover", "landRover", 248.0, 143.5,
+		_yaw_to(Vector2(248.0, 143.5), Vector2(245.0, 148.5)), 1.0)
+	_world("campfire", "foc", vatra_int.x, vatra_int.y, 0.0, 1.1, "", "30|2.4")
+	_world("safari_tent", "cort", 250.5, 147.0,
+		_yaw_to(Vector2(250.5, 147.0), vatra_int), 0.80)
+	_world("ankole_horns", "coarne", 247.0, 143.5, 1.4, 1.0)
+
 	# Termitierele: una rosie la 9 m de muchie in dreapta drumului de
 	# intoarcere (in cadrul hero, stanga, la 22 m de camera) si una in
 	# interiorul buclei.

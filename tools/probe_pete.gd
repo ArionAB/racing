@@ -65,7 +65,14 @@ func _ready() -> void:
 	var lums: PackedFloat32Array = PackedFloat32Array()
 	var spots := 0
 	var bad: Array[String] = []
-	for f in [0.212, 0.224, 0.240, 0.253, 0.268, 0.287, 0.300, 0.315]:
+	# Fractiile de esantion sunt DIN SECTIUNEA DEASA (0.214-0.334), fiindca
+	# doar acolo exista contractul „baldachin cu pete de soare". La 0.212 e
+	# intrarea in padure — savana se subtiaza, iarba e inca galbena si drumul
+	# TREBUIE sa fie deschis; o versiune anterioara a sondei o esantiona si o
+	# raporta „PICA (insorit 81%)", adica cerea baldachin unde brief-ul cere
+	# tranzitie (memoria `caseta-de-masura-exclude-defectul`, pe cealalta
+	# parte: caseta includea ce nu trebuia).
+	for f in [0.224, 0.232, 0.240, 0.253, 0.262, 0.268, 0.287, 0.300, 0.315]:
 		var r := _shot(f)
 		var px: PackedFloat32Array = r[0]
 		var lit := 0

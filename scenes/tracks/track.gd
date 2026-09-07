@@ -6023,6 +6023,26 @@ const PROP_AO_RADIUS_MIN: float = 0.8
 ## Mai slaba decat la faleze: sunt multe si se suprapun langa drum.
 const PROP_AO_STRENGTH: float = 0.26
 
+## PLAFONUL DE SUPRAPUNERE (POI G, runda 5). Materialul discurilor e
+## BLEND_MODE_MUL, deci doua discuri peste acelasi pixel NU dau o umbra mai
+## corecta, ci produsul: la 0.26 fiecare, doua dau 0.55, patru 0.30, sase 0.16.
+## Intr-o padure deasa (Lerai: fever_tree la 4-5 m unul de altul, raza plafonata
+## la 6 m) fiecare punct de sol sta sub 3-6 discuri, si podeaua iese o PLACA
+## aproape neagra — masurat pe cadrul de joc de la frac 0.77 cu umbrele stinse:
+## sol insorit sub crang 46/255 fata de 119/255 pe crusta de alaturi, adica un
+## factor de 0.39 din discuri singure, inainte de orice umbra dinamica.
+##
+## Reparatia: raza nu se mai ia din diagonala GABARITULUI intreg, ci din
+## amprenta de la BAZA piesei. Un fever_tree are coroana de 8,7 m si trunchi de
+## ~0,5 m; ce atinge solul e trunchiul, deci discul lui e mic si nu se mai
+## suprapune cu al vecinului. Umbra coroanei o face lumina directionala, care
+## are forma si directie — discul e doar contactul.
+##
+## Inaltimea sub care se masoara amprenta, ca fractie din inaltimea piesei.
+const PROP_AO_FOOT_BAND: float = 0.18
+## Cat se mai umfla amprenta bazei, ca discul sa iasa putin de sub piesa.
+const PROP_AO_FOOT_SCALE: float = 1.6
+
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
 ##
@@ -6054,8 +6074,13 @@ func _prop_contact_discs() -> PackedVector4Array:
 		if aabb.size == Vector3.ZERO:
 			continue
 		var gp := n3.global_position
-		# Raza din jumatatea diagonalei ORIZONTALE a gabaritului.
-		var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		# Raza din AMPRENTA DE LA BAZA, nu din diagonala gabaritului intreg
+		# (vezi nota de la PROP_AO_FOOT_BAND). Cand piesa n-are vertecsi in
+		# banda de jos — panouri, pasari, orice fara picior — se cade inapoi
+		# pe vechea socoteala, ca sa nu ramana piese fara contact.
+		var half := _prop_foot_radius(n3, aabb)
+		if half <= 0.0:
+			half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
 		var r := clampf(half * PROP_AO_RADIUS_SCALE,
 				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
 		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
@@ -6103,6 +6128,52 @@ func _visual_aabb(n: Node3D) -> AABB:
 			acc = box
 			have = true
 	return acc if have else AABB()
+
+
+## Raza amprentei de la BAZA piesei: cel mai departe vertex, pe orizontala, din
+## banda de jos a gabaritului (PROP_AO_FOOT_BAND din inaltime).
+##
+## De ce nu ajunge AABB-ul intreg: la un copac diagonala orizontala e a
+## COROANEI (fever_tree: 8,7 x 8,0 m), iar discul ei plafonat la 6 m se
+## suprapune peste al fiecarui vecin dintr-o padure deasa. Cu blend-ul
+## multiplicativ suprapunerile se inmultesc si podeaua iese neagra. Ce atinge
+## solul e trunchiul (~0,5 m), si aia e umbra de contact; forma coroanei o
+## deseneaza umbra dinamica.
+##
+## Costa o trecere peste vertecsii pieselor din DecorManual, o singura data la
+## constructie.
+func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
+	var band := aabb.position.y + aabb.size.y * PROP_AO_FOOT_BAND
+	var base := n.global_transform.basis
+	if absf(base.determinant()) < 0.000001:
+		return 0.0
+	var inv := n.global_transform.affine_inverse()
+	var best := 0.0
+	var stack: Array[Node] = [n]
+	while not stack.is_empty():
+		var cur: Node = stack.pop_back()
+		var cur3 := cur as Node3D
+		if cur3 != null and not cur3.visible:
+			continue
+		for c in cur.get_children():
+			stack.append(c)
+		var mi := cur as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		if absf(mi.global_transform.basis.determinant()) < 0.000001:
+			continue
+		var rel := inv * mi.global_transform
+		for si in mi.mesh.get_surface_count():
+			var arrays: Array = mi.mesh.surface_get_arrays(si)
+			if arrays.size() <= Mesh.ARRAY_VERTEX:
+				continue
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				var lv := rel * v
+				if lv.y > band:
+					continue
+				best = maxf(best, Vector2(lv.x, lv.z).length())
+	return best * PROP_AO_FOOT_SCALE
 
 
 ## Umbra de contact a prop-urilor, ca factor multiplicativ (1.0 = neatins).

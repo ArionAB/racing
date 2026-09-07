@@ -194,30 +194,34 @@ func _left_bank() -> void:
 	var f := FRAC_A + 0.001
 	while f < FRAC_B:
 		anchors.append(f + _rng.randf_range(-0.0022, 0.0022))
-		f += 0.0086
+		f += 0.0132
 	var k := 0
 	for af in anchors:
 		# Copacul mare al palcului, la 1,5-5 m de muchie (referinta: coroana
 		# atarna PESTE banda).
 		var big: String = "acacia_c" if k % 2 == 0 else "acacia_b"
-		_place(big, "Acacia", af, -1.0, _rng.randf_range(1.5, 5.0),
+		_place(big, "Acacia", af, -1.0, _rng.randf_range(4.5, 9.0),
 			_rng.randf_range(0.0, TAU), _rng.randf_range(0.9, 1.15))
 		# Insotitorii palcului: 1-3 piese in jurul lui, la 3-8 m mai departe,
 		# defazate longitudinal cu +-6 m; se suprapun cu el si intre ele.
-		var mates: int = _rng.randi_range(1, 3)
+		var mates: int = _rng.randi_range(1, 2)
 		for m in mates:
 			var pick: String = ["acacia_a", "acacia_a", "acacia_b", "euphorbia"][_rng.randi_range(0, 3)]
 			_place(pick, "AcaciaPalc", af + _rng.randf_range(-0.0028, 0.0028), -1.0,
-				_rng.randf_range(3.0, 11.0), _rng.randf_range(0.0, TAU),
+				_rng.randf_range(7.0, 16.0), _rng.randf_range(0.0, TAU),
 				_rng.randf_range(0.8, 1.1))
 		# Bolovanii de granit: in referinta sunt LANGA banda si mari in cadru.
-		var nb: int = _rng.randi_range(1, 3)
+		# Piesele JOASE umplu golul lasat de pasul mai mare intre copaci: ele
+		# dau densitate la 0,4-6 m de banda fara sa arunce umbre lungi (un
+		# bolovan de 2 m arunca 2,9 m la 35 grade, o coroana de 10 m arunca
+		# 14). Referinta: bolovani lipiti de banda pe TOATA lungimea.
+		var nb: int = _rng.randi_range(3, 5)
 		for j in nb:
 			var bn: String = ["boulder_a", "boulder_b", "boulder_c", "boulder_c"][_rng.randi_range(0, 3)]
-			_place(bn, "Bolovan", af + _rng.randf_range(-0.0035, 0.0035), -1.0,
-				_rng.randf_range(0.4, 4.0), _rng.randf_range(0.0, TAU),
+			_place(bn, "Bolovan", af + _rng.randf_range(-0.0055, 0.0055), -1.0,
+				_rng.randf_range(0.4, 6.0), _rng.randf_range(0.0, TAU),
 				_rng.randf_range(0.85, 1.5))
-		if k % 3 == 1:
+		if k % 2 == 0:
 			_place("euphorbia", "Euphorbia", af + _rng.randf_range(-0.002, 0.002), -1.0,
 				_rng.randf_range(0.8, 3.0), _rng.randf_range(0.0, TAU),
 				_rng.randf_range(0.8, 1.2))
@@ -238,6 +242,10 @@ func _left_bank() -> void:
 	_place("termite_b", "Termitiera", 0.372, -1.0, 4.5, 0.3, 1.0)
 	_place("termite_a", "Termitiera", 0.415, -1.0, 2.2, 1.7, 1.0)
 	_place("termite_b", "Termitiera", 0.468, -1.0, 7.5, 2.9, 1.1)
+	_place("termite_a", "Termitiera", 0.386, -1.0, 3.1, 2.2, 1.1)
+	_place("termite_b", "Termitiera", 0.402, -1.0, 5.8, 1.1, 0.95)
+	_place("termite_a", "Termitiera", 0.444, -1.0, 2.6, 0.5, 1.05)
+	_place("termite_b", "Termitiera", 0.477, -1.0, 4.2, 2.0, 1.0)
 
 
 ## DREAPTA (buza craterului si flancul de sub ea). Referinta NU are un tiv de

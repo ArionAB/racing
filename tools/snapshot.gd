@@ -436,6 +436,18 @@ func _ready() -> void:
 		cam.position = want
 		cam.look_at(focus + dir * look_ahead + Vector3.UP * look_h, Vector3.UP)
 		cam.current = true
+		# DECORUL CARE SE CONSTRUIESTE SINGUR are nevoie de cadre inainte de
+		# poza. FlamingoFlock (si orice alt decor cu `_build.call_deferred()`)
+		# asteapta doua cadre de proces PLUS doua de fizica, ca terenul sa fie
+		# in serverul de fizica; cu doar doua `process_frame` poza se facea
+		# INAINTE ca stolurile sa existe. Masurat in runda 4 pe POI G:
+		# `_ready` al stolurilor rula, `_build` nu apuca niciodata, deci nici
+		# un flamingo din MultiMesh nu aparea in capturi — pe TOATE rundele de
+		# pana acum, nu doar pe inel. Asteptarea e de cateva cadre si face
+		# captura sa arate ce vede jucatorul, nu o stare intermediara.
+		for _i in 8:
+			await get_tree().process_frame
+			await get_tree().physics_frame
 		await get_tree().process_frame
 		await get_tree().process_frame
 		await RenderingServer.frame_post_draw

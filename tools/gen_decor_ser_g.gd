@@ -39,7 +39,9 @@ func _ready() -> void:
 	_sus_y = hi + 120.0
 	_sea_y = _track._sampler.mean_road_y() + _track.sea_level_offset
 	_rng.seed = 140701
-	if "--dump" in OS.get_cmdline_user_args():
+	if "--arc" in OS.get_cmdline_user_args():
+		_arc_dump()
+	elif "--dump" in OS.get_cmdline_user_args():
 		_dump()
 	else:
 		_compose()
@@ -48,6 +50,64 @@ func _ready() -> void:
 			print(line)
 		print("; asezate %d piese, %d avertismente" % [_n, _warn])
 	get_tree().quit(0)
+
+
+## Ce ARC din conturul lacului vede soferul. Pentru cateva fractii pun camera
+## unde o pune ChaseCamera (10 m sus, 12,5 m in spate) si masor, pentru fiecare
+## punct de pe poligonul lacului, daca intra in frustumul orizontal (FOV 68,
+## ecran 16:9 => semiunghi orizontal ~ 54 grade). Rezultatul spune pe ce sector
+## de unghi merita pus inelul de flamingi, in loc sa-l intind pe tot lacul.
+func _arc_dump() -> void:
+	var poly: PackedVector2Array = _track._lagoon_poly()
+	var c := Vector2.ZERO
+	for q in poly:
+		c += q
+	c /= float(poly.size())
+	print("; centru lac (%.1f, %.1f), apa la y=%.2f" % [c.x, c.y, _sea_y])
+	for f in [0.760, 0.770, 0.775, 0.780, 0.790, 0.800]:
+		var n := _track.baked.size()
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var fwd := (_track.baked[(i + 4) % n] - p)
+		fwd.y = 0.0
+		fwd = fwd.normalized()
+		var eye := p - fwd * 12.5 + Vector3.UP * 10.0
+		var lo := 999.0
+		var hi := -999.0
+		var seen := 0
+		# esantionez conturul des, nu doar varfurile
+		for k in 360:
+			var ang := float(k)
+			var rr := 0.0
+			# raza poligonului pe directia `ang`, prin cautare pe segmente
+			var dir := Vector2(cos(deg_to_rad(ang)), sin(deg_to_rad(ang)))
+			var best := -1.0
+			for j in poly.size():
+				var a2 := poly[j] - c
+				var b2 := poly[(j + 1) % poly.size()] - c
+				var d1 := a2.cross(dir)
+				var d2 := b2.cross(dir)
+				if (d1 <= 0.0 and d2 > 0.0) or (d1 > 0.0 and d2 <= 0.0):
+					var t := absf(d1) / maxf(0.0001, absf(d1) + absf(d2))
+					var hit := a2.lerp(b2, t)
+					if hit.dot(dir) > 0.0:
+						best = hit.length()
+			if best < 0.0:
+				continue
+			rr = best
+			var w := Vector3(c.x + dir.x * rr, _sea_y, c.y + dir.y * rr)
+			var rel := w - eye
+			rel.y = 0.0
+			var dist := rel.length()
+			if dist > 260.0:
+				continue
+			var horiz := rad_to_deg(acos(clampf(rel.normalized().dot(fwd), -1.0, 1.0)))
+			if horiz <= 54.0:
+				seen += 1
+				lo = minf(lo, ang)
+				hi = maxf(hi, ang)
+		print("; frac %.3f  ochi (%.1f, %.1f)  puncte de contur vizibile: %d  arc %.0f..%.0f grade"
+			% [f, eye.x, eye.z, seen, lo, hi])
 
 
 # ------------------------------------------------------------------ masuratori
@@ -223,11 +283,21 @@ func _lake_shore() -> void:
 	# Stolurile isi cauta singure linia apei; malul nou e la 20-22 m de ax pe
 	# 0.780-0.790, deci razele sunt mai mici si stolurile mai dese decat in
 	# runda 1 (cand malul era la 35 m si banda roz se pierdea in crusta).
-	_flock(0.772, 1.0, 20.0, 13.0, 170, 0.30)
-	_flock(0.778, 1.0, 20.0, 14.0, 210, 0.26)
-	_flock(0.784, 1.0, 20.0, 14.0, 210, 0.24)
-	_flock(0.790, 1.0, 22.0, 15.0, 200, 0.22)
-	_flock(0.796, 1.0, 26.0, 16.0, 160, 0.30)
+	# RUNDA 4 — INEL, nu discuri. Discurile de raza 13-16 m puneau cea mai mare
+	# parte a pasarilor DEPARTE de linia apei, unde fereastra de cota le respinge:
+	# masurat pe G_r3_hero.png, 0,39% acoperire roz cu cea mai mare pata de
+	# 137 px, fata de 8,13% / 2259 px in referinta. `shore_ring` aseaza fiecare
+	# pasare pe conturul lacului, deci inelul e continuu din constructie.
+	# Sectoarele vin din masuratoare (`--arc`): la frac 0,770 soferul vede
+	# conturul intre 5 si 282 grade, la 0,775 intre 21 si 243, la 0,780 intre
+	# 41 si 186. Miezul mereu vizibil e 40-190, deci acolo pun inelul cel mai
+	# dens, si intind cozi mai rare pe restul arcului vazut de la intrare.
+	_ring(0.780, 1.0, 22.0, 40.0, 190.0, 900, 0.20, 6.0, 3.5, 2.8)
+	_ring(0.780, 1.0, 22.0, 186.0, 250.0, 260, 0.24, 5.0, 3.0, 2.6)
+	_ring(0.780, 1.0, 22.0, 350.0, 42.0, 300, 0.24, 5.0, 3.0, 2.6)
+	# Grupuri revarsate in apa mica, ca in referinta (pasari izolate dincolo de
+	# inel, pe luciu): banda mutata spre apa, densitate mica.
+	_ring(0.780, 1.0, 22.0, 55.0, 175.0, 220, 0.34, 13.0, -1.0, 1.3, 1.6)
 	# Elefantii de pe crusta (referinta: trei siluete gri pe alb). DOI stau ca
 	# decor, mergand spre lac; al treilea si al patrulea TRAVERSEAZA drumul
 	# (HazardMarker G_Elefant1/2 in Track14.tscn). Trei hazarduri pe acelasi
@@ -399,4 +469,29 @@ func _flock(f: float, sgn: float, dist: float, radius: float, count: int,
 	_out.append("count = %d" % count)
 	_out.append("radius = %.1f" % radius)
 	_out.append("wings_fraction = %.2f" % wings)
+	_out.append("seed = %d" % (1400 + _n))
+
+
+## Un stol pe CONTURUL lacului (`FlamingoFlock.shore_ring`). Spre deosebire de
+## `_flock`, nodul nu mai defineste un disc: el da doar punctul de ancorare
+## (pentru cota), iar asezarea urmareste linia apei pe sectorul de unghi cerut.
+func _ring(f: float, sgn: float, dist: float, a_from: float, a_to: float,
+		count: int, wings: float, r_in: float, r_out: float, bias: float,
+		depth: float = 0.6) -> void:
+	var q := _world_at(f, sgn, dist)
+	_n += 1
+	_out.append("")
+	_out.append("[node name=\"InelFlamingi_%03d\" type=\"Node3D\" parent=\"%s\"]" % [_n, ZONE])
+	_out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.3f, %.3f, %.3f)"
+		% [q.x, q.y, q.z])
+	_out.append("script = ExtResource(\"flock\")")
+	_out.append("count = %d" % count)
+	_out.append("shore_ring = true")
+	_out.append("arc_from_deg = %.1f" % a_from)
+	_out.append("arc_to_deg = %.1f" % a_to)
+	_out.append("ring_in = %.1f" % r_in)
+	_out.append("ring_out = %.1f" % r_out)
+	_out.append("ring_bias = %.1f" % bias)
+	_out.append("wings_fraction = %.2f" % wings)
+	_out.append("depth_max = %.2f" % depth)
 	_out.append("seed = %d" % (1400 + _n))

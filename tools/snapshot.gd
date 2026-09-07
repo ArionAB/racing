@@ -81,6 +81,13 @@ extends Node
 ##                             aceeasi faza): 0.05-0.07 = urca, 0.07-0.17 =
 ##                             SUS pe banda, 0.17-0.21 = se scufunda, restul
 ##                             = sub albie, invizibili.
+##   --cross-at=8.0            obstacolele care TRAVERSEAZA (SlidingHazard
+##                             Motion.TRAVERSARE: elefantii din Serengeti,
+##                             cireada) la N SECUNDE absolute in ciclul lor
+##                             (`phase` intra in socoteala, ca in joc). Un ciclu
+##                             = 2 x (5 s parcat + 1,2 s telegraf + traversare);
+##                             sonda tipareste pentru fiecare unde e si daca e
+##                             pe carosabil.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -148,6 +155,7 @@ func _ready() -> void:
 	var door_at := -1.0
 	var herd_at := -1.0
 	var hippo_at := -1.0
+	var cross_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
 	var lava_stage := -1
@@ -184,6 +192,8 @@ func _ready() -> void:
 			herd_at = float(arg.trim_prefix("--herd-at="))
 		elif arg.begins_with("--hippo-at="):
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
+		elif arg.begins_with("--cross-at="):
+			cross_at = float(arg.trim_prefix("--cross-at="))
 		elif arg.begins_with("--burner-at="):
 			burner_at = float(arg.trim_prefix("--burner-at="))
 		elif arg.begins_with("--balloon-at="):
@@ -247,6 +257,8 @@ func _ready() -> void:
 		await _set_herd_time(track, herd_at)
 	if hippo_at >= 0.0:
 		await _set_hippo_phase(track, hippo_at)
+	if cross_at >= 0.0:
+		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
 		await _set_burner_phase(track, burner_at)
 	if balloon_at >= 0.0:
@@ -640,6 +652,36 @@ func _set_herd_time(root: Node, seconds: float) -> void:
 				mmi.multimesh.instance_count, str(mmi.get_aabb())])
 	if found == 0:
 		print("--herd-at=%.2f: NICIO turma pe pista asta" % seconds)
+
+
+## Aduce obstacolele care TRAVERSEAZA la `seconds` absolute in ciclul lor
+## (vezi `--cross-at`). Cursa si perioada se configureaza la primul tick
+## (`_configure`, dupa ce pista a pus `travel`), deci se cere un cadru de
+## fizica inainte; apoi se INGHEATA, ca la turma.
+func _set_cross_time(root: Node, seconds: float) -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "SlidingHazard", true, false):
+		var hz := node as SlidingHazard
+		if hz == null or hz.motion != SlidingHazard.Motion.TRAVERSARE:
+			continue
+		hz.set("_time", seconds)
+		hz._physics_process(0.0)
+		hz.set_physics_process(false)
+		found += 1
+		var off: float = hz.call("_offset_now")
+		var lateral := off * hz.travel.length()
+		var hw := hz.road_half_width
+		var body_half: float = hz.get("_half_extent")
+		var on_road := absf(lateral) - body_half < hw
+		print("--cross-at=%.2f: %s la (%.1f, %.1f, %.1f), offset %.2f (%.1f m de ax, banda %.1f), pe carosabil=%s, perioada %.1f s, ciclu %.1f s"
+			% [seconds, hz.name, hz.global_position.x, hz.global_position.y,
+			hz.global_position.z, off, lateral, hw, on_road, hz.period,
+			2.0 * (SlidingHazard.CROSS_WAIT + SlidingHazard.CROSS_TELEGRAPH
+				+ hz.period * 0.5)])
+	if found == 0:
+		print("--cross-at=%.2f: NICIUN obstacol care traverseaza pe pista asta" % seconds)
 
 
 ## Muta hipopotamii la o fractie din ciclul lor (vezi `--hippo-at`). Toti la

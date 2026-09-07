@@ -499,6 +499,21 @@ static func themes() -> Dictionary:
 			"lagoon_band_out": 6.0,
 			"lagoon_inner": 1.5,
 			"lagoon_rim": 8.0,
+			# CRUSTA DE SODA (POI G, brief §2 G / §4): banda de teren ALBA
+			# masurata in metri de la conturul lagunei (sampler.
+			# lagoon_signed_dist), nu pe cota — fundul craterului e plat la
+			# 1,7 m, deci nicio banda de altitudine n-ar putea-o taia. 48 m
+			# duce crusta pana sub drum (axul e la 33-45 m de contur pe
+			# 0.755-0.78), cu marginea zdrentuita spre iarba pe inca 16 m.
+			# Malul roz: banda ingusta de NEON_PINK peste linia apei (sd
+			# -5..+4 m), flamingii ca textura de departe; cei modelati
+			# (FlamingoFlock) stau tot acolo.
+			"lagoon_crust_tint": Palette.color(Palette.FOAM_WHITE),
+			"lagoon_crust_width": 48.0,
+			"lagoon_crust_fade": 16.0,
+			"lagoon_shore_tint": Color(0.86, 0.55, 0.58),
+			"lagoon_shore_in": 4.0,
+			"lagoon_shore_out": 5.0,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -4437,6 +4452,15 @@ func _build_terrain() -> void:
 	var rock_tint: Variant = theme_flag("rock_band_tint", null)
 	var rock_line := float(theme_flag("rock_line", 0.0))
 	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
+	# CRUSTA DE SODA din jurul lagunei (serengeti, POI G): banda masurata in
+	# metri de la contur, nu pe cota. Null pe orice tema fara cheie, deci
+	# restul pistelor nu se schimba cu un pixel. Vezi "lagoon_crust_tint".
+	var crust_tint: Variant = theme_flag("lagoon_crust_tint", null)
+	var crust_width := float(theme_flag("lagoon_crust_width", 40.0))
+	var crust_fade := maxf(float(theme_flag("lagoon_crust_fade", 15.0)), 0.001)
+	var shore_tint: Variant = theme_flag("lagoon_shore_tint", null)
+	var shore_in := float(theme_flag("lagoon_shore_in", 4.0))
+	var shore_out := float(theme_flag("lagoon_shore_out", 5.0))
 	# STRATUL DE JOS, oglinda lui rock_band: acela tinteaza PESTE o cota
 	# (etaj de munte), asta SUB ea (masa de teren de sub nivelul soselei).
 	# Null pe orice tema care nu-l cere, deci restul pistelor nu se schimba cu
@@ -4623,6 +4647,34 @@ func _build_terrain() -> void:
 							if bw > 0.0:
 								tint = tint.lerp(btints[bi] as Color, bw)
 								grass_w *= 1.0 - bw
+					if crust_tint != null or shore_tint != null:
+						var sd := _sampler.lagoon_signed_dist(v.x, v.z)
+						if sd < 1e8:
+							if crust_tint != null:
+								# 1 pana la `crust_width` in afara conturului,
+								# apoi coboara pe `crust_fade`; marginea se
+								# zdrentuieste cu acelasi zgomot ca etajele.
+								var crust_w := clampf(
+									(sd + crust_width + crust_fade) / crust_fade,
+									0.0, 1.0)
+								crust_w = clampf(crust_w + dirt_noise.get_noise_2d(
+									v.x * 0.5, v.z * 0.5) * 0.30, 0.0, 1.0)
+								crust_w = smoothstep(0.0, 1.0, crust_w)
+								if crust_w > 0.0:
+									tint = tint.lerp(crust_tint as Color, crust_w)
+									# Pe soda nu creste iarba.
+									grass_w *= 1.0 - crust_w
+							if shore_tint != null:
+								# Trapez peste linia apei: -shore_out .. +shore_in,
+								# cu 2 m de racord la fiecare capat.
+								var s_up := clampf((sd + shore_out) / 2.0, 0.0, 1.0)
+								var s_dn := clampf((shore_in - sd) / 2.0, 0.0, 1.0)
+								var shore_w := smoothstep(0.0, 1.0, minf(s_up, s_dn))
+								shore_w *= 0.55 + 0.45 * clampf(
+									dirt_noise.get_noise_2d(v.x * 1.5, v.z * 1.5)
+									* 0.5 + 0.5, 0.0, 1.0)
+								if shore_w > 0.0:
+									tint = tint.lerp(shore_tint as Color, shore_w * 0.85)
 					if rock_tint != null:
 						var rock_w := clampf(
 							(v.y - rock_line) / rock_fade, 0.0, 1.0)
@@ -8383,6 +8435,11 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# nevoie sa stie modul ca sa nu taie cursa la marginea drumului.
 		ball.motion = int(kind.get("motion",
 			theme_flag("hazard_motion", 0))) as SlidingHazard.Motion
+		# Plafonul de viteza al maturarii, cand nodul l-a declarat (elefantul
+		# din Serengeti merge la 2 m/s, nu la 12 ca bolovanul). Fara cheie
+		# ramane implicitul clasei, deci nimic de pe alte piste nu se misca.
+		ball.max_sweep_speed = float(kind.get("sweep_speed",
+			theme_flag("hazard_sweep_speed", SlidingHazard.MAX_SWEEP_SPEED_DEFAULT)))
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa
@@ -8403,6 +8460,10 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		if bool(kind.get("face_travel",
 				theme_flag("hazard_face_travel", crossing or door))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
+			# La TRAVERSARE se si INTOARCE la drumul de intoarcere — un animal
+			# care revine cu spatele nu revine, da inapoi. Vezi
+			# SlidingHazard.turn_around.
+			ball.turn_around = crossing
 			# O USA nu se uita incotro merge, se uita in lungul soselei: fata
 			# discului trebuie sa fie spre masina care vine, ca sa se citeasca
 			# zid, iar rostogolirea (in jurul normalei discului) sa fie a unei

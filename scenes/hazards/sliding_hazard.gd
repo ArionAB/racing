@@ -126,6 +126,11 @@ var escape_lane: float = ESCAPE_LANE_DEFAULT
 ## Defazaj 0..1 dintr-o perioada. Doua obstacole pe aceeasi pista cu acelasi
 ## defazaj se misca la unison si arata ca un mecanism, nu ca doua obstacole.
 var phase: float = 0.0
+## TRAVERSARE cu model care are un „inainte": la drumul de intoarcere corpul
+## se INTOARCE cu fata spre sensul de mers (o jumatate de tura in jurul
+## verticalei), in loc sa mearga cu spatele. Pus de pista odata cu
+## `face_travel`. Pendularea si usa nu-l folosesc.
+var turn_around: bool = false
 
 ## Model optional + configuratia lui.
 var model_scene: PackedScene
@@ -344,9 +349,13 @@ func _animate(speed: float) -> void:
 		target = ANIM_WALK
 		rate = clampf(speed / WALK_CYCLE_SPEED, 0.75, 2.2)
 	if target == &"":
+		# Fara animatie de repaus (elefantul are doar Walk/Trumpet): parcat pe
+		# acostament STA, nu merge pe loc. Se reia de unde a ramas la urnire.
+		if _anim.is_playing():
+			_anim.pause()
 		return
 	_anim.speed_scale = rate
-	if _anim.current_animation != String(target):
+	if _anim.current_animation != String(target) or not _anim.is_playing():
 		_anim.play(target, ANIM_BLEND)
 
 func _build_placeholder_box() -> void:
@@ -383,8 +392,17 @@ func _physics_process(delta: float) -> void:
 	if not _configured:
 		_configure()
 	_time += delta
-	global_position = center + travel * _offset_now()
-	var moved := global_position - _last_pos
+	var next_pos := center + travel * _offset_now()
+	var moved := next_pos - _last_pos
+	# Intoarcerea la capat de cursa: O SINGURA scriere de transform (baza +
+	# pozitie) — cu sync_to_physics, pozitia si rotatia scrise separat in
+	# acelasi pas ingheata corpul tacut (memoria jolt-sync-transform).
+	var flat_move := Vector3(moved.x, 0.0, moved.z)
+	if turn_around and flat_move.length() > 0.01 			and (-global_transform.basis.z).dot(flat_move) < 0.0:
+		global_transform = Transform3D(
+			global_transform.basis.rotated(Vector3.UP, PI), next_pos)
+	else:
+		global_position = next_pos
 	_speed = moved.length() / delta if delta > 0.0 else 0.0
 	if _pivot != null and roll_radius > 0.0:
 		# Rostogolire: rotatie in jurul axei perpendiculare pe miscare.

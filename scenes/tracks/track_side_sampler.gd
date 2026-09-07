@@ -1058,6 +1058,27 @@ func _lagoon_mix(wx: float, wz: float) -> float:
 	return smoothstep(-lagoon_out, lagoon_in, sd)
 
 
+## Distanta cu semn (m) de la un punct la CONTURUL lagunei: pozitiva inauntrul
+## poligonului, negativa in afara, 1e9 fara laguna. E cifra din spatele lui
+## `_lagoon_mix`, expusa ca atare fiindca CRUSTA DE SODA (tema serengeti,
+## `lagoon_crust_*` in Track._build_terrain) e o banda de teren masurata in
+## metri de la mal, nu o fractie din amestecul de adancime.
+func lagoon_signed_dist(wx: float, wz: float) -> float:
+	var n := _lagoon_poly.size()
+	if n < 3:
+		return 1e9
+	var p := Vector2(wx, wz)
+	var d_sq := INF
+	for i in n:
+		var q := Geometry2D.get_closest_point_to_segment(
+			p, _lagoon_poly[i], _lagoon_poly[(i + 1) % n])
+		d_sq = minf(d_sq, p.distance_squared_to(q))
+	var sd := sqrt(d_sq)
+	if not Geometry2D.is_point_in_polygon(p, _lagoon_poly):
+		sd = -sd
+	return sd
+
+
 ## Minim neted polinomial: coincide cu minf departe de intersectie, rotunjeste
 ## muchia pe o banda de ~k metri. Rezultatul e <= minf(a, b), deci "sapa, nu
 ## ridica" ramane adevarat oriunde se foloseste in loc de minf.

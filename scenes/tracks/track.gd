@@ -532,15 +532,30 @@ static func themes() -> Dictionary:
 			# pamant ud. Reteta e cea a Yangtze-ului (§ water_tint): slot cald,
 			# desaturare mare, tenta aproape neutra — namolul e gri-maroniu,
 			# nu ocru aprins.
-			"water_b_mul": Color(1.0, 0.94, 0.86),
-			"water_b_desat": 0.34,
-			"water_b_gain": 0.90,
-			"water_b_glint": 0.7,
-			"water_b_glint_cut": 0.72,
+			# RUNDA 2 (POI C). Criticul a cerut "apa mai inchisa"; masuratoarea
+			# pe referinta spune INVERS: raul din diorama e V0.52, exact cat
+			# malul de noroi (V0.52) — nu valoarea separa apa de mal, ci
+			# NUANTA (rau H8-12 neutru-rece fata de mal H29 ocru cald) plus
+			# dungile speculare (pete pana la V0.72). La noi apa iesise
+			# V0.43 langa mal V0.40 (raport 1.08): doua suprafete in aceeasi
+			# familie, deci ochiul nu vedea niciun rau. Reteta e cea a
+			# Yangtze-ului (§1370-1383): albedo desaturat spre neutru, si
+			# lumina se intoarce ca sclipiri, nu ca albedo plat.
+			# Tinta e MASURATA pe referinta: rau S0.17 V0.52, mal S0.30 V0.52.
+			# Deci nu "mai inchis decat malul" (sunt la aceeasi valoare), ci
+			# mai PUTIN saturat, cu aceeasi luminozitate. desat 0.72 dadea
+			# S0.03 (gri de beton, masurat pe C_r2_t2.png) — prea mult.
+			"water_b_mul": Color(0.97, 0.96, 0.97),
+			"water_b_desat": 0.48,
+			"water_b_gain": 1.22,
+			"water_b_glint": 1.9,
+			"water_b_glint_cut": 0.60,
 			# Spuma alba e ce facea lacul sa citeasca mint: toata panza de la
 			# vad e sub SEA_FOAM_DEPTH (0.6 m), deci era spuma pe tot.
 			"water_foam": 0.0,
 			"water_foam_mix": 0.92,
+			# Vezi _build_sea_far: fara larg deschis, apa e doar albia raului.
+			"sea_far": false,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -5350,6 +5365,17 @@ func _build_channel_respawn(ch: Dictionary, water_y: float) -> void:
 
 ## Largul: doua triunghiuri. Nu are nevoie de mai mult.
 func _build_sea_far(root: Node3D, sea_y: float) -> void:
+	# `sea_far` (implicit true) = exista larg deschis dincolo de tarm. Pe o
+	# insula placa asta sta oricum sub teren si nu se vede. Pe Serengeti apa e
+	# un RAU intr-un bazin de crater: albia are 0.03-0.63 m adancime pe o banda
+	# de ~50 m (masurat, x -99..-51 la z=165), iar restul bazinului e o tava
+	# plata la y ~ 0, adica DOAR 1.05 m peste sea_y. Cvadrilaterul de larg n-are
+	# niciun test de adancime, deci iesea prin toata tava si umplea jumatate de
+	# cadru cu o campie gri — exact ce se vedea in C_r2_ab_nosea.png (cu Sea
+	# stins drumul trece uscat pana la orizont). SeaNear ramane si deseneaza
+	# raul, fiindca el chiar testeaza adancimea per celula.
+	if not bool(theme_flag("sea_far", true)):
+		return
 	var c := _centroid()
 	var h := SEA_FAR_EXTENT * 0.5
 	var y := sea_y - SEA_FAR_DROP

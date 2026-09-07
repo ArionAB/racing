@@ -484,7 +484,34 @@ static func themes() -> Dictionary:
 			# Varful firului, cerut EXPLICIT: derivarea implicita a
 			# TrackGrass e de pajiste alpina (verde x1.18, albastru /2) si pe
 			# ocru dadea lime acid. Savana e pai auriu — masurat pe captura.
-			"dense_grass_tip": Color.html("A08A4A"),
+			# Masurat pe A_r2_c2.png, caseta 800..1250 x 430..700, cei mai
+			# luminosi 8% din pixeli (= firele): (253,230,148) V=0.99, adica
+			# ARSE — pe fundalul de sol V=0.65 citeau a oase/aschii albe, nu a
+			# iarba. Vertex color-ul intra in ALBEDO si mai primeste o data
+			# soarele cald plus saturatia din post, deci varful trebuie sa
+			# plece MAI INCHIS decat solul, nu mai deschis. Referinta
+			# (ref_A.png) are exact asta: smocuri oliv-inchise ca ACCENTE pe
+			# un covor auriu deschis, nu tepi mai luminosi decat pamantul.
+			"dense_grass_tip": Color.html("6E6631"),
+			# PROFIL DE COVOR (TrackGrass.carpet). Implicitul TrackGrass e
+			# croit pentru pajistea alpina: fire de 40-70 cm, rare, cu baza
+			# bruna (0.45/0.42/0.38 din varf). Masurat pe A_r2_before.png,
+			# caseta 0..340 x 430..720 (campul dintre banda si turma):
+			# 35.5% din pixeli sub V=0.42 — adica baza firelor, NU umbra
+			# aruncata (`cast_shadow` era deja OFF pe MultiMesh). De la
+			# inaltimea chase cam-ului asta citea a miriste de tepi pe nisip,
+			# nu a covor. Cheia scurteaza firul sub 0,5 m, indeasa smocul
+			# (20 de fire pe raza 0,34), ridica baza aproape la culoarea
+			# varfului si largeste banda la 13 m, ca solul gol sa nu inceapa
+			# la 7 m de asfalt. Tinta criticului: umbra de lama sub 12%.
+			"dense_grass_carpet": true,
+			# PODEAUA DE SAVANA (vezi savanna_grass_w in _build_terrain).
+			# Greutatea trimite shader-ul de teren pe perechea de texturi de
+			# IARBA in loc de cea de nisip: granulatie de fire, nu pete de
+			# dune. Tenta ridica si lumineaza paiul, ca solul dintre fire sa
+			# fie la acelasi hue cu varful firului (cerinta criticului).
+			"savanna_grass_w": 0.85,
+			"savanna_grass_tint": Color.html("C6AC63"),
 			"hazard_model": "res://assets/models/rocks/boulder_roller.glb",
 			# Bolovanii rostogoliti de pe serpentine (POI F) sunt GRANIT, ca
 			# kopje-urile (clasa din palette.gd) — nu gresia de canion.
@@ -4439,6 +4466,20 @@ func _build_terrain() -> void:
 	# tema de insula, deci restul lumii nu se schimba cu un pixel.
 	var inland: Variant = theme_flag("inland_tint", null)
 	var inland_mix := float(theme_flag("inland_strength", 0.0))
+	# COVORUL DE SAVANA: greutate de IARBA constanta pe tot terenul, fara
+	# poarta de cota. `inland_tint` nu poate face asta — el porneste de la
+	# nivelul marii (BEACH_SAND_TOP / BEACH_FADE), iar Serengeti n-are mare,
+	# deci pe pista asta ar iesi ori 0 peste tot, ori o linie de nivel prin
+	# mijlocul campiei. Motivul pentru care cheia exista: masurat pe
+	# A_r2_before.png vs A_r2_c1.png, scurtarea si luminarea FIRELOR n-a
+	# miscat nimic (dark 0.355 -> 0.343) fiindca pixelii intunecati nu erau
+	# fire, ci SOLUL — perechea de texturi de NISIP, cu petele ei macro, plus
+	# umbrele prop-urilor peste ea. Referinta (ref_A.png) are un covor
+	# continuu de pai pana la orizont, cu tufele verzi ca accente separate;
+	# firele de iarba sunt detaliul de aproape, nu covorul. Deci schimbam
+	# PODEAUA, nu tepii de pe ea. 0.0 pe orice alta tema = zero diferenta.
+	var savanna_w := float(theme_flag("savanna_grass_w", 0.0))
+	var savanna_tint: Variant = theme_flag("savanna_grass_tint", null)
 	# Zapada de creasta: null pe orice tema fara munte, deci restul pistelor
 	# nu se schimba cu un pixel. Vezi "snow_line" in themes().
 	var snow_tint: Variant = theme_flag("snow_tint", null)
@@ -4539,6 +4580,13 @@ func _build_terrain() -> void:
 					# spre shader prin COLOR.a: acolo alege intre perechea de
 					# texturi de nisip si cea de iarba (#206).
 					var grass_w := 0.0
+					# Covorul de savana (vezi savanna_grass_w mai sus): se
+					# aplica INAINTE de inland, ca o tema care ar avea si mare
+					# si savana sa poata suprascrie pe fasia de plaja.
+					if savanna_w > 0.0:
+						grass_w = savanna_w
+						if savanna_tint != null:
+							tint = tint.lerp(savanna_tint as Color, savanna_w)
 					if inland != null:
 						# Banda de trecere e larga (3.5 m de cota) tocmai ca sa
 						# nu se vada o linie de nivel: dunele o strambă singure,
@@ -10322,7 +10370,8 @@ func _build_world_decor() -> void:
 	if bool(theme_flag("dense_grass", false)):
 		var grass := TrackGrass.build(_sampler, _world_seed(), theme_ground_tint,
 			float(theme_flag("dense_grass_max_y", 1e9)),
-			theme_flag("dense_grass_tip", Color(0, 0, 0, 0)) as Color)
+			theme_flag("dense_grass_tip", Color(0, 0, 0, 0)) as Color,
+			bool(theme_flag("dense_grass_carpet", false)))
 		add_child(grass)
 
 

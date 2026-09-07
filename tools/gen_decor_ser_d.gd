@@ -72,6 +72,8 @@ const RES := {
 	"kopje_boulder_b": "s_kopje_boulder_b",
 	"kopje_boulder_c": "s_kopje_boulder_c",
 	"acacia_umbrella_a": "s_acacia_umbrella_a",
+	"acacia_umbrella_b": "s_acacia_umbrella_b",
+	"acacia_umbrella_c": "s_acacia_umbrella_c",
 }
 
 ## Raza de DEGAJARE la sol (m): trunchiul la copaci (coliziunea e trunk),
@@ -80,24 +82,25 @@ const RES := {
 const BASE_R := {
 	"fig_tree": 0.7, "fever_tree": 0.5, "euphorbia": 0.9, "dead_tree": 0.6,
 	"kopje_boulder_a": 1.1, "kopje_boulder_b": 2.0, "kopje_boulder_c": 2.8,
-	"acacia_umbrella_a": 0.5,
+	"acacia_umbrella_a": 0.5, "acacia_umbrella_b": 0.5, "acacia_umbrella_c": 0.5,
 }
 ## Raza COROANEI (m), pentru testul camerei (nota 3) si pentru „se ating".
 const CROWN_R := {
 	"fig_tree": 5.6, "fever_tree": 4.4, "euphorbia": 0.9, "dead_tree": 2.4,
 	"kopje_boulder_a": 1.1, "kopje_boulder_b": 2.0, "kopje_boulder_c": 2.8,
-	"acacia_umbrella_a": 4.5,
+	"acacia_umbrella_a": 4.5, "acacia_umbrella_b": 4.5, "acacia_umbrella_c": 4.5,
 }
 ## Inaltimea CENTRULUI de coroana ca fractie din inaltimea piesei (masurata pe
 ## GLB-uri): folosita si de `_blocks_gate` si de tools/probe_pete.gd.
 const CROWN_Y := {
 	"fig_tree": 0.72, "fever_tree": 0.78, "acacia_umbrella_a": 0.85,
+	"acacia_umbrella_b": 0.85, "acacia_umbrella_c": 0.85,
 }
 ## Inaltimea reala (m) — scara se cere in METRI, nu din burta.
 const HEIGHT := {
 	"fig_tree": 13.0, "fever_tree": 10.12, "euphorbia": 4.03, "dead_tree": 6.01,
 	"kopje_boulder_a": 1.44, "kopje_boulder_b": 2.88, "kopje_boulder_c": 4.32,
-	"acacia_umbrella_a": 7.04,
+	"acacia_umbrella_a": 7.04, "acacia_umbrella_b": 8.5, "acacia_umbrella_c": 10.0,
 }
 
 ## CULOARELE DE SOARE (runda 3). Criticul rundei 2 a cerut pete de soare pe
@@ -165,7 +168,7 @@ var _gated := 0
 const TRI := {
 	"fig_tree": 3494, "fever_tree": 1188, "euphorbia": 1558, "dead_tree": 404,
 	"kopje_boulder_a": 158, "kopje_boulder_b": 178, "kopje_boulder_c": 178,
-	"acacia_umbrella_a": 1176,
+	"acacia_umbrella_a": 1176, "acacia_umbrella_b": 1418, "acacia_umbrella_c": 1462,
 }
 
 
@@ -269,10 +272,33 @@ func _step(meters: float) -> float:
 var _total_len := 2098.7
 
 
-## SUBARBORETUL: euphorbia (4 m) si copaci uscati pe umar, la 0.8-2.5 m de
+## SUBARBORETUL, doua straturi.
+##
+## (a) ETAJUL INFERIOR (runda 5): tufe late de 3.2-5.5 m la 5.0-9.0 m de
+## muchie, alternand malurile la ~6 m. Histograma de inaltimi masurata pe
+## starea rundei 4 (tools/ProbeSides.tscn) avea un GOL exact aici:
+##
+##   inaltimi (m)  0-4:22  4-8:7  8-12:61  12-16:87  16-20:29  20+:41
+##
+## adica sapte piese intre 4 si 8 m pe toata padurea — intre euforbia de 4 m si
+## coroanele de la 9 m in sus nu era nimic, si asta se citeste in cadru ca
+## podea de iarba sub un tavan de frunzis. Referinta are un al doilea etaj de
+## tufe si arbori mici SUB coroane, pe toata lungimea.
+##
+## Piesa e `acacia_umbrella_b/c` scalata la 3.5-6.5 m: coroana ei e plata si
+## lata cat inaltimea (inventar §plants), deci la 5 m inaltime da o masa lata
+## de 5 m la nivelul geamului — exact tufa din referinta, si nu un copac mic
+## (un fever_tree scalat ar fi ramas un bat cu o bila).
+##
+## Nu umbreste banda in plus: la 5 m inaltime si 35 grade elevatie umbra ei are
+## 7 m, deci de la 8 m de ax ajunge la 1 m de ax doar cand cade spre drum, si
+## intra oricum in testul culoarelor de soare din `_place`.
+##
+## (b) euphorbia (4 m) si copaci uscati pe umar, la 0.8-2.5 m de
 ## muchie. E stratul de la inaltimea ochiului, cel care trece pe langa geam;
 ## fara el intre iarba si coroanele de la 8 m nu e nimic.
 func _understory() -> void:
+	_low_layer()
 	var f := F_IN
 	var k := 0
 	while f < F_OUT:
@@ -288,9 +314,66 @@ func _understory() -> void:
 		k += 1
 
 
-## RANDUL APROPIAT: smochini (13 m) si acacii galbene (10 m) la 4.0-6.5 m de
-## muchie, un copac la ~9 m pe fiecare parte. Coroanele de 11 m se ating
-## de-a lungul benzii si trec peste umar; asta e „drumul intra sub copaci".
+## Etajul inferior: tufe late (acacia_umbrella_b/c scalata la 3.5-6.5 m) pe
+## ambele maluri, la 1.0-4.0 m de muchie, cu pasul de ~6 m pe fiecare parte.
+func _low_layer() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var f := F_IN + (0.0 if sgn < 0.0 else _step(3.0))
+		var k := 0
+		while f < F_OUT:
+			var dens := _density(f)
+			if _rng.randf() < 0.30 + 0.70 * dens:
+				var mdl := "acacia_umbrella_b" if k % 2 == 0 else "acacia_umbrella_c"
+				# RUNDA 5, a doua masuratoare (D_r5_hero.png): la 1-4 m de
+				# muchie si 3.5-6.5 m inaltime, coroana plata (raza 4.5 m la
+				# scara 1) ajungea la 4-5 m de ax si trecea prin dreptul
+				# camerei ca o LESPEDE verde de 4 m latime la 2 m de ochi — se
+				# citea ca bolovan, nu ca tufa. Coroana plata e lata cat
+				# inaltimea, deci marimea ei pe ecran nu se regleaza din
+				# inaltime, ci din DISTANTA: la 5-9 m de muchie (11.5-15.5 m de
+				# ax) o tufa de 5 m subintinde ~20 grade, adica exact tufele
+				# din referinta, si ramane SUB coroanele smochinilor din randul
+				# apropiat (care sunt acum la 3-5 m de muchie).
+				var h := _rng.randf_range(3.2, 5.5)
+				_place(mdl, "tufa", f, sgn, _rng.randf_range(5.0, 9.0),
+					_rng.randf_range(0.0, TAU), _scale_for(mdl, h), "trunk")
+			f += _step(6.0 + _rng.randf_range(-1.2, 1.2))
+			k += 1
+
+
+## RANDUL APROPIAT: smochini (13 m) si acacii galbene (10 m) la 2.0-5.0 m de
+## MUCHIE (8.5-11.5 m de ax), CONTINUU pe ambele parti. Coroanele de 11 m se
+## ating de-a lungul benzii si trec peste umar; asta e „drumul intra sub
+## copaci".
+##
+## RUNDA 5 — masuratoare, nu impresie. Criticul rundei 4 a numit „padurea
+## inchide banda doar pe stanga". Am masurat cu tools/ProbeSides.tscn si
+## NUMARUL e simetric (129 stanga / 118 dreapta pe felia deasa, raport 0.91),
+## deci ipoteza lui despre cauza era gresita — dar cadrul lui era corect. Ce
+## a iesit din histograma laterala e defectul real, si e pe AMBELE parti:
+##
+##   lateral de la ax: 0-5:0  5-10:6  10-15:45  15-20:64  20-25:37  30+:77
+##   piese la <=12 m de ax pe TOATA felia deasa (~250 m de drum): 19
+##
+## Adica un copac la fiecare ~26 m de drum pe fiecare parte in banda apropiata,
+## restul la 15-45 m. Un smochin de 13 m pus la 15 m de ax are centrul coroanei
+## la ~9.4 m, exact la inaltimea camerei: se vede ca silueta la orizont, nu ca
+## perete langa geam. De aia jumatatea „goala" din cadru e podea de iarba cu
+## trunchiuri razlete — nu lipseau copacii de pe o parte, lipseau de APROAPE
+## pe amandoua. Referinta are coroane la 2-8 m de muchie, continue.
+##
+## Ce se schimba: pasul ramane 7 m dar probabilitatea in nucleul des e 1.0 (nu
+## 0.25+0.75*dens), iar lateralul coboara de la 4.0-10.0 la 2.0-5.0 m de
+## muchie. „Fereastra de soare" a rundei 2 (un smochin din trei aproape,
+## restul retrasi la 7.5-10 m) se scoate: runda 4 a dovedit ca adancimea
+## umbrei, nu desimea, facea tunelul negru, iar retragerea era exact ce
+## golea primul plan.
+##
+## Camera: coroana are raza 5.6 m la 13 m inaltime; la 8.5 m de ax marginea
+## coroanei ajunge la 2.9 m de ax, sub pragul de 4.0 m din `_place`. De aceea
+## lateralul minim pentru smochin e 3.0 m de muchie (9.5 m de ax, coroana la
+## 3.9 m — verificat de avertismentul din `_place`), si doar acaciile mici
+## (coroana 4.5 m scalata) coboara sub el.
 func _near_row() -> void:
 	for sgn: float in [-1.0, 1.0]:
 		var f := F_IN + (0.0 if sgn < 0.0 else _step(4.5))
@@ -302,7 +385,7 @@ func _near_row() -> void:
 			var mdl := "fig_tree"
 			if k % 3 == 2 or dens < 0.5:
 				mdl = "fever_tree"
-			if _rng.randf() < 0.25 + 0.75 * dens:
+			if _rng.randf() < 0.35 + 0.65 * dens:
 				var h := _rng.randf_range(11.0, 13.5) if mdl == "fig_tree" \
 					else _rng.randf_range(9.0, 11.0)
 				# FEREASTRA DE SOARE (runda 2). Masurat pe D_r2_hero_b.png:
@@ -316,11 +399,11 @@ func _near_row() -> void:
 				# Un smochin din trei ramane aproape (coroana peste drum),
 				# restul se retrag la 7.5-10 m: masa de frunzis ramane continua
 				# din masina, dar intre coroane raman ferestre de soare.
-				var lat: float = _rng.randf_range(4.0, 6.5) if k % 3 == 0 else _rng.randf_range(7.5, 10.0)
+				var lat: float = _rng.randf_range(3.0, 5.0) if mdl == "fig_tree" 					else _rng.randf_range(2.2, 4.5)
 				_place(mdl, "smochin" if mdl == "fig_tree" else "febra", f, sgn,
 					lat, _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, h), "trunk")
-			f += _step(7.0 + _rng.randf_range(-1.2, 1.2))
+			f += _step(6.5 + _rng.randf_range(-1.0, 1.0))
 			k += 1
 
 
@@ -338,9 +421,9 @@ func _second_row() -> void:
 				var h := _rng.randf_range(14.0, 17.0) if mdl == "fig_tree" \
 					else _rng.randf_range(10.0, 12.0)
 				_place(mdl, "smochinSpate" if mdl == "fig_tree" else "febraSpate",
-					f, sgn, _rng.randf_range(9.0, 16.0), _rng.randf_range(0.0, TAU),
+					f, sgn, _rng.randf_range(12.0, 18.0), _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, h), "trunk")
-			f += _step(8.5 + _rng.randf_range(-1.5, 1.5))
+			f += _step(7.0 + _rng.randf_range(-1.2, 1.2))
 			k += 1
 
 
@@ -358,9 +441,9 @@ func _far_row() -> void:
 				var h := _rng.randf_range(13.0, 17.0) if mdl == "fig_tree" \
 					else _rng.randf_range(10.0, 12.0)
 				_place(mdl, "smochinFund" if mdl == "fig_tree" else "febraFund",
-					f, sgn, _rng.randf_range(20.0, 36.0), _rng.randf_range(0.0, TAU),
+					f, sgn, _rng.randf_range(19.0, 32.0), _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, h), "trunk")
-			f += _step(10.0 + _rng.randf_range(-2.0, 2.0))
+			f += _step(8.0 + _rng.randf_range(-1.5, 1.5))
 			k += 1
 	_backdrop()
 

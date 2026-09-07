@@ -33,6 +33,21 @@ func _ready() -> void:
 	var frac := 0.27
 	var matches: Array[String] = []
 	var groups: Array[String] = []
+	# --hippo-at: aceeasi faza ca in Snapshot. Fara ea hipopotamii stau in
+	# REPAUS (sub apa), deci o masca pe ei ar iesi mereu 0 px si ar „dovedi"
+	# ca gimmickul lipseste chiar cand e in regula.
+	var hippo_at := -1.0
+	# --min-group-px / --min-total-px transforma sonda in GARDA: fiecare grup
+	# raportat trebuie sa aiba cel putin atatia pixeli, iar suma cel putin
+	# atatia, altfel iesirea e 1. Fara ele sonda doar masoara, ca pana acum.
+	#
+	# Rostul: un contract de gimmick se scrie ca o cifra masurata in starea
+	# ACTIVA (vezi `garda-cu-numele-gimmickului`). Pe Serengeti POI C cele patru
+	# garzi existente erau toate verzi cu vadul GOL — hipopotamii scufundati sub
+	# teren erau numarati de probe_decor, nu blocau banda si nici nu incetineau
+	# cursa. O masca pe obiect, cu prag, e singura care pica atunci.
+	var min_group_px := 0
+	var min_total_px := 0
 	var no_shadow := false
 	var caster := ""
 	var eye_pos := Vector3.ZERO
@@ -58,6 +73,12 @@ func _ready() -> void:
 			matches.append(arg.trim_prefix("--match="))
 		elif arg.begins_with("--group="):
 			groups.append(arg.trim_prefix("--group="))
+		elif arg.begins_with("--hippo-at="):
+			hippo_at = float(arg.trim_prefix("--hippo-at="))
+		elif arg.begins_with("--min-group-px="):
+			min_group_px = int(arg.trim_prefix("--min-group-px="))
+		elif arg.begins_with("--min-total-px="):
+			min_total_px = int(arg.trim_prefix("--min-total-px="))
 	if matches.is_empty():
 		matches.append("Taietura")
 
@@ -68,6 +89,15 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+	if hippo_at >= 0.0:
+		for node in track.find_children("*", "HippoHazard", true, false):
+			var hippo := node as HippoHazard
+			hippo.set("_time", clampf(hippo_at, 0.0, 0.999) * hippo.period)
+			hippo._physics_process(0.0)
+			hippo.set_physics_process(false)
+			print("--hippo-at=%.2f: %s la y=%.2f sus=%s"
+				% [hippo_at, hippo.name, hippo.global_position.y, hippo.is_up()])
+		await get_tree().process_frame
 
 	var cam := Camera3D.new()
 	add_child(cam)
@@ -181,8 +211,28 @@ func _ready() -> void:
 		var keys: Array = by_node.keys()
 		keys.sort_custom(func(x, y): return int(by_node[x]) > int(by_node[y]))
 		print("--- pe obiect (grupuri: %s) ---" % ", ".join(groups))
+		var total_px := 0
+		var sub := 0
 		for kk in keys:
-			print("  GRUP %7d px  %s" % [by_node[kk], kk])
+			var px: int = int(by_node[kk])
+			total_px += px
+			var mark := ""
+			if min_group_px > 0 and px < min_group_px:
+				mark = "  << SUB PRAG (%d)" % min_group_px
+				sub += 1
+			print("  GRUP %7d px  %s%s" % [px, kk, mark])
+		if min_group_px > 0 or min_total_px > 0:
+			print("--- total %d px pe %d grupuri (praguri: fiecare >= %d, total >= %d)"
+				% [total_px, keys.size(), min_group_px, min_total_px])
+			if keys.is_empty():
+				print("VERDICT: REGRESIE — niciun grup in cadru")
+				get_tree().quit(1)
+				return
+			if sub > 0 or total_px < min_total_px:
+				print("VERDICT: REGRESIE — %d grupuri sub prag, total %d" % [sub, total_px])
+				get_tree().quit(1)
+				return
+			print("VERDICT: OK")
 
 	for m in matches:
 		for k in all.size():

@@ -188,8 +188,12 @@ func _approach() -> void:
 			_rng.randf_range(0.9, 1.3), _rng.randf() * TAU)
 
 
-## 0.752-0.785, DREAPTA: lacul de soda. Malul e la ~35 m de ax pe 0.760-0.775
-## (masurat: amestecul de laguna la 25 m de margine urca la 0.21 la 0.770).
+## 0.770-0.800, DREAPTA: lacul de soda. Lacul a fost MUTAT in runda 2 la
+## (-55, -30), R 38 x 1.15/0.95: pe traseul vechi (centru (0,-68)) apa statea la
+## 89-130 grade fata de directia de mers pe TOATA felia 0.77-0.85, adica in
+## spatele soferului - masurat 0.00% pixeli de apa la --frac=0.77. Acum drumul
+## MERGE SPRE lac de la 0.72 (unghi 15 grade, 140 m) la 0.775 (26 m), si trece
+## pe langa mal la 0.78-0.79 (20-22 m de ax, amestec de laguna 0.51-1.00).
 ## Flamingii vin in TREI stoluri care isi cauta singure linia apei: unul
 ## aproape (se citesc individual), doua pe malul din departare, ca banda roz.
 ## Hoitul cu vulturi sta la 9 m de banda, ca in referinta.
@@ -201,38 +205,50 @@ func _lake_shore() -> void:
 	# Un rand de flamingi MODELATI langa banda, ca sa se vada individual la
 	# 8-14 m (stolurile MultiMesh de pe mal sunt la 25-40 m si citesc doar ca
 	# banda roz). Sunt fantome (world_prop: "none"), deci nu ating masina.
-	var ff := 0.7515
-	while ff < 0.7815:
-		var d := 10.0 + _rng.randf_range(0.0, 12.0)
-		_put("s_flamingo" if _rng.randf() > 0.28 else "s_flamingo_wings",
-			ff, 1.0, d, _rng.randf_range(0.95, 1.15), _rng.randf() * TAU)
-		_put("s_flamingo" if _rng.randf() > 0.30 else "s_flamingo_wings",
-			ff + 0.0008, 1.0, d + _rng.randf_range(2.0, 6.0),
-			_rng.randf_range(0.95, 1.15), _rng.randf() * TAU)
+	# Randul de pasari MODELATE se aseaza pe linia apei masurata la fiecare
+	# fractie (`_shore_dist`), nu la o degajare fixa: se citesc individual la
+	# 8-14 m si stau CU PICIOARELE la mal, ca in referinta, in loc sa fie
+	# jumatate inecate si jumatate in mijlocul crustei.
+	var ff := 0.7680
+	while ff < 0.8000:
+		var sh := _shore_dist(ff, 1.0, 46.0)
+		if sh > 0.0:
+			_put("s_flamingo" if _rng.randf() > 0.28 else "s_flamingo_wings",
+				ff, 1.0, sh - _rng.randf_range(0.5, 2.5),
+				_rng.randf_range(0.95, 1.15), _rng.randf() * TAU)
+			_put("s_flamingo" if _rng.randf() > 0.30 else "s_flamingo_wings",
+				ff + 0.0008, 1.0, sh - _rng.randf_range(2.5, 6.0),
+				_rng.randf_range(0.95, 1.15), _rng.randf() * TAU)
 		ff += 0.0011
-	_flock(0.756, 1.0, 14.0, 14.0, 130, 0.30)
-	_flock(0.762, 1.0, 22.0, 16.0, 190, 0.26)
-	_flock(0.768, 1.0, 26.0, 16.0, 190, 0.22)
-	_flock(0.774, 1.0, 30.0, 18.0, 200, 0.20)
-	_flock(0.750, 1.0, 20.0, 15.0, 150, 0.34)
+	# Stolurile isi cauta singure linia apei; malul nou e la 20-22 m de ax pe
+	# 0.780-0.790, deci razele sunt mai mici si stolurile mai dese decat in
+	# runda 1 (cand malul era la 35 m si banda roz se pierdea in crusta).
+	_flock(0.772, 1.0, 20.0, 13.0, 170, 0.30)
+	_flock(0.778, 1.0, 20.0, 14.0, 210, 0.26)
+	_flock(0.784, 1.0, 20.0, 14.0, 210, 0.24)
+	_flock(0.790, 1.0, 22.0, 15.0, 200, 0.22)
+	_flock(0.796, 1.0, 26.0, 16.0, 160, 0.30)
 	# Elefantii de pe crusta (referinta: trei siluete gri pe alb). DOI stau ca
 	# decor, mergand spre lac; al treilea si al patrulea TRAVERSEAZA drumul
 	# (HazardMarker G_Elefant1/2 in Track14.tscn). Trei hazarduri pe acelasi
 	# tronson insemnau drum ocupat permanent (ProbeRace: 26% lent, doua
 	# blocaje), asa ca doar doi sunt mobili.
-	_put("s_elephant", 0.759, 1.0, 21.0, 1.05, 1.9)
-	_put("s_elephant", 0.7635, 1.0, 27.0, 1.15, 2.0)
-	_put("s_elephant", 0.7565, 1.0, 33.0, 0.95, 1.7)
-	_put("s_carcass_vultures", 0.757, 1.0, 9.0, 1.15, 2.1)
-	_put("s_carcass_vultures", 0.784, -1.0, 11.0, 1.0, 0.6)
+	# Elefantii de decor stau pe crusta ALBA dintre drum si mal, la 0.762-0.771
+	# - adica in fata soferului cand vine spre lac, cu apa in spatele lor
+	# (compozitia din referinta: siluete gri pe alb, cu turcoazul dincolo).
+	_put("s_elephant", 0.7660, 1.0, 19.0, 1.05, 1.9)
+	_put("s_elephant", 0.7705, 1.0, 25.0, 1.15, 2.0)
+	_put("s_elephant", 0.7620, 1.0, 30.0, 0.95, 1.7)
+	_put("s_carcass_vultures", 0.7585, 1.0, 9.0, 1.15, 2.1)
+	_put("s_carcass_vultures", 0.804, -1.0, 11.0, 1.0, 0.6)
 	# Bolovani de granit izolati pe crusta, ca in referinta (petele gri intre
 	# lac si drum): sparg albul continuu si primesc umbra lunga.
 	var rocks := [
-		[0.755, 1.0, 16.0, "s_kopje_boulder_a", 0.85],
-		[0.766, 1.0, 13.0, "s_kopje_boulder_c", 0.70],
-		[0.777, 1.0, 18.0, "s_kopje_boulder_b", 0.95],
-		[0.760, -1.0, 14.0, "s_kopje_boulder_b", 0.80],
-		[0.771, -1.0, 10.0, "s_kopje_boulder_a", 0.65],
+		[0.7555, 1.0, 16.0, "s_kopje_boulder_a", 0.85],
+		[0.7645, 1.0, 13.0, "s_kopje_boulder_c", 0.70],
+		[0.7745, 1.0, 15.0, "s_kopje_boulder_b", 0.95],
+		[0.7600, -1.0, 14.0, "s_kopje_boulder_b", 0.80],
+		[0.7710, -1.0, 10.0, "s_kopje_boulder_a", 0.65],
 	]
 	for r: Array in rocks:
 		_put(r[3] as String, r[0] as float, r[1] as float, r[2] as float,
@@ -266,12 +282,17 @@ func _lerai() -> void:
 ## tabara sta mai departe (11-24 m) ca sa nu se acopere reciproc. Balonul e
 ## 16,6 x 9,1 m culcat: pata galben-verde exact ca in referinta.
 func _balloon_camp() -> void:
-	_put("s_safari_balloon_landed", 0.793, 1.0, 17.0, 1.0, 2.6)
-	_put("s_safari_tent", 0.796, 1.0, 13.0, 1.0, 1.1)
-	_put("s_safari_tent", 0.798, 1.0, 20.0, 0.95, 2.4)
-	_put("s_land_rover", 0.791, 1.0, 11.0, 1.0, 1.9)
-	_put("s_campfire", 0.7955, 1.0, 15.5, 1.0, 0.0)
-	_put("s_acacia_umbrella_b", 0.789, 1.0, 24.0, 1.15, 0.9)
+	# Mutata in runda 2 de la 0.791-0.798: acolo lacul nou (centru (-55,-30))
+	# ajunge la 20 m de ax si tabara ar fi stat IN apa (amestec de laguna
+	# 0.33-0.99 la 15-25 m). La 0.806-0.816 amestecul e 0.00 si terenul -0.30,
+	# adica crusta uscata dincolo de lac - exact ca in referinta, unde balonul
+	# sta pe alb, cu apa intre el si drum.
+	_put("s_safari_balloon_landed", 0.8085, 1.0, 17.0, 1.0, 2.6)
+	_put("s_safari_tent", 0.8115, 1.0, 13.0, 1.0, 1.1)
+	_put("s_safari_tent", 0.8135, 1.0, 20.0, 0.95, 2.4)
+	_put("s_land_rover", 0.8065, 1.0, 11.0, 1.0, 1.9)
+	_put("s_campfire", 0.8105, 1.0, 15.5, 1.0, 0.0)
+	_put("s_acacia_umbrella_b", 0.8155, 1.0, 24.0, 1.15, 0.9)
 	_put("s_acacia_umbrella_a", 0.806, 1.0, 19.0, 1.05, 2.2)
 	_put("s_termite_mound_a", 0.800, 1.0, 8.5, 1.2, 0.0)
 	_put("s_termite_mound_b", 0.809, -1.0, 8.0, 1.1, 0.0)
@@ -327,6 +348,21 @@ func _world_at(f: float, sgn: float, dist: float) -> Vector3:
 	var q: Vector3 = p + s * sgn * (hw + dist)
 	q.y = _sol_real(q.x, q.z)
 	return q
+
+
+## Degajarea (in metri de la marginea benzii) la care terenul intra sub apa pe
+## fractia data, cautata din 1 in 1 m. Intoarce -1 daca nu exista apa pana la
+## `dmax`. Exista fiindca lacul mutat in runda 2 NU e concentric cu drumul:
+## linia apei sare de la 26 m (frac 0.775) la 20 m (0.780) la 22 m (0.790), iar
+## un rand de pasari pus la o degajare FIXA cade jumatate in apa (23 de piese
+## sarite de garda din `_put`) si jumatate pe crusta uscata, la 6 m de mal.
+func _shore_dist(f: float, sgn: float, dmax: float) -> float:
+	var d := 3.0
+	while d <= dmax:
+		if _world_at(f, sgn, d).y < _sea_y - 0.05:
+			return d
+		d += 1.0
+	return -1.0
 
 
 func _put(res_id: String, f: float, sgn: float, dist: float, scl: float,

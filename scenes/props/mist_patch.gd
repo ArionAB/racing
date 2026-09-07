@@ -21,7 +21,7 @@ extends Node3D
 const TEX_PATH: String = "res://assets/textures/smoke_puff.png"
 
 ## Cate billboard-uri in petic.
-@export_range(1, 24) var count: int = 8:
+@export_range(1, 48) var count: int = 8:
 	set(v):
 		count = v
 		_rebuild()
@@ -99,7 +99,7 @@ func _rebuild() -> void:
 			rng.randf_range(height.x, height.y), sin(a) * r * footprint.y)
 		var s := rng.randf_range(size.x, size.y)
 		# Latit: ceata joasa e o panza, nu o bila.
-		var b := Basis.IDENTITY.scaled(Vector3(s, s * 0.55, 1.0))
+		var b := Basis.IDENTITY.scaled(Vector3(s, s * 0.42, 1.0))
 		mm.set_instance_transform(i, Transform3D(b, p))
 		var c := tint
 		c.a = tint.a * rng.randf_range(0.7, 1.0)

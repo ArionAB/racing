@@ -391,17 +391,25 @@ func _edges() -> void:
 ## fara masina e singura ceata care se vede — culoarul de ceata al
 ## Environment-ului lucreaza doar cu jucatorul inauntru.
 func _mist() -> void:
-	var f := F_DENSE_IN
-	var k := 0
-	while f < F_DENSE_OUT:
-		var sgn := -1.0 if k % 2 == 0 else 1.0
-		_mist_at(f, sgn, _rng.randf_range(9.0, 16.0), 8,
-			Vector2(8.0, 5.0), Vector2(5.0, 9.0), 0.30)
-		if k % 2 == 1:
-			_mist_at(f + _step(6.0), -sgn, _rng.randf_range(22.0, 30.0), 6,
-				Vector2(12.0, 7.0), Vector2(8.0, 14.0), 0.26)
-		f += _step(15.0)
-		k += 1
+	# Voalul sta INTRE TRUNCHIURI, nu peste carosabil. Masurat pe D_r1_hero_b:
+	# panze de 11-20 m puse la 8-15 m de ax acopereau drumul pana in botul
+	# masinii (banda are 6.5 m semi-latime, deci o panza de 20 m centrata la
+	# 10 m ajunge la 0 m). Regula: `lateral - size_max/2 >= half + 3`, adica
+	# panza incepe la cel putin 3 m in afara muchiei. De aici lateralele de
+	# 18-26 m si 30-46 m cu panze de 12-18 m.
+	#
+	# Densitatea vine din SUPRAPUNERE la alpha mic (0.05-0.07): la 0.30 fiecare
+	# panza citea ca un ghemotoc alb de vata (D_r1_hero.png), la 0.085 pe patru
+	# benzi a inecat cadrul. Un singur strat trebuie sa fie aproape invizibil.
+	var f := F_DENSE_IN - _step(10.0)
+	while f < F_DENSE_OUT + _step(10.0):
+		for sgn: float in [-1.0, 1.0]:
+			_mist_at(f, sgn, _rng.randf_range(18.0, 26.0), 9,
+				Vector2(11.0, 7.0), Vector2(12.0, 18.0), 0.065)
+			if _rng.randf() < 0.6:
+				_mist_at(f + _step(7.0), sgn, _rng.randf_range(30.0, 46.0), 7,
+					Vector2(14.0, 9.0), Vector2(14.0, 22.0), 0.055)
+		f += _step(16.0)
 
 
 func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,
@@ -420,7 +428,8 @@ func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,
 	_out.append("count = %d" % cnt)
 	_out.append("footprint = Vector2(%.1f, %.1f)" % [foot.x, foot.y])
 	_out.append("size = Vector2(%.1f, %.1f)" % [sz.x, sz.y])
-	_out.append("tint = Color(0.86, 0.88, 0.87, %.2f)" % alpha)
+	_out.append("tint = Color(0.87, 0.89, 0.88, %.3f)" % alpha)
+	_out.append("height = Vector2(0.4, 2.2)")
 	_out.append("seed = %d" % (1000 + _n))
 	_out.append("")
 

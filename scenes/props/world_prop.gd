@@ -803,7 +803,11 @@ const SLOT_REMAP_BY_MODEL := {
 	# 0.28 (verde de brocoli); pe 12 da (139,148,54), nuanta 0.18 = nuanta
 	# referintei (92,93,34), doar mai deschis. Se pastreaza 12: nuanta e a
 	# slotului, valoarea e a luminii.
-	"tropical_shrub": {21: Palette.CACTUS_GREEN},
+	# Runda 2: si slotul 12 (CACTUS_GREEN) al tufei merge pe 13 DRY_VEGETATION.
+	# Masurat pe fasia de umar din cadrul de joc, referinta are 0,6 % verde viu
+	# la nivelul solului; tot verdele ei e in coroanele acaciilor. Tufa ramane
+	# ca SILUETA (etaj intre sol si coroane), dar in registrul uscat al campiei.
+	"tropical_shrub": {21: Palette.CACTUS_GREEN, 12: Palette.DRY_VEGETATION},
 	# Smocurile de iarba (POI B, runda 2). Slotul unei piese se citeste din
 	# UV.x * 32, nu din vertex color — prima incercare a remapat sloturile 7 si
 	# 8 (citite gresit din culoarea vertecsilor) si smocurile au ramas VERZI pe

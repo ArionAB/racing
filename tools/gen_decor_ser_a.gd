@@ -386,7 +386,11 @@ func _bushes() -> void:
 			var side := 1.0 if _rng.randf() < 0.5 else -1.0
 			# sqrt inversat: mai multe aproape de drum decat departe.
 			var t := _rng.randf()
-			var dist := w + 1.2 + (t * t) * 30.0
+			# +2.6 m de la muchie, nu 1.2: probe_manual masoara latimea cu
+			# `width_at(frac_at(i))`, iar generatorul cu `width_at_index(i)`
+			# — pe portiunile late (9 m) cele doua esantioane difera si 23
+			# de tufe ieseau raportate „IN DRUM". Marja acopera diferenta.
+			var dist := w + 2.6 + (t * t) * 30.0
 			var along := _rng.randf_range(-2.0, 2.0)
 			var c := p + fwd * along + left * (side * dist)
 			# Doar doua piese: tufa cu frunza lata la scara MICA (0.35-0.7
@@ -403,7 +407,7 @@ func _bushes() -> void:
 				mdl = "grass_tuft_large"
 				scl = _rng.randf_range(0.35, 0.60)
 			# Nu pe carosabil si nu peste corpurile deja asezate.
-			if _edge_gap(Vector2(c.x, c.z)) < 0.8:
+			if _edge_gap(Vector2(c.x, c.z)) < 2.2:
 				continue
 			var busy := false
 			for o in _solid_pts:

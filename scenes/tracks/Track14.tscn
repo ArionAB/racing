@@ -281,697 +281,667 @@ transform = Transform3D(-0.9422, 0.0000, 0.3350, 0.0000, 1.0000, 0.0000, -0.3350
 transform = Transform3D(0.0707, 0.0000, 0.9975, 0.0000, 1.0000, 0.0000, -0.9975, 0.0000, 0.0707, 226.00, -0.30, 108.50)
 
 [node name="tufa48" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0492, 0.0000, 0.4582, 0.0000, 0.4609, 0.0000, -0.4582, 0.0000, -0.0492, 226.69, -0.30, 148.00)
+transform = Transform3D(-0.0492, 0.0000, 0.4582, 0.0000, 0.4609, 0.0000, -0.4582, 0.0000, -0.0492, 226.69, -0.30, 146.60)
 
 [node name="tufa49" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.5552, 0.0000, -0.0829, 0.0000, 0.5613, 0.0000, 0.0829, 0.0000, 0.5552, 225.72, -0.30, 149.31)
+transform = Transform3D(0.5552, 0.0000, -0.0829, 0.0000, 0.5613, 0.0000, 0.0829, 0.0000, 0.5552, 225.72, -0.30, 147.91)
 
 [node name="tufa50" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4563, 0.0000, -0.2477, 0.0000, 0.5192, 0.0000, 0.2477, 0.0000, -0.4563, 221.62, -0.30, 192.49)
+transform = Transform3D(-0.4563, 0.0000, -0.2477, 0.0000, 0.5192, 0.0000, 0.2477, 0.0000, -0.4563, 221.62, -0.30, 193.90)
 
 [node name="tufa51" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0234, 0.0000, 0.5321, 0.0000, 0.5326, 0.0000, -0.5321, 0.0000, 0.0234, 219.05, -0.30, 176.00)
+transform = Transform3D(0.0234, 0.0000, 0.5321, 0.0000, 0.5326, 0.0000, -0.5321, 0.0000, 0.0234, 219.05, -0.30, 177.40)
 
 [node name="tufa52" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.5643, 0.0000, 0.3722, 0.0000, 0.6760, 0.0000, -0.3722, 0.0000, -0.5643, 216.28, -0.30, 154.62)
+transform = Transform3D(-0.5643, 0.0000, 0.3722, 0.0000, 0.6760, 0.0000, -0.3722, 0.0000, -0.5643, 216.28, -0.30, 153.22)
 
 [node name="tufa53" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.3594, 0.0000, -0.1877, 0.0000, 0.4054, 0.0000, 0.1877, 0.0000, -0.3594, 217.97, -0.30, 187.33)
+transform = Transform3D(-0.3594, 0.0000, -0.1877, 0.0000, 0.4054, 0.0000, 0.1877, 0.0000, -0.3594, 217.97, -0.30, 188.73)
 
 [node name="tufa54" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.5736, 0.0000, 0.0083, 0.0000, 0.5737, 0.0000, -0.0083, 0.0000, -0.5736, 215.54, -0.30, 151.73)
+transform = Transform3D(-0.5736, 0.0000, 0.0083, 0.0000, 0.5737, 0.0000, -0.0083, 0.0000, -0.5736, 215.54, -0.30, 150.33)
 
 [node name="tufa55" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.3997, 0.0000, -0.2918, 0.0000, 0.4949, 0.0000, 0.2918, 0.0000, -0.3997, 211.71, -0.30, 195.46)
+transform = Transform3D(-0.3997, 0.0000, -0.2918, 0.0000, 0.4949, 0.0000, 0.2918, 0.0000, -0.3997, 211.71, -0.30, 196.86)
 
 [node name="tufa56" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4872, 0.0000, 0.5463, 0.0000, 0.7320, 0.0000, -0.5463, 0.0000, -0.4872, 210.17, -0.30, 152.92)
+transform = Transform3D(-0.4872, 0.0000, 0.5463, 0.0000, 0.7320, 0.0000, -0.5463, 0.0000, -0.4872, 210.17, -0.30, 151.52)
 
 [node name="tufa57" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1386, 0.0000, -0.3902, 0.0000, 0.4140, 0.0000, 0.3902, 0.0000, -0.1386, 208.06, -0.30, 183.48)
+transform = Transform3D(-0.1386, 0.0000, -0.3902, 0.0000, 0.4140, 0.0000, 0.3902, 0.0000, -0.1386, 208.06, -0.30, 184.88)
 
 [node name="tufa58" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4759, 0.0000, 0.4374, 0.0000, 0.6464, 0.0000, -0.4374, 0.0000, -0.4759, 206.84, -0.30, 177.91)
+transform = Transform3D(-0.4759, 0.0000, 0.4374, 0.0000, 0.6464, 0.0000, -0.4374, 0.0000, -0.4759, 206.84, -0.30, 179.31)
 
 [node name="tufa59" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.2998, 0.0000, 0.4288, 0.0000, 0.5233, 0.0000, -0.4288, 0.0000, -0.2998, 205.37, -0.30, 175.53)
+transform = Transform3D(-0.2998, 0.0000, 0.4288, 0.0000, 0.5233, 0.0000, -0.4288, 0.0000, -0.2998, 205.37, -0.30, 176.93)
 
 [node name="tufa60" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4412, 0.0000, 0.3805, 0.0000, 0.5826, 0.0000, -0.3805, 0.0000, -0.4412, 203.37, -0.30, 154.17)
+transform = Transform3D(-0.4412, 0.0000, 0.3805, 0.0000, 0.5826, 0.0000, -0.3805, 0.0000, -0.4412, 203.37, -0.30, 152.77)
 
 [node name="tufa61" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.4003, 0.0000, 0.1913, 0.0000, 0.4437, 0.0000, -0.1913, 0.0000, -0.4003, 199.56, -0.30, 150.61)
+transform = Transform3D(-0.4003, 0.0000, 0.1913, 0.0000, 0.4437, 0.0000, -0.1913, 0.0000, -0.4003, 199.56, -0.30, 149.21)
 
 [node name="tufa62" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.5743, 0.0000, 0.2103, 0.0000, 0.6116, 0.0000, -0.2103, 0.0000, 0.5743, 198.17, -0.30, 183.35)
+transform = Transform3D(0.5743, 0.0000, 0.2103, 0.0000, 0.6116, 0.0000, -0.2103, 0.0000, 0.5743, 198.17, -0.30, 184.75)
 
 [node name="tufa63" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0174, 0.0000, 0.5935, 0.0000, 0.5938, 0.0000, -0.5935, 0.0000, 0.0174, 194.03, -0.30, 186.30)
+transform = Transform3D(0.0174, 0.0000, 0.5935, 0.0000, 0.5938, 0.0000, -0.5935, 0.0000, 0.0174, 194.03, -0.30, 187.70)
 
 [node name="tufa64" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4476, 0.0000, -0.5510, 0.0000, 0.7099, 0.0000, 0.5510, 0.0000, -0.4476, 194.22, -0.30, 132.68)
+transform = Transform3D(-0.4476, 0.0000, -0.5510, 0.0000, 0.7099, 0.0000, 0.5510, 0.0000, -0.4476, 194.22, -0.30, 131.28)
 
 [node name="tufa65" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.7040, 0.0000, 0.0226, 0.0000, 0.7044, 0.0000, -0.0226, 0.0000, -0.7040, 191.48, -0.30, 176.77)
+transform = Transform3D(-0.7040, 0.0000, 0.0226, 0.0000, 0.7044, 0.0000, -0.0226, 0.0000, -0.7040, 191.48, -0.30, 178.17)
 
 [node name="tufa66" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.4563, 0.0000, -0.1858, 0.0000, 0.4927, 0.0000, 0.1858, 0.0000, 0.4563, 191.28, -0.30, 176.11)
+transform = Transform3D(0.4563, 0.0000, -0.1858, 0.0000, 0.4927, 0.0000, 0.1858, 0.0000, 0.4563, 191.28, -0.30, 177.51)
 
 [node name="tufa67" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.4489, 0.0000, -0.2250, 0.0000, 0.5021, 0.0000, 0.2250, 0.0000, 0.4489, 186.94, -0.30, 154.16)
+transform = Transform3D(0.4489, 0.0000, -0.2250, 0.0000, 0.5021, 0.0000, 0.2250, 0.0000, 0.4489, 186.94, -0.30, 152.76)
 
 [node name="tufa68" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.5544, 0.0000, 0.0098, 0.0000, 0.5545, 0.0000, -0.0098, 0.0000, -0.5544, 185.49, -0.30, 175.35)
+transform = Transform3D(-0.5544, 0.0000, 0.0098, 0.0000, 0.5545, 0.0000, -0.0098, 0.0000, -0.5544, 185.49, -0.30, 176.75)
 
 [node name="tufa69" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3930, 0.0000, 0.0602, 0.0000, 0.3976, 0.0000, -0.0602, 0.0000, 0.3930, 185.68, -0.30, 199.77)
+transform = Transform3D(0.3930, 0.0000, 0.0602, 0.0000, 0.3976, 0.0000, -0.0602, 0.0000, 0.3930, 185.68, -0.30, 201.17)
 
 [node name="tufa70" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4753, 0.0000, 0.4323, 0.0000, 0.6425, 0.0000, -0.4323, 0.0000, -0.4753, 183.02, -0.30, 136.46)
+transform = Transform3D(-0.4753, 0.0000, 0.4323, 0.0000, 0.6425, 0.0000, -0.4323, 0.0000, -0.4753, 183.02, -0.30, 135.06)
 
 [node name="tufa71" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0333, 0.0000, 0.4103, 0.0000, 0.4116, 0.0000, -0.4103, 0.0000, -0.0333, 179.94, -0.30, 153.03)
+transform = Transform3D(-0.0333, 0.0000, 0.4103, 0.0000, 0.4116, 0.0000, -0.4103, 0.0000, -0.0333, 179.94, -0.30, 151.63)
 
 [node name="tufa72" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0218, 0.0000, 0.7376, 0.0000, 0.7379, 0.0000, -0.7376, 0.0000, 0.0218, 179.57, -0.30, 147.53)
+transform = Transform3D(0.0218, 0.0000, 0.7376, 0.0000, 0.7379, 0.0000, -0.7376, 0.0000, 0.0218, 179.57, -0.30, 146.13)
 
 [node name="tufa73" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4172, 0.0000, -0.3446, 0.0000, 0.5411, 0.0000, 0.3446, 0.0000, -0.4172, 177.06, -0.30, 144.97)
+transform = Transform3D(-0.4172, 0.0000, -0.3446, 0.0000, 0.5411, 0.0000, 0.3446, 0.0000, -0.4172, 177.06, -0.30, 143.57)
 
 [node name="tufa74" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.4762, 0.0000, -0.2113, 0.0000, 0.5209, 0.0000, 0.2113, 0.0000, 0.4762, 173.28, -0.30, 176.81)
+transform = Transform3D(0.4762, 0.0000, -0.2113, 0.0000, 0.5209, 0.0000, 0.2113, 0.0000, 0.4762, 173.28, -0.30, 178.21)
 
 [node name="tufa75" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0326, 0.0000, -0.7329, 0.0000, 0.7336, 0.0000, 0.7329, 0.0000, 0.0326, 170.98, -0.30, 154.73)
+transform = Transform3D(0.0326, 0.0000, -0.7329, 0.0000, 0.7336, 0.0000, 0.7329, 0.0000, 0.0326, 170.98, -0.30, 153.33)
 
 [node name="tufa76" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0612, 0.0000, -0.4734, 0.0000, 0.4774, 0.0000, 0.4734, 0.0000, 0.0612, 170.04, -0.30, 182.52)
+transform = Transform3D(0.0612, 0.0000, -0.4734, 0.0000, 0.4774, 0.0000, 0.4734, 0.0000, 0.0612, 170.04, -0.30, 183.92)
 
 [node name="tufa77" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.5767, 0.0000, -0.2052, 0.0000, 0.6121, 0.0000, 0.2052, 0.0000, -0.5767, 166.46, -0.30, 152.89)
+transform = Transform3D(-0.5767, 0.0000, -0.2052, 0.0000, 0.6121, 0.0000, 0.2052, 0.0000, -0.5767, 166.46, -0.30, 151.49)
 
 [node name="tufa78" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.3309, 0.0000, 0.5730, 0.0000, 0.6617, 0.0000, -0.5730, 0.0000, -0.3309, 167.82, -0.30, 190.50)
+transform = Transform3D(-0.3309, 0.0000, 0.5730, 0.0000, 0.6617, 0.0000, -0.5730, 0.0000, -0.3309, 167.82, -0.30, 191.90)
 
 [node name="tufa79" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3531, 0.0000, 0.3389, 0.0000, 0.4894, 0.0000, -0.3389, 0.0000, 0.3531, 163.61, -0.30, 188.90)
+transform = Transform3D(0.3531, 0.0000, 0.3389, 0.0000, 0.4894, 0.0000, -0.3389, 0.0000, 0.3531, 163.61, -0.30, 190.30)
 
 [node name="tufa80" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.5846, 0.0000, 0.0572, 0.0000, 0.5874, 0.0000, -0.0572, 0.0000, 0.5846, 163.12, -0.30, 176.26)
+transform = Transform3D(0.5846, 0.0000, 0.0572, 0.0000, 0.5874, 0.0000, -0.0572, 0.0000, 0.5846, 163.12, -0.30, 177.66)
 
 [node name="tufa81" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.1241, 0.0000, 0.4366, 0.0000, 0.4539, 0.0000, -0.4366, 0.0000, 0.1241, 159.31, -0.30, 141.91)
+transform = Transform3D(0.1241, 0.0000, 0.4366, 0.0000, 0.4539, 0.0000, -0.4366, 0.0000, 0.1241, 159.31, -0.30, 140.51)
 
 [node name="tufa82" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.2788, 0.0000, -0.4310, 0.0000, 0.5133, 0.0000, 0.4310, 0.0000, 0.2788, 158.91, -0.30, 153.54)
+transform = Transform3D(0.2788, 0.0000, -0.4310, 0.0000, 0.5133, 0.0000, 0.4310, 0.0000, 0.2788, 158.91, -0.30, 152.14)
 
 [node name="tufa83" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0677, 0.0000, -0.4761, 0.0000, 0.4808, 0.0000, 0.4761, 0.0000, -0.0677, 155.24, -0.30, 179.36)
+transform = Transform3D(-0.0677, 0.0000, -0.4761, 0.0000, 0.4808, 0.0000, 0.4761, 0.0000, -0.0677, 155.24, -0.30, 180.76)
 
 [node name="tufa84" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.1510, 0.0000, -0.3258, 0.0000, 0.3591, 0.0000, 0.3258, 0.0000, 0.1510, 152.81, -0.30, 202.04)
+transform = Transform3D(0.1510, 0.0000, -0.3258, 0.0000, 0.3591, 0.0000, 0.3258, 0.0000, 0.1510, 152.81, -0.30, 203.44)
 
 [node name="tufa85" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.3444, 0.0000, -0.3571, 0.0000, 0.4961, 0.0000, 0.3571, 0.0000, 0.3444, 150.79, -0.30, 154.41)
+transform = Transform3D(0.3444, 0.0000, -0.3571, 0.0000, 0.4961, 0.0000, 0.3571, 0.0000, 0.3444, 150.79, -0.30, 153.01)
 
 [node name="tufa86" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.4804, 0.0000, 0.2339, 0.0000, 0.5343, 0.0000, -0.2339, 0.0000, -0.4804, 147.72, -0.30, 183.15)
+transform = Transform3D(-0.4804, 0.0000, 0.2339, 0.0000, 0.5343, 0.0000, -0.2339, 0.0000, -0.4804, 147.72, -0.30, 184.55)
 
 [node name="tufa87" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3714, 0.0000, -0.6105, 0.0000, 0.7146, 0.0000, 0.6105, 0.0000, 0.3714, 146.63, -0.30, 153.98)
+transform = Transform3D(0.3714, 0.0000, -0.6105, 0.0000, 0.7146, 0.0000, 0.6105, 0.0000, 0.3714, 146.63, -0.30, 152.58)
 
 [node name="tufa88" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0448, 0.0000, 0.3684, 0.0000, 0.3711, 0.0000, -0.3684, 0.0000, -0.0448, 144.05, -0.30, 143.29)
+transform = Transform3D(-0.0448, 0.0000, 0.3684, 0.0000, 0.3711, 0.0000, -0.3684, 0.0000, -0.0448, 144.05, -0.30, 141.89)
 
 [node name="tufa89" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.4884, 0.0000, 0.1958, 0.0000, 0.5262, 0.0000, -0.1958, 0.0000, 0.4884, 140.94, -0.30, 176.55)
+transform = Transform3D(0.4884, 0.0000, 0.1958, 0.0000, 0.5262, 0.0000, -0.1958, 0.0000, 0.4884, 140.94, -0.30, 177.95)
 
 [node name="tufa90" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.6262, 0.0000, 0.1273, 0.0000, 0.6390, 0.0000, -0.1273, 0.0000, -0.6262, 138.44, -0.30, 178.93)
+transform = Transform3D(-0.6262, 0.0000, 0.1273, 0.0000, 0.6390, 0.0000, -0.1273, 0.0000, -0.6262, 138.44, -0.30, 180.33)
 
 [node name="tufa91" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.4347, 0.0000, 0.1558, 0.0000, 0.4618, 0.0000, -0.1558, 0.0000, 0.4347, 138.37, -0.30, 144.54)
+transform = Transform3D(0.4347, 0.0000, 0.1558, 0.0000, 0.4618, 0.0000, -0.1558, 0.0000, 0.4347, 138.37, -0.30, 143.14)
 
 [node name="tufa92" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.1182, 0.0000, 0.4770, 0.0000, 0.4914, 0.0000, -0.4770, 0.0000, 0.1182, 134.81, -0.30, 185.13)
+transform = Transform3D(0.1182, 0.0000, 0.4770, 0.0000, 0.4914, 0.0000, -0.4770, 0.0000, 0.1182, 134.81, -0.30, 186.53)
 
 [node name="tufa93" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.5827, 0.0000, -0.0890, 0.0000, 0.5894, 0.0000, 0.0890, 0.0000, 0.5827, 135.54, -0.30, 136.38)
+transform = Transform3D(0.5827, 0.0000, -0.0890, 0.0000, 0.5894, 0.0000, 0.0890, 0.0000, 0.5827, 135.54, -0.30, 134.98)
 
 [node name="tufa94" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0193, 0.0000, 0.5449, 0.0000, 0.5452, 0.0000, -0.5449, 0.0000, -0.0193, 86.53, -0.28, 141.62)
+transform = Transform3D(-0.0193, 0.0000, 0.5449, 0.0000, 0.5452, 0.0000, -0.5449, 0.0000, -0.0193, 86.63, -0.28, 143.01)
 
 [node name="tufa95" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.2195, 0.0000, 0.4120, 0.0000, 0.4668, 0.0000, -0.4120, 0.0000, -0.2195, 87.73, -0.28, 140.79)
+transform = Transform3D(-0.2195, 0.0000, 0.4120, 0.0000, 0.4668, 0.0000, -0.4120, 0.0000, -0.2195, 87.92, -0.28, 142.18)
 
 [node name="tufa96" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0640, 0.0000, -0.5418, 0.0000, 0.5456, 0.0000, 0.5418, 0.0000, -0.0640, 88.52, -0.27, 116.70)
+transform = Transform3D(-0.0640, 0.0000, -0.5418, 0.0000, 0.5456, 0.0000, 0.5418, 0.0000, -0.0640, 88.26, -0.23, 115.33)
 
 [node name="tufa97" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1441, 0.0000, 0.5690, 0.0000, 0.5870, 0.0000, -0.5690, 0.0000, -0.1441, 87.52, 4.82, 103.01)
+transform = Transform3D(-0.1441, 0.0000, 0.5690, 0.0000, 0.5870, 0.0000, -0.5690, 0.0000, -0.1441, 87.21, 6.38, 101.64)
 
 [node name="tufa98" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.2883, 0.0000, -0.5172, 0.0000, 0.5921, 0.0000, 0.5172, 0.0000, -0.2883, 98.22, -0.29, 142.19)
+transform = Transform3D(-0.2883, 0.0000, -0.5172, 0.0000, 0.5921, 0.0000, 0.5172, 0.0000, -0.2883, 98.51, -0.29, 143.56)
 
 [node name="tufa99" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.5029, 0.0000, 0.3264, 0.0000, 0.5995, 0.0000, -0.3264, 0.0000, 0.5029, 101.34, -0.30, 153.29)
+transform = Transform3D(0.3828, 0.0000, 0.5057, 0.0000, 0.6342, 0.0000, -0.5057, 0.0000, 0.3828, 94.11, -0.18, 111.65)
 
-[node name="tufa100" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.4013, 0.0000, 0.1022, 0.0000, 0.4141, 0.0000, -0.1022, 0.0000, -0.4013, 94.16, -0.27, 115.09)
+[node name="tufa100" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.5757, 0.0000, -0.4507, 0.0000, 0.7311, 0.0000, 0.4507, 0.0000, -0.5757, 107.43, -0.30, 152.67)
 
-[node name="tufa101" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.5141, 0.0000, 0.2670, 0.0000, 0.5793, 0.0000, -0.2670, 0.0000, -0.5141, 102.73, -0.30, 134.12)
+[node name="tufa101" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.2624, 0.0000, 0.3590, 0.0000, 0.4446, 0.0000, -0.3590, 0.0000, -0.2624, 99.32, 0.37, 108.89)
 
-[node name="tufa102" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3114, 0.0000, 0.2820, 0.0000, 0.4202, 0.0000, -0.2820, 0.0000, 0.3114, 102.99, -0.29, 143.10)
+[node name="tufa102" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.4779, 0.0000, 0.0027, 0.0000, 0.4780, 0.0000, -0.0027, 0.0000, 0.4779, 109.88, -0.30, 134.68)
 
 [node name="tufa103" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0695, 0.0000, -0.7410, 0.0000, 0.7443, 0.0000, 0.7410, 0.0000, 0.0695, 103.18, -0.28, 112.18)
+transform = Transform3D(0.2399, 0.0000, 0.6247, 0.0000, 0.6692, 0.0000, -0.6247, 0.0000, 0.2399, 107.36, -0.30, 112.76)
 
 [node name="tufa104" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3938, 0.0000, -0.1603, 0.0000, 0.4252, 0.0000, 0.1603, 0.0000, 0.3938, 101.20, 0.40, 108.33)
+transform = Transform3D(0.2625, 0.0000, -0.5873, 0.0000, 0.6433, 0.0000, 0.5873, 0.0000, 0.2625, 112.24, -0.30, 131.95)
 
 [node name="tufa105" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.4895, 0.0000, 0.2746, 0.0000, 0.5613, 0.0000, -0.2746, 0.0000, 0.4895, 101.51, 12.67, 96.90)
+transform = Transform3D(0.0064, 0.0000, -0.5477, 0.0000, 0.5477, 0.0000, 0.5477, 0.0000, 0.0064, 113.31, -0.30, 136.80)
 
 [node name="tufa106" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0461, 0.0000, -0.5252, 0.0000, 0.5273, 0.0000, 0.5252, 0.0000, -0.0461, 114.80, -0.30, 150.00)
+transform = Transform3D(-0.6819, 0.0000, -0.0708, 0.0000, 0.6856, 0.0000, 0.0708, 0.0000, -0.6819, 113.51, -0.30, 134.59)
 
-[node name="tufa107" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.4008, 0.0000, -0.0117, 0.0000, 0.4010, 0.0000, 0.0117, 0.0000, -0.4008, 116.62, -0.30, 148.38)
+[node name="tufa107" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.4120, 0.0000, 0.2898, 0.0000, 0.5037, 0.0000, -0.2898, 0.0000, -0.4120, 113.70, 0.18, 106.12)
 
 [node name="tufa108" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.6262, 0.0000, 0.2774, 0.0000, 0.6849, 0.0000, -0.2774, 0.0000, 0.6262, 115.10, -0.30, 137.71)
+transform = Transform3D(0.0353, 0.0000, -0.5587, 0.0000, 0.5598, 0.0000, 0.5587, 0.0000, 0.0353, 122.87, -0.30, 154.85)
 
 [node name="tufa109" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.3838, 0.0000, -0.0594, 0.0000, 0.3884, 0.0000, 0.0594, 0.0000, -0.3838, 114.15, -0.20, 109.18)
+transform = Transform3D(-0.4493, 0.0000, 0.0629, 0.0000, 0.4537, 0.0000, -0.0629, 0.0000, -0.4493, 122.52, -0.30, 146.62)
 
-[node name="tufa110" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0061, 0.0000, -0.6007, 0.0000, 0.6007, 0.0000, 0.6007, 0.0000, -0.0061, 123.19, -0.30, 146.47)
+[node name="tufa110" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.0534, 0.0000, -0.5303, 0.0000, 0.5330, 0.0000, 0.5303, 0.0000, 0.0534, 128.84, -0.30, 146.01)
 
 [node name="tufa111" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.1166, 0.0000, -0.3976, 0.0000, 0.4143, 0.0000, 0.3976, 0.0000, 0.1166, 116.90, 0.01, 106.66)
+transform = Transform3D(-0.5727, 0.0000, 0.0977, 0.0000, 0.5810, 0.0000, -0.0977, 0.0000, -0.5727, 126.74, -0.30, 137.10)
 
-[node name="tufa112" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.0534, 0.0000, -0.5303, 0.0000, 0.5330, 0.0000, 0.5303, 0.0000, 0.0534, 126.81, -0.30, 144.95)
+[node name="tufa112" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.0499, 0.0000, 0.5690, 0.0000, 0.5712, 0.0000, -0.5690, 0.0000, 0.0499, 133.89, -0.30, 135.02)
 
-[node name="tufa113" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.5727, 0.0000, 0.0977, 0.0000, 0.5810, 0.0000, -0.0977, 0.0000, -0.5727, 124.97, -0.30, 135.99)
+[node name="tufa113" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.3795, 0.0000, 0.0193, 0.0000, 0.3800, 0.0000, -0.0193, 0.0000, -0.3795, 128.68, -0.30, 107.63)
 
-[node name="tufa114" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4669, 0.0000, -0.5542, 0.0000, 0.7246, 0.0000, 0.5542, 0.0000, -0.4669, 131.95, -0.30, 155.69)
+[node name="tufa114" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.2670, 0.0000, 0.4504, 0.0000, 0.5236, 0.0000, -0.4504, 0.0000, 0.2670, 134.35, -0.30, 134.17)
 
-[node name="tufa115" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.2778, 0.0000, 0.3469, 0.0000, 0.4444, 0.0000, -0.3469, 0.0000, 0.2778, 120.77, 8.31, 89.24)
+[node name="tufa115" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.0462, 0.0000, 0.4382, 0.0000, 0.4406, 0.0000, -0.4382, 0.0000, 0.0462, 138.18, -0.30, 142.16)
 
 [node name="tufa116" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.1059, 0.0000, -0.5364, 0.0000, 0.5468, 0.0000, 0.5364, 0.0000, 0.1059, 127.61, -0.30, 106.56)
+transform = Transform3D(-0.5163, 0.0000, -0.3701, 0.0000, 0.6352, 0.0000, 0.3701, 0.0000, -0.5163, 134.40, -0.30, 105.66)
 
-[node name="tufa117" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3201, 0.0000, 0.5400, 0.0000, 0.6278, 0.0000, -0.5400, 0.0000, 0.3201, 130.68, -0.30, 110.06)
+[node name="tufa117" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.2386, 0.0000, -0.4501, 0.0000, 0.5094, 0.0000, 0.4501, 0.0000, -0.2386, 141.48, -0.30, 140.11)
 
-[node name="tufa118" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.0462, 0.0000, 0.4382, 0.0000, 0.4406, 0.0000, -0.4382, 0.0000, 0.0462, 136.15, -0.30, 141.10)
+[node name="tufa118" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.3320, 0.0000, -0.2299, 0.0000, 0.4038, 0.0000, 0.2299, 0.0000, 0.3320, 140.02, -0.30, 105.22)
 
 [node name="tufa119" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.5163, 0.0000, -0.3701, 0.0000, 0.6352, 0.0000, 0.3701, 0.0000, -0.5163, 133.12, -0.30, 107.31)
+transform = Transform3D(0.2289, 0.0000, 0.3227, 0.0000, 0.3957, 0.0000, -0.3227, 0.0000, 0.2289, 147.24, -0.30, 135.92)
 
-[node name="tufa120" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.2386, 0.0000, -0.4501, 0.0000, 0.5094, 0.0000, 0.4501, 0.0000, -0.2386, 138.63, -0.30, 139.20)
+[node name="tufa120" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.3767, 0.0000, 0.0559, 0.0000, 0.3808, 0.0000, -0.0559, 0.0000, -0.3767, 141.10, -0.30, 92.50)
 
 [node name="tufa121" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3320, 0.0000, -0.2299, 0.0000, 0.4038, 0.0000, 0.2299, 0.0000, 0.3320, 137.67, -0.30, 107.06)
+transform = Transform3D(0.1416, 0.0000, 0.4120, 0.0000, 0.4356, 0.0000, -0.4120, 0.0000, 0.1416, 141.95, -0.29, 88.86)
 
 [node name="tufa122" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.2289, 0.0000, 0.3227, 0.0000, 0.3957, 0.0000, -0.3227, 0.0000, 0.2289, 145.48, -0.30, 134.81)
+transform = Transform3D(-0.1535, 0.0000, 0.6655, 0.0000, 0.6830, 0.0000, -0.6655, 0.0000, -0.1535, 149.51, -0.30, 128.31)
 
-[node name="tufa123" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.3767, 0.0000, 0.0559, 0.0000, 0.3808, 0.0000, -0.0559, 0.0000, -0.3767, 139.60, -0.30, 94.19)
+[node name="tufa123" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.3704, 0.0000, -0.3690, 0.0000, 0.5228, 0.0000, 0.3690, 0.0000, -0.3704, 155.72, -0.30, 152.49)
 
 [node name="tufa124" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.1416, 0.0000, 0.4120, 0.0000, 0.4356, 0.0000, -0.4120, 0.0000, 0.1416, 140.48, -0.29, 90.54)
+transform = Transform3D(0.2167, 0.0000, -0.5293, 0.0000, 0.5719, 0.0000, 0.5293, 0.0000, 0.2167, 154.96, -0.30, 127.73)
 
-[node name="tufa125" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1535, 0.0000, 0.6655, 0.0000, 0.6830, 0.0000, -0.6655, 0.0000, -0.1535, 147.72, -0.30, 127.21)
+[node name="tufa125" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.1242, 0.0000, 0.4929, 0.0000, 0.5083, 0.0000, -0.4929, 0.0000, -0.1242, 158.37, -0.30, 146.74)
 
-[node name="tufa126" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.3704, 0.0000, -0.3690, 0.0000, 0.5228, 0.0000, 0.3690, 0.0000, -0.3704, 153.03, -0.30, 151.57)
+[node name="tufa126" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.0095, 0.0000, 0.4254, 0.0000, 0.4255, 0.0000, -0.4254, 0.0000, 0.0095, 152.31, -0.30, 97.65)
 
 [node name="tufa127" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.2167, 0.0000, -0.5293, 0.0000, 0.5719, 0.0000, 0.5293, 0.0000, 0.2167, 152.20, -0.30, 126.80)
+transform = Transform3D(-0.2405, 0.0000, 0.4566, 0.0000, 0.5161, 0.0000, -0.4566, 0.0000, -0.2405, 161.80, -0.30, 123.97)
 
 [node name="tufa128" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.1242, 0.0000, 0.4929, 0.0000, 0.5083, 0.0000, -0.4929, 0.0000, -0.1242, 156.75, -0.30, 145.61)
+transform = Transform3D(0.1087, 0.0000, -0.3713, 0.0000, 0.3868, 0.0000, 0.3713, 0.0000, 0.1087, 164.55, -0.30, 127.34)
 
 [node name="tufa129" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0095, 0.0000, 0.4254, 0.0000, 0.4255, 0.0000, -0.4254, 0.0000, 0.0095, 150.93, -0.30, 99.29)
+transform = Transform3D(-0.5381, 0.0000, 0.2128, 0.0000, 0.5787, 0.0000, -0.2128, 0.0000, -0.5381, 168.71, -0.30, 141.26)
 
-[node name="tufa130" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.2405, 0.0000, 0.4566, 0.0000, 0.5161, 0.0000, -0.4566, 0.0000, -0.2405, 159.55, -0.30, 122.98)
+[node name="tufa130" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.1047, 0.0000, -0.3830, 0.0000, 0.3971, 0.0000, 0.3830, 0.0000, -0.1047, 166.39, -0.30, 141.94)
 
-[node name="tufa131" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.1087, 0.0000, -0.3713, 0.0000, 0.3868, 0.0000, 0.3713, 0.0000, 0.1087, 162.64, -0.30, 126.32)
+[node name="tufa131" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.2396, 0.0000, 0.6819, 0.0000, 0.7228, 0.0000, -0.6819, 0.0000, -0.2396, 167.99, -0.30, 151.15)
 
 [node name="tufa132" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.5381, 0.0000, 0.2128, 0.0000, 0.5787, 0.0000, -0.2128, 0.0000, -0.5381, 167.18, -0.30, 140.09)
+transform = Transform3D(0.5320, 0.0000, 0.1919, 0.0000, 0.5655, 0.0000, -0.1919, 0.0000, 0.5320, 169.71, -0.30, 121.69)
 
-[node name="tufa133" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.1047, 0.0000, -0.3830, 0.0000, 0.3971, 0.0000, 0.3830, 0.0000, -0.1047, 165.45, -0.30, 140.82)
+[node name="tufa133" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.2754, 0.0000, -0.3480, 0.0000, 0.4438, 0.0000, 0.3480, 0.0000, -0.2754, 169.26, -0.30, 142.90)
 
 [node name="tufa134" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.2396, 0.0000, 0.6819, 0.0000, 0.7228, 0.0000, -0.6819, 0.0000, -0.2396, 167.98, -0.30, 149.80)
+transform = Transform3D(-0.6459, 0.0000, -0.1236, 0.0000, 0.6576, 0.0000, 0.1236, 0.0000, -0.6459, 173.81, -0.30, 85.39)
 
 [node name="tufa135" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.5320, 0.0000, 0.1919, 0.0000, 0.5655, 0.0000, -0.1919, 0.0000, 0.5320, 168.16, -0.30, 120.33)
+transform = Transform3D(0.3097, 0.0000, 0.3689, 0.0000, 0.4817, 0.0000, -0.3689, 0.0000, 0.3097, 177.29, -0.30, 103.82)
 
 [node name="tufa136" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.2754, 0.0000, -0.3480, 0.0000, 0.4438, 0.0000, 0.3480, 0.0000, -0.2754, 168.58, -0.30, 141.54)
+transform = Transform3D(0.0363, 0.0000, -0.5265, 0.0000, 0.5278, 0.0000, 0.5265, 0.0000, 0.0363, 174.49, -0.30, 122.95)
 
 [node name="tufa137" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.6459, 0.0000, -0.1236, 0.0000, 0.6576, 0.0000, 0.1236, 0.0000, -0.6459, 170.54, -0.30, 86.68)
+transform = Transform3D(-0.1264, 0.0000, 0.4351, 0.0000, 0.4531, 0.0000, -0.4351, 0.0000, -0.1264, 177.59, -0.30, 130.29)
 
 [node name="tufa138" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3097, 0.0000, 0.3689, 0.0000, 0.4817, 0.0000, -0.3689, 0.0000, 0.3097, 174.02, -0.30, 104.83)
+transform = Transform3D(-0.3542, 0.0000, 0.2181, 0.0000, 0.4159, 0.0000, -0.2181, 0.0000, -0.3542, 175.76, -0.30, 142.52)
 
 [node name="tufa139" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0363, 0.0000, -0.5265, 0.0000, 0.5278, 0.0000, 0.5265, 0.0000, 0.0363, 172.11, -0.30, 121.20)
+transform = Transform3D(-0.1855, 0.0000, 0.3368, 0.0000, 0.3845, 0.0000, -0.3368, 0.0000, -0.1855, 179.72, -0.30, 123.22)
 
-[node name="tufa140" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1264, 0.0000, 0.4351, 0.0000, 0.4531, 0.0000, -0.4351, 0.0000, -0.1264, 176.04, -0.30, 128.66)
+[node name="tufa140" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.3648, 0.0000, 0.4720, 0.0000, 0.5966, 0.0000, -0.4720, 0.0000, -0.3648, 180.10, -0.30, 122.85)
 
-[node name="tufa141" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.3542, 0.0000, 0.2181, 0.0000, 0.4159, 0.0000, -0.2181, 0.0000, -0.3542, 174.08, -0.30, 140.88)
+[node name="tufa141" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.1751, 0.0000, 0.3843, 0.0000, 0.4224, 0.0000, -0.3843, 0.0000, 0.1751, 185.83, -0.30, 126.03)
 
 [node name="tufa142" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1855, 0.0000, 0.3368, 0.0000, 0.3845, 0.0000, -0.3368, 0.0000, -0.1855, 178.23, -0.30, 121.63)
+transform = Transform3D(0.2110, 0.0000, 0.2845, 0.0000, 0.3542, 0.0000, -0.2845, 0.0000, 0.2110, 186.56, -0.30, 125.63)
 
 [node name="tufa143" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.3648, 0.0000, 0.4720, 0.0000, 0.5966, 0.0000, -0.4720, 0.0000, -0.3648, 178.95, -0.30, 121.31)
+transform = Transform3D(-0.0054, 0.0000, 0.5244, 0.0000, 0.5244, 0.0000, -0.5244, 0.0000, -0.0054, 185.81, -0.30, 137.28)
 
-[node name="tufa144" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.1751, 0.0000, 0.3843, 0.0000, 0.4224, 0.0000, -0.3843, 0.0000, 0.1751, 183.61, -0.30, 124.22)
+[node name="tufa144" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.0252, 0.0000, 0.3569, 0.0000, 0.3578, 0.0000, -0.3569, 0.0000, -0.0252, 188.84, -0.30, 140.60)
 
-[node name="tufa145" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.2110, 0.0000, 0.2845, 0.0000, 0.3542, 0.0000, -0.2845, 0.0000, 0.2110, 184.15, -0.30, 123.77)
+[node name="tufa145" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.1483, 0.0000, 0.4489, 0.0000, 0.4728, 0.0000, -0.4489, 0.0000, -0.1483, 191.44, -0.30, 142.58)
 
 [node name="tufa146" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0054, 0.0000, 0.5244, 0.0000, 0.5244, 0.0000, -0.5244, 0.0000, -0.0054, 184.35, -0.30, 135.60)
+transform = Transform3D(0.1337, 0.0000, 0.5339, 0.0000, 0.5504, 0.0000, -0.5339, 0.0000, 0.1337, 197.84, -0.30, 101.68)
 
-[node name="tufa147" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0252, 0.0000, 0.3569, 0.0000, 0.3578, 0.0000, -0.3569, 0.0000, -0.0252, 187.17, -0.30, 138.90)
+[node name="tufa147" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.0367, 0.0000, -0.4165, 0.0000, 0.4181, 0.0000, 0.4165, 0.0000, -0.0367, 193.78, -0.30, 132.48)
 
 [node name="tufa148" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.1483, 0.0000, 0.4489, 0.0000, 0.4728, 0.0000, -0.4489, 0.0000, -0.1483, 189.86, -0.30, 140.91)
+transform = Transform3D(-0.4027, 0.0000, 0.3761, 0.0000, 0.5510, 0.0000, -0.3761, 0.0000, -0.4027, 196.02, -0.30, 146.72)
 
-[node name="tufa149" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.1337, 0.0000, 0.5339, 0.0000, 0.5504, 0.0000, -0.5339, 0.0000, 0.1337, 196.10, -0.30, 102.82)
+[node name="tufa149" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.5922, 0.0000, 0.0183, 0.0000, 0.5925, 0.0000, -0.0183, 0.0000, -0.5922, 197.43, -0.30, 136.60)
 
-[node name="tufa150" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0367, 0.0000, -0.4165, 0.0000, 0.4181, 0.0000, 0.4165, 0.0000, -0.0367, 191.40, -0.30, 130.67)
+[node name="tufa150" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.0747, 0.0000, -0.6992, 0.0000, 0.7031, 0.0000, 0.6992, 0.0000, -0.0747, 202.99, -0.30, 127.78)
 
-[node name="tufa151" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.4027, 0.0000, 0.3761, 0.0000, 0.5510, 0.0000, -0.3761, 0.0000, -0.4027, 193.64, -0.30, 144.92)
+[node name="tufa151" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.1815, 0.0000, 0.3998, 0.0000, 0.4391, 0.0000, -0.3998, 0.0000, -0.1815, 208.91, -0.30, 100.33)
 
 [node name="tufa152" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.5922, 0.0000, 0.0183, 0.0000, 0.5925, 0.0000, -0.0183, 0.0000, -0.5922, 196.13, -0.30, 134.97)
+transform = Transform3D(-0.0297, 0.0000, -0.5495, 0.0000, 0.5503, 0.0000, 0.5495, 0.0000, -0.0297, 208.24, -0.30, 102.76)
 
 [node name="tufa153" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0747, 0.0000, -0.6992, 0.0000, 0.7031, 0.0000, 0.6992, 0.0000, -0.0747, 201.43, -0.30, 126.11)
+transform = Transform3D(0.1205, 0.0000, -0.5766, 0.0000, 0.5890, 0.0000, 0.5766, 0.0000, 0.1205, 212.93, -0.30, 103.90)
 
-[node name="tufa154" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1815, 0.0000, 0.3998, 0.0000, 0.4391, 0.0000, -0.3998, 0.0000, -0.1815, 206.89, -0.30, 101.42)
+[node name="tufa154" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.4361, 0.0000, -0.3282, 0.0000, 0.5458, 0.0000, 0.3282, 0.0000, 0.4361, 209.57, -0.30, 135.44)
 
 [node name="tufa155" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0297, 0.0000, -0.5495, 0.0000, 0.5503, 0.0000, 0.5495, 0.0000, -0.0297, 206.49, -0.30, 103.89)
+transform = Transform3D(0.4613, 0.0000, 0.3237, 0.0000, 0.5636, 0.0000, -0.3237, 0.0000, 0.4613, 214.42, -0.30, 109.37)
 
-[node name="tufa156" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.1205, 0.0000, -0.5766, 0.0000, 0.5890, 0.0000, 0.5766, 0.0000, 0.1205, 210.10, -0.30, 104.86)
+[node name="tufa156" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.2535, 0.0000, -0.5136, 0.0000, 0.5727, 0.0000, 0.5136, 0.0000, 0.2535, 216.40, -0.30, 107.69)
 
-[node name="tufa157" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.4361, 0.0000, -0.3282, 0.0000, 0.5458, 0.0000, 0.3282, 0.0000, 0.4361, 207.18, -0.30, 133.64)
+[node name="tufa157" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.0739, 0.0000, -0.3802, 0.0000, 0.3874, 0.0000, 0.3802, 0.0000, -0.0739, 220.97, -0.30, 109.96)
 
-[node name="tufa158" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.4613, 0.0000, 0.3237, 0.0000, 0.5636, 0.0000, -0.3237, 0.0000, 0.4613, 212.67, -0.30, 110.50)
+[node name="tufa158" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.4041, 0.0000, 0.2123, 0.0000, 0.4565, 0.0000, -0.2123, 0.0000, 0.4041, 217.69, -0.30, 140.71)
 
-[node name="tufa159" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.2535, 0.0000, -0.5136, 0.0000, 0.5727, 0.0000, 0.5136, 0.0000, 0.2535, 214.42, -0.30, 108.78)
+[node name="tufa159" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.0319, 0.0000, -0.5787, 0.0000, 0.5796, 0.0000, 0.5787, 0.0000, 0.0319, 225.22, -0.30, 85.86)
 
-[node name="tufa160" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0739, 0.0000, -0.3802, 0.0000, 0.3874, 0.0000, 0.3802, 0.0000, -0.0739, 219.01, -0.30, 111.08)
+[node name="tufa160" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.1023, 0.0000, -0.3477, 0.0000, 0.3625, 0.0000, 0.3477, 0.0000, 0.1023, 218.55, -0.30, 152.50)
 
 [node name="tufa161" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.4041, 0.0000, 0.2123, 0.0000, 0.4565, 0.0000, -0.2123, 0.0000, 0.4041, 216.31, -0.30, 139.08)
+transform = Transform3D(0.4653, 0.0000, 0.3388, 0.0000, 0.5756, 0.0000, -0.3388, 0.0000, 0.4653, 232.17, -0.30, 101.74)
 
 [node name="tufa162" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0319, 0.0000, -0.5787, 0.0000, 0.5796, 0.0000, 0.5787, 0.0000, 0.0319, 222.08, -0.30, 86.82)
+transform = Transform3D(-0.2908, 0.0000, -0.4869, 0.0000, 0.5671, 0.0000, 0.4869, 0.0000, -0.2908, 227.79, -0.30, 132.19)
 
 [node name="tufa163" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.1023, 0.0000, -0.3477, 0.0000, 0.3625, 0.0000, 0.3477, 0.0000, 0.1023, 217.57, -0.30, 150.92)
+transform = Transform3D(-0.5725, 0.0000, 0.1563, 0.0000, 0.5935, 0.0000, -0.1563, 0.0000, -0.5725, 227.51, -0.30, 134.60)
 
-[node name="tufa164" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.4653, 0.0000, 0.3388, 0.0000, 0.5756, 0.0000, -0.3388, 0.0000, 0.4653, 230.29, -0.30, 102.82)
+[node name="tufa164" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.4157, 0.0000, 0.1042, 0.0000, 0.4286, 0.0000, -0.1042, 0.0000, 0.4157, 229.93, -0.30, 132.16)
 
-[node name="tufa165" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.2908, 0.0000, -0.4869, 0.0000, 0.5671, 0.0000, 0.4869, 0.0000, -0.2908, 226.03, -0.30, 130.46)
+[node name="tufa165" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.3876, 0.0000, 0.0341, 0.0000, 0.3891, 0.0000, -0.0341, 0.0000, -0.3876, 239.95, -0.30, 113.71)
 
-[node name="tufa166" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.5725, 0.0000, 0.1563, 0.0000, 0.5935, 0.0000, -0.1563, 0.0000, -0.5725, 226.15, -0.30, 132.96)
+[node name="tufa166" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.1264, 0.0000, -0.5089, 0.0000, 0.5244, 0.0000, 0.5089, 0.0000, 0.1264, 232.62, -0.30, 143.01)
 
 [node name="tufa167" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.4157, 0.0000, 0.1042, 0.0000, 0.4286, 0.0000, -0.1042, 0.0000, 0.4157, 228.10, -0.30, 130.58)
+transform = Transform3D(0.0803, 0.0000, 0.5317, 0.0000, 0.5377, 0.0000, -0.5317, 0.0000, 0.0803, 247.71, -0.30, 101.09)
 
 [node name="tufa168" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.3876, 0.0000, 0.0341, 0.0000, 0.3891, 0.0000, -0.0341, 0.0000, -0.3876, 236.41, -0.30, 114.28)
+transform = Transform3D(-0.0745, 0.0000, 0.4621, 0.0000, 0.4681, 0.0000, -0.4621, 0.0000, -0.0745, 235.78, -0.30, 137.87)
 
-[node name="tufa169" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.1264, 0.0000, -0.5089, 0.0000, 0.5244, 0.0000, 0.5089, 0.0000, 0.1264, 232.46, -0.30, 141.45)
+[node name="tufa169" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.1913, 0.0000, 0.3990, 0.0000, 0.4425, 0.0000, -0.3990, 0.0000, -0.1913, 237.31, -0.30, 140.08)
 
 [node name="tufa170" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0803, 0.0000, 0.5317, 0.0000, 0.5377, 0.0000, -0.5317, 0.0000, 0.0803, 245.09, -0.30, 101.67)
+transform = Transform3D(-0.5607, 0.0000, 0.3275, 0.0000, 0.6493, 0.0000, -0.3275, 0.0000, -0.5607, 259.31, -0.30, 112.60)
 
 [node name="tufa171" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0745, 0.0000, 0.4621, 0.0000, 0.4681, 0.0000, -0.4621, 0.0000, -0.0745, 234.72, -0.30, 136.00)
+transform = Transform3D(-0.0369, 0.0000, 0.5485, 0.0000, 0.5498, 0.0000, -0.5485, 0.0000, -0.0369, 257.65, -0.30, 119.40)
 
-[node name="tufa172" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.1913, 0.0000, 0.3990, 0.0000, 0.4425, 0.0000, -0.3990, 0.0000, -0.1913, 237.15, -0.30, 138.47)
+[node name="tufa172" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(-0.3286, 0.0000, 0.3364, 0.0000, 0.4703, 0.0000, -0.3364, 0.0000, -0.3286, 242.59, -0.30, 138.68)
 
 [node name="tufa173" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.5607, 0.0000, 0.3275, 0.0000, 0.6493, 0.0000, -0.3275, 0.0000, -0.5607, 254.96, -0.30, 111.45)
+transform = Transform3D(0.3981, 0.0000, -0.0317, 0.0000, 0.3994, 0.0000, 0.0317, 0.0000, 0.3981, 245.16, -0.30, 137.99)
 
 [node name="tufa174" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0369, 0.0000, 0.5485, 0.0000, 0.5498, 0.0000, -0.5485, 0.0000, -0.0369, 255.04, -0.30, 119.15)
+transform = Transform3D(0.0470, 0.0000, -0.5805, 0.0000, 0.5824, 0.0000, 0.5805, 0.0000, 0.0470, 263.58, -0.30, 126.20)
 
-[node name="tufa175" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.3286, 0.0000, 0.3364, 0.0000, 0.4703, 0.0000, -0.3364, 0.0000, -0.3286, 242.53, -0.30, 136.87)
+[node name="tufa175" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.1266, 0.0000, -0.3761, 0.0000, 0.3969, 0.0000, 0.3761, 0.0000, 0.1266, 275.13, -0.30, 124.18)
 
-[node name="tufa176" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3981, 0.0000, -0.0317, 0.0000, 0.3994, 0.0000, 0.0317, 0.0000, 0.3981, 245.61, -0.30, 136.54)
+[node name="tufa176" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.2162, 0.0000, -0.3885, 0.0000, 0.4446, 0.0000, 0.3885, 0.0000, 0.2162, 247.56, -0.30, 141.32)
 
 [node name="tufa177" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.0470, 0.0000, -0.5805, 0.0000, 0.5824, 0.0000, 0.5805, 0.0000, 0.0470, 259.88, -0.30, 124.15)
+transform = Transform3D(0.2772, 0.0000, -0.3516, 0.0000, 0.4477, 0.0000, 0.3516, 0.0000, 0.2772, 286.43, -0.30, 138.21)
 
-[node name="tufa178" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.1266, 0.0000, -0.3761, 0.0000, 0.3969, 0.0000, 0.3761, 0.0000, 0.1266, 271.90, -0.30, 122.08)
+[node name="tufa178" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.4278, 0.0000, -0.2306, 0.0000, 0.4860, 0.0000, 0.2306, 0.0000, 0.4278, 289.87, -0.30, 142.07)
 
 [node name="tufa179" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.2162, 0.0000, -0.3885, 0.0000, 0.4446, 0.0000, 0.3885, 0.0000, 0.2162, 247.99, -0.30, 139.22)
+transform = Transform3D(-0.3377, 0.0000, 0.1114, 0.0000, 0.3556, 0.0000, -0.1114, 0.0000, -0.3377, 225.11, -0.30, 152.52)
 
-[node name="tufa180" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.2635, 0.0000, -0.2826, 0.0000, 0.3864, 0.0000, 0.2826, 0.0000, 0.2635, 270.55, -0.30, 127.52)
+[node name="tufa180" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.2297, 0.0000, -0.2783, 0.0000, 0.3608, 0.0000, 0.2783, 0.0000, 0.2297, 250.94, -0.30, 151.47)
 
 [node name="tufa181" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.2100, 0.0000, -0.4090, 0.0000, 0.4598, 0.0000, 0.4090, 0.0000, -0.2100, 247.64, -0.30, 143.05)
+transform = Transform3D(-0.3360, 0.0000, -0.1216, 0.0000, 0.3574, 0.0000, 0.1216, 0.0000, -0.3360, 249.11, -0.30, 150.77)
 
 [node name="tufa182" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0070, 0.0000, -0.5133, 0.0000, 0.5134, 0.0000, 0.5133, 0.0000, 0.0070, 286.90, -0.30, 118.35)
+transform = Transform3D(-0.5723, 0.0000, -0.3499, 0.0000, 0.6708, 0.0000, 0.3499, 0.0000, -0.5723, 274.09, -0.30, 158.14)
 
-[node name="tufa183" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.3442, 0.0000, -0.4785, 0.0000, 0.5894, 0.0000, 0.4785, 0.0000, -0.3442, 248.82, -0.30, 146.54)
+[node name="tufa183" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.3679, 0.0000, 0.0654, 0.0000, 0.3736, 0.0000, -0.0654, 0.0000, 0.3679, 285.20, -0.30, 175.11)
 
-[node name="tufa184" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.2397, 0.0000, 0.3776, 0.0000, 0.4473, 0.0000, -0.3776, 0.0000, -0.2397, 288.61, -0.30, 130.40)
+[node name="tufa184" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.3774, 0.0000, -0.1481, 0.0000, 0.4054, 0.0000, 0.1481, 0.0000, 0.3774, 251.42, -0.30, 152.93)
 
-[node name="tufa185" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(-0.0412, 0.0000, -0.4559, 0.0000, 0.4578, 0.0000, 0.4559, 0.0000, -0.0412, 271.54, -0.30, 145.75)
+[node name="tufa185" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.5501, 0.0000, 0.1600, 0.0000, 0.5729, 0.0000, -0.1600, 0.0000, 0.5501, 258.89, -0.30, 175.95)
 
 [node name="tufa186" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1090, 0.0000, 0.4593, 0.0000, 0.4720, 0.0000, -0.4593, 0.0000, -0.1090, 253.51, -0.30, 151.79)
+transform = Transform3D(0.4041, 0.0000, -0.2037, 0.0000, 0.4526, 0.0000, 0.2037, 0.0000, 0.4041, 257.04, -0.30, 194.00)
 
 [node name="tufa187" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.5069, 0.0000, 0.1540, 0.0000, 0.5298, 0.0000, -0.1540, 0.0000, 0.5069, 245.41, -0.30, 150.22)
+transform = Transform3D(-0.3873, 0.0000, 0.6076, 0.0000, 0.7206, 0.0000, -0.6076, 0.0000, -0.3873, 244.84, -0.30, 138.11)
 
 [node name="tufa188" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.6326, 0.0000, 0.1191, 0.0000, 0.6438, 0.0000, -0.1191, 0.0000, 0.6326, 294.59, -0.30, 166.89)
+transform = Transform3D(-0.1368, 0.0000, -0.7330, 0.0000, 0.7457, 0.0000, 0.7330, 0.0000, -0.1368, 253.50, -0.30, 179.53)
 
 [node name="tufa189" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.3087, 0.0000, -0.1876, 0.0000, 0.3612, 0.0000, 0.1876, 0.0000, -0.3087, 253.46, -0.30, 151.14)
+transform = Transform3D(0.1876, 0.0000, 0.7176, 0.0000, 0.7417, 0.0000, -0.7176, 0.0000, 0.1876, 250.90, -0.30, 177.85)
 
 [node name="tufa190" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3427, 0.0000, -0.6403, 0.0000, 0.7262, 0.0000, 0.6403, 0.0000, 0.3427, 286.88, -0.30, 178.25)
+transform = Transform3D(-0.3112, 0.0000, -0.5500, 0.0000, 0.6319, 0.0000, 0.5500, 0.0000, -0.3112, 245.57, -0.30, 149.47)
 
 [node name="tufa191" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.2011, 0.0000, 0.5039, 0.0000, 0.5425, 0.0000, -0.5039, 0.0000, 0.2011, 252.65, -0.30, 149.43)
+transform = Transform3D(0.2573, 0.0000, -0.6751, 0.0000, 0.7225, 0.0000, 0.6751, 0.0000, 0.2573, 242.82, -0.30, 191.76)
 
 [node name="tufa192" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.0813, 0.0000, -0.4277, 0.0000, 0.4353, 0.0000, 0.4277, 0.0000, 0.0813, 251.64, -0.30, 149.85)
+transform = Transform3D(0.4477, 0.0000, -0.1405, 0.0000, 0.4692, 0.0000, 0.1405, 0.0000, 0.4477, 238.44, -0.30, 204.27)
 
-[node name="tufa193" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.3872, 0.0000, -0.3635, 0.0000, 0.5311, 0.0000, 0.3635, 0.0000, 0.3872, 253.51, -0.30, 150.68)
+[node name="tufa193" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
+transform = Transform3D(0.0390, 0.0000, -0.5187, 0.0000, 0.5201, 0.0000, 0.5187, 0.0000, 0.0390, 241.39, -0.30, 146.17)
 
-[node name="tufa194" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.2025, 0.0000, 0.4389, 0.0000, 0.4834, 0.0000, -0.4389, 0.0000, 0.2025, 260.72, -0.30, 199.50)
+[node name="tufa194" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(-0.0169, 0.0000, -0.3714, 0.0000, 0.3718, 0.0000, 0.3714, 0.0000, -0.0169, 235.65, -0.30, 133.23)
 
-[node name="tufa195" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.3994, 0.0000, 0.1552, 0.0000, 0.4285, 0.0000, -0.1552, 0.0000, 0.3994, 258.31, -0.30, 203.65)
+[node name="tufa195" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
+transform = Transform3D(0.3718, 0.0000, 0.1512, 0.0000, 0.4014, 0.0000, -0.1512, 0.0000, 0.3718, 230.54, -0.30, 177.55)
 
 [node name="tufa196" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.0509, 0.0000, 0.5447, 0.0000, 0.5470, 0.0000, -0.5447, 0.0000, 0.0509, 257.29, -0.30, 203.27)
+transform = Transform3D(0.3601, 0.0000, 0.0504, 0.0000, 0.3636, 0.0000, -0.0504, 0.0000, 0.3601, 231.47, -0.30, 149.77)
 
-[node name="tufa197" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.4031, 0.0000, -0.1861, 0.0000, 0.4440, 0.0000, 0.1861, 0.0000, 0.4031, 246.22, -0.30, 141.77)
+[node name="gnu197" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.3889, 0.0000, 0.8743, 0.0000, 0.9569, 0.0000, -0.8743, 0.0000, -0.3889, 241.48, -0.30, 140.03)
 
-[node name="tufa198" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1372, 0.0000, 0.4413, 0.0000, 0.4621, 0.0000, -0.4413, 0.0000, -0.1372, 244.80, -0.30, 155.09)
+[node name="gnu198" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.0167, 0.0000, 1.0248, 0.0000, 1.0250, 0.0000, -1.0248, 0.0000, -0.0167, 239.16, -0.30, 142.59)
 
-[node name="tufa199" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4210, 0.0000, 0.2133, 0.0000, 0.4719, 0.0000, -0.2133, 0.0000, -0.4210, 245.87, -0.30, 139.15)
-
-[node name="tufa200" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.4578, 0.0000, 0.4817, 0.0000, 0.6646, 0.0000, -0.4817, 0.0000, -0.4578, 243.94, -0.30, 139.72)
-
-[node name="tufa201" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.1353, 0.0000, 0.6164, 0.0000, 0.6311, 0.0000, -0.6164, 0.0000, -0.1353, 237.06, -0.30, 204.36)
-
-[node name="tufa202" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(0.1196, 0.0000, 0.3951, 0.0000, 0.4128, 0.0000, -0.3951, 0.0000, 0.1196, 238.04, -0.30, 191.75)
-
-[node name="tufa203" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.2783, 0.0000, -0.2917, 0.0000, 0.4032, 0.0000, 0.2917, 0.0000, -0.2783, 232.58, -0.30, 175.31)
-
-[node name="tufa204" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_grass_tuft_large")]
-transform = Transform3D(0.3891, 0.0000, 0.1805, 0.0000, 0.4289, 0.0000, -0.1805, 0.0000, 0.3891, 234.36, -0.30, 154.71)
-
-[node name="tufa205" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_broadleaf_shrub")]
-transform = Transform3D(-0.0007, 0.0000, -0.6104, 0.0000, 0.6104, 0.0000, 0.6104, 0.0000, -0.0007, 229.72, -0.30, 152.10)
-
-[node name="gnu206" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu199" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.1833, 0.0000, 0.9724, 0.0000, 0.9895, 0.0000, -0.9724, 0.0000, -0.1833, 239.65, -0.30, 149.35)
 
-[node name="gnu207" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu200" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.3609, 0.0000, 0.9620, 0.0000, 1.0275, 0.0000, -0.9620, 0.0000, -0.3609, 242.05, -0.30, 149.29)
 
-[node name="gnu208" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu201" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.4023, 0.0000, 0.9018, 0.0000, 0.9875, 0.0000, -0.9018, 0.0000, -0.4023, 236.34, -0.30, 146.53)
 
-[node name="gnu209" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.0981, 0.0000, 1.0128, 0.0000, 1.0176, 0.0000, -1.0128, 0.0000, 0.0981, 240.87, -0.30, 140.73)
-
-[node name="gnu210" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu202" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(0.3762, 0.0000, 0.9785, 0.0000, 1.0484, 0.0000, -0.9785, 0.0000, 0.3762, 243.95, -0.30, 147.52)
 
-[node name="gnu211" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.6861, 0.0000, 0.7752, 0.0000, 1.0352, 0.0000, -0.7752, 0.0000, -0.6861, 241.37, -0.30, 138.23)
-
-[node name="gnu212" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu203" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.1586, 0.0000, 0.9530, 0.0000, 0.9661, 0.0000, -0.9530, 0.0000, -0.1586, 236.49, -0.30, 139.22)
 
-[node name="gnu213" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu204" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.6423, 0.0000, 0.7796, 0.0000, 1.0101, 0.0000, -0.7796, 0.0000, -0.6423, 247.59, -0.30, 146.64)
 
-[node name="gnu214" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu205" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.0441, 0.0000, 1.0001, 0.0000, 1.0011, 0.0000, -1.0001, 0.0000, -0.0441, 234.47, -0.30, 144.62)
 
-[node name="zebra215" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="zebra206" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
 transform = Transform3D(0.2934, 0.0000, 0.9230, 0.0000, 0.9685, 0.0000, -0.9230, 0.0000, 0.2934, 244.05, -0.30, 140.68)
 
-[node name="zebra216" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="zebra207" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
 transform = Transform3D(0.3688, 0.0000, 0.9585, 0.0000, 1.0270, 0.0000, -0.9585, 0.0000, 0.3688, 239.45, -0.30, 146.76)
 
-[node name="zebra217" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="zebra208" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
 transform = Transform3D(0.1317, 0.0000, 0.9888, 0.0000, 0.9975, 0.0000, -0.9888, 0.0000, 0.1317, 245.68, -0.30, 149.08)
 
-[node name="zebra218" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.2045, 0.0000, 0.9831, 0.0000, 1.0041, 0.0000, -0.9831, 0.0000, 0.2045, 237.59, -0.30, 141.29)
-
-[node name="zebra219" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="zebra209" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
 transform = Transform3D(-0.3719, 0.0000, 0.9263, 0.0000, 0.9982, 0.0000, -0.9263, 0.0000, -0.3719, 238.61, -0.30, 137.96)
 
-[node name="gnu220" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.1773, 0.0000, 0.9504, 0.0000, 0.9668, 0.0000, -0.9504, 0.0000, -0.1773, 263.17, -0.30, 119.76)
+[node name="gnu210" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.6644, 0.0000, 0.7512, 0.0000, 1.0029, 0.0000, -0.7512, 0.0000, -0.6644, 271.41, -0.30, 124.99)
 
-[node name="gnu221" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.0750, 0.0000, 0.9597, 0.0000, 0.9626, 0.0000, -0.9597, 0.0000, -0.0750, 267.14, -0.30, 118.18)
+[node name="gnu211" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.2264, 0.0000, 1.0024, 0.0000, 1.0276, 0.0000, -1.0024, 0.0000, 0.2264, 271.05, -0.30, 122.58)
 
-[node name="gnu222" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.4104, 0.0000, 0.8773, 0.0000, 0.9686, 0.0000, -0.8773, 0.0000, -0.4104, 271.50, -0.30, 123.26)
-
-[node name="gnu223" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.6689, 0.0000, 0.7668, 0.0000, 1.0176, 0.0000, -0.7668, 0.0000, -0.6689, 272.75, -0.30, 119.05)
-
-[node name="gnu224" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.7252, 0.0000, 0.7361, 0.0000, 1.0334, 0.0000, -0.7361, 0.0000, -0.7252, 270.00, -0.30, 125.04)
-
-[node name="gnu225" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu212" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.0478, 0.0000, 0.9680, 0.0000, 0.9691, 0.0000, -0.9680, 0.0000, -0.0478, 264.71, -0.30, 116.39)
 
-[node name="gnu226" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu213" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.0145, 0.0000, 1.0237, 0.0000, 1.0238, 0.0000, -1.0237, 0.0000, -0.0145, 267.10, -0.30, 117.68)
+
+[node name="gnu214" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.5972, 0.0000, 0.8464, 0.0000, 1.0359, 0.0000, -0.8464, 0.0000, -0.5972, 270.90, -0.30, 117.43)
 
-[node name="gnu227" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu215" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.4261, 0.0000, 0.8745, 0.0000, 0.9728, 0.0000, -0.8745, 0.0000, -0.4261, 260.31, -0.30, 121.95)
 
-[node name="zebra228" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="gnu216" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.7992, 0.0000, 0.6602, 0.0000, 1.0367, 0.0000, -0.6602, 0.0000, -0.7992, 269.01, -0.30, 123.78)
+
+[node name="gnu217" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.7792, 0.0000, 0.6080, 0.0000, 0.9884, 0.0000, -0.6080, 0.0000, -0.7792, 264.30, -0.30, 126.35)
 
-[node name="zebra229" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="zebra218" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
 transform = Transform3D(0.1207, 0.0000, 0.9671, 0.0000, 0.9746, 0.0000, -0.9671, 0.0000, 0.1207, 269.91, -0.30, 119.85)
 
-[node name="zebra230" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.2698, 0.0000, 0.9608, 0.0000, 0.9979, 0.0000, -0.9608, 0.0000, 0.2698, 261.15, -0.30, 117.92)
+[node name="zebra219" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.1684, 0.0000, 1.0116, 0.0000, 1.0255, 0.0000, -1.0116, 0.0000, -0.1684, 264.89, -0.30, 119.28)
 
-[node name="gnu231" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.4459, 0.0000, 0.9375, 0.0000, 1.0382, 0.0000, -0.9375, 0.0000, -0.4459, 287.31, -0.30, 116.11)
+[node name="zebra220" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.6528, 0.0000, 0.7704, 0.0000, 1.0098, 0.0000, -0.7704, 0.0000, -0.6528, 262.05, -0.30, 117.44)
 
-[node name="gnu232" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.8390, 0.0000, 0.4904, 0.0000, 0.9718, 0.0000, -0.4904, 0.0000, -0.8390, 288.63, -0.30, 118.84)
-
-[node name="gnu233" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.1899, 0.0000, 0.9821, 0.0000, 1.0003, 0.0000, -0.9821, 0.0000, -0.1899, 284.15, -0.30, 119.80)
-
-[node name="gnu234" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.7552, 0.0000, 0.6703, 0.0000, 1.0098, 0.0000, -0.6703, 0.0000, -0.7552, 279.55, -0.30, 112.31)
-
-[node name="gnu235" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu221" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.0998, 0.0000, 1.0120, 0.0000, 1.0169, 0.0000, -1.0120, 0.0000, -0.0998, 285.89, -0.30, 113.45)
 
-[node name="gnu236" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu222" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(0.1242, 0.0000, 0.9540, 0.0000, 0.9620, 0.0000, -0.9540, 0.0000, 0.1242, 279.05, -0.30, 114.94)
 
-[node name="zebra237" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="gnu223" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.4119, 0.0000, 0.9343, 0.0000, 1.0210, 0.0000, -0.9343, 0.0000, -0.4119, 289.04, -0.30, 116.79)
+
+[node name="gnu224" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.7267, 0.0000, 0.7472, 0.0000, 1.0423, 0.0000, -0.7472, 0.0000, -0.7267, 278.22, -0.30, 117.77)
 
-[node name="zebra238" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="gnu225" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.0344, 0.0000, 0.9578, 0.0000, 0.9585, 0.0000, -0.9578, 0.0000, -0.0344, 281.14, -0.30, 118.59)
 
-[node name="zebra239" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(-0.0591, 0.0000, 0.9633, 0.0000, 0.9651, 0.0000, -0.9633, 0.0000, -0.0591, 289.94, -0.30, 116.50)
+[node name="gnu226" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.1261, 0.0000, 1.0070, 0.0000, 1.0148, 0.0000, -1.0070, 0.0000, -0.1261, 285.97, -0.30, 119.71)
 
-[node name="gnu240" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.9682, 0.0000, 0.3042, 0.0000, 1.0148, 0.0000, -0.3042, 0.0000, 0.9682, 307.09, -0.10, 183.93)
+[node name="zebra227" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.0085, 0.0000, 0.9572, 0.0000, 0.9572, 0.0000, -0.9572, 0.0000, 0.0085, 283.36, -0.30, 111.14)
 
-[node name="gnu241" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.9433, 0.0000, 0.1629, 0.0000, 0.9572, 0.0000, -0.1629, 0.0000, 0.9433, 302.63, -0.30, 170.23)
+[node name="zebra228" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.1736, 0.0000, 0.9587, 0.0000, 0.9743, 0.0000, -0.9587, 0.0000, -0.1736, 285.74, -0.30, 117.28)
 
-[node name="gnu242" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.7896, 0.0000, 0.6290, 0.0000, 1.0095, 0.0000, -0.6290, 0.0000, 0.7896, 293.96, -0.30, 176.36)
+[node name="zebra229" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.7668, 0.0000, 0.5795, 0.0000, 0.9612, 0.0000, -0.5795, 0.0000, -0.7668, 288.45, -0.30, 114.12)
 
-[node name="gnu243" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.4063, 0.0000, 0.8676, 0.0000, 0.9580, 0.0000, -0.8676, 0.0000, 0.4063, 296.63, -0.30, 173.63)
+[node name="gnu230" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.6620, 0.0000, 0.7251, 0.0000, 0.9818, 0.0000, -0.7251, 0.0000, 0.6620, 300.88, -0.30, 174.87)
 
-[node name="gnu244" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.9743, 0.0000, 0.2949, 0.0000, 1.0180, 0.0000, -0.2949, 0.0000, 0.9743, 301.42, -0.30, 173.24)
+[node name="gnu231" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.3743, 0.0000, 0.9027, 0.0000, 0.9772, 0.0000, -0.9027, 0.0000, 0.3743, 299.67, -0.28, 183.30)
 
-[node name="gnu245" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.4330, 0.0000, 0.8581, 0.0000, 0.9612, 0.0000, -0.8581, 0.0000, 0.4330, 311.35, -0.11, 175.00)
+[node name="gnu232" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.4907, 0.0000, 0.8576, 0.0000, 0.9880, 0.0000, -0.8576, 0.0000, 0.4907, 313.14, 0.12, 180.68)
 
-[node name="zebra246" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.6228, 0.0000, 0.7676, 0.0000, 0.9885, 0.0000, -0.7676, 0.0000, 0.6228, 297.67, -0.30, 182.31)
+[node name="gnu233" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.8855, 0.0000, 0.4055, 0.0000, 0.9739, 0.0000, -0.4055, 0.0000, 0.8855, 306.55, -0.15, 182.38)
 
-[node name="zebra247" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.4012, 0.0000, 0.9670, 0.0000, 1.0469, 0.0000, -0.9670, 0.0000, 0.4012, 308.97, -0.10, 179.67)
+[node name="gnu234" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.6666, 0.0000, 0.7983, 0.0000, 1.0400, 0.0000, -0.7983, 0.0000, 0.6666, 299.29, -0.30, 172.33)
 
-[node name="zebra248" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.9177, 0.0000, 0.3906, 0.0000, 0.9973, 0.0000, -0.3906, 0.0000, 0.9177, 298.90, -0.30, 173.72)
+[node name="gnu235" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.9418, 0.0000, 0.2100, 0.0000, 0.9649, 0.0000, -0.2100, 0.0000, 0.9418, 311.07, -0.10, 175.67)
 
-[node name="gnu249" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.3972, 0.0000, 0.9483, 0.0000, 1.0282, 0.0000, -0.9483, 0.0000, -0.3972, 207.31, -0.30, 187.14)
+[node name="zebra236" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.8211, 0.0000, 0.5354, 0.0000, 0.9802, 0.0000, -0.5354, 0.0000, 0.8211, 302.31, -0.25, 184.69)
 
-[node name="gnu250" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.3971, 0.0000, 0.8794, 0.0000, 0.9649, 0.0000, -0.8794, 0.0000, 0.3971, 222.59, -0.30, 182.98)
+[node name="zebra237" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.8648, 0.0000, 0.5262, 0.0000, 1.0123, 0.0000, -0.5262, 0.0000, 0.8648, 297.33, -0.30, 174.68)
 
-[node name="gnu251" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.0643, 0.0000, 0.9781, 0.0000, 0.9802, 0.0000, -0.9781, 0.0000, 0.0643, 212.37, -0.30, 186.93)
+[node name="zebra238" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.9430, 0.0000, 0.3901, 0.0000, 1.0205, 0.0000, -0.3901, 0.0000, 0.9430, 296.28, -0.30, 179.74)
 
-[node name="gnu252" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.0979, 0.0000, 1.0076, 0.0000, 1.0123, 0.0000, -1.0076, 0.0000, 0.0979, 206.55, -0.30, 182.55)
-
-[node name="gnu253" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.2537, 0.0000, 0.9885, 0.0000, 1.0205, 0.0000, -0.9885, 0.0000, 0.2537, 205.33, -0.30, 184.76)
-
-[node name="gnu254" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+[node name="gnu239" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.1036, 0.0000, 1.0242, 0.0000, 1.0294, 0.0000, -1.0242, 0.0000, -0.1036, 215.85, -0.30, 182.68)
 
-[node name="gnu255" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.3512, 0.0000, 0.9121, 0.0000, 0.9774, 0.0000, -0.9121, 0.0000, -0.3512, 221.78, -0.30, 185.96)
+[node name="gnu240" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.4659, 0.0000, 0.9147, 0.0000, 1.0265, 0.0000, -0.9147, 0.0000, -0.4659, 213.66, -0.30, 187.21)
 
-[node name="zebra256" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+[node name="gnu241" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
 transform = Transform3D(0.3036, 0.0000, 0.9179, 0.0000, 0.9668, 0.0000, -0.9179, 0.0000, 0.3036, 217.14, -0.30, 185.89)
 
-[node name="zebra257" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.1933, 0.0000, 0.9906, 0.0000, 1.0093, 0.0000, -0.9906, 0.0000, 0.1933, 218.33, -0.30, 183.94)
+[node name="gnu242" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.5342, 0.0000, 0.7934, 0.0000, 0.9564, 0.0000, -0.7934, 0.0000, 0.5342, 211.29, -0.30, 187.48)
 
-[node name="zebra258" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.4804, 0.0000, 0.9074, 0.0000, 1.0267, 0.0000, -0.9074, 0.0000, 0.4804, 202.12, -0.30, 186.22)
+[node name="gnu243" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.1066, 0.0000, 0.9442, 0.0000, 0.9502, 0.0000, -0.9442, 0.0000, -0.1066, 205.97, -0.30, 181.60)
+
+[node name="gnu244" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.1448, 0.0000, 1.0283, 0.0000, 1.0384, 0.0000, -1.0283, 0.0000, -0.1448, 205.87, -0.30, 183.95)
+
+[node name="gnu245" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.5604, 0.0000, 0.8238, 0.0000, 0.9963, 0.0000, -0.8238, 0.0000, -0.5604, 222.40, -0.30, 182.25)
+
+[node name="zebra246" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.0485, 0.0000, 1.0471, 0.0000, 1.0482, 0.0000, -1.0471, 0.0000, -0.0485, 208.30, -0.30, 182.54)
+
+[node name="zebra247" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.3019, 0.0000, 0.9862, 0.0000, 1.0313, 0.0000, -0.9862, 0.0000, 0.3019, 219.58, -0.30, 182.60)
+
+[node name="zebra248" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.0031, 0.0000, 1.0344, 0.0000, 1.0344, 0.0000, -1.0344, 0.0000, 0.0031, 199.76, -0.30, 183.06)
+
+[node name="gnu249" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.0222, 0.0000, -1.0085, 0.0000, 1.0087, 0.0000, 1.0085, 0.0000, -0.0222, 200.60, -0.30, 148.46)
+
+[node name="gnu250" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.2922, 0.0000, -0.9653, 0.0000, 1.0085, 0.0000, 0.9653, 0.0000, -0.2922, 186.06, -0.30, 145.42)
+
+[node name="gnu251" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.2808, 0.0000, -0.9272, 0.0000, 0.9688, 0.0000, 0.9272, 0.0000, 0.2808, 203.59, -0.30, 146.80)
+
+[node name="gnu252" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.1846, 0.0000, -0.9473, 0.0000, 0.9651, 0.0000, 0.9473, 0.0000, 0.1846, 195.06, -0.30, 145.37)
+
+[node name="gnu253" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.0594, 0.0000, -0.9700, 0.0000, 0.9719, 0.0000, 0.9700, 0.0000, -0.0594, 191.62, -0.30, 148.91)
+
+[node name="zebra254" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.1143, 0.0000, -0.9789, 0.0000, 0.9856, 0.0000, 0.9789, 0.0000, 0.1143, 199.45, -0.30, 146.06)
+
+[node name="zebra255" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.1321, 0.0000, -1.0307, 0.0000, 1.0391, 0.0000, 1.0307, 0.0000, -0.1321, 190.40, -0.30, 146.59)
+
+[node name="gnu256" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.3777, 0.0000, -0.9378, 0.0000, 1.0110, 0.0000, 0.9378, 0.0000, -0.3777, 150.36, -0.30, 137.71)
+
+[node name="gnu257" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.2722, 0.0000, -0.9761, 0.0000, 1.0133, 0.0000, 0.9761, 0.0000, -0.2722, 137.79, -0.30, 138.41)
+
+[node name="gnu258" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.1255, 0.0000, -0.9545, 0.0000, 0.9627, 0.0000, 0.9545, 0.0000, 0.1255, 164.62, -0.30, 141.55)
 
 [node name="gnu259" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.2765, 0.0000, -0.9204, 0.0000, 0.9610, 0.0000, 0.9204, 0.0000, -0.2765, 203.85, -0.30, 147.03)
+transform = Transform3D(-0.4798, 0.0000, -0.8414, 0.0000, 0.9686, 0.0000, 0.8414, 0.0000, -0.4798, 135.64, -0.30, 139.60)
 
 [node name="gnu260" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.3181, 0.0000, -0.9989, 0.0000, 1.0483, 0.0000, 0.9989, 0.0000, -0.3181, 183.44, -0.30, 147.71)
+transform = Transform3D(-0.3196, 0.0000, -0.9837, 0.0000, 1.0343, 0.0000, 0.9837, 0.0000, -0.3196, 169.10, -0.30, 139.95)
 
-[node name="gnu261" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.5386, 0.0000, -0.8256, 0.0000, 0.9857, 0.0000, 0.8256, 0.0000, -0.5386, 186.96, -0.30, 145.11)
+[node name="zebra261" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.5287, 0.0000, -0.7983, 0.0000, 0.9575, 0.0000, 0.7983, 0.0000, -0.5287, 148.15, -0.30, 138.09)
 
-[node name="gnu262" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.3933, 0.0000, -0.8795, 0.0000, 0.9635, 0.0000, 0.8795, 0.0000, 0.3933, 194.83, -0.30, 144.25)
+[node name="zebra262" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(-0.2749, 0.0000, -0.9693, 0.0000, 1.0076, 0.0000, 0.9693, 0.0000, -0.2749, 161.63, -0.30, 140.80)
 
 [node name="gnu263" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.5720, 0.0000, -0.8057, 0.0000, 0.9882, 0.0000, 0.8057, 0.0000, -0.5720, 201.15, -0.30, 148.77)
+transform = Transform3D(-0.0780, 0.0000, -0.9957, 0.0000, 0.9987, 0.0000, 0.9957, 0.0000, -0.0780, 151.97, -0.30, 95.18)
 
-[node name="zebra264" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(-0.5791, 0.0000, -0.8432, 0.0000, 1.0229, 0.0000, 0.8432, 0.0000, -0.5791, 195.48, -0.30, 149.02)
+[node name="gnu264" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(0.0450, 0.0000, -0.9754, 0.0000, 0.9764, 0.0000, 0.9754, 0.0000, 0.0450, 148.22, -0.30, 94.52)
 
-[node name="zebra265" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(-0.2219, 0.0000, -1.0060, 0.0000, 1.0301, 0.0000, 1.0060, 0.0000, -0.2219, 186.12, -0.30, 147.96)
+[node name="gnu265" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
+transform = Transform3D(-0.2141, 0.0000, -0.9576, 0.0000, 0.9812, 0.0000, 0.9576, 0.0000, -0.2141, 138.76, -0.25, 94.23)
 
 [node name="gnu266" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.6258, 0.0000, -0.7713, 0.0000, 0.9932, 0.0000, 0.7713, 0.0000, -0.6258, 140.69, -0.30, 138.29)
+transform = Transform3D(-0.1381, 0.0000, -0.9990, 0.0000, 1.0085, 0.0000, 0.9990, 0.0000, -0.1381, 155.27, -0.30, 95.27)
 
-[node name="gnu267" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.3780, 0.0000, -0.8900, 0.0000, 0.9669, 0.0000, 0.8900, 0.0000, -0.3780, 155.77, -0.30, 141.23)
+[node name="zebra267" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.7275, 0.0000, -0.6639, 0.0000, 0.9849, 0.0000, 0.6639, 0.0000, 0.7275, 166.06, -0.30, 97.07)
 
-[node name="gnu268" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.1191, 0.0000, -0.9820, 0.0000, 0.9892, 0.0000, 0.9820, 0.0000, 0.1191, 149.52, -0.30, 141.32)
-
-[node name="gnu269" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.3994, 0.0000, -0.9181, 0.0000, 1.0012, 0.0000, 0.9181, 0.0000, -0.3994, 137.51, -0.30, 140.29)
-
-[node name="gnu270" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.5143, 0.0000, -0.8108, 0.0000, 0.9602, 0.0000, 0.8108, 0.0000, -0.5143, 165.07, -0.30, 139.34)
-
-[node name="zebra271" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(-0.1564, 0.0000, -0.9389, 0.0000, 0.9518, 0.0000, 0.9389, 0.0000, -0.1564, 143.69, -0.30, 141.52)
-
-[node name="zebra272" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(-0.4044, 0.0000, -0.9484, 0.0000, 1.0310, 0.0000, 0.9484, 0.0000, -0.4044, 129.26, -0.30, 139.65)
-
-[node name="gnu273" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.1606, 0.0000, -1.0035, 0.0000, 1.0162, 0.0000, 1.0035, 0.0000, 0.1606, 148.56, -0.30, 93.11)
-
-[node name="gnu274" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.7229, 0.0000, -0.7329, 0.0000, 1.0294, 0.0000, 0.7329, 0.0000, 0.7229, 139.72, -0.30, 94.09)
-
-[node name="gnu275" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.0937, 0.0000, -0.9641, 0.0000, 0.9686, 0.0000, 0.9641, 0.0000, -0.0937, 136.95, -0.30, 97.04)
-
-[node name="gnu276" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_wildebeest")]
-transform = Transform3D(0.0427, 0.0000, -1.0012, 0.0000, 1.0021, 0.0000, 1.0012, 0.0000, 0.0427, 141.94, -0.30, 92.97)
-
-[node name="zebra277" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(0.7130, 0.0000, -0.6684, 0.0000, 0.9773, 0.0000, 0.6684, 0.0000, 0.7130, 157.63, -0.30, 96.43)
-
-[node name="zebra278" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
-transform = Transform3D(-0.0780, 0.0000, -0.9957, 0.0000, 0.9987, 0.0000, 0.9957, 0.0000, -0.0780, 151.97, -0.30, 95.18)
+[node name="zebra268" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_zebra")]
+transform = Transform3D(0.6021, 0.0000, -0.7464, 0.0000, 0.9590, 0.0000, 0.7464, 0.0000, 0.6021, 145.75, -0.30, 94.48)
 
 [node name="ZoneB_RaulDeGnu" type="Node3D" parent="DecorManual"]
 

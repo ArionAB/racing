@@ -492,7 +492,7 @@ static func themes() -> Dictionary:
 			# plece MAI INCHIS decat solul, nu mai deschis. Referinta
 			# (ref_A.png) are exact asta: smocuri oliv-inchise ca ACCENTE pe
 			# un covor auriu deschis, nu tepi mai luminosi decat pamantul.
-			"dense_grass_tip": Color.html("6E6631"),
+			"dense_grass_tip": Color.html("8A7C40"),
 			# PROFIL DE COVOR (TrackGrass.carpet). Implicitul TrackGrass e
 			# croit pentru pajistea alpina: fire de 40-70 cm, rare, cu baza
 			# bruna (0.45/0.42/0.38 din varf). Masurat pe A_r2_before.png,

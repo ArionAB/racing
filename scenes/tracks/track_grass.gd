@@ -97,7 +97,11 @@ const ALT_FADE: float = 10.0
 static var carpet: bool = false
 
 ## Cat de intunecata e baza firului fata de varf, in profilul de covor.
-const CARPET_BASE_MUL: Vector3 = Vector3(0.72, 0.70, 0.62)
+# Masurat pe A_r2_c5.png (caseta 60..340 x 430..700, percentile de V):
+# p05 0.13 / p25 0.23 / p50 0.57 / p75 0.82 / p95 0.89 — sfertul de jos era
+# aproape negru pe un sol de 0.82, de-aia campul citea tepos. Baza urcata
+# strange ecartul: covorul are variatie, nu contrast de cioburi.
+const CARPET_BASE_MUL: Vector3 = Vector3(0.90, 0.88, 0.80)
 ## Inaltimea firului in profilul de covor (m): scund si indesat.
 const CARPET_H_MIN: float = 0.34
 const CARPET_H_MAX: float = 0.62

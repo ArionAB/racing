@@ -55,6 +55,7 @@ const RES := {
 	"kopje_boulder_a": "s_kopje_boulder_a", "kopje_boulder_b": "s_kopje_boulder_b",
 	"kopje_boulder_c": "s_kopje_boulder_c",
 	"safari_tent": "s_safari_tent", "land_rover": "s_land_rover",
+	"maasai_boma": "s_maasai_boma", "ankole_horns": "s_ankole_horns",
 	"campfire": "s_campfire",
 	"acacia_umbrella_a": "s_acacia_umbrella_a",
 	"acacia_umbrella_b": "s_acacia_umbrella_b",
@@ -73,6 +74,7 @@ const BASE_R := {
 	"kopje_camp": 6.93, "lion_kopje": 1.45,
 	"kopje_boulder_a": 1.08, "kopje_boulder_b": 2.03, "kopje_boulder_c": 2.80,
 	"safari_tent": 2.82, "land_rover": 2.28, "campfire": 0.72,
+	"maasai_boma": 4.20, "ankole_horns": 0.55,
 	"acacia_umbrella_a": 4.45, "acacia_umbrella_b": 5.55, "acacia_umbrella_c": 6.24,
 	"dead_tree": 2.36, "euphorbia": 0.92,
 	"termite_mound_a": 0.95, "termite_mound_b": 1.64,
@@ -84,7 +86,7 @@ const BASE_R := {
 ## garda aplicam; NU se scrie in .tscn decat daca difera de implicit).
 const TRUNK := ["acacia_umbrella_a", "acacia_umbrella_b", "acacia_umbrella_c",
 	"dead_tree", "euphorbia"]
-const GHOST := ["campfire", "lion_kopje",
+const GHOST := ["campfire", "lion_kopje", "ankole_horns",
 	"broadleaf_shrub", "tropical_shrub", "grass_tuft_large"]
 
 ## Degajarea minima a ANIMALELOR fata de muchie (brief: 15-40 m; in
@@ -170,47 +172,71 @@ func _sun() -> void:
 
 # ------------------------------------------------------------------ compozitia
 
-## Muchia exterioara a apexului (masurata cu _geometry): axa 0.976 (259.4,141.4)
-## w 7.3 -> 0.982 (263.1,152.5) w 8.7; muchia trece prin (265.5,137.4),
-## (270.3,146.2), (271.8,153.1). Referinta (ref_A.png) aseaza, dinspre drum
-## spre stanca: Land Rover-urile la 1-2 m de laterit, focul intre ele, corturile
-## la 6-10 m in spatele masinilor, si bolovanii de granit LIPITI de corturi.
-## Aici: masini la 3-4 m de muchie (sunt corpuri solide, nu vrem un zid la
-## 1 m de o iesire din viraj), foc la 5 m, corturi la 12-15 m, gramada de
-## bolovani de la 16 m, kopje-ul cu centrul la ~18 m de muchie (brief-ul zicea
-## 8 m, dar atunci tabara n-avea unde sa stea INTRE drum si stanca, cum e in
-## referinta; leul ramane in cadru de la 0.95 pana la 0.975, si iese din el
-## abia la apex — contractul „recompensa vizuala a fiecarui tur" se tine).
+## Muchia exterioara a apexului (masurata cu _geometry, runda 3): axa
+## 0.973 (256.5,137.0) w 6.7; 0.976 (259.4,141.4) w 7.3; 0.979 (262.5,147.6)
+## w 8.0; 0.982 (263.1,152.5) w 8.7. La `--frac=0.97` masina e in (252.3,131.6)
+## si merge catre (0.67, 0.74), adica DREPT SPRE tabara — deci ce decide
+## marimea taberei in cadru e DISTANTA, nu unghiul.
+##
+## Runda 2 a masurat gruparea la 5.0 % din aria cadrului fata de 13.4 % la
+## referinta, la ~42 m de camera. Runda 3 o aduce la muchie: Land Rover-uri la
+## 2.8-3.0 m de laterit, focul la 2.1 m, corturile la 6-9 m, boma si bolovanii
+## de la 14 m, kopje-ul in spatele lor. Grupul e si mai NUMEROS (4 corturi in
+## loc de 3, boma, coarne de ankole, al doilea foc) ca sa umple latimea, si e
+## intins pe directia de mers (z 130-159), nu perpendicular pe ea — asa
+## ocupa banda de mijloc a cadrului pe toata traversarea virajului.
+##
+## Distantele sunt verificate de `_edge_gap` la generare (avertisment sub
+## 0.5 m marja solida) si de ProbeLaneClear dupa.
 func _camp() -> void:
-	_kopje_pos = Vector3(296.5, 0.0, 150.0)
+	_kopje_pos = Vector3(294.0, 0.0, 147.0)
 	_kopje_yaw = deg_to_rad(20.0)
 	_world("kopje_camp", "kopje", _kopje_pos.x, _kopje_pos.z, _kopje_yaw, 1.0)
 	_lion()
-	# GRAMADA de granit in jurul kopje-ului: in referinta stanca nu e un turn,
-	# e un ciorchine de 5-6 bolovani rotunjiti de 4-8 m, lat cat inalt. Piesele
-	# b/c scalate 1.4-1.8 dau bolovani de 4-8 m; gradientul de contact
-	# (memoria `patru-defecte-de-diorama` pct. 3) il fac cele mici, la 0.8-1.0.
-	_world("kopje_boulder_c", "bolovan", 289.0, 139.0, 0.9, 1.5)
-	_world("kopje_boulder_c", "bolovan", 301.0, 137.5, 2.4, 1.8)
-	_world("kopje_boulder_b", "bolovan", 289.5, 160.5, 2.3, 1.7)
-	_world("kopje_boulder_b", "bolovan", 305.0, 158.5, 0.4, 1.5)
-	_world("kopje_boulder_c", "bolovan", 307.5, 148.0, 4.0, 1.4)
-	_world("kopje_boulder_a", "bolovan", 284.5, 163.5, 4.1, 1.4)
-	_world("kopje_boulder_a", "bolovan", 294.0, 134.0, 5.2, 1.3)
-	_world("kopje_boulder_a", "bolovan", 288.5, 152.5, 1.7, 0.9)
-	_world("kopje_boulder_a", "bolovan", 297.0, 141.5, 0.3, 0.8)
-	_world("kopje_boulder_a", "bolovan", 296.5, 160.0, 2.9, 0.8)
-	# Corturile: trei, in arc la 12-15 m de muchie, cu fata (-Z) spre drum.
-	_world("safari_tent", "cort", 280.5, 138.5, _yaw_to(Vector2(280.5, 138.5), Vector2(265.0, 138.0)), 1.0)
-	_world("safari_tent", "cort", 284.0, 147.0, _yaw_to(Vector2(284.0, 147.0), Vector2(270.0, 146.5)), 1.0)
-	_world("safari_tent", "cort", 281.0, 156.0, _yaw_to(Vector2(281.0, 156.0), Vector2(268.0, 158.0)), 0.95)
-	# Land Rover-urile: parcate la 3-4 m de muchie, paralele cu banda, ca in
-	# referinta (doua masini verzi intre laterit si corturi).
-	_world("land_rover", "landRover", 270.5, 139.0, _yaw_to(Vector2(270.5, 139.0), Vector2(276.0, 147.3)), 1.0)
-	_world("land_rover", "landRover", 275.0, 152.5, _yaw_to(Vector2(275.0, 152.5), Vector2(274.3, 142.5)), 1.0)
-	# Focul: intre cele doua masini, la 5 m de muchie. Emisiv pe slotul 30
+	# GRAMADA de granit: ciorchine de bolovani rotunjiti care leaga kopje-ul
+	# de tabara, ca in referinta unde stanca atinge corturile.
+	_world("kopje_boulder_c", "bolovan", 283.5, 133.5, 0.9, 1.5)
+	_world("kopje_boulder_c", "bolovan", 299.0, 134.5, 2.4, 1.8)
+	_world("kopje_boulder_b", "bolovan", 285.5, 159.5, 2.3, 1.7)
+	_world("kopje_boulder_b", "bolovan", 302.0, 156.0, 0.4, 1.5)
+	_world("kopje_boulder_c", "bolovan", 305.0, 145.0, 4.0, 1.4)
+	_world("kopje_boulder_a", "bolovan", 282.5, 165.0, 4.1, 1.4)
+	_world("kopje_boulder_a", "bolovan", 291.0, 130.0, 5.2, 1.3)
+	_world("kopje_boulder_a", "bolovan", 284.0, 141.0, 1.7, 0.9)
+	_world("kopje_boulder_a", "bolovan", 281.0, 149.5, 0.3, 0.8)
+	_world("kopje_boulder_a", "bolovan", 287.5, 152.0, 2.9, 0.8)
+	# SILUETA taberei. Masurat pe .glb (arie pe slot, orientarea normalelor):
+	# `safari_tent` are 160 m2 de panza aproape ORIZONTALA (orizontalitate
+	# 0.75-0.78) si doar 0.85 m2 de geometrie verticala — e o copertina pe
+	# pari, fara pereti si fara intrare. La scara 1.0 citeste ca o placa alba
+	# culcata (masurat pe A_r3_tabara_free.png: fata luminata V0.65 e corecta
+	# ca CULOARE fata de referinta V0.57-0.61, dar restul suprafetei cade in
+	# umbra la V0.29 si se citeste ca lespede). Referinta are trei corturi
+	# COMPACTE, aproape la fel de inalte cat de late, cu intrare intunecata.
+	#
+	# Deci silueta taberei se muta pe `maasai_boma` (cupola, are volum si
+	# umbra proprie), iar `safari_tent` ramane in tabara la 0.65-0.72 —
+	# la scara aia copertina e o umbra de popas, nu o lespede, si nu mai
+	# domina cadrul. Doua bome fac perechea de „corturi" din referinta.
+	var vatra := Vector2(271.5, 143.0)
+	_world("maasai_boma", "cortDom", 275.0, 137.5, _yaw_to(Vector2(275.0, 137.5), vatra), 0.80)
+	_world("maasai_boma", "cortDom", 277.5, 146.5, _yaw_to(Vector2(277.5, 146.5), vatra), 0.90)
+	_world("maasai_boma", "cortDom", 277.0, 154.5, _yaw_to(Vector2(277.0, 154.5), vatra), 0.72)
+	_world("safari_tent", "cort", 273.0, 131.0, _yaw_to(Vector2(273.0, 131.0), vatra), 0.70)
+	_world("safari_tent", "cort", 280.5, 150.5, _yaw_to(Vector2(280.5, 150.5), vatra), 0.65)
+	# Land Rover-urile: parcate la 2.8-3.0 m de laterit, paralele cu banda,
+	# ca in referinta (doua masini verzi INTRE drum si corturi).
+	_world("land_rover", "landRover", 268.5, 136.5, _yaw_to(Vector2(268.5, 136.5), Vector2(273.5, 145.0)), 1.0)
+	_world("land_rover", "landRover", 275.5, 152.0, _yaw_to(Vector2(275.5, 152.0), Vector2(272.5, 141.5)), 1.0)
+	# Focul: intre masini, la 2.1 m de muchie. Emisiv pe slotul 30
 	# (LAVA_ORANGE) prin metadata `lumina` (world_prop._glow_spec).
-	_world("campfire", "foc", 275.5, 145.5, 0.0, 1.0, "", "30|2.0")
+	_world("campfire", "foc", vatra.x, vatra.y, 0.0, 1.0, "", "30|2.2")
+	# Al doilea foc, stins, langa corturile din spate.
+	_world("campfire", "vatra", 275.5, 148.5, 1.9, 0.85)
+	# Boma mare (gospodaria) in spate, la 14 m — inchide grupul spre kopje.
+	_world("maasai_boma", "boma", 285.0, 159.0, _yaw_to(Vector2(285.0, 159.0), vatra), 1.0)
+	_world("ankole_horns", "coarne", 277.0, 139.5, 2.2, 1.0)
+	_world("ankole_horns", "coarne", 276.5, 149.5, 5.0, 0.9)
 	# Termitierele: una rosie la 9 m de muchie in dreapta drumului de
 	# intoarcere (in cadrul hero, stanga, la 22 m de camera) si una in
 	# interiorul buclei.

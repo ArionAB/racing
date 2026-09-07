@@ -298,6 +298,14 @@ func _flank() -> void:
 				continue
 			var t: float = clampf(drop / 40.0, 0.0, 1.0) # 0 sus pe buza, 1 jos
 			var r := _rng.randf()
+			# Fereastra spre lac, masurata din OCHI (10 m peste banda), nu
+			# lateral: piesele de la 10-19 m lateral dar 14-43 m mai jos sunt
+			# la 20-45 m de camera si exact in coltul din dreapta jos. Sub 34 m
+			# de ochi punem doar piatra si euphorbia — iarba aurie si granit,
+			# ca in referinta; verdele incepe dincolo.
+			var eye_d := sqrt(jl * jl + pow(p.y + 10.0 - g, 2.0))
+			if eye_d < 34.0:
+				r = minf(r, 0.55)
 			var model := ""
 			var scl := 1.0
 			if r < 0.42 - 0.22 * t:
@@ -311,10 +319,13 @@ func _flank() -> void:
 				# Verdele coastei: acacii mici sus, fever_tree jos (padurea Lerai).
 				if t > 0.55 and _rng.randf() < 0.55:
 					model = "fever"
-					scl = _rng.randf_range(0.8, 1.2)
+					scl = _rng.randf_range(0.75, 1.15)
 				else:
 					model = ["acacia_a", "acacia_a", "acacia_b"][_rng.randi_range(0, 2)]
-					scl = _rng.randf_range(0.55, 0.95)
+					# Sus, langa buza, coroanele raman MICI: altfel umplu coltul
+					# din dreapta cadrului si ascund exact lacul pentru care
+					# exista POI-ul (masurat pe E_r1_hero.png).
+					scl = _rng.randf_range(0.30, 0.45) + 0.45 * t
 			_raw(model, "Flanc", Vector3(qq.x, g, qq.z), _rng.randf_range(0.0, TAU), scl,
 				"trunk" if model != "boulder_c" and model != "boulder_b" else "hull")
 			placed += 1
@@ -331,8 +342,15 @@ func _boma_and_herd() -> void:
 	# treceri (leg) = 5 + 1,2 + period/2; cu amp ≈ 9,3 m si 12 m/s period ≈
 	# 3,1 s, deci leg ≈ 7,75 s si ciclul dus-intors ≈ 15,5 s; 0,3 s = 0,019.
 	var n := _track.baked.size()
+	# Cinci vaci care traverseaza IN SIR, nu in front. `SlidingHazard` isi ia
+	# defazajul din fractie (`fposmod(frac * 3.7, 1.0)` in track.gd), deci
+	# markerele lipite unul de altul ar porni la unison si ar face un ZID
+	# mobil pe o buza fara parapet: ProbeRace a dat 2 repuneri exact aici
+	# (frac 0.454-0.457) cand erau la 2 m distanta. Pasul de 0.0068 din tur
+	# (~14 m) le da defazaje de 0.025 intre ele si le intinde pe 57 m, deci
+	# masina prinde mereu o fereastra intre doua vaci.
 	for c in 5:
-		var fr := 0.4605 + 0.0018 * float(c)
+		var fr := 0.4535 + 0.0068 * float(c)
 		var i := int(fr * float(n)) % n
 		var p := _track.baked[i]
 		_n += 1
@@ -344,7 +362,8 @@ func _boma_and_herd() -> void:
 		_out.append("face_travel = true")
 		_out.append("motion = 1")
 		_out.append("")
-		print("; Ankole%d la frac %.4f (%.1f, %.1f, %.1f)" % [c + 1, fr, p.x, p.y, p.z])
+		print("; Ankole%d la frac %.4f (%.1f, %.1f, %.1f), defazaj %.3f"
+			% [c + 1, fr, p.x, p.y, p.z, fposmod(fr * 3.7, 1.0)])
 	# Coarnele Ankole nu se pot parenta pe un hazard care isi construieste
 	# singur modelul (HazardMarker n-are `attach_*`), deci raman ca trofeu pe
 	# gardul bomei — exact unde le pune si referinta (stalpul cu shuka rosie).
@@ -411,7 +430,14 @@ func _far_wall() -> void:
 const FAR_WALL_YAW := 0.0
 
 
-## Flamingii: pe bordura lagunei, in banda dintre apa si crusta.
+## Flamingii: bordura roz a lacului Magadi. Doua lectii aplicate:
+##  - NU un tiv pe contur (lectia bucatii G): banda are latime, deci pasarile
+##    stau si IN apa mica, in trei inele concentrice, cu densitatea cea mai
+##    mare pe muchia apei;
+##  - pe JUMATATEA DINSPRE DRUM. Prima incercare le-a asezat uniform pe tot
+##    conturul, iar jumatatea dinspre camera (z < -68) primise doar cateva:
+##    in captura de la 0.4 nu se vedea niciun flamingo, desi sonda numarase
+##    170 (memoria `efecte-invizibile-nu-se-numara`).
 func _flamingos() -> void:
 	var poly := _track._lagoon_poly()
 	if poly.is_empty():
@@ -427,23 +453,26 @@ func _flamingos() -> void:
 	var tries := 0
 	var kept := 0
 	var kept_w := 0
-	while kept + kept_w < 170 and tries < 3000:
+	var sea := _sea_y()
+	while kept + kept_w < 320 and tries < 12000:
 		tries += 1
 		var e := _rng.randi_range(0, poly.size() - 1)
 		var a := poly[e]
 		var b := poly[(e + 1) % poly.size()]
-		var t := _rng.randf()
-		var q := a.lerp(b, t)
+		var q := a.lerp(b, _rng.randf())
 		var out_dir := (q - Vector2(cx, cz)).normalized()
-		q += out_dir * _rng.randf_range(-3.0, 4.0)
-		var g := _sol_real(q.x, q.y)
-		var sea := _sea_y()
-		# In apa mica sau pe crusta: intre 0,4 m sub luciu si 1,2 m peste.
-		if g < sea - 0.4 or g > sea + 1.2:
+		# Banda, nu linie: de la 6 m in apa pana la 5 m pe crusta.
+		q += out_dir * _rng.randf_range(-6.0, 5.0)
+		# Jumatatea dinspre sosea (z mai mic decat centrul) primeste de patru
+		# ori mai multe pasari; restul conturului ramane populat, dar rar.
+		if q.y > cz and _rng.randf() > 0.25:
+			continue
+		var g := _sol_real(q.x, q.y, true)
+		if g < sea - 1.0 or g > sea + 1.4:
 			continue
 		var y := maxf(g, sea)
 		var yaw := _rng.randf_range(0.0, TAU)
-		if _rng.randf() < 0.14:
+		if _rng.randf() < 0.16:
 			_wing_pos.append(Vector3(q.x, y, q.y))
 			_wing_yaw.append(yaw)
 			kept_w += 1
@@ -451,8 +480,12 @@ func _flamingos() -> void:
 			_flam_pos.append(Vector3(q.x, y, q.y))
 			_flam_yaw.append(yaw)
 			kept += 1
-	print("; flamingi: %d in picioare + %d cu aripi, din %d incercari; centru laguna (%.1f, %.1f)"
-		% [kept, kept_w, tries, cx, cz])
+	var near := 0
+	for fp in _flam_pos:
+		if fp.z < cz:
+			near += 1
+	print("; flamingi: %d in picioare (%d pe malul dinspre drum) + %d cu aripi, din %d incercari"
+		% [kept, near, kept_w, tries])
 
 
 func _sea_y() -> float:

@@ -110,6 +110,7 @@ road_dir = Vector3(-1, 0, 0)
 files_per_strip = 2
 spacing = 2.0
 herd_desat = 0.55
+herd_white_cap = 0.42
 
 [node name="Hipopotam1" type="AnimatableBody3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.0, -1.5, 163.0)
@@ -1214,6 +1215,7 @@ half_x = 15.0
 band_near = 13.0
 band_far = 110.0
 herd_desat = 0.55
+herd_white_cap = 0.42
 min_gap = 2.0
 
 [node name="TurmaFundalDreapta" type="Node3D" parent="DecorManual/ZoneB_RaulDeGnu"]
@@ -1226,6 +1228,7 @@ band_far = 32.0
 far_side = false
 near_side = true
 herd_desat = 0.55
+herd_white_cap = 0.42
 min_gap = 2.0
 seed = 2711
 
@@ -1239,6 +1242,7 @@ band_far = 24.0
 zebra_ratio = 0.25
 heading_spread = 0.45
 herd_desat = 0.55
+herd_white_cap = 0.42
 min_gap = 3.2
 seed = 5501
 
@@ -1254,6 +1258,7 @@ near_side = true
 zebra_ratio = 0.25
 heading_spread = 0.45
 herd_desat = 0.55
+herd_white_cap = 0.42
 min_gap = 3.2
 seed = 5502
 

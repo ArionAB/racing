@@ -38,6 +38,10 @@ extends Node3D
 @export_range(0.0, 1.0, 0.05) var zebra_ratio: float = 0.2
 ## Ca la HerdHazard: cat din saturatia blanii se stinge spre gri.
 @export_range(0.0, 1.0, 0.05) var herd_desat: float = 0.0
+
+## Plafonul de valoare pe blana, pasat mai departe la materialul donorului
+## (vezi `HerdHazard._herd_material`). 1.0 = neatins.
+@export_range(0.4, 1.0, 0.01) var herd_white_cap: float = 1.0
 ## Cati dintre ei galopeaza pe loc (shader-ul turmei); restul pasc, nemiscati.
 @export_range(0.0, 1.0, 0.05) var gallop_ratio: float = 0.0
 ## Toti cu fata in directia curgerii (+Z local), cu abaterea asta in radiani.
@@ -81,6 +85,7 @@ func _build() -> void:
 	# HerdHazard temporar ca sa nu existe doua copii ale shader-ului.
 	var donor := HerdHazard.new()
 	donor.herd_desat = herd_desat
+	donor.herd_white_cap = herd_white_cap
 	var mat: ShaderMaterial = donor._herd_material(true)
 	donor.free()
 

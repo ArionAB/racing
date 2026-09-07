@@ -545,9 +545,20 @@ static func themes() -> Dictionary:
 			# Deci nu "mai inchis decat malul" (sunt la aceeasi valoare), ci
 			# mai PUTIN saturat, cu aceeasi luminozitate. desat 0.72 dadea
 			# S0.03 (gri de beton, masurat pe C_r2_t2.png) — prea mult.
-			"water_b_mul": Color(0.97, 0.96, 0.97),
-			"water_b_desat": 0.48,
-			"water_b_gain": 1.22,
+			# RUNDA 3 (POI C). Cu albia sapata, vadul se vede in sfarsit ca
+			# rau — si atunci reglajul rundei 2 se dovedeste tras prea
+			# departe: masurat pe C_r3_t5.png, apa iesea (84,84,80) H65 S0.04
+			# V0.33, adica gri-verzui de beton, cand referinta are (114,96,90)
+			# H15 S0.22 V0.45, noroi cald. Desaturarea de atunci corecta un
+			# cadru in care apa umplea tot ecranul si era cea mai DESCHISA
+			# suprafata din el; acum apa e o banda ingusta intre maluri, deci
+			# problema s-a mutat exact pe dos. Se lasa in urma: desat 0.48 ->
+			# 0.30 (saturatie inapoi in banda), mul spre cald (rosu peste
+			# albastru) ca nuanta sa cada la H15-25, gain 1.22 -> 1.05 ca sa
+			# nu urce valoarea peste maluri.
+			"water_b_mul": Color(1.0, 0.90, 0.80),
+			"water_b_desat": 0.30,
+			"water_b_gain": 1.45,
 			"water_b_glint": 1.9,
 			"water_b_glint_cut": 0.60,
 			# Spuma alba e ce facea lacul sa citeasca mint: toata panza de la

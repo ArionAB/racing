@@ -833,10 +833,21 @@ metadata/coliziune = "trunk"
 [node name="TurmaFundal" type="Node3D" parent="DecorManual/ZoneB_RaulDeGnu"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, -0.299973, 165)
 script = ExtResource("herdbg")
-count = 420
+count = 620
+half_x = 80.0
+band_near = 16.0
+band_far = 130.0
+
+[node name="TurmaFundalDreapta" type="Node3D" parent="DecorManual/ZoneB_RaulDeGnu"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, -0.299973, 165)
+script = ExtResource("herdbg")
+count = 150
 half_x = 70.0
-band_near = 34.0
-band_far = 125.0
+band_near = 15.0
+band_far = 33.0
+far_side = false
+near_side = true
+seed = 2711
 
 [node name="ZoneC_VadulMara" type="Node3D" parent="DecorManual"]
 

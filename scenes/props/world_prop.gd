@@ -806,28 +806,31 @@ const SLOT_REMAP_BY_MODEL := {
 		2: Palette.ASPHALT,
 		29: Palette.VOLCANIC_BLACK,
 	},
-	# Flamingii: pe .glb stau pe [4, 20, 31] — dar atlasul are 31 de sloturi
-	# (HEX 0..30), deci slotul 31 nu exista si iesea MAGENTA fluorescent
-	# (masurat pe G_r1_lac4.png). TILE_TERRACOTTA 23 a fost prima incercare
-	# si a iesit portocaliu-caramida sub soarele cald (G_r1_hero.png), deci
-	# corpul trece pe CAR_RED 14 (#E54839) — rosu deschis care, spalat de
-	# lumina calda si vazut de la 20 m, citeste ca banda roz din referinta —
-	# iar picioarele (4, ROCK_DARK maro) pe SAND_LIGHT, ca sa nu ancoreze
-	# pasarea intr-un maro care o face bat infipt in crusta.
-	# Atlasul nu are roz: masurate toate cele 31 de sloturi, niciunul nu are hue
-	# 300-30 cu saturatie sub 0.55. Incercarea evidenta — penajul (slotul 31,
-	# 73% din vertecsi) pe CONCRETE 8 palid, ca sa citeasca roz spalat de
-	# soarele cald — a fost FACUTA si respinsa pe captura (G_r3_flam.png):
-	# pasarile au disparut complet, fiindca malul e crusta de soda ALBA si o
-	# masa palida pe fundal palid nu are de ce sa se vada. In referinta rozul
-	# se citeste tocmai fiindca e in CONTRAST cu albul din jur.
-	# Deci penajul ramane pe CAR_RED (14) — la 20-40 m, spalat de lumina calda,
-	# e cea mai apropiata impresie de roz pe care o poate da atlasul — si ce
-	# se schimba e RUPEREA masei: slotul 20 (14%, y=[0.82,1.23], capul si gatul)
-	# trece pe CONCRETE palid, ca silueta sa aiba gat deschis peste corp rosu
-	# in loc sa fie o singura bila rosie. Picioarele raman scoase din maro.
-	"flamingo": {31: Palette.CAR_RED, 20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
-	"flamingo_wings": {31: Palette.CAR_RED, 20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
+	# Flamingii: pe .glb stau pe [4, 20, 31]. Penajul (31, 73% din vertecsi)
+	# NU se mai remapeaza — slotul 31 e de acum FLAMINGO_PINK in atlas, exact
+	# culoarea pentru care kitul a fost exportat.
+	#
+	# Patru runde de critica au cautat rozul in remap, si toate au esuat din
+	# aceeasi cauza: slotul 31 era NEDEFINIT in HEX, deci generatorul de atlas
+	# ii dadea magenta pur, iar magenta x sun_color da vermilion. Ocolirile
+	# incercate, in ordine, toate respinse pe captura:
+	#   - TILE_TERRACOTTA 23: portocaliu-caramida (G_r1_hero.png);
+	#   - CONCRETE 8 palid: pasarile DISPAR pe crusta de soda alba
+	#     (G_r3_flam.png) — pe fundal palid o masa palida nu are contrast;
+	#   - CAR_RED 14: cea mai buna dintre ele, si tot rosu — masurat pe
+	#     captura hero sat 0.66 la hue +16.3, fata de sat 0.51 la hue +3.9 in
+	#     diorama de referinta.
+	# Niciuna nu putea reusi: masurate toate cele 31 de culori scrise, atlasul
+	# chiar nu avea niciun slot cu hue 300-30 sub saturatie 0.55. Reparatia era
+	# o culoare noua in atlas, nu inca un slot vechi (vezi Palette.FLAMINGO_PINK).
+	#
+	# Ce ramane din rundele vechi, fiindca s-a masurat ca ajuta silueta: gatul
+	# si capul (20, 14% din vertecsi, y=[0.82,1.23]) stau pe CONCRETE palid, ca
+	# pasarea sa aiba un ecart de valoare in interior in loc sa fie o singura
+	# bila; picioarele (4, ROCK_DARK maro) pe SAND_LIGHT, ca sa nu para batute
+	# in crusta.
+	"flamingo": {20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
+	"flamingo_wings": {20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)

@@ -8415,9 +8415,20 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
 		ball.model_scale = float(kind.get("scale",
 			theme_flag("hazard_scale", 0.52)))
+		# CLASA DE TEXTURA vine de la tema DOAR pentru bolovanul implicit al
+		# temei. Un nod care si-a declarat singur `model` a cerut un obiect
+		# anume, nu piatra temei: pe Serengeti `hazard_class: "granite"` se
+		# aplica triplanar peste elefant si ii STERGE atlasul, deci si remap-ul
+		# de sloturi (masurat pe G_r3_pre_hero.png: corp lum 0.769 sat 0.34,
+		# crem de gresie, mai LUMINOS decat drumul 0.512 — pare un bolovan de
+		# nisip, nu un animal). Doua runde s-au dus pe remap-ul de sloturi,
+		# care era corect (805 verts pe 11), fiindca defectul era mai jos:
+		# clasa triplanara nici nu ajunge sa citeasca UV-urile.
+		var declared_model: bool = not String(kind.get("model", "")).is_empty()
 		ball.model_tri_class = String(kind.get("tri_class",
-			theme_flag("hazard_class", "")))
-		ball.model_classes = theme_flag("hazard_classes", {})
+			"" if declared_model else theme_flag("hazard_class", "")))
+		ball.model_classes = (kind.get("classes", {}) if declared_model
+			else theme_flag("hazard_classes", {}))
 		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
 		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
 		# causeway nu se da peste cap.

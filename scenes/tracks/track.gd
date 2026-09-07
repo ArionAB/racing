@@ -519,7 +519,12 @@ static func themes() -> Dictionary:
 			# Runda 1b: D49C9A a sarit peste tinta — (241,137,96) v 0.95 roz;
 			# referinta (185,109,66) v 0.73. Raportul iesire/tenta pe canale cu
 			# D49C9A: 1.14 / 0.88 / 0.62 => tinta A27C6A, rotunjita mai cald.
-			"dirt_road_tint": Color.html("AC8A86"),
+			# Runda 1 (POI B, masurat pe cadrul de joc la 0.06, caseta din banda
+			# apropiata): AC8A86 dadea (197,116,77), referinta in aceeasi caseta
+			# (221,136,83) — acelasi TON (H 20 fata de 23, S 0.61 fata de 0.62),
+			# doar mai inchis cu ~11 %. Se ridica valoarea, nu nuanta: canalele
+			# tentei x 221/197, 136/116, 83/77 = 1.12 / 1.17 / 1.08.
+			"dirt_road_tint": Color.html("C09E90"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,

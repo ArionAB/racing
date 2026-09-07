@@ -248,8 +248,20 @@ func _near_row() -> void:
 			if _rng.randf() < 0.25 + 0.75 * dens:
 				var h := _rng.randf_range(11.0, 13.5) if mdl == "fig_tree" \
 					else _rng.randf_range(9.0, 11.0)
+				# FEREASTRA DE SOARE (runda 2). Masurat pe D_r2_hero_b.png:
+				# carosabilul in sectiunea deasa citea (29,14,16), de 6,5 ori
+				# mai intunecat decat in referinta (189,115,74) — coroanele de
+				# 11 m puse la 4 m de muchie se ating PESTE drum si nu mai lasa
+				# nicio pata de soare. Ce rezolva ambiguitatea „e tema sau e
+				# padurea" e aceeasi pista: la 0.33, unde coroanele se ridica,
+				# drumul iese rosu-laterit corect FARA nicio schimbare de tema
+				# (D_r2_ctx33.png). Deci parghia e locala, nu `ambient_energy`.
+				# Un smochin din trei ramane aproape (coroana peste drum),
+				# restul se retrag la 7.5-10 m: masa de frunzis ramane continua
+				# din masina, dar intre coroane raman ferestre de soare.
+				var lat: float = _rng.randf_range(4.0, 6.5) if k % 3 == 0 else _rng.randf_range(7.5, 10.0)
 				_place(mdl, "smochin" if mdl == "fig_tree" else "febra", f, sgn,
-					_rng.randf_range(4.0, 6.5), _rng.randf_range(0.0, TAU),
+					lat, _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, h), "trunk")
 			f += _step(7.0 + _rng.randf_range(-1.2, 1.2))
 			k += 1
@@ -406,21 +418,27 @@ func _mist() -> void:
 	#     regula de 3 m in afara muchiei nu mai e necesara si peticele pot
 	#     veni APROAPE de banda, unde referinta le are.
 	# Densitatea ramane din SUPRAPUNERE la alpha mic: un strat singur trebuie
-	# sa fie aproape invizibil.
+	# sa fie aproape invizibil. Prima captura cu panze CULCATE (D_r2_hero.png,
+	# alpha 0.055-0.075, lateral 8-14 m) a aratat efectul invers al celui din
+	# runda 1: culcata, o panza se vede pe TOATA lungimea ei in perspectiva —
+	# suprafata acoperita pe ecran e de cateva ori mai mare decat a uneia
+	# verticale, deci acelasi alpha ineaca primul plan intr-un film laptos.
+	# De aici alpha 0.038-0.045 si lateralele impinse la 11+ m: ceata trece
+	# printre trunchiuri, nu peste bot.
 	var f := F_DENSE_IN - _step(10.0)
 	while f < F_DENSE_OUT + _step(10.0):
 		for sgn: float in [-1.0, 1.0]:
 			# Randul de la baza trunchiurilor, langa banda.
-			_mist_at(f, sgn, _rng.randf_range(8.0, 14.0), 9,
-				Vector2(9.0, 6.0), Vector2(12.0, 17.0), 0.075,
+			_mist_at(f, sgn, _rng.randf_range(11.0, 16.0), 7,
+				Vector2(8.0, 5.0), Vector2(10.0, 15.0), 0.038,
 				Vector2(0.25, 0.8))
 			# Al doilea, decalat cu ~8 m si mai in adanc: suprapunerea face voalul.
-			_mist_at(f + _step(8.0), sgn, _rng.randf_range(15.0, 24.0), 8,
-				Vector2(11.0, 7.0), Vector2(13.0, 19.0), 0.065,
+			_mist_at(f + _step(8.0), sgn, _rng.randf_range(17.0, 26.0), 7,
+				Vector2(10.0, 6.0), Vector2(12.0, 18.0), 0.042,
 				Vector2(0.3, 0.9))
 			if _rng.randf() < 0.6:
-				_mist_at(f + _step(4.0), sgn, _rng.randf_range(28.0, 42.0), 7,
-					Vector2(13.0, 8.0), Vector2(14.0, 20.0), 0.055,
+				_mist_at(f + _step(4.0), sgn, _rng.randf_range(30.0, 44.0), 6,
+					Vector2(12.0, 7.0), Vector2(13.0, 19.0), 0.045,
 					Vector2(0.3, 0.9))
 		f += _step(16.0)
 

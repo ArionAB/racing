@@ -454,6 +454,13 @@ static func themes() -> Dictionary:
 			"ambient_color": Color.html("8E8598"),
 			"ambient_energy": 0.22,
 			"shadows": true,
+			# Umbra nu e neagra: 0.72 lasa 28% din lumina soarelui sa treaca
+			# prin ea. Masurat pe carosabilul din POI D (padurea de ceata):
+			# raportul umbra/soare urca de la 0.24 spre 0.46, care e cifra
+			# masurata pe bara de referinta. Zonele INSORITE raman
+			# neschimbate, deci contrastul savanei (POI A/B) nu se spala —
+			# ceea ce ridicarea ambientului ar fi facut.
+			"shadow_opacity": 0.62,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
 			"fog_depth": true,
@@ -3735,6 +3742,19 @@ func _build_environment() -> void:
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
 		sun.shadow_blur = 1.4
+		# ADANCIMEA UMBREI, ca steag de tema (POI D, runda 4). Implicit
+		# `shadow_opacity` e 1.0, deci un punct la umbra primeste NUMAI
+		# ambientul. Masurat pe carosabilul din padurea Serengeti: umbra 31,
+		# soare 126, raport 0.24 — in bara de referinta raportul e 0.46 (umbra
+		# 85 / soare 184). Nu e o problema de cat de MULTA umbra e (baleierea
+		# continua da 81% insorit in medie), ci de cat de ADANCA: in padure
+		# umbra e umpluta de lumina reflectata de frunzisul insorit, pe care
+		# ambientul global constant nu o modeleaza. Ridicarea ambientului ar
+		# spala si zonele insorite si ar strica raportul soare/ambient al temei
+		# (memoria `geometria-fara-lumina-e-invizibila`); `shadow_opacity`
+		# atinge NUMAI pixelii aflati la umbra. Implicitul ramane 1.0, deci
+		# nicio tema fara steag nu se schimba.
+		sun.shadow_opacity = float(theme_flag("shadow_opacity", 1.0))
 		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
 		# acne pe fetele orientate spre soare.
 		sun.shadow_bias = float(theme_flag("shadow_bias", 0.06))

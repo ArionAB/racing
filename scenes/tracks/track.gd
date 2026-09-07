@@ -499,6 +499,48 @@ static func themes() -> Dictionary:
 			"lagoon_band_out": 6.0,
 			"lagoon_inner": 1.5,
 			"lagoon_rim": 8.0,
+			# VADUL MARA (POI C): raul de namol, separat de lacul de soda.
+			# Sea e o singura panza cu o singura culoare, dar shader-ul stie
+			# doua rauri (`water_split`, mecanismul Chongqing): dreapta de
+			# despartire e perpendiculara pe Z, la z = 60. La NORD de ea
+			# (z > 60, adica vadul de la z = 165) curge raul B, brun; la sud
+			# ramane lacul de soda laptos al flamingilor (z = -26..-110).
+			# Fara asta, vadul mostenea spuma alb-verzuie a lacului si umplea
+			# tot cadrul cu mint (masurat pe C_r1_stare.png).
+			# Sloturile apei: NU recif tropical. Vadul e namol, iar lacul de
+			# soda e tot o apa opaca, nu o laguna — deci ambele sloturi ies
+			# din familia calda. RUST_METAL (#91461E) trecut prin water_desat
+			# devine gri-maroniu de pamant ud (reteta Yangtze, § water_tint);
+			# ASPHALT_EDGE tine adancul putin mai inchis.
+			"water_shallow_slot": Palette.RUST_METAL,
+			"water_deep_slot": Palette.ASPHALT_EDGE,
+			# Masurat pe C_r1_apa5.png: cu desat 0.58 / dim 0.86 apa iesea
+			# (189,174,151) S0.20 V0.74 — cea mai DESCHISA si cea mai
+			# spalacita suprafata din cadru, langa drum S0.59 V0.64 si iarba
+			# S0.61 V0.72. In referinta raul e mai INCHIS decat malurile si
+			# clar brun. Tinta: S ~0.35, V ~0.45.
+			"water_desat": 0.30,
+			"water_mul": Color(1.0, 0.93, 0.82),
+			"water_dim": 0.52,
+			"water_split": 1.0,
+			"water_split_dir": Vector2(0.0, 1.0),
+			"water_split_offset": 60.0,
+			"water_split_soft": 30.0,
+			"water_split_meander": 18.0,
+			"water_split_wave": 180.0,
+			# Namolul: RUST_METAL (#91461E) desaturat pana in registrul de
+			# pamant ud. Reteta e cea a Yangtze-ului (§ water_tint): slot cald,
+			# desaturare mare, tenta aproape neutra — namolul e gri-maroniu,
+			# nu ocru aprins.
+			"water_b_mul": Color(1.0, 0.94, 0.86),
+			"water_b_desat": 0.34,
+			"water_b_gain": 0.90,
+			"water_b_glint": 0.7,
+			"water_b_glint_cut": 0.72,
+			# Spuma alba e ce facea lacul sa citeasca mint: toata panza de la
+			# vad e sub SEA_FOAM_DEPTH (0.6 m), deci era spuma pe tot.
+			"water_foam": 0.0,
+			"water_foam_mix": 0.92,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -5539,7 +5581,14 @@ func _sea_color(d: float) -> Color:
 	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
-	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(reef, 0.35)
+	# Cat de mult trage spuma spre culoarea apei mici. 0.35 (implicitul, adica
+	# toate temele de pana la Serengeti) e sparger de val pe recif: alb rupt cu
+	# turcoaz. Un VAD de savana n-are spuma — apa de 30 cm peste namol e tot
+	# namol, doar mai deschis fiindca se vede fundul. Cu 0.35 pe Serengeti,
+	# toata panza vadului (adancime sub SEA_FOAM_DEPTH, deci NUMAI banda de
+	# spuma) iesea alb-gri: un cearsaf peste rau, masurat pe C_r1_apa4.png.
+	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(reef,
+		clampf(float(theme_flag("water_foam_mix", 0.35)), 0.0, 1.0))
 	var c: Color
 	if d <= 0.0:
 		c = foam # varf uscat al unei celule de mal

@@ -67,7 +67,7 @@ custom_theme = "serengeti"
 custom_half_width = 6.5
 custom_road_surface = "dirt"
 custom_gate_model = "none"
-custom_sea_level_offset = -16.26
+custom_sea_level_offset = -16.84
 custom_wet_ranges = Array[Vector2]([Vector2(0.136, 0.152)])
 custom_ravines = Array[Vector4]([Vector4(0.358, 0.486, 45, 1)])
 custom_cornice_ravines = Array[int]([0])
@@ -75,7 +75,7 @@ custom_ravine_floors = Array[Vector2]([Vector2(0, 2.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 175)])
 custom_width_segments = Array[Vector3]([Vector3(0.985, 0.04, 9.0), Vector3(0.04, 0.121, 10.0), Vector3(0.121, 0.173, 8.0), Vector3(0.196, 0.362, 6.5), Vector3(0.362, 0.482, 7.0), Vector3(0.482, 0.715, 6.0), Vector3(0.715, 0.853, 9.0), Vector3(0.853, 0.887, 7.0)])
 custom_lagoon = Array[Vector2]([Vector2(52.0, -68.0), Vector2(48.0, -52.1), Vector2(36.8, -38.6), Vector2(19.9, -29.6), Vector2(0.0, -26.4), Vector2(-19.9, -29.6), Vector2(-36.8, -38.6), Vector2(-48.0, -52.1), Vector2(-52.0, -68.0), Vector2(-48.0, -83.9), Vector2(-36.8, -97.4), Vector2(-19.9, -106.4), Vector2(-0.0, -109.6), Vector2(19.9, -106.4), Vector2(36.8, -97.4), Vector2(48.0, -83.9)])
-sea_level_offset = -16.26
+sea_level_offset = -16.84
 lagoon_depth = 19.3
 terrain_pad_m = 200.0
 

@@ -451,8 +451,8 @@ static func themes() -> Dictionary:
 			"sun_energy": 1.70,
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
-			"ambient_color": Color.html("8E8598"),
-			"ambient_energy": 0.22,
+			"ambient_color": Color.html("A8968E"),
+			"ambient_energy": 0.16,
 			"shadows": true,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
@@ -858,7 +858,7 @@ static func themes() -> Dictionary:
 			# Culoarea e bounce-ul de pe nisip coraligen: mai deschis si mai putin
 			# auriu decat cel de desert (#E2B77A), fiindca si nisipul e mai alb.
 			"ambient_color": Color.html("EADFC8"),
-			"ambient_energy": 0.30,
+			"ambient_energy": 0.22,
 			# Ceata de adancime, ca la desert: marea se pierde in orizont la o
 			# distanta cunoscuta, iar camera poate taia fix acolo.
 			"fog_depth": true,

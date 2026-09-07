@@ -3559,6 +3559,8 @@ func rebuild() -> void:
 		# Un canal se trece ori pe pod, ori din saritura — nu amandoua. Cu
 		# `jump: true` golul ramane gol si primeste in schimb o trambulina pe
 		# toata latimea (vezi _build_channel_kicker).
+		if bool(ch.get("ford", false)):
+			continue # vad: drumul intra in apa, deci n-are ce trece peste el
 		if bool(ch.get("jump", false)):
 			_build_channel_kicker(ch)
 		else:
@@ -5244,8 +5246,12 @@ func _build_channel_water() -> void:
 	var mat := _water_material()
 	for ch in _channels:
 		var drop := float(ch.get("water_y_drop", -1.0))
-		if drop < 0.0:
+		var is_ford := bool(ch.get("ford", false))
+		if drop < 0.0 and not is_ford:
 			continue # canal la nivelul marii — il acopera grila de tarm
+		# La VAD dropul e negativ INTENTIONAT (apa peste asfalt), deci suprafata
+		# proprie e obligatorie: grila de tarm sta cu mult mai jos si n-ar
+		# acoperi albia.
 		var o: Vector3 = ch["origin"]
 		var along: Vector3 = ch["along"]
 		var across: Vector3 = ch["across"]
@@ -5311,6 +5317,8 @@ func _build_channel_water() -> void:
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi)
+		if bool(ch.get("ford", false)):
+			continue # din vad nu cade nimeni: drumul trece prin el
 		_build_channel_respawn(ch, water_y)
 
 
@@ -5321,6 +5329,12 @@ func _build_channel_water() -> void:
 ## Un parau sapat 18 m cu apa la 15 m are 3 m de apa — si dupa cei 3 m se
 ## normalizeaza culoarea, altfel gradientul de adancime nu se vede deloc.
 func _channel_water_depth(ch: Dictionary) -> float:
+	if bool(ch.get("ford", false)):
+		# La vad stratul de pe banda e cel care da scara culorii: cativa
+		# decimetri. Cu `depth - drop` (3.4 + 0.3) apa de 30 cm ar intra in
+		# gradient ca 8 % — adica spuma alba pe tot vadul.
+		return maxf(TrackSideSampler.FORD_BED_SINK
+			+ float(ch.get("water_over_road", 0.3)), 0.3)
 	return maxf(float(ch["depth"]) - float(ch.get("water_y_drop", 0.0)), 0.5)
 
 
@@ -7325,6 +7339,8 @@ func _resolve_channels() -> void:
 		ch["depth"] = float(spec.get("depth", 13.0))
 		ch["reach"] = float(spec.get("reach", 200.0))
 		ch["fade"] = float(spec.get("fade", 60.0))
+		ch["ford"] = bool(spec.get("ford", false))
+		ch["water_over_road"] = float(spec.get("water_over_road", 0.3))
 		_channels.append(ch)
 
 
@@ -7355,6 +7371,9 @@ func _road_gap(i: int, j: int = -1) -> bool:
 	if _channels.is_empty():
 		return false
 	for ch in _channels:
+		# Vadul sapa albia, dar NU rupe carosabilul: se trece PRIN apa.
+		if bool(ch.get("ford", false)):
+			continue
 		var span: int = 2 * int(ch["steps"])
 		var near_i: int = ch["near"]
 		if ((i - near_i) % n + n) % n < span:

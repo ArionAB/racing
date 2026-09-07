@@ -84,6 +84,17 @@ func _ready() -> void:
 			print("HIPPO %s pos(%.1f,%.2f,%.1f) frac %.4f lateral %.2f m (half %.1f) sosea y %.2f" % [
 				h.name, h.global_position.x, h.global_position.y, h.global_position.z,
 				float(q) / float(n), lat, _track.width_at_index(q), p2.y])
+	# Apa vadului: exista mesh-ul, si unde sta fata de pat si de asfalt?
+	for c in _track.get_children():
+		var nm := String(c.name)
+		if nm.begins_with("ChannelWater") or nm.begins_with("Sea"):
+			var mi := c as MeshInstance3D
+			if mi != null:
+				print("APA %s  AABB %s  vizibil %s" % [nm, mi.get_aabb(), mi.visible])
+	for ch in _track._channels:
+		print("CANAL %s ford=%s origin=%s depth=%.2f drop=%s steps=%d gap=%.1f" % [
+			ch.get("label"), ch.get("ford"), ch["origin"], ch["depth"],
+			ch.get("water_y_drop"), int(ch["steps"]), ch["gap"]])
 	get_tree().quit(0)
 
 

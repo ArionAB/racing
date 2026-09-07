@@ -814,8 +814,20 @@ const SLOT_REMAP_BY_MODEL := {
 	# lumina calda si vazut de la 20 m, citeste ca banda roz din referinta —
 	# iar picioarele (4, ROCK_DARK maro) pe SAND_LIGHT, ca sa nu ancoreze
 	# pasarea intr-un maro care o face bat infipt in crusta.
-	"flamingo": {31: Palette.CAR_RED, 4: Palette.SAND_LIGHT},
-	"flamingo_wings": {31: Palette.CAR_RED, 4: Palette.SAND_LIGHT},
+	# Atlasul nu are roz: masurate toate cele 31 de sloturi, niciunul nu are hue
+	# 300-30 cu saturatie sub 0.55. Incercarea evidenta — penajul (slotul 31,
+	# 73% din vertecsi) pe CONCRETE 8 palid, ca sa citeasca roz spalat de
+	# soarele cald — a fost FACUTA si respinsa pe captura (G_r3_flam.png):
+	# pasarile au disparut complet, fiindca malul e crusta de soda ALBA si o
+	# masa palida pe fundal palid nu are de ce sa se vada. In referinta rozul
+	# se citeste tocmai fiindca e in CONTRAST cu albul din jur.
+	# Deci penajul ramane pe CAR_RED (14) — la 20-40 m, spalat de lumina calda,
+	# e cea mai apropiata impresie de roz pe care o poate da atlasul — si ce
+	# se schimba e RUPEREA masei: slotul 20 (14%, y=[0.82,1.23], capul si gatul)
+	# trece pe CONCRETE palid, ca silueta sa aiba gat deschis peste corp rosu
+	# in loc sa fie o singura bila rosie. Picioarele raman scoase din maro.
+	"flamingo": {31: Palette.CAR_RED, 20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
+	"flamingo_wings": {31: Palette.CAR_RED, 20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)

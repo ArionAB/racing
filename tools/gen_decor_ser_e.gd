@@ -298,34 +298,41 @@ func _flank() -> void:
 				continue
 			var t: float = clampf(drop / 40.0, 0.0, 1.0) # 0 sus pe buza, 1 jos
 			var r := _rng.randf()
-			# Fereastra spre lac, masurata din OCHI (10 m peste banda), nu
-			# lateral: piesele de la 10-19 m lateral dar 14-43 m mai jos sunt
-			# la 20-45 m de camera si exact in coltul din dreapta jos. Sub 34 m
-			# de ochi punem doar piatra si euphorbia — iarba aurie si granit,
-			# ca in referinta; verdele incepe dincolo.
 			var eye_d := sqrt(jl * jl + pow(p.y + 10.0 - g, 2.0))
-			if eye_d < 34.0:
-				r = minf(r, 0.55)
+			# COASTA E DE PIATRA SI IARBA, NU PADURE. Cifra care a decis:
+			# in sfertul din dreapta-jos referinta are 2,8 % verde, iar noi
+			# aveam 23,0 % (masurat E_r1/E_r2 fata de ref_E). Nu era o
+			# problema de scara a coroanelor, ci de PROPORTIE: 324 de piese
+			# de flanc din care majoritatea verzi fac o panza continua, si
+			# panza aia ascunde exact crusta si inelul de flamingi pentru
+			# care exista POI-ul. Runda 1 a incercat sa taie verdele sub 34 m
+			# de ochi si runda 2 sub 52 m, dar CLAMP-ul `r = min(r, 0.55)`
+			# cadea in intervalul euphorbiei (0.42-0.62), iar euphorbia e un
+			# candelabru VERDE — fereastra nu taia nimic.
+			#
+			# Acum coasta se compune ca in referinta: coame de granit gri care
+			# ies din iarba aurie, si verde doar ca pete rare, tot mai jos.
+			var green_p: float = 0.06 + 0.30 * t # 6 % pe buza, 36 % pe fund
+			if eye_d < 60.0 or _in_lake_window(Vector3(qq.x, g, qq.z)):
+				green_p = 0.0 # in fata ochiului si peste lac: doar piatra
 			var model := ""
 			var scl := 1.0
-			if r < 0.42 - 0.22 * t:
+			if r < green_p:
+				if t > 0.55 and _rng.randf() < 0.6:
+					model = "fever"
+					scl = _rng.randf_range(0.7, 1.05)
+				else:
+					model = ["acacia_a", "acacia_a", "acacia_b"][_rng.randi_range(0, 2)]
+					scl = _rng.randf_range(0.30, 0.45) + 0.35 * t
+			elif r < green_p + 0.42 - 0.14 * t:
 				# Coama de granit: sus, mare; jos, mai rara.
 				model = ["boulder_c", "boulder_b", "boulder_b"][_rng.randi_range(0, 2)]
 				scl = _rng.randf_range(1.0, 2.4)
-			elif r < 0.62:
-				model = "euphorbia"
-				scl = _rng.randf_range(0.7, 1.3)
 			else:
-				# Verdele coastei: acacii mici sus, fever_tree jos (padurea Lerai).
-				if t > 0.55 and _rng.randf() < 0.55:
-					model = "fever"
-					scl = _rng.randf_range(0.75, 1.15)
-				else:
-					model = ["acacia_a", "acacia_a", "acacia_b"][_rng.randi_range(0, 2)]
-					# Sus, langa buza, coroanele raman MICI: altfel umplu coltul
-					# din dreapta cadrului si ascund exact lacul pentru care
-					# exista POI-ul (masurat pe E_r1_hero.png).
-					scl = _rng.randf_range(0.30, 0.45) + 0.45 * t
+				# Restul e IARBA GOALA: nu asezam nimic. Referinta are panta
+				# de iarba aurie intre coamele de granit, nu tufe peste tot.
+				lat += step
+				continue
 			_raw(model, "Flanc", Vector3(qq.x, g, qq.z), _rng.randf_range(0.0, TAU), scl,
 				"trunk" if model != "boulder_c" and model != "boulder_b" else "hull")
 			placed += 1
@@ -384,7 +391,7 @@ func _crater_floor() -> void:
 	# Padurea: inel intre raza 56 si raza 105 fata de centrul lacului, DAR
 	# numai pe jumatatea dinspre drum (z < -55), ca sa nu punem copaci in
 	# jumatatea pe care camera n-o vede niciodata din bucata asta.
-	while kept < 150 and tries < 4000:
+	while kept < 70 and tries < 4000:
 		tries += 1
 		var ang := _rng.randf_range(0.0, TAU)
 		var rad := _rng.randf_range(54.0, 108.0)
@@ -397,8 +404,14 @@ func _crater_floor() -> void:
 			continue # in apa, pe crusta uda, sau deja pe coasta
 		# Densitatea creste spre lac (referinta: verde des la baza coastei).
 		var t: float = clampf((108.0 - rad) / 54.0, 0.0, 1.0)
-		if _rng.randf() > 0.35 + 0.5 * t:
+		# Rarita in runda 2: padurea Lerai e in referinta un pluton de
+		# copaci inchisi la culoare pe fundul craterului, nu o panza verde.
+		# 150 de copaci + 324 de piese de flanc dadeau 23 % verde in sfertul
+		# in care referinta are 2,8 %.
+		if _rng.randf() > 0.18 + 0.30 * t:
 			continue
+		if _in_lake_window(Vector3(px, g, pz)):
+			continue # padurea nu are voie sa acopere lacul din cadrul erou
 		var model: String = "fever" if _rng.randf() < 0.7 else "acacia_a"
 		_raw(model, "Lerai", Vector3(px, g, pz), _rng.randf_range(0.0, TAU),
 			_rng.randf_range(0.8, 1.2), "trunk")
@@ -406,17 +419,22 @@ func _crater_floor() -> void:
 	print("; padurea Lerai: %d copaci din %d incercari" % [kept, tries])
 	# Elefantii pe crusta, langa apa, in doua grupuri (referinta: sirag, nu
 	# obiecte izolate).
-	var groups := [[-34.0, -118.0], [16.0, -124.0], [46.0, -104.0]]
+	# Elefantii stau pe ARCUL DINSPRE DRUM al crustei (z sub centrul lacului),
+	# fiindca doar el intra in cadrul de la 0.40; grupurile de la z = -104..
+	# -124 din runda 1 erau pe malul opus, adica in afara frustumului. La
+	# 90-120 m un elefant la scara 1 are ~9 px inaltime: il ducem la 1.6-1.9,
+	# ca in referinta, unde elefantii sunt siluete clare pe crusta alba.
+	var groups := [[-30.0, -104.0], [8.0, -110.0], [40.0, -96.0], [-58.0, -88.0]]
 	for gr in groups:
-		var m: int = _rng.randi_range(2, 3)
+		var m: int = _rng.randi_range(2, 4)
 		for e in m:
-			var px := float(gr[0]) + _rng.randf_range(-9.0, 9.0)
-			var pz := float(gr[1]) + _rng.randf_range(-7.0, 7.0)
+			var px := float(gr[0]) + _rng.randf_range(-11.0, 11.0)
+			var pz := float(gr[1]) + _rng.randf_range(-8.0, 8.0)
 			var g := _sol_real(px, pz, true)
-			if g < sea - 0.2 or g > sea + 6.0:
+			if g < sea - 0.3 or g > sea + 4.0:
 				continue
 			_raw("elephant", "Elefant", Vector3(px, maxf(g, sea), pz),
-				_rng.randf_range(0.0, TAU), _rng.randf_range(0.9, 1.1), "none")
+				_rng.randf_range(0.0, TAU), _rng.randf_range(1.6, 1.9), "none")
 
 
 ## Peretele opus al craterului, ca silueta in ceata la ~190 m de banda.
@@ -450,29 +468,45 @@ func _flamingos() -> void:
 		cz += p.y
 	cx /= float(poly.size())
 	cz /= float(poly.size())
+	var sea := _sea_y()
+	# ARCUL VIZIBIL. Lacul e la 83-135 m de ochi, iar camera de joc are 68 gr
+	# vertical = ~97 gr orizontal, deci +-48 gr. Masurat (tools/_pE.gd): la
+	# frac 0.40 malul dinspre drum e la azimut +31 gr (in cadru), centrul la
+	# +47 (pe muchie) si malul opus la +75 (AFARA). La 0.42-0.47 tot lacul e
+	# la +83..+137 gr, adica in spatele umarului drept. Deci exista UN singur
+	# cadru care poate arata gimmickul, cel de la 0.40, si in el se vede doar
+	# arcul dinspre sosea. Tot ce se aseaza pe restul conturului e munca
+	# nevazuta (memoria `decor-nevazut-se-numara-pe-obiect`): aici il numim
+	# explicit si il taiem la un tiv rar.
+	# Arcul dinspre drum = z < cz (drumul e la z ~ -166, lacul la z ~ -68).
+	_crust(poly, cx, cz, sea)
 	var tries := 0
 	var kept := 0
 	var kept_w := 0
-	var sea := _sea_y()
-	while kept + kept_w < 320 and tries < 12000:
+	# Tinta masurata pe referinta: rozul e 8,35 % din sfertul din dreapta-jos,
+	# la noi era 0,73 %. Inelul nu se ingroasa cu ce nu se vede, deci crestem
+	# NUMARUL pe arcul vizibil si SCARA (la 85 m un flamingo de 1,2 m are ~7
+	# px; masa il face banda, nu individul).
+	while kept + kept_w < 900 and tries < 40000:
 		tries += 1
 		var e := _rng.randi_range(0, poly.size() - 1)
 		var a := poly[e]
 		var b := poly[(e + 1) % poly.size()]
 		var q := a.lerp(b, _rng.randf())
 		var out_dir := (q - Vector2(cx, cz)).normalized()
-		# Banda, nu linie: de la 6 m in apa pana la 5 m pe crusta.
-		q += out_dir * _rng.randf_range(-6.0, 5.0)
-		# Jumatatea dinspre sosea (z mai mic decat centrul) primeste de patru
-		# ori mai multe pasari; restul conturului ramane populat, dar rar.
-		if q.y > cz and _rng.randf() > 0.25:
+		# Banda LATA: 9 m in apa mica, 9 m pe crusta. In referinta inelul roz
+		# are grosime, nu e un contur.
+		q += out_dir * _rng.randf_range(-9.0, 9.0)
+		# Arcul dinspre drum ia 9 din 10 pasari; restul conturului ramane
+		# populat rar, ca lacul sa nu para chel daca alt POI il priveste.
+		if q.y > cz and _rng.randf() > 0.10:
 			continue
 		var g := _sol_real(q.x, q.y, true)
-		if g < sea - 1.0 or g > sea + 1.4:
+		if g < sea - 1.2 or g > sea + 1.6:
 			continue
 		var y := maxf(g, sea)
 		var yaw := _rng.randf_range(0.0, TAU)
-		if _rng.randf() < 0.16:
+		if _rng.randf() < 0.14:
 			_wing_pos.append(Vector3(q.x, y, q.y))
 			_wing_yaw.append(yaw)
 			kept_w += 1
@@ -484,8 +518,65 @@ func _flamingos() -> void:
 	for fp in _flam_pos:
 		if fp.z < cz:
 			near += 1
-	print("; flamingi: %d in picioare (%d pe malul dinspre drum) + %d cu aripi, din %d incercari"
+	print("; flamingi: %d in picioare (%d pe arcul dinspre drum) + %d cu aripi, din %d incercari"
 		% [kept, near, kept_w, tries])
+
+
+## CRUSTA DE SARE: placi plate albe (slot 22 FOAM_WHITE) pe bordura lacului.
+##
+## De ce e livrabilul cel mai mare al rundei: masurat pe sfertul din
+## dreapta-jos al cadrului, referinta are 20,8 % crusta alba, 13,9 % apa si
+## 8,4 % roz; noi aveam 0,2 % crusta, 24,7 % apa si 0,7 % roz — adica un
+## bazin turcoaz care atinge direct verdele. Crusta e ce da inelului roz un
+## fundal pe care sa se citeasca, si e cea mai luminoasa suprafata din cadru.
+func _crust(poly: PackedVector2Array, cx: float, cz: float, sea: float) -> void:
+	var pos: PackedVector3Array = []
+	var yaw: PackedFloat32Array = []
+	var tries := 0
+	while pos.size() < 420 and tries < 20000:
+		tries += 1
+		var e := _rng.randi_range(0, poly.size() - 1)
+		var a := poly[e]
+		var b := poly[(e + 1) % poly.size()]
+		var q := a.lerp(b, _rng.randf())
+		var out_dir := (q - Vector2(cx, cz)).normalized()
+		# De la 4 m in apa (crusta se vede prin apa mica) pana la 26 m pe mal.
+		q += out_dir * _rng.randf_range(-4.0, 26.0)
+		if q.y > cz and _rng.randf() > 0.12:
+			continue
+		var g := _sol_real(q.x, q.y, true)
+		# Crusta urca pana la 3 m peste apa; mai sus incepe coasta verde.
+		if g < sea - 1.5 or g > sea + 3.0:
+			continue
+		# INALTIMEA E CE A OMORAT PRIMA VERSIUNE. O placa PLATA de 14 m
+		# diametru asezata la +0,12 m pe un mal in panta intra cu totul in
+		# teren: A/B-ul crusta on/off a dat 0,04 % din cadru, adica invizibila,
+		# desi 193 din 420 de placi se proiectau in cadru. Ridicarea se ia din
+		# panta REALA sub placa: cat coboara terenul pe raza ei, atat trebuie
+		# sa pluteasca marginea ca sa nu se ingroape.
+		var rr := 7.0 * 1.1
+		var lo := g
+		for da in [0.0, TAU / 3.0, TAU * 2.0 / 3.0]:
+			lo = minf(lo, _sol_real(q.x + cos(da) * rr, q.y + sin(da) * rr, true))
+		var lift: float = clampf(g - lo, 0.0, 2.5) + 0.15
+		pos.append(Vector3(q.x, maxf(g, sea - 0.35) + lift, q.y))
+		yaw.append(_rng.randf_range(0.0, TAU))
+	if pos.is_empty():
+		print("; ATENTIE: crusta goala")
+		return
+	_out.append('[node name="E_CrustaSare" type="MultiMeshInstance3D" parent="%s"]' % ZONE)
+	_out.append('script = ExtResource("flock")')
+	_out.append("disc_slot = 22")
+	_out.append("disc_radius = 7.0")
+	_out.append("scale_min = 0.75")
+	_out.append("scale_max = 1.5")
+	_out.append("positions = %s" % var_to_str(pos).replace("
+", ""))
+	_out.append("yaws = %s" % var_to_str(yaw).replace("
+", ""))
+	_out.append("")
+	_n += 1
+	print("; crusta de sare: %d placi din %d incercari" % [pos.size(), tries])
 
 
 func _sea_y() -> float:
@@ -506,6 +597,8 @@ func _emit_flock() -> void:
 		_out.append('[node name="%s" type="MultiMeshInstance3D" parent="%s"]' % [spec[0], ZONE])
 		_out.append('script = ExtResource("flock")')
 		_out.append('model = ExtResource("%s")' % spec[1])
+		_out.append("scale_min = 1.5")
+		_out.append("scale_max = 2.1")
 		_out.append("positions = %s" % var_to_str(pos).replace("\n", ""))
 		_out.append("yaws = %s" % var_to_str(spec[3]).replace("\n", ""))
 		_out.append("")
@@ -563,6 +656,43 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 	if mode != "" and mode != "hull":
 		_out.append('metadata/coliziune = "%s"' % mode)
 	_out.append("")
+
+
+## FEREASTRA LACULUI, in COORDONATE DE ECRAN. Trei runde au incercat sa taie
+## verdele din coltul dreapta-jos cu praguri pe distanta (34 m, apoi 52, apoi
+## 60) si de fiecare data a ramas o panza: piesele care umplu coltul sunt la
+## 59-118 m, adica DINCOLO de orice prag rezonabil, dar jos in cadru fiindca
+## stau pe coasta, sub linia de vedere. Distanta nu spune unde cade un obiect
+## pe ecran; proiectia spune.
+##
+## Aici proiectam pozitia prin exact camera de joc de la `frac` (10 m sus,
+## 12,5 m in spate, FOV 68, 16:9) si spunem daca pica in dreptunghiul pe care
+## referinta il tine pentru lac: x > 0,72 si y > 0,34 din cadru.
+func _in_lake_window(pos: Vector3) -> bool:
+	var n := _track.baked.size()
+	var i := int(HERO_FRAC * float(n)) % n
+	var p := _track.baked[i]
+	var fwd := (_track.baked[(i + 8) % n] - p).normalized()
+	var eye := p - fwd * 12.5 + Vector3(0, 10, 0)
+	var right := Vector3(-fwd.z, 0.0, fwd.x)
+	var target := p + fwd * 14.0 + Vector3(0, 1.2, 0)
+	var look := (target - eye).normalized()
+	var cam_r := look.cross(Vector3.UP).normalized()
+	var cam_u := cam_r.cross(look).normalized()
+	var d := pos - eye
+	var z := d.dot(look)
+	if z <= 0.5:
+		return false
+	var ty := tan(deg_to_rad(68.0) * 0.5)
+	var tx := ty * (16.0 / 9.0)
+	var sx := (d.dot(cam_r) / z) / tx # -1..1, + = dreapta
+	var sy := (d.dot(cam_u) / z) / ty # -1..1, + = sus
+	var fx := 0.5 + 0.5 * sx
+	var fy := 0.5 - 0.5 * sy
+	return fx > 0.72 and fy > 0.34
+
+
+const HERO_FRAC := 0.40
 
 
 ## Adevarat daca piesa ar sta peste ORICE felie de sosea (nu doar cea din care

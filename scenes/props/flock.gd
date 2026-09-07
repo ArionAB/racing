@@ -23,12 +23,28 @@ class_name FlockProp
 @export var scale_min: float = 0.9
 @export var scale_max: float = 1.15
 @export var seed_value: int = 20260907
+## CRUSTA: cand `model` e null si `disc_slot >= 0`, mesh-ul nu vine dintr-un
+## GLB ci e o PLACA plata de 12 laturi asezata pe slotul cerut din atlas.
+##
+## De ce exista: masurata pe referinta, bordura alba de sare a lacului Magadi
+## ocupa 20,8 % din sfertul din dreapta-jos al cadrului, iar la noi 0,2 %.
+## Fara ea inelul de flamingi sta pe turcoaz si nu se citeste (roz pe alb =
+## banda; roz pe apa = zgomot). Terenul nu o poate da — `_lagoon_mix` sapa
+## doar inaltimea, nu vopseste — si o textura noua ar fi un material in plus,
+## de aceea crusta e geometrie pe un slot care exista deja (22 FOAM_WHITE).
+## Placile se suprapun deliberat: 12 laturi x cateva sute = o suprafata, nu
+## niste discuri.
+@export var disc_slot: int = -1
+## Raza placii, in metri (scalata apoi de scale_min/scale_max).
+@export var disc_radius: float = 6.0
 
 
 func _ready() -> void:
-	if model == null or positions.is_empty():
+	if positions.is_empty():
 		return
-	var mesh := _mesh_of(model)
+	if model == null and disc_slot < 0:
+		return
+	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius) if model == null and disc_slot >= 0 else _mesh_of(model)
 	if mesh == null:
 		push_warning("FlockProp: %s nu are mesh" % model.resource_path)
 		return
@@ -78,3 +94,25 @@ static func _mesh_of(ps: PackedScene) -> Mesh:
 			mesh = out
 	root.free()
 	return mesh
+
+
+## Placa plata de crusta: 12 laturi, un singur triunghi-evantai, toate
+## varfurile pe UV-ul slotului cerut. Normala in sus, deci primeste soarele
+## plin — crusta de sare din referinta e cea mai LUMINOASA suprafata din cadru,
+## nu doar cea mai putin saturata.
+static func _disc_mesh(slot: int, radius: float) -> Mesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var uv := Palette.uv(slot)
+	var segs := 12
+	for i in segs:
+		var a0 := TAU * float(i) / float(segs)
+		var a1 := TAU * float(i + 1) / float(segs)
+		for v in [Vector3.ZERO,
+				Vector3(cos(a1) * radius, 0.0, sin(a1) * radius),
+				Vector3(cos(a0) * radius, 0.0, sin(a0) * radius)]:
+			st.set_uv(uv)
+			st.set_normal(Vector3.UP)
+			st.set_color(Color.WHITE)
+			st.add_vertex(v)
+	return st.commit()

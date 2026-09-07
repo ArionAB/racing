@@ -142,6 +142,7 @@ func _ready() -> void:
 		_far_row()
 		_granite()
 		_edges()
+		_mist()
 		_write()
 	get_tree().quit(0)
 
@@ -220,17 +221,13 @@ func _understory() -> void:
 	while f < F_OUT:
 		var dens := _density(f)
 		var sgn := -1.0 if k % 2 == 0 else 1.0
-		if _rng.randf() < 0.35 + 0.65 * dens:
+		# Rar: referinta n-are candelabre, are numai masa verde a coroanelor.
+		# Cateva pe umar dau scara la nivelul geamului, mai multe fac cactusi.
+		if _rng.randf() < 0.15 + 0.35 * dens:
 			_place("euphorbia", "euforbie", f, sgn,
-				_rng.randf_range(0.8, 2.5), _rng.randf_range(0.0, TAU),
-				_scale_for("euphorbia", _rng.randf_range(3.2, 4.6)), "trunk")
-		# A doua euphorbia pe cealalta parte, mai rar: umarul sa nu fie gol pe
-		# nicio parte mai mult de ~14 m.
-		if dens > 0.5 and _rng.randf() < 0.5:
-			_place("euphorbia", "euforbie", f + _step(3.0), -sgn,
-				_rng.randf_range(1.0, 3.0), _rng.randf_range(0.0, TAU),
+				_rng.randf_range(1.5, 3.0), _rng.randf_range(0.0, TAU),
 				_scale_for("euphorbia", _rng.randf_range(3.0, 4.2)), "trunk")
-		f += _step(7.0)
+		f += _step(9.0)
 		k += 1
 
 
@@ -254,7 +251,7 @@ func _near_row() -> void:
 				_place(mdl, "smochin" if mdl == "fig_tree" else "febra", f, sgn,
 					_rng.randf_range(4.0, 6.5), _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, h), "trunk")
-			f += _step(9.0 + _rng.randf_range(-1.5, 1.5))
+			f += _step(7.0 + _rng.randf_range(-1.2, 1.2))
 			k += 1
 
 
@@ -274,13 +271,13 @@ func _second_row() -> void:
 				_place(mdl, "smochinSpate" if mdl == "fig_tree" else "febraSpate",
 					f, sgn, _rng.randf_range(9.0, 16.0), _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, h), "trunk")
-			f += _step(11.0 + _rng.randf_range(-2.0, 2.0))
+			f += _step(8.5 + _rng.randf_range(-1.5, 1.5))
 			k += 1
 
 
-## FUNDALUL: la 20-36 m de muchie, mai rar. Umple golurile dintre trunchiuri
-## pe interiorul S-urilor, unde camera priveste PESTE primul rand; in ceata
-## culoarului ies ca siluete verde-gri.
+## FUNDALUL: la 20-36 m de muchie, la ~10 m pas. Umple golurile dintre
+## trunchiuri pe interiorul S-urilor, unde camera priveste PESTE primul rand;
+## in ceata culoarului ies ca siluete verde-gri.
 func _far_row() -> void:
 	for sgn: float in [-1.0, 1.0]:
 		var f := F_IN + _step(5.0 if sgn < 0.0 else 12.0)
@@ -288,41 +285,70 @@ func _far_row() -> void:
 		while f < F_OUT:
 			var dens := _density(f)
 			if _rng.randf() < 0.2 + 0.8 * dens:
-				var mdl := "fig_tree" if k % 3 != 2 else "fever_tree"
+				var mdl := "fig_tree" if k % 4 != 3 else "fever_tree"
 				var h := _rng.randf_range(13.0, 17.0) if mdl == "fig_tree" \
 					else _rng.randf_range(10.0, 12.0)
 				_place(mdl, "smochinFund" if mdl == "fig_tree" else "febraFund",
 					f, sgn, _rng.randf_range(20.0, 36.0), _rng.randf_range(0.0, TAU),
 					_scale_for(mdl, h), "trunk")
-			f += _step(16.0 + _rng.randf_range(-3.0, 3.0))
+			f += _step(10.0 + _rng.randf_range(-2.0, 2.0))
+			k += 1
+	_backdrop()
+
+
+## ZIDUL DE FUND: smochinii cei mai INALTI (16-19 m) la 38-60 m de muchie, la
+## ~12 m pas. Masurat pe captura v1 (D_r1_a026.png, D_r1_a0.253.png): la
+## iesirea din fiecare S camera priveste PESTE randurile de la 4-36 m si vede
+## CERUL violet intre coroane — padurea „se termina" la 40 m. In referinta nu
+## exista orizont in padure: fiecare gol dintre coroane e alta coroana, mai
+## departe si mai in ceata. Inaltimea mare e ca sa se vada PESTE randurile
+## din fata (plafonul 10 + 0.093*d la 50 m = 14.6 m, deci varful e taiat —
+## bine: intra sub marginea de sus a cadrului ca frunzis, nu ca silueta).
+func _backdrop() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var f := F_IN + _step(3.0 if sgn < 0.0 else 9.0)
+		var k := 0
+		while f < F_OUT + _step(20.0):
+			var dens := _density(clampf(f, F_IN, F_OUT - 0.001))
+			if _rng.randf() < 0.3 + 0.7 * dens:
+				var h := _rng.randf_range(16.0, 19.0)
+				_place("fig_tree", "smochinZid", f, sgn,
+					_rng.randf_range(38.0, 60.0), _rng.randf_range(0.0, TAU),
+					_scale_for("fig_tree", h), "trunk")
+			f += _step(12.0 + _rng.randf_range(-2.0, 2.0))
 			k += 1
 
 
 ## GRANITUL: grupuri de bolovani pe partea care URCA (masurata: solul la 25 m
 ## lateral mai sus decat pe cealalta parte; la egalitate, dreapta, ca in
-## referinta), la 3-11 m de muchie, ca „versantul de granit" sa aiba piatra
-## la vedere intre trunchiuri. Cate 3-5 bucati la ~30 m, cu marimi diferite
+## referinta), la 5-14 m de muchie, ca „versantul de granit" sa aiba piatra
+## la vedere intre trunchiuri. Cate 3-4 bucati la ~45 m, cu marimi diferite
 ## (1.5-7 m), cel mare in spate, cei mici spre drum — gradientul de contact
-## (patru-defecte-de-diorama, 3).
+## (patru-defecte-de-diorama, 3). Mai rar si mai in spate decat in v1:
+## clasa `granite` iese ALBA sub soarele cald (D_r1_a026.png — bolovanii
+## citeau ca marmura/sare la 3 m de drum), deci pana la o tenta mai gri a
+## clasei (partajata, decizia lead-ului) piatra sta intre trunchiuri, nu pe
+## umar.
 func _granite() -> void:
-	var f := F_IN + _step(14.0)
+	var f := F_IN + _step(20.0)
 	var g := 0
 	while f < F_OUT - _step(10.0):
 		var dens := _density(f)
 		if dens > 0.4:
 			var sgn := _uphill_side(f)
-			var cnt := 3 + (g % 3)
+			var cnt := 3 + (g % 2)
 			for j in cnt:
 				var mdl := "kopje_boulder_c" if j == 0 else (
 					"kopje_boulder_b" if j % 2 == 1 else "kopje_boulder_a")
-				var gap := 6.0 + _rng.randf_range(0.0, 5.0) if j == 0 					else _rng.randf_range(2.5, 7.0)
+				var gap := 9.0 + _rng.randf_range(0.0, 5.0) if j == 0 \
+					else _rng.randf_range(5.0, 11.0)
 				var h := _rng.randf_range(5.0, 7.5) if j == 0 else (
 					_rng.randf_range(2.5, 4.0) if j % 2 == 1
-					else _rng.randf_range(1.2, 2.2))
-				_place(mdl, "granit", f + _step(_rng.randf_range(-6.0, 6.0)),
+					else _rng.randf_range(1.4, 2.2))
+				_place(mdl, "granit", f + _step(_rng.randf_range(-7.0, 7.0)),
 					sgn, gap, _rng.randf_range(0.0, TAU), _scale_for(mdl, h),
 					"hull")
-		f += _step(30.0 + _rng.randf_range(-6.0, 6.0))
+		f += _step(45.0 + _rng.randf_range(-6.0, 6.0))
 		g += 1
 
 
@@ -355,6 +381,48 @@ func _edges() -> void:
 		_place("fever_tree", "febraIesire", f_out,
 			1.0 if j % 2 == 0 else -1.0, _rng.randf_range(3.0, 9.0),
 			_rng.randf_range(0.0, TAU), _scale_for("fever_tree", 9.5), "trunk")
+
+
+## CEATA JOASA (MistPatch, scenes/props/mist_patch.gd): petice de billboard-uri
+## moi intre trunchiuri, la 9-16 m de ax pe partea DINSPRE care priveste
+## camera la iesirea din fiecare S (interiorul virajului urmator), plus unul
+## mai departe (22-30 m), mai rar, pentru adancime. Nu pe carosabil: un
+## billboard de 8 m peste banda ar acoperi drumul de la 10 m. In captura
+## fara masina e singura ceata care se vede — culoarul de ceata al
+## Environment-ului lucreaza doar cu jucatorul inauntru.
+func _mist() -> void:
+	var f := F_DENSE_IN
+	var k := 0
+	while f < F_DENSE_OUT:
+		var sgn := -1.0 if k % 2 == 0 else 1.0
+		_mist_at(f, sgn, _rng.randf_range(9.0, 16.0), 8,
+			Vector2(8.0, 5.0), Vector2(5.0, 9.0), 0.30)
+		if k % 2 == 1:
+			_mist_at(f + _step(6.0), -sgn, _rng.randf_range(22.0, 30.0), 6,
+				Vector2(12.0, 7.0), Vector2(8.0, 14.0), 0.26)
+		f += _step(15.0)
+		k += 1
+
+
+func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,
+		foot: Vector2, sz: Vector2, alpha: float) -> void:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var p := _track.baked[i]
+	var s := _track._side_at(i) * side_sign
+	var q := p + s * lateral
+	var g := _sol_real(q.x, q.z)
+	_n += 1
+	_out.append('[node name="ceata%d" type="Node3D" parent="%s"]' % [_n, ZONE])
+	_out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %f, %f, %f)"
+		% [q.x, g, q.z])
+	_out.append('script = ExtResource("mist")')
+	_out.append("count = %d" % cnt)
+	_out.append("footprint = Vector2(%.1f, %.1f)" % [foot.x, foot.y])
+	_out.append("size = Vector2(%.1f, %.1f)" % [sz.x, sz.y])
+	_out.append("tint = Color(0.86, 0.88, 0.87, %.2f)" % alpha)
+	_out.append("seed = %d" % (1000 + _n))
+	_out.append("")
 
 
 # ------------------------------------------------------------------ asezarea

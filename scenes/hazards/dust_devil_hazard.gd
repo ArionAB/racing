@@ -64,10 +64,28 @@ func _ready() -> void:
 	_cone.mesh = mesh
 	_cone.position = Vector3.UP * height * 0.5
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.78, 0.66, 0.46, 0.55)
+	mat.albedo_color = Color(0.78, 0.66, 0.46, 1.0)
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	# ALPHA PE INALTIME, nu alpha uniform. Cu 0.55 peste tot, conul are o
+	# MUCHIE de poligon la fel de tare ca un obiect solid: pe captura de joc
+	# (G_r3_context.png) vartejul citea ca un triunghi de hartie decupat, nu ca
+	# o coloana de praf — aceeasi capcana ca la praful de sub roti (memoria
+	# `particule-muchia-nu-numarul`): ce se vede nu e numarul, e marginea.
+	# Gradientul face praful DES jos (unde ridica nisipul) si il stinge complet
+	# sus, deci silueta nu se mai termina intr-o linie dreapta.
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
+	grad.colors = PackedColorArray([
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.72), Color(1, 1, 1, 0.0)])
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.width = 4
+	tex.height = 64
+	tex.fill_from = Vector2(0.0, 1.0)
+	tex.fill_to = Vector2(0.0, 0.0)
+	mat.albedo_texture = tex
 	_cone.material_override = mat
 	_cone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_cone)

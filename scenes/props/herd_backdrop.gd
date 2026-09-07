@@ -36,6 +36,8 @@ extends Node3D
 @export var near_side: bool = false
 ## Zebre la suta (turma de pe drum are 0.2).
 @export_range(0.0, 1.0, 0.05) var zebra_ratio: float = 0.2
+## Ca la HerdHazard: cat din saturatia blanii se stinge spre gri.
+@export_range(0.0, 1.0, 0.05) var herd_desat: float = 0.0
 ## Cati dintre ei galopeaza pe loc (shader-ul turmei); restul pasc, nemiscati.
 @export_range(0.0, 1.0, 0.05) var gallop_ratio: float = 0.0
 ## Toti cu fata in directia curgerii (+Z local), cu abaterea asta in radiani.
@@ -78,6 +80,7 @@ func _build() -> void:
 	# Materialul turmei (atlas + galop in vertex shader), luat de la un
 	# HerdHazard temporar ca sa nu existe doua copii ale shader-ului.
 	var donor := HerdHazard.new()
+	donor.herd_desat = herd_desat
 	var mat: ShaderMaterial = donor._herd_material(true)
 	donor.free()
 

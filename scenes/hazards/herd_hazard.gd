@@ -107,6 +107,8 @@ const ZEBRA_GLB := "res://assets/models/serengeti/animals/zebra.glb"
 
 @export_group("Aspect")
 @export_range(0.0, 1.0, 0.05) var zebra_ratio: float = 0.2
+## Cat din saturatia blanii se stinge spre gri (0 = atlasul brut).
+@export_range(0.0, 1.0, 0.05) var herd_desat: float = 0.0
 ## Sol plat implicit; pe pista se da un Callable(Vector3) -> float.
 var ground_y_at: Callable = Callable()
 ## Masinile urmarite (sondele le dau explicit); gol = cele din zona de prindere.
@@ -459,6 +461,11 @@ uniform float gallop_hz = 2.4;
 uniform float leg_top = 0.55;
 uniform float swing = 0.32;
 uniform float bob = 0.09;
+// Desaturarea blanii spre luminanta. Slotul de atlas al gnu-ului e un brun
+// portocaliu (S 0.78 masurat pe cadrul de joc), in timp ce gnu-ul referintei
+// e gri-brun (S 0.49) — diferenta e de SATURATIE, nu de nuanta (H 24 fata de
+// 29) si nici de valoare (V 0.38 fata de 0.34). 0 = neatins.
+uniform float desat = 0.0;
 void vertex() {
 	float ph = INSTANCE_CUSTOM.r * 6.2831853;
 	float still = INSTANCE_CUSTOM.g;
@@ -470,7 +477,9 @@ void vertex() {
 }
 void fragment() {
 	vec3 atlas = texture(albedo_atlas, UV).rgb;
-	ALBEDO = mix(COLOR.rgb, atlas * COLOR.rgb, use_atlas);
+	vec3 base = mix(COLOR.rgb, atlas * COLOR.rgb, use_atlas);
+	float lum = dot(base, vec3(0.299, 0.587, 0.114));
+	ALBEDO = mix(base, vec3(lum), desat);
 	ROUGHNESS = 0.9;
 	SPECULAR = 0.15;
 }
@@ -479,6 +488,7 @@ void fragment() {
 	mat.shader = sh
 	mat.set_shader_parameter("albedo_atlas", load(Palette.ATLAS_PATH))
 	mat.set_shader_parameter("use_atlas", 1.0 if from_kit else 0.0)
+	mat.set_shader_parameter("desat", herd_desat)
 	return mat
 
 

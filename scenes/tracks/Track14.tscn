@@ -425,19 +425,19 @@ transform = Transform3D(-0.483429, 0, 0.028411, 0, 0.484263, 0, -0.028411, 0, -0
 transform = Transform3D(-0.131525, 0, -0.477910, 0, 0.495678, 0, 0.477910, 0, -0.131525, -87.716553, -1.359528, 154.636826)
 
 [node name="Crocodil91" parent="DecorManual/ZoneC_VadulMara" instance=ExtResource("s_crocodile")]
-transform = Transform3D(0.953339, 0, -0.584497, 0, 1.118253, 0, 0.584497, 0, 0.953339, -46.566093, -0.821869, 151.500000)
+transform = Transform3D(0.953339, 0, -0.584497, 0, 1.118253, 0, 0.584497, 0, 0.953339, -46.566093, -1.180000, 151.500000)
 
 [node name="Crocodil92" parent="DecorManual/ZoneC_VadulMara" instance=ExtResource("s_crocodile")]
-transform = Transform3D(0.743375, 0, 0.692525, 0, 1.015971, 0, -0.692525, 0, 0.743375, -55.550461, -1.183929, 179.500000)
+transform = Transform3D(0.743375, 0, 0.692525, 0, 1.015971, 0, -0.692525, 0, 0.743375, -55.550461, -1.180000, 179.500000)
 
 [node name="Crocodil93" parent="DecorManual/ZoneC_VadulMara" instance=ExtResource("s_crocodile")]
-transform = Transform3D(0.934246, 0, 0.341026, 0, 0.994542, 0, -0.341026, 0, 0.934246, -83.514473, -1.396393, 152.126022)
+transform = Transform3D(0.934246, 0, 0.341026, 0, 0.994542, 0, -0.341026, 0, 0.934246, -83.514473, -1.180000, 152.126022)
 
 [node name="Crocodil94" parent="DecorManual/ZoneC_VadulMara" instance=ExtResource("s_crocodile")]
-transform = Transform3D(0.696731, 0, -0.793112, 0, 1.055680, 0, 0.793112, 0, 0.696731, -91.530357, -1.323456, 176.420670)
+transform = Transform3D(0.696731, 0, -0.793112, 0, 1.055680, 0, 0.793112, 0, 0.696731, -91.530357, -1.180000, 176.420670)
 
 [node name="Crocodil95" parent="DecorManual/ZoneC_VadulMara" instance=ExtResource("s_crocodile")]
-transform = Transform3D(1.109446, 0, -0.167676, 0, 1.122046, 0, 0.167676, 0, 1.109446, -62.176544, -1.329376, 182.052811)
+transform = Transform3D(1.109446, 0, -0.167676, 0, 1.122046, 0, 0.167676, 0, 1.109446, -62.176544, -1.180000, 182.052811)
 
 [node name="KopjeLeu96" parent="DecorManual/ZoneC_VadulMara" instance=ExtResource("s_kopje_camp")]
 transform = Transform3D(-0.631058, 0, -1.079012, 0, 1.250000, 0, 1.079012, 0, -0.631058, -37.360001, 4.685547, 127.000000)

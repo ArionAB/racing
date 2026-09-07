@@ -95,6 +95,28 @@ func _ready() -> void:
 		print("CANAL %s ford=%s origin=%s depth=%.2f drop=%s steps=%d gap=%.1f" % [
 			ch.get("label"), ch.get("ford"), ch["origin"], ch["depth"],
 			ch.get("water_y_drop"), int(ch["steps"]), ch["gap"]])
+	# Cota terenului exact sub crocodili si sub bolovanii de mal: apa vadului e
+	# la -1.08, deci se vede daca stau pe uscat, la linia apei sau ingropati.
+	# Unde e LINIA APEI pe fiecare mal: se cauta z-ul la care terenul trece prin
+	# cota apei, pe cateva coloane de x. Acolo se aseaza crocodilii (jumatate in
+	# apa), nu pe o cota ghicita.
+	var water_y := -1.08
+	for cx in [-100.0, -92.0, -84.0, -76.0, -62.0, -55.0, -47.0, -40.0] as Array[float]:
+		var hits: Array[String] = []
+		var zz := 100.0
+		var prev := s.ground_y(cx, zz)
+		while zz <= 240.0:
+			var cur := s.ground_y(cx, zz)
+			if (prev - water_y) * (cur - water_y) < 0.0:
+				hits.append("%.1f" % zz)
+			prev = cur
+			zz += 1.0
+		print("LINIA APEI x=%.0f : z = %s" % [cx, ", ".join(hits)])
+	for nd in _track.find_children("Crocodil*", "Node3D", true, false):
+		var gp: Vector3 = nd.global_position
+		var gy := s.ground_y(gp.x, gp.z)
+		print("CROC %s pos(%.1f,%.2f,%.1f) teren %.2f  fata de apa(-1.08) %+.2f" % [
+			nd.name, gp.x, gp.y, gp.z, gy, gp.y - (-1.08)])
 	get_tree().quit(0)
 
 

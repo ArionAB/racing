@@ -60,7 +60,7 @@ const F_IN := 0.196
 const F_OUT := 0.339
 ## Pana unde e DEASA (intrarea si iesirea se raresc).
 const F_DENSE_IN := 0.214
-const F_DENSE_OUT := 0.328
+const F_DENSE_OUT := 0.334
 
 ## id-urile ext_resource din Track14.tscn (handoff §1).
 const RES := {
@@ -406,9 +406,14 @@ func _mist() -> void:
 		for sgn: float in [-1.0, 1.0]:
 			_mist_at(f, sgn, _rng.randf_range(18.0, 26.0), 9,
 				Vector2(11.0, 7.0), Vector2(12.0, 18.0), 0.065)
+			# In PERECHE, decalat cu ~8 m: un petic singur, vazut din lateral,
+			# citeste ca un obiect gri (D_r1_ctx33.png, stanga jos) — n-are cu
+			# ce sa se suprapuna. Doua care se intrepatrund fac un voal.
+			_mist_at(f + _step(8.0), sgn, _rng.randf_range(16.0, 24.0), 8,
+				Vector2(12.0, 8.0), Vector2(12.0, 18.0), 0.055)
 			if _rng.randf() < 0.6:
-				_mist_at(f + _step(7.0), sgn, _rng.randf_range(30.0, 46.0), 7,
-					Vector2(14.0, 9.0), Vector2(14.0, 22.0), 0.055)
+				_mist_at(f + _step(4.0), sgn, _rng.randf_range(30.0, 46.0), 7,
+					Vector2(14.0, 9.0), Vector2(14.0, 22.0), 0.05)
 		f += _step(16.0)
 
 

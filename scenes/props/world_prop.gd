@@ -790,9 +790,21 @@ const SLOT_REMAP_BY_MODEL := {
 	# care ramane gri e un slot RECE. Pielea pe PAINTED_METAL (11, gri-albastrui,
 	# masurat sat 0.09 pe hipopotam), fildesii raman pe FOAM_WHITE 22 ca sa
 	# citeasca in contrast.
+	# DOUA sloturi, nu unul: criticul rundei 2 a cerut ecart de valoare INTRE
+	# corp / cap / urechi / fildesi, nu doar "sa nu fie crem". Pe .glb slotul 29
+	# (56% din vertecsi) e masa corpului, slotul 2 (34%) capul, urechile si
+	# picioarele, iar 22 (10%, z=[-3.21,-1.92]) sunt fildesii — masurat cu o
+	# sonda pe UV-uri, nu ghicit. Corpul pe VOLCANIC_BLACK (20, #55535A, gri
+	# rece inchis) ca sa stea SUB luminanta drumului, capul si picioarele pe
+	# ASPHALT (5, #4B4B4D) gri NEUTRU inchis, fildesii raman pe FOAM_WHITE 22.
+	# PAINTED_METAL 11 a fost incercat pe 2 si respins pe captura: e albastru
+	# destul cat urechile si labele sa iasa bleu-plastic langa corpul gri
+	# (masurat sat 0.12 dar citit ca petice colorate) — vezi G_r3_ele2.png.
+	# Griurile NEUTRE ale .glb-ului ies crem sub soarele cald (1.0,0.90,0.72) +
+	# saturatia 1.18 din post; doar sloturile RECI raman gri.
 	"elephant": {
-		2: Palette.PAINTED_METAL,
-		29: Palette.PAINTED_METAL,
+		2: Palette.ASPHALT,
+		29: Palette.VOLCANIC_BLACK,
 	},
 	# Flamingii: pe .glb stau pe [4, 20, 31] — dar atlasul are 31 de sloturi
 	# (HEX 0..30), deci slotul 31 nu exista si iesea MAGENTA fluorescent

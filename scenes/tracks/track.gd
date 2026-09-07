@@ -470,7 +470,14 @@ static func themes() -> Dictionary:
 			# referinta umbra pe iarba e la 1,3x sub lumina. 0.32 pastreaza
 			# raportul soare/ambient la 5,3 (>= 3,5, memoria
 			# `geometria-fara-lumina-e-invizibila`).
-			"ambient_energy": 0.68,
+			# Runda 6: 0.68 lasa raportul soare/ambient la 2.87, SUB pragul de
+			# 3.5 pe care il cere chiar comentariul de mai sus (memoria
+			# `geometria-fara-lumina-e-invizibila`). Cu 0.50 raportul urca la
+			# 3.90 si coroanele acaciilor capata diferenta de valoare intre
+			# fata de sus si cea de dedesubt — exact ce lipsea in runda 5.
+			# Podeaua de umbra ramane deasupra negrului fiindca ambient_color
+			# e bounce-ul cald de savana, nu violetul cerului.
+			"ambient_energy": 0.50,
 			"shadows": true,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
@@ -524,7 +531,17 @@ static func themes() -> Dictionary:
 			# (221,136,83) — acelasi TON (H 20 fata de 23, S 0.61 fata de 0.62),
 			# doar mai inchis cu ~11 %. Se ridica valoarea, nu nuanta: canalele
 			# tentei x 221/197, 136/116, 83/77 = 1.12 / 1.17 / 1.08.
-			"dirt_road_tint": Color.html("C09E90"),
+			# POI B (runda 6): tenta de mai sus fusese calibrata la lumina
+			# rundei 1 (sun 1.70 / ambient 0.32). Runda 3 a urcat lumina
+			# (1.95 / 0.68) si NU a remasurat drumul: masurat pe cadrul de joc
+			# la 0.06, banda apropiata iesea (243,175,110) V 0.95 sat 0.55 —
+			# roz spalat, cu interval tonal p90/p10 = 1.26, adica PLAT.
+			# Referinta in aceeasi caseta: (196,109,67) V 0.77 sat 0.66,
+			# p90/p10 = 2.62. De-aia criticul rundei 5 n-a vazut nicio umbra pe
+			# carosabil: umbrele CADEAU acolo, dar suprafata era saturata in
+			# alb si nu mai avea loc sa se intunece. Raport iesire/tinta pe
+			# canale: 0.81 / 0.62 / 0.61 aplicat pe (192,158,144) => 9B6258.
+			"dirt_road_tint": Color.html("9A7870"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,
@@ -3765,10 +3782,17 @@ func _build_environment() -> void:
 	if theme_shadows:
 		sun.directional_shadow_mode = \
 			DirectionalLight3D.SHADOW_ORTHOGONAL
-		sun.directional_shadow_max_distance = SHADOW_DISTANCE
+		# Cheia de tema `shadow_distance` era SCRISA in trei teme si nu se
+		# citea niciodata (POI B, runda 6): valoarea folosita era constanta
+		# SHADOW_DISTANCE. Pe Serengeti casterii care conteaza — acaciile de pe
+		# umeri si randul apropiat al turmei — stau la 8-45 m, deci 110 ii
+		# acopera; cheia ramane totusi onorata, ca sa nu mai minta comentariul
+		# din tema (memoria `justificarea-din-comentariu-se-verifica`).
+		sun.directional_shadow_max_distance = float(
+			theme_flag("shadow_distance", SHADOW_DISTANCE))
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
-		sun.shadow_blur = 1.4
+		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))
 		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
 		# acne pe fetele orientate spre soare.
 		sun.shadow_bias = float(theme_flag("shadow_bias", 0.06))

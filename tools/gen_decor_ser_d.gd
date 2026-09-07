@@ -124,7 +124,22 @@ const HEIGHT := {
 ## si se curata doar fasia din MIJLOC a benzii (0.35 din semi-latime): pe
 ## umeri raman coroane care arunca umbra inauntru, si lumina ajunge in pete,
 ## nu ca un gol de padure.
-const SUN_GATE_EVERY := 34.0  # un culoar la ~34 m de traseu
+## RUNDA 4. Criticul a aratat ca ProbePete esantiona noua fractii care cadeau
+## FIX pe porti, deci raporta 120.6 pe un drum care intre porti era 20.8. Pasul
+## coboara la 20 m — latimea umbrei unei coroane de 19 m la 35 grade elevatie
+## este 27 m, deci la 34 m ramanea intre porti o bucata pe care nicio raza nu
+## avea cum sa ajunga. Verificarea nu mai e pe fractii alese, ci pe baleierea
+## continua din tools/ProbeSunSweep.tscn (pas 2.5 m, fereastra glisanta 20 m).
+## RUNDA 4, a doua masuratoare. Pasul de 20 m a fost incercat si MASURAT: cu
+## el, 49 de coroane refuzate, iar la fractia hero jumatatea din dreapta a
+## cadrului ramane iarba deschisa cu trunchiuri goale — padurea dispare, exact
+## rasturnarea de care se ferea runda 3 la poarta de 15 m. Cauza reala a
+## „tunelului negru" nu era cat de multa umbra e (baleierea continua da 81%
+## insorit in medie), ci cat de ADANCA: `shadow_opacity` implicit 1.0 lasa in
+## umbra numai ambientul. Odata reparata adancimea (steag de tema, 0.62),
+## culoarul de soare nu mai are ce sa repare si poate fi RAR — atat cat sa
+## pastreze cateva pete pe drum, nu ca sa deschida padurea.
+const SUN_GATE_EVERY := 48.0  # un culoar la ~48 m de traseu
 const SUN_GATE_LEN := 9.0     # lungimea (pe traseu) a golului luminat
 const SUN_GATE_HALF := 0.35   # cat din semi-latimea benzii se degajeaza
 ## Cat de departe pe raza de soare se pastreaza culoarul: 19 m inaltime / tan(35)
@@ -365,11 +380,18 @@ func _backdrop() -> void:
 		while f < F_OUT + _step(20.0):
 			var dens := _density(clampf(f, F_IN, F_OUT - 0.001))
 			if _rng.randf() < 0.3 + 0.7 * dens:
-				var h := _rng.randf_range(16.0, 19.0)
+				# RUNDA 4: masurat pe D_r4_op062.png, cerul violet ocupa inca
+				# 1.5% din cadru (4.6% din treimea de sus), in referinta 0.0%.
+				# Gaura e PESTE coridorul drumului, la 60-120 m in fata:
+				# plafonul frustumului acolo e 10 + 0.093*d = 15.6-21.2 m, iar
+				# zidul de 16-19 m de la 38-60 m lateral nu urca destul ca sa
+				# taie banda de cer. Deci mai inalt (19-23 m) si putin mai
+				# aproape, cu pasul strans de la 12 la 9 m.
+				var h := _rng.randf_range(19.0, 23.0)
 				_place("fig_tree", "smochinZid", f, sgn,
-					_rng.randf_range(38.0, 60.0), _rng.randf_range(0.0, TAU),
+					_rng.randf_range(34.0, 56.0), _rng.randf_range(0.0, TAU),
 					_scale_for("fig_tree", h), "trunk")
-			f += _step(12.0 + _rng.randf_range(-2.0, 2.0))
+			f += _step(9.0 + _rng.randf_range(-1.5, 1.5))
 			k += 1
 
 
@@ -523,7 +545,7 @@ func _build_gates() -> void:
 	while f < F_OUT:
 		var overlap := false
 		for g in _gates:
-			if f > g.x - _step(12.0) and f < g.y + _step(12.0):
+			if f > g.x - _step(7.0) and f < g.y + _step(7.0):
 				overlap = true
 		if not overlap:
 			_gates.append(Vector2(f - _step(SUN_GATE_LEN * 0.5),

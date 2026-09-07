@@ -383,42 +383,50 @@ func _edges() -> void:
 			_rng.randf_range(0.0, TAU), _scale_for("fever_tree", 9.5), "trunk")
 
 
-## CEATA JOASA (MistPatch, scenes/props/mist_patch.gd): petice de billboard-uri
-## moi intre trunchiuri, la 9-16 m de ax pe partea DINSPRE care priveste
-## camera la iesirea din fiecare S (interiorul virajului urmator), plus unul
-## mai departe (22-30 m), mai rar, pentru adancime. Nu pe carosabil: un
-## billboard de 8 m peste banda ar acoperi drumul de la 10 m. In captura
-## fara masina e singura ceata care se vede — culoarul de ceata al
-## Environment-ului lucreaza doar cu jucatorul inauntru.
+## CEATA JOASA (MistPatch, scenes/props/mist_patch.gd): o PATURA de panze
+## culcate pe sol intre trunchiuri, la 8-24 m de ax pe ambele parti, plus un
+## rand mai departe (28-42 m) pentru adancime. In captura fara masina e
+## singura ceata care se vede — culoarul de ceata al Environment-ului
+## lucreaza doar cu jucatorul inauntru.
 func _mist() -> void:
-	# Voalul sta INTRE TRUNCHIURI, nu peste carosabil. Masurat pe D_r1_hero_b:
-	# panze de 11-20 m puse la 8-15 m de ax acopereau drumul pana in botul
-	# masinii (banda are 6.5 m semi-latime, deci o panza de 20 m centrata la
-	# 10 m ajunge la 0 m). Regula: `lateral - size_max/2 >= half + 3`, adica
-	# panza incepe la cel putin 3 m in afara muchiei. De aici lateralele de
-	# 18-26 m si 30-46 m cu panze de 12-18 m.
-	#
-	# Densitatea vine din SUPRAPUNERE la alpha mic (0.05-0.07): la 0.30 fiecare
-	# panza citea ca un ghemotoc alb de vata (D_r1_hero.png), la 0.085 pe patru
-	# benzi a inecat cadrul. Un singur strat trebuie sa fie aproape invizibil.
+	# RUNDA 2 — schimbare de METODA, nu de marime. Rundele 1 au reglat alpha
+	# (0.30 -> 0.085 -> 0.05) si distanta laterala, adica axa gresita:
+	# materialul avea `billboard_mode = BILLBOARD_ENABLED`, deci fiecare panza
+	# se intorcea VERTICAL spre camera si se citea ca tep alb atarnat de
+	# coroane / placa gri in picioare. Acum panzele sunt ORIZONTALE
+	# (mist_patch.gd, `BILLBOARD_DISABLED` + quad culcat, inclinare <= 10 deg),
+	# deci:
+	#   - inaltimea unei panze = size * sin(tilt_efectiv); cele doua inclinari
+	#     mici se compun, deci la `tilt_deg` 6 unghiul efectiv urca pana la
+	#     ~8.5 deg si o panza de 20 m are ~3.0 m gabarit vertical, cu centrul
+	#     la 0.25-0.9 m => y_top - origine <= 2.4 m (masurat: ProbeMist);
+	#   - raportul latime/inaltime >= 4 pe TOATE cele 711 panze (masurat);
+	#   - o panza culcata NU mai acopera drumul chiar daca ii trece pe
+	#     deasupra la 1 m (o vezi in perspectiva, ca o ceata rasa), deci
+	#     regula de 3 m in afara muchiei nu mai e necesara si peticele pot
+	#     veni APROAPE de banda, unde referinta le are.
+	# Densitatea ramane din SUPRAPUNERE la alpha mic: un strat singur trebuie
+	# sa fie aproape invizibil.
 	var f := F_DENSE_IN - _step(10.0)
 	while f < F_DENSE_OUT + _step(10.0):
 		for sgn: float in [-1.0, 1.0]:
-			_mist_at(f, sgn, _rng.randf_range(18.0, 26.0), 9,
-				Vector2(11.0, 7.0), Vector2(12.0, 18.0), 0.065)
-			# In PERECHE, decalat cu ~8 m: un petic singur, vazut din lateral,
-			# citeste ca un obiect gri (D_r1_ctx33.png, stanga jos) — n-are cu
-			# ce sa se suprapuna. Doua care se intrepatrund fac un voal.
-			_mist_at(f + _step(8.0), sgn, _rng.randf_range(16.0, 24.0), 8,
-				Vector2(12.0, 8.0), Vector2(12.0, 18.0), 0.055)
+			# Randul de la baza trunchiurilor, langa banda.
+			_mist_at(f, sgn, _rng.randf_range(8.0, 14.0), 9,
+				Vector2(9.0, 6.0), Vector2(12.0, 17.0), 0.075,
+				Vector2(0.25, 0.8))
+			# Al doilea, decalat cu ~8 m si mai in adanc: suprapunerea face voalul.
+			_mist_at(f + _step(8.0), sgn, _rng.randf_range(15.0, 24.0), 8,
+				Vector2(11.0, 7.0), Vector2(13.0, 19.0), 0.065,
+				Vector2(0.3, 0.9))
 			if _rng.randf() < 0.6:
-				_mist_at(f + _step(4.0), sgn, _rng.randf_range(30.0, 46.0), 7,
-					Vector2(14.0, 9.0), Vector2(14.0, 22.0), 0.05)
+				_mist_at(f + _step(4.0), sgn, _rng.randf_range(28.0, 42.0), 7,
+					Vector2(13.0, 8.0), Vector2(14.0, 20.0), 0.055,
+					Vector2(0.3, 0.9))
 		f += _step(16.0)
 
 
 func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,
-		foot: Vector2, sz: Vector2, alpha: float) -> void:
+		foot: Vector2, sz: Vector2, alpha: float, hgt: Vector2) -> void:
 	var n := _track.baked.size()
 	var i := int(frac * float(n)) % n
 	var p := _track.baked[i]
@@ -434,7 +442,8 @@ func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,
 	_out.append("footprint = Vector2(%.1f, %.1f)" % [foot.x, foot.y])
 	_out.append("size = Vector2(%.1f, %.1f)" % [sz.x, sz.y])
 	_out.append("tint = Color(0.87, 0.89, 0.88, %.3f)" % alpha)
-	_out.append("height = Vector2(0.4, 2.2)")
+	_out.append("height = Vector2(%.1f, %.1f)" % [hgt.x, hgt.y])
+	_out.append("tilt_deg = 6.0")
 	_out.append("seed = %d" % (1000 + _n))
 	_out.append("")
 

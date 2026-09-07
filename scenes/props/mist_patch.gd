@@ -1,26 +1,34 @@
 @tool
 class_name MistPatch
 extends Node3D
-## Petic de CEATA JOASA pentru padurea de ceata (Serengeti, POI D): un pumn de
-## billboard-uri moi, unshaded, cu textura de fum, culcate intre trunchiuri
-## la 0.5-3 m de sol. E ceata care se VEDE in cadru — spre deosebire de
-## `FogCorridorHazard`, care misca ceata de adancime a Environment-ului doar
-## cand jucatorul e inauntru (deci nu apare intr-o captura fara masina si nu
-## sta „intre trunchiuri": ceata de adancime e un voal pe distanta, nu un
-## petic la sol).
+## Petic de CEATA JOASA pentru padurea de ceata (Serengeti, POI D): o
+## PATURA de panze aproape ORIZONTALE, unshaded, cu textura de fum, culcate
+## la 0.3-1.8 m de sol intre trunchiuri. E ceata care se VEDE in cadru —
+## spre deosebire de `FogCorridorHazard`, care misca ceata de adancime a
+## Environment-ului doar cand jucatorul e inauntru.
+##
+## [b]De ce ORIZONTALE (runda 2)[/b]: pana aici materialul avea
+## `billboard_mode = BILLBOARD_ENABLED`. Un billboard se roteste ca sa
+## priveasca spre camera, deci o panza „latita" (scale 1 x 0.42) ramane
+## VERTICALA in ecran: din masina se citeau ca tepi albi atarnand de coroane
+## si ca placi gri stand in picioare intre trunchiuri. Ceata joasa reala e o
+## patura care taie trunchiurile la baza — deci quad-ul se culca pe sol
+## (rotit -90 deg pe X, normala in sus), cu o inclinare mica aleatoare, si NU
+## se mai orienteaza dupa camera. Consecinte masurabile: inaltimea totala a
+## unei panze ajunge `size * sin(tilt)` (sub 1 m la tilt <= 14 deg) in loc de
+## `size * 0.42` (5-8 m), raportul latime/inaltime trece de 4:1 pe toate, iar
+## marginea de sus ramane sub prima ramura.
 ##
 ## [b]Cost[/b]: UN material partajat de toate peticele (static, `_mat`) si UN
 ## draw call per petic (MultiMeshInstance3D). Ce costa pe mobil e
-## overdraw-ul: `count` x quad-uri de `size` m suprapuse. De aia numarul e
-## mic (8 implicit) si peticele se pun unde camera le vede prin trunchiuri,
-## nu pe toata padurea.
+## overdraw-ul: `count` x quad-uri de `size` m suprapuse.
 ##
 ## Fara coliziune, fara umbra, fara scriere in adancime (e gaz). WorldProp nu
 ## il atinge: nu e instanta de .glb.
 
 const TEX_PATH: String = "res://assets/textures/smoke_puff.png"
 
-## Cate billboard-uri in petic.
+## Cate panze in petic.
 @export_range(1, 48) var count: int = 8:
 	set(v):
 		count = v
@@ -30,15 +38,23 @@ const TEX_PATH: String = "res://assets/textures/smoke_puff.png"
 	set(v):
 		footprint = v
 		_rebuild()
-## Latura unui billboard (m): min si max.
+## Latura unei panze (m): min si max. Panza e patrata si CULCATA, deci asta e
+## intinderea ei pe sol, nu inaltimea.
 @export var size: Vector2 = Vector2(6.0, 11.0):
 	set(v):
 		size = v
 		_rebuild()
-## Centrul billboard-ului sta intre cotele astea deasupra originii (m).
-@export var height: Vector2 = Vector2(0.8, 2.6):
+## Centrul panzei sta intre cotele astea deasupra originii (m). Tine-l jos:
+## garda cere `y_top - teren <= 2.5 m`, iar y_top = height.y + size_max*sin(tilt)/2.
+@export var height: Vector2 = Vector2(0.3, 1.4):
 	set(v):
 		height = v
+		_rebuild()
+## Inclinarea maxima fata de orizontala (grade). Peste ~16 deg panza incepe
+## sa se citeasca ca placa in picioare si raportul latime/inaltime scade sub 4.
+@export_range(0.0, 30.0) var tilt_deg: float = 10.0:
+	set(v):
+		tilt_deg = v
 		_rebuild()
 ## Culoarea cetii (alpha = densitatea unui singur strat).
 @export var tint: Color = Color(0.86, 0.88, 0.87, 0.30):
@@ -62,14 +78,39 @@ static func material() -> StandardMaterial3D:
 		_mat.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
 		_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 		_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-		_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-		_mat.billboard_keep_scale = true
+		# NU billboard: panza e culcata pe sol si trebuie sa RAMANA culcata
+		# indiferent de unde priveste camera (vezi antetul clasei).
+		_mat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
 		_mat.vertex_color_use_as_albedo = true
 		_mat.albedo_texture = load(TEX_PATH) as Texture2D
-		# Ceata de adancime a scenei o inghite si pe ea, ca pe orice altceva:
-		# un petic la 150 m nu are voie sa ramana alb pe fundalul violet.
+		# Ceata de adancime a scenei o inghite si pe ea, ca pe orice altceva.
 		_mat.disable_fog = false
 	return _mat
+
+
+## Transformarea unei singure panze. Statica si publica fiindca garda
+## (`tools/probe_mist.gd`) trebuie sa masoare EXACT geometria desenata, nu o
+## reimplementare a ei: scena Track14 nu se poate adauga in arbore in afara
+## unei curse, deci peticele nu-si construiesc MultiMesh-ul acolo si garda le
+## reconstruieste din aceeasi functie.
+static func quad_transform(rng: RandomNumberGenerator, foot: Vector2,
+		sz: Vector2, hgt: Vector2, tmax: float) -> Transform3D:
+	var a := rng.randf_range(0.0, TAU)
+	var r := sqrt(rng.randf())
+	var p := Vector3(cos(a) * r * foot.x,
+		rng.randf_range(hgt.x, hgt.y), sin(a) * r * foot.y)
+	var s := rng.randf_range(sz.x, sz.y)
+	# Panza e alungita pe o axa: o patura, nu un disc. Scara se aplica INTAI,
+	# in spatiul quad-ului (XY), apoi se culca si se roteste — `Basis.scaled`
+	# inmulteste la STANGA, deci dupa rotatie ar intinde axele lumii.
+	var b := Basis.IDENTITY.scaled(Vector3(s, s * rng.randf_range(0.45, 0.8), 1.0))
+	# QuadMesh sta in planul XY cu normala pe +Z; rotit cu -90 deg pe X ajunge
+	# culcat, cu normala in sus.
+	b = Basis(Vector3.RIGHT, -PI * 0.5) * b
+	b = Basis(Vector3.UP, rng.randf_range(0.0, TAU)) * b
+	b = Basis(Vector3.RIGHT, rng.randf_range(-tmax, tmax)) * b
+	b = Basis(Vector3.FORWARD, rng.randf_range(-tmax, tmax)) * b
+	return Transform3D(b, p)
 
 
 func _ready() -> void:
@@ -92,15 +133,9 @@ func _rebuild() -> void:
 	mm.use_colors = true
 	mm.mesh = quad
 	mm.instance_count = count
+	var tmax := deg_to_rad(tilt_deg)
 	for i in count:
-		var a := rng.randf_range(0.0, TAU)
-		var r := sqrt(rng.randf())
-		var p := Vector3(cos(a) * r * footprint.x,
-			rng.randf_range(height.x, height.y), sin(a) * r * footprint.y)
-		var s := rng.randf_range(size.x, size.y)
-		# Latit: ceata joasa e o panza, nu o bila.
-		var b := Basis.IDENTITY.scaled(Vector3(s, s * 0.42, 1.0))
-		mm.set_instance_transform(i, Transform3D(b, p))
+		mm.set_instance_transform(i, quad_transform(rng, footprint, size, height, tmax))
 		var c := tint
 		c.a = tint.a * rng.randf_range(0.7, 1.0)
 		mm.set_instance_color(i, c)

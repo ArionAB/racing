@@ -1310,875 +1310,961 @@ transform = Transform3D(-0.933417, 0, -0.099778, 0, 0.938735, 0, 0.099778, 0, -0
 metadata/coliziune = "trunk"
 
 [node name="ceata298" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -207.114441, 6.447418, 123.213470)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -198.251404, 6.450287, 115.818954)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1298
 
 [node name="ceata299" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -206.929794, 7.134995, 115.578682)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -206.468597, 7.138779, 115.183228)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1299
 
 [node name="ceata300" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174.374237, 7.008240, 95.898041)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -182.142624, 6.453568, 102.379265)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1300
 
 [node name="ceata301" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -178.286865, 8.120193, 91.018593)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -178.800140, 8.030502, 91.458710)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1301
 
 [node name="ceata302" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.675568, 10.694962, 80.692017)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -164.901886, 10.134247, 82.548866)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1302
 
 [node name="ceata303" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.389023, 8.099091, 111.731194)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -208.924118, 8.320984, 104.661705)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1303
 
 [node name="ceata304" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -219.429504, 8.966599, 102.055229)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -219.071426, 8.975159, 101.830765)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1304
 
 [node name="ceata305" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.435989, 10.137894, 82.636604)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.522369, 8.676041, 89.423355)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1305
 
 [node name="ceata306" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.621216, 10.537506, 80.862984)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.120895, 10.453613, 81.176193)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1306
 
 [node name="ceata307" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.944519, 14.021698, 69.227890)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -166.129013, 13.447433, 71.344460)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1307
 
 [node name="ceata308" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -225.373886, 10.286240, 87.085571)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.958450, 10.308975, 85.118469)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1308
 
 [node name="ceata309" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -225.478668, 11.614655, 69.419670)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -225.067337, 11.608490, 69.528908)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1309
 
 [node name="ceata310" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -184.954239, 10.908035, 79.451752)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195.452637, 10.435165, 81.434525)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1310
 
 [node name="ceata311" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -187.986511, 10.828598, 79.376221)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.687668, 10.849823, 79.190018)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1311
 
 [node name="ceata312" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -169.879364, 11.273468, 78.795815)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -172.629669, 11.219482, 78.892326)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1312
 
 [node name="ceata313" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -224.754608, 12.855270, 55.508057)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.733093, 12.370773, 61.643684)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1313
 
 [node name="ceata314" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -213.120010, 14.070709, 47.539909)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.818909, 14.036041, 47.823227)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1314
 
 [node name="ceata315" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -181.362457, 10.262177, 82.074707)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -191.570328, 11.605774, 75.824974)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1315
 
 [node name="ceata316" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.282516, 12.614594, 72.792587)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.996429, 12.755737, 72.120834)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1316
 
 [node name="ceata317" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204.836868, 15.959869, 38.710640)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -198.162415, 14.558548, 47.420929)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1317
 
 [node name="ceata318" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200.139236, 17.298721, 33.995079)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200.034439, 17.265610, 34.129959)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1318
 
 [node name="ceata319" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176.309113, 11.960724, 75.939903)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.457184, 13.989304, 66.611542)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1319
 
 [node name="ceata320" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.068253, 13.835846, 68.834229)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.261002, 13.881760, 68.586166)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1320
 
 [node name="ceata321" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -196.628983, 18.738495, 28.826513)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.561493, 16.712601, 37.129513)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1321
 
 [node name="ceata322" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -190.265121, 18.537033, 29.713047)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -189.792557, 18.456635, 30.005356)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1322
 
 [node name="ceata323" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -201.105255, 21.389343, 19.218933)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -199.337921, 20.900909, 21.048195)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1323
 
 [node name="ceata324" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -164.445877, 15.502518, 61.949150)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -172.089645, 16.350403, 54.082230)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1324
 
 [node name="ceata325" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.898300, 17.391083, 48.496761)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.732590, 17.437073, 47.980705)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1325
 
 [node name="ceata326" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.944916, 18.776611, 28.882421)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.107895, 18.260666, 31.722904)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1326
 
 [node name="ceata327" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -193.340393, 18.914139, 28.307213)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -193.294540, 18.916077, 28.301846)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1327
 
 [node name="ceata328" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -211.745941, 18.346725, 29.658228)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -208.241455, 18.407013, 29.589098)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1328
 
 [node name="ceata329" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.799805, 18.167831, 41.340755)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.317291, 18.315628, 38.015034)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1329
 
 [node name="ceata330" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.508835, 19.520172, 22.942623)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.693344, 19.519592, 22.964220)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1330
 
 [node name="ceata331" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -138.948120, 19.094482, 28.222193)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -141.044037, 19.104630, 28.263538)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1331
 
 [node name="ceata332" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -189.217636, 19.078766, 27.807461)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.319412, 20.311310, 22.332956)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1332
 
 [node name="ceata333" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.017517, 20.211273, 23.811268)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -187.377396, 20.386490, 23.177046)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1333
 
 [node name="ceata334" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -202.793488, 17.107468, 34.504883)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200.649506, 17.544266, 33.017010)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1334
 
 [node name="ceata335" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.016846, 20.809616, 7.996395)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -165.537689, 20.591690, 13.238714)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1335
 
 [node name="ceata336" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -163.818375, 21.825226, -0.164359)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -164.415634, 21.779785, 0.427378)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1336
 
 [node name="ceata337" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -137.201431, 23.301163, -11.014546)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140.381042, 22.808441, -8.807969)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1337
 
 [node name="ceata338" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -197.458847, 20.633759, 22.037306)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -189.966614, 22.267471, 14.038971)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1338
 
 [node name="ceata339" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204.597076, 21.790039, 17.842617)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204.549332, 21.803528, 17.789137)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1339
 
 [node name="ceata340" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -167.527527, 23.492004, -9.915890)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -175.038162, 22.569504, -1.897909)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1340
 
 [node name="ceata341" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.084808, 25.270813, -17.451210)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.094116, 25.268326, -17.440788)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1341
 
 [node name="ceata342" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -206.759674, 23.294693, 11.184187)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200.061111, 24.252151, 3.126975)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1342
 
 [node name="ceata343" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.788345, 25.155151, -0.212627)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.155563, 25.193375, -0.643993)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1343
 
 [node name="ceata344" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.434174, 26.390793, -21.683655)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.599228, 24.785934, -13.065332)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1344
 
 [node name="ceata345" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -184.809525, 26.237930, -20.648771)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.387039, 26.170532, -20.255081)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1345
 
 [node name="ceata346" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -170.178574, 28.781677, -31.071314)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -172.316788, 28.304138, -29.274933)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1346
 
 [node name="ceata347" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -224.735214, 26.426041, -13.277933)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.197525, 26.591599, -15.630280)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1347
 
 [node name="ceata348" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -221.284836, 27.301300, -25.061844)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -220.326813, 27.304260, -25.019758)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1348
 
 [node name="ceata349" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -235.271896, 26.769623, -17.434908)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -233.183136, 26.779602, -17.683626)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1349
 
 [node name="ceata350" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.525085, 26.635132, -22.030876)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195.525681, 26.559677, -19.798426)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1350
 
 [node name="ceata351" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.995697, 27.014542, -23.555525)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -187.745743, 27.037781, -23.588474)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1351
 
 [node name="ceata352" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -171.640091, 27.174164, -25.011826)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174.029861, 27.120285, -24.727264)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1352
 
 [node name="ceata353" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -221.415665, 28.431778, -41.033466)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -211.821213, 28.332458, -36.728584)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1353
 
 [node name="ceata354" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.632736, 29.672806, -54.660702)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.453598, 29.667328, -54.499077)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1354
 
 [node name="ceata355" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -234.977280, 29.440857, -60.401733)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -232.219345, 29.368622, -58.359398)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1355
 
 [node name="ceata356" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.438385, 27.298630, -24.891016)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -194.874313, 28.382202, -29.124777)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1356
 
 [node name="ceata357" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -182.795868, 27.509857, -25.935871)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.091888, 27.580597, -26.202963)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1357
 
 [node name="ceata358" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -207.621719, 30.210236, -57.232529)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200.068512, 30.079651, -50.532215)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1358
 
 [node name="ceata359" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -203.197327, 31.183395, -64.777672)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -202.835922, 31.173325, -64.459290)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1359
 
 [node name="ceata360" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.556763, 31.052963, -69.113190)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -211.074387, 31.016785, -67.769157)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1360
 
 [node name="ceata361" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -177.753006, 28.633957, -30.736549)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.895859, 30.010162, -37.959919)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1361
 
 [node name="ceata362" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174.966003, 30.578552, -39.907169)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -175.577835, 30.644821, -40.446159)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1362
 
 [node name="ceata363" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.959320, 26.368683, -22.331369)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -163.333710, 26.979675, -24.484152)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1363
 
 [node name="ceata364" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -196.196640, 32.150772, -70.111450)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.611313, 32.053711, -63.434032)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1364
 
 [node name="ceata365" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -192.452042, 33.156418, -77.157616)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -192.127457, 33.142761, -76.841225)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1365
 
 [node name="ceata366" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168.122391, 31.590851, -45.397453)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -175.812225, 32.033524, -52.166874)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1366
 
 [node name="ceata367" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.433853, 32.191422, -47.897942)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -162.653549, 32.209427, -48.112099)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1367
 
 [node name="ceata368" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.947525, 29.631653, -33.189568)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152.423950, 30.124161, -35.425591)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1368
 
 [node name="ceata369" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -189.090622, 33.800949, -80.801376)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.312683, 33.768829, -74.903763)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1369
 
 [node name="ceata370" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.116150, 34.500168, -85.265900)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.649628, 34.511993, -85.051964)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1370
 
 [node name="ceata371" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.162567, 33.635712, -57.334370)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -163.247223, 33.831726, -63.438046)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1371
 
 [node name="ceata372" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -146.252441, 34.942200, -66.985893)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -146.256866, 34.942169, -66.987923)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1372
 
 [node name="ceata373" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -137.160706, 34.040619, -54.071968)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.783417, 34.106125, -55.507153)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1373
 
 [node name="ceata374" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.639130, 35.250214, -90.712746)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.956863, 35.489090, -86.692650)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1374
 
 [node name="ceata375" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.865433, 36.269562, -98.489922)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.330582, 36.284882, -98.268456)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1375
 
 [node name="ceata376" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -205.839188, 35.228134, -105.111946)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -202.138092, 35.339615, -103.622269)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1376
 
 [node name="ceata377" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -141.354874, 35.791336, -73.156265)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152.402786, 35.578461, -77.743370)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1377
 
 [node name="ceata378" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.958984, 36.587616, -84.450356)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -146.729385, 36.572403, -84.769356)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1378
 
 [node name="ceata379" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -124.088928, 36.771057, -72.207787)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -127.359741, 36.689270, -73.524277)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1379
 
 [node name="ceata380" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.012390, 37.208565, -108.200500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168.918777, 37.397354, -103.673752)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1380
 
 [node name="ceata381" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -175.998962, 37.945709, -114.852051)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -175.809937, 37.948563, -114.761154)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1381
 
 [node name="ceata382" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -136.578354, 37.682503, -89.169853)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.130096, 37.458794, -93.902054)
 script = ExtResource("mist")
 count = 9
-footprint = Vector2(11.0, 7.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.065)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(9.0, 6.0)
+size = Vector2(12.0, 17.0)
+tint = Color(0.87, 0.89, 0.88, 0.075)
+height = Vector2(0.3, 0.8)
+tilt_deg = 6.0
 seed = 1382
 
 [node name="ceata383" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -135.334717, 38.425148, -95.297760)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -135.469955, 38.422264, -95.362793)
 script = ExtResource("mist")
 count = 8
-footprint = Vector2(12.0, 8.0)
-size = Vector2(12.0, 18.0)
-tint = Color(0.87, 0.89, 0.88, 0.055)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(11.0, 7.0)
+size = Vector2(13.0, 19.0)
+tint = Color(0.87, 0.89, 0.88, 0.065)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1383
 
 [node name="ceata384" type="Node3D" parent="DecorManual/ZoneD_PadureaDeCeata"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -123.014084, 38.318161, -85.887955)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.719658, 38.249947, -87.170059)
 script = ExtResource("mist")
 count = 7
-footprint = Vector2(14.0, 9.0)
-size = Vector2(14.0, 22.0)
-tint = Color(0.87, 0.89, 0.88, 0.050)
-height = Vector2(0.4, 2.2)
+footprint = Vector2(13.0, 8.0)
+size = Vector2(14.0, 20.0)
+tint = Color(0.87, 0.89, 0.88, 0.055)
+height = Vector2(0.3, 0.9)
+tilt_deg = 6.0
 seed = 1384
-
 
 [node name="ZoneE_Buza" type="Node3D" parent="DecorManual"]
 

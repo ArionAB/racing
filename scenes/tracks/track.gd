@@ -414,13 +414,23 @@ static func themes() -> Dictionary:
 			# de SAND_MID-ul Dunelor. Verdele de altitudine (buza, crater)
 			# vine mai tarziu, ca banda de teren peste o cota (rock_band_tint
 			# ca la Cappadocia), nu ca alt slot.
-			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
+			# POI B (runda 1), masurat pe captura --gamecam la 0.06 fata de
+			# referinta: iarba iesea (205,178,91) sat 0.56 pe DRY_VEGETATION
+			# curat, referinta are (185,148,42) sat 0.77 — mai saturata si
+			# putin mai inchisa. Tenta scade albastrul (raportul iesire/tenta
+			# masurat ~1.15 pe toate canalele), nu schimba nuanta (44-46).
+			"ground_tint": Color.html("9E8524"),
 			# Cerul de furtuna: violet-gri inchis sus, o banda calda jos
 			# (soarele sub nori). E cel mai ieftin element de identitate de
 			# pe pista: cu +5 grade peste orizontala, cerul e banda de sus a
 			# ecranului pe orice dreapta (brief §2.0).
-			"sky_top": Color.html("2C2838"),
-			"sky_horizon": Color.html("443C52"),
+			# POI B: referinta are nori (72,72,94) sus si o BANDA CALDA
+			# (243,189,127) chiar deasupra orizontului — soarele sub nori.
+			# Cu fog_sky_affect 0.08 cerul se vede cu culorile lui, deci banda
+			# vine din sky_horizon, nu din ceata (care ramane gri-violet, ca
+			# sa nu adauge saturatie pe teren la distanta).
+			"sky_top": Color.html("1C1E30"),
+			"sky_horizon": Color.html("D9A878"),
 			"sky_cover_alpha": 0.0,
 			# Ceata de adancime acopera TOT cerul cand `fog_sky_affect` sta pe
 			# implicitul 1.0 (cerul e la adancime infinita): masurat pe captura
@@ -440,7 +450,7 @@ static func themes() -> Dictionary:
 			# ramane SUB cea a ierbii (memoria `ceata-in-familia-solului` e
 			# despre saturatie: ceata nu are voie sa ADAUGE saturatie cu
 			# distanta), doar nuanta trece in familia cerului.
-			"fog": Color(0.46, 0.43, 0.50),
+			"fog": Color(0.52, 0.45, 0.47),
 			"hill_color": Color(0.62, 0.56, 0.40),
 			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
 			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
@@ -452,7 +462,11 @@ static func themes() -> Dictionary:
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
 			"ambient_color": Color.html("8E8598"),
-			"ambient_energy": 0.22,
+			# POI B: umbrele acaciilor pe drum ieseau (41,11,1) — negre; in
+			# referinta umbra pe iarba e la 1,3x sub lumina. 0.32 pastreaza
+			# raportul soare/ambient la 5,3 (>= 3,5, memoria
+			# `geometria-fara-lumina-e-invizibila`).
+			"ambient_energy": 0.32,
 			"shadows": true,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
@@ -490,7 +504,10 @@ static func themes() -> Dictionary:
 			# B06A45 -> (201,64,3), saturatie 0.98 = lava, nu laterit;
 			# 94807A -> (153,97,58), saturatie 0.62, adica exact registrul
 			# slotului 23. Regleaza pe captura, nu pe hex.
-			"dirt_road_tint": Color.html("94807A"),
+			# POI B (runda 1): 94807A dadea (152,93,53) v 0.60; referinta are
+			# (217,112,69) v 0.85 — laterit mai DESCHIS si mai portocaliu.
+			# Raportul iesire/tenta masurat pe canale: 1.03 / 0.73 / 0.43.
+			"dirt_road_tint": Color.html("D49C9A"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,

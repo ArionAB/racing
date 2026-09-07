@@ -694,7 +694,9 @@ const CLASS_TINT := {
 	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
 	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
 	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
-	"granite": Color(0.95, 0.97, 1.0),
+	# POI B Serengeti: bolovanii ieseau (156,119,82) sat 0.47 (crem);
+	# referinta are granit (166,131,112) sat 0.33. Tenta rece scade saturatia.
+	"granite": Color(0.86, 0.90, 1.0),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

@@ -782,6 +782,16 @@ const SLOT_REMAP_BY_GROUP := {
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
+	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
+	# (190,188,96), identica cu campia) si pe 21 (TROPICAL_GREEN, verde de
+	# brocoli (92,183,50)). Referinta are coroane OLIV INCHIS, (69,68,26) /
+	# (105,105,31), mai intunecate decat iarba. Amandoua merg pe CACTUS_GREEN
+	# (5B7C34, oliv); variatia ramane din AO-ul din vertex colors si din
+	# lumina. Trunchiul (28) si ramurile (12) nu se ating.
+	"acacia_umbrella_a": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	"acacia_umbrella_b": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	"acacia_umbrella_c": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)

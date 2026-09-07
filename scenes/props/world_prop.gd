@@ -986,6 +986,89 @@ func _remap_model_slots() -> void:
 			if mi == null or mi.mesh == null:
 				continue
 			mi.mesh = _mesh_with_slots_moved(mi.mesh, remap)
+	_dim_model_vertex_colors()
+
+
+## Cat de mult se INTUNECA vertecsii unui model, per stem (1.0 = neatins).
+##
+## De ce exista. Coroanele acaciilor stau pe slotul 12 (CACTUS_GREEN #5B7C34),
+## ales in rundele trecute pentru NUANTA lui — si masuratoarea confirma alegerea:
+## slotul are H 87 / S 0.58, iar coroana din referinta H 75 / S 0.55. Ce nu se
+## potriveste e VALOAREA. Masurat pe cadrul de joc (--frac=0.06 --gamecam), pe
+## toti pixelii verzi: coroanele noastre ies RGB(102,128,20) V 0.53 pe 9,8 % din
+## cadru, referinta le are RGB(58,67,30) V 0.27 pe 2,0 %. Sub soare cald plus
+## expunere 1.10 orice slot verde se ridica, si nu exista slot mai inchis cu
+## aceeasi nuanta: 21 e verde de brocoli, 5/20 sunt griuri reci.
+##
+## De ce vertex color si nu o clasa proprie de frunzis: e clampata la [0,1] si
+## se inmulteste peste albedo (memoria `surfacetool-clamp-vertex-color`), deci
+## poate DOAR sa intunece — singurul sens de care avem nevoie. Costa zero
+## materiale (acelasi `world_material` partajat, garda ramane la 12/38) si
+## pastreaza variatia de AO deja coapta in vertecsi, fiindca inmulteste in loc
+## sa inlocuiasca. O clasa proprie ar costa un material pentru o singura
+## diferenta de luminanta.
+##
+## Factorul e DERIVAT, nu ales: 0.27 / 0.53 = 0.51 din valoarea randata, iar
+## masuratoarea A/B pe captura (0.62 -> V 0.43, 0.38 -> V 0.33) confirma
+## proportionalitatea. 0.44 pune coroana pe V 0.28.
+const VERTEX_DIM_BY_MODEL := {
+	"acacia_umbrella_a": 0.44,
+	"acacia_umbrella_b": 0.44,
+	"acacia_umbrella_c": 0.44,
+}
+
+
+## Inmulteste culorile de vertex ale modelelor din VERTEX_DIM_BY_MODEL.
+##
+## Ruleaza DUPA `_remap_model_slots`, pe mesh-ul deja duplicat de acolo cand
+## modelul are si remap — altfel ar scrie in resursa partajata din cache si ar
+## intuneca piesa pentru toate instantele si toate pistele (aceeasi capcana
+## explicata la `_remap_model_slots`). Pentru modelele fara remap duplica el.
+func _dim_model_vertex_colors() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not VERTEX_DIM_BY_MODEL.has(stem):
+			continue
+		var f := float(VERTEX_DIM_BY_MODEL[stem])
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			mi.mesh = _mesh_with_colors_dimmed(mi.mesh, f)
+
+
+## Copia unui mesh cu culorile de vertex inmultite cu `f`.
+##
+## Daca mesh-ul n-are deloc culori de vertex (cazul obisnuit pentru un GLB de
+## kit), se SCRIE un canal plin cu `f` — altfel intunecarea n-ar avea pe ce sa
+## se aplice. Alpha ramane 1.
+static func _mesh_with_colors_dimmed(src: Mesh, f: float) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := src.surface_get_arrays(s)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var cols: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+		if cols.is_empty():
+			cols = PackedColorArray()
+			cols.resize(verts.size())
+			for i in cols.size():
+				cols[i] = Color(f, f, f, 1.0)
+		else:
+			for i in cols.size():
+				var c := cols[i]
+				cols[i] = Color(c.r * f, c.g * f, c.b * f, c.a)
+		arr[Mesh.ARRAY_COLOR] = cols
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
 
 
 ## Numele grupului de decor manual (copilul direct al acestui nod) in care sta

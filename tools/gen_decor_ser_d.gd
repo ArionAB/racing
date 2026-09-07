@@ -88,12 +88,52 @@ const CROWN_R := {
 	"kopje_boulder_a": 1.1, "kopje_boulder_b": 2.0, "kopje_boulder_c": 2.8,
 	"acacia_umbrella_a": 4.5,
 }
+## Inaltimea CENTRULUI de coroana ca fractie din inaltimea piesei (masurata pe
+## GLB-uri): folosita si de `_blocks_gate` si de tools/probe_pete.gd.
+const CROWN_Y := {
+	"fig_tree": 0.72, "fever_tree": 0.78, "acacia_umbrella_a": 0.85,
+}
 ## Inaltimea reala (m) — scara se cere in METRI, nu din burta.
 const HEIGHT := {
 	"fig_tree": 13.0, "fever_tree": 10.12, "euphorbia": 4.03, "dead_tree": 6.01,
 	"kopje_boulder_a": 1.44, "kopje_boulder_b": 2.88, "kopje_boulder_c": 4.32,
 	"acacia_umbrella_a": 7.04,
 }
+
+## CULOARELE DE SOARE (runda 3). Criticul rundei 2 a cerut pete de soare pe
+## carosabil; masurat cu tools/probe_pete.gd, pe felia deasa fractiile 0.212 si
+## 0.268 aveau 1-2% din banda insorita (mediana 25.9 = DOAR ambient), adica
+## tunel inchis, iar 0.240/0.300 erau la 43-83%. Deci nu lipsea lumina „in
+## medie", alternau tuneluri cu poieni.
+##
+## Metoda pe care am schimbat-o: runda 2 a departat TRUNCHIURILE randului
+## apropiat. tools/probe_who_shade.gd arata de ce n-a mers — cei care umbresc
+## banda la fractiile inchise sunt din TOATE randurile, inclusiv `smochinZid`
+## de la 38-60 m: soarele e la 35 grade, deci o coroana de 19 m de la 50 m
+## arunca umbra 27 m si ajunge pe drum. Departarea trunchiului nu misca nimic.
+##
+## Ce misca: un CULOAR liber de coroane pe directia din care VINE soarele,
+## deschis periodic. La fiecare ~PAS metri de traseu, pe o lungime de
+## SUN_GATE_LEN, nicio coroana n-are voie sa intersecteze prisma dintre banda
+## si soare. Regula sta in `_place`, deci se aplica la TOATE randurile, nu doar
+## la cel apropiat — altfel randul de fund reface plafonul.
+## Marimile s-au reglat pe masuratoare, nu din ochi. Prima incercare (poarta
+## de 15 m, curatata pe toata latimea benzii, la fiecare 42 m) a rasturnat
+## defectul: 0.212 a trecut de la 2% insorit la 90%, adica din tunel in
+## poiana — iar referinta e pestrita, nu deschisa. Deci poarta e SCURTA (9 m)
+## si se curata doar fasia din MIJLOC a benzii (0.35 din semi-latime): pe
+## umeri raman coroane care arunca umbra inauntru, si lumina ajunge in pete,
+## nu ca un gol de padure.
+const SUN_GATE_EVERY := 34.0  # un culoar la ~34 m de traseu
+const SUN_GATE_LEN := 9.0     # lungimea (pe traseu) a golului luminat
+const SUN_GATE_HALF := 0.35   # cat din semi-latimea benzii se degajeaza
+## Cat de departe pe raza de soare se pastreaza culoarul: 19 m inaltime / tan(35)
+## = 27 m umbra, plus raza celei mai mari coroane -> 36 m acopera tot ce poate
+## ateriza pe banda.
+const SUN_GATE_REACH := 36.0
+
+var _sun_to: Vector3 = Vector3(0.579, 0.574, -0.579) # spre soare (survey r1)
+var _gates: Array[Vector2] = []                      # [frac_in, frac_out]
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -106,6 +146,7 @@ var _rng := RandomNumberGenerator.new()
 var _out_path := ""
 var _survey_only := false
 var _tri := 0
+var _gated := 0
 const TRI := {
 	"fig_tree": 3494, "fever_tree": 1188, "euphorbia": 1558, "dead_tree": 404,
 	"kopje_boulder_a": 158, "kopje_boulder_b": 178, "kopje_boulder_c": 178,
@@ -135,6 +176,7 @@ func _ready() -> void:
 	_sus_y = hi + 120.0
 	_rng.seed = 140401
 	_survey()
+	_build_gates()
 	if not _survey_only:
 		_understory()
 		_near_row()
@@ -468,6 +510,55 @@ func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,
 
 # ------------------------------------------------------------------ asezarea
 
+## Portile: intervale de fractie in care se deschide culoarul de soare.
+## Se aseaza pe LUNGIME de traseu, nu pe fractie, ca pasul sa fie constant in
+## metri; primele doua sunt fixate pe fractiile masurate ca inchise (0.212 si
+## 0.268), ca reparatia sa cada exact unde e defectul.
+func _build_gates() -> void:
+	_gates.clear()
+	for f0 in [0.209, 0.265]:
+		_gates.append(Vector2(f0 - _step(SUN_GATE_LEN * 0.5),
+			f0 + _step(SUN_GATE_LEN * 0.5)))
+	var f := F_IN + _step(10.0)
+	while f < F_OUT:
+		var overlap := false
+		for g in _gates:
+			if f > g.x - _step(12.0) and f < g.y + _step(12.0):
+				overlap = true
+		if not overlap:
+			_gates.append(Vector2(f - _step(SUN_GATE_LEN * 0.5),
+				f + _step(SUN_GATE_LEN * 0.5)))
+		f += _step(SUN_GATE_EVERY)
+	print("; %d culoare de soare" % _gates.size())
+
+
+## Ar umbri coroana asezata la `pos` cu raza `cr` banda dintr-o poarta?
+## Testul e cel din sonda, intors pe dos: proiectez centrul coroanei pe raza de
+## soare care pleaca din punctele de banda ale portii, si daca distanta e sub
+## raza coroanei, coroana taie lumina — deci piesa se refuza.
+func _blocks_gate(pos: Vector3, cy: float, cr: float) -> bool:
+	var n := _track.baked.size()
+	for g in _gates:
+		var i0 := int(g.x * float(n)) % n
+		var i1 := int(g.y * float(n)) % n
+		var steps := 6
+		for k in steps + 1:
+			var t := float(k) / float(steps)
+			var idx := (i0 + int(t * float((i1 - i0 + n) % n))) % n
+			var p: Vector3 = _track.baked[idx]
+			var half := _track.width_at_index(idx)
+			var sd := _track._side_at(idx)
+			for lat: float in [-half * SUN_GATE_HALF, 0.0, half * SUN_GATE_HALF]:
+				var hp: Vector3 = p + sd * lat + Vector3(0, 0.15, 0)
+				var v: Vector3 = Vector3(pos.x, cy, pos.z) - hp
+				var tca: float = v.dot(_sun_to)
+				if tca <= 0.0 or tca > SUN_GATE_REACH:
+					continue
+				if v.length_squared() - tca * tca <= cr * cr:
+					return true
+	return false
+
+
 func _scale_for(model: String, meters: float) -> float:
 	var h: float = HEIGHT.get(model, 1.0)
 	return meters / h if h > 0.001 else 1.0
@@ -503,6 +594,13 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	if g - p.y > 6.0 or p.y - g > 12.0:
 		print("; nota %s la frac %.4f: teren la %+.2f m fata de sosea (lateral %.1f)" % [
 			model, frac, g - p.y, d])
+	# CULOARUL DE SOARE: daca aceasta coroana ar umbri banda intr-o poarta, se
+	# refuza. Doar copacii (bolovanii sunt sub 8 m si nu ajung pe banda).
+	if CROWN_Y.has(model):
+		var cy := g + float(HEIGHT[model]) * float(CROWN_Y[model]) * scl
+		if _blocks_gate(Vector3(q.x, g, q.z), cy, cr):
+			_gated += 1
+			return
 	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode)
 
 
@@ -525,7 +623,7 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 
 
 func _write() -> void:
-	print("; asezate %d piese, %d avertismente, ~%d triunghiuri" % [_n, _warn, _tri])
+	print("; asezate %d piese, %d refuzate de culoarele de soare, %d avertismente, ~%d triunghiuri" % [_n, _gated, _warn, _tri])
 	if _out_path.is_empty():
 		for line in _out:
 			print(line)

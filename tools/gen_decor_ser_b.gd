@@ -84,6 +84,7 @@ func _ready() -> void:
 	_report_sun()
 	_report_route()
 	_roadside_acacias()
+	_bushes()
 	_termites()
 	_boulders_and_kopje()
 	_mid_acacias()
@@ -98,6 +99,7 @@ func _ready() -> void:
 func _measure_kit() -> void:
 	for m in ["plants/acacia_umbrella_a", "plants/acacia_umbrella_b",
 			"plants/acacia_umbrella_c", "plants/euphorbia", "plants/dead_tree",
+			"plants/tropical_shrub",
 			"rocks/termite_mound_a", "rocks/termite_mound_b",
 			"rocks/kopje_boulder_a", "rocks/kopje_boulder_b", "rocks/kopje_boulder_c"]:
 		var ps := load(KIT + m + ".glb") as PackedScene
@@ -144,19 +146,46 @@ func _roadside_acacias() -> void:
 		"plants/acacia_umbrella_b", "plants/acacia_umbrella_a",
 		"plants/acacia_umbrella_b", "plants/acacia_umbrella_c",
 	]
-	var step := 0.0052
+	# Runda 1b: cu pasul de 11 m (0.0052) jumatatea de jos a cadrului la 0.06
+	# era goala — in referinta coroanele se ating si intra din colturile
+	# cadrului. Pas de 8,4 m, muchia la 2,5-5,5 m.
+	var step := 0.0040
 	var k := 0
 	for sgn in [1.0, -1.0]:
 		var f := F0 + (0.0 if sgn > 0.0 else 0.5 * step)
 		while f < F1:
 			var x := _x_at(f)
 			var in_herd := x > HERD_X0 - 6.0 and x < HERD_X1 + 6.0
-			var gap := _rng.randf_range(8.0, 14.0) if in_herd else _rng.randf_range(3.0, 6.0)
+			var gap := _rng.randf_range(8.0, 14.0) if in_herd else _rng.randf_range(2.5, 5.5)
 			var mdl := models[k % models.size()]
 			_place(mdl, "acacie", f, sgn, gap, _rng.randf_range(0.0, TAU),
 				_rng.randf_range(0.95, 1.15), "trunk")
 			k += 1
 			f += step * _rng.randf_range(0.85, 1.15)
+
+
+## Tufe rotunde de savana (tropical_shrub, 2,5 m, remapat pe verdele
+## acaciilor) la 1-4,5 m de muchie, pe ambele parti, la ~4,5 m una de alta:
+## e etajul de la inaltimea rotii, cel care in referinta umple colturile de
+## jos ale cadrului (memoria `patru-defecte-de-diorama`: „obiecte infipte in
+## plan" e defectul cand lipseste tocmai etajul asta). Fara corp: se trece
+## prin ele. Un al doilea rand, mai rar, la 7-16 m, leaga tufele de coroane.
+func _bushes() -> void:
+	for sgn in [1.0, -1.0]:
+		var f := F0 + (0.0011 if sgn > 0.0 else 0.0)
+		var j := 0
+		while f < F1:
+			var x := _x_at(f)
+			var in_herd := x > HERD_X0 - 4.0 and x < HERD_X1 + 4.0
+			var gap := _rng.randf_range(5.0, 10.0) if in_herd else _rng.randf_range(1.0, 4.5)
+			_place("plants/tropical_shrub", "tufa", f, sgn, gap,
+				_rng.randf_range(0.0, TAU), _rng.randf_range(1.2, 2.2), "none")
+			if j % 3 == 1:
+				_place("plants/tropical_shrub", "tufa", f + 0.0008, sgn,
+					_rng.randf_range(7.0, 16.0), _rng.randf_range(0.0, TAU),
+					_rng.randf_range(1.3, 2.0), "none")
+			j += 1
+			f += 0.0022 * _rng.randf_range(0.75, 1.25)
 
 
 ## Termitiere rosii la 2,5-5 m de muchie, alternand partile.
@@ -201,6 +230,14 @@ func _boulders_and_kopje() -> void:
 	_place("rocks/kopje_boulder_a", "kopje", kf - 0.0065, -1.0, 28.0, 2.5, 1.3, "hull")
 	_place("plants/acacia_umbrella_b", "kopjeAcacie", kf + 0.0072, -1.0, 27.0, 1.2, 1.1, "trunk")
 	_place("plants/dead_tree", "kopjeUscat", kf - 0.0080, -1.0, 24.0, 0.7, 1.1, "trunk")
+	# Termitiere MARI in etajul mediu (8-14 m de muchie, 5-6,5 m inalte):
+	# in referinta sunt turnurile rosii care marcheaza adancimea la 30-60 m,
+	# vizibile peste tufe si sub coroane (plafon la 20 m de ax: 11,9 m).
+	_place("rocks/termite_mound_b", "termitieraMare", 0.058, -1.0, 9.0, 0.8, 2.0, "hull")
+	_place("rocks/termite_mound_b", "termitieraMare", 0.082, 1.0, 9.0, 2.0, 2.1, "hull")
+	_place("rocks/termite_mound_b", "termitieraMare", 0.090, -1.0, 13.0, 0.3, 1.9, "hull")
+	_place("rocks/termite_mound_b", "termitieraMare", 0.100, 1.0, 8.0, 1.4, 2.2, "hull")
+	_place("rocks/termite_mound_b", "termitieraMare", 0.112, -1.0, 11.0, 2.6, 2.0, "hull")
 	# Euphorbii candelabru (4 m) si un copac uscat: variatie de silueta la
 	# inaltimea ochiului, intre termitiere si coroane.
 	_place("plants/euphorbia", "euforbie", 0.0475, 1.0, 6.5, 1.0, 1.0, "trunk")

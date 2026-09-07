@@ -419,7 +419,7 @@ static func themes() -> Dictionary:
 			# curat, referinta are (185,148,42) sat 0.77 — mai saturata si
 			# putin mai inchisa. Tenta scade albastrul (raportul iesire/tenta
 			# masurat ~1.15 pe toate canalele), nu schimba nuanta (44-46).
-			"ground_tint": Color.html("9E8524"),
+			"ground_tint": Color.html("A88E34"),
 			# Cerul de furtuna: violet-gri inchis sus, o banda calda jos
 			# (soarele sub nori). E cel mai ieftin element de identitate de
 			# pe pista: cu +5 grade peste orizontala, cerul e banda de sus a
@@ -429,8 +429,12 @@ static func themes() -> Dictionary:
 			# Cu fog_sky_affect 0.08 cerul se vede cu culorile lui, deci banda
 			# vine din sky_horizon, nu din ceata (care ramane gri-violet, ca
 			# sa nu adauge saturatie pe teren la distanta).
-			"sky_top": Color.html("1C1E30"),
-			"sky_horizon": Color.html("D9A878"),
+			# POI B runda 1b, masurat: cu D9A878 banda de cer iesea (224,185,144)
+			# piersica pe 12 % din cadru; referinta are cerul (124,108,111)
+			# violet-gri de furtuna aproape peste tot, banda calda e o dunga la
+			# colt. Orizontul vine in familia cetii, doar putin mai cald.
+			"sky_top": Color.html("1C1C2A"),
+			"sky_horizon": Color.html("645458"),
 			"sky_cover_alpha": 0.0,
 			# Ceata de adancime acopera TOT cerul cand `fog_sky_affect` sta pe
 			# implicitul 1.0 (cerul e la adancime infinita): masurat pe captura
@@ -450,7 +454,7 @@ static func themes() -> Dictionary:
 			# ramane SUB cea a ierbii (memoria `ceata-in-familia-solului` e
 			# despre saturatie: ceata nu are voie sa ADAUGE saturatie cu
 			# distanta), doar nuanta trece in familia cerului.
-			"fog": Color(0.52, 0.45, 0.47),
+			"fog": Color(0.42, 0.36, 0.38),
 			"hill_color": Color(0.62, 0.56, 0.40),
 			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
 			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
@@ -471,8 +475,13 @@ static func themes() -> Dictionary:
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
 			"fog_depth": true,
-			"fog_begin": 60.0,
-			"fog_end": 260.0,
+			# Runda 1b (POI B): la 60/260 banda de orizont iesea (177,152,156),
+			# mai deschisa decat cerul de furtuna de deasupra ei; referinta are
+			# orizontul INCHIS si detaliul de la 100 m curat. Ceata mai inchisa
+			# (0.42,0.36,0.38 — sub luminanta ierbii, in nuanta cerului) si mai
+			# departe: 90/290 (< FAR_PLANE 380; Track14 n-are inele de orizont).
+			"fog_begin": 90.0,
+			"fog_end": 290.0,
 			"fog_curve": 1.0,
 			"horizon_model": "",
 			"horizon_class": "",
@@ -507,7 +516,10 @@ static func themes() -> Dictionary:
 			# POI B (runda 1): 94807A dadea (152,93,53) v 0.60; referinta are
 			# (217,112,69) v 0.85 — laterit mai DESCHIS si mai portocaliu.
 			# Raportul iesire/tenta masurat pe canale: 1.03 / 0.73 / 0.43.
-			"dirt_road_tint": Color.html("D49C9A"),
+			# Runda 1b: D49C9A a sarit peste tinta — (241,137,96) v 0.95 roz;
+			# referinta (185,109,66) v 0.73. Raportul iesire/tenta pe canale cu
+			# D49C9A: 1.14 / 0.88 / 0.62 => tinta A27C6A, rotunjita mai cald.
+			"dirt_road_tint": Color.html("AC8A86"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,

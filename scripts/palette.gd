@@ -696,7 +696,10 @@ const CLASS_TINT := {
 	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
 	# POI B Serengeti: bolovanii ieseau (156,119,82) sat 0.47 (crem);
 	# referinta are granit (166,131,112) sat 0.33. Tenta rece scade saturatia.
-	"granite": Color(0.86, 0.90, 1.0),
+	# Runda 1b: kopje-ul de la 30 m iesea (186,160,126) v 0.73 crem;
+	# referinta (114,96,85) v 0.45. Valoarea scade cu tenta, nu cu soarele
+	# (soarele e al ierbii). 0.62x pe toate canalele, cu racirea pastrata.
+	"granite": Color(0.56, 0.60, 0.68),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

@@ -187,6 +187,9 @@ const PROP_COLLISION := {
 	# deci n-au corp propriu — si oricum `_collect_models` sare peste ce e
 	# sub un corp fizic.
 	"ankole_horns": "none",
+	# Tufele de savana (POI B): `tropical_shrub` din kitul comun, la 1,5-5 m de
+	# banda, zeci de bucati — vegetatie moale prin care se trece, nu obstacol.
+	"tropical_shrub": "none",
 	# Hull implicit, corect, pentru restul: kopje_camp, kopje_boulder_a/b/c,
 	# termite_mound_a/b, maasai_boma, safari_tent, land_rover, crocodile,
 	# hippo_back (ca decor static pe mal), elephant (ca decor static),
@@ -792,6 +795,12 @@ const SLOT_REMAP_BY_MODEL := {
 	"acacia_umbrella_a": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
 	"acacia_umbrella_b": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
 	"acacia_umbrella_c": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	# Tufa de savana: acelasi verde ca acaciile de langa ea (21 -> 12).
+	# A/B runda 1b (POI B): totul pe 21 TROPICAL_GREEN da (65,133,35), nuanta
+	# 0.28 (verde de brocoli); pe 12 da (139,148,54), nuanta 0.18 = nuanta
+	# referintei (92,93,34), doar mai deschis. Se pastreaza 12: nuanta e a
+	# slotului, valoarea e a luminii.
+	"tropical_shrub": {21: Palette.CACTUS_GREEN},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)

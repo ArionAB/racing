@@ -483,26 +483,44 @@ static func themes() -> Dictionary:
 			"sun_energy": 1.95,
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
-			# INTEGRARE: G a cerut ambient (A8968E, 0.16), B (B9A88C, 0.50).
-			# Amandoua vor ambientul in familia solului cald, nu a cerului
-			# violet — pe culoare sunt de acord. Pe energie se pastreaza B:
-			# 0.16 duce raportul soare/ambient pe la 10, cu umbra aproape
-			# neagra, iar pragul documentat in repo e >= 3.5 (memoria
-			# `geometria-fara-lumina-e-invizibila`), pe care 0.50 il tine la
-			# 3.90. De re-masurat pe cadrul de pe fundul craterului.
-			"ambient_color": Color.html("B9A88C"),
-			# POI B: umbrele acaciilor pe drum ieseau (41,11,1) — negre; in
-			# referinta umbra pe iarba e la 1,3x sub lumina. 0.32 pastreaza
-			# raportul soare/ambient la 5,3 (>= 3,5, memoria
-			# `geometria-fara-lumina-e-invizibila`).
-			# Runda 6: 0.68 lasa raportul soare/ambient la 2.87, SUB pragul de
-			# 3.5 pe care il cere chiar comentariul de mai sus (memoria
-			# `geometria-fara-lumina-e-invizibila`). Cu 0.50 raportul urca la
-			# 3.90 si coroanele acaciilor capata diferenta de valoare intre
-			# fata de sus si cea de dedesubt — exact ce lipsea in runda 5.
-			# Podeaua de umbra ramane deasupra negrului fiindca ambient_color
-			# e bounce-ul cald de savana, nu violetul cerului.
-			"ambient_energy": 0.50,
+			# INTEGRARE — AMBIENTUL, a treia oara. Trei bucati au propus:
+			# G (A8968E, 0.16), B (B9A88C, 0.50), H (C9A98A, 0.40). Toate trei
+			# vor ambientul in familia solului cald; difera energia. Se
+			# pastreaza H, si nu fiindca e ultima: e singura care masoara
+			# RAPORTUL lumina/umbra fata de bara de referinta (0.15 la noi
+			# fata de 0.33 in bara) in loc sa se uite doar la raportul
+			# soare/ambient, si singura care verifica lipsa regresiei pe
+			# celelalte zone, la patru fractii (0.075, 0.144, 0.40, 0.60).
+			# Argumentul lui B — ca pragul de 3.5 trebuie tinut — ramane
+			# satisfacut: 1.70 / 0.40 = 4.25.
+			# RUNDA 5 POI H — ambientul CALD si raportul soare/ambient adus la
+			# nivelul dioramei de referinta, masurat, nu ales.
+			#
+			# Pana aici: sun 1.70 / ambient 0.22 = raport 7,7, cu ambient
+			# gri-violet rece (#8E8598). Comentariul de deasupra invoca regula
+			# „soare/ambient >= 3,5" din memoria `geometria-fara-lumina-e-
+			# invizibila`, dar aia e un PRAG DE JOS (sub el geometria se
+			# aplatizeaza), nu o tinta — si 7,7 e mai mult decat dublul lui.
+			# Consecinta, masurata pe cadrul de la volan din POI H: pixelii de
+			# sol din umbra cad la V10=0.11 fata de V10=0.30 in bara, adica
+			# raport lumina/umbra 0.15 fata de 0.33. Umbra unei coroane de
+			# acacia nu se citea ca umbra, ci ca o gaura neagra peste jumatate
+			# din carosabil — 30 % din cadru era pixel prea intunecat ca sa mai
+			# apartina vreunei clase de culoare (laterit, iarba sau roca).
+			#
+			# Ambientul urca la 0.40 si trece pe cald (#C9A98A, culoarea de
+			# bounce de pe sol din style_bible §5, ca in restul temelor de
+			# desert): raportul devine 4,25 — peste pragul de 3,5, deci
+			# modelarea se pastreaza — si umbrele ies calde si TRANSPARENTE,
+			# cu textura drumului vizibila prin ele (memoria
+			# `umbra-moale-se-citeste-textura`).
+			#
+			# Verificat sa nu fie regresie in alta parte, fiindca tema e
+			# comuna celor 8 zone: raportul lumina/umbra masurat la fractiile
+			# 0.075 (turma), 0.144 (vadul), 0.40 si 0.60 sta la 0.32-0.75, deci
+			# nicaieri umbre infundate si nicaieri spalare.
+			"ambient_color": Color.html("C9A98A"),
+			"ambient_energy": 0.40,
 			"shadows": true,
 			# Umbra nu e neagra: 0.72 lasa 28% din lumina soarelui sa treaca
 			# prin ea. Masurat pe carosabilul din POI D (padurea de ceata):

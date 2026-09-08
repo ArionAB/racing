@@ -463,7 +463,41 @@ static func themes() -> Dictionary:
 			# inchis), E de pe buza craterului (bolul inaintea cetii). Pastrata
 			# masuratoarea lui E — e cea mai recenta si singura facuta pe un
 			# cadru unde ceata chiar acopera subiectul (malul opus la 200-400 m).
-			"fog": Color(0.46, 0.43, 0.50),
+			# INTEGRARE RUNDA 3 — CEATA AVEA CULOAREA CERULUI, NU A PAMANTULUI.
+			# Criticul de ansamblu: jumatatea de sus a cadrului era o panza
+			# lavanda-gri mai DESCHISA si mai RECE decat solul apropiat, cu o
+			# muchie orizontala neta pe la mijloc; geometria era pe ecran, doar
+			# vopsita in culoarea cerului. Masurat pe cadrul de ansamblu
+			# (--eye=170,95,255 --look=-10,0,40), pe benzi de inaltime:
+			#   285 din 720 de randuri (39,6%) se clasificau drept CER;
+			#   benzile 0.0-0.1 si 0.3-0.4 nu aveau NICIUN rand de teren —
+			#   erau mancate in intregime. Referinta: 22 din 1086 (2,0%).
+			# Cauza e directa: la 250+ m ceata e completa, deci tot ce e departe
+			# converge la CULOAREA ei — iar (0.46,0.43,0.50) e H=266 S=0.14
+			# V=0.50, adica exact opusul solului pe roata de culoare (H=47) si
+			# mai deschis decat iarba luminata de langa el.
+			#
+			# Directia ceruta de critic (gradient pe INALTIME, fog_height /
+			# fog_height_density) a fost incercata prima si e MOARTA in
+			# FOG_MODE_DEPTH: Godot ignora acolo cheile de inaltime. A/B
+			# bit-identic cu baza la -0.06 si chiar la +2.0 (valoare absurda) —
+			# aceleasi 285 de randuri, aceeasi saturatie pe benzi. Nota e in
+			# _build_environment, ca sa nu se mai reincerce.
+			#
+			# Ce a mers: ceata trece in FAMILIA SOLULUI (memoria
+			# `ceata-in-familia-solului`) si incepe mai tarziu, cu o curba mai
+			# stransa, ca banda de cer sa ramana a cerului. Masurat, benzile
+			# 0.3-0.5 (departarea): H 336 -> 41, S 0.30 -> 0.37; benzile de sus
+			# isi tin violetul (0.0-0.1 la H=338).
+			# Garda pe axa care se putea plati — cerul de furtuna — nu mai e
+			# numaratoarea de randuri (devine oarba cand ceata e calda), ci
+			# procentul de pixeli violet din banda de sus a cadrului DE JOC
+			# (scratchpad/skyband.py): 31,3% la H=49,6, fata de 31,2% la H=45,8
+			# in referinta. Pe cadrul liber de ansamblu banda de sus e teren
+			# departat, nu cer, si acolo referinta e la fel de calda ca noi.
+			# Respins ca prea departe: fog_curve 2.2 (cerul iese 97,9% violet,
+			# dar departarea recade la S 0.25 — ceata ajunge prea tarziu).
+			"fog": Color(0.58, 0.51, 0.38),
 			# Malul opus al craterului. Nu e "dealul de fundal" al altor teme:
 			# de pe buza, movilele de orizont (`_build_horizon_fallback`, 240-480 m)
 			# sunt EXACT banda de deasupra lacului, 30% din cadrul hero
@@ -576,9 +610,9 @@ static func themes() -> Dictionary:
 			# aerul ramane limpede pana la 260 m si se ingroasa spre final
 			# (curve 1.4, implicitul), in loc sa se aseze liniar de la 190 m
 			# peste tot ce e mai departe de buza craterului.
-			"fog_begin": 260.0,
+			"fog_begin": 300.0,
 			"fog_end": 370.0,
-			"fog_curve": 1.4,
+			"fog_curve": 1.8,
 			"horizon_model": "",
 			"horizon_class": "",
 			"walls": false,
@@ -3936,6 +3970,18 @@ func _build_environment() -> void:
 		env.fog_depth_curve = float(theme_flag("fog_curve", 1.4))
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)
+	# PERSPECTIVA AERIANA: cat din lumina CERULUI se amesteca in ceata cu
+	# adancimea (0 = culoare de ceata pura, implicitul Godot si al temelor
+	# vechi, deci cheia nu schimba nimic unde nu e declarata).
+	#
+	# Cheile de ceata pe INALTIME (`fog_height` / `fog_height_density`) au
+	# fost incercate aici si SCOASE: in `FOG_MODE_DEPTH` Godot le ignora
+	# complet. Masurat pe cadrul de ansamblu, A/B bit-identic cu baza —
+	# `fog_height_density` -0.06 si chiar +2.0 (valoare absurda) dau aceleasi
+	# 285 de randuri clasificate drept cer si aceeasi saturatie pe benzi.
+	# Ceata pe inaltime cere FOG_MODE_EXPONENTIAL, adica renuntarea la
+	# inceputul/sfarsitul explicit pe care se bazeaza ChaseCamera.far.
+	env.fog_aerial_perspective = float(theme_flag("fog_aerial", 0.0))
 	# Cat din cer acopera ceata (1.0 = tot, implicitul Godot si al temelor
 	# vechi). Ceata de ADANCIME vede cerul la infinit, deci cu 1.0 sky_top si
 	# sky_horizon nu ajung niciodata pe ecran — orice cer de tema e de fapt

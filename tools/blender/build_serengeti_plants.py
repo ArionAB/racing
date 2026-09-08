@@ -46,8 +46,12 @@ OLIVE = CACTUS_GREEN           # frunzis de acacie (oliv prafuit)
 GREEN = TROPICAL_GREEN         # frunzis dens (smochin)
 DRY = DRY_VEGETATION
 LICHEN = FOAM_WHITE
-# Flamingo: slotul 31 e NEON_PINK in scripts/palette.gd (Chongqing), exact
-# rozul de flamingo; brief §4 il numeste explicit. dio_lib nu-l defineste.
+# Flamingo: slotul 31 e FLAMINGO_PINK (#D2A0BE) in scripts/palette.gd, brief §4.
+# ATENTIE la istoric — comentariul de aici a spus multa vreme ca "31 e NEON_PINK
+# (Chongqing)", si era FALS: Chongqing a declarat slotul consumat (track.gd:1295)
+# dar a folosit RUST_METAL si nu l-a repictat niciodata in atlas. Kitul a fost
+# deci exportat pe un slot care in atlas era magenta pur, iar pasarile au iesit
+# vermilion patru runde la rand. Culoarea exista abia din septembrie 2026.
 FLAMINGO_PINK = 31
 BEAK = VOLCANIC_BLACK
 LEG = ROCK_DARK

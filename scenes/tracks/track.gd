@@ -483,6 +483,13 @@ static func themes() -> Dictionary:
 			"sun_energy": 1.95,
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
+			# INTEGRARE: G a cerut ambient (A8968E, 0.16), B (B9A88C, 0.50).
+			# Amandoua vor ambientul in familia solului cald, nu a cerului
+			# violet — pe culoare sunt de acord. Pe energie se pastreaza B:
+			# 0.16 duce raportul soare/ambient pe la 10, cu umbra aproape
+			# neagra, iar pragul documentat in repo e >= 3.5 (memoria
+			# `geometria-fara-lumina-e-invizibila`), pe care 0.50 il tine la
+			# 3.90. De re-masurat pe cadrul de pe fundul craterului.
 			"ambient_color": Color.html("B9A88C"),
 			# POI B: umbrele acaciilor pe drum ieseau (41,11,1) — negre; in
 			# referinta umbra pe iarba e la 1,3x sub lumina. 0.32 pastreaza
@@ -693,6 +700,21 @@ static func themes() -> Dictionary:
 			"water_foam_mix": 0.92,
 			# Vezi _build_sea_far: fara larg deschis, apa e doar albia raului.
 			"sea_far": false,
+			# CRUSTA DE SODA (POI G, brief §2 G / §4): banda de teren ALBA
+			# masurata in metri de la conturul lagunei (sampler.
+			# lagoon_signed_dist), nu pe cota — fundul craterului e plat la
+			# 1,7 m, deci nicio banda de altitudine n-ar putea-o taia. 48 m
+			# duce crusta pana sub drum (axul e la 33-45 m de contur pe
+			# 0.755-0.78), cu marginea zdrentuita spre iarba pe inca 16 m.
+			# Malul roz: banda ingusta de NEON_PINK peste linia apei (sd
+			# -5..+4 m), flamingii ca textura de departe; cei modelati
+			# (FlamingoFlock) stau tot acolo.
+			"lagoon_crust_tint": Palette.color(Palette.FOAM_WHITE),
+			"lagoon_crust_width": 48.0,
+			"lagoon_crust_fade": 16.0,
+			"lagoon_shore_tint": Color(0.86, 0.55, 0.58),
+			"lagoon_shore_in": 4.0,
+			"lagoon_shore_out": 5.0,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -1037,7 +1059,7 @@ static func themes() -> Dictionary:
 			# Culoarea e bounce-ul de pe nisip coraligen: mai deschis si mai putin
 			# auriu decat cel de desert (#E2B77A), fiindca si nisipul e mai alb.
 			"ambient_color": Color.html("EADFC8"),
-			"ambient_energy": 0.30,
+			"ambient_energy": 0.22,
 			# Ceata de adancime, ca la desert: marea se pierde in orizont la o
 			# distanta cunoscuta, iar camera poate taia fix acolo.
 			"fog_depth": true,
@@ -4667,6 +4689,15 @@ func _build_terrain() -> void:
 	var rock_tint: Variant = theme_flag("rock_band_tint", null)
 	var rock_line := float(theme_flag("rock_line", 0.0))
 	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
+	# CRUSTA DE SODA din jurul lagunei (serengeti, POI G): banda masurata in
+	# metri de la contur, nu pe cota. Null pe orice tema fara cheie, deci
+	# restul pistelor nu se schimba cu un pixel. Vezi "lagoon_crust_tint".
+	var crust_tint: Variant = theme_flag("lagoon_crust_tint", null)
+	var crust_width := float(theme_flag("lagoon_crust_width", 40.0))
+	var crust_fade := maxf(float(theme_flag("lagoon_crust_fade", 15.0)), 0.001)
+	var shore_tint: Variant = theme_flag("lagoon_shore_tint", null)
+	var shore_in := float(theme_flag("lagoon_shore_in", 4.0))
+	var shore_out := float(theme_flag("lagoon_shore_out", 5.0))
 	# STRATUL DE JOS, oglinda lui rock_band: acela tinteaza PESTE o cota
 	# (etaj de munte), asta SUB ea (masa de teren de sub nivelul soselei).
 	# Null pe orice tema care nu-l cere, deci restul pistelor nu se schimba cu
@@ -4860,6 +4891,34 @@ func _build_terrain() -> void:
 							if bw > 0.0:
 								tint = tint.lerp(btints[bi] as Color, bw)
 								grass_w *= 1.0 - bw
+					if crust_tint != null or shore_tint != null:
+						var sd := _sampler.lagoon_signed_dist(v.x, v.z)
+						if sd < 1e8:
+							if crust_tint != null:
+								# 1 pana la `crust_width` in afara conturului,
+								# apoi coboara pe `crust_fade`; marginea se
+								# zdrentuieste cu acelasi zgomot ca etajele.
+								var crust_w := clampf(
+									(sd + crust_width + crust_fade) / crust_fade,
+									0.0, 1.0)
+								crust_w = clampf(crust_w + dirt_noise.get_noise_2d(
+									v.x * 0.5, v.z * 0.5) * 0.30, 0.0, 1.0)
+								crust_w = smoothstep(0.0, 1.0, crust_w)
+								if crust_w > 0.0:
+									tint = tint.lerp(crust_tint as Color, crust_w)
+									# Pe soda nu creste iarba.
+									grass_w *= 1.0 - crust_w
+							if shore_tint != null:
+								# Trapez peste linia apei: -shore_out .. +shore_in,
+								# cu 2 m de racord la fiecare capat.
+								var s_up := clampf((sd + shore_out) / 2.0, 0.0, 1.0)
+								var s_dn := clampf((shore_in - sd) / 2.0, 0.0, 1.0)
+								var shore_w := smoothstep(0.0, 1.0, minf(s_up, s_dn))
+								shore_w *= 0.55 + 0.45 * clampf(
+									dirt_noise.get_noise_2d(v.x * 1.5, v.z * 1.5)
+									* 0.5 + 0.5, 0.0, 1.0)
+								if shore_w > 0.0:
+									tint = tint.lerp(shore_tint as Color, shore_w * 0.85)
 					if rock_tint != null:
 						var rock_w := clampf(
 							(v.y - rock_line) / rock_fade, 0.0, 1.0)
@@ -6238,6 +6297,26 @@ const PROP_AO_RADIUS_MIN: float = 0.8
 ## Mai slaba decat la faleze: sunt multe si se suprapun langa drum.
 const PROP_AO_STRENGTH: float = 0.26
 
+## PLAFONUL DE SUPRAPUNERE (POI G, runda 5). Materialul discurilor e
+## BLEND_MODE_MUL, deci doua discuri peste acelasi pixel NU dau o umbra mai
+## corecta, ci produsul: la 0.26 fiecare, doua dau 0.55, patru 0.30, sase 0.16.
+## Intr-o padure deasa (Lerai: fever_tree la 4-5 m unul de altul, raza plafonata
+## la 6 m) fiecare punct de sol sta sub 3-6 discuri, si podeaua iese o PLACA
+## aproape neagra — masurat pe cadrul de joc de la frac 0.77 cu umbrele stinse:
+## sol insorit sub crang 46/255 fata de 119/255 pe crusta de alaturi, adica un
+## factor de 0.39 din discuri singure, inainte de orice umbra dinamica.
+##
+## Reparatia: raza nu se mai ia din diagonala GABARITULUI intreg, ci din
+## amprenta de la BAZA piesei. Un fever_tree are coroana de 8,7 m si trunchi de
+## ~0,5 m; ce atinge solul e trunchiul, deci discul lui e mic si nu se mai
+## suprapune cu al vecinului. Umbra coroanei o face lumina directionala, care
+## are forma si directie — discul e doar contactul.
+##
+## Inaltimea sub care se masoara amprenta, ca fractie din inaltimea piesei.
+const PROP_AO_FOOT_BAND: float = 0.18
+## Cat se mai umfla amprenta bazei, ca discul sa iasa putin de sub piesa.
+const PROP_AO_FOOT_SCALE: float = 1.6
+
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
 ##
@@ -6269,8 +6348,13 @@ func _prop_contact_discs() -> PackedVector4Array:
 		if aabb.size == Vector3.ZERO:
 			continue
 		var gp := n3.global_position
-		# Raza din jumatatea diagonalei ORIZONTALE a gabaritului.
-		var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		# Raza din AMPRENTA DE LA BAZA, nu din diagonala gabaritului intreg
+		# (vezi nota de la PROP_AO_FOOT_BAND). Cand piesa n-are vertecsi in
+		# banda de jos — panouri, pasari, orice fara picior — se cade inapoi
+		# pe vechea socoteala, ca sa nu ramana piese fara contact.
+		var half := _prop_foot_radius(n3, aabb)
+		if half <= 0.0:
+			half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
 		var r := clampf(half * PROP_AO_RADIUS_SCALE,
 				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
 		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
@@ -6318,6 +6402,52 @@ func _visual_aabb(n: Node3D) -> AABB:
 			acc = box
 			have = true
 	return acc if have else AABB()
+
+
+## Raza amprentei de la BAZA piesei: cel mai departe vertex, pe orizontala, din
+## banda de jos a gabaritului (PROP_AO_FOOT_BAND din inaltime).
+##
+## De ce nu ajunge AABB-ul intreg: la un copac diagonala orizontala e a
+## COROANEI (fever_tree: 8,7 x 8,0 m), iar discul ei plafonat la 6 m se
+## suprapune peste al fiecarui vecin dintr-o padure deasa. Cu blend-ul
+## multiplicativ suprapunerile se inmultesc si podeaua iese neagra. Ce atinge
+## solul e trunchiul (~0,5 m), si aia e umbra de contact; forma coroanei o
+## deseneaza umbra dinamica.
+##
+## Costa o trecere peste vertecsii pieselor din DecorManual, o singura data la
+## constructie.
+func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
+	var band := aabb.position.y + aabb.size.y * PROP_AO_FOOT_BAND
+	var base := n.global_transform.basis
+	if absf(base.determinant()) < 0.000001:
+		return 0.0
+	var inv := n.global_transform.affine_inverse()
+	var best := 0.0
+	var stack: Array[Node] = [n]
+	while not stack.is_empty():
+		var cur: Node = stack.pop_back()
+		var cur3 := cur as Node3D
+		if cur3 != null and not cur3.visible:
+			continue
+		for c in cur.get_children():
+			stack.append(c)
+		var mi := cur as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		if absf(mi.global_transform.basis.determinant()) < 0.000001:
+			continue
+		var rel := inv * mi.global_transform
+		for si in mi.mesh.get_surface_count():
+			var arrays: Array = mi.mesh.surface_get_arrays(si)
+			if arrays.size() <= Mesh.ARRAY_VERTEX:
+				continue
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				var lv := rel * v
+				if lv.y > band:
+					continue
+				best = maxf(best, Vector2(lv.x, lv.z).length())
+	return best * PROP_AO_FOOT_SCALE
 
 
 ## Umbra de contact a prop-urilor, ca factor multiplicativ (1.0 = neatins).
@@ -8635,9 +8765,20 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
 		ball.model_scale = float(kind.get("scale",
 			theme_flag("hazard_scale", 0.52)))
+		# CLASA DE TEXTURA vine de la tema DOAR pentru bolovanul implicit al
+		# temei. Un nod care si-a declarat singur `model` a cerut un obiect
+		# anume, nu piatra temei: pe Serengeti `hazard_class: "granite"` se
+		# aplica triplanar peste elefant si ii STERGE atlasul, deci si remap-ul
+		# de sloturi (masurat pe G_r3_pre_hero.png: corp lum 0.769 sat 0.34,
+		# crem de gresie, mai LUMINOS decat drumul 0.512 — pare un bolovan de
+		# nisip, nu un animal). Doua runde s-au dus pe remap-ul de sloturi,
+		# care era corect (805 verts pe 11), fiindca defectul era mai jos:
+		# clasa triplanara nici nu ajunge sa citeasca UV-urile.
+		var declared_model: bool = not String(kind.get("model", "")).is_empty()
 		ball.model_tri_class = String(kind.get("tri_class",
-			theme_flag("hazard_class", "")))
-		ball.model_classes = theme_flag("hazard_classes", {})
+			"" if declared_model else theme_flag("hazard_class", "")))
+		ball.model_classes = (kind.get("classes", {}) if declared_model
+			else theme_flag("hazard_classes", {}))
 		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
 		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
 		# causeway nu se da peste cap.
@@ -8655,6 +8796,11 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# nevoie sa stie modul ca sa nu taie cursa la marginea drumului.
 		ball.motion = int(kind.get("motion",
 			theme_flag("hazard_motion", 0))) as SlidingHazard.Motion
+		# Plafonul de viteza al maturarii, cand nodul l-a declarat (elefantul
+		# din Serengeti merge la 2 m/s, nu la 12 ca bolovanul). Fara cheie
+		# ramane implicitul clasei, deci nimic de pe alte piste nu se misca.
+		ball.max_sweep_speed = float(kind.get("sweep_speed",
+			theme_flag("hazard_sweep_speed", SlidingHazard.MAX_SWEEP_SPEED_DEFAULT)))
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa
@@ -8675,6 +8821,10 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		if bool(kind.get("face_travel",
 				theme_flag("hazard_face_travel", crossing or door))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
+			# La TRAVERSARE se si INTOARCE la drumul de intoarcere — un animal
+			# care revine cu spatele nu revine, da inapoi. Vezi
+			# SlidingHazard.turn_around.
+			ball.turn_around = crossing
 			# O USA nu se uita incotro merge, se uita in lungul soselei: fata
 			# discului trebuie sa fie spre masina care vine, ca sa se citeasca
 			# zid, iar rostogolirea (in jurul normalei discului) sa fie a unei

@@ -844,6 +844,55 @@ const SLOT_REMAP_BY_MODEL := {
 	# doar pe coroanele acaciilor, unde referinta il are.
 	"grass_tuft_large": {12: Palette.DRY_VEGETATION, 21: Palette.DRY_VEGETATION},
 	"grass_tuft_small": {12: Palette.DRY_VEGETATION},
+	# Elefantul: pe .glb corpul sta pe [2, 22, 29] — SAND_SHADOW, FOAM_WHITE si
+	# MARBLE_GREY, adica trei griuri NEUTRE. Sub soarele cald al temei
+	# (1.0, 0.90, 0.72) plus saturatia 1.18 din post, orice gri neutru iese
+	# crem: masurat pe G_r1_lac.png, elefantii citeau ca bolovani albi, nu ca
+	# animale. Aceeasi capcana ca la hipopotam (handoff §5.13): singurul gri
+	# care ramane gri e un slot RECE. Pielea pe PAINTED_METAL (11, gri-albastrui,
+	# masurat sat 0.09 pe hipopotam), fildesii raman pe FOAM_WHITE 22 ca sa
+	# citeasca in contrast.
+	# DOUA sloturi, nu unul: criticul rundei 2 a cerut ecart de valoare INTRE
+	# corp / cap / urechi / fildesi, nu doar "sa nu fie crem". Pe .glb slotul 29
+	# (56% din vertecsi) e masa corpului, slotul 2 (34%) capul, urechile si
+	# picioarele, iar 22 (10%, z=[-3.21,-1.92]) sunt fildesii — masurat cu o
+	# sonda pe UV-uri, nu ghicit. Corpul pe VOLCANIC_BLACK (20, #55535A, gri
+	# rece inchis) ca sa stea SUB luminanta drumului, capul si picioarele pe
+	# ASPHALT (5, #4B4B4D) gri NEUTRU inchis, fildesii raman pe FOAM_WHITE 22.
+	# PAINTED_METAL 11 a fost incercat pe 2 si respins pe captura: e albastru
+	# destul cat urechile si labele sa iasa bleu-plastic langa corpul gri
+	# (masurat sat 0.12 dar citit ca petice colorate) — vezi G_r3_ele2.png.
+	# Griurile NEUTRE ale .glb-ului ies crem sub soarele cald (1.0,0.90,0.72) +
+	# saturatia 1.18 din post; doar sloturile RECI raman gri.
+	"elephant": {
+		2: Palette.ASPHALT,
+		29: Palette.VOLCANIC_BLACK,
+	},
+	# Flamingii: pe .glb stau pe [4, 20, 31]. Penajul (31, 73% din vertecsi)
+	# NU se mai remapeaza — slotul 31 e de acum FLAMINGO_PINK in atlas, exact
+	# culoarea pentru care kitul a fost exportat.
+	#
+	# Patru runde de critica au cautat rozul in remap, si toate au esuat din
+	# aceeasi cauza: slotul 31 era NEDEFINIT in HEX, deci generatorul de atlas
+	# ii dadea magenta pur, iar magenta x sun_color da vermilion. Ocolirile
+	# incercate, in ordine, toate respinse pe captura:
+	#   - TILE_TERRACOTTA 23: portocaliu-caramida (G_r1_hero.png);
+	#   - CONCRETE 8 palid: pasarile DISPAR pe crusta de soda alba
+	#     (G_r3_flam.png) — pe fundal palid o masa palida nu are contrast;
+	#   - CAR_RED 14: cea mai buna dintre ele, si tot rosu — masurat pe
+	#     captura hero sat 0.66 la hue +16.3, fata de sat 0.51 la hue +3.9 in
+	#     diorama de referinta.
+	# Niciuna nu putea reusi: masurate toate cele 31 de culori scrise, atlasul
+	# chiar nu avea niciun slot cu hue 300-30 sub saturatie 0.55. Reparatia era
+	# o culoare noua in atlas, nu inca un slot vechi (vezi Palette.FLAMINGO_PINK).
+	#
+	# Ce ramane din rundele vechi, fiindca s-a masurat ca ajuta silueta: gatul
+	# si capul (20, 14% din vertecsi, y=[0.82,1.23]) stau pe CONCRETE palid, ca
+	# pasarea sa aiba un ecart de valoare in interior in loc sa fie o singura
+	# bila; picioarele (4, ROCK_DARK maro) pe SAND_LIGHT, ca sa nu para batute
+	# in crusta.
+	"flamingo": {20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
+	"flamingo_wings": {20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)

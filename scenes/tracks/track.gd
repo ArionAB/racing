@@ -414,13 +414,27 @@ static func themes() -> Dictionary:
 			# de SAND_MID-ul Dunelor. Verdele de altitudine (buza, crater)
 			# vine mai tarziu, ca banda de teren peste o cota (rock_band_tint
 			# ca la Cappadocia), nu ca alt slot.
-			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
+			# POI B (runda 1), masurat pe captura --gamecam la 0.06 fata de
+			# referinta: iarba iesea (205,178,91) sat 0.56 pe DRY_VEGETATION
+			# curat, referinta are (185,148,42) sat 0.77 — mai saturata si
+			# putin mai inchisa. Tenta scade albastrul (raportul iesire/tenta
+			# masurat ~1.15 pe toate canalele), nu schimba nuanta (44-46).
+			"ground_tint": Color.html("A88E34"),
 			# Cerul de furtuna: violet-gri inchis sus, o banda calda jos
 			# (soarele sub nori). E cel mai ieftin element de identitate de
 			# pe pista: cu +5 grade peste orizontala, cerul e banda de sus a
 			# ecranului pe orice dreapta (brief §2.0).
-			"sky_top": Color.html("2C2838"),
-			"sky_horizon": Color.html("443C52"),
+			# POI B: referinta are nori (72,72,94) sus si o BANDA CALDA
+			# (243,189,127) chiar deasupra orizontului — soarele sub nori.
+			# Cu fog_sky_affect 0.08 cerul se vede cu culorile lui, deci banda
+			# vine din sky_horizon, nu din ceata (care ramane gri-violet, ca
+			# sa nu adauge saturatie pe teren la distanta).
+			# POI B runda 1b, masurat: cu D9A878 banda de cer iesea (224,185,144)
+			# piersica pe 12 % din cadru; referinta are cerul (124,108,111)
+			# violet-gri de furtuna aproape peste tot, banda calda e o dunga la
+			# colt. Orizontul vine in familia cetii, doar putin mai cald.
+			"sky_top": Color.html("1C1C2A"),
+			"sky_horizon": Color.html("645458"),
 			"sky_cover_alpha": 0.0,
 			# Ceata de adancime acopera TOT cerul cand `fog_sky_affect` sta pe
 			# implicitul 1.0 (cerul e la adancime infinita): masurat pe captura
@@ -440,7 +454,7 @@ static func themes() -> Dictionary:
 			# ramane SUB cea a ierbii (memoria `ceata-in-familia-solului` e
 			# despre saturatie: ceata nu are voie sa ADAUGE saturatie cu
 			# distanta), doar nuanta trece in familia cerului.
-			"fog": Color(0.46, 0.43, 0.50),
+			"fog": Color(0.42, 0.36, 0.38),
 			"hill_color": Color(0.62, 0.56, 0.40),
 			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
 			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
@@ -448,17 +462,33 @@ static func themes() -> Dictionary:
 			# iese plata. Azimutul se masoara pe traseul real (brief §4) si
 			# se pune pe scena (custom_sun_rotation_deg), nu aici.
 			"sun_color": Color(1.0, 0.90, 0.72),
-			"sun_energy": 1.70,
+			"sun_energy": 1.95,
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
-			"ambient_color": Color.html("8E8598"),
-			"ambient_energy": 0.22,
+			"ambient_color": Color.html("B9A88C"),
+			# POI B: umbrele acaciilor pe drum ieseau (41,11,1) — negre; in
+			# referinta umbra pe iarba e la 1,3x sub lumina. 0.32 pastreaza
+			# raportul soare/ambient la 5,3 (>= 3,5, memoria
+			# `geometria-fara-lumina-e-invizibila`).
+			# Runda 6: 0.68 lasa raportul soare/ambient la 2.87, SUB pragul de
+			# 3.5 pe care il cere chiar comentariul de mai sus (memoria
+			# `geometria-fara-lumina-e-invizibila`). Cu 0.50 raportul urca la
+			# 3.90 si coroanele acaciilor capata diferenta de valoare intre
+			# fata de sus si cea de dedesubt — exact ce lipsea in runda 5.
+			# Podeaua de umbra ramane deasupra negrului fiindca ambient_color
+			# e bounce-ul cald de savana, nu violetul cerului.
+			"ambient_energy": 0.50,
 			"shadows": true,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
 			"fog_depth": true,
-			"fog_begin": 60.0,
-			"fog_end": 260.0,
+			# Runda 1b (POI B): la 60/260 banda de orizont iesea (177,152,156),
+			# mai deschisa decat cerul de furtuna de deasupra ei; referinta are
+			# orizontul INCHIS si detaliul de la 100 m curat. Ceata mai inchisa
+			# (0.42,0.36,0.38 — sub luminanta ierbii, in nuanta cerului) si mai
+			# departe: 90/290 (< FAR_PLANE 380; Track14 n-are inele de orizont).
+			"fog_begin": 90.0,
+			"fog_end": 290.0,
 			"fog_curve": 1.0,
 			"horizon_model": "",
 			"horizon_class": "",
@@ -528,7 +558,28 @@ static func themes() -> Dictionary:
 			# B06A45 -> (201,64,3), saturatie 0.98 = lava, nu laterit;
 			# 94807A -> (153,97,58), saturatie 0.62, adica exact registrul
 			# slotului 23. Regleaza pe captura, nu pe hex.
-			"dirt_road_tint": Color.html("94807A"),
+			# POI B (runda 1): 94807A dadea (152,93,53) v 0.60; referinta are
+			# (217,112,69) v 0.85 — laterit mai DESCHIS si mai portocaliu.
+			# Raportul iesire/tenta masurat pe canale: 1.03 / 0.73 / 0.43.
+			# Runda 1b: D49C9A a sarit peste tinta — (241,137,96) v 0.95 roz;
+			# referinta (185,109,66) v 0.73. Raportul iesire/tenta pe canale cu
+			# D49C9A: 1.14 / 0.88 / 0.62 => tinta A27C6A, rotunjita mai cald.
+			# Runda 1 (POI B, masurat pe cadrul de joc la 0.06, caseta din banda
+			# apropiata): AC8A86 dadea (197,116,77), referinta in aceeasi caseta
+			# (221,136,83) — acelasi TON (H 20 fata de 23, S 0.61 fata de 0.62),
+			# doar mai inchis cu ~11 %. Se ridica valoarea, nu nuanta: canalele
+			# tentei x 221/197, 136/116, 83/77 = 1.12 / 1.17 / 1.08.
+			# POI B (runda 6): tenta de mai sus fusese calibrata la lumina
+			# rundei 1 (sun 1.70 / ambient 0.32). Runda 3 a urcat lumina
+			# (1.95 / 0.68) si NU a remasurat drumul: masurat pe cadrul de joc
+			# la 0.06, banda apropiata iesea (243,175,110) V 0.95 sat 0.55 —
+			# roz spalat, cu interval tonal p90/p10 = 1.26, adica PLAT.
+			# Referinta in aceeasi caseta: (196,109,67) V 0.77 sat 0.66,
+			# p90/p10 = 2.62. De-aia criticul rundei 5 n-a vazut nicio umbra pe
+			# carosabil: umbrele CADEAU acolo, dar suprafata era saturata in
+			# alb si nu mai avea loc sa se intunece. Raport iesire/tinta pe
+			# canale: 0.81 / 0.62 / 0.61 aplicat pe (192,158,144) => 9B6258.
+			"dirt_road_tint": Color.html("9A7870"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,
@@ -3769,10 +3820,17 @@ func _build_environment() -> void:
 	if theme_shadows:
 		sun.directional_shadow_mode = \
 			DirectionalLight3D.SHADOW_ORTHOGONAL
-		sun.directional_shadow_max_distance = SHADOW_DISTANCE
+		# Cheia de tema `shadow_distance` era SCRISA in trei teme si nu se
+		# citea niciodata (POI B, runda 6): valoarea folosita era constanta
+		# SHADOW_DISTANCE. Pe Serengeti casterii care conteaza — acaciile de pe
+		# umeri si randul apropiat al turmei — stau la 8-45 m, deci 110 ii
+		# acopera; cheia ramane totusi onorata, ca sa nu mai minta comentariul
+		# din tema (memoria `justificarea-din-comentariu-se-verifica`).
+		sun.directional_shadow_max_distance = float(
+			theme_flag("shadow_distance", SHADOW_DISTANCE))
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
-		sun.shadow_blur = 1.4
+		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))
 		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
 		# acne pe fetele orientate spre soare.
 		sun.shadow_bias = float(theme_flag("shadow_bias", 0.06))

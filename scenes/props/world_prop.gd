@@ -192,6 +192,12 @@ const PROP_COLLISION := {
 	# deci n-au corp propriu — si oricum `_collect_models` sare peste ce e
 	# sub un corp fizic.
 	"ankole_horns": "none",
+	# Tufele de savana (POI B): `tropical_shrub` din kitul comun, la 1,5-5 m de
+	# banda, zeci de bucati — vegetatie moale prin care se trece, nu obstacol.
+	"tropical_shrub": "none",
+	# Smocurile de iarba (POI B): la 1,5-6 m de banda, sute de bucati sub 1,2 m
+	# — prin ele se trece, ca prin iarba campiei.
+	"grass_tuft_large": "none", "grass_tuft_small": "none",
 	# Hull implicit, corect, pentru restul: kopje_camp, kopje_boulder_a/b/c,
 	# termite_mound_a/b, maasai_boma, safari_tent, land_rover, crocodile,
 	# hippo_back (ca decor static pe mal), elephant (ca decor static),
@@ -806,6 +812,36 @@ const SLOT_REMAP_BY_GROUP := {
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
+	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
+	# (190,188,96), identica cu campia) si pe 21 (TROPICAL_GREEN, verde de
+	# brocoli (92,183,50)). Referinta are coroane OLIV INCHIS, (69,68,26) /
+	# (105,105,31), mai intunecate decat iarba. Amandoua merg pe CACTUS_GREEN
+	# (5B7C34, oliv); variatia ramane din AO-ul din vertex colors si din
+	# lumina. Trunchiul (28) si ramurile (12) nu se ating.
+	"acacia_umbrella_a": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	"acacia_umbrella_b": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	"acacia_umbrella_c": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	# Tufa de savana: acelasi verde ca acaciile de langa ea (21 -> 12).
+	# A/B runda 1b (POI B): totul pe 21 TROPICAL_GREEN da (65,133,35), nuanta
+	# 0.28 (verde de brocoli); pe 12 da (139,148,54), nuanta 0.18 = nuanta
+	# referintei (92,93,34), doar mai deschis. Se pastreaza 12: nuanta e a
+	# slotului, valoarea e a luminii.
+	# Runda 2: si slotul 12 (CACTUS_GREEN) al tufei merge pe 13 DRY_VEGETATION.
+	# Masurat pe fasia de umar din cadrul de joc, referinta are 0,6 % verde viu
+	# la nivelul solului; tot verdele ei e in coroanele acaciilor. Tufa ramane
+	# ca SILUETA (etaj intre sol si coroane), dar in registrul uscat al campiei.
+	"tropical_shrub": {21: Palette.CACTUS_GREEN, 12: Palette.DRY_VEGETATION},
+	# Smocurile de iarba (POI B, runda 2). Slotul unei piese se citeste din
+	# UV.x * 32, nu din vertex color — prima incercare a remapat sloturile 7 si
+	# 8 (citite gresit din culoarea vertecsilor) si smocurile au ramas VERZI pe
+	# captura. Masurat corect (UV): `grass_tuft_large` e pe 12 CACTUS_GREEN +
+	# 21 TROPICAL_GREEN, `grass_tuft_small` pe 13 + 12. Pe savana toate merg pe
+	# 13 DRY_VEGETATION (#AF9F4E) — acelasi slot ca iarba campiei, ca smocul sa
+	# fie campia RIDICATA, nu un obiect verde asezat peste ea. Verdele ramane
+	# doar pe coroanele acaciilor, unde referinta il are.
+	"grass_tuft_large": {12: Palette.DRY_VEGETATION, 21: Palette.DRY_VEGETATION},
+	"grass_tuft_small": {12: Palette.DRY_VEGETATION},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)
@@ -974,6 +1010,89 @@ func _remap_model_slots() -> void:
 			if mi == null or mi.mesh == null:
 				continue
 			mi.mesh = _mesh_with_slots_moved(mi.mesh, remap)
+	_dim_model_vertex_colors()
+
+
+## Cat de mult se INTUNECA vertecsii unui model, per stem (1.0 = neatins).
+##
+## De ce exista. Coroanele acaciilor stau pe slotul 12 (CACTUS_GREEN #5B7C34),
+## ales in rundele trecute pentru NUANTA lui — si masuratoarea confirma alegerea:
+## slotul are H 87 / S 0.58, iar coroana din referinta H 75 / S 0.55. Ce nu se
+## potriveste e VALOAREA. Masurat pe cadrul de joc (--frac=0.06 --gamecam), pe
+## toti pixelii verzi: coroanele noastre ies RGB(102,128,20) V 0.53 pe 9,8 % din
+## cadru, referinta le are RGB(58,67,30) V 0.27 pe 2,0 %. Sub soare cald plus
+## expunere 1.10 orice slot verde se ridica, si nu exista slot mai inchis cu
+## aceeasi nuanta: 21 e verde de brocoli, 5/20 sunt griuri reci.
+##
+## De ce vertex color si nu o clasa proprie de frunzis: e clampata la [0,1] si
+## se inmulteste peste albedo (memoria `surfacetool-clamp-vertex-color`), deci
+## poate DOAR sa intunece — singurul sens de care avem nevoie. Costa zero
+## materiale (acelasi `world_material` partajat, garda ramane la 12/38) si
+## pastreaza variatia de AO deja coapta in vertecsi, fiindca inmulteste in loc
+## sa inlocuiasca. O clasa proprie ar costa un material pentru o singura
+## diferenta de luminanta.
+##
+## Factorul e DERIVAT, nu ales: 0.27 / 0.53 = 0.51 din valoarea randata, iar
+## masuratoarea A/B pe captura (0.62 -> V 0.43, 0.38 -> V 0.33) confirma
+## proportionalitatea. 0.44 pune coroana pe V 0.28.
+const VERTEX_DIM_BY_MODEL := {
+	"acacia_umbrella_a": 0.44,
+	"acacia_umbrella_b": 0.44,
+	"acacia_umbrella_c": 0.44,
+}
+
+
+## Inmulteste culorile de vertex ale modelelor din VERTEX_DIM_BY_MODEL.
+##
+## Ruleaza DUPA `_remap_model_slots`, pe mesh-ul deja duplicat de acolo cand
+## modelul are si remap — altfel ar scrie in resursa partajata din cache si ar
+## intuneca piesa pentru toate instantele si toate pistele (aceeasi capcana
+## explicata la `_remap_model_slots`). Pentru modelele fara remap duplica el.
+func _dim_model_vertex_colors() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not VERTEX_DIM_BY_MODEL.has(stem):
+			continue
+		var f := float(VERTEX_DIM_BY_MODEL[stem])
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			mi.mesh = _mesh_with_colors_dimmed(mi.mesh, f)
+
+
+## Copia unui mesh cu culorile de vertex inmultite cu `f`.
+##
+## Daca mesh-ul n-are deloc culori de vertex (cazul obisnuit pentru un GLB de
+## kit), se SCRIE un canal plin cu `f` — altfel intunecarea n-ar avea pe ce sa
+## se aplice. Alpha ramane 1.
+static func _mesh_with_colors_dimmed(src: Mesh, f: float) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := src.surface_get_arrays(s)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var cols: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+		if cols.is_empty():
+			cols = PackedColorArray()
+			cols.resize(verts.size())
+			for i in cols.size():
+				cols[i] = Color(f, f, f, 1.0)
+		else:
+			for i in cols.size():
+				var c := cols[i]
+				cols[i] = Color(c.r * f, c.g * f, c.b * f, c.a)
+		arr[Mesh.ARRAY_COLOR] = cols
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
 
 
 ## Numele grupului de decor manual (copilul direct al acestui nod) in care sta

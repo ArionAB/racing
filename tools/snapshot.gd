@@ -153,7 +153,14 @@ func _ready() -> void:
 	var lava_stage := -1
 	var route_idx := 0
 	var hide_node := ""
+	# --car: masina jucatorului (Muscle) INGHETATA pe punctul de focus, ca in
+	# cadrul de joc — referintele de diorama au masina in prim-plan, iar o
+	# captura fara ea compara un peisaj cu o scena. Fara fizica (on_start_grid).
+	var show_car := false
 	for arg in OS.get_cmdline_user_args():
+		if arg == "--car":
+			show_car = true
+			continue
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
 		elif arg.begins_with("--span-at="):
@@ -403,6 +410,15 @@ func _ready() -> void:
 				print("--cave: nicio CameraZone langa frac %.3f" % zoom_frac)
 		var ahead: Vector3 = pts[route.wrap_index(idx + 12)]
 		var dir := (ahead - focus).normalized()
+		if show_car:
+			var car := (load("res://scenes/cars/Car.tscn") as PackedScene).instantiate() as Car
+			car.track = track
+			add_child(car)
+			car.apply_data(load("res://scenes/cars/data/muscle.tres") as CarData)
+			car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
+				focus + Vector3.UP * 0.45)
+			car.road_index = idx
+			car.on_start_grid = true
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0

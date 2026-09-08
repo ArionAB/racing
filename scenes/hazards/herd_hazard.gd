@@ -107,6 +107,12 @@ const ZEBRA_GLB := "res://assets/models/serengeti/animals/zebra.glb"
 
 @export_group("Aspect")
 @export_range(0.0, 1.0, 0.05) var zebra_ratio: float = 0.2
+
+## Plafonul de valoare pe blana (vezi shader-ul): 1.0 = neatins, deci celelalte
+## piste si hazardurile existente raman identice. Coboara numai capatul alb.
+@export_range(0.4, 1.0, 0.01) var herd_white_cap: float = 1.0
+## Cat din saturatia blanii se stinge spre gri (0 = atlasul brut).
+@export_range(0.0, 1.0, 0.05) var herd_desat: float = 0.0
 ## Sol plat implicit; pe pista se da un Callable(Vector3) -> float.
 var ground_y_at: Callable = Callable()
 ## Masinile urmarite (sondele le dau explicit); gol = cele din zona de prindere.
@@ -459,6 +465,21 @@ uniform float gallop_hz = 2.4;
 uniform float leg_top = 0.55;
 uniform float swing = 0.32;
 uniform float bob = 0.09;
+// Desaturarea blanii spre luminanta. Slotul de atlas al gnu-ului e un brun
+// portocaliu (S 0.78 masurat pe cadrul de joc), in timp ce gnu-ul referintei
+// e gri-brun (S 0.49) — diferenta e de SATURATIE, nu de nuanta (H 24 fata de
+// 29) si nici de valoare (V 0.38 fata de 0.34). 0 = neatins.
+uniform float desat = 0.0;
+// PLAFONUL DE ALB, si e o axa diferita de `desat`. Zebra din kit e alb pur:
+// masurat pe cadrul de joc (--frac=0.06 --gamecam --herd-at=4), pixelii
+// aproape-albi (V > 0.80, S < 0.22) sunt 2.66 % din caseta turmei si au media
+// (254,250,229) — taiati in alb. In referinta aceiasi pixeli sunt 0.37 % si au
+// media (231,212,199), adica un alb-crem cald. `desat` nu putea repara asta
+// niciodata: desaturarea albului da tot alb, ea lucreaza pe saturatie iar aici
+// diferenta e de VALOARE. Plafonul coboara doar capatul de sus si lasa
+// registrul brun al gnu-ului (deja la paritate) neatins. 1.0 = neatins.
+uniform float white_cap = 1.0;
+uniform vec3 white_tint = vec3(1.0, 0.94, 0.88);
 void vertex() {
 	float ph = INSTANCE_CUSTOM.r * 6.2831853;
 	float still = INSTANCE_CUSTOM.g;
@@ -470,7 +491,21 @@ void vertex() {
 }
 void fragment() {
 	vec3 atlas = texture(albedo_atlas, UV).rgb;
-	ALBEDO = mix(COLOR.rgb, atlas * COLOR.rgb, use_atlas);
+	vec3 base = mix(COLOR.rgb, atlas * COLOR.rgb, use_atlas);
+	float lum = dot(base, vec3(0.299, 0.587, 0.114));
+	vec3 col = mix(base, vec3(lum), desat);
+	// Coborare DURA a capatului de sus, nu o interpolare: prima incercare a
+	// amestecat proportional cu cat se depaseste plafonul, si formula se lupta
+	// singura (cu cat plafonul e mai jos, cu atat numitorul 1 - white_cap creste
+	// si factorul de amestec scade) — masurat, 0.72 -> 0.45 a taiat numarul de
+	// pixeli albi la jumatate, dar pixelii ramasi erau tot (255,250,213), adica
+	// tot taiati in alb. Aici tot ce depaseste plafonul e readus FIX la el si
+	// primit tenta calda; tonurile medii, sub plafon, nu se ating deloc.
+	float over = max(max(col.r, col.g), col.b);
+	if (over > white_cap) {
+		col = col * (white_cap / over) * white_tint;
+	}
+	ALBEDO = col;
 	ROUGHNESS = 0.9;
 	SPECULAR = 0.15;
 }
@@ -479,6 +514,8 @@ void fragment() {
 	mat.shader = sh
 	mat.set_shader_parameter("albedo_atlas", load(Palette.ATLAS_PATH))
 	mat.set_shader_parameter("use_atlas", 1.0 if from_kit else 0.0)
+	mat.set_shader_parameter("desat", herd_desat)
+	mat.set_shader_parameter("white_cap", herd_white_cap)
 	return mat
 
 

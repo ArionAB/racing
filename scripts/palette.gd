@@ -694,13 +694,19 @@ const CLASS_TINT := {
 	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
 	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
 	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
-	# Runda A1 (POI A, ref_A.png): cu (0.95,0.97,1.0) kopje-ul iesea CREM-alb
-	# (masurat pe captura --gamecam 0.97: ~(225,220,205)), iar granitul din
-	# referinta e gri-albastrui (~(120,130,145) pe fata luminata). Aceeasi
-	# mecanica precum volcanic_rock: tenta rece si coborata, ca soarele cald
-	# + saturatia din post sa aterizeze pe gri, nu pe crem. Masurat pe
-	# captura, nu ales.
-	"granite": Color(0.50, 0.56, 0.68),
+	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
+	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite,
+	# si au propus: A (0.50,0.56,0.68), B (0.56,0.60,0.68),
+	# C (0.520,0.578,0.723), E (0.50,0.51,0.58), F (0.42,0.38,0.38),
+	# H (0.766,0.810,1.0). Cinci din sase spun acelasi lucru — tenta trebuie
+	# COBORATA (valoarea era problema, nu doar nuanta) si RACITA (albastrul
+	# canalul cel mai mare), fiindca soarele cald (1.0,0.90,0.72) plus
+	# saturatia 1.18 din post duc orice gri neutru spre crem.
+	# Integrarea ia mediana canalelor celor cinci care converg (A, B, C, E si
+	# tinta de valoare a lui H adusa in acelasi registru): (0.52, 0.57, 0.68).
+	# F (cald si mai inchis) si H (deschis) raman notate ca dezacord de
+	# masuratoare — se re-masoara pe capturile de integrare, pe POI-ul lor.
+	"granite": Color(0.52, 0.57, 0.68),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

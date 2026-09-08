@@ -704,10 +704,18 @@ const CLASS_TINT := {
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
-	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
-	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
-	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
-	"granite": Color(0.95, 0.97, 1.0),
+	# Granitul Serengeti: dala olkhon e usor calda (178,165,150), soarele
+	# temei e galbui (1.0, 0.90, 0.72) si energia lui e 1.70 — cu tenta
+	# aproape alba de dinainte (0.95,0.97,1.0) kopje-urile ieseau ALBE pe
+	# captura, iar peretele craterului mai LUMINOS decat campia, adica exact
+	# pe dos fata de referinta (perete de piatra inchisa, campie aurie).
+	# Masurat pe --frac=0.40 --gamecam: peretele (114,102,115) V=0.45 fata de
+	# (141,123,107) V=0.55 in referinta, dar cu campia la V=0.74 — deci nu
+	# peretele era prea inchis, ci totul prea deschis. 0.50 aduce bolovanii
+	# in registrul de piatra gri si redeschide diferenta perete/campie.
+	# Clasa e folosita DOAR de kitul Serengeti (kopje_*, crater_*, lengai),
+	# deci schimbarea nu atinge alte piste — verificat cu grep.
+	"granite": Color(0.50, 0.51, 0.58),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

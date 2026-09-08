@@ -23,6 +23,19 @@ class_name FlockProp
 @export var scale_min: float = 0.9
 @export var scale_max: float = 1.15
 @export var seed_value: int = 20260907
+## AO-ul copt in COLOR_0 al modelului, neutralizat partial.
+##
+## Masurat pe flamingo.glb: COLOR_0 are luminanta mediana 0.760 si minim
+## 0.240, iar `vertex_color_use_as_albedo` o inmulteste peste albedo. Slotul
+## 31 e roz pal (V=0.94), dar inelul iesea rgb(105,61,60) V=0.41 pe cadrul
+## erou, fata de rgb(188,129,131) V=0.74 in referinta: la 100-150 m un
+## flamingo e cativa pixeli, deci AO-ul propriu nu se citeste ca volum, doar
+## innegreste. Umbra placilor de crusta a fost exclusa prin A/B (cast_shadow
+## off pe crusta: V 0.41 -> 0.42, adica nimic).
+##
+## 1.0 = culorile din GLB neatinse; 0.0 = alb curat. Se aplica DOAR aici,
+## deci nu atinge niciun alt prop din atlas.
+@export_range(0.0, 1.0) var ao_keep: float = 1.0
 ## CRUSTA: cand `model` e null si `disc_slot >= 0`, mesh-ul nu vine dintr-un
 ## GLB ci e o PLACA plata de 12 laturi asezata pe slotul cerut din atlas.
 ##
@@ -45,6 +58,8 @@ func _ready() -> void:
 	if model == null and disc_slot < 0:
 		return
 	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius) if model == null and disc_slot >= 0 else _mesh_of(model)
+	if mesh != null and model != null and ao_keep < 1.0:
+		mesh = _lift_ao(mesh, ao_keep)
 	if mesh == null:
 		push_warning("FlockProp: %s nu are mesh" % model.resource_path)
 		return
@@ -123,3 +138,31 @@ static func _disc_mesh(slot: int, radius: float) -> Mesh:
 			st.set_color(Color.WHITE)
 			st.add_vertex(v)
 	return st.commit()
+
+
+## Ridica AO-ul copt spre alb: fiecare canal se muta cu (1 - keep) catre 1.
+## Pe mesh, nu pe material, fiindca materialul e cel comun de lume (o singura
+## instanta pentru toata pista) — nu poate purta o corectie de model.
+static func _lift_ao(src: Mesh, keep: float) -> Mesh:
+	var out := ArrayMesh.new()
+	for si in src.get_surface_count():
+		var arr := src.surface_get_arrays(si)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var raw: Variant = arr[Mesh.ARRAY_COLOR]
+		var cols := PackedColorArray()
+		if raw is PackedColorArray:
+			cols = raw
+		if cols.size() != verts.size():
+			cols = PackedColorArray()
+			cols.resize(verts.size())
+			cols.fill(Color.WHITE)
+		for i in cols.size():
+			var c := cols[i]
+			cols[i] = Color(
+				1.0 - (1.0 - c.r) * keep,
+				1.0 - (1.0 - c.g) * keep,
+				1.0 - (1.0 - c.b) * keep,
+				c.a)
+		arr[Mesh.ARRAY_COLOR] = cols
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	return out

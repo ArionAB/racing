@@ -276,355 +276,401 @@ transform = Transform3D(-1.285333, 0.000000, 0.773252, 0.000000, 1.500000, 0.000
 transform = Transform3D(0.352019, 0.000000, 1.354396, 0.000000, 1.399395, 0.000000, -1.354396, 0.000000, 0.352019, 36.607903, 0.398514, 96.344856)
 
 [node name="umarGura33" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.705045, 0.000000, -0.936797, 0.000000, 1.172466, 0.000000, 0.936797, 0.000000, -0.705045, 25.548565, 0.060349, 141.199478)
+transform = Transform3D(-0.773275, 0.000000, -1.027454, 0.000000, 1.285930, 0.000000, 1.027454, 0.000000, -0.773275, 25.959503, 0.139526, 138.997711)
 
 [node name="umarSpate34" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.480121, 0.000000, -1.110981, 0.000000, 1.210287, 0.000000, 1.110981, 0.000000, -0.480121, 43.523094, 0.320679, 91.907608)
+transform = Transform3D(-0.480121, 0.000000, -1.110981, 0.000000, 1.210287, 0.000000, 1.110981, 0.000000, -0.480121, 43.157272, 0.312943, 93.873871)
 
 [node name="umarSpate35" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.611850, 0.000000, 0.817587, 0.000000, 1.021180, 0.000000, -0.817587, 0.000000, 0.611850, 36.555153, -0.204514, 147.762894)
+transform = Transform3D(0.679834, 0.000000, 0.908430, 0.000000, 1.134645, 0.000000, -0.908430, 0.000000, 0.679834, 37.329483, -0.061371, 143.594406)
 
-[node name="umarIesire36" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.734084, 0.000000, 1.009404, 0.000000, 1.248109, 0.000000, -1.009404, 0.000000, 0.734084, 79.886169, -0.284012, 146.629272)
+[node name="umarDreapta36" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(0.622859, 0.000000, 0.856464, 0.000000, 1.059002, 0.000000, -0.856464, 0.000000, 0.622859, 21.439989, 0.286179, 136.364349)
 
-[node name="umarIesire37" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.829960, 0.000000, -0.527408, 0.000000, 0.983359, 0.000000, 0.527408, 0.000000, -0.829960, 82.140884, 3.434158, 105.116425)
+[node name="umarDreapta37" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(-0.702274, 0.000000, -0.446269, 0.000000, 0.832073, 0.000000, 0.446269, 0.000000, -0.702274, 14.525796, 0.342926, 135.840866)
 
-[node name="creasta38" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.136206, 0.000000, 1.126440, 0.000000, 1.134645, 0.000000, -1.126440, 0.000000, 0.136206, 16.757879, 0.821228, 85.634979)
+[node name="umarIesire38" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(0.340400, 0.000000, 1.200793, 0.000000, 1.248109, 0.000000, -1.200793, 0.000000, 0.340400, 79.886169, -0.284012, 146.629272)
 
-[node name="creasta39" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.634059, 0.000000, -0.586457, 0.000000, 1.736111, 0.000000, 0.586457, 0.000000, 1.634059, -5.594995, 0.138840, 138.411697)
+[node name="umarIesire39" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(0.118045, 0.000000, 0.976248, 0.000000, 0.983359, 0.000000, -0.976248, 0.000000, 0.118045, 82.140884, 3.434158, 105.116425)
 
 [node name="creasta40" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.573242, 0.000000, 0.367238, 0.000000, 0.680787, 0.000000, -0.367238, 0.000000, 0.573242, 21.434765, 0.776520, 82.735428)
+transform = Transform3D(1.067948, 0.000000, -0.383282, 0.000000, 1.134645, 0.000000, 0.383282, 0.000000, 1.067948, 16.977163, 0.822968, 85.205811)
 
-[node name="creasta41" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.982368, 0.000000, 0.829801, 0.000000, 1.285930, 0.000000, -0.829801, 0.000000, 0.982368, 2.985471, -0.183731, 147.295044)
+[node name="creasta41" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(1.461856, 0.000000, 0.936514, 0.000000, 1.736111, 0.000000, -0.936514, 0.000000, 1.461856, -6.173154, 0.074677, 139.622284)
 
-[node name="creasta42" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-0.223033, 0.000000, -1.370864, 0.000000, 1.388889, 0.000000, 1.370864, 0.000000, -0.223033, 21.162910, 0.675705, 92.678963)
+[node name="creasta42" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(0.520077, 0.000000, 0.439306, 0.000000, 0.680787, 0.000000, -0.439306, 0.000000, 0.520077, 21.406605, 0.776093, 82.806183)
 
-[node name="creasta43" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.929171, 0.000000, -0.386934, 0.000000, 1.967593, 0.000000, 0.386934, 0.000000, 1.929171, 10.235046, 0.026001, 142.244568)
+[node name="creasta43" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(-0.206500, 0.000000, -1.269242, 0.000000, 1.285930, 0.000000, 1.269242, 0.000000, -0.206500, 3.334502, -0.139221, 146.173355)
 
-[node name="creasta44" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-1.210708, 0.000000, 0.622951, 0.000000, 1.361573, 0.000000, -0.622951, 0.000000, -1.210708, 25.075972, 0.710175, 82.978371)
+[node name="creasta44" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(1.361768, 0.000000, -0.273130, 0.000000, 1.388889, 0.000000, 0.273130, 0.000000, 1.361768, 21.152534, 0.675568, 92.715897)
 
 [node name="creasta45" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-1.173218, 0.000000, 0.942056, 0.000000, 1.504630, 0.000000, -0.942056, 0.000000, -1.173218, 18.818409, -0.142838, 146.476410)
+transform = Transform3D(-1.749579, 0.000000, 0.900219, 0.000000, 1.967593, 0.000000, -0.900219, 0.000000, -1.749579, 10.003298, -0.012878, 143.221008)
 
-[node name="creasta46" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(0.960462, 0.000000, 0.645836, 0.000000, 1.157407, 0.000000, -0.645836, 0.000000, 0.960462, 28.476101, 0.528259, 95.639214)
+[node name="creasta46" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(-1.061671, 0.000000, 0.852488, 0.000000, 1.361573, 0.000000, -0.852488, 0.000000, -1.061671, 24.861727, 0.692734, 84.571884)
 
-[node name="creasta47" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.791526, 0.000000, 0.256575, 0.000000, 0.832073, 0.000000, -0.256575, 0.000000, -0.791526, 22.124487, 0.061737, 141.289093)
+[node name="creasta47" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(1.248601, 0.000000, 0.839586, 0.000000, 1.504630, 0.000000, -0.839586, 0.000000, 1.248601, 18.548824, -0.215057, 148.291641)
 
-[node name="creastaSpate48" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.561587, 0.000000, 1.072108, 0.000000, 1.210287, 0.000000, -1.072108, 0.000000, -0.561587, 46.196548, 0.577942, 87.436157)
+[node name="creasta48" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(-1.101008, 0.000000, 0.356894, 0.000000, 1.157407, 0.000000, -0.356894, 0.000000, -1.101008, 28.239901, 0.522644, 97.006348)
 
-[node name="creastaSpate49" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.050458, 0.000000, 1.077241, 0.000000, 1.504630, 0.000000, -1.077241, 0.000000, 1.050458, 43.220436, -0.259247, 149.235016)
+[node name="creasta49" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(-0.386091, 0.000000, 0.737074, 0.000000, 0.832073, 0.000000, -0.737074, 0.000000, -0.386091, 21.939976, 0.023453, 142.280380)
 
 [node name="creastaSpate50" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.872614, 0.000000, 0.249984, 0.000000, 0.907716, 0.000000, -0.249984, 0.000000, 0.872614, 60.731297, 1.407425, 97.709114)
+transform = Transform3D(0.844963, 0.000000, 0.866506, 0.000000, 1.210287, 0.000000, -0.866506, 0.000000, 0.844963, 45.714745, 0.469406, 90.027496)
 
 [node name="creastaSpate51" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.685973, 0.000000, 0.766062, 0.000000, 1.851852, 0.000000, -0.766062, 0.000000, 1.685973, 58.359756, -0.274979, 149.476578)
+transform = Transform3D(1.446446, 0.000000, 0.414373, 0.000000, 1.504630, 0.000000, -0.414373, 0.000000, 1.446446, 43.802990, -0.161407, 146.097000)
 
 [node name="creastaSpate52" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(1.355484, 0.000000, -0.477758, 0.000000, 1.437216, 0.000000, 0.477758, 0.000000, 1.355484, 75.603638, 14.313171, 93.726517)
+transform = Transform3D(0.762228, 0.000000, 0.346336, 0.000000, 0.837222, 0.000000, -0.346336, 0.000000, 0.762228, 61.682518, 4.015427, 92.582741)
 
 [node name="creastaSpate53" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(0.346653, 0.000000, -1.582856, 0.000000, 1.620370, 0.000000, 1.582856, 0.000000, 0.346653, 79.949921, -0.292450, 151.085236)
+transform = Transform3D(1.746540, 0.000000, -0.615591, 0.000000, 1.851852, 0.000000, 0.615591, 0.000000, 1.746540, 58.233307, -0.277054, 150.065063)
 
-[node name="acaciaIntrare54" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="creastaSpate54" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
+transform = Transform3D(0.211242, 0.000000, -0.964554, 0.000000, 0.987415, 0.000000, 0.964554, 0.000000, 0.211242, 75.637115, 14.716141, 93.433525)
+
+[node name="creastaSpate55" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(1.343996, 0.000000, -0.905138, 0.000000, 1.620370, 0.000000, 0.905138, 0.000000, 1.343996, 79.940613, -0.291443, 150.434494)
+
+[node name="acaciaIntrare56" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(0.825336, 0.000000, 0.564642, 0.000000, 1.000000, 0.000000, -0.564642, 0.000000, 0.825336, 13.343674, 0.544754, 129.146805)
 metadata/coliziune = "trunk"
 
-[node name="acaciaIntrare55" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acaciaIntrare57" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.617926, 0.000000, 0.848921, 0.000000, 1.050000, 0.000000, -0.848921, 0.000000, -0.617926, 14.270689, 0.740311, 100.735001)
 metadata/coliziune = "trunk"
 
-[node name="acaciaIntrare56" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="acaciaIntrare58" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(-0.653644, 0.000000, -0.756802, 0.000000, 1.000000, 0.000000, 0.756802, 0.000000, -0.653644, -9.722426, 0.850204, 121.748573)
 metadata/coliziune = "trunk"
 
-[node name="acaciaIntrare57" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acaciaIntrare59" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.161469, 0.000000, 0.936177, 0.000000, 0.950000, 0.000000, -0.936177, 0.000000, 0.161469, -5.282664, 1.133789, 91.174217)
 metadata/coliziune = "trunk"
 
-[node name="acaciaIntrare58" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="acaciaIntrare60" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(-1.099049, 0.000000, 0.045739, 0.000000, 1.100000, 0.000000, -0.045739, 0.000000, -1.099049, -29.433140, 1.313065, 108.663193)
 metadata/coliziune = "trunk"
 
-[node name="copacUscat59" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_dead_tree")]
+[node name="copacUscat61" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_dead_tree")]
 transform = Transform3D(0.766377, 0.000000, 0.789092, 0.000000, 1.100000, 0.000000, -0.789092, 0.000000, 0.766377, 12.130363, 0.820221, 94.691444)
 metadata/coliziune = "trunk"
 
-[node name="tufaApropiere60" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.179735, 0.000000, 0.503113, 0.000000, 0.534254, 0.000000, -0.503113, 0.000000, 0.179735, -22.276592, 1.483017, 81.659729)
-metadata/coliziune = "none"
-
-[node name="tufaApropiere61" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.568338, 0.000000, 0.055995, 0.000000, 0.571089, 0.000000, -0.055995, 0.000000, 0.568338, -35.023335, 1.472366, 101.562729)
-metadata/coliziune = "none"
-
 [node name="piatraApropiere62" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.300651, 0.000000, 0.618540, 0.000000, 0.687738, 0.000000, -0.618540, 0.000000, -0.300651, -14.581095, 1.354797, 82.761398)
+transform = Transform3D(-0.427979, 0.000000, -0.062547, 0.000000, 0.432525, 0.000000, 0.062547, 0.000000, -0.427979, -22.936684, 1.482208, 82.690414)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere63" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.181915, 0.000000, -0.456176, 0.000000, 0.491111, 0.000000, 0.456176, 0.000000, 0.181915, -14.316200, 1.301147, 87.736603)
+[node name="tufaApropiere63" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.568338, 0.000000, 0.055995, 0.000000, 0.571089, 0.000000, -0.055995, 0.000000, 0.568338, -22.401342, 1.482849, 81.854523)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere64" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.519546, 0.000000, -0.357890, 0.000000, 0.630883, 0.000000, 0.357890, 0.000000, -0.519546, -27.535776, 1.328400, 105.354218)
+[node name="tufaApropiere64" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.029683, 0.000000, -0.429477, 0.000000, 0.430502, 0.000000, 0.429477, 0.000000, 0.029683, -36.449261, 1.486084, 101.431381)
 metadata/coliziune = "none"
 
-[node name="tufaApropiere65" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.475669, 0.000000, -0.056539, 0.000000, 0.479017, 0.000000, 0.056539, 0.000000, -0.475669, -7.550241, 1.206848, 86.827950)
+[node name="piatraApropiere65" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.601659, 0.000000, -0.261094, 0.000000, 0.655869, 0.000000, 0.261094, 0.000000, -0.601659, -13.640179, 1.301636, 86.572067)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere66" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.348460, 0.000000, -0.086855, 0.000000, 0.359122, 0.000000, 0.086855, 0.000000, -0.348460, -4.253442, 1.183838, 84.327866)
+transform = Transform3D(-0.519546, 0.000000, -0.357890, 0.000000, 0.630883, 0.000000, 0.357890, 0.000000, -0.519546, -16.636522, 1.349350, 86.346039)
 metadata/coliziune = "none"
 
 [node name="tufaApropiere67" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.078287, 0.000000, -0.583069, 0.000000, 0.588301, 0.000000, 0.583069, 0.000000, 0.078287, -21.626892, 1.106796, 113.304512)
+transform = Transform3D(0.478016, 0.000000, 0.040248, 0.000000, 0.479707, 0.000000, -0.040248, 0.000000, 0.478016, -31.655090, 1.391159, 112.538254)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere68" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.489808, 0.000000, 0.498279, 0.000000, 0.698709, 0.000000, -0.498279, 0.000000, 0.489808, 1.103981, 1.085129, 85.654221)
+transform = Transform3D(-0.118286, 0.000000, -0.529442, 0.000000, 0.542495, 0.000000, 0.529442, 0.000000, -0.118286, -25.941360, 1.284058, 107.762314)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere69" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.309514, 0.000000, 0.084318, 0.000000, 0.320793, 0.000000, -0.084318, 0.000000, -0.309514, -15.599526, 1.061508, 113.519470)
+[node name="tufaApropiere69" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.078287, 0.000000, -0.583069, 0.000000, 0.588301, 0.000000, 0.583069, 0.000000, 0.078287, -9.267736, 1.239182, 86.166519)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere70" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.264818, 0.000000, -0.327533, 0.000000, 0.421197, 0.000000, 0.327533, 0.000000, -0.264818, -15.650900, 1.060898, 113.605179)
+[node name="tufaApropiere70" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.357209, 0.000000, 0.134216, 0.000000, 0.381591, 0.000000, -0.134216, 0.000000, -0.357209, -25.652309, 1.051743, 117.006355)
 metadata/coliziune = "none"
 
-[node name="tufaApropiere71" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.438386, 0.000000, -0.308682, 0.000000, 0.536160, 0.000000, 0.308682, 0.000000, 0.438386, 2.519230, 0.966110, 97.096985)
+[node name="piatraApropiere71" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.022572, 0.000000, -0.493902, 0.000000, 0.494418, 0.000000, 0.493902, 0.000000, -0.022572, -24.138935, 1.105423, 114.483368)
 metadata/coliziune = "none"
 
-[node name="tufaApropiere72" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.171042, 0.000000, 0.309995, 0.000000, 0.354051, 0.000000, -0.309995, 0.000000, -0.171042, 1.922898, 0.967194, 98.022881)
+[node name="piatraApropiere72" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.264818, 0.000000, -0.327533, 0.000000, 0.421197, 0.000000, 0.327533, 0.000000, -0.264818, -5.575706, 1.133896, 91.663116)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere73" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.291126, 0.000000, 0.180353, 0.000000, 0.342464, 0.000000, -0.180353, 0.000000, 0.291126, -12.089952, 0.897247, 119.779892)
+[node name="tufaApropiere73" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.366128, 0.000000, -0.120188, 0.000000, 0.385350, 0.000000, 0.120188, 0.000000, -0.366128, -3.572536, 1.133270, 88.321075)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere74" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.432119, 0.000000, -0.011686, 0.000000, 0.432277, 0.000000, 0.011686, 0.000000, 0.432119, -10.488031, 0.965820, 117.292671)
+transform = Transform3D(0.174763, 0.000000, 0.345755, 0.000000, 0.387413, 0.000000, -0.345755, 0.000000, 0.174763, -3.121047, 1.087616, 92.702530)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere75" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.171352, 0.000000, 0.366174, 0.000000, 0.404283, 0.000000, -0.366174, 0.000000, 0.171352, 9.115969, 0.829849, 100.590881)
+transform = Transform3D(0.160886, 0.000000, 0.320074, 0.000000, 0.358234, 0.000000, -0.320074, 0.000000, 0.160886, -17.260069, 1.125168, 111.157036)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere76" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.372469, 0.000000, 0.626692, 0.000000, 0.729024, 0.000000, -0.626692, 0.000000, 0.372469, 9.293734, 0.829224, 100.242989)
+[node name="tufaApropiere76" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.422420, 0.000000, -0.231290, 0.000000, 0.481595, 0.000000, 0.231290, 0.000000, 0.422420, -17.068134, 1.127579, 110.836815)
 metadata/coliziune = "none"
 
 [node name="tufaApropiere77" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.477617, 0.000000, -0.118574, 0.000000, 0.492115, 0.000000, 0.118574, 0.000000, -0.477617, -3.505195, 0.818619, 121.059715)
+transform = Transform3D(-0.094462, 0.000000, -0.448827, 0.000000, 0.458660, 0.000000, 0.448827, 0.000000, -0.094462, 3.077455, 1.020676, 89.196045)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere78" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.229430, 0.000000, 0.314196, 0.000000, 0.389047, 0.000000, -0.314196, 0.000000, 0.229430, -1.668710, 0.799911, 121.697479)
+transform = Transform3D(-0.050223, 0.000000, -0.506486, 0.000000, 0.508970, 0.000000, 0.506486, 0.000000, -0.050223, -1.024940, 1.028641, 95.912498)
 metadata/coliziune = "none"
 
 [node name="tufaApropiere79" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.451555, 0.000000, 0.277197, 0.000000, 0.529849, 0.000000, -0.277197, 0.000000, 0.451555, 14.098398, 0.767883, 97.176453)
+transform = Transform3D(0.049698, 0.000000, -0.430576, 0.000000, 0.433435, 0.000000, 0.430576, 0.000000, 0.049698, -12.751990, 0.967438, 118.178848)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere80" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.507183, 0.000000, -0.183230, 0.000000, 0.539266, 0.000000, 0.183230, 0.000000, -0.507183, 14.954867, 0.739853, 99.016022)
+transform = Transform3D(-0.338695, 0.000000, -0.567626, 0.000000, 0.660994, 0.000000, 0.567626, 0.000000, -0.338695, -12.726881, 1.009094, 115.070946)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere81" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.236792, 0.000000, 0.226376, 0.000000, 0.327592, 0.000000, -0.226376, 0.000000, 0.236792, 13.046286, 0.738388, 103.811287)
+transform = Transform3D(-0.463385, 0.000000, 0.012475, 0.000000, 0.463553, 0.000000, -0.012475, 0.000000, -0.463385, -12.109694, 1.014160, 114.060486)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere82" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.646467, 0.000000, -0.177885, 0.000000, 0.670494, 0.000000, 0.177885, 0.000000, 0.646467, 1.659379, 0.744293, 123.222046)
+transform = Transform3D(0.074059, 0.000000, 0.727497, 0.000000, 0.731257, 0.000000, -0.727497, 0.000000, 0.074059, 5.955791, 0.887589, 100.275391)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere83" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.220751, 0.000000, 0.239928, 0.000000, 0.326031, 0.000000, -0.239928, 0.000000, 0.220751, 1.870893, 0.745651, 122.779160)
+transform = Transform3D(-0.231335, 0.000000, 0.613455, 0.000000, 0.655624, 0.000000, -0.613455, 0.000000, -0.231335, 6.485373, 0.885712, 99.325027)
 metadata/coliziune = "none"
 
-[node name="tufaApropiere84" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.271798, 0.000000, -0.369735, 0.000000, 0.458888, 0.000000, 0.369735, 0.000000, -0.271798, 16.345543, 0.667694, 104.359444)
+[node name="piatraApropiere84" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.537142, 0.000000, -0.075181, 0.000000, 0.542378, 0.000000, 0.075181, 0.000000, -0.537142, 6.446611, 0.920746, 95.171814)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere85" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.680724, 0.000000, 0.009151, 0.000000, 0.680786, 0.000000, -0.009151, 0.000000, 0.680724, 11.482596, 0.585327, 127.133560)
+transform = Transform3D(-0.369237, 0.000000, 0.158733, 0.000000, 0.401911, 0.000000, -0.158733, 0.000000, -0.369237, -5.349308, 0.827469, 120.562866)
 metadata/coliziune = "none"
 
-[node name="tufaApropiere86" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.543432, 0.000000, -0.163587, 0.000000, 0.567520, 0.000000, 0.163587, 0.000000, 0.543432, 8.148920, 0.512039, 130.701126)
+[node name="piatraApropiere86" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.565795, 0.000000, -0.290791, 0.000000, 0.636147, 0.000000, 0.290791, 0.000000, 0.565795, -7.076726, 0.922470, 117.399887)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere87" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.032840, 0.000000, 0.403751, 0.000000, 0.405085, 0.000000, -0.403751, 0.000000, -0.032840, 22.523977, 0.569641, 101.959618)
+[node name="tufaApropiere87" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.271798, 0.000000, -0.369735, 0.000000, 0.458888, 0.000000, 0.369735, 0.000000, -0.271798, -7.479671, 0.918564, 118.062195)
 metadata/coliziune = "none"
 
 [node name="tufaApropiere88" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.019529, 0.000000, -0.352367, 0.000000, 0.352908, 0.000000, 0.352367, 0.000000, -0.019529, 20.676224, 0.611008, 100.703949)
+transform = Transform3D(0.333645, 0.000000, -0.483131, 0.000000, 0.587141, 0.000000, 0.483131, 0.000000, 0.333645, 8.970829, 0.830353, 100.874939)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere89" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.443212, 0.000000, -0.047370, 0.000000, 0.445736, 0.000000, 0.047370, 0.000000, 0.443212, 15.835458, 0.532822, 128.358871)
+transform = Transform3D(0.455423, 0.000000, -0.484487, 0.000000, 0.664934, 0.000000, 0.484487, 0.000000, 0.455423, 7.279646, 0.861923, 100.465340)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere90" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.618030, 0.000000, 0.052673, 0.000000, 0.620270, 0.000000, -0.052673, 0.000000, -0.618030, 14.787262, 0.417618, 134.347122)
+[node name="tufaApropiere90" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.141326, 0.000000, -0.578060, 0.000000, 0.595085, 0.000000, 0.578060, 0.000000, -0.141326, 12.131786, 0.792374, 98.583778)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere91" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.056800, 0.000000, 0.498545, 0.000000, 0.501770, 0.000000, -0.498545, 0.000000, -0.056800, 24.646523, 0.520020, 107.233376)
+[node name="tufaApropiere91" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.019529, 0.000000, -0.352367, 0.000000, 0.352908, 0.000000, 0.352367, 0.000000, -0.019529, -3.765141, 0.753738, 125.800385)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere92" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.245543, 0.000000, 0.582020, 0.000000, 0.631695, 0.000000, -0.582020, 0.000000, 0.245543, 24.940752, 0.523041, 105.252205)
+transform = Transform3D(-0.386814, 0.000000, 0.562061, 0.000000, 0.682303, 0.000000, -0.562061, 0.000000, -0.386814, -2.697162, 0.663666, 127.763809)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere93" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.161102, 0.000000, -0.262699, 0.000000, 0.308163, 0.000000, 0.262699, 0.000000, -0.161102, 19.023094, 0.505920, 127.998520)
+transform = Transform3D(-0.455417, 0.000000, -0.112440, 0.000000, 0.469092, 0.000000, 0.112440, 0.000000, -0.455417, -2.152541, 0.712097, 126.692116)
 metadata/coliziune = "none"
 
 [node name="tufaApropiere94" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.428548, 0.000000, -0.230414, 0.000000, 0.486564, 0.000000, 0.230414, 0.000000, 0.428548, 21.399521, 0.473633, 129.096756)
+transform = Transform3D(-0.396038, 0.000000, -0.189322, 0.000000, 0.438964, 0.000000, 0.189322, 0.000000, -0.396038, 13.401791, 0.739624, 102.918083)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere95" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.062029, 0.000000, -0.448269, 0.000000, 0.452540, 0.000000, 0.448269, 0.000000, -0.062029, 26.588976, 0.496704, 106.561928)
+transform = Transform3D(-0.719394, 0.000000, 0.009722, 0.000000, 0.719459, 0.000000, -0.009722, 0.000000, -0.719394, 13.331682, 0.739578, 103.094231)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere96" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.599206, 0.000000, -0.127768, 0.000000, 0.612676, 0.000000, 0.127768, 0.000000, 0.599206, 26.647202, 0.496979, 106.224915)
+transform = Transform3D(0.368818, 0.000000, 0.469985, 0.000000, 0.597422, 0.000000, -0.469985, 0.000000, 0.368818, 3.304875, 0.607483, 128.286346)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere97" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.309557, 0.000000, 0.275204, 0.000000, 0.414202, 0.000000, -0.275204, 0.000000, -0.309557, 28.444166, 0.470093, 107.336227)
+transform = Transform3D(0.276805, 0.000000, -0.318905, 0.000000, 0.422281, 0.000000, 0.318905, 0.000000, 0.276805, 2.276045, 0.748245, 121.930832)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere98" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.192893, 0.000000, 0.713613, 0.000000, 0.739224, 0.000000, -0.713613, 0.000000, 0.192893, 22.872007, 0.467636, 128.075806)
+transform = Transform3D(0.448767, 0.000000, 0.059030, 0.000000, 0.452633, 0.000000, -0.059030, 0.000000, 0.448767, 17.539715, 0.633301, 105.574806)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere99" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.066055, 0.000000, -0.473190, 0.000000, 0.477778, 0.000000, 0.473190, 0.000000, -0.066055, 21.659239, 0.341400, 135.095322)
+transform = Transform3D(0.227809, 0.000000, 0.460257, 0.000000, 0.513550, 0.000000, -0.460257, 0.000000, 0.227809, 17.860342, 0.679794, 99.491295)
 metadata/coliziune = "none"
 
-[node name="tufaApropiere100" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.060092, 0.000000, -0.380425, 0.000000, 0.385142, 0.000000, 0.380425, 0.000000, -0.060092, 21.837297, 0.386230, 134.064713)
+[node name="piatraApropiere100" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.628829, 0.000000, 0.010648, 0.000000, 0.628919, 0.000000, -0.010648, 0.000000, -0.628829, 18.531403, 0.686249, 97.334694)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere101" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.056420, 0.000000, 0.300033, 0.000000, 0.305292, 0.000000, -0.300033, 0.000000, -0.056420, 32.248863, 0.422729, 105.299744)
+[node name="tufaApropiere101" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.414022, 0.000000, 0.380769, 0.000000, 0.562494, 0.000000, -0.380769, 0.000000, -0.414022, 9.846835, 0.651199, 125.244499)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere102" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.572670, 0.000000, 0.227168, 0.000000, 0.616082, 0.000000, -0.227168, 0.000000, 0.572670, 31.051928, 0.446014, 103.266098)
+transform = Transform3D(-0.020843, 0.000000, 0.605202, 0.000000, 0.605561, 0.000000, -0.605202, 0.000000, -0.020843, 13.438796, 0.551056, 128.746017)
 metadata/coliziune = "none"
 
 [node name="piatraApropiere103" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.321218, 0.000000, -0.402430, 0.000000, 0.514908, 0.000000, 0.402430, 0.000000, -0.321218, 25.021544, 0.282227, 135.624374)
+transform = Transform3D(0.313029, 0.000000, 0.117938, 0.000000, 0.334510, 0.000000, -0.117938, 0.000000, 0.313029, 10.125511, 0.488556, 131.963760)
 metadata/coliziune = "none"
 
-[node name="piatraApropiere104" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.072598, 0.000000, -0.365085, 0.000000, 0.372233, 0.000000, 0.365085, 0.000000, -0.072598, 26.425726, 0.229309, 136.499725)
+[node name="tufaApropiere104" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.489293, 0.000000, -0.028210, 0.000000, 0.490106, 0.000000, 0.028210, 0.000000, -0.489293, 22.393623, 0.567352, 102.929161)
 metadata/coliziune = "none"
 
-[node name="tufaApropiere105" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.004727, 0.000000, -0.567537, 0.000000, 0.567557, 0.000000, 0.567537, 0.000000, 0.004727, 25.563080, 0.376099, 132.718552)
+[node name="piatraApropiere105" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.162894, 0.000000, 0.634427, 0.000000, 0.655006, 0.000000, -0.634427, 0.000000, -0.162894, 21.831591, 0.559021, 107.109459)
 metadata/coliziune = "none"
 
-[node name="acaciaPeste106" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="piatraApropiere106" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.149341, 0.000000, 0.445729, 0.000000, 0.470082, 0.000000, -0.445729, 0.000000, -0.149341, 19.053373, 0.509552, 127.773300)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere107" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.133021, 0.000000, -0.734502, 0.000000, 0.746450, 0.000000, 0.734502, 0.000000, -0.133021, 18.961597, 0.499802, 128.455917)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere108" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.225929, 0.000000, -0.239907, 0.000000, 0.329544, 0.000000, 0.239907, 0.000000, 0.225929, 24.581081, 0.519547, 107.674011)
+metadata/coliziune = "none"
+
+[node name="tufaApropiere109" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.577025, 0.000000, -0.132471, 0.000000, 0.592036, 0.000000, 0.132471, 0.000000, 0.577025, 24.691233, 0.520370, 106.932320)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere110" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.246681, 0.000000, -0.352628, 0.000000, 0.430346, 0.000000, 0.352628, 0.000000, -0.246681, 21.486801, 0.480774, 128.509048)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere111" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.179957, 0.000000, 0.623940, 0.000000, 0.649374, 0.000000, -0.623940, 0.000000, -0.179957, 22.689718, 0.455215, 129.130890)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere112" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.565235, 0.000000, -0.021878, 0.000000, 0.565658, 0.000000, 0.021878, 0.000000, -0.565235, 22.625727, 0.450836, 129.501282)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere113" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.442868, 0.000000, 0.063509, 0.000000, 0.447398, 0.000000, -0.063509, 0.000000, 0.442868, 29.621223, 0.476349, 101.012421)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere114" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.395166, 0.000000, 0.175696, 0.000000, 0.432464, 0.000000, -0.175696, 0.000000, -0.395166, 26.470127, 0.420761, 127.851456)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere115" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.437288, 0.000000, -0.235601, 0.000000, 0.496718, 0.000000, 0.235601, 0.000000, -0.437288, 23.318707, 0.334122, 134.873077)
+metadata/coliziune = "none"
+
+[node name="piatraApropiere116" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(-0.038021, 0.000000, -0.348115, 0.000000, 0.350185, 0.000000, 0.348115, 0.000000, -0.038021, 24.320358, 0.427429, 129.491638)
+metadata/coliziune = "none"
+
+[node name="acaciaPeste117" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(0.621348, 0.000000, 0.967692, 0.000000, 1.150000, 0.000000, -0.967692, 0.000000, 0.621348, 53.658089, 2.572128, 84.543846)
 metadata/coliziune = "trunk"
 
-[node name="acaciaCampie107" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acaciaCampie118" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.980067, 0.000000, 0.198669, 0.000000, 1.000000, 0.000000, -0.198669, 0.000000, 0.980067, 96.251625, -0.298431, 135.822784)
 metadata/coliziune = "trunk"
 
-[node name="acaciaCampie108" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="acaciaCampie119" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(-0.970958, 0.000000, 0.239249, 0.000000, 1.000000, 0.000000, -0.239249, 0.000000, -0.970958, 98.515465, -0.253952, 112.029137)
 metadata/coliziune = "trunk"
 
-[node name="acaciaCampie109" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="acaciaCampie120" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(-0.122402, 0.000000, 0.942082, 0.000000, 0.950000, 0.000000, -0.942082, 0.000000, -0.122402, 114.472534, -0.299225, 133.214630)
 metadata/coliziune = "trunk"
 
-[node name="acaciaCampie110" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acaciaCampie121" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.941596, 0.000000, -0.464646, 0.000000, 1.050000, 0.000000, 0.464646, 0.000000, -0.941596, 120.947556, -0.298096, 109.926315)
 metadata/coliziune = "trunk"
 
-[node name="acaciaCampie111" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="acaciaCampie122" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(0.683771, 0.000000, 0.861660, 0.000000, 1.100000, 0.000000, -0.861660, 0.000000, 0.683771, 138.665482, -0.299744, 132.179825)
 metadata/coliziune = "trunk"
 
-[node name="acaciaCampie112" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="acaciaCampie123" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(-0.666276, 0.000000, 0.745705, 0.000000, 1.000000, 0.000000, -0.745705, 0.000000, -0.666276, 144.344086, -0.299911, 104.678535)
 metadata/coliziune = "trunk"
 
-[node name="acaciaMijloc113" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="acaciaMijloc124" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(1.013167, 0.000000, 0.428360, 0.000000, 1.100000, 0.000000, -0.428360, 0.000000, 1.013167, 101.880859, -0.298004, 150.179276)
 metadata/coliziune = "trunk"
 
-[node name="acaciaMijloc114" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="acaciaMijloc125" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(-0.436954, 0.000000, 0.954762, 0.000000, 1.050000, 0.000000, -0.954762, 0.000000, -0.436954, 112.594948, 12.254166, 92.514397)
 metadata/coliziune = "trunk"
 
-[node name="acaciaMijloc115" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acaciaMijloc126" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.362358, 0.000000, 0.932039, 0.000000, 1.000000, 0.000000, -0.932039, 0.000000, 0.362358, 144.541199, -0.299957, 150.148560)
 metadata/coliziune = "trunk"
 
-[node name="copacUscat116" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_dead_tree")]
+[node name="copacUscat127" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_dead_tree")]
 transform = Transform3D(-0.801144, 0.000000, 0.598472, 0.000000, 1.000000, 0.000000, -0.598472, 0.000000, -0.801144, 110.757431, -0.295410, 141.891205)
 metadata/coliziune = "trunk"
 
-[node name="euphorbiaCampie117" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.112164, 0.000000, 0.786922, 0.000000, 0.794875, 0.000000, -0.786922, 0.000000, 0.112164, 112.954170, -0.299194, 133.500961)
+[node name="euphorbiaCampie128" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.971554, 0.000000, -0.192367, 0.000000, 0.990416, 0.000000, 0.192367, 0.000000, -0.971554, 86.543640, -0.170273, 114.044266)
 metadata/coliziune = "trunk"
 
-[node name="euphorbiaCampie118" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.176729, 0.000000, 0.694500, 0.000000, 0.716633, 0.000000, -0.694500, 0.000000, -0.176729, 117.224213, -0.292999, 109.726158)
+[node name="euphorbiaCampie129" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.742728, 0.000000, 0.598546, 0.000000, 0.953888, 0.000000, -0.598546, 0.000000, 0.742728, 98.114922, -0.294128, 138.501251)
 metadata/coliziune = "trunk"
 
-[node name="euphorbiaCampie119" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.990653, 0.000000, -0.096871, 0.000000, 0.995378, 0.000000, 0.096871, 0.000000, -0.990653, 126.456734, -0.299545, 132.101273)
+[node name="euphorbiaCampie130" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.572944, 0.000000, 0.624147, 0.000000, 0.847245, 0.000000, -0.624147, 0.000000, -0.572944, 101.464493, -0.275497, 113.526382)
 metadata/coliziune = "trunk"
 
-[node name="euphorbiaCampie120" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.147810, 0.000000, -0.883365, 0.000000, 0.895646, 0.000000, 0.883365, 0.000000, 0.147810, 131.103729, -0.299866, 108.842522)
+[node name="euphorbiaCampie131" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.179951, 0.000000, -0.767512, 0.000000, 0.788325, 0.000000, 0.767512, 0.000000, 0.179951, 113.167564, -0.298553, 134.701157)
 metadata/coliziune = "trunk"
 
-[node name="euphorbiaCampie121" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.695234, 0.000000, -0.553865, 0.000000, 0.888885, 0.000000, 0.553865, 0.000000, 0.695234, 143.612198, -0.299835, 129.862396)
+[node name="euphorbiaCampie132" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.202879, 0.000000, 0.928465, 0.000000, 0.950372, 0.000000, -0.928465, 0.000000, -0.202879, 117.219116, -0.292313, 109.697495)
 metadata/coliziune = "trunk"
 
-[node name="piatraCazuta122" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.722934, 0.000000, -0.461030, 0.000000, 0.857427, 0.000000, 0.461030, 0.000000, -0.722934, 89.285362, -0.285217, 141.222260)
+[node name="euphorbiaCampie133" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.259787, 0.000000, 0.957421, 0.000000, 0.992041, 0.000000, -0.957421, 0.000000, -0.259787, 126.108917, -0.299652, 130.143051)
+metadata/coliziune = "trunk"
 
-[node name="piatraCazuta123" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.867061, 0.000000, -0.314297, 0.000000, 0.922267, 0.000000, 0.314297, 0.000000, 0.867061, 94.556702, 0.407959, 108.967537)
+[node name="piatraCazuta134" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.720687, 0.000000, -0.416420, 0.000000, 0.832343, 0.000000, 0.416420, 0.000000, 0.720687, 89.188332, -0.286682, 140.491852)
+
+[node name="piatraCazuta135" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.117729, 0.000000, -0.706185, 0.000000, 0.715931, 0.000000, 0.706185, 0.000000, 0.117729, 94.713425, -0.068848, 109.849380)
 metadata/coliziune = "none"
 
-[node name="piatraCazuta124" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.779038, 0.000000, 0.594482, 0.000000, 0.979954, 0.000000, -0.594482, 0.000000, -0.779038, 109.908417, -0.297089, 137.113922)
+[node name="piatraCazuta136" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.021603, 0.000000, 0.773855, 0.000000, 0.774157, 0.000000, -0.773855, 0.000000, 0.021603, 110.275108, -0.295807, 139.177261)
 metadata/coliziune = "none"
 
-[node name="piatraCazuta125" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.429981, 0.000000, 0.811459, 0.000000, 0.918341, 0.000000, -0.811459, 0.000000, -0.429981, 115.784981, -0.299316, 110.456436)
+[node name="piatraCazuta137" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_b")]
+transform = Transform3D(0.306051, 0.000000, -0.722290, 0.000000, 0.784455, 0.000000, 0.722290, 0.000000, 0.306051, 114.795952, 0.331787, 104.893768)
 
-[node name="piatraCazuta126" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.210902, 0.000000, -0.748956, 0.000000, 0.778084, 0.000000, 0.748956, 0.000000, -0.210902, 129.152847, -0.299606, 132.174606)
+[node name="piatraCazuta138" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_a")]
+transform = Transform3D(0.393134, 0.000000, 0.665836, 0.000000, 0.773235, 0.000000, -0.665836, 0.000000, 0.393134, 129.712540, -0.299286, 135.325592)
 metadata/coliziune = "none"
 

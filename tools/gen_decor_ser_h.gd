@@ -356,8 +356,25 @@ const H1 := {
 ## pe boulder_c, ca dala triplanara sa nu se intinda vizibil.
 func _place_h(base: String, frac: float, side_sign: float, gap: float,
 		h_m: float) -> void:
-	var model := "kopje_camp" if h_m >= 9.0 else "kopje_boulder_c"
-	var scl: float = h_m / float(H1[model])
+	# Inaltimea ceruta e fata de SOSEA, nu fata de solul de sub piesa. Unde
+	# terenul urca lateral, o masa de 19 m pe un dambovic de 14 m are varful la
+	# 33 m si citeste ca stanca atarnata in cer, desprinsa de peisaj — asa
+	# arata `creastaSpate52` in `H_r2_hero.png`, coltul din dreapta sus. Deci
+	# se scade cota terenului din inaltimea ceruta, si sub 3,5 m ramasi piesa
+	# se sare: acolo dealul face treaba, nu bolovanul.
+	var i := _idx(frac)
+	var p := _track.baked[i]
+	var s := _track._side_at(i) * side_sign
+	var half := _track.width_at_index(i)
+	var q := p + s * (half + gap)
+	var ridicat: float = _sol_real(q.x, q.z) - p.y
+	var h_ef: float = h_m - maxf(ridicat, 0.0)
+	if h_ef < 3.5:
+		print("; SARIT %s la frac %.4f: terenul urca %.1f m, ar ramane %.1f m de piesa" % [
+			base, frac, ridicat, h_ef])
+		return
+	var model := "kopje_camp" if h_ef >= 9.0 else "kopje_boulder_c"
+	var scl: float = h_ef / float(H1[model])
 	_place(model, base, frac, side_sign, gap, _rng.randf_range(0.0, TAU), scl, "hull")
 
 
@@ -392,11 +409,18 @@ func _umerii_gurii() -> void:
 	# Asimetrice ca inaltime (18 / 15,5 m): doua mase egale citesc ca poarta
 	# de fabrica, referinta are o stanca vizibil mai mare decat cealalta.
 	_place_h("umarGura", entry - 0.0006, -1.0, 6.5, 18.5)
-	_place_h("umarGura", entry - 0.0014, 1.0, 7.5, 15.5)
+	_place_h("umarGura", entry - 0.0014, 1.0, 4.5, 17.0)
 	# A doua pereche, in spatele primei si mai departe lateral: masa continua
 	# dincolo de gura, deci silueta nu cade brusc la iarba dupa umeri.
-	_place_h("umarSpate", entry + 0.0022, -1.0, 14.0, 16.0)
-	_place_h("umarSpate", entry + 0.0040, 1.0, 15.5, 13.5)
+	_place_h("umarSpate", entry + 0.0022, -1.0, 12.0, 16.0)
+	_place_h("umarSpate", entry + 0.0040, 1.0, 9.0, 15.0)
+	# Umarul din DREAPTA cadrului erou: in `H_r2_hero.png` stanga era inchisa
+	# de o masa care iese din cadru, iar dreapta ramasese cu cer si orizont
+	# pana jos. Cauza: garda de traseu strain trage piesele din dreapta inapoi
+	# spre ax (traseul se intoarce pe z=165 pe partea aia), deci ce era departe
+	# lateral a fost sarit. Se compenseaza cu piese APROAPE, nu departe.
+	_place_h("umarDreapta", entry - 0.0042, 1.0, 3.5, 14.0)
+	_place_h("umarDreapta", entry - 0.0072, 1.0, 5.0, 11.0)
 	# La IESIRE, ca taietura sa se inchida si in oglinda retrovizoare si in
 	# cadrul de context de la 0.858 (unde privesti prin gura spre campie).
 	_place_h("umarIesire", exit + 0.0014, 1.0, 7.0, 16.5)

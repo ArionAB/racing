@@ -591,14 +591,32 @@ func _pereche_prim_plan(f: float, sgn: float, push: float) -> void:
 	# .tscn-ul rezultat. Fereastra utila din proiectie e 11,8-14,2 m: sub ea
 	# marginea piesei intra in carosabil (half 9,0 + raza), peste 14,2 piesa
 	# iese lateral din cadru la z=-4 m.
-	var gap: float = -(_rng.randf_range(11.8, 13.4) + push)
-	var h_m: float = _rng.randf_range(2.5, 4.5)
+	# RUNDA 5. Criticul rundei 4 a numit podeaua de savana: pe tot cadrul
+	# (y>0.18H) iarba masura 15 % la noi fata de 61 % in bara, iar drumul 41 %
+	# fata de 14 %. Cauza nu e ca lipseste iarba din teren, ci ca nu se VEDE:
+	# cu lateralul 11,8-13,4 m si `half_width` 9,0, marginea unei mase de
+	# granit (raza 2-3 m dupa scara) ajunge la 0-2 m de asfalt — granitul creste
+	# direct din umar si strange podeaua intr-o fasie de sub un metru, exact
+	# cum se vede in captura. In bara, intre laterit si primul bloc sunt 6-10 m
+	# de iarba pe fiecare parte, si de aia drumul citeste ca panglica PRIN
+	# lume, nu ca albie de cariera.
+	#
+	# Deci lateralul urca la 16-20 m. Verificat pe proiectie sa nu repet
+	# greseala rundei 3 (piese in afara cadrului): la z=-4 m fata de masina un
+	# punct la x=18 cade la px -300 din 1280, adica in afara — DAR piesele
+	# astea nu mai sunt cerute in coltul de jos, banda de jos si-a atins pragul
+	# in runda 4 (stanca 16,1 % fata de 12 % cerut). Rolul lor acum e la 15-40 m
+	# in fata, unde x=18 e bine in cadru (la z=+20 m, px 455). Ca sa nu piara
+	# din prim-plan cu totul, inaltimile cresc odata cu lateralul: la 18 m si
+	# z=-4 o masa de 5 m are varful la y/H=0.60, deci tot in treimea de jos.
+	var gap: float = -(_rng.randf_range(16.0, 19.0) + push)
+	var h_m: float = _rng.randf_range(3.5, 6.0)
 	_place_h("primPlan", f, sgn, gap, h_m, "none")
 	# a doua masa, mai mica si mai in spate: in bara granitul vine in grupuri,
 	# nu in exemplare singuratice.
 	if _rng.randf() < 0.55:
 		_place_h("primPlan", f + _rng.randf_range(0.0004, 0.0012), sgn,
-			gap - _rng.randf_range(1.2, 2.8), _rng.randf_range(2.5, 3.8), "none")
+			gap - _rng.randf_range(1.2, 2.8), _rng.randf_range(3.0, 4.5), "none")
 	# moloz la talpa (memoria `patru-defecte-de-diorama` #3: fara moloz stanca
 	# pare infipta in plan)
 	for r in 2:
@@ -610,6 +628,21 @@ func _pereche_prim_plan(f: float, sgn: float, push: float) -> void:
 		_place("euphorbia", "tufaPrimPlan", f + 0.0007, sgn,
 			gap + _rng.randf_range(0.4, 1.6),
 			_rng.randf_range(0.0, TAU), _rng.randf_range(0.4, 0.7), "none")
+	# PODEAUA eliberata (runda 5): intre umar si noul rand de granit sunt acum
+	# 7-11 m de iarba goala pe fiecare parte. Goala inseamna suprafata plata de
+	# o singura tenta, adica exact defectul #1 din memoria `patru-defecte-de-
+	# diorama`. In bara podeaua are tufe rotunde mici si iarba inalta risipita,
+	# NU bolovani (aia sunt gruparea de la baza stancilor). Deci aici merg doar
+	# piese joase, sub 1,2 m, care nu ridica silueta si nu fura din verde.
+	for r in 3:
+		var gp: float = _rng.randf_range(4.5, 12.0)
+		var jf := f + _rng.randf_range(-0.0016, 0.0016)
+		if _rng.randf() < 0.45:
+			_place("euphorbia", "tufaPodea", jf, sgn, gp,
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.30, 0.5), "none")
+		else:
+			_place("kopje_boulder_a", "pietricicaPodea", jf, sgn, gp,
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.22, 0.42), "none")
 
 ## Tufe si pietre marunte LA MUCHIA drumului, pe intervalul dat. Nu e un tiv
 ## regulat: pasul are jitter de peste jumatate din el, distanta laterala e

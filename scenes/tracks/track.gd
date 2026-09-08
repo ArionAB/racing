@@ -451,8 +451,34 @@ static func themes() -> Dictionary:
 			"sun_energy": 1.70,
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
-			"ambient_color": Color.html("8E8598"),
-			"ambient_energy": 0.22,
+			# RUNDA 5 POI H — ambientul CALD si raportul soare/ambient adus la
+			# nivelul dioramei de referinta, masurat, nu ales.
+			#
+			# Pana aici: sun 1.70 / ambient 0.22 = raport 7,7, cu ambient
+			# gri-violet rece (#8E8598). Comentariul de deasupra invoca regula
+			# „soare/ambient >= 3,5" din memoria `geometria-fara-lumina-e-
+			# invizibila`, dar aia e un PRAG DE JOS (sub el geometria se
+			# aplatizeaza), nu o tinta — si 7,7 e mai mult decat dublul lui.
+			# Consecinta, masurata pe cadrul de la volan din POI H: pixelii de
+			# sol din umbra cad la V10=0.11 fata de V10=0.30 in bara, adica
+			# raport lumina/umbra 0.15 fata de 0.33. Umbra unei coroane de
+			# acacia nu se citea ca umbra, ci ca o gaura neagra peste jumatate
+			# din carosabil — 30 % din cadru era pixel prea intunecat ca sa mai
+			# apartina vreunei clase de culoare (laterit, iarba sau roca).
+			#
+			# Ambientul urca la 0.40 si trece pe cald (#C9A98A, culoarea de
+			# bounce de pe sol din style_bible §5, ca in restul temelor de
+			# desert): raportul devine 4,25 — peste pragul de 3,5, deci
+			# modelarea se pastreaza — si umbrele ies calde si TRANSPARENTE,
+			# cu textura drumului vizibila prin ele (memoria
+			# `umbra-moale-se-citeste-textura`).
+			#
+			# Verificat sa nu fie regresie in alta parte, fiindca tema e
+			# comuna celor 8 zone: raportul lumina/umbra masurat la fractiile
+			# 0.075 (turma), 0.144 (vadul), 0.40 si 0.60 sta la 0.32-0.75, deci
+			# nicaieri umbre infundate si nicaieri spalare.
+			"ambient_color": Color.html("C9A98A"),
+			"ambient_energy": 0.40,
 			"shadows": true,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,

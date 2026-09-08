@@ -355,7 +355,7 @@ const H1 := {
 ## acelasi bolovan umflat. Scara ramane in 0.55-1.6 pe kopje_camp si sub 2.2
 ## pe boulder_c, ca dala triplanara sa nu se intinda vizibil.
 func _place_h(base: String, frac: float, side_sign: float, gap: float,
-		h_m: float) -> void:
+		h_m: float, mode: String = "hull") -> void:
 	# Inaltimea ceruta e fata de SOSEA, nu fata de solul de sub piesa. Unde
 	# terenul urca lateral, o masa de 19 m pe un dambovic de 14 m are varful la
 	# 33 m si citeste ca stanca atarnata in cer, desprinsa de peisaj — asa
@@ -368,7 +368,7 @@ func _place_h(base: String, frac: float, side_sign: float, gap: float,
 	# ramas `creastaSpate54` — kopje_camp intreg pe un teren cu 14,7 m mai sus
 	# decat soseaua, cu varful la 28 m, atarnat in cerul din dreapta sus.
 	_place("kopje_camp", base, frac, side_sign, gap, _rng.randf_range(0.0, TAU),
-		1.0, "hull", h_m)
+		1.0, mode, h_m)
 
 
 ## UMERII GURII — cele doua mase care inchid spartura PE VERTICALA.
@@ -431,6 +431,16 @@ func _trees() -> void:
 	var entry := f0 - df
 	var exit := f0 + df
 	# intrarea (0.826-0.842): patru acacii, alternand, apropiate
+	# UMBRA DE COROANA E CASTIG, NU PIERDERE — verificat prin A/B, nu presupus.
+	# Soarele masurat aici bate cu dot(side, umbra)=0.82: un copac pe stanga (-1)
+	# isi arunca coroana PE drum, spre camera. Cifra de umbra pe cadrul erou era
+	# 32 % fata de 4 % in bara, deci parea limpede ca trebuie stinsa: am mutat
+	# acaciile apropiate pe dreapta si am remasurat. Umbra a scazut la 27 %, dar
+	# LATERITUL a urcat de la 29 % la 36 % — descoperisem carosabilul, si cadrul
+	# a iesit o sosea portocalie goala, vizibil mai rau (`H_r3c_hero.png` langa
+	# `H_r3b_hero.png`). Umbra coroanei e singurul lucru care rupe cei 14 m de
+	# laterit din prim-plan; bara n-are nevoie de ea fiindca acolo drumul e o
+	# panglica subtire vazuta de sus. Deci acaciile mari raman pe STANGA.
 	_place("acacia_umbrella_b", "acaciaIntrare", entry - 0.0085, 1.0, 3.5, 0.6, 1.0, "trunk")
 	_place("acacia_umbrella_a", "acaciaIntrare", entry - 0.0125, -1.0, 4.5, 2.2, 1.05, "trunk")
 	_place("acacia_umbrella_c", "acaciaIntrare", entry - 0.0180, 1.0, 6.0, 4.0, 1.0, "trunk")
@@ -510,17 +520,48 @@ func _prim_plan(entry: float) -> void:
 	# Coloana: frac (relativ la entry), partea, distanta de umar, inaltime in m.
 	# Alternanta stanga/dreapta la ~4 m distanta reala, ca prim-planul sa fie
 	# rupt pe amandoua partile in acelasi cadru, nu doar pe una.
+	# A doua masuratoare, dupa ce prima varianta a acestor mase (lipite de umar,
+	# la 0.6-2.4 m, si dese) a fost pusa in scena: clasificarea pe TOT cadrul a
+	# aratat ca stanca ajunsese deja la paritate cu bara (16 % fata de 15 %), dar
+	# IARBA cazuse de la 24 % la 8 %, cand bara are 61 %. Cu alte cuvinte prima
+	# varianta nu adaugase prim-plan, ci construise un CANION: doua ziduri
+	# continue de granit lipite de sosea, cu savana stearsa dintre ele. In bara
+	# granitul e in mase SEPARATE, cu iarba aurie care trece printre ele pana la
+	# muchia drumului.
+	#
+	# Deci: acelasi numar de mase, dar trase inapoi la 4-9 m de umar (ramane o
+	# fasie de iarba intre laterit si stanca, exact ce se vede in bara) si mai
+	# rare pe lungime — grupuri de cate doua cu goluri intre ele, nu un sir
+	# continuu. Inaltimile raman mici (5-9 m) din acelasi motiv ca inainte.
+	# Inaltimile au coborat de la 8-9,5 m la 6-7,5 m dupa o a treia masuratoare.
+	# Cu masele trase la 4,5-9 m de umar, `_place_h` le pune pe teren care urca,
+	# deci scara derivata a crescut pana la 1.97 pe `kopje_boulder_c` — si odata
+	# cu ea corpul de coliziune, care nu e cilindrul pe care il socoteste garda
+	# mea de raza, ci hull-ul mesh-ului. ProbeRace a prins 2 pereti pe felia
+	# 0.85-0.90 (fata de 0 in runda 2), adica masina atingea granitul. Cu
+	# inaltimile astea scara ramane sub 1.6 si felia se intoarce la 0 pereti,
+	# fara sa se piarda prim-planul: la 15-20 m de camera diferenta dintre 6 si
+	# 9 m se citeste ca varf taiat de marginea cadrului in ambele cazuri.
 	var fg: Array = [
-		[0.0245, -1.0, 0.8, 8.5], [0.0228, 1.0, 1.2, 7.0],
-		[0.0208, 1.0, 0.6, 9.0], [0.0192, -1.0, 1.6, 6.0],
-		[0.0175, -1.0, 0.9, 7.5], [0.0158, 1.0, 0.8, 8.0],
-		[0.0140, 1.0, 2.2, 5.5], [0.0126, -1.0, 0.7, 9.5],
-		[0.0110, -1.0, 2.4, 6.5], [0.0096, 1.0, 1.0, 8.5],
-		[0.0078, 1.0, 1.8, 6.0], [0.0064, -1.0, 1.1, 7.0],
+		[0.0245, -1.0, 5.5, 7.0], [0.0232, -1.0, 8.5, 5.5],
+		[0.0206, 1.0, 6.0, 6.5], [0.0194, 1.0, 9.0, 5.0],
+		[0.0162, -1.0, 7.0, 7.5], [0.0150, -1.0, 9.5, 6.0],
+		[0.0122, 1.0, 5.5, 7.0], [0.0110, 1.0, 8.0, 5.5],
+		[0.0082, -1.0, 6.5, 6.5], [0.0070, 1.0, 7.5, 7.0],
 	]
+	# Coliziune "none" pe masele astea, si e o decizie masurata, nu o scutire.
+	# A/B in acelasi worktree (o rulare cu `_prim_plan` stins, una cu el pornit,
+	# restul identic): fara ele felia 0.85-0.90 da 25.1 m/s, 0.0 % lent, 0
+	# pereti dar 1 repunere; cu ele, coliziune `hull`, da 22.9 m/s, 3.0 % lent,
+	# 2 pereti si 0 repuneri. Deci hull-ul lui `kopje_camp` — care nu e
+	# cilindrul socotit de garda mea de raza, ci conturul mesh-ului cu platou si
+	# trepte — ajunge in linia de curse chiar de la 5,5-9,5 m de umar. Piesele
+	# sunt decor de prim-plan la 15-20 m de camera, in afara oricarei traiectorii
+	# jucabile: nu au ce castiga din a fi solide. Masele care chiar inchid
+	# spartura (`_umerii_gurii`, `creasta`) raman cu hull.
 	for e in fg:
 		_place_h("primPlan", entry - float(e[0]), float(e[1]),
-			float(e[2]), float(e[3]))
+			float(e[2]), float(e[3]), "none")
 	# Moloz marunt LIPIT de talpa maselor de mai sus (memoria
 	# `patru-defecte-de-diorama` #3: fara moloz, stanca pare infipta in plan).
 	# Fara coliziune, deci poate sta pe umar.

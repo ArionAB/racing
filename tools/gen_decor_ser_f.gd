@@ -325,6 +325,30 @@ func _place(nm: String, p: Vector3, s: Vector3, off: float, along: float,
 		else:
 			_warn += 1
 			return
+	# Cota se REVERIFICA pe gabaritul piesei, nu doar in centrul ei. Raycast-ul
+	# din centru nimereste uneori peretele unei scobituri (`Scobituri`, terasele
+	# rundei 2): solul e la cota buzei in centru si cu 3 m mai jos la o jumatate
+	# de raza distanta, iar piesa ramane atarnata peste gol. Runda 3 a avut un
+	# singur caz (FAca44, +3.40 m raportat de probe_manual), dar unul e destul —
+	# copacul plutea la 10 m de axa, adica exact in cadrul soferului.
+	# MINIMUL pe tot conturul e prea agresiv: pe versantul de ~20 de grade un
+	# copac ar fi tras la cota muchiei lui din vale si ar iesi INGROPAT cu 2-5 m
+	# (masurat: 3 cazuri). Piesa sta pe TRUNCHI, deci cota de referinta ramane
+	# cea din centru; conturul serveste doar ca sa prinda golul de sub ea.
+	# Se coboara doar cand centrul e mult peste conturul cel mai jos — atunci
+	# raycast-ul din centru a nimerit buza unei scobituri — si doar pana la
+	# MEDIA conturului, ca panta normala sa nu ingroape nimic.
+	if r > 0.6:
+		var acc := 0.0
+		var lo := y
+		for a in 4:
+			var an: float = TAU * float(a) / 4.0
+			var gy := _sol_real(pos.x + cos(an) * r * 0.7, pos.z + sin(an) * r * 0.7)
+			acc += gy
+			lo = minf(lo, gy)
+		var avg: float = acc / 4.0
+		if y - lo > 1.5:
+			y = minf(y, avg)
 	var yaw: float = _rng.randf_range(-PI, PI)
 	if face_road:
 		# Chevron-ul se uita SPRE drum: -Z al piesei pe -s.

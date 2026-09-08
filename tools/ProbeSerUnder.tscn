@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://tools/probe_ser_under.gd" id="1"]
 
-[node name="ProbeSerUnder" type="Node3D"]
+[node name="ProbeSerUnder" type="Node"]
 script = ExtResource("1")

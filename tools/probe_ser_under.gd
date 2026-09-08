@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 ## Serpentina de la POI F pare o placa PLUTITOARE in captura de la 0.555:
 ## carosabilul are un intrados intunecat vizibil si nu se vede teren sub bucla.
 ## Se masoara golul dintre fata de jos a soselei si terenul de dedesubt.
@@ -10,9 +10,9 @@ func _ready() -> void:
 	get_tree().root.add_child(track)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	await get_tree().physics_frame
-	var space := get_world_3d().direct_space_state
 	var r: TrackRoute = track.routes[0]
+	await get_tree().physics_frame
+	var space := track.get_world_3d().direct_space_state
 	var n := r.baked.size()
 	var worst := 0.0
 	var worst_at := Vector3.ZERO

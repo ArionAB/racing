@@ -557,33 +557,22 @@ func _prim_plan(entry: float) -> void:
 	var f := entry - 0.0330
 	var k := 0
 	while f < entry + 0.0060:
-		# alternanta cu ruperi: doua piese pe aceeasi parte la rand, apoi
-		# schimbare — un sir strict stanga-dreapta se citeste ca alee.
-		var sgn: float = -1.0 if (k / 2) % 2 == 0 else 1.0
-		# LATERAL ABSOLUT (gap negativ), nu degajare fata de umar: `half_width`
-		# aici e 9,0 m, iar raza unei mase scalate mai adauga 2-3 m, asa ca
-		# „1-6,5 m de umar" a asezat piesele la 17-25 m de ax — masurat pe
-		# .tscn-ul rezultat. Fereastra utila din proiectie e 10,5-14 m: sub 10
-		# marginea intra in carosabil (half 9,0 + raza), peste 14 piesa iese
-		# lateral din cadru la z=-4 m.
-		var gap: float = -_rng.randf_range(11.8, 14.2)
-		var h_m: float = _rng.randf_range(2.5, 4.5)
-		_place_h("primPlan", f, sgn, gap, h_m, "none")
-		# a doua masa, mai mica, lipita de prima pe cealalta parte a pasului:
-		# in bara granitul vine in grupuri, nu in exemplare singuratice
-		if _rng.randf() < 0.55:
-			_place_h("primPlan", f + _rng.randf_range(0.0004, 0.0012), sgn,
-				gap - _rng.randf_range(1.2, 2.8), _rng.randf_range(2.5, 3.8), "none")
-		# moloz la talpa (memoria `patru-defecte-de-diorama` #3)
-		for r in 2:
-			_place("kopje_boulder_a", "molozPrimPlan", f + _rng.randf_range(-0.0010, 0.0010),
-				sgn, gap + _rng.randf_range(-1.6, 0.7),
-				_rng.randf_range(0.0, TAU), _rng.randf_range(0.45, 0.95), "none")
-		# tufa verde la baza, cum cere brief-ul
-		if k % 2 == 0:
-			_place("euphorbia", "tufaPrimPlan", f + 0.0007, sgn,
-				gap + _rng.randf_range(0.4, 1.6),
-				_rng.randf_range(0.0, TAU), _rng.randf_range(0.4, 0.7), "none")
+		# AMBELE parti la fiecare pas, nu alternanta. Masurat pe cadrul erou
+		# dupa prima varianta (alternanta cu ruperi de cate doua): pe dreapta
+		# erau mase la z=-5.2, -2.6 si +0.1 — fix in banda de jos, si acolo
+		# cadrul se citea bine — dar pe stanga nu era nimic intre z=-8.7 si
+		# +4.8, adica exact coltul din stanga-jos ramanea gol. Si tocmai acolo
+		# cade umbra coroanei: jumatatea de jos-stanga a cadrului (px 0-540)
+		# masoara v~0.1, o pata neagra pe laterit gol. Cu masa pe ambele parti
+		# umbra cade PE granit, nu pe sosea.
+		#
+		# Ca sa nu iasa alee, ruperea se muta din alternanta in DISTANTA: una
+		# din parti sta la lateralul minim, cealalta e impinsa cu 0-3 m, si
+		# rolurile se schimba la fiecare pas.
+		var push_l: float = 0.0 if k % 2 == 0 else _rng.randf_range(0.8, 3.0)
+		var push_r: float = _rng.randf_range(0.8, 3.0) if k % 2 == 0 else 0.0
+		for sgn: float in [-1.0, 1.0]:
+			_pereche_prim_plan(f, sgn, push_l if sgn < 0.0 else push_r)
 		f += _rng.randf_range(0.0018, 0.0026)
 		k += 1
 	# Coliziune "none" pe toate: A/B-ul din runda 3 (o rulare cu `_prim_plan`
@@ -592,6 +581,35 @@ func _prim_plan(entry: float) -> void:
 	# mea de raza. Piesele astea sunt decor de prim-plan langa umar, in afara
 	# oricarei traiectorii jucabile; masele care chiar inchid spartura
 	# (`_umerii_gurii`, `creasta`) raman cu hull.
+
+
+## O masa de prim-plan cu molozul si tufa ei, pe partea si la impingerea date.
+func _pereche_prim_plan(f: float, sgn: float, push: float) -> void:
+	# LATERAL ABSOLUT (gap negativ), nu degajare fata de umar: `half_width`
+	# aici e 9,0 m, iar raza unei mase scalate mai adauga 2-3 m, asa ca
+	# „1-6,5 m de umar" a asezat piesele la 17-25 m lateral — masurat pe
+	# .tscn-ul rezultat. Fereastra utila din proiectie e 11,8-14,2 m: sub ea
+	# marginea piesei intra in carosabil (half 9,0 + raza), peste 14,2 piesa
+	# iese lateral din cadru la z=-4 m.
+	var gap: float = -(_rng.randf_range(11.8, 13.4) + push)
+	var h_m: float = _rng.randf_range(2.5, 4.5)
+	_place_h("primPlan", f, sgn, gap, h_m, "none")
+	# a doua masa, mai mica si mai in spate: in bara granitul vine in grupuri,
+	# nu in exemplare singuratice.
+	if _rng.randf() < 0.55:
+		_place_h("primPlan", f + _rng.randf_range(0.0004, 0.0012), sgn,
+			gap - _rng.randf_range(1.2, 2.8), _rng.randf_range(2.5, 3.8), "none")
+	# moloz la talpa (memoria `patru-defecte-de-diorama` #3: fara moloz stanca
+	# pare infipta in plan)
+	for r in 2:
+		_place("kopje_boulder_a", "molozPrimPlan", f + _rng.randf_range(-0.0010, 0.0010),
+			sgn, gap + _rng.randf_range(-1.6, 0.7),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.45, 0.95), "none")
+	# tufa verde la baza, cum cere brief-ul
+	if _rng.randf() < 0.5:
+		_place("euphorbia", "tufaPrimPlan", f + 0.0007, sgn,
+			gap + _rng.randf_range(0.4, 1.6),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.4, 0.7), "none")
 
 ## Tufe si pietre marunte LA MUCHIA drumului, pe intervalul dat. Nu e un tiv
 ## regulat: pasul are jitter de peste jumatate din el, distanta laterala e

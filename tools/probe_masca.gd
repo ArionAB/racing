@@ -38,6 +38,7 @@ func _ready() -> void:
 	var eye_pos := Vector3.ZERO
 	var look_pos := Vector3.ZERO
 	var free_eye := false
+	var game_cam := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--eye="):
 			var e := arg.trim_prefix("--eye=").split(",")
@@ -58,6 +59,8 @@ func _ready() -> void:
 			matches.append(arg.trim_prefix("--match="))
 		elif arg.begins_with("--group="):
 			groups.append(arg.trim_prefix("--group="))
+		elif arg == "--gamecam":
+			game_cam = true
 	if matches.is_empty():
 		matches.append("Taietura")
 
@@ -80,9 +83,21 @@ func _ready() -> void:
 	cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 	cam.fov = MEASURE_FOV
 	cam.far = 400.0
-	cam.position = focus - dir * MEASURE_DIST + Vector3.UP * MEASURE_HEIGHT
-	cam.look_at(focus + dir * MEASURE_LOOK_AHEAD
-		+ Vector3.UP * MEASURE_LOOK_HEIGHT, Vector3.UP)
+	var m_dist := MEASURE_DIST
+	var m_h := MEASURE_HEIGHT
+	var m_ahead := MEASURE_LOOK_AHEAD
+	var m_lh := MEASURE_LOOK_HEIGHT
+	if game_cam:
+		# --gamecam: parametrii REALI ai camerei de urmarire, ca in Snapshot.
+		# Fara ei masca masoara un cadru pe care jucatorul nu-l vede niciodata
+		# (--driver sta la 7.5 m si 3.2 m inaltime, camera de joc la 12.5/10).
+		m_dist = ChaseCamera.DEFAULT_DISTANCE
+		m_h = ChaseCamera.DEFAULT_HEIGHT
+		m_ahead = ChaseCamera.LOOK_AHEAD
+		m_lh = ChaseCamera.LOOK_HEIGHT
+		cam.fov = ChaseCamera.BASE_FOV
+	cam.position = focus - dir * m_dist + Vector3.UP * m_h
+	cam.look_at(focus + dir * m_ahead + Vector3.UP * m_lh, Vector3.UP)
 	if free_eye:
 		# --eye=x,y,z --look=x,y,z: camera libera, ca in Snapshot — pentru
 		# atribuirea unui obiect vazut dintr-un unghi pe care camera de joc

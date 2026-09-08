@@ -108,9 +108,16 @@ static func _disc_mesh(slot: int, radius: float) -> Mesh:
 	for i in segs:
 		var a0 := TAU * float(i) / float(segs)
 		var a1 := TAU * float(i + 1) / float(segs)
+		# ORDINEA VARFURILOR conteaza: cu fata in sus, Godot deseneaza doar
+		# triunghiurile parcurse invers acelor de ceas privite dinspre +Y.
+		# Scrise ca (centru, a1, a0) placile erau BACK-FACING si crusta nu se
+		# randa deloc — masurat cu slotul 30 (portocaliu de lava) pe cadrul
+		# hero: zero pixeli, si la +3 m deasupra terenului. Nimic nu semnala
+		# defectul: nodul exista, MultiMesh-ul avea 241 de instante, sondele
+		# de mesh-uri sunt oarbe la MultiMesh.
 		for v in [Vector3.ZERO,
-				Vector3(cos(a1) * radius, 0.0, sin(a1) * radius),
-				Vector3(cos(a0) * radius, 0.0, sin(a0) * radius)]:
+				Vector3(cos(a0) * radius, 0.0, sin(a0) * radius),
+				Vector3(cos(a1) * radius, 0.0, sin(a1) * radius)]:
 			st.set_uv(uv)
 			st.set_normal(Vector3.UP)
 			st.set_color(Color.WHITE)

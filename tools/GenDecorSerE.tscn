@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/gen_decor_ser_e.gd" id="1_gen"]
+
+[node name="GenDecorSerE" type="Node"]
+script = ExtResource("1_gen")

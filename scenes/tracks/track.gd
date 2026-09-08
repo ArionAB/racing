@@ -454,8 +454,21 @@ static func themes() -> Dictionary:
 			# ramane SUB cea a ierbii (memoria `ceata-in-familia-solului` e
 			# despre saturatie: ceata nu are voie sa ADAUGE saturatie cu
 			# distanta), doar nuanta trece in familia cerului.
-			"fog": Color(0.42, 0.36, 0.38),
-			"hill_color": Color(0.62, 0.56, 0.40),
+			# INTEGRARE: B a masurat ceata de la nivelul campiei (orizont
+			# inchis), E de pe buza craterului (bolul inaintea cetii). Pastrata
+			# masuratoarea lui E — e cea mai recenta si singura facuta pe un
+			# cadru unde ceata chiar acopera subiectul (malul opus la 200-400 m).
+			"fog": Color(0.46, 0.43, 0.50),
+			# Malul opus al craterului. Nu e "dealul de fundal" al altor teme:
+			# de pe buza, movilele de orizont (`_build_horizon_fallback`, 240-480 m)
+			# sunt EXACT banda de deasupra lacului, 30% din cadrul hero
+			# (ProbeMasca la frac 0.40). La (0.62,0.56,0.40) sub soare 1.70 ieseau
+			# crem luminos si bolul nu se inchidea: profilul de valoare pe partea
+			# craterului era plat (V 0.66-0.68 pe randurile 0.20-0.35, apoi 0.52
+			# pe podeaua de crusta), adica INVERS fata de referinta, care cade la
+			# 0.31-0.49 pe mal si urca la 0.89 pe crusta. Verde-gri inchis: malul
+			# devine treapta intunecata sub linia cerului.
+			"hill_color": Color(0.24, 0.25, 0.22),
 			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
 			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
 			# — cerul intunecat tenteaza la ambient mare, si atunci savana
@@ -489,13 +502,25 @@ static func themes() -> Dictionary:
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
 			"fog_depth": true,
-			# Runda 1b (POI B): la 60/260 banda de orizont iesea (177,152,156),
-			# mai deschisa decat cerul de furtuna de deasupra ei; referinta are
-			# orizontul INCHIS si detaliul de la 100 m curat. Ceata mai inchisa
-			# (0.42,0.36,0.38 — sub luminanta ierbii, in nuanta cerului) si mai
-			# departe: 90/290 (< FAR_PLANE 380; Track14 n-are inele de orizont).
-			"fog_begin": 90.0,
-			"fog_end": 290.0,
+			# CEATA — dezacord masurat intre doua bucati, rezolvat la integrare.
+			# B (POI B, de la nivelul campiei): la 60/260 banda de orizont
+			# iesea (177,152,156), mai deschisa decat cerul de furtuna de
+			# deasupra ei; a cerut 90/290 ca orizontul sa se inchida.
+			# E (POI E, de pe buza craterului): cu inceputul la 60-90 m, tot
+			# ce trecea de buza (malul opus e la 200-400 m de ochi) era deja
+			# 40-90% ceata — masurat pe cadrul hero, banda de deasupra lacului
+			# iesea rgb(122,108,114) H=336 S=0.11, adica FIX culoarea cetii si
+			# mai DESCHISA decat campia (V 0.48 fata de 0.34), cand referinta
+			# are acolo un mal cald si mai INTUNECAT (V 0.40 fata de 0.49).
+			# Se pastreaza masuratoarea lui E: e singura facuta pe un cadru in
+			# care ceata acopera chiar subiectul POI-ului, iar gimmickul
+			# craterului (bolul vazut de pe buza) nu exista fara ea.
+			# fog_end e 370, nu 380: la fix FAR_PLANE (380) niciun obiect nu
+			# ajunge vreodata la ceata completa, deci geometria dispare sec la
+			# planul de taiere in loc sa se topeasca (memoria
+			# `efecte-de-fundal-cote-legate`). 370 lasa 10 m de topire.
+			"fog_begin": 190.0,
+			"fog_end": 370.0,
 			"fog_curve": 1.0,
 			"horizon_model": "",
 			"horizon_class": "",

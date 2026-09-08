@@ -107,8 +107,21 @@ const MARBLE_GREY: int = 29    # marmura Stancii Samanului, faleza Olkhon
 ## REEF_SHALLOW/SEA_DEEP 17/18, TROPICAL_GREEN 21, MARBLE_GREY 29 (cenusa).
 const LAVA_ORANGE: int = 30    # lava incandescenta; accent, nu suprafata mare
 
-## 31 ramane ULTIMA rezerva (magenta in atlas, ca greselile de UV sa sara in
-## ochi). Urmatoarea pista fie reutilizeaza, fie plateste o discutie serioasa.
+## --- Serengeti (Track14) ----------------------------------------------------
+##
+## 31 era ULTIMA rezerva, tinuta magenta ca greselile de UV sa sara in ochi, cu
+## nota „urmatoarea pista fie reutilizeaza, fie plateste o discutie serioasa".
+## Serengeti o plateste aici, si nu ca sa castige o nuanta in plus: kitul
+## exporta DEJA corpul flamingoului pe slotul 31 (masurat pe GLB: 268 din 368
+## de vertecsi in `flamingo.glb`), deci inelul lacului Magadi — gimmickul
+## intregului POI E — se desena in magenta de eroare. Alternativele masurate pe
+## paleta existenta erau slotul 14 (#E54839, sat 0.75) si 30 (#E8622D, sat
+## 0.81): amandoua rosii de semnal, adica un inel de flacari pe un lac alb.
+## Culoarea vine din referinta, nu din gust: pixelii tare-roz ai inelului au
+## median #FFABB7 (hue 351, sat 0.33) si p85 #EB8291 (sat 0.45); #F0A0AE cade
+## intre ele si ramane pal dupa ce soarele cald si saturatia 1.18 din post il
+## mai ridica o data.
+const FLAMINGO_PINK: int = 31  # penajul flamingilor; singura sursa de roz
 
 ## Zapada NU are slot propriu — alias peste FOAM_WHITE, vezi nota de mai sus.
 const SNOW_WHITE: int = FOAM_WHITE
@@ -145,7 +158,7 @@ const HEX: Array[String] = [
 	"E54839", "2C82E8", "F2D03C",
 	"54BFB8", "2E5F6B", "E9DCC0", "55535A", "3F7A3C", "E9F2F0", "C4784F",
 	"7FC4C9", "2F6E82", "1A2A33", "A8683A", "4A3526", "B8B4AC",
-	"E8622D",
+	"E8622D", "F0A0AE",
 ]
 
 ## Culoarea unui slot.

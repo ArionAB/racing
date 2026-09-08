@@ -53,6 +53,7 @@ func _ready() -> void:
 	var eye_pos := Vector3.ZERO
 	var look_pos := Vector3.ZERO
 	var free_eye := false
+	var game_cam := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--eye="):
 			var e := arg.trim_prefix("--eye=").split(",")
@@ -79,6 +80,8 @@ func _ready() -> void:
 			min_group_px = int(arg.trim_prefix("--min-group-px="))
 		elif arg.begins_with("--min-total-px="):
 			min_total_px = int(arg.trim_prefix("--min-total-px="))
+		elif arg == "--gamecam":
+			game_cam = true
 	if matches.is_empty():
 		matches.append("Taietura")
 
@@ -110,9 +113,21 @@ func _ready() -> void:
 	cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 	cam.fov = MEASURE_FOV
 	cam.far = 400.0
-	cam.position = focus - dir * MEASURE_DIST + Vector3.UP * MEASURE_HEIGHT
-	cam.look_at(focus + dir * MEASURE_LOOK_AHEAD
-		+ Vector3.UP * MEASURE_LOOK_HEIGHT, Vector3.UP)
+	var m_dist := MEASURE_DIST
+	var m_h := MEASURE_HEIGHT
+	var m_ahead := MEASURE_LOOK_AHEAD
+	var m_lh := MEASURE_LOOK_HEIGHT
+	if game_cam:
+		# --gamecam: parametrii REALI ai camerei de urmarire, ca in Snapshot.
+		# Fara ei masca masoara un cadru pe care jucatorul nu-l vede niciodata
+		# (--driver sta la 7.5 m si 3.2 m inaltime, camera de joc la 12.5/10).
+		m_dist = ChaseCamera.DEFAULT_DISTANCE
+		m_h = ChaseCamera.DEFAULT_HEIGHT
+		m_ahead = ChaseCamera.LOOK_AHEAD
+		m_lh = ChaseCamera.LOOK_HEIGHT
+		cam.fov = ChaseCamera.BASE_FOV
+	cam.position = focus - dir * m_dist + Vector3.UP * m_h
+	cam.look_at(focus + dir * m_ahead + Vector3.UP * m_lh, Vector3.UP)
 	if free_eye:
 		# --eye=x,y,z --look=x,y,z: camera libera, ca in Snapshot — pentru
 		# atribuirea unui obiect vazut dintr-un unghi pe care camera de joc
@@ -192,8 +207,14 @@ func _ready() -> void:
 	order.sort_custom(func(x, y): return int(per[x]) > int(per[y]))
 	print("--- ce acopera cadrul (primele 12) ---")
 	for k in order.slice(0, 12):
-		print("  %7d px  %5.2f%%  %s" % [per[k],
-			100.0 * float(per[k]) / float(_w * _h), all[k].name])
+		# Numele nu identifica: mesh-urile generate in cod ies @MeshInstance3D@NNN
+		# si acelasi nume apare de mai multe ori (memoria `nume-noduri-nu-sunt-unice`).
+		# Calea in scena + centrul de lume spun CARE obiect e.
+		var ab := all[k].get_aabb()
+		var ctr: Vector3 = all[k].global_transform * ab.get_center()
+		print("  %7d px  %5.2f%%  %s  centru(%.0f,%.0f,%.0f)  %s" % [per[k],
+			100.0 * float(per[k]) / float(_w * _h), all[k].name,
+			ctr.x, ctr.y, ctr.z, str(all[k].get_path())])
 
 	# --group=<nume parinte>: aduna pixelii pe COPILUL direct al acelui parinte
 	# (nodul-obiect din DecorManual), nu pe mesh-ul din GLB — ca sa se vada

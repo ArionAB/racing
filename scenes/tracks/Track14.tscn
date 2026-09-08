@@ -146,6 +146,10 @@ cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
 cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_facet_m = 1.8
+cut_facet_cols = 3
+cut_facet_crown_bands = 1.0
+cut_facet_seed = 7
 talus_m = 1.0
 talus_slot = 11
 
@@ -163,6 +167,10 @@ cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
 cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_facet_m = 1.8
+cut_facet_cols = 3
+cut_facet_crown_bands = 1.0
+cut_facet_seed = 13
 talus_m = 1.0
 talus_slot = 11
 
@@ -180,6 +188,10 @@ cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
 cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_facet_m = 1.8
+cut_facet_cols = 3
+cut_facet_crown_bands = 1.0
+cut_facet_seed = 23
 talus_m = 1.0
 talus_slot = 11
 
@@ -197,6 +209,10 @@ cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
 cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_facet_m = 1.8
+cut_facet_cols = 3
+cut_facet_crown_bands = 1.0
+cut_facet_seed = 31
 talus_m = 1.0
 talus_slot = 11
 

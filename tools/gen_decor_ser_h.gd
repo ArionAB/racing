@@ -632,7 +632,13 @@ func _undergrowth(f_from: float, f_to: float) -> void:
 				# (generatorul dadea 6 avertismente de degajare) — fara sa
 				# blocheze (coliziune "none"), dar o tufa care creste din
 				# carosabil se vede de la 30 m.
-				var gap: float = _rng.randf_range(0.7, 3.2) if near else _rng.randf_range(5.0, 11.0)
+				# Minimul a urcat de la 0.7 la 1.4: `probe_manual` marcheaza
+				# „IN DRUM" 14 piese de aici, si nu fiindca plutesc (toate ies
+				# „ok" pe cota) ci fiindca marginea lor sta pe asfalt. Raza
+				# unui `kopje_boulder_a` la scara 0.75 e ~0.8 m, deci sub 1.4 m
+				# de umar piesa creste din carosabil — se vede de la 30 m chiar
+				# daca n-are coliziune.
+				var gap: float = _rng.randf_range(1.4, 3.6) if near else _rng.randf_range(5.0, 11.0)
 				var jf := f + _rng.randf_range(-0.0009, 0.0009)
 				# Amestecul e 0.30 euphorbia / 0.70 piatra, nu 0.58/0.42, si
 				# euphorbia e mica (0.35-0.6, nu 0.5-0.95). Motiv masurat pe

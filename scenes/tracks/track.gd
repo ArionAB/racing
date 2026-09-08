@@ -699,7 +699,33 @@ static func themes() -> Dictionary:
 			# clar brun. Tinta: S ~0.35, V ~0.45.
 			"water_desat": 0.30,
 			"water_mul": Color(1.0, 0.93, 0.82),
-			"water_dim": 0.52,
+			# INTEGRARE RUNDA 2 — APA IESEA NEAGRA la POI C (vad) si POI G (lac).
+			# Criticul a presupus (si eu la fel) ca apa a fost reglata de C sub
+			# ambientul vechi, inainte ca H sa-l schimbe, si a cerut A/B cu
+			# ambientul lui H inghetat. A/B-ul REFUTA ipoteza amandurora: cu
+			# ambientul dat inapoi la starea lui C (8E8598 / 0.22) apa iese
+			# IDENTICA la trei zecimale (vad H29 S0.291 V0.329, lac V0.341).
+			# Identic la bit inseamna ca mecanismul nici nu e conectat
+			# (memoria `sonda-masura-alt-obiect`), si asa si e — scrie mai sus,
+			# in _water_material: shaderul apei e UNSHADED, deci apa nu vede
+			# nici soarele, nici ambientul. `water_dim` E lumina pe care apa
+			# ar fi primit-o, pusa de mana.
+			# Deci cauza nu e ambientul, ci ca `water_dim` a ramas la 0.52 —
+			# „jumatate din lumina", potrivit unei ape de noapte — in timp ce
+			# terenul din jur e luminat de soare 1.95 plus ambient cald 0.40.
+			# De-aia apa era de doua-trei ori mai intunecata decat tot ce o
+			# inconjura: crusta lacului masoara V 1.00, drumul V 0.63-0.75,
+			# apa V 0.33.
+			# Tinta e MASURATA pe referinta, nu aleasa: vadul din diorama are
+			# V 0.561. A/B pe capturile --gamecam la 0.13 (vad) si 0.77 (lac):
+			#   dim 0.52 (pana acum) ... vad V 0.329  lac V 0.341
+			#   dim 0.75 ............... vad V 0.494  lac V 0.514
+			#   dim 0.85 ............... vad V 0.565  lac V 0.584   <- aplicat
+			#   dim 0.90 ............... vad V 0.596  lac V 0.620
+			# Nuanta nu se misca (H 29 -> 30), deci reglajul de noroi cald al
+			# lui C din runda 3 se pastreaza intreg — se schimba doar cata
+			# lumina cade pe el.
+			"water_dim": 0.85,
 			"water_split": 1.0,
 			"water_split_dir": Vector2(0.0, 1.0),
 			"water_split_offset": 60.0,

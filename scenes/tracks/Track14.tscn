@@ -145,7 +145,7 @@ cut_min_rise_m = 10.5
 cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
-cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_slots = Array[int]([29, 6, 5, 6, 20, 5, 6, 5])
 cut_facet_m = 1.8
 cut_facet_cols = 3
 cut_facet_crown_bands = 1.0
@@ -153,7 +153,7 @@ cut_taper_frac = 0.24
 cut_tuck_m = 14.0
 cut_facet_seed = 7
 talus_m = 1.0
-talus_slot = 11
+talus_slot = 6
 
 [node name="PereteADouaDreapta" type="Marker3D" parent="Faleze"]
 script = ExtResource("cliffface")
@@ -168,7 +168,7 @@ cut_min_rise_m = 10.5
 cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
-cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_slots = Array[int]([29, 6, 5, 6, 20, 5, 6, 5])
 cut_facet_m = 1.8
 cut_facet_cols = 3
 cut_facet_crown_bands = 1.0
@@ -176,7 +176,7 @@ cut_taper_frac = 0.24
 cut_tuck_m = 14.0
 cut_facet_seed = 13
 talus_m = 1.0
-talus_slot = 11
+talus_slot = 6
 
 [node name="PereteATreiaDreapta" type="Marker3D" parent="Faleze"]
 script = ExtResource("cliffface")
@@ -191,7 +191,7 @@ cut_min_rise_m = 10.5
 cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
-cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_slots = Array[int]([29, 6, 5, 6, 20, 5, 6, 5])
 cut_facet_m = 1.8
 cut_facet_cols = 3
 cut_facet_crown_bands = 1.0
@@ -199,7 +199,7 @@ cut_taper_frac = 0.24
 cut_tuck_m = 14.0
 cut_facet_seed = 23
 talus_m = 1.0
-talus_slot = 11
+talus_slot = 6
 
 [node name="PereteAPatraDreapta" type="Marker3D" parent="Faleze"]
 script = ExtResource("cliffface")
@@ -214,7 +214,7 @@ cut_min_rise_m = 10.5
 cut_batter_m = 1.6
 cut_step_m = 3.0
 cut_bands = 8
-cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
+cut_slots = Array[int]([29, 6, 5, 6, 20, 5, 6, 5])
 cut_facet_m = 1.8
 cut_facet_cols = 3
 cut_facet_crown_bands = 1.0
@@ -222,7 +222,7 @@ cut_taper_frac = 0.24
 cut_tuck_m = 14.0
 cut_facet_seed = 31
 talus_m = 1.0
-talus_slot = 11
+talus_slot = 6
 
 [node name="Scobituri" type="Node3D" parent="."]
 
@@ -546,6 +546,146 @@ gizmo_extents = 12.0
 script = ExtResource("hollow")
 radius_m = 3.0
 wall_m = 9.0
+
+[node name="TrenchG1_88" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 25.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG1_100" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 24.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG1_112" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 23.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG1_124" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124, 22.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG1_136" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 136, 21.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG1_148" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 148, 20.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG1_160" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 19.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG1_172" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172, 18.5, -101.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG2_90" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 8.4, -71.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG2_102" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 9.6, -71.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG2_114" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 114, 10.8, -71.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG2_126" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 12.0, -71.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG2_138" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 138, 13.2, -71.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG2_150" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 14.4, -71.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG2_162" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 162, 15.6, -71.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG3_88" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 5.5, -41.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG3_100" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 4.2, -41.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG3_112" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 3.0, -41.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG3_124" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124, 1.7, -41.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
+
+[node name="TrenchG3_136" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 136, 0.4, -41.0)
+gizmo_extents = 15.0
+script = ExtResource("hollow")
+radius_m = 11.0
+wall_m = 4.0
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("prop")
 

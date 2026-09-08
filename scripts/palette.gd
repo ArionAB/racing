@@ -691,10 +691,14 @@ const CLASS_TINT := {
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
-	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
-	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
-	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
-	"granite": Color(0.95, 0.97, 1.0),
+	# Granitul Serengeti. Tenta veche (0.95, 0.97, 1.0) era aleasa ca sa nu
+	# vireze spre crem, dar nu atingea problema de VALOARE: masurat pe cadrul
+	# de joc, kopje-urile ieseau cu luminanta mediana 150, iar granitul din
+	# referinta (docs, decupajul POI F) sta pe 63 — de 2.4 ori mai inchis.
+	# De aceea bolovanii se citeau ca marmura alba pe nisip, nu ca stanca.
+	# Raportul 63/150 da 0.42; canalele verde/albastru se taie cu inca 10%
+	# fiindca RGB-ul mediu al referintei (80, 72, 74) e usor CALD, nu rece.
+	"granite": Color(0.42, 0.38, 0.38),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

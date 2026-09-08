@@ -131,6 +131,7 @@ func _ready() -> void:
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
 	var cine := false
 	var hide_terrain := false
+	var no_fog := false
 	var game_cam := false
 	## --cave: aplica presetul si intunericul celei mai apropiate [CameraZone].
 	##
@@ -224,6 +225,11 @@ func _ready() -> void:
 		elif arg == "--gamecam":
 			driver_view = true
 			game_cam = true
+		elif arg == "--no-fog":
+			# Diagnostic: stinge ceata de adancime. Raspunde la intrebarea
+			# „geometria departata lipseste, sau doar e inghitita de ceata?" —
+			# doua defecte cu leacuri opuse (populare vs. reglaj de atmosfera).
+			no_fog = true
 		elif arg == "--no-terrain":
 			# Diagnostic: ascunde panza de teren, ca sa se vada ce e SUB ea.
 			# „Exista in scena" si „se vede in cadru" sunt intrebari diferite —
@@ -248,6 +254,13 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
+	if no_fog:
+		var envs := track.find_children("*", "WorldEnvironment", true, false)
+		for e in envs:
+			var we := e as WorldEnvironment
+			if we.environment != null:
+				we.environment.fog_enabled = false
+		print("--no-fog: ceata stinsa pe %d WorldEnvironment" % envs.size())
 	if hide_terrain:
 		var tb := track.get_node_or_null("TerrainBody")
 		if tb != null:

@@ -623,6 +623,37 @@ static func themes() -> Dictionary:
 			"fog_begin": 300.0,
 			"fog_end": 370.0,
 			"fog_curve": 1.8,
+			# CAT DE OPACA ajunge ceata, nu de unde incepe. Criticul de
+			# ansamblu (runda 3) a cerut un STRAT DE SILUETE departate:
+			# campia de dincolo de 150 m masura 1.29 energie de muchii fata
+			# de 9.07 in referinta, deci "adauga turme mici, movile si acacii
+			# pana la linia cerului". Masuratoarea de atribuire spune altceva.
+			# A/B pe acelasi cadru de ansamblu, cu ceata STINSA (--no-fog, o
+			# optiune de diagnostic adaugata la snapshot pentru asta):
+			#   ceata pornita (300/370/1.8) ... banda departata  2.99
+			#   ceata stinsa .................. banda departata 10.01
+			# Geometria era DEJA acolo — 3344 de prop-uri dincolo de 150 m —
+			# si cu aerul limpede banda departata trece PESTE referinta.
+			# Nu lipsea decorul, ceata il stergea: prescriptia criticului ar
+			# fi platit pe axa gresita (memoria `tinta-pe-o-axa-se-atinge-pe-
+			# axa-aia`) si ar fi adaugat obiecte peste unele deja invizibile.
+			# Parghia corecta nu e nici distanta (POI E a reglat-o pe crater
+			# si o pierdem daca o mutam), ci OPACITATEA maxima. Masurat:
+			#   fog_max 1.0 (starea r3) ... muchii 2.99  pastrare saturatie 69%
+			#   fog_max 0.55 .............. muchii 5.41  pastrare 76%
+			#   fog_max 0.40 .............. muchii 6.36  pastrare 78%
+			#   fog_max 0.30 .............. muchii 7.07  pastrare 80%
+			#   fog_max 0.20 .............. muchii 7.86  pastrare 82%  <-
+			#   (ceata stinsa) ............ muchii 10.01 pastrare 89%
+			#   referinta ................. muchii  9.07 pastrare 82%
+			# 0.20 nimereste EXACT pastrarea de saturatie a referintei (82%,
+			# castigul rundei 2 nu se plateste — creste pe amandoua axele) si
+			# duce muchiile de la 2.99 la 7.86, cu prim-planul neatins la
+			# 8.50 (referinta 7.77). Profilul de distanta 300/370/1.8 ramane
+			# neschimbat, deci bolul craterului vazut de pe buza (POI E) isi
+			# pastreaza perspectiva aeriana — verificat pe cadrul de joc la
+			# 0.40: malul opus se citeste, nu mai e o panza crem.
+			"fog_max": 0.20,
 			"horizon_model": "",
 			"horizon_class": "",
 			"walls": false,
@@ -3978,6 +4009,12 @@ func _build_environment() -> void:
 		# ramane — o tema o poate cere liniara — dar Serengeti sta acum tot
 		# pe 1.4, si nicio tema nu foloseste inca 1.0.
 		env.fog_depth_curve = float(theme_flag("fog_curve", 1.4))
+		# CAT DE OPACA devine ceata la `fog_depth_end`, nu de la ce distanta
+		# incepe. In FOG_MODE_DEPTH Godot inmulteste rampa de adancime cu
+		# `fog_density`, deci sub 1.0 geometria departata ramane o silueta
+		# tentata in loc sa fie stearsa complet. Implicitul 1.0 = purtarea de
+		# pana acum, deci temele vechi nu se schimba.
+		env.fog_density = float(theme_flag("fog_max", 1.0))
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)
 	# PERSPECTIVA AERIANA: cat din lumina CERULUI se amesteca in ceata cu

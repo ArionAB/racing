@@ -588,6 +588,74 @@ static func themes() -> Dictionary:
 			"lagoon_band_out": 6.0,
 			"lagoon_inner": 1.5,
 			"lagoon_rim": 8.0,
+			# VADUL MARA (POI C): raul de namol, separat de lacul de soda.
+			# Sea e o singura panza cu o singura culoare, dar shader-ul stie
+			# doua rauri (`water_split`, mecanismul Chongqing): dreapta de
+			# despartire e perpendiculara pe Z, la z = 60. La NORD de ea
+			# (z > 60, adica vadul de la z = 165) curge raul B, brun; la sud
+			# ramane lacul de soda laptos al flamingilor (z = -26..-110).
+			# Fara asta, vadul mostenea spuma alb-verzuie a lacului si umplea
+			# tot cadrul cu mint (masurat pe C_r1_stare.png).
+			# Sloturile apei: NU recif tropical. Vadul e namol, iar lacul de
+			# soda e tot o apa opaca, nu o laguna — deci ambele sloturi ies
+			# din familia calda. RUST_METAL (#91461E) trecut prin water_desat
+			# devine gri-maroniu de pamant ud (reteta Yangtze, § water_tint);
+			# ASPHALT_EDGE tine adancul putin mai inchis.
+			"water_shallow_slot": Palette.RUST_METAL,
+			"water_deep_slot": Palette.ASPHALT_EDGE,
+			# Masurat pe C_r1_apa5.png: cu desat 0.58 / dim 0.86 apa iesea
+			# (189,174,151) S0.20 V0.74 — cea mai DESCHISA si cea mai
+			# spalacita suprafata din cadru, langa drum S0.59 V0.64 si iarba
+			# S0.61 V0.72. In referinta raul e mai INCHIS decat malurile si
+			# clar brun. Tinta: S ~0.35, V ~0.45.
+			"water_desat": 0.30,
+			"water_mul": Color(1.0, 0.93, 0.82),
+			"water_dim": 0.52,
+			"water_split": 1.0,
+			"water_split_dir": Vector2(0.0, 1.0),
+			"water_split_offset": 60.0,
+			"water_split_soft": 30.0,
+			"water_split_meander": 18.0,
+			"water_split_wave": 180.0,
+			# Namolul: RUST_METAL (#91461E) desaturat pana in registrul de
+			# pamant ud. Reteta e cea a Yangtze-ului (§ water_tint): slot cald,
+			# desaturare mare, tenta aproape neutra — namolul e gri-maroniu,
+			# nu ocru aprins.
+			# RUNDA 2 (POI C). Criticul a cerut "apa mai inchisa"; masuratoarea
+			# pe referinta spune INVERS: raul din diorama e V0.52, exact cat
+			# malul de noroi (V0.52) — nu valoarea separa apa de mal, ci
+			# NUANTA (rau H8-12 neutru-rece fata de mal H29 ocru cald) plus
+			# dungile speculare (pete pana la V0.72). La noi apa iesise
+			# V0.43 langa mal V0.40 (raport 1.08): doua suprafete in aceeasi
+			# familie, deci ochiul nu vedea niciun rau. Reteta e cea a
+			# Yangtze-ului (§1370-1383): albedo desaturat spre neutru, si
+			# lumina se intoarce ca sclipiri, nu ca albedo plat.
+			# Tinta e MASURATA pe referinta: rau S0.17 V0.52, mal S0.30 V0.52.
+			# Deci nu "mai inchis decat malul" (sunt la aceeasi valoare), ci
+			# mai PUTIN saturat, cu aceeasi luminozitate. desat 0.72 dadea
+			# S0.03 (gri de beton, masurat pe C_r2_t2.png) — prea mult.
+			# RUNDA 3 (POI C). Cu albia sapata, vadul se vede in sfarsit ca
+			# rau — si atunci reglajul rundei 2 se dovedeste tras prea
+			# departe: masurat pe C_r3_t5.png, apa iesea (84,84,80) H65 S0.04
+			# V0.33, adica gri-verzui de beton, cand referinta are (114,96,90)
+			# H15 S0.22 V0.45, noroi cald. Desaturarea de atunci corecta un
+			# cadru in care apa umplea tot ecranul si era cea mai DESCHISA
+			# suprafata din el; acum apa e o banda ingusta intre maluri, deci
+			# problema s-a mutat exact pe dos. Se lasa in urma: desat 0.48 ->
+			# 0.30 (saturatie inapoi in banda), mul spre cald (rosu peste
+			# albastru) ca nuanta sa cada la H15-25, gain 1.22 -> 1.05 ca sa
+			# nu urce valoarea peste maluri.
+			"water_b_mul": Color(1.0, 0.90, 0.80),
+			"water_b_desat": 0.30,
+			"water_b_gain": 1.45,
+			"water_b_glint": 1.9,
+			"water_b_glint_cut": 0.60,
+			# Spuma alba e ce facea lacul sa citeasca mint: toata panza de la
+			# vad e sub SEA_FOAM_DEPTH (0.6 m), deci era spuma pe tot.
+			"water_foam": 0.0,
+			"water_foam_mix": 0.92,
+			# Vezi _build_sea_far: fara larg deschis, apa e doar albia raului.
+			"sea_far": false,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -3591,6 +3659,8 @@ func rebuild() -> void:
 		# Un canal se trece ori pe pod, ori din saritura — nu amandoua. Cu
 		# `jump: true` golul ramane gol si primeste in schimb o trambulina pe
 		# toata latimea (vezi _build_channel_kicker).
+		if bool(ch.get("ford", false)):
+			continue # vad: drumul intra in apa, deci n-are ce trece peste el
 		if bool(ch.get("jump", false)):
 			_build_channel_kicker(ch)
 		else:
@@ -5304,8 +5374,12 @@ func _build_channel_water() -> void:
 	var mat := _water_material()
 	for ch in _channels:
 		var drop := float(ch.get("water_y_drop", -1.0))
-		if drop < 0.0:
+		var is_ford := bool(ch.get("ford", false))
+		if drop < 0.0 and not is_ford:
 			continue # canal la nivelul marii — il acopera grila de tarm
+		# La VAD dropul e negativ INTENTIONAT (apa peste asfalt), deci suprafata
+		# proprie e obligatorie: grila de tarm sta cu mult mai jos si n-ar
+		# acoperi albia.
 		var o: Vector3 = ch["origin"]
 		var along: Vector3 = ch["along"]
 		var across: Vector3 = ch["across"]
@@ -5371,6 +5445,8 @@ func _build_channel_water() -> void:
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi)
+		if bool(ch.get("ford", false)):
+			continue # din vad nu cade nimeni: drumul trece prin el
 		_build_channel_respawn(ch, water_y)
 
 
@@ -5381,6 +5457,12 @@ func _build_channel_water() -> void:
 ## Un parau sapat 18 m cu apa la 15 m are 3 m de apa — si dupa cei 3 m se
 ## normalizeaza culoarea, altfel gradientul de adancime nu se vede deloc.
 func _channel_water_depth(ch: Dictionary) -> float:
+	if bool(ch.get("ford", false)):
+		# La vad stratul de pe banda e cel care da scara culorii: cativa
+		# decimetri. Cu `depth - drop` (3.4 + 0.3) apa de 30 cm ar intra in
+		# gradient ca 8 % — adica spuma alba pe tot vadul.
+		return maxf(TrackSideSampler.FORD_BED_SINK
+			+ float(ch.get("water_over_road", 0.3)), 0.3)
 	return maxf(float(ch["depth"]) - float(ch.get("water_y_drop", 0.0)), 0.5)
 
 
@@ -5425,6 +5507,17 @@ func _build_channel_respawn(ch: Dictionary, water_y: float) -> void:
 
 ## Largul: doua triunghiuri. Nu are nevoie de mai mult.
 func _build_sea_far(root: Node3D, sea_y: float) -> void:
+	# `sea_far` (implicit true) = exista larg deschis dincolo de tarm. Pe o
+	# insula placa asta sta oricum sub teren si nu se vede. Pe Serengeti apa e
+	# un RAU intr-un bazin de crater: albia are 0.03-0.63 m adancime pe o banda
+	# de ~50 m (masurat, x -99..-51 la z=165), iar restul bazinului e o tava
+	# plata la y ~ 0, adica DOAR 1.05 m peste sea_y. Cvadrilaterul de larg n-are
+	# niciun test de adancime, deci iesea prin toata tava si umplea jumatate de
+	# cadru cu o campie gri — exact ce se vedea in C_r2_ab_nosea.png (cu Sea
+	# stins drumul trece uscat pana la orizont). SeaNear ramane si deseneaza
+	# raul, fiindca el chiar testeaza adancimea per celula.
+	if not bool(theme_flag("sea_far", true)):
+		return
 	var c := _centroid()
 	var h := SEA_FAR_EXTENT * 0.5
 	var y := sea_y - SEA_FAR_DROP
@@ -5656,7 +5749,14 @@ func _sea_color(d: float) -> Color:
 	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
-	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(reef, 0.35)
+	# Cat de mult trage spuma spre culoarea apei mici. 0.35 (implicitul, adica
+	# toate temele de pana la Serengeti) e sparger de val pe recif: alb rupt cu
+	# turcoaz. Un VAD de savana n-are spuma — apa de 30 cm peste namol e tot
+	# namol, doar mai deschis fiindca se vede fundul. Cu 0.35 pe Serengeti,
+	# toata panza vadului (adancime sub SEA_FOAM_DEPTH, deci NUMAI banda de
+	# spuma) iesea alb-gri: un cearsaf peste rau, masurat pe C_r1_apa4.png.
+	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(reef,
+		clampf(float(theme_flag("water_foam_mix", 0.35)), 0.0, 1.0))
 	var c: Color
 	if d <= 0.0:
 		c = foam # varf uscat al unei celule de mal
@@ -7367,6 +7467,8 @@ func _resolve_channels() -> void:
 		ch["depth"] = float(spec.get("depth", 13.0))
 		ch["reach"] = float(spec.get("reach", 200.0))
 		ch["fade"] = float(spec.get("fade", 60.0))
+		ch["ford"] = bool(spec.get("ford", false))
+		ch["water_over_road"] = float(spec.get("water_over_road", 0.3))
 		_channels.append(ch)
 
 
@@ -7397,6 +7499,9 @@ func _road_gap(i: int, j: int = -1) -> bool:
 	if _channels.is_empty():
 		return false
 	for ch in _channels:
+		# Vadul sapa albia, dar NU rupe carosabilul: se trece PRIN apa.
+		if bool(ch.get("ford", false)):
+			continue
 		var span: int = 2 * int(ch["steps"])
 		var near_i: int = ch["near"]
 		if ((i - near_i) % n + n) % n < span:

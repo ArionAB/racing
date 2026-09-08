@@ -118,8 +118,10 @@ const PROP_COLLISION := {
 	# Tufele de savana (Serengeti POI A): strat pur vizual, cu SUTELE. Un
 	# hull pe fiecare ar da sute de corpuri fizice pentru obiecte de 1 m
 	# peste care masina oricum trece — si ar face din campie un zid.
-	"broadleaf_shrub": "none", "tropical_shrub": "none",
-	"grass_tuft_large": "none",
+	# `tropical_shrub` si `grass_tuft_large` sunt declarate mai jos, cu
+	# acelasi "none", de POI B (o cheie de doua ori intr-un dictionar e
+	# Parse Error si opreste tot scriptul).
+	"broadleaf_shrub": "none",
 	# --- Chongqing (POI A-D) ----------------------------------------------
 	# Stalpii: lampioanele si firmele au bratul si felinarul latite mult peste
 	# stalp (lamp_lantern_a e 1.40 m lat pe un stalp de ~12 cm). Un hull ar

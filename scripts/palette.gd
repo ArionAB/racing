@@ -691,22 +691,23 @@ const CLASS_TINT := {
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
-	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
-	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
-	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
-	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite,
-	# si au propus: A (0.50,0.56,0.68), B (0.56,0.60,0.68),
-	# C (0.520,0.578,0.723), E (0.50,0.51,0.58), F (0.42,0.38,0.38),
-	# H (0.766,0.810,1.0). Cinci din sase spun acelasi lucru — tenta trebuie
-	# COBORATA (valoarea era problema, nu doar nuanta) si RACITA (albastrul
-	# canalul cel mai mare), fiindca soarele cald (1.0,0.90,0.72) plus
-	# saturatia 1.18 din post duc orice gri neutru spre crem.
-	# Integrarea ia mediana canalelor celor cinci care converg (A, B, C, E si
-	# tinta de valoare a lui H adusa in acelasi registru): (0.52, 0.57, 0.68).
+	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
+	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
+	# E (0.50,0.51,0.58), F (0.42,0.38,0.38), H (0.766,0.810,1.0).
+	# Cinci din sase spun acelasi lucru: tenta veche (0.95,0.97,1.0) era o
+	# corectie de NUANTA pe o dala deja deschisa, iar problema era VALOAREA —
+	# bolovanii ieseau creta (S0.39 V0.83 masurat de C) fata de stanca din
+	# referinta (S0.18 V0.53).
+	# Mecanica, derivata de C si confirmata de restul: o tenta multiplicativa
+	# nu desatureaza singura, doar scaleaza canalele. Ce le departeaza e
+	# soarele cald (1.0, 0.90, 0.72), deci tenta corecta e INVERSUL lui,
+	# normalizat ca sa nu urce valoarea: (1, 1/0.90, 1/0.72) scalat cu ~0.52.
+	# Asta explica de ce A, B, C si E au aterizat toate pe acelasi vector
+	# (albastrul canalul cel mai mare) pornind din capturi diferite.
 	# F (cald si mai inchis) si H (deschis) raman notate ca dezacord de
 	# masuratoare — se re-masoara pe capturile de integrare, pe POI-ul lor.
-	"granite": Color(0.52, 0.57, 0.68),
+	"granite": Color(0.520, 0.578, 0.700),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

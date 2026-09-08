@@ -66,7 +66,17 @@ const BASE_R := {
 const GAP_FREE_X: float = 12.0
 const GAP_LEN_Z: float = 43.8
 ## Cat ramane liber intre muchia carosabilului si fata de granit, minim.
-const GAP_MARGIN: float = 2.0
+##
+## Era 2.0 si dadea scara X 1.60, adica 19,2 m liber intre fete — de trei ori
+## mai mult decat cei 12 m din brief. Doua pagube masurate pe cadrul de joc:
+## taietura citea ca un CORIDOR larg, nu ca o strangere, iar scara pe X intinde
+## fetele pe orizontala, deci coloanele granitului se rareau si se vedea cerul
+## printre ele. Cifrele reale pe lungimea fetelor (survey, 0.863-0.884):
+## `half_width` constant 7.0 si abatere laterala maxima 0.20 m — deci 14 m de
+## carosabil. Cu marginea la 1.2 m iese 16,4 m liber (scara 1.40): masina trece
+## fara sa atinga (ProbeRace 0 pereti pe felia 0.85-0.90), dar fata de granit e
+## la 8,2 m de ax in loc de 9,6, adica intra in cadru ca perete, nu ca gard.
+const GAP_MARGIN: float = 1.2
 ## Fractia din jurul careia se cauta centrul sparturii (brief: 0.853).
 const GAP_FRAC_NOMINAL: float = 0.872
 const GAP_FRAC_SEARCH: float = 0.003
@@ -298,6 +308,31 @@ func _corners() -> void:
 	_place("kopje_boulder_c", "spateColt", entry - 0.0010, -1.0, 8.0, 1.9, 1.6, "hull")
 	_place("kopje_boulder_c", "spateColt", entry - 0.0030, 1.0, 9.0, 0.3, 1.5, "hull")
 	_place("kopje_boulder_c", "spateColt", exit + 0.0030, 1.0, 8.5, 2.6, 1.5, "hull")
+	# CRESTA din care e taiata spartura. In cadrul erou fetele incepeau brusc
+	# din campie plata: se citea ca doua placi asezate pe iarba, nu ca o
+	# taietura intr-un perete (defectul „obiecte infipte in plan" din memoria
+	# `patru-defecte-de-diorama`). Bolovanii de aici urca de la 12 la 24 m
+	# lateral pe ultimii 45 m de apropiere si se SUPRAPUN intre ei, ca masa
+	# de granit sa existe si inainte, si in spatele fetelor.
+	var ridge: Array = [
+		[0.0150, -1.0, 13.0, 1.9], [0.0132, 1.0, 15.0, 1.7],
+		[0.0118, -1.0, 19.0, 2.1], [0.0104, 1.0, 21.0, 1.8],
+		[0.0092, -1.0, 11.5, 1.6], [0.0080, 1.0, 12.5, 2.0],
+		[0.0068, -1.0, 16.0, 1.9], [0.0058, 1.0, 17.5, 1.7],
+		[0.0046, -1.0, 10.0, 1.5], [0.0036, 1.0, 10.5, 1.8],
+	]
+	for e in ridge:
+		var model := "kopje_boulder_c" if _rng.randf() < 0.6 else "kopje_boulder_b"
+		_place(model, "creasta", entry - float(e[0]), float(e[1]),
+			float(e[2]) + _rng.randf_range(-1.5, 1.5), _rng.randf_range(0.0, TAU),
+			float(e[3]) * _rng.randf_range(0.9, 1.15), "hull")
+	# si dincolo de fete, ca peretele sa aiba adancime cand treci prin gura
+	for j in 6:
+		var side := -1.0 if j % 2 == 0 else 1.0
+		_place("kopje_boulder_c" if j % 2 == 0 else "kopje_boulder_b", "creastaSpate",
+			entry + 0.0030 + 0.0038 * float(j), side,
+			_rng.randf_range(13.0, 22.0), _rng.randf_range(0.0, TAU),
+			_rng.randf_range(1.4, 2.0), "hull")
 
 
 ## ACACIILE: referinta are coroane la 3-8 m de drum, care se ating, si umbre
@@ -317,6 +352,13 @@ func _trees() -> void:
 	_place("acacia_umbrella_a", "acaciaIntrare", entry - 0.0235, -1.0, 3.0, 1.4, 0.95, "trunk")
 	_place("acacia_umbrella_b", "acaciaIntrare", entry - 0.0290, 1.0, 5.0, 3.1, 1.1, "trunk")
 	_place("dead_tree", "copacUscat", entry - 0.0150, -1.0, 9.0, 0.8, 1.1, "trunk")
+	# STRATUL DE LA SOL PE APROPIERE (0.836-0.862). In cadrul erou de la 0.84
+	# apropierea avea NUMAI copaci: intre asfalt si trunchiuri ramanea iarba
+	# goala pe 20 m, iar referinta are tufe si pietre chiar pe muchie. Banda
+	# de aici e generata cu jitter (lectia valurilor 1-2: pasul fix se
+	# citeste ca „instante plasate"), cu densitate care CRESTE spre spartura,
+	# si cu piese care se suprapun intre ele.
+	_undergrowth(entry - 0.0330, entry - 0.0010)
 	# O acacie DINCOLO de fata din stanga (fata scalata tine pana la 28,5 m de
 	# ax; la 21 m copacul era IN stanca). Pe dreapta nu: linia de sosire trece
 	# la z=165, la 40 m de axa noastra, si coroana ar fi cazut peste ea
@@ -346,6 +388,40 @@ func _trees() -> void:
 		_place("kopje_boulder_b" if j % 3 == 0 else "kopje_boulder_a", "piatraCazuta", f, sgn,
 			_rng.randf_range(2.5, 9.0), _rng.randf_range(0.0, TAU), _rng.randf_range(0.7, 1.0),
 			"hull" if j % 3 == 0 else "none")
+
+
+## Tufe si pietre marunte LA MUCHIA drumului, pe intervalul dat. Nu e un tiv
+## regulat: pasul are jitter de peste jumatate din el, distanta laterala e
+## trasa din doua cozi (majoritatea la 0.3-3 m de muchie, cateva la 6-10 m),
+## iar densitatea creste liniar spre capatul dinspre spartura. Piesele au voie
+## sa se atinga — asta le face sa citeasca drept tufaris, nu drept obiecte.
+func _undergrowth(f_from: float, f_to: float) -> void:
+	var span := f_to - f_from
+	var f := f_from
+	var k := 0
+	while f < f_to:
+		# 0 la inceputul apropierii, 1 langa spartura
+		var t: float = clampf((f - f_from) / maxf(span, 1e-6), 0.0, 1.0)
+		for sgn: float in [-1.0, 1.0]:
+			# doua-trei piese pe pas langa spartura, una la inceput
+			var reps := 1 + int(_rng.randf() < 0.35 + 0.55 * t) + int(_rng.randf() < 0.15 + 0.45 * t)
+			for r in reps:
+				var near := _rng.randf() < 0.72
+				# minimul e 0.7, nu 0.2: sub el marginea piesei intra in asfalt
+				# (generatorul dadea 6 avertismente de degajare) — fara sa
+				# blocheze (coliziune "none"), dar o tufa care creste din
+				# carosabil se vede de la 30 m.
+				var gap: float = _rng.randf_range(0.7, 3.2) if near else _rng.randf_range(5.0, 11.0)
+				var jf := f + _rng.randf_range(-0.0009, 0.0009)
+				if _rng.randf() < 0.58:
+					_place("euphorbia", "tufaApropiere", jf, sgn, gap,
+						_rng.randf_range(0.0, TAU), _rng.randf_range(0.5, 0.95), "none")
+				else:
+					_place("kopje_boulder_a", "piatraApropiere", jf, sgn, gap,
+						_rng.randf_range(0.0, TAU), _rng.randf_range(0.35, 0.8), "none")
+		# pasul se strange spre spartura (0.0034 -> 0.0016 in fractii)
+		f += _rng.randf_range(0.6, 1.4) * (0.0034 - 0.0018 * t)
+		k += 1
 
 
 ## KICKERUL de la iesire: HazardMarker kind=6 (FLYOFF) — rampa de 12 m urca

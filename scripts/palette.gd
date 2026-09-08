@@ -692,9 +692,15 @@ const CLASS_TINT := {
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
 	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
-	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
-	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
-	"granite": Color(0.95, 0.97, 1.0),
+	# temei e galbui (1.0, 0.90, 0.72). Taierea mica de rosu de la fundatie
+	# (0.95, 0.97, 1.0) NU ajungea: masurat pe cadrul de joc la POI H, fata
+	# la soare iesea (162,136,102), S0.37 V0.64 — crem mai DESCHIS decat
+	# iarba (V0.76 langa el), adica exact pe dos fata de referinta, unde
+	# stanca e o masa mai inchisa decat campia (S0.15-0.20, V0.42 fata de
+	# iarba V0.67). Tenta de aici e DERIVATA, nu aleasa: tinta referintei
+	# adusa in expunerea noastra (raportul de iarba 1.220) da (131,114,104),
+	# iar tenta = tenta_veche * tinta / masurat, pe canale.
+	"granite": Color(0.766, 0.810, 1.0),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

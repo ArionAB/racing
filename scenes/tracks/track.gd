@@ -497,6 +497,16 @@ static func themes() -> Dictionary:
 			# departat, nu cer, si acolo referinta e la fel de calda ca noi.
 			# Respins ca prea departe: fog_curve 2.2 (cerul iese 97,9% violet,
 			# dar departarea recade la S 0.25 — ceata ajunge prea tarziu).
+			#
+			# ATENTIE la unealta de masura (memoria
+			# `caseta-de-masura-exclude-defectul`): `scratchpad/sat_depth.py`
+			# isi ALEGE singur randurile de "teren", deci pe starea veche
+			# masura pe 435 de randuri (excludea 285 ca fiind cer) si pe cea
+			# noua pe toate 720 — cifra lui scade 50% -> 36% desi imaginea s-a
+			# imbunatatit. Pe o fereastra FIXA de randuri, identica intre
+			# stari (y 0.35..0.95, `scratchpad/sat_fix.py`), pastrarea de
+			# saturatie cu adancimea urca 29% -> 70%, cu referinta la 58% si
+			# cu saturatia de prim-plan neschimbata (0.527 in ambele stari).
 			"fog": Color(0.58, 0.51, 0.38),
 			# Malul opus al craterului. Nu e "dealul de fundal" al altor teme:
 			# de pe buza, movilele de orizont (`_build_horizon_fallback`, 240-480 m)

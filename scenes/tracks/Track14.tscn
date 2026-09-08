@@ -273,76 +273,76 @@ transform = Transform3D(1.433005, 0.000000, 0.443280, 0.000000, 1.500000, 0.0000
 transform = Transform3D(-1.285333, 0.000000, 0.773252, 0.000000, 1.500000, 0.000000, -0.773252, 0.000000, -1.285333, 83.361595, -0.286575, 146.899521)
 
 [node name="umarGura32" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.352019, 0.000000, 1.354396, 0.000000, 1.399395, 0.000000, -1.354396, 0.000000, 0.352019, 36.607903, 0.398514, 96.344856)
+transform = Transform3D(0.352019, 0.000000, 1.354396, 0.000000, 1.399395, 0.000000, -1.354396, 0.000000, 0.352019, 36.116859, 0.392548, 98.975365)
 
 [node name="umarGura33" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.773275, 0.000000, -1.027454, 0.000000, 1.285930, 0.000000, 1.027454, 0.000000, -0.773275, 25.959503, 0.139526, 138.997711)
+transform = Transform3D(-0.773275, 0.000000, -1.027454, 0.000000, 1.285930, 0.000000, 1.027454, 0.000000, -0.773275, 26.310984, 0.207214, 137.114502)
 
 [node name="umarSpate34" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.480121, 0.000000, -1.110981, 0.000000, 1.210287, 0.000000, 1.110981, 0.000000, -0.480121, 43.157272, 0.312943, 93.873871)
+transform = Transform3D(-0.480121, 0.000000, -1.110981, 0.000000, 1.210287, 0.000000, 1.110981, 0.000000, -0.480121, 42.899567, 0.309402, 95.259026)
 
 [node name="umarSpate35" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.679834, 0.000000, 0.908430, 0.000000, 1.134645, 0.000000, -0.908430, 0.000000, 0.679834, 37.329483, -0.061371, 143.594406)
+transform = Transform3D(0.679834, 0.000000, 0.908430, 0.000000, 1.134645, 0.000000, -0.908430, 0.000000, 0.679834, 37.494240, -0.031235, 142.707458)
 
 [node name="umarDreapta36" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.622859, 0.000000, 0.856464, 0.000000, 1.059002, 0.000000, -0.856464, 0.000000, 0.622859, 21.439989, 0.286179, 136.364349)
+transform = Transform3D(0.622859, 0.000000, 0.856464, 0.000000, 1.059002, 0.000000, -0.856464, 0.000000, 0.622859, 21.507290, 0.303131, 135.974808)
 
 [node name="umarDreapta37" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.702274, 0.000000, -0.446269, 0.000000, 0.832073, 0.000000, 0.446269, 0.000000, -0.702274, 14.525796, 0.342926, 135.840866)
+transform = Transform3D(-0.702274, 0.000000, -0.446269, 0.000000, 0.832073, 0.000000, 0.446269, 0.000000, -0.702274, 14.331803, 0.287521, 136.949127)
 
 [node name="umarIesire38" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.340400, 0.000000, 1.200793, 0.000000, 1.248109, 0.000000, -1.200793, 0.000000, 0.340400, 79.886169, -0.284012, 146.629272)
+transform = Transform3D(0.340400, 0.000000, 1.200793, 0.000000, 1.248109, 0.000000, -1.200793, 0.000000, 0.340400, 79.905304, -0.286819, 147.966797)
 
 [node name="umarIesire39" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.118045, 0.000000, 0.976248, 0.000000, 0.983359, 0.000000, -0.976248, 0.000000, 0.118045, 82.140884, 3.434158, 105.116425)
+transform = Transform3D(0.086222, 0.000000, 0.713067, 0.000000, 0.718261, 0.000000, -0.713067, 0.000000, 0.086222, 82.132607, 3.511795, 105.005234)
 
 [node name="creasta40" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(1.067948, 0.000000, -0.383282, 0.000000, 1.134645, 0.000000, 0.383282, 0.000000, 1.067948, 16.977163, 0.822968, 85.205811)
+transform = Transform3D(1.067948, 0.000000, -0.383282, 0.000000, 1.134645, 0.000000, 0.383282, 0.000000, 1.067948, 16.566694, 0.819702, 86.009140)
 
 [node name="creasta41" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.461856, 0.000000, 0.936514, 0.000000, 1.736111, 0.000000, -0.936514, 0.000000, 1.461856, -6.173154, 0.074677, 139.622284)
+transform = Transform3D(1.461856, 0.000000, 0.936514, 0.000000, 1.736111, 0.000000, -0.936514, 0.000000, 1.461856, -6.965641, -0.013290, 141.281647)
 
 [node name="creasta42" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.520077, 0.000000, 0.439306, 0.000000, 0.680787, 0.000000, -0.439306, 0.000000, 0.520077, 21.406605, 0.776093, 82.806183)
+transform = Transform3D(0.520077, 0.000000, 0.439306, 0.000000, 0.680787, 0.000000, -0.439306, 0.000000, 0.520077, 22.197506, 0.788391, 80.819069)
 
 [node name="creasta43" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.206500, 0.000000, -1.269242, 0.000000, 1.285930, 0.000000, 1.269242, 0.000000, -0.206500, 3.334502, -0.139221, 146.173355)
+transform = Transform3D(-0.206500, 0.000000, -1.269242, 0.000000, 1.285930, 0.000000, 1.269242, 0.000000, -0.206500, 2.566681, -0.237152, 148.640915)
 
 [node name="creasta44" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.361768, 0.000000, -0.273130, 0.000000, 1.388889, 0.000000, 0.273130, 0.000000, 1.361768, 21.152534, 0.675568, 92.715897)
+transform = Transform3D(1.361768, 0.000000, -0.273130, 0.000000, 1.388889, 0.000000, 0.273130, 0.000000, 1.361768, 21.912901, 0.687134, 90.009567)
 
 [node name="creasta45" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-1.749579, 0.000000, 0.900219, 0.000000, 1.967593, 0.000000, -0.900219, 0.000000, -1.749579, 10.003298, -0.012878, 143.221008)
+transform = Transform3D(-1.749579, 0.000000, 0.900219, 0.000000, 1.967593, 0.000000, -0.900219, 0.000000, -1.749579, 9.728327, -0.059006, 144.379578)
 
 [node name="creasta46" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-1.061671, 0.000000, 0.852488, 0.000000, 1.361573, 0.000000, -0.852488, 0.000000, -1.061671, 24.861727, 0.692734, 84.571884)
+transform = Transform3D(-1.061671, 0.000000, 0.852488, 0.000000, 1.361573, 0.000000, -0.852488, 0.000000, -1.061671, 24.538925, 0.669083, 86.972824)
 
 [node name="creasta47" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.248601, 0.000000, 0.839586, 0.000000, 1.504630, 0.000000, -0.839586, 0.000000, 1.248601, 18.548824, -0.215057, 148.291641)
+transform = Transform3D(1.248601, 0.000000, 0.839586, 0.000000, 1.504630, 0.000000, -0.839586, 0.000000, 1.248601, 18.403826, -0.253876, 149.267975)
 
 [node name="creasta48" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-1.101008, 0.000000, 0.356894, 0.000000, 1.157407, 0.000000, -0.356894, 0.000000, -1.101008, 28.239901, 0.522644, 97.006348)
+transform = Transform3D(-1.101008, 0.000000, 0.356894, 0.000000, 1.157407, 0.000000, -0.356894, 0.000000, -1.101008, 28.828835, 0.538620, 93.597588)
 
 [node name="creasta49" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.386091, 0.000000, 0.737074, 0.000000, 0.832073, 0.000000, -0.737074, 0.000000, -0.386091, 21.939976, 0.023453, 142.280380)
+transform = Transform3D(-0.386091, 0.000000, 0.737074, 0.000000, 0.832073, 0.000000, -0.737074, 0.000000, -0.386091, 21.734095, -0.020218, 143.386490)
 
 [node name="creastaSpate50" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.844963, 0.000000, 0.866506, 0.000000, 1.210287, 0.000000, -0.866506, 0.000000, 0.844963, 45.714745, 0.469406, 90.027496)
+transform = Transform3D(0.844963, 0.000000, 0.866506, 0.000000, 1.210287, 0.000000, -0.866506, 0.000000, 0.844963, 45.457195, 0.411392, 91.412682)
 
 [node name="creastaSpate51" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.446446, 0.000000, 0.414373, 0.000000, 1.504630, 0.000000, -0.414373, 0.000000, 1.446446, 43.802990, -0.161407, 146.097000)
+transform = Transform3D(1.446446, 0.000000, 0.414373, 0.000000, 1.504630, 0.000000, -0.414373, 0.000000, 1.446446, 43.349045, -0.237656, 148.542252)
 
-[node name="creastaSpate52" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.762228, 0.000000, 0.346336, 0.000000, 0.837222, 0.000000, -0.346336, 0.000000, 0.762228, 61.682518, 4.015427, 92.582741)
+[node name="creastaSpate52" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(1.603942, 0.000000, 0.728790, 0.000000, 1.761751, 0.000000, -0.728790, 0.000000, 1.603942, 61.881493, 4.734238, 91.510429)
 
 [node name="creastaSpate53" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.746540, 0.000000, -0.615591, 0.000000, 1.851852, 0.000000, 0.615591, 0.000000, 1.746540, 58.233307, -0.277054, 150.065063)
+transform = Transform3D(1.746540, 0.000000, -0.615591, 0.000000, 1.851852, 0.000000, 0.615591, 0.000000, 1.746540, 58.545307, -0.258362, 148.613022)
 
-[node name="creastaSpate54" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.211242, 0.000000, -0.964554, 0.000000, 0.987415, 0.000000, 0.964554, 0.000000, 0.211242, 75.637115, 14.716141, 93.433525)
+[node name="creastaSpate54" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
+transform = Transform3D(0.211918, 0.000000, -0.967641, 0.000000, 0.990575, 0.000000, 0.967641, 0.000000, 0.211918, 75.646683, 14.831375, 93.349747)
 
 [node name="creastaSpate55" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.343996, 0.000000, -0.905138, 0.000000, 1.620370, 0.000000, 0.905138, 0.000000, 1.343996, 79.940613, -0.291443, 150.434494)
+transform = Transform3D(1.343996, 0.000000, -0.905138, 0.000000, 1.620370, 0.000000, 0.905138, 0.000000, 1.343996, 79.907173, -0.287094, 148.097702)
 
 [node name="acaciaIntrare56" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(0.825336, 0.000000, 0.564642, 0.000000, 1.000000, 0.000000, -0.564642, 0.000000, 0.825336, 13.343674, 0.544754, 129.146805)

@@ -362,20 +362,13 @@ func _place_h(base: String, frac: float, side_sign: float, gap: float,
 	# arata `creastaSpate52` in `H_r2_hero.png`, coltul din dreapta sus. Deci
 	# se scade cota terenului din inaltimea ceruta, si sub 3,5 m ramasi piesa
 	# se sare: acolo dealul face treaba, nu bolovanul.
-	var i := _idx(frac)
-	var p := _track.baked[i]
-	var s := _track._side_at(i) * side_sign
-	var half := _track.width_at_index(i)
-	var q := p + s * (half + gap)
-	var ridicat: float = _sol_real(q.x, q.z) - p.y
-	var h_ef: float = h_m - maxf(ridicat, 0.0)
-	if h_ef < 3.5:
-		print("; SARIT %s la frac %.4f: terenul urca %.1f m, ar ramane %.1f m de piesa" % [
-			base, frac, ridicat, h_ef])
-		return
-	var model := "kopje_camp" if h_ef >= 9.0 else "kopje_boulder_c"
-	var scl: float = h_ef / float(H1[model])
-	_place(model, base, frac, side_sign, gap, _rng.randf_range(0.0, TAU), scl, "hull")
+	# Piesa si scara se aleg DUPA ce se stie pozitia finala: garda de traseu
+	# strain din `_place` poate muta piesa lateral, si acolo terenul are alta
+	# cota. Prima varianta calcula plafonul la distanta NOMINALA, si asa a
+	# ramas `creastaSpate54` — kopje_camp intreg pe un teren cu 14,7 m mai sus
+	# decat soseaua, cu varful la 28 m, atarnat in cerul din dreapta sus.
+	_place("kopje_camp", base, frac, side_sign, gap, _rng.randf_range(0.0, TAU),
+		1.0, "hull", h_m)
 
 
 ## UMERII GURII — cele doua mase care inchid spartura PE VERTICALA.
@@ -567,7 +560,8 @@ func _dist_orice_drum(x: float, z: float) -> float:
 
 
 func _place(model: String, base: String, frac: float, side_sign: float,
-		gap: float, yaw: float, scl: float, mode: String = "hull") -> void:
+		gap: float, yaw: float, scl: float, mode: String = "hull",
+		h_dorit: float = 0.0) -> void:
 	var i := _idx(frac)
 	var p := _track.baked[i]
 	var s := _track._side_at(i) * side_sign
@@ -590,6 +584,17 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 			q = p + s * d
 			tries += 1
 		g = _sol_real(q.x, q.z)
+	# Cu inaltime ceruta (masele de granit): abia ACUM, pe pozitia finala, se
+	# stie cat urca terenul si deci ce mai ramane de pus deasupra soselei.
+	if h_dorit > 0.0:
+		var h_ef: float = h_dorit - maxf(g - p.y, 0.0)
+		if h_ef < 3.5:
+			print("; SARIT %s la frac %.4f: terenul urca %.1f m, ar ramane %.1f m" % [
+				base, frac, g - p.y, h_ef])
+			return
+		model = "kopje_camp" if h_ef >= 9.0 else "kopje_boulder_c"
+		scl = h_ef / float(H1[model])
+		r = float(BASE_R.get(model, 0.6)) * scl
 	if d - r < half + 0.5:
 		_warn += 1
 		print("; ATENTIE %s la frac %.4f: marginea la %.2f m de ax, banda %.2f" % [

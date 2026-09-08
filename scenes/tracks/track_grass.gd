@@ -75,6 +75,46 @@ const CORRIDOR_CLEAR: float = 5.0
 ## Pe cati metri sub plafonul de altitudine se rareste iarba pana la zero.
 const ALT_FADE: float = 10.0
 
+## PROFILUL DE COVOR (optional, cerut de tema prin `dense_grass_carpet`).
+##
+## De ce exista: implicitul de mai sus e croit pentru pajistea ALPINA, unde
+## smocul e un accent verde peste un teren verde — fire inalte, rare, cu baza
+## intunecata care da volum. Pe savana asta iese exact invers: masurat pe
+## captura --gamecam 0.97 fata de ref_A.png, 35.5% din pixelii campului erau
+## sub V=0.42 (baza bruna a firelor, nu umbra aruncata — `cast_shadow` e deja
+## OFF) si doar 53.8% erau lama luminata, deci covorul citea a MIRISTE de tepi
+## pe nisip gol. Referinta e un covor continuu de pai auriu, cu tufele verzi ca
+## accente SEPARATE.
+##
+## Ce schimba profilul, in ordinea efectului masurat:
+##   - baza firului nu mai e bruna (0.45/0.42/0.38 din varf) ci aproape la
+##     culoarea varfului — un fir de pai n-are radacina neagra la 10 m;
+##   - firele scad sub 1 m si smocul se stange, deci lamele se suprapun in loc
+##     sa lase sol intre tepi;
+##   - mai multe fire pe smoc (buget de vertecsi, nu de desene — un smoc
+##     ramane acelasi MultiMesh) si banda se largeste, ca solul gol sa nu mai
+##     inceapa la 7 m de asfalt.
+static var carpet: bool = false
+
+## Cat de intunecata e baza firului fata de varf, in profilul de covor.
+# Masurat pe A_r2_c5.png (caseta 60..340 x 430..700, percentile de V):
+# p05 0.13 / p25 0.23 / p50 0.57 / p75 0.82 / p95 0.89 — sfertul de jos era
+# aproape negru pe un sol de 0.82, de-aia campul citea tepos. Baza urcata
+# strange ecartul: covorul are variatie, nu contrast de cioburi.
+const CARPET_BASE_MUL: Vector3 = Vector3(0.90, 0.88, 0.80)
+## Inaltimea firului in profilul de covor (m): scund si indesat.
+const CARPET_H_MIN: float = 0.34
+const CARPET_H_MAX: float = 0.62
+## Raza smocului si latimea firului in profilul de covor.
+const CARPET_RADIUS: float = 0.42
+const CARPET_W_MIN: float = 0.075
+const CARPET_W_MAX: float = 0.125
+## Fire pe smoc si banda (multiplicatori peste BLADES / benzile de mai sus).
+const CARPET_BLADES: int = 20
+const CARPET_BAND_MAX: float = 26.0
+const CARPET_NEAR_PER_M: float = 20.0
+const CARPET_FAR_PER_M: float = 13.0
+
 static var _material: ShaderMaterial
 
 const _SHADER: String = "
@@ -121,13 +161,19 @@ void fragment() {
 ## `max_y`: plafonul de altitudine (in lume) peste care iarba nu mai creste —
 ## pe Alpi pajistea se opreste unde incepe etajul de stanca. 1e9 = fara plafon.
 static func build(sampler: TrackSideSampler, world_seed: int,
-		ground_tint: Color, max_y: float = 1e9) -> Node3D:
+		ground_tint: Color, max_y: float = 1e9,
+		tip_override: Color = Color(0, 0, 0, 0),
+		carpet_profile: bool = false) -> Node3D:
+	carpet = carpet_profile
+	var band_max := CARPET_BAND_MAX if carpet else BAND_MAX
+	var near_pm := CARPET_NEAR_PER_M if carpet else NEAR_PER_M
+	var far_pm := CARPET_FAR_PER_M if carpet else FAR_PER_M
 	var root := Node3D.new()
 	root.name = "DenseGrass"
 	var rng := RandomNumberGenerator.new()
 	rng.seed = world_seed ^ 0x6772A55  # sa nu repete sirul rng al decorului
 
-	var mesh := _patch_mesh(rng, ground_tint)
+	var mesh := _patch_mesh(rng, ground_tint, tip_override)
 
 	# Benzile secundare (scurtatura prin iarba, poteci), intr-un cos spatial:
 	# verificarea "sunt pe poteca?" per smoc devine O(1), nu O(n).
@@ -156,9 +202,9 @@ static func build(sampler: TrackSideSampler, world_seed: int,
 				continue
 			var side := side_v * side_sign
 			placed += _scatter(cells, sampler, rng, corridor, max_y,
-				a, along, side, hw, seg, NEAR_PER_M, BAND_MIN, BAND_NEAR)
+				a, along, side, hw, seg, near_pm, BAND_MIN, BAND_NEAR)
 			placed += _scatter(cells, sampler, rng, corridor, max_y,
-				a, along, side, hw, seg, FAR_PER_M, BAND_NEAR, BAND_MAX)
+				a, along, side, hw, seg, far_pm, BAND_NEAR, band_max)
 
 	_emit_cells(root, cells, mesh)
 	root.set_meta(&"grass_patches", placed)
@@ -325,7 +371,14 @@ static func _emit_cells(root: Node3D, cells: Dictionary, mesh: Mesh) -> void:
 ## lata, varf ciupit, aplecat intr-o directie proprie. Vertex colors: gradient
 ## baza intunecata -> varf deschis (culoarea vine de aici, nu din textura),
 ## alpha = fractia de inaltime (greutatea vantului in shader).
-static func _patch_mesh(rng: RandomNumberGenerator, tint: Color) -> ArrayMesh:
+## `tip_override`: culoarea varfului, ceruta explicit de tema. Implicitul
+## (alpha 0) pastreaza derivarea de pajiste alpina de mai jos — verde saturat.
+## Serengeti o foloseste fiindca savana e IARBA USCATA: derivarea inmulteste
+## verdele cu 1.18 si taie albastrul la jumatate, si pe un ground_tint ocru
+## (#AF9F4E) iese lime acid, exact contrariul referintei (ref_A.png: pai auriu
+## si tufe verde-inchis SEPARATE). Masurat pe captura --gamecam 0.97.
+static func _patch_mesh(rng: RandomNumberGenerator, tint: Color,
+		tip_override: Color = Color(0, 0, 0, 0)) -> ArrayMesh:
 	# Mai SATURAT decat solul, nu doar mai inchis/deschis: firele stau PESTE
 	# textura pictata a terenului, iar daca au aceeasi croma se pierd in ea —
 	# prima incercare (varfuri spre galben-pai) iesea buruieni uscate, invizibile
@@ -333,28 +386,39 @@ static func _patch_mesh(rng: RandomNumberGenerator, tint: Color) -> ArrayMesh:
 	var base_col := Color(tint.r * 0.28, tint.g * 0.46, tint.b * 0.28, 0.0)
 	var tip_col := Color(tint.r * 0.85, minf(tint.g * 1.18 + 0.03, 1.0),
 		tint.b * 0.50, 1.0)
+	if tip_override.a > 0.0:
+		tip_col = Color(tip_override.r, tip_override.g, tip_override.b, 1.0)
+		var bm := CARPET_BASE_MUL if carpet else Vector3(0.45, 0.42, 0.38)
+		base_col = Color(tip_override.r * bm.x, tip_override.g * bm.y,
+			tip_override.b * bm.z, 0.0)
+	var blades := CARPET_BLADES if carpet else BLADES
+	var radius := CARPET_RADIUS if carpet else PATCH_RADIUS
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for _b in BLADES:
+	for _b in blades:
 		var ang := rng.randf_range(0.0, TAU)
-		var r := sqrt(rng.randf()) * PATCH_RADIUS
+		var r := sqrt(rng.randf()) * radius
 		var base := Vector3(cos(ang) * r, 0.0, sin(ang) * r)
 		# Fire INALTE si LATE — geometrie de dioramă, nu gazon realist: de la
 		# inaltimea chase cam-ului un fir de 6 cm latime dispare; la 12-18 cm
 		# firele se suprapun si abia atunci citesc a covor.
-		var h := rng.randf_range(0.40, 0.70)
+		var h := rng.randf_range(CARPET_H_MIN, CARPET_H_MAX) if carpet 			else rng.randf_range(0.40, 0.70)
 		var lean_ang := rng.randf_range(0.0, TAU)
 		# Aproape verticale: cu aplecare mare smocul iese "stea de mare" si
 		# covorul citeste tepos; referinta are fire drepte, doar cu varful dus.
 		var lean := rng.randf_range(0.03, 0.12)
 		var face_ang := rng.randf_range(0.0, TAU)
-		var half_w := rng.randf_range(0.055, 0.09)
+		var half_w := rng.randf_range(CARPET_W_MIN, CARPET_W_MAX) if carpet 			else rng.randf_range(0.055, 0.09)
 		var perp := Vector3(cos(face_ang), 0.0, sin(face_ang))
 		var tip := base + Vector3(cos(lean_ang) * lean, h, sin(lean_ang) * lean)
 		# Firele de la margine putin mai scunde: smocul iese boltit, nu tuns.
-		tip.y *= 1.0 - 0.35 * (r / PATCH_RADIUS)
+		tip.y *= 1.0 - 0.35 * (r / radius)
 		# O idee spre galben pe alocuri: "fan tanar", nu gazon de plastic.
-		var tc := tip_col.lerp(Color(0.78, 0.80, 0.28, 1.0), rng.randf() * 0.12)
+		# Pe covor variatia NU merge spre alb: masurat pe A_r2_c1.png, cu
+		# lerp 0.30 spre (0.92,0.86,0.52) firele ieseau confetti aproape albe
+		# pe sol, adica exact contrariul unui covor. 0.14 spre un pai cald.
+		var vary := Color(0.52, 0.50, 0.26, 1.0) if carpet 			else Color(0.78, 0.80, 0.28, 1.0)
+		var tc := tip_col.lerp(vary, rng.randf() * (0.14 if carpet else 0.12))
 		var v0 := base - perp * half_w
 		var v1 := base + perp * half_w
 		var v2 := tip + perp * half_w * 0.18

@@ -115,6 +115,11 @@ const PROP_COLLISION := {
 	"flowers_orange": "none", "flowers_white": "none",
 	"hibiscus_bush": "none", "sugar_cane_clump": "none",
 	"shrub_snow": "none", "grass_tuft_dry": "none",
+	# Tufele de savana (Serengeti POI A): strat pur vizual, cu SUTELE. Un
+	# hull pe fiecare ar da sute de corpuri fizice pentru obiecte de 1 m
+	# peste care masina oricum trece — si ar face din campie un zid.
+	"broadleaf_shrub": "none", "tropical_shrub": "none",
+	"grass_tuft_large": "none",
 	# --- Chongqing (POI A-D) ----------------------------------------------
 	# Stalpii: lampioanele si firmele au bratul si felinarul latite mult peste
 	# stalp (lamp_lantern_a e 1.40 m lat pe un stalp de ~12 cm). Un hull ar
@@ -779,6 +784,25 @@ const SLOT_REMAP_BY_GROUP := {
 	"F3_Gat": {"hall_alcove": {}, "church_arch": {}},
 	"F4_Sala2": {"hall_alcove": {}, "church_arch": {}},
 	"F5_Ocol": {"hall_alcove": {}, "church_arch": {}},
+	# Serengeti, POI A (campul de safari). Masurat pe captura --gamecam la
+	# 0.97 fata de ref_A.png: prelata cortului e pe CORAL_SAND 19 (#E9DCC0) si
+	# sub soarele cald iese ALBA — in referinta corturile sunt kaki-bej;
+	# CONCRETE 8 (#C8BDA9) e cel mai apropiat bej din atlas. Coroana acaciei
+	# are pete pe DRY_VEGETATION 13 (galbenul ierbii) peste verdele 21: in
+	# referinta coroanele sunt verde-oliv uniform, deci petele trec pe
+	# CACTUS_GREEN 12. Scop pe GRUP, nu pe model: alte POI-uri decid singure.
+	"ZoneA_Camp": {
+		# Tufa cu frunza lata e din kitul tropical (verde 21 lucios, de
+		# bananier); pe savana trece pe CACTUS_GREEN 12, oliv sters, ca sa
+		# citeasca a tufa uscata pe iarba aurie (ref_A.png).
+		"broadleaf_shrub": {21: Palette.CACTUS_GREEN},
+		"grass_tuft_large": {21: Palette.DRY_VEGETATION,
+			13: Palette.DRY_VEGETATION},
+		"safari_tent": {19: Palette.CONCRETE},
+		"acacia_umbrella_a": {13: Palette.CACTUS_GREEN},
+		"acacia_umbrella_b": {13: Palette.CACTUS_GREEN},
+		"acacia_umbrella_c": {13: Palette.CACTUS_GREEN},
+	},
 }
 
 const SLOT_REMAP_BY_MODEL := {

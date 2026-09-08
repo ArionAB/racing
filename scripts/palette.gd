@@ -694,7 +694,13 @@ const CLASS_TINT := {
 	# Granitul Serengeti: dala olkhon e usor calda (178,165,150) si soarele
 	# temei e galbui (1.0, 0.90, 0.72); o taiere mica de rosu o tine pe
 	# gri-roz de granit, nu pe crem. Verificat pe captura (handoff_fundatia).
-	"granite": Color(0.95, 0.97, 1.0),
+	# Runda A1 (POI A, ref_A.png): cu (0.95,0.97,1.0) kopje-ul iesea CREM-alb
+	# (masurat pe captura --gamecam 0.97: ~(225,220,205)), iar granitul din
+	# referinta e gri-albastrui (~(120,130,145) pe fata luminata). Aceeasi
+	# mecanica precum volcanic_rock: tenta rece si coborata, ca soarele cald
+	# + saturatia din post sa aterizeze pe gri, nu pe crem. Masurat pe
+	# captura, nu ales.
+	"granite": Color(0.50, 0.56, 0.68),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta

@@ -300,12 +300,23 @@ func _ready() -> void:
 	if hide_node != "":
 		await get_tree().process_frame
 		await get_tree().process_frame
-		var h := track.find_child(hide_node, true, false) as Node3D
-		if h != null:
-			h.visible = false
-			print("snapshot: ascuns %s (%s)" % [hide_node, h.get_path()])
+		# ADITIV (POI D, runda 4): un `*` la coada ascunde TOATE nodurile al
+		# caror nume incepe cu prefixul. Fara asta nu se poate face A/B-ul de
+		# atribuire pe o CLASA de piese (ceata, coroane) — doar pe un nod.
+		if hide_node.ends_with("*"):
+			var pref := hide_node.substr(0, hide_node.length() - 1)
+			var cnt := 0
+			for nd in track.find_children("%s*" % pref, "Node3D", true, false):
+				(nd as Node3D).visible = false
+				cnt += 1
+			print("snapshot: ascunse %d noduri cu prefixul %s" % [cnt, pref])
 		else:
-			print("snapshot: nu am gasit %s" % hide_node)
+			var h := track.find_child(hide_node, true, false) as Node3D
+			if h != null:
+				h.visible = false
+				print("snapshot: ascuns %s (%s)" % [hide_node, h.get_path()])
+			else:
+				print("snapshot: nu am gasit %s" % hide_node)
 
 	# Ceata se stinge doar pentru vederile DE SUS (ansamblul ortografic), unde
 	# camera e la sute de metri si ceata ar spala tot intr-o pata uniforma.

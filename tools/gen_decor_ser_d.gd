@@ -1,0 +1,769 @@
+extends Node
+## Generator de decor MANUAL pentru POI D — PADUREA DE CEATA (Track14,
+## Serengeti, frac 0.196-0.339, urcarea 0 -> 45 m pe flancul craterului).
+## Ca la Cappadocia (gen_decor_capp_a.gd): nu e sonda, e unealta care
+## CALCULEAZA transformarile ce se lipesc in Track14.tscn sub
+## `DecorManual/ZoneD_PadureaDeCeata`.
+##
+##   godot --headless --fixed-fps 60 --path . res://tools/GenDecorSerD.tscn -- \
+##       --out=C:/cale/zoneD.part [--survey]
+##
+## Cu `--survey` scrie doar profilul terenului (cote pe laterale, panta,
+## directia umbrei) si nu genereaza nimic — compozitia se decide pe cifre.
+##
+## Ce decide compozitia (masurat cu --survey, runda 1, D_r1_survey.txt):
+##
+## 1. TERENUL E O RAMPA LINA, NU UN FLANC. Pe tot intervalul solul sta la
+##    ±0.5 m de sosea pana la 15 m lateral si la cel mult ±6 m la 40 m;
+##    partea care URCA alterneaza cu S-urile (la 0.24 urca stanga +5.2 m la
+##    40 m, la 0.27 urca dreapta +3.8 m). Deci etajele NU ies din teren:
+##    al doilea etaj e facut din smochini mai INALTI (14-17 m) in randul
+##    al doilea, iar „versantul de granit" e o pereche de grupuri de
+##    bolovani puse pe partea masurata ca urca la fiecare S (nu „dreapta").
+##
+## 2. PLAFONUL DE CADRU (10 + 0.093*d) decide cat de aproape stau smochinii
+##    de 13 m: la 4 m de muchie centrul e la 6.5 + 4 + 0.6 = 11.1 m de ax,
+##    deci camera vede pana la 11 m — coroana intra intreaga cu varful taiat
+##    usor, exact ce trebuie: drumul intra SUB copaci (brief §2 D).
+##
+## 3. CAMERA NU ARE VOIE IN COROANE. Camera zboara pe axa la 10 m si taie
+##    coltul in S-uri cu 2-3 m; coroana smochinului are raza 5.6 m, deci la
+##    sub 4 m de muchie ar ajunge la mai putin de 5 m de ax si camera ar
+##    intra in frunzis la fiecare ocolire pe umar. Randul apropiat sta la
+##    4.0-6.5 m de muchie.
+##
+## 4. DENSITATEA E CE SE VEDE, NU CE SE NUMARA (memoria
+##    driver-view-for-composition): un copac la 9 m pe fiecare parte, cu
+##    coroane de 11 m, inseamna coroane care se ATING de-a lungul benzii; al
+##    doilea rand la 11 m pas, al treilea la 16 m — primul plan plin,
+##    fundalul se rareste in ceata, ca in referinta.
+##
+## 5. DEGAJAREA se masoara de la MUCHIA drumului la TRUNCHI (coliziunea e
+##    `trunk` pe toti copacii — world_prop), nu la coroana: coroana are voie
+##    peste umar, trunchiul nu.
+##
+## 6. SOARELE (survey): lumina merge spre (-0.58,-0.57,0.58), elevatie 35;
+##    umbra pe XZ -> (-0.707, +0.707). Pe drepte (0.20-0.22, 0.27-0.28)
+##    umbra cade spre STANGA (dot side/umbra = -1): copacii din dreapta
+##    arunca umbre PESTE drum — de aia randul din dreapta e cel mai des.
+##    Pe 0.24-0.25 si 0.30-0.31 soarele e in fata camerei (umbrele vin
+##    spre ea).
+##
+## 7. Copacii uscati NU intra: referinta e o masa verde-inchis compacta, un
+##    trunchi gol in ea ar fi un gol. Subarboretul e doar euphorbia.
+
+const TRACK := "res://scenes/tracks/Track14.tscn"
+const ZONE := "DecorManual/ZoneD_PadureaDeCeata"
+
+## Inceputul/sfarsitul padurii pe traseu (brief-ul bucatii D).
+const F_IN := 0.196
+const F_OUT := 0.339
+## Pana unde e DEASA (intrarea si iesirea se raresc).
+const F_DENSE_IN := 0.214
+const F_DENSE_OUT := 0.334
+
+## id-urile ext_resource din Track14.tscn (handoff §1).
+const RES := {
+	"fig_tree": "s_fig_tree",
+	"fever_tree": "s_fever_tree",
+	"euphorbia": "s_euphorbia",
+	"dead_tree": "s_dead_tree",
+	"kopje_boulder_a": "s_kopje_boulder_a",
+	"kopje_boulder_b": "s_kopje_boulder_b",
+	"kopje_boulder_c": "s_kopje_boulder_c",
+	"acacia_umbrella_a": "s_acacia_umbrella_a",
+	"acacia_umbrella_b": "s_acacia_umbrella_b",
+	"acacia_umbrella_c": "s_acacia_umbrella_c",
+}
+
+## Raza de DEGAJARE la sol (m): trunchiul la copaci (coliziunea e trunk),
+## jumatatea laturii mari la bolovani (hull). Din AABB-urile masurate
+## (0_r1_kit_probe.txt).
+const BASE_R := {
+	"fig_tree": 0.7, "fever_tree": 0.5, "euphorbia": 0.9, "dead_tree": 0.6,
+	"kopje_boulder_a": 1.1, "kopje_boulder_b": 2.0, "kopje_boulder_c": 2.8,
+	"acacia_umbrella_a": 0.5, "acacia_umbrella_b": 0.5, "acacia_umbrella_c": 0.5,
+}
+## Raza COROANEI (m), pentru testul camerei (nota 3) si pentru „se ating".
+const CROWN_R := {
+	"fig_tree": 5.6, "fever_tree": 4.4, "euphorbia": 0.9, "dead_tree": 2.4,
+	"kopje_boulder_a": 1.1, "kopje_boulder_b": 2.0, "kopje_boulder_c": 2.8,
+	"acacia_umbrella_a": 4.5, "acacia_umbrella_b": 4.5, "acacia_umbrella_c": 4.5,
+}
+## Inaltimea CENTRULUI de coroana ca fractie din inaltimea piesei (masurata pe
+## GLB-uri): folosita si de `_blocks_gate` si de tools/probe_pete.gd.
+const CROWN_Y := {
+	"fig_tree": 0.72, "fever_tree": 0.78, "acacia_umbrella_a": 0.85,
+	"acacia_umbrella_b": 0.85, "acacia_umbrella_c": 0.85,
+}
+## Inaltimea reala (m) — scara se cere in METRI, nu din burta.
+const HEIGHT := {
+	"fig_tree": 13.0, "fever_tree": 10.12, "euphorbia": 4.03, "dead_tree": 6.01,
+	"kopje_boulder_a": 1.44, "kopje_boulder_b": 2.88, "kopje_boulder_c": 4.32,
+	"acacia_umbrella_a": 7.04, "acacia_umbrella_b": 8.5, "acacia_umbrella_c": 10.0,
+}
+
+## CULOARELE DE SOARE (runda 3). Criticul rundei 2 a cerut pete de soare pe
+## carosabil; masurat cu tools/probe_pete.gd, pe felia deasa fractiile 0.212 si
+## 0.268 aveau 1-2% din banda insorita (mediana 25.9 = DOAR ambient), adica
+## tunel inchis, iar 0.240/0.300 erau la 43-83%. Deci nu lipsea lumina „in
+## medie", alternau tuneluri cu poieni.
+##
+## Metoda pe care am schimbat-o: runda 2 a departat TRUNCHIURILE randului
+## apropiat. tools/probe_who_shade.gd arata de ce n-a mers — cei care umbresc
+## banda la fractiile inchise sunt din TOATE randurile, inclusiv `smochinZid`
+## de la 38-60 m: soarele e la 35 grade, deci o coroana de 19 m de la 50 m
+## arunca umbra 27 m si ajunge pe drum. Departarea trunchiului nu misca nimic.
+##
+## Ce misca: un CULOAR liber de coroane pe directia din care VINE soarele,
+## deschis periodic. La fiecare ~PAS metri de traseu, pe o lungime de
+## SUN_GATE_LEN, nicio coroana n-are voie sa intersecteze prisma dintre banda
+## si soare. Regula sta in `_place`, deci se aplica la TOATE randurile, nu doar
+## la cel apropiat — altfel randul de fund reface plafonul.
+## Marimile s-au reglat pe masuratoare, nu din ochi. Prima incercare (poarta
+## de 15 m, curatata pe toata latimea benzii, la fiecare 42 m) a rasturnat
+## defectul: 0.212 a trecut de la 2% insorit la 90%, adica din tunel in
+## poiana — iar referinta e pestrita, nu deschisa. Deci poarta e SCURTA (9 m)
+## si se curata doar fasia din MIJLOC a benzii (0.35 din semi-latime): pe
+## umeri raman coroane care arunca umbra inauntru, si lumina ajunge in pete,
+## nu ca un gol de padure.
+## RUNDA 4. Criticul a aratat ca ProbePete esantiona noua fractii care cadeau
+## FIX pe porti, deci raporta 120.6 pe un drum care intre porti era 20.8. Pasul
+## coboara la 20 m — latimea umbrei unei coroane de 19 m la 35 grade elevatie
+## este 27 m, deci la 34 m ramanea intre porti o bucata pe care nicio raza nu
+## avea cum sa ajunga. Verificarea nu mai e pe fractii alese, ci pe baleierea
+## continua din tools/ProbeSunSweep.tscn (pas 2.5 m, fereastra glisanta 20 m).
+## RUNDA 4, a doua masuratoare. Pasul de 20 m a fost incercat si MASURAT: cu
+## el, 49 de coroane refuzate, iar la fractia hero jumatatea din dreapta a
+## cadrului ramane iarba deschisa cu trunchiuri goale — padurea dispare, exact
+## rasturnarea de care se ferea runda 3 la poarta de 15 m. Cauza reala a
+## „tunelului negru" nu era cat de multa umbra e (baleierea continua da 81%
+## insorit in medie), ci cat de ADANCA: `shadow_opacity` implicit 1.0 lasa in
+## umbra numai ambientul. Odata reparata adancimea (steag de tema, 0.62),
+## culoarul de soare nu mai are ce sa repare si poate fi RAR — atat cat sa
+## pastreze cateva pete pe drum, nu ca sa deschida padurea.
+const SUN_GATE_EVERY := 48.0  # un culoar la ~48 m de traseu
+const SUN_GATE_LEN := 9.0     # lungimea (pe traseu) a golului luminat
+const SUN_GATE_HALF := 0.35   # cat din semi-latimea benzii se degajeaza
+## Cat de departe pe raza de soare se pastreaza culoarul: 19 m inaltime / tan(35)
+## = 27 m umbra, plus raza celei mai mari coroane -> 36 m acopera tot ce poate
+## ateriza pe banda.
+const SUN_GATE_REACH := 36.0
+
+var _sun_to: Vector3 = Vector3(0.579, 0.574, -0.579) # spre soare (survey r1)
+var _gates: Array[Vector2] = []                      # [frac_in, frac_out]
+
+var _track: Track
+var _sampler: TrackSideSampler
+var _terrain_rid: RID = RID()
+var _sus_y := 0.0
+var _out: Array[String] = []
+var _n := 0
+var _warn := 0
+var _rng := RandomNumberGenerator.new()
+var _out_path := ""
+var _survey_only := false
+var _tri := 0
+var _gated := 0
+const TRI := {
+	"fig_tree": 3494, "fever_tree": 1188, "euphorbia": 1558, "dead_tree": 404,
+	"kopje_boulder_a": 158, "kopje_boulder_b": 178, "kopje_boulder_c": 178,
+	"acacia_umbrella_a": 1176, "acacia_umbrella_b": 1418, "acacia_umbrella_c": 1462,
+}
+
+
+func _ready() -> void:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--out="):
+			_out_path = a.trim_prefix("--out=")
+		elif a == "--survey":
+			_survey_only = true
+	await get_tree().process_frame
+	_track = (load(TRACK) as PackedScene).instantiate() as Track
+	get_tree().root.add_child(_track)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_sampler = _track._sampler
+	var nd: int = _track.baked.size()
+	if _track._dists.size() > nd:
+		_total_len = float(_track._dists[nd])
+	print("; lungime traseu %.1f m, %d puncte" % [_total_len, nd])
+	var hi := -INF
+	for bp in _track.baked:
+		hi = maxf(hi, bp.y)
+	_sus_y = hi + 120.0
+	_rng.seed = 140401
+	_survey()
+	_build_gates()
+	if not _survey_only:
+		_understory()
+		_near_row()
+		_second_row()
+		_far_row()
+		_granite()
+		_edges()
+		_mist()
+		_write()
+	get_tree().quit(0)
+
+
+# ------------------------------------------------------------------ masuratori
+
+## Profilul terenului pe laterale + directia umbrei. Se citeste INAINTE de
+## compozitie; cifrele din antet vin de aici.
+func _survey() -> void:
+	var sun := _find_sun(_track)
+	if sun != null:
+		var dir: Vector3 = -sun.global_transform.basis.z
+		# Umbra cade in sensul in care merge lumina (dir), proiectat pe XZ.
+		var sh := Vector3(dir.x, 0.0, dir.z).normalized()
+		print("; soare: rot %s, lumina merge spre (%.2f, %.2f, %.2f), umbra pe XZ -> (%.3f, %.3f), elevatie %.1f deg" % [
+			str(sun.rotation_degrees), dir.x, dir.y, dir.z, sh.x, sh.z,
+			rad_to_deg(asin(-dir.y))])
+	var n := _track.baked.size()
+	print("; frac      ax(x,z)          y_drum  half  side(x,z)        sol la -40 -25 -15 -8 | +8 +15 +25 +40   dot(side,umbra)")
+	var f := 0.19
+	var shadow := Vector3.ZERO
+	if sun != null:
+		var d: Vector3 = -sun.global_transform.basis.z
+		shadow = Vector3(d.x, 0.0, d.z).normalized()
+	while f <= 0.35:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		var cols: Array[String] = []
+		for off: float in [-40.0, -25.0, -15.0, -8.0, 8.0, 15.0, 25.0, 40.0]:
+			var q := p + s * off
+			cols.append("%+6.1f" % (_sol_real(q.x, q.z) - p.y))
+		print("; %.3f  (%7.1f,%7.1f)  %5.1f  %4.1f  (%+.2f,%+.2f)  %s  %+.2f" % [
+			f, p.x, p.z, p.y, half, s.x, s.z, " ".join(cols), s.dot(shadow)])
+		f += 0.01
+
+
+func _find_sun(node: Node) -> DirectionalLight3D:
+	if node is DirectionalLight3D:
+		return node as DirectionalLight3D
+	for c in node.get_children():
+		var r := _find_sun(c)
+		if r != null:
+			return r
+	return null
+
+
+# ------------------------------------------------------------------ compozitia
+
+## Cat de „in padure" e fractia: 0 la margini, 1 in interiorul dens. Randurile
+## se raresc cu ea, ca padurea sa se INCHIDA peste drum in 20 m, nu sa apara
+## dintr-un foc.
+func _density(f: float) -> float:
+	if f < F_IN or f > F_OUT:
+		return 0.0
+	var a := clampf((f - F_IN) / (F_DENSE_IN - F_IN), 0.0, 1.0)
+	var b := clampf((F_OUT - f) / (F_OUT - F_DENSE_OUT), 0.0, 1.0)
+	return minf(a, b)
+
+
+## Pasul pe traseu in fractii pentru `meters` metri.
+func _step(meters: float) -> float:
+	return meters / _total_len
+
+
+var _total_len := 2098.7
+
+
+## SUBARBORETUL, doua straturi.
+##
+## (a) ETAJUL INFERIOR (runda 5): tufe late de 3.2-5.5 m la 5.0-9.0 m de
+## muchie, alternand malurile la ~6 m. Histograma de inaltimi masurata pe
+## starea rundei 4 (tools/ProbeSides.tscn) avea un GOL exact aici:
+##
+##   inaltimi (m)  0-4:22  4-8:7  8-12:61  12-16:87  16-20:29  20+:41
+##
+## adica sapte piese intre 4 si 8 m pe toata padurea — intre euforbia de 4 m si
+## coroanele de la 9 m in sus nu era nimic, si asta se citeste in cadru ca
+## podea de iarba sub un tavan de frunzis. Referinta are un al doilea etaj de
+## tufe si arbori mici SUB coroane, pe toata lungimea.
+##
+## Piesa e `acacia_umbrella_b/c` scalata la 3.5-6.5 m: coroana ei e plata si
+## lata cat inaltimea (inventar §plants), deci la 5 m inaltime da o masa lata
+## de 5 m la nivelul geamului — exact tufa din referinta, si nu un copac mic
+## (un fever_tree scalat ar fi ramas un bat cu o bila).
+##
+## Nu umbreste banda in plus: la 5 m inaltime si 35 grade elevatie umbra ei are
+## 7 m, deci de la 8 m de ax ajunge la 1 m de ax doar cand cade spre drum, si
+## intra oricum in testul culoarelor de soare din `_place`.
+##
+## (b) euphorbia (4 m) si copaci uscati pe umar, la 0.8-2.5 m de
+## muchie. E stratul de la inaltimea ochiului, cel care trece pe langa geam;
+## fara el intre iarba si coroanele de la 8 m nu e nimic.
+func _understory() -> void:
+	_low_layer()
+	var f := F_IN
+	var k := 0
+	while f < F_OUT:
+		var dens := _density(f)
+		var sgn := -1.0 if k % 2 == 0 else 1.0
+		# Rar: referinta n-are candelabre, are numai masa verde a coroanelor.
+		# Cateva pe umar dau scara la nivelul geamului, mai multe fac cactusi.
+		if _rng.randf() < 0.15 + 0.35 * dens:
+			_place("euphorbia", "euforbie", f, sgn,
+				_rng.randf_range(1.5, 3.0), _rng.randf_range(0.0, TAU),
+				_scale_for("euphorbia", _rng.randf_range(3.0, 4.2)), "trunk")
+		f += _step(9.0)
+		k += 1
+
+
+## Etajul inferior: tufe late (acacia_umbrella_b/c scalata la 3.5-6.5 m) pe
+## ambele maluri, la 1.0-4.0 m de muchie, cu pasul de ~6 m pe fiecare parte.
+func _low_layer() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var f := F_IN + (0.0 if sgn < 0.0 else _step(3.0))
+		var k := 0
+		while f < F_OUT:
+			var dens := _density(f)
+			if _rng.randf() < 0.30 + 0.70 * dens:
+				var mdl := "acacia_umbrella_b" if k % 2 == 0 else "acacia_umbrella_c"
+				# RUNDA 5, a doua masuratoare (D_r5_hero.png): la 1-4 m de
+				# muchie si 3.5-6.5 m inaltime, coroana plata (raza 4.5 m la
+				# scara 1) ajungea la 4-5 m de ax si trecea prin dreptul
+				# camerei ca o LESPEDE verde de 4 m latime la 2 m de ochi — se
+				# citea ca bolovan, nu ca tufa. Coroana plata e lata cat
+				# inaltimea, deci marimea ei pe ecran nu se regleaza din
+				# inaltime, ci din DISTANTA: la 5-9 m de muchie (11.5-15.5 m de
+				# ax) o tufa de 5 m subintinde ~20 grade, adica exact tufele
+				# din referinta, si ramane SUB coroanele smochinilor din randul
+				# apropiat (care sunt acum la 3-5 m de muchie).
+				var h := _rng.randf_range(3.2, 5.5)
+				_place(mdl, "tufa", f, sgn, _rng.randf_range(5.0, 9.0),
+					_rng.randf_range(0.0, TAU), _scale_for(mdl, h), "trunk")
+			f += _step(6.0 + _rng.randf_range(-1.2, 1.2))
+			k += 1
+
+
+## RANDUL APROPIAT: smochini (13 m) si acacii galbene (10 m) la 2.0-5.0 m de
+## MUCHIE (8.5-11.5 m de ax), CONTINUU pe ambele parti. Coroanele de 11 m se
+## ating de-a lungul benzii si trec peste umar; asta e „drumul intra sub
+## copaci".
+##
+## RUNDA 5 — masuratoare, nu impresie. Criticul rundei 4 a numit „padurea
+## inchide banda doar pe stanga". Am masurat cu tools/ProbeSides.tscn si
+## NUMARUL e simetric (129 stanga / 118 dreapta pe felia deasa, raport 0.91),
+## deci ipoteza lui despre cauza era gresita — dar cadrul lui era corect. Ce
+## a iesit din histograma laterala e defectul real, si e pe AMBELE parti:
+##
+##   lateral de la ax: 0-5:0  5-10:6  10-15:45  15-20:64  20-25:37  30+:77
+##   piese la <=12 m de ax pe TOATA felia deasa (~250 m de drum): 19
+##
+## Adica un copac la fiecare ~26 m de drum pe fiecare parte in banda apropiata,
+## restul la 15-45 m. Un smochin de 13 m pus la 15 m de ax are centrul coroanei
+## la ~9.4 m, exact la inaltimea camerei: se vede ca silueta la orizont, nu ca
+## perete langa geam. De aia jumatatea „goala" din cadru e podea de iarba cu
+## trunchiuri razlete — nu lipseau copacii de pe o parte, lipseau de APROAPE
+## pe amandoua. Referinta are coroane la 2-8 m de muchie, continue.
+##
+## Ce se schimba: pasul ramane 7 m dar probabilitatea in nucleul des e 1.0 (nu
+## 0.25+0.75*dens), iar lateralul coboara de la 4.0-10.0 la 2.0-5.0 m de
+## muchie. „Fereastra de soare" a rundei 2 (un smochin din trei aproape,
+## restul retrasi la 7.5-10 m) se scoate: runda 4 a dovedit ca adancimea
+## umbrei, nu desimea, facea tunelul negru, iar retragerea era exact ce
+## golea primul plan.
+##
+## Camera: coroana are raza 5.6 m la 13 m inaltime; la 8.5 m de ax marginea
+## coroanei ajunge la 2.9 m de ax, sub pragul de 4.0 m din `_place`. De aceea
+## lateralul minim pentru smochin e 3.0 m de muchie (9.5 m de ax, coroana la
+## 3.9 m — verificat de avertismentul din `_place`), si doar acaciile mici
+## (coroana 4.5 m scalata) coboara sub el.
+func _near_row() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var f := F_IN + (0.0 if sgn < 0.0 else _step(4.5))
+		var k := 0
+		while f < F_OUT:
+			var dens := _density(f)
+			# La margini randul se rareste si trece pe fever tree (mai mic, mai
+			# deschis): tranzitia de biom din savana in padure.
+			var mdl := "fig_tree"
+			if k % 3 == 2 or dens < 0.5:
+				mdl = "fever_tree"
+			if _rng.randf() < 0.35 + 0.65 * dens:
+				var h := _rng.randf_range(11.0, 13.5) if mdl == "fig_tree" \
+					else _rng.randf_range(9.0, 11.0)
+				# FEREASTRA DE SOARE (runda 2). Masurat pe D_r2_hero_b.png:
+				# carosabilul in sectiunea deasa citea (29,14,16), de 6,5 ori
+				# mai intunecat decat in referinta (189,115,74) — coroanele de
+				# 11 m puse la 4 m de muchie se ating PESTE drum si nu mai lasa
+				# nicio pata de soare. Ce rezolva ambiguitatea „e tema sau e
+				# padurea" e aceeasi pista: la 0.33, unde coroanele se ridica,
+				# drumul iese rosu-laterit corect FARA nicio schimbare de tema
+				# (D_r2_ctx33.png). Deci parghia e locala, nu `ambient_energy`.
+				# Un smochin din trei ramane aproape (coroana peste drum),
+				# restul se retrag la 7.5-10 m: masa de frunzis ramane continua
+				# din masina, dar intre coroane raman ferestre de soare.
+				var lat: float = _rng.randf_range(3.0, 5.0) if mdl == "fig_tree" 					else _rng.randf_range(2.2, 4.5)
+				_place(mdl, "smochin" if mdl == "fig_tree" else "febra", f, sgn,
+					lat, _rng.randf_range(0.0, TAU),
+					_scale_for(mdl, h), "trunk")
+			f += _step(6.5 + _rng.randf_range(-1.0, 1.0))
+			k += 1
+
+
+## AL DOILEA RAND: smochini mai MARI (14-17 m) la 9-16 m de muchie. Pe dreapta
+## terenul urca, deci coroanele lor ies PESTE primul rand (al doilea etaj din
+## referinta); pe stanga terenul coboara si se aduna in masa.
+func _second_row() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var f := F_IN + _step(2.0 if sgn < 0.0 else 7.0)
+		var k := 0
+		while f < F_OUT:
+			var dens := _density(f)
+			if _rng.randf() < 0.15 + 0.85 * dens:
+				var mdl := "fig_tree" if k % 4 != 1 else "fever_tree"
+				var h := _rng.randf_range(14.0, 17.0) if mdl == "fig_tree" \
+					else _rng.randf_range(10.0, 12.0)
+				_place(mdl, "smochinSpate" if mdl == "fig_tree" else "febraSpate",
+					f, sgn, _rng.randf_range(12.0, 18.0), _rng.randf_range(0.0, TAU),
+					_scale_for(mdl, h), "trunk")
+			f += _step(7.0 + _rng.randf_range(-1.2, 1.2))
+			k += 1
+
+
+## FUNDALUL: la 20-36 m de muchie, la ~10 m pas. Umple golurile dintre
+## trunchiuri pe interiorul S-urilor, unde camera priveste PESTE primul rand;
+## in ceata culoarului ies ca siluete verde-gri.
+func _far_row() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var f := F_IN + _step(5.0 if sgn < 0.0 else 12.0)
+		var k := 0
+		while f < F_OUT:
+			var dens := _density(f)
+			if _rng.randf() < 0.2 + 0.8 * dens:
+				var mdl := "fig_tree" if k % 4 != 3 else "fever_tree"
+				var h := _rng.randf_range(13.0, 17.0) if mdl == "fig_tree" \
+					else _rng.randf_range(10.0, 12.0)
+				_place(mdl, "smochinFund" if mdl == "fig_tree" else "febraFund",
+					f, sgn, _rng.randf_range(19.0, 32.0), _rng.randf_range(0.0, TAU),
+					_scale_for(mdl, h), "trunk")
+			f += _step(8.0 + _rng.randf_range(-1.5, 1.5))
+			k += 1
+	_backdrop()
+
+
+## ZIDUL DE FUND: smochinii cei mai INALTI (16-19 m) la 38-60 m de muchie, la
+## ~12 m pas. Masurat pe captura v1 (D_r1_a026.png, D_r1_a0.253.png): la
+## iesirea din fiecare S camera priveste PESTE randurile de la 4-36 m si vede
+## CERUL violet intre coroane — padurea „se termina" la 40 m. In referinta nu
+## exista orizont in padure: fiecare gol dintre coroane e alta coroana, mai
+## departe si mai in ceata. Inaltimea mare e ca sa se vada PESTE randurile
+## din fata (plafonul 10 + 0.093*d la 50 m = 14.6 m, deci varful e taiat —
+## bine: intra sub marginea de sus a cadrului ca frunzis, nu ca silueta).
+func _backdrop() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var f := F_IN + _step(3.0 if sgn < 0.0 else 9.0)
+		var k := 0
+		while f < F_OUT + _step(20.0):
+			var dens := _density(clampf(f, F_IN, F_OUT - 0.001))
+			if _rng.randf() < 0.3 + 0.7 * dens:
+				# RUNDA 4: masurat pe D_r4_op062.png, cerul violet ocupa inca
+				# 1.5% din cadru (4.6% din treimea de sus), in referinta 0.0%.
+				# Gaura e PESTE coridorul drumului, la 60-120 m in fata:
+				# plafonul frustumului acolo e 10 + 0.093*d = 15.6-21.2 m, iar
+				# zidul de 16-19 m de la 38-60 m lateral nu urca destul ca sa
+				# taie banda de cer. Deci mai inalt (19-23 m) si putin mai
+				# aproape, cu pasul strans de la 12 la 9 m.
+				var h := _rng.randf_range(19.0, 23.0)
+				_place("fig_tree", "smochinZid", f, sgn,
+					_rng.randf_range(34.0, 56.0), _rng.randf_range(0.0, TAU),
+					_scale_for("fig_tree", h), "trunk")
+			f += _step(9.0 + _rng.randf_range(-1.5, 1.5))
+			k += 1
+
+
+## GRANITUL: grupuri de bolovani pe partea care URCA (masurata: solul la 25 m
+## lateral mai sus decat pe cealalta parte; la egalitate, dreapta, ca in
+## referinta), la 5-14 m de muchie, ca „versantul de granit" sa aiba piatra
+## la vedere intre trunchiuri. Cate 3-4 bucati la ~45 m, cu marimi diferite
+## (1.5-7 m), cel mare in spate, cei mici spre drum — gradientul de contact
+## (patru-defecte-de-diorama, 3). Mai rar si mai in spate decat in v1:
+## clasa `granite` iese ALBA sub soarele cald (D_r1_a026.png — bolovanii
+## citeau ca marmura/sare la 3 m de drum), deci pana la o tenta mai gri a
+## clasei (partajata, decizia lead-ului) piatra sta intre trunchiuri, nu pe
+## umar.
+func _granite() -> void:
+	var f := F_IN + _step(20.0)
+	var g := 0
+	while f < F_OUT - _step(10.0):
+		var dens := _density(f)
+		if dens > 0.4:
+			var sgn := _uphill_side(f)
+			var cnt := 3 + (g % 2)
+			for j in cnt:
+				var mdl := "kopje_boulder_c" if j == 0 else (
+					"kopje_boulder_b" if j % 2 == 1 else "kopje_boulder_a")
+				var gap := 9.0 + _rng.randf_range(0.0, 5.0) if j == 0 \
+					else _rng.randf_range(5.0, 11.0)
+				var h := _rng.randf_range(5.0, 7.5) if j == 0 else (
+					_rng.randf_range(2.5, 4.0) if j % 2 == 1
+					else _rng.randf_range(1.4, 2.2))
+				_place(mdl, "granit", f + _step(_rng.randf_range(-7.0, 7.0)),
+					sgn, gap, _rng.randf_range(0.0, TAU), _scale_for(mdl, h),
+					"hull")
+		f += _step(45.0 + _rng.randf_range(-6.0, 6.0))
+		g += 1
+
+
+## Partea care urca la fractia data: solul la 25 m lateral, stanga fata de
+## dreapta. Diferenta sub 1 m = egalitate = dreapta (+1).
+func _uphill_side(frac: float) -> float:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var p := _track.baked[i]
+	var s := _track._side_at(i)
+	var l := p + s * -25.0
+	var r := p + s * 25.0
+	var dl := _sol_real(l.x, l.z)
+	var dr := _sol_real(r.x, r.z)
+	if dl - dr > 1.0:
+		return -1.0
+	return 1.0
+
+
+## MARGINILE: acacii-umbrela la intrarea si iesirea din padure, pe 30 m in
+## afara intervalului, ca sa lege savana de padure (o acacie apoi doua, apoi
+## smochini) in loc de un zid care incepe la o fractie.
+func _edges() -> void:
+	for j in 3:
+		var f_in := F_IN - _step(12.0 + 14.0 * float(j))
+		_place("acacia_umbrella_a", "acacieIntrare", f_in,
+			-1.0 if j % 2 == 0 else 1.0, _rng.randf_range(3.0, 8.0),
+			_rng.randf_range(0.0, TAU), 1.0, "trunk")
+		var f_out := F_OUT + _step(8.0 + 14.0 * float(j))
+		_place("fever_tree", "febraIesire", f_out,
+			1.0 if j % 2 == 0 else -1.0, _rng.randf_range(3.0, 9.0),
+			_rng.randf_range(0.0, TAU), _scale_for("fever_tree", 9.5), "trunk")
+
+
+## CEATA JOASA (MistPatch, scenes/props/mist_patch.gd): o PATURA de panze
+## culcate pe sol intre trunchiuri, la 8-24 m de ax pe ambele parti, plus un
+## rand mai departe (28-42 m) pentru adancime. In captura fara masina e
+## singura ceata care se vede — culoarul de ceata al Environment-ului
+## lucreaza doar cu jucatorul inauntru.
+func _mist() -> void:
+	# RUNDA 2 — schimbare de METODA, nu de marime. Rundele 1 au reglat alpha
+	# (0.30 -> 0.085 -> 0.05) si distanta laterala, adica axa gresita:
+	# materialul avea `billboard_mode = BILLBOARD_ENABLED`, deci fiecare panza
+	# se intorcea VERTICAL spre camera si se citea ca tep alb atarnat de
+	# coroane / placa gri in picioare. Acum panzele sunt ORIZONTALE
+	# (mist_patch.gd, `BILLBOARD_DISABLED` + quad culcat, inclinare <= 10 deg),
+	# deci:
+	#   - inaltimea unei panze = size * sin(tilt_efectiv); cele doua inclinari
+	#     mici se compun, deci la `tilt_deg` 6 unghiul efectiv urca pana la
+	#     ~8.5 deg si o panza de 20 m are ~3.0 m gabarit vertical, cu centrul
+	#     la 0.25-0.9 m => y_top - origine <= 2.4 m (masurat: ProbeMist);
+	#   - raportul latime/inaltime >= 4 pe TOATE cele 711 panze (masurat);
+	#   - o panza culcata NU mai acopera drumul chiar daca ii trece pe
+	#     deasupra la 1 m (o vezi in perspectiva, ca o ceata rasa), deci
+	#     regula de 3 m in afara muchiei nu mai e necesara si peticele pot
+	#     veni APROAPE de banda, unde referinta le are.
+	# Densitatea ramane din SUPRAPUNERE la alpha mic: un strat singur trebuie
+	# sa fie aproape invizibil. Prima captura cu panze CULCATE (D_r2_hero.png,
+	# alpha 0.055-0.075, lateral 8-14 m) a aratat efectul invers al celui din
+	# runda 1: culcata, o panza se vede pe TOATA lungimea ei in perspectiva —
+	# suprafata acoperita pe ecran e de cateva ori mai mare decat a uneia
+	# verticale, deci acelasi alpha ineaca primul plan intr-un film laptos.
+	# De aici alpha 0.038-0.045 si lateralele impinse la 11+ m: ceata trece
+	# printre trunchiuri, nu peste bot.
+	var f := F_DENSE_IN - _step(10.0)
+	while f < F_DENSE_OUT + _step(10.0):
+		for sgn: float in [-1.0, 1.0]:
+			# Randul de la baza trunchiurilor, langa banda.
+			_mist_at(f, sgn, _rng.randf_range(11.0, 16.0), 7,
+				Vector2(8.0, 5.0), Vector2(10.0, 15.0), 0.038,
+				Vector2(0.25, 0.8))
+			# Al doilea, decalat cu ~8 m si mai in adanc: suprapunerea face voalul.
+			_mist_at(f + _step(8.0), sgn, _rng.randf_range(17.0, 26.0), 7,
+				Vector2(10.0, 6.0), Vector2(12.0, 18.0), 0.042,
+				Vector2(0.3, 0.9))
+			if _rng.randf() < 0.6:
+				_mist_at(f + _step(4.0), sgn, _rng.randf_range(30.0, 44.0), 6,
+					Vector2(12.0, 7.0), Vector2(13.0, 19.0), 0.045,
+					Vector2(0.3, 0.9))
+		f += _step(16.0)
+
+
+func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,
+		foot: Vector2, sz: Vector2, alpha: float, hgt: Vector2) -> void:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var p := _track.baked[i]
+	var s := _track._side_at(i) * side_sign
+	var q := p + s * lateral
+	var g := _sol_real(q.x, q.z)
+	_n += 1
+	_out.append('[node name="ceata%d" type="Node3D" parent="%s"]' % [_n, ZONE])
+	_out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %f, %f, %f)"
+		% [q.x, g, q.z])
+	_out.append('script = ExtResource("mist")')
+	_out.append("count = %d" % cnt)
+	_out.append("footprint = Vector2(%.1f, %.1f)" % [foot.x, foot.y])
+	_out.append("size = Vector2(%.1f, %.1f)" % [sz.x, sz.y])
+	_out.append("tint = Color(0.87, 0.89, 0.88, %.3f)" % alpha)
+	_out.append("height = Vector2(%.1f, %.1f)" % [hgt.x, hgt.y])
+	_out.append("tilt_deg = 6.0")
+	_out.append("seed = %d" % (1000 + _n))
+	_out.append("")
+
+
+# ------------------------------------------------------------------ asezarea
+
+## Portile: intervale de fractie in care se deschide culoarul de soare.
+## Se aseaza pe LUNGIME de traseu, nu pe fractie, ca pasul sa fie constant in
+## metri; primele doua sunt fixate pe fractiile masurate ca inchise (0.212 si
+## 0.268), ca reparatia sa cada exact unde e defectul.
+func _build_gates() -> void:
+	_gates.clear()
+	for f0 in [0.209, 0.265]:
+		_gates.append(Vector2(f0 - _step(SUN_GATE_LEN * 0.5),
+			f0 + _step(SUN_GATE_LEN * 0.5)))
+	var f := F_IN + _step(10.0)
+	while f < F_OUT:
+		var overlap := false
+		for g in _gates:
+			if f > g.x - _step(7.0) and f < g.y + _step(7.0):
+				overlap = true
+		if not overlap:
+			_gates.append(Vector2(f - _step(SUN_GATE_LEN * 0.5),
+				f + _step(SUN_GATE_LEN * 0.5)))
+		f += _step(SUN_GATE_EVERY)
+	print("; %d culoare de soare" % _gates.size())
+
+
+## Ar umbri coroana asezata la `pos` cu raza `cr` banda dintr-o poarta?
+## Testul e cel din sonda, intors pe dos: proiectez centrul coroanei pe raza de
+## soare care pleaca din punctele de banda ale portii, si daca distanta e sub
+## raza coroanei, coroana taie lumina — deci piesa se refuza.
+func _blocks_gate(pos: Vector3, cy: float, cr: float) -> bool:
+	var n := _track.baked.size()
+	for g in _gates:
+		var i0 := int(g.x * float(n)) % n
+		var i1 := int(g.y * float(n)) % n
+		var steps := 6
+		for k in steps + 1:
+			var t := float(k) / float(steps)
+			var idx := (i0 + int(t * float((i1 - i0 + n) % n))) % n
+			var p: Vector3 = _track.baked[idx]
+			var half := _track.width_at_index(idx)
+			var sd := _track._side_at(idx)
+			for lat: float in [-half * SUN_GATE_HALF, 0.0, half * SUN_GATE_HALF]:
+				var hp: Vector3 = p + sd * lat + Vector3(0, 0.15, 0)
+				var v: Vector3 = Vector3(pos.x, cy, pos.z) - hp
+				var tca: float = v.dot(_sun_to)
+				if tca <= 0.0 or tca > SUN_GATE_REACH:
+					continue
+				if v.length_squared() - tca * tca <= cr * cr:
+					return true
+	return false
+
+
+func _scale_for(model: String, meters: float) -> float:
+	var h: float = HEIGHT.get(model, 1.0)
+	return meters / h if h > 0.001 else 1.0
+
+
+func _ceiling(d: float) -> float:
+	return 10.0 + 0.093 * d
+
+
+## Aseaza o piesa la `frac`, pe partea `side_sign`, la `gap` metri de MUCHIA
+## drumului pana la TRUNCHI (raza de degajare). Cota vine din teren (raza).
+func _place(model: String, base: String, frac: float, side_sign: float,
+		gap: float, yaw: float, scl: float, mode: String = "hull") -> void:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var p := _track.baked[i]
+	var s := _track._side_at(i) * side_sign
+	var half := _track.width_at_index(i)
+	var r: float = BASE_R.get(model, 0.6) * scl
+	var d := half + gap + r
+	var q := p + s * d
+	var g := _sol_real(q.x, q.z)
+	if d - r < half + 0.5:
+		_warn += 1
+		print("; ATENTIE %s la frac %.4f: marginea la %.2f m de ax, banda %.2f" % [
+			model, frac, d - r, half])
+	# Camera zboara pe axa, la 10 m: coroana n-are voie sub 4.0 m de ax.
+	var cr: float = CROWN_R.get(model, 0.6) * scl
+	if d - cr < 4.0:
+		_warn += 1
+		print("; ATENTIE coroana %s la frac %.4f ajunge la %.2f m de ax" % [
+			model, frac, d - cr])
+	if g - p.y > 6.0 or p.y - g > 12.0:
+		print("; nota %s la frac %.4f: teren la %+.2f m fata de sosea (lateral %.1f)" % [
+			model, frac, g - p.y, d])
+	# CULOARUL DE SOARE: daca aceasta coroana ar umbri banda intr-o poarta, se
+	# refuza. Doar copacii (bolovanii sunt sub 8 m si nu ajung pe banda).
+	if CROWN_Y.has(model):
+		var cy := g + float(HEIGHT[model]) * float(CROWN_Y[model]) * scl
+		if _blocks_gate(Vector3(q.x, g, q.z), cy, cr):
+			_gated += 1
+			return
+	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode)
+
+
+func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
+		mode: String) -> void:
+	_n += 1
+	_tri += int(TRI.get(model, 0))
+	var c := cos(yaw) * scl
+	var s := sin(yaw) * scl
+	_out.append('[node name="%s%d" parent="%s" instance=ExtResource("%s")]'
+		% [base, _n, ZONE, RES[model]])
+	# Randurile bazei (memoria tscn-transform-e-pe-randuri): yaw pur =
+	# (bx.x, 0, bz.x, 0, 1, 0, bx.z, 0, bz.z), cu bx = (cos, 0, -sin),
+	# bz = (sin, 0, cos), totul inmultit cu scara.
+	_out.append("transform = Transform3D(%f, 0, %f, 0, %f, 0, %f, 0, %f, %f, %f, %f)"
+		% [c, s, scl, -s, c, pos.x, pos.y, pos.z])
+	if mode != "hull":
+		_out.append('metadata/coliziune = "%s"' % mode)
+	_out.append("")
+
+
+func _write() -> void:
+	print("; asezate %d piese, %d refuzate de culoarele de soare, %d avertismente, ~%d triunghiuri" % [_n, _gated, _warn, _tri])
+	if _out_path.is_empty():
+		for line in _out:
+			print(line)
+		return
+	var fa := FileAccess.open(_out_path, FileAccess.WRITE)
+	if fa == null:
+		push_error("nu pot scrie %s" % _out_path)
+		return
+	for line in _out:
+		fa.store_line(line)
+	fa.close()
+	print("; scris %s" % _out_path)
+
+
+## Cota SOLULUI din coliziunea reala a panzei de teren (TerrainBody), nu din
+## campul neted si nu din _terrain_mesh_y (memoria terrain-mesh-y-extrapoleaza).
+func _sol_real(x: float, z: float) -> float:
+	if _terrain_rid == RID():
+		for c in _track.get_children():
+			if str(c.name) == "TerrainBody":
+				_terrain_rid = (c as StaticBody3D).get_rid()
+	var space := _track.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(x, _sus_y, z), Vector3(x, _sus_y - 900.0, z))
+	q.collide_with_areas = false
+	if _terrain_rid != RID():
+		q.collide_with_bodies = true
+		q.exclude = []
+		var hit: Dictionary = space.intersect_ray(q)
+		var guard := 0
+		while not hit.is_empty() and hit["rid"] != _terrain_rid and guard < 24:
+			q.exclude = q.exclude + [hit["rid"]]
+			hit = space.intersect_ray(q)
+			guard += 1
+		if not hit.is_empty() and hit["rid"] == _terrain_rid:
+			return float(hit["position"].y)
+	print("; ATENTIE fara sol la (%.1f, %.1f): se cade pe camp" % [x, z])
+	return _sampler.ground_y(x, z)

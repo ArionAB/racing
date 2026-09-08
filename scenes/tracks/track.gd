@@ -458,7 +458,7 @@ static func themes() -> Dictionary:
 			"shadow_blur": 1.0,
 			"fog_depth": true,
 			"fog_begin": 60.0,
-			"fog_end": 260.0,
+			"fog_end": 380.0,
 			"fog_curve": 1.0,
 			"horizon_model": "",
 			"horizon_class": "",

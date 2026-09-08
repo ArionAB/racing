@@ -444,6 +444,23 @@ func _trees() -> void:
 	# citeste ca „instante plasate"), cu densitate care CRESTE spre spartura,
 	# si cu piese care se suprapun intre ele.
 	_undergrowth(entry - 0.0330, entry - 0.0010)
+	# PRIM-PLANUL DE LANGA CAMERA (frac entry-0.021 .. entry-0.011, adica 8-20 m
+	# in fata masinii in cadrul erou de la 0.84). Aici era defectul numit de
+	# critic: ultimele doua cincimi ale cadrului aveau 43 % si 56 % laterit, fata
+	# de 11 % si 17 % in bara. Masurat pe randuri, lateritul e CONTINUU de la
+	# x=163 la x=1097 pe banda 4 si de la 80 la 1171 pe banda 5 — adica 73 % si
+	# 85 % din latimea cadrului, dintr-o bucata. Nu e „gol langa banda": e
+	# carosabilul insusi, 14 m latime la 8 m de camera; muchia drumului e deja
+	# in afara cadrului acolo. Deci tufele de la 2-8 m de margine (ce ceruse
+	# critic-ul textual) nu pot atinge banda 5 — sunt in afara ecranului.
+	#
+	# Ce are bara in aceleasi doua benzi, clasificat pe pixeli: 27 % si 9 %
+	# STANCA, si 0 % verde. Noi aveam 1 % si 0 % stanca. Diferenta nu e stratul
+	# de tufe, sunt MASELE DE GRANIT taiate de marginile cadrului. Deci se pun
+	# mase mari lipite de umarul drumului, aproape de camera: la 12 m distanta
+	# un bloc de 8 m umple coltul de jos, fiindca privirea vine de la 10 m
+	# inaltime si cade peste el.
+	_prim_plan(entry)
 	# O acacie DINCOLO de fata din stanga (fata scalata tine pana la 28,5 m de
 	# ax; la 21 m copacul era IN stanca). Pe dreapta nu: linia de sosire trece
 	# la z=165, la 40 m de axa noastra, si coroana ar fi cazut peste ea
@@ -474,6 +491,51 @@ func _trees() -> void:
 			_rng.randf_range(2.5, 9.0), _rng.randf_range(0.0, TAU), _rng.randf_range(0.7, 1.0),
 			"hull" if j % 3 == 0 else "none")
 
+
+## Masele de granit din PRIM-PLAN, cele care sunt taiate de marginile de jos
+## ale cadrului. Sunt separate de `_undergrowth` fiindca au alt rol: aia
+## imbraca muchia drumului la 30-60 m, astea intra in cadru la 8-20 m si
+## rup panglica de laterit pe orizontala.
+##
+## Inaltimile sunt MICI dinadins (5-9 m, nu 15-19 ca umerii gurii): la 12 m
+## de camera plafonul frustumului e 10 + 0.093*12 = 11,1 m, dar o masa care
+## iese din cadru sus in prim-plan devine un zid care ascunde spartura. Se
+## cere sa fie taiata de marginea LATERALA, nu de cea de sus.
+##
+## `gap` mic (0.6-2.5 m de umar): coltul de jos al cadrului la 10 m distanta
+## e la ~9 m lateral de ax, deci o piesa la 8-9 m de ax intra in cadru; una
+## la 15 m nu apare deloc. Toate merg prin `_place`, deci trec prin garda de
+## traseu strain si prin plafonul de inaltime pe pozitia finala.
+func _prim_plan(entry: float) -> void:
+	# Coloana: frac (relativ la entry), partea, distanta de umar, inaltime in m.
+	# Alternanta stanga/dreapta la ~4 m distanta reala, ca prim-planul sa fie
+	# rupt pe amandoua partile in acelasi cadru, nu doar pe una.
+	var fg: Array = [
+		[0.0245, -1.0, 0.8, 8.5], [0.0228, 1.0, 1.2, 7.0],
+		[0.0208, 1.0, 0.6, 9.0], [0.0192, -1.0, 1.6, 6.0],
+		[0.0175, -1.0, 0.9, 7.5], [0.0158, 1.0, 0.8, 8.0],
+		[0.0140, 1.0, 2.2, 5.5], [0.0126, -1.0, 0.7, 9.5],
+		[0.0110, -1.0, 2.4, 6.5], [0.0096, 1.0, 1.0, 8.5],
+		[0.0078, 1.0, 1.8, 6.0], [0.0064, -1.0, 1.1, 7.0],
+	]
+	for e in fg:
+		_place_h("primPlan", entry - float(e[0]), float(e[1]),
+			float(e[2]), float(e[3]))
+	# Moloz marunt LIPIT de talpa maselor de mai sus (memoria
+	# `patru-defecte-de-diorama` #3: fara moloz, stanca pare infipta in plan).
+	# Fara coliziune, deci poate sta pe umar.
+	for e in fg:
+		for r in 2:
+			_place("kopje_boulder_a", "molozPrimPlan",
+				entry - float(e[0]) + _rng.randf_range(-0.0012, 0.0012),
+				float(e[1]), float(e[2]) + _rng.randf_range(-0.5, 1.8),
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.45, 0.95), "none")
+	# Tufe verzi la baza, cum cere brief-ul („tufe verzi la baza stancilor").
+	for j in 8:
+		var e: Array = fg[(j * 3) % fg.size()]
+		_place("euphorbia", "tufaPrimPlan", entry - float(e[0]) + 0.0008,
+			float(e[1]), float(e[2]) + _rng.randf_range(0.2, 1.4),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.4, 0.7), "none")
 
 ## Tufe si pietre marunte LA MUCHIA drumului, pe intervalul dat. Nu e un tiv
 ## regulat: pasul are jitter de peste jumatate din el, distanta laterala e

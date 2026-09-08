@@ -328,6 +328,20 @@ var _grid_span: float = 4.0
 ## 18 m taie orizontul din vederea soferului (ochiul e la ~6 m peste asfalt),
 ## deci peretele se citeste ca masa, nu ca bordura inalta.
 @export var cut_height_m: float = 18.0
+## Inaltimea MINIMA a fetei, indiferent cat de plat e masivul de dincolo.
+##
+## Zero (implicit) pastreaza comportamentul vechi: peretele urmeaza creasta
+## reala si se stinge unde nu e masiv. Serengeti are nevoie de altceva —
+## masurat cu GenDecorSerF --survey, versantul dintre doua brate ale
+## serpentinei urca doar +3..+16 m pe 20 m de rulaj, deci `rise` iese 4-6 m si
+## taietura se citeste ca un parapet de beton, nu ca peretele de granit din
+## referinta. Aici peretele nu e o sapatura intr-un munte existent, e MALUL
+## dintre doua bucle de drum sapate una sub alta: inaltimea lui e diferenta de
+## cota dintre bratul de sus si cel de jos (30 m pe orizontala, ~10 m pe
+## verticala), nu cota unei creste indepartate.
+##
+## Se aplica INAINTE de stingerea de la capete, deci capetele tot intra in mal.
+@export var cut_min_rise_m: float = 0.0
 ## Retragerea laterala TOTALA a fetei, de la talpa la coama.
 ##
 ## Mica: o taietura de drum e aproape verticala (asa se sapa), spre deosebire de
@@ -592,7 +606,7 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		samples += 1.0
 		probe += 6.0
 	crest /= maxf(samples, 1.0)
-	var rise: float = minf(crest - foot_y, cut_height_m)
+	var rise: float = minf(maxf(crest - foot_y, cut_min_rise_m), cut_height_m)
 	# STINGERE la capete, pe `cut_taper_frac` din lungime.
 	#
 	# Fara ea peretele incepea cu o fata de 10 m taiata drept in aer: prima

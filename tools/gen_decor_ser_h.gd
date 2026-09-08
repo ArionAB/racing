@@ -517,66 +517,81 @@ func _trees() -> void:
 ## la 15 m nu apare deloc. Toate merg prin `_place`, deci trec prin garda de
 ## traseu strain si prin plafonul de inaltime pe pozitia finala.
 func _prim_plan(entry: float) -> void:
-	# Coloana: frac (relativ la entry), partea, distanta de umar, inaltime in m.
-	# Alternanta stanga/dreapta la ~4 m distanta reala, ca prim-planul sa fie
-	# rupt pe amandoua partile in acelasi cadru, nu doar pe una.
-	# A doua masuratoare, dupa ce prima varianta a acestor mase (lipite de umar,
-	# la 0.6-2.4 m, si dese) a fost pusa in scena: clasificarea pe TOT cadrul a
-	# aratat ca stanca ajunsese deja la paritate cu bara (16 % fata de 15 %), dar
-	# IARBA cazuse de la 24 % la 8 %, cand bara are 61 %. Cu alte cuvinte prima
-	# varianta nu adaugase prim-plan, ci construise un CANION: doua ziduri
-	# continue de granit lipite de sosea, cu savana stearsa dintre ele. In bara
-	# granitul e in mase SEPARATE, cu iarba aurie care trece printre ele pana la
-	# muchia drumului.
+	# RUNDA 4 — SCHIMBARE DE METODA, nu de parametru. Rundele 2 si 3 au mutat
+	# aceleasi mase tot mai aproape de umar (9,5 m -> 4,5 m) si criticul a dat
+	# acelasi verdict: „stanca 0 % in treimea de jos". Inainte de a le mai
+	# apropia o data am PROIECTAT frustumul in loc sa-l estimez, cu parametrii
+	# reali ai camerei de joc (ChaseCamera: 12,5 m in spate, 10 m sus, FOV 68
+	# vertical, 1280x720, tinta la 5 m in fata si 0,4 m inaltime):
 	#
-	# Deci: acelasi numar de mase, dar trase inapoi la 4-9 m de umar (ramane o
-	# fasie de iarba intre laterit si stanca, exact ce se vede in bara) si mai
-	# rare pe lungime — grupuri de cate doua cu goluri intre ele, nu un sir
-	# continuu. Inaltimile raman mici (5-9 m) din acelasi motiv ca inainte.
-	# Inaltimile au coborat de la 8-9,5 m la 6-7,5 m dupa o a treia masuratoare.
-	# Cu masele trase la 4,5-9 m de umar, `_place_h` le pune pe teren care urca,
-	# deci scara derivata a crescut pana la 1.97 pe `kopje_boulder_c` — si odata
-	# cu ea corpul de coliziune, care nu e cilindrul pe care il socoteste garda
-	# mea de raza, ci hull-ul mesh-ului. ProbeRace a prins 2 pereti pe felia
-	# 0.85-0.90 (fata de 0 in runda 2), adica masina atingea granitul. Cu
-	# inaltimile astea scara ramane sub 1.6 si felia se intoarce la 0 pereti,
-	# fara sa se piarda prim-planul: la 15-20 m de camera diferenta dintre 6 si
-	# 9 m se citeste ca varf taiat de marginea cadrului in ambele cazuri.
-	var fg: Array = [
-		[0.0245, -1.0, 5.5, 7.0], [0.0232, -1.0, 8.5, 5.5],
-		[0.0206, 1.0, 6.0, 6.5], [0.0194, 1.0, 9.0, 5.0],
-		[0.0162, -1.0, 7.0, 7.5], [0.0150, -1.0, 9.5, 6.0],
-		[0.0122, 1.0, 5.5, 7.0], [0.0110, 1.0, 8.0, 5.5],
-		[0.0082, -1.0, 6.5, 6.5], [0.0070, 1.0, 7.5, 7.0],
-	]
-	# Coliziune "none" pe masele astea, si e o decizie masurata, nu o scutire.
-	# A/B in acelasi worktree (o rulare cu `_prim_plan` stins, una cu el pornit,
-	# restul identic): fara ele felia 0.85-0.90 da 25.1 m/s, 0.0 % lent, 0
-	# pereti dar 1 repunere; cu ele, coliziune `hull`, da 22.9 m/s, 3.0 % lent,
-	# 2 pereti si 0 repuneri. Deci hull-ul lui `kopje_camp` — care nu e
-	# cilindrul socotit de garda mea de raza, ci conturul mesh-ului cu platou si
-	# trepte — ajunge in linia de curse chiar de la 5,5-9,5 m de umar. Piesele
-	# sunt decor de prim-plan la 15-20 m de camera, in afara oricarei traiectorii
-	# jucabile: nu au ce castiga din a fi solide. Masele care chiar inchid
-	# spartura (`_umerii_gurii`, `creasta`) raman cu hull.
-	for e in fg:
-		_place_h("primPlan", entry - float(e[0]), float(e[1]),
-			float(e[2]), float(e[3]), "none")
-	# Moloz marunt LIPIT de talpa maselor de mai sus (memoria
-	# `patru-defecte-de-diorama` #3: fara moloz, stanca pare infipta in plan).
-	# Fara coliziune, deci poate sta pe umar.
-	for e in fg:
+	#   sol y=0 la z=+30 m fata de masina -> y/H = 0.294
+	#   sol y=0 la z=+10 m                -> y/H = 0.438
+	#   sol y=0 la z= +2 m                -> y/H = 0.576
+	#   sol y=0 la z=  0 m (dreptul masinii) -> y/H = 0.630
+	#   sol y=0 la z= -4 m (masina l-a trecut) -> y/H = 0.783
+	#
+	# Deci pragul criticului, y > 0.62*H, incepe FIX la dreptul masinii si
+	# contine numai lume de la z <= 0. Orice piesa asezata IN FATA masinii —
+	# si toate cele din rundele 2 si 3 erau in fata, la 8-20 m — se proiecteaza
+	# deasupra pragului oricat de aproape de umar ar fi: la z=0 chiar si baza
+	# unui bolovan e la 0.630, iar varful lui urca spre 0.35. De aia trei runde
+	# de „mai aproape, mai jos" n-au miscat cifra: cautau in intervalul gresit.
+	#
+	# Regula corecta, derivata din aceleasi proiectii:
+	#   * z intre -7 si -1 m fata de masina (piesa pe care masina TOCMAI a
+	#     trecut-o), adica frac intre f-0.0035 si f-0.0005 la 2 m/0.001;
+	#   * lateral 8-14 m de ax: la z=-4 muchia drumului (x=7) cade la px 335 si
+	#     x=15 iese din cadru la px -13, deci fereastra utila e ingusta si
+	#     asezarea „la 4,5-9,5 m de umar" (adica x=11,5..16,5) era pe jumatate
+	#     in afara ecranului;
+	#   * inaltime 2,5-4,5 m, nu 5-7,5: la z=-4 si x=10 varful unei mase de 3 m
+	#     e la y/H=0.640, deci piesa e INTREAGA sub prag; una de 6 m iese la
+	#     0.42 si isi pune majoritatea pixelilor in banda de mijloc, unde noi
+	#     eram deja la paritate cu bara.
+	#
+	# Si o consecinta de fond: cadrul erou e o singura fractie, dar masina trece
+	# prin toate. Un pinten la 0.838 ar fi un truc de un cadru. Deci banda e
+	# CONTINUA pe toata apropierea si prin spartura, cu pas de ~0.0022 (4,5 m)
+	# si alternanta de parte — la orice fractie din interval exista o masa in
+	# spatele-lateralul masinii.
+	var f := entry - 0.0330
+	var k := 0
+	while f < entry + 0.0060:
+		# alternanta cu ruperi: doua piese pe aceeasi parte la rand, apoi
+		# schimbare — un sir strict stanga-dreapta se citeste ca alee.
+		var sgn: float = -1.0 if (k / 2) % 2 == 0 else 1.0
+		# LATERAL ABSOLUT (gap negativ), nu degajare fata de umar: `half_width`
+		# aici e 9,0 m, iar raza unei mase scalate mai adauga 2-3 m, asa ca
+		# „1-6,5 m de umar" a asezat piesele la 17-25 m de ax — masurat pe
+		# .tscn-ul rezultat. Fereastra utila din proiectie e 10,5-14 m: sub 10
+		# marginea intra in carosabil (half 9,0 + raza), peste 14 piesa iese
+		# lateral din cadru la z=-4 m.
+		var gap: float = -_rng.randf_range(11.8, 14.2)
+		var h_m: float = _rng.randf_range(2.5, 4.5)
+		_place_h("primPlan", f, sgn, gap, h_m, "none")
+		# a doua masa, mai mica, lipita de prima pe cealalta parte a pasului:
+		# in bara granitul vine in grupuri, nu in exemplare singuratice
+		if _rng.randf() < 0.55:
+			_place_h("primPlan", f + _rng.randf_range(0.0004, 0.0012), sgn,
+				gap - _rng.randf_range(1.2, 2.8), _rng.randf_range(2.5, 3.8), "none")
+		# moloz la talpa (memoria `patru-defecte-de-diorama` #3)
 		for r in 2:
-			_place("kopje_boulder_a", "molozPrimPlan",
-				entry - float(e[0]) + _rng.randf_range(-0.0012, 0.0012),
-				float(e[1]), float(e[2]) + _rng.randf_range(-0.5, 1.8),
+			_place("kopje_boulder_a", "molozPrimPlan", f + _rng.randf_range(-0.0010, 0.0010),
+				sgn, gap + _rng.randf_range(-1.6, 0.7),
 				_rng.randf_range(0.0, TAU), _rng.randf_range(0.45, 0.95), "none")
-	# Tufe verzi la baza, cum cere brief-ul („tufe verzi la baza stancilor").
-	for j in 8:
-		var e: Array = fg[(j * 3) % fg.size()]
-		_place("euphorbia", "tufaPrimPlan", entry - float(e[0]) + 0.0008,
-			float(e[1]), float(e[2]) + _rng.randf_range(0.2, 1.4),
-			_rng.randf_range(0.0, TAU), _rng.randf_range(0.4, 0.7), "none")
+		# tufa verde la baza, cum cere brief-ul
+		if k % 2 == 0:
+			_place("euphorbia", "tufaPrimPlan", f + 0.0007, sgn,
+				gap + _rng.randf_range(0.4, 1.6),
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.4, 0.7), "none")
+		f += _rng.randf_range(0.0018, 0.0026)
+		k += 1
+	# Coliziune "none" pe toate: A/B-ul din runda 3 (o rulare cu `_prim_plan`
+	# stins, una cu el pornit) a atribuit 2 pereti si 3.0 % lent pe felia
+	# 0.85-0.90 hull-ului lui `kopje_camp`, care nu e cilindrul socotit de garda
+	# mea de raza. Piesele astea sunt decor de prim-plan langa umar, in afara
+	# oricarei traiectorii jucabile; masele care chiar inchid spartura
+	# (`_umerii_gurii`, `creasta`) raman cu hull.
 
 ## Tufe si pietre marunte LA MUCHIA drumului, pe intervalul dat. Nu e un tiv
 ## regulat: pasul are jitter de peste jumatate din el, distanta laterala e
@@ -670,7 +685,15 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var s := _track._side_at(i) * side_sign
 	var half := _track.width_at_index(i)
 	var r: float = BASE_R.get(model, 0.6) * scl
-	var d := half + gap + r
+	# `gap` NEGATIV inseamna: distanta ABSOLUTA de la ax, nu de la umar.
+	# Runda 4, masurat pe cadrul erou: `half_width` la 0.836-0.842 e 9.0 m, nu
+	# 7.0 cum spunea comentariul (7.0 e cifra din INTERIORUL sparturii,
+	# 0.863-0.884). Cu `d = half + gap + r` si r-ul unei mase scalate, cele
+	# zece piese de prim-plan au aterizat la 17-25 m lateral — iar proiectia
+	# spune ca la z=-4 m fata de masina lateralul 15 m e deja in afara cadrului
+	# (px -13 din 1280). Deci pentru ele conteaza lateralul absolut, nu
+	# degajarea fata de umar, si e cerut ca atare.
+	var d: float = (-gap) if gap < 0.0 else (half + gap + r)
 	var q := p + s * d
 	var g := _sol_real(q.x, q.z)
 	# Garda de traseu STRAIN: marginea piesei trebuie sa stea la >= 2 m de
@@ -691,11 +714,21 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	# stie cat urca terenul si deci ce mai ramane de pus deasupra soselei.
 	if h_dorit > 0.0:
 		var h_ef: float = h_dorit - maxf(g - p.y, 0.0)
-		if h_ef < 3.5:
+		# Pragul era 3.5 m si taia tocmai masele de prim-plan din runda 4, care
+		# sunt joase DINADINS (2,5-4,5 m): la z=-4 m fata de masina o masa de
+		# 3 m are varful la y/H=0.640, adica intreaga sub pragul de 0.62 al
+		# criticului, pe cand una de 6 m isi pune pixelii in banda de mijloc.
+		# Sub 1,8 m insa piesa dispare sub muchia dealului, deci acolo se sare.
+		if h_ef < 1.8:
 			print("; SARIT %s la frac %.4f: terenul urca %.1f m, ar ramane %.1f m" % [
 				base, frac, g - p.y, h_ef])
 			return
-		model = "kopje_camp" if h_ef >= 9.0 else "kopje_boulder_c"
+		if h_ef >= 9.0:
+			model = "kopje_camp"
+		elif h_ef >= 3.6:
+			model = "kopje_boulder_c"
+		else:
+			model = "kopje_boulder_b"
 		scl = h_ef / float(H1[model])
 		r = float(BASE_R.get(model, 0.6)) * scl
 	if d - r < half + 0.5:

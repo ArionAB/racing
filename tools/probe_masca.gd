@@ -177,8 +177,14 @@ func _ready() -> void:
 	order.sort_custom(func(x, y): return int(per[x]) > int(per[y]))
 	print("--- ce acopera cadrul (primele 12) ---")
 	for k in order.slice(0, 12):
-		print("  %7d px  %5.2f%%  %s" % [per[k],
-			100.0 * float(per[k]) / float(_w * _h), all[k].name])
+		# Numele nu identifica: mesh-urile generate in cod ies @MeshInstance3D@NNN
+		# si acelasi nume apare de mai multe ori (memoria `nume-noduri-nu-sunt-unice`).
+		# Calea in scena + centrul de lume spun CARE obiect e.
+		var ab := all[k].get_aabb()
+		var ctr: Vector3 = all[k].global_transform * ab.get_center()
+		print("  %7d px  %5.2f%%  %s  centru(%.0f,%.0f,%.0f)  %s" % [per[k],
+			100.0 * float(per[k]) / float(_w * _h), all[k].name,
+			ctr.x, ctr.y, ctr.z, str(all[k].get_path())])
 
 	# --group=<nume parinte>: aduna pixelii pe COPILUL direct al acelui parinte
 	# (nodul-obiect din DecorManual), nu pe mesh-ul din GLB — ca sa se vada

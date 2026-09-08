@@ -441,7 +441,16 @@ static func themes() -> Dictionary:
 			# despre saturatie: ceata nu are voie sa ADAUGE saturatie cu
 			# distanta), doar nuanta trece in familia cerului.
 			"fog": Color(0.46, 0.43, 0.50),
-			"hill_color": Color(0.62, 0.56, 0.40),
+			# Malul opus al craterului. Nu e "dealul de fundal" al altor teme:
+			# de pe buza, movilele de orizont (`_build_horizon_fallback`, 240-480 m)
+			# sunt EXACT banda de deasupra lacului, 30% din cadrul hero
+			# (ProbeMasca la frac 0.40). La (0.62,0.56,0.40) sub soare 1.70 ieseau
+			# crem luminos si bolul nu se inchidea: profilul de valoare pe partea
+			# craterului era plat (V 0.66-0.68 pe randurile 0.20-0.35, apoi 0.52
+			# pe podeaua de crusta), adica INVERS fata de referinta, care cade la
+			# 0.31-0.49 pe mal si urca la 0.89 pe crusta. Verde-gri inchis: malul
+			# devine treapta intunecata sub linia cerului.
+			"hill_color": Color(0.24, 0.25, 0.22),
 			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
 			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
 			# — cerul intunecat tenteaza la ambient mare, si atunci savana
@@ -457,7 +466,18 @@ static func themes() -> Dictionary:
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
 			"fog_depth": true,
-			"fog_begin": 60.0,
+			# Ceata incepe DUPA bolul craterului, nu in el. Cu 60 m, tot ce
+			# trecea de buza (malul opus e la 200-400 m de ochi) era deja
+			# 40-90% ceata: masurat pe cadrul hero, banda de deasupra lacului
+			# iesea rgb(122,108,114) H=336 S=0.11 — adica FIX culoarea cetii,
+			# violet-gri si mai DESCHISA decat campia din stanga (V 0.48 fata
+			# de 0.34). Referinta are acolo un mal cald si mai INTUNECAT decat
+			# campia (H=35 S=0.36 V=0.40 fata de 0.49). Nu era o problema de
+			# tenta pe geometrie (rock_band_tint tinteste peste o cota,
+			# strata_tint sub ea, si drumul insusi urca de la -1 la 45 m, deci
+			# nicio linie de cota nu separa malul de restul pistei) — era
+			# ceata asezata peste bol. Cu 190 m bolul intra intreg inaintea ei.
+			"fog_begin": 190.0,
 			"fog_end": 380.0,
 			"fog_curve": 1.0,
 			"horizon_model": "",

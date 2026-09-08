@@ -357,6 +357,22 @@ var _grid_span: float = 4.0
 ## Sloturile taieturii, de la coama in jos. Aceleasi strate ca faleza, ca sa se
 ## citeasca drept ACEEASI roca vazuta din partea cealalta a benzii.
 @export var cut_slots: Array[int] = [23, 10, 27, 23, 10, 27, 4]
+
+## Cat de mult se INTUNECA fata taieturii, peste gradientul din [method _shade].
+## 1.0 = neschimbat, deci celelalte piste raman exact cum erau.
+##
+## Exista fiindca `_shade` are o plaja ingusta deliberat (1.0 -> 0.78), potrivita
+## pentru tuful crem de pe Cappadocia, iar granitul de crater cere alta VALOARE,
+## nu alta nuanta. Masurat pe cadrul de joc de la frac 0.625: fata taieturii
+## statea pe luminanta ~156 (RGB 174/150/100) desi sloturile ei sunt gri inchis
+## (4B4B4D, 696765, 55535A, adica 75-105) — diferenta o face soarele temei, care
+## e puternic si galbui. Granitul din referinta sta pe 63.
+##
+## Se aplica pe vertex color, care poate DOAR sa intunece
+## (memoria `surfacetool-clamp-vertex-color`) — deci e exact unealta potrivita
+## aici, unde tinta e sub starea actuala. Un slot si mai inchis nu ajuta:
+## sloturile sunt deja cele mai inchise din atlas.
+@export var cut_shade: float = 1.0
 ## Ce fractie din lungime se duce pe stingerea de la FIECARE capat.
 ##
 ## Vezi `_cut_column`: fara stingere peretele incepe cu o muchie verticala in
@@ -666,8 +682,8 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 			# peretelui si coama prinde soarele. Randul 0 e COAMA.
 			var t0 := float(r) / float(rows - 1)
 			var t1 := float(r + 1) / float(rows - 1)
-			var c0 := _shade(t0)
-			var c1 := _shade(t1)
+			var c0 := _shade(t0) * cut_shade
+			var c1 := _shade(t1) * cut_shade
 			# Ordine inversa fata de `_build`: fata priveste spre banda.
 			# NORMALE DURE pe fiecare fata cand peretele e fatetat: altfel
 			# `generate_normals` mediaza intre blocuri si muchia construita

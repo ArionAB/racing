@@ -266,7 +266,7 @@ func _gap() -> void:
 			var g := _sol_real(q.x, q.z)
 			if k % 3 == 1:
 				_raw("euphorbia", "euphorbiaBaza", Vector3(q.x, g, q.z),
-					_rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(0.55, 0.85), "none")
+					_rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(0.4, 0.6), "none")
 			else:
 				_raw("kopje_boulder_a", "molozBaza", Vector3(q.x, g - 0.25, q.z),
 					_rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(0.6, 1.0), "none")
@@ -413,12 +413,19 @@ func _undergrowth(f_from: float, f_to: float) -> void:
 				# carosabil se vede de la 30 m.
 				var gap: float = _rng.randf_range(0.7, 3.2) if near else _rng.randf_range(5.0, 11.0)
 				var jf := f + _rng.randf_range(-0.0009, 0.0009)
-				if _rng.randf() < 0.58:
+				# Amestecul e 0.30 euphorbia / 0.70 piatra, nu 0.58/0.42, si
+				# euphorbia e mica (0.35-0.6, nu 0.5-0.95). Motiv masurat pe
+				# cadrul erou al rundei: cu 55 de exemplare mari, euphorbia —
+				# care e o planta COLUMNARA — umplea campul cu ce citeste ca
+				# saguaro verde-deschis, adica desert american, nu savana. In
+				# bara, stratul de la baza stancilor e din tufe mici si
+				# rotunde, iar verdele mare vine DOAR din coroanele acaciilor.
+				if _rng.randf() < 0.30:
 					_place("euphorbia", "tufaApropiere", jf, sgn, gap,
-						_rng.randf_range(0.0, TAU), _rng.randf_range(0.5, 0.95), "none")
+						_rng.randf_range(0.0, TAU), _rng.randf_range(0.35, 0.6), "none")
 				else:
 					_place("kopje_boulder_a", "piatraApropiere", jf, sgn, gap,
-						_rng.randf_range(0.0, TAU), _rng.randf_range(0.35, 0.8), "none")
+						_rng.randf_range(0.0, TAU), _rng.randf_range(0.3, 0.75), "none")
 		# pasul se strange spre spartura (0.0034 -> 0.0016 in fractii)
 		f += _rng.randf_range(0.6, 1.4) * (0.0034 - 0.0018 * t)
 		k += 1

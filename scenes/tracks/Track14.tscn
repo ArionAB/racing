@@ -200,6 +200,168 @@ cut_slots = Array[int]([19, 29, 8, 29, 19, 8, 29, 8])
 talus_m = 1.0
 talus_slot = 11
 
+[node name="Scobituri" type="Node3D" parent="."]
+
+[node name="TerasaG1_90" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 30.0, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_100" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 29.1, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_110" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110, 28.3, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_120" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 27.4, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_130" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, 26.5, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_140" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 25.7, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_150" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 24.8, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_160" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 24.0, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG1_170" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170, 23.1, -101.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_92" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 92, 12.4, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_102" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 13.3, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_112" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 14.3, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_122" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 122, 15.3, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_132" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 132, 16.2, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_142" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142, 17.2, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_152" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152, 18.1, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG2_162" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 162, 19.1, -71.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG3_90" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 9.0, -41.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG3_100" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 8.0, -41.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG3_110" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110, 6.9, -41.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG3_120" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 5.9, -41.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG3_130" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, 4.9, -41.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
+
+[node name="TerasaG3_140" type="Marker3D" parent="Scobituri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 3.9, -41.0)
+gizmo_extents = 13.0
+script = ExtResource("hollow")
+radius_m = 4.0
+wall_m = 9.0
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("prop")
 

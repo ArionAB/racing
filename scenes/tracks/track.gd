@@ -405,9 +405,14 @@ static func themes() -> Dictionary:
 		"serengeti": {
 			# SAVANA SUB CER DE FURTUNA (docs/track_briefs/serengeti.md §4).
 			# Prima trecere: doar lumina, cerul, solul si apa; kitul de
-			# savana si clasele de textura vin cu POI-urile. `props` cade pe
-			# kitul de desert (acacii/kopje-uri nu exista inca), `decor` e
-			# stins ca la Cappadocia — decorul se pune de mana, pe POI.
+			# savana si clasele de textura vin cu POI-urile. `decor` e stins
+			# ca la Cappadocia — decorul se pune de mana, pe POI.
+			# (Istoric: `props` a fost o vreme "desert" cu nota „acacii/kopje-uri
+			# nu exista inca". Nota NU mai e valabila din PR #376 — kitul de
+			# savana exista si `props` e "serengeti" mai jos. Comentariul
+			# invechit a costat o runda de critica: un critic l-a citit ca pe
+			# cod viu si a raportat cactusi generati procedural, desi cu
+			# `decor: "none"` TrackDecor nici nu ruleaza pe pista asta.)
 			#
 			# Iarba aurie: DRY_VEGETATION (#AF9F4E) e ocru-oliv, nu nisip —
 			# exact registrul „auriu de iarba uscata" din brief, si diferit

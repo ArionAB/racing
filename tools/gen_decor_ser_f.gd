@@ -220,16 +220,34 @@ func _populate_straight(f0: float, f1: float, up: float) -> void:
 			var nm := "kopje_boulder_b" if _rng.randf() < 0.6 else "kopje_boulder_c"
 			_place(nm, p, s, half + _rng.randf_range(5.0, 11.0),
 				_rng.randf_range(-3.0, 3.0), i, _rng.randf_range(0.8, 1.25))
-		# --- 3. vegetatie AGATATA de perete: rara, dar chiar pe versant.
+		# --- 3. vegetatie AGATATA de perete. Referinta (ref_F.png) are peretele
+		# ACOPERIT de coroane late verzi care se ating; euforbia-candelabru e
+		# accentul RAR dintre ele. Runda 2 avea raportul invers (20 euforbii /
+		# 6 acacii, numarate in .tscn) si acacii impinse la 8-14 m si micsorate
+		# la 0.55-0.8 — de aceea criticul a citit banda ca pe un desert de
+		# saguaro: singura silueta care ajungea langa drum era cea columnara.
+		# Aici acacia devine specia DOMINANTA (0.46 fata de 0.10), se aseaza la
+		# 2.5-9 m de asfalt si la scara 0.85-1.25. Verificarea de frustum:
+		# acacia_c are 10 m (inventar), deci la 8 m distanta plafonul e
+		# 10 + 0.093*8 = 10.7 m — coroana intra intreaga in cadru.
 		var r := _rng.randf()
-		if r < 0.30 * dens:
+		# Scara si distanta merg IMPREUNA: coroana lui acacia_c are raza 6.24 m,
+		# deci la 3 m de asfalt si scara 1.25 ea umple un sfert de cadru si
+		# ascunde chiar peretele pe care trebuia sa-l imbrace (masurat pe
+		# F_r3_hero, prima varianta). Exemplarele MARI (c, scara 0.85-1.10) se
+		# duc la 7-13 m, unde coroana se citeste intreaga peste versant; langa
+		# drum ramane doar `a`, cel mic (7 m inaltime), la scara 0.55-0.75.
+		if r < 0.46 * dens:
+			if _rng.randf() < 0.55:
+				_place("acacia_umbrella_c", p, s, half + _rng.randf_range(7.0, 13.0),
+					_rng.randf_range(-4.0, 4.0), i, _rng.randf_range(0.85, 1.10))
+			else:
+				_place("acacia_umbrella_a", p, s, half + _rng.randf_range(2.5, 6.0),
+					_rng.randf_range(-4.0, 4.0), i, _rng.randf_range(0.55, 0.75))
+		elif r < 0.56 * dens:
 			_place("euphorbia", p, s, half + _rng.randf_range(2.2, 7.5),
 				_rng.randf_range(-3.0, 3.0), i, _rng.randf_range(0.8, 1.4))
-		elif r < 0.42 * dens:
-			var tn := "acacia_umbrella_c" if _rng.randf() < 0.5 else "acacia_umbrella_a"
-			_place(tn, p, s, half + _rng.randf_range(8.0, 14.0),
-				_rng.randf_range(-4.0, 4.0), i, _rng.randf_range(0.55, 0.8))
-		elif r < 0.48 * dens:
+		elif r < 0.62 * dens:
 			_place("dead_tree", p, s, half + _rng.randf_range(3.0, 8.0),
 				_rng.randf_range(-3.0, 3.0), i, _rng.randf_range(0.6, 0.95))
 		# --- 4. umarul dinspre GOL: pietre mici si un tufis, ca muchia sa nu fie
@@ -237,9 +255,12 @@ func _populate_straight(f0: float, f1: float, up: float) -> void:
 		if _rng.randf() < 0.5 * dens:
 			_place("kopje_boulder_a", p, -s, half + _rng.randf_range(0.8, 2.4),
 				_rng.randf_range(-3.0, 3.0), i, _rng.randf_range(0.35, 0.7))
+		# Umarul dinspre gol primeste tot acacie mica, nu euforbie: sirul de
+		# candelabre de pe partea golului era exact banda pe care criticul a
+		# numit-o „cactusi saguaro pe toata banda dreapta".
 		if _rng.randf() < 0.22 * dens:
-			_place("euphorbia", p, -s, half + _rng.randf_range(1.5, 4.0),
-				_rng.randf_range(-3.0, 3.0), i, _rng.randf_range(0.6, 1.0))
+			_place("acacia_umbrella_a", p, -s, half + _rng.randf_range(1.5, 4.0),
+				_rng.randf_range(-3.0, 3.0), i, _rng.randf_range(0.40, 0.60))
 
 
 ## Un ac de par: chevron-uri pe EXTERIOR (partea spre care te duce inertia,
@@ -276,9 +297,34 @@ func _place(nm: String, p: Vector3, s: Vector3, off: float, along: float,
 	var y := _sol_real(pos.x, pos.z)
 	var r: float = BASE_R.get(nm, 1.0) * sc
 	# Garda de banda: marginea piesei nu are voie sa intre in asfalt.
-	if off - r < _track.width_at_index(i) + 0.25:
-		_warn += 1
-		return
+	# Latimea se ia la indexul UNDE AJUNGE piesa dupa deplasarea `along`, nu la
+	# `i`: pe ace de par carosabilul se largeste si se curbeaza spre piesa, iar
+	# un bolovan mare mutat cu 4 m pe traseu ajunge in fata unei benzi mai late
+	# decat cea masurata la `i`. Runda 3 a prins asa o regresie reala
+	# (FKop128_col, kopje_boulder_c la frac 0.710, +2.0 m in banda), aparuta
+	# doar fiindca schimbarea mixului de vegetatie a decalat sirul RNG.
+	# Marja urca la 0.6 m: BASE_R e jumatate din latura AABB-ului, deci
+	# subestimeaza un bolovan rotit neuniform.
+	var j := i
+	if absf(along) > 0.01:
+		var seg: float = _track.baked[(i + 1) % n].distance_to(_track.baked[i])
+		if seg > 0.01:
+			j = posmod(i + int(round(along / seg)), n)
+	var w_here: float = maxf(_track.width_at_index(i), _track.width_at_index(j))
+	# Piesa care nu incape NU se arunca: se IMPINGE spre exterior pana incape.
+	# Aruncarea era o pierdere dubla — cu marja stransa la 0.6 m si acacii mari
+	# se pierdeau 23 de piese din 176, adica exact densitatea de coroane pe care
+	# o cere referinta. Se renunta la piesa doar daca nici la +6 m nu incape
+	# (atunci chiar nu e loc intre asfalt si buza).
+	var need: float = w_here + 0.6 + r
+	if off < need:
+		if need - off <= 6.0:
+			off = need
+			pos = p + s * off + dir * along
+			y = _sol_real(pos.x, pos.z)
+		else:
+			_warn += 1
+			return
 	var yaw: float = _rng.randf_range(-PI, PI)
 	if face_road:
 		# Chevron-ul se uita SPRE drum: -Z al piesei pe -s.

@@ -549,9 +549,36 @@ static func themes() -> Dictionary:
 			# ajunge vreodata la ceata completa, deci geometria dispare sec la
 			# planul de taiere in loc sa se topeasca (memoria
 			# `efecte-de-fundal-cote-legate`). 370 lasa 10 m de topire.
-			"fog_begin": 190.0,
+			# INTEGRARE RUNDA 2 — CEATA DESATURA DEPARTAREA.
+			# Criticul de ansamblu a masurat pe cadrul de ansamblu: saturatia
+			# din prim-plan e IDENTICA cu referinta (0.54 fata de 0.62, paleta
+			# e corecta), dar la distanta pastram doar 33% din ea, unde
+			# referinta pastreaza 67% — campia aurie, turmele de fundal si
+			# lacul de soda deveneau o pata violet-laptoasa uniforma.
+			# A/B pe acelasi cadru liber (--eye=170,95,255 --look=-10,0,40),
+			# capturi bit-identice la reluare, deci ordonarea e reala:
+			#   fog_begin 190 / curve 1.0 (starea de pana acum) .... 33%
+			#   fog_end   370 -> 378 ............................... 33%  (mort)
+			#   fog       tras spre iarba uscata (S 0.27 / 0.35) .... 37% / 38%
+			#   fog_begin 260 ...................................... 44%
+			#   fog_begin 260 + curve 1.4 .......................... 50%  <-
+			# Doua lucruri masurate contrazic directia propusa de critic.
+			# (a) `fog_end` NU e o parghie: la distantele din cadru ceata e
+			# deja aproape completa mult inaintea lui 370, deci a-l impinge
+			# spre FAR_PLANE nu schimba nimic (33% inainte, 33% dupa).
+			# (b) Ridicarea saturatiei CULORII de ceata plateste pe axa
+			# gresita (memoria `tinta-pe-o-axa-se-atinge-pe-axa-aia`): aduce
+			# doar +4 puncte, si o data cu ele inghite cerul de furtuna —
+			# randurile clasificate ca teren sar de la 411 la 720, adica
+			# ceata calda a mancat toata banda de cer pe care POI B si POI E
+			# au reglat-o. Culoarea cetii ramane deci NESCHIMBATA.
+			# Ce a mers e distanta la care incepe ceata, nu culoarea ei:
+			# aerul ramane limpede pana la 260 m si se ingroasa spre final
+			# (curve 1.4, implicitul), in loc sa se aseze liniar de la 190 m
+			# peste tot ce e mai departe de buza craterului.
+			"fog_begin": 260.0,
 			"fog_end": 370.0,
-			"fog_curve": 1.0,
+			"fog_curve": 1.4,
 			"horizon_model": "",
 			"horizon_class": "",
 			"walls": false,
@@ -3873,10 +3900,13 @@ func _build_environment() -> void:
 		# taie la 250 m e ce ascunde marginea lumii.
 		env.fog_depth_end = float(theme_flag("fog_end", 250.0))
 		# Implicit se ingroasa spre final (1.4), nu liniar: aerul limpede
-		# pana departe, ceata doar la marginea lumii. O tema cu aer INCARCAT
-		# (furtuna pe savana) o cere liniara (1.0): la 60/260 m ceata la
-		# 180 m urca de la 46% la 60% si relieful de la orizont se spala
-		# in culoarea ceatii, nu ramane sol luminat de soare.
+		# pana departe, ceata doar la marginea lumii. Cheia a fost adaugata
+		# pentru savana sub furtuna, care parea sa ceara aer INCARCAT, deci
+		# liniar (1.0). Masurat la integrare pe cadrul de ansamblu, liniarul
+		# e exact ce spala departarea: cu 1.0 pastram 33% din saturatia de
+		# prim-plan la distanta, cu 1.4 pastram 50% (referinta: 67%). Cheia
+		# ramane — o tema o poate cere liniara — dar Serengeti sta acum tot
+		# pe 1.4, si nicio tema nu foloseste inca 1.0.
 		env.fog_depth_curve = float(theme_flag("fog_curve", 1.4))
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)

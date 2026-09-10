@@ -277,9 +277,25 @@ func _right_shoulder() -> void:
 ## Coasta de sub buza, esantionata pe teren real. Piesele se aseaza in
 ## coordonate de lume (nu prin `_place`, care lucreaza pe distanta laterala
 ## constanta si ar rata caderea).
+##
+## RUNDA 2 -- diagnosticul vechi (verde prea des) era corect ca simptom dar
+## gresit ca leac: dupa ce runda 1 a rarit verdele la 22,7 %, roca a ramas la
+## 1,9 % fata de tinta 20+ %. Masurat pe captura: bolovanii `kopje_boulder_*`
+## sunt ROTUNZI (6 m la scara 1) si stateau IZOLATI, la 4-9 m unul de altul,
+## pe un flanc de 90 m -- la 60-150 m de camera, cateva puncte gri pe o
+## panta verde nu ajung niciodata la 20 % din caseta. Referinta nu are
+## bolovani presarati, are FATA DE STANCA: benzi aproape verticale de gri
+## care se ating si se suprapun pe toata caderea.
+##
+## Leacul: roca devine UMPLUTURA de fond, nu accent. Compunem "coame" --
+## grupuri de 3-6 bolovani suprapusi, intinsi pe verticala si turtiti pe o
+## axa orizontala (scale3 neuniform, cere `_raw` cu parametru nou), asezate
+## dese (pas 3-5 m) pe toata latimea coastei. Verdele ramane, dar doar ca
+## pete RARE agatate intre coame (candelabre/copaci mici), nu ca panza.
 func _flank() -> void:
 	var n := _track.baked.size()
 	var placed := 0
+	var ridges := 0
 	var f := FRAC_A
 	while f < FRAC_B:
 		var i := int(f * float(n)) % n
@@ -288,9 +304,9 @@ func _flank() -> void:
 		var half := _track.width_at_index(i)
 		var lat := half + 3.0
 		while lat < 95.0:
-			var step := _rng.randf_range(4.0, 9.0)
-			var jl := lat + _rng.randf_range(-1.8, 1.8)
-			var jf := f + _rng.randf_range(-0.004, 0.004)
+			var step := _rng.randf_range(3.0, 5.0)
+			var jl := lat + _rng.randf_range(-1.2, 1.2)
+			var jf := f + _rng.randf_range(-0.003, 0.003)
 			var ii := int(jf * float(n)) % n
 			var pp := _track.baked[ii]
 			var ss := _track._side_at(ii)
@@ -305,48 +321,45 @@ func _flank() -> void:
 				lat += step
 				continue
 			var t: float = clampf(drop / 40.0, 0.0, 1.0) # 0 sus pe buza, 1 jos
-			var r := _rng.randf()
 			var eye_d := sqrt(jl * jl + pow(p.y + 10.0 - g, 2.0))
-			# COASTA E DE PIATRA SI IARBA, NU PADURE. Cifra care a decis:
-			# in sfertul din dreapta-jos referinta are 2,8 % verde, iar noi
-			# aveam 23,0 % (masurat E_r1/E_r2 fata de ref_E). Nu era o
-			# problema de scara a coroanelor, ci de PROPORTIE: 324 de piese
-			# de flanc din care majoritatea verzi fac o panza continua, si
-			# panza aia ascunde exact crusta si inelul de flamingi pentru
-			# care exista POI-ul. Runda 1 a incercat sa taie verdele sub 34 m
-			# de ochi si runda 2 sub 52 m, dar CLAMP-ul `r = min(r, 0.55)`
-			# cadea in intervalul euphorbiei (0.42-0.62), iar euphorbia e un
-			# candelabru VERDE — fereastra nu taia nimic.
-			#
-			# Acum coasta se compune ca in referinta: coame de granit gri care
-			# ies din iarba aurie, si verde doar ca pete rare, tot mai jos.
-			var green_p: float = 0.06 + 0.30 * t # 6 % pe buza, 36 % pe fund
-			if eye_d < 60.0 or _in_lake_window(Vector3(qq.x, g, qq.z)):
-				green_p = 0.0 # in fata ochiului si peste lac: doar piatra
-			var model := ""
-			var scl := 1.0
-			if r < green_p:
-				if t > 0.55 and _rng.randf() < 0.6:
-					model = "fever"
-					scl = _rng.randf_range(0.7, 1.05)
-				else:
-					model = ["acacia_a", "acacia_a", "acacia_b"][_rng.randi_range(0, 2)]
-					scl = _rng.randf_range(0.30, 0.45) + 0.35 * t
-			elif r < green_p + 0.42 - 0.14 * t:
-				# Coama de granit: sus, mare; jos, mai rara.
-				model = ["boulder_c", "boulder_b", "boulder_b"][_rng.randi_range(0, 2)]
-				scl = _rng.randf_range(1.0, 2.4)
-			else:
-				# Restul e IARBA GOALA: nu asezam nimic. Referinta are panta
-				# de iarba aurie intre coamele de granit, nu tufe peste tot.
-				lat += step
-				continue
-			_raw(model, "Flanc", Vector3(qq.x, g, qq.z), _rng.randf_range(0.0, TAU), scl,
-				"trunk" if model != "boulder_c" and model != "boulder_b" else "hull")
-			placed += 1
+			var in_view_window: bool = eye_d < 60.0 or _in_lake_window(Vector3(qq.x, g, qq.z))
+			# COASTA E O FATA DE STANCA, NU O PANTA DE IARBA. O "coama" e un
+			# grup de bolovani suprapusi la aceeasi ancora lateral+longitudinal,
+			# intinsi pe verticala (scale3.y mare) si turtiti pe orizontala
+			# (scale3.x/z mici) ca sa citeasca drept CRESTE care urmeaza
+			# caderea, nu bulgari rotunzi. Referinta: benzile se ating.
+			var mates: int = _rng.randi_range(3, 6)
+			for m in mates:
+				var bn: String = ["boulder_c", "boulder_c", "boulder_b"][_rng.randi_range(0, 2)]
+				var dl := _rng.randf_range(-2.4, 2.4)
+				var df := _rng.randf_range(-0.0015, 0.0015)
+				var fi := int((jf + df) * float(n)) % n
+				var fp := _track.baked[fi]
+				var fs := _track._side_at(fi)
+				var rq := fp + fs * (jl + dl)
+				var rg := _sol_real(rq.x, rq.z, true)
+				if rg < _sea_y() + 0.3:
+					continue
+				var stretch_v := _rng.randf_range(1.7, 2.9) # verticala: creasta inalta
+				var flat_h := _rng.randf_range(0.55, 0.85)  # orizontala: turtita
+				var sc3 := Vector3(flat_h, stretch_v, flat_h) * _rng.randf_range(0.9, 1.5)
+				_raw(bn, "Coama", Vector3(rq.x, rg - 0.6, rq.z), _rng.randf_range(0.0, TAU),
+					1.0, "hull", sc3)
+				placed += 1
+			ridges += 1
+			# Verde: doar pete RARE agatate intre coamele de piatra, niciodata
+			# in fereastra ochi/lac. 8 % pe buza -> 16 % pe fund, mult sub
+			# pragul 6-14 % masurat pe toata caseta (buza + flanc + campie).
+			var green_p: float = 0.08 + 0.08 * t
+			if not in_view_window and _rng.randf() < green_p:
+				var model := "fever" if (t > 0.55 and _rng.randf() < 0.6) else "acacia_a"
+				var scl: float = _rng.randf_range(0.30, 0.45) + 0.30 * t
+				_raw(model, "FlancVerde", Vector3(qq.x, g, qq.z), _rng.randf_range(0.0, TAU),
+					scl, "trunk")
+				placed += 1
 			lat += step
-		f += 0.0045
-	print("; flanc: %d piese pe coasta" % placed)
+		f += 0.0035
+	print("; flanc: %d piese pe coasta (%d coame)" % [placed, ridges])
 
 
 ## BOMA la 0.454 pe campie + cireada Ankole care traverseaza dupa ea.
@@ -652,12 +665,17 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 
 
 func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
-		mode: String) -> void:
-	if _too_close_to_road(pos, BASE_R.get(model, 0.6) * scl):
+		mode: String, scale3: Vector3 = Vector3.ZERO) -> void:
+	# scale3 != ZERO: scalare NEUNIFORMA (coame de granit intinse pe verticala
+	# si turtite pe o axa orizontala) — raza de coliziune/road-clear foloseste
+	# tot componenta cea mai mare, ca sa nu subestimeze gabaritul.
+	var eff_scl := scl if scale3 == Vector3.ZERO else maxf(scale3.x, maxf(scale3.y, scale3.z))
+	if _too_close_to_road(pos, BASE_R.get(model, 0.6) * eff_scl):
 		_skipped_road += 1
 		return
 	_n += 1
-	var t := Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3.ONE * scl), pos)
+	var sc := Vector3.ONE * scl if scale3 == Vector3.ZERO else scale3
+	var t := Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(sc), pos)
 	_out.append('[node name="E_%s%d" parent="%s" instance=ExtResource("%s")]'
 		% [base, _n, ZONE, RES[model]])
 	_out.append("transform = %s" % var_to_str(t))

@@ -494,7 +494,13 @@ func _water_fill(f: float, sgn: float, dist: float, water_count: int,
 	_out.append("[node name=\"LuciuFlamingi_%03d\" type=\"Node3D\" parent=\"%s\"]" % [_n, ZONE])
 	_out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.3f, %.3f, %.3f)"
 		% [q.x, q.y, q.z])
-	_out.append("script = ExtResource(\"flock\")")
+	# "flockg" (FlamingoFlock, scenes/props/flamingo_flock.gd), NU "flock"
+	# (scenes/props/flock.gd, extends MultiMeshInstance3D — incompatibil cu
+	# type="Node3D" de mai sus si nu declara water_fill/water_count/etc).
+	# Bug descoperit la integrare: nodul se incarca "curat" fiindca Node3D
+	# accepta orice script, dar water_fill nu exista pe flock.gd, deci
+	# stolul din luciu nu se construia niciodata.
+	_out.append("script = ExtResource(\"flockg\")")
 	_out.append("count = 0")
 	_out.append("water_fill = true")
 	_out.append("water_count = %d" % water_count)

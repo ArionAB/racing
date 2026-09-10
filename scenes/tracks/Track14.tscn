@@ -7346,7 +7346,7 @@ seed = 1462
 
 [node name="LuciuFlamingi_063" type="Node3D" parent="DecorManual/ZoneG_FundulCraterului"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.543, -3.775, -16.009)
-script = ExtResource("flock")
+script = ExtResource("flockg")
 count = 0
 water_fill = true
 water_count = 260

@@ -298,6 +298,16 @@ func _lake_shore() -> void:
 	# Grupuri revarsate in apa mica, ca in referinta (pasari izolate dincolo de
 	# inel, pe luciu): banda mutata spre apa, densitate mica.
 	_ring(0.780, 1.0, 22.0, 55.0, 175.0, 420, 0.34, 17.0, -2.0, 1.3, 1.6)
+	# RUNDA 6 — UMPLEREA LUCIULUI (critica bucla orba: "flamingii sunt un TIV
+	# de tarm"). Inelele de mai sus (shore_ring) pun pasarile STRICT pe
+	# conturul lacului: masurat raport roz/apa 0,007 fata de 0,699 in
+	# referinta, banda verticala 0,128 fata de peste 0,4 — suprafata din
+	# spatele inelului ramanea apa goala. `water_fill` populeaza INTERIORUL
+	# poligonului `custom_lagoon`, cu densitatea scazand spre larg
+	# (`water_falloff`), plus o parte in zbor jos deasupra apei
+	# (`fly_fraction`) — asta ridica direct banda verticala, fiindca nu mai
+	# stau toate la aceeasi inaltime de orizont ca cele de pe mal.
+	_water_fill(0.780, 1.0, 22.0, 260, 2.2, 0.16)
 	# Elefantii de pe crusta (referinta: trei siluete gri pe alb). DOI stau ca
 	# decor, mergand spre lac; al treilea si al patrulea TRAVERSEAZA drumul
 	# (HazardMarker G_Elefant1/2 in Track14.tscn). Trei hazarduri pe acelasi
@@ -469,6 +479,28 @@ func _flock(f: float, sgn: float, dist: float, radius: float, count: int,
 	_out.append("count = %d" % count)
 	_out.append("radius = %.1f" % radius)
 	_out.append("wings_fraction = %.2f" % wings)
+	_out.append("seed = %d" % (1400 + _n))
+
+
+## Un nod care umple INTERIORUL lacului (`FlamingoFlock.water_fill`), cu
+## densitate scazand spre larg si o parte in zbor jos. Punctul de ancorare
+## e doar pentru cota initiala (`_world_at` pe crusta, langa mal) — asezarea
+## reala foloseste poligonul `custom_lagoon` direct in `_build_water_fill`.
+func _water_fill(f: float, sgn: float, dist: float, water_count: int,
+		falloff: float, fly_fraction: float) -> void:
+	var q := _world_at(f, sgn, dist)
+	_n += 1
+	_out.append("")
+	_out.append("[node name=\"LuciuFlamingi_%03d\" type=\"Node3D\" parent=\"%s\"]" % [_n, ZONE])
+	_out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.3f, %.3f, %.3f)"
+		% [q.x, q.y, q.z])
+	_out.append("script = ExtResource(\"flock\")")
+	_out.append("count = 0")
+	_out.append("water_fill = true")
+	_out.append("water_count = %d" % water_count)
+	_out.append("water_falloff = %.2f" % falloff)
+	_out.append("fly_fraction = %.2f" % fly_fraction)
+	_out.append("wings_fraction = 0.22")
 	_out.append("seed = %d" % (1400 + _n))
 
 

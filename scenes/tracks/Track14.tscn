@@ -7113,6 +7113,7 @@ transform = Transform3D(0.5013, -0.0975, 0.7293, 0.0287, 0.8844, 0.0986, -0.7352
 transform = Transform3D(-0.2627, 0.0001, 0.6530, 0.0691, 0.7000, 0.0277, -0.6494, 0.0744, -0.2613, 90.730, 8.326, -40.096)
 [node name="ZoneG_FundulCraterului" type="Node3D" parent="DecorManual"]
 
+
 [node name="acacia_umbrella_a_001" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-1.0860, 0.0000, -0.3783, 0.0000, 1.1500, 0.0000, 0.3783, 0.0000, -1.0860, 123.431, 3.232, 18.089)
 
@@ -7343,207 +7344,217 @@ wings_fraction = 0.34
 depth_max = 1.60
 seed = 1462
 
-[node name="elephant_063" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_elephant")]
-transform = Transform3D(-0.3395, 0.0000, -0.9936, 0.0000, 1.0500, 0.0000, 0.9936, 0.0000, -0.3395, 12.032, 1.863, -20.342)
+[node name="LuciuFlamingi_063" type="Node3D" parent="DecorManual/ZoneG_FundulCraterului"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.543, -3.775, -16.009)
+script = ExtResource("flock")
+count = 0
+water_fill = true
+water_count = 260
+water_falloff = 2.20
+fly_fraction = 0.16
+wings_fraction = 0.22
+seed = 1463
 
 [node name="elephant_064" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_elephant")]
-transform = Transform3D(-0.4786, 0.0000, -1.0457, 0.0000, 1.1500, 0.0000, 1.0457, 0.0000, -0.4786, 3.805, 1.835, -25.658)
+transform = Transform3D(-0.3395, 0.0000, -0.9936, 0.0000, 1.0500, 0.0000, 0.9936, 0.0000, -0.3395, 12.032, 1.863, -20.342)
 
 [node name="elephant_065" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_elephant")]
+transform = Transform3D(-0.4786, 0.0000, -1.0457, 0.0000, 1.1500, 0.0000, 1.0457, 0.0000, -0.4786, 3.805, 1.835, -25.658)
+
+[node name="elephant_066" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_elephant")]
 transform = Transform3D(-0.1224, 0.0000, -0.9421, 0.0000, 0.9500, 0.0000, 0.9421, 0.0000, -0.1224, 19.258, 2.614, -32.116)
 
-[node name="carcass_vultures_066" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_carcass_vultures")]
+[node name="carcass_vultures_067" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_carcass_vultures")]
 transform = Transform3D(-0.5806, 0.0000, -0.9927, 0.0000, 1.1500, 0.0000, 0.9927, 0.0000, -0.5806, 29.106, 1.870, -11.999)
 
-[node name="carcass_vultures_067" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_carcass_vultures")]
+[node name="carcass_vultures_068" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_carcass_vultures")]
 transform = Transform3D(0.8253, 0.0000, -0.5646, 0.0000, 1.0000, 0.0000, 0.5646, 0.0000, 0.8253, -29.160, 1.690, 48.890)
 
-[node name="kopje_boulder_a_068" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_a")]
+[node name="kopje_boulder_a_069" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.8483, 0.0000, 0.0530, 0.0000, 0.8500, 0.0000, -0.0530, 0.0000, 0.8483, 34.387, 2.547, -19.565)
 
-[node name="kopje_boulder_c_069" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_c")]
+[node name="kopje_boulder_c_070" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_c")]
 transform = Transform3D(-0.5269, 0.0000, -0.4608, 0.0000, 0.7000, 0.0000, 0.4608, 0.0000, -0.5269, 16.793, 1.820, -14.786)
 
-[node name="kopje_boulder_b_070" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_b")]
+[node name="kopje_boulder_b_071" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(0.1723, 0.0000, -0.9342, 0.0000, 0.9500, 0.0000, 0.9342, 0.0000, 0.1723, -5.613, 1.678, -14.419)
 
-[node name="kopje_boulder_b_071" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_b")]
+[node name="kopje_boulder_b_072" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(0.7291, 0.0000, -0.3292, 0.0000, 0.8000, 0.0000, 0.3292, 0.0000, 0.7291, 30.582, 1.735, 29.059)
 
-[node name="kopje_boulder_a_072" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_a")]
+[node name="kopje_boulder_a_073" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.2114, 0.0000, 0.6147, 0.0000, 0.6500, 0.0000, -0.6147, 0.0000, -0.2114, 6.719, 1.700, 27.294)
 
-[node name="fever_tree_073" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_074" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.8580, 0.0000, -0.4372, 0.0000, 0.9630, 0.0000, 0.4372, 0.0000, -0.8580, 38.695, 1.751, 23.420)
 
-[node name="fever_tree_074" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_075" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.2068, 0.0000, 1.2739, 0.0000, 1.2906, 0.0000, -1.2739, 0.0000, -0.2068, 36.193, 1.768, 32.012)
 
-[node name="fig_tree_075" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
+[node name="fig_tree_076" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
 transform = Transform3D(-0.2620, 0.0000, -1.0275, 0.0000, 1.0604, 0.0000, 1.0275, 0.0000, -0.2620, 34.674, 1.710, 43.279)
 
-[node name="fever_tree_076" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_077" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.6649, 0.0000, -0.8496, 0.0000, 1.0788, 0.0000, 0.8496, 0.0000, -0.6649, 28.544, 1.719, 24.272)
 
-[node name="fever_tree_077" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_078" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-1.2774, 0.0000, -0.1848, 0.0000, 1.2907, 0.0000, 0.1848, 0.0000, -1.2774, 25.686, 1.723, 32.241)
 
-[node name="euphorbia_078" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
+[node name="euphorbia_079" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
 transform = Transform3D(0.6437, 0.0000, 1.1814, 0.0000, 1.3454, 0.0000, -1.1814, 0.0000, 0.6437, 24.634, 1.708, 21.711)
 
-[node name="fever_tree_079" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_080" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.6866, 0.0000, -0.7607, 0.0000, 1.0247, 0.0000, 0.7607, 0.0000, 0.6866, 18.086, 1.705, 24.871)
 
-[node name="fever_tree_080" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_081" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.8487, 0.0000, -0.6808, 0.0000, 1.0880, 0.0000, 0.6808, 0.0000, 0.8487, 17.408, 1.703, 33.647)
 
-[node name="fig_tree_081" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
+[node name="fig_tree_082" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
 transform = Transform3D(0.9116, 0.0000, 0.6461, 0.0000, 1.1174, 0.0000, -0.6461, 0.0000, 0.9116, 13.956, 1.668, 41.862)
 
-[node name="fever_tree_082" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_083" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.5476, 0.0000, 1.0120, 0.0000, 1.1506, 0.0000, -1.0120, 0.0000, -0.5476, 10.989, 1.701, 26.008)
 
-[node name="fever_tree_083" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_084" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(1.1237, 0.0000, 0.0338, 0.0000, 1.1242, 0.0000, -0.0338, 0.0000, 1.1237, 7.558, 1.694, 34.033)
 
-[node name="fever_tree_084" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_085" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.9777, 0.0000, 0.1301, 0.0000, 0.9863, 0.0000, -0.1301, 0.0000, 0.9777, 1.696, 1.698, 27.952)
 
-[node name="fever_tree_085" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_086" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-1.0716, 0.0000, -0.6678, 0.0000, 1.2627, 0.0000, 0.6678, 0.0000, -1.0716, 1.291, 1.686, 37.905)
 
-[node name="fig_tree_086" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
+[node name="fig_tree_087" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
 transform = Transform3D(0.0444, 0.0000, -1.0822, 0.0000, 1.0831, 0.0000, 1.0822, 0.0000, 0.0444, 3.544, 1.645, 46.246)
 
-[node name="euphorbia_087" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
+[node name="euphorbia_088" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
 transform = Transform3D(0.1586, 0.0000, 1.3051, 0.0000, 1.3147, 0.0000, -1.3051, 0.0000, 0.1586, -1.635, 1.699, 24.638)
 
-[node name="fever_tree_088" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_089" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(1.1237, 0.0000, 0.0660, 0.0000, 1.1256, 0.0000, -0.0660, 0.0000, 1.1237, -3.570, 1.698, 28.606)
 
-[node name="fever_tree_089" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_090" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.9074, 0.0000, -0.8273, 0.0000, 1.2279, 0.0000, 0.8273, 0.0000, -0.9074, -0.576, 1.688, 36.806)
 
-[node name="fever_tree_090" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_091" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.3733, 0.0000, -1.1224, 0.0000, 1.1829, 0.0000, 1.1224, 0.0000, 0.3733, -8.425, 1.698, 29.996)
 
-[node name="fever_tree_091" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_092" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.8154, 0.0000, 0.6355, 0.0000, 1.0338, 0.0000, -0.6355, 0.0000, -0.8154, -6.641, 1.682, 40.366)
 
-[node name="fig_tree_092" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
+[node name="fig_tree_093" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
 transform = Transform3D(-0.0112, 0.0000, 0.9371, 0.0000, 0.9372, 0.0000, -0.9371, 0.0000, -0.0112, -3.730, 1.624, 50.119)
 
-[node name="fever_tree_093" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_094" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.9513, 0.0000, 0.1148, 0.0000, 0.9582, 0.0000, -0.1148, 0.0000, 0.9513, -16.342, 1.696, 34.805)
 
-[node name="fever_tree_094" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_095" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.8050, 0.0000, -0.9924, 0.0000, 1.2778, 0.0000, 0.9924, 0.0000, -0.8050, -15.212, 1.682, 43.098)
 
-[node name="euphorbia_095" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
+[node name="euphorbia_096" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
 transform = Transform3D(0.4981, 0.0000, -1.2388, 0.0000, 1.3352, 0.0000, 1.2388, 0.0000, 0.4981, -20.749, 1.698, 35.293)
 
-[node name="fever_tree_096" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_097" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.8584, 0.0000, -0.5369, 0.0000, 1.0125, 0.0000, 0.5369, 0.0000, 0.8584, -23.920, 1.694, 40.810)
 
-[node name="fever_tree_097" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_098" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.9483, 0.0000, 0.4233, 0.0000, 1.0385, 0.0000, -0.4233, 0.0000, 0.9483, -19.629, 1.671, 48.895)
 
-[node name="fig_tree_098" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
+[node name="fig_tree_099" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fig_tree")]
 transform = Transform3D(0.9431, 0.0000, 0.1142, 0.0000, 0.9500, 0.0000, -0.1142, 0.0000, 0.9431, -13.442, 1.613, 56.090)
 
-[node name="fever_tree_099" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_100" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.5542, 0.0000, 1.0268, 0.0000, 1.1668, 0.0000, -1.0268, 0.0000, -0.5542, -27.979, 1.695, 43.362)
 
-[node name="fever_tree_100" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_101" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-1.0837, 0.0000, 0.3843, 0.0000, 1.1498, 0.0000, -0.3843, 0.0000, -1.0837, -22.655, 1.673, 50.640)
 
-[node name="safari_balloon_landed_101" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_balloon_landed")]
+[node name="safari_balloon_landed_102" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_balloon_landed")]
 transform = Transform3D(-0.8569, 0.0000, -0.5155, 0.0000, 1.0000, 0.0000, 0.5155, 0.0000, -0.8569, -75.247, 1.702, 57.128)
 
-[node name="safari_tent_102" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_tent")]
+[node name="safari_tent_103" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_tent")]
 transform = Transform3D(0.4536, 0.0000, -0.8912, 0.0000, 1.0000, 0.0000, 0.8912, 0.0000, 0.4536, -68.891, 1.685, 67.566)
 
-[node name="safari_tent_103" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_tent")]
+[node name="safari_tent_104" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_tent")]
 transform = Transform3D(-0.7005, 0.0000, -0.6417, 0.0000, 0.9500, 0.0000, 0.6417, 0.0000, -0.7005, -74.918, 1.683, 71.797)
 
-[node name="land_rover_104" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_land_rover")]
+[node name="land_rover_105" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_land_rover")]
 transform = Transform3D(-0.3233, 0.0000, -0.9463, 0.0000, 1.0000, 0.0000, 0.9463, 0.0000, -0.3233, -69.498, 1.699, 50.975)
 
-[node name="campfire_105" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_campfire")]
+[node name="campfire_106" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_campfire")]
 transform = Transform3D(1.0000, 0.0000, 0.0000, 0.0000, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000, -72.107, 1.687, 65.611)
 
-[node name="acacia_umbrella_b_106" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="acacia_umbrella_b_107" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(0.7149, 0.0000, -0.9008, 0.0000, 1.1500, 0.0000, 0.9008, 0.0000, 0.7149, -77.832, 1.699, 76.380)
 
-[node name="acacia_umbrella_a_107" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acacia_umbrella_a_108" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.6179, 0.0000, -0.8489, 0.0000, 1.0500, 0.0000, 0.8489, 0.0000, -0.6179, -77.464, 1.721, 48.689)
 
-[node name="termite_mound_a_108" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_a")]
+[node name="termite_mound_a_109" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_a")]
 transform = Transform3D(1.2000, 0.0000, 0.0000, 0.0000, 1.2000, 0.0000, 0.0000, 0.0000, 1.2000, -61.606, 1.700, 30.056)
 
-[node name="termite_mound_b_109" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_b")]
+[node name="termite_mound_b_110" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_b")]
 transform = Transform3D(1.1000, 0.0000, 0.0000, 0.0000, 1.1000, 0.0000, 0.0000, 0.0000, 1.1000, -32.498, 1.693, 52.483)
 
-[node name="dead_tree_110" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_dead_tree")]
+[node name="dead_tree_111" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_dead_tree")]
 transform = Transform3D(0.1955, 0.0000, -1.1333, 0.0000, 1.1500, 0.0000, 1.1333, 0.0000, 0.1955, -30.129, 1.692, 48.644)
 
-[node name="acacia_umbrella_c_111" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="acacia_umbrella_c_112" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(1.1053, 0.0000, -0.4673, 0.0000, 1.2000, 0.0000, 0.4673, 0.0000, 1.1053, -24.991, 1.668, 53.826)
 
-[node name="kopje_boulder_a_112" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_a")]
+[node name="kopje_boulder_a_113" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(1.2536, 0.0000, -0.3444, 0.0000, 1.3000, 0.0000, 0.3444, 0.0000, 1.2536, -67.051, 1.693, 77.633)
 
-[node name="kopje_boulder_b_113" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_b")]
+[node name="kopje_boulder_b_114" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(-1.2581, 0.0000, 0.9885, 0.0000, 1.6000, 0.0000, -0.9885, 0.0000, -1.2581, -68.595, 5.574, 89.626)
 
-[node name="acacia_umbrella_a_114" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acacia_umbrella_a_115" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.3678, 0.0000, -1.1422, 0.0000, 1.2000, 0.0000, 1.1422, 0.0000, -0.3678, -56.609, 6.464, 101.089)
 
-[node name="kopje_boulder_c_115" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_c")]
+[node name="kopje_boulder_c_116" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_c")]
 transform = Transform3D(1.1096, 0.0000, -0.8537, 0.0000, 1.4000, 0.0000, 0.8537, 0.0000, 1.1096, -48.459, 12.536, 115.983)
 
-[node name="acacia_umbrella_c_116" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="acacia_umbrella_c_117" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(0.5165, 0.0000, -0.9142, 0.0000, 1.0500, 0.0000, 0.9142, 0.0000, 0.5165, -35.098, 2.013, 112.543)
 
-[node name="baobab_117" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_baobab")]
+[node name="baobab_118" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_baobab")]
 transform = Transform3D(0.4743, 0.0000, -0.6442, 0.0000, 0.8000, 0.0000, 0.6442, 0.0000, 0.4743, -27.379, 1.020, 122.898)
 
-[node name="fever_tree_118" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_119" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.6220, 0.0000, -0.7830, 0.0000, 1.0000, 0.0000, 0.7830, 0.0000, -0.6220, -14.569, 0.781, 123.629)
 
-[node name="acacia_umbrella_b_119" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="acacia_umbrella_b_120" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(1.1418, 0.0000, -0.1369, 0.0000, 1.1500, 0.0000, 0.1369, 0.0000, 1.1418, -4.965, 0.209, 137.093)
 
-[node name="acacia_umbrella_b_120" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_b")]
+[node name="acacia_umbrella_b_121" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_b")]
 transform = Transform3D(0.9019, 0.0000, 0.6297, 0.0000, 1.1000, 0.0000, -0.6297, 0.0000, 0.9019, -24.748, 1.633, 65.308)
 
-[node name="acacia_umbrella_a_121" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acacia_umbrella_a_122" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.7009, 0.0000, -1.0350, 0.0000, 1.2500, 0.0000, 1.0350, 0.0000, 0.7009, -17.602, 1.547, 66.811)
 
-[node name="dead_tree_122" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_dead_tree")]
+[node name="dead_tree_123" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_dead_tree")]
 transform = Transform3D(1.0257, 0.0000, -0.2246, 0.0000, 1.0500, 0.0000, 0.2246, 0.0000, 1.0257, -17.358, 1.446, 77.606)
 
-[node name="acacia_umbrella_c_123" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_c")]
+[node name="acacia_umbrella_c_124" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(-0.8969, 0.0000, 0.7198, 0.0000, 1.1500, 0.0000, -0.7198, 0.0000, -0.8969, -4.542, 1.255, 78.290)
 
-[node name="fever_tree_124" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
+[node name="fever_tree_125" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.4642, 0.0000, -0.8289, 0.0000, 0.9500, 0.0000, 0.8289, 0.0000, 0.4642, 3.825, 1.019, 87.972)
 
-[node name="acacia_umbrella_a_125" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
+[node name="acacia_umbrella_a_126" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.1176, 0.0000, 1.1942, 0.0000, 1.2000, 0.0000, -1.1942, 0.0000, 0.1176, 16.885, 0.822, 85.386)
 
-[node name="euphorbia_126" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
+[node name="euphorbia_127" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_euphorbia")]
 transform = Transform3D(-0.0812, 0.0000, 1.2975, 0.0000, 1.3000, 0.0000, -1.2975, 0.0000, -0.0812, 17.590, 0.708, 96.842)
 
-[node name="termite_mound_a_127" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_a")]
+[node name="termite_mound_a_128" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_a")]
 transform = Transform3D(-0.4978, 0.0000, 1.1198, 0.0000, 1.2255, 0.0000, -1.1198, 0.0000, -0.4978, -27.236, 1.643, 72.020)
 
-[node name="termite_mound_b_128" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_b")]
+[node name="termite_mound_b_129" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_b")]
 transform = Transform3D(-0.7011, 0.0000, 1.2032, 0.0000, 1.3926, 0.0000, -1.2032, 0.0000, -0.7011, -28.325, 1.337, 111.869)
 
-[node name="termite_mound_a_129" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_a")]
+[node name="termite_mound_a_130" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_a")]
 transform = Transform3D(-0.8382, 0.0000, 0.6483, 0.0000, 1.0596, 0.0000, -0.6483, 0.0000, -0.8382, 8.778, 0.878, 95.210)
-
 [node name="ZoneH_Spartura" type="Node3D" parent="DecorManual"]
 
 [node name="spartura1" parent="DecorManual/ZoneH_Spartura" instance=ExtResource("s_crater_gap")]

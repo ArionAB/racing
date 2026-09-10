@@ -16,6 +16,18 @@ extends Node
 ##   godot --rendering-driver vulkan --path . res://tools/ProbeMasca.tscn -- \
 ##       --track=13 --frac=0.27 --match=Taietura
 ##
+## `--gamecam`: foloseste parametrii REALI ai ChaseCamera (ca `snapshot.gd
+## --gamecam`) in loc de camera inghetata MEASURE_*, pentru compozitie "cum
+## arata cand joci" in loc de poza de masurare.
+##
+## MultiMesh: decorul imprastiat (stoluri, turme — `MultiMeshInstance3D`, ca
+## `FlamingoFlock`) era INVIZIBIL pentru unealta: `_collect` aduna doar
+## `MeshInstance3D`. Acum se colecteaza si instantele 3D dintr-un
+## `MultiMeshInstance3D` (transform = `mmi.global_transform * mm.
+## get_instance_transform(i)`), rasterizate in ACELASI z-buffer, cu numele
+## RAPORTAT = numele nodului MultiMesh (nu se inventeaza nume per instanta).
+## Instantele cu `transform_format != TRANSFORM_3D` se sar, cu avertisment.
+##
 ## Iese: snapshots/masca_<frac>_cadru.png si snapshots/masca_<frac>_<nume>.png
 
 const MEASURE_DIST: float = 7.5
@@ -70,6 +82,8 @@ func _ready() -> void:
 			caster = arg.trim_prefix("--caster=")
 		elif arg == "--no-shadow":
 			no_shadow = true
+		elif arg == "--gamecam":
+			game_cam = true
 		elif arg.begins_with("--match="):
 			matches.append(arg.trim_prefix("--match="))
 		elif arg.begins_with("--group="):
@@ -101,9 +115,49 @@ func _ready() -> void:
 			print("--hippo-at=%.2f: %s la y=%.2f sus=%s"
 				% [hippo_at, hippo.name, hippo.global_position.y, hippo.is_up()])
 		await get_tree().process_frame
+	# DECOR CARE SE CONSTRUIESTE SINGUR (FlamingoFlock: `_build.
+	# call_deferred()` in `_ready`, apoi INCA 2 cadre de proces + 2 de fizica
+	# inauntrul lui `_build` inainte sa aseze pasarile). Fara asteptare
+	# suplimentara MultiMesh-ul stolului nu exista inca la momentul capturii.
+	# Asteptarea e CONDITIONATA de prezenta unui asemenea nod — pistele fara
+	# el (marea majoritate) nu primesc cadre in plus, ca sa nu se schimbe
+	# faza hazardelor animate pe `_physics_process` (masurat: cateva cadre
+	# in plus mutau vizibil Balloon_Envelope pe Cappadocia). Comportamentul
+	# existent pe MeshInstance3D ramane neschimbat pe orice pista fara
+	# decor MultiMesh amanat.
+	var flocks: Array[FlamingoFlock] = []
+	_collect_flocks(track, flocks)
+	if not flocks.is_empty():
+		var guard := 0
+		while guard < 24:
+			var all_built := true
+			for f in flocks:
+				if f.placed == 0 and f.placed_water == 0:
+					all_built = false
+					break
+			if all_built:
+				break
+			await get_tree().process_frame
+			await get_tree().physics_frame
+			guard += 1
+		print("ProbeMasca: %d FlamingoFlock, construit dupa %d cadre in plus" % [flocks.size(), guard])
 
 	var cam := Camera3D.new()
 	add_child(cam)
+	var dist := MEASURE_DIST
+	var cam_h := MEASURE_HEIGHT
+	var fov := MEASURE_FOV
+	var look_ahead := MEASURE_LOOK_AHEAD
+	var look_h := MEASURE_LOOK_HEIGHT
+	if game_cam:
+		# --gamecam: parametrii REALI ai ChaseCamera (ca snapshot.gd
+		# --gamecam), pentru compozitie "cum arata cand joci" in loc de poza
+		# de masurare inghetata.
+		dist = ChaseCamera.DEFAULT_DISTANCE
+		cam_h = ChaseCamera.DEFAULT_HEIGHT
+		fov = ChaseCamera.BASE_FOV
+		look_ahead = ChaseCamera.LOOK_AHEAD
+		look_h = ChaseCamera.LOOK_HEIGHT
 	var pts := track.route_at(0).baked
 	var n := pts.size()
 	var i := int(frac * float(n)) % n
@@ -111,23 +165,11 @@ func _ready() -> void:
 	var ahead: Vector3 = pts[track.route_at(0).wrap_index(i + 12)]
 	var dir := (ahead - focus).normalized()
 	cam.projection = Camera3D.PROJECTION_PERSPECTIVE
-	cam.fov = MEASURE_FOV
+	cam.fov = fov
 	cam.far = 400.0
-	var m_dist := MEASURE_DIST
-	var m_h := MEASURE_HEIGHT
-	var m_ahead := MEASURE_LOOK_AHEAD
-	var m_lh := MEASURE_LOOK_HEIGHT
-	if game_cam:
-		# --gamecam: parametrii REALI ai camerei de urmarire, ca in Snapshot.
-		# Fara ei masca masoara un cadru pe care jucatorul nu-l vede niciodata
-		# (--driver sta la 7.5 m si 3.2 m inaltime, camera de joc la 12.5/10).
-		m_dist = ChaseCamera.DEFAULT_DISTANCE
-		m_h = ChaseCamera.DEFAULT_HEIGHT
-		m_ahead = ChaseCamera.LOOK_AHEAD
-		m_lh = ChaseCamera.LOOK_HEIGHT
-		cam.fov = ChaseCamera.BASE_FOV
-	cam.position = focus - dir * m_dist + Vector3.UP * m_h
-	cam.look_at(focus + dir * m_ahead + Vector3.UP * m_lh, Vector3.UP)
+	cam.position = focus - dir * dist + Vector3.UP * cam_h
+	cam.look_at(focus + dir * look_ahead
+		+ Vector3.UP * look_h, Vector3.UP)
 	if free_eye:
 		# --eye=x,y,z --look=x,y,z: camera libera, ca in Snapshot — pentru
 		# atribuirea unui obiect vazut dintr-un unghi pe care camera de joc
@@ -179,13 +221,17 @@ func _ready() -> void:
 	_h = vp.get_texture().get_height()
 	var dir_out := ProjectSettings.globalize_path("res://snapshots")
 	DirAccess.make_dir_recursive_absolute(dir_out)
-	var tag := ("%.3f" % frac) + ("_noumbra" if no_shadow else ("_fara_" + caster.to_lower() if caster != "" else ""))
+	var tag := ("%.3f" % frac) + ("_gamecam" if game_cam else "") \
+		+ ("_noumbra" if no_shadow else ("_fara_" + caster.to_lower() if caster != "" else ""))
 	vp.get_texture().get_image().save_png(
 		"%s/masca_%s_cadru.png" % [dir_out, tag])
 	print("CADRU: %s/masca_%s_cadru.png (%dx%d)" % [dir_out, tag, _w, _h])
 
 	# Z-buffer pe TOT ce se randeaza, apoi masca per obiect cerut.
-	var all: Array[MeshInstance3D] = []
+	# `all` tine si MeshInstance3D (comportament neschimbat), si
+	# MultiMeshInstance3D (un intreg stol = O intrare, ca numele raportat sa
+	# fie al nodului MultiMesh, nu inventat per instanta).
+	var all: Array[Node] = []
 	_collect(track, all)
 	var zbuf := PackedFloat32Array()
 	zbuf.resize(_w * _h)
@@ -194,7 +240,11 @@ func _ready() -> void:
 	owner_id.resize(_w * _h)
 	owner_id.fill(-1)
 	for k in all.size():
-		_raster(all[k], cam, zbuf, owner_id, k)
+		var node: Node = all[k]
+		if node is MeshInstance3D:
+			_raster(node as MeshInstance3D, cam, zbuf, owner_id, k)
+		elif node is MultiMeshInstance3D:
+			_raster_multimesh(node as MultiMeshInstance3D, cam, zbuf, owner_id, k)
 
 	# Numaratoare pe TOATE mesh-urile vizibile, ca atribuirea sa fie completa:
 	# altfel nu se stie ce acopera restul cadrului.
@@ -256,6 +306,20 @@ func _ready() -> void:
 			print("VERDICT: OK")
 
 	for m in matches:
+		# Numara intai cate intrari matchuite ar scrie in ACELASI fisier (nume
+		# identic): nodurile MultiMesh dintr-un stol se numesc la fel in orice
+		# FlamingoFlock ("Stand"/"Wings"/"Fly", din `_make_lot`), asa ca
+		# --match=Stand pe o pista cu mai multe stoluri lovea coliziunea asta
+		# — ultima masca scria peste cele dinaintea ei, tacut. Comportamentul
+		# NU se schimba cand numele e unic (calea ramane cea veche); se
+		# adauga un sufix doar cand chiar ar coliziona.
+		var name_hits := {}
+		for k in all.size():
+			if not all[k].name.contains(m) or int(per.get(k, 0)) < 200:
+				continue
+			var nm: String = all[k].name
+			name_hits[nm] = int(name_hits.get(nm, 0)) + 1
+		var name_seen := {}
 		for k in all.size():
 			if not all[k].name.contains(m):
 				continue
@@ -267,6 +331,10 @@ func _ready() -> void:
 				if owner_id[pix] == k:
 					img.set_pixel(pix % _w, pix / _w, Color.WHITE)
 			var safe: String = all[k].name.to_lower().replace(" ", "_")
+			if int(name_hits.get(all[k].name, 0)) > 1:
+				var seen: int = int(name_seen.get(all[k].name, 0))
+				name_seen[all[k].name] = seen + 1
+				safe += "_%d" % seen
 			var out := "%s/masca_%s_%s.png" % [dir_out, tag, safe]
 			img.save_png(out)
 			print("MASCA %s: %d px (%.2f%%) -> %s"
@@ -275,27 +343,70 @@ func _ready() -> void:
 	get_tree().quit()
 
 
-func _collect(node: Node, out: Array[MeshInstance3D]) -> void:
+## Aduna nodurile FlamingoFlock (sau orice alt decor cu acelasi contract:
+## `placed`/`placed_water` raman 0 pana termina `_build`), ca sa stim cat sa
+## asteptam inainte de captura.
+func _collect_flocks(node: Node, out: Array[FlamingoFlock]) -> void:
+	if node is FlamingoFlock:
+		out.append(node as FlamingoFlock)
+	for c in node.get_children():
+		_collect_flocks(c, out)
+
+
+func _collect(node: Node, out: Array[Node]) -> void:
 	if node is MeshInstance3D and (node as MeshInstance3D).visible \
 			and (node as MeshInstance3D).mesh != null:
-		var vis := true
-		var p: Node = node
-		while p != null:
-			if p is Node3D and not (p as Node3D).visible:
-				vis = false
-				break
-			p = p.get_parent()
-		if vis:
+		if _ancestors_visible(node):
 			out.append(node as MeshInstance3D)
+	elif node is MultiMeshInstance3D and (node as MultiMeshInstance3D).visible:
+		var mmi := node as MultiMeshInstance3D
+		var mm := mmi.multimesh
+		if mm != null and mm.mesh != null and mm.instance_count > 0 \
+				and _ancestors_visible(node):
+			if mm.transform_format == MultiMesh.TRANSFORM_3D:
+				out.append(mmi)
+			else:
+				push_warning("ProbeMasca: %s are MultiMesh.transform_format = TRANSFORM_2D, sarit (doar 3D e suportat)" % mmi.name)
 	for c in node.get_children():
 		_collect(c, out)
+
+
+## Adevarat daca `node` si toti stramosii lui Node3D sunt vizibili.
+func _ancestors_visible(node: Node) -> bool:
+	var p: Node = node
+	while p != null:
+		if p is Node3D and not (p as Node3D).visible:
+			return false
+		p = p.get_parent()
+	return true
 
 
 ## Rasterizeaza triunghiurile unui mesh in z-buffer, marcand proprietarul.
 func _raster(mi: MeshInstance3D, cam: Camera3D, zbuf: PackedFloat32Array,
 		owner_id: PackedInt32Array, id: int) -> void:
-	var xf := mi.global_transform
-	var mesh := mi.mesh
+	_raster_mesh_xf(mi.mesh, mi.global_transform, cam, zbuf, owner_id, id)
+
+
+## Rasterizeaza un MultiMeshInstance3D: fiecare instanta e transformul ei
+## LOCAL (`mm.get_instance_transform`) compus cu transformul GLOBAL al
+## nodului — acelasi mesh, acelasi ID (proprietarul raportat e nodul
+## MultiMesh, nu o instanta anume), in ACELASI z-buffer ca MeshInstance3D,
+## deci rezultatele sunt direct comparabile.
+func _raster_multimesh(mmi: MultiMeshInstance3D, cam: Camera3D,
+		zbuf: PackedFloat32Array, owner_id: PackedInt32Array, id: int) -> void:
+	var mm := mmi.multimesh
+	var node_xf := mmi.global_transform
+	for i in mm.instance_count:
+		var inst_xf := node_xf * mm.get_instance_transform(i)
+		_raster_mesh_xf(mm.mesh, inst_xf, cam, zbuf, owner_id, id)
+
+
+## Nucleul comun de rasterizare: un mesh cu un transform GLOBAL dat, indiferent
+## daca provine dintr-un MeshInstance3D sau dintr-o instanta de MultiMesh.
+func _raster_mesh_xf(mesh: Mesh, xf: Transform3D, cam: Camera3D,
+		zbuf: PackedFloat32Array, owner_id: PackedInt32Array, id: int) -> void:
+	if mesh == null:
+		return
 	for s in mesh.get_surface_count():
 		var arr := mesh.surface_get_arrays(s)
 		if arr.is_empty():

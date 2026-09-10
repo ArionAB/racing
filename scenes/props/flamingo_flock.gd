@@ -55,8 +55,30 @@ const GLB_WINGS := "res://assets/models/serengeti/plants/flamingo_wings.glb"
 ## Cat de tare se ingramadesc spre linia apei: 1 = uniform pe banda, 3 = mult
 ## mai dese la mal (ca in referinta, unde inelul e lipit de apa).
 @export_range(1.0, 6.0, 0.1) var ring_bias: float = 2.6
+## UMPLEREA APEI (runda 6, critica bucla orba POI G). `shore_ring` singur
+## lasa LUCIUL gol: e un TIV de mal, o singura grosime de obiect pe contur,
+## iar suprafata din spate ramane apa pura — masurat raport roz/apa 0,007
+## fata de 0,699 in referinta. Cu `water_fill` pornit, stolul mai pune
+## pasari SI in interiorul lacului (nu doar pe linia apei), cu densitate
+## care SCADE de la mal spre larg (`water_falloff`), plus o parte `fly_fraction`
+## ridicate deasupra apei (zbor jos) — asta ridica banda verticala de
+## acoperire (masurata 0,128, cerut > 0,4), fiindca pasarile de pe luciu nu
+## mai stau toate la aceeasi inaltime de orizont ca cele de pe mal.
+@export var water_fill: bool = false
+## Cate pasari suplimentare in interiorul apei (pe langa `count` de pe mal).
+@export_range(0, 400, 1) var water_count: int = 0
+## Cat de repede scade densitatea spre centrul lacului: 1 = aproape uniform,
+## 3+ = concentrat langa mal, rarindu-se rapid spre larg (dar tot acopera
+## toata suprafata, nu doar o franjura).
+@export_range(0.5, 5.0, 0.1) var water_falloff: float = 2.0
+## Fractia din pasarile de apa (`water_count`) ridicate in zbor jos deasupra
+## luciului, cu aripile deschise.
+@export_range(0.0, 1.0, 0.05) var fly_fraction: float = 0.12
+## Inaltimea deasupra apei a celor in zbor (m): min si max.
+@export var fly_height: Vector2 = Vector2(1.5, 4.5)
 
 var placed: int = 0
+var placed_water: int = 0
 
 
 func _ready() -> void:
@@ -158,15 +180,90 @@ func _build() -> void:
 		else:
 			stand_xf.append(xf)
 	placed = stand_xf.size() + wings_xf.size()
-	if placed == 0:
+	if placed == 0 and not water_fill:
 		push_warning("FlamingoFlock %s: niciun punct pe linia apei in raza de %.0f m (apa la %.2f)"
 			% [name, radius, sea_y])
 		return
+	var fly_xf: Array[Transform3D] = []
+	if water_fill:
+		placed_water = _build_water_fill(track, sea_y, rng, stand_xf, wings_xf, fly_xf)
 	_make_lot("Stand", stand_mesh, stand_xf)
 	_make_lot("Wings", wings_mesh, wings_xf)
+	_make_lot("Fly", wings_mesh, fly_xf)
 	if OS.is_stdout_verbose() or "--flock-report" in OS.get_cmdline_user_args():
-		print("FlamingoFlock %s: %d pasari (%d cu aripi) din %d incercari, apa la %.2f"
-			% [name, placed, wings_xf.size(), tries, sea_y])
+		print("FlamingoFlock %s: %d pasari mal (%d cu aripi) + %d pe apa (%d zbor) din %d incercari, apa la %.2f"
+			% [name, placed, wings_xf.size(), placed_water, fly_xf.size(), tries, sea_y])
+
+
+## Umple INTERIORUL lacului: puncte in poligonul `custom_lagoon`, cu
+## densitatea scazand de la mal spre centru (`water_falloff`). Nu foloseste
+## raza pe teren (e apa deschisa, fara fund accesibil de raycast) — pasarile
+## stau la `sea_y` (plutesc) sau, pentru `fly_fraction`, ridicate deasupra ei
+## (zbor jos). Adauga in `stand_xf`/`wings_xf` (aceleasi loturi ca malul, ca
+## sa nu inmulteasca draw call-urile) si in `fly_xf` (lot separat, altfel
+## silueta de zbor ar avea aceeasi pauza ca cele de pe apa).
+func _build_water_fill(track: Track, sea_y: float, rng: RandomNumberGenerator,
+		stand_xf: Array[Transform3D], wings_xf: Array[Transform3D],
+		fly_xf: Array[Transform3D]) -> int:
+	var poly: PackedVector2Array = track._lagoon_poly()
+	if poly.size() < 3:
+		push_warning("FlamingoFlock %s: water_fill fara contur de lac" % name)
+		return 0
+	var c := Vector2.ZERO
+	for p in poly:
+		c += p
+	c /= float(poly.size())
+	var placed_n := 0
+	var tries := 0
+	var target := water_count
+	while placed_n < target and tries < target * 60:
+		tries += 1
+		var a := rng.randf() * TAU
+		var dir := Vector2(cos(a), sin(a))
+		var r_edge := _poly_radius(poly, c, dir)
+		if r_edge <= 0.5:
+			continue
+		# u in [0,1): 0 la mal, 1 in centru. pow(water_falloff) impinge
+		# esantioanele spre mal (u mic), deci densitatea SCADE spre larg —
+		# dar tot acopera pana la 1 (centrul), spre deosebire de shore_ring
+		# care nu trece niciodata de `ring_in` metri de la linia apei.
+		var u := pow(rng.randf(), water_falloff)
+		var r := u * r_edge * 0.96
+		var pt := c + dir * r
+		var x := pt.x
+		var z := pt.y
+		if not Geometry2D.is_point_in_polygon(pt, poly):
+			continue
+		placed_n += 1
+		var yaw := rng.randf() * TAU
+		var scl := rng.randf_range(0.85, 1.1)
+		var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scl)
+		if rng.randf() < fly_fraction:
+			var h := rng.randf_range(fly_height.x, fly_height.y)
+			fly_xf.append(Transform3D(basis, Vector3(x, sea_y + h, z)))
+		elif rng.randf() < wings_fraction:
+			wings_xf.append(Transform3D(basis, Vector3(x, sea_y - 0.15, z)))
+		else:
+			stand_xf.append(Transform3D(basis, Vector3(x, sea_y - 0.15, z)))
+	return placed_n
+
+
+## Raza poligonului `poly` (centrat pe `c`) pe directia `dir`, prin cautare pe
+## segmente — acelasi principiu ca `_arc_dump` din generator, dar reintrodus
+## aici fiindca `FlamingoFlock` ruleaza la joc, nu doar in unealta offline.
+func _poly_radius(poly: PackedVector2Array, c: Vector2, dir: Vector2) -> float:
+	var best := -1.0
+	for j in poly.size():
+		var a2 := poly[j] - c
+		var b2 := poly[(j + 1) % poly.size()] - c
+		var d1 := a2.cross(dir)
+		var d2 := b2.cross(dir)
+		if (d1 <= 0.0 and d2 > 0.0) or (d1 > 0.0 and d2 <= 0.0):
+			var t := absf(d1) / maxf(0.0001, absf(d1) + absf(d2))
+			var hit := a2.lerp(b2, t)
+			if hit.dot(dir) > 0.0:
+				best = hit.length()
+	return best
 
 
 func _make_lot(lot_name: String, mesh: Mesh, xfs: Array[Transform3D]) -> void:

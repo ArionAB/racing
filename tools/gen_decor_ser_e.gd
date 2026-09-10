@@ -77,6 +77,18 @@ var _flam_pos: PackedVector3Array = []
 var _flam_yaw: PackedFloat32Array = []
 var _wing_pos: PackedVector3Array = []
 var _wing_yaw: PackedFloat32Array = []
+## Creasta de granit a flancului (POI E, runda 3): MultiMesh, nu WorldProp.
+## Runda 2 punea 2.800+ bolovani ca instante de scena individuale -- corect
+## vizual (masurat separat), dar fiecare instanta e un desen propriu, si
+## garda de desene ("aranjamentul bate numarul") a picat: 3126 desene pe toata
+## pista, fata de 2426 pe scena integrata FARA creasta. Doua loturi (boulder_b,
+## boulder_c), cate un desen fiecare -- acelasi numar de bolovani, ~2 desene.
+var _coama_b_pos: Array[Vector3] = []
+var _coama_b_yaw: Array[float] = []
+var _coama_b_scale: Array[Vector3] = []
+var _coama_c_pos: Array[Vector3] = []
+var _coama_c_yaw: Array[float] = []
+var _coama_c_scale: Array[Vector3] = []
 
 
 func _ready() -> void:
@@ -108,6 +120,7 @@ func _ready() -> void:
 		_far_wall()
 		_flamingos()
 		_emit_flock()
+		_emit_coame()
 		if _out_path != "":
 			var f := FileAccess.open(_out_path, FileAccess.WRITE)
 			for line in _out:
@@ -330,7 +343,7 @@ func _flank() -> void:
 			# caderea, nu bulgari rotunzi. Referinta: benzile se ating.
 			var mates: int = _rng.randi_range(3, 6)
 			for m in mates:
-				var bn: String = ["boulder_c", "boulder_c", "boulder_b"][_rng.randi_range(0, 2)]
+				var use_c: bool = _rng.randf() < 0.66 # 2/3 boulder_c, 1/3 boulder_b
 				var dl := _rng.randf_range(-2.4, 2.4)
 				var df := _rng.randf_range(-0.0015, 0.0015)
 				var fi := int((jf + df) * float(n)) % n
@@ -343,8 +356,20 @@ func _flank() -> void:
 				var stretch_v := _rng.randf_range(1.7, 2.9) # verticala: creasta inalta
 				var flat_h := _rng.randf_range(0.55, 0.85)  # orizontala: turtita
 				var sc3 := Vector3(flat_h, stretch_v, flat_h) * _rng.randf_range(0.9, 1.5)
-				_raw(bn, "Coama", Vector3(rq.x, rg - 0.6, rq.z), _rng.randf_range(0.0, TAU),
-					1.0, "hull", sc3)
+				var rp := Vector3(rq.x, rg - 0.6, rq.z)
+				var ry := _rng.randf_range(0.0, TAU)
+				var eff_r: float = BASE_R.get("boulder_c" if use_c else "boulder_b", 0.6) \
+					* maxf(sc3.x, maxf(sc3.y, sc3.z))
+				if _too_close_to_road(rp, eff_r):
+					continue
+				if use_c:
+					_coama_c_pos.append(rp)
+					_coama_c_yaw.append(ry)
+					_coama_c_scale.append(sc3)
+				else:
+					_coama_b_pos.append(rp)
+					_coama_b_yaw.append(ry)
+					_coama_b_scale.append(sc3)
 				placed += 1
 			ridges += 1
 			# Verde: doar pete RARE agatate intre coamele de piatra, niciodata
@@ -624,6 +649,32 @@ func _emit_flock() -> void:
 		_out.append("yaws = %s" % var_to_str(spec[3]).replace("\n", ""))
 		_out.append("")
 		_n += 1
+
+
+## Creasta de granit ca MultiMesh -- doua loturi (boulder_b, boulder_c), un
+## desen fiecare, scalare NEUNIFORMA per instanta prin `scale3_list`
+## (FlockProp, runda 3). ~2.800 de bolovani coborau garda de desene de la
+## 2.426 (scena integrata fara creasta) la 3.126; ca MultiMesh acelasi numar
+## de bolovani adauga doar 2 desene.
+func _emit_coame() -> void:
+	for spec in [["E_CoameB", "s_kopje_boulder_b", _coama_b_pos, _coama_b_yaw, _coama_b_scale],
+			["E_CoameC", "s_kopje_boulder_c", _coama_c_pos, _coama_c_yaw, _coama_c_scale]]:
+		var pos: Array[Vector3] = spec[2]
+		if pos.is_empty():
+			continue
+		var pv := PackedVector3Array(pos)
+		var yv := PackedFloat32Array(spec[3])
+		_out.append('[node name="%s" type="MultiMeshInstance3D" parent="%s"]' % [spec[0], ZONE])
+		_out.append('script = ExtResource("flock")')
+		_out.append('model = ExtResource("%s")' % spec[1])
+		_out.append('tri_class = "granite"')
+		_out.append("positions = %s" % var_to_str(pv).replace("\n", ""))
+		_out.append("yaws = %s" % var_to_str(yv).replace("\n", ""))
+		_out.append("scale3_list = %s" % var_to_str(spec[4]).replace("\n", ""))
+		_out.append("")
+		_n += 1
+	print("; creasta: %d boulder_b + %d boulder_c ca MultiMesh (2 desene)"
+		% [_coama_b_pos.size(), _coama_c_pos.size()])
 
 
 # ------------------------------------------------------------------ asezarea

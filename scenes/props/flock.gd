@@ -23,6 +23,17 @@ class_name FlockProp
 @export var scale_min: float = 0.9
 @export var scale_max: float = 1.15
 @export var seed_value: int = 20260907
+## Scalare NEUNIFORMA per instanta (optional). Cand nu e goala, inlocuieste
+## `scale_min`/`scale_max`: fiecare element e (x, y, z) in loc de un scalar.
+## Nascut pe creasta de granit a POI E — coame de stanca intinse pe verticala
+## si turtite orizontal, ca sa citeasca drept creste care urmeaza caderea, nu
+## bulgari rotunzi (vezi `tools/gen_decor_ser_e.gd`).
+@export var scale3_list: Array[Vector3] = []
+## Clasa triplanara de folosit ca material (ex. "granite"), in loc de
+## `Palette.world_material()` (atlas plat). Gol = comportament vechi
+## (flamingi, crusta): niciun MultiMesh existent nu foloseste asta, deci
+## implicitul pastreaza exact aspectul de dinainte.
+@export var tri_class: String = ""
 ## AO-ul copt in COLOR_0 al modelului, neutralizat partial.
 ##
 ## Masurat pe flamingo.glb: COLOR_0 are luminanta mediana 0.760 si minim
@@ -69,14 +80,23 @@ func _ready() -> void:
 	mm.instance_count = positions.size()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
+	var use_scale3 := scale3_list.size() == positions.size()
 	for i in positions.size():
 		var yaw: float = yaws[i] if i < yaws.size() else 0.0
-		var s := rng.randf_range(scale_min, scale_max)
+		# ATENTIE: niciodata scale.x negativ pentru oglindire — Godot culleste
+		# instantele MultiMesh cu determinant negativ (compenseaza doar pe
+		# noduri). Oglindirea se face din yaw, nu din scara.
+		var sc: Vector3
+		if use_scale3:
+			sc = scale3_list[i]
+		else:
+			var s := rng.randf_range(scale_min, scale_max)
+			sc = Vector3.ONE * s
 		mm.set_instance_transform(i, Transform3D(
-			Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3.ONE * s),
+			Basis(Vector3.UP, yaw) * Basis.from_scale(sc),
 			positions[i]))
 	multimesh = mm
-	material_override = Palette.world_material()
+	material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 

@@ -126,6 +126,7 @@ var _loop_len: float = 0.0
 var _strip: PackedInt32Array
 var _row_off: PackedFloat32Array     # metri in spatele capului pulsului
 var _lateral: PackedFloat32Array     # pe axa drumului
+var _yaw: PackedFloat32Array         # abatere de cap fata de flow_dir, radiani
 var _wobble_amp: PackedFloat32Array
 var _wobble_freq: PackedFloat32Array
 var _wobble_ph: PackedFloat32Array
@@ -166,7 +167,45 @@ func _ready() -> void:
 	_build_visual()
 	_build_pool()
 	_build_catch()
+	_build_dust()
 	_time = phase * period()
+
+
+## Praf ieftin pe fasia de traversare (brief POI B): un nor jos, static ca
+## pozitie de emisie (nu urmareste animalele individual — ar fi N emitatoare),
+## centrat pe axa drumului unde pulsul o taie. Cost: UN CPUParticles3D,
+## unshaded, fara umbra proprie (vezi nota din brief §"praf ieftin").
+func _build_dust() -> void:
+	var p := CPUParticles3D.new()
+	p.name = "PrafTurma"
+	p.amount = 40
+	p.lifetime = 2.2
+	p.emitting = true
+	p.local_coords = false
+	# Emitatorul acopera fasia de traversare: lat pe road_dir (corridor_m),
+	# ingust pe flow_dir (langa axa drumului, ROAD_ZONE), jos.
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = Vector3(ROAD_ZONE * 1.3, 0.15, corridor_m * 0.5)
+	p.position = Vector3.UP * 0.25
+	p.direction = Vector3.UP
+	p.spread = 40.0
+	p.gravity = Vector3(0.0, 0.4, 0.0)
+	p.initial_velocity_min = 0.3
+	p.initial_velocity_max = 1.0
+	p.scale_amount_min = 1.2
+	p.scale_amount_max = 2.6
+	p.color = Color(0.60, 0.47, 0.42, 0.35)
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(0.9, 0.9)
+	p.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+	mat.vertex_color_use_as_albedo = true
+	mesh.material = mat
+	add_child(p)
 
 
 ## Zona din care se citesc masinile: culoarul plus o margine, pe toata bucla.
@@ -198,6 +237,7 @@ func _build_flow() -> void:
 	_strip.resize(_count)
 	_row_off.resize(_count)
 	_lateral.resize(_count)
+	_yaw.resize(_count)
 	_wobble_amp.resize(_count)
 	_wobble_freq.resize(_count)
 	_wobble_ph.resize(_count)
@@ -219,9 +259,24 @@ func _build_flow() -> void:
 				_strip[i] = s
 				# Randurile alterneaza intre fisiere (sah), ca sa nu para grila.
 				var stagger := 0.5 * spacing if (f % 2 == 1) else 0.0
+				# Jitter de-a lungul curgerii: >= 0.5*spacing (criticul rundei 6:
+				# "pas aproape constant pe doua axe" — grila era jitter-ata doar
+				# 0.25*spacing, insuficient sa sparga randurile vizual si sa
+				# produca suprapuneri intre randuri vecine).
 				_row_off[i] = float(r) * spacing + stagger \
-					+ _rng.randf_range(-0.25, 0.25) * spacing
-				_lateral[i] = file_center + _rng.randf_range(-0.3, 0.3) * file_w
+					+ _rng.randf_range(-0.6, 0.6) * spacing
+				# Jitter lateral, la fel >= 0.5*file_w, PLUS densitate care
+				# creste spre axa drumului (file_center = 0): un t patrat pe
+				# uniform trage centrul benzii spre 0, ca in referinta unde
+				# animalele se aduna pe carosabil si se raresc spre coama de
+				# tufe (mai putina tragere la 0, pana la 35% la marginea benzii).
+				var pull := _rng.randf()
+				pull = pull * pull * 0.35
+				var pulled_center := file_center * (1.0 - pull)
+				_lateral[i] = pulled_center + _rng.randf_range(-0.65, 0.65) * file_w
+				# Yaw +-30 grade in jurul directiei de traversare: fara el toti
+				# stau pe acelasi cap (defectul "retea", nu turma vie).
+				_yaw[i] = _rng.randf_range(-0.5236, 0.5236)
 				_wobble_amp[i] = _rng.randf_range(0.2, 0.6)
 				_wobble_freq[i] = _rng.randf_range(0.4, 0.9)
 				_wobble_ph[i] = _rng.randf_range(0.0, TAU)
@@ -574,8 +629,11 @@ func _advance_animals(delta: float) -> void:
 
 
 func _animal_transform(i: int) -> Transform3D:
-	# -Z al modelului spre directia curgerii.
-	var basis := Basis.looking_at(flow_dir, Vector3.UP)
+	# -Z al modelului spre directia curgerii, cu evantaiul de cap +-30 grade
+	# (_yaw): fara el toata turma alearga pe acelasi cap, ceea ce citea ca o
+	# RETEA de instante identice, nu ca animale individuale (verdictul
+	# criticului rundei 6).
+	var basis := Basis.looking_at(flow_dir, Vector3.UP) * Basis(Vector3.UP, _yaw[i])
 	if _state[i] == State.TUMBLE:
 		basis = basis * Basis(Vector3.FORWARD, _tumble_roll[i])
 		return Transform3D(basis, _pos[i] + Vector3.UP * 0.35)

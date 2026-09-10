@@ -38,6 +38,12 @@ const TRACK := "res://scenes/tracks/Track14.tscn"
 const ZONE := "DecorManual/ZoneE_Buza"
 const FRAC_A := 0.362
 const FRAC_B := 0.482
+## Probabilitatea ca un punct din reteaua flancului sa devina PINTEN de
+## bolovani (runda 3). Cu reteaua la pas 3-5 m longitudinal x 3-5 m lateral
+## pe o coasta de ~90 m lat x ~1500 puncte lung, 0.42 da roca imprastiata in
+## banda 20-38 % (masurat pe caseta perete) fara sa fie gard continuu -- vezi
+## `_flank()`.
+const SPUR_P := 0.42
 
 ## id-urile ext_resource din Track14.tscn (pre-inregistrate de fundatie).
 const RES := {
@@ -77,6 +83,18 @@ var _flam_pos: PackedVector3Array = []
 var _flam_yaw: PackedFloat32Array = []
 var _wing_pos: PackedVector3Array = []
 var _wing_yaw: PackedFloat32Array = []
+## Creasta de granit a flancului (POI E, runda 3): MultiMesh, nu WorldProp.
+## Runda 2 punea 2.800+ bolovani ca instante de scena individuale -- corect
+## vizual (masurat separat), dar fiecare instanta e un desen propriu, si
+## garda de desene ("aranjamentul bate numarul") a picat: 3126 desene pe toata
+## pista, fata de 2426 pe scena integrata FARA creasta. Doua loturi (boulder_b,
+## boulder_c), cate un desen fiecare -- acelasi numar de bolovani, ~2 desene.
+var _coama_b_pos: Array[Vector3] = []
+var _coama_b_yaw: Array[float] = []
+var _coama_b_scale: Array[Vector3] = []
+var _coama_c_pos: Array[Vector3] = []
+var _coama_c_yaw: Array[float] = []
+var _coama_c_scale: Array[Vector3] = []
 
 
 func _ready() -> void:
@@ -108,6 +126,7 @@ func _ready() -> void:
 		_far_wall()
 		_flamingos()
 		_emit_flock()
+		_emit_coame()
 		if _out_path != "":
 			var f := FileAccess.open(_out_path, FileAccess.WRITE)
 			for line in _out:
@@ -277,9 +296,37 @@ func _right_shoulder() -> void:
 ## Coasta de sub buza, esantionata pe teren real. Piesele se aseaza in
 ## coordonate de lume (nu prin `_place`, care lucreaza pe distanta laterala
 ## constanta si ar rata caderea).
+##
+## RUNDA 2 -- diagnosticul vechi (verde prea des) era corect ca simptom dar
+## gresit ca leac: dupa ce runda 1 a rarit verdele la 22,7 %, roca a ramas la
+## 1,9 % fata de tinta 20+ %. Masurat pe captura: bolovanii `kopje_boulder_*`
+## sunt ROTUNZI (6 m la scara 1) si stateau IZOLATI, la 4-9 m unul de altul,
+## pe un flanc de 90 m -- la 60-150 m de camera, cateva puncte gri pe o
+## panta verde nu ajung niciodata la 20 % din caseta. Referinta nu are
+## bolovani presarati, are FATA DE STANCA: benzi aproape verticale de gri
+## care se ating si se suprapun pe toata caderea.
+##
+## Leacul (runda 2): roca devine UMPLUTURA de fond -- grupuri de bolovani
+## INTINSI PE VERTICALA la fiecare punct al retelei (pas 3-5 m), fara gol.
+## Rezultat masurat pe captura (`caps/W5E_shadowON_ab.png`): rock 18.5 % (in
+## criteriu) dar V p10 0.067 -- NEGRU STRIVIT. Cauza nu era materialul
+## (`granite` are Vmed 0.675 pe fetele insorite din acelasi cadru), era
+## GEOMETRIA: prisme pana la 4,35 x inaltime x 0,5 x latime, 3-6 pe grup,
+## suprapuse la fiecare pas de 3-5 m pe toata latimea -- crapaturile dintre
+## ele stau mereu in umbra proprie, si sunt atat de multe incat coboara
+## percentila 10 sub referinta (0.282).
+##
+## RUNDA 3 -- leacul e RARIREA, nu intinderea. Bolovanii raman BOLOVANI
+## (scara aproape uniforma, usor turtiti pe Y ca sa stea pe panta -- niciodata
+## intinsi). Grupurile devin PINTENI separati (probabilitate de aparitie la
+## fiecare punct al retelei, nu fiecare punct), cu iarba si pamant vizibile
+## intre ele -- coverage-ul de roca vine din NUMARUL de pinteni pe coasta, nu
+## din densitatea in interiorul unui pinten. Verdele revine in banda 6-14 %,
+## agatat preferential IN golurile dintre pinteni.
 func _flank() -> void:
 	var n := _track.baked.size()
 	var placed := 0
+	var ridges := 0
 	var f := FRAC_A
 	while f < FRAC_B:
 		var i := int(f * float(n)) % n
@@ -288,9 +335,9 @@ func _flank() -> void:
 		var half := _track.width_at_index(i)
 		var lat := half + 3.0
 		while lat < 95.0:
-			var step := _rng.randf_range(4.0, 9.0)
-			var jl := lat + _rng.randf_range(-1.8, 1.8)
-			var jf := f + _rng.randf_range(-0.004, 0.004)
+			var step := _rng.randf_range(3.0, 5.0)
+			var jl := lat + _rng.randf_range(-1.2, 1.2)
+			var jf := f + _rng.randf_range(-0.003, 0.003)
 			var ii := int(jf * float(n)) % n
 			var pp := _track.baked[ii]
 			var ss := _track._side_at(ii)
@@ -305,48 +352,64 @@ func _flank() -> void:
 				lat += step
 				continue
 			var t: float = clampf(drop / 40.0, 0.0, 1.0) # 0 sus pe buza, 1 jos
-			var r := _rng.randf()
 			var eye_d := sqrt(jl * jl + pow(p.y + 10.0 - g, 2.0))
-			# COASTA E DE PIATRA SI IARBA, NU PADURE. Cifra care a decis:
-			# in sfertul din dreapta-jos referinta are 2,8 % verde, iar noi
-			# aveam 23,0 % (masurat E_r1/E_r2 fata de ref_E). Nu era o
-			# problema de scara a coroanelor, ci de PROPORTIE: 324 de piese
-			# de flanc din care majoritatea verzi fac o panza continua, si
-			# panza aia ascunde exact crusta si inelul de flamingi pentru
-			# care exista POI-ul. Runda 1 a incercat sa taie verdele sub 34 m
-			# de ochi si runda 2 sub 52 m, dar CLAMP-ul `r = min(r, 0.55)`
-			# cadea in intervalul euphorbiei (0.42-0.62), iar euphorbia e un
-			# candelabru VERDE — fereastra nu taia nimic.
-			#
-			# Acum coasta se compune ca in referinta: coame de granit gri care
-			# ies din iarba aurie, si verde doar ca pete rare, tot mai jos.
-			var green_p: float = 0.06 + 0.30 * t # 6 % pe buza, 36 % pe fund
-			if eye_d < 60.0 or _in_lake_window(Vector3(qq.x, g, qq.z)):
-				green_p = 0.0 # in fata ochiului si peste lac: doar piatra
-			var model := ""
-			var scl := 1.0
-			if r < green_p:
-				if t > 0.55 and _rng.randf() < 0.6:
-					model = "fever"
-					scl = _rng.randf_range(0.7, 1.05)
-				else:
-					model = ["acacia_a", "acacia_a", "acacia_b"][_rng.randi_range(0, 2)]
-					scl = _rng.randf_range(0.30, 0.45) + 0.35 * t
-			elif r < green_p + 0.42 - 0.14 * t:
-				# Coama de granit: sus, mare; jos, mai rara.
-				model = ["boulder_c", "boulder_b", "boulder_b"][_rng.randi_range(0, 2)]
-				scl = _rng.randf_range(1.0, 2.4)
-			else:
-				# Restul e IARBA GOALA: nu asezam nimic. Referinta are panta
-				# de iarba aurie intre coamele de granit, nu tufe peste tot.
-				lat += step
-				continue
-			_raw(model, "Flanc", Vector3(qq.x, g, qq.z), _rng.randf_range(0.0, TAU), scl,
-				"trunk" if model != "boulder_c" and model != "boulder_b" else "hull")
-			placed += 1
+			var in_view_window: bool = eye_d < 60.0 or _in_lake_window(Vector3(qq.x, g, qq.z))
+			# COASTA E O FATA DE STANCA CU PINTENI, NU UN GARD CONTINUU.
+			# Un "pinten" apare doar la SPUR_P din punctele retelei (rarire
+			# longitudinala+laterala) -- intre pinteni raman goluri de
+			# iarba/pamant vizibile, ca in referinta (roca ~35 % dar
+			# IMPRASTIATA). Cand apare, e un grup mic de bolovani RAR
+			# suprapusi (mates mai putini, dl mai larg) ca sa nu se auto-
+			# umbreasca in crapaturi.
+			var is_spur: bool = _rng.randf() < SPUR_P
+			if is_spur:
+				var mates: int = _rng.randi_range(2, 3)
+				for m in mates:
+					var use_c: bool = _rng.randf() < 0.66 # 2/3 boulder_c, 1/3 boulder_b
+					var dl := _rng.randf_range(-3.6, 3.6) # spread mai larg -- mai putina suprapunere
+					var df := _rng.randf_range(-0.0018, 0.0018)
+					var fi := int((jf + df) * float(n)) % n
+					var fp := _track.baked[fi]
+					var fs := _track._side_at(fi)
+					var rq := fp + fs * (jl + dl)
+					var rg := _sol_real(rq.x, rq.z, true)
+					if rg < _sea_y() + 0.3:
+						continue
+					# BOLOVANI, NU PRISME: scara aproape uniforma, usor turtiti
+					# pe Y (asezare pe panta), niciodata intinsi. Varietatea
+					# vine din marime (scale_all) si yaw, nu din intindere
+					# verticala -- vezi runda 2 (Vp10 0.067, "gard negru").
+					var scale_all := _rng.randf_range(0.85, 1.5)
+					var y_squash := _rng.randf_range(0.80, 1.0)
+					var sc3 := Vector3(scale_all, scale_all * y_squash, scale_all)
+					var rp := Vector3(rq.x, rg - 0.3, rq.z)
+					var ry := _rng.randf_range(0.0, TAU)
+					var eff_r: float = BASE_R.get("boulder_c" if use_c else "boulder_b", 0.6) \
+						* maxf(sc3.x, maxf(sc3.y, sc3.z))
+					if _too_close_to_road(rp, eff_r):
+						continue
+					if use_c:
+						_coama_c_pos.append(rp)
+						_coama_c_yaw.append(ry)
+						_coama_c_scale.append(sc3)
+					else:
+						_coama_b_pos.append(rp)
+						_coama_b_yaw.append(ry)
+						_coama_b_scale.append(sc3)
+					placed += 1
+				ridges += 1
+			# Verde: revine in banda 6-14 %, agatat preferential in GOLURILE
+			# dintre pinteni (nu peste ele -- ar ascunde roca).
+			var green_p: float = (0.10 + 0.10 * t) if not is_spur else (0.02 + 0.02 * t)
+			if not in_view_window and _rng.randf() < green_p:
+				var model := "fever" if (t > 0.55 and _rng.randf() < 0.6) else "acacia_a"
+				var scl: float = _rng.randf_range(0.30, 0.45) + 0.30 * t
+				_raw(model, "FlancVerde", Vector3(qq.x, g, qq.z), _rng.randf_range(0.0, TAU),
+					scl, "trunk")
+				placed += 1
 			lat += step
-		f += 0.0045
-	print("; flanc: %d piese pe coasta" % placed)
+		f += 0.0035
+	print("; flanc: %d piese pe coasta (%d coame)" % [placed, ridges])
 
 
 ## BOMA la 0.454 pe campie + cireada Ankole care traverseaza dupa ea.
@@ -613,6 +676,32 @@ func _emit_flock() -> void:
 		_n += 1
 
 
+## Creasta de granit ca MultiMesh -- doua loturi (boulder_b, boulder_c), un
+## desen fiecare, scalare NEUNIFORMA per instanta prin `scale3_list`
+## (FlockProp, runda 3). ~2.800 de bolovani coborau garda de desene de la
+## 2.426 (scena integrata fara creasta) la 3.126; ca MultiMesh acelasi numar
+## de bolovani adauga doar 2 desene.
+func _emit_coame() -> void:
+	for spec in [["E_CoameB", "s_kopje_boulder_b", _coama_b_pos, _coama_b_yaw, _coama_b_scale],
+			["E_CoameC", "s_kopje_boulder_c", _coama_c_pos, _coama_c_yaw, _coama_c_scale]]:
+		var pos: Array[Vector3] = spec[2]
+		if pos.is_empty():
+			continue
+		var pv := PackedVector3Array(pos)
+		var yv := PackedFloat32Array(spec[3])
+		_out.append('[node name="%s" type="MultiMeshInstance3D" parent="%s"]' % [spec[0], ZONE])
+		_out.append('script = ExtResource("flock")')
+		_out.append('model = ExtResource("%s")' % spec[1])
+		_out.append('tri_class = "granite"')
+		_out.append("positions = %s" % var_to_str(pv).replace("\n", ""))
+		_out.append("yaws = %s" % var_to_str(yv).replace("\n", ""))
+		_out.append("scale3_list = %s" % var_to_str(spec[4]).replace("\n", ""))
+		_out.append("")
+		_n += 1
+	print("; creasta: %d boulder_b + %d boulder_c ca MultiMesh (2 desene)"
+		% [_coama_b_pos.size(), _coama_c_pos.size()])
+
+
 # ------------------------------------------------------------------ asezarea
 
 ## Aseaza o piesa la `frac`, pe partea `side_sign`, la `gap` metri de MUCHIA
@@ -652,12 +741,17 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 
 
 func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
-		mode: String) -> void:
-	if _too_close_to_road(pos, BASE_R.get(model, 0.6) * scl):
+		mode: String, scale3: Vector3 = Vector3.ZERO) -> void:
+	# scale3 != ZERO: scalare NEUNIFORMA (coame de granit intinse pe verticala
+	# si turtite pe o axa orizontala) — raza de coliziune/road-clear foloseste
+	# tot componenta cea mai mare, ca sa nu subestimeze gabaritul.
+	var eff_scl := scl if scale3 == Vector3.ZERO else maxf(scale3.x, maxf(scale3.y, scale3.z))
+	if _too_close_to_road(pos, BASE_R.get(model, 0.6) * eff_scl):
 		_skipped_road += 1
 		return
 	_n += 1
-	var t := Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3.ONE * scl), pos)
+	var sc := Vector3.ONE * scl if scale3 == Vector3.ZERO else scale3
+	var t := Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(sc), pos)
 	_out.append('[node name="E_%s%d" parent="%s" instance=ExtResource("%s")]'
 		% [base, _n, ZONE, RES[model]])
 	_out.append("transform = %s" % var_to_str(t))

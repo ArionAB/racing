@@ -269,10 +269,31 @@ func _build_flow() -> void:
 				# creste spre axa drumului (file_center = 0): un t patrat pe
 				# uniform trage centrul benzii spre 0, ca in referinta unde
 				# animalele se aduna pe carosabil si se raresc spre coama de
-				# tufe (mai putina tragere la 0, pana la 35% la marginea benzii).
+				# tufe.
+				#
+				# DEPLASARE ABSOLUTA, nu procentuala (ProbeSerengeti runda
+				# "recuperare gimmick"): un pull ca FRACTIE din file_center
+				# (varianta initiala, pana la 35%) goleste fasiile exterioare
+				# exact cat le umple pe cele centrale — masurat cu DBG_HIT:
+				# loviturile erau deja saturate la hit_cooldown (0.3 s intre
+				# ele) pe toata portiunea centrala a culoarului (car_z intre
+				# +8.7 si -8.8 din +-12), deci mai multa tragere procentuala
+				# nu mai putea creste franarea (platou la 12.6-12.7 m/s de la
+				# pull 55% -> 95%) — putea doar sa scurteze si mai mult
+				# fasiile late (car_z 8.7->12), unde NU era nicio lovitura.
+				# O deplasare in METRI (plafonata la 0 ca sa nu treaca strip-ul
+				# dincolo de axa) muta la fel de mult spre centru dar NU goleste
+				# fasiile exterioare proportional — pastreaza acoperirea pe
+				# toata latimea culoarului, deci lovituri incep mai devreme si
+				# se opresc mai tarziu in traversare, nu doar mai dese la mijloc.
 				var pull := _rng.randf()
-				pull = pull * pull * 0.35
-				var pulled_center := file_center * (1.0 - pull)
+				pull = pull * pull * 0.75
+				var shift := pull * strip_w
+				var pulled_center := file_center
+				if file_center > 0.0:
+					pulled_center = maxf(file_center - shift, 0.0)
+				elif file_center < 0.0:
+					pulled_center = minf(file_center + shift, 0.0)
 				_lateral[i] = pulled_center + _rng.randf_range(-0.65, 0.65) * file_w
 				# Yaw +-30 grade in jurul directiei de traversare: fara el toti
 				# stau pe acelasi cap (defectul "retea", nu turma vie).

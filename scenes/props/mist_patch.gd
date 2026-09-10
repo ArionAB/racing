@@ -2,10 +2,15 @@
 class_name MistPatch
 extends Node3D
 ## Petic de CEATA JOASA pentru padurea de ceata (Serengeti, POI D): o
-## PATURA de panze aproape ORIZONTALE, unshaded, cu textura de fum, culcate
-## la 0.3-1.8 m de sol intre trunchiuri. E ceata care se VEDE in cadru —
+## PATURA de panze aproape ORIZONTALE, cu textura de fum, culcate
+## la 1.2-2.2 m de sol intre trunchiuri. E ceata care se VEDE in cadru —
 ## spre deosebire de `FogCorridorHazard`, care misca ceata de adancime a
 ## Environment-ului doar cand jucatorul e inauntru.
+##
+## [b]De ce NU unshaded (runda 6)[/b]: un petic UNSHADED are aceeasi
+## luminanta sub coroana si in soare — se citeste ca PODEA solida, nu ca gaz.
+## Normala quad-ului e in sus, deci `SHADING_MODE_PER_PIXEL` il face sa
+## raspunda la soare/umbra ca orice suprafata orizontala.
 ##
 ## [b]De ce ORIZONTALE (runda 2)[/b]: pana aici materialul avea
 ## `billboard_mode = BILLBOARD_ENABLED`. Un billboard se roteste ca sa
@@ -73,7 +78,13 @@ var _mmi: MultiMeshInstance3D
 static func material() -> StandardMaterial3D:
 	if _mat == null:
 		_mat = StandardMaterial3D.new()
-		_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		# RUNDA 6: NU mai e UNSHADED. Fiind opac la luminanta indiferent de
+		# lumina, un petic sub coroana (umbra) iesea la fel de deschis ca unul
+		# in soare — se citea ca PODEA solida, nu ca gaz. Normala quad-ului e
+		# in sus (vezi antetul clasei), deci PER_PIXEL raspunde la soare/umbra
+		# ca orice suprafata orizontala: mai stins sub coroane, mai deschis in
+		# culoarele de soare — exact contrastul care lipsea.
+		_mat.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
 		_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_mat.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
 		_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED

@@ -547,47 +547,45 @@ func _edges() -> void:
 ## rand mai departe (28-42 m) pentru adancime. In captura fara masina e
 ## singura ceata care se vede — culoarul de ceata al Environment-ului
 ## lucreaza doar cu jucatorul inauntru.
+##
+## RUNDA 6 — MistPatch e o PODEA opaca (critica bucla orba, POI D). 602 panze
+## de 10-19 m culcate la 0.3-0.9 m taiau bazele trunchiurilor pe toata
+## treimea stanga a cadrului: mari, joase si UNSHADED, se citeau ca o placa
+## solida sub padure, nu ca gaz. Masurat pe `world_material` (mist_patch.gd):
+## suprapunerea medie (layers) era 2.74 straturi peste orice punct de sol in
+## banda de ceata (footprint * count / aria benzii).
+##
+## Trei schimbari, nu doar cifre mai mici:
+##   1. `size` coboara la 4-6 m (de la 10-19 m) — o panza nu mai acopera
+##      trunchiul vecin, e un fuior, nu o dala.
+##   2. `height` urca la 1.2-2.2 m (de la 0.3-0.9 m) — centrul peticului stă
+##      DEASUPRA bazei trunchiului, nu peste ea; solul ramane vizibil sub el.
+##   3. Materialul nu mai e UNSHADED (mist_patch.gd) — raspunde la lumina, deci
+##      sub coroane (umbra) se stinge si nu mai citeste ca podea uniforma.
+## Densitatea coboara sub 1.0 straturi: acelasi numar de puncte de ancorare
+## (pas pe traseu neschimbat), dar footprint mai mic (raza patrunde mai putin
+## in lateral) si un singur strat pe randul apropiat (al doilea rand, mai
+## rar, doar in adancime) — panzele NU se mai insira, se VAD individual.
 func _mist() -> void:
-	# RUNDA 2 — schimbare de METODA, nu de marime. Rundele 1 au reglat alpha
-	# (0.30 -> 0.085 -> 0.05) si distanta laterala, adica axa gresita:
-	# materialul avea `billboard_mode = BILLBOARD_ENABLED`, deci fiecare panza
-	# se intorcea VERTICAL spre camera si se citea ca tep alb atarnat de
-	# coroane / placa gri in picioare. Acum panzele sunt ORIZONTALE
-	# (mist_patch.gd, `BILLBOARD_DISABLED` + quad culcat, inclinare <= 10 deg),
-	# deci:
-	#   - inaltimea unei panze = size * sin(tilt_efectiv); cele doua inclinari
-	#     mici se compun, deci la `tilt_deg` 6 unghiul efectiv urca pana la
-	#     ~8.5 deg si o panza de 20 m are ~3.0 m gabarit vertical, cu centrul
-	#     la 0.25-0.9 m => y_top - origine <= 2.4 m (masurat: ProbeMist);
-	#   - raportul latime/inaltime >= 4 pe TOATE cele 711 panze (masurat);
-	#   - o panza culcata NU mai acopera drumul chiar daca ii trece pe
-	#     deasupra la 1 m (o vezi in perspectiva, ca o ceata rasa), deci
-	#     regula de 3 m in afara muchiei nu mai e necesara si peticele pot
-	#     veni APROAPE de banda, unde referinta le are.
-	# Densitatea ramane din SUPRAPUNERE la alpha mic: un strat singur trebuie
-	# sa fie aproape invizibil. Prima captura cu panze CULCATE (D_r2_hero.png,
-	# alpha 0.055-0.075, lateral 8-14 m) a aratat efectul invers al celui din
-	# runda 1: culcata, o panza se vede pe TOATA lungimea ei in perspectiva —
-	# suprafata acoperita pe ecran e de cateva ori mai mare decat a uneia
-	# verticale, deci acelasi alpha ineaca primul plan intr-un film laptos.
-	# De aici alpha 0.038-0.045 si lateralele impinse la 11+ m: ceata trece
-	# printre trunchiuri, nu peste bot.
 	var f := F_DENSE_IN - _step(10.0)
 	while f < F_DENSE_OUT + _step(10.0):
 		for sgn: float in [-1.0, 1.0]:
-			# Randul de la baza trunchiurilor, langa banda.
-			_mist_at(f, sgn, _rng.randf_range(11.0, 16.0), 7,
-				Vector2(8.0, 5.0), Vector2(10.0, 15.0), 0.038,
-				Vector2(0.25, 0.8))
-			# Al doilea, decalat cu ~8 m si mai in adanc: suprapunerea face voalul.
-			_mist_at(f + _step(8.0), sgn, _rng.randf_range(17.0, 26.0), 7,
-				Vector2(10.0, 6.0), Vector2(12.0, 18.0), 0.042,
-				Vector2(0.3, 0.9))
-			if _rng.randf() < 0.6:
-				_mist_at(f + _step(4.0), sgn, _rng.randf_range(30.0, 44.0), 6,
-					Vector2(12.0, 7.0), Vector2(13.0, 19.0), 0.045,
-					Vector2(0.3, 0.9))
-		f += _step(16.0)
+			# Randul de la baza trunchiurilor, langa banda: fuioare mici,
+			# ridicate, rare — se VAD printre trunchiuri, nu peste ei.
+			_mist_at(f, sgn, _rng.randf_range(9.0, 14.0), 3,
+				Vector2(5.0, 3.5), Vector2(4.0, 5.0), 0.05,
+				Vector2(1.3, 1.7))
+			# Al doilea, decalat si mai in adanc: adauga voal fara sa dubleze
+			# stratul de langa banda (suprapunerea era in randul apropiat).
+			if _rng.randf() < 0.7:
+				_mist_at(f + _step(9.0), sgn, _rng.randf_range(18.0, 27.0), 3,
+					Vector2(6.0, 4.0), Vector2(4.5, 6.0), 0.055,
+					Vector2(1.5, 1.9))
+			if _rng.randf() < 0.4:
+				_mist_at(f + _step(4.5), sgn, _rng.randf_range(30.0, 44.0), 2,
+					Vector2(7.0, 4.5), Vector2(5.0, 6.0), 0.06,
+					Vector2(1.6, 1.9))
+		f += _step(22.0)
 
 
 func _mist_at(frac: float, side_sign: float, lateral: float, cnt: int,

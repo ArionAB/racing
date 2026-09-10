@@ -160,10 +160,18 @@ void fragment() {
 ##
 ## `max_y`: plafonul de altitudine (in lume) peste care iarba nu mai creste —
 ## pe Alpi pajistea se opreste unde incepe etajul de stanca. 1e9 = fara plafon.
+##
+## `prop_exclusions`: OPTIONAL, (x, z, raza, _nefolosit) pentru prop-uri asezate
+## pe sol (rover, cort, foc de tabara...) in jurul carora iarba nu trebuie sa
+## creasca — pamant batatorit, nu pajiste. Gol implicit: pistele/temele care nu
+## trimit nimic se comporta EXACT ca inainte (zero regresie). Vezi
+## `_prop_exclusion_bucket` / `_near_prop` — refolosesc acelasi cos spatial ca
+## benzile secundare, doar cu raza pe punct in loc de CORRIDOR_CLEAR fix.
 static func build(sampler: TrackSideSampler, world_seed: int,
 		ground_tint: Color, max_y: float = 1e9,
 		tip_override: Color = Color(0, 0, 0, 0),
-		carpet_profile: bool = false) -> Node3D:
+		carpet_profile: bool = false,
+		prop_exclusions: PackedVector4Array = PackedVector4Array()) -> Node3D:
 	carpet = carpet_profile
 	var band_max := CARPET_BAND_MAX if carpet else BAND_MAX
 	var near_pm := CARPET_NEAR_PER_M if carpet else NEAR_PER_M
@@ -178,6 +186,7 @@ static func build(sampler: TrackSideSampler, world_seed: int,
 	# Benzile secundare (scurtatura prin iarba, poteci), intr-un cos spatial:
 	# verificarea "sunt pe poteca?" per smoc devine O(1), nu O(n).
 	var corridor := _bucket(sampler.extra_points())
+	var prop_buckets := _prop_exclusion_bucket(prop_exclusions)
 
 	# Plasarea: pe indecsii curbei coapte (~3 m intre puncte), cate o mana de
 	# smocuri pe fiecare parte, cu numarul scalat de lungimea segmentului.
@@ -201,9 +210,9 @@ static func build(sampler: TrackSideSampler, world_seed: int,
 			if sampler.ravine_at(frac, side_sign):
 				continue
 			var side := side_v * side_sign
-			placed += _scatter(cells, sampler, rng, corridor, max_y,
+			placed += _scatter(cells, sampler, rng, corridor, prop_buckets, max_y,
 				a, along, side, hw, seg, near_pm, BAND_MIN, BAND_NEAR)
-			placed += _scatter(cells, sampler, rng, corridor, max_y,
+			placed += _scatter(cells, sampler, rng, corridor, prop_buckets, max_y,
 				a, along, side, hw, seg, far_pm, BAND_NEAR, band_max)
 
 	_emit_cells(root, cells, mesh)
@@ -297,9 +306,9 @@ static func material() -> ShaderMaterial:
 
 ## Imprastie smocurile unei benzi pe segmentul curent. Intoarce cate a pus.
 static func _scatter(cells: Dictionary, sampler: TrackSideSampler,
-		rng: RandomNumberGenerator, corridor: Dictionary, max_y: float,
-		a: Vector3, along: Vector3, side: Vector3, hw: float, seg: float,
-		per_m: float, off_min: float, off_max: float) -> int:
+		rng: RandomNumberGenerator, corridor: Dictionary, prop_buckets: Dictionary,
+		max_y: float, a: Vector3, along: Vector3, side: Vector3, hw: float,
+		seg: float, per_m: float, off_min: float, off_max: float) -> int:
 	# Numarul fractionar se rotunjeste STOCASTIC, altfel segmentele scurte din
 	# viraje n-ar primi niciodata nimic si banda ar avea gauri exact pe arc.
 	var want := per_m * seg
@@ -309,6 +318,8 @@ static func _scatter(cells: Dictionary, sampler: TrackSideSampler,
 		var off := rng.randf_range(off_min, off_max)
 		var p := a + along * rng.randf_range(0.0, seg) + side * (hw + off)
 		if _near_corridor(corridor, p.x, p.z):
+			continue
+		if _near_prop(prop_buckets, p.x, p.z):
 			continue
 		# Paraul si malurile lui raman fara iarba (smocul si-ar lua cota din
 		# ground_y si ar creste de pe fundul albiei, cu varful prin apa).
@@ -463,5 +474,61 @@ static func _near_corridor(buckets: Dictionary, x: float, z: float) -> bool:
 				var ex := p.x - x
 				var ez := p.y - z
 				if ex * ex + ez * ez < clear_sq:
+					return true
+	return false
+
+
+## Cosul spatial al degajarilor din jurul prop-urilor asezate pe sol (rover,
+## cort, foc de tabara...): `exclusions` e o lista de (x, z, raza, _nefolosit).
+##
+## Acelasi tipar ca [method _bucket] (celule + scan pe cele 9 vecine), dar cu
+## RAZA PE PUNCT in loc de CORRIDOR_CLEAR fix — un rover si o incinta boma nu
+## degajeaza acelasi cerc. Latura celulei e cea mai mare raza primita (minim
+## CORRIDOR_CLEAR, ca o singura piesa mica sa nu produca celule minuscule):
+## asa scanul de 9 vecine ramane valabil oricat de mare ar fi o raza
+## individuala, fara o a doua constanta de tuning. Cheia string "_cell" tine
+## latura folosita (nu poate coincide cu un Vector2i), ca [method _near_prop]
+## sa citeasca aceeasi grila cu care s-a construit cosul.
+## `e` e (x, z, raza, _nefolosit) — aceeasi conventie ca `_prop_contact_discs`
+## din track.gd (Vector4(gp.x, gp.z, r, base_y)), ca apelantul sa poata trimite
+## direct rezultatul lui fara remapare de campuri.
+static func _prop_exclusion_bucket(exclusions: PackedVector4Array) -> Dictionary:
+	var out := {}
+	if exclusions.is_empty():
+		return out
+	var cell := CORRIDOR_CLEAR
+	for e in exclusions:
+		cell = maxf(cell, e.z)
+	out["_cell"] = cell
+	for e in exclusions:
+		var wx := e.x
+		var wz := e.y
+		var r := e.z
+		var key := Vector2i(int(floor(wx / cell)), int(floor(wz / cell)))
+		if not out.has(key):
+			out[key] = [] as Array[Vector3]
+		# Vector3(x, z, raza) — nu (x, y, z): tine doar ce citeste _near_prop.
+		(out[key] as Array).append(Vector3(wx, wz, r))
+	return out
+
+
+## E punctul in raza vreunui prop din `_prop_exclusion_bucket`? Gol implicit —
+## pistele/temele fara excluderi platesc un singur `is_empty()`.
+static func _near_prop(buckets: Dictionary, x: float, z: float) -> bool:
+	if buckets.is_empty():
+		return false
+	var cell: float = buckets.get("_cell", CORRIDOR_CLEAR)
+	var cx := int(floor(x / cell))
+	var cz := int(floor(z / cell))
+	for dx in [-1, 0, 1]:
+		for dz in [-1, 0, 1]:
+			var key := Vector2i(cx + dx, cz + dz)
+			if not buckets.has(key):
+				continue
+			for p: Vector3 in buckets[key]:
+				var ex := p.x - x
+				var ez := p.y - z
+				var r := p.z
+				if ex * ex + ez * ez < r * r:
 					return true
 	return false

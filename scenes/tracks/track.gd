@@ -564,7 +564,15 @@ static func themes() -> Dictionary:
 			# 0.075 (turma), 0.144 (vadul), 0.40 si 0.60 sta la 0.32-0.75, deci
 			# nicaieri umbre infundate si nicaieri spalare.
 			"ambient_color": Color.html("C9A98A"),
-			"ambient_energy": 0.40,
+			# W6A — ridicat 0.40 -> 0.55: geometria umbrita cadea spre V<0.20
+			# (2.664 pixeli masurati pe caseta peretelui la frac 0.40, tinta
+			# <2.000), desi tenta lor era deja sanatoasa (S=0.607, nu era
+			# desaturare — fixul de ceata in familia pamantului rezolvase deja
+			# partea de "other"). La 0.50 cifra scade doar la 2.101 (inca
+			# peste prag); 0.55 e plafonul dat de raportul soare/ambient >=
+			# 3,5 (memoria geometria-fara-lumina-e-invizibila): 1.95/0.55 =
+			# 3,55. Nu se atinge sun_energy.
+			"ambient_energy": 0.55,
 			"shadows": true,
 			# Umbra nu e neagra: 0.72 lasa 28% din lumina soarelui sa treaca
 			# prin ea. Masurat pe carosabilul din POI D (padurea de ceata):
@@ -675,6 +683,14 @@ static func themes() -> Dictionary:
 			# material partajat, fara coliziune si fara umbre — cheia costa
 			# zero draw call-uri noi pe pista (probe_decor, materiale 15).
 			"dense_grass": true,
+			# DEGAJARE IN JURUL PROP-URILOR asezate pe sol (rover, cort, foc,
+			# boma — vezi Track.GRASS_CLEAR_MODELS): fara ea iarba deasa
+			# creste PRIN orice piesa din DecorManual, nu doar prin rover-ele
+			# de la POI A — `TrackGrass.build()` nu stia deloc de decor
+			# inainte de asta, taia doar in jurul benzilor secundare.
+			# Implicit false: pistele fara steagul asta (13 din 14) raman
+			# identice, cu zero cost de calcul in plus.
+			"dense_grass_prop_clear": true,
 			# Varful firului, cerut EXPLICIT: derivarea implicita a
 			# TrackGrass e de pajiste alpina (verde x1.18, albastru /2) si pe
 			# ocru dadea lime acid. Savana e pai auriu — masurat pe captura.
@@ -6532,6 +6548,62 @@ func _prop_contact_discs() -> PackedVector4Array:
 	return out
 
 
+## Modelele din DecorManual care stau PE SOL si merita pamant batatorit in
+## jur, cu marja PESTE gabaritul lor orizontal (nu raza AO de mai sus — aia e
+## umbra de contact, asta e cat de departe se retrage iarba).
+##
+## Lista e EXPLICITA si scurta, adinsa: un copac vrea iarba pana la trunchi
+## (baobab, acacia), o stanca sau un musuroi la fel — doar piesele astea patru
+## au sub ele o zona de sol expus in realitate:
+##   - land_rover: masina parcata, praf batatorit de roti sub si in jurul ei
+##   - safari_tent: covorul/prelata calcata din fata cortului
+##   - campfire: cercul de vatra, ars/tasat de foc si de cei asezati in jur
+##   - maasai_boma: incinta imprejmuita cu spini — solul DIN INTERIORUL
+##     gardului e curte batatorita, nu pajiste (motivul razei mai mari)
+const GRASS_CLEAR_MODELS: Dictionary = {
+	"land_rover": 1.5,
+	"safari_tent": 1.5,
+	"campfire": 1.5,
+	"maasai_boma": 3.5,
+}
+
+## Degajarile de iarba din jurul prop-urilor de sol din DecorManual (vezi
+## [constant GRASS_CLEAR_MODELS]): (x, z, raza, _nefolosit) — aceeasi conventie
+## ca [method _prop_contact_discs], asa incat TrackGrass.build primeste direct
+## rezultatul, fara remapare de campuri.
+##
+## Raza = jumatate din diagonala orizontala a AABB-ului VIZUAL real (nu o
+## cifra din brief: un model poate varia intre kituri), plus marja din
+## [constant GRASS_CLEAR_MODELS]. Piesele fara stem cunoscut sau fara mesh nu
+## produc nimic — apelul e opt-in prin lista, nu prin prezenta in DecorManual.
+func _grass_prop_exclusions() -> PackedVector4Array:
+	var out := PackedVector4Array()
+	var root := get_node_or_null("DecorManual")
+	if root == null:
+		return out
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		var n3 := n as Node3D
+		if n3 == null or n3 == root or not n3.visible:
+			continue
+		if n3.scene_file_path.is_empty():
+			continue
+		var stem := n3.scene_file_path.get_file().get_basename()
+		if not GRASS_CLEAR_MODELS.has(stem):
+			continue
+		var aabb := _visual_aabb(n3)
+		if aabb.size == Vector3.ZERO:
+			continue
+		var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		var margin: float = GRASS_CLEAR_MODELS[stem]
+		var gp := n3.global_position
+		out.append(Vector4(gp.x, gp.z, half + margin, 0.0))
+	return out
+
+
 ## AABB-ul vizual al unui nod, in metri de lume, adunat din mesh-urile lui.
 ##
 ## `visible` se testeaza pe fiecare mesh: GLB-urile multi-varianta isi tin
@@ -10898,10 +10970,17 @@ func _build_world_decor() -> void:
 	# _decor_roots (n-are volum, nimic nu trebuie s-o ocoleasca) si nici in
 	# coacere (e deja MultiMesh pe celule). Vezi TrackGrass.
 	if bool(theme_flag("dense_grass", false)):
+		# Degajare in jurul prop-urilor de sol (vezi GRASS_CLEAR_MODELS):
+		# opt-in prin steagul de tema, ca pistele fara el sa nu plateasca nici
+		# macar traversarea lui DecorManual.
+		var prop_clear := PackedVector4Array()
+		if bool(theme_flag("dense_grass_prop_clear", false)):
+			prop_clear = _grass_prop_exclusions()
 		var grass := TrackGrass.build(_sampler, _world_seed(), theme_ground_tint,
 			float(theme_flag("dense_grass_max_y", 1e9)),
 			theme_flag("dense_grass_tip", Color(0, 0, 0, 0)) as Color,
-			bool(theme_flag("dense_grass_carpet", false)))
+			bool(theme_flag("dense_grass_carpet", false)),
+			prop_clear)
 		add_child(grass)
 
 

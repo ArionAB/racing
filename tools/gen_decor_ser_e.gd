@@ -38,6 +38,12 @@ const TRACK := "res://scenes/tracks/Track14.tscn"
 const ZONE := "DecorManual/ZoneE_Buza"
 const FRAC_A := 0.362
 const FRAC_B := 0.482
+## Probabilitatea ca un punct din reteaua flancului sa devina PINTEN de
+## bolovani (runda 3). Cu reteaua la pas 3-5 m longitudinal x 3-5 m lateral
+## pe o coasta de ~90 m lat x ~1500 puncte lung, 0.42 da roca imprastiata in
+## banda 20-38 % (masurat pe caseta perete) fara sa fie gard continuu -- vezi
+## `_flank()`.
+const SPUR_P := 0.42
 
 ## id-urile ext_resource din Track14.tscn (pre-inregistrate de fundatie).
 const RES := {
@@ -300,11 +306,23 @@ func _right_shoulder() -> void:
 ## bolovani presarati, are FATA DE STANCA: benzi aproape verticale de gri
 ## care se ating si se suprapun pe toata caderea.
 ##
-## Leacul: roca devine UMPLUTURA de fond, nu accent. Compunem "coame" --
-## grupuri de 3-6 bolovani suprapusi, intinsi pe verticala si turtiti pe o
-## axa orizontala (scale3 neuniform, cere `_raw` cu parametru nou), asezate
-## dese (pas 3-5 m) pe toata latimea coastei. Verdele ramane, dar doar ca
-## pete RARE agatate intre coame (candelabre/copaci mici), nu ca panza.
+## Leacul (runda 2): roca devine UMPLUTURA de fond -- grupuri de bolovani
+## INTINSI PE VERTICALA la fiecare punct al retelei (pas 3-5 m), fara gol.
+## Rezultat masurat pe captura (`caps/W5E_shadowON_ab.png`): rock 18.5 % (in
+## criteriu) dar V p10 0.067 -- NEGRU STRIVIT. Cauza nu era materialul
+## (`granite` are Vmed 0.675 pe fetele insorite din acelasi cadru), era
+## GEOMETRIA: prisme pana la 4,35 x inaltime x 0,5 x latime, 3-6 pe grup,
+## suprapuse la fiecare pas de 3-5 m pe toata latimea -- crapaturile dintre
+## ele stau mereu in umbra proprie, si sunt atat de multe incat coboara
+## percentila 10 sub referinta (0.282).
+##
+## RUNDA 3 -- leacul e RARIREA, nu intinderea. Bolovanii raman BOLOVANI
+## (scara aproape uniforma, usor turtiti pe Y ca sa stea pe panta -- niciodata
+## intinsi). Grupurile devin PINTENI separati (probabilitate de aparitie la
+## fiecare punct al retelei, nu fiecare punct), cu iarba si pamant vizibile
+## intre ele -- coverage-ul de roca vine din NUMARUL de pinteni pe coasta, nu
+## din densitatea in interiorul unui pinten. Verdele revine in banda 6-14 %,
+## agatat preferential IN golurile dintre pinteni.
 func _flank() -> void:
 	var n := _track.baked.size()
 	var placed := 0
@@ -336,46 +354,53 @@ func _flank() -> void:
 			var t: float = clampf(drop / 40.0, 0.0, 1.0) # 0 sus pe buza, 1 jos
 			var eye_d := sqrt(jl * jl + pow(p.y + 10.0 - g, 2.0))
 			var in_view_window: bool = eye_d < 60.0 or _in_lake_window(Vector3(qq.x, g, qq.z))
-			# COASTA E O FATA DE STANCA, NU O PANTA DE IARBA. O "coama" e un
-			# grup de bolovani suprapusi la aceeasi ancora lateral+longitudinal,
-			# intinsi pe verticala (scale3.y mare) si turtiti pe orizontala
-			# (scale3.x/z mici) ca sa citeasca drept CRESTE care urmeaza
-			# caderea, nu bulgari rotunzi. Referinta: benzile se ating.
-			var mates: int = _rng.randi_range(3, 6)
-			for m in mates:
-				var use_c: bool = _rng.randf() < 0.66 # 2/3 boulder_c, 1/3 boulder_b
-				var dl := _rng.randf_range(-2.4, 2.4)
-				var df := _rng.randf_range(-0.0015, 0.0015)
-				var fi := int((jf + df) * float(n)) % n
-				var fp := _track.baked[fi]
-				var fs := _track._side_at(fi)
-				var rq := fp + fs * (jl + dl)
-				var rg := _sol_real(rq.x, rq.z, true)
-				if rg < _sea_y() + 0.3:
-					continue
-				var stretch_v := _rng.randf_range(1.7, 2.9) # verticala: creasta inalta
-				var flat_h := _rng.randf_range(0.55, 0.85)  # orizontala: turtita
-				var sc3 := Vector3(flat_h, stretch_v, flat_h) * _rng.randf_range(0.9, 1.5)
-				var rp := Vector3(rq.x, rg - 0.6, rq.z)
-				var ry := _rng.randf_range(0.0, TAU)
-				var eff_r: float = BASE_R.get("boulder_c" if use_c else "boulder_b", 0.6) \
-					* maxf(sc3.x, maxf(sc3.y, sc3.z))
-				if _too_close_to_road(rp, eff_r):
-					continue
-				if use_c:
-					_coama_c_pos.append(rp)
-					_coama_c_yaw.append(ry)
-					_coama_c_scale.append(sc3)
-				else:
-					_coama_b_pos.append(rp)
-					_coama_b_yaw.append(ry)
-					_coama_b_scale.append(sc3)
-				placed += 1
-			ridges += 1
-			# Verde: doar pete RARE agatate intre coamele de piatra, niciodata
-			# in fereastra ochi/lac. 8 % pe buza -> 16 % pe fund, mult sub
-			# pragul 6-14 % masurat pe toata caseta (buza + flanc + campie).
-			var green_p: float = 0.08 + 0.08 * t
+			# COASTA E O FATA DE STANCA CU PINTENI, NU UN GARD CONTINUU.
+			# Un "pinten" apare doar la SPUR_P din punctele retelei (rarire
+			# longitudinala+laterala) -- intre pinteni raman goluri de
+			# iarba/pamant vizibile, ca in referinta (roca ~35 % dar
+			# IMPRASTIATA). Cand apare, e un grup mic de bolovani RAR
+			# suprapusi (mates mai putini, dl mai larg) ca sa nu se auto-
+			# umbreasca in crapaturi.
+			var is_spur: bool = _rng.randf() < SPUR_P
+			if is_spur:
+				var mates: int = _rng.randi_range(2, 3)
+				for m in mates:
+					var use_c: bool = _rng.randf() < 0.66 # 2/3 boulder_c, 1/3 boulder_b
+					var dl := _rng.randf_range(-3.6, 3.6) # spread mai larg -- mai putina suprapunere
+					var df := _rng.randf_range(-0.0018, 0.0018)
+					var fi := int((jf + df) * float(n)) % n
+					var fp := _track.baked[fi]
+					var fs := _track._side_at(fi)
+					var rq := fp + fs * (jl + dl)
+					var rg := _sol_real(rq.x, rq.z, true)
+					if rg < _sea_y() + 0.3:
+						continue
+					# BOLOVANI, NU PRISME: scara aproape uniforma, usor turtiti
+					# pe Y (asezare pe panta), niciodata intinsi. Varietatea
+					# vine din marime (scale_all) si yaw, nu din intindere
+					# verticala -- vezi runda 2 (Vp10 0.067, "gard negru").
+					var scale_all := _rng.randf_range(0.85, 1.5)
+					var y_squash := _rng.randf_range(0.80, 1.0)
+					var sc3 := Vector3(scale_all, scale_all * y_squash, scale_all)
+					var rp := Vector3(rq.x, rg - 0.3, rq.z)
+					var ry := _rng.randf_range(0.0, TAU)
+					var eff_r: float = BASE_R.get("boulder_c" if use_c else "boulder_b", 0.6) \
+						* maxf(sc3.x, maxf(sc3.y, sc3.z))
+					if _too_close_to_road(rp, eff_r):
+						continue
+					if use_c:
+						_coama_c_pos.append(rp)
+						_coama_c_yaw.append(ry)
+						_coama_c_scale.append(sc3)
+					else:
+						_coama_b_pos.append(rp)
+						_coama_b_yaw.append(ry)
+						_coama_b_scale.append(sc3)
+					placed += 1
+				ridges += 1
+			# Verde: revine in banda 6-14 %, agatat preferential in GOLURILE
+			# dintre pinteni (nu peste ele -- ar ascunde roca).
+			var green_p: float = (0.10 + 0.10 * t) if not is_spur else (0.02 + 0.02 * t)
 			if not in_view_window and _rng.randf() < green_p:
 				var model := "fever" if (t > 0.55 and _rng.randf() < 0.6) else "acacia_a"
 				var scl: float = _rng.randf_range(0.30, 0.45) + 0.30 * t

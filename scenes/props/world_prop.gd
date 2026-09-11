@@ -115,6 +115,13 @@ const PROP_COLLISION := {
 	"flowers_orange": "none", "flowers_white": "none",
 	"hibiscus_bush": "none", "sugar_cane_clump": "none",
 	"shrub_snow": "none", "grass_tuft_dry": "none",
+	# Tufele de savana (Serengeti POI A): strat pur vizual, cu SUTELE. Un
+	# hull pe fiecare ar da sute de corpuri fizice pentru obiecte de 1 m
+	# peste care masina oricum trece — si ar face din campie un zid.
+	# `tropical_shrub` si `grass_tuft_large` sunt declarate mai jos, cu
+	# acelasi "none", de POI B (o cheie de doua ori intr-un dictionar e
+	# Parse Error si opreste tot scriptul).
+	"broadleaf_shrub": "none",
 	# --- Chongqing (POI A-D) ----------------------------------------------
 	# Stalpii: lampioanele si firmele au bratul si felinarul latite mult peste
 	# stalp (lamp_lantern_a e 1.40 m lat pe un stalp de ~12 cm). Un hull ar
@@ -157,6 +164,46 @@ const PROP_COLLISION := {
 	# 15 m e o coloana de 2,5 m latime care te opreste in aer.
 	"poplar_a": "trunk", "poplar_b": "trunk",
 	# Cosul balonului e mic si solid; ferma e o casa: hull implicit, corect.
+	# --- Serengeti (kitul din assets/models/serengeti/, PR #376) -----------
+	# Prin ele se TRECE: spartura Lerai are 12 m liber intre cele doua fete
+	# (hull-ul ar fi un bloc plin peste drum), iar kopje-ul-rampa e chiar
+	# rampa pe care se urca (8 x 6 x 2,8 m, 19°) — pe un hull convex masina
+	# s-ar fi urcat pe un capac plan peste bolovanii de langa rampa.
+	# Saltul il face un HazardMarker kind=FLYOFF pus pe buza (POI C), ca
+	# `KickerulDinGura` pe Cappadocia; mesh-ul nu arunca nimic singur.
+	"crater_gap": "mesh",
+	"kopje_kicker": "mesh",
+	# Copacii: cilindru pe trunchi. Coroana acaciei-umbrela e lata cat
+	# inaltimea (8,9 x 7 m), deci hull-ul ei ar fi un cort care te opreste la
+	# 4 m de trunchi; baobabul de 22 m ar fi o coloana de 13 m latime.
+	"acacia_umbrella_a": "trunk", "acacia_umbrella_b": "trunk",
+	"acacia_umbrella_c": "trunk", "fever_tree": "trunk", "fig_tree": "trunk",
+	"baobab": "trunk", "dead_tree": "trunk", "euphorbia": "trunk",
+	# Fantome: flamingii stau pe lac (sub banda), hoitul cu vulturi e o
+	# lespede de 1 m in iarba, focul e 80 cm, panza balonului aterizat ZACE
+	# pe sol (16,6 x 9 m, 1,8 m) exact ca `balloon_landed` de mai sus, iar
+	# Lengai (300 m) si peretele opus al craterului (210 m) sunt orizont,
+	# la 200-300 m de banda: un hull pe ele ar fi un corp cat o pista.
+	"flamingo": "none", "flamingo_wings": "none",
+	"carcass_vultures": "none", "campfire": "none",
+	"safari_balloon_landed": "none",
+	"lengai": "none", "crater_far_wall": "none",
+	# Leul de pe kopje: sta pe platoul de la 13 m, nimeni nu ajunge la el.
+	"lion_kopje": "none",
+	# Coarnele Ankole se parenteaza pe capul vacii (PathMover/SlidingHazard),
+	# deci n-au corp propriu — si oricum `_collect_models` sare peste ce e
+	# sub un corp fizic.
+	"ankole_horns": "none",
+	# Tufele de savana (POI B): `tropical_shrub` din kitul comun, la 1,5-5 m de
+	# banda, zeci de bucati — vegetatie moale prin care se trece, nu obstacol.
+	"tropical_shrub": "none",
+	# Smocurile de iarba (POI B): la 1,5-6 m de banda, sute de bucati sub 1,2 m
+	# — prin ele se trece, ca prin iarba campiei.
+	"grass_tuft_large": "none", "grass_tuft_small": "none",
+	# Hull implicit, corect, pentru restul: kopje_camp, kopje_boulder_a/b/c,
+	# termite_mound_a/b, maasai_boma, safari_tent, land_rover, crocodile,
+	# hippo_back (ca decor static pe mal), elephant (ca decor static),
+	# wildebeest, zebra (figuranti statici in afara turmei).
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -208,6 +255,18 @@ const SPLIT_MODELS := {
 	# pistei, inclusiv cele doua din sat. Exact capcana `House_` de mai sus,
 	# a doua oara: o mapare pe model e globala pe pista.
 	"church_arch": ["F1_Gura", "F2_Sala1", "F3_Gat", "F4_Sala2", "F5_Ocol"],
+	# Serengeti: kopje-ul de start si spartura Lerai au IARBA pe platou
+	# (slotul 13, DRY_VEGETATION — masurat pe .glb cu tools/_tmp_probe_serkit:
+	# kopje_camp pe [3, 4, 13, 29], crater_gap pe [3, 4, 13, 29]). Granitul
+	# (clasa triplanara) ar fi sters-o; ruptura o lasa pe atlas, ca la case.
+	# Bolovanii si kopje-ul-rampa sunt pe [3, 4, 29] curat: nu se rup.
+	"kopje_camp": true,
+	"crater_gap": true,
+	# Orizontul: Lengai are varful alb (22) pe [2, 22, 29], peretele opus are
+	# padurea de pe creasta (12, 21) pe [3, 12, 21]. Aceeasi ruptura, ca
+	# granitul sa nu stearga exact benzile care le fac lizibile de la 200 m.
+	"lengai": true,
+	"crater_far_wall": true,
 }
 
 const ACCENT_SPLIT := {
@@ -236,6 +295,14 @@ const ACCENT_SPLIT := {
 	# subtiri pe o arcada de 255 m². De aia nu se putea pune clasa pe toata
 	# piesa: ar fi imbracat 89% piatra intr-o textura de pictura.
 	"Church_Arch": [Palette.SAND_SHADOW, Palette.ROCK_DARK],
+	# Serengeti: lista e ce ramane in CORP (sloturile de granit, 3/4/29), ca
+	# la `House_A` unde ramane varul; tot restul — iarba de pe platou (13) —
+	# trece in `_Accente` si ramane pe atlas. Corpul ia granitul din
+	# CLASSES_BY_MODEL.
+	"Kopje_Camp": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	"Crater_Gap": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	"Lengai": [Palette.SAND_SHADOW, Palette.MARBLE_GREY],
+	"Crater_Far_Wall": [Palette.ROCK_LIGHT],
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -533,6 +600,51 @@ const CLASSES_BY_MODEL := {
 	"hongya_dong": {
 		"Hongya": Palette.GLOW_PREFIX + "30|2.0",
 	},
+
+	# --- Serengeti: GRANITUL kopje-urilor si al spartturii -------------------
+	#
+	# Clasa `granite` (palette.gd) refoloseste dala `olkhon_marble` — o faleza
+	# naturala de 12,7 m, la scara kopje-ului de 14 m — cu o tenta usor
+	# racita. Nu `alpine_granite` (zid de piatra de 2 m: pe stanca naturala a
+	# iesit cetate de doua ori, memoria `clase-pe-piese-de-kit`) si nu `rock`
+	# (gresie calda de canion, medie (141,97,58), pe cand granitul de aici sta
+	# pe MARBLE_GREY/ROCK_LIGHT). Masurat: dala olkhon (178,165,150) e la
+	# 3-9% de tinta pe fiecare canal, deci ajunge o tenta sub 1 — fara
+	# CLASS_LIFT si fara PNG nou.
+	#
+	# Proiectia e in spatiul LUMII (world triplanar), ca stratele sa curga
+	# continuu din bolovanul de 2 m in kopje-ul de langa el — aceeasi scara
+	# pe toate piesele, deliberat: bolovanul mic prinde o fractiune din dala,
+	# ceea ce pe o roca ROTUNJITA e corect (e un bulgare din acelasi corp).
+	# UV-urile kitului sunt colapsate pe centrele sloturilor (verify_glb),
+	# deci pe UV-uri orice textura ar fi citit un texel.
+	#
+	# kopje_camp si crater_gap au iarba pe platou (slot 13) si sunt RUPTE
+	# intai (SPLIT_MODELS/ACCENT_SPLIT): corpul de aici e doar granitul.
+	# lion_kopje NU intra: e leul (blana pe 0/27), nu stanca.
+	# UN material in plus la garda pentru toata clasa (Track14: 15 -> 16).
+	"kopje_camp": {"Kopje_Camp": Palette.TRI_PREFIX + "granite"},
+	"kopje_kicker": {"Kopje_Kicker": Palette.TRI_PREFIX + "granite"},
+	"kopje_boulder_a": {"Kopje_Boulder_A": Palette.TRI_PREFIX + "granite"},
+	"kopje_boulder_b": {"Kopje_Boulder_B": Palette.TRI_PREFIX + "granite"},
+	"kopje_boulder_c": {"Kopje_Boulder_C": Palette.TRI_PREFIX + "granite"},
+	"crater_gap": {"Crater_Gap": Palette.TRI_PREFIX + "granite"},
+	# Orizontul (Lengai, peretele opus) sta la 200-300 m, in ceata: acolo
+	# textura nu se mai citeste (mip-ul cel mai mic), dar clasa NU costa
+	# nimic in plus (acelasi material) si scoate piesele de pe atlasul plat
+	# — siluetele raman in familia de culoare a kopje-urilor din prim-plan.
+	"lengai": {"Lengai": Palette.TRI_PREFIX + "granite"},
+	"crater_far_wall": {"Crater_Far_Wall": Palette.TRI_PREFIX + "granite"},
+}
+
+## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
+## 200-300 m. Un caster de 300 m care intra in cascada de umbre ii prabuseste
+## precizia pentru prim-plan (memoria `caster-departat-fura-umbra`: hornurile
+## Cappadociei se auto-umbreau pe fata dinspre soare din cauza inelelor de
+## orizont). `_build_horizon` din track.gd face acelasi lucru pe siluetele
+## procedurale; aici e varianta pentru orizontul asezat de mana.
+const NO_SHADOW_MODELS := {
+	"lengai": true, "crater_far_wall": true,
 }
 
 
@@ -680,9 +792,107 @@ const SLOT_REMAP_BY_GROUP := {
 	"F3_Gat": {"hall_alcove": {}, "church_arch": {}},
 	"F4_Sala2": {"hall_alcove": {}, "church_arch": {}},
 	"F5_Ocol": {"hall_alcove": {}, "church_arch": {}},
+	# Serengeti, POI A (campul de safari). Masurat pe captura --gamecam la
+	# 0.97 fata de ref_A.png: prelata cortului e pe CORAL_SAND 19 (#E9DCC0) si
+	# sub soarele cald iese ALBA — in referinta corturile sunt kaki-bej;
+	# CONCRETE 8 (#C8BDA9) e cel mai apropiat bej din atlas. Coroana acaciei
+	# are pete pe DRY_VEGETATION 13 (galbenul ierbii) peste verdele 21: in
+	# referinta coroanele sunt verde-oliv uniform, deci petele trec pe
+	# CACTUS_GREEN 12. Scop pe GRUP, nu pe model: alte POI-uri decid singure.
+	"ZoneA_Camp": {
+		# Tufa cu frunza lata e din kitul tropical (verde 21 lucios, de
+		# bananier); pe savana trece pe CACTUS_GREEN 12, oliv sters, ca sa
+		# citeasca a tufa uscata pe iarba aurie (ref_A.png).
+		"broadleaf_shrub": {21: Palette.CACTUS_GREEN},
+		"grass_tuft_large": {21: Palette.DRY_VEGETATION,
+			13: Palette.DRY_VEGETATION},
+		"safari_tent": {19: Palette.CONCRETE},
+		"acacia_umbrella_a": {13: Palette.CACTUS_GREEN},
+		"acacia_umbrella_b": {13: Palette.CACTUS_GREEN},
+		"acacia_umbrella_c": {13: Palette.CACTUS_GREEN},
+	},
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
+	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
+	# (190,188,96), identica cu campia) si pe 21 (TROPICAL_GREEN, verde de
+	# brocoli (92,183,50)). Referinta are coroane OLIV INCHIS, (69,68,26) /
+	# (105,105,31), mai intunecate decat iarba. Amandoua merg pe CACTUS_GREEN
+	# (5B7C34, oliv); variatia ramane din AO-ul din vertex colors si din
+	# lumina. Trunchiul (28) si ramurile (12) nu se ating.
+	"acacia_umbrella_a": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	"acacia_umbrella_b": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	"acacia_umbrella_c": {13: Palette.CACTUS_GREEN, 21: Palette.CACTUS_GREEN},
+	# Tufa de savana: acelasi verde ca acaciile de langa ea (21 -> 12).
+	# A/B runda 1b (POI B): totul pe 21 TROPICAL_GREEN da (65,133,35), nuanta
+	# 0.28 (verde de brocoli); pe 12 da (139,148,54), nuanta 0.18 = nuanta
+	# referintei (92,93,34), doar mai deschis. Se pastreaza 12: nuanta e a
+	# slotului, valoarea e a luminii.
+	# Runda 2: si slotul 12 (CACTUS_GREEN) al tufei merge pe 13 DRY_VEGETATION.
+	# Masurat pe fasia de umar din cadrul de joc, referinta are 0,6 % verde viu
+	# la nivelul solului; tot verdele ei e in coroanele acaciilor. Tufa ramane
+	# ca SILUETA (etaj intre sol si coroane), dar in registrul uscat al campiei.
+	"tropical_shrub": {21: Palette.CACTUS_GREEN, 12: Palette.DRY_VEGETATION},
+	# Smocurile de iarba (POI B, runda 2). Slotul unei piese se citeste din
+	# UV.x * 32, nu din vertex color — prima incercare a remapat sloturile 7 si
+	# 8 (citite gresit din culoarea vertecsilor) si smocurile au ramas VERZI pe
+	# captura. Masurat corect (UV): `grass_tuft_large` e pe 12 CACTUS_GREEN +
+	# 21 TROPICAL_GREEN, `grass_tuft_small` pe 13 + 12. Pe savana toate merg pe
+	# 13 DRY_VEGETATION (#AF9F4E) — acelasi slot ca iarba campiei, ca smocul sa
+	# fie campia RIDICATA, nu un obiect verde asezat peste ea. Verdele ramane
+	# doar pe coroanele acaciilor, unde referinta il are.
+	"grass_tuft_large": {12: Palette.DRY_VEGETATION, 21: Palette.DRY_VEGETATION},
+	"grass_tuft_small": {12: Palette.DRY_VEGETATION},
+	# Elefantul: pe .glb corpul sta pe [2, 22, 29] — SAND_SHADOW, FOAM_WHITE si
+	# MARBLE_GREY, adica trei griuri NEUTRE. Sub soarele cald al temei
+	# (1.0, 0.90, 0.72) plus saturatia 1.18 din post, orice gri neutru iese
+	# crem: masurat pe G_r1_lac.png, elefantii citeau ca bolovani albi, nu ca
+	# animale. Aceeasi capcana ca la hipopotam (handoff §5.13): singurul gri
+	# care ramane gri e un slot RECE. Pielea pe PAINTED_METAL (11, gri-albastrui,
+	# masurat sat 0.09 pe hipopotam), fildesii raman pe FOAM_WHITE 22 ca sa
+	# citeasca in contrast.
+	# DOUA sloturi, nu unul: criticul rundei 2 a cerut ecart de valoare INTRE
+	# corp / cap / urechi / fildesi, nu doar "sa nu fie crem". Pe .glb slotul 29
+	# (56% din vertecsi) e masa corpului, slotul 2 (34%) capul, urechile si
+	# picioarele, iar 22 (10%, z=[-3.21,-1.92]) sunt fildesii — masurat cu o
+	# sonda pe UV-uri, nu ghicit. Corpul pe VOLCANIC_BLACK (20, #55535A, gri
+	# rece inchis) ca sa stea SUB luminanta drumului, capul si picioarele pe
+	# ASPHALT (5, #4B4B4D) gri NEUTRU inchis, fildesii raman pe FOAM_WHITE 22.
+	# PAINTED_METAL 11 a fost incercat pe 2 si respins pe captura: e albastru
+	# destul cat urechile si labele sa iasa bleu-plastic langa corpul gri
+	# (masurat sat 0.12 dar citit ca petice colorate) — vezi G_r3_ele2.png.
+	# Griurile NEUTRE ale .glb-ului ies crem sub soarele cald (1.0,0.90,0.72) +
+	# saturatia 1.18 din post; doar sloturile RECI raman gri.
+	"elephant": {
+		2: Palette.ASPHALT,
+		29: Palette.VOLCANIC_BLACK,
+	},
+	# Flamingii: pe .glb stau pe [4, 20, 31]. Penajul (31, 73% din vertecsi)
+	# NU se mai remapeaza — slotul 31 e de acum FLAMINGO_PINK in atlas, exact
+	# culoarea pentru care kitul a fost exportat.
+	#
+	# Patru runde de critica au cautat rozul in remap, si toate au esuat din
+	# aceeasi cauza: slotul 31 era NEDEFINIT in HEX, deci generatorul de atlas
+	# ii dadea magenta pur, iar magenta x sun_color da vermilion. Ocolirile
+	# incercate, in ordine, toate respinse pe captura:
+	#   - TILE_TERRACOTTA 23: portocaliu-caramida (G_r1_hero.png);
+	#   - CONCRETE 8 palid: pasarile DISPAR pe crusta de soda alba
+	#     (G_r3_flam.png) — pe fundal palid o masa palida nu are contrast;
+	#   - CAR_RED 14: cea mai buna dintre ele, si tot rosu — masurat pe
+	#     captura hero sat 0.66 la hue +16.3, fata de sat 0.51 la hue +3.9 in
+	#     diorama de referinta.
+	# Niciuna nu putea reusi: masurate toate cele 31 de culori scrise, atlasul
+	# chiar nu avea niciun slot cu hue 300-30 sub saturatie 0.55. Reparatia era
+	# o culoare noua in atlas, nu inca un slot vechi (vezi Palette.FLAMINGO_PINK).
+	#
+	# Ce ramane din rundele vechi, fiindca s-a masurat ca ajuta silueta: gatul
+	# si capul (20, 14% din vertecsi, y=[0.82,1.23]) stau pe CONCRETE palid, ca
+	# pasarea sa aiba un ecart de valoare in interior in loc sa fie o singura
+	# bila; picioarele (4, ROCK_DARK maro) pe SAND_LIGHT, ca sa nu para batute
+	# in crusta.
+	"flamingo": {20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
+	"flamingo_wings": {20: Palette.CONCRETE, 4: Palette.SAND_LIGHT},
 	"hollow_rock": {
 		4: Palette.CORAL_SAND,     # ROCK_DARK maro -> crem de tuf
 		6: Palette.SAND_SHADOW,    # ASPHALT_EDGE -> tuf umbrit (valoare, nu tenta)
@@ -788,8 +998,44 @@ const SLOT_REMAP_BY_MODEL := {
 }
 
 
+## Repictare CONDITIONATA DE GEOMETRIE: muta pe alt slot triunghiurile care cad
+## intr-o caseta din spatiul LOCAL al modelului, indiferent pe ce slot sunt.
+##
+## Exista fiindca `SLOT_REMAP_BY_MODEL` nu putea rezolva Land Rover-ul: pe
+## `land_rover.glb` cele patru roti (masurate: 342 de triunghiuri in 4 grupuri
+## la x ±0.87..1.21, y 0.00..0.82, z -2.20..-1.07 si +0.81..+1.63) stau pe
+## ACELASI slot 4 ca sasiul si acoperisul, deci orice mutare de slot le-ar fi
+## dus impreuna cu corpul. Verdictul rundei 4 spunea exact asta: „o cutie verde
+## cu capac crem, fara roti care sa rupa linia solului, fara banda intunecata de
+## parbriz". Geometria EXISTA (nu e capcana „parametrului care doar aduna"), doar
+## culoarea o topea intr-o singura silueta.
+##
+## Fiecare regula e {"min": Vector3, "max": Vector3, "slot": int} in coordonate
+## LOCALE, si se aplica pe CENTROIDUL triunghiului — o fata partial in caseta
+## ramane intreaga pe slotul ei, deci nu apar dungi la marginea casetei.
+## Vertecsii se DESPART inainte de scriere (fiecare triunghi isi primeste
+## propriile UV-uri), altfel un vertex partajat intre roata si aripa ar fi tras
+## si aripa in negru.
+const SLOT_REPAINT_BY_BOX := {
+	"land_rover": [
+		# Cele 4 roti: tot ce e sub y 0.84 si mai in afara de x 0.84 —
+		# adica anvelopa si janta, nu si podeaua sasiului dintre ele.
+		{"min": Vector3(0.84, -0.05, -2.40), "max": Vector3(1.30, 0.84, 1.80),
+			"slot": Palette.ICE_CRACK},
+		{"min": Vector3(-1.30, -0.05, -2.40), "max": Vector3(-0.84, 0.84, 1.80),
+			"slot": Palette.ICE_CRACK},
+		# Banda de geam: chenarul de sus al cabinei, sub streasina (y 1.97) si
+		# deasupra taliei (y 1.45), pe toata latimea corpului. Rupe caroseria
+		# verde in doua valori pe verticala — cerinta 3 din verdict.
+		{"min": Vector3(-1.05, 1.45, -2.30), "max": Vector3(1.05, 1.94, 2.30),
+			"slot": Palette.SEA_DEEP},
+	],
+}
+
+
 func _ready() -> void:
 	_remap_model_slots()
+	_repaint_slot_boxes()
 	_split_shutters()
 	_retint_tuff()
 	_warm_tuff()
@@ -800,8 +1046,24 @@ func _ready() -> void:
 	_fade_tuff_detail()
 	_apply_tint()
 	_apply_glow()
+	_apply_no_shadow()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
+
+
+## Stinge umbra pe modelele din `NO_SHADOW_MODELS` (orizontul asezat de mana).
+## Ruleaza DUPA rupturi (`_split_shutters`), ca sa prinda si copiii `_Accente`.
+func _apply_no_shadow() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not NO_SHADOW_MODELS.has(stem):
+			continue
+		for node in Palette._walk(model):
+			if node is GeometryInstance3D:
+				(node as GeometryInstance3D).cast_shadow = \
+					GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## Muta vertecsii unui model de pe un slot de atlas pe altul (vezi
@@ -835,6 +1097,89 @@ func _remap_model_slots() -> void:
 			if mi == null or mi.mesh == null:
 				continue
 			mi.mesh = _mesh_with_slots_moved(mi.mesh, remap)
+	_dim_model_vertex_colors()
+
+
+## Cat de mult se INTUNECA vertecsii unui model, per stem (1.0 = neatins).
+##
+## De ce exista. Coroanele acaciilor stau pe slotul 12 (CACTUS_GREEN #5B7C34),
+## ales in rundele trecute pentru NUANTA lui — si masuratoarea confirma alegerea:
+## slotul are H 87 / S 0.58, iar coroana din referinta H 75 / S 0.55. Ce nu se
+## potriveste e VALOAREA. Masurat pe cadrul de joc (--frac=0.06 --gamecam), pe
+## toti pixelii verzi: coroanele noastre ies RGB(102,128,20) V 0.53 pe 9,8 % din
+## cadru, referinta le are RGB(58,67,30) V 0.27 pe 2,0 %. Sub soare cald plus
+## expunere 1.10 orice slot verde se ridica, si nu exista slot mai inchis cu
+## aceeasi nuanta: 21 e verde de brocoli, 5/20 sunt griuri reci.
+##
+## De ce vertex color si nu o clasa proprie de frunzis: e clampata la [0,1] si
+## se inmulteste peste albedo (memoria `surfacetool-clamp-vertex-color`), deci
+## poate DOAR sa intunece — singurul sens de care avem nevoie. Costa zero
+## materiale (acelasi `world_material` partajat, garda ramane la 12/38) si
+## pastreaza variatia de AO deja coapta in vertecsi, fiindca inmulteste in loc
+## sa inlocuiasca. O clasa proprie ar costa un material pentru o singura
+## diferenta de luminanta.
+##
+## Factorul e DERIVAT, nu ales: 0.27 / 0.53 = 0.51 din valoarea randata, iar
+## masuratoarea A/B pe captura (0.62 -> V 0.43, 0.38 -> V 0.33) confirma
+## proportionalitatea. 0.44 pune coroana pe V 0.28.
+const VERTEX_DIM_BY_MODEL := {
+	"acacia_umbrella_a": 0.44,
+	"acacia_umbrella_b": 0.44,
+	"acacia_umbrella_c": 0.44,
+}
+
+
+## Inmulteste culorile de vertex ale modelelor din VERTEX_DIM_BY_MODEL.
+##
+## Ruleaza DUPA `_remap_model_slots`, pe mesh-ul deja duplicat de acolo cand
+## modelul are si remap — altfel ar scrie in resursa partajata din cache si ar
+## intuneca piesa pentru toate instantele si toate pistele (aceeasi capcana
+## explicata la `_remap_model_slots`). Pentru modelele fara remap duplica el.
+func _dim_model_vertex_colors() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not VERTEX_DIM_BY_MODEL.has(stem):
+			continue
+		var f := float(VERTEX_DIM_BY_MODEL[stem])
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			mi.mesh = _mesh_with_colors_dimmed(mi.mesh, f)
+
+
+## Copia unui mesh cu culorile de vertex inmultite cu `f`.
+##
+## Daca mesh-ul n-are deloc culori de vertex (cazul obisnuit pentru un GLB de
+## kit), se SCRIE un canal plin cu `f` — altfel intunecarea n-ar avea pe ce sa
+## se aplice. Alpha ramane 1.
+static func _mesh_with_colors_dimmed(src: Mesh, f: float) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := src.surface_get_arrays(s)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var cols: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+		if cols.is_empty():
+			cols = PackedColorArray()
+			cols.resize(verts.size())
+			for i in cols.size():
+				cols[i] = Color(f, f, f, 1.0)
+		else:
+			for i in cols.size():
+				var c := cols[i]
+				cols[i] = Color(c.r * f, c.g * f, c.b * f, c.a)
+		arr[Mesh.ARRAY_COLOR] = cols
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
 
 
 ## Numele grupului de decor manual (copilul direct al acestui nod) in care sta
@@ -861,6 +1206,90 @@ static func _mesh_with_slots_moved(src: Mesh, remap: Dictionary) -> Mesh:
 					uv[i].x = (float(int(remap[slot])) + 0.5) / float(Palette.SLOTS)
 			arr[Mesh.ARRAY_TEX_UV] = uv
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
+
+
+## Aplica [constant SLOT_REPAINT_BY_BOX] pe modelele din arbore.
+func _repaint_slot_boxes() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not SLOT_REPAINT_BY_BOX.has(stem):
+			continue
+		var rules: Array = SLOT_REPAINT_BY_BOX[stem]
+		if rules.is_empty():
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			mi.mesh = _mesh_with_boxes_repainted(mi.mesh, rules)
+
+
+## Copia unui mesh cu triunghiurile din casetele `rules` mutate pe alt slot.
+## Mesh-ul se duplica (ca la `_mesh_with_slots_moved`): resursa .glb e partajata
+## intre toate instantele si tinuta in cache de ResourceLoader.
+static func _mesh_with_boxes_repainted(src: Mesh, rules: Array) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := src.surface_get_arrays(s)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		if verts.is_empty() or uv.is_empty() or idx.is_empty():
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			var m0 := src.surface_get_material(s)
+			if m0 != null:
+				out.surface_set_material(s, m0)
+			continue
+		var normals: PackedVector3Array = arr[Mesh.ARRAY_NORMAL] 			if arr[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
+		var colors: PackedColorArray = arr[Mesh.ARRAY_COLOR] 			if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+		# Desparte vertecsii pe triunghi: un vertex partajat intre roata si
+		# aripa ar duce culoarea rotii si pe aripa.
+		var nv := PackedVector3Array()
+		var nn := PackedVector3Array()
+		var nu := PackedVector2Array()
+		var nc := PackedColorArray()
+		var ni := PackedInt32Array()
+		var tri_count := idx.size() / 3
+		for t in tri_count:
+			var a := idx[t * 3]
+			var b := idx[t * 3 + 1]
+			var c := idx[t * 3 + 2]
+			var centroid := (verts[a] + verts[b] + verts[c]) / 3.0
+			var target := -1
+			for r: Dictionary in rules:
+				var lo: Vector3 = r["min"]
+				var hi: Vector3 = r["max"]
+				if centroid.x >= lo.x and centroid.x <= hi.x 						and centroid.y >= lo.y and centroid.y <= hi.y 						and centroid.z >= lo.z and centroid.z <= hi.z:
+					target = int(r["slot"])
+					break
+			for k in [a, b, c]:
+				ni.append(nv.size())
+				nv.append(verts[k])
+				if not normals.is_empty():
+					nn.append(normals[k])
+				if not colors.is_empty():
+					nc.append(colors[k])
+				nu.append(Palette.uv(target) if target >= 0 else uv[k])
+		var na := []
+		na.resize(Mesh.ARRAY_MAX)
+		na[Mesh.ARRAY_VERTEX] = nv
+		na[Mesh.ARRAY_TEX_UV] = nu
+		na[Mesh.ARRAY_INDEX] = ni
+		if not nn.is_empty():
+			na[Mesh.ARRAY_NORMAL] = nn
+		if not nc.is_empty():
+			na[Mesh.ARRAY_COLOR] = nc
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, na)
 		var m := src.surface_get_material(s)
 		if m != null:
 			out.surface_set_material(s, m)

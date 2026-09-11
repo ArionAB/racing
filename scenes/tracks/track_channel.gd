@@ -67,6 +67,12 @@ extends Marker3D
 ## Cat de jos sta APA fata de cota soselei. Negativ = canalul se umple din marea
 ## pistei (comportamentul Okinawei), deci nu primeste suprafata proprie.
 ##
+## La un VAD ([member ford]) cifra e mica si poate fi chiar NEGATIVA prin
+## [member water_over_road]: apa trebuie sa treaca PESTE asfalt, altfel
+## suprafata ei ramane sub carosabil si nu se vede nimic din masina (masurat pe
+## Serengeti: apa la -1.43, drumul la -1.38 — mesh-ul exista, vizibil, si
+## ascuns sub drum pe toata latimea).
+##
 ## Diferenta [member depth] − [code]water_y_drop[/code] e grosimea reala a
 ## stratului de apa, si tot ea da scara gradientului de culoare. Un parau sapat
 ## 18 m cu apa la 15 are 3 m de apa: albie larga cu firicel, nu canal plin ochi.
@@ -95,6 +101,33 @@ extends Marker3D
 ## participa: cercul isi e propriul capat.
 @export var pit: bool = false
 
+## Canalul e un VAD: albia si apa se construiesc la fel, dar soseaua NU se
+## intrerupe — se trece prin apa, nu peste gol.
+##
+## Motivul e masurat, nu stilistic (Serengeti, POI C): un rau care taie drumul
+## avea nevoie de o albie REALA (bolovanii trebuie sa intre pe jumatate in apa,
+## spinarile de hipopotam trebuie sa iasa DEASUPRA ei), dar carosabilul trebuie
+## sa ramana conducibil — gimmickul e apa de 30 cm care incetineste, nu o
+## saritura. Fara steagul asta singurul mecanism de sapatura din pista
+## ([method TrackSideSampler._carve_channel]) venea legat de golul din asfalt,
+## iar [TerrainHollow] nu ajuta: e PLAFON, nu groapa, deci nu poate cobori
+## terenul sub cota la care il aseaza soseaua.
+##
+## Cu `ford` pornit: se sapa albia, se aseaza suprafata de apa (deci si muchia
+## apa/mal, fiindca patratele uscate se sar), si NU se construieste nici gol de
+## sosea, nici trambulina, nici travee, nici [RespawnZone]. [member depth] si
+## [member water_y_drop] raman parghiile — diferenta lor e cata apa ai pe drum,
+## si ea trebuie tinuta mica (sub ~0.5 m) ca masina sa treaca.
+@export var ford: bool = false
+
+## Cati metri de apa stau PESTE cota asfaltului la vad.
+##
+## Numai pentru [member ford]. E cifra pe care o simte soferul: sub ~0.15 m apa
+## abia se vede, peste ~0.5 m masina inoata. Brief-ul POI C cere 30 cm.
+## Suprafata se aseaza la `cota drumului + water_over_road`, iar patul rezultat
+## se sapa cu [code]TrackSideSampler.FORD_BED_SINK[/code] sub drum.
+@export var water_over_road: float = 0.3
+
 ## Numele afisat in sonde si in mesaje de eroare.
 @export var label: String = ""
 
@@ -120,9 +153,16 @@ func to_spec(track: Node3D) -> Dictionary:
 		"fade": fade,
 		"jump": jump,
 		"pit": pit,
+		"ford": ford,
 		"label": label if label != "" else name,
 	}
-	if water_y_drop >= 0.0:
+	if ford:
+		# Apa peste drum = drop NEGATIV fata de cota soselei. Steagul „canal la
+		# nivelul marii" (drop < 0) nu se aplica la vad: acolo suprafata proprie
+		# e obligatorie, altfel n-ar exista rau.
+		spec["water_y_drop"] = -water_over_road
+		spec["water_over_road"] = water_over_road
+	elif water_y_drop >= 0.0:
 		spec["water_y_drop"] = water_y_drop
 	return spec
 

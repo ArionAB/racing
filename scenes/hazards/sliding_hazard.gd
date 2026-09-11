@@ -126,6 +126,11 @@ var escape_lane: float = ESCAPE_LANE_DEFAULT
 ## Defazaj 0..1 dintr-o perioada. Doua obstacole pe aceeasi pista cu acelasi
 ## defazaj se misca la unison si arata ca un mecanism, nu ca doua obstacole.
 var phase: float = 0.0
+## TRAVERSARE cu model care are un „inainte": la drumul de intoarcere corpul
+## se INTOARCE cu fata spre sensul de mers (o jumatate de tura in jurul
+## verticalei), in loc sa mearga cu spatele. Pus de pista odata cu
+## `face_travel`. Pendularea si usa nu-l folosesc.
+var turn_around: bool = false
 
 ## Model optional + configuratia lui.
 var model_scene: PackedScene
@@ -255,6 +260,14 @@ func _build_model() -> void:
 	# locul atlasului — dar in spatiul OBIECTULUI, ca sa se rostogoleasca odata
 	# cu el. `model_scale` intra in socoteala ca pietrele pictate sa masoare in
 	# lume cat cele de pe falezele din care s-a desprins.
+	# REMAP-UL DE SLOTURI, inainte de material. Un hazard care isi incarca
+	# singur GLB-ul nu trece prin WorldProp, deci nu primea corectiile din
+	# `SLOT_REMAP_BY_MODEL` (handoff §5.9, aceeasi capcana ca la hipopotam):
+	# elefantul din Serengeti sta pe sloturi gri NEUTRE, care sub soarele cald
+	# al temei ies albe — masurat, hazardul era alb langa decorul gri corect,
+	# adica acelasi animal in doua culori. Tabela ramane una singura, in
+	# WorldProp; aici doar se aplica.
+	_remap_model_slots(model)
 	if not model_classes.is_empty():
 		Palette.apply_class_materials(model, model_classes)
 	elif model_tri_class.is_empty():
@@ -344,9 +357,13 @@ func _animate(speed: float) -> void:
 		target = ANIM_WALK
 		rate = clampf(speed / WALK_CYCLE_SPEED, 0.75, 2.2)
 	if target == &"":
+		# Fara animatie de repaus (elefantul are doar Walk/Trumpet): parcat pe
+		# acostament STA, nu merge pe loc. Se reia de unde a ramas la urnire.
+		if _anim.is_playing():
+			_anim.pause()
 		return
 	_anim.speed_scale = rate
-	if _anim.current_animation != String(target):
+	if _anim.current_animation != String(target) or not _anim.is_playing():
 		_anim.play(target, ANIM_BLEND)
 
 func _build_placeholder_box() -> void:
@@ -383,8 +400,17 @@ func _physics_process(delta: float) -> void:
 	if not _configured:
 		_configure()
 	_time += delta
-	global_position = center + travel * _offset_now()
-	var moved := global_position - _last_pos
+	var next_pos := center + travel * _offset_now()
+	var moved := next_pos - _last_pos
+	# Intoarcerea la capat de cursa: O SINGURA scriere de transform (baza +
+	# pozitie) — cu sync_to_physics, pozitia si rotatia scrise separat in
+	# acelasi pas ingheata corpul tacut (memoria jolt-sync-transform).
+	var flat_move := Vector3(moved.x, 0.0, moved.z)
+	if turn_around and flat_move.length() > 0.01 			and (-global_transform.basis.z).dot(flat_move) < 0.0:
+		global_transform = Transform3D(
+			global_transform.basis.rotated(Vector3.UP, PI), next_pos)
+	else:
+		global_position = next_pos
 	_speed = moved.length() / delta if delta > 0.0 else 0.0
 	if _pivot != null and roll_radius > 0.0:
 		# Rostogolire: rotatie in jurul axei perpendiculare pe miscare.
@@ -532,3 +558,20 @@ func _shove_cars(delta: float) -> void:
 		fwd.y = 0.0
 		car.apply_sweep(away.normalized() * SWEEP_PUSH
 			+ fwd.normalized() * SWEEP_PUSH * 0.5 + Vector3.UP * 0.8)
+
+
+## Muta sloturile modelului dupa `WorldProp.SLOT_REMAP_BY_MODEL`, daca stem-ul
+## GLB-ului are o intrare acolo. Fara intrare nu se atinge nimic, deci niciun
+## hazard de pe alta pista nu se schimba.
+func _remap_model_slots(model: Node3D) -> void:
+	if model.scene_file_path.is_empty():
+		return
+	var stem := model.scene_file_path.get_file().get_basename()
+	var remap: Variant = WorldProp.SLOT_REMAP_BY_MODEL.get(stem, null)
+	if remap == null or not (remap is Dictionary) or (remap as Dictionary).is_empty():
+		return
+	for node in Palette._walk(model):
+		var mi := node as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		mi.mesh = WorldProp._mesh_with_slots_moved(mi.mesh, remap as Dictionary)

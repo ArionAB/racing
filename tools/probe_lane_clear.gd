@@ -165,6 +165,18 @@ func _ready() -> void:
 ## Verificat prin sabotaj (`--sabotaj`) pe 5 sep 2026: un stalp de 6x12x6 pe
 ## axa la frac 0.55 duce cifra de la 9 la 12 (trei fire laterale il vad, pe
 ## nume), verdict REGRESIE, cod de iesire 1.
+## [b]Serengeti: linie de baza pusa la integrare, 8 sep 2026.[/b] Masurat de
+## 3 ori pe starea de dupa merge-ul celor 8 POI-uri, identic: **7** raportari,
+## toate cu numele lor in log si toate gimmick-uri intentionate —
+## 1 la frac 0.145 (`Hipopotam2`, spinarea care iese din vad, brief §4),
+## 3 la 0.765 (elefantul care traverseaza fundul craterului, `G_Elefant`:
+## corpul lui e AnimatableBody3D creat la runtime, deci apare cu nume generat)
+## si 3 la 0.870 (`FlyoffRamp`, kickerul din POI H).
+## Baza e 9, adica 7 + marja 2: sub 7 nu se poate coborî fara sa scoti un
+## gimmick, iar marja lasa loc unei singure piese noi pe margine fara alarma
+## falsa. Pana acum pista NU avea linie de baza, deci sonda nu putea distinge
+## un hazard voit de un corp ratacit in banda (memoria `garda-existenta-nerulata`).
+## Verificat prin sabotaj (`--sabotaj`) in acelasi commit.
 const BASELINE := {
 	"Dunele (Track01)": 30,
 	"Okinawa manual (Track08)": 18,
@@ -173,6 +185,7 @@ const BASELINE := {
 	"Stromboli (Track11)": 190,
 	"Chongqing (Track12)": 146,
 	"Cappadocia (Track13)": 11,
+	"Serengeti (Track14)": 9,
 }
 
 

@@ -1,0 +1,843 @@
+extends Node
+## Generator de decor MANUAL pentru POI H — SPARTURA LERAI (Track14, Serengeti,
+## frac 0.853-0.887). Nu e sonda: CALCULEAZA transformarile care se lipesc in
+## Track14.tscn sub `DecorManual/ZoneH_Spartura` (si un HazardMarker FLYOFF in
+## `Hazarduri`). Tiparul e `gen_decor_capp_a.gd`.
+##
+##   godot --headless --fixed-fps 60 --path . res://tools/GenDecorSerH.tscn
+##
+## Ce decide compozitia, si de ce cifrele sunt astea:
+##
+## 1. PERETELE NU E IN TEREN. Masurat (ProbeFrac + raycast): la 0.853 drumul e
+##    la y~1 pe campie plata; craterul (rapa 0.358-0.486) e in alta parte a
+##    turului. Deci „taietura in peretele de granit" e INTREAGA in
+##    `crater_gap.glb` (doua fete de ~40 m, 12,4 m inalte). Fara el nu exista
+##    POI, cu el trebuie sa para ca peretele continua: bolovanii kopje la
+##    colturi si acaciile din spate ii dau grosime.
+##
+## 2. GOLUL E MAI INGUST DECAT DRUMUL. GLB-ul are 12 m liber; drumul aici are
+##    `half_width` 7,0 (14 m carosabil) — brief-ul spunea „7 m" si era
+##    semilatimea. Solutia: scara pe X local (perpendicular pe drum) astfel
+##    incat intre fete sa ramana carosabilul + margine; cifra se DERIVA din
+##    devierea reala a axului fata de o dreapta pe lungimea fetelor (drumul
+##    coteste ~17 grade pe 0.84-0.87), nu se alege. Vezi `_fit_gap`.
+##
+## 3. ORIGINEA GLB-ULUI e `assembly`, pe axa drumului, la talpa fetelor. Cota se
+##    ia din TEREN sub talpa fetelor (minimul pe ambele parti), nu din sosea:
+##    o fata care pluteste 30 cm se vede de la 40 m, una ingropata 30 cm nu.
+##
+## 4. COMPOZITIA E DE SOFER (memoria `driver-view-for-composition`): cadrul erou
+##    e la 0.84, cu masina la ~28 m de gura sparturii. Ce conteaza e ce e la
+##    5-40 m in fata, pe ambele parti: coltul fetelor cu bolovani si euphorbii
+##    la baza, acacii la 3-8 m de muchie inainte si dupa, coroane care intra
+##    peste drum. Plafonul frustumului (10 + 0.093*d): fetele de 12,4 m intra
+##    intregi de la 26 m incolo.
+##
+## 5. SOARELE (masurat din DirectionalLight3D, nu presupus): vine din fata-
+##    stanga fata de sensul de mers (+x). Fata din stanga isi arunca umbra PE
+##    drum, spre camera; fata din dreapta e luminata. Acaciile mari stau pe
+##    stanga ca umbra coroanei sa cada pe laterit.
+
+const TRACK := "res://scenes/tracks/Track14.tscn"
+const ZONE := "DecorManual/ZoneH_Spartura"
+
+## id-urile ext_resource asa cum sunt deja in Track14.tscn (handoff §1).
+const RES := {
+	"crater_gap": "s_crater_gap",
+	"kopje_boulder_a": "s_kopje_boulder_a",
+	"kopje_boulder_b": "s_kopje_boulder_b",
+	"kopje_boulder_c": "s_kopje_boulder_c",
+	"euphorbia": "s_euphorbia",
+	"acacia_umbrella_a": "s_acacia_umbrella_a",
+	"acacia_umbrella_b": "s_acacia_umbrella_b",
+	"acacia_umbrella_c": "s_acacia_umbrella_c",
+	"dead_tree": "s_dead_tree",
+	"kopje_camp": "s_kopje_camp",
+}
+
+## Raza la sol a piesei (probe_serengeti_kit: jumatate din latura mare a AABB
+## pentru bolovani; TRUNCHIUL pentru copaci — coroana are voie peste drum).
+const BASE_R := {
+	"kopje_boulder_a": 1.07, "kopje_boulder_b": 2.03, "kopje_boulder_c": 2.80,
+	"euphorbia": 0.90, "acacia_umbrella_a": 0.6, "acacia_umbrella_b": 0.7,
+	"acacia_umbrella_c": 0.8, "dead_tree": 0.5, "kopje_camp": 6.7,
+}
+
+## Spartura: din AABB-ul GLB-ului (pos -18.37..17.80 pe X, -21.64..22.16 pe Z).
+const GAP_FREE_X: float = 12.0
+const GAP_LEN_Z: float = 43.8
+## Cat ramane liber intre muchia carosabilului si fata de granit, minim.
+##
+## Era 2.0 si dadea scara X 1.60, adica 19,2 m liber intre fete — de trei ori
+## mai mult decat cei 12 m din brief. Doua pagube masurate pe cadrul de joc:
+## taietura citea ca un CORIDOR larg, nu ca o strangere, iar scara pe X intinde
+## fetele pe orizontala, deci coloanele granitului se rareau si se vedea cerul
+## printre ele. Cifrele reale pe lungimea fetelor (survey, 0.863-0.884):
+## `half_width` constant 7.0 si abatere laterala maxima 0.20 m — deci 14 m de
+## carosabil. Cu marginea la 1.2 m iese 16,4 m liber (scara 1.40): masina trece
+## fara sa atinga (ProbeRace 0 pereti pe felia 0.85-0.90), dar fata de granit e
+## la 8,2 m de ax in loc de 9,6, adica intra in cadru ca perete, nu ca gard.
+const GAP_MARGIN: float = 1.2
+## Fractia din jurul careia se cauta centrul sparturii (brief: 0.853).
+const GAP_FRAC_NOMINAL: float = 0.872
+const GAP_FRAC_SEARCH: float = 0.003
+
+var _track: Track
+var _sampler: TrackSideSampler
+var _terrain_rid: RID = RID()
+var _sus_y := 0.0
+var _out: Array[String] = []
+var _haz: Array[String] = []
+var _n := 0
+var _rng := RandomNumberGenerator.new()
+var _warn := 0
+## Rezultatul potrivirii sparturii: centrul (index), directia, scara X.
+var _gap_idx := 0
+var _gap_dir := Vector3.FORWARD
+var _gap_center := Vector3.ZERO
+var _gap_sx := 1.0
+var _m_per_frac := 2.0
+
+
+func _ready() -> void:
+	await get_tree().process_frame
+	_track = (load(TRACK) as PackedScene).instantiate() as Track
+	get_tree().root.add_child(_track)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_sampler = _track._sampler
+	var hi := -INF
+	for bp in _track.baked:
+		hi = maxf(hi, bp.y)
+	_sus_y = hi + 120.0
+	_rng.seed = 140853
+	var n := _track.baked.size()
+	_m_per_frac = _track._dists[_track._dists.size() - 1] / 1000.0
+	_sun()
+	_survey()
+	_fit_gap()
+	_gap()
+	_corners()
+	_trees()
+	_kicker()
+	print("")
+	print(";;; ZONE")
+	for line in _out:
+		print(line)
+	print(";;; HAZARDURI")
+	for line in _haz:
+		print(line)
+	print(";;; END")
+	print("; asezate %d piese, %d avertismente de degajare" % [_n, _warn])
+	get_tree().quit(0)
+
+
+## Directia LUMINII, citita din nod — brief §4 cere remasurare la fiecare
+## redesenare a traseului.
+func _sun() -> void:
+	var light: DirectionalLight3D = null
+	for c in _track.find_children("*", "DirectionalLight3D", true, false):
+		light = c
+		break
+	if light == null:
+		print("; ATENTIE: fara DirectionalLight3D in scena")
+		return
+	var d := -light.global_transform.basis.z
+	var i := _idx(GAP_FRAC_NOMINAL)
+	var s := _track._side_at(i)
+	print("; soare: lumina merge spre (%.3f, %.3f, %.3f); dot(side, umbra_xz)=%.2f (>0: umbra cade spre +side)" % [
+		d.x, d.y, d.z, Vector3(d.x, 0, d.z).normalized().dot(s)])
+
+
+func _idx(frac: float) -> int:
+	var n := _track.baked.size()
+	return int(fposmod(frac, 1.0) * float(n)) % n
+
+
+func _survey() -> void:
+	print("; frac   ax(x,z)          y_drum  dir(x,z)      half  sol@-20 sol@-10 sol@+10 sol@+20")
+	var f := 0.826
+	while f < 0.932:
+		var i := _idx(f)
+		var p := _track.baked[i]
+		var n := _track.baked.size()
+		var d := (_track.baked[(i + 1) % n] - p).normalized()
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		var row := "; %.3f (%7.2f,%7.2f) %6.2f (%5.2f,%5.2f) %4.1f" % [f, p.x, p.z, p.y, d.x, d.z, half]
+		for off: float in [-20.0, -10.0, 10.0, 20.0]:
+			var q := p + s * off
+			row += " %7.2f" % _sol_real(q.x, q.z)
+		print(row)
+		f += 0.002
+
+
+## Potrivirea sparturii pe drumul care coteste: pentru fiecare centru candidat
+## se ia directia medie a axului pe +-GAP_LEN_Z/2 si se masoara cat se abate
+## axul de la dreapta aia (lateral). Se alege centrul cu abaterea minima, si
+## scara pe X iese din abatere + half_width + margine.
+func _fit_gap() -> void:
+	var n := _track.baked.size()
+	var best_dev := INF
+	var f := GAP_FRAC_NOMINAL - GAP_FRAC_SEARCH
+	while f <= GAP_FRAC_NOMINAL + GAP_FRAC_SEARCH + 1e-6:
+		var ci := _idx(f)
+		var c := _track.baked[ci]
+		# indexii pe +-jumatate din lungime, pe distanta reala
+		var pts: Array[Vector3] = []
+		var dsum := Vector3.ZERO
+		for k in range(-80, 81):
+			var j := ((ci + k) % n + n) % n
+			var p := _track.baked[j]
+			var along := (p - c).length()
+			if along <= GAP_LEN_Z * 0.5:
+				pts.append(p)
+				dsum += (_track.baked[(j + 1) % n] - p).normalized()
+		var dir := Vector3(dsum.x, 0, dsum.z).normalized()
+		var side := dir.cross(Vector3.UP).normalized()
+		var dev := 0.0
+		var wmax := 0.0
+		for p in pts:
+			dev = maxf(dev, absf((p - c).dot(side)))
+		for p in pts:
+			wmax = maxf(wmax, _track.width_at_index(_nearest(p)))
+		var need := dev + wmax + GAP_MARGIN
+		print("; candidat %.4f: abatere laterala max %.2f m, half max %.1f -> liber necesar %.1f m (%d puncte)" % [
+			f, dev, wmax, 2.0 * need, pts.size()])
+		# Se alege SPATIUL minim necesar (abatere + banda + margine), nu abaterea:
+		# pe 0.869-0.875 abaterea e sub 0,5 m peste tot, dar banda scade de la
+		# 10 la 7 m — si banda decide scara.
+		if need < best_dev:
+			best_dev = need
+			_gap_idx = ci
+			_gap_dir = dir
+			_gap_center = c
+			_gap_sx = ceil(2.0 * need / GAP_FREE_X * 20.0) / 20.0
+		f += 0.0005
+	print("; SPARTURA la frac %.4f centru (%.2f, %.2f, %.2f) dir (%.3f, %.3f) scara X %.2f -> %.1f m liber" % [
+		float(_gap_idx) / float(n), _gap_center.x, _gap_center.y, _gap_center.z,
+		_gap_dir.x, _gap_dir.z, _gap_sx, GAP_FREE_X * _gap_sx])
+
+
+func _nearest(p: Vector3) -> int:
+	var n := _track.baked.size()
+	var best := 0
+	var bd := INF
+	for k in range(-100, 101):
+		var j := ((_gap_idx + k) % n + n) % n
+		var d := (_track.baked[j] - p).length_squared()
+		if d < bd:
+			bd = d
+			best = j
+	return best
+
+
+## Spartura propriu-zisa: pe axa, cu Z local pe directia drumului, cota din
+## terenul de sub TALPA fetelor.
+func _gap() -> void:
+	var side := _gap_dir.cross(Vector3.UP).normalized()
+	var inner := GAP_FREE_X * 0.5 * _gap_sx
+	var lo := INF
+	var hi := -INF
+	for sgn: float in [-1.0, 1.0]:
+		for lat: float in [inner + 0.5, inner + 4.0, inner + 9.0]:
+			var along := -GAP_LEN_Z * 0.45
+			while along <= GAP_LEN_Z * 0.45:
+				var q := _gap_center + side * (sgn * lat) + _gap_dir * along
+				var g := _sol_real(q.x, q.z)
+				lo = minf(lo, g)
+				hi = maxf(hi, g)
+				along += 4.0
+	print("; teren sub fete: %.2f .. %.2f (drum %.2f) -> spartura la y=%.2f" % [
+		lo, hi, _gap_center.y, lo])
+	var yaw := atan2(_gap_dir.x, _gap_dir.z)
+	_raw("crater_gap", "spartura", Vector3(_gap_center.x, lo, _gap_center.z),
+		yaw, Vector3(_gap_sx, 1.0, 1.0), "mesh")
+	# Tufe si moloz LA BAZA fetelor, pe fasia dintre carosabil si granit
+	# (memoria `patru-defecte-de-diorama` #3: stanca atinge solul prin moloz,
+	# des si marunt la baza). Fara coliziune: fasia are 2 m si e langa banda.
+	for sgn: float in [-1.0, 1.0]:
+		var along := -GAP_LEN_Z * 0.42
+		var k := 0
+		while along <= GAP_LEN_Z * 0.42:
+			# La talpa fetei (inner = 9,6 m), nu pe umar: probe_manual cere
+			# >= banda + 2 m de ax, si banda e 7,0-7,3 pe lungimea fetelor.
+			var lat := inner + 0.1 + _rng.randf_range(0.0, 0.6)
+			var q := _gap_center + side * (sgn * lat) + _gap_dir * along
+			var g := _sol_real(q.x, q.z)
+			if k % 3 == 1:
+				_raw("euphorbia", "euphorbiaBaza", Vector3(q.x, g, q.z),
+					_rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(0.4, 0.6), "none")
+			else:
+				_raw("kopje_boulder_a", "molozBaza", Vector3(q.x, g - 0.25, q.z),
+					_rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(0.6, 1.0), "none")
+			along += _rng.randf_range(4.5, 7.0)
+			k += 1
+
+
+## COLTURILE fetelor: aici se citeste ca peretele e din bolovani ingramaditi,
+## nu o placa. Bolovani b/c (2,9 / 4,3 m) lipiti de capetele fetelor, in
+## AFARA carosabilului (marginea la >= 0,5 m de muchie), cu hull.
+func _corners() -> void:
+	var n := _track.baked.size()
+	var f0 := float(_gap_idx) / float(n)
+	var df := (GAP_LEN_Z * 0.5) / _m_per_frac / 1000.0
+	var entry := f0 - df
+	var exit := f0 + df
+	print("; fete de la frac %.4f la %.4f (%.1f m/0.001)" % [entry, exit, _m_per_frac])
+	# intrare: bolovanii mari pe colt, un pic inaintea fetei, plus euphorbii
+	_place("kopje_boulder_c", "coltIntrare", entry - 0.0025, -1.0, 1.6, 0.7, 1.15, "hull")
+	_place("kopje_boulder_b", "coltIntrare", entry - 0.0048, -1.0, 1.2, 2.1, 1.0, "hull")
+	_place("kopje_boulder_b", "coltIntrare", entry - 0.0020, 1.0, 1.4, 3.9, 1.25, "hull")
+	_place("kopje_boulder_c", "coltIntrare", entry - 0.0042, 1.0, 2.2, 1.3, 0.95, "hull")
+	_place("kopje_boulder_a", "molozIntrare", entry - 0.0062, -1.0, 2.2, 0.4, 1.1, "none")
+	_place("kopje_boulder_a", "molozIntrare", entry - 0.0070, 1.0, 2.1, 2.8, 0.9, "none")
+	_place("euphorbia", "euphorbiaIntrare", entry - 0.0036, -1.0, 3.6, 0.0, 0.9, "trunk")
+	_place("euphorbia", "euphorbiaIntrare", entry - 0.0058, 1.0, 2.6, 1.1, 1.0, "trunk")
+	_place("euphorbia", "euphorbiaIntrare", entry - 0.0012, 1.0, 4.4, 2.0, 0.8, "trunk")
+	# iesire
+	_place("kopje_boulder_c", "coltIesire", exit + 0.0022, 1.0, 1.5, 5.1, 1.1, "hull")
+	_place("kopje_boulder_b", "coltIesire", exit + 0.0046, 1.0, 1.0, 0.9, 1.05, "hull")
+	_place("kopje_boulder_b", "coltIesire", exit + 0.0018, -1.0, 1.3, 2.4, 1.2, "hull")
+	_place("kopje_boulder_c", "coltIesire", exit + 0.0044, -1.0, 2.4, 4.0, 0.9, "hull")
+	_place("kopje_boulder_a", "molozIesire", exit + 0.0066, 1.0, 2.2, 1.7, 1.0, "none")
+	_place("kopje_boulder_a", "molozIesire", exit + 0.0072, -1.0, 2.4, 0.2, 0.85, "none")
+	_place("euphorbia", "euphorbiaIesire", exit + 0.0034, 1.0, 3.4, 0.5, 1.0, "trunk")
+	_place("euphorbia", "euphorbiaIesire", exit + 0.0056, -1.0, 2.8, 3.3, 0.85, "trunk")
+	# Bolovani MARI in spatele colturilor, ca peretele sa aiba grosime cand il
+	# vezi oblic (la 8-14 m de muchie, dincolo de fata).
+	_place("kopje_boulder_c", "spateColt", entry - 0.0010, -1.0, 8.0, 1.9, 1.6, "hull")
+	_place("kopje_boulder_c", "spateColt", entry - 0.0030, 1.0, 9.0, 0.3, 1.5, "hull")
+	_place("kopje_boulder_c", "spateColt", exit + 0.0030, 1.0, 8.5, 2.6, 1.5, "hull")
+	_umerii_gurii()
+	# CRESTA din care e taiata spartura. In cadrul erou fetele incepeau brusc
+	# din campie plata: se citea ca doua placi asezate pe iarba, nu ca o
+	# taietura intr-un perete (defectul „obiecte infipte in plan" din memoria
+	# `patru-defecte-de-diorama`). Bolovanii de aici urca de la 12 la 24 m
+	# lateral pe ultimii 45 m de apropiere si se SUPRAPUN intre ei, ca masa
+	# de granit sa existe si inainte, si in spatele fetelor.
+	# Coloana a 4-a e ACUM inaltimea tinta in metri, nu un factor de scara: din
+	# ea se alege si piesa, si scara. Motiv masurat pe cadrul erou al rundei 1
+	# (`H_r2_before.png`): ecartul siluetei pe toata latimea cadrului era 0.133
+	# din inaltime — adica linia cerului e PLATA, un gard de tarusi la aceeasi
+	# cota. Cauza nu era scara prea mica, ci faptul ca TOATA creasta era
+	# `kopje_boulder_c` (4,32 m) intre 1.5 si 2.1: acelasi contur, aceeasi
+	# inaltime, de 16 ori. Un bolovan marit ramane un bolovan.
+	var ridge: Array = [
+		[0.0150, -1.0, 13.0, 15.0], [0.0132, 1.0, 15.0, 7.5],
+		[0.0118, -1.0, 19.0, 9.0], [0.0104, 1.0, 21.0, 17.0],
+		[0.0092, -1.0, 11.5, 6.0], [0.0080, 1.0, 12.5, 8.5],
+		[0.0068, -1.0, 16.0, 18.0], [0.0058, 1.0, 17.5, 6.5],
+		[0.0046, -1.0, 10.0, 5.0], [0.0036, 1.0, 10.5, 11.0],
+	]
+	for e in ridge:
+		_place_h("creasta", entry - float(e[0]), float(e[1]),
+			float(e[2]) + _rng.randf_range(-1.5, 1.5), float(e[3]))
+	# si dincolo de fete, ca peretele sa aiba adancime cand treci prin gura
+	var back_h: Array = [16.0, 6.5, 12.0, 8.0, 19.0, 7.0]
+	for j in 6:
+		var side := -1.0 if j % 2 == 0 else 1.0
+		_place_h("creastaSpate", entry + 0.0030 + 0.0038 * float(j), side,
+			_rng.randf_range(13.0, 22.0), float(back_h[j]))
+
+
+## Inaltimea reala a piesei la scara 1 (AABB din probe_serengeti_kit). Din ea
+## se DERIVA scara pentru o inaltime ceruta, in loc sa fie ghicita.
+const H1 := {
+	"kopje_boulder_a": 1.44, "kopje_boulder_b": 2.88, "kopje_boulder_c": 4.32,
+	"kopje_camp": 13.22,
+}
+
+
+## Aseaza masa de granit cea mai potrivita pentru inaltimea `h_m`, cu scara
+## derivata. Regula piesei: sub 5 m boulder_c, 5-9 m boulder_c intins, peste
+## 9 m `kopje_camp` — care e o alta forma (13,2 m, cu platou si trepte), nu
+## acelasi bolovan umflat. Scara ramane in 0.55-1.6 pe kopje_camp si sub 2.2
+## pe boulder_c, ca dala triplanara sa nu se intinda vizibil.
+func _place_h(base: String, frac: float, side_sign: float, gap: float,
+		h_m: float, mode: String = "hull") -> void:
+	# Inaltimea ceruta e fata de SOSEA, nu fata de solul de sub piesa. Unde
+	# terenul urca lateral, o masa de 19 m pe un dambovic de 14 m are varful la
+	# 33 m si citeste ca stanca atarnata in cer, desprinsa de peisaj — asa
+	# arata `creastaSpate52` in `H_r2_hero.png`, coltul din dreapta sus. Deci
+	# se scade cota terenului din inaltimea ceruta, si sub 3,5 m ramasi piesa
+	# se sare: acolo dealul face treaba, nu bolovanul.
+	# Piesa si scara se aleg DUPA ce se stie pozitia finala: garda de traseu
+	# strain din `_place` poate muta piesa lateral, si acolo terenul are alta
+	# cota. Prima varianta calcula plafonul la distanta NOMINALA, si asa a
+	# ramas `creastaSpate54` — kopje_camp intreg pe un teren cu 14,7 m mai sus
+	# decat soseaua, cu varful la 28 m, atarnat in cerul din dreapta sus.
+	_place("kopje_camp", base, frac, side_sign, gap, _rng.randf_range(0.0, TAU),
+		1.0, mode, h_m)
+
+
+## UMERII GURII — cele doua mase care inchid spartura PE VERTICALA.
+##
+## Defectul numit de critic pe cadrul erou al rundei 1: blocurile de la buza
+## taieturii se termina pe la o treime din inaltimea cadrului si lasa cer plus
+## orizont vizibil intre ele, deci „spartura" citea ca un drum drept cu pietre
+## pe margini. Cifrele de pe `H_r2_before.png`: cer 10.2 % in banda centrala,
+## ecart de silueta 0.133 pe toata latimea (linie plata).
+##
+## De ce NU se rezolva marind bolovanii, cum ar veni la indemana: fetele
+## `crater_gap` au 12,36 m si sunt deja cea mai inalta piesa de acolo, iar
+## `kopje_boulder_c` are 4,32 m — ca sa ajunga la 18 m ii trebuie scara 4.2,
+## adica dala triplanara se intinde de patru ori si iese o piatra de plastic.
+## Piesa corecta exista deja in kit: `kopje_camp`, 13,22 m, cu platou si
+## trepte — la scara 1.25-1.45 da 16,5-19 m fara sa intinda textura.
+##
+## Plasarea: perechea sta la intrarea in fete (unde e privita din fata la
+## ~28 m in cadrul erou), retrasa lateral cat sa NU intre in carosabil dar
+## destul de aproape cat sa acopere unghiul dintre coloane. Plafonul
+## frustumului la 28 m e 10 + 0.093*28 = 12,6 m, deci varful unei mase de 18 m
+## IESE din cadru sus — exact ce se cere: cerul dintre coloane dispare fiindca
+## masa il taie, nu fiindca e vazuta intreaga.
+func _umerii_gurii() -> void:
+	var n := _track.baked.size()
+	var f0 := float(_gap_idx) / float(n)
+	var df := (GAP_LEN_Z * 0.5) / _m_per_frac / 1000.0
+	var entry := f0 - df
+	var exit := f0 + df
+	# Perechea dominanta, imediat in fata fetelor, una pe fiecare parte.
+	# Asimetrice ca inaltime (18 / 15,5 m): doua mase egale citesc ca poarta
+	# de fabrica, referinta are o stanca vizibil mai mare decat cealalta.
+	_place_h("umarGura", entry - 0.0006, -1.0, 6.5, 18.5)
+	_place_h("umarGura", entry - 0.0014, 1.0, 4.5, 17.0)
+	# A doua pereche, in spatele primei si mai departe lateral: masa continua
+	# dincolo de gura, deci silueta nu cade brusc la iarba dupa umeri.
+	_place_h("umarSpate", entry + 0.0022, -1.0, 12.0, 16.0)
+	_place_h("umarSpate", entry + 0.0040, 1.0, 9.0, 15.0)
+	# Umarul din DREAPTA cadrului erou: in `H_r2_hero.png` stanga era inchisa
+	# de o masa care iese din cadru, iar dreapta ramasese cu cer si orizont
+	# pana jos. Cauza: garda de traseu strain trage piesele din dreapta inapoi
+	# spre ax (traseul se intoarce pe z=165 pe partea aia), deci ce era departe
+	# lateral a fost sarit. Se compenseaza cu piese APROAPE, nu departe.
+	_place_h("umarDreapta", entry - 0.0042, 1.0, 3.5, 14.0)
+	_place_h("umarDreapta", entry - 0.0072, 1.0, 5.0, 11.0)
+	# La IESIRE, ca taietura sa se inchida si in oglinda retrovizoare si in
+	# cadrul de context de la 0.858 (unde privesti prin gura spre campie).
+	_place_h("umarIesire", exit + 0.0014, 1.0, 7.0, 16.5)
+	_place_h("umarIesire", exit + 0.0034, -1.0, 8.5, 13.0)
+
+
+## ACACIILE: referinta are coroane la 3-8 m de drum, care se ating, si umbre
+## pe laterit. Inainte de spartura pe ambele parti (cadrul erou le vede
+## lateral), dupa spartura in campia aurie, cu inaltimile mari in fata
+## (plafonul frustumului creste cu distanta).
+func _trees() -> void:
+	var n := _track.baked.size()
+	var f0 := float(_gap_idx) / float(n)
+	var df := (GAP_LEN_Z * 0.5) / _m_per_frac / 1000.0
+	var entry := f0 - df
+	var exit := f0 + df
+	# intrarea (0.826-0.842): patru acacii, alternand, apropiate
+	# UMBRA DE COROANA E CASTIG, NU PIERDERE — verificat prin A/B, nu presupus.
+	# Soarele masurat aici bate cu dot(side, umbra)=0.82: un copac pe stanga (-1)
+	# isi arunca coroana PE drum, spre camera. Cifra de umbra pe cadrul erou era
+	# 32 % fata de 4 % in bara, deci parea limpede ca trebuie stinsa: am mutat
+	# acaciile apropiate pe dreapta si am remasurat. Umbra a scazut la 27 %, dar
+	# LATERITUL a urcat de la 29 % la 36 % — descoperisem carosabilul, si cadrul
+	# a iesit o sosea portocalie goala, vizibil mai rau (`H_r3c_hero.png` langa
+	# `H_r3b_hero.png`). Umbra coroanei e singurul lucru care rupe cei 14 m de
+	# laterit din prim-plan; bara n-are nevoie de ea fiindca acolo drumul e o
+	# panglica subtire vazuta de sus. Deci acaciile mari raman pe STANGA.
+	_place("acacia_umbrella_b", "acaciaIntrare", entry - 0.0085, 1.0, 3.5, 0.6, 1.0, "trunk")
+	_place("acacia_umbrella_a", "acaciaIntrare", entry - 0.0125, -1.0, 4.5, 2.2, 1.05, "trunk")
+	_place("acacia_umbrella_c", "acaciaIntrare", entry - 0.0180, 1.0, 6.0, 4.0, 1.0, "trunk")
+	_place("acacia_umbrella_a", "acaciaIntrare", entry - 0.0235, -1.0, 3.0, 1.4, 0.95, "trunk")
+	_place("acacia_umbrella_b", "acaciaIntrare", entry - 0.0290, 1.0, 5.0, 3.1, 1.1, "trunk")
+	_place("dead_tree", "copacUscat", entry - 0.0150, -1.0, 9.0, 0.8, 1.1, "trunk")
+	# STRATUL DE LA SOL PE APROPIERE (0.836-0.862). In cadrul erou de la 0.84
+	# apropierea avea NUMAI copaci: intre asfalt si trunchiuri ramanea iarba
+	# goala pe 20 m, iar referinta are tufe si pietre chiar pe muchie. Banda
+	# de aici e generata cu jitter (lectia valurilor 1-2: pasul fix se
+	# citeste ca „instante plasate"), cu densitate care CRESTE spre spartura,
+	# si cu piese care se suprapun intre ele.
+	_undergrowth(entry - 0.0330, entry - 0.0010)
+	# PRIM-PLANUL DE LANGA CAMERA (frac entry-0.021 .. entry-0.011, adica 8-20 m
+	# in fata masinii in cadrul erou de la 0.84). Aici era defectul numit de
+	# critic: ultimele doua cincimi ale cadrului aveau 43 % si 56 % laterit, fata
+	# de 11 % si 17 % in bara. Masurat pe randuri, lateritul e CONTINUU de la
+	# x=163 la x=1097 pe banda 4 si de la 80 la 1171 pe banda 5 — adica 73 % si
+	# 85 % din latimea cadrului, dintr-o bucata. Nu e „gol langa banda": e
+	# carosabilul insusi, 14 m latime la 8 m de camera; muchia drumului e deja
+	# in afara cadrului acolo. Deci tufele de la 2-8 m de margine (ce ceruse
+	# critic-ul textual) nu pot atinge banda 5 — sunt in afara ecranului.
+	#
+	# Ce are bara in aceleasi doua benzi, clasificat pe pixeli: 27 % si 9 %
+	# STANCA, si 0 % verde. Noi aveam 1 % si 0 % stanca. Diferenta nu e stratul
+	# de tufe, sunt MASELE DE GRANIT taiate de marginile cadrului. Deci se pun
+	# mase mari lipite de umarul drumului, aproape de camera: la 12 m distanta
+	# un bloc de 8 m umple coltul de jos, fiindca privirea vine de la 10 m
+	# inaltime si cade peste el.
+	_prim_plan(entry)
+	# O acacie DINCOLO de fata din stanga (fata scalata tine pana la 28,5 m de
+	# ax; la 21 m copacul era IN stanca). Pe dreapta nu: linia de sosire trece
+	# la z=165, la 40 m de axa noastra, si coroana ar fi cazut peste ea
+	# (probe_manual: „IN DRUM" la 11,6 m de axa ei).
+	_place("acacia_umbrella_c", "acaciaPeste", f0 - 0.004, -1.0, 30.0, 1.0, 1.15, "trunk")
+	# iesirea si campia (0.865-0.895)
+	_place("acacia_umbrella_a", "acaciaCampie", exit + 0.0080, 1.0, 3.0, 0.2, 1.0, "trunk")
+	_place("acacia_umbrella_c", "acaciaCampie", exit + 0.0120, -1.0, 5.0, 2.9, 1.0, "trunk")
+	_place("acacia_umbrella_b", "acaciaCampie", exit + 0.0175, 1.0, 4.0, 1.7, 0.95, "trunk")
+	_place("acacia_umbrella_a", "acaciaCampie", exit + 0.0230, -1.0, 3.5, 3.6, 1.05, "trunk")
+	_place("acacia_umbrella_c", "acaciaCampie", exit + 0.0290, 1.0, 7.0, 0.9, 1.1, "trunk")
+	_place("acacia_umbrella_b", "acaciaCampie", exit + 0.0340, -1.0, 4.5, 2.3, 1.0, "trunk")
+	# etajul de mijloc: 15-30 m de muchie, rar
+	_place("acacia_umbrella_c", "acaciaMijloc", exit + 0.0100, 1.0, 18.0, 0.4, 1.1, "trunk")
+	_place("acacia_umbrella_b", "acaciaMijloc", exit + 0.0200, -1.0, 22.0, 2.0, 1.05, "trunk")
+	_place("acacia_umbrella_a", "acaciaMijloc", exit + 0.0300, 1.0, 26.0, 1.2, 1.0, "trunk")
+	_place("dead_tree", "copacUscat", exit + 0.0150, 1.0, 12.0, 2.5, 1.0, "trunk")
+	# euphorbii in iarba, la drum, si cateva pietre razlete (cazute din perete)
+	for j in 8:
+		var f := exit + 0.0060 + 0.0036 * float(j)
+		var sgn := -1.0 if j % 2 == 0 else 1.0
+		_place("euphorbia", "euphorbiaCampie", f, sgn, _rng.randf_range(1.2, 6.0),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.7, 1.0), "trunk")
+	for j in 5:
+		var f := exit + 0.0050 + 0.0050 * float(j)
+		var sgn := 1.0 if j % 2 == 0 else -1.0
+		_place("kopje_boulder_b" if j % 3 == 0 else "kopje_boulder_a", "piatraCazuta", f, sgn,
+			_rng.randf_range(2.5, 9.0), _rng.randf_range(0.0, TAU), _rng.randf_range(0.7, 1.0),
+			"hull" if j % 3 == 0 else "none")
+
+
+## Masele de granit din PRIM-PLAN, cele care sunt taiate de marginile de jos
+## ale cadrului. Sunt separate de `_undergrowth` fiindca au alt rol: aia
+## imbraca muchia drumului la 30-60 m, astea intra in cadru la 8-20 m si
+## rup panglica de laterit pe orizontala.
+##
+## Inaltimile sunt MICI dinadins (5-9 m, nu 15-19 ca umerii gurii): la 12 m
+## de camera plafonul frustumului e 10 + 0.093*12 = 11,1 m, dar o masa care
+## iese din cadru sus in prim-plan devine un zid care ascunde spartura. Se
+## cere sa fie taiata de marginea LATERALA, nu de cea de sus.
+##
+## `gap` mic (0.6-2.5 m de umar): coltul de jos al cadrului la 10 m distanta
+## e la ~9 m lateral de ax, deci o piesa la 8-9 m de ax intra in cadru; una
+## la 15 m nu apare deloc. Toate merg prin `_place`, deci trec prin garda de
+## traseu strain si prin plafonul de inaltime pe pozitia finala.
+func _prim_plan(entry: float) -> void:
+	# RUNDA 4 — SCHIMBARE DE METODA, nu de parametru. Rundele 2 si 3 au mutat
+	# aceleasi mase tot mai aproape de umar (9,5 m -> 4,5 m) si criticul a dat
+	# acelasi verdict: „stanca 0 % in treimea de jos". Inainte de a le mai
+	# apropia o data am PROIECTAT frustumul in loc sa-l estimez, cu parametrii
+	# reali ai camerei de joc (ChaseCamera: 12,5 m in spate, 10 m sus, FOV 68
+	# vertical, 1280x720, tinta la 5 m in fata si 0,4 m inaltime):
+	#
+	#   sol y=0 la z=+30 m fata de masina -> y/H = 0.294
+	#   sol y=0 la z=+10 m                -> y/H = 0.438
+	#   sol y=0 la z= +2 m                -> y/H = 0.576
+	#   sol y=0 la z=  0 m (dreptul masinii) -> y/H = 0.630
+	#   sol y=0 la z= -4 m (masina l-a trecut) -> y/H = 0.783
+	#
+	# Deci pragul criticului, y > 0.62*H, incepe FIX la dreptul masinii si
+	# contine numai lume de la z <= 0. Orice piesa asezata IN FATA masinii —
+	# si toate cele din rundele 2 si 3 erau in fata, la 8-20 m — se proiecteaza
+	# deasupra pragului oricat de aproape de umar ar fi: la z=0 chiar si baza
+	# unui bolovan e la 0.630, iar varful lui urca spre 0.35. De aia trei runde
+	# de „mai aproape, mai jos" n-au miscat cifra: cautau in intervalul gresit.
+	#
+	# Regula corecta, derivata din aceleasi proiectii:
+	#   * z intre -7 si -1 m fata de masina (piesa pe care masina TOCMAI a
+	#     trecut-o), adica frac intre f-0.0035 si f-0.0005 la 2 m/0.001;
+	#   * lateral 8-14 m de ax: la z=-4 muchia drumului (x=7) cade la px 335 si
+	#     x=15 iese din cadru la px -13, deci fereastra utila e ingusta si
+	#     asezarea „la 4,5-9,5 m de umar" (adica x=11,5..16,5) era pe jumatate
+	#     in afara ecranului;
+	#   * inaltime 2,5-4,5 m, nu 5-7,5: la z=-4 si x=10 varful unei mase de 3 m
+	#     e la y/H=0.640, deci piesa e INTREAGA sub prag; una de 6 m iese la
+	#     0.42 si isi pune majoritatea pixelilor in banda de mijloc, unde noi
+	#     eram deja la paritate cu bara.
+	#
+	# Si o consecinta de fond: cadrul erou e o singura fractie, dar masina trece
+	# prin toate. Un pinten la 0.838 ar fi un truc de un cadru. Deci banda e
+	# CONTINUA pe toata apropierea si prin spartura, cu pas de ~0.0022 (4,5 m)
+	# si alternanta de parte — la orice fractie din interval exista o masa in
+	# spatele-lateralul masinii.
+	var f := entry - 0.0330
+	var k := 0
+	while f < entry + 0.0060:
+		# AMBELE parti la fiecare pas, nu alternanta. Masurat pe cadrul erou
+		# dupa prima varianta (alternanta cu ruperi de cate doua): pe dreapta
+		# erau mase la z=-5.2, -2.6 si +0.1 — fix in banda de jos, si acolo
+		# cadrul se citea bine — dar pe stanga nu era nimic intre z=-8.7 si
+		# +4.8, adica exact coltul din stanga-jos ramanea gol. Si tocmai acolo
+		# cade umbra coroanei: jumatatea de jos-stanga a cadrului (px 0-540)
+		# masoara v~0.1, o pata neagra pe laterit gol. Cu masa pe ambele parti
+		# umbra cade PE granit, nu pe sosea.
+		#
+		# Ca sa nu iasa alee, ruperea se muta din alternanta in DISTANTA: una
+		# din parti sta la lateralul minim, cealalta e impinsa cu 0-3 m, si
+		# rolurile se schimba la fiecare pas.
+		var push_l: float = 0.0 if k % 2 == 0 else _rng.randf_range(0.8, 3.0)
+		var push_r: float = _rng.randf_range(0.8, 3.0) if k % 2 == 0 else 0.0
+		for sgn: float in [-1.0, 1.0]:
+			_pereche_prim_plan(f, sgn, push_l if sgn < 0.0 else push_r)
+		f += _rng.randf_range(0.0018, 0.0026)
+		k += 1
+	# Coliziune "none" pe toate: A/B-ul din runda 3 (o rulare cu `_prim_plan`
+	# stins, una cu el pornit) a atribuit 2 pereti si 3.0 % lent pe felia
+	# 0.85-0.90 hull-ului lui `kopje_camp`, care nu e cilindrul socotit de garda
+	# mea de raza. Piesele astea sunt decor de prim-plan langa umar, in afara
+	# oricarei traiectorii jucabile; masele care chiar inchid spartura
+	# (`_umerii_gurii`, `creasta`) raman cu hull.
+
+
+## O masa de prim-plan cu molozul si tufa ei, pe partea si la impingerea date.
+func _pereche_prim_plan(f: float, sgn: float, push: float) -> void:
+	# LATERAL ABSOLUT (gap negativ), nu degajare fata de umar: `half_width`
+	# aici e 9,0 m, iar raza unei mase scalate mai adauga 2-3 m, asa ca
+	# „1-6,5 m de umar" a asezat piesele la 17-25 m lateral — masurat pe
+	# .tscn-ul rezultat. Fereastra utila din proiectie e 11,8-14,2 m: sub ea
+	# marginea piesei intra in carosabil (half 9,0 + raza), peste 14,2 piesa
+	# iese lateral din cadru la z=-4 m.
+	# RUNDA 5. Criticul rundei 4 a numit podeaua de savana: pe tot cadrul
+	# (y>0.18H) iarba masura 15 % la noi fata de 61 % in bara, iar drumul 41 %
+	# fata de 14 %. Cauza nu e ca lipseste iarba din teren, ci ca nu se VEDE:
+	# cu lateralul 11,8-13,4 m si `half_width` 9,0, marginea unei mase de
+	# granit (raza 2-3 m dupa scara) ajunge la 0-2 m de asfalt — granitul creste
+	# direct din umar si strange podeaua intr-o fasie de sub un metru, exact
+	# cum se vede in captura. In bara, intre laterit si primul bloc sunt 6-10 m
+	# de iarba pe fiecare parte, si de aia drumul citeste ca panglica PRIN
+	# lume, nu ca albie de cariera.
+	#
+	# Deci lateralul urca la 16-20 m. Verificat pe proiectie sa nu repet
+	# greseala rundei 3 (piese in afara cadrului): la z=-4 m fata de masina un
+	# punct la x=18 cade la px -300 din 1280, adica in afara — DAR piesele
+	# astea nu mai sunt cerute in coltul de jos, banda de jos si-a atins pragul
+	# in runda 4 (stanca 16,1 % fata de 12 % cerut). Rolul lor acum e la 15-40 m
+	# in fata, unde x=18 e bine in cadru (la z=+20 m, px 455). Ca sa nu piara
+	# din prim-plan cu totul, inaltimile cresc odata cu lateralul: la 18 m si
+	# z=-4 o masa de 5 m are varful la y/H=0.60, deci tot in treimea de jos.
+	var gap: float = -(_rng.randf_range(16.0, 19.0) + push)
+	var h_m: float = _rng.randf_range(3.5, 6.0)
+	_place_h("primPlan", f, sgn, gap, h_m, "none")
+	# a doua masa, mai mica si mai in spate: in bara granitul vine in grupuri,
+	# nu in exemplare singuratice.
+	if _rng.randf() < 0.55:
+		_place_h("primPlan", f + _rng.randf_range(0.0004, 0.0012), sgn,
+			gap - _rng.randf_range(1.2, 2.8), _rng.randf_range(3.0, 4.5), "none")
+	# moloz la talpa (memoria `patru-defecte-de-diorama` #3: fara moloz stanca
+	# pare infipta in plan)
+	for r in 2:
+		_place("kopje_boulder_a", "molozPrimPlan", f + _rng.randf_range(-0.0010, 0.0010),
+			sgn, gap + _rng.randf_range(-1.6, 0.7),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.45, 0.95), "none")
+	# tufa verde la baza, cum cere brief-ul
+	if _rng.randf() < 0.5:
+		_place("euphorbia", "tufaPrimPlan", f + 0.0007, sgn,
+			gap + _rng.randf_range(0.4, 1.6),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.4, 0.7), "none")
+	# PODEAUA eliberata (runda 5): intre umar si noul rand de granit sunt acum
+	# 7-11 m de iarba goala pe fiecare parte. Goala inseamna suprafata plata de
+	# o singura tenta, adica exact defectul #1 din memoria `patru-defecte-de-
+	# diorama`. In bara podeaua are tufe rotunde mici si iarba inalta risipita,
+	# NU bolovani (aia sunt gruparea de la baza stancilor). Deci aici merg doar
+	# piese joase, sub 1,2 m, care nu ridica silueta si nu fura din verde.
+	for r in 3:
+		var gp: float = _rng.randf_range(4.5, 12.0)
+		var jf := f + _rng.randf_range(-0.0016, 0.0016)
+		if _rng.randf() < 0.45:
+			_place("euphorbia", "tufaPodea", jf, sgn, gp,
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.30, 0.5), "none")
+		else:
+			_place("kopje_boulder_a", "pietricicaPodea", jf, sgn, gp,
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.22, 0.42), "none")
+
+## Tufe si pietre marunte LA MUCHIA drumului, pe intervalul dat. Nu e un tiv
+## regulat: pasul are jitter de peste jumatate din el, distanta laterala e
+## trasa din doua cozi (majoritatea la 0.3-3 m de muchie, cateva la 6-10 m),
+## iar densitatea creste liniar spre capatul dinspre spartura. Piesele au voie
+## sa se atinga — asta le face sa citeasca drept tufaris, nu drept obiecte.
+func _undergrowth(f_from: float, f_to: float) -> void:
+	var span := f_to - f_from
+	var f := f_from
+	var k := 0
+	while f < f_to:
+		# 0 la inceputul apropierii, 1 langa spartura
+		var t: float = clampf((f - f_from) / maxf(span, 1e-6), 0.0, 1.0)
+		for sgn: float in [-1.0, 1.0]:
+			# doua-trei piese pe pas langa spartura, una la inceput
+			var reps := 1 + int(_rng.randf() < 0.35 + 0.55 * t) + int(_rng.randf() < 0.15 + 0.45 * t)
+			for r in reps:
+				var near := _rng.randf() < 0.72
+				# minimul e 0.7, nu 0.2: sub el marginea piesei intra in asfalt
+				# (generatorul dadea 6 avertismente de degajare) — fara sa
+				# blocheze (coliziune "none"), dar o tufa care creste din
+				# carosabil se vede de la 30 m.
+				# Minimul a urcat de la 0.7 la 1.4: `probe_manual` marcheaza
+				# „IN DRUM" 14 piese de aici, si nu fiindca plutesc (toate ies
+				# „ok" pe cota) ci fiindca marginea lor sta pe asfalt. Raza
+				# unui `kopje_boulder_a` la scara 0.75 e ~0.8 m, deci sub 1.4 m
+				# de umar piesa creste din carosabil — se vede de la 30 m chiar
+				# daca n-are coliziune.
+				var gap: float = _rng.randf_range(1.4, 3.6) if near else _rng.randf_range(5.0, 11.0)
+				var jf := f + _rng.randf_range(-0.0009, 0.0009)
+				# Amestecul e 0.30 euphorbia / 0.70 piatra, nu 0.58/0.42, si
+				# euphorbia e mica (0.35-0.6, nu 0.5-0.95). Motiv masurat pe
+				# cadrul erou al rundei: cu 55 de exemplare mari, euphorbia —
+				# care e o planta COLUMNARA — umplea campul cu ce citeste ca
+				# saguaro verde-deschis, adica desert american, nu savana. In
+				# bara, stratul de la baza stancilor e din tufe mici si
+				# rotunde, iar verdele mare vine DOAR din coroanele acaciilor.
+				if _rng.randf() < 0.30:
+					_place("euphorbia", "tufaApropiere", jf, sgn, gap,
+						_rng.randf_range(0.0, TAU), _rng.randf_range(0.35, 0.6), "none")
+				else:
+					_place("kopje_boulder_a", "piatraApropiere", jf, sgn, gap,
+						_rng.randf_range(0.0, TAU), _rng.randf_range(0.3, 0.75), "none")
+		# pasul se strange spre spartura (0.0034 -> 0.0016 in fractii)
+		f += _rng.randf_range(0.6, 1.4) * (0.0034 - 0.0018 * t)
+		k += 1
+
+
+## KICKERUL de la iesire: HazardMarker kind=6 (FLYOFF) — rampa de 12 m urca
+## pana la 2,8 m si buza verticala te arunca pe lateritul din campie. Incepe
+## chiar dupa capatul fetelor, ca sa zbori DIN spartura, nu inainte de ea.
+func _kicker() -> void:
+	var n := _track.baked.size()
+	var f0 := float(_gap_idx) / float(n)
+	var df := (GAP_LEN_Z * 0.5) / _m_per_frac / 1000.0
+	# Rampa (12 m, track.gd FLYOFF_RISE_LEN) incepe cu 12 m inaintea CENTRULUI
+	# sparturii, deci buza e la mijlocul taieturii. De ce nu la capat: gravitatia
+	# jocului e 28 m/s2 (Car.gravity), deci la 30 m/s zborul e ~25 m si cu turbo
+	# ~35 m; drumul coteste 16 grade pe 0.882-0.890, iar o aterizare dincolo de
+	# 0.890 ar cadea cu 3-4 m in afara axei. Cu buza la 0.874 aterizezi la
+	# 0.886-0.891: in gura sparturii, pe laterit, inca pe axa (abatere <3 m).
+	var fk := f0 - 12.0 / _m_per_frac / 1000.0
+	var p := _track.baked[_idx(fk)]
+	print("; kicker FLYOFF la frac %.4f: rampa de la (%.2f, %.2f, %.2f), buza la ~%.4f" % [
+		fk, p.x, p.y, p.z, fk + 12.0 / _m_per_frac / 1000.0])
+	_haz.append('[node name="H_Kicker" type="Marker3D" parent="Hazarduri"]')
+	_haz.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.2f, %.2f, %.2f)" % [p.x, p.y, p.z])
+	_haz.append("gizmo_extents = 3.0")
+	_haz.append('script = ExtResource("hzm")')
+	_haz.append("kind = 6")
+	_haz.append("")
+
+
+# ------------------------------------------------------------------ asezarea
+
+## Distanta de la un punct pana la CEA MAI APROPIATA portiune de traseu, pe
+## tot turul — nu doar pe felia noastra. Fara ea o piesa impinsa lateral din
+## zona H aterizeaza pe alta bucata de sosea: aici traseul se intoarce pe
+## z=165, la ~40 m de axa sparturii, si ProbeLaneClear a prins doua mase
+## (`creasta45`, `creastaSpate57`) chiar pe banda de la frac 0.07-0.11.
+func _dist_orice_drum(x: float, z: float) -> float:
+	var best := INF
+	var n := _track.baked.size()
+	for j in n:
+		var b := _track.baked[j]
+		var d2 := (b.x - x) * (b.x - x) + (b.z - z) * (b.z - z)
+		if d2 < best:
+			best = d2
+	return sqrt(best)
+
+
+func _place(model: String, base: String, frac: float, side_sign: float,
+		gap: float, yaw: float, scl: float, mode: String = "hull",
+		h_dorit: float = 0.0) -> void:
+	var i := _idx(frac)
+	var p := _track.baked[i]
+	var s := _track._side_at(i) * side_sign
+	var half := _track.width_at_index(i)
+	var r: float = BASE_R.get(model, 0.6) * scl
+	# `gap` NEGATIV inseamna: distanta ABSOLUTA de la ax, nu de la umar.
+	# Runda 4, masurat pe cadrul erou: `half_width` la 0.836-0.842 e 9.0 m, nu
+	# 7.0 cum spunea comentariul (7.0 e cifra din INTERIORUL sparturii,
+	# 0.863-0.884). Cu `d = half + gap + r` si r-ul unei mase scalate, cele
+	# zece piese de prim-plan au aterizat la 17-25 m lateral — iar proiectia
+	# spune ca la z=-4 m fata de masina lateralul 15 m e deja in afara cadrului
+	# (px -13 din 1280). Deci pentru ele conteaza lateralul absolut, nu
+	# degajarea fata de umar, si e cerut ca atare.
+	var d: float = (-gap) if gap < 0.0 else (half + gap + r)
+	var q := p + s * d
+	var g := _sol_real(q.x, q.z)
+	# Garda de traseu STRAIN: marginea piesei trebuie sa stea la >= 2 m de
+	# ORICE carosabil, nu doar de al nostru. Piesele solide se muta inapoi
+	# spre ax pana incap; daca nici lipite de banda noastra nu incap, se sar.
+	if mode != "none":
+		var tries := 0
+		while _dist_orice_drum(q.x, q.z) < r + 9.0 and tries < 12:
+			d -= 1.5
+			if d - r < half + 0.5:
+				print("; SARIT %s la frac %.4f: nu incape intre banda noastra si alt drum" % [
+					model, frac])
+				return
+			q = p + s * d
+			tries += 1
+		g = _sol_real(q.x, q.z)
+	# Cu inaltime ceruta (masele de granit): abia ACUM, pe pozitia finala, se
+	# stie cat urca terenul si deci ce mai ramane de pus deasupra soselei.
+	if h_dorit > 0.0:
+		var h_ef: float = h_dorit - maxf(g - p.y, 0.0)
+		# Pragul era 3.5 m si taia tocmai masele de prim-plan din runda 4, care
+		# sunt joase DINADINS (2,5-4,5 m): la z=-4 m fata de masina o masa de
+		# 3 m are varful la y/H=0.640, adica intreaga sub pragul de 0.62 al
+		# criticului, pe cand una de 6 m isi pune pixelii in banda de mijloc.
+		# Sub 1,8 m insa piesa dispare sub muchia dealului, deci acolo se sare.
+		if h_ef < 1.8:
+			print("; SARIT %s la frac %.4f: terenul urca %.1f m, ar ramane %.1f m" % [
+				base, frac, g - p.y, h_ef])
+			return
+		if h_ef >= 9.0:
+			model = "kopje_camp"
+		elif h_ef >= 3.6:
+			model = "kopje_boulder_c"
+		else:
+			model = "kopje_boulder_b"
+		scl = h_ef / float(H1[model])
+		r = float(BASE_R.get(model, 0.6)) * scl
+	if d - r < half + 0.5:
+		_warn += 1
+		print("; ATENTIE %s la frac %.4f: marginea la %.2f m de ax, banda %.2f" % [
+			model, frac, d - r, half])
+	if absf(p.y - g) > 1.2:
+		print("; nota %s la frac %.4f: teren la %.2f m fata de sosea" % [model, frac, g - p.y])
+	_raw(model, base, Vector3(q.x, g, q.z), yaw, Vector3.ONE * scl, mode)
+
+
+func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: Vector3,
+		mode: String) -> void:
+	_n += 1
+	# Baza se construieste in cod si se scrie pe RANDURI (memoria
+	# `tscn-transform-e-pe-randuri`); apoi se citeste inapoi si se compara.
+	var b := Basis(Vector3.UP, yaw) * Basis.from_scale(scl)
+	var s := "Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)" % [
+		b.x.x, b.y.x, b.z.x, b.x.y, b.y.y, b.z.y, b.x.z, b.y.z, b.z.z,
+		pos.x, pos.y, pos.z]
+	var back: Transform3D = str_to_var(s)
+	if (back.basis.z - b.z).length() > 1e-3 or (back.basis.x - b.x).length() > 1e-3:
+		print("; EROARE de serializare pe %s: %s" % [base, s])
+	_out.append('[node name="%s%d" parent="%s" instance=ExtResource("%s")]' % [
+		base, _n, ZONE, RES[model]])
+	_out.append("transform = " + s)
+	if mode != "hull":
+		_out.append('metadata/coliziune = "%s"' % mode)
+	_out.append("")
+
+
+## Cota SOLULUI din coliziunea reala a panzei de teren (portat din
+## gen_decor_capp_a: `_terrain_mesh_y` extrapoleaza, campul e neted).
+func _sol_real(x: float, z: float) -> float:
+	if _terrain_rid == RID():
+		for c in _track.get_children():
+			if str(c.name) == "TerrainBody":
+				_terrain_rid = (c as StaticBody3D).get_rid()
+	var space := _track.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(x, _sus_y, z), Vector3(x, _sus_y - 900.0, z))
+	q.collide_with_areas = false
+	if _terrain_rid != RID():
+		q.collide_with_bodies = true
+		q.exclude = []
+		var hit: Dictionary = space.intersect_ray(q)
+		var guard := 0
+		while not hit.is_empty() and hit["rid"] != _terrain_rid and guard < 24:
+			q.exclude = q.exclude + [hit["rid"]]
+			hit = space.intersect_ray(q)
+			guard += 1
+		if not hit.is_empty() and hit["rid"] == _terrain_rid:
+			return float(hit["position"].y)
+	print("; ATENTIE fara sol la (%.1f, %.1f): se cade pe camp" % [x, z])
+	return _sampler.ground_y(x, z)

@@ -107,8 +107,44 @@ const MARBLE_GREY: int = 29    # marmura Stancii Samanului, faleza Olkhon
 ## REEF_SHALLOW/SEA_DEEP 17/18, TROPICAL_GREEN 21, MARBLE_GREY 29 (cenusa).
 const LAVA_ORANGE: int = 30    # lava incandescenta; accent, nu suprafata mare
 
-## 31 ramane ULTIMA rezerva (magenta in atlas, ca greselile de UV sa sara in
-## ochi). Urmatoarea pista fie reutilizeaza, fie plateste o discutie serioasa.
+## Roz de flamingo, ultimul slot din rezerva (Serengeti, POI G).
+##
+## 31 a fost pana acum marcajul de eroare de UV: NEDEFINIT in HEX, deci
+## generatorul de atlas ii dadea magenta pur, ca o greseala de UV sa sara in
+## ochi. Kitul Serengeti l-a exportat totusi ca slot de penaj — comentariul din
+## tools/blender/build_serengeti_plants.py:49 spunea ca "31 e NEON_PINK
+## (Chongqing)", ceea ce e fals: Chongqing a declarat slotul consumat
+## (track.gd:1295) dar a folosit pana la urma RUST_METAL pentru Yangtze si nu
+## l-a repictat NICIODATA in atlas. Masurat pe atlasul comis: slotul 31 era
+## (255, 0, 255).
+##
+## Consecinta in cadru: penajul magenta inmultit cu sun_color (1.0, 0.90, 0.72)
+## da VERMILION, si asta a costat patru runde de critica. Solutia de ocolire
+## din rundele 1-4 (penajul remapat pe CAR_RED 14) a mutat pasarile de la
+## magenta la rosu-caramida — masurat pe captura hero: sat 0.66 la hue +16.3,
+## fata de sat 0.51 la hue +3.9 in diorama de referinta. Un inel de flamingi
+## nu se putea repara in remap fiindca atlasul chiar NU avea niciun slot in
+## familia rozului (masurate toate 31: niciunul cu hue 300-30 sub sat 0.55).
+##
+## Valoarea e aleasa PRIN COMPENSARE INVERSA, nu la ochi: lumina calda a temei
+## roteste nuanta cu ~+19 grade si urca saturatia HLS cu ~0.10, deci sursa e
+## un roz RECE si palid (#D2A0BE, hue -28, sat 0.46) care ajunge pe ecran la
+## hue +6 / sat 0.53 — banda referintei. Acelasi tipar ca la apa de noapte din
+## Chongqing (memoria "apa stilizata de noapte").
+##
+## Nu strica nimic: 31 nu era desenat de nicio pista (verificat prin grep pe
+## toate cele 8), deci schimbarea e pur aditiva. Ce dispare o data cu ea e
+## marcajul de eroare de UV — de acum sloturile INEXISTENTE (>=32) nu mai au
+## unde sa cada, iar UV-urile gresite ies roz, nu magenta. Costul e asumat:
+## kitul e deja exportat si masurat.
+const FLAMINGO_PINK: int = 31
+##
+## INTEGRARE: E si G au ajuns amandoua la concluzia ca 31 trebuie pictat, dar
+## cu rozuri diferite — E #F0A0AE (mediana pixelilor rozi din referinta) si G
+## #D2A0BE (aceeasi tinta, dar compensata invers pentru lumina calda a temei).
+## Se pastreaza G: e singura care tine cont ca soarele temei roteste nuanta si
+## urca saturatia INAINTE ca pixelul sa ajunga pe ecran, si e verificata pe
+## captura fata de banda referintei (sat 0.51 / hue +3.4 fata de 0.55 / +7.9).
 
 ## Zapada NU are slot propriu — alias peste FOAM_WHITE, vezi nota de mai sus.
 const SNOW_WHITE: int = FOAM_WHITE
@@ -145,7 +181,7 @@ const HEX: Array[String] = [
 	"E54839", "2C82E8", "F2D03C",
 	"54BFB8", "2E5F6B", "E9DCC0", "55535A", "3F7A3C", "E9F2F0", "C4784F",
 	"7FC4C9", "2F6E82", "1A2A33", "A8683A", "4A3526", "B8B4AC",
-	"E8622D",
+	"E8622D", "D2A0BE",
 ]
 
 ## Culoarea unui slot.
@@ -622,6 +658,17 @@ const CLASS_TEXTURES := {
 	# culoare. O fresca nu e o suprafata cu alta culoare, e un DESEN — nicio
 	# tenta pusa peste gresie sau peste tencuiala nu produce un medalion.
 	"fresco": "res://assets/textures/classes/fresco.png",
+	# GRANITUL kopje-urilor din Serengeti (Track14). ACEEASI dala ca
+	# `olkhon_marble` — nu se dubleaza in memorie, se schimba doar tenta
+	# (mecanica volcanic_rock / tuff_cream). Sursa (marble_cliff_04, 12,7 m)
+	# e o faleza NATURALA la scara kopje-ului de 14 m; `alpine_granite` e un
+	# zid de piatra de 2 m si pe stanca naturala a iesit cetate de doua ori
+	# (memoria `clase-pe-piese-de-kit`), iar `rock` e gresie calda de canion
+	# (141,97,58) — granitul de aici sta pe MARBLE_GREY / ROCK_LIGHT.
+	# Masurat: dala olkhon are media (178,165,150), la 3-9% de tinta pe
+	# canal, deci nu cere CLASS_LIFT. Clasa separata fiindca o tenta pe
+	# `olkhon_marble` ar fi revopsit Stanca Samanului de pe Baikal.
+	"granite": "res://assets/textures/classes/olkhon_marble.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -680,6 +727,23 @@ const CLASS_TINT := {
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
+	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
+	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
+	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
+	# E (0.50,0.51,0.58), F (0.42,0.38,0.38), H (0.766,0.810,1.0).
+	# Cinci din sase spun acelasi lucru: tenta veche (0.95,0.97,1.0) era o
+	# corectie de NUANTA pe o dala deja deschisa, iar problema era VALOAREA —
+	# bolovanii ieseau creta (S0.39 V0.83 masurat de C) fata de stanca din
+	# referinta (S0.18 V0.53).
+	# Mecanica, derivata de C si confirmata de restul: o tenta multiplicativa
+	# nu desatureaza singura, doar scaleaza canalele. Ce le departeaza e
+	# soarele cald (1.0, 0.90, 0.72), deci tenta corecta e INVERSUL lui,
+	# normalizat ca sa nu urce valoarea: (1, 1/0.90, 1/0.72) scalat cu ~0.52.
+	# Asta explica de ce A, B, C si E au aterizat toate pe acelasi vector
+	# (albastrul canalul cel mai mare) pornind din capturi diferite.
+	# F (cald si mai inchis) si H (deschis) raman notate ca dezacord de
+	# masuratoare — se re-masoara pe capturile de integrare, pe POI-ul lor.
+	"granite": Color(0.520, 0.578, 0.700),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -815,6 +879,9 @@ const CLASS_TRIPLANAR_SCALE := {
 	# repetitie — vinele si stratele fotografiei se citesc ca geologie, nu ca
 	# tipar care se repeta.
 	"olkhon_marble": 0.09,
+	# Granitul Serengeti: aceeasi dala ca olkhon_marble, aceeasi scara —
+	# world triplanar, ca stratele sa curga din bolovan in kopje.
+	"granite": 0.09,
 	# Zidaria taiata: 0.5 = o repetitie la 2 m, adica SCARA REALA a sursei.
 	# Blocurile din fotografie ies atunci la 20-40 cm, randurile din geometrie
 	# sunt la 0.9 m: doua scari de zidarie care se sprijina una pe alta, exact

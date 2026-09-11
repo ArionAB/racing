@@ -528,7 +528,7 @@ func ground_y(wx: float, wz: float) -> float:
 	y = _carve_branches(y, wx, wz, dist, near_i)
 	y = _carve_lagoon(y, dist, wx, wz, near_i)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
-	y = _carve_channel(y, wx, wz)
+	y = _carve_channel(y, wx, wz, local.x, local.y, half_width_at(near_i))
 	# ULTIMA, si un PLAFON, nu inca un camp: scobitura trebuie sa bata tot ce
 	# ridica teren (media soselei, lacatul local, masivele, benzile), altfel un
 	# singur drum care trece pe deasupra golului il umple la loc. Vezi
@@ -831,7 +831,24 @@ func _carve_lagoon(y: float, road_dist: float, wx: float, wz: float,
 ## Fundul e PLAT (cota drumului minus `depth`), nu ondulat ca fundul de mare:
 ## un senal navigabil e dragat. In plus, un fund plat garanteaza acelasi pescaj
 ## pe toata lungimea, deci vaporul nu iese din apa la un capat.
-func _carve_channel(y: float, wx: float, wz: float) -> float:
+## Cati metri de racord are malul vadului de o parte si de alta a asfaltului.
+##
+## Fara racord albia s-ar sapa si SUB carosabil, iar drumul ar ramane o panglica
+## suspendata peste transee (masurat pe Serengeti POI C: 2.7 m de gol sub roti).
+## Cu el, sapatura se stinge pe ultimii metri dinainte de marginea drumului, deci
+## asfaltul isi pastreaza patul si masina intra in apa, nu in aer.
+const FORD_ROAD_BLEND: float = 7.0
+
+## Cu cati metri sub cota asfaltului ramane patul vadului pe banda.
+##
+## E chiar ADANCIMEA APEI de pe drum: suprafata canalului sta la
+## `water_y_drop` sub sosea, iar patul la cifra asta, deci diferenta lor e
+## stratul prin care trec rotile. Brief-ul POI C cere ~30 cm.
+const FORD_BED_SINK: float = 0.35
+
+
+func _carve_channel(y: float, wx: float, wz: float, road_dist: float = INF,
+		road_y: float = 0.0, road_half: float = 0.0) -> float:
 	for ch in _channels:
 		var o: Vector3 = ch["origin"]
 		# Groapa circulara (vezi TrackChannel.pit): acelasi profil de mal, dar
@@ -865,7 +882,23 @@ func _carve_channel(y: float, wx: float, wz: float) -> float:
 		var run := 1.0 - smoothstep(reach - float(ch["fade"]), reach, t)
 		if run <= 0.0:
 			continue
-		y = _smin(y, o.y - float(ch["depth"]) * lat * run, SMOOTH_RAVINE_K)
+		var target := o.y - float(ch["depth"]) * lat * run
+		# VAD: sub carosabil sapatura se stinge, altfel drumul ramane suspendat
+		# peste propria albie. Racordul e pe distanta perpendiculara la ax, nu pe
+		# indice: la un pas de esantionare de ~6 m, o masca pe indici ar lasa
+		# praguri de latimea unui segment exact pe malul prin care se intra.
+		if bool(ch.get("ford", false)) and road_dist < INF:
+			# Patul soselei se reface pana SUB cota ei, nu pana la ea: apa
+			# vadului sta la `water_y_drop` sub asfalt, iar daca patul ar urca
+			# exact la road_y toate patratele de apa de pe carosabil ar iesi
+			# uscate si suprafata s-ar autoculega (masurat: 0 quad-uri umede pe
+			# banda). Cu buza la road_y - FORD_BED_SINK raman cei ~30 cm de apa
+			# prin care se trece.
+			var over := 1.0 - smoothstep(road_half, road_half + FORD_ROAD_BLEND,
+				road_dist)
+			if over > 0.0:
+				target = lerpf(target, road_y - FORD_BED_SINK, over)
+		y = _smin(y, target, SMOOTH_RAVINE_K)
 	return y
 
 
@@ -1056,6 +1089,27 @@ func _lagoon_mix(wx: float, wz: float) -> float:
 	if not Geometry2D.is_point_in_polygon(p, _lagoon_poly):
 		sd = -sd
 	return smoothstep(-lagoon_out, lagoon_in, sd)
+
+
+## Distanta cu semn (m) de la un punct la CONTURUL lagunei: pozitiva inauntrul
+## poligonului, negativa in afara, 1e9 fara laguna. E cifra din spatele lui
+## `_lagoon_mix`, expusa ca atare fiindca CRUSTA DE SODA (tema serengeti,
+## `lagoon_crust_*` in Track._build_terrain) e o banda de teren masurata in
+## metri de la mal, nu o fractie din amestecul de adancime.
+func lagoon_signed_dist(wx: float, wz: float) -> float:
+	var n := _lagoon_poly.size()
+	if n < 3:
+		return 1e9
+	var p := Vector2(wx, wz)
+	var d_sq := INF
+	for i in n:
+		var q := Geometry2D.get_closest_point_to_segment(
+			p, _lagoon_poly[i], _lagoon_poly[(i + 1) % n])
+		d_sq = minf(d_sq, p.distance_squared_to(q))
+	var sd := sqrt(d_sq)
+	if not Geometry2D.is_point_in_polygon(p, _lagoon_poly):
+		sd = -sd
+	return sd
 
 
 ## Minim neted polinomial: coincide cu minf departe de intersectie, rotunjeste

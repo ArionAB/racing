@@ -405,56 +405,361 @@ static func themes() -> Dictionary:
 		"serengeti": {
 			# SAVANA SUB CER DE FURTUNA (docs/track_briefs/serengeti.md §4).
 			# Prima trecere: doar lumina, cerul, solul si apa; kitul de
-			# savana si clasele de textura vin cu POI-urile. `props` cade pe
-			# kitul de desert (acacii/kopje-uri nu exista inca), `decor` e
-			# stins ca la Cappadocia — decorul se pune de mana, pe POI.
+			# savana si clasele de textura vin cu POI-urile. `decor` e stins
+			# ca la Cappadocia — decorul se pune de mana, pe POI.
+			# (Istoric: `props` a fost o vreme "desert" cu nota „acacii/kopje-uri
+			# nu exista inca". Nota NU mai e valabila din PR #376 — kitul de
+			# savana exista si `props` e "serengeti" mai jos. Comentariul
+			# invechit a costat o runda de critica: un critic l-a citit ca pe
+			# cod viu si a raportat cactusi generati procedural, desi cu
+			# `decor: "none"` TrackDecor nici nu ruleaza pe pista asta.)
 			#
 			# Iarba aurie: DRY_VEGETATION (#AF9F4E) e ocru-oliv, nu nisip —
 			# exact registrul „auriu de iarba uscata" din brief, si diferit
 			# de SAND_MID-ul Dunelor. Verdele de altitudine (buza, crater)
 			# vine mai tarziu, ca banda de teren peste o cota (rock_band_tint
 			# ca la Cappadocia), nu ca alt slot.
-			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
+			# POI B (runda 1), masurat pe captura --gamecam la 0.06 fata de
+			# referinta: iarba iesea (205,178,91) sat 0.56 pe DRY_VEGETATION
+			# curat, referinta are (185,148,42) sat 0.77 — mai saturata si
+			# putin mai inchisa. Tenta scade albastrul (raportul iesire/tenta
+			# masurat ~1.15 pe toate canalele), nu schimba nuanta (44-46).
+			"ground_tint": Color.html("A88E34"),
 			# Cerul de furtuna: violet-gri inchis sus, o banda calda jos
 			# (soarele sub nori). E cel mai ieftin element de identitate de
 			# pe pista: cu +5 grade peste orizontala, cerul e banda de sus a
 			# ecranului pe orice dreapta (brief §2.0).
-			"sky_top": Color.html("3A3548"),
-			"sky_horizon": Color.html("9C8A80"),
+			# POI B: referinta are nori (72,72,94) sus si o BANDA CALDA
+			# (243,189,127) chiar deasupra orizontului — soarele sub nori.
+			# Cu fog_sky_affect 0.08 cerul se vede cu culorile lui, deci banda
+			# vine din sky_horizon, nu din ceata (care ramane gri-violet, ca
+			# sa nu adauge saturatie pe teren la distanta).
+			# POI B runda 1b, masurat: cu D9A878 banda de cer iesea (224,185,144)
+			# piersica pe 12 % din cadru; referinta are cerul (124,108,111)
+			# violet-gri de furtuna aproape peste tot, banda calda e o dunga la
+			# colt. Orizontul vine in familia cetii, doar putin mai cald.
+			"sky_top": Color.html("1C1C2A"),
+			"sky_horizon": Color.html("645458"),
 			"sky_cover_alpha": 0.0,
-			# Ceata IN FAMILIA SOLULUI (memoria `ceata-in-familia-solului`):
-			# gri-cald desaturat, sub saturatia ierbii, ca departarea sa se
-			# spele, nu sa se coloreze.
-			"fog": Color(0.66, 0.63, 0.58),
-			"hill_color": Color(0.62, 0.56, 0.40),
+			# Ceata de adancime acopera TOT cerul cand `fog_sky_affect` sta pe
+			# implicitul 1.0 (cerul e la adancime infinita): masurat pe captura
+			# --gamecam la 0.08, banda de cer iesea (218,204,168) — culoarea
+			# cetii, nu a cerului — oricat de inchise erau sky_top/sky_horizon.
+			# Cu 0.08 cerul de furtuna se vede (banda de sus masurata
+			# violet-gri, nu crem), iar ceata calda ramane pe teren si lasa
+			# doar banda calda de la orizont (brief §4).
+			"fog_sky_affect": 0.08,
+			# Ceata IN FAMILIA CERULUI, nu a solului. Masurat pe --gamecam la
+			# 0.08 (runda 2, fog gri-cald 0.66/0.63/0.58): cerul propriu-zis e
+			# doar banda de 3-6% de sus (relieful craterului urca pana la
+			# 0.06 din cadru), iar tot ce e sub ea, pana la iarba, e teren
+			# inghitit de ceata la 250-300 m -> (222,205,156), crem luminos =
+			# zi insorita. Ce vede jucatorul ca „cer" e de fapt ceata, deci
+			# ceata trebuie sa fie violet-gri ca cerul de furtuna. Saturatia
+			# ramane SUB cea a ierbii (memoria `ceata-in-familia-solului` e
+			# despre saturatie: ceata nu are voie sa ADAUGE saturatie cu
+			# distanta), doar nuanta trece in familia cerului.
+			# INTEGRARE: B a masurat ceata de la nivelul campiei (orizont
+			# inchis), E de pe buza craterului (bolul inaintea cetii). Pastrata
+			# masuratoarea lui E — e cea mai recenta si singura facuta pe un
+			# cadru unde ceata chiar acopera subiectul (malul opus la 200-400 m).
+			# INTEGRARE RUNDA 3 — CEATA AVEA CULOAREA CERULUI, NU A PAMANTULUI.
+			# Criticul de ansamblu: jumatatea de sus a cadrului era o panza
+			# lavanda-gri mai DESCHISA si mai RECE decat solul apropiat, cu o
+			# muchie orizontala neta pe la mijloc; geometria era pe ecran, doar
+			# vopsita in culoarea cerului. Masurat pe cadrul de ansamblu
+			# (--eye=170,95,255 --look=-10,0,40), pe benzi de inaltime:
+			#   285 din 720 de randuri (39,6%) se clasificau drept CER;
+			#   benzile 0.0-0.1 si 0.3-0.4 nu aveau NICIUN rand de teren —
+			#   erau mancate in intregime. Referinta: 22 din 1086 (2,0%).
+			# Cauza e directa: la 250+ m ceata e completa, deci tot ce e departe
+			# converge la CULOAREA ei — iar (0.46,0.43,0.50) e H=266 S=0.14
+			# V=0.50, adica exact opusul solului pe roata de culoare (H=47) si
+			# mai deschis decat iarba luminata de langa el.
+			#
+			# Directia ceruta de critic (gradient pe INALTIME, fog_height /
+			# fog_height_density) a fost incercata prima si e MOARTA in
+			# FOG_MODE_DEPTH: Godot ignora acolo cheile de inaltime. A/B
+			# bit-identic cu baza la -0.06 si chiar la +2.0 (valoare absurda) —
+			# aceleasi 285 de randuri, aceeasi saturatie pe benzi. Nota e in
+			# _build_environment, ca sa nu se mai reincerce.
+			#
+			# Ce a mers: ceata trece in FAMILIA SOLULUI (memoria
+			# `ceata-in-familia-solului`) si incepe mai tarziu, cu o curba mai
+			# stransa, ca banda de cer sa ramana a cerului. Masurat, benzile
+			# 0.3-0.5 (departarea): H 336 -> 41, S 0.30 -> 0.37; benzile de sus
+			# isi tin violetul (0.0-0.1 la H=338).
+			# Garda pe axa care se putea plati — cerul de furtuna — nu mai e
+			# numaratoarea de randuri (devine oarba cand ceata e calda), ci
+			# procentul de pixeli violet din banda de sus a cadrului DE JOC
+			# (scratchpad/skyband.py): 31,3% la H=49,6, fata de 31,2% la H=45,8
+			# in referinta. Pe cadrul liber de ansamblu banda de sus e teren
+			# departat, nu cer, si acolo referinta e la fel de calda ca noi.
+			# Respins ca prea departe: fog_curve 2.2 (cerul iese 97,9% violet,
+			# dar departarea recade la S 0.25 — ceata ajunge prea tarziu).
+			#
+			# ATENTIE la unealta de masura (memoria
+			# `caseta-de-masura-exclude-defectul`): `scratchpad/sat_depth.py`
+			# isi ALEGE singur randurile de "teren", deci pe starea veche
+			# masura pe 435 de randuri (excludea 285 ca fiind cer) si pe cea
+			# noua pe toate 720 — cifra lui scade 50% -> 36% desi imaginea s-a
+			# imbunatatit. Pe o fereastra FIXA de randuri, identica intre
+			# stari (y 0.35..0.95, `scratchpad/sat_fix.py`), pastrarea de
+			# saturatie cu adancimea urca 29% -> 70%, cu referinta la 58% si
+			# cu saturatia de prim-plan neschimbata (0.527 in ambele stari).
+			"fog": Color(0.58, 0.51, 0.38),
+			# Malul opus al craterului. Nu e "dealul de fundal" al altor teme:
+			# de pe buza, movilele de orizont (`_build_horizon_fallback`, 240-480 m)
+			# sunt EXACT banda de deasupra lacului, 30% din cadrul hero
+			# (ProbeMasca la frac 0.40). La (0.62,0.56,0.40) sub soare 1.70 ieseau
+			# crem luminos si bolul nu se inchidea: profilul de valoare pe partea
+			# craterului era plat (V 0.66-0.68 pe randurile 0.20-0.35, apoi 0.52
+			# pe podeaua de crusta), adica INVERS fata de referinta, care cade la
+			# 0.31-0.49 pe mal si urca la 0.89 pe crusta. Verde-gri inchis: malul
+			# devine treapta intunecata sub linia cerului.
+			"hill_color": Color(0.24, 0.25, 0.22),
 			# Soare cald, jos (~35 grade), PUTERNIC fata de ambient: raportul
 			# soare/ambient >= 3,5 (memoria `geometria-fara-lumina-e-invizibila`)
 			# — cerul intunecat tenteaza la ambient mare, si atunci savana
 			# iese plata. Azimutul se masoara pe traseul real (brief §4) si
 			# se pune pe scena (custom_sun_rotation_deg), nu aici.
 			"sun_color": Color(1.0, 0.90, 0.72),
-			"sun_energy": 1.70,
+			"sun_energy": 1.95,
 			"exposure": 1.10,
 			"sun_rotation_deg": Vector3(-35, 135, 0),
-			"ambient_color": Color.html("8E8598"),
-			"ambient_energy": 0.22,
+			# INTEGRARE — AMBIENTUL, a treia oara. Trei bucati au propus:
+			# G (A8968E, 0.16), B (B9A88C, 0.50), H (C9A98A, 0.40). Toate trei
+			# vor ambientul in familia solului cald; difera energia. Se
+			# pastreaza H, si nu fiindca e ultima: e singura care masoara
+			# RAPORTUL lumina/umbra fata de bara de referinta (0.15 la noi
+			# fata de 0.33 in bara) in loc sa se uite doar la raportul
+			# soare/ambient, si singura care verifica lipsa regresiei pe
+			# celelalte zone, la patru fractii (0.075, 0.144, 0.40, 0.60).
+			# Argumentul lui B — ca pragul de 3.5 trebuie tinut — ramane
+			# satisfacut: 1.70 / 0.40 = 4.25.
+			# RUNDA 5 POI H — ambientul CALD si raportul soare/ambient adus la
+			# nivelul dioramei de referinta, masurat, nu ales.
+			#
+			# Pana aici: sun 1.70 / ambient 0.22 = raport 7,7, cu ambient
+			# gri-violet rece (#8E8598). Comentariul de deasupra invoca regula
+			# „soare/ambient >= 3,5" din memoria `geometria-fara-lumina-e-
+			# invizibila`, dar aia e un PRAG DE JOS (sub el geometria se
+			# aplatizeaza), nu o tinta — si 7,7 e mai mult decat dublul lui.
+			# Consecinta, masurata pe cadrul de la volan din POI H: pixelii de
+			# sol din umbra cad la V10=0.11 fata de V10=0.30 in bara, adica
+			# raport lumina/umbra 0.15 fata de 0.33. Umbra unei coroane de
+			# acacia nu se citea ca umbra, ci ca o gaura neagra peste jumatate
+			# din carosabil — 30 % din cadru era pixel prea intunecat ca sa mai
+			# apartina vreunei clase de culoare (laterit, iarba sau roca).
+			#
+			# Ambientul urca la 0.40 si trece pe cald (#C9A98A, culoarea de
+			# bounce de pe sol din style_bible §5, ca in restul temelor de
+			# desert): raportul devine 4,25 — peste pragul de 3,5, deci
+			# modelarea se pastreaza — si umbrele ies calde si TRANSPARENTE,
+			# cu textura drumului vizibila prin ele (memoria
+			# `umbra-moale-se-citeste-textura`).
+			#
+			# Verificat sa nu fie regresie in alta parte, fiindca tema e
+			# comuna celor 8 zone: raportul lumina/umbra masurat la fractiile
+			# 0.075 (turma), 0.144 (vadul), 0.40 si 0.60 sta la 0.32-0.75, deci
+			# nicaieri umbre infundate si nicaieri spalare.
+			"ambient_color": Color.html("C9A98A"),
+			# W6A — ridicat 0.40 -> 0.55: geometria umbrita cadea spre V<0.20
+			# (2.664 pixeli masurati pe caseta peretelui la frac 0.40, tinta
+			# <2.000), desi tenta lor era deja sanatoasa (S=0.607, nu era
+			# desaturare — fixul de ceata in familia pamantului rezolvase deja
+			# partea de "other"). La 0.50 cifra scade doar la 2.101 (inca
+			# peste prag); 0.55 e plafonul dat de raportul soare/ambient >=
+			# 3,5 (memoria geometria-fara-lumina-e-invizibila): 1.95/0.55 =
+			# 3,55. Nu se atinge sun_energy.
+			"ambient_energy": 0.55,
 			"shadows": true,
+			# Umbra nu e neagra: 0.72 lasa 28% din lumina soarelui sa treaca
+			# prin ea. Masurat pe carosabilul din POI D (padurea de ceata):
+			# raportul umbra/soare urca de la 0.24 spre 0.46, care e cifra
+			# masurata pe bara de referinta. Zonele INSORITE raman
+			# neschimbate, deci contrastul savanei (POI A/B) nu se spala —
+			# ceea ce ridicarea ambientului ar fi facut.
+			"shadow_opacity": 0.62,
 			"shadow_distance": 130.0,
 			"shadow_blur": 1.0,
 			"fog_depth": true,
-			"fog_begin": 95.0,
-			"fog_end": 300.0,
+			# CEATA — dezacord masurat intre doua bucati, rezolvat la integrare.
+			# B (POI B, de la nivelul campiei): la 60/260 banda de orizont
+			# iesea (177,152,156), mai deschisa decat cerul de furtuna de
+			# deasupra ei; a cerut 90/290 ca orizontul sa se inchida.
+			# E (POI E, de pe buza craterului): cu inceputul la 60-90 m, tot
+			# ce trecea de buza (malul opus e la 200-400 m de ochi) era deja
+			# 40-90% ceata — masurat pe cadrul hero, banda de deasupra lacului
+			# iesea rgb(122,108,114) H=336 S=0.11, adica FIX culoarea cetii si
+			# mai DESCHISA decat campia (V 0.48 fata de 0.34), cand referinta
+			# are acolo un mal cald si mai INTUNECAT (V 0.40 fata de 0.49).
+			# Se pastreaza masuratoarea lui E: e singura facuta pe un cadru in
+			# care ceata acopera chiar subiectul POI-ului, iar gimmickul
+			# craterului (bolul vazut de pe buza) nu exista fara ea.
+			# fog_end e 370, nu 380: la fix FAR_PLANE (380) niciun obiect nu
+			# ajunge vreodata la ceata completa, deci geometria dispare sec la
+			# planul de taiere in loc sa se topeasca (memoria
+			# `efecte-de-fundal-cote-legate`). 370 lasa 10 m de topire.
+			# INTEGRARE RUNDA 2 — CEATA DESATURA DEPARTAREA.
+			# Criticul de ansamblu a masurat pe cadrul de ansamblu: saturatia
+			# din prim-plan e IDENTICA cu referinta (0.54 fata de 0.62, paleta
+			# e corecta), dar la distanta pastram doar 33% din ea, unde
+			# referinta pastreaza 67% — campia aurie, turmele de fundal si
+			# lacul de soda deveneau o pata violet-laptoasa uniforma.
+			# A/B pe acelasi cadru liber (--eye=170,95,255 --look=-10,0,40),
+			# capturi bit-identice la reluare, deci ordonarea e reala:
+			#   fog_begin 190 / curve 1.0 (starea de pana acum) .... 33%
+			#   fog_end   370 -> 378 ............................... 33%  (mort)
+			#   fog       tras spre iarba uscata (S 0.27 / 0.35) .... 37% / 38%
+			#   fog_begin 260 ...................................... 44%
+			#   fog_begin 260 + curve 1.4 .......................... 50%  <-
+			# Doua lucruri masurate contrazic directia propusa de critic.
+			# (a) `fog_end` NU e o parghie: la distantele din cadru ceata e
+			# deja aproape completa mult inaintea lui 370, deci a-l impinge
+			# spre FAR_PLANE nu schimba nimic (33% inainte, 33% dupa).
+			# (b) Ridicarea saturatiei CULORII de ceata plateste pe axa
+			# gresita (memoria `tinta-pe-o-axa-se-atinge-pe-axa-aia`): aduce
+			# doar +4 puncte, si o data cu ele inghite cerul de furtuna —
+			# randurile clasificate ca teren sar de la 411 la 720, adica
+			# ceata calda a mancat toata banda de cer pe care POI B si POI E
+			# au reglat-o. Culoarea cetii ramane deci NESCHIMBATA.
+			# Ce a mers e distanta la care incepe ceata, nu culoarea ei:
+			# aerul ramane limpede pana la 260 m si se ingroasa spre final
+			# (curve 1.4, implicitul), in loc sa se aseze liniar de la 190 m
+			# peste tot ce e mai departe de buza craterului.
+			"fog_begin": 300.0,
+			"fog_end": 370.0,
+			"fog_curve": 1.8,
+			# CAT DE OPACA ajunge ceata, nu de unde incepe. Criticul de
+			# ansamblu (runda 3) a cerut un STRAT DE SILUETE departate:
+			# campia de dincolo de 150 m masura 1.29 energie de muchii fata
+			# de 9.07 in referinta, deci "adauga turme mici, movile si acacii
+			# pana la linia cerului". Masuratoarea de atribuire spune altceva.
+			# A/B pe acelasi cadru de ansamblu, cu ceata STINSA (--no-fog, o
+			# optiune de diagnostic adaugata la snapshot pentru asta):
+			#   ceata pornita (300/370/1.8) ... banda departata  2.99
+			#   ceata stinsa .................. banda departata 10.01
+			# Geometria era DEJA acolo — 3344 de prop-uri dincolo de 150 m —
+			# si cu aerul limpede banda departata trece PESTE referinta.
+			# Nu lipsea decorul, ceata il stergea: prescriptia criticului ar
+			# fi platit pe axa gresita (memoria `tinta-pe-o-axa-se-atinge-pe-
+			# axa-aia`) si ar fi adaugat obiecte peste unele deja invizibile.
+			# Parghia corecta nu e nici distanta (POI E a reglat-o pe crater
+			# si o pierdem daca o mutam), ci OPACITATEA maxima. Masurat:
+			#   fog_max 1.0 (starea r3) ... muchii 2.99  pastrare saturatie 69%
+			#   fog_max 0.55 .............. muchii 5.41  pastrare 76%
+			#   fog_max 0.40 .............. muchii 6.36  pastrare 78%
+			#   fog_max 0.30 .............. muchii 7.07  pastrare 80%
+			#   fog_max 0.20 .............. muchii 7.86  pastrare 82%  <-
+			#   (ceata stinsa) ............ muchii 10.01 pastrare 89%
+			#   referinta ................. muchii  9.07 pastrare 82%
+			# 0.20 nimereste EXACT pastrarea de saturatie a referintei (82%,
+			# castigul rundei 2 nu se plateste — creste pe amandoua axele) si
+			# duce muchiile de la 2.99 la 7.86, cu prim-planul neatins la
+			# 8.50 (referinta 7.77). Profilul de distanta 300/370/1.8 ramane
+			# neschimbat, deci bolul craterului vazut de pe buza (POI E) isi
+			# pastreaza perspectiva aeriana — verificat pe cadrul de joc la
+			# 0.40: malul opus se citeste, nu mai e o panza crem.
+			"fog_max": 0.20,
 			"horizon_model": "",
 			"horizon_class": "",
 			"walls": false,
 			"kerbs": false,
 			"cliffs": false,
 			"decor": "none",
-			"props": "desert",
+			# Numele CORECT al kitului (assets/models/serengeti/, PR #376), ca
+			# la Cappadocia: cu `decor: "none"` cheia nu ajunge in TrackDecor
+			# (build() se opreste inainte s-o citeasca), deci nu exista un set
+			# "serengeti" de inregistrat acolo — decorul se pune de mana, pe
+			# POI, sub DecorManual. Dar cheia NU e doar o eticheta: cat era
+			# "desert", `_build_fences` punea gardul de ranch texan pe toata
+			# pista (masurat cu probe_decor: 69 de bucati de `wooden_fence`).
+			"props": "serengeti",
+			# IARBA DENSA pe marginea drumului (TrackGrass). Masurat pe
+			# captura --gamecam la 0.97 fata de ref_A.png: solul nostru era
+			# nisip PLAT (o singura nuanta pe toata adancimea), iar referinta
+			# are iarba fir cu fir pana la buza lateritului. Un singur
+			# material partajat, fara coliziune si fara umbre — cheia costa
+			# zero draw call-uri noi pe pista (probe_decor, materiale 15).
+			"dense_grass": true,
+			# DEGAJARE IN JURUL PROP-URILOR asezate pe sol (rover, cort, foc,
+			# boma — vezi Track.GRASS_CLEAR_MODELS): fara ea iarba deasa
+			# creste PRIN orice piesa din DecorManual, nu doar prin rover-ele
+			# de la POI A — `TrackGrass.build()` nu stia deloc de decor
+			# inainte de asta, taia doar in jurul benzilor secundare.
+			# Implicit false: pistele fara steagul asta (13 din 14) raman
+			# identice, cu zero cost de calcul in plus.
+			"dense_grass_prop_clear": true,
+			# Varful firului, cerut EXPLICIT: derivarea implicita a
+			# TrackGrass e de pajiste alpina (verde x1.18, albastru /2) si pe
+			# ocru dadea lime acid. Savana e pai auriu — masurat pe captura.
+			# Masurat pe A_r2_c2.png, caseta 800..1250 x 430..700, cei mai
+			# luminosi 8% din pixeli (= firele): (253,230,148) V=0.99, adica
+			# ARSE — pe fundalul de sol V=0.65 citeau a oase/aschii albe, nu a
+			# iarba. Vertex color-ul intra in ALBEDO si mai primeste o data
+			# soarele cald plus saturatia din post, deci varful trebuie sa
+			# plece MAI INCHIS decat solul, nu mai deschis. Referinta
+			# (ref_A.png) are exact asta: smocuri oliv-inchise ca ACCENTE pe
+			# un covor auriu deschis, nu tepi mai luminosi decat pamantul.
+			"dense_grass_tip": Color.html("8A7C40"),
+			# PROFIL DE COVOR (TrackGrass.carpet). Implicitul TrackGrass e
+			# croit pentru pajistea alpina: fire de 40-70 cm, rare, cu baza
+			# bruna (0.45/0.42/0.38 din varf). Masurat pe A_r2_before.png,
+			# caseta 0..340 x 430..720 (campul dintre banda si turma):
+			# 35.5% din pixeli sub V=0.42 — adica baza firelor, NU umbra
+			# aruncata (`cast_shadow` era deja OFF pe MultiMesh). De la
+			# inaltimea chase cam-ului asta citea a miriste de tepi pe nisip,
+			# nu a covor. Cheia scurteaza firul sub 0,5 m, indeasa smocul
+			# (20 de fire pe raza 0,34), ridica baza aproape la culoarea
+			# varfului si largeste banda la 13 m, ca solul gol sa nu inceapa
+			# la 7 m de asfalt. Tinta criticului: umbra de lama sub 12%.
+			"dense_grass_carpet": true,
+			# PODEAUA DE SAVANA (vezi savanna_grass_w in _build_terrain).
+			# Greutatea trimite shader-ul de teren pe perechea de texturi de
+			# IARBA in loc de cea de nisip: granulatie de fire, nu pete de
+			# dune. Tenta ridica si lumineaza paiul, ca solul dintre fire sa
+			# fie la acelasi hue cu varful firului (cerinta criticului).
+			"savanna_grass_w": 0.85,
+			"savanna_grass_tint": Color.html("C6AC63"),
 			"hazard_model": "res://assets/models/rocks/boulder_roller.glb",
-			"hazard_class": "rock",
-			"rockfall_class": "rock",
+			# Bolovanii rostogoliti de pe serpentine (POI F) sunt GRANIT, ca
+			# kopje-urile (clasa din palette.gd) — nu gresia de canion.
+			"hazard_class": "granite",
+			"rockfall_class": "granite",
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			# DRUM DE LATERIT ROSU (brief §4: TILE_TERRACOTTA pe banda, nu
+			# asfalt si nu nisipul auriu implicit #CCA86E). Pista declara
+			# `custom_road_surface = "dirt"`; cheia asta ii da culoarea, ca pe
+			# Cappadocia. MULT sub slotul 23 (#C4784F, saturatie 0.60):
+			# tenta se imparte la SAND_MACRO_MEAN (0.85), se inmulteste cu
+			# macro-ul de nisip si soarele cald mai ridica o data rosul.
+			# Masurat pe captura --gamecam la 0.08 (caseta din banda):
+			# B06A45 -> (201,64,3), saturatie 0.98 = lava, nu laterit;
+			# 94807A -> (153,97,58), saturatie 0.62, adica exact registrul
+			# slotului 23. Regleaza pe captura, nu pe hex.
+			# POI B (runda 1): 94807A dadea (152,93,53) v 0.60; referinta are
+			# (217,112,69) v 0.85 — laterit mai DESCHIS si mai portocaliu.
+			# Raportul iesire/tenta masurat pe canale: 1.03 / 0.73 / 0.43.
+			# Runda 1b: D49C9A a sarit peste tinta — (241,137,96) v 0.95 roz;
+			# referinta (185,109,66) v 0.73. Raportul iesire/tenta pe canale cu
+			# D49C9A: 1.14 / 0.88 / 0.62 => tinta A27C6A, rotunjita mai cald.
+			# Runda 1 (POI B, masurat pe cadrul de joc la 0.06, caseta din banda
+			# apropiata): AC8A86 dadea (197,116,77), referinta in aceeasi caseta
+			# (221,136,83) — acelasi TON (H 20 fata de 23, S 0.61 fata de 0.62),
+			# doar mai inchis cu ~11 %. Se ridica valoarea, nu nuanta: canalele
+			# tentei x 221/197, 136/116, 83/77 = 1.12 / 1.17 / 1.08.
+			# POI B (runda 6): tenta de mai sus fusese calibrata la lumina
+			# rundei 1 (sun 1.70 / ambient 0.32). Runda 3 a urcat lumina
+			# (1.95 / 0.68) si NU a remasurat drumul: masurat pe cadrul de joc
+			# la 0.06, banda apropiata iesea (243,175,110) V 0.95 sat 0.55 —
+			# roz spalat, cu interval tonal p90/p10 = 1.26, adica PLAT.
+			# Referinta in aceeasi caseta: (196,109,67) V 0.77 sat 0.66,
+			# p90/p10 = 2.62. De-aia criticul rundei 5 n-a vazut nicio umbra pe
+			# carosabil: umbrele CADEAU acolo, dar suprafata era saturata in
+			# alb si nu mai avea loc sa se intunece. Raport iesire/tinta pe
+			# canale: 0.81 / 0.62 / 0.61 aplicat pe (192,158,144) => 9B6258.
+			"dirt_road_tint": Color.html("9A7870"),
 			# Lacul de soda (custom_lagoon in Track14.tscn): apa laptoasa,
 			# fara mare deschisa in exteriorul buclei.
 			"water": true,
@@ -463,6 +768,115 @@ static func themes() -> Dictionary:
 			"lagoon_band_out": 6.0,
 			"lagoon_inner": 1.5,
 			"lagoon_rim": 8.0,
+			# VADUL MARA (POI C): raul de namol, separat de lacul de soda.
+			# Sea e o singura panza cu o singura culoare, dar shader-ul stie
+			# doua rauri (`water_split`, mecanismul Chongqing): dreapta de
+			# despartire e perpendiculara pe Z, la z = 60. La NORD de ea
+			# (z > 60, adica vadul de la z = 165) curge raul B, brun; la sud
+			# ramane lacul de soda laptos al flamingilor (z = -26..-110).
+			# Fara asta, vadul mostenea spuma alb-verzuie a lacului si umplea
+			# tot cadrul cu mint (masurat pe C_r1_stare.png).
+			# Sloturile apei: NU recif tropical. Vadul e namol, iar lacul de
+			# soda e tot o apa opaca, nu o laguna — deci ambele sloturi ies
+			# din familia calda. RUST_METAL (#91461E) trecut prin water_desat
+			# devine gri-maroniu de pamant ud (reteta Yangtze, § water_tint);
+			# ASPHALT_EDGE tine adancul putin mai inchis.
+			"water_shallow_slot": Palette.RUST_METAL,
+			"water_deep_slot": Palette.ASPHALT_EDGE,
+			# Masurat pe C_r1_apa5.png: cu desat 0.58 / dim 0.86 apa iesea
+			# (189,174,151) S0.20 V0.74 — cea mai DESCHISA si cea mai
+			# spalacita suprafata din cadru, langa drum S0.59 V0.64 si iarba
+			# S0.61 V0.72. In referinta raul e mai INCHIS decat malurile si
+			# clar brun. Tinta: S ~0.35, V ~0.45.
+			"water_desat": 0.30,
+			"water_mul": Color(1.0, 0.93, 0.82),
+			# INTEGRARE RUNDA 2 — APA IESEA NEAGRA la POI C (vad) si POI G (lac).
+			# Criticul a presupus (si eu la fel) ca apa a fost reglata de C sub
+			# ambientul vechi, inainte ca H sa-l schimbe, si a cerut A/B cu
+			# ambientul lui H inghetat. A/B-ul REFUTA ipoteza amandurora: cu
+			# ambientul dat inapoi la starea lui C (8E8598 / 0.22) apa iese
+			# IDENTICA la trei zecimale (vad H29 S0.291 V0.329, lac V0.341).
+			# Identic la bit inseamna ca mecanismul nici nu e conectat
+			# (memoria `sonda-masura-alt-obiect`), si asa si e — scrie mai sus,
+			# in _water_material: shaderul apei e UNSHADED, deci apa nu vede
+			# nici soarele, nici ambientul. `water_dim` E lumina pe care apa
+			# ar fi primit-o, pusa de mana.
+			# Deci cauza nu e ambientul, ci ca `water_dim` a ramas la 0.52 —
+			# „jumatate din lumina", potrivit unei ape de noapte — in timp ce
+			# terenul din jur e luminat de soare 1.95 plus ambient cald 0.40.
+			# De-aia apa era de doua-trei ori mai intunecata decat tot ce o
+			# inconjura: crusta lacului masoara V 1.00, drumul V 0.63-0.75,
+			# apa V 0.33.
+			# Tinta e MASURATA pe referinta, nu aleasa: vadul din diorama are
+			# V 0.561. A/B pe capturile --gamecam la 0.13 (vad) si 0.77 (lac):
+			#   dim 0.52 (pana acum) ... vad V 0.329  lac V 0.341
+			#   dim 0.75 ............... vad V 0.494  lac V 0.514
+			#   dim 0.85 ............... vad V 0.565  lac V 0.584   <- aplicat
+			#   dim 0.90 ............... vad V 0.596  lac V 0.620
+			# Nuanta nu se misca (H 29 -> 30), deci reglajul de noroi cald al
+			# lui C din runda 3 se pastreaza intreg — se schimba doar cata
+			# lumina cade pe el.
+			"water_dim": 0.85,
+			"water_split": 1.0,
+			"water_split_dir": Vector2(0.0, 1.0),
+			"water_split_offset": 60.0,
+			"water_split_soft": 30.0,
+			"water_split_meander": 18.0,
+			"water_split_wave": 180.0,
+			# Namolul: RUST_METAL (#91461E) desaturat pana in registrul de
+			# pamant ud. Reteta e cea a Yangtze-ului (§ water_tint): slot cald,
+			# desaturare mare, tenta aproape neutra — namolul e gri-maroniu,
+			# nu ocru aprins.
+			# RUNDA 2 (POI C). Criticul a cerut "apa mai inchisa"; masuratoarea
+			# pe referinta spune INVERS: raul din diorama e V0.52, exact cat
+			# malul de noroi (V0.52) — nu valoarea separa apa de mal, ci
+			# NUANTA (rau H8-12 neutru-rece fata de mal H29 ocru cald) plus
+			# dungile speculare (pete pana la V0.72). La noi apa iesise
+			# V0.43 langa mal V0.40 (raport 1.08): doua suprafete in aceeasi
+			# familie, deci ochiul nu vedea niciun rau. Reteta e cea a
+			# Yangtze-ului (§1370-1383): albedo desaturat spre neutru, si
+			# lumina se intoarce ca sclipiri, nu ca albedo plat.
+			# Tinta e MASURATA pe referinta: rau S0.17 V0.52, mal S0.30 V0.52.
+			# Deci nu "mai inchis decat malul" (sunt la aceeasi valoare), ci
+			# mai PUTIN saturat, cu aceeasi luminozitate. desat 0.72 dadea
+			# S0.03 (gri de beton, masurat pe C_r2_t2.png) — prea mult.
+			# RUNDA 3 (POI C). Cu albia sapata, vadul se vede in sfarsit ca
+			# rau — si atunci reglajul rundei 2 se dovedeste tras prea
+			# departe: masurat pe C_r3_t5.png, apa iesea (84,84,80) H65 S0.04
+			# V0.33, adica gri-verzui de beton, cand referinta are (114,96,90)
+			# H15 S0.22 V0.45, noroi cald. Desaturarea de atunci corecta un
+			# cadru in care apa umplea tot ecranul si era cea mai DESCHISA
+			# suprafata din el; acum apa e o banda ingusta intre maluri, deci
+			# problema s-a mutat exact pe dos. Se lasa in urma: desat 0.48 ->
+			# 0.30 (saturatie inapoi in banda), mul spre cald (rosu peste
+			# albastru) ca nuanta sa cada la H15-25, gain 1.22 -> 1.05 ca sa
+			# nu urce valoarea peste maluri.
+			"water_b_mul": Color(1.0, 0.90, 0.80),
+			"water_b_desat": 0.30,
+			"water_b_gain": 1.45,
+			"water_b_glint": 1.9,
+			"water_b_glint_cut": 0.60,
+			# Spuma alba e ce facea lacul sa citeasca mint: toata panza de la
+			# vad e sub SEA_FOAM_DEPTH (0.6 m), deci era spuma pe tot.
+			"water_foam": 0.0,
+			"water_foam_mix": 0.92,
+			# Vezi _build_sea_far: fara larg deschis, apa e doar albia raului.
+			"sea_far": false,
+			# CRUSTA DE SODA (POI G, brief §2 G / §4): banda de teren ALBA
+			# masurata in metri de la conturul lagunei (sampler.
+			# lagoon_signed_dist), nu pe cota — fundul craterului e plat la
+			# 1,7 m, deci nicio banda de altitudine n-ar putea-o taia. 48 m
+			# duce crusta pana sub drum (axul e la 33-45 m de contur pe
+			# 0.755-0.78), cu marginea zdrentuita spre iarba pe inca 16 m.
+			# Malul roz: banda ingusta de NEON_PINK peste linia apei (sd
+			# -5..+4 m), flamingii ca textura de departe; cei modelati
+			# (FlamingoFlock) stau tot acolo.
+			"lagoon_crust_tint": Palette.color(Palette.FOAM_WHITE),
+			"lagoon_crust_width": 48.0,
+			"lagoon_crust_fade": 16.0,
+			"lagoon_shore_tint": Color(0.86, 0.55, 0.58),
+			"lagoon_shore_in": 4.0,
+			"lagoon_shore_out": 5.0,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -807,7 +1221,7 @@ static func themes() -> Dictionary:
 			# Culoarea e bounce-ul de pe nisip coraligen: mai deschis si mai putin
 			# auriu decat cel de desert (#E2B77A), fiindca si nisipul e mai alb.
 			"ambient_color": Color.html("EADFC8"),
-			"ambient_energy": 0.30,
+			"ambient_energy": 0.22,
 			# Ceata de adancime, ca la desert: marea se pierde in orizont la o
 			# distanta cunoscuta, iar camera poate taia fix acolo.
 			"fog_depth": true,
@@ -3466,6 +3880,8 @@ func rebuild() -> void:
 		# Un canal se trece ori pe pod, ori din saritura — nu amandoua. Cu
 		# `jump: true` golul ramane gol si primeste in schimb o trambulina pe
 		# toata latimea (vezi _build_channel_kicker).
+		if bool(ch.get("ford", false)):
+			continue # vad: drumul intra in apa, deci n-are ce trece peste el
 		if bool(ch.get("jump", false)):
 			_build_channel_kicker(ch)
 		else:
@@ -3600,9 +4016,40 @@ func _build_environment() -> void:
 		# alpin distanta mare e chiar subiectul; intr-un canion, ceata care
 		# taie la 250 m e ce ascunde marginea lumii.
 		env.fog_depth_end = float(theme_flag("fog_end", 250.0))
-		env.fog_depth_curve = 1.4 # se ingroasa spre final, nu liniar
+		# Implicit se ingroasa spre final (1.4), nu liniar: aerul limpede
+		# pana departe, ceata doar la marginea lumii. Cheia a fost adaugata
+		# pentru savana sub furtuna, care parea sa ceara aer INCARCAT, deci
+		# liniar (1.0). Masurat la integrare pe cadrul de ansamblu, liniarul
+		# e exact ce spala departarea: cu 1.0 pastram 33% din saturatia de
+		# prim-plan la distanta, cu 1.4 pastram 50% (referinta: 67%). Cheia
+		# ramane — o tema o poate cere liniara — dar Serengeti sta acum tot
+		# pe 1.4, si nicio tema nu foloseste inca 1.0.
+		env.fog_depth_curve = float(theme_flag("fog_curve", 1.4))
+		# CAT DE OPACA devine ceata la `fog_depth_end`, nu de la ce distanta
+		# incepe. In FOG_MODE_DEPTH Godot inmulteste rampa de adancime cu
+		# `fog_density`, deci sub 1.0 geometria departata ramane o silueta
+		# tentata in loc sa fie stearsa complet. Implicitul 1.0 = purtarea de
+		# pana acum, deci temele vechi nu se schimba.
+		env.fog_density = float(theme_flag("fog_max", 1.0))
 	else:
 		env.fog_density = theme_flag("fog_density", 0.0035)
+	# PERSPECTIVA AERIANA: cat din lumina CERULUI se amesteca in ceata cu
+	# adancimea (0 = culoare de ceata pura, implicitul Godot si al temelor
+	# vechi, deci cheia nu schimba nimic unde nu e declarata).
+	#
+	# Cheile de ceata pe INALTIME (`fog_height` / `fog_height_density`) au
+	# fost incercate aici si SCOASE: in `FOG_MODE_DEPTH` Godot le ignora
+	# complet. Masurat pe cadrul de ansamblu, A/B bit-identic cu baza —
+	# `fog_height_density` -0.06 si chiar +2.0 (valoare absurda) dau aceleasi
+	# 285 de randuri clasificate drept cer si aceeasi saturatie pe benzi.
+	# Ceata pe inaltime cere FOG_MODE_EXPONENTIAL, adica renuntarea la
+	# inceputul/sfarsitul explicit pe care se bazeaza ChaseCamera.far.
+	env.fog_aerial_perspective = float(theme_flag("fog_aerial", 0.0))
+	# Cat din cer acopera ceata (1.0 = tot, implicitul Godot si al temelor
+	# vechi). Ceata de ADANCIME vede cerul la infinit, deci cu 1.0 sky_top si
+	# sky_horizon nu ajung niciodata pe ecran — orice cer de tema e de fapt
+	# culoarea cetii. Serengeti (cer de furtuna) e prima tema care il coboara.
+	env.fog_sky_affect = float(theme_flag("fog_sky_affect", 1.0))
 	# Culorile flat au nevoie de un pic de "pop": saturatie si contrast.
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	# Expunerea: SINGURA parghie globala de luminozitate a scenei.
@@ -3685,10 +4132,30 @@ func _build_environment() -> void:
 	if theme_shadows:
 		sun.directional_shadow_mode = \
 			DirectionalLight3D.SHADOW_ORTHOGONAL
-		sun.directional_shadow_max_distance = SHADOW_DISTANCE
+		# Cheia de tema `shadow_distance` era SCRISA in trei teme si nu se
+		# citea niciodata (POI B, runda 6): valoarea folosita era constanta
+		# SHADOW_DISTANCE. Pe Serengeti casterii care conteaza — acaciile de pe
+		# umeri si randul apropiat al turmei — stau la 8-45 m, deci 110 ii
+		# acopera; cheia ramane totusi onorata, ca sa nu mai minta comentariul
+		# din tema (memoria `justificarea-din-comentariu-se-verifica`).
+		sun.directional_shadow_max_distance = float(
+			theme_flag("shadow_distance", SHADOW_DISTANCE))
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
-		sun.shadow_blur = 1.4
+		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))
+		# ADANCIMEA UMBREI, ca steag de tema (POI D, runda 4). Implicit
+		# `shadow_opacity` e 1.0, deci un punct la umbra primeste NUMAI
+		# ambientul. Masurat pe carosabilul din padurea Serengeti: umbra 31,
+		# soare 126, raport 0.24 — in bara de referinta raportul e 0.46 (umbra
+		# 85 / soare 184). Nu e o problema de cat de MULTA umbra e (baleierea
+		# continua da 81% insorit in medie), ci de cat de ADANCA: in padure
+		# umbra e umpluta de lumina reflectata de frunzisul insorit, pe care
+		# ambientul global constant nu o modeleaza. Ridicarea ambientului ar
+		# spala si zonele insorite si ar strica raportul soare/ambient al temei
+		# (memoria `geometria-fara-lumina-e-invizibila`); `shadow_opacity`
+		# atinge NUMAI pixelii aflati la umbra. Implicitul ramane 1.0, deci
+		# nicio tema fara steag nu se schimba.
+		sun.shadow_opacity = float(theme_flag("shadow_opacity", 1.0))
 		# Falezele sunt mari si inclinate; cu bias implicit apar dungi de shadow
 		# acne pe fetele orientate spre soare.
 		sun.shadow_bias = float(theme_flag("shadow_bias", 0.06))
@@ -4382,6 +4849,20 @@ func _build_terrain() -> void:
 	# tema de insula, deci restul lumii nu se schimba cu un pixel.
 	var inland: Variant = theme_flag("inland_tint", null)
 	var inland_mix := float(theme_flag("inland_strength", 0.0))
+	# COVORUL DE SAVANA: greutate de IARBA constanta pe tot terenul, fara
+	# poarta de cota. `inland_tint` nu poate face asta — el porneste de la
+	# nivelul marii (BEACH_SAND_TOP / BEACH_FADE), iar Serengeti n-are mare,
+	# deci pe pista asta ar iesi ori 0 peste tot, ori o linie de nivel prin
+	# mijlocul campiei. Motivul pentru care cheia exista: masurat pe
+	# A_r2_before.png vs A_r2_c1.png, scurtarea si luminarea FIRELOR n-a
+	# miscat nimic (dark 0.355 -> 0.343) fiindca pixelii intunecati nu erau
+	# fire, ci SOLUL — perechea de texturi de NISIP, cu petele ei macro, plus
+	# umbrele prop-urilor peste ea. Referinta (ref_A.png) are un covor
+	# continuu de pai pana la orizont, cu tufele verzi ca accente separate;
+	# firele de iarba sunt detaliul de aproape, nu covorul. Deci schimbam
+	# PODEAUA, nu tepii de pe ea. 0.0 pe orice alta tema = zero diferenta.
+	var savanna_w := float(theme_flag("savanna_grass_w", 0.0))
+	var savanna_tint: Variant = theme_flag("savanna_grass_tint", null)
 	# Zapada de creasta: null pe orice tema fara munte, deci restul pistelor
 	# nu se schimba cu un pixel. Vezi "snow_line" in themes().
 	var snow_tint: Variant = theme_flag("snow_tint", null)
@@ -4391,6 +4872,15 @@ func _build_terrain() -> void:
 	var rock_tint: Variant = theme_flag("rock_band_tint", null)
 	var rock_line := float(theme_flag("rock_line", 0.0))
 	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
+	# CRUSTA DE SODA din jurul lagunei (serengeti, POI G): banda masurata in
+	# metri de la contur, nu pe cota. Null pe orice tema fara cheie, deci
+	# restul pistelor nu se schimba cu un pixel. Vezi "lagoon_crust_tint".
+	var crust_tint: Variant = theme_flag("lagoon_crust_tint", null)
+	var crust_width := float(theme_flag("lagoon_crust_width", 40.0))
+	var crust_fade := maxf(float(theme_flag("lagoon_crust_fade", 15.0)), 0.001)
+	var shore_tint: Variant = theme_flag("lagoon_shore_tint", null)
+	var shore_in := float(theme_flag("lagoon_shore_in", 4.0))
+	var shore_out := float(theme_flag("lagoon_shore_out", 5.0))
 	# STRATUL DE JOS, oglinda lui rock_band: acela tinteaza PESTE o cota
 	# (etaj de munte), asta SUB ea (masa de teren de sub nivelul soselei).
 	# Null pe orice tema care nu-l cere, deci restul pistelor nu se schimba cu
@@ -4482,6 +4972,13 @@ func _build_terrain() -> void:
 					# spre shader prin COLOR.a: acolo alege intre perechea de
 					# texturi de nisip si cea de iarba (#206).
 					var grass_w := 0.0
+					# Covorul de savana (vezi savanna_grass_w mai sus): se
+					# aplica INAINTE de inland, ca o tema care ar avea si mare
+					# si savana sa poata suprascrie pe fasia de plaja.
+					if savanna_w > 0.0:
+						grass_w = savanna_w
+						if savanna_tint != null:
+							tint = tint.lerp(savanna_tint as Color, savanna_w)
 					if inland != null:
 						# Banda de trecere e larga (3.5 m de cota) tocmai ca sa
 						# nu se vada o linie de nivel: dunele o strambă singure,
@@ -4577,6 +5074,34 @@ func _build_terrain() -> void:
 							if bw > 0.0:
 								tint = tint.lerp(btints[bi] as Color, bw)
 								grass_w *= 1.0 - bw
+					if crust_tint != null or shore_tint != null:
+						var sd := _sampler.lagoon_signed_dist(v.x, v.z)
+						if sd < 1e8:
+							if crust_tint != null:
+								# 1 pana la `crust_width` in afara conturului,
+								# apoi coboara pe `crust_fade`; marginea se
+								# zdrentuieste cu acelasi zgomot ca etajele.
+								var crust_w := clampf(
+									(sd + crust_width + crust_fade) / crust_fade,
+									0.0, 1.0)
+								crust_w = clampf(crust_w + dirt_noise.get_noise_2d(
+									v.x * 0.5, v.z * 0.5) * 0.30, 0.0, 1.0)
+								crust_w = smoothstep(0.0, 1.0, crust_w)
+								if crust_w > 0.0:
+									tint = tint.lerp(crust_tint as Color, crust_w)
+									# Pe soda nu creste iarba.
+									grass_w *= 1.0 - crust_w
+							if shore_tint != null:
+								# Trapez peste linia apei: -shore_out .. +shore_in,
+								# cu 2 m de racord la fiecare capat.
+								var s_up := clampf((sd + shore_out) / 2.0, 0.0, 1.0)
+								var s_dn := clampf((shore_in - sd) / 2.0, 0.0, 1.0)
+								var shore_w := smoothstep(0.0, 1.0, minf(s_up, s_dn))
+								shore_w *= 0.55 + 0.45 * clampf(
+									dirt_noise.get_noise_2d(v.x * 1.5, v.z * 1.5)
+									* 0.5 + 0.5, 0.0, 1.0)
+								if shore_w > 0.0:
+									tint = tint.lerp(shore_tint as Color, shore_w * 0.85)
 					if rock_tint != null:
 						var rock_w := clampf(
 							(v.y - rock_line) / rock_fade, 0.0, 1.0)
@@ -5141,8 +5666,12 @@ func _build_channel_water() -> void:
 	var mat := _water_material()
 	for ch in _channels:
 		var drop := float(ch.get("water_y_drop", -1.0))
-		if drop < 0.0:
+		var is_ford := bool(ch.get("ford", false))
+		if drop < 0.0 and not is_ford:
 			continue # canal la nivelul marii — il acopera grila de tarm
+		# La VAD dropul e negativ INTENTIONAT (apa peste asfalt), deci suprafata
+		# proprie e obligatorie: grila de tarm sta cu mult mai jos si n-ar
+		# acoperi albia.
 		var o: Vector3 = ch["origin"]
 		var along: Vector3 = ch["along"]
 		var across: Vector3 = ch["across"]
@@ -5208,6 +5737,8 @@ func _build_channel_water() -> void:
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi)
+		if bool(ch.get("ford", false)):
+			continue # din vad nu cade nimeni: drumul trece prin el
 		_build_channel_respawn(ch, water_y)
 
 
@@ -5218,6 +5749,12 @@ func _build_channel_water() -> void:
 ## Un parau sapat 18 m cu apa la 15 m are 3 m de apa — si dupa cei 3 m se
 ## normalizeaza culoarea, altfel gradientul de adancime nu se vede deloc.
 func _channel_water_depth(ch: Dictionary) -> float:
+	if bool(ch.get("ford", false)):
+		# La vad stratul de pe banda e cel care da scara culorii: cativa
+		# decimetri. Cu `depth - drop` (3.4 + 0.3) apa de 30 cm ar intra in
+		# gradient ca 8 % — adica spuma alba pe tot vadul.
+		return maxf(TrackSideSampler.FORD_BED_SINK
+			+ float(ch.get("water_over_road", 0.3)), 0.3)
 	return maxf(float(ch["depth"]) - float(ch.get("water_y_drop", 0.0)), 0.5)
 
 
@@ -5262,6 +5799,17 @@ func _build_channel_respawn(ch: Dictionary, water_y: float) -> void:
 
 ## Largul: doua triunghiuri. Nu are nevoie de mai mult.
 func _build_sea_far(root: Node3D, sea_y: float) -> void:
+	# `sea_far` (implicit true) = exista larg deschis dincolo de tarm. Pe o
+	# insula placa asta sta oricum sub teren si nu se vede. Pe Serengeti apa e
+	# un RAU intr-un bazin de crater: albia are 0.03-0.63 m adancime pe o banda
+	# de ~50 m (masurat, x -99..-51 la z=165), iar restul bazinului e o tava
+	# plata la y ~ 0, adica DOAR 1.05 m peste sea_y. Cvadrilaterul de larg n-are
+	# niciun test de adancime, deci iesea prin toata tava si umplea jumatate de
+	# cadru cu o campie gri — exact ce se vedea in C_r2_ab_nosea.png (cu Sea
+	# stins drumul trece uscat pana la orizont). SeaNear ramane si deseneaza
+	# raul, fiindca el chiar testeaza adancimea per celula.
+	if not bool(theme_flag("sea_far", true)):
+		return
 	var c := _centroid()
 	var h := SEA_FAR_EXTENT * 0.5
 	var y := sea_y - SEA_FAR_DROP
@@ -5493,7 +6041,14 @@ func _sea_color(d: float) -> Color:
 	# La FOAM_WHITE pur, banda de tarm citea ca zapada, nu ca sparger de val —
 	# si o citea lat, fiindca varfurile USCATE ale celulelor de mal sunt tot
 	# spuma si isi intind culoarea peste toata celula prin interpolare.
-	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(reef, 0.35)
+	# Cat de mult trage spuma spre culoarea apei mici. 0.35 (implicitul, adica
+	# toate temele de pana la Serengeti) e sparger de val pe recif: alb rupt cu
+	# turcoaz. Un VAD de savana n-are spuma — apa de 30 cm peste namol e tot
+	# namol, doar mai deschis fiindca se vede fundul. Cu 0.35 pe Serengeti,
+	# toata panza vadului (adancime sub SEA_FOAM_DEPTH, deci NUMAI banda de
+	# spuma) iesea alb-gri: un cearsaf peste rau, masurat pe C_r1_apa4.png.
+	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(reef,
+		clampf(float(theme_flag("water_foam_mix", 0.35)), 0.0, 1.0))
 	var c: Color
 	if d <= 0.0:
 		c = foam # varf uscat al unei celule de mal
@@ -5925,6 +6480,26 @@ const PROP_AO_RADIUS_MIN: float = 0.8
 ## Mai slaba decat la faleze: sunt multe si se suprapun langa drum.
 const PROP_AO_STRENGTH: float = 0.26
 
+## PLAFONUL DE SUPRAPUNERE (POI G, runda 5). Materialul discurilor e
+## BLEND_MODE_MUL, deci doua discuri peste acelasi pixel NU dau o umbra mai
+## corecta, ci produsul: la 0.26 fiecare, doua dau 0.55, patru 0.30, sase 0.16.
+## Intr-o padure deasa (Lerai: fever_tree la 4-5 m unul de altul, raza plafonata
+## la 6 m) fiecare punct de sol sta sub 3-6 discuri, si podeaua iese o PLACA
+## aproape neagra — masurat pe cadrul de joc de la frac 0.77 cu umbrele stinse:
+## sol insorit sub crang 46/255 fata de 119/255 pe crusta de alaturi, adica un
+## factor de 0.39 din discuri singure, inainte de orice umbra dinamica.
+##
+## Reparatia: raza nu se mai ia din diagonala GABARITULUI intreg, ci din
+## amprenta de la BAZA piesei. Un fever_tree are coroana de 8,7 m si trunchi de
+## ~0,5 m; ce atinge solul e trunchiul, deci discul lui e mic si nu se mai
+## suprapune cu al vecinului. Umbra coroanei o face lumina directionala, care
+## are forma si directie — discul e doar contactul.
+##
+## Inaltimea sub care se masoara amprenta, ca fractie din inaltimea piesei.
+const PROP_AO_FOOT_BAND: float = 0.18
+## Cat se mai umfla amprenta bazei, ca discul sa iasa putin de sub piesa.
+const PROP_AO_FOOT_SCALE: float = 1.6
+
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
 ##
@@ -5956,8 +6531,13 @@ func _prop_contact_discs() -> PackedVector4Array:
 		if aabb.size == Vector3.ZERO:
 			continue
 		var gp := n3.global_position
-		# Raza din jumatatea diagonalei ORIZONTALE a gabaritului.
-		var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		# Raza din AMPRENTA DE LA BAZA, nu din diagonala gabaritului intreg
+		# (vezi nota de la PROP_AO_FOOT_BAND). Cand piesa n-are vertecsi in
+		# banda de jos — panouri, pasari, orice fara picior — se cade inapoi
+		# pe vechea socoteala, ca sa nu ramana piese fara contact.
+		var half := _prop_foot_radius(n3, aabb)
+		if half <= 0.0:
+			half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
 		var r := clampf(half * PROP_AO_RADIUS_SCALE,
 				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
 		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
@@ -5965,6 +6545,62 @@ func _prop_contact_discs() -> PackedVector4Array:
 		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
 		var base_y := gp.y + aabb.position.y
 		out.append(Vector4(gp.x, gp.z, r, base_y))
+	return out
+
+
+## Modelele din DecorManual care stau PE SOL si merita pamant batatorit in
+## jur, cu marja PESTE gabaritul lor orizontal (nu raza AO de mai sus — aia e
+## umbra de contact, asta e cat de departe se retrage iarba).
+##
+## Lista e EXPLICITA si scurta, adinsa: un copac vrea iarba pana la trunchi
+## (baobab, acacia), o stanca sau un musuroi la fel — doar piesele astea patru
+## au sub ele o zona de sol expus in realitate:
+##   - land_rover: masina parcata, praf batatorit de roti sub si in jurul ei
+##   - safari_tent: covorul/prelata calcata din fata cortului
+##   - campfire: cercul de vatra, ars/tasat de foc si de cei asezati in jur
+##   - maasai_boma: incinta imprejmuita cu spini — solul DIN INTERIORUL
+##     gardului e curte batatorita, nu pajiste (motivul razei mai mari)
+const GRASS_CLEAR_MODELS: Dictionary = {
+	"land_rover": 1.5,
+	"safari_tent": 1.5,
+	"campfire": 1.5,
+	"maasai_boma": 3.5,
+}
+
+## Degajarile de iarba din jurul prop-urilor de sol din DecorManual (vezi
+## [constant GRASS_CLEAR_MODELS]): (x, z, raza, _nefolosit) — aceeasi conventie
+## ca [method _prop_contact_discs], asa incat TrackGrass.build primeste direct
+## rezultatul, fara remapare de campuri.
+##
+## Raza = jumatate din diagonala orizontala a AABB-ului VIZUAL real (nu o
+## cifra din brief: un model poate varia intre kituri), plus marja din
+## [constant GRASS_CLEAR_MODELS]. Piesele fara stem cunoscut sau fara mesh nu
+## produc nimic — apelul e opt-in prin lista, nu prin prezenta in DecorManual.
+func _grass_prop_exclusions() -> PackedVector4Array:
+	var out := PackedVector4Array()
+	var root := get_node_or_null("DecorManual")
+	if root == null:
+		return out
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		var n3 := n as Node3D
+		if n3 == null or n3 == root or not n3.visible:
+			continue
+		if n3.scene_file_path.is_empty():
+			continue
+		var stem := n3.scene_file_path.get_file().get_basename()
+		if not GRASS_CLEAR_MODELS.has(stem):
+			continue
+		var aabb := _visual_aabb(n3)
+		if aabb.size == Vector3.ZERO:
+			continue
+		var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		var margin: float = GRASS_CLEAR_MODELS[stem]
+		var gp := n3.global_position
+		out.append(Vector4(gp.x, gp.z, half + margin, 0.0))
 	return out
 
 
@@ -6005,6 +6641,52 @@ func _visual_aabb(n: Node3D) -> AABB:
 			acc = box
 			have = true
 	return acc if have else AABB()
+
+
+## Raza amprentei de la BAZA piesei: cel mai departe vertex, pe orizontala, din
+## banda de jos a gabaritului (PROP_AO_FOOT_BAND din inaltime).
+##
+## De ce nu ajunge AABB-ul intreg: la un copac diagonala orizontala e a
+## COROANEI (fever_tree: 8,7 x 8,0 m), iar discul ei plafonat la 6 m se
+## suprapune peste al fiecarui vecin dintr-o padure deasa. Cu blend-ul
+## multiplicativ suprapunerile se inmultesc si podeaua iese neagra. Ce atinge
+## solul e trunchiul (~0,5 m), si aia e umbra de contact; forma coroanei o
+## deseneaza umbra dinamica.
+##
+## Costa o trecere peste vertecsii pieselor din DecorManual, o singura data la
+## constructie.
+func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
+	var band := aabb.position.y + aabb.size.y * PROP_AO_FOOT_BAND
+	var base := n.global_transform.basis
+	if absf(base.determinant()) < 0.000001:
+		return 0.0
+	var inv := n.global_transform.affine_inverse()
+	var best := 0.0
+	var stack: Array[Node] = [n]
+	while not stack.is_empty():
+		var cur: Node = stack.pop_back()
+		var cur3 := cur as Node3D
+		if cur3 != null and not cur3.visible:
+			continue
+		for c in cur.get_children():
+			stack.append(c)
+		var mi := cur as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		if absf(mi.global_transform.basis.determinant()) < 0.000001:
+			continue
+		var rel := inv * mi.global_transform
+		for si in mi.mesh.get_surface_count():
+			var arrays: Array = mi.mesh.surface_get_arrays(si)
+			if arrays.size() <= Mesh.ARRAY_VERTEX:
+				continue
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				var lv := rel * v
+				if lv.y > band:
+					continue
+				best = maxf(best, Vector2(lv.x, lv.z).length())
+	return best * PROP_AO_FOOT_SCALE
 
 
 ## Umbra de contact a prop-urilor, ca factor multiplicativ (1.0 = neatins).
@@ -7204,6 +7886,8 @@ func _resolve_channels() -> void:
 		ch["depth"] = float(spec.get("depth", 13.0))
 		ch["reach"] = float(spec.get("reach", 200.0))
 		ch["fade"] = float(spec.get("fade", 60.0))
+		ch["ford"] = bool(spec.get("ford", false))
+		ch["water_over_road"] = float(spec.get("water_over_road", 0.3))
 		_channels.append(ch)
 
 
@@ -7234,6 +7918,9 @@ func _road_gap(i: int, j: int = -1) -> bool:
 	if _channels.is_empty():
 		return false
 	for ch in _channels:
+		# Vadul sapa albia, dar NU rupe carosabilul: se trece PRIN apa.
+		if bool(ch.get("ford", false)):
+			continue
 		var span: int = 2 * int(ch["steps"])
 		var near_i: int = ch["near"]
 		if ((i - near_i) % n + n) % n < span:
@@ -8317,9 +9004,20 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
 		ball.model_scale = float(kind.get("scale",
 			theme_flag("hazard_scale", 0.52)))
+		# CLASA DE TEXTURA vine de la tema DOAR pentru bolovanul implicit al
+		# temei. Un nod care si-a declarat singur `model` a cerut un obiect
+		# anume, nu piatra temei: pe Serengeti `hazard_class: "granite"` se
+		# aplica triplanar peste elefant si ii STERGE atlasul, deci si remap-ul
+		# de sloturi (masurat pe G_r3_pre_hero.png: corp lum 0.769 sat 0.34,
+		# crem de gresie, mai LUMINOS decat drumul 0.512 — pare un bolovan de
+		# nisip, nu un animal). Doua runde s-au dus pe remap-ul de sloturi,
+		# care era corect (805 verts pe 11), fiindca defectul era mai jos:
+		# clasa triplanara nici nu ajunge sa citeasca UV-urile.
+		var declared_model: bool = not String(kind.get("model", "")).is_empty()
 		ball.model_tri_class = String(kind.get("tri_class",
-			theme_flag("hazard_class", "")))
-		ball.model_classes = theme_flag("hazard_classes", {})
+			"" if declared_model else theme_flag("hazard_class", "")))
+		ball.model_classes = (kind.get("classes", {}) if declared_model
+			else theme_flag("hazard_classes", {}))
 		# Doar intentia "se rostogoleste"; raza reala o ia din model. Cu
 		# `hazard_roll: false` obiectul doar ALUNECA — o barca targita peste
 		# causeway nu se da peste cap.
@@ -8337,6 +9035,11 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# nevoie sa stie modul ca sa nu taie cursa la marginea drumului.
 		ball.motion = int(kind.get("motion",
 			theme_flag("hazard_motion", 0))) as SlidingHazard.Motion
+		# Plafonul de viteza al maturarii, cand nodul l-a declarat (elefantul
+		# din Serengeti merge la 2 m/s, nu la 12 ca bolovanul). Fara cheie
+		# ramane implicitul clasei, deci nimic de pe alte piste nu se misca.
+		ball.max_sweep_speed = float(kind.get("sweep_speed",
+			theme_flag("hazard_sweep_speed", SlidingHazard.MAX_SWEEP_SPEED_DEFAULT)))
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa
@@ -8357,6 +9060,10 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		if bool(kind.get("face_travel",
 				theme_flag("hazard_face_travel", crossing or door))):
 			ball.rotation = Vector3(0.0, atan2(-side.x, -side.z), 0.0)
+			# La TRAVERSARE se si INTOARCE la drumul de intoarcere — un animal
+			# care revine cu spatele nu revine, da inapoi. Vezi
+			# SlidingHazard.turn_around.
+			ball.turn_around = crossing
 			# O USA nu se uita incotro merge, se uita in lungul soselei: fata
 			# discului trebuie sa fie spre masina care vine, ca sa se citeasca
 			# zid, iar rostogolirea (in jurul normalei discului) sa fie a unei
@@ -10263,8 +10970,17 @@ func _build_world_decor() -> void:
 	# _decor_roots (n-are volum, nimic nu trebuie s-o ocoleasca) si nici in
 	# coacere (e deja MultiMesh pe celule). Vezi TrackGrass.
 	if bool(theme_flag("dense_grass", false)):
+		# Degajare in jurul prop-urilor de sol (vezi GRASS_CLEAR_MODELS):
+		# opt-in prin steagul de tema, ca pistele fara el sa nu plateasca nici
+		# macar traversarea lui DecorManual.
+		var prop_clear := PackedVector4Array()
+		if bool(theme_flag("dense_grass_prop_clear", false)):
+			prop_clear = _grass_prop_exclusions()
 		var grass := TrackGrass.build(_sampler, _world_seed(), theme_ground_tint,
-			float(theme_flag("dense_grass_max_y", 1e9)))
+			float(theme_flag("dense_grass_max_y", 1e9)),
+			theme_flag("dense_grass_tip", Color(0, 0, 0, 0)) as Color,
+			bool(theme_flag("dense_grass_carpet", false)),
+			prop_clear)
 		add_child(grass)
 
 

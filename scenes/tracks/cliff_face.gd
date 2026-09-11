@@ -328,6 +328,20 @@ var _grid_span: float = 4.0
 ## 18 m taie orizontul din vederea soferului (ochiul e la ~6 m peste asfalt),
 ## deci peretele se citeste ca masa, nu ca bordura inalta.
 @export var cut_height_m: float = 18.0
+## Inaltimea MINIMA a fetei, indiferent cat de plat e masivul de dincolo.
+##
+## Zero (implicit) pastreaza comportamentul vechi: peretele urmeaza creasta
+## reala si se stinge unde nu e masiv. Serengeti are nevoie de altceva —
+## masurat cu GenDecorSerF --survey, versantul dintre doua brate ale
+## serpentinei urca doar +3..+16 m pe 20 m de rulaj, deci `rise` iese 4-6 m si
+## taietura se citeste ca un parapet de beton, nu ca peretele de granit din
+## referinta. Aici peretele nu e o sapatura intr-un munte existent, e MALUL
+## dintre doua bucle de drum sapate una sub alta: inaltimea lui e diferenta de
+## cota dintre bratul de sus si cel de jos (30 m pe orizontala, ~10 m pe
+## verticala), nu cota unei creste indepartate.
+##
+## Se aplica INAINTE de stingerea de la capete, deci capetele tot intra in mal.
+@export var cut_min_rise_m: float = 0.0
 ## Retragerea laterala TOTALA a fetei, de la talpa la coama.
 ##
 ## Mica: o taietura de drum e aproape verticala (asa se sapa), spre deosebire de
@@ -343,6 +357,22 @@ var _grid_span: float = 4.0
 ## Sloturile taieturii, de la coama in jos. Aceleasi strate ca faleza, ca sa se
 ## citeasca drept ACEEASI roca vazuta din partea cealalta a benzii.
 @export var cut_slots: Array[int] = [23, 10, 27, 23, 10, 27, 4]
+
+## Cat de mult se INTUNECA fata taieturii, peste gradientul din [method _shade].
+## 1.0 = neschimbat, deci celelalte piste raman exact cum erau.
+##
+## Exista fiindca `_shade` are o plaja ingusta deliberat (1.0 -> 0.78), potrivita
+## pentru tuful crem de pe Cappadocia, iar granitul de crater cere alta VALOARE,
+## nu alta nuanta. Masurat pe cadrul de joc de la frac 0.625: fata taieturii
+## statea pe luminanta ~156 (RGB 174/150/100) desi sloturile ei sunt gri inchis
+## (4B4B4D, 696765, 55535A, adica 75-105) — diferenta o face soarele temei, care
+## e puternic si galbui. Granitul din referinta sta pe 63.
+##
+## Se aplica pe vertex color, care poate DOAR sa intunece
+## (memoria `surfacetool-clamp-vertex-color`) — deci e exact unealta potrivita
+## aici, unde tinta e sub starea actuala. Un slot si mai inchis nu ajuta:
+## sloturile sunt deja cele mai inchise din atlas.
+@export var cut_shade: float = 1.0
 ## Ce fractie din lungime se duce pe stingerea de la FIECARE capat.
 ##
 ## Vezi `_cut_column`: fara stingere peretele incepe cu o muchie verticala in
@@ -359,6 +389,116 @@ var _grid_span: float = 4.0
 ##
 ## Vezi `_cut_column`: fara retragere capatul ramane o pana detasata in nisip.
 @export var cut_tuck_m: float = 9.0
+
+## ############################################################################
+## FATETAREA TAIETURII: blocuri discrete cu normale dure.
+## ############################################################################
+##
+## Verdictul rundei 3 pe POI F, si e o observatie despre GEOMETRIE, nu culoare:
+## „peretele craterului nu e granit fatetat: se randeaza ca o panza neteda cu
+## benzi orizontale, cu o singura nuanta intinsa pe toata adancimea — zero fete
+## de sus luminate, zero umbre proprii intre blocuri, silueta nu rupe linia
+## cerului. Referinta il construieste din blocuri discrete ale caror fete
+## superioare prind soarele in timp ce laturile cad in umbra."
+##
+## Are dreptate de doua ori, si amandoua din acelasi loc — [method
+## SurfaceTool.generate_normals] MEDIAZA normalele vertecsilor care coincid ca
+## pozitie+UV+culoare. Panza taieturii e o grila in care fiecare coloana isi
+## imparte vertecsii cu vecina, deci oricat de zimtata ar fi facuta forma,
+## umbrirea iese Gouraud si o netezeste inapoi la un plan. Al doilea: fara
+## deplasare LATERALA pe coloana, forma chiar E un plan — batter-ul si
+## `cut_step_out_m` misca doar pe verticala si pe strat, deci nu produc nicio
+## muchie verticala si nicio fata orientata altfel.
+##
+## Reparatia are trei parti, si toate trei sunt necesare:
+##   1. coloanele se grupeaza in BLOCURI de `cut_facet_cols` coloane vecine;
+##      fiecare bloc primeste retragerea lui laterala (hash pe indicele
+##      blocului, deci stabila intre rulari) — asa apare muchia VERTICALA
+##      dintre blocuri, care in referinta e ce desparte o stanca de vecina ei;
+##   2. tot pe bloc se roteste si COTA COAMEI cu un pas de banda, ca silueta sa
+##      rupa linia cerului in loc sa fie o coama continua;
+##   3. [method SurfaceTool.set_smooth_group] cu 0xFFFFFFFF (grup „fara
+##      netezire") inainte de fiecare triunghi, deci fiecare fata isi tine
+##      normala ei si fata de sus a unui bloc chiar prinde alta lumina decat
+##      laterala lui.
+##
+## Zero materiale in plus: e tot [method Palette.world_material].
+
+## Cat de mult se retrage/iese un bloc fata de linia medie a fetei (metri, in
+## amplitudine totala). Zero pastreaza comportamentul dinainte (panza neteda).
+##
+## Se tine sub `cut_offset_m - half_width`: un bloc care iese prea mult intra in
+## banda si il prinde ProbeLaneClear.
+@export var cut_facet_m: float = 0.0
+## Cate coloane vecine formeaza un bloc. Cu `cut_step_m` de 3 m, doua coloane
+## inseamna blocuri de ~6 m — scara pietrei din referinta fata de latimea
+## drumului.
+@export var cut_facet_cols: int = 2
+## Cu cate benzi poate sari coama unui bloc fata de coama medie. 1 = coama urca
+## sau coboara cu un strat, deci silueta e zimtata la scara stratului.
+@export var cut_facet_crown_bands: float = 1.0
+## Samanta hash-ului de blocuri. Se schimba ca sa iasa alt tipar, fara sa se
+## atinga scara.
+@export var cut_facet_seed: int = 7
+## TREAPTA orizontala la fiecare banda: cati metri iese fiecare strat peste cel
+## de deasupra lui, ca o SCARA reala si nu ca o panza inclinata.
+##
+## De ce nu ajunge `cut_facet_m` singur, si e o masuratoare, nu o parere. Dupa
+## ce fatetarea laterala a intrat, statistica pe masca peretelui aproape nu s-a
+## miscat (densitate de muchii 10.00% -> 9.72%, p50 al valorii 49 -> 43). Cauza
+## e ca soarele bate din elevatie 42 grade ([method Track._sun_rotation_deg]):
+## ORICE fata aproape verticala primeste acelasi cosinus, indiferent cat de mult
+## e retrasa. O fata retrasa nu e o fata luminata altfel — e aceeasi fata, mai
+## in spate.
+##
+## „Zero fete de sus luminate" din verdict e literal: peretele e o perdea de
+## benzi cvasi-verticale si NU ARE nicio suprafata orizontala. Ca sa prinda
+## soarele de 42 de grade, trebuie sa existe TREPTE — o contratreapta verticala
+## (in umbra proprie) si o treapta orizontala (in plin soare) la fiecare strat.
+## Asta e diferenta dintre o stanca in blocuri si un versant tapitat, si e chiar
+## ce descrie referinta.
+##
+## Se tine sub `cut_offset_m - half_width` cumulat: treptele se aduna in sus,
+## deci coama sta cu `cut_bands * cut_tread_m` mai in spate decat talpa. Zero
+## pastreaza comportamentul dinainte (fata continua).
+@export var cut_tread_m: float = 0.0
+
+
+## Retragerea laterala si saltul de coama ale blocului din care face parte
+## coloana `si`. Determinist: acelasi bloc da acelasi rezultat la fiecare
+## regenerare, deci scena nu „danseaza" intre rulari.
+##
+## Intoarce (retragere_laterala_m, salt_coama_m).
+func _facet_of(si: int, span: float) -> Vector2:
+	if cut_facet_m <= 0.0:
+		return Vector2.ZERO
+	var blk: int = int(floorf(float(si) / float(maxi(cut_facet_cols, 1))))
+	# Hash intreg, ieftin si stabil (nu RandomNumberGenerator: nodul se
+	# regenereaza si din editor, si sirul ar depinde de ordinea nodurilor).
+	var h: int = (blk * 374761393 + cut_facet_seed * 668265263) & 0x7FFFFFFF
+	h = (h ^ (h >> 13)) * 1274126177 & 0x7FFFFFFF
+	var u: float = float(h % 1024) / 1023.0
+	var v: float = float((h >> 10) % 1024) / 1023.0
+	# Retragerea e DOAR spre interiorul malului (pozitiva), niciodata spre drum.
+	#
+	# Prima varianta centra amplitudinea pe zero, deci jumatate din blocuri
+	# ieseau cu pana la jumatate de amplitudine INSPRE banda: cu `cut_offset_m`
+	# 7.2 si semilatimea de 7.0, un bloc de 1.1 m ajungea in carosabil si il
+	# prindea ProbeLaneClear. Muchia nu are nevoie de asta — un bloc care se
+	# RETRAGE lasa exact aceeasi muchie verticala fata de vecinul lui, doar ca
+	# banda ramane libera prin constructie.
+	var lateral: float = u * cut_facet_m
+	# Coama: DOAR in jos (0 sau -1 x banda), niciodata peste coama medie.
+	#
+	# Prima varianta permitea si +1, si captura a aratat de ce nu merge: saltul
+	# in sus se aduna peste `rise` DUPA ce s-a aplicat stingerea de capat, deci
+	# la capetele peretelui, unde coloanele vecine sunt aproape zero, un bloc
+	# ridicat cu o banda intreaga iesea ca o pana ascutita detasata in aer —
+	# citita ca hartie, nu ca granit. Un bloc care se ADANCESTE lasa exact
+	# aceeasi muchie verticala fata de vecin (silueta tot se rupe), dar nu poate
+	# depasi profilul peretelui.
+	var crown: float = -roundf(v) * cut_facet_crown_bands * maxf(span, 1.0)
+	return Vector2(lateral, crown)
 
 
 ## BUZA EXTERIOARA: pragul de roca de pe umarul dinspre vale.
@@ -526,7 +666,7 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var cols: Array = []
 	for si in steps + 1:
 		var f := frac_start + (frac_end - frac_start) * (float(si) / float(steps))
-		cols.append(_cut_column(sampler, f, surface_y))
+		cols.append(_cut_column(sampler, f, surface_y, si))
 	var built := 0
 	for si in steps:
 		var a: Array = cols[si]
@@ -542,9 +682,14 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 			# peretelui si coama prinde soarele. Randul 0 e COAMA.
 			var t0 := float(r) / float(rows - 1)
 			var t1 := float(r + 1) / float(rows - 1)
-			var c0 := _shade(t0)
-			var c1 := _shade(t1)
+			var c0 := _shade(t0) * cut_shade
+			var c1 := _shade(t1) * cut_shade
 			# Ordine inversa fata de `_build`: fata priveste spre banda.
+			# NORMALE DURE pe fiecare fata cand peretele e fatetat: altfel
+			# `generate_normals` mediaza intre blocuri si muchia construita
+			# dispare in Gouraud. Vezi `cut_facet_m`.
+			if cut_facet_m > 0.0:
+				st.set_smooth_group(0xFFFFFFFF)
 			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1, true)
 	if built == 0:
 		return null
@@ -563,7 +708,8 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 ## O coloana din taietura: de la coama in jos pana in talpa, infipta in umar.
 ##
 ## Intoarce lista goala cand nu e in ce sapa — vezi mai jos.
-func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
+func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable,
+		col_index: int = -1) -> Array:
 	var n := sampler.point_count()
 	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
 	var p := sampler.baked_point(i)
@@ -592,7 +738,13 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		samples += 1.0
 		probe += 6.0
 	crest /= maxf(samples, 1.0)
-	var rise: float = minf(crest - foot_y, cut_height_m)
+	var rise: float = minf(maxf(crest - foot_y, cut_min_rise_m), cut_height_m)
+	# FATETARE: blocul asta al peretelui isi are propria retragere laterala si
+	# propriul salt de coama. Vezi `cut_facet_m` pentru masuratoarea din spate.
+	var facet := _facet_of(col_index, maxf(band_span_m, 1.0)) 		if col_index >= 0 else Vector2.ZERO
+	rise = maxf(rise + facet.y, 0.0)
+	# NOTA: saltul de coama intra INAINTE de stingerea de capat (mai jos), ca la
+	# capete peretele sa se stinga cu tot cu fatetare, nu peste ea.
 	# STINGERE la capete, pe `cut_taper_frac` din lungime.
 	#
 	# Fara ea peretele incepea cu o fata de 10 m taiata drept in aer: prima
@@ -663,7 +815,17 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 					/ maxf(band_span_m, 1.0)))
 			# alternanta dur/moale: bancurile pare ies, cele impare se retrag
 			back -= cut_step_out_m * (1.0 if (si % 2) == 0 else 0.0)
-		var q: Vector3 = p + sd * (cut_offset_m + back + tuck)
+		# TREPTE REALE: la fiecare banda se emit DOUA puncte la aceeasi cota —
+		# unul la retragerea stratului de deasupra, unul la a celui de dedesubt.
+		# Intre ele iese o fata ORIZONTALA (treapta, luminata de soarele de 42
+		# grade), iar intre banda si urmatoarea o fata VERTICALA (contratreapta,
+		# in umbra proprie). Vezi `cut_tread_m` pentru masuratoarea din spate.
+		if cut_tread_m > 0.0 and r > 0:
+			var back_up: float = back + cut_tread_m * float(cut_bands - r + 1)
+			var qu: Vector3 = p + sd * (cut_offset_m + back_up + tuck + facet.x)
+			out.append(Vector3(qu.x, y, qu.z))
+		var tread: float = cut_tread_m * float(cut_bands - r)
+		var q: Vector3 = p + sd * (cut_offset_m + back + tread + tuck + facet.x)
 		out.append(Vector3(q.x, y, q.z))
 	# Poala de moloz la piciorul taieturii. Aici e cea mai vizibila din tot
 	# cadrul: taietura sta CHIAR langa banda, deci imbinarea ei cu umarul e la

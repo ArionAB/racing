@@ -68,6 +68,26 @@ extends Node
 ##                             sunt stare, nu functie de timp. Ceasul din
 ##                             hazard (`_cross_time`) spune cand e piatra
 ##                             deasupra soselei; sonda il tipareste.
+##   --herd-at=4.0             RAUL DE GNU (HerdHazard, Serengeti) la N SECUNDE
+##                             in ciclul pulsului (puls 8 s + gol 7 s = 15 s;
+##                             `_time` absolut, fara `phase`). Capul pulsului
+##                             e pe axa soselei la 0; blocul de 52 m vine din
+##                             spate, deci 3-8 = drumul PLIN pe toate benzile,
+##                             9-14 = culoar liber. Turma se calculeaza in
+##                             _physics_process, iar captura o ingheata —
+##                             fara asta pozele arata pozitia de la _ready.
+##   --hippo-at=0.12           hipopotamii (HippoHazard) la o fractie din ciclul
+##                             lor (20 s implicit; `phase` ignorat, toti la
+##                             aceeasi faza): 0.05-0.07 = urca, 0.07-0.17 =
+##                             SUS pe banda, 0.17-0.21 = se scufunda, restul
+##                             = sub albie, invizibili.
+##   --cross-at=8.0            obstacolele care TRAVERSEAZA (SlidingHazard
+##                             Motion.TRAVERSARE: elefantii din Serengeti,
+##                             cireada) la N SECUNDE absolute in ciclul lor
+##                             (`phase` intra in socoteala, ca in joc). Un ciclu
+##                             = 2 x (5 s parcat + 1,2 s telegraf + traversare);
+##                             sonda tipareste pentru fiecare unde e si daca e
+##                             pe carosabil.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -111,6 +131,7 @@ func _ready() -> void:
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
 	var cine := false
 	var hide_terrain := false
+	var no_fog := false
 	var game_cam := false
 	## --cave: aplica presetul si intunericul celei mai apropiate [CameraZone].
 	##
@@ -133,12 +154,22 @@ func _ready() -> void:
 	var wave_at := -1.0
 	var rock_at := -1.0
 	var door_at := -1.0
+	var herd_at := -1.0
+	var hippo_at := -1.0
+	var cross_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
 	var hide_node := ""
+	# --car: masina jucatorului (Muscle) INGHETATA pe punctul de focus, ca in
+	# cadrul de joc — referintele de diorama au masina in prim-plan, iar o
+	# captura fara ea compara un peisaj cu o scena. Fara fizica (on_start_grid).
+	var show_car := false
 	for arg in OS.get_cmdline_user_args():
+		if arg == "--car":
+			show_car = true
+			continue
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
 		elif arg.begins_with("--span-at="):
@@ -165,6 +196,12 @@ func _ready() -> void:
 			rock_at = float(arg.trim_prefix("--rock-at="))
 		elif arg.begins_with("--door-at="):
 			door_at = float(arg.trim_prefix("--door-at="))
+		elif arg.begins_with("--herd-at="):
+			herd_at = float(arg.trim_prefix("--herd-at="))
+		elif arg.begins_with("--hippo-at="):
+			hippo_at = float(arg.trim_prefix("--hippo-at="))
+		elif arg.begins_with("--cross-at="):
+			cross_at = float(arg.trim_prefix("--cross-at="))
 		elif arg.begins_with("--burner-at="):
 			burner_at = float(arg.trim_prefix("--burner-at="))
 		elif arg.begins_with("--balloon-at="):
@@ -188,6 +225,11 @@ func _ready() -> void:
 		elif arg == "--gamecam":
 			driver_view = true
 			game_cam = true
+		elif arg == "--no-fog":
+			# Diagnostic: stinge ceata de adancime. Raspunde la intrebarea
+			# „geometria departata lipseste, sau doar e inghitita de ceata?" —
+			# doua defecte cu leacuri opuse (populare vs. reglaj de atmosfera).
+			no_fog = true
 		elif arg == "--no-terrain":
 			# Diagnostic: ascunde panza de teren, ca sa se vada ce e SUB ea.
 			# „Exista in scena" si „se vede in cadru" sunt intrebari diferite —
@@ -212,6 +254,13 @@ func _ready() -> void:
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
+	if no_fog:
+		var envs := track.find_children("*", "WorldEnvironment", true, false)
+		for e in envs:
+			var we := e as WorldEnvironment
+			if we.environment != null:
+				we.environment.fog_enabled = false
+		print("--no-fog: ceata stinsa pe %d WorldEnvironment" % envs.size())
 	if hide_terrain:
 		var tb := track.get_node_or_null("TerrainBody")
 		if tb != null:
@@ -224,6 +273,12 @@ func _ready() -> void:
 		_set_train_phase(track, train_at)
 	if door_at >= 0.0:
 		await _set_door_phase(track, door_at)
+	if herd_at >= 0.0:
+		await _set_herd_time(track, herd_at)
+	if hippo_at >= 0.0:
+		await _set_hippo_phase(track, hippo_at)
+	if cross_at >= 0.0:
+		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
 		await _set_burner_phase(track, burner_at)
 	if balloon_at >= 0.0:
@@ -270,12 +325,23 @@ func _ready() -> void:
 	if hide_node != "":
 		await get_tree().process_frame
 		await get_tree().process_frame
-		var h := track.find_child(hide_node, true, false) as Node3D
-		if h != null:
-			h.visible = false
-			print("snapshot: ascuns %s (%s)" % [hide_node, h.get_path()])
+		# ADITIV (POI D, runda 4): un `*` la coada ascunde TOATE nodurile al
+		# caror nume incepe cu prefixul. Fara asta nu se poate face A/B-ul de
+		# atribuire pe o CLASA de piese (ceata, coroane) — doar pe un nod.
+		if hide_node.ends_with("*"):
+			var pref := hide_node.substr(0, hide_node.length() - 1)
+			var cnt := 0
+			for nd in track.find_children("%s*" % pref, "Node3D", true, false):
+				(nd as Node3D).visible = false
+				cnt += 1
+			print("snapshot: ascunse %d noduri cu prefixul %s" % [cnt, pref])
 		else:
-			print("snapshot: nu am gasit %s" % hide_node)
+			var h := track.find_child(hide_node, true, false) as Node3D
+			if h != null:
+				h.visible = false
+				print("snapshot: ascuns %s (%s)" % [hide_node, h.get_path()])
+			else:
+				print("snapshot: nu am gasit %s" % hide_node)
 
 	# Ceata se stinge doar pentru vederile DE SUS (ansamblul ortografic), unde
 	# camera e la sute de metri si ceata ar spala tot intr-o pata uniforma.
@@ -380,6 +446,15 @@ func _ready() -> void:
 				print("--cave: nicio CameraZone langa frac %.3f" % zoom_frac)
 		var ahead: Vector3 = pts[route.wrap_index(idx + 12)]
 		var dir := (ahead - focus).normalized()
+		if show_car:
+			var car := (load("res://scenes/cars/Car.tscn") as PackedScene).instantiate() as Car
+			car.track = track
+			add_child(car)
+			car.apply_data(load("res://scenes/cars/data/muscle.tres") as CarData)
+			car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
+				focus + Vector3.UP * 0.45)
+			car.road_index = idx
+			car.on_start_grid = true
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -401,6 +476,18 @@ func _ready() -> void:
 		cam.position = want
 		cam.look_at(focus + dir * look_ahead + Vector3.UP * look_h, Vector3.UP)
 		cam.current = true
+		# DECORUL CARE SE CONSTRUIESTE SINGUR are nevoie de cadre inainte de
+		# poza. FlamingoFlock (si orice alt decor cu `_build.call_deferred()`)
+		# asteapta doua cadre de proces PLUS doua de fizica, ca terenul sa fie
+		# in serverul de fizica; cu doar doua `process_frame` poza se facea
+		# INAINTE ca stolurile sa existe. Masurat in runda 4 pe POI G:
+		# `_ready` al stolurilor rula, `_build` nu apuca niciodata, deci nici
+		# un flamingo din MultiMesh nu aparea in capturi — pe TOATE rundele de
+		# pana acum, nu doar pe inel. Asteptarea e de cateva cadre si face
+		# captura sa arate ce vede jucatorul, nu o stare intermediara.
+		for _i in 8:
+			await get_tree().process_frame
+			await get_tree().physics_frame
 		await get_tree().process_frame
 		await get_tree().process_frame
 		await RenderingServer.frame_post_draw
@@ -584,6 +671,89 @@ func _set_door_phase(root: Node, at: float) -> void:
 			door.travel.length(), door.door_closed_now()])
 	if found == 0:
 		print("--door-at=%.2f: NICIO usa de piatra pe pista asta" % at)
+
+
+## Aduce turma de gnu la `seconds` in ciclul pulsului (vezi `--herd-at`).
+##
+## Turma e un camp de curgere: pozitia fiecarui animal e FUNCTIE de `_time`,
+## deci nu trebuie simulata cadru cu cadru (spre deosebire de bolovani) — se
+## pune ceasul si se cere o plasare vizuala. Apoi se INGHEATA: pana la captura
+## mai trec cadre si pulsul ar fugi de pe drum. Hazardele stau sub `Hazarduri`,
+## nu direct sub pista, deci cautarea e recursiva.
+func _set_herd_time(root: Node, seconds: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "HerdHazard", true, false):
+		var herd := node as HerdHazard
+		herd.set("_time", seconds)
+		herd.call("_advance_animals", 0.0)
+		herd.call("_place_visuals")
+		herd.set_physics_process(false)
+		found += 1
+		var on_road := 0
+		var pos: PackedVector3Array = herd.get("_pos")
+		for p in pos:
+			var rel: Vector3 = p - herd.global_position
+			if absf(rel.dot(herd.flow_dir)) < HerdHazard.ROAD_ZONE:
+				on_road += 1
+		print("--herd-at=%.2f: %s, %d animale, %d in zona drumului, culoar liber=%s, perioada %.1f s"
+			% [seconds, herd.name, herd.count(), on_road, herd.window_open_now(), herd.period()])
+		for lot: Variant in [herd.get("_mmi"), herd.get("_mmi_zebra")]:
+			var mmi := lot as MultiMeshInstance3D
+			print("  lot %s: %d instante, cutie %s" % [mmi.name,
+				mmi.multimesh.instance_count, str(mmi.get_aabb())])
+	if found == 0:
+		print("--herd-at=%.2f: NICIO turma pe pista asta" % seconds)
+
+
+## Aduce obstacolele care TRAVERSEAZA la `seconds` absolute in ciclul lor
+## (vezi `--cross-at`). Cursa si perioada se configureaza la primul tick
+## (`_configure`, dupa ce pista a pus `travel`), deci se cere un cadru de
+## fizica inainte; apoi se INGHEATA, ca la turma.
+func _set_cross_time(root: Node, seconds: float) -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "SlidingHazard", true, false):
+		var hz := node as SlidingHazard
+		if hz == null or hz.motion != SlidingHazard.Motion.TRAVERSARE:
+			continue
+		hz.set("_time", seconds)
+		hz._physics_process(0.0)
+		hz.set_physics_process(false)
+		found += 1
+		var off: float = hz.call("_offset_now")
+		var lateral := off * hz.travel.length()
+		var hw := hz.road_half_width
+		var body_half: float = hz.get("_half_extent")
+		var on_road := absf(lateral) - body_half < hw
+		print("--cross-at=%.2f: %s la (%.1f, %.1f, %.1f), offset %.2f (%.1f m de ax, banda %.1f), pe carosabil=%s, perioada %.1f s, ciclu %.1f s"
+			% [seconds, hz.name, hz.global_position.x, hz.global_position.y,
+			hz.global_position.z, off, lateral, hw, on_road, hz.period,
+			2.0 * (SlidingHazard.CROSS_WAIT + SlidingHazard.CROSS_TELEGRAPH
+				+ hz.period * 0.5)])
+	if found == 0:
+		print("--cross-at=%.2f: NICIUN obstacol care traverseaza pe pista asta" % seconds)
+
+
+## Muta hipopotamii la o fractie din ciclul lor (vezi `--hippo-at`). Toti la
+## aceeasi faza, ca in captura sa se vada starea, nu defazajul. Un cadru de
+## fizica intai, ca `_rest` sa fie citit din pozitia reala (sync_to_physics).
+func _set_hippo_phase(root: Node, at: float) -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "HippoHazard", true, false):
+		var hippo := node as HippoHazard
+		hippo.set("_time", clampf(at, 0.0, 0.999) * hippo.period)
+		hippo._physics_process(0.0)
+		hippo.set_physics_process(false)
+		found += 1
+		print("--hippo-at=%.2f: %s la y=%.2f (ridicare %.2f m din %.2f), sus=%s"
+			% [at, hippo.name, hippo.global_position.y, hippo.lift_at(hippo.get("_time")),
+			hippo.rise_m, hippo.is_up()])
+	if found == 0:
+		print("--hippo-at=%.2f: NICIUN hipopotam pe pista asta" % at)
 
 
 ## Aduce bolovanii cu traseu la `seconds` de la desprindere, simuland cadrele.

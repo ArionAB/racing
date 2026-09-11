@@ -128,6 +128,15 @@ enum Kind {
 ## `SlidingHazard.Motion` — nu le reordona.
 @export_enum("Pendulare:0", "Traversare:1", "Usa:2") var motion: int = 0
 
+## Plafonul de viteza al maturarii (m/s). 0 = implicitul clasei (12, bolovanul).
+##
+## Exista pentru animalele care traverseaza pe picioarele lor: elefantul din
+## Serengeti (brief §3, ~1,5-2 m/s) la 12 m/s ar fi o sarja, nu un zid care
+## merge. Perioada se DEDUCE din viteza si din cursa reala (vezi
+## SlidingHazard._readable_period), deci ciclul iese de la sine ~35-40 s pe un
+## drum de 9 m. Doar pentru SLIDING.
+@export_range(0.0, 30.0, 0.1) var sweep_speed: float = 0.0
+
 ## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
 ##
 ## O CLASA, nu o textura proprie: garda de materiale din `tools/probe_decor.gd`
@@ -194,6 +203,8 @@ func model_spec() -> Dictionary:
 	# ar fi stins o eventuala declaratie de tema, in loc s-o lase sa vorbeasca.
 	if motion != 0:
 		spec["motion"] = motion
+	if sweep_speed > 0.0:
+		spec["sweep_speed"] = sweep_speed
 	if kind == Kind.ROCKFALL:
 		spec["rock_speed"] = rock_speed
 		spec["rock_pause"] = rock_pause

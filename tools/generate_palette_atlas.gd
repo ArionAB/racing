@@ -477,9 +477,15 @@ func _fill_slot(img: Image, slot: int) -> void:
 			img.set_pixel(x, y, c)
 
 
-## Culoarea de baza a slotului. Sloturile fara culoare definita (24..31, rezerva)
-## raman magenta, ca o greseala de UV sa sara in ochi imediat. Garda s-a ingustat
-## de la 17..31 cand mediul insular a ocupat 17..23 — dar exista in continuare.
+## Culoarea de baza a slotului. Sloturile fara culoare definita raman magenta,
+## ca o greseala de UV sa sara in ochi imediat.
+##
+## Garda s-a ingustat de la 17..31 cand mediul insular a ocupat 17..23, apoi de
+## la 24..31 pe masura ce Baikal/Stromboli/Chongqing au consumat rezerva, si de
+## la septembrie 2026 nu mai are NICIUN slot real sub ea: HEX are toate cele 32
+## de culori, ultima fiind FLAMINGO_PINK 31 (Serengeti). Ramura de magenta e de
+## acum doar plasa pentru un UV in afara atlasului (slot >= 32) — pastrata
+## intentionat, fiindca exact asta a prins defectul flamingilor.
 func _base_color(slot: int) -> Color:
 	if slot < Palette.HEX.size():
 		return Palette.color(slot)
@@ -526,7 +532,8 @@ func _texture_for(slot: int, base: Color, x: int, y: int) -> Color:
 		Palette.MARBLE_GREY:
 			return _marble(base, x, y)
 		_:
-			# Accentele de masina (14-16) si LAVA_ORANGE (30) raman plate:
+			# Accentele de masina (14-16), LAVA_ORANGE (30) si FLAMINGO_PINK
+			# (31) raman plate:
 			# accentele trebuie sa fie cele mai saturate si mai curate suprafete
 			# din cadru (style_bible §1); lava isi ia viata din emisivul de
 			# clasa la integrare, nu din granulatie de albedo.

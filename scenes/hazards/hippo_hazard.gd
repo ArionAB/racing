@@ -50,8 +50,18 @@ const HIPPO_GLB := "res://assets/models/serengeti/animals/hippo_back.glb"
 ##   11 PAINTED_METAL #7692A8 -> (127,139,126) HSV(115,0.09,0.55) GRI
 ## Slotul rece anuleaza caldura soarelui (un slot e o CULOARE, nu o
 ## eticheta); gri-ul iesit are o urma verde-albastruie, ca hipopotamul ud.
+##
+## RUNDA 2 (verdict de la volan: „hipopotamii arata ca niste bolovani").
+## Masurat pe captura de joc la vad: hipopotam V 0.51, namol 0.53, bolovanii
+## de kopje din spate 0.55 — toate trei in acelasi registru, cu un ecart de
+## 2-4%. Ochiul desparte o silueta de fundal de la ~15% diferenta de VALOARE,
+## deci problema nu era nuanta (toata zona e maro-cald), ci lipsa de contrast.
+## PAINTED_METAL iese pe ecran la V 0.67, adica mai DESCHIS decat namolul din
+## jur — exact invers decat trebuie. LOG_DARK (#4A3526) iese la V 0.38, cu
+## 0.15 sub fundal, si ramane cald (H 25), deci nu vireaza spre crem sub
+## soarele temei asa cum face orice gri neutru (vezi masuratoarea de mai sus).
 const HIPPO_SLOT_REMAP := {
-	Palette.ROCK_DARK: Palette.PAINTED_METAL,    # corpul: gri
+	Palette.ROCK_DARK: Palette.LOG_DARK,         # corpul: brun-inchis
 	Palette.TILE_TERRACOTTA: Palette.KERB_RED,   # gura: rosu
 }
 

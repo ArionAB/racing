@@ -145,6 +145,31 @@ def build():
         arm.rotation_euler.rotate_axis("Z", 3.1415926)
         print("capul era spre -Y, am intors vaca")
         assert bone_y("Head") > bone_y("Tail"), "capul tot nu e spre +Y"
+    # A DOUA JUMATATE A GARZII, si ea lipsea. Testul de mai sus se uita la
+    # `matrix_basis` al ARMATURII, dar mesh-ul e copil si pleaca spre export cu
+    # transformul LUI. Garda trecea verde in timp ce GLB-ul livrat avea capul
+    # spre +Z in Godot: masurat pe cow.glb din kit (oase Head z=+3.98,
+    # Tail z=-2.29), iar vaca mergea cu spatele si pe Alpi (Track09, acelasi
+    # face_travel) si pe Serengeti (cireada Ankole). Verificam pe GEOMETRIA
+    # care chiar se exporta.
+    # NU pe "masa de sus": la vaca asta coada e ridicata mai sus decat capul
+    # (scrie chiar deasupra, in nota oaselor), deci euristica aia cade pe coada.
+    # Martorul e osul Head purtat prin transformul MESH-ului — adica exact
+    # geometria care pleaca la export, nu `matrix_basis` al armaturii.
+    def mesh_bone_y(prefix):
+        # Osul e deja in spatiul armaturii: `arm.matrix_world @ head_local` il
+        # duce in lume. A-l mai inmulti si cu `mesh.matrix_world` (prima
+        # varianta) il transforma de DOUA ori — de-aia garda raporta
+        # cap -3.98 <= coada 2.29 dupa doua intoarceri corecte.
+        for b in arm.data.bones:
+            if b.name.startswith(prefix):
+                return (arm.matrix_world @ b.head_local).y
+        raise AssertionError("os lipsa: %s*" % prefix)
+
+    bpy.context.view_layer.update()
+    assert mesh_bone_y("Head") > mesh_bone_y("Tail"), (
+        "mesh-ul are capul spre -Y (deci +Z in Godot): cap %.3f <= coada %.3f"
+        % (mesh_bone_y("Head"), mesh_bone_y("Tail")))
 
     arm.scale *= TARGET_LENGTH / length
     bpy.context.view_layer.update()

@@ -195,8 +195,16 @@ func _build_dust() -> void:
 	p.scale_amount_min = 1.2
 	p.scale_amount_max = 2.6
 	p.color = Color(0.60, 0.47, 0.42, 0.35)
+	# Particula se STINGE spre margini, altfel se vede PATRATUL.
+	#
+	# Asa arata praful turmei de la volan (raportat de dezvoltator, POI B):
+	# "niste patrate gri". Cauza nu e numarul de particule, e MUCHIA — un
+	# QuadMesh cu alpha uniform are margine de poligon la fel de neta ca un
+	# obiect solid (memoria `particule-muchia-nu-numarul`, platita o data pe
+	# praful de sub roti si o data pe conul vartejului). Un gradient radial
+	# scris la rulare face din acelasi quad o pata fara margine.
 	var mesh := QuadMesh.new()
-	mesh.size = Vector2(0.9, 0.9)
+	mesh.size = Vector2(1.6, 1.6)
 	p.mesh = mesh
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -204,8 +212,27 @@ func _build_dust() -> void:
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	mat.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
 	mat.vertex_color_use_as_albedo = true
+	mat.albedo_texture = _puff_texture()
+	# Fara scriere in depth: doua puf-uri suprapuse nu se taie unul pe altul.
+	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 	mesh.material = mat
 	add_child(p)
+
+
+## Textura unei particule de praf: alb in centru, transparent la margine, cu
+## cadere continua (smoothstep pe raza). 64x64 e destul — la 1,6 m pe ecran
+## nu se vede niciun texel, iar costul e o singura textura pentru toata turma.
+static func _puff_texture() -> ImageTexture:
+	var size := 64
+	var img := Image.create(size, size, false, Image.FORMAT_RGBAF)
+	var c := float(size - 1) * 0.5
+	for y in size:
+		for x in size:
+			var d := Vector2(float(x) - c, float(y) - c).length() / c
+			# smoothstep inversat: 1 in centru, 0 la r=1, fara muchie
+			var a := 1.0 - smoothstep(0.15, 1.0, d)
+			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, a * a))
+	return ImageTexture.create_from_image(img)
 
 
 ## Zona din care se citesc masinile: culoarul plus o margine, pe toata bucla.

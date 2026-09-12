@@ -32,11 +32,25 @@ signal spun(car: Car)
 @export_range(0.5, 10.0, 0.1) var cooldown: float = 3.0
 
 @export_group("Forma")
-@export_range(0.5, 5.0, 0.1) var radius: float = 1.5
-@export_range(3.0, 30.0, 0.5) var height: float = 12.0
+@export_range(0.5, 5.0, 0.1) var radius: float = 2.4
+@export_range(3.0, 30.0, 0.5) var height: float = 14.0
+
+@export_group("Ridicare")
+## Cat te ridica trecerea prin vartej (m). 0 = deloc (comportamentul vechi).
+##
+## NU e tromba de pe Okinawa si nu are voie sa devina: aia te scoate din joc
+## 1,5-2,5 s si iti garanteaza aterizarea pe sosea (LIFT 5-15 m). Aici
+## ridicarea e DECOR PENTRU PEDEAPSA: 2,5 m inseamna 11,8 m/s si ~0,85 s de
+## aer (g = 28), adica exact cat sa simti ca te-a luat pe sus in timp ce te
+## intoarce cu 180°. Pedeapsa ramane orientarea, nu timpul.
+@export_range(0.0, 6.0, 0.1) var lift_m: float = 2.5
+## Cat pastrezi din viteza orizontala cand te ridica.
+@export_range(0.3, 1.0, 0.01) var speed_keep: float = 0.82
 
 var _area: Area3D
 var _cone: MeshInstance3D
+var _dust: CPUParticles3D
+var _debris: CPUParticles3D
 var _time: float = 0.0
 var _origin: Vector3
 var _cooldown: Dictionary = {}
@@ -54,17 +68,29 @@ func _ready() -> void:
 	shape.position = Vector3.UP * height * 0.5
 	_area.add_child(shape)
 	add_child(_area)
+	# PALNIA, si de ce era „un con transparent" (verdictul de la volan).
+	#
+	# Doua greseli, amandoua de silueta: (1) varful de 5.3 m peste o zona de
+	# prindere de 2.4 m facea o pana lata si plata, nu o coloana — ochiul citea
+	# triunghi de hartie; (2) un singur cilindru cu alpha mic n-are DENSITATE:
+	# praful adevarat e opac jos si se destrama sus.
+	# Acum: varf mai stramt (x1.5), talpa mai groasa, si DOUA invelisuri
+	# concentrice care se rotesc in sens contrar (vezi _cone2) — suprapunerea
+	# lor da variatia care spune „se invarte".
 	var mesh := CylinderMesh.new()
-	mesh.top_radius = radius * 2.2
-	mesh.bottom_radius = radius * 0.4
+	mesh.top_radius = radius * 1.5
+	mesh.bottom_radius = radius * 0.55
 	mesh.height = height
-	mesh.radial_segments = 12
+	mesh.radial_segments = 14
 	mesh.rings = 3
 	_cone = MeshInstance3D.new()
 	_cone.mesh = mesh
 	_cone.position = Vector3.UP * height * 0.5
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.78, 0.66, 0.46, 1.0)
+	# Mai INCHISA decat savana din spate (masurat pe captura: iarba iese
+	# ~(205,178,91), iar o coloana la 0.78/0.66/0.46 cadea peste ea fara
+	# contrast). Praful in suspensie e cenusiu-brun, nu nisip luminat.
+	mat.albedo_color = Color(0.52, 0.44, 0.34, 1.0)
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -78,7 +104,7 @@ func _ready() -> void:
 	var grad := Gradient.new()
 	grad.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
 	grad.colors = PackedColorArray([
-		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.72), Color(1, 1, 1, 0.0)])
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.95), Color(1, 1, 1, 0.0)])
 	var tex := GradientTexture2D.new()
 	tex.gradient = grad
 	tex.width = 4
@@ -89,6 +115,72 @@ func _ready() -> void:
 	_cone.material_override = mat
 	_cone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_cone)
+	_build_particles()
+
+
+## PRAFUL, si de ce conul singur nu ajungea.
+##
+## Verdictul de la volan: „arata ca un con transparent". Asa si era — un singur
+## cilindru unshaded cu un gradient de alpha, adica o siluetă, nu un vartej. Ce
+## face diferenta e acelasi lucru ca la tromba de pe Okinawa: `radial_accel`
+## NEGATIV (trage bucatile spre axa) plus `tangential_accel` pozitiv (le da
+## imbrancitura perpendiculara). Fara ele, oricate particule ai emite, iese o
+## fantana. Cu ele, ochiul vede ca materialul se INVARTE.
+##
+## Doua straturi, la scari diferite, fiindca un singur strat citeste ca un
+## obiect: nisipul jos (mult, mic, repede) e corpul coloanei, iar bucatile mari
+## si lenese care urca pe langa palnie spun ca vartejul RIDICA lucruri.
+func _build_particles() -> void:
+	_dust = _spin_emitter(46, Palette.color(Palette.SAND_MID),
+		1.6, 1.5, 9.0, 0.3, radius * 1.1)
+	_debris = _spin_emitter(16, Palette.color(Palette.DRY_VEGETATION),
+		2.4, 2.2, 6.5, 0.8, radius * 1.5)
+
+
+func _spin_emitter(count: int, tint: Color, life: float, size: float,
+		rise: float, from_y: float, r: float) -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = count
+	p.lifetime = life
+	p.position = Vector3.UP * from_y
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE_SURFACE
+	p.emission_sphere_radius = r
+	p.direction = Vector3.UP
+	p.spread = 20.0
+	p.initial_velocity_min = rise * 0.5
+	p.initial_velocity_max = rise
+	p.radial_accel_min = -8.0
+	p.radial_accel_max = -3.5
+	p.tangential_accel_min = 6.0
+	p.tangential_accel_max = 13.0
+	# Gravitatie slaba: praful ridicat nu recade ca o piatra.
+	p.gravity = Vector3(0.0, -2.5, 0.0)
+	p.scale_amount_min = size * 0.6
+	p.scale_amount_max = size
+	var fade := Gradient.new()
+	fade.set_color(0, Color(tint.r, tint.g, tint.b, 0.0))
+	fade.set_color(1, Color(tint.r, tint.g, tint.b, 0.0))
+	fade.add_point(0.18, Color(tint.r, tint.g, tint.b, 0.72))
+	fade.add_point(0.70, Color(tint.r, tint.g, tint.b, 0.45))
+	p.color_ramp = fade
+	var bit := SphereMesh.new()
+	bit.radius = 0.30
+	bit.height = 0.60
+	# Rezolutia implicita a unei sfere Godot e 64x32 = 4224 de triunghiuri
+	# (CLAUDE.md): cu 46 de particule ar fi 194.000 de triunghiuri de praf.
+	bit.radial_segments = 5
+	bit.rings = 3
+	var dm := StandardMaterial3D.new()
+	dm.vertex_color_use_as_albedo = true
+	# Culorile proiectului sunt sRGB; fara steag ies cu ~1.5 trepte mai deschise.
+	dm.vertex_color_is_srgb = true
+	dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	dm.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	bit.material = dm
+	p.mesh = bit
+	add_child(p)
+	return p
 
 
 func _physics_process(delta: float) -> void:
@@ -106,6 +198,16 @@ func _physics_process(delta: float) -> void:
 		_cooldown[car] = cooldown
 		var dir_sign := 1.0 if (spins % 2 == 0) else -1.0
 		car.apply_yaw_kick(dir_sign * deg_to_rad(spin_deg) / spin_time, spin_time)
+		# Ridicarea: inaltimea ceruta se traduce in viteza verticala, nu invers
+		# (aceeasi aritmetica ca la tromba: v = sqrt(2*g*h)). Cifra pe care o
+		# reglezi e inaltimea, fiindca aia se vede.
+		if lift_m > 0.0:
+			car.launch(sqrt(2.0 * car.gravity * lift_m))
+			car.velocity.x *= speed_keep
+			car.velocity.z *= speed_keep
+			# Caroseria se invarte si vizual cat e in aer: fara asta, o masina
+			# ridicata drept arata ca un lift, nu ca un vartej.
+			car.spin_body(dir_sign * 5.0, spin_time)
 		if blind_time > 0.0:
 			car.blind(blind_time)
 		spins += 1

@@ -851,15 +851,24 @@ static func themes() -> Dictionary:
 			# 0.30 (saturatie inapoi in banda), mul spre cald (rosu peste
 			# albastru) ca nuanta sa cada la H15-25, gain 1.22 -> 1.05 ca sa
 			# nu urce valoarea peste maluri.
-			"water_b_mul": Color(1.0, 0.90, 0.80),
+			# 12 sep 2026, verdictul dezvoltatorului dupa merge-ul v12: „apa tot
+			# arata ca un murdar gri; mai bine fa-o sa arate ca o apa curata
+			# albastra". Deci raul B (vadul) nu mai e namol: sloturile lagunei
+			# (turcoaz peste recif, albastru la adanc), fara desaturare, fara
+			# tenta calda, luciu de apa limpede (rugozitate 0.10). Lacul de
+			# soda (raul A) ramane laptos.
+			"water_b_shallow_slot": Palette.REEF_SHALLOW,
+			"water_b_deep_slot": Palette.SEA_DEEP,
+			"water_b_shore_slot": Palette.CORAL_SAND,
+			"water_b_mul": Color(1.0, 1.0, 1.0),
 			# v12 (sep 2026): masurat cu apa ascunsa (--hide=ChannelWater), sub
 			# vad e nisip H24 S0.58 V0.74, iar apa iesea H31 S0.26 V0.60 — o
 			# versiune SPALATA a malului, cu 43 m de latime peste drum si nisip.
 			# Asta era „pata gri". Namolul coboara sub mal (gain 1.45 -> 1.15)
 			# si isi recapata putin brun (desat 0.30 -> 0.22); referinta are
 			# raul S0.22 V0.45-0.52, sub malurile lui.
-			"water_b_desat": 0.22,
-			"water_b_gain": 1.15,
+			"water_b_desat": 0.0,
+			"water_b_gain": 1.3,
 			"water_b_glint": 1.9,
 			"water_b_glint_cut": 0.60,
 			# Spuma alba e ce facea lacul sa citeasca mint: toata panza de la
@@ -878,10 +887,10 @@ static func themes() -> Dictionary:
 			# `ripple_tex` — zero VRAM in plus) inmulteste culoarea de baza.
 			# 0.30 e peste 0.21 al Yangtze-ului fiindca namolul de vad se vede
 			# de la 10-15 m, nu de la 60: granulatia are voie sa fie mai tare.
-			"water_ripple": 0.30,
+			"water_ripple": 0.18,
 			# fatete: pete mari de valoare cu MUCHII, ce se vede in diorama
 			# cand te uiti la apa mica. Pe namol sunt banci de mal, nu unde.
-			"water_facet": 0.55,
+			"water_facet": 0.30,
 			"water_facet_count": 7,
 			"water_facet_scale": 0.38,
 			"water_facet_wobble": 0.40,
@@ -896,10 +905,10 @@ static func themes() -> Dictionary:
 			# velur, masurat pe t14_0.145 v2. Sub 1.5 m lungime de unda si cu
 			# panta la o treime, undele se topesc in textura de la 10 m.
 			"water_lit_rough": 0.30,
-			"water_lit_rough_b": 0.45,
+			"water_lit_rough_b": 0.10,
 			"water_lit_normal": 0.35,
 			"water_lit_wave_len": 1.4,
-			"water_lit_fresnel": 0.4,
+			"water_lit_fresnel": 0.35,
 			"water_lit_spec": 1.1,
 			"water_flow_speed": 2.2,
 			"water_flow_foam": 0.6,
@@ -5857,10 +5866,23 @@ func water_level_at(pos: Vector3) -> float:
 ## (`vertex_color_is_srgb`, vezi Car._puff_mesh), iar `water_tint` intoarce
 ## liniar. Prima sonda a dat stropi (0.22, 0.16, 0.11) — un brun aproape negru,
 ## invizibil pe namol (ProbeSplash, prima rulare).
-func water_splash_color() -> Color:
+##
+## `pos`: pe temele cu doua rauri (`water_split`, dreapta din shader) stropul
+## ia culoarea raului in care ai intrat — turcoaz pe vadul Mara, laptos pe
+## lacul de soda.
+func water_splash_color(pos: Vector3 = Vector3.ZERO) -> Color:
 	var dim := clampf(float(theme_flag("water_dim", 1.0)), 0.0, 1.0)
-	var shallow := water_tint(theme_flag("water_shallow_slot",
-		Palette.REEF_SHALLOW), dim)
+	var slot: int = theme_flag("water_shallow_slot", Palette.REEF_SHALLOW)
+	var mul_key := "water_mul"
+	var desat_key := "water_desat"
+	if float(theme_flag("water_split", 0.0)) > 0.0:
+		var sdir: Vector2 = theme_flag("water_split_dir", Vector2(1.0, 0.0))
+		var sd := Vector2(pos.x, pos.z).dot(sdir.normalized()) 			- float(theme_flag("water_split_offset", 0.0))
+		if sd > 0.0:
+			slot = theme_flag("water_b_shallow_slot", slot)
+			mul_key = "water_b_mul"
+			desat_key = "water_b_desat"
+	var shallow := water_tint(slot, dim, mul_key, desat_key)
 	# Cel mult 40% apa in strop: stropii sunt spuma (aer + apa), deci mai
 	# deschisi decat luciul chiar si pe un rau de namol.
 	var mix_k := clampf(float(theme_flag("water_foam_mix", 0.35)) * 0.4, 0.0, 0.4)
@@ -6552,7 +6574,9 @@ func _water_material() -> ShaderMaterial:
 		float(theme_flag("water_flow_foam_cut", 0.35)))
 	# Spuma de curgere e spuma temei (FOAM_WHITE tras spre apa mica prin
 	# `water_foam_mix`), nu alb pur: pe namol e crem-maronie, pe recif alba.
-	var ffoam := water_tint(Palette.FOAM_WHITE, dim).lerp(shallow,
+	# Pe raul B (unde curge apa, cand exista despartire) spuma e a lui B.
+	var foam_base := b_shallow if float(theme_flag("water_split", 0.0)) > 0.0 		else shallow
+	var ffoam := water_tint(Palette.FOAM_WHITE, dim).lerp(foam_base,
 		clampf(float(theme_flag("water_foam_mix", 0.35)) * 0.4, 0.0, 1.0))
 	_water_mat.set_shader_parameter("flow_foam_col",
 		Vector3(ffoam.r, ffoam.g, ffoam.b))

@@ -111,20 +111,20 @@ herd_white_cap = 0.42
 herd_desat = 0.55
 
 [node name="Hipopotam1" type="AnimatableBody3D" parent="Hazarduri" unique_id=1919468610]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -81, -0.67, 163)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -81, -0.87, 163)
 script = ExtResource("4_hippo")
 rise_m = 1.5
 rest_top = -0.05
 
 [node name="Hipopotam2" type="AnimatableBody3D" parent="Hazarduri" unique_id=1977003479]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -75, -0.67, 167.5)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -75, -0.87, 167.5)
 script = ExtResource("4_hippo")
 phase = 0.33
 rise_m = 1.5
 rest_top = -0.05
 
 [node name="Hipopotam3" type="AnimatableBody3D" parent="Hazarduri" unique_id=1945893748]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -69, -0.67, 163.5)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -69, -0.87, 163.5)
 script = ExtResource("4_hippo")
 phase = 0.66
 rise_m = 1.5
@@ -172,6 +172,7 @@ reach = 130.0
 fade = 45.0
 jump = false
 ford = true
+water_over_road = 0.22
 label = "vad_mara"
 
 [node name="Faleze" type="Node3D" parent="." unique_id=537970118]

@@ -1184,7 +1184,7 @@ func _update_water() -> void:
 		return
 	if not _water_color_ready:
 		_water_color_ready = true
-		var c := track.water_splash_color()
+		var c := track.water_splash_color(global_position)
 		_water_spray.color = c
 		_water_burst.color = c
 		if _ring_material != null:

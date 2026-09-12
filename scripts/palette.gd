@@ -684,6 +684,15 @@ const CLASS_TEXTURES := {
 	# fi cerut sa coboare verde/albastru cu 35-57%, adica sa stearga toata
 	# granulatia sursei ca sa ajunga rosii — `rock` are nevoie de doar 5-11%.
 	"termite_clay": "res://assets/textures/classes/rock.png",
+	# Coroana savanei (Serengeti, lotul FRUNZISULUI): acaciile-umbrela,
+	# fever_tree, fig_tree, euphorbia. A patra clasa PICTATA (dupa
+	# pine_needles/macchia/fresco) — vezi tools/paint_acacia_canopy.py pentru
+	# de ce nici macchia (frunza lata de tufa mediteraneana), nici
+	# pine_needles (tusa liniara de ac) nu descriu o frunza compusa pinnata pe
+	# un platou de 7-13 m. Dala PROPRIE, nu una refolosita cu alta tenta:
+	# masurat (probe_slots.gd), coroanele nu au un slot cald de indepartat —
+	# ele ADUNA deja pe 12/13/21, deci nu era nevoie de CLASS_TINT/CLASS_LIFT.
+	"acacia_canopy": "res://assets/textures/classes/acacia_canopy.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -970,6 +979,23 @@ const CLASS_TRIPLANAR_SCALE := {
 	# piesa mica). Tinta: ~2 repetitii pe movila de 3 m (ca 1 pe cea de 1.5 m),
 	# adica o repetitie la 1.5 m -> scara 0.65 (rotunjit de la 0.667).
 	"termite_clay": 0.65,
+	# Coroana savanei (Serengeti): acaciile-umbrela, fever_tree, fig_tree,
+	# euphorbia. Sursa e PICTATA, nu fotografiata (ca ace/macchia), deci n-are
+	# o scara "reala" de masurat — lobii ei de densitate (`_clump_mask` in
+	# tools/paint_acacia_canopy.py, raza 60-130 din 1024) sunt o PROPORTIE a
+	# dalei, nu un desen la o dimensiune fizica.
+	#
+	# 0.05 = o repetitie la 20 m. Aleasa din marimea coroanei, nu din ochi:
+	# acaciile-umbrela au 7-10 m (brief §14), fig_tree/fever_tree ajung la
+	# 12-13 m pe verticala (probe_slots.gd: fig_tree y 7.04..13.00). Un lob de
+	# masca (6-13% din dala, la 20 m/repetitie) cade atunci la 1.2-2.6 m —
+	# marimea unui "bulgare" vizibil de frunzis din referinta
+	# (docs/asset_briefs/img/serengeti_plants.png), nu o pata cat toata
+	# coroana si nu un tipar sub-metru care s-ar citi ca zgomot. Proiectie in
+	# spatiul LUMII: copacii nu se misca, si benzile de valoare curg continuu
+	# intre coroanele vecine dintr-o padure deasa (POI D), exact ca la
+	# `pine_needles` pe un rand de brazi.
+	"acacia_canopy": 0.05,
 }
 
 static var _tri_mats: Dictionary = {}

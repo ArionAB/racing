@@ -267,6 +267,30 @@ const SPLIT_MODELS := {
 	# granitul sa nu stearga exact benzile care le fac lizibile de la 200 m.
 	"lengai": true,
 	"crater_far_wall": true,
+	# Lotul FRUNZISULUI (Serengeti, sep 2026): coroanele acaciilor si rudelor
+	# lor de savana primesc clasa `acacia_canopy` (Palette.gd), dar trunchiul e
+	# terenul ALTUI agent (clasa `bark`, sloturile 27/28/9/0) — vezi
+	# CLASSES_BY_MODEL mai jos. Ruptura tine cele doua sloturi separate, ca la
+	# `church_arch`, si e INVERSATA fata de casele eoliene: acolo corpul (varul)
+	# ia clasa si accentul (obloanele) ramane pe atlas; aici e pe dos — corpul
+	# (trunchiul, `keep_slot`) ramane pe atlas si accentul (coroana) ia clasa.
+	# Vezi ACCENT_HOLDS_CLASS.
+	#
+	# Acaciile-umbrela sunt SINGURUL caz cu remap in plus: `SLOT_REMAP_BY_MODEL`
+	# muta deja 13 si 21 pe 12 (CACTUS_GREEN) inainte ca ruptura sa se
+	# intample (`_remap_model_slots` ruleaza inaintea lui `_split_shutters`),
+	# deci ruptura de aici vede un mesh cu DOAR doua sloturi: 12 (coroana,
+	# unificata) si 28 (trunchiul). `keep_slot` = 28 (LOG_DARK) pastreaza
+	# trunchiul pe corp.
+	"acacia_umbrella_a": true,
+	"acacia_umbrella_b": true,
+	"acacia_umbrella_c": true,
+	# fever_tree, fig_tree, euphorbia n-au niciun remap: masurat pe .glb brut
+	# (tools/probe_slots.gd), coroana si trunchiul sunt deja pe sloturi
+	# separate din kit, deci ruptura taie direct pe ce vine din Blender.
+	"fever_tree": true,
+	"fig_tree": true,
+	"euphorbia": true,
 }
 
 const ACCENT_SPLIT := {
@@ -303,6 +327,38 @@ const ACCENT_SPLIT := {
 	"Crater_Gap": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
 	"Lengai": [Palette.SAND_SHADOW, Palette.MARBLE_GREY],
 	"Crater_Far_Wall": [Palette.ROCK_LIGHT],
+	# Lotul FRUNZISULUI (Serengeti): `keep_slot` e trunchiul, nu coroana — pe
+	# dos fata de intrarile de mai sus, unde corpul mare (var/piatra) ramane si
+	# accentul mic pleaca. Aici piesa mica (trunchiul) ramane pe atlas si masa
+	# mare (coroana) pleaca in `_Accente`, ca sa poata primi `acacia_canopy`
+	# fara sa piarda AO-ul si vertex colors ale trunchiului scoartei — acela
+	# e terenul clasei `bark` (alt agent), nu al acestui lot.
+	#
+	# Acaciile-umbrela: dupa `SLOT_REMAP_BY_MODEL` (13,21 -> 12), coroana e
+	# UN slot (12); trunchiul ramane 28 (LOG_DARK in .glb, folosit doar ca
+	# eticheta de slot aici, nu ca "barne siberiene"). keep_slot = 28.
+	"Acacia_Umbrella_A": Palette.LOG_DARK,
+	"Acacia_Umbrella_B": Palette.LOG_DARK,
+	"Acacia_Umbrella_C": Palette.LOG_DARK,
+	# fever_tree: trunchi pe 0 (SAND_LIGHT in .glb — kitul l-a desenat pe
+	# galbenul scoartei acaciei-febra, nu pe nisip; eticheta de slot, nu de
+	# rol). Masurat (probe_slots.gd): 33.9% verts pe 0, y 0.00..9.42 — acopera
+	# si o parte din baza coroanei (trunchiul se subtiaza in ramuri), dar
+	# ruptura taie pe SLOT, nu pe inaltime, deci nu conteaza unde se opreste
+	# vizual trunchiul.
+	"Fever_Tree": Palette.SAND_LIGHT,
+	# fig_tree: trunchi pe 9 (WOOD_WEATHERED, 27.7% verts, y 0.00..10.14) SI
+	# fructele/luminile din coroana pe 22 (FOAM_WHITE, 16.7% verts,
+	# y 5.03..8.23) raman AMBELE pe corp — nu doar trunchiul. Masurat: slotul
+	# 22 e H 167, complet in alta familie de culoare fata de verdele 12/21
+	# (H 87-117); o clasa triplanara pusa pe tot accentul le-ar fi sters ca pe
+	# orice alt slot (memoria `clase-pe-piese-de-kit`). `split_accents` accepta
+	# o LISTA de sloturi de pastrat (ca la ShophouseA/B/C), deci accentul ramane
+	# doar cu 12/21 — coroana verde, tinta reala a clasei.
+	"Fig_Tree": [Palette.WOOD_WEATHERED, Palette.FOAM_WHITE],
+	# euphorbia: "trunchi" (baza carnoasa, sub coroana candelabru) pe 28
+	# (LOG_DARK), 5.9% verts, y 0.00..1.60 — cea mai mica piesa din patru.
+	"Euphorbia": Palette.LOG_DARK,
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -320,6 +376,14 @@ const ACCENT_SPLIT := {
 ## de doua ori nu lasa nicio urma in log si nicio garda nu-l prinde.
 const ACCENT_HOLDS_CLASS := {
 	"church_arch": true,
+	# Lotul FRUNZISULUI (Serengeti): coroana (accent) ia `acacia_canopy`,
+	# trunchiul (corp) ramane pe atlas — teren separat, clasa `bark`.
+	"acacia_umbrella_a": true,
+	"acacia_umbrella_b": true,
+	"acacia_umbrella_c": true,
+	"fever_tree": true,
+	"fig_tree": true,
+	"euphorbia": true,
 }
 
 
@@ -635,6 +699,47 @@ const CLASSES_BY_MODEL := {
 	# — siluetele raman in familia de culoare a kopje-urilor din prim-plan.
 	"lengai": {"Lengai": Palette.TRI_PREFIX + "granite"},
 	"crater_far_wall": {"Crater_Far_Wall": Palette.TRI_PREFIX + "granite"},
+
+	# --- Serengeti: COROANA savanei (lotul FRUNZISULUI) ----------------------
+	#
+	# Masurat cu tools/probe_slots.gd: toata coroana zonei POI D (206 smochini,
+	# 67 acacii-febra, ~150 acacii-umbrela, 19 euforbii) sta pe aceeasi pereche
+	# de sloturi de atlas — 12 CACTUS_GREEN si 21 TROPICAL_GREEN — deci toata
+	# adancimea padurii de ceata citea UN SINGUR SMARALD plat. Clasa noua
+	# `acacia_canopy` (Palette.gd, sursa tools/paint_acacia_canopy.py) da
+	# variatie de valoare in interiorul coroanei, fara sa schimbe nuanta.
+	#
+	# ACCENT_HOLDS_CLASS: cheia e nodul `_Accente`, nu corpul — ruptura
+	# (SPLIT_MODELS/ACCENT_SPLIT) a mutat coroana acolo si a lasat trunchiul pe
+	# atlas, ca sa nu se stearga clasa `bark` a trunchiului (alt agent, alt
+	# lot). TRIPLANAR in spatiul LUMII: copacii nu se misca, iar intr-o padure
+	# deasa (POI D) benzile de valoare curg continuu dintr-o coroana in vecina
+	# ei, exact ca la `pine_needles` pe un rand de brazi.
+	#
+	# Acaciile-umbrela intra si in `SLOT_REMAP_BY_MODEL` (13,21 -> 12): dupa
+	# remapare coroana lor e deja UN slot inainte sa ajunga aici, deci clasa
+	# doar adauga textura peste o culoare deja unificata.
+	"acacia_umbrella_a": {
+		"Acacia_Umbrella_A_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
+	"acacia_umbrella_b": {
+		"Acacia_Umbrella_B_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
+	"acacia_umbrella_c": {
+		"Acacia_Umbrella_C_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
+	"fever_tree": {
+		"Fever_Tree_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
+	# fig_tree: ACCENT_SPLIT pastreaza si fructele (slot 22) pe CORP, langa
+	# trunchi — vezi nota de acolo. Accentul ramane doar cu verdele (12/21),
+	# deci clasa nu atinge fructele.
+	"fig_tree": {
+		"Fig_Tree_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
+	"euphorbia": {
+		"Euphorbia_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la

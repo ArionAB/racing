@@ -273,6 +273,19 @@ static func classes() -> Dictionary:
 		# in interval la deviatie. Orice ridicare ar fi scos-o din familie.
 		"fresco": {"src": "fresco_src.png",
 			"anchor": Palette.color(Palette.TILE_TERRACOTTA)},
+		# Coroana savanei (Serengeti): acaciile-umbrela, fever_tree, fig_tree,
+		# euphorbia (lotul FRUNZISULUI, sep 2026). A patra clasa PICTATA, din
+		# acelasi motiv ca ace/macchia — sursa: tools/paint_acacia_canopy.py,
+		# cu argumentul de ce nici macchia (frunza LATA, scara de tufa
+		# mediteraneana 0.6-2.5 m) nici pine_needles (tusa LINIARA, ac de
+		# conifer) nu descriu o frunza compusa pinnata pe un platou de 7-10 m.
+		# Masurat pe sursa (runda 2): medie 72.3 (ratie 0.68 fata de
+		# CACTUS_GREEN, 106 — sub 0.86 de la ace/macchia, dar in aceeasi
+		# directie: subexpusa deliberat, ca gradarea sa aiba loc de urcat),
+		# in-dala 22.0, dezechilibru 0.8%/1.2%.
+		"acacia_canopy": {"src": "acacia_canopy_src.png",
+			"anchor": Palette.color(Palette.CACTUS_GREEN), "gain": 1.20,
+			"lift": 0.10},
 	}
 	# NU exista clasa "chalet_wood", si e o decizie, nu o omisiune.
 	#

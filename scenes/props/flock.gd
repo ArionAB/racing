@@ -62,12 +62,45 @@ class_name FlockProp
 ## Raza placii, in metri (scalata apoi de scale_min/scale_max).
 @export var disc_radius: float = 6.0
 
+## Reaseaza fiecare instanta pe TERENUL de la rulare, pastrand ofsetul fata de
+## cota cu care a fost scrisa in lista.
+##
+## De ce exista: `positions` sunt literali in .tscn, scrisi de generator pe
+## relieful de ATUNCI. Cand terenul se resapa dupa aceea, lista nu afla — si
+## piesele raman in aer. Masurat pe Track14 (E_CrustaSare, raportat de la
+## volan): 75 din 420 de placi plutesc, cele mai rele la +7,4 m, ca o pojghita
+## alba taiata drept peste sosea si peste nisip, prin care trece masina.
+##
+## ATENTIE la ce face de fapt: pune piesa PE SOL (plus `snap_lift`), nu
+## pastreaza ofsetul cu care a fost scrisa. E corect pentru crusta, care e o
+## depunere pe teren, si GRESIT pentru orice stol ridicat deliberat (pasari in
+## zbor) — acela ar fi tarat la pamant. De aceea e optional si implicit stins.
+##
+## Implicit STINS: pe restul pistelor listele sunt inca in acord cu terenul,
+## iar o mutare tacuta acolo n-ar repara nimic si ar putea strica ceva.
+@export var snap_to_ground: bool = false
+
+## Cat de sus fata de teren stau piesele reasezate (metri).
+##
+## Placa e plata si orizontala, deci coplanara cu terenul ar palpai
+## (z-fighting). 6 cm e sub pragul la care ochiul vede un prag de la
+## inaltimea camerei si peste zgomotul de interpolare al samplerului.
+@export_range(0.0, 1.0, 0.01) var snap_lift: float = 0.06
+
 
 func _ready() -> void:
 	if positions.is_empty():
 		return
 	if model == null and disc_slot < 0:
 		return
+	# AMANAT, fiindca reasezarea are nevoie de samplerul pistei, iar acela nu
+	# exista inca: copiii se pregatesc inaintea parintelui. Vezi _find_sampler.
+	# Stolurile fara reasezare n-au nevoie de amanare, dar o fac oricum — un
+	# singur drum prin cod e mai usor de tinut corect decat doua.
+	_build.call_deferred()
+
+
+func _build() -> void:
 	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius) if model == null and disc_slot >= 0 else _mesh_of(model)
 	if mesh != null and model != null and ao_keep < 1.0:
 		mesh = _lift_ao(mesh, ao_keep)
@@ -81,6 +114,13 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 	var use_scale3 := scale3_list.size() == positions.size()
+	# Reasezarea pe terenul de la rulare. Vezi `snap_to_ground`.
+	#
+	# PER INSTANTA, nu o deplasare rigida a stolului: masurat pe E_CrustaSare,
+	# abaterea merge de la +7,4 m la un capat al lacului la sub 0,5 m la
+	# celalalt, deci un reper unic ar lasa jumatate din placi in aer si ar
+	# ingropa cealalta jumatate.
+	var sampler: Object = _find_sampler() if snap_to_ground else null
 	for i in positions.size():
 		var yaw: float = yaws[i] if i < yaws.size() else 0.0
 		# ATENTIE: niciodata scale.x negativ pentru oglindire — Godot culleste
@@ -92,12 +132,46 @@ func _ready() -> void:
 		else:
 			var s := rng.randf_range(scale_min, scale_max)
 			sc = Vector3.ONE * s
+		var p: Vector3 = positions[i]
+		if sampler != null:
+			# Cota vine de la teren; ofsetul scris in lista se pastreaza doar
+			# cat sa nu produca z-fighting. Crusta e o DEPUNERE pe sol, deci
+			# cota ei corecta e chiar solul — nu o cota mostenita dintr-un
+			# relief care nu mai exista.
+			p.y = sampler.ground_y(p.x, p.z) + snap_lift
 		mm.set_instance_transform(i, Transform3D(
-			Basis(Vector3.UP, yaw) * Basis.from_scale(sc),
-			positions[i]))
+			Basis(Vector3.UP, yaw) * Basis.from_scale(sc), p))
 	multimesh = mm
 	material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+
+
+## Samplerul pistei din care vine cota terenului, urcand in ierarhie.
+##
+## Nodul de stol sta sub `DecorManual` in scena pistei, deci pista e un
+## stramos, si `Track` isi expune samplerul ca `_sampler`.
+##
+## [b]De ce NU se poate citi din `_ready`.[/b] In Godot copiii se pregatesc
+## INAINTEA parintelui, iar pista isi construieste samplerul in propriul
+## `_ready` (track.gd, `rebuild`). Deci la `_ready`-ul stolului `_sampler` e
+## inca null si reasezarea nu ruleaza deloc — tacut, fiindca lipsa lui arata
+## la fel ca "pista n-are sampler". Masurat: cu reasezarea pornita, 72 din 420
+## de placi ramaneau in aer, la fel ca inainte.
+##
+## De aceea apelul e amanat cu `call_deferred` (acelasi tipar ca
+## `flamingo_flock.gd` si `path_mover.gd`, ambele din acelasi motiv).
+func _find_sampler() -> Object:
+	var cur: Node = get_parent()
+	while cur != null:
+		if cur is Track:
+			var s: Variant = cur.get("_sampler")
+			if s != null:
+				return s as Object
+			push_warning("FlockProp %s: pista nu are sampler; nu reasez" % name)
+			return null
+		cur = cur.get_parent()
+	push_warning("FlockProp %s: nu gasesc pista; nu reasez" % name)
+	return null
 
 
 static func _mesh_of(ps: PackedScene) -> Mesh:

@@ -5938,6 +5938,7 @@ scale_min = 0.75
 scale_max = 1.5
 disc_slot = 22
 disc_radius = 7.0
+snap_to_ground = true
 
 [node name="E_Flamingi" type="MultiMeshInstance3D" parent="DecorManual/ZoneE_Buza" unique_id=1556414416]
 script = ExtResource("flock")
@@ -6757,7 +6758,7 @@ transform = Transform3D(-0.1224, 0, -0.9421, 0, 0.95, 0, 0.9421, 0, -0.1224, 19.
 transform = Transform3D(-0.5806, 0, -0.9927, 0, 1.15, 0, 0.9927, 0, -0.5806, 29.106, 1.87, -11.999)
 
 [node name="carcass_vultures_068" parent="DecorManual/ZoneG_FundulCraterului" unique_id=1499421369 instance=ExtResource("s_carcass_vultures")]
-transform = Transform3D(0.8253, 0, -0.5646, 0, 1, 0, 0.5646, 0, 0.8253, -29.16, 1.69, 48.89)
+transform = Transform3D(0.8253, 0, -0.5646, 0, 1, 0, 0.5646, 0, 0.8253, -31.380924, 1.6971121, 44.874626)
 
 [node name="kopje_boulder_a_069" parent="DecorManual/ZoneG_FundulCraterului" unique_id=1783056367 instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.8483, 0, 0.053, 0, 0.85, 0, -0.053, 0, 0.8483, 34.387, 2.547, -19.565)

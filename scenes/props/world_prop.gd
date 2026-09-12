@@ -267,6 +267,34 @@ const SPLIT_MODELS := {
 	# granitul sa nu stearga exact benzile care le fac lizibile de la 200 m.
 	"lengai": true,
 	"crater_far_wall": true,
+	# Serengeti: SCOARTA (clasa `bark`) pe copacii cu trunchi + coroana pe
+	# ACELASI nod de mesh — masurat cu tools/probe_slots.gd, fiecare copac al
+	# kitului e un singur MeshInstance3D (verificat pe fisier, vezi tabelul de
+	# mai jos la ACCENT_SPLIT). Fara ruptura, clasa pe tot nodul ar face
+	# coroana maro (trunchiul e sub 30% din arie) SAU trunchiul verde.
+	#
+	# Acacia-umbrela: slot 28 (LOG_DARK) 22.7-29.3% e trunchiul, restul —
+	# 12/13/21 — coroana. Se rupe pe toate trei variantele.
+	"acacia_umbrella_a": true,
+	"acacia_umbrella_b": true,
+	"acacia_umbrella_c": true,
+	# fig_tree: NU `true`. Fisierul `fig_tree.glb` exista de DOUA ori in kit-uri
+	# diferite — assets/models/serengeti/plants/ SI assets/models/stromboli/
+	# trees/ — si SPLIT_MODELS cheie pe STEM DE FISIER (scene_file_path fara
+	# extensie), nu pe cale intreaga. Verificat: ambele se numesc "fig_tree",
+	# deci o intrare `true` ar fi incercat ruptura si pe smochinul de Stromboli
+	# (Track11, grupul "7)Coasta de est"). Acolo insa piesa e deja DOUA noduri
+	# separate (Fig_Canopy/Fig_Trunk, vezi STROMBOLI_CLASSES in track_decor.gd)
+	# — `Palette.split_accents` ar fi gasit un mesh fara UV-uri colapsate pe
+	# nodul gresit sau, mai rau, ar fi rupt un nod care nu mai are nevoie.
+	# Limitata la grupurile Serengeti (mecanica `church_arch`), memoria
+	# `nume-noduri-nu-sunt-unice`.
+	"fig_tree": ["ZoneC_VadulMara", "ZoneD_PadureaDeCeata", "ZoneE_Buza",
+		"ZoneG_FundulCraterului"],
+	# baobab si dead_tree NU intra: sunt deja MONOCROME (100% pe un singur
+	# slot, masurat) — nimic de rupt, clasa (unde se aplica) merge direct pe
+	# tot nodul prin CLASSES_BY_MODEL. fever_tree NU intra: vezi nota de
+	# respingere de la CLASSES_BY_MODEL — trunchiul ei e chiar accentul.
 }
 
 const ACCENT_SPLIT := {
@@ -303,6 +331,27 @@ const ACCENT_SPLIT := {
 	"Crater_Gap": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
 	"Lengai": [Palette.SAND_SHADOW, Palette.MARBLE_GREY],
 	"Crater_Far_Wall": [Palette.ROCK_LIGHT],
+	# Serengeti: scoarta. Lista e ce RAMANE in corp — masurat pe .glb cu
+	# tools/probe_slots.gd (slot, % din vertecsi, interval de y):
+	#   Acacia_Umbrella_A  28 LOG_DARK 27.7% y 0.00-6.05 (trunchi)
+	#                      12 CACTUS_GREEN 51.3%, 13 DRY_VEGETATION 9.3%,
+	#                      21 TROPICAL_GREEN 11.8% (coroana, y 5.28+)
+	#   Acacia_Umbrella_B  28 29.3% / 12+13+21 70.7%
+	#   Acacia_Umbrella_C  28 22.7% / 12+13+21 77.3%
+	# Trunchiul (28) ramane in corp si ia `bark`; coroana (12/13/21) trece in
+	# `_Accente` si ramane pe atlas — verdele nu e lotul asta, si o clasa pe
+	# tot nodul ar fi facut fie trunchiul verde, fie coroana maro.
+	"Acacia_Umbrella_A": [Palette.LOG_DARK],
+	"Acacia_Umbrella_B": [Palette.LOG_DARK],
+	"Acacia_Umbrella_C": [Palette.LOG_DARK],
+	# Fig_Tree (Serengeti, NU Stromboli — vezi SPLIT_MODELS): trunchi + 5
+	# contraforti pe slot 9 (WOOD_WEATHERED, 27.7%, y 0.00-10.14). Restul —
+	# coroana (12/21, 55.6%) SI licheni (22 FOAM_WHITE, 16.7%, y 5.03-8.23) —
+	# trece in `_Accente`. Lichenii NU intra in corp desi cad in aceeasi banda
+	# de inaltime ca trunchiul: `build_serengeti_plants.py` ii numeste explicit
+	# "identitatea padurii de ceata" (POI D) — fire albe care atarna de sub
+	# coroana. O clasa de scoarta pusa peste ei i-ar fi sters exact pe ei.
+	"Fig_Tree": [Palette.WOOD_WEATHERED],
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -662,6 +711,70 @@ const CLASSES_BY_MODEL := {
 	"termite_mound_b": {
 		"Termite_Mound_B": Palette.TRI_PREFIX + "termite_clay",
 	},
+	# --- Serengeti: SCOARTA copacilor, clasa `bark` -------------------------
+	#
+	# Dala `bark` exista deja (Okinawa/Stromboli, sursa palm_tree_bark, scanare
+	# de 1,3 m de trunchi de PALMIER — inele fine de cicatrici de frunza,
+	# CLASS_TRIPLANAR_SCALE 0.77 = o repetitie la 1,3 m REALA). Intra doar
+	# piesele al caror trunchi e la scara ei; masurat pe .glb, sectiune la
+	# baza (y<2 m, tools/_tmp_probe_trunk_widths.gd):
+	#   acacia_umbrella_a/b/c   0.56-0.68 m  (0.4-0.5x sursa)
+	#   dead_tree               0.55 m       (0.4x sursa)
+	#   fig_tree                2.22 m       (1.7x sursa — contraforti grosi,
+	#                                         inca in aceeasi ordine de marime)
+	#   baobab                  6.44 m       (4.95x sursa — vezi RESPINGERE mai jos)
+	#
+	# CINE NU intra, desi are trunchi:
+	#   baobab — RESPINS. 6,44 m fata de sursa de 1,3 m e acelasi tip de
+	#     greseala masurata pe `alpine_granite` peste coltii Stancii Samanului
+	#     (style_bible §4, memoria `clase-pe-piese-de-kit`): inelele fine de
+	#     scoarta de palmier, la orice scara triplanara, tot inele de palmier
+	#     raman — un trunchi de 6,4 m nu devine neted marindu-le, doar le
+	#     intinde in dungi late si neclare. Reparata corect ar cere o sursa
+	#     fotografiata la scara baobabului (scoarta neteda, groasa, gen piele
+	#     de elefant — vezi style_bible §4 "fiecare scara isi cere propria
+	#     sursa"), care nu exista azi in `assets/textures/classes/src/` si nu
+	#     intra in lotul asta (zero pipeline de textura noua aici). In plus,
+	#     `build_serengeti_plants.py` numeste explicit baobabul "silueta de
+	#     fundal (150+ m), doar profilul conteaza" — la distanta aia orice
+	#     detaliu de suprafata se pierde in mipmap oricum (aceeasi masuratoare
+	#     ca "banda ingusta" din style_bible §4), deci baobabul ramane pe atlas
+	#     fara nicio pierdere vizibila. Framas de verificat CAND apare o sursa
+	#     potrivita: o captura de aproape ar confirma ca profilul + culoarea
+	#     LARCH_RUST sunt suficiente.
+	#   fever_tree — RESPINS. Trunchiul ei (slot 0, SAND_LIGHT) NU e un maro
+	#     oarecare: `build_serengeti_plants.py` il numeste explicit
+	#     BARK_YELLOW si spune direct "scoarta galben-verde... trunchiul palid
+	#     e ce o deosebeste de la volan" — e identitatea speciei (de-aia se
+	#     numeste "fever tree", Vachellia xanthophloea). Dala `bark` e gradata
+	#     spre ancora WOOD_WEATHERED (maro), fara tenta proprie in CLASS_TINT:
+	#     pusa pe trunchi, l-ar fi vopsit maro peste galbenul care e chiar
+	#     motivul pentru care specia exista in kit. S-ar putea repara cu o a
+	#     doua clasa (mecanica volcanic_rock: acelasi PNG, CLASS_TINT galben) —
+	#     dar tot ar aplica INELE DE PALMIER pe un trunchi neted de acacie, deci
+	#     nu doar culoarea e gresita. Ramane pe atlas, netul: sub 1.0 material
+	#     cheltuit ca sa NU stergem singurul indiciu vizual al speciei.
+	#
+	# Zero PNG nou, zero clasa noua: `bark` refoloseste exact dala si scara de
+	# pe Okinawa/Stromboli. Corpurile de mai jos sunt deja RUPTE (SPLIT_MODELS/
+	# ACCENT_SPLIT), deci aici se ating doar trunchiurile (Acacia_Umbrella_*,
+	# Fig_Tree) sau tot nodul, cand piesa e monocroma (Dead_Tree).
+	"acacia_umbrella_a": {"Acacia_Umbrella_A": Palette.TRI_PREFIX + "bark"},
+	"acacia_umbrella_b": {"Acacia_Umbrella_B": Palette.TRI_PREFIX + "bark"},
+	"acacia_umbrella_c": {"Acacia_Umbrella_C": Palette.TRI_PREFIX + "bark"},
+	# Fig_Tree: vezi SPLIT_MODELS pentru limitarea la grupurile Serengeti —
+	# fisierul "fig_tree.glb" exista si pe Stromboli (alt corp, alta mapare,
+	# STROMBOLI_CLASSES in track_decor.gd), deci maparea GLOBALA de aici s-ar
+	# fi aplicat si acolo daca `_apply_model_classes` n-ar filtra pe stem +
+	# ruptura anterioara — verificat ca cele doua sisteme nu se ating (nodurile
+	# Stromboli sunt Fig_Trunk/Fig_Canopy, generate de track_decor.gd inainte
+	# sa intre in .tscn, nu Fig_Tree).
+	"fig_tree": {"Fig_Tree": Palette.TRI_PREFIX + "bark"},
+	# Dead_Tree: 100% pe slotul 28 (LOG_DARK) — monocrom, masurat, nimic de
+	# rupt. Copacul uscat de pe malul raului (POI C) primeste scoarta pe tot
+	# corpul, ca la baobab/dead_tree pe Okinawa unde piesele monocrome iau
+	# clasa direct.
+	"dead_tree": {"Dead_Tree": Palette.TRI_PREFIX + "bark"},
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la

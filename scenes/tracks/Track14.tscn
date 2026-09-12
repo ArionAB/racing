@@ -2728,7 +2728,7 @@ transform = Transform3D(0.728738, 0, -0.465013, 0, 0.864463, 0, 0.465013, 0, 0.7
 transform = Transform3D(-0.794038, 0, 0.344917, 0, 0.865717, 0, -0.344917, 0, -0.794038, -43.139893, -0.811218, 152.16017)
 
 [node name="BolovanFund12" parent="DecorManual/ZoneC_VadulMara" unique_id=1060982699 instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.487911, 0, 0.104926, 0, 0.499065, 0, -0.104926, 0, 0.487911, -48.509735, 6.938416, 138.52985)
+transform = Transform3D(0.487911, 0, 0.104926, 0, 0.499065, 0, -0.104926, 0, 0.487911, -48.509735, -0.835814, 138.52985)
 
 [node name="Musuroi13" parent="DecorManual/ZoneC_VadulMara" unique_id=2091836512 instance=ExtResource("s_termite_mound_a")]
 transform = Transform3D(-0.635346, 0, -0.594161, 0, 0.86988, 0, 0.594161, 0, -0.635346, -41.10893, -0.482422, 147.82635)
@@ -2749,10 +2749,10 @@ transform = Transform3D(0.600542, 0, -0.351663, 0, 0.695929, 0, 0.351663, 0, 0.6
 transform = Transform3D(-0.60719, 0, 0.628411, 0, 0.87383, 0, -0.628411, 0, -0.60719, -58.091057, -1.121246, 151.25235)
 
 [node name="BolovanFund19" parent="DecorManual/ZoneC_VadulMara" unique_id=578346871 instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.647186, 0, 0.013173, 0, 0.64732, 0, -0.013173, 0, 0.647186, -59.8251, 12.014404, 138.59206)
+transform = Transform3D(0.647186, 0, 0.013173, 0, 0.64732, 0, -0.013173, 0, 0.647186, -59.8251, -4.4862366, 138.59206)
 
 [node name="Musuroi20" parent="DecorManual/ZoneC_VadulMara" unique_id=130451232 instance=ExtResource("s_termite_mound_a")]
-transform = Transform3D(0.846901, 0, -0.259007, 0, 0.885622, 0, 0.259007, 0, 0.846901, -53.25069, 5.823578, 140.92882)
+transform = Transform3D(0.846901, 0, -0.259007, 0, 0.885622, 0, 0.259007, 0, 0.846901, -53.25069, -3.1211443, 140.92882)
 
 [node name="Bolovan21" parent="DecorManual/ZoneC_VadulMara" unique_id=466000171 instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(-0.578404, 0, -0.370642, 0, 0.686969, 0, 0.370642, 0, -0.578404, -54.04093, -1.155701, 175.99915)
@@ -2796,9 +2796,6 @@ transform = Transform3D(-0.815405, 0, 0.588172, 0, 1.005401, 0, -0.588172, 0, -0
 [node name="Bolovan34" parent="DecorManual/ZoneC_VadulMara" unique_id=1993993320 instance=ExtResource("s_kopje_boulder_c")]
 transform = Transform3D(0.84351, 0, -0.475745, 0, 0.968422, 0, 0.475745, 0, 0.84351, -68.6989, -1.386871, 152.8028)
 
-[node name="BolovanFund35" parent="DecorManual/ZoneC_VadulMara" unique_id=1627079094 instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.296361, 0, 0.368105, 0, 0.47258, 0, -0.368105, 0, 0.296361, -64.81899, 3.795532, 144.99971)
-
 [node name="Bolovan36" parent="DecorManual/ZoneC_VadulMara" unique_id=125139644 instance=ExtResource("s_kopje_boulder_c")]
 transform = Transform3D(0.143894, 0, 0.832562, 0, 0.844906, 0, -0.832562, 0, 0.143894, -70.41593, -1.545227, 177.31525)
 
@@ -2823,9 +2820,6 @@ transform = Transform3D(-0.469066, 0, 0.796663, 0, 0.924497, 0, -0.796663, 0, -0
 [node name="Bolovan43" parent="DecorManual/ZoneC_VadulMara" unique_id=142685802 instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.259354, 0, 0.763823, 0, 0.806654, 0, -0.763823, 0, 0.259354, -72.47867, -1.415314, 152.21689)
 
-[node name="BolovanFund44" parent="DecorManual/ZoneC_VadulMara" unique_id=1045194359 instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.627599, 0, 0.394996, 0, 0.741554, 0, -0.394996, 0, -0.627599, -65.08524, 5.317596, 143.75789)
-
 [node name="Bolovan45" parent="DecorManual/ZoneC_VadulMara" unique_id=2046892693 instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(-0.902587, 0, 0.264811, 0, 0.940631, 0, -0.264811, 0, -0.902587, -68.96092, -1.523865, 177.44109)
 
@@ -2848,10 +2842,10 @@ transform = Transform3D(-0.000706, 0, 0.935525, 0, 0.935525, 0, -0.935525, 0, -0
 transform = Transform3D(-0.855894, 0, 0.15888, 0, 0.870515, 0, -0.15888, 0, -0.855894, -74.35072, -1.421783, 152.27107)
 
 [node name="BolovanFund52" parent="DecorManual/ZoneC_VadulMara" unique_id=1478885913 instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.498984, 0, 0.54417, 0, 0.738313, 0, -0.54417, 0, 0.498984, -79.07588, 6.097992, 143.03714)
+transform = Transform3D(0.498984, 0, 0.54417, 0, 0.738313, 0, -0.54417, 0, 0.498984, -79.07588, -1.391366, 143.03714)
 
 [node name="Musuroi53" parent="DecorManual/ZoneC_VadulMara" unique_id=484106257 instance=ExtResource("s_termite_mound_b")]
-transform = Transform3D(-0.582785, 0, -0.889209, 0, 1.06317, 0, 0.889209, 0, -0.582785, -76.56177, -0.015747, 148.3841)
+transform = Transform3D(-0.582785, 0, -0.889209, 0, 1.06317, 0, 0.889209, 0, -0.582785, -76.56177, -4.778325, 148.3841)
 
 [node name="Bolovan54" parent="DecorManual/ZoneC_VadulMara" unique_id=767119217 instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(-0.607826, 0, 0.485479, 0, 0.777909, 0, -0.485479, 0, -0.607826, -80.32023, -1.493439, 180.39685)
@@ -2884,10 +2878,7 @@ transform = Transform3D(0.110334, 0, 0.57077, 0, 0.581336, 0, -0.57077, 0, 0.110
 transform = Transform3D(-0.503811, 0, -0.582251, 0, 0.769962, 0, 0.582251, 0, -0.503811, -97.85896, -0.871704, 149.04518)
 
 [node name="BolovanFund64" parent="DecorManual/ZoneC_VadulMara" unique_id=1871898049 instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.658655, 0, 0.286274, 0, 0.718177, 0, -0.286274, 0, 0.658655, -86.20245, 15.299225, 137.64479)
-
-[node name="Musuroi65" parent="DecorManual/ZoneC_VadulMara" unique_id=719620917 instance=ExtResource("s_termite_mound_b")]
-transform = Transform3D(-0.083836, 0, -0.862658, 0, 0.866722, 0, 0.862658, 0, -0.083836, -92.86113, 3.036804, 143.35913)
+transform = Transform3D(0.658655, 0, 0.286274, 0, 0.718177, 0, -0.286274, 0, 0.658655, -86.20245, -1.7218285, 137.64479)
 
 [node name="Bolovan66" parent="DecorManual/ZoneC_VadulMara" unique_id=1559132566 instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.100927, 0, -0.7477, 0, 0.754481, 0, 0.7477, 0, -0.100927, -99.026566, -1.085022, 178.49963)
@@ -2902,7 +2893,7 @@ transform = Transform3D(0.555205, 0, 0.187893, 0, 0.586137, 0, -0.187893, 0, 0.5
 transform = Transform3D(-0.642255, 0, -0.320688, 0, 0.717867, 0, 0.320688, 0, -0.642255, -102.09416, -0.473419, 148.46172)
 
 [node name="BolovanFund70" parent="DecorManual/ZoneC_VadulMara" unique_id=606141310 instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(0.457985, 0, 0.053548, 0, 0.461105, 0, -0.053548, 0, 0.457985, -97.323074, 8.396057, 137.50758)
+transform = Transform3D(0.457985, 0, 0.053548, 0, 0.461105, 0, -0.053548, 0, 0.457985, -97.323074, -2.6022844, 137.50758)
 
 [node name="Musuroi71" parent="DecorManual/ZoneC_VadulMara" unique_id=1604523597 instance=ExtResource("s_termite_mound_b")]
 transform = Transform3D(0.685658, 0, 0.150045, 0, 0.701883, 0, -0.150045, 0, 0.685658, -100.22507, 1.254211, 144.67752)
@@ -2980,17 +2971,17 @@ transform = Transform3D(0.696731, 0, -0.793112, 0, 1.05568, 0, 0.793112, 0, 0.69
 transform = Transform3D(1.109446, 0, -0.167676, 0, 1.122046, 0, 0.167676, 0, 1.109446, -62.176544, -1.18, 182.05281)
 
 [node name="KopjeLeu96" parent="DecorManual/ZoneC_VadulMara" unique_id=1447492262 instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(-0.631058, 0, -1.079012, 0, 1.25, 0, 1.079012, 0, -0.631058, -37.36, 4.685547, 127)
+transform = Transform3D(-0.63105786, 0, -1.0790119, 0, 1.2499999, 0, 1.0790119, 0, -0.63105786, -37.36, -0.0141067505, 127)
 
 [node name="Leu97" parent="DecorManual/ZoneC_VadulMara" unique_id=486172324 instance=ExtResource("s_lion_kopje")]
-transform = Transform3D(-0.737394, 0, -0.675463, 0, 1, 0, 0.675463, 0, -0.737394, -37.36, 17.085546, 127)
+transform = Transform3D(-0.737394, 0, -0.675463, 0, 1, 0, 0.675463, 0, -0.737394, -37.36, 16.53026, 127)
 metadata/coliziune = "none"
 
 [node name="BolovanKopje98" parent="DecorManual/ZoneC_VadulMara" unique_id=289311777 instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.932415, 0, -1.17499, 0, 1.5, 0, 1.17499, 0, 0.932415, -28.364143, -0.042969, 138)
 
 [node name="BolovanKopje99" parent="DecorManual/ZoneC_VadulMara" unique_id=720996538 instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-1.084887, 0, -0.512856, 0, 1.2, 0, 0.512856, 0, -1.084887, -45.35632, 9.485535, 134)
+transform = Transform3D(-1.084887, 0, -0.512856, 0, 1.2, 0, 0.512856, 0, -1.084887, -45.35632, 4.1600666, 134)
 
 [node name="Acacia100" parent="DecorManual/ZoneC_VadulMara" unique_id=1696004078 instance=ExtResource("s_fig_tree")]
 transform = Transform3D(-0.695009, 0, -0.501136, 0, 0.85684, 0, 0.501136, 0, -0.695009, -26.8962, -0.395355, 154.47401)
@@ -3013,7 +3004,7 @@ transform = Transform3D(-1.153867, 0, 0.015653, 0, 1.153973, 0, -0.015653, 0, -1
 metadata/coliziune = "trunk"
 
 [node name="Acacia105" parent="DecorManual/ZoneC_VadulMara" unique_id=466246012 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-1.037962, 0, -0.646221, 0, 1.222688, 0, 0.646221, 0, -1.037962, -56.44533, 0.978119, 146.85509)
+transform = Transform3D(-1.037962, 0, -0.646221, 0, 1.222688, 0, 0.646221, 0, -1.037962, -56.44533, -3.9224205, 146.85509)
 metadata/coliziune = "trunk"
 
 [node name="Acacia106" parent="DecorManual/ZoneC_VadulMara" unique_id=771092328 instance=ExtResource("s_acacia_umbrella_a")]
@@ -3041,7 +3032,7 @@ transform = Transform3D(-0.557444, 0, -0.862917, 0, 1.027312, 0, 0.862917, 0, -0
 metadata/coliziune = "trunk"
 
 [node name="Acacia112" parent="DecorManual/ZoneC_VadulMara" unique_id=615739017 instance=ExtResource("s_fig_tree")]
-transform = Transform3D(-1.007751, 0, 0.19166, 0, 1.025814, 0, -0.19166, 0, -1.007751, -89.72272, 5.980133, 140.97728)
+transform = Transform3D(-1.007751, 0, 0.19166, 0, 1.025814, 0, -0.19166, 0, -1.007751, -98.16776, -4.5627794, 140.97728)
 metadata/coliziune = "trunk"
 
 [node name="Acacia113" parent="DecorManual/ZoneC_VadulMara" unique_id=1598041421 instance=ExtResource("s_fig_tree")]

@@ -6019,11 +6019,35 @@ func _build_sea_near(root: Node3D, sea_y: float) -> void:
 			var idx := [i00, i00 + 1, i00 + cells + 1, i00 + cells + 2]
 			var d_max := -INF
 			var d_min := INF
+			var wet := 0
 			for k: int in idx:
 				d_max = maxf(d_max, depth[k])
 				d_min = minf(d_min, depth[k])
+				if depth[k] > 0.0:
+					wet += 1
 			if d_max <= 0.0:
 				continue # uscat pe tot patratul
+			# MAJORITATEA colturilor sub linia apei, nu doar unul.
+			#
+			# Celula se deseneaza INTREAGA si PLANA, la cota `sea_y`. Cu
+			# pragul vechi (`d_max > 0.0`) era de ajuns un singur colt sub
+			# apa ca sa se emita tot patratul de `cell` metri — iar pe un mal
+			# in panta coltul din albie tragea dupa el restul patratului,
+			# peste uscat. Masurat pe Serengeti inainte de fix: din 376 de
+			# triunghiuri emise, 113 (30%) stateau peste teren USCAT, adica
+			# o pelicula plana taiata drept peste nisip, prin care masina
+			# trecea — raportat de la volan in ZoneG (fundul craterului).
+			#
+			# De ce nu se vedea in editor: SeaNear se construieste la rulare
+			# (`_build_sea_near`), deci scena nu-l contine.
+			#
+			# De ce nu s-a vazut pe pistele cu mare: acolo malul coboara
+			# repede si celula urmatoare e oricum apa, deci franjurul de o
+			# celula cade sub linia de plaja. Pe Serengeti apa e un rau de
+			# 0,03-0,63 m intr-un bazin aproape plat, deci franjurul ramane
+			# in aer deasupra tavii.
+			if wet < 3:
+				continue # doar un colt/o muchie uda: franjur peste mal
 			if d_min > SEA_NEAR_DEPTH:
 				continue # larg curat — il acopera cvadrilaterul de dedesubt
 			var pos := [

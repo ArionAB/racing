@@ -475,7 +475,74 @@ uniform float glint_facet_far = 130.0;
 // rare (putine placi), si mici in placile alea.
 uniform float facet_gate : hint_range(0.0, 0.95) = 0.0;
 
+// ===========================================================================
+// v12 — STRAT ILUMINAT (sep 2026). Raspunsul la „apa arata ca o pata".
+//
+// Tot ce e deasupra desena apa ca ALBEDO: culoare de adancime, spuma, hula ca
+// modulatie de valoare, sclipiri decupate dintr-o masca de textura. Niciuna
+// din ele nu raspunde la LUMINA sau la UNGHIUL PRIVIRII — si exact astea
+// doua sunt semnalele prin care ochiul recunoaste un lichid: (1) suprafata
+// oglindeste CERUL, tot mai mult cu cat te uiti mai razant (Fresnel), si (2)
+// soarele se sparge pe unde in scantei care se MISCA. O suprafata fara ele
+// citeste ca linoleum oricat de bine ar fi calibrata culoarea — masurat de
+// 8 runde pe Chongqing si inca 3 pe Serengeti, toate pe culoare.
+//
+// Ce se adauga, in ordinea costului:
+//   - normale de unda ANALITICE: 4 sinusoide directionale in plan XZ,
+//     derivate exact (4 cos). Zero esantioane de textura. Faza serpuieste
+//     cu ondulatia deja esantionata (a*b), ca peste tot in shaderul asta.
+//   - reflexia cerului: DOUA culori (zenit/orizont, cele din tema), alese
+//     dupa inaltimea vectorului reflectat. Nu e cubemap, nu e SSR — e
+//     gradientul de ProceduralSky din care e facut si cerul de deasupra.
+//   - Fresnel Schlick pe normala perturbata: apa de la picioare ramane
+//     culoarea ei, apa de la orizont devine cer. Rugozitatea il inmoaie.
+//   - specular Blinn-Phong normalizat pe soarele temei (sun_dir/sun_col),
+//     plafonat ca la incidenta razanta sa nu se aprinda toata panza.
+//   - CURGERE: directia vine din UV2 (setata de Track._build_channel_water
+//     pe albiile de rau; zero pe mare si pe pelicula hazardelor). Undele si
+//     ondulatia sunt purtate de ea, iar pe rau apar DARE DE SPUMA lungi pe
+//     directia curgerii — semnatura raului din diorama (linii albe subtiri
+//     pe namol), decupate din fisurile texturii intinse pe axa curgerii.
+//
+// Contractele 1-3 raman: opac, unshaded (lumina se calculeaza AICI, din
+// uniforme, deci fara umbre/acne), zero texturi noi. `lit_strength` 0 =
+// exact purtarea v11.
+// ===========================================================================
+uniform float lit_strength : hint_range(0.0, 1.0) = 0.0;
+// Rugozitatea: 0.05 lac ca oglinda, 0.2 mare, 0.5 rau de namol. A doua e
+// pentru raul B (mecanismul `split`); 0 = aceeasi ca A.
+uniform float lit_rough : hint_range(0.02, 1.0) = 0.22;
+uniform float lit_rough_b : hint_range(0.0, 1.0) = 0.0;
+// Cat de tare inclina undele normala (panta maxima, ~0.12 la 1.0).
+uniform float lit_normal : hint_range(0.0, 3.0) = 1.0;
+// Lungimea de unda a undei celei mai mari, in metri; celelalte trei sunt
+// fractii incomensurabile din ea.
+uniform float lit_wave_len : hint_range(0.5, 40.0) = 4.0;
+uniform float lit_wave_speed : hint_range(0.0, 5.0) = 1.0;
+// Cat din reflexia cerului se vede la incidenta razanta (1 = fizic).
+uniform float lit_fresnel : hint_range(0.0, 1.0) = 0.45;
+// Intensitatea si plafonul specularului: fara plafon, la soare in fata si
+// privire razanta lobul Blinn-Phong normalizat trece de 50 si toata apa iese
+// alba.
+uniform float lit_spec : hint_range(0.0, 4.0) = 1.0;
+uniform float lit_spec_cap : hint_range(0.1, 20.0) = 3.0;
+// Cerul (liniar) si soarele (culoare x energie, liniar), puse de pe CPU din
+// aceleasi chei de tema care construiesc cerul si DirectionalLight-ul.
+uniform vec3 sky_zenith = vec3(0.07, 0.21, 0.60);
+uniform vec3 sky_horizon = vec3(0.48, 0.67, 0.89);
+uniform vec3 sun_col = vec3(1.2);
+// Curgerea IMPLICITA (pentru mesh-urile fara UV2, adica marea): zero = apa
+// statatoare, undele doar pulseaza pe loc.
+uniform vec2 flow_default = vec2(0.0);
+uniform float flow_speed : hint_range(0.0, 8.0) = 1.5;
+// Dare de spuma pe directia curgerii, doar unde exista curgere.
+uniform float flow_foam : hint_range(0.0, 1.0) = 0.0;
+uniform float flow_foam_cut : hint_range(0.0, 0.95) = 0.35;
+uniform vec3 flow_foam_col = vec3(1.0);
+
 varying vec3 world_pos;
+// Directia de curgere, din UV2 (zero unde apa nu curge).
+varying vec2 flow_v;
 
 // Anvelopa valurilor din adancimea normalizata: urca de la 0 la tarm pana la 1
 // pe recif, coboara inapoi la 0 spre larg. Identica cu masca pe care o cocea
@@ -488,6 +555,7 @@ float wave_envelope(float depth01) {
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	flow_v = UV2;
 	float swell = sin(world_pos.x * 0.55 + TIME * 1.05) * 0.6
 		+ cos(world_pos.z * 0.47 - TIME * 0.85) * 0.4;
 	VERTEX.y += swell * wave_amp * wave_envelope(COLOR.a);
@@ -1113,6 +1181,101 @@ void fragment() {
 	}
 	float g = glint * gmask * g_att;
 	base += g * glint_strength * mix(1.0, glint_b_gain, side) * glint_col;
+
+	// ---- v12: STRAT ILUMINAT. Vezi nota de la `lit_strength`. ----
+	if (lit_strength > 0.0) {
+		// Curgerea: din UV2 daca mesh-ul o declara, altfel implicitul temei.
+		vec2 flow = length(flow_v) > 0.01 ? normalize(flow_v) : flow_default;
+		float has_flow = length(flow) > 0.01 ? 1.0 : 0.0;
+		// Baza directiilor de unda: pe rau, in lungul curgerii; pe mare,
+		// dinspre soare (aceeasi conventie ca hula de mai sus).
+		vec2 wbase = has_flow > 0.5 ? flow : normalize(crest_dir);
+		vec2 wperp = vec2(-wbase.y, wbase.x);
+		// Patru unde la unghiuri si lungimi incomensurabile — nicio pereche
+		// nu se aliniaza, deci nu apare grila (lectia de la `rot` de sus).
+		vec2 d0 = wbase;
+		vec2 d1 = normalize(wbase * 0.80 + wperp * 0.60);
+		vec2 d2 = normalize(wbase * 0.62 - wperp * 0.79);
+		vec2 d3 = normalize(-wbase * 0.19 + wperp * 0.98);
+		float k0 = 6.2831853 / max(lit_wave_len, 0.5);
+		float k1 = k0 / 0.63;
+		float k2 = k0 / 0.41;
+		float k3 = k0 / 0.27;
+		// Undele scurte merg mai incet (dispersie de apa adanca, ~sqrt(L)),
+		// si toate sunt PURTATE de curgere.
+		float adv = has_flow * flow_speed;
+		float wob = (a * b - 0.79) * 2.5;
+		float ph0 = dot(p, d0) * k0 - TIME * (lit_wave_speed + adv * dot(flow, d0)) * k0 + wob;
+		float ph1 = dot(p, d1) * k1 - TIME * (lit_wave_speed * 0.79 + adv * dot(flow, d1)) * k1 + wob * 0.7;
+		float ph2 = dot(p, d2) * k2 - TIME * (lit_wave_speed * 0.64 + adv * dot(flow, d2)) * k2 - wob * 0.5;
+		float ph3 = dot(p, d3) * k3 - TIME * (lit_wave_speed * 0.52 + adv * dot(flow, d3)) * k3 + wob * 0.3;
+		// Pantele: derivata exacta a sumei de sinusuri, cu amplitudinea data
+		// direct ca PANTA (independent de lungimea de unda).
+		// GRUPURI de valuri, nu velur: fara anvelopa, patru sinusoide dau
+		// dungi paralele pe kilometri (masurat pe Okinawa, prima randare v12 —
+		// „corduroy"). Doua anvelope lente, pe directii incomensurabile,
+		// ridica si coboara amplitudinea pe pete de 20-40 m, asa cum vantul
+		// incretește apa pe petice.
+		float env_a = 0.55 + 0.45 * sin(dot(p, d1) * 0.17 + TIME * 0.23);
+		float env_b = 0.55 + 0.45 * sin(dot(p, d3) * 0.11 - TIME * 0.17 + 2.1);
+		vec2 slope = (d0 * (0.11 * cos(ph0)) + d2 * (0.06 * cos(ph2))) * env_a
+			+ (d1 * (0.08 * cos(ph1)) + d3 * (0.045 * cos(ph3))) * env_b;
+		// Departe undele cad sub pixel si normala ar palpai: se sting cu
+		// distanta, ramane cea plata (reflexia cerului si Fresnel raman).
+		float wave_aa = 1.0 - smoothstep(0.35, 1.2, fwidth(ph3));
+		slope *= lit_normal * wave_aa;
+		vec3 n_lit = normalize(vec3(-slope.x, 1.0, -slope.y));
+
+		float rough = lit_rough_b > 0.0 ? mix(lit_rough, lit_rough_b, side)
+			: lit_rough;
+		// Fresnel Schlick, F0 = 0.02 (apa). Rugozitatea inmoaie reflexia: o
+		// suprafata mata reflecta un cer difuz, mai putin si mai neted.
+		float ndv = clamp(dot(n_lit, view), 0.0, 1.0);
+		float fres = 0.02 + 0.98 * pow(1.0 - ndv, 5.0);
+		fres *= 1.0 - rough * 0.65;
+		vec3 refl = reflect(-view, n_lit);
+		vec3 sky = mix(sky_horizon, sky_zenith,
+			smoothstep(0.0, 0.45, refl.y + rough * 0.15));
+		vec3 lit = mix(base, sky, fres * lit_fresnel);
+
+		// Specular Blinn-Phong normalizat pe soare; rugozitatea decide
+		// latimea lobului: 0.05 -> scantei, 0.5 -> luciu lat si moale.
+		vec3 hv = normalize(sun_dir + view);
+		float shin = exp2(1.0 + 9.0 * (1.0 - rough));
+		float spec = pow(max(dot(n_lit, hv), 0.0), shin) * (shin + 8.0) / 25.13;
+		float fres_s = 0.02 + 0.98 * pow(1.0 - max(dot(hv, view), 0.0), 5.0);
+		spec = min(spec * fres_s, lit_spec_cap);
+		// Ondulatia din textura sparge lobul in pete — un luciu perfect neted
+		// e plastic, nu apa.
+		spec *= 0.55 + 0.9 * a * b;
+		lit += sun_col * spec * lit_spec * max(sun_dir.y, 0.0);
+
+		// DARE DE SPUMA pe curgere: pete rare de spuma, usor alungite pe axa
+		// curgerii (2:1, nu 7:1), care aluneca la vale — mai dese la mal
+		// (adancime mica), unde apa se sparge de pietre.
+		//
+		// De ce doar 2:1 si de ce al doilea esantion e ROTIT: detail_rock.png
+		// are strate orizontale, iar intinsa de 7 ori pe o axa stratele devin
+		// dungi paralele pe toata apa — velur de-a latul vadului, atribuit
+		// prin A/B cu foam 0 / normale 0 / ripple 0 (doar foam 0 le stingea).
+		// Produsul a doua esantioane pe axe rotite (aceeasi lectie ca `rot`
+		// din capul shaderului) nu mai are directie de strat.
+		if (flow_foam > 0.0 && has_flow > 0.5) {
+			float u_al = dot(p, flow) * 0.09 - TIME * flow_speed * 0.09;
+			float u_ac = dot(p, wperp) * 0.18;
+			vec2 fu = vec2(u_al, u_ac);
+			vec2 fr = vec2(fu.x * 0.454 - fu.y * 0.891,
+				fu.x * 0.891 + fu.y * 0.454) * 0.61 + vec2(0.37, -TIME * 0.02);
+			float s1 = texture(ripple_tex, fu).r;
+			float s2 = texture(ripple_tex, fr).r;
+			float streak = 1.0 - s1 * s2;
+			float sk = smoothstep(flow_foam_cut, flow_foam_cut + 0.25, streak);
+			sk *= 0.45 + 0.55 * (1.0 - depth01);
+			sk *= wave_aa;
+			lit = mix(lit, flow_foam_col, sk * flow_foam * (1.0 - foam));
+		}
+		base = mix(base, lit, lit_strength);
+	}
 
 	ALBEDO = base;
 }

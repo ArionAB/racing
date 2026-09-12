@@ -203,6 +203,15 @@ exportul, ca oricine din echipă să poată modifica ulterior propul.
   citite ca liniare ieșeau cu ~1.5 trepte mai deschise, deci TOATE particulele
   din joc randau spălăcit.
 
+  **Apa are sonda ei.** Intrarea în apă (strop, inel de unde, spray de la roți,
+  semnalul `splashed`) se verifică pe o pistă cu vad sau pârâu:
+  ```
+  godot --rendering-driver vulkan --path . res://tools/ProbeSplash.tscn -- --track=14
+  ```
+  Sonda așază mașina cu viteză înaintea canalului, tipărește tranziția
+  `in_water` și starea emitatoarelor, și salvează capturi la intrare, la strop
+  și în timpul spray-ului. Ieșire diferită de 0 = ceva n-a pornit.
+
 - **Schimbi camera? Fotografiază, nu descrie.** Sonda de cameră rulează aceeași
   bucată de cursă (AI cu sămânță fixă, fără adversari) și salvează capturi din
   aceleași puncte, cu setări diferite de cameră:

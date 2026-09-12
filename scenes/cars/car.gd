@@ -247,6 +247,19 @@ var _fire_particles: CPUParticles3D
 ## Praf de sub roti cand esti pe nisip. Separat de fumul de drift: fumul iese
 ## din cauciuc si e gri, praful e ridicat din SOL si ia culoarea temei.
 var _dust_particles: CPUParticles3D
+## APA (v12). Rotile sunt sub luciul unei ape (vad, parau, mare, lac):
+## tranzitia fals -> adevarat e „am intrat in apa" (strop, inel, semnal, sunet).
+var in_water: bool = false
+## Spray continuu de la rotile din FATA cat timp treci prin apa cu viteza.
+var _water_spray: CPUParticles3D
+## Stropul de la intrare: o rafala (one_shot) repornita la fiecare intrare.
+var _water_burst: CPUParticles3D
+## Materialul inelului de unde — al masinii, nu static: culoarea e a apei din
+## tema curenta, iar un static ar duce namolul Serengeti pe laguna Okinawei.
+var _ring_material: StandardMaterial3D
+var _water_color_ready: bool = false
+## Inelul: acelasi mesh pentru toate masinile si toate intrarile.
+static var _ring_mesh: ArrayMesh = null
 ## Pietricelele si bulgarii aruncati de roata pe sol afanat.
 ##
 ## Al doilea strat al efectului, si singurul care are MUCHII: in referinta
@@ -436,6 +449,9 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 		data.body_width * 0.42, data.body_length * 0.38)
 	if _drift_particles != null:
 		_drift_particles.position.z = data.body_length * 0.5
+	if _water_spray != null:
+		_water_spray.position.z = -data.body_length * 0.42
+		_water_spray.emission_box_extents.x = data.body_width * 0.45
 		_boost_particles.position.z = data.body_length * 0.5 + 0.1
 	if _shadow != null:
 		_shadow.scale = Vector3(data.body_width * 0.62, 1.0, data.body_length * 0.5)
@@ -538,6 +554,7 @@ func _physics_process(delta: float) -> void:
 	_update_wheels(delta, steer, fwd_speed)
 	_update_shadow()
 	_update_effects(delta)
+	_update_water()
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
@@ -1141,10 +1158,152 @@ func respawn(backoff_m: float = 14.0) -> void:
 	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
 	_impact_yaw = 0.0 # nici rotatia din ultima izbitura nu ne urmareste
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
+	in_water = false # repusa pe uscat; urmatoarea intrare in apa e o intrare
 	route = last_safe_route
 	road_index = track.closest_index_global(global_position, route)
 	last_safe_index = road_index
 	respawned.emit(self)
+
+# ------------------------------------------------------------------- apa
+
+## Sub viteza asta rotile nu mai arunca apa: o masina oprita in vad nu stropeste.
+const WATER_SPRAY_MIN_SPEED: float = 3.5
+
+## Apa de sub roti, o data pe tick. Intrarea (fals -> adevarat) da stropul,
+## inelul de unde, semnalul `splashed` si sunetul; cat timp esti in apa si te
+## misti, rotile din fata arunca spray.
+##
+## „In apa" = cota rotilor sub luciu. Luciul il stie pista
+## (Track.water_level_at); cota rotilor e contactul cel mai de jos din tick
+## (`_road_wheel_y`, pus de suspensie). In AER — cand cazi in parau sau in
+## mare — se ia fundul rotii sub caroserie, ca stropul sa apara la ATINGEREA
+## apei, nu abia pe fundul albiei, unde te asteapta RespawnZone-ul si te
+## teleporteaza inainte sa se vada ceva.
+func _update_water() -> void:
+	if track == null or _water_burst == null:
+		return
+	if not _water_color_ready:
+		_water_color_ready = true
+		var c := track.water_splash_color()
+		_water_spray.color = c
+		_water_burst.color = c
+		if _ring_material != null:
+			_ring_material.albedo_color = c
+	var level := track.water_level_at(global_position)
+	var was := in_water
+	if level == -INF:
+		in_water = false
+	else:
+		var wheel_y := _road_wheel_y if _road_wheel_y < INF \
+			else global_position.y - suspension_rest - _susp_wheel_radius
+		in_water = wheel_y < level - 0.02
+	if in_water and not was:
+		_enter_water(level)
+	var live := in_water and horizontal_speed() > WATER_SPRAY_MIN_SPEED
+	_water_spray.emitting = live
+	if live:
+		# Stropii pleaca CU masina, nu raman pe loc: la 27 m/s, un strop
+		# aruncat doar in sus ramane in urma si trece de camera in 0.3 s —
+		# prima sonda n-a vazut niciun spray desi emitatorul mergea. Deci
+		# viteza initiala poarta jumatate din viteza de mers, inainte (-Z e
+		# fata), plus saltul in sus; de acolo cad singuri sub gravitatie.
+		var hs := horizontal_speed()
+		var dir := Vector3(0.0, 4.5, -hs * 0.5)
+		var v := dir.length()
+		_water_spray.direction = dir / v
+		_water_spray.initial_velocity_min = v * 0.8
+		_water_spray.initial_velocity_max = v * 1.2
+
+
+## Am intrat in apa: strop la nivelul LUCIULUI (nu la masina, care poate fi
+## deja pe jumatate sub el), inel de unde, zguduitura si sunet.
+##
+## Energia intrarii decide totul: caderea in parau (10-15 m/s pe verticala) e
+## un plesnet, vadul luat la 20 m/s e o brazda, iar la pas nu e nici un strop.
+func _enter_water(level: float) -> void:
+	var fall := maxf(-velocity.y, 0.0)
+	var run := horizontal_speed()
+	var energy := clampf((fall * 1.3 + run * 0.45) / 16.0, 0.0, 1.0)
+	if energy < 0.05:
+		return
+	var at := Vector3(global_position.x, level + 0.05, global_position.z)
+	_water_burst.global_position = at
+	_water_burst.initial_velocity_min = lerpf(1.5, 5.0, energy)
+	_water_burst.initial_velocity_max = lerpf(3.5, 11.0, energy)
+	if data != null:
+		_water_burst.emission_box_extents = Vector3(
+			data.body_width * 0.5, 0.05, data.body_length * 0.5)
+	_water_burst.restart()
+	_spawn_ring(at, energy)
+	# Aceeasi cale ca valul de pe dig (WaveSurge): semnalul zguduie camera
+	# jucatorului, ascultatorii isi iau ce vor.
+	splash(lerpf(0.1, 0.55, energy))
+	if is_player:
+		AudioManager.play_sfx(&"splash", lerpf(1.2, 0.85, energy))
+
+
+## Inelul de unde de pe luciu: un disc plat care creste si se stinge intr-o
+## secunda. Un singur mesh pentru toate masinile; materialul e al masinii
+## (culoarea apei temei). Parintele e cel al urmelor (lumea), nu masina —
+## inelul ramane unde ai intrat, masina merge mai departe.
+func _spawn_ring(at: Vector3, energy: float) -> void:
+	var parent: Node = skid_parent if skid_parent != null else track
+	if parent == null:
+		return
+	if _ring_mesh == null:
+		_ring_mesh = _build_ring_mesh()
+	if _ring_material == null:
+		_ring_material = StandardMaterial3D.new()
+		_ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_ring_material.vertex_color_use_as_albedo = true
+		_ring_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+		_ring_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_ring_material.albedo_color = _water_burst.color
+	var ring := MeshInstance3D.new()
+	ring.mesh = _ring_mesh
+	ring.material_override = _ring_material
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(ring)
+	ring.global_position = at + Vector3.UP * 0.06
+	var r0 := lerpf(1.0, 1.6, energy)
+	var r1 := lerpf(3.2, 6.5, energy)
+	ring.scale = Vector3(r0, 1.0, r0)
+	var tw := ring.create_tween().set_parallel(true)
+	tw.tween_property(ring, "scale", Vector3(r1, 1.0, r1), 1.1) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	tw.tween_property(ring, "transparency", 1.0, 1.1) \
+		.set_ease(Tween.EASE_IN)
+	tw.chain().tween_callback(ring.queue_free)
+
+
+## Inel plat (coroana circulara) cu alfa in vertex: 0 pe muchia interioara si
+## pe cea exterioara, 1 la mijloc — deci un inel moale, fara textura.
+## 20 de segmente x 2 fasii x 2 triunghiuri = 80 de triunghiuri.
+static func _build_ring_mesh() -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	const SEGS := 20
+	const RADII: Array[float] = [0.55, 0.78, 1.0]
+	const ALPHA: Array[float] = [0.0, 0.85, 0.0]
+	for i in SEGS:
+		var a0 := TAU * float(i) / float(SEGS)
+		var a1 := TAU * float(i + 1) / float(SEGS)
+		for band in 2:
+			var ri := RADII[band]
+			var ro := RADII[band + 1]
+			var ci := Color(1, 1, 1, ALPHA[band])
+			var co := Color(1, 1, 1, ALPHA[band + 1])
+			var p0 := Vector3(cos(a0) * ri, 0.0, sin(a0) * ri)
+			var p1 := Vector3(cos(a1) * ri, 0.0, sin(a1) * ri)
+			var p2 := Vector3(cos(a0) * ro, 0.0, sin(a0) * ro)
+			var p3 := Vector3(cos(a1) * ro, 0.0, sin(a1) * ro)
+			for v: Array in [[p0, ci], [p2, co], [p1, ci], [p1, ci], [p2, co], [p3, co]]:
+				st.set_color(v[1])
+				st.set_normal(Vector3.UP)
+				st.add_vertex(v[0])
+	return st.commit()
+
 
 func horizontal_speed() -> float:
 	return Vector3(velocity.x, 0.0, velocity.z).length()
@@ -1618,6 +1777,82 @@ func _build_effects() -> void:
 	# umbra lor ar fi un dreptunghi care se roteste dupa privitor.
 	_dust_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_dust_particles)
+
+	# STROPI DE APA (v12). Doua emitatoare din aceeasi familie ca praful (panza
+	# spre camera cu material luminat, vezi _puff_mesh); culorile vin din tema
+	# la primul tick cu pista (Track.water_splash_color).
+	#   - `WaterSpray`: continuu, de la rotile din FATA, cat timp treci prin apa
+	#     cu viteza. Sursa e botul care taie apa, deci se vede din chase cam —
+	#     un spray din spate n-ar fi vazut de nimeni. Aruncat in sus si lateral
+	#     si tras jos tare (gravitatie -12): stropii cad, nu plutesc ca praful.
+	#   - `WaterBurst`: o rafala la INTRARE (one_shot), la nivelul luciului, pe
+	#     tot gabaritul masinii.
+	# Buget: 28 + 40 pe masina, dar rafala traieste 0.8 s si spray-ul doar in
+	# apa — in 95% din cursa amandoua stau stinse.
+	_water_spray = CPUParticles3D.new()
+	_water_spray.name = "WaterSpray"
+	_water_spray.position = Vector3(0, 0.3, -1.15) # puntea fata (-Z e fata)
+	_water_spray.emitting = false
+	_water_spray.amount = 28
+	_water_spray.lifetime = 0.7
+	_water_spray.direction = Vector3(0, 1, -0.35)
+	_water_spray.spread = 38.0
+	_water_spray.initial_velocity_min = 2.0
+	_water_spray.initial_velocity_max = 6.0
+	_water_spray.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	_water_spray.emission_box_extents = Vector3(0.75, 0.05, 0.25)
+	_water_spray.gravity = Vector3(0, -9.0, 0)
+	_water_spray.damping_min = 0.5
+	_water_spray.damping_max = 1.5
+	_water_spray.scale_amount_min = 0.5
+	_water_spray.scale_amount_max = 1.1
+	var spray_grow := Curve.new()
+	spray_grow.add_point(Vector2(0.0, 0.6))
+	spray_grow.add_point(Vector2(1.0, 1.0))
+	_water_spray.scale_amount_curve = spray_grow
+	_water_spray.angle_min = -180.0
+	_water_spray.angle_max = 180.0
+	var spray_fade := Gradient.new()
+	spray_fade.set_offsets(PackedFloat32Array([0.0, 0.1, 1.0]))
+	spray_fade.set_colors(PackedColorArray([
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.85), Color(1, 1, 1, 0.0)]))
+	_water_spray.color_ramp = spray_fade
+	_water_spray.color = Color(0.85, 0.92, 0.95)
+	_water_spray.mesh = _puff_mesh(0.36)
+	_water_spray.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_water_spray)
+
+	_water_burst = CPUParticles3D.new()
+	_water_burst.name = "WaterBurst"
+	_water_burst.emitting = false
+	_water_burst.one_shot = true
+	_water_burst.explosiveness = 0.95
+	_water_burst.amount = 40
+	_water_burst.lifetime = 0.8
+	_water_burst.direction = Vector3(0, 1, 0)
+	_water_burst.spread = 70.0
+	_water_burst.initial_velocity_min = 3.0
+	_water_burst.initial_velocity_max = 9.0
+	_water_burst.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	_water_burst.emission_box_extents = Vector3(0.9, 0.05, 1.6)
+	_water_burst.gravity = Vector3(0, -13.0, 0)
+	_water_burst.scale_amount_min = 0.6
+	_water_burst.scale_amount_max = 1.4
+	var burst_grow := Curve.new()
+	burst_grow.add_point(Vector2(0.0, 0.7))
+	burst_grow.add_point(Vector2(1.0, 1.1))
+	_water_burst.scale_amount_curve = burst_grow
+	_water_burst.angle_min = -180.0
+	_water_burst.angle_max = 180.0
+	var burst_fade := Gradient.new()
+	burst_fade.set_offsets(PackedFloat32Array([0.0, 0.08, 1.0]))
+	burst_fade.set_colors(PackedColorArray([
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.0)]))
+	_water_burst.color_ramp = burst_fade
+	_water_burst.color = Color(0.85, 0.92, 0.95)
+	_water_burst.mesh = _puff_mesh(0.42)
+	_water_burst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_water_burst)
 
 	# Pietricele aruncate de roata. Contrapunctul prafului: bucati MICI si
 	# opace, cu gravitatie adevarata, care cad inapoi pe sol. Norul da

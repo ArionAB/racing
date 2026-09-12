@@ -635,6 +635,33 @@ const CLASSES_BY_MODEL := {
 	# — siluetele raman in familia de culoare a kopje-urilor din prim-plan.
 	"lengai": {"Lengai": Palette.TRI_PREFIX + "granite"},
 	"crater_far_wall": {"Crater_Far_Wall": Palette.TRI_PREFIX + "granite"},
+
+	# --- Serengeti: LUTUL termitierelor ---------------------------------
+	#
+	# Clasa `termite_clay` (palette.gd) refoloseste dala `rock` (aceeasi gresie
+	# calda de canion pe care sta si granitul kopje-urilor, dar tentata altfel)
+	# — masurat, e cea mai apropiata de familia caramizie a sloturilor 23/27
+	# pe care sta piesa in atlas (77-78% + 22-23%, ambele caramizii). `wood`,
+	# `plaster`, `concrete`, `stone_wall` au fost masurate si respinse: toate
+	# cer o corectie de tenta mult mai mare pe verde/albastru ca sa ajunga
+	# rosii, adica ar sterge granulatia sursei.
+	#
+	# TRIPLANAR, obligatoriu: UV-urile kitului Serengeti sunt colapsate pe
+	# centrele sloturilor (verificat deja pe kopje/crater_gap din blocul de mai
+	# sus, acelasi kit), deci pe UV-uri orice textura ar citi un texel.
+	# Proiectie in spatiul LUMII: piesele stau pe loc, granulatia curge
+	# continuu intre movilele vecine.
+	#
+	# UN material in plus la garda (Track14: 24 -> 25). Nu se rupe (fara
+	# SPLIT_MODELS): fiecare piesa e un singur nod (`Termite_Mound_A/B`), 77-78%
+	# deja pe familia de culoare tinta — un accent de 22-23% pe acelasi
+	# caramiziu (slot 27) nu justifica o ruptura de nod.
+	"termite_mound_a": {
+		"Termite_Mound_A": Palette.TRI_PREFIX + "termite_clay",
+	},
+	"termite_mound_b": {
+		"Termite_Mound_B": Palette.TRI_PREFIX + "termite_clay",
+	},
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la

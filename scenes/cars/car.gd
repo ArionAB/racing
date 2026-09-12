@@ -258,6 +258,12 @@ var _water_burst: CPUParticles3D
 ## tema curenta, iar un static ar duce namolul Serengeti pe laguna Okinawei.
 var _ring_material: StandardMaterial3D
 var _water_color_ready: bool = false
+## Siajul: panza plata la nivelul luciului, sub si in spatele masinii, cu
+## spuma care curge spre spate (assets/shaders/water_wake.gdshader).
+var _water_wake: MeshInstance3D
+var _water_rumble: float = 0.0
+static var _wake_mesh: ArrayMesh = null
+static var _wake_material: ShaderMaterial = null
 ## Inelul: acelasi mesh pentru toate masinile si toate intrarile.
 static var _ring_mesh: ArrayMesh = null
 ## Pietricelele si bulgarii aruncati de roata pe sol afanat.
@@ -451,7 +457,7 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 		_drift_particles.position.z = data.body_length * 0.5
 	if _water_spray != null:
 		_water_spray.position.z = -data.body_length * 0.42
-		_water_spray.emission_box_extents.x = data.body_width * 0.45
+		_water_spray.emission_box_extents.x = data.body_width * 0.6
 		_boost_particles.position.z = data.body_length * 0.5 + 0.1
 	if _shadow != null:
 		_shadow.scale = Vector3(data.body_width * 0.62, 1.0, data.body_length * 0.5)
@@ -554,7 +560,7 @@ func _physics_process(delta: float) -> void:
 	_update_wheels(delta, steer, fwd_speed)
 	_update_shadow()
 	_update_effects(delta)
-	_update_water()
+	_update_water(delta)
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
@@ -1179,7 +1185,7 @@ const WATER_SPRAY_MIN_SPEED: float = 3.5
 ## mare — se ia fundul rotii sub caroserie, ca stropul sa apara la ATINGEREA
 ## apei, nu abia pe fundul albiei, unde te asteapta RespawnZone-ul si te
 ## teleporteaza inainte sa se vada ceva.
-func _update_water() -> void:
+func _update_water(delta: float) -> void:
 	if track == null or _water_burst == null:
 		return
 	if not _water_color_ready:
@@ -1213,6 +1219,106 @@ func _update_water() -> void:
 		_water_spray.direction = dir / v
 		_water_spray.initial_velocity_min = v * 0.8
 		_water_spray.initial_velocity_max = v * 1.2
+	# PRIN apa, nu PE apa (verdictul dezvoltatorului dupa #382: „masina pare
+	# ca merge pe apa"). Cota era corecta; lipsea INTERACTIUNEA — apa nu
+	# raspundea deloc la masina. Trei lucruri, toate legate de viteza:
+	#   1. siajul: panza de spuma sub si in spatele masinii, la nivelul
+	#      luciului, care curge spre spate — continua, nu rara ca stropii;
+	#   2. frana apei: apa pana la butuc ia din viteza (mult sub valul de pe
+	#      dig, 1.4/s, care e o pedeapsa; aici e o senzatie);
+	#   3. un tremur de camera cat timp esti in apa cu viteza, ca la val.
+	_update_wake(level, live)
+	if in_water and is_on_floor():
+		var keep := 1.0 - clampf(WATER_DRAG_PER_SEC * delta, 0.0, 0.5)
+		linear_velocity.x *= keep
+		linear_velocity.z *= keep
+		if horizontal_speed() > 8.0:
+			_water_rumble += delta
+			if _water_rumble >= WATER_RUMBLE_EVERY:
+				_water_rumble = 0.0
+				splash(WATER_RUMBLE)
+	else:
+		_water_rumble = 0.0
+
+
+## Cat din viteza ia apa pe secunda, cat esti cu rotile in ea.
+const WATER_DRAG_PER_SEC: float = 0.55
+## Tremurul de fond prin apa: mic si des (trauma^2, deci abia se simte), ca la
+## WaveSurge.SPLASH_RUMBLE dar mai bland — vadul e traseu, nu hazard.
+const WATER_RUMBLE: float = 0.15
+const WATER_RUMBLE_EVERY: float = 0.15
+
+
+## Siajul: se aseaza PLAT la nivelul luciului (nu urmeaza ruliul masinii),
+## cu botul la bara din fata si coada in urma; lungimea si spuma cresc cu
+## viteza. Stins cand nu esti in apa.
+func _update_wake(level: float, live: bool) -> void:
+	if _water_wake == null:
+		if not live:
+			return
+		_build_wake()
+	_water_wake.visible = live
+	if not live:
+		return
+	var hs := horizontal_speed()
+	var k := clampf(hs / maxf(max_speed, 1.0), 0.0, 1.0)
+	var bw := data.body_width if data != null else 1.8
+	var bl := data.body_length if data != null else 3.8
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	if fwd.length_squared() < 1e-4:
+		return
+	fwd = fwd.normalized()
+	var right := fwd.cross(Vector3.UP)
+	var bow := Vector3(global_position.x, level + 0.05, global_position.z) 		+ fwd * (bl * 0.5 + 0.4)
+	var length := lerpf(4.0, 11.0, k)
+	# Baza: X = dreapta (latimea), Z = spre SPATE (coada), Y sus.
+	var basis := Basis(right * (bw * 0.85), Vector3.UP, -fwd * length)
+	_water_wake.global_transform = Transform3D(basis, bow)
+	_water_wake.set_instance_shader_parameter(&"strength", lerpf(0.45, 1.0, k))
+
+
+func _build_wake() -> void:
+	if _wake_mesh == null:
+		_wake_mesh = _build_wake_mesh()
+	if _wake_material == null:
+		_wake_material = ShaderMaterial.new()
+		_wake_material.shader = load("res://assets/shaders/water_wake.gdshader") as Shader
+		_wake_material.set_shader_parameter("ripple_tex", load(Palette.DETAIL_PATH))
+	_water_wake = MeshInstance3D.new()
+	_water_wake.name = "WaterWake"
+	_water_wake.mesh = _wake_mesh
+	_water_wake.material_override = _wake_material
+	_water_wake.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_water_wake.top_level = true # transformul e pus in lume, nu fata de masina
+	add_child(_water_wake)
+	var c := _water_burst.color
+	_water_wake.set_instance_shader_parameter(&"foam_col", Vector3(c.r, c.g, c.b))
+
+
+## V-ul siajului in unitati: X in -1..1 (latimea la coada), Z in 0..1 (bot ->
+## coada), bot pe jumatate din latime. UV.x = lungimea, UV.y = latimea in
+## -1..1 — shaderul deseneaza spuma dupa ele. 6 x 4 quad-uri = 48 triunghiuri.
+static func _build_wake_mesh() -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	const NZ := 6
+	const NX := 4
+	for iz in NZ:
+		for ix in NX:
+			var quad: Array[Vector3] = []
+			var uvs: Array[Vector2] = []
+			for corner: Vector2 in [Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)]:
+				var tz := (float(iz) + corner.y) / float(NZ)
+				var tx := (float(ix) + corner.x) / float(NX) * 2.0 - 1.0
+				var half := lerpf(0.55, 1.0, tz)
+				quad.append(Vector3(tx * half, 0.0, tz))
+				uvs.append(Vector2(tz, tx))
+			for k: int in [0, 1, 2, 1, 3, 2]:
+				st.set_uv(uvs[k])
+				st.set_normal(Vector3.UP)
+				st.add_vertex(quad[k])
+	return st.commit()
 
 
 ## Am intrat in apa: strop la nivelul LUCIULUI (nu la masina, care poate fi
@@ -1793,10 +1899,10 @@ func _build_effects() -> void:
 	_water_spray.name = "WaterSpray"
 	_water_spray.position = Vector3(0, 0.3, -1.15) # puntea fata (-Z e fata)
 	_water_spray.emitting = false
-	_water_spray.amount = 28
+	_water_spray.amount = 36
 	_water_spray.lifetime = 0.7
 	_water_spray.direction = Vector3(0, 1, -0.35)
-	_water_spray.spread = 38.0
+	_water_spray.spread = 50.0
 	_water_spray.initial_velocity_min = 2.0
 	_water_spray.initial_velocity_max = 6.0
 	_water_spray.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
@@ -1818,7 +1924,7 @@ func _build_effects() -> void:
 		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.85), Color(1, 1, 1, 0.0)]))
 	_water_spray.color_ramp = spray_fade
 	_water_spray.color = Color(0.85, 0.92, 0.95)
-	_water_spray.mesh = _puff_mesh(0.36)
+	_water_spray.mesh = _puff_mesh(0.5)
 	_water_spray.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_water_spray)
 

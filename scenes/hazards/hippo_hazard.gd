@@ -15,8 +15,8 @@ extends AnimatableBody3D
 
 signal surfacing(hippo: HippoHazard)
 
-## Spinarea din kitul de savana (PR #376): 2,5 x 4,8 x 1,35 m, origine la
-## baza, -Z inainte. Se aseaza cu VARFUL spinarii la `rest_top`, exact ca
+## Hipopotamul din kitul de savana: 2,45 x 4,8 x 2,45 m, origine la baza,
+## -Z inainte. Se aseaza cu VARFUL spinarii la `rest_top`, exact ca
 ## elipsoidul procedural pe care il inlocuieste VIZUAL. Coliziunea RAMANE
 ## jumatatea de elipsoid (`width` x `length`), nu hull-ul mesh-ului: masurat cu
 ## ProbeSerengeti, hull-ul din mesh are crupa aproape verticala (0,9 m in 0,4 m)
@@ -24,6 +24,17 @@ signal surfacing(hippo: HippoHazard)
 ## aer); elipsoidul e o movila lina, si movila e mecanica (vezi antetul).
 ## Mesh-ul e cu 0,4 m mai lung la fiecare capat decat colizorul — capul si
 ## crupa ies din apa fara corp, ceea ce nu se simte de la volan.
+##
+## SEPT 2026: mesh-ul e acum un hipopotam INTREG (low_poly_hippo.glb, Sketchfab
+## 378 tri, vezi `build_hippo`), nu doar spinarea. Motivul e verdictul de la
+## volan de mai jos („arata ca niste bolovani"): vechiul asset era construit din
+## `rock`+`boulder`, adica exact generatorul care face stancile de kopje, si
+## nicio reglare de slot nu repara o SILUETA gresita.
+## E mai INALT (2,45 m fata de 1,35 m), si asta e in regula tocmai fiindca
+## asezarea se face dupa VARF (`rest_top - aabb.end.y`): surplusul coboara SUB
+## albie, unde nu se vede. Din apa iese exact cat inainte — `rise_m` decide, nu
+## inaltimea mesh-ului — doar ca acum ce iese are bot, urechi si crupa, iar
+## picioarele stau sub albie ca la un hipopotam adevarat in vad.
 ## Fara fisier (alt worktree, kit neimportat) se vede elipsoidul, ca sondele
 ## sa nu pice din cauza unui asset.
 const HIPPO_GLB := "res://assets/models/serengeti/animals/hippo_back.glb"
@@ -60,9 +71,13 @@ const HIPPO_GLB := "res://assets/models/serengeti/animals/hippo_back.glb"
 ## jur — exact invers decat trebuie. LOG_DARK (#4A3526) iese la V 0.38, cu
 ## 0.15 sub fundal, si ramane cald (H 25), deci nu vireaza spre crem sub
 ## soarele temei asa cum face orice gri neutru (vezi masuratoarea de mai sus).
+## RUNDA 3 (sept 2026, odata cu mesh-ul nou): assetul e acum pe UN SINGUR slot,
+## deci a ramas o singura mutare. Intrarea pentru gura (23 -> KERB_RED) a fost
+## SCOASA fiindca nicio fata nu mai e pe 23: pe botul modelului nou rosul se
+## citea ca o rana, nu ca piele — masurat la nivelul drumului, bot rgb(147,65,27)
+## fata de corp rgb(95,67,45), adica +55% rosu. Motivul lung e in `build_hippo`.
 const HIPPO_SLOT_REMAP := {
 	Palette.ROCK_DARK: Palette.LOG_DARK,         # corpul: brun-inchis
-	Palette.TILE_TERRACOTTA: Palette.KERB_RED,   # gura: rosu
 }
 
 @export_group("Ritm")
@@ -178,7 +193,8 @@ func _build_from_kit() -> bool:
 		return false
 	var aabb := Track.model_aabb(model)
 	# Varful spinarii la rest_top: modelul are originea la baza, deci coboara
-	# cu toata inaltimea lui. Sub albie ramane si cand e sus (1,35 > rise_m).
+	# cu toata inaltimea lui. Sub albie ramane si cand e sus (2,45 > rise_m),
+	# iar surplusul fata de vechea spinare (picioarele, burta) ramane ingropat.
 	model.position = Vector3(0.0, rest_top - aabb.end.y, 0.0)
 	for mi in meshes:
 		var m := mi as MeshInstance3D

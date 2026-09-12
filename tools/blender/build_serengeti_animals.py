@@ -39,6 +39,7 @@ from mathutils import Matrix, Vector
 PACK_ULTIMATE = (r"D:\GameDev\downloaded assets"
                  r"\Ultimate Animated Animals - July 2021-20260813T155229Z-1-001"
                  r"\Ultimate Animated Animals - July 2021\glTF\Bull.gltf")
+PACK_HIPPO = r"D:\GameDev\downloaded assets\low_poly_hippo\low_poly_hippo.glb"
 PACK_FARM = r"D:\GameDev\downloaded assets\Farm Animal Pack-glb\Zebra.glb"
 
 AO_ANIMAL = dict(samples=20, dist=2.0, gradient="vertical",
@@ -55,6 +56,10 @@ GREY_SH = SAND_SHADOW
 IVORY = FOAM_WHITE
 HIPPO = ROCK_DARK
 HIPPO_PINK = TILE_TERRACOTTA
+## Lungimea spinarii din contractul cu HippoHazard (vezi build_hippo). Sursa e
+## de 10 m — un hipopotam adevarat are ~3,5 m, dar aici cifra care conteaza e
+## gabaritul pe care hazardul il asaza in vad, nu realismul zoologic.
+HIPPO_LENGTH = 4.8
 CROC = CACTUS_GREEN
 CROC_BELLY = SAND_SHADOW
 
@@ -440,17 +445,91 @@ def build_elephant():
 # ------------------------------------------------------------- hipopotam, crocodil
 
 def build_hippo():
-    """Spinare + cap, 4 x 2,5 m, 1,5 m inalt: `rock` cu capac plat jos (sta in
-    apa), cap bombat cu ochi si urechi sus — ce iese primul din apa."""
-    b = Builder()
-    b.rock((0.0, -0.4, 0.0), (2.5, 3.2, 1.35), HIPPO, seed=601, segments=9, rings=4, taper=0.45)
-    b.rock((0.0, 1.5, 0.0), (1.7, 1.9, 1.15), HIPPO, seed=607, segments=8, rings=4, taper=0.35)
-    b.boulder((0.0, 2.35, 0.55), (1.3, 0.9, 0.75), HIPPO_PINK, seed=611, segments=7, rings=3, deviation=0.05)
-    for sx in (-0.5, 0.5):
-        b.boulder((sx, 1.05, 1.2), (0.22, 0.2, 0.24), HIPPO, seed=620, segments=5, rings=3, deviation=0.04)
-        b.boulder((sx * 1.2, 1.55, 1.05), (0.26, 0.22, 0.2), HIPPO, seed=625, segments=5, rings=3, deviation=0.04)
-        b.boulder((sx * 0.7, 2.7, 0.75), (0.16, 0.14, 0.14), HIPPO, seed=630, segments=5, rings=3, deviation=0.04)
-    return b.to_object("Hippo_Back")
+    """Hipopotam INTREG, importat (low_poly_hippo.glb, Sketchfab, 378 tri).
+
+    Inlocuieste spinarea procedurala din `rock`/`boulder` (PR #376). Motivul e
+    verdictul de la volan notat in `HippoHazard`: „hipopotamii arata ca niste
+    bolovani" — si chiar erau, literal, trei `rock` si sase `boulder` din
+    acelasi generator care face stancile de kopje. Nicio reglare de slot nu
+    putea repara o SILUETA de bolovan (memoria `silueta-inainte-de-umbrire`:
+    masoara profilul inainte de lumina); diferenta o face un mesh cu bot,
+    urechi si crupa de hipopotam.
+
+    **Numele fisierului ramane `hippo_back.glb` si gabaritul ramane cel vechi**
+    (2,5 x 4,8 x 1,35 m, origine la baza), fiindca HippoHazard asaza modelul cu
+    VARFUL spinarii la `rest_top` si coboara restul sub albie. Din apa se vede
+    tot ce e deasupra liniei apei — spinarea, capul; picioarele stau sub albie,
+    exact ca la un hipopotam adevarat in vad. Deci mecanica (ciclu, coliziune
+    elipsoidala, rise_m) NU se schimba: assetul e pur vizual.
+
+    Sursa e Z-up ca Blender, dar cu capul pe -Y si de 10 m lungime. Aici se
+    intoarce pe +Y (= -Z in Godot, contractul din antet) si se scaleaza la
+    lungimea ceruta. Fara `import_static`: aia presupune o armatura (assert
+    len(arms) == 1), iar modelul asta n-are schelet.
+    """
+    _wipe()
+    bpy.ops.import_scene.gltf(filepath=PACK_HIPPO)
+    meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+    assert len(meshes) == 1, "asteptam 1 mesh: %r" % [m.name for m in meshes]
+    mesh = meshes[0]
+    mesh.name = "Hippo_Back"
+    bpy.context.view_layer.objects.active = mesh
+    mesh.select_set(True)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    # Sensul: capul pe +Y. Martorul e BOTUL — varfurile cele mai departate pe
+    # Y, la inaltime mica (botul unui hipopotam sta jos, sub linia spinarii),
+    # fata de crupa care e masiva si inalta. Masurat pe sursa: capul la
+    # y = -5.09, coada la y = +4.95. Se rotesc VARFURILE, nu obiectul —
+    # `transform_apply` e un no-op in --background (nota lunga din
+    # `import_static`, cinci runde pierdute pe ea).
+    me = mesh.data
+    ys = [v.co.y for v in me.vertices]
+    zs = [v.co.z for v in me.vertices]
+    z_lo = min(zs) + (max(zs) - min(zs)) * 0.55   # sub linia spinarii
+    snout = [v.co.y for v in me.vertices if v.co.z < z_lo]
+    # Capul e capatul cu masa JOASA cea mai departata de centru.
+    y_head = min(snout) if abs(min(snout)) > abs(max(snout)) else max(snout)
+    if y_head < 0.0:
+        rot = Matrix.Rotation(math.pi, 4, "Z")
+        for v in me.vertices:
+            v.co = rot @ v.co
+        me.update()
+        print("  hipopotam: capul era spre -Y, am intors varfurile cu pi")
+
+    # Scara pe LUNGIME (Y), ca gabaritul sa iasa cel din contract. Se scriu
+    # varfurile direct, din acelasi motiv ca rotatia de mai sus.
+    lo, hi = _world_bbox([mesh])
+    s = HIPPO_LENGTH / (hi.y - lo.y)
+    for v in me.vertices:
+        v.co *= s
+    me.update()
+
+    # Textura sursei se arunca: culoarea vine din atlas, nu per asset
+    # (CLAUDE.md). Fetele se pun pe UN SINGUR slot, prin atributul `slot` —
+    # NU prin UV-uri. `finish()` face bevel si abia apoi scrie UV-urile din
+    # `snapshot_slots`, deci UV-uri puse aici ar fi oricum suprascrise, iar
+    # banda de bevel n-ar sti ce culoare sa ia.
+    #
+    # DE CE UN SINGUR SLOT, fara accentul cald de pe bot. Vechea spinare avea
+    # botul pe HIPPO_PINK (KERB_RED), si prima varianta de aici l-a pastrat, pe
+    # ultimii 12% spre cap. Masurat pe captura de la nivelul drumului (vad,
+    # ochi la 1,3 m, hipopotamii SUS): botul iesea rgb(147,65,27) fata de corp
+    # rgb(95,67,45) — cu 55% mai mult rosu si vizibil mai cald, adica se citea
+    # ca o RANA, nu ca piele. Pe bolovanul vechi mergea fiindca era o movila
+    # mica si rotunda; pe un bot adevarat, intors spre camera, aceeasi culoare
+    # ocupa o fata plata si sare in ochi. Slotul de accent ramane definit
+    # (HIPPO_PINK) ca sa fie clar ca lipsa lui e o alegere, nu o scapare.
+    attr = me.attributes.get("slot") or me.attributes.new(
+        name="slot", type="INT", domain="FACE")
+    for poly in me.polygons:
+        attr.data[poly.index].value = HIPPO
+    me.materials.clear()
+    me.materials.append(atlas_material())
+    lo, hi = _world_bbox([mesh])
+    print("  hipopotam: %d tris, %.2f lat x %.2f lung x %.2f inalt (slot unic)"
+          % (tri_count(mesh), hi.x - lo.x, hi.y - lo.y, hi.z - lo.z))
+    return mesh
 
 
 def build_crocodile():

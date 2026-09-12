@@ -189,6 +189,16 @@ Ce e permis:
   Apa și spuma stau jos deliberat: stratul de detaliu e o textură de *rocă*, iar
   la intensitate mare face marea să arate ca noroi.
 
+- **Apa răspunde la lumină, nu doar la culoare** (v12, sep 2026,
+  `water.gdshader` § „STRAT ILUMINAT"). Opacă și unshaded rămâne (contractele
+  1–3 din capul shaderului), dar calculează singură, din uniforme: normale de
+  undă analitice (4 sinusoide în grupuri, zero texturi), reflexia cerului în
+  două culori (zenit/orizont, trecute prin ceață exact cum le vede camera) cu
+  Fresnel, specular de soare plafonat, iar pe râuri direcția de curgere din UV2
+  cu pete de spumă care alunecă la vale. Fresnel-ul stă la **0.25**, nu 1.0
+  fizic: din chase cam toată apa e razantă, iar la plin marea devenea cer.
+  Chei per temă: `water_lit*`, `water_flow*`. Nici SSR, nici cubemap — §8 rămâne.
+
 - **Texturi tileabile gri** pentru suprafețele mari (teren, șosea, umeri,
   borduri). Astea au UV-uri reale, deci folosesc același strat **fără**
   triplanar. Se înmulțesc peste albedo, deci nu aduc culori noi. Centrul lor e

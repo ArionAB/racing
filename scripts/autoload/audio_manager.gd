@@ -39,6 +39,9 @@ const SFX: Dictionary = {
 	&"ice_crack": preload("res://assets/audio/ice_crack.wav"),
 	# Impactul, o singura data, cand masa te inghite.
 	&"avalanche_hit": preload("res://assets/audio/avalanche_hit.wav"),
+	# Stropul de apa la intrarea in vad / parau / mare (Car._enter_water):
+	# pitch inalt la pas, jos la o cadere de la inaltime.
+	&"splash": preload("res://assets/audio/splash.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.

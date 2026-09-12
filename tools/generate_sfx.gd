@@ -58,6 +58,9 @@ func _init() -> void:
 	# neatinse. Un singur fisier pentru ambele momente: hazardul il canta la
 	# pitch ~1.35 ca avertisment (placa se inclina) si la ~0.62 la rupere.
 	_save("ice_crack", _ice_crack())
+	# Stropul de apa (intrarea in vad / parau / mare, vezi Car._enter_water).
+	# TOT LA SFARSIT, din acelasi motiv: `rng` e un singur sir semanat o data.
+	_save("splash", _splash())
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -66,6 +69,35 @@ func _init() -> void:
 ## huruit jos dedesubt. Gheata reala pocneste intai ascutit (fisura sparge
 ## suprafata), apoi sunetul fuge in placa si se ingroasa — de-aia sweep-ul,
 ## nu un simplu thud.
+## Plesnetul apei: un „plop" scurt si jos (masa care intra), peste care se
+## sparge un sfarait de stropi — zgomot filtrat cu taietura care COBOARA in
+## timp (stropii mari cad primii, pulberea fina ramane in aer). Fara nicio
+## inaltime tonala: apa n-are nota, are doar atac si coada.
+func _splash() -> PackedFloat32Array:
+	const DUR := 0.55
+	var n := int(RATE * DUR)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var body := 0.0
+	var phase := 0.0
+	for i in n:
+		var t := float(i) / float(n)
+		var white := rng.randf() * 2.0 - 1.0
+		# Sfaraitul: filtrul se inchide pe masura ce trece timpul.
+		var k := lerpf(0.35, 0.92, t)
+		lp = lp * k + white * (1.0 - k)
+		var hiss := lp * (1.0 - t) * (1.0 - t) * 1.6
+		# Plopul: o cadere de frecventa 240 -> 70 Hz in primele 90 ms.
+		var f := lerpf(240.0, 70.0, minf(t / 0.16, 1.0))
+		phase += TAU * f / float(RATE)
+		body = sin(phase) * maxf(1.0 - t / 0.18, 0.0) * 0.7
+		# Atac instantaneu, coada de un sfert de secunda.
+		var env := minf(float(i) / (RATE * 0.004), 1.0)
+		out[i] = clampf((hiss + body) * env * 0.8, -1.0, 1.0)
+	return out
+
+
 func _ice_crack() -> PackedFloat32Array:
 	var n := int(RATE * 0.42)
 	var out := PackedFloat32Array()

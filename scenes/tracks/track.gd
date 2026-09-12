@@ -852,8 +852,14 @@ static func themes() -> Dictionary:
 			# albastru) ca nuanta sa cada la H15-25, gain 1.22 -> 1.05 ca sa
 			# nu urce valoarea peste maluri.
 			"water_b_mul": Color(1.0, 0.90, 0.80),
-			"water_b_desat": 0.30,
-			"water_b_gain": 1.45,
+			# v12 (sep 2026): masurat cu apa ascunsa (--hide=ChannelWater), sub
+			# vad e nisip H24 S0.58 V0.74, iar apa iesea H31 S0.26 V0.60 — o
+			# versiune SPALATA a malului, cu 43 m de latime peste drum si nisip.
+			# Asta era „pata gri". Namolul coboara sub mal (gain 1.45 -> 1.15)
+			# si isi recapata putin brun (desat 0.30 -> 0.22); referinta are
+			# raul S0.22 V0.45-0.52, sub malurile lui.
+			"water_b_desat": 0.22,
+			"water_b_gain": 1.15,
 			"water_b_glint": 1.9,
 			"water_b_glint_cut": 0.60,
 			# Spuma alba e ce facea lacul sa citeasca mint: toata panza de la
@@ -879,6 +885,25 @@ static func themes() -> Dictionary:
 			"water_facet_count": 7,
 			"water_facet_scale": 0.38,
 			"water_facet_wobble": 0.40,
+			# v12, STRAT ILUMINAT (sep 2026): raul de namol citea „o pata gri"
+			# de la volan (verdictul dezvoltatorului), cu tot reglajul de culoare
+			# de mai sus — fiindca nu raspundea la lumina. Namolul e MAT (rugozitate
+			# mare: luciu lat si moale, nu scantei), reflecta putin cer, si CURGE:
+			# dare de spuma crem in lungul albiei, ca liniile albe subtiri de pe
+			# raul din diorama. Lacul de soda (raul A) ramane mai lucios.
+			# Undele: MICI si slabe. Cu lobul lat al namolului (rugozitate 0.45)
+			# fiecare sinusoida se citea ca o dunga de umbra de-a latul apei —
+			# velur, masurat pe t14_0.145 v2. Sub 1.5 m lungime de unda si cu
+			# panta la o treime, undele se topesc in textura de la 10 m.
+			"water_lit_rough": 0.30,
+			"water_lit_rough_b": 0.45,
+			"water_lit_normal": 0.35,
+			"water_lit_wave_len": 1.4,
+			"water_lit_fresnel": 0.4,
+			"water_lit_spec": 1.1,
+			"water_flow_speed": 2.2,
+			"water_flow_foam": 0.6,
+			"water_flow_foam_cut": 0.50,
 			# Vezi _build_sea_far: fara larg deschis, apa e doar albia raului.
 			"sea_far": false,
 			# CRUSTA DE SODA (POI G, brief §2 G / §4): banda de teren ALBA
@@ -5695,6 +5720,11 @@ func _build_channel_water() -> void:
 		var along: Vector3 = ch["along"]
 		var across: Vector3 = ch["across"]
 		var water_y := o.y - drop
+		# Directia de CURGERE, dusa in UV2 pentru shader (v12): undele si darele
+		# de spuma aluneca in lungul albiei, nu pe loc. Marea si pelicula
+		# hazardelor n-au UV2 (zero), deci raman statatoare. `flow_sign` intoarce
+		# sensul cand albia curge invers fata de axa canalului.
+		var flow := Vector2(along.x, along.z) * float(ch.get("flow_sign", 1.0))
 		var half: float = float(ch["water_half"]) + float(ch["bank"]) * 0.5
 		var reach: float = ch["reach"]
 		# Pasul lateral e mai fin decat cel longitudinal: pe latime se vede
@@ -5741,6 +5771,7 @@ func _build_channel_water() -> void:
 					# pana la culoarea plina la mijloc.
 					var t := clampf(d[k] / _channel_water_depth(ch), 0.0, 1.0)
 					st.set_color(_sea_color(t * SEA_NEAR_DEPTH))
+					st.set_uv2(flow)
 					st.add_vertex(quad[k] - global_position)
 
 		st.generate_normals()
@@ -5775,6 +5806,65 @@ func _channel_water_depth(ch: Dictionary) -> float:
 		return maxf(TrackSideSampler.FORD_BED_SINK
 			+ float(ch.get("water_over_road", 0.3)), 0.3)
 	return maxf(float(ch["depth"]) - float(ch.get("water_y_drop", 0.0)), 0.5)
+
+
+## Cota LUCIULUI de apa de la (pos.x, pos.z), sau -INF unde nu e apa.
+##
+## Pentru masina (stropul de intrare, spray-ul de la roti — vezi
+## Car._update_water): raspunde la „e apa aici, si cat de sus?". Doua surse,
+## aceleasi ca in _build_water: canalele cu apa proprie (parau de munte, vad)
+## si marea/lacul temei. Nu spune daca masina e SUB luciu — asta o decide
+## masina din cota rotilor ei.
+##
+## Ieftin cu buna stiinta: cutii pe canale, si pentru mare un prag pe cota
+## inainte sa intrebe sampler-ul (`ground_y` e o medie Shepard peste toate
+## punctele coapte, deci nu se apeleaza la fiecare tick pentru cinci masini).
+## Sampler-ul e intrebat doar cand punctul e deja sub nivelul marii — pe o
+## sosea normala nu se intampla niciodata, in apa e exact intrebarea corecta:
+## grila de tarm exista doar unde terenul e sub cota marii, deci aceeasi
+## regula decide si ce se randeaza, si ce e „apa" pentru fizica.
+func water_level_at(pos: Vector3) -> float:
+	var best := -INF
+	for ch in _channels:
+		if bool(ch.get("pit", false)):
+			continue
+		var drop := float(ch.get("water_y_drop", -1.0))
+		if drop < 0.0 and not bool(ch.get("ford", false)):
+			continue # la nivelul marii — il acopera testul de mare de mai jos
+		var o: Vector3 = ch["origin"]
+		var d := Vector2(pos.x - o.x, pos.z - o.z)
+		if absf(d.dot(ch["along2"])) > float(ch["reach"]):
+			continue
+		if absf(d.dot(ch["across2"])) \
+				> float(ch["water_half"]) + float(ch["bank"]) * 0.5:
+			continue
+		best = maxf(best, o.y - drop)
+	if theme_flag("water", false) and not is_frozen() \
+			and _sampler != null and not baked.is_empty():
+		var sea_y := _sampler.mean_road_y() + sea_level_offset
+		if sea_y > best and pos.y < sea_y + 1.5 \
+				and _sampler.ground_y(pos.x, pos.z) < sea_y:
+			best = sea_y
+	return best
+
+
+## Culoarea STROPILOR de apa: spuma temei (alb rupt tras spre apa mica prin
+## `water_foam_mix`), aceeasi din care e facuta si banda de tarm. Pe recif e
+## alb-turcoaz, pe un vad de namol e crem-maroniu — stropii sunt din apa in
+## care ai intrat, nu din alta.
+##
+## In sRGB, nu liniar: materialul particulelor citeste culoarea ca sRGB
+## (`vertex_color_is_srgb`, vezi Car._puff_mesh), iar `water_tint` intoarce
+## liniar. Prima sonda a dat stropi (0.22, 0.16, 0.11) — un brun aproape negru,
+## invizibil pe namol (ProbeSplash, prima rulare).
+func water_splash_color() -> Color:
+	var dim := clampf(float(theme_flag("water_dim", 1.0)), 0.0, 1.0)
+	var shallow := water_tint(theme_flag("water_shallow_slot",
+		Palette.REEF_SHALLOW), dim)
+	# Cel mult 40% apa in strop: stropii sunt spuma (aer + apa), deci mai
+	# deschisi decat luciul chiar si pe un rau de namol.
+	var mix_k := clampf(float(theme_flag("water_foam_mix", 0.35)) * 0.4, 0.0, 0.4)
+	return water_tint(Palette.FOAM_WHITE, dim).lerp(shallow, mix_k).linear_to_srgb()
 
 
 ## Cati metri INAINTE de buza e repus cine cade in canal.
@@ -6399,6 +6489,73 @@ func _water_material() -> ShaderMaterial:
 	# doar ca aici consecinta desincronizarii nu e cosmetica: SEA_FAR_DROP se
 	# calculeaza din ea, iar daca shaderul ar avea alta valoare, grila fina s-ar
 	# scufunda sub larg si ar reaparea petele de sea_deep pe laguna.
+	# --- v12: STRAT ILUMINAT (sep 2026). Vezi nota din water.gdshader.
+	#
+	# Pana aici apa era doar ALBEDO calibrat: nu raspundea nici la lumina,
+	# nici la unghiul privirii — de-aia raul de namol de pe Serengeti citea
+	# „o pata gri" de la volan, oricat de bine masurata ii era culoarea. Cerul
+	# si soarele vin din ACELEASI chei de tema care construiesc cerul
+	# (`sky_top`/`sky_horizon`) si DirectionalLight-ul (`sun_color`,
+	# `sun_energy`), deci ce se oglindeste in apa e ce e deasupra ei, si nu
+	# se pot desincroniza. Toate in liniar, ca restul uniformelor de aici.
+	#
+	# Implicit PORNIT pe toate temele (`water_lit` 1.0): e reparatia
+	# generala ceruta de dezvoltator, nu un efect de pista. O tema care nu-l
+	# vrea il coboara din cheie.
+	_water_mat.set_shader_parameter("lit_strength",
+		clampf(float(theme_flag("water_lit", 1.0)), 0.0, 1.0))
+	_water_mat.set_shader_parameter("lit_rough",
+		float(theme_flag("water_lit_rough", 0.22)))
+	_water_mat.set_shader_parameter("lit_rough_b",
+		float(theme_flag("water_lit_rough_b", 0.0)))
+	_water_mat.set_shader_parameter("lit_normal",
+		float(theme_flag("water_lit_normal", 1.0)))
+	_water_mat.set_shader_parameter("lit_wave_len",
+		float(theme_flag("water_lit_wave_len", 4.0)))
+	_water_mat.set_shader_parameter("lit_wave_speed",
+		float(theme_flag("water_lit_wave_speed", 1.0)))
+	# 0.25, nu 1.0 fizic: din chase cam TOATA apa e razanta, iar la Fresnel
+	# plin marea Stromboli iesea cerul intreg (albastru pal, fara adancime);
+	# la 0.45 tot spala turcoazul Okinawei spre gri (A/B pe t8_0.95). Cerul
+	# se vede ca luciu pe departare, culoarea apei ramane a temei.
+	_water_mat.set_shader_parameter("lit_fresnel",
+		float(theme_flag("water_lit_fresnel", 0.25)))
+	_water_mat.set_shader_parameter("lit_spec",
+		float(theme_flag("water_lit_spec", 1.0)))
+	_water_mat.set_shader_parameter("lit_spec_cap",
+		float(theme_flag("water_lit_spec_cap", 3.0)))
+	# Cerul reflectat trece prin aceeasi „lumina" de tema ca albedo-ul apei
+	# (`water_dim`): pe o tema de noapte cerul e oricum intunecat, dar pe una
+	# de amiaza cu apa scazuta deliberat, o reflexie la putere plina ar fi
+	# singurul lucru din cadru care nu a primit dim-ul.
+	# ...si prin CEATA: cu `fog_sky_affect` 1.0 (implicitul Godot si al
+	# temelor vechi) cerul de pe ecran E culoarea cetii, sky_top/sky_horizon nu
+	# ajung niciodata pe ecran (vezi _build_environment). Apa trebuie sa
+	# oglindeasca ce vede camera deasupra ei, nu gradientul teoretic — altfel
+	# pe Okinawa ar reflecta un albastru pe care nimeni nu-l vede in joc.
+	var sky_k := clampf(float(theme_flag("fog_sky_affect", 1.0)), 0.0, 1.0)
+	var fog_lin := theme_fog.srgb_to_linear()
+	var zen := theme_sky_top.srgb_to_linear().lerp(fog_lin, sky_k) * dim
+	var hor := theme_sky_horizon.srgb_to_linear().lerp(fog_lin, sky_k) * dim
+	_water_mat.set_shader_parameter("sky_zenith", Vector3(zen.r, zen.g, zen.b))
+	_water_mat.set_shader_parameter("sky_horizon", Vector3(hor.r, hor.g, hor.b))
+	var sc := theme_sun_color.srgb_to_linear() * theme_sun_energy
+	_water_mat.set_shader_parameter("sun_col", Vector3(sc.r, sc.g, sc.b))
+	# Curgerea marii (implicit statatoare); raurile isi iau directia din UV2.
+	var flow: Vector2 = theme_flag("water_flow", Vector2.ZERO)
+	_water_mat.set_shader_parameter("flow_default", flow)
+	_water_mat.set_shader_parameter("flow_speed",
+		float(theme_flag("water_flow_speed", 1.5)))
+	_water_mat.set_shader_parameter("flow_foam",
+		float(theme_flag("water_flow_foam", 0.0)))
+	_water_mat.set_shader_parameter("flow_foam_cut",
+		float(theme_flag("water_flow_foam_cut", 0.35)))
+	# Spuma de curgere e spuma temei (FOAM_WHITE tras spre apa mica prin
+	# `water_foam_mix`), nu alb pur: pe namol e crem-maronie, pe recif alba.
+	var ffoam := water_tint(Palette.FOAM_WHITE, dim).lerp(shallow,
+		clampf(float(theme_flag("water_foam_mix", 0.35)) * 0.4, 0.0, 1.0))
+	_water_mat.set_shader_parameter("flow_foam_col",
+		Vector3(ffoam.r, ffoam.g, ffoam.b))
 	_water_mat.set_shader_parameter("wave_amp", SEA_WAVE_AMP)
 	return _water_mat
 

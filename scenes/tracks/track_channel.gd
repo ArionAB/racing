@@ -78,6 +78,11 @@ extends Marker3D
 ## 18 m cu apa la 15 are 3 m de apa: albie larga cu firicel, nu canal plin ochi.
 @export var water_y_drop: float = 15.0
 
+## Sensul de CURGERE fata de axa canalului: 1 sau -1. Doar vizual (undele si
+## darele de spuma din shaderul apei aluneca in sensul asta); nu misca nimic
+## din fizica.
+@export var flow_sign: float = 1.0
+
 ## Cat de departe merge albia in fiecare parte, inainte sa se stinga in teren.
 @export var reach: float = 90.0:
 	set(value):
@@ -154,6 +159,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"jump": jump,
 		"pit": pit,
 		"ford": ford,
+		"flow_sign": flow_sign,
 		"label": label if label != "" else name,
 	}
 	if ford:

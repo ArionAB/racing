@@ -122,21 +122,21 @@ herd_desat = 0.55
 herd_white_cap = 0.42
 
 [node name="Hipopotam1" type="AnimatableBody3D" parent="Hazarduri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.0, -0.67, 163.0)
+transform = Transform3D(0.0000, 0, -1.0000, 0, 1, 0, 1.0000, 0, 0.0000, -81.0, -0.67, 163.0)
 script = ExtResource("4_hippo")
 phase = 0.0
 rise_m = 1.5
 rest_top = -0.05
 
 [node name="Hipopotam2" type="AnimatableBody3D" parent="Hazarduri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75.0, -0.67, 167.5)
+transform = Transform3D(0.0000, 0, -1.0000, 0, 1, 0, 1.0000, 0, 0.0000, -75.0, -0.67, 167.5)
 script = ExtResource("4_hippo")
 phase = 0.33
 rise_m = 1.5
 rest_top = -0.05
 
 [node name="Hipopotam3" type="AnimatableBody3D" parent="Hazarduri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -69.0, -0.67, 163.5)
+transform = Transform3D(0.0000, 0, -1.0000, 0, 1, 0, 1.0000, 0, 0.0000, -69.0, -0.67, 163.5)
 script = ExtResource("4_hippo")
 phase = 0.66
 rise_m = 1.5
@@ -753,10 +753,10 @@ script = ExtResource("prop")
 [node name="ZoneA_Camp" type="Node3D" parent="DecorManual"]
 
 [node name="kopje1" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_kopje_camp")]
-transform = Transform3D(0.9397, 0.0000, 0.3420, 0.0000, 1.0000, 0.0000, -0.3420, 0.0000, 0.9397, 294.00, -0.30, 147.00)
+transform = Transform3D(0.9397, 0.0000, 0.3420, 0.0000, 1.0000, 0.0000, -0.3420, 0.0000, 0.9397, 291.20, -0.30, 134.90)
 
 [node name="leu2" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_lion_kopje")]
-transform = Transform3D(0.2635, 0.0000, 0.9647, 0.0000, 1.0000, 0.0000, -0.9647, 0.0000, 0.2635, 295.25, 12.91, 147.36)
+transform = Transform3D(0.2635, 0.0000, 0.9647, 0.0000, 1.0000, 0.0000, -0.9647, 0.0000, 0.2635, 292.45, 12.91, 135.26)
 
 [node name="bolovan3" parent="DecorManual/ZoneA_Camp" instance=ExtResource("s_kopje_boulder_c")]
 transform = Transform3D(0.9324, 0.0000, 1.1750, 0.0000, 1.5000, 0.0000, -1.1750, 0.0000, 0.9324, 285.50, -0.30, 136.00)
@@ -6003,71 +6003,71 @@ scale3_list = Array[Vector3]([Vector3(1.0629671, 0.99402314, 1.0629671), Vector3
 [node name="ZoneF_Serpentine" type="Node3D" parent="DecorManual"]
 
 [node name="FKop1" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.4790, 0.0339, -0.4898, 0.0480, 0.6778, 0.0939, 0.4886, -0.0999, 0.4710, 161.196, 24.080, -106.260)
+transform = Transform3D(0.4790, 0.0339, -0.4898, 0.0480, 0.6778, 0.0939, 0.4886, -0.0999, 0.4710, 161.196, 18.995, -106.260)
 [node name="FKop2" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-0.7026, -0.0369, -0.6093, 0.0060, 0.9286, -0.0632, 0.6104, -0.0517, -0.7007, 160.315, 23.208, -101.052)
+transform = Transform3D(-0.7026, -0.0369, -0.6093, 0.0060, 0.9286, -0.0632, 0.6104, -0.0517, -0.7007, 160.315, 18.864, -101.052)
 [node name="FAca3" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.3272, 0.0000, 0.3181, 0.0000, 0.4563, 0.0000, -0.3181, 0.0000, -0.3272, 156.201, 41.258, -125.345)
 [node name="FKop4" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.5603, 0.0719, 0.2765, -0.1121, 0.6152, 0.0672, -0.2628, -0.1091, 0.5609, 152.003, 25.125, -106.941)
+transform = Transform3D(0.5603, 0.0719, 0.2765, -0.1121, 0.6152, 0.0672, -0.2628, -0.1091, 0.5609, 152.003, 19.668, -106.941)
 [node name="FAca5" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.4816, 0.0000, -0.4280, 0.0000, 0.6443, 0.0000, 0.4280, 0.0000, -0.4816, 154.381, 24.677, -105.315)
+transform = Transform3D(-0.4816, 0.0000, -0.4280, 0.0000, 0.6443, 0.0000, 0.4280, 0.0000, -0.4816, 154.381, 19.547, -105.315)
 [node name="FKop6" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.0552, 0.0921, -0.6070, 0.0910, 0.6039, 0.0833, 0.6072, -0.0821, -0.0677, 144.960, 25.411, -106.433)
+transform = Transform3D(-0.0552, 0.0921, -0.6070, 0.0910, 0.6039, 0.0833, 0.6072, -0.0821, -0.0677, 144.960, 20.352, -106.433)
 [node name="FKop7" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(0.4602, -0.0076, -0.6782, 0.1070, 0.8101, 0.0635, 0.6697, -0.1242, 0.4559, 146.354, 24.540, -100.931)
+transform = Transform3D(0.4602, -0.0076, -0.6782, 0.1070, 0.8101, 0.0635, 0.6697, -0.1242, 0.4559, 146.354, 20.033, -100.931)
 [node name="FEup8" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.5094, 0.0000, -1.1979, 0.0000, 1.3017, 0.0000, 1.1979, 0.0000, 0.5094, 148.204, 24.867, -103.597)
+transform = Transform3D(0.5094, 0.0000, -1.1979, 0.0000, 1.3017, 0.0000, 1.1979, 0.0000, 0.5094, 148.204, 19.862, -103.597)
 [node name="FKop9" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.5145, 0.0208, -0.1021, -0.0062, 0.5195, 0.0748, 0.1041, -0.0721, 0.5094, 143.153, 39.607, -123.167)
 [node name="FKop10" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.9845, -0.1586, 0.0236, -0.1573, 0.9838, 0.0482, -0.0309, 0.0439, -0.9960, 135.988, 26.135, -107.803)
+transform = Transform3D(-0.9845, -0.1586, 0.0236, -0.1573, 0.9838, 0.0482, -0.0309, 0.0439, -0.9960, 135.988, 21.220, -107.803)
 [node name="FAca11" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
-transform = Transform3D(-0.5649, 0.0000, 0.6626, 0.0000, 0.8707, 0.0000, -0.6626, 0.0000, -0.5649, 137.127, 25.897, -97.666)
+transform = Transform3D(-0.5649, 0.0000, 0.6626, 0.0000, 0.8707, 0.0000, -0.6626, 0.0000, -0.5649, 137.127, 20.804, -97.666)
 [node name="FKop12" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.4333, -0.0381, -0.4211, 0.0818, 0.5992, 0.0299, 0.4149, -0.0782, 0.4340, 135.233, 38.857, -123.310)
 [node name="FKop13" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.7521, 0.1217, -0.3859, -0.1692, 0.8344, -0.0666, 0.3675, 0.1352, 0.7589, 128.629, 26.667, -106.931)
+transform = Transform3D(0.7521, 0.1217, -0.3859, -0.1692, 0.8344, -0.0666, 0.3675, 0.1352, 0.7589, 128.629, 21.608, -106.931)
 [node name="FKop14" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.5978, -0.0273, 0.8015, -0.0771, 0.9930, 0.0914, -0.7982, -0.1164, 0.5914, 132.808, 25.810, -99.135)
+transform = Transform3D(0.5978, -0.0273, 0.8015, -0.0771, 0.9930, 0.0914, -0.7982, -0.1164, 0.5914, 132.808, 21.352, -99.135)
 [node name="FAca15" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
-transform = Transform3D(-0.6926, 0.0000, -0.5610, 0.0000, 0.8913, 0.0000, 0.5610, 0.0000, -0.6926, 130.992, 26.342, -98.377)
+transform = Transform3D(-0.6926, 0.0000, -0.5610, 0.0000, 0.8913, 0.0000, 0.5610, 0.0000, -0.6926, 130.992, 21.559, -98.377)
 [node name="FAca16" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.3634, 0.0000, 0.2115, 0.0000, 0.4205, 0.0000, -0.2115, 0.0000, -0.3634, 129.560, 38.520, -125.756)
 [node name="FKop17" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.1372, -0.0752, -0.7647, -0.0409, 0.7764, -0.0691, 0.7673, 0.0280, -0.1404, 121.500, 27.497, -107.413)
+transform = Transform3D(-0.1372, -0.0752, -0.7647, -0.0409, 0.7764, -0.0691, 0.7673, 0.0280, -0.1404, 121.500, 22.394, -107.413)
 [node name="FKop18" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.8186, -0.0546, 0.4962, -0.0456, 0.9572, 0.0301, -0.4971, 0.0021, -0.8199, 123.063, 27.344, -107.586)
+transform = Transform3D(-0.8186, -0.0546, 0.4962, -0.0456, 0.9572, 0.0301, -0.4971, 0.0021, -0.8199, 123.063, 22.267, -107.586)
 [node name="FKop19" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.4451, -0.1658, -0.9159, 0.0163, 1.0164, -0.1761, 0.9306, 0.0615, 0.4411, 120.801, 26.692, -100.064)
+transform = Transform3D(0.4451, -0.1658, -0.9159, 0.0163, 1.0164, -0.1761, 0.9306, 0.0615, 0.4411, 120.801, 22.051, -100.064)
 [node name="FKop20" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.2393, 0.0476, 0.5925, -0.0845, 0.6349, -0.0169, -0.5883, -0.0718, 0.2434, 122.409, 37.635, -123.292)
 [node name="FAca21" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.4177, 0.0000, 0.3391, 0.0000, 0.5380, 0.0000, -0.3391, 0.0000, 0.4177, 122.619, 37.837, -124.997)
 [node name="FKop22" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.7332, 0.0190, 0.1300, 0.0214, 0.7444, 0.0114, -0.1296, 0.0149, -0.7333, 113.963, 28.079, -106.907)
+transform = Transform3D(-0.7332, 0.0190, 0.1300, 0.0214, 0.7444, 0.0114, -0.1296, 0.0149, -0.7333, 113.963, 22.948, -106.907)
 [node name="FKop23" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.8770, 0.1114, -0.2488, -0.0681, 0.9012, 0.1633, 0.2639, -0.1374, 0.8689, 113.255, 28.303, -108.109)
+transform = Transform3D(0.8770, 0.1114, -0.2488, -0.0681, 0.9012, 0.1633, 0.2639, -0.1374, 0.8689, 113.255, 23.100, -108.109)
 [node name="FAca24" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.0503, 0.0000, 0.5137, 0.0000, 0.5162, 0.0000, -0.5137, 0.0000, 0.0503, 117.651, 37.388, -125.737)
 [node name="FKop25" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.7298, -0.1232, -0.3083, -0.1621, 0.7820, 0.0711, 0.2898, 0.1270, -0.7367, 107.798, 28.453, -106.207)
+transform = Transform3D(-0.7298, -0.1232, -0.3083, -0.1621, 0.7820, 0.0711, 0.2898, 0.1270, -0.7367, 107.798, 23.504, -106.207)
 [node name="FKop26" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(0.0203, 0.0102, -1.0160, 0.0942, 1.0118, 0.0121, 1.0117, -0.0944, 0.0193, 110.829, 27.502, -101.104)
+transform = Transform3D(0.0203, 0.0102, -1.0160, 0.0942, 1.0118, 0.0121, 1.0117, -0.0944, 0.0193, 110.829, 23.139, -101.104)
 [node name="FKop27" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.5960, 0.0305, 0.3565, -0.0181, 0.6892, -0.0892, -0.3573, -0.0858, -0.5901, 112.495, 36.670, -123.299)
 [node name="FKop28" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.3753, -0.0283, -0.4207, 0.0163, 0.5638, -0.0233, 0.4213, 0.0033, 0.3756, 99.787, 29.249, -107.618)
+transform = Transform3D(0.3753, -0.0283, -0.4207, 0.0163, 0.5638, -0.0233, 0.4213, 0.0033, 0.3756, 99.787, 24.196, -107.618)
 [node name="FKop29" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.7224, -0.0618, 0.6298, 0.0166, 0.9536, 0.1127, -0.6326, 0.0957, -0.7162, 104.034, 28.386, -104.480)
+transform = Transform3D(-0.7224, -0.0618, 0.6298, 0.0166, 0.9536, 0.1127, -0.6326, 0.0957, -0.7162, 104.034, 23.588, -104.480)
 [node name="FKop30" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.9629, 0.0425, 0.1918, 0.0599, 0.9773, 0.0842, -0.1871, 0.0942, -0.9602, 99.439, 29.110, -106.726)
+transform = Transform3D(-0.9629, 0.0425, 0.1918, 0.0599, 0.9773, 0.0842, -0.1871, 0.0942, -0.9602, 99.439, 24.139, -106.726)
 [node name="FKop31" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.1742, 0.0759, 0.5800, 0.0475, 0.6050, -0.0649, -0.5830, 0.0266, -0.1786, 100.056, 29.125, -106.606)
+transform = Transform3D(-0.1742, 0.0759, 0.5800, 0.0475, 0.6050, -0.0649, -0.5830, 0.0266, -0.1786, 100.056, 24.062, -106.606)
 [node name="FEup32" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(0.0495, 0.0000, 0.8811, 0.0000, 0.8825, 0.0000, -0.8811, 0.0000, 0.0495, 95.592, 29.430, -105.080)
+transform = Transform3D(0.0495, 0.0000, 0.8811, 0.0000, 0.8825, 0.0000, -0.8811, 0.0000, 0.0495, 95.592, 24.369, -105.080)
 [node name="FKop33" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.5518, 0.1040, -0.6152, -0.0364, 0.8253, 0.1068, 0.6229, -0.0439, 0.5513, 90.753, 29.788, -105.658)
+transform = Transform3D(0.5518, 0.1040, -0.6152, -0.0364, 0.8253, 0.1068, 0.6229, -0.0439, 0.5513, 90.753, 24.799, -105.658)
 [node name="FKop34" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.1493, -0.0067, 0.6154, -0.0868, 0.6267, 0.0279, -0.6093, -0.0909, 0.1468, 76.262, 31.575, -86.815)
 [node name="FKop35" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
@@ -6075,97 +6075,97 @@ transform = Transform3D(-0.5352, 0.0865, 0.1732, 0.0659, 0.5601, -0.0760, -0.182
 [node name="FAca36" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(0.9329, 0.0000, 0.1715, 0.0000, 0.9485, 0.0000, -0.1715, 0.0000, 0.9329, 68.978, 29.548, -83.849)
 [node name="FKop37" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.0620, 0.1112, -0.6339, -0.0931, 0.6317, 0.1018, 0.6368, 0.0815, 0.0766, 90.042, 29.985, -96.128)
+transform = Transform3D(0.0620, 0.1112, -0.6339, -0.0931, 0.6317, 0.1018, 0.6368, 0.0815, 0.0766, 90.042, 24.774, -96.128)
 [node name="FAca38" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.2838, 0.0000, 0.3136, 0.0000, 0.4229, 0.0000, -0.3136, 0.0000, -0.2838, 87.795, 30.120, -101.039)
+transform = Transform3D(-0.2838, 0.0000, 0.3136, 0.0000, 0.4229, 0.0000, -0.3136, 0.0000, -0.2838, 87.795, 25.059, -101.039)
 [node name="FKop39" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.7779, -0.1267, -0.0749, -0.1251, 0.7814, -0.0219, 0.0774, -0.0097, -0.7878, 79.662, 30.876, -84.920)
 [node name="FKop40" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.3049, -0.1003, 0.6095, -0.1033, 0.6784, 0.0600, -0.6090, -0.0648, -0.3153, 90.819, 29.857, -96.460)
+transform = Transform3D(-0.3049, -0.1003, 0.6095, -0.1033, 0.6784, 0.0600, -0.6090, -0.0648, -0.3153, 90.819, 24.676, -96.460)
 [node name="FKop41" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.0062, -0.0834, -0.8469, -0.1525, 0.8333, -0.0809, 0.8372, 0.1512, -0.0210, 91.367, 12.990, -77.437)
+transform = Transform3D(-0.0062, -0.0834, -0.8469, -0.1525, 0.8333, -0.0809, 0.8372, 0.1512, -0.0210, 91.367, 8.400, -77.437)
 [node name="FKop42" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.9260, -0.0567, -0.1684, -0.0746, 0.9351, 0.0951, 0.1613, 0.1067, -0.9229, 93.946, 12.862, -78.446)
+transform = Transform3D(-0.9260, -0.0567, -0.1684, -0.0746, 0.9351, 0.0951, 0.1613, 0.1067, -0.9229, 93.946, 8.665, -78.446)
 [node name="FKop43" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-0.9970, 0.0522, 0.2584, 0.0211, 1.0234, -0.1254, -0.2628, -0.1160, -0.9905, 91.720, 12.129, -71.922)
+transform = Transform3D(-0.9970, 0.0522, 0.2584, 0.0211, 1.0234, -0.1254, -0.2628, -0.1160, -0.9905, 91.720, 8.400, -71.922)
 [node name="FAca44" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.6840, 0.0000, 0.1827, 0.0000, 0.7080, 0.0000, -0.1827, 0.0000, -0.6840, 87.939, 16.535, -77.476)
+transform = Transform3D(-0.6840, 0.0000, 0.1827, 0.0000, 0.7080, 0.0000, -0.1827, 0.0000, -0.6840, 87.939, 8.400, -77.476)
 [node name="FKop45" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.6505, -0.0611, 0.2149, -0.0934, 0.6753, -0.0907, -0.2030, -0.1150, -0.6470, 98.371, 13.327, -77.088)
+transform = Transform3D(-0.6505, -0.0611, 0.2149, -0.0934, 0.6753, -0.0907, -0.2030, -0.1150, -0.6470, 98.371, 9.266, -77.088)
 [node name="FKop46" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.3892, 0.0076, 0.6422, 0.0970, 0.7416, -0.0675, -0.6349, 0.1179, 0.3834, 101.508, 13.736, -77.603)
+transform = Transform3D(0.3892, 0.0076, 0.6422, 0.0970, 0.7416, -0.0675, -0.6349, 0.1179, 0.3834, 101.508, 9.344, -77.603)
 [node name="FAca47" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.0485, 0.0000, -0.6197, 0.0000, 0.6216, 0.0000, 0.6197, 0.0000, -0.0485, 99.044, 13.285, -73.594)
+transform = Transform3D(-0.0485, 0.0000, -0.6197, 0.0000, 0.6216, 0.0000, 0.6197, 0.0000, -0.0485, 99.044, 8.734, -73.594)
 [node name="FKop48" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.0590, 0.0649, 0.6726, -0.0501, 0.6738, -0.0606, -0.6739, -0.0444, 0.0634, 97.959, 29.035, -93.490)
+transform = Transform3D(0.0590, 0.0649, 0.6726, -0.0501, 0.6738, -0.0606, -0.6739, -0.0444, 0.0634, 97.959, 25.068, -93.490)
 [node name="FKop49" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.2870, 0.1267, -0.7435, -0.0078, 0.7950, 0.1385, 0.7542, 0.0564, -0.2815, 109.419, 14.605, -77.110)
+transform = Transform3D(-0.2870, 0.1267, -0.7435, -0.0078, 0.7950, 0.1385, 0.7542, 0.0564, -0.2815, 109.419, 9.819, -77.110)
 [node name="FKop50" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.6629, 0.0467, 0.3247, -0.0462, 0.7381, -0.0118, -0.3248, -0.0097, 0.6644, 104.755, 14.147, -76.854)
+transform = Transform3D(0.6629, 0.0467, 0.3247, -0.0462, 0.7381, -0.0118, -0.3248, -0.0097, 0.6644, 104.755, 9.230, -76.854)
 [node name="FKop51" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.7887, 0.1481, -0.8396, -0.0086, 1.1451, 0.1939, 0.8525, -0.1255, 0.7787, 106.006, 13.570, -72.400)
+transform = Transform3D(0.7887, 0.1481, -0.8396, -0.0086, 1.1451, 0.1939, 0.8525, -0.1255, 0.7787, 106.006, 9.300, -72.400)
 [node name="FAca52" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
-transform = Transform3D(0.5021, 0.0000, -0.9046, 0.0000, 1.0346, 0.0000, 0.9046, 0.0000, 0.5021, 105.078, 13.874, -69.683)
+transform = Transform3D(0.5021, 0.0000, -0.9046, 0.0000, 1.0346, 0.0000, 0.9046, 0.0000, 0.5021, 105.078, 9.420, -69.683)
 [node name="FKop53" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.3577, -0.0099, 0.2292, 0.0191, 0.4218, 0.0480, -0.2286, 0.0507, -0.3546, 110.467, 28.185, -94.244)
+transform = Transform3D(-0.3577, -0.0099, 0.2292, 0.0191, 0.4218, 0.0480, -0.2286, 0.0507, -0.3546, 110.467, 23.696, -94.244)
 [node name="FKop54" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.7330, 0.0504, 0.3727, 0.0056, 0.8149, -0.1213, -0.3761, 0.1105, 0.7247, 113.215, 14.646, -76.007)
+transform = Transform3D(0.7330, 0.0504, 0.3727, 0.0056, 0.8149, -0.1213, -0.3761, 0.1105, 0.7247, 113.215, 10.397, -76.007)
 [node name="FKop55" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-1.1780, 0.0184, 0.0043, 0.0181, 1.1752, -0.0811, -0.0056, -0.0810, -1.1753, 112.239, 13.818, -70.559)
+transform = Transform3D(-1.1780, 0.0184, 0.0043, 0.0181, 1.1752, -0.0811, -0.0056, -0.0810, -1.1753, 112.239, 10.248, -70.559)
 [node name="FKop56" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.0443, -0.0338, -0.5311, 0.0583, 0.5301, -0.0289, 0.5290, -0.0556, 0.0477, 115.458, 27.717, -93.591)
+transform = Transform3D(0.0443, -0.0338, -0.5311, 0.0583, 0.5301, -0.0289, 0.5290, -0.0556, 0.0477, 115.458, 23.507, -93.591)
 [node name="FKop57" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.6109, 0.0519, 0.1279, 0.0384, 0.6213, -0.0690, -0.1326, -0.0595, -0.6092, 119.653, 15.277, -78.239)
+transform = Transform3D(-0.6109, 0.0519, 0.1279, 0.0384, 0.6213, -0.0690, -0.1326, -0.0595, -0.6092, 119.653, 11.376, -78.239)
 [node name="FKop58" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.4476, 0.0961, 0.3321, -0.0292, 0.5519, -0.1203, -0.3445, 0.0781, 0.4417, 117.406, 14.869, -76.053)
+transform = Transform3D(0.4476, 0.0961, 0.3321, -0.0292, 0.5519, -0.1203, -0.3445, 0.0781, 0.4417, 117.406, 11.035, -76.053)
 [node name="FKop59" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.6131, -0.0771, -0.1094, 0.0646, 0.6197, -0.0749, 0.1172, 0.0619, 0.6134, 117.168, 27.535, -93.994)
+transform = Transform3D(0.6131, -0.0771, -0.1094, 0.0646, 0.6197, -0.0749, 0.1172, 0.0619, 0.6134, 117.168, 23.157, -93.994)
 [node name="FAca60" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.4428, 0.0000, -0.0344, 0.0000, 0.4441, 0.0000, 0.0344, 0.0000, 0.4428, 118.976, 27.467, -94.991)
+transform = Transform3D(0.4428, 0.0000, -0.0344, 0.0000, 0.4441, 0.0000, 0.0344, 0.0000, 0.4428, 118.976, 22.436, -94.991)
 [node name="FKop61" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.1005, -0.0376, -0.6335, 0.0372, 0.6399, -0.0439, 0.6335, -0.0436, -0.0979, 127.880, 16.033, -77.497)
+transform = Transform3D(-0.1005, -0.0376, -0.6335, 0.0372, 0.6399, -0.0439, 0.6335, -0.0436, -0.0979, 127.880, 11.728, -77.497)
 [node name="FKop62" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.2232, 0.0171, -1.0018, -0.0152, 1.0263, 0.0141, 1.0019, 0.0118, 0.2234, 124.793, 15.538, -76.424)
+transform = Transform3D(0.2232, 0.0171, -1.0018, -0.0152, 1.0263, 0.0141, 1.0019, 0.0118, 0.2234, 124.793, 11.564, -76.424)
 [node name="FAca63" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
-transform = Transform3D(-0.1052, 0.0000, -1.0634, 0.0000, 1.0686, 0.0000, 1.0634, 0.0000, -0.1052, 126.575, 15.892, -67.233)
+transform = Transform3D(-0.1052, 0.0000, -1.0634, 0.0000, 1.0686, 0.0000, 1.0634, 0.0000, -0.1052, 126.575, 11.864, -67.233)
 [node name="FKop64" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.0452, -0.0607, 0.7556, -0.0426, 0.7556, 0.0633, -0.7569, -0.0462, 0.0415, 130.555, 16.244, -76.407)
+transform = Transform3D(0.0452, -0.0607, 0.7556, -0.0426, 0.7556, 0.0633, -0.7569, -0.0462, 0.0415, 130.555, 11.835, -76.407)
 [node name="FKop65" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-0.4645, 0.0727, -0.8474, 0.0608, 0.9659, 0.0495, 0.8483, -0.0295, -0.4676, 133.851, 16.104, -73.311)
+transform = Transform3D(-0.4645, 0.0727, -0.8474, 0.0608, 0.9659, 0.0495, 0.8483, -0.0295, -0.4676, 133.851, 12.337, -73.311)
 [node name="FDea66" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_dead_tree")]
-transform = Transform3D(0.4889, 0.0000, 0.4719, 0.0000, 0.6795, 0.0000, -0.4719, 0.0000, 0.4889, 134.672, 16.694, -73.395)
+transform = Transform3D(0.4889, 0.0000, 0.4719, 0.0000, 0.6795, 0.0000, -0.4719, 0.0000, 0.4889, 134.672, 12.462, -73.395)
 [node name="FKop67" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.5073, -0.0896, 0.0972, -0.0900, 0.5164, 0.0063, -0.0968, -0.0106, -0.5151, 132.877, 26.130, -93.352)
+transform = Transform3D(-0.5073, -0.0896, 0.0972, -0.0900, 0.5164, 0.0063, -0.0968, -0.0106, -0.5151, 132.877, 22.278, -93.352)
 [node name="FKop68" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.2730, -0.0376, 0.6111, -0.0944, 0.6585, 0.0826, -0.6050, -0.1197, 0.2629, 139.624, 17.390, -76.710)
+transform = Transform3D(0.2730, -0.0376, 0.6111, -0.0944, 0.6585, 0.0826, -0.6050, -0.1197, 0.2629, 139.624, 13.215, -76.710)
 [node name="FKop69" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.1341, -0.0524, 0.6775, -0.0346, 0.6902, 0.0465, -0.6786, -0.0249, -0.1363, 144.192, 17.925, -76.979)
+transform = Transform3D(-0.1341, -0.0524, 0.6775, -0.0346, 0.6902, 0.0465, -0.6786, -0.0249, -0.1363, 144.192, 13.910, -76.979)
 [node name="FKop70" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.2065, -0.0731, -0.5175, 0.0712, 0.5551, -0.0500, 0.5177, -0.0472, 0.2132, 143.773, 25.231, -93.223)
+transform = Transform3D(0.2065, -0.0731, -0.5175, 0.0712, 0.5551, -0.0500, 0.5177, -0.0472, 0.2132, 143.773, 21.531, -93.223)
 [node name="FKop71" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.4733, 0.0117, 0.7274, 0.1030, 0.8580, -0.0808, -0.7202, 0.1304, 0.4665, 150.525, 18.211, -77.123)
+transform = Transform3D(0.4733, 0.0117, 0.7274, 0.1030, 0.8580, -0.0808, -0.7202, 0.1304, 0.4665, 150.525, 14.071, -77.123)
 [node name="FKop72" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-0.6793, 0.0254, 0.6017, 0.0858, 0.9018, 0.0589, -0.5961, 0.1009, -0.6772, 151.016, 17.421, -71.718)
+transform = Transform3D(-0.6793, 0.0254, 0.6017, 0.0858, 0.9018, 0.0589, -0.5961, 0.1009, -0.6772, 151.016, 13.749, -71.718)
 [node name="FAca73" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
-transform = Transform3D(0.4830, 0.0000, 0.7758, 0.0000, 0.9139, 0.0000, -0.7758, 0.0000, 0.4830, 144.112, 17.478, -70.060)
+transform = Transform3D(0.4830, 0.0000, 0.7758, 0.0000, 0.9139, 0.0000, -0.7758, 0.0000, 0.4830, 144.112, 13.200, -70.060)
 [node name="FKop74" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.1214, 0.0297, 0.6066, 0.0432, 0.6175, -0.0216, -0.6058, 0.0381, -0.1231, 155.288, 18.458, -77.683)
+transform = Transform3D(-0.1214, 0.0297, 0.6066, 0.0432, 0.6175, -0.0216, -0.6058, 0.0381, -0.1231, 155.288, 14.399, -77.683)
 [node name="FKop75" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-0.2374, 0.0173, 0.7780, -0.1283, 0.8014, -0.0570, -0.7676, -0.1393, -0.2311, 156.975, 18.084, -69.331)
+transform = Transform3D(-0.2374, 0.0173, 0.7780, -0.1283, 0.8014, -0.0570, -0.7676, -0.1393, -0.2311, 156.975, 14.655, -69.331)
 [node name="FAca76" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.3414, 0.0000, -0.6063, 0.0000, 0.6958, 0.0000, 0.6063, 0.0000, 0.3414, 152.800, 18.327, -76.267)
+transform = Transform3D(0.3414, 0.0000, -0.6063, 0.0000, 0.6958, 0.0000, 0.6063, 0.0000, 0.3414, 152.800, 14.020, -76.267)
 [node name="FKop77" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.5501, -0.1026, -0.6547, -0.0452, 0.8431, -0.1701, 0.6611, 0.1430, 0.5331, 161.195, 19.071, -77.518)
+transform = Transform3D(0.5501, -0.1026, -0.6547, -0.0452, 0.8431, -0.1701, 0.6611, 0.1430, 0.5331, 161.195, 15.297, -77.518)
 [node name="FKop78" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.5469, 0.0565, -0.2949, 0.0038, 0.6140, 0.1106, 0.3002, 0.0952, -0.5386, 163.110, 19.311, -76.788)
+transform = Transform3D(-0.5469, 0.0565, -0.2949, 0.0038, 0.6140, 0.1106, 0.3002, 0.0952, -0.5386, 163.110, 15.589, -76.788)
 [node name="FKop79" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.5684, -0.1841, 0.8634, -0.0335, 1.0306, 0.1977, -0.8821, 0.0795, -0.5638, 159.287, 18.372, -73.758)
+transform = Transform3D(-0.5684, -0.1841, 0.8634, -0.0335, 1.0306, 0.1977, -0.8821, 0.0795, -0.5638, 159.287, 15.007, -73.758)
 [node name="FKop80" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.3158, -0.0310, -0.4527, 0.0064, 0.5518, -0.0333, 0.4537, 0.0138, 0.3155, 163.927, 23.604, -92.550)
+transform = Transform3D(0.3158, -0.0310, -0.4527, 0.0064, 0.5518, -0.0333, 0.4537, 0.0138, 0.3155, 163.927, 20.025, -92.550)
 [node name="FKop81" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.4287, 0.1284, -0.6267, 0.0821, 0.7593, 0.0994, 0.6345, -0.0115, -0.4364, 162.840, 19.087, -74.242)
+transform = Transform3D(-0.4287, 0.1284, -0.6267, 0.0821, 0.7593, 0.0994, 0.6345, -0.0115, -0.4364, 162.840, 15.548, -74.242)
 [node name="FKop82" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.5499, 0.0425, 0.9829, -0.0061, 1.1259, -0.0521, -0.9838, -0.0307, -0.5491, 160.708, 18.525, -73.775)
+transform = Transform3D(-0.5499, 0.0425, 0.9829, -0.0061, 1.1259, -0.0521, -0.9838, -0.0307, -0.5491, 160.708, 15.223, -73.775)
 [node name="FKop83" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.4987, 0.0895, 0.5277, -0.0735, 0.7259, -0.0536, -0.5301, -0.0165, 0.5038, 172.254, 20.637, -50.439)
 [node name="FKop84" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
@@ -6177,63 +6177,63 @@ transform = Transform3D(-0.3115, -0.0954, -0.5059, -0.1268, 0.5873, -0.0327, 0.4
 [node name="FKop87" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.2238, 0.0198, -0.5527, -0.0156, 0.5962, 0.0151, 0.5528, 0.0088, 0.2242, 153.285, 16.941, -47.804)
 [node name="FKop88" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.0770, -0.0456, -0.3982, -0.0252, 0.4053, -0.0416, 0.4001, 0.0167, -0.0793, 153.450, 18.571, -63.519)
+transform = Transform3D(-0.0770, -0.0456, -0.3982, -0.0252, 0.4053, -0.0416, 0.4001, 0.0167, -0.0793, 153.450, 14.310, -63.519)
 [node name="FKop89" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.8909, 0.1599, 0.2132, 0.1461, 0.9152, -0.0758, -0.2229, -0.0392, -0.9019, 146.124, 8.485, -46.397)
+transform = Transform3D(-0.8909, 0.1599, 0.2132, 0.1461, 0.9152, -0.0758, -0.2229, -0.0392, -0.9019, 146.124, 4.943, -46.397)
 [node name="FAca90" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.1188, 0.0000, 0.6363, 0.0000, 0.6473, 0.0000, -0.6363, 0.0000, 0.1188, 142.050, 5.943, -45.763)
+transform = Transform3D(0.1188, 0.0000, 0.6363, 0.0000, 0.6473, 0.0000, -0.6363, 0.0000, 0.1188, 142.050, 2.153, -45.763)
 [node name="FKop91" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.7593, -0.1772, -0.6410, 0.0822, 0.9904, -0.1763, 0.6599, 0.0804, 0.7595, 138.509, 4.199, -46.678)
+transform = Transform3D(0.7593, -0.1772, -0.6410, 0.0822, 0.9904, -0.1763, 0.6599, 0.0804, 0.7595, 138.509, 0.400, -46.678)
 [node name="FKop92" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.0592, -0.0517, 0.3426, -0.0313, 0.3454, 0.0576, -0.3451, -0.0402, 0.0536, 134.208, 16.711, -63.217)
+transform = Transform3D(0.0592, -0.0517, 0.3426, -0.0313, 0.3454, 0.0576, -0.3451, -0.0402, 0.0536, 134.208, 12.462, -63.217)
 [node name="FKop93" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.7333, -0.0229, -0.1033, -0.0324, 0.7372, 0.0667, 0.1007, 0.0705, -0.7306, 131.500, 5.459, -48.225)
+transform = Transform3D(-0.7333, -0.0229, -0.1033, -0.0324, 0.7372, 0.0667, 0.1007, 0.0705, -0.7306, 131.500, 1.248, -48.225)
 [node name="FKop94" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.8602, -0.0597, -0.1935, 0.0234, 0.8681, -0.1636, 0.2011, 0.1542, 0.8466, 131.723, 4.795, -46.866)
+transform = Transform3D(0.8602, -0.0597, -0.1935, 0.0234, 0.8681, -0.1636, 0.2011, 0.1542, 0.8466, 131.723, 0.400, -46.866)
 [node name="FAca95" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
-transform = Transform3D(0.7793, 0.0000, -0.4640, 0.0000, 0.9070, 0.0000, 0.4640, 0.0000, 0.7793, 127.793, 4.753, -39.651)
+transform = Transform3D(0.7793, 0.0000, -0.4640, 0.0000, 0.9070, 0.0000, 0.4640, 0.0000, 0.7793, 127.793, 0.583, -39.651)
 [node name="FKop96" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.6106, -0.0304, -0.4721, -0.0958, 0.7628, 0.0748, 0.4633, 0.1177, -0.6068, 121.320, 5.768, -47.361)
+transform = Transform3D(-0.6106, -0.0304, -0.4721, -0.0958, 0.7628, 0.0748, 0.4633, 0.1177, -0.6068, 121.320, 1.555, -47.361)
 [node name="FKop97" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.0155, 0.0354, -0.8810, -0.0693, 0.8784, 0.0365, 0.8790, 0.0699, -0.0126, 125.211, 4.627, -39.926)
+transform = Transform3D(-0.0155, 0.0354, -0.8810, -0.0693, 0.8784, 0.0365, 0.8790, 0.0699, -0.0126, 125.211, 0.664, -39.926)
 [node name="FKop98" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.7042, 0.0741, 0.4143, -0.0513, 0.8166, -0.0589, -0.4178, 0.0247, 0.7056, 115.371, 6.342, -47.485)
+transform = Transform3D(0.7042, 0.0741, 0.4143, -0.0513, 0.8166, -0.0589, -0.4178, 0.0247, 0.7056, 115.371, 1.781, -47.485)
 [node name="FAca99" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.5561, 0.0000, -0.0810, 0.0000, 0.5619, 0.0000, 0.0810, 0.0000, 0.5561, 112.968, 6.603, -44.726)
+transform = Transform3D(0.5561, 0.0000, -0.0810, 0.0000, 0.5619, 0.0000, 0.0810, 0.0000, 0.5561, 112.968, 2.177, -44.726)
 [node name="FAca100" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.5081, 0.0000, 0.1064, 0.0000, 0.5191, 0.0000, -0.1064, 0.0000, -0.5081, 116.207, 15.016, -64.911)
+transform = Transform3D(-0.5081, 0.0000, 0.1064, 0.0000, 0.5191, 0.0000, -0.1064, 0.0000, -0.5081, 116.207, 10.800, -64.911)
 [node name="FKop101" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.6772, -0.1321, 0.4347, 0.0895, 0.8038, 0.1048, -0.4455, -0.0393, 0.6820, 109.887, 6.921, -46.359)
+transform = Transform3D(0.6772, -0.1321, 0.4347, 0.0895, 0.8038, 0.1048, -0.4455, -0.0393, 0.6820, 109.887, 2.685, -46.359)
 [node name="FKop102" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-1.1447, 0.0280, 0.2240, 0.0091, 1.1625, -0.0985, -0.2255, -0.0949, -1.1408, 105.779, 6.854, -42.465)
+transform = Transform3D(-1.1447, 0.0280, 0.2240, 0.0091, 1.1625, -0.0985, -0.2255, -0.0949, -1.1408, 105.779, 3.049, -42.465)
 [node name="FEup103" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_euphorbia")]
-transform = Transform3D(-0.1532, 0.0000, 0.9299, 0.0000, 0.9425, 0.0000, -0.9299, 0.0000, -0.1532, 105.008, 7.530, -44.935)
+transform = Transform3D(-0.1532, 0.0000, 0.9299, 0.0000, 0.9425, 0.0000, -0.9299, 0.0000, -0.1532, 105.008, 3.081, -44.935)
 [node name="FKop104" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.4643, 0.0476, -0.0222, 0.0460, 0.4639, 0.0312, 0.0252, 0.0288, -0.4657, 106.794, 14.213, -64.157)
+transform = Transform3D(-0.4643, 0.0476, -0.0222, 0.0460, 0.4639, 0.0312, 0.0252, 0.0288, -0.4657, 106.794, 9.600, -64.157)
 [node name="FKop105" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.9023, 0.1000, -0.1618, -0.1215, 0.9066, -0.1168, 0.1464, 0.1356, 0.9003, 104.361, 7.511, -45.935)
+transform = Transform3D(0.9023, 0.1000, -0.1618, -0.1215, 0.9066, -0.1168, 0.1464, 0.1356, 0.9003, 104.361, 3.246, -45.935)
 [node name="FKop106" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.5726, -0.0774, -0.5021, -0.1101, 0.7575, 0.0088, 0.4960, 0.0788, -0.5777, 104.072, 7.708, -47.550)
+transform = Transform3D(-0.5726, -0.0774, -0.5021, -0.1101, 0.7575, 0.0088, 0.4960, 0.0788, -0.5777, 104.072, 3.426, -47.550)
 [node name="FAca107" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.5346, 0.0000, 0.0313, 0.0000, 0.5355, 0.0000, -0.0313, 0.0000, -0.5346, 101.139, 13.670, -65.094)
+transform = Transform3D(-0.5346, 0.0000, 0.0313, 0.0000, 0.5355, 0.0000, -0.0313, 0.0000, -0.5346, 101.139, 9.519, -65.094)
 [node name="FKop108" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.3055, 0.0052, -0.7456, -0.0395, 0.8045, 0.0218, 0.7446, 0.0448, -0.3047, 93.724, 8.741, -47.479)
+transform = Transform3D(-0.3055, 0.0052, -0.7456, -0.0395, 0.8045, 0.0218, 0.7446, 0.0448, -0.3047, 93.724, 4.141, -47.479)
 [node name="FKop109" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.4426, -0.0283, -0.8633, 0.0559, 0.9671, -0.0603, 0.8619, -0.0772, -0.4394, 94.582, 8.756, -47.930)
+transform = Transform3D(-0.4426, -0.0283, -0.8633, 0.0559, 0.9671, -0.0603, 0.8619, -0.0772, -0.4394, 94.582, 4.312, -47.930)
 [node name="FKop110" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(-0.1560, 0.1161, -1.0881, 0.1664, 1.0888, 0.0923, 1.0815, -0.1508, -0.1711, 98.176, 7.340, -40.095)
+transform = Transform3D(-0.1560, 0.1161, -1.0881, 0.1664, 1.0888, 0.0923, 1.0815, -0.1508, -0.1711, 98.176, 3.446, -40.095)
 [node name="FDea111" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_dead_tree")]
-transform = Transform3D(0.7425, 0.0000, -0.1090, 0.0000, 0.7505, 0.0000, 0.1090, 0.0000, 0.7425, 96.980, 8.580, -47.147)
+transform = Transform3D(0.7425, 0.0000, -0.1090, 0.0000, 0.7505, 0.0000, 0.1090, 0.0000, 0.7425, 96.980, 4.016, -47.147)
 [node name="FKop112" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.3932, -0.0502, 0.9082, -0.0924, 0.9865, 0.0145, -0.9049, -0.0789, -0.3961, 92.406, 8.736, -46.446)
+transform = Transform3D(-0.3932, -0.0502, 0.9082, -0.0924, 0.9865, 0.0145, -0.9049, -0.0789, -0.3961, 92.406, 4.192, -46.446)
 [node name="FAca113" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.1499, 0.0000, -0.5347, 0.0000, 0.5553, 0.0000, 0.5347, 0.0000, -0.1499, 81.348, 13.413, -60.204)
+transform = Transform3D(-0.1499, 0.0000, -0.5347, 0.0000, 0.5553, 0.0000, 0.5347, 0.0000, -0.1499, 81.348, 10.291, -60.204)
 [node name="FKop114" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.4138, 0.0665, 0.8301, -0.0090, 0.9266, -0.0787, -0.8327, -0.0431, -0.4117, 83.867, 9.409, -20.485)
 [node name="FKop115" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.2865, 0.0852, -0.7747, 0.0095, 0.8250, 0.0942, 0.7793, -0.0414, 0.2836, 83.504, 9.327, -20.357)
 [node name="FAca116" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.4967, 0.0000, 0.1928, 0.0000, 0.5328, 0.0000, -0.1928, 0.0000, -0.4967, 89.352, 8.792, -39.366)
+transform = Transform3D(-0.4967, 0.0000, 0.1928, 0.0000, 0.5328, 0.0000, -0.1928, 0.0000, -0.4967, 89.352, 4.670, -39.366)
 [node name="FKop117" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.7677, 0.0208, -0.1084, 0.0160, 0.7747, 0.0356, 0.1092, 0.0330, -0.7672, 89.379, 9.082, -18.348)
 [node name="FKop118" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
@@ -6241,7 +6241,7 @@ transform = Transform3D(-0.6159, 0.0656, 0.3377, 0.0187, 0.6979, -0.1014, -0.343
 [node name="FAca119" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(0.5576, 0.0000, 0.9125, 0.0000, 1.0694, 0.0000, -0.9125, 0.0000, 0.5576, 86.900, 6.622, -13.970)
 [node name="FKop120" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.4147, 0.0058, -0.2446, -0.0096, 0.4814, -0.0050, 0.2445, 0.0092, 0.4148, 94.073, 9.036, -33.786)
+transform = Transform3D(0.4147, 0.0058, -0.2446, -0.0096, 0.4814, -0.0050, 0.2445, 0.0092, 0.4148, 94.073, 4.100, -33.786)
 [node name="FKop121" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.6989, 0.0415, -0.4418, 0.0105, 0.8255, 0.0610, 0.4436, 0.0459, -0.6975, 99.409, 8.686, -18.302)
 [node name="FKop122" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
@@ -6251,7 +6251,7 @@ transform = Transform3D(0.3499, 0.0074, -0.8304, 0.1229, 0.8907, 0.0598, 0.8213,
 [node name="FEup124" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_euphorbia")]
 transform = Transform3D(-0.3065, 0.0000, -0.9443, 0.0000, 0.9928, 0.0000, 0.9443, 0.0000, -0.3065, 105.616, 7.792, -15.553)
 [node name="FKop125" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(0.1340, 0.0675, -0.4409, 0.0057, 0.4600, 0.0722, 0.4459, -0.0262, 0.1315, 107.371, 7.487, -34.109)
+transform = Transform3D(0.1340, 0.0675, -0.4409, 0.0057, 0.4600, 0.0722, 0.4459, -0.0262, 0.1315, 107.371, 3.092, -34.109)
 [node name="FKop126" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(-0.6849, 0.0893, 0.0056, 0.0876, 0.6778, -0.0997, -0.0184, -0.0982, -0.6834, 110.452, 7.733, -16.449)
 [node name="FKop127" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
@@ -6265,7 +6265,7 @@ transform = Transform3D(0.7287, -0.1083, -0.5472, 0.0115, 0.9030, -0.1633, 0.557
 [node name="FDea131" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_dead_tree")]
 transform = Transform3D(-0.1948, 0.0000, 0.7821, 0.0000, 0.8060, 0.0000, -0.7821, 0.0000, -0.1948, 116.724, 6.160, -14.347)
 [node name="FKop132" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.3821, -0.0395, 0.1718, -0.0328, 0.4189, 0.0233, -0.1732, 0.0078, -0.3834, 118.714, 6.419, -33.593)
+transform = Transform3D(-0.3821, -0.0395, 0.1718, -0.0328, 0.4189, 0.0233, -0.1732, 0.0078, -0.3834, 118.714, 1.667, -33.593)
 [node name="FKop133" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.6173, -0.1082, -0.0091, 0.1084, 0.6124, 0.0773, -0.0045, -0.0777, 0.6219, 127.440, 5.825, -17.993)
 [node name="FKop134" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
@@ -6273,7 +6273,7 @@ transform = Transform3D(0.7894, 0.0347, 0.4290, 0.0452, 0.8845, -0.1548, -0.4280
 [node name="FEup135" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_euphorbia")]
 transform = Transform3D(1.1048, 0.0000, -0.4023, 0.0000, 1.1758, 0.0000, 0.4023, 0.0000, 1.1048, 126.557, 5.799, -16.140)
 [node name="FKop136" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(-0.1403, 0.0208, -0.5767, -0.0580, 0.5900, 0.0353, 0.5741, 0.0647, -0.1373, 125.181, 5.697, -34.315)
+transform = Transform3D(-0.1403, 0.0208, -0.5767, -0.0580, 0.5900, 0.0353, 0.5741, 0.0647, -0.1373, 125.181, 1.351, -34.315)
 [node name="FKop137" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_a")]
 transform = Transform3D(0.6268, 0.0613, -0.1670, -0.0629, 0.6485, 0.0017, 0.1664, 0.0145, 0.6298, 125.831, 6.283, -18.116)
 [node name="FChe138" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
@@ -6303,13 +6303,13 @@ transform = Transform3D(0.9785, 0.0000, -0.2061, 0.0000, 1.0000, 0.0000, 0.2061,
 [node name="FChe150" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
 transform = Transform3D(0.8000, 0.0000, -0.6000, 0.0000, 1.0000, 0.0000, 0.6000, 0.0000, 0.8000, 82.360, 34.149, -117.810)
 [node name="FChe151" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(0.1913, 0.0000, -0.9815, 0.0000, 1.0000, 0.0000, 0.9815, 0.0000, 0.1913, 73.101, 33.119, -105.689)
+transform = Transform3D(0.1913, 0.0000, -0.9815, 0.0000, 1.0000, 0.0000, 0.9815, 0.0000, 0.1913, 73.101, 31.552, -105.689)
 [node name="FChe152" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(-0.5103, 0.0000, -0.8600, 0.0000, 1.0000, 0.0000, 0.8600, 0.0000, -0.5103, 74.357, 32.171, -93.672)
+transform = Transform3D(-0.5103, 0.0000, -0.8600, 0.0000, 1.0000, 0.0000, 0.8600, 0.0000, -0.5103, 74.357, 29.627, -93.672)
 [node name="FChe153" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
 transform = Transform3D(-0.7306, 0.0000, -0.6828, 0.0000, 1.0000, 0.0000, 0.6828, 0.0000, -0.7306, 80.265, 31.288, -85.888)
 [node name="FChe154" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(-0.9734, 0.0000, -0.2293, 0.0000, 1.0000, 0.0000, 0.2293, 0.0000, -0.9734, 92.398, 13.477, -79.574)
+transform = Transform3D(-0.9734, 0.0000, -0.2293, 0.0000, 1.0000, 0.0000, 0.2293, 0.0000, -0.9734, 92.398, 9.119, -79.574)
 [node name="FKop155" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(0.9784, 0.0564, 0.1064, -0.0481, 0.9815, -0.0783, -0.1104, 0.0726, 0.9769, 82.439, 34.382, -122.967)
 [node name="FKop156" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
@@ -6317,9 +6317,9 @@ transform = Transform3D(-0.6707, -0.1064, -0.5303, -0.0343, 0.8515, -0.1275, 0.5
 [node name="FKop157" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(-0.2964, -0.0368, -0.9851, 0.1100, 1.0210, -0.0712, 0.9796, -0.1257, -0.2900, 75.223, 31.291, -87.043)
 [node name="FChe158" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(0.9877, 0.0000, 0.1566, 0.0000, 1.0000, 0.0000, -0.1566, 0.0000, 0.9877, 161.181, 23.948, -92.611)
+transform = Transform3D(0.9877, 0.0000, 0.1566, 0.0000, 1.0000, 0.0000, -0.1566, 0.0000, 0.9877, 161.181, 20.270, -92.611)
 [node name="FChe159" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(0.8704, 0.0000, 0.4923, 0.0000, 1.0000, 0.0000, -0.4923, 0.0000, 0.8704, 170.660, 23.581, -89.441)
+transform = Transform3D(0.8704, 0.0000, 0.4923, 0.0000, 1.0000, 0.0000, -0.4923, 0.0000, 0.8704, 170.660, 21.480, -89.441)
 [node name="FChe160" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
 transform = Transform3D(0.3309, 0.0000, 0.9437, 0.0000, 1.0000, 0.0000, -0.9437, 0.0000, 0.3309, 180.791, 22.898, -78.333)
 [node name="FChe161" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
@@ -6337,25 +6337,25 @@ transform = Transform3D(0.5943, -0.1380, 0.7898, 0.0736, 0.9884, 0.1173, -0.7984
 [node name="FKop167" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
 transform = Transform3D(0.7119, 0.0985, 0.2045, -0.1125, 0.7378, 0.0363, -0.1971, -0.0654, 0.7178, 170.853, 20.390, -49.434)
 [node name="FChe168" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(-0.9985, 0.0000, -0.0552, 0.0000, 1.0000, 0.0000, 0.0552, 0.0000, -0.9985, 102.277, 9.069, -49.124)
+transform = Transform3D(-0.9985, 0.0000, -0.0552, 0.0000, 1.0000, 0.0000, 0.0552, 0.0000, -0.9985, 102.277, 5.400, -49.124)
 [node name="FChe169" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(-0.9622, 0.0000, 0.2722, 0.0000, 1.0000, 0.0000, -0.2722, 0.0000, -0.9622, 96.067, 9.567, -49.343)
+transform = Transform3D(-0.9622, 0.0000, 0.2722, 0.0000, 1.0000, 0.0000, -0.2722, 0.0000, -0.9622, 96.067, 5.772, -49.343)
 [node name="FChe170" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(-0.6621, 0.0000, 0.7495, 0.0000, 1.0000, 0.0000, -0.7495, 0.0000, -0.6621, 89.969, 9.203, -46.693)
+transform = Transform3D(-0.6621, 0.0000, 0.7495, 0.0000, 1.0000, 0.0000, -0.7495, 0.0000, -0.6621, 89.969, 4.569, -46.693)
 [node name="FChe171" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(-0.3851, 0.0000, 0.9229, 0.0000, 1.0000, 0.0000, -0.9229, 0.0000, -0.3851, 87.417, 9.225, -43.388)
+transform = Transform3D(-0.3851, 0.0000, 0.9229, 0.0000, 1.0000, 0.0000, -0.9229, 0.0000, -0.3851, 87.417, 4.989, -43.388)
 [node name="FChe172" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(0.2887, 0.0000, 0.9574, 0.0000, 1.0000, 0.0000, -0.9574, 0.0000, 0.2887, 86.636, 9.035, -39.782)
+transform = Transform3D(0.2887, 0.0000, 0.9574, 0.0000, 1.0000, 0.0000, -0.9574, 0.0000, 0.2887, 86.636, 5.118, -39.782)
 [node name="FChe173" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(0.8425, 0.0000, 0.5387, 0.0000, 1.0000, 0.0000, -0.5387, 0.0000, 0.8425, 89.901, 9.296, -35.574)
+transform = Transform3D(0.8425, 0.0000, 0.5387, 0.0000, 1.0000, 0.0000, -0.5387, 0.0000, 0.8425, 89.901, 4.625, -35.574)
 [node name="FChe174" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_chevron_post")]
-transform = Transform3D(0.9926, 0.0000, 0.1213, 0.0000, 1.0000, 0.0000, -0.1213, 0.0000, 0.9926, 93.842, 9.189, -33.513)
+transform = Transform3D(0.9926, 0.0000, 0.1213, 0.0000, 1.0000, 0.0000, -0.1213, 0.0000, 0.9926, 93.842, 4.141, -33.513)
 [node name="FKop175" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.5571, -0.0689, 0.8259, -0.0233, 0.9961, 0.0673, -0.8284, 0.0183, -0.5573, 95.586, 8.254, -46.121)
+transform = Transform3D(-0.5571, -0.0689, 0.8259, -0.0233, 0.9961, 0.0673, -0.8284, 0.0183, -0.5573, 95.586, 4.070, -46.121)
 [node name="FKop176" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(0.5013, -0.0975, 0.7293, 0.0287, 0.8844, 0.0986, -0.7352, -0.0320, 0.5011, 91.808, 8.126, -39.793)
+transform = Transform3D(0.5013, -0.0975, 0.7293, 0.0287, 0.8844, 0.0986, -0.7352, -0.0320, 0.5011, 91.808, 4.265, -39.793)
 [node name="FKop177" parent="DecorManual/ZoneF_Serpentine" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-0.2627, 0.0001, 0.6530, 0.0691, 0.7000, 0.0277, -0.6494, 0.0744, -0.2613, 90.730, 8.326, -40.096)
+transform = Transform3D(-0.2627, 0.0001, 0.6530, 0.0691, 0.7000, 0.0277, -0.6494, 0.0744, -0.2613, 90.730, 4.443, -40.096)
 [node name="ZoneG_FundulCraterului" type="Node3D" parent="DecorManual"]
 
 
@@ -6393,7 +6393,7 @@ transform = Transform3D(1.2495, 0.0000, 0.0353, 0.0000, 1.2500, 0.0000, -0.0353,
 transform = Transform3D(-0.7141, 0.0000, -0.8367, 0.0000, 1.1000, 0.0000, 0.8367, 0.0000, -0.7141, 112.566, 3.121, 23.752)
 
 [node name="acacia_umbrella_a_012" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.9614, 0.0000, -0.7181, 0.0000, 1.2000, 0.0000, 0.7181, 0.0000, -0.9614, 96.719, 10.316, -36.947)
+transform = Transform3D(-0.9614, 0.0000, -0.7181, 0.0000, 1.2000, 0.0000, 0.7181, 0.0000, -0.9614, 96.719, 3.679, -36.947)
 
 [node name="dead_tree_013" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_dead_tree")]
 transform = Transform3D(-0.9999, 0.0000, -0.0158, 0.0000, 1.0000, 0.0000, 0.0158, 0.0000, -0.9999, 83.639, 9.224, -18.820)
@@ -6715,25 +6715,25 @@ transform = Transform3D(-0.5542, 0.0000, 1.0268, 0.0000, 1.1668, 0.0000, -1.0268
 transform = Transform3D(-1.0837, 0.0000, 0.3843, 0.0000, 1.1498, 0.0000, -0.3843, 0.0000, -1.0837, -22.655, 1.673, 50.640)
 
 [node name="safari_balloon_landed_102" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_balloon_landed")]
-transform = Transform3D(-0.8569, 0.0000, -0.5155, 0.0000, 1.0000, 0.0000, 0.5155, 0.0000, -0.8569, -75.247, 1.702, 57.128)
+transform = Transform3D(-0.8569, 0.0000, -0.5155, 0.0000, 1.0000, 0.0000, 0.5155, 0.0000, -0.8569, -75.247, -2.029, 47.128)
 
 [node name="safari_tent_103" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_tent")]
-transform = Transform3D(0.4536, 0.0000, -0.8912, 0.0000, 1.0000, 0.0000, 0.8912, 0.0000, 0.4536, -68.891, 1.685, 67.566)
+transform = Transform3D(0.4536, 0.0000, -0.8912, 0.0000, 1.0000, 0.0000, 0.8912, 0.0000, 0.4536, -68.891, -2.039, 47.566)
 
 [node name="safari_tent_104" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_safari_tent")]
-transform = Transform3D(-0.7005, 0.0000, -0.6417, 0.0000, 0.9500, 0.0000, 0.6417, 0.0000, -0.7005, -74.918, 1.683, 71.797)
+transform = Transform3D(-0.7005, 0.0000, -0.6417, 0.0000, 0.9500, 0.0000, 0.6417, 0.0000, -0.7005, -74.918, -2.097, 47.797)
 
 [node name="land_rover_105" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_land_rover")]
-transform = Transform3D(-0.3233, 0.0000, -0.9463, 0.0000, 1.0000, 0.0000, 0.9463, 0.0000, -0.3233, -69.498, 1.699, 50.975)
+transform = Transform3D(-0.3233, 0.0000, -0.9463, 0.0000, 1.0000, 0.0000, 0.9463, 0.0000, -0.3233, -69.498, -2.393, 50.975)
 
 [node name="campfire_106" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_campfire")]
-transform = Transform3D(1.0000, 0.0000, 0.0000, 0.0000, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000, -72.107, 1.687, 65.611)
+transform = Transform3D(1.0000, 0.0000, 0.0000, 0.0000, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000, -72.107, -2.061, 47.611)
 
 [node name="acacia_umbrella_b_107" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_b")]
-transform = Transform3D(0.7149, 0.0000, -0.9008, 0.0000, 1.1500, 0.0000, 0.9008, 0.0000, 0.7149, -77.832, 1.699, 76.380)
+transform = Transform3D(0.7149, 0.0000, -0.9008, 0.0000, 1.1500, 0.0000, 0.9008, 0.0000, 0.7149, -77.832, -2.173, 48.380)
 
 [node name="acacia_umbrella_a_108" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.6179, 0.0000, -0.8489, 0.0000, 1.0500, 0.0000, 0.8489, 0.0000, -0.6179, -77.464, 1.721, 48.689)
+transform = Transform3D(-0.6179, 0.0000, -0.8489, 0.0000, 1.0500, 0.0000, 0.8489, 0.0000, -0.6179, -77.464, -2.204, 48.689)
 
 [node name="termite_mound_a_109" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_termite_mound_a")]
 transform = Transform3D(1.2000, 0.0000, 0.0000, 0.0000, 1.2000, 0.0000, 0.0000, 0.0000, 1.2000, -61.606, 1.700, 30.056)
@@ -6748,16 +6748,16 @@ transform = Transform3D(0.1955, 0.0000, -1.1333, 0.0000, 1.1500, 0.0000, 1.1333,
 transform = Transform3D(1.1053, 0.0000, -0.4673, 0.0000, 1.2000, 0.0000, 0.4673, 0.0000, 1.1053, -24.991, 1.668, 53.826)
 
 [node name="kopje_boulder_a_113" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_a")]
-transform = Transform3D(1.2536, 0.0000, -0.3444, 0.0000, 1.3000, 0.0000, 0.3444, 0.0000, 1.2536, -67.051, 1.693, 77.633)
+transform = Transform3D(1.2536, 0.0000, -0.3444, 0.0000, 1.3000, 0.0000, 0.3444, 0.0000, 1.2536, -67.051, -2.036, 47.633)
 
 [node name="kopje_boulder_b_114" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_b")]
-transform = Transform3D(-1.2581, 0.0000, 0.9885, 0.0000, 1.6000, 0.0000, -0.9885, 0.0000, -1.2581, -68.595, 5.574, 89.626)
+transform = Transform3D(-1.2581, 0.0000, 0.9885, 0.0000, 1.6000, 0.0000, -0.9885, 0.0000, -1.2581, -68.595, -2.044, 47.626)
 
 [node name="acacia_umbrella_a_115" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.3678, 0.0000, -1.1422, 0.0000, 1.2000, 0.0000, 1.1422, 0.0000, -0.3678, -56.609, 6.464, 101.089)
+transform = Transform3D(-0.3678, 0.0000, -1.1422, 0.0000, 1.2000, 0.0000, 1.1422, 0.0000, -0.3678, -56.609, -1.553, 73.089)
 
 [node name="kopje_boulder_c_116" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_kopje_boulder_c")]
-transform = Transform3D(1.1096, 0.0000, -0.8537, 0.0000, 1.4000, 0.0000, 0.8537, 0.0000, 1.1096, -48.459, 12.536, 115.983)
+transform = Transform3D(1.1096, 0.0000, -0.8537, 0.0000, 1.4000, 0.0000, 0.8537, 0.0000, 1.1096, -48.459, -1.735, 115.983)
 
 [node name="acacia_umbrella_c_117" parent="DecorManual/ZoneG_FundulCraterului" instance=ExtResource("s_acacia_umbrella_c")]
 transform = Transform3D(0.5165, 0.0000, -0.9142, 0.0000, 1.0500, 0.0000, 0.9142, 0.0000, 0.5165, -35.098, 2.013, 112.543)

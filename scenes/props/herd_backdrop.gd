@@ -141,6 +141,13 @@ func _build() -> void:
 		var yaw := rng.randf_range(-heading_spread, heading_spread)
 		# -Z e „inainte" la mesh-urile din kit; curgerea merge pe +Z local,
 		# deci fata spre +Z inseamna yaw PI.
+		#
+		# PI-ul a fost o vreme si CORECTIA unui asset stramb: gnu-ul si zebra
+		# ieseau din `build_serengeti_animals.py` cu capul spre +Z (coarnele
+		# masurate la z=+0.93), deci turma de pe drum alerga cu spatele iar
+		# fundalul, avand PI in plus, iesea din intamplare corect. Assetul e
+		# reparat la sursa (varfurile se rotesc in builder), deci PI-ul ramane
+		# aici DOAR pentru ce spune comentariul: intoarcerea de la -Z la +Z.
 		var basis := Basis(Vector3.UP, PI + yaw)
 		var scl := rng.randf_range(0.92, 1.08)
 		var xf := Transform3D(basis.scaled(Vector3(scl, scl, scl)),

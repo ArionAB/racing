@@ -860,6 +860,25 @@ static func themes() -> Dictionary:
 			# vad e sub SEA_FOAM_DEPTH (0.6 m), deci era spuma pe tot.
 			"water_foam": 0.0,
 			"water_foam_mix": 0.92,
+			# NAMOLUL NU AVEA NICIO TEXTURA, si de-aia citea ca o pata gri
+			# decupata (verdictul dezvoltatorului la volan, POI G). Tema asta
+			# nu seta nici `water_ripple`, nici `water_facet` — iar
+			# `facet_strength` are implicitul 0 in shader, adica sistemul de
+			# fatete era pur si simplu STINS. Ce ramanea era albedo plat plus
+			# glint, adica exact "linoleum" (aceeasi diagnoza ca la Yangtze,
+			# vezi water_ripple 0.21 de acolo).
+			#
+			# ripple: masca de detaliu (detail_rock.png, deja incarcata ca
+			# `ripple_tex` — zero VRAM in plus) inmulteste culoarea de baza.
+			# 0.30 e peste 0.21 al Yangtze-ului fiindca namolul de vad se vede
+			# de la 10-15 m, nu de la 60: granulatia are voie sa fie mai tare.
+			"water_ripple": 0.30,
+			# fatete: pete mari de valoare cu MUCHII, ce se vede in diorama
+			# cand te uiti la apa mica. Pe namol sunt banci de mal, nu unde.
+			"water_facet": 0.55,
+			"water_facet_count": 7,
+			"water_facet_scale": 0.38,
+			"water_facet_wobble": 0.40,
 			# Vezi _build_sea_far: fara larg deschis, apa e doar albia raului.
 			"sea_far": false,
 			# CRUSTA DE SODA (POI G, brief §2 G / §4): banda de teren ALBA
@@ -10401,6 +10420,29 @@ const SHOULDER_SINK: float = 0.10
 ## in commit-urile de arta, si ruleaza ProbeLaneClear inainte de merge, nu dupa.
 const SHOULDER_MAX_DROP: float = 2.5
 
+## De la ce gol sub marginea exterioara a umarului se coboara o FUSTA verticala
+## pana in teren, si cat intra ea in sol.
+##
+## Plafonul de mai sus lasa banda la 2.5 m sub asfalt; acolo unde terenul e si
+## mai jos, intre ele ramanea AER, iar masina care parasea drumul cadea pe sub
+## umar (Serengeti, serpentinele F: 4.56 m de gol la frac 0.690). Fusta nu
+## schimba forma umarului si nici plafonul — doar inchide golul, ca sa nu mai
+## existe "sub harta". 0.35 m e pragul de la care golul chiar inghite o roata
+## (raza rotii ~0.33, memoria `suprafete-cu-goluri-si-praguri`).
+const SHOULDER_SKIRT_MIN: float = 0.35
+const SHOULDER_SKIRT_BITE: float = 0.6
+## Peste atata cadere fusta NU se mai construieste.
+##
+## Masurat pe Track14: fusta se cere in 200 de puncte, cu maximul 21.05 m la
+## frac 0.518. Un perete de pietris de 21 m nu e un racord, e decorul altcuiva —
+## si e exact zidul pe care il interzice antetul lui SHOULDER_MAX_DROP. Peste
+## plafon, golul e prea mare ca sa fie o treapta: acolo e relief, si se rezolva
+## din teren (sau e o rapa declarata, unde prapastia e chiar subiectul).
+## 6 m acopera serpentinele de pe Serengeti (3.4-4.6 m masurat) cu marja.
+const SHOULDER_SKIRT_MAX: float = 6.0
+## Fusta e in umbra: e un perete vertical sub banda, nu suprafata de rulare.
+const INNER_SHADE_SKIRT := Color(0.58, 0.57, 0.56)
+
 
 ## Cati metri de sosea acopera o repetitie a texturii de umar.
 ##
@@ -10521,6 +10563,51 @@ func _build_shoulders() -> void:
 				road1 - SHOULDER_MAX_DROP, road1)
 			# U-ul urmeaza latimea REALA, altfel textura se intinde exact acolo
 			# unde banda se lateste.
+			# FUSTA: sub marginea exterioara, pana in teren.
+			#
+			# `SHOULDER_MAX_DROP` opreste banda la 2.5 m sub asfalt, ca sa nu
+			# devina perdea verticala de zeci de metri (vezi antetul lui). Dar
+			# acolo unde terenul chiar e mai jos de atat, ce ramanea era o buza
+			# de pietris ATARNATA, cu aer sub ea: masurat pe Serengeti F, la
+			# frac 0.690 marginea statea la y=6.86 cu solul la 2.30, deci 4.56 m
+			# de gol. Masina care iesea de pe drum trecea PE SUB umar si ajungea
+			# sub harta (raportat de dezvoltator: "daca cazi de pe o serpentina
+			# pe alta cazi sub drum"). Terenul era acolo — lipsea peretele care
+			# leaga banda de el.
+			# PLAFONATA, si asta nu e cosmetica: masurat pe toata pista, fusta
+			# se cere in 200 de puncte, iar cea mai adanca cadere e 21.05 m la
+			# frac 0.518. O perdea de pietris de 21 m e chiar greseala pe care o
+			# descrie antetul lui SHOULDER_MAX_DROP (zidul de 38 m de pe
+			# Cappadocia): acolo unde terenul e ATAT de jos, golul nu mai e
+			# treaba umarului — e o rapa, si se rezolva din teren.
+			# Fusta inchide doar treapta mica, aia in care chiar pica o roata.
+			var skirt0 := _terrain_mesh_y(outer0.x, outer0.z) - SHOULDER_SINK
+			var skirt1 := _terrain_mesh_y(outer1.x, outer1.z) - SHOULDER_SINK
+			var drop0 := outer0.y - skirt0
+			var drop1 := outer1.y - skirt1
+			var need_skirt := (drop0 > SHOULDER_SKIRT_MIN or drop1 > SHOULDER_SKIRT_MIN) \
+				and maxf(drop0, drop1) <= SHOULDER_SKIRT_MAX
+			if need_skirt:
+				# Coboara pana in teren, cu o palma in plus ca sa intre in el
+				# (aceeasi idee ca SHOULDER_SINK: doua suprafete care se
+				# intersecteaza nu lasa treapta).
+				var d0 := Vector3(outer0.x, minf(skirt0, outer0.y) - SHOULDER_SKIRT_BITE, outer0.z)
+				var d1 := Vector3(outer1.x, minf(skirt1, outer1.y) - SHOULDER_SKIRT_BITE, outer1.z)
+				var sc := INNER_SHADE_SKIRT
+				if side_sign < 0.0:
+					st.set_color(sc); st.set_uv(Vector2(0, v0)); st.add_vertex(outer0)
+					st.set_color(sc); st.set_uv(Vector2(1, v0)); st.add_vertex(d0)
+					st.set_color(sc); st.set_uv(Vector2(0, v1)); st.add_vertex(outer1)
+					st.set_color(sc); st.set_uv(Vector2(1, v0)); st.add_vertex(d0)
+					st.set_color(sc); st.set_uv(Vector2(1, v1)); st.add_vertex(d1)
+					st.set_color(sc); st.set_uv(Vector2(0, v1)); st.add_vertex(outer1)
+				else:
+					st.set_color(sc); st.set_uv(Vector2(0, v0)); st.add_vertex(outer0)
+					st.set_color(sc); st.set_uv(Vector2(0, v1)); st.add_vertex(outer1)
+					st.set_color(sc); st.set_uv(Vector2(1, v0)); st.add_vertex(d0)
+					st.set_color(sc); st.set_uv(Vector2(1, v0)); st.add_vertex(d0)
+					st.set_color(sc); st.set_uv(Vector2(0, v1)); st.add_vertex(outer1)
+					st.set_color(sc); st.set_uv(Vector2(1, v1)); st.add_vertex(d1)
 			var u_shoulder := maxf(w0, w1) / tile
 			# Gradient de vertex color: mai INCHIS la contactul cu asfaltul
 			# (praful batatorit de lansat rotile), plin spre nisip. Face umarul

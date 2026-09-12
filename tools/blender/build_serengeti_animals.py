@@ -113,7 +113,14 @@ def import_static(path, name, slots, target_length, target_tris, ao_floor=0.78):
     mesh.select_set(True)
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-    # orientare: lungimea pe Y, capul spre +Y
+    # orientare: lungimea pe Y, capul spre +Y (= -Z in Godot, vezi antetul).
+    #
+    # ATENTIE, rotatia asta NU poate corecta un 180. `ang` iese din
+    # `atan2(d.y, d.x)`, iar pe pack-ul Ultimate vectorul coada->cap e chiar
+    # (0, -6.28): ang = -180 grade, si atunci `-ang` si `+ang` sunt ACEEASI
+    # rotatie. Deci pentru sursele deja aliniate pe Y linia de mai jos e un
+    # no-op, si capul ramane pe partea pe care l-a adus pack-ul. Corectia de
+    # sens se face mai jos, DUPA ce stim unde au cazut piesele de cap.
     d = head_w - tail_w
     ang = math.atan2(d.y, d.x) - math.pi * 0.5
     mesh.rotation_euler = (0.0, 0.0, -ang)
@@ -140,6 +147,75 @@ def import_static(path, name, slots, target_length, target_tris, ao_floor=0.78):
         mod = mesh.modifiers.new("Decimate", "DECIMATE")
         mod.ratio = ratio
         bpy.ops.object.modifier_apply(modifier=mod.name)
+    # SENSUL, pe GEOMETRIA finala si pe SLOTURILE de cap.
+    #
+    # De ce nu pe oase: `head_w`/`tail_w` se citesc INAINTE de rotatie si de
+    # `transform_apply`, deci nu mai descriu mesh-ul de la finalul functiei.
+    # Masurat: vectorul lor rotit iesea +6.28 (deci "cap pe +Y"), in timp ce
+    # coarnele mesh-ului cadeau la y=-0.93. Iar rotatia de mai sus nu poate
+    # repara un 180 (ang = -180 => -ang == +ang), deci sursele deja aliniate pe
+    # Y treceau neatinse, cu capul in partea in care le-a adus pack-ul.
+    # Sloturile de cap sunt singurul martor care nu minte: coarnele si ochii
+    # exista DOAR in cap (o euristica de "masa sus" cade pe coada, capcana
+    # documentata in build_cow_animated.py).
+    # Martorul e MATERIALUL SURSEI, nu UV-ul: UV-urile pe sloturi se scriu abia
+    # mai jos (dupa blocul asta), deci aici `uv_layers.active` e inca None —
+    # prima varianta a crapat exact asa. Materialele sunt insa intacte pana la
+    # `me.materials.clear()`, si numele lor e cheia din `slots`.
+    # SE CITESTE `v.co` BRUT, NU `matrix_world @ v.co`. Masurat cu o sonda pe
+    # un cub: dupa `rotation_euler = pi` SI dupa `transform_apply(rotation)`,
+    # `matrix_world @ co` intoarce tot valoarea VECHE (+2.000 la toate cele trei
+    # citiri), in timp ce `co` brut se schimba exact la transform_apply
+    # (0.000 -> +2.000). `transform_apply` COACE rotatia in varfuri si lasa
+    # matricea identitate — deci martorul e geometria, nu matricea.
+    # Fara asta, corectia de mai jos se masura pe o valoare invechita: se
+    # intorcea cand nu trebuia si raporta -0.957 acolo unde geometria avea
+    # -0.935 (doua runde pierdute pe un 180 care se plimba).
+    head_mats = {i for i, mat in enumerate(mesh.data.materials)
+                 if mat.name.split(".")[0]
+                 in ("Horns", "Eye_Black", "Eye_White", "Muzzle")}
+    me_o = mesh.data
+    ys, cnt = 0.0, 0
+    if head_mats:
+        for poly in me_o.polygons:
+            if poly.material_index not in head_mats:
+                continue
+            for li in poly.loop_indices:
+                ys += me_o.vertices[me_o.loops[li].vertex_index].co.y
+                cnt += 1
+    else:
+        # ZEBRA: n-are slot doar-de-cap (doar Black/White), deci martorul e
+        # GATUL — varfurile cele mai INALTE. La zebra gatul chiar e punctul
+        # cel mai de sus (masurat: ymax 1.53 la cap fata de 1.10 la crupa),
+        # spre deosebire de vaca, unde coada e mai sus decat capul. Fara
+        # ramura asta, `head_mats` iesea gol si zebra NU primea corectia —
+        # gnu-ul se repara, zebra ramanea cu spatele.
+        zs = [v.co.z for v in me_o.vertices]
+        z_top = max(zs) - (max(zs) - min(zs)) * 0.12
+        for v in me_o.vertices:
+            if v.co.z >= z_top:
+                ys += v.co.y
+                cnt += 1
+    # Corectia e COMUNA celor doua masuratori (gnu pe sloturi, zebra pe gat).
+    # Prima varianta o lasase din greseala in ramura `else`, deci gnu-ul masura
+    # si nu se mai intorcea niciodata — trecuse o data la +0.933 si a recazut la
+    # -0.933 la editarea urmatoare, fara ca nimic din logica sa se schimbe.
+    if cnt and ys / cnt < 0.0:
+        # SE ROTESC VARFURILE, nu obiectul. `bpy.ops.object.transform_apply`
+        # intoarce {'FINISHED'} si NU schimba nimic in modul asta
+        # (--background --factory-startup): masurat pe acest mesh, cu
+        # context garantat (active=W, selected, mode=OBJECT), coarnele au
+        # ramas la y=-0.929 inainte si dupa apel, cu rotation_euler revenit
+        # la zero. Rotind direct `v.co`, aceleasi coarne trec la +0.929.
+        # Cinci runde de "intors semnul" au dat cifre identice la trei
+        # zecimale exact din cauza asta (memoria `sonda-masura-alt-obiect`:
+        # cifra identica la bit inseamna mecanism neconectat).
+        rot = Matrix.Rotation(math.pi, 4, "Z")
+        for v in me_o.vertices:
+            v.co = rot @ v.co
+        me_o.update()
+        print("  orientare: capul era spre -Y (y=%+.3f), am intors varfurile cu pi"
+              % (ys / cnt))
     print("  %s: %d -> %d tris (sursa %s)" % (name, before, tri_count(mesh), path.split("\\")[-1]))
 
     # UV-uri pe sloturi dupa materialul sursa
@@ -397,6 +473,36 @@ def build_crocodile():
     return b.to_object("Crocodile")
 
 
+
+# --------------------------------------------------------------- garda de sens
+
+## Capul TREBUIE sa iasa pe +Y in Blender (= -Z in Godot, verificat cu un marker
+## exportat: Blender +Y -> Godot -Z). Se masoara pe SLOTURILE care exista doar
+## in cap, nu pe masa de sus: la gnu coada e ridicata aproape cat greabanul,
+## deci orice euristica de "masa sus" cade pe coada (capcana documentata si in
+## build_cow_animated.py). Sloturi de cap: coarne (SAND_LIGHT) si ochi
+## (ASPHALT / FOAM_WHITE) la gnu; la zebra nu exista slot doar-de-cap, deci se
+## verifica pe BOT (VOLCANIC_BLACK sub mediana) — vezi apelul.
+def assert_head_plus_y(obj, head_slots, label):
+    me = obj.data
+    uv = me.uv_layers.active.data
+    ys, n = 0.0, 0
+    for poly in me.polygons:
+        slot = int(round(uv[poly.loop_indices[0]].uv[0] * SLOTS - 0.5))
+        if slot not in head_slots:
+            continue
+        for li in poly.loop_indices:
+            # `co` brut, nu `matrix_world @ co` — vezi nota din import_static:
+            # matricea nu se actualizeaza nici dupa transform_apply.
+            ys += me.vertices[me.loops[li].vertex_index].co.y
+            n += 1
+    assert n, "%s: niciun varf pe sloturile de cap %s" % (label, head_slots)
+    y = ys / n
+    print("  %s: piesele de cap la y=%+.3f (trebuie > 0)" % (label, y))
+    assert y > 0.0, ("%s: capul a iesit pe -Y (deci +Z in Godot, turma merge cu "
+                     "spatele): y=%.3f" % (label, y))
+
+
 results = []
 
 
@@ -408,9 +514,22 @@ def emit(obj, path, ao, origin="base", bevel=0.02, objs=None):
 
 clear_built()
 gnu = build_wildebeest()
+assert_head_plus_y(gnu, {SAND_LIGHT, ASPHALT}, "wildebeest")
 _, sz = export_glb([gnu], "serengeti/animals/wildebeest.glb")
 results.append(("animals/wildebeest.glb", tri_count(gnu), sz / 1024.0))
 zeb = build_zebra()
+# Zebra n-are slot doar-de-cap: are doar alb si negru. Capul se recunoaste pe
+# GATUL ridicat — varfurile cele mai INALTE ale zebrei sunt coama/gat, si ele
+# stau spre cap.
+_zme = zeb.data
+# `co` brut (vezi nota din import_static): matrix_world nu reflecta rotatiile
+# deja coapte in varfuri.
+_ztop = [v.co for v in _zme.vertices]
+_zz = max(v.z for v in _ztop)
+_zhead = [v for v in _ztop if v.z >= _zz - 0.25]
+_zy = sum(v.y for v in _zhead) / len(_zhead)
+print("  zebra: gatul (varfuri sus) la y=%+.3f (trebuie > 0)" % _zy)
+assert _zy > 0.0, "zebra: capul a iesit pe -Y (deci +Z in Godot): y=%.3f" % _zy
 _, sz = export_glb([zeb], "serengeti/animals/zebra.glb")
 results.append(("animals/zebra.glb", tri_count(zeb), sz / 1024.0))
 

@@ -41,6 +41,9 @@ PACK_ULTIMATE = (r"D:\GameDev\downloaded assets"
                  r"\Ultimate Animated Animals - July 2021\glTF\Bull.gltf")
 PACK_HIPPO = r"D:\GameDev\downloaded assets\low_poly_hippo\low_poly_hippo.glb"
 PACK_FARM = r"D:\GameDev\downloaded assets\Farm Animal Pack-glb\Zebra.glb"
+PACK_ELEPHANT = (r"D:\GameDev\downloaded assets\191 animals pack\assets\models"
+                  r"\african-elephant_ba7f1b66-218e-4b28-8e8c-2cbf68512f04"
+                  r"\african-elephant-character-low-poly_2K_ff8635e6-1c58-49ae-b3cd-e608613f8b46.blend")
 
 AO_ANIMAL = dict(samples=20, dist=2.0, gradient="vertical",
                  low=0.46, high=1.00, power=0.9, floor=0.18)
@@ -289,80 +292,219 @@ def build_zebra():
 # --------------------------------------------------------------------- elefantul
 
 def elephant_mesh():
-    b = Builder()
-    # corp
-    b.boulder((0.0, 0.0, 2.15), (2.3, 3.7, 2.3), GREY, seed=501, segments=9, rings=5, deviation=0.05)
-    # cap + frunte bombata
-    b.boulder((0.0, 2.25, 2.55), (1.6, 1.6, 1.7), GREY, seed=507, segments=8, rings=4, deviation=0.05)
-    # trompa in doua bucati (doua oase)
-    b.taper_sweep([Vector((0, 2.95, 2.15)), Vector((0, 3.35, 1.55)), Vector((0, 3.45, 1.15))],
-                  [0.30, 0.24, 0.20], GREY, segments=7)
-    b.taper_sweep([Vector((0, 3.45, 1.15)), Vector((0, 3.40, 0.60)), Vector((0, 3.25, 0.12))],
-                  [0.20, 0.16, 0.12], GREY, segments=6)
-    # urechi: lamele mari, aproape verticale, in spatele ochilor
-    for sx in (-1.0, 1.0):
-        b.blade([Vector((sx * 0.72, 2.05, 2.75)), Vector((sx * 1.45, 1.95, 2.6)), Vector((sx * 1.7, 1.8, 1.9))],
-                [0.9, 1.3, 0.6], 0.08, GREY_SH, up=(0, 0, 1))
-    # fildesi
-    for sx in (-1.0, 1.0):
-        b.taper_sweep([Vector((sx * 0.38, 2.9, 1.85)), Vector((sx * 0.45, 3.6, 1.55)), Vector((sx * 0.42, 4.15, 1.75))],
-                      [0.12, 0.09, 0.03], IVORY, segments=5)
-    # picioare: coloane
-    for sx in (-0.7, 0.7):
-        for sy in (1.15, -1.2):
-            b.cylinder((sx, sy, 0.78), 0.36 if sy > 0 else 0.33, 1.56, GREY, segments=7)
-            b.cylinder((sx, sy, 0.10), 0.40 if sy > 0 else 0.37, 0.20, GREY_SH, segments=7)
-    # coada
-    b.taper_sweep([Vector((0, -1.85, 2.3)), Vector((0, -2.15, 1.6)), Vector((0, -2.2, 1.0))],
-                  [0.07, 0.05, 0.08], GREY_SH, segments=4)
-    return b.to_object("Elephant_Mesh")
+    """Geometria elefantului: mesh IMPORTAT (pachetul "191 animals pack",
+    low-poly, Z-up ca Blender, capul deja pe +Y), nu Builder.
+
+    Inlocuieste boulder-ele procedurale (silueta veche citea a bolovan pe
+    picioare, nu a elefant — acelasi verdict care a scos hipopotamul din
+    `rock`/`boulder`, vezi build_hippo). Sursa e un mesh STATIC fara schelet
+    (1143 verts, 2272 tri, un singur material cu textura bitmap 2K) — rig-ul
+    ramane cel din `elephant_rig`, scris peste geometria asta prin clasificare
+    pe pozitie (nu pe insule Builder: mesh-ul e continuu, sudat la export).
+    """
+    _wipe()
+    with bpy.data.libraries.load(PACK_ELEPHANT, link=False) as (data_from, data_to):
+        data_to.objects = [n for n in data_from.objects]
+    for o in data_to.objects:
+        if o is not None:
+            bpy.context.collection.objects.link(o)
+    meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+    assert len(meshes) == 1, "asteptam 1 mesh: %r" % [m.name for m in meshes]
+    mesh = meshes[0]
+    mesh.name = "Elephant_Mesh"
+    bpy.context.view_layer.objects.active = mesh
+    mesh.select_set(True)
+    for m in list(mesh.modifiers):
+        mesh.modifiers.remove(m)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    # Capul e deja spre +Y (masurat: y in [-1.98, +3.65], asimetric spre +Y,
+    # confirmat vizual din preview -- vezi antetul). Doar scara si originea
+    # raman de facut, ca la orice import static.
+    me = mesh.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.002)
+    bm.to_mesh(me)
+    bm.free()
+    before = tri_count(mesh)
+    target_tris = 1100
+    ratio = min(1.0, target_tris / float(max(before, 1)))
+    if ratio < 0.98:
+        mod = mesh.modifiers.new("Decimate", "DECIMATE")
+        mod.ratio = ratio
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    print("  elephant import: %d -> %d tris" % (before, tri_count(mesh)))
+
+    # Scara: pastram gabaritul vechi (lungime bot-coada ~6,35 m, masurata pe
+    # boulder-ele inlocuite) ca sa nu schimbam contractul cu Track14 (spatiere
+    # in DecorManual, coliziunea din world_prop).
+    lo, hi = _world_bbox([mesh])
+    target_length = 6.2
+    s = target_length / (hi.y - lo.y)
+    mesh.scale = (s, s, s)
+    bpy.ops.object.transform_apply(scale=True)
+    lo, hi = _world_bbox([mesh])
+    mesh.location -= Vector(((lo.x + hi.x) * 0.5, 0.0, lo.z))
+    bpy.ops.object.transform_apply(location=True)
+
+    # Sloturi de paleta: fildesii sunt geometria subtire, aproape de axa X=0,
+    # care iese cel mai departe pe +Y la inaltime mica (langa trompa); labele
+    # sunt jos SI laterale (|x|>0.35) — restul corpului/urechilor/picioarelor
+    # ramane pe GREY.
+    #
+    # Prima varianta punea GREY_SH pe orice fata sub un prag de Z absolut,
+    # fara sa ceara si lateralitate: pe langa labe a prins si burta/coada, la
+    # aceeasi inaltime joasa dar aproape de axa X=0, si a iesit o banda
+    # zimtata pe tot spatele in preview (masurat: 90 de fete GREY_SH cu x
+    # intre -0.09 si +0.09 la y intre -1.6 si +3.35 — adica linia de mijloc a
+    # corpului, nu labele).
+    lo, hi = _world_bbox([mesh])
+    y_head = hi.y - (hi.y - lo.y) * 0.18   # ultimii 18% din lungime = zona trompei/fildesilor
+    z_low = lo.z + (hi.z - lo.z) * 0.12    # sub genunchi = labe
+    # UV-uri pe sloturi, scrise direct (fara `finish()`: mesh-ul se articuleaza
+    # pe schelet, deci nu trece prin bevel/bake_ao — vezi nota din antet si
+    # reteta vacii in `asset-animat-pipeline`).
+    while me.uv_layers:
+        me.uv_layers.remove(me.uv_layers[0])
+    uv = me.uv_layers.new(name="UVMap")
+    for poly in me.polygons:
+        cy = sum(me.vertices[me.loops[li].vertex_index].co.y for li in poly.loop_indices) / len(poly.loop_indices)
+        cx = sum(me.vertices[me.loops[li].vertex_index].co.x for li in poly.loop_indices) / len(poly.loop_indices)
+        cz = sum(me.vertices[me.loops[li].vertex_index].co.z for li in poly.loop_indices) / len(poly.loop_indices)
+        if cy > y_head and abs(cx) < 0.35:
+            slot = IVORY
+        elif cz < z_low and abs(cx) > 0.35:
+            slot = GREY_SH
+        else:
+            slot = GREY
+        u = slot_u(slot)
+        for li in poly.loop_indices:
+            uv.data[li].uv = (u, 0.5)
+
+    # AO gradient vertical (fara raycast — mesh-ul o sa se articuleze pe
+    # schelet, un AO copt ar ramane lipit de blana cand oasele se misca).
+    for layer in list(me.color_attributes):
+        me.color_attributes.remove(layer)
+    ao = me.color_attributes.new(name="AO", type="FLOAT_COLOR", domain="CORNER")
+    lo, hi = _world_bbox([mesh])
+    for poly in me.polygons:
+        for li in poly.loop_indices:
+            z = me.vertices[me.loops[li].vertex_index].co.z
+            t = max(0.0, min(1.0, (z - lo.z) / max(hi.z - lo.z, 1e-6)))
+            v = 0.42 + (1.0 - 0.42) * t
+            ao.data[li].color = (v, v, v, 1.0)
+    me.color_attributes.active_color = ao
+    me.materials.clear()
+    me.materials.append(atlas_material())
+    apply_smooth(mesh, 55.0)
+    print("  elephant gabarit: %.2f x %.2f x %.2f m" % (hi.x - lo.x, hi.y - lo.y, hi.z - lo.z))
+    return mesh
 
 
-def elephant_rig(obj, shift):
-    def P(x, y, z):
-        return Vector((x, y, z)) + shift
+def elephant_rig(obj):
+    """Schelet peste mesh-ul IMPORTAT (sudat, o singura insula) — spre
+    deosebire de reteta testoasei, aici `mesh_islands` nu ajuta (nu exista
+    piese separate de Builder). Fiecare VERTEX e clasificat direct pe
+    pozitia lui in bbox-ul mesh-ului (masurat dupa scalare/origine din
+    `elephant_mesh`: X centrat in [-2.0, 2.0], Y in [-2.2, 4.0] cu coada pe
+    -Y si trompa pe +Y, Z de la baza 0 pana la varful capului ~4.6 m).
+    Greutatea ramane RIGIDA (un elefant de jucarie nu se indoaie): fiecare
+    vertex cade intr-un singur os, fara ramp intre zone — mesh-ul continuu nu
+    are muchia naturala de insula care sa ascunda o tranzitie brusca, si o
+    tranzitie vazuta e mai putin rea decat un poligon rupt intre doua oase.
+    """
+    me = obj.data
+    lo, hi = _world_bbox([obj])
+    sy, sz = hi.y - lo.y, hi.z - lo.z
+    y_tail, y_headstart, y_trunk1, y_trunk2 = (lo.y + sy * 0.12, lo.y + sy * 0.62,
+                                                lo.y + sy * 0.82, lo.y + sy * 0.93)
+    z_knee = lo.z + sz * 0.34
+    x_ear = 0.55
+
     bones = [
-        dict(name="Body", head=P(0, -1.0, 2.15), tail=P(0, 1.0, 2.15)),
-        dict(name="Head", head=P(0, 1.55, 2.5), tail=P(0, 2.9, 2.4), parent="Body"),
-        dict(name="Trunk1", head=P(0, 2.95, 2.15), tail=P(0, 3.45, 1.15), parent="Head"),
-        dict(name="Trunk2", head=P(0, 3.45, 1.15), tail=P(0, 3.25, 0.12), parent="Trunk1"),
-        dict(name="Tail", head=P(0, -1.85, 2.3), tail=P(0, -2.2, 1.0), parent="Body"),
+        dict(name="Body", head=(0, lo.y + sy * 0.30, lo.z + sz * 0.55),
+             tail=(0, lo.y + sy * 0.62, lo.z + sz * 0.55)),
+        dict(name="Head", head=(0, y_headstart, lo.z + sz * 0.62),
+             tail=(0, y_trunk1, lo.z + sz * 0.55), parent="Body"),
+        dict(name="Trunk1", head=(0, y_trunk1, lo.z + sz * 0.50),
+             tail=(0, y_trunk2, lo.z + sz * 0.28), parent="Head"),
+        dict(name="Trunk2", head=(0, y_trunk2, lo.z + sz * 0.28),
+             tail=(0, hi.y, lo.z + sz * 0.03), parent="Trunk1"),
+        dict(name="Tail", head=(0, lo.y + sy * 0.05, lo.z + sz * 0.55),
+             tail=(0, lo.y, lo.z + sz * 0.22), parent="Body"),
     ]
     for sx, side in ((-1.0, "L"), (1.0, "R")):
-        bones.append(dict(name="Ear" + side, head=P(sx * 0.7, 2.05, 2.75), tail=P(sx * 1.7, 1.8, 1.9), parent="Head"))
-        bones.append(dict(name="LegF" + side, head=P(sx * 0.7, 1.15, 1.6), tail=P(sx * 0.7, 1.15, 0.0), parent="Body"))
-        bones.append(dict(name="LegR" + side, head=P(sx * 0.7, -1.2, 1.6), tail=P(sx * 0.7, -1.2, 0.0), parent="Body"))
+        bones.append(dict(name="Ear" + side, head=(sx * 0.5, y_headstart + sy * 0.06, lo.z + sz * 0.68),
+                          tail=(sx * x_ear * 3.2, y_headstart, lo.z + sz * 0.48), parent="Head"))
+        bones.append(dict(name="LegF" + side, head=(sx * 0.75, lo.y + sy * 0.83, z_knee + sz * 0.10),
+                          tail=(sx * 0.75, lo.y + sy * 0.83, lo.z), parent="Body"))
+        bones.append(dict(name="LegR" + side, head=(sx * 0.75, lo.y + sy * 0.42, z_knee + sz * 0.10),
+                          tail=(sx * 0.75, lo.y + sy * 0.42, lo.z), parent="Body"))
     arm = make_armature("Elephant", bones, mesh=obj)
+
+    # Picioarele NU se recunosc doar pe |x| lateral: piciorul din fata e mai
+    # aproape de axa centrala decat cel din spate (masurat: x intre 0.1 si
+    # 0.9 la orice z, de la laba pana la umar), deci un prag fix de |x| il
+    # taia pe la mijloc — jumatatea cu |x| mic cadea pe Trunk/Head si se
+    # smucea cu -55 grade la Trumpet, rupta vizibil de restul labei.
+    #
+    # Fereastra corecta e pe Y: picioarele ocupa DOUA clustere Y departate
+    # (masurat: spate in [0.02, 0.90], fata in [2.67, 3.39]) care nu se
+    # suprapun cu NIMIC altceva la acelasi Y (corpul central e intre ele,
+    # capul/trompa incep dupa). In fereastra de Y a unui picior, tot ce nu e
+    # coada (z mica langa axa) apartine piciorului — deci testul e pe Y
+    # dintai, cu Z doar ca sa desparta laba (jos) de umar (sus, ramane Body).
+    y_back_lo, y_back_hi = y_tail, lo.y + sy * 0.50
+    y_front_lo, y_front_hi = lo.y + sy * 0.58, lo.y + sy * 0.90
+
+    def leg_at(y_lo, y_hi, prefix):
+        def test(x, y, z):
+            if not (y_lo <= y <= y_hi):
+                return None
+            if z >= z_knee:
+                return None  # umarul/soldul: ramane Body
+            return prefix + ("L" if x < 0 else "R")
+        return test
+
+    leg_tests = [leg_at(y_back_lo, y_back_hi, "LegR"), leg_at(y_front_lo, y_front_hi, "LegF")]
+
+    def classify(co):
+        x, y, z = co.x, co.y, co.z
+        for test in leg_tests:
+            name = test(x, y, z)
+            if name:
+                return name
+        # Trompa e ingusta (aproape de X=0) — fara conditia asta, umarul lat
+        # din fata (|x| mare, y in zona trompei) intra pe Trunk1/Trunk2.
+        if abs(x) < 0.35:
+            if y >= y_trunk2:
+                return "Trunk2"
+            if y >= y_trunk1:
+                return "Trunk1"
+        if y >= y_headstart:
+            if abs(x) > x_ear and z > lo.z + sz * 0.40:
+                return "EarL" if x < 0 else "EarR"
+            # Capul e la fel de ingust ca urechea (x_ear): geometria mai
+            # lata din aceeasi banda de Y e umar/corp care se largeste spre
+            # picior, nu cap — ramasa pe Head se smucea cu Trumpet (masurat:
+            # x pana la 1.16 la z=1.7-1.9, in plina zona de tranzitie umar).
+            if abs(x) < x_ear:
+                return "Head"
+        if y <= y_tail:
+            return "Tail"
+        return "Body"
+
     counts = {}
-    for island in mesh_islands(obj):
-        lo, hi = island_bbox(obj, island)
-        c = (lo + hi) * 0.5 - shift
-        size = hi - lo
-        if c.z < 1.7 and abs(c.y) < 1.6 and abs(c.x) > 0.3:
-            name = "Leg" + ("F" if c.y > 0 else "R") + ("L" if c.x < 0 else "R")
-        elif abs(c.x) > 0.7 and c.y > 1.4:
-            name = "Ear" + ("L" if c.x < 0 else "R")
-        elif c.y > 2.9 and c.z < 1.0:
-            name = "Trunk2"
-        elif c.y > 2.9 and abs(c.x) < 0.2 and c.z < 1.9:
-            name = "Trunk1"
-        elif c.y < -1.5:
-            name = "Tail"
-        elif c.y > 1.4:
-            name = "Head"
-        else:
-            name = "Body"
-        # greutate RIGIDA pe os (un elefant de jucarie nu se indoaie): value
-        # constant 1 peste prag; `None` e permis doar cand osul e chiar radacina.
-        if name == "Body":
-            weight_ramp(obj, island, "Body", "Body", None, 0.0, 1.0)
-        else:
-            weight_ramp(obj, island, name, "Body", lambda co: 1.0, 0.0, 0.5)
+    for v in me.vertices:
+        name = classify(v.co)
         counts[name] = counts.get(name, 0) + 1
+        weight_ramp(obj, [v.index], name, "Body", (lambda c: 1.0) if name != "Body" else None,
+                    0.0, 0.5 if name != "Body" else 1.0)
     expect = {"Body", "Head", "Trunk1", "Trunk2", "Tail", "EarL", "EarR",
               "LegFL", "LegFR", "LegRL", "LegRR"}
     assert set(counts) == expect, "piese nerecunoscute/lipsa: %r" % counts
-    print("  insule pe oase:", counts)
+    print("  varfuri pe oase:", counts)
     return arm
 
 
@@ -430,15 +572,11 @@ def elephant_animate(arm):
 
 def build_elephant():
     obj = elephant_mesh()
-    lo0, hi0 = island_bbox(obj, range(len(obj.data.vertices)))
-    stats = finish(obj, bevel=0.03, origin="base", ao=AO_BIG)
-    lo1, hi1 = island_bbox(obj, range(len(obj.data.vertices)))
-    shift = Vector((((lo1 + hi1) - (lo0 + hi0)).x * 0.5, ((lo1 + hi1) - (lo0 + hi0)).y * 0.5, lo1.z - lo0.z))
-    arm = elephant_rig(obj, shift)
+    arm = elephant_rig(obj)
     elephant_animate(arm)
     bpy.context.view_layer.update()
     d = obj.dimensions
-    print("  elephant: %d tris, %.2f lat x %.2f lung x %.2f inalt" % (stats["tris"], d.x, d.y, d.z))
+    print("  elephant: %d tris, %.2f lat x %.2f lung x %.2f inalt" % (tri_count(obj), d.x, d.y, d.z))
     return arm, obj
 
 

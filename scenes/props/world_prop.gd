@@ -261,6 +261,16 @@ const SPLIT_MODELS := {
 	# (clasa triplanara) ar fi sters-o; ruptura o lasa pe atlas, ca la case.
 	# Bolovanii si kopje-ul-rampa sunt pe [3, 4, 29] curat: nu se rup.
 	"kopje_camp": true,
+	# Boma masai: nodul `Maasai_Boma` (colibele) e 36.6% LUT (slot 2), 43.5%
+	# PAIE (slot 13) si 19.8% usa (slot 4) — masurat cu probe_slots.gd pe GLB-ul
+	# re-exportat. `termite_clay` pus pe tot nodul cadea si peste paie: masurat,
+	# dala aterizeaza pe (189.7, 116.2, 74.3), deci paiele (#AF9F4E, luminanta
+	# 157) se INCHIDEAU la 129 (-18%) si se mutau din ocru-galben in caramiziu
+	# de lut, iar usa (#67421F, luminanta 71) se DESCHIDEA la 129 (+81%).
+	# Adica exact acoperisurile reclamate ca plate isi pierdeau si culoarea.
+	# Ruptura lasa pe corp doar lutul; paiele si usa pleaca in `_Accente` si
+	# raman pe atlas. Zero materiale in plus.
+	"maasai_boma": true,
 	"crater_gap": true,
 	# Orizontul: Lengai are varful alb (22) pe [2, 22, 29], peretele opus are
 	# padurea de pe creasta (12, 21) pe [3, 12, 21]. Aceeasi ruptura, ca
@@ -342,6 +352,11 @@ const ACCENT_SPLIT := {
 	# trece in `_Accente` si ramane pe atlas. Corpul ia granitul din
 	# CLASSES_BY_MODEL.
 	"Kopje_Camp": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	# Boma masai: lista e ce RAMANE in corp, adica doar LUTUL peretilor
+	# (SAND_SHADOW 2, 36.6% din vertecsi, y 0.00..1.70). Paiele (DRY_VEGETATION
+	# 13, 43.5%, y 1.65..3.69 — acoperisul) si usa (ROCK_DARK 4) trec in
+	# `Maasai_Boma_Accente` si raman pictate pe atlas.
+	"Maasai_Boma": [Palette.SAND_SHADOW],
 	"Crater_Gap": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
 	"Lengai": [Palette.SAND_SHADOW, Palette.MARBLE_GREY],
 	"Crater_Far_Wall": [Palette.ROCK_LIGHT],
@@ -755,6 +770,60 @@ const CLASSES_BY_MODEL := {
 	"termite_mound_b": {
 		"Termite_Mound_B": Palette.TRI_PREFIX + "termite_clay",
 	},
+
+	# --- Serengeti: LUTUL colibelor boma (lotul re-exportului, sep 2026) ----
+	#
+	# Boma a fost RESPINSA in valul 1 (materiale) cu motivul: era UN singur
+	# nod de mesh, iar `ACCENT_SPLIT` rupe doar noduri copil deja existente in
+	# export — cu 3 instante pe pista, reexportul nu se justifica DOAR pentru
+	# clasa. Redeschisa dupa ce dezvoltatorul a vazut de la volan ca boma (POI
+	# A, langa start) e mare in prim-plan, cu acoperisurile de paie complet
+	# plate. Piesa a fost re-exportata pe doua noduri (tools/blender/
+	# build_serengeti_camp.py, build_boma()): `Maasai_Boma` (cele 4 colibe)
+	# si `Boma_Camp` (gardul de spini + Maasai-ul cu sulita).
+	#
+	# NUME ales dupa un bug prins headless: prima incercare a numit al doilea
+	# nod `Maasai_Boma_Camp`. Maparea de aici alege pe PREFIX cel mai lung
+	# (mai jos, `_apply_model_classes`), si "Maasai_Boma_Camp".begins_with(
+	# "Maasai_Boma") e adevarat — gardul si Maasai-ul mosteneau `termite_clay`
+	# si acopereau shuka (slot 14, CAR_RED). Instantiere Track14 (cele 3 boma)
+	# arata ambele noduri cu albedo (1.0, 0.886, 0.947) — tenta clasei — pe
+	# ambele. Exact capcana `House_`/`House_Sand` de mai sus. `Boma_Camp` nu
+	# mai e prefixat de `Maasai_Boma`.
+	#
+	# Doar colibele intra aici. Masurat pe .glb (raportul complet, tools/
+	# probe_slots.gd): slotul 2 (SAND_SHADOW/MUD, lutul cilindrului) e 4,4%
+	# din piesa INTREAGA dinainte de ruptura — acum e o parte mult mai mare
+	# din nodul `Maasai_Boma` de sine statator (colibele + usa, fara gard).
+	#
+	# `termite_clay`, nu o clasa noua: masurat raportul RGB al lutului (hex
+	# #915D27 = 145,93,39) fata de dala `rock.png` (medie 140.7,97.3,58.2) —
+	# raport (1.03, 0.96, 0.67), ecart doar 0.36 intre canale. E cea mai
+	# apropiata potrivire dintre toate clasele existente (wood 0.62, plaster
+	# 0.65, stone_wall 0.66, concrete 0.59, pine_needles 0.83, macchia 1.14 —
+	# toate masurate cu Pillow direct pe PNG-urile din assets/textures/classes/).
+	# E si aceeasi familie de MATERIAL, nu doar de culoare: lutul batut al unei
+	# colibe maasai e aceeasi argila de savana ca lutul unei termitiere.
+	# Refoloseste materialul deja cache-uit de termite_mound_a/b de mai sus —
+	# ZERO materiale in plus la garda (Track14 ramane la 27; cache pe clasa,
+	# vezi Palette._tri_mats).
+	#
+	# Usa (slot 4, ROCK_DARK, 4,6%) NU intra: e un accent mic si intunecat,
+	# pe care clasa `termite_clay` — ridicata si tentata spre cald — l-ar fi
+	# spalat. Fara SPLIT_MODELS/ACCENT_SPLIT pentru nodul asta: masurat, 4,6%
+	# pe un singur slot mic nu justifica inca o ruptura (acelasi prag ca la
+	# termite_mound, unde accentul de 22-23% pe UN slot n-a cerut ruptura).
+	#
+	# Acoperisul de paie (slot 13, DRY_VEGETATION/THATCH, 5,1%) RAMANE pe
+	# atlas: masurat, ratia THATCH (hex #AF9F4E = 175,159,78) fata de ORICE
+	# clasa din repo are ecart peste 0.49 (cel mai bun candidat, concrete,
+	# tot gresit ca familie de material — beton turnat pe acoperis de paie).
+	# Zero pipeline de textura noua in lotul asta (ca la baobab mai sus):
+	# ramane pictat, refuz motivat, nu omisiune.
+	"maasai_boma": {
+		"Maasai_Boma": Palette.TRI_PREFIX + "termite_clay",
+	},
+
 	# --- Serengeti: SCOARTA copacilor, clasa `bark` -------------------------
 	#
 	# Dala `bark` exista deja (Okinawa/Stromboli, sursa palm_tree_bark, scanare

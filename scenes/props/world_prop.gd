@@ -786,18 +786,23 @@ const CLASSES_BY_MODEL := {
 	#     fara nicio pierdere vizibila. Framas de verificat CAND apare o sursa
 	#     potrivita: o captura de aproape ar confirma ca profilul + culoarea
 	#     LARCH_RUST sunt suficiente.
-	#   fever_tree — RESPINS. Trunchiul ei (slot 0, SAND_LIGHT) NU e un maro
-	#     oarecare: `build_serengeti_plants.py` il numeste explicit
-	#     BARK_YELLOW si spune direct "scoarta galben-verde... trunchiul palid
-	#     e ce o deosebeste de la volan" — e identitatea speciei (de-aia se
-	#     numeste "fever tree", Vachellia xanthophloea). Dala `bark` e gradata
-	#     spre ancora WOOD_WEATHERED (maro), fara tenta proprie in CLASS_TINT:
-	#     pusa pe trunchi, l-ar fi vopsit maro peste galbenul care e chiar
-	#     motivul pentru care specia exista in kit. S-ar putea repara cu o a
-	#     doua clasa (mecanica volcanic_rock: acelasi PNG, CLASS_TINT galben) —
-	#     dar tot ar aplica INELE DE PALMIER pe un trunchi neted de acacie, deci
-	#     nu doar culoarea e gresita. Ramane pe atlas, netul: sub 1.0 material
-	#     cheltuit ca sa NU stergem singurul indiciu vizual al speciei.
+	#   fever_tree — RESPINS in valul 1, REDESCHIS si INVERSAT in valul 2 (vezi
+	#     intrarea "fever_tree" mai jos in acest dictionar). Observatia a fost
+	#     corecta: trunchiul ei (slot 0, SAND_LIGHT) NU e un maro oarecare —
+	#     `build_serengeti_plants.py` il numeste explicit BARK_YELLOW si spune
+	#     direct "scoarta galben-verde... trunchiul palid e ce o deosebeste de
+	#     la volan" — e identitatea speciei (de-aia se numeste "fever tree",
+	#     Vachellia xanthophloea). Dala `bark` e gradata spre ancora
+	#     WOOD_WEATHERED (maro), fara tenta proprie: pusa direct, l-ar fi
+	#     vopsit maro peste galbenul care e chiar motivul pentru care specia
+	#     exista in kit.
+	#     CONCLUZIA gresita a fost "deci ramane pe atlas": exact mecanica
+	#     volcanic_rock/tuff_cream/termite_clay (aceeasi dala, CLASS_LIFT +
+	#     CLASS_TINT calculate) rezolva problema — clasa noua `bark_fever`
+	#     ATERIZEAZA pe SAND_LIGHT in loc de WOOD_WEATHERED, deci semnul
+	#     speciei se pastreaza SI trunchiul capata granulatie de scoarta.
+	#     Ramane un avertisment real (inele de palmier pe un trunchi de
+	#     acacie), notat la noua intrare, nu o respingere totala.
 	#
 	# Zero PNG nou, zero clasa noua: `bark` refoloseste exact dala si scara de
 	# pe Okinawa/Stromboli. Corpurile de mai jos sunt deja RUPTE (SPLIT_MODELS/
@@ -858,7 +863,26 @@ const CLASSES_BY_MODEL := {
 		"Acacia_Umbrella_C": Palette.TRI_PREFIX + "bark",
 		"Acacia_Umbrella_C_Accente": Palette.TRI_PREFIX + "acacia_canopy",
 	},
+	# fever_tree: CORPUL primeste scoarta acum (valul 2, redeschidere a
+	# respingerii de mai sus la "fever_tree — RESPINS"). Clasa noua
+	# `bark_fever` (Palette.gd) rezolva exact obiectia veche: e ACEEASI dala
+	# `bark` (zero PNG nou), dar cu CLASS_LIFT+CLASS_TINT calculate sa
+	# aterizeze pe SAND_LIGHT (232,192,116) — galbenul scoartei — nu pe
+	# WOOD_WEATHERED. Semnul speciei (trunchi palid) se pastreaza, doar ca
+	# acum are granulatie de scoarta in loc de o dala plata. Scara triplanara
+	# ramane 0.77, verificata pe piesa (vezi nota din CLASS_TRIPLANAR_SCALE):
+	# trunchiul are 0.648 m diametru la baza, chiar in intervalul acaciilor-
+	# umbrela (0.57-0.69 m) care deja folosesc aceeasi scara fara plangeri.
+	#
+	# Obiectia despre INELELE de palmier ramane valabila ca AVERTISMENT, nu ca
+	# motiv de respingere totala: la 148 de instante si scara comparabila cu
+	# acaciile-umbrela (unde acelasi bark citeste bine), riscul e mult mai mic
+	# decat pe baobab (6,44 m, RESPINS mai sus). Verificare vizuala ramasa
+	# NEFACUTA (necesita captura, vezi raportul lotului) — daca inelele de
+	# palmier se citesc totusi ciudat pe o acacie, following-up e o sursa noua
+	# de bark, nu o alta clasa.
 	"fever_tree": {
+		"Fever_Tree": Palette.TRI_PREFIX + "bark_fever",
 		"Fever_Tree_Accente": Palette.TRI_PREFIX + "acacia_canopy",
 	},
 	# fig_tree: ACCENT_SPLIT pastreaza si fructele (slot 22) pe CORP, langa

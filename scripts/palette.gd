@@ -693,6 +693,19 @@ const CLASS_TEXTURES := {
 	# masurat (probe_slots.gd), coroanele nu au un slot cald de indepartat —
 	# ele ADUNA deja pe 12/13/21, deci nu era nevoie de CLASS_TINT/CLASS_LIFT.
 	"acacia_canopy": "res://assets/textures/classes/acacia_canopy.png",
+	# SCOARTA GALBEN-VERZUIE a acaciei-febra (fever tree, Vachellia
+	# xanthophloea). ACEEASI dala ca "bark" — nu se dubleaza in memorie, se
+	# schimba doar ridicarea si tenta (mecanica volcanic_rock / tuff_cream /
+	# termite_clay). Redeschide respingerea valului 1 (vezi CLASSES_BY_MODEL,
+	# nota veche "fever_tree — RESPINS"): observatia era corecta (trunchiul
+	# galben e semnul speciei), dar concluzia gresita — o dala nu poate fi
+	# tentata direct spre o culoare MAI DESCHISA decat ea (albedo_color doar
+	# intuneca), insa CLASS_LIFT poate, exact ca la tuff_cream/termite_clay.
+	#
+	# Nu se putea tenta "bark" direct: e clasa trunchiurilor de acacia
+	# obisnuita/smochin/copac-uscat de pe Serengeti SI a palmierilor de pe
+	# Okinawa/Stromboli — o tenta galbena ar fi revopsit toate astea.
+	"bark_fever": "res://assets/textures/classes/bark.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -773,6 +786,15 @@ const CLASS_TINT := {
 	# G si B in jos, ca la city_concrete — R ramane 1.0, canalul pe care
 	# ridicarea a nimerit exact.
 	"termite_clay": Color(1.0, 0.886, 0.947),
+	# Scoarta acaciei-febra: dupa CLASS_LIFT (k=1.3642, mai jos) dala ajunge la
+	# (234.3, 192.0, 146.9), tinta e slotul 0 SAND_LIGHT (232, 192, 116) —
+	# chiar galbenul scoartei (masurat de lotul respins in valul 1). Raportul
+	# target/dala pe canale, INAINTE de ridicare, e (1.351, 1.365, 1.077) —
+	# PESTE 1 pe toate trei, deci nu se poate obtine dintr-un `albedo_color`
+	# (doar intuneca): cere CLASS_LIFT, ca la tuff_cream/termite_clay. Tenta
+	# doar corecteaza R si B in jos dupa ridicare; G ramane 1.0, canalul pe
+	# care ridicarea (k = max al raportului) a nimerit exact.
+	"bark_fever": Color(0.990, 1.0, 0.789),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -818,6 +840,16 @@ const CLASS_LIFT := {
 	# tenta, care coboara doua canale din trei. k = max(tinta_c / dala_c) pe
 	# canale = 1.3483 (canalul R e cel care nimereste exact).
 	"termite_clay": 0.549,
+	# Scoarta acaciei-febra: dala `bark` are luminanta 0.568 (rec709) si
+	# trebuie sa ajunga pe slotul 0 SAND_LIGHT (232, 192, 116), luminanta
+	# 0.749. Ridicarea e la 0.775, nu la 0.749, din acelasi motiv ca la
+	# macchia_dry/tuff_cream/termite_clay: tinta se atinge DUPA tenta, care
+	# coboara doua canale din trei. k = max(tinta_c / dala_c) pe canale =
+	# 1.3642 (canalul G e cel care nimereste exact — masurat cu
+	# tools/_tmp_probe_bark_fever.gd, esantionare 128x128 din bark.png:
+	# media (171.72, 140.74, 107.71), la 0.03-0.07% de valorile citate in
+	# nota de respingere a valului 1).
+	"bark_fever": 0.775,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -970,6 +1002,16 @@ const CLASS_TRIPLANAR_SCALE := {
 	# cad exact cat sunt. Regula 1 din pipeline (scara sursei fata de
 	# repetitia din joc, style_bible §4).
 	"bark": 0.77,
+	# Scoarta acaciei-febra: ACEEASI scara ca `bark` (0.77), verificata pe
+	# piesa, nu copiata orbeste. Masurat pe geometria fever_tree.glb
+	# (tools/_tmp_probe_bark_fever.gd, vertecsii pe slot 0 cu y <= 0.15/0.5/
+	# 1.0 m — stabil pe toate trei benzile): trunchiul are 0.648 m diametru
+	# la baza. Acaciile-umbrela (deja pe `bark` la 0.77, nicio plangere de
+	# scara) masoara 0.570-0.686 m la baza (tools/_tmp_probe_trunks.gd) —
+	# fever_tree cade CHIAR IN mijlocul acelui interval, deci scara sursei de
+	# 1.3 m/repetitie ramane la fel de potrivita ca pe acaciile-umbrela. Nu
+	# exista o masuratoare care sa ceara alta cifra.
+	"bark_fever": 0.77,
 	# Termitiere (Serengeti): scara DERIVATA din piesa, nu copiata de la `rock`
 	# (0.14, calibrata pe faleze de 6-12 m). Cele doua modele masoara 1.5 m
 	# (termite_mound_a) si 3.0 m (termite_mound_b) pe verticala

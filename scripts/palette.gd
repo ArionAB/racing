@@ -693,6 +693,50 @@ const CLASS_TEXTURES := {
 	# masurat (probe_slots.gd), coroanele nu au un slot cald de indepartat —
 	# ele ADUNA deja pe 12/13/21, deci nu era nevoie de CLASS_TINT/CLASS_LIFT.
 	"acacia_canopy": "res://assets/textures/classes/acacia_canopy.png",
+	# PIELEA elefantului (Serengeti, lotul ELEFANTULUI). ACEEASI dala ca
+	# "concrete" — nu se dubleaza in memorie, se schimba doar tenta (mecanica
+	# volcanic_rock / city_concrete / termite_clay).
+	#
+	# Elefantul a fost exclus in bloc din valul 1 cu argumentul corect pentru
+	# zebra ("dungile SUNT sloturile de paleta") — dar pielea lui e o
+	# suprafata monocroma incretita, exact ce descrie o clasa triplanara, nu o
+	# paleta de accente. Masurat pe .glb (tools/_tmp_probe_elephant4.gd):
+	# corpul (slot 29, 88.7% din arie) si capul/picioarele (slot 2, 2.8%) sunt
+	# amandoua griuri NEUTRE — nimic de pastrat acolo. Fildesii (slot 22,
+	# 8.5%, z=[-4.02,-2.66], fata modelului) raman pictati prin ACCENT_SPLIT/
+	# ACCENT_HOLDS_CLASS (vezi world_prop.gd): un alb intentionat, sters de
+	# orice clasa aplicata pe tot nodul.
+	#
+	# De ce "concrete" si nu "rock"/"stone_wall"/"alpine_granite"/
+	# "olkhon_marble": masurat (tools/_tmp_probe_elephant, script temporar,
+	# sters) directia dominanta a variatiei per candidat (raport std pe
+	# randuri sau coloane fata de std total, pe dala redusa la 256x256):
+	#   rock            0.581 pe randuri  -> STRATE orizontale (faleza
+	#                   sedimentara, exact ce style_bible §4 numeste gresit
+	#                   pentru o suprafata care nu e geologie)
+	#   olkhon_marble   0.446 pe coloane  -> vine/strate verticale
+	#   alpine_granite  0.265 pe randuri  -> sisturi, tot stratificat
+	#   stone_wall      0.259 pe randuri  -> calcar ciupit in BLOCURI (bun
+	#                   pentru zid, prea grosier pentru piele: variatie
+	#                   fina 19.13 e cea mai mare, dar in pete de bloc, nu
+	#                   in crapaturi fine)
+	#   plaster         aproape plat (std local 8x8 = 0.57 — e tencuiala
+	#                   neteda a satului eolian, zero relief de suprafata)
+	#   concrete        0.156 / 0.220     -> IZOTROP (nicio axa dominanta),
+	#                   variatie fina 18.12 pe bloc de 8x8, crapaturi si pete
+	#                   NEREGULATE — exact "incretit", nu "stratificat"
+	# `concrete` e singura fara directie dominanta si cu detaliu fin
+	# comparabil cu `stone_wall`, deci imbraca elefantul in crapaturi
+	# organice, nu in randuri de sediment.
+	#
+	# Zero PNG nou: refoloseste dala lui `concrete`. Scara triplanara ramane
+	# NESCHIMBATA fata de `concrete` (vezi CLASS_TRIPLANAR_SCALE) — masurat cu
+	# autocorelatie (diferenta medie absoluta intre pixeli la distanta d),
+	# distanta de decorelare a detaliului fin e ~19px din 512, adica 3.71%
+	# din dala. La scara existenta a lui `concrete` (o repetitie la 2 m),
+	# 3.71% * 2 m = 7.4 cm — in banda 5-15 cm ceruta de brief pentru
+	# increiturile pielii. Nicio derivare noua de scara nu era necesara.
+	"elephant_hide": "res://assets/textures/classes/concrete.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -773,6 +817,20 @@ const CLASS_TINT := {
 	# G si B in jos, ca la city_concrete — R ramane 1.0, canalul pe care
 	# ridicarea a nimerit exact.
 	"termite_clay": Color(1.0, 0.886, 0.947),
+	# Pielea elefantului: dala `concrete` (168.8, 160.7, 145.0) trasa spre
+	# VOLCANIC_BLACK (85, 83, 90) — slotul CORPULUI (29), 88.7% din arie
+	# masurata, deci tenta se calculeaza pe el, nu pe o medie ponderata cu
+	# capul/picioarele (slot 2, doar 2.8%). Toate trei canale ies SUB 1
+	# (0.503, 0.517, 0.621), deci nu cere CLASS_LIFT.
+	#
+	# Consecinta masurata pe capul/picioarele ramase pe slotul 2 (ASPHALT,
+	# 75,75,77): aceeasi tenta unica le duce la (85,83,90) — diferenta fata de
+	# tinta lor proprie e 18.25 in distanta euclidiana pe 0..255 (4.1% din
+	# maximul posibil), adica tot un gri rece inchis, in aceeasi familie ca
+	# ASPHALT, nu o pata straina. Acceptat: elefantul e UN nod, deci UN
+	# material, iar 2.8% din arie (capul, urechile, picioarele) nu justifica
+	# o a doua ruptura de accent pentru o diferenta sub prag de vizibilitate.
+	"elephant_hide": Color(0.5034, 0.5165, 0.6206),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -955,6 +1013,18 @@ const CLASS_TRIPLANAR_SCALE := {
 	# 5.8 m prinde ~2.9 repetitii: destul cat granulatia sa se citeasca la
 	# viteza, prea putin cat sa devina tapet (style_bible §4).
 	"city_concrete": 0.5,
+	# Pielea elefantului: ACEEASI scara ca `concrete`/`city_concrete`, NEDERIVATA
+	# din marimea elefantului (4.66 m inaltimea corpului, masurat pe .glb cu
+	# tools/_tmp_probe_elephant2.gd) ci din distanta de DECORELARE a detaliului
+	# fin al dalei — masurata cu diferenta medie absoluta intre pixeli la
+	# distanta d (tools/_tmp_probe pentru autocorelatie, script temporar,
+	# sters): curba urca abrupt si se aplatizeaza la d~=19px din 512, adica
+	# 3.71% din dala. La scara EXISTENTA a lui `concrete` (o repetitie la 2 m,
+	# nota de mai sus), 3.71% * 2 m = 7.4 cm — in banda 5-15 cm pe care
+	# style_bible/brief o cere pentru increiturile pielii de elefant.
+	# Rescalarea ar fi rezolvat o problema care nu exista: pastrarea scarii
+	# lui `concrete` nimereste deja tinta, fara nicio derivare suplimentara.
+	"elephant_hide": 0.5,
 	# Zidaria scarilor Shibati. `stone_wall` avea textura si ancora, dar NU si
 	# o scara triplanara — se folosea doar pe UV-uri reale. Kitul Chongqing are
 	# UV-urile colapsate (ca Stromboli), deci ii trebuie una.

@@ -309,6 +309,14 @@ const SPLIT_MODELS := {
 	# rupt si smochinul de pe Track11. Ramane limitarea pe grupuri de mai sus.
 	"fever_tree": true,
 	"euphorbia": true,
+	# Elefantul (Serengeti, lotul ELEFANTULUI): pielea (corp + cap/picioare,
+	# sloturile 2 si 29, 91.5% din arie masurata) ia clasa `elephant_hide`, dar
+	# fildesii (slot 22, 8.5%, z=[-4.02,-2.66] — fata modelului) raman
+	# pictati pe FOAM_WHITE, ca sa nu-i imbrace clasa in piele. Un singur nod
+	# de mesh (`Elephant_Mesh`), deci foloseste aceeasi mecanica de ruptura ca
+	# `church_arch`/`fig_tree`/`fever_tree`: ACCENT_HOLDS_CLASS, nu
+	# CLASSES_BY_MODEL direct pe corp.
+	"elephant": true,
 }
 
 const ACCENT_SPLIT := {
@@ -388,6 +396,15 @@ const ACCENT_SPLIT := {
 	# euphorbia: "trunchi" (baza carnoasa, sub coroana candelabru) pe 28
 	# (LOG_DARK), 5.9% verts, y 0.00..1.60 — cea mai mica piesa din patru.
 	"Euphorbia": Palette.LOG_DARK,
+	# Elefantul: se pastreaza DOAR fildesii (22, FOAM_WHITE) pe corp — restul
+	# (2 SAND_SHADOW/cap-picioare, 29 MARBLE_GREY/corp, remapate deja de
+	# SLOT_REMAP_BY_MODEL pe ASPHALT/VOLCANIC_BLACK inainte sa ajunga aici,
+	# vezi nota de acolo) trece in `_Accente` si ia `elephant_hide`. Pe dos
+	# fata de `Fig_Tree` (unde piesa mica ramane si masa mare pleaca): aici
+	# ambele sloturi mari pleaca si doar accentul alb ramane, ca la
+	# `Kopje_Camp` unde iarba (mica) ramane si granitul (mare) e cel ce
+	# primeste clasa prin ACCENT_HOLDS_CLASS.
+	"Elephant_Mesh": Palette.FOAM_WHITE,
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -413,6 +430,10 @@ const ACCENT_HOLDS_CLASS := {
 	"fever_tree": true,
 	"fig_tree": true,
 	"euphorbia": true,
+	# Elefantul: accentul (corpul, cap, picioare — restul dupa ce fildesii au
+	# ramas pe corp) ia `elephant_hide`; corpul original ramane doar cu
+	# fildesii pe atlas.
+	"elephant": true,
 }
 
 
@@ -870,6 +891,50 @@ const CLASSES_BY_MODEL := {
 	},
 	"euphorbia": {
 		"Euphorbia_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
+
+	# --- Serengeti: PIELEA elefantului -------------------------------------
+	#
+	# Vezi ACCENT_SPLIT["Elephant_Mesh"] pentru ruptura si nota lunga din
+	# palette.gd (CLASS_TEXTURES/CLASS_TINT) pentru masuratorile care au ales
+	# dala `concrete` si tenta. Aici doar cablarea: accentul (corpul, capul,
+	# picioarele — 91.5% din arie) ia clasa, corpul original ramane cu
+	# fildesii (FOAM_WHITE) pe atlas.
+	#
+	# UN material in plus la garda (Track14: 27 -> 28).
+	#
+	# RESPINSE, masurat, nu presupus (acelasi kit, sloturi verificate cu
+	# tools/_tmp_probe_hippo_croc.gd, script temporar, sters):
+	#   hippo_back — e cel mai monocrom animal din kit (100% pe slotul 4,
+	#     ROCK_DARK), si tinta lui ar fi fost o tenta separata (concrete ->
+	#     ROCK_DARK, (0.61, 0.41, 0.21), fara CLASS_LIFT) — merita pe cifre.
+	#     NU intra fiindca lotul asta are voie sa adauge cel mult UN material
+	#     (instructiunea lotului), iar elefantul e piesa ceruta explicit.
+	#     O tenta separata pentru hippo ar fi un al DOILEA material (acelasi
+	#     PNG, alta intrare in cache-ul `_tri_mats`, cheie pe clasa) — ramane
+	#     pentru un lot viitor daca bugetul permite.
+	#   crocodile — pe TREI sloturi in DOUA familii de nuanta incompatibile:
+	#     12 CACTUS_GREEN (52.8%, verde ~H88) si 2 SAND_SHADOW + 4 ROCK_DARK
+	#     (47.2%, maro ~H29-31) — 59 de grade distanta pe cerc, o singura
+	#     tenta multiplicativa nu poate impinge un gri neutru spre AMBELE
+	#     fara sa greseasca una din ele. Ar cere fie doua clase, fie o ruptura
+	#     de accent — peste bugetul de 1 material, si crocodilul e oricum
+	#     placi/solzi, alt limbaj de suprafata decat pielea incretita.
+	#
+	# NEACOPERITI, deliberat: `G_Elefant1`/`G_Elefant2` din grupul "Hazarduri"
+	# (Track14.tscn) sunt elefanti MOBILI puse prin HazardMarker (motion=1,
+	# sweep_speed, face_travel) — alt cod (track.gd/hazard_marker.gd,
+	# `Palette.apply_triplanar_class`), care pune `material_override` pe TOT
+	# subarborele, fara mecanica de accent-split. Aplicat acolo prin
+	# `tri_class`, ar sterge fildesii (fara ACCENT_SPLIT in codul ala) SI ar
+	# "inota" pe pielea care se MISCA (proiectie de lume pe un corp translat —
+	# acelasi defect documentat la CLASS_TRIPLANAR_SCALE["snow"], unde
+	# bolovanul rulant cere `apply_object_triplanar_class`). Brief-ul lotului
+	# oricum numara doar cele 9 instante DecorManual (6 ZoneE + 3 ZoneG);
+	# elefantii-hazard raman pe atlas pana cand cineva scrie varianta
+	# obiect-spatiu + accent pentru `hazard_marker.gd`.
+	"elephant": {
+		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
 	},
 }
 

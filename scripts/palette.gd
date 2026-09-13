@@ -669,6 +669,30 @@ const CLASS_TEXTURES := {
 	# canal, deci nu cere CLASS_LIFT. Clasa separata fiindca o tenta pe
 	# `olkhon_marble` ar fi revopsit Stanca Samanului de pe Baikal.
 	"granite": "res://assets/textures/classes/olkhon_marble.png",
+	# LUTUL BATUT al termitierelor (Serengeti). ACEEASI dala ca "rock" — nu se
+	# dubleaza in memorie, se schimba doar ridicarea si tenta (mecanica
+	# volcanic_rock / tuff_cream / city_concrete).
+	#
+	# Masurat (tools/_tmp_probe_class_rgb.gd) fata de ancora ponderata a
+	# termitierei (77-78% slot 23 #C4784F + 22-23% slot 27 #A8683A, ambele
+	# caramizii — o singura familie de culoare, nu doua): dala `rock` are media
+	# (140.7, 97.4, 58.2), tinta ponderata (189.7, 116.4, 74.3). Raportul pe
+	# canale e (1.35, 1.19, 1.28) — PESTE 1 pe toate trei, deci nu se poate
+	# obtine dintr-un `albedo_color` (doar intuneca): cere CLASS_LIFT, vezi mai
+	# jos. Alte candidate incercate (plaster, concrete, stone_wall) au iesit
+	# net mai rau: dupa aceeasi ridicare, spread-ul intre canale la tenta le-ar
+	# fi cerut sa coboare verde/albastru cu 35-57%, adica sa stearga toata
+	# granulatia sursei ca sa ajunga rosii — `rock` are nevoie de doar 5-11%.
+	"termite_clay": "res://assets/textures/classes/rock.png",
+	# Coroana savanei (Serengeti, lotul FRUNZISULUI): acaciile-umbrela,
+	# fever_tree, fig_tree, euphorbia. A patra clasa PICTATA (dupa
+	# pine_needles/macchia/fresco) — vezi tools/paint_acacia_canopy.py pentru
+	# de ce nici macchia (frunza lata de tufa mediteraneana), nici
+	# pine_needles (tusa liniara de ac) nu descriu o frunza compusa pinnata pe
+	# un platou de 7-13 m. Dala PROPRIE, nu una refolosita cu alta tenta:
+	# masurat (probe_slots.gd), coroanele nu au un slot cald de indepartat —
+	# ele ADUNA deja pe 12/13/21, deci nu era nevoie de CLASS_TINT/CLASS_LIFT.
+	"acacia_canopy": "res://assets/textures/classes/acacia_canopy.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -744,6 +768,11 @@ const CLASS_TINT := {
 	# F (cald si mai inchis) si H (deschis) raman notate ca dezacord de
 	# masuratoare — se re-masoara pe capturile de integrare, pe POI-ul lor.
 	"granite": Color(0.520, 0.578, 0.700),
+	# Termitiere: dupa CLASS_LIFT (k=1.3483, mai jos) dala ajunge la
+	# (189.7, 131.3, 78.5), tinta e (189.7, 116.4, 74.3). Tenta doar corecteaza
+	# G si B in jos, ca la city_concrete — R ramane 1.0, canalul pe care
+	# ridicarea a nimerit exact.
+	"termite_clay": Color(1.0, 0.886, 0.947),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -783,6 +812,12 @@ const CLASS_LIFT := {
 	# sunt crem SI gri-cald in benzi de valoare, iar o clasa care aterizeaza pe
 	# slotul 19 curat le-ar fi facut cu 15% mai palide decat sunt azi.
 	"tuff_cream": 0.791,
+	# Termitiere: dala `rock` are luminanta 0.407 si trebuie sa ajunga pe media
+	# ponderata a sloturilor 23/27 (0.506). Ridicarea e la 0.549, nu la 0.506,
+	# din acelasi motiv ca la macchia_dry/tuff_cream: tinta se atinge DUPA
+	# tenta, care coboara doua canale din trei. k = max(tinta_c / dala_c) pe
+	# canale = 1.3483 (canalul R e cel care nimereste exact).
+	"termite_clay": 0.549,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -935,6 +970,32 @@ const CLASS_TRIPLANAR_SCALE := {
 	# cad exact cat sunt. Regula 1 din pipeline (scara sursei fata de
 	# repetitia din joc, style_bible §4).
 	"bark": 0.77,
+	# Termitiere (Serengeti): scara DERIVATA din piesa, nu copiata de la `rock`
+	# (0.14, calibrata pe faleze de 6-12 m). Cele doua modele masoara 1.5 m
+	# (termite_mound_a) si 3.0 m (termite_mound_b) pe verticala
+	# (tools/probe_slots.gd). La 0.14 movila mare ar fi prins ~0.4 repetitii —
+	# sub o singura banda, adica exact defectul "zid de 2 m pe stanca de 18 m"
+	# din memoria `clase-pe-piese-de-kit`, doar inversat (dala prea RARA pe o
+	# piesa mica). Tinta: ~2 repetitii pe movila de 3 m (ca 1 pe cea de 1.5 m),
+	# adica o repetitie la 1.5 m -> scara 0.65 (rotunjit de la 0.667).
+	"termite_clay": 0.65,
+	# Coroana savanei (Serengeti): acaciile-umbrela, fever_tree, fig_tree,
+	# euphorbia. Sursa e PICTATA, nu fotografiata (ca ace/macchia), deci n-are
+	# o scara "reala" de masurat — lobii ei de densitate (`_clump_mask` in
+	# tools/paint_acacia_canopy.py, raza 60-130 din 1024) sunt o PROPORTIE a
+	# dalei, nu un desen la o dimensiune fizica.
+	#
+	# 0.05 = o repetitie la 20 m. Aleasa din marimea coroanei, nu din ochi:
+	# acaciile-umbrela au 7-10 m (brief §14), fig_tree/fever_tree ajung la
+	# 12-13 m pe verticala (probe_slots.gd: fig_tree y 7.04..13.00). Un lob de
+	# masca (6-13% din dala, la 20 m/repetitie) cade atunci la 1.2-2.6 m —
+	# marimea unui "bulgare" vizibil de frunzis din referinta
+	# (docs/asset_briefs/img/serengeti_plants.png), nu o pata cat toata
+	# coroana si nu un tipar sub-metru care s-ar citi ca zgomot. Proiectie in
+	# spatiul LUMII: copacii nu se misca, si benzile de valoare curg continuu
+	# intre coroanele vecine dintr-o padure deasa (POI D), exact ca la
+	# `pine_needles` pe un rand de brazi.
+	"acacia_canopy": 0.05,
 }
 
 static var _tri_mats: Dictionary = {}

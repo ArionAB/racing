@@ -62,11 +62,52 @@ def _hut(b, cx, cy, r, h, seed):
 
 
 def build_boma():
-    b = Builder()
+    """Re-export pe DOUA noduri (re-deschidere valul 1, PR #385): boma era UN
+    singur mesh, deci `ACCENT_SPLIT` (care rupe doar noduri copil DEJA
+    existente in export) nu putea atinge nimic — respinsa atunci cu motivul
+    corect ca reexportul nu se justifica pentru clasa in sine. Motivul pentru
+    re-deschidere e vizual, nu mecanic: dezvoltatorul a vazut de la volan ca
+    boma (3 instante, POI A langa start) e MARE in prim-plan, cu acoperisurile
+    de paie complet plate — style_bible §4, aceeasi boala ca faleza (deviatie
+    de luminanta ~0.76 pe UV colapsat).
+
+    Impartire pe MASURATOARE (raportul complet in commit): sloturile boma-ei
+    sunt 28 THORN 84,0% (gard+Maasai), 13 THATCH 5,1%, 4 usa 4,6%, 2 MUD 4,4%,
+    14 SHUKA 1,1% (ACCENT DE MASINA, ramane pictat), 0 HORN 0,8%.
+
+    Doua noduri, nu mai multe (fiecare nod e un material potential):
+      Maasai_Boma  cele 4 colibe — MUD + THATCH + usa (14,1% din piesa, dar
+                   cel mai mare element vizual din cadru la distanta de POI A:
+                   patru conuri late, aproape de camera)
+      Boma_Camp    gardul de spini + Maasai-ul cu sulita (85,9%) — ramane
+                   NEATINS pe atlas, exact ca sa nu puna clasa peste slotul 14
+                   (SHUKA/CAR_RED): shuka e panza rosie masai, accent de
+                   masina folosit deliberat pe decor
+                   (`--allow-car-slots=Maasai_Boma`, style_bible §1), si orice
+                   clasa pe nodul care o contine ar fi acoperit-o.
+    Gardul (THORN, 84% din piesa) NU intra in nodul cu clasa: e geometrie
+    subtire (tepi/cutii), nu suprafata mare citita plat — problema masurata
+    de dezvoltator e acoperisul, nu gardul.
+
+    NUME, nu `Maasai_Boma_Camp`: `_apply_model_classes` (world_prop.gd) alege
+    clasa pe PREFIX (`nm.begins_with(part)`), ca sa prinda si accentele numite
+    explicit — vezi `ShophouseA` / `ShophouseA_Accente`. Cu numele lung,
+    "Maasai_Boma_Camp".begins_with("Maasai_Boma") e ADEVARAT, deci gardul si
+    Maasai-ul ar fi mostenit `termite_clay` si ar fi acoperit shuka — exact
+    capcana "lacomia prefixelor" documentata acolo pentru `House_`/`House_Sand`.
+    Masurat cu o sonda headless (instantiere Track14, cele 3 boma): cu numele
+    vechi ambele noduri ieseau cu albedo (1.0, 0.886, 0.947) — tenta clasei.
+    `Boma_Camp` nu e prefixat de `Maasai_Boma` si nici invers, deci scapa
+    complet de mapare.
+    """
+    hb = Builder()
     R = 7.5
     for k in range(4):
         a = 2.0 * math.pi * k / 4 + 0.4
-        _hut(b, math.cos(a) * 4.2, math.sin(a) * 4.2, 1.9 + 0.2 * (k % 2), 1.7, 71 + k)
+        _hut(hb, math.cos(a) * 4.2, math.sin(a) * 4.2, 1.9 + 0.2 * (k % 2), 1.7, 71 + k)
+    huts = hb.to_object("Maasai_Boma")
+
+    cb = Builder()
     # gardul de spini: inel de tepi incrucisati
     rnd = _lcg(83)
     n = 40
@@ -80,16 +121,17 @@ def build_boma():
             tip = Vector((cx + math.cos(aa) * (rnd() - 0.5) * 1.2, cy + math.sin(aa) * (rnd() - 0.5) * 1.2,
                           0.9 + rnd() * 0.7))
             base = Vector((cx + (rnd() - 0.5) * 0.6, cy + (rnd() - 0.5) * 0.6, 0.0))
-            b.taper_sweep([base, tip], [0.06, 0.01], THORN, segments=4)
-        b.box((cx, cy, 0.45), (0.9, 0.9, 0.9), THORN, rotation=Matrix.Rotation(a + rnd(), 3, "Z"))
+            cb.taper_sweep([base, tip], [0.06, 0.01], THORN, segments=4)
+        cb.box((cx, cy, 0.45), (0.9, 0.9, 0.9), THORN, rotation=Matrix.Rotation(a + rnd(), 3, "Z"))
     # Maasai-ul: la poarta, cu sulita
     px, py = math.cos(2.0 * math.pi * 0.285) * (R + 1.2), math.sin(2.0 * math.pi * 0.285) * (R + 1.2)
-    b.cylinder((px, py, 0.45), 0.12, 0.9, SKIN, segments=6)
-    b.revolve([(0.30, 0.85), (0.34, 1.35), (0.22, 1.62)], SHUKA, segments=7, origin=(px, py, 0.0))
-    b.boulder((px, py, 1.78), (0.24, 0.24, 0.26), SKIN, seed=91, segments=6, rings=3, deviation=0.04)
-    b.beam((px + 0.35, py, 0.0), (px + 0.35, py, 2.3), 0.03, THORN)
-    b.box((px + 0.35, py, 2.35), (0.06, 0.02, 0.28), HORN)
-    return b.to_object("Maasai_Boma")
+    cb.cylinder((px, py, 0.45), 0.12, 0.9, SKIN, segments=6)
+    cb.revolve([(0.30, 0.85), (0.34, 1.35), (0.22, 1.62)], SHUKA, segments=7, origin=(px, py, 0.0))
+    cb.boulder((px, py, 1.78), (0.24, 0.24, 0.26), SKIN, seed=91, segments=6, rings=3, deviation=0.04)
+    cb.beam((px + 0.35, py, 0.0), (px + 0.35, py, 2.3), 0.03, THORN)
+    cb.box((px + 0.35, py, 2.35), (0.06, 0.02, 0.28), HORN)
+    camp = cb.to_object("Boma_Camp")
+    return [huts, camp]
 
 
 def build_ankole_horns():
@@ -206,13 +248,31 @@ clear_built()
 results = []
 
 
-def emit(obj, path, ao, origin="base", bevel=0.03):
-    st = finish(obj, bevel=bevel, ao=ao, origin=origin)
-    _, sz = export_glb([obj], "serengeti/" + path)
-    results.append((path, st["tris"], sz / 1024.0))
+def emit(obj_or_objs, path, ao, origin="base", bevel=0.03):
+    """`obj_or_objs` accepta si o LISTA (boma re-exportata pe doua noduri,
+    ca fig_tree/build_slope_plants.py): fiecare nod primeste acelasi
+    bevel/AO/origine si toate se exporta impreuna, ca frati directi ai
+    radacinii GLB — conventia din docs/blender_export.md."""
+    objs = obj_or_objs if isinstance(obj_or_objs, list) else [obj_or_objs]
+    tris = 0
+    for obj in objs:
+        st = finish(obj, bevel=bevel, ao=ao, origin=origin)
+        tris += st["tris"]
+    _, sz = export_glb(objs, "serengeti/" + path)
+    results.append((path, tris, sz / 1024.0))
 
 
-emit(build_boma(), "buildings/maasai_boma.glb", AO_HOUSE, bevel=0.03)
+# origin="none": doua noduri separate (Maasai_Boma + Boma_Camp) care trebuie
+# sa ramana la pozitiile relative din constructie. `origin="base"` ar fi
+# centrat FIECARE nod pe propriul bbox si le-ar fi suprapus in centru —
+# gresala din build_baikal_forest.py (CliffFaceOlkhon/_Ice), reparata acolo cu
+# `_origin_group`. Aici nu e nevoie de ea: geometria e construita deja cu
+# minimul pe Z=0 (toate formele pleaca de la z>=0) si bbox-ul COMBINAT e
+# simetric pe XY prin constructie (gardul de spini, R=7.5, domina bbox-ul si
+# e centrat pe (0,0); colibele si Maasai-ul stau bine in interiorul lui) —
+# verificat pe cifre (bbox aprox -9.4..9.4 pe X si Y, centru (0,0)), deci
+# `origin="base"` pe piesa nedespartita era oricum un no-op pe XY/Z.
+emit(build_boma(), "buildings/maasai_boma.glb", AO_HOUSE, bevel=0.03, origin="none")
 emit(build_ankole_horns(), "props/ankole_horns.glb", AO_PROP, bevel=0.008)
 emit(build_tent(), "props/safari_tent.glb", AO_PROP, bevel=0.02)
 emit(build_land_rover(), "props/land_rover.glb", AO_PROP, bevel=0.03)

@@ -261,6 +261,16 @@ const SPLIT_MODELS := {
 	# (clasa triplanara) ar fi sters-o; ruptura o lasa pe atlas, ca la case.
 	# Bolovanii si kopje-ul-rampa sunt pe [3, 4, 29] curat: nu se rup.
 	"kopje_camp": true,
+	# Boma masai: nodul `Maasai_Boma` (colibele) e 36.6% LUT (slot 2), 43.5%
+	# PAIE (slot 13) si 19.8% usa (slot 4) — masurat cu probe_slots.gd pe GLB-ul
+	# re-exportat. `termite_clay` pus pe tot nodul cadea si peste paie: masurat,
+	# dala aterizeaza pe (189.7, 116.2, 74.3), deci paiele (#AF9F4E, luminanta
+	# 157) se INCHIDEAU la 129 (-18%) si se mutau din ocru-galben in caramiziu
+	# de lut, iar usa (#67421F, luminanta 71) se DESCHIDEA la 129 (+81%).
+	# Adica exact acoperisurile reclamate ca plate isi pierdeau si culoarea.
+	# Ruptura lasa pe corp doar lutul; paiele si usa pleaca in `_Accente` si
+	# raman pe atlas. Zero materiale in plus.
+	"maasai_boma": true,
 	"crater_gap": true,
 	# Orizontul: Lengai are varful alb (22) pe [2, 22, 29], peretele opus are
 	# padurea de pe creasta (12, 21) pe [3, 12, 21]. Aceeasi ruptura, ca
@@ -342,6 +352,11 @@ const ACCENT_SPLIT := {
 	# trece in `_Accente` si ramane pe atlas. Corpul ia granitul din
 	# CLASSES_BY_MODEL.
 	"Kopje_Camp": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	# Boma masai: lista e ce RAMANE in corp, adica doar LUTUL peretilor
+	# (SAND_SHADOW 2, 36.6% din vertecsi, y 0.00..1.70). Paiele (DRY_VEGETATION
+	# 13, 43.5%, y 1.65..3.69 — acoperisul) si usa (ROCK_DARK 4) trec in
+	# `Maasai_Boma_Accente` si raman pictate pe atlas.
+	"Maasai_Boma": [Palette.SAND_SHADOW],
 	"Crater_Gap": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
 	"Lengai": [Palette.SAND_SHADOW, Palette.MARBLE_GREY],
 	"Crater_Far_Wall": [Palette.ROCK_LIGHT],

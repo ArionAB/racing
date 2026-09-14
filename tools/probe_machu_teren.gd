@@ -79,7 +79,12 @@ const HAIRPIN_X: float = -200.0
 const ROAD_HALF: float = 3.25
 ## Raza axei drumului in ac. Suprascrisa cu `-- --hairpin-r=13` (informativ:
 ## la 10 m sportul nu poate tine banda interioara — vezi raportul din D).
-var HAIRPIN_R: float = 10.0
+## 13, nu 10: e DECIZIA de pista (brief §3, autobuzul). La raza 10 pe axa,
+## sportul nu tine interiorul nici fara autobuz (raza lui minima fara drift e
+## 9.5 m), deci contactul de pe interior era al masinii, nu al hazardului.
+## Acele din Track15 se deseneaza cu raza >= 13 m pe axa; `--hairpin-r=10`
+## ramane ca sa se vada cifra de latime necesara pentru un ac mai strans.
+var HAIRPIN_R: float = 13.0
 const HAIRPIN_LEG: float = 70.0
 ## 3.6 m = peste jumatate din drumul de 6.5 m (scara de jucarie); decizia
 ## valului 2, in locul celor 4.2 m (2/3) cu care interiorul acului nu incapea.

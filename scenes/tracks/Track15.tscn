@@ -4,6 +4,11 @@
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://dxvqq0y23t7vu" path="res://scenes/tracks/terrain_hollow.gd" id="hollow"]
 [ext_resource type="Script" uid="uid://b0y8jokvx14r4" path="res://scenes/hazards/rope_bridge_hazard.gd" id="rope_bridge"]
+[ext_resource type="Script" uid="uid://cun4ologbx5v6" path="res://scenes/hazards/lift_bridge_hazard.gd" id="lift_bridge"]
+[ext_resource type="Script" path="res://scenes/hazards/cloud_rise_hazard.gd" id="cloud_rise"]
+[ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="hazard_marker"]
+[ext_resource type="PackedScene" uid="uid://w4kptwkt5aly" path="res://assets/models/props/cow.glb" id="cow"]
+[ext_resource type="Script" uid="uid://cig1qufehliet" path="res://scenes/hazards/train_hazard.gd" id="train"]
 
 [sub_resource type="Curve3D" id="Curve3D_machupicchu"]
 closed = true
@@ -70,3 +75,83 @@ gizmo_extents = 65
 script = ExtResource("hollow")
 radius_m = 65
 wall_m = 15.0
+
+[node name="Hazarduri" type="Node3D" parent="."]
+
+[node name="BarnePodIncas" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -140, 0, 63.86)
+script = ExtResource("lift_bridge")
+road_half_width = 6.0
+gap = 4.25
+near_lip = Vector3(0, 0, 2.13)
+far_lip = Vector3(0, 0, -2.12)
+water_y = -2.0
+channel_reach = 0.0
+period = 28.0
+open_hold = 6.0
+descend = true
+build_towers = false
+build_ships = false
+standalone_hole = true
+fall_top_drop = 0.15
+fall_backoff = 35.0
+
+[node name="NorulDefileului" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 166.87, 27.79, 107.01)
+script = ExtResource("cloud_rise")
+length = 40.0
+half_width = 9.0
+ramp_in = 8.0
+ramp_out = 6.0
+fog_begin_inside = 5.0
+fog_end_inside = 26.0
+fog_density_inside = 0.09
+phase = 0.35
+
+[node name="Lama1" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.07, -16.04, -200.22)
+gizmo_extents = 3.0
+script = ExtResource("hazard_marker")
+model = ExtResource("cow")
+model_scale = 1.0
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="Lama2" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.08, -16.24, -197.0)
+gizmo_extents = 3.0
+script = ExtResource("hazard_marker")
+model = ExtResource("cow")
+model_scale = 1.0
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="Lama3" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.05, -16.45, -194.0)
+gizmo_extents = 3.0
+script = ExtResource("hazard_marker")
+model = ExtResource("cow")
+model_scale = 1.0
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="Lama4" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.0, -16.65, -191.0)
+gizmo_extents = 3.0
+script = ExtResource("hazard_marker")
+model = ExtResource("cow")
+model_scale = 1.0
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="TrenPeruRail" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, -33, -205)
+script = ExtResource("train")
+period = 40.0
+half_rail = 65.0
+road_half_width = 0.6
+ground_drop = PackedFloat32Array(-4.6, -3, -1.6, -0.3, 0.8, 1.7, 3, 3.6, 3.2, 2.8, 2.4, 2, 1.6, 1.2, 0.8, 0.5, 0.2, 0, -0.4)

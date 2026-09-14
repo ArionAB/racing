@@ -54,6 +54,11 @@ extends Node
 ##                             din ciclul lor (toate la aceeasi faza): ~0.29-0.57
 ##                             urca, ~0.60-0.64 MATURA banda, ~0.64-0.68 urca
 ##                             sa elibereze.
+##   --cloud-at=5.0            NORUL din defileu (CloudRiseHazard, Machu
+##                             Picchu) la N SECUNDE in ciclul lui (31 s;
+##                             `phase` ignorat): 0-3.5 urca de sub banda,
+##                             3.5-7.5 ACOPERA drumul, 7.5-10 se retrage,
+##                             restul = ascuns. Fara el norul e in defileu.
 ##   --rope-load=2.6[,0.5]     PODUL DE FRANGHIE (RopeBridgeHazard, Machu
 ##                             Picchu): o masina-fantoma cu mass_factor-ul dat
 ##                             (Autobuz 2.6, sport 0.9) apasa tablierul la
@@ -167,6 +172,7 @@ func _ready() -> void:
 	var hippo_at := -1.0
 	var rope_load := -1.0
 	var rope_u := 0.5
+	var cloud_at := -1.0
 	var cross_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
@@ -211,6 +217,8 @@ func _ready() -> void:
 			herd_at = float(arg.trim_prefix("--herd-at="))
 		elif arg.begins_with("--hippo-at="):
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
+		elif arg.begins_with("--cloud-at="):
+			cloud_at = float(arg.trim_prefix("--cloud-at="))
 		elif arg.begins_with("--rope-load="):
 			var parts := arg.trim_prefix("--rope-load=").split(",")
 			rope_load = float(parts[0])
@@ -295,6 +303,8 @@ func _ready() -> void:
 		await _set_hippo_phase(track, hippo_at)
 	if rope_load >= 0.0:
 		await _set_rope_load(track, rope_load, rope_u)
+	if cloud_at >= 0.0:
+		await _set_cloud_time(track, cloud_at)
 	if cross_at >= 0.0:
 		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
@@ -618,7 +628,7 @@ func _shoot_landmark(track: Track, cam: Camera3D, track_index: int,
 ## in afara hartii si invizibila. 0.55 il prinde pe la mijlocul traversarii.
 func _set_train_phase(root: Node, at: float) -> void:
 	var found := 0
-	for node in root.get_children():
+	for node in root.find_children("*", "TrainHazard", true, false):
 		var train := node as TrainHazard
 		if train == null:
 			continue
@@ -758,6 +768,21 @@ func _set_cross_time(root: Node, seconds: float) -> void:
 ## Muta hipopotamii la o fractie din ciclul lor (vezi `--hippo-at`). Toti la
 ## aceeasi faza, ca in captura sa se vada starea, nu defazajul. Un cadru de
 ## fizica intai, ca `_rest` sa fie citit din pozitia reala (sync_to_physics).
+## Norul: la N secunde in ciclu, cu ceasul lui oprit pe durata pozei.
+func _set_cloud_time(root: Node, at: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "CloudRiseHazard", true, false):
+		var cloud := node as CloudRiseHazard
+		cloud.set_cycle_time(at)
+		cloud.set_physics_process(false)
+		found += 1
+		print("--cloud-at=%.1f: %s acoperire %.2f, panza la y=%.1f (local)"
+			% [at, cloud.name, cloud.cover(), cloud.get_node("Cloud").position.y])
+	if found == 0:
+		print("--cloud-at: NICIUN nor pe pista asta")
+
+
 ## Podul de franghie: o incarcare fantoma la fractia u din pod, cu sageata
 ## adusa la echilibru — apoi tick-ul podului e oprit, ca poza sa nu-l prinda
 ## in mijlocul unei oscilatii.
@@ -914,13 +939,15 @@ func _set_span_phase(root: Node, at: float) -> void:
 
 func _set_bridge_phase(root: Node, at: float) -> void:
 	var found := 0
-	for node in root.get_children():
+	# Recursiv: barnele din Machu Picchu stau sub un Node3D „Hazarduri", si
+	# ritmul e al nodului (`period`), nu constanta clasei.
+	for node in root.find_children("*", "LiftBridgeHazard", true, false):
 		var bridge := node as LiftBridgeHazard
 		if bridge == null:
 			continue
-		var t := LiftBridgeHazard.SHIP_PERIOD * clampf(at, 0.0, 0.999)
+		var t: float = float(bridge.call("_ship_period")) * clampf(at, 0.0, 0.999)
 		bridge.set("_time", t)
-		bridge.call("_apply_cycle", fposmod(t, LiftBridgeHazard.PERIOD))
+		bridge.call("_apply_cycle", fposmod(t, bridge.period))
 		found += 1
 	print("--bridge-at=%.2f: %d poduri mobile mutate in ciclu" % [at, found])
 

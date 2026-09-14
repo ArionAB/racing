@@ -28,9 +28,24 @@ extends Node3D
 ##
 ## Vaporul NU e decor de fundal: el e cronometrul. Il vezi venind pe canal cu
 ## secunde inainte si stii, fara sa te uiti la lumini, daca prinzi traveea jos.
+##
+## [b]Reuse cu parametri — barnele Podului Incas (Machu Picchu, brief §2 POI H)[/b].
+## Pe cornisa, golul de 4 m e acoperit de barne care sunt SCOASE 6 s din 28:
+## acelasi mecanism, cu traveea care COBOARA sub cornisa (`descend`) in loc
+## sa urce intre turnuri, fara turnuri, fara corabii (`build_towers`,
+## `build_ships`), cu ritmul din exporturi (`period`, `open_hold`,
+## `lift_time`). Declarat DIRECT in scena pistei (nu printr-un canal): nod cu
+## scriptul asta, `transform` cu -Z local pe sensul de mers si originea pe
+## punctul copt din mijlocul golului, `near_lip`/`far_lip` LOCAL pe punctele
+## copte vecine, `gap` = distanta dintre ele, `standalone_hole = true` — asa
+## isi cere singur gaura din carosabil prin `road_hole_span()`
+## (Track._resolve_span_holes, contractul pasajului rotativ si al podului de
+## franghie). Pe cornisa nu e apa sub gol: terenul ramane la ~0.3 m sub
+## asfalt, deci plasa de cadere isi ia plafonul din `fall_top_drop` (0.15),
+## ca o masina oprita in gol sa fie repusa, nu blocata intre rampe.
 
 # ------------------------------------------------------------------ ciclul
-## Cat dureaza un ciclu complet.
+## Cat dureaza un ciclu complet (implicitul; vezi `period`).
 const PERIOD: float = 10.0
 ## Cat sta traveea sus, complet deschisa.
 const OPEN_HOLD: float = 3.0
@@ -143,6 +158,33 @@ const FALL_BACKOFF: float = 70.0
 ## soseaua e orizontala acolo — pe Okinawa are ~1.7% panta, adica 20 cm pe gol.
 @export var near_lip: Vector3 = Vector3.ZERO
 @export var far_lip: Vector3 = Vector3.ZERO
+
+@export_group("Ciclu")
+## Durata ciclului (s), cat sta traveea deschisa (s), cat dureaza miscarea (s).
+## Implicitele sunt ale podului de pe Okinawa; barnele din Machu Picchu:
+## 28 / 6 / 0.9.
+@export_range(4.0, 120.0, 0.5) var period: float = PERIOD
+@export_range(0.5, 60.0, 0.5) var open_hold: float = OPEN_HOLD
+@export_range(0.2, 5.0, 0.1) var lift_time: float = LIFT_TIME
+## SENSUL: traveea urca intre turnuri (implicit) sau COBOARA sub drum
+## (barnele scoase de sub cornisa). Cursa e aceeasi (LIFT_HEIGHT).
+@export var descend: bool = false
+
+@export_group("Structura")
+## Turnurile cu grinda si lampile; corabiile de pe canal. Se sting pe un gol
+## fara canal (cornisa): acolo nu are ce sa ridice si nu are pe ce sa pluteasca.
+@export var build_towers: bool = true
+@export var build_ships: bool = true
+## Declarat direct in scena, nu printr-un canal: isi cere singur gaura din
+## carosabil (`road_hole_span()` = `gap`). FALS cand podul e construit de
+## Track dintr-un TrackChannel — acolo canalul a taiat deja asfaltul, si o a
+## doua gaura pe acelasi loc ar putea cadea cu un pas mai lunga.
+@export var standalone_hole: bool = false
+## Plafonul plasei de cadere, sub cota buzei celei mai joase (m). 2.0 peste
+## apa; pe cornisa, unde terenul e la 0.3 m sub asfalt, 0.15.
+@export_range(0.05, 5.0, 0.05) var fall_top_drop: float = 2.0
+## Cati metri inapoi e repusa masina cazuta. Vezi FALL_BACKOFF.
+@export_range(5.0, 120.0, 1.0) var fall_backoff: float = FALL_BACKOFF
 ## Cota apei, local. Din ea ies pescajul corabiilor si podeaua zonei de cadere.
 @export var water_y: float = -8.5
 ## Cat de departe se intinde apa canalului in fiecare parte. Corabiile nu ies
@@ -177,12 +219,14 @@ static var _lamp_mat: StandardMaterial3D
 
 
 func _ready() -> void:
-	_build_towers()
+	if build_towers:
+		_build_towers()
 	_build_piers()
 	_build_ramps()
 	_build_kicker()
 	_build_span()
-	_build_ships()
+	if build_ships:
+		_build_ships()
 	_build_fall_zone()
 	_audio = AudioStreamPlayer3D.new()
 	_audio.bus = &"SFX"
@@ -520,8 +564,18 @@ func _build_ships() -> void:
 ## faza ei sa fie la jumatatea buclei. De acolo iese formula, si de aceea
 ## ramane corecta daca se schimba OPEN_HOLD sau LIFT_TIME.
 func _ship_offset(i: int) -> float:
-	var phase := fposmod(_time + SHIP_LEAD + float(i) * PERIOD, SHIP_PERIOD)
-	return SHIP_SPEED * (phase - SHIP_PERIOD * 0.5)
+	var phase := fposmod(_time + _ship_lead() + float(i) * period, _ship_period())
+	return SHIP_SPEED * (phase - _ship_period() * 0.5)
+
+
+## Bucla corabiilor si decalajul ei, din ritmul CURENT (vezi SHIP_PERIOD /
+## SHIP_LEAD pentru derivare).
+func _ship_period() -> float:
+	return period * float(SHIP_COUNT)
+
+
+func _ship_lead() -> float:
+	return _ship_period() * 0.5 - lift_time - open_hold * 0.5
 
 
 # ------------------------------------------------------------ plasa de cadere
@@ -535,11 +589,11 @@ func _ship_offset(i: int) -> float:
 func _build_fall_zone() -> void:
 	var zone := RespawnZone.new()
 	zone.name = "BridgeFall"
-	zone.backoff_m = FALL_BACKOFF
+	zone.backoff_m = fall_backoff
 	add_child(zone)
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	var top := minf(near_lip.y, far_lip.y) - 2.0
+	var top := minf(near_lip.y, far_lip.y) - fall_top_drop
 	var bottom := water_y - 4.0
 	box.size = Vector3(road_half_width * 4.0, maxf(top - bottom, 2.0),
 		gap + RAMP_RUN * 2.0)
@@ -551,8 +605,8 @@ func _build_fall_zone() -> void:
 # ------------------------------------------------------------------- ciclul
 
 func _physics_process(delta: float) -> void:
-	_time = fposmod(_time + delta, SHIP_PERIOD)
-	_apply_cycle(fposmod(_time, PERIOD))
+	_time = fposmod(_time + delta, _ship_period())
+	_apply_cycle(fposmod(_time, period))
 	if Engine.is_editor_hint():
 		return
 	_tick_cooldowns(delta)
@@ -561,24 +615,24 @@ func _physics_process(delta: float) -> void:
 
 ## Cat e ridicata traveea, in 0..1, la momentul `t` din ciclu.
 func _open_amount(t: float) -> float:
-	if t < LIFT_TIME:
-		return smoothstep(0.0, 1.0, t / LIFT_TIME)
-	if t < LIFT_TIME + OPEN_HOLD:
+	if t < lift_time:
+		return smoothstep(0.0, 1.0, t / lift_time)
+	if t < lift_time + open_hold:
 		return 1.0
-	var falling := t - LIFT_TIME - OPEN_HOLD
-	if falling < LIFT_TIME:
-		return smoothstep(0.0, 1.0, 1.0 - falling / LIFT_TIME)
+	var falling := t - lift_time - open_hold
+	if falling < lift_time:
+		return smoothstep(0.0, 1.0, 1.0 - falling / lift_time)
 	return 0.0
 
 
 func _apply_cycle(t: float) -> void:
 	var k := _open_amount(t)
 	if _span != null:
-		_span.position.y = _span_rest + LIFT_HEIGHT * k
+		_span.position.y = _span_rest + (-LIFT_HEIGHT if descend else LIFT_HEIGHT) * k
 	# Luminile: clipesc in avertizare (inainte de ridicare) si stau APRINSE cat
 	# timp e gol. Doua stari diferite pentru doua informatii diferite — "vine" si
 	# "acum" — fiindca la 100 km/h nu ai timp sa numeri clipiri.
-	var warning := t > PERIOD - WARN
+	var warning := t > period - WARN
 	var on := k > 0.02 or (warning and fmod(t, 0.45) < 0.24)
 	for lamp in _lamps:
 		lamp.visible = on
@@ -595,7 +649,7 @@ func _apply_cycle(t: float) -> void:
 
 func _tick_audio(t: float, warning: bool) -> void:
 	if warning:
-		var bell := int((t - (PERIOD - WARN)) / 0.45)
+		var bell := int((t - (period - WARN)) / 0.45)
 		if bell != _last_bell:
 			_last_bell = bell
 			_play(&"crossing_bell")
@@ -645,7 +699,19 @@ func _hit_ships() -> void:
 			if car == null or _cooldown.has(car):
 				continue
 			_cooldown[car] = 2.0
-			car.respawn(FALL_BACKOFF)
+			car.respawn(fall_backoff)
+
+
+# ---------------------------------------------------------- pentru Track
+
+## Contractul gaurii de carosabil (Track._resolve_span_holes), doar cand podul
+## e declarat direct in scena (`standalone_hole`).
+func road_hole_span() -> float:
+	return gap if standalone_hole else 0.0
+
+
+func wall_clear_span() -> float:
+	return 0.0
 
 
 # -------------------------------------------------------------------- unelte

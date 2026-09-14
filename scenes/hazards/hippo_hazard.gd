@@ -38,6 +38,21 @@ signal surfacing(hippo: HippoHazard)
 ## Fara fisier (alt worktree, kit neimportat) se vede elipsoidul, ca sondele
 ## sa nu pice din cauza unui asset.
 const HIPPO_GLB := "res://assets/models/serengeti/animals/hippo_back.glb"
+## ISTORIC (RUNDELE 1-3 de mai jos, pana la lotul PIELII): spinarea statea pe
+## un SLOT de paleta remapat (`HIPPO_SLOT_REMAP`, mai jos), o culoare plata,
+## nu o clasa de textura. Lotul PIELII (sept 2026) inlocuieste asta cu clasa
+## triplanara `hippo_hide` (palette.gd — aceeasi dala `concrete` ca
+## `elephant_hide`, tenta proprie derivata din slotul 4 masurat pe .glb,
+## vezi `_build_from_kit`), aplicata cu `apply_object_triplanar_class`
+## (obligatoriu pe corp care se misca). `HIPPO_SLOT_REMAP` ramane mai jos ca
+## istoric, dar e MORT: un material triplanar suprascrie `material_override`
+## pe tot nodul, deci remap-ul de sub el nu se mai vede. Motivul contrastului
+## (RUNDA 2) ramane valabil ca REFERINTA: tenta noua a fost calculata sa
+## cada pe #67421F (acelasi hex-tinta ca ROCK_DARK folosit atunci), care e in
+## aceeasi familie calda-inchisa (V~0.40) ca LOG_DARK (V~0.38) — dar
+## verificarea pe CAPTURA la vad, cu increturile triplanare (nu doar culoarea
+## plata), a ramas NEFACUTA (interzisa in acest lot, vezi raportul).
+##
 ## Sloturile de atlas ale spinarii, mutate INAINTE de material. Masurat pe
 ## .glb (arie pe slot, sonda temporara): CORPUL e slotul 4 (ROCK_DARK #67421F,
 ## 1074 tri, 27,8 m2), iar 23 (TILE_TERRACOTTA, 136 tri, 2,6 m2, y mediu 0,54
@@ -196,11 +211,15 @@ func _build_from_kit() -> bool:
 	# cu toata inaltimea lui. Sub albie ramane si cand e sus (2,45 > rise_m),
 	# iar surplusul fata de vechea spinare (picioarele, burta) ramane ingropat.
 	model.position = Vector3(0.0, rest_top - aabb.end.y, 0.0)
-	for mi in meshes:
-		var m := mi as MeshInstance3D
-		if m.mesh != null:
-			m.mesh = WorldProp._mesh_with_slots_moved(m.mesh, HIPPO_SLOT_REMAP)
-	Palette.apply_world_material(model)
+	# Clasa triplanara `hippo_hide` (palette.gd), aplicata IN SPATIUL
+	# OBIECTULUI (`apply_object_triplanar_class`), obligatoriu pe corpuri care
+	# se misca — spinarea urca/coboara pe ciclu (sliding_hazard.gd foloseste
+	# aceeasi mecanica pentru bolovanul care se rostogoleste; proiectia de
+	# LUME ar face increturile sa "inoate" pe suprafata odata cu miscarea).
+	# Inlocuieste vechiul HIPPO_SLOT_REMAP (slot 4 -> LOG_DARK, o culoare plata
+	# de paleta): un material triplanar suprascrie `material_override` pe tot
+	# nodul, deci remap-ul de sloturi devine fara efect vizibil sub el.
+	Palette.apply_object_triplanar_class(model, "hippo_hide")
 	add_child(model)
 	_mesh = meshes[0] as MeshInstance3D
 	return true

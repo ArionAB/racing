@@ -750,6 +750,31 @@ const CLASS_TEXTURES := {
 	# 3.71% * 2 m = 7.4 cm — in banda 5-15 cm ceruta de brief pentru
 	# increiturile pielii. Nicio derivare noua de scara nu era necesara.
 	"elephant_hide": "res://assets/textures/classes/concrete.png",
+	# PIELEA hipopotamului (Serengeti, lotul HIPOPOTAMULUI, redeschidere a
+	# respingerii pur bugetare din lotul elefantului — vezi ACCENT_HOLDS_CLASS
+	# / hippo_hazard.gd pentru cablare). ACEEASI dala ca "concrete"/
+	# "elephant_hide" — nu se dubleaza in memorie, se schimba doar tenta si
+	# scara (mecanica volcanic_rock / city_concrete / termite_clay).
+	#
+	# De ce ACEEASI dala si nu alta: masurat (tools/_tmp_probe_hippo_tex2.gd,
+	# script temporar, sters), anizotropie pe dala redusa la 128x128 (aceeasi
+	# metoda ca la elephant_hide, raport std pe randuri/coloane fata de std
+	# total):
+	#   rock            0.623 pe randuri  -> STRATE (respins, acelasi motiv ca
+	#                   la elefant)
+	#   stone_wall      0.309 pe randuri  -> aproape izotrop, dar grain FIN
+	#                   (decorelare la 3.9% din dala, vezi mai jos) — bloc de
+	#                   piatra ciupita, nu increitura de piele
+	#   olkhon_marble   0.232/0.508       -> vine verticale (respins)
+	#   plaster         0.119/0.114       -> izotrop, dar aproape PLAT (std pe
+	#                   bloc de 8x8 = 0.31, fata de 17+ la concrete/stone_wall)
+	#                   — zero relief, nu descrie "increturi mari si rare"
+	#   concrete        0.218/0.311       -> IZOTROP (nicio axa dominanta,
+	#                   acelasi rezultat calitativ ca la derivarea elefantului),
+	#                   relief real (std bloc 8x8 = 17.3)
+	# `concrete` ramane singura cu izotropie SI relief vizibil — exact
+	# argumentul care a ales-o si pentru elefant, redescoperit independent.
+	"hippo_hide": "res://assets/textures/classes/concrete.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -853,6 +878,15 @@ const CLASS_TINT := {
 	# material, iar 2.8% din arie (capul, urechile, picioarele) nu justifica
 	# o a doua ruptura de accent pentru o diferenta sub prag de vizibilitate.
 	"elephant_hide": Color(0.5034, 0.5165, 0.6206),
+	# Pielea hipopotamului: dala `concrete` (168.84, 160.68, 145.01, medie
+	# precisa cu PIL/numpy) trasa spre ROCK_DARK (#67421F, 103, 66, 31) —
+	# slotul CORPULUI (4), 100% din arie masurata (tools/_tmp_probe_hippo1.gd,
+	# script temporar, sters; hippo_back.glb e cel mai monocrom animal din kit,
+	# fara accent de pastrat). Raport pe canale (0.6101, 0.4107, 0.2138) —
+	# TOATE SUB 1, deci nu cere CLASS_LIFT. Verificare inversa (mean * tint):
+	# (168.84*0.6101, 160.68*0.4107, 145.01*0.2138) = (103.00, 66.00, 31.00) —
+	# cade EXACT pe tinta (103, 66, 31), sub 0.01 unitate pe fiecare canal.
+	"hippo_hide": Color(0.6101, 0.4107, 0.2138),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1057,6 +1091,22 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Rescalarea ar fi rezolvat o problema care nu exista: pastrarea scarii
 	# lui `concrete` nimereste deja tinta, fara nicio derivare suplimentara.
 	"elephant_hide": 0.5,
+	# Pielea hipopotamului: ACEEASI dala ca `elephant_hide` (`concrete`), dar
+	# scara NU e copiata orbeste — brief-ul cere increturi mai MARI si mai
+	# RARE decat la elefant. Derivat din decorelarea texturii, ca la
+	# `elephant_hide`, dar cu o tinta de granulatie explicit mai mare:
+	# autocorelatie (diferenta medie absoluta intre pixeli la distanta d,
+	# tools/_tmp_probe_hippo_auto.gd, script temporar, sters) pe dala nativa
+	# 512x512 da platoul (90%) la d~=40px, adica 7.81% din dala — fata de
+	# 3.71% masurat pentru elefant (metode comparabile dar nu identice, deci
+	# cifrele nu se cumuleaza direct; foloseste-le doar comparativ, in ACELASI
+	# fel de masuratoare).
+	# Tinta explicita pentru hipopotam: banda 15-25 cm (fata de 5-15 cm la
+	# elefant — de 2-3x mai mare, cum cere brief-ul), mijloc 20 cm. Scara:
+	# 0.0781 / 0.20 = 0.391, rotunjit la 0.4 (1 repetitie la 2.5 m, fata de
+	# 1 repetitie la 2 m pe elefant — grain mai rar SI mai mare pe animalul
+	# mai mic, exact directia ceruta).
+	"hippo_hide": 0.4,
 	# Zidaria scarilor Shibati. `stone_wall` avea textura si ancora, dar NU si
 	# o scara triplanara — se folosea doar pe UV-uri reale. Kitul Chongqing are
 	# UV-urile colapsate (ca Stromboli), deci ii trebuie una.

@@ -59,6 +59,11 @@ extends Node
 ##                             `phase` ignorat): 0-3.5 urca de sub banda,
 ##                             3.5-7.5 ACOPERA drumul, 7.5-10 se retrage,
 ##                             restul = ascuns. Fara el norul e in defileu.
+##   --bus-at=30               AUTOBUZUL de pe serpentine (BusHazard, Machu
+##                             Picchu) la N SECUNDE de coborare pe curba lui
+##                             (7 m/s => 30 s = 210 m de la capatul de sus),
+##                             cu ceasul oprit pe durata pozei. Fara el e sus,
+##                             ascuns — exact starea in care nu se vede.
 ##   --rope-load=2.6[,0.5]     PODUL DE FRANGHIE (RopeBridgeHazard, Machu
 ##                             Picchu): o masina-fantoma cu mass_factor-ul dat
 ##                             (Autobuz 2.6, sport 0.9) apasa tablierul la
@@ -173,6 +178,7 @@ func _ready() -> void:
 	var rope_load := -1.0
 	var rope_u := 0.5
 	var cloud_at := -1.0
+	var bus_at := -1.0
 	var cross_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
@@ -219,6 +225,8 @@ func _ready() -> void:
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
 		elif arg.begins_with("--cloud-at="):
 			cloud_at = float(arg.trim_prefix("--cloud-at="))
+		elif arg.begins_with("--bus-at="):
+			bus_at = float(arg.trim_prefix("--bus-at="))
 		elif arg.begins_with("--rope-load="):
 			var parts := arg.trim_prefix("--rope-load=").split(",")
 			rope_load = float(parts[0])
@@ -305,6 +313,8 @@ func _ready() -> void:
 		await _set_rope_load(track, rope_load, rope_u)
 	if cloud_at >= 0.0:
 		await _set_cloud_time(track, cloud_at)
+	if bus_at >= 0.0:
+		await _set_bus_time(track, bus_at)
 	if cross_at >= 0.0:
 		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
@@ -781,6 +791,36 @@ func _set_cloud_time(root: Node, at: float) -> void:
 			% [at, cloud.name, cloud.cover(), cloud.get_node("Cloud").position.y])
 	if found == 0:
 		print("--cloud-at: NICIUN nor pe pista asta")
+
+
+## Autobuzul: la N secunde de coborare pe curba lui, cu botul pe directia de
+## mers si ceasul oprit. `_dist`/`_yaw` sunt private prin conventie, ca la
+## tren; `_has_prev` se stinge ca primul tick sa nu citeasca teleportarea ca
+## pe o miscare (si sa roteasca botul dupa ea).
+func _set_bus_time(root: Node, at: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "BusHazard", true, false):
+		var bus := node as BusHazard
+		if bus == null or bus.curve == null:
+			continue
+		var length: float = bus.curve.get_baked_length()
+		var d: float = clampf(at * bus.speed, 0.0, length - 0.1)
+		bus.set("_started", true)
+		bus.set("_dist", d)
+		bus.set("_has_prev", false)
+		var pos: Vector3 = bus.to_global(bus.curve.sample_baked(d, true))
+		bus.set("_yaw", bus.call("_travel_yaw", length, pos))
+		found += 1
+		for _i in 3:
+			await get_tree().physics_frame
+		bus.set_physics_process(false)
+		var body: Node3D = bus.body()
+		print("--bus-at=%.1f: %s la %.0f m din %.0f pe curba, corp la (%.1f, %.1f, %.1f)"
+			% [at, bus.name, d, length, body.global_position.x, body.global_position.y,
+				body.global_position.z])
+	if found == 0:
+		print("--bus-at: NICIUN autobuz pe pista asta")
 
 
 ## Podul de franghie: o incarcare fantoma la fractia u din pod, cu sageata

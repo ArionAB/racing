@@ -21,6 +21,8 @@ extends Node
 ##   ... -- --mode=cliff --track=0
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
+## `--slice=a,b`: felia de traseu (fractii) raportata separat. (-1,-1) = fara.
+var _slice: Vector2 = Vector2(-1.0, -1.0)
 const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 ## Seed fix: fixeaza ZARURILE (rocket start, variatia de viteza, linia
 ## fiecarui AI), ca "inainte / dupa" sa porneasca din aceeasi cursa.
@@ -226,6 +228,9 @@ func _ready() -> void:
 			_seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--car="):
 			_player_car = int(arg.trim_prefix("--car="))
+		elif arg.begins_with("--slice="):
+			var ab := arg.trim_prefix("--slice=").split(",")
+			_slice = Vector2(float(ab[0]), float(ab[1]))
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -314,6 +319,8 @@ func _start_race() -> void:
 			"respawns": 0, "walls": 0, "wall_impact": 0.0,
 			"bumps": 0, "bump_peak": 0.0,
 			"slide_hits": 0, "carousel_hits": 0, "deflector_hits": 0,
+			"bus_hits": 0,
+			"sl_speed": 0.0, "sl_samples": 0, "sl_slow": 0.0, "sl_walls": 0, "sl_bus": 0,
 			"speed_sum": 0.0, "samples": 0,
 			"stuck_t": 0.0, "stuck_reports": 0,
 			"branch_laps": 0, "branch_s": 0.0, "last_route": 0,
@@ -374,6 +381,21 @@ func _tick_race(delta: float) -> void:
 				st.carousel_hits = int(st.carousel_hits) + 1
 			elif _is_under(hit as Node, "DeflectorHazard"):
 				st.deflector_hits = int(st.deflector_hits) + 1
+			elif _is_under(hit as Node, "BusHazard"):
+				# Autobuzul de pe serpentine (Machu Picchu): corp cinematic
+				# pe traseu; contactul se numara ca la minge/deviator.
+				st.bus_hits = int(st.bus_hits) + 1
+				if _in_slice(_race.track.frac_at(car.road_index, car.route)):
+					st.sl_bus = int(st.sl_bus) + 1
+		# FELIA ceruta cu --slice=a,b: aceleasi cifre, doar pe portiunea aia —
+		# pentru un hazard local (autobuzul de pe serpentine) media pe tot turul
+		# ascunde tot ce conteaza.
+		var fr_here: float = _race.track.frac_at(car.road_index, car.route)
+		if _in_slice(fr_here):
+			st.sl_speed = float(st.sl_speed) + speed
+			st.sl_samples = int(st.sl_samples) + 1
+			if speed < 4.0:
+				st.sl_slow = float(st.sl_slow) + delta
 		# Harta pistei: unde anume se scurge viteza. Fara ea nu stii daca AI-ul
 		# pierde in acelasi viraj de fiecare data sau imprastiat peste tot.
 		var b := clampi(int(_race.track.frac_at(car.road_index, car.route)
@@ -386,6 +408,15 @@ func _tick_race(delta: float) -> void:
 		_watch_stuck(car, st, speed, delta)
 	if _elapsed >= _seconds:
 		_report_race()
+
+
+func _in_slice(frac: float) -> bool:
+	if _slice.x < 0.0:
+		return false
+	var f := fposmod(frac, 1.0)
+	if _slice.x <= _slice.y:
+		return f >= _slice.x and f <= _slice.y
+	return f >= _slice.x or f <= _slice.y
 
 
 func _is_under(node: Node, type_name: String) -> bool:
@@ -455,6 +486,8 @@ func _on_respawn(car: Car, index: int) -> void:
 
 func _on_wall(car: Car, impact: float, index: int) -> void:
 	_stats[index].walls = int(_stats[index].walls) + 1
+	if _in_slice(_race.track.frac_at(car.road_index, car.route)):
+		_stats[index].sl_walls = int(_stats[index].sl_walls) + 1
 	_stats[index].wall_impact = maxf(float(_stats[index].wall_impact), impact)
 	var b := clampi(int(_race.track.frac_at(car.road_index, car.route)
 			* float(BUCKETS)),
@@ -500,6 +533,34 @@ func _report_race() -> void:
 				st.name, int(st.branch_laps), float(st.branch_s)]
 	print("--- banda secundara: %d treceri%s" % [branch_total,
 		branch_line if branch_total > 0 else " (nimeni n-a luat-o)"])
+	var bus_total := 0
+	for i in cars.size():
+		bus_total += int(_stats[i].bus_hits)
+	if bus_total > 0 or _slice.x >= 0.0:
+		print("--- contacte cu autobuzul (BusHazard): %d cadre" % bus_total)
+	if _slice.x >= 0.0:
+		print("--- felia %.3f-%.3f: %-20s %6s %6s %7s %8s" % [_slice.x, _slice.y,
+			"masina", "v_med", "lent", "pereti", "autobuz"])
+		var sl_speed := 0.0
+		var sl_samples := 0
+		var sl_slow := 0.0
+		var sl_walls := 0
+		var sl_bus := 0
+		for i in cars.size():
+			var st := _stats[i]
+			var ns := maxi(int(st.sl_samples), 1)
+			print("    %-32s %6.1f %5.1f%% %7d %8d" % [st.name,
+				float(st.sl_speed) / float(ns),
+				float(st.sl_slow) / maxf(float(st.sl_samples) / 60.0, 0.001) * 100.0,
+				int(st.sl_walls), int(st.sl_bus)])
+			sl_speed += float(st.sl_speed)
+			sl_samples += int(st.sl_samples)
+			sl_slow += float(st.sl_slow)
+			sl_walls += int(st.sl_walls)
+			sl_bus += int(st.sl_bus)
+		print("    %-32s %6.1f %5.1f%% %7d %8d" % ["TOTAL",
+			sl_speed / float(maxi(sl_samples, 1)),
+			sl_slow / maxf(float(sl_samples) / 60.0, 0.001) * 100.0, sl_walls, sl_bus])
 	print("\n--- unde se scurge viteza (felie de pista -> v_med, %% lent, pereti)")
 	for b in BUCKETS:
 		var samples := maxi(_bucket_samples[b], 1)

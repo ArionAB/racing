@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://dxvqq0y23t7vu" path="res://scenes/tracks/terrain_hollow.gd" id="hollow"]
+[ext_resource type="Script" uid="uid://b0y8jokvx14r4" path="res://scenes/hazards/rope_bridge_hazard.gd" id="rope_bridge"]
 
 [sub_resource type="Curve3D" id="Curve3D_machupicchu"]
 closed = true
@@ -19,6 +20,7 @@ custom_theme = "machupicchu"
 custom_half_width = 6.0
 custom_sun_rotation_deg = Vector3(-40, 45, 0)
 custom_road_surface = "dirt"
+custom_step_ranges = Array[Vector2]([Vector2(0.04, 0.2)])
 custom_gate_model = "none"
 custom_ravines = Array[Vector4]([Vector4(0.074, 0.356, 75, 1), Vector4(0.222, 0.356, 22, -1), Vector4(0.528, 0.585, 25, 0), Vector4(0.585, 0.662, 12, 1), Vector4(0.912, 0.981, 12, -1)])
 custom_cornice_ravines = Array[int]([0, 2, 3, 4])
@@ -28,6 +30,13 @@ custom_ravine_widths = Array[Vector2]([Vector2(0, 200), Vector2(1, 70), Vector2(
 custom_ravine_floor_slopes = Array[Vector2]([Vector2(0, 8)])
 custom_width_segments = Array[Vector3]([Vector3(0.981, 0.051, 9), Vector3(0.174, 0.356, 6.5), Vector3(0.538, 0.555, 5.5), Vector3(0.585, 0.662, 8), Vector3(0.687, 0.912, 6.5), Vector3(0.964, 0.971, 4)])
 terrain_pad_m = 200.0
+
+[node name="PodFranghie" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.71, -20, -154.99)
+script = ExtResource("rope_bridge")
+near_end = Vector3(17.12, 0, -0.01)
+far_end = Vector3(-17.12, 0, -0.04)
+deck_width = 11.0
 
 [node name="Path" type="Path3D" parent="." unique_id=570182309]
 curve = SubResource("Curve3D_machupicchu")

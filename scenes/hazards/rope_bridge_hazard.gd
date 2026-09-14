@@ -21,8 +21,17 @@ extends Node3D
 ## sau, editabil cu gizmo, un copil Path3D numit „Route" cu DOUA puncte
 ## (primul = buza de plecare, ultimul = buza de sosire); daca exista, el
 ## bate exporturile. Cele doua capete trebuie sa fie CHIAR pe cota soselei la
-## buze (tablierul incepe la nivelul lor, fara prag), iar pista trebuie sa
-## lase GOL carosabilul intre ele (custom_ravines) — podul e drumul acolo.
+## buze (tablierul incepe la nivelul lor, fara prag). GOLUL din carosabil il
+## cere podul singur: `road_hole_span()` (acelasi contract ca
+## RotatingSpanHazard, vezi Track._resolve_span_holes) — Track taie asfaltul,
+## coliziunea soselei si parapetul pe `2k` pasi copti centrati pe POZITIA
+## NODULUI, cu lungimea cea mai apropiata de a tablierului. De aceea nodul se
+## pune PE punctul copt din mijlocul podului, iar capetele pe punctele copte
+## de la ±k pasi (Track15: nodul pe baked[619], capetele pe baked[609] si
+## baked[629], 34.24 m): asa buzele asfaltului si capetele tablierului cad pe
+## ACELEASI puncte, fara fanta si fara suprapunere. Plasa de repunere a
+## viaductului de dedesubt isi coboara plafonul cu `net_ceiling_drop()`
+## (Track._build_viaduct_nets), ca tablierul afundat sa nu fie „cazut".
 ## Latimea e a tablierului; soseaua de la buze poate fi mai lata.
 ##
 ## [b]Modelul fizic[/b] (brief §3: NU lant de RigidBody3D cu joint-uri —
@@ -549,3 +558,25 @@ func deck_point_global(u: float) -> Vector3:
 
 func plates() -> Array[AnimatableBody3D]:
 	return _plates
+
+
+# ---------------------------------------------------------------- pentru Track
+
+## Contractul gaurii de carosabil (Track._resolve_span_holes): cati metri de
+## sosea lipsesc, centrati pe pozitia nodului. Lungimea tablierului.
+func road_hole_span() -> float:
+	if _length <= 1.0:
+		_resolve_ends()
+	return _length
+
+
+## Fara rampa de serviciu: peretele pistei (daca exista) nu se degajeaza.
+func wall_clear_span() -> float:
+	return 0.0
+
+
+## Cu cat trebuie coborat plafonul plasei de repunere de sub pod fata de cota
+## soselei: sageata de repaus + de doua ori sageata autobuzului (masurat 2.65 m
+## cu 4 masini pe tablier; 3.5 m lasa loc si la val).
+func net_ceiling_drop() -> float:
+	return rest_sag + 2.0 * sag_bus

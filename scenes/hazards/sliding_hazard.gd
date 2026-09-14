@@ -268,8 +268,41 @@ func _build_model() -> void:
 	# adica acelasi animal in doua culori. Tabela ramane una singura, in
 	# WorldProp; aici doar se aplica.
 	_remap_model_slots(model)
+	# Ruptura de accente (elefant: fildesii raman pe atlas), INAINTE de
+	# materiale — acelasi ordin ca `WorldProp._split_shutters` si acelasi
+	# motiv: nodul `_Accente` trebuie sa existe cand se aplica maparea, altfel
+	# ramane pe materialul implicit.
+	_split_model_accents(model)
 	if not model_classes.is_empty():
-		Palette.apply_class_materials(model, model_classes)
+		# CUANTIZAT la pas 0.5, ca in `avalanche_hazard.gd` (bolovanul de
+		# zapada): `object_triplanar_class_material` cacheaza pe (clasa,
+		# scale), deci scari distincte insemna materiale distincte pentru
+		# aceeasi textura — exact regresia pe care o vaneaza
+		# `tools/probe_decor.gd`. G_Elefant1 (1.0) si G_Elefant2 (1.1) ar fi
+		# dat DOUA materiale `elephant_hide` (masurat: 29 -> 31 pe Track14,
+		# buget +1) pentru un tipar de piele care la 10% diferenta de scara
+		# nu se distinge de la volan. `model.scale` (linia de mai sus, deci
+		# gabaritul de coliziune) NU se atinge — doar intrarea in cache-ul de
+		# textura.
+		var tex_scale := maxf(snappedf(model_scale, 0.5), 0.5)
+		# OBIECT-spatiu, nu `apply_class_materials`: hazardul se MISCA
+		# (traversare/pendulare), iar o clasa "tri:" proiectata in spatiul
+		# lumii ar lasa textura pe loc in timp ce corpul aluneca pe sub ea —
+		# acelasi defect ca la bolovanul de zapada din avalanche_hazard.gd.
+		# Pentru clasele fara prefix "tri:" (ex. barca sabani, "wood") nu
+		# schimba nimic: `class_material` foloseste UV-uri reale, nu
+		# triplanar, deci world-space si object-space produc acelasi material.
+		Palette.apply_object_class_materials(model, model_classes, tex_scale)
+		# A DOUA trecere, doar pe accentele NUMITE EXACT in mapare.
+		# `Palette._class_for` (folosit de apelul de mai sus) respinge ORICE
+		# nod terminat in `_Accente`, indiferent ce spune maparea — pazitorul
+		# corect impotriva prefixelor lacome (`House_A` nu trebuie sa se
+		# reverse peste `House_A_Accente`). Dar elefantul chiar VREA clasa PE
+		# accent (`Elephant_Mesh_Accente`): fildesii raman pe corp, pielea
+		# pleaca in accent, exact ca `WorldProp.ACCENT_HOLDS_CLASS` +
+		# `_apply_model_classes` pentru decorul static. Aici e varianta ei
+		# pentru un hazard care nu trece prin WorldProp.
+		_apply_named_accent_classes(model, tex_scale)
 	elif model_tri_class.is_empty():
 		Palette.apply_world_material(model)
 	else:
@@ -575,3 +608,77 @@ func _remap_model_slots(model: Node3D) -> void:
 		if mi == null or mi.mesh == null:
 			continue
 		mi.mesh = WorldProp._mesh_with_slots_moved(mi.mesh, remap as Dictionary)
+
+
+## Rupe accentele pictate (`WorldProp.ACCENT_SPLIT`) de pe modelul acestui
+## hazard, daca stem-ul GLB-ului e in `WorldProp.SPLIT_MODELS` — ACEEASI
+## mecanica pe care o foloseste decorul static (`WorldProp._split_shutters`),
+## doar ca aici hazardul isi incarca singur GLB-ul si nu trece prin WorldProp.
+##
+## Fara asta, o clasa ceruta prin `model_classes` pe un model cu accent (ex.
+## elefantul: fildesii pe slotul FOAM_WHITE) ar imbraca TOT nodul, fiindca
+## `Elephant_Mesh_Accente` n-ar exista inca. Trebuie sa ruleze INAINTE de
+## aplicarea materialelor.
+##
+## `where` poate fi o LISTA de grupuri de decor manual (vezi nota de la
+## `church_arch` in SPLIT_MODELS) — restrictie care nu are sens pentru un
+## hazard (n-are grup de decor), deci o lista inseamna "nu se aplica aici".
+func _split_model_accents(model: Node3D) -> void:
+	if model.scene_file_path.is_empty():
+		return
+	var stem := model.scene_file_path.get_file().get_basename()
+	if not WorldProp.SPLIT_MODELS.has(stem):
+		return
+	var where: Variant = WorldProp.SPLIT_MODELS[stem]
+	if where is Array:
+		return
+	var stack: Array[Node] = [model]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		for c in node.get_children():
+			stack.append(c)
+		var mi := node as MeshInstance3D
+		if mi == null:
+			continue
+		for prefix: String in WorldProp.ACCENT_SPLIT:
+			if String(mi.name).begins_with(prefix):
+				Palette.split_accents(mi, WorldProp.ACCENT_SPLIT[prefix])
+				break
+
+
+## Aplica pe `model_classes` clasa ceruta pentru un nod care se termina in
+## `Palette.ACCENT_SUFFIX`, dar NUMAI cand cheia din mapare e numele lui EXACT
+## (nu un prefix). `Palette.apply_object_class_materials` nu poate face asta —
+## `Palette._class_for` respinge orice `_Accente` inainte sa se uite la
+## mapare. Contractul e cel din `WorldProp._apply_model_classes`, portat aici
+## in spatiul OBIECTULUI (triplanar proiectat pe model, nu pe lume), ca
+## pielea elefantului sa nu alunece pe sub textura in timp ce traverseaza.
+##
+## `tex_scale` e CUANTIZAT (vezi apelantul), nu `model_scale` brut — acelasi
+## motiv ca la `apply_object_class_materials`: doua instante la scari vecine
+## nu trebuie sa coste doua materiale pentru acelasi tipar de piele.
+func _apply_named_accent_classes(model: Node3D, tex_scale: float) -> void:
+	for node in Palette._walk(model):
+		var mi := node as MeshInstance3D
+		if mi == null:
+			continue
+		var nm := String(mi.name)
+		if not nm.ends_with(Palette.ACCENT_SUFFIX):
+			continue
+		if not model_classes.has(nm):
+			continue
+		var cls := String(model_classes[nm])
+		if cls.begins_with(Palette.GLOW_PREFIX):
+			mi.material_override = Palette._glow_from_spec(
+				cls.trim_prefix(Palette.GLOW_PREFIX))
+		elif cls.begins_with(Palette.FINISH_PREFIX):
+			mi.material_override = Palette.finish_material(
+				cls.trim_prefix(Palette.FINISH_PREFIX))
+		elif cls.begins_with(Palette.SHADER_PREFIX):
+			mi.material_override = Palette.shader_material(
+				cls.trim_prefix(Palette.SHADER_PREFIX))
+		elif cls.begins_with(Palette.TRI_PREFIX):
+			mi.material_override = Palette.object_triplanar_class_material(
+				cls.trim_prefix(Palette.TRI_PREFIX), tex_scale)
+		else:
+			mi.material_override = Palette.class_material(cls)

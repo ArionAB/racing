@@ -140,6 +140,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.7, 2, 7.9)
 gizmo_extents = 3.0
 script = ExtResource("hzm")
 model = ExtResource("s_elephant")
+model_classes = {
+"Elephant_Mesh_Accente": "tri:elephant_hide"
+}
 face_travel = true
 motion = 1
 sweep_speed = 3.4
@@ -150,6 +153,9 @@ gizmo_extents = 3.0
 script = ExtResource("hzm")
 model = ExtResource("s_elephant")
 model_scale = 1.1
+model_classes = {
+"Elephant_Mesh_Accente": "tri:elephant_hide"
+}
 face_travel = true
 motion = 1
 sweep_speed = 3.0

@@ -693,6 +693,63 @@ const CLASS_TEXTURES := {
 	# masurat (probe_slots.gd), coroanele nu au un slot cald de indepartat —
 	# ele ADUNA deja pe 12/13/21, deci nu era nevoie de CLASS_TINT/CLASS_LIFT.
 	"acacia_canopy": "res://assets/textures/classes/acacia_canopy.png",
+	# SCOARTA GALBEN-VERZUIE a acaciei-febra (fever tree, Vachellia
+	# xanthophloea). ACEEASI dala ca "bark" — nu se dubleaza in memorie, se
+	# schimba doar ridicarea si tenta (mecanica volcanic_rock / tuff_cream /
+	# termite_clay). Redeschide respingerea valului 1 (vezi CLASSES_BY_MODEL,
+	# nota veche "fever_tree — RESPINS"): observatia era corecta (trunchiul
+	# galben e semnul speciei), dar concluzia gresita — o dala nu poate fi
+	# tentata direct spre o culoare MAI DESCHISA decat ea (albedo_color doar
+	# intuneca), insa CLASS_LIFT poate, exact ca la tuff_cream/termite_clay.
+	#
+	# Nu se putea tenta "bark" direct: e clasa trunchiurilor de acacia
+	# obisnuita/smochin/copac-uscat de pe Serengeti SI a palmierilor de pe
+	# Okinawa/Stromboli — o tenta galbena ar fi revopsit toate astea.
+	"bark_fever": "res://assets/textures/classes/bark.png",
+	# PIELEA elefantului (Serengeti, lotul ELEFANTULUI). ACEEASI dala ca
+	# "concrete" — nu se dubleaza in memorie, se schimba doar tenta (mecanica
+	# volcanic_rock / city_concrete / termite_clay).
+	#
+	# Elefantul a fost exclus in bloc din valul 1 cu argumentul corect pentru
+	# zebra ("dungile SUNT sloturile de paleta") — dar pielea lui e o
+	# suprafata monocroma incretita, exact ce descrie o clasa triplanara, nu o
+	# paleta de accente. Masurat pe .glb (tools/_tmp_probe_elephant4.gd):
+	# corpul (slot 29, 88.7% din arie) si capul/picioarele (slot 2, 2.8%) sunt
+	# amandoua griuri NEUTRE — nimic de pastrat acolo. Fildesii (slot 22,
+	# 8.5%, z=[-4.02,-2.66], fata modelului) raman pictati prin ACCENT_SPLIT/
+	# ACCENT_HOLDS_CLASS (vezi world_prop.gd): un alb intentionat, sters de
+	# orice clasa aplicata pe tot nodul.
+	#
+	# De ce "concrete" si nu "rock"/"stone_wall"/"alpine_granite"/
+	# "olkhon_marble": masurat (tools/_tmp_probe_elephant, script temporar,
+	# sters) directia dominanta a variatiei per candidat (raport std pe
+	# randuri sau coloane fata de std total, pe dala redusa la 256x256):
+	#   rock            0.581 pe randuri  -> STRATE orizontale (faleza
+	#                   sedimentara, exact ce style_bible §4 numeste gresit
+	#                   pentru o suprafata care nu e geologie)
+	#   olkhon_marble   0.446 pe coloane  -> vine/strate verticale
+	#   alpine_granite  0.265 pe randuri  -> sisturi, tot stratificat
+	#   stone_wall      0.259 pe randuri  -> calcar ciupit in BLOCURI (bun
+	#                   pentru zid, prea grosier pentru piele: variatie
+	#                   fina 19.13 e cea mai mare, dar in pete de bloc, nu
+	#                   in crapaturi fine)
+	#   plaster         aproape plat (std local 8x8 = 0.57 — e tencuiala
+	#                   neteda a satului eolian, zero relief de suprafata)
+	#   concrete        0.156 / 0.220     -> IZOTROP (nicio axa dominanta),
+	#                   variatie fina 18.12 pe bloc de 8x8, crapaturi si pete
+	#                   NEREGULATE — exact "incretit", nu "stratificat"
+	# `concrete` e singura fara directie dominanta si cu detaliu fin
+	# comparabil cu `stone_wall`, deci imbraca elefantul in crapaturi
+	# organice, nu in randuri de sediment.
+	#
+	# Zero PNG nou: refoloseste dala lui `concrete`. Scara triplanara ramane
+	# NESCHIMBATA fata de `concrete` (vezi CLASS_TRIPLANAR_SCALE) — masurat cu
+	# autocorelatie (diferenta medie absoluta intre pixeli la distanta d),
+	# distanta de decorelare a detaliului fin e ~19px din 512, adica 3.71%
+	# din dala. La scara existenta a lui `concrete` (o repetitie la 2 m),
+	# 3.71% * 2 m = 7.4 cm — in banda 5-15 cm ceruta de brief pentru
+	# increiturile pielii. Nicio derivare noua de scara nu era necesara.
+	"elephant_hide": "res://assets/textures/classes/concrete.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -773,6 +830,29 @@ const CLASS_TINT := {
 	# G si B in jos, ca la city_concrete — R ramane 1.0, canalul pe care
 	# ridicarea a nimerit exact.
 	"termite_clay": Color(1.0, 0.886, 0.947),
+	# Scoarta acaciei-febra: dupa CLASS_LIFT (k=1.3642, mai jos) dala ajunge la
+	# (234.3, 192.0, 146.9), tinta e slotul 0 SAND_LIGHT (232, 192, 116) —
+	# chiar galbenul scoartei (masurat de lotul respins in valul 1). Raportul
+	# target/dala pe canale, INAINTE de ridicare, e (1.351, 1.365, 1.077) —
+	# PESTE 1 pe toate trei, deci nu se poate obtine dintr-un `albedo_color`
+	# (doar intuneca): cere CLASS_LIFT, ca la tuff_cream/termite_clay. Tenta
+	# doar corecteaza R si B in jos dupa ridicare; G ramane 1.0, canalul pe
+	# care ridicarea (k = max al raportului) a nimerit exact.
+	"bark_fever": Color(0.990, 1.0, 0.789),
+	# Pielea elefantului: dala `concrete` (168.8, 160.7, 145.0) trasa spre
+	# VOLCANIC_BLACK (85, 83, 90) — slotul CORPULUI (29), 88.7% din arie
+	# masurata, deci tenta se calculeaza pe el, nu pe o medie ponderata cu
+	# capul/picioarele (slot 2, doar 2.8%). Toate trei canale ies SUB 1
+	# (0.503, 0.517, 0.621), deci nu cere CLASS_LIFT.
+	#
+	# Consecinta masurata pe capul/picioarele ramase pe slotul 2 (ASPHALT,
+	# 75,75,77): aceeasi tenta unica le duce la (85,83,90) — diferenta fata de
+	# tinta lor proprie e 18.25 in distanta euclidiana pe 0..255 (4.1% din
+	# maximul posibil), adica tot un gri rece inchis, in aceeasi familie ca
+	# ASPHALT, nu o pata straina. Acceptat: elefantul e UN nod, deci UN
+	# material, iar 2.8% din arie (capul, urechile, picioarele) nu justifica
+	# o a doua ruptura de accent pentru o diferenta sub prag de vizibilitate.
+	"elephant_hide": Color(0.5034, 0.5165, 0.6206),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -818,6 +898,16 @@ const CLASS_LIFT := {
 	# tenta, care coboara doua canale din trei. k = max(tinta_c / dala_c) pe
 	# canale = 1.3483 (canalul R e cel care nimereste exact).
 	"termite_clay": 0.549,
+	# Scoarta acaciei-febra: dala `bark` are luminanta 0.568 (rec709) si
+	# trebuie sa ajunga pe slotul 0 SAND_LIGHT (232, 192, 116), luminanta
+	# 0.749. Ridicarea e la 0.775, nu la 0.749, din acelasi motiv ca la
+	# macchia_dry/tuff_cream/termite_clay: tinta se atinge DUPA tenta, care
+	# coboara doua canale din trei. k = max(tinta_c / dala_c) pe canale =
+	# 1.3642 (canalul G e cel care nimereste exact — masurat cu
+	# tools/_tmp_probe_bark_fever.gd, esantionare 128x128 din bark.png:
+	# media (171.72, 140.74, 107.71), la 0.03-0.07% de valorile citate in
+	# nota de respingere a valului 1).
+	"bark_fever": 0.775,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -955,6 +1045,18 @@ const CLASS_TRIPLANAR_SCALE := {
 	# 5.8 m prinde ~2.9 repetitii: destul cat granulatia sa se citeasca la
 	# viteza, prea putin cat sa devina tapet (style_bible §4).
 	"city_concrete": 0.5,
+	# Pielea elefantului: ACEEASI scara ca `concrete`/`city_concrete`, NEDERIVATA
+	# din marimea elefantului (4.66 m inaltimea corpului, masurat pe .glb cu
+	# tools/_tmp_probe_elephant2.gd) ci din distanta de DECORELARE a detaliului
+	# fin al dalei — masurata cu diferenta medie absoluta intre pixeli la
+	# distanta d (tools/_tmp_probe pentru autocorelatie, script temporar,
+	# sters): curba urca abrupt si se aplatizeaza la d~=19px din 512, adica
+	# 3.71% din dala. La scara EXISTENTA a lui `concrete` (o repetitie la 2 m,
+	# nota de mai sus), 3.71% * 2 m = 7.4 cm — in banda 5-15 cm pe care
+	# style_bible/brief o cere pentru increiturile pielii de elefant.
+	# Rescalarea ar fi rezolvat o problema care nu exista: pastrarea scarii
+	# lui `concrete` nimereste deja tinta, fara nicio derivare suplimentara.
+	"elephant_hide": 0.5,
 	# Zidaria scarilor Shibati. `stone_wall` avea textura si ancora, dar NU si
 	# o scara triplanara — se folosea doar pe UV-uri reale. Kitul Chongqing are
 	# UV-urile colapsate (ca Stromboli), deci ii trebuie una.
@@ -970,6 +1072,16 @@ const CLASS_TRIPLANAR_SCALE := {
 	# cad exact cat sunt. Regula 1 din pipeline (scara sursei fata de
 	# repetitia din joc, style_bible §4).
 	"bark": 0.77,
+	# Scoarta acaciei-febra: ACEEASI scara ca `bark` (0.77), verificata pe
+	# piesa, nu copiata orbeste. Masurat pe geometria fever_tree.glb
+	# (tools/_tmp_probe_bark_fever.gd, vertecsii pe slot 0 cu y <= 0.15/0.5/
+	# 1.0 m — stabil pe toate trei benzile): trunchiul are 0.648 m diametru
+	# la baza. Acaciile-umbrela (deja pe `bark` la 0.77, nicio plangere de
+	# scara) masoara 0.570-0.686 m la baza (tools/_tmp_probe_trunks.gd) —
+	# fever_tree cade CHIAR IN mijlocul acelui interval, deci scara sursei de
+	# 1.3 m/repetitie ramane la fel de potrivita ca pe acaciile-umbrela. Nu
+	# exista o masuratoare care sa ceara alta cifra.
+	"bark_fever": 0.77,
 	# Termitiere (Serengeti): scara DERIVATA din piesa, nu copiata de la `rock`
 	# (0.14, calibrata pe faleze de 6-12 m). Cele doua modele masoara 1.5 m
 	# (termite_mound_a) si 3.0 m (termite_mound_b) pe verticala

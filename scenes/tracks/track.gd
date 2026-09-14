@@ -924,7 +924,36 @@ static func themes() -> Dictionary:
 			# Malul roz: banda ingusta de NEON_PINK peste linia apei (sd
 			# -5..+4 m), flamingii ca textura de departe; cei modelati
 			# (FlamingoFlock) stau tot acolo.
-			"lagoon_crust_tint": Palette.color(Palette.FOAM_WHITE),
+			#
+			# RAPORT DEZVOLTATOR (13 sep, de la volan): crusta se citeste
+			# PLATA — "valuri de relief fara granulatie de suprafata".
+			# Masurat cu ProbeSerCrust.tscn (headless, pe mesh-ul terenului,
+			# fara Snapshot): sigma texturii LOCALE pe podeaua crustei era
+			# 16.6 fata de 10.5 pe savana din jur — MAI MARE, nu mai mica,
+			# deci ipoteza initiala ("tenta aproape-alba satureaza/aplatizeaza
+			# luminanta") nu se confirma pe luminanta. Ce s-a confirmat e
+			# SATURATIA: FOAM_WHITE are S=0.037 (aproape gri), iar ALBEDO-ul
+			# simulat (COLOR.rgb * micro * macro, ca in terrain_splat.gdshader)
+			# iese cu saturatie mediana 0.0385 pe podeaua crustei fata de
+			# 0.524 pe podeaua de savana — un multiplicator aproape-gri sterge
+			# variatia de NUANTA pe care textura o poarta, chiar daca luminanta
+			# tot variaza. Rezultatul se citeste "panza alb-gri", nu "sol".
+			# Fix: tenta ramane deschisa (V comparabil, cf. masuratoarea de mai
+			# jos), dar cu saturatie reala — un gri-verzui prafuit, ca varul de
+			# soda mineralizat, nu alb de spuma. Ales in familia RECE (verde),
+			# nu calda (crem/CONCRETE): CONCRETE (H39, S0.16) e la doar 77° de
+			# hue de FLAMINGO_PINK (H324) — exact reteta care a facut pasarile
+			# sa dispara pe fond palid intr-o iteratie anterioara (vezi nota
+			# din palette.gd la FLAMINGO_PINK). Verdele pastreaza 146° distanta
+			# de hue, la fel de sigur ca vechiul FOAM_WHITE (157°).
+			# Simulat pe texturile reale (surface_sand + surface_sand_macro,
+			# shade 0.85): saturatie iesita 0.0372 (vechi) -> 0.1556 (nou),
+			# adica de 4,2x, in banda CONCRETE (0.155)/dry_vegetation din
+			# style_bible §1. Luminanta estimata randata scade proportional
+			# V 0.949->0.90, adica ~1.00 -> ~0.95 (cf. "crusta V 1.00, drumul
+			# V 0.63-0.75" masurat anterior) — ramane cu ~0.20 peste drum,
+			# regula "asfaltul cel mai inchis" (style_bible §1) intacta.
+			"lagoon_crust_tint": Color(0.78, 0.90, 0.76),
 			"lagoon_crust_width": 48.0,
 			"lagoon_crust_fade": 16.0,
 			"lagoon_shore_tint": Color(0.86, 0.55, 0.58),
@@ -4931,6 +4960,20 @@ func _build_terrain() -> void:
 	var crust_tint: Variant = theme_flag("lagoon_crust_tint", null)
 	var crust_width := float(theme_flag("lagoon_crust_width", 40.0))
 	var crust_fade := maxf(float(theme_flag("lagoon_crust_fade", 15.0)), 0.001)
+	# GARDA DE COTA a crustei — gasita masurand (ProbeSerCrust), nu ceruta de
+	# brief. `lagoon_signed_dist` e distanta PLANA (XZ) pana la conturul
+	# lagunei: pe fundul plat al craterului asta e exact ce vrem, dar acelasi
+	# calcul nu stie ca peretele craterului urca abrupt la doar cativa metri
+	# XZ mai departe. Masurat pe bucket-ul "crust_w aproape 1.0": 151 din 410
+	# vertecsi (37%) stateau la cota 6-42 m, adica pe PERETE, nu pe podea —
+	# crusta alba se intindea peste versant ca o panza, contribuind vizibil la
+	# raportul "valuri de relief fara granulatie" (arata drapat, nu asezat).
+	# Fade pe inaltime FATA DE NIVELUL LACULUI (sea_y), cu aceeasi forma
+	# trapez-cu-prag ca rock/snow de mai jos: sub +8 m crusta ramane intreaga,
+	# intre +8 si +16 m se stinge, peste +16 m e zero — acopera podeaua reala
+	# (masurata pana la ~9 m median in banda apropiata) fara sa urce pe versant.
+	var crust_rise_start := 8.0
+	var crust_rise_fade := 8.0
 	var shore_tint: Variant = theme_flag("lagoon_shore_tint", null)
 	var shore_in := float(theme_flag("lagoon_shore_in", 4.0))
 	var shore_out := float(theme_flag("lagoon_shore_out", 5.0))
@@ -5140,6 +5183,14 @@ func _build_terrain() -> void:
 								crust_w = clampf(crust_w + dirt_noise.get_noise_2d(
 									v.x * 0.5, v.z * 0.5) * 0.30, 0.0, 1.0)
 								crust_w = smoothstep(0.0, 1.0, crust_w)
+								# Garda de cota (vezi comentariul de la declararea
+								# crust_rise_start): fara ea crusta urca pe peretele
+								# craterului oriunde XZ-ul cade in banda, masurat
+								# 37% din nucleul benzii pe versant (cota 6-42 m).
+								var rise := clampf(
+									(v.y - sea_y - crust_rise_start) / crust_rise_fade,
+									0.0, 1.0)
+								crust_w *= 1.0 - rise
 								if crust_w > 0.0:
 									tint = tint.lerp(crust_tint as Color, crust_w)
 									# Pe soda nu creste iarba.

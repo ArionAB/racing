@@ -261,6 +261,16 @@ const SPLIT_MODELS := {
 	# (clasa triplanara) ar fi sters-o; ruptura o lasa pe atlas, ca la case.
 	# Bolovanii si kopje-ul-rampa sunt pe [3, 4, 29] curat: nu se rup.
 	"kopje_camp": true,
+	# Boma masai: nodul `Maasai_Boma` (colibele) e 36.6% LUT (slot 2), 43.5%
+	# PAIE (slot 13) si 19.8% usa (slot 4) — masurat cu probe_slots.gd pe GLB-ul
+	# re-exportat. `termite_clay` pus pe tot nodul cadea si peste paie: masurat,
+	# dala aterizeaza pe (189.7, 116.2, 74.3), deci paiele (#AF9F4E, luminanta
+	# 157) se INCHIDEAU la 129 (-18%) si se mutau din ocru-galben in caramiziu
+	# de lut, iar usa (#67421F, luminanta 71) se DESCHIDEA la 129 (+81%).
+	# Adica exact acoperisurile reclamate ca plate isi pierdeau si culoarea.
+	# Ruptura lasa pe corp doar lutul; paiele si usa pleaca in `_Accente` si
+	# raman pe atlas. Zero materiale in plus.
+	"maasai_boma": true,
 	"crater_gap": true,
 	# Orizontul: Lengai are varful alb (22) pe [2, 22, 29], peretele opus are
 	# padurea de pe creasta (12, 21) pe [3, 12, 21]. Aceeasi ruptura, ca
@@ -309,6 +319,14 @@ const SPLIT_MODELS := {
 	# rupt si smochinul de pe Track11. Ramane limitarea pe grupuri de mai sus.
 	"fever_tree": true,
 	"euphorbia": true,
+	# Elefantul (Serengeti, lotul ELEFANTULUI): pielea (corp + cap/picioare,
+	# sloturile 2 si 29, 91.5% din arie masurata) ia clasa `elephant_hide`, dar
+	# fildesii (slot 22, 8.5%, z=[-4.02,-2.66] — fata modelului) raman
+	# pictati pe FOAM_WHITE, ca sa nu-i imbrace clasa in piele. Un singur nod
+	# de mesh (`Elephant_Mesh`), deci foloseste aceeasi mecanica de ruptura ca
+	# `church_arch`/`fig_tree`/`fever_tree`: ACCENT_HOLDS_CLASS, nu
+	# CLASSES_BY_MODEL direct pe corp.
+	"elephant": true,
 }
 
 const ACCENT_SPLIT := {
@@ -342,6 +360,11 @@ const ACCENT_SPLIT := {
 	# trece in `_Accente` si ramane pe atlas. Corpul ia granitul din
 	# CLASSES_BY_MODEL.
 	"Kopje_Camp": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	# Boma masai: lista e ce RAMANE in corp, adica doar LUTUL peretilor
+	# (SAND_SHADOW 2, 36.6% din vertecsi, y 0.00..1.70). Paiele (DRY_VEGETATION
+	# 13, 43.5%, y 1.65..3.69 — acoperisul) si usa (ROCK_DARK 4) trec in
+	# `Maasai_Boma_Accente` si raman pictate pe atlas.
+	"Maasai_Boma": [Palette.SAND_SHADOW],
 	"Crater_Gap": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
 	"Lengai": [Palette.SAND_SHADOW, Palette.MARBLE_GREY],
 	"Crater_Far_Wall": [Palette.ROCK_LIGHT],
@@ -388,6 +411,15 @@ const ACCENT_SPLIT := {
 	# euphorbia: "trunchi" (baza carnoasa, sub coroana candelabru) pe 28
 	# (LOG_DARK), 5.9% verts, y 0.00..1.60 — cea mai mica piesa din patru.
 	"Euphorbia": Palette.LOG_DARK,
+	# Elefantul: se pastreaza DOAR fildesii (22, FOAM_WHITE) pe corp — restul
+	# (2 SAND_SHADOW/cap-picioare, 29 MARBLE_GREY/corp, remapate deja de
+	# SLOT_REMAP_BY_MODEL pe ASPHALT/VOLCANIC_BLACK inainte sa ajunga aici,
+	# vezi nota de acolo) trece in `_Accente` si ia `elephant_hide`. Pe dos
+	# fata de `Fig_Tree` (unde piesa mica ramane si masa mare pleaca): aici
+	# ambele sloturi mari pleaca si doar accentul alb ramane, ca la
+	# `Kopje_Camp` unde iarba (mica) ramane si granitul (mare) e cel ce
+	# primeste clasa prin ACCENT_HOLDS_CLASS.
+	"Elephant_Mesh": Palette.FOAM_WHITE,
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -413,6 +445,10 @@ const ACCENT_HOLDS_CLASS := {
 	"fever_tree": true,
 	"fig_tree": true,
 	"euphorbia": true,
+	# Elefantul: accentul (corpul, cap, picioare — restul dupa ce fildesii au
+	# ramas pe corp) ia `elephant_hide`; corpul original ramane doar cu
+	# fildesii pe atlas.
+	"elephant": true,
 }
 
 
@@ -755,6 +791,60 @@ const CLASSES_BY_MODEL := {
 	"termite_mound_b": {
 		"Termite_Mound_B": Palette.TRI_PREFIX + "termite_clay",
 	},
+
+	# --- Serengeti: LUTUL colibelor boma (lotul re-exportului, sep 2026) ----
+	#
+	# Boma a fost RESPINSA in valul 1 (materiale) cu motivul: era UN singur
+	# nod de mesh, iar `ACCENT_SPLIT` rupe doar noduri copil deja existente in
+	# export — cu 3 instante pe pista, reexportul nu se justifica DOAR pentru
+	# clasa. Redeschisa dupa ce dezvoltatorul a vazut de la volan ca boma (POI
+	# A, langa start) e mare in prim-plan, cu acoperisurile de paie complet
+	# plate. Piesa a fost re-exportata pe doua noduri (tools/blender/
+	# build_serengeti_camp.py, build_boma()): `Maasai_Boma` (cele 4 colibe)
+	# si `Boma_Camp` (gardul de spini + Maasai-ul cu sulita).
+	#
+	# NUME ales dupa un bug prins headless: prima incercare a numit al doilea
+	# nod `Maasai_Boma_Camp`. Maparea de aici alege pe PREFIX cel mai lung
+	# (mai jos, `_apply_model_classes`), si "Maasai_Boma_Camp".begins_with(
+	# "Maasai_Boma") e adevarat — gardul si Maasai-ul mosteneau `termite_clay`
+	# si acopereau shuka (slot 14, CAR_RED). Instantiere Track14 (cele 3 boma)
+	# arata ambele noduri cu albedo (1.0, 0.886, 0.947) — tenta clasei — pe
+	# ambele. Exact capcana `House_`/`House_Sand` de mai sus. `Boma_Camp` nu
+	# mai e prefixat de `Maasai_Boma`.
+	#
+	# Doar colibele intra aici. Masurat pe .glb (raportul complet, tools/
+	# probe_slots.gd): slotul 2 (SAND_SHADOW/MUD, lutul cilindrului) e 4,4%
+	# din piesa INTREAGA dinainte de ruptura — acum e o parte mult mai mare
+	# din nodul `Maasai_Boma` de sine statator (colibele + usa, fara gard).
+	#
+	# `termite_clay`, nu o clasa noua: masurat raportul RGB al lutului (hex
+	# #915D27 = 145,93,39) fata de dala `rock.png` (medie 140.7,97.3,58.2) —
+	# raport (1.03, 0.96, 0.67), ecart doar 0.36 intre canale. E cea mai
+	# apropiata potrivire dintre toate clasele existente (wood 0.62, plaster
+	# 0.65, stone_wall 0.66, concrete 0.59, pine_needles 0.83, macchia 1.14 —
+	# toate masurate cu Pillow direct pe PNG-urile din assets/textures/classes/).
+	# E si aceeasi familie de MATERIAL, nu doar de culoare: lutul batut al unei
+	# colibe maasai e aceeasi argila de savana ca lutul unei termitiere.
+	# Refoloseste materialul deja cache-uit de termite_mound_a/b de mai sus —
+	# ZERO materiale in plus la garda (Track14 ramane la 27; cache pe clasa,
+	# vezi Palette._tri_mats).
+	#
+	# Usa (slot 4, ROCK_DARK, 4,6%) NU intra: e un accent mic si intunecat,
+	# pe care clasa `termite_clay` — ridicata si tentata spre cald — l-ar fi
+	# spalat. Fara SPLIT_MODELS/ACCENT_SPLIT pentru nodul asta: masurat, 4,6%
+	# pe un singur slot mic nu justifica inca o ruptura (acelasi prag ca la
+	# termite_mound, unde accentul de 22-23% pe UN slot n-a cerut ruptura).
+	#
+	# Acoperisul de paie (slot 13, DRY_VEGETATION/THATCH, 5,1%) RAMANE pe
+	# atlas: masurat, ratia THATCH (hex #AF9F4E = 175,159,78) fata de ORICE
+	# clasa din repo are ecart peste 0.49 (cel mai bun candidat, concrete,
+	# tot gresit ca familie de material — beton turnat pe acoperis de paie).
+	# Zero pipeline de textura noua in lotul asta (ca la baobab mai sus):
+	# ramane pictat, refuz motivat, nu omisiune.
+	"maasai_boma": {
+		"Maasai_Boma": Palette.TRI_PREFIX + "termite_clay",
+	},
+
 	# --- Serengeti: SCOARTA copacilor, clasa `bark` -------------------------
 	#
 	# Dala `bark` exista deja (Okinawa/Stromboli, sursa palm_tree_bark, scanare
@@ -786,18 +876,23 @@ const CLASSES_BY_MODEL := {
 	#     fara nicio pierdere vizibila. Framas de verificat CAND apare o sursa
 	#     potrivita: o captura de aproape ar confirma ca profilul + culoarea
 	#     LARCH_RUST sunt suficiente.
-	#   fever_tree — RESPINS. Trunchiul ei (slot 0, SAND_LIGHT) NU e un maro
-	#     oarecare: `build_serengeti_plants.py` il numeste explicit
-	#     BARK_YELLOW si spune direct "scoarta galben-verde... trunchiul palid
-	#     e ce o deosebeste de la volan" — e identitatea speciei (de-aia se
-	#     numeste "fever tree", Vachellia xanthophloea). Dala `bark` e gradata
-	#     spre ancora WOOD_WEATHERED (maro), fara tenta proprie in CLASS_TINT:
-	#     pusa pe trunchi, l-ar fi vopsit maro peste galbenul care e chiar
-	#     motivul pentru care specia exista in kit. S-ar putea repara cu o a
-	#     doua clasa (mecanica volcanic_rock: acelasi PNG, CLASS_TINT galben) —
-	#     dar tot ar aplica INELE DE PALMIER pe un trunchi neted de acacie, deci
-	#     nu doar culoarea e gresita. Ramane pe atlas, netul: sub 1.0 material
-	#     cheltuit ca sa NU stergem singurul indiciu vizual al speciei.
+	#   fever_tree — RESPINS in valul 1, REDESCHIS si INVERSAT in valul 2 (vezi
+	#     intrarea "fever_tree" mai jos in acest dictionar). Observatia a fost
+	#     corecta: trunchiul ei (slot 0, SAND_LIGHT) NU e un maro oarecare —
+	#     `build_serengeti_plants.py` il numeste explicit BARK_YELLOW si spune
+	#     direct "scoarta galben-verde... trunchiul palid e ce o deosebeste de
+	#     la volan" — e identitatea speciei (de-aia se numeste "fever tree",
+	#     Vachellia xanthophloea). Dala `bark` e gradata spre ancora
+	#     WOOD_WEATHERED (maro), fara tenta proprie: pusa direct, l-ar fi
+	#     vopsit maro peste galbenul care e chiar motivul pentru care specia
+	#     exista in kit.
+	#     CONCLUZIA gresita a fost "deci ramane pe atlas": exact mecanica
+	#     volcanic_rock/tuff_cream/termite_clay (aceeasi dala, CLASS_LIFT +
+	#     CLASS_TINT calculate) rezolva problema — clasa noua `bark_fever`
+	#     ATERIZEAZA pe SAND_LIGHT in loc de WOOD_WEATHERED, deci semnul
+	#     speciei se pastreaza SI trunchiul capata granulatie de scoarta.
+	#     Ramane un avertisment real (inele de palmier pe un trunchi de
+	#     acacie), notat la noua intrare, nu o respingere totala.
 	#
 	# Zero PNG nou, zero clasa noua: `bark` refoloseste exact dala si scara de
 	# pe Okinawa/Stromboli. Corpurile de mai jos sunt deja RUPTE (SPLIT_MODELS/
@@ -858,7 +953,26 @@ const CLASSES_BY_MODEL := {
 		"Acacia_Umbrella_C": Palette.TRI_PREFIX + "bark",
 		"Acacia_Umbrella_C_Accente": Palette.TRI_PREFIX + "acacia_canopy",
 	},
+	# fever_tree: CORPUL primeste scoarta acum (valul 2, redeschidere a
+	# respingerii de mai sus la "fever_tree — RESPINS"). Clasa noua
+	# `bark_fever` (Palette.gd) rezolva exact obiectia veche: e ACEEASI dala
+	# `bark` (zero PNG nou), dar cu CLASS_LIFT+CLASS_TINT calculate sa
+	# aterizeze pe SAND_LIGHT (232,192,116) — galbenul scoartei — nu pe
+	# WOOD_WEATHERED. Semnul speciei (trunchi palid) se pastreaza, doar ca
+	# acum are granulatie de scoarta in loc de o dala plata. Scara triplanara
+	# ramane 0.77, verificata pe piesa (vezi nota din CLASS_TRIPLANAR_SCALE):
+	# trunchiul are 0.648 m diametru la baza, chiar in intervalul acaciilor-
+	# umbrela (0.57-0.69 m) care deja folosesc aceeasi scara fara plangeri.
+	#
+	# Obiectia despre INELELE de palmier ramane valabila ca AVERTISMENT, nu ca
+	# motiv de respingere totala: la 148 de instante si scara comparabila cu
+	# acaciile-umbrela (unde acelasi bark citeste bine), riscul e mult mai mic
+	# decat pe baobab (6,44 m, RESPINS mai sus). Verificare vizuala ramasa
+	# NEFACUTA (necesita captura, vezi raportul lotului) — daca inelele de
+	# palmier se citesc totusi ciudat pe o acacie, following-up e o sursa noua
+	# de bark, nu o alta clasa.
 	"fever_tree": {
+		"Fever_Tree": Palette.TRI_PREFIX + "bark_fever",
 		"Fever_Tree_Accente": Palette.TRI_PREFIX + "acacia_canopy",
 	},
 	# fig_tree: ACCENT_SPLIT pastreaza si fructele (slot 22) pe CORP, langa
@@ -870,6 +984,50 @@ const CLASSES_BY_MODEL := {
 	},
 	"euphorbia": {
 		"Euphorbia_Accente": Palette.TRI_PREFIX + "acacia_canopy",
+	},
+
+	# --- Serengeti: PIELEA elefantului -------------------------------------
+	#
+	# Vezi ACCENT_SPLIT["Elephant_Mesh"] pentru ruptura si nota lunga din
+	# palette.gd (CLASS_TEXTURES/CLASS_TINT) pentru masuratorile care au ales
+	# dala `concrete` si tenta. Aici doar cablarea: accentul (corpul, capul,
+	# picioarele — 91.5% din arie) ia clasa, corpul original ramane cu
+	# fildesii (FOAM_WHITE) pe atlas.
+	#
+	# UN material in plus la garda (Track14: 27 -> 28).
+	#
+	# RESPINSE, masurat, nu presupus (acelasi kit, sloturi verificate cu
+	# tools/_tmp_probe_hippo_croc.gd, script temporar, sters):
+	#   hippo_back — e cel mai monocrom animal din kit (100% pe slotul 4,
+	#     ROCK_DARK), si tinta lui ar fi fost o tenta separata (concrete ->
+	#     ROCK_DARK, (0.61, 0.41, 0.21), fara CLASS_LIFT) — merita pe cifre.
+	#     NU intra fiindca lotul asta are voie sa adauge cel mult UN material
+	#     (instructiunea lotului), iar elefantul e piesa ceruta explicit.
+	#     O tenta separata pentru hippo ar fi un al DOILEA material (acelasi
+	#     PNG, alta intrare in cache-ul `_tri_mats`, cheie pe clasa) — ramane
+	#     pentru un lot viitor daca bugetul permite.
+	#   crocodile — pe TREI sloturi in DOUA familii de nuanta incompatibile:
+	#     12 CACTUS_GREEN (52.8%, verde ~H88) si 2 SAND_SHADOW + 4 ROCK_DARK
+	#     (47.2%, maro ~H29-31) — 59 de grade distanta pe cerc, o singura
+	#     tenta multiplicativa nu poate impinge un gri neutru spre AMBELE
+	#     fara sa greseasca una din ele. Ar cere fie doua clase, fie o ruptura
+	#     de accent — peste bugetul de 1 material, si crocodilul e oricum
+	#     placi/solzi, alt limbaj de suprafata decat pielea incretita.
+	#
+	# NEACOPERITI, deliberat: `G_Elefant1`/`G_Elefant2` din grupul "Hazarduri"
+	# (Track14.tscn) sunt elefanti MOBILI puse prin HazardMarker (motion=1,
+	# sweep_speed, face_travel) — alt cod (track.gd/hazard_marker.gd,
+	# `Palette.apply_triplanar_class`), care pune `material_override` pe TOT
+	# subarborele, fara mecanica de accent-split. Aplicat acolo prin
+	# `tri_class`, ar sterge fildesii (fara ACCENT_SPLIT in codul ala) SI ar
+	# "inota" pe pielea care se MISCA (proiectie de lume pe un corp translat —
+	# acelasi defect documentat la CLASS_TRIPLANAR_SCALE["snow"], unde
+	# bolovanul rulant cere `apply_object_triplanar_class`). Brief-ul lotului
+	# oricum numara doar cele 9 instante DecorManual (6 ZoneE + 3 ZoneG);
+	# elefantii-hazard raman pe atlas pana cand cineva scrie varianta
+	# obiect-spatiu + accent pentru `hazard_marker.gd`.
+	"elephant": {
+		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
 	},
 }
 

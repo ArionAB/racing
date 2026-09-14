@@ -10327,6 +10327,23 @@ func _build_viaduct_nets() -> void:
 		if deck_min == INF:
 			continue
 		var top := deck_min - 1.6
+		# Un tablier care SE AFUNDA (podul de franghie din Machu Picchu:
+		# sageata pana la 2.65 m masurata cu 4 masini pe el) ar intra in plasa
+		# cu masinile pe el. Fiecare hazard din fereastra rapei care declara
+		# `net_ceiling_drop()` coboara plafonul cu atat.
+		for node in _net_drop_nodes():
+			var p := to_local((node as Node3D).global_position)
+			var ci := 0
+			var best := INF
+			for i in n:
+				var d := p.distance_squared_to(baked[i])
+				if d < best:
+					best = d
+					ci = i
+			var f := _dists[ci] / total
+			var inside := (f >= r.x and f <= r.y) if r.x <= r.y 				else (f >= r.x or f <= r.y)
+			if inside:
+				top = minf(top, deck_min - 1.6 - float(node.call("net_ceiling_drop")))
 		var bottom := top - 25.0
 		var zone := RespawnZone.new()
 		zone.name = "ViaductNet%d" % ri
@@ -10343,6 +10360,18 @@ func _build_viaduct_nets() -> void:
 
 ## Cat dincolo de amprenta XZ a tablierului se intinde plasa viaductului.
 const VIADUCT_NET_MARGIN: float = 45.0
+
+## Nodurile (Node3D) care cer plasei de viaduct un plafon mai jos.
+func _net_drop_nodes() -> Array[Node]:
+	var out: Array[Node] = []
+	var stack: Array[Node] = [self]
+	while not stack.is_empty():
+		var nd: Node = stack.pop_back()
+		if nd != self and nd is Node3D and nd.has_method("net_ceiling_drop"):
+			out.append(nd)
+		for c in nd.get_children():
+			stack.append(c)
+	return out
 
 ## Plasa de siguranta a unei creste: un volum plat de nisip, mult SUB sosea,
 ## in jurul zonei de aterizare. Plafonul se calculeaza din cea mai joasa

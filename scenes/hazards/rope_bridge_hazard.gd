@@ -21,8 +21,17 @@ extends Node3D
 ## sau, editabil cu gizmo, un copil Path3D numit „Route" cu DOUA puncte
 ## (primul = buza de plecare, ultimul = buza de sosire); daca exista, el
 ## bate exporturile. Cele doua capete trebuie sa fie CHIAR pe cota soselei la
-## buze (tablierul incepe la nivelul lor, fara prag), iar pista trebuie sa
-## lase GOL carosabilul intre ele (custom_ravines) — podul e drumul acolo.
+## buze (tablierul incepe la nivelul lor, fara prag). GOLUL din carosabil il
+## cere podul singur: `road_hole_span()` (acelasi contract ca
+## RotatingSpanHazard, vezi Track._resolve_span_holes) — Track taie asfaltul,
+## coliziunea soselei si parapetul pe `2k` pasi copti centrati pe POZITIA
+## NODULUI, cu lungimea cea mai apropiata de a tablierului. De aceea nodul se
+## pune PE punctul copt din mijlocul podului, iar capetele pe punctele copte
+## de la ±k pasi (Track15: nodul pe baked[619], capetele pe baked[609] si
+## baked[629], 34.24 m): asa buzele asfaltului si capetele tablierului cad pe
+## ACELEASI puncte, fara fanta si fara suprapunere. Plasa de repunere a
+## viaductului de dedesubt isi coboara plafonul cu `net_ceiling_drop()`
+## (Track._build_viaduct_nets), ca tablierul afundat sa nu fie „cazut".
 ## Latimea e a tablierului; soseaua de la buze poate fi mai lata.
 ##
 ## [b]Modelul fizic[/b] (brief §3: NU lant de RigidBody3D cu joint-uri —
@@ -143,6 +152,10 @@ const SHADER_PATH: String = "res://assets/shaders/rope_bridge.gdshader"
 @export_range(2.0, 40.0, 0.5) var roll_arm: float = 20.0
 
 @export_group("Constructie")
+## Incarcari FANTOMA (fractie u, lateral x, mass_factor): apasa tablierul ca
+## niste masini care nu exista. Pentru capturi (tools/snapshot.gd
+## `--rope-load`) si pentru editor — nu pentru joc.
+@export var preview_loads: Array[Vector3] = []
 @export_range(4, 16) var plate_count: int = 8
 @export_range(0.0, 0.5, 0.05) var plate_overlap: float = 0.2
 
@@ -448,6 +461,13 @@ func _gather_loads() -> void:
 		moment += car.mass_factor * local.x * p
 		load += car.mass_factor * p
 		_dips.append(Vector2(u, a * dip_ratio))
+	for ph in preview_loads:
+		var a := amplitude_for(ph.z)
+		var p := _p(clampf(ph.x, 0.0, 1.0))
+		_sag_target += a * p
+		moment += ph.z * ph.y * p
+		load += ph.z * p
+		_dips.append(Vector2(ph.x, a * dip_ratio))
 	_sway_target = sway_gain * moment / (deck_mass + load)
 	if _dips.size() > 4:
 		_dips.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.y > b.y)
@@ -549,3 +569,36 @@ func deck_point_global(u: float) -> Vector3:
 
 func plates() -> Array[AnimatableBody3D]:
 	return _plates
+
+
+## Sare peste dinamica: starea = tinta incarcarilor curente (capturi).
+func settle_now() -> void:
+	_gather_loads()
+	_sag = _sag_target
+	_sag_vel = 0.0
+	_sway = _sway_target
+	_sway_vel = 0.0
+	_place_plates(0.0)
+	_push_shader_params()
+
+
+# ---------------------------------------------------------------- pentru Track
+
+## Contractul gaurii de carosabil (Track._resolve_span_holes): cati metri de
+## sosea lipsesc, centrati pe pozitia nodului. Lungimea tablierului.
+func road_hole_span() -> float:
+	if _length <= 1.0:
+		_resolve_ends()
+	return _length
+
+
+## Fara rampa de serviciu: peretele pistei (daca exista) nu se degajeaza.
+func wall_clear_span() -> float:
+	return 0.0
+
+
+## Cu cat trebuie coborat plafonul plasei de repunere de sub pod fata de cota
+## soselei: sageata de repaus + de doua ori sageata autobuzului (masurat 2.65 m
+## cu 4 masini pe tablier; 3.5 m lasa loc si la val).
+func net_ceiling_drop() -> float:
+	return rest_sag + 2.0 * sag_bus

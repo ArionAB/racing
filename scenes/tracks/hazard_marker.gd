@@ -144,6 +144,26 @@ enum Kind {
 ## e exact ce urca numarul ala. Vezi CLAUDE.md §texturi.
 @export var tri_class: String = ""
 
+## Mapare NUME-DE-NOD -> clasa, pentru modelele mixte (o parte primeste clasa,
+## alta ramane pe atlas). Gol = doar `tri_class`, pe tot subarborele.
+##
+## Spre deosebire de `tri_class` (care imbraca TOT modelul), asta se aplica pe
+## fiecare `MeshInstance3D` in parte, dupa cel mai lung prefix de nume care se
+## potriveste — acelasi contract ca `WorldProp.CLASSES_BY_MODEL` si ca
+## `_hazard_kinds()`/`kind["classes"]` din `Track._build_hazard`. Valoarea
+## poate purta prefixul "tri:" pentru clasele triplanare (ex.
+## "tri:elephant_hide") sau "finish:"/"glow:"/"shader:" ca in restul paletei.
+##
+## De ce exista pe langa `tri_class`: elefantul-hazard (Serengeti) trebuie sa
+## primeasca `elephant_hide` doar pe piele, nu si pe fildesi (slot 22,
+## FOAM_WHITE) — `tri_class` ar imbraca tot modelul si ar sterge fildesii.
+## `SlidingHazard` rupe intai accentul (ACCENT_SPLIT/SPLIT_MODELS din
+## WorldProp, aceeasi mecanica de la prop-urile statice) si aplica maparea de
+## aici cu `Palette.apply_object_class_materials` — triplanar in spatiul
+## OBIECTULUI, ca pielea sa nu "inoate" pe un corp care se misca (style_bible
+## §4, acelasi leac ca la bolovanul de zapada din avalanche_hazard.gd).
+@export var model_classes: Dictionary = {}
+
 @export_group("Rostogolire")
 
 ## Doar pentru ROCKFALL, cand nodul are un copil Path3D cu traseul.
@@ -198,6 +218,8 @@ func model_spec() -> Dictionary:
 			spec["model_node"] = model_node
 	if not tri_class.is_empty():
 		spec["tri_class"] = tri_class
+	if not model_classes.is_empty():
+		spec["classes"] = model_classes
 	# Modul de miscare se trimite DOAR cand nu e implicitul. Cheia lipsa
 	# inseamna „ce zice pista", exact ca la model — un `motion: 0` trimis mereu
 	# ar fi stins o eventuala declaratie de tema, in loc s-o lase sa vorbeasca.

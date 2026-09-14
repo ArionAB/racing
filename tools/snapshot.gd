@@ -54,6 +54,15 @@ extends Node
 ##                             din ciclul lor (toate la aceeasi faza): ~0.29-0.57
 ##                             urca, ~0.60-0.64 MATURA banda, ~0.64-0.68 urca
 ##                             sa elibereze.
+##   --rope-load=2.6[,0.5]     PODUL DE FRANGHIE (RopeBridgeHazard, Machu
+##                             Picchu): o masina-fantoma cu mass_factor-ul dat
+##                             (Autobuz 2.6, sport 0.9) apasa tablierul la
+##                             fractia u din pod (implicit 0.5 = mijloc), iar
+##                             sageata e adusa direct la echilibru. Fara el
+##                             podul e in repaus (0.5 m) si gimmick-ul nu se
+##                             vede. Cu `--car`, masina e asezata PE tablierul
+##                             afundat (nu la cota soselei) si isi lasa si ea
+##                             greutatea.
 ##   --burner-at=0.05          arzatorul balonului (BurnerHazard) la o fractie
 ##                             din ciclul lui: 0.00-0.06 = telegraf (flacara),
 ##                             0.06-0.10 = sufla (praf), restul = stins.
@@ -156,6 +165,8 @@ func _ready() -> void:
 	var door_at := -1.0
 	var herd_at := -1.0
 	var hippo_at := -1.0
+	var rope_load := -1.0
+	var rope_u := 0.5
 	var cross_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
@@ -200,6 +211,11 @@ func _ready() -> void:
 			herd_at = float(arg.trim_prefix("--herd-at="))
 		elif arg.begins_with("--hippo-at="):
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
+		elif arg.begins_with("--rope-load="):
+			var parts := arg.trim_prefix("--rope-load=").split(",")
+			rope_load = float(parts[0])
+			if parts.size() > 1:
+				rope_u = float(parts[1])
 		elif arg.begins_with("--cross-at="):
 			cross_at = float(arg.trim_prefix("--cross-at="))
 		elif arg.begins_with("--burner-at="):
@@ -277,6 +293,8 @@ func _ready() -> void:
 		await _set_herd_time(track, herd_at)
 	if hippo_at >= 0.0:
 		await _set_hippo_phase(track, hippo_at)
+	if rope_load >= 0.0:
+		await _set_rope_load(track, rope_load, rope_u)
 	if cross_at >= 0.0:
 		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
@@ -455,6 +473,7 @@ func _ready() -> void:
 				focus + Vector3.UP * 0.45)
 			car.road_index = idx
 			car.on_start_grid = true
+			_seat_car_on_rope_bridge(track, car)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -739,6 +758,41 @@ func _set_cross_time(root: Node, seconds: float) -> void:
 ## Muta hipopotamii la o fractie din ciclul lor (vezi `--hippo-at`). Toti la
 ## aceeasi faza, ca in captura sa se vada starea, nu defazajul. Un cadru de
 ## fizica intai, ca `_rest` sa fie citit din pozitia reala (sync_to_physics).
+## Podul de franghie: o incarcare fantoma la fractia u din pod, cu sageata
+## adusa la echilibru — apoi tick-ul podului e oprit, ca poza sa nu-l prinda
+## in mijlocul unei oscilatii.
+func _set_rope_load(root: Node, mass_factor: float, u: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "RopeBridgeHazard", true, false):
+		var bridge := node as RopeBridgeHazard
+		bridge.preview_loads.append(Vector3(u, 0.0, mass_factor))
+		bridge.settle_now()
+		found += 1
+		print("--rope-load=%.1f,%.2f: %s sageata %.2f m la mijloc (%.2f la u=%.2f), balans %.2f"
+			% [mass_factor, u, bridge.name, bridge.sag_at(0.5), bridge.sag_at(u), u, bridge.sway()])
+	if found == 0:
+		print("--rope-load: NICIUN pod de franghie pe pista asta")
+
+
+## `--car` pe un pod de franghie: masina inghetata se aseaza PE tablierul
+## afundat, nu la cota soselei, si isi lasa si ea greutatea (masina Muscle,
+## mass_factor-ul ei) — altfel pluteste cu sageata deasupra scandurilor.
+func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
+	for node in root.find_children("*", "RopeBridgeHazard", true, false):
+		var bridge := node as RopeBridgeHazard
+		var dc := bridge.deck_coords(car.global_position)
+		if dc.z <= 0.0 or dc.z >= 1.0 or absf(dc.x) > bridge.deck_width * 0.5 + 1.0:
+			continue
+		bridge.preview_loads.append(Vector3(dc.z, dc.x, car.mass_factor))
+		bridge.settle_now()
+		dc = bridge.deck_coords(car.global_position)
+		car.global_position -= Vector3.UP * (dc.y - 0.45)
+		print("--car pe %s: u=%.2f, x=%.2f, coborata cu %.2f m pe tablier" % [bridge.name, dc.z, dc.x, dc.y - 0.45])
+		bridge.set_physics_process(false)
+		return
+
+
 func _set_hippo_phase(root: Node, at: float) -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame

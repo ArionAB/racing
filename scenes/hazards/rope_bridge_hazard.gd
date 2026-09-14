@@ -54,7 +54,10 @@ extends Node3D
 ##     `jolt-sync-transform-o-singura-scriere`). Coarda, nu tangenta la
 ##     centru: placile vecine impart EXACT punctul de capat, deci niciun prag
 ##     (memoria `suprafete-cu-goluri-si-praguri`: > 0.3 m e zid); suprapunerea
-##     `plate_overlap` acopera unghiul dintre ele. Fiecare placa publica
+##     `plate_overlap` acopera unghiul dintre ele. Pretul coardei: sub
+##     autobuzul oprit la mijloc, mijlocul placii sta cu ~0.1 m peste curba
+##     vizuala (sageata coardei de 4.4 m pe curbura maxima); rotile par sa
+##     pluteasca putin doar in cazul asta static. Fiecare placa publica
 ##     `platform_velocity` (mecanismul telecabinei: Car isi socoteste
 ##     amortizorul, grip-ul si plafonul fata de sol) — asa valul ridica masina
 ##     usoara si balansul o impinge, fara cuplu si fara apply_torque_impulse
@@ -109,9 +112,12 @@ const SHADER_PATH: String = "res://assets/shaders/rope_bridge.gdshader"
 @export_range(0.0, 1.0, 0.05) var dip_ratio: float = 0.3
 ## Latimea afundarii locale (m, sigma gaussiana).
 @export_range(1.0, 10.0, 0.1) var dip_sigma: float = 3.5
-## Valul: cat din P(u) se scade ca sin²(2πu). La 1.0, autobuzul la mijloc
-## ridica sferturile cu ~0.3 m.
-@export_range(0.0, 1.5, 0.05) var wave_gain: float = 1.0
+## Valul: cat din P(u) se scade ca sin²(2πu). La 1.1, autobuzul la mijloc
+## ridica mediana sferturilor cu ~0.4 m; o masina parcata acolo urca mai
+## putin (~0.17 m): rotile ei stau la ±1.45 m de creasta, pe placi-coarda
+## care coboara spre cuva, iar ruliul din balansul spre banda autobuzului ii
+## coboara partea. Sub 1.0 valul nu mai ridica masina deloc (masurat).
+@export_range(0.0, 1.5, 0.05) var wave_gain: float = 1.1
 ## Frecventa (Hz) si amortizarea modului global.
 @export_range(0.2, 4.0, 0.05) var sag_freq: float = 1.2
 @export_range(0.05, 1.5, 0.05) var sag_damping: float = 0.5
@@ -127,8 +133,14 @@ const SHADER_PATH: String = "res://assets/shaders/rope_bridge.gdshader"
 @export_range(0.05, 1.5, 0.01) var sway_damping: float = 0.35
 ## Limita moale a deplasarii laterale la mijloc (m). Brief: ±1.2.
 @export_range(0.2, 3.0, 0.05) var sway_max: float = 1.2
-## Bratul ruliului (m): roll = atan(x / roll_arm).
-@export_range(2.0, 20.0, 0.5) var roll_arm: float = 6.0
+## Bratul ruliului (m): roll = atan(x / roll_arm). La 20, balansul maxim
+## inclina tablierul cu ~3.4°: semnalul vizual al balansului e deplasarea
+## laterala (±1.2 m fata de capatul opus), nu inclinarea. Un brat mai scurt
+## (8 m, ~8.5°) anula valul pentru masina de pe banda opusa autobuzului
+## (partea ei coboara cu ruliul cat urca cu valul) si facea o masina PARCATA
+## sa alunece spre centru cu ~0.15 m/s (cauciucul n-are aderenta statica la
+## viteza zero — ramane asa si la 20, doar mai incet).
+@export_range(2.0, 40.0, 0.5) var roll_arm: float = 20.0
 
 @export_group("Constructie")
 @export_range(4, 16) var plate_count: int = 8

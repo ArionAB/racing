@@ -26,10 +26,10 @@ instance uniform float rest_sag = 0.5;
 // Amplitudinea modului global (A din hazard): parabola in jos la mijloc si
 // valul care ridica sferturile (wave_gain).
 instance uniform float sag = 0.0;
-instance uniform float wave_gain = 1.0;
+instance uniform float wave_gain = 1.1;
 // Deplasarea laterala la mijloc (m) si bratul din care iese ruliul.
 instance uniform float sway = 0.0;
-instance uniform float roll_arm = 6.0;
+instance uniform float roll_arm = 20.0;
 // Afundarile locale de sub (cel mult) 4 masini: pozitia (fractie) si
 // amplitudinea (m). u negativ = slot gol.
 instance uniform vec4 dip_u = vec4(-1.0);

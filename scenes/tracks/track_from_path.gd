@@ -138,6 +138,11 @@ extends Track
 ## Intervalele de suprafata AFANATA (cenusa, nisip negru adanc). Vezi
 ## Track._loose_ranges. Pe Stromboli: plaja de la B si buza+coborarea D-E.
 @export var custom_loose_ranges: Array[Vector2] = []
+
+## Intervalele de TREPTE (ruina ca si carosabil, Machu Picchu POI B). Vezi
+## Track._step_ranges: coliziunea ramane panta lina, treptele sunt doar in
+## vizual + vibratia de ±3 cm pe raycast-ul suspensiei (Car.STEP_NOISE_M).
+@export var custom_step_ranges: Array[Vector2] = []
 ## Intrari de mina lipite de perete: fiecare Vector2 = (fractie, parte ±1).
 @export var custom_mine_spots: Array[Vector2] = []
 ## Caruselul: morisca cu vane care matura soseaua (gimmick de timing).
@@ -301,6 +306,9 @@ func _ice_ranges() -> Array[Vector2]:
 
 func _loose_ranges() -> Array[Vector2]:
 	return custom_loose_ranges
+
+func _step_ranges() -> Array[Vector2]:
+	return custom_step_ranges
 
 
 func _wave_fracs() -> Array[float]:

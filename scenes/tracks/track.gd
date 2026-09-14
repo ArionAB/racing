@@ -12750,6 +12750,27 @@ func is_loose_at(frac: float) -> bool:
 	return _frac_in_ranges(frac, _loose_ranges())
 
 
+## Portiunile de TREPTE de pe traseul principal: (frac_start, frac_end).
+##
+## „Ruina ca si carosabil" (Machu Picchu, brief §3 „Treptele Drumului Incas"):
+## treptele NU exista in coliziune. Geometria pe care calca raycast-ul
+## suspensiei ramane panta lina — o treapta reala de 25 cm e un prag, si
+## memoria `suprafete-cu-goluri-si-praguri` spune ce se intampla: raza rotii
+## cade in orice gol si pragul devine zid. Treptele traiesc doar in mesh-ul
+## vizual si intr-un zgomot vertical periodic pe raycast (vezi
+## `Car.STEP_NOISE_M`/`STEP_PITCH_M`): vibratia se simte si se aude, dar nu
+## costa viteza.
+##
+## Acelasi tipar ca udul/gheata/afanatul: o STARE a drumului pe o distanta,
+## declarata in fractii ca sa supravietuiasca modificarilor de traseu.
+func _step_ranges() -> Array[Vector2]:
+	return []
+
+
+func is_steps_at(frac: float) -> bool:
+	return _frac_in_ranges(frac, _step_ranges())
+
+
 ## Mai e practicabila banda secundara cu indexul dat?
 ##
 ## Implicit DA — pistele care n-au nimic care sa inchida o banda nu simt

@@ -49,6 +49,10 @@ signal splashed(car: Car, strength: float)
 ## Aburul nu atinge masina deloc — daca ar fi legate, prima tunare a valului ar
 ## fi mutat si comportamentul unui hazard care prin definitie nu costa nimic.
 signal blinded(car: Car, seconds: float)
+## A intrat pe / a iesit de pe TREPTE (ruina ca si carosabil, Machu Picchu).
+## Carligul pentru audio si camera: cine vrea „huruitul rotilor pe piatra" se
+## leaga aici, nu citeste suspensia. Se emite doar la tranzitie.
+signal steps_changed(car: Car, on: bool)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -323,6 +327,23 @@ var _yaw_kick_left: float = 0.0
 var wheel_compression: Array[float] = [0.0, 0.0, 0.0, 0.0]
 ## Cate roti au atins solul in tick-ul curent (0-4).
 var wheels_on_ground: int = 0
+## TREPTELE ca suprafata (Machu Picchu, brief §3 „Treptele Drumului Incas").
+##
+## Coliziunea de sub roti e panta lina; treapta e doar un termen periodic in
+## lungimea raycast-ului: ±STEP_NOISE_M pe un pas de STEP_PITCH_M in lungul
+## drumului. Arcul „vede" o denivelare care nu exista in geometrie, deci
+## caroseria vibreaza, dar nimic nu se opune inaintarii — media termenului e
+## zero, iar forta lui e verticala. Masurat in tools/probe_machu_teren.gd:
+## viteza la iesirea din panta identica (< 3%) cu si fara trepte.
+##
+## Sursa: intervalul de fractie declarat pe pista (`Track.is_steps_at`) SAU
+## meta `inca_steps` pe colizorul lovit (geometrie de test, corpuri separate).
+const STEP_NOISE_M: float = 0.03
+const STEP_PITCH_M: float = 1.2
+## Cel putin o roata pe trepte in tick-ul curent (pentru HUD/audio prin
+## polling; semnalul `steps_changed` e pentru tranzitii).
+var on_steps: bool = false
+var _steps_here: bool = false
 ## Factor extern pe plafonul de viteza (crush-ul are al lui; asta e pentru
 ## sonde si hazarde care vor sa taie viteza fara sa stie de crush).
 var speed_limit_factor: float = 1.0
@@ -495,6 +516,8 @@ func _physics_process(delta: float) -> void:
 		# Se verifica ULTIMUL — pe o portiune si udă si cu cenusa, udul
 		# castiga, la fel cum gheata castiga in fata udului.
 		var loose_here := route == 0 and track.is_loose_at(frac_here)
+		# TREPTE: nu schimba grip-ul, se citeste in _apply_suspension.
+		_steps_here = route == 0 and track.is_steps_at(frac_here)
 		if ice_here:
 			var gi := track.ice_grip()
 			apply_slip(gi if gi > 0.0 else SLIP_GRIP_ICE)
@@ -603,6 +626,13 @@ func _apply_suspension() -> void:
 	var space := get_world_3d().direct_space_state
 	var up := global_transform.basis.y
 	var cast_len := suspension_rest + _susp_wheel_radius
+	# Axa in lungul careia se numara treptele: directia masinii pe orizontala
+	# (pe trepte drumul si masina merg in acelasi sens; o mica abatere doar
+	# muta faza vibratiei, nu o schimba).
+	var fwd_along := -global_transform.basis.z
+	fwd_along.y = 0.0
+	fwd_along = fwd_along.normalized()
+	var steps_wheels := 0
 	# Rigiditatea pe roata din frecventa si masa pe roata (k = m(2*pi*f)^2),
 	# amortizarea din raport — tuning independent de cat cantareste masina.
 	var wheel_mass := mass * 0.25
@@ -635,6 +665,13 @@ func _apply_suspension() -> void:
 		_axle_grounded[axle] += 1
 		var dist := attach.distance_to(hit.position as Vector3)
 		var compression := clampf(cast_len - dist, 0.0, suspension_rest)
+		# Treptele: termen periodic in lungimea razei, vezi STEP_NOISE_M.
+		if _steps_here or (ground != null and ground.has_meta(&"inca_steps")):
+			steps_wheels += 1
+			var along := (hit.position as Vector3).dot(fwd_along)
+			compression = clampf(compression
+				+ STEP_NOISE_M * sin(TAU * along / STEP_PITCH_M),
+				0.0, suspension_rest)
 		wheel_compression[i] = compression
 		var offset := attach - global_position
 		var point_vel := linear_velocity + angular_velocity.cross(offset)
@@ -646,6 +683,9 @@ func _apply_suspension() -> void:
 		# masina in jos nefiresc.
 		if force_mag > 0.0:
 			apply_force(up * force_mag, offset)
+	if (steps_wheels > 0) != on_steps:
+		on_steps = steps_wheels > 0
+		steps_changed.emit(self, on_steps)
 	if wheels_on_ground > 0:
 		_contact_offset = contact_sum / float(wheels_on_ground) - global_position
 		_ground_normal = normal_sum.normalized()

@@ -40,15 +40,23 @@ extends Node
 ##      vrea ca scurtatura sa fie a masinilor usoare, trebuie CONSTRUIT
 ##      (trepte mai adanci decat zborul unui corp greu, buza care agata), nu
 ##      presupus.
-##   D. jumatate: pe dreapta, interiorul trece curat (0 contact, 0 ghiont la
-##      15 m/s) si masina de pe partea autobuzului NU e oprita (max 0.68 s
-##      sub 5 m/s), dar e impinsa 4.1 m spre exterior, nu 1-3: la un contact
-##      frontal centrat, ca sa scape de coltul unui corp de 4.2 m trebuie
-##      sa se mute geometric >= 2.1 + 0.87 ~ 3 m, deci „1-3 m" e sub minimul
-##      geometric. PE ac (raza 10), interiorul NU trece: sportul deriva
-##      ~0.8 m spre exterior la 9 m/s, iar coarda autobuzului taie din banda
-##      (0.41 m la 6 m lungime, 0.95 m la 9 m) — 2.3 m de banda libera nu
-##      ajung. Un corp de 9 m bloca masina 3.6 s; la 6 m, 0.10 s.
+##   D. (valul 2: autobuz 3.6 x 6 m, bot 20°, ia acul larg cu +1 m la apex)
+##      Pe dreapta: interiorul trece curat (0 contact, 0 ghiont la 15 m/s);
+##      partea autobuzului e SCOASA de pe banda spre exterior (3.9-4.1 m) si
+##      NU e oprita (max 0.73 s sub 5 m/s). PE ac, partea autobuzului: impins
+##      4.6-6.4 m spre exterior, 0.2-0.7 s sub 5 m/s. PE ac, interiorul:
+##      la raza 13 ZERO contact (7 si 9 m/s); la raza 10 contact 15 cadre —
+##      nu din cauza autobuzului, ci a masinii: raza minima de viraj a
+##      sportului fara drift e max_speed / (2 * steer_speed) = 9.5 m, iar
+##      banda interioara a unui ac de raza 10 e la 8.2 m. Coltul autobuzului
+##      ajunge la raza 9.98; masinii ii trebuie 10.34 + 0.3 aer => inca
+##      0.66 m spre exterior (apex_outer_m 1.7), adica drum de 8.2 m la apex
+##      daca autobuzul ramane pe asfalt. Alternativa ieftina: acele cu raza
+##      >= 13 m pe axa (drumul ramane 6.5 m).
+##      Soferul de test: „moale" (gain 0.35) pe partea autobuzului — cel
+##      „tare" (0.12) vireaza la maxim inapoi in flancul autobuzului si sta
+##      40-95 de cadre in contact (artefact de scenariu); „tare" pe interior,
+##      ca sa tina banda.
 
 const STEP: float = 1.0 / 60.0
 const BusScript := preload("res://scenes/hazards/bus_hazard.gd")
@@ -69,9 +77,13 @@ const TERRACE_DEPTH: float = 12.0
 const TERRACE_DROPS: int = 8
 const HAIRPIN_X: float = -200.0
 const ROAD_HALF: float = 3.25
-const HAIRPIN_R: float = 10.0
+## Raza axei drumului in ac. Suprascrisa cu `-- --hairpin-r=13` (informativ:
+## la 10 m sportul nu poate tine banda interioara — vezi raportul din D).
+var HAIRPIN_R: float = 10.0
 const HAIRPIN_LEG: float = 70.0
-const BUS_WIDTH: float = 4.2
+## 3.6 m = peste jumatate din drumul de 6.5 m (scara de jucarie); decizia
+## valului 2, in locul celor 4.2 m (2/3) cu care interiorul acului nu incapea.
+const BUS_WIDTH: float = 3.6
 ## Lungimea autobuzului: pe un ac de raza 10, un corp de 9 m taie ~0.95 m din
 ## interior (sageata corzii), deci banda libera de 2.3 m nu mai incape sportul.
 const BUS_LENGTH: float = 6.0
@@ -108,9 +120,17 @@ class ScriptDriver:
 class LaneDriver:
 	extends CarController
 	var points: PackedVector3Array = PackedVector3Array()
-	var lookahead: float = 6.0
+	var lookahead: float = 5.0
 	var throttle: float = 1.0
 	var _idx: int = 0
+	## Castigul directiei (rad de eroare la care steer-ul satureaza). 0.35 e
+	## soferul MOALE: nu tine un arc de 11 m (unghiul spre reperul de la 5 m
+	## pe cerc e ~0.25 rad -> steer 0.7 -> raza ~12 m; masurat: primul contact
+	## la 12.4). 0.12 e soferul TARE, care tine banda interioara — dar care,
+	## impins de autobuz, vireaza la maxim INAPOI in flancul lui si sta in
+	## contact 40-95 de cadre (v5): artefact de scenariu, nu de mecanism, deci
+	## scenariile „pe partea autobuzului" ruleaza cu soferul moale.
+	var gain: float = 0.35
 	func get_steer() -> float:
 		if car == null or points.is_empty():
 			return 0.0
@@ -131,7 +151,7 @@ class LaneDriver:
 		if to.length_squared() < 0.01 or fwd.length_squared() < 0.01:
 			return 0.0
 		var ang := fwd.normalized().signed_angle_to(to.normalized(), Vector3.UP)
-		return clampf(ang / 0.35, -1.0, 1.0)
+		return clampf(ang / gain, -1.0, 1.0)
 	func get_throttle() -> float:
 		return throttle
 	func is_drift_pressed() -> bool:
@@ -153,6 +173,8 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):
 			only = arg.trim_prefix("--only=").to_upper()
+		elif arg.begins_with("--hairpin-r="):
+			HAIRPIN_R = float(arg.trim_prefix("--hairpin-r="))
 	print("")
 	print("=== Machu Picchu: sondele tehnice de teren (B, C, D) ===")
 	if only.contains("B"):
@@ -458,8 +480,8 @@ func _bus_curve() -> Curve3D:
 	var r := HAIRPIN_R + BUS_LANE
 	c.add_point(Vector3(r, 0.0, HAIRPIN_LEG))
 	c.add_point(Vector3(r, 0.0, 0.0))
-	for k in range(1, 8):
-		var a := PI * float(k) / 8.0
+	for k in range(1, 12):
+		var a := PI * float(k) / 12.0
 		c.add_point(Vector3(r * cos(a), 0.0, -r * sin(a)))
 	c.add_point(Vector3(-r, 0.0, 0.0))
 	c.add_point(Vector3(-r, 0.0, HAIRPIN_LEG))
@@ -469,15 +491,19 @@ func _bus_curve() -> Curve3D:
 ## Reperele benzii de urcare pentru masina: pe x = -(HAIRPIN_R + offset)
 ## dinspre +Z, apoi pe arc, apoi pe x = +(HAIRPIN_R + offset) spre +Z.
 ## `offset` > 0 = spre exterior (partea autobuzului), < 0 = interior.
-func _lane_points(offset: float) -> PackedVector3Array:
+## `arc_extra` muta banda pe ARC (nu pe drepte) mai spre exterior: e locul
+## unde sta autobuzul la apex (`apex_outer_m`), pentru scenariul „pe partea
+## lui, PE ac".
+func _lane_points(offset: float, arc_extra: float = 0.0) -> PackedVector3Array:
 	var pts := PackedVector3Array()
 	var r := HAIRPIN_R + offset
+	var ra := r + arc_extra
 	var origin := Vector3(HAIRPIN_X, 0.0, 0.0)
 	for z in range(int(HAIRPIN_LEG) - 5, 0, -5):
 		pts.append(origin + Vector3(-r, 0.0, float(z)))
 	for k in range(0, 13):
 		var a := PI * float(k) / 12.0
-		pts.append(origin + Vector3(-r * cos(a), 0.0, -r * sin(a)))
+		pts.append(origin + Vector3(-ra * cos(a), 0.0, -ra * sin(a)))
 	for z in range(5, int(HAIRPIN_LEG) + 10, 5):
 		pts.append(origin + Vector3(r, 0.0, float(z)))
 	return pts
@@ -498,16 +524,18 @@ func _test_bus() -> void:
 	bus.shoved.connect(func(_b: Node3D, _c: Car) -> void: _shoves += 1)
 	await get_tree().physics_frame
 	var length: float = bus.curve.get_baked_length()
-	print("  curba %.0f m, coborare %.1f s, ciclu %.0f s, autobuz %.1f m lat x %.0f m lung, bot %.0f° (banda libera %.2f m)"
-		% [length, length / bus.speed, bus.period, BUS_WIDTH, BUS_LENGTH, NOSE_DEG, ROAD_HALF * 2.0 - BUS_WIDTH])
+	print("  curba %.0f m, coborare %.1f s, ciclu %.0f s, autobuz %.1f m lat x %.0f m lung, bot %.0f°, apex +%.1f m spre exterior (banda libera pe dreapta %.2f m)"
+		% [length, length / bus.speed, bus.period, BUS_WIDTH, BUS_LENGTH, NOSE_DEG,
+			bus.apex_outer_m, ROAD_HALF * 2.0 - BUS_WIDTH])
 
 	# 1. pe partea autobuzului, pe dreapta de urcare, la 15 m/s
 	var straight_meet := HAIRPIN_LEG + PI * (HAIRPIN_R + BUS_LANE) + 15.0
 	var r1 := await _meet(bus, BUS_LANE, 15.0, straight_meet, "partea autobuzului, dreapta")
 	_check(int(r1.contacts) + int(r1.shoves) > 0, "partea autobuzului: contact/ghiont cu autobuzul")
-	_check(absf(float(r1.lateral_max)) >= 1.0 and absf(float(r1.lateral_max)) <= 3.0,
-		"partea autobuzului: impins lateral 1-3 m (%.2f m)" % r1.lateral_max)
-	_check(float(r1.lateral_max) < 0.0, "partea autobuzului: impins spre EXTERIOR")
+	# Contractul (valul 2): SCOS de pe banda lui — deplasare laterala >= 3 m
+	# spre exterior (cat sa treaca de coltul autobuzului), fara oprire.
+	_check(float(r1.lateral_max) <= -3.0,
+		"partea autobuzului: scos de pe banda, >= 3 m spre EXTERIOR (%.2f m)" % r1.lateral_max)
 	_check(float(r1.slow_max) <= 1.0, "partea autobuzului: nu e oprit sub 5 m/s mai mult de 1 s (%.2f s)" % r1.slow_max)
 	_check(float(r1.up_min) > 0.5, "partea autobuzului: fara rasturnare")
 
@@ -516,14 +544,44 @@ func _test_bus() -> void:
 	_check(int(r2.contacts) == 0 and int(r2.shoves) == 0, "interior: zero contact, zero ghiont")
 	_check(float(r2.v_min) > 12.0, "interior: viteza pastrata (min %.1f m/s)" % r2.v_min)
 
-	# 3. intalnire PE ac, partea autobuzului, 9 m/s (informativ + siguranta)
-	var arc_meet := HAIRPIN_LEG + PI * (HAIRPIN_R + BUS_LANE) * 0.5
-	var r3 := await _meet(bus, BUS_LANE, 9.0, arc_meet, "partea autobuzului, PE ac")
+	# Geometria la apex: raza minima atinsa de colturile corpului autobuzului
+	# cat trece prin ac -> cat din drum ramane liber pe interior.
+	var inner_r := await _apex_clearance(bus)
+	var inner_edge := HAIRPIN_R - ROAD_HALF
+	var need := ROAD_HALF * 2.0 + maxf(0.0, 1.74 + 0.3 - (inner_r - inner_edge))
+	print("  apex: coltul interior al autobuzului ajunge la raza %.2f m -> banda libera pe interior %.2f m (colizerul sportului are 1.74 m; drum necesar la apex pentru 0.3 m aer: %.1f m)"
+		% [inner_r, inner_r - inner_edge, need])
+
+	# 3. intalnire PE ac, partea autobuzului (pe linia lui de apex), 9 m/s
+	var apex_extra: float = bus.apex_outer_m
+	var arc_meet := HAIRPIN_LEG + PI * (HAIRPIN_R + BUS_LANE + apex_extra) * 0.5
+	var r3 := await _meet(bus, BUS_LANE, 9.0, arc_meet, "partea autobuzului, PE ac", apex_extra)
 	_check(float(r3.up_min) > 0.5, "pe ac: fara rasturnare")
+	_check(float(r3.lateral_max) < 0.0, "pe ac: impins spre EXTERIOR (%.2f m)" % r3.lateral_max)
 	_check(float(r3.slow_max) <= 1.5, "pe ac: nu e oprit sub 5 m/s mai mult de 1.5 s (%.2f s)" % r3.slow_max)
-	# 4. interiorul acului PE ac, 9 m/s
-	var r4 := await _meet(bus, INNER_LANE, 9.0, arc_meet, "interior, PE ac")
-	_check(int(r4.contacts) == 0, "interior pe ac: zero contact cu autobuzul")
+	# 4. interiorul acului PE ac: 7 m/s e viteza la care sportul TINE raza
+	# de 8.2 m (la 9 m/s deriva ~0.8 m spre exterior — se raporteaza, nu se
+	# judeca: acul de raza 10 se ia franat, iar decizia POI-ului e „treci pe
+	# langa el", nu „treci in viteza").
+	var r4 := await _meet(bus, INNER_LANE, 7.0, arc_meet, "interior, PE ac", 0.0, 0.12)
+	_check(int(r4.contacts) == 0, "interior pe ac la 7 m/s: zero contact cu autobuzul")
+	# Cat poate strange sportul: yaw_rate = steer_speed * v / (max_speed/2)
+	# (Car._apply_driving, sub jumatatea vitezei maxime), deci raza minima
+	# de viraj FARA drift = max_speed / (2 * steer_speed), independenta de v.
+	var sport_data := GameState.CAR_DATA[SPORT] as CarData
+	var car0 := Car.new()
+	var r_min_turn := sport_data.max_speed / (2.0 * car0.steer_speed)
+	car0.free()
+	var car_line := maxf(r_min_turn, HAIRPIN_R + INNER_LANE)
+	var need_corner := car_line + 0.87 + 0.3
+	var extra := maxf(0.0, need_corner - inner_r)
+	print("  sportul: raza minima de viraj fara drift %.1f m (banda interioara e la %.1f m) -> linia lui reala pe ac ~%.1f m, marginea exterioara la %.2f m; coltul autobuzului e la %.2f m -> ii mai trebuie %.2f m spre exterior (apex_outer_m %.1f), adica drum la apex de %.1f m daca autobuzul ramane pe asfalt"
+		% [r_min_turn, HAIRPIN_R + INNER_LANE, car_line, car_line + 0.87, inner_r, extra,
+			bus.apex_outer_m + extra,
+			(HAIRPIN_R + BUS_LANE + bus.apex_outer_m + extra + BUS_WIDTH * 0.5) - (HAIRPIN_R - ROAD_HALF)])
+	var r4b := await _meet(bus, INNER_LANE, 9.0, arc_meet, "interior, PE ac (informativ)", 0.0, 0.12)
+	print("  interior pe ac la 9 m/s: contact %d cadre (informativ, sportul deriva spre exterior la viteza asta)"
+		% int(r4b.contacts))
 
 	# 5. costul pe tick, cu o masina in zona
 	var car := _spawn(Vector3(HAIRPIN_X - HAIRPIN_R - BUS_LANE, 0.7, 40.0), SPORT, 0.0)
@@ -542,21 +600,47 @@ func _test_bus() -> void:
 	await get_tree().physics_frame
 
 
+## Raza minima (fata de centrul acului) atinsa de colturile corpului
+## autobuzului cat trece prin arc: cat „taie" din interior.
+func _apex_clearance(bus: Node3D) -> float:
+	var body: Node3D = bus.body()
+	var half := Vector3(BUS_WIDTH * 0.5, 0.0, BUS_LENGTH * 0.5)
+	var origin := Vector3(HAIRPIN_X, 0.0, 0.0)
+	var r_min := INF
+	var guard := 0
+	# Asteapta sa intre in arc (z < 2), masoara pana iese pe partea cealalta.
+	while guard < int(80.0 / STEP):
+		await get_tree().physics_frame
+		guard += 1
+		var p := body.global_position - origin
+		if bus.is_hidden() or p.z > 2.0:
+			if r_min < INF and p.x < 0.0:
+				break
+			continue
+		for sx: float in [-1.0, 1.0]:
+			for sz: float in [-1.0, 1.0]:
+				var corner := body.global_transform * Vector3(sx * half.x, 0.0, sz * half.z) - origin
+				r_min = minf(r_min, Vector2(corner.x, corner.z).length())
+	return r_min
+
+
 ## Asteapta ca autobuzul sa fie la `meet_dist - gap` pe curba, apoi lanseaza
 ## masina pe banda `offset` din z = +HAIRPIN_LEG, la `speed`, si o urmareste
 ## 5 s. Autobuzul si masina se inchid cu (speed + 7) m/s, deci gap-ul se alege
 ## ca intalnirea sa cada la `meet_dist` pe curba autobuzului.
 func _meet(bus: Node3D, offset: float, speed: float, meet_dist: float,
-		label: String) -> Dictionary:
+		label: String, arc_extra: float = 0.0, gain: float = 0.35) -> Dictionary:
 	_shoves = 0
 	# Distanta masinii pana la punctul de intalnire, masurata pe banda ei:
-	# de la z = HAIRPIN_LEG pe dreapta (spre z = 0), apoi pe arc.
+	# de la z = HAIRPIN_LEG pe dreapta (spre z = 0), apoi pe arc. Autobuzul
+	# sta pe arc cu `apex_outer_m` mai in afara decat curba lui.
 	var car_r := HAIRPIN_R + offset
-	var bus_r := HAIRPIN_R + BUS_LANE
+	var arc_r := car_r + arc_extra
+	var bus_r: float = HAIRPIN_R + BUS_LANE + bus.apex_outer_m
 	var car_dist_to_meet := 0.0
 	if meet_dist <= HAIRPIN_LEG + PI * bus_r:
 		var arc_frac := (meet_dist - HAIRPIN_LEG) / (PI * bus_r)
-		car_dist_to_meet = HAIRPIN_LEG + PI * car_r * (1.0 - arc_frac)
+		car_dist_to_meet = HAIRPIN_LEG + PI * arc_r * (1.0 - arc_frac)
 	else:
 		car_dist_to_meet = HAIRPIN_LEG - (meet_dist - HAIRPIN_LEG - PI * bus_r)
 	var car_time := car_dist_to_meet / speed
@@ -569,7 +653,8 @@ func _meet(bus: Node3D, offset: float, speed: float, meet_dist: float,
 		guard += 1
 	var lane_x := HAIRPIN_X - car_r
 	var drv := LaneDriver.new()
-	drv.points = _lane_points(offset)
+	drv.points = _lane_points(offset, arc_extra)
+	drv.gain = gain
 	var car := _spawn(Vector3(lane_x, 0.7, HAIRPIN_LEG), SPORT, speed, true, drv)
 	var body: Node3D = bus.body()
 	var contacts := 0
@@ -585,11 +670,17 @@ func _meet(bus: Node3D, offset: float, speed: float, meet_dist: float,
 	var frames := int((car_time + 8.0) / STEP)
 	for _f in frames:
 		await get_tree().physics_frame
-		if _lane_progress(car, car_r) > car_dist_to_meet + 25.0:
+		if _lane_progress(car, car_r, arc_r) > car_dist_to_meet + 25.0:
 			break
 		for b in car.get_colliding_bodies():
 			if b == body:
 				contacts += 1
+				if contacts == 1:
+					var pc := car.global_position - Vector3(HAIRPIN_X, 0.0, 0.0)
+					var pb := body.global_position - Vector3(HAIRPIN_X, 0.0, 0.0)
+					print("    (primul contact: masina la raza %.2f, z %.1f; autobuz la raza %.2f, z %.1f, yaw %.0f°)"
+						% [Vector2(pc.x, pc.z).length(), pc.z, Vector2(pb.x, pb.z).length(), pb.z,
+							rad_to_deg(body.global_transform.basis.get_euler().y)])
 		# Viteza de INAINTARE pe banda: pe dreapta e -Z; pe arc, tangenta.
 		var prog := _progress_speed(car, offset)
 		v_min = minf(v_min, prog)
@@ -604,7 +695,7 @@ func _meet(bus: Node3D, offset: float, speed: float, meet_dist: float,
 		# Devierea se citeste doar IN intalnire (aproape de autobuz): dupa,
 		# driverul revine pe banda, iar pe arc sportul deriva oricum.
 		if gap < 14.0:
-			var lat := _lateral_offset(car, car_r)
+			var lat := _lateral_offset(car, car_r, arc_r)
 			if absf(lat) > absf(lat_max):
 				lat_max = lat
 	print("  %s la %.0f m/s: contact %d cadre, ghionturi %d, deviere max in intalnire %.2f m (+ = spre interior), v inaintare min %.1f m/s, sub 5 m/s max %.2f s, up min %.2f, distanta minima centre %.1f m"
@@ -618,25 +709,25 @@ func _meet(bus: Node3D, offset: float, speed: float, meet_dist: float,
 ## Pozitia masinii fata de banda ei: + = spre interiorul acului (spre centrul
 ## acului), - = spre exterior (golul). Pe drepte: distanta fata de x-ul benzii;
 ## pe arc: raza fata de raza benzii.
-func _lateral_offset(car: Car, car_r: float) -> float:
+func _lateral_offset(car: Car, car_r: float, arc_r: float) -> float:
 	var p := car.global_position - Vector3(HAIRPIN_X, 0.0, 0.0)
 	if p.z > 0.0:
 		# Pe dreapta de urcare (x < 0): interior = spre x mai mare.
 		if p.x < 0.0:
 			return p.x + car_r
 		return car_r - p.x
-	return car_r - Vector2(p.x, p.z).length()
+	return arc_r - Vector2(p.x, p.z).length()
 
 
 ## Cat a parcurs masina pe banda ei (m): dreapta de urcare, apoi arcul.
-func _lane_progress(car: Car, car_r: float) -> float:
+func _lane_progress(car: Car, car_r: float, arc_r: float) -> float:
 	var p := car.global_position - Vector3(HAIRPIN_X, 0.0, 0.0)
 	if p.z > 0.0 and p.x < 0.0:
 		return HAIRPIN_LEG - p.z
 	if p.z > 0.0:
-		return HAIRPIN_LEG + PI * car_r + p.z
+		return HAIRPIN_LEG + PI * arc_r + p.z
 	var a := atan2(-p.z, -p.x) # 0 la (-r, 0), PI la (+r, 0)
-	return HAIRPIN_LEG + a * car_r
+	return HAIRPIN_LEG + a * arc_r
 
 
 func _progress_speed(car: Car, _offset: float) -> float:

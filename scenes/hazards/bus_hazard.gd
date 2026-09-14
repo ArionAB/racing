@@ -42,30 +42,61 @@ extends "res://scenes/props/path_mover.gd"
 ## Se masoara in tools/probe_machu_teren.gd (testul D): impins lateral, nu
 ## oprit, zero contact pe interiorul acului, cost sub 100 us pe tick.
 ##
-## DECLARARE in .tscn (ca orice PathMover — nod Path3D cu scriptul asta,
-## curba desenata cu gizmo-ul, de SUS in jos, primul punct in afara drumului):
-##   [node name="Autobuz" type="Path3D" parent="." ]
-##   script = ExtResource("bus_hazard.gd")
-##   curve = SubResource("Curve3D_...")
-##   speed = 7.0
-##   period = 35.0
-##   model = ExtResource("consettur_bus.glb")   # optional; fara = cutia
-##   nose_side = 1                               # +1 = deflecteaza spre dreapta lui
-## `stick_to_ground` ramane pornit: cota o ia din teren cu raycast, curba se
-## deseneaza de sus fara sa-ti pese de panta.
+## ACUL LUAT LARG (`apex_outer_m`): autorul deseneaza curba pe BANDA
+## autobuzului de pe drepte (jumatatea dinspre gol, dreapta lui la coborare)
+## si NU deseneaza arcul de mana. Corpul se muta singur spre exteriorul
+## virajului proportional cu curbura curbei (saturata la `apex_radius_m`):
+## pe un ac de raza 10 sta cu `apex_outer_m` mai in afara decat curba, pe
+## drepte exact pe ea. Asa interiorul acului ramane liber (decizia POI G:
+## „astepti in interior sau treci pe langa el"), iar autobuzele reale chiar
+## asa iau serpentinele. Masurat in tools/probe_machu_teren.gd (testul D,
+## 14 sep 2026): pe ac de raza 13 interiorul trece cu zero contact la 7 si
+## 9 m/s; pe raza 10 nu — dar fiindca sportul nu poate vira sub 9.5 m
+## (max_speed / (2 * steer_speed)), nu din cauza autobuzului. Acele
+## serpentinelor: raza >= 13 m pe axa, sau 8.2 m latime la apex.
+##
+## DECLARARE PE PISTA (.tscn) — nodul INSUSI e Path3D-ul (tiparul PathMover;
+## nu are nevoie de un copil „Route"), copil direct al pistei:
+##   [node name="Autobuz" type="Path3D" parent="."]
+##   script = ExtResource("res://scenes/hazards/bus_hazard.gd")
+##   curve = SubResource("Curve3D_...")   # desenata cu gizmo-ul, DE SUS IN JOS
+##   speed = 7.0                          # m/s la coborare
+##   period = 35.0                        # ciclu; ascuns sus in rest
+##   nose_side = 1                        # +1: deflecteaza spre DREAPTA lui
+##   apex_outer_m = 1.0                   # cat iese spre exterior la apex
+##   apex_radius_m = 15.0                 # sub raza asta ofsetul e intreg
+##   body_size = Vector3(3.6, 3.0, 6.0)   # placeholder; cu model, din AABB
+##   model = ExtResource("consettur_bus.glb")   # optional
+## SENSUL: curba se deseneaza in sensul coborarii: primul punct SUS, in
+## afara drumului (in spatele unui perete) — acolo sta ascuns intre doua
+## coborari si acolo reapare; ultimul punct jos, tot in afara drumului.
+## Curba merge pe jumatatea drumului dinspre gol (dreapta autobuzului la
+## coborare); masinile care urca il vad venind din fata, pe jumatatea
+## dinspre gol, iar interiorul acului (dinspre perete) ramane liber.
+## `nose_side = 1` = impinge spre dreapta LUI = spre gol. `stick_to_ground`
+## ramane pornit: cota o ia din teren cu raycast, curba se deseneaza de sus
+## fara sa-ti pese de panta. AI-ul nu-l vede (obstacol dinamic):
+## HazardMarker „asteapta in interiorul acului" pe waypoint ramane de pus de
+## agentul pistei (brief §3).
 
 ## Ciclul complet (s): o coborare + timpul ascuns. Daca e mai scurt decat
 ## coborarea, autobuzul reapare imediat ce a ajuns jos.
 @export_range(5.0, 120.0, 0.5) var period: float = 35.0
 ## Gabaritul cutiei placeholder (latime, inaltime, lungime) cand nu e model.
 ## 4.2 m latime = 2/3 din drumul de 6.5 m al serpentinelor (brief §2 POI G).
-@export var body_size: Vector3 = Vector3(4.2, 3.0, 6.0)
+@export var body_size: Vector3 = Vector3(3.6, 3.0, 6.0)
 ## Incotro deflecteaza botul: +1 = spre dreapta autobuzului (exteriorul
 ## serpentinei cand coboara pe partea lui), -1 = spre stanga.
 @export_enum("Dreapta:1", "Stanga:-1") var nose_side: int = 1
 ## Unghiul fetei oblice fata de axa transversala (grade). 0 = fata plata (zid
 ## care merge — nu). Mai mare = deflectare mai blanda, dar bot mai lung.
 @export_range(0.0, 45.0, 1.0) var nose_angle_deg: float = 20.0
+## Cat iese corpul spre EXTERIORUL virajului la apex, fata de curba (m).
+## 0 = urmeaza curba exact. Vezi antetul, „acul luat larg".
+@export_range(0.0, 4.0, 0.1) var apex_outer_m: float = 1.0
+## Raza de viraj sub care ofsetul e intreg; peste ea scade liniar cu
+## curbura (la raza dubla e jumatate). Serpentinele au ~10 m.
+@export_range(3.0, 60.0, 0.5) var apex_radius_m: float = 15.0
 ## m/s adaugati lateral masinii care intra in zona de ghiont (o data, cu
 ## cooldown — dezechilibrarea).
 @export_range(0.0, 12.0, 0.5) var shove: float = 3.0
@@ -93,12 +124,22 @@ const SHOVE_COOLDOWN: float = 0.35
 const SHOVE_MARGIN_SIDE: float = 0.15
 const SHOVE_MARGIN_FRONT: float = 4.0
 const NOSE_THICKNESS: float = 0.35
+## Pe cati metri de curba (inainte si inapoi) se citeste curbura. Destul
+## de mult ca o curba desenata din segmente drepte (fara manere) sa nu dea
+## curbura zero intre doua varfuri si un salt la varf.
+const APEX_SAMPLE_M: float = 6.0
+## Cat de repede urmareste ofsetul curbura (1/s): netezeste saltul dintre
+## segmentele unei curbe poligonale.
+const APEX_FOLLOW: float = 4.0
 
 var _hidden: bool = false
 var _hide_left: float = 0.0
 var _shove_area: Area3D
 var _cooldown: Dictionary = {}
 var _box_size: Vector3 = Vector3.ZERO
+var _apex: Vector3 = Vector3.ZERO
+var _prev_pos: Vector3 = Vector3.ZERO
+var _has_prev: bool = false
 var _box_center: Vector3 = Vector3.ZERO
 
 
@@ -211,12 +252,70 @@ func _build_shove_area() -> void:
 	_body.add_child(_shove_area)
 
 
+## Tick-ul lui PathMover, rescris cu un singur adaos: ofsetul spre exterior
+## la apex. (Nu se poate injecta intre esantionarea curbei si scrierea
+## transformului fara sa se copieze restul, si restul e mic.)
 func _physics_process(delta: float) -> void:
 	var t0 := Time.get_ticks_usec()
-	super(delta)
+	if _body == null or curve == null:
+		return
+	var length := curve.get_baked_length()
+	if length < 0.5:
+		return
+	if not _started:
+		_started = true
+		_dist = phase * length
+	_time += delta
+	_advance(delta, length)
+	var pos := to_global(curve.sample_baked(_dist, true))
+	var target_yaw := _travel_yaw(length, pos)
+	_apex = _apex.lerp(_apex_offset(length), minf(APEX_FOLLOW * delta, 1.0))
+	pos += _apex
+	# Botul arata INCOTRO SE MISCA corpul (cu tot cu iesirea spre exterior la
+	# apex), nu pe tangenta curbei: altfel pe ac corpul „crabeaza" cu varful
+	# botului rotit spre interior si masina din fata il ia in flanc, nu pe
+	# fata oblica.
+	if _has_prev and not _hidden:
+		var moved := pos - _prev_pos
+		moved.y = 0.0
+		if moved.length() > 0.02:
+			target_yaw = atan2(-moved.x, -moved.z)
+	_prev_pos = pos
+	_has_prev = true
+	_yaw = lerp_angle(_yaw, target_yaw, minf(TURN_RATE * delta, 1.0))
+	if stick_to_ground:
+		pos.y = _ground_y(pos)
+	# O SINGURA scriere de transform (memoria jolt-sync-transform).
+	_body.global_transform = Transform3D(Basis(Vector3.UP, _yaw), pos)
+	_apply_sway()
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)
 	last_tick_usec = int(Time.get_ticks_usec() - t0)
+
+
+## Ofsetul spre exteriorul virajului in punctul curent: curbura din unghiul
+## dintre tangentele la -APEX_SAMPLE_M si +APEX_SAMPLE_M, saturata la
+## 1/apex_radius_m; exteriorul unui viraj la stanga e dreapta.
+func _apex_offset(length: float) -> Vector3:
+	if apex_outer_m <= 0.0:
+		return Vector3.ZERO
+	var h := APEX_SAMPLE_M
+	var a := to_global(curve.sample_baked(clampf(_dist - h, 0.0, length), true))
+	var b := to_global(curve.sample_baked(_dist, true))
+	var c := to_global(curve.sample_baked(clampf(_dist + h, 0.0, length), true))
+	var t1 := b - a
+	var t2 := c - b
+	t1.y = 0.0
+	t2.y = 0.0
+	if t1.length_squared() < 0.01 or t2.length_squared() < 0.01:
+		return Vector3.ZERO
+	var dtheta := t1.normalized().signed_angle_to(t2.normalized(), Vector3.UP)
+	var kappa := dtheta / h
+	var frac := clampf(absf(kappa) * apex_radius_m, 0.0, 1.0)
+	var tangent := c - a
+	tangent.y = 0.0
+	var right := tangent.normalized().cross(Vector3.UP)
+	return right * signf(kappa) * apex_outer_m * frac
 
 
 ## Ciclul: coboara o data, se ascunde sus, asteapta restul perioadei.
@@ -286,8 +385,13 @@ func _shove_cars(delta: float) -> void:
 		# directie in care deflecteaza fata oblica — altfel ghiontul si botul
 		# se anuleaza si masina ramane infipta (masurat pe ac: 3.7 s sub
 		# 5 m/s). ALATURI: de langa axa, ca la SlidingHazard.
+		# „In banda lui" = centrul masinii la mai putin de (jumatate de latime
+		# - 0.6 m) de axa: o masina care CALARESTE muchia opusa botului atinge
+		# flancul si varful, care o imping de langa axa; ghiontul trebuie sa
+		# mearga in aceeasi parte, altfel se anuleaza (masurat pe ac, r = 13:
+		# 40 de cadre de contact, 2.9 s sub 5 m/s).
 		var side := signf(rel.dot(right))
-		if rel.dot(ahead) > -front - 0.5 and absf(rel.dot(right)) < _box_size.x * 0.5:
+		if rel.dot(ahead) > -front - 0.5 				and absf(rel.dot(right)) < _box_size.x * 0.5 - 0.6:
 			side = float(nose_side)
 		elif side == 0.0:
 			side = float(nose_side)

@@ -27,6 +27,12 @@ GROUPS = {
                                "inca_stair_a", "inca_stair_b", "fountain_basin",
                                "water_channel", "trail_marker", "rope_rail"], 7.0),
     "buildings": ("buildings", ["inca_house_a", "inca_house_b", "guardhouse"], 9.0),
+    # Piesele MICI, cu pasul lor: pe plansa `citadel` (pas 7 m, alaturi de
+    # scari de 6 m) fantana si marcajul ies cateva zeci de pixeli si nu se pot
+    # judeca. Un grup separat, strans, le aduce la o marime la care se vede
+    # daca au forma sau doar volum.
+    "small": ("structures", ["fountain_basin", "water_channel", "trail_marker",
+                             "rope_rail"], 2.6),
     "forest": ("plants", ["polylepis_a", "polylepis_b", "tree_fern", "bromeliad",
                           "orchid_cluster", "bamboo_clump"], 6.0),
     "rocks": ("rocks", ["moss_boulder_a", "moss_boulder_b", "moss_boulder_c"], 5.0),

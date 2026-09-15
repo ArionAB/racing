@@ -960,6 +960,80 @@ static func themes() -> Dictionary:
 			"lagoon_shore_in": 4.0,
 			"lagoon_shore_out": 5.0,
 		},
+		"machupicchu": {
+			# CETATE DE GRANIT PE CREASTA VERDE, SUB CER ANDIN, CU NORUL IN VALE
+			# (docs/track_briefs/machu_picchu.md §4). Prima trecere (pasul 2 din
+			# §7): doar lumina, cerul, ceata si solul; kitul de cetate, clasele
+			# de textura (inca_stone, inca_steps, terrace_grass) si apa raului
+			# vin cu POI-urile. `decor` e stins ca la Cappadocia / Serengeti —
+			# decorul se pune de mana, pe POI.
+			#
+			# Iarba scurta de terase: verde-oliv de altitudine (CACTUS_GREEN e
+			# familia, #5F6B3E-ul de aici e putin mai inchis ca solul sa nu poata
+			# fi mai deschis decat norul — brief §4, memoria
+			# `ceata-in-familia-solului` aplicata invers).
+			"ground_tint": Color.html("5F6B3E"),
+			# Cer andin: albastru saturat sus, pal la orizont (aer subtire, ca pe
+			# Alpi, dar mai adanc — 2400 m, sezon uscat).
+			"sky_top": Color.html("2A5BA6"),
+			"sky_horizon": Color.html("B9CFE3"),
+			"sky_cover_alpha": 0.12,
+			# Ceata e NORUL care urca din defileu: alb-gri, in familia norului, nu
+			# a solului. Cerul isi pastreaza albastrul (fog_sky_affect mic, ca pe
+			# Serengeti — la 1.0 banda de cer iesea culoarea cetii).
+			"fog_sky_affect": 0.15,
+			"fog": Color(0.86, 0.87, 0.89),
+			# Peretele opus al defileului: padure de nori, verde inchis-albastrui.
+			"hill_color": Color(0.20, 0.30, 0.22),
+			# Soare la ~40 grade, alb-cald, sezon uscat. Azimutul PROVIZORIU
+			# (Track15.tscn il suprascrie cu custom_sun_rotation_deg) — se
+			# remasoara la fiecare redesenare de traseu (memoria
+			# `azimutul-soarelui-fata-de-drum`): zidurile teraselor sa arunce
+			# umbra pe treapta de sub ele, fata de sud a lui Huayna Picchu in
+			# lumina cand e in fata (C-D).
+			"sun_color": Color(1.0, 0.95, 0.85),
+			"sun_energy": 1.80,
+			"exposure": 1.05,
+			"sun_rotation_deg": Vector3(-40, 45, 0),
+			# Ambient rece, din cer, MIC: raportul soare/ambient 1.80/0.45 = 4.0,
+			# peste pragul 3.5 din brief (memoria
+			# `geometria-fara-lumina-e-invizibila`) — granitul alb tenteaza la
+			# ambient mare si atunci zidurile fara mortar devin o fata plata.
+			"ambient_color": Color.html("B4C2D2"),
+			"ambient_energy": 0.45,
+			# Umbrele SUNT identitatea pistei (dungile de sub zidurile de terasa).
+			# Cascada la 150 m, nu 90: de la creasta (+35) terasele sunt la
+			# 60-150 m (memoria `umbre-exista-dar-cascada-e-scurta`). E prima
+			# setare de scurtat (la 90) si apoi de stins daca device-ul nu tine.
+			"shadows": true,
+			"shadow_opacity": 0.70,
+			"shadow_distance": 150.0,
+			"shadow_blur": 1.0,
+			"fog_depth": true,
+			"fog_begin": 110.0,
+			"fog_end": 300.0,
+			"fog_curve": 1.6,
+			"fog_max": 0.85,
+			"horizon_model": "",
+			"horizon_class": "",
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "none",
+			# Setul de prop-uri e doar eticheta pe care o citesc benzile de decor
+			# (stinse aici) si gardul de ranch (doar "desert"); kitul propriu vine
+			# cu POI-urile, ca la Serengeti. "forest" = niciun efect special.
+			"props": "forest",
+			"hazard_model": "",
+			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			# Drumul: a doua pista fara asfalt (brief §4). Pista declara
+			# `custom_road_surface = "dirt"`; tenta e granit alb-cenusiu palid
+			# (piata, treptele) — serpentinele de pamant ocru si clasa
+			# `inca_steps` vin ca suprafete de POI, nu de aici. PROVIZORIU: se
+			# regleaza pe captura, nu pe hex (lectia tentelor de la Serengeti).
+			"dirt_road_tint": Color.html("C9C3B8"),
+			"water": false,
+		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
 			"sky_top": Color(0.22, 0.48, 0.9),
@@ -10304,6 +10378,23 @@ func _build_viaduct_nets() -> void:
 		if deck_min == INF:
 			continue
 		var top := deck_min - 1.6
+		# Un tablier care SE AFUNDA (podul de franghie din Machu Picchu:
+		# sageata pana la 2.65 m masurata cu 4 masini pe el) ar intra in plasa
+		# cu masinile pe el. Fiecare hazard din fereastra rapei care declara
+		# `net_ceiling_drop()` coboara plafonul cu atat.
+		for node in _net_drop_nodes():
+			var p := to_local((node as Node3D).global_position)
+			var ci := 0
+			var best := INF
+			for i in n:
+				var d := p.distance_squared_to(baked[i])
+				if d < best:
+					best = d
+					ci = i
+			var f := _dists[ci] / total
+			var inside := (f >= r.x and f <= r.y) if r.x <= r.y 				else (f >= r.x or f <= r.y)
+			if inside:
+				top = minf(top, deck_min - 1.6 - float(node.call("net_ceiling_drop")))
 		var bottom := top - 25.0
 		var zone := RespawnZone.new()
 		zone.name = "ViaductNet%d" % ri
@@ -10320,6 +10411,18 @@ func _build_viaduct_nets() -> void:
 
 ## Cat dincolo de amprenta XZ a tablierului se intinde plasa viaductului.
 const VIADUCT_NET_MARGIN: float = 45.0
+
+## Nodurile (Node3D) care cer plasei de viaduct un plafon mai jos.
+func _net_drop_nodes() -> Array[Node]:
+	var out: Array[Node] = []
+	var stack: Array[Node] = [self]
+	while not stack.is_empty():
+		var nd: Node = stack.pop_back()
+		if nd != self and nd is Node3D and nd.has_method("net_ceiling_drop"):
+			out.append(nd)
+		for c in nd.get_children():
+			stack.append(c)
+	return out
 
 ## Plasa de siguranta a unei creste: un volum plat de nisip, mult SUB sosea,
 ## in jurul zonei de aterizare. Plafonul se calculeaza din cea mai joasa
@@ -12799,6 +12902,27 @@ func loose_grip() -> float:
 
 func is_loose_at(frac: float) -> bool:
 	return _frac_in_ranges(frac, _loose_ranges())
+
+
+## Portiunile de TREPTE de pe traseul principal: (frac_start, frac_end).
+##
+## „Ruina ca si carosabil" (Machu Picchu, brief §3 „Treptele Drumului Incas"):
+## treptele NU exista in coliziune. Geometria pe care calca raycast-ul
+## suspensiei ramane panta lina — o treapta reala de 25 cm e un prag, si
+## memoria `suprafete-cu-goluri-si-praguri` spune ce se intampla: raza rotii
+## cade in orice gol si pragul devine zid. Treptele traiesc doar in mesh-ul
+## vizual si intr-un zgomot vertical periodic pe raycast (vezi
+## `Car.STEP_NOISE_M`/`STEP_PITCH_M`): vibratia se simte si se aude, dar nu
+## costa viteza.
+##
+## Acelasi tipar ca udul/gheata/afanatul: o STARE a drumului pe o distanta,
+## declarata in fractii ca sa supravietuiasca modificarilor de traseu.
+func _step_ranges() -> Array[Vector2]:
+	return []
+
+
+func is_steps_at(frac: float) -> bool:
+	return _frac_in_ranges(frac, _step_ranges())
 
 
 ## Mai e practicabila banda secundara cu indexul dat?

@@ -54,6 +54,25 @@ extends Node
 ##                             din ciclul lor (toate la aceeasi faza): ~0.29-0.57
 ##                             urca, ~0.60-0.64 MATURA banda, ~0.64-0.68 urca
 ##                             sa elibereze.
+##   --cloud-at=5.0            NORUL din defileu (CloudRiseHazard, Machu
+##                             Picchu) la N SECUNDE in ciclul lui (31 s;
+##                             `phase` ignorat): 0-3.5 urca de sub banda,
+##                             3.5-7.5 ACOPERA drumul, 7.5-10 se retrage,
+##                             restul = ascuns. Fara el norul e in defileu.
+##   --bus-at=30               AUTOBUZUL de pe serpentine (BusHazard, Machu
+##                             Picchu) la N SECUNDE de coborare pe curba lui
+##                             (7 m/s => 30 s = 210 m de la capatul de sus),
+##                             cu ceasul oprit pe durata pozei. Fara el e sus,
+##                             ascuns — exact starea in care nu se vede.
+##   --rope-load=2.6[,0.5]     PODUL DE FRANGHIE (RopeBridgeHazard, Machu
+##                             Picchu): o masina-fantoma cu mass_factor-ul dat
+##                             (Autobuz 2.6, sport 0.9) apasa tablierul la
+##                             fractia u din pod (implicit 0.5 = mijloc), iar
+##                             sageata e adusa direct la echilibru. Fara el
+##                             podul e in repaus (0.5 m) si gimmick-ul nu se
+##                             vede. Cu `--car`, masina e asezata PE tablierul
+##                             afundat (nu la cota soselei) si isi lasa si ea
+##                             greutatea.
 ##   --burner-at=0.05          arzatorul balonului (BurnerHazard) la o fractie
 ##                             din ciclul lui: 0.00-0.06 = telegraf (flacara),
 ##                             0.06-0.10 = sufla (praf), restul = stins.
@@ -156,6 +175,10 @@ func _ready() -> void:
 	var door_at := -1.0
 	var herd_at := -1.0
 	var hippo_at := -1.0
+	var rope_load := -1.0
+	var rope_u := 0.5
+	var cloud_at := -1.0
+	var bus_at := -1.0
 	var cross_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
@@ -200,6 +223,15 @@ func _ready() -> void:
 			herd_at = float(arg.trim_prefix("--herd-at="))
 		elif arg.begins_with("--hippo-at="):
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
+		elif arg.begins_with("--cloud-at="):
+			cloud_at = float(arg.trim_prefix("--cloud-at="))
+		elif arg.begins_with("--bus-at="):
+			bus_at = float(arg.trim_prefix("--bus-at="))
+		elif arg.begins_with("--rope-load="):
+			var parts := arg.trim_prefix("--rope-load=").split(",")
+			rope_load = float(parts[0])
+			if parts.size() > 1:
+				rope_u = float(parts[1])
 		elif arg.begins_with("--cross-at="):
 			cross_at = float(arg.trim_prefix("--cross-at="))
 		elif arg.begins_with("--burner-at="):
@@ -277,6 +309,12 @@ func _ready() -> void:
 		await _set_herd_time(track, herd_at)
 	if hippo_at >= 0.0:
 		await _set_hippo_phase(track, hippo_at)
+	if rope_load >= 0.0:
+		await _set_rope_load(track, rope_load, rope_u)
+	if cloud_at >= 0.0:
+		await _set_cloud_time(track, cloud_at)
+	if bus_at >= 0.0:
+		await _set_bus_time(track, bus_at)
 	if cross_at >= 0.0:
 		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
@@ -455,6 +493,7 @@ func _ready() -> void:
 				focus + Vector3.UP * 0.45)
 			car.road_index = idx
 			car.on_start_grid = true
+			_seat_car_on_rope_bridge(track, car)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -599,7 +638,7 @@ func _shoot_landmark(track: Track, cam: Camera3D, track_index: int,
 ## in afara hartii si invizibila. 0.55 il prinde pe la mijlocul traversarii.
 func _set_train_phase(root: Node, at: float) -> void:
 	var found := 0
-	for node in root.get_children():
+	for node in root.find_children("*", "TrainHazard", true, false):
 		var train := node as TrainHazard
 		if train == null:
 			continue
@@ -739,6 +778,86 @@ func _set_cross_time(root: Node, seconds: float) -> void:
 ## Muta hipopotamii la o fractie din ciclul lor (vezi `--hippo-at`). Toti la
 ## aceeasi faza, ca in captura sa se vada starea, nu defazajul. Un cadru de
 ## fizica intai, ca `_rest` sa fie citit din pozitia reala (sync_to_physics).
+## Norul: la N secunde in ciclu, cu ceasul lui oprit pe durata pozei.
+func _set_cloud_time(root: Node, at: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "CloudRiseHazard", true, false):
+		var cloud := node as CloudRiseHazard
+		cloud.set_cycle_time(at)
+		cloud.set_physics_process(false)
+		found += 1
+		print("--cloud-at=%.1f: %s acoperire %.2f, panza la y=%.1f (local)"
+			% [at, cloud.name, cloud.cover(), cloud.get_node("Cloud").position.y])
+	if found == 0:
+		print("--cloud-at: NICIUN nor pe pista asta")
+
+
+## Autobuzul: la N secunde de coborare pe curba lui, cu botul pe directia de
+## mers si ceasul oprit. `_dist`/`_yaw` sunt private prin conventie, ca la
+## tren; `_has_prev` se stinge ca primul tick sa nu citeasca teleportarea ca
+## pe o miscare (si sa roteasca botul dupa ea).
+func _set_bus_time(root: Node, at: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "BusHazard", true, false):
+		var bus := node as BusHazard
+		if bus == null or bus.curve == null:
+			continue
+		var length: float = bus.curve.get_baked_length()
+		var d: float = clampf(at * bus.speed, 0.0, length - 0.1)
+		bus.set("_started", true)
+		bus.set("_dist", d)
+		bus.set("_has_prev", false)
+		var pos: Vector3 = bus.to_global(bus.curve.sample_baked(d, true))
+		bus.set("_yaw", bus.call("_travel_yaw", length, pos))
+		found += 1
+		for _i in 3:
+			await get_tree().physics_frame
+		bus.set_physics_process(false)
+		var body: Node3D = bus.body()
+		print("--bus-at=%.1f: %s la %.0f m din %.0f pe curba, corp la (%.1f, %.1f, %.1f)"
+			% [at, bus.name, d, length, body.global_position.x, body.global_position.y,
+				body.global_position.z])
+	if found == 0:
+		print("--bus-at: NICIUN autobuz pe pista asta")
+
+
+## Podul de franghie: o incarcare fantoma la fractia u din pod, cu sageata
+## adusa la echilibru — apoi tick-ul podului e oprit, ca poza sa nu-l prinda
+## in mijlocul unei oscilatii.
+func _set_rope_load(root: Node, mass_factor: float, u: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "RopeBridgeHazard", true, false):
+		var bridge := node as RopeBridgeHazard
+		bridge.preview_loads.append(Vector3(u, 0.0, mass_factor))
+		bridge.settle_now()
+		found += 1
+		print("--rope-load=%.1f,%.2f: %s sageata %.2f m la mijloc (%.2f la u=%.2f), balans %.2f"
+			% [mass_factor, u, bridge.name, bridge.sag_at(0.5), bridge.sag_at(u), u, bridge.sway()])
+	if found == 0:
+		print("--rope-load: NICIUN pod de franghie pe pista asta")
+
+
+## `--car` pe un pod de franghie: masina inghetata se aseaza PE tablierul
+## afundat, nu la cota soselei, si isi lasa si ea greutatea (masina Muscle,
+## mass_factor-ul ei) — altfel pluteste cu sageata deasupra scandurilor.
+func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
+	for node in root.find_children("*", "RopeBridgeHazard", true, false):
+		var bridge := node as RopeBridgeHazard
+		var dc := bridge.deck_coords(car.global_position)
+		if dc.z <= 0.0 or dc.z >= 1.0 or absf(dc.x) > bridge.deck_width * 0.5 + 1.0:
+			continue
+		bridge.preview_loads.append(Vector3(dc.z, dc.x, car.mass_factor))
+		bridge.settle_now()
+		dc = bridge.deck_coords(car.global_position)
+		car.global_position -= Vector3.UP * (dc.y - 0.45)
+		print("--car pe %s: u=%.2f, x=%.2f, coborata cu %.2f m pe tablier" % [bridge.name, dc.z, dc.x, dc.y - 0.45])
+		bridge.set_physics_process(false)
+		return
+
+
 func _set_hippo_phase(root: Node, at: float) -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -860,13 +979,15 @@ func _set_span_phase(root: Node, at: float) -> void:
 
 func _set_bridge_phase(root: Node, at: float) -> void:
 	var found := 0
-	for node in root.get_children():
+	# Recursiv: barnele din Machu Picchu stau sub un Node3D „Hazarduri", si
+	# ritmul e al nodului (`period`), nu constanta clasei.
+	for node in root.find_children("*", "LiftBridgeHazard", true, false):
 		var bridge := node as LiftBridgeHazard
 		if bridge == null:
 			continue
-		var t := LiftBridgeHazard.SHIP_PERIOD * clampf(at, 0.0, 0.999)
+		var t: float = float(bridge.call("_ship_period")) * clampf(at, 0.0, 0.999)
 		bridge.set("_time", t)
-		bridge.call("_apply_cycle", fposmod(t, LiftBridgeHazard.PERIOD))
+		bridge.call("_apply_cycle", fposmod(t, bridge.period))
 		found += 1
 	print("--bridge-at=%.2f: %d poduri mobile mutate in ciclu" % [at, found])
 

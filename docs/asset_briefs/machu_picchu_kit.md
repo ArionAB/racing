@@ -77,8 +77,7 @@ Bugetele sunt plafoane. Dimensiunile sunt în metri. „Origine" = `finish(origi
 
 | fișier | cote | tri | contract |
 |---|---|---:|---|
-| `structures/rope_bridge.glb` | tablier **35,0 × 11,0** m (X × Z Blender: X = lungimea, Y Blender = lățimea), plăci de 0,15 grosime | 3.000 | **Piesa cea mai importantă.** Trei noduri: `Deck` (scânduri transversale, un singur mesh, vârfuri partajate, **o secțiune la fiecare 0,5 m pe lungime** — 70 de secțiuni — fiindcă `RopeBridgeHazard` deformează mesh-ul în shader după doi parametri: săgeata și unghiul lateral; plăcile trebuie să aibă rezoluție pe lungime, nu pe lățime), `Cables` (4 cabluri de iarbă împletită: două sub marginile tablierului, două balustrade la 1,0 m deasupra, tuburi cu 6 segmente, aceleași secțiuni la 0,5 m, **drepte** în GLB — sagul îl dă codul), `Rails` (legături verticale de frânghie între cablul de sus și cel de jos, la fiecare 1,0 m, pe ambele părți). **Originea: centrul tablierului, la fața de sus a scândurilor** (podul stă în scenă la `(13.71, −20, −155)`, capetele la x = ±17,12). Verify cu `--origin=assembly`. Sloturi: scânduri `WOOD_WEATHERED`, cabluri și legături `DRY_VEGETATION`. Fără turnuri în fișierul ăsta. |
-| `structures/bridge_tower_a.glb`, `bridge_tower_b.glb` | 4 × 4 la bază, **5,0** înalt, ușor trapezoidale | 600 fiecare | Turnuri de ancorare din piatră potrivită, cu două găuri prin care trec cablurile la 1,0 și la 0,1 m. `a` cu o nișă trapezoidală spre pod, `b` cu o treaptă. Origine la bază, centrată. Sloturi `MARBLE_GREY` / `ROCK_LIGHT`. Se așază la integrare la x = ±17,5 față de pod. |
+| ~~`structures/rope_bridge.glb`~~, ~~`bridge_tower_a/b.glb`~~ | — | — | **NU se generează** (corecție 15 sep 2026, semnalată de instanța de assets). `rope_bridge_hazard.gd` își construiește singur tablierul, cele 4 cabluri, legăturile **și turnurile** în SurfaceTool (`_build_visual`, `_build_towers`), pe atlas, deformate de `assets/shaders/rope_bridge.gdshader` (cadrul coardei: lungimea pe −Z, originea la capătul apropiat). Rândul din brief-ul pistei §5.2 e dinaintea acestui commit. Un GLB n-ar avea consumator. Dacă o captură din mașină arată că turnurile-cutii nu țin, instanța de gameplay adaugă un `deck_model`/`tower_model` în hazard și **abia atunci** se comandă piesa, în cadrul real al hazardului. |
 | `rocks/huayna_picchu.glb` | **30 m** înalt, bază ~90 m diametru, vârf ascuțit ușor aplecat | 2.500 | Vârful-flanc din brief §2.0. **Trei etaje de culoare, ca retag pe fețe, nu ca volum:** coroană de granit `MARBLE_GREY` (treimea de sus, fețe mari, tăioase), flanc `TROPICAL_GREEN` + `LOG_DARK` în umbră, bază `CACTUS_GREEN` cu 3–4 terase mici (trepte de 2 m, vârfuri partajate). Baza se îngroapă 3 m în teren (geometria coboară la −3 sub origine; `--origin=assembly`). Se vede de la 50 m din mașină, deci fațetele mari; de la 250 m de la Poarta Soarelui, deci silueta contează. `rock()` din Builder cu `taper` mare, nu `mesa()` (memoria: mesa la 40 m dă butoaie). |
 | `structures/inti_punku.glb` | două încăperi de 5 × 4 × 5 m înalte, **14,0 m liber între ele** pe axa drumului | 1.800 | Poarta Soarelui. Drumul la POI C are semi-lățime 6,5 (13 m lat), deci poarta **nu are buiandrug**: sunt două camere de piatră fără acoperiș, cu nișe trapezoidale, care flanchează drumul, plus o treaptă lată de granit între ele (prag de 0,1 m max, vârfuri partajate, muchii teșite). Originea pe axa drumului, la bază (`--origin=assembly`, ca `crater_gap` de la Serengeti). Drumul trece pe **Y Blender**. |
 | `structures/main_gate.glb` | deschidere trapezoidală **8,4 m la bază, 7,4 m sus, 6,0 m liber sub buiandrug**; tocul 1,2 m gros, 7,5 m total înalt | 1.500 | Poarta Principală (POI H). Drumul acolo are semi-lățime 4 (8 m), deci 8,4 liber. Buiandrug monolit, toc de granit, un rest de zid de 3 m de fiecare parte. Originea pe axa drumului, la bază (`--origin=assembly`). Drumul pe Y Blender. |
@@ -142,6 +141,8 @@ Bugetele sunt plafoane. Dimensiunile sunt în metri. „Origine" = `finish(origi
 
 ### 1.7 Ce NU se generează
 
+- `rope_bridge`, `bridge_tower_a/b` — podul e integral în `RopeBridgeHazard`
+  (vezi §1.1). Se comandă doar dacă integrarea deschide un hook de model.
 - `cloud_bank` — norul e pânză billboard cu textură cu cădere continuă, din cod
   (memoria `particule-muchia-nu-numarul`, `CloudRiseHazard`). Nu e GLB.
 - `chevron_post` — reuse `assets/models/chongqing/props/chevron_post.glb`.
@@ -161,8 +162,8 @@ Bugetele sunt plafoane. Dimensiunile sunt în metri. „Origine" = `finish(origi
 
 ## 3. Ordinea de lucru (valuri, fiecare cu verify + preview + commit)
 
-1. **Hero:** podul primul (singurul cu risc tehnic: rezoluția pe lungime
-   pentru shader), apoi turnurile, Huayna Picchu, porțile, ledge-ul, sacrele.
+1. **Hero:** Huayna Picchu primul (singura piesă judecată din mașină, la
+   50 m), apoi porțile (lățimile libere sunt contract), ledge-ul, sacrele.
 2. **Cetate:** zidul `a` primul și verificat că se înlănțuie (două instanțe cap
    la cap în preview, fără rost), apoi restul kitului.
 3. **Pădure + gară + fundal.**

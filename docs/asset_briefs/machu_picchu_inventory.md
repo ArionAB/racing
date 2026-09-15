@@ -30,7 +30,7 @@ Planșele de control, randate **din GLB-urile exportate**:
 | `structures/intihuatana.glb` | 492 / 500 | Trepte cu vârfuri partajate: 160 muchii interioare, **0** bordură liberă (măsurat pre-bevel) |
 | `structures/three_windows.glb` | 540 / 600 | Cele 3 ferestre trapezoidale; se înclină doar muchiile dinspre gol, nu capetele de zid |
 
-### `structures/`, `buildings/` — val 2 (8 piese livrate din 13)
+### `structures/`, `buildings/` — val 2 (13 piese, 3.894 tri)
 
 | fișier | tri / buget | notă |
 |---|---:|---|
@@ -42,9 +42,17 @@ Planșele de control, randate **din GLB-urile exportate**:
 | `structures/trail_marker.glb` | 76 / 80 | — |
 | `structures/rope_rail.glb` | 92 / 200 | Stâlpii la ±2,0; bbox-ul include capătul care iese |
 | `buildings/inca_house_b.glb` | 496 / 500 | Ruina, un singur nod — n-a fost atinsă de problema acoperișurilor |
+| `structures/inca_stair_a.glb` | **422 / 300 (+41%)** | Trepte cu vârfuri partajate (rise 0,25 m), obraji în trepte; peste buget, **decizie** |
+| `structures/inca_stair_b.glb` | **798 / 500 (+60%)** | Idem, 20 de trepte |
+| `buildings/inca_house_a.glb` | 548 / 700 | `House_Stone` + `House_Thatch`. `--origin=assembly` |
+| `buildings/guardhouse.glb` | 504 / 800 | Trei ziduri, pantă abruptă, streașină 0,6. `--origin=assembly` |
 
-Scările și cele două case cu acoperiș erau încă în lucru la scrierea rândurilor
-astea; vezi „ce nu e făcut".
+Acoperișurile au cerut **patru iterații**, toate eșuate identic, până s-a găsit
+cauza reală (originea per nod — vezi secțiunea de metodă). Dovada că stau acum pe
+ziduri, dincolo de planșă: bbox-ul lui `House_Thatch` pe Y e **2,260 → 4,825**
+(începe la streașină 2,5, se termină puțin peste coamă 4,5); înainte era
+**0,000 → 2,566**, adică picat la sol. La guardhouse: **2,057 → 7,878** față de
+coama la 7,46.
 
 ### `plants/`, `rocks/`, `props/` — val 3 (15 piese)
 

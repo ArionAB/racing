@@ -70,14 +70,19 @@ singure geometria, deci GLB-ul ar fi fost fișier mort, exportat, trecut prin
 
 ### Abateri de la planșă / brief, cu motiv
 
-- **`main_gate` are 8,4 m, nu 4 m.** Brief-ul **pistei** §2 POI H scrie „4 m
-  lățime"; brief-ul de **assets** §1.1 cere 8,4 bază / 6,0 liber. S-a construit
-  după al doilea, fiindcă închide aritmetic: drumul are semi-lățime 4 (8 m lat),
-  iar o poartă de 4 m pe un drum de 8 m e zid cu fantă, nu gâtuire — mașinile
-  AI și jucătorul s-ar bloca acolo. **Decizia dezvoltatorului (15 sep 2026):
-  piesa rămâne la 8,4, iar contradicția se notează DOAR aici** — rândul din
-  `docs/track_briefs/machu_picchu.md` §2 POI H rămâne neschimbat, deci cele două
-  cifre circulă în continuare. De ținut minte la integrare.
+- **`main_gate` are 8,4 m liber la bază, nu 4 — cauza: semi-lățime citită ca
+  lățime.** Brief-ul **pistei** scria în v0.1 „4 m", care e **semi-lățimea**
+  drumului (coloana din dreapta a tabelului POI), nu lățimea lui: drumul are
+  13 m, strâns la 8 în poartă. O poartă de 4 m pe un drum de 8 m ar fi fost zid
+  cu fantă, nu gâtuire — mașinile AI și jucătorul s-ar fi blocat acolo. Piesa
+  s-a construit după brief-ul de **assets** §1.1 (8,4 bază / 7,4 sus / 6,0 liber
+  sub buiandrug), care închide aritmetic. **Brief-ul pistei a fost corectat pe
+  tree-ul principal (15 sep 2026)**: §2 POI H și tabelul de assets spun acum 8 m
+  liber la bază / 6 m sub buiandrug, cu cauza notată acolo. Nu mai există
+  contradicție.
+  **Cota livrată e 8,390 m** (măsurată pe geometrie), adică peste cei 8 m ceruți
+  — dacă cineva „corectează" vreodată piesa la 8,0 exact, pierde marja, nu
+  câștigă conformitate.
 - **`huayna_picchu` are baza 79×73 m, nu ~90.** Perturbația per coloană, cea
   care dă fațetele cerute de brief, scade raza medie. Compromis conștient între
   fațete late (silueta de la 250 m) și diametrul nominal.

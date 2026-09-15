@@ -30,9 +30,42 @@ Planșele de control, randate **din GLB-urile exportate**:
 | `structures/intihuatana.glb` | 492 / 500 | Trepte cu vârfuri partajate: 160 muchii interioare, **0** bordură liberă (măsurat pre-bevel) |
 | `structures/three_windows.glb` | 540 / 600 | Cele 3 ferestre trapezoidale; se înclină doar muchiile dinspre gol, nu capetele de zid |
 
-### Valurile 2–4
+### `structures/`, `buildings/` — val 2 (8 piese livrate din 13)
 
-Se completează pe măsură ce intră. Contractele sunt în brief §1.2–§1.5.
+| fișier | tri / buget | notă |
+|---|---:|---|
+| `structures/inca_wall_a.glb` | 208 / 300 | **Contractul de înlănțuire dovedit:** capete la x = ±2,0000, lungime 4,0000, rost **0,0000** la îmbinare |
+| `structures/inca_wall_b.glb` | 296 / 300 | Capete la ±3,0000, 2 nișe |
+| `structures/inca_wall_c.glb` | 152 / 200 | Capete la ±1,0000 (rotunjirea colțului deplasa X; acum e doar pe Y) |
+| `structures/fountain_basin.glb` | **266 / 200 (+33%)** | Peste buget, **decizie** — vezi abaterile |
+| `structures/water_channel.glb` | 36 / 100 | Capete la ±2,0000 |
+| `structures/trail_marker.glb` | 76 / 80 | — |
+| `structures/rope_rail.glb` | 92 / 200 | Stâlpii la ±2,0; bbox-ul include capătul care iese |
+| `buildings/inca_house_b.glb` | 496 / 500 | Ruina, un singur nod — n-a fost atinsă de problema acoperișurilor |
+
+Scările și cele două case cu acoperiș erau încă în lucru la scrierea rândurilor
+astea; vezi „ce nu e făcut".
+
+### `plants/`, `rocks/`, `props/` — val 3 (15 piese)
+
+| fișier | tri / buget | notă |
+|---|---:|---|
+| `plants/polylepis_a.glb` | 598 / 1.000 | Coroană aproape sferică, coborâtă la 0,76 din înălțime |
+| `plants/polylepis_b.glb` | 1.098 / 1.400 | Două trunchiuri din aceeași bază |
+| `plants/tree_fern.glb` | 768 / 900 | — |
+| `plants/bromeliad.glb` | **248 / 200 (+24%)** | Peste buget, declarat |
+| `plants/orchid_cluster.glb` | **410 / 200 (+105%)** | Peste buget, declarat; `--allow-slots=31` |
+| `plants/bamboo_clump.glb` | **958 / 600 (+60%)** | Peste buget, declarat |
+| `rocks/moss_boulder_a/b/c.glb` | 200/200, 242/250, 238/300 | Mușchiul e retag pur pe fețele de sus |
+| `props/tent_a.glb`, `tent_b.glb` | 256 / 300 fiecare | Cele mai bune piese din set (dom, țăruși, corzi) |
+| `props/backpack_pile.glb` | 288 / 400 | Piesa cea mai slabă: la 1 m citește a cutii, nu a bagaje |
+| `rocks/gorge_far_wall.glb` | 1.706 / 5.000 | **196,0 × 75,4 m** măsurat (cerut 200×80), săgeata arcului 58,4 m. `--origin=assembly` |
+| `rocks/machu_picchu_mountain.glb` | 1.126 / 1.500 | **146,7 × 60,5 m** măsurat (cerut 150×60), fără trepte pe creastă (salt max 4,9 m) |
+
+### Valul 4
+
+Se completează. Contractele reale (citite din cod, nu din brief) sunt mai jos,
+la „Contracte pentru valul 4".
 
 ## Ce trebuie știut la integrare
 
@@ -88,6 +121,46 @@ singure geometria, deci GLB-ul ar fi fost fișier mort, exportat, trecut prin
   fațete late (silueta de la 250 m) și diametrul nominal.
 - **`WOOD_WEATHERED` nu există ca nume în `dio_lib`** — constanta e `WOOD`,
   același slot 9. Irelevant pentru piesele livrate, dar brief-ul îl numește așa.
+
+#### Piese peste buget, fiecare cu cifra și motivul
+
+Bugetul e **plafon pentru formă, nu invers**: o piesă care intră în buget
+pierzându-și semnătura nu e o piesă livrată. Cinci piese rămân peste, declarat:
+
+- **`fountain_basin` 266/200 (+33%)** — 6 volume × 12 tri × 3,67 (multiplicatorul
+  de bevel măsurat) = 264. `bevel_angle` nu ajută: toate muchiile unei cutii sunt
+  de 90°, deci se califică mereu. Singurele pârghii tăiau buza bazinului sau gura
+  de apă — exact ce face piesa să se citească pe planșa strânsă. **Decizie.**
+- **`inca_stair_a` 422/300 (+41%)** și **`inca_stair_b` 798/500 (+60%)** —
+  aduse de la 646 și 1.246 prin rărirea coloanelor obrazului la fiecare a 3-a
+  treaptă, fără să se atingă treptele. Mai departe se pierde citirea de „zid în
+  trepte", adică exact ce a reparat ocluzia. **Decizie.**
+- **`bromeliad` 248/200, `orchid_cluster` 410/200, `bamboo_clump` 958/600** —
+  tăiate până la bevel zero, `stations=3`, mai puține frunze/tulpini, noduri din
+  `box` în loc de `cylinder`. Tăierea următoare atingea silueta unor piese care
+  se văd de la 3–4 m în pădurea de nori.
+
+#### Alte abateri ale valului 3
+
+- **Orhideea are o petală-lamelă + labelum per floare**, nu trei petale. Brief-ul
+  cere „5 flori pe tije" — numărul de *flori* se respectă; la 0,4 m și buget 200,
+  petalele 2 și 3 costau 80 tri/floare și nu se distingeau.
+- **Mușchiul de pe bolovani e retag pur, fără volum.** Două variante cu volum au
+  fost încercate și respinse (pietricele lipite / capac cusut peste stâncă);
+  brief-ul cere la literă „fețele de SUS retag `CACTUS_GREEN`".
+- **Fără volume de vegetație pe creasta `gorge_far_wall`.** Peretele e o *pânză*
+  (două foi cusute), deci nu există „a îngropa" ceva în ea — obiectul trece prin
+  ea și atârnă pe dedesubt. Pădurea rămâne benzi de retag; volumul de vegetație e
+  problema integrării (scatter pe teren, unde există sol).
+- **Queñualul a ieșit inițial identic cu o acacie-umbrelă** (coroană plată pe
+  trunchi gol): cauza era `squash=0.55`, rețeta acaciei de la Serengeti.
+
+#### Două trimiteri greșite în brief-ul de assets (§1.6)
+
+Brief-ul dă `crater_far_wall` de la Serengeti ca analog pentru `gorge_far_wall`,
+dar îl caută în `build_serengeti_rocks.py`: piesa e de fapt în
+**`build_serengeti_camp.py`**, iar bugetul ei e **6.000 cu `--origin=assembly`**,
+nu 5.000. Nu schimbă nimic la piesa livrată (1.706 tri), dar costă o căutare.
 
 ### Origini care NU sunt la baza bbox-ului
 
@@ -161,6 +234,33 @@ piesă la 20% din buget care arată netedă nu e eficientă, e formă lipsă
 pragurile, capetele plane se măsoară explicit pe geometrie și se scriu aici.
 Vârfurile partajate se verifică pe topologia **pre-bevel** — pe GLB bevel-ul
 sparge muchiile și cifra ar trece și fără cusătură.
+
+**Nici planșa nu vede culoarea.** `preview.py` nu referențiază `atlas_material`
+/ `ATLAS`, deci toate planșele randează monocrom (gri-bej) — inclusiv orhideea,
+singurul accent saturat din kit. Consecința practică: mușchiul-retag, benzile de
+culoare de pe peretele defileului și rozul orhideei **nu pot fi judecate din
+harnașamentul ăsta**; verdictul lor rămâne pentru integrare, în Godot. Planșa
+dovedește silueta, `verify_glb.py` dovedește sloturile; culoarea *compusă* nu e
+dovedită de niciunul.
+
+**`finish` re-centrează fiecare nod pe bbox-ul LUI.** `finish(origin="base")` →
+`set_origin_base(obj, center_xy=True)` (`dio_lib.py:1291`) calculează
+`dx = -(min+max)/2`, `dy` la fel, `dz = -min(z)` — **pe obiectul curent**. Pe o
+piesă cu mai multe noduri construite în același cadru (casa: `House_Stone` +
+`House_Thatch`), fiecare nod e apoi mutat separat: zidurile stau (talpa e deja la
+0), dar acoperișul coboară până când *streașina lui* ajunge la 0, deci se
+desprinde de casă cu ~2,5 m și se re-centrează și pe XY pe extentul lui. Efectul
+e independent de geometria acoperișului — de aceea **trei algoritmi diferiți au
+eșuat identic** și a costat valul 2 patru iterații. Pe piesele compuse, offsetul
+se calculează **o dată pe ansamblu** și se aplică identic tuturor nodurilor
+(`set_origin_base` întoarce chiar vectorul), iar verificarea e `--origin=assembly`.
+
+Un corolar despre regula „fișier identic la bit = schimbarea n-a ajuns la
+geometrie": e bună, dar **întreabă întâi dacă cifra depinde de ce ai schimbat**.
+Numărul de triunghiuri depinde de topologie, nu de poziție: două cutii mutate
+rămân 88 de triunghiuri, iar un bevel a cărui *lățime* se schimbă tesește
+aceleași muchii (se califică după unghi), deci dă același număr. În ambele cazuri
+identitatea e normală, nu simptom.
 
 ## Ce NU e făcut
 

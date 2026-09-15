@@ -70,10 +70,19 @@ coama la 7,46.
 | `rocks/gorge_far_wall.glb` | 1.706 / 5.000 | **196,0 × 75,4 m** măsurat (cerut 200×80), săgeata arcului 58,4 m. `--origin=assembly` |
 | `rocks/machu_picchu_mountain.glb` | 1.126 / 1.500 | **146,7 × 60,5 m** măsurat (cerut 150×60), fără trepte pe creastă (salt max 4,9 m) |
 
-### Valul 4
+### `animals/`, `vehicles/` — val 4 (6 piese, 7.088 tri)
 
-Se completează. Contractele reale (citite din cod, nu din brief) sunt mai jos,
-la „Contracte pentru valul 4".
+| fișier | tri / buget | notă |
+|---|---:|---|
+| `animals/llama.glb` | 400 / 400 | `FOAM_WHITE`. **Cele 4 acțiuni confirmate din fișier** (JSON glTF): `Eating`, `Gallop`, `Idle`, `Walk`, `skins=1` |
+| `animals/llama_b.glb` | 400 / 400 | `SAND_MID`, aceleași acțiuni |
+| `animals/llama_c.glb` | 400 / 400 | `LOG_DARK`, aceleași acțiuni |
+| `animals/condor.glb` | **986 / 900 (+10%)** | **Static, rig amânat** — vezi abaterile. `--origin=assembly` |
+| `vehicles/consettur_bus.glb` | 968 / 1.200 | AABB **3,66 × 3,09 × 6,16 m** măsurat (contract 3,6 × 3,0 × 6,0 + bevel). Origine la sol, centrat XZ, **înainte = −Z** |
+| `vehicles/perurail_train.glb` | 3.934 (vezi nota) | `Train_Loco` 1.390 + `Train_Tender` 1.228 + `Train_Wagon` 1.316. **Botul pe +X**, ecartament la bandaj \|z\| = 0,530 călare pe centrul de șină 0,45, **baza roților y = 0,000** pe toate trei nodurile |
+
+**Verdictul kitului: `bash tools/blender/verify_machupicchu.sh` → `VERDICT KIT: OK`,
+39 de GLB-uri.**
 
 ## Ce trebuie știut la integrare
 
@@ -162,6 +171,30 @@ pierzându-și semnătura nu e o piesă livrată. Cinci piese rămân peste, dec
   problema integrării (scatter pe teren, unde există sol).
 - **Queñualul a ieșit inițial identic cu o acacie-umbrelă** (coroană plată pe
   trunchi gol): cauza era `squash=0.55`, rețeta acaciei de la Serengeti.
+
+#### Abaterile valului 4
+
+- **Condorul e STATIC; rig-ul e amânat deliberat.** Acțiunile `Open`/`Close` din
+  brief §1.4 n-au niciun declanșator în cod — nimic din `scenes/` nu le caută, iar
+  `Area3D`-ul de 25 m e al integrării și nu e scris. Aripile sunt lăsate ca
+  **insule de mesh separate**, ca rig-ul de mai târziu să nu retaie geometria.
+  Depășirea de 86 tri e cost de bevel pe multe elemente mici (~284 brut × ~3,2):
+  ce ar încăpea în 900 se obține doar ștergând gulerul, ciocul sau ghearele.
+- **Reuse-ul lui `bus.fbx` a fost respins cu măsurătoare**, nu din ochi: sursa are
+  **13,70 m lungime la 3,81 lățime**; adusă uniform la cei 6,0 m ceruți ar fi dat
+  **1,67 m lățime** față de 3,6 — un autobuz de două ori prea îngust. Construit
+  din Builder. `bus.fbx` rămâne neatins.
+- **Axa trenului confirmată ca +X**, cum spune codul și nu brief-ul (vezi
+  „Contracte pentru valul 4"). Un export pe −Z ar fi traversat cu spatele.
+
+#### `verify_glb.py` verifică bugetul PE NOD, nu pe fișier
+
+Măsurat pe tren: fișierul are **3.934 tri** și trece cu un buget de 3.000,
+fiindcă niciun nod luat separat nu-l depășește (1.390 / 1.228 / 1.316). Cu un
+buget absurd (100) pică, deci mecanismul funcționează — dar **pe piesele cu mai
+multe noduri plafonul din brief nu e cel verificat**. Brief-ul §1.5 dă 3.000 pe
+toată garnitura; cifra reală e 3.934 și e rezonabilă pentru locomotivă + furgon +
+vagon, dar trebuie citită ca atare, nu ca „3.934 sub 3.000".
 
 #### Două trimiteri greșite în brief-ul de assets (§1.6)
 
@@ -270,8 +303,50 @@ rămân 88 de triunghiuri, iar un bevel a cărui *lățime* se schimbă tesește
 aceleași muchii (se califică după unghi), deci dă același număr. În ambele cazuri
 identitatea e normală, nu simptom.
 
+### Harnașamentul a raportat roșu piese corecte — de două ori, din aceeași cauză
+
+Prima rulare completă a dat `VERDICT KIT: PROBLEME` pe șapte piese. Niciuna nu
+era defectă:
+
+- **`inca_house_a`, `guardhouse`, `fountain_basin`** — verificate implicit cu
+  `--origin=base`, deși sunt piese pe **două noduri** al căror al doilea nod nu
+  atinge solul prin construcție (`House_Thatch` începe la streașină, ~2 m;
+  `Water` e un quad plan la 0,5 m). Exact cifrele reclamate („min Y = 2,260 /
+  2,057 / 0,500") sunt **dovada că așezarea e corectă**. Lista de excepții a
+  scriptului fusese scrisă înainte ca piesele astea să devină compuse — omisiune
+  a coordonării, nu a build-urilor. Fix: `--origin=assembly`, ca la piesele hero.
+- **`bromeliad`, `orchid_cluster`, `bamboo_clump`, `condor`** — depășiri de buget
+  **deja decise**, cu motivul scris. Scriptul nu le știa.
+
+Bugetele acceptate sunt acum **înghețate în `verify_machupicchu.sh`**, fiecare cu
+cifra din brief alături și motivul în comentariu. Motivul e cel din
+`verify_glb.py` însuși (nota despre excepția declarată de la #45): **o gardă
+despre care știm dinainte că pică nu mai e gardă** — data viitoare când pică din
+alt motiv, nimeni nu se mai uită.
+
 ## Ce NU e făcut
 
-Integrarea în `Track15.tscn` (plantarea pe POI, clasele de textură, tema), rig-ul
-condorului (vezi mai sus), și planșele colorate — previzualizarea randează gri,
-fără atlas: verifică forma, originea și orientarea, nu culoarea.
+Tot ce urmează e al **instanței de gameplay**; aici s-au livrat doar GLB-urile,
+build-urile, planșele, verify-ul și inventarul.
+
+- **Integrarea în `Track15.tscn`**: plantarea pe POI (`DecorManual`, tiparul de la
+  Track14), clasele de textură (`inca_stone` etc. — rosturile de piatră vin de
+  acolo, nu din geometrie, vezi regula §0.5), tema cu `props: "machupicchu"`.
+  Temă are azi `decor: "none"` (`track.gd:1022`), deci nimic nu se așază automat.
+- **Cele trei piese cu consumator trebuie cablate**: `model` pe `AutobuzConsettur`
+  (`Track15.tscn:168-175`, azi doar `body_size` placeholder), constanta
+  `MODEL_PATH` sau un export nou pe `TrenPeruRail` (azi încarcă
+  `vehicles/train.glb`), și `cow.glb` → `llama.glb` pe cele patru `Lama1..4`
+  (`Track15.tscn:120-158`).
+- **Rig-ul condorului**, când se scrie `Area3D`-ul de 25 m: acțiunile `Open` /
+  `Close` n-au azi niciun declanșator. Aripile sunt deja insule de mesh separate
+  ca rig-ul să nu retaie geometria.
+- **Verdictul de CULOARE.** Planșele randează monocrom (`preview.py` nu aplică
+  atlasul), deci mușchiul pus ca retag, benzile de pe peretele defileului și rozul
+  orhideei **nu sunt dovedite de nimic din harnașamentul ăsta** — se judecă în
+  Godot, la prima captură din mașină.
+- **Nu se generează deloc** (hazardele își fac geometria singure): `rope_bridge`,
+  `bridge_tower_a/b`, `inca_bridge_beams`, `cloud_bank` — vezi secțiunea cu
+  motivele din cod. Dacă o captură din mașină arată că turnurile-cutii ale podului
+  nu țin, se deschide întâi un `deck_model`/`tower_model` în hazard și **abia
+  atunci** se comandă piesa, în cadrul real al hazardului.

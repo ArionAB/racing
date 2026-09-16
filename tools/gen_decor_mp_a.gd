@@ -178,6 +178,9 @@ var _total_len := 1985.6
 var _podea_pos: Array[Vector3] = []
 var _podea_scl: Array[Vector3] = []
 var _n_terase := 0
+## Amprentele teraselor, ca piesele de deasupra (case, soclu) sa poata cere
+## COTA PODELEI in loc de cota terenului. Fiecare: {c, u, v, hw, hd, top}.
+var _terase: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -844,12 +847,51 @@ func _platforma(c: Vector2, w: float, dpt: float, rot: float, lift: float,
 		_at("inca_stair_a", tag + "Scara", sc.x, sc.y, s_yaw,
 			_scale_for("inca_stair_a", s_h), "", -0.05)
 
+	# Amprenta, pentru `_cota_terasa`: ce se aseaza deasupra (o casa, un soclu)
+	# trebuie sa stea pe PODEA, nu pe solul de sub terasa.
+	_terase.append({
+		"c": c, "u": u, "v": v, "hw": hw - 1.2, "hd": hd - 1.2,
+		"top": base_y + lift,
+	})
+
 	# (d) CAMERELE, desenate PE podea (y_off = lift fata de solul lor).
 	if rooms_u > 0 and rooms_v > 0:
 		var cw := (w - 3.0) / float(rooms_u)
 		var cd := (dpt - 3.0) / float(rooms_v)
 		_block_abs(c, rooms_u, rooms_v, cw, cd, rot, room_h, 0.22,
 			tag + "Cam", base_y + lift, _n_terase * 137)
+
+
+## Cota PODELEI terasei care contine punctul, sau NAN daca punctul e pe teren.
+##
+## De ce exista: o casa asezata la 23 m de ax cade acum INAUNTRUL unei terase
+## ridicate cu 1,8 m. Cu `_at` (raycast pe teren) ar fi stat la cota solului,
+## adica 1,8 m SUB podeaua din jurul ei — ingropata pana la ferestre, cu iarba
+## terasei taindu-i peretii. Defectul e exact perechea pe minus a celui pentru
+## care a picat runda 6 (acolo zidul plutea peste gol, aici casa se ingroapa
+## sub podea), si se vede la fel de prost.
+func _cota_terasa(x: float, z: float) -> float:
+	var p := Vector2(x, z)
+	var best := NAN
+	for t in _terase:
+		var d: Vector2 = p - (t["c"] as Vector2)
+		if absf(d.dot(t["u"] as Vector2)) <= float(t["hw"]) \
+				and absf(d.dot(t["v"] as Vector2)) <= float(t["hd"]):
+			# Daca doua terase se suprapun, castiga cea de SUS: o piesa nu
+			# poate sta sub podeaua pe care o strapunge.
+			if is_nan(best) or float(t["top"]) > best:
+				best = float(t["top"])
+	return best
+
+
+## Ca `_at`, dar daca punctul cade pe o terasa, cota vine de la PODEAUA ei.
+func _at_terasa(model: String, base: String, x: float, z: float, yaw: float,
+		scl: float, mode: String = "", y_off: float = 0.0) -> void:
+	var t := _cota_terasa(x, z)
+	if is_nan(t):
+		_at(model, base, x, z, yaw, scl, mode, y_off)
+		return
+	_raw(model, base, Vector3(x, t + y_off, z), yaw, scl, mode)
 
 
 ## Zid de sprijin INALT, facut din ASIZE suprapuse in loc de o piesa intinsa.
@@ -1201,7 +1243,7 @@ func _temple() -> void:
 	# Acum sta la -12,5 m, in FATA oricarui zid, cu nisele spre sosea.
 	var f := 0.0155
 	var c := _pt(f, -12.5)
-	_at("three_windows", "treiFerestre", c.x, c.y, _yaw_at(f) + PI, 1.0, "", -0.10)
+	_at_terasa("three_windows", "treiFerestre", c.x, c.y, _yaw_at(f) + PI, 1.0, "", -0.10)
 	# Templul Principal (sun_temple, zid curb, 5,59 m) pe DREAPTA, la 16 m de
 	# ax, in poarta curtii mari — e cea mai inalta piesa de piatra din piata
 	# si trebuie sa stea in fata incintei, nu in spatele ei.
@@ -1212,7 +1254,7 @@ func _temple() -> void:
 	# 13,5 m, in fata zidului, pe teren gol.
 	var f2 := 0.0215
 	var c2 := _pt(f2, 13.5)
-	_at("sun_temple", "templulSoarelui", c2.x, c2.y, _yaw_at(f2) - PI * 0.5,
+	_at_terasa("sun_temple", "templulSoarelui", c2.x, c2.y, _yaw_at(f2) - PI * 0.5,
 		1.0, "", -0.12)
 	# A doua fatada de nise, pentru cadrul de la frac 0.02: la 0.038 pe
 	# dreapta. Piesa `three_windows` e o fatada, nu o cladire — doua exemplare
@@ -1220,7 +1262,7 @@ func _temple() -> void:
 	# duplicat (in bara, sirul de nise se repeta pe toata terasa de sus).
 	var f3 := 0.0380
 	var c3 := _pt(f3, 17.0)
-	_at("three_windows", "treiFerestreB", c3.x, c3.y, _yaw_at(f3) + PI,
+	_at_terasa("three_windows", "treiFerestreB", c3.x, c3.y, _yaw_at(f3) + PI,
 		0.95, "", -0.10)
 
 
@@ -1259,7 +1301,7 @@ func _case() -> void:
 	# e la ~36 m in fata, adica in treimea din mijloc a ecranului.
 	var f := 0.0180
 	var c := _pt(f, 23.0)
-	_at("inca_house_a", "casaPaie", c.x, c.y, _yaw_at(f) - PI * 0.5, 1.0, "", -0.10)
+	_at_terasa("inca_house_a", "casaPaie", c.x, c.y, _yaw_at(f) - PI * 0.5, 1.0, "", -0.10)
 	# A doua, pe etajul 1 (ridicata 1,6 m), la frac 0.038: silueta de sus a
 	# cetatii pentru cadrul de la frac 0.02.
 	# A doua casa sta pe etajul 1, la +1,55 m. Acum etajul e SOLID (soclul
@@ -1269,7 +1311,7 @@ func _case() -> void:
 	# primeste soclul ei propriu, un inel scund chiar sub amprenta casei.
 	var f2 := 0.0380
 	var c2 := _pt(f2, 42.0)
-	_at("inca_house_a", "casaPaieB", c2.x, c2.y, _yaw_at(f2) - PI * 0.35,
+	_at_terasa("inca_house_a", "casaPaieB", c2.x, c2.y, _yaw_at(f2) - PI * 0.35,
 		1.12, "", -0.10)
 	# RUINELE FARA ACOPERIS — diferenta „casa intreaga / casa cazuta" din
 	# bara. Runda 4 le facuse din `inca_house_b`, si captura a aratat de ce
@@ -1340,7 +1382,7 @@ func _lame() -> void:
 	for p: Array in poz:
 		var fr: float = p[1]
 		var c := _pt(fr, float(p[2]))
-		_at(String(p[0]), "lama", c.x, c.y, _yaw_at(fr) + float(p[3]), s,
+		_at_terasa(String(p[0]), "lama", c.x, c.y, _yaw_at(fr) + float(p[3]), s,
 			"none", 0.0)
 
 

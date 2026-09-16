@@ -2558,7 +2558,7 @@ transform = Transform3D(0.939840, 0, 0.341614, 0, 1.000000, 0, -0.341614, 0, 0.9
 transform = Transform3D(-0.000984, 0, -0.719999, 0, 0.720000, 0, 0.719999, 0, -0.000984, -57.598316, 1.747760, 162.631836)
 
 [node name="casaPaie778" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_house_a")]
-transform = Transform3D(0.000000, 0, -1.000000, 0, 1.000000, 0, 1.000000, 0, 0.000000, -69.947739, 0.942923, 173.000000)
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1.000000, 0, 1.000000, 0, 0.000000, -69.947739, 3.131961, 173.000000)
 
 [node name="casaPaieB779" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_house_a")]
 transform = Transform3D(0.394533, 0, -1.048210, 0, 1.120000, 0, 1.048210, 0, 0.394533, -26.569159, 4.700751, 190.834290)

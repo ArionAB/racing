@@ -338,6 +338,12 @@ const WALL_LEN := {"inca_wall_a": 4.0, "inca_wall_b": 6.0, "inca_wall_c": 2.0}
 const FALL_TARGET := 1.8
 const LAT_MIN := 7.3       # 0,8 m dincolo de muchia drumului (semi-latime 6,5)
 const LAT_MAX := 10.5      # dincolo de racordul cornisei piesa ar atarna in aer
+## Cat poate sta zidul dincolo de MUCHIA locala. 1,4 m: piesa e groasa 0,83-0,86
+## (masuratori §1), deci fata ei dinspre drum ramane la ~1 m de asfalt — destul
+## cat sa nu fie obstacol pe umar, prea putin cat sa se vada iarba intre sosea
+## si zid. Se masoara fata de `width_at_index`, nu fata de 6,5 fix: semi-latimea
+## se schimba pe felie (custom_width_segments).
+const EDGE_BAND := 1.4
 
 ## RUNDA 3 A GRESIT PASUL, si captura a aratat-o inainte de orice cifra
 ## (G_r3_f076/082/088.png): zidul citea ca un SIR DE STALPI cu iarba pe cap, nu
@@ -575,7 +581,18 @@ func _smooth_lateral(i: int, sgn: float) -> float:
 		var j := (i + k * 3 + n) % n
 		acc += _fall_lateral_raw(j, sgn)
 		cnt += 1
-	return clampf(acc / float(cnt), LAT_MIN, LAT_MAX)
+	# ...si apoi se leaga de MUCHIE, nu doar de cele doua plafoane absolute.
+	# Pe cornisa, zidul TINE ASFALTUL: buza taieturii e la 0,5 m de el
+	# (RAVINE_CORNICE_INNER), deci un zid la 10,5 m de ax cand muchia e la 6,5
+	# lasa patru metri de iarba intre sosea si zid — si atunci piesele nu mai
+	# citesc ca terasamentul drumului, ci ca un gard pe camp, splayate pe panta.
+	# Exact asta se vede in prim-planul lui G_r6_f082.png.
+	# Deci limita de sus e RELATIVA la muchia locala: cel mult `EDGE_BAND` metri
+	# dincolo de ea. Cautarea conturului de cadere ramane, dar doar ca sa apropie
+	# zidul acolo unde rapa incepe mai devreme decat buza nominala.
+	var half := _track.width_at_index(i)
+	return clampf(acc / float(cnt), maxf(LAT_MIN, half + 0.5),
+		minf(LAT_MAX, half + EDGE_BAND))
 
 
 func _fall_lateral_raw(i: int, sgn: float) -> float:

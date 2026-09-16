@@ -715,6 +715,34 @@ func _terase_dreapta() -> void:
 ## de tema, comun celorlalte doua POI-uri care lucreaza in paralel. Ce tine
 ## de mine e cat din ea se VEDE.
 ##
+## RUNDA 13, partea a doua — CURTEA, nu camera.
+##
+## Dupa ce colturile s-au inchis si coronamentul verde a disparut, decupajul
+## din masina (crop_r13_dr.png / crop_r13_st.png) inca nu citea incinte pe
+## partea dreapta: se vedeau siruri de fete lungi de zid. Comparatia cu
+## decupajul barii (bara_crop.png, aceeasi marime pe ecran) arata de ce, si
+## nu e nici coltul, nici culoarea — e RAPORTUL PIATRA/IARBA la sol.
+##
+## In bara, cetatea sta pe o terasa in mare parte DESCHISA: zidurile sunt
+## linii rare care delimiteaza curti mari, iar iarba curtii e cea mai mare
+## suprafata dupa piatra. La noi erau trei randuri de blocuri de 2x3 camere
+## de 7,5 m, adica ziduri la fiecare 7,5 m pe 40 m de adancime: din ochiul
+## de la 10 m fiecare zid era acoperit de urmatorul si nu ramanea nicio
+## podea vizibila. Masurat pe decupaj: **piatra 61-65% din cadru, iarba
+## 27-29%**, iar in bara raportul e invers pe zona de cetate.
+##
+## Deci camerele nu se mai inmultesc, se MARESC: 12-13,5 m in loc de 7,5 m,
+## si 1-2 pe latura in loc de 2-3. Cu zidul tot la 1,8-2,0 m, raportul
+## inaltime/latura trece de la 1/4 la 1/7 — capatul pe care runda 11 il
+## respinsese fiindca la 10 m latura inelul se rupea. Aici nu se rupe,
+## fiindca intre timp `_wall_run` ancoreaza colturile: ce rupea inelul la
+## runda 11 nu era latura lunga, erau capetele lasate in aer pe ea.
+## (Memoria `revenirea-e-o-mutare-valida`: reglajul respins atunci se
+## reincearca acum, cu cauza reala reparata.)
+##
+## Randul din fund scade de la 4 blocuri la 3 (dreapta) si de la 3 la 2
+## (stanga): adancimea vine din doua planuri, nu din trei.
+
 ## CAMPUL DIN DREAPTA: blocuri de camere, doua randuri de adancime.
 ## Fiecare bloc e rotit usor fata de drum (+/- 0,08..0,15 rad): in bara,
 ## incintele nu sunt toate pe aceeasi axa, si micile diferente de unghi sunt
@@ -724,20 +752,19 @@ func _camp_dreapta() -> void:
 	# 6,2 x 5,6 m = 18,6 x 16,8 m: marginea dinspre drum ajunge la
 	# 23 - 8,4 = 14,6 m de ax, deci la 5,6 m de muchia benzii de 9 m.
 	for sp: Array in [
-			[-0.0050, 25.0, 2, 3, 7.6, 7.2, 0.09, 1.90, 0.22],
-			[0.0070, 26.0, 3, 2, 7.4, 7.6, -0.11, 1.80, 0.20],
-			[0.0190, 25.0, 2, 3, 7.8, 7.0, 0.13, 2.00, 0.22],
-			[0.0305, 26.0, 3, 2, 7.5, 7.4, -0.08, 1.85, 0.20],
-			[0.0420, 25.0, 2, 2, 7.6, 7.2, 0.10, 1.95, 0.22]]:
+			[-0.0050, 26.0, 2, 2, 12.5, 11.5, 0.09, 1.90, 0.22],
+			[0.0080, 27.0, 2, 1, 13.0, 12.5, -0.11, 1.80, 0.20],
+			[0.0210, 26.0, 1, 2, 13.5, 12.0, 0.13, 2.00, 0.22],
+			[0.0340, 27.0, 2, 2, 12.0, 12.5, -0.08, 1.85, 0.20],
+			[0.0460, 26.0, 1, 1, 13.0, 12.0, 0.10, 1.95, 0.22]]:
 		_blk(sp, "cameraDr")
 	# Randul din fund, dincolo de zidul de sprijin, la 51-52 m: camere putin
 	# mai mari si ziduri mai inalte (3,1-3,3 m), ca sa se vada peste randul
 	# din fata fara sa fie ridicate pe cota (terenul e plat, nota 1).
 	for sp: Array in [
-			[-0.0030, 52.0, 3, 2, 8.2, 7.8, -0.14, 2.45, 0.25],
-			[0.0115, 53.0, 2, 2, 8.0, 8.2, 0.12, 2.55, 0.25],
-			[0.0260, 52.0, 3, 2, 8.4, 7.6, -0.10, 2.40, 0.25],
-			[0.0395, 53.0, 2, 2, 8.0, 8.0, 0.15, 2.55, 0.25]]:
+			[-0.0030, 53.0, 2, 1, 13.0, 12.5, -0.14, 2.45, 0.25],
+			[0.0150, 54.0, 1, 2, 13.5, 12.0, 0.12, 2.55, 0.25],
+			[0.0330, 53.0, 2, 1, 13.0, 12.5, -0.10, 2.40, 0.25]]:
 		_blk(sp, "cameraDrB")
 
 
@@ -776,18 +803,17 @@ func _camp_stanga() -> void:
 	_terasa(-0.0095, 0.0010, -16.0, 1.6, 0.0, "margineGol")
 	# Randul din fata, de la +0.004 (unde -22 m e sigur platou).
 	for sp: Array in [
-			[0.0065, -24.0, 3, 2, 7.5, 7.4, -0.12, 1.85, 0.20],
-			[0.0185, -24.0, 2, 3, 7.8, 7.0, 0.10, 1.95, 0.22],
-			[0.0300, -23.0, 3, 2, 7.4, 7.6, -0.09, 1.80, 0.20],
-			[0.0415, -24.0, 2, 2, 7.6, 7.2, 0.13, 1.90, 0.22]]:
+			[0.0070, -25.0, 2, 2, 12.5, 11.5, -0.12, 1.85, 0.20],
+			[0.0210, -25.0, 1, 2, 13.5, 12.0, 0.10, 1.95, 0.22],
+			[0.0345, -24.0, 2, 1, 13.0, 12.5, -0.09, 1.80, 0.20],
+			[0.0465, -25.0, 1, 1, 13.0, 12.0, 0.13, 1.90, 0.22]]:
 		_blk(sp, "cameraStg")
 	_terasa(0.0090, 0.0450, -36.0, 2.2, 0.0, "sprijinStg")
 	# Randul din fund, de la +0.014: la -44 m platoul incepe la +0.006, iar
 	# blocul are 12-14 m adancime, deci centrul lui nu poate cobori sub +0.012.
 	for sp: Array in [
-			[0.0155, -45.0, 2, 2, 8.2, 8.0, 0.14, 2.45, 0.25],
-			[0.0275, -45.0, 3, 2, 8.0, 7.8, -0.11, 2.55, 0.25],
-			[0.0400, -44.0, 2, 2, 8.4, 7.6, 0.09, 2.40, 0.25]]:
+			[0.0165, -46.0, 2, 1, 13.0, 12.5, 0.14, 2.45, 0.25],
+			[0.0350, -46.0, 1, 2, 13.5, 12.0, -0.11, 2.55, 0.25]]:
 		_blk(sp, "cameraStgB")
 
 

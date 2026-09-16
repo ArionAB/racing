@@ -787,12 +787,23 @@ func _understory() -> void:
 ## zidului (dincolo de fata de piatra), ca sa nu fie un stalp pe umar.
 func _markers() -> void:
 	var n := _track.baked.size()
+	# RUNDA 8: bornele stau pe COAMA zidului, nu dincolo de el.
+	#
+	# Cat timp zidul era la 7-8 m de ax, „1,35 m dincolo de zid" insemna umarul
+	# de iarba. Acum zidul e lipit de asfalt (`_smooth_lateral`) si dincolo de
+	# el nu mai e umar, e golul taiat de cornisa `scarp` — o borna pusa acolo
+	# atarna in aer (masurat: borna482-486, 4,9-18,6 m de plutire).
+	# Deci se pun pe coama, si cota nu se mai cauta in teren: e chiar cota
+	# soselei plus buza, la fel ca parapetul de alaturi.
 	var f := F_IN
 	while f < F_OUT:
 		var i := int(f * float(n)) % n
 		var sgn := _downhill_side(i)
-		_place("trail_marker", "borna", f, sgn, 1.35, 0.0,
-			_scale_for("trail_marker", 1.2), "none", LIP - 0.1)
+		var p := _track.baked[i]
+		var half := _track.width_at_index(i)
+		var q := p + _track._side_at(i) * sgn * (half + WALL_HALF_THICK)
+		_raw("trail_marker", "borna", Vector3(q.x, p.y + LIP, q.z), 0.0,
+			_scale_for("trail_marker", 1.2), "none")
 		f += _step(22.0)
 	# Parapetul de franghie in apexul acelor: se cauta maximul local de curbura.
 	for rg: Vector2 in [Vector2(0.738, 0.752), Vector2(0.774, 0.790),
@@ -920,10 +931,21 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	if sink > maxf(0.5 * piece_h, 1.0):
 		_skipped += 1
 		return
-	# Cand campul neted e mai SUS decat panza, piesa se ridica la el: altfel
-	# sta intr-o groapa invizibila (asta era defectul lui quenualJos192).
-	if sink > 0.0:
-		g = smooth + dy
+	# RUNDA 8: ridicarea la campul neted se SCOATE, fiindca odata cu cornisele
+	# `scarp` a devenit chiar mecanismul care face prop-uri plutitoare.
+	#
+	# Regula dinainte („daca panza de coliziune e sub campul neted, urca piesa
+	# la camp") avea sens cand cele doua suprafete difereau prin cute de zeci de
+	# centimetri: acolo campul neted chiar era linia pe care o vede ochiul.
+	# Campul neted NU stie insa de rape — `_carve_ravines` sapa in panza, nu in
+	# el — asa ca pe o taietura verticala diferenta nu mai e o cuta, e toata
+	# adancimea rapei. Masurat dupa trecerea la scarp (probe_manual --track=15):
+	# 22 de piese PLUTESTE, intre 3,4 si 18,6 m in aer, toate pe buza taieturii,
+	# si toate ridicate exact de randul asta.
+	#
+	# Panza de coliziune e singura suprafata pe care se poate sta. Daca o piesa
+	# ar fi ingropata fata de campul neted, raspunsul e s-o refuz (garda de mai
+	# sus), nu s-o ridic in gol.
 	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode, pitch)
 
 

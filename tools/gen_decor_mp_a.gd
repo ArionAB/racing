@@ -168,6 +168,7 @@ var _out: Array[String] = []
 var _n := 0
 var _warn := 0
 var _tri := 0
+var _holes := 0
 var _rng := RandomNumberGenerator.new()
 var _out_path := ""
 var _survey_only := false
@@ -303,24 +304,60 @@ func _wall_side_y(a: Vector2, b: Vector2, h: float, gate_t: float,
 ## piatra. Sub 2,0 m ramane gol: un rost de 1 m intr-un zid incas e o nisa,
 ## nu o greseala, iar deformarea s-ar vedea (memoria
 ## `accentul-de-slot-depinde-de-forma`).
+##
+## RUNDA 9: restul se CENTREAZA. Pe ziduri lungi (randurile de 26 m ale
+## rundei 8) nu conta unde cade rostul. Pe laturi de CAMERA de 4-6 m conteaza
+## tot: un rest de 1,4 m lasat la capat ar fi insemnat ca fiecare camera are
+## un colt lipsa, adica exact defectul pe care blocul il repara. Restul
+## `length - t_final` se imparte la doi si se pune jumatate la fiecare capat,
+## deci coltul ramane inchis la ambele capete cu cel mult 0,7 m de rost —
+## care citeste ca imbinare de piatra, nu ca zid rupt.
 func _wall_run(start: Vector2, u: Vector2, length: float, yaw: float,
 		h: float, tag: String, y_off: float) -> void:
-	var t := 0.0
+	# Prima trecere, seaca: cat se umple efectiv din `length`.
+	var used := 0.0
+	var g0 := 0
+	while length - used >= 1.95 and g0 < 200:
+		g0 += 1
+		var m0 := "inca_wall_c"
+		if length - used >= 6.0:
+			m0 = "inca_wall_b"
+		elif length - used >= 4.0:
+			m0 = "inca_wall_a"
+		var rl0: float = float(LEN_X[m0]) * _scale_for(m0, h)
+		if used + rl0 > length + 0.25:
+			if m0 == "inca_wall_b":
+				m0 = "inca_wall_a"
+			elif m0 == "inca_wall_a":
+				m0 = "inca_wall_c"
+			else:
+				break
+			rl0 = float(LEN_X[m0]) * _scale_for(m0, h)
+			if used + rl0 > length + 0.25:
+				break
+		used += rl0
+	var pad := maxf(0.0, (length - used) * 0.5)
+	var t := pad
 	var guard := 0
-	while length - t >= 1.95 and guard < 200:
+	var stop := length - pad
+	while stop - t >= 1.95 and guard < 200:
 		guard += 1
 		var mdl := "inca_wall_c"
-		if length - t >= 6.0:
+		if stop - t >= 6.0:
 			mdl = "inca_wall_b"
-		elif length - t >= 4.0:
+		elif stop - t >= 4.0:
 			mdl = "inca_wall_a"
 		var l: float = LEN_X[mdl]
 		var scl := _scale_for(mdl, h)
 		# Piesa se scaleaza UNIFORM (scara e una singura in `_raw`), deci
-		# lungimea ei reala pe teren e l * scl. Cu h = 2,5 m si inaltimea
-		# nominala 2,487 m, scl ~ 1,005: lungimile raman practic nominale.
+		# lungimea ei reala pe teren e l * scl — si de la runda 11 asta
+		# CONTEAZA: zidurile de camp au 1,80-2,00 m, deci scl ~ 0,76, deci
+		# `inca_wall_b` masoara 4,6 m pe teren, nu 6,0. O latura de camera de
+		# 7,5 m se umple din b + c, doua bucati. Algoritmul e corect
+		# fiindca masoara `real_l`, dar cifra din comentariul vechi
+		# („scl ~ 1,005") era a rundei 2 si ar fi indus in eroare.
 		var real_l := l * scl
-		if t + real_l > length + 0.25:
+		if t + real_l > stop + 0.25:
 			# Nu incape la scara asta: incearca piesa urmatoare mai mica.
 			if mdl == "inca_wall_b":
 				mdl = "inca_wall_a"
@@ -331,7 +368,7 @@ func _wall_run(start: Vector2, u: Vector2, length: float, yaw: float,
 			l = LEN_X[mdl]
 			scl = _scale_for(mdl, h)
 			real_l = l * scl
-			if t + real_l > length + 0.25:
+			if t + real_l > stop + 0.25:
 				break
 		var c := start + u * (t + real_l * 0.5)
 		_at(mdl, tag, c.x, c.y, yaw, scl, "", y_off - 0.12)
@@ -439,9 +476,41 @@ func _build() -> void:
 ## iar interiorul lui (iarba de la +3,2 m) e cu 3,2 m peste coronamentul
 ## randului I (2,5 m), deci se VEDE peste el. Asta e ce lipsea.
 ##
-## (b) INCINTELE ERAU PREA MULTE SI PREA MARUNTE. Runda 2 pastreaza acelasi
-## numar de ziduri dar le pune in incinte MARI (22-30 m latura): din masina,
-## o incinta mare citeste ca o curte, patru mici citesc ca un labirint.
+## (b) RUNDA 9 O INTOARCE, CU MOTIV MASURAT. Runda 2 scrisese aici ca
+## "o incinta mare citeste ca o curte, patru mici citesc ca un labirint",
+## si a marit incintele la 22-30 m latura. Capturile A_r8_f000/f002.png
+## arata ca a fost exact invers, si se vede de ce din geometrie, nu din gust:
+##
+##   Ochiul sta la ~10 m inaltime, la 12,5 m in spatele masinii, si priveste
+##   PE LUNGUL drumului. O incinta de 26 x 15 m aliniata cu drumul isi arata
+##   camerei numai latura LUNGA (26 m, aproape paralela cu privirea, deci
+##   intinsa pe toata latimea cadrului) — laturile transversale au 15 m si
+##   sunt vazute aproape din capat, deci ocupa cateva zeci de pixeli. Iar
+##   incinta urmatoare, la 13 m mai departe pe aceeasi linie laterala, isi
+##   aliniaza latura lunga cu a celei dinainte: din masina, cele cinci curti
+##   ale etajului 0 se citesc ca UN SINGUR zid continuu de 130 m. Exact ce
+##   a numit criticul rundei 8: "siruri lungi paralele cu drumul".
+##
+##   In bara, dreptunghiurile de iarba au 4-8 m pe latura. La marimea aia,
+##   ORICE unghi de privire arata doua laturi si un colt, fiindca latura
+##   transversala e la fel de lunga cu cea longitudinala. Coltul e ce
+##   citeste; lungimea e ce sterge coltul.
+##
+## Deci campul nu se mai compune din incinte independente, ci din BLOCURI
+## impartite in CAMERE: `_block` deseneaza grila completa a unui dreptunghi
+## (toate liniile pe u si toate pe v), cu celula de 5-7 m. Fiecare zid iese
+## atunci cu doua colturi PRIN CONSTRUCTIE, si camerele vecine impart zidul
+## dintre ele — exact ce cere criticul si exact ce e in bara.
+##
+## Si consecinta secundara pe care criticul a legat-o corect de aceeasi
+## cauza: dunga verde. Slotul 12 (CACTUS_GREEN) de pe `inca_wall_*` e iarba
+## de CORONAMENT, la y 2,31-2,49 (masuratori §2), adica pe muchia de sus a
+## zidului. Pe un sir drept de 130 m, coronamentele tuturor pieselor stau pe
+## aceeasi linie si iese o dunga de vopsea de-a latul cadrului. Rupta in
+## camere de 6 m, cu inaltimi care variaza +/- 0,45 m de la camera la camera
+## (`_h_of`), aceeasi iarba de coronament devine ce e in bara: petice verzi
+## pe capetele de zid, la cote diferite. Nu schimb nicio textura si nicio
+## clasa — schimb geometria care le insira.
 ##
 ## (c) STANGA ERA GOALA de la frac 0.02 incolo. Masuratoarea de runda 2 arata
 ## ca platoul din stanga tine pana la -46 m de la frac +0.005 — deci se umple.
@@ -456,85 +525,274 @@ func _terasa(f0: float, f1: float, lat: float, h: float, y_off: float,
 	_wall_side_y(a, b, h, -1.0, 0.0, tag, y_off)
 
 
+## ------------------------------------------------------------------ BLOCUL
+## Un bloc de cetate: dreptunghi de `nu` x `nv` camere, fiecare de `cw` x `cd`
+## metri, centrat in `c`, rotit cu `rot`. Se deseneaza GRILA COMPLETA — cele
+## `nv+1` linii pe directia u si cele `nu+1` linii pe directia v — deci:
+##
+##   * fiecare camera e INCHISA (patru laturi), fiindca liniile se
+##     intersecteaza in colturi;
+##   * camerele vecine IMPART zidul dintre ele (o linie interioara e latura
+##     din dreapta a unei camere si latura din stanga a celeilalte), deci
+##     zidaria nu se dubleaza;
+##   * niciun zid nu are capat liber: orice segment porneste dintr-un colt
+##     si se opreste in altul.
+##
+## GOLURILE — si de ce runda 9 le-a facut gresit din prima incercare.
+##
+## Prima versiune sarea fiecare segment cu p = 0,16 (bord) / 0,22 (interior),
+## independent. Captura A_r9_f000.png arata rezultatul: pe stanga, in loc de
+## camere, un camp de LESPEZI IZOLATE la unghiuri diferite — adica exact
+## defectul rundei 8, doar cu alta forma. Cauza e combinatorica, nu estetica:
+## o camera are 4 laturi, deci sansa sa ramana INTREAGA e (1-p)^4. La p = 0,22
+## aia e 0,37. Doua treimi din camere pierdeau macar o latura, si o camera cu
+## doua laturi lipsa nu mai e camera, e un colt razlet. Pe un bloc de 2x2
+## (12 segmente) se vedea cel mai tare, fiindca n-avea destule camere ca
+## macar una sa iasa intreaga.
+##
+## Regula noua, care pastreaza si intentia (o cetate nu e plasa de sarma) si
+## contractul (fiecare zid cu doua colturi):
+##
+##   * bordul blocului NU se sare niciodata — conturul exterior e ce spune
+##     „asta e un corp construit", si e si ce inchide camerele de margine;
+##   * dintre segmentele INTERIOARE se scoate cel mult unul din patru, si
+##     numai daca scoaterea lui nu lasa vreo camera cu mai putin de trei
+##     laturi. Verificarea se face pe o harta de laturi per camera, nu pe o
+##     aruncare de zar: un gol care scoate a doua latura a unei camere se
+##     REFUZA, nu se spera sa nu apara.
+##
+## Un gol asa plasat e o USA intre doua camere vecine — ce e si in bara.
+##
+## `h` variaza pe SEGMENT (`h` +/- `h_var`) — vezi nota (b): asta e si ce
+## rupe dunga de coronament.
+func _block(c: Vector2, nu: int, nv: int, cw: float, cd: float, rot: float,
+		h: float, h_var: float, tag: String, seed_off: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 900000 + seed_off
+	var u := Vector2(cos(rot), sin(rot))
+	var v := Vector2(-sin(rot), cos(rot))
+	var o := c - u * (float(nu) * cw * 0.5) - v * (float(nv) * cd * 0.5)
+	# Inventarul segmentelor. Cheia "U|i|j" = segmentul de pe linia u de
+	# indice j, intre coloanele i si i+1; "V|i|j" = cel de pe linia v de
+	# indice i, intre randurile j si j+1.
+	var keep := {}
+	var interior: Array[String] = []
+	for j in range(nv + 1):
+		for i in range(nu):
+			var k := "U|%d|%d" % [i, j]
+			keep[k] = true
+			if j > 0 and j < nv:
+				interior.append(k)
+	for i in range(nu + 1):
+		for j in range(nv):
+			var k2 := "V|%d|%d" % [i, j]
+			keep[k2] = true
+			if i > 0 and i < nu:
+				interior.append(k2)
+	# Cate laturi mai are fiecare camera daca se scoate un segment dat.
+	var budget := int(floor(float(interior.size()) * 0.25))
+	interior.shuffle()  # foloseste RNG-ul global; ordinea nu e critica
+	var dropped := 0
+	for k3 in interior:
+		if dropped >= budget:
+			break
+		keep[k3] = false
+		if _min_laturi(keep, nu, nv) < 3:
+			keep[k3] = true  # refuzat: ar fi rupt o camera
+		else:
+			dropped += 1
+	# Desenarea.
+	for j2 in range(nv + 1):
+		for i2 in range(nu):
+			if not bool(keep["U|%d|%d" % [i2, j2]]):
+				continue
+			var a := o + u * (float(i2) * cw) + v * (float(j2) * cd)
+			_wall_side_y(a, a + u * cw, _h_of(h, h_var, rng), -1.0, 0.0,
+				tag, 0.0)
+	for i3 in range(nu + 1):
+		for j3 in range(nv):
+			if not bool(keep["V|%d|%d" % [i3, j3]]):
+				continue
+			var a2 := o + u * (float(i3) * cw) + v * (float(j3) * cd)
+			_wall_side_y(a2, a2 + v * cd, _h_of(h, h_var, rng), -1.0, 0.0,
+				tag, 0.0)
+
+
+## Cate laturi are camera cea mai saraca din bloc, cu harta de segmente data.
+## Camera (i, j) e marginita de U|i|j (in fata), U|i|j+1 (in spate),
+## V|i|j (la stanga) si V|i+1|j (la dreapta).
+func _min_laturi(keep: Dictionary, nu: int, nv: int) -> int:
+	var worst := 4
+	for i in range(nu):
+		for j in range(nv):
+			var n := 0
+			if bool(keep["U|%d|%d" % [i, j]]):
+				n += 1
+			if bool(keep["U|%d|%d" % [i, j + 1]]):
+				n += 1
+			if bool(keep["V|%d|%d" % [i, j]]):
+				n += 1
+			if bool(keep["V|%d|%d" % [i + 1, j]]):
+				n += 1
+			worst = mini(worst, n)
+	return worst
+
+
+func _h_of(h: float, h_var: float, rng: RandomNumberGenerator) -> float:
+	return maxf(1.15, h + rng.randf_range(-h_var, h_var))
+
+
 ## TERASELE de pe partea DREAPTA (side = +1), unde platoul tine pana la
-## +60 m si unde cade umbra peste drum. Trei etaje:
-##   etaj 0 (piata):    sol,      incinte la 14-30 m de ax
-##   etaj 1 (+1.6 m):   zid la 32 m, incinte la 34-50 m
-##   etaj 2 (+3.2 m):   zid la 52 m, incinte la 54-62 m
+## +60 m si unde cade umbra peste drum.
 func _terase_dreapta() -> void:
-	_terasa(-0.0090, 0.0440, 32.0, 2.7, 0.0, "sprijin1")
-	# Al treilea rand de zid lung, la 52 m: la cota terenului, dar mai INALT
-	# (3,2 m) decat cele din fata lui (2,7 m). Asa randul din fund se vede
-	# peste cele doua din fata fara sa fie ridicat — adancimea vine din
-	# inaltime, nu din cota.
-	_terasa(-0.0060, 0.0430, 52.0, 3.2, 0.0, "sprijin2")
+	# Zidul lung de sprijin RAMANE (separa randul din fata de cel din fund),
+	# dar se muta la 38 m si se rupe in doua tronsoane cu gol la mijloc. Cu
+	# blocurile de camere in fata lui nu mai e el linia care se citeste; daca
+	# ar fi ramas continuu pe 100 m, ar fi refacut singur defectul rundei 8.
+	_terasa(-0.0090, 0.0150, 39.0, 2.2, 0.0, "sprijin1")
+	_terasa(0.0215, 0.0440, 39.0, 2.2, 0.0, "sprijin1")
 
 
-## CAMPUL DIN DREAPTA: incinte mari, trei randuri, fiecare pe etajul lui.
+## RUNDA 11 — RAPORTUL INALTIME/CAMERA, masurat pe decupaje puse fata in fata
+## (`cmp_r10.png`: bara sus, captura noastra jos, aceeasi marime pe ecran).
+##
+## Camerele rundei 10 se inchid corect — coltul e acolo, criticul rundei 8 ar
+## fi multumit pe punctul lui principal. Dar decupajul arata ca nu se vede
+## NICIUNA pe dinauntru: din masina se citesc numai FETELE si CAPETELE de zid,
+## niciodata podeaua de iarba a vreunei curti. In bara e invers — fiecare
+## incinta isi arata interiorul, si iarba dinauntru e cea mai mare suprafata
+## din cadru dupa piatra.
+##
+## Cauza e un raport, si e usor de citit pe bara: acolo zidul are cam a
+## CINCEA pana la a OPTA parte din latura camerei. La noi era 2,5 m pe camera
+## de 6,0 m — adica 1/2,4. Ochiul sta la 10 m si priveste aproape razant;
+## la raportul ala, zidul din fata acopera complet podeaua camerei din spatele
+## lui.
+##
+## RUNDA 12 a gasit si capatul CELALALT al reglajului, tot pe decupaj
+## (`cmp_r11.png`). La 1/7 — camere de 10 m cu ziduri de 1,4 m — podeaua se
+## vede, dar camera nu se mai citeste: piesele se scaleaza UNIFORM, deci un
+## zid de 1,4 m e si SUBTIRE (0,47 m in loc de 0,83), iar patru lame subtiri
+## asezate pe un patrat de 10 m nu se mai grupeaza in „inel". Fiecare citea
+## iar ca lespede separata — adica defectul rundei 9 intors pe alt drum.
+##
+## Deci raportul nu e singurul parametru; mai e unul, si e lungimea ABSOLUTA
+## a laturii fata de grosimea zidului. Reglajul de oprire, masurat intre cele
+## doua capete pe care le-am vazut amandoua pe captura:
+##
+##   runda 10:  camera 6,0 m · zid 2,5 m (1/2,4) → curti invizibile
+##   runda 11:  camera 10,0 m · zid 1,4 m (1/7)  → curti vizibile, inel rupt
+##   runda 12:  camera 7,5 m · zid 1,9 m (1/4)   → si, si
+##
+## La 1,9 m scara e 0,764, deci zidul are 0,63 m grosime si `inca_wall_b`
+## masoara 4,58 m pe teren: o latura de 7,5 m se face din b + c, doua bucati,
+## deci inelul ramane citibil ca inel. Iar linia de vedere de la 10 m
+## inaltime trece peste un coronament de 1,9 m si cade pe podea incepand de
+## la ~7 m in spatele lui — adica fix inauntrul camerei urmatoare.
+##
+## Si asta rezolva si obiectia SECUNDARA a criticului, cea pe care a legat-o
+## (corect) de aceeasi cauza: „iarba dinauntrul incintelor nu e mai aprinsa
+## decat panta din jur, deci petecele nu se delimiteaza cand zidul e scund;
+## iar bordura verde de la baza zidurilor citeste ca dunga de vopsea".
+##
+## Verdele ala nu e la baza, e la CORONAMENT: slotul 12 (CACTUS_GREEN) de pe
+## `inca_wall_*` sta la y 2,31-2,49 din 2,49 (masuratori §2), adica iarba
+## crescuta pe muchia de sus. Criticul l-a vazut la baza fiindca zidurile din
+## planul doi isi arata coronamentul exact acolo unde zidul din planul intai
+## isi are talpa. Cu ziduri de 1,4 m si camere de 10 m, numarul de coronamente
+## vizibile scade de vreo trei ori, si fiecare e un petec scurt pe o camera,
+## nu un fir continuu — iar intre ele se vede podeaua.
+##
+## Nu ating nicio textura si nicio clasa. Iarba nu se poate face mai aprinsa
+## din decor oricum (memoria `surfacetool-clamp-vertex-color`: vertex color
+## doar INTUNECA), iar culoarea terenului se decide in `track.gd`, care e cod
+## de tema, comun celorlalte doua POI-uri care lucreaza in paralel. Ce tine
+## de mine e cat din ea se VEDE.
+##
+## CAMPUL DIN DREAPTA: blocuri de camere, doua randuri de adancime.
+## Fiecare bloc e rotit usor fata de drum (+/- 0,08..0,15 rad): in bara,
+## incintele nu sunt toate pe aceeasi axa, si micile diferente de unghi sunt
+## ce face ca laturile lungi sa NU se mai alinieze intr-o dunga unica.
 func _camp_dreapta() -> void:
-	# Etajul 0 — doua curti mari lipite de piata, la 14-30 m de ax.
-	# Poarta fiecareia da spre drum: din masina se vede PRIN ea in curte.
+	# Randul din fata, centre la 23-24 m de ax. Bloc de 3x3 camere de
+	# 6,2 x 5,6 m = 18,6 x 16,8 m: marginea dinspre drum ajunge la
+	# 23 - 8,4 = 14,6 m de ax, deci la 5,6 m de muchia benzii de 9 m.
 	for sp: Array in [
-			[-0.0055, 22.0, 26.0, 15.0, 2.5, 0.0, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0075, 22.0, 28.0, 15.0, 2.5, 0.0, [-1.0, -1.0, -1.0, 0.45]],
-			[0.0205, 22.0, 24.0, 15.0, 2.4, 0.0, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0330, 21.0, 24.0, 14.0, 2.5, 0.0, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0440, 20.0, 22.0, 13.0, 2.4, 0.0, [-1.0, -1.0, -1.0, 0.5]]]:
-		_inc(sp, "curteDr")
-	# Etajul 1 — peste zidul de sprijin de la 32 m, ridicat cu 1,6 m.
+			[-0.0050, 25.0, 2, 3, 7.6, 7.2, 0.09, 1.90, 0.22],
+			[0.0070, 26.0, 3, 2, 7.4, 7.6, -0.11, 1.80, 0.20],
+			[0.0190, 25.0, 2, 3, 7.8, 7.0, 0.13, 2.00, 0.22],
+			[0.0305, 26.0, 3, 2, 7.5, 7.4, -0.08, 1.85, 0.20],
+			[0.0420, 25.0, 2, 2, 7.6, 7.2, 0.10, 1.95, 0.22]]:
+		_blk(sp, "cameraDr")
+	# Randul din fund, dincolo de zidul de sprijin, la 51-52 m: camere putin
+	# mai mari si ziduri mai inalte (3,1-3,3 m), ca sa se vada peste randul
+	# din fata fara sa fie ridicate pe cota (terenul e plat, nota 1).
 	for sp: Array in [
-			[-0.0045, 42.0, 28.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0100, 42.0, 30.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0240, 41.0, 22.0, 15.0, 2.9, 0.0, [-1.0, -1.0, 0.5, -1.0]],
-			[0.0375, 41.0, 26.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]]]:
-		_inc(sp, "curteDrB")
-	# Etajul 2 — peste zidul de la 52 m, ridicat cu 3,2 m. Astea sunt
-	# siluetele de sus din bara: se vad peste tot restul.
-	for sp: Array in [
-			[-0.0020, 59.0, 24.0, 12.0, 3.6, 0.0, [-1.0, -1.0, -1.0, -1.0]],
-			[0.0140, 59.0, 26.0, 12.0, 3.6, 0.0, [-1.0, -1.0, -1.0, -1.0]],
-			[0.0310, 58.0, 24.0, 12.0, 3.6, 0.0, [-1.0, -1.0, -1.0, -1.0]]]:
-		_inc(sp, "curteDrC")
+			[-0.0030, 52.0, 3, 2, 8.2, 7.8, -0.14, 2.45, 0.25],
+			[0.0115, 53.0, 2, 2, 8.0, 8.2, 0.12, 2.55, 0.25],
+			[0.0260, 52.0, 3, 2, 8.4, 7.6, -0.10, 2.40, 0.25],
+			[0.0395, 53.0, 2, 2, 8.0, 8.0, 0.15, 2.55, 0.25]]:
+		_blk(sp, "cameraDrB")
 
 
-## CAMPUL DIN STANGA (side = -1). La intrare (frac -0.010..+0.003) platoul
-## tine doar pana la -26 m: acolo o singura incinta ingusta, lipita de
-## buza defileului. De la +0.005 incolo terenul e plat pana la -46 m si
-## campul se deschide pe doua etaje, ca in dreapta.
+## CAMPUL DIN STANGA (side = -1).
+##
+## RUNDA 9, MASURAT DIN NOU si altfel decat la runda 2. `probe_manual` a
+## picat pe `cameraStg161` (ingropat 2,71 m fata de campul neted), si sonda
+## `probe_mp_a_dip.gd` a aratat ca nu e o gaura de coliziune si nici o minciuna
+## a campului: acolo terenul chiar coboara de la -0,2 la -5,3 pe vreo 12 m,
+## iar campul neted ramane in urma pe rampa cu pana la 2,4 m. Piesa statea
+## corect pe sol — dar pe o RAMPA, ceea ce pentru un bloc de camere e mai rau
+## decat sa pluteasca: camerele ies la cote diferite si blocul se rupe.
+##
+## Buza defileului din stanga NU e paralela cu drumul, e o DIAGONALA. Din
+## tabelul sondei (cota fata de sosea, raycast pe TerrainBody):
+##
+##   frac      -52    -44    -35    -28    -22    -16
+##   -0.0120  -11.3   -9.4   -7.1   -5.3   -3.5   -0.8
+##   -0.0040  -11.4   -9.4   -7.0   -3.6   -1.9   -0.3
+##   +0.0000  -11.5   -9.5   -0.4   -0.2   -0.2   -0.3
+##   +0.0040   -9.2   -3.0   -0.1   -0.1   -0.1   -0.2
+##   +0.0080   -0.6    0.0    0.1    0.1   -0.0   -0.2
+##   +0.0120    0.0    0.1    0.2    0.1    0.1   -0.1
+##
+## Adica: la -22 m e platou de la frac -0.002 in sus; la -44 m abia de la
+## +0.006; la -52 m abia de la +0.008. Runda 2 „stia" din `--survey` ca de
+## la +0.005 e plat pana la -46 — dar `--survey` masura coloane la ±40/55/70/90,
+## deci nu se uitase NICIODATA la cotele pe care le foloseste compozitia
+## (memoria `caseta-de-masura-exclude-defectul`).
+##
+## Deci: randul din fata incepe la +0.004 (platou la -22 de la -0.002, cu
+## marja pentru adancimea blocului); randul din fund abia de la +0.012.
 func _camp_stanga() -> void:
-	# Buza defileului: incinta ingusta la intrare, cu latura dinspre gol
-	# lipsa (in bara, zidul de margine se termina la prapastie).
+	# La INTRARE (frac sub 0.000) stanga e deja rapa: nu se pune bloc, se
+	# pune numai zidul de margine care opreste ochiul inainte de gol.
+	_terasa(-0.0095, 0.0010, -16.0, 1.6, 0.0, "margineGol")
+	# Randul din fata, de la +0.004 (unde -22 m e sigur platou).
 	for sp: Array in [
-			[-0.0045, -19.0, 22.0, 12.0, 2.5, 0.0, [-1.0, 0.5, -1.0, -1.0]]]:
-		_inc(sp, "curteStg")
-	# Zidul de margine dinspre gol: linia care opreste ochiul inainte de
-	# prapastie si da cetatii contur pe partea aia.
-	_terasa(-0.0095, 0.0010, -27.0, 2.2, 0.0, "margineGol")
-	# De la +0.005: campul plin, doua etaje.
+			[0.0065, -24.0, 3, 2, 7.5, 7.4, -0.12, 1.85, 0.20],
+			[0.0185, -24.0, 2, 3, 7.8, 7.0, 0.10, 1.95, 0.22],
+			[0.0300, -23.0, 3, 2, 7.4, 7.6, -0.09, 1.80, 0.20],
+			[0.0415, -24.0, 2, 2, 7.6, 7.2, 0.13, 1.90, 0.22]]:
+		_blk(sp, "cameraStg")
+	_terasa(0.0090, 0.0450, -36.0, 2.2, 0.0, "sprijinStg")
+	# Randul din fund, de la +0.014: la -44 m platoul incepe la +0.006, iar
+	# blocul are 12-14 m adancime, deci centrul lui nu poate cobori sub +0.012.
 	for sp: Array in [
-			[0.0085, -21.0, 26.0, 15.0, 2.5, 0.0, [-1.0, 0.5, -1.0, -1.0]],
-			[0.0215, -21.0, 24.0, 15.0, 2.4, 0.0, [-1.0, 0.5, -1.0, -1.0]],
-			[0.0340, -20.0, 24.0, 14.0, 2.5, 0.0, [-1.0, 0.5, -1.0, -1.0]],
-			[0.0450, -19.0, 22.0, 13.0, 2.4, 0.0, [-1.0, 0.5, -1.0, -1.0]]]:
-		_inc(sp, "curteStg")
-	_terasa(0.0035, 0.0450, -31.0, 2.7, 0.0, "sprijinStg")
-	for sp: Array in [
-			# -36 m, nu -40/-41: `probe_manual` a gasit doua piese plutind la
-			# 3,5 si 7,7 m acolo. `--survey` esantiona din 0.005 in 0.005 si
-			# a ratat scobitura; garda a masurat pe fiecare piesa, deci ea are
-			# rezolutia, nu sondajul meu (memoria `garda-existenta-nerulata`).
-			[0.0110, -36.0, 26.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0250, -36.0, 22.0, 15.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0390, -36.0, 24.0, 15.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]]]:
-		_inc(sp, "curteStgB")
+			[0.0155, -45.0, 2, 2, 8.2, 8.0, 0.14, 2.45, 0.25],
+			[0.0275, -45.0, 3, 2, 8.0, 7.8, -0.11, 2.55, 0.25],
+			[0.0400, -44.0, 2, 2, 8.4, 7.6, 0.09, 2.40, 0.25]]:
+		_blk(sp, "cameraStgB")
 
 
-## Dezambalarea unei specificatii de incinta.
-func _inc(sp: Array, tag: String) -> void:
+## Dezambalarea unei specificatii de BLOC:
+## [frac, lat, nu, nv, cw, cd, rot_rel, h, h_var]
+func _blk(sp: Array, tag: String) -> void:
 	var fr: float = sp[0]
 	var c := _pt(fr, float(sp[1]))
-	_enclosure_y(c, float(sp[2]), float(sp[3]), _yaw_at(fr), float(sp[4]),
-		sp[6] as Array, tag, float(sp[5]))
+	_block(c, int(sp[2]), int(sp[3]), float(sp[4]), float(sp[5]),
+		_yaw_at(fr) + float(sp[6]), float(sp[7]), float(sp[8]), tag,
+		int(absf(fr) * 100000.0) + int(absf(float(sp[1]))))
 
 
 ## TEMPLELE. Brief: Trei Ferestre pe STANGA (deci side = **-1**, dupa
@@ -809,7 +1067,7 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var r: float = float(BASE_R.get(model, 0.6)) * scl
 	var d := half + gap + r
 	var q := p + s * d
-	var g := _sol_real(q.x, q.z)
+	var g := _sol_med(q.x, q.z)
 	if d - r < half + 0.35:
 		_warn += 1
 		print("; ATENTIE %s la frac %+.4f: marginea la %.2f m de ax, banda %.2f" % [
@@ -819,9 +1077,29 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 
 ## Aseaza la o pozitie absoluta in lume (pentru incinte: coltul se calculeaza
 ## o data, restul zidurilor se insira din el).
+## RUNDA 9: cota nu mai vine dintr-un SINGUR raycast. `probe_manual` a gasit
+## `cameraStg161` la -2,97 m cu terenul la -0,26 — un zid ingropat 2,71 m.
+## Cauza nu e extrapolarea campului neted (aia e alta memorie): raycast-ul pe
+## TerrainBody a nimerit o muchie a panzei de coliziune si a cazut prin ea.
+## Un singur esantion nu are cum sa stie ca a cazut; MEDIANA a cinci
+## esantioane pe un mic cerc (centru + 4 la 0,9 m) stie, fiindca patru dintre
+## ele stau pe fata buna. Pragul de alerta: daca centrul difera de mediana cu
+## peste 0,8 m, cota luata e a MEDIANEI si se raporteaza.
+func _sol_med(x: float, z: float) -> float:
+	var vals: Array[float] = [_sol_real(x, z)]
+	for d: Vector2 in [Vector2(0.9, 0.0), Vector2(-0.9, 0.0),
+			Vector2(0.0, 0.9), Vector2(0.0, -0.9)]:
+		vals.append(_sol_real(x + d.x, z + d.y))
+	vals.sort()
+	var med: float = vals[2]
+	if absf(vals[0] - med) > 0.8 or absf(vals[4] - med) > 0.8:
+		_holes += 1
+	return med
+
+
 func _at(model: String, base: String, x: float, z: float, yaw: float,
 		scl: float, mode: String = "", y_off: float = 0.0) -> Vector3:
-	var g := _sol_real(x, z)
+	var g := _sol_med(x, z)
 	return _raw(model, base, Vector3(x, g + y_off, z), yaw, scl, mode)
 
 
@@ -844,7 +1122,7 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 
 
 func _write() -> void:
-	print("; asezate %d piese, %d avertismente, ~%d triunghiuri" % [_n, _warn, _tri])
+	print("; asezate %d piese, %d avertismente, %d cote netezite (gauri de coliziune), ~%d triunghiuri" % [_n, _warn, _holes, _tri])
 	if _out_path.is_empty():
 		for line in _out:
 			print(line)

@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://o1kdsuqapxx5p"]
+﻿[gd_scene format=3 uid="uid://o1kdsuqapxx5p"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -161,7 +161,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.07, -16.04, -200.22)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
 model = ExtResource("s_llama")
-model_scale = 1.0
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -171,7 +171,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.08, -16.24, -197.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
 model = ExtResource("s_llama_b")
-model_scale = 1.0
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -181,7 +181,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.05, -16.45, -194.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
 model = ExtResource("s_llama_c")
-model_scale = 1.0
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -191,7 +191,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.0, -16.65, -191.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
 model = ExtResource("s_llama")
-model_scale = 1.0
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0

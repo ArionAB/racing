@@ -138,6 +138,12 @@ var _index: int = 0
 var _frames: int = 0
 var _track: Node = null
 var _rows: Array[Dictionary] = []
+# `quit()` din `_initialize()` doar ridica un steag; `_process` ruleaza mai
+# departe, iar `_report()` pe zero randuri tiparea "VERDICT: OK" si iesea 0.
+# Adica singura garda cu drept de veto (materialele) se facea VERDE cand nu
+# masura NIMIC — un typo in numarul de pista era de ajuns. Prins de sceptic la
+# fundatia Machu Picchu, 16 sep 2026, cu `--track=99`.
+var _empty: bool = false
 
 
 func _initialize() -> void:
@@ -153,10 +159,13 @@ func _initialize() -> void:
 			_paths.append(path)
 	if _paths.is_empty():
 		push_error("probe_decor: nu am gasit nicio pista")
+		_empty = true
 		quit(1)
 
 
 func _process(_delta: float) -> bool:
+	if _empty:
+		return true # nu raporta nimic pe zero piste: verdictul ar fi fals
 	if _track == null:
 		if _index >= _paths.size():
 			return _report()

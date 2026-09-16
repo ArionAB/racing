@@ -314,62 +314,48 @@ func _wall_side_y(a: Vector2, b: Vector2, h: float, gate_t: float,
 ## care citeste ca imbinare de piatra, nu ca zid rupt.
 func _wall_run(start: Vector2, u: Vector2, length: float, yaw: float,
 		h: float, tag: String, y_off: float) -> void:
-	# Prima trecere, seaca: cat se umple efectiv din `length`.
-	var used := 0.0
-	var g0 := 0
-	while length - used >= 1.95 and g0 < 200:
-		g0 += 1
-		var m0 := "inca_wall_c"
-		if length - used >= 6.0:
-			m0 = "inca_wall_b"
-		elif length - used >= 4.0:
-			m0 = "inca_wall_a"
-		var rl0: float = float(LEN_X[m0]) * _scale_for(m0, h)
-		if used + rl0 > length + 0.25:
-			if m0 == "inca_wall_b":
-				m0 = "inca_wall_a"
-			elif m0 == "inca_wall_a":
-				m0 = "inca_wall_c"
-			else:
-				break
-			rl0 = float(LEN_X[m0]) * _scale_for(m0, h)
-			if used + rl0 > length + 0.25:
-				break
-		used += rl0
-	var pad := maxf(0.0, (length - used) * 0.5)
-	var t := pad
+	if length < 1.2:
+		return
+	var scl_c := _scale_for("inca_wall_c", h)
+	var scl_a := _scale_for("inca_wall_a", h)
+	var scl_b := _scale_for("inca_wall_b", h)
+	var lc: float = float(LEN_X["inca_wall_c"]) * scl_c
+	var la: float = float(LEN_X["inca_wall_a"]) * scl_a
+	var lb: float = float(LEN_X["inca_wall_b"]) * scl_b
+	# ANCORA DE COLT. Prima si ultima piesa incep EXACT la capatul laturii.
+	# Daca latura e mai scurta decat doua piese-colt, o singura piesa
+	# centrata tine ambele capete si latura ramane inchisa.
+	if length < lc * 2.0 - 0.10:
+		var cc := start + u * (length * 0.5)
+		_at("inca_wall_c", tag, cc.x, cc.y, yaw, scl_c * minf(1.0,
+			length / lc), "", y_off - 0.12)
+		return
+	var p_a := start + u * (lc * 0.5)
+	var p_b := start + u * (length - lc * 0.5)
+	_at("inca_wall_c", tag, p_a.x, p_a.y, yaw, scl_c, "", y_off - 0.12)
+	_at("inca_wall_c", tag, p_b.x, p_b.y, yaw, scl_c, "", y_off - 0.12)
+	# MIJLOCUL. Ce ramane intre cele doua pietre de colt se umple de la
+	# stanga la dreapta cu piesa cea mai lunga care incape; restul, daca
+	# mai ramane, cade in MIJLOC, unde citeste ca nisa, nu ca un colt rupt.
+	var t := lc
+	var stop := length - lc
 	var guard := 0
-	var stop := length - pad
-	while stop - t >= 1.95 and guard < 200:
+	while stop - t >= 1.85 and guard < 200:
 		guard += 1
+		var rest := stop - t
 		var mdl := "inca_wall_c"
-		if stop - t >= 6.0:
+		var real_l := lc
+		var scl := scl_c
+		if rest >= lb - 0.10:
 			mdl = "inca_wall_b"
-		elif stop - t >= 4.0:
+			real_l = lb
+			scl = scl_b
+		elif rest >= la - 0.10:
 			mdl = "inca_wall_a"
-		var l: float = LEN_X[mdl]
-		var scl := _scale_for(mdl, h)
-		# Piesa se scaleaza UNIFORM (scara e una singura in `_raw`), deci
-		# lungimea ei reala pe teren e l * scl — si de la runda 11 asta
-		# CONTEAZA: zidurile de camp au 1,80-2,00 m, deci scl ~ 0,76, deci
-		# `inca_wall_b` masoara 4,6 m pe teren, nu 6,0. O latura de camera de
-		# 7,5 m se umple din b + c, doua bucati. Algoritmul e corect
-		# fiindca masoara `real_l`, dar cifra din comentariul vechi
-		# („scl ~ 1,005") era a rundei 2 si ar fi indus in eroare.
-		var real_l := l * scl
-		if t + real_l > stop + 0.25:
-			# Nu incape la scara asta: incearca piesa urmatoare mai mica.
-			if mdl == "inca_wall_b":
-				mdl = "inca_wall_a"
-			elif mdl == "inca_wall_a":
-				mdl = "inca_wall_c"
-			else:
-				break
-			l = LEN_X[mdl]
-			scl = _scale_for(mdl, h)
-			real_l = l * scl
-			if t + real_l > stop + 0.25:
-				break
+			real_l = la
+			scl = scl_a
+		if real_l > rest + 0.10:
+			break
 		var c := start + u * (t + real_l * 0.5)
 		_at(mdl, tag, c.x, c.y, yaw, scl, "", y_off - 0.12)
 		t += real_l
@@ -590,7 +576,22 @@ func _block(c: Vector2, nu: int, nv: int, cw: float, cd: float, rot: float,
 			if i > 0 and i < nu:
 				interior.append(k2)
 	# Cate laturi mai are fiecare camera daca se scoate un segment dat.
-	var budget := int(floor(float(interior.size()) * 0.25))
+	# RUNDA 13. Bugetul de goluri scade de la 25% la 10%, si golul nu mai e
+	# o latura INTREAGA lipsa: e o POARTA de 1,5 m taiata in mijlocul ei
+	# (`gates`, mai jos). Masuratoarea care cere schimbarea: din 778 de
+	# capete de zid ale rundei 12, **376 (48%) nu aveau vecin la sub 0,8 m**,
+	# iar mediana golului intre capete era 0,75 m. Adica jumatate din ziduri
+	# se terminau in aer — exact ce a vazut criticul („niciuna intalnindu-se
+	# cu alta la un colt"). Doua cauze, amandoua reparate aici:
+	#   (a) `_wall_run` centra restul si lasa pana la 0,7 m de gol la FIECARE
+	#       capat, deci un colt aduna doua goluri: pana la 1,4 m lipsa pe o
+	#       latura de 7,5 m. Acum prima si ultima piesa sunt ANCORATE pe
+	#       capat si restul cade in mijloc.
+	#   (b) aici: 25% din laturile interioare lipseau cu totul. `_min_laturi`
+	#       garanta ca nicio CAMERA nu scade sub 3 laturi, dar din masina nu
+	#       se vad camere, se vad LATURI — iar o latura lipsa e un colt
+	#       deschis pentru toate camerele care o imparteau.
+	var budget := int(floor(float(interior.size()) * 0.10))
 	interior.shuffle()  # foloseste RNG-ul global; ordinea nu e critica
 	var dropped := 0
 	for k3 in interior:
@@ -601,20 +602,25 @@ func _block(c: Vector2, nu: int, nv: int, cw: float, cd: float, rot: float,
 			keep[k3] = true  # refuzat: ar fi rupt o camera
 		else:
 			dropped += 1
-	# Desenarea.
+	# Desenarea. O treime din laturile PASTRATE primesc o poarta de 1,5 m in
+	# mijloc: incinta ramane inchisa la colturi (ce cere criticul) dar are
+	# intrare, iar rostul de poarta e in mijlocul laturii, unde se citeste ca
+	# usa, nu ca zid rupt.
 	for j2 in range(nv + 1):
 		for i2 in range(nu):
 			if not bool(keep["U|%d|%d" % [i2, j2]]):
 				continue
 			var a := o + u * (float(i2) * cw) + v * (float(j2) * cd)
-			_wall_side_y(a, a + u * cw, _h_of(h, h_var, rng), -1.0, 0.0,
+			var gt := 0.5 if rng.randf() < 0.33 else -1.0
+			_wall_side_y(a, a + u * cw, _h_of(h, h_var, rng), gt, 1.5,
 				tag, 0.0)
 	for i3 in range(nu + 1):
 		for j3 in range(nv):
 			if not bool(keep["V|%d|%d" % [i3, j3]]):
 				continue
 			var a2 := o + u * (float(i3) * cw) + v * (float(j3) * cd)
-			_wall_side_y(a2, a2 + v * cd, _h_of(h, h_var, rng), -1.0, 0.0,
+			var gt2 := 0.5 if rng.randf() < 0.33 else -1.0
+			_wall_side_y(a2, a2 + v * cd, _h_of(h, h_var, rng), gt2, 1.5,
 				tag, 0.0)
 
 

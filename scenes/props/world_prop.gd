@@ -408,10 +408,29 @@ const ACCENT_SPLIT := {
 	# se schimba in aceeasi captura: rgb(71,75,79) -> rgb(80,68,54).
 	#
 	# Piatra zidurilor sta pe 3 (ROCK_LIGHT), 29 (MARBLE_GREY) si, la
-	# inca_wall_b, 4 (ROCK_DARK) pentru nise. Iarba de coronament (12) ramane
-	# in `_Accente`, pictata.
-	"Inca_Wall_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
-	"Inca_Wall_B": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	# inca_wall_b, 4 (ROCK_DARK) pentru nise.
+	#
+	# CORONAMENTUL (slotul 12, CACTUS_GREEN, y 2.31-2.49) INTRA SI EL IN CORP,
+	# nu mai ramane accent pictat. Redactarea de dinainte il tinea in
+	# `_Accente` „ca iarba de coronament" — pe un zid izolat e corect, pe un
+	# CAMP nu. In Piata Sacra sunt ~850 de piese de zid, deci ~850 de dungi
+	# verzi late de 18 cm, si fiindca ochiul sta la 10 m fiecare zid din
+	# planul doi isi arata coronamentul fix acolo unde zidul din planul intai
+	# isi are talpa. Criticul orb al rundei 12 a citit exact asta, fara sa
+	# stie ce e: „lespezile au partea de sus verde si par bucati de teren
+	# decupate, nu zidarie". Decupajul A_r12_f000 confirma: linia verde e
+	# continua pe fiecare lespede din cadru.
+	#
+	# Iarba nu dispare din cetate — ramane iarba TERENULUI intre incinte, care
+	# e ce trebuie sa se vada in curti (si ce cere bara). Ce dispare e chenarul
+	# verde de pe piatra. 12 e slot GLOBAL (bromelii, muschi, tent_b): de aia
+	# schimbarea se face aici, pe cheia de NOD a zidului, nu pe o mapare de
+	# slot — memoria `nume-noduri-nu-sunt-unice` invers, cheia e destul de
+	# ingusta.
+	"Inca_Wall_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY,
+		Palette.CACTUS_GREEN],
+	"Inca_Wall_B": [Palette.ROCK_LIGHT, Palette.ROCK_DARK,
+		Palette.MARBLE_GREY, Palette.CACTUS_GREEN],
 	# `Inca_Wall_C` lipsea si de aici si din CLASSES_BY_MODEL, desi inventarul
 	# o masurase ca separandu-se LA FEL de curat ca A (corp 3+29 91.5%, accent
 	# 12 la y 2.33-2.43, verdict "DA"). Consecinta, gasita la POI A: din 352
@@ -419,7 +438,8 @@ const ACCENT_SPLIT := {
 	# brut langa 304 clasate — aceeasi ruptura de familie ca la piesele-erou,
 	# doar mai mica. Piesa se foloseste exact acolo unde se vede cel mai bine:
 	# la capetele scurte de incinta, adica in colturi.
-	"Inca_Wall_C": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
+	"Inca_Wall_C": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY,
+		Palette.CACTUS_GREEN],
 	"Inca_Stair_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Stair_B": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	# Chongqing: DOUA sloturi pastrate, nu unul. Masurat pe inaltime, slotul 29

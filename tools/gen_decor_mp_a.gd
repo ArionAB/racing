@@ -790,8 +790,8 @@ func _platforma(c: Vector2, w: float, dpt: float, rot: float, lift: float,
 	# linia podelei — oricat de mult ar cadea terenul sub ea.
 	var h_spr := lift + drop
 	for e: Array in [[p0, p1], [p1, p2], [p2, p3], [p3, p0]]:
-		_wall_abs(e[0] as Vector2, e[1] as Vector2, h_spr, base_y - drop,
-			tag + "Spr")
+		_wall_abs_inalt(e[0] as Vector2, e[1] as Vector2, h_spr,
+			base_y - drop, tag + "Spr")
 
 	# (b) PODEAUA. Placi de 12 laturi, raza `r`, asezate pe o grila cu pasul
 	# `r` — deci se SUPRAPUN mult si iese o suprafata continua, nu niste
@@ -850,6 +850,37 @@ func _platforma(c: Vector2, w: float, dpt: float, rot: float, lift: float,
 		var cd := (dpt - 3.0) / float(rooms_v)
 		_block_abs(c, rooms_u, rooms_v, cw, cd, rot, room_h, 0.22,
 			tag + "Cam", base_y + lift, _n_terase * 137)
+
+
+## Zid de sprijin INALT, facut din ASIZE suprapuse in loc de o piesa intinsa.
+##
+## De ce, masurat pe captura A_r14b_f002.png si pe scara reala din .tscn:
+## piesele de zid se scaleaza UNIFORM, deci un zid cerut la 4,90 m iese la
+## scara 1,97 — si atunci nu e doar inalt, e si **1,64 m GROS** (0,83 x 1,97)
+## si are blocurile de piatra de doua ori mai mari. Pe cadru iesea un panou
+## brun-inchis, fara textura de zidarie citibila, exact acolo unde terenul
+## cade mai mult sub terasa. Masurat in scena: `terasaStgBSpr` mergea pana la
+## scara **2,012**, `terasaDrBSpr` pana la 1,971.
+##
+## Un zid incas inalt nu e un bloc mai mare, e mai multe ASIZE. Deci peste
+## `H_ASIZA` se pun mai multe randuri suprapuse, fiecare aproape de scara 1,
+## si grosimea ramane cea a piesei. Randul de sus e cel care da coronamentul,
+## deci el se aseaza ultimul si fix sub cota podelei.
+##
+## Consecinta secundara, dorita: rostul orizontal dintre asize e chiar linia
+## pe care o are si zidul de terasa din bara — o dunga de umbra la fiecare
+## 2,4 m pe inaltime, care e ce face piatra sa se citeasca drept piatra.
+const H_ASIZA := 2.45
+
+func _wall_abs_inalt(a: Vector2, b: Vector2, h: float, y_abs: float,
+		tag: String) -> void:
+	if h <= H_ASIZA * 1.12:
+		_wall_abs(a, b, h, y_abs, tag)
+		return
+	var n := int(ceil(h / H_ASIZA))
+	var hh := h / float(n)
+	for k in range(n):
+		_wall_abs(a, b, hh, y_abs + float(k) * hh, tag)
 
 
 ## `_wall_side` cu cota ABSOLUTA: piesele nu mai citesc solul, stau toate la

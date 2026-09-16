@@ -349,7 +349,13 @@ const FALL_TARGET := 1.8
 ## jumatatea grosimii masurate.
 const WALL_HALF_THICK := 0.43
 const LAT_MIN := 6.93      # = 6,5 + 0,43: fata interioara pe muchia asfaltului
-const LAT_MAX := 7.30      # +0,37 m de joc, cat sa urmeze latimea variabila
+## RUNDA 9c: plafonul urca de la 7,30 la 8,20 ca sa incapa marja de colt
+## (`_corner_margin`): pe acul de 13 m, piesa de 2 m cere 0,08 m, iar pe
+## racordurile de 20-40 m piesa de 4 m cere 0,20 m peste fata. 8,20 = 6,5 + 0,43
+## + 1,27, adica tot sub `EDGE_BAND` (1,4 m dincolo de muchie), deci zidul ramane
+## lipit de sosea: nu se intoarce iarba dintre asfalt si piatra, care a pierdut
+## rundele 4-7.
+const LAT_MAX := 8.20
 ## Cat poate sta zidul dincolo de MUCHIA locala. 1,4 m: piesa e groasa 0,83-0,86
 ## (masuratori §1), deci fata ei dinspre drum ramane la ~1 m de asfalt — destul
 ## cat sa nu fie obstacol pe umar, prea putin cat sa se vada iarba intre sosea
@@ -386,6 +392,70 @@ const WALL_POLY_STEP := 0.5   # cat de des se esantioneaza linia zidului (m de a
 ## (masurat pe G_r4_f082: salt de yaw median 8,7 grade, maxim 43).
 ## 6 grade pe o piesa de 2 m inseamna o sageata de 2,6 cm — sub ce se vede.
 const WALL_MAX_TURN_DEG := 6.0
+## RUNDA 9: PIESELE SE SUPRAPUN, nu se ating cap la cap.
+##
+## Runda 8 a rezolvat ROSTUL si l-a masurat: median 0,000 m, 1 din 95 de
+## imbinari peste 0,30. Si totusi captura (G_r9base_f082.png) arata in prim-plan
+## un SIR DE LESPEZI puse pe muchie, cu lumina intre ele. Masurat pe .tscn, ce
+## mai ramasese nu era golul, era UNGHIUL: salt de yaw median 6,88 grade, 57 din
+## 95 peste pragul de 6 pe care generatorul si-l pune singur, maximul 23,02.
+##
+## Cauza e o gaura in alegerea modelului: `inca_wall_c` (2 m) e FALLBACK, si nu
+## e testat niciodata. Pe ac nu are cum sa treaca — 2 m pe raza masurata de 13 m
+## subintind 8,8 grade — deci pe fiecare ac se aseza piesa scurta si unghiul ei
+## se accepta in tacere. Pragul de 6 grade nu constrangea decat piesele de 6 si 4 m.
+##
+## Dar piesa mai scurta nu e raspunsul, fiindca 2 m e deja cea mai scurta din kit:
+## la R=13 m orice panou DREPT faceteaza, si doua fete drepte care se intalnesc la
+## 8,8 grade lasa pe fata exterioara un prag de 0,85*sin(8,8) = 0,13 m. Un sir de
+## praguri de 13 cm privit aproape PE LUNG (cum il vede soferul in ac) e exact
+## silueta de lespezi razlete — oricat de lipite ar fi capetele.
+##
+## Singurul mod de a stinge pragul cu piese drepte e ca fetele VECINE SA SE
+## SUPRAPUNA: pasul devine `L * WALL_OVERLAP`, deci coada piesei k intra cu
+## 25 % in piesa k+1 si acopera crestatura in V. Zidaria incasa chiar asa arata
+## (blocuri incalecate), si la 0,83 m grosime suprapunerea nu se vede ca dublare.
+## Rostul ramane 0 prin constructie; ce dispare e muchia.
+const WALL_OVERLAP := 0.75
+## RUNDA 9b: SUPRAPUNEREA SINGURA A INRAUTATIT CAPTURA, si de ce.
+##
+## Cu pasul scurtat, cifrele au iesit exact cum trebuie — suprapunere mediana
+## 1,00 m, doar 2 din 137 de imbinari expuse, salt de yaw median 5,05 grade — si
+## totusi G_r9lap_f082.png citea MAI RAU decat inainte: un pieptene de fini
+## inalte si subtiri, mai despartite, nu mai putine.
+##
+## Cifra masurase imbinarea PE LUNGUL zidului. Defectul era PROPORTIA fiecarei
+## stive, pe care nicio masuratoare de rost n-o putea vedea (memoria
+## statistica-de-ordin-zero-nu-vede-forma: masoara forma, nu niveluri).
+## Masurat pe .tscn: pe ace generatorul alege piesa de 2 m si o stivuieste pe
+## 3-4 cursuri, adica un bloc de 2 m latime si 7,5-9,9 m inaltime — raport
+## L/H 0,20-0,27. Aia e o LESPEDE PE MUCHIE, nu zidarie; un zid de sprijin se
+## citeste ca zid fiindca e mai LAT decat INALT. Suprapunerea doar a ingrosat
+## fiecare fin si l-a facut mai distinct.
+##
+## Doua schimbari, amandoua din aceeasi masuratoare:
+##
+## 1. Pe ac se ia piesa CEA MAI LUNGA, nu cea mai scurta. Rationamentul rundei 8
+##    (piesa scurta faceteaza mai putin) optimiza unghiul, care e o abatere de
+##    13 cm pe fata — invizibila — si platea cu proportia, care se vede din prima.
+##    Cu suprapunerea de 25 % muchia oricum se ingroapa, deci facetarea nu mai e
+##    moneda de schimb.
+##
+## 2. Cursurile se opresc la cat se VEDE. Ochiul soferului e la ~1,5 m peste
+##    sosea si zidul incepe la 6,8 m lateral, deci baza unui zid de 5 m cade la
+##    27 grade sub orizontala, iar la 7,5 m la 41 de grade. Camera de joc
+##    priveste INAINTE (memoria masoara-inainte-nu-langa): sub ~35 de grade nu
+##    mai intra in cadru decat primele doua cursuri. Cursurile 3 si 4 sunt
+##    geometrie nevazuta din masina — se vad doar din banda de deasupra, privind
+##    peste bucla, si acolo doua cursuri (5 m de fata) sunt deja suficiente.
+const WALL_COURSES_VISIBLE := 2
+## Cat poate taia o piesa DREAPTA pe dinauntrul curbei zidului (sageata, m).
+## 0,12 m: sub grosimea piesei (0,83-0,86), deci capatul piesei nu iese in
+## afara fetei vecinei ei si lantul citeste ca o curba, nu ca un evantai.
+## Pe raza masurata a acelor (13 m): piesa de 6 m are sageata 0,35 (refuzata),
+## cea de 4 m 0,15 (refuzata), cea de 2 m 0,04 (trece). Pe dreapta trec toate,
+## deci se ia cea mai lunga — si proportia iese de la sine.
+const WALL_MAX_SAGITTA := 0.12
 ## Cate cursuri de zidarie se stivuiesc sub buza, cel mult. 4 x 2,487 = 9,95 m
 ## de fata — destul ca peretele sa se citeasca pe caderile de 8-14 m masurate
 ## (ProbeMpGZid), si un plafon la caderile de 20+ m unde oricum ceata si
@@ -421,6 +491,29 @@ func _retaining() -> void:
 		w.idx = i
 		line.append(w)
 		f += _step(WALL_POLY_STEP)
+	# (a2) RUNDA 9d, INCERCARE RESPINSA PE CAPTURA — se pastreaza nota, nu codul.
+	#
+	# Diagnosticul era bun si masurat: `ProbeMpGColt` a aratat ca 210 din 245 de
+	# piese aveau un COLT peste carosabil (median 0,49 m, cel mai rau 1,72) —
+	# adica piesele traversau muchia, si asta e „dintele de fierastrau" din
+	# vederea de sus, nu facetarea si nu proportia.
+	#
+	# Reparatia incercata: se impinge intreaga LINIE in afara cu exact cat ii
+	# trebuie celui mai dinauntru colt. Cifra a iesit perfect — 21 din 523 de
+	# piese peste asfalt, median +2,13 m in afara muchiei. Captura a aratat insa
+	# altceva (crop_top_nas_f.png): un INEL DUBLU de blocuri in iarba, cu o fasie
+	# de pamant gol intre sosea si piatra, adica exact „zidul in pajiste" care a
+	# pierdut rundele 4-7. Motivul e o bucla de reactie: impingi linia, colturile
+	# se muta, noul colt cel mai dinauntru cere si mai multa impingere, si asa
+	# pana cand zidul pleaca de langa drum.
+	#
+	# Lectia, in forma in care se poate refolosi: colturile NU se repara mutand
+	# zidul, fiindca pozitia lui e fixata de sosea. Se repara scurtand piesa
+	# (coltul e la L/2 de centru) sau lasand-o sa intre putin — 0,3-0,5 m de
+	# piatra peste marginea asfaltului e chiar racordul dintre drum si parapet,
+	# nu un defect, cata vreme nu urca peste cota carosabilului (LIP = 0,25 m,
+	# sub pragul de 0,3 m la care devine zid pentru fizica).
+	# De aia versiunea care ramane e 9c, cu pragul de sageata, si nu asta.
 	# (b) se calca pe ea. Latura se inverseaza la fiecare ac; acolo linia SARE
 	# de pe un mal pe celalalt (masurat: 17-19 m intr-un pas), si acolo lantul
 	# TREBUIE sa se rupa — sunt doua ziduri diferite, pe doi versanti diferiti.
@@ -466,12 +559,32 @@ func _retaining() -> void:
 		# `WALL_MAX_TURN_DEG`: se masoara direct cat se roteste linia zidului pe
 		# 6 m, pe 4 m si pe 2 m in fata, si se ia cea mai lunga piesa care incape
 		# sub prag. Pe dreapta iese tot cea de 6 m (unghi ~0), pe ac cea de 2 m.
+		# RUNDA 9c: piesa cea mai lunga CARE MAI URMEAZA CURBA, cu pragul aplicat
+		# de data asta si piesei scurte.
+		#
+		# Runda 9b a luat mereu piesa de 6 m (proportia era defectul de atunci) si
+		# vederea de sus (G_r9b_top082.png) a aratat pretul: pe nasul acului
+		# piesele se desfac in EVANTAI, fiecare iesind radial din muchie, exact
+		# „coastele" din prim-planul capturii din masina. Geometria spune cat:
+		# pe raza masurata de 13 m, o piesa de 6 m are sageata 0,35 m si consuma
+		# 19,9 grade la fiecare pas de 4,5 m — capetele consecutive se departeaza
+		# radial cat se vede cu ochiul liber.
+		#
+		# Deci pragul de unghi al rundei 8 era corect, si gaura lui era doar ca
+		# `inca_wall_c` nu se testa NICIODATA (era fallback). Acum se testeaza si
+		# ea, iar pragul e pe sageata, nu pe unghi, fiindca sageata e chiar
+		# abaterea vizibila de la curba. Pe dreapta trece piesa de 6 m (sageata
+		# ~0), pe ac trece doar cea de 2 m (sageata 0,04 m) — si proportia pe ac
+		# o repara suprapunerea plus cele doua cursuri, nu lungimea piesei.
 		var mdl := "inca_wall_c"
-		for cand: String in ["inca_wall_b", "inca_wall_a"]:
-			if _line_turn_deg(line, k, WALL_LEN[cand]) <= WALL_MAX_TURN_DEG:
+		for cand: String in ["inca_wall_b", "inca_wall_a", "inca_wall_c"]:
+			if _line_sagitta(line, k, WALL_LEN[cand]) <= WALL_MAX_SAGITTA:
 				mdl = cand
 				break
-		var seg: float = WALL_LEN[mdl]
+		# Piesa are lungimea ei (asta se aseaza), dar PASUL e mai scurt: capatul
+		# ei intra in urmatoarea si ii acopera crestatura. `seg` = cat se avanseaza
+		# pe linie; `WALL_LEN[mdl]` = cat de lunga e piesa care se pune acolo.
+		var seg: float = WALL_LEN[mdl] * WALL_OVERLAP
 		# Cauta primul punct de polilinie aflat la >= `seg` IN LINIE DREAPTA de
 		# `head`, apoi interpoleaza pe ultimul segment ca sa cada la fix `seg`.
 		var j := k + 1
@@ -524,6 +637,44 @@ func _line_turn_deg(line: Array[WallPt], k: int, span: float) -> float:
 	return rad_to_deg(absf(d0.normalized().angle_to(d1.normalized())))
 
 
+## SAGEATA: cat taie o piesa DREAPTA de `span` metri pe dinauntrul liniei
+## zidului, pornind de la `k`. E abaterea maxima dintre coarda (piesa) si
+## polilinia reala (curba pe care ar trebui sa stea) — adica exact ce se vede ca
+## „evantai" cand e prea mare. 999 daca lantul se rupe inainte sa incapa piesa.
+func _line_sagitta(line: Array[WallPt], k: int, span: float) -> float:
+	var p0: Vector3 = line[k].pos
+	var j := k + 1
+	while j < line.size():
+		var pj: WallPt = line[j]
+		var pv: WallPt = line[j - 1]
+		if pj.sgn != pv.sgn or Vector3(pj.pos.x - pv.pos.x, 0.0,
+				pj.pos.z - pv.pos.z).length() > 5.0:
+			return 999.0
+		if Vector3(pj.pos.x - p0.x, 0.0, pj.pos.z - p0.z).length() >= span:
+			break
+		j += 1
+	if j >= line.size():
+		return 999.0
+	# Coarda pe care ar sta piesa: p0 -> punctul de la `span` in linie dreapta.
+	var p1 := _chord_point(p0, line[j - 1].pos, line[j].pos, span)
+	var d := Vector3(p1.x - p0.x, 0.0, p1.z - p0.z)
+	var l := d.length()
+	if l < 0.01:
+		return 999.0
+	var dir := d / l
+	# Departarea maxima a poliliniei fata de coarda, pe portiunea acoperita.
+	var worst := 0.0
+	for t in range(k, j + 1):
+		var q: Vector3 = line[t].pos
+		var v := Vector3(q.x - p0.x, 0.0, q.z - p0.z)
+		var along: float = v.dot(dir)
+		if along < 0.0 or along > l:
+			continue
+		var perp := (v - dir * along).length()
+		worst = maxf(worst, perp)
+	return worst
+
+
 ## Punctul de pe segmentul p0->p1 aflat la fix `r` in linie dreapta de `c`.
 ## (intersectia cercului de raza r centrat in c cu segmentul; r e intre |c-p0|
 ## si |c-p1| prin constructia apelantului, deci solutia exista)
@@ -559,6 +710,18 @@ func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
 	# daca buza NU a fost taiata (racordul cornisei se stinge spre capetele
 	# feliei), piesa ar sta pe iarba plata si ar citi iar ca bordura — exact
 	# bordura ornamentala care a pierdut runda 2. Sub 0,8 m se sare.
+	# RUNDA 9d: impinge piesa in afara pana cand NICIUN COLT nu mai e pe asfalt.
+	#
+	# Masurat cu `ProbeMpGColt` pe versiunea 9c: 210 din 245 de piese aveau un
+	# colt peste carosabil, median 0,49 m, cel mai rau 1,72 m. Asta e „dintele de
+	# fierastrau" din vederea de sus (crop_top_nas.png): piesele traverseaza
+	# muchia, o parte pe drum, o parte in gol.
+	#
+	# Marja calculata din curbura (9c) n-a reparat nimic, fiindca unghiul piesei
+	# NU vine din curbura drumului, ci din coarda liniei de zid — care difera si
+	# pe portiuni drepte (latime variabila, alternanta de mal, pasul de
+	# suprapunere). Deci marja nu se PREZICE, se MASOARA pe piesa asezata:
+	# se iau cele patru colturi reale si se impinge lateral exact cat trebuie.
 	var side := _track._side_at(w0.idx) * w0.sgn
 	var probe := mid + side * 0.6
 	var foot: float = minf(_sol_real(probe.x, probe.z),
@@ -596,7 +759,11 @@ func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
 	var foot_out: float = _sol_real(probe.x, probe.z)
 	var need := top - foot_out
 	var courses := int(ceil(need / WALL_H))
-	courses = clampi(courses, 1, WALL_COURSES_MAX)
+	# Plafonul e cat se VEDE din masina (WALL_COURSES_VISIBLE), nu cat de adanca
+	# e rapa: sub doua cursuri baza zidului trece de 27 grade sub orizontala si
+	# iese din cadrul camerei de joc. Adancimea ramasa o inchid coroanele de sub
+	# buza si ceata.
+	courses = clampi(courses, 1, WALL_COURSES_VISIBLE)
 	for c in courses:
 		var y := top - WALL_H * float(c + 1)
 		_raw(mdl, "zidSprijin", Vector3(mid.x, y, mid.z), yaw, 1.0,
@@ -628,9 +795,92 @@ func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
 ## Cu cornisele declarate `scarp` (Track15.tscn, `custom_scarp_ravines`),
 ## caderea incepe oricum in primii metri dupa buza, deci nu mai e nimic de
 ## cautat: zidul se lipeste de asfalt si peretele e sub el prin constructie.
+## RUNDA 9c: marja pentru COLTUL piesei, nu doar pentru fata ei.
+##
+## Vederea de sus (crop_top_nas.png) a aratat ca piesele CALCA PE ASFALT cu un
+## colt, si ies peste buza cu celalalt — un dinte de fierastrau care traverseaza
+## muchia, nu un zid pe langa ea. Cifra din spate: `LAT_MIN` = 6,93 = 6,5 + 0,43
+## pune fata interioara FIX pe muchie, cu marja zero. Dar piesa e lunga si pe ac
+## se roteste fata de tangenta locala, iar un colt aflat la L/2 de centru intra
+## spre drum cu (L/2)*sin(unghi): pentru piesa de 6 m la 20 de grade inseamna
+## 1,03 m PESTE asfalt.
+##
+## Deci marja nu e o constanta, e o functie de cat de lunga e piesa si cat
+## coteste linia acolo. Se adauga exact cat trebuie ca si coltul cel mai
+## dinauntru sa ramana dincolo de muchie.
 func _smooth_lateral(i: int, sgn: float) -> float:
 	var half := _track.width_at_index(i)
-	return clampf(half + WALL_HALF_THICK, LAT_MIN, LAT_MAX)
+	return clampf(half + WALL_HALF_THICK + _corner_margin(i), LAT_MIN, LAT_MAX)
+
+
+## Cat trebuie impinsa lateral o piesa asezata in `mid`, orientata pe `tang`, ca
+## niciunul din cele patru colturi ale ei sa nu ramana peste carosabil.
+## Se masoara pe colturile REALE (nu se prezice din curbura), fiindca unghiul
+## piesei vine din coarda liniei de zid, nu din tangenta drumului.
+## `CORNER_KEEP` e marja peste muchie: 0,10 m, cat sa nu atinga banda nici la
+## rotunjirile de virgula.
+const CORNER_KEEP := 0.10
+
+## Tangenta liniei zidului la indexul t (vecinii de acelasi mal).
+func _line_tangent(line: Array[WallPt], t: int) -> Vector3:
+	var a: int = maxi(0, t - 1)
+	var b: int = mini(line.size() - 1, t + 1)
+	if line[a].sgn != line[t].sgn:
+		a = t
+	if line[b].sgn != line[t].sgn:
+		b = t
+	if a == b:
+		return Vector3.ZERO
+	var d := Vector3(line[b].pos.x - line[a].pos.x, 0.0,
+		line[b].pos.z - line[a].pos.z)
+	if d.length() < 0.01 or d.length() > 12.0:
+		return Vector3.ZERO
+	return d.normalized()
+
+
+func _corner_push(mid: Vector3, tang: Vector3, side: Vector3, seg_len: float) -> float:
+	var n := _track.baked.size()
+	var worst := 0.0
+	for su: float in [-1.0, 1.0]:
+		for sv: float in [-1.0, 1.0]:
+			var c := mid + tang * (seg_len * 0.5 * su) + side * (WALL_HALF_THICK * sv)
+			# indexul cel mai apropiat de COLT, nu de centru
+			var bi := 0
+			var bd := INF
+			for i in n:
+				var b: Vector3 = _track.baked[i]
+				var dd := (b.x - c.x) * (b.x - c.x) + (b.z - c.z) * (b.z - c.z)
+				if dd < bd:
+					bd = dd
+					bi = i
+			var bp: Vector3 = _track.baked[bi]
+			var s := _track._side_at(bi)
+			var lat: float = absf(Vector3(c.x - bp.x, 0.0, c.z - bp.z).dot(s))
+			var need: float = _track.width_at_index(bi) + CORNER_KEEP - lat
+			worst = maxf(worst, need)
+	return worst
+
+
+## Cat trebuie impins zidul in afara ca sa nu intre cu coltul pe carosabil.
+## Se foloseste curbura locala: piesa cea mai lunga care trece de pragul de
+## sageata subintinde un unghi fata de tangenta, iar coltul ei intra cu
+## (L/2)*sin(unghi). Se ia piesa de 6 m ca cel mai rau caz de pe dreapta si
+## unghiul real al liniei; pe ac piesa e scurta, deci marja iese mica.
+func _corner_margin(i: int) -> float:
+	var kappa: float = absf(_curv(i))
+	if kappa < 1e-5:
+		return 0.0
+	var r: float = 1.0 / kappa
+	# Piesa aleasa acolo (aproximata dupa raza) si jumatatea ei de lungime.
+	var l := 6.0
+	if r < 40.0:
+		l = 4.0
+	if r < 20.0:
+		l = 2.0
+	# Unghiul dintre coarda piesei si tangenta la capatul ei: jumatate din
+	# unghiul la centru subintins de piesa.
+	var th: float = asin(clampf(l / (2.0 * r), 0.0, 1.0))
+	return (l * 0.5) * sin(th)
 
 
 func _fall_lateral_raw(i: int, sgn: float) -> float:
@@ -928,7 +1178,19 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var smooth := _sampler.ground_y(q.x, q.z)
 	var sink := smooth - (g - dy)
 	var piece_h: float = float(HEIGHT.get(model, 1.0)) * scl
-	if sink > maxf(0.5 * piece_h, 1.0):
+	# RUNDA 9c: pragul de scufundare nu mai e jumatate din inaltime pentru TOT.
+	#
+	# `probe_manual --track=15` a gasit 4 quenuali ingropati 2,2-2,8 m, toti la
+	# 11,7-13,4 m lateral, adica pe fata taiata de cornisa unde panza de coliziune
+	# coboara sub campul neted. Regula „jumatate din inaltime" ii lasa sa treaca
+	# fiindca sunt inalti de 6-8 m — dar la un COPAC nu conteaza jumatatea, ci
+	# trunchiul: unul ingropat 2,8 m nu mai citeste a copac, citeste a tufa, si
+	# taman pe randul de sub buza (`quenualJos`) care trebuie sa se vada peste
+	# creasta zidului.
+	# Pentru piesele zvelte (copaci, ferigi) pragul e deci absolut, nu procentual.
+	var zvelt: bool = model.begins_with("polylepis") or model == "tree_fern"
+	var max_sink: float = 0.8 if zvelt else maxf(0.5 * piece_h, 1.0)
+	if sink > max_sink:
 		_skipped += 1
 		return
 	# RUNDA 8: ridicarea la campul neted se SCOATE, fiindca odata cu cornisele

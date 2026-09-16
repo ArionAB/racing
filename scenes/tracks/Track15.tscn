@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://o1kdsuqapxx5p"]
+﻿[gd_scene format=3 uid="uid://o1kdsuqapxx5p"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
@@ -7,9 +7,48 @@
 [ext_resource type="Script" uid="uid://cun4ologbx5v6" path="res://scenes/hazards/lift_bridge_hazard.gd" id="lift_bridge"]
 [ext_resource type="Script" path="res://scenes/hazards/cloud_rise_hazard.gd" id="cloud_rise"]
 [ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="hazard_marker"]
-[ext_resource type="PackedScene" uid="uid://w4kptwkt5aly" path="res://assets/models/props/cow.glb" id="cow"]
 [ext_resource type="Script" uid="uid://cig1qufehliet" path="res://scenes/hazards/train_hazard.gd" id="train"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="bus"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="prop"]
+[ext_resource type="PackedScene" uid="uid://b8o5myt8choit" path="res://assets/models/machupicchu/animals/condor.glb" id="s_condor"]
+[ext_resource type="PackedScene" uid="uid://bdt8behq0xn57" path="res://assets/models/machupicchu/animals/llama.glb" id="s_llama"]
+[ext_resource type="PackedScene" uid="uid://8crmsakcg4sj" path="res://assets/models/machupicchu/animals/llama_b.glb" id="s_llama_b"]
+[ext_resource type="PackedScene" uid="uid://plndxv7rnvbt" path="res://assets/models/machupicchu/animals/llama_c.glb" id="s_llama_c"]
+[ext_resource type="PackedScene" uid="uid://edae32fu0i4d" path="res://assets/models/machupicchu/buildings/guardhouse.glb" id="s_guardhouse"]
+[ext_resource type="PackedScene" uid="uid://bwww5c4oym2j3" path="res://assets/models/machupicchu/buildings/inca_house_a.glb" id="s_inca_house_a"]
+[ext_resource type="PackedScene" uid="uid://cx7agdprybcd5" path="res://assets/models/machupicchu/buildings/inca_house_b.glb" id="s_inca_house_b"]
+[ext_resource type="PackedScene" uid="uid://dn2l10wira5xb" path="res://assets/models/machupicchu/plants/bamboo_clump.glb" id="s_bamboo_clump"]
+[ext_resource type="PackedScene" uid="uid://f1kcq027imfc" path="res://assets/models/machupicchu/plants/bromeliad.glb" id="s_bromeliad"]
+[ext_resource type="PackedScene" uid="uid://wdh77c7pgj37" path="res://assets/models/machupicchu/plants/orchid_cluster.glb" id="s_orchid_cluster"]
+[ext_resource type="PackedScene" uid="uid://caxlser3qgdk" path="res://assets/models/machupicchu/plants/polylepis_a.glb" id="s_polylepis_a"]
+[ext_resource type="PackedScene" uid="uid://bkaen3jeh1lqa" path="res://assets/models/machupicchu/plants/polylepis_b.glb" id="s_polylepis_b"]
+[ext_resource type="PackedScene" uid="uid://dvivo1mmd7uqu" path="res://assets/models/machupicchu/plants/tree_fern.glb" id="s_tree_fern"]
+[ext_resource type="PackedScene" uid="uid://m0uxhopvvfwq" path="res://assets/models/machupicchu/props/backpack_pile.glb" id="s_backpack_pile"]
+[ext_resource type="PackedScene" uid="uid://dteprk0q7s0v6" path="res://assets/models/machupicchu/props/tent_a.glb" id="s_tent_a"]
+[ext_resource type="PackedScene" uid="uid://cw1vnvfghosfq" path="res://assets/models/machupicchu/props/tent_b.glb" id="s_tent_b"]
+[ext_resource type="PackedScene" uid="uid://gtvclieajpvc" path="res://assets/models/machupicchu/rocks/gorge_far_wall.glb" id="s_gorge_far_wall"]
+[ext_resource type="PackedScene" uid="uid://b8qiuglgheh5t" path="res://assets/models/machupicchu/rocks/huayna_picchu.glb" id="s_huayna_picchu"]
+[ext_resource type="PackedScene" uid="uid://nfqnbk4qwc3p" path="res://assets/models/machupicchu/rocks/machu_picchu_mountain.glb" id="s_machu_picchu_mountain"]
+[ext_resource type="PackedScene" uid="uid://y78s7nwvf6yg" path="res://assets/models/machupicchu/rocks/moss_boulder_a.glb" id="s_moss_boulder_a"]
+[ext_resource type="PackedScene" uid="uid://cb5re7ykny2c7" path="res://assets/models/machupicchu/rocks/moss_boulder_b.glb" id="s_moss_boulder_b"]
+[ext_resource type="PackedScene" uid="uid://ddu3p2qo2mup1" path="res://assets/models/machupicchu/rocks/moss_boulder_c.glb" id="s_moss_boulder_c"]
+[ext_resource type="PackedScene" uid="uid://cvqgs1xy2egpk" path="res://assets/models/machupicchu/structures/fountain_basin.glb" id="s_fountain_basin"]
+[ext_resource type="PackedScene" uid="uid://ckk2pb8dj78wr" path="res://assets/models/machupicchu/structures/inca_bridge_ledge.glb" id="s_inca_bridge_ledge"]
+[ext_resource type="PackedScene" uid="uid://bdk2rcm1s0x85" path="res://assets/models/machupicchu/structures/inca_stair_a.glb" id="s_inca_stair_a"]
+[ext_resource type="PackedScene" uid="uid://d2uwwe4l6cuiy" path="res://assets/models/machupicchu/structures/inca_stair_b.glb" id="s_inca_stair_b"]
+[ext_resource type="PackedScene" uid="uid://dwmfadp4vt4my" path="res://assets/models/machupicchu/structures/inca_wall_a.glb" id="s_inca_wall_a"]
+[ext_resource type="PackedScene" uid="uid://dsljdqbnm3exr" path="res://assets/models/machupicchu/structures/inca_wall_b.glb" id="s_inca_wall_b"]
+[ext_resource type="PackedScene" uid="uid://b66hg6eokc3r5" path="res://assets/models/machupicchu/structures/inca_wall_c.glb" id="s_inca_wall_c"]
+[ext_resource type="PackedScene" uid="uid://dgdctg1x7pgtv" path="res://assets/models/machupicchu/structures/inti_punku.glb" id="s_inti_punku"]
+[ext_resource type="PackedScene" uid="uid://dcqxrw56tslcy" path="res://assets/models/machupicchu/structures/intihuatana.glb" id="s_intihuatana"]
+[ext_resource type="PackedScene" uid="uid://oscj64jo2644" path="res://assets/models/machupicchu/structures/main_gate.glb" id="s_main_gate"]
+[ext_resource type="PackedScene" uid="uid://blcxt1aonlb8r" path="res://assets/models/machupicchu/structures/rope_rail.glb" id="s_rope_rail"]
+[ext_resource type="PackedScene" uid="uid://cvhh67o8flksi" path="res://assets/models/machupicchu/structures/sun_temple.glb" id="s_sun_temple"]
+[ext_resource type="PackedScene" uid="uid://dwpqakrevlrr1" path="res://assets/models/machupicchu/structures/three_windows.glb" id="s_three_windows"]
+[ext_resource type="PackedScene" uid="uid://nfn0hh7r6bd7" path="res://assets/models/machupicchu/structures/trail_marker.glb" id="s_trail_marker"]
+[ext_resource type="PackedScene" uid="uid://dvc1frqw5ch27" path="res://assets/models/machupicchu/structures/water_channel.glb" id="s_water_channel"]
+[ext_resource type="PackedScene" uid="uid://de6lmfp5ndhh6" path="res://assets/models/machupicchu/vehicles/consettur_bus.glb" id="s_consettur_bus"]
+[ext_resource type="PackedScene" uid="uid://6hs2oxob4u2" path="res://assets/models/machupicchu/vehicles/perurail_train.glb" id="s_perurail_train"]
 
 [sub_resource type="Curve3D" id="Curve3D_machupicchu"]
 closed = true
@@ -121,8 +160,8 @@ phase = 0.35
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.07, -16.04, -200.22)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
-model_scale = 1.0
+model = ExtResource("s_llama")
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -131,8 +170,8 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.08, -16.24, -197.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
-model_scale = 1.0
+model = ExtResource("s_llama_b")
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -141,8 +180,8 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.05, -16.45, -194.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
-model_scale = 1.0
+model = ExtResource("s_llama_c")
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -151,8 +190,8 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.0, -16.65, -191.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
-model_scale = 1.0
+model = ExtResource("s_llama")
+model_scale = 3.135
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -160,6 +199,7 @@ sweep_speed = 2.0
 [node name="TrenPeruRail" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, -33, -205)
 script = ExtResource("train")
+model_path = "res://assets/models/machupicchu/vehicles/perurail_train.glb"
 period = 40.0
 half_rail = 65.0
 road_half_width = 0.6
@@ -173,3 +213,23 @@ period = 75.0
 nose_side = 1
 apex_outer_m = 1.0
 body_size = Vector3(3.6, 3, 6)
+model = ExtResource("s_consettur_bus")
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("prop")
+
+[node name="ZoneA_PiataSacra" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneB_DrumulIncas" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneC_PoartaSoarelui" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneD_Terase" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneE_Pod" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneF_MalulRaului" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneG_Serpentine" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneH_Cornisa" type="Node3D" parent="DecorManual"]

@@ -706,6 +706,30 @@ const CLASS_TEXTURES := {
 	# obisnuita/smochin/copac-uscat de pe Serengeti SI a palmierilor de pe
 	# Okinawa/Stromboli — o tenta galbena ar fi revopsit toate astea.
 	"bark_fever": "res://assets/textures/classes/bark.png",
+	# --- Machu Picchu: ZIDARIA INCASA (Track15) ---------------------------
+	#
+	# ACEEASI dala ca `alpine_granite` / `cut_stone` — nu se dubleaza in
+	# memorie, se schimba doar ridicarea si tenta (mecanica volcanic_rock /
+	# tuff_cream / termite_clay).
+	#
+	# De ce o clasa si nu `cut_stone` direct, desi scara de zidarie (0.28) e
+	# exact ce trebuie: `cut_stone` e clasa tunelului si a viaductului de pe
+	# BAIKAL (track_decor.gd:654-659, Tunnel_Portal/Bore/Niche, Viaduct_Pier/
+	# Arch/End), iar tenta lui e RECE — Color(0.88, 0.91, 0.97). Zidaria
+	# incasa trebuie sa aterizeze CALD: tinta e media ponderata pe arie a
+	# sloturilor pe care stau chiar piesele kitului (3 ROCK_LIGHT si 29
+	# MARBLE_GREY domina, cu 4 ROCK_DARK pe nise si cornisa), pe cele sase
+	# piese de zidarie. Cifrele sunt re-derivabile din atlas + dala: tinta e
+	# 55% ROCK_LIGHT + 33% MARBLE_GREY + 13% ROCK_DARK (eroare 0.0008), iar
+	# lift*tenta aterizeaza pe (0.7104, 0.5550, 0.3956). Verificat independent
+	# la revizia adversariala. (Prima redactare cita o unealta
+	# `probe_mp_tints.gd` care NU exista — cifrele erau bune, calea de
+	# reverificare nu; memoria `justificarea-din-comentariu-se-verifica`.)
+	#   tinta  (0.7104, 0.5549, 0.3927)  lum 0.5762
+	#   dala   (0.6376, 0.5992, 0.5208)  lum 0.6017
+	#   raport (1.1142, 0.9260, 0.7541)  -> un canal PESTE 1, deci cere lift
+	# O tenta pe `cut_stone` ar fi facut tunelul Baikalului maro.
+	"inca_stone": "res://assets/textures/classes/alpine_granite.png",
 	# PIELEA elefantului (Serengeti, lotul ELEFANTULUI). ACEEASI dala ca
 	# "concrete" — nu se dubleaza in memorie, se schimba doar tenta (mecanica
 	# volcanic_rock / city_concrete / termite_clay).
@@ -798,6 +822,12 @@ const CLASS_TINT := {
 	# calcarului de Okinawa); pe Baikal trebuie sa ramana piatra cenusie sub
 	# soare rece, de unde tenta rece de aici.
 	"cut_stone": Color(0.88, 0.91, 0.97),
+	# Zidaria incasa: dupa ridicarea la 0.6704 (CLASS_LIFT, k = 1.1142 = max
+	# raport pe canale) dala ajunge la (0.7104, 0.6676, 0.5803); tenta o aduce
+	# pe tinta masurata (0.7104, 0.5549, 0.3927). Calculata, nu aleasa —
+	# tinta_c / (dala_c * k), ca la macchia_dry / tuff_cream / termite_clay.
+	# Canalul R nimereste exact (1.0000), deci nu mai ramane nimic de urcat.
+	"inca_stone": Color(1.0, 0.8311, 0.6768),
 	# Bazalt: gresia calda a dalei impinsa spre cenusiu-rece si coborata mult.
 	# Nu e o alegere de gust — pe un vulcan tanar roca de langa crater e cea
 	# mai INCHISA suprafata din cadru, iar cu dala netentata buza citea ca o
@@ -932,6 +962,12 @@ const CLASS_LIFT := {
 	# tenta, care coboara doua canale din trei. k = max(tinta_c / dala_c) pe
 	# canale = 1.3483 (canalul R e cel care nimereste exact).
 	"termite_clay": 0.549,
+	# Zidaria incasa: dala `alpine_granite` are luminanta 0.6017 si trebuie sa
+	# ajunga pe media ponderata pe arie a sloturilor de zidarie (0.5762).
+	# Ridicarea e la 0.6704, nu la 0.5762, din acelasi motiv ca la
+	# macchia_dry / tuff_cream / termite_clay: tinta se atinge DUPA tenta,
+	# care coboara doua canale din trei. k = max(tinta_c / dala_c) = 1.1142.
+	"inca_stone": 0.6704,
 	# Scoarta acaciei-febra: dala `bark` are luminanta 0.568 (rec709) si
 	# trebuie sa ajunga pe slotul 0 SAND_LIGHT (232, 192, 116), luminanta
 	# 0.749. Ridicarea e la 0.775, nu la 0.749, din acelasi motiv ca la
@@ -1047,6 +1083,13 @@ const CLASS_TRIPLANAR_SCALE := {
 	# ca la o pila reala. La scara alpina (0.16, 6.25 m) blocurile ar fi de
 	# 1-1.2 m — zidarie ciclopica, alt fel de constructie.
 	"cut_stone": 0.28,
+	# Zidaria incasa: ACEEASI scara ca `cut_stone`, si nu din lene — 0.28
+	# inseamna o repetitie la ~3.6 m, iar blocurile kitului masoara 4.00 m
+	# (inca_wall_a) si 6.00 m (inca_wall_b) pe lungime, cu 2.49 m inaltime:
+	# un zid prinde ~1.1-1.7 repetitii, adica rosturile se citesc ca blocuri
+	# potrivite, nu ca tapet. E chiar scara de zidarie reala pentru care a
+	# fost reglat `cut_stone` pe viaductul Baikalului, la alta culoare.
+	"inca_stone": 0.28,
 	# --- Clasele insulei vulcanice (Stromboli) ----------------------------
 	#
 	# Toate patru exista deja ca dale, dar pana acum DOAR pe UV-uri reale

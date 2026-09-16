@@ -177,6 +177,28 @@ func _ready() -> void:
 ## falsa. Pana acum pista NU avea linie de baza, deci sonda nu putea distinge
 ## un hazard voit de un corp ratacit in banda (memoria `garda-existenta-nerulata`).
 ## Verificat prin sabotaj (`--sabotaj`) in acelasi commit.
+## [b]Machu Picchu: linie de baza pusa pe fundatie, 16 sep 2026.[/b] Masurat de
+## 3 ori pe starea finala a fundatiei, identic: **18** raportari. Toate sunt
+## atribuite unei piese intentionate:
+##   - 11 la frac 0.940/0.945, sub `Hazarduri/BarnePodIncas` (podul basculant):
+##     cele doua buze (`@StaticBody3D@34`, `@StaticBody3D@37`) si tablierul
+##     `LiftSpan`. Sunt gimmickul insusi, raportat cu podul JOS.
+##   - 7 la frac 0.500/0.505: [b]LAMELE[/b] (`Hazarduri/Lama1..4`, corpuri
+##     `SlidingHazard`), nu podul de franghie. Prima redactare le atribuia
+##     gresit lui `PodFranghie`; podul e la frac 0.549-0.565 si nu apare deloc
+##     in raportare. Atribuirea gresita a fost prinsa de revizia adversariala
+##     (memoria `justificarea-din-comentariu-se-verifica`) — cifra era buna,
+##     explicatia nu, si exact explicatia e ce citeste urmatorul.
+## [b]De ce 18 si nu 14:[/b] prima masuratoare s-a facut cand lamele aveau
+## 53 cm (scala Blender neaplicata, vezi commit-ul de fix). Cu lamele la
+## marimea reala de 1.66 m, sondele de la h=1.0 si h=1.6 le vad si ele — deci
+## cresterea de la 14 la 18 e [b]corectitudine castigata, nu regresie[/b]:
+## inainte garda nu vedea un obstacol care oricum nu exista mecanic.
+## Baza e 20, adica 18 + marja 2, conventia de mai sus.
+## [b]Atentie la cifra lead-ului: 15.[/b] A fost masurata pe main INAINTE de
+## fundatie; alt set de corpuri, nu o regresie fata de ea.
+## Verificat prin sabotaj (`--sabotaj`): stalpul de 6x12x6 pe axa la frac 0.55
+## duce cifra peste baza, verdict REGRESIE, cod de iesire 1.
 const BASELINE := {
 	"Dunele (Track01)": 30,
 	"Okinawa manual (Track08)": 18,
@@ -186,6 +208,7 @@ const BASELINE := {
 	"Chongqing (Track12)": 146,
 	"Cappadocia (Track13)": 11,
 	"Serengeti (Track14)": 9,
+	"Machu Picchu (Track15)": 20,
 }
 
 

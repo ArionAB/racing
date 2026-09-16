@@ -7,7 +7,6 @@
 [ext_resource type="Script" uid="uid://cun4ologbx5v6" path="res://scenes/hazards/lift_bridge_hazard.gd" id="lift_bridge"]
 [ext_resource type="Script" path="res://scenes/hazards/cloud_rise_hazard.gd" id="cloud_rise"]
 [ext_resource type="Script" uid="uid://ccxa8xagvu55q" path="res://scenes/tracks/hazard_marker.gd" id="hazard_marker"]
-[ext_resource type="PackedScene" uid="uid://w4kptwkt5aly" path="res://assets/models/props/cow.glb" id="cow"]
 [ext_resource type="Script" uid="uid://cig1qufehliet" path="res://scenes/hazards/train_hazard.gd" id="train"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="bus"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="prop"]
@@ -161,7 +160,7 @@ phase = 0.35
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.07, -16.04, -200.22)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
+model = ExtResource("s_llama")
 model_scale = 1.0
 face_travel = true
 motion = 1
@@ -171,7 +170,7 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.08, -16.24, -197.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
+model = ExtResource("s_llama_b")
 model_scale = 1.0
 face_travel = true
 motion = 1
@@ -181,7 +180,7 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.05, -16.45, -194.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
+model = ExtResource("s_llama_c")
 model_scale = 1.0
 face_travel = true
 motion = 1
@@ -191,7 +190,7 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.0, -16.65, -191.0)
 gizmo_extents = 3.0
 script = ExtResource("hazard_marker")
-model = ExtResource("cow")
+model = ExtResource("s_llama")
 model_scale = 1.0
 face_travel = true
 motion = 1
@@ -200,6 +199,7 @@ sweep_speed = 2.0
 [node name="TrenPeruRail" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, -33, -205)
 script = ExtResource("train")
+model_path = "res://assets/models/machupicchu/vehicles/perurail_train.glb"
 period = 40.0
 half_rail = 65.0
 road_half_width = 0.6
@@ -213,6 +213,7 @@ period = 75.0
 nose_side = 1
 apex_outer_m = 1.0
 body_size = Vector3(3.6, 3, 6)
+model = ExtResource("s_consettur_bus")
 
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("prop")

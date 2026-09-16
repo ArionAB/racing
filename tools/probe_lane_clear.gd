@@ -177,6 +177,24 @@ func _ready() -> void:
 ## falsa. Pana acum pista NU avea linie de baza, deci sonda nu putea distinge
 ## un hazard voit de un corp ratacit in banda (memoria `garda-existenta-nerulata`).
 ## Verificat prin sabotaj (`--sabotaj`) in acelasi commit.
+## [b]Machu Picchu: linie de baza pusa pe fundatie, 16 sep 2026.[/b] Masurat de
+## 3 ori pe starea de dupa pasii 1-2 ai fundatiei (kit inregistrat + cele 3
+## piese cu consumator), identic: **14** raportari. Toate sunt atribuite, pe
+## cale completa, unei piese intentionate — verificat cu o sonda temporara care
+## printeaza `get_path()`, fiindca 3 din ele ies cu nume generat:
+##   - 11 la frac 0.940/0.945, toate sub `Hazarduri/BarnePodIncas` (podul
+##     basculant): cele doua buze (`@StaticBody3D@34`, `@StaticBody3D@37`) si
+##     tablierul `LiftSpan`. Sunt gimmickul insusi, raportat cu podul JOS.
+##   - 3 la frac 0.500/0.505, corpuri `AnimatableBody3D` copii directi ai
+##     `Track15`, la z ~= -195: podul de franghie (`PodFranghie` e legat la
+##     radacina scenei, `parent="."`, nu sub `Hazarduri`).
+## Baza e 16, adica 14 + marja 2, conventia de mai sus.
+## [b]Atentie la cifra lead-ului: 15, nu 14.[/b] A fost masurata pe main INAINTE
+## de pasii 1-2; setul de corpuri difera, deci nu e o scadere de la 15 la 14 pe
+## aceeasi stare, ci alta stare. Nu cauta o regresie intre ele.
+## Verificat prin sabotaj (`--sabotaj`) in acelasi commit: stalpul de 6x12x6 pe
+## axa la frac 0.55 duce cifra de la 14 la 17 (trei fire laterale il vad, pe
+## nume, `STALP_DE_SABOTAJ`), verdict REGRESIE, cod de iesire 1.
 const BASELINE := {
 	"Dunele (Track01)": 30,
 	"Okinawa manual (Track08)": 18,
@@ -186,6 +204,7 @@ const BASELINE := {
 	"Chongqing (Track12)": 146,
 	"Cappadocia (Track13)": 11,
 	"Serengeti (Track14)": 9,
+	"Machu Picchu (Track15)": 16,
 }
 
 

@@ -339,39 +339,220 @@ const FALL_TARGET := 1.8
 const LAT_MIN := 7.3       # 0,8 m dincolo de muchia drumului (semi-latime 6,5)
 const LAT_MAX := 10.5      # dincolo de racordul cornisei piesa ar atarna in aer
 
+## RUNDA 3 A GRESIT PASUL, si captura a aratat-o inainte de orice cifra
+## (G_r3_f076/082/088.png): zidul citea ca un SIR DE STALPI cu iarba pe cap, nu
+## ca o linie de zidarie. Masurat pe .tscn-ul rezultat (capetele piesei pe axa
+## ei locala +X, lungimi 6,00/4,00/2,00 din AABB): rost median 1,42 m, 65 din
+## 92 de imbinari peste 1 m, 30 peste 2 m. Piesele trebuie sa se ATINGA (rost
+## 0,000 — capetele sunt la ±3,00/±2,00/±1,00 exact), deci lantul era rupt la
+## doua treimi din imbinari.
+##
+## Prima incercare de reparatie a cautat, binar, fractia la care capul piesei
+## urmatoare cade pe coada celei precedente. A injumatatit rostul (median 1,26)
+## si atat, iar descompunerea imbinarii pe axe a aratat de ce: abaterea e PE
+## TANGENTA si ALTERNEAZA semnul (+1,96 / -1,08 / -0,47 / +2,75 / -1,73), adica
+## piesele cad alternativ prea departe si suprapuse. Cauza e ca predicatul de
+## cautare foloseste tangenta si `lat` de la fractia `mid`, iar piesa care chiar
+## se aseaza acolo isi recalculeaza `lat` si modelul — deci testul si asezarea
+## nu vorbesc despre acelasi capat. Nicio cautare pe fractie nu poate inchide
+## asta, fiindca marimea cautata (pozitia capatului) nu e monotona in fractie.
+##
+## Asa ca zidul nu se mai aseaza pe fractii: se construieste intai LINIA lui, ca
+## polilinie deasa, si abia apoi se calca pe ea la intervale exacte. Un zid e o
+## curba cu piese pe ea, nu un sir de piese care incearca sa nimereasca o curba.
+## Pasul pe polilinie e chiar lungimea piesei, deci rostul e 0 prin constructie:
+## capatul piesei k e, la milimetru, inceputul piesei k+1.
+const WALL_POLY_STEP := 0.5   # cat de des se esantioneaza linia zidului (m de axa)
+## Cat poate coti linia pe lungimea UNEI piese, in grade. Peste atat, imbinarea
+## dintre doua piese drepte lasa o crestatura vizibila si sirul citeste a stalpi
+## (masurat pe G_r4_f082: salt de yaw median 8,7 grade, maxim 43).
+## 6 grade pe o piesa de 2 m inseamna o sageata de 2,6 cm — sub ce se vede.
+const WALL_MAX_TURN_DEG := 6.0
+
+## Un punct de pe linia zidului, cu tot ce trebuie ca sa se aseze o piesa acolo.
+class WallPt:
+	var pos: Vector3       # pozitia pe linia zidului (x, z reale; y = cota drumului)
+	var road_y: float      # cota soselei la fractia asta (varful zidului o urmeaza)
+	var sgn: float         # pe ce latura cade
+	var frac: float
+	var idx: int
+
+
 func _retaining() -> void:
+	# (a) linia zidului, esantionata des pe fractie.
 	var n := _track.baked.size()
-	var s_arc := 0.0
+	var line: Array[WallPt] = []
 	var f := F_IN
-	var guard := 0
-	while f < F_OUT and guard < 4000:
-		guard += 1
+	while f < F_OUT:
 		var i := int(f * float(n)) % n
-		var kap := absf(_curv(i))
 		var sgn := _downhill_side(i)
 		var lat := _smooth_lateral(i, sgn)
-		# Piesa se alege dupa curbura APARENTA la raza zidului: pe un ac de
-		# raza 13 m, un zid la 14 m lateral in exterior are raza 27 m, deci
-		# poate folosi piesa lunga. Raza efectiva = 1/kap + lat (exterior).
-		var r_eff: float = (1.0 / kap + lat) if kap > 0.001 else 1.0e9
-		var mdl := "inca_wall_b"
-		if r_eff < 16.0:
-			mdl = "inca_wall_c"
-		elif r_eff < 34.0:
-			mdl = "inca_wall_a"
-		var seg: float = WALL_LEN[mdl]              # 6,00 / 4,00 / 2,00 m exact
-		_wall_seg(mdl, "zidSprijin", f, sgn, i, lat)
-		s_arc += seg
-		# Pasul pe traseu se corecteaza cu raportul razelor: zidul e pe un arc
-		# mai LUNG decat axa (e in exteriorul curbei), deci o piesa de 6 m
-		# acopera mai putin din fractie decat 6 m de axa. Fara corectia asta,
-		# piesele se suprapun in ac si se rup pe dreapta (se vede in
-		# G_r1_f082.png: dinti de piatra cu goluri intre ei).
-		var ratio: float = 1.0
-		if kap > 0.001:
-			ratio = (1.0 / kap) / maxf(r_eff, 0.1)
-		f += _step(seg * ratio)
-	print("; zid de sprijin: %d piese pe ~%.0f m de arc" % [_n, s_arc])
+		var p := _track.baked[i]
+		var q := p + _track._side_at(i) * sgn * lat
+		var w := WallPt.new()
+		w.pos = Vector3(q.x, p.y, q.z)
+		w.road_y = p.y
+		w.sgn = sgn
+		w.frac = f
+		w.idx = i
+		line.append(w)
+		f += _step(WALL_POLY_STEP)
+	# (b) se calca pe ea. Latura se inverseaza la fiecare ac; acolo linia SARE
+	# de pe un mal pe celalalt (masurat: 17-19 m intr-un pas), si acolo lantul
+	# TREBUIE sa se rupa — sunt doua ziduri diferite, pe doi versanti diferiti.
+	#
+	# A DOUA INCERCARE A GRESIT AICI, si masuratoarea a aratat exact cat: se
+	# consuma `WALL_LEN` metri de ARC (suma pasilor de polilinie) si apoi piesa
+	# se aseza pe COARDA dintre capete. Coarda unei curbe e mai scurta decat
+	# arcul ei, deci o piesa de 6,00 m ajungea centrata pe o coarda de ~5 m, iar
+	# urmatoarea pornea de la capatul ARCULUI — cu un metru mai departe decat
+	# capatul piesei. Rostul median masurat: 1,35 m, adica exact diferenta.
+	#
+	# Piesa e DREAPTA si are lungime fixa, deci ce trebuie sa se potriveasca e
+	# coarda, nu arcul: se cauta pe polilinie punctul aflat la fix `WALL_LEN`
+	# metri IN LINIE DREAPTA de capatul precedent, si piesa se intinde intre
+	# cele doua. Asa capatul piesei k e, la milimetru, inceputul piesei k+1.
+	var s_arc := 0.0
+	var k := 0
+	var head := Vector3.INF     # capatul piesei precedente (inceputul celei noi)
+	var head_w: WallPt = null
+	while k < line.size() - 1:
+		var a: WallPt = line[k]
+		var b: WallPt = line[k + 1]
+		var jump := Vector3(b.pos.x - a.pos.x, 0.0, b.pos.z - a.pos.z).length()
+		if a.sgn != b.sgn or jump > 5.0:
+			head = Vector3.INF      # salt de mal: lantul se rupe aici
+			head_w = null
+			k += 1
+			continue
+		if head == Vector3.INF:
+			head = a.pos
+			head_w = a
+		# Modelul se alege dupa CAT COTESTE LINIA pe lungimea piesei, nu dupa o
+		# raza efectiva ghicita.
+		#
+		# Ce a aratat captura G_r4_f082: rostul era deja mic (median 0,23 m), dar
+		# zidul tot citea ca un sir de lespezi razlete. Masurat pe .tscn, cauza
+		# nu era rostul, era UNGHIUL: salt de yaw median 8,7 grade intre piese
+		# vecine, 26 din 76 peste 10 grade, maximul 43. Doua piese drepte care se
+		# intalnesc la 15 grade lasa o crestatura in V la imbinare, si un sir de
+		# crestaturi e exact silueta de „stalpi", oricat de lipite ar fi.
+		#
+		# Deci lungimea piesei se alege ca ea sa subintinda cel mult
+		# `WALL_MAX_TURN_DEG`: se masoara direct cat se roteste linia zidului pe
+		# 6 m, pe 4 m si pe 2 m in fata, si se ia cea mai lunga piesa care incape
+		# sub prag. Pe dreapta iese tot cea de 6 m (unghi ~0), pe ac cea de 2 m.
+		var mdl := "inca_wall_c"
+		for cand: String in ["inca_wall_b", "inca_wall_a"]:
+			if _line_turn_deg(line, k, WALL_LEN[cand]) <= WALL_MAX_TURN_DEG:
+				mdl = cand
+				break
+		var seg: float = WALL_LEN[mdl]
+		# Cauta primul punct de polilinie aflat la >= `seg` IN LINIE DREAPTA de
+		# `head`, apoi interpoleaza pe ultimul segment ca sa cada la fix `seg`.
+		var j := k + 1
+		var broke := false
+		while j < line.size():
+			var pj: WallPt = line[j]
+			var pv: WallPt = line[j - 1]
+			if pj.sgn != pv.sgn or Vector3(pj.pos.x - pv.pos.x, 0.0,
+					pj.pos.z - pv.pos.z).length() > 5.0:
+				broke = true
+				break
+			if Vector3(pj.pos.x - head.x, 0.0, pj.pos.z - head.z).length() >= seg:
+				break
+			j += 1
+		if broke or j >= line.size():
+			head = Vector3.INF
+			head_w = null
+			k = j
+			continue
+		var tip := _chord_point(head, line[j - 1].pos, line[j].pos, seg)
+		if _place_wall(mdl, head, tip, head_w, line[j]):
+			s_arc += seg
+		head = tip
+		head_w = line[j]
+		k = j - 1
+	print("; zid de sprijin: %d piese pe ~%.0f m de linie" % [_n, s_arc])
+
+
+## Cat coteste linia zidului (grade) pe `span` metri in linie dreapta inainte de
+## punctul `k`. Se compara directia primei coarde cu a ultimei.
+func _line_turn_deg(line: Array[WallPt], k: int, span: float) -> float:
+	var p0: Vector3 = line[k].pos
+	var j := k + 1
+	while j < line.size():
+		var pj: WallPt = line[j]
+		var pv: WallPt = line[j - 1]
+		if pj.sgn != pv.sgn or Vector3(pj.pos.x - pv.pos.x, 0.0,
+				pj.pos.z - pv.pos.z).length() > 5.0:
+			return 999.0        # rupere de mal: nu incape nicio piesa lunga
+		if Vector3(pj.pos.x - p0.x, 0.0, pj.pos.z - p0.z).length() >= span:
+			break
+		j += 1
+	if j >= line.size():
+		return 999.0
+	var d0 := Vector3(line[k + 1].pos.x - p0.x, 0.0, line[k + 1].pos.z - p0.z)
+	var d1 := Vector3(line[j].pos.x - line[j - 1].pos.x, 0.0,
+		line[j].pos.z - line[j - 1].pos.z)
+	if d0.length() < 0.01 or d1.length() < 0.01:
+		return 999.0
+	return rad_to_deg(absf(d0.normalized().angle_to(d1.normalized())))
+
+
+## Punctul de pe segmentul p0->p1 aflat la fix `r` in linie dreapta de `c`.
+## (intersectia cercului de raza r centrat in c cu segmentul; r e intre |c-p0|
+## si |c-p1| prin constructia apelantului, deci solutia exista)
+func _chord_point(c: Vector3, p0: Vector3, p1: Vector3, r: float) -> Vector3:
+	var d := Vector3(p1.x - p0.x, 0.0, p1.z - p0.z)
+	var m := Vector3(p0.x - c.x, 0.0, p0.z - c.z)
+	var aa := d.dot(d)
+	if aa < 1e-9:
+		return p1
+	var bb := 2.0 * m.dot(d)
+	var cc := m.dot(m) - r * r
+	var disc := bb * bb - 4.0 * aa * cc
+	if disc < 0.0:
+		return p1
+	var t := (-bb + sqrt(disc)) / (2.0 * aa)
+	t = clampf(t, 0.0, 1.0)
+	return p0.lerp(p1, t)
+
+
+## Aseaza o piesa de zid pe coarda p0->p1. Intoarce false daca s-a sarit.
+func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
+		w1: WallPt) -> bool:
+	var d := Vector3(p1.x - p0.x, 0.0, p1.z - p0.z)
+	if d.length() < 0.01:
+		return false
+	var tang := d.normalized()
+	var mid := (p0 + p1) * 0.5
+	# Varful zidului urmeaza cota SOSELEI (media capetelor) plus buza — pe
+	# cornisa zidul TINE DRUMUL, deci cota lui e a drumului, nu a terenului de
+	# alaturi, fiindca dincolo de el nu mai e teren, e gol.
+	var top := (w0.road_y + w1.road_y) * 0.5 + LIP
+	# Cat de adanca e caderea sub fata zidului. Singura decizie pe care o ia:
+	# daca buza NU a fost taiata (racordul cornisei se stinge spre capetele
+	# feliei), piesa ar sta pe iarba plata si ar citi iar ca bordura — exact
+	# bordura ornamentala care a pierdut runda 2. Sub 0,8 m se sare.
+	var side := _track._side_at(w0.idx) * w0.sgn
+	var probe := mid + side * 0.6
+	var foot: float = minf(_sol_real(probe.x, probe.z),
+		_sampler.ground_y(probe.x, probe.z))
+	if top - foot < 0.8:
+		_skipped += 1
+		return false
+	# INALTIMEA RAMANE INTREAGA, talpa se ingroapa (sau atarna pe fata).
+	# Runda 3 a strans piesele pe verticala la fata disponibila (v_scl); in
+	# captura (G_r4_f076.png) au iesit blocuri indesate care citeau a lazi, nu
+	# a zidarie — proportia pietrelor din textura se strica odata cu piesa.
+	# Un zid pe jumatate ingropat e tot un zid; unul turtit nu mai e.
+	var y := top - WALL_H
+	# Yaw astfel incat local +X sa mearga pe coarda. Baza X a lui
+	# Basis.from_euler(0, yaw, 0) e (cos, 0, -sin); o egalez cu coarda.
+	var yaw := atan2(-tang.z, tang.x)
+	_raw(mdl, "zidSprijin", Vector3(mid.x, y, mid.z), yaw, 1.0, "hull")
+	return true
 
 
 ## RUNDA 4 A GRESIT AICI. Versiunea dinainte (`_fall_lateral`) cauta, la
@@ -407,67 +588,6 @@ func _fall_lateral_raw(i: int, sgn: float) -> float:
 			return d
 		d += 0.5
 	return LAT_MAX
-
-
-## O piesa de zid, culcata pe muchia care cade, cu varful la y_drum + LIP.
-## Yaw-ul aliniaza axa LUNGA a piesei (local +X) cu tangenta drumului.
-func _wall_seg(mdl: String, base: String, frac: float, sgn: float, i: int,
-		lat: float) -> void:
-	var n := _track.baked.size()
-	var p := _track.baked[i]
-	var side := _track._side_at(i) * sgn
-	var tang := (_track.baked[(i + 2) % n] - _track.baked[(i - 2 + n) % n])
-	tang.y = 0.0
-	if tang.length() < 0.01:
-		return
-	tang = tang.normalized()
-	var q := p + side * lat
-	# RUNDA 2 (critica oarba) A SIMPLIFICAT AICI, si simplificarea e chiar
-	# reparatia. Toata logica de dinainte — media solului pe „prispa", talpa cea
-	# mai joasa din fereastra, ridicarea la 0,45 m de fata expusa — descria cum
-	# se aseaza un zid pe un UMAR PLAT. Umarul nu mai exista: cele patru cornise
-	# (custom_ravines 5-8) taie terenul la 0,5 m de asfalt, deci zidul nu mai
-	# cauta o buza in camp, el ESTE buza.
-	#
-	# Regula pe cornisa e una singura, si e cea din bara: zidul TINE DRUMUL.
-	# Varful lui sta la cota SOSELEI plus buza — nu la cota unui teren de
-	# alaturi, fiindca dincolo de el nu mai e teren, e gol. Restul piesei atarna
-	# pe fata, si cu cat fata e mai adanca cu atat se vede mai mult din ea.
-	# Varful urmareste linia drumului (media pe fereastra, ca lantul sa nu iasa
-	# zimtat de la o piesa la alta), nu relieful de sub el.
-	var top := 0.0
-	var cnt := 0
-	for k in range(-3, 4):
-		var j := (i + k * 3 + n) % n
-		top += _track.baked[j].y
-		cnt += 1
-	top = top / float(cnt) + LIP
-	# Cat de adanca e caderea sub fata zidului — se masoara, si serveste la o
-	# singura decizie: daca buza NU a fost taiata (racordul cornisei se stinge
-	# spre capetele feliei), piesa ar sta pe iarba plata si ar citi iar ca
-	# bordura. Sub 0,8 m de cadere se sare: un gol in lant se citeste mai bine
-	# decat o bordura ornamentala, si exact bordura a pierdut runda 2.
-	var foot := INF
-	for k in range(-2, 3):
-		var j := (i + k * 3 + n) % n
-		var pj := _track.baked[j]
-		var sj := _track._side_at(j) * sgn
-		var oj := pj + sj * (lat + 0.6)
-		foot = minf(foot, minf(_sol_real(oj.x, oj.z),
-			_sampler.ground_y(oj.x, oj.z)))
-	if top - foot < 0.8:
-		_skipped += 1
-		return
-	# INALTIMEA RAMANE INTREAGA, talpa se ingroapa (sau atarna pe fata).
-	# Runda 3 a strans piesele pe verticala la fata disponibila (v_scl); in
-	# captura (G_r4_f076.png) au iesit blocuri indesate care citeau a lazi, nu
-	# a zidarie — proportia pietrelor din textura se strica odata cu piesa.
-	# Un zid pe jumatate ingropat e tot un zid; unul turtit nu mai e.
-	var y := top - WALL_H
-	# Yaw astfel incat local +X sa mearga pe tangenta. Baza X a lui
-	# Basis.from_euler(0, yaw, 0) e (cos, 0, -sin); o egalez cu tangenta.
-	var yaw := atan2(-tang.z, tang.x)
-	_raw(mdl, base, Vector3(q.x, y, q.z), yaw, 1.0, "hull")
 
 
 ## (2) VERSANTUL DINSPRE MUNTE: peretele verde din bara. Bolovani cu muschi

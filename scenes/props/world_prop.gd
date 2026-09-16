@@ -874,6 +874,14 @@ const CLASSES_BY_MODEL := {
 	# motiv NU exista un MACHUPICCHU_CLASSES in track_decor.gd.
 	"inca_wall_a": {"Inca_Wall_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_wall_b": {"Inca_Wall_B": Palette.TRI_PREFIX + "inca_stone"},
+	# `_c` (capatul de zid, 2 m) lipsea din lista, si nu dintr-o decizie: nu are
+	# nicio nota de respingere, spre deosebire de `inca_house_b`/`fountain_basin`
+	# de mai jos. Cat timp era folosit rar nu se vedea; POI G il pune de 47 de
+	# ori pe serpentine si captura (G_r5_f076.png) arata de ce conteaza — panouri
+	# PALIDE intre piesele tan, fiindca ramaneau pe atlas in loc sa ia dala de
+	# granit. Un zid din doua materiale nu citeste ca un zid (memoria
+	# scatter-nu-primeste-clasele-temei: hardcodarile ocolesc mapari corecte).
+	"inca_wall_c": {"Inca_Wall_C": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_a": {"Inca_Stair_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_b": {"Inca_Stair_B": Palette.TRI_PREFIX + "inca_stone"},
 	# Cornisa podului: piesa peste care sare LiftBridgeHazard, deci cea mai

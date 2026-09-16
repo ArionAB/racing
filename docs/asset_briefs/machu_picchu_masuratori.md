@@ -286,6 +286,26 @@ măsoară Okinawa și dă verde fals. (Toate celelalte sonde — `ProbeLayout`,
 Nu am plantat nimic, deci cifra de 20 e neschimbată; e linia de bază față de
 care se citește primul val.
 
+> **CORECȚIE (pasul 4, clasele de textură).** Fraza de mai sus — „fiecare fișier
+> .glb distinct instanțiat pe Track15 adaugă un material" — e **falsă**, și a
+> fost citită greșit din tabelul lui `probe_decor`. Coloana `mat.` e
+> `all_mats.size()`, un set **deduplicat global pe `instance_id`**, iar blocul
+> „pe surse" de sub el numără același material o dată pentru **fiecare sursă**
+> în care apare. De aceea rândurile `GLB: train 1 materiale`, `GLB: cow 1` etc.
+> par să se adune la 20 fără să se adune de fapt: materialul lor **e** atlasul,
+> deja numărat în cele 20 procedurale.
+>
+> Măsurat direct (`tools/probe_mp_class_cost.gd`, care plantează 26 de piese de
+> kit în Track15 și numără exact ca garda): **16 materiale unice, 156 de noduri
+> pe același `Palette.world_material()`**. Kitul de 39 de GLB-uri costă
+> **ZERO** materiale, nu 39.
+>
+> Consecința pentru buget: aritmetica „20 + 7 clase = 27 > 20" nu se aplică.
+> Pe `feat/mp-fundatie` Track15 pleacă de la **17** materiale, iar plafonul real
+> al garzii e **38**, nu 20 — deci există loc. Ce costă e **clasa**, nu piesa:
+> un material per clasă, oricâte piese o poartă (`triplanar_class_material` e
+> cache-uit per clasă).
+
 ## 6. Ce NU spune măsurătoarea asta
 
 - **Culoarea compusă.** Sloturile de mai sus sunt indici în atlas; cum arată

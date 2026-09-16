@@ -285,6 +285,20 @@ const SPLIT_MODELS := {
 	# pista de noapte firmele sunt chiar semnalul, deci o clasa pusa pe tot
 	# corpul ar fi sters exact ce trebuie sa se vada.
 	"shophouse_a": true, "shophouse_b": true, "shophouse_c": true,
+	# Zidaria incasa (Machu Picchu). Piesele au iarba pe coronament — slotul
+	# 12 CACTUS_GREEN — pe ACELASI nod de mesh ca piatra (masurat, fiecare
+	# piesa de zidarie e un singur MeshInstance3D). Fara ruptura, clasa
+	# `inca_stone` pusa pe tot nodul ar fi STERS iarba: e 6.3% din arie pe
+	# ziduri, deci n-ar fi mutat culoarea piesei, dar ar fi taiat chiar
+	# semnalul „ruina veche, nu zid nou". Acelasi tipar ca acacia-umbrela.
+	"inca_wall_a": true, "inca_wall_b": true,
+	"inca_stair_a": true, "inca_stair_b": true,
+	# inca_bridge_ledge: 12 CACTUS_GREEN e 2.5% — sub pragul la care ruptura
+	# mai plateste un nod in plus, si piesa sta pe prapastie, nu langa ochi.
+	# inca_house_b (ruina) NU se rupe: muschiul e 22.8%, adica o TREIME din
+	# silueta, iar inventarul o spune explicit — intervalele de y se SUPRAPUN
+	# (muschi 0.85..2.83 peste zid 0..2.83), deci o ruptura pe inaltime ar
+	# taia gresit. Ramane integral pe atlas (vezi CLASSES_BY_MODEL).
 	# Arcada de biserica rupestra (Cappadocia, POI F). Aici ruptura merge in
 	# sens INVERS fata de casele de mai sus: acolo CORPUL ia clasa si accentul
 	# ramane pictat pe atlas, aici accentul — frescele — ia clasa si corpul de
@@ -380,6 +394,26 @@ const ACCENT_SPLIT := {
 	"House_C": Palette.FOAM_WHITE,
 	"Church_Body": Palette.FOAM_WHITE,
 	"Church_Tower": Palette.FOAM_WHITE,
+	# Zidaria incasa. ATENTIE la sensul valorii, verificat pe cod si pe captura:
+	# `split_accents` pune in CORP (`mi.mesh`) triunghiurile ale caror sloturi
+	# sunt in lista, si in `_Accente` pe toate celelalte — iar clasa cade pe
+	# CORP. Deci aici se enumera PIATRA, nu iarba.
+	#
+	# Prima versiune avea aici CACTUS_GREEN, „ca sa se pastreze iarba", si
+	# efectul era exact pe dos: iarba (6.3% din arie) lua textura de granit si
+	# tot zidul ramanea pe atlasul plat. Masurat pe captura A/B
+	# (tools/probe_mp_wall_shot.gd, caseta pe primul zid): rgb(88,63,37)
+	# std 21.08 fara clasa, rgb(88,63,37) std 21.09 cu ea — identic la cifra,
+	# adica materialul nu ajungea niciodata pe piatra. Casa, care NU se rupe,
+	# se schimba in aceeasi captura: rgb(71,75,79) -> rgb(80,68,54).
+	#
+	# Piatra zidurilor sta pe 3 (ROCK_LIGHT), 29 (MARBLE_GREY) si, la
+	# inca_wall_b, 4 (ROCK_DARK) pentru nise. Iarba de coronament (12) ramane
+	# in `_Accente`, pictata.
+	"Inca_Wall_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
+	"Inca_Wall_B": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	"Inca_Stair_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
+	"Inca_Stair_B": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	# Chongqing: DOUA sloturi pastrate, nu unul. Masurat pe inaltime, slotul 29
 	# tine parterul (y 0..3.1) si slotul 8 etajele (y 2.9..5.8) — acelasi perete
 	# de beton, taiat pe orizontala din motive de compozitie, nu doua materiale.
@@ -809,6 +843,41 @@ const CLASSES_BY_MODEL := {
 	# — siluetele raman in familia de culoare a kopje-urilor din prim-plan.
 	"lengai": {"Lengai": Palette.TRI_PREFIX + "granite"},
 	"crater_far_wall": {"Crater_Far_Wall": Palette.TRI_PREFIX + "granite"},
+
+	# --- Machu Picchu: ZIDARIA INCASA (Track15) --------------------------
+	#
+	# Identitatea pistei si singura clasa NOUA a kitului. Rosturile de piatra
+	# potrivita se citesc la 3-5 m — adica exact la distanta la care trece
+	# masina pe langa ziduri — iar pe atlasul plat un zid incas e o pata
+	# maro-gri fara scara. Raspunsul la „ce se vede din masina daca lipseste":
+	# dispare chiar diferenta dintre zidul incas si o stanca.
+	#
+	# COSTA UN SINGUR MATERIAL pentru toate cele sase piese, fiindca
+	# `triplanar_class_material` e cache-uit per clasa — masurat
+	# (tools/probe_mp_class_cost.gd): 7 noduri, un material.
+	#
+	# Cheia e STEM DE FISIER, nu nume de nod, si asta nu e pedanterie:
+	# `House_Ruin`/`Basin` sunt nume generice, iar o mapare globala pe nume
+	# ar fi lovit alte kituri (memoria nume-noduri-nu-sunt-unice). Din acelasi
+	# motiv NU exista un MACHUPICCHU_CLASSES in track_decor.gd.
+	"inca_wall_a": {"Inca_Wall_A": Palette.TRI_PREFIX + "inca_stone"},
+	"inca_wall_b": {"Inca_Wall_B": Palette.TRI_PREFIX + "inca_stone"},
+	"inca_stair_a": {"Inca_Stair_A": Palette.TRI_PREFIX + "inca_stone"},
+	"inca_stair_b": {"Inca_Stair_B": Palette.TRI_PREFIX + "inca_stone"},
+	# Cornisa podului: piesa peste care sare LiftBridgeHazard, deci cea mai
+	# privita bucata de piatra din cursa. Nu se rupe (iarba e 2.5%).
+	"inca_bridge_ledge": {
+		"Inca_Bridge_Ledge": Palette.TRI_PREFIX + "inca_stone",
+	},
+	# Casele: DOAR peretele de piatra ia clasa. Acoperisul de paie
+	# (`House_Thatch`, 63-66% DRY_VEGETATION) ramane pe atlas — paiele nu sunt
+	# zidarie, iar dala de granit pe ele ar fi facut acoperisul de piatra.
+	# Nodurile paznicului au SUFIX _001, si maparea potriveste pe PREFIX, deci
+	# "House_Stone" prinde si "House_Stone_001" — verificat pe fisier.
+	"inca_house_a": {"House_Stone": Palette.TRI_PREFIX + "inca_stone"},
+	"guardhouse": {"House_Stone": Palette.TRI_PREFIX + "inca_stone"},
+	# inca_house_b (ruina) si fountain_basin NU intra: vezi nota de respingere
+	# de sub CLASS_TEXTURES["inca_stone"] din palette.gd.
 
 	# --- Serengeti: LUTUL termitierelor ---------------------------------
 	#

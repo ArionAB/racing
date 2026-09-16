@@ -292,7 +292,11 @@ const SPLIT_MODELS := {
 	# ziduri, deci n-ar fi mutat culoarea piesei, dar ar fi taiat chiar
 	# semnalul „ruina veche, nu zid nou". Acelasi tipar ca acacia-umbrela.
 	"inca_wall_a": true, "inca_wall_b": true,
+	"inca_wall_c": true,
 	"inca_stair_a": true, "inca_stair_b": true,
+	# sun_temple: 12 CACTUS_GREEN pe coronamentul neregulat, la fel ca zidurile.
+	# Corpul e 3 (68.5%) + 29 (25.5%), amandoua piatra, deci raman impreuna.
+	"sun_temple": true,
 	# inca_bridge_ledge: 12 CACTUS_GREEN e 2.5% — sub pragul la care ruptura
 	# mai plateste un nod in plus, si piesa sta pe prapastie, nu langa ochi.
 	# inca_house_b (ruina) NU se rupe: muschiul e 22.8%, adica o TREIME din
@@ -412,8 +416,12 @@ const ACCENT_SPLIT := {
 	# in `_Accente`, pictata.
 	"Inca_Wall_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Wall_B": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	"Inca_Wall_C": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Stair_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Stair_B": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
+	# Templul Soarelui: 3 (68.5%) + 29 (25.5%) sunt piatra si raman pe corp;
+	# iarba de coronament (12) pleaca in `_Accente`, ca la ziduri.
+	"Sun_Temple": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	# Chongqing: DOUA sloturi pastrate, nu unul. Masurat pe inaltime, slotul 29
 	# tine parterul (y 0..3.1) si slotul 8 etajele (y 2.9..5.8) — acelasi perete
 	# de beton, taiat pe orizontala din motive de compozitie, nu doua materiale.
@@ -874,8 +882,27 @@ const CLASSES_BY_MODEL := {
 	# motiv NU exista un MACHUPICCHU_CLASSES in track_decor.gd.
 	"inca_wall_a": {"Inca_Wall_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_wall_b": {"Inca_Wall_B": Palette.TRI_PREFIX + "inca_stone"},
+	# inca_wall_c LIPSEA, si era cea mai vizibila scapare din tot blocul: e
+	# zidul de INLANTUIRE folosit impreuna cu a si b (capete la ±1,0 fata de
+	# ±2,0 si ±3,0), deci acelasi gard continuu se randa pe jumatate granit si
+	# pe jumatate atlas plat. Se vede pe captura POI A, runda 1.
+	"inca_wall_c": {"Inca_Wall_C": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_a": {"Inca_Stair_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_b": {"Inca_Stair_B": Palette.TRI_PREFIX + "inca_stone"},
+	# Cele PATRU piese sacre + cele doua porti. Toate au sloturile 3 / 4 / 29,
+	# care sunt TOATE piatra (ROCK_LIGHT / ROCK_DARK / MARBLE_GREY), deci clasa
+	# poate cadea pe nodul intreg fara ACCENT_SPLIT — masurat in
+	# machu_picchu_masuratori.md §2, care le numeste explicit la "piesele care
+	# NU cer ACCENT_SPLIT". Exceptia e sun_temple, care are si 12 (iarba de
+	# coronament): ala se rupe, ca zidurile.
+	"intihuatana": {"Intihuatana": Palette.TRI_PREFIX + "inca_stone"},
+	"three_windows": {"Three_Windows": Palette.TRI_PREFIX + "inca_stone"},
+	"sun_temple": {"Sun_Temple": Palette.TRI_PREFIX + "inca_stone"},
+	# Portile: piesele prin care CONDUCI, deci cele mai privite bucati de
+	# piatra din tur. `main_gate` e gatuirea de la POI H (7,39 m gol masurat),
+	# `inti_punku` e Poarta Soarelui de la POI C (13,98 m).
+	"main_gate": {"Main_Gate": Palette.TRI_PREFIX + "inca_stone"},
+	"inti_punku": {"Inti_Punku": Palette.TRI_PREFIX + "inca_stone"},
 	# Cornisa podului: piesa peste care sare LiftBridgeHazard, deci cea mai
 	# privita bucata de piatra din cursa. Nu se rupe (iarba e 2.5%).
 	"inca_bridge_ledge": {

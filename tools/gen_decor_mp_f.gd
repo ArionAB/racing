@@ -140,27 +140,13 @@ const ZONE := "DecorManual/ZoneF_MalulRaului"
 const F_IN := 0.655
 const F_OUT := 0.730
 
-## ALBIA, in coordonate de LUME. DOUA REPRIZE, si impartirea asta e chiar
-## livrabilul masuratorii din nota 9.
-##
-## SUS (`UP_*`, luciu la -28.0): jgheabul larg si putin adanc din fata
-## soferului, pe care il vede cap-coada la 0.660-0.675. Fundul lui masurat e
-## -27.4..-28.3 pe x de la -260 la -205 si z de la -200 la -168 — o tava, nu un
-## canal, deci apa il umple pana unde o opreste terenul.
-## JOS (`LOW_*`, luciu la -34.2): bazinul adanc, unde trece estacada trenului.
-## Nu se vede de la volan (nota 9), dar exista fiindca acolo CHIAR e cel mai
-## jos punct, acolo e trenul, si fara el jgheabul de sus ar fi o balta fara
-## aval.
-const UP_Y := -28.0
-const UP_X0 := -266.0
-const UP_X1 := -202.0
-const UP_Z0 := -204.0
-const UP_Z1 := -166.0
-const LOW_Y := -34.2
-const LOW_X0 := -212.0
-const LOW_X1 := -118.0
-const LOW_Z0 := -222.0
-const LOW_Z1 := -186.0
+## NOTA 11 (runda 2). Reprizele `UP_*` / `LOW_*` ale rundei 1 au DISPARUT,
+## si merita spus de ce, fiindca erau rezultatul unei masuratori corecte
+## interpretate gresit. Erau doua dreptunghiuri de apa, fiecare la un singur Y
+## — si exact asta a numit criticul orb „o panza turcoaz plata la un singur Y".
+## Masuratoarea care le-a produs (nota 9: ce se vede de la volan) ramane
+## valabila si e chiar cea care a ghidat albia noua; ce a fost gresit e forma,
+## nu locul. Vezi blocul de deasupra lui `CH_A` pentru ce le-a inlocuit.
 ## Calea ferata (TrenPeruRail): z = -205, x de la -225 la -95, sina la y = -33.
 const RAIL_Z := -205.0
 
@@ -242,12 +228,14 @@ func _ready() -> void:
 		hi = maxf(hi, bp.y)
 	_sus_y = hi + 150.0
 	_rng.seed = 660721
+	_chan_init()
 	_survey()
 	if not _survey_only:
 		_river()
-		_gravel()
+		#_gravel()
 		_river_rocks()
 		_foam()
+		_canyon_wall()
 		_banks()
 		_bank_edge()
 		_road_side()
@@ -335,452 +323,734 @@ func _survey() -> void:
 ## repezisura se citeste dupa darele din SPATELE pietrelor. Al patrulea camp e
 ## cota LUCIULUI reprizei din care face parte piatra (sunt doua), fiindca dara
 ## trebuie sa stea pe apa ei, nu pe a celeilalte.
+## ALBIA, RUNDA 2: UN CANAL CU BAZINE SI PRAGURI, nu doua dreptunghiuri.
+##
+## De ce s-a schimbat. Criticul orb a spus, despre captura rundei 1: „apa e o
+## panza turcoaz plata la un singur Y, cu elipse albe plutind decorativ peste
+## ea, fara nicio legatura cu vreun obstacol — toti bolovanii sunt pe mal".
+## Verificat in cod, avea dreptate de doua ori, si din doua cauze diferite:
+##
+##   (a) BOLOVANII. `_river_rocks` cerea `g >= wy - 2.2` pentru fiecare piatra.
+##       Masurat acum (grila fina de 5 m, x -330..-200, z -185..-115): fundul
+##       raftului tine intre -27,3 si -29,0 pe TOATA intinderea lui, adica
+##       adancimea sub luciul de -28,0 nu trece nicaieri de 0,7 m. Filtrul nu
+##       taia deci nimic in albie — dar perechea lui, `g <= wy + 1.2`, lasa
+##       inauntru toata aria uscata de banc, care e de cateva ori mai mare
+##       decat luciul. Esantionarea uniforma pe dreptunghi a pus prin urmare
+##       majoritatea pietrelor pe pietris, exact cum s-a vazut.
+##   (b) SPUMA. Din ~1000 de pietre ude, `if _rng.randf() > 0.09: continue`
+##       dadea dara la vreo 90. Restul albului era covorul (b), adica placi
+##       imprastiate la intamplare pe luciu — spuma FARA cauza, literal.
+##
+## CE S-A MASURAT INAINTE DE REPARAT (sonda temporara, grila de 5 m + profile):
+##
+##   1. Raftul de ~-28 incepe la x = -195 si se termina spre SV pe o BUZA care
+##      merge oblic: x = -227 la z = -120, pana la x = -285..-305 la z = -180.
+##      Dincolo de buza terenul cade la -32 si apoi in podeaua hartii (-40).
+##   2. `ProbeMpFSeen` la frac 0.660 / 0.670 / 0.680 da acelasi raspuns de
+##      trei ori: ce se vede de la volan e banda x -320..-210, z -180..-120.
+##      Reprizele rundei 1 (z -204..-166) cadeau pe jumatate in zona ocluzata.
+##   3. Profil pe linia propusa, esantionat din 6 in 6 m cu +-16 m lateral:
+##      albia tine -27,6..-29,3 cap-coada, iar buza raftului sta constant la
+##      14-26 m spre SV.
+##
+## CONSECINTA DE PROIECTARE, si e cinstit sa fie scrisa: raftul are ~1,3 m de
+## denivelare pe 98 m. Nu exista aici cascade de sase metri si nu se inventeaza:
+## ce incape sunt TREI BAZINE cu DOUA PRAGURI scurte intre ele (0,45 si 0,40 m),
+## adica exact ce face un rau de munte pe un raft — si la 40-70 m de ochi un
+## prag de o jumatate de metru cu banda alba pe muchie CITESTE ca treapta de
+## repezis. Criticul a cerut „2-3 cote cu caderi scurte"; astea sunt, si sunt
+## masurate, nu decorative.
+##
+## Albia e parametrizata pe (t, o): `t` de-a lungul firului, `o` lateral. Tot
+## ce urmeaza — luciu, pietre, spuma — se aseaza in coordonatele astea, deci
+## spuma STIE unde sunt pietrele si unde sunt pragurile.
+## FIRUL ALBIEI. A patra oara — si merita scrise toate patru, fiindca fiecare a
+## picat pe alt test, si impreuna sunt chiar lista de teste care trebuie trecute
+## SIMULTAN. Cine muta albia a cincea oara sa le treaca pe toate, nu pe ultimul.
+##
+##   R1: in bazinul adanc (z <= -190, y = -34). Cota buna, dar `ProbeMpFSeen`:
+##       0 celule neocluzate la frac 0.67. NU SE VEDEA.
+##   R2a: pe raftul de -28, linia (-193,-138) -> (-275,-191). Se vedea, dar
+##       firul trecea PE SUB SOSEA: pe pragul de la t=4 sonda a dat
+##       `drum = -0,1 / -2,1 / -4,1 / -6,1`, adica metri INTRE marginile
+##       carosabilului. De aia iesisera 0 pietre de prag si 0 benzi — garda de
+##       carosabil respingea, corect, tot. Lectia: „terenul e jos" nu inseamna
+##       „e loc", fiindca drumul insusi coboara pe raft.
+##   R2b: in troaca de la z = -178, x = -240..-300. Libera de drum (16-50 m) SI
+##       81-90 % din puncte neocluzate... si in captura apa a iesit 0,05 % din
+##       cadru, fata de 4,57 % pe bara. Adica: „neocluzat" nu inseamna „se vede".
+##       Troaca e la 60-100 m, oblica fata de privire, si subintinde aproape
+##       nimic. Testul care lipsea e ARIA PE ECRAN, nu vizibilitatea binara.
+##
+## R2c (asta): se cer TOATE PATRU, si fiecare e masurata.
+##   (a) LIBER DE DRUM: 17-37 m de la marginea carosabilului pe toata lungimea.
+##   (b) VIZIBIL: neocluzat de la volan.
+##   (c) ARIE PE ECRAN: sonda a clasat toate celulele de 10x10 m din zona dupa
+##       aria proiectata la frac 0.67. Primele sase sunt toate pe z = -180..-190,
+##       x = -210..-240, la 20-45 m de camera; celula (-210,-180) singura face
+##       7,9 % din ecran — mai mult decat TOATA apa din bara (4,57 %).
+##   (d) PANTA REALA: pe z = -190 terenul coboara de la -27,9 (x=-252) la -31,4
+##       (x=-204), adica 3,5 m pe 48 m. Raul curge spre EST, spre bazinul adanc
+##       si spre Urubamba — exact sensul din brief.
+const CH_A := Vector2(-250.0, -188.0)
+const CH_B := Vector2(-206.0, -186.0)
+const CH_OFF := 0.0
+## Semi-latimea albiei: pana unde tine fundul pe profilul N-S masurat.
+const CH_HALF := 12.0
+const CH_WET := 46.0
+
+## BAZINELE: [t_start, t_end, y_luciu]. Fundul MASURAT pe fir (z ~ -188):
+##   x     -250   -240   -234   -228   -222   -216   -210   -206
+##   sol  -27,9  -27,8  -27,6  -27,5  -28,1  -29,0  -29,7  -30,6
+## Deci panta e reala si se accelereaza spre est. Trei bazine cu doua caderi,
+## fiecare cadere pusa acolo unde terenul CHIAR se rupe (intre x=-222 si -216,
+## si intre x=-212 si -206):
+##   bazin 1 (t 0..30, x -250..-220): luciu -27,75
+##   bazin 2 (t 30..40, x -220..-210): luciu -28,85
+##   bazin 3 (t 40..48, x -210..-202): luciu -30,10
+## Caderile sunt de 1,10 si 1,25 m — de trei ori mai mari decat ce incapea pe
+## raft, fiindca aici panta e reala, nu inventata.
+## RUNDA 2, A DOUA MASURATOARE (si e cea care a scos „autocolantele"). Sonda de
+## profil pe fir a aratat ca bazinul 1 la -27,75 statea in ±0,30 m de teren pe
+## TOATA lungimea lui: nu e apa, e un FILM, si placile intrau si ieseau din
+## pamant de la un metru la altul. Exact asa arata spuma „plutind fara cauza",
+## fiindca sub ea nu era luciu continuu.
+## Cotele coboara deci cu ~0,55 m fiecare, ca fiecare bazin sa aiba ADANCIME
+## masurabila (0,4-0,9 m pe fir), si a treia ramane mai sus decat era ca sa nu
+## inunde malul de la t=48 incolo (acolo terenul e deja cu 2,2 m sub ea).
+## SI A TREIA MASURATOARE, care a corectat-o pe a doua. Coborate cu 0,55 m,
+## bazinele au ajuns SUB terenul vizibil si raul a disparut aproape complet din
+## cadru (F_r19_0.67.png: panza cenusie din r18 nu se mai vede deloc).
+## Concluzia, si e o constrangere reala a locului, nu o preferinta: luciul
+## traieste intr-o FEREASTRA de vreo jumatate de metru. Mai sus de -27,8 e film
+## peste iarba; mai jos de -28,4 dispare sub mal. Cotele de mai jos sunt
+## mijlocul ferestrei, verificat pe captura in ambele sensuri.
+const POOLS := [
+	[-6.0, 30.0, -27.95],
+	[30.0, 40.0, -28.95],
+	[40.0, 52.0, -30.00],
+]
+
+var _chan_dir := Vector2.ZERO
+var _chan_per := Vector2.ZERO
+var _chan_len := 0.0
+
+## Pietrele din ALBIE, retinute ca ancore de spuma: (x, z, raza_efectiva,
+## y_luciu). Numai cele care chiar stau in apa — spuma vine din ele.
 var _wet_rocks: Array[Vector4] = []
 ## Placile de luciu deja asezate, ca spuma sa cada pe apa, nu pe pietris.
 var _water_pts: Array[Vector2] = []
 
 
-## LUCIUL: placi plate de 7 m pe slotul 18 (SEA_DEEP), la cota WATER_Y, numai
-## acolo unde terenul REAL e sub ea (nota 5). Conturul iese din teren, nu din
-## poligon autorat, deci bancurile de pietris apar singure intre brate.
+func _chan_init() -> void:
+	_chan_dir = (CH_B - CH_A).normalized()
+	_chan_per = Vector2(-_chan_dir.y, _chan_dir.x)
+	_chan_len = CH_A.distance_to(CH_B)
+
+
+## Din (t, o) in lume.
+func _chan_pt(t: float, o: float) -> Vector2:
+	return CH_A + _chan_dir * t + _chan_per * (o + CH_OFF)
+
+
+## Cota luciului la `t`: constanta pe bazin, cu o cadere scurta intre bazine.
+## Intre bazine interpoleaza pe 1,6 m de `t` — asta e „buza" pragului, si tot
+## ea e locul unde se aseaza banda de spuma.
+func _water_y(t: float) -> float:
+	for k in POOLS.size():
+		var p: Array = POOLS[k]
+		var t0: float = float(p[0])
+		var t1: float = float(p[1])
+		if t < t1 or k == POOLS.size() - 1:
+			if k + 1 < POOLS.size() and t > t1 - 1.6:
+				var nxt: float = float((POOLS[k + 1] as Array)[2])
+				var u: float = clampf((t - (t1 - 1.6)) / 1.6, 0.0, 1.0)
+				return lerpf(float(p[2]), nxt, u)
+			return float(p[2])
+	return float((POOLS[POOLS.size() - 1] as Array)[2])
+
+
+## Semi-latimea apei la `t`: albia se ingusteaza la praguri (apa se strange ca
+## sa cada) si se largeste in bazine. Asta e ce da forma de clepsidra pe care
+## ochiul o citeste ca „repezis", si nu o panglica de latime egala.
+func _water_half(t: float) -> float:
+	var w := CH_HALF
+	for k in POOLS.size() - 1:
+		var tk: float = float((POOLS[k] as Array)[1])
+		var d: float = absf(t - tk)
+		if d < 9.0:
+			w = minf(w, lerpf(CH_HALF * 0.55, CH_HALF, d / 9.0))
+	return w
+
+
+## LUCIUL: placi plate pe sloturile de apa, asezate in coordonate de albie, la
+## cota BAZINULUI, si numai unde terenul real e sub ea.
 ##
 ## `snap_to_ground` ramane STINS: apa e un NIVEL, nu o depunere. Pus pe pornit
 ## ar tara luciul pe fundul albiei si ar disparea sub pietre.
 func _river() -> void:
-	_reach("Sus", UP_Y, UP_X0, UP_X1, UP_Z0, UP_Z1, 620, 6.0, 77001)
-	_reach("Jos", LOW_Y, LOW_X0, LOW_X1, LOW_Z0, LOW_Z1, 480, 7.5, 77003)
-
-
-## O repriza de luciu: placi plate pe slotul 18, numai unde terenul REAL e sub
-## cota ceruta (nota 5). `snap_to_ground` ramane STINS — apa e un NIVEL, nu o
-## depunere; pornit, ar tara luciul pe fundul albiei si ar disparea sub pietre.
-func _reach(eticheta: String, wy: float, x0: float, x1: float, z0: float,
-		z1: float, vrea: int, raza: float, sid: int) -> void:
 	var pos: PackedVector3Array = []
 	var yaw: PackedFloat32Array = []
 	var pos_d: PackedVector3Array = []
 	var yaw_d: PackedFloat32Array = []
 	var tries := 0
-	while pos.size() + pos_d.size() < vrea and tries < 40000:
+	while pos.size() + pos_d.size() < 1500 and tries < 90000:
 		tries += 1
-		var x := _rng.randf_range(x0, x1)
-		var z := _rng.randf_range(z0, z1)
-		# ADANCIMEA CERUTA CRESTE SPRE MARGINEA CASETEI. Fara asta conturul
-		# apei e taiat DREPT acolo unde se termina dreptunghiul de cautare, si
-		# in captura rundei 2 exact asta s-a vazut: o muchie de rigla in
-		# coltul din dreapta-jos, la x = -266. Cu o cerinta care creste de la
-		# 0,15 m in mijloc la 1,2 m pe ultimii 12 m de caseta, apa se
-		# subtiaza singura si se termina acolo unde terenul chiar urca — deci
-		# caseta nu se mai vede.
-		var m: float = minf(minf(x - x0, x1 - x), minf(z - z0, z1 - z))
-		var need: float = lerpf(1.2, 0.15, clampf(m / 12.0, 0.0, 1.0))
-		var g := _sol_real(x, z)
+		var t := _rng.randf_range(-10.0, CH_WET)
+		var half := _water_half(t)
+		var o := _rng.randf_range(-half, half)
+		var c := _chan_pt(t, o)
+		var wy := _water_y(t)
+		var g := _sol_real(c.x, c.y)
+		# Malul taie apa: acolo unde terenul real urca peste luciu, apa se
+		# opreste singura. Cerinta creste spre marginea albiei, ca sa nu se
+		# vada muchia de caseta (lectia rundei 2 de anul trecut).
+		# Cerinta de adancime creste spre MAL: in mijloc ajunge 0,05 m, pe
+		# ultimii doi metri de albie cere 0,45 m. Fara asta conturul apei se
+		# termina cu muchia casetei si placile ies pe iarba — si o placa de apa
+		# pe iarba e chiar „autocolantul" reclamat.
+		# RUNDA 2, masuratoare de CONTINUITATE. Componenta conexa cea mai mare
+		# a apei era doar 36 % din pixelii de apa din banda: raul iesea in
+		# cinci bucati separate de iarba, si cinci balti nu citesc ca un rau.
+		# Cauza: cerinta de adancime respingea placile oriunde fundul se umfla
+		# cu cativa centimetri. In mijlocul albiei se cere deci doar ca
+		# terenul sa fie SUB luciu (0,02 m), si numai ultimii doi metri de mal
+		# pastreaza pragul mare, ca apa sa nu urce pe iarba.
+		var m: float = 1.0 - clampf(absf(o) / half, 0.0, 1.0)
+		var need: float = lerpf(0.40, 0.02, clampf(m / 0.22, 0.0, 1.0))
 		if g > wy - need:
-			continue # mal sau banc de pietris
-		# Apa nu curge pe sosea: aceeasi marja ca la restul loturilor.
-		if _dist_to_road(x, z) < 3.0:
 			continue
-		# DOUA SLOTURI, si impartirea e MASURATA, nu de gust. Pe captura rundei
-		# 4 apa noastra iesea rgb(63, 141, 146), S = 0.57 — turcoaz de recif.
-		# Pe bara, aceleasi zone de apa dau rgb(115, 118, 116) si
-		# rgb(140, 130, 110), adica S sub 0.12: un rau de munte plin de aluviuni
-		# nu are culoare, are VALOARE. Slotul 6 (#696765, rgb 105/103/101,
-		# S 0.04, numit `ASPHALT_EDGE` in paleta) nimereste tinta aproape la
-		# bit; slotul 18 SEA_DEEP, cerut de
-		# brief §4, ramane pentru gropile ADANCI, unde apa chiar se vede
-		# albastra. Adancimea decide, si PRAGUL E MASURAT: la 1,2 m, doua
-		# treimi din placi cadeau pe slotul 18 si apa ramanea turcoaz (209
-		# gri fata de 411 albastre pe repriza de sus). La 2,2 m raportul se
-		# rastoarna, iar albastrul ramane doar in gropi — ceea ce si vrea
-		# bara: ochiuri intunecate intre bancuri de pietris palid.
-		if wy - g > 2.2:
-			pos_d.append(Vector3(x, wy, z))
+		if _dist_to_road(c.x, c.y) < 3.0:
+			continue
+		# Apa nu trece de buza raftului: dincolo de ea terenul cade in gol.
+		if g < wy - 4.0:
+			continue
+		var adanc := wy - g
+		if adanc > 0.75:
+			pos_d.append(Vector3(c.x, wy, c.y))
 			yaw_d.append(_rng.randf_range(0.0, TAU))
 		else:
-			pos.append(Vector3(x, wy, z))
+			pos.append(Vector3(c.x, wy, c.y))
 			yaw.append(_rng.randf_range(0.0, TAU))
-		_water_pts.append(Vector2(x, z))
+		_water_pts.append(Vector2(c.x, c.y))
 	if pos.is_empty() and pos_d.is_empty():
-		print("; ATENTIE: repriza %s e goala — luciul e sub tot terenul" % eticheta)
+		print("; ATENTIE: albia e goala — luciul e sub tot terenul")
 		return
 	if not pos.is_empty():
-		_disc_flock("F_Luciu%s" % eticheta, Palette.ASPHALT_EDGE, raza, 0.85,
-			1.35, pos, yaw, sid)
+		_disc_flock("F_Luciu", Palette.ASPHALT_EDGE, 5.5, 0.85, 1.35, pos,
+			yaw, 77001)
 	if not pos_d.is_empty():
-		_disc_flock("F_LuciuAdanc%s" % eticheta, Palette.SEA_DEEP, raza * 0.8,
-			0.8, 1.2, pos_d, yaw_d, sid + 1)
-	print("; luciu %s (y=%.1f): %d placi mici-adancime + %d in ochiuri, din %d incercari"
-		% [eticheta, wy, pos.size(), pos_d.size(), tries])
+		_disc_flock("F_LuciuAdanc", Palette.SEA_DEEP, 4.5, 0.8, 1.2, pos_d,
+			yaw_d, 77002)
+	print("; luciu: %d placi mici-adancime + %d in ochiuri, din %d incercari"
+		% [pos.size(), pos_d.size(), tries])
 
 
 ## PIETRISUL UD: placi plate pe slotul 4 ROCK_DARK (#67421F, rgb 103/66/31,
-## H 29, S 0,70, V 0,40) pe BANCURILE dintre brate, adica acolo unde terenul e
-## chiar peste cota luciului.
+## H 29, S 0,70, V 0,40) pe MALURILE albiei, adica in banda dintre marginea
+## apei si iarba.
 ##
 ## Slotul s-a ales pe doua masuratori, nu din prima. Cu slotul 2 SAND_SHADOW
-## (#915D27, V 0,57) zona de rau a iesit H 56 / S 0,39 / V 0,63 fata de
-## H 40 / S 0,28 / V 0,50 pe bara: directia era buna (verdele disparuse, albul
-## coborase de la 23,2 % la 4,9 %) dar bancul citea PORTOCALIU aprins. Orice
-## suprafata orizontala pe soarele de 40 de grade plus expunerea 1,05 se ridica
-## in valoare, deci slotul trebuie ales SUB tinta, nu pe ea. ROCK_DARK e cu
-## 0,17 mai inchis in V si cu aceeasi nuanta calda.
+## (V 0,57) zona de rau a iesit H 56 / S 0,39 / V 0,63 fata de H 40 / S 0,28 /
+## V 0,50 pe bara: directia era buna (verdele disparuse, albul coborase de la
+## 23,2 % la 4,9 %) dar bancul citea PORTOCALIU aprins. Orice suprafata
+## orizontala pe soarele de 40 de grade plus expunerea 1,05 se ridica in
+## valoare, deci slotul trebuie ales SUB tinta, nu pe ea.
 ## (Memoria `rock-dark-nu-pe-bazalt` spune ca slotul asta face rugina pe roca
 ## vulcanica — aici rugina e chiar ce vrem: pietris de rau ud.)
 ##
-## De ce exista, masurat: zona de rau a rundei 5 avea H 86 (verde) si V 0,73,
-## fata de H 40 / V 0,50 pe bara. Verdele nu venea din apa, venea din IARBA
-## terenului care se vedea printre pietre — malul unui rau de munte nu e iarba,
-## e pietris si nisip ud, si exact asta e culoarea calda din bara. Slotul 9 e
-## cel mai apropiat din atlas de tinta rgb(124,114,98) tinand cont ca o
-## suprafata orizontala sub soarele de 40 de grade se ridica in valoare. (Slotul
-## 9 ar fi fost mai aproape numeric, dar e WOOD_WEATHERED — scanduri si garduri
-## — si o mapare de clasa pe lemn l-ar fi luat cu ea.)
-##
-## Placile sunt LATE (4 m) si putine (390): e o suprafata, nu niste discuri, si
-## se suprapun deliberat, ca la crusta de sare de la Serengeti.
+## RUNDA 2: pietrisul se aseaza tot in coordonate de albie, pe o banda de la
+## marginea apei spre exterior. Inainte umplea un dreptunghi si iesea un CAMP
+## ocru cat toata valea, in care albia se pierdea; criticul l-a si numit
+## („campul de pietris ocru"). O prundisul de rau e o fasie pe langa apa.
 func _gravel() -> void:
 	var pos: PackedVector3Array = []
 	var yaw: PackedFloat32Array = []
 	var sc3: Array[Vector3] = []
-	for rc: Array in [["Sus", UP_Y, UP_X0, UP_X1, UP_Z0, UP_Z1, 240],
-			["Jos", LOW_Y, LOW_X0, LOW_X1, LOW_Z0, LOW_Z1, 150]]:
-		var wy: float = float(rc[1])
-		var got := 0
-		var tries := 0
-		while got < int(rc[6]) and tries < 26000:
-			tries += 1
-			var x := _rng.randf_range(float(rc[2]) - 6.0, float(rc[3]) + 6.0)
-			var z := _rng.randf_range(float(rc[4]) - 4.0, float(rc[5]) + 4.0)
-			var g := _sol_real(x, z)
-			# Banc: de la 0,3 m sub luciu (pietris care iese din apa) pana la
-			# 2,0 m peste el (plaja dintre apa si vegetatie). Mai sus incepe
-			# malul cu iarba, si acolo pietrisul ar fi minciuna.
-			if g < wy - 0.3 or g > wy + 2.0:
-				continue
-			# NU langa drum. Runda 6: o placa de pietris de 4 m a iesit fix pe
-			# carosabil, fiindca bancul se intinde pana sub sosea la capatul de
-			# est al jgheabului. Pietrisul e decor de albie, deci se cere
-			# 14 m liberi pana la marginea drumului (drum + acostament de 4 m).
-			if _dist_to_road(x, z) < 14.0:
-				continue
-			# Ridicarea: placa e plata, malul e in panta. Se ia caderea REALA
-			# pe raza placii, ca marginea sa nu intre in pamant (aceeasi
-			# corectie ca la crusta de sare, unde 193 din 420 de placi erau
-			# invizibile fara ea).
-			var rr := 4.0
-			var lo := g
-			for da: float in [0.0, TAU / 3.0, TAU * 2.0 / 3.0]:
-				lo = minf(lo, _sol_real(x + cos(da) * rr, z + sin(da) * rr))
-			var lift: float = clampf(g - lo, 0.0, 1.6) + 0.10
-			pos.append(Vector3(x, g + lift, z))
-			yaw.append(_rng.randf_range(0.0, TAU))
-			sc3.append(Vector3(_rng.randf_range(0.7, 1.4), 1.0,
-				_rng.randf_range(0.7, 1.4)))
-			got += 1
+	var tries := 0
+	var got := 0
+	while got < 70 and tries < 40000:
+		tries += 1
+		var t := _rng.randf_range(-12.0, CH_WET + 8.0)
+		var half := _water_half(t)
+		var sgn: float = 1.0 if _rng.randf() < 0.5 else -1.0
+		var o := sgn * _rng.randf_range(half * 0.95, half + 1.6)
+		var c := _chan_pt(t, o)
+		var wy := _water_y(t)
+		var g := _sol_real(c.x, c.y)
+		# Banda de prundis: de la putin sub linia apei pana la 1,8 m peste ea.
+		if g < wy - 0.3 or g > wy + 1.0:
+			continue
+		if _dist_to_road(c.x, c.y) < 3.0:
+			continue
+		# Ridicata peste vecini, ca placa plata sa nu intre in panta.
+		var rr := 4.0
+		var lo := g
+		for da: float in [0.0, TAU / 3.0, TAU * 2.0 / 3.0]:
+			lo = minf(lo, _sol_real(c.x + cos(da) * rr, c.y + sin(da) * rr))
+		var lift: float = clampf(g - lo, 0.0, 1.6) + 0.10
+		pos.append(Vector3(c.x, g + lift, c.y))
+		yaw.append(_rng.randf_range(0.0, TAU))
+		sc3.append(Vector3(_rng.randf_range(0.7, 1.4), 1.0,
+			_rng.randf_range(0.7, 1.4)))
+		got += 1
 	if pos.is_empty():
 		print("; ATENTIE: pietris gol")
 		return
-	_disc_flock("F_Pietris", Palette.ROCK_DARK, 4.0, 1.0, 1.0, pos, yaw,
+	# Placi de 2,4 m, nu de 4: la 20-40 m de camera o placa de 4 m e o dala
+	# ocru cat un sfert de ecran. MASURAT pe captura rundei precedente:
+	# pietrisul iesise 18,3 % din cadru, fata de 1,7 % pe bara — de zece ori.
+	# Prundisul nu e peisajul, e chenarul apei.
+	_disc_flock("F_Pietris", Palette.ROCK_DARK, 1.8, 1.0, 1.0, pos, yaw,
 		77005, sc3)
-	print("; pietris de banc: %d placi" % pos.size())
+	print("; pietris de mal: %d placi" % pos.size())
 
 
-## BOLOVANII UZI: piatra in albie si pe bancuri, pe AMANDOUA reprizele. Sunt
-## structura repezisului — fara ei apa e o pata, cu ei e curent rupt. Trei
-## marimi, cel mare mai rar, toate ca MultiMesh (un desen per lot).
+## BOLOVANII DIN ALBIE — reparatia principala a rundei 2.
+##
+## Criticul: „bolovani mari semi-scufundati in albie, calare pe linia de apa".
+## Deci nu se mai esantioneaza un dreptunghi si nu se mai filtreaza dupa cota
+## terenului: pietrele se aseaza PE FIRUL APEI, in coordonate de albie, si
+## inaltimea lor se alege astfel incat sa iasa din luciu cu o fractiune
+## MASURATA din corp. O piatra care iese 0,35-0,9 m din apa la 40-70 m de ochi
+## e exact silueta din bara.
+##
+## TREI FAMILII, si impartirea e ce face repezisul sa aiba structura:
+##   - `prag`: pietrele de pe buza fiecarui prag, dese si aliniate transversal.
+##     Ele sunt cauza caderii; fara ele treapta pare o taietura in apa.
+##   - `fir`: bolovani mari, raspanditi pe mijlocul curentului. Fiecare isi
+##     capata dara lui in aval si dunga lui in amonte.
+##   - `mal`: piatra marunta pe marginea apei, care leaga albia de prundis.
 ##
 ## COLIZIUNEA: niciuna. MultiMesh nu produce corp fizic, si asta e corect aici —
 ## totul e sub plasa de repunere; un corp acolo ar fi doar ceva de care sa se
 ## agate masina care oricum va fi repusa.
-##
-## Repriza de SUS primeste de doua ori mai multa piatra la aceeasi suprafata:
-## e cea pe care o vede soferul (nota 9), iar acolo trebuie sa se citeasca
-## repezis, nu lac.
 func _river_rocks() -> void:
-	var reaches := [
-		["Sus", UP_Y, UP_X0, UP_X1, UP_Z0, UP_Z1, 1.0],
-		["Jos", LOW_Y, LOW_X0, LOW_X1, LOW_Z0, LOW_Z1, 0.55],
-	]
-	# RUNDA 2, MASURAT PE CAPTURA (F_r2_0.66.png / F_r2_0.67.png). Prima
-	# incercare a scalat `moss_boulder_b` pana la 2,6 si i-a mai dat 1,0-1,35
-	# pe lateral: 1,957 m x 2,6 x 1,35 = 6,9 m latime. La 30-40 m de camera un
-	# bolovan de 7 m subintinde ~11 grade si acopera un sfert din inaltimea
-	# cadrului — si fiindca `moss_boulder_*` are 12-39 % din vertecsi pe slotul
-	# 12 (CACTUS_GREEN, masuratori §2), la marimea aia muschiul nu mai e un
-	# accent, e toata piesa. Ce a iesit in captura: perne verzi de varza, nu
-	# piatra uda.
-	#
-	# Marimile de acum vin din bara, citite ca raport fata de latimea albiei
-	# (~30 m): cele mai mari pietre din repezis au 2-3 m, majoritatea sub 1,5 m,
-	# si sunt CENUSII cu muschi pe capac. Scara maxima scade deci de la 2,6 la
-	# 1,15 (b -> 2,25 m), de la 1,9 la 0,85 (c -> 2,61 m), de la 2,8 la 1,6
-	# (a -> 1,19 m), iar intinderea laterala de la 1,35 la 1,15.
-	# In schimb sunt MAI MULTE: la 2 m in loc de 6, aceeasi suprafata de piatra
-	# cere de trei ori mai multe bucati, si abia asa se citeste albie cu pietre
-	# in loc de cativa bolovani.
-	var lots := [
-		["moss_boulder_b", 420, 0.45, 1.15],
-		["moss_boulder_c", 150, 0.35, 0.85],
-		["moss_boulder_a", 620, 0.6, 1.6],
-	]
-	for rc: Array in reaches:
-		var eticheta: String = String(rc[0])
-		var wy: float = float(rc[1])
-		var dens: float = float(rc[6])
-		for lot: Array in lots:
-			var mdl: String = String(lot[0])
-			var pos: PackedVector3Array = []
-			var yaw: PackedFloat32Array = []
-			var sc3: Array[Vector3] = []
-			var tries := 0
-			var want := int(float(lot[1]) * dens)
-			while pos.size() < want and tries < 26000:
-				tries += 1
-				var x := _rng.randf_range(float(rc[2]) - 4.0, float(rc[3]) + 4.0)
-				var z := _rng.randf_range(float(rc[4]) - 3.0, float(rc[5]) + 3.0)
-				var g := _sol_real(x, z)
-				# Intre 2.2 m sub luciu si 1.2 m peste el: piatra din albie si
-				# de pe banc. Mai jos nu se vede, mai sus e deja mal uscat.
-				if g < wy - 2.2 or g > wy + 1.2:
-					continue
-				# Acelasi motiv ca la maluri: albia de sus ajunge pana sub
-				# sosea, iar un bolovan pe carosabil e un obstacol invizibil
-				# pentru AI (nu are corp — e MultiMesh) si o minciuna vizuala.
-				if _dist_to_road(x, z) < 3.0:
-					continue
-				var sc: float = _rng.randf_range(float(lot[2]), float(lot[3]))
-				# Bolovan de rau: turtit pe verticala de apa, nu bulgare.
-				sc3.append(Vector3(sc * _rng.randf_range(1.0, 1.15), sc * 0.72,
-					sc * _rng.randf_range(1.0, 1.15)))
-				# Ingropat un sfert: o piatra din albie nu sta PE luciu, iese
-				# din el.
-				pos.append(Vector3(x, g - HEIGHT[mdl] * sc * 0.22, z))
-				yaw.append(_rng.randf_range(0.0, TAU))
-				if g < wy + 0.4:
-					_wet_rocks.append(Vector4(x, g, z, wy))
-			if pos.is_empty():
+	var lots := {
+		"moss_boulder_b": {"pos": PackedVector3Array(), "yaw": PackedFloat32Array(), "sc": [] as Array[Vector3]},
+		"moss_boulder_c": {"pos": PackedVector3Array(), "yaw": PackedFloat32Array(), "sc": [] as Array[Vector3]},
+		"moss_boulder_a": {"pos": PackedVector3Array(), "yaw": PackedFloat32Array(), "sc": [] as Array[Vector3]},
+	}
+
+	# --- (1) PIETRELE DE PRAG: cauza fiecarei caderi.
+	# Pe buza fiecarui prag, un sir transversal de bolovani mari, semi-scufundati
+	# in apa DE SUS. Din ei iese banda alba de pe muchie.
+	var praguri: Array[float] = []
+	for k in POOLS.size() - 1:
+		praguri.append(float((POOLS[k] as Array)[1]))
+	for tk in praguri:
+		var half := _water_half(tk)
+		var o := -half
+		while o <= half:
+			var jitter := _rng.randf_range(-1.1, 1.1)
+			var c := _chan_pt(tk + jitter, o + _rng.randf_range(-0.7, 0.7))
+			var wy_sus := _water_y(tk - 2.0)
+			var g := _sol_real(c.x, c.y)
+			if g > wy_sus + 1.3 or g < wy_sus - 3.5 or _dist_to_road(c.x, c.y) < 3.0:
+				o += _rng.randf_range(1.9, 3.1)
 				continue
-			_flock_seed += 1
-			# CLASA DE PIATRA, nu atlasul. `moss_boulder_*` are 12-39 % din
-			# vertecsi pe slotul 12 CACTUS_GREEN (masuratori §2), adica
-			# muschi — si in captura rundei 2 exact muschiul a facut din albie
-			# un camp de varza verde. Un material de clasa inlocuieste tot
-			# nodul, deci scoate muschiul din ecuatie.
-			#
-			# CARE clasa: masurat pe captura, nu ales din lista. Prima
-			# incercare a fost `inca_stone`, fiindca exista deja pe pista si
-			# ar fi costat zero materiale — dar tenta ei e (1.0, 0.831,
-			# 0.677), adica granit CALD, si in F_r3_0.67.png albia a iesit un
-			# camp de pietricele bej: plaja, nu repezis. `granite` are tenta
-			# (0.520, 0.578, 0.700), cenusiu-rece si mai inchis — exact piatra
-			# uda din bara. Costa UN material (garda e la 17 din 38, deci
-			# incape) si e deja folosita la Serengeti, deci nu e o dala noua.
-			#
-			# Muschiul nu dispare din POI: bolovanii de pe BUZA drumului
-			# (`_bank_edge`) raman pe atlas, si acolo se vad de aproape.
-			_model_flock("F_Pietre%s_%s" % [eticheta, mdl], RES[mdl], pos, yaw,
-				sc3, 77200 + _flock_seed, "granite")
-			print("; pietre %s %s: %d din %d incercari" % [eticheta, mdl, pos.size(), tries])
-	print("; %d pietre UDE (ancore de spuma)" % _wet_rocks.size())
+			var mdl := "moss_boulder_b" if _rng.randf() < 0.6 else "moss_boulder_a"
+			# Iese din apa 0,45-0,95 m: o treapta trebuie sa aiba piatra
+			# VIZIBILA pe ea, altfel muchia alba n-are de ce sa se sparga.
+			var iesire := _rng.randf_range(0.45, 0.95)
+			var sc: float = clampf((iesire + (wy_sus - g)) / HEIGHT[mdl], 0.30, 1.30)
+			(lots[mdl]["pos"] as PackedVector3Array).append(Vector3(c.x, g, c.y))
+			(lots[mdl]["yaw"] as PackedFloat32Array).append(_rng.randf_range(0.0, TAU))
+			(lots[mdl]["sc"] as Array[Vector3]).append(Vector3(
+				sc * _rng.randf_range(1.0, 1.25), sc * 0.78,
+				sc * _rng.randf_range(1.0, 1.25)))
+			_wet_rocks.append(Vector4(c.x, c.y,
+				BASE_R.get(mdl, 0.6) * sc, wy_sus))
+			o += _rng.randf_range(1.9, 3.1)
+
+	var n_prag := _wet_rocks.size()
+
+	# --- (2) BOLOVANII DE FIR: mari, in mijlocul curentului, calare pe luciu.
+	var tries := 0
+	var fir := 0
+	while fir < 210 and tries < 40000:
+		tries += 1
+		var t := _rng.randf_range(-8.0, CH_WET)
+		var half := _water_half(t)
+		var o := _rng.randf_range(-half * 0.92, half * 0.92)
+		var c := _chan_pt(t, o)
+		var wy := _water_y(t)
+		var g := _sol_real(c.x, c.y)
+		# CALARE PE LINIA DE APA. Pragul rundei precedente (`g > wy + 0.05`)
+		# a scos 90 % din candidati si a lasat 17 bolovani de fir din 150:
+		# masurat, fundul albiei e la doar 0,1-0,7 m sub luciu, deci un test
+		# care cere teren STRICT sub apa cade pe zgomotul terenului. Fereastra
+		# corecta e „fundul e in albie", adica de la 3 m sub luciu pana la
+		# 0,45 m peste el — o piatra pe un prag submers iese si ea din apa, si
+		# aia e chiar silueta din bara.
+		if g > wy + 0.35 or g < wy - 2.6:
+			continue
+		if _dist_to_road(c.x, c.y) < 3.0:
+			continue
+		# Prea aproape de alta piatra mare -> se face gramada, nu repezis.
+		var prea := false
+		for w in _wet_rocks:
+			if Vector2(w.x - c.x, w.y - c.y).length() < 2.4:
+				prea = true
+				break
+		if prea:
+			continue
+		var mdl := "moss_boulder_b"
+		var rz := _rng.randf()
+		if rz < 0.30:
+			mdl = "moss_boulder_a"
+		elif rz > 0.86:
+			mdl = "moss_boulder_c"
+		# Iese din apa 0,4-1,0 m — cele mai mari pietre din bara au 2-3 m
+		# latime, majoritatea sub 1,5, si ies din apa cam o treime.
+		var iesire := _rng.randf_range(0.40, 1.00)
+		var sc: float = clampf((iesire + (wy - g)) / HEIGHT[mdl], 0.30, 1.35)
+		(lots[mdl]["pos"] as PackedVector3Array).append(Vector3(c.x, g, c.y))
+		(lots[mdl]["yaw"] as PackedFloat32Array).append(_rng.randf_range(0.0, TAU))
+		(lots[mdl]["sc"] as Array[Vector3]).append(Vector3(
+			sc * _rng.randf_range(1.0, 1.2), sc * 0.75,
+			sc * _rng.randf_range(1.0, 1.2)))
+		_wet_rocks.append(Vector4(c.x, c.y, BASE_R.get(mdl, 0.6) * sc, wy))
+		fir += 1
+
+	# --- (3) PIATRA DE MAL: marunta, pe muchia apei, ca albia sa nu se termine
+	# intr-o linie dreapta intre luciu si prundis.
+	var tries2 := 0
+	var mal := 0
+	while mal < 320 and tries2 < 30000:
+		tries2 += 1
+		var t := _rng.randf_range(-12.0, CH_WET + 8.0)
+		var half := _water_half(t)
+		var sgn: float = 1.0 if _rng.randf() < 0.5 else -1.0
+		var o := sgn * _rng.randf_range(half * 0.8, half + 5.0)
+		var c := _chan_pt(t, o)
+		var wy := _water_y(t)
+		var g := _sol_real(c.x, c.y)
+		if g < wy - 1.2 or g > wy + 1.4:
+			continue
+		if _dist_to_road(c.x, c.y) < 3.0:
+			continue
+		var mdl := "moss_boulder_a" if _rng.randf() < 0.75 else "moss_boulder_c"
+		var sc: float = _rng.randf_range(0.30, 0.75)
+		(lots[mdl]["pos"] as PackedVector3Array).append(
+			Vector3(c.x, g - HEIGHT[mdl] * sc * 0.20, c.y))
+		(lots[mdl]["yaw"] as PackedFloat32Array).append(_rng.randf_range(0.0, TAU))
+		(lots[mdl]["sc"] as Array[Vector3]).append(Vector3(
+			sc * _rng.randf_range(1.0, 1.15), sc * 0.72,
+			sc * _rng.randf_range(1.0, 1.15)))
+		# Pietrele de mal care chiar ating apa dau si ele spuma, dar mai putina.
+		if g < wy + 0.25:
+			_wet_rocks.append(Vector4(c.x, c.y, BASE_R.get(mdl, 0.6) * sc, wy))
+		mal += 1
+
+	for mdl: String in lots.keys():
+		var d: Dictionary = lots[mdl]
+		var pos: PackedVector3Array = d["pos"]
+		if pos.is_empty():
+			continue
+		_flock_seed += 1
+		# CLASA DE PIATRA, nu atlasul. `moss_boulder_*` are 12-39 % din
+		# vertecsi pe slotul 12 CACTUS_GREEN (masuratori §2), adica muschi — si
+		# in captura rundei 2 exact muschiul a facut din albie un camp de varza
+		# verde. Un material de clasa inlocuieste tot nodul, deci scoate
+		# muschiul din ecuatie.
+		#
+		# CARE clasa: masurat pe captura, nu ales din lista. `inca_stone` are
+		# tenta (1.0, 0.831, 0.677), granit CALD, si albia iesea un camp de
+		# pietricele bej: plaja, nu repezis. `granite` are (0.520, 0.578,
+		# 0.700), cenusiu-rece si mai inchis — exact piatra uda din bara.
+		_model_flock("F_Pietre_%s" % mdl, RES[mdl], pos, d["yaw"], d["sc"],
+			77200 + _flock_seed, "granite")
+		print("; pietre %s: %d" % [mdl, pos.size()])
+	print("; %d pietre UDE (ancore de spuma), din care %d de prag si %d de fir"
+		% [_wet_rocks.size(), n_prag, fir])
 
 
-## SPUMA: doua mecanisme, fiindca „repezisuri albe" nu inseamna pete albe.
+## SPUMA — a doua reparatie a rundei 2, si cea pe care criticul a numit-o
+## „defectul de ordin zero".
 ##
-## (a) DARELE din aval de fiecare piatra uda: 3-6 placi mici insirate pe
-## directia curentului (spre EST, +x — raul coboara spre Urubamba), imprastiate
-## tot mai lat pe masura ce se departeaza de piatra. Asta e ce face curentul sa
-## se citeasca drept curent, si nu un covor de confetti.
-## (b) Un covor rarefiat pe restul luciului, ca albia sa nu fie neagra intre
-## pietre. Pe repriza de SUS, de doua ori mai des: acolo se uita soferul.
-## (c) CASCADA dintre reprize: pragul de la x ~ -205, unde terenul cade de la
-## -28 la -34 in 10 m, primeste o banda compacta de spuma. E singura legatura
-## vizibila dintre jgheabul din fata si bazinul de jos; fara ea apa de sus e o
-## balta fara aval.
+## Verdictul, cuvant cu cuvant: „spuma nu are cauza si citeste ca autocolante pe
+## plastic". Avea dreptate: 91 % din ancore erau aruncate (`randf() > 0.09`),
+## iar cea mai mare parte a albului era un covor imprastiat uniform pe luciu.
 ##
-## Placile sunt MICI (1.6 m fata de cei 6-7.5 m ai luciului): la 40-70 m de
-## sofer o placa alba de 7 m ar fi o dala, una de 1.6 m e o creasta de val.
+## Acum FIECARE placa alba iese dintr-o interactie, si sunt trei, toate cerute
+## explicit de critic:
+##   (a) DUNGA DIN AMONTE: o banda scurta, transversala pe curent, lipita de
+##       fata din amonte a fiecarei pietre. Acolo apa loveste piatra si se
+##       ridica alba. Fara ea piatra pare pusa pe apa; cu ea, apa pare ca da
+##       peste piatra.
+##   (b) SIAJUL CONIC DIN AVAL: 3-7 placi care pleaca din spatele pietrei si se
+##       largesc si se sting cu distanta. Asta e semnul de curgere.
+##   (c) BANDA DE PE MUCHIA FIECARUI PRAG: continua, transversala, pe toata
+##       latimea apei. E singurul alb care are voie sa fie compact.
+##
+## Nu mai exista covor pe luciu. Daca dupa runda asta albia pare prea intunecata
+## intre pietre, raspunsul e MAI MULTE PIETRE, nu mai mult alb liber —
+## repezisul din bara are apa inchisa intre benzile albe, si fara apa inchisa nu
+## e repezis, e zapada.
+##
+## TOATE formele albe sunt orientate pe CURENT (yaw-ul albiei), cum a cerut
+## criticul: „toate formele albe orientate in sensul curgerii".
+##
+## Cantitatea ramane sub control: pe bara, pixelii aproape-albi (min(R,G,B) >
+## 215) sunt 0,8 % din cadru si 1,5 % pe banda de apa; runda 1 ajunsese la
+## 23,2 % si apoi s-a taiat la ~5 %. Structura de acum e insa ALTA — albul sta
+## strans langa pietre si pe muchii, deci se citeste mult mai tare la acelasi
+## procent. Cine il urca inapoi trebuie sa remasoare, nu sa se uite la
+## miniatura.
 func _foam() -> void:
 	var pos: PackedVector3Array = []
 	var yaw: PackedFloat32Array = []
 	var sc3: Array[Vector3] = []
-	# CURENTUL curge spre EST (+x): raul coboara spre Urubamba, si toate cotele
-	# masurate scad in sensul asta (-27,4 la x=-205, -36,4 la x=-175). Deci
-	# crestele de spuma sunt lungi pe X si inguste pe Z, cu abateri mici de
-	# yaw — nu discuri rotite aiurea.
-	# (a) dare in aval de pietre
+	# CURENTUL curge de la CH_A spre CH_B (spre SV, in aval). Yaw-ul unei placi
+	# aliniate pe curent: directia albiei in plan XZ.
+	var flow_yaw := atan2(_chan_dir.x, _chan_dir.y)
+	var amonte := 0
+	var siaj := 0
+
 	for r in _wet_rocks:
-		if _rng.randf() > 0.09:
-			continue
+		var rx := r.x
+		var rz := r.y
+		var rad: float = maxf(float(r.z), 0.45)
 		var wy: float = r.w
-		var cnt := _rng.randi_range(1, 3)
+		# --- (a) dunga din AMONTE: transversala, lipita de piatra.
+		var up := _chan_pt(0.0, 0.0)
+		var ux := rx - _chan_dir.x * (rad + 0.35)
+		var uz := rz - _chan_dir.y * (rad + 0.35)
+		if _sol_real(ux, uz) < wy - 0.03 and _dist_to_road(ux, uz) >= 3.0:
+			pos.append(Vector3(ux, wy + 0.13, uz))
+			yaw.append(flow_yaw + _rng.randf_range(-0.12, 0.12))
+			# Lata pe transversala (Z local), scurta pe curent (X local).
+			sc3.append(Vector3(_rng.randf_range(0.30, 0.45), 1.0,
+				rad * _rng.randf_range(1.5, 2.1)))
+			amonte += 1
+		# --- (b) SIAJUL conic din aval. Numai pietrele care chiar sparg apa:
+		# o piatra de 40 cm nu lasa siaj de 8 m. Pragul e pe raza, si e ce
+		# tine albul jos fara sa-i ia cauza — runda precedenta scosese 1045 de
+		# placi (848 numai siaj) si albia iesea ZAPADA, defectul pe care
+		# criticul l-a numit deja o data.
+		if rad < 0.55:
+			continue
+		var cnt := _rng.randi_range(3, 6)
 		for k in cnt:
-			var t := float(k) + _rng.randf()
-			var px := r.x + t * _rng.randf_range(1.4, 2.4)
-			var pz := r.z + _rng.randf_range(-0.9, 0.9) * (1.0 + t * 0.5)
-			if _sol_real(px, pz) > wy - 0.05 or _dist_to_road(px, pz) < 3.0:
+			var t := 0.6 + float(k) * _rng.randf_range(0.75, 1.15)
+			var lat := _rng.randf_range(-1.0, 1.0) * rad * (0.35 + t * 0.30)
+			var px := rx + _chan_dir.x * (rad + t * 1.25) + _chan_per.x * lat
+			var pz := rz + _chan_dir.y * (rad + t * 1.25) + _chan_per.y * lat
+			if _sol_real(px, pz) > wy - 0.03 or _dist_to_road(px, pz) < 3.0:
 				continue
-			pos.append(Vector3(px, wy + 0.10, pz))
-			yaw.append(_rng.randf_range(-0.35, 0.35))
-			# Dara se subtiaza si se lungeste pe masura ce se departeaza.
-			# RUNDA 4: cu 1,6-2,8 (plus t) pe X si raza de 1,15 m, o dara iesea
-			# de 4-7 m lungime si citea ca o zgarietura alba trasa cu rigla.
-			# O creasta de repezis are ~2 m; scara pe X coboara deci la
-			# 0,9-1,7 si cresterea cu distanta la 0,18.
-			sc3.append(Vector3(_rng.randf_range(0.9, 1.7) + t * 0.18, 1.0,
-				_rng.randf_range(0.35, 0.60)))
-	var wake := pos.size()
-	# (b) covor pe fiecare luciu
-	# RUNDA 2, MASURAT PE CAPTURA. Covorul de 620 + 300 de placi de 1,6 m peste
-	# ~1.500 m2 de luciu se SUPRAPUNEA: 920 x pi x 1,6^2 = 7.400 m2, adica
-	# cinci straturi peste fiecare punct de apa. In captura albia iesea o
-	# PANZA alba continua, nu repezisuri — acelasi defect ca podeaua de ceata
-	# de la Serengeti POI D (`mist-patch e o podea opaca`). Repezisul din bara
-	# are apa INCHISA intre benzile albe; fara apa inchisa nu e repezis, e
-	# zapada. Covorul coboara deci la 150 + 90, adica ~1,3 straturi, iar
-	# structura o dau darele si cascada, care stau unde apa CHIAR sparge.
-	for rc: Array in [["Sus", UP_Y, UP_X0, UP_X1, UP_Z0, UP_Z1, 22],
-			["Jos", LOW_Y, LOW_X0, LOW_X1, LOW_Z0, LOW_Z1, 14]]:
-		var wy2: float = float(rc[1])
-		var tries := 0
-		var got := 0
-		while got < int(rc[6]) and tries < 26000:
-			tries += 1
-			var x := _rng.randf_range(float(rc[2]), float(rc[3]))
-			var z := _rng.randf_range(float(rc[4]), float(rc[5]))
-			if _sol_real(x, z) > wy2 - 0.4 or _dist_to_road(x, z) < 3.0:
-				continue
-			pos.append(Vector3(x, wy2 + 0.08, z))
-			yaw.append(_rng.randf_range(-0.5, 0.5))
-			sc3.append(Vector3(_rng.randf_range(0.8, 1.5), 1.0,
-				_rng.randf_range(0.30, 0.55)))
-			got += 1
-	var carpet := pos.size() - wake
-	# (c) cascada de prag intre reprize: aici apa cade, deci crestele sunt
-	# TRANSVERSALE pe curent (late pe Z, scurte pe X) — o treapta de cascada,
-	# nu o dara.
+			# Se stinge: placile de departe sunt mai mici si mai subtiri.
+			var fade: float = clampf(1.0 - t * 0.16, 0.25, 1.0)
+			pos.append(Vector3(px, wy + 0.11, pz))
+			yaw.append(flow_yaw + _rng.randf_range(-0.22, 0.22))
+			sc3.append(Vector3(_rng.randf_range(0.9, 1.5) * fade, 1.0,
+				_rng.randf_range(0.28, 0.48) * fade))
+			siaj += 1
+
+	# --- (c) BANDA DE PE MUCHIA PRAGURILOR: continua, pe toata latimea.
 	var casc := 0
-	var cz := UP_Z0
-	while cz <= UP_Z1:
-		var cx := -212.0
-		while cx <= -196.0:
-			var g := _sol_real(cx, cz)
-			if g < UP_Y + 0.2 and g > LOW_Y - 0.5 and _rng.randf() < 0.14 					and _dist_to_road(cx, cz) >= 3.0:
-				pos.append(Vector3(cx + _rng.randf_range(-1.2, 1.2),
-					g + 0.25, cz + _rng.randf_range(-1.4, 1.4)))
-				yaw.append(_rng.randf_range(-0.25, 0.25))
-				sc3.append(Vector3(_rng.randf_range(0.5, 0.9), 1.0,
-					_rng.randf_range(1.5, 2.6)))
+	for k in POOLS.size() - 1:
+		var tk: float = float((POOLS[k] as Array)[1])
+		var half := _water_half(tk)
+		var o := -half
+		while o <= half:
+			# Doua-trei randuri de placi pe muchie, ca banda sa fie SOLIDA:
+			# criticul a cerut „banda alba solida pe muchie", si e singurul
+			# alb compact din albie.
+			for row: float in [-0.7, 0.0, 0.7, 1.5]:
+				var c := _chan_pt(tk + row + _rng.randf_range(-0.25, 0.25),
+					o + _rng.randf_range(-0.35, 0.35))
+				var wy2 := _water_y(tk - 1.0)
+				var g := _sol_real(c.x, c.y)
+				# Aceeasi lectie ca la pietre: fundul e la o palma sub luciu,
+				# deci un prag pe cota nu are voie sa fie strans. Se cere doar
+				# sa nu fim deja pe mal uscat.
+				if g > wy2 + 1.2 or _dist_to_road(c.x, c.y) < 3.0:
+					continue
+				pos.append(Vector3(c.x, minf(wy2, g + 0.9) + 0.16, c.y))
+				yaw.append(flow_yaw + _rng.randf_range(-0.10, 0.10))
+				sc3.append(Vector3(_rng.randf_range(0.34, 0.52), 1.0,
+					_rng.randf_range(1.5, 2.3)))
 				casc += 1
-			cx += 1.6
-		cz += 1.6
+			o += _rng.randf_range(1.1, 1.8)
+
 	if pos.is_empty():
 		print("; ATENTIE: spuma goala")
 		return
+	# CAT ALB, SI CUM S-A MASURAT — fiindca prima masuratoare a fost gresita
+	# si a trimis reglajul in directia opusa.
+	#
+	# Pe TOT cadrul, pixelii aproape-albi (min(R,G,B) > 215) dau 6,6 % la noi
+	# si 0,82 % pe bara, si concluzia „de opt ori prea mult" pare evidenta.
+	# E falsa: harta pe celule a albului arata ca la noi albul st in CENTRUL
+	# si in JOSUL cadrului (41 % intr-o celula de mijloc), adica pe CAROSABILUL
+	# nostru palid — nu in rau. Bara are in acelasi loc un drum ingust si
+	# maro, deci compara doua lucruri diferite.
+	#
+	# Masurat unde trebuie, adica NUMAI in banda raului:
+	#     noi  0,59 %      bara  1,69 % si 1,94 % (doua benzi de apa)
+	# Adica avem MAI PUTINA spuma decat referinta, nu mai multa. De aia raza
+	# ramane 0,85 m si numarul creste — invers decat sugera cifra pe cadru.
+	# (Memoria `caseta-de-masura-exclude-defectul`, in varianta ei inversa:
+	# caseta prea LARGA a inclus un obiect strain si a mintit la fel de bine.)
 	_disc_flock("F_Spuma", Palette.FOAM_WHITE, 0.85, 0.45, 1.0, pos, yaw,
-		77002, sc3)
-	print("; spuma: %d placi (%d dare + %d covor + %d cascada)"
-		% [pos.size(), wake, carpet, casc])
+		77003, sc3)
+	print("; spuma: %d placi (%d amonte + %d siaj + %d muchii de prag)"
+		% [pos.size(), amonte, siaj, casc])
 
 
-## MALURILE raului: bambus si ferigi arborescente pe malurile fiecarei reprize,
-## plus queñual (polylepis) mai sus pe taluz. In bara copacii sunt INGHESUITI pe
-## mal — masa verde inchisa care margineste albia pe toata lungimea, nu
-## exemplare razlete.
+## PERETELE DE STANCA AL GORJULUI — nota secundara a criticului: „ne lipseste
+## peretele de stanca al canionului, care in referinta da spate si scara
+## verticala; la noi scena se termina intr-o panta verde plata topita in ceata".
 ##
-## RUNDA 1, a doua masuratoare: prima versiune cauta pe BENZI de z fixe si a
-## iesit cu 18 piese pe tot malul, fiindca taluzul urca de la -34 la -25 in 8 m
-## orizontali — banda „0..3,4 m peste luciu" e lata de doi metri si cade unde
-## nimereste. Cautarea se face acum pe COTA, nu pe z: se pleaca de la mijlocul
-## albiei, se baleiaza spre mal si se opreste la prima cota din fereastra
-## ceruta. Asta urmareste conturul real, oricat de strans ar fi taluzul.
+## Nu se modeleaza un perete nou (n-avem piesa si n-ar incapea in materiale):
+## se IMBRACA rama gorjului, care exista deja si e chiar in spatele albiei.
+## Masurat pe profile N-S din 2 in 2 m: la z = -174..-176 terenul e inca la
+## -28..-30, iar la z = -168 a ajuns la -32..-38. Deci e o rupere de 6-10 m pe
+## cativa metri de teren, chiar in spatele apei si in plin cadru.
 ##
-## Coliziunea e `trunk` (raport raza/semi-latime 0,40 la bambus si 0,15 la
-## feriga, masuratori §4), dar totul e sub plasa de repunere.
-func _banks() -> void:
-	for rc: Array in [["Sus", UP_Y, UP_X0, UP_X1, UP_Z0, UP_Z1],
-			["Jos", LOW_Y, LOW_X0, LOW_X1, LOW_Z0, LOW_Z1]]:
-		var eticheta: String = String(rc[0])
-		var wy: float = float(rc[1])
-		var zc: float = (float(rc[4]) + float(rc[5])) * 0.5
-		# RUNDA 2: pe repriza de SUS prima versiune a scos 19 piese pe tot
-		# malul, fata de 58 pe cea de jos. Cauza masurata: tava de sus e larga
-		# si lina, deci fereastra de cota (de exemplu „0..2,5 m peste luciu")
-		# se satisface pe o banda de zeci de metri, iar cautarea se opreste la
-		# PRIMA potrivire — adica toate piesele cad pe acelasi inel subtire, si
-		# pasul de 4 m pe x le rareste. Reparatia nu e „mai multa
-		# probabilitate", e mai multe FERESTRE: fiecare mal primeste trei
-		# inele de cota in loc de unul, cu pas mai mic. Asta imbraca malul in
-		# adancime (tufa la apa, feriga peste ea, copac in spate), adica exact
-		# masa verde inghesuita din bara.
-		for spec: Array in [
-				# [spre_nord?, model, h_min, h_max, pas, prob, y_min, y_max]
-				[true, "bamboo_clump", 3.8, 6.2, 3.0, 0.90, 0.0, 0.8],
-				[true, "bamboo_clump", 3.4, 5.6, 3.5, 0.85, 1.0, 2.2],
-				[true, "tree_fern", 2.6, 4.2, 4.0, 0.80, 0.4, 1.6],
-				[true, "tree_fern", 2.4, 3.8, 5.0, 0.70, 2.0, 3.6],
-				[true, "polylepis_a", 3.2, 4.8, 6.0, 0.70, 2.5, 5.0],
-				[true, "polylepis_b", 5.5, 8.0, 9.0, 0.65, 3.5, 8.0],
-				[false, "bamboo_clump", 3.5, 5.8, 3.2, 0.88, 0.0, 0.8],
-				[false, "bamboo_clump", 3.2, 5.2, 3.8, 0.82, 1.0, 2.2],
-				[false, "tree_fern", 2.4, 3.8, 4.5, 0.75, 0.4, 1.6],
-				[false, "tree_fern", 2.2, 3.4, 5.5, 0.65, 2.0, 3.6],
-				[false, "polylepis_a", 3.4, 5.2, 6.5, 0.70, 2.5, 5.0],
-				[false, "polylepis_b", 5.5, 8.0, 9.0, 0.65, 3.5, 8.0],
-			]:
-			var spre_nord: bool = bool(spec[0])
-			var mdl: String = String(spec[1])
-			var pos: PackedVector3Array = []
-			var yaw: PackedFloat32Array = []
-			var sc3: Array[Vector3] = []
-			var x := float(rc[2]) - 8.0
-			while x < float(rc[3]) + 8.0:
-				x += float(spec[4]) + _rng.randf_range(-1.2, 1.2)
-				if _rng.randf() > float(spec[5]):
-					continue
-				var dz: float = 1.0 if spre_nord else -1.0
-				var z := zc
-				var hit := false
-				var want := _rng.randf_range(float(spec[6]), float(spec[7]))
-				for _i in 110:
-					z += dz * 0.8
-					if z > float(rc[5]) + 16.0 or z < float(rc[4]) - 16.0:
-						break
-					if _sol_real(x, z) - wy >= want:
-						hit = true
-						break
-				if not hit:
-					continue
-				# Jitter lateral, ca sirul sa nu fie o linie trasa cu rigla.
-				z += dz * _rng.randf_range(-1.6, 2.4)
-				var g := _sol_real(x, z)
-				if g < wy - 0.2:
-					continue
-				# NU IN DRUM. Loturile de MultiMesh nu trec prin `_place`, deci
-				# n-aveau niciun test de carosabil — si cautarea pe cota, care
-				# merge dinspre albie SPRE mal, urca fix pe umarul soselei
-				# cand malul de nord al jgheabului e chiar sub ea. In
-				# F_r8_0.67.png asta s-a vazut ca o feriga si un bambus in
-				# mijlocul benzii palide (`F_MalSus_*_N`, z pana la -160,8,
-				# cu soseaua la z = -166,9). Marja e 3 m de la marginea
-				# acostamentului REAL.
-				if _dist_to_road(x, z) < 3.0:
-					continue
-				var h := _rng.randf_range(float(spec[2]), float(spec[3]))
-				var sc := _scale_for(mdl, h)
-				pos.append(Vector3(x, g, z))
-				yaw.append(_rng.randf_range(0.0, TAU))
-				sc3.append(Vector3(sc, sc, sc))
-			if pos.is_empty():
+## Pe ea se aseaza trei randuri de bolovani mari (2,5-5,5 m) pe clasa `granite`:
+## la 50-80 m de ochi sirul citeste ca mal stancos care inchide valea, si taie
+## exact „panta verde plata topita in ceata".
+##
+## Costul: zero materiale (aceeasi clasa `granite` ca pietrele din albie).
+func _canyon_wall() -> void:
+	var pos: PackedVector3Array = []
+	var yaw: PackedFloat32Array = []
+	var sc3: Array[Vector3] = []
+	# Rama se cauta pe fiecare coloana x, mergand dinspre albie spre z MAI MIC
+	# (spre sud, in adancul bazinului): primul punct sub -31,5. Masurat, malul
+	# sudic al albiei cade spre bazinul adanc, care ajunge la -34..-36.
+	var x := -256.0
+	while x <= -198.0:
+		var z := -194.0
+		var gasit := false
+		var zr := 0.0
+		while z > -218.0:
+			z -= 0.8
+			if _sol_real(x, z) < -31.5:
+				zr = z
+				gasit = true
+				break
+		if not gasit:
+			x += 3.0
+			continue
+		# Trei randuri pe cadere, ca peretele sa aiba grosime si sa nu fie un
+		# gard de pietre.
+		for dz: float in [1.4, -1.8, -5.0]:
+			var zz := zr + dz + _rng.randf_range(-1.0, 1.0)
+			var xx := x + _rng.randf_range(-1.4, 1.4)
+			var g2 := _sol_real(xx, zz)
+			if g2 < -39.0 or _dist_to_road(xx, zz) < 3.0:
 				continue
-			_flock_seed += 1
-			# Numele poarta si indicele inelului: doua specificatii impart
-			# acelasi model si acelasi mal, iar doua noduri cu acelasi nume
-			# sub acelasi parinte sunt o eroare de .tscn.
-			_model_flock("F_Mal%s_%s_%s%d" % [eticheta, mdl,
-				"N" if spre_nord else "S", _flock_seed], RES[mdl], pos, yaw,
-				sc3, 77300 + _flock_seed)
-			print("; mal %s %s (%s): %d piese" % [eticheta, mdl,
-				"nord" if spre_nord else "sud", pos.size()])
+			# 2,5-5,5 m: scara verticala, nu pietricele. `moss_boulder_b` e cea
+			# mai masiva piesa din kit (1,957 m masurat), deci duce scalarea
+			# fara sa se subtieze.
+			var meters := _rng.randf_range(2.5, 5.5)
+			var sc: float = meters / HEIGHT["moss_boulder_b"]
+			pos.append(Vector3(xx, g2 - HEIGHT["moss_boulder_b"] * sc * 0.16, zz))
+			yaw.append(_rng.randf_range(0.0, TAU))
+			sc3.append(Vector3(sc * _rng.randf_range(1.0, 1.4), sc,
+				sc * _rng.randf_range(1.0, 1.4)))
+		x += 3.0
+	if pos.is_empty():
+		print("; ATENTIE: peretele de canion e gol")
+		return
+	_flock_seed += 1
+	_model_flock("F_PereteCanion", RES["moss_boulder_b"], pos, yaw, sc3,
+		77400 + _flock_seed, "granite")
+	print("; perete de canion: %d bolovani pe malul spre bazin" % pos.size())
+
+
+func _banks() -> void:
+	# RUNDA 2: malurile urmaresc ALBIA, nu doua dreptunghiuri. Cautarea merge
+	# de-a lungul firului (`t`) si iese PERPENDICULAR (`o`) pana gaseste cota
+	# ceruta peste luciu — asta urmareste conturul real al malului, oricat de
+	# oblic ar fi, si e singurul mod de a imbraca un canal diagonal.
+	#
+	# Se pastreaza ideea care a mers in runda 1: nu un inel de cota, ci TREI
+	# ferestre suprapuse pe fiecare mal (tufa la apa, feriga peste ea, copac in
+	# spate). Cu o singura fereastra, un mal lin satisface conditia pe zeci de
+	# metri si toate piesele cad pe acelasi inel subtire.
+	for spec: Array in [
+			# [spre_dreapta?, model, h_min, h_max, pas, prob, y_min, y_max]
+			# MALUL DINSPRE CAMERA E RAR — si asta e o decizie de compozitie,
+			# masurata pe captura. La densitatea malului opus (prob 0,8-0,9,
+			# pas 3-4 m), ferigile si bambusul de pe malul apropiat au ajuns
+			# un PARAVAN verde intre ochi si apa: in F_r22_0.67.png raul se
+			# mai vedea doar pe sfertul de sus al benzii lui. Apa e subiectul
+			# POI-ului F; vegetatia care o acopera lucreaza impotriva lui.
+			# Raman tufe joase si rare, ca malul sa nu fie chel, dar fara
+			# coroane care sa taie linia apei.
+			[true, "bamboo_clump", 2.6, 3.6, 8.0, 0.30, 0.0, 0.8],
+			[true, "tree_fern", 1.8, 2.6, 11.0, 0.25, 0.4, 1.6],
+			[false, "bamboo_clump", 3.5, 5.8, 3.2, 0.88, 0.0, 0.8],
+			[false, "bamboo_clump", 3.2, 5.2, 3.8, 0.82, 1.0, 2.2],
+			[false, "tree_fern", 2.4, 3.8, 4.5, 0.75, 0.4, 1.6],
+			[false, "tree_fern", 2.2, 3.4, 5.5, 0.65, 2.0, 3.6],
+			[false, "polylepis_a", 3.4, 5.2, 6.5, 0.70, 2.5, 5.0],
+			[false, "polylepis_b", 5.5, 8.0, 9.0, 0.65, 3.5, 8.0],
+		]:
+		var spre_dr: bool = bool(spec[0])
+		var mdl: String = String(spec[1])
+		var pos: PackedVector3Array = []
+		var yaw: PackedFloat32Array = []
+		var sc3: Array[Vector3] = []
+		var t := -12.0
+		while t < _chan_len + 16.0:
+			t += float(spec[4]) + _rng.randf_range(-1.2, 1.2)
+			if _rng.randf() > float(spec[5]):
+				continue
+			var half := _water_half(t)
+			var wy := _water_y(t)
+			var dir_o: float = 1.0 if spre_dr else -1.0
+			var want := _rng.randf_range(float(spec[6]), float(spec[7]))
+			var o := half * 0.7
+			var hit := false
+			for _i in 90:
+				o += 0.8
+				if o > half + 42.0:
+					break
+				var c := _chan_pt(t, dir_o * o)
+				var gg := _sol_real(c.x, c.y)
+				# Buza raftului cade in gol: dincolo de ea nu creste nimic.
+				if gg < wy - 4.0:
+					break
+				if gg - wy >= want:
+					hit = true
+					break
+			if not hit:
+				continue
+			# Jitter lateral, ca sirul sa nu fie o linie trasa cu rigla.
+			o += _rng.randf_range(-1.6, 2.4)
+			var c2 := _chan_pt(t, dir_o * o)
+			var g := _sol_real(c2.x, c2.y)
+			if g < wy - 0.2:
+				continue
+			# NU IN DRUM. Loturile de MultiMesh nu trec prin `_place`, deci
+			# n-aveau niciun test de carosabil — si cautarea pe cota, care
+			# merge dinspre albie SPRE mal, urca fix pe umarul soselei cand
+			# malul e chiar sub ea. In F_r8_0.67.png asta s-a vazut ca o
+			# feriga si un bambus in mijlocul benzii palide. Marja e 3 m de la
+			# marginea acostamentului REAL.
+			if _dist_to_road(c2.x, c2.y) < 3.0:
+				continue
+			var h := _rng.randf_range(float(spec[2]), float(spec[3]))
+			var sc := _scale_for(mdl, h)
+			pos.append(Vector3(c2.x, g, c2.y))
+			yaw.append(_rng.randf_range(0.0, TAU))
+			sc3.append(Vector3(sc, sc, sc))
+		if pos.is_empty():
+			continue
+		_flock_seed += 1
+		# Numele poarta si indicele inelului: doua specificatii impart acelasi
+		# model si acelasi mal, iar doua noduri cu acelasi nume sub acelasi
+		# parinte sunt o eroare de .tscn.
+		_model_flock("F_Mal_%s_%s%d" % [mdl, "D" if spre_dr else "S",
+			_flock_seed], RES[mdl], pos, yaw, sc3, 77300 + _flock_seed)
+		print("; mal %s (%s): %d piese" % [mdl,
+			"dreapta" if spre_dr else "stanga", pos.size()])
 
 
 ## BUZA MALULUI DE SUB SOSEA: bolovani pe taluzul de 45 de grade, intre drum si
@@ -1011,10 +1281,21 @@ func _camp() -> void:
 ## `backoff_m` 70 e cifra canalelor (Track.CHANNEL_FALL_BACKOFF): de la 14 m
 ## masina nu apuca sa ia viteza, recade, si bucla aia o tine in apa toata cursa.
 func _respawn() -> void:
-	var x0: float = minf(UP_X0, LOW_X0) - 10.0
-	var x1: float = maxf(UP_X1, LOW_X1) + 10.0
-	var z0: float = minf(UP_Z0, LOW_Z0) - 10.0
-	var z1: float = maxf(UP_Z1, LOW_Z1) + 6.0
+	# UNDE E GAURA, MASURAT. `ProbeRespawnZones` pe starea de plecare gaseste
+	# doar `BridgeFall` si `ViaductNet2` (x de la -106 la 94). Gorjul de sub
+	# POI-ul F — x de la -310 la -230, z de la -186 la -150 — n-are plasa:
+	# terenul acolo cade la -32..-40, panta de intoarcere e de peste 45 de
+	# grade, si o masina ajunsa in el nu mai iese conducand.
+	#
+	# AMPRENTA NU E CASETA ALBIEI, si asta e reparatia rundei 2. Caseta
+	# albiei largita cu maluri ajungea pana sub sosea (drumul coboara la -28,1
+	# chiar acolo), deci nu mai ramanea plafon: `top` iesea -30,6, adica SUB
+	# apa, si plasa nu se mai emitea deloc. Corect e sa se acopere GORJUL, care
+	# e sub rama, nu albia, care e la nivelul drumului.
+	var x0 := -300.0
+	var x1 := -190.0
+	var z0 := -232.0
+	var z1 := -192.0
 	# Cea mai joasa sosea din amprenta, marginea inclusa.
 	var n := _track.baked.size()
 	var road_lo := INF
@@ -1026,15 +1307,14 @@ func _respawn() -> void:
 			var q := p + sd * lat
 			if q.x >= x0 and q.x <= x1 and q.z >= z0 and q.z <= z1:
 				road_lo = minf(road_lo, p.y)
-	var top: float = UP_Y + 1.4
+	# Plafonul: sub cel mai jos carosabil din amprenta, si sub albie — o masina
+	# care merge pe drum sau care sare in albie nu are voie sa fie repusa.
+	var apa_jos: float = float((POOLS[POOLS.size() - 1] as Array)[2])
+	var top: float = apa_jos - 1.6
 	if road_lo < INF:
 		top = minf(top, road_lo - 2.5)
 		print("; plasa: cea mai joasa sosea in amprenta e %.1f -> plafon %.1f" % [road_lo, top])
-	if top <= LOW_Y + 0.5:
-		print("; ATENTIE: nu ramane plafon peste apa (%.1f <= %.1f); NU emit plasa"
-			% [top, LOW_Y + 0.5])
-		return
-	var bottom := LOW_Y - 14.0
+	var bottom := -62.0
 	_out.append('[node name="F_RaulRepunere" type="Area3D" parent="%s"]' % ZONE)
 	_out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %f, %f, %f)"
 		% [(x0 + x1) * 0.5, (top + bottom) * 0.5, (z0 + z1) * 0.5])
@@ -1158,7 +1438,25 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var r: float = BASE_R.get(model, 0.6) * scl
 	var d := half + gap + r
 	var q := p + s * d
+	# COTA SE IA PE AMPRENTA, NU INTR-UN PUNCT. `probe_manual` a gasit patru
+	# corturi din tabara ingropate cu 2,3 m — si de data asta NU era falsul
+	# pozitiv al campului neted: verificate cu raycast, chiar erau sub teren.
+	# Cauza: tabara sta pe taluzul malului, unde solul coboara cu ~1 m pe
+	# metru, iar un cort de 2,09 m amprenta asezat dupa cota din CENTRU are
+	# marginea din amonte infipta si pe cea din aval in aer. Se ia deci cota
+	# cea mai MARE de pe amprenta (colturile plus centrul): piesa sta pe
+	# varful denivelarii, si nimic nu intra in pamant.
+	# Raza de esantionare: cel putin 1,2 m, chiar daca piesa are trunchi
+	# subtire. `FVers28` (o feriga) a ramas ingropata cu 2,9 m dupa prima
+	# versiune a acestui fix, fiindca `BASE_R` pentru feriga e raza
+	# TRUNCHIULUI (~0,3 m) si esantionarea nu ajungea pe taluz. Ce conteaza
+	# aici nu e cat de gros e trunchiul, ci cat de repede coboara terenul sub
+	# el — deci raza minima e a pantei, nu a piesei.
+	var rs: float = maxf(r, 1.2)
 	var g := _sol_real(q.x, q.z)
+	for ang: float in [0.0, TAU * 0.125, TAU * 0.25, TAU * 0.375, TAU * 0.5,
+			TAU * 0.625, TAU * 0.75, TAU * 0.875]:
+		g = maxf(g, _sol_real(q.x + cos(ang) * rs, q.z + sin(ang) * rs))
 	if d - r < half + 0.5:
 		_warn += 1
 		print("; ATENTIE %s la frac %.4f: marginea la %.2f m de ax, banda %.2f" % [

@@ -58,12 +58,12 @@ func _ready() -> void:
 		% [cam.x, cam.y, cam.z, view.x, view.y, view.z, FOV,
 			2.0 * rad_to_deg(atan(tan_h))])
 	print("; grila la y=%.1f: '#' = in cadru SI vizibil, '.' = in cadru dar ascuns de teren, ' ' = in afara cadrului" % _probe_y)
-	print("; x de la -320 la -110 pas 10, z de la -240 la -120 pas 10")
+	print("; x de la -320 la -110 pas 10, z de la -240 la -100 pas 10")
 	var space := _track.get_world_3d().direct_space_state
 	var seen := 0
 	var framed := 0
 	var zz := -240.0
-	while zz <= -120.0:
+	while zz <= -100.0:
 		var row := ""
 		var xx := -320.0
 		while xx <= -110.0:

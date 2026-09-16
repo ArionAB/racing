@@ -233,1383 +233,1082 @@ script = ExtResource("prop")
 [node name="ZoneG_Serpentine" type="Node3D" parent="DecorManual"]
 
 [node name="zidSprijin1" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.382632, 0.000000, 0.923901, 0.000000, 1.000000, 0.000000, -0.923901, 0.000000, -0.382632, -155.146393, -26.713404, -120.073517)
+transform = Transform3D(-0.382632, 0.000000, 0.923901, 0.000000, 1.000000, 0.000000, -0.923901, 0.000000, -0.382632, -152.031830, -26.000942, -118.312820)
 
 [node name="zidSprijin2" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.488744, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, -0.488744, -155.041885, -26.589960, -119.343124)
+transform = Transform3D(-0.488744, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, -0.488744, -152.331787, -25.867735, -117.181374)
 
 [node name="zidSprijin3" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -155.185928, -26.557327, -118.914703)
+transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -137.929459, -25.772856, -102.734482)
 
 [node name="zidSprijin4" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.716016, 0.000000, 0.698084, 0.000000, 1.000000, 0.000000, -0.698084, 0.000000, -0.716016, -155.480637, -26.505972, -118.376236)
+transform = Transform3D(-0.807401, 0.000000, 0.590004, 0.000000, 1.000000, 0.000000, -0.590004, 0.000000, -0.807401, -141.802994, -25.492203, -99.324348)
 
 [node name="zidSprijin5" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.807401, 0.000000, 0.590004, 0.000000, 1.000000, 0.000000, -0.590004, 0.000000, -0.807401, -155.339111, -26.392849, -117.946815)
+transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -144.504089, -25.397429, -97.561852)
 
 [node name="zidSprijin6" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -154.401688, -26.329498, -118.224777)
+transform = Transform3D(-0.933056, 0.000000, 0.359732, 0.000000, 1.000000, 0.000000, -0.359732, 0.000000, -0.933056, -148.626755, -25.264418, -95.786049)
 
 [node name="zidSprijin7" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, -0.958502, -156.180801, -26.136572, -116.950859)
+transform = Transform3D(-0.978337, 0.000000, 0.207019, 0.000000, 1.000000, 0.000000, -0.207019, 0.000000, -0.978337, -153.443024, -25.036854, -94.785622)
 
 [node name="zidSprijin8" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.986930, 0.000000, 0.161149, 0.000000, 1.000000, 0.000000, -0.161149, 0.000000, -0.986930, -159.007050, -25.951567, -116.112617)
+transform = Transform3D(-0.995580, 0.000000, 0.093922, 0.000000, 1.000000, 0.000000, -0.093922, 0.000000, -0.995580, -157.809036, -24.757006, -94.116997)
 
 [node name="zidSprijin9" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.999862, 0.000000, 0.016596, 0.000000, 1.000000, 0.000000, -0.016596, 0.000000, -0.999862, -159.907181, -25.747330, -115.423698)
+transform = Transform3D(-0.998790, 0.000000, -0.049182, 0.000000, 1.000000, 0.000000, 0.049182, 0.000000, -0.998790, -165.807556, -24.397606, -94.317497)
 
 [node name="zidSprijin10" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.998829, 0.000000, -0.048389, 0.000000, 1.000000, 0.000000, 0.048389, 0.000000, -0.998829, -166.415680, -25.347822, -115.124084)
+transform = Transform3D(-0.999986, 0.000000, -0.005352, 0.000000, 1.000000, 0.000000, 0.005352, 0.000000, -0.999986, -170.119843, -24.024471, -94.511108)
 
 [node name="zidSprijin11" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -171.582626, -24.887260, -114.555557)
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -176.573547, -23.666252, -94.511108)
 
 [node name="zidSprijin12" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -178.033768, -24.441164, -114.111115)
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -182.926453, -23.199747, -112.211113)
 
 [node name="zidSprijin13" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -182.926453, -24.005777, -113.777779)
+transform = Transform3D(-0.999986, 0.000000, -0.005352, 0.000000, 1.000000, 0.000000, 0.005352, 0.000000, -0.999986, -189.380157, -22.841528, -111.855553)
 
 [node name="zidSprijin14" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.999774, 0.000000, -0.021249, 0.000000, 1.000000, 0.000000, 0.021249, 0.000000, -0.999774, -190.882156, -23.371096, -113.497498)
+transform = Transform3D(-0.998790, 0.000000, -0.049182, 0.000000, 1.000000, 0.000000, 0.049182, 0.000000, -0.998790, -193.631409, -22.468395, -111.794624)
 
 [node name="zidSprijin15" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.999558, 0.000000, -0.029728, 0.000000, 1.000000, 0.000000, 0.029728, 0.000000, -0.999558, -196.694473, -22.879030, -113.638702)
+transform = Transform3D(-0.986930, 0.000000, 0.161149, 0.000000, 1.000000, 0.000000, -0.161149, 0.000000, -0.986930, -203.928711, -21.969128, -111.385300)
 
-[node name="zidSprijin16" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.986930, 0.000000, 0.161149, 0.000000, 1.000000, 0.000000, -0.161149, 0.000000, -0.986930, -204.241043, -23.299803, -112.999809)
+[node name="zidSprijin16" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.958502, 0.000000, 0.285086, 0.000000, 1.000000, 0.000000, -0.285086, 0.000000, -0.958502, -207.623520, -21.734503, -110.594040)
 
-[node name="zidSprijin17" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.958502, 0.000000, 0.285086, 0.000000, 1.000000, 0.000000, -0.285086, 0.000000, -0.958502, -208.053314, -24.745993, -112.238815)
+[node name="zidSprijin17" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -215.128403, -21.468573, -107.589409)
 
 [node name="zidSprijin18" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.807399, 0.000000, 0.590005, 0.000000, 1.000000, 0.000000, -0.590005, 0.000000, -0.807399, -218.484360, -28.986776, -107.934227)
+transform = Transform3D(-0.716014, 0.000000, 0.698086, 0.000000, 1.000000, 0.000000, -0.698086, 0.000000, -0.716014, -218.553879, -21.233511, -104.714111)
 
 [node name="zidSprijin19" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.716014, 0.000000, 0.698086, 0.000000, 1.000000, 0.000000, -0.698086, 0.000000, -0.716014, -220.158768, -28.097715, -106.218887)
+transform = Transform3D(-0.618878, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618878, -220.080353, -21.093143, -103.051262)
 
 [node name="zidSprijin20" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.618878, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618878, -222.451691, -30.609539, -104.942787)
+transform = Transform3D(-0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382634, -223.682129, -20.865059, -96.798294)
 
 [node name="zidSprijin21" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382634, -226.497894, -29.502319, -97.579857)
+transform = Transform3D(-0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, -0.271212, -224.587097, -20.731808, -92.984467)
 
 [node name="zidSprijin22" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, -0.271212, -228.374329, -32.015556, -93.410507)
+transform = Transform3D(-0.000002, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000002, -224.796234, -20.496286, -88.765320)
 
 [node name="zidSprijin23" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -228.551956, -31.809225, -91.017578)
+transform = Transform3D(0.120248, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120248, -224.700851, -20.355713, -86.523643)
 
 [node name="zidSprijin24" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.120248, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120248, -229.260971, -33.491879, -86.010712)
+transform = Transform3D(0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, 0.382634, -222.895844, -20.127441, -79.591370)
 
 [node name="zidSprijin25" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271212, -228.626343, -33.175701, -82.687637)
+transform = Transform3D(0.488745, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, 0.488745, -221.153015, -19.994184, -76.026222)
 
 [node name="zidSprijin26" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, 0.382634, -226.745499, -32.397911, -77.415108)
+transform = Transform3D(0.716015, 0.000000, 0.698085, 0.000000, 1.000000, 0.000000, -0.698085, 0.000000, 0.716015, -218.260391, -19.758907, -72.731720)
 
 [node name="zidSprijin27" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.488745, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, 0.488745, -224.957565, -34.681778, -72.991463)
+transform = Transform3D(0.807400, 0.000000, 0.590005, 0.000000, 1.000000, 0.000000, -0.590005, 0.000000, 0.807400, -216.599472, -19.618622, -70.834274)
 
 [node name="zidSprijin28" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.618877, 0.000000, 0.785488, 0.000000, 1.000000, 0.000000, -0.785488, 0.000000, 0.618877, -203.503448, -20.353243, -89.674629)
+transform = Transform3D(0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, 0.890658, -214.189514, -19.523865, -69.245354)
 
-[node name="zidSprijin29" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.807400, 0.000000, 0.590005, 0.000000, 1.000000, 0.000000, -0.590005, 0.000000, 0.807400, -203.376938, -20.177868, -89.025337)
+[node name="zidSprijin29" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, 0.958502, -203.988586, -19.258047, -83.538109)
 
-[node name="zidSprijin30" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, 0.890658, -204.522308, -20.163414, -89.427277)
+[node name="zidSprijin30" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.986930, 0.000000, 0.161149, 0.000000, 1.000000, 0.000000, -0.161149, 0.000000, 0.986930, -201.074173, -19.023525, -82.604889)
 
-[node name="zidSprijin31" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.933056, 0.000000, 0.359731, 0.000000, 1.000000, 0.000000, -0.359731, 0.000000, 0.933056, -204.799942, -20.069239, -89.027863)
+[node name="zidSprijin31" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.999558, 0.000000, -0.029727, 0.000000, 1.000000, 0.000000, 0.029727, 0.000000, 0.999558, -197.601776, -18.656740, -81.971413)
 
 [node name="zidSprijin32" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, 0.958502, -203.019806, -19.949669, -88.477333)
+transform = Transform3D(0.999774, 0.000000, -0.021249, 0.000000, 1.000000, 0.000000, 0.021249, 0.000000, 0.999774, -191.100006, -18.290489, -82.011108)
 
 [node name="zidSprijin33" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.986930, 0.000000, 0.161149, 0.000000, 1.000000, 0.000000, -0.161149, 0.000000, 0.986930, -200.256821, -19.846640, -87.537636)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -185.420868, -17.924835, -81.655556)
 
 [node name="zidSprijin34" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.999558, 0.000000, -0.029727, 0.000000, 1.000000, 0.000000, 0.029727, 0.000000, 0.999558, -198.031494, -19.562822, -86.807915)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -178.033768, -17.420486, -81.300003)
 
 [node name="zidSprijin35" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.998829, 0.000000, -0.048389, 0.000000, 1.000000, 0.000000, 0.048389, 0.000000, 0.998829, -193.125107, -19.398209, -86.901398)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -171.582642, -17.062395, -81.300003)
 
 [node name="zidSprijin36" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -187.917374, -19.066917, -86.388885)
+transform = Transform3D(0.998829, 0.000000, -0.048389, 0.000000, 1.000000, 0.000000, 0.048389, 0.000000, 0.998829, -167.144424, -16.689402, -81.324326)
 
 [node name="zidSprijin37" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -179.750000, -18.585405, -85.555557)
+transform = Transform3D(0.999862, 0.000000, 0.016596, 0.000000, 1.000000, 0.000000, -0.016596, 0.000000, 0.999862, -159.464783, -16.330162, -81.678261)
 
 [node name="zidSprijin38" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -174.079117, -18.210058, -85.055557)
+transform = Transform3D(0.978337, 0.000000, 0.207018, 0.000000, 1.000000, 0.000000, -0.207018, 0.000000, 0.978337, -153.884521, -15.955876, -80.832619)
 
-[node name="zidSprijin39" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.999774, 0.000000, -0.021249, 0.000000, 1.000000, 0.000000, 0.021249, 0.000000, 0.999774, -168.652252, -17.862305, -84.997108)
+[node name="zidSprijin39" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, 0.890658, -144.469620, -15.595412, -77.454605)
 
-[node name="zidSprijin40" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.999558, 0.000000, -0.029727, 0.000000, 1.000000, 0.000000, 0.029727, 0.000000, 0.999558, -162.841476, -17.523901, -85.638382)
+[node name="zidSprijin40" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.807400, 0.000000, 0.590005, 0.000000, 1.000000, 0.000000, -0.590005, 0.000000, 0.807400, -142.683609, -15.500651, -76.101929)
 
-[node name="zidSprijin41" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.986930, 0.000000, 0.161149, 0.000000, 1.000000, 0.000000, -0.161149, 0.000000, 0.986930, -154.794678, -17.136515, -85.399757)
+[node name="zidSprijin41" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, 0.618879, -139.549942, -15.219996, -72.947342)
 
 [node name="zidSprijin42" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.933056, 0.000000, 0.359730, 0.000000, 1.000000, 0.000000, -0.359730, 0.000000, 0.933056, -145.910400, -16.723799, -83.551155)
+transform = Transform3D(0.488743, 0.000000, 0.872428, 0.000000, 1.000000, 0.000000, -0.872428, 0.000000, 0.488743, -137.959549, -15.125105, -70.806259)
 
 [node name="zidSprijin43" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, 0.890658, -141.738892, -16.539396, -81.211456)
+transform = Transform3D(0.271210, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271210, -134.614777, -14.858560, -63.018005)
 
 [node name="zidSprijin44" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.807400, 0.000000, 0.590005, 0.000000, 1.000000, 0.000000, -0.590005, 0.000000, 0.807400, -139.145782, -16.446417, -79.988403)
+transform = Transform3D(0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120246, -134.401810, -14.763587, -60.906490)
 
 [node name="zidSprijin45" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.716017, 0.000000, 0.698083, 0.000000, 1.000000, 0.000000, -0.698083, 0.000000, 0.716017, -137.233841, -16.260900, -78.194885)
+transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -134.092499, -14.482431, -56.444149)
 
 [node name="zidSprijin46" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, 0.618879, -135.528229, -16.070242, -76.155327)
+transform = Transform3D(-0.271211, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, -0.271211, -134.503082, -14.387455, -53.695141)
 
 [node name="zidSprijin47" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.382633, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, 0.382633, -130.379059, -16.062750, -68.307930)
+transform = Transform3D(-0.488745, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, -0.488745, -137.773666, -14.120894, -45.568958)
 
 [node name="zidSprijin48" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.271210, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271210, -129.303833, -15.416592, -63.615448)
+transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -139.153397, -14.025982, -43.882057)
 
 [node name="zidSprijin49" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120246, -128.449326, -15.177778, -61.097950)
+transform = Transform3D(-0.807401, 0.000000, 0.590004, 0.000000, 1.000000, 0.000000, -0.590004, 0.000000, -0.807401, -152.634506, -13.745224, -54.225918)
 
 [node name="zidSprijin50" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.000002, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, 0.000002, -128.340393, -14.954032, -58.560642)
+transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -152.428894, -13.650428, -54.106220)
 
 [node name="zidSprijin51" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -156.793777, -14.774015, -58.997665)
+transform = Transform3D(-0.933056, 0.000000, 0.359731, 0.000000, 1.000000, 0.000000, -0.359731, 0.000000, -0.933056, -153.236496, -13.517406, -53.427040)
 
-[node name="zidSprijin52" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.382633, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382633, -155.823456, -14.716015, -60.456295)
+[node name="zidSprijin52" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.978337, 0.000000, 0.207019, 0.000000, 1.000000, 0.000000, -0.207019, 0.000000, -0.978337, -156.834274, -13.289839, -52.316181)
 
-[node name="zidSprijin53" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.488745, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, -0.488745, -155.780243, -14.594764, -59.932030)
+[node name="zidSprijin53" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.999862, 0.000000, 0.016596, 0.000000, 1.000000, 0.000000, -0.016596, 0.000000, -0.999862, -159.978683, -12.915539, -51.446560)
 
-[node name="zidSprijin54" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -155.915405, -14.574060, -59.598717)
+[node name="zidSprijin54" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.998790, 0.000000, -0.049183, 0.000000, 1.000000, 0.000000, 0.049183, 0.000000, -0.998790, -164.697449, -12.650604, -51.425964)
 
-[node name="zidSprijin55" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.716016, 0.000000, 0.698084, 0.000000, 1.000000, 0.000000, -0.698084, 0.000000, -0.716016, -156.191208, -14.503672, -59.156799)
+[node name="zidSprijin55" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.999986, 0.000000, -0.005352, 0.000000, 1.000000, 0.000000, 0.005352, 0.000000, -0.999986, -170.119843, -12.277457, -51.411110)
 
-[node name="zidSprijin56" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.807401, 0.000000, 0.590004, 0.000000, 1.000000, 0.000000, -0.590004, 0.000000, -0.807401, -156.090393, -14.383221, -58.980400)
+[node name="zidSprijin56" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -178.033768, -11.825215, -51.299999)
 
-[node name="zidSprijin57" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -154.977692, -14.326536, -59.427277)
+[node name="zidSprijin57" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -182.926453, -11.452909, -51.299999)
 
-[node name="zidSprijin58" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.933056, 0.000000, 0.359731, 0.000000, 1.000000, 0.000000, -0.359731, 0.000000, -0.933056, -154.742188, -14.211969, -59.189121)
+[node name="zidSprijin58" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.999774, 0.000000, -0.021249, 0.000000, 1.000000, 0.000000, 0.021249, 0.000000, -0.999774, -190.932617, -10.955440, -51.298080)
 
 [node name="zidSprijin59" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, -0.958502, -156.501587, -14.093375, -58.586369)
+transform = Transform3D(-0.999558, 0.000000, -0.029728, 0.000000, 1.000000, 0.000000, 0.029728, 0.000000, -0.999558, -196.730011, -10.589272, -51.661243)
 
 [node name="zidSprijin60" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.995580, 0.000000, 0.093922, 0.000000, 1.000000, 0.000000, -0.093922, 0.000000, -0.995580, -159.926117, -13.806227, -57.610687)
+transform = Transform3D(-0.986930, 0.000000, 0.161151, 0.000000, 1.000000, 0.000000, -0.161151, 0.000000, -0.986930, -203.886490, -10.222486, -51.167122)
 
-[node name="zidSprijin61" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.999558, 0.000000, -0.029727, 0.000000, 1.000000, 0.000000, 0.029727, 0.000000, -0.999558, -161.419357, -13.593657, -57.361290)
+[node name="zidSprijin61" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, -0.958502, -207.581375, -9.987954, -50.432777)
 
-[node name="zidSprijin62" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.998829, 0.000000, -0.048388, 0.000000, 1.000000, 0.000000, 0.048388, 0.000000, -0.998829, -166.360901, -13.375859, -57.512348)
+[node name="zidSprijin62" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.890658, 0.000000, 0.454673, 0.000000, 1.000000, 0.000000, -0.454673, 0.000000, -0.890658, -215.239456, -9.722136, -47.742195)
 
-[node name="zidSprijin63" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -171.582626, -13.007266, -57.222221)
+[node name="zidSprijin63" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.716014, 0.000000, 0.698086, 0.000000, 1.000000, 0.000000, -0.698086, 0.000000, -0.716014, -218.951050, -9.487094, -45.086491)
 
-[node name="zidSprijin64" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -179.750000, -12.586736, -56.777779)
+[node name="zidSprijin64" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -220.505966, -9.346713, -43.390755)
 
-[node name="zidSprijin65" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -185.420883, -12.244474, -56.333332)
+[node name="zidSprijin65" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.488743, 0.000000, 0.872428, 0.000000, 1.000000, 0.000000, -0.872428, 0.000000, -0.488743, -222.159454, -9.251817, -41.156242)
 
-[node name="zidSprijin66" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.999774, 0.000000, -0.021249, 0.000000, 1.000000, 0.000000, 0.021249, 0.000000, -0.999774, -190.818481, -11.944982, -56.274551)
+[node name="zidSprijin66" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, -0.271212, -225.591873, -8.985351, -33.097500)
 
-[node name="zidSprijin67" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.999558, 0.000000, -0.029728, 0.000000, 1.000000, 0.000000, 0.029728, 0.000000, -0.999558, -196.636505, -11.589831, -56.860401)
+[node name="zidSprijin67" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -225.808929, -8.890602, -30.929352)
 
-[node name="zidSprijin68" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.986930, 0.000000, 0.161151, 0.000000, 1.000000, 0.000000, -0.161151, 0.000000, -0.986930, -204.916321, -11.182282, -56.490650)
+[node name="zidSprijin68" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.120248, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120248, -226.114151, -8.610180, -26.364666)
 
 [node name="zidSprijin69" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.933056, 0.000000, 0.359730, 0.000000, 1.000000, 0.000000, -0.359730, 0.000000, -0.933056, -213.997559, -11.201757, -54.402927)
+transform = Transform3D(0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271212, -225.682114, -8.515146, -23.504894)
 
 [node name="zidSprijin70" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.890658, 0.000000, 0.454673, 0.000000, 1.000000, 0.000000, -0.454673, 0.000000, -0.890658, -218.414444, -11.151327, -52.110207)
+transform = Transform3D(0.488745, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, 0.488745, -208.280029, -8.247835, -26.294497)
 
 [node name="zidSprijin71" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.807399, 0.000000, 0.590005, 0.000000, 1.000000, 0.000000, -0.590005, 0.000000, -0.807399, -220.765610, -11.050283, -50.440304)
+transform = Transform3D(0.618059, 0.000000, 0.786132, 0.000000, 1.000000, 0.000000, -0.786132, 0.000000, 0.618059, -207.880417, -8.151779, -25.570705)
 
 [node name="zidSprijin72" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.716014, 0.000000, 0.698086, 0.000000, 1.000000, 0.000000, -0.698086, 0.000000, -0.716014, -222.793060, -10.896902, -48.688820)
+transform = Transform3D(0.713329, 0.000000, 0.700830, 0.000000, 1.000000, 0.000000, -0.700830, 0.000000, 0.713329, -207.209015, -8.008739, -24.818804)
 
 [node name="zidSprijin73" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -224.666672, -10.686331, -46.709587)
+transform = Transform3D(0.888066, 0.000000, 0.459717, 0.000000, 1.000000, 0.000000, -0.459717, 0.000000, 0.888066, -207.085922, -7.767563, -23.961069)
 
 [node name="zidSprijin74" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.382635, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382635, -229.602737, -9.920645, -38.441658)
+transform = Transform3D(0.932112, 0.000000, 0.362170, 0.000000, 1.000000, 0.000000, -0.362170, 0.000000, 0.932112, -206.348572, -7.630524, -23.414063)
 
-[node name="zidSprijin75" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, -0.271212, -230.858658, -9.747001, -33.689976)
+[node name="zidSprijin75" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.979363, 0.000000, 0.202107, 0.000000, 1.000000, 0.000000, -0.202107, 0.000000, 0.979363, -202.815781, -7.394958, -22.207066)
 
-[node name="zidSprijin76" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -203.176193, -9.539889, -30.201374)
+[node name="zidSprijin76" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.996186, 0.000000, 0.087261, 0.000000, 1.000000, 0.000000, -0.087261, 0.000000, 0.996186, -200.079956, -7.104422, -21.462402)
 
-[node name="zidSprijin77" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(-0.000002, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000002, -203.507233, -9.512839, -29.450073)
+[node name="zidSprijin77" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.999011, 0.000000, -0.044466, 0.000000, 1.000000, 0.000000, 0.044466, 0.000000, 0.999011, -193.947495, -6.727702, -21.262405)
 
-[node name="zidSprijin78" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.120248, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120248, -203.479126, -9.362798, -28.910723)
+[node name="zidSprijin78" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.999987, 0.000000, -0.005033, 0.000000, 1.000000, 0.000000, 0.005033, 0.000000, 0.999987, -188.157928, -6.330845, -21.299999)
 
-[node name="zidSprijin79" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271212, -203.787720, -9.393043, -29.582314)
+[node name="zidSprijin79" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -179.842072, -5.839593, -21.299999)
 
-[node name="zidSprijin80" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, 0.382634, -204.595413, -9.316935, -29.936831)
+[node name="zidSprijin80" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -174.546402, -5.443783, -21.299999)
 
-[node name="zidSprijin81" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.618059, 0.000000, 0.786132, 0.000000, 1.000000, 0.000000, -0.786132, 0.000000, 0.618059, -204.313995, -9.149595, -28.914646)
+[node name="zidSprijin81" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.999998, 0.000000, -0.001908, 0.000000, 1.000000, 0.000000, 0.001908, 0.000000, 0.999998, -167.395142, -5.051830, -21.355556)
 
-[node name="zidSprijin82" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.713329, 0.000000, 0.700830, 0.000000, 1.000000, 0.000000, -0.700830, 0.000000, 0.713329, -204.090973, -9.005710, -28.215885)
+[node name="zidSprijin82" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.999816, 0.000000, -0.019171, 0.000000, 1.000000, 0.000000, 0.019171, 0.000000, 0.999816, -160.451416, -4.509425, -21.753405)
 
-[node name="zidSprijin83" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.802981, 0.000000, 0.596004, 0.000000, 1.000000, 0.000000, -0.596004, 0.000000, 0.802981, -203.965576, -8.850162, -28.002850)
+[node name="zidSprijin83" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.997925, 0.000000, 0.064383, 0.000000, 1.000000, 0.000000, -0.064383, 0.000000, 0.997925, -152.236343, -4.127005, -21.974630)
 
 [node name="zidSprijin84" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.888066, 0.000000, 0.459717, 0.000000, 1.000000, 0.000000, -0.459717, 0.000000, 0.888066, -204.946533, -8.818330, -28.319901)
+transform = Transform3D(0.890472, 0.000000, 0.455038, 0.000000, 1.000000, 0.000000, -0.455038, 0.000000, 0.890472, -142.045120, -3.745997, -19.340031)
 
 [node name="zidSprijin85" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.932112, 0.000000, 0.362170, 0.000000, 1.000000, 0.000000, -0.362170, 0.000000, 0.932112, -205.186569, -8.619383, -27.841908)
+transform = Transform3D(0.820761, 0.000000, 0.571272, 0.000000, 1.000000, 0.000000, -0.571272, 0.000000, 0.820761, -139.517456, -3.622566, -17.726746)
 
-[node name="zidSprijin86" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.958822, 0.000000, 0.284008, 0.000000, 1.000000, 0.000000, -0.284008, 0.000000, 0.958822, -203.396698, -8.458797, -27.342239)
+[node name="zidSprijin86" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.707106, 0.000000, 0.707107, 0.000000, 1.000000, 0.000000, -0.707107, 0.000000, 0.707106, -136.988297, -3.499139, -15.894670)
 
-[node name="zidSprijin87" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.996186, 0.000000, 0.087261, 0.000000, 1.000000, 0.000000, -0.087261, 0.000000, 0.996186, -199.682587, -8.030234, -26.234776)
+[node name="zidSprijin87" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.495688, 0.000000, 0.868501, 0.000000, 1.000000, 0.000000, -0.868501, 0.000000, 0.495688, -133.944229, -3.260403, -11.530392)
 
-[node name="zidSprijin88" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.999639, 0.000000, -0.026870, 0.000000, 1.000000, 0.000000, 0.026870, 0.000000, 0.999639, -197.327957, -7.671875, -25.766071)
+[node name="zidSprijin88" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.385239, 0.000000, 0.922817, 0.000000, 1.000000, 0.000000, -0.922817, 0.000000, 0.385239, -132.324844, -3.147859, -8.759831)
 
-[node name="zidSprijin89" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.999806, 0.000000, -0.019684, 0.000000, 1.000000, 0.000000, 0.019684, 0.000000, 0.999806, -190.000000, -7.251655, -26.000000)
+[node name="zidSprijin89" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.258865, 0.000000, 0.965913, 0.000000, 1.000000, 0.000000, -0.965913, 0.000000, 0.258865, -131.652130, -3.034039, -6.025938)
 
 [node name="zidSprijin90" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -184.000000, -6.694801, -25.666668)
+transform = Transform3D(0.084719, 0.000000, 0.996405, 0.000000, 1.000000, 0.000000, -0.996405, 0.000000, 0.084719, -130.805725, -2.848777, -1.717438)
 
 [node name="zidSprijin91" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -176.140961, -6.191814, -25.500000)
+transform = Transform3D(0.002230, 0.000000, 0.999997, 0.000000, 1.000000, 0.000000, -0.999997, 0.000000, 0.002230, -130.810043, -2.688849, 3.150952)
 
 [node name="zidSprijin92" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -169.015472, -5.833301, -25.333332)
+transform = Transform3D(-0.008367, 0.000000, 0.999965, 0.000000, 1.000000, 0.000000, -0.999965, 0.000000, -0.008367, -130.944443, -2.502553, 7.724000)
 
 [node name="zidSprijin93" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.999901, 0.000000, -0.014102, 0.000000, 1.000000, 0.000000, 0.014102, 0.000000, 0.999901, -163.811005, -5.543501, -25.679581)
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -130.777771, -2.320161, 14.303007)
 
-[node name="zidSprijin94" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.999981, 0.000000, 0.006114, 0.000000, 1.000000, 0.000000, -0.006114, 0.000000, 0.999981, -158.832016, -5.675635, -26.199024)
-
-[node name="zidSprijin95" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.980279, 0.000000, 0.197619, 0.000000, 1.000000, 0.000000, -0.197619, 0.000000, 0.980279, -148.519745, -5.639472, -25.929079)
-
-[node name="zidSprijin96" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.890472, 0.000000, 0.455038, 0.000000, 1.000000, 0.000000, -0.455038, 0.000000, 0.890472, -139.992203, -5.591605, -22.603596)
-
-[node name="zidSprijin97" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.820761, 0.000000, 0.571272, 0.000000, 1.000000, 0.000000, -0.571272, 0.000000, 0.820761, -137.225510, -5.316260, -20.474010)
-
-[node name="zidSprijin98" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.707106, 0.000000, 0.707107, 0.000000, 1.000000, 0.000000, -0.707107, 0.000000, 0.707106, -134.599380, -5.006247, -17.887682)
-
-[node name="zidSprijin99" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.598131, 0.000000, 0.801399, 0.000000, 1.000000, 0.000000, -0.801399, 0.000000, 0.598131, -132.676926, -4.720755, -15.417461)
-
-[node name="zidSprijin100" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.495688, 0.000000, 0.868501, 0.000000, 1.000000, 0.000000, -0.868501, 0.000000, 0.495688, -131.328522, -4.149649, -12.882359)
-
-[node name="zidSprijin101" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_a")]
-transform = Transform3D(0.258865, 0.000000, 0.965913, 0.000000, 1.000000, 0.000000, -0.965913, 0.000000, 0.258865, -154.951477, -3.629868, -2.201617)
-
-[node name="zidSprijin102" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.153148, 0.000000, 0.988203, 0.000000, 1.000000, 0.000000, -0.988203, 0.000000, 0.153148, -154.863693, -3.481049, -1.443204)
-
-[node name="zidSprijin103" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.036728, 0.000000, 0.999325, 0.000000, 1.000000, 0.000000, -0.999325, 0.000000, 0.036728, -154.504135, -3.319112, 0.914023)
-
-[node name="zidSprijin104" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.024299, 0.000000, 0.999705, 0.000000, 1.000000, 0.000000, -0.999705, 0.000000, -0.024299, -128.895111, -3.763657, 5.037005)
-
-[node name="zidSprijin105" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.002350, 0.000000, 0.999997, 0.000000, 1.000000, 0.000000, -0.999997, 0.000000, -0.002350, -129.277771, -5.408054, 9.511250)
-
-[node name="zidSprijin106" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -129.944443, -6.588625, 15.924187)
-
-[node name="bolovan107" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan94" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.312777, 0.000000, 1.074882, 0.000000, 1.119465, 0.000000, -1.074882, 0.000000, -0.312777, -130.116989, -23.579016, -105.924103)
 
-[node name="bolovan108" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan95" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.906047, 0.000000, 0.089388, 0.000000, 0.910446, 0.000000, -0.089388, 0.000000, 0.906047, -132.004028, -24.247198, -113.001495)
 
-[node name="bolovan109" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.452580, 0.000000, -0.993441, 0.000000, 1.091674, 0.000000, 0.993441, 0.000000, 0.452580, -140.044571, -22.848471, -96.905174)
+[node name="bolovan96" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.452580, 0.000000, -0.993441, 0.000000, 1.091674, 0.000000, 0.993441, 0.000000, 0.452580, -155.150742, -24.625860, -117.687660)
 
-[node name="bolovan110" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.562698, 0.000000, -0.802434, 0.000000, 0.980066, 0.000000, 0.802434, 0.000000, 0.562698, -144.468903, -23.250280, -97.488419)
+[node name="bolovan97" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.562698, 0.000000, -0.802434, 0.000000, 0.980066, 0.000000, 0.802434, 0.000000, 0.562698, -153.054474, -24.368795, -115.412216)
 
-[node name="bolovan111" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.954587, 0.000000, 0.764700, 0.000000, 1.223112, 0.000000, -0.764700, 0.000000, -0.954587, -138.318314, -23.172171, -99.522537)
+[node name="bolovan98" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.954587, 0.000000, 0.764700, 0.000000, 1.223112, 0.000000, -0.764700, 0.000000, -0.954587, -154.467697, -24.570913, -117.263458)
 
-[node name="bolovan112" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.377334, 0.000000, 0.769347, 0.000000, 0.856898, 0.000000, -0.769347, 0.000000, 0.377334, -154.774567, -18.548529, -90.569427)
+[node name="bolovan99" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.377334, 0.000000, 0.769347, 0.000000, 0.856898, 0.000000, -0.769347, 0.000000, 0.377334, -159.225433, -24.712088, -117.430573)
 
-[node name="bolovan113" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.178576, 0.000000, 0.725559, 0.000000, 0.747212, 0.000000, -0.725559, 0.000000, -0.178576, -160.335754, -19.409246, -91.592422)
+[node name="bolovan100" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.178576, 0.000000, 0.725559, 0.000000, 0.747212, 0.000000, -0.725559, 0.000000, -0.178576, -159.904144, -24.467505, -115.592133)
 
-[node name="bolovan114" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.999337, 0.000000, -0.137764, 0.000000, 1.008788, 0.000000, 0.137764, 0.000000, 0.999337, -160.331635, -19.593527, -91.821289)
+[node name="bolovan101" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.999337, 0.000000, -0.137764, 0.000000, 1.008788, 0.000000, 0.137764, 0.000000, 0.999337, -159.908264, -24.437887, -115.363266)
 
-[node name="bolovan115" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.907319, 0.000000, 0.489572, 0.000000, 1.030974, 0.000000, -0.489572, 0.000000, 0.907319, -155.179886, -20.629705, -93.015594)
+[node name="bolovan102" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.907319, 0.000000, 0.489572, 0.000000, 1.030974, 0.000000, -0.489572, 0.000000, 0.907319, -158.820114, -24.401022, -114.984406)
 
-[node name="bolovan116" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.403389, 0.000000, -0.774452, 0.000000, 0.873212, 0.000000, 0.774452, 0.000000, 0.403389, -167.022507, -16.949001, -88.668976)
+[node name="bolovan103" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.403389, 0.000000, -0.774452, 0.000000, 0.873212, 0.000000, 0.774452, 0.000000, 0.403389, -166.320999, -25.356569, -119.251740)
 
-[node name="bolovan117" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.157470, 0.000000, 0.980612, 0.000000, 0.993175, 0.000000, -0.980612, 0.000000, 0.157470, -170.119843, -20.572714, -93.402504)
+[node name="bolovan104" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.157470, 0.000000, 0.980612, 0.000000, 0.993175, 0.000000, -0.980612, 0.000000, 0.157470, -170.119843, -24.230352, -114.597496)
 
-[node name="bolovan118" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.464715, 0.000000, 1.005439, 0.000000, 1.107641, 0.000000, -1.005439, 0.000000, -0.464715, -176.573547, -18.737143, -90.580933)
+[node name="bolovan105" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.287182, 0.000000, 0.976691, 0.000000, 1.018037, 0.000000, -0.976691, 0.000000, -0.287182, -199.573975, -22.677633, -88.874741)
 
-[node name="bolovan119" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.674936, 0.000000, -0.395628, 0.000000, 0.782342, 0.000000, 0.395628, 0.000000, -0.674936, -176.573547, -20.594931, -93.739746)
+[node name="bolovan106" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.730661, 0.000000, 0.496297, 0.000000, 0.883276, 0.000000, -0.496297, 0.000000, -0.730661, -200.508102, -20.005957, -93.703468)
 
-[node name="bolovan120" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.129989, 0.000000, -1.127704, 0.000000, 1.135171, 0.000000, 1.127704, 0.000000, 0.129989, -179.750000, -20.638632, -94.122513)
+[node name="bolovan107" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.564987, 0.000000, -1.023466, 0.000000, 1.169056, 0.000000, 1.023466, 0.000000, 0.564987, -201.400223, -19.317844, -89.166534)
 
-[node name="bolovan121" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(1.068172, 0.000000, -0.106739, 0.000000, 1.073491, 0.000000, 0.106739, 0.000000, 1.068172, -193.682709, -18.854864, -90.871300)
+[node name="bolovan108" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.820623, 0.000000, -0.544556, 0.000000, 0.984867, 0.000000, 0.544556, 0.000000, -0.820623, -204.073456, -19.717489, -93.684677)
 
-[node name="bolovan122" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.827451, 0.000000, 0.147050, 0.000000, 0.840416, 0.000000, -0.147050, 0.000000, -0.827451, -187.917358, -19.965918, -93.387238)
-
-[node name="bolovan123" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.940707, 0.000000, 0.812609, 0.000000, 1.243086, 0.000000, -0.812609, 0.000000, 0.940707, -189.380157, -20.380667, -94.194321)
-
-[node name="bolovan124" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.970623, 0.000000, -0.383161, 0.000000, 1.043514, 0.000000, 0.383161, 0.000000, 0.970623, -191.337524, -20.055426, -93.644768)
-
-[node name="bolovan125" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.287182, 0.000000, 0.976691, 0.000000, 1.018037, 0.000000, -0.976691, 0.000000, -0.287182, -199.573975, -18.144398, -88.874741)
-
-[node name="bolovan126" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.730661, 0.000000, 0.496297, 0.000000, 0.883276, 0.000000, -0.496297, 0.000000, -0.730661, -200.508102, -19.689581, -93.703468)
-
-[node name="bolovan127" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.564987, 0.000000, -1.023466, 0.000000, 1.169056, 0.000000, 1.023466, 0.000000, 0.564987, -201.400223, -18.362524, -89.166534)
-
-[node name="bolovan128" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.820623, 0.000000, -0.544556, 0.000000, 0.984867, 0.000000, 0.544556, 0.000000, -0.820623, -204.073456, -19.509283, -93.684677)
-
-[node name="bolovan129" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan109" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.723720, 0.000000, 0.769742, 0.000000, 1.056538, 0.000000, -0.769742, 0.000000, 0.723720, -206.387177, -19.462797, -93.306358)
 
-[node name="bolovan130" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.155572, 0.000000, -1.160211, 0.000000, 1.170595, 0.000000, 1.160211, 0.000000, -0.155572, -201.562485, -18.686499, -90.149467)
+[node name="bolovan110" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.155572, 0.000000, -1.160211, 0.000000, 1.170595, 0.000000, 1.160211, 0.000000, -0.155572, -201.562485, -19.527548, -90.149467)
 
-[node name="bolovan131" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan111" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.448374, 0.000000, 0.588727, 0.000000, 0.740027, 0.000000, -0.588727, 0.000000, -0.448374, -207.706421, -18.977518, -91.085503)
 
-[node name="bolovan132" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.163237, 0.000000, -1.324905, 0.000000, 1.334923, 0.000000, 1.324905, 0.000000, -0.163237, -206.933502, -18.600241, -89.339867)
+[node name="bolovan112" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.163237, 0.000000, -1.324905, 0.000000, 1.334923, 0.000000, 1.324905, 0.000000, -0.163237, -206.933502, -18.744900, -89.339867)
 
-[node name="bolovan133" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.735015, 0.000000, 0.768308, 0.000000, 1.063270, 0.000000, -0.768308, 0.000000, -0.735015, -205.014801, -18.474325, -89.401581)
+[node name="bolovan113" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.735015, 0.000000, 0.768308, 0.000000, 1.063270, 0.000000, -0.768308, 0.000000, -0.735015, -205.014801, -18.877146, -89.401581)
 
-[node name="bolovan134" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.639117, 0.000000, 0.561502, 0.000000, 0.850738, 0.000000, -0.561502, 0.000000, 0.639117, -225.018738, -17.222933, -69.501450)
+[node name="bolovan114" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.639117, 0.000000, 0.561502, 0.000000, 0.850738, 0.000000, -0.561502, 0.000000, 0.639117, -203.467682, -19.173948, -89.708160)
 
-[node name="bolovan135" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.621473, 0.000000, -0.551284, 0.000000, 0.830749, 0.000000, 0.551284, 0.000000, -0.621473, -219.208023, -16.880194, -67.245552)
+[node name="bolovan115" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.621473, 0.000000, -0.551284, 0.000000, 0.830749, 0.000000, 0.551284, 0.000000, -0.621473, -204.596664, -18.156012, -87.347282)
 
-[node name="bolovan136" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.640753, 0.000000, 0.619774, 0.000000, 0.891451, 0.000000, -0.619774, 0.000000, -0.640753, -211.891586, -15.036642, -61.888985)
+[node name="bolovan116" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.640753, 0.000000, 0.619774, 0.000000, 0.891451, 0.000000, -0.619774, 0.000000, -0.640753, -211.891586, -26.963140, -61.888985)
 
-[node name="bolovan137" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.133802, 0.000000, -0.871720, 0.000000, 0.881929, 0.000000, 0.871720, 0.000000, -0.133802, -206.460281, -15.649755, -62.700798)
+[node name="bolovan117" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.133802, 0.000000, -0.871720, 0.000000, 0.881929, 0.000000, 0.871720, 0.000000, -0.133802, -206.460281, -22.938971, -62.700798)
 
-[node name="bolovan138" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.749371, 0.000000, -0.626334, 0.000000, 0.976653, 0.000000, 0.626334, 0.000000, 0.749371, -204.405258, -15.438772, -62.501671)
+[node name="bolovan118" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.749371, 0.000000, -0.626334, 0.000000, 0.976653, 0.000000, 0.626334, 0.000000, 0.749371, -204.405258, -21.777990, -62.501671)
 
-[node name="bolovan139" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.760357, 0.000000, 0.514038, 0.000000, 0.917811, 0.000000, -0.514038, 0.000000, 0.760357, -193.373230, -12.348959, -59.397850)
+[node name="bolovan119" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.760631, 0.000000, -0.456173, 0.000000, 0.886935, 0.000000, 0.456173, 0.000000, -0.760631, -201.857651, -22.228643, -62.267147)
 
-[node name="bolovan140" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.346347, 0.000000, -0.869651, 0.000000, 0.936082, 0.000000, 0.869651, 0.000000, 0.346347, -192.587112, -15.840033, -63.447430)
+[node name="bolovan120" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.562089, 0.000000, -0.467431, 0.000000, 0.731051, 0.000000, 0.467431, 0.000000, -0.562089, -192.605103, -17.667046, -64.231201)
 
-[node name="bolovan141" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.760631, 0.000000, -0.456173, 0.000000, 0.886935, 0.000000, 0.456173, 0.000000, -0.760631, -201.857651, -15.131033, -62.267147)
+[node name="bolovan121" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.074788, 0.000000, 1.062316, 0.000000, 1.064945, 0.000000, -1.062316, 0.000000, 0.074788, -168.163086, -14.865151, -63.671661)
 
-[node name="bolovan142" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.562089, 0.000000, -0.467431, 0.000000, 0.731051, 0.000000, 0.467431, 0.000000, -0.562089, -192.605103, -16.425100, -64.231201)
-
-[node name="bolovan143" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.218384, 0.000000, -1.031381, 0.000000, 1.054248, 0.000000, 1.031381, 0.000000, 0.218384, -187.917374, -13.827658, -61.136955)
-
-[node name="bolovan144" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.648795, 0.000000, 0.679002, 0.000000, 0.939137, 0.000000, -0.679002, 0.000000, 0.648795, -182.926453, -14.932486, -62.951801)
-
-[node name="bolovan145" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.897907, 0.000000, -0.223583, 0.000000, 0.925325, 0.000000, 0.223583, 0.000000, -0.897907, -181.466232, -13.525381, -61.002380)
-
-[node name="bolovan146" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.780373, 0.000000, 0.540886, 0.000000, 0.949495, 0.000000, -0.540886, 0.000000, -0.780373, -181.466232, -14.819860, -62.918106)
-
-[node name="bolovan147" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.602647, 0.000000, 0.990074, 0.000000, 1.159064, 0.000000, -0.990074, 0.000000, -0.602647, -176.573547, -14.577719, -62.793552)
-
-[node name="bolovan148" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(1.037847, 0.000000, 0.462863, 0.000000, 1.136384, 0.000000, -0.462863, 0.000000, 1.037847, -170.119843, -13.571630, -61.326603)
-
-[node name="bolovan149" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.612864, 0.000000, 0.820936, 0.000000, 1.024470, 0.000000, -0.820936, 0.000000, -0.612864, -164.228775, -14.312857, -63.338734)
-
-[node name="bolovan150" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.074788, 0.000000, 1.062316, 0.000000, 1.064945, 0.000000, -1.062316, 0.000000, 0.074788, -168.163086, -14.688620, -63.671661)
-
-[node name="bolovan151" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan122" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.658031, 0.000000, 0.642397, 0.000000, 0.919608, 0.000000, -0.642397, 0.000000, -0.658031, -162.462555, -14.580801, -64.567047)
 
-[node name="bolovan152" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.978524, 0.000000, -0.497088, 0.000000, 1.097546, 0.000000, 0.497088, 0.000000, 0.978524, -159.658463, -12.738882, -60.257851)
+[node name="bolovan123" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.524642, 0.000000, -0.561623, 0.000000, 0.768550, 0.000000, 0.561623, 0.000000, 0.524642, -153.883499, -13.718256, -62.583717)
 
-[node name="bolovan153" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.526467, 0.000000, 0.915411, 0.000000, 1.056004, 0.000000, -0.915411, 0.000000, 0.526467, -157.548264, -13.386297, -62.152855)
+[node name="bolovan124" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.917195, 0.000000, -0.169074, 0.000000, 0.932648, 0.000000, 0.169074, 0.000000, 0.917195, -154.424194, -13.488638, -61.498596)
 
-[node name="bolovan154" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(1.071657, 0.000000, -0.074822, 0.000000, 1.074265, 0.000000, 0.074822, 0.000000, 1.071657, -156.828384, -12.777716, -59.822514)
+[node name="bolovan125" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.733758, 0.000000, -0.801679, 0.000000, 1.086779, 0.000000, 0.801679, 0.000000, -0.733758, -142.343903, -13.387828, -33.052101)
 
-[node name="bolovan155" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.524642, 0.000000, -0.561623, 0.000000, 0.768550, 0.000000, 0.561623, 0.000000, 0.524642, -153.883499, -13.452597, -62.583717)
+[node name="bolovan126" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-1.035320, 0.000000, 0.143781, 0.000000, 1.045256, 0.000000, -0.143781, 0.000000, -1.035320, -144.251587, -13.960544, -37.034714)
 
-[node name="bolovan156" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.917195, 0.000000, -0.169074, 0.000000, 0.932648, 0.000000, 0.169074, 0.000000, 0.917195, -154.424194, -13.197760, -61.498596)
+[node name="bolovan127" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.483008, 0.000000, -0.967135, 0.000000, 1.081040, 0.000000, 0.967135, 0.000000, 0.483008, -160.348785, -9.950163, -30.869263)
 
-[node name="bolovan157" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.745071, 0.000000, -0.555161, 0.000000, 0.929158, 0.000000, 0.555161, 0.000000, -0.745071, -128.494781, -12.393604, -52.027401)
+[node name="bolovan128" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.698158, 0.000000, -0.713706, 0.000000, 0.998399, 0.000000, 0.713706, 0.000000, -0.698158, -157.633286, -10.542140, -32.166862)
 
-[node name="bolovan158" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.908048, 0.000000, -0.369728, 0.000000, 0.980433, 0.000000, 0.369728, 0.000000, 0.908048, -131.493835, -12.699469, -56.151844)
-
-[node name="bolovan159" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.862552, 0.000000, -0.404625, 0.000000, 0.952742, 0.000000, 0.404625, 0.000000, 0.862552, -132.627487, -12.225439, -47.343304)
-
-[node name="bolovan160" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.671216, 0.000000, 0.749726, 0.000000, 1.006290, 0.000000, -0.749726, 0.000000, 0.671216, -134.036392, -12.295294, -48.139774)
-
-[node name="bolovan161" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.733758, 0.000000, -0.801679, 0.000000, 1.086779, 0.000000, 0.801679, 0.000000, -0.733758, -142.343903, -9.733465, -33.052101)
-
-[node name="bolovan162" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-1.035320, 0.000000, 0.143781, 0.000000, 1.045256, 0.000000, -0.143781, 0.000000, -1.035320, -144.251587, -11.212545, -37.034714)
-
-[node name="bolovan163" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.483008, 0.000000, -0.967135, 0.000000, 1.081040, 0.000000, 0.967135, 0.000000, 0.483008, -160.348785, -9.153051, -30.869263)
-
-[node name="bolovan164" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.698158, 0.000000, -0.713706, 0.000000, 0.998399, 0.000000, 0.713706, 0.000000, -0.698158, -157.633286, -10.362127, -32.166862)
-
-[node name="bolovan165" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan129" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.578748, 0.000000, 0.769290, 0.000000, 0.962682, 0.000000, -0.769290, 0.000000, 0.578748, -165.797043, -10.422079, -34.479469)
 
-[node name="bolovan166" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-1.000373, 0.000000, 0.479776, 0.000000, 1.109473, 0.000000, -0.479776, 0.000000, -1.000373, -171.582626, -7.990103, -29.853611)
-
-[node name="bolovan167" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan130" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.673298, 0.000000, 0.604036, 0.000000, 0.904538, 0.000000, -0.604036, 0.000000, 0.673298, -174.079132, -9.874365, -33.842442)
 
-[node name="bolovan168" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan131" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.253872, 0.000000, 0.891747, 0.000000, 0.927180, 0.000000, -0.891747, 0.000000, -0.253872, -174.079132, -9.861639, -33.646137)
 
-[node name="bolovan169" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan132" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.453251, 0.000000, 0.922069, 0.000000, 1.027447, 0.000000, -0.922069, 0.000000, 0.453251, -171.582626, -9.941626, -32.873974)
 
-[node name="bolovan170" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.180834, 0.000000, -0.907903, 0.000000, 0.925737, 0.000000, 0.907903, 0.000000, -0.180834, -182.926453, -8.341284, -30.566616)
-
-[node name="bolovan171" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan133" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.612953, 0.000000, -0.852262, 0.000000, 1.049791, 0.000000, 0.852262, 0.000000, -0.612953, -178.033768, -9.649298, -33.547611)
 
-[node name="bolovan172" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.972022, 0.000000, -0.462227, 0.000000, 1.076327, 0.000000, 0.462227, 0.000000, -0.972022, -189.380157, -8.288565, -30.775928)
+[node name="bolovan134" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.517919, 0.000000, -0.869822, 0.000000, 1.012339, 0.000000, 0.869822, 0.000000, 0.517919, -193.600021, -8.740638, -32.146126)
 
-[node name="bolovan173" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.517919, 0.000000, -0.869822, 0.000000, 1.012339, 0.000000, 0.869822, 0.000000, 0.517919, -193.600021, -8.666082, -32.146126)
-
-[node name="bolovan174" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan135" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(1.171533, 0.000000, 0.571024, 0.000000, 1.303287, 0.000000, -0.571024, 0.000000, 1.171533, -193.505295, -8.820166, -33.605881)
 
-[node name="bolovan175" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.897318, 0.000000, -0.717144, 0.000000, 1.148685, 0.000000, 0.717144, 0.000000, -0.897318, -198.127304, -7.937277, -30.506096)
+[node name="bolovan136" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.897318, 0.000000, -0.717144, 0.000000, 1.148685, 0.000000, 0.717144, 0.000000, -0.897318, -198.127304, -8.154843, -30.506096)
 
-[node name="bolovan176" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan137" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.949039, 0.000000, -0.221331, 0.000000, 0.974507, 0.000000, 0.221331, 0.000000, 0.949039, -199.017746, -8.442709, -33.368294)
 
-[node name="bolovan177" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan138" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-1.008059, 0.000000, -0.834516, 0.000000, 1.308663, 0.000000, 0.834516, 0.000000, -1.008059, -199.226685, -8.466421, -34.629227)
 
-[node name="bolovan178" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan139" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.746650, 0.000000, -0.098275, 0.000000, 0.753089, 0.000000, 0.098275, 0.000000, 0.746650, -197.046600, -8.606009, -34.060051)
 
-[node name="bolovan179" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-1.085901, 0.000000, -0.045888, 0.000000, 1.086870, 0.000000, 0.045888, 0.000000, -1.085901, -203.493408, -7.888129, -31.582413)
+[node name="bolovan140" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-1.085901, 0.000000, -0.045888, 0.000000, 1.086870, 0.000000, 0.045888, 0.000000, -1.085901, -203.493408, -8.020134, -31.582413)
 
-[node name="bolovan180" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan141" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.742005, 0.000000, 0.254721, 0.000000, 0.784509, 0.000000, -0.254721, 0.000000, 0.742005, -204.827805, -7.617834, -30.884878)
 
-[node name="bolovan181" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.209412, 0.000000, -1.121807, 0.000000, 1.141186, 0.000000, 1.121807, 0.000000, -0.209412, -232.324158, -7.393206, -33.854836)
+[node name="bolovan142" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.209412, 0.000000, -1.121807, 0.000000, 1.141186, 0.000000, 1.121807, 0.000000, -0.209412, -202.231140, -7.919050, -30.469574)
 
-[node name="bolovan182" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.875277, 0.000000, -0.078097, 0.000000, 0.878754, 0.000000, 0.078097, 0.000000, 0.875277, -227.150391, -7.395819, -37.760967)
+[node name="bolovan143" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.875277, 0.000000, -0.078097, 0.000000, 0.878754, 0.000000, 0.078097, 0.000000, 0.875277, -205.931610, -7.656856, -31.871342)
 
-[node name="bolovan183" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.462052, 0.000000, -0.940780, 0.000000, 1.048121, 0.000000, 0.940780, 0.000000, -0.462052, -226.636169, -7.062933, -30.955959)
+[node name="bolovan144" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.462052, 0.000000, -0.940780, 0.000000, 1.048121, 0.000000, 0.940780, 0.000000, -0.462052, -208.257019, -7.185512, -30.364799)
 
-[node name="bolovan184" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan145" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.507048, 0.000000, -0.753845, 0.000000, 0.908505, 0.000000, 0.753845, 0.000000, 0.507048, -224.454758, -6.375433, -10.030233)
 
-[node name="bolovan185" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan146" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.107844, 0.000000, -0.710160, 0.000000, 0.718302, 0.000000, 0.710160, 0.000000, -0.107844, -223.364944, -6.390623, -14.261881)
 
-[node name="bolovan186" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.689293, 0.000000, 1.017423, 0.000000, 1.228932, 0.000000, -1.017423, 0.000000, 0.689293, -227.873383, -6.767547, -22.896645)
+[node name="bolovan147" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.689293, 0.000000, 1.017423, 0.000000, 1.228932, 0.000000, -1.017423, 0.000000, 0.689293, -227.873383, -8.723120, -22.896645)
 
-[node name="bolovan187" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.653984, 0.000000, -0.782676, 0.000000, 1.019939, 0.000000, 0.782676, 0.000000, 0.653984, -228.447479, -6.778049, -22.737288)
+[node name="bolovan148" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.653984, 0.000000, -0.782676, 0.000000, 1.019939, 0.000000, 0.782676, 0.000000, 0.653984, -228.447479, -8.031939, -22.737288)
 
-[node name="bolovan188" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan149" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.382826, 0.000000, 1.030482, 0.000000, 1.099294, 0.000000, -1.030482, 0.000000, -0.382826, -217.084717, -6.036292, -3.589389)
 
-[node name="bolovan189" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan150" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.323758, 0.000000, 1.013433, 0.000000, 1.063892, 0.000000, -1.013433, 0.000000, 0.323758, -206.356903, -5.553687, -3.158414)
 
-[node name="bolovan190" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan151" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.622122, 0.000000, 0.952966, 0.000000, 1.138060, 0.000000, -0.952966, 0.000000, 0.622122, -192.767731, -4.926779, -1.212895)
 
-[node name="bolovan191" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan152" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.010038, 0.000000, 0.960619, 0.000000, 0.960671, 0.000000, -0.960619, 0.000000, -0.010038, -195.366776, -5.105383, -1.066741)
 
-[node name="bolovan192" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan153" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.628057, 0.000000, -0.517103, 0.000000, 0.813542, 0.000000, 0.517103, 0.000000, -0.628057, -201.691589, -5.359885, -2.107237)
 
-[node name="bolovan193" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan154" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.662306, 0.000000, -0.603604, 0.000000, 0.896096, 0.000000, 0.603604, 0.000000, 0.662306, -181.390945, -4.171225, -1.425653)
 
-[node name="bolovan194" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan155" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.917719, 0.000000, 0.001230, 0.000000, 0.917720, 0.000000, -0.001230, 0.000000, 0.917719, -190.000000, -4.732825, -1.885842)
 
-[node name="bolovan195" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan156" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.651452, 0.000000, 0.567260, 0.000000, 0.863813, 0.000000, -0.567260, 0.000000, -0.651452, -184.000000, -4.327841, -3.393860)
 
-[node name="bolovan196" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan157" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.737570, 0.000000, -0.680698, 0.000000, 1.003673, 0.000000, 0.680698, 0.000000, -0.737570, -181.390945, -4.164328, -2.677884)
 
-[node name="bolovan197" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan158" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.487696, 0.000000, -0.830456, 0.000000, 0.963070, 0.000000, 0.830456, 0.000000, -0.487696, -178.000000, -3.951666, -1.109911)
 
-[node name="bolovan198" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan159" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.709300, 0.000000, 0.573641, 0.000000, 0.912234, 0.000000, -0.573641, 0.000000, 0.709300, -179.842072, -4.071112, -1.546662)
 
-[node name="bolovan199" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan160" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(1.087244, 0.000000, -0.334609, 0.000000, 1.137568, 0.000000, 0.334609, 0.000000, 1.087244, -169.015472, -3.197669, -0.490910)
 
-[node name="bolovan200" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan161" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.916691, 0.000000, -0.186295, 0.000000, 0.935429, 0.000000, 0.186295, 0.000000, -0.916691, -163.293503, -2.932166, -2.079678)
 
-[node name="bolovan201" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan162" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.923074, 0.000000, -0.112611, 0.000000, 0.929918, 0.000000, 0.112611, 0.000000, 0.923074, -169.015472, -3.346457, -4.167057)
 
-[node name="bolovan202" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan163" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-1.051028, 0.000000, -0.120553, 0.000000, 1.057919, 0.000000, 0.120553, 0.000000, -1.051028, -154.384705, -1.402155, 0.459884)
 
-[node name="bolovan203" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan164" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.124617, 0.000000, -0.859632, 0.000000, 0.868618, 0.000000, 0.859632, 0.000000, -0.124617, -154.105927, -2.210837, -3.199354)
 
-[node name="bolovan204" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan165" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.716079, 0.000000, 0.895794, 0.000000, 1.146829, 0.000000, -0.895794, 0.000000, -0.716079, -156.446899, -2.441626, -4.991017)
 
-[node name="bolovan205" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan166" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.496813, 0.000000, 0.559135, 0.000000, 0.747967, 0.000000, -0.559135, 0.000000, 0.496813, -154.002075, -2.209403, -3.535707)
 
-[node name="bolovan206" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan167" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.714130, 0.000000, -0.848718, 0.000000, 1.109190, 0.000000, 0.848718, 0.000000, 0.714130, -152.888733, -2.029654, -2.540191)
 
-[node name="bolovan207" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan168" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.498348, 0.000000, -0.528995, 0.000000, 0.726764, 0.000000, 0.528995, 0.000000, 0.498348, -151.112137, -1.601574, -2.656916)
 
-[node name="bolovan208" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan169" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-1.004782, 0.000000, 0.499666, 0.000000, 1.122165, 0.000000, -0.499666, 0.000000, -1.004782, -124.594040, -1.232347, -2.202141)
 
-[node name="bolovan209" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan170" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.295349, 0.000000, -0.788900, 0.000000, 0.842374, 0.000000, 0.788900, 0.000000, 0.295349, -130.322357, -1.037725, -1.755156)
 
-[node name="bolovan210" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan171" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(1.164281, 0.000000, 0.006801, 0.000000, 1.164300, 0.000000, -0.006801, 0.000000, 1.164281, -128.931656, -1.120154, 1.189531)
 
-[node name="bolovan211" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan172" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.873857, 0.000000, -0.182222, 0.000000, 0.892654, 0.000000, 0.182222, 0.000000, 0.873857, -153.077835, -0.001639, 12.736576)
 
-[node name="bolovan212" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan173" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.624855, 0.000000, 0.575063, 0.000000, 0.849200, 0.000000, -0.575063, 0.000000, -0.624855, -151.267944, -0.641226, 5.943150)
 
-[node name="bolovan213" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan174" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.863275, 0.000000, 0.939363, 0.000000, 1.275792, 0.000000, -0.939363, 0.000000, 0.863275, -150.247345, -0.477896, 7.724000)
 
-[node name="bolovan214" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan175" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.443118, 0.000000, 0.966445, 0.000000, 1.063188, 0.000000, -0.966445, 0.000000, -0.443118, -151.681564, -0.132361, 11.160716)
 
-[node name="bolovan215" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan176" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.148449, 0.000000, 0.900594, 0.000000, 0.912747, 0.000000, -0.900594, 0.000000, 0.148449, -151.545364, 0.248178, 21.757999)
 
-[node name="bolovan216" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan177" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.182314, 0.000000, -0.967787, 0.000000, 0.984809, 0.000000, 0.967787, 0.000000, -0.182314, -151.495728, 0.283685, 23.880554)
 
-[node name="quenual217" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual178" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.114837, 0.000000, 1.030433, 0.000000, 1.036812, 0.000000, -1.030433, 0.000000, -0.114837, -132.335724, -23.677185, -107.178383)
 metadata/coliziune = "trunk"
 
-[node name="quenual218" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.984954, 0.000000, -0.549140, 0.000000, 1.127692, 0.000000, 0.549140, 0.000000, -0.984954, -141.134659, -23.012100, -98.404861)
+[node name="quenual179" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.984954, 0.000000, -0.549140, 0.000000, 1.127692, 0.000000, 0.549140, 0.000000, -0.984954, -154.060654, -24.313461, -116.187973)
 metadata/coliziune = "trunk"
 
-[node name="quenual219" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.851054, 0.000000, -0.329639, 0.000000, 0.912663, 0.000000, 0.329639, 0.000000, -0.851054, -152.775940, -19.101440, -91.337273)
+[node name="quenual180" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.851054, 0.000000, -0.329639, 0.000000, 0.912663, 0.000000, 0.329639, 0.000000, -0.851054, -157.803101, -24.461227, -117.324501)
 metadata/coliziune = "trunk"
 
-[node name="quenual220" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.957003, 0.000000, -0.297547, 0.000000, 1.002192, 0.000000, 0.297547, 0.000000, 0.957003, -163.734436, -18.885666, -91.305267)
+[node name="quenual181" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.957003, 0.000000, -0.297547, 0.000000, 1.002192, 0.000000, 0.297547, 0.000000, 0.957003, -161.542969, -24.493149, -115.969879)
 metadata/coliziune = "trunk"
 
-[node name="quenual221" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.608162, 0.000000, -0.818455, 0.000000, 1.019671, 0.000000, 0.818455, 0.000000, 0.608162, -171.582626, -20.776749, -94.073654)
+[node name="quenual182" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.608162, 0.000000, -0.818455, 0.000000, 1.019671, 0.000000, 0.818455, 0.000000, 0.608162, -171.582626, -23.951462, -113.926346)
 metadata/coliziune = "trunk"
 
-[node name="quenual222" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.864963, 0.000000, -0.297922, 0.000000, 0.914833, 0.000000, 0.297922, 0.000000, 0.864963, -181.466232, -19.707993, -92.665421)
+[node name="quenual183" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.989374, 0.000000, -0.423611, 0.000000, 1.076247, 0.000000, 0.423611, 0.000000, -0.989374, -200.428726, -19.817230, -93.293121)
 metadata/coliziune = "trunk"
 
-[node name="quenual223" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.128226, 0.000000, -0.912292, 0.000000, 0.921259, 0.000000, 0.912292, 0.000000, 0.128226, -191.360580, -19.518875, -92.640022)
+[node name="quenual184" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-1.038560, 0.000000, -0.206691, 0.000000, 1.058928, 0.000000, 0.206691, 0.000000, -1.038560, -203.695221, -19.394196, -91.860077)
 metadata/coliziune = "trunk"
 
-[node name="quenual224" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.989374, 0.000000, -0.423611, 0.000000, 1.076247, 0.000000, 0.423611, 0.000000, -0.989374, -200.428726, -19.440247, -93.293121)
+[node name="quenual185" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.607177, 0.000000, 0.923531, 0.000000, 1.105248, 0.000000, -0.923531, 0.000000, 0.607177, -203.752319, -19.267654, -90.750359)
 metadata/coliziune = "trunk"
 
-[node name="quenual225" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-1.038560, 0.000000, -0.206691, 0.000000, 1.058928, 0.000000, 0.206691, 0.000000, -1.038560, -203.695221, -18.860794, -91.860077)
+[node name="quenual186" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.080721, 0.000000, 1.019639, 0.000000, 1.022830, 0.000000, -1.019639, 0.000000, 0.080721, -206.052399, -18.603531, -89.368210)
 metadata/coliziune = "trunk"
 
-[node name="quenual226" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.607177, 0.000000, 0.923531, 0.000000, 1.105248, 0.000000, -0.923531, 0.000000, 0.607177, -203.752319, -18.578827, -90.750359)
+[node name="quenual187" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.670048, 0.000000, -0.602493, 0.000000, 0.901089, 0.000000, 0.602493, 0.000000, 0.670048, -205.465485, -18.416849, -88.539574)
 metadata/coliziune = "trunk"
 
-[node name="quenual227" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.080721, 0.000000, 1.019639, 0.000000, 1.022830, 0.000000, -1.019639, 0.000000, 0.080721, -206.052399, -18.392426, -89.368210)
+[node name="quenual188" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.152854, 0.000000, -0.895328, 0.000000, 0.908282, 0.000000, 0.895328, 0.000000, 0.152854, -206.046082, -17.915823, -86.246140)
 metadata/coliziune = "trunk"
 
-[node name="quenual228" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.670048, 0.000000, -0.602493, 0.000000, 0.901089, 0.000000, 0.602493, 0.000000, 0.670048, -205.465485, -18.135391, -88.539574)
+[node name="quenual189" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.466134, 0.000000, 1.011200, 0.000000, 1.113466, 0.000000, -1.011200, 0.000000, -0.466134, -204.348389, -21.248871, -62.844879)
 metadata/coliziune = "trunk"
 
-[node name="quenual229" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.152854, 0.000000, -0.895328, 0.000000, 0.908282, 0.000000, 0.895328, 0.000000, 0.152854, -215.430542, -16.641937, -66.654495)
+[node name="quenual190" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.640386, 0.000000, -0.890762, 0.000000, 1.097065, 0.000000, 0.890762, 0.000000, -0.640386, -191.100006, -17.528793, -63.563271)
 metadata/coliziune = "trunk"
 
-[node name="quenual230" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.466134, 0.000000, 1.011200, 0.000000, 1.113466, 0.000000, -1.011200, 0.000000, -0.466134, -204.348389, -15.608246, -62.844879)
+[node name="quenual191" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.064596, 0.000000, -0.983079, 0.000000, 0.985199, 0.000000, 0.983079, 0.000000, 0.064596, -181.466232, -15.480839, -63.605114)
 metadata/coliziune = "trunk"
 
-[node name="quenual231" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.640386, 0.000000, -0.890762, 0.000000, 1.097065, 0.000000, 0.890762, 0.000000, -0.640386, -191.100006, -15.688080, -63.563271)
+[node name="quenual192" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.341128, 0.000000, 0.955738, 0.000000, 1.014792, 0.000000, -0.955738, 0.000000, -0.341128, -157.307312, -13.921298, -63.381355)
 metadata/coliziune = "trunk"
 
-[node name="quenual232" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.064596, 0.000000, -0.983079, 0.000000, 0.985199, 0.000000, 0.983079, 0.000000, 0.064596, -181.466232, -15.179642, -63.605114)
+[node name="quenual193" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-1.007784, 0.000000, 0.309073, 0.000000, 1.054113, 0.000000, -0.309073, 0.000000, -1.007784, -153.433212, -13.579647, -63.005909)
 metadata/coliziune = "trunk"
 
-[node name="quenual233" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.818596, 0.000000, 0.646947, 0.000000, 1.043379, 0.000000, -0.646947, 0.000000, -0.818596, -174.079117, -14.275742, -62.790184)
+[node name="quenual194" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-1.012292, 0.000000, 0.423391, 0.000000, 1.097267, 0.000000, -0.423391, 0.000000, -1.012292, -152.857468, -13.222803, -62.068668)
 metadata/coliziune = "trunk"
 
-[node name="quenual234" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.909651, 0.000000, -0.462154, 0.000000, 1.020319, 0.000000, 0.462154, 0.000000, 0.909651, -164.045319, -13.306458, -61.273899)
+[node name="quenual195" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.176457, 0.000000, -1.065686, 0.000000, 1.080196, 0.000000, 1.065686, 0.000000, -0.176457, -154.984268, -12.669173, -58.794125)
 metadata/coliziune = "trunk"
 
-[node name="quenual235" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.341128, 0.000000, 0.955738, 0.000000, 1.014792, 0.000000, -0.955738, 0.000000, -0.341128, -157.307312, -13.714706, -63.381355)
+[node name="quenual196" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.400672, 0.000000, 0.909436, 0.000000, 0.993786, 0.000000, -0.909436, 0.000000, -0.400672, -151.322784, -11.370638, -32.182850)
 metadata/coliziune = "trunk"
 
-[node name="quenual236" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-1.007784, 0.000000, 0.309073, 0.000000, 1.054113, 0.000000, -0.309073, 0.000000, -1.007784, -153.433212, -13.379974, -63.005909)
+[node name="quenual197" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.076366, 0.000000, 0.984796, 0.000000, 0.987752, 0.000000, -0.984796, 0.000000, -0.076366, -157.621277, -10.344386, -32.033604)
 metadata/coliziune = "trunk"
 
-[node name="quenual237" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-1.012292, 0.000000, 0.423391, 0.000000, 1.097267, 0.000000, -0.423391, 0.000000, -1.012292, -152.857468, -13.065277, -62.068668)
-metadata/coliziune = "trunk"
-
-[node name="quenual238" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.176457, 0.000000, -1.065686, 0.000000, 1.080196, 0.000000, 1.065686, 0.000000, -0.176457, -129.122543, -12.490829, -55.885113)
-metadata/coliziune = "trunk"
-
-[node name="quenual239" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.311370, 0.000000, 0.921786, 0.000000, 0.972955, 0.000000, -0.921786, 0.000000, 0.311370, -138.922867, -11.557983, -40.186684)
-metadata/coliziune = "trunk"
-
-[node name="quenual240" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.400672, 0.000000, 0.909436, 0.000000, 0.993786, 0.000000, -0.909436, 0.000000, -0.400672, -151.322784, -10.115540, -32.182850)
-metadata/coliziune = "trunk"
-
-[node name="quenual241" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.076366, 0.000000, 0.984796, 0.000000, 0.987752, 0.000000, -0.984796, 0.000000, -0.076366, -157.621277, -10.093994, -32.033604)
-metadata/coliziune = "trunk"
-
-[node name="quenual242" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual198" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.958711, 0.000000, 0.073850, 0.000000, 0.961551, 0.000000, -0.073850, 0.000000, 0.958711, -166.894608, -10.185730, -34.245090)
 metadata/coliziune = "trunk"
 
-[node name="quenual243" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-1.096247, 0.000000, 0.394121, 0.000000, 1.164941, 0.000000, -0.394121, 0.000000, -1.096247, -171.582626, -9.463837, -31.986015)
+[node name="quenual199" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-1.096247, 0.000000, 0.394121, 0.000000, 1.164941, 0.000000, -0.394121, 0.000000, -1.096247, -171.582626, -9.652663, -31.986015)
 metadata/coliziune = "trunk"
 
-[node name="quenual244" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.066019, 0.000000, -0.991704, 0.000000, 0.993899, 0.000000, 0.991704, 0.000000, 0.066019, -179.750000, -8.704575, -31.367279)
+[node name="quenual200" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.066019, 0.000000, -0.991704, 0.000000, 0.993899, 0.000000, 0.991704, 0.000000, 0.066019, -179.750000, -9.084914, -31.367279)
 metadata/coliziune = "trunk"
 
-[node name="quenual245" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual201" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.944621, 0.000000, -0.320968, 0.000000, 0.997662, 0.000000, 0.320968, 0.000000, -0.944621, -187.917358, -8.920029, -32.784904)
 metadata/coliziune = "trunk"
 
-[node name="quenual246" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.486124, 0.000000, -0.866193, 0.000000, 0.993281, 0.000000, 0.866193, 0.000000, -0.486124, -197.081161, -8.333755, -32.138481)
+[node name="quenual202" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.486124, 0.000000, -0.866193, 0.000000, 0.993281, 0.000000, 0.866193, 0.000000, -0.486124, -197.081161, -8.388521, -32.138481)
 metadata/coliziune = "trunk"
 
-[node name="quenual247" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.796357, 0.000000, 0.737201, 0.000000, 1.085196, 0.000000, -0.737201, 0.000000, 0.796357, -201.626511, -7.531998, -30.495125)
+[node name="quenual203" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.796357, 0.000000, 0.737201, 0.000000, 1.085196, 0.000000, -0.737201, 0.000000, 0.796357, -201.626511, -7.787976, -30.495125)
 metadata/coliziune = "trunk"
 
-[node name="quenual248" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual204" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.225468, 0.000000, 0.949386, 0.000000, 0.975792, 0.000000, -0.949386, 0.000000, -0.225468, -205.498322, -7.490566, -31.419716)
 metadata/coliziune = "trunk"
 
-[node name="quenual249" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.226446, 0.000000, -1.151730, 0.000000, 1.173780, 0.000000, 1.151730, 0.000000, 0.226446, -204.041092, -7.522202, -30.673180)
+[node name="quenual205" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.226446, 0.000000, -1.151730, 0.000000, 1.173780, 0.000000, 1.151730, 0.000000, 0.226446, -204.041092, -7.611630, -30.673180)
 metadata/coliziune = "trunk"
 
-[node name="quenual250" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.949651, 0.000000, 0.258954, 0.000000, 0.984324, 0.000000, -0.258954, 0.000000, -0.949651, -228.579514, -6.630676, -22.700638)
+[node name="quenual206" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.949651, 0.000000, 0.258954, 0.000000, 0.984324, 0.000000, -0.258954, 0.000000, -0.949651, -205.975815, -6.868956, -28.974945)
 metadata/coliziune = "trunk"
 
-[node name="quenual251" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual207" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.285650, 0.000000, -1.029073, 0.000000, 1.067982, 0.000000, 1.029073, 0.000000, -0.285650, -218.705002, -5.979706, -8.144727)
 metadata/coliziune = "trunk"
 
-[node name="quenual252" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual208" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.393124, 0.000000, -0.822638, 0.000000, 0.911746, 0.000000, 0.822638, 0.000000, -0.393124, -206.491547, -5.404419, -2.434095)
 metadata/coliziune = "trunk"
 
-[node name="quenual253" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual209" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.024103, 0.000000, -0.933318, 0.000000, 0.933629, 0.000000, 0.933318, 0.000000, -0.024103, -191.607162, -4.696945, -1.230178)
 metadata/coliziune = "trunk"
 
-[node name="quenual254" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual210" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.860653, 0.000000, -0.375997, 0.000000, 0.939201, 0.000000, 0.375997, 0.000000, -0.860653, -186.609055, -4.343964, -3.626602)
 metadata/coliziune = "trunk"
 
-[node name="quenual255" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual211" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.846697, 0.000000, -0.366200, 0.000000, 0.922495, 0.000000, 0.366200, 0.000000, -0.846697, -178.000000, -3.797409, -2.506349)
 metadata/coliziune = "trunk"
 
-[node name="quenual256" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual212" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.754027, 0.000000, -0.611027, 0.000000, 0.970520, 0.000000, 0.611027, 0.000000, 0.754027, -169.015472, -3.049728, -0.493131)
 metadata/coliziune = "trunk"
 
-[node name="quenual257" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual213" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.305734, 0.000000, 1.057671, 0.000000, 1.100973, 0.000000, -1.057671, 0.000000, 0.305734, -161.521103, -2.674316, -4.200721)
 metadata/coliziune = "trunk"
 
-[node name="quenual258" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual214" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.631843, 0.000000, 0.675861, 0.000000, 0.925210, 0.000000, -0.675861, 0.000000, -0.631843, -154.192307, -1.988464, -1.549149)
 metadata/coliziune = "trunk"
 
-[node name="quenual259" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual215" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.210497, 0.000000, 1.124346, 0.000000, 1.143881, 0.000000, -1.124346, 0.000000, 0.210497, -153.024460, -1.806564, -1.536415)
 metadata/coliziune = "trunk"
 
-[node name="quenual260" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual216" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.752400, 0.000000, 0.587923, 0.000000, 0.954861, 0.000000, -0.587923, 0.000000, 0.752400, -152.337402, -1.755508, -2.125885)
 metadata/coliziune = "trunk"
 
-[node name="quenual261" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual217" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.391731, 0.000000, 1.063552, 0.000000, 1.133401, 0.000000, -1.063552, 0.000000, 0.391731, -126.334305, -1.040176, 1.217514)
 metadata/coliziune = "trunk"
 
-[node name="quenual262" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+[node name="quenual218" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.400445, 0.000000, 1.096071, 0.000000, 1.166931, 0.000000, -1.096071, 0.000000, -0.400445, -152.755188, -0.372345, 7.724000)
 metadata/coliziune = "trunk"
 
-[node name="quenual263" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+[node name="quenual219" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.964832, 0.000000, -0.131691, 0.000000, 0.973778, 0.000000, 0.131691, 0.000000, 0.964832, -151.476700, 0.273285, 17.664295)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos264" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.416621, 0.000000, -0.763154, 0.000000, 0.869470, 0.000000, 0.763154, 0.000000, -0.416621, -156.831390, -24.793457, -119.999840)
+[node name="quenualJos220" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.416621, 0.000000, -0.763154, 0.000000, 0.869470, 0.000000, 0.763154, 0.000000, -0.416621, -128.810577, -37.359177, -81.449867)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos265" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-1.035038, 0.000000, 0.318138, 0.000000, 1.082828, 0.000000, -0.318138, 0.000000, -1.035038, -159.796204, -25.120483, -120.875198)
+[node name="quenualJos221" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.977996, 0.000000, 0.423567, 0.000000, 1.065779, 0.000000, -0.423567, 0.000000, -0.977996, -239.500534, -38.426132, -124.354126)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos266" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.773411, 0.000000, 0.546002, 0.000000, 0.946722, 0.000000, -0.546002, 0.000000, 0.773411, -168.399994, -25.447281, -119.900414)
+[node name="quenualJos222" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.663622, 0.000000, -0.636673, 0.000000, 0.919645, 0.000000, 0.636673, 0.000000, 0.663622, -253.623459, -43.539276, -91.823997)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos267" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.003608, 0.000000, -1.091680, 0.000000, 1.091686, 0.000000, 1.091680, 0.000000, 0.003608, -179.750000, -25.979385, -120.457001)
+[node name="quenualJos223" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.534692, 0.000000, -0.632543, 0.000000, 0.828255, 0.000000, 0.632543, 0.000000, -0.534692, -233.120605, -23.404585, -56.407005)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos268" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.549112, 0.000000, 0.622538, 0.000000, 0.830107, 0.000000, -0.622538, 0.000000, 0.549112, -191.967087, -21.992250, -117.311737)
+[node name="quenualJos224" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.905617, 0.000000, 0.362007, 0.000000, 0.975290, 0.000000, -0.362007, 0.000000, -0.905617, -112.535698, -29.423105, -65.501747)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos269" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.931678, 0.000000, -0.091896, 0.000000, 0.936200, 0.000000, 0.091896, 0.000000, 0.931678, -205.449753, -26.716095, -119.247932)
+[node name="quenualJos225" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.843922, 0.000000, 0.011571, 0.000000, 0.844001, 0.000000, -0.011571, 0.000000, 0.843922, -119.816498, -20.666977, -40.101074)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos270" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.977996, 0.000000, 0.423567, 0.000000, 1.065779, 0.000000, -0.423567, 0.000000, -0.977996, -226.184265, -27.316284, -111.868515)
+[node name="quenualJos226" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.424209, 0.000000, -0.809376, 0.000000, 0.913806, 0.000000, 0.809376, 0.000000, -0.424209, -232.193314, -31.256775, -62.994202)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos271" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.663622, 0.000000, -0.636673, 0.000000, 0.919645, 0.000000, 0.636673, 0.000000, 0.663622, -235.065765, -39.823273, -91.227097)
+[node name="quenualJos227" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.859348, 0.000000, -0.151682, 0.000000, 0.872632, 0.000000, 0.151682, 0.000000, -0.859348, -240.836151, -10.888393, -24.708691)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos272" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.534692, 0.000000, -0.632543, 0.000000, 0.828255, 0.000000, 0.632543, 0.000000, -0.534692, -203.298401, -18.140945, -89.168243)
+[node name="quenualJos228" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.210693, 0.000000, -0.898340, 0.000000, 0.922717, 0.000000, 0.898340, 0.000000, 0.210693, -106.094116, -5.183293, -17.455032)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos273" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.254788, 0.000000, 0.888108, 0.000000, 0.923933, 0.000000, -0.888108, 0.000000, -0.254788, -200.609070, -17.316780, -85.411842)
+[node name="quenualJos229" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.874685, 0.000000, 0.622612, 0.000000, 1.073648, 0.000000, -0.622612, 0.000000, -0.874685, -105.231155, -2.129203, 4.311687)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos274" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.540797, 0.000000, 0.705664, 0.000000, 0.889057, 0.000000, -0.705664, 0.000000, 0.540797, -195.199738, -17.356749, -87.547173)
+[node name="quenualJos230" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.310157, 0.000000, 0.968122, 0.000000, 1.016591, 0.000000, -0.968122, 0.000000, -0.310157, -107.479980, -3.889633, 11.160716)
 metadata/coliziune = "trunk"
 
-[node name="quenualJos275" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.901737, 0.000000, -0.074282, 0.000000, 0.904792, 0.000000, 0.074282, 0.000000, 0.901737, -182.926453, -17.225445, -88.438187)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos276" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.726471, 0.000000, -0.777549, 0.000000, 1.064116, 0.000000, 0.777549, 0.000000, 0.726471, -170.119843, -17.400681, -89.020912)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos277" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.998196, 0.000000, 0.288563, 0.000000, 1.039069, 0.000000, -0.288563, 0.000000, 0.998196, -156.332504, -16.397877, -88.412392)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos278" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.376365, 0.000000, 0.928142, 0.000000, 1.001547, 0.000000, -0.928142, 0.000000, -0.376365, -136.981842, -15.103296, -82.365601)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos279" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.905617, 0.000000, 0.362007, 0.000000, 0.975290, 0.000000, -0.362007, 0.000000, -0.905617, -127.828720, -12.930892, -63.781391)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos280" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.843922, 0.000000, 0.011571, 0.000000, 0.844001, 0.000000, -0.011571, 0.000000, 0.843922, -154.281448, -12.498779, -59.584583)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos281" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.495757, 0.000000, -0.897883, 0.000000, 1.025655, 0.000000, 0.897883, 0.000000, -0.495757, -154.364990, -11.991364, -57.745659)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos282" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.634096, 0.000000, -0.586921, 0.000000, 0.864033, 0.000000, 0.586921, 0.000000, 0.634096, -159.850433, -12.026272, -58.576900)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos283" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.398131, 0.000000, 0.808727, 0.000000, 0.901414, 0.000000, -0.808727, 0.000000, -0.398131, -171.582626, -10.889404, -56.495720)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos284" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.755111, 0.000000, -0.561787, 0.000000, 0.941169, 0.000000, 0.561787, 0.000000, -0.755111, -187.917358, -11.035178, -58.481022)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos285" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.421338, 0.000000, -0.775723, 0.000000, 0.882764, 0.000000, 0.775723, 0.000000, -0.421338, -200.372986, -9.047067, -55.426338)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos286" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.424209, 0.000000, -0.809376, 0.000000, 0.913806, 0.000000, 0.809376, 0.000000, -0.424209, -221.881287, -8.923356, -51.665936)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos287" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.859348, 0.000000, -0.151682, 0.000000, 0.872632, 0.000000, 0.151682, 0.000000, -0.859348, -206.232635, -6.832639, -28.600998)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos288" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.322087, 0.000000, -0.781770, 0.000000, 0.845520, 0.000000, 0.781770, 0.000000, 0.322087, -202.075195, -7.649323, -31.013809)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos289" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.405681, 0.000000, 0.934135, 0.000000, 1.018423, 0.000000, -0.934135, 0.000000, 0.405681, -199.803711, -7.882141, -31.253298)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos290" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.607513, 0.000000, 0.860787, 0.000000, 1.053578, 0.000000, -0.860787, 0.000000, -0.607513, -188.157928, -5.444481, -27.386055)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos291" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-1.083957, 0.000000, 0.135726, 0.000000, 1.092422, 0.000000, -0.135726, 0.000000, -1.083957, -174.546402, -5.040012, -27.721006)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos292" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.343963, 0.000000, 0.741867, 0.000000, 0.817727, 0.000000, -0.741867, 0.000000, -0.343963, -163.877899, -5.209738, -28.729774)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos293" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-1.045292, 0.000000, 0.301135, 0.000000, 1.087804, 0.000000, -0.301135, 0.000000, -1.045292, -148.259369, -3.949466, -27.474205)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos294" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.210693, 0.000000, -0.898340, 0.000000, 0.922717, 0.000000, 0.898340, 0.000000, 0.210693, -123.737465, -1.886409, -11.606454)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos295" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.874685, 0.000000, 0.622612, 0.000000, 1.073648, 0.000000, -0.622612, 0.000000, -0.874685, -122.968330, -1.740189, 3.506798)
-metadata/coliziune = "trunk"
-
-[node name="quenualJos296" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.310157, 0.000000, 0.968122, 0.000000, 1.016591, 0.000000, -0.968122, 0.000000, -0.310157, -124.003700, -3.618530, 11.160716)
-metadata/coliziune = "trunk"
-
-[node name="feriga297" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga231" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.858376, 0.000000, -0.116977, 0.000000, 0.866310, 0.000000, 0.116977, 0.000000, -0.858376, -132.885452, -23.730560, -107.489151)
 metadata/coliziune = "trunk"
 
-[node name="bromelie298" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie232" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(2.047333, 0.000000, 0.134598, 0.000000, 2.051753, 0.000000, -0.134598, 0.000000, 2.047333, -135.779984, -23.585037, -103.978630)
 metadata/coliziune = "none"
 
-[node name="bromelie299" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-2.025189, 0.000000, 0.898368, 0.000000, 2.215504, 0.000000, -0.898368, 0.000000, -2.025189, -148.276993, -21.896042, -94.447548)
+[node name="bromelie233" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.025189, 0.000000, 0.898368, 0.000000, 2.215504, 0.000000, -0.898368, 0.000000, -2.025189, -153.959885, -24.311691, -116.195305)
 metadata/coliziune = "none"
 
-[node name="orhidee300" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
-transform = Transform3D(1.533220, 0.000000, 0.076693, 0.000000, 1.535137, 0.000000, -0.076693, 0.000000, 1.533220, -151.675827, -21.388153, -93.982750)
+[node name="orhidee234" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(1.533220, 0.000000, 0.076693, 0.000000, 1.535137, 0.000000, -0.076693, 0.000000, 1.533220, -155.852554, -24.270935, -115.277382)
 metadata/coliziune = "none"
 
-[node name="feriga301" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.129680, 0.000000, 0.908252, 0.000000, 0.917463, 0.000000, -0.908252, 0.000000, 0.129680, -155.135910, -20.253906, -92.750153)
+[node name="feriga235" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.129680, 0.000000, 0.908252, 0.000000, 0.917463, 0.000000, -0.908252, 0.000000, 0.129680, -158.864090, -24.275223, -115.249847)
 metadata/coliziune = "trunk"
 
-[node name="bromelie302" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.259144, 0.000000, 1.164172, 0.000000, 1.714859, 0.000000, -1.164172, 0.000000, -1.259144, -168.399994, -20.911774, -93.945679)
+[node name="bromelie236" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.259144, 0.000000, 1.164172, 0.000000, 1.714859, 0.000000, -1.164172, 0.000000, -1.259144, -168.399994, -23.962845, -114.054321)
 metadata/coliziune = "none"
 
-[node name="orhidee303" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
-transform = Transform3D(-0.673893, 0.000000, 1.428492, 0.000000, 1.579468, 0.000000, -1.428492, 0.000000, -0.673893, -170.119843, -21.161453, -94.489639)
+[node name="orhidee237" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-0.673893, 0.000000, 1.428492, 0.000000, 1.579468, 0.000000, -1.428492, 0.000000, -0.673893, -170.119843, -23.779556, -113.510361)
 metadata/coliziune = "none"
 
-[node name="feriga304" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.823629, 0.000000, 0.437793, 0.000000, 0.932752, 0.000000, -0.437793, 0.000000, -0.823629, -171.582626, -18.719803, -91.046570)
+[node name="feriga238" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.823629, 0.000000, 0.437793, 0.000000, 0.932752, 0.000000, -0.437793, 0.000000, -0.823629, -171.582626, -24.789047, -116.953430)
 metadata/coliziune = "trunk"
 
-[node name="bromelie305" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.286739, 0.000000, -1.501131, 0.000000, 1.977142, 0.000000, 1.501131, 0.000000, 1.286739, -176.573547, -20.722031, -94.218056)
+[node name="bromelie239" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.286739, 0.000000, -1.501131, 0.000000, 1.977142, 0.000000, 1.501131, 0.000000, 1.286739, -176.573547, -23.721008, -113.781944)
 metadata/coliziune = "none"
 
-[node name="bromelie306" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.490117, 0.000000, 1.466097, 0.000000, 1.545851, 0.000000, -1.466097, 0.000000, 0.490117, -182.926453, -19.348572, -91.951752)
+[node name="bromelie240" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(2.258457, 0.000000, -0.005761, 0.000000, 2.258464, 0.000000, 0.005761, 0.000000, 2.258457, -198.850128, -19.874786, -92.356682)
 metadata/coliziune = "none"
 
-[node name="feriga307" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.415904, 0.000000, -0.838730, 0.000000, 0.936185, 0.000000, 0.838730, 0.000000, 0.415904, -189.380157, -19.875549, -93.398285)
+[node name="feriga241" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.835466, 0.000000, -0.385768, 0.000000, 0.920228, 0.000000, 0.385768, 0.000000, 0.835466, -203.083160, -19.414536, -91.617279)
 metadata/coliziune = "trunk"
 
-[node name="bromelie308" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(2.258457, 0.000000, -0.005761, 0.000000, 2.258464, 0.000000, 0.005761, 0.000000, 2.258457, -198.850128, -19.324875, -92.356682)
+[node name="bromelie242" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.727359, 0.000000, -1.194423, 0.000000, 2.100099, 0.000000, 1.194423, 0.000000, -1.727359, -204.549423, -19.460800, -93.035255)
 metadata/coliziune = "none"
 
-[node name="feriga309" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.835466, 0.000000, -0.385768, 0.000000, 0.920228, 0.000000, 0.385768, 0.000000, 0.835466, -203.083160, -18.790161, -91.617279)
+[node name="feriga243" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.201075, 0.000000, -0.851172, 0.000000, 0.874600, 0.000000, 0.851172, 0.000000, 0.201075, -206.668015, -18.597349, -89.348412)
 metadata/coliziune = "trunk"
 
-[node name="bromelie310" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.727359, 0.000000, -1.194423, 0.000000, 2.100099, 0.000000, 1.194423, 0.000000, -1.727359, -204.549423, -19.226990, -93.035255)
+[node name="bromelie244" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.206796, 0.000000, 0.070428, 0.000000, 2.207920, 0.000000, -0.070428, 0.000000, -2.206796, -205.195419, -18.548418, -88.717667)
 metadata/coliziune = "none"
 
-[node name="feriga311" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.201075, 0.000000, -0.851172, 0.000000, 0.874600, 0.000000, 0.851172, 0.000000, 0.201075, -206.668015, -18.432846, -89.348412)
-metadata/coliziune = "trunk"
-
-[node name="bromelie312" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-2.206796, 0.000000, 0.070428, 0.000000, 2.207920, 0.000000, -0.070428, 0.000000, -2.206796, -205.195419, -18.161316, -88.717667)
+[node name="bromelie245" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.330275, 0.000000, 2.187143, 0.000000, 2.211940, 0.000000, -2.187143, 0.000000, 0.330275, -204.103806, -20.342031, -64.320946)
 metadata/coliziune = "none"
 
-[node name="feriga313" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.897345, 0.000000, -0.222726, 0.000000, 0.924572, 0.000000, 0.222726, 0.000000, 0.897345, -207.579773, -16.846375, -65.228851)
-metadata/coliziune = "trunk"
-
-[node name="bromelie314" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.330275, 0.000000, 2.187143, 0.000000, 2.211940, 0.000000, -2.187143, 0.000000, 0.330275, -204.103806, -16.777039, -64.320946)
-metadata/coliziune = "none"
-
-[node name="feriga315" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga246" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.833370, 0.000000, -0.037707, 0.000000, 0.834223, 0.000000, 0.037707, 0.000000, -0.833370, -185.420868, -15.798462, -64.412201)
 metadata/coliziune = "trunk"
 
-[node name="bromelie316" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.392124, 0.000000, -1.619897, 0.000000, 1.666681, 0.000000, 1.619897, 0.000000, 0.392124, -181.466232, -14.904327, -63.234081)
+[node name="bromelie247" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.115197, 0.000000, -0.925560, 0.000000, 1.449250, 0.000000, 0.925560, 0.000000, -1.115197, -174.079117, -15.081671, -63.853691)
 metadata/coliziune = "none"
 
-[node name="bromelie317" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.115197, 0.000000, -0.925560, 0.000000, 1.449250, 0.000000, 0.925560, 0.000000, -1.115197, -174.079117, -14.948563, -63.853691)
-metadata/coliziune = "none"
-
-[node name="feriga318" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga248" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.906026, 0.000000, 0.046565, 0.000000, 0.907222, 0.000000, -0.046565, 0.000000, 0.906026, -166.032013, -14.648972, -64.180237)
 metadata/coliziune = "trunk"
 
-[node name="bromelie319" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.045086, 0.000000, -1.272898, 0.000000, 1.646960, 0.000000, 1.272898, 0.000000, -1.045086, -164.267731, -14.374237, -63.777176)
+[node name="bromelie249" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.045086, 0.000000, -1.272898, 0.000000, 1.646960, 0.000000, 1.272898, 0.000000, -1.045086, -164.267731, -14.522576, -63.777176)
 metadata/coliziune = "none"
 
-[node name="bromelie320" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.689504, 0.000000, -0.816549, 0.000000, 1.876480, 0.000000, 0.816549, 0.000000, 1.689504, -156.356262, -13.672531, -63.450268)
+[node name="bromelie250" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.689504, 0.000000, -0.816549, 0.000000, 1.876480, 0.000000, 0.816549, 0.000000, 1.689504, -156.356262, -13.884692, -63.450268)
 metadata/coliziune = "none"
 
-[node name="feriga321" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga251" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.489913, 0.000000, -0.733555, 0.000000, 0.882109, 0.000000, 0.733555, 0.000000, 0.489913, -154.398987, -13.668236, -63.794086)
 metadata/coliziune = "trunk"
 
-[node name="bromelie322" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.100009, 0.000000, 1.802486, 0.000000, 2.111629, 0.000000, -1.802486, 0.000000, -1.100009, -154.672028, -13.167053, -61.844372)
+[node name="bromelie252" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.100009, 0.000000, 1.802486, 0.000000, 2.111629, 0.000000, -1.802486, 0.000000, -1.100009, -154.672028, -13.529916, -61.844372)
 metadata/coliziune = "none"
 
-[node name="feriga323" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.475323, 0.000000, 0.726034, 0.000000, 0.867788, 0.000000, -0.726034, 0.000000, 0.475323, -131.600571, -12.381653, -52.889484)
+[node name="bromelie253" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.105271, 0.000000, 2.105647, 0.000000, 2.378103, 0.000000, -2.105647, 0.000000, 1.105271, -143.831009, -14.235327, -36.156693)
+metadata/coliziune = "none"
+
+[node name="feriga254" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.487133, 0.000000, -0.755204, 0.000000, 0.898683, 0.000000, 0.755204, 0.000000, 0.487133, -153.214050, -11.248764, -33.602112)
 metadata/coliziune = "trunk"
 
-[node name="bromelie324" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.105271, 0.000000, 2.105647, 0.000000, 2.378103, 0.000000, -2.105647, 0.000000, 1.105271, -143.831009, -10.882339, -36.156693)
+[node name="bromelie255" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.308458, 0.000000, 1.350328, 0.000000, 1.385111, 0.000000, -1.350328, 0.000000, 0.308458, -157.603989, -10.272257, -31.841814)
 metadata/coliziune = "none"
 
-[node name="feriga325" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.487133, 0.000000, -0.755204, 0.000000, 0.898683, 0.000000, 0.755204, 0.000000, 0.487133, -153.214050, -10.578156, -33.602112)
-metadata/coliziune = "trunk"
-
-[node name="bromelie326" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.308458, 0.000000, 1.350328, 0.000000, 1.385111, 0.000000, -1.350328, 0.000000, 0.308458, -157.603989, -9.923996, -31.841814)
-metadata/coliziune = "none"
-
-[node name="bromelie327" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie256" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(2.229654, 0.000000, -0.827407, 0.000000, 2.378226, 0.000000, 0.827407, 0.000000, 2.229654, -168.399994, -10.088562, -34.244747)
 metadata/coliziune = "none"
 
-[node name="feriga328" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga257" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.489502, 0.000000, 0.827152, 0.000000, 0.961141, 0.000000, -0.827152, 0.000000, -0.489502, -174.079132, -9.728882, -33.911972)
 metadata/coliziune = "trunk"
 
-[node name="bromelie329" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.292982, 0.000000, 1.349202, 0.000000, 1.380647, 0.000000, -1.349202, 0.000000, 0.292982, -187.917358, -8.826614, -32.196999)
+[node name="bromelie258" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.292982, 0.000000, 1.349202, 0.000000, 1.380647, 0.000000, -1.349202, 0.000000, 0.292982, -187.917358, -8.871143, -32.196999)
 metadata/coliziune = "none"
 
-[node name="feriga330" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga259" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.823040, 0.000000, 0.478912, 0.000000, 0.952235, 0.000000, -0.478912, 0.000000, 0.823040, -195.347046, -8.529648, -32.485157)
 metadata/coliziune = "trunk"
 
-[node name="bromelie331" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.200552, 0.000000, 2.152862, 0.000000, 2.162183, 0.000000, -2.152862, 0.000000, -0.200552, -198.282837, -8.274124, -32.231918)
+[node name="bromelie260" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.200552, 0.000000, 2.152862, 0.000000, 2.162183, 0.000000, -2.152862, 0.000000, -0.200552, -198.282837, -8.284010, -32.231918)
 metadata/coliziune = "none"
 
-[node name="bromelie332" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.339620, 0.000000, -0.246606, 0.000000, 1.362129, 0.000000, 0.246606, 0.000000, 1.339620, -203.716553, -7.845642, -31.889410)
+[node name="bromelie261" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.339620, 0.000000, -0.246606, 0.000000, 1.362129, 0.000000, 0.246606, 0.000000, 1.339620, -203.716553, -7.892111, -31.889410)
 metadata/coliziune = "none"
 
-[node name="feriga333" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.413684, 0.000000, 0.860139, 0.000000, 0.954449, 0.000000, -0.860139, 0.000000, 0.413684, -204.036423, -7.590424, -30.910938)
+[node name="feriga262" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.413684, 0.000000, 0.860139, 0.000000, 0.954449, 0.000000, -0.860139, 0.000000, 0.413684, -204.036423, -7.637403, -30.910938)
 metadata/coliziune = "trunk"
 
-[node name="bromelie334" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie263" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.449064, 0.000000, -0.640347, 0.000000, 1.584245, 0.000000, 0.640347, 0.000000, -1.449064, -207.004959, -7.362220, -32.169266)
 metadata/coliziune = "none"
 
-[node name="orhidee335" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
+[node name="orhidee264" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(1.295938, 0.000000, -0.367298, 0.000000, 1.346983, 0.000000, 0.367298, 0.000000, 1.295938, -206.311493, -7.309523, -30.928585)
 metadata/coliziune = "none"
 
-[node name="bromelie336" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.792787, 0.000000, -1.429384, 0.000000, 2.292864, 0.000000, 1.429384, 0.000000, -1.792787, -226.952408, -6.475295, -17.298134)
+[node name="bromelie265" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.792787, 0.000000, -1.429384, 0.000000, 2.292864, 0.000000, 1.429384, 0.000000, -1.792787, -206.129562, -6.873132, -29.069557)
 metadata/coliziune = "none"
 
-[node name="orhidee337" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
-transform = Transform3D(-1.598339, 0.000000, -0.534299, 0.000000, 1.685278, 0.000000, 0.534299, 0.000000, -1.598339, -223.911682, -6.246757, -13.825773)
-metadata/coliziune = "none"
-
-[node name="feriga338" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga266" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.401519, 0.000000, 0.859240, 0.000000, 0.948426, 0.000000, -0.859240, 0.000000, -0.401519, -217.707336, -5.968781, -9.488854)
 metadata/coliziune = "trunk"
 
-[node name="bromelie339" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie267" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.346959, 0.000000, -0.085752, 0.000000, 1.349686, 0.000000, 0.085752, 0.000000, 1.346959, -211.038010, -5.642334, -5.544734)
 metadata/coliziune = "none"
 
-[node name="bromelie340" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie268" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-0.694020, 0.000000, -1.904032, 0.000000, 2.026573, 0.000000, 1.904032, 0.000000, -0.694020, -198.992538, -5.089569, -3.246164)
 metadata/coliziune = "none"
 
-[node name="feriga341" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga269" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.734271, 0.000000, -0.306530, 0.000000, 0.795685, 0.000000, 0.306530, 0.000000, -0.734271, -191.657104, -4.687164, -3.594001)
 metadata/coliziune = "trunk"
 
-[node name="feriga342" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga270" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.545773, 0.000000, 0.822978, 0.000000, 0.987502, 0.000000, -0.822978, 0.000000, 0.545773, -171.791260, -3.378860, -2.501243)
 metadata/coliziune = "trunk"
 
-[node name="bromelie343" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie271" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(2.085709, 0.000000, 1.122150, 0.000000, 2.368417, 0.000000, -1.122150, 0.000000, 2.085709, -169.015472, -3.198257, -3.363000)
 metadata/coliziune = "none"
 
-[node name="bromelie344" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie272" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-0.041044, 0.000000, -2.186790, 0.000000, 2.187175, 0.000000, 2.186790, 0.000000, -0.041044, -161.480820, -2.664017, -2.847240)
 metadata/coliziune = "none"
 
-[node name="feriga345" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga273" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.514958, 0.000000, -0.741544, 0.000000, 0.902812, 0.000000, 0.741544, 0.000000, -0.514958, -154.157257, -2.017395, -1.915147)
 metadata/coliziune = "trunk"
 
-[node name="bromelie346" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie274" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.612000, 0.000000, 0.652119, 0.000000, 1.738909, 0.000000, -0.652119, 0.000000, -1.612000, -153.936432, -2.054306, -3.549633)
 metadata/coliziune = "none"
 
-[node name="bromelie347" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie275" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.302138, 0.000000, 0.879569, 0.000000, 1.571371, 0.000000, -0.879569, 0.000000, 1.302138, -151.255890, -1.458743, -2.582616)
 metadata/coliziune = "none"
 
-[node name="feriga348" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.773504, 0.000000, -0.472515, 0.000000, 0.906409, 0.000000, 0.472515, 0.000000, -0.773504, -130.025558, -0.893300, -1.778314)
+[node name="feriga276" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.773504, 0.000000, -0.472515, 0.000000, 0.906409, 0.000000, 0.472515, 0.000000, -0.773504, -149.974442, -0.975211, -0.221686)
 metadata/coliziune = "trunk"
 
-[node name="bromelie349" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie277" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.112965, 0.000000, -0.883862, 0.000000, 1.421233, 0.000000, 0.883862, 0.000000, 1.112965, -151.357956, -0.154663, 9.511250)
 metadata/coliziune = "none"
 
-[node name="feriga350" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
+[node name="feriga278" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.718488, 0.000000, 0.589580, 0.000000, 0.929425, 0.000000, -0.589580, 0.000000, -0.718488, -149.545959, -0.132538, 14.303007)
 metadata/coliziune = "trunk"
 
-[node name="bromelie351" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
+[node name="bromelie279" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.860008, 0.000000, 0.662633, 0.000000, 1.974516, 0.000000, -0.662633, 0.000000, -1.860008, -151.153122, 0.246460, 17.664295)
 metadata/coliziune = "none"
 
-[node name="orhidee352" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
+[node name="orhidee280" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(-1.348689, 0.000000, -0.054534, 0.000000, 1.349791, 0.000000, 0.054534, 0.000000, -1.348689, -148.896286, -0.083344, 19.587505)
 metadata/coliziune = "none"
 
-[node name="borna353" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -150.045090, -23.931742, -117.189697)
+[node name="borna281" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -150.045090, -24.057047, -117.189697)
 metadata/coliziune = "none"
 
-[node name="borna354" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -161.918289, -22.496195, -111.745636)
+[node name="borna282" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -163.359116, -22.387186, -95.529510)
 metadata/coliziune = "none"
 
-[node name="borna355" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -185.420883, -21.017307, -112.139999)
+[node name="borna283" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -185.420883, -22.937784, -112.139999)
 metadata/coliziune = "none"
 
-[node name="borna356" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -215.524292, -19.339705, -108.134064)
-metadata/coliziune = "none"
-
-[node name="borna357" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -221.549103, -17.808683, -75.710274)
-metadata/coliziune = "none"
-
-[node name="borna358" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -194.838959, -16.419165, -81.987007)
-metadata/coliziune = "none"
-
-[node name="borna359" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -171.582642, -14.985848, -82.139999)
-metadata/coliziune = "none"
-
-[node name="borna360" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -142.118149, -13.410431, -76.723106)
-metadata/coliziune = "none"
-
-[node name="borna361" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -151.194809, -11.915247, -55.172516)
-metadata/coliziune = "none"
-
-[node name="borna362" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -166.485092, -10.460122, -52.098217)
-metadata/coliziune = "none"
-
-[node name="borna363" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -190.913361, -8.917445, -52.137859)
-metadata/coliziune = "none"
-
-[node name="borna364" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -219.045074, -7.405137, -45.174652)
-metadata/coliziune = "none"
-
-[node name="borna365" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -207.602707, -5.872720, -24.389872)
-metadata/coliziune = "none"
-
-[node name="borna366" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -188.157928, -4.302969, -22.139999)
-metadata/coliziune = "none"
-
-[node name="borna367" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -163.733688, -2.747272, -22.153763)
-metadata/coliziune = "none"
-
-[node name="borna368" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -134.510803, -1.156965, -11.237551)
-metadata/coliziune = "none"
-
-[node name="borna369" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
+[node name="borna284" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -132.092148, -1.075147, 14.303007)
 metadata/coliziune = "none"
 
-[node name="parapet370" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+[node name="parapet285" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(0.271211, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271211, -149.128784, -24.554373, -121.385269)
 metadata/coliziune = "none"
 
-[node name="parapet371" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.000002, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, 0.000002, -148.946411, -24.323065, -119.223434)
+[node name="parapet286" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.000002, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, 0.000002, -148.946411, -24.347698, -119.223434)
 metadata/coliziune = "none"
 
-[node name="parapet372" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.382632, 0.000000, 0.923901, 0.000000, 1.000000, 0.000000, -0.923901, 0.000000, -0.382632, -149.009171, -24.023352, -116.604073)
+[node name="parapet287" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.382632, 0.000000, 0.923901, 0.000000, 1.000000, 0.000000, -0.923901, 0.000000, -0.382632, -149.009171, -24.088259, -116.604073)
 metadata/coliziune = "none"
 
-[node name="parapet373" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -150.326721, -23.727209, -114.358551)
+[node name="parapet288" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.618879, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618879, -140.186829, -23.699240, -104.851059)
 metadata/coliziune = "none"
 
-[node name="parapet374" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.807401, 0.000000, 0.590004, 0.000000, 1.000000, 0.000000, -0.590004, 0.000000, -0.807401, -151.683975, -23.493155, -112.918213)
+[node name="parapet289" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.807401, 0.000000, 0.590004, 0.000000, 1.000000, 0.000000, -0.590004, 0.000000, -0.807401, -143.511337, -23.426367, -101.674622)
 metadata/coliziune = "none"
 
-[node name="parapet375" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, -0.958502, -155.101883, -23.078972, -111.450119)
+[node name="parapet290" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, -0.958502, -152.426498, -22.960653, -97.810013)
 metadata/coliziune = "none"
 
-[node name="parapet376" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -214.824631, -19.352371, -107.171486)
+[node name="parapet291" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -214.824631, -20.112576, -107.171486)
 metadata/coliziune = "none"
 
-[node name="parapet377" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.618878, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618878, -219.676437, -19.087206, -102.729080)
+[node name="parapet292" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.618878, 0.000000, 0.785487, 0.000000, 1.000000, 0.000000, -0.785487, 0.000000, -0.618878, -219.676437, -19.837206, -102.729080)
 metadata/coliziune = "none"
 
-[node name="parapet378" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382634, -223.237808, -21.248426, -96.674965)
+[node name="parapet293" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382634, -223.237808, -21.912302, -96.674965)
 metadata/coliziune = "none"
 
-[node name="parapet379" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -224.393005, -22.057426, -90.883804)
+[node name="parapet294" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -224.393005, -22.684828, -90.883804)
 metadata/coliziune = "none"
 
-[node name="parapet380" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271212, -223.974457, -19.610180, -83.978905)
+[node name="parapet295" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.271212, 0.000000, 0.962520, 0.000000, 1.000000, 0.000000, -0.962520, 0.000000, 0.271212, -223.974457, -20.415611, -83.978905)
 metadata/coliziune = "none"
 
-[node name="parapet381" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.488745, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, 0.488745, -220.618805, -17.879980, -76.452332)
+[node name="parapet296" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.488745, 0.000000, 0.872427, 0.000000, 1.000000, 0.000000, -0.872427, 0.000000, 0.488745, -220.618805, -18.638880, -76.452332)
 metadata/coliziune = "none"
 
-[node name="parapet382" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120246, -135.106995, -12.651907, -60.883808)
+[node name="parapet297" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120246, -135.106995, -13.447635, -60.883808)
 metadata/coliziune = "none"
 
-[node name="parapet383" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -148.959854, -12.401632, -58.116478)
+[node name="parapet298" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -135.146957, -13.224216, -56.562759)
 metadata/coliziune = "none"
 
-[node name="parapet384" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.382633, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382633, -149.009155, -12.254873, -56.604084)
+[node name="parapet299" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.382633, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, -0.382633, -136.908844, -12.966131, -49.763607)
 metadata/coliziune = "none"
 
-[node name="parapet385" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.716016, 0.000000, 0.698084, 0.000000, 1.000000, 0.000000, -0.698084, 0.000000, -0.716016, -151.071457, -11.865887, -53.532509)
+[node name="parapet300" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.716016, 0.000000, 0.698084, 0.000000, 1.000000, 0.000000, -0.698084, 0.000000, -0.716016, -141.714554, -12.580962, -43.253494)
 metadata/coliziune = "none"
 
-[node name="parapet386" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -151.764084, -11.674036, -52.718338)
+[node name="parapet301" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.890658, 0.000000, 0.454674, 0.000000, 1.000000, 0.000000, -0.454674, 0.000000, -0.890658, -151.764084, -12.394049, -52.718338)
 metadata/coliziune = "none"
 
-[node name="parapet387" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, -0.958502, -155.101883, -11.332150, -51.450119)
+[node name="parapet302" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.958502, 0.000000, 0.285087, 0.000000, 1.000000, 0.000000, -0.285087, 0.000000, -0.958502, -155.101883, -12.086515, -51.450119)
 metadata/coliziune = "none"
 
-[node name="parapet388" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -210.500183, -6.897910, -30.436949)
+[node name="parapet303" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(-0.120246, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, -0.120246, -224.393005, -7.574934, -30.883810)
 metadata/coliziune = "none"
 
-[node name="parapet389" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.120248, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120248, -210.540146, -6.653908, -28.116476)
+[node name="parapet304" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.120248, 0.000000, 0.992744, 0.000000, 1.000000, 0.000000, -0.992744, 0.000000, 0.120248, -224.353043, -7.351843, -26.562761)
 metadata/coliziune = "none"
 
-[node name="parapet390" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, 0.382634, -210.490814, -6.468339, -26.604082)
+[node name="parapet305" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.382634, 0.000000, 0.923900, 0.000000, 1.000000, 0.000000, -0.923900, 0.000000, 0.382634, -210.490814, -7.072302, -26.604082)
 metadata/coliziune = "none"
 
-[node name="parapet391" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.618059, 0.000000, 0.786132, 0.000000, 1.000000, 0.000000, -0.786132, 0.000000, 0.618059, -209.173233, -6.054190, -24.358524)
+[node name="parapet306" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.618059, 0.000000, 0.786132, 0.000000, 1.000000, 0.000000, -0.786132, 0.000000, 0.618059, -209.173233, -6.913267, -24.358524)
 metadata/coliziune = "none"
 
-[node name="parapet392" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.888066, 0.000000, 0.459717, 0.000000, 1.000000, 0.000000, -0.459717, 0.000000, 0.888066, -207.710114, -5.803506, -22.689327)
+[node name="parapet307" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.888066, 0.000000, 0.459717, 0.000000, 1.000000, 0.000000, -0.459717, 0.000000, 0.888066, -207.710114, -6.553506, -22.689327)
 metadata/coliziune = "none"
 
-[node name="parapet393" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.958822, 0.000000, 0.284008, 0.000000, 1.000000, 0.000000, -0.284008, 0.000000, 0.958822, -204.527191, -5.467327, -21.455359)
+[node name="parapet308" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.958822, 0.000000, 0.284008, 0.000000, 1.000000, 0.000000, -0.284008, 0.000000, 0.958822, -204.527191, -6.224647, -21.455359)
 metadata/coliziune = "none"
 
-[node name="parapet394" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.999404, 0.000000, 0.034534, 0.000000, 1.000000, 0.000000, -0.034534, 0.000000, 0.999404, -155.561890, -2.251076, -21.101215)
+[node name="parapet309" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.999404, 0.000000, 0.034534, 0.000000, 1.000000, 0.000000, -0.034534, 0.000000, 0.999404, -155.561890, -3.001076, -21.101215)
 metadata/coliziune = "none"
 
-[node name="parapet395" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.980279, 0.000000, 0.197619, 0.000000, 1.000000, 0.000000, -0.197619, 0.000000, 0.980279, -149.414322, -1.905102, -20.620594)
+[node name="parapet310" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.980279, 0.000000, 0.197619, 0.000000, 1.000000, 0.000000, -0.197619, 0.000000, 0.980279, -149.414322, -2.655102, -20.620594)
 metadata/coliziune = "none"
 
-[node name="parapet396" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.820761, 0.000000, 0.571272, 0.000000, 1.000000, 0.000000, -0.571272, 0.000000, 0.820761, -140.460571, -1.477023, -16.596270)
+[node name="parapet311" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.820761, 0.000000, 0.571272, 0.000000, 1.000000, 0.000000, -0.571272, 0.000000, 0.820761, -140.460571, -2.230573, -16.596270)
 metadata/coliziune = "none"
 
-[node name="parapet397" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.598131, 0.000000, 0.801399, 0.000000, 1.000000, 0.000000, -0.801399, 0.000000, 0.598131, -136.857513, -1.286824, -12.787751)
+[node name="parapet312" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.598131, 0.000000, 0.801399, 0.000000, 1.000000, 0.000000, -0.801399, 0.000000, 0.598131, -136.857513, -2.043003, -12.787751)
 metadata/coliziune = "none"
 
-[node name="parapet398" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.385239, 0.000000, 0.922817, 0.000000, 1.000000, 0.000000, -0.922817, 0.000000, 0.385239, -134.323456, -1.039316, -8.097315)
+[node name="parapet313" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.385239, 0.000000, 0.922817, 0.000000, 1.000000, 0.000000, -0.922817, 0.000000, 0.385239, -134.323456, -1.789906, -8.097315)
 metadata/coliziune = "none"
 
-[node name="parapet399" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
-transform = Transform3D(0.084719, 0.000000, 0.996405, 0.000000, 1.000000, 0.000000, -0.996405, 0.000000, 0.084719, -146.928940, -0.785065, -0.459329)
+[node name="parapet314" parent="DecorManual/ZoneG_Serpentine" instance=ExtResource("s_rope_rail")]
+transform = Transform3D(0.084719, 0.000000, 0.996405, 0.000000, 1.000000, 0.000000, -0.996405, 0.000000, 0.084719, -133.071060, -0.760513, -1.540671)
 metadata/coliziune = "none"
 
 [node name="ZoneH_Cornisa" type="Node3D" parent="DecorManual"]

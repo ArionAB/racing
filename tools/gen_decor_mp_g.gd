@@ -323,9 +323,21 @@ const WALL_LEN := {"inca_wall_a": 4.0, "inca_wall_b": 6.0, "inca_wall_c": 2.0}
 ## conturul iesea la 15-17 m de ax pe picioarele plate, adica destul de departe
 ## incat zidul sa nu mai citeasca drept al DRUMULUI, ci un zid oarecare in
 ## camp. La 1,1 m conturul sta la 10-13 m — inca pe taluz, inca legat de sosea.
-const FALL_TARGET := 1.1
-const LAT_MIN := 8.5       # niciodata mai aproape de ax decat atat
-const LAT_MAX := 15.0      # dincolo de atat zidul nu mai citeste ca al drumului
+##
+## RUNDA 2 (critica oarba) a mutat PREMISA, nu cifra. Cat timp felia nu avea
+## rapa declarata, terenul statea la cota drumului pana la 9-11 m si orice
+## „contur de cadere" era un artefact al campului, nu o buza — de aia zidul
+## fugea la 10-15 m si citea ca bordura intr-o pajiste. Cu cele patru cornise
+## (custom_ravines 5-8) buza e REALA si e la 0,5 m de asfalt
+## (RAVINE_CORNICE_INNER), deci zidul se muta pe ea:
+##   LAT_MIN 8,5 -> 7,3 m de ax = 0,8 m dincolo de muchia de 6,5.
+##   LAT_MAX 15 -> 10,5: dincolo de racordul cornisei (6 m) peretele e deja in
+##   cadere libera si o piesa pusa acolo atarna in aer.
+## FALL_TARGET urca la 1,8: pe cornisa caderea trece de 1,8 m in primii metri,
+## deci pragul alege buza, nu panta de racord.
+const FALL_TARGET := 1.8
+const LAT_MIN := 7.3       # 0,8 m dincolo de muchia drumului (semi-latime 6,5)
+const LAT_MAX := 10.5      # dincolo de racordul cornisei piesa ar atarna in aer
 
 func _retaining() -> void:
 	var n := _track.baked.size()
@@ -410,35 +422,31 @@ func _wall_seg(mdl: String, base: String, frac: float, sgn: float, i: int,
 		return
 	tang = tang.normalized()
 	var q := p + side * lat
-	# Varful zidului la cota PRISPEI de deasupra lui (solul cu un metru mai
-	# inauntru), plus buza. Asa zidul retine prispa in loc sa stea in aer:
-	# fata lui e diferenta dintre prispa si solul de sub el.
-	# Cota varfului: media solului de pe prispa (1,2 m mai inauntru decat fata
-	# zidului) pe o fereastra de traseu, nu o singura raza. O raza singura
-	# sare cu 20-40 cm de la o piesa la alta si lantul iese zimtat.
+	# RUNDA 2 (critica oarba) A SIMPLIFICAT AICI, si simplificarea e chiar
+	# reparatia. Toata logica de dinainte — media solului pe „prispa", talpa cea
+	# mai joasa din fereastra, ridicarea la 0,45 m de fata expusa — descria cum
+	# se aseaza un zid pe un UMAR PLAT. Umarul nu mai exista: cele patru cornise
+	# (custom_ravines 5-8) taie terenul la 0,5 m de asfalt, deci zidul nu mai
+	# cauta o buza in camp, el ESTE buza.
+	#
+	# Regula pe cornisa e una singura, si e cea din bara: zidul TINE DRUMUL.
+	# Varful lui sta la cota SOSELEI plus buza — nu la cota unui teren de
+	# alaturi, fiindca dincolo de el nu mai e teren, e gol. Restul piesei atarna
+	# pe fata, si cu cat fata e mai adanca cu atat se vede mai mult din ea.
+	# Varful urmareste linia drumului (media pe fereastra, ca lantul sa nu iasa
+	# zimtat de la o piesa la alta), nu relieful de sub el.
 	var top := 0.0
 	var cnt := 0
 	for k in range(-3, 4):
 		var j := (i + k * 3 + n) % n
-		var pj := _track.baked[j]
-		var sj := _track._side_at(j) * sgn
-		var inj := pj + sj * maxf(lat - 1.2, 0.0)
-		top += _sol_real(inj.x, inj.z)
+		top += _track.baked[j].y
 		cnt += 1
 	top = top / float(cnt) + LIP
-	# CAT SE VEDE DIN FATA. Daca terenul de sub zid e mai sus decat `top` minus
-	# o palma, piesa iese din pamant doar cu coronamentul — adica, in captura,
-	# o LESPEDE VERDE culcata pe iarba (G_r5_f082.png, stanga jos: iarba de
-	# coronament fara piatra sub ea). Sub 0,45 m de fata expusa, piesa se sare:
-	# un gol in lant se citeste mult mai bine decat o scandura verde.
-	# Talpa: cota cea mai JOASA din fereastra, nu media.
-	# Doua corectii suprapuse, amandoua din probe_manual:
-	#  - cea mai joasa dintre cele DOUA citiri de teren (raycast pe panza si
-	#    camp neted): in apexul lui ac2 ele difera cu 6 m, si pentru o piesa
-	#    care trebuie sa ATINGA solul citirea sigura e cea de jos;
-	#  - MINIMUL pe fereastra, nu media: runda 8 a incercat media si a mutat
-	#    piesele doar cu 30 cm, fiindca fereastra de +-2 piese calca pe buza
-	#    rapei si media dilua chiar cifra care conteaza.
+	# Cat de adanca e caderea sub fata zidului — se masoara, si serveste la o
+	# singura decizie: daca buza NU a fost taiata (racordul cornisei se stinge
+	# spre capetele feliei), piesa ar sta pe iarba plata si ar citi iar ca
+	# bordura. Sub 0,8 m de cadere se sare: un gol in lant se citeste mai bine
+	# decat o bordura ornamentala, si exact bordura a pierdut runda 2.
 	var foot := INF
 	for k in range(-2, 3):
 		var j := (i + k * 3 + n) % n
@@ -447,31 +455,14 @@ func _wall_seg(mdl: String, base: String, frac: float, sgn: float, i: int,
 		var oj := pj + sj * (lat + 0.6)
 		foot = minf(foot, minf(_sol_real(oj.x, oj.z),
 			_sampler.ground_y(oj.x, oj.z)))
-	# Pe prispele plate fata iese sub 0,45 m. Nu se sare piesa (un gol in lant
-	# rupe exact continuitatea care face zidul sa citeasca a terasament), ci se
-	# RIDICA varful pana la 0,45 m de fata. Ridicarea e limitata la `LIP_MAX`
-	# peste cota drumului: mai sus ar deveni parapet, adica zid pe langa banda.
-	var y_top := top
-	if y_top - foot < 0.45:
-		y_top = minf(foot + 0.45, p.y + LIP_MAX)
-	if y_top - foot < 0.20:
+	if top - foot < 0.8:
 		_skipped += 1
 		return
-	# PLAFONUL DE INALTIME A FETEI. Linia neteda a prispei e corecta pe umar,
-	# dar in apexul lui ac2 terenul cade -5,0 m chiar la muchie (survey), iar
-	# acolo linia neteda ramane suspendata: runda 6 a lasat cinci piese
-	# (zidSprijin21-25) plutind 3,4-6,5 m in aer, exact sub ochii soferului.
-	# Zidul nu poate arata mai multa fata decat are piesa (2,487 m): daca
-	# terenul e mai jos de atat, zidul coboara cu el si se sprijina pe sol.
-	if y_top - foot > WALL_H - 0.15:
-		y_top = foot + WALL_H - 0.15
-	top = y_top
-	# INALTIMEA RAMANE INTREAGA, talpa se ingroapa.
+	# INALTIMEA RAMANE INTREAGA, talpa se ingroapa (sau atarna pe fata).
 	# Runda 3 a strans piesele pe verticala la fata disponibila (v_scl); in
 	# captura (G_r4_f076.png) au iesit blocuri indesate care citeau a lazi, nu
 	# a zidarie — proportia pietrelor din textura se strica odata cu piesa.
 	# Un zid pe jumatate ingropat e tot un zid; unul turtit nu mai e.
-	# Varful urmeaza linia neteda a prispei, restul intra in pamant.
 	var y := top - WALL_H
 	# Yaw astfel incat local +X sa mearga pe tangenta. Baza X a lui
 	# Basis.from_euler(0, yaw, 0) e (cos, 0, -sin); o egalez cu tangenta.
@@ -547,7 +538,20 @@ func _quenual_row() -> void:
 		# exact unde camera priveste cel mai mult spre versant.
 		f += _step(8.0 + _rng.randf_range(-2.0, 2.0))
 		k += 1
-	# (b) randul de sub buza, pe partea care cade
+	# (b) randul de SUB buza, pe partea care cade — coroanele care se vad peste
+	# creasta zidului.
+	#
+	# RUNDA 2: departarea a urcat de la 4-11 m la 16-30 m. Cat timp felia era
+	# plata, 4-11 m insemna „pe umar, putin mai jos"; cu cornisele taiate, un
+	# copac la 4-11 m sta CHIAR PE FATA peretelui, adica exact in dreptul golului
+	# pe care criticul cere sa-l vezi („peste zid vezi coroane si stanca
+	# dedesubt, plus tierul urmator de drum"). La 16-30 m sunt dincolo de racord
+	# (6 m) si in interiorul latimii declarate (55 m), deci stau pe fundul si pe
+	# malul rapei: din masina, varfurile lor apar SUB linia zidului, si golul
+	# dintre zid si ele e chiar adancimea.
+	#
+	# `_place` ia cota din `_sol_real`, adica din panza de coliziune reala, deci
+	# coboara singur cu peretele (memoria terrain-mesh-y-extrapoleaza).
 	f = F_IN + _step(7.0)
 	k = 0
 	while f < F_OUT:
@@ -556,7 +560,7 @@ func _quenual_row() -> void:
 		var mdl := "polylepis_b" if k % 2 == 0 else "polylepis_a"
 		var h := _rng.randf_range(5.5, 7.5) if mdl == "polylepis_b" \
 			else _rng.randf_range(3.6, 4.6)
-		_place(mdl, "quenualJos", f, sgn, _rng.randf_range(4.0, 11.0),
+		_place(mdl, "quenualJos", f, sgn, _rng.randf_range(16.0, 30.0),
 			_rng.randf_range(0.0, TAU), _scale_for(mdl, h), "trunk")
 		f += _step(11.0 + _rng.randf_range(-2.5, 2.5))
 		k += 1
@@ -711,6 +715,17 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 		_warn += 1
 		print("; ATENTIE silueta %s la frac %.4f ajunge la %.2f m de ax (banda %.2f)" % [
 			model, frac, d - cr, half])
+	# ALT PICIOR DE SERPENTINA. Degajarea de mai sus se uita doar la muchia
+	# LOCALA, si pe o serpentina asta nu ajunge: drumul se intoarce, deci 16-30 m
+	# lateral de pe un picior cad pe ASFALTUL piciorului urmator. Masurat cand
+	# randul `quenualJos` a fost mutat in rapa (runda 2): ProbeLaneClear a sarit
+	# de la 18 la 34 de probe blocate, toate pe `quenualJos*_col`, la fractii
+	# 0,700-0,850 — copaci plantati in banda de dedesubt.
+	# Acelasi test ca `CliffFace._on_any_road`: distanta pe INEL intre indici,
+	# ca sa nu se compare piesa cu propria ei curba.
+	if mode != "none" and _on_any_road(q, i, r):
+		_skipped += 1
+		return
 	# TERENUL REAL vs CAMPUL NETED. `_sol_real` e adevarul pentru fizica, dar
 	# acolo unde panza de coliziune are o cuta sub campul neted piesa ajunge
 	# sub linia pe care o vede ochiul (si pe care o masoara `probe_manual`):
@@ -735,6 +750,32 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	if sink > 0.0:
 		g = smooth + dy
 	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode, pitch)
+
+
+## Cade punctul `p` pe carosabilul ALTUI tronson (nu pe cel local)?
+##
+## `home_i` e indexul de care apartine piesa; tot ce e la mai putin de
+## NEAR_WINDOW de el pe inel se sare, altfel orice piesa s-ar respinge singura
+## fata de propria ei curba. `body_r` e raza corpului fizic, ca sa se pastreze
+## degajarea si la piese groase.
+const NEAR_WINDOW_FRAC := 0.012   # ~24 m in fata si in spate pe 1986 m de tur
+const OTHER_ROAD_KEEP := 1.2      # peste muchia celuilalt picior
+
+func _on_any_road(p: Vector3, home_i: int, body_r: float) -> bool:
+	var n := _track.baked.size()
+	var skip := int(round(float(n) * NEAR_WINDOW_FRAC))
+	for i in n:
+		var di := absi(i - home_i)
+		di = mini(di, n - di)
+		if di <= skip:
+			continue
+		var b: Vector3 = _track.baked[i]
+		var dx := b.x - p.x
+		var dz := b.z - p.z
+		var clear: float = _track.width_at_index(i) + OTHER_ROAD_KEEP + body_r
+		if dx * dx + dz * dz < clear * clear:
+			return true
+	return false
 
 
 ## Ca `_raw`, dar cu scara verticala separata: zidul de sprijin isi pastreaza

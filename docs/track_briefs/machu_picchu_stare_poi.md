@@ -28,6 +28,26 @@
   a sloturilor de zidărie, pe dala existentă `alpine_granite` — zero VRAM nou).
 - **`ProbeLaneClear` e ARMATĂ** pentru Track15 și verificată prin sabotaj.
 
+### Runda 2 a valului 1 (ultima rulare a sesiunii)
+
+Cei trei constructori au mai livrat o rundă pe terenul reparat, înainte ca
+sesiunea să se oprească:
+
+- **A** — terasele au acum **podea**, nu doar ziduri: platforme de iarbă la
+  cote diferite, fețe de sprijin vizibile, scări între niveluri. Exact ce
+  ceruse criticul orb de trei runde („nu închid un **plan orizontal**").
+- **G** — zidul se face din **asize**, nu dintr-o piesă întinsă (criticul citea
+  „lespezi" fiindcă piesele traversau muchia).
+- **F** — râul s-a mutat din platou **în gorjă**, pe cornișa adăugată la
+  integrare.
+
+Materialele au **scăzut** la 19 (de la 20) deși prop-urile au crescut de la
+3232 la 3880 — constructorii au consolidat, n-au adăugat. Deci mai e o unitate
+de marjă sub plafonul cerut.
+
+**Niciunul n-a ajuns la criticul orb în runda asta** — sesiunea s-a oprit
+la granița dintre constructori și critici, deliberat.
+
 ### Valul 1 — POI-urile A, G, F (merge-uite, dar **nu terminate**)
 
 Decor plasat în cele trei zone, plus două reparații de nivel de pistă pe care
@@ -51,11 +71,11 @@ Măsurate pe main, după `--import`. **Astea sunt referința de regresie.**
 
 | gardă | comandă | cifră |
 |---|---|---|
-| probe_decor | `--script res://tools/probe_decor.gd -- --track=15` | **20 materiale**, 3232 prop, 487 714 tri |
+| probe_decor | `--script res://tools/probe_decor.gd -- --track=15` | **19 materiale**, 3880 prop, 601 804 tri |
 | ProbeBuried | `res://tools/ProbeBuried.tscn -- --track=8` | 0 îngropate, 0 tavane |
 | ProbeLaneClear | `res://tools/ProbeLaneClear.tscn -- --track=8` | **18**, linia de bază 20 |
 | ProbeLayout | `res://tools/ProbeLayout.tscn -- --track=8` | 1986,4 m, rază 9,0 m @0.41, **pantă 11,5 % @0.16** |
-| ProbeRace | `res://tools/ProbeRace.tscn -- --mode=race --track=8 --seconds=150 --seed=N` | **0 repuneri în 4 din 5 rulări** (una a dat 1) |
+| ProbeRace | `res://tools/ProbeRace.tscn -- --mode=race --track=8 --seconds=150 --seed=N` | **0 repuneri pe seed 1, 3, 4**; seed 2 dă 0/1/3 (vezi §3.6) |
 
 Binar: `D:\GameDev\Godot_v4.7-stable_win64_console.exe`.
 **`probe_decor` ia `--track=15` (număr de scenă); toate celelalte iau
@@ -121,6 +141,22 @@ Se reia de la cea mai bine judecată stare, pe terenul nou
   `LiftBridgeHazard` pune un dâmb de 1,6 m pe cornișă (profilul nu mai citește
   „bârne peste gol"), iar sub gol terenul rămâne la −0,3 m, deci nu e
   prăpastie. Brief-ul §3 spune că cere săpătură locală de 4 m. Nefăcut.
+
+### 3.6 O slăbiciune reală la frac 0.187–0.190 (POI B, neconstruit)
+
+Seed 2 rulat de **trei ori** a dat 0, 1 și 3 repuneri — deci nedeterminism
+Jolt, cum era de așteptat (memoria `proberace-nedeterminism`). **Dar locul nu e
+aleatoriu**: repunerile se grupează la frac **0.187–0.190**, cota +36 m,
+pozițiile (244…246, 36, 124…129). Aia e coama urcării pe treptele Drumului
+Incaș — adică **POI B, pe care nu l-a construit încă nimeni**. Mașinile ies în
+afară acolo. A treia rulare a arătat și o repunere la frac 0.554 (podul de
+frânghie).
+
+Pe seed-urile 1, 3, 4: **0 repuneri**.
+
+Nu s-a reparat, fiindcă e în intervalul lui B și se face când se construiește
+B, cu `ProbeRace --slice=0.15,0.22` înainte și după. Scris ca să nu se piardă:
+e prima repunere reproductibilă ca **loc** din toată sesiunea.
 
 ### 3.5 Niciun POI n-a câștigat încă orb
 

@@ -336,8 +336,20 @@ const WALL_LEN := {"inca_wall_a": 4.0, "inca_wall_b": 6.0, "inca_wall_c": 2.0}
 ## FALL_TARGET urca la 1,8: pe cornisa caderea trece de 1,8 m in primii metri,
 ## deci pragul alege buza, nu panta de racord.
 const FALL_TARGET := 1.8
-const LAT_MIN := 7.3       # 0,8 m dincolo de muchia drumului (semi-latime 6,5)
-const LAT_MAX := 10.5      # dincolo de racordul cornisei piesa ar atarna in aer
+## RUNDA 8: zidul se lipeste de ASFALT, nu de „buza" cautata in teren.
+##
+## Criticul: „suprafata drumului se termina exact PE capatul lui". Masurat pe
+## runda 7 (ProbeMpGZid), zidul statea la 6,89-8,00 m de ax cu muchia la 6,5 —
+## adica 0,4-1,5 m de IARBA intre asfalt si piatra. Iarba aia e tot ce trebuia
+## ca profilul sa citeasca „panou pe pajiste" in loc de „drum sprijinit pe zid":
+## un zid de sprijin nu are pamant in fata lui, are sosea.
+##
+## Piesa e groasa 0,83-0,86 m (masuratori §1), deci centrul la `half + 0,43`
+## pune fata dinspre drum FIX pe muchia asfaltului. Cei 0,43 nu sunt aleşi, sunt
+## jumatatea grosimii masurate.
+const WALL_HALF_THICK := 0.43
+const LAT_MIN := 6.93      # = 6,5 + 0,43: fata interioara pe muchia asfaltului
+const LAT_MAX := 7.30      # +0,37 m de joc, cat sa urmeze latimea variabila
 ## Cat poate sta zidul dincolo de MUCHIA locala. 1,4 m: piesa e groasa 0,83-0,86
 ## (masuratori §1), deci fata ei dinspre drum ramane la ~1 m de asfalt — destul
 ## cat sa nu fie obstacol pe umar, prea putin cat sa se vada iarba intre sosea
@@ -374,6 +386,12 @@ const WALL_POLY_STEP := 0.5   # cat de des se esantioneaza linia zidului (m de a
 ## (masurat pe G_r4_f082: salt de yaw median 8,7 grade, maxim 43).
 ## 6 grade pe o piesa de 2 m inseamna o sageata de 2,6 cm — sub ce se vede.
 const WALL_MAX_TURN_DEG := 6.0
+## Cate cursuri de zidarie se stivuiesc sub buza, cel mult. 4 x 2,487 = 9,95 m
+## de fata — destul ca peretele sa se citeasca pe caderile de 8-14 m masurate
+## (ProbeMpGZid), si un plafon la caderile de 20+ m unde oricum ceata si
+## coroanele de sub buza inchid cadrul. Fara plafon, un ac cu 26 m de rapa ar
+## cere 11 cursuri si ar umple felia cu piatra nevazuta.
+const WALL_COURSES_MAX := 4
 
 ## Un punct de pe linia zidului, cu tot ce trebuie ca sa se aseze o piesa acolo.
 class WallPt:
@@ -553,11 +571,36 @@ func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
 	# captura (G_r4_f076.png) au iesit blocuri indesate care citeau a lazi, nu
 	# a zidarie — proportia pietrelor din textura se strica odata cu piesa.
 	# Un zid pe jumatate ingropat e tot un zid; unul turtit nu mai e.
-	var y := top - WALL_H
 	# Yaw astfel incat local +X sa mearga pe coarda. Baza X a lui
 	# Basis.from_euler(0, yaw, 0) e (cos, 0, -sin); o egalez cu coarda.
 	var yaw := atan2(-tang.z, tang.x)
-	_raw(mdl, "zidSprijin", Vector3(mid.x, y, mid.z), yaw, 1.0, "hull")
+	# ------------------------------------------------------------------
+	# RUNDA 8: ZIDUL PRIMESTE CURSURI, fiindca o singura piesa nu are FATA.
+	#
+	# Criticul orb a numit exact relatia care lipsea: „suprafata drumului se
+	# termina exact PE capatul lui, cu golul dedesubt (...) fata zidului cazand
+	# in vid". Masurat pe .tscn-ul rundei 7 (ProbeMpGZid): toate cele 108 piese
+	# erau deja pe partea care cade si toate aveau varful la +0,17..+0,41 fata
+	# de sosea — deci primele doua cereri ale criticului erau DEJA satisfacute,
+	# si totusi captura citea „bordura de gradina". Cauza e a treia cerere:
+	# golul masurat la 1 m dincolo de fata era -0,9..-14,2 m, iar piesa are
+	# 2,487 m. Un panou de 2,5 m in fata unei caderi de 12 m nu e o fata, e o
+	# scandura suspendata — si exact asa arata in G_r7_f082.png, slabe razlete
+	# cu talpa in aer.
+	#
+	# Deci zidul se STIVUIESTE: acelasi model, acelasi yaw, acelasi centru, pus
+	# in cursuri una sub alta pana cand talpa ajunge la teren. Nu se intinde pe
+	# verticala (runda 3 a aratat ce face scara verticala cu proportia pietrei
+	# din textura: ies lazi), se REPETA — ceea ce e si constructia reala a unei
+	# terase incase, si ce se vede in bara: randuri de zidarie, nu un panou.
+	var foot_out: float = _sol_real(probe.x, probe.z)
+	var need := top - foot_out
+	var courses := int(ceil(need / WALL_H))
+	courses = clampi(courses, 1, WALL_COURSES_MAX)
+	for c in courses:
+		var y := top - WALL_H * float(c + 1)
+		_raw(mdl, "zidSprijin", Vector3(mid.x, y, mid.z), yaw, 1.0,
+			"hull" if c == 0 else "none")
 	return true
 
 
@@ -573,26 +616,21 @@ func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
 ## cadere pe o fereastra de +-12 m de traseu, clampata. Se pastreaza adaptarea
 ## (pe unde e rapa, zidul se apropie; pe unde e prispa lunga, se departeaza)
 ## fara zimtii care rup lantul.
+## RUNDA 8: nu mai exista cautare. Distanta laterala e MUCHIA plus jumatatea
+## grosimii piesei, si atat.
+##
+## Rundele 4-7 au cautat, cu tot mai multa grija, „conturul unde terenul a cazut
+## deja", si de fiecare data zidul a iesit la 7-8 m cu iarba in fata lui. Cauta
+## greseala era in intrebare: conturul de cadere e o proprietate a TERENULUI,
+## iar un zid de sprijin e o proprietate a DRUMULUI. Cat timp pozitia lui se
+## citea din teren, zidul nu putea sa fie al soselei — cel mult vecin cu ea.
+##
+## Cu cornisele declarate `scarp` (Track15.tscn, `custom_scarp_ravines`),
+## caderea incepe oricum in primii metri dupa buza, deci nu mai e nimic de
+## cautat: zidul se lipeste de asfalt si peretele e sub el prin constructie.
 func _smooth_lateral(i: int, sgn: float) -> float:
-	var n := _track.baked.size()
-	var acc := 0.0
-	var cnt := 0
-	for k in range(-4, 5):
-		var j := (i + k * 3 + n) % n
-		acc += _fall_lateral_raw(j, sgn)
-		cnt += 1
-	# ...si apoi se leaga de MUCHIE, nu doar de cele doua plafoane absolute.
-	# Pe cornisa, zidul TINE ASFALTUL: buza taieturii e la 0,5 m de el
-	# (RAVINE_CORNICE_INNER), deci un zid la 10,5 m de ax cand muchia e la 6,5
-	# lasa patru metri de iarba intre sosea si zid — si atunci piesele nu mai
-	# citesc ca terasamentul drumului, ci ca un gard pe camp, splayate pe panta.
-	# Exact asta se vede in prim-planul lui G_r6_f082.png.
-	# Deci limita de sus e RELATIVA la muchia locala: cel mult `EDGE_BAND` metri
-	# dincolo de ea. Cautarea conturului de cadere ramane, dar doar ca sa apropie
-	# zidul acolo unde rapa incepe mai devreme decat buza nominala.
 	var half := _track.width_at_index(i)
-	return clampf(acc / float(cnt), maxf(LAT_MIN, half + 0.5),
-		minf(LAT_MAX, half + EDGE_BAND))
+	return clampf(half + WALL_HALF_THICK, LAT_MIN, LAT_MAX)
 
 
 func _fall_lateral_raw(i: int, sgn: float) -> float:

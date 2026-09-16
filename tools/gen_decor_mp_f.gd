@@ -739,9 +739,13 @@ func _river_rocks() -> void:
 		(lots[mdl]["sc"] as Array[Vector3]).append(Vector3(
 			sc * _rng.randf_range(1.0, 1.15), sc * 0.72,
 			sc * _rng.randf_range(1.0, 1.15)))
-		# Pietrele de mal care chiar ating apa dau si ele spuma, dar mai putina.
+		# Pietrele de mal care ating apa intra ca ancore, dar MARCATE: raza se
+		# trece cu semn negativ. Ele primesc doar dunga din amonte, nu si siaj
+		# — o piatra de 40 cm de pe mal nu lasa dara de sase metri, si in
+		# F_r25 exact darele astea faceau albia sa para pieptanata cu linii
+		# paralele care nu ies din nimic vizibil.
 		if g < wy + 0.25:
-			_wet_rocks.append(Vector4(c.x, c.y, BASE_R.get(mdl, 0.6) * sc, wy))
+			_wet_rocks.append(Vector4(c.x, c.y, -BASE_R.get(mdl, 0.6) * sc, wy))
 		mal += 1
 
 	for mdl: String in lots.keys():
@@ -812,7 +816,11 @@ func _foam() -> void:
 	for r in _wet_rocks:
 		var rx := r.x
 		var rz := r.y
-		var rad: float = maxf(float(r.z), 0.45)
+		# Semnul razei spune de unde vine ancora: pozitiv = piatra din albie
+		# (prag sau fir), negativ = piatra de mal. Numai cele din albie fac
+		# siaj.
+		var in_albie: bool = float(r.z) > 0.0
+		var rad: float = maxf(absf(float(r.z)), 0.45)
 		var wy: float = r.w
 		# --- (a) dunga din AMONTE: transversala, lipita de piatra.
 		var up := _chan_pt(0.0, 0.0)
@@ -830,7 +838,7 @@ func _foam() -> void:
 		# tine albul jos fara sa-i ia cauza — runda precedenta scosese 1045 de
 		# placi (848 numai siaj) si albia iesea ZAPADA, defectul pe care
 		# criticul l-a numit deja o data.
-		if rad < 0.55:
+		if not in_albie or rad < 0.55:
 			continue
 		var cnt := _rng.randi_range(3, 6)
 		for k in cnt:
@@ -843,7 +851,10 @@ func _foam() -> void:
 			# Se stinge: placile de departe sunt mai mici si mai subtiri.
 			var fade: float = clampf(1.0 - t * 0.16, 0.25, 1.0)
 			pos.append(Vector3(px, wy + 0.11, pz))
-			yaw.append(flow_yaw + _rng.randf_range(-0.22, 0.22))
+			# Imprastiere mai mare pe yaw: siajul unei pietre se desface, nu
+			# merge paralel cu al vecinei. Cu +-0,22 rad toate darele ieseau
+			# pe aceeasi directie si albia citea „pieptanata".
+			yaw.append(flow_yaw + _rng.randf_range(-0.55, 0.55))
 			sc3.append(Vector3(_rng.randf_range(0.9, 1.5) * fade, 1.0,
 				_rng.randf_range(0.28, 0.48) * fade))
 			siaj += 1

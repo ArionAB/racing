@@ -890,6 +890,36 @@ const CLASSES_BY_MODEL := {
 	"guardhouse": {"House_Stone": Palette.TRI_PREFIX + "inca_stone"},
 	# inca_house_b (ruina) si fountain_basin NU intra: vezi nota de respingere
 	# de sub CLASS_TEXTURES["inca_stone"] din palette.gd.
+	#
+	# PIESELE-EROU DE PIATRA (adaugate la POI A, pe masuratoare de captura).
+	# `machu_picchu_masuratori.md` §2 le trecuse deja pe lista celor care
+	# "NU cer ACCENT_SPLIT" fiindca "toate sunt piatra" — adica erau gandite
+	# sa primeasca clasa pe TOT nodul — dar cheia nu fusese scrisa. Pana la
+	# masuratoarea de mai jos asta nu se vedea: pe .glb brut nu se vede, se
+	# vede abia dupa remap, in cadru, langa zidurile clasate
+	# (memoria `monocromia-se-masoara-dupa-remap`).
+	#
+	# Masurat pe A_r3_sun_temple.png si A_r4_f000.png, media pe suprafata
+	# luminata, in acelasi cadru cu zidaria clasata de langa ele:
+	#
+	#   inca_wall_* (cu `inca_stone`)  H 39-44 deg   S 0.45-0.50
+	#   three_windows                  H 43 deg      S **0.22**
+	#   sun_temple                     H **81** deg  S **0.06**
+	#   intihuatana                    H **77** deg  S **0.05**
+	#
+	# Adica nuanta nimereste doar la `three_windows`, iar SATURATIA e de
+	# doua-zece ori mai mica peste tot: in cadru, templul si piatra-ceas
+	# citesc ca beton cenusiu-verzui langa un zid de granit cald, la 2 m
+	# distanta, desi brief-ul spune ca sunt acelasi granit. Asta e ce facea
+	# hero-assets-urile sa dispara in campul de ziduri al Pietei Sacre.
+	#
+	# Toate trei sunt mono-familie (3+4+29 / 3+29, toate sloturi de piatra),
+	# deci clasa merge pe nodul intreg fara ACCENT_SPLIT — exact cum a
+	# argumentat inventarul. `trail_marker` (3+29) intra din acelasi motiv.
+	"three_windows": {"Three_Windows": Palette.TRI_PREFIX + "inca_stone"},
+	"sun_temple": {"Sun_Temple": Palette.TRI_PREFIX + "inca_stone"},
+	"intihuatana": {"Intihuatana": Palette.TRI_PREFIX + "inca_stone"},
+	"trail_marker": {"Trail_Marker": Palette.TRI_PREFIX + "inca_stone"},
 
 	# --- Serengeti: LUTUL termitierelor ---------------------------------
 	#

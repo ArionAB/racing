@@ -49,6 +49,17 @@ extends Node
 ##    jumatate de cadru iarba goala) tocmai fiindca citise gresit mana si
 ##    crezuse ca acolo e prapastia. Nu e.
 ##
+## 7. UNDE SE UITA CAMERA (runda 3, masurat pe capturi). `--gamecam` pune
+##    camera la 12,5 m IN SPATELE punctului de fractie, la 10 m inaltime.
+##    Deci ce sta FIX la fractia de captura e la 12 m in fata, in marginea
+##    de jos a cadrului; cadrul se umple cu ce e intre 20 si 80 m in fata,
+##    adica intre frac+0.010 si frac+0.040 (1986 m / tur -> 19,86 m per
+##    0.01 de fractie). Runda 2 pusese Trei Ferestre la frac 0.0005 si
+##    Templul Soarelui la 0.0035, adica **langa masina**, si pe captura nu
+##    se vede niciunul (memoria `masoara-inainte-nu-langa`). Piesele-erou
+##    se muta la frac 0.012-0.030 pentru captura de la 0.00, si se dubleaza
+##    intre 0.030-0.045 pentru captura de la 0.02.
+##
 ## 6. FRACTIA DE INTRARE. Zona incepe la -0.010 (unde platoul incepe si
 ##    latimea e deja 9 m) si tine pana la +0.050, unde soseaua urca la
 ##    +7,6 m si intra deja in POI B (`custom_step_ranges` incepe la 0.0405).
@@ -98,7 +109,17 @@ const HEIGHT := {
 	"three_windows": 4.000, "sun_temple": 5.586, "intihuatana": 2.720,
 	"inca_house_a": 4.825, "inca_house_b": 2.833, "guardhouse": 7.878,
 	"fountain_basin": 0.600, "water_channel": 0.300,
-	"llama": 0.529, "llama_b": 0.529, "llama_c": 0.529,
+	# LAMA: 1.657 m, NU 0.529. Tabelul din machu_picchu_masuratori.md §1 da
+	# 0.529 fiindca masoara AABB-ul mesh-ului in spatiul LUI, inainte de
+	# transformarea scheletului (LlamaMesh sta sub un Node3D sub un
+	# Skeleton3D). Cifra reala, masurata in motor cu get_aabb() compus prin
+	# global_transform, e (0.393 x 1.657 x 1.369). Runda 3 a crezut tabelul
+	# si a cerut "1,66 m inaltime": a iesit scara 3.135 si o lama de 5,2 m,
+	# vizibila pe A_r3_three_windows.png ca o girafa peste ziduri.
+	# Memoria `sonda-masura-alt-obiect`: cifra din tabel masura alt obiect.
+	# (Aceeasi scara 3.135 e pe cele patru lame-hazard din Track15.tscn,
+	# cablate de fundatie — nu e zona mea, dar defectul e acelasi.)
+	"llama": 1.657, "llama_b": 1.657, "llama_c": 1.657,
 	"trail_marker": 1.200,
 	"inca_stair_a": 2.500, "inca_stair_b": 5.000,
 	"moss_boulder_a": 0.741, "moss_boulder_b": 1.957,
@@ -118,7 +139,7 @@ const BASE_R := {
 	"three_windows": 0.58, "sun_temple": 3.80, "intihuatana": 3.00,
 	"inca_house_a": 3.58, "inca_house_b": 3.64, "guardhouse": 4.01,
 	"fountain_basin": 1.06, "water_channel": 0.20,
-	"llama": 0.30, "llama_b": 0.30, "llama_c": 0.30,
+	"llama": 0.69, "llama_b": 0.69, "llama_c": 0.69,
 	"trail_marker": 0.29,
 	"inca_stair_a": 1.50, "inca_stair_b": 3.00,
 	"moss_boulder_a": 0.43, "moss_boulder_b": 1.24,
@@ -416,8 +437,8 @@ func _terasa(f0: float, f1: float, lat: float, h: float, y_off: float,
 ##   etaj 1 (+1.6 m):   zid la 32 m, incinte la 34-50 m
 ##   etaj 2 (+3.2 m):   zid la 52 m, incinte la 54-62 m
 func _terase_dreapta() -> void:
-	_terasa(-0.0090, 0.0270, 32.0, 2.7, 0.0, "sprijin1")
-	_terasa(-0.0060, 0.0270, 52.0, 2.9, 1.6, "sprijin2")
+	_terasa(-0.0090, 0.0440, 32.0, 2.7, 0.0, "sprijin1")
+	_terasa(-0.0060, 0.0430, 52.0, 2.9, 1.6, "sprijin2")
 
 
 ## CAMPUL DIN DREAPTA: incinte mari, trei randuri, fiecare pe etajul lui.
@@ -427,19 +448,23 @@ func _camp_dreapta() -> void:
 	for sp: Array in [
 			[-0.0055, 22.0, 26.0, 15.0, 2.5, 0.0, [-1.0, -1.0, -1.0, 0.5]],
 			[0.0075, 22.0, 28.0, 15.0, 2.5, 0.0, [-1.0, -1.0, -1.0, 0.45]],
-			[0.0205, 22.0, 24.0, 15.0, 2.4, 0.0, [-1.0, -1.0, -1.0, 0.5]]]:
+			[0.0205, 22.0, 24.0, 15.0, 2.4, 0.0, [-1.0, -1.0, -1.0, 0.5]],
+			[0.0330, 21.0, 24.0, 14.0, 2.5, 0.0, [-1.0, -1.0, -1.0, 0.5]],
+			[0.0440, 20.0, 22.0, 13.0, 2.4, 0.0, [-1.0, -1.0, -1.0, 0.5]]]:
 		_inc(sp, "curteDr")
 	# Etajul 1 — peste zidul de sprijin de la 32 m, ridicat cu 1,6 m.
 	for sp: Array in [
 			[-0.0045, 42.0, 28.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
 			[0.0100, 42.0, 30.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0240, 41.0, 22.0, 15.0, 2.5, 1.6, [-1.0, -1.0, 0.5, -1.0]]]:
+			[0.0240, 41.0, 22.0, 15.0, 2.5, 1.6, [-1.0, -1.0, 0.5, -1.0]],
+			[0.0375, 41.0, 26.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]]]:
 		_inc(sp, "curteDrB")
 	# Etajul 2 — peste zidul de la 52 m, ridicat cu 3,2 m. Astea sunt
 	# siluetele de sus din bara: se vad peste tot restul.
 	for sp: Array in [
 			[-0.0020, 59.0, 24.0, 12.0, 2.7, 3.2, [-1.0, -1.0, -1.0, -1.0]],
-			[0.0140, 59.0, 26.0, 12.0, 2.7, 3.2, [-1.0, -1.0, -1.0, -1.0]]]:
+			[0.0140, 59.0, 26.0, 12.0, 2.7, 3.2, [-1.0, -1.0, -1.0, -1.0]],
+			[0.0310, 58.0, 24.0, 12.0, 2.7, 3.2, [-1.0, -1.0, -1.0, -1.0]]]:
 		_inc(sp, "curteDrC")
 
 
@@ -459,12 +484,15 @@ func _camp_stanga() -> void:
 	# De la +0.005: campul plin, doua etaje.
 	for sp: Array in [
 			[0.0085, -21.0, 26.0, 15.0, 2.5, 0.0, [-1.0, 0.5, -1.0, -1.0]],
-			[0.0215, -21.0, 24.0, 15.0, 2.4, 0.0, [-1.0, 0.5, -1.0, -1.0]]]:
+			[0.0215, -21.0, 24.0, 15.0, 2.4, 0.0, [-1.0, 0.5, -1.0, -1.0]],
+			[0.0340, -20.0, 24.0, 14.0, 2.5, 0.0, [-1.0, 0.5, -1.0, -1.0]],
+			[0.0450, -19.0, 22.0, 13.0, 2.4, 0.0, [-1.0, 0.5, -1.0, -1.0]]]:
 		_inc(sp, "curteStg")
-	_terasa(0.0035, 0.0300, -31.0, 2.7, 0.0, "sprijinStg")
+	_terasa(0.0035, 0.0450, -31.0, 2.7, 0.0, "sprijinStg")
 	for sp: Array in [
 			[0.0110, -41.0, 26.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0250, -40.0, 22.0, 15.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]]]:
+			[0.0250, -40.0, 22.0, 15.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
+			[0.0390, -40.0, 24.0, 15.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]]]:
 		_inc(sp, "curteStgB")
 
 
@@ -483,16 +511,35 @@ func _temple() -> void:
 	# Trei Ferestre: fatada de 10 m x 4,0 m. La 15 m de ax pe STANGA, cu
 	# fata spre drum: cele trei nise trapezoidale sunt semnalul de
 	# recunoastere si trebuie sa se vada din masina la trecerea prin grila.
-	var f := 0.0005
-	var c := _pt(f, -15.0)
-	_at("three_windows", "treiFerestre", c.x, c.y, _yaw_at(f), 1.0, "", -0.10)
+	# Piesa e o FATADA (10,00 x 4,00 x 1,15 m masurat in motor), nu o
+	# cladire: are o singura fata buna, cea cu nisele. Runda 3 o pusese la
+	# -15 m de ax, adica IN SPATELE zidului incintei din stanga (care e la
+	# 21 m centru, deci latura lui dinspre drum e la ~13,5 m): pe captura se
+	# vedea doar buiandrugul peste coronament (A_r3_three_windows.png).
+	# Acum sta la -12,5 m, in FATA oricarui zid, cu nisele spre sosea.
+	var f := 0.0155
+	var c := _pt(f, -12.5)
+	_at("three_windows", "treiFerestre", c.x, c.y, _yaw_at(f) + PI, 1.0, "", -0.10)
 	# Templul Principal (sun_temple, zid curb, 5,59 m) pe DREAPTA, la 16 m de
 	# ax, in poarta curtii mari — e cea mai inalta piesa de piatra din piata
 	# si trebuie sa stea in fata incintei, nu in spatele ei.
-	var f2 := 0.0035
-	var c2 := _pt(f2, 16.0)
+	# Templul Principal: 8,79 x 5,59 x 7,59 m — o cladire, nu o fatada, deci
+	# are nevoie de teren liber in jur. Runda 3 il pusese la 16 m de ax, fix
+	# peste latura dinspre drum a curtii de pe dreapta: zidul ii taia baza
+	# si iesea o lespede curba de piatra (A_r3_sun_temple.png). Acum sta la
+	# 13,5 m, in fata zidului, pe teren gol.
+	var f2 := 0.0215
+	var c2 := _pt(f2, 13.5)
 	_at("sun_temple", "templulSoarelui", c2.x, c2.y, _yaw_at(f2) - PI * 0.5,
 		1.0, "", -0.12)
+	# A doua fatada de nise, pentru cadrul de la frac 0.02: la 0.038 pe
+	# dreapta. Piesa `three_windows` e o fatada, nu o cladire — doua exemplare
+	# la 45 m distanta citesc ca doua incaperi ale aceluiasi templu, nu ca
+	# duplicat (in bara, sirul de nise se repeta pe toata terasa de sus).
+	var f3 := 0.0380
+	var c3 := _pt(f3, 17.0)
+	_at("three_windows", "treiFerestreB", c3.x, c3.y, _yaw_at(f3) + PI,
+		0.95, "", -0.10)
 
 
 ## INTIHUATANA pe movila. Runda 1 a facut soclul din doua inele concentrice
@@ -507,7 +554,7 @@ func _temple() -> void:
 ## deci marginea lui (raza 3,0 m la scara 1 + jumatate de latura) e la
 ## ~11 m de ax, adica 2 m dincolo de muchia benzii de 9 m. Masinile nu ajung.
 func _movila_intihuatana() -> void:
-	var f := 0.0175
+	var f := 0.0265
 	var c := _pt(f, 19.0)
 	_enclosure_y(c, 14.0, 13.0, _yaw_at(f), 1.8, [-1.0, -1.0, -1.0, 0.5],
 		"soclu", 0.0)
@@ -526,21 +573,45 @@ func _movila_intihuatana() -> void:
 ## `guardhouse` (7,88 m) NU intra: e piesa de la Casa Paznicului (POI C); in
 ## piata ar fi inghitit silueta templului.
 func _case() -> void:
-	var f := 0.0075
-	var c := _pt(f, 24.0)
+	# Casa din curtea de pe dreapta, la frac 0.018: pentru cadrul de la 0.00
+	# e la ~36 m in fata, adica in treimea din mijloc a ecranului.
+	var f := 0.0180
+	var c := _pt(f, 23.0)
 	_at("inca_house_a", "casaPaie", c.x, c.y, _yaw_at(f) - PI * 0.5, 1.0, "", -0.10)
-	var f2 := 0.0100
-	var c2 := _pt(f2, 44.0)
+	# A doua, pe etajul 1 (ridicata 1,6 m), la frac 0.038: silueta de sus a
+	# cetatii pentru cadrul de la frac 0.02.
+	var f2 := 0.0380
+	var c2 := _pt(f2, 42.0)
 	_at("inca_house_a", "casaPaieB", c2.x, c2.y, _yaw_at(f2) - PI * 0.35,
-		1.06, "", 1.55)
-	# Ruine fara acoperis (inca_house_b, 2,83 m): diferenta „casa intreaga /
-	# casa cazuta" din bara. Una in curtea din stanga, una pe etajul 2.
+		1.08, "", 1.55)
+	# RUINELE FARA ACOPERIS — diferenta „casa intreaga / casa cazuta" din
+	# bara. Runda 4 le facuse din `inca_house_b`, si captura a aratat de ce
+	# nu merge: piesa aia e SINGURA bucata de zidarie din kit care nu poate
+	# primi clasa `inca_stone` (inventarul o respinge cu motiv masurat —
+	# muschiul e 22,8% si intervalele de y se SUPRAPUN, deci o ruptura pe
+	# inaltime ar taia gresit). Ramasa pe atlasul brut, in cadru citea la
+	# **H 186 grade, S 0.09** — cyan — la doi metri de ziduri la H 39-44,
+	# S 0.45-0.50. Doua familii de piatra in acelasi cadru, pe obiecte
+	# despre care brief-ul spune ca sunt acelasi granit
+	# (A_r4_ruina.png; memoria `tenta-de-clasa-se-decide-la-integrare`).
+	#
+	# Nu „corectez" respingerea inventarului: scot piesa din POI-ul asta.
+	# Casa cazuta se face din ce citeste corect — un inel JOS de zid (1,2 m)
+	# in interiorul unei curti, cu o latura lipsa. E chiar ce arata bara:
+	# in piata, ruinele sunt conturul de temelie al unei incaperi, nu un
+	# corp de casa.
 	var f3 := 0.0085
 	var c3 := _pt(f3, -22.0)
-	_at("inca_house_b", "ruina", c3.x, c3.y, _yaw_at(f3) + 0.2, 1.0, "", -0.12)
-	var f4 := 0.0140
-	var c4 := _pt(f4, 59.0)
-	_at("inca_house_b", "ruinaB", c4.x, c4.y, _yaw_at(f4) - 0.3, 1.0, "", 3.15)
+	_enclosure(c3, 7.0, 6.0, _yaw_at(f3) + 0.2, 1.2,
+		[-1.0, -1.0, 0.5, -1.0], "temelie")
+	var f4 := 0.0195
+	var c4 := _pt(f4, 26.0)
+	_enclosure(c4, 8.0, 6.0, _yaw_at(f4) - 0.25, 1.2,
+		[0.5, -1.0, -1.0, -1.0], "temelie")
+	var f5 := 0.0330
+	var c5 := _pt(f5, -24.0)
+	_enclosure(c5, 7.0, 6.0, _yaw_at(f5) + 0.3, 1.3,
+		[-1.0, 0.5, -1.0, -1.0], "temelie")
 
 
 ## APA. Canalul incas spune „oras, nu ruina": jgheab de 4 m (`water_channel`,
@@ -550,8 +621,8 @@ func _case() -> void:
 func _apa() -> void:
 	var f := 0.0010
 	while f < 0.0250:
-		var c := _pt(f, -11.5)
-		_at("water_channel", "canal", c.x, c.y, _yaw_at(f), 1.0, "none", -0.02)
+		var c := _pt(f, -10.6)
+		_at("water_channel", "canal", c.x, c.y, _yaw_at(f), 1.0, "none", -0.08)
 		f += _step(3.98)
 	for fr: float in [0.0040, 0.0125, 0.0210]:
 		var cb := _pt(fr, -13.2)
@@ -565,6 +636,8 @@ func _apa() -> void:
 ## sunt reperul de marime al intregului cadru. Deci se pun la 12-16 m de ax,
 ## nu prin curti unde s-ar pierde.
 func _lame() -> void:
+	# Scara iese ~1.00 acum (1,66 / 1,657), adica piesa la marimea ei
+	# naturala: kitul e deja livrat la scara de lume, nu la scara de mesh.
 	var s := _scale_for("llama", 1.66)
 	var poz := [
 		["llama", 0.0025, 13.0, 0.8],
@@ -585,12 +658,33 @@ func _lame() -> void:
 ## la marginea platoului, dupa ultimul etaj de incinte — acolo inchid cadrul
 ## si dau adancime; in piata raman doar accente sub linia capotei.
 func _verde() -> void:
-	for sp: Array in [[-0.0080, 70.0, "polylepis_b", 7.4],
-			[0.0050, 72.0, "polylepis_b", 6.8],
-			[0.0180, 68.0, "polylepis_a", 4.6],
-			[0.0280, 62.0, "polylepis_a", 4.4],
-			[0.0120, -52.0, "polylepis_b", 6.6],
-			[0.0260, -50.0, "polylepis_a", 4.5],
+	# RUNDA 3. In bara, cetatea e INCONJURATA de o coroana de copaci inchisi
+	# la culoare: ei sunt ce o face sa fie un ostrov de piatra intr-un munte
+	# verde, si ei inchid cadrul sus. Runda 2 ii pusese la 62-72 m de ax,
+	# adica dincolo de tot campul de incinte — pe captura nu se vede niciunul.
+	# Acum inelul e la 46-64 m (imediat dupa ultimul etaj) si e DES: 12 piese
+	# pe dreapta si 7 pe stanga, nu 7 in total. Inaltimea 6,5-8,5 m: la 55 m
+	# plafonul de cadru e 10 + 0.093*55 = 15,1 m, deci intra intregi si stau
+	# peste coronamentul etajului 2 (3,2 + 2,7 = 5,9 m) — adica se vad ca
+	# masa verde in spatele pietrei, exact cum sunt in bara.
+	for sp: Array in [[-0.0090, 58.0, "polylepis_b", 8.2],
+			[-0.0020, 64.0, "polylepis_b", 7.6],
+			[0.0050, 60.0, "polylepis_b", 8.4],
+			[0.0110, 64.0, "polylepis_a", 5.2],
+			[0.0175, 58.0, "polylepis_b", 7.8],
+			[0.0235, 63.0, "polylepis_b", 7.2],
+			[0.0295, 57.0, "polylepis_a", 5.0],
+			[0.0350, 62.0, "polylepis_b", 8.0],
+			[0.0410, 56.0, "polylepis_b", 7.4],
+			[0.0460, 60.0, "polylepis_a", 4.8],
+			[0.0200, 46.0, "polylepis_a", 4.6],
+			[0.0420, 46.0, "polylepis_a", 4.4],
+			[0.0120, -48.0, "polylepis_b", 7.6],
+			[0.0200, -52.0, "polylepis_b", 8.2],
+			[0.0280, -47.0, "polylepis_a", 5.0],
+			[0.0360, -51.0, "polylepis_b", 7.4],
+			[0.0440, -47.0, "polylepis_b", 7.8],
+			[0.0490, -44.0, "polylepis_a", 4.6],
 			[-0.0110, -32.0, "polylepis_a", 4.2]]:
 		var fr: float = sp[0]
 		var c := _pt(fr, float(sp[1]))

@@ -525,135 +525,221 @@ transform = Transform3D(0.031745, 0, 0.534264, 0, 0.535206, 0, -0.534264, 0, 0.0
 transform = Transform3D(-0.645761, 0, -0.264268, 0, 0.697742, 0, 0.264268, 0, -0.645761, -247.517090, -35.062210, -148.165497)
 
 [node name="FVers16" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
-transform = Transform3D(-0.777799, 0, 0.441876, 0, 0.894553, 0, -0.441876, 0, -0.777799, -174.981110, -25.980133, -152.151123)
+transform = Transform3D(0.022981, 0, -1.017167, 0, 1.017426, 0, 1.017167, 0, 0.022981, -174.799133, -26.243942, -150.012878)
 metadata/coliziune = "trunk"
 
-[node name="FVers17" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.944086, 0, -0.270914, 0, 0.982188, 0, 0.270914, 0, -0.944086, -193.552887, -26.515091, -152.228638)
+[node name="FVers17" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.780797, 0, 0.373149, 0, 0.865381, 0, -0.373149, 0, 0.780797, -179.580215, -26.505463, -149.803345)
 metadata/coliziune = "trunk"
 
-[node name="FVers18" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.327591, 0, 0.719649, 0, 0.790703, 0, -0.719649, 0, 0.327591, -203.087097, -27.743088, -147.928162)
+[node name="FVers18" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(-0.563437, 0, 0.913721, 0, 1.073474, 0, -0.913721, 0, -0.563437, -183.383026, -25.987823, -153.599304)
 metadata/coliziune = "trunk"
 
-[node name="FVers19" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
-transform = Transform3D(0.179218, 0, -0.723831, 0, 0.745688, 0, 0.723831, 0, 0.179218, -206.707565, -28.450409, -146.087723)
+[node name="FVers19" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.788600, 0, -0.080170, 0, 0.792665, 0, 0.080170, 0, -0.788600, -186.947174, -26.063583, -154.052246)
 metadata/coliziune = "trunk"
 
-[node name="FVers20" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
-transform = Transform3D(-0.402546, 0, 1.021538, 0, 1.097991, 0, -1.021538, 0, -0.402546, -211.216309, -28.779236, -146.216217)
+[node name="FVers20" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.702043, 0, 0.369562, 0, 0.793373, 0, -0.369562, 0, 0.702043, -188.414780, -27.281693, -146.627808)
 metadata/coliziune = "trunk"
 
-[node name="FVers21" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.570193, 0, 0.827888, 0, 1.005245, 0, -0.827888, 0, 0.570193, -221.033783, -27.736359, -119.089500)
+[node name="FVers21" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(-0.295376, 0, -0.918308, 0, 0.964643, 0, 0.918308, 0, -0.295376, -192.862091, -26.825638, -150.143829)
 metadata/coliziune = "trunk"
 
-[node name="FVers22" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
-transform = Transform3D(-0.417334, 0, 0.748336, 0, 0.856840, 0, -0.748336, 0, -0.417334, -207.356369, -27.308090, -119.996094)
+[node name="FVers22" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.782230, 0, 0.279360, 0, 0.830618, 0, -0.279360, 0, -0.782230, -199.684692, -27.361801, -148.847275)
 metadata/coliziune = "trunk"
 
-[node name="FVers23" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.752567, 0, 0.087340, 0, 0.757618, 0, -0.087340, 0, -0.752567, -200.765427, -23.650818, -116.200348)
+[node name="FVers23" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(-0.783937, 0, 0.506236, 0, 0.933184, 0, -0.506236, 0, -0.783937, -212.223175, -28.787079, -146.138260)
 metadata/coliziune = "trunk"
 
-[node name="FVers24" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.134296, 0, -1.004475, 0, 1.013413, 0, 1.004475, 0, -0.134296, -178.000000, -25.901535, -120.292435)
+[node name="FVers24" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.833957, 0, -0.530368, 0, 0.988319, 0, 0.530368, 0, -0.833957, -208.794113, -28.526642, -146.733002)
 metadata/coliziune = "trunk"
 
-[node name="FVers25" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
-transform = Transform3D(0.182892, 0, -0.998134, 0, 1.014752, 0, 0.998134, 0, 0.182892, -170.740341, -25.543091, -119.929504)
+[node name="FVers25" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.491645, 0, -0.811316, 0, 0.948656, 0, 0.811316, 0, 0.491645, -222.842239, -28.916489, -121.423805)
 metadata/coliziune = "trunk"
 
-[node name="FVers26" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.285730, 0, 0.805593, 0, 0.854764, 0, -0.805593, 0, -0.285730, -159.854950, -24.402435, -117.824814)
+[node name="FVers26" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(-0.263399, 0, 0.829411, 0, 0.870231, 0, -0.829411, 0, -0.263399, -216.374191, -26.351349, -118.408409)
 metadata/coliziune = "trunk"
 
-[node name="FMalDrum27" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.080292, 0, -0.904577, 0, 1.409004, 0, 0.904577, 0, 1.080292, -177.975616, -35.805939, -187.337601)
+[node name="FVers27" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.782389, 0, -0.386813, 0, 0.872786, 0, 0.386813, 0, 0.782389, -209.952835, -23.889816, -115.769867)
+metadata/coliziune = "trunk"
+
+[node name="FVers28" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(-0.496950, 0, 0.911859, 0, 1.038483, 0, -0.911859, 0, -0.496950, -199.000000, -26.757599, -120.173203)
+metadata/coliziune = "trunk"
+
+[node name="FVers29" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.640100, 0, -0.848024, 0, 1.062484, 0, 0.848024, 0, -0.640100, -195.027191, -24.792862, -117.676369)
+metadata/coliziune = "trunk"
+
+[node name="FVers30" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.656663, 0, -0.380474, 0, 0.758925, 0, 0.380474, 0, -0.656663, -185.000000, -26.373276, -121.507721)
+metadata/coliziune = "trunk"
+
+[node name="FVers31" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.922542, 0, 0.278285, 0, 0.963601, 0, -0.278285, 0, 0.922542, -181.079987, -26.033310, -120.743477)
+metadata/coliziune = "trunk"
+
+[node name="FVers32" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(-0.363521, 0, 0.774504, 0, 0.855572, 0, -0.774504, 0, -0.363521, -176.512497, -24.546280, -117.717331)
+metadata/coliziune = "trunk"
+
+[node name="FVers33" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(0.606422, 0, 0.661833, 0, 0.897647, 0, -0.661833, 0, 0.606422, -165.701065, -23.863190, -116.090736)
+metadata/coliziune = "trunk"
+
+[node name="FVers34" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.246807, 0, 0.774547, 0, 0.812919, 0, -0.774547, 0, -0.246807, -162.325760, -25.401138, -121.297104)
+metadata/coliziune = "trunk"
+
+[node name="FVers35" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.249227, 0, 0.837130, 0, 0.873442, 0, -0.837130, 0, -0.249227, -159.784424, -24.402435, -118.224335)
+metadata/coliziune = "trunk"
+
+[node name="FVers36" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]
+transform = Transform3D(-0.182711, 0, -0.950489, 0, 0.967890, 0, 0.950489, 0, -0.182711, -159.908432, -23.426575, -114.949615)
+metadata/coliziune = "trunk"
+
+[node name="FMalDrum37" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.001941, 0, -1.463317, 0, 1.463318, 0, 1.463317, 0, -0.001941, -194.007187, -32.776398, -182.688705)
 metadata/coliziune = "none"
-
-[node name="FMalDrum28" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.917902, 0, 0.038774, 0, 0.918720, 0, -0.038774, 0, 0.917902, -182.813400, -34.889755, -185.184052)
-
-[node name="FMalDrum29" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.816888, 0, -0.758197, 0, 1.114526, 0, 0.758197, 0, 0.816888, -201.119507, -30.733215, -179.822906)
-metadata/coliziune = "none"
-
-[node name="FMalDrum30" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.215175, 0, 1.241575, 0, 1.260083, 0, -1.241575, 0, 0.215175, -222.114685, -27.613174, -172.551178)
-metadata/coliziune = "none"
-
-[node name="FMalDrum31" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-1.343859, 0, 0.562719, 0, 1.456918, 0, -0.562719, 0, -1.343859, -232.584488, -28.034744, -168.974213)
-
-[node name="FMalDrum32" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.025968, 0, 0.728543, 0, 0.729006, 0, -0.728543, 0, 0.025968, -243.022903, -32.234573, -148.120346)
-metadata/coliziune = "trunk"
-
-[node name="FMalDrum33" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.767759, 0, -0.861314, 0, 1.153827, 0, 0.861314, 0, -0.767759, -199.000000, -27.339111, -149.169693)
-metadata/coliziune = "none"
-
-[node name="FMalDrum34" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-1.230581, 0, 0.673714, 0, 1.402932, 0, -0.673714, 0, -1.230581, -193.432480, -27.056244, -148.797409)
-
-[node name="FMalDrum35" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.694528, 0, -0.330541, 0, 0.769172, 0, 0.330541, 0, -0.694528, -181.079987, -26.720337, -149.012039)
-metadata/coliziune = "trunk"
-
-[node name="FMalDrum36" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.479740, 0, -0.516802, 0, 1.567392, 0, 0.516802, 0, -1.479740, -162.017181, -25.476913, -149.967194)
-metadata/coliziune = "none"
-
-[node name="FMalDrum37" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.577865, 0, 0.543144, 0, 0.793054, 0, -0.543144, 0, -0.577865, -154.696518, -25.344040, -147.050797)
-metadata/coliziune = "trunk"
 
 [node name="FMalDrum38" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.425862, 0, 0.340302, 0, 1.465909, 0, -0.340302, 0, 1.425862, -144.910370, -24.959061, -144.479294)
+transform = Transform3D(-1.075583, 0, 1.008133, 0, 1.474181, 0, -1.008133, 0, -1.075583, -206.666428, -30.545197, -181.260620)
 metadata/coliziune = "none"
 
-[node name="FGara39" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_inca_house_b")]
-transform = Transform3D(0.913089, 0, 0.407760, 0, 1.000000, 0, -0.407760, 0, 0.913089, -232.000000, -27.413584, -186.000000)
+[node name="FMalDrum39" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.523270, 0, 0.879457, 0, 1.023356, 0, -0.879457, 0, 0.523270, -211.735229, -28.809647, -180.366943)
 
-[node name="FRucsacGara40" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
-transform = Transform3D(0.303252, 0, -0.952911, 0, 1.000000, 0, 0.952911, 0, 0.303252, -237.199997, -27.758636, -182.516922)
+[node name="FMalDrum40" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.294187, 0, -0.684992, 0, 0.745493, 0, 0.684992, 0, -0.294187, -222.236938, -27.594147, -172.868439)
+metadata/coliziune = "trunk"
+
+[node name="FMalDrum41" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.925647, 0, 1.162108, 0, 1.485704, 0, -1.162108, 0, -0.925647, -230.890503, -27.839737, -173.762787)
 metadata/coliziune = "none"
 
-[node name="FRucsacGara41" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
-transform = Transform3D(0.110837, 0, 0.993839, 0, 1.000000, 0, -0.993839, 0, 0.110837, -234.000000, -27.670822, -183.474243)
+[node name="FMalDrum42" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.703538, 0, -1.053615, 0, 1.266914, 0, 1.053615, 0, -0.703538, -240.752411, -28.366257, -159.426544)
+
+[node name="FMalDrum43" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.617695, 0, 1.112406, 0, 1.272397, 0, -1.112406, 0, -0.617695, -210.290405, -28.629044, -146.574890)
 metadata/coliziune = "none"
 
-[node name="FRucsacGara42" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
-transform = Transform3D(-0.999999, 0, 0.001655, 0, 1.000000, 0, -0.001655, 0, -0.999999, -228.600006, -27.530380, -182.796860)
+[node name="FMalDrum44" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.576055, 0, -0.990758, 0, 1.146054, 0, 0.990758, 0, 0.576055, -193.432480, -27.056244, -148.917618)
+
+[node name="FMalDrum45" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.365720, 0, 0.459488, 0, 1.440944, 0, -0.459488, 0, 1.365720, -188.902405, -26.838470, -148.783478)
 metadata/coliziune = "none"
 
-[node name="FCortGara43" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_a")]
-transform = Transform3D(0.105778, 0, -0.994390, 0, 1.000000, 0, 0.994390, 0, 0.105778, -240.500000, -27.781647, -184.792847)
-
-[node name="FCortGara44" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_b")]
-transform = Transform3D(-0.307052, 0, -0.951693, 0, 1.000000, 0, 0.951693, 0, -0.307052, -224.399994, -27.799927, -185.073013)
-
-[node name="FCort45" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_a")]
-transform = Transform3D(0.457675, 0, 0.889120, 0, 1.000000, 0, -0.889120, 0, 0.457675, -191.953049, -24.298584, -116.825027)
-
-[node name="FCort46" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_b")]
-transform = Transform3D(-0.935675, 0, -0.352864, 0, 1.000000, 0, 0.352864, 0, -0.935675, -187.112366, -25.030273, -118.063507)
-
-[node name="FRucsac47" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
-transform = Transform3D(0.853455, 0, 0.521166, 0, 1.000000, 0, -0.521166, 0, 0.853455, -200.840302, -26.681427, -119.322723)
+[node name="FMalDrum46" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.063225, 0, -0.506100, 0, 1.177533, 0, 0.506100, 0, -1.063225, -176.512497, -26.271179, -150.748169)
 metadata/coliziune = "none"
 
-[node name="FRucsac48" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
-transform = Transform3D(-0.069019, 0, 0.997615, 0, 1.000000, 0, -0.997615, 0, -0.069019, -195.027191, -24.043259, -116.482185)
+[node name="FMalDrum47" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.999282, 0, 1.000441, 0, 1.414018, 0, -1.000441, 0, 0.999282, -171.329651, -25.776123, -151.862701)
+
+[node name="FMalDrum48" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.805329, 0, -0.247798, 0, 0.842591, 0, 0.247798, 0, -0.805329, -156.880371, -25.401062, -148.151535)
+metadata/coliziune = "trunk"
+
+[node name="FBuzaVale49" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.790187, 0, 0.194094, 0, 0.813676, 0, -0.194094, 0, 0.790187, -208.697449, -28.606537, -145.959137)
+
+[node name="FBuzaVale50" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.130450, 0, -0.607099, 0, 0.620956, 0, 0.607099, 0, 0.130450, -206.245789, -27.741577, -149.131897)
+
+[node name="FBuzaVale51" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.547982, 0, 0.398335, 0, 0.677462, 0, -0.398335, 0, -0.547982, -199.000000, -27.450287, -148.597290)
+
+[node name="FBuzaVale52" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.726912, 0, -0.467295, 0, 0.864156, 0, 0.467295, 0, -0.726912, -195.027191, -27.019684, -149.510834)
+
+[node name="FBuzaVale53" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.937098, 0, -0.106218, 0, 0.943098, 0, 0.106218, 0, -0.937098, -190.479492, -26.713104, -149.866776)
+
+[node name="FBuzaVale54" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.080870, 0, 0.707348, 0, 0.711956, 0, -0.707348, 0, 0.080870, -185.000000, -26.132111, -152.728668)
+
+[node name="FBuzaVale55" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.708241, 0, 0.027488, 0, 0.708774, 0, -0.027488, 0, -0.708241, -181.079987, -26.235870, -152.160233)
+
+[node name="FBuzaVale56" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.724716, 0, 0.082466, 0, 0.729392, 0, -0.082466, 0, -0.724716, -176.512497, -26.510910, -148.717529)
+
+[node name="FBuzaVale57" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.688910, 0, 0.766213, 0, 1.030378, 0, -0.766213, 0, 0.688910, -173.117493, -26.526901, -146.448502)
+
+[node name="FBuzaVale58" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.450447, 0, 0.124049, 0, 0.467216, 0, -0.124049, 0, -0.450447, -168.385727, -25.267471, -154.117966)
+
+[node name="FBuzaVale59" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.497865, 0, 0.240357, 0, 0.552848, 0, -0.240357, 0, -0.497865, -161.963211, -24.707169, -154.982422)
+
+[node name="FBuzaVale60" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.362300, 0, 0.607426, 0, 0.707268, 0, -0.607426, 0, -0.362300, -153.444229, -24.301926, -154.145813)
+
+[node name="FGara61" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_inca_house_b")]
+transform = Transform3D(1.353679, 0, 0.604516, 0, 1.482527, 0, -0.604516, 0, 1.353679, -232.000000, -27.413584, -186.000000)
+
+[node name="FRucsacGara62" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(-1.036727, 0, 1.560151, 0, 1.873199, 0, -1.560151, 0, -1.036727, -237.199997, -27.749466, -182.899506)
 metadata/coliziune = "none"
 
-[node name="FRucsac49" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
-transform = Transform3D(-0.998054, 0, 0.062361, 0, 1.000000, 0, -0.062361, 0, -0.998054, -190.479492, -24.238831, -117.222000)
+[node name="FRucsacGara63" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(1.822103, 0, -0.434529, 0, 1.873199, 0, 0.434529, 0, 1.822103, -234.000000, -27.692352, -182.444992)
 metadata/coliziune = "none"
 
-[node name="FRucsac50" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
-transform = Transform3D(0.992709, 0, -0.120538, 0, 1.000000, 0, 0.120538, 0, 0.992709, -185.000000, -24.957382, -117.840981)
+[node name="FRucsacGara64" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(-1.242698, 0, -1.401633, 0, 1.873199, 0, 1.401633, 0, -1.242698, -228.600006, -27.530380, -182.856567)
+metadata/coliziune = "none"
+
+[node name="FCortGara65" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_a")]
+transform = Transform3D(1.694780, 0, -0.193204, 0, 1.705757, 0, 0.193204, 0, 1.694780, -240.500000, -27.810883, -183.634476)
+
+[node name="FCortGara66" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_b")]
+transform = Transform3D(-0.017103, 0, -1.705671, 0, 1.705757, 0, 1.705671, 0, -0.017103, -224.399994, -27.799927, -184.834534)
+
+[node name="FCort67" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_a")]
+transform = Transform3D(-0.430940, 0, -1.650423, 0, 1.705757, 0, 1.650423, 0, -0.430940, -203.377197, -25.106445, -117.738106)
+
+[node name="FRucsac68" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(1.540298, 0, 1.065999, 0, 1.873199, 0, -1.065999, 0, 1.540298, -202.105652, -26.318176, -118.789810)
+metadata/coliziune = "none"
+
+[node name="FRucsac69" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(-0.684878, 0, -1.743507, 0, 1.873199, 0, 1.743507, 0, -0.684878, -200.823395, -25.815536, -118.617386)
+metadata/coliziune = "none"
+
+[node name="FRucsac70" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(1.865397, 0, -0.170789, 0, 1.873199, 0, 0.170789, 0, 1.865397, -199.000000, -25.676117, -118.615196)
+metadata/coliziune = "none"
+
+[node name="FCort71" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_a")]
+transform = Transform3D(1.105604, 0, -1.298940, 0, 1.705757, 0, 1.298940, 0, 1.105604, -191.953049, -25.048187, -118.009598)
+
+[node name="FCort72" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_tent_a")]
+transform = Transform3D(-1.705599, 0, -0.023210, 0, 1.705757, 0, 0.023210, 0, -1.705599, -187.112366, -25.030273, -118.009598)
+
+[node name="FRucsac73" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(1.828250, 0, 0.407890, 0, 1.873199, 0, -0.407890, 0, 1.828250, -191.953049, -25.422958, -118.540054)
+metadata/coliziune = "none"
+
+[node name="FRucsac74" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(1.611211, 0, -0.955443, 0, 1.873199, 0, 0.955443, 0, 1.611211, -188.902405, -26.053101, -119.430969)
+metadata/coliziune = "none"
+
+[node name="FRucsac75" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_backpack_pile")]
+transform = Transform3D(0.659466, 0, 1.753276, 0, 1.873199, 0, -1.753276, 0, 0.659466, -187.112366, -25.350601, -118.442009)
 metadata/coliziune = "none"
 
 [node name="F_RaulRepunere" type="Area3D" parent="DecorManual/ZoneF_MalulRaului"]

@@ -109,6 +109,32 @@ extends Node
 ##    „in cadru" nu inseamna „vizibil". Sunt trei teste, si numai al treilea
 ##    conteaza.
 
+## 10. `probe_manual` RAPORTEAZA FALS „INGROPAT" AICI, SI ARE DE CE.
+##     Sonda compara cota piesei cu `_sampler.ground_y`, adica CAMPUL NETED
+##     (media Shepard peste punctele coapte), pe cand generatorul aseaza pe
+##     raycast in TerrainBody. Zece piese din tabara au iesit „INGROPAT" cu
+##     2,5-3,7 m. Verificat punct cu punct pe o transversala de 6 m la
+##     x = -203,4:
+##
+##       z       raycast   sampler
+##       -115,0  -22,94    -20,70
+##       -116,5  -24,24    -21,31
+##       -117,7  -25,28    -21,98
+##       -119,0  -26,41    -26,55
+##       -121,0  -27,32    -27,74
+##
+##     Raycastul coboara LIN, cu ~0,73 m la fiecare metru; samplerul sare cu
+##     4,6 m intre -117,7 si -119,0 si abia dupa aia prinde din urma. Deci
+##     terenul REAL e o panta continua, iar campul neted e cel care se rupe —
+##     exact memoria `terrain-mesh-y-extrapoleaza`, si exact motivul pentru care
+##     `_sol_real` trage raza in loc sa intrebe samplerul.
+##     Nu s-a mutat nimic si nu s-a adaugat niciun filtru: piesele stau corect
+##     pe terenul pe care il ating masinile. Cine vrea garda verde trebuie sa
+##     repare sonda (sa traga si ea raza), nu decorul.
+##     Si: `probe_manual` ia NUMARUL DE SCENA (isi compune calea cu
+##     `"Track%02d.tscn" % idx`), deci `--track=15`. Cu `--track=8` masoara
+##     Okinawa si raporteaza `coral_rock` si `coconut_palm`.
+
 const TRACK := "res://scenes/tracks/Track15.tscn"
 const ZONE := "DecorManual/ZoneF_MalulRaului"
 const F_IN := 0.655
@@ -793,13 +819,37 @@ func _bank_edge() -> void:
 ## rare — acolo trebuie sa se vada in jos, spre albie. Partea dinspre versant
 ## primeste masa: bambus si queñual.
 func _road_side() -> void:
-	# --- versantul (partea opusa raului) ---
+	# --- versantul (partea opusa raului), DOUA RANDURI ---
+	#
+	# RUNDA 9, masurat pe captura la 0.70: cu un singur rand la pas 7,5 m si
+	# probabilitate 0,78 iese o piesa la ~9,6 m de drum, adica exact ce s-a
+	# vazut — cativa copaci razleti pe un izlaz gol, nu un mal. Randul apropiat
+	# coboara la pas 4,5 m si probabilitate 0,88 (o piesa la ~5 m), iar peste el
+	# se adauga un rand de fund la 16-30 m, mai inalt: masa verde care inchide
+	# cadrul, in loc de orizont de iarba.
+	for leg: Array in [[0.6560, 0.6870, -1.0], [0.6930, 0.7300, 1.0]]:
+		var fb := float(leg[0])
+		var kb := 0
+		while fb < float(leg[1]):
+			if _rng.randf() < 0.75:
+				var mdlb: String = ["polylepis_b", "bamboo_clump",
+					"polylepis_a", "polylepis_b"][kb % 4]
+				var hb := {
+					"polylepis_b": _rng.randf_range(6.0, 8.5),
+					"bamboo_clump": _rng.randf_range(4.5, 6.5),
+					"polylepis_a": _rng.randf_range(3.8, 5.0),
+				}[mdlb] as float
+				_place(mdlb, "FVersFund", fb, float(leg[2]),
+					_rng.randf_range(16.0, 30.0), _rng.randf_range(0.0, TAU),
+					_scale_for(mdlb, hb), "trunk")
+			fb += _step(8.0 + _rng.randf_range(-1.5, 1.5))
+			kb += 1
 	for leg: Array in [[0.6560, 0.6870, -1.0], [0.6930, 0.7300, 1.0]]:
 		var f := float(leg[0])
 		var k := 0
 		while f < float(leg[1]):
 			var sgn := float(leg[2])
-			if _rng.randf() < 0.78:
+			if _rng.randf() < 0.88:
 				var mdl: String = ["bamboo_clump", "polylepis_a", "bamboo_clump",
 					"tree_fern", "polylepis_b"][k % 5]
 				var h := {
@@ -814,7 +864,7 @@ func _road_side() -> void:
 				# 4 m si o piesa pusa „la 2 m de muchie" statea in el (runda 4).
 				_place(mdl, "FVers", f, sgn, _rng.randf_range(5.5, 13.0),
 					_rng.randf_range(0.0, TAU), _scale_for(mdl, h), "trunk")
-			f += _step(7.5 + _rng.randf_range(-1.5, 1.5))
+			f += _step(4.5 + _rng.randf_range(-1.0, 1.0))
 			k += 1
 	# --- partea dinspre rau: doar piese joase, ca sa nu astupe albia ---
 	for leg2: Array in [[0.6560, 0.6870, 1.0], [0.6930, 0.7300, -1.0]]:
@@ -836,11 +886,30 @@ func _road_side() -> void:
 					_scale_for(mdl2, h2), mode)
 			f2 += _step(6.0 + _rng.randf_range(-1.2, 1.2))
 			k2 += 1
+	# BUZA DINSPRE VALE pe bratul de INTORS. Raul nu se vede de acolo (nota 9),
+	# dar CADEREA trebuie sa se vada: fara ea, la 0.70 marginea din stanga e
+	# iarba care se pierde in orizont, si POI-ul „cel mai jos punct al turului"
+	# nu are nicio buza. Bolovani mici, rari, pe umarul dinspre vale — acelasi
+	# rol ca `_bank_edge` pe bratul de dus.
+	var fv := 0.6950
+	var kv := 0
+	while fv < 0.7290:
+		var mv: String = ["moss_boulder_b", "moss_boulder_a", "moss_boulder_a",
+			"moss_boulder_c"][kv % 4]
+		var hv := _rng.randf_range(1.4, 2.2) if mv == "moss_boulder_c" else (
+			_rng.randf_range(0.9, 1.5) if mv == "moss_boulder_b"
+			else _rng.randf_range(0.5, 1.0))
+		_place(mv, "FBuzaVale", fv, -1.0, _rng.randf_range(5.5, 14.0),
+			_rng.randf_range(0.0, TAU), _scale_for(mv, hv), "hull")
+		fv += 0.0026 + _rng.randf_range(-0.0005, 0.0005)
+		kv += 1
 	# Repere de traseu pe acul de la 0.685-0.695, unde drumul se intoarce 180 de
 	# grade peste o creasta: singurul semn de „aici se intoarce" din tot POI-ul.
 	for fm: float in [0.6835, 0.6870, 0.6905, 0.6940]:
-		_place("trail_marker", "FSemn", fm, -1.0, 4.6,
-			_rng.randf_range(0.0, TAU), 1.0, "none")
+		# 1,7 m in loc de 1,2: la 1,2 m un reper de traseu e un cilindru palid
+		# de doi pixeli si citea ca gunoi in captura rundei 10.
+		_place("trail_marker", "FSemn", fm, -1.0, 5.2,
+			_rng.randf_range(0.0, TAU), _scale_for("trail_marker", 1.7), "none")
 
 
 ## GARA MICA (`inca_house_b`, 2,83 m inalt, 6,00 x 4,21 m in plan).
@@ -863,41 +932,67 @@ func _station() -> void:
 	var sx := -232.0
 	var sz := -186.0
 	var g := _sol_real(sx, sz)
+	# SCARA: 2,833 m livrat, 4,2 m aici. Gara sta la ~50 m de sofer, peste apa;
+	# la inaltimea din GLB ar subintinde 3 grade si s-ar pierde intre bolovanii
+	# de 2 m. La 4,2 m ramane „cladire mica" fata de un drum de 16 m latime, dar
+	# se citeste ca acoperis si ziduri.
 	_place_world("inca_house_b", "FGara", Vector3(sx, g + 0.15, sz), 0.42,
-		1.0, "hull")
+		_scale_for("inca_house_b", 4.2), "hull")
 	# Peronul: rucsaci si doua corturi — gara are oameni, altfel e o ruina.
 	for off: float in [-5.2, -2.0, 3.4]:
 		var px := sx + off
 		var pz := sz + _rng.randf_range(2.0, 3.6)
 		_place_world("backpack_pile", "FRucsacGara",
 			Vector3(px, _sol_real(px, pz), pz), _rng.randf_range(0.0, TAU),
-			1.0, "none")
+			_scale_for("backpack_pile", 1.3), "none")
 	for i in 2:
 		var tx := sx + (-8.5 if i == 0 else 7.6)
 		var tz := sz + _rng.randf_range(-1.0, 2.4)
 		_place_world("tent_a" if i == 0 else "tent_b", "FCortGara",
 			Vector3(tx, _sol_real(tx, tz), tz), _rng.randf_range(0.0, TAU),
-			1.0, "hull")
+			_scale_for("tent_a", 2.4), "hull")
 
 
 ## TABARA DE PE DRUM (brief §2 F: „gara mica, corturi, rucsacuri"). Sta pe
 ## bratul de INTORS, pe partea dinspre versant, fiindca acolo raul nu se vede
-## (nota 2) si cadrul are nevoie de ceva ce nu e iarba.
+## (nota 9) si cadrul are nevoie de ceva ce nu e iarba.
 ##
-## Corturile au `hull` si stau la 4-9 m de muchie: un cort de 2.1 m latime
-## atins la 20 m/s e o oprire, deci NU intra in banda. `_place` striga daca o
-## fac.
+## RUNDA 9, masurat pe captura: la 0.70 cadrul era drum peste izlaz, cu patru
+## corturi razlete de 1,4 m la 6-12 m de muchie — la 40 m de camera subintind
+## doua grade, deci nu se citesc ca tabara, se citesc ca gunoi. Tabara din
+## bara e un GRUP: corturi unul langa altul, rucsaci intre ele, pe o poiana.
+## Deci corturile se aduna in DOUA pilcuri (4 + 3), in aceeasi fereastra de
+## fractie, la 7-11 m de muchie, cu rucsaci si repere intre ele.
+##
+## Corturile au `hull`: un cort de 2,1 m latime atins la 20 m/s e o oprire,
+## deci nu intra in banda — verificarea e cea din `_place`, fata de marginea
+## acostamentului real.
 func _camp() -> void:
-	var spots := [
-		[0.7035, 1.0, "tent_a"], [0.7060, 1.0, "tent_b"],
-		[0.7085, 1.0, "tent_a"], [0.7115, 1.0, "tent_b"],
-	]
-	for s: Array in spots:
-		_place(String(s[2]), "FCort", float(s[0]), float(s[1]),
-			_rng.randf_range(6.0, 12.0), _rng.randf_range(0.0, TAU), 1.0, "hull")
-	for fb: float in [0.7040, 0.7072, 0.7100, 0.7128]:
-		_place("backpack_pile", "FRucsac", fb, 1.0, _rng.randf_range(5.5, 11.0),
-			_rng.randf_range(0.0, TAU), 1.0, "none")
+	# Doua pilcuri, fiecare cu centrul lui, ca sa se citeasca „doua grupuri de
+	# oameni", nu „un sir de corturi la distante egale".
+	for pilc: Array in [[0.7045, 4], [0.7105, 3]]:
+		var f0: float = float(pilc[0])
+		for i in int(pilc[1]):
+			var mdl := "tent_a" if i % 2 == 0 else "tent_b"
+			# SCARA CORTULUI: GLB-ul e livrat la 1,407 m inaltime si 2,09 m
+			# amprenta. Runda 10, masurat pe captura la 0.70: la 30-40 m de
+			# camera un cort de 1,4 m subintinde sub doua grade si citea ca o
+			# pata inchisa pe iarba — nu ca un cort. La 2,4 m (scara 1,71)
+			# subintinde 3,5-4,5 grade, adica se vede acoperisul si intrarea,
+			# si ramane sub inaltimea unei masini, deci nu e un zid.
+			# STRANS, nu imprastiat: un pilc de corturi la 3 m unul de altul si
+			# la 7-9 m de muchie citeste „tabara"; aceleasi corturi la 5 m si
+			# 11 m citesc „ceva aruncat pe camp" (runda 11).
+			_place(mdl, "FCort", f0 + _step(float(i) * 3.0 - 4.0), 1.0,
+				7.0 + float(i % 2) * 2.0, _rng.randf_range(0.0, TAU),
+				_scale_for(mdl, 2.4), "hull")
+		for j in 3:
+			# Rucsacii tot asa: 0,694 m e invizibil la 35 m. La 1,3 m sunt
+			# gramezi de bagaje langa corturi, si raman sub capota.
+			_place("backpack_pile", "FRucsac",
+				f0 + _step(float(j) * 2.6 - 3.0), 1.0,
+				_rng.randf_range(6.2, 8.5), _rng.randf_range(0.0, TAU),
+				_scale_for("backpack_pile", 1.3), "none")
 
 
 ## PLASA DE REPUNERE peste albie (nota 7). Bazinul asta n-avea niciuna:

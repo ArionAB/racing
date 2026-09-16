@@ -793,24 +793,38 @@ func _platforma(c: Vector2, w: float, dpt: float, rot: float, lift: float,
 		_wall_abs(e[0] as Vector2, e[1] as Vector2, h_spr, base_y - drop,
 			tag + "Spr")
 
-	# (b) PODEAUA. Placi hexagonale (raza `r`) asezate pe o grila cu pas
-	# `r * 1.5` pe u si `r * 1.3` pe v: se SUPRAPUN, deci iese o suprafata
-	# continua, nu niste discuri (exact ce scrie flock.gd despre crusta).
-	# Marginea se retrage cu 0,35 m in interior, ca placa sa nu iasa din
-	# spatele zidului si sa se vada o buza verde pe fata de piatra.
+	# (b) PODEAUA. Placi de 12 laturi, raza `r`, asezate pe o grila cu pasul
+	# `r` — deci se SUPRAPUN mult si iese o suprafata continua, nu niste
+	# discuri (exact ce scrie flock.gd despre crusta de sare).
+	#
+	# RAZA SE SCADE DIN INSET, si asta e un bug reparat pe CAPTURA, nu pe
+	# cifra (docs/bara_vizuala.md, regula zero). Prima versiune retragea
+	# CENTRUL placii cu 0,35 m de la contur si scria in comentariu ca asa
+	# „placa nu iese din spatele zidului". Fals: placa are raza 3,2 x 1,12 =
+	# 3,58 m, deci iesea 3,23 m PESTE zid. Pe A_r14_f002.png se vede limpede
+	# in dreapta — o limba de iarba atarnand peste fata de piatra, ca o fata
+	# de masa. Marginea trebuie sa fie `r_efectiv`, nu o constanta.
+	#
+	# Placa e o suprafata, nu un stol: scara ramane 1.0 pe toate. Variatia ar
+	# lasa goluri intre placi prin care s-ar vedea solul de sub terasa.
 	var r := 3.2
 	var y := base_y + lift - 0.06
-	var nu := int(ceil((w - 0.7) / (r * 1.5))) + 1
-	var nv := int(ceil((dpt - 0.7) / (r * 1.3))) + 1
+	# Zidul are ~0,6 m grosime la inaltimile astea; placa se opreste cu raza
+	# ei inauntrul fetei INTERIOARE, deci nu se vede de afara deloc.
+	var inset := r + 0.30
+	var span_u := maxf(0.0, w - 2.0 * inset)
+	var span_v := maxf(0.0, dpt - 2.0 * inset)
+	var nu := maxi(1, int(ceil(span_u / r)) + 1)
+	var nv := maxi(1, int(ceil(span_v / r)) + 1)
 	for i in range(nu):
 		for j in range(nv):
-			var su := -hw + 0.35 + (float(i) + 0.5) * (w - 0.7) / float(nu)
-			var sv := -hd + 0.35 + (float(j) + 0.5) * (dpt - 0.7) / float(nv)
+			var fu: float = 0.5 if nu == 1 else float(i) / float(nu - 1)
+			var fv: float = 0.5 if nv == 1 else float(j) / float(nv - 1)
+			var su := -span_u * 0.5 + fu * span_u
+			var sv := -span_v * 0.5 + fv * span_v
 			var q := c + u * su + v * sv
 			_podea_pos.append(Vector3(q.x, y, q.y))
-			# Scalare NEUNIFORMA, ca placile de la margine sa umple coltul fara
-			# sa iasa din contur: pe y sunt turtite (0,02) fiindca sunt plane.
-			_podea_scl.append(Vector3(1.12, 1.0, 1.12))
+			_podea_scl.append(Vector3(1.0, 1.0, 1.0))
 
 	# (c) SCARA intre niveluri — „o scara intre niveluri" din verdict, si
 	# singura piesa care spune ca podeaua de sus e CALCABILA, nu un capac.
@@ -931,12 +945,14 @@ func _wall_abs_gate(a: Vector2, b: Vector2, h: float, y_abs: float,
 ## TERASELE de pe partea DREAPTA (side = +1), unde platoul tine pana la
 ## +60 m si unde cade umbra peste drum.
 func _terase_dreapta() -> void:
-	# Zidul lung de sprijin RAMANE (separa randul din fata de cel din fund),
-	# dar se muta la 38 m si se rupe in doua tronsoane cu gol la mijloc. Cu
-	# blocurile de camere in fata lui nu mai e el linia care se citeste; daca
-	# ar fi ramas continuu pe 100 m, ar fi refacut singur defectul rundei 8.
-	_terasa(-0.0090, 0.0150, 39.0, 2.2, 0.0, "sprijin1")
-	_terasa(0.0215, 0.0440, 39.0, 2.2, 0.0, "sprijin1")
+	# RUNDA 14: cele doua tronsoane de zid drept de 60 m de la 39 m de ax au
+	# fost SCOASE. Erau ultima bucata din decorul rundelor 8-13 care facea
+	# exact ce a numit criticul — „bare lungi paralele asezate una sub alta" —
+	# si existau ca sa separe randul din fata de cel din fund. Separarea o face
+	# acum caderea de cota intre terase (1,5-2,9 m in fata, 3,4-4,2 m in fund),
+	# care e si ce cere verdictul. Un zid drept lasat in fata lor le-ar fi
+	# ascuns tocmai fetele de sprijin.
+	pass
 
 
 ## RUNDA 11 — RAPORTUL INALTIME/CAMERA, masurat pe decupaje puse fata in fata
@@ -1042,21 +1058,29 @@ func _terase_dreapta() -> void:
 ## si `ProbeLaneClear` (marja 2 fata de baza 20) nu are ce sa vada.
 func _camp_dreapta() -> void:
 	# [frac, lat, w, dpt, rot_rel, lift, camere_u, camere_v, h_camera, scara]
+	#
+	# CAMERELE SUNT PUTINE ANUME. Prima rulare a rundei 14 pusese 2x1 / 1x2 pe
+	# fiecare terasa, si captura A_r14_f000.png arata ca refacea singura
+	# defectul rundei 13: zidurile de camera stau PE podea, deci se aduna cu
+	# zidul de sprijin si acopera exact suprafata pe care terasa tocmai o
+	# castigase. Podeaua e ce cere criticul; camera pe ea e punctuatie, nu
+	# umplutura. Doua terase din cinci raman COMPLET goale — o curte de iarba
+	# incadrata de zidul ei de sprijin e deja o incinta inchisa cu podea.
 	for sp: Array in [
-			[-0.0050, 26.0, 24.0, 17.0, 0.09, 1.50, 2, 1, 1.35, -1.0],
-			[0.0080, 27.0, 25.0, 18.0, -0.11, 2.40, 1, 2, 1.30, -1.0],
-			[0.0210, 26.0, 24.0, 17.0, 0.13, 1.80, 2, 1, 1.40, -1.0],
-			[0.0345, 27.0, 25.0, 18.0, -0.08, 2.90, 1, 1, 1.25, -1.0],
-			[0.0465, 26.0, 22.0, 16.0, 0.10, 1.60, 1, 1, 1.35, -1.0]]:
+			[-0.0050, 26.0, 24.0, 17.0, 0.09, 1.50, 1, 1, 1.30, -1.0],
+			[0.0080, 27.0, 25.0, 18.0, -0.11, 2.40, 0, 0, 0.0, -1.0],
+			[0.0210, 26.0, 24.0, 17.0, 0.13, 1.80, 1, 1, 1.35, -1.0],
+			[0.0345, 27.0, 25.0, 18.0, -0.08, 2.90, 0, 0, 0.0, -1.0],
+			[0.0465, 26.0, 22.0, 16.0, 0.10, 1.60, 1, 1, 1.30, -1.0]]:
 		_plt(sp, "terasaDr")
 	# Randul din fund. Ridicarile de 3,4-4,2 m sunt ce face ca podeaua LUI sa
 	# se vada peste terasa din fata: podeaua din fata e la 1,5-2,9 m, deci
 	# diferenta e 0,5-2,7 m — destul cat privirea de la 10 m sa prinda si a
 	# doua suprafata de iarba, nu doar capul zidului.
 	for sp: Array in [
-			[-0.0030, 52.0, 26.0, 18.0, -0.14, 3.60, 2, 1, 1.40, 0.0],
-			[0.0150, 53.0, 27.0, 19.0, 0.12, 4.20, 1, 2, 1.35, 0.0],
-			[0.0335, 52.0, 26.0, 18.0, -0.10, 3.40, 2, 1, 1.45, 0.0]]:
+			[-0.0030, 52.0, 26.0, 18.0, -0.14, 3.60, 1, 1, 1.40, 0.0],
+			[0.0150, 53.0, 27.0, 19.0, 0.12, 4.20, 0, 0, 0.0, 0.0],
+			[0.0335, 52.0, 26.0, 18.0, -0.10, 3.40, 1, 1, 1.45, 0.0]]:
 		_plt(sp, "terasaDrB")
 
 
@@ -1098,16 +1122,16 @@ func _camp_stanga() -> void:
 	# Din masina cele doua parti se vad in acelasi cadru, si daca ar urca la
 	# fel ar citi ca o singura terasa taiata de sosea, nu ca doua niveluri.
 	for sp: Array in [
-			[0.0070, -25.0, 24.0, 17.0, -0.12, 2.60, 1, 2, 1.30, 1.0],
-			[0.0210, -25.0, 25.0, 18.0, 0.10, 1.50, 2, 1, 1.40, 1.0],
+			[0.0070, -25.0, 24.0, 17.0, -0.12, 2.60, 1, 1, 1.30, 1.0],
+			[0.0210, -25.0, 25.0, 18.0, 0.10, 1.50, 0, 0, 0.0, 1.0],
 			[0.0345, -24.0, 23.0, 16.0, -0.09, 2.20, 1, 1, 1.35, 1.0],
-			[0.0470, -25.0, 22.0, 16.0, 0.13, 1.70, 1, 1, 1.30, 1.0]]:
+			[0.0470, -25.0, 22.0, 16.0, 0.13, 1.70, 0, 0, 0.0, 1.0]]:
 		_plt(sp, "terasaStg")
 	# Randul din fund, de la +0.014: la -44 m platoul incepe la +0.006, iar
 	# terasa are 18 m adancime, deci centrul ei nu poate cobori sub +0.012.
 	for sp: Array in [
-			[0.0175, -46.0, 26.0, 18.0, 0.14, 3.80, 2, 1, 1.40, 0.0],
-			[0.0355, -46.0, 25.0, 18.0, -0.11, 3.30, 1, 2, 1.35, 0.0]]:
+			[0.0175, -46.0, 26.0, 18.0, 0.14, 3.80, 1, 1, 1.40, 0.0],
+			[0.0355, -46.0, 25.0, 18.0, -0.11, 3.30, 0, 0, 0.0, 0.0]]:
 		_plt(sp, "terasaStgB")
 
 

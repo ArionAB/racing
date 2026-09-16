@@ -412,6 +412,14 @@ const ACCENT_SPLIT := {
 	# in `_Accente`, pictata.
 	"Inca_Wall_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Wall_B": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	# `Inca_Wall_C` lipsea si de aici si din CLASSES_BY_MODEL, desi inventarul
+	# o masurase ca separandu-se LA FEL de curat ca A (corp 3+29 91.5%, accent
+	# 12 la y 2.33-2.43, verdict "DA"). Consecinta, gasita la POI A: din 352
+	# de piese de zid asezate in Piata Sacra, 48 (13%) ramaneau pe atlasul
+	# brut langa 304 clasate — aceeasi ruptura de familie ca la piesele-erou,
+	# doar mai mica. Piesa se foloseste exact acolo unde se vede cel mai bine:
+	# la capetele scurte de incinta, adica in colturi.
+	"Inca_Wall_C": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Stair_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Stair_B": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	# Chongqing: DOUA sloturi pastrate, nu unul. Masurat pe inaltime, slotul 29
@@ -874,6 +882,7 @@ const CLASSES_BY_MODEL := {
 	# motiv NU exista un MACHUPICCHU_CLASSES in track_decor.gd.
 	"inca_wall_a": {"Inca_Wall_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_wall_b": {"Inca_Wall_B": Palette.TRI_PREFIX + "inca_stone"},
+	"inca_wall_c": {"Inca_Wall_C": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_a": {"Inca_Stair_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_b": {"Inca_Stair_B": Palette.TRI_PREFIX + "inca_stone"},
 	# Cornisa podului: piesa peste care sare LiftBridgeHazard, deci cea mai

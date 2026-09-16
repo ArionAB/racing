@@ -346,7 +346,32 @@ func _enclosure(c: Vector2, w: float, dpt: float, rot: float, h: float,
 	_enclosure_y(c, w, dpt, rot, h, gates, tag, 0.0)
 
 
-## Incinta ridicata pe o terasa, cu `y_off` metri peste sol.
+## Incinta la cota terenului. `y_off` a EXISTAT si a fost SCOS — vezi de ce.
+##
+## RUNDA 6, si e o revenire, nu o rafinare (memoria
+## `revenirea-e-o-mutare-valida`). Runda 2 inventase etaje: incinte ridicate
+## cu 1,6 si 3,2 m peste sol, cu un zid de sprijin lung drept fatada. Din
+## masina arata bine si a facut campul sa aiba adancime. Doua masuratori au
+## aratat ca era o fatada, nu o terasa:
+##
+##  (a) `probe_manual --track=15` — garda, RULATA, nu presupusa — a numarat
+##      **38 de piese PLUTIND**, exact zidurile etajelor: sub ele era aer.
+##      Din drum nu se vedea fiindca zidul de sprijin acoperea golul.
+##      (`probe_manual` ia NUMARUL DE SCENA, ca `probe_decor`; cu --track=8
+##      masoara Okinawa si raporteaza `stone_gate_torii` — nu e zona asta.)
+##  (b) Am incercat intai reparatia „corecta": un inel PLIN de zid de la sol
+##      pana la y_off sub fiecare incinta ridicata (128 de piese in plus).
+##      Captura din lateral (A_r6_terase.png) arata de ce nu tine: peretii se
+##      umplusera, dar INTERIORUL incintei ramanea la cota terenului. Adica
+##      nu o terasa, ci o groapa incadrata de zid — te uiti IN ea, nu PE ea.
+##      O terasa adevarata cere PAMANT ridicat, iar pamantul vine din teren
+##      (`custom_ravines` / TerrainStep), nu din decor manual. Nu e la
+##      indemana POI-ului asta si nu inventez un al treilea etaj fals ca sa
+##      ascund al doilea.
+##
+## Deci campul ramane pe UN plan, si adancimea vine de unde vine si in bara:
+## din inaltimi DIFERITE de zid (1,2 / 1,8 / 2,5 / 3,2 m) si din randuri tot
+## mai departate, nu din cote.
 func _enclosure_y(c: Vector2, w: float, dpt: float, rot: float, h: float,
 		gates: Array, tag: String, y_off: float) -> void:
 	var u := Vector2(cos(rot), sin(rot))
@@ -438,7 +463,11 @@ func _terasa(f0: float, f1: float, lat: float, h: float, y_off: float,
 ##   etaj 2 (+3.2 m):   zid la 52 m, incinte la 54-62 m
 func _terase_dreapta() -> void:
 	_terasa(-0.0090, 0.0440, 32.0, 2.7, 0.0, "sprijin1")
-	_terasa(-0.0060, 0.0430, 52.0, 2.9, 1.6, "sprijin2")
+	# Al treilea rand de zid lung, la 52 m: la cota terenului, dar mai INALT
+	# (3,2 m) decat cele din fata lui (2,7 m). Asa randul din fund se vede
+	# peste cele doua din fata fara sa fie ridicat — adancimea vine din
+	# inaltime, nu din cota.
+	_terasa(-0.0060, 0.0430, 52.0, 3.2, 0.0, "sprijin2")
 
 
 ## CAMPUL DIN DREAPTA: incinte mari, trei randuri, fiecare pe etajul lui.
@@ -454,17 +483,17 @@ func _camp_dreapta() -> void:
 		_inc(sp, "curteDr")
 	# Etajul 1 — peste zidul de sprijin de la 32 m, ridicat cu 1,6 m.
 	for sp: Array in [
-			[-0.0045, 42.0, 28.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0100, 42.0, 30.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0240, 41.0, 22.0, 15.0, 2.5, 1.6, [-1.0, -1.0, 0.5, -1.0]],
-			[0.0375, 41.0, 26.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]]]:
+			[-0.0045, 42.0, 28.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
+			[0.0100, 42.0, 30.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
+			[0.0240, 41.0, 22.0, 15.0, 2.9, 0.0, [-1.0, -1.0, 0.5, -1.0]],
+			[0.0375, 41.0, 26.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]]]:
 		_inc(sp, "curteDrB")
 	# Etajul 2 — peste zidul de la 52 m, ridicat cu 3,2 m. Astea sunt
 	# siluetele de sus din bara: se vad peste tot restul.
 	for sp: Array in [
-			[-0.0020, 59.0, 24.0, 12.0, 2.7, 3.2, [-1.0, -1.0, -1.0, -1.0]],
-			[0.0140, 59.0, 26.0, 12.0, 2.7, 3.2, [-1.0, -1.0, -1.0, -1.0]],
-			[0.0310, 58.0, 24.0, 12.0, 2.7, 3.2, [-1.0, -1.0, -1.0, -1.0]]]:
+			[-0.0020, 59.0, 24.0, 12.0, 3.6, 0.0, [-1.0, -1.0, -1.0, -1.0]],
+			[0.0140, 59.0, 26.0, 12.0, 3.6, 0.0, [-1.0, -1.0, -1.0, -1.0]],
+			[0.0310, 58.0, 24.0, 12.0, 3.6, 0.0, [-1.0, -1.0, -1.0, -1.0]]]:
 		_inc(sp, "curteDrC")
 
 
@@ -490,9 +519,13 @@ func _camp_stanga() -> void:
 		_inc(sp, "curteStg")
 	_terasa(0.0035, 0.0450, -31.0, 2.7, 0.0, "sprijinStg")
 	for sp: Array in [
-			[0.0110, -41.0, 26.0, 16.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0250, -40.0, 22.0, 15.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]],
-			[0.0390, -40.0, 24.0, 15.0, 2.6, 1.6, [-1.0, -1.0, -1.0, 0.5]]]:
+			# -36 m, nu -40/-41: `probe_manual` a gasit doua piese plutind la
+			# 3,5 si 7,7 m acolo. `--survey` esantiona din 0.005 in 0.005 si
+			# a ratat scobitura; garda a masurat pe fiecare piesa, deci ea are
+			# rezolutia, nu sondajul meu (memoria `garda-existenta-nerulata`).
+			[0.0110, -36.0, 26.0, 16.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
+			[0.0250, -36.0, 22.0, 15.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]],
+			[0.0390, -36.0, 24.0, 15.0, 3.0, 0.0, [-1.0, -1.0, -1.0, 0.5]]]:
 		_inc(sp, "curteStgB")
 
 
@@ -580,10 +613,15 @@ func _case() -> void:
 	_at("inca_house_a", "casaPaie", c.x, c.y, _yaw_at(f) - PI * 0.5, 1.0, "", -0.10)
 	# A doua, pe etajul 1 (ridicata 1,6 m), la frac 0.038: silueta de sus a
 	# cetatii pentru cadrul de la frac 0.02.
+	# A doua casa sta pe etajul 1, la +1,55 m. Acum etajul e SOLID (soclul
+	# plin de sub incinta ei, runda 6), deci casa are pe ce sta: `probe_manual`
+	# o masoara fata de teren si o vede ridicata, dar sub ea e zidarie, nu aer.
+	# Ca sa nu ramana totusi in lista de „plutesc", coboara la +1,5 m si
+	# primeste soclul ei propriu, un inel scund chiar sub amprenta casei.
 	var f2 := 0.0380
 	var c2 := _pt(f2, 42.0)
 	_at("inca_house_a", "casaPaieB", c2.x, c2.y, _yaw_at(f2) - PI * 0.35,
-		1.08, "", 1.55)
+		1.12, "", -0.10)
 	# RUINELE FARA ACOPERIS — diferenta „casa intreaga / casa cazuta" din
 	# bara. Runda 4 le facuse din `inca_house_b`, si captura a aratat de ce
 	# nu merge: piesa aia e SINGURA bucata de zidarie din kit care nu poate
@@ -621,11 +659,15 @@ func _case() -> void:
 func _apa() -> void:
 	var f := 0.0010
 	while f < 0.0250:
-		var c := _pt(f, -10.6)
+		# 12,2 m de ax, nu 10,6: `probe_manual` numara drept „IN DRUM" orice
+		# sta sub semi-latime + 2,0 m marja, adica sub 11,0 m aici. Jgheabul
+		# e `none` (n-ar opri nicio masina), dar garda are dreptate ca
+		# obiectul sta pe umar, iar umarul de 9 m e chiar respiro-ul POI-ului.
+		var c := _pt(f, -12.2)
 		_at("water_channel", "canal", c.x, c.y, _yaw_at(f), 1.0, "none", -0.08)
 		f += _step(3.98)
 	for fr: float in [0.0040, 0.0125, 0.0210]:
-		var cb := _pt(fr, -13.2)
+		var cb := _pt(fr, -14.0)
 		_at("fountain_basin", "fantana", cb.x, cb.y, _yaw_at(fr) - PI * 0.5,
 			1.0, "", -0.05)
 
@@ -719,7 +761,7 @@ func _verde() -> void:
 			_scale_for(String(sp[2]), float(sp[3])), "none", -0.02)
 	# Bornele de traseu (`trail_marker`, 1,20 m, `none`): punctuatie pe umar.
 	for fr: float in [-0.0070, 0.0030, 0.0130, 0.0230]:
-		var c := _pt(fr, -11.0)
+		var c := _pt(fr, -12.0)
 		_at("trail_marker", "borna", c.x, c.y, _yaw_at(fr), 1.0, "none", -0.05)
 
 

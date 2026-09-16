@@ -292,7 +292,11 @@ const SPLIT_MODELS := {
 	# ziduri, deci n-ar fi mutat culoarea piesei, dar ar fi taiat chiar
 	# semnalul „ruina veche, nu zid nou". Acelasi tipar ca acacia-umbrela.
 	"inca_wall_a": true, "inca_wall_b": true,
+	"inca_wall_c": true,
 	"inca_stair_a": true, "inca_stair_b": true,
+	# sun_temple: 12 CACTUS_GREEN pe coronamentul neregulat, la fel ca zidurile.
+	# Corpul e 3 (68.5%) + 29 (25.5%), amandoua piatra, deci raman impreuna.
+	"sun_temple": true,
 	# inca_bridge_ledge: 12 CACTUS_GREEN e 2.5% — sub pragul la care ruptura
 	# mai plateste un nod in plus, si piesa sta pe prapastie, nu langa ochi.
 	# inca_house_b (ruina) NU se rupe: muschiul e 22.8%, adica o TREIME din
@@ -408,12 +412,43 @@ const ACCENT_SPLIT := {
 	# se schimba in aceeasi captura: rgb(71,75,79) -> rgb(80,68,54).
 	#
 	# Piatra zidurilor sta pe 3 (ROCK_LIGHT), 29 (MARBLE_GREY) si, la
-	# inca_wall_b, 4 (ROCK_DARK) pentru nise. Iarba de coronament (12) ramane
-	# in `_Accente`, pictata.
-	"Inca_Wall_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
-	"Inca_Wall_B": [Palette.ROCK_LIGHT, Palette.ROCK_DARK, Palette.MARBLE_GREY],
+	# inca_wall_b, 4 (ROCK_DARK) pentru nise.
+	#
+	# CORONAMENTUL (slotul 12, CACTUS_GREEN, y 2.31-2.49) INTRA SI EL IN CORP,
+	# nu mai ramane accent pictat. Redactarea de dinainte il tinea in
+	# `_Accente` „ca iarba de coronament" — pe un zid izolat e corect, pe un
+	# CAMP nu. In Piata Sacra sunt ~850 de piese de zid, deci ~850 de dungi
+	# verzi late de 18 cm, si fiindca ochiul sta la 10 m fiecare zid din
+	# planul doi isi arata coronamentul fix acolo unde zidul din planul intai
+	# isi are talpa. Criticul orb al rundei 12 a citit exact asta, fara sa
+	# stie ce e: „lespezile au partea de sus verde si par bucati de teren
+	# decupate, nu zidarie". Decupajul A_r12_f000 confirma: linia verde e
+	# continua pe fiecare lespede din cadru.
+	#
+	# Iarba nu dispare din cetate — ramane iarba TERENULUI intre incinte, care
+	# e ce trebuie sa se vada in curti (si ce cere bara). Ce dispare e chenarul
+	# verde de pe piatra. 12 e slot GLOBAL (bromelii, muschi, tent_b): de aia
+	# schimbarea se face aici, pe cheia de NOD a zidului, nu pe o mapare de
+	# slot — memoria `nume-noduri-nu-sunt-unice` invers, cheia e destul de
+	# ingusta.
+	"Inca_Wall_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY,
+		Palette.CACTUS_GREEN],
+	"Inca_Wall_B": [Palette.ROCK_LIGHT, Palette.ROCK_DARK,
+		Palette.MARBLE_GREY, Palette.CACTUS_GREEN],
+	# `Inca_Wall_C` lipsea si de aici si din CLASSES_BY_MODEL, desi inventarul
+	# o masurase ca separandu-se LA FEL de curat ca A (corp 3+29 91.5%, accent
+	# 12 la y 2.33-2.43, verdict "DA"). Consecinta, gasita la POI A: din 352
+	# de piese de zid asezate in Piata Sacra, 48 (13%) ramaneau pe atlasul
+	# brut langa 304 clasate — aceeasi ruptura de familie ca la piesele-erou,
+	# doar mai mica. Piesa se foloseste exact acolo unde se vede cel mai bine:
+	# la capetele scurte de incinta, adica in colturi.
+	"Inca_Wall_C": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY,
+		Palette.CACTUS_GREEN],
 	"Inca_Stair_A": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	"Inca_Stair_B": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
+	# Templul Soarelui: 3 (68.5%) + 29 (25.5%) sunt piatra si raman pe corp;
+	# iarba de coronament (12) pleaca in `_Accente`, ca la ziduri.
+	"Sun_Temple": [Palette.ROCK_LIGHT, Palette.MARBLE_GREY],
 	# Chongqing: DOUA sloturi pastrate, nu unul. Masurat pe inaltime, slotul 29
 	# tine parterul (y 0..3.1) si slotul 8 etajele (y 2.9..5.8) — acelasi perete
 	# de beton, taiat pe orizontala din motive de compozitie, nu doua materiale.
@@ -874,8 +909,31 @@ const CLASSES_BY_MODEL := {
 	# motiv NU exista un MACHUPICCHU_CLASSES in track_decor.gd.
 	"inca_wall_a": {"Inca_Wall_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_wall_b": {"Inca_Wall_B": Palette.TRI_PREFIX + "inca_stone"},
+	# `_c` (capatul de zid, 2 m) lipsea din lista, si nu dintr-o decizie: nu are
+	# nicio nota de respingere, spre deosebire de `inca_house_b`/`fountain_basin`
+	# de mai jos. Cat timp era folosit rar nu se vedea; POI G il pune de 47 de
+	# ori pe serpentine si captura (G_r5_f076.png) arata de ce conteaza — panouri
+	# PALIDE intre piesele tan, fiindca ramaneau pe atlas in loc sa ia dala de
+	# granit. Un zid din doua materiale nu citeste ca un zid (memoria
+	# scatter-nu-primeste-clasele-temei: hardcodarile ocolesc mapari corecte).
+	"inca_wall_c": {"Inca_Wall_C": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_a": {"Inca_Stair_A": Palette.TRI_PREFIX + "inca_stone"},
 	"inca_stair_b": {"Inca_Stair_B": Palette.TRI_PREFIX + "inca_stone"},
+	# Cele PATRU piese sacre + cele doua porti. Toate au sloturile 3 / 4 / 29,
+	# care sunt TOATE piatra (ROCK_LIGHT / ROCK_DARK / MARBLE_GREY), deci clasa
+	# poate cadea pe nodul intreg fara ACCENT_SPLIT — masurat in
+	# machu_picchu_masuratori.md §2, care le numeste explicit la "piesele care
+	# NU cer ACCENT_SPLIT". Exceptia e sun_temple, care are si 12 (iarba de
+	# coronament): ala se rupe, ca zidurile.
+	# (three_windows / sun_temple / intihuatana / trail_marker sunt mai jos, la
+	# blocul piese-erou adaugat de POI A, cu masuratoarea de nuanta/saturatie
+	# care le-a justificat. Aici ar fi fost chei DUBLATE — GDScript pastreaza
+	# tacut ultima valoare, deci dublura n-ar fi crapat, doar ar fi mintit.)
+	# Portile: piesele prin care CONDUCI, deci cele mai privite bucati de
+	# piatra din tur. `main_gate` e gatuirea de la POI H (7,39 m gol masurat),
+	# `inti_punku` e Poarta Soarelui de la POI C (13,98 m).
+	"main_gate": {"Main_Gate": Palette.TRI_PREFIX + "inca_stone"},
+	"inti_punku": {"Inti_Punku": Palette.TRI_PREFIX + "inca_stone"},
 	# Cornisa podului: piesa peste care sare LiftBridgeHazard, deci cea mai
 	# privita bucata de piatra din cursa. Nu se rupe (iarba e 2.5%).
 	"inca_bridge_ledge": {
@@ -890,6 +948,36 @@ const CLASSES_BY_MODEL := {
 	"guardhouse": {"House_Stone": Palette.TRI_PREFIX + "inca_stone"},
 	# inca_house_b (ruina) si fountain_basin NU intra: vezi nota de respingere
 	# de sub CLASS_TEXTURES["inca_stone"] din palette.gd.
+	#
+	# PIESELE-EROU DE PIATRA (adaugate la POI A, pe masuratoare de captura).
+	# `machu_picchu_masuratori.md` §2 le trecuse deja pe lista celor care
+	# "NU cer ACCENT_SPLIT" fiindca "toate sunt piatra" — adica erau gandite
+	# sa primeasca clasa pe TOT nodul — dar cheia nu fusese scrisa. Pana la
+	# masuratoarea de mai jos asta nu se vedea: pe .glb brut nu se vede, se
+	# vede abia dupa remap, in cadru, langa zidurile clasate
+	# (memoria `monocromia-se-masoara-dupa-remap`).
+	#
+	# Masurat pe A_r3_sun_temple.png si A_r4_f000.png, media pe suprafata
+	# luminata, in acelasi cadru cu zidaria clasata de langa ele:
+	#
+	#   inca_wall_* (cu `inca_stone`)  H 39-44 deg   S 0.45-0.50
+	#   three_windows                  H 43 deg      S **0.22**
+	#   sun_temple                     H **81** deg  S **0.06**
+	#   intihuatana                    H **77** deg  S **0.05**
+	#
+	# Adica nuanta nimereste doar la `three_windows`, iar SATURATIA e de
+	# doua-zece ori mai mica peste tot: in cadru, templul si piatra-ceas
+	# citesc ca beton cenusiu-verzui langa un zid de granit cald, la 2 m
+	# distanta, desi brief-ul spune ca sunt acelasi granit. Asta e ce facea
+	# hero-assets-urile sa dispara in campul de ziduri al Pietei Sacre.
+	#
+	# Toate trei sunt mono-familie (3+4+29 / 3+29, toate sloturi de piatra),
+	# deci clasa merge pe nodul intreg fara ACCENT_SPLIT — exact cum a
+	# argumentat inventarul. `trail_marker` (3+29) intra din acelasi motiv.
+	"three_windows": {"Three_Windows": Palette.TRI_PREFIX + "inca_stone"},
+	"sun_temple": {"Sun_Temple": Palette.TRI_PREFIX + "inca_stone"},
+	"intihuatana": {"Intihuatana": Palette.TRI_PREFIX + "inca_stone"},
+	"trail_marker": {"Trail_Marker": Palette.TRI_PREFIX + "inca_stone"},
 
 	# --- Serengeti: LUTUL termitierelor ---------------------------------
 	#

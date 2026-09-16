@@ -853,8 +853,20 @@ const CLASSES_BY_MODEL := {
 	# dispare chiar diferenta dintre zidul incas si o stanca.
 	#
 	# COSTA UN SINGUR MATERIAL pentru toate cele sase piese, fiindca
-	# `triplanar_class_material` e cache-uit per clasa — masurat
-	# (tools/probe_mp_class_cost.gd): 7 noduri, un material.
+	# `triplanar_class_material` e cache-uit per clasa (palette.gd, dictionarul
+	# de materiale pe nume de clasa) — asta e mecanismul, citit in cod.
+	#
+	# CIFRA INSA NU E INCA MASURATA, si se spune limpede: cat timp niciun POI
+	# n-a asezat o piesa, clasa e inregistrata dar nu se aplica nicaieri, deci
+	# `probe_decor --track=15` da 17 materiale si CU si FARA ea — identic la
+	# cifra. Exact semnalul din docs/bara_vizuala.md ca masori altceva decat
+	# crezi. Costul real se citeste la primul POI care planteaza un zid:
+	# daca acolo cifra creste cu 1, mecanismul e confirmat; daca creste cu 6,
+	# cache-ul nu tine si trebuie reparat inainte de urmatoarele sapte POI-uri.
+	# (Prima redactare cita `probe_mp_class_cost.gd` ca dovada. Unealta e
+	# MOARTA — in modul --script lipsesc autoload-urile, Track15 nu se incarca,
+	# si ambele brate A/B dadeau aceeasi cifra fiindca nu masurau nimic;
+	# memoria `sonda-masura-alt-obiect`.)
 	#
 	# Cheia e STEM DE FISIER, nu nume de nod, si asta nu e pedanterie:
 	# `House_Ruin`/`Basin` sunt nume generice, iar o mapare globala pe nume

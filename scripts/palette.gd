@@ -718,8 +718,13 @@ const CLASS_TEXTURES := {
 	# Arch/End), iar tenta lui e RECE — Color(0.88, 0.91, 0.97). Zidaria
 	# incasa trebuie sa aterizeze CALD: tinta e media ponderata pe arie a
 	# sloturilor pe care stau chiar piesele kitului (3 ROCK_LIGHT si 29
-	# MARBLE_GREY domina, cu 4 ROCK_DARK pe nise si cornisa), masurata cu
-	# tools/probe_mp_tints.gd pe cele sase piese de zidarie:
+	# MARBLE_GREY domina, cu 4 ROCK_DARK pe nise si cornisa), pe cele sase
+	# piese de zidarie. Cifrele sunt re-derivabile din atlas + dala: tinta e
+	# 55% ROCK_LIGHT + 33% MARBLE_GREY + 13% ROCK_DARK (eroare 0.0008), iar
+	# lift*tenta aterizeaza pe (0.7104, 0.5550, 0.3956). Verificat independent
+	# la revizia adversariala. (Prima redactare cita o unealta
+	# `probe_mp_tints.gd` care NU exista — cifrele erau bune, calea de
+	# reverificare nu; memoria `justificarea-din-comentariu-se-verifica`.)
 	#   tinta  (0.7104, 0.5549, 0.3927)  lum 0.5762
 	#   dala   (0.6376, 0.5992, 0.5208)  lum 0.6017
 	#   raport (1.1142, 0.9260, 0.7541)  -> un canal PESTE 1, deci cere lift

@@ -204,6 +204,51 @@ const PROP_COLLISION := {
 	# termite_mound_a/b, maasai_boma, safari_tent, land_rover, crocodile,
 	# hippo_back (ca decor static pe mal), elephant (ca decor static),
 	# wildebeest, zebra (figuranti statici in afara turmei).
+	# --- Machu Picchu (kitul din assets/models/machupicchu/, PR #386) ------
+	# Modurile de mai jos vin din masurarea AABB-ului fiecarei piese (raport
+	# raza-la-baza / semi-latime), nu din ochi.
+	#
+	# Prin ea se TRECE: cornisa podului incas. Golul masurat e 4,230 m la cota
+	# cornisei (fereastra y 8,00..11,00), ceea ce confirma contractul gap=4.25
+	# din Track15.tscn. Un hull ar astupa exact prapastia de 12,90 m peste care
+	# sare LiftBridgeHazard — acelasi motiv ca `crater_bowl` mai sus: cine cade
+	# trebuie sa CADA. (Pe toata inaltimea, y 0,15..12,80, golul se strange la
+	# 3,750 m — deci contractul e la cota cornisei, nu global.)
+	"inca_bridge_ledge": "mesh",
+	# Copacii si bambusul: cilindru pe trunchi, ca toti copacii de mai sus.
+	# Rapoartele raza-baza/semi-latime masurate sunt sub pragul de 0,5 —
+	# bamboo_clump 0,40, polylepis_a 0,41, polylepis_b 0,47 — adica coroana
+	# depaseste masiv baza, iar hull-ul ar fi un bloc care te opreste in aer.
+	"bamboo_clump": "trunk", "polylepis_a": "trunk", "polylepis_b": "trunk",
+	# Feriga arborescenta, raportul cel mai extrem din kit (0,30/2,07 = 0,15):
+	# stipa de 0,30 m sub o coroana de 4,13 m. ATENTIE, cilindrul automat e
+	# PREA GROS aici: `_add_trunk` ia raza din latimea AABB, adica
+	# max(4,13 * TRUNK_FRACTION, TRUNK_MIN_RADIUS) = 0,537 m, de 1,8 ori raza
+	# reala a stipei. Ramane "trunk" fiindca alternativele sunt mai rele (un
+	# hull ar fi un cort de 4 m), dar cine o aseaza langa banda trebuie sa stie
+	# ca stalpul invizibil e cu ~24 cm mai lat de fiecare parte decat se vede.
+	"tree_fern": "trunk",
+	# Fantome. Accente sub linia capotei, unde un corp fizic ar fi doar un
+	# pietroi invizibil: condor 1,16 m, llama 0,53 m, bromeliad 0,38 m,
+	# orchid_cluster 0,39 m, backpack_pile 0,69 m (bagaje, nu obstacol).
+	# Lamele se monteaza oricum pe SlidingHazard, care isi face colizorul lui.
+	"condor": "none", "llama": "none", "llama_b": "none", "llama_c": "none",
+	"bromeliad": "none", "orchid_cluster": "none", "backpack_pile": "none",
+	# Orizontul. Acelasi tipar ca `lengai` / `crater_far_wall` la Serengeti: un
+	# hull pe ele ar fi un corp fizic cat o pista. gorge_far_wall e 196,00 x
+	# 75,39 x 92,06 m si e o PANZA (doua foi cusute), deci nici n-are volum de
+	# umplut; huayna_picchu 79,47 x 33,00 x 73,47 m; machu_picchu_mountain
+	# 146,71 x 60,50 x 134,74 m.
+	"gorge_far_wall": "none", "huayna_picchu": "none",
+	"machu_picchu_mountain": "none",
+	# Hull implicit, corect, pentru restul: guardhouse (raport 1,02),
+	# inca_house_a (1,05), inca_house_b (1,21), tent_a/tent_b (1,29),
+	# moss_boulder_a/b/c (0,87 / 0,76 / 0,82), fountain_basin (1,13),
+	# inca_wall_a/b (1,01) si scarile inca_stair_a/b. Pe scari raportul iese
+	# 2,11 / 2,03, dar cifra insala: pe o scara `raza la baza` masoara
+	# diagonala treptei de jos, nu un trunchi, iar hull-ul unei scari e o PANA,
+	# nu un capac plan. Daca o captura arata masina urcata pe capac in loc sa
+	# atinga treptele, se trece pe "mesh" (tiparul `kopje_kicker`).
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.

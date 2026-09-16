@@ -220,6 +220,626 @@ script = ExtResource("prop")
 
 [node name="ZoneA_PiataSacra" type="Node3D" parent="DecorManual"]
 
+[node name="zidStg1" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.004347, 0, -0.042056, 0, 1.005227, 0, 0.042056, 0, 1.004347, -117.502327, -0.409291, 164.605179)
+
+[node name="zidStg2" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.004347, 0, -0.042056, 0, 1.005227, 0, 0.042056, 0, 1.004347, -111.476242, -0.404943, 164.352844)
+
+[node name="zidStg3" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(1.027060, 0, -0.043007, 0, 1.027961, 0, 0.043007, 0, 1.027060, -107.436142, -0.398809, 164.183670)
+
+[node name="zidStg4" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.042056, 0, 1.004347, 0, 1.005227, 0, -1.004347, 0, 0.042056, -105.444389, -0.376775, 166.112488)
+
+[node name="zidStg5" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.042056, 0, 1.004347, 0, 1.005227, 0, -1.004347, 0, 0.042056, -105.138977, -0.278432, 173.406097)
+
+[node name="zidStg6" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.004347, 0, 0.042056, 0, 1.005227, 0, -0.042056, 0, -1.004347, -108.039497, -0.291844, 176.219467)
+
+[node name="zidStg7" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.004347, 0, 0.042056, 0, 1.005227, 0, -0.042056, 0, -1.004347, -114.065582, -0.334417, 176.471802)
+
+[node name="zidStg8" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-1.027060, 0, 0.043007, 0, 1.027961, 0, -0.043007, 0, -1.027060, -118.105682, -0.356420, 176.640976)
+
+[node name="zidStg9" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.042056, 0, -1.004347, 0, 1.005227, 0, 1.004347, 0, -0.042056, -120.139488, -0.371358, 173.707809)
+
+[node name="zidStg10" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.042056, 0, -1.004347, 0, 1.005227, 0, 1.004347, 0, -0.042056, -120.349770, -0.398778, 168.686081)
+
+[node name="zidStg11" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, 1.005227, -102.958832, -0.381230, 164.000000)
+
+[node name="zidStg12" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, 1.005227, -96.927467, -0.336446, 164.000000)
+
+[node name="zidStg13" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 1.005227, 0, 1.005227, 0, -1.005227, 0, 0.000000, -92.974510, -0.242879, 167.015686)
+
+[node name="zidStg14" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, 1.005227, 0, 1.005227, 0, -1.005227, 0, 0.000000, -92.974510, -0.112905, 172.041824)
+
+[node name="zidStg15" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, -1.005227, -94.984962, -0.090154, 176.000000)
+
+[node name="zidStg16" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, -1.005227, -102.134964, -0.222737, 176.000000)
+
+[node name="zidStg17" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -1.005227, 0, 1.005227, 0, 1.005227, 0, 0.000000, -105.974510, -0.295781, 172.984314)
+
+[node name="zidStg18" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, -1.005227, 0, 1.005227, 0, 1.005227, 0, 0.000000, -105.974510, -0.359197, 167.958176)
+
+[node name="zidStg19" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, 0.965018, -89.542099, -0.215383, 164.500000)
+
+[node name="zidStg20" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, 0.965018, -83.751991, -0.066320, 164.500000)
+
+[node name="zidStg21" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.986842, 0, 0.000000, 0, 0.986842, 0, -0.000000, 0, 0.986842, -79.870094, 0.100383, 164.500000)
+
+[node name="zidStg22" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, 0.965018, 0, 0.965018, 0, -0.965018, 0, 0.000000, -78.437157, 0.205119, 166.430038)
+
+[node name="zidStg23" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, 0.965018, 0, 0.965018, 0, -0.965018, 0, 0.000000, -78.437157, 0.475978, 174.330032)
+
+[node name="zidStg24" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, -0.965018, -81.332214, 0.366526, 176.500000)
+
+[node name="zidStg25" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, -0.965018, -87.122322, 0.137339, 176.500000)
+
+[node name="zidStg26" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.986842, 0, 0.000000, 0, 0.986842, 0, -0.000000, 0, -0.986842, -91.004219, 0.013682, 176.500000)
+
+[node name="zidStg27" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -0.965018, 0, 0.965018, 0, 0.965018, 0, 0.000000, -92.437157, -0.061589, 173.604950)
+
+[node name="zidStg28" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -0.965018, 0, 0.965018, 0, 0.965018, 0, 0.000000, -92.437157, -0.211309, 167.814835)
+
+[node name="zidStg29" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, 1.005227, -77.507942, 0.211924, 165.000000)
+
+[node name="zidStg30" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, 1.005227, -69.707939, 0.680797, 165.000000)
+
+[node name="zidStg31" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 1.005227, 0, 1.005227, 0, -1.005227, 0, 0.000000, -66.518394, 1.004527, 168.015686)
+
+[node name="zidStg32" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, 1.005227, 0, 1.005227, 0, -1.005227, 0, 0.000000, -66.518394, 1.164592, 173.041824)
+
+[node name="zidStg33" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, -1.005227, -69.534073, 1.009257, 177.000000)
+
+[node name="zidStg34" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, -1.005227, -75.565437, 0.647853, 177.000000)
+
+[node name="zidStg35" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -1.005227, 0, 1.005227, 0, 1.005227, 0, 0.000000, -79.518394, 0.422908, 173.984314)
+
+[node name="zidStg36" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, -1.005227, 0, 1.005227, 0, 1.005227, 0, 0.000000, -79.518394, 0.243525, 168.958176)
+
+[node name="zidStgB37" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.163069, 0, -0.083517, 0, 1.166064, 0, 0.083517, 0, 1.163069, -117.008751, -0.340322, 179.793793)
+
+[node name="zidStgB38" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.163069, 0, -0.083517, 0, 1.166064, 0, 0.083517, 0, 1.163069, -110.030334, -0.292470, 179.292694)
+
+[node name="zidStgB39" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.163069, 0, -0.083517, 0, 1.166064, 0, 0.083517, 0, 1.163069, -103.051926, -0.215215, 178.791580)
+
+[node name="zidStgB40" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.083517, 0, 1.163069, 0, 1.166064, 0, -1.163069, 0, 0.083517, -99.384850, -0.144078, 180.866394)
+
+[node name="zidStgB41" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.083517, 0, 1.163069, 0, 1.166064, 0, -1.163069, 0, 0.083517, -98.718758, -0.067083, 190.142517)
+
+[node name="zidStgB42" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.163069, 0, 0.083517, 0, 1.166064, 0, -0.083517, 0, -1.163069, -101.895119, -0.107076, 194.749725)
+
+[node name="zidStgB43" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.163069, 0, 0.083517, 0, 1.166064, 0, -0.083517, 0, -1.163069, -108.873535, -0.213643, 195.250824)
+
+[node name="zidStgB44" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.163069, 0, 0.083517, 0, 1.166064, 0, -0.083517, 0, -1.163069, -115.851944, -0.285421, 195.751938)
+
+[node name="zidStgB45" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.083517, 0, -1.163069, 0, 1.166064, 0, 1.163069, 0, -0.083517, -119.602539, -0.319493, 192.514053)
+
+[node name="zidStgB46" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.083517, 0, -1.163069, 0, 1.166064, 0, 1.163069, 0, -0.083517, -120.103638, -0.340230, 185.535645)
+
+[node name="zidStgB47" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.166064, 0, 0.000000, 0, 1.166064, 0, -0.000000, 0, 1.166064, -99.591301, -0.158223, 179.500000)
+
+[node name="zidStgB48" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.166064, 0, 0.000000, 0, 1.166064, 0, -0.000000, 0, 1.166064, -92.594925, -0.005956, 179.500000)
+
+[node name="zidStgB49" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(1.166064, 0, 0.000000, 0, 1.166064, 0, -0.000000, 0, 1.166064, -86.764603, 0.180583, 179.500000)
+
+[node name="zidStgB50" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 1.166064, 0, 1.166064, 0, -1.166064, 0, 0.000000, -83.089493, 0.352565, 182.998184)
+
+[node name="zidStgB51" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 1.166064, 0, 1.166064, 0, -1.166064, 0, 0.000000, -83.089493, 0.411052, 189.994568)
+
+[node name="zidStgB52" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.166064, 0, 0.000000, 0, 1.166064, 0, -0.000000, 0, -1.166064, -86.587685, 0.311976, 195.500000)
+
+[node name="zidStgB53" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.166064, 0, 0.000000, 0, 1.166064, 0, -0.000000, 0, -1.166064, -97.887688, -0.020406, 195.500000)
+
+[node name="zidStgB54" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -1.166064, 0, 1.166064, 0, 1.166064, 0, 0.000000, -103.089493, -0.139989, 192.001816)
+
+[node name="zidStgB55" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -1.166064, 0, 1.166064, 0, 1.166064, 0, 0.000000, -103.089493, -0.178426, 185.005432)
+
+[node name="zidStgB56" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.125854, 0, 0.000000, 0, 1.125854, 0, -0.000000, 0, 1.125854, -79.640831, 0.481318, 180.000000)
+
+[node name="zidStgB57" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.125854, 0, 0.000000, 0, 1.125854, 0, -0.000000, 0, 1.125854, -68.340828, 1.109736, 180.000000)
+
+[node name="zidStgB58" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 1.125854, 0, 1.125854, 0, -1.125854, 0, 0.000000, -63.018394, 1.516765, 183.377563)
+
+[node name="zidStgB59" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 1.125854, 0, 1.125854, 0, -1.125854, 0, 0.000000, -63.018394, 1.551921, 190.132690)
+
+[node name="zidStgB60" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.000000, 0, 1.151316, 0, 1.151316, 0, -1.151316, 0, 0.000000, -63.018394, 1.567790, 194.661575)
+
+[node name="zidStgB61" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.125854, 0, 0.000000, 0, 1.125854, 0, -0.000000, 0, -1.125854, -66.395958, 1.345256, 196.000000)
+
+[node name="zidStgB62" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.125854, 0, 0.000000, 0, 1.125854, 0, -0.000000, 0, -1.125854, -73.151085, 0.938411, 196.000000)
+
+[node name="zidStgB63" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-1.125854, 0, 0.000000, 0, 1.125854, 0, -0.000000, 0, -1.125854, -78.780357, 0.644816, 196.000000)
+
+[node name="zidStgB64" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -1.125854, 0, 1.125854, 0, 1.125854, 0, 0.000000, -83.018394, 0.431041, 192.622437)
+
+[node name="zidStgB65" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -1.125854, 0, 1.125854, 0, 1.125854, 0, 0.000000, -83.018394, 0.380061, 185.867310)
+
+[node name="zidStgB66" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.000000, 0, -1.151316, 0, 1.151316, 0, 1.151316, 0, 0.000000, -83.018394, 0.340617, 181.338425)
+
+[node name="terasaStg67" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -122.475723, -0.368505, 178.355972)
+
+[node name="terasaStg68" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -116.203453, -0.341268, 178.422195)
+
+[node name="terasaStg69" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -109.931183, -0.295827, 178.488419)
+
+[node name="terasaStg70" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -103.658920, -0.225377, 178.554642)
+
+[node name="terasaStg71" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -97.386642, -0.119847, 178.620865)
+
+[node name="terasaStg72" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -91.114380, 0.030345, 178.687088)
+
+[node name="terasaStg73" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -84.842110, 0.236522, 178.753311)
+
+[node name="terasaStg74" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -78.569839, 0.517787, 178.819534)
+
+[node name="terasaStg75" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -72.297577, 0.863871, 178.885757)
+
+[node name="terasaStg76" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.045378, 0, 0.011037, 0, 1.045436, 0, -0.011037, 0, 1.045378, -66.025307, 1.270656, 178.951965)
+
+[node name="zidDr77" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.002479, 0, -0.074284, 0, 1.005227, 0, 0.074284, 0, 1.002479, -116.868141, -4.126943, 126.156265)
+
+[node name="zidDr78" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.002479, 0, -0.074284, 0, 1.005227, 0, 0.074284, 0, 1.002479, -110.853271, -1.630788, 125.710564)
+
+[node name="zidDr79" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(1.025150, 0, -0.075964, 0, 1.027961, 0, 0.075964, 0, 1.025150, -106.820686, -0.322057, 125.411743)
+
+[node name="zidDr80" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.074285, 0, 1.002479, 0, 1.005227, 0, -1.002479, 0, 0.074285, -104.693741, -0.312108, 128.278091)
+
+[node name="zidDr81" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.074285, 0, 1.002479, 0, 1.005227, 0, -1.002479, 0, 0.074285, -104.322319, -0.364064, 133.290482)
+
+[node name="zidDr82" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.002479, 0, 0.074284, 0, 1.005227, 0, -0.074284, 0, -1.002479, -107.111153, -0.399297, 136.463425)
+
+[node name="zidDr83" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.002479, 0, 0.074284, 0, 1.005227, 0, -0.074284, 0, -1.002479, -113.126022, -0.408025, 136.909119)
+
+[node name="zidDr84" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-1.025150, 0, 0.075964, 0, 1.027961, 0, -0.075964, 0, -1.025150, -117.158607, -0.412969, 137.207932)
+
+[node name="zidDr85" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.074285, 0, -1.002479, 0, 1.005227, 0, 1.002479, 0, -0.074285, -119.211266, -0.412297, 135.344070)
+
+[node name="zidDr86" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.074285, 0, -1.002479, 0, 1.005227, 0, 1.002479, 0, -0.074285, -119.713776, -3.043462, 128.562668)
+
+[node name="zidDr87" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, 0.965018, -99.001183, -0.215612, 125.000000)
+
+[node name="zidDr88" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, 0.965018, -93.211075, -0.095311, 125.000000)
+
+[node name="zidDr89" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.986842, 0, 0.000000, 0, 0.986842, 0, -0.000000, 0, 0.986842, -89.329178, 0.024104, 125.000000)
+
+[node name="zidDr90" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 0.965018, 0, 0.965018, 0, -0.965018, 0, 0.000000, -87.896240, 0.026515, 127.895058)
+
+[node name="zidDr91" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, 0.965018, 0, 0.965018, 0, -0.965018, 0, 0.000000, -87.896240, -0.110829, 132.720139)
+
+[node name="zidDr92" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, -0.965018, -89.826279, -0.226018, 136.000000)
+
+[node name="zidDr93" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.965018, 0, 0.000000, 0, 0.965018, 0, -0.000000, 0, -0.965018, -98.126282, -0.346318, 136.000000)
+
+[node name="zidDr94" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, -0.965018, 0, 0.965018, 0, 0.965018, 0, 0.000000, -101.896240, -0.350011, 133.104950)
+
+[node name="zidDr95" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, -0.965018, 0, 0.965018, 0, 0.965018, 0, 0.000000, -101.896240, -0.280736, 128.279861)
+
+[node name="zidDr96" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, 1.005227, -80.418320, 0.374095, 125.500000)
+
+[node name="zidDr97" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, 1.005227, -74.386955, 0.695536, 125.500000)
+
+[node name="zidDr98" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000000, 0, 1.005227, 0, 1.005227, 0, -1.005227, 0, 0.000000, -70.433998, 0.859095, 128.515686)
+
+[node name="zidDr99" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, 1.005227, 0, 1.005227, 0, -1.005227, 0, 0.000000, -70.433998, 0.674281, 133.541824)
+
+[node name="zidDr100" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, -1.005227, -73.449677, 0.417308, 136.500000)
+
+[node name="zidDr101" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.005227, 0, 0.000000, 0, 1.005227, 0, -0.000000, 0, -1.005227, -79.481041, 0.100123, 136.500000)
+
+[node name="zidDr102" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, -1.005227, 0, 1.005227, 0, 1.005227, 0, 0.000000, -83.433998, -0.039937, 134.489548)
+
+[node name="zidDr103" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000000, 0, -1.005227, 0, 1.005227, 0, 1.005227, 0, 0.000000, -83.433998, 0.178721, 127.689545)
+
+[node name="terasaDr104" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -112.591904, -2.630940, 122.243713)
+
+[node name="terasaDr105" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -107.284370, -0.327428, 122.216484)
+
+[node name="terasaDr106" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -101.976845, -0.260152, 122.189255)
+
+[node name="terasaDr107" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -96.669312, -0.158300, 122.162025)
+
+[node name="terasaDr108" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -91.361786, -0.033742, 122.134796)
+
+[node name="terasaDr109" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.904593, 0, -0.004641, 0, 0.904605, 0, 0.004641, 0, 0.904593, -87.803429, 0.092036, 122.116547)
+
+[node name="terasaDr110" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -79.992722, 0.423625, 122.076477)
+
+[node name="terasaDr111" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -74.685188, 0.707469, 122.049248)
+
+[node name="terasaDr112" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.884588, 0, -0.004538, 0, 0.884600, 0, 0.004538, 0, 0.884588, -69.377663, 1.051005, 122.022018)
+
+[node name="treiFerestre113" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_three_windows")]
+transform = Transform3D(0.999823, 0, -0.018814, 0, 1.000000, 0, 0.018814, 0, 0.999823, -106.840218, -0.368982, 165.537369)
+
+[node name="templulSoarelui114" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_sun_temple")]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1.000000, 0, -1.000000, 0, 0.000000, -101.070755, -0.351812, 133.500000)
+
+[node name="soclu115" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.522717, 0, 0.001247, 0, 0.522718, 0, -0.001247, 0, 0.522717, -69.431686, 0.610164, 159.984619)
+
+[node name="soclu116" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.522717, 0, 0.001247, 0, 0.522718, 0, -0.001247, 0, 0.522717, -66.295387, 0.858119, 159.992111)
+
+[node name="soclu117" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.522717, 0, 0.001247, 0, 0.522718, 0, -0.001247, 0, 0.522717, -63.159088, 1.129512, 159.999588)
+
+[node name="soclu118" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.522717, 0, 0.001247, 0, 0.522718, 0, -0.001247, 0, 0.522717, -60.022789, 1.399485, 160.007080)
+
+[node name="soclu119" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.534538, 0, 0.001275, 0, 0.534539, 0, -0.001275, 0, 0.534538, -57.920101, 1.610301, 160.012085)
+
+[node name="soclu120" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.534538, 0, 0.001275, 0, 0.534539, 0, -0.001275, 0, 0.534538, -56.851028, 1.717509, 160.014648)
+
+[node name="soclu121" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.001247, 0, 0.522717, 0, 0.522718, 0, -0.522717, 0, -0.001247, -55.002380, 1.913142, 161.064499)
+
+[node name="soclu122" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.001276, 0, 0.534538, 0, 0.534539, 0, -0.534538, 0, -0.001276, -55.006149, 1.924037, 162.644470)
+
+[node name="soclu123" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.001276, 0, 0.534538, 0, 0.534539, 0, -0.534538, 0, -0.001276, -55.008701, 1.931407, 163.713531)
+
+[node name="soclu124" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.001247, 0, 0.522717, 0, 0.522718, 0, -0.522717, 0, -0.001247, -55.022186, 2.022258, 169.364487)
+
+[node name="soclu125" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.001276, 0, 0.534538, 0, 0.534539, 0, -0.534538, 0, -0.001276, -55.025955, 2.046580, 170.944458)
+
+[node name="soclu126" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.001276, 0, 0.534538, 0, 0.534539, 0, -0.534538, 0, -0.001276, -55.028507, 2.063045, 172.013519)
+
+[node name="soclu127" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.522717, 0, -0.001247, 0, 0.522718, 0, 0.001247, 0, -0.522717, -56.601444, 1.960551, 174.015289)
+
+[node name="soclu128" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.522717, 0, -0.001247, 0, 0.522718, 0, 0.001247, 0, -0.522717, -59.737743, 1.695598, 174.007797)
+
+[node name="soclu129" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.522717, 0, -0.001247, 0, 0.522718, 0, 0.001247, 0, -0.522717, -62.874046, 1.456157, 174.000320)
+
+[node name="soclu130" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.522717, 0, -0.001247, 0, 0.522718, 0, 0.001247, 0, -0.522717, -66.010345, 1.224666, 173.992828)
+
+[node name="soclu131" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.534538, 0, -0.001275, 0, 0.534539, 0, 0.001275, 0, -0.534538, -68.113029, 1.069468, 173.987823)
+
+[node name="soclu132" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.534538, 0, -0.001275, 0, 0.534539, 0, 0.001275, 0, -0.534538, -69.182106, 1.000590, 173.985260)
+
+[node name="soclu133" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.001247, 0, -0.522717, 0, 0.522718, 0, 0.522717, 0, 0.001247, -71.029503, 0.837901, 172.412704)
+
+[node name="soclu134" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.001247, 0, -0.522717, 0, 0.522718, 0, 0.522717, 0, 0.001247, -71.022018, 0.732814, 169.276398)
+
+[node name="soclu135" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.001247, 0, -0.522717, 0, 0.522718, 0, 0.522717, 0, 0.001247, -71.014534, 0.621776, 166.140106)
+
+[node name="soclu136" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.001247, 0, -0.522717, 0, 0.522718, 0, 0.522717, 0, 0.001247, -71.008301, 0.573253, 163.526520)
+
+[node name="soclu137" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.001275, 0, -0.534538, 0, 0.534539, 0, 0.534538, 0, 0.001275, -71.004532, 0.545802, 161.946548)
+
+[node name="socluB138" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.411183, 0, 0.000982, 0, 0.411184, 0, -0.000982, 0, 0.411183, -67.095825, 0.841502, 162.990204)
+
+[node name="socluB139" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.411183, 0, 0.000982, 0, 0.411184, 0, -0.000982, 0, 0.411183, -66.273460, 0.912654, 162.992172)
+
+[node name="socluB140" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.411183, 0, 0.000982, 0, 0.411184, 0, -0.000982, 0, 0.411183, -61.295845, 1.326228, 163.004044)
+
+[node name="socluB141" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.411183, 0, 0.000982, 0, 0.411184, 0, -0.000982, 0, 0.411183, -60.473480, 1.394618, 163.006012)
+
+[node name="socluB142" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.000959, 0, 0.402090, 0, 0.402091, 0, -0.402090, 0, -0.000959, -58.509914, 1.606181, 164.216980)
+
+[node name="socluB143" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.000959, 0, 0.402090, 0, 0.402091, 0, -0.402090, 0, -0.000959, -58.514709, 1.624537, 166.227432)
+
+[node name="socluB144" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.000981, 0, 0.411183, 0, 0.411184, 0, -0.411183, 0, -0.000981, -58.517609, 1.654719, 167.442795)
+
+[node name="socluB145" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.000981, 0, 0.411183, 0, 0.411184, 0, -0.411183, 0, -0.000981, -58.519573, 1.675151, 168.265152)
+
+[node name="socluB146" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.000981, 0, 0.411183, 0, 0.411184, 0, -0.411183, 0, -0.000981, -58.521534, 1.695567, 169.087524)
+
+[node name="socluB147" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.402090, 0, -0.000960, 0, 0.402091, 0, 0.000960, 0, -0.402090, -59.732391, 1.629954, 171.007797)
+
+[node name="socluB148" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.402090, 0, -0.000960, 0, 0.402091, 0, 0.000960, 0, -0.402090, -62.144932, 1.436198, 171.002045)
+
+[node name="socluB149" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.402090, 0, -0.000960, 0, 0.402091, 0, 0.000960, 0, -0.402090, -64.155380, 1.287730, 170.997238)
+
+[node name="socluB150" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.411183, 0, -0.000982, 0, 0.411184, 0, 0.000982, 0, -0.411183, -65.370743, 1.197963, 170.994339)
+
+[node name="socluB151" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.000959, 0, -0.402090, 0, 0.402091, 0, 0.402090, 0, 0.000959, -67.523224, 0.981196, 169.782928)
+
+[node name="socluB152" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.000959, 0, -0.402090, 0, 0.402091, 0, 0.402090, 0, 0.000959, -67.518425, 0.913951, 167.772476)
+
+[node name="socluB153" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.000981, 0, -0.411183, 0, 0.411184, 0, 0.411183, 0, 0.000981, -67.515526, 0.873301, 166.557114)
+
+[node name="socluB154" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.000981, 0, -0.411183, 0, 0.411184, 0, 0.411183, 0, 0.000981, -67.513565, 0.850688, 165.734756)
+
+[node name="socluB155" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.000981, 0, -0.411183, 0, 0.411184, 0, 0.411183, 0, 0.000981, -67.511597, 0.839259, 164.912384)
+
+[node name="intihuatana156" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_intihuatana")]
+transform = Transform3D(0.938552, 0, 0.345138, 0, 1.000000, 0, -0.345138, 0, 0.938552, -63.016567, 2.328830, 166.999954)
+
+[node name="trepteSoclu157" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.001002, 0, 0.419999, 0, 0.420000, 0, -0.419999, 0, -0.001002, -68.466354, 0.820010, 164.500000)
+
+[node name="casaPaie158" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_house_a")]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1.000000, 0, -1.000000, 0, 0.000000, -99.474510, -0.251382, 170.000000)
+
+[node name="casaPaieB159" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_house_a")]
+transform = Transform3D(0.650538, 0, -0.650538, 0, 0.920000, 0, 0.650538, 0, 0.650538, -76.933998, 0.385107, 131.000000)
+
+[node name="ruina160" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_house_b")]
+transform = Transform3D(0.991779, 0, 0.127964, 0, 1.000000, 0, -0.127964, 0, 0.991779, -109.451935, -0.251058, 187.271759)
+
+[node name="ruinaB161" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_inca_house_b")]
+transform = Transform3D(0.955336, 0, -0.295520, 0, 1.000000, 0, 0.295520, 0, 0.955336, -71.430023, 0.990550, 188.000000)
+
+[node name="canal162" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.997257, 0, 0.074019, 0, 1.000000, 0, -0.074019, 0, 0.997257, -116.124718, -0.315853, 138.812363)
+metadata/coliziune = "none"
+
+[node name="canal163" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.997432, 0, -0.071623, 0, 1.000000, 0, 0.071623, 0, 0.997432, -112.925629, -0.311031, 138.896332)
+metadata/coliziune = "none"
+
+[node name="canal164" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.998585, 0, -0.053180, 0, 1.000000, 0, 0.053180, 0, 0.998585, -109.572853, -0.311565, 138.653809)
+metadata/coliziune = "none"
+
+[node name="canal165" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -105.000000, -0.297161, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal166" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -101.070755, -0.289745, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal167" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -97.983498, -0.262310, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal168" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -93.089493, -0.218715, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal169" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -88.843834, -0.131023, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal170" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -85.437157, -0.063839, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal171" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -82.452240, 0.038868, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal172" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -76.933998, 0.272908, 138.500000)
+metadata/coliziune = "none"
+
+[node name="canal173" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_water_channel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -73.018394, 0.509434, 138.500000)
+metadata/coliziune = "none"
+
+[node name="fantana174" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(0.071623, 0, 0.997432, 0, 1.000000, 0, -0.997432, 0, 0.071623, -113.047386, -0.338376, 137.200684)
+
+[node name="fantana175" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1.000000, 0, -1.000000, 0, 0.000000, -97.983498, -0.280286, 136.800003)
+
+[node name="fantana176" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1.000000, 0, -1.000000, 0, 0.000000, -82.452240, 0.035968, 136.800003)
+
+[node name="lama177" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama")]
+transform = Transform3D(2.186263, 0, 2.251061, 0, 3.137996, 0, -2.251061, 0, 2.186263, -90.967003, -0.141174, 163.500000)
+metadata/coliziune = "none"
+
+[node name="lama178" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama_b")]
+transform = Transform3D(-1.584205, 0, 2.708748, 0, 3.137996, 0, -2.708748, 0, -1.584205, -85.437157, 0.020416, 165.500000)
+metadata/coliziune = "none"
+
+[node name="lama179" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama_c")]
+transform = Transform3D(-3.072160, 0, -0.639416, 0, 3.137996, 0, 0.639416, 0, -3.072160, -109.652626, -0.285828, 137.155945)
+metadata/coliziune = "none"
+
+[node name="lama180" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama")]
+transform = Transform3D(0.890131, 0, -3.009101, 0, 3.137996, 0, 3.009101, 0, 0.890131, -68.466354, 1.163864, 174.000000)
+metadata/coliziune = "none"
+
+[node name="lama181" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama_b")]
+transform = Transform3D(1.105425, 0, 2.936845, 0, 3.137996, 0, -2.936845, 0, 1.105425, -115.469902, -0.227203, 175.411194)
+metadata/coliziune = "none"
+
+[node name="quenual182" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(1.041438, 0, 0.192804, 0, 1.059135, 0, -0.192804, 0, 1.041438, -129.173767, -0.387503, 201.045380)
+
+[node name="quenual183" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.333179, 0, -0.911914, 0, 0.970874, 0, 0.911914, 0, -0.333179, -97.983498, -0.002203, 205.000000)
+
+[node name="quenual184" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(1.047745, 0, -0.070572, 0, 1.050119, 0, 0.070572, 0, 1.047745, -74.817993, 0.827676, 200.000000)
+
+[node name="quenual185" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.657363, 0, -0.879291, 0, 1.097852, 0, 0.879291, 0, 0.657363, -59.507038, 1.787271, 196.015167)
+
+[node name="bolovan186" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.515518, 0, 0.882422, 0, 1.021972, 0, -0.882422, 0, 0.515518, -118.900421, -0.360936, 176.209503)
+
+[node name="bolovan187" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.707513, 0, 0.815481, 0, 1.079622, 0, -0.815481, 0, -0.707513, -87.035439, 0.150508, 177.500000)
+
+[node name="bolovan188" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.895456, 0, -0.679644, 0, 1.124170, 0, 0.679644, 0, -0.895456, -66.880714, 1.194438, 126.000000)
+
+[node name="bolovan189" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.894603, 0, 0.473418, 0, 1.012146, 0, -0.473418, 0, -0.894603, -110.317368, -1.378026, 124.673630)
+
+[node name="accent190" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.016033, 0, 1.193526, 0, 1.193634, 0, -1.193526, 0, 0.016033, -120.723770, -0.315029, 162.385132)
+metadata/coliziune = "none"
+
+[node name="accent191" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.498146, 0, 0.996482, 0, 1.114058, 0, -0.996482, 0, 0.498146, -93.089493, -0.213039, 138.000000)
+metadata/coliziune = "none"
+
+[node name="accent192" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.630640, 0, -0.982057, 0, 1.167109, 0, 0.982057, 0, -0.630640, -71.430023, 0.634022, 162.800003)
+metadata/coliziune = "none"
+
+[node name="accent193" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-0.678015, 0, -0.933625, 0, 1.153846, 0, 0.933625, 0, -0.678015, -97.983498, -0.264629, 162.199997)
+metadata/coliziune = "none"
+
+[node name="accent194" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-0.659707, 0, 0.851205, 0, 1.076923, 0, -0.851205, 0, -0.659707, -65.085655, 1.097493, 137.500000)
+metadata/coliziune = "none"
+
+[node name="borna195" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(0.990810, 0, 0.135262, 0, 1.000000, 0, -0.135262, 0, 0.990810, -120.588509, -0.346417, 161.394318)
+metadata/coliziune = "none"
+
+[node name="borna196" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -99.474510, -0.311536, 161.500000)
+metadata/coliziune = "none"
+
+[node name="borna197" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -80.856277, 0.073322, 161.500000)
+metadata/coliziune = "none"
+
+[node name="borna198" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(0.999955, 0, 0.009517, 0, 1.000000, 0, -0.009517, 0, 0.999955, -59.178684, 1.574390, 161.516739)
+metadata/coliziune = "none"
+
 [node name="ZoneB_DrumulIncas" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneC_PoartaSoarelui" type="Node3D" parent="DecorManual"]

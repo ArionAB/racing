@@ -221,6 +221,7 @@ func _ready() -> void:
 		_ridge_punctuation()
 		_downhill_canopy()
 		_uphill_side()
+		_cornisa_umar()
 		_markers()
 		_write()
 	get_tree().quit(0)
@@ -414,6 +415,7 @@ func _gate() -> void:
 		gscl, GATE_FRAC, _curv(i), 1.0 / maxf(absf(_curv(i)), 1e-6)])
 	print(";   drum %.1f m, gol %.1f m, inaltime %.1f m, buiandrug la %.1f m peste sosea (ochiul camerei e la 10,0)" % [
 		latime, GATE_CLEAR_AT_1 * gscl, 7.5 * gscl, 6.0 * gscl - GATE_SINK])
+	_picior_contrafort(i, p, side, gscl)
 	# CONTRAFORTUL, SCOS DUPA CE probe_manual L-A MASURAT. Il pusesem ca sa
 	# sprijine vizual piciorul dinspre prapastie: cinci `inca_wall_b` coborand
 	# din talpa portii pe fata stancii. Sonda a raspuns:
@@ -434,6 +436,72 @@ func _gate() -> void:
 	# sa o rezolve nu mai exista. Cinci piese care nu se vad sunt cinci piese in
 	# plus. (Memoria refuzul-motivat-e-livrare, la scara mica.)
 
+
+## (1b) PICIORUL CARE ATARNA — a doua reclamatie a criticului, subordonata:
+## "picioarele portii se termina in aer deasupra pantei din dreapta (decupaj
+## lipit peste fundal, exact defectul de contact cu solul)".
+##
+## CONFIRMAT de masuratoarea proprie (probe_mp_c_picior.gd, la 0,2250):
+##   x local +3,70 -> +6,51 m de ax -> teren la 2,35 -> 26,95 m de AER
+##   x local +8,40 -> +14,78 m de ax -> teren la -36,85 -> 66,14 m de AER
+##
+## RUNDA 2 A GRESIT AICI, SI RECUNOSC MECANISMUL. Scosesem contrafortul cu
+## argumentul ca dupa `GATE_SINK` muchia de jos sta "in spatele dalei de drum".
+## Captura rundei 3 arata ca nu sta: camera e la 10 m si priveste IN JOS, deci
+## dala nu ascunde nimic din ce e dincolo de ea — vezi pe sub margine pana la
+## piciorul retezat. Ascunderea prin ocluzie presupunea o camera la nivelul
+## solului; camera jocului nu e acolo. (Memoria masoara-inainte-nu-langa: am
+## judecat ocluzia din alt punct decat cel din care se priveste.)
+##
+## Prima incercare de contrafort esuase din motiv opus: alegea partea dupa solul
+## de sub piciorul INTERIOR (7 m de ax), unde mai e inca munte, si ingropa cele
+## cinci piese in deal (-4,20 pana la -11,74, masurat de probe_manual). Deci:
+## un test la 7 m, o asezare la 14 m.
+##
+## Acum nu se mai deduce partea din nimic: se masoara solul CHIAR SUB coloana
+## unde va sta piesa, si coloana coboara de acolo. Daca sub ea e teren, nu se
+## pune nimic (nu e nevoie); daca e aer, se coboara pana ceata inchide silueta.
+const PICIOR_X_LOCAL := 3.70
+const PICIOR_AER_MIN := 3.0
+const PICIOR_PIESE := 6
+
+func _picior_contrafort(i: int, p: Vector3, side: Vector3, gscl: float) -> void:
+	var n := _track.baked.size()
+	var tang := _track.baked[(i + 4) % n] - _track.baked[(i - 4 + n) % n]
+	tang.y = 0.0
+	tang = tang.normalized()
+	var yaw := atan2(-tang.z, tang.x)
+	var d_picior := PICIOR_X_LOCAL * gscl
+	var total := 0
+	for sg: float in [-1.0, 1.0]:
+		var q: Vector3 = p + side * sg * d_picior
+		var gy := _sol_real(q.x, q.z)
+		var aer := p.y - gy
+		if aer < PICIOR_AER_MIN:
+			print("; picior %+.0f: teren la %.1f m sub talpa, nu are nevoie de contrafort" % [
+				sg, aer])
+			continue
+		# Coloana de zidarie sub talpa portii. Latimea piesei (6,00 m la scara
+		# 1) acopera grosimea usciorului; scara 1,0 ajunge.
+		var wscl := 1.0
+		var h_piesa := 2.487 * wscl
+		var y := p.y - GATE_SINK - h_piesa * 0.55
+		var puse := 0
+		for k in PICIOR_PIESE:
+			# Retragere spre munte: un contrafort real se ingroasa in jos, deci
+			# fiecare treapta intra cu 0,30 m spre ax. Fara asta coloana e o
+			# teava si citeste tot ca decupaj.
+			var d := d_picior - 0.30 * float(k)
+			var qk: Vector3 = p + side * sg * d
+			_raw("inca_wall_b", "piciorPoarta", Vector3(qk.x, y, qk.z),
+				yaw, wscl, "none")
+			puse += 1
+			y -= h_piesa - 0.20
+		total += puse
+		print("; picior %+.0f: %d piese sub %.1f m de aer (de la %.1f in jos)" % [
+			sg, puse, aer, p.y - GATE_SINK])
+	if total == 0:
+		print("; contrafort: niciun picior nu atarna")
 
 ## CONTRAFORTUL DE SUB PICIORUL DINSPRE PRAPASTIE.
 ##
@@ -719,9 +787,26 @@ func _condor_rock() -> void:
 	# Condorul pe capacul celei mari. Capacul e sub cota AABB (forma e
 	# rotunjita): 0,82 din inaltime, masurat pe silueta piesei.
 	var top := gy + SPIRE_H * 0.82
-	# Anvergura 6 m: la 18,9 m distanta acopera 16,7% din latimea cadrului,
-	# adica se vede ca pasare cu aripi, nu ca punct. Piesa are 1,36 m la scara 1.
-	var condor_scl := 6.0 / 1.36
+	# ANVERGURA, RUNDA 3. Criticul: "condorul e o masa gri fara aripile
+	# desfacute — problema de silueta, nu de culoare".
+	#
+	# Partea pe care NU o pot da, si o spun pe fata: piesa nu are pozitie de
+	# aripi deschise. Masuratoarea (docs/asset_briefs/machu_picchu_masuratori.md
+	# §"none") o descrie "aripi ca insule de mesh separate — fara AnimationPlayer
+	# in fisier, static, confirmat", cu gabarit 1,36 x 0,92. Nu exista actiune
+	# Open/Close de declansat si nu se modeleaza aici un asset nou. Deci aripile
+	# desfacute din bara nu se pot obtine; ce se poate obtine e ca silueta sa fie
+	# CITIBILA ca pasare in loc de pata.
+	#
+	# Doua parghii, amandoua masurabile:
+	#  - marimea unghiulara. 6,0 m la 18,9 m distanta = 16,7% din latimea
+	#    cadrului. La 8,5 m ajunge 23,7%: la rezolutia de joc diferenta dintre
+	#    "pata" si "pasare cu aripi intinse lateral" e chiar numarul de pixeli
+	#    pe care cade conturul aripii.
+	#  - fundalul. O silueta se citeste doar pe CER (vezi mai jos, SPIRE_H):
+	#    capacul stancii trebuie sa fie peste linia orizontului din cadru, altfel
+	#    pasarea sta pe iarba si orice anvergura e degeaba.
+	var condor_scl := 8.5 / 1.36
 	# PRIVIREA. Prima varianta o intorcea "spre drum" (perpendicular pe ax) si
 	# captura a aratat pasarea DIN SPATE: spinare gri si mot rosu, fara profil.
 	# Motivul, evident dupa ce l-am vazut: masina nu vine dinspre drum, vine
@@ -1050,6 +1135,118 @@ func _uphill_side() -> void:
 			k += 1
 		f += _step(11.0 + _rng.randf_range(-2.0, 2.0))
 
+
+## (6b) BANDA DE ROCA PE UMARUL STANG — reparatia cheie a rundei 3.
+##
+## VERDICTUL ORB, cuvant cu cuvant: "drumul e lipit de un versant de iarba care
+## urca continuu la stanga (ocupa ~40% din cadru) [...] Nu exista niciun element
+## de roca intre carosabil si panta: iarba atinge direct asfaltul, deci nu se
+## citeste nicio buza, nicio cadere."
+##
+## E ADEVARAT, si survey-ul spune DE CE — nu e o scapare de asezare, e teren:
+##
+##   frac     cadere la -3 m   la -8   la -15   la -25   la -40   unghi(-1)
+##   0.2100      -0,3          -0,3     -0,3     -0,6     -1,6      0,1
+##   0.2150      -0,3          -0,2     -0,2     -0,3     -1,2      0,0
+##   0.2200      -0,3          -0,2     -0,1     -0,0     -0,7      0,0
+##   0.2250      -0,3          -0,3     -0,1     -0,3     -0,2      0,0
+##   0.2300      -2,2          -2,6     -3,5     -3,8     +0,4      9,1
+##
+## Pe 0,210-0,232 partea -1 e PLATOU: 0,3 m de cadere pe 40 de metri. Capturile
+## criticului sunt exact de acolo (0,210 si 0,215). `_ridge_punctuation` cere
+## `fall >= LIP_FALL_MIN` (4 m pe 3 m) si deci sare corect peste zona — nu e
+## nimic de marcat, fiindca acolo chiar NU e muchie. Iar `_uphill_side` punea
+## bolovani improstiati la 1,6-4,2 m in iarba, cu yaw aleator: umplutura de
+## versant, nu buza. Amandoua isi faceau treaba; niciuna nu facea treaba asta.
+##
+## Traseul nu se atinge (bara e LOOK, nu layout) si terenul nu e al meu. Deci
+## muchia se CONSTRUIESTE din materie, exact ce a cerut criticul: "o banda de
+## roca stratificata pe umarul stang". Un sir continuu de `inca_wall_c`, asezat
+## pe cota drumului si aliniat pe tangenta, care taie panta de iarba la o linie
+## orizontala. Ochiul citeste linia drept buza: iarba nu mai atinge asfaltul.
+##
+## DE CE `inca_wall_c` SI NU BOLOVANI: piesa are 2,43 m, e dreptunghiulara si
+## are asize orizontale (stratificarea ceruta pe nume). Un sir de bolovani
+## rotunzi da o dantelura, nu o linie; linia e chiar mecanismul prin care se
+## citeste buza. Si e piesa de zid, deci cade in clasa `inca_stone` care exista
+## deja: banda nu costa niciun material nou.
+##
+## INALTIMEA, derivata nu aleasa. Camera: ochi la 10 m, priveste in jos cu
+## 28,75 grade. Banda trebuie sa ascunda TALPA pantei de iarba (racordul unde
+## iarba atinge drumul), nu sa devina un zid care inchide cadrul. La 1,1-1,5 m
+## peste sosea acopera racordul si ramane sub linia capotei, deci nu fura
+## priveliste. Peste ~2 m ar deveni tunel.
+##
+## PARTEA: nu se scrie "-1" in cod. Se masoara, la fiecare index, care parte e
+## cea PLATA (versantul care urca) — banda are sens doar acolo. Pe partea care
+## deja cade, `_ridge_punctuation` si-a facut treaba si un al doilea sir ar fi
+## dublura.
+const CORNISA_H_MIN := 1.10
+const CORNISA_H_MAX := 1.50
+
+## Pasul: piesa are 6,0 m lungime la scara 1; la scara de inaltime iese ~2,4 m
+## lungime efectiva pe directia drumului. Se calca 0,25 m ca sa nu se vada rost.
+const CORNISA_PAS := 2.15
+
+## Unde se opreste: dincolo de 0,2360 partea -1 incepe sa cada singura (unghi
+## 15,9 la 0,2350, 54,1 la 0,2400) si punctuatia de muchie preia. Banda e
+## PROTEZA pentru portiunea plata, nu decor permanent.
+const CORNISA_F_IN := 0.2080
+const CORNISA_F_OUT := 0.2380
+
+func _cornisa_umar() -> void:
+	var n := _track.baked.size()
+	var f := CORNISA_F_IN
+	var puse := 0
+	var k := 0
+	while f < CORNISA_F_OUT:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s_base := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		# Partea PLATA se masoara: cea pe care solul la 8 m NU a cazut.
+		var sg := 0.0
+		for cand: float in [-1.0, 1.0]:
+			var q8 := p + s_base * cand * (half + 8.0)
+			if p.y - _sol_real(q8.x, q8.z) < 2.0:
+				sg = cand
+				break
+		if sg == 0.0:
+			f += _step(CORNISA_PAS)
+			continue
+		var s := s_base * sg
+		# Tangenta: piesa se aliniaza CU drumul (anvergura pe X local urmeaza
+		# axul), ca sirul sa dea o linie continua, nu un gard de scanduri.
+		var tang := _track.baked[(i + 3) % n] - _track.baked[(i - 3 + n) % n]
+		tang.y = 0.0
+		tang = tang.normalized()
+		var yaw := atan2(-tang.z, tang.x)
+		var h := CORNISA_H_MIN + (CORNISA_H_MAX - CORNISA_H_MIN) * _rng.randf()
+		var scl := _scale_for("inca_wall_c", h)
+		# Marginea interioara a piesei sta la EDGE_KEEP dincolo de muchie:
+		# banda margineste drumul, nu intra pe el.
+		var d := half + EDGE_KEEP + WALL_HALF_THICK * scl
+		var q := p + s * d
+		# Cota: talpa la nivelul soselei minus 0,35 ca piesa sa para crescuta
+		# din umar, nu pusa peste el. Terenul de aici e plat (survey), deci
+		# cota drumului E cota umarului.
+		var y := p.y - 0.35
+		_raw("inca_wall_c", "cornisaUmar", Vector3(q.x, y, q.z), yaw, scl,
+			"none")
+		puse += 1
+		# Din loc in loc un bolovan calare pe banda, ca linia sa nu fie
+		# mecanica. Deasupra ei, nu langa: langa ar readuce dantelura.
+		if k % 4 == 2:
+			var bs := _scale_for("moss_boulder_b", _rng.randf_range(1.0, 1.5))
+			var qb := p + s * (d + 0.5)
+			_raw("moss_boulder_b", "cornisaBolovan",
+				Vector3(qb.x, y + h * 0.55, qb.z),
+				_rng.randf_range(0.0, TAU), bs, "none")
+			puse += 1
+		k += 1
+		f += _step(CORNISA_PAS)
+	print("; cornisa de umar: %d piese pe %.4f-%.4f (partea plata, masurata per index)" % [
+		puse, CORNISA_F_IN, CORNISA_F_OUT])
 
 ## (7) PARAPETUL PUNCTUAT si bornele.
 ##

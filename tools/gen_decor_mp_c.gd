@@ -1165,11 +1165,22 @@ func _uphill_side() -> void:
 ## pe cota drumului si aliniat pe tangenta, care taie panta de iarba la o linie
 ## orizontala. Ochiul citeste linia drept buza: iarba nu mai atinge asfaltul.
 ##
-## DE CE `inca_wall_c` SI NU BOLOVANI: piesa are 2,43 m, e dreptunghiulara si
-## are asize orizontale (stratificarea ceruta pe nume). Un sir de bolovani
-## rotunzi da o dantelura, nu o linie; linia e chiar mecanismul prin care se
-## citeste buza. Si e piesa de zid, deci cade in clasa `inca_stone` care exista
-## deja: banda nu costa niciun material nou.
+## DE CE PIESA DE ZID SI NU BOLOVANI: e dreptunghiulara si are asize orizontale
+## (stratificarea ceruta pe nume). Un sir de bolovani rotunzi da o dantelura, nu
+## o linie; linia e chiar mecanismul prin care se citeste buza. Si e piesa de
+## zid, deci cade in clasa `inca_stone` care exista deja: banda nu costa niciun
+## material nou.
+##
+## DE CE `inca_wall_b` SI NU `_c`, corectat dupa PRIMA captura a rundei 3.
+## Pusesem `_c` si banda a iesit un sir de CUTII cu goluri intre ele — citea a
+## baloti de paie, nu a cornisa. Cauza, din masuratori (§1): `inca_wall_c` are
+## 2,00 m lungime, nu 6,00; iar cerandu-i 1,10-1,50 m inaltime pe o piesa de
+## 2,432 m, scara iese ~0,47, deci lungimea efectiva ajunge 0,94 m — pe un pas
+## de 2,15 m. Fiecare piesa acoperea sub jumatate din pas.
+## `inca_wall_b` are 6,00 m lungime la 2,487 m inaltime: la aceeasi scara de
+## inaltime da 2,8-3,6 m de lungime efectiva, deci pasul se poate CALCULA din
+## ea in loc sa fie ghicit. (Memoria masoara-inainte-nu-langa, varianta pe
+## dimensiuni: aveam cifra in tabel si n-am citit-o.)
 ##
 ## INALTIMEA, derivata nu aleasa. Camera: ochi la 10 m, priveste in jos cu
 ## 28,75 grade. Banda trebuie sa ascunda TALPA pantei de iarba (racordul unde
@@ -1184,9 +1195,14 @@ func _uphill_side() -> void:
 const CORNISA_H_MIN := 1.10
 const CORNISA_H_MAX := 1.50
 
-## Pasul: piesa are 6,0 m lungime la scara 1; la scara de inaltime iese ~2,4 m
-## lungime efectiva pe directia drumului. Se calca 0,25 m ca sa nu se vada rost.
-const CORNISA_PAS := 2.15
+## Lungimea si inaltimea piesei, din docs/asset_briefs/machu_picchu_masuratori.md
+## §1. Pasul NU mai e o constanta ghicita: se deriva din lungimea efectiva la
+## scara ceruta, minus calcarea. Asa banda ramane continua la orice inaltime.
+const CORNISA_LEN := 6.00
+const CORNISA_PIESA_H := 2.487
+## Cat intra o piesa in urmatoarea. 0,45 m: destul cat rostul sa nu se vada din
+## camera de joc, putin cat sa nu se iroseasca piese.
+const CORNISA_CALCARE := 0.45
 
 ## Unde se opreste: dincolo de 0,2360 partea -1 incepe sa cada singura (unghi
 ## 15,9 la 0,2350, 54,1 la 0,2400) si punctuatia de muchie preia. Banda e
@@ -1212,7 +1228,7 @@ func _cornisa_umar() -> void:
 				sg = cand
 				break
 		if sg == 0.0:
-			f += _step(CORNISA_PAS)
+			f += _step(2.0)
 			continue
 		var s := s_base * sg
 		# Tangenta: piesa se aliniaza CU drumul (anvergura pe X local urmeaza
@@ -1222,16 +1238,18 @@ func _cornisa_umar() -> void:
 		tang = tang.normalized()
 		var yaw := atan2(-tang.z, tang.x)
 		var h := CORNISA_H_MIN + (CORNISA_H_MAX - CORNISA_H_MIN) * _rng.randf()
-		var scl := _scale_for("inca_wall_c", h)
+		var scl := _scale_for("inca_wall_b", h)
 		# Marginea interioara a piesei sta la EDGE_KEEP dincolo de muchie:
 		# banda margineste drumul, nu intra pe el.
 		var d := half + EDGE_KEEP + WALL_HALF_THICK * scl
 		var q := p + s * d
-		# Cota: talpa la nivelul soselei minus 0,35 ca piesa sa para crescuta
-		# din umar, nu pusa peste el. Terenul de aici e plat (survey), deci
-		# cota drumului E cota umarului.
-		var y := p.y - 0.35
-		_raw("inca_wall_c", "cornisaUmar", Vector3(q.x, y, q.z), yaw, scl,
+		# Cota: talpa INFIPTA 0,55 m sub sosea, nu asezata pe ea. Prima captura
+		# a rundei 3 arata piesele stand PESTE linia ierbii, ca niste lazi puse
+		# acolo; o cornisa iese din umar, nu se sprijina pe el. Terenul de aici
+		# e plat (survey), deci cota drumului E cota umarului si infigerea se
+		# poate socoti direct din ea.
+		var y := p.y - 0.55
+		_raw("inca_wall_b", "cornisaUmar", Vector3(q.x, y, q.z), yaw, scl,
 			"none")
 		puse += 1
 		# Din loc in loc un bolovan calare pe banda, ca linia sa nu fie
@@ -1244,7 +1262,7 @@ func _cornisa_umar() -> void:
 				_rng.randf_range(0.0, TAU), bs, "none")
 			puse += 1
 		k += 1
-		f += _step(CORNISA_PAS)
+		f += _step(maxf(CORNISA_LEN * scl - CORNISA_CALCARE, 0.8))
 	print("; cornisa de umar: %d piese pe %.4f-%.4f (partea plata, masurata per index)" % [
 		puse, CORNISA_F_IN, CORNISA_F_OUT])
 

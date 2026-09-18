@@ -934,6 +934,26 @@ const CLASSES_BY_MODEL := {
 	# `inti_punku` e Poarta Soarelui de la POI C (13,98 m).
 	"main_gate": {"Main_Gate": Palette.TRI_PREFIX + "inca_stone"},
 	"inti_punku": {"Inti_Punku": Palette.TRI_PREFIX + "inca_stone"},
+	# MASA DE PIATRA a cornisei (POI H). `huayna_picchu` a fost exportat ca
+	# silueta de ORIZONT si e pictat ca atare: slot 29 (#B8B4AC, gri pal) pe
+	# flancuri si sloturi de nisip (2 #915D27, 3 #C18446) pe restul, adica un
+	# varf palid cu tenta calda, bun la 250 m dincolo de ceata. Pus la 8 m de
+	# sosea ca PERETE al cornisei, grupul ala de culori citeste alb-portocaliu,
+	# nu granit - masurat pe captura `H_r10_f0940.png`, unde flancul iese cea
+	# mai deschisa suprafata din cadru (memoria `suprafata-palida-e-lumina`:
+	# o suprafata palida inmultita cu soarele temei devine lumina, nu piatra).
+	#
+	# Clasa `inca_stone` (alpine_granite.png) e EXACT ce trebuie si nu costa
+	# nimic: e deja clasa intregii zidarii a pistei, inclusiv a portii prin care
+	# treci, deci peretele si poarta taiata in el ies din aceeasi piatra - si e
+	# granit natural stratificat, nu asize de zid, deci nu face muntele sa para
+	# caramida (memoria `conul-e-casa-nu-stanca`). ZERO materiale noi: clasa e
+	# deja numarata in cele 19 ale pistei.
+	#
+	# Nu se rupe in accente: piesa n-are iarba pe coronament ca zidurile, iar
+	# sloturile ei verzi (12, 21) sunt petice de vegetatie pe flanc, pe care
+	# oricum le acopera vegetatia asezata de mana deasupra.
+	"huayna_picchu": {"Huayna_Picchu": Palette.TRI_PREFIX + "inca_stone"},
 	# Cornisa podului: piesa peste care sare LiftBridgeHazard, deci cea mai
 	# privita bucata de piatra din cursa. Nu se rupe (iarba e 2.5%).
 	"inca_bridge_ledge": {

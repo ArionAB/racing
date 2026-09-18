@@ -630,14 +630,30 @@ func _gate_footing(i: int, p: Vector3, side: Vector3, gscl: float) -> void:
 ## poarta ar fi ramas singura la celalalt capat. Un ansamblu rupt in doua ca sa
 ## nimereasca o fractie de judecata e exact genul de optimizare care arata bine
 ## in raport si prost in joc.
-const CONDOR_FRAC := 0.2320
+## MUTAT DE LA 0,2320 LA 0,2200 IN ACEEASI RUNDA, dupa captura. La 0,2320
+## stanca era la 2,5 miimi DUPA poarta, deci camera care vedea poarta o avea
+## exact in spatele piciorului drept, iar camera care ajungea langa ea trecea
+## prea aproape ca sa mai incapa in cadru. Se vedea stanca, nu se vedea pasarea.
+##
+## 0,2200 e INAINTEA portii (0,2250), pe umarul de 12 m masurat de
+## probe_mp_c_umar.gd — cel mai lat din tot POI-ul. Consecinte, toate in
+## directia buna:
+##  - intra in acelasi cadru cu poarta, din camerele de la 0,205-0,220, adica
+##    poarta si condorul se citesc ca UN ansamblu. Asta cere si brief-ul
+##    ("condorul pe stanca alaturata") si asta arata bara.
+##  - 12 m de umar inseamna ca stanca poate creste fara sa se apropie de banda.
+const CONDOR_FRAC := 0.2200
 
 ## Inaltimea ansamblului de stanca, in metri peste solul pe care se aseaza.
 ## 5,5: la scara 1,79 capacul de muschi al lui `moss_boulder_c` ramane capac
 ## (peste ~2,5 devine discul din incercarea (b)), iar raza siluetei ramane
 ## 3,10 m — incape pe umarul de 5,0 m masurat la 0,2320. Cu condorul deasupra
 ## ansamblul ajunge la ~10 m peste drum, adica la cota ochiului camerei.
-const SPIRE_H := 5.5
+## 7,5 in loc de 5,5: pe umarul de 12 m de la 0,2200 raza siluetei (1,73 *
+## 2,44 = 4,23 m) incape cu marja, iar ansamblul cu condorul deasupra ajunge la
+## ~12 m peste sosea. Peste ~2,5 scara capacul de muschi al lui
+## `moss_boulder_c` incepe sa domine piesa, deci 2,44 e chiar sub prag.
+const SPIRE_H := 7.5
 
 ## Distanta de la MUCHIA carosabilului la marginea siluetei stancii, spre
 ## exterior. Offsetul se aplica SILUETEI, nu centrului: centrul se aseaza la
@@ -706,11 +722,23 @@ func _condor_rock() -> void:
 	# Anvergura 6 m: la 18,9 m distanta acopera 16,7% din latimea cadrului,
 	# adica se vede ca pasare cu aripi, nu ca punct. Piesa are 1,36 m la scara 1.
 	var condor_scl := 6.0 / 1.36
-	# Privirea spre drum: asa aripile se vad din fata cand treci pe langa.
-	var to_road := (p - q)
-	to_road.y = 0.0
-	to_road = to_road.normalized()
-	var yaw := atan2(-to_road.z, to_road.x)
+	# PRIVIREA. Prima varianta o intorcea "spre drum" (perpendicular pe ax) si
+	# captura a aratat pasarea DIN SPATE: spinare gri si mot rosu, fara profil.
+	# Motivul, evident dupa ce l-am vazut: masina nu vine dinspre drum, vine
+	# dinspre COADA pistei. Un condor care se uita spre ax ii arata spatele
+	# soferului care se apropie.
+	#
+	# Se intoarce deci spre camera care vine, adica INAPOI pe tangenta, cu o
+	# abatere spre drum ca sa nu fie perfect frontal (o silueta strict din fata
+	# e mai plata decat una la trei sferturi).
+	var inapoi := _track.baked[(i - 6 + n) % n] - _track.baked[i]
+	inapoi.y = 0.0
+	inapoi = inapoi.normalized()
+	var spre_ax := (p - q)
+	spre_ax.y = 0.0
+	spre_ax = spre_ax.normalized()
+	var privire := (inapoi * 0.75 + spre_ax * 0.25).normalized()
+	var yaw := atan2(-privire.z, privire.x)
 	_raw("condor", "condor", Vector3(q.x, top, q.z), yaw, condor_scl, "none")
 	print("; stanca la frac %.4f parte %+.0f: soclu %.1f, capac %.1f (%.1f m peste drum)" % [
 		CONDOR_FRAC, sg, gy, top, top - p.y])

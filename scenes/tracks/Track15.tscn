@@ -2887,6 +2887,606 @@ scale3_list = [Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000
 
 [node name="ZoneD_Terase" type="Node3D" parent="DecorManual"]
 
+[node name="zidTerasa1" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.056140, 0, 1.003658, 0, 1.005227, 0, -1.003658, 0, -0.056140, 166.181259, -2.446030, -184.995346)
+
+[node name="zidTerasa2" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.101168, 0, 1.000123, 0, 1.005227, 0, -1.000123, 0, 0.101168, 165.260452, -2.779892, -188.129883)
+
+[node name="zidTerasa3" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.136424, 0, 1.018868, 0, 1.027961, 0, -1.018868, 0, -0.136424, 164.471222, -3.379242, -195.629700)
+
+[node name="zidTerasa4" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.167496, 0, 0.991175, 0, 1.005227, 0, -0.991175, 0, -0.167496, 166.064728, -2.516068, -198.338791)
+
+[node name="zidTerasa5" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.215321, 0, 0.981895, 0, 1.005227, 0, -0.981895, 0, -0.215321, 164.051224, -3.846359, -204.480316)
+
+[node name="zidTerasa6" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.468627, 0, 0.914927, 0, 1.027961, 0, -0.914927, 0, -0.468627, 161.395218, -5.531815, -209.830170)
+
+[node name="zidTerasa7" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.621247, 0, 0.790274, 0, 1.005227, 0, -0.790274, 0, -0.621247, 161.178696, -5.301056, -214.024261)
+
+[node name="zidTerasaSus8" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.101168, 0, 1.000123, 0, 1.005227, 0, -1.000123, 0, 0.101168, 167.543976, -1.743561, -187.898895)
+
+[node name="zidTerasaSus9" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.167496, 0, 0.991175, 0, 1.005227, 0, -0.991175, 0, -0.167496, 167.844330, -1.392227, -198.639511)
+
+[node name="zidTerasaSus10" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.165660, 0, 1.014524, 0, 1.027961, 0, -1.014524, 0, -0.165660, 169.238205, -0.330124, -202.905685)
+
+[node name="zidTerasaSus11" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.215321, 0, 0.981895, 0, 1.005227, 0, -0.981895, 0, -0.215321, 169.223495, -0.209061, -205.614548)
+
+[node name="zidTerasaSus12" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.621247, 0, 0.790274, 0, 1.005227, 0, -0.790274, 0, -0.621247, 172.031570, -0.422607, -222.555878)
+
+[node name="zidTerasa13" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.927821, 0, -0.386820, 0, 1.005227, 0, 0.386820, 0, -0.927821, 144.218292, -6.161087, -198.881348)
+
+[node name="zidTerasa14" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.594882, 0, -0.810307, 0, 1.005227, 0, 0.810307, 0, -0.594882, 144.270355, -6.364120, -200.834656)
+
+[node name="zidTerasa15" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.187306, 0, -1.010752, 0, 1.027961, 0, 1.010752, 0, -0.187306, 143.366684, -6.747147, -201.563309)
+
+[node name="zidTerasa16" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.132713, 0, -0.996428, 0, 1.005227, 0, 0.996428, 0, -0.132713, 143.590286, -6.530090, -200.397491)
+
+[node name="zidTerasa17" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.112836, 0, -0.998874, 0, 1.005227, 0, 0.998874, 0, -0.112836, 143.333572, -6.486710, -194.737244)
+
+[node name="zidTerasa18" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.077561, 0, -1.025030, 0, 1.027961, 0, 1.025030, 0, 0.077561, 142.178848, -6.899155, -192.916946)
+
+[node name="zidTerasa19" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.107267, 0, -0.999488, 0, 1.005227, 0, 0.999488, 0, 0.107267, 144.394119, -5.709457, -190.235672)
+
+[node name="zidTerasa20" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.179282, 0, -0.989110, 0, 1.005227, 0, 0.989110, 0, -0.179282, 143.419693, -6.053528, -181.989502)
+
+[node name="zidTerasa21" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.242576, 0, -0.998929, 0, 1.027961, 0, 0.998929, 0, -0.242576, 141.517471, -7.359207, -177.547638)
+
+[node name="zidTerasa22" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.272131, 0, -0.967691, 0, 1.005227, 0, 0.967691, 0, -0.272131, 142.842407, -6.337662, -174.789963)
+
+[node name="zidTerasa23" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.731639, 0, -0.689337, 0, 1.005227, 0, 0.689337, 0, -0.731639, 136.168411, -9.842117, -164.074738)
+
+[node name="zidTerasa24" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.951343, 0, -0.389421, 0, 1.027961, 0, 0.389421, 0, -0.951343, 129.851013, -10.505295, -160.811279)
+
+[node name="zidTerasa25" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.979319, 0, -0.226752, 0, 1.005227, 0, 0.226752, 0, -0.979319, 127.110382, -10.733398, -157.757538)
+
+[node name="zidTerasaSus26" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.594882, 0, -0.810307, 0, 1.005227, 0, 0.810307, 0, -0.594882, 143.702209, -6.599838, -201.251770)
+
+[node name="zidTerasaSus27" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.132713, 0, -0.996428, 0, 1.005227, 0, 0.996428, 0, -0.132713, 143.892441, -6.427261, -200.357254)
+
+[node name="zidTerasaSus28" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.149254, 0, -1.017067, 0, 1.027961, 0, 1.017067, 0, -0.149254, 143.939758, -6.331497, -196.421387)
+
+[node name="zidTerasaSus29" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.112836, 0, -0.998874, 0, 1.005227, 0, 0.998874, 0, -0.112836, 144.123718, -6.092072, -194.647980)
+
+[node name="zidTerasaSus30" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.107267, 0, -0.999488, 0, 1.005227, 0, 0.999488, 0, 0.107267, 144.697205, -5.558899, -190.268204)
+
+[node name="zidTerasaSus31" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.061381, 0, -1.026126, 0, 1.027961, 0, 1.026126, 0, -0.061381, 144.033707, -5.714600, -185.065140)
+
+[node name="zidTerasaSus32" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.179282, 0, -0.989110, 0, 1.005227, 0, 0.989110, 0, -0.179282, 145.678070, -4.564651, -181.580154)
+
+[node name="zidTerasaSus33" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.272131, 0, -0.967691, 0, 1.005227, 0, 0.967691, 0, -0.272131, 147.467804, -4.252121, -173.489212)
+
+[node name="zidTerasaSus34" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.600778, 0, -0.834127, 0, 1.027961, 0, 0.834127, 0, -0.600778, 149.692261, -4.842606, -158.805405)
+
+[node name="zidTerasaSus35" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.731639, 0, -0.689337, 0, 1.005227, 0, 0.689337, 0, -0.731639, 147.000000, -6.023407, -152.578461)
+
+[node name="zidTerasa36" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.775305, 0, 0.639831, 0, 1.005227, 0, -0.639831, 0, -0.775305, 122.272972, -10.111908, -180.699799)
+
+[node name="zidTerasa37" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.167431, 0, 0.991185, 0, 1.005227, 0, -0.991185, 0, -0.167431, 121.848755, -10.444824, -178.383072)
+
+[node name="zidTerasa38" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.041099, 0, 1.027139, 0, 1.027961, 0, -1.027139, 0, -0.041099, 120.654625, -10.359863, -180.148849)
+
+[node name="zidTerasa39" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.046087, 0, 1.004170, 0, 1.005227, 0, -1.004170, 0, -0.046087, 122.523468, -9.915314, -182.114594)
+
+[node name="zidTerasa40" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.038847, 0, 1.004476, 0, 1.005227, 0, -1.004476, 0, 0.038847, 121.130020, -9.748642, -187.351013)
+
+[node name="zidTerasa41" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.117652, 0, 1.021206, 0, 1.027961, 0, -1.021206, 0, 0.117652, 120.606194, -9.818527, -191.720215)
+
+[node name="zidTerasa42" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.031618, 0, 1.004730, 0, 1.005227, 0, -1.004730, 0, 0.031618, 122.792694, -8.988144, -194.064880)
+
+[node name="zidTerasa43" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.306641, 0, 0.957315, 0, 1.005227, 0, -0.957315, 0, -0.306641, 120.704857, -9.579361, -203.105911)
+
+[node name="zidTerasa44" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.496105, 0, 0.900323, 0, 1.027961, 0, -0.900323, 0, -0.496105, 117.033386, -12.383972, -210.013702)
+
+[node name="zidTerasa45" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.594417, 0, 0.810648, 0, 1.005227, 0, -0.810648, 0, -0.594417, 117.092552, -12.328827, -213.727982)
+
+[node name="zidTerasa46" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.924154, 0, 0.395502, 0, 1.005227, 0, -0.395502, 0, -0.924154, 108.362541, -14.088577, -220.005814)
+
+[node name="zidTerasaSus47" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.167431, 0, 0.991185, 0, 1.005227, 0, -0.991185, 0, -0.167431, 121.153770, -10.546036, -178.265671)
+
+[node name="zidTerasaSus48" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.046087, 0, 1.004170, 0, 1.005227, 0, -1.004170, 0, -0.046087, 122.827972, -9.900818, -182.128571)
+
+[node name="zidTerasaSus49" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.062595, 0, 1.026053, 0, 1.027961, 0, -1.026053, 0, -0.062595, 123.091347, -9.489548, -186.481064)
+
+[node name="zidTerasaSus50" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.038847, 0, 1.004476, 0, 1.005227, 0, -1.004476, 0, 0.038847, 123.423477, -9.413132, -187.262314)
+
+[node name="zidTerasaSus51" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.031618, 0, 1.004730, 0, 1.005227, 0, -1.004730, 0, 0.031618, 123.097366, -8.966644, -194.055283)
+
+[node name="zidTerasaSus52" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.237066, 0, 1.000251, 0, 1.027961, 0, -1.000251, 0, -0.237066, 123.189766, -8.695358, -200.784515)
+
+[node name="zidTerasaSus53" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.306641, 0, 0.957315, 0, 1.005227, 0, -0.957315, 0, -0.306641, 124.319138, -8.533325, -204.263611)
+
+[node name="zidTerasaSus54" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.594417, 0, 0.810648, 0, 1.005227, 0, -0.810648, 0, -0.594417, 128.225220, -8.582581, -221.891129)
+
+[node name="zidTerasa55" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.924522, 0, -0.394640, 0, 1.005227, 0, 0.394640, 0, -0.924522, 100.651718, -15.380142, -198.996063)
+
+[node name="zidTerasa56" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.564414, 0, -0.831817, 0, 1.005227, 0, 0.831817, 0, -0.564414, 99.460503, -15.799133, -199.876633)
+
+[node name="zidTerasa57" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.230097, 0, -1.001877, 0, 1.027961, 0, 1.001877, 0, -0.230097, 98.577713, -15.831390, -200.976837)
+
+[node name="zidTerasa58" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.088932, 0, -1.001286, 0, 1.005227, 0, 1.001286, 0, -0.088932, 100.393829, -15.579300, -200.703476)
+
+[node name="zidTerasa59" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.003906, 0, -1.005220, 0, 1.005227, 0, 1.005220, 0, 0.003906, 99.331818, -15.895645, -196.801285)
+
+[node name="zidTerasa60" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.016463, 0, -1.027829, 0, 1.027961, 0, 1.027829, 0, -0.016463, 98.166489, -16.610794, -190.373825)
+
+[node name="zidTerasa61" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.022229, 0, -1.004981, 0, 1.005227, 0, 1.004981, 0, 0.022229, 100.082260, -15.864624, -189.017288)
+
+[node name="zidTerasa62" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.032725, 0, -1.004694, 0, 1.005227, 0, 1.004694, 0, 0.032725, 99.265167, -16.555817, -184.522766)
+
+[node name="zidTerasa63" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.040021, 0, -1.027181, 0, 1.027961, 0, 1.027181, 0, -0.040021, 98.364113, -17.211731, -180.346069)
+
+[node name="zidTerasa64" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.008974, 0, -1.005187, 0, 1.005227, 0, 1.005187, 0, 0.008974, 100.166115, -16.330002, -176.594223)
+
+[node name="zidTerasa65" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.062752, 0, -1.003267, 0, 1.005227, 0, 1.003267, 0, -0.062752, 99.210960, -17.122223, -170.576477)
+
+[node name="zidTerasa66" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.291256, 0, -0.985836, 0, 1.027961, 0, 0.985836, 0, -0.291256, 97.505875, -18.060776, -165.269821)
+
+[node name="zidTerasa67" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.399047, 0, -0.922629, 0, 1.005227, 0, 0.922629, 0, -0.399047, 98.386620, -17.712646, -161.697662)
+
+[node name="zidTerasa68" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.706089, 0, -0.715485, 0, 1.005227, 0, 0.715485, 0, -0.706089, 91.606094, -18.845871, -152.484833)
+
+[node name="zidTerasaSus69" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.564414, 0, -0.831817, 0, 1.005227, 0, 0.831817, 0, -0.564414, 100.118500, -15.570557, -199.430161)
+
+[node name="zidTerasaSus70" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.088932, 0, -1.001286, 0, 1.005227, 0, 1.001286, 0, -0.088932, 99.203346, -15.787903, -200.809219)
+
+[node name="zidTerasaSus71" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.020848, 0, -1.027749, 0, 1.027961, 0, 1.027749, 0, 0.020848, 101.141739, -15.242554, -198.822342)
+
+[node name="zidTerasaSus72" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.003906, 0, -1.005220, 0, 1.005227, 0, 1.005220, 0, 0.003906, 101.626976, -15.209137, -196.810196)
+
+[node name="zidTerasaSus73" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.022229, 0, -1.004981, 0, 1.005227, 0, 1.004981, 0, 0.022229, 100.387009, -15.729156, -189.024017)
+
+[node name="zidTerasaSus74" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.051843, 0, -1.026652, 0, 1.027961, 0, 1.026652, 0, 0.051843, 101.027771, -15.643784, -186.316498)
+
+[node name="zidTerasaSus75" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.032725, 0, -1.004694, 0, 1.005227, 0, 1.004694, 0, 0.032725, 101.559120, -15.262909, -184.597488)
+
+[node name="zidTerasaSus76" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.032330, 0, -1.004707, 0, 1.005227, 0, 1.004707, 0, -0.032330, 102.033348, -15.099487, -178.183426)
+
+[node name="zidTerasaSus77" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.002174, 0, -1.027958, 0, 1.027961, 0, 1.027958, 0, 0.002174, 102.578506, -14.636581, -172.903214)
+
+[node name="zidTerasaSus78" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.062752, 0, -1.003267, 0, 1.005227, 0, 1.003267, 0, -0.062752, 102.998734, -14.339676, -170.339569)
+
+[node name="zidTerasaSus79" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.399047, 0, -0.922629, 0, 1.005227, 0, 0.922629, 0, -0.399047, 111.057114, -12.608063, -156.217529)
+
+[node name="zidTerasaSus80" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.630371, 0, -0.811994, 0, 1.027961, 0, 0.811994, 0, -0.630371, 104.378479, -15.278488, -146.224411)
+
+[node name="scaraUrcare81" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.055127, 0, -0.998479, 0, 1.000000, 0, 0.998479, 0, -0.055127, 165.018280, -3.088821, -190.225677)
+
+[node name="scaraUrcare82" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.148092, 0, -0.988974, 0, 1.000000, 0, 0.988974, 0, 0.148092, 164.327515, -3.620346, -199.990646)
+
+[node name="scaraUrcare83" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.148092, 0, -0.988974, 0, 1.000000, 0, 0.988974, 0, 0.148092, 167.294449, -1.695923, -200.434921)
+
+[node name="scaraUrcare84" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.618017, 0, -0.786165, 0, 1.000000, 0, 0.786165, 0, 0.618017, 160.049942, -5.400818, -213.136917)
+
+[node name="scaraUrcare85" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.106709, 0, -0.994290, 0, 1.000000, 0, 0.994290, 0, 0.106709, 142.966537, -6.418564, -190.082458)
+
+[node name="scaraUrcare86" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.584437, 0, -0.811439, 0, 1.000000, 0, 0.811439, 0, -0.584437, 138.097092, -9.671387, -167.156799)
+
+[node name="scaraUrcare87" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.584437, 0, -0.811439, 0, 1.000000, 0, 0.811439, 0, -0.584437, 140.531418, -7.904678, -165.403488)
+
+[node name="scaraUrcare88" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.039981, 0, -0.999200, 0, 1.000000, 0, 0.999200, 0, 0.039981, 121.164581, -10.294266, -180.169250)
+
+[node name="scaraUrcare89" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.114452, 0, -0.993429, 0, 1.000000, 0, 0.993429, 0, -0.114452, 121.113205, -9.569077, -191.661804)
+
+[node name="scaraUrcare90" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.398209, 0, -0.917295, 0, 1.000000, 0, 0.917295, 0, 0.398209, 118.632805, -11.105591, -207.725250)
+
+[node name="scaraUrcare91" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.398209, 0, -0.917295, 0, 1.000000, 0, 0.917295, 0, 0.398209, 121.384689, -9.378159, -208.919876)
+
+[node name="scaraUrcare92" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.088470, 0, -0.996079, 0, 1.000000, 0, 0.996079, 0, -0.088470, 98.963676, -15.809937, -200.830505)
+
+[node name="scaraUrcare93" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.050433, 0, -0.998727, 0, 1.000000, 0, 0.998727, 0, 0.050433, 98.741043, -16.664978, -186.201019)
+
+[node name="scaraUrcare94" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.050433, 0, -0.998727, 0, 1.000000, 0, 0.998727, 0, 0.050433, 101.737228, -15.279587, -186.352325)
+
+[node name="scaraUrcare95" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.163951, 0, -0.986469, 0, 1.000000, 0, 0.986469, 0, -0.163951, 98.549782, -17.702347, -167.967056)
+
+[node name="scaraUrcare96" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(-0.163951, 0, -0.986469, 0, 1.000000, 0, 0.986469, 0, -0.163951, 101.509186, -15.431580, -167.475204)
+
+[node name="scara97" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(-0.591789, 0, -0.806093, 0, 1.000000, 0, 0.806093, 0, -0.591789, 123.924080, -9.147476, -215.771774)
+
+[node name="scara98" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(-0.591789, 0, -0.806093, 0, 1.000000, 0, 0.806093, 0, -0.591789, 119.087517, -11.732132, -219.322495)
+
+[node name="canal99" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.038684, 0, 0.999251, 0, 1.000000, 0, -0.999251, 0, 0.038684, 163.468323, -3.455692, -185.711212)
+metadata/coliziune = "none"
+
+[node name="canal100" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.100642, 0, 0.994923, 0, 1.000000, 0, -0.994923, 0, 0.100642, 163.638123, -3.591769, -188.293991)
+metadata/coliziune = "none"
+
+[node name="canal101" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.029296, 0, 0.999571, 0, 1.000000, 0, -0.999571, 0, -0.029296, 163.931259, -3.577213, -192.744781)
+metadata/coliziune = "none"
+
+[node name="canal102" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.148092, 0, 0.988974, 0, 1.000000, 0, -0.988974, 0, -0.148092, 163.150635, -4.333713, -199.814407)
+metadata/coliziune = "none"
+
+[node name="canal103" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.214201, 0, 0.976790, 0, 1.000000, 0, -0.976790, 0, -0.214201, 162.458466, -4.941638, -204.131042)
+metadata/coliziune = "none"
+
+[node name="canal104" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.455881, 0, 0.890041, 0, 1.000000, 0, -0.890041, 0, -0.455881, 160.790314, -5.525790, -209.520325)
+metadata/coliziune = "none"
+
+[node name="canal105" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.762645, 0, 0.646818, 0, 1.000000, 0, -0.646818, 0, -0.762645, 156.837006, -5.846164, -214.984894)
+metadata/coliziune = "none"
+
+[node name="canal106" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.849499, 0, -0.527590, 0, 1.000000, 0, 0.527590, 0, -0.849499, 142.991714, -6.791995, -201.349091)
+metadata/coliziune = "none"
+
+[node name="canal107" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.591789, 0, -0.806093, 0, 1.000000, 0, 0.806093, 0, -0.591789, 142.955933, -6.859469, -201.799637)
+metadata/coliziune = "none"
+
+[node name="canal108" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.182212, 0, -0.983259, 0, 1.000000, 0, 0.983259, 0, -0.182212, 142.698425, -6.928882, -201.687149)
+metadata/coliziune = "none"
+
+[node name="canal109" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.122603, 0, -0.992456, 0, 1.000000, 0, 0.992456, 0, -0.122603, 142.249557, -6.750216, -198.861588)
+metadata/coliziune = "none"
+
+[node name="canal110" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.112250, 0, -0.993680, 0, 1.000000, 0, 0.993680, 0, -0.112250, 141.713272, -7.245883, -194.920273)
+metadata/coliziune = "none"
+
+[node name="canal111" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.075451, 0, -0.997150, 0, 1.000000, 0, 0.997150, 0, 0.075451, 141.501144, -7.176852, -192.865662)
+metadata/coliziune = "none"
+
+[node name="canal112" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.043104, 0, -0.999071, 0, 1.000000, 0, 0.999071, 0, 0.043104, 141.995941, -6.989718, -187.791229)
+metadata/coliziune = "none"
+
+[node name="canal113" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.178350, 0, -0.983967, 0, 1.000000, 0, 0.983967, 0, -0.178350, 141.815216, -6.960269, -182.280319)
+metadata/coliziune = "none"
+
+[node name="canal114" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.235978, 0, -0.971758, 0, 1.000000, 0, 0.971758, 0, -0.235978, 140.857025, -7.781466, -177.708023)
+metadata/coliziune = "none"
+
+[node name="canal115" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.340340, 0, -0.940302, 0, 1.000000, 0, 0.940302, 0, -0.340340, 139.619049, -8.559756, -173.122162)
+metadata/coliziune = "none"
+
+[node name="canal116" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.584437, 0, -0.811439, 0, 1.000000, 0, 0.811439, 0, -0.584437, 137.131485, -9.849643, -167.852280)
+metadata/coliziune = "none"
+
+[node name="canal117" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.925467, 0, -0.378829, 0, 1.000000, 0, 0.378829, 0, -0.925467, 129.593552, -10.462665, -161.440262)
+metadata/coliziune = "none"
+
+[node name="canal118" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.997499, 0, -0.070674, 0, 1.000000, 0, 0.070674, 0, -0.997499, 123.361748, -10.860232, -159.705841)
+metadata/coliziune = "none"
+
+[node name="canal119" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.651096, 0, 0.758995, 0, 1.000000, 0, -0.758995, 0, -0.651096, 120.390945, -10.537616, -178.665039)
+metadata/coliziune = "none"
+
+[node name="canal120" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.166560, 0, 0.986031, 0, 1.000000, 0, -0.986031, 0, -0.166560, 120.240921, -10.629001, -178.111481)
+metadata/coliziune = "none"
+
+[node name="canal121" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.039981, 0, 0.999200, 0, 1.000000, 0, -0.999200, 0, -0.039981, 119.975533, -10.397235, -180.121674)
+metadata/coliziune = "none"
+
+[node name="canal122" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.085030, 0, 0.996378, 0, 1.000000, 0, -0.996378, 0, -0.085030, 119.785049, -10.394305, -184.346771)
+metadata/coliziune = "none"
+
+[node name="canal123" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.038645, 0, 0.999253, 0, 1.000000, 0, -0.999253, 0, 0.038645, 119.500626, -10.242145, -187.414017)
+metadata/coliziune = "none"
+
+[node name="canal124" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.114452, 0, 0.993429, 0, 1.000000, 0, -0.993429, 0, 0.114452, 119.931023, -10.100665, -191.798004)
+metadata/coliziune = "none"
+
+[node name="canal125" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.092899, 0, 0.995676, 0, 1.000000, 0, -0.995676, 0, -0.092899, 120.181694, -9.775287, -196.940643)
+metadata/coliziune = "none"
+
+[node name="canal126" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.305047, 0, 0.952337, 0, 1.000000, 0, -0.952337, 0, -0.305047, 119.151962, -10.458270, -202.608505)
+metadata/coliziune = "none"
+
+[node name="canal127" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.398209, 0, 0.917295, 0, 1.000000, 0, -0.917295, 0, -0.398209, 117.541222, -11.740802, -207.251389)
+metadata/coliziune = "none"
+
+[node name="canal128" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.713973, 0, 0.700173, 0, 1.000000, 0, -0.700173, 0, -0.713973, 113.031456, -14.066623, -214.611893)
+metadata/coliziune = "none"
+
+[node name="canal129" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.919348, 0, 0.393446, 0, 1.000000, 0, -0.393446, 0, -0.919348, 107.720985, -14.188312, -218.506714)
+metadata/coliziune = "none"
+
+[node name="canal130" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.853482, 0, -0.521122, 0, 1.000000, 0, 0.521122, 0, -0.853482, 99.293762, -15.657458, -201.380646)
+metadata/coliziune = "none"
+
+[node name="canal131" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.561479, 0, -0.827491, 0, 1.000000, 0, 0.827491, 0, -0.561479, 98.111183, -15.848254, -200.792191)
+metadata/coliziune = "none"
+
+[node name="canal132" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.223839, 0, -0.974626, 0, 1.000000, 0, 0.974626, 0, -0.223839, 97.915321, -15.813632, -201.128967)
+metadata/coliziune = "none"
+
+[node name="canal133" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.007412, 0, -0.999973, 0, 1.000000, 0, 0.999973, 0, -0.007412, 97.676872, -15.944369, -200.151047)
+metadata/coliziune = "none"
+
+[node name="canal134" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.003886, 0, -0.999992, 0, 1.000000, 0, 0.999992, 0, 0.003886, 97.701218, -16.216984, -196.794937)
+metadata/coliziune = "none"
+
+[node name="canal135" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.016015, 0, -0.999872, 0, 1.000000, 0, 0.999872, 0, -0.016015, 97.486931, -16.597980, -190.384720)
+metadata/coliziune = "none"
+
+[node name="canal136" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.046771, 0, -0.998906, 0, 1.000000, 0, 0.998906, 0, 0.046771, 97.484200, -16.802097, -187.602280)
+metadata/coliziune = "none"
+
+[node name="canal137" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.032555, 0, -0.999470, 0, 1.000000, 0, 0.999470, 0, 0.032555, 97.635414, -17.023167, -184.469681)
+metadata/coliziune = "none"
+
+[node name="canal138" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.038933, 0, -0.999242, 0, 1.000000, 0, 0.999242, 0, -0.038933, 97.684990, -17.302402, -180.372528)
+metadata/coliziune = "none"
+
+[node name="canal139" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(0.008927, 0, -0.999960, 0, 1.000000, 0, 0.999960, 0, 0.008927, 97.540436, -17.559788, -176.570786)
+metadata/coliziune = "none"
+
+[node name="canal140" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.062426, 0, -0.998050, 0, 1.000000, 0, 0.998050, 0, -0.062426, 97.583527, -17.853275, -170.678268)
+metadata/coliziune = "none"
+
+[node name="canal141" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.283333, 0, -0.959021, 0, 1.000000, 0, 0.959021, 0, -0.283333, 96.854088, -18.117771, -165.462387)
+metadata/coliziune = "none"
+
+[node name="canal142" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.470037, 0, -0.882647, 0, 1.000000, 0, 0.882647, 0, -0.470037, 94.871239, -18.315784, -160.263947)
+metadata/coliziune = "none"
+
+[node name="canal143" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_water_channel")]
+transform = Transform3D(-0.613225, 0, -0.789908, 0, 1.000000, 0, 0.789908, 0, -0.613225, 92.150986, -18.727345, -155.716904)
+metadata/coliziune = "none"
+
+[node name="fantana144" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 121.867874, -10.442017, -178.386307)
+metadata/coliziune = "none"
+
+[node name="fantana145" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 122.526962, -10.325699, -178.994614)
+metadata/coliziune = "none"
+
+[node name="fantana146" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 123.147018, -9.885605, -182.143219)
+metadata/coliziune = "none"
+
+[node name="fantana147" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 123.660652, -9.463989, -186.515793)
+metadata/coliziune = "none"
+
+[node name="fantana148" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 124.347000, -9.379120, -187.226593)
+metadata/coliziune = "none"
+
+[node name="fantana149" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 125.266129, -9.185791, -189.164383)
+metadata/coliziune = "none"
+
+[node name="fantana150" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 126.615013, -8.774200, -193.944580)
+metadata/coliziune = "none"
+
+[node name="fantana151" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 127.400345, -8.518707, -197.614151)
+metadata/coliziune = "none"
+
+[node name="fantana152" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 99.523453, -15.761154, -200.759628)
+metadata/coliziune = "none"
+
+[node name="fantana153" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 100.218735, -15.632736, -200.719040)
+metadata/coliziune = "none"
+
+[node name="fantana154" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 100.912148, -15.311462, -198.817688)
+metadata/coliziune = "none"
+
+[node name="fantana155" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 101.744667, -15.254456, -194.168335)
+metadata/coliziune = "none"
+
+[node name="fantana156" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 102.435501, -14.737732, -191.787659)
+metadata/coliziune = "none"
+
+[node name="fantana157" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 103.105736, -14.520676, -189.084152)
+metadata/coliziune = "none"
+
+[node name="fantana158" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 103.994354, -13.966888, -186.466293)
+metadata/coliziune = "none"
+
+[node name="fantana159" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_fountain_basin")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, 104.942726, -13.218979, -182.549576)
+metadata/coliziune = "none"
+
+[node name="lama160" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama")]
+transform = Transform3D(1.226477, 0, 2.292543, 0, 2.600000, 0, -2.292543, 0, 1.226477, 169.746109, -0.853088, -189.964645)
+metadata/coliziune = "none"
+
+[node name="lama161" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama_b")]
+transform = Transform3D(0.201181, 0, 2.592205, 0, 2.600000, 0, -2.592205, 0, 0.201181, 169.357697, -0.252548, -202.925186)
+metadata/coliziune = "none"
+
+[node name="lama162" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama_c")]
+transform = Transform3D(1.434819, 0, -2.168247, 0, 2.600000, 0, 2.168247, 0, 1.434819, 164.397568, -3.648209, -216.554672)
+metadata/coliziune = "none"
+
+[node name="lama163" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama")]
+transform = Transform3D(-2.596627, 0, -0.132397, 0, 2.600000, 0, 0.132397, 0, -2.596627, 149.045105, -5.695740, -200.511017)
+metadata/coliziune = "none"
+
+[node name="lama164" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama_b")]
+transform = Transform3D(-2.145862, 0, 1.468085, 0, 2.600000, 0, -1.468085, 0, -2.145862, 152.713104, -4.758698, -188.253601)
+metadata/coliziune = "none"
+
+[node name="lama165" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama_c")]
+transform = Transform3D(0.807758, 0, -2.471341, 0, 2.600000, 0, 2.471341, 0, 0.807758, 145.354095, -5.628998, -161.929962)
+metadata/coliziune = "none"
+
+[node name="lama166" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama")]
+transform = Transform3D(0.650866, 0, -2.517216, 0, 2.600000, 0, 2.517216, 0, 0.650866, 127.525040, -9.910568, -180.423752)
+metadata/coliziune = "none"
+
+[node name="lama167" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama_b")]
+transform = Transform3D(2.262758, 0, 1.280596, 0, 2.600000, 0, -1.280596, 0, 2.262758, 131.873260, -8.902161, -190.422150)
+metadata/coliziune = "none"
+
+[node name="lama168" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama_c")]
+transform = Transform3D(1.079566, 0, 2.365278, 0, 2.600000, 0, -2.365278, 0, 1.079566, 124.276695, -8.920395, -214.004990)
+metadata/coliziune = "none"
+
+[node name="lama169" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama")]
+transform = Transform3D(-1.411313, 0, 2.183620, 0, 2.600000, 0, -2.183620, 0, -1.411313, 105.854782, -12.759293, -184.737411)
+metadata/coliziune = "none"
+
+[node name="lama170" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_llama_b")]
+transform = Transform3D(-2.591173, 0, -0.214067, 0, 2.600000, 0, 0.214067, 0, -2.591173, 106.445328, -12.467209, -162.628754)
+metadata/coliziune = "none"
+
+[node name="casaTeraseB171" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_inca_house_b")]
+transform = Transform3D(0.870254, 0, -1.096658, 0, 1.400000, 0, 1.096658, 0, 0.870254, 52.762047, -18.563065, -187.970596)
+
+[node name="bolovan172" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.356962, 0, -0.934119, 0, 1.000000, 0, 0.934119, 0, -0.356962, 150.961411, -4.255371, -164.372787)
+
+[node name="quenual173" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.387425, 0, -1.022409, 0, 1.093352, 0, 1.022409, 0, -0.387425, 99.794144, -16.379883, -153.461441)
+metadata/coliziune = "trunk"
+
+[node name="quenual174" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-1.490951, 0, 0.958810, 0, 1.772639, 0, -0.958810, 0, -1.490951, 78.227074, -17.109161, -189.010239)
+metadata/coliziune = "trunk"
+
+[node name="quenual175" parent="DecorManual/ZoneD_Terase" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.139864, 0, 1.007581, 0, 1.017242, 0, -1.007581, 0, 0.139864, 63.547840, -17.862152, -186.013306)
+metadata/coliziune = "trunk"
+
 [node name="ZoneE_Pod" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneF_MalulRaului" type="Node3D" parent="DecorManual"]

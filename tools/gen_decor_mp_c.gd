@@ -222,6 +222,7 @@ func _ready() -> void:
 		_downhill_canopy()
 		_uphill_side()
 		_cornisa_umar()
+		_fata_de_stanca()
 		_markers()
 		_write()
 	get_tree().quit(0)
@@ -1265,6 +1266,93 @@ func _cornisa_umar() -> void:
 		f += _step(maxf(CORNISA_LEN * scl - CORNISA_CALCARE, 0.8))
 	print("; cornisa de umar: %d piese pe %.4f-%.4f (partea plata, masurata per index)" % [
 		puse, CORNISA_F_IN, CORNISA_F_OUT])
+
+## (6c) FATA DE STANCA SUB BUZA — a doua jumatate a reclamatiei "cadere vizibila
+## sub ea".
+##
+## `probe_mp_c_unghi.gd` a aratat ca pe 0,24-0,33 terenul CADE din ochi (56-63
+## grade la 10 m lateral pe partea -1). Geometria e creasta. Si totusi captura
+## de la 0,24 citeste a pajiste, fiindca fata rapei si versantul de dincolo
+## (la 80 m) sunt aceeasi IARBA de aceeasi culoare, fara nimic intre ele: ochiul
+## uneste doua suprafete continue intr-un singur deal.
+##
+## Deci nu lipseste caderea, lipseste CONTRASTUL care o face citibila. Se pune
+## roca pe fata de sub buza — nu pe umar, unde ar fi parapet, ci la 5-11 m sub
+## cota drumului, exact fasia pe care ochiul o parcurge cand se uita peste
+## margine. O fasie de piatra intre iarba de sus si iarba de jos separa cele
+## doua suprafete, si abia atunci caderea are doua maluri.
+##
+## Piesele au `none`: sunt sub cota drumului, pe fata peretelui, deci nu pot fi
+## obstacol — iar un corp acolo ar fi doar cost. Se scriu prin `_raw`, nu prin
+## `_place`, fiindca garda de plutire a lui `_place` compara cu cota SOSELEI si
+## le-ar refuza pe toate — rostul lor e chiar sa stea 5-11 m sub ea. Sprijinul
+## nu se pierde totusi: cota laterala se cauta pana unde terenul chiar ajunge la
+## adancimea ceruta, deci piesa se aseaza pe perete, nu langa el.
+const FATA_F_IN := 0.2360
+const FATA_F_OUT := 0.3600
+const FATA_PAS := 13.0
+## Adancimea sub sosea la care se agata piesele. 5-11 m: sub buza (deci nu
+## ascund drumul) dar in treimea de sus a peretelui, singura care se vede din
+## camera — mai jos intra in ceata si nu mai cumpara nimic.
+const FATA_JOS_MIN := 5.0
+const FATA_JOS_MAX := 11.0
+
+func _fata_de_stanca() -> void:
+	var n := _track.baked.size()
+	var f := FATA_F_IN
+	var puse := 0
+	var k := 0
+	while f < FATA_F_OUT:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s_base := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		for sg: float in [-1.0, 1.0]:
+			var s := s_base * sg
+			# Doar unde chiar cade: pe partea plata banda de umar face treaba.
+			var q3 := p + s * (half + 3.0)
+			if p.y - _sol_real(q3.x, q3.z) < LIP_FALL_MIN:
+				continue
+			var adanc := _rng.randf_range(FATA_JOS_MIN, FATA_JOS_MAX)
+			var y := p.y - adanc
+			# Lateral: se cauta punctul de pe fata unde terenul e chiar la cota
+			# asta, ca piesa sa se sprijine pe perete, nu sa pluteasca langa el.
+			var lat := half + 1.0
+			var gasit := false
+			while lat < half + 26.0:
+				var q := p + s * lat
+				if _sol_real(q.x, q.z) <= y:
+					gasit = true
+					break
+				lat += 1.0
+			if not gasit:
+				continue
+			var q := p + s * lat
+			# PIESA: zidarie, nu bolovan — si asta e corectia care a costat o
+			# captura. Pusesem `moss_boulder_*` si fasia a iesit un sir de pete
+			# VERZI pe marginea din dreapta: se topea in iarba exact cand rostul
+			# ei era sa contrasteze cu iarba. Motivul e in tabelul de sloturi
+			# (masuratori §1): toate `moss_boulder_*` poarta slotul 12, adica
+			# tocmai muschiul. O piatra verde pusa sa separe doua suprafete verzi
+			# nu separa nimic.
+			# `inca_wall_a` (sloturi 3,12,29) se randeaza ca piatra palida, ca
+			# restul zidariei din captura, si cade in aceeasi clasa `inca_stone`
+			# — deci fasia ramane pe zero materiale noi.
+			var mdl := "inca_wall_a" if k % 3 != 2 else "inca_wall_c"
+			var h := _rng.randf_range(2.6, 4.2) if k % 3 != 2 else _rng.randf_range(1.6, 2.4)
+			# Aliniate pe tangenta, nu rotite aleator: o fata de stanca are
+			# straturi ORIZONTALE care urmeaza valea. Yaw-ul aleator ar da iar
+			# un morman, si mormanul e tocmai ce nu se citeste.
+			var tg := _track.baked[(i + 3) % n] - _track.baked[(i - 3 + n) % n]
+			tg.y = 0.0
+			tg = tg.normalized()
+			_raw(mdl, "fataStanca", Vector3(q.x, y, q.z),
+				atan2(-tg.z, tg.x), _scale_for(mdl, h), "none")
+			puse += 1
+			k += 1
+		f += _step(FATA_PAS)
+	print("; fata de stanca sub buza: %d piese pe %.4f-%.4f (%.0f-%.0f m sub sosea)" % [
+		puse, FATA_F_IN, FATA_F_OUT, FATA_JOS_MIN, FATA_JOS_MAX])
 
 ## (7) PARAPETUL PUNCTUAT si bornele.
 ##

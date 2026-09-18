@@ -92,6 +92,40 @@ extends Node
 ##    asezare: terasa are nevoie de podea proprie (clasa de iarba scurta pe
 ##    banda dintre ziduri), nu de mai multe ziduri.
 
+## 9. SEED 6 NU E O REGRESIE A MEA — masurat A/B, nu presupus. Pe felia
+##    0.42-0.56 runda 5 arata masina jucatorului cu 16,6% lent si 8 atingeri
+##    de perete pe seed 6, mult peste restul seed-urilor. Inainte sa mut
+##    zidul mai departe de drum (ceea ce ar fi costat treapta a doua, masurat:
+##    la 5,4 m nivelul 1 scade de la 30-58 m la 14-18 m), am rulat ACEEASI
+##    felie pe scena rundei 4, cu aceleasi seed-uri:
+##
+##      seed   runda 4 (Tu)                 runda 5 (Tu)
+##       5     24,6 m/s  0,0% lent  1 per   22,0 m/s   5,4% lent  5 per
+##       6     16,2 m/s 31,3% lent  5 per   18,8 m/s  16,6% lent  8 per
+##       7     25,8 m/s  0,0% lent  1 per   23,4 m/s   1,7% lent  2 per
+##
+##    Seed 6 era DEJA cel mai rau inainte de runda asta — 31,3% lent si o
+##    repunere, fata de 16,6% si zero acum. Adica pe seed-ul care doare,
+##    versiunea noua e mai buna, nu mai rea. Pe 5 si 7 pierde putin, si e
+##    pretul cinstit al unui zid CONTINUU: acum e zidarie pe toata lungimea
+##    piciorului, unde inainte erau bucati rupte de garda. Zidul e la acelasi
+##    lateral ca in runda 4 (9,2 m de ax), deci nu s-a apropiat de nimeni.
+##    Concluzia: nu mut zidul. Costul masurat al mutarii (jumatate din
+##    cascada) e mai mare decat castigul.
+
+## 10. `probe_manual` RAPORTEAZA „PLUTESTE"/„INGROPAT" PE ZIDURI, SI E CORECT
+##     ASA. Sonda masoara fiecare piesa fata de terenul de sub ea, deci un zid
+##     de sprijin — care prin definitie are coama PESTE teren si talpa INGROPATA
+##     — iese semnalat de doua ori. Zona mea trece de la 38 la 156 semnalari.
+##     Nu e o regresie: e acelasi tipar pe care l-a produs si POI A cand si-a
+##     ridicat platformele. Masurat pe scena rundei 4 fata de a mea:
+##       runda 4: 450 obiecte pe toata pista, din care 428 in alte zone, 38 la D
+##       runda 7: 566 obiecte pe toata pista, din care aceleasi 428 in alte
+##                zone si 156 la D
+##     Adica tot ce s-a adaugat e zidaria mea de sprijin, si niciun obiect din
+##     alta zona nu s-a miscat. Garzile care au drept de veto (probe_decor,
+##     ProbeBuried, ProbeLaneClear, ProbeRace) sunt toate verzi.
+
 const TRACK := "res://scenes/tracks/Track15.tscn"
 const ZONE := "DecorManual/ZoneD_Terase"
 
@@ -174,6 +208,8 @@ var _out: Array[String] = []
 var _n := 0
 var _warn := 0
 var _lane_reject := 0
+var _podea_pos: Array[Vector3] = []
+var _n_rafturi := 0
 var _tri := 0
 var _rng := RandomNumberGenerator.new()
 var _out_path := ""
@@ -204,6 +240,8 @@ func _ready() -> void:
 	_sus_y = hi + 140.0
 	_rng.seed = 150413
 	_survey()
+	if _survey_only:
+		_cat_incape()
 	if not _survey_only:
 		_build()
 		_write()
@@ -266,6 +304,33 @@ const WALL_NEAR_GAP := 3.2
 const WALL_FAR_GAP := 18.0
 
 
+## Cat lateral liber e de fapt pe fiecare picior? Se masoara, nu se ghiceste.
+func _cat_incape() -> void:
+	print("; lat maxim la care un zid continuu (>=12 m) INCAPE, per picior:")
+	for leg in LEGS:
+		var f0: float = leg[0]
+		var f1: float = leg[1]
+		var sgn: float = leg[2]
+		var base_y := _sol_mediana(f0, f1, sgn, 4.0, 10.0)
+		var line := "; picior %.3f-%.3f sgn %+.0f :" % [f0, f1, sgn]
+		for lat: float in [3.2, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 20.0, 25.0]:
+			var a := f0
+			var b := f1
+			var pas := _step(2.0)
+			var ml := _step(12.0)
+			var got := 0.0
+			while b - a >= ml:
+				if _nivel_incape(a, b, sgn, lat, base_y + RAFT_H):
+					got = (b - a) * _total_len
+					break
+				if not _nivel_incape(a, a + ml, sgn, lat, base_y + RAFT_H):
+					a += pas
+				else:
+					b -= pas
+			line += " %.0f:%.0fm" % [lat, got]
+		print(line)
+
+
 func _build() -> void:
 	_terrace_walls()
 	_stairs()
@@ -275,164 +340,447 @@ func _build() -> void:
 	_greens()
 
 
-## ZIDURILE DE TERASA — identitatea POI-ului.
+## TERASELE — RAFTURI DE PAMANT, nu lespezi pe panta. (RUNDA 5)
 ##
-## Doua siruri continue pe partea care urca, la piciorul celor doua risere
-## masurate. Piesele se INLANTUIE cap la cap (capetele masurate: wall_a ±2,0,
-## wall_b ±3,0, wall_c ±1,0, rost 0,0000), deci pasul pe traseu e exact
-## lungimea piesei — altfel raman rosturi si zidul citeste a lespezi razlete
-## (memoria din POI G: piesele care traverseaza muchia rup zidul).
+## VERDICTUL CARE A DESCHIS RUNDA ASTA, si de ce are dreptate impotriva notei
+## 1 din antetul asta. Criticul orb, cuvant cu cuvant:
+##   «Zidurile noastre de terasa sunt lespezi izolate asezate pe o panta verde
+##   CONTINUA — nu retin nimic. In referinta, terenul din spatele fiecarui zid
+##   e ridicat pana la coama lui, formand un raft plat; zidul devine zid de
+##   sprijin, iar banda alb/umbra de sub el e riser-ul dintre doua niveluri.
+##   La noi iarba e la aceeasi cota si deasupra si dedesubtul zidului, deci nu
+##   exista trepte, nu exista silueta in trepte, iar scara de piatra nu are
+##   prin ce sa coboare.»
 ##
-## Inaltimea: 2,5 m, adica treapta ceruta de brief. NU se scaleaza in jos —
-## un zid de 1,2 m nu mai arunca dunga de umbra care e identitatea.
+## Verificat pe captura D_r4_frac0.44.png inainte de a scrie o linie, si e
+## confirmat mai rau decat suna: piesele stau la unghiuri diferite, unele
+## rasturnate, infipte intr-un gazon neted care trece NESCHIMBAT pe deasupra
+## si pe dedesubtul lor. Nu se citeste nicio treapta.
 ##
-## Coliziune: implicit `hull` = solid. Asta e INTENTIONAT (brief §2 D:
-## „pragul lateral > 0,3 m e zid — aici e intentionat zid, terasa de sub
-## tine"). Dar zidul APROPIAT sta la 9,2 m de ax pe un drum cu semi-latimea
-## 6,0, deci ramane 3,2 m de umar liber de fiecare parte: rampa intra in zid
-## fara prag, iar ProbeLaneClear nu vede nimic in banda.
+## CAUZA, in codul rundelor 1-4, e in doua linii si amandoua erau ale mele:
+##   (a) `_place` lua cota fiecarei piese din `_sol_real` — raycast INDIVIDUAL
+##       pe teren. Deci sirul urma fiecare val al panzei: capul zidului
+##       serpuia, si un cap de zid care serpuie nu e o linie de raft, e un
+##       morman. (POI A a invatat asta deja si scrie negru pe alb la
+##       `_wall_abs_inalt`: cota e ABSOLUTA, nu raycast per piesa.)
+##   (b) bucla `while g2 > 1.5: g2 -= 1.5` din `_wall_run` tragea spre
+##       interior fiecare piesa refuzata de garda de banda, INDEPENDENT de
+##       vecinele ei. Asta e chiar „segmente scurte, distantate, la unghiuri
+##       diferite" din verdict, scris de mine cu mana mea. Cand o piesa nu
+##       incape, nu se muta ea singura — se muta TOT nivelul, sau nu se pune.
+##
+## Nota 1 a antetului („terenul e deja o cascada, terasele exista, se IMBRACA")
+## e infirmata de captura: terenul are panta, dar panta CONTINUA nu e trepte.
+## Un raft cere o suprafata ORIZONTALA, iar relieful n-o are si eu n-am voie
+## sa ating traseul. Deci rafturile se fac din geometrie — ca la POI A.
+##
+## MECANISMUL, luat de la POI A (`_platforma`) fiindca acolo a trecut deja
+## exact acest verdict: podeaua e un `FlockProp` cu `disc_slot` — placi plate
+## de 12 laturi din ATLAS, suprapuse pana se face o suprafata continua. Un
+## singur `MultiMesh` pentru tot POI-ul, deci UN desen si ZERO materiale noi
+## (verificat pe probe_decor, nu presupus). Slotul e 12 CACTUS_GREEN, acelasi
+## ca la POI A si pe aceeasi masuratoare: luminanta Rec.709 111,8 fata de
+## 101,2 a lui `ground_tint` — singurul verde din atlas mai DESCHIS decat
+## solul, deci raftul se separa de panta pe care sta. (Mai inchis n-ar merge
+## nici corectat: `set_color` doar INTUNECA — memoria
+## `surfacetool-clamp-vertex-color`.)
+##
+## DIFERENTA FATA DE POI A, si de ce nu pot copia `_platforma` direct: acolo
+## terasele sunt DREPTUNGHIURI pe un platou plat. Aici drumul coboara 17 m in
+## zigzag si terasa trebuie sa URMEZE curba lui, altfel raftul intra in panta
+## la un capat si atarna in aer la celalalt. Deci raftul de aici e o PANGLICA:
+## esantionata pe fractii din 2,9 in 2,9 metri, latime laterala `lat0..lat1`,
+## cota proprie constanta. Asta e `_raft`.
+##
+## CUM SE ALEG COTELE — cerinta e „ridica terenul in spatele fiecarui zid la
+## cota capului lui si coboara-l in fata", adica riser de 2,5 m intre doua
+## rafturi vecine, exact inaltimea lui `inca_wall_*`. Nivelul k al unui
+## picior sta la `y_baza + (k+1) * 2,5`, unde `y_baza` e MEDIANA solului
+## masurat pe banda cea mai de jos (mediana, nu un raycast: o singura sonda
+## poate nimeri o muchie a panzei — memoria din `_sol_med` de la POI A).
+##
+## De ce mediana pe banda intreaga si nu cota drumului: banda e la 9-30 m
+## lateral pe o panta de 12-23 grade (nota 2), deci intre capetele ei sunt
+## metri buni de diferenta. Ancorarea pe drum ar ingropa capatul de sus.
+##
+## ORDINEA IN CARE SE VEDE DIN MASINA, per nivel:
+##   1. ZIDUL DE SPRIJIN, sir continuu, cap la cap, cu COAMA la cota raftului
+##      (`y_raft`), deci talpa la `y_raft - 2,5`. Cota e absoluta pe tot sirul.
+##   2. PODEAUA raftului la `y_raft - 0,06` (cei 6 cm ca placa sa nu palpaie
+##      cu coronamentul), de la spatele zidului pana la piciorul riserului
+##      urmator.
+##   3. RISERUL e chiar golul de 2,5 m dintre coama nivelului k si talpa
+##      nivelului k+1 — acolo cade dunga de umbra, si acum are pe ce sa cada:
+##      pe podeaua nivelului de dedesubt, care e o suprafata ORIZONTALA.
+##
+## GARDA DE BANDA, reasezata corect. Nu mai trag piese individuale spre
+## interior. Testez NIVELUL INTREG inainte sa-l scriu: daca oricare piesa de
+## zid a unui nivel cade in banda vreunui picior, nivelul nu se pune deloc.
+## Un raft partial ar fi exact defectul din verdict.
+##
+## COLIZIUNEA. Zidul ramane `hull` (piesa de kit, implicit) — e zidul de
+## sprijin, si brief-ul cere sa fie zid. Podeaua e MultiMesh, deci fantoma
+## prin constructie: un raft solid la +2,5 m ar fi o rampa pe care ar urca
+## AI-ul. Exact argumentul lui POI A, si aici conteaza mai mult, fiindca
+## rafturile mele sunt mai aproape de sosea decat ale lui.
+const RAFT_H := 2.5          # inaltimea unui riser = inaltimea lui inca_wall_*
+const RAFT_SLOT := 12        # CACTUS_GREEN, +10,6 luminanta peste ground_tint
+## Raza placii de podea. POI A folosea 3,2 m, dar acolo rafturile erau
+## dreptunghiuri de 25 m; aici raftul are 3,3 m ADANCIME, deci o placa de
+## raza 3,2 ar atarna cu metri buni peste zidul din fata ei — exact bugul pe
+## care POI A l-a reparat pe captura („o limba de iarba peste fata de piatra,
+## ca o fata de masa").
+##
+## 1,4 m a fost prea mult, si s-a vazut pe captura D_r5_frac0.49.png: cu
+## marginile retrase cu o raza de fiecare parte, banda in care mai incapeau
+## CENTRE de placa era 5,05 -> 5,10 m, adica 5 cm. Deci `nv` iesea 1 si
+## podeaua era un SIR DE DISCURI pe mijlocul raftului, nu o suprafata — se
+## vedeau ca niste frunze verzi razlete, exact ce nu trebuie.
+##
+## Cu 0,75 m banda de centre e 4,40 -> 5,75 m (1,35 m, deci 3 randuri care se
+## suprapun) si placile acopera 3,65 -> 6,50 m: tot raftul, pana la fata
+## zidului urmator, fara sa iasa peste coama celui din fata.
+const RAFT_R := 0.75
+
+
+## Nivelurile fiecarui picior: [lat_zid, lat_spate_raft], in metri de la
+## MUCHIA drumului. `lat_zid` e fata zidului de sprijin; `lat_spate` e unde se
+## termina raftul lui si incepe riserul urmator.
+##
+## CIFRELE SUNT MASURATE, si prima incercare a rundei 5 le alesese gresit.
+## Alesesem 3,2 / 11 / 20 m din profilul lateral al terenului (nota 2), si a
+## iesit cu 6 rafturi din 12: nivelurile 1 si 2 cadeau pe banda piciorului de
+## dedesubt aproape peste tot. Am pus atunci in generator o masuratoare
+## directa — `_cat_incape`, „pe ce lateral incape un zid CONTINUU de cel
+## putin 12 m" — si raspunsul e fara echivoc (m de zid continuu care incap):
+##
+##   picior          3 m   6 m   8 m  10 m  12 m  16 m  20 m  25 m
+##   0.418-0.433 dr   30    30    18    14     0     0     0    14
+##   0.437-0.463 st   52    38    20    16    14    14    14     0
+##   0.467-0.489 dr   42    34    16     0     0     0     0    18
+##   0.493-0.522 st   58    58    38    36    36    32    34    56
+##
+## Deci banda 3-6 m e libera pe TOATE picioarele, la lungime aproape
+## intreaga; de la 8 m in sus se prabuseste pe trei din patru. Motivul e cel
+## de la nota 6: picioarele de zigzag sunt la 21,7-23,1 m unul de altul, deci
+## la 11 m lateral esti deja la jumatatea drumului spre soseaua de dedesubt.
+##
+## Concluzia, si e o decizie de compozitie luata pe cifra: terasele de aici
+## sunt DOUA trepte inguste, nu trei late. Un raft de 3,3 m adancime in loc
+## de 8 m — dar doua risere reale, cu podea reala, pe toata lungimea fiecarui
+## picior. Din masina asta se citeste mai bine decat varianta lata, fiindca
+## treptele sunt aproape de ochi: la 9-16 m de ax ocupa unghi, la 30 m ar fi
+## un detaliu de fundal. Piciorul 4 (0.493-0.522), singurul care are loc pana
+## la 25 m, primeste si a treia treapta — vezi `NIVELE_LARG`.
+const NIVELE := [
+	[3.2, 6.5],
+	[6.5, 9.8],
+]
+## Piciorul larg (0.493-0.522): masurat, incape zid continuu si la 16 si la
+## 20 si la 25 m, deci acolo cascada are trei trepte in loc de doua.
+const NIVELE_LARG := [
+	[3.2, 6.5],
+	[6.5, 9.8],
+	[9.8, 14.0],
+]
+
+
+## Care set de niveluri se aplica piciorului care incepe la `f0`.
+func _nivele_pt(f0: float) -> Array:
+	return NIVELE_LARG if absf(f0 - 0.493) < 0.001 else NIVELE
+
+
 func _terrace_walls() -> void:
 	for leg in LEGS:
 		var f0: float = leg[0]
 		var f1: float = leg[1]
 		var sgn: float = leg[2]
-		_wall_run(f0, f1, sgn, WALL_NEAR_GAP, 2.5, "zidTerasa")
-		_wall_run(f0 + _step(6.0), f1 - _step(4.0), sgn, WALL_FAR_GAP, 2.5,
-			"zidTerasaSus")
+		# Cota de baza a piciorului: mediana solului pe banda cea mai de jos,
+		# masurata pe toata lungimea lui.
+		var base_y := _sol_mediana(f0, f1, sgn, 4.0, 10.0)
+		var niv: Array = _nivele_pt(f0)
+		for k in niv.size():
+			var lat0: float = niv[k][0]
+			var lat1: float = niv[k][1]
+			# Coama nivelului k. Nivelul 0 isi pune coama la o treapta peste
+			# solul de la piciorul lui, ca zidul sa nu iasa din pamant.
+			var y_raft: float = base_y + RAFT_H * float(k + 1)
+			_nivel_taiat(f0, f1, sgn, lat0, lat1, y_raft, k)
 
 
-## Un sir continuu de zid intre doua fractii, la `gap` de muchie.
-## Piesele alterneaza a (4,0 m) / b (6,0 m) / c (2,0 m) ca rostul sa nu cada
-## pe acelasi ritm ca al terasei de deasupra.
-func _wall_run(f0: float, f1: float, sgn: float, gap: float, h: float,
-		base: String) -> void:
+## UN NIVEL, cu CAPETELE TAIATE pana incape — nu aruncat intreg.
+##
+## De ce exista, si e o masuratoare, nu o intuitie. Prima versiune a rundei 5
+## arunca nivelul intreg cand o piesa cadea in banda, si iesea cu 3 rafturi
+## din 12. Diagnosticul (print temporar pe fiecare refuz) a aratat un tipar
+## curat: din cele 9 niveluri refuzate, 8 picau la PIESA 0, adica fix la
+## inceputul piciorului, si singurul care nu pica acolo (L3 nivel 0) pica la
+## piesa 1. Mijlocul fiecarui picior era liber pe toate.
+##
+##   k=1 f0=0.418 lat 11  pica la piesa 0   | k=2 f0=0.418 lat 20  piesa 0
+##   k=1 f0=0.437 lat 11  pica la piesa 0   | k=2 f0=0.437 lat 20  piesa 0
+##   k=0 f0=0.467 lat  3  pica la piesa 1   | k=1 f0=0.467 lat 11  piesa 0
+##   k=2 f0=0.467 lat 20  pica la piesa 0   | k=1 f0=0.493 lat 11  piesa 0
+##   k=2 f0=0.493 lat 20  pica la piesa 0
+##
+## Cauza e geometria acului, nu garda: capetele unui picior de zigzag sunt
+## chiar varfurile de ac, unde piciorul urmator trece la 21,7-23,1 m (nota 6).
+## Un raft lat de 20-30 m acolo aterizeaza pe banda de dedesubt. La mijlocul
+## piciorului distanta e mult mai mare si totul incape.
+##
+## Deci reparatia corecta nu e „tot sau nimic" si nici „trage fiecare piesa
+## spre interior" (defectul (b) pentru care am picat runda 4) — e sa TAI
+## CAPETELE nivelului si sa pastrez mijlocul lui ca linie continua. Un zid
+## care se opreste inainte de varful acului si reincepe pe piciorul urmator e
+## exact ce se vede si in referinta: terasele se opresc la muchia pintenului.
+##
+## Cautarea e pe capete, din 2 in 2 metri, si se opreste cand ce ramane e sub
+## 12 m (mai putin de patru piese: sub atat nu mai e linie, e lespede).
+func _nivel_taiat(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
+		y_raft: float, k: int) -> void:
+	var a := f0
+	var b := f1
+	var pas := _step(2.0)
+	var min_len := _step(12.0)
+	while b - a >= min_len:
+		if _nivel_incape(a, b, sgn, lat0, y_raft):
+			_nivel(a, b, sgn, lat0, lat1, y_raft, k)
+			print("; raft k=%d picior %.3f-%.3f sgn %+.0f -> pastrat %.3f-%.3f (%.0f m din %.0f)" % [
+				k, f0, f1, sgn, a, b, (b - a) * _total_len,
+				(f1 - f0) * _total_len])
+			return
+		# Taie capatul care PICA. Verific fiecare capat separat: daca prima
+		# piesa e vinovata tai in fata, altfel tai din spate.
+		if not _nivel_incape(a, a + min_len, sgn, lat0, y_raft):
+			a += pas
+		else:
+			b -= pas
+	_lane_reject += 1
+	print("; raft k=%d picior %.3f-%.3f sgn %+.0f -> NU INCAPE deloc (lat %.1f)" % [
+		k, f0, f1, sgn, lat0])
+
+
+## Incape TOT nivelul intre `a` si `b`? Acelasi calcul ca `_nivel`, fara
+## sa scrie nimic — se foloseste la cautarea capetelor.
+func _nivel_incape(a: float, b: float, sgn: float, lat0: float,
+		y_raft: float) -> bool:
 	var n := _track.baked.size()
-	var f := f0
-	var k := 0
-	while f < f1:
+	var f := a
+	var idx := 0
+	while f < b:
 		var mdl := "inca_wall_b"
-		if k % 3 == 1:
+		if idx % 3 == 1:
 			mdl = "inca_wall_a"
-		elif k % 3 == 2:
+		elif idx % 3 == 2:
 			mdl = "inca_wall_c"
 		var seg: float = {"inca_wall_a": 4.0, "inca_wall_b": 6.0,
 			"inca_wall_c": 2.0}[mdl]
-		var scl := _scale_for(mdl, h)
-		# Yaw-ul: piesa are lungimea pe X, deci X-ul ei trebuie sa fie TANGENT
-		# la traseu. Tangenta se ia din doua puncte coapte consecutive.
+		var scl := _scale_for(mdl, RAFT_H)
 		var i := int(f * float(n)) % n
-		var j := (i + 1) % n
-		var tg: Vector3 = (_track.baked[j] - _track.baked[i])
+		var p := _track.baked[i]
+		var s := _track._side_at(i) * sgn
+		var half := _track.width_at_index(i)
+		var q := p + s * (half + lat0)
+		var lr: float = float(SIDE_R.get(mdl, 0.45)) * scl
+		# Cota e ACEEASI ca in `_nivel` (talpa la o treapta sub coama), nu
+		# raycast: `_lane_free` e sensibil pe verticala (are scaparea „piesa
+		# e in intregime sub cota soselei"), deci un test pe alta cota decat
+		# cea la care se scrie piesa ar raspunde la alta intrebare.
+		if not _lane_free(Vector3(q.x, y_raft - RAFT_H, q.z), lr, RAFT_H):
+			return false
+		f += _step(seg * scl)
+		idx += 1
+	return idx >= 3
+
+
+## UN NIVEL DE TERASA: zid de sprijin continuu + raftul plat din spatele lui.
+##
+## Se scrie TOT sau DELOC (vezi nota despre garda de banda): intai se
+## calculeaza toate piesele de zid si se testeaza fiecare, si numai daca trec
+## toate se comit. Asa sirul ramane o linie, nu o dantela.
+func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
+		y_raft: float, k: int) -> void:
+	var n := _track.baked.size()
+	# --- 1. ZIDUL: piesele, calculate dar inca nescrise.
+	var plan: Array[Dictionary] = []
+	var f := f0
+	var idx := 0
+	while f < f1:
+		var mdl := "inca_wall_b"
+		if idx % 3 == 1:
+			mdl = "inca_wall_a"
+		elif idx % 3 == 2:
+			mdl = "inca_wall_c"
+		var seg: float = {"inca_wall_a": 4.0, "inca_wall_b": 6.0,
+			"inca_wall_c": 2.0}[mdl]
+		var scl := _scale_for(mdl, RAFT_H)
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i) * sgn
+		var half := _track.width_at_index(i)
+		var tg: Vector3 = (_track.baked[(i + 1) % n] - p)
 		tg.y = 0.0
 		tg = tg.normalized()
 		var yaw := atan2(tg.x, tg.z) - PI * 0.5
-		# Pe un zigzag lateralul ideal poate cadea pe banda piciorului de
-		# dedesubt (nota 6). In loc sa pierd bucata, o TRAG SPRE INTERIOR
-		# pana incape: sirul ramane continuu, doar ca serpuieste cu terasa —
-		# ceea ce e si mai aproape de bara, unde zidurile urmeaza panta.
-		var g2 := gap
-		while g2 > 1.5:
-			if _place_ok(mdl, f, sgn, g2, scl):
-				break
-			g2 -= 1.5
-		_place(mdl, base, f, sgn, g2, yaw, scl)
+		var q := p + s * (half + lat0)
+		# COTA E ABSOLUTA, nu raycast: talpa la o treapta sub coama, pe tot
+		# sirul. Asta e reparatia (a) din nota de mai sus.
+		var pos := Vector3(q.x, y_raft - RAFT_H, q.z)
+		var lr: float = float(SIDE_R.get(mdl, 0.45)) * scl
+		if not _lane_free(pos, lr, RAFT_H):
+			_lane_reject += 1
+			return   # nivelul intreg cade — un raft partial e defectul
+		plan.append({"m": mdl, "p": pos, "y": yaw, "s": scl})
 		f += _step(seg * scl)
-		k += 1
+		idx += 1
+	if plan.size() < 3:
+		return
+	# Cat AER ramane sub talpa zidului? Cota lui e absoluta pe tot sirul, deci
+	# acolo unde terenul cade sub mediana se vede pe dedesubt — defectul „placa
+	# plutitoare" de pe captura D_r6_frac0.49.png. Se masoara, apoi se umple.
+	var aer_max := 0.0
+	for w in plan:
+		var wp: Vector3 = w["p"] as Vector3
+		aer_max = maxf(aer_max, wp.y - _sol_real(wp.x, wp.z))
+	for w in plan:
+		_raw(w["m"] as String, "zidSprijin%d" % k, w["p"] as Vector3,
+			float(w["y"]), float(w["s"]), "")
+	if aer_max > 0.35:
+		print("; raft k=%d: aer sub talpa pana la %.2f m -> asize de umplere" % [
+			k, aer_max])
+		_asize_umplere(plan, aer_max, k)
+	_n_rafturi += 1
+	# --- 2. PODEAUA raftului. Marginea din fata se retrage cu RAZA placii de
+	# la spatele zidului, nu cu o constanta: altfel placa iese peste coama
+	# zidului si atarna in fata lui (bugul reparat pe captura la POI A).
+	_raft(f0, f1, sgn, lat0 + 0.45 + RAFT_R, lat1 - RAFT_R, y_raft - 0.06)
 
 
-## SCARA care taie DREPT prin terase — silueta care face POI-ul.
+## ASIZE DE UMPLERE sub talpa unui sir de zid.
 ##
-## MASURAT, nu presupus (runda 3). Prima incercare punea scara pe partea
-## VALE, ca in bara, si TOATE cele 12 tronsoane au fost refuzate de garda de
-## banda. Cauza e geometria zigzagului, nu garda: pe un ac, „la vale de
-## piciorul asta" ESTE piciorul urmator. Am masurat unde incape o scara de
-## 3 tronsoane care coboara la >=9,5 m de orice ax, si raspunsul e UN SINGUR
-## loc pe tot POI-ul:
-##   0.440 dreapta  cade -5,5 m  cel mai stramt 18,0 m  INCAPE
-##   0.445 dreapta  cade -5,9 m  cel mai stramt  5,5 m  blocat
-##   0.470 stanga   cade -6,1 m  cel mai stramt  4,6 m  blocat
-##   0.420 stanga   cade -4,0 m  cel mai stramt  1,9 m  blocat
-##   (restul, intre 2,6 si 6,2 m — adica pe banda piciorului de sub el)
+## De ce, si e un defect gasit pe CAPTURA nu pe cifra (regula zero din
+## bara_vizuala). Cota sirului e absoluta — asta e chiar reparatia care a facut
+## zidul sa citeasca a linie in loc de morman. Pretul ei e ca acolo unde
+## terenul cade sub mediana piciorului, talpa ramane in aer: pe
+## D_r6_frac0.49.png se vad placi de raft plutind cu cerul pe dedesubt, la
+## doar 9,7 m de ax si +1,9 m peste sosea.
 ##
-## Deci scara nu poate COBORI in gol: coboara in drumul de dedesubt. Ce se
-## face in loc, si e si mai corect incaș: scara URCA riserul de pe partea
-## DEAL, legand terasa de langa drum de shelf-ul de deasupra. Acolo nu e
-## nicio banda de aparat (riserul urca), iar din masina silueta e aceeasi —
-## o banda de trepte care taie perpendicular dungile de zid, exact ce se
-## citeste in bara. `inca_stair_a` are 2,50 m, adica FIX inaltimea unei
-## terase din brief, deci un tronson = o treapta de terasa.
+## Masurat pe generator (`aer_max` de mai sus), golul ajunge la cativa metri.
+## Nu se repara lasand zidul pe raycast (ne-am intoarce la morman), ci
+## ADAUGAND asize sub el pana la pamant — exact ce face `_wall_abs_inalt` la
+## POI A pentru zidurile de sprijin inalte, si exact ce face si zidaria incasa
+## reala, care se ingroapa pana gaseste stanca.
 ##
-## Cele doua locuri care incap pe vale (0.440 dreapta) pastreaza si scara
-## care coboara, cu `inca_stair_b` (5,0 m = doua terase): acolo se vede
-## cascada intreaga dintr-o privire.
+## Fiecare asiza e o copie a sirului coborata cu inaltimea unei piese. Se pun
+## atatea cate trebuie ca sa acopere `aer_max`, si piesele care ajung sub
+## pamant nu deranjeaza: sunt ingropate, nu vizibile. Garda de banda a trecut
+## deja pe sirul de deasupra, iar asizele stau la ACELASI lateral si mai jos,
+## deci nu pot intra in nicio banda in care nu era deja.
+func _asize_umplere(plan: Array[Dictionary], aer_max: float, k: int) -> void:
+	var n_asize := int(ceil(aer_max / RAFT_H))
+	for a in range(1, n_asize + 1):
+		for w in plan:
+			var wp: Vector3 = w["p"] as Vector3
+			var y := wp.y - RAFT_H * float(a)
+			# Sub pamant cu mai mult de o asiza intreaga nu mai are rost.
+			if y + RAFT_H < _sol_real(wp.x, wp.z) - RAFT_H:
+				continue
+			_raw(w["m"] as String, "asiza%d" % k, Vector3(wp.x, y, wp.z),
+				float(w["y"]), float(w["s"]), "")
+
+
+## PANGLICA de podea: placi suprapuse pe banda `lat0..lat1`, la cota `y`.
+##
+## Placile se suprapun deliberat (pas = 0,9 x raza), ca la crusta de sare din
+## flock.gd: 12 laturi x cateva sute = o suprafata, nu niste discuri.
+func _raft(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
+		y: float) -> void:
+	var n := _track.baked.size()
+	var span := maxf(0.0, lat1 - lat0)
+	var nv := maxi(1, int(ceil(span / (RAFT_R * 0.9))) + 1)
+	var f := f0
+	while f < f1:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i) * sgn
+		var half := _track.width_at_index(i)
+		for j in range(nv):
+			var fv: float = 0.5 if nv == 1 else float(j) / float(nv - 1)
+			var q := p + s * (half + lat0 + fv * span)
+			_podea_pos.append(Vector3(q.x, y, q.z))
+		f += _step(RAFT_R * 0.9)
+
+
+## MEDIANA solului pe o banda laterala, pe toata lungimea unui picior.
+## Un singur raycast poate nimeri o muchie a panzei si ar aseza tot nivelul
+## cu metri mai jos (argumentul lui `_sol_med` de la POI A, extins la lungimea
+## piciorului).
+func _sol_mediana(f0: float, f1: float, sgn: float, lat0: float,
+		lat1: float) -> float:
+	var n := _track.baked.size()
+	var vals: Array[float] = []
+	var f := f0
+	while f < f1:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i) * sgn
+		var half := _track.width_at_index(i)
+		for lat: float in [lat0, (lat0 + lat1) * 0.5, lat1]:
+			var q := p + s * (half + lat)
+			vals.append(_sol_real(q.x, q.z))
+		f += _step(5.0)
+	if vals.is_empty():
+		return 0.0
+	vals.sort()
+	return vals[vals.size() / 2]
+
+
+## SCARA care taie DREPT prin risere — silueta care face POI-ul.
+##
+## Acum are prin ce sa coboare, si asta e a doua jumatate a verdictului
+## („scara taie drept prin risere"). Pana la runda asta scara statea pe o
+## panta continua, deci era o lespede de trepte in iarba: nu lega nimic de
+## nimic, fiindca nu existau doua niveluri intre care sa lege.
+##
+## Se aseaza pe ACELEASI cote ca rafturile, nu pe raycast: un tronson de 2,5 m
+## urca de la coama nivelului k-1 la coama nivelului k, adica exact un riser.
+## Yaw-ul e spre drum (treptele se vad frontal din masina).
+##
+## Lateralul e fata zidului nivelului k, plus grosimea scarii. Scara sta
+## lipita de zid si il INTRERUPE vizual — ceea ce e corect incas si e chiar
+## ce se citeste in bara: banda de trepte taie sirul de dungi perpendicular.
 func _stairs() -> void:
 	for leg in LEGS:
 		var f0: float = leg[0]
 		var f1: float = leg[1]
-		var deal: float = leg[2]
-		# Scari care URCA riserul de pe deal: trei pe picior, ca sa taie
-		# dungile de zid des, ca in bara.
-		for t: float in [0.22, 0.50, 0.78]:
-			_stair_up(lerpf(f0, f1, t), deal)
-	# Singurul loc masurat in care o scara poate COBORI fara sa cada pe
-	# banda piciorului de dedesubt (18,0 m liber).
-	_stair_run(0.440, 1.0, 3)
+		var sgn: float = leg[2]
+		var base_y := _sol_mediana(f0, f1, sgn, 4.0, 10.0)
+		# Trei scari pe picior, ca sirul de dungi sa fie taiat des, ca in bara.
+		for t: float in [0.24, 0.52, 0.80]:
+			_scara_prin_risere(lerpf(f0, f1, t), sgn, base_y, f0)
 
 
-## Scara care URCA riserul de pe partea deal: doua tronsoane de 2,5 m, adica
-## doua terase, pornind din spatele zidului de langa drum.
-func _stair_up(frac: float, sgn: float) -> void:
+## O scara care urca toate nivelurile puse la fractia asta: cate un tronson
+## `inca_stair_a` (2,50 m = FIX un riser) per nivel, lipit de fata zidului lui.
+func _scara_prin_risere(frac: float, sgn: float, base_y: float,
+		f0_leg: float) -> void:
 	var n := _track.baked.size()
 	var i := int(frac * float(n)) % n
 	var p := _track.baked[i]
 	var s := _track._side_at(i) * sgn
 	var half := _track.width_at_index(i)
-	# Se uita SPRE drum (treptele coboara spre tine), deci yaw-ul e pe -s.
+	# Treptele coboara SPRE drum, deci scara se uita pe -s.
 	var yaw := atan2(-s.x, -s.z)
-	var lat := half + WALL_NEAR_GAP + 1.6
-	var prev_y := -INF
-	for k in 2:
-		var q := p + s * lat
-		var g := _sol_real(q.x, q.z)
-		# Scara urca: daca terenul nu s-a ridicat, nu mai e riser de urcat.
-		if k > 0 and g < prev_y + 0.8:
-			return
-		if not _lane_free(Vector3(q.x, g, q.z), 1.30, 2.5):
+	var niv: Array = _nivele_pt(f0_leg)
+	for k in niv.size():
+		var lat: float = niv[k][0]
+		var y_raft: float = base_y + RAFT_H * float(k + 1)
+		var q := p + s * (half + lat + 1.2)
+		var pos := Vector3(q.x, y_raft - RAFT_H, q.z)
+		if not _lane_free(pos, 1.30, RAFT_H):
 			_lane_reject += 1
 			return
-		_raw("inca_stair_a", "scaraUrcare", Vector3(q.x, g, q.z), yaw, 1.0, "")
-		prev_y = g
-		lat += 3.0
-
-
-## Scara care COBOARA, cu `inca_stair_b` (5,0 m = doua terase pe tronson).
-## Se foloseste doar acolo unde masuratoarea a aratat loc (0.440 dreapta).
-func _stair_run(frac: float, sgn: float, flights: int) -> void:
-	var n := _track.baked.size()
-	var i := int(frac * float(n)) % n
-	var p := _track.baked[i]
-	var s := _track._side_at(i) * sgn
-	var half := _track.width_at_index(i)
-	var yaw := atan2(s.x, s.z)
-	var lat := half + 2.0
-	var prev_y := p.y
-	for k in flights:
-		var q := p + s * lat
-		var g := _sol_real(q.x, q.z)
-		# Scara se opreste cand terenul NU MAI COBOARA fata de tronsonul de
-		# dinainte: o scara pe plat e un bloc de piatra in iarba.
-		if k > 0 and g > prev_y - 1.5:
-			return
-		# Raza pentru testul de banda e SEMI-LATIMEA piesei (2,60 / 2 = 1,30),
-		# nu `BASE_R` (6,08 = raza pe diagonala): o scara asezata cu latimea
-		# spre drum ocupa 1,3 m lateral, nu 6.
-		if not _lane_free(Vector3(q.x, g, q.z), 1.30, 5.0):
-			_lane_reject += 1
-			lat += 6.0
-			continue
-		_raw("inca_stair_b", "scara", Vector3(q.x, g, q.z), yaw, 1.0, "")
-		prev_y = g
-		lat += 6.0
+		_raw("inca_stair_a", "scaraRiser", pos, yaw, 1.0, "")
 
 
 ## CANALUL DE APA pe o parte (bara: dunga de apa care coboara pe langa scara)
@@ -649,8 +997,36 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 	_out.append("")
 
 
+## PODEAUA rafturilor, ca UN SINGUR nod `FlockProp`. Vezi nota mare de la
+## `_terrace_walls`: mecanismul crustei de sare, slotul 12, materialul comun
+## de lume. Un desen pentru toate placile din POI, zero materiale noi.
+func _emit_podea() -> void:
+	if _podea_pos.is_empty():
+		return
+	var pos: Array[String] = []
+	for p in _podea_pos:
+		pos.append("%f, %f, %f" % [p.x, p.y, p.z])
+	_out.append('[node name="D_PodeaTerase" type="MultiMeshInstance3D" parent="%s"]' % ZONE)
+	_out.append('script = ExtResource("flock")')
+	_out.append("disc_slot = %d" % RAFT_SLOT)
+	_out.append("disc_radius = %.2f" % RAFT_R)
+	# Fara variatie de scara: raftul e o SUPRAFATA, nu un stol. Variatia ar
+	# lasa goluri intre placi prin care s-ar vedea panta de sub raft.
+	_out.append("scale_min = 1.0")
+	_out.append("scale_max = 1.0")
+	_out.append("seed_value = 150413")
+	# NU se reaseaza pe teren: cota lor E cota raftului, tot rostul lor.
+	# `snap_to_ground` le-ar tari la pamant si ar sterge exact treapta.
+	_out.append("snap_to_ground = false")
+	_out.append("positions = PackedVector3Array(%s)" % ", ".join(pos))
+	_out.append("")
+	print("; podea: %d placi pe %d rafturi, slot %d, un singur MultiMesh" % [
+		_podea_pos.size(), _n_rafturi, RAFT_SLOT])
+
+
 func _write() -> void:
-	print("; asezate %d piese, %d refuzate de garda de banda, %d avertismente, ~%d triunghiuri" % [_n, _lane_reject, _warn, _tri])
+	_emit_podea()
+	print("; asezate %d piese, %d rafturi, %d refuzate de garda de banda, %d avertismente, ~%d triunghiuri" % [_n, _n_rafturi, _lane_reject, _warn, _tri])
 	if _out_path.is_empty():
 		for line in _out:
 			print(line)

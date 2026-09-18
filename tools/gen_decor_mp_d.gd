@@ -462,6 +462,46 @@ const RAFT_SLOT := 12        # CACTUS_GREEN, +10,6 luminanta peste ground_tint
 ## zidului urmator, fara sa iasa peste coama celui din fata.
 const RAFT_R := 0.75
 
+## ADANCIMEA FUSTEI podelei — reparatia rundei 6, si e o singura cifra.
+##
+## VERDICTUL, cuvant cu cuvant: «zidurile sunt lespezi de sine statatoare
+## infipte intr-un ses plat, cu goluri intre ele prin care se vede, iar solul
+## din spatele unui zid e la aceeasi cota cu cel din fata. "Terasa" e un decal
+## verde asezat PESTE suprafata plana, nu fata de sus a unei trepte umplute.»
+##
+## Verificat pe D_r13_frac0.44.png inainte de a schimba ceva, si e exact asa:
+## printre piesele de zid se vede acelasi nisip plat care trece si prin fata
+## si prin spatele lor, iar benzile verzi plutesc la cota coamei ca niste
+## frunze taiate. Cauza NU e asezarea (sirurile sunt continue si la cota
+## corecta din runda 5) — e MESH-UL podelei: `_disc_mesh` face o placa plata
+## cu o singura fata, deci raftul e o FOAIE. O foaie n-are ce sa retina si
+## n-are ce sa umbreasca.
+##
+## Reparatia e `disc_skirt` in flock.gd: placa devine prisma, cu o centura de
+## fete verticale sub fata de sus. Suprapuse, prismele nu mai dau o suprafata
+## ci un BLOC — masa de pamant pe care o retine zidul.
+##
+## De ce EXACT o treapta (2,5 m) si nu „pana la teren": fusta e o proprietate a
+## MESH-ului, deci una singura pentru tot MultiMesh-ul; nu poate varia per
+## placa. Iar cota corecta unde trebuie sa ajunga masa nivelului k e chiar
+## fata de sus a nivelului k-1, care e cu exact un riser mai jos — aceeasi
+## cifra pentru toate placile, fiindca rafturile sunt echidistante prin
+## constructie (`y_raft = base_y + RAFT_H * (k+1)`).
+##
+## Sub nivelul 1 masa intra in panta reala; acolo fusta se ingroapa, ceea ce e
+## corect — o terasa incasa se ingroapa si ea pana gaseste panta.
+const RAFT_SKIRT := RAFT_H
+
+## Slotul FETEI VERTICALE a masei. 4 ROCK_DARK (#67421F) — pamant brun inchis,
+## deja in atlas, deci zero materiale noi.
+##
+## Masurat pe D_r14_frac0.44.png, unde fusta mostenise slotul de iarba: masa
+## exista (verdictul e reparat) dar rafturile citeau CUTII VERZI, un gard viu
+## in trepte. Cauza e ca in referinta fata verticala a unei terase nu e
+## niciodata iarba — iarba e doar coama, fata e pamant taiat sau zidarie.
+## Cu 4, coama ramane verde si fata devine pamant: exact citirea din bara.
+const RAFT_SKIRT_SLOT := 4
+
 
 ## Nivelurile fiecarui picior: [lat_zid, lat_spate_raft], in metri de la
 ## MUCHIA drumului. `lat_zid` e fata zidului de sprijin; `lat_spate` e unde se
@@ -694,7 +734,34 @@ func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 	var spate := lat1
 	if k == _nivele_pt_k_max:
 		spate = _pana_unde_urca(f0, f1, sgn, lat1, y_raft)
-	_raft(f0 + _step(RAFT_R), f1 - _step(RAFT_R),
+	# UNDE INCEPE MASA, si asta e a doua jumatate a verdictului rundei 6
+	# („goluri intre ele prin care se vede"). Pana acum podeaua incepea la
+	# `lat0 + 0.45 + RAFT_R`, adica 1,2 m IN SPATELE fetei zidului — retragere
+	# corecta pentru o foaie plata, care altfel ar fi atarnat peste coama.
+	# O prisma nu atarna: ea coboara. Deci masa incepe chiar la fata din SPATE
+	# a zidului (`lat0 + 0.45`), si golurile dintre piese nu mai arata cerul si
+	# nisipul de dincolo, ci pamantul retinut — care e chiar ce trebuie vazut
+	# printr-un zid de sprijin cu rosturi.
+	#
+	# Capetele pe LUNGIME raman retrase (motivul de la D_r8_frac0.52.png tine
+	# si pentru prisme: dincolo de ultima piesa de zid nu mai e nimic care sa
+	# tina masa), dar cu jumatate de raza in loc de una intreaga — cu fusta,
+	# un capat retras prea mult lasa zidul cu aer in spate la colturi.
+	# CAT DE APROAPE de zid incepe masa. Cifra se deriva, nu se alege: placa are
+	# raza RAFT_R, deci marginea ei din fata ajunge cu RAFT_R mai in fata decat
+	# CENTRUL ei. Zidul are fata la `lat0` si spatele la `lat0 + 0.45`.
+	#
+	# Masurat pe D_r15_frac0.49.png: cu centrele la `lat0 + 0.45`, marginea
+	# masei ajungea la `lat0 - 0.30`, adica 30 cm IN FATA fetei zidului, si
+	# acoperea zidaria pe toata inaltimea ei — pe captura terasele erau pamant
+	# maro cu coama verde, si piatra palida disparuse aproape complet. Cu ea a
+	# disparut si dunga alb/umbra, care are nevoie de o fata PALIDA pe care sa
+	# se vada: identitatea POI-ului, stearsa de propria reparatie.
+	#
+	# Corect: masa e retinuta DE zid, deci incepe in spatele lui. Marginea din
+	# fata a masei la fata din spate a zidului inseamna centrele la
+	# `lat0 + 0.45 + RAFT_R`, si zidaria ramane vizibila pe toata inaltimea.
+	_raft(f0 + _step(RAFT_R * 0.5), f1 - _step(RAFT_R * 0.5),
 		sgn, lat0 + 0.45 + RAFT_R, spate - RAFT_R, y_raft - 0.06, lat1)
 
 
@@ -1147,6 +1214,9 @@ func _emit_podea() -> void:
 	_out.append('script = ExtResource("flock")')
 	_out.append("disc_slot = %d" % RAFT_SLOT)
 	_out.append("disc_radius = %.2f" % RAFT_R)
+	# FUSTA: face din foaie un bloc. Vezi RAFT_SKIRT.
+	_out.append("disc_skirt = %.2f" % RAFT_SKIRT)
+	_out.append("disc_skirt_slot = %d" % RAFT_SKIRT_SLOT)
 	# Fara variatie de scara: raftul e o SUPRAFATA, nu un stol. Variatia ar
 	# lasa goluri intre placi prin care s-ar vedea panta de sub raft.
 	_out.append("scale_min = 1.0")

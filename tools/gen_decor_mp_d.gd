@@ -227,6 +227,9 @@ var _warn := 0
 var _lane_reject := 0
 var _podea_pos: Array[Vector3] = []
 var _n_rafturi := 0
+## Indicele ultimului nivel al piciorului curent (raftul de sus isi duce
+## podeaua pana in deal — vezi `_pana_unde_urca`).
+var _nivele_pt_k_max := 0
 var _tri := 0
 var _rng := RandomNumberGenerator.new()
 var _out_path := ""
@@ -516,6 +519,7 @@ func _terrace_walls() -> void:
 		# masurata pe toata lungimea lui.
 		var base_y := _sol_mediana(f0, f1, sgn, 4.0, 10.0)
 		var niv: Array = _nivele_pt(f0)
+		_nivele_pt_k_max = niv.size() - 1
 		for k in niv.size():
 			var lat0: float = niv[k][0]
 			var lat1: float = niv[k][1]
@@ -680,8 +684,18 @@ func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 	# zid si atarna in aer ca niste limbi verzi, fiindca acolo nu mai e nimic
 	# care sa le tina. Lateral retragerea era deja exacta (placile acopera
 	# 3,65-6,50 m, fata zidului urmator e la 6,50); pe lungime lipsea.
+	# ADANCIMEA raftului de SUS: podeaua e MultiMesh, deci fantoma — n-are corp,
+	# deci n-are ce sa blocheze si nu are nevoie de garda de banda pe care o
+	# cere zidul. Pe D_final_frac0.46.png se vede de ce conteaza: raftul de 3,3
+	# m citeste ca o FASIE cocotata pe coama zidului, nu ca pamant. Ultimul
+	# nivel isi duce podeaua pana unde terenul o ajunge din urma — adica pana
+	# se ingroapa singura in panta — si atunci treapta se termina in deal, cum
+	# se termina si in referinta.
+	var spate := lat1
+	if k == _nivele_pt_k_max:
+		spate = _pana_unde_urca(f0, f1, sgn, lat1, y_raft)
 	_raft(f0 + _step(RAFT_R), f1 - _step(RAFT_R),
-		sgn, lat0 + 0.45 + RAFT_R, lat1 - RAFT_R, y_raft - 0.06)
+		sgn, lat0 + 0.45 + RAFT_R, spate - RAFT_R, y_raft - 0.06, lat1)
 
 
 ## ASIZE DE UMPLERE sub talpa unui sir de zid.
@@ -717,12 +731,51 @@ func _asize_umplere(plan: Array[Dictionary], aer_max: float, k: int) -> void:
 				float(w["y"]), float(w["s"]), "")
 
 
+## PANA UNDE poate merge podeaua ultimului raft inainte sa intre in deal.
+##
+## Se cauta lateralul la care terenul real ajunge la cota raftului: dincolo de
+## el placa ar fi sub pamant, deci n-ar face decat sa incarce scena. Se ia
+## MEDIANA pe lungimea sirului, nu un punct — altfel o singura groapa ar
+## scurta toata treapta.
+##
+## Plafon la 26 m: mai departe e fundal, iar placile de acolo n-ar mai fi
+## citite ca terasa nici daca ar incapea.
+func _pana_unde_urca(f0: float, f1: float, sgn: float, lat_min: float,
+		y_raft: float) -> float:
+	var lat := lat_min
+	while lat < 26.0:
+		var urmator := lat + 1.5
+		# Cati metri din sir au deja pamantul PESTE cota raftului la `urmator`?
+		var n := _track.baked.size()
+		var peste := 0
+		var tot := 0
+		var f := f0
+		while f < f1:
+			var i := int(f * float(n)) % n
+			var p := _track.baked[i]
+			var sd := _track._side_at(i) * sgn
+			var half := _track.width_at_index(i)
+			var q := p + sd * (half + urmator)
+			tot += 1
+			if _sol_real(q.x, q.z) >= y_raft:
+				peste += 1
+			f += _step(4.0)
+		# Cand jumatate din sir e deja ingropat, m-am oprit in deal.
+		if tot == 0 or float(peste) / float(tot) > 0.5:
+			break
+		lat = urmator
+	return lat
+
+
 ## PANGLICA de podea: placi suprapuse pe banda `lat0..lat1`, la cota `y`.
 ##
 ## Placile se suprapun deliberat (pas = 0,9 x raza), ca la crusta de sare din
 ## flock.gd: 12 laturi x cateva sute = o suprafata, nu niste discuri.
+## `lat_liber`: pana la lateralul asta placa se pune neconditionat (e raftul
+## tinut de zidul ei, unde golul de sub podea e chiar riserul). Dincolo de el,
+## placa exista doar daca solul a urcat deja sub ea.
 func _raft(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
-		y: float) -> void:
+		y: float, lat_liber: float = 1e9) -> void:
 	var n := _track.baked.size()
 	var span := maxf(0.0, lat1 - lat0)
 	var nv := maxi(1, int(ceil(span / (RAFT_R * 0.9))) + 1)
@@ -734,7 +787,17 @@ func _raft(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 		var half := _track.width_at_index(i)
 		for j in range(nv):
 			var fv: float = 0.5 if nv == 1 else float(j) / float(nv - 1)
-			var q := p + s * (half + lat0 + fv * span)
+			var lat := lat0 + fv * span
+			var q := p + s * (half + lat)
+			# FIECARE PLACA isi verifica solul ei, nu o mediana pe sir.
+			# Pe D_r10_frac0.46.png se vedea de ce: cu o limita comuna pe tot
+			# sirul, capetele unde terenul CADE ramaneau cu placi plutind peste
+			# gol. O treapta trebuie sa moara in deal, nu sa iasa in aer.
+			# Toleranta: placa se pastreaza doar cat timp solul de sub ea e la
+			# cel mult o treapta mai jos (adica exact cat tine zidul ei).
+			var g := _sol_real(q.x, q.z)
+			if lat > lat_liber and y - g > RAFT_H:
+				continue
 			_podea_pos.append(Vector3(q.x, y, q.z))
 		f += _step(RAFT_R * 0.9)
 

@@ -2,8 +2,13 @@
 
 Stare: **prototip pe o masina si un model**, ramura `feat/ragdoll-buggy`.
 Intrebarea la care raspunde: *e amuzant sa vezi figurina zburand din masina
-la un accident?* Verdictul e al dezvoltatorului, la volan. Documentul de
-fata spune ce s-a construit, ce reguli s-au fixat si cum se testeaza.
+la un accident?*
+
+**Verdictul dezvoltatorului (18 sep 2026): da, e amuzant.** Directia dorita:
+*toti* pilotii sa fie ragdoll, in decapotabile de tipuri diferite (nu neaparat
+buggy-uri). Deocamdata prototipul ramane asa; garajul deschis e pasul urmator,
+nedeschis inca. Documentul de fata spune ce s-a construit, ce reguli s-au
+fixat si cum se testeaza.
 
 ## Cum se testeaza
 

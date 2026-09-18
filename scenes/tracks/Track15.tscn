@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://dxvqq0y23t7vu" path="res://scenes/tracks/terrain_hollow.gd" id="hollow"]
+[ext_resource type="Script" uid="uid://c4avlqtdcpl6o" path="res://scenes/tracks/cliff_face.gd" id="cliffface"]
 [ext_resource type="Script" uid="uid://b0y8jokvx14r4" path="res://scenes/hazards/rope_bridge_hazard.gd" id="rope_bridge"]
 [ext_resource type="Script" uid="uid://cun4ologbx5v6" path="res://scenes/hazards/lift_bridge_hazard.gd" id="lift_bridge"]
 [ext_resource type="Script" path="res://scenes/hazards/cloud_rise_hazard.gd" id="cloud_rise"]
@@ -119,6 +120,89 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180, 70, 40)
 gizmo_extents = 55
 script = ExtResource("2_peak")
 radius_m = 55
+
+[node name="Faleze" type="Node3D" parent="."]
+
+[node name="TaieturaDrumIncasA" type="Marker3D" parent="Faleze"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("cliffface")
+frac_start = 0.042
+frac_end = 0.108
+side = 1.0
+far_wall = false
+cut_wall = true
+cut_offset_m = 6.2
+cut_edge_offset_m = 0.2
+cut_height_m = 17.0
+cut_min_rise_m = 13.0
+cut_batter_m = 0.9
+cut_step_m = 3.0
+cut_bands = 8
+cut_slots = Array[int]([8, 29, 6, 29, 20, 29, 6, 20])
+cut_shade = 0.82
+cut_taper_frac = 0.08
+cut_tuck_m = 4.0
+cut_facet_m = 0.85
+cut_facet_cols = 2
+cut_facet_crown_bands = 0.55
+cut_facet_seed = 7
+cut_tread_m = 0.12
+cut_step_out_m = 0.18
+cut_foot_bite_m = 1.4
+
+[node name="TaieturaDrumIncasB" type="Marker3D" parent="Faleze"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("cliffface")
+frac_start = 0.096
+frac_end = 0.162
+side = 1.0
+far_wall = false
+cut_wall = true
+cut_offset_m = 6.2
+cut_edge_offset_m = 0.2
+cut_height_m = 22.0
+cut_min_rise_m = 15.0
+cut_batter_m = 0.9
+cut_step_m = 3.0
+cut_bands = 8
+cut_slots = Array[int]([8, 29, 6, 29, 20, 29, 6, 20])
+cut_shade = 0.82
+cut_taper_frac = 0.07
+cut_tuck_m = 4.0
+cut_facet_m = 0.85
+cut_facet_cols = 3
+cut_facet_crown_bands = 0.55
+cut_facet_seed = 23
+cut_tread_m = 0.12
+cut_step_out_m = 0.18
+cut_foot_bite_m = 1.4
+
+[node name="TaieturaDrumIncasC" type="Marker3D" parent="Faleze"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("cliffface")
+frac_start = 0.150
+frac_end = 0.209
+side = 1.0
+far_wall = false
+cut_wall = true
+cut_offset_m = 6.2
+cut_edge_offset_m = 0.2
+cut_height_m = 17.0
+cut_min_rise_m = 12.5
+cut_batter_m = 0.9
+cut_step_m = 3.0
+cut_bands = 8
+cut_slots = Array[int]([8, 29, 6, 29, 20, 29, 6, 20])
+cut_shade = 0.82
+cut_taper_frac = 0.08
+cut_tuck_m = 4.0
+cut_facet_m = 0.85
+cut_facet_cols = 2
+cut_facet_crown_bands = 0.55
+cut_facet_seed = 41
+cut_tread_m = 0.12
+cut_step_out_m = 0.18
+cut_foot_bite_m = 1.4
 
 [node name="Hollows" type="Node3D" parent="." unique_id=2066634079]
 
@@ -2882,6 +2966,1262 @@ positions = PackedVector3Array(-123.434418, 1.216199, 170.581161, -123.685989, 1
 scale3_list = [Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000, 1.000000)]
 
 [node name="ZoneB_DrumulIncas" type="Node3D" parent="DecorManual"]
+
+[node name="buzaPiatra1" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.265044, 0, 0.964236, 0, 0.422513, 0, -0.964236, 0, -0.265044, 46.266117, 10.185385, 141.368927)
+metadata/coliziune = "none"
+
+[node name="falezaB2" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.752135, 0, 1.199179, 0, 2.123207, 0, -1.199179, 0, 1.752135, 49.631001, -4.535527, 150.423111)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra3" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.285175, 0, 0.958475, 0, 0.422513, 0, -0.958475, 0, -0.285175, 49.384430, 8.960791, 140.488724)
+metadata/coliziune = "none"
+
+[node name="pintenBuza4" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.477855, 0, 0.878439, 0, 0.638764, 0, -0.878439, 0, -0.477855, 51.509979, 8.524725, 140.250168)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra5" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.312793, 0, 0.949821, 0, 0.430020, 0, -0.949821, 0, -0.312793, 52.401161, 9.085592, 139.623047)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra6" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.336046, 0, 0.941845, 0, 0.416304, 0, -0.941845, 0, -0.336046, 54.847801, 7.377570, 138.872650)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra7" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.293837, 0, 0.955855, 0, 0.409802, 0, -0.955855, 0, -0.293837, 57.082417, 4.147528, 138.175995)
+metadata/coliziune = "none"
+
+[node name="falezaB8" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(2.089312, 0, 1.073375, 0, 2.348905, 0, -1.073375, 0, 2.089312, 65.390800, -25.664450, 154.749741)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra9" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.333813, 0, 0.942639, 0, 0.410098, 0, -0.942639, 0, -0.333813, 59.513390, 3.235098, 137.423080)
+metadata/coliziune = "none"
+
+[node name="pintenBuza10" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.572238, 0, 0.820088, 0, 0.734925, 0, -0.820088, 0, -0.572238, 61.470383, 4.252829, 137.180969)
+metadata/coliziune = "none"
+
+[node name="falezaB11" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(3.622234, 0, -0.622304, 0, 3.675301, 0, 0.622304, 0, 3.622234, 63.521084, -28.890282, 147.715973)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra12" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.277391, 0, 0.960757, 0, 0.390124, 0, -0.960757, 0, -0.277391, 62.483387, 6.662543, 136.490936)
+metadata/coliziune = "none"
+
+[node name="falezaB13" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-1.953438, 0, 2.328444, 0, 3.039337, 0, -2.328444, 0, -1.953438, 68.939415, -33.322266, 153.471069)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra14" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.304226, 0, 0.952600, 0, 0.377337, 0, -0.952600, 0, -0.304226, 65.460457, 9.005163, 135.575104)
+metadata/coliziune = "none"
+
+[node name="falezaB15" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.102846, 0, 5.177837, 0, 5.178858, 0, -5.177837, 0, 0.102846, 73.169601, -42.485352, 151.137634)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra16" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.324295, 0, 0.945956, 0, 0.371228, 0, -0.945956, 0, -0.324295, 67.894852, 7.258933, 134.835190)
+metadata/coliziune = "none"
+
+[node name="falezaB17" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.655744, 0, -1.973161, 0, 2.575821, 0, 1.973161, 0, 1.655744, 73.565041, -43.447224, 146.347321)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra18" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.321966, 0, 0.946751, 0, 0.347606, 0, -0.946751, 0, -0.321966, 70.101265, 5.715277, 134.144104)
+metadata/coliziune = "none"
+
+[node name="pintenBuza19" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.469174, 0, 0.883106, 0, 0.614758, 0, -0.883106, 0, -0.469174, 71.701698, 2.034506, 134.027481)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra20" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.264649, 0, 0.964345, 0, 0.331610, 0, -0.964345, 0, -0.264649, 72.502472, 1.679983, 133.404251)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra21" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.276740, 0, 0.960945, 0, 0.322724, 0, -0.960945, 0, -0.276740, 75.460159, -0.493677, 132.505295)
+metadata/coliziune = "none"
+
+[node name="falezaB22" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.762233, 0, 3.757498, 0, 4.150212, 0, -3.757498, 0, 1.762233, 79.344261, -45.606712, 142.456772)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra23" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.312053, 0, 0.950065, 0, 0.300120, 0, -0.950065, 0, -0.312053, 78.501434, -4.318948, 131.552979)
+metadata/coliziune = "none"
+
+[node name="falezaB24" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-1.428448, 0, -2.153969, 0, 2.584579, 0, 2.153969, 0, -1.428448, 84.721085, -45.595322, 141.106567)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra25" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.272693, 0, 0.962101, 0, 0.285798, 0, -0.962101, 0, -0.272693, 80.975632, -9.860697, 130.777069)
+metadata/coliziune = "none"
+
+[node name="pintenBuza26" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.565496, 0, 0.824751, 0, 0.606885, 0, -0.824751, 0, -0.565496, 82.477180, -15.169336, 130.683563)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra27" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.274014, 0, 0.961726, 0, 0.279363, 0, -0.961726, 0, -0.274014, 83.142769, -10.942026, 130.110977)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra28" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.274170, 0, 0.961681, 0, 0.262802, 0, -0.961681, 0, -0.274170, 85.435951, -5.544946, 129.401749)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra29" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.261261, 0, 0.965268, 0, 0.255103, 0, -0.965268, 0, -0.261261, 88.286446, 0.805197, 128.564072)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra30" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.264553, 0, 0.964371, 0, 0.256121, 0, -0.964371, 0, -0.264553, 91.310440, 6.408713, 127.711861)
+metadata/coliziune = "none"
+
+[node name="pintenBuza31" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.476325, 0, 0.879269, 0, 0.535924, 0, -0.879269, 0, -0.476325, 93.038010, 6.218680, 127.595924)
+metadata/coliziune = "none"
+
+[node name="falezaB32" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.032846, 0, -3.187028, 0, 3.187197, 0, 3.187028, 0, 0.032846, 96.735855, -44.452053, 134.887482)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra33" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.280083, 0, 0.959976, 0, 0.249131, 0, -0.959976, 0, -0.280083, 93.778633, 10.017996, 127.020905)
+metadata/coliziune = "none"
+
+[node name="falezaB34" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.660580, 0, 2.989301, 0, 3.419568, 0, -2.989301, 0, 1.660580, 98.709778, -47.605923, 144.845078)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra35" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.274355, 0, 0.961628, 0, 0.251280, 0, -0.961628, 0, -0.274355, 96.006088, 13.056646, 126.426933)
+metadata/coliziune = "none"
+
+[node name="falezaB36" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(4.374429, 0, 1.868123, 0, 4.756628, 0, -1.868123, 0, 4.374429, 99.489868, -46.474487, 138.436096)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra37" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.226789, 0, 0.973944, 0, 0.262751, 0, -0.973944, 0, -0.226789, 98.367348, 13.038351, 125.814926)
+metadata/coliziune = "none"
+
+[node name="falezaB38" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.505932, 0, -2.604593, 0, 3.008610, 0, 2.604593, 0, 1.505932, 105.989449, -46.619736, 139.161713)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra39" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.254757, 0, 0.967005, 0, 0.266025, 0, -0.967005, 0, -0.254757, 101.278114, 6.273734, 125.027138)
+metadata/coliziune = "none"
+
+[node name="pintenBuza40" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.428841, 0, 0.903380, 0, 0.591172, 0, -0.903380, 0, -0.428841, 103.427299, -1.465219, 124.818047)
+metadata/coliziune = "none"
+
+[node name="falezaB41" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-4.303166, 0, 0.086743, 0, 4.304040, 0, -0.086743, 0, -4.303166, 105.314224, -46.233742, 140.112900)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra42" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.256305, 0, 0.966596, 0, 0.278329, 0, -0.966596, 0, -0.256305, 104.439163, -2.394433, 124.169464)
+metadata/coliziune = "none"
+
+[node name="falezaB43" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.120133, 0, 2.769199, 0, 2.771804, 0, -2.769199, 0, -0.120133, 109.229965, -45.985092, 135.247925)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra44" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.252617, 0, 0.967566, 0, 0.300177, 0, -0.967566, 0, -0.252617, 107.017387, -5.674890, 123.474098)
+metadata/coliziune = "none"
+
+[node name="falezaB45" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.337322, 0, 5.487181, 0, 5.497540, 0, -5.487181, 0, -0.337322, 112.259247, -47.130352, 133.233597)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra46" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.237959, 0, 0.971275, 0, 0.311237, 0, -0.971275, 0, -0.237959, 109.284615, -2.298776, 122.839790)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra47" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.282054, 0, 0.959399, 0, 0.330930, 0, -0.959399, 0, -0.282054, 111.603233, -2.775735, 122.201180)
+metadata/coliziune = "none"
+
+[node name="pintenBuza48" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.456628, 0, 0.889657, 0, 0.661066, 0, -0.889657, 0, -0.456628, 113.400497, -6.674112, 122.081024)
+metadata/coliziune = "none"
+
+[node name="falezaB49" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-3.917273, 0, -0.841218, 0, 4.006579, 0, 0.841218, 0, -3.917273, 116.986237, -45.407970, 130.434021)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra50" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.269303, 0, 0.963056, 0, 0.360017, 0, -0.963056, 0, -0.269303, 114.415031, -3.408578, 121.440628)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra51" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.261164, 0, 0.965294, 0, 0.374014, 0, -0.965294, 0, -0.261164, 117.736275, 4.189322, 120.502853)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra52" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.266833, 0, 0.963743, 0, 0.396188, 0, -0.963743, 0, -0.266833, 120.418816, 10.783926, 119.686180)
+metadata/coliziune = "none"
+
+[node name="falezaB53" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-1.790490, 0, -1.723060, 0, 2.484912, 0, 1.723060, 0, -1.790490, 125.639229, -45.473293, 130.464691)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra54" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.293297, 0, 0.956021, 0, 0.427419, 0, -0.956021, 0, -0.293297, 122.582359, 15.175451, 119.017776)
+metadata/coliziune = "none"
+
+[node name="pintenBuza55" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.465319, 0, 0.885143, 0, 0.715427, 0, -0.885143, 0, -0.465319, 123.941452, 13.574148, 118.977051)
+metadata/coliziune = "none"
+
+[node name="falezaB56" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.313500, 0, 3.181460, 0, 3.441943, 0, -3.181460, 0, 1.313500, 128.367447, -45.356239, 134.467331)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra57" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.239613, 0, 0.970868, 0, 0.438770, 0, -0.970868, 0, -0.239613, 124.597527, 16.986807, 118.424530)
+metadata/coliziune = "none"
+
+[node name="falezaB58" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.238357, 0, 1.674549, 0, 2.082701, 0, -1.674549, 0, 1.238357, 128.531540, -45.007210, 132.381409)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra59" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.196744, 0, 0.980455, 0, 0.458073, 0, -0.980455, 0, -0.196744, 127.023384, 14.791311, 117.836182)
+metadata/coliziune = "none"
+
+[node name="falezaB60" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-2.001688, 0, -4.479276, 0, 4.906187, 0, 4.479276, 0, -2.001688, 130.972397, -46.634274, 130.102798)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra61" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.123309, 0, 0.992368, 0, 0.486176, 0, -0.992368, 0, -0.123309, 130.006836, 11.622717, 117.256577)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra62" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.117207, 0, 0.993107, 0, 0.490463, 0, -0.993107, 0, -0.117207, 132.493347, 10.755438, 116.843536)
+metadata/coliziune = "none"
+
+[node name="pintenBuza63" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.443971, 0, 0.896041, 0, 0.838240, 0, -0.896041, 0, -0.443971, 133.914993, 7.910635, 117.024239)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra64" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.052903, 0, 0.998600, 0, 0.502933, 0, -0.998600, 0, -0.052903, 134.634705, 8.206060, 116.582504)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra65" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.095375, 0, 0.995441, 0, 0.524288, 0, -0.995441, 0, -0.095375, 136.942474, 5.179785, 116.386826)
+metadata/coliziune = "none"
+
+[node name="falezaB66" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(3.856093, 0, 1.491543, 0, 4.134507, 0, -1.491543, 0, 3.856093, 141.672348, -45.645016, 126.840775)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra67" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.060954, 0, 0.998141, 0, 0.519717, 0, -0.998141, 0, -0.060954, 139.719894, 4.748221, 116.144424)
+metadata/coliziune = "none"
+
+[node name="falezaB68" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(2.786624, 0, -1.461430, 0, 3.146593, 0, 1.461430, 0, 2.786624, 144.353760, -47.179562, 135.041931)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra69" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.080190, 0, 0.996780, 0, 0.524098, 0, -0.996780, 0, -0.080190, 142.995163, 2.005087, 115.838203)
+metadata/coliziune = "none"
+
+[node name="pintenBuza70" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.376110, 0, 0.926575, 0, 0.827666, 0, -0.926575, 0, -0.376110, 144.897736, -1.673517, 116.025436)
+metadata/coliziune = "none"
+
+[node name="falezaB71" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-4.784492, 0, -2.906638, 0, 5.598206, 0, 2.906638, 0, -4.784492, 145.609940, -47.838238, 134.237061)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra72" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.079646, 0, 0.996823, 0, 0.537935, 0, -0.996823, 0, -0.079646, 145.808853, -0.877893, 115.594994)
+metadata/coliziune = "none"
+
+[node name="falezaB73" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.780700, 0, 1.904150, 0, 2.057979, 0, -1.904150, 0, 0.780700, 148.748169, -44.961239, 129.932999)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra74" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.088062, 0, 0.996115, 0, 0.525842, 0, -0.996115, 0, -0.088062, 148.156158, 0.327795, 115.399757)
+metadata/coliziune = "none"
+
+[node name="falezaB75" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.432352, 0, 4.542370, 0, 4.562900, 0, -4.542370, 0, 0.432352, 151.395233, -46.404320, 129.812180)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra76" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.033990, 0, 0.999422, 0, 0.523901, 0, -0.999422, 0, -0.033990, 150.500580, -1.214151, 115.231613)
+metadata/coliziune = "none"
+
+[node name="falezaB77" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(2.291319, 0, 0.903671, 0, 2.463080, 0, -0.903671, 0, 2.291319, 153.823380, -45.996941, 134.002182)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra78" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.059766, 0, 0.998212, 0, 0.532449, 0, -0.998212, 0, -0.059766, 153.197266, -4.200723, 115.049889)
+metadata/coliziune = "none"
+
+[node name="pintenBuza79" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.422628, 0, 0.906303, 0, 0.820926, 0, -0.906303, 0, -0.422628, 155.411819, -6.010767, 115.234833)
+metadata/coliziune = "none"
+
+[node name="falezaB80" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.844710, 0, -4.959903, 0, 5.031319, 0, 4.959903, 0, -0.844710, 158.585281, -46.681816, 126.369629)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra81" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.073254, 0, 0.997313, 0, 0.516668, 0, -0.997313, 0, -0.073254, 156.654984, -2.814630, 114.762695)
+metadata/coliziune = "none"
+
+[node name="falezaB82" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-3.329525, 0, -0.515706, 0, 3.369227, 0, 0.515706, 0, -3.329525, 159.932587, -47.644135, 134.944107)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra83" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.156339, 0, 0.987704, 0, 0.512414, 0, -0.987704, 0, -0.156339, 159.865997, -3.222421, 114.408730)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra84" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.125349, 0, 0.992113, 0, 0.519943, 0, -0.992113, 0, -0.125349, 162.189117, -3.003000, 114.098640)
+metadata/coliziune = "none"
+
+[node name="falezaB85" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-1.314792, 0, 1.976954, 0, 2.374242, 0, -1.976954, 0, -1.314792, 165.217407, -45.019627, 125.110382)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra86" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.034945, 0, 0.999389, 0, 0.505270, 0, -0.999389, 0, -0.034945, 164.113205, -0.893167, 113.861023)
+metadata/coliziune = "none"
+
+[node name="pintenBuza87" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.338489, 0, 0.940970, 0, 0.807111, 0, -0.940970, 0, -0.338489, 165.388916, -2.921136, 114.138489)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra88" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.014477, 0, 0.999895, 0, 0.503354, 0, -0.999895, 0, -0.014477, 166.196960, 0.134894, 113.763237)
+metadata/coliziune = "none"
+
+[node name="falezaB89" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.661568, 0, 2.031879, 0, 2.624755, 0, -2.031879, 0, 1.661568, 166.936264, -46.036381, 130.160980)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra90" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.088502, 0, 0.996076, 0, 0.514472, 0, -0.996076, 0, 0.088502, 168.902435, -1.655695, 113.857002)
+metadata/coliziune = "none"
+
+[node name="falezaB91" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(2.002767, 0, 4.581266, 0, 4.999907, 0, -4.581266, 0, 2.002767, 168.208832, -46.991436, 130.168304)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra92" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.153808, 0, 0.988101, 0, 0.504802, 0, -0.988101, 0, 0.153808, 171.390945, -3.634073, 114.087219)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra93" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.223188, 0, 0.974775, 0, 0.508693, 0, -0.974775, 0, 0.223188, 173.402328, -6.428583, 114.448555)
+metadata/coliziune = "none"
+
+[node name="pintenBuza94" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.096921, 0, 0.995292, 0, 0.766220, 0, -0.995292, 0, -0.096921, 174.648712, -5.674463, 115.112488)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra95" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.216059, 0, 0.976380, 0, 0.526515, 0, -0.976380, 0, 0.216059, 175.522354, -1.894800, 114.973328)
+metadata/coliziune = "none"
+
+[node name="falezaB96" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-2.940486, 0, -1.710998, 0, 3.402054, 0, 1.710998, 0, -2.940486, 173.231262, -47.001667, 126.471405)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra97" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.234300, 0, 0.972164, 0, 0.523325, 0, -0.972164, 0, 0.234300, 178.221786, 1.877554, 115.647903)
+metadata/coliziune = "none"
+
+[node name="falezaB98" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.603790, 0, -3.169686, 0, 3.226681, 0, 3.169686, 0, 0.603790, 178.902115, -44.695099, 127.215652)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra99" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.213377, 0, 0.976970, 0, 0.533930, 0, -0.976970, 0, 0.213377, 181.554764, 5.721060, 116.393517)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra100" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.177727, 0, 0.984080, 0, 0.558806, 0, -0.984080, 0, 0.177727, 184.763748, 16.362677, 117.003639)
+metadata/coliziune = "none"
+
+[node name="pintenBuza101" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.207395, 0, 0.978257, 0, 0.920896, 0, -0.978257, 0, -0.207395, 186.367661, 18.336294, 117.632530)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra102" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.136859, 0, 0.990591, 0, 0.560540, 0, -0.990591, 0, 0.136859, 187.243271, 19.765860, 117.416161)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra103" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.226290, 0, 0.974060, 0, 0.575776, 0, -0.974060, 0, 0.226290, 189.249283, 22.986288, 117.784477)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra104" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.244853, 0, 0.969560, 0, 0.605037, 0, -0.969560, 0, 0.244853, 191.310654, 26.288076, 118.281471)
+metadata/coliziune = "none"
+
+[node name="falezaB105" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-3.059947, 0, 1.375181, 0, 3.354757, 0, -1.375181, 0, -3.059947, 188.333313, -47.119907, 132.178665)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra106" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.288592, 0, 0.957452, 0, 0.607628, 0, -0.957452, 0, 0.288592, 193.961487, 23.568518, 119.060524)
+metadata/coliziune = "none"
+
+[node name="pintenBuza107" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.030833, 0, 0.999525, 0, 0.891164, 0, -0.999525, 0, -0.030833, 195.708511, 15.152227, 120.025925)
+metadata/coliziune = "none"
+
+[node name="falezaB108" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.825909, 0, 3.108416, 0, 3.216267, 0, -3.108416, 0, 0.825909, 192.435837, -44.588875, 129.019943)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra109" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.348807, 0, 0.937195, 0, 0.623109, 0, -0.937195, 0, 0.348807, 196.679535, 15.605108, 119.988243)
+metadata/coliziune = "none"
+
+[node name="falezaB110" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-2.088408, 0, -0.180727, 0, 2.096214, 0, 0.180727, 0, -2.088408, 194.020355, -43.723209, 130.025818)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra111" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.402042, 0, 0.915621, 0, 0.651929, 0, -0.915621, 0, 0.402042, 198.695160, 8.948645, 120.760269)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra112" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.447609, 0, 0.894230, 0, 0.650267, 0, -0.894230, 0, 0.447609, 200.374084, 5.595282, 121.512619)
+metadata/coliziune = "none"
+
+[node name="falezaB113" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.608472, 0, 1.972551, 0, 2.545219, 0, -1.972551, 0, 1.608472, 195.503769, -45.793243, 135.479492)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra114" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.496573, 0, 0.867995, 0, 0.660849, 0, -0.867995, 0, 0.496573, 202.252655, -0.292673, 122.518951)
+metadata/coliziune = "none"
+
+[node name="pintenBuza115" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.151073, 0, 0.988523, 0, 0.975952, 0, -0.988523, 0, 0.151073, 203.547424, -8.862421, 123.695633)
+metadata/coliziune = "none"
+
+[node name="falezaB116" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-4.975283, 0, 1.707777, 0, 5.260222, 0, -1.707777, 0, -4.975283, 196.406662, -47.146992, 135.825974)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra117" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.497793, 0, 0.867296, 0, 0.683920, 0, -0.867296, 0, 0.497793, 204.626465, -3.469034, 123.937790)
+metadata/coliziune = "none"
+
+[node name="falezaB118" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-2.174760, 0, -2.464834, 0, 3.287094, 0, 2.464834, 0, -2.174760, 200.652664, -46.815540, 135.194092)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra119" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.595366, 0, 0.803454, 0, 0.673727, 0, -0.803454, 0, 0.595366, 206.867996, 13.625906, 125.383270)
+metadata/coliziune = "none"
+
+[node name="falezaB120" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-1.991073, 0, 3.182083, 0, 3.753668, 0, -3.182083, 0, -1.991073, 198.317200, -45.695488, 139.647614)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra121" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.630199, 0, 0.776433, 0, 0.675364, 0, -0.776433, 0, 0.630199, 208.602936, 26.209127, 126.718002)
+metadata/coliziune = "none"
+
+[node name="falezaB122" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-2.206717, 0, 0.740857, 0, 2.327761, 0, -0.740857, 0, -2.206717, 197.806061, -45.743763, 141.839645)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra123" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.602550, 0, 0.798081, 0, 0.688772, 0, -0.798081, 0, 0.602550, 210.327881, 14.248465, 128.227524)
+metadata/coliziune = "none"
+
+[node name="pintenBuza124" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.329561, 0, 0.944134, 0, 0.995208, 0, -0.944134, 0, 0.329561, 211.408417, 1.491522, 129.623062)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra125" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.597051, 0, 0.802203, 0, 0.668204, 0, -0.802203, 0, 0.597051, 212.413910, -1.907114, 130.000122)
+metadata/coliziune = "none"
+
+[node name="falezaB126" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(2.224529, 0, -1.395066, 0, 2.625783, 0, 1.395066, 0, 2.224529, 202.914963, -46.204834, 145.143448)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra127" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.570562, 0, 0.821254, 0, 0.659430, 0, -0.821254, 0, 0.570562, 214.962509, 9.051855, 131.951660)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra128" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.644675, 0, 0.764456, 0, 0.662052, 0, -0.764456, 0, 0.644675, 217.193405, 26.531866, 133.636475)
+metadata/coliziune = "none"
+
+[node name="falezaB129" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-2.456447, 0, -1.973129, 0, 3.150773, 0, 1.973129, 0, -2.456447, 209.120575, -46.744328, 144.480957)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra130" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.640002, 0, 0.768374, 0, 0.632447, 0, -0.768374, 0, 0.640002, 219.327652, 17.560019, 135.466064)
+metadata/coliziune = "none"
+
+[node name="pintenBuza131" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.439891, 0, 0.898051, 0, 0.909150, 0, -0.898051, 0, 0.439891, 220.717484, 4.840140, 137.110840)
+metadata/coliziune = "none"
+
+[node name="falezaB132" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-2.062054, 0, -2.550491, 0, 3.279797, 0, 2.550491, 0, -2.062054, 214.759842, -45.050945, 150.998993)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra133" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.528934, 0, 0.848663, 0, 0.614946, 0, -0.848663, 0, 0.528934, 221.970566, 2.502661, 137.609177)
+metadata/coliziune = "none"
+
+[node name="falezaB134" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.977961, 0, 3.139557, 0, 3.288347, 0, -3.139557, 0, 0.977961, 219.335403, -46.900143, 157.330933)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra135" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(0.342275, 0, 0.939600, 0, 0.608859, 0, -0.939600, 0, 0.342275, 225.537872, 6.467154, 139.678741)
+metadata/coliziune = "none"
+
+[node name="falezaB136" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-2.834787, 0, -2.809317, 0, 3.991024, 0, 2.809317, 0, -2.834787, 221.395386, -45.516731, 151.389816)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra137" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(0.112350, 0, 0.993669, 0, 0.574347, 0, -0.993669, 0, 0.112350, 229.797119, 10.904470, 140.905975)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra138" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.057248, 0, 0.998360, 0, 0.552401, 0, -0.998360, 0, -0.057248, 233.999496, 20.086493, 141.279755)
+metadata/coliziune = "none"
+
+[node name="pintenBuza139" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.392063, 0, 0.919939, 0, 0.893435, 0, -0.919939, 0, -0.392063, 236.751541, 14.562490, 141.504639)
+metadata/coliziune = "none"
+
+[node name="falezaB140" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.846073, 0, 3.694612, 0, 4.130151, 0, -3.694612, 0, 1.846073, 235.188004, -45.327446, 153.532928)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra141" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.219256, 0, 0.975667, 0, 0.542163, 0, -0.975667, 0, -0.219256, 238.201263, 14.178686, 140.921204)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra142" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.411670, 0, 0.911333, 0, 0.508277, 0, -0.911333, 0, -0.411670, 242.307602, 13.648458, 139.739197)
+metadata/coliziune = "none"
+
+[node name="falezaB143" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-3.018645, 0, 1.984316, 0, 3.612440, 0, -1.984316, 0, -3.018645, 255.964828, -44.687809, 149.797150)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra144" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.591387, 0, 0.806388, 0, 0.487297, 0, -0.806388, 0, -0.591387, 246.051605, 18.030539, 137.650635)
+metadata/coliziune = "none"
+
+[node name="falezaB145" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.613394, 0, -1.927300, 0, 2.022557, 0, 1.927300, 0, -0.613394, 255.913925, -44.110157, 140.031021)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra146" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.782797, 0, 0.622277, 0, 0.478344, 0, -0.622277, 0, -0.782797, 249.258240, 24.728277, 134.829041)
+metadata/coliziune = "none"
+
+[node name="pintenBuza147" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.897869, 0, 0.440263, 0, 0.810751, 0, -0.440263, 0, -0.897869, 251.375641, 14.664770, 132.748276)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra148" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.906095, 0, 0.423074, 0, 0.450143, 0, -0.423074, 0, -0.906095, 251.984009, 13.462790, 131.122192)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra149" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.972785, 0, 0.231709, 0, 0.434803, 0, -0.231709, 0, -0.972785, 253.663864, 2.530966, 127.000359)
+metadata/coliziune = "none"
+
+[node name="falezaB150" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-3.279671, 0, 1.856079, 0, 3.768458, 0, -1.856079, 0, -3.279671, 270.904541, -45.182446, 122.630440)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra151" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.999327, 0, 0.036688, 0, 0.431556, 0, -0.036688, 0, -0.999327, 254.279266, 1.496542, 123.176712)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra152" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.999027, 0, -0.044098, 0, 0.411928, 0, 0.044098, 0, -0.999027, 254.249680, 3.739874, 119.956276)
+metadata/coliziune = "none"
+
+[node name="pintenBuza153" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.939645, 0, -0.342150, 0, 0.666001, 0, 0.342150, 0, -0.939645, 254.491791, 1.794363, 118.029999)
+metadata/coliziune = "none"
+
+[node name="falezaB154" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-2.222410, 0, 4.643554, 0, 5.147981, 0, -4.643554, 0, -2.222410, 266.384033, -46.728165, 116.946465)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra155" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.995460, 0, -0.095180, 0, 0.404587, 0, 0.095180, 0, -0.995460, 254.055954, 2.503027, 116.987434)
+metadata/coliziune = "none"
+
+[node name="falezaB156" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-3.102707, 0, -1.086502, 0, 3.287442, 0, 1.086502, 0, -3.102707, 272.634491, -46.917233, 114.793144)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra157" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.990291, 0, -0.139012, 0, 0.408956, 0, 0.139012, 0, -0.990291, 253.779388, -1.636850, 113.246750)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra158" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.978262, 0, -0.207372, 0, 0.397711, 0, 0.207372, 0, -0.978262, 253.200790, 0.542822, 109.627831)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra159" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.949721, 0, -0.313099, 0, 0.397691, 0, 0.313099, 0, -0.949721, 252.421188, 0.131262, 106.739311)
+metadata/coliziune = "none"
+
+[node name="pintenBuza160" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.829421, 0, -0.558623, 0, 0.616565, 0, 0.558623, 0, -0.829421, 252.253754, 1.565634, 105.087936)
+metadata/coliziune = "none"
+
+[node name="falezaB161" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-4.849281, 0, -0.676973, 0, 4.896307, 0, 0.676973, 0, -4.849281, 267.555603, -46.929443, 100.097542)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra162" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.938628, 0, -0.344931, 0, 0.408505, 0, 0.344931, 0, -0.938628, 251.648422, 7.113532, 104.402481)
+metadata/coliziune = "none"
+
+[node name="falezaB163" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.139492, 0, -3.135027, 0, 3.335692, 0, 3.135027, 0, 1.139492, 270.304474, -47.557117, 97.572227)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra164" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.971696, 0, -0.236233, 0, 0.402596, 0, 0.236233, 0, -0.971696, 250.885406, 14.028448, 102.148994)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra165" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.977221, 0, -0.212223, 0, 0.406566, 0, 0.212223, 0, -0.977221, 250.075607, 20.859320, 99.198082)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra166" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.971352, 0, -0.237643, 0, 0.420141, 0, 0.237643, 0, -0.971352, 249.376694, 26.286535, 96.357994)
+metadata/coliziune = "none"
+
+[node name="pintenBuza167" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.862394, 0, -0.506238, 0, 0.708415, 0, 0.506238, 0, -0.862394, 249.332245, 26.196630, 94.707069)
+metadata/coliziune = "none"
+
+[node name="falezaB168" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.262310, 0, 2.899163, 0, 3.162052, 0, -2.899163, 0, 1.262310, 264.651611, -45.060627, 90.029144)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra169" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.965804, 0, -0.259273, 0, 0.414913, 0, 0.259273, 0, -0.965804, 248.773361, 27.621328, 93.949547)
+metadata/coliziune = "none"
+
+[node name="falezaB170" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.540863, 0, -2.682035, 0, 2.736027, 0, 2.682035, 0, 0.540863, 265.323792, -46.395378, 86.378868)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra171" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.971365, 0, -0.237592, 0, 0.418243, 0, 0.237592, 0, -0.971365, 248.154572, 19.055227, 91.541473)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra172" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.965391, 0, -0.260807, 0, 0.429876, 0, 0.260807, 0, -0.965391, 247.409958, 9.439871, 88.834511)
+metadata/coliziune = "none"
+
+[node name="buzaPiatra173" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_a")]
+transform = Transform3D(-0.964547, 0, -0.263912, 0, 0.420886, 0, 0.263912, 0, -0.964547, 246.428452, 5.130850, 85.605156)
+metadata/coliziune = "none"
+
+[node name="pintenBuza174" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_wall_c")]
+transform = Transform3D(-0.790853, 0, -0.612007, 0, 0.693667, 0, 0.612007, 0, -0.790853, 246.121017, -4.570856, 83.453087)
+metadata/coliziune = "none"
+
+[node name="ferigaStg175" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.684648, 0, -0.199429, 0, 0.713102, 0, 0.199429, 0, -0.684648, 42.366596, 13.297211, 127.813507)
+metadata/coliziune = "none"
+
+[node name="bromStg176" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.617425, 0, -1.451196, 0, 2.173024, 0, 1.451196, 0, -1.617425, 44.149754, 13.524673, 126.820648)
+metadata/coliziune = "none"
+
+[node name="bromBuza177" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.298894, 0, -2.265183, 0, 2.611165, 0, 2.265183, 0, -1.298894, 50.312351, 7.691238, 141.917435)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza178" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.205428, 0, -0.715752, 0, 0.744649, 0, 0.715752, 0, -0.205428, 51.898869, 6.183441, 141.533524)
+metadata/coliziune = "none"
+
+[node name="ferigaStg179" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.640888, 0, 0.004458, 0, 0.640903, 0, -0.004458, 0, 0.640888, 48.073975, 13.987061, 125.894730)
+metadata/coliziune = "none"
+
+[node name="bromBuza180" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.234756, 0, 0.105602, 0, 2.237249, 0, -0.105602, 0, -2.234756, 55.650925, 0.117996, 140.556335)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza181" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.805218, 0, -0.232271, 0, 0.838049, 0, 0.232271, 0, 0.805218, 56.713985, -0.718323, 140.014893)
+metadata/coliziune = "none"
+
+[node name="ferigaStg182" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.018960, 0, -0.678247, 0, 0.678512, 0, 0.678247, 0, 0.018960, 52.677464, 14.518265, 125.013428)
+metadata/coliziune = "none"
+
+[node name="bromStg183" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.274226, 0, -1.818764, 0, 2.220710, 0, 1.818764, 0, -1.274226, 53.863113, 14.695892, 123.491516)
+metadata/coliziune = "none"
+
+[node name="bromBuza184" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.866284, 0, 1.710888, 0, 1.917703, 0, -1.710888, 0, 0.866284, 60.006985, 0.610550, 138.331116)
+metadata/coliziune = "none"
+
+[node name="ferigaStg185" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.551218, 0, 0.224519, 0, 0.595189, 0, -0.224519, 0, -0.551218, 58.069897, 15.147263, 123.517952)
+metadata/coliziune = "none"
+
+[node name="bromStg186" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.687102, 0, 0.048562, 0, 1.687801, 0, -0.048562, 0, -1.687102, 59.792576, 15.385284, 121.917740)
+metadata/coliziune = "none"
+
+[node name="bromBuza187" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.978148, 0, -1.634050, 0, 2.565773, 0, 1.634050, 0, 1.978148, 66.130814, -3.780838, 137.382965)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza188" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.122254, 0, 0.600391, 0, 0.612711, 0, -0.600391, 0, 0.122254, 67.393089, -4.801590, 137.027374)
+metadata/coliziune = "none"
+
+[node name="orhidee189" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(1.020163, 0, 1.569498, 0, 1.871913, 0, -1.569498, 0, 1.020163, 64.871506, -0.383636, 137.401581)
+metadata/coliziune = "none"
+
+[node name="bromStg190" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.747829, 0, 2.038095, 0, 2.684909, 0, -2.038095, 0, 1.747829, 64.508080, 15.952667, 120.095390)
+metadata/coliziune = "none"
+
+[node name="bromBuza191" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.861201, 0, 0.558562, 0, 2.915212, 0, -0.558562, 0, -2.861201, 70.818497, -9.731812, 136.448883)
+metadata/coliziune = "none"
+
+[node name="bromStg192" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.964227, 0, 1.247637, 0, 1.576810, 0, -1.247637, 0, 0.964227, 69.276756, 16.518356, 118.489273)
+metadata/coliziune = "none"
+
+[node name="bromBuza193" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.611160, 0, -1.496406, 0, 2.198879, 0, 1.496406, 0, -1.611160, 76.032211, -14.669434, 134.754105)
+metadata/coliziune = "none"
+
+[node name="bromStg194" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.870716, 0, -1.867923, 0, 2.643618, 0, 1.867923, 0, -1.870716, 75.054512, 17.197952, 116.625778)
+metadata/coliziune = "none"
+
+[node name="bromStg195" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.782528, 0, -2.260891, 0, 2.392484, 0, 2.260891, 0, -0.782528, 79.566467, 17.725510, 115.066872)
+metadata/coliziune = "none"
+
+[node name="bromBuza196" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.504006, 0, -1.003173, 0, 2.697481, 0, 1.003173, 0, -2.504006, 85.752907, -20.486420, 131.501236)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza197" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.016705, 0, 0.693627, 0, 0.693828, 0, -0.693627, 0, -0.016705, 86.534119, -4.467300, 129.318039)
+metadata/coliziune = "none"
+
+[node name="bromStg198" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.678477, 0, -0.324490, 0, 1.709555, 0, 0.324490, 0, 1.678477, 85.493294, 18.374924, 114.329063)
+metadata/coliziune = "none"
+
+[node name="bromBuza199" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.585477, 0, 2.507959, 0, 2.967086, 0, -2.507959, 0, 1.585477, 91.259544, -2.726776, 129.000031)
+metadata/coliziune = "none"
+
+[node name="bromBuza200" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.462403, 0, 2.756962, 0, 2.795471, 0, -2.756962, 0, 0.462403, 96.190269, -3.928574, 128.798508)
+metadata/coliziune = "none"
+
+[node name="ferigaStg201" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.410974, 0, 0.739811, 0, 0.846298, 0, -0.739811, 0, -0.410974, 93.953217, 19.342361, 112.337395)
+metadata/coliziune = "none"
+
+[node name="bromStg202" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.595277, 0, 0.794544, 0, 1.782192, 0, -0.794544, 0, 1.595277, 95.366783, 19.529526, 111.162834)
+metadata/coliziune = "none"
+
+[node name="bromBuza203" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.214974, 0, -1.685003, 0, 1.698661, 0, 1.685003, 0, -0.214974, 100.949280, -0.136169, 126.569969)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza204" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.664688, 0, -0.180908, 0, 0.688867, 0, 0.180908, 0, -0.664688, 102.551796, -3.936707, 126.114029)
+metadata/coliziune = "none"
+
+[node name="bromBuza205" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.111859, 0, -2.236797, 0, 2.497898, 0, 2.236797, 0, 1.111859, 106.883423, -14.750793, 125.381554)
+metadata/coliziune = "none"
+
+[node name="orhidee206" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-1.056894, 0, -1.550109, 0, 1.876130, 0, 1.550109, 0, -1.056894, 101.336021, 20.240280, 109.028702)
+metadata/coliziune = "none"
+
+[node name="ferigaStg207" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.196671, 0, 0.671576, 0, 0.699781, 0, -0.671576, 0, -0.196671, 104.645813, 20.593430, 109.308807)
+metadata/coliziune = "none"
+
+[node name="bromBuza208" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.318517, 0, 2.476239, 0, 2.496640, 0, -2.476239, 0, 0.318517, 111.263977, -12.965637, 123.682861)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza209" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.476739, 0, 0.542157, 0, 0.721951, 0, -0.542157, 0, -0.476739, 112.763657, -22.293243, 124.368622)
+metadata/coliziune = "none"
+
+[node name="bromStg210" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.330881, 0, 2.273062, 0, 2.634019, 0, -2.273062, 0, 1.330881, 111.005844, 21.367371, 106.641960)
+metadata/coliziune = "none"
+
+[node name="bromBuza211" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.823221, 0, 1.157030, 0, 2.159364, 0, -1.157030, 0, -1.823221, 117.337189, -16.360931, 123.198700)
+metadata/coliziune = "none"
+
+[node name="ferigaStg212" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.671275, 0, -0.288545, 0, 0.730663, 0, 0.288545, 0, -0.671275, 115.192543, 21.807907, 106.928291)
+metadata/coliziune = "none"
+
+[node name="bromStg213" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.567712, 0, -2.234257, 0, 2.729400, 0, 2.234257, 0, 1.567712, 116.359512, 21.979019, 105.102081)
+metadata/coliziune = "none"
+
+[node name="ferigaStg214" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.759058, 0, 0.291266, 0, 0.813022, 0, -0.291266, 0, 0.759058, 119.978683, 22.339035, 105.545937)
+metadata/coliziune = "none"
+
+[node name="bromBuza215" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.629068, 0, -0.378790, 0, 2.656216, 0, 0.378790, 0, -2.629068, 126.585411, -4.455658, 120.841133)
+metadata/coliziune = "none"
+
+[node name="ferigaStg216" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.023933, 0, -0.811804, 0, 0.812157, 0, 0.811804, 0, -0.023933, 125.780350, 22.998215, 103.620117)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza217" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.568901, 0, 0.289988, 0, 0.638546, 0, -0.289988, 0, -0.568901, 132.971878, -2.793655, 119.636429)
+metadata/coliziune = "none"
+
+[node name="ferigaStg218" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.848805, 0, -0.004429, 0, 0.848817, 0, 0.004429, 0, 0.848805, 131.916946, 23.651917, 102.630386)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza219" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.219536, 0, -0.702116, 0, 0.735638, 0, 0.702116, 0, -0.219536, 137.225174, -4.780136, 118.899040)
+metadata/coliziune = "none"
+
+[node name="ferigaStg220" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.026684, 0, -0.586977, 0, 0.587583, 0, 0.586977, 0, 0.026684, 136.763000, 24.169617, 102.494606)
+metadata/coliziune = "none"
+
+[node name="bromStg221" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.850543, 0, -1.991606, 0, 2.165622, 0, 1.991606, 0, -0.850543, 138.446823, 24.440216, 101.629951)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza222" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.413354, 0, 0.523850, 0, 0.667294, 0, -0.523850, 0, 0.413354, 143.328751, -16.874725, 119.705734)
+metadata/coliziune = "none"
+
+[node name="ferigaStg223" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.487902, 0, 0.497094, 0, 0.696528, 0, -0.497094, 0, 0.487902, 142.867996, 24.871277, 102.130783)
+metadata/coliziune = "none"
+
+[node name="bromStg224" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.206099, 0, 1.986268, 0, 1.996932, 0, -1.986268, 0, -0.206099, 144.637405, 25.144714, 101.238968)
+metadata/coliziune = "none"
+
+[node name="bromBuza225" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.681435, 0, -1.209905, 0, 2.071496, 0, 1.209905, 0, -1.681435, 147.086060, -11.833710, 117.737190)
+metadata/coliziune = "none"
+
+[node name="orhidee226" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(1.041876, 0, 1.607931, 0, 1.915972, 0, -1.607931, 0, 1.041876, 146.019043, -8.469208, 117.245392)
+metadata/coliziune = "none"
+
+[node name="bromStg227" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.166501, 0, -0.368261, 0, 2.197577, 0, 0.368261, 0, -2.166501, 149.319092, 25.651840, 100.218613)
+metadata/coliziune = "none"
+
+[node name="ferigaStg228" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.827894, 0, 0.312359, 0, 0.884859, 0, -0.312359, 0, 0.827894, 152.910294, 26.033264, 100.730064)
+metadata/coliziune = "none"
+
+[node name="bromBuza229" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.643605, 0, -2.150323, 0, 2.244575, 0, 2.150323, 0, -0.643605, 158.314072, -20.010269, 116.837585)
+metadata/coliziune = "none"
+
+[node name="ferigaStg230" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.367190, 0, 0.565937, 0, 0.674621, 0, -0.565937, 0, -0.367190, 158.514359, 26.611847, 100.518692)
+metadata/coliziune = "none"
+
+[node name="bromStg231" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.118096, 0, 1.215452, 0, 1.651503, 0, -1.215452, 0, 1.118096, 160.101028, 26.796341, 99.932953)
+metadata/coliziune = "none"
+
+[node name="bromBuza232" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.914523, 0, 1.713270, 0, 2.569181, 0, -1.713270, 0, 1.914523, 163.043839, -11.901489, 115.286072)
+metadata/coliziune = "none"
+
+[node name="ferigaStg233" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.022673, 0, -0.792978, 0, 0.793302, 0, 0.792978, 0, -0.022673, 163.851532, 27.165222, 100.352737)
+metadata/coliziune = "none"
+
+[node name="bromStg234" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.308604, 0, -1.491815, 0, 1.984428, 0, 1.491815, 0, 1.308604, 165.876389, 27.367813, 99.247917)
+metadata/coliziune = "none"
+
+[node name="bromStg235" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.584182, 0, -0.115849, 0, 2.586777, 0, 0.115849, 0, -2.584182, 173.112549, 28.068802, 99.331337)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza236" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.872313, 0, -0.260293, 0, 0.910320, 0, 0.260293, 0, -0.872313, 172.184708, -27.892426, 117.903168)
+metadata/coliziune = "none"
+
+[node name="ferigaStg237" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.576170, 0, -0.441478, 0, 0.725862, 0, 0.441478, 0, -0.576170, 176.820206, 28.458252, 100.989861)
+metadata/coliziune = "none"
+
+[node name="bromStg238" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.839488, 0, -1.375955, 0, 2.297165, 0, 1.375955, 0, -1.839488, 178.509308, 28.630432, 100.848961)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza239" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.460488, 0, -0.761740, 0, 0.890111, 0, 0.761740, 0, 0.460488, 177.254761, -2.404419, 116.379936)
+metadata/coliziune = "none"
+
+[node name="ferigaStg240" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.580576, 0, 0.285434, 0, 0.646947, 0, -0.285434, 0, 0.580576, 181.500320, 28.996277, 102.069855)
+metadata/coliziune = "none"
+
+[node name="bromStg241" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.897102, 0, -2.446140, 0, 2.605454, 0, 2.446140, 0, -0.897102, 183.461639, 29.214218, 101.625282)
+metadata/coliziune = "none"
+
+[node name="bromBuza242" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.098092, 0, -2.264924, 0, 2.267047, 0, 2.264924, 0, 0.098092, 182.081192, 6.038513, 117.697525)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza243" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.367304, 0, -0.658638, 0, 0.754133, 0, 0.658638, 0, 0.367304, 183.828354, 12.607071, 117.505287)
+metadata/coliziune = "none"
+
+[node name="ferigaStg244" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.706831, 0, -0.170420, 0, 0.727086, 0, 0.170420, 0, -0.706831, 187.048981, 29.544861, 103.715439)
+metadata/coliziune = "none"
+
+[node name="bromStg245" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.503600, 0, -1.789727, 0, 1.859229, 0, 1.789727, 0, -0.503600, 188.892410, 29.805618, 102.859032)
+metadata/coliziune = "none"
+
+[node name="bromBuza246" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.638803, 0, 0.665092, 0, 1.768621, 0, -0.665092, 0, -1.638803, 187.443680, 19.838974, 118.447571)
+metadata/coliziune = "none"
+
+[node name="orhidee247" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(1.221822, 0, 2.209341, 0, 2.524685, 0, -2.209341, 0, 1.221822, 189.229675, 29.852966, 101.946930)
+metadata/coliziune = "none"
+
+[node name="ferigaStg248" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.205552, 0, -0.694618, 0, 0.724393, 0, 0.694618, 0, 0.205552, 198.052643, 30.825089, 106.217484)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza249" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.656907, 0, -0.475602, 0, 0.811002, 0, 0.475602, 0, -0.656907, 196.977280, -9.989822, 122.931244)
+metadata/coliziune = "none"
+
+[node name="bromStg250" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(2.116525, 0, 0.922619, 0, 2.308875, 0, -0.922619, 0, 2.116525, 206.122101, 31.613022, 107.463364)
+metadata/coliziune = "none"
+
+[node name="bromStg251" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.840822, 0, 0.620390, 0, 1.942552, 0, -0.620390, 0, -1.840822, 211.004379, 32.151505, 110.118935)
+metadata/coliziune = "none"
+
+[node name="bromBuza252" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.133374, 0, 1.115477, 0, 1.590228, 0, -1.115477, 0, 1.133374, 203.670898, -10.486771, 125.723015)
+metadata/coliziune = "none"
+
+[node name="bromStg253" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.516524, 0, -0.227151, 0, 1.533442, 0, 0.227151, 0, -1.516524, 216.936188, 32.808868, 113.897690)
+metadata/coliziune = "none"
+
+[node name="bromBuza254" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.222709, 0, 1.804362, 0, 2.179619, 0, -1.804362, 0, 1.222709, 207.108154, 10.993774, 128.599747)
+metadata/coliziune = "none"
+
+[node name="ferigaStg255" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.518221, 0, 0.677380, 0, 0.852876, 0, -0.677380, 0, -0.518221, 219.443115, 33.072891, 116.336472)
+metadata/coliziune = "none"
+
+[node name="bromBuza256" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.642441, 0, 1.797553, 0, 1.908907, 0, -1.797553, 0, 0.642441, 211.734161, -8.285873, 130.727036)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza257" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.421724, 0, -0.555550, 0, 0.697487, 0, 0.555550, 0, -0.421724, 212.661926, -10.334564, 132.279037)
+metadata/coliziune = "none"
+
+[node name="ferigaStg258" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.673994, 0, -0.078657, 0, 0.678568, 0, 0.078657, 0, -0.673994, 222.858231, 33.378677, 119.467361)
+metadata/coliziune = "none"
+
+[node name="bromStg259" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.267690, 0, 1.393301, 0, 1.418783, 0, -1.393301, 0, -0.267690, 224.855316, 33.629974, 120.687439)
+metadata/coliziune = "none"
+
+[node name="bromBuza260" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.352603, 0, 2.087729, 0, 2.487598, 0, -2.087729, 0, 1.352603, 215.475983, 11.849915, 135.449738)
+metadata/coliziune = "none"
+
+[node name="bromStg261" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.482828, 0, -1.398436, 0, 2.038235, 0, 1.398436, 0, 1.482828, 230.342346, 34.081497, 123.473457)
+metadata/coliziune = "none"
+
+[node name="bromBuza262" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.521915, 0, -1.693810, 0, 2.277107, 0, 1.693810, 0, -1.521915, 220.991608, -4.566910, 138.290131)
+metadata/coliziune = "none"
+
+[node name="orhidee263" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-0.852268, 0, 1.907946, 0, 2.089646, 0, -1.907946, 0, -0.852268, 219.256088, -3.633743, 137.999573)
+metadata/coliziune = "none"
+
+[node name="ferigaStg264" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.312176, 0, -0.592930, 0, 0.670090, 0, 0.592930, 0, 0.312176, 230.938110, 34.201218, 125.017227)
+metadata/coliziune = "none"
+
+[node name="bromStg265" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.476742, 0, -1.065227, 0, 2.696101, 0, 1.065227, 0, -2.476742, 231.263260, 34.222137, 125.026184)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza266" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.225378, 0, 0.919931, 0, 0.947137, 0, -0.919931, 0, 0.225378, 231.151596, 6.291504, 143.673920)
+metadata/coliziune = "none"
+
+[node name="ferigaStg267" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.287698, 0, -0.720748, 0, 0.776047, 0, 0.720748, 0, -0.287698, 232.888046, 34.380035, 126.072968)
+metadata/coliziune = "none"
+
+[node name="bromStg268" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.546336, 0, 2.254970, 0, 2.734236, 0, -2.254970, 0, -1.546336, 233.867249, 34.334412, 124.617165)
+metadata/coliziune = "none"
+
+[node name="bromStg269" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.591060, 0, 0.250482, 0, 2.603139, 0, -0.250482, 0, -2.591060, 235.651535, 34.388885, 125.043419)
+metadata/coliziune = "none"
+
+[node name="bromBuza270" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.245538, 0, 1.984611, 0, 1.999742, 0, -1.984611, 0, -0.245538, 246.348907, -2.197098, 139.664902)
+metadata/coliziune = "none"
+
+[node name="bromStg271" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.551292, 0, -0.861071, 0, 1.774247, 0, 0.861071, 0, -1.551292, 237.077682, 34.372849, 124.150131)
+metadata/coliziune = "none"
+
+[node name="bromBuza272" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.301818, 0, 1.807497, 0, 2.227504, 0, -1.807497, 0, -1.301818, 251.782440, 12.244141, 132.385025)
+metadata/coliziune = "none"
+
+[node name="ferigaStg273" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.715716, 0, 0.567444, 0, 0.913369, 0, -0.567444, 0, -0.715716, 238.359543, 34.380402, 123.874001)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza274" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.618758, 0, -0.002746, 0, 0.618764, 0, 0.002746, 0, -0.618758, 257.134003, -15.297363, 122.454552)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza275" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.894938, 0, 0.072122, 0, 0.897839, 0, -0.072122, 0, -0.894938, 256.830750, -13.819122, 116.159668)
+metadata/coliziune = "none"
+
+[node name="bromStg276" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.447088, 0, 1.443776, 0, 2.044151, 0, -1.443776, 0, -1.447088, 238.400391, 33.905792, 114.891258)
+metadata/coliziune = "none"
+
+[node name="ferigaStg277" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.460381, 0, -0.381499, 0, 0.597906, 0, 0.381499, 0, 0.460381, 238.401840, 33.746399, 112.378479)
+metadata/coliziune = "none"
+
+[node name="orhidee278" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-1.884719, 0, -1.205079, 0, 2.237048, 0, 1.205079, 0, -1.884719, 235.889099, 33.622833, 111.737755)
+metadata/coliziune = "none"
+
+[node name="ferigaStg279" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.242674, 0, 0.542134, 0, 0.593970, 0, -0.542134, 0, 0.242674, 236.670975, 33.384613, 108.063141)
+metadata/coliziune = "none"
+
+[node name="bromStg280" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.727704, 0, 2.367876, 0, 2.477174, 0, -2.367876, 0, 0.727704, 235.048813, 33.224823, 106.288330)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza281" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.085704, 0, -0.773349, 0, 0.778084, 0, 0.773349, 0, 0.085704, 251.296021, 10.107071, 98.663673)
+metadata/coliziune = "none"
+
+[node name="ferigaStg282" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.180704, 0, -0.561235, 0, 0.589609, 0, 0.561235, 0, 0.180704, 234.659958, 32.904037, 101.620575)
+metadata/coliziune = "none"
+
+[node name="bromStg283" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.350965, 0, 1.860977, 0, 2.299639, 0, -1.860977, 0, -1.350965, 233.992584, 32.743591, 99.915138)
+metadata/coliziune = "none"
+
+[node name="bromBuza284" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.285211, 0, -1.569970, 0, 2.028934, 0, 1.569970, 0, 1.285211, 250.294296, 17.932663, 94.751938)
+metadata/coliziune = "none"
+
+[node name="ferigaBuza285" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.206547, 0, -0.818371, 0, 0.844034, 0, 0.818371, 0, 0.206547, 250.000046, 20.497986, 93.559113)
+metadata/coliziune = "none"
+
+[node name="bromBuza286" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-2.714192, 0, 0.399601, 0, 2.743450, 0, -0.399601, 0, -2.714192, 249.777115, 7.956619, 89.710403)
+metadata/coliziune = "none"
+
+[node name="trepteStg287" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(0.995509, 0, 0.094669, 0, 1.000000, 0, -0.094669, 0, 0.995509, -17.141550, 5.655459, 131.483414)
+metadata/coliziune = "none"
+
+[node name="trepteStg288" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.977538, 0, 0.210761, 0, 1.000000, 0, -0.210761, 0, 0.977538, 2.507987, 7.953113, 132.048355)
+metadata/coliziune = "none"
+
+[node name="trepteStg289" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(0.977671, 0, 0.210140, 0, 1.000000, 0, -0.210140, 0, 0.977671, 23.497126, 10.419421, 126.207764)
+metadata/coliziune = "none"
+
+[node name="trepteStg290" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.959621, 0, 0.281295, 0, 1.000000, 0, -0.281295, 0, 0.959621, 44.273476, 12.809207, 124.617790)
+metadata/coliziune = "none"
+
+[node name="trepteStg291" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(0.954712, 0, 0.297532, 0, 1.000000, 0, -0.297532, 0, 0.954712, 63.528877, 15.204806, 115.173683)
+metadata/coliziune = "none"
+
+[node name="trepteStg292" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.963470, 0, 0.267815, 0, 1.000000, 0, -0.267815, 0, 0.963470, 85.521423, 17.664112, 111.566399)
+metadata/coliziune = "none"
+
+[node name="trepteStg293" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(0.966213, 0, 0.257747, 0, 1.000000, 0, -0.257747, 0, 0.966213, 105.033554, 20.019733, 102.930763)
+metadata/coliziune = "none"
+
+[node name="trepteStg294" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.989388, 0, 0.145298, 0, 1.000000, 0, -0.145298, 0, 0.989388, 128.349579, 22.941044, 100.295197)
+metadata/coliziune = "none"
+
+[node name="trepteStg295" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(0.997723, 0, 0.067450, 0, 1.000000, 0, -0.067450, 0, 0.997723, 149.585068, 25.183811, 95.892044)
+metadata/coliziune = "none"
+
+[node name="trepteStg296" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.986167, 0, -0.165755, 0, 1.000000, 0, 0.165755, 0, 0.986167, 174.222000, 27.365177, 97.417435)
+metadata/coliziune = "none"
+
+[node name="trepteStg297" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(0.964757, 0, -0.263143, 0, 1.000000, 0, 0.263143, 0, 0.964757, 196.110916, 29.666294, 99.502045)
+metadata/coliziune = "none"
+
+[node name="trepteStg298" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.791626, 0, -0.611006, 0, 1.000000, 0, 0.611006, 0, 0.791626, 218.496490, 32.045933, 112.953468)
+metadata/coliziune = "none"
+
+[node name="trepteStg299" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(0.977321, 0, -0.211764, 0, 1.000000, 0, 0.211764, 0, 0.977321, 232.566513, 33.211826, 119.543983)
+metadata/coliziune = "none"
+
+[node name="trepteStg300" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_a")]
+transform = Transform3D(0.116359, 0, 0.993207, 0, 1.000000, 0, -0.993207, 0, 0.116359, 236.414749, 33.522022, 123.164680)
+metadata/coliziune = "none"
+
+[node name="trepteStg301" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_inca_stair_b")]
+transform = Transform3D(-0.255113, 0, 0.966911, 0, 1.000000, 0, -0.966911, 0, -0.255113, 229.936752, 32.258839, 106.776062)
+metadata/coliziune = "none"
+
+[node name="borna302" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-0.243484, 0, -1.114459, 0, 1.140746, 0, 1.114459, 0, -0.243484, -18.266333, 5.799371, 159.009949)
+metadata/coliziune = "none"
+
+[node name="borna303" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(0.933850, 0, 0.591200, 0, 1.105257, 0, -0.591200, 0, 0.933850, 2.963414, 8.614267, 134.006729)
+metadata/coliziune = "none"
+
+[node name="borna304" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(0.633087, 0, 1.074902, 0, 1.247483, 0, -1.074902, 0, 0.633087, 31.686100, 11.442820, 147.222397)
+metadata/coliziune = "none"
+
+[node name="borna305" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(0.072012, 0, -1.482670, 0, 1.484418, 0, 1.482670, 0, 0.072012, 51.483154, 14.313517, 122.749695)
+metadata/coliziune = "none"
+
+[node name="borna306" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(0.501755, 0, -1.054152, 0, 1.167474, 0, 1.054152, 0, 0.501755, 81.415779, -20.619329, 132.013535)
+metadata/coliziune = "none"
+
+[node name="borna307" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(0.282451, 0, -1.126880, 0, 1.161738, 0, 1.126880, 0, 0.282451, 101.386658, 20.086161, 109.362732)
+metadata/coliziune = "none"
+
+[node name="borna308" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-0.881976, 0, -0.730869, 0, 1.145448, 0, 0.730869, 0, -0.881976, 128.976761, 10.311365, 118.511734)
+metadata/coliziune = "none"
+
+[node name="borna309" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-1.451902, 0, 0.226533, 0, 1.469468, 0, -0.226533, 0, -1.451902, 151.706940, 25.817362, 99.026299)
+metadata/coliziune = "none"
+
+[node name="borna310" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-0.838697, 0, 0.951677, 0, 1.268504, 0, -0.951677, 0, -0.838697, 175.626938, -7.948523, 116.307259)
+metadata/coliziune = "none"
+
+[node name="borna311" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-1.077704, 0, 0.600442, 0, 1.233685, 0, -0.600442, 0, -1.077704, 205.736893, 31.429209, 107.493134)
+metadata/coliziune = "none"
+
+[node name="borna312" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-0.481007, 0, 1.343604, 0, 1.427109, 0, -1.343604, 0, -0.481007, 218.015579, 13.637583, 135.815826)
+metadata/coliziune = "none"
+
+[node name="borna313" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-1.368546, 0, -0.157103, 0, 1.377534, 0, 0.157103, 0, -1.368546, 236.913498, 34.191628, 123.458061)
+metadata/coliziune = "none"
+
+[node name="borna314" parent="DecorManual/ZoneB_DrumulIncas" instance=ExtResource("s_trail_marker")]
+transform = Transform3D(-1.175871, 0, 0.705422, 0, 1.371238, 0, -0.705422, 0, -1.175871, 251.694733, 6.724359, 101.005211)
+metadata/coliziune = "none"
 
 [node name="ZoneC_PoartaSoarelui" type="Node3D" parent="DecorManual"]
 

@@ -323,6 +323,26 @@ var _grid_span: float = 4.0
 ## daca peretele nu e LANGA banda, ramane duna intre el si roata si nu s-a
 ## rezolvat nimic. Sub half_width ar musca din carosabil.
 @export var cut_offset_m: float = 8.2
+## Cand e pozitiv, `cut_offset_m` se IGNORA si talpa se aseaza la atatia metri
+## dincolo de MARGINEA locala a asfaltului, nu la un rulaj fix fata de ax.
+##
+## Motivul, masurat pe POI B al pistei Machu Picchu. Verdictul orb al rundei 3
+## era „drumul nu e taiat in nimic: e un terasament cu umar de iarba pe ambele
+## parti". Peretele era acolo si era inalt, dar `cut_offset_m` fix (7,6 m) cu
+## semilatime variabila lasa intre asfalt si prima piatra o fasie de teren
+## inierbat de 1,25-2,50 m — exact „umarul de iarba" (masurat cu SvMpBFasie;
+## pe pixeli, fasia din stanga-jos a cadrului era 14-17 % verde fata de 0,1 %
+## in bara).
+##
+## Coborarea rulajului fix la 6,2 m a inchis fasia in mijloc (0,00-0,75 m), dar
+## a bagat coama peretelui IN carosabil pe portiunea unde drumul se largeste la
+## 8,36-9,00 m: talpa ajungea la -0,7..-2,9 m fata de margine, adica peste
+## banda. Un singur numar nu poate fi si „langa margine" si „in afara ei" cand
+## marginea se misca cu 3 m.
+##
+## Cu rulajul legat de margine, talpa sta la aceeasi distanta de asfalt pe TOT
+## intervalul, si acolo unde drumul se largeste peretele se retrage cu el.
+@export var cut_edge_offset_m: float = 0.0
 ## Cati metri urca fata, de la talpa in sus.
 ##
 ## 18 m taie orizontul din vederea soferului (ochiul e la ~6 m peste asfalt),
@@ -715,7 +735,12 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable,
 	var p := sampler.baked_point(i)
 	# Interiorul e latura OPUSA golului: nodul declara `side` pentru cadere.
 	var sd := sampler.side_at(i) * -signf(side)
-	var foot: Vector3 = p + sd * cut_offset_m
+	# Rulajul talpii: fix fata de ax, sau legat de marginea LOCALA a asfaltului.
+	# Vezi `cut_edge_offset_m` pentru masuratoarea din spate.
+	var offs := cut_offset_m
+	if cut_edge_offset_m > 0.0:
+		offs = sampler.half_width_at(i) + cut_edge_offset_m
+	var foot: Vector3 = p + sd * offs
 	var foot_y: float = surface_y.call(foot.x, foot.z)
 	# Talpa se infige sub suprafata umarului, ca sa nu ramana fanta.
 	foot_y = minf(foot_y, p.y) - cut_foot_bite_m
@@ -822,10 +847,10 @@ func _cut_column(sampler: TrackSideSampler, f: float, surface_y: Callable,
 		# in umbra proprie). Vezi `cut_tread_m` pentru masuratoarea din spate.
 		if cut_tread_m > 0.0 and r > 0:
 			var back_up: float = back + cut_tread_m * float(cut_bands - r + 1)
-			var qu: Vector3 = p + sd * (cut_offset_m + back_up + tuck + facet.x)
+			var qu: Vector3 = p + sd * (offs + back_up + tuck + facet.x)
 			out.append(Vector3(qu.x, y, qu.z))
 		var tread: float = cut_tread_m * float(cut_bands - r)
-		var q: Vector3 = p + sd * (cut_offset_m + back + tread + tuck + facet.x)
+		var q: Vector3 = p + sd * (offs + back + tread + tuck + facet.x)
 		out.append(Vector3(q.x, y, q.z))
 	# Poala de moloz la piciorul taieturii. Aici e cea mai vizibila din tot
 	# cadrul: taietura sta CHIAR langa banda, deci imbinarea ei cu umarul e la

@@ -23,12 +23,17 @@ poți repara în decorul POI-ului.
 | gardă | comandă | prag |
 |---|---|---|
 | ProbeRace | `res://tools/ProbeRace.tscn -- --mode=race --track=8 --seconds=150 --seed=N` | **0 repuneri**, mai multe seed-uri |
-| probe_decor | `--script res://tools/probe_decor.gd -- --track=15` | **≤ 20 materiale** |
+| probe_decor | `--script res://tools/probe_decor.gd -- --track=15` | **≤ 30 materiale** (plafon ridicat 18 sep; garda pică la 38) |
 | ProbeBuried | `res://tools/ProbeBuried.tscn -- --track=8` | **0** |
 | ProbeLaneClear | `res://tools/ProbeLaneClear.tscn -- --track=8` | **pe linia de bază** |
 | ProbeLayout | `res://tools/ProbeLayout.tscn -- --track=8` | pantă **sub 13 %** (sonda pică abia la 22 %) |
+| **probe_manual** | `--script res://tools/probe_manual.gd -- --track=15` | **0 obiecte de reparat** — ia **număr de scenă**, ca `probe_decor` |
 
-`--import` înaintea oricărei serii. `probe_decor` ia **15**, restul **8**.
+`--import` înaintea oricărei serii. **`probe_decor` și `probe_manual` iau
+numărul de SCENĂ (15); celelalte iau INDEXUL (8).** Cu `--track=8`, cele două
+măsoară **Okinawa** și dau verde — exact ce s-a întâmplat la valul 2, unde toate
+cele trei POI-uri au rulat `probe_manual --track=8` și n-au văzut niciun defect,
+deși pista avea **528 de piese** plutind sau îngropate.
 
 ## Captura: ce comandă, pentru care POI
 

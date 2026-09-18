@@ -845,6 +845,9 @@ func _condor_rock() -> void:
 ## domina creasta; brief-ul o descrie ca o casa mica cu acoperis de paie, iar in
 ## bara e vizibil mai mica decat poarta. 0,85 -> 6,70 m.
 const GUARD_FRAC := 0.3300
+## Unde se poate CHIAR zidi, masurat cu probe_mp_c_umar.gd (vezi nota din
+## `_guardhouse`). La 0,33 nu exista umar pe niciuna din parti.
+const GUARD_FRAC_REAL := 0.3620
 
 func _guardhouse() -> void:
 	# RUNDA 1 A ALES PARTEA DIN RATIONAMENT, si terenul a contrazis-o. Presupusesem
@@ -876,17 +879,60 @@ func _guardhouse() -> void:
 	# se cauta fractia din jurul lui 0,33 la care exista cel mai mult umar, si
 	# se pune acolo. Cadrul pozei ramane la 0,33 — ce conteaza e ca o VEZI din
 	# masina la 0,33, nu ca talpa ei sa fie la 0,3300 exact.
-	var gs := _solid_side(GUARD_FRAC)
-	var gf := _best_shelf(GUARD_FRAC, gs)
-	_place("guardhouse", "casaPaznic", gf, gs, 0.4,
+	# RUNDA 3: CASA LIPSEA DIN SCENA DE TREI RUNDE, si comentariile de mai sus
+	# sustineau ca e rezolvata. Nu era: `.part` avea 0 noduri "casaPaznic".
+	# `_best_shelf` raporta cinstit ce gasea ("sol la 5 m de muchie: -23,52 m"),
+	# `_place` refuza cinstit piesa (`DROP_REJECT`), si nimeni nu citea nici
+	# raportul, nici lipsa. De aia se termina acum cu o VERIFICARE, nu cu o
+	# asezare: daca nu s-a pus, se spune tare. (Memoria
+	# justificarea-din-comentariu-se-verifica si garda-existenta-nerulata.)
+	#
+	# `tools/probe_mp_c_umar.gd` a masurat toata vecinatatea, si raspunsul e ca
+	# umarul NU exista acolo — nu ca il cautam prost:
+	#
+	#   frac    sub sosea la 3 m dincolo de muchie:  -1  /  +1
+	#   0,3000          -8,94 / -31,27
+	#   0,3300         -10,16 / -18,13
+	#   0,3500          -8,52 / -22,66
+	#   0,3550          -3,58 /  -9,91
+	#   0,3600          -1,90 /  -4,02     <- primul loc unde se poate zidi
+	#   0,3650          +2,41 /  -0,34
+	#
+	# Pe 0,29-0,355 creasta e mai ingusta decat drumul plus o cladire, pe AMBELE
+	# parti. Fereastra de ±35 m a lui `_best_shelf` nu putea ajunge la 0,360 de
+	# la 0,330, deci cauta intr-un interval in care nu exista raspuns.
+	#
+	# Ce se face: casa se muta la primul teren real (0,3600-0,3650), si fereastra
+	# de cautare se largeste ca sa poata ajunge acolo. Brief-ul cere ca ea sa fie
+	# "cadrul pozei clasice" — pe creasta care coboara spre 0,36 masina o are in
+	# fata pe toata coborarea, deci cadrul se pastreaza; ce nu se pastreaza e
+	# fictiunea ca ar incapea la 0,33.
+	# `gap` 1,6 si nu 0,4: la 0,4 sonda a raportat "corpul la 6,62 m de ax,
+	# muchia la 6,22", adica hull-ul intra 0,40 m peste margine — si ProbeRace
+	# a urcat pe seed 2 la 2 repuneri si 9,8% offroad, de la 0 si 0,6%. Cladirile
+	# sunt singurele piese cu corp din POI, deci ele sunt singurele care pot face
+	# asta. Se retrag pana ies din banda.
+	var gs := _solid_side(GUARD_FRAC_REAL)
+	var gf := _best_shelf(GUARD_FRAC_REAL, gs)
+	_place("guardhouse", "casaPaznic", gf, gs, 1.6,
 		_yaw_to_road(gf, gs), 0.85, "hull")
 	# O ruina mica alaturi, ca sa nu fie un singur obiect pe creasta: in bara
 	# constructiile vin in grup, nu una singura.
-	var ff := GUARD_FRAC + _step(14.0)
+	var ff := GUARD_FRAC_REAL + _step(16.0)
 	var rs := _solid_side(ff)
 	var rf := _best_shelf(ff, rs)
-	_place("inca_house_b", "ruinaPaznic", rf, rs, 0.4,
+	_place("inca_house_b", "ruinaPaznic", rf, rs, 1.6,
 		_yaw_to_road(rf, rs) + 0.4, 1.0, "hull")
+	# VERIFICAREA. O piesa de contract care lipseste trebuie sa tipe, nu sa
+	# dispara intr-un `_skipped += 1`.
+	for nume: String in ["casaPaznic", "ruinaPaznic"]:
+		var gasit := false
+		for ln: String in _out:
+			if ln.contains('name="%s' % nume):
+				gasit = true
+				break
+		if not gasit:
+			print("; !!! PIESA DE CONTRACT LIPSA: %s nu a fost asezata" % nume)
 
 
 ## Fractia din vecinatatea lui `frac` (±35 m) la care partea `sg` are cel mai
@@ -896,8 +942,11 @@ func _best_shelf(frac: float, sg: float) -> float:
 	var n := _track.baked.size()
 	var best := frac
 	var best_y := -INF
-	var d := -35.0
-	while d <= 35.0:
+	# Fereastra ±22 m: la 0,362 terenul apare si dispare pe portiuni scurte, iar
+	# o fereastra larga ar muta casa departe de cadrul cerut. Cautarea porneste
+	# insa dintr-o fractie care ARE raspuns (vezi GUARD_FRAC_REAL).
+	var d := -22.0
+	while d <= 22.0:
 		var f := frac + _step(d)
 		var i := int(f * float(n)) % n
 		var p := _track.baked[i]

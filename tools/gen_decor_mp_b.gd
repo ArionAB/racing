@@ -16,7 +16,60 @@ extends Node
 ## nori albi in vale dedesubt. Materia dominanta e PIATRA, nu iarba: drumul e
 ## o panglica pe o coama de roca, nu o poteca pe pajiste.
 ##
-## CIFRELE DE SURVEY se scriu aici dupa prima rulare cu --survey.
+## CIFRELE DE SURVEY (runda 1, B_r1_survey.txt) — compozitia se decide pe ele:
+##
+## 1. DREAPTA E O PRAPASTIE ADEVARATA, de la frac 0.080 in sus. Cotele fata de
+##    drum la +2 / +4 / +8 m lateral de MUCHIE:
+##      0.075   -0.9   -1.5   -2.9     (buza incepe)
+##      0.080   -5.2   -6.8  -13.6
+##      0.085  -15.1  -21.4  -34.4
+##      0.100  -26.1  -40.3  -59.3
+##      0.140  -40.2  -55.8  -65.6
+##      0.190  -38.7  -51.9  -64.1
+##    Unghiul sub orizontala din OCHIUL CAMEREI (10 m peste drum), la 4/8/15 m:
+##      0.040    3.7    1.7    0.7   <- inca platou, nu e inca POI-ul
+##      0.080   59.7   59.6   47.6
+##      0.100   84.3   82.3   75.9
+##      0.190   85.6   82.9   78.8
+##    Deci FORMA EXISTA si e verticala. Nu se cere teren. Capcana 3 din brief
+##    („peretii verticali apar la 28-35 grade, limita de rezolutie a grilei")
+##    NU se aplica aici: unghiul real e 59-86 grade, cu mult peste
+##    `scarp_slope_deg` 28, deci tenta de stanca se aplica si SE VEDE (verificat
+##    pe captura B_r0_gol_f0.08.png: fata cenusie e acolo).
+##
+## 2. STANGA E PLATOU pe aproape tot intervalul (-0,3 m pana la 40 m lateral).
+##    Doua exceptii masurate: flancul muntelui urca la 0.110-0.145 (+1,7 m la
+##    -15 m pe 0.115; +12,2 m la -15 m si +51,5 m la -40 m pe 0.130), si un gol
+##    pe DEPARTE la 0.120-0.140 (-6,1 m la -8 m, -26,2 m la -15 m pe 0.120).
+##
+## 3. CE LIPSESTE, MASURAT PE PIXELI — si e opusul a ce cerea brief-ul.
+##    Clasificare HSV (roca = satur < 0,14 si valoare 0,25-0,75; iarba = nuanta
+##    0,15-0,35 cu satur > 0,15; drum = satur > 0,08 si valoare > 0,70):
+##
+##      sursa            roca    iarba   drum
+##      BARA            17,8 %   10,6 %  58,5 %
+##      noi la 0.08      3,6 %   42,6 %  42,9 %
+##      noi la 0.18      0,1 %   24,0 %  67,9 %
+##
+##    Bara are de 5-170 de ori mai multa PIATRA si un sfert din iarba. Deci
+##    deficitul e de ROCA, nu de vegetatie — invers fata de lista de piese din
+##    contract, care incepe cu bromelii si ferigi.
+##    Confirmat pe captura, nu doar pe cifra (regula zero din bara_vizuala):
+##    la 0.18 nu se vede NICIO piatra in cadru, drumul pal ocupa doua treimi,
+##    iar dincolo de banda maro de muchie e fasie verde si ceata.
+##
+## 4. DE CE NU SE VEDE PRAPASTIA DE LA 0.18, desi masoara -38 m la +2 m.
+##    Drumul e in viraj si bombat: propria lui muchie (banda maro) o ascunde.
+##    Din masina, la 0.18, ochiul nu ajunge peste buza. Reparatia care e A MEA
+##    e sa pun STANCA VIZIBILA pe buza — pinteni de `moss_boulder_*` mariti,
+##    care ies deasupra liniei muchiei si rup silueta — nu sa cobor un prag de
+##    panta sau sa ating terenul.
+##
+## 5. NU EXISTA PIESA DE TUNEL in kit (39 GLB-uri verificate: nicio gura de
+##    tunel, niciun arc). Contractul cere „gura de tunel cu arc de piatra".
+##    Nu o fabric din `inca_wall_*` — un arc din trei lespezi nu citeste a
+##    tunel, citeste a poarta prabusita, si POI C are deja poarta. Se
+##    raporteaza ca lipsa de kit, nu se mascheaza.
 
 const TRACK := "res://scenes/tracks/Track15.tscn"
 const ZONE := "DecorManual/ZoneB_DrumulIncas"
@@ -189,8 +242,170 @@ func _step(meters: float) -> float:
 	return meters / _total_len
 
 
+## Unde incepe caderea reala pe dreapta (nota 1): inainte de asta e platou si
+## un pinten de stanca acolo ar fi o piatra pusa pe pajiste.
+const F_BUZA := 0.078
+## Flancul care urca pe stanga (nota 2).
+const F_FLANC_IN := 0.105
+const F_FLANC_OUT := 0.152
+
+
 func _build() -> void:
-	pass
+	_buza_de_stanca()
+	_perete_stanga()
+	_vegetatie_agatata()
+	_trepte_si_semne()
+
+
+## PINTENII DE PE BUZA — piesa centrala a POI-ului, si singura care repara
+## deficitul masurat la nota 3.
+##
+## Ce trebuie sa faca, si de ce asa: prapastia exista (59-86 grade) dar nu se
+## vede, fiindca muchia bombata a drumului o ascunde (nota 4). Un pinten de
+## stanca pe buza rezolva amandoua problemele deodata — adauga materia care
+## lipseste (roca) si RUPE linia muchiei, deci ochiul primeste un reper care
+## spune „dincolo de asta se cade".
+##
+## Se pun DOUA siruri, nu unul:
+##   - `creasta`: bolovani mari (4-8 m) pe buza propriu-zisa, la 0,6-2,2 m de
+##     muchie. Astia sunt cei care se vad din masina.
+##   - `faleza`: bolovani si mai mari (7-13 m) coborati pe fata prapastiei, la
+##     6-16 m de muchie si cu `dy` negativ, ca fata sa aiba relief si sa nu
+##     fie o panza neteda cenusie.
+##
+## Coliziunea: `none` pe TOT. Motivul e masurat, nu de comoditate — o piatra
+## cu corp la 0,6 m de muchie e un zid pe o banda de 6 m unde masinile intra
+## in viraj la 0.18; iar contractul cere explicit „pe dreapta FARA parapet,
+## defileul". Rostul lor e sa se VADA, nu sa opreasca. Cu `none` sar si garda
+## de banda (memoria coliziune-none-e-fantoma: mesh-ul ramane, corpul dispare).
+func _buza_de_stanca() -> void:
+	var f := F_BUZA
+	var k := 0
+	while f <= F_OUT:
+		# Creasta de pe buza: sirul pe care il vede soferul.
+		var m: String = ["moss_boulder_c", "moss_boulder_b", "moss_boulder_c",
+			"moss_boulder_b", "moss_boulder_a"][k % 5]
+		var inalt := _rng.randf_range(4.0, 8.0)
+		_place(m, "pintenBuza", f, 1.0,
+			_rng.randf_range(0.6, 2.2), _rng.randf_range(0.0, TAU),
+			_scale_for(m, inalt), "none",
+			# Infipt cu o treime sub sol: un bolovan asezat exact pe cota
+			# citeste a minge pusa pe masa. Vezi patru-defecte-de-diorama.
+			-inalt * 0.30)
+		# Al doilea rand, mai retras si mai mic — rupe linia perfecta.
+		if _rng.randf() < 0.55:
+			var m2: String = "moss_boulder_b" if k % 2 == 0 else "moss_boulder_a"
+			var h2 := _rng.randf_range(2.0, 4.5)
+			_place(m2, "pintenBuza", f + _step(2.4), 1.0,
+				_rng.randf_range(2.6, 5.0), _rng.randf_range(0.0, TAU),
+				_scale_for(m2, h2), "none", -h2 * 0.35)
+		# Faleza: relief pe fata prapastiei, sub cota drumului.
+		if _rng.randf() < 0.70:
+			var m3: String = ["moss_boulder_c", "moss_boulder_b"][k % 2]
+			var h3 := _rng.randf_range(7.0, 13.0)
+			_place(m3, "falezaB", f + _step(_rng.randf_range(0.0, 5.0)), 1.0,
+				_rng.randf_range(6.0, 16.0), _rng.randf_range(0.0, TAU),
+				_scale_for(m3, h3), "none", -h3 * 0.45)
+		f += _step(6.5)
+		k += 1
+
+
+## PERETELE DIN STANGA, doar pe flancul care chiar urca (nota 2). In afara
+## intervalului 0.105-0.152 stanga e platou, si o stanca pe platou e o piatra
+## pe pajiste — exact greseala pe care o descrie constatarea valului 2.
+func _perete_stanga() -> void:
+	var f := F_FLANC_IN
+	var k := 0
+	while f <= F_FLANC_OUT:
+		var m: String = ["moss_boulder_c", "moss_boulder_b", "moss_boulder_c"][k % 3]
+		var h := _rng.randf_range(3.5, 7.0)
+		# Coliziune `none` si aici: peretele urca, deci masina care il atinge
+		# e deja in afara benzii, iar un corp acolo transforma o iesire intr-o
+		# rasturnare. Contractul cere perete VIZUAL, cu muschi si bromelii.
+		_place(m, "pereteStg", f, -1.0,
+			_rng.randf_range(0.8, 4.0), _rng.randf_range(0.0, TAU),
+			_scale_for(m, h), "none", -h * 0.28)
+		# Al doilea etaj, mai sus pe flanc.
+		if _rng.randf() < 0.6:
+			var h2 := _rng.randf_range(5.0, 9.0)
+			_place("moss_boulder_c", "pereteStg", f + _step(3.0), -1.0,
+				_rng.randf_range(7.0, 16.0), _rng.randf_range(0.0, TAU),
+				_scale_for("moss_boulder_c", h2), "none", -h2 * 0.25)
+		f += _step(7.0)
+		k += 1
+
+
+## VEGETATIA AGATATA — pe PIATRA, nu pe iarba. In bara frunzisul creste din
+## fata de stanca; pe pajiste ar adauga tocmai materia de care avem deja de
+## patru ori prea multa (nota 3: 42,6 % iarba fata de 10,6 % in bara).
+##
+## Deci: ferigi si bromelii pe flancul din stanga, unde tocmai am pus roca, si
+## pe buza din dreapta intre pinteni. Orhideea e accent RAR (contractul o cere
+## la 2-3 m de banda), deci una la ~8 pasi.
+func _vegetatie_agatata() -> void:
+	var f := F_BUZA
+	var k := 0
+	while f <= F_OUT:
+		var pe_flanc := f >= F_FLANC_IN and f <= F_FLANC_OUT
+		if pe_flanc:
+			if _rng.randf() < 0.75:
+				var h := _rng.randf_range(2.2, 3.6)
+				_place("tree_fern", "ferigaStg", f, -1.0,
+					_rng.randf_range(1.5, 7.0), _rng.randf_range(0.0, TAU),
+					_scale_for("tree_fern", h), "none")
+			if _rng.randf() < 0.8:
+				_place("bromeliad", "bromStg", f + _step(1.8), -1.0,
+					_rng.randf_range(0.9, 6.0), _rng.randf_range(0.0, TAU),
+					_rng.randf_range(1.6, 3.2), "none")
+		# Pe buza din dreapta, printre pinteni.
+		if _rng.randf() < 0.6:
+			_place("bromeliad", "bromBuza", f + _step(3.2), 1.0,
+				_rng.randf_range(0.5, 2.6), _rng.randf_range(0.0, TAU),
+				_rng.randf_range(1.5, 3.0), "none")
+		if _rng.randf() < 0.45:
+			var hf := _rng.randf_range(2.0, 3.2)
+			_place("tree_fern", "ferigaBuza", f + _step(4.6), 1.0,
+				_rng.randf_range(1.2, 4.5), _rng.randf_range(0.0, TAU),
+				_scale_for("tree_fern", hf), "none")
+		# Accentul roz: rar, si aproape de banda ca sa se vada.
+		if k % 8 == 3:
+			var sgn := 1.0 if k % 16 == 3 else -1.0
+			_place("orchid_cluster", "orhidee", f + _step(2.0), sgn,
+				_rng.randf_range(2.0, 3.0), _rng.randf_range(0.0, TAU),
+				_rng.randf_range(1.8, 2.6), "none")
+		f += _step(5.5)
+		k += 1
+
+
+## TREPTELE SI SEMNELE. `custom_step_ranges` (0.0405-0.2034) pune deja treptele
+## VIZUALE pe carosabil, si coliziunea ramane panta lina (track.gd:_step_ranges).
+## Deci NU pun geometrie de treapta peste drum — ar fi un prag de zid.
+## Piesele `inca_stair_*` merg LANGA drum, pe flancul din stanga: in bara
+## treptele sunt alaturi de drum, nu pe el.
+func _trepte_si_semne() -> void:
+	var f := F_FLANC_IN
+	var k := 0
+	while f <= F_FLANC_OUT:
+		if k % 2 == 0:
+			var m: String = "inca_stair_b" if k % 4 == 0 else "inca_stair_a"
+			# Orientata pe directia drumului (scara urca odata cu el).
+			var a := _at(f)
+			var s: Vector3 = a["s"]
+			var yaw := atan2(s.x, s.z)
+			_place(m, "trepteStg", f, -1.0, _rng.randf_range(3.0, 6.0),
+				yaw, 1.0, "none", -0.8)
+		k += 1
+		f += _step(9.0)
+	# Bornele de poteca, pe amandoua partile, rare — punctuatie, nu gard.
+	f = F_IN + 0.004
+	var j := 0
+	while f <= F_OUT:
+		var sgn := 1.0 if j % 2 == 0 else -1.0
+		_place("trail_marker", "borna", f, sgn, _rng.randf_range(1.4, 3.0),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(1.1, 1.5), "none",
+			-0.15)
+		j += 1
+		f += _step(26.0)
 
 
 func _scale_for(model: String, meters: float) -> float:

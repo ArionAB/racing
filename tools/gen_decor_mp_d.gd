@@ -570,7 +570,20 @@ const RAFT_R := 0.40
 ##
 ## Sub nivelul 1 masa intra in panta reala; acolo fusta se ingroapa, ceea ce e
 ## corect — o terasa incasa se ingroapa si ea pana gaseste panta.
-const RAFT_SKIRT := RAFT_H
+## Fusta e 60% din riser, nu riserul intreg — masurat pe zoom_dungi_r23.png.
+##
+## Cu fusta = RAFT_H masa cobora la `y_raft - 1,31`, adica exact cat talpa
+## zidului. Geometric e corect (masa umple tot riserul), dar din chase cam,
+## care priveste de sus, fata de PAMANT a masei apare deasupra fetei de PIATRA
+## si ii fura locul in cadru: pe captura riserele citeau brun, si piatra palida
+## — pe care cade dunga alb/umbra — se vedea doar pe ici pe colo.
+##
+## Cu 0,60 * RAFT_H masa coboara la `y_raft - 0,81` si se opreste deasupra
+## talpii zidului: golul de dedesubt e ascuns de zid oricum (masa incepe la
+## `lat0 + 0,45`, adica exact in spatele lui), deci nu se vede nimic pe
+## dedesubt, dar fata vizibila a riserului redevine in mare parte PIATRA.
+## Dunga isi recapata suprafata pe care sa cada.
+const RAFT_SKIRT := RAFT_H * 0.60
 
 ## Slotul FETEI VERTICALE a masei. 4 ROCK_DARK (#67421F) — pamant brun inchis,
 ## deja in atlas, deci zero materiale noi.

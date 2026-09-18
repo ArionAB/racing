@@ -9,7 +9,7 @@ export const meta = {
 
 const REPO = 'D:/GameDev/ignition-spike'
 const GODOT = 'D:\\GameDev\\Godot_v4.7-stable_win64_console.exe'
-const SCRATCH = 'C:/Users/Arion/AppData/Local/Temp/claude/d--GameDev-ignition-spike/a127ddaa-ed44-4d8a-9e28-0290ec402731/scratchpad'
+const SCRATCH = 'C:/Users/Arion/AppData/Local/Temp/claude/d--GameDev-ignition-spike/74e515a1-c703-4f42-aaf2-ba914a36b188/scratchpad'
 
 const POIS = [
   {
@@ -173,16 +173,20 @@ ATENTIE: probe_decor ia **--track=15** (numar de scena), restul iau **--track=8*
 (index). probe_decor --track=8 masoara OKINAWA si da verde.
 
 PRAGURI, cu cifrele de PLECARE masurate pe scena integrata (main de azi):
-- ProbeRace **0 repuneri**. Masurat: 0 in 4 din 5 rulari, una a dat 1. E
-  nedeterminist (memoria proberace-nedeterminism) — daca vezi 1, re-ruleaza
-  inainte sa acuzi o regresie, dar daca vezi 2-3 constant, e a ta.
-- probe_decor **20 materiale ACUM**, si plafonul cerut de dezvoltator e 20
-  (garda pica abia la 38). **Nu mai e loc.** Daca ai nevoie de un material nou,
-  spune-o explicit in raport cu motivul si cu ce cumpara — nu-l adauga in
-  tacere. Prefera refolosirea claselor existente (inca_stone exista si acopera
-  toata zidaria; macchia acopera verdele de padure).
-- ProbeBuried **0**. ProbeLaneClear **18, baza 20** — ai marja 2, deci daca
-  decorul tau intra in banda se vede imediat.
+- ProbeRace **0 repuneri**. Masurat azi pe main: **0 pe seed 1, 2 si 3**
+  (offroad max 0.0% / 1.1% / 0.0%). E nedeterminist (memoria
+  proberace-nedeterminism) — daca vezi 1, re-ruleaza inainte sa acuzi o
+  regresie, dar daca vezi 2-3 constant, e a ta.
+- probe_decor **19 materiale ACUM** (masurat pe main azi, 18 sep). Plafonul a
+  fost ridicat la **30** de dezvoltator (docs/track_briefs/machu_picchu.md §6:
+  cifra veche de 20 presupunea ca fiecare GLB costa un material, ceea ce e fals
+  masurat — kitul costa zero, doar CLASA de textura costa 1). Garda pica la 38.
+  **Ai loc, dar plafonul NU e o alocare de cheltuit:** un material nou se cere
+  **explicit in raport**, cu motivul si cu ce cumpara vizual. Ce se poate
+  refolosi, se refoloseste (inca_stone acopera TOATA zidaria, inclusiv portile;
+  macchia acopera verdele de padure). Raporteaza cifra dupa fiecare runda.
+- ProbeBuried **0**. ProbeLaneClear **18, baza 20** (verificat azi) — ai marja
+  2, deci daca decorul tau intra in banda se vede imediat.
 - Panta ramane **11,5 %** si raza minima **9,0 m** — daca se misca, ai atins
   traseul, ceea ce nu e treaba ta.
 Si nu te uita doar la "repuneri": citeste [blocaj], lent, invers, carusel,

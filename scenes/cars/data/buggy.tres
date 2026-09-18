@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
 [ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_buggy.glb" id="2"]
-[ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_driver.glb" id="3"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_driver_blue.glb" id="3"]
 
 [resource]
 script = ExtResource("1")

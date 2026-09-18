@@ -240,6 +240,12 @@ O singură rulare verde nu înseamnă nimic aici.
 
 Sonda de măsură: `tools/SvMpB.tscn` (profil lateral + căderea față de margine).
 
+**Și e SINGURA coamă de pe pistă.** Inventarul pe tot turul
+(`tools/SvMpCoame.tscn`: răsturnare de semn a pantei, fereastră ±8 indici,
+prag ±3 %) găsește **exact una**, la frac **0.185**, amplitudine 8,3 puncte pe
+fereastra scurtă. Singurul loc cu repuneri reproductibile din tot turul
+coincide cu singura coamă din tot turul — nu mai e o corelație, e mecanismul.
+
 ## 4. Lecția de metodă care merită dusă mai departe
 
 **Când criticul orb repetă același verdict de două ori aproape neschimbat,

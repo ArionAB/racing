@@ -39,8 +39,8 @@ fixat si cum se testeaza.
    ramane TIMP, ca peste tot in joc (CLAUDE.md: nu exista stare „distrus").
 2. **Nu se ejecteaza din imbranceli intre masini.** Bumping-ul e mecanica
    (principiul 1); pedepsirea lui ar fi pedepsirea jocului. Declansatoarele
-   sunt doar peretii (`eject_wall_dv`, 18 m/s delta-v orizontal) si
-   caderile (`eject_land_speed`, 24 m/s).
+   sunt doar peretii (`eject_wall_dv`, 26 m/s delta-v orizontal) si
+   prabusirile (`eject_land_speed`, 34 m/s) — praguri masurate, vezi mai jos.
 3. **Ragdoll-ul nu se ciocneste cu nicio masina** (exceptii de coliziune pe
    grupul `cars`). Un corp pe asfalt ar fi un obstacol pe care AI-ul nu-l
    vede, iar un contact cu propria masina ar da un impuls fantoma.
@@ -54,19 +54,69 @@ fixat si cum se testeaza.
 `ProbeEject` (toate trecute): o singura ejectare la impact la 29 m/s, 7
 corpuri, trunchiul zboara ~5 m in 0,5 s si trece peste o bariera de 1,3 m,
 zero contacte ragdoll-masina pe toate cadrele, soferul e inapoi pe scaun
-dupa 1,1 s; atingerea la 9 m/s nu ejecteaza; caderea de la 16 m (28 m/s)
-ejecteaza, saritura de la 5 m (14 m/s) nu.
+dupa 1,1 s; atingerea la 9 m/s nu ejecteaza; prabusirea de la 24 m (37 m/s)
+ejecteaza, saritura de la 12 m (26 m/s) nu.
 
 `ProbeRace` pe Dunele, 150 s, seed 1, buggy pe locul jucatorului: 3,72
 tururi (Muscle facea 3,80), o repunere (ejectarea de la un perete), AI-ul
 neschimbat ca ritm (2,8–3,6 tururi).
 
-## Ce NU e decis (si ar urma daca verdictul e „da")
+## Garajul deschis (pasul 2, dupa verdict)
 
-- Restul garajului: cele 5 FBX-uri RgsDev sunt inchise; ar trebui inlocuite
-  cu variante deschise (autobuz turistic descoperit, camion de pompieri cu
-  cabina deschisa etc.). E costul mare al ideii.
-- Soferi cu identitate pe pilot (`Race.PILOTS`): culori pe casca/tricou.
-- Alte declansatoare (strivire, tren) si un sunet propriu pentru ejectare.
+Cele 5 FBX-uri RgsDev (inchise) au fost inlocuite cu decapotabile de tipuri
+diferite, construite in `tools/blender/build_open_garage.py` (piesele comune —
+figurina, rotile, exportul — in `toy_driver_parts.py`). Identitatea din `.tres`
+(viteza, grip, masa, suspensie) NU s-a schimbat; s-au schimbat modelul,
+dimensiunile si scaunul soferului.
+
+| masina | model | tip | sofer |
+|---|---|---|---|
+| Muscle | `open_roadster.glb` | roadster lung si jos, doua locuri, aripioare | tricou albastru |
+| Politia | `open_police.glb` | roadster usor, capota alba, bara de impingere, girofaruri pe arc | galben |
+| Taxi | `open_taxi.glb` | cutie galbena fara acoperis, carouri, firma pe arc, bancheta | verde |
+| Autobuzul | `open_bus.glb` | autobuz turistic descoperit, 4 randuri de banci, soferul sus in fata-stanga | rosu |
+| Pompierii | `open_firetruck.glb` | cabina deschisa, cisterna, rezervor, scara, furtun | galben |
+| Buggy | `toy_buggy.glb` | prototipul | albastru |
+
+Toate au `open_cockpit = true`, deci **toti pilotii, AI inclusiv, sunt
+ejectati dupa aceleasi reguli**. Previzualizari: `snapshots/open_*_preview.png`
+si `open_garage_lineup.png`. Bugete: 2,5–3,5k triunghiuri per vehicul,
+~0,8k per sofer.
+
+## Pragurile, masurate cu tot garajul deschis
+
+Cand toate cele 6 masini au sofer, ejectarea se intampla si AI-ului, deci
+pragurile din `Car` au fost tunate pe ProbeRace (150 s, 6 masini), nu pe
+impresii. `ProbeRace` are acum coloana `ejec p/a` (perete/aterizare), linii
+`[ejectare]` cu cauza si marimea, si „cea mai dura aterizare FARA ejectare"
+— cifra care spune cat de aproape e o saritura proiectata de prag.
+
+| prag | initial | final | de ce |
+|---|---|---|---|
+| `eject_wall_dv` | 18 | **26** | la 18, Dunele dadea 16 ejectari (o masina la ~50 s, cel mai rapid pierdea o jumatate de tur): pragul prindea atingerile oblice de 20–25 m/s. La 26 ramane izbitura frontala. |
+| `eject_land_speed` | 24 | **34** | la 24, saritura PROIECTATA peste golul de pe Alpii (frac 0.71, aterizare la 24–30 m/s) arunca fiecare sofer, tur de tur: 11 ejectari. Saritura e distractia, nu accidentul. 34 m/s = cadere de la ~20 m la g=28. |
+
+Dupa tunare (seed 1, 150 s):
+
+| pista | ejectari | cauza | cea mai dura aterizare fara ejectare |
+|---|---|---|---|
+| Dunele | 7 (seed 2: 4) | toate la tractorul care traverseaza drumul (frac 0.15, 33–49 m/s) si la bariera de la linie (0.997, 26–30 m/s) | 18–20 m/s |
+| Alpii | 1 | perete, autobuzul | 28.5 m/s (golul) |
+| Cappadocia | 0 | — | 13 m/s |
+| Machu Picchu | 1 | perete | 12.5 m/s |
+
+Constatarea colaterala de pe Dunele: AI-ul intra in tractor si in bariera
+mobila la viteza maxima, tur de tur — hazarde pe care nu le citeste (vezi nota
+de memorie „obstacol pe drum poate fi gimmick"). Inainte costa un ricoseu;
+acum costa o ejectare. E o problema de AI, nu de prag, si ramane deschisa.
+
+## Ce ramane deschis
+
+- Sunet propriu pentru ejectare; alte declansatoare (strivire, tren).
 - Ejectarea la caderea in gol (repunerea de la −25 m): azi soferul se
   reaseaza tacut, fiindca la adancimea aia camera n-ar vedea figurina.
+- Soferi cu identitate pe PILOT (`Race.PILOTS`), nu pe masina: azi culoarea
+  tricoului vine din `.tres`, deci doi AI in acelasi model au acelasi sofer.
+- Verdictul de feel pe garajul intreg: sunt cele 5 siluete destul de
+  diferite intre ele din chase cam? (ProbeRace nu poate raspunde la asta.)
+- AI-ul sa citeasca tractorul si bariera de pe Dunele (vezi mai sus).

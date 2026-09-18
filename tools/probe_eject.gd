@@ -10,7 +10,7 @@ extends Node
 ##   3. dupa `eject_hold` soferul e inapoi pe scaun (fara pista nu exista
 ##      repunere, deci se reaseaza direct);
 ##   4. atingerea unui perete la viteza mica NU arunca (pragul e prag);
-##   5. caderea de la inaltime arunca; saritura normala nu.
+##   5. prabusirea de la inaltime arunca; saritura mare, proiectata, nu.
 ##
 ## Ruleaza CA SCENA (are nevoie de autoload-uri):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeEject.tscn
@@ -54,8 +54,10 @@ func _ready() -> void:
 	print("=== Sofer + ragdoll (buggy) ===")
 	await _test_wall_eject()
 	await _test_soft_wall()
-	await _test_landing(16.0, true)
-	await _test_landing(5.0, false)
+	# Pragul e 34 m/s (~20 m de cadere la g=28): 24 m arunca, 12 m (26 m/s,
+	# adica o saritura proiectata mare, ca golul de pe Alpii) NU arunca.
+	await _test_landing(24.0, true)
+	await _test_landing(12.0, false)
 	print("")
 	print("REZULTAT: ", "PICAT" if _failed else "TRECUT")
 	get_tree().quit(1 if _failed else 0)

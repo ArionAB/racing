@@ -159,11 +159,21 @@ const SLIP_GRIP_ICE: float = 1.5
 ## (principiul 1), nu accident.
 @export var eject_enabled: bool = true
 ## Delta-v ORIZONTAL la un perete (m/s) peste care soferul zboara. 8 e pragul
-## la care se aude izbitura; la 18 esti aproape frontal, la viteza de cursa.
-@export var eject_wall_dv: float = 18.0
-## Viteza de cadere (m/s) la aterizare peste care soferul zboara. Saritura
-## normala ateriza sub 15; de la 24 in sus ai cazut de la ~10 m.
-@export var eject_land_speed: float = 24.0
+## la care se aude izbitura. Masurat pe Dunele cu tot garajul deschis
+## (ProbeRace, 150 s, seed 1): la 18 zburau 16 soferi in 150 s, adica o
+## ejectare pe masina la ~50 s, si cel mai rapid pierdea o jumatate de tur —
+## pragul prindea si atingerile oblice la viteza de cursa (20-25 m/s). La 26
+## ramane doar izbitura FRONTALA (de la ~19 m/s in sus, cu ricoseul inclus)
+## sau una oblica peste ~60° la viteza maxima.
+@export var eject_wall_dv: float = 26.0
+## Viteza de cadere (m/s) la aterizare peste care soferul zboara.
+## Masurat cu ProbeRace pe Alpii (garaj deschis, 150 s): SARITURA PROIECTATA
+## peste gol (frac 0.71) ateriza la 24-30 m/s, si la pragul de 24 fiecare
+## masina isi pierdea soferul pe ea, tur de tur — 11 ejectari intr-o cursa.
+## Saritura e distractia (principiul 1), nu accidentul. La 34 m/s (gravitatia
+## jocului e 28, deci o cadere de la ~20 m) ramane doar prabusirea: de pe
+## cornisa, in rapa, de pe un pasaj — nu de pe o rampa.
+@export var eject_land_speed: float = 34.0
 ## Cat sta masina fara sofer (comenzi taiate, camera pe figurina) pana la
 ## repunere. Referinta Ignition: ~1,5-2 s de ecran fara masina.
 @export var eject_hold: float = 1.1
@@ -410,6 +420,10 @@ var _collision_shape: CollisionShape3D
 var _driver: Driver
 var is_ejected: bool = false
 var _eject_left: float = 0.0
+## Ultima ejectare, pentru sonde: ce a declansat-o ("perete" / "aterizare")
+## si cu ce marime (delta-v orizontal, respectiv viteza de cadere, m/s).
+var last_eject_cause: String = ""
+var last_eject_value: float = 0.0
 
 func _ready() -> void:
 	# Grupul e pentru cine trebuie sa stie TOATE masinile fara sa treaca prin
@@ -939,7 +953,7 @@ func _process_contacts(delta: float) -> void:
 			# 0.6 din viteza inainte + 7.5 m/s in sus: peste o bariera de 1,2 m
 			# trece; intr-o faleza se izbeste si cade — amandoua sunt corecte.
 			var fling := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.6
-			_eject(fling + Vector3.UP * 7.5)
+			_eject(fling + Vector3.UP * 7.5, "perete", dv_h)
 
 	for key: int in _bump_pairs.keys():
 		var left := float(_bump_pairs[key]) - delta
@@ -1200,7 +1214,8 @@ func _detect_landing() -> void:
 			# putin inainte (masina se opreste brusc pe verticala, el nu).
 			if -_prev_velocity.y >= eject_land_speed:
 				var fwd_v := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.5
-				_eject(fwd_v + Vector3.UP * minf(-_prev_velocity.y * 0.35, 12.0))
+				_eject(fwd_v + Vector3.UP * minf(-_prev_velocity.y * 0.35, 12.0),
+					"aterizare", -_prev_velocity.y)
 	_was_on_floor = is_on_floor()
 
 # ------------------------------------------------------------------ ejectare
@@ -1212,13 +1227,15 @@ func _detect_landing() -> void:
 ## cazut. Nu se ciocneste cu nicio masina (grupul "cars") — vezi ToyRagdoll.
 ## Tacut cand nu are ce arunca: caroserie inchisa, deja aruncat, cursa
 ## terminata sau masina scoasa din cursa de un hazard (`race_active`).
-func _eject(fling: Vector3) -> void:
+func _eject(fling: Vector3, cause: String = "", value: float = 0.0) -> void:
 	if not eject_enabled or _driver == null or is_ejected or finished \
 			or not race_active or get_parent() == null:
 		return
 	var ragdoll := _driver.eject(fling, get_tree().get_nodes_in_group(&"cars"))
 	if ragdoll == null:
 		return
+	last_eject_cause = cause
+	last_eject_value = value
 	get_parent().add_child(ragdoll)
 	is_ejected = true
 	_eject_left = eject_hold

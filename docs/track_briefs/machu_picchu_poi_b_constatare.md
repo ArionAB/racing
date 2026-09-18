@@ -273,3 +273,134 @@ e `none`. E corect si intentionat: contractul cere „pe stanga peretele", si
 (fatetarea se retrage doar spre interior, niciodata spre drum). ProbeLaneClear
 o confirma: 18 blocate, exact ca inainte. Interdictia de parapet e pe DREAPTA,
 unde n-am pus nimic cu corp.
+
+## 10. Runda 7 - verdictul rundei 3, masurat inainte de a fi reparat
+
+Verdictul orb: "Drumul nostru nu e taiat in nimic: e un terasament cu umar de
+iarba pe ambele parti, iar stanca sta la 20+ m in stanga, separata de asfalt.
+[...] Fara perete la marginea carosabilului nu exista suport pentru gura de
+tunel, trepte sau vegetatie agatata - de aceea lipsesc toate."
+
+Am masurat cele trei afirmatii inainte sa schimb ceva. Doua sunt false, una e
+adevarata - si aia era reparatia.
+
+### Ce e FALS in verdict, cu cifra
+
+**"stanca sta la 20+ m in stanga".** Nu statea. `SvMpBApropiere` (minim lateral
+pe felie longitudinala de +-4 m, separat pe talpa si pe materia de peste linia
+ochiului) da, pe intervalul 0.052-0.196:
+
+```
+talpa peretelui      +1,1 .. +2,1 m de marginea asfaltului
+coama                +10 .. +15 m peste cota axului
+unghiul din ochi     54-68 grade
+```
+
+**"pe dreapta caderea trebuie sa inceapa de la pavaj".** Incepea deja.
+`SvMpBUmar`, de la 0.080 in sus: **-1,9 m la 0,75 m** dincolo de margine,
+**-20..-47 m la 3-5 m**. Pe intervalul 0.04-0.078 chiar e platou, si asta e
+documentat in nota 1 - POI-ul B are doua regimuri.
+
+### Trei sonde care au mintit, si de ce merita scrise
+
+Drumul pana la cifra buna a trecut prin trei masuratori gresite. Toate trei
+sunt in `tools/`, cu motivul in antet:
+
+1. `SvMpBPerete` cauta mesh-urile **sub nodul Marker3D** si raporta "0 mesh-uri
+   copil". `CliffFace.build_all` le pune intr-un nod separat, `CliffFaces`,
+   copil al pistei. Memoria `sonda-masura-alt-obiect`: zero nu inseamna lipsa.
+2. `SvMpBPanza` a raportat peretele la **-13,5..-18 m** de margine, adica exact
+   cifra din verdict. E FALSA: asociaza fiecare vertex celui mai apropiat punct
+   de traseu, iar coloanele de capat - retrase cu `cut_tuck_m` = 12 m - cad in
+   feliile din mijloc si le trag media afara. Am crezut-o vreo zece minute
+   fiindca **confirma verdictul**, si aia e tocmai situatia in care o sonda
+   trebuie verificata mai tare, nu mai putin.
+3. `SvMpBRaza` (raze orizontale din ochiul soferului) n-a gasit nimic pe stanga
+   pe tot intervalul. Corect ca masuratoare, inselator ca dovada: panzele
+   `cut_wall` **n-au corp de coliziune**, deci razele trec prin ele.
+
+Ce a inchis discutia a fost aritmetica refacuta pe cele trei surse independent
+(`SvMpBOffset`, `SvMpBSampler`): samplerul e identic la bit cu `Track.baked`,
+si talpa iese la -7,60 m de ax, adica 1,6 m de margine. Cand aritmetica si
+sonda nu sunt de acord, una din ele e de reparat inainte de orice decizie.
+
+### Ce era ADEVARAT, si ce a costat
+
+Intre asfalt si prima piatra de **deasupra cotei drumului** ramanea o fasie de
+teren inierbat. `SvMpBFasie`:
+
+```
+1,25 - 2,50 m pe aproape tot intervalul
+8 - 14 m in trei goluri: 0.096-0.104, 0.148-0.160, 0.200+
+```
+
+Cele trei goluri sunt zonele de stingere dintre nodurile [CliffFace] - acolo
+peretele disparea complet si drumul ramanea pe pajiste. Pe pixeli, fasia din
+stanga-jos a cadrului: **14-17 % verde la noi, 0,1 % in bara.**
+
+**Criticul a citit corect si a explicat gresit.** A vazut umar de iarba intre
+asfalt si piatra - era acolo. A dedus din asta ca peretele e departe - nu era.
+Lectia, pentru cine judeca urmatorul POI: un verdict orb e un raport despre ce
+se VEDE, si merita crezut la nivelul ala; explicatia pe care si-o da criticul
+e o ipoteza, si se masoara ca oricare alta.
+
+### Reparatia
+
+- **`cut_edge_offset_m`**, nou in `cliff_face.gd`: talpa se aseaza fata de
+  marginea LOCALA a asfaltului, nu la un rulaj fix fata de ax. Implicit 0,0,
+  deci celelalte piste raman identice la bit.
+  Necesar fiindca semilatimea pe interval merge de la 6,00 la 9,00 m. Cu 6,2 m
+  fix, coama intra IN carosabil la 0.048-0.056 (-0,7..-2,9 m fata de margine);
+  cu rulaj legat de margine, cel mai rau caz e **-0,12 m**.
+- `cut_batter_m` 1,9 -> 0,9 si `cut_tread_m` 0,22 -> 0,12: retragerea impingea
+  FATA inapoi cu 3,7 m peste talpa. Peretele era vertical in sectiune dar citea
+  ca scara.
+- `cut_taper_frac` 0,20/0,16 -> 0,08/0,07, `cut_tuck_m` 12,0 -> 4,0, intervale
+  suprapuse (0.042-0.108 / 0.096-0.162 / 0.150-0.209): inchid cele trei goluri.
+- In generator, `F_PERETE_IN/OUT` (0.046-0.205) inlocuiesc `F_FLANC_IN/OUT`
+  (0.105-0.152) pentru vegetatie si trepte, cu `GAP_PERETE_MIN/MAX` 0,35-1,30 m.
+  Fereastra veche descria unde urca TERENUL natural; peretele construit exista
+  acum pe tot intervalul.
+
+### Rezultatul, masurat
+
+```
+                        inainte                    dupa
+fasia de iarba          1,25-2,50 m (goluri 8-14)  0,00-0,75 m, fara goluri
+unghiul din ochi        54-68 grade                73-84 grade
+incalecarea carosabil   -2,87 m (cu 6,2 fix)       -0,12 m
+verde in fasia stanga   14,1 / 17,4 / 1,8 %        3,6 / 2,6 / 0,0 %  (bara 0,1)
+piese in zona           291                        314
+```
+
+Si verdele ramas nu mai e umar de iarba, ci plantele de pe perete - care e
+tocmai ce arata bara.
+
+### Garzile
+
+```
+probe_decor --track=15    19 materiale (NESCHIMBAT), 9643 prop, 1 202 562 tri
+ProbeBuried --track=8     0 ingropate, 0 tavane
+ProbeLaneClear --track=8  18 blocate, linia de baza 20 - neschimbat
+ProbeRace seed 1 si 3     0 repuneri, 0,0 % offroad, 0 pereti pe 0.00-0.25
+ProbeRace seed 2 x4       0/0/0/0 repuneri (offroad 2,3/2,3/2,3/0,1 %)
+```
+
+**Zero materiale noi.** Peretele e tot `Palette.world_material`.
+
+### Ce ramane deschis dupa runda 7
+
+**(a) Gura de tunel - tot nu exista piesa in kit.** Neschimbat fata de nota 8a.
+Acum insa **exista peretele pe care s-ar sprijini**, deci daca se comanda o
+piesa, are unde sta. Inainte n-avea.
+
+**(b) Bromeliile citesc ca decal-uri pe fata peretelui.** Se vede la 0.14:
+plantele sunt asezate pe suprafata terenului, care acolo e aproape verticala,
+deci cartonasul verde sta lipit de perete in loc sa iasa din el. Nu l-am
+reparat: e o problema de orientare a piesei pe normala fetei, nu de pozitie, si
+n-a fost ce a cerut criticul. Ferigile, care au trunchi, citesc corect.
+
+**(c) La 0.06 dreapta e tot pajiste deschisa** - corect, si documentat in nota
+1: caderea reala incepe la 0.078. Nu e ceva de reparat cu decor.
+
+**(d) Coama de la frac 0.186** - neatinsa, confirmata 0/0/0/0 pe seed 2.

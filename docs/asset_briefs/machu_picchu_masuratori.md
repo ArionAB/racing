@@ -203,6 +203,41 @@ multe seed-uri + `ProbeLaneClear`):
    sursă de contact „nedrept" (CLAUDE.md: contactul e mecanică, dar un zid fix
    pe linia de cursă nu e îmbrânceală).
 
+#### Cât metal încape, de fapt (18 sep 2026)
+
+Înainte de a alege între cele trei, iată aritmetica — ca decizia să nu se ia
+pe impresie. Lățimea de **coliziune** a unei mașini e `body_width * 0.9`
+(`car.gd:466`), nu `body_width`:
+
+| mașină | `body_width` | coliziune |
+|---|---:|---:|
+| taxi | 2,075 | **1,868** |
+| muscle | 1,949 | 1,754 |
+| police_sports | 1,932 | 1,739 |
+| firetruck | 1,730 | 1,557 |
+| bus | 1,520 | 1,368 |
+
+Plutonul real de 4 (taxi + muscle + police + firetruck) = **6,92 m de metal**.
+Cazul absolut, 4 × taxi, ar fi 7,47 m — dar taxiul e **singura** mașină de
+2 m, deci nu se întâmplă într-un grid mixt.
+
+| deschidere | joc total pentru 4 | pe interval (3 rosturi + 2 margini) |
+|---|---:|---:|
+| **7,39 m** (măsurat) | **+0,47 m** | +0,09 m |
+| 8,00 m (drumul) | +1,08 m | +0,22 m |
+| 8,39 m (inventar) | +1,47 m | +0,29 m |
+
+**Concluzia: plutonul încape și prin 7,39 m**, cu 47 cm de joc între toate
+patru. E strâmt — dar „patru mașini care abia încap" e exact îmbrânceala pe
+care o cere brief-ul, nu un defect. Ce rămâne real e că **ușciorii stau în
+carosabil** câte ~30 cm: nu blochează plutonul, dar pedepsesc mașina care ia
+poarta pe margine.
+
+Deci opțiunea (c) — se acceptă — are acum cifra care o susține, iar decizia
+se ia pe `ProbeRace --slice=0.92,1.00` când poarta e plantată: dacă plutonul
+trece fără repuneri și fără „pereți" în plus, nu se atinge nici piesa, nici
+drumul.
+
 
 ## 4. Coliziunea propusÄƒ, cu motivul mÄƒsurat
 

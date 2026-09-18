@@ -308,9 +308,10 @@ func _buza_de_stanca() -> void:
 	var k := 0
 	while f <= F_OUT:
 		# SIRUL DE PE BUZA: zidarie joasa, lipita, care urmeaza muchia.
-		# Pasul de 3,6 m pe o piesa de 4,00 m (inca_wall_a) le suprapune
-		# putin, deci sirul e CONTINUU - un sir cu goluri citeste a lespezi
-		# razlete, verdictul care a costat POI D trei runde.
+		# Pasul de 2,8 m pe o piesa de 4,00 m (inca_wall_a) le suprapune cu
+		# 1,2 m, deci sirul e CONTINUU chiar si in viraj, unde coarda taie din
+		# lungimea utila - un sir cu goluri citeste a lespezi razlete,
+		# verdictul care a costat POI D trei runde.
 		var a := _at(f)
 		var s: Vector3 = a["s"]
 		# Zidul se aseaza TANGENT la drum: yaw pe directia de mers.
@@ -319,16 +320,16 @@ func _buza_de_stanca() -> void:
 		# Inaltime mica si variabila: e o buza de sprijin, nu un gard. Scara
 		# pe inaltime separata de cea din plan (lectia `_raw_h` de la POI D):
 		# un zid mai scund nu e un zid mai SUBTIRE.
-		var hz := _rng.randf_range(0.9, 1.7)
-		_zid_buza(m, "buzaPiatra", f, 1.0, _rng.randf_range(0.3, 1.1),
-			yaw + _rng.randf_range(-0.12, 0.12), hz)
+		var hz := _coama(f)
+		_zid_buza(m, "buzaPiatra", f, 1.0, _retragere(f),
+			yaw + _rng.randf_range(-0.035, 0.035), hz)
 		# PINTENII care rup linia: tot zidarie, dar rotita si mai inalta,
 		# la fiecare al treilea pas. Fara ei sirul e o bordura de gradina.
-		if k % 3 == 1:
+		if k % 4 == 1:
 			_zid_buza("inca_wall_c", "pintenBuza", f + _step(1.8), 1.0,
-				_rng.randf_range(0.4, 1.4),
-				yaw + _rng.randf_range(0.5, 1.0),
-				_rng.randf_range(2.0, 3.2))
+				_retragere(f + _step(1.8)) + 0.35,
+				yaw + _rng.randf_range(0.18, 0.38),
+				_coama(f) + _rng.randf_range(0.5, 0.9))
 		# FALEZA: relief pe fata prapastiei, sub cota drumului. Aici bolovanul
 		# e corect - e departe (6-16 m) si in jos, deci capacul de muschi nu
 		# se vede din masina, doar silueta.
@@ -338,8 +339,62 @@ func _buza_de_stanca() -> void:
 			_place(m3, "falezaB", f + _step(_rng.randf_range(0.0, 4.0)), 1.0,
 				_rng.randf_range(6.0, 16.0), _rng.randf_range(0.0, TAU),
 				_scale_for(m3, h3), "none", -h3 * 0.55)
-		f += _step(3.6)
+		f += _step(2.8)
 		k += 1
+
+
+## COAMA SIRULUI - reparatia rundei 3, si e o singura idee.
+##
+## VERDICTUL PE CAPTURA B_r2_f0.14.png (regula zero: captura bate cifra):
+## zidaria e acolo si citeste a piatra - castigul rundei 2 - dar blocurile sar
+## in sus si in jos ca un gard de scanduri rupt, fiecare la alta inaltime si la
+## alt unghi. Adica exact «segmente scurte, distantate, la unghiuri diferite»,
+## verdictul pe care POI D l-a incasat de trei ori.
+##
+## CAUZA E IN CODUL MEU, o linie: inaltimea era `_rng.randf_range(0.9, 1.7)`
+## trasa INDEPENDENT pentru fiecare piesa. Doua piese vecine, la 3,6 m una de
+## alta, puteau iesi una de 0,9 si una de 1,7 - o treapta de 0,8 m intre doi
+## vecini lipiti. Zgomot alb pe o marime care trebuie sa fie CONTINUA.
+##
+## Un zid de sprijin real isi schimba inaltimea LENT, pe zeci de metri, fiindca
+## urmeaza terenul de sub el. Deci inaltimea nu se trage la zar per piesa, ci se
+## citeste dintr-o functie NETEDA de pozitia pe traseu. Variatia ramane (nu e o
+## bordura turnata), dar are lungime de unda de ~40 m, nu de 3,6 m.
+##
+## Doua sinusoide cu perioade incomensurabile, ca sa nu se vada tiparul.
+func _coama(frac: float) -> float:
+	var d := frac * _total_len
+	return 1.15 + 0.38 * sin(d / 41.0) + 0.17 * sin(d / 13.7 + 2.1)
+
+
+## Idem pentru peretele taiat din stanga, dar mai inalt: acolo drumul e TAIAT
+## in versant, deci fata se vede pe toata inaltimea ei.
+func _coama_stg(frac: float) -> float:
+	var d := frac * _total_len
+	return 2.70 + 0.55 * sin(d / 37.0 + 0.7) + 0.22 * sin(d / 11.3)
+
+
+## RETRAGEREA fata de muchie - a doua jumatate a reparatiei din runda 3.
+##
+## Dupa ce `_coama` a netezit INALTIMEA, captura B_r3_f0.14.png arata ca sirul
+## tot nu citeste a perete: blocurile ies din linie fiecare cu alt cat, deci se
+## vede o SCARA DE CUTII, nu o fata continua. Cauza e aceeasi greseala ca la
+## inaltime, lasata pe alta marime: `gap` era `_rng.randf_range(0.3, 1.1)`,
+## tras independent per piesa. Doi vecini la 2,8 m puteau iesi unul la 0,3 si
+## altul la 1,1 - o treapta de 0,8 m in plan, exact cat sa se vada colturile.
+##
+## Lectia, si merita scrisa o data pentru toate: pe un SIR care trebuie sa
+## citeasca drept o singura suprafata, ORICE marime desenata independent per
+## piesa (inaltime, retragere, unghi, scara) produce zimti. Zgomotul se pune pe
+## o functie neteda de pozitie, nu pe fiecare piesa in parte.
+func _retragere(frac: float) -> float:
+	var d := frac * _total_len
+	return 0.55 + 0.22 * sin(d / 29.0 + 1.3)
+
+
+func _retragere_stg(frac: float) -> float:
+	var d := frac * _total_len
+	return 0.42 + 0.18 * sin(d / 23.0 + 0.4)
 
 
 ## Un zid pe buza: pozitia si cota ca la `_place`, dar cu scara pe inaltime
@@ -373,13 +428,13 @@ func _perete_stanga() -> void:
 		var yaw := atan2(s.x, s.z) + PI * 0.5
 		# Doua asize suprapuse: peretele taiat are inaltime, nu e o bordura.
 		var m: String = "inca_wall_a" if k % 2 == 0 else "inca_wall_c"
-		_zid_buza(m, "pereteStg", f, -1.0, _rng.randf_range(0.2, 0.9),
-			yaw + _rng.randf_range(-0.1, 0.1), _rng.randf_range(2.2, 3.4))
+		_zid_buza(m, "pereteStg", f, -1.0, _retragere_stg(f),
+			yaw + _rng.randf_range(-0.035, 0.035), _coama_stg(f))
 		if _rng.randf() < 0.65:
 			_zid_buza("inca_wall_c", "pereteStg", f + _step(1.6), -1.0,
-				_rng.randf_range(1.2, 3.0),
-				yaw + _rng.randf_range(-0.2, 0.2),
-				_rng.randf_range(1.6, 2.8))
+				_retragere_stg(f + _step(1.6)) + 1.25,
+				yaw + _rng.randf_range(-0.06, 0.06),
+				_coama_stg(f) + _rng.randf_range(0.6, 1.4))
 		# Bolovani MICI la piciorul peretelui: aici capacul de muschi e
 		# corect si citeste ca bolovan cazut, nu ca umbrela.
 		if _rng.randf() < 0.5:

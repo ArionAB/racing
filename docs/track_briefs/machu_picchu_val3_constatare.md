@@ -80,9 +80,23 @@ măsoară nimic" din CLAUDE.md.
    același defect, iar `SvMpBuza` îl confirmă numeric. `machu_picchu_teren_D.md`
    are propunerea măsurată pentru D (două râpe cu parte alternantă). G și H cer
    aceeași analiză. **Decizie de dezvoltator: atinge terenul.**
-2. **Pereții gorjei lui E**, de la V ierbos la fațete de rocă. Fie prin
-   `custom_scarp_ravines` pe râpele 2/3 (taie vertical, `RAVINE_SCARP_RIM`),
-   fie prin piese de faleză. Prima e o linie în `.tscn`.
+2. **Pereții gorjei lui E**, de la V ierbos la fațete de rocă. **Testat și
+   respins varianta ieftină:** `custom_scarp_ravines` pe râpele 2/3 nu schimbă
+   nimic — măsurat, cifrele sunt **identice la zecimală** înainte și după
+   (96 de vertecși în gorjă, unghi mediu **14,3°**, 37,5 % peste 28°, 19,8 % cu
+   tentă de piatră).
+
+   Motivul e în cod: în `_carve_ravines`, ramura de **viaduct** rulează **după**
+   cea de scarp și **suprascrie `rim`** (`rim = RAVINE_VIADUCT_RIM`). Râpa 2 e
+   viaduct, deci flagul de scarp pe ea e **mort prin construcție**; râpa 3 nu e
+   viaduct, dar începe la 0.5834, iar podul e 0.5482–0.5662 — adică integral în
+   râpa 2. **Un flag ignorat în tăcere e o capcană**: merită ori un
+   `push_warning`, ori ordinea inversată, ori documentat în `terrain_hollow`-ul
+   de lângă.
+
+   Ce rămâne: unghiul **mediu de 14,3°** spune că gorja e un **bazin larg**, nu
+   o crăpătură. Niciun prag de tentă n-o poate face să citească drept prăpastie
+   — cere geometrie (pereți mai abrupți sau piese de faleză), nu culoare.
 3. **A: incinte închise** (874 de piese, zero spații închise) și **F: râul**
    (92 de piese, fără apă). Amândouă reparabile **în zonă**, fără teren.
 4. **Tunelul lui B** — piesă de comandat.

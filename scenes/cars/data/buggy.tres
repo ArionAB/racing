@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CarData" load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_buggy.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_driver.glb" id="3"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Buggy"
+color = Color(0.95, 0.75, 0.15, 1)
+max_speed = 35.0
+acceleration = 16.0
+grip = 8.5
+mass_factor = 1.0
+spring_freq = 2.2
+damping_ratio = 0.5
+suspension_rest = 0.4
+model = ExtResource("2")
+model_scale = 1.0
+model_rotation_deg = 180.0
+body_length = 3.7
+body_width = 2.08
+palette_model = true
+open_cockpit = true
+driver_model = ExtResource("3")
+driver_seat = Vector3(0, 0.64, 0.22)

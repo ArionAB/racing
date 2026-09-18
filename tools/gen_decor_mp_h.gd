@@ -152,6 +152,8 @@ const RES := {
 	"bromeliad": "s_bromeliad",
 	"orchid_cluster": "s_orchid_cluster",
 	"trail_marker": "s_trail_marker",
+	"huayna_picchu": "s_huayna_picchu",
+	"gorge_far_wall": "s_gorge_far_wall",
 }
 
 ## Inaltimea AABB masurata (docs/asset_briefs/machu_picchu_masuratori.md §1).
@@ -162,6 +164,7 @@ const HEIGHT := {
 	"moss_boulder_a": 0.741, "moss_boulder_b": 1.957, "moss_boulder_c": 3.069,
 	"polylepis_a": 4.190, "polylepis_b": 6.798, "tree_fern": 3.306,
 	"bromeliad": 0.377, "orchid_cluster": 0.390, "trail_marker": 1.200,
+	"huayna_picchu": 33.000, "gorge_far_wall": 75.393,
 }
 
 ## Raza de DEGAJARE la sol (m) la scara 1: raza corpului fizic.
@@ -171,6 +174,7 @@ const BASE_R := {
 	"moss_boulder_a": 0.43, "moss_boulder_b": 1.24, "moss_boulder_c": 2.11,
 	"polylepis_a": 0.61, "polylepis_b": 1.10, "tree_fern": 0.54,
 	"bromeliad": 0.46, "orchid_cluster": 0.17, "trail_marker": 0.29,
+	"huayna_picchu": 40.80, "gorge_far_wall": 97.42,
 }
 
 const CROWN_R := {
@@ -179,6 +183,7 @@ const CROWN_R := {
 	"moss_boulder_a": 0.43, "moss_boulder_b": 1.24, "moss_boulder_c": 2.11,
 	"polylepis_a": 1.39, "polylepis_b": 2.27, "tree_fern": 2.07,
 	"bromeliad": 0.46, "orchid_cluster": 0.17, "trail_marker": 0.29,
+	"huayna_picchu": 40.80, "gorge_far_wall": 97.42,
 }
 
 const TRI := {
@@ -187,6 +192,7 @@ const TRI := {
 	"moss_boulder_a": 200, "moss_boulder_b": 242, "moss_boulder_c": 238,
 	"polylepis_a": 598, "polylepis_b": 1098, "tree_fern": 768,
 	"bromeliad": 248, "orchid_cluster": 410, "trail_marker": 76,
+	"huayna_picchu": 503, "gorge_far_wall": 1706,
 }
 
 const EDGE_KEEP := 0.8
@@ -285,6 +291,8 @@ func _ready() -> void:
 		_cliff_face()
 		_understory()
 		_citadel_walls()
+		_cliff_mass()
+		_gap_rock_lip()
 		_write()
 	get_tree().quit(0)
 
@@ -338,7 +346,14 @@ func _survey_lateral() -> void:
 			var q := p + s * off
 			row.append("%.1f" % (_sol_real(q.x, q.z) - p.y))
 			off += 1.0
-		print("; frac %.4f half %.2f | %s" % [f, half, " ".join(row)])
+		print("; GOL  frac %.4f half %.2f | %s" % [f, half, " ".join(row)])
+		var row2: Array[String] = []
+		var off2 := 4.0
+		while off2 <= 30.0:
+			var q2 := p + s * -off2
+			row2.append("%.1f" % (_sol_real(q2.x, q2.z) - p.y))
+			off2 += 1.0
+		print("; PER  frac %.4f half %.2f | %s" % [f, half, " ".join(row2)])
 	print("; (coloane: lateral 4,5,6,...,30 m)")
 
 
@@ -1237,3 +1252,220 @@ func _sol_real(x: float, z: float) -> float:
 			return float(hit["position"].y)
 	print("; ATENTIE fara sol la (%.1f, %.1f): se cade pe camp" % [x, z])
 	return _sampler.ground_y(x, z)
+
+
+# --------------------------------------------------- RUNDA 10: peretele si buza
+##
+## VERDICTUL ORB AL RUNDEI 9: "in a noastra drumul trece peste o pajiste
+## continua, cu ambele margini la aceeasi cota cu terenul din spate. Nu exista
+## buza taiata / cadere pe partea golului (stanga e iarba care urca bland pana
+## in orizont), iar zidul de pe dreapta e o bordura joasa peste care camera
+## trece. [...] poarta pare gratuita - sta singura in mijlocul campului,
+## ocolibila pe iarba, in loc sa fie taiata prin masa de piatra."
+##
+## L-am verificat cu `--lat`, care acum masoara AMANDOUA partile (pas 1 m, cote
+## fata de sosea). Criticul are dreptate pe amandoua, si cifrele spun de ce:
+##
+##  PARTEA GOLULUI (muchia la half 6,00):
+##    lateral   4     5     6     7     8     9    10    11    12 ...  16
+##    frac .94 -1.7  -1.9  -2.1  -2.3  -2.5  -3.7  -4.9  -6.1  -7.4 ... -12.3
+##  Primii ~4 m de dupa muchie coboara 0,8 m in total: un UMAR DE IARBA. Rapa de
+##  12,3 m e reala, dar incepe la 9 m lateral, adica dincolo de umar - iar din
+##  camera de joc (2,6 m) umarul propriu ridica linia de vedere si ascunde exact
+##  muchia (memoria umarul-ingust-ascunde-caderea). De aia se citeste "pajiste".
+##
+##  PARTEA PERETELUI:
+##    lateral   4     8    12    15    20    25    30
+##    frac .94 -0.7  -0.3  +0.9  +1.8  +8.7  +22.5 +34.8
+##    frac .96 -0.7  -0.3  -0.3  -0.3  -0.3  -0.3  -0.3
+##  La 0,94 "peretele" e o coasta care abia se ridica 1,8 m in primii 15 m, si
+##  urca serios abia dupa 20 m. La poarta (0,955-0,964) e PLAT la -0,30 m pe tot
+##  intervalul de 30 m. Deci la poarta nu exista niciun perete: poarta chiar sta
+##  in camp si chiar e ocolibila pe iarba. Nu e o chestiune de a inalta zidaria
+##  cu inca un curs - nu exista masa de piatra in care sa fie taiata.
+##
+## CE FAC, exact cele doua lucruri cerute, nimic altceva:
+##
+## (A) BUZA TAIATA pe partea golului, in primii 3-5 m. Nu pot sapa terenul (nu e
+##     treaba POI-ului si traseul a trecut ProbeLayout), dar pot pune PIATRA
+##     acolo unde acum e iarba: un sir continuu de bolovani INCLINATI cu coama
+##     chiar sub cota soselei, lipit de muchie, care inlocuieste umarul verde cu
+##     o muchie de stanca - si sub el un al doilea sir, mai jos, in fereastra
+##     vizibila. Efectul cerut: primii 3-5 m sa fie flanc de stanca, nu iarba.
+##
+## (B) MASA DE PIATRA pe partea opusa, prin care trece poarta. `huayna_picchu`
+##     (33,00 m inaltime, 79,47 x 73,47 m amprenta, 503 triunghiuri, coliziune
+##     `none` prin PROP_COLLISION) e exact piesa pentru asta si e deja
+##     inregistrata in Track15.tscn ca `s_huayna_picchu` - NEFOLOSITA de niciun
+##     POI. Sloturile ei (2,3,12,21,28,29) sunt aceleasi ca ale bolovanilor, deci
+##     ZERO materiale noi: nu cer buget, refolosesc.
+##
+##     Se aseaza cu flancul lipit de umarul drumului si INGROPATA adanc, ca sa
+##     iasa din ea doar felia dinspre drum: un perete care urca dincolo de cadru.
+##     Sirul merge de la intrarea pe cornisa pana DUPA poarta, ca poarta sa fie
+##     taiata prin masa, nu pusa langa ea.
+##
+## Ce NU fac: nu ating traseul, nu largesc poarta, nu mut terasele (criticul nu
+## le-a cerut si ele raman muchia de sus a caderii), nu adaug material nou.
+
+
+## Gap-ul (fata de muchie) la care ajunge FLANCUL masei de piatra la cota
+## soselei. Mic dinadins: criticul cere ca peretele sa ocupe cadrul, iar
+## coliziunea piesei e `none`, deci nu poate impinge masina - dar garda de banda
+## de mai jos ramane, ca silueta sa nu intre peste carosabil.
+## RUNDA 10b: 1,6 -> 0,2. Pe `H_r10_f0940.png` intre muchia drumului si piciorul
+## masei ramanea o pana de IARBA de cativa metri, deci peretele plutea peste
+## pajiste in loc ca drumul sa fie taiat in el - exact jumatatea de verdict
+## ramasa nerezolvata ("in loc sa fie taiata prin masa de piatra"). Coliziunea
+## piesei e `none`, deci apropierea nu poate atinge masina; garda de banda de mai
+## jos ramane, pe silueta.
+## 1,6 era prea departe (pana de iarba intre drum si perete), 0,2 prea aproape:
+## garda de banda l-a refuzat pe toate patru, si pe buna dreptate - silueta ar fi
+## atarnat peste umarul pe care se aterizeaza dupa barne. Se ia exact
+## `EDGE_KEEP` (0,8 m), adica cel mai aproape pe care garda il accepta: piciorul
+## peretelui sta pe umar, fara pana de pajiste, dar nu peste banda.
+const CLIFF_GAP := 0.85
+## Cat din piesa se ingroapa. Piesa e un CON de 33 m cu baza de ~81 m; intreaga,
+## baza ei ar acoperi jumatate de pista. Ingropata cu `CLIFF_SINK`, ce ramane
+## afara e o felie de flanc - perete, nu munte.
+const CLIFF_H := 33.0
+## Cat urca varful masei PESTE COTA SOSELEI. Criticul cere ca peretele sa ocupe
+## ~1/3 din cadru pe verticala si sa urce dincolo de el. Camera de joc sta la
+## ~2,6 m peste sosea si priveste aproape orizontal, cu FOV vertical ~70 deg,
+## deci jumatatea de sus a cadrului acopera ~35 deg. Un perete al carui picior e
+## la ~8 m lateral si al carui varf e la 14 m peste ochi subintinde
+## atan(14/8) = 60 deg, adica trece DINCOLO de marginea de sus: exact ce s-a
+## cerut. 14 m e si cifra care tine piesa in cascada de umbre (shadow_distance),
+## ca sa TAIE lumina - a doua jumatate a verdictului.
+const CLIFF_TOP_OVER_ROAD := 14.0
+
+
+## (A) BUZA TAIATA pe marginea dinspre gol.
+##
+## RUNDA 13, dupa doua incercari gresite cu `moss_boulder_c` - ambele pastrate
+## in istoric fiindca spun de ce piesa nu era buna:
+##   r11: bolovani drepti, coama sub sosea -> 42/47 vizibili geometric, dar la
+##        -12,0 grade mediana, adica sub botul masinii. Existau, nu se vedeau.
+##   r12/r13: coama ridicata peste sosea si inclinata 35-50 grade ca sa arate
+##        flancul - `H_r13_f0950.png` arata un sir de DISCURI cu capac verde si
+##        burta maro. `moss_boulder_*` are muschi pe fata de sus si o baza plata:
+##        inclinat, isi arata talpa. E o piatra de camp, nu o muchie taiata.
+##
+## Piesa buna o aveam deja in cadru: `inca_wall_b`, din care sunt facute cele 76
+## de fete de terasa care se citesc curat pe taluz in aceeasi captura. O cornisa
+## incasa CHIAR e zidita pe muchie - buza nu e un sir de bolovani, e cursul de
+## sus al sprijinului, iesit putin peste carosabil. Deci buza devine un curs de
+## zidarie continuu pe muchia dinspre gol, cu coama peste cota soselei, adica
+## exact "buza + flanc de stanca in primii 3-5 m, nu iarba" din verdict - si in
+## materia care e deja peste tot in zona (`inca_stone`), nu una noua.
+##
+## Zidul de sprijin (`_retaining`) sta pe ACEEASI muchie, dar sub cota soselei:
+## el e fata care tine drumul. Buza e cursul de deasupra lui, singurul care rupe
+## linia orizontului. Impreuna dau profilul "drumul se termina intr-o muchie de
+## piatra, apoi cade".
+const LIP_RISE := 0.62           # cat iese coama peste sosea
+const LIP_STEP := 4.5            # pasul, sub lungimea piesei (6,0 m) => se incaleca
+
+
+func _gap_rock_lip() -> void:
+	var n := _track.baked.size()
+	var f := F_IN
+	var puse := 0
+	var k := 0
+	while f < F_OUT:
+		var i := int(f * float(n)) % n
+		var sgn := _gap_side(i)
+		var p := _track.baked[i]
+		var half := _track.width_at_index(i)
+		var side := _track._side_at(i) * sgn
+		var tang := (_track.baked[(i + 2) % n] - _track.baked[(i - 2 + n) % n])
+		tang.y = 0.0
+		if tang.length() < 0.01:
+			f += _step(LIP_STEP)
+			continue
+		tang = tang.normalized()
+		# La poarta si la barne se lasa loc: poarta are usciori pe umeri, iar
+		# traveea podului trebuie sa ramana libera.
+		var la_poarta: bool = absf(f - GATE_FRAC) < 0.006
+		var la_barne: bool = absf(f - BEAM_FRAC) < BEAM_HALF_SPAN + 0.0015
+		if not la_poarta and not la_barne:
+			# Fata interioara pe muchia asfaltului, ca la zidul de sprijin:
+			# centrul piesei la half + jumatatea grosimii.
+			var q := p + side * (half + WALL_HALF_THICK)
+			_raw("inca_wall_b", "buzaTaiata",
+				Vector3(q.x, p.y + LIP_RISE - WALL_H, q.z),
+				atan2(-tang.z, tang.x), 1.0, "none")
+			puse += 1
+			# Bolovani RARI la piciorul buzei, ca accent de stanca sub zidarie -
+			# nu ca buza in sine. Drepti (fara pitch): asa arata capacul cu
+			# muschi, care aici e corect, e vegetatie agatata de perete.
+			if k % 3 == 0:
+				var h2 := _rng.randf_range(1.4, 2.2)
+				_place("moss_boulder_b", "pietreBuza", f, sgn,
+					_rng.randf_range(2.6, 4.2), _rng.randf_range(0.0, TAU),
+					_scale_for("moss_boulder_b", h2), "none", -0.35)
+		f += _step(LIP_STEP)
+		k += 1
+	print("; buza taiata pe partea golului: %d asize de inca_wall_b, coama la +%.2f m peste sosea" % [
+		puse, LIP_RISE])
+
+
+## (B) MASA DE PIATRA pe partea peretelui, prin care e taiata poarta.
+func _cliff_mass() -> void:
+	var n := _track.baked.size()
+	# De la intrarea pe cornisa pana DUPA poarta. Capatul de dupa poarta e ce
+	# face poarta sa fie "taiata prin masa": daca masa s-ar opri la poarta,
+	# poarta ar fi tot capatul unui zid, nu o trecere.
+	var runs: Array = [
+		GATE_FRAC - _step(74.0),
+		GATE_FRAC - _step(40.0),
+		GATE_FRAC - _step(12.0),
+		GATE_FRAC + _step(14.0),
+	]
+	var puse := 0
+	for ff: float in runs:
+		var i := int(ff * float(n)) % n
+		var up := -_gap_side(i)
+		var p := _track.baked[i]
+		var half := _track.width_at_index(i)
+		var side := _track._side_at(i) * up
+		var scl := 1.0
+		var r: float = BASE_R["huayna_picchu"] * scl
+		# Cota se ia de la SOL sub centrul piesei, nu de la sosea, ca sa nu
+		# pluteasca pe portiunea unde terenul lateral urca.
+		# Distanta centrului se ALEGE ca flancul la cota soselei sa cada la
+		# `CLIFF_GAP` de muchie: la inaltimea `p.y` conul are raza
+		# `r * (1 - (p.y - y) / CLIFF_H)`, deci d = half + CLIFF_GAP + raza_aia.
+		# Se rezolva in doi pasi, fiindca `y` depinde de `d` prin sol.
+		# Cota TALPII se leaga de SOSEA, nu de solul de sub centrul piesei.
+		# Prima versiune lua `_sol_real` sub centru si scadea CLIFF_SINK; dar
+		# centrul cade la 48 m lateral, unde terenul e deja la +34..+60 m, deci
+		# varful iesea la 48-74 m peste drum: un munte, nu o cornisa. Aceeasi
+		# capcana ca la poarta (nota din `_gate`): o cota luata dintr-un punct
+		# nereprezentativ misca TOT obiectul.
+		#
+		# Se cere in schimb INALTIMEA PESTE DRUM, care e marimea din verdict
+		# ("sa ocupe ~1/3 din cadru pe verticala"), si talpa iese din ea.
+		var y: float = p.y + CLIFF_TOP_OVER_ROAD - CLIFF_H
+		var d: float = half + CLIFF_GAP + r * 0.4
+		var q := p + side * d
+		for _it in 3:
+			var t0: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
+			d = half + CLIFF_GAP + r * (1.0 - t0)
+			q = p + side * d
+		# GARDA DE BANDA, de mana (memoria plafonul-buclei-orbe-pe-banda):
+		# flancul conului la cota soselei nu are voie sa intre in carosabil.
+		var t: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
+		var raza_la_drum: float = r * (1.0 - t)
+		var pana_la_ax: float = d - raza_la_drum
+		if pana_la_ax < half + EDGE_KEEP:
+			_warn += 1
+			print("; ATENTIE masa de piatra la frac %.4f intra in banda: flanc la %.2f m de ax, muchia la %.2f" % [
+				ff, pana_la_ax, half])
+			continue
+		_raw("huayna_picchu", "masaPiatra", Vector3(q.x, y, q.z),
+			_rng.randf_range(0.0, TAU), scl, "none")
+		puse += 1
+		print("; masa de piatra frac %.4f: centru la %.1f m de ax, talpa %.1f (sosea %.1f), ies %.1f m, flanc la %.2f m de ax (muchia %.2f)" % [
+			ff, d, y, p.y, (y + CLIFF_H) - p.y, pana_la_ax, half])
+	print("; masa de piatra: %d bucati huayna_picchu (coliziune none, sloturi de roca - zero materiale noi)" % puse)

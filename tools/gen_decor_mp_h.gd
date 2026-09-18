@@ -118,6 +118,22 @@ const ZONE := "DecorManual/ZoneH_Cornisa"
 
 const F_IN := 0.9280
 const F_OUT := 0.9990
+## Unde se OPRESTE zidul de sprijin (restul decorului merge pana la F_OUT).
+##
+## RUNDA 4: captura `H_r4_f097.png` arata o lespede de piatra care umple
+## jumatatea de jos a cadrului — pe `main`, la aceeasi fractie, nu e nimic
+## acolo (`BAZA_main_f097.png`), deci e a mea. Masurat pe .tscn, vinovatele sunt
+## piesele de la z = 118-136, asezate la 7,4-11,7 m lateral pe o portiune unde
+## drumul are deja half 6,6-9,0 si COTESTE spre piata: camera de urmarire
+## taie larg prin viraj si trece prin ele.
+##
+## Cauza de fond nu e distanta, e ca acolo nu mai exista cornisa. Dupa poarta
+## traseul iese din rapa (survey: cota la +8 m urca de la -2,6 la -0,3 intre
+## 0,968 si 0,976) si intra in piata — un „zid de sprijin" acolo nu sprijina
+## nimic si nu are ce cauta. Deci se opreste la poarta, nu se impinge mai
+## departe: memoria capcana-parametrului-care-doar-aduna — intrebarea nu e cu
+## cat sa-l mut, ci de unde vine forma.
+const F_WALL_OUT := 0.9655
 
 ## id-urile ext_resource din Track15.tscn (fundatia).
 const RES := {
@@ -199,11 +215,18 @@ const WALL_LEN := {"inca_wall_a": 4.0, "inca_wall_b": 6.0, "inca_wall_c": 2.0}
 const WALL_OVERLAP := 0.75     # pasul = L * asta, deci fetele se incaleca 25 %
 const WALL_MAX_SAGITTA := 0.12
 const WALL_POLY_STEP := 0.5
-## Cate cursuri se stivuiesc. Aici caderea masurata e 11-12 m, dar din masina se
-## vad primele doua (ochiul la ~1,5 m, zidul la 4-6 m lateral: sub 35 de grade
-## nu mai intra in cadru). Al treilea curs se vede doar de departe, la intrarea
-## pe cornisa, si acolo chiar conteaza — de aia 3, nu 2 ca la POI G.
-const WALL_COURSES := 3
+## Cate cursuri de zidarie se pun sub coama, pe buza golului.
+##
+## Cifra a fost 3 (r1), 5 (r2, cu retragere pe panta), 5 (r3, cu contact cautat
+## per curs) si a ajuns inapoi la 2 — vezi nota lunga din `_place_wall`, care
+## spune de ce: pe o DREAPTA, zidul paralel cu soseaua nu intra in cadrul unei
+## camere care priveste inainte, deci cursurile de sub primele doua sunt
+## geometrie pe care nu o vede nimeni din masina, iar incercarile de a le face
+## vizibile (retragere, contact) le-au transformat in panouri inclinate.
+##
+## Doua cursuri = 4,97 m de fata sub coama: destul cat marginea sa citeasca a
+## zidarie si nu a bordura, si atat cat se vede de pe drum.
+const WALL_COURSES := 2
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -330,9 +353,35 @@ func _gate() -> void:
 	# X-ul local pe `side`: Basis.from_euler(0, yaw, 0) are coloana X =
 	# (cos yaw, 0, -sin yaw). O egalez cu `side`.
 	var yaw := atan2(-s.z, s.x)
-	# Cota: talpa pe SOSEA, nu pe teren. Poarta sta pe carosabil, si carosabilul
-	# e la p.y; terenul de sub el poate fi mai jos (cornisa).
-	_raw("main_gate", "poarta", Vector3(p.x, p.y, p.z), yaw, 1.0, "mesh")
+	# COTA. Prima versiune punea talpa pe SOSEA (`p.y`), fiindca poarta sta pe
+	# carosabil. Captura `H_test_f0966.png` a aratat ce scapa rationamentul:
+	# poarta are 16,80 m ANVERGURA pe un drum de 8,00 m, deci usciorii ei
+	# exterioari cad la 4-8 m dincolo de muchie — pe teren, care acolo e la
+	# -0,30 m. Rezultatul: blocurile laterale ATARNA IN AER cu 30 cm.
+	#
+	# Se ia deci cea mai JOASA dintre cota soselei si cotele terenului sub cele
+	# doua capete ale piesei. Poarta se afunda cu diferenta (aici ~0,30 m), ceea
+	# ce nu schimba nimic pentru masina — golul masurat e 8,120 m in fereastra
+	# 0,15-1,80 m peste TALPA, iar buiandrugul ramane la 5,94 m, mult peste
+	# gabarit — dar sterge aerul de sub uscioarele exterioare.
+	# Prima incercare a luat `min` peste cele doua capete ale anvergurii si a
+	# iesit -5,04 m: capatul dinspre gol atarna peste rapa, deci minimul lui e
+	# fundul rapei, si poarta s-ar fi ingropat cu 5 m cu tot cu deschidere.
+	# Memoria origin-base-ridica-tot-obiectul, in oglinda — o cota luata dintr-un
+	# punct nereprezentativ misca TOT obiectul.
+	#
+	# Ce trebuie de fapt: poarta sa nu atarne pe UMERII drumului, adica pe fasia
+	# imediat de langa carosabil, unde chiar e pamant. Se ia cota terenului la
+	# +-5 m de ax (inca pe umar la half 4,0) si se afunda cel mult 0,6 m — atat
+	# cat sa dispara aerul de sub usciori, fara sa scada gabaritul.
+	var um_a := p + s * 5.0
+	var um_b := p - s * 5.0
+	var y_um: float = minf(_sol_real(um_a.x, um_a.z), _sol_real(um_b.x, um_b.z))
+	var y_gate: float = maxf(minf(p.y, y_um), p.y - 0.6)
+	_raw("main_gate", "poarta", Vector3(p.x, y_gate, p.z), yaw, 1.0, "mesh")
+	print("; poarta: talpa la %.2f (sosea %.2f, umeri %.2f / %.2f), afundare %.2f m" % [
+		y_gate, p.y, _sol_real(um_a.x, um_a.z), _sol_real(um_b.x, um_b.z),
+		p.y - y_gate])
 	print("; poarta la frac %.4f, (%.1f, %.1f, %.1f), yaw %.1f deg, semi-latime %.2f m (drum %.2f), gol masurat 8,120 m" % [
 		GATE_FRAC, p.x, p.y, p.z, rad_to_deg(yaw), half, 2.0 * half])
 
@@ -378,7 +427,7 @@ func _retaining() -> void:
 	var n := _track.baked.size()
 	var line: Array[WallPt] = []
 	var f := F_IN
-	while f < F_OUT:
+	while f < F_WALL_OUT:
 		var i := int(f * float(n)) % n
 		var sgn := _gap_side(i)
 		var half := _track.width_at_index(i)
@@ -510,14 +559,79 @@ func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
 		_skipped += 1
 		return false
 	var yaw := atan2(-tang.z, tang.x)
+	# ------------------------------------------------------------------
+	# RUNDA 2: CURSURILE SE RETRAG PE PANTA, NU SE STIVUIESC PE VERTICALA.
+	#
+	# Runda 1 punea toate cursurile la acelasi `mid`, adica unul sub altul. Pe
+	# POI G asta era corect: acolo zidul imbraca o taietura verticala (`scarp`).
+	# Aici NU e vertical, si `tools/ProbeMpHCornisa.tscn` a masurat exact cat:
+	#
+	#   frac    panta 0-3m   0-6m   0-12m    cota la +3 / +6 / +12 m
+	#   0.9400    27.2       41.2   40.3      -3.7  -7.4  -12.3
+	#   0.9480    28.4       41.2   39.8      -3.9  -7.6  -12.3
+	#   0.9560    33.8       39.8   37.8      -5.0  -8.0  -12.3
+	#
+	# Adica un TALUZ de ~40 de grade adanc de 12,3 m, care incepe la 0,3 m dupa
+	# muchie. Un curs pus 2,487 m mai jos la acelasi `mid` intra in deal cu
+	# 2,487 / tan(40) = 2,96 m — de aia `probe_manual` le-a raportat INGROPATE
+	# cu -3,67 m, si de aia captura H_r1_f0935 arata doar buza de piatra pe o
+	# panta verde de 12 m.
+	#
+	# Cifra nu era un fals pozitiv, cum am presupus cand am citit-o prima data:
+	# era chiar defectul, scris pe nume (memoria garda-existenta-nerulata, in
+	# varianta ei mai neplacuta — garda rulata si RASTALMACITA).
+	#
+	# Deci fiecare curs se muta in afara cu cat cere panta LOCALA masurata
+	# acolo, si se opreste cand talpa lui a ajuns la teren. Asa fata de piatra
+	# urmeaza taluzul in trepte, ca o terasa incasa adevarata, in loc sa se
+	# ingroape.
 	var foot_out: float = _sol_real(probe.x, probe.z)
-	var courses := int(ceil((top - foot_out) / WALL_H))
-	courses = clampi(courses, 1, WALL_COURSES)
-	for c in courses:
+	# Panta locala a taluzului, masurata pe primii 6 m dupa muchie: e intervalul
+	# pe care cad cursurile 1-3, si singurul care se vede din masina.
+	var e6 := mid + side * 6.0
+	var drop6: float = maxf(0.0, top - _sol_real(e6.x, e6.z))
+	var slope := atan2(drop6, 6.0)
+	# Retragerea pe orizontala per curs. Sub 25 de grade panta e destul de lina
+	# cat un zid drept sa mai citeasca; peste 60 e practic vertical si retragerea
+	# ar rupe lantul, deci se plafoneaza.
+	var step_out: float = 0.0
+	if slope > deg_to_rad(25.0):
+		step_out = WALL_H / tan(clampf(slope, deg_to_rad(25.0), deg_to_rad(60.0)))
+	# RUNDA 4: SE REVINE LA STIVA SIMPLA, si motivul e o lectie, nu o retragere.
+	#
+	# Rundele 2 si 3 au incercat sa faca fata de piatra sa imbrace taluzul: mai
+	# intai cu un offset calculat din panta (r2), apoi cu un contact cautat per
+	# curs (r3). Amandoua au inrautatit captura:
+	#   r2 (H_r2_f0955) — blocuri razlete imprastiate pe panta, 1,3-2,6 m de
+	#     plutire masurata cu probe_manual;
+	#   r3 (H_r3_f0955) — si mai rau: cursurile isi pastreaza yaw-ul soselei dar
+	#     stau la departari si cote diferite, deci lantul citeste ca un sir de
+	#     PANOURI CAZUTE, inclinate unul fata de altul.
+	#
+	# Diagnosticul, dupa a treia captura cu acelasi verdict (memoria
+	# criticul-cere-ce-zona-nu-poate-da: acelasi verdict de doua ori inseamna ca
+	# la cauza nu se ajunge din zona in care sap):
+	#
+	#   Felia mea e o DREAPTA (survey nota 1: x = -140 constant pe 70 m). Un zid
+	#   paralel cu un drum drept nu se vede dintr-o camera care priveste INAINTE
+	#   (memoria perete-paralel-nu-se-vede: doar serpentina spre interior
+	#   infasoara peretele). La POI G fata de piatra era eroul fiindca acolo
+	#   bucla de deasupra priveste in jos pe bucla de dedesubt; aici nu exista
+	#   nicio bucla care sa se uite inapoi la ea.
+	#
+	# Deci nicio cantitate de cursuri nu poate face din zid eroul POI-ului asta,
+	# si fiecare incercare l-a facut doar mai zgomotos pe marginea cadrului. Ce
+	# poate face zidul pe o dreapta e sa fie o LINIE CURATA de piatra care
+	# margineste drumul — si aia o face stiva simpla, cu 2 cursuri, cel mai bine.
+	#
+	# Ce lipseste cu adevarat (silueta de stanca a taluzului) e o proprietate a
+	# TERENULUI, nu a decorului manual: taluzul e verde fiindca asa il coloreaza
+	# tema, si culoarea lui nu e a POI-ului. Se raporteaza, nu se bricoleaza.
+	for c in WALL_COURSES:
 		var y := top - WALL_H * float(c + 1)
 		# Doar cursul de sus poarta coliziune: e singurul care atinge cota
-		# soselei. Cele de dedesubt sunt fata de piatra, in gol — un hull acolo
-		# ar fi o polita invizibila peste prapastie.
+		# soselei. Cel de sub el e fata de piatra deasupra caderii — un hull
+		# acolo ar fi o polita invizibila peste prapastie.
 		_raw(mdl, "zidSprijin", Vector3(mid.x, y, mid.z), yaw, 1.0,
 			"hull" if c == 0 else "none")
 	return true
@@ -540,7 +654,9 @@ func _gap_lip() -> void:
 	var n := _track.baked.size()
 	var f := F_IN
 	var k := 0
-	while f < F_OUT:
+	# Parapetul marcheaza buza CORNISEI, deci se termina unde se termina si ea
+	# (la poarta), din acelasi motiv ca zidul.
+	while f < F_WALL_OUT:
 		var i := int(f * float(n)) % n
 		var sgn := _gap_side(i)
 		var p := _track.baked[i]
@@ -673,44 +789,53 @@ func _understory() -> void:
 ##
 ## In bara, in jurul portalului nu e doar stanca: sunt terase si ziduri joase de
 ## aceeasi zidarie, care spun ca poarta e intrarea intr-o CETATE, nu un arc
-## singuratic in pustiu. Se pun doar in ultimii ~45 m dinaintea portii si imediat
-## dupa ea, in siruri scurte paralele cu drumul, esalonate pe doua trepte.
+## singuratic in pustiu.
 ##
-## Sunt `hull` si stau pe partea peretelui, la >= 1,6 m de muchie.
+## RUNDA 1 A GRESIT AICI DE DOUA ORI, si captura le-a aratat pe amandoua:
+##
+## 1. `H_r1_f097.png` — o piesa asezata dupa poarta umple JUMATATEA DE JOS A
+##    CADRULUI, ca o lespede pusa de-a curmezisul in fata masinii. Cauza:
+##    sirul de dupa poarta pornea la 9 m si drumul coteste acolo (survey: side
+##    se roteste de la (-1, 0) la (0, +1) dupa 0,976), deci o piesa pusa
+##    „lateral" fata de fractia ei ajunge IN FATA la fractia urmatoare.
+##    Memoria masoara-inainte-nu-langa, exact: camera priveste inainte.
+##
+## 2. `H_r1_f0955.png` — piesele de pe dreapta stau in aer si la unghiuri
+##    razlete, ca niste scanduri aruncate pe iarba. Cauza: `_raw` direct, cu
+##    cota din `_sol_real` plus un `dy` fix, ocoleste toate garzile din
+##    `_place` (scufundare, degajare, carosabilul altui tronson).
+##
+## Deci sirurile se muta TOATE inaintea portii, pe portiunea dreapta unde
+## `side` e constant, si trec prin `_place` ca orice alta piesa.
 func _citadel_walls() -> void:
 	var n := _track.baked.size()
+	# Doar pe dreapta dinaintea portii (frac < GATE_FRAC), unde survey-ul da
+	# side = (-1, 0) constant. Dupa poarta traseul coteste spre piata si orice
+	# piesa „laterala" ajunge in fata camerei.
 	var runs: Array = [
-		# frac_start, cate piese, gap de la muchie, treapta (dy)
-		[GATE_FRAC - _step(44.0), 5, 1.6, 0.0],
-		[GATE_FRAC - _step(26.0), 4, 5.2, 1.1],
-		[GATE_FRAC + _step(9.0), 4, 2.0, 0.0],
+		# frac_start, cate piese, gap de la muchie
+		[GATE_FRAC - _step(52.0), 5, 1.8],
+		[GATE_FRAC - _step(34.0), 4, 6.0],
+		[GATE_FRAC - _step(20.0), 3, 11.0],
 	]
 	for r: Array in runs:
 		var f0: float = r[0]
 		var cnt: int = r[1]
 		var gap: float = r[2]
-		var dy: float = r[3]
 		for j in cnt:
-			var ff: float = f0 + _step(6.0 * float(j))
+			var ff: float = f0 + _step(6.2 * float(j))
 			var i := int(ff * float(n)) % n
 			var up := -_gap_side(i)
-			var p := _track.baked[i]
-			var s := _track._side_at(i) * up
-			var half := _track.width_at_index(i)
 			var tang := (_track.baked[(i + 2) % n] - _track.baked[(i - 2 + n) % n])
 			tang.y = 0.0
 			if tang.length() < 0.01:
 				continue
 			tang = tang.normalized()
 			# Piesa e lunga pe X-ul ei local si trebuie sa stea PARALEL cu
-			# drumul, deci X local pe tangenta.
-			var yaw := atan2(-tang.z, tang.x)
-			var d := half + gap + 0.43
-			var q := p + s * d
-			var gy := _sol_real(q.x, q.z)
-			# Treapta a doua sta mai sus: e o terasa in spatele primeia.
-			_raw("inca_wall_b", "zidCetate",
-				Vector3(q.x, gy + dy, q.z), yaw, 1.0, "hull")
+			# drumul, deci X local pe tangenta. `_place` primeste yaw-ul gata
+			# calculat si pune cota, garzile si refuzurile.
+			_place("inca_wall_b", "zidCetate", ff, up, gap,
+				atan2(-tang.z, tang.x), 1.0, "hull", -0.10)
 
 
 # ------------------------------------------------------------------ asezarea

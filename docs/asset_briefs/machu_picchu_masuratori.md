@@ -172,72 +172,41 @@ pistei cere â€ž8 m liber la bazÄƒ" pe un drum de 13 m. 7.39 m e sub cei 8,
 inventarul raporteazÄƒ marjÄƒ pozitivÄƒ. Cu maÈ™inile AI care intrÄƒ Ã®n pluton acolo,
 asta se verificÄƒ cu `ProbeLaneClear` È™i `ProbeRace` dupÄƒ plantare, nu din tabel.
 
-### Poarta e mai îngustă decât drumul pe care stă (18 sep 2026)
+### ~~Poarta e mai îngustă decât drumul~~ — **RETRAS: poarta e TRAPEZOIDALĂ** (18 sep 2026)
 
-Cifra de 7,39 m nu e doar „sub cei 8 m ceruți" — **inversează intenția de
-design**, iar asta nu se vede din tabel.
+> Secțiunea asta a susținut, pe 18 sep, că `main_gate` e cu 0,61 m mai îngustă
+> decât carosabilul și că ușciorii stau în drum. **E greșit, și a fost
+> infirmat în aceeași zi de constructorul POI-ului H** (`ProbeMpHGate.tscn`,
+> rulată și independent). Se păstrează scrisă fiindcă eroarea e instructivă.
 
-`Track15.tscn`, `custom_width_segments` conține `Vector3(0.9631, 0.9703, 4)`:
-pe **exact intervalul porții**, semi-lățimea drumului e 4,0 m, adică **8,0 m
-carosabil**. Brief-ul §2 (rândul H) descrie ce trebuia să se întâmple: drumul
-se strânge de la 13 la 8 m, poarta livrează 8,4 m liber, deci **poarta
-încadrează drumul** cu ~0,2 m joc de fiecare parte. Gâtuirea — îmbrânceala cu
-4 mașini — era a **drumului**; piatra doar o înrăma.
+**Ce s-a ratat: poarta e trapezoidală**, deci golul **se strâmtează cu
+înălțimea**. Măsurătoarea de 7,39 m din §3 e corectă — dar e luată pe
+fereastra `y = 0,15–5,80` (până sub buiandrug), adică **la o înălțime la care
+mașina nu trece**. Măsurat pe trei ferestre:
 
-Livrată la 7,39 m, poarta e cu **0,61 m mai îngustă decât carosabilul**: ușciorii
-stau **în** drum, câte ~30 cm de fiecare parte. Nu mai e un cadru, e un
-obstacol — o mașină care ține marginea (linia normală a AI-ului pe exterior)
-intră în granit.
+| fereastră de înălțime | gol liber | ce e |
+|---|---:|---|
+| `0,15–0,60` | **8,300 m** | „8,390 bază" din inventar |
+| **`0,15–1,80`** | **8,120 m** | **gabaritul caroseriei — cifra care contează** |
+| `0,15–5,80` | **7,420 m** | „7,410 sus" din inventar, și cei 7,39 din §3 |
 
-**Nu s-a corectat nimic.** Cele trei opțiuni, toate deschise, decizia la
-integrarea POI-ului H, pe măsurătoare (`ProbeRace --slice=0.92,1.00` pe mai
-multe seed-uri + `ProbeLaneClear`):
+**Cele trei cifre din inventar sunt toate corecte.** Nu se contrazic și nu
+descriu greșit piesa — le lipsea doar **fereastra la care au fost luate**.
+Nu se corectează nimic în inventar.
 
-1. **Se lățește piesa** la ~8,4 m — restaurează intenția din brief, dar cere
-   re-export din Blender și re-măsurare.
-2. **Se îngustează drumul** sub 7,39 pe segment (de ex. semi-lățime 3,5) —
-   poarta redevine cadru, gâtuirea rămâne a drumului, zero muncă de asset. Dar
-   schimbă traseul, care a trecut deja ProbeLayout.
-3. **Se acceptă** poarta ca gâtuire reală, și se verifică doar că e trecătoare
-   pentru plutonul de 4 — cel mai ieftin, dar ușciorii în carosabil rămân o
-   sursă de contact „nedrept" (CLAUDE.md: contactul e mecanică, dar un zid fix
-   pe linia de cursă nu e îmbrânceală).
+Și contractul de gameplay **se confirmă**: brief-ul cere 8 m liber pentru
+îmbrânceala cu 4 mașini; în fereastra caroseriei sunt **8,120 m**, marjă
+**+0,12 m**. La locul unde cade poarta (frac 0,963–0,965) drumul are exact
+8,00 m, deci poarta e cu **6 cm mai largă de fiecare parte decât carosabilul**:
+**încadrează drumul**, cum voia brief-ul. Gâtuirea rămâne a **drumului**.
 
-#### Cât metal încape, de fapt (18 sep 2026)
+**Lecția:** un gol nu e un număr, e un număr **plus fereastra pe care a fost
+măsurat**. Când două măsurători ale „aceleiași" deschideri nu se potrivesc,
+întreabă întâi **la ce înălțime** — înainte să declari una greșită. Memoria:
+`golul-se-masoara-pe-fereastra-lui`.
 
-Înainte de a alege între cele trei, iată aritmetica — ca decizia să nu se ia
-pe impresie. Lățimea de **coliziune** a unei mașini e `body_width * 0.9`
-(`car.gd:466`), nu `body_width`:
-
-| mașină | `body_width` | coliziune |
-|---|---:|---:|
-| taxi | 2,075 | **1,868** |
-| muscle | 1,949 | 1,754 |
-| police_sports | 1,932 | 1,739 |
-| firetruck | 1,730 | 1,557 |
-| bus | 1,520 | 1,368 |
-
-Plutonul real de 4 (taxi + muscle + police + firetruck) = **6,92 m de metal**.
-Cazul absolut, 4 × taxi, ar fi 7,47 m — dar taxiul e **singura** mașină de
-2 m, deci nu se întâmplă într-un grid mixt.
-
-| deschidere | joc total pentru 4 | pe interval (3 rosturi + 2 margini) |
-|---|---:|---:|
-| **7,39 m** (măsurat) | **+0,47 m** | +0,09 m |
-| 8,00 m (drumul) | +1,08 m | +0,22 m |
-| 8,39 m (inventar) | +1,47 m | +0,29 m |
-
-**Concluzia: plutonul încape și prin 7,39 m**, cu 47 cm de joc între toate
-patru. E strâmt — dar „patru mașini care abia încap" e exact îmbrânceala pe
-care o cere brief-ul, nu un defect. Ce rămâne real e că **ușciorii stau în
-carosabil** câte ~30 cm: nu blochează plutonul, dar pedepsesc mașina care ia
-poarta pe margine.
-
-Deci opțiunea (c) — se acceptă — are acum cifra care o susține, iar decizia
-se ia pe `ProbeRace --slice=0.92,1.00` când poarta e plantată: dacă plutonul
-trece fără repuneri și fără „pereți" în plus, nu se atinge nici piesa, nici
-drumul.
-
+Aritmetica plutonului de mai jos rămâne valabilă — și devine mai comodă:
+prin 8,12 m, cele patru mașini (6,92 m de metal) au **1,20 m de joc**.
 
 ## 4. Coliziunea propusÄƒ, cu motivul mÄƒsurat
 

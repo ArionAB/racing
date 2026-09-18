@@ -138,13 +138,17 @@ Se reia de la cea mai bine judecată stare, pe terenul nou
 
 ### 3.4 Două lucruri deschise, măsurate și nerezolvate
 
-- **`main_gate` are 7,39 m liber, nu 8,39.** Deschiderea reală între uşciori,
-  măsurată prin proiecția triunghiurilor, e constantă de la sol până sub
-  buiandrug. Inventarul scrie trei cifre (8,390 / 7,410 / 6,000) care nu
-  descriu piesa. Brief-ul pistei cere **8 m** la bază pentru îmbrânceala cu 4
-  mașini la POI H. **Nu s-a corectat nimic în tăcere** — se verifică cu
-  ProbeRace (`--slice=0.92,1.00`) când POI H plantează poarta, și abia atunci
-  se decide: se lărgește piesa, se lărgește drumul, sau se acceptă cifra.
+- ~~**`main_gate` are 7,39 m liber, nu 8,39.**~~ **ÎNCHIS (18 sep 2026):
+  poarta e TRAPEZOIDALă, deci golul depinde de înălțimea la care măsori.**
+  Cei 7,39 m erau luați pe fereastra `y=0,15–5,80` (până sub buiandrug) — o
+  înălțime la care mașina nu trece. În fereastra caroseriei (`y=0,15–1,80`)
+  golul e **8,120 m**, deci cei 8 m ceruți de brief **se confirmă**, cu marjă
+  +0,12 m. Cele trei cifre din inventar (8,390 / 7,410 / 6,000) sunt **toate
+  corecte**, doar luate la înălțimi diferite; nu se corectează nimic.
+  La locul porții drumul are 8,00 m, deci poarta **încadrează** carosabilul cu
+  6 cm de fiecare parte, cum voia brief-ul. Sondă: `tools/ProbeMpHGate.tscn`
+  (constructorul POI-ului H; rulată și independent). Memoria:
+  `golul-se-masoara-pe-fereastra-lui`.
 - **Bârnele Podului Incaș aduc rampele podului mobil.** Reuse-ul
   `LiftBridgeHazard` pune un dâmb de 1,6 m pe cornișă (profilul nu mai citește
   „bârne peste gol"), iar sub gol terenul rămâne la −0,3 m, deci nu e

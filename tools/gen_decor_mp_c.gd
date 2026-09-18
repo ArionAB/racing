@@ -85,12 +85,14 @@ const F_OUT := 0.400
 ## id-urile ext_resource din Track15.tscn (fundatia).
 const RES := {
 	"inti_punku": "s_inti_punku",
+	"main_gate": "s_main_gate",
 	"condor": "s_condor",
 	"guardhouse": "s_guardhouse",
 	"inca_house_b": "s_inca_house_b",
 	"inca_wall_a": "s_inca_wall_a",
 	"inca_wall_b": "s_inca_wall_b",
 	"inca_wall_c": "s_inca_wall_c",
+	"huayna_picchu": "s_huayna_picchu",
 	"moss_boulder_a": "s_moss_boulder_a",
 	"moss_boulder_b": "s_moss_boulder_b",
 	"moss_boulder_c": "s_moss_boulder_c",
@@ -106,8 +108,10 @@ const RES := {
 ## Inaltimea AABB masurata (docs/asset_briefs/machu_picchu_masuratori.md §1).
 const HEIGHT := {
 	"inti_punku": 5.000, "condor": 1.156, "guardhouse": 7.878,
+	"main_gate": 7.500,
 	"inca_house_b": 2.833,
 	"inca_wall_a": 2.487, "inca_wall_b": 2.487, "inca_wall_c": 2.432,
+	"huayna_picchu": 33.000,
 	"moss_boulder_a": 0.741, "moss_boulder_b": 1.957, "moss_boulder_c": 3.069,
 	"polylepis_a": 4.190, "polylepis_b": 6.798, "tree_fern": 3.306,
 	"bromeliad": 0.377, "orchid_cluster": 0.390,
@@ -118,6 +122,8 @@ const HEIGHT := {
 ## pentru trunk, jumatatea laturii mari a AABB pentru hull).
 const BASE_R := {
 	"inti_punku": 12.16, "condor": 0.73, "guardhouse": 4.01,
+	"main_gate": 8.45,
+	"huayna_picchu": 40.80,
 	"inca_house_b": 3.00,
 	"inca_wall_a": 2.03, "inca_wall_b": 3.02, "inca_wall_c": 1.06,
 	"moss_boulder_a": 0.43, "moss_boulder_b": 1.24, "moss_boulder_c": 2.11,
@@ -129,6 +135,8 @@ const BASE_R := {
 ## Raza COROANEI (m) la scara 1 — testul de silueta peste banda.
 const CROWN_R := {
 	"inti_punku": 12.60, "condor": 0.68, "guardhouse": 4.74,
+	"main_gate": 8.45,
+	"huayna_picchu": 40.80,
 	"inca_house_b": 3.65,
 	"inca_wall_a": 2.03, "inca_wall_b": 3.02, "inca_wall_c": 1.06,
 	"moss_boulder_a": 0.43, "moss_boulder_b": 1.24, "moss_boulder_c": 2.11,
@@ -139,6 +147,8 @@ const CROWN_R := {
 
 const TRI := {
 	"inti_punku": 1092, "condor": 986, "guardhouse": 504, "inca_house_b": 496,
+	"main_gate": 588,
+	"huayna_picchu": 503,
 	"inca_wall_a": 208, "inca_wall_b": 296, "inca_wall_c": 152,
 	"moss_boulder_a": 200, "moss_boulder_b": 242, "moss_boulder_c": 238,
 	"polylepis_a": 598, "polylepis_b": 1098, "tree_fern": 768,
@@ -298,7 +308,66 @@ func _find_sun(node: Node) -> DirectionalLight3D:
 ##
 ## Coliziunea e `mesh` (PROP_COLLISION, fundatia): un hull peste o poarta e un
 ## bloc plin de 25,19 x 5,00 m fix peste drum.
+## POARTA. Trei lucruri s-au schimbat in runda 2, si al treilea le explica pe
+## primele doua.
+##
+## (1) Mutata la 0,2605, fiindca fractiile judecate sunt 0,24 / 0,30 / 0,36 si
+##     poarta statea inapoia tuturor. 0,2605 avea raza 717 m fata de 232 m.
+##
+## (2) Adusa inapoi la 0,2250, fiindca probe_mp_c_umar.gd a masurat umarul pe
+##     toata zona: pe 0,232-0,358 e intre -1 si +5 m si de cele mai multe ori
+##     zero — soseaua e cornisa peste aer pe ambele parti, pe 126 de fractii.
+##     Singurele locuri cu pamant sunt capetele: 0,220-0,232 si de la 0,364.
+##
+## (3) SCHIMBATA DIN PIESA, si asta era problema reala de la inceput.
+##     Capturile aratau doua cutii de piatra de o parte si de alta a drumului si
+##     NIMIC intre ele. probe_mp_c_poarta.gd a numarat vertecsii lui
+##     `inti_punku` pe felii de inaltime, cu x_min/x_max si cati cad in banda
+##     centrala (|x| < 2 m, adica deasupra golului):
+##
+##       felie Y      n    x_min    x_max   in banda centrala
+##       0,00-0,50   160  -12,00   +12,00          5
+##       1,00-1,50    55  -12,51   +12,50          0
+##       2,00-2,50    78  -12,63   +12,38          0
+##       3,00-3,50    62  -12,46   +12,56          0
+##       4,50-5,00    90  -12,00   +12,00          0
+##
+##     ZERO vertecsi peste gol la ORICE inaltime peste 1 m. `inti_punku` NU ARE
+##     BUIANDRUG: sunt doi usciori la 25 m distanta plus o dala la sol. "Golul
+##     de 13,98 m" din masuratori e distanta dintre picioare, cu cer deasupra.
+##     Piesa nu poate citi ca poarta din nicio camera, fiindca nu e o poarta.
+##
+##     `main_gate`, masurata la fel, ARE traversa: feliile 5,25-6,00 si
+##     6,00-7,50 traverseaza centrul (x de la -8,40 la +8,40, apoi -4,90 la
+##     +4,90). Deschidere libera 7,39 m, buiandrug la 5,94-6,06 m, inaltime 7,50.
+##
+##     Scalata ca golul sa acopere cei 13,0 m de carosabil: 13,0 / 7,39 = 1,759.
+##     Ansamblul iese de 13,19 m inaltime, cu BUIANDRUGUL LA 10,55 m — adica
+##     peste ochiul camerei (10,0 m). Asta e chiar ce lipsea din verdictul
+##     criticului ("nu ai ce citi pe cer daca nu e nimic vertical acolo"):
+##     arcada taie linia orizontului, iar masina trece pe sub ea.
+##
+##     Contractul de gameplay se pastreaza si se largeste: golul devine 13,0 m
+##     pe un drum de 13,0 m, in loc de 13,98 pe 13,0. Marja scade de la +0,98 la
+##     0,00 la nivelul carosabilului — dar usciorii lui `main_gate` sunt
+##     inclinati, deci la inaltimea masinii golul e mai larg decat la sol.
+##     Se verifica cu ProbeLaneClear si ProbeRace dupa plantare, nu din tabel.
 const GATE_FRAC := 0.2250
+
+## Scara portii: golul liber (7,39 m la scara 1) trebuie sa acopere latimea
+## carosabilului. Se recalculeaza din latimea masurata la fata locului, nu se
+## scrie o cifra fixa: daca traseul se redeseneaza, poarta se rescaleaza singura.
+const GATE_CLEAR_AT_1 := 7.39
+
+## Cat intra talpa portii sub cota soselei, ca muchia de jos a aripii care
+## atarna peste prapastie sa ramana ascunsa in spatele dalei de drum.
+const GATE_SINK := 1.20
+
+## Cota ochiului camerei de joc peste sosea (ChaseCamera.DEFAULT_HEIGHT) si cat
+## trebuie sa treaca buiandrugul PESTE ea ca arcada sa se citeasca pe cer, nu
+## lipita de linia orizontului.
+const EYE_H := 10.0
+const GATE_SKY_MARGIN := 1.0
 
 func _gate() -> void:
 	var n := _track.baked.size()
@@ -313,10 +382,131 @@ func _gate() -> void:
 	# nu pe tangenta: poarta sta DE-A CURMEZISUL drumului.
 	var side := Vector3(-tang.z, 0.0, tang.x)
 	var yaw := atan2(-side.z, side.x)
-	_raw("inti_punku", "poartaSoarelui", Vector3(p.x, p.y, p.z), yaw, 1.0, "mesh")
-	print("; poarta la frac %.4f, curbura %+.4f (raza %.0f m), drum de %.1f m" % [
-		GATE_FRAC, _curv(i), 1.0 / maxf(absf(_curv(i)), 1e-6),
-		2.0 * _track.width_at_index(i)])
+	var latime := 2.0 * _track.width_at_index(i)
+	# Scara: golul trebuie sa acopere carosabilul, DAR buiandrugul trebuie sa
+	# ramana peste ochiul camerei si dupa coborarea cu GATE_SINK. A doua conditie
+	# e cea care castiga daca se bat cap in cap, fiindca prima se poate plati din
+	# marja (usciorii stau pe muchii), iar a doua nu se poate plati din nimic:
+	# sub cota ochiului arcada nu mai taie orizontul si POI-ul isi pierde
+	# silueta — exact ce a reclamat criticul.
+	var gscl := maxf(latime / GATE_CLEAR_AT_1,
+		(EYE_H + GATE_SKY_MARGIN + GATE_SINK) / 6.0)
+	# ARIPA EXTERIOARA CARE ATARNA, si de ce se rezolva cu cota, nu cu scara.
+	#
+	# Poarta are 29,55 m latime la scara 1,759 pe un drum de 13,0: usciorii
+	# interiori cad exact pe muchii (+-6,51 fata de +-6,50), dar aripile
+	# exterioare ajung la +-14,78. Pe partea -1 acolo e teren (umar 12 m); pe
+	# partea +1 e gol de 27-66 m, si captura arata aripa retezata in aer.
+	#
+	# Micsorarea nu e o optiune: buiandrugul trebuie sa treaca peste ochiul
+	# camerei (10,0 m) ca arcada sa taie orizontul, ceea ce cere scara >= 1,667,
+	# adica exact latimea care nu incape. Cerintele se exclud pe terenul asta.
+	#
+	# Ce se poate: COBORAREA piesei. Talpa portii intra sub cota soselei cu
+	# GATE_SINK, deci capatul de jos al aripii dispare in spatele dalei de drum
+	# in loc sa se vada taiat pe ceata. Cat se pierde in inaltime se recastiga
+	# din scara, fiindca buiandrugul urca oricum cu 6,00 * gscl de la talpa.
+	# 1,20 m: destul cat muchia de jos sa fie ascunsa din camera de joc (care
+	# priveste de sus), prea putin cat sa se vada ca poarta e ingropata.
+	_raw("main_gate", "poartaSoarelui", Vector3(p.x, p.y - GATE_SINK, p.z),
+		yaw, gscl, "mesh")
+	print("; poarta (main_gate, scara %.3f) la frac %.4f, curbura %+.4f (raza %.0f m)" % [
+		gscl, GATE_FRAC, _curv(i), 1.0 / maxf(absf(_curv(i)), 1e-6)])
+	print(";   drum %.1f m, gol %.1f m, inaltime %.1f m, buiandrug la %.1f m peste sosea (ochiul camerei e la 10,0)" % [
+		latime, GATE_CLEAR_AT_1 * gscl, 7.5 * gscl, 6.0 * gscl - GATE_SINK])
+	# CONTRAFORTUL, SCOS DUPA CE probe_manual L-A MASURAT. Il pusesem ca sa
+	# sprijine vizual piciorul dinspre prapastie: cinci `inca_wall_b` coborand
+	# din talpa portii pe fata stancii. Sonda a raspuns:
+	#
+	#   contrafortPoarta3   y 23,52   teren 27,72   -4,20   INGROPAT
+	#   contrafortPoarta4   y 21,18   teren 28,24   -7,05   INGROPAT
+	#   contrafortPoarta5   y 18,84   teren 28,24   -9,40   INGROPAT
+	#   contrafortPoarta6   y 16,51   teren 28,24  -11,74   INGROPAT
+	#
+	# Adica piesele coborau intr-un loc unde terenul e la cota soselei (28,24):
+	# le ingropam in deal, nu le atarnam peste gol. Alegerea partii se facea pe
+	# "unde cade solul cel mai jos sub piciorul interior", dar piciorul interior
+	# e la 7 m de ax, iar acolo mai e inca munte — prapastia incepe mai departe.
+	# Sonda masura un punct, contrafortul se punea in altul.
+	#
+	# Nu l-am mutat, l-am scos: dupa coborarea portii cu GATE_SINK muchia de jos
+	# a aripii sta oricum in spatele dalei de drum, deci problema pe care venise
+	# sa o rezolve nu mai exista. Cinci piese care nu se vad sunt cinci piese in
+	# plus. (Memoria refuzul-motivat-e-livrare, la scara mica.)
+
+
+## CONTRAFORTUL DE SUB PICIORUL DINSPRE PRAPASTIE.
+##
+## probe_mp_c_picior.gd a masurat solul sub fiecare pozitie de pe latimea portii
+## (scara 1,759, deci 29,55 m latime pe un drum de 13,0), la 0,2250:
+##
+##   x local   pozitie fata de ax   cota teren   sub sosea
+##    -8,40        -14,78 m           29,04        -0,25    teren
+##    -3,70         -6,51 m           28,90        -0,39    teren
+##     0,00          0,00 m           28,55        -0,74    teren
+##    +3,70         +6,51 m            2,35       -26,95    AER
+##    +8,40        +14,78 m          -36,85       -66,14    AER
+##
+## Jumatatea stanga a portii sta pe munte; jumatatea dreapta atarna peste un gol
+## de 27-66 m. Captura de la 0,22 arata exact asta: uscior retezat in aer.
+##
+## Doua feluri de a repara, si alegerea conteaza:
+##  - sa micsorez poarta pana incape pe teren. Dar buiandrugul trebuie sa treaca
+##    peste ochiul camerei (10,0 m) ca arcada sa taie orizontul, iar asta cere
+##    scara >= 1,667 — adica exact latimea care nu incape. Cele doua cerinte se
+##    exclud pe terenul asta.
+##  - sa CONSTRUIESC sub picior. Pe o cornisa, o poarta reala ar fi zidita pe un
+##    contrafort care coboara pe fata stancii — si asta e chiar ce arata bara,
+##    unde zidaria continua sub obiecte pana in nor.
+##
+## Se alege al doilea: un sir de `inca_wall_b` (6,00 x 2,49 m) suprapuse, care
+## coboara din talpa piciorului pana unde ceata le inghite. Nu e nevoie sa
+## atinga fundul — la 27 m sub drum ceata si distanta inchid oricum silueta;
+## ce conteaza e ca ochiul sa nu vada capatul taiat.
+##
+## Coliziune `none` pe tot: sunt sub cota drumului, deci nu pot fi obstacol, iar
+## un corp acolo ar fi doar cost.
+const FOOTING_PIECES := 5
+
+func _gate_footing(i: int, p: Vector3, side: Vector3, gscl: float) -> void:
+	var n := _track.baked.size()
+	# Care parte atarna: se MASOARA, nu se presupune. Se compara solul sub
+	# piciorul interior al fiecarei parti (x local 3,70 * scara).
+	var d_picior := 3.70 * gscl
+	var caz := 0.0
+	var jos := -INF
+	for sg: float in [-1.0, 1.0]:
+		var q: Vector3 = p + side * sg * d_picior
+		var gy := _sol_real(q.x, q.z)
+		if p.y - gy > jos:
+			jos = p.y - gy
+			caz = sg
+	if jos < 2.0:
+		print("; contrafort: nu e nevoie, ambele picioare pe teren (max %.1f m)" % jos)
+		return
+	# Tangenta, ca zidul sa fie paralel cu poarta (de-a curmezisul drumului).
+	var tang := _track.baked[(i + 4) % n] - _track.baked[(i - 4 + n) % n]
+	tang.y = 0.0
+	tang = tang.normalized()
+	var yaw := atan2(-tang.z, tang.x)
+	# Scara zidului: latimea lui (6,00 m) trebuie sa acopere piciorul portii.
+	# Piciorul are ~1,7 m grosime la scara 1, deci 3,0 la 1,759; un zid de 6 m
+	# la scara 1,0 il acopera cu marja.
+	var wscl := 1.0
+	var h_piesa := 2.487 * wscl
+	# Sirul porneste sub talpa portii si coboara. Fiecare piesa intra putin in
+	# cea de deasupra (0,15 m) ca sa nu se vada rost intre ele.
+	var y := p.y - GATE_SINK - h_piesa * 0.9
+	for k in FOOTING_PIECES:
+		# Se retrage cate 0,35 m spre munte la fiecare treapta: un contrafort
+		# real se ingroasa in jos spre stanca, nu cade drept.
+		var d := d_picior - 0.35 * float(k)
+		var q: Vector3 = p + side * caz * d
+		_raw("inca_wall_b", "contrafortPoarta", Vector3(q.x, y, q.z),
+			yaw, wscl, "none")
+		y -= h_piesa - 0.15
+	print("; contrafort pe partea %+.0f: %d piese sub piciorul care atarna %.1f m" % [
+		caz, FOOTING_PIECES, jos])
 	# Zidaria care leaga poarta de creasta: cate o aripa scurta pe fiecare parte,
 	# care porneste din uscior si se stinge in versant. Fara ele poarta sta ca un
 	# arc de triumf in camp — in bara poarta e CAPATUL unui zid, nu un obiect
@@ -345,21 +535,116 @@ func _gate() -> void:
 				"hull" if k == 0 else "none")
 
 
-## (2) CONDORUL PE STANCA. Al doilea semnal al barei, si singurul obiect din POI
-## care e pura silueta: negru (VOLCANIC_BLACK 20) pe cer.
+## (2) CONDORUL PE PINTEN. Al doilea semnal al barei, si singurul obiect din
+## POI care e pura silueta: negru (VOLCANIC_BLACK 20) pe cer.
 ##
-## Brief §2.0: "Condorul nu zboara. Sta pe stanca, la 2 m, langa Poarta
-## Soarelui." Actiunile Open/Close ale GLB-ului nu au declansator in cod, deci
-## piesa se ASEAZA, nu se animeaza.
+## RUNDA 2 A REFACUT COMPLET PIESA ASTA, si cifra care a cerut-o e derivata din
+## camera, nu din gust. Criticul orb: "nu ai ce citi pe cer daca nu e nimic
+## vertical acolo". Runda 1 avea condorul la 2,2 m pe un bolovan de 3,07 m.
 ##
-## Unde: pe partea +1 (faleza, 82,7 grade la 0,225), imediat dupa poarta, pe un
-## `moss_boulder_c` care ii tine loc de stanca. Perechea stanca+condor se pune
-## ca UN GRUP.
+## PLAFONUL SE DERIVA (memoria inaltimea-obiectelor-si-camera). ChaseCamera:
+## ochi la 10,0 m peste masina, 12,5 m in spate, priveste un punct la 5,0 m
+## inainte si 0,40 m inaltime, FOV 68. Pitch-ul iese -28,75 grade, deci
+## ORIZONTUL CADE LA 7,7% DIN INALTIMEA CADRULUI, masurat de sus. Tot ce nu
+## trece peste cota ochiului se vede pe iarba, prin definitie.
 ##
-## Scara condorului: piesa are 1,156 m inaltime si 1,36 m anvergura in AABB. La
-## scara de jucarie a pistei se pune la 2,2 m inaltime, deci scara 1,90 —
-## anvergura iese 2,58 m, adica o silueta care se citeste de la 30-40 m.
+## Si creasta COBOARA: de la 29 m la 0,225 la 4 m la 0,36. Deci un obiect din
+## fata camerei e deja sub ea. probe_mp_c_sky.gd, de la ochiul capturii 0,2400:
+##   distanta   cota drumului fata de ochi   H necesar ca varful sa fie 3 grade
+##                                           PESTE orizontala (adica pe cer)
+##     22 m            -11,79 m                      12,8 m
+##     39 m            -13,49 m                      15,4 m
+##     56 m            -15,19 m                      18,0 m
+##
+## Adica: silueta ceruta de bara costa 13-16 m de inaltime, nu 5. Un condor de
+## 2,2 m pe un bolovan de 3 m nu ajungea nici la o cincime din prag — de aia
+## capturile aratau coama goala si de aia criticul n-a gasit nimic vertical.
+##
+## Solutia e cea din bara, citita inca o data: ACOLO CONDORUL STA PE UN PINTEN,
+## nu pe o piatra. Stanca da inaltimea; pasarea da doar semnatura de sus. Deci
+## `moss_boulder_c` (3,069 m) se stivuieste in trei bucati care se ingusteaza —
+## o silueta de stanca, nu un bolovan umflat. Anvergura condorului urca de la
+## 2,58 m la ~6 m ca sa ramana citibila de la 27 m: acolo pasarea acopera ~7%
+## din latimea cadrului, deci se vede ca pasare, nu ca punct.
+##
+## UNDE, SI CELE PATRU INCERCARI CARE AU DUS ACOLO. Merita scrise toate,
+## fiindca fiecare a picat pe alt motiv si impreuna dau regula.
+##
+## (a) 0,2448, partea +1, la 1 m dincolo de muchie, pe o "banca" de -1,92 m.
+##     `_sol_real` a refuzat: "30,2 m sub drum". probe_mp_c_lip.gd a masurat
+##     DOUA cote in acelasi punct — prima coliziune si terenul propriu-zis:
+##
+##       offset:        -3      -2      -1    -0,5     0,0    +0,5    +1,0
+##       ORICE corp:  0,00    0,00    0,00    0,00    0,00   -0,96   -1,92
+##       TEREN:      -4,85  -11,20  -17,55  -20,72  -23,90  -27,07  -30,25
+##
+##     Banca NU E TEREN: e umarul DALEI DE DRUM. (Memoria
+##     terrain-mesh-y-extrapoleaza, pe dos: nu campul neted minte, ci raza care
+##     se opreste in primul lucru pe care il atinge.)
+##
+## (b) Stiva de trei `moss_boulder_c` de 20 m la 0,2555. Cifra a iesit — varf la
+##     42,0, peste ochiul de 37,7 — si captura a aratat de ce cifra nu era
+##     intrebarea: un bolovan cu capac de muschi ramane bolovan la orice scara,
+##     iar la 9 m capacul devine un DISC VERDE de 12 m. Trei clatite suprapuse.
+##     (Memoria capcana-parametrului-care-doar-aduna.)
+##
+## (c) `huayna_picchu` scalat la 20 m. Silueta buna, dar piesa e munte de
+##     fundal: la inaltimea ceruta baza iese de 48 m si ingroapa drumul, iar de
+##     aproape benzile ei de albedo se citesc ca un tort.
+##
+##     Dupa (c) am masurat kitul in loc sa mai incerc piese. Zveltetea
+##     (inaltime / latura mare a bazei): guardhouse 1,00 · moss_boulder_a 0,87 ·
+##     inca_stair_b 0,83 · moss_boulder_b 0,79 · moss_boulder_c 0,73 · ... ·
+##     inti_punku 0,20. CEA MAI ZVELTA PIESA DIN KIT E UN CUB. Orice piesa dusa
+##     la 20 m inaltime capata 23-52 m de baza. Silueta inalta pe cer nu se
+##     poate cumpara din kitul asta — e o proprietate a assetului, nu a asezarii.
+##
+## (d) Atunci am cumparat APROPIEREA in loc de inaltime: stanca de 8 m la 0,2436,
+##     la 18,9 m de ochi. Captura a aratat condorul clar, pe banda de nor — dar
+##     si stanca stand CALARE PE DRUM. Cauza, gasita la masuratoare: offsetul se
+##     aplica CENTRULUI, iar cu raza de 4,52 m silueta ajungea cu 7,02 m peste
+##     carosabil. ProbeLaneClear a trecut (18, sub linia de baza 20) fiindca
+##     piesa are coliziune `none` — garda masoara corpuri, iar aici corp nu era.
+##     Captura a aratat ce cifra n-avea cum sa arate.
+##
+##     Corectarea offsetului (pe silueta, nu pe centru) a mutat centrul la 10,2 m
+##     de ax — si acolo terenul e la -11,8 m. Adica exact cornisa.
+##
+## CE A LAMURIT TOT: probe_mp_c_umar.gd, care a intrebat direct cat de departe
+## dincolo de muchie mai e teren, pe toata zona C. Pe 0,232-0,358 umarul e intre
+## -1 si +5 m si de cele mai multe ori zero — soseaua e cornisa peste aer pe
+## ambele parti, pe 126 de fractii. Nu exista loc pentru niciun obiect de volum
+## langa drum pe portiunea de creasta. Incercarile (a) si (d) n-au picat pe
+## execuție, ci pe o premisa falsa: ca ar exista un umar acolo.
+##
+## Cele doua locuri cu pamant sunt capetele: 0,220-0,232 (umar 5-12 m pe partea
+## -1) si de la 0,364 incolo (12 m pe ambele). Ansamblul se pune pe primul,
+## la 0,2320: langa poarta (0,2250), pe umarul de 5 m, exact cum cere brief-ul
+## ("condorul pe stanca alaturata" portii) si cum arata bara, unde poarta si
+## condorul sunt UN grup, nu doua obiecte in locuri diferite.
+##
+## Costul, spus pe fata: ansamblul cade inaintea fractiei judecate 0,24, deci
+## captura de la 0,24 tot nu-l contine. Se vede insa cand CONDUCI, pe 0,21-0,24,
+## si se vede in captura de la 0,22. Alternativa ar fi fost sa-l mut la 0,358,
+## unde ar fi prins captura 0,36 — dar acolo nu mai e creasta, e coborarea, si
+## poarta ar fi ramas singura la celalalt capat. Un ansamblu rupt in doua ca sa
+## nimereasca o fractie de judecata e exact genul de optimizare care arata bine
+## in raport si prost in joc.
 const CONDOR_FRAC := 0.2320
+
+## Inaltimea ansamblului de stanca, in metri peste solul pe care se aseaza.
+## 5,5: la scara 1,79 capacul de muschi al lui `moss_boulder_c` ramane capac
+## (peste ~2,5 devine discul din incercarea (b)), iar raza siluetei ramane
+## 3,10 m — incape pe umarul de 5,0 m masurat la 0,2320. Cu condorul deasupra
+## ansamblul ajunge la ~10 m peste drum, adica la cota ochiului camerei.
+const SPIRE_H := 5.5
+
+## Distanta de la MUCHIA carosabilului la marginea siluetei stancii, spre
+## exterior. Offsetul se aplica SILUETEI, nu centrului: centrul se aseaza la
+## half + SPIRE_CLEAR + raza, deci marginea cade exact la SPIRE_CLEAR dincolo de
+## muchie oricat de mare ar fi scara. Varianta care il aplica centrului isi
+## schimba intelesul la fiecare scalare — asa a ajuns stanca pe drum la (d).
+const SPIRE_CLEAR := 0.6
 
 func _condor_rock() -> void:
 	var n := _track.baked.size()
@@ -367,59 +652,73 @@ func _condor_rock() -> void:
 	var p := _track.baked[i]
 	var side := _track._side_at(i)
 	var half := _track.width_at_index(i)
-	# Stanca sta pe umarul dinspre faleza, la 2,5 m de muchie: destul cat sa nu
-	# fie obstacol (hull-ul lui moss_boulder_c are raza 2,11 la scara 1), destul
-	# de aproape cat condorul de deasupra sa fie in cadru cand treci poarta.
-	# DOUA RUNDE GRESITE AICI, si a doua a fost mai rea decat prima.
-	#
-	# r1a: stanca la 2,5 m dincolo de muchie a cazut pe podeaua rapei — print-ul
-	#      a dat "cota -7.3, -35.3 m peste drum". Pe cornisa, buza e la 0,5 m de
-	#      asfalt, deci la 2,5 m afara `_sol_real` raspunde PERETELE.
-	# r1b: "reparatia" a fost `maxf(_sol_real, p.y - 0.5)` — adica ridic piesa la
-	#      cota drumului. probe_manual: "stancaCondor6 PLUTESTE 59,44 m,
-	#      condor7 PLUTESTE 62,05". Am mutat defectul din "ingropat" in
-	#      "suspendat", ceea ce e mai rau: ingropat nu se vede, suspendat da.
-	#
-	# Lectia, in forma refolosibila: cota nu se CORECTEAZA, se CAUTA un loc unde
-	# cota e buna. Stanca condorului trebuie sa fie pe muchie si pe teren solid,
-	# deci se plimba departarea de la 0,6 m in afara spre interior si se ia
-	# prima pozitie la care terenul chiar tine piesa.
-	# A TREIA OARA PE MASURATOARE, nu pe presupunere. `probe_mp_c_condor.gd` a
-	# taiat profilul fin al umarului la 0,2320, partea +1 (cote fata de sosea):
-	#
-	#   offset fata de muchie:  -2,0   -1,0   -0,5    0,0   +0,5   +1,0   +2,0
-	#   cota:                  -1,68  -1,77  -1,82  -1,86  -4,18  -8,17 -16,14
-	#
-	# Adica: teren solid la -1,86 m pana FIX pe muchie, si prapastie imediat
-	# dupa. Buza e latimea unui prag, nu a unui umar. Cautarea de la 2,5 m in
-	# afara nu avea cum sa gaseasca nimic, fiindca acolo nu E nimic — de aia a
-	# refuzat piesa cu totul.
-	#
-	# Deci stanca se aseaza CU CENTRUL pe muchie: raza hull-ului (2,11 m) intra
-	# spre umar, iar silueta iese peste gol — exact ce arata bara, unde stanca
-	# condorului e un pinten care se desprinde din creasta.
-	var rock_scl := 1.0
-	var q := p + side * half
-	var gy := _sol_real(q.x, q.z)
+	# Partea se MASOARA la fiecare rulare, nu se scrie in cod: daca traseul se
+	# redeseneaza, stanca trebuie sa ramana pe teren, nu pe fostul teren.
+	# Se alege partea pe care solul de la SPIRE_OFF e mai sus.
+	# Raza siluetei la scara ceruta: centrul se aseaza astfel incat MARGINEA sa
+	# cada la SPIRE_CLEAR dincolo de muchie.
+	var scl_mare := SPIRE_H / 3.069
+	var r_silueta: float = 1.73 * scl_mare
+	var d_centru := half + SPIRE_CLEAR + r_silueta
+	var sg := 1.0
+	var best := -INF
+	for cand: float in [-1.0, 1.0]:
+		var t := p + side * cand * d_centru
+		var ty := _sol_real(t.x, t.z)
+		if ty > best:
+			best = ty
+			sg = cand
+	var q := p + side * sg * d_centru
+	# Cota ca MEDIANA a trei raze de-a lungul drumului: o cusatura in panza de
+	# teren strica un punct, nu o vecinatate. (Incercarea (a) a primit asa un
+	# -23,9 izolat.) O masuratoare care se poate strica dintr-un singur esantion
+	# nu e masuratoare.
+	var probe: Array[float] = []
+	for du: float in [-0.8, 0.0, 0.8]:
+		var tg := _track.baked[(i + 1) % n] - _track.baked[(i - 1 + n) % n]
+		tg.y = 0.0
+		var r := q + tg.normalized() * du
+		probe.append(_sol_real(r.x, r.z))
+	probe.sort()
+	var gy: float = probe[1]
 	if p.y - gy > 3.0:
-		print("; ATENTIE: buza de la %.4f nu mai tine stanca (%.1f m sub drum)" % [
-			CONDOR_FRAC, p.y - gy])
+		print("; ATENTIE: soclul de la %.4f nu e teren (%.1f m sub drum, raze %s)" % [
+			CONDOR_FRAC, p.y - gy, str(probe)])
 		return
+	# Stanca: doua `moss_boulder_c`, una mare si una care o sprijina lateral.
+	# NU stivuite pe verticala (asta a dat clatitele la incercarea (b)): cea de
+	# sus e mai MICA si decalata, deci silueta se ingusteaza spre varf si capacul
+	# de muschi ramane un capac, nu un disc.
+	#
 	_raw("moss_boulder_c", "stancaCondor", Vector3(q.x, gy, q.z),
-		_rng.randf_range(0.0, TAU), rock_scl, "hull")
-	# Condorul pe capac. Inaltimea bolovanului e 3,069 la scara 1; capacul e usor
-	# mai jos decat AABB-ul (forma e rotunjita), deci 0,85 din inaltime.
-	var condor_scl := _scale_for("condor", 2.2)
-	var top := gy + 3.069 * rock_scl * 0.85
-	# Privirea: spre drum, adica spre ax. Asa aripile se vad desfacute din fata,
-	# nu din spate, cand treci pe langa el.
+		_rng.randf_range(0.0, TAU), scl_mare, "none")
+	# Contrafortul: 55% din cea mare, lipit de ea spre drum, cu talpa pe teren.
+	var tg2 := _track.baked[(i + 1) % n] - _track.baked[(i - 1 + n) % n]
+	tg2.y = 0.0
+	var c2 := q + side * sg * 2.2 + tg2.normalized() * 1.4
+	var gy2 := _sol_real(c2.x, c2.z)
+	if p.y - gy2 <= 3.0:
+		_raw("moss_boulder_c", "stancaCondor", Vector3(c2.x, gy2, c2.z),
+			_rng.randf_range(0.0, TAU), scl_mare * 0.55, "none")
+	# Condorul pe capacul celei mari. Capacul e sub cota AABB (forma e
+	# rotunjita): 0,82 din inaltime, masurat pe silueta piesei.
+	var top := gy + SPIRE_H * 0.82
+	# Anvergura 6 m: la 18,9 m distanta acopera 16,7% din latimea cadrului,
+	# adica se vede ca pasare cu aripi, nu ca punct. Piesa are 1,36 m la scara 1.
+	var condor_scl := 6.0 / 1.36
+	# Privirea spre drum: asa aripile se vad din fata cand treci pe langa.
 	var to_road := (p - q)
 	to_road.y = 0.0
 	to_road = to_road.normalized()
 	var yaw := atan2(-to_road.z, to_road.x)
 	_raw("condor", "condor", Vector3(q.x, top, q.z), yaw, condor_scl, "none")
-	print("; condor la frac %.4f, cota %.1f (%.1f m peste drum), scara %.2f" % [
-		CONDOR_FRAC, top, top - p.y, condor_scl])
+	print("; stanca la frac %.4f parte %+.0f: soclu %.1f, capac %.1f (%.1f m peste drum)" % [
+		CONDOR_FRAC, sg, gy, top, top - p.y])
+	print(";   scara %.2f, raza silueta %.2f m, centru la %.2f m de ax, margine la %+.2f fata de muchie" % [
+		scl_mare, r_silueta, d_centru, d_centru - r_silueta - half])
+	print("; condor scara %.2f (anvergura %.1f m), varf aripi la %.1f (%.1f m peste drum)" % [
+		condor_scl, 1.36 * condor_scl, top + 1.156 * condor_scl,
+		top + 1.156 * condor_scl - p.y])
 
 
 ## (3) CASA PAZNICULUI la 0,33 — cadrul pozei clasice (brief §2, tabelul POI).

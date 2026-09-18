@@ -2885,456 +2885,450 @@ scale3_list = [Vector3(1.000000, 1.000000, 1.000000), Vector3(1.000000, 1.000000
 
 [node name="ZoneC_PoartaSoarelui" type="Node3D" parent="DecorManual"]
 
-[node name="poartaSoarelui1" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_inti_punku")]
-transform = Transform3D(0.958241, 0.000000, -0.285961, 0.000000, 1.000000, 0.000000, 0.285961, 0.000000, 0.958241, 229.798080, 29.293926, 59.991989)
+[node name="poartaSoarelui1" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_main_gate")]
+transform = Transform3D(1.948424, 0.000000, -0.581454, 0.000000, 2.033333, 0.000000, 0.581454, 0.000000, 1.948424, 229.798080, 28.093925, 59.991989)
 metadata/coliziune = "mesh"
 
-[node name="aripaPoarta2" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.958241, 0.000000, -0.285961, 0.000000, 1.000000, 0.000000, 0.285961, 0.000000, 0.958241, 220.225250, 29.009796, 62.848740)
-
-[node name="aripaPoarta3" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.958241, 0.000000, -0.285961, 0.000000, 1.000000, 0.000000, 0.285961, 0.000000, 0.958241, 214.475800, 29.065582, 64.564507)
+[node name="stancaCondor2" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.791539, 0.000000, 0.045436, 0.000000, 1.792115, 0.000000, -0.045436, 0.000000, 1.791539, 216.444122, 25.451279, 48.391800)
 metadata/coliziune = "none"
 
-[node name="stancaCondor4" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.999679, 0.000000, 0.025353, 0.000000, 1.000000, 0.000000, -0.025353, 0.000000, 0.999679, 232.846008, 26.103729, 45.248493)
-
-[node name="condor5" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_condor")]
-transform = Transform3D(-1.869101, 0.000000, 0.358200, 0.000000, 1.903114, 0.000000, -0.358200, 0.000000, -1.869101, 232.846008, 28.712379, 45.248493)
+[node name="condor3" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_condor")]
+transform = Transform3D(4.332914, 0.000000, -0.830374, 0.000000, 4.411765, 0.000000, 0.830374, 0.000000, 4.332914, 216.444122, 29.961279, 48.391800)
 metadata/coliziune = "none"
 
-[node name="muchie6" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_inca_wall_c")]
+[node name="muchie4" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_inca_wall_c")]
 transform = Transform3D(0.076968, 0.000000, -0.409045, 0.000000, 0.416224, 0.000000, 0.409045, 0.000000, 0.076968, 216.888901, 22.388514, 8.090412)
 metadata/coliziune = "none"
 
-[node name="muchie7" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="muchie5" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.932067, 0.000000, 0.177684, 0.000000, 0.948852, 0.000000, -0.177684, 0.000000, -0.932067, 216.942688, 6.719705, -144.314529)
 metadata/coliziune = "none"
 
-[node name="coroanaJos8" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos6" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.608406, 0.000000, -0.573714, 0.000000, 0.836244, 0.000000, 0.573714, 0.000000, -0.608406, 258.736694, -42.020920, 56.945461)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos9" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos7" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.984044, 0.000000, 0.119123, 0.000000, 0.991228, 0.000000, -0.119123, 0.000000, -0.984044, 255.628052, -42.027054, 46.034924)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos10" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos8" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.920423, 0.000000, -0.423480, 0.000000, 1.013170, 0.000000, 0.423480, 0.000000, 0.920423, 247.579468, -41.518402, 38.349041)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos11" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos9" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.885217, 0.000000, 0.362459, 0.000000, 0.956549, 0.000000, -0.362459, 0.000000, -0.885217, 198.414154, 12.283920, 37.166687)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos12" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos10" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.632564, 0.000000, 0.600300, 0.000000, 0.872065, 0.000000, -0.600300, 0.000000, 0.632564, 253.351639, -42.183548, 21.389074)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos13" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos11" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.881228, 0.000000, 0.308232, 0.000000, 0.933579, 0.000000, -0.308232, 0.000000, 0.881228, 195.903198, 3.299377, 17.095293)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos14" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos12" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.438588, 0.000000, 0.967760, 0.000000, 1.062505, 0.000000, -0.967760, 0.000000, -0.438588, 250.932022, -41.994034, 20.859173)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos15" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos13" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(1.058594, 0.000000, 0.142597, 0.000000, 1.068156, 0.000000, -0.142597, 0.000000, 1.058594, 201.759918, 1.618866, 1.539071)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos16" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos14" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.804728, 0.000000, -0.252378, 0.000000, 0.843375, 0.000000, 0.252378, 0.000000, 0.804728, 243.967209, -41.382416, 12.854815)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos17" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos15" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.363219, 0.000000, 0.749851, 0.000000, 0.833189, 0.000000, -0.749851, 0.000000, -0.363219, 198.999573, 0.864883, -7.675109)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos18" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos16" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.960909, 0.000000, -0.472325, 0.000000, 1.070717, 0.000000, 0.472325, 0.000000, -0.960909, 256.635345, -42.264984, 4.425385)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos19" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos17" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.747015, 0.000000, -0.487025, 0.000000, 0.891754, 0.000000, 0.487025, 0.000000, -0.747015, 196.663864, -0.520096, -23.990761)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos20" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos18" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.948990, 0.000000, -0.274266, 0.000000, 0.987828, 0.000000, 0.274266, 0.000000, 0.948990, 259.431000, -42.336914, -5.423602)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos21" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos19" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.237511, 0.000000, -0.982838, 0.000000, 1.011129, 0.000000, 0.982838, 0.000000, -0.237511, 208.794128, -1.452454, -32.020248)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos22" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos20" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.816213, 0.000000, -0.037317, 0.000000, 0.817066, 0.000000, 0.037317, 0.000000, -0.816213, 250.945786, -41.410706, -19.570061)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos23" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos21" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.937446, 0.000000, 0.049088, 0.000000, 0.938731, 0.000000, -0.049088, 0.000000, -0.937446, 210.335938, -2.977997, -46.974186)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos24" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos22" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.233247, 0.000000, 1.048969, 0.000000, 1.074589, 0.000000, -1.048969, 0.000000, 0.233247, 262.024231, -42.019104, -29.986061)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos25" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos23" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-1.030556, 0.000000, 0.049622, 0.000000, 1.031750, 0.000000, -0.049622, 0.000000, -1.030556, 208.851410, -3.373199, -50.824730)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos26" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos24" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(1.045508, 0.000000, 0.213192, 0.000000, 1.067023, 0.000000, -0.213192, 0.000000, 1.045508, 256.381775, -41.355072, -40.873562)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos27" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos25" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-1.016537, 0.000000, -0.054018, 0.000000, 1.017971, 0.000000, 0.054018, 0.000000, -1.016537, 212.531540, -4.509247, -60.725719)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos28" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos26" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.939836, 0.000000, 0.474463, 0.000000, 1.052809, 0.000000, -0.474463, 0.000000, -0.939836, 259.151489, -41.399353, -57.222027)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos29" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos27" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.905747, 0.000000, 0.121762, 0.000000, 0.913894, 0.000000, -0.121762, 0.000000, 0.905747, 207.077240, -5.964615, -73.453636)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos30" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos28" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.561782, 0.000000, -0.901071, 0.000000, 1.061851, 0.000000, 0.901071, 0.000000, 0.561782, 265.299438, -41.827744, -70.108849)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos31" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos29" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.928491, 0.000000, 0.006721, 0.000000, 0.928515, 0.000000, -0.006721, 0.000000, -0.928491, 211.782059, -6.954010, -82.028709)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos32" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos30" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.283895, 0.000000, -0.767189, 0.000000, 0.818032, 0.000000, 0.767189, 0.000000, 0.283895, 271.377075, -42.298798, -87.368027)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos33" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos31" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.669686, 0.000000, 0.820784, 0.000000, 1.059323, 0.000000, -0.820784, 0.000000, -0.669686, 217.860840, -8.089401, -93.427353)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos34" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos32" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.847246, 0.000000, 0.076442, 0.000000, 0.850687, 0.000000, -0.076442, 0.000000, 0.847246, 265.581512, -42.077484, -104.822273)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos35" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos33" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(1.096863, 0.000000, -0.032278, 0.000000, 1.097338, 0.000000, 0.032278, 0.000000, 1.096863, 255.110336, -41.401230, -112.122551)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos36" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos34" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.848870, 0.000000, -0.189702, 0.000000, 0.869808, 0.000000, 0.189702, 0.000000, -0.848870, 207.935776, -10.711975, -114.873184)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos37" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos35" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.392506, 0.000000, -1.010444, 0.000000, 1.084001, 0.000000, 1.010444, 0.000000, -0.392506, 252.241440, -41.489136, -128.484772)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos38" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos36" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.879627, 0.000000, -0.440739, 0.000000, 0.983867, 0.000000, 0.440739, 0.000000, -0.879627, 207.472549, -12.075134, -127.169662)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos39" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos37" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.290481, 0.000000, 0.983731, 0.000000, 1.025722, 0.000000, -0.983731, 0.000000, -0.290481, 260.144318, -42.354324, -140.383286)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos40" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos38" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.357160, 0.000000, -0.856720, 0.000000, 0.928187, 0.000000, 0.856720, 0.000000, -0.357160, 205.517792, -13.503967, -139.062103)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos41" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos39" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(0.255401, 0.000000, 1.013240, 0.000000, 1.044933, 0.000000, -1.013240, 0.000000, 0.255401, 246.824631, -41.655182, -155.082458)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos42" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
+[node name="coroanaJos40" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.407026, 0.000000, -0.806494, 0.000000, 0.903384, 0.000000, 0.806494, 0.000000, 0.407026, 201.630249, -16.314697, -157.830887)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos43" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos41" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.952511, 0.000000, -0.315678, 0.000000, 1.003459, 0.000000, 0.315678, 0.000000, -0.952511, 241.094482, -41.341614, -163.638260)
 metadata/coliziune = "trunk"
 
-[node name="coroanaJos44" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
+[node name="coroanaJos42" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.720273, 0.000000, 0.473056, 0.000000, 0.861728, 0.000000, -0.473056, 0.000000, -0.720273, 249.206970, -42.074905, -173.360184)
 metadata/coliziune = "trunk"
 
-[node name="bolovan45" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan43" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.109765, 0.000000, -0.957630, 0.000000, 0.963900, 0.000000, 0.957630, 0.000000, 0.109765, 221.786163, 29.595163, 70.743217)
 
-[node name="feriga46" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga44" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.455748, 0.000000, -0.642050, 0.000000, 0.787359, 0.000000, 0.642050, 0.000000, -0.455748, 221.566437, 29.586044, 68.975609)
 metadata/coliziune = "trunk"
 
-[node name="bolovan47" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan45" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.212709, 0.000000, -0.798210, 0.000000, 0.826066, 0.000000, 0.798210, 0.000000, 0.212709, 218.097839, 28.862009, 63.443649)
 
-[node name="bolovan48" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan46" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.675776, 0.000000, -0.228533, 0.000000, 0.713372, 0.000000, 0.228533, 0.000000, -0.675776, 220.374084, 28.850595, 62.772137)
 
-[node name="orhidee49" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
+[node name="orhidee47" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(0.896430, 0.000000, -0.839969, 0.000000, 1.228468, 0.000000, 0.839969, 0.000000, 0.896430, 218.627365, 26.976288, 56.145126)
 metadata/coliziune = "none"
 
-[node name="bolovan50" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan48" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.583276, 0.000000, -0.826528, 0.000000, 1.011612, 0.000000, 0.826528, 0.000000, -0.583276, 219.527573, 26.907953, 55.930477)
 
-[node name="bromelie51" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie49" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.560463, 0.000000, -1.531738, 0.000000, 2.186610, 0.000000, 1.531738, 0.000000, -1.560463, 217.777924, 26.168045, 52.681751)
 metadata/coliziune = "none"
 
-[node name="orhidee52" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
+[node name="orhidee50" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(0.997596, 0.000000, -1.359419, 0.000000, 1.686185, 0.000000, 1.359419, 0.000000, 0.997596, 216.455582, 24.573929, 38.251343)
 metadata/coliziune = "none"
 
-[node name="feriga53" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga51" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.878252, 0.000000, 0.206089, 0.000000, 0.902108, 0.000000, -0.206089, 0.000000, 0.878252, 207.166702, 2.519058, -192.335556)
 metadata/coliziune = "trunk"
 
-[node name="bolovan54" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan52" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.735712, 0.000000, 0.457512, 0.000000, 0.866365, 0.000000, -0.457512, 0.000000, -0.735712, 204.939117, 2.485574, -197.937241)
 
-[node name="bolovan55" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan53" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.705618, 0.000000, 0.079307, 0.000000, 0.710061, 0.000000, -0.079307, 0.000000, -0.705618, 204.170578, 2.342142, -197.548920)
 
-[node name="feriga56" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga54" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.838941, 0.000000, 0.044407, 0.000000, 0.840115, 0.000000, -0.044407, 0.000000, -0.838941, 204.104172, 2.969131, -199.070099)
 metadata/coliziune = "trunk"
 
-[node name="bromelie57" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie55" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-0.822315, 0.000000, -1.276044, 0.000000, 1.518055, 0.000000, 1.276044, 0.000000, -0.822315, 204.509109, 2.558731, -197.730255)
 metadata/coliziune = "none"
 
-[node name="bolovan58" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan56" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.224178, 0.000000, -0.758700, 0.000000, 0.791127, 0.000000, 0.758700, 0.000000, 0.224178, 200.137604, 2.493906, -200.221008)
 
-[node name="feriga59" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga57" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.504538, 0.000000, 0.653816, 0.000000, 0.825854, 0.000000, -0.653816, 0.000000, 0.504538, 200.699234, 2.635269, -202.540924)
 metadata/coliziune = "trunk"
 
-[node name="bolovan60" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan58" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.972873, 0.000000, -0.101200, 0.000000, 0.978122, 0.000000, 0.101200, 0.000000, 0.972873, 210.708313, 2.572885, -220.355026)
 
-[node name="bolovan61" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan59" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.039015, 0.000000, -0.766927, 0.000000, 0.767919, 0.000000, 0.766927, 0.000000, -0.039015, 214.840027, 2.867548, -216.923218)
 
-[node name="bromelie62" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie60" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.312754, 0.000000, -0.780269, 0.000000, 1.527135, 0.000000, 0.780269, 0.000000, -1.312754, 209.779282, 2.743240, -218.585510)
 metadata/coliziune = "none"
 
-[node name="bolovan63" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan61" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.734825, 0.000000, -0.433182, 0.000000, 0.853003, 0.000000, 0.433182, 0.000000, -0.734825, 196.791656, 1.811777, -202.859299)
 
-[node name="bolovan64" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan62" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.666917, 0.000000, -0.501394, 0.000000, 0.834371, 0.000000, 0.501394, 0.000000, -0.666917, 199.667725, 2.232660, -203.969406)
 
-[node name="bolovan65" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan63" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.949291, 0.000000, -0.103072, 0.000000, 0.954870, 0.000000, 0.103072, 0.000000, 0.949291, 196.873917, 1.847940, -203.484146)
 
-[node name="feriga66" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga64" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.163322, 0.000000, -0.766439, 0.000000, 0.783647, 0.000000, 0.766439, 0.000000, 0.163322, 194.873444, 1.849625, -203.985474)
 metadata/coliziune = "trunk"
 
-[node name="bolovan67" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan65" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.468088, 0.000000, 0.628927, 0.000000, 0.784000, 0.000000, -0.628927, 0.000000, 0.468088, 201.762772, 2.155588, -224.358963)
 
-[node name="bolovan68" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan66" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.921253, 0.000000, 0.216697, 0.000000, 0.946395, 0.000000, -0.216697, 0.000000, -0.921253, 189.552139, 0.832269, -203.247162)
 
-[node name="bolovan69" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan67" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(-0.678063, 0.000000, 0.051681, 0.000000, 0.680030, 0.000000, -0.051681, 0.000000, -0.678063, 189.236862, 0.916711, -204.767563)
 
-[node name="feriga70" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga68" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.061338, 0.000000, 0.769958, 0.000000, 0.772397, 0.000000, -0.769958, 0.000000, -0.061338, 189.306564, 1.082031, -204.827408)
 metadata/coliziune = "trunk"
 
-[node name="bolovan71" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan69" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.356460, 0.000000, 0.944567, 0.000000, 1.009590, 0.000000, -0.944567, 0.000000, 0.356460, 184.723328, 1.102380, -223.602539)
 
-[node name="bolovan72" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan70" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.681348, 0.000000, -0.135849, 0.000000, 0.694759, 0.000000, 0.135849, 0.000000, 0.681348, 184.829224, 1.127573, -223.160599)
 
-[node name="bolovan73" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan71" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.294718, 0.000000, -0.829777, 0.000000, 0.880561, 0.000000, 0.829777, 0.000000, 0.294718, 190.544556, 1.423288, -223.394806)
 
-[node name="bromelie74" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie72" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.515951, 0.000000, 1.408320, 0.000000, 2.069172, 0.000000, -1.408320, 0.000000, 1.515951, 184.646439, 1.234100, -223.923416)
 metadata/coliziune = "none"
 
-[node name="bolovan75" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan73" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.840895, 0.000000, -0.267760, 0.000000, 0.882497, 0.000000, 0.267760, 0.000000, 0.840895, 191.001617, 1.157846, -204.568802)
 
-[node name="feriga76" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga74" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.894384, 0.000000, -0.156759, 0.000000, 0.908018, 0.000000, 0.156759, 0.000000, 0.894384, 188.256485, 0.657913, -201.575836)
 metadata/coliziune = "trunk"
 
-[node name="bromelie77" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie75" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.424724, 0.000000, -0.832914, 0.000000, 1.650328, 0.000000, 0.832914, 0.000000, -1.424724, 187.317093, 0.807648, -205.022339)
 metadata/coliziune = "none"
 
-[node name="orhidee78" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
+[node name="orhidee76" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(0.999236, 0.000000, -0.795808, 0.000000, 1.277413, 0.000000, 0.795808, 0.000000, 0.999236, 186.300720, 0.199570, -199.529068)
 metadata/coliziune = "none"
 
-[node name="bolovan79" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan77" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.788509, 0.000000, 0.297104, 0.000000, 0.842625, 0.000000, -0.297104, 0.000000, -0.788509, 171.618362, 0.014581, -213.473282)
 
-[node name="bolovan80" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan78" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.451917, 0.000000, -0.722824, 0.000000, 0.852469, 0.000000, 0.722824, 0.000000, 0.451917, 168.885162, -0.609961, -208.577408)
 
-[node name="bromelie81" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie79" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(2.039422, 0.000000, -1.233366, 0.000000, 2.383366, 0.000000, 1.233366, 0.000000, 2.039422, 169.967270, 0.094177, -208.368698)
 metadata/coliziune = "none"
 
-[node name="bolovan82" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan80" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.421999, 0.000000, 0.892878, 0.000000, 0.987580, 0.000000, -0.892878, 0.000000, -0.421999, 188.091766, 0.182123, -196.898972)
 
-[node name="bolovan83" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan81" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.533375, 0.000000, -0.475037, 0.000000, 0.714247, 0.000000, 0.475037, 0.000000, 0.533375, 187.037323, -0.126395, -195.549576)
 
-[node name="bolovan84" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan82" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.781367, 0.000000, -0.255017, 0.000000, 0.821930, 0.000000, 0.255017, 0.000000, 0.781367, 186.578751, -0.314322, -194.319992)
 
-[node name="feriga85" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga83" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.480646, 0.000000, -0.656274, 0.000000, 0.813460, 0.000000, 0.656274, 0.000000, -0.480646, 185.254303, -0.588547, -191.769974)
 metadata/coliziune = "trunk"
 
-[node name="bromelie86" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie84" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(2.108733, 0.000000, -0.314398, 0.000000, 2.132041, 0.000000, 0.314398, 0.000000, 2.108733, 167.381042, -1.725784, -194.387802)
 metadata/coliziune = "none"
 
-[node name="orhidee87" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
+[node name="orhidee85" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(1.511872, 0.000000, -0.752217, 0.000000, 1.688664, 0.000000, 0.752217, 0.000000, 1.511872, 168.299561, -1.425568, -191.408325)
 metadata/coliziune = "none"
 
-[node name="bolovan88" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan86" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(0.776687, 0.000000, -0.466888, 0.000000, 0.906216, 0.000000, 0.466888, 0.000000, 0.776687, 187.736252, -0.865927, -182.280396)
 
-[node name="bolovan89" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan87" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.240458, 0.000000, 0.749409, 0.000000, 0.787041, 0.000000, -0.749409, 0.000000, 0.240458, 186.123169, -0.876059, -188.119812)
 
-[node name="feriga90" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
+[node name="feriga88" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.853608, 0.000000, -0.382266, 0.000000, 0.935293, 0.000000, 0.382266, 0.000000, -0.853608, 185.439209, -1.292023, -180.744568)
 metadata/coliziune = "trunk"
 
-[node name="bromelie91" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie89" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.976310, 0.000000, 0.326392, 0.000000, 2.003081, 0.000000, -0.326392, 0.000000, -1.976310, 185.459457, -1.186478, -182.465317)
 metadata/coliziune = "none"
 
-[node name="bolovan92" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
+[node name="bolovan90" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_c")]
 transform = Transform3D(-0.395841, 0.000000, 0.845372, 0.000000, 0.933458, 0.000000, -0.845372, 0.000000, -0.395841, 166.341415, -2.443869, -189.034378)
 
-[node name="bolovan93" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan91" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.107092, 0.000000, -0.876742, 0.000000, 0.883258, 0.000000, 0.876742, 0.000000, 0.107092, 167.345688, -2.055670, -186.630356)
 
-[node name="bolovan94" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan92" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.903887, 0.000000, 0.472266, 0.000000, 1.019827, 0.000000, -0.472266, 0.000000, 0.903887, 167.499863, -1.842383, -188.848999)
 
-[node name="bromelie95" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
+[node name="bromelie93" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.740434, 0.000000, -0.450947, 0.000000, 1.797905, 0.000000, 0.450947, 0.000000, -1.740434, 166.229218, -2.497086, -184.027176)
 metadata/coliziune = "none"
 
-[node name="parapet96" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet94" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.199705, 0.000000, -0.979856, 0.000000, 1.000000, 0.000000, 0.979856, 0.000000, -0.199705, 230.914169, 25.567610, 31.154253)
 metadata/coliziune = "none"
 
-[node name="parapet97" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet95" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.226613, 0.000000, -0.973985, 0.000000, 1.000000, 0.000000, 0.973985, 0.000000, -0.226613, 230.098480, 25.325064, 27.692413)
 metadata/coliziune = "none"
 
-[node name="parapet98" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet96" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.118084, 0.000000, -0.993004, 0.000000, 1.000000, 0.000000, 0.993004, 0.000000, -0.118084, 229.342117, 24.986067, 24.173399)
 metadata/coliziune = "none"
 
-[node name="parapet99" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet97" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.013746, 0.000000, -0.999906, 0.000000, 1.000000, 0.000000, 0.999906, 0.000000, -0.013746, 229.120483, 24.609247, 21.082747)
 metadata/coliziune = "none"
 
-[node name="parapet100" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet98" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(0.089709, 0.000000, -0.995968, 0.000000, 1.000000, 0.000000, 0.995968, 0.000000, 0.089709, 229.211426, 24.245554, 18.037132)
 metadata/coliziune = "none"
 
-[node name="parapet101" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet99" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(0.203288, 0.000000, -0.979119, 0.000000, 1.000000, 0.000000, 0.979119, 0.000000, 0.203288, 229.891190, 23.722162, 14.163269)
 metadata/coliziune = "none"
 
-[node name="parapet102" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet100" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.031318, 0.000000, -0.999510, 0.000000, 1.000000, 0.000000, 0.999510, 0.000000, -0.031318, 246.540344, 14.384442, -83.564529)
 metadata/coliziune = "none"
 
-[node name="parapet103" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet101" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.126079, 0.000000, -0.992020, 0.000000, 1.000000, 0.000000, 0.992020, 0.000000, -0.126079, 246.039795, 13.921975, -89.650154)
 metadata/coliziune = "none"
 
-[node name="parapet104" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet102" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.189885, 0.000000, -0.981806, 0.000000, 1.000000, 0.000000, 0.981806, 0.000000, -0.189885, 245.336090, 13.549698, -94.022774)
 metadata/coliziune = "none"
 
-[node name="parapet105" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet103" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.250326, 0.000000, -0.968162, 0.000000, 1.000000, 0.000000, 0.968162, 0.000000, -0.250326, 244.532501, 13.257293, -97.375847)
 metadata/coliziune = "none"
 
-[node name="parapet106" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet104" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.243095, 0.000000, -0.970002, 0.000000, 1.000000, 0.000000, 0.970002, 0.000000, -0.243095, 243.297607, 12.736657, -101.877365)
 metadata/coliziune = "none"
 
-[node name="parapet107" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
+[node name="parapet105" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_rope_rail")]
 transform = Transform3D(-0.222183, 0.000000, -0.975005, 0.000000, 1.000000, 0.000000, 0.975005, 0.000000, -0.222183, 242.363831, 12.292072, -105.871315)
 metadata/coliziune = "none"
 
-[node name="borna108" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna106" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 235.544769, 29.221611, 54.935406)
 metadata/coliziune = "none"
 
-[node name="borna109" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna107" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 230.462326, 26.714663, 29.248329)
 metadata/coliziune = "none"
 
-[node name="borna110" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna108" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 231.034561, 24.427999, 8.312833)
 metadata/coliziune = "none"
 
-[node name="borna111" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna109" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 235.702438, 21.970108, -16.471659)
 metadata/coliziune = "none"
 
-[node name="borna112" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna110" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 242.548477, 19.633648, -39.853035)
 metadata/coliziune = "none"
 
-[node name="borna113" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna111" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 246.082184, 17.116583, -67.464111)
 metadata/coliziune = "none"
 
-[node name="borna114" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna112" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 245.316559, 14.749787, -94.018456)
 metadata/coliziune = "none"
 
-[node name="borna115" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna113" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 239.131393, 12.262891, -119.693390)
 metadata/coliziune = "none"
 
-[node name="borna116" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna114" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 232.136780, 9.805000, -144.747360)
 metadata/coliziune = "none"
 
-[node name="borna117" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna115" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 227.546860, 7.520774, -166.914322)
 metadata/coliziune = "none"
 
-[node name="borna118" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna116" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 224.256577, 5.155581, -194.214966)
 metadata/coliziune = "none"
 
-[node name="borna119" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna117" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 201.079697, 3.076040, -205.784912)
 metadata/coliziune = "none"
 
-[node name="borna120" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna118" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 173.320969, 1.091408, -209.934753)
 metadata/coliziune = "none"
 
-[node name="borna121" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
+[node name="borna119" parent="DecorManual/ZoneC_PoartaSoarelui" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 169.285507, -0.751573, -183.778946)
 metadata/coliziune = "none"
 

@@ -193,3 +193,37 @@ deformarea, iar scandurile si catenara sunt vertecsi ai mesh-ului podului.
 **Nu comit nimic in hazard fara mandat** (e gimmickul pistei, cu fizica
 calibrata si garzi proprii — `tools/probe_machu_pod.gd`). Ridic intrebarea,
 cu cifrele de mai sus.
+
+## 8. Garzile din runda 3, pe scena integrata din worktree
+
+Rulate dupa `--import`, toate pe `D:/GameDev/wt-mp-e`:
+
+```
+probe_decor --track=15   Track15  10961 prop  2809 desene  19 mat  1 372 214 tri  OK
+ProbeBuried --track=8    1111 puncte | ingropate >1 m: 0 | tavane: 0            OK
+ProbeLaneClear --track=8 18 probe blocate, sub linia de baza (20)               OK
+ProbeRace seed 1         0 repuneri · 0.0% offroad · fara blocaj/invers/carusel
+ProbeRace seed 3         0 repuneri · 0.0% offroad
+ProbeRace seed 2         0 repuneri · 2.3% offroad
+```
+
+**19 materiale** din plafonul de 30: cele 1649 de piese ale zonei n-au adus
+niciun material nou. Banda mea (0.55-0.65) merge la 27,8-30,1 m/s cu **0 %
+lent si 0 pereti**. Seed 2 n-a dat coama de la 0.186 in rularea asta.
+
+Afundarea, verificata pe captura, nu numarand:
+`--rope-load=2.6,0.5` -> `PodFranghie sageata 1.50 m la mijloc, balans 0.00`.
+
+## 9. Ce raman eu sa fi facut, si ce nu pot
+
+Decorul zonei (rau, pereti, coame, ancoraj) e cel din rundele 1-2 si trece
+toate garzile. **Runda 3 n-a adaugat piese**, fiindca niciunul din cele trei
+defecte numite de critic nu e in decor:
+
+- un turn pus ca prop langa tablier n-ar urma `deck_drop(u)`, deci s-ar
+  desprinde vizibil de pod cand acesta se afunda cu 1,5 m sub autobuz;
+- scandurile si catenara sunt vertecsi ai mesh-ului podului.
+
+Capturile rundei: `E_r3_0.540.png`, `E_r3_0.548.png`, `E_r3_0.556.png`.
+Cea de la **0.548** e cea mai cinstita: se vad ambele turnuri in prim-plan,
+si sunt **mai scunde decat bolovanii de langa ele**.

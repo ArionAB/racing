@@ -798,8 +798,54 @@ func _raft(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 			var g := _sol_real(q.x, q.z)
 			if lat > lat_liber and y - g > RAFT_H:
 				continue
+			# PODEAUA NU ARE VOIE PESTE CAROSABIL, si asta NU se vede in
+			# garzi: `_lane_free` se cheama doar pentru piesele cu corp, iar
+			# placa e MultiMesh, deci fantoma — ProbeLaneClear plimba o cutie
+			# solida si trece curat prin ea. Defectul s-a vazut doar pe
+			# captura (D_r11_frac0.44.png): pe un ac, „in spatele raftului"
+			# ajunge deasupra soselei de dedesubt, si iarba statea intinsa
+			# peste asfalt ca niste covoare. Memoria
+			# `efecte-invizibile-nu-se-numara`, in varianta ei urata: o garda
+			# verde nu inseamna ca nu se vede nimic.
+			# Deci testul de banda se face si aici, pe mana: placa se sterge
+			# daca amprenta ei cade peste banda oricarui punct de traseu si
+			# nu e in intregime sub cota lui.
+			if not _podea_libera(Vector3(q.x, y, q.z)):
+				continue
 			_podea_pos.append(Vector3(q.x, y, q.z))
 		f += _step(RAFT_R * 0.9)
+
+
+## E LIBERA placa de podea fata de carosabil?
+##
+## NU e acelasi test ca `_lane_free`, si diferenta conteaza. `_lane_free` e
+## scris pentru piese cu CORP, deci intreaba „poate masina sa loveasca asta?"
+## si respinge orice nu e in intregime sub cota soselei. O placa de podea n-are
+## corp: nu poate lovi pe nimeni, deci criteriul ala ar sterge si rafturile
+## legitime care stau mai sus decat o sosea care trece pe langa — si chiar asta
+## s-a intamplat la prima incercare, pe D_r12_frac0.46.png iarba a disparut
+## aproape toata si zidurile au ramas piatra goala.
+##
+## Intrebarea corecta pentru o placa e alta: „se vede iarba INTINSA PESTE
+## asfalt?". Adica placa deranjeaza doar cand e chiar DEASUPRA benzii, la o
+## cota apropiata de a ei. Sub sosea nu se vede (e acoperita), mult deasupra
+## nu e pe ea (e taluzul de deasupra, unde iarba e corecta).
+##
+## Fereastra e -0,5 .. +3,0 m fata de cota drumului: de la sub asfalt pana la
+## inaltimea la care placa ar fi tavan, nu covor.
+func _podea_libera(pos: Vector3) -> bool:
+	var n := _track.baked.size()
+	for i in n:
+		var p: Vector3 = _track.baked[i]
+		var dy := pos.y - p.y
+		if dy < -0.5 or dy > 3.0:
+			continue
+		var dx := pos.x - p.x
+		var dz := pos.z - p.z
+		var need: float = _track.width_at_index(i) + RAFT_R
+		if dx * dx + dz * dz < need * need:
+			return false
+	return true
 
 
 ## MEDIANA solului pe o banda laterala, pe toata lungimea unui picior.

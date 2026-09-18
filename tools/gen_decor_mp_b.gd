@@ -1,5 +1,5 @@
 extends Node
-## Generator de decor MANUAL pentru POI B — DRUMUL INCAS (Track15,
+## Generator de decor MANUAL pentru POI B - DRUMUL INCAS (Track15,
 ## Machu Picchu, frac 0.04-0.20). Nu e sonda: calculeaza transformarile care
 ## se lipesc in Track15.tscn sub `DecorManual/ZoneB_DrumulIncas`.
 ##
@@ -9,14 +9,14 @@ extends Node
 ## Cu `--survey` scrie doar profilul terenului masurat si nu genereaza nimic.
 ##
 ## CE SE VEDE IN BARA (bara_poi_B.png, deschisa inainte de asezare):
-## drum de pamant tan taiat intr-o CREASTA DE STANCA — fete cenusii plane,
+## drum de pamant tan taiat intr-o CREASTA DE STANCA - fete cenusii plane,
 ## fatetate, care cad de AMANDOUA partile imediat de langa asfalt; pe fete
 ## stau smocuri de copaci verde-inchis, agatati; o gura de tunel cu arc de
 ## piatra si un parapet de blocuri deasupra; trepte de piatra langa portal;
 ## nori albi in vale dedesubt. Materia dominanta e PIATRA, nu iarba: drumul e
 ## o panglica pe o coama de roca, nu o poteca pe pajiste.
 ##
-## CIFRELE DE SURVEY (runda 1, B_r1_survey.txt) — compozitia se decide pe ele:
+## CIFRELE DE SURVEY (runda 1, B_r1_survey.txt) - compozitia se decide pe ele:
 ##
 ## 1. DREAPTA E O PRAPASTIE ADEVARATA, de la frac 0.080 in sus. Cotele fata de
 ##    drum la +2 / +4 / +8 m lateral de MUCHIE:
@@ -32,7 +32,7 @@ extends Node
 ##      0.100   84.3   82.3   75.9
 ##      0.190   85.6   82.9   78.8
 ##    Deci FORMA EXISTA si e verticala. Nu se cere teren. Capcana 3 din brief
-##    („peretii verticali apar la 28-35 grade, limita de rezolutie a grilei")
+##    ("peretii verticali apar la 28-35 grade, limita de rezolutie a grilei")
 ##    NU se aplica aici: unghiul real e 59-86 grade, cu mult peste
 ##    `scarp_slope_deg` 28, deci tenta de stanca se aplica si SE VEDE (verificat
 ##    pe captura B_r0_gol_f0.08.png: fata cenusie e acolo).
@@ -42,7 +42,7 @@ extends Node
 ##    -15 m pe 0.115; +12,2 m la -15 m si +51,5 m la -40 m pe 0.130), si un gol
 ##    pe DEPARTE la 0.120-0.140 (-6,1 m la -8 m, -26,2 m la -15 m pe 0.120).
 ##
-## 3. CE LIPSESTE, MASURAT PE PIXELI — si e opusul a ce cerea brief-ul.
+## 3. CE LIPSESTE, MASURAT PE PIXELI - si e opusul a ce cerea brief-ul.
 ##    Clasificare HSV (roca = satur < 0,14 si valoare 0,25-0,75; iarba = nuanta
 ##    0,15-0,35 cu satur > 0,15; drum = satur > 0,08 si valoare > 0,70):
 ##
@@ -52,7 +52,7 @@ extends Node
 ##      noi la 0.18      0,1 %   24,0 %  67,9 %
 ##
 ##    Bara are de 5-170 de ori mai multa PIATRA si un sfert din iarba. Deci
-##    deficitul e de ROCA, nu de vegetatie — invers fata de lista de piese din
+##    deficitul e de ROCA, nu de vegetatie - invers fata de lista de piese din
 ##    contract, care incepe cu bromelii si ferigi.
 ##    Confirmat pe captura, nu doar pe cifra (regula zero din bara_vizuala):
 ##    la 0.18 nu se vede NICIO piatra in cadru, drumul pal ocupa doua treimi,
@@ -61,13 +61,14 @@ extends Node
 ## 4. DE CE NU SE VEDE PRAPASTIA DE LA 0.18, desi masoara -38 m la +2 m.
 ##    Drumul e in viraj si bombat: propria lui muchie (banda maro) o ascunde.
 ##    Din masina, la 0.18, ochiul nu ajunge peste buza. Reparatia care e A MEA
-##    e sa pun STANCA VIZIBILA pe buza — pinteni de `moss_boulder_*` mariti,
-##    care ies deasupra liniei muchiei si rup silueta — nu sa cobor un prag de
-##    panta sau sa ating terenul.
+##    e sa pun PIATRA VIZIBILA pe buza, care iese deasupra liniei muchiei si
+##    rupe silueta - nu sa cobor un prag de panta si nu sa ating terenul.
+##    CU CE anume, vezi nota de la `_buza_de_stanca`: runda 1 a incercat cu
+##    `moss_boulder_*` marit si a esuat masurat.
 ##
 ## 5. NU EXISTA PIESA DE TUNEL in kit (39 GLB-uri verificate: nicio gura de
-##    tunel, niciun arc). Contractul cere „gura de tunel cu arc de piatra".
-##    Nu o fabric din `inca_wall_*` — un arc din trei lespezi nu citeste a
+##    tunel, niciun arc). Contractul cere "gura de tunel cu arc de piatra".
+##    Nu o fabric din `inca_wall_*` - un arc din trei lespezi nu citeste a
 ##    tunel, citeste a poarta prabusita, si POI C are deja poarta. Se
 ##    raporteaza ca lipsa de kit, nu se mascheaza.
 
@@ -103,7 +104,7 @@ const HEIGHT := {
 	"inca_wall_a": 2.487, "inca_wall_b": 2.487, "inca_wall_c": 2.432,
 	"polylepis_a": 4.190, "polylepis_b": 6.798,
 }
-## Raza de degajare la baza (m) — coloana "raza baza" din inventar.
+## Raza de degajare la baza (m) - coloana "raza baza" din inventar.
 const BASE_R := {
 	"moss_boulder_a": 0.37, "moss_boulder_b": 0.94, "moss_boulder_c": 1.73,
 	"bromeliad": 0.46, "tree_fern": 0.30, "orchid_cluster": 0.17,
@@ -257,85 +258,141 @@ func _build() -> void:
 	_trepte_si_semne()
 
 
-## PINTENII DE PE BUZA — piesa centrala a POI-ului, si singura care repara
-## deficitul masurat la nota 3.
+## RUNDA 2 - DE CE AU DISPARUT BOLOVANII SI CE LE IA LOCUL.
 ##
-## Ce trebuie sa faca, si de ce asa: prapastia exista (59-86 grade) dar nu se
-## vede, fiindca muchia bombata a drumului o ascunde (nota 4). Un pinten de
-## stanca pe buza rezolva amandoua problemele deodata — adauga materia care
-## lipseste (roca) si RUPE linia muchiei, deci ochiul primeste un reper care
-## spune „dincolo de asta se cade".
+## Runda 1 a pus 220 de piese, din care ~200 `moss_boulder_*` mariti la 4-13 m
+## pe buza. Masurat pe captura, fata de aceeasi clasificare HSV ca la nota 3:
 ##
-## Se pun DOUA siruri, nu unul:
-##   - `creasta`: bolovani mari (4-8 m) pe buza propriu-zisa, la 0,6-2,2 m de
-##     muchie. Astia sunt cei care se vad din masina.
-##   - `faleza`: bolovani si mai mari (7-13 m) coborati pe fata prapastiei, la
-##     6-16 m de muchie si cu `dy` negativ, ca fata sa aiba relief si sa nu
-##     fie o panza neteda cenusie.
+##   captura            roca    iarba   drum
+##   0.08 zona GOALA     3,6 %   42,6 %  42,9 %
+##   0.08 runda 1        3,7 %   43,6 %  41,8 %
+##   0.18 zona GOALA     0,1 %   24,0 %  67,9 %
+##   0.18 runda 1        0,1 %   23,9 %  68,0 %
 ##
-## Coliziunea: `none` pe TOT. Motivul e masurat, nu de comoditate — o piatra
-## cu corp la 0,6 m de muchie e un zid pe o banda de 6 m unde masinile intra
-## in viraj la 0.18; iar contractul cere explicit „pe dreapta FARA parapet,
-## defileul". Rostul lor e sa se VADA, nu sa opreasca. Cu `none` sar si garda
-## de banda (memoria coliziune-none-e-fantoma: mesh-ul ramane, corpul dispare).
+## 220 de piese au cumparat 0,1 puncte de roca si au ADAUGAT iarba. Pe captura
+## (B_r1_f0.14.png) se vede de ce, fara dubiu: bolovanii citesc ca niste
+## CARAPACE VERZI cu o dunga tan la baza - un sir de umbrele tropicale, adica
+## fix materia de care aveam deja de patru ori prea multa.
+##
+## CAUZA E MASURATA, NU PRESUPUSA, si era deja scrisa in inventar (§2, tabelul
+## de ACCENT_SPLIT): pe `Moss_Boulder_C` muschiul (slot 12 CACTUS_GREEN) ocupa
+## banda de y 0,97-3,07 dintr-o inaltime de 3,069 - adica **68 % din inaltime,
+## si tocmai partea de sus**, cea care sta in fata camerei. Pe A e 0,38-0,74
+## din 0,741 (49 %), pe B 0,92-1,96 din 1,957 (53 %).
+##
+## Fractia aia e INVARIANTA LA SCARA. Nu exista marime la care piesa sa citeasca
+## a stanca: marind-o de la 3 m la 8 m am marit capacul de muschi in exact
+## aceeasi proportie. Asta e capcana din memoria
+## `capcana-parametrului-care-doar-aduna` - intrebarea nu era "cat sa maresc",
+## ci "de unde vine forma".
+##
+## CE CITESTE A PIATRA IN KITUL ASTA, masurat in acelasi tabel:
+##   `Inca_Wall_A`  3+29 (piatra) **93,7 %**, slot 12 doar 6,3 %, si numai pe
+##                  coronament (y 2,31-2,49 din 2,487)
+##   `Inca_Wall_C`  3+29 **91,5 %**, slot 12 8,5 %, tot pe coronament
+##   `Trail_Marker` doar 3+29, deci piatra curata
+## Deci buza se face din ZIDARIE, nu din bolovani. Si asta nu e o abatere de la
+## bara: in bara, sub gura de tunel, marginea drumului chiar e sprijinita de un
+## parapet de blocuri de piatra - aceeasi materie.
+##
+## Bolovanii RAMAN, dar in rolul pentru care au fost masurati: accente MICI
+## (0,8-1,8 m) la sol, unde un capac de muschi pe o piatra e corect si nu
+## ocupa cadrul.
+##
+## COLIZIUNEA RAMANE `none` pe tot, inclusiv pe zidarie. Contractul cere
+## explicit "pe dreapta FARA parapet, defileul" - deci piatra de pe buza e
+## semnal vizual, nu bara de protectie. Cu corp, un zid la 0,8 m de muchie ar
+## fi exact parapetul pe care brief-ul il interzice, pe o banda de 6 m.
 func _buza_de_stanca() -> void:
 	var f := F_BUZA
 	var k := 0
 	while f <= F_OUT:
-		# Creasta de pe buza: sirul pe care il vede soferul.
-		var m: String = ["moss_boulder_c", "moss_boulder_b", "moss_boulder_c",
-			"moss_boulder_b", "moss_boulder_a"][k % 5]
-		var inalt := _rng.randf_range(4.0, 8.0)
-		_place(m, "pintenBuza", f, 1.0,
-			_rng.randf_range(0.6, 2.2), _rng.randf_range(0.0, TAU),
-			_scale_for(m, inalt), "none",
-			# Infipt cu o treime sub sol: un bolovan asezat exact pe cota
-			# citeste a minge pusa pe masa. Vezi patru-defecte-de-diorama.
-			-inalt * 0.30)
-		# Al doilea rand, mai retras si mai mic — rupe linia perfecta.
+		# SIRUL DE PE BUZA: zidarie joasa, lipita, care urmeaza muchia.
+		# Pasul de 3,6 m pe o piesa de 4,00 m (inca_wall_a) le suprapune
+		# putin, deci sirul e CONTINUU - un sir cu goluri citeste a lespezi
+		# razlete, verdictul care a costat POI D trei runde.
+		var a := _at(f)
+		var s: Vector3 = a["s"]
+		# Zidul se aseaza TANGENT la drum: yaw pe directia de mers.
+		var yaw := atan2(s.x, s.z) + PI * 0.5
+		var m: String = "inca_wall_a" if k % 3 != 2 else "inca_wall_c"
+		# Inaltime mica si variabila: e o buza de sprijin, nu un gard. Scara
+		# pe inaltime separata de cea din plan (lectia `_raw_h` de la POI D):
+		# un zid mai scund nu e un zid mai SUBTIRE.
+		var hz := _rng.randf_range(0.9, 1.7)
+		_zid_buza(m, "buzaPiatra", f, 1.0, _rng.randf_range(0.3, 1.1),
+			yaw + _rng.randf_range(-0.12, 0.12), hz)
+		# PINTENII care rup linia: tot zidarie, dar rotita si mai inalta,
+		# la fiecare al treilea pas. Fara ei sirul e o bordura de gradina.
+		if k % 3 == 1:
+			_zid_buza("inca_wall_c", "pintenBuza", f + _step(1.8), 1.0,
+				_rng.randf_range(0.4, 1.4),
+				yaw + _rng.randf_range(0.5, 1.0),
+				_rng.randf_range(2.0, 3.2))
+		# FALEZA: relief pe fata prapastiei, sub cota drumului. Aici bolovanul
+		# e corect - e departe (6-16 m) si in jos, deci capacul de muschi nu
+		# se vede din masina, doar silueta.
 		if _rng.randf() < 0.55:
-			var m2: String = "moss_boulder_b" if k % 2 == 0 else "moss_boulder_a"
-			var h2 := _rng.randf_range(2.0, 4.5)
-			_place(m2, "pintenBuza", f + _step(2.4), 1.0,
-				_rng.randf_range(2.6, 5.0), _rng.randf_range(0.0, TAU),
-				_scale_for(m2, h2), "none", -h2 * 0.35)
-		# Faleza: relief pe fata prapastiei, sub cota drumului.
-		if _rng.randf() < 0.70:
 			var m3: String = ["moss_boulder_c", "moss_boulder_b"][k % 2]
-			var h3 := _rng.randf_range(7.0, 13.0)
-			_place(m3, "falezaB", f + _step(_rng.randf_range(0.0, 5.0)), 1.0,
+			var h3 := _rng.randf_range(6.0, 11.0)
+			_place(m3, "falezaB", f + _step(_rng.randf_range(0.0, 4.0)), 1.0,
 				_rng.randf_range(6.0, 16.0), _rng.randf_range(0.0, TAU),
-				_scale_for(m3, h3), "none", -h3 * 0.45)
-		f += _step(6.5)
+				_scale_for(m3, h3), "none", -h3 * 0.55)
+		f += _step(3.6)
 		k += 1
+
+
+## Un zid pe buza: pozitia si cota ca la `_place`, dar cu scara pe inaltime
+## separata de cea din plan (piesa isi pastreaza lungimea si grosimea
+## masurata) si infipt cu 0,35 m sub sol ca sa nu i se vada talpa.
+func _zid_buza(model: String, base: String, frac: float, side_sign: float,
+		gap: float, yaw: float, inalt: float) -> void:
+	var a := _at(frac)
+	var p: Vector3 = a["p"]
+	var s: Vector3 = (a["s"] as Vector3) * side_sign
+	var half: float = a["half"]
+	var lr: float = SIDE_R.get(model, 0.45)
+	var q := p + s * (half + gap + lr)
+	var g := _sol_real(q.x, q.z)
+	_raw_h(model, base, Vector3(q.x, g - 0.35, q.z), yaw, 1.0,
+		inalt / float(HEIGHT.get(model, 1.0)), "none")
 
 
 ## PERETELE DIN STANGA, doar pe flancul care chiar urca (nota 2). In afara
 ## intervalului 0.105-0.152 stanga e platou, si o stanca pe platou e o piatra
-## pe pajiste — exact greseala pe care o descrie constatarea valului 2.
+## pe pajiste - exact greseala descrisa in constatarea valului 2.
+##
+## Si aici materia e ZIDARIE, din acelasi motiv masurat mai sus: drumul e
+## TAIAT in versant, iar in bara fata taiata e piatra, nu muschi.
 func _perete_stanga() -> void:
 	var f := F_FLANC_IN
 	var k := 0
 	while f <= F_FLANC_OUT:
-		var m: String = ["moss_boulder_c", "moss_boulder_b", "moss_boulder_c"][k % 3]
-		var h := _rng.randf_range(3.5, 7.0)
-		# Coliziune `none` si aici: peretele urca, deci masina care il atinge
-		# e deja in afara benzii, iar un corp acolo transforma o iesire intr-o
-		# rasturnare. Contractul cere perete VIZUAL, cu muschi si bromelii.
-		_place(m, "pereteStg", f, -1.0,
-			_rng.randf_range(0.8, 4.0), _rng.randf_range(0.0, TAU),
-			_scale_for(m, h), "none", -h * 0.28)
-		# Al doilea etaj, mai sus pe flanc.
-		if _rng.randf() < 0.6:
-			var h2 := _rng.randf_range(5.0, 9.0)
-			_place("moss_boulder_c", "pereteStg", f + _step(3.0), -1.0,
-				_rng.randf_range(7.0, 16.0), _rng.randf_range(0.0, TAU),
-				_scale_for("moss_boulder_c", h2), "none", -h2 * 0.25)
-		f += _step(7.0)
+		var a := _at(f)
+		var s: Vector3 = a["s"]
+		var yaw := atan2(s.x, s.z) + PI * 0.5
+		# Doua asize suprapuse: peretele taiat are inaltime, nu e o bordura.
+		var m: String = "inca_wall_a" if k % 2 == 0 else "inca_wall_c"
+		_zid_buza(m, "pereteStg", f, -1.0, _rng.randf_range(0.2, 0.9),
+			yaw + _rng.randf_range(-0.1, 0.1), _rng.randf_range(2.2, 3.4))
+		if _rng.randf() < 0.65:
+			_zid_buza("inca_wall_c", "pereteStg", f + _step(1.6), -1.0,
+				_rng.randf_range(1.2, 3.0),
+				yaw + _rng.randf_range(-0.2, 0.2),
+				_rng.randf_range(1.6, 2.8))
+		# Bolovani MICI la piciorul peretelui: aici capacul de muschi e
+		# corect si citeste ca bolovan cazut, nu ca umbrela.
+		if _rng.randf() < 0.5:
+			var b: String = ["moss_boulder_a", "moss_boulder_b"][k % 2]
+			var hb := _rng.randf_range(0.8, 1.8)
+			_place(b, "bolovanStg", f + _step(2.4), -1.0,
+				_rng.randf_range(0.5, 3.0), _rng.randf_range(0.0, TAU),
+				_scale_for(b, hb), "none", -hb * 0.25)
+		f += _step(3.8)
 		k += 1
 
 
-## VEGETATIA AGATATA — pe PIATRA, nu pe iarba. In bara frunzisul creste din
+## VEGETATIA AGATATA - pe PIATRA, nu pe iarba. In bara frunzisul creste din
 ## fata de stanca; pe pajiste ar adauga tocmai materia de care avem deja de
 ## patru ori prea multa (nota 3: 42,6 % iarba fata de 10,6 % in bara).
 ##
@@ -379,7 +436,7 @@ func _vegetatie_agatata() -> void:
 
 ## TREPTELE SI SEMNELE. `custom_step_ranges` (0.0405-0.2034) pune deja treptele
 ## VIZUALE pe carosabil, si coliziunea ramane panta lina (track.gd:_step_ranges).
-## Deci NU pun geometrie de treapta peste drum — ar fi un prag de zid.
+## Deci NU pun geometrie de treapta peste drum - ar fi un prag de zid.
 ## Piesele `inca_stair_*` merg LANGA drum, pe flancul din stanga: in bara
 ## treptele sunt alaturi de drum, nu pe el.
 func _trepte_si_semne() -> void:
@@ -396,7 +453,7 @@ func _trepte_si_semne() -> void:
 				yaw, 1.0, "none", -0.8)
 		k += 1
 		f += _step(9.0)
-	# Bornele de poteca, pe amandoua partile, rare — punctuatie, nu gard.
+	# Bornele de poteca, pe amandoua partile, rare - punctuatie, nu gard.
 	f = F_IN + 0.004
 	var j := 0
 	while f <= F_OUT:
@@ -431,7 +488,7 @@ func _lane_free(pos: Vector3, r: float, h: float) -> bool:
 	return true
 
 
-## Pozitia + latura + semi-latimea INTERPOLATE intre punctele coapte — pasul
+## Pozitia + latura + semi-latimea INTERPOLATE intre punctele coapte - pasul
 ## sub 1,79 m altfel da grupuri suprapuse (nota 8bis a lui POI D).
 func _at(frac: float) -> Dictionary:
 	var n := _track.baked.size()

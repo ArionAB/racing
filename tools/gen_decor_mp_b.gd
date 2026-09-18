@@ -247,8 +247,28 @@ func _step(meters: float) -> float:
 ## un pinten de stanca acolo ar fi o piatra pusa pe pajiste.
 const F_BUZA := 0.078
 ## Flancul care urca pe stanga (nota 2).
+##
+## RUNDA 7: cele doua cifre de mai jos erau fereastra in care TERENUL natural
+## urca pe stanga (platou in rest). Nu mai e criteriul potrivit: peretele taiat
+## e acum teren construit pe TOT intervalul (nodurile CliffFace, cu talpa la
+## 0,2 m de marginea locala), deci exista fata de piatra de la 0.042 la 0.209.
+## Vegetatia agatata se muta pe toata lungimea lui, altfel ramane un pluton de
+## ferigi pe 4,7 % din zona si perete gol in rest.
 const F_FLANC_IN := 0.105
 const F_FLANC_OUT := 0.152
+## Intervalul pe care exista fata de piatra construita (nodurile CliffFace din
+## Track15.tscn). Vegetatia se agata de ea, nu de iarba.
+const F_PERETE_IN := 0.046
+const F_PERETE_OUT := 0.205
+## Cat de aproape de talpa peretelui sta frunzisul.
+##
+## Talpa e la 0,2 m de marginea asfaltului, iar fata urca aproape vertical
+## (73-84 grade din ochiul soferului, masurat cu SvMpBApropiere). Deci banda in
+## care o planta pare ca IESE DIN perete, si nu ca sta pe un umar in fata lui,
+## e ingusta: peste ~1,4 m de margine planta e deja in fata peretelui, adica
+## exact "recuzita pe pajiste" reclamata de criticii rundelor 2-4.
+const GAP_PERETE_MIN := 0.35
+const GAP_PERETE_MAX := 1.30
 
 
 func _build() -> void:
@@ -514,17 +534,22 @@ func _vegetatie_agatata() -> void:
 	var f := F_BUZA
 	var k := 0
 	while f <= F_OUT:
-		var pe_flanc := f >= F_FLANC_IN and f <= F_FLANC_OUT
-		if pe_flanc:
-			if _rng.randf() < 0.75:
-				var h := _rng.randf_range(2.2, 3.6)
+		# Pe TOATA fata de piatra, nu doar pe fereastra unde urca terenul
+		# natural: vezi nota de la F_PERETE_IN. Rulajul e mic si constant, ca
+		# planta sa iasa din perete, nu sa stea in fata lui pe un umar.
+		var pe_perete := f >= F_PERETE_IN and f <= F_PERETE_OUT
+		if pe_perete:
+			if _rng.randf() < 0.62:
+				var h := _rng.randf_range(1.9, 3.1)
 				_place("tree_fern", "ferigaStg", f, -1.0,
-					_rng.randf_range(1.5, 7.0), _rng.randf_range(0.0, TAU),
+					_rng.randf_range(GAP_PERETE_MIN, GAP_PERETE_MAX),
+					_rng.randf_range(0.0, TAU),
 					_scale_for("tree_fern", h), "none")
-			if _rng.randf() < 0.8:
+			if _rng.randf() < 0.72:
 				_place("bromeliad", "bromStg", f + _step(1.8), -1.0,
-					_rng.randf_range(0.9, 6.0), _rng.randf_range(0.0, TAU),
-					_rng.randf_range(1.6, 3.2), "none")
+					_rng.randf_range(GAP_PERETE_MIN, GAP_PERETE_MAX),
+					_rng.randf_range(0.0, TAU),
+					_rng.randf_range(1.4, 2.8), "none")
 		# Pe buza din dreapta, printre pinteni.
 		if _rng.randf() < 0.6:
 			_place("bromeliad", "bromBuza", f + _step(3.2), 1.0,
@@ -551,19 +576,24 @@ func _vegetatie_agatata() -> void:
 ## Piesele `inca_stair_*` merg LANGA drum, pe flancul din stanga: in bara
 ## treptele sunt alaturi de drum, nu pe el.
 func _trepte_si_semne() -> void:
-	var f := F_FLANC_IN
+	# Ca si vegetatia: pe toata fata de piatra, si LIPITE de talpa ei. Cu
+	# rulajul vechi (3,0-6,0 m de margine) scarile stateau pe umarul din fata
+	# peretelui — de cand peretele s-a mutat la 0,2 m de asfalt, alea ar fi
+	# ingropate in el sau suspendate in fata lui.
+	var f := F_PERETE_IN
 	var k := 0
-	while f <= F_FLANC_OUT:
+	while f <= F_PERETE_OUT:
 		if k % 2 == 0:
 			var m: String = "inca_stair_b" if k % 4 == 0 else "inca_stair_a"
 			# Orientata pe directia drumului (scara urca odata cu el).
 			var a := _at(f)
 			var s: Vector3 = a["s"]
 			var yaw := atan2(s.x, s.z)
-			_place(m, "trepteStg", f, -1.0, _rng.randf_range(3.0, 6.0),
+			_place(m, "trepteStg", f, -1.0,
+				_rng.randf_range(GAP_PERETE_MIN, GAP_PERETE_MAX),
 				yaw, 1.0, "none", -0.8)
 		k += 1
-		f += _step(9.0)
+		f += _step(11.0)
 	# Bornele de poteca, pe amandoua partile, rare - punctuatie, nu gard.
 	f = F_IN + 0.004
 	var j := 0

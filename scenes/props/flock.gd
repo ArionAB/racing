@@ -62,6 +62,36 @@ class_name FlockProp
 ## Raza placii, in metri (scalata apoi de scale_min/scale_max).
 @export var disc_radius: float = 6.0
 
+## FUSTA placii: cati metri coboara o margine verticala sub fata de sus.
+##
+## De ce exista, si e un verdict de critic orb pe POI D (terase Machu Picchu),
+## cuvant cu cuvant: «solul din spatele unui zid e la aceeasi cota cu cel din
+## fata. "Terasa" e un decal verde asezat PESTE suprafata plana, nu fata de sus
+## a unei trepte umplute.» Avea dreptate, si cauza e chiar mesh-ul de aici:
+## `_disc_mesh` face o placa PLATA cu o singura fata. Suprapuse, placile dau o
+## suprafata — dar o suprafata n-are grosime, deci prin golurile dintre piesele
+## de zid se vedea acelasi teren neatins, si dunga de umbra de sub zid n-avea
+## ce s-o arunce: nu exista masa care s-o arunce.
+##
+## Cu `disc_skirt > 0` placa devine o PRISMA: aceeasi fata de sus, plus o
+## centura de fete verticale care coboara `disc_skirt` metri. Suprapuse,
+## prismele nu mai dau o foaie ci un BLOC — pamantul retinut de zid.
+##
+## Implicit 0 (placa plata), ca sa nu schimbe crusta de sare de pe Track14 si
+## nici terasele lui POI A, care sunt deja acceptate asa.
+@export var disc_skirt: float = 0.0
+
+## Slotul fetelor VERTICALE ale fustei. -1 = acelasi ca fata de sus.
+##
+## De ce e separat, si e o masuratoare pe captura nu o preferinta: la prima
+## incercare fusta a mostenit slotul fetei de sus (12 CACTUS_GREEN, iarba) si
+## pe D_r14_frac0.44.png rafturile au iesit cutii verzi de 2,5 m — citeau a
+## GARD VIU, nu a pamant retinut. In referinta fata verticala a unei terase nu
+## e niciodata iarba: iarba e doar coama, iar fata e pamantul taiat sau zidul.
+## Deci fusta isi ia slotul ei, si cel corect e 4 ROCK_DARK (#67421F), pamantul
+## brun inchis — care exista deja in atlas, deci costa ZERO materiale.
+@export var disc_skirt_slot: int = -1
+
 ## Reaseaza fiecare instanta pe TERENUL de la rulare, pastrand ofsetul fata de
 ## cota cu care a fost scrisa in lista.
 ##
@@ -101,7 +131,7 @@ func _ready() -> void:
 
 
 func _build() -> void:
-	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius) if model == null and disc_slot >= 0 else _mesh_of(model)
+	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius, disc_skirt, disc_skirt_slot) if model == null and disc_slot >= 0 else _mesh_of(model)
 	if mesh != null and model != null and ao_keep < 1.0:
 		mesh = _lift_ao(mesh, ao_keep)
 	if mesh == null:
@@ -209,7 +239,8 @@ static func _mesh_of(ps: PackedScene) -> Mesh:
 ## varfurile pe UV-ul slotului cerut. Normala in sus, deci primeste soarele
 ## plin — crusta de sare din referinta e cea mai LUMINOASA suprafata din cadru,
 ## nu doar cea mai putin saturata.
-static func _disc_mesh(slot: int, radius: float) -> Mesh:
+static func _disc_mesh(slot: int, radius: float, skirt: float = 0.0,
+		skirt_slot: int = -1) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var uv := Palette.uv(slot)
@@ -231,6 +262,36 @@ static func _disc_mesh(slot: int, radius: float) -> Mesh:
 			st.set_normal(Vector3.UP)
 			st.set_color(Color.WHITE)
 			st.add_vertex(v)
+	# FUSTA: centura de fete verticale care coboara de la marginea fetei de sus.
+	# Fara ea placa e o foaie fara grosime si terasa citeste ca un decal (vezi
+	# `disc_skirt`). Cu ea, placile suprapuse dau un bloc de pamant.
+	#
+	# Fetele laterale se INTUNECA prin vertex color (0,62), din doua motive:
+	# una, o fata verticala care primeste aceeasi lumina ca fata orizontala de
+	# deasupra ei nu se citeste ca o muchie, si atunci blocul redevine o pata;
+	# doua, `set_color` doar INMULTESTE (memoria `surfacetool-clamp-vertex-color`),
+	# deci intunecarea e singurul sens disponibil — noroc ca e chiar cel cerut.
+	if skirt > 0.0:
+		var jos := -skirt
+		var uv_s := Palette.uv(skirt_slot) if skirt_slot >= 0 else uv
+		var umbra := Color(0.78, 0.78, 0.78)
+		for i in segs:
+			var a0 := TAU * float(i) / float(segs)
+			var a1 := TAU * float(i + 1) / float(segs)
+			var c0 := Vector3(cos(a0) * radius, 0.0, sin(a0) * radius)
+			var c1 := Vector3(cos(a1) * radius, 0.0, sin(a1) * radius)
+			var b0 := Vector3(c0.x, jos, c0.z)
+			var b1 := Vector3(c1.x, jos, c1.z)
+			# Normala fetei: spre exterior, pe orizontala.
+			var nrm := Vector3(cos((a0 + a1) * 0.5), 0.0, sin((a0 + a1) * 0.5))
+			# Aceeasi ordine ca fata de sus — invers acelor de ceas privind
+			# dinspre exterior — altfel centura iese back-facing si nu se
+			# deseneaza deloc (exact capcana notata mai sus pentru fata de sus).
+			for v in [c0, b0, b1, c0, b1, c1]:
+				st.set_uv(uv_s)
+				st.set_normal(nrm)
+				st.set_color(umbra)
+				st.add_vertex(v)
 	return st.commit()
 
 

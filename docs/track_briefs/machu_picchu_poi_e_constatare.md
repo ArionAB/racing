@@ -116,3 +116,80 @@ copaci nu mișcă un versant întreg. Un material care nu cumpără nimic se dă
    **în lungul** tablierului, iar o coborâre de 1,5 m la mijlocul unei
    deschideri de 34 m nu subîntinde aproape nimic. E o observație despre
    **cadru**, nu un defect al hazardului — și nu e reparabilă din decor.
+
+## 7. Runda 3 — criticul are dreptate, si cauza e MASURATA, nu de impresie
+
+Verdictul orb: „podul nu exista ca obiect — tablier maro plat la nivelul
+solului, doua sfori galbene, fara turnuri, fara scanduri, fara catenara".
+**Am masurat fiecare din cele trei, si toate trei sunt in COD, nu in decor.**
+
+### (1) Turnurile sunt sub linia ochiului — nu pot rupe orizontul
+
+`rope_bridge_hazard.gd:102-103`: `TOWER_SIZE = (1.2, 3.9, 1.2)`,
+`TOWER_SINK = 1.5`. Deci **2,4 m vizibili** deasupra tablierului, pe o
+latime de 1,2 m, langa un tablier de **11 m** latime (`deck_width = 11.0`,
+Track15.tscn:98) si 34,24 m lungime.
+
+Cota, exact:
+
+```
+varful turnului : deck - 1.5 + 3.9 = deck + 2.4  =>  y = -17.60
+ochiul chase cam: deck + 3.2                     =>  y = -16.80
+```
+
+**Turnul e cu 0,80 m SUB ochiul camerei.** Nu e o problema de umbrire sau de
+tenta: geometric nu are cum sa taie linia orizontului, fiindca se termina sub
+ea. Unghiul subintins, fata de un turn ca in bara (~10 m, adica ~3x
+autobuzul):
+
+| distanta | acum (2,4 m) | bara (10 m) | raport |
+|---|---|---|---|
+| 10 m | 13,50 deg | 45,00 deg | 3,3x |
+| 20 m |  6,84 deg | 26,57 deg | 3,9x |
+| 34 m |  4,04 deg | 16,39 deg | 4,1x |
+
+### (2) Scandurile exista ca geometrie, dar n-au NICIUN contrast
+
+Pasul de scandura e rezolvabil pe ecran — nu asta e lipsa:
+
+```
+ 5 m: 38,3 px/scandura     20 m: 2,4 px
+10 m:  9,6 px/scandura     34 m: 0,8 px
+```
+
+Lipsa e de **valoare**. `_build_visual` da fiecarei scanduri o singura culoare
+de vertex, `shade = 0.82 + 0.18 * fmod(k*0.618, 1)`, iar `_box` o scrie
+identic pe toate cele 8 varfuri (`rope_bridge_hazard.gd:399`). Toate scandurile
+stau pe **acelasi texel** din atlas (`Palette.uv(WOOD_SLOT)`), cu fata de sus
+plana si normala unica. Rezulta o suprafata maro uniforma, cu o unduire de
+valoare de cel mult 18 % — sub pragul la care ochiul citeste „scanduri".
+
+Iar fanta dintre ele (`PLANK_GAP = 0.06`) nu ajuta: la unghiul razant din
+chase cam se deschide 0,09 m la 5 m si 0,19 m la 10 m, pe o grosime de placa
+de 0,16 m — practic inchisa, si oricum fara nimic intunecat dedesubt.
+
+### (3) Cablurile nu cad — sunt drepte prin constructie
+
+`_build_visual` aseaza cablul portant la `y = -PLANK_THICKNESS - 0.1`
+**constant pe toata lungimea**, si balustrada la `RAIL_HEIGHT = 1.0`
+constant. Amandoua sunt paralele cu tablierul, deci se deformeaza **impreuna
+cu el** in vertex shader (`deck_drop(u)` se aplica la fel tuturor vertecsilor
+de la acelasi `u`). O catenara adevarata cere ca **cablul sa urce spre
+capete** in timp ce tablierul ramane jos — adica un termen care sa creasca
+spre `u = 0` si `u = 1`, exact opusul lui `P(u) = 4u(1-u)`.
+
+Cele doua „sfori galbene intinse drept" pe care le vede criticul sunt chiar
+balustradele: slotul 13 (`DRY_VEGETATION`) e galben-pai, si sunt drepte
+fiindca urmeaza tablierul.
+
+### Ce inseamna asta pentru contractul POI-ului
+
+Contractul spune „POI E nu construieste podul" — si e corect ca **decorul nu
+trebuie sa dubleze podul**. Dar cele trei defecte pe care le numeste criticul
+sunt toate in `rope_bridge_hazard.gd`, si niciunul nu e reparabil din
+`DecorManual/ZoneE_Pod`: un turn pus ca prop langa tablier n-ar urma
+deformarea, iar scandurile si catenara sunt vertecsi ai mesh-ului podului.
+
+**Nu comit nimic in hazard fara mandat** (e gimmickul pistei, cu fizica
+calibrata si garzi proprii — `tools/probe_machu_pod.gd`). Ridic intrebarea,
+cu cifrele de mai sus.

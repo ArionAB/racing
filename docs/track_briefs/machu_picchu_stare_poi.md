@@ -128,19 +128,36 @@ Se reia de la cea mai bine judecată stare, pe terenul nou
 (pata gri = pânză opacă, lipsește Fresnel-ul din chase cam) și
 `strop-apa-particule`.
 
-### 3.4 Două lucruri deschise, măsurate și nerezolvate
+### 3.4 Două lucruri deschise — unul închis, unul încă deschis
 
-- **`main_gate` are 7,39 m liber, nu 8,39.** Deschiderea reală între uşciori,
-  măsurată prin proiecția triunghiurilor, e constantă de la sol până sub
-  buiandrug. Inventarul scrie trei cifre (8,390 / 7,410 / 6,000) care nu
-  descriu piesa. Brief-ul pistei cere **8 m** la bază pentru îmbrânceala cu 4
-  mașini la POI H. **Nu s-a corectat nimic în tăcere** — se verifică cu
-  ProbeRace (`--slice=0.92,1.00`) când POI H plantează poarta, și abia atunci
-  se decide: se lărgește piesa, se lărgește drumul, sau se acceptă cifra.
-- **Bârnele Podului Incaș aduc rampele podului mobil.** Reuse-ul
-  `LiftBridgeHazard` pune un dâmb de 1,6 m pe cornișă (profilul nu mai citește
-  „bârne peste gol"), iar sub gol terenul rămâne la −0,3 m, deci nu e
-  prăpastie. Brief-ul §3 spune că cere săpătură locală de 4 m. Nefăcut.
+- **`main_gate`: ÎNCHIS. Cele trei cifre sunt trei tăieturi prin aceeași piesă,
+  nu o contradicție.** Ușciorii sunt în TALUZ — poarta e trapezoidală, cum o
+  descrie chiar brief-ul — deci golul se strâmtează cu înălțimea. Măsurat de POI
+  H cu `tools/ProbeMpHGate.tscn` (proiecția triunghiurilor pe planul
+  (lateral, y), grilă de 1 cm, memoria `cota-de-contract-se-masoara-ca-gol`):
+
+  | fereastră pe y | gol liber | cifra din inventar |
+  |---|---:|---|
+  | 0,15–0,60 m | **8,300 m** | „8,390 bază" |
+  | 0,15–1,80 m (**gabaritul mașinii**) | **8,120 m** | — |
+  | 0,15–5,80 m (până sub buiandrug) | **7,420 m** | „7,410 sus", și 7,39 din §3 |
+
+  `masuratori.md` §3 a măsurat până sub buiandrug și a citit corect 7,39 — dar
+  mașina nu trece pe la 5,8 m înălțime. În fereastra pe care o ocupă caroseria
+  golul e **8,120 m pe un drum de 8,00 m**, deci brief-ul se **confirmă** cu
+  marjă +0,12 m. Poarta rămâne la scara 1: „corectată" la 8,0 s-ar pierde marja.
+  Verificat și dinamic, nu doar geometric (memoria
+  `proberace-la-inceput-nu-la-final`): ProbeRace seed 1/2/3 pe scena cu poarta
+  plantată dă **0 repuneri, offroad max 0,0%**.
+- **Bârnele Podului Incaș aduc rampele podului mobil. ÎNCĂ DESCHIS — e teren,
+  nu decor.** Reuse-ul `LiftBridgeHazard` pune un dâmb de 1,6 m pe cornișă, iar
+  sub gol terenul rămâne la −0,3 m. Verificat pe captură de POI H
+  (`--bridge-at=0.24`, `H_FINAL_f09435.png`): cu bârnele ridicate profilul
+  citește **o rampă maro lătă peste drum**, nu „bârne peste gol", și nu se vede
+  nicio prăpastie dedesubt — exact cum o descrie brief-ul §3, care cere
+  săpătură locală de 4 m. **Nefăcut, și nu s-a mascat cu decor**: e o modificare
+  de teren, iar traseul a trecut deja ProbeLayout. Ce a făcut decorul e să pună
+  piatră pe buzele golului, ca marginea să aibă capete de stâncă.
 
 ### 3.6 O slăbiciune reală la frac 0.187–0.190 (POI B, neconstruit)
 

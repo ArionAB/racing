@@ -227,3 +227,47 @@ defecte numite de critic nu e in decor:
 Capturile rundei: `E_r3_0.540.png`, `E_r3_0.548.png`, `E_r3_0.556.png`.
 Cea de la **0.548** e cea mai cinstita: se vad ambele turnuri in prim-plan,
 si sunt **mai scunde decat bolovanii de langa ele**.
+
+
+## 10. Runda 4 — forma locului, aflata printr-o incercare esuata
+
+Verdictul orb cerea sapatura verticala sub tablier, pe premisa ca „terenul
+trece continuu pe sub scanduri, iarba verde la ~2 m sub tablier".
+
+**Cifra din premisa e falsa** (`tools/SvMpE4.tscn`, raza filtrata pe RID-ul lui
+`TerrainBody`): golul e 12,13 m la capatul apropiat si **20,30 m** pe tot
+mijlocul, cu podea plata la −40,30 pe `dz = −40..+40`. Brief-ul cere 20 m.
+
+**Dar criticul descrie corect ce vede**, si runda 4 a aflat de ce. Am pus intai
+o cornisa de 101 blocuri pe muchia bazinului; numarate pe pozitiile emise, pe
+buza de langa tablier (`|z+155|<25`, `10<x<36`) au cazut **zero**. Scanarea
+inelara gasise marginea intregii cuvete, nu muchia peste care priveste soferul.
+
+Aia a aratat forma adevarata. Profilul e **identic** pe toate feliile de la
+`dz=0` la `dz=±40`:
+
+```
+x +34 -> +31 : 28.1 grade     x +20 -> +14 :  6.7 grade
+x +31 -> +26 : 26.6 grade     x +14 ->  -6 :  0.0 grade (podea plata)
+x +26 -> +20 : 29.5 grade
+```
+
+Terenul **nu depinde de z**. Nu e bazin si nu e crapatura: e un **jgheab
+invariant pe Z** care coboara 26–29 de grade de-a lungul lui X — in *lungul*
+directiei de mers. Ravena 2 din `custom_ravines` (0.5269–0.5834, podea −40) are
+latimea 60 m si merge **paralel** cu drumul.
+
+De aici tot: un defileu se citeste fiindca ii vezi cei doi pereti **din
+profil**. Aici peretii erau in fata si in spate — cobori in vale si urci pe
+partea cealalta — iar lateral, exact unde priveste soferul de pe tablier, era
+podea plata pe ±40 m.
+
+**Reparatia:** doi **pereti de flanc** pe Z, `gorge_far_wall` (piesa facuta
+pentru asta, deja la POI H, colizor `none`, zero materiale noi). Cota si
+departarea gasite pe captura, in trei pasi: 26 m/−20,5 inchidea cadrul;
+38 m/−24,5 citea dar coama statea ca o platforma peste pajiste; **38 m/−27,5**
+baga capacul sub linia ierbii, si muchia de sus devine muchia terenului.
+
+**Lectia, generala:** cand o garda geometrica spune „forma exista" si ochiul
+spune „nu se vede", intrebarea nu e *cat de adanc*, ci **pe ce axa** — o
+cadere paralela cu directia de mers nu se vede niciodata din masina.

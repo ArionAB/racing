@@ -343,10 +343,16 @@ func _sol_real(x: float, z: float) -> float:
 ## are cu ce sa masoare cat de adanc e. Firul de apa e lucrul care da scara,
 ## si e exact ce se vede in bara sub tablier.
 ##
-## Sloturile: se refolosesc cele masurate de POI F pe aceeasi pista
-## (gen_decor_mp_f.gd, trei masuratori de saturatie), deci ZERO materiale noi:
-##   6 ASPHALT_EDGE  ( 79, 79, 85) H 240 S 0,07 V 0,33 — apa mica
-##   5 ASPHALT       ( 59, 59, 64) H 240 S 0,08 V 0,25 — ochiuri adanci
+## Sloturile, RUNDA 2, alese pe masuratoarea proprie a barei (nu preluate):
+##   apa din BARA     rgb( 95, 97, 98) H 208,2  S 0,03  V 0,39  R-B  -3
+## Runda 1 folosise perechea lui POI F (6 ASPHALT_EDGE + 5 ASPHALT) si a iesit
+## rgb(123,119,108) H 44,6 S 0,12 — adica pe partea CALDA a rotii, fiindca
+## slotul 6 e #696765, H 30 / R-B +4. Sloturile s-au reales dupa cele trei
+## cifre ale barei, dintre cele deja folosite pe pista:
+##   5  ASPHALT         #4B4B4D H 240  S 0,03  V 0,30  R-B  -2  <- apa mica
+##   20 VOLCANIC_BLACK  #55535A H 257  S 0,08  V 0,35  R-B  -5  <- ochiuri
+## Amandoua neutre-reci, cu saturatia exact pe cifra barei (0,03 si 0,08 fata
+## de 0,03). ZERO materiale noi: sunt sloturi de atlas, nu clase.
 ## Memoria `apa-iluminata-v12`: culoarea NU vine din slot, contrastul vine din
 ## spuma alba si din pietre. Un gri singur pe iarba citeste asfalt; acelasi
 ## gri intre bolovani si spuma citeste apa.
@@ -387,9 +393,9 @@ func _rau() -> void:
 	if pos.is_empty():
 		print("; ATENTIE: albia e goala — luciul e sub tot terenul")
 		return
-	_disc_flock("E_Luciu", 6, 4.2, 0.85, 1.35, pos, yaw, 56001)
+	_disc_flock("E_Luciu", 5, 4.2, 0.85, 1.35, pos, yaw, 56001)
 	if not pos_d.is_empty():
-		_disc_flock("E_LuciuAdanc", 5, 3.4, 0.8, 1.2, pos_d, yaw_d, 56002)
+		_disc_flock("E_LuciuAdanc", 20, 3.4, 0.8, 1.2, pos_d, yaw_d, 56002)
 	print("; rau: %d placi luciu + %d ochiuri adanci, din %d incercari" % [
 		pos.size(), pos_d.size(), tries])
 
@@ -404,7 +410,7 @@ func _spuma() -> void:
 	var yaw: PackedFloat32Array = []
 	var sc3: Array[Vector3] = []
 	var tries := 0
-	while pos.size() < 260 and tries < 40000:
+	while pos.size() < 42 and tries < 40000:
 		tries += 1
 		var z := _rng.randf_range(RAU_Z0 + 4.0, RAU_Z1 - 4.0)
 		var mid := RAU_X + sin((z + 155.0) * 0.045) * 4.5
@@ -424,18 +430,24 @@ func _spuma() -> void:
 			if Vector2(x - r.x, z - r.y).length() < r.z + 1.6:
 				langa_piatra = true
 				break
-		var p_accept: float = 0.10 + strans * 0.45 + (0.45 if langa_piatra else 0.0)
+		# RUNDA 2: spuma NUMAI langa piatra. Masurat pe E_r1_0.556.png, spuma
+		# facea 9,1% din cadru fata de 0,0% (12 pixeli) pe bara — adica nu
+		# citea ca repezis, citea ca petice de zapada. Un repezis face alb
+		# acolo unde apa LOVESTE ceva, nu pe toata albia.
+		if not langa_piatra:
+			continue
+		var p_accept: float = 0.25 + strans * 0.5
 		if _rng.randf() > p_accept:
 			continue
 		pos.append(Vector3(x, RAU_Y + 0.05, z))
 		yaw.append(_rng.randf_range(0.0, TAU))
 		# Scalare NEUNIFORMA: o creasta de repezis e LUNGA si INGUSTA. Cu
 		# discuri egale iese un covor de nuferi (lectia rundei 3 a lui F).
-		sc3.append(Vector3(_rng.randf_range(0.5, 1.0), 1.0,
-			_rng.randf_range(1.3, 2.6)))
+		sc3.append(Vector3(_rng.randf_range(0.5, 0.9), 1.0,
+			_rng.randf_range(1.2, 2.2)))
 	if pos.is_empty():
 		return
-	_disc_flock("E_Spuma", 22, 0.80, 1.0, 1.0, pos, yaw, 56003, sc3)
+	_disc_flock("E_Spuma", 22, 0.45, 1.0, 1.0, pos, yaw, 56003, sc3)
 	print("; spuma: %d creste, din %d incercari" % [pos.size(), tries])
 
 
@@ -521,7 +533,7 @@ func _pereti() -> void:
 	var loturi := {}
 	var puse := 0
 	var tries := 0
-	while puse < 340 and tries < 90000:
+	while puse < 430 and tries < 90000:
 		tries += 1
 		# Peretele: inelul din jurul podelei, intre buza bazinului si fund.
 		var z := _rng.randf_range(PODEA_Z0 - 6.0, PODEA_Z1 + 6.0)
@@ -551,7 +563,13 @@ func _pereti() -> void:
 		# Bolovanii de perete sunt MARI: la 20-40 m de ochi, o piatra de 1 m
 		# subintinde cat nimic. Se scaleaza 1,6-3,4x, dar NEUNIFORM, ca sa nu
 		# iasa un sir de bile egale.
-		var sx := _rng.randf_range(1.6, 3.4)
+		# RUNDA 2: scara coborata de la 1,6-3,4 la 0,9-2,0. Masurat pe
+		# E_r1_0.540.png: piatra iesea V 0,86 fata de 0,59 pe bara, si pe
+		# captura se vede de ce — doi bolovani de ~10 m flancau drumul ca
+		# niste dune si ACOPEREAU chiar defileul pe care trebuiau sa-l
+		# descrie. Nu e o problema de culoare (la 0.556, unde sunt departe,
+		# piatra mea da V 0,58 fata de 0,59 pe bara), e una de SCARA.
+		var sx := _rng.randf_range(0.9, 2.0)
 		_lot_add(loturi, mdl, Vector3(x, g - 0.25, z), _rng.randf_range(0.0, TAU),
 			Vector3(sx, sx * _rng.randf_range(0.55, 0.95),
 				sx * _rng.randf_range(0.8, 1.3)))
@@ -585,7 +603,7 @@ func _coame() -> void:
 	var loturi := {}
 	var puse := 0
 	var tries := 0
-	while puse < 300 and tries < 80000:
+	while puse < 165 and tries < 80000:
 		tries += 1
 		var z := _rng.randf_range(PODEA_Z0 - 14.0, PODEA_Z1 + 14.0)
 		var x := _rng.randf_range(PODEA_X0 - 44.0, PODEA_X1 + 50.0)
@@ -640,6 +658,19 @@ func _coame() -> void:
 			continue
 		tot += pp.size()
 		k += 1
+		# CLASA: NICIUNA, si asta e o revenire masurata, nu o omisiune.
+		#
+		# Runda 2 pusese `macchia` pe coama, cu argumentul ca verdele meu e
+		# V 0,63 fata de 0,29 pe bara. Masurat DUPA, argumentul nu sta:
+		#   (a) probe_decor a urcat de la 19 la 20 de materiale — deci
+		#       `macchia` NU era deja in cele 19, cum scrisese comentariul
+		#       (memoria `justificarea-din-comentariu-se-verifica`);
+		#   (b) si n-a cumparat nimic: verdele a ramas V 0,63 / 28,2% fata de
+		#       V 0,61 / 26,7% inainte. Fiindca verdele masurat in cadru e
+		#       IARBA DE TEREN, nu frunzisul meu — 165 de copaci nu misca un
+		#       versant intreg.
+		# Un material care nu cumpara nimic se da inapoi. Tenta verdelui de
+		# teren e a temei, deci nu e a POI-ului meu.
 		_model_flock("E_Coama_%s" % mdl, RES[mdl], pp, dd["yaw"], dd["sc"],
 			56200 + k)
 	print("; coame: %d piese de vegetatie pe buza, din %d incercari" % [
@@ -678,7 +709,9 @@ func _capete_pod() -> void:
 				continue
 			pos.append(Vector3(dx, g - 0.3, dz))
 			yaw.append(_rng.randf_range(0.0, TAU))
-			var sx := _rng.randf_range(1.8, 3.6)
+			# Scara, ca la perete: acestia sunt cei mai APROAPE de ochi, deci
+			# cei care au blocat cadrul la runda 1. 1,0-2,2 in loc de 1,8-3,6.
+			var sx := _rng.randf_range(1.0, 2.2)
 			sc3.append(Vector3(sx, sx * _rng.randf_range(0.6, 1.0),
 				sx * _rng.randf_range(0.85, 1.25)))
 	if pos.is_empty():

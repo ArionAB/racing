@@ -985,6 +985,13 @@ static func themes() -> Dictionary:
 			"fog": Color(0.86, 0.87, 0.89),
 			# Peretele opus al defileului: padure de nori, verde inchis-albastrui.
 			"hill_color": Color(0.20, 0.30, 0.22),
+			# FATA DE STANCA: granit andin cenusiu-cald, pe orice teren mai
+			# inclinat de 38 grade. Culoarea e luata din familia zidariei
+			# (`inca_stone`), ca faleza si cetatea sa fie aceeasi piatra —
+			# altfel rapa ar citi ca alt material decat zidurile de deasupra ei.
+			"scarp_tint": Color.html("4A4844"),
+			"scarp_slope_deg": 28.0,
+			"scarp_fade_deg": 10.0,
 			# Soare la ~40 grade, alb-cald, sezon uscat. Azimutul PROVIZORIU
 			# (Track15.tscn il suprascrie cu custom_sun_rotation_deg) — se
 			# remasoara la fiecare redesenare de traseu (memoria
@@ -5028,6 +5035,25 @@ func _build_terrain() -> void:
 	var rock_tint: Variant = theme_flag("rock_band_tint", null)
 	var rock_line := float(theme_flag("rock_line", 0.0))
 	var rock_fade := maxf(float(theme_flag("rock_fade", 1.0)), 0.001)
+	# FATA DE STANCA PE PANTA (nu pe cota). `rock_band_tint` de mai sus pune
+	# piatra peste o LINIE DE NIVEL — bun pe munte, inutil acolo unde golul e
+	# SUB sosea: pe Machu Picchu rapele coboara de la drum in jos, deci nicio
+	# cota nu le prinde. Aici greutatea vine din INCLINARE: fata care cade e
+	# piatra, platoul de deasupra ramane iarba.
+	#
+	# De ce e nevoie (valul 2, 18 sep 2026): trei critici orbi, pe trei POI-uri,
+	# in noua runde, au cerut acelasi lucru — "nu exista buza / gol / stanca, e
+	# o panta verde continua". Masurat, caderea EXISTA pe C (-13 m la 4 m de
+	# margine, unghi 56-77 grade din ochiul camerei), dar fata ei, versantul de
+	# dincolo si fundalul aveau TOATE `ground_tint`, deci ochiul le unea intr-un
+	# deal. Lipsea contrastul, nu geometria (docs/track_briefs/
+	# machu_picchu_val2_constatare.md).
+	#
+	# Null pe orice tema fara cheie: restul pistelor nu se schimba cu un pixel.
+	var scarp_tint: Variant = theme_flag("scarp_tint", null)
+	## De la ce inclinare incepe piatra (grade) si pe cate grade se topeste.
+	var scarp_deg := float(theme_flag("scarp_slope_deg", 38.0))
+	var scarp_fade_deg := maxf(float(theme_flag("scarp_fade_deg", 12.0)), 0.001)
 	# CRUSTA DE SODA din jurul lagunei (serengeti, POI G): banda masurata in
 	# metri de la contur, nu pe cota. Null pe orice tema fara cheie, deci
 	# restul pistelor nu se schimba cu un pixel. Vezi "lagoon_crust_tint".
@@ -5127,9 +5153,31 @@ func _build_terrain() -> void:
 					heights[idx00 + cells + 2],
 					origin.z + float(gz + 1) * step),
 			]
+			# INCLINAREA, pentru fata de stanca. Se ia PER VERTEX, din campul
+			# de inaltimi cu diferente centrale — nu per celula: o valoare pe
+			# celula face ca fiecare celula sa primeasca o singura tenta, si
+			# muchia dintre doua celule sare. Rezultatul, vazut pe captura, e o
+			# tabla de sah de PATRATE pe versantul departat. Per vertex,
+			# valorile se interpoleaza pe triunghi si marginea iese continua.
+			var slope_at := func(cx: int, cz: int) -> float:
+				var i0: int = cz * (cells + 1) + cx
+				var hL: float = heights[i0 - (1 if cx > 0 else 0)]
+				var hR: float = heights[i0 + (1 if cx < cells else 0)]
+				var hD: float = heights[i0 - ((cells + 1) if cz > 0 else 0)]
+				var hU: float = heights[i0 + ((cells + 1) if cz < cells else 0)]
+				var sx: float = (hR - hL) / (step * (2.0 if cx > 0 and cx < cells else 1.0))
+				var sz: float = (hU - hD) / (step * (2.0 if cz > 0 and cz < cells else 1.0))
+				return rad_to_deg(atan2(sqrt(sx * sx + sz * sz), 1.0))
+			var slope_deg := [0.0, 0.0, 0.0, 0.0]
+			if scarp_tint != null:
+				slope_deg[0] = slope_at.call(gx, gz)
+				slope_deg[1] = slope_at.call(gx + 1, gz)
+				slope_deg[2] = slope_at.call(gx, gz + 1)
+				slope_deg[3] = slope_at.call(gx + 1, gz + 1)
 			for tri in [[0, 1, 2], [1, 3, 2]]:
 				for corner_idx: int in tri:
 					var v: Vector3 = corners[corner_idx]
+					var cell_slope_deg: float = slope_deg[corner_idx]
 					# Nuanta dupa inaltimea RELATIVA la media pistei, nu absoluta.
 					# Absoluta functiona doar cat timp terenul statea in jurul lui
 					# zero; acum, cu terenul care urca la 19 m, ar fi spalat tot
@@ -5291,6 +5339,22 @@ func _build_terrain() -> void:
 							# Pe piatra nu creste iarba: greutatea coboara spre
 							# textura de nisip/roca, exact ca sub zapada.
 							grass_w *= 1.0 - rock_w
+					# FATA DE STANCA: dupa panta, nu dupa cota. Se aplica
+					# INAINTE de zapada, ca albul sa ramana ultimul strat.
+					if scarp_tint != null and cell_slope_deg > 0.0:
+						var scarp_w := clampf(
+							(cell_slope_deg - scarp_deg) / scarp_fade_deg,
+							0.0, 1.0)
+						# Marginea se zdrentuieste cu ACELASI zgomot ca restul
+						# straturilor: o linie de panta perfecta se citeste ca
+						# desen tehnic, nu ca roca.
+						scarp_w = clampf(scarp_w + dirt_noise.get_noise_2d(
+							v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0)
+						scarp_w = smoothstep(0.0, 1.0, scarp_w)
+						if scarp_w > 0.0:
+							tint = tint.lerp(scarp_tint as Color, scarp_w)
+							# Pe fata de stanca nu creste iarba.
+							grass_w *= 1.0 - scarp_w
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)

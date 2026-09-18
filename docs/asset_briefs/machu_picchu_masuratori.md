@@ -172,6 +172,38 @@ pistei cere â€ž8 m liber la bazÄƒ" pe un drum de 13 m. 7.39 m e sub cei 8,
 inventarul raporteazÄƒ marjÄƒ pozitivÄƒ. Cu maÈ™inile AI care intrÄƒ Ã®n pluton acolo,
 asta se verificÄƒ cu `ProbeLaneClear` È™i `ProbeRace` dupÄƒ plantare, nu din tabel.
 
+### Poarta e mai îngustă decât drumul pe care stă (18 sep 2026)
+
+Cifra de 7,39 m nu e doar „sub cei 8 m ceruți" — **inversează intenția de
+design**, iar asta nu se vede din tabel.
+
+`Track15.tscn`, `custom_width_segments` conține `Vector3(0.9631, 0.9703, 4)`:
+pe **exact intervalul porții**, semi-lățimea drumului e 4,0 m, adică **8,0 m
+carosabil**. Brief-ul §2 (rândul H) descrie ce trebuia să se întâmple: drumul
+se strânge de la 13 la 8 m, poarta livrează 8,4 m liber, deci **poarta
+încadrează drumul** cu ~0,2 m joc de fiecare parte. Gâtuirea — îmbrânceala cu
+4 mașini — era a **drumului**; piatra doar o înrăma.
+
+Livrată la 7,39 m, poarta e cu **0,61 m mai îngustă decât carosabilul**: ușciorii
+stau **în** drum, câte ~30 cm de fiecare parte. Nu mai e un cadru, e un
+obstacol — o mașină care ține marginea (linia normală a AI-ului pe exterior)
+intră în granit.
+
+**Nu s-a corectat nimic.** Cele trei opțiuni, toate deschise, decizia la
+integrarea POI-ului H, pe măsurătoare (`ProbeRace --slice=0.92,1.00` pe mai
+multe seed-uri + `ProbeLaneClear`):
+
+1. **Se lățește piesa** la ~8,4 m — restaurează intenția din brief, dar cere
+   re-export din Blender și re-măsurare.
+2. **Se îngustează drumul** sub 7,39 pe segment (de ex. semi-lățime 3,5) —
+   poarta redevine cadru, gâtuirea rămâne a drumului, zero muncă de asset. Dar
+   schimbă traseul, care a trecut deja ProbeLayout.
+3. **Se acceptă** poarta ca gâtuire reală, și se verifică doar că e trecătoare
+   pentru plutonul de 4 — cel mai ieftin, dar ușciorii în carosabil rămân o
+   sursă de contact „nedrept" (CLAUDE.md: contactul e mecanică, dar un zid fix
+   pe linia de cursă nu e îmbrânceală).
+
+
 ## 4. Coliziunea propusÄƒ, cu motivul mÄƒsurat
 
 Tiparul e cel din `world_prop.gd:61` (`PROP_COLLISION`). Fiecare linie de mai

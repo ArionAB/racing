@@ -85,12 +85,30 @@ pe cealalta; drumul se stramteaza vizibil catre poarta.`,
 scrie inventarul — vezi mai jos), inca_bridge_ledge (cornisa, gol 4,23 m la
 cota ei), rope_rail, moss_boulder_*, polylepis_a/b.`,
     capcana: `DOUA lucruri deschise, amandoua scrise si nerezolvate:
-1. **main_gate are 7,39 m liber, nu 8,39.** Masurat pe geometrie prin proiectia
-   triunghiurilor (docs/asset_briefs/machu_picchu_masuratori.md §3). Brief-ul
-   pistei cere 8 m la baza pentru imbranceala cu 4 masini, iar inventarul
-   raporta marja pozitiva. Cand asezi poarta, VERIFICA cu ProbeRace
-   (--slice=0.92,1.00) si ProbeLaneClear ca plutonul trece. Daca nu trece,
-   raporteaza cifra — nu largi poarta in tacere si nu muta drumul.
+1. **main_gate are 7,39 m liber, nu 8,39 — si e mai INGUST decat drumul.**
+   Asta e cifra pe care trebuie s-o intelegi inainte sa asezi poarta; am
+   verificat-o eu (lead) inainte sa pornesti, ca sa n-o descoperi la runda 3.
+   - Golul liber masurat pe geometrie, prin proiectia triunghiurilor pe planul
+     (lateral, y), grila de 1 cm: **7,39 m, CONSTANT de la sol pana sub
+     buiandrug** (docs/asset_briefs/machu_picchu_masuratori.md §3). Nu se
+     stramteaza pe verticala, cum sugereaza cele trei cifre din inventar
+     (8,390 / 7,410 / 6,000) — alea nu descriu piesa.
+   - **Drumul la locul portii are 8,0 m.** Track15.tscn custom_width_segments
+     are Vector3(0.9631, 0.9703, 4) — semi-latime 4,0 pe exact intervalul
+     portii. Brief-ul §2 (randul H) descrie intentia: drumul se strange de la
+     13 la 8 m, poarta livreaza 8,4 m, deci poarta INCADREAZA drumul cu 0,4 m
+     joc de fiecare parte. Gatuirea trebuia sa fie a DRUMULUI, nu a pietrei.
+   - Cu 7,39 m, intentia se inverseaza: poarta e cu **0,61 m mai ingusta decat
+     carosabilul**, adica usciorii stau IN drum. Nu mai e un cadru, e un
+     obstacol — si o masina care tine marginea intra in piatra.
+   Deci: **masoara inainte sa concluzionezi, si nu repara in tacere.** Asaza
+   poarta, apoi ruleaza ProbeRace --slice=0.92,1.00 pe cel putin 3 seed-uri si
+   ProbeLaneClear, si raporteaza cifrele. Optiunile, daca plutonul chiar
+   sufera, sunt trei si NICIUNA nu e a ta s-o alegi singur: (a) se lateste
+   piesa la ~8,4 m, (b) se ingusteaza drumul sub 7,39 ca poarta sa redevina
+   cadru, (c) se accepta ca poarta e o gatuire reala si se verifica doar ca e
+   trecatoare. Raporteaza CE AI MASURAT si care varianta o recomanzi, cu
+   motivul. Decizia se ia la integrare.
 2. **Barnele aduc rampele podului mobil.** Reuse-ul LiftBridgeHazard pune un
    damb de 1,6 m pe cornisa, deci profilul nu mai citeste "barne peste gol";
    iar SUB gol terenul ramane la -0,3 m, deci nu e prapastie. Brief-ul §3 spune

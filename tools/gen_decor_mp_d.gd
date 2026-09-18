@@ -64,6 +64,33 @@ extends Node
 ##    `_lane_free` verifica distanta de la amprenta piesei la TOATE punctele
 ##    coapte ale traseului, nu doar la piciorul curent, si refuza piesa care
 ##    intra in banda oricarui picior. Cifra de refuz se raporteaza.
+##
+## 7. LAMELE RAMAN UNDE SUNT — masurat, nu presupus. Brief-ul lasa deschis
+##    „parcate pe interiorul acului prind Autobuzul, de verificat daca pe
+##    exterior e mai cinstit". Masurat INAINTE de a le misca, ProbeRace cu
+##    --slice=0.42,0.56, patru seed-uri:
+##      seed 1  v_med 24,2  lent 0,0%  pereti 0  autobuz 0  repuneri 0
+##      seed 2  v_med 23,7  lent 0,7%  pereti 1  autobuz 0  repuneri 0
+##      seed 3  v_med 22,9  lent 3,6%  pereti 2  autobuz 0  repuneri 0
+##      seed 4  v_med 23,0  lent 3,3%  pereti 2  autobuz 0  repuneri 0
+##    Premisa NU se confirma: contacte cu autobuzul 0 pe toate patru, si
+##    repuneri 0 pe toate patru. Procentele de „lent" sunt masinile care
+##    incetinesc pentru un ac de 12,5% — gimmickul, nu un blocaj. Nu se
+##    muta un hazard cablat pe o premisa nemasurata.
+##
+## 8. CE NU SE CITESTE INCA (runda 4, pe capturi — captura bate cifra).
+##    La 0.44 zidurile se vad si zigzagul se citeste, dar:
+##    (a) terasele sunt PALE, nu benzi de iarba intre ziduri palide, cum e in
+##        bara; suprafata din jurul drumului e nisip, nu iarba scurta;
+##    (b) la 0.49 zidurile citesc ca un morman scurt langa drum, nu ca siruri
+##        continue cu dungi — sirul se rupe fiindca garda de banda taie
+##        bucatile din mijlocul acului;
+##    (c) dungile de umbra exista geometric (azimutul e verificat la nota 3)
+##        dar nu se vad ca dungi fiindca nu au pe ce sa cada: nu e treapta
+##        de iarba sub zid, e acelasi nisip.
+##    Asta e sarcina rundei urmatoare, si e o problema de SUPRAFATA, nu de
+##    asezare: terasa are nevoie de podea proprie (clasa de iarba scurta pe
+##    banda dintre ziduri), nu de mai multe ziduri.
 
 const TRACK := "res://scenes/tracks/Track15.tscn"
 const ZONE := "DecorManual/ZoneD_Terase"

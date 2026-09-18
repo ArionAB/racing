@@ -126,6 +126,23 @@ extends Node
 ##     alta zona nu s-a miscat. Garzile care au drept de veto (probe_decor,
 ##     ProbeBuried, ProbeLaneClear, ProbeRace) sunt toate verzi.
 
+## 11. 5,4% OFFROAD PE SEED 1 NU E IN ZONA MEA — localizat prin injumatatire,
+##     nu presupus. ProbeRace arata masina jucatorului cu 5,4% offroad pe seed
+##     1 (plecare 0,0%), si cifra e DETERMINISTA: trei rulari identice la bit,
+##     deci nu e zgomotul din memoria `proberace-nedeterminism`. Se cerea
+##     cautata, nu scuzata.
+##     Felia mea e curata: pe 0.42-0.56 toate cele SASE masini au 0,0% lent,
+##     0 pereti, 0 contacte cu autobuzul. Injumatatind restul traseului:
+##       0.00-0.20  0,0%  |  0.20-0.42  0,0%  |  0.56-0.80  0,0%
+##       0.80-1.00  17,3%   <- aici e
+##     Si acolo e dinainte de mine. Masurat pe scena rundei 4, aceeasi felie:
+##       runda 4: seed 1 11,3% · seed 2 12,4% · seed 3 12,3%
+##       runda 9: seed 2 14,2% · seed 3 11,7% · seed 4 11,2%
+##     Adica 0.80-1.00 e un viraj lent pe TOATE seed-urile si in ambele
+##     versiuni. Ce s-a schimbat e doar in ce stare ajunge masina acolo.
+##     Decorul meu e intre 0.418 si 0.522; n-are cum sa atinga 0.80-1.00.
+##     Nu e treaba mea si nu o ating (e zona altui POI).
+
 const TRACK := "res://scenes/tracks/Track15.tscn"
 const ZONE := "DecorManual/ZoneD_Terase"
 
@@ -541,7 +558,12 @@ func _nivel_taiat(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 	var a := f0
 	var b := f1
 	var pas := _step(2.0)
-	var min_len := _step(12.0)
+	# 12 m era prea putin: pe D_r7_frac0.44.png cele mai scurte siruri (14-18 m
+	# pe nivelul 1) se citesc tot ca lespezi razlete sus pe deal, adica exact
+	# defectul din verdict, doar mai sus in cadru. Un sir citeste ca LINIE de
+	# la vreo 20 m in sus — sub atat, mai bine lipseste nivelul decat sa puna
+	# trei blocuri in iarba.
+	var min_len := _step(20.0)
 	while b - a >= min_len:
 		if _nivel_incape(a, b, sgn, lat0, y_raft):
 			_nivel(a, b, sgn, lat0, lat1, y_raft, k)
@@ -653,7 +675,13 @@ func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 	# --- 2. PODEAUA raftului. Marginea din fata se retrage cu RAZA placii de
 	# la spatele zidului, nu cu o constanta: altfel placa iese peste coama
 	# zidului si atarna in fata lui (bugul reparat pe captura la POI A).
-	_raft(f0, f1, sgn, lat0 + 0.45 + RAFT_R, lat1 - RAFT_R, y_raft - 0.06)
+	# CAPETELE se retrag si pe LUNGIME, nu doar lateral. Pe D_r8_frac0.52.png
+	# se vede de ce: la capatul unui sir placile ies dincolo de ultima piesa de
+	# zid si atarna in aer ca niste limbi verzi, fiindca acolo nu mai e nimic
+	# care sa le tina. Lateral retragerea era deja exacta (placile acopera
+	# 3,65-6,50 m, fata zidului urmator e la 6,50); pe lungime lipsea.
+	_raft(f0 + _step(RAFT_R), f1 - _step(RAFT_R),
+		sgn, lat0 + 0.45 + RAFT_R, lat1 - RAFT_R, y_raft - 0.06)
 
 
 ## ASIZE DE UMPLERE sub talpa unui sir de zid.

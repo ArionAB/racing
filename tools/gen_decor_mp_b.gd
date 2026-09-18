@@ -253,7 +253,9 @@ const F_FLANC_OUT := 0.152
 
 func _build() -> void:
 	_buza_de_stanca()
-	_perete_stanga()
+	# `_perete_stanga` NU se mai apeleaza: peretele din stanga e acum teren
+	# construit (noduri CliffFace in Track15.tscn), nu un sir de piese. Vezi
+	# nota lunga de deasupra lui `_perete_stanga_RETRAS`.
 	_vegetatie_agatata()
 	_trepte_si_semne()
 
@@ -413,13 +415,67 @@ func _zid_buza(model: String, base: String, frac: float, side_sign: float,
 		inalt / float(HEIGHT.get(model, 1.0)), "none")
 
 
-## PERETELE DIN STANGA, doar pe flancul care chiar urca (nota 2). In afara
-## intervalului 0.105-0.152 stanga e platou, si o stanca pe platou e o piatra
-## pe pajiste - exact greseala descrisa in constatarea valului 2.
+## PERETELE DIN STANGA - RETRAS IN RUNDA 5, si motivul merita scris o data
+## pentru toate fiindca e acelasi pe care l-au ratat rundele 1-4.
 ##
-## Si aici materia e ZIDARIE, din acelasi motiv masurat mai sus: drumul e
-## TAIAT in versant, iar in bara fata taiata e piatra, nu muschi.
-func _perete_stanga() -> void:
+## Verdictul criticului orb, dupa runda 4: «drumul nostru nu e taiat in nimic.
+## In referinta, o masa continua de piatra se ridica pe stanga [...]. La noi
+## stanga e o panta verde moale, iar in locul peretelui sunt ~15 blocuri de
+## piatra razlete, la scara de recuzita, stand libere pe iarba - material
+## corect, OBIECT GRESIT.»
+##
+## Avea dreptate, si diagnosticul rundelor 2-4 era incomplet, nu gresit.
+## Runda 2 a aflat ca materia trebuie sa fie zidarie, nu muschi (corect).
+## Runda 3 a aflat ca inaltimea si retragerea nu se trag la zar per piesa
+## (corect). Dar amandoua au raspuns la intrebarea „ce piesa pun?", cand
+## intrebarea era „de unde vine FORMA?" - exact memoria
+## `capcana-parametrului-care-doar-aduna`.
+##
+## Cifra care inchide discutia, din survey (nota 2): pe stanga terenul e PLATOU
+## la -0,3 m pe tot intervalul, in afara de 0.110-0.145. Un perete de 15-20 m nu
+## poate fi facut din piese de 2,5 m asezate pe un platou plat, la NICIO
+## densitate: ii lipseste masa de dedesubt. `inca_wall_a` are 2,487 m; ca sa
+## acopere o fata de 17 m ar trebui 7 asize suprapuse, adica un zid de cetate,
+## nu un versant taiat.
+##
+## Un perete nu e o piesa de decor, e TEREN - si terenul nu poate fi cerut
+## campului de inaltime: celula grilei e 7,92 m (Track.TERRAIN_CELL), deci orice
+## taietura lipita de asfalt se intinde pe o celula intreaga si iese rampa.
+## Nodul care rezolva exact asta exista deja in proiect, construit pentru un
+## verdict aproape identic pe POI C al Cappadociei: [CliffFace] cu `cut_wall`,
+## „TAIETURA DIN INTERIORUL VIRAJULUI: peretele in care e SAPAT drumul".
+##
+## Deci peretele din stanga e acum declarat in Track15.tscn ca trei noduri
+## CliffFace (`Faleze/TaieturaDrumIncasA/B/C`, fractiile 0.044-0.207), si
+## functia asta nu se mai apeleaza. Costa ZERO materiale in plus (e tot
+## Palette.world_material, benzile sunt UV-uri pe sloturi din acelasi atlas),
+## si pe platou nu se stinge fiindca `cut_min_rise_m` da o inaltime de podea -
+## acelasi mecanism cu care Serengeti si-a facut malul dintre bratele
+## serpentinei (Track14.tscn, `PeretePrimaDreapta`).
+##
+## SLOTURILE, si aici am gresit o data masurat inainte sa ma uit la captura.
+## Prima incercare a folosit 3/29/4 (ROCK_LIGHT / MARBLE_GREY / ROCK_DARK),
+## fiindca asta scrie palette.gd:723 ca fiind amestecul zidariei incase. Pe
+## captura (B_r5_f0.14.png) peretele a iesit PORTOCALIU-CARAMIZIU. Cauza,
+## citita din atlas cu PIL:
+##   slot  3 #CE8D4A  H30,5 S0,64 V0,81   <- gresie calda de canion
+##   slot  4 #774C23  H29   S0,71 V0,47
+## Cifrele din palette.gd sunt tinta pe care o atinge clasa `inca_stone` DUPA
+## lift+tenta, pe piesele de kit. Panza falezei NU trece prin clasa aia: ia
+## slotul brut din atlas. Deci pe ea sloturile se aleg dupa culoarea BRUTA.
+##
+## Ancora e `scarp_tint` al temei (#4A4844, H40 S0,08 V0,29) - granitul andin
+## pe care il are deja rapa de alaturi, si de care peretele nu are voie sa
+## difere, altfel taietura citeste ca alt material decat faleza de sub ea.
+## Masurat pe aceeasi ancora:
+##   slot 29 #B6B2AA  H40,0 S0,07   <- ACEEASI nuanta si saturatie, mai deschis
+##   slot  8 #C8BDA9  H38,7 S0,16   <- coama in soare
+##   slot  6 #5C5A59  H20,0 S0,03   <- strat neutru inchis
+##   slot 20 #56545B  H257  S0,08   <- umbra rece de strat
+## Niciunul peste S0,16; slotul 3 sta la S0,64, adica de opt ori mai saturat.
+## Ordinea alterneaza deschis/inchis fiindca benzile se citesc drept STRATE doar
+## daca vecinele difera in VALOARE (nota din `band_slots`).
+func _perete_stanga_RETRAS() -> void:
 	var f := F_FLANC_IN
 	var k := 0
 	while f <= F_FLANC_OUT:

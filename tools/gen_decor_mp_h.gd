@@ -240,7 +240,11 @@ var _tri := 0
 var _rng := RandomNumberGenerator.new()
 var _out_path := ""
 var _survey_only := false
+var _lat_only := false
+var _terr_test := false
 var _total_len := 1.0
+var _lvl_ok: Array[int] = []
+var _lvl_no: Array[int] = []
 
 
 func _ready() -> void:
@@ -249,6 +253,10 @@ func _ready() -> void:
 			_out_path = a.trim_prefix("--out=")
 		elif a == "--survey":
 			_survey_only = true
+		elif a == "--lat":
+			_lat_only = true
+		elif a == "--terr-test":
+			_terr_test = true
 	await get_tree().process_frame
 	_track = (load(TRACK) as PackedScene).instantiate() as Track
 	get_tree().root.add_child(_track)
@@ -264,10 +272,15 @@ func _ready() -> void:
 		hi = maxf(hi, bp.y)
 	_sus_y = hi + 150.0
 	_rng.seed = 940971
+	if _lat_only:
+		_survey_lateral()
+		get_tree().quit(0)
+		return
 	_survey()
 	if not _survey_only:
 		_gate()
 		_retaining()
+		_terraces()
 		_gap_lip()
 		_cliff_face()
 		_understory()
@@ -303,6 +316,30 @@ func _survey() -> void:
 			f, p.x, p.z, p.y, half, s.x, s.z, _curv(i), " ".join(cols),
 			s.dot(shadow)])
 		f += 0.002
+
+
+## Profil lateral FIN pe partea golului: unde exact incepe caderea si cat de
+## abrupta e. Survey-ul general masoara la -40/-25/-15/-8; runda 7 are nevoie de
+## pasul de 1 m intre 5 si 30 m, fiindca criticul spune ca nu se citeste nicio
+## cadere, iar cifra de la 8 -> 15 m (-2,5 -> -11,1) e o PANTA de 8,6 m pe 7 m,
+## adica 51 de grade: real, dar neted si acoperit de iarba.
+func _survey_lateral() -> void:
+	var n := _track.baked.size()
+	print("; PROFIL LATERAL pe partea golului (pas 1 m, cote fata de sosea)")
+	for f: float in [0.9300, 0.9350, 0.9400, 0.9450, 0.9500, 0.9550, 0.9600, 0.9640]:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var sgn := _gap_side(i)
+		var s := _track._side_at(i) * sgn
+		var half := _track.width_at_index(i)
+		var row: Array[String] = []
+		var off := 4.0
+		while off <= 30.0:
+			var q := p + s * off
+			row.append("%.1f" % (_sol_real(q.x, q.z) - p.y))
+			off += 1.0
+		print("; frac %.4f half %.2f | %s" % [f, half, " ".join(row)])
+	print("; (coloane: lateral 4,5,6,...,30 m)")
 
 
 func _curv(i: int) -> float:
@@ -649,6 +686,245 @@ func _place_wall(mdl: String, p0: Vector3, p1: Vector3, w0: WallPt,
 ## poarta, unde uscioarele sunt chiar marginea.
 const BEAM_FRAC := 0.9435
 const BEAM_HALF_SPAN := 0.0035   # ~7 m de traseu, cat traveea plus buzele
+
+## ------------------------------------------------------------------ RUNDA 7
+## (2b) TERASELE ANDENE PE TALUZ — ce a cerut criticul orb, cuvant cu cuvant.
+##
+## Verdictul rundei 6: «Lipseste GOLUL. [...] zidul e o singura panglica
+## subtire de ~1.5m, iar de cealalta parte terenul e o pajiste verde perfect
+## neteda care urca continuu spre orizont: nicio cadere, niciun etaj, niciun
+## gol.»
+##
+## Am masurat premisa inainte sa construiesc (`--lat`, pas de 1 m, cote fata de
+## sosea pe partea golului):
+##
+##   frac 0.9400  half 6.00
+##     lateral:  4     5     6     7     8  |  9    10    11    12    13    14
+##     cota:   -1.7  -1.9  -2.1  -2.3  -2.5 | -3.7 -4.9  -6.1  -7.4  -8.6  -9.8
+##     lateral: 15    16   17..30
+##     cota:  -11.1 -12.3  -12.3 (podea plata)
+##
+## Deci CADEREA EXISTA IN TEREN si e mare: **12,3 m**, pe banda 9-16 m lateral,
+## adica 8,6 m de cadere pe 7 m de orizontala = **51 de grade**. Criticul nu se
+## inseala insa: 51 de grade de IARBA NETEDA, fara nimic pe ea care sa dea
+## scara sau muchie, se citeste ca o pajiste. Nu are nici macar o umbra proprie
+## — de aia „umbra lunga din stanga nu are niciun caster".
+##
+## Asta e reparabil strict in decor, si exact asa cum a spus el: terasele sunt
+## decor lateral. Trei etaje de zidarie pe taluz, fiecare cu fata pe verticala
+## si cu banda de iarba deasupra ei, transforma panta neteda in trepte care
+## arunca umbre si dau scara. Sub ele, pe podeaua de la -12,3 m, bolovani: de
+## acolo in jos e piatra, nu pajiste.
+##
+## DE CE MERGE AICI SI NU A MERS LA ZIDUL DE SPRIJIN (runda 4, nota din
+## `_place_wall`). Zidul de sprijin e pe MUCHIE si paralel cu o sosea dreapta,
+## deci camera il vede din cutit (memoria perete-paralel-nu-se-vede). Terasele
+## nu: ele stau la 9-16 m lateral, **sub** nivelul ochiului, deci camera le vede
+## IN PLAN, desfasurate, exact zona care ocupa jumatatea stanga a cadrului in
+## `H_r6_f094.png`. Aceeasi piesa, alt loc, alta vizibilitate — nu contrazice
+## runda 4, o completeaza.
+##
+## Geometria unui etaj: fata de piatra e VERTICALA (cursuri stivuite la acelasi
+## `mid`, ca la POI G), inalta cat `TERR_RISE`; urmatorul etaj se retrage spre
+## exterior cu `TERR_RUN`, deci profilul e scara, nu panta. Retragerea se alege
+## din panta reala (51 grade => rise/run = 1,23), ca terasele sa urmeze taluzul
+## in loc sa iasa din el sau sa se ingroape.
+## ------------------------------------------------------------------ RUNDA 7
+## (2b) TERASELE ANDENE PE TALUZ — ce a cerut criticul orb, cuvant cu cuvant.
+##
+## Verdictul rundei 6: «Lipseste GOLUL. [...] zidul e o singura panglica subtire
+## de ~1.5m, iar de cealalta parte terenul e o pajiste verde perfect neteda care
+## urca continuu spre orizont: nicio cadere, niciun etaj, niciun gol.»
+##
+## CADEREA EXISTA IN TEREN, masurata cu `--lat` (pas de 1 m, cote fata de sosea,
+## partea golului, frac 0,9400):
+##
+##   lateral:  4     5     6     7     8  |  9    10    11    12    13    14
+##   cota:   -1,7  -1,9  -2,1  -2,3  -2,5 | -3,7 -4,9  -6,1  -7,4  -8,6  -9,8
+##   lateral: 15    16   17..30
+##   cota:  -11,1 -12,3  -12,3 (podea plata)
+##
+## 12,3 m de cadere pe banda 9-16 m, adica **51 de grade**. Criticul nu se
+## insala totusi: 51 de grade de IARBA NETEDA, fara nimic pe ea care sa dea
+## scara sau muchie, se citesc ca pajiste.
+##
+## DOUA INCERCARI GRESITE, si de ce — amandoua masurate, nu ghicite.
+##
+## 7a: 51 de fete pe banda 9,5-14,3 m, cu coama la `teren + 0,55`. Captura
+##     `H_r7_f0935.png`: niciuna vizibila. Cauza, calculata pe .tscn: coama la
+##     -3,02 peste un teren de -3,70 inseamna ca din piesa de 2,487 m ies
+##     **0,68 m, adica 27 %**. O dunga de piatra pe 12 m de verde nu e o terasa.
+##     Nu erau ratate — erau prea putin expuse ca sa existe.
+##
+## 7b: terasele mutate pe MUCHIE, in fereastra 0-4,5 m, fiindca un prim calcul
+##     al ocluziei (unghiul catre fiecare punct, de pe ax) parea sa spuna ca
+##     umarul de la 4 m ascunde tot ce e dincolo. Captura `H_r7b_f0935.png`:
+##     tot nimic, si 35 de fete din 61 refuzate ca ingropate.
+##     Calculul era gresit, si merita scris de ce ca sa nu-l refac: comparasem
+##     unghiul catre un punct lateral cu unghiul catre umar masurat **lateral**,
+##     nu **pe aceeasi raza azimutala**. Refacut corect (raza care pleaca din
+##     camera catre punct intalneste linia umarului la distanta 4/sin(azimut)),
+##     banda 9-16 m e **vizibila la orice distanta inainte**: la 20 m in fata,
+##     punctul de la lat 12 e la 23,2 grade sub orizontala iar umarul pe aceeasi
+##     raza la 28,9 — deci raza trece pe deasupra. Umarul nu ascunde nimic.
+##     (Memoria umarul-ingust-ascunde-caderea cere sa verifici UNGHIUL; cere si
+##     sa-l verifici pe directia corecta.)
+##
+## DECI 7c: terasele se intorc pe taluz, unde 7a le pusese, dar cu cifra care
+## le face sa se vada. Expunerea unei fete = cat coboara terenul intre lateralul
+## ei si piciorul ei, adica `teren(L) - teren(L + run)`. Masurat pe profil:
+##
+##   run = 1,5 m -> expunere 1,80-1,90 m
+##   run = 2,0 m -> expunere **2,40-2,50 m**  (= toata piesa de 2,487)
+##   run = 2,5 m -> expunere 3,00-3,10 m (mai mult decat piesa: ar ramane gol)
+##
+## `run = 2,0` e singurul care expune fata INTREAGA fara sa lase gol sub ea.
+## Coama fiecarui etaj se ia din terenul de la lateralul lui (raycast pe
+## TerrainBody, memoria terrain-mesh-y-extrapoleaza), talpa la coama - 2,487,
+## si piciorul cade exact pe terenul de la L + 2,0. Rezultat: o scara de piatra
+## de 5 etaje care coboara din umarul drumului pana pe podeaua rapei — etaje cu
+## fasie de iarba intre ele, exact cum arata bara.
+const TERR_LEVELS := 4
+const TERR_RISE := 2.487
+## Retragerea per etaj. 1,6 m (runda 8) lipea etajele intre ele si impreuna cu
+## zidul de sprijin citeau ca o singura masa bej — in bara treptele sunt
+## SEPARATE, cu o fasie de iarba pe fiecare. La 2,6 m retragere si 1,2 m cadere
+## treapta are 1,4 m de banda orizontala descoperita intre coama unui etaj si
+## fata urmatorului: destul cat sa se vada iarba dintre ele.
+const TERR_RUN := 2.6            # retragerea per etaj
+## Caderea coamei per etaj si cat de jos fata de sosea mai e vizibil un etaj.
+const TERR_DROP := 1.2
+const TERR_VIS_DEPTH := 3.9
+const TERR_LAT0 := 7.8           # primul etaj, imediat dupa zidul de sprijin
+const TERR_STEP := 4.6
+const TERR_F_IN := 0.9285
+const TERR_F_OUT := 0.9620
+
+func _terraces() -> void:
+	var n := _track.baked.size()
+	var placed := 0
+	var refuzate := 0
+	var expuneri: Array[float] = []
+	_lvl_ok.resize(TERR_LEVELS)
+	_lvl_no.resize(TERR_LEVELS)
+	_lvl_ok.fill(0)
+	_lvl_no.fill(0)
+	for lvl in TERR_LEVELS:
+		var lat: float = TERR_LAT0 + float(lvl) * TERR_RUN
+		var f := TERR_F_IN
+		while f < TERR_F_OUT:
+			var i := int(f * float(n)) % n
+			var sgn := _gap_side(i)
+			var p := _track.baked[i]
+			var side := _track._side_at(i) * sgn
+			var q := p + side * lat
+			var g := _sol_real(q.x, q.z)
+			var qf := p + side * (lat + TERR_RUN)
+			var foot: float = _sol_real(qf.x, qf.z)
+			var expunere: float = g - foot
+			# Garzile: (a) sub etaj trebuie sa fie cadere reala, altfel e o
+			# bordura pe camp; (b) coama sub cota soselei, altfel e damb pe umar.
+			if expunere < 0.35:
+				refuzate += 1
+				_lvl_no[lvl] += 1
+				if _lvl_no[lvl] == 1:
+					print("; etaj %d refuz la frac %.4f: lat %.1f, g %.2f, foot %.2f, expunere %.2f, sosea %.2f" % [
+						lvl, f, lat, g, foot, expunere, p.y])
+				f += _step(TERR_STEP)
+				continue
+			var tang := (_track.baked[(i + 2) % n] - _track.baked[(i - 2 + n) % n])
+			tang.y = 0.0
+			if tang.length() < 0.01:
+				f += _step(TERR_STEP)
+				continue
+			tang = tang.normalized()
+			var yaw := atan2(-tang.z, tang.x)
+			# COAMA — aici a fost bug-ul rundei 7c, si merita numit.
+			#
+			# Calculasem corect `expunere` = cat coboara terenul intre lateralul
+			# fetei si piciorul ei (2,07 m in medie), dar apoi asezasem coama la
+			# `g + 0,30`, adica la 30 cm peste terenul de sub ea. Din piesa de
+			# 2,487 m ieseau deci 30 cm, restul stand ingropat in taluz — a
+			# treia oara la rand cand asez terase care exista in .tscn si nu se
+			# vad in captura (`H_r7c_f0950.png`: panta e verde curat).
+			# Cifra buna o aveam masurata si nu o foloseam.
+			#
+			# Corect: coama se ridica fata de terenul de la PICIORUL fetei, nu de
+			# la capul ei. Talpa cade pe `foot`, coama la `foot + RISE`, deci
+			# fata sta INTREAGA peste taluz si se vede de sus pana jos. Cand
+			# expunerea e mai mica decat piesa, diferenta se ingroapa in spate —
+			# unde nu o vede nimeni — nu in fata.
+			# COAMA — cifra care a decis toata runda, gasita prin experiment.
+			#
+			# Trei versiuni au asezat terase corecte pe hartie si invizibile in
+			# captura (7a coama la teren+0,55; 7c la teren+0,30; 7d la
+			# picior+RISE). De fiecare data cele 76 de fete erau in .tscn, peste
+			# sol, cu expunere calculata de 2,07 m — si panta ramanea verde.
+			#
+			# Experimentul care a taiat nodul (`--terr-test`, captura
+			# `H_test2_f0945.png`): aceleasi piese, acelasi lateral, acelasi
+			# numar, doar cu coama fortata la cota SOSELEI minus un pas mic. Au
+			# aparut toate patru etajele, instantaneu. Deci nu era nici cull,
+			# nici origine, nici ingropare: era ocluzie.
+			#
+			# Plimbarea razei pe teren o spune exact: din camera de joc (2,6 m
+			# peste sosea), umarul propriu al drumului ridica linia de vedere,
+			# si tot ce are coama sub ~1 m fata de cota soselei cade in spatele
+			# lui. Caderea de 12,3 m EXISTA in teren, dar soferul nu poate privi
+			# in ea — memoria umarul-ingust-ascunde-caderea, in forma ei tare:
+			# nu conteaza cat de adanca e prapastia, ci sub ce unghi o vezi.
+			#
+			# Deci scara nu coboara in rapa, ci pe fereastra care se vede: patru
+			# etaje intre cota soselei si -3,6 m, cu treapta de 1,2 m. Fiecare
+			# etaj are coama peste umar, deci fata lui se vede intreaga, si
+			# impreuna citesc drept terase andene care coboara catre gol — ceea
+			# ce a cerut criticul — in loc sa fie zidarie ascunsa in iarba.
+			# Sub ultimul etaj terenul isi continua caderea reala de 12,3 m:
+			# terasele nu inlocuiesc prapastia, ii dau muchia de sus vizibila.
+			var top: float = p.y - 0.25 - float(lvl) * TERR_DROP
+			# Garda de ocluzie: daca un etaj ar cadea prea jos fata de sosea, nu
+			# se vede si nu se aseaza (mai bine trei etaje vizibile decat cinci
+			# din care doua sunt geometrie moarta).
+			if p.y - top > TERR_VIS_DEPTH:
+				refuzate += 1
+				_lvl_no[lvl] += 1
+				f += _step(TERR_STEP)
+				continue
+			expuneri.append(expunere)
+			_raw("inca_wall_b", "terasa", Vector3(q.x, top - TERR_RISE, q.z),
+				yaw, 1.0, "none")
+			placed += 1
+			_lvl_ok[lvl] += 1
+			f += _step(TERR_STEP * WALL_OVERLAP)
+	for lvl in TERR_LEVELS:
+		print("; etaj %d la lat %.1f m: %d asezate, %d refuzate" % [
+			lvl, TERR_LAT0 + float(lvl) * TERR_RUN, _lvl_ok[lvl], _lvl_no[lvl]])
+	var med := 0.0
+	for e in expuneri:
+		med += e
+	if expuneri.size() > 0:
+		med /= float(expuneri.size())
+	print("; terase andene: %d fete asezate, %d refuzate, expunere medie %.2f m (piesa 2,49)" % [
+		placed, refuzate, med])
+	# Grohotisul pe podeaua rapei, sub ultimul etaj: de acolo in jos e piatra,
+	# nu pajiste. `moss_boulder` are muschi doar pe fata de sus, deci vazut de
+	# sus citeste verde — de aia se pun INCLINATI (pitch), ca sa arate flancul
+	# de piatra catre camera.
+	var fb := TERR_F_IN
+	while fb < TERR_F_OUT:
+		var i := int(fb * float(n)) % n
+		var sgn := _gap_side(i)
+		var half := _track.width_at_index(i)
+		for j in 3:
+			var lat: float = _rng.randf_range(18.0, 24.0)
+			var mdl := "moss_boulder_c" if j == 0 else "moss_boulder_b"
+			var h := _rng.randf_range(2.8, 4.0) if j == 0 				else _rng.randf_range(1.6, 2.4)
+			_place(mdl, "grohotis", fb + _step(_rng.randf_range(-3.5, 3.5)),
+				sgn, maxf(1.0, lat - half), _rng.randf_range(0.0, TAU),
+				_scale_for(mdl, h), "none", -0.4,
+				_rng.randf_range(-0.5, -0.2))
+		fb += _step(10.0)
+
 
 func _gap_lip() -> void:
 	var n := _track.baked.size()

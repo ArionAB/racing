@@ -86,6 +86,7 @@ const RES := {
 	"inca_wall_b": "s_inca_wall_b",
 	"inca_wall_c": "s_inca_wall_c",
 	"trail_marker": "s_trail_marker",
+	"gorge_far_wall": "s_gorge_far_wall",
 }
 
 ## Inaltimea AABB masurata (docs/asset_briefs/machu_picchu_masuratori.md §1).
@@ -97,6 +98,7 @@ const HEIGHT := {
 	"inca_house_b": 2.833,
 	"inca_wall_a": 2.487, "inca_wall_b": 2.487, "inca_wall_c": 2.432,
 	"trail_marker": 1.200,
+	"gorge_far_wall": 75.393,
 }
 const BASE_R := {
 	"moss_boulder_a": 0.37, "moss_boulder_b": 0.94, "moss_boulder_c": 1.73,
@@ -105,6 +107,7 @@ const BASE_R := {
 	"inca_house_b": 3.64,
 	"inca_wall_a": 2.03, "inca_wall_b": 3.02, "inca_wall_c": 1.06,
 	"trail_marker": 0.29,
+	"gorge_far_wall": 97.42,
 }
 const TRI := {
 	"moss_boulder_a": 200, "moss_boulder_b": 242, "moss_boulder_c": 238,
@@ -113,6 +116,7 @@ const TRI := {
 	"inca_house_b": 496,
 	"inca_wall_a": 208, "inca_wall_b": 296, "inca_wall_c": 152,
 	"trail_marker": 76,
+	"gorge_far_wall": 1706,
 }
 
 ## GEOMETRIA LOCULUI, toata din survey — nu din brief si nu din ochi.
@@ -284,6 +288,7 @@ func _build() -> void:
 	_spuma()
 	_bolovani_albie()
 	_pereti()
+	_pereti_flanc()
 	_coame()
 	_capete_pod()
 
@@ -720,6 +725,106 @@ func _capete_pod() -> void:
 	_model_flock("E_AncorajPod", RES["moss_boulder_c"], pos, yaw, sc3,
 		56300, "inca_stone")
 	print("; ancoraj pod: %d bolovani la cele doua capete" % pos.size())
+
+
+## ============================================================
+## PERETII DE FLANC — RUNDA 4. De ce n-a mers cornisa, si ce e de fapt.
+## ============================================================
+## Verdictul orb al rundei 4: „nu exista gol sub tablier; terenul trece
+## continuu pe sub scanduri (iarba verde la ~2 m sub tablier)".
+##
+## CIFRA DIN VERDICT E FALSA, masurata inainte sa ating ceva (tools/SvMpE4.tscn,
+## raza filtrata pe RID-ul lui TerrainBody — sub tablier stau Plate*/
+## AnimatableBody3D si ar raporta „gol 0"):
+##
+##   x=+34 sol -32.13  gol 12.13 m        x=+17..-5 sol -40.30  gol 20.30 m
+##   x=+31 sol -33.65  gol 13.65 m        podea plata la -40.30 pe TOT
+##   x=+26 sol -36.23  gol 16.23 m        intervalul dz = -40..+40
+##
+## Nicaieri „iarba la 2 m". Golul cerut de brief (20 m) e acolo.
+##
+## DAR OCHIUL NU-L VEDE, si runda 4 a aflat DE CE — printr-o incercare care a
+## esuat masurat. Am pus intai o CORNISA: 101 blocuri inalte pe muchia
+## bazinului. Rezultatul, numarat pe pozitiile emise:
+##
+##   blocuri 101 | x -58.8..42.8 | z -214.3..-100.1
+##   pe buza de langa tablier (|z+155|<25, 10<x<36): **0**
+##
+## Zero. Si asta a aratat forma adevarata a locului. Profilul din sectiunea A a
+## lui SvMpE4 e IDENTIC pe toate feliile de la dz=0 la dz=+-40:
+##
+##   x  +34 -> +31 : 28.1 grade      x  +20 -> +14 :  6.7 grade
+##   x  +31 -> +26 : 26.6 grade      x  +14 ->  -6 :  0.0 grade (podea plata)
+##   x  +26 -> +20 : 29.5 grade
+##
+## Terenul nu depinde de z. Nu e un BAZIN si nu e o CRAPATURA: e un JGHEAB
+## invariant pe Z, care coboara 26-29 de grade de-a lungul lui X — adica in
+## LUNGUL directiei de mers. Ravena 2 din `custom_ravines` (0.5269-0.5834,
+## podea -40) are latimea 60 m si merge PARALEL cu drumul.
+##
+## De aici tot: un defileu se citeste fiindca ii vezi cei doi pereti din
+## profil, stanga si dreapta. Aici peretii sunt in FATA si in SPATE — cobori in
+## vale si urci pe partea cealalta — iar lateral, exact unde se uita soferul de
+## pe tablier, e podea plata pe +-40 m. De asta fiecare captura arata un plan
+## continuu: iarba, albie cenusie, iarba. Criticul descrie corect ce vede;
+## numai cota din verdict e gresita.
+##
+## CE FAC, si e chiar ce cere verdictul („pereti destul de abrupti ca sa
+## citeasca drept stanca"): dau tablierului DOI PERETI DE FLANC, pe Z, cate
+## unul de fiecare parte a podului. Piesa e `gorge_far_wall` — 196 x 75.4 x
+## 92 m, facuta exact pentru asta si deja folosita de POI H, colizor `none`,
+## deci nu atinge banda. Sloturile ei (2,3,12,21,28,29) sunt aceeasi familie de
+## piatra ca restul zonei.
+##
+## Peretele se aseaza cu COAMA la cota buzei si talpa in podea, la ~26 m
+## lateral de axa tablierului — destul de aproape ca sa umple cadrul din chase
+## cam, destul de departe ca sa nu ascunda podul. Doi pereti, nu patru: in bara
+## defileul are exact doi.
+## RUNDA 4b, masurata pe captura (E_r4b_0.548.png): la 26 m si coama -20.5
+## peretii INCHIDEAU cadrul — ascundeau raul, iar cel din dreapta taia turnul
+## de ancoraj. Defileul citea, dar podul nu mai avea unde sa plece de pe mal.
+## Impinsi la 38 m si coborati la -24.5: fata verticala ramane in cadru pe
+## toata lungimea tablierului, dar albia si turnurile se vad printre ei.
+## RUNDA 4c, tot pe captura: la 38 m / -24.5 defileul CITESTE (E_r4c_0.540.png
+## arata podul peste o fanta cu pereti de piatra si albia vizibila dedesubt).
+## A ramas insa ca la coama peretii sunt PLATFORME plate care stau PESTE
+## pajiste — slab pus pe gazon, nu gazon taiat. Coama urca la -21.8, adica
+## peste cota terenului de deasupra (-20.0 la buza, dar versantul de la 38 m
+## lateral e mai sus). Coborata la -27.5: fata ramane la fel de inalta in
+## cadru (12,8 m de perete), dar capacul intra sub linia ierbii si muchia de
+## sus devine muchia TERENULUI, nu a piesei.
+const FLANC_DZ := 38.0        # departarea laterala a fetei, de la axa podului
+const FLANC_COAMA := -27.5    # cota coamei, sub linia ierbii de deasupra
+
+
+func _pereti_flanc() -> void:
+	var pos: PackedVector3Array = []
+	var yaw: PackedFloat32Array = []
+	var sc3: Array[Vector3] = []
+	# Scara: piesa are 75.393 m inaltime si 196 m lungime. Vreau un perete de
+	# ~20 m inaltime (de la podea -40.30 la coama -20.5) si ~120 m lungime, ca
+	# sa tina tot cadrul de-a lungul tablierului.
+	var h_vrut := FLANC_COAMA - PODEA_Y      # 19.8 m
+	var sy := h_vrut / float(HEIGHT["gorge_far_wall"])
+	var sx := 120.0 / 196.0
+	var sz := 0.34
+	for side: float in [1.0, -1.0]:
+		var z := POD_Z + side * FLANC_DZ
+		# Centrul peretelui pe X: la mijlocul deschiderii tablierului.
+		var x := (POD_X_NEAR + POD_X_FAR) * 0.5
+		# Fata verticala priveste SPRE pod. Piesa e lunga pe X, deci yaw 0 o
+		# lasa asa; partea dinspre pod se alege intorcand-o cu PI pe -Z.
+		var rot: float = 0.0 if side > 0.0 else PI
+		# Talpa in podea, coama la FLANC_COAMA: originea piesei e la baza
+		# (origin="base" pe kitul asta — vezi origin-base-ridica-tot-obiectul),
+		# deci se aseaza la cota podelei.
+		pos.append(Vector3(x, PODEA_Y - 1.2, z))
+		yaw.append(rot)
+		sc3.append(Vector3(sx, sy, sz))
+	_model_flock("E_PereteFlanc", RES["gorge_far_wall"], pos, yaw, sc3,
+		56400, "inca_stone")
+	print("; pereti de flanc: %d, coama %.1f, talpa %.1f, la +-%.0f m de axa" % [
+		pos.size(), FLANC_COAMA, PODEA_Y, FLANC_DZ])
 
 
 ## ============================================================

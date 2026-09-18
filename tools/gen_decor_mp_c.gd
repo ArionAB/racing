@@ -39,7 +39,42 @@ extends Node
 ## ------------------------------------------------------------------------
 ## SURVEY (se completeaza dupa prima rulare cu --survey)
 ##
-## <<SURVEY>>
+## SURVEY (runda 1, --survey, C_r1_survey_cornisa.txt). Traseu 1986,4 m pe 1111
+## puncte. Soare: rot (-40, 45, 0), lumina spre (-0,54, -0,64, -0,54),
+## elevatie 40 grade. Semi-latime 6,5 pe tot 0,22-0,3627, apoi scade la 6,0.
+##
+## 1. CREASTA, DUPA REPARATIA DE TEREN (commit "rapa 1 devine cornisa").
+##    Unghiul caderii pe primii 3 m de la muchie, cele doua parti:
+##      frac    ungh(-1)  ungh(+1)   cadere la 3 m: -1 / +1
+##      0,2250    0,0       82,7      -0,3 / -50,4
+##      0,2400   54,1       74,9      -5,2 / -32,8
+##      0,2500   69,2       80,5     -10,1 / -38,5
+##      0,3000   69,2       73,6      -8,9 / -31,3
+##      0,3300   43,4       79,4     -10,2 / -18,1
+##      0,3500   46,0       79,8      -8,5 / -22,7
+##      0,3550   15,8       71,2      -3,6 /  -9,9
+##    Deci: gol de AMBELE parti pe 0,235-0,352. Pe 0,22-0,232 partea -1 e
+##    inca platou (saua Portii Soarelui) — acolo se pune poarta, si e corect:
+##    o poarta sta pe sa, nu pe muchie.
+##
+## 2. CE A ARATAT CAPTURA CA NU ARATA CIFRA (docs/bara_vizuala.md, regula zero).
+##    Cu unghiul reparat de la 0-28 la 36-70 grade, capturile C_r1_cornisa_*
+##    sunt aproape identice cu C_r0_gol_*: caderea din stanga TOT nu se vede.
+##    Motivul, citit din imagine: pe partea +1 taietura se citeste fiindca
+##    are ALTA CULOARE decat iarba (fata de pamant portocalie); pe partea -1
+##    fata taiata prinde umbra si ramane VERDE, deci ochiul o citeste ca pe o
+##    coasta, nu ca pe o muchie. Din masina, la 10 m inaltime si privind
+##    INAINTE (memoria masoara-inainte-nu-langa), buza apropiata e sub cadru,
+##    iar fata departata e scurtata de perspectiva.
+##    Consecinta pentru decor: muchia trebuie MARCATA cu materie, nu cu
+##    geometrie. Un sir de piatra pe buza da linia pe care terenul se termina,
+##    si dincolo de ea nu mai e nimic — exact ce face bara cu zidul ei.
+##
+## 3. UNDE STA POARTA. La 0,2250 curbura e +0,0043 (raza 233 m, practic
+##    dreapta) — golul masurat al lui inti_punku e 13,98 m pe axa drumului,
+##    iar drumul are semi-latime 6,5 (deci 13,0 m). Marja e 0,98 m TOTAL,
+##    adica 0,49 m pe parte: poarta nu suporta nici rotatie, nici curbura.
+##    De aia se aseaza pe tangenta locala, la un punct cu raza peste 200 m.
 
 const TRACK := "res://scenes/tracks/Track15.tscn"
 const ZONE := "DecorManual/ZoneC_PoartaSoarelui"
@@ -113,6 +148,13 @@ const TRI := {
 
 const EDGE_KEEP := 0.8
 const WALL_HALF_THICK := 0.43
+## Cat poate sta o piesa sub cota soselei de alaturi inainte sa fie refuzata.
+## 2,5 m: pe umarul real terenul coboara 0,3-2,2 m (survey, coloana -3 pe
+## portiunile fara rapa), deci 2,5 acopera umarul cinstit; peretele cornisei
+## trece instant de el (-8..-15 m la 3 m de muchie). Piesele care TREBUIE sa
+## stea jos — coroanele de sub buza — nu trec pe aici, au propria lor cale
+## (`_below_lip`), fiindca acolo cota joasa e chiar scopul.
+const DROP_REJECT := 2.5
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -127,6 +169,9 @@ var _rng := RandomNumberGenerator.new()
 var _out_path := ""
 var _survey_only := false
 var _total_len := 1.0
+## Cand e adevarat, `_place` lasa piesa sa stea sub cota drumului (coroanele de
+## pe fata rapei). Vezi `DROP_REJECT`.
+var _below_lip := false
 
 
 func _ready() -> void:
@@ -226,34 +271,471 @@ func _find_sun(node: Node) -> DirectionalLight3D:
 
 
 # ------------------------------------------------------------------ compozitia
-# (se completeaza dupa survey)
+
+## (1) POARTA SOARELUI. Contractul de gameplay al POI-ului: golul MASURAT e
+## 13,98 m pe axa drumului (masuratori §3, confirmat) si drumul are semi-latime
+## 6,5 acolo, adica 13,0 m de asfalt. Marja totala e 0,98 m — 0,49 m pe parte.
+##
+## Trei consecinte, toate din cifra asta:
+##  a. Poarta se aseaza pe TANGENTA locala, nu pe o directie aleasa: 1 grad de
+##     eroare pe o piesa de 25,19 m anvergura misca un uscior cu 0,22 m, adica
+##     jumatate din marja.
+##  b. Se pune unde drumul e DREPT. La 0,2250 curbura e +0,0043 (raza 233 m):
+##     pe cei 5 m de grosime ai portii drumul se abate 0,05 m. La 0,2450
+##     (curbura +0,0290, raza 34 m) abaterea ar fi 0,37 m — trei sferturi din
+##     marja, doar din curba.
+##  c. Scara ramane 1,0. `inti_punku` e livrat exact pe contract; orice scalare
+##     sub 1 strange golul proportional (0,98 scara = 13,70 m gol, adica marja
+##     se injumatateste) si peste 1 ridica buiandrugul degeaba.
+##
+## Coliziunea e `mesh` (PROP_COLLISION, fundatia): un hull peste o poarta e un
+## bloc plin de 25,19 x 5,00 m fix peste drum.
+const GATE_FRAC := 0.2250
 
 func _gate() -> void:
-	pass
+	var n := _track.baked.size()
+	var i := int(GATE_FRAC * float(n)) % n
+	var p := _track.baked[i]
+	# Tangenta pe o baza lunga (±4 puncte ≈ ±7 m): pe o baza scurta zgomotul
+	# punctelor coapte ar roti poarta cu zecimi de grad degeaba.
+	var tang := _track.baked[(i + 4) % n] - _track.baked[(i - 4 + n) % n]
+	tang.y = 0.0
+	tang = tang.normalized()
+	# Piesa isi are anvergura pe X local, deci +X trebuie sa cada pe LATERAL,
+	# nu pe tangenta: poarta sta DE-A CURMEZISUL drumului.
+	var side := Vector3(-tang.z, 0.0, tang.x)
+	var yaw := atan2(-side.z, side.x)
+	_raw("inti_punku", "poartaSoarelui", Vector3(p.x, p.y, p.z), yaw, 1.0, "mesh")
+	print("; poarta la frac %.4f, curbura %+.4f (raza %.0f m), drum de %.1f m" % [
+		GATE_FRAC, _curv(i), 1.0 / maxf(absf(_curv(i)), 1e-6),
+		2.0 * _track.width_at_index(i)])
+	# Zidaria care leaga poarta de creasta: cate o aripa scurta pe fiecare parte,
+	# care porneste din uscior si se stinge in versant. Fara ele poarta sta ca un
+	# arc de triumf in camp — in bara poarta e CAPATUL unui zid, nu un obiect
+	# izolat. Piesele se lipesc cap la cap (capete la ±3,00 exact).
+	# RUNDA 1 A GRESIT AICI, si probe_manual a dat cifra: aripaPoarta4 plutea
+	# 38,51 m, aripaPoarta5 68,32 m. `clampf(gy, p.y - 2.0, ...)` le ridica la
+	# cota soselei cand solul era la -11 si -41 — adica exact pe partea +1, unde
+	# la 0,225 faleza cade cu 82,7 grade CHIAR de la muchie (survey).
+	#
+	# O aripa de zid porneste din uscior si se stinge in versant; daca nu exista
+	# versant, nu exista aripa. Deci nu se mai ridica nimic: se pune piesa doar
+	# unde terenul chiar o tine, si pe partea falezei poarta ramane cu usciorul
+	# in gol — ceea ce e adevarul geometric al locului si arata mai bine decat
+	# un zid suspendat.
+	for sg: float in [-1.0, 1.0]:
+		for k in 2:
+			# Prima piesa incepe dincolo de uscior (6,99 = jumatatea golului
+			# masurat), apoi se inlantuie spre exterior.
+			var lat := 6.99 + 3.0 + 6.0 * float(k)
+			var q := p + side * sg * lat
+			var gy := _sol_real(q.x, q.z)
+			if p.y - gy > DROP_REJECT:
+				_skipped += 1
+				continue
+			_raw("inca_wall_b", "aripaPoarta", Vector3(q.x, gy, q.z), yaw, 1.0,
+				"hull" if k == 0 else "none")
 
+
+## (2) CONDORUL PE STANCA. Al doilea semnal al barei, si singurul obiect din POI
+## care e pura silueta: negru (VOLCANIC_BLACK 20) pe cer.
+##
+## Brief §2.0: "Condorul nu zboara. Sta pe stanca, la 2 m, langa Poarta
+## Soarelui." Actiunile Open/Close ale GLB-ului nu au declansator in cod, deci
+## piesa se ASEAZA, nu se animeaza.
+##
+## Unde: pe partea +1 (faleza, 82,7 grade la 0,225), imediat dupa poarta, pe un
+## `moss_boulder_c` care ii tine loc de stanca. Perechea stanca+condor se pune
+## ca UN GRUP.
+##
+## Scara condorului: piesa are 1,156 m inaltime si 1,36 m anvergura in AABB. La
+## scara de jucarie a pistei se pune la 2,2 m inaltime, deci scara 1,90 —
+## anvergura iese 2,58 m, adica o silueta care se citeste de la 30-40 m.
+const CONDOR_FRAC := 0.2320
 
 func _condor_rock() -> void:
-	pass
+	var n := _track.baked.size()
+	var i := int(CONDOR_FRAC * float(n)) % n
+	var p := _track.baked[i]
+	var side := _track._side_at(i)
+	var half := _track.width_at_index(i)
+	# Stanca sta pe umarul dinspre faleza, la 2,5 m de muchie: destul cat sa nu
+	# fie obstacol (hull-ul lui moss_boulder_c are raza 2,11 la scara 1), destul
+	# de aproape cat condorul de deasupra sa fie in cadru cand treci poarta.
+	# DOUA RUNDE GRESITE AICI, si a doua a fost mai rea decat prima.
+	#
+	# r1a: stanca la 2,5 m dincolo de muchie a cazut pe podeaua rapei — print-ul
+	#      a dat "cota -7.3, -35.3 m peste drum". Pe cornisa, buza e la 0,5 m de
+	#      asfalt, deci la 2,5 m afara `_sol_real` raspunde PERETELE.
+	# r1b: "reparatia" a fost `maxf(_sol_real, p.y - 0.5)` — adica ridic piesa la
+	#      cota drumului. probe_manual: "stancaCondor6 PLUTESTE 59,44 m,
+	#      condor7 PLUTESTE 62,05". Am mutat defectul din "ingropat" in
+	#      "suspendat", ceea ce e mai rau: ingropat nu se vede, suspendat da.
+	#
+	# Lectia, in forma refolosibila: cota nu se CORECTEAZA, se CAUTA un loc unde
+	# cota e buna. Stanca condorului trebuie sa fie pe muchie si pe teren solid,
+	# deci se plimba departarea de la 0,6 m in afara spre interior si se ia
+	# prima pozitie la care terenul chiar tine piesa.
+	# A TREIA OARA PE MASURATOARE, nu pe presupunere. `probe_mp_c_condor.gd` a
+	# taiat profilul fin al umarului la 0,2320, partea +1 (cote fata de sosea):
+	#
+	#   offset fata de muchie:  -2,0   -1,0   -0,5    0,0   +0,5   +1,0   +2,0
+	#   cota:                  -1,68  -1,77  -1,82  -1,86  -4,18  -8,17 -16,14
+	#
+	# Adica: teren solid la -1,86 m pana FIX pe muchie, si prapastie imediat
+	# dupa. Buza e latimea unui prag, nu a unui umar. Cautarea de la 2,5 m in
+	# afara nu avea cum sa gaseasca nimic, fiindca acolo nu E nimic — de aia a
+	# refuzat piesa cu totul.
+	#
+	# Deci stanca se aseaza CU CENTRUL pe muchie: raza hull-ului (2,11 m) intra
+	# spre umar, iar silueta iese peste gol — exact ce arata bara, unde stanca
+	# condorului e un pinten care se desprinde din creasta.
+	var rock_scl := 1.0
+	var q := p + side * half
+	var gy := _sol_real(q.x, q.z)
+	if p.y - gy > 3.0:
+		print("; ATENTIE: buza de la %.4f nu mai tine stanca (%.1f m sub drum)" % [
+			CONDOR_FRAC, p.y - gy])
+		return
+	_raw("moss_boulder_c", "stancaCondor", Vector3(q.x, gy, q.z),
+		_rng.randf_range(0.0, TAU), rock_scl, "hull")
+	# Condorul pe capac. Inaltimea bolovanului e 3,069 la scara 1; capacul e usor
+	# mai jos decat AABB-ul (forma e rotunjita), deci 0,85 din inaltime.
+	var condor_scl := _scale_for("condor", 2.2)
+	var top := gy + 3.069 * rock_scl * 0.85
+	# Privirea: spre drum, adica spre ax. Asa aripile se vad desfacute din fata,
+	# nu din spate, cand treci pe langa el.
+	var to_road := (p - q)
+	to_road.y = 0.0
+	to_road = to_road.normalized()
+	var yaw := atan2(-to_road.z, to_road.x)
+	_raw("condor", "condor", Vector3(q.x, top, q.z), yaw, condor_scl, "none")
+	print("; condor la frac %.4f, cota %.1f (%.1f m peste drum), scara %.2f" % [
+		CONDOR_FRAC, top, top - p.y, condor_scl])
 
+
+## (3) CASA PAZNICULUI la 0,33 — cadrul pozei clasice (brief §2, tabelul POI).
+##
+## De ce pe -1 si nu pe +1: la 0,33 partea -1 e cea care da spre terase si spre
+## Huayna Picchu, adica exact directia in care priveste soferul cand casa e in
+## cadru. O casa pe partea falezei ar sta cu spatele la priveliste.
+##
+## Scara 0,85: la 7,878 m casa ar fi cu 2 m mai inalta decat poarta de 5 m si ar
+## domina creasta; brief-ul o descrie ca o casa mica cu acoperis de paie, iar in
+## bara e vizibil mai mica decat poarta. 0,85 -> 6,70 m.
+const GUARD_FRAC := 0.3300
 
 func _guardhouse() -> void:
-	pass
+	# RUNDA 1 A ALES PARTEA DIN RATIONAMENT, si terenul a contrazis-o. Presupusesem
+	# -1 fiindca "acolo e cetatea"; probe_manual a raspuns "casaPaznic8 PLUTESTE
+	# 5,35 m", iar profilul fin (probe_mp_c_condor.gd, 0,3300) a aratat de ce:
+	#
+	#   offset fata de muchie:  -2,0   -1,0    0,0   +1,0   +2,0
+	#   partea -1:             -4,83  -6,08  -7,33  -8,57  -9,75   <- cade DEJA
+	#   partea +1:             -1,93  -1,98  -2,02  -6,31 -12,22   <- tine pana pe muchie
+	#
+	# Pe partea -1 terenul e cu 4,8 m sub sosea deja la DOI METRI INAINTE de
+	# muchie — acolo nu se poate pune o casa, se poate pune cel mult un copac pe
+	# fata rapei. Casa merge pe +1, unde exista prag.
+	#
+	# Partea nu se mai scrie in cod: se citeste din teren la fiecare rulare, ca
+	# `_downhill_side` la POI G. Daca traseul se redeseneaza, casa se muta singura.
+	var gs := _solid_side(GUARD_FRAC)
+	_place("guardhouse", "casaPaznic", GUARD_FRAC, gs, 0.9,
+		_yaw_to_road(GUARD_FRAC, gs), 0.85, "hull")
+	# O ruina mica alaturi, ca sa nu fie un singur obiect pe creasta: in bara
+	# constructiile vin in grup, nu una singura.
+	var ff := GUARD_FRAC + _step(14.0)
+	var rs := _solid_side(ff)
+	_place("inca_house_b", "ruinaPaznic", ff, rs, 0.9,
+		_yaw_to_road(ff, rs) + 0.4, 1.0, "hull")
 
+
+## Pe ce parte e teren care TINE o cladire la fractia `frac`: cea la care solul
+## de pe muchie e mai aproape de cota soselei. Se masoara PE MUCHIE, fiindca
+## acolo ajunge talpa, nu la 3 m unde masurau garzile de felie.
+func _solid_side(frac: float) -> float:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var p := _track.baked[i]
+	var s := _track._side_at(i)
+	var half := _track.width_at_index(i)
+	var best := -INF
+	var sgn := 1.0
+	for sg: float in [-1.0, 1.0]:
+		var q := p + s * sg * half
+		var y := _sol_real(q.x, q.z)
+		if y > best:
+			best = y
+			sgn = sg
+	return sgn
+
+
+## Yaw-ul care intoarce fata piesei spre drum, de pe partea `sg`.
+func _yaw_to_road(frac: float, sg: float) -> float:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var to_road := -_track._side_at(i) * sg
+	return atan2(-to_road.z, to_road.x)
+
+
+## (4) PUNCTUATIA DE MUCHIE — raspunsul la ce a aratat captura.
+##
+## Nota 2 din survey: unghiul e reparat, dar caderea din stanga tot nu se
+## citeste, fiindca fata taiata ramane verde ca iarba de deasupra. Muchia se
+## marcheaza deci cu MATERIE: pietre de creasta lipite de buza, care dau linia
+## unde terenul se termina.
+##
+## Nu e un zid continuu (aia e semnatura lui G, si brief-ul cere aici
+## PUNCTUATIE). Sunt bolovani si scurte reprize de zidarie, dese unde caderea e
+## mare si absente unde nu e.
+##
+## Pragul: se pune ceva doar unde caderea la 3 m de muchie trece de
+## `LIP_FALL_MIN`. Sub atat nu e muchie, e coasta, si o piatra acolo ar minti.
+const LIP_FALL_MIN := 4.0
+## Cat de des. 9 m: la 31 m/s (viteza masurata de ProbeRace pe felia 0.20-0.30)
+## inseamna o piatra la fiecare 0,3 s — dens cat sa citeasca linie, rar cat sa
+## nu fie gard.
+const LIP_STEP := 9.0
+## Distanta de la MUCHIE la marginea corpului. 0,9 m: peste EDGE_KEEP (0,8), deci
+## nu e obstacol pe umar, si sub 1 m, deci nu ramane iarba intre asfalt si piatra
+## (lectia rundelor 4-7 de la POI G).
+const LIP_GAP := 0.9
 
 func _ridge_punctuation() -> void:
-	pass
+	var n := _track.baked.size()
+	var f := F_IN
+	var k := 0
+	while f < F_OUT:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var half := _track.width_at_index(i)
+		for sg: float in [-1.0, 1.0]:
+			var s := _track._side_at(i) * sg
+			var edge := p + s * half
+			var y_edge := _sol_real(edge.x, edge.z)
+			var q3 := p + s * (half + 3.0)
+			var fall := y_edge - _sol_real(q3.x, q3.z)
+			if fall < LIP_FALL_MIN:
+				continue
+			# Alternanta: bolovan / piatra de zid / bolovan mic. Un sir de
+			# obiecte identice citeste a balustrada, nu a creasta.
+			var mdl: String = ["moss_boulder_b", "inca_wall_c", "moss_boulder_a",
+				"moss_boulder_b"][k % 4]
+			var h := 1.0
+			if mdl == "moss_boulder_b":
+				h = _rng.randf_range(1.5, 2.1)
+			elif mdl == "inca_wall_c":
+				h = _rng.randf_range(1.0, 1.4)
+			else:
+				h = _rng.randf_range(0.6, 0.9)
+			var scl := _scale_for(mdl, h)
+			var yaw := _rng.randf_range(0.0, TAU)
+			if mdl == "inca_wall_c":
+				# Piesa de zid urmeaza muchia, nu se roteste aiurea.
+				var tang := _track.baked[(i + 2) % n] - _track.baked[(i - 2 + n) % n]
+				tang.y = 0.0
+				tang = tang.normalized()
+				yaw = atan2(-tang.z, tang.x)
+			# Coboara putin sub buza: o piatra asezata exact pe cota arata
+			# lipita, una infipta 15 cm arata crescuta din creasta.
+			_place(mdl, "muchie", f, sg, LIP_GAP, yaw, scl, "hull", -0.15)
+			k += 1
+		f += _step(LIP_STEP)
 
 
+## (5) COROANELE DE SUB BUZA — semnalul 4 al barei: varfuri verzi care se vad
+## peste margine, sub cota drumului, nu trunchiuri langa sosea.
+##
+## Departarea: 12-26 m de muchie. Cu cornisa (racord 6 m) peretele de sub buza
+## cade in primii metri, deci la 12 m esti deja pe fata, si `_sol_real` coboara
+## cu ea — copacul iese cu varful pe la nivelul buzei sau sub el, exact ce
+## trebuie. Sub 12 m ar sta CHIAR pe muchie si ar astupa golul pe care POI-ul il
+## vinde.
 func _downhill_canopy() -> void:
-	pass
+	var n := _track.baked.size()
+	var f := F_IN + _step(6.0)
+	var k := 0
+	while f < F_OUT:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		for sg: float in [-1.0, 1.0]:
+			var s := _track._side_at(i) * sg
+			var half := _track.width_at_index(i)
+			var q3 := p + s * (half + 3.0)
+			var edge := p + s * half
+			if _sol_real(edge.x, edge.z) - _sol_real(q3.x, q3.z) < LIP_FALL_MIN:
+				continue
+			var mdl := "polylepis_b" if k % 3 != 1 else "polylepis_a"
+			var h := _rng.randf_range(5.5, 7.5) if mdl == "polylepis_b" \
+				else _rng.randf_range(3.6, 4.6)
+			# `_below_lip` = acelasi `_place`, dar FARA garda de plutire: aici
+			# cota joasa e scopul, nu defectul. Coroanele stau pe fata rapei si
+			# se vad peste buza — cu garda pornita s-ar refuza toate.
+			_below_lip = true
+			_place(mdl, "coroanaJos", f + _step(_rng.randf_range(-3.0, 3.0)), sg,
+				_rng.randf_range(12.0, 26.0), _rng.randf_range(0.0, TAU),
+				_scale_for(mdl, h), "trunk")
+			_below_lip = false
+			k += 1
+		f += _step(12.0 + _rng.randf_range(-2.5, 2.5))
 
 
+## (6) PARTEA CARE URCA. Pe 0,22-0,235 partea -1 e inca platou (saua portii) si
+## pe 0,355-0,40 amandoua se aseaza: acolo creasta se termina si incepe
+## coborarea spre terase. Pe portiunile alea decorul e cel de versant — bolovani
+## cu muschi, ferigi, bromelii — ca sa nu ramana iarba goala intre poarta si
+## muchie.
 func _uphill_side() -> void:
-	pass
+	var n := _track.baked.size()
+	var f := F_IN
+	var k := 0
+	while f < F_OUT:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var half := _track.width_at_index(i)
+		for sg: float in [-1.0, 1.0]:
+			var s := _track._side_at(i) * sg
+			var edge := p + s * half
+			var q3 := p + s * (half + 3.0)
+			# DOAR unde NU e gol: aici e umplutura de versant, complementul
+			# punctuatiei de muchie.
+			if _sol_real(edge.x, edge.z) - _sol_real(q3.x, q3.z) >= LIP_FALL_MIN:
+				continue
+			var cnt := 1 + (k % 3)
+			for j in cnt:
+				var mdl := "moss_boulder_c" if j == 0 else (
+					"moss_boulder_b" if j % 2 == 1 else "moss_boulder_a")
+				var h := _rng.randf_range(2.4, 3.2) if j == 0 else (
+					_rng.randf_range(1.3, 1.9) if j % 2 == 1
+					else _rng.randf_range(0.6, 1.0))
+				# 2,2-6,5 m a produs 8 bolovani plutitori (probe_manual r1):
+				# dincolo de ~4 m incepe racordul cornisei. Garda de plutire ii
+				# refuza oricum, dar cautand mai aproape se pastreaza piesele.
+				_place(mdl, "bolovan", f + _step(_rng.randf_range(-3.0, 3.0)), sg,
+					_rng.randf_range(1.6, 4.2), _rng.randf_range(0.0, TAU),
+					_scale_for(mdl, h), "hull", -0.15)
+			if k % 2 == 0:
+				_place("tree_fern", "feriga", f + _step(4.0), sg,
+					_rng.randf_range(2.0, 4.0), _rng.randf_range(0.0, TAU),
+					_scale_for("tree_fern", _rng.randf_range(2.4, 3.2)), "trunk")
+			if _rng.randf() < 0.7:
+				_place("bromeliad", "bromelie", f + _step(2.0), sg,
+					_rng.randf_range(1.5, 3.4), _rng.randf_range(0.0, TAU),
+					_scale_for("bromeliad", _rng.randf_range(0.5, 0.9)), "none")
+			if _rng.randf() < 0.12:
+				_place("orchid_cluster", "orhidee", f + _step(6.0), sg,
+					_rng.randf_range(1.6, 3.2), _rng.randf_range(0.0, TAU),
+					_scale_for("orchid_cluster", _rng.randf_range(0.45, 0.7)),
+					"none")
+			k += 1
+		f += _step(11.0 + _rng.randf_range(-2.0, 2.0))
 
 
+## (7) PARAPETUL PUNCTUAT si bornele.
+##
+## Brief: `rope_rail` doar la CELE DOUA ACE ("punctuatie"), nu pe toata creasta:
+## pe dreapta defileul TREBUIE sa se vada, si un parapet continuu il ascunde
+## exact cand e cel mai spectaculos.
+##
+## Acele se citesc din curbura, la fel ca la POI G: maximele locale ale lui
+## |curbura| pe felie, despartite de cel putin 30 m.
 func _markers() -> void:
-	pass
+	var n := _track.baked.size()
+	# PRIMA RULARE A ALES ACELE GRESIT, si print-ul a aratat unde: 0,3821 (raza
+	# 9,2 m) si 0,3650 (raza 18,1 m). Amandoua sunt DUPA ce se termina creasta —
+	# la 0,365 rapele 0 si 1 s-au stins (survey: cadere -0,3 m pe ambele parti)
+	# si drumul intra in cascada de terase, adica POI-ul D. Un parapet de creasta
+	# pus acolo e parapetul altcuiva.
+	#
+	# Maximul global pe felie nu e criteriul, fiindca felia mea include si
+	# racordul spre D. Acele CRESTEI sunt cele doua S-uri din brief, si se
+	# recunosc prin faptul ca au GOL de ambele parti: se cauta doar acolo unde
+	# muchia chiar cade (acelasi prag ca la punctuatie).
+	var peaks: Array[Vector2] = []
+	var f := F_IN
+	while f < F_OUT:
+		var i := int(f * float(n)) % n
+		if _both_sides_fall(i):
+			peaks.append(Vector2(f, absf(_curv(i))))
+		f += _step(2.0)
+	peaks.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.y > b.y)
+	var chosen: Array[float] = []
+	for pk: Vector2 in peaks:
+		if chosen.size() >= 2:
+			break
+		var ok := true
+		for c: float in chosen:
+			if absf(c - pk.x) < _step(30.0):
+				ok = false
+		if ok:
+			chosen.append(pk.x)
+	for c: float in chosen:
+		var ci := int(c * float(n)) % n
+		print("; ac la frac %.4f, curbura %.4f (raza %.1f m)" % [
+			c, absf(_curv(ci)), 1.0 / maxf(absf(_curv(ci)), 1e-6)])
+		var sg := _worse_fall_side(ci)
+		for j in range(-2, 4):
+			var ff := c + _step(4.14 * float(j))
+			var i := int(ff * float(n)) % n
+			var p := _track.baked[i]
+			var side := _track._side_at(i) * sg
+			var tang := _track.baked[(i + 2) % n] - _track.baked[(i - 2 + n) % n]
+			tang.y = 0.0
+			if tang.length() < 0.01:
+				continue
+			tang = tang.normalized()
+			var half := _track.width_at_index(i)
+			var q := p + side * (half + 0.45)
+			# Parapetul nu urca peste buza si nu se ingroapa: minimul dintre cota
+			# drumului si solul real + 10 cm (lectia parapet311 de la POI G).
+			var gy: float = maxf(_sol_real(q.x, q.z), _sampler.ground_y(q.x, q.z))
+			_raw("rope_rail", "parapet",
+				Vector3(q.x, minf(p.y + 0.25, gy + 0.10), q.z),
+				atan2(-tang.z, tang.x), 1.0, "none")
+	# Bornele pe muchia care cade mai tare, la fiecare 26 m.
+	f = F_IN + _step(13.0)
+	while f < F_OUT:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var sg := _worse_fall_side(i)
+		var half := _track.width_at_index(i)
+		var q := p + _track._side_at(i) * sg * (half + WALL_HALF_THICK)
+		_raw("trail_marker", "borna", Vector3(q.x, p.y + 0.25, q.z), 0.0,
+			_scale_for("trail_marker", 1.2), "none")
+		f += _step(26.0)
+
+
+## Cade terenul de AMBELE parti la indexul i? Asta e definitia operationala a
+## "creastei" in POI-ul asta, si separa felia mea (0,235-0,352) de racordul
+## spre terase (0,355+), unde rapele s-au stins.
+func _both_sides_fall(i: int) -> bool:
+	var p := _track.baked[i]
+	var s := _track._side_at(i)
+	var half := _track.width_at_index(i)
+	for sg: float in [-1.0, 1.0]:
+		var edge := p + s * sg * half
+		var q3 := p + s * sg * (half + 3.0)
+		if _sol_real(edge.x, edge.z) - _sol_real(q3.x, q3.z) < LIP_FALL_MIN:
+			return false
+	return true
+
+
+## Pe ce parte cade mai tare la indexul i. Se CITESTE din teren la fiecare
+## folosire — pe creasta amandoua cad, dar nu la fel.
+func _worse_fall_side(i: int) -> float:
+	var p := _track.baked[i]
+	var s := _track._side_at(i)
+	var half := _track.width_at_index(i)
+	var best := 0.0
+	var sgn := 1.0
+	for sg: float in [-1.0, 1.0]:
+		var q := p + s * sg * (half + 8.0)
+		var drop := p.y - _sol_real(q.x, q.z)
+		if drop > best:
+			best = drop
+			sgn = sg
+	return sgn
 
 
 # ------------------------------------------------------------------ asezarea
@@ -291,6 +773,22 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	if mode != "none" and _on_any_road(q, i, r):
 		_skipped += 1
 		return
+	# GARDA DE PLUTIRE, adaugata dupa `probe_manual --track=15` (runda 1): 15 din
+	# 146 de piese pluteau intre 3,2 si 68,3 m. Cauza, una singura pentru toate:
+	# pe o CORNISA buza e la 0,5 m de asfalt si racordul e 6 m, deci orice piesa
+	# asezata la mai mult de ~1 m dincolo de muchie cade pe PERETE, nu pe umar.
+	# Testele mele de "aici nu e gol" masurau la 3 m de muchie, dar piesele
+	# plecau pana la 6,5 m — adica se decidea intr-un punct si se punea in altul
+	# (exact capcana din runda 3 a lui POI G).
+	#
+	# Aici nu se mai deduce nimic: se compara cota pe care AR PRIMI-O piesa cu
+	# cota drumului de alaturi. Daca e mai jos cu peste `DROP_REJECT`, piesa e
+	# pe fata peretelui si se refuza — nu se ridica, fiindca ridicarea e chiar
+	# mecanismul care a produs plutirea la condor si la aripile portii.
+	if not _below_lip:
+		if p.y - g > DROP_REJECT:
+			_skipped += 1
+			return
 	var smooth := _sampler.ground_y(q.x, q.z)
 	var sink := smooth - (g - dy)
 	var piece_h: float = float(HEIGHT.get(model, 1.0)) * scl

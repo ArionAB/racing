@@ -155,6 +155,12 @@ const WALL_HALF_THICK := 0.43
 ## stea jos — coroanele de sub buza — nu trec pe aici, au propria lor cale
 ## (`_below_lip`), fiindca acolo cota joasa e chiar scopul.
 const DROP_REJECT := 2.5
+## Cat poate cobori o piesa de BUZA sub sosea. 4,0 m: pe muchie profilul masurat
+## da -1,9..-2,1 m la 0,2320 si -2,0..-7,3 la 0,3300, deci 4 m prinde buza reala
+## si respinge orice a alunecat pe fata peretelui. Coroanele de sub buza
+## (`coroanaJos`) NU trec pe aici — ele au voie oriunde pe fata, si de aia isi
+## pastreaza calea proprie.
+const LIP_DROP_MAX := 4.0
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -172,6 +178,8 @@ var _total_len := 1.0
 ## Cand e adevarat, `_place` lasa piesa sa stea sub cota drumului (coroanele de
 ## pe fata rapei). Vezi `DROP_REJECT`.
 var _below_lip := false
+## Cand e adevarat, piesa are voie oriunde pe fata rapei (coroanele de sub buza).
+var _free_fall := false
 
 
 func _ready() -> void:
@@ -440,15 +448,57 @@ func _guardhouse() -> void:
 	#
 	# Partea nu se mai scrie in cod: se citeste din teren la fiecare rulare, ca
 	# `_downhill_side` la POI G. Daca traseul se redeseneaza, casa se muta singura.
+	# RUNDA 2: si casa a fost refuzata in tacere (0 noduri "casaPaznic" in .tscn).
+	# La `gap = 0,9` centrul ei ajunge la 6,5 + 0,9 + 3,41 = 10,8 m de ax, adica
+	# 4,3 m dincolo de muchie — pe cornisa, in gol. `gap` se masoara pana la
+	# MARGINEA corpului, deci pentru o piesa lata conteaza raza, nu gap-ul.
+	#
+	# Casa se lipeste de umar: gap 0,15 m pune corpul la 6,65 m de ax, adica
+	# fix langa banda, si centrul la 10,06 m. Pe partea aleasa de `_solid_side`
+	# (masurata: +1 la 0,3300, unde solul pe muchie e la -2,02 fata de -7,33 pe
+	# cealalta parte) acolo chiar e teren.
+	# Casa e singura piesa din POI care TREBUIE sa aiba corp (e o cladire; daca
+	# masina trece prin ea, cadrul pozei clasice devine o fantoma). Cum pe buza
+	# nu e loc pentru un hull de 3,41 m raza, casa se muta INAPOI de la muchie:
+	# se cauta fractia din jurul lui 0,33 la care exista cel mai mult umar, si
+	# se pune acolo. Cadrul pozei ramane la 0,33 — ce conteaza e ca o VEZI din
+	# masina la 0,33, nu ca talpa ei sa fie la 0,3300 exact.
 	var gs := _solid_side(GUARD_FRAC)
-	_place("guardhouse", "casaPaznic", GUARD_FRAC, gs, 0.9,
-		_yaw_to_road(GUARD_FRAC, gs), 0.85, "hull")
+	var gf := _best_shelf(GUARD_FRAC, gs)
+	_place("guardhouse", "casaPaznic", gf, gs, 0.4,
+		_yaw_to_road(gf, gs), 0.85, "hull")
 	# O ruina mica alaturi, ca sa nu fie un singur obiect pe creasta: in bara
 	# constructiile vin in grup, nu una singura.
 	var ff := GUARD_FRAC + _step(14.0)
 	var rs := _solid_side(ff)
-	_place("inca_house_b", "ruinaPaznic", ff, rs, 0.9,
-		_yaw_to_road(ff, rs) + 0.4, 1.0, "hull")
+	var rf := _best_shelf(ff, rs)
+	_place("inca_house_b", "ruinaPaznic", rf, rs, 0.4,
+		_yaw_to_road(rf, rs) + 0.4, 1.0, "hull")
+
+
+## Fractia din vecinatatea lui `frac` (±35 m) la care partea `sg` are cel mai
+## mult UMAR: cota solului la 5 m dincolo de muchie, cat mai aproape de sosea.
+## Pe o cornisa umarul apare si dispare pe portiuni; nu se ghiceste unde e.
+func _best_shelf(frac: float, sg: float) -> float:
+	var n := _track.baked.size()
+	var best := frac
+	var best_y := -INF
+	var d := -35.0
+	while d <= 35.0:
+		var f := frac + _step(d)
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i) * sg
+		var half := _track.width_at_index(i)
+		var q := p + s * (half + 5.0)
+		var rel := _sol_real(q.x, q.z) - p.y
+		if rel > best_y:
+			best_y = rel
+			best = f
+		d += 2.5
+	print("; umar pentru cladire: frac %.4f (sol la 5 m de muchie: %+.2f m)" % [
+		best, best_y])
+	return best
 
 
 ## Pe ce parte e teren care TINE o cladire la fractia `frac`: cea la care solul
@@ -500,7 +550,41 @@ const LIP_STEP := 9.0
 ## Distanta de la MUCHIE la marginea corpului. 0,9 m: peste EDGE_KEEP (0,8), deci
 ## nu e obstacol pe umar, si sub 1 m, deci nu ramane iarba intre asfalt si piatra
 ## (lectia rundelor 4-7 de la POI G).
-const LIP_GAP := 0.9
+## RUNDA 2: TOATE cele ~30 de piese de muchie au fost REFUZATE in tacere, si
+## inventarul .tscn a aratat-o (0 noduri "muchie"), nu sonda.
+##
+## Cauza e aceeasi cu a plutitoarelor, doar ca de partea cealalta a garzii:
+## `_place` masoara `gap` de la muchie SPRE AFARA, iar profilul fin
+## (probe_mp_c_condor.gd) spune ca pe cornisa, la +0,5 m dincolo de muchie,
+## solul e deja la -4,18 m. Deci `LIP_GAP = 0,9` punea fiecare piatra peste gol,
+## si garda de plutire (corect) le arunca pe toate.
+##
+## O piatra de creasta nu sta DUPA muchie, sta PE ea: jumatate pe umar, jumatate
+## deasupra golului — asta e ce o face sa citeasca drept buza. Deci gap-ul
+## devine NEGATIV: centrul piesei intra spre drum cu raza corpului, iar silueta
+## atarna peste margine.
+##
+## -0,35 m: cu raza medie a bolovanilor (0,4-1,2 m la scara folosita) corpul
+## ramane la 0,6-0,9 m dincolo de banda, deci peste EDGE_KEEP (0,8) la piesele
+## mari si la limita la cele mici — si toate sunt `hull` mic, nu ziduri.
+## RUNDA 3: -0,35 a dus piesele IN BANDA (54 de avertismente "corpul la 6,15 m
+## de ax, muchia la 6,50") si tot n-a asezat decat 5 din ~30.
+##
+## Aici se vede constrangerea reala a POI-ului, si merita scrisa ca atare:
+## PE CORNISA NU EXISTA UMAR. Buza e la 0,5 m de asfalt si peretele cade imediat
+## (profil masurat: -4,18 m la +0,5 m dincolo de muchie). Deci pentru o piesa cu
+## CORP nu exista pozitie buna — ori intra pe banda, ori atarna in gol. Cele
+## doua incercari (0,9 si -0,35) sunt exact cele doua capete ale aceleiasi
+## fisii inexistente.
+##
+## Solutia nu e o a treia cifra, e sa cada cerinta de corp: punctuatia de muchie
+## e DECOR, nu obstacol. Cu `coliziune = "none"` piesa poate sta calare pe buza
+## — silueta peste gol, talpa pe umar — fara sa fie nici obstacol pe banda, nici
+## corp suspendat. Masinile trec prin ea, dar masinile n-au ce cauta acolo:
+## dincolo de buza e prapastia, si ProbeLaneClear ramane pe linia de baza.
+##
+## 0,1 m: centrul cade la ~0,5-1,5 m dincolo de muchie, adica exact calare.
+const LIP_GAP := 0.1
 
 func _ridge_punctuation() -> void:
 	var n := _track.baked.size()
@@ -539,7 +623,15 @@ func _ridge_punctuation() -> void:
 				yaw = atan2(-tang.z, tang.x)
 			# Coboara putin sub buza: o piatra asezata exact pe cota arata
 			# lipita, una infipta 15 cm arata crescuta din creasta.
-			_place(mdl, "muchie", f, sg, LIP_GAP, yaw, scl, "hull", -0.15)
+			# `_below_lip` pornit: pe muchie solul E cu 1-2 m sub sosea
+			# (profilul fin: -1,86 m la 0,2320), iar garda generala de 2,5 m ar
+			# taia tocmai piesele de pe buza — cele pentru care cota joasa e
+			# rostul lor. Marginea reala se apara prin `gap`, nu prin cota.
+			# `none`: vezi nota de la LIP_GAP — piesa e semn de margine, nu
+			# obstacol. `_below_lip` ii permite cota de buza (pana la -4 m).
+			_below_lip = true
+			_place(mdl, "muchie", f, sg, LIP_GAP, yaw, scl, "none", -0.15)
+			_below_lip = false
 			k += 1
 		f += _step(LIP_STEP)
 
@@ -572,11 +664,11 @@ func _downhill_canopy() -> void:
 			# `_below_lip` = acelasi `_place`, dar FARA garda de plutire: aici
 			# cota joasa e scopul, nu defectul. Coroanele stau pe fata rapei si
 			# se vad peste buza — cu garda pornita s-ar refuza toate.
-			_below_lip = true
+			_free_fall = true
 			_place(mdl, "coroanaJos", f + _step(_rng.randf_range(-3.0, 3.0)), sg,
 				_rng.randf_range(12.0, 26.0), _rng.randf_range(0.0, TAU),
 				_scale_for(mdl, h), "trunk")
-			_below_lip = false
+			_free_fall = false
 			k += 1
 		f += _step(12.0 + _rng.randf_range(-2.5, 2.5))
 
@@ -785,10 +877,12 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	# cota drumului de alaturi. Daca e mai jos cu peste `DROP_REJECT`, piesa e
 	# pe fata peretelui si se refuza — nu se ridica, fiindca ridicarea e chiar
 	# mecanismul care a produs plutirea la condor si la aripile portii.
-	if not _below_lip:
-		if p.y - g > DROP_REJECT:
-			_skipped += 1
-			return
+	# `_below_lip` nu e "orice cota merge": piesele de buza au voie sa stea sub
+	# sosea, dar nu pe podeaua rapei (la -22 m). Plafonul lor e `LIP_DROP_MAX`.
+	var limita: float = LIP_DROP_MAX if _below_lip else DROP_REJECT
+	if not _free_fall and p.y - g > limita:
+		_skipped += 1
+		return
 	var smooth := _sampler.ground_y(q.x, q.z)
 	var sink := smooth - (g - dy)
 	var piece_h: float = float(HEIGHT.get(model, 1.0)) * scl

@@ -107,9 +107,31 @@ nu era a lui. Criticul a avut și el dreptate: lipsea.
 - **Nu e bara greșit citită.** Verdictele sunt despre materie și siluetă, exact
   ce cere protocolul, nu despre layout.
 
-## 5. Ce se face
+## 5. Ce s-a făcut (18 sep 2026)
 
-Decizia e a dezvoltatorului fiindcă **atinge terenul**, nu decorul.
+> Secțiunea a fost scrisă ca listă de opțiuni. Între timp s-a și **măsurat**,
+> iar diagnosticul de mai sus s-a dovedit **doar pe jumătate corect**.
+
+**Corecție la §2–3.** `SvMpSapa` (cotă drum vs cotă sol la +1/+4/+10 m) arată
+că **POI C are căderea**: −1,6 m la +1 m, dar **−13,1 m la +4 m** și
+**−30,7 m la +10 m**. Deci pe C nu lipsea terenul. **POI D chiar e plat**
+(−12,7 la drum, −12,2 la +10 m) — acolo diagnosticul stă în picioare.
+
+**Cauza reală pe C, G, H: contrastul, nu geometria.** Fața căderii, versantul
+de dincolo și fundalul aveau **toate** `ground_tint` #5F6B3E. O prăpastie și o
+pajiște fără diferență de culoare sunt aceeași suprafață pentru ochi.
+Constructorul lui C o scrisese în raport: *„nu lipsește căderea, lipsește
+CONTRASTUL care o face citibilă."*
+
+**Rezolvat** (decizia dezvoltatorului, cheia `scarp_tint`): față de stâncă
+după **pantă**, nu după cotă — `rock_band_tint` exista, dar se ia din
+`v.y - rock_line`, iar golurile de aici coboară SUB drum, deci nicio linie de
+nivel nu le prinde. Cost: **zero materiale**; celelalte piste au cifre
+identice. Două lucruri găsite pe captură, nu prin raționament: panta per
+**celulă** dă pătrate (se ia per vertex), iar prima tentă **se aplica dar nu se
+vedea** (verificat pe vertex colors). Memoria: `contrastul-nu-geometria`.
+
+### Ce rămâne de decis (tot teren)
 
 1. **Flag de cornișă pe râpele POI-urilor care n-au** — cel mai ieftin, o linie
    în `custom_cornice_ravines`. Mută buza de la 4 m la 0,5 m. Nu schimbă

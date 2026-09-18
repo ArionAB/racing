@@ -92,6 +92,31 @@ extends Node
 ##    asezare: terasa are nevoie de podea proprie (clasa de iarba scurta pe
 ##    banda dintre ziduri), nu de mai multe ziduri.
 
+## 8bis. PASUL IN METRI + INDEX PE PUNCTE COAPTE = SIR DE BUTOAIE (runda 6).
+##    Lectia cea mai scumpa a rundei, si merita scrisa pentru urmatorul POI.
+##
+##    Traseul are 1986,4 m pe 1111 puncte coapte, deci 1,788 m intre puncte.
+##    Orice bucla care avanseaza cu `f += _step(metri)` si apoi ia pozitia cu
+##    `_track.baked[int(f * n)]` produce, pentru un pas mai mic decat 1,788 m,
+##    grupuri de piese SUPRAPUSE pe acelasi punct, separate de goluri de 1,788
+##    m. Cu pasul de 0,36 m ies fix 5 pozitii identice, apoi un salt.
+##
+##    Din masina asta nu arata a „sir cu goluri", arata a SIR DE BUTOAIE:
+##    fiecare grup e un cilindru de placi suprapuse, si privesti in lungul lui.
+##
+##    Trei masuratori au trecut pe langa defect inainte sa-l prind:
+##      - „distanta la cel mai apropiat vecin" 0,0-0,2 m — masura vecinii din
+##        acelasi grup, nu golul dintre grupuri;
+##      - „intinderea raftului" 37-53 m — masura capetele, nu continuitatea;
+##      - captura de ansamblu — grupurile se citeau ca o panglica de departe.
+##    Cifra care l-a prins e COMPONENTA CONEXA: 16-25 bucati pe raft, aproape
+##    toate de exact 15 placi (5 pozitii x 3 randuri laterale). Cand un numar
+##    iese suspect de regulat (15, 15, 15, ...), ala e tiparul, nu zgomotul.
+##
+##    Reparatia e interpolarea intre `baked[i]` si `baked[i+1]` (pozitie,
+##    vector lateral si semi-latime deodata), nu marirea pasului: pasul mic e
+##    corect, snap-ul pe index nu era.
+
 ## 9. SEED 6 NU E O REGRESIE A MEA — masurat A/B, nu presupus. Pe felia
 ##    0.42-0.56 runda 5 arata masina jucatorului cu 16,6% lent si 8 atingeri
 ##    de perete pe seed 6, mult peste restul seed-urilor. Inainte sa mut
@@ -704,7 +729,9 @@ func _nivel_incape(a: float, b: float, sgn: float, lat0: float,
 			mdl = "inca_wall_c"
 		var seg: float = {"inca_wall_a": 4.0, "inca_wall_b": 6.0,
 			"inca_wall_c": 2.0}[mdl]
-		var scl := _scale_for(mdl, RAFT_H)
+		# Scara din PLAN ramane 1,0: un zid mai scund nu e un zid mai scurt.
+		# Vezi `_raw_h`. Doar Y se scaleaza la riser.
+		var scl := 1.0
 		var i := int(f * float(n)) % n
 		var p := _track.baked[i]
 		var s := _track._side_at(i) * sgn
@@ -742,7 +769,9 @@ func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 			mdl = "inca_wall_c"
 		var seg: float = {"inca_wall_a": 4.0, "inca_wall_b": 6.0,
 			"inca_wall_c": 2.0}[mdl]
-		var scl := _scale_for(mdl, RAFT_H)
+		# Scara din PLAN 1,0, inaltimea la riser — vezi `_raw_h`.
+		var scl := 1.0
+		var scl_y := _scale_for(mdl, RAFT_H)
 		var i := int(f * float(n)) % n
 		var p := _track.baked[i]
 		var s := _track._side_at(i) * sgn
@@ -759,7 +788,7 @@ func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 		if not _lane_free(pos, lr, RAFT_H):
 			_lane_reject += 1
 			return   # nivelul intreg cade — un raft partial e defectul
-		plan.append({"m": mdl, "p": pos, "y": yaw, "s": scl})
+		plan.append({"m": mdl, "p": pos, "y": yaw, "s": scl, "sy": scl_y})
 		f += _step(seg * scl)
 		idx += 1
 	if plan.size() < 3:
@@ -772,8 +801,8 @@ func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 		var wp: Vector3 = w["p"] as Vector3
 		aer_max = maxf(aer_max, wp.y - _sol_real(wp.x, wp.z))
 	for w in plan:
-		_raw(w["m"] as String, "zidSprijin%d" % k, w["p"] as Vector3,
-			float(w["y"]), float(w["s"]), "")
+		_raw_h(w["m"] as String, "zidSprijin%d" % k, w["p"] as Vector3,
+			float(w["y"]), float(w["s"]), float(w["sy"]), "")
 	if aer_max > 0.35:
 		print("; raft k=%d: aer sub talpa pana la %.2f m -> asize de umplere" % [
 			k, aer_max])
@@ -830,6 +859,62 @@ func _nivel(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 	# `lat0 + 0.45 + RAFT_R`, si zidaria ramane vizibila pe toata inaltimea.
 	_raft(f0 + _step(RAFT_R * 0.5), f1 - _step(RAFT_R * 0.5),
 		sgn, lat0 + 0.45 + RAFT_R, spate - RAFT_R, y_raft - 0.06, lat1)
+	# --- 3. ZIDURILE DE CAPAT (intoarcerile). Defect gasit pe zoom_r21.png,
+	# si numai pe captura: la capatul fiecarui picior terasele se opresc, iar
+	# masa ramane taiata cu fata de pamant la vedere. Din masina, unde privesti
+	# CHIAR IN LUNGUL sirului, vezi sase capete unul sub altul si fiecare e un
+	# BUTOI maro cu capac verde — „panouri de gard imprastiate" pe alta axa.
+	# Cifrele spuneau ca totul e in regula (ribbon continuu de 37-53 m, placi
+	# la 0,0-0,2 m una de alta, mult sub diametrul inscris de 0,77), fiindca
+	# masurau CONTINUITATEA, nu CAPATUL. Memoria `procent-de-culoare-nu-e-
+	# dovada`, in varianta ei de aici: captura bate cifra.
+	#
+	# O terasa reala nu se termina intr-o felie de pamant: zidul se INTOARCE
+	# si inchide capatul. Deci la fiecare capat de nivel se pune o bucata de
+	# zid perpendiculara pe sir, lunga cat adancimea raftului.
+	_capat_nivel(f0, sgn, lat0, lat1, y_raft, k)
+	_capat_nivel(f1, sgn, lat0, lat1, y_raft, k)
+
+
+## ZID DE CAPAT: inchide masa acolo unde terasa se termina.
+##
+## Perpendicular pe sir (yaw rotit cu 90 grade), asezat pe mijlocul benzii
+## `lat0..lat1` si lung cat adancimea ei. Cota si inaltimea sunt ale nivelului,
+## ca sa se lege exact cu zidul lung si cu coama.
+##
+## Coliziune: la fel ca zidul lung (implicita, `hull`) — e zidarie, si oricum
+## garda de banda il testeaza ca pe orice piesa cu corp. Daca nu incape, nu se
+## pune: mai bine un capat deschis decat o piesa in banda.
+func _capat_nivel(frac: float, sgn: float, lat0: float, lat1: float,
+		y_raft: float, k: int) -> void:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var p := _track.baked[i]
+	var sd := _track._side_at(i) * sgn
+	var half := _track.width_at_index(i)
+	var adanc := lat1 - lat0
+	# Piesa care acopera cel mai bine adancimea raftului, fara sa iasa peste.
+	var mdl := "inca_wall_c"   # 1,06 m
+	if adanc > 3.0:
+		mdl = "inca_wall_b"    # 3,02 m
+	elif adanc > 2.0:
+		mdl = "inca_wall_a"    # 2,03 m
+	var q := p + sd * (half + (lat0 + lat1) * 0.5)
+	var tg: Vector3 = (_track.baked[(i + 1) % n] - p)
+	tg.y = 0.0
+	tg = tg.normalized()
+	# Perpendicular pe sir: sirul are yaw = atan2 - PI/2, capatul e rotit inca
+	# 90 de grade, deci chiar atan2 (memoria `rotatii-in-builder-semnul`:
+	# semnul se deriva, nu se ghiceste — aici din faptul ca zidul lung e
+	# paralel cu tangenta, deci capatul trebuie sa fie paralel cu lateralul).
+	var yaw := atan2(tg.x, tg.z)
+	var pos := Vector3(q.x, y_raft - RAFT_H, q.z)
+	var scl_y := _scale_for(mdl, RAFT_H)
+	var lr: float = float(SIDE_R.get(mdl, 0.45))
+	if not _lane_free(pos, lr, RAFT_H):
+		_lane_reject += 1
+		return
+	_raw_h(mdl, "zidCapat%d" % k, pos, yaw, 1.0, scl_y, "")
 
 
 ## ASIZE DE UMPLERE sub talpa unui sir de zid.
@@ -861,8 +946,8 @@ func _asize_umplere(plan: Array[Dictionary], aer_max: float, k: int) -> void:
 			# Sub pamant cu mai mult de o asiza intreaga nu mai are rost.
 			if y + RAFT_H < _sol_real(wp.x, wp.z) - RAFT_H:
 				continue
-			_raw(w["m"] as String, "asiza%d" % k, Vector3(wp.x, y, wp.z),
-				float(w["y"]), float(w["s"]), "")
+			_raw_h(w["m"] as String, "asiza%d" % k, Vector3(wp.x, y, wp.z),
+				float(w["y"]), float(w["s"]), float(w["sy"]), "")
 
 
 ## PANA UNDE poate merge podeaua ultimului raft inainte sa intre in deal.
@@ -915,10 +1000,33 @@ func _raft(f0: float, f1: float, sgn: float, lat0: float, lat1: float,
 	var nv := maxi(1, int(ceil(span / (RAFT_R * 0.9))) + 1)
 	var f := f0
 	while f < f1:
-		var i := int(f * float(n)) % n
-		var p := _track.baked[i]
-		var s := _track._side_at(i) * sgn
-		var half := _track.width_at_index(i)
+		# INTERPOLARE intre punctele coapte, nu snap pe index — si asta e
+		# reparatia defectului „butoaie" de pe zoom_r21.png/zoom_r22.png.
+		#
+		# Masurat, fiindca doua masuratori inainte spusesera ca totul e bine si
+		# amandoua raspundeau la alta intrebare: traseul are 1986,4 m pe 1111
+		# puncte coapte, deci 1,788 m intre puncte, iar `_raft` avanseaza cu
+		# RAFT_R*0,9 = 0,36 m. Cu `int(f * n)` CINCI pasi consecutivi cad pe
+		# ACELASI punct (5 x 3 randuri laterale = clusterul de 15 placi pe care
+		# l-am gasit apoi in fisier), dupa care indexul sare 1,788 m si lasa un
+		# gol de ~1,0 m — mai lat decat placa (diametru inscris 0,77). Fiecare
+		# punct coapt devine un BUTOI, si din masina se vad ca butoaie fiindca
+		# privesti in lungul sirului.
+		#
+		# De ce nu s-a vazut la masuratori: „distanta la cel mai apropiat
+		# vecin" iesea 0,0-0,2 m (vecinii din ACELASI cluster), iar
+		# „intinderea" iesea 37-53 m (capetele clusterelor, nu golurile dintre
+		# ele). Cifra care l-a prins e componenta conexa: 16-25 bucati pe raft,
+		# aproape toate de exact 15 placi. Memoria `caseta-de-masura-exclude-
+		# defectul`, in varianta ei de conectivitate.
+		var fi := f * float(n)
+		var i := int(fi) % n
+		var i2 := (i + 1) % n
+		var t: float = fi - floor(fi)
+		var p: Vector3 = _track.baked[i].lerp(_track.baked[i2], t)
+		var s := (_track._side_at(i) * sgn).lerp(_track._side_at(i2) * sgn, t).normalized()
+		var half: float = lerpf(_track.width_at_index(i),
+			_track.width_at_index(i2), t)
 		for j in range(nv):
 			var fv: float = 0.5 if nv == 1 else float(j) / float(nv - 1)
 			var lat := lat0 + fv * span
@@ -1310,6 +1418,34 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 			_lane_reject += 1
 			return
 	_raw(model, base, Vector3(q.x, g + dy, q.z), yaw, scl, mode)
+
+
+## Ca `_raw`, dar cu scara pe INALTIME separata de cea din plan.
+##
+## De ce, si e un defect gasit pe captura (regula zero din bara_vizuala): cand
+## riserul a scazut la 1,25 m, `_scale_for` a scalat zidul UNIFORM la 0,50 —
+## deci piesele au ajuns si de doua ori mai SCURTE si de doua ori mai
+## SUBTIRI. Pe zoom_butoaie.png se vede rezultatul fara dubiu: lespezi
+## verticale subtiri, distantate, cu cate un butoi de pamant intre ele. Adica
+## exact defectul pe care verdictul rundei 5 il numise deja («segmente scurte,
+## distantate, la unghiuri diferite»), reintrodus pe alta usa.
+##
+## Un zid de sprijin mai scund nu e un zid mai scurt: e acelasi zid, retezat.
+## Deci scara din plan ramane 1,0 (lungimea si grosimea piesei, cum a fost
+## masurata) si doar Y se scaleaza la riser.
+func _raw_h(model: String, base: String, pos: Vector3, yaw: float,
+		scl_xz: float, scl_y: float, mode: String) -> void:
+	_n += 1
+	_tri += int(TRI.get(model, 0))
+	var c := cos(yaw) * scl_xz
+	var s := sin(yaw) * scl_xz
+	_out.append('[node name="%s%d" parent="%s" instance=ExtResource("%s")]'
+		% [base, _n, ZONE, RES[model]])
+	_out.append("transform = Transform3D(%f, 0, %f, 0, %f, 0, %f, 0, %f, %f, %f, %f)"
+		% [c, s, scl_y, -s, c, pos.x, pos.y, pos.z])
+	if mode != "":
+		_out.append('metadata/coliziune = "%s"' % mode)
+	_out.append("")
 
 
 func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,

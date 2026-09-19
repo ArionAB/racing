@@ -1385,6 +1385,29 @@ func _lame() -> void:
 		var c := _pt(fr, float(p[2]))
 		_at_terasa(String(p[0]), "lama", c.x, c.y, _yaw_at(fr) + float(p[3]), s,
 			"none", 0.0)
+	# RUNDA 15. Lamele de mai sus stau toate la 13-16 m de ax, adica pe
+	# fasia dintre sosea si primul zid — corect ca punctuatie langa drum, dar
+	# in bara lamele PASC IN CURTI, intre ziduri, si sunt semnul ca incinta e
+	# un loc folosit, nu o ruina. Cinci exemplare pe toata zona insemnau ca
+	# nicio curte nu are niciuna. Se adauga cate o lama pe patru dintre
+	# terase, pe PODEA (`_at_terasa`), nu pe solul de sub ea.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 150016
+	var idx := 0
+	for t in _terase:
+		idx += 1
+		if idx % 3 != 1:
+			continue
+		var c2: Vector2 = t["c"]
+		var u2: Vector2 = t["u"]
+		var v2: Vector2 = t["v"]
+		var su := rng.randf_range(-float(t["hw"]) + 2.0, float(t["hw"]) - 2.0)
+		var sv := rng.randf_range(-float(t["hd"]) + 2.0, float(t["hd"]) - 2.0)
+		var q := c2 + u2 * su + v2 * sv
+		var nume: Array[String] = ["llama", "llama_b", "llama_c"]
+		var mdl: String = nume[rng.randi() % 3]
+		_at_terasa(mdl, "lamaCurte", q.x, q.y, rng.randf_range(0.0, TAU), s,
+			"none", 0.0)
 
 
 ## VERDELE. Piata din bara e IARBA cu piatra peste, si verdele adevarat
@@ -1589,6 +1612,45 @@ func _vegetatie_in_cetate() -> void:
 				else rng.randf_range(1.3, 2.0)
 			_at(mdl4, "bolovanColt", q4.x, q4.y, rng.randf_range(0.0, TAU),
 				_scale_for(mdl4, h4), "", -0.14)
+		# (d) PODEAUA CURTII nu ramane un dreptunghi verde gol.
+		#
+		# Masurat pe captura A_r15_f000.png (zoom z15_drp.png), care e si
+		# motivul pentru care pasul asta exista: dupa (a)-(c) copacii rup
+		# coama si talpa zidului are verde, dar curtea din prim-plan e un
+		# TRAPEZ VERDE PLAT de ~20 x 14 m fara nimic pe el. In bara nu exista
+		# nicio curte goala: fiecare are bolovani, tufe joase sau lame. Un
+		# plan mare de o singura culoare citeste ca gazon, nu ca teren de
+		# cetate — acelasi mecanism pe care CLAUDE.md il descrie la podeaua
+		# vaii (verde gol = lume nefacuta), doar la alta scara.
+		#
+		# Densitatea e mica anume (4-7 piese pe ~300 m2): scopul e sa RUPA
+		# planul, nu sa-l umple. O curte plina ar acoperi podeaua care
+		# tocmai s-a castigat in runda 14 si pentru care criticul ceruse
+		# trei runde („ce se inchide are PODEA").
+		var n_curte := 4 + (rng.randi() % 4)
+		for k5 in range(n_curte):
+			var su5 := rng.randf_range(-hw + 1.5, hw - 1.5)
+			var sv5 := rng.randf_range(-hd + 1.5, hd - 1.5)
+			var q5 := c + u * su5 + v * sv5
+			var r5 := rng.randf()
+			var mdl5 := "moss_boulder_a"
+			var h5 := 0.5
+			var mode5 := "none"
+			if r5 < 0.40:
+				mdl5 = "moss_boulder_a"
+				h5 = rng.randf_range(0.45, 0.80)
+			elif r5 < 0.62:
+				mdl5 = "moss_boulder_b"
+				h5 = rng.randf_range(1.1, 1.7)
+				mode5 = ""
+			elif r5 < 0.85:
+				mdl5 = "bromeliad"
+				h5 = rng.randf_range(0.38, 0.58)
+			else:
+				mdl5 = "orchid_cluster"
+				h5 = rng.randf_range(0.36, 0.52)
+			_at_terasa(mdl5, "curte", q5.x, q5.y, rng.randf_range(0.0, TAU),
+				_scale_for(mdl5, h5), mode5, -0.06)
 
 
 # ------------------------------------------------------------------ asezarea

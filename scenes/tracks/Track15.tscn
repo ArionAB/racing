@@ -3642,960 +3642,1266 @@ metadata/coliziune = "none"
 transform = Transform3D(0.354111, 0, 0.937139, 0, 1.001811, 0, -0.937139, 0, 0.354111, -59.202477, 1.655579, 164.016617)
 metadata/coliziune = "none"
 
-[node name="quenual839" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(1.186083, 0, 0.219582, 0, 1.206237, 0, -0.219582, 0, 1.186083, -131.812744, -0.391226, 206.709152)
+[node name="lamaCurte839" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama_c")]
+transform = Transform3D(-0.538858, 0, 0.844545, 0, 1.001811, 0, -0.844545, 0, -0.538858, -113.612740, 1.276199, 173.235626)
+metadata/coliziune = "none"
 
-[node name="quenual840" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.383661, 0, -1.050083, 0, 1.117976, 0, 1.050083, 0, -0.383661, -105.557793, -0.042014, 214.046982)
+[node name="lamaCurte840" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama_c")]
+transform = Transform3D(0.417537, 0, -0.910652, 0, 1.001811, 0, 0.910652, 0, 0.417537, -31.040493, 6.752081, 175.009415)
+metadata/coliziune = "none"
 
-[node name="quenual841" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(1.232864, 0, -0.083041, 0, 1.235658, 0, 0.083041, 0, 1.232864, -94.896240, 0.130472, 210.000000)
+[node name="lamaCurte841" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama")]
+transform = Transform3D(0.747577, 0, -0.666899, 0, 1.001811, 0, 0.666899, 0, 0.747577, -81.547348, 5.185061, 196.507538)
+metadata/coliziune = "none"
 
-[node name="quenual842" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.743106, 0, -0.993981, 0, 1.241050, 0, 0.993981, 0, 0.743106, -83.944313, 0.495096, 214.000000)
+[node name="lamaCurte842" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama_c")]
+transform = Transform3D(-0.085724, 0, -0.998136, 0, 1.001811, 0, 0.998136, 0, -0.085724, -73.248009, 2.968613, 125.678406)
+metadata/coliziune = "none"
 
-[node name="quenual843" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.578786, 0, 0.990719, 0, 1.147396, 0, -0.990719, 0, 0.578786, -71.430023, 1.010156, 208.000000)
+[node name="lamaCurte843" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_llama_c")]
+transform = Transform3D(0.081950, 0, 0.998453, 0, 1.001811, 0, -0.998453, 0, 0.081950, -71.706665, 4.884076, 102.906670)
+metadata/coliziune = "none"
 
 [node name="quenual844" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.694087, 0, 0.800007, 0, 1.059135, 0, -0.800007, 0, -0.694087, -59.668835, 1.589121, 213.014404)
+transform = Transform3D(1.186083, 0, 0.219582, 0, 1.206237, 0, -0.219582, 0, 1.186083, -131.812744, -0.391226, 206.709152)
 
-[node name="quenual845" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.950536, 0, -0.721449, 0, 1.193317, 0, 0.721449, 0, -0.950536, -45.880672, 2.697916, 206.950546)
+[node name="quenual845" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.383661, 0, -1.050083, 0, 1.117976, 0, 1.050083, 0, -0.383661, -105.557793, -0.042014, 214.046982)
 
 [node name="quenual846" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-1.040150, 0, 0.550441, 0, 1.176817, 0, -0.550441, 0, -1.040150, -32.678925, 3.544916, 211.429840)
+transform = Transform3D(1.232864, 0, -0.083041, 0, 1.235658, 0, 0.083041, 0, 1.232864, -94.896240, 0.130472, 210.000000)
 
-[node name="quenual847" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.014622, 0, 1.088457, 0, 1.088555, 0, -1.088457, 0, 0.014622, -18.086672, 5.117654, 203.888138)
+[node name="quenual847" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.743106, 0, -0.993981, 0, 1.241050, 0, 0.993981, 0, 0.743106, -83.944313, 0.495096, 214.000000)
 
-[node name="quenual848" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.512242, 0, 1.024681, 0, 1.145585, 0, -1.024681, 0, 0.512242, -10.168022, 5.608285, 207.040039)
+[node name="quenual848" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.578786, 0, 0.990719, 0, 1.147396, 0, -0.990719, 0, 0.578786, -71.430023, 1.010156, 208.000000)
 
-[node name="quenual849" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.593217, 0, -0.923781, 0, 1.097852, 0, 0.923781, 0, -0.593217, -66.880714, 1.282526, 196.000000)
+[node name="quenual849" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.694087, 0, 0.800007, 0, 1.059135, 0, -0.800007, 0, -0.694087, -59.668835, 1.589121, 213.014404)
 
 [node name="quenual850" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.617064, 0, -0.849695, 0, 1.050119, 0, 0.849695, 0, -0.617064, -17.933441, 5.438806, 193.786896)
+transform = Transform3D(-0.950536, 0, -0.721449, 0, 1.193317, 0, 0.721449, 0, -0.950536, -45.880672, 2.697916, 206.950546)
 
 [node name="quenual851" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.684855, 0, 0.883653, 0, 1.117976, 0, -0.883653, 0, -0.684855, -82.452240, 0.226755, 102.000000)
+transform = Transform3D(-1.040150, 0, 0.550441, 0, 1.176817, 0, -0.550441, 0, -1.040150, -32.678925, 3.544916, 211.429840)
 
 [node name="quenual852" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.740963, 0, -0.951831, 0, 1.206237, 0, 0.951831, 0, -0.740963, -66.880714, 1.195184, 98.000000)
+transform = Transform3D(0.014622, 0, 1.088457, 0, 1.088555, 0, -1.088457, 0, 0.014622, -18.086672, 5.117654, 203.888138)
 
 [node name="quenual853" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.512242, 0, 1.024681, 0, 1.145585, 0, -1.024681, 0, 0.512242, -10.168022, 5.608285, 207.040039)
+
+[node name="quenual854" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.593217, 0, -0.923781, 0, 1.097852, 0, 0.923781, 0, -0.593217, -66.880714, 1.282526, 196.000000)
+
+[node name="quenual855" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.617064, 0, -0.849695, 0, 1.050119, 0, 0.849695, 0, -0.617064, -17.933441, 5.438806, 193.786896)
+
+[node name="quenual856" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.684855, 0, 0.883653, 0, 1.117976, 0, -0.883653, 0, -0.684855, -82.452240, 0.226755, 102.000000)
+
+[node name="quenual857" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.740963, 0, -0.951831, 0, 1.206237, 0, 0.951831, 0, -0.740963, -66.880714, 1.195184, 98.000000)
+
+[node name="quenual858" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(0.449587, 0, 1.105386, 0, 1.193317, 0, -1.105386, 0, 0.449587, -51.924213, 2.695093, 103.041824)
 
-[node name="quenual854" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+[node name="quenual859" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.725742, 0, 0.811327, 0, 1.088555, 0, -0.811327, 0, -0.725742, -39.345734, 4.091287, 98.617622)
 
-[node name="quenual855" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+[node name="quenual860" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
 transform = Transform3D(-0.294337, 0, 1.109001, 0, 1.147396, 0, -1.109001, 0, -0.294337, -23.815125, 6.001337, 100.860855)
 
-[node name="quenual856" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+[node name="quenual861" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-1.095422, 0, -0.073009, 0, 1.097852, 0, 0.073009, 0, -1.095422, -17.136524, 6.813684, 103.222221)
 
-[node name="quenual857" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+[node name="quenual862" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.701489, 0, 0.716026, 0, 1.002387, 0, -0.716026, 0, -0.701489, -118.742943, -6.657629, 117.597412)
 
-[node name="feriga858" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="feriga863" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.825070, 0, -0.506124, 0, 0.967937, 0, 0.506124, 0, -0.825070, -115.110397, -4.834253, 121.266510)
 
-[node name="feriga859" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="feriga864" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.586664, 0, -0.610853, 0, 0.846945, 0, 0.610853, 0, 0.586664, -112.802521, -3.336755, 120.339928)
 
-[node name="bolovan860" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan865" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.016178, 0, -1.072949, 0, 1.073071, 0, 1.072949, 0, 0.016178, -109.630989, -0.264409, 184.778183)
 
-[node name="bolovan861" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan866" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.600070, 0, 0.897497, 0, 1.079622, 0, -0.897497, 0, -0.600070, -80.856277, 0.463542, 184.000000)
 
-[node name="bolovan862" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan867" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(1.032059, 0, -0.445658, 0, 1.124170, 0, 0.445658, 0, 1.032059, -59.388069, 1.783564, 183.515747)
 
-[node name="bolovan863" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovan868" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.095930, 0, 1.007589, 0, 1.012146, 0, -1.007589, 0, -0.095930, -73.018394, 0.855281, 117.000000)
 
-[node name="bolovan864" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+[node name="bolovan869" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
 transform = Transform3D(0.657210, 0, -0.714613, 0, 0.970874, 0, 0.714613, 0, 0.657210, -93.089493, -0.078572, 121.000000)
 
-[node name="accent865" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="accent870" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(0.088326, 0, 1.190362, 0, 1.193634, 0, -1.190362, 0, 0.088326, -120.723770, -0.314907, 162.385132)
 metadata/coliziune = "none"
 
-[node name="accent866" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="accent871" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.104853, 0, -0.142921, 0, 1.114058, 0, 0.142921, 0, 1.104853, -93.089493, -0.213039, 138.000000)
 metadata/coliziune = "none"
 
-[node name="accent867" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="accent872" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-0.667610, 0, -0.957309, 0, 1.167109, 0, 0.957309, 0, -0.667610, -68.466354, 0.820210, 162.800003)
 metadata/coliziune = "none"
 
-[node name="accent868" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+[node name="accent873" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(0.494239, 0, 1.042636, 0, 1.153846, 0, -1.042636, 0, 0.494239, -97.983498, -0.264629, 162.199997)
 metadata/coliziune = "none"
 
-[node name="accent869" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+[node name="accent874" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
 transform = Transform3D(0.737289, 0, 0.784963, 0, 1.076923, 0, -0.784963, 0, 0.737289, -60.780682, 1.462788, 137.505325)
 metadata/coliziune = "none"
 
-[node name="borna870" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+[node name="borna875" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(0.990810, 0, 0.135262, 0, 1.000000, 0, -0.135262, 0, 0.990810, -117.409851, -0.344403, 138.110275)
 metadata/coliziune = "none"
 
-[node name="borna871" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+[node name="borna876" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -99.474510, -0.306546, 138.000000)
 metadata/coliziune = "none"
 
-[node name="borna872" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+[node name="borna877" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1.000000, 0, -0.000000, 0, 1.000000, -80.856277, 0.086337, 138.000000)
 metadata/coliziune = "none"
 
-[node name="borna873" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
+[node name="borna878" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_trail_marker")]
 transform = Transform3D(0.999955, 0, 0.009517, 0, 1.000000, 0, -0.009517, 0, 0.999955, -58.955025, 1.605365, 138.017807)
 metadata/coliziune = "none"
 
-[node name="arbTerasa874" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+[node name="arbTerasa879" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.746564, 0, 0.553698, 0, 0.929483, 0, -0.553698, 0, -0.746564, -117.516678, 1.156199, 173.231552)
 
-[node name="arbTerasa875" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+[node name="arbTerasa880" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.560876, 0, -0.694133, 0, 0.892414, 0, 0.694133, 0, -0.560876, -120.311295, 1.156199, 172.587585)
 
-[node name="ferigaTerasa876" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="ferigaTerasa881" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.498278, 0, 0.429001, 0, 0.657513, 0, -0.429001, 0, -0.498278, -105.854866, 1.196199, 179.621124)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa877" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="ferigaTerasa882" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(0.008134, 0, -0.589327, 0, 0.589383, 0, 0.589327, 0, 0.008134, -106.311432, 1.196199, 184.135269)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa878" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="tufaTalpa883" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.477609, 0, -0.389828, 0, 1.528167, 0, 0.389828, 0, 1.477609, -104.299202, -0.148541, 180.722214)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa879" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="tufaTalpa884" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-0.489895, 0, -1.269628, 0, 1.360864, 0, 1.269628, 0, -0.489895, -103.464928, -0.166776, 176.382050)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa880" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="tufaTalpa885" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.596755, 0, -0.156570, 0, 0.616953, 0, 0.156570, 0, -0.596755, -103.378143, -0.167111, 176.122803)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa881" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="tufaTalpa886" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-0.690779, 0, 0.823629, 0, 1.074961, 0, -0.823629, 0, -0.690779, -115.891190, -0.247891, 184.799561)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa882" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="tufaTalpa887" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.470233, 0, 0.157165, 0, 0.495802, 0, -0.157165, 0, -0.470233, -114.960640, -0.239529, 185.029861)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa883" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="tufaTalpa888" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.398391, 0, -0.666811, 0, 1.549236, 0, 0.666811, 0, 1.398391, -110.655090, -0.203458, 184.967255)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa884" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="tufaTalpa889" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.429502, 0, 0.430247, 0, 0.607935, 0, -0.430247, 0, -0.429502, -126.623779, -0.324399, 171.978500)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa885" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="tufaTalpa890" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.321846, 0, 0.574767, 0, 0.658742, 0, -0.574767, 0, -0.321846, -126.927010, -0.319348, 173.685104)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa886" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="tufaTalpa891" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(1.227679, 0, 0.478067, 0, 1.317476, 0, -0.478067, 0, 1.227679, -128.021835, -0.310239, 180.390350)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa887" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+[node name="tufaTalpa892" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
 transform = Transform3D(-0.074989, 0, -0.611349, 0, 0.615931, 0, 0.611349, 0, -0.074989, -118.204796, -0.330701, 167.808914)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa888" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+[node name="tufaTalpa893" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
 transform = Transform3D(-1.357151, 0, -0.080495, 0, 1.359536, 0, 0.080495, 0, -1.357151, -116.768005, -0.323346, 168.360046)
 metadata/coliziune = "none"
 
-[node name="bolovanColt889" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+[node name="bolovanColt894" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-0.789858, 0, -0.960080, 0, 1.243234, 0, 0.960080, 0, -0.789858, -126.385590, -0.428162, 166.965836)
 
-[node name="arbTerasa890" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.195911, 0, -1.191436, 0, 1.207436, 0, 1.191436, 0, -0.195911, -83.099335, 2.487138, 174.402313)
-
-[node name="arbTerasa891" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.610931, 0, 0.198998, 0, 0.642524, 0, -0.198998, 0, 0.610931, -86.015709, 2.487138, 173.277878)
-
-[node name="arbTerasa892" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.004769, 0, -0.907088, 0, 0.907100, 0, 0.907088, 0, 0.004769, -83.580894, 2.487138, 175.541565)
-
-[node name="ferigaTerasa893" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.296896, 0, 0.431322, 0, 0.523628, 0, -0.431322, 0, 0.296896, -78.219574, 2.527138, 178.457886)
+[node name="curte895" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.515320, 0, -0.399220, 0, 0.651868, 0, 0.399220, 0, 0.515320, -118.144028, 1.216199, 180.010651)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa894" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.387464, 0, 0.429460, 0, 0.578416, 0, -0.429460, 0, 0.387464, -99.499832, 2.527138, 175.254730)
+[node name="curte896" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.862753, 0, 0.092088, 0, 0.867654, 0, -0.092088, 0, 0.862753, -121.306229, 1.216199, 178.643784)
+
+[node name="curte897" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(1.155100, 0, 0.425617, 0, 1.231018, 0, -0.425617, 0, 1.155100, -116.318199, 1.216199, 175.367432)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa895" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.929680, 0, -0.640346, 0, 1.128870, 0, 0.640346, 0, 0.929680, -77.445236, 0.295367, 165.577377)
+[node name="curte898" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.228315, 0, -0.725651, 0, 0.760721, 0, 0.725651, 0, -0.228315, -113.622879, 1.216199, 172.919678)
+
+[node name="curte899" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(1.038855, 0, 0.231670, 0, 1.064373, 0, -0.231670, 0, 1.038855, -111.989471, 1.216199, 171.225967)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa896" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.423812, 0, -0.452588, 0, 0.620042, 0, 0.452588, 0, -0.423812, -77.515060, 0.295779, 165.761246)
+[node name="curte900" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.671986, 0, 0.516566, 0, 0.847589, 0, -0.516566, 0, 0.671986, -122.559860, 1.216199, 170.538879)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa897" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.519817, 0, 1.251854, 0, 1.355488, 0, -1.251854, 0, 0.519817, -77.403961, 0.550006, 172.838242)
+[node name="arbTerasa901" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.579474, 0, -0.553469, 0, 0.801323, 0, 0.553469, 0, -0.579474, -97.764198, 2.487138, 180.189026)
+
+[node name="arbTerasa902" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.973610, 0, 0.402851, 0, 1.053663, 0, -0.402851, 0, 0.973610, -82.850319, 2.487138, 178.638748)
+
+[node name="arbTerasa903" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.021547, 0, 1.261586, 0, 1.261770, 0, -1.261586, 0, -0.021547, -94.376015, 2.487138, 171.836380)
+
+[node name="ferigaTerasa904" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.518360, 0, -0.377745, 0, 0.641396, 0, 0.377745, 0, 0.518360, -92.790390, 2.527138, 170.493927)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa898" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.462087, 0, -1.302556, 0, 1.382091, 0, 1.302556, 0, -0.462087, -92.268661, 0.122653, 185.734055)
+[node name="ferigaTerasa905" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.082780, 0, 0.493572, 0, 0.500465, 0, -0.493572, 0, -0.082780, -96.533791, 2.527138, 170.907379)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa899" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.200981, 0, 0.210758, 0, 1.219334, 0, -0.210758, 0, -1.200981, -92.759018, 0.115894, 186.366699)
+[node name="tufaTalpa906" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.540484, 0, 1.263692, 0, 1.374423, 0, -1.263692, 0, 0.540484, -77.490395, 0.296451, 165.738770)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa900" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.086481, 0, 0.493659, 0, 0.501177, 0, -0.493659, 0, -0.086481, -101.118927, -0.144116, 175.242462)
+[node name="tufaTalpa907" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.656223, 0, 1.240613, 0, 1.403477, 0, -1.240613, 0, 0.656223, -76.343414, 0.701251, 179.824692)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa901" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.133391, 0, 0.450892, 0, 1.219787, 0, -0.450892, 0, 1.133391, -101.753471, -0.163937, 173.652100)
+[node name="tufaTalpa908" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.493491, 0, 0.410262, 0, 0.641754, 0, -0.410262, 0, -0.493491, -82.371262, 0.471942, 184.939896)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa902" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.074284, 0, -0.686525, 0, 1.274913, 0, 0.686525, 0, 1.074284, -84.382278, 0.068698, 167.915710)
+[node name="tufaTalpa909" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.083334, 0, -0.824088, 0, 1.361152, 0, 0.824088, 0, 1.083334, -89.715256, 0.207523, 185.782242)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa903" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.546704, 0, -0.018351, 0, 0.547012, 0, 0.018351, 0, -0.546704, -85.109787, 0.047809, 167.983444)
+[node name="tufaTalpa910" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.515214, 0, 0.983233, 0, 1.110041, 0, -0.983233, 0, 0.515214, -90.400978, 0.184253, 185.714630)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa904" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.123691, 0, 0.506347, 0, 0.521235, 0, -0.506347, 0, -0.123691, -96.382217, -0.185513, 168.779785)
+[node name="tufaTalpa911" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.626282, 0, 0.134292, 0, 0.640519, 0, -0.134292, 0, -0.626282, -101.430153, -0.146603, 175.497513)
 metadata/coliziune = "none"
 
-[node name="arbTerasa905" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.585488, 0, 0.223160, 0, 0.626576, 0, -0.223160, 0, -0.585488, -59.446220, 3.111961, 177.699127)
-
-[node name="arbTerasa906" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.627550, 0, -0.698532, 0, 0.939024, 0, 0.698532, 0, -0.627550, -65.594505, 3.111961, 171.437119)
-
-[node name="arbTerasa907" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.631533, 0, -0.389015, 0, 0.741732, 0, 0.389015, 0, -0.631533, -56.482346, 3.111961, 175.222687)
-
-[node name="ferigaTerasa908" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.189195, 0, 0.456278, 0, 0.493948, 0, -0.456278, 0, 0.189195, -67.707344, 3.151961, 182.111710)
+[node name="tufaTalpa912" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.235509, 0, 0.575609, 0, 0.621924, 0, -0.575609, 0, 0.235509, -101.513252, -0.189984, 172.020676)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa909" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.354119, 0, -0.492900, 0, 0.606919, 0, 0.492900, 0, 0.354119, -74.487610, 3.151961, 171.546143)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa910" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.430141, 0, 0.108694, 0, 0.443662, 0, -0.108694, 0, 0.430141, -53.850254, 2.290485, 180.771317)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa911" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.049586, 0, -1.169102, 0, 1.571124, 0, 1.169102, 0, -1.049586, -53.304600, 2.327823, 178.800507)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa912" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.377882, 0, 1.173322, 0, 1.232671, 0, -1.173322, 0, 0.377882, -53.648029, 2.293811, 177.036209)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa913" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.820950, 0, 1.357479, 0, 1.586414, 0, -1.357479, 0, -0.820950, -60.594463, 1.764392, 185.052811)
+[node name="tufaTalpa913" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.241476, 0, -0.522539, 0, 0.575637, 0, 0.522539, 0, -0.241476, -101.349236, -0.134747, 176.974030)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa914" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.091521, 0, -0.545215, 0, 1.220114, 0, 0.545215, 0, 1.091521, -68.075897, 1.229999, 183.838913)
+transform = Transform3D(0.370080, 0, -1.323601, 0, 1.374365, 0, 1.323601, 0, 0.370080, -84.230591, 0.058215, 167.433411)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa915" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.410780, 0, -0.201220, 0, 0.457416, 0, 0.201220, 0, -0.410780, -61.457932, 1.704395, 184.970886)
+transform = Transform3D(-0.615525, 0, 0.074199, 0, 0.619981, 0, -0.074199, 0, -0.615525, -86.933228, -0.010968, 167.770081)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa916" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.604760, 0, 1.484213, 0, 1.602692, 0, -1.484213, 0, -0.604760, -75.511154, 0.429126, 166.688675)
+transform = Transform3D(-0.821687, 0, -0.745780, 0, 1.109665, 0, 0.745780, 0, -0.821687, -86.880280, -0.005658, 167.926575)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa917" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.055041, 0, 0.192904, 0, 1.072532, 0, -0.192904, 0, 1.055041, -77.212845, 0.646487, 178.483719)
+[node name="bolovanColt917" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-1.022671, 0, 0.754498, 0, 1.270875, 0, -0.754498, 0, -1.022671, -75.652122, 0.695007, 184.396530)
+
+[node name="bolovanColt918" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.023922, 0, -0.964300, 0, 0.964597, 0, 0.964300, 0, -0.023922, -102.035545, -0.328950, 169.603470)
+
+[node name="curte919" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.632555, 0, 0.220688, 0, 0.669947, 0, -0.220688, 0, 0.632555, -93.444801, 2.547138, 174.898926)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa918" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.415230, 0, 0.500003, 0, 0.649938, 0, -0.500003, 0, -0.415230, -75.819107, 0.494006, 169.019379)
+[node name="curte920" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-0.598287, 0, -0.876415, 0, 1.061155, 0, 0.876415, 0, -0.598287, -84.543091, 2.547138, 172.597824)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa919" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.444196, 0, 0.149834, 0, 0.468786, 0, -0.149834, 0, 0.444196, -59.003464, 1.702762, 168.387634)
+[node name="curte921" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.751581, 0, 0.725760, 0, 1.044798, 0, -0.725760, 0, 0.751581, -90.376404, 2.547138, 171.959412)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa920" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.172023, 0, -1.458814, 0, 1.468922, 0, 1.458814, 0, 0.172023, -68.180908, 0.906375, 167.088898)
+[node name="curte922" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.270263, 0, 0.835050, 0, 0.877696, 0, -0.835050, 0, 0.270263, -82.884567, 2.547138, 180.761795)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa921" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.109476, 0, -0.576904, 0, 0.587199, 0, 0.576904, 0, -0.109476, -64.708031, 1.217319, 167.826996)
+[node name="curte923" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.394597, 0, 0.968426, 0, 1.045732, 0, -0.968426, 0, -0.394597, -81.278908, 2.547138, 173.701950)
 metadata/coliziune = "none"
 
-[node name="bolovanColt922" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.976416, 0, -0.020171, 0, 0.976624, 0, 0.020171, 0, 0.976416, -54.461185, 2.168212, 185.759644)
-
-[node name="bolovanColt923" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.833411, 0, -0.246470, 0, 0.869092, 0, 0.246470, 0, -0.833411, -75.710121, 0.310424, 166.240356)
-
-[node name="arbTerasa924" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-1.224555, 0, 0.025183, 0, 1.224814, 0, -0.025183, 0, -1.224555, -39.268353, 6.632082, 177.701050)
-
-[node name="arbTerasa925" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.860822, 0, 0.529128, 0, 1.010441, 0, -0.529128, 0, -0.860822, -33.183140, 6.632082, 178.001923)
-
-[node name="arbTerasa926" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(1.135446, 0, 0.138007, 0, 1.143802, 0, -0.138007, 0, 1.135446, -46.154030, 6.632082, 173.435486)
-
-[node name="ferigaTerasa927" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.526995, 0, 0.395423, 0, 0.658850, 0, -0.395423, 0, 0.526995, -29.385500, 6.672081, 168.539276)
+[node name="curte924" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.606559, 0, 0.110904, 0, 0.616615, 0, -0.110904, 0, 0.606559, -92.849312, 2.547138, 177.488037)
 metadata/coliziune = "none"
+
+[node name="curte925" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-0.835025, 0, 1.005505, 0, 1.307022, 0, -1.005505, 0, -0.835025, -83.610100, 2.547138, 174.010376)
+metadata/coliziune = "none"
+
+[node name="arbTerasa926" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.503457, 0, 0.169824, 0, 0.531328, 0, -0.169824, 0, 0.503457, -58.334072, 3.111961, 178.707962)
+
+[node name="arbTerasa927" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.132420, 0, -1.122968, 0, 1.130748, 0, 1.122968, 0, 0.132420, -71.339554, 3.111961, 178.318008)
 
 [node name="ferigaTerasa928" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.495519, 0, -0.345565, 0, 0.604115, 0, 0.345565, 0, 0.495519, -41.678974, 6.672081, 184.264603)
+transform = Transform3D(-0.312303, 0, -0.628483, 0, 0.701801, 0, 0.628483, 0, -0.312303, -67.015106, 3.151961, 182.202209)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa929" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.555318, 0, -0.134758, 0, 0.571435, 0, 0.134758, 0, 0.555318, -24.672935, 5.017566, 180.831955)
+[node name="ferigaTerasa929" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.782772, 0, -0.016171, 0, 0.782939, 0, 0.016171, 0, 0.782772, -60.547138, 3.151961, 170.138901)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa930" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.481271, 0, -0.169876, 0, 0.510372, 0, 0.169876, 0, 0.481271, -24.580042, 5.046557, 178.812607)
+[node name="tufaTalpa930" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.181739, 0, -0.508313, 0, 1.286425, 0, 0.508313, 0, -1.181739, -53.632523, 2.301715, 178.932251)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa931" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.273565, 0, -0.796669, 0, 1.502215, 0, 0.796669, 0, 1.273565, -33.360760, 4.148623, 184.819504)
+transform = Transform3D(-0.745998, 0, -1.271301, 0, 1.474015, 0, 1.271301, 0, -0.745998, -53.004623, 2.342990, 176.180862)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa932" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.139431, 0, 0.423288, 0, 0.445661, 0, -0.423288, 0, -0.139431, -41.424126, 3.393359, 186.328583)
+[node name="tufaTalpa932" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.128230, 0, 0.023426, 0, 1.128473, 0, -0.023426, 0, -1.128230, -65.763313, 1.396549, 184.110413)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa933" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.289240, 0, -0.357900, 0, 1.337995, 0, 0.357900, 0, 1.289240, -33.281635, 4.155124, 185.106735)
+[node name="tufaTalpa933" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.215693, 0, -0.593635, 0, 0.631606, 0, 0.593635, 0, 0.215693, -68.895851, 1.174442, 183.383774)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa934" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.097806, 0, 1.445285, 0, 1.448591, 0, -1.445285, 0, -0.097806, -50.561356, 2.546756, 172.495346)
+transform = Transform3D(0.513239, 0, -1.149196, 0, 1.258596, 0, 1.149196, 0, 0.513239, -61.189903, 1.722232, 184.842163)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa935" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.414504, 0, -0.169508, 0, 0.447824, 0, 0.169508, 0, -0.414504, -49.107357, 2.703906, 179.195847)
+transform = Transform3D(0.350764, 0, -0.278396, 0, 0.447817, 0, 0.278396, 0, 0.350764, -77.279037, 0.621478, 176.437836)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa936" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.338006, 0, 0.282621, 0, 0.440594, 0, -0.282621, 0, 0.338006, -41.992340, 3.338702, 168.662216)
+transform = Transform3D(0.539169, 0, -0.162805, 0, 0.563213, 0, 0.162805, 0, 0.539169, -76.770309, 0.558429, 172.269272)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa937" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.071093, 0, -0.295435, 0, 1.111090, 0, 0.295435, 0, 1.071093, -35.666084, 3.969409, 167.383179)
+transform = Transform3D(-0.751558, 0, 1.073510, 0, 1.310444, 0, -1.073510, 0, -0.751558, -58.493916, 1.764209, 168.929520)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa938" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.244742, 0, -0.495004, 0, 0.552202, 0, 0.495004, 0, 0.244742, -44.938385, 3.043323, 168.992294)
+transform = Transform3D(0.294955, 0, -0.555459, 0, 0.628915, 0, 0.555459, 0, 0.294955, -60.780785, 1.530658, 167.961395)
 metadata/coliziune = "none"
 
-[node name="bolovanColt939" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.701604, 0, -0.975549, 0, 1.201643, 0, 0.975549, 0, 0.701604, -23.847849, 4.987121, 183.600861)
+[node name="tufaTalpa939" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.523182, 0, 1.433594, 0, 1.526077, 0, -1.433594, 0, -0.523182, -69.144562, 0.851642, 167.360413)
+metadata/coliziune = "none"
 
 [node name="bolovanColt940" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.140213, 0, 0.930088, 0, 0.940597, 0, -0.930088, 0, -0.140213, -50.717369, 2.403304, 169.710236)
+transform = Transform3D(0.267096, 0, -0.981256, 0, 1.016958, 0, 0.981256, 0, 0.267096, -54.461185, 2.168212, 185.759644)
 
-[node name="arbTerasa941" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.347281, 0, 0.578434, 0, 0.674677, 0, -0.578434, 0, -0.347281, -10.695331, 7.948262, 176.292130)
+[node name="bolovanColt941" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.075851, 0, 1.120866, 0, 1.123430, 0, -1.120866, 0, -0.075851, -75.710121, 0.310424, 166.240356)
 
-[node name="arbTerasa942" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.672084, 0, 0.368197, 0, 0.766333, 0, -0.368197, 0, 0.672084, -7.651820, 7.948262, 176.491531)
-
-[node name="ferigaTerasa943" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.532819, 0, -0.135027, 0, 0.549662, 0, 0.135027, 0, -0.532819, -8.925421, 7.988262, 167.123001)
+[node name="curte942" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.626709, 0, -0.526487, 0, 0.818507, 0, 0.526487, 0, -0.626709, -65.908485, 3.171961, 172.588013)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa944" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.271583, 0, -0.544195, 0, 0.608199, 0, 0.544195, 0, -0.271583, -3.702649, 7.988262, 178.910904)
+[node name="curte943" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.050907, 0, 0.520401, 0, 1.172699, 0, -0.520401, 0, 1.050907, -62.968529, 3.171961, 181.589050)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa945" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.355943, 0, 0.015181, 0, 1.356028, 0, -0.015181, 0, 1.355943, -0.738925, 7.596118, 169.512909)
+[node name="curte944" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(0.276252, 0, 0.911685, 0, 0.952620, 0, -0.911685, 0, 0.276252, -62.019932, 3.171961, 172.703674)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa946" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.124882, 0, -0.572603, 0, 0.586063, 0, 0.572603, 0, -0.124882, -0.766992, 7.552020, 171.969727)
+[node name="curte945" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.839239, 0, -0.169416, 0, 0.856168, 0, 0.169416, 0, 0.839239, -65.301414, 3.171961, 181.574600)
+
+[node name="curte946" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-1.046328, 0, 0.097350, 0, 1.050847, 0, -0.097350, 0, -1.046328, -58.396496, 3.171961, 171.911194)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa947" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.420498, 0, -0.117375, 0, 0.436572, 0, 0.117375, 0, 0.420498, -15.938530, 5.886600, 180.900040)
+[node name="arbTerasa947" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-1.232345, 0, -0.303161, 0, 1.269086, 0, 0.303161, 0, -1.232345, -28.402363, 6.632082, 178.616852)
+
+[node name="arbTerasa948" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.931314, 0, 0.875462, 0, 1.278194, 0, -0.875462, 0, -0.931314, -31.761763, 6.632082, 172.631866)
+
+[node name="ferigaTerasa949" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.166985, 0, -0.512565, 0, 0.539080, 0, 0.512565, 0, 0.166985, -31.524662, 6.672081, 168.849213)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa948" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.050728, 0, -0.558760, 0, 0.561058, 0, 0.558760, 0, 0.050728, -10.503124, 6.430743, 180.980209)
+[node name="ferigaTerasa950" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.638994, 0, -0.140015, 0, 0.654154, 0, 0.140015, 0, 0.638994, -26.644999, 6.672081, 177.545929)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa949" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.356613, 0, 0.352215, 0, 0.501226, 0, -0.352215, 0, 0.356613, -22.726166, 5.314639, 169.014557)
+[node name="tufaTalpa951" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.428472, 0, -0.430417, 0, 0.607327, 0, 0.430417, 0, 0.428472, -25.872374, 4.982837, 168.719833)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa950" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.187514, 0, -0.395747, 0, 0.437924, 0, 0.395747, 0, -0.187514, -22.066982, 5.411166, 164.990768)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa951" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.196398, 0, 1.518360, 0, 1.531009, 0, -1.518360, 0, -0.196398, -22.231647, 5.296786, 176.927536)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa952" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.486920, 0, 1.123137, 0, 1.224144, 0, -1.123137, 0, -0.486920, -11.133780, 6.594974, 165.194046)
+[node name="tufaTalpa952" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.310922, 0, 0.383901, 0, 0.494017, 0, -0.383901, 0, 0.310922, -26.508038, 4.921573, 165.931870)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa953" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.837817, 0, 1.032151, 0, 1.329388, 0, -1.032151, 0, 0.837817, -12.356323, 6.468509, 165.272110)
+transform = Transform3D(-0.435396, 0, 1.397243, 0, 1.463509, 0, -1.397243, 0, -0.435396, -25.319120, 5.019382, 172.614609)
 metadata/coliziune = "none"
 
-[node name="bolovanColt954" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.023376, 0, -0.828440, 0, 0.828770, 0, 0.828440, 0, 0.023376, -0.844254, 7.313980, 180.804276)
-
-[node name="bolovanColt955" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.033885, 0, 0.886799, 0, 0.887446, 0, -0.886799, 0, -0.033885, -22.480387, 5.273712, 165.254440)
-
-[node name="arbTerasa956" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.503933, 0, 0.223057, 0, 0.551093, 0, -0.223057, 0, 0.503933, -98.350739, 3.448079, 196.883530)
-
-[node name="arbTerasa957" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.104577, 0, -1.071550, 0, 1.076641, 0, 1.071550, 0, -0.104577, -111.101807, 3.448079, 207.222961)
-
-[node name="ferigaTerasa958" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.399364, 0, 0.644404, 0, 0.758121, 0, -0.644404, 0, 0.399364, -94.584641, 3.488079, 206.735764)
+[node name="tufaTalpa954" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.035711, 0, 0.605070, 0, 0.606123, 0, -0.605070, 0, -0.035711, -36.818890, 3.813876, 185.238708)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa959" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.167489, 0, 0.734781, 0, 0.753628, 0, -0.734781, 0, 0.167489, -115.985619, 3.488079, 210.913300)
+[node name="tufaTalpa955" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.059615, 0, 1.244227, 0, 1.245655, 0, -1.244227, 0, 0.059615, -34.386089, 4.050036, 184.722824)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa960" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.328124, 0, -0.471695, 0, 0.574597, 0, 0.471695, 0, 0.328124, -95.931747, 0.078540, 192.075897)
+[node name="tufaTalpa956" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.494618, 0, 0.051680, 0, 0.497310, 0, -0.051680, 0, -0.494618, -48.264076, 2.784580, 186.572662)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa961" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.552501, 0, -0.230631, 0, 0.598705, 0, 0.230631, 0, 0.552501, -94.894020, 0.130389, 196.692917)
+[node name="tufaTalpa957" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.981390, 0, -0.488227, 0, 1.096125, 0, 0.488227, 0, 0.981390, -49.685917, 2.648257, 177.593460)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa962" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.253926, 0, 0.593241, 0, 0.645301, 0, -0.593241, 0, -0.253926, -92.707710, 0.256808, 207.553558)
+[node name="tufaTalpa958" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.406729, 0, -0.382316, 0, 0.558206, 0, 0.382316, 0, 0.406729, -33.100372, 4.232745, 167.129257)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa963" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.551366, 0, 0.181886, 0, 1.561992, 0, -0.181886, 0, -1.551366, -108.675423, -0.024915, 211.757965)
+[node name="tufaTalpa959" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.497334, 0, -0.013684, 0, 0.497522, 0, 0.013684, 0, -0.497334, -32.140179, 4.331470, 167.478546)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa964" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.592488, 0, 1.246981, 0, 1.380581, 0, -1.246981, 0, -0.592488, -104.507271, 0.034061, 210.916458)
+[node name="bolovanColt960" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.726770, 0, -0.942702, 0, 1.190329, 0, 0.942702, 0, -0.726770, -23.847849, 4.987121, 183.600861)
+
+[node name="bolovanColt961" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.841808, 0, 0.653108, 0, 1.065454, 0, -0.653108, 0, 0.841808, -50.717369, 2.403304, 169.710236)
+
+[node name="curte962" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.246992, 0, 1.038900, 0, 1.067857, 0, -1.038900, 0, 0.246992, -44.229919, 6.692081, 174.556641)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa965" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.457213, 0, -1.255172, 0, 1.335852, 0, 1.255172, 0, -0.457213, -120.123184, -0.233258, 201.095688)
+[node name="curte963" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.421706, 0, -0.576992, 0, 0.714672, 0, 0.576992, 0, 0.421706, -34.349682, 6.692081, 173.026443)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa966" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.271483, 0, 1.176445, 0, 1.207363, 0, -1.176445, 0, -0.271483, -117.239761, -0.111569, 213.458420)
+[node name="curte964" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.277512, 0, 0.837315, 0, 1.527460, 0, -0.837315, 0, 1.277512, -45.535282, 6.692081, 179.073090)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa967" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.243883, 0, 0.583058, 0, 0.632009, 0, -0.583058, 0, 0.243883, -120.134087, -0.236234, 199.635864)
+[node name="curte965" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.980748, 0, -0.331905, 0, 1.035387, 0, 0.331905, 0, 0.980748, -38.169136, 6.692081, 175.330185)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa968" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.011858, 0, -1.240849, 0, 1.601113, 0, 1.240849, 0, 1.011858, -106.719826, -0.122403, 193.016632)
+[node name="arbTerasa966" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-1.023982, 0, 0.684704, 0, 1.231811, 0, -0.684704, 0, -1.023982, -14.811553, 7.948262, 176.550858)
+
+[node name="arbTerasa967" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.384224, 0, -0.552342, 0, 0.672837, 0, 0.552342, 0, 0.384224, -17.090107, 7.948262, 172.999207)
+
+[node name="arbTerasa968" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.650665, 0, -0.271608, 0, 0.705079, 0, 0.271608, 0, 0.650665, -13.671561, 7.948262, 173.395721)
+
+[node name="ferigaTerasa969" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.501553, 0, -0.289401, 0, 0.579059, 0, 0.289401, 0, 0.501553, -4.583380, 7.988262, 178.912949)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa969" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.398262, 0, -0.339598, 0, 0.523392, 0, 0.339598, 0, 0.398262, -102.498405, -0.058057, 192.578598)
+[node name="ferigaTerasa970" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.728749, 0, 0.148119, 0, 0.743649, 0, -0.148119, 0, -0.728749, -6.452475, 7.988262, 167.117264)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa970" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.743399, 0, -1.174451, 0, 1.389956, 0, 1.174451, 0, 0.743399, -113.764099, -0.198117, 194.665192)
+[node name="tufaTalpa971" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.592488, 0, 1.246981, 0, 1.380581, 0, -1.246981, 0, -0.592488, -0.588548, 7.559756, 172.594818)
 metadata/coliziune = "none"
 
-[node name="bolovanColt971" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.268892, 0, 0.615317, 0, 0.671504, 0, -0.615317, 0, -0.268892, -92.366219, 0.179275, 207.997147)
-
-[node name="bolovanColt972" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.789897, 0, -0.986730, 0, 1.263952, 0, 0.986730, 0, 0.789897, -121.119576, -0.340760, 196.234299)
-
-[node name="arbTerasa973" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.842544, 0, 0.543561, 0, 1.002666, 0, -0.543561, 0, 0.842544, -67.030777, 5.065062, 201.767746)
-
-[node name="arbTerasa974" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.323644, 0, 0.698273, 0, 0.769630, 0, -0.698273, 0, -0.323644, -68.838860, 5.065062, 202.831009)
-
-[node name="arbTerasa975" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(1.125608, 0, 0.610819, 0, 1.280661, 0, -0.610819, 0, 1.125608, -70.086357, 5.065062, 207.742828)
-
-[node name="ferigaTerasa976" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.151766, 0, 0.754999, 0, 0.770101, 0, -0.754999, 0, -0.151766, -85.279305, 5.105062, 194.530396)
+[node name="tufaTalpa972" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.515870, 0, 0.095110, 0, 0.524564, 0, -0.095110, 0, -0.515870, -0.823056, 7.549548, 171.775620)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa977" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.088709, 0, -0.497205, 0, 0.505057, 0, 0.497205, 0, 0.088709, -77.575867, 5.105062, 195.213852)
+[node name="tufaTalpa973" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.006791, 0, 1.353150, 0, 1.353167, 0, -1.353150, 0, -0.006791, -1.282381, 7.429507, 176.426788)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa974" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.243883, 0, 0.583058, 0, 0.632009, 0, -0.583058, 0, 0.243883, -14.473222, 6.036624, 180.595154)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa975" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.446085, 0, -0.225374, 0, 0.499785, 0, 0.225374, 0, 0.446085, -10.609565, 6.422137, 180.841919)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa976" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.286646, 0, 0.783825, 0, 1.506598, 0, -0.783825, 0, -1.286646, -15.806578, 5.897220, 181.102097)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa977" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.743399, 0, -1.174451, 0, 1.389956, 0, 1.174451, 0, 0.743399, -22.417940, 5.249347, 179.886078)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa978" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.930092, 0, -0.930770, 0, 1.315828, 0, 0.930770, 0, 0.930092, -62.016087, 1.661151, 207.440445)
+transform = Transform3D(1.138702, 0, -0.503767, 0, 1.245160, 0, 0.503767, 0, 1.138702, -22.737616, 5.279635, 172.884583)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa979" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.267630, 0, 1.043624, 0, 1.077393, 0, -1.043624, 0, -0.267630, -61.948582, 1.638156, 208.845337)
+transform = Transform3D(-0.745859, 0, 1.378808, 0, 1.567615, 0, -1.378808, 0, -0.745859, -6.325370, 7.090701, 165.031006)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa980" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.109725, 0, 0.508645, 0, 0.520345, 0, -0.508645, 0, -0.109725, -62.532665, 1.523395, 213.368820)
+[node name="tufaTalpa980" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.375170, 0, 0.648407, 0, 1.520370, 0, -0.648407, 0, -1.375170, -12.616364, 6.440600, 165.367477)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa981" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.106000, 0, -0.632888, 0, 1.274277, 0, 0.632888, 0, 1.106000, -69.435837, 1.179126, 213.294876)
+transform = Transform3D(0.713233, 0, -1.321790, 0, 1.501942, 0, 1.321790, 0, 0.713233, -9.153704, 6.801089, 164.984634)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa982" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.272322, 0, 1.020467, 0, 1.630999, 0, -1.020467, 0, -1.272322, -82.428551, 0.639178, 211.030426)
+[node name="bolovanColt982" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.662875, 0, 0.200679, 0, 0.692586, 0, -0.200679, 0, 0.662875, -0.844254, 7.313980, 180.804276)
+
+[node name="curte983" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.188337, 0, 0.798260, 0, 0.820177, 0, -0.798260, 0, 0.188337, -11.898615, 8.008262, 168.978806)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa983" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.040659, 0, -1.108289, 0, 1.520288, 0, 1.108289, 0, 1.040659, -88.252960, 0.382480, 205.613831)
+[node name="curte984" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.074464, 0, 0.927692, 0, 0.930675, 0, -0.927692, 0, 0.074464, -16.822481, 8.008262, 176.631546)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa984" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.592928, 0, 0.291354, 0, 1.619354, 0, -0.291354, 0, 1.592928, -88.845863, 0.387271, 208.077606)
+[node name="curte985" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.117985, 0, -0.641692, 0, 0.652449, 0, 0.641692, 0, 0.117985, -8.289565, 8.008262, 168.137589)
+
+[node name="curte986" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.534902, 0, 0.474394, 0, 0.714961, 0, -0.474394, 0, 0.534902, -17.406107, 8.008262, 170.514832)
+
+[node name="curte987" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(0.926320, 0, 0.891820, 0, 1.285851, 0, -0.891820, 0, 0.926320, -5.980316, 8.008262, 171.075073)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa985" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.737713, 0, 1.412919, 0, 1.593913, 0, -1.412919, 0, 0.737713, -88.001434, 0.356372, 199.216156)
+[node name="curte988" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(0.963997, 0, -0.131500, 0, 0.972925, 0, 0.131500, 0, 0.963997, -17.686522, 8.008262, 172.618362)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa986" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.368879, 0, -1.038206, 0, 1.101791, 0, 1.038206, 0, -0.368879, -72.611412, 1.029483, 193.946243)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa987" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.852120, 0, -0.831472, 0, 1.190569, 0, 0.831472, 0, 0.852120, -80.982651, 0.598972, 193.363098)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa988" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.236977, 0, -1.104773, 0, 1.129904, 0, 1.104773, 0, 0.236977, -66.948364, 1.373294, 195.012924)
-metadata/coliziune = "none"
-
-[node name="bolovanColt989" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.691563, 0, -0.145706, 0, 0.706746, 0, 0.145706, 0, 0.691563, -86.909019, 0.259811, 192.174698)
+[node name="arbTerasa989" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.165750, 0, 0.585693, 0, 0.608695, 0, -0.585693, 0, -0.165750, -109.663498, 3.448079, 206.910202)
 
 [node name="arbTerasa990" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.477683, 0, -0.301426, 0, 0.564835, 0, 0.301426, 0, 0.477683, -42.209248, 6.898103, 203.658813)
+transform = Transform3D(-0.491494, 0, 0.159791, 0, 0.516816, 0, -0.159791, 0, -0.491494, -97.950470, 3.448079, 196.721542)
 
-[node name="arbTerasa991" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.937467, 0, -0.308142, 0, 0.986811, 0, 0.308142, 0, 0.937467, -32.585159, 6.898103, 201.891129)
+[node name="ferigaTerasa991" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.045236, 0, 0.679376, 0, 0.680881, 0, -0.679376, 0, -0.045236, -95.633682, 3.488079, 201.907990)
+metadata/coliziune = "none"
 
 [node name="ferigaTerasa992" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.220806, 0, -0.684367, 0, 0.719107, 0, 0.684367, 0, 0.220806, -47.267128, 6.938103, 210.142807)
+transform = Transform3D(-0.036553, 0, -0.654240, 0, 0.655261, 0, 0.654240, 0, -0.036553, -100.720032, 3.488079, 193.745987)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa993" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.479909, 0, -0.183349, 0, 0.513741, 0, 0.183349, 0, 0.479909, -48.772545, 6.938103, 202.587708)
+[node name="tufaTalpa993" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.086668, 0, -0.011850, 0, 1.086733, 0, 0.011850, 0, -1.086668, -96.526016, 0.058765, 190.934814)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa994" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.577852, 0, 0.325322, 0, 1.611040, 0, -0.325322, 0, 1.577852, -26.152077, 4.767703, 193.263611)
+[node name="tufaTalpa994" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.036725, 0, 0.482705, 0, 0.484100, 0, -0.482705, 0, -0.036725, -95.708099, 0.097690, 194.578842)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa995" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.109000, 0, 0.286489, 0, 1.145406, 0, -0.286489, 0, -1.109000, -26.397322, 4.766986, 190.860733)
+transform = Transform3D(-1.094565, 0, 0.960976, 0, 1.456554, 0, -0.960976, 0, -1.094565, -105.913849, 0.004688, 210.489777)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa996" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.455640, 0, -0.417530, 0, 0.618013, 0, 0.417530, 0, 0.455640, -38.233749, 3.258960, 210.265182)
+transform = Transform3D(-0.602038, 0, 0.054919, 0, 0.604538, 0, -0.054919, 0, -0.602038, -111.559669, -0.063153, 211.663422)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa997" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.135725, 0, 0.424304, 0, 0.445483, 0, -0.424304, 0, -0.135725, -37.512356, 3.291950, 210.757141)
+[node name="tufaTalpa997" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.496568, 0, 1.491783, 0, 1.572259, 0, -1.491783, 0, -0.496568, -98.712791, 0.128940, 209.371796)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa998" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.649697, 0, 0.989275, 0, 1.183542, 0, -0.989275, 0, 0.649697, -51.813351, 2.478656, 196.881531)
+transform = Transform3D(-0.726532, 0, -0.973353, 0, 1.214604, 0, 0.973353, 0, -0.726532, -117.389107, -0.118497, 212.897125)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa999" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.607638, 0, -0.258601, 0, 1.628304, 0, 0.258601, 0, 1.607638, -51.762558, 2.483096, 195.052475)
+transform = Transform3D(-0.681302, 0, 1.373138, 0, 1.532867, 0, -1.373138, 0, -0.681302, -119.159874, -0.206311, 205.511520)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1000" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.251361, 0, -1.220301, 0, 1.245920, 0, 1.220301, 0, 0.251361, -49.874046, 2.541934, 204.806274)
+[node name="tufaTalpa1000" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.454697, 0, 0.291810, 0, 0.540280, 0, -0.291810, 0, 0.454697, -110.661339, -0.169080, 193.682648)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1001" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.133758, 0, 0.078989, 0, 1.136506, 0, -0.078989, 0, 1.133758, -34.539700, 3.995303, 192.116684)
+transform = Transform3D(1.374703, 0, 0.159273, 0, 1.383899, 0, -0.159273, 0, 1.374703, -104.410995, -0.089215, 192.334808)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1002" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.506348, 0, -0.564929, 0, 1.608797, 0, 0.564929, 0, 1.506348, -32.602505, 4.178729, 191.784698)
+[node name="bolovanColt1002" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.735997, 0, 0.535283, 0, 0.910066, 0, -0.535283, 0, 0.735997, -92.366219, 0.179275, 207.997147)
+
+[node name="bolovanColt1003" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.878766, 0, -0.644807, 0, 1.089957, 0, 0.644807, 0, 0.878766, -121.119576, -0.340760, 196.234299)
+
+[node name="curte1004" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.341005, 0, -0.751071, 0, 0.824859, 0, 0.751071, 0, -0.341005, -99.602699, 3.508079, 205.488983)
+
+[node name="curte1005" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.888934, 0, -0.445400, 0, 0.994276, 0, 0.445400, 0, 0.888934, -115.514053, 3.508079, 201.433441)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1003" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.033846, 0, 1.271656, 0, 1.272107, 0, -1.271656, 0, -0.033846, -43.631474, 3.168323, 194.171005)
+[node name="curte1006" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-1.027886, 0, -0.108938, 0, 1.033643, 0, 0.108938, 0, -1.027886, -113.571205, 3.508079, 199.859909)
 metadata/coliziune = "none"
 
-[node name="bolovanColt1004" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.786261, 0, 0.176220, 0, 0.805767, 0, -0.176220, 0, 0.786261, -23.891964, 4.408432, 208.480896)
-
-[node name="arbTerasa1005" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.858282, 0, 0.516146, 0, 1.001527, 0, -0.516146, 0, -0.858282, -87.268005, 2.570088, 128.016113)
-
-[node name="arbTerasa1006" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.677786, 0, -0.844447, 0, 1.082813, 0, 0.844447, 0, 0.677786, -92.666702, 2.570088, 126.367584)
-
-[node name="ferigaTerasa1007" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.505657, 0, -0.121227, 0, 0.519985, 0, 0.121227, 0, -0.505657, -100.965904, 2.610088, 124.774460)
+[node name="curte1007" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(1.083578, 0, 0.215726, 0, 1.104843, 0, -0.215726, 0, 1.083578, -114.752274, 3.508079, 209.943863)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa1008" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.434664, 0, -0.472798, 0, 0.642239, 0, 0.472798, 0, -0.434664, -80.952805, 2.610088, 125.352371)
+[node name="arbTerasa1008" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.778030, 0, -0.926497, 0, 1.209846, 0, 0.926497, 0, 0.778030, -78.989151, 5.065062, 206.080185)
+
+[node name="arbTerasa1009" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(1.060461, 0, -0.726969, 0, 1.285715, 0, 0.726969, 0, 1.060461, -82.472435, 5.065062, 197.373352)
+
+[node name="ferigaTerasa1010" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.250706, 0, 0.429930, 0, 0.497688, 0, -0.429930, 0, 0.250706, -73.645256, 5.105062, 195.687805)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1009" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.135762, 0, 0.527197, 0, 0.544397, 0, -0.527197, 0, 0.135762, -80.049530, 0.516376, 117.206596)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa1010" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.908936, 0, -0.947454, 0, 1.312949, 0, 0.947454, 0, -0.908936, -78.646255, 0.457217, 128.315735)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa1011" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.162691, 0, -0.435146, 0, 0.464565, 0, 0.435146, 0, 0.162691, -80.014999, 0.522433, 115.319809)
+[node name="ferigaTerasa1011" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.088321, 0, -0.597118, 0, 0.603615, 0, 0.597118, 0, 0.088321, -85.915306, 5.105062, 199.804901)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1012" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.248011, 0, 0.432301, 0, 0.498391, 0, -0.432301, 0, -0.248011, -90.782646, -0.137891, 133.592377)
+transform = Transform3D(0.568724, 0, 0.254161, 0, 0.622932, 0, -0.254161, 0, 0.568724, -60.795830, 1.783862, 193.640869)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1013" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.490452, 0, -0.421841, 0, 0.646910, 0, 0.421841, 0, 0.490452, -94.542900, -0.214398, 133.950668)
+[node name="tufaTalpa1013" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.210245, 0, 0.735730, 0, 1.416331, 0, -0.735730, 0, -1.210245, -61.653954, 1.709522, 203.515305)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1014" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.482866, 0, 0.096992, 0, 0.492511, 0, -0.096992, 0, -0.482866, -102.693138, -0.216306, 127.991402)
+[node name="tufaTalpa1014" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.037456, 0, 0.868640, 0, 1.353089, 0, -0.868640, 0, 1.037456, -61.720303, 1.683872, 207.031448)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1015" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.400132, 0, 0.388585, 0, 0.557767, 0, -0.388585, 0, 0.400132, -102.951385, -0.200803, 121.499382)
+transform = Transform3D(0.404595, 0, 0.159354, 0, 0.434845, 0, -0.159354, 0, 0.404595, -76.425690, 0.850925, 211.765823)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1016" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.385153, 0, 0.639927, 0, 1.525830, 0, -0.639927, 0, -1.385153, -102.497826, -0.199490, 124.500465)
+transform = Transform3D(0.511594, 0, 0.957749, 0, 1.085823, 0, -0.957749, 0, 0.511594, -74.135612, 0.962711, 212.455032)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1017" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.078569, 0, -0.641221, 0, 1.254781, 0, 0.641221, 0, 1.078569, -97.661278, -0.108273, 117.243645)
+transform = Transform3D(-0.728154, 0, -1.305353, 0, 1.494709, 0, 1.305353, 0, -0.728154, -86.585617, 0.349750, 190.329834)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1018" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.416723, 0, 0.741323, 0, 1.598957, 0, -0.741323, 0, 1.416723, -90.854584, 0.066119, 116.507874)
+[node name="tufaTalpa1018" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.380589, 0, -0.224754, 0, 0.441998, 0, 0.224754, 0, 0.380589, -88.978867, 0.407932, 210.632004)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1019" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.300514, 0, -0.492269, 0, 0.576747, 0, 0.492269, 0, 0.300514, -86.078072, 0.236331, 115.876060)
+transform = Transform3D(0.522374, 0, -0.203752, 0, 0.560704, 0, 0.203752, 0, 0.522374, -78.473282, 0.711261, 193.045273)
 metadata/coliziune = "none"
 
-[node name="bolovanColt1020" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.956269, 0, -0.834745, 0, 1.269350, 0, 0.834745, 0, 0.956269, -103.675758, -0.300171, 118.172295)
-
-[node name="arbTerasa1021" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.405909, 0, -0.599697, 0, 0.724153, 0, 0.599697, 0, 0.405909, -62.559891, 2.848613, 128.342667)
-
-[node name="arbTerasa1022" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.311833, 0, 0.711355, 0, 0.776702, 0, -0.711355, 0, 0.311833, -59.839386, 2.848613, 124.960045)
-
-[node name="ferigaTerasa1023" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.465827, 0, 0.231653, 0, 0.520248, 0, -0.231653, 0, -0.465827, -68.480667, 2.888613, 117.724716)
+[node name="tufaTalpa1020" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.691800, 0, -1.405837, 0, 1.566833, 0, 1.405837, 0, 0.691800, -69.562355, 1.204608, 194.520493)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa1024" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.106659, 0, -0.724228, 0, 0.732039, 0, 0.724228, 0, 0.106659, -75.803093, 2.888613, 127.643303)
+[node name="bolovanColt1021" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.084102, 0, 0.977925, 0, 0.981535, 0, -0.977925, 0, -0.084102, -62.726963, 1.416534, 213.825302)
+
+[node name="bolovanColt1022" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.196916, 0, 0.873169, 0, 0.895098, 0, -0.873169, 0, -0.196916, -86.909019, 0.259811, 192.174698)
+
+[node name="curte1023" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.834400, 0, -0.807384, 0, 1.161074, 0, 0.807384, 0, -0.834400, -71.214409, 5.125062, 206.206680)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1025" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.139045, 0, 0.515054, 0, 0.533492, 0, -0.515054, 0, -0.139045, -53.222271, 2.377353, 128.911484)
+[node name="curte1024" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.020719, 0, -0.689740, 0, 0.690051, 0, 0.689740, 0, 0.020719, -76.786308, 5.125062, 204.049240)
+
+[node name="curte1025" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.809363, 0, -1.298808, 0, 1.530350, 0, 1.298808, 0, 0.809363, -68.786346, 5.125062, 197.837234)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1026" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.351384, 0, 0.564732, 0, 0.665127, 0, -0.564732, 0, -0.351384, -53.876495, 2.146274, 136.188263)
+[node name="curte1026" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(0.600757, 0, 0.898336, 0, 1.080702, 0, -0.898336, 0, 0.600757, -70.914856, 5.125062, 202.958679)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1027" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.470067, 0, -1.505436, 0, 1.577118, 0, 1.505436, 0, -0.470067, -53.261002, 2.408695, 127.556770)
+[node name="arbTerasa1027" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.225165, 0, 0.880041, 0, 0.908390, 0, -0.880041, 0, 0.225165, -45.907089, 6.898103, 201.648209)
+
+[node name="arbTerasa1028" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.529190, 0, 0.587520, 0, 0.790710, 0, -0.587520, 0, -0.529190, -39.410801, 6.898103, 203.569336)
+
+[node name="ferigaTerasa1029" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.446483, 0, 0.519002, 0, 0.684624, 0, -0.519002, 0, -0.446483, -37.540077, 6.938103, 194.690079)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1028" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.426562, 0, -0.156988, 0, 0.454534, 0, 0.156988, 0, -0.426562, -63.834827, 1.248950, 133.598312)
+[node name="ferigaTerasa1030" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.509010, 0, 0.404522, 0, 0.650177, 0, -0.404522, 0, -0.509010, -41.207611, 6.938103, 195.252411)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1029" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.953977, 0, -1.209117, 0, 1.540142, 0, 1.209117, 0, 0.953977, -71.893707, 0.661884, 133.262421)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa1030" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.030886, 0, -1.509006, 0, 1.509322, 0, 1.509006, 0, 0.030886, -78.019882, 0.286655, 133.778610)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa1031" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.663159, 0, 0.000167, 0, 0.663159, 0, -0.000167, 0, 0.663159, -76.590515, 0.695132, 114.907974)
+[node name="tufaTalpa1031" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.155664, 0, -1.055775, 0, 1.565318, 0, 1.055775, 0, -1.155664, -26.020454, 4.774814, 193.845627)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1032" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.930408, 0, 1.259049, 0, 1.565523, 0, -1.259049, 0, 0.930408, -67.802406, 1.285220, 115.739700)
+transform = Transform3D(-0.860014, 0, -1.154932, 0, 1.439962, 0, 1.154932, 0, -0.860014, -26.166479, 4.748096, 195.159744)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1033" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.488736, 0, -0.235705, 0, 0.542604, 0, 0.235705, 0, -0.488736, -65.665916, 1.461124, 115.925934)
+[node name="tufaTalpa1033" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.055955, 0, 0.804561, 0, 1.327539, 0, -0.804561, 0, 1.055955, -35.771713, 3.466922, 209.929062)
 metadata/coliziune = "none"
 
-[node name="bolovanColt1034" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.781099, 0, 0.053229, 0, 0.782910, 0, -0.053229, 0, 0.781099, -76.445671, 0.612136, 115.016014)
-
-[node name="arbTerasa1035" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.567077, 0, -0.563334, 0, 0.799325, 0, 0.563334, 0, -0.567077, -42.448502, 5.935728, 128.574463)
-
-[node name="arbTerasa1036" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.994554, 0, 0.241002, 0, 1.023337, 0, -0.241002, 0, -0.994554, -43.512386, 5.935728, 129.368118)
-
-[node name="ferigaTerasa1037" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.036219, 0, 0.502894, 0, 0.504197, 0, -0.502894, 0, -0.036219, -32.918545, 5.975728, 130.548126)
+[node name="tufaTalpa1034" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.847793, 0, -1.158931, 0, 1.435922, 0, 1.158931, 0, -0.847793, -41.327332, 3.008792, 210.717651)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa1038" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.740767, 0, -0.262930, 0, 0.786046, 0, 0.262930, 0, -0.740767, -49.233685, 5.975728, 121.137756)
+[node name="tufaTalpa1035" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.530162, 0, -0.287612, 0, 0.603152, 0, 0.287612, 0, -0.530162, -50.196442, 2.546802, 203.087631)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1039" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.374477, 0, -0.333893, 0, 0.501715, 0, 0.333893, 0, -0.374477, -30.452766, 5.090823, 116.197990)
+[node name="tufaTalpa1036" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.757814, 0, -1.284278, 0, 1.491191, 0, 1.284278, 0, -0.757814, -49.678467, 2.433460, 209.968445)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1040" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.472106, 0, -0.337171, 0, 0.580145, 0, 0.337171, 0, 0.472106, -28.527222, 5.125979, 130.912064)
+[node name="tufaTalpa1037" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.601103, 0, -0.055513, 0, 0.603661, 0, 0.055513, 0, -0.601103, -45.327488, 3.020587, 194.220291)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1041" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.083561, 0, -0.636332, 0, 1.256592, 0, 0.636332, 0, -1.083561, -35.487293, 4.269992, 132.430618)
+[node name="tufaTalpa1038" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.565151, 0, 1.289381, 0, 1.407799, 0, -1.289381, 0, 0.565151, -41.537437, 3.359317, 193.475159)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1042" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.321978, 0, 0.353768, 0, 0.478353, 0, -0.353768, 0, -0.321978, -33.970146, 4.451221, 132.389023)
+[node name="tufaTalpa1039" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.484393, 0, 0.593486, 0, 1.598640, 0, -0.593486, 0, -1.484393, -33.919724, 4.052096, 192.333145)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1043" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-1.042857, 0, -0.216693, 0, 1.065132, 0, 0.216693, 0, -1.042857, -51.399616, 2.597446, 127.684036)
+[node name="bolovanColt1040" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.421624, 0, -0.669897, 0, 0.791536, 0, 0.669897, 0, -0.421624, -51.863674, 2.384460, 194.964111)
+
+[node name="curte1041" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.707886, 0, -0.711053, 0, 1.003344, 0, 0.711053, 0, -0.707886, -31.125549, 6.958103, 196.209229)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1044" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.258431, 0, -1.608174, 0, 1.628806, 0, 1.608174, 0, -0.258431, -50.282219, 2.525287, 136.588379)
+[node name="curte1042" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.790133, 0, -0.678530, 0, 1.041496, 0, 0.678530, 0, 0.790133, -37.897797, 6.958103, 202.637238)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1045" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.500097, 0, 1.405439, 0, 1.491763, 0, -1.405439, 0, 0.500097, -50.187271, 2.550220, 135.319855)
+[node name="curte1043" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.045203, 0, -0.776167, 0, 0.777482, 0, 0.776167, 0, 0.045203, -42.239883, 6.958103, 196.155762)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1046" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.163833, 0, -0.557700, 0, 0.581266, 0, 0.557700, 0, -0.163833, -37.081543, 4.296695, 117.542107)
+[node name="curte1044" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.520636, 0, -1.038419, 0, 1.161626, 0, 1.038419, 0, 0.520636, -40.821724, 6.958103, 196.664612)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1047" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.625313, 0, -0.007524, 0, 0.625358, 0, 0.007524, 0, -0.625313, -40.932320, 3.860339, 117.798180)
+[node name="curte1045" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.101179, 0, 0.816541, 0, 0.822786, 0, -0.816541, 0, 0.101179, -40.754826, 6.958103, 202.092850)
+
+[node name="curte1046" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.200559, 0, -0.619872, 0, 0.651510, 0, 0.619872, 0, -0.200559, -37.602680, 6.958103, 198.639359)
 metadata/coliziune = "none"
 
-[node name="bolovanColt1048" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.822598, 0, -0.807694, 0, 1.152838, 0, 0.807694, 0, -0.822598, -28.176744, 5.067993, 131.735306)
+[node name="arbTerasa1047" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.124990, 0, -0.479002, 0, 0.495041, 0, 0.479002, 0, 0.124990, -89.385704, 2.570088, 130.133484)
 
-[node name="bolovanColt1049" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.863523, 0, 0.073518, 0, 0.866647, 0, -0.073518, 0, -0.863523, -52.900890, 2.466613, 119.783882)
+[node name="arbTerasa1048" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.441989, 0, 0.609837, 0, 0.753163, 0, -0.609837, 0, -0.441989, -90.073326, 2.570088, 123.006042)
 
-[node name="arbTerasa1050" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.124625, 0, -0.827803, 0, 0.837131, 0, 0.827803, 0, 0.124625, -22.735119, 8.240370, 126.109383)
+[node name="arbTerasa1049" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.386953, 0, 0.591687, 0, 0.706984, 0, -0.591687, 0, 0.386953, -83.702026, 2.570088, 125.698280)
 
-[node name="arbTerasa1051" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.441883, 0, -0.240739, 0, 0.503206, 0, 0.240739, 0, 0.441883, -23.199831, 8.240370, 121.659111)
-
-[node name="arbTerasa1052" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.486212, 0, 0.669502, 0, 0.827427, 0, -0.669502, 0, -0.486212, -22.863045, 8.240370, 124.923889)
-
-[node name="ferigaTerasa1053" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.411652, 0, 0.486383, 0, 0.637201, 0, -0.486383, 0, -0.411652, -7.911682, 8.280370, 120.257462)
+[node name="ferigaTerasa1050" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.572503, 0, 0.101881, 0, 0.581498, 0, -0.101881, 0, 0.572503, -101.483932, 2.610088, 120.478325)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa1054" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.368209, 0, 0.410257, 0, 0.551262, 0, -0.410257, 0, -0.368209, -25.908920, 8.280370, 127.134888)
+[node name="ferigaTerasa1051" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.568136, 0, 0.045564, 0, 0.569960, 0, -0.045564, 0, -0.568136, -80.579605, 2.610088, 128.447449)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1055" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.321106, 0, 0.449026, 0, 1.395330, 0, -0.449026, 0, 1.321106, -6.085880, 7.981189, 117.686905)
+[node name="tufaTalpa1052" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.931988, 0, 1.067475, 0, 1.417076, 0, -1.067475, 0, -0.931988, -80.481834, 0.500247, 114.004250)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1053" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.926869, 0, 0.772836, 0, 1.206798, 0, -0.772836, 0, 0.926869, -78.062897, 0.321063, 132.781982)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1054" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.418618, 0, 0.486760, 0, 0.642010, 0, -0.486760, 0, -0.418618, -79.034119, 0.440372, 128.262833)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1055" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.533965, 0, -0.301742, 0, 0.613324, 0, 0.301742, 0, 0.533965, -91.868233, -0.164944, 133.532867)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1056" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.572120, 0, 0.129026, 0, 1.577406, 0, -0.129026, 0, 1.572120, -5.971713, 7.835895, 126.172089)
+transform = Transform3D(-0.197852, 0, -1.326659, 0, 1.341331, 0, 1.326659, 0, -0.197852, -94.166962, -0.202908, 133.646790)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1057" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.037974, 0, 0.552056, 0, 0.553360, 0, -0.552056, 0, -0.037974, -18.120298, 6.318469, 130.170929)
+transform = Transform3D(0.307742, 0, -0.445180, 0, 0.541194, 0, 0.445180, 0, 0.307742, -104.018532, -0.215543, 117.816185)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1058" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.200740, 0, 0.541205, 0, 0.577234, 0, -0.541205, 0, 0.200740, -21.950094, 5.888644, 129.526352)
+[node name="tufaTalpa1058" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.170100, 0, -1.129862, 0, 1.142594, 0, 1.129862, 0, 0.170100, -102.045944, -0.288098, 133.619919)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1059" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.318659, 0, 1.422008, 0, 1.457275, 0, -1.422008, 0, 0.318659, -27.097248, 5.523150, 113.921837)
+transform = Transform3D(1.159974, 0, 1.099456, 0, 1.598232, 0, -1.099456, 0, 1.159974, -92.568703, 0.007526, 116.777512)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1060" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.601943, 0, -1.186754, 0, 1.330684, 0, 1.186754, 0, 0.601943, -27.720680, 5.409076, 116.580261)
+transform = Transform3D(-0.545625, 0, 1.141538, 0, 1.265233, 0, -1.141538, 0, -0.545625, -88.277710, 0.158511, 116.685455)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1061" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(0.943343, 0, -0.999621, 0, 1.374459, 0, 0.999621, 0, 0.943343, -19.927029, 6.380801, 114.186043)
+transform = Transform3D(-1.271040, 0, -0.052641, 0, 1.272130, 0, 0.052641, 0, -1.271040, -90.532951, 0.078571, 117.021454)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1062" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.153191, 0, 1.033158, 0, 1.548311, 0, -1.033158, 0, 1.153191, -15.228996, 6.945987, 114.456161)
+[node name="bolovanColt1062" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.648813, 0, -0.326320, 0, 0.726252, 0, 0.326320, 0, 0.648813, -78.258247, 0.257308, 131.827713)
+
+[node name="bolovanColt1063" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.194713, 0, 1.066274, 0, 1.083907, 0, -1.066274, 0, 0.194713, -103.675758, -0.300171, 118.172295)
+
+[node name="curte1064" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.270453, 0, 0.746515, 0, 0.793996, 0, -0.746515, 0, 0.270453, -91.451569, 2.630088, 125.381439)
+
+[node name="curte1065" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.144806, 0, -0.630621, 0, 0.647033, 0, 0.630621, 0, -0.144806, -94.924438, 2.630088, 122.459946)
+
+[node name="curte1066" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.391105, 0, -0.703891, 0, 0.805249, 0, 0.703891, 0, 0.391105, -81.849220, 2.630088, 126.919548)
+
+[node name="curte1067" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.419958, 0, -0.854045, 0, 0.951713, 0, 0.854045, 0, 0.419958, -95.235443, 2.630088, 121.879829)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1063" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.964075, 0, -0.767376, 0, 1.232196, 0, 0.767376, 0, -0.964075, -21.957680, 6.132205, 114.439156)
+[node name="curte1068" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.112334, 0, -0.961516, 0, 0.968056, 0, 0.961516, 0, -0.112334, -85.893776, 2.630088, 125.874931)
 metadata/coliziune = "none"
 
-[node name="bolovanColt1064" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.513992, 0, -1.147993, 0, 1.257806, 0, 1.147993, 0, -0.513992, -6.291550, 7.626525, 130.392014)
+[node name="arbTerasa1069" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.577166, 0, -0.227862, 0, 0.620517, 0, 0.227862, 0, 0.577166, -69.165451, 2.848613, 124.517670)
 
-[node name="bolovanColt1065" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.573251, 0, 0.451674, 0, 0.729812, 0, -0.451674, 0, 0.573251, -27.451523, 5.386199, 114.200180)
+[node name="arbTerasa1070" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.695976, 0, 0.279846, 0, 0.750131, 0, -0.279846, 0, 0.695976, -62.393898, 2.848613, 123.589981)
 
-[node name="arbTerasa1066" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.293260, 0, 1.025004, 0, 1.066131, 0, -1.025004, 0, 0.293260, -77.681755, 4.764076, 98.509247)
+[node name="arbTerasa1071" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.852746, 0, -0.527151, 0, 1.002529, 0, 0.527151, 0, -0.852746, -65.444298, 2.848613, 128.303665)
 
-[node name="arbTerasa1067" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.595538, 0, 0.805078, 0, 1.001407, 0, -0.805078, 0, 0.595538, -68.449326, 4.764076, 99.148827)
-
-[node name="arbTerasa1068" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(0.663976, 0, -0.260568, 0, 0.713274, 0, 0.260568, 0, 0.663976, -77.617805, 4.764076, 104.480476)
-
-[node name="ferigaTerasa1069" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.673228, 0, 0.166521, 0, 0.693517, 0, -0.166521, 0, 0.673228, -82.246811, 4.804076, 109.443855)
+[node name="ferigaTerasa1072" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.447510, 0, 0.244206, 0, 0.509806, 0, -0.244206, 0, 0.447510, -54.829502, 2.888613, 126.954117)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa1070" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.236042, 0, -0.743601, 0, 0.780166, 0, 0.743601, 0, -0.236042, -61.930290, 4.804076, 112.306892)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa1071" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.599928, 0, 0.124657, 0, 0.612742, 0, -0.124657, 0, -0.599928, -58.092266, 2.157626, 101.001144)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa1072" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.636575, 0, 0.034305, 0, 0.637499, 0, -0.034305, 0, 0.636575, -57.918312, 2.131366, 98.125534)
-metadata/coliziune = "none"
-
-[node name="tufaTalpa1073" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.000695, 0, 0.542418, 0, 0.542418, 0, -0.542418, 0, -0.000695, -57.742188, 2.123172, 96.540550)
+[node name="ferigaTerasa1073" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.341918, 0, 0.391540, 0, 0.519819, 0, -0.391540, 0, 0.341918, -54.653877, 2.888613, 119.112022)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1074" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.300592, 0, 0.512155, 0, 0.593851, 0, -0.512155, 0, -0.300592, -73.530357, 0.906985, 112.220955)
+transform = Transform3D(-0.039254, 0, -0.566706, 0, 0.568064, 0, 0.566706, 0, -0.039254, -52.029999, 2.654590, 118.904495)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1075" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.323195, 0, -0.539870, 0, 0.629217, 0, 0.539870, 0, 0.323195, -65.939659, 1.453586, 113.169960)
+transform = Transform3D(-0.120006, 0, -0.422905, 0, 0.439602, 0, 0.422905, 0, -0.120006, -53.270100, 2.447955, 126.085808)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1076" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.616326, 0, 0.061616, 0, 0.619398, 0, -0.061616, 0, 0.616326, -83.423401, 0.239169, 99.816803)
+[node name="tufaTalpa1076" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.327733, 0, 0.963572, 0, 1.640532, 0, -0.963572, 0, 1.327733, -53.803143, 2.193256, 133.735596)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1077" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.446254, 0, 0.314962, 0, 0.546209, 0, -0.314962, 0, 0.446254, -83.967873, 0.213977, 99.975166)
+[node name="tufaTalpa1077" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.347559, 0, -0.302674, 0, 1.381132, 0, 0.302674, 0, -1.347559, -67.514633, 0.952640, 133.322815)
 metadata/coliziune = "none"
 
 [node name="tufaTalpa1078" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.120336, 0, 0.636953, 0, 1.288744, 0, -0.636953, 0, 1.120336, -64.426056, 1.479556, 96.092842)
+transform = Transform3D(-0.824447, 0, 0.798246, 0, 1.147567, 0, -0.798246, 0, -0.824447, -60.089821, 1.541965, 134.508743)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1079" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.717843, 0, 0.973596, 0, 1.209622, 0, -0.973596, 0, -0.717843, -67.977295, 1.153827, 95.758530)
+[node name="tufaTalpa1079" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.581326, 0, -0.218001, 0, 0.620857, 0, 0.218001, 0, 0.581326, -76.526321, 0.677341, 119.947182)
 metadata/coliziune = "none"
 
-[node name="bolovanColt1080" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.119480, 0, -0.700635, 0, 0.710750, 0, 0.700635, 0, -0.119480, -59.983234, 1.848403, 114.500046)
-
-[node name="bolovanColt1081" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.701311, 0, 0.075051, 0, 0.705315, 0, -0.075051, 0, -0.701311, -82.876808, 0.062835, 93.499954)
-
-[node name="arbTerasa1082" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(-0.613814, 0, 0.632869, 0, 0.881641, 0, -0.632869, 0, -0.613814, -40.857281, 7.289115, 108.426292)
-
-[node name="arbTerasa1083" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.729726, 0, 0.293299, 0, 0.786464, 0, -0.293299, 0, 0.729726, -42.888885, 7.289115, 108.510071)
-
-[node name="arbTerasa1084" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.252469, 0, -0.463214, 0, 0.527549, 0, 0.463214, 0, -0.252469, -34.669945, 7.289115, 105.358795)
-
-[node name="ferigaTerasa1085" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.088548, 0, 0.639294, 0, 0.645397, 0, -0.639294, 0, -0.088548, -33.223984, 7.329115, 109.372795)
+[node name="tufaTalpa1080" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.933561, 0, 0.661180, 0, 1.143982, 0, -0.661180, 0, -0.933561, -76.813866, 0.677036, 117.916435)
 metadata/coliziune = "none"
 
-[node name="ferigaTerasa1086" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.011498, 0, 0.667193, 0, 0.667292, 0, -0.667193, 0, -0.011498, -37.925034, 7.329115, 110.244125)
+[node name="tufaTalpa1081" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.558401, 0, -0.306049, 0, 0.636771, 0, 0.306049, 0, 0.558401, -70.503426, 1.095081, 116.067085)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1087" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.013422, 0, 0.631936, 0, 0.632078, 0, -0.631936, 0, -0.013422, -28.807447, 5.473315, 98.870224)
+[node name="tufaTalpa1082" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.211659, 0, -0.730378, 0, 1.414768, 0, 0.730378, 0, 1.211659, -63.799210, 1.605747, 116.673439)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1088" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.267896, 0, -0.391375, 0, 0.474281, 0, 0.391375, 0, -0.267896, -27.119745, 5.618320, 107.448921)
+[node name="bolovanColt1083" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.697808, 0, 0.483369, 0, 0.848871, 0, -0.483369, 0, 0.697808, -53.725636, 2.087066, 134.983994)
+
+[node name="bolovanColt1084" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.103170, 0, 1.046525, 0, 1.051598, 0, -1.046525, 0, 0.103170, -76.445671, 0.612136, 115.016014)
+
+[node name="curte1085" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.808876, 0, -0.615410, 0, 1.016370, 0, 0.615410, 0, -0.808876, -71.303200, 2.908613, 128.015259)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1089" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.975252, 0, -0.512080, 0, 1.101518, 0, 0.512080, 0, -0.975252, -30.085382, 5.307452, 95.250877)
+[node name="curte1086" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.222077, 0, -0.548848, 0, 0.592075, 0, 0.548848, 0, -0.222077, -58.848648, 2.908613, 130.771957)
+
+[node name="curte1087" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.688173, 0, 0.391252, 0, 0.791619, 0, -0.391252, 0, 0.688173, -56.891106, 2.908613, 127.518288)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1090" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.273211, 0, 0.551885, 0, 0.615810, 0, -0.551885, 0, -0.273211, -43.378990, 3.643695, 112.711533)
+[node name="curte1088" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.431776, 0, 0.585609, 0, 0.727577, 0, -0.585609, 0, -0.431776, -61.741920, 2.908613, 124.427605)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1091" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.392978, 0, -1.511326, 0, 1.561582, 0, 1.511326, 0, -0.392978, -33.947502, 4.747516, 111.167076)
+[node name="curte1089" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.942017, 0, 0.113594, 0, 0.948841, 0, -0.113594, 0, -0.942017, -60.310181, 2.908613, 128.295120)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1092" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(1.182683, 0, -0.643790, 0, 1.346553, 0, 0.643790, 0, 1.182683, -52.728493, 2.694049, 105.726303)
+[node name="curte1090" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.799270, 0, 0.319480, 0, 0.860756, 0, -0.319480, 0, -0.799270, -54.959938, 2.908613, 121.137016)
+
+[node name="curte1091" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.382770, 0, 0.683366, 0, 0.783264, 0, -0.683366, 0, -0.382770, -56.808369, 2.908613, 119.988571)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1093" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.926995, 0, -0.745478, 0, 1.189562, 0, 0.745478, 0, -0.926995, -53.784973, 2.552295, 98.202881)
+[node name="arbTerasa1092" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.134348, 0, -1.174335, 0, 1.181995, 0, 1.174335, 0, -0.134348, -44.654495, 5.935728, 121.961357)
+
+[node name="arbTerasa1093" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(-0.286977, 0, 0.667319, 0, 0.726410, 0, -0.667319, 0, -0.286977, -33.538193, 5.935728, 121.522011)
+
+[node name="arbTerasa1094" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.335426, 0, 1.006842, 0, 1.061245, 0, -1.006842, 0, 0.335426, -37.329430, 5.935728, 123.045868)
+
+[node name="ferigaTerasa1095" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.596711, 0, 0.001049, 0, 0.596711, 0, -0.001049, 0, -0.596711, -35.681004, 5.975728, 130.976624)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1094" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.272215, 0, 0.494586, 0, 0.564550, 0, -0.494586, 0, 0.272215, -51.258171, 2.780689, 114.610077)
+[node name="ferigaTerasa1096" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.015397, 0, 0.724920, 0, 0.725084, 0, -0.724920, 0, -0.015397, -35.119331, 5.975728, 118.948380)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1095" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.535949, 0, 0.017833, 0, 0.536245, 0, -0.017833, 0, -0.535949, -48.675571, 3.084079, 96.137062)
+[node name="tufaTalpa1097" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.405721, 0, 0.235522, 0, 0.469127, 0, -0.235522, 0, 0.405721, -28.418676, 5.123492, 132.341721)
 metadata/coliziune = "none"
 
-[node name="tufaTalpa1096" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
-transform = Transform3D(-0.861038, 0, -0.674883, 0, 1.094008, 0, 0.674883, 0, -0.861038, -37.805134, 4.323672, 94.011520)
+[node name="tufaTalpa1098" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.281548, 0, -0.574633, 0, 0.639900, 0, 0.574633, 0, 0.281548, -30.740274, 5.029529, 118.108505)
 metadata/coliziune = "none"
 
-[node name="bolovanColt1097" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.284486, 0, 0.772301, 0, 0.823031, 0, -0.772301, 0, 0.284486, -26.887045, 5.514328, 110.130615)
+[node name="tufaTalpa1099" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.284527, 0, 1.094622, 0, 1.130996, 0, -1.094622, 0, -0.284527, -42.886864, 3.371921, 134.154602)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1100" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.432864, 0, -0.031744, 0, 0.434026, 0, 0.031744, 0, -0.432864, -35.738739, 4.230121, 133.096771)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1101" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.165743, 0, -1.093386, 0, 1.598265, 0, 1.093386, 0, 1.165743, -40.919930, 3.617221, 133.332535)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1102" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.257685, 0, -0.358532, 0, 0.441528, 0, 0.358532, 0, 0.257685, -50.463104, 2.551761, 133.387482)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1103" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.613296, 0, 0.169515, 0, 1.622177, 0, -0.169515, 0, 1.613296, -52.062611, 2.579868, 124.968864)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1104" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.658055, 0, -1.178407, 0, 1.349696, 0, 1.178407, 0, 0.658055, -52.519405, 2.564441, 122.205605)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1105" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.489032, 0, -0.388718, 0, 0.624703, 0, 0.388718, 0, -0.489032, -41.107735, 3.832767, 118.414757)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1106" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.092629, 0, 1.115693, 0, 1.119531, 0, -1.115693, 0, 0.092629, -42.325569, 3.694858, 118.492538)
+metadata/coliziune = "none"
+
+[node name="bolovanColt1107" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.824769, 0, -0.441790, 0, 0.935640, 0, 0.441790, 0, -0.824769, -52.900890, 2.466613, 119.783882)
+
+[node name="curte1108" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.931422, 0, 0.834773, 0, 1.250757, 0, -0.834773, 0, 0.931422, -43.800434, 5.995728, 127.031380)
+metadata/coliziune = "none"
+
+[node name="curte1109" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.252082, 0, -0.625455, 0, 0.674343, 0, 0.625455, 0, 0.252082, -32.553757, 5.995728, 123.790848)
+metadata/coliziune = "none"
+
+[node name="curte1110" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.242973, 0, -0.639506, 0, 0.684108, 0, 0.639506, 0, 0.242973, -39.899849, 5.995728, 129.882172)
+metadata/coliziune = "none"
+
+[node name="curte1111" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.727182, 0, 0.726756, 0, 1.028090, 0, -0.726756, 0, 0.727182, -49.332207, 5.995728, 123.792747)
+metadata/coliziune = "none"
+
+[node name="curte1112" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-0.612601, 0, -0.813055, 0, 1.018007, 0, 0.813055, 0, -0.612601, -44.519005, 5.995728, 125.279503)
+metadata/coliziune = "none"
+
+[node name="curte1113" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(-1.138050, 0, 0.073558, 0, 1.140425, 0, -0.073558, 0, -1.138050, -45.971542, 5.995728, 125.284142)
+metadata/coliziune = "none"
+
+[node name="arbTerasa1114" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.214825, 0, -0.965932, 0, 0.989532, 0, 0.965932, 0, 0.214825, -13.523508, 8.240370, 120.342361)
+
+[node name="arbTerasa1115" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.561542, 0, -0.984534, 0, 1.133418, 0, 0.984534, 0, -0.561542, -20.628439, 8.240370, 119.897575)
+
+[node name="ferigaTerasa1116" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.558125, 0, 0.377695, 0, 0.673912, 0, -0.377695, 0, -0.558125, -7.991697, 8.280370, 123.147415)
+metadata/coliziune = "none"
+
+[node name="ferigaTerasa1117" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.323635, 0, 0.638105, 0, 0.715485, 0, -0.638105, 0, 0.323635, -20.673769, 8.280370, 128.093079)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1118" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.129030, 0, -0.642953, 0, 0.655773, 0, 0.642953, 0, 0.129030, -6.167293, 8.034961, 114.597633)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1119" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.346256, 0, 0.806628, 0, 1.569412, 0, -0.806628, 0, 1.346256, -6.427458, 7.685046, 131.223892)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1120" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.307111, 0, -0.426543, 0, 0.525600, 0, 0.426543, 0, 0.307111, -6.604680, 7.744586, 126.871498)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1121" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.091895, 0, -0.605290, 0, 0.612226, 0, 0.605290, 0, -0.091895, -18.687281, 6.253558, 130.061737)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1122" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.464399, 0, -0.220986, 0, 0.514297, 0, 0.220986, 0, -0.464399, -15.656859, 6.603702, 130.164841)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1123" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.544681, 0, 0.035282, 0, 0.545822, 0, -0.035282, 0, 0.544681, -27.379213, 5.403247, 119.700256)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1124" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.420460, 0, -0.538897, 0, 1.519249, 0, 0.538897, 0, 1.420460, -27.010111, 5.543292, 113.259834)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1125" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.436669, 0, 0.125146, 0, 0.454248, 0, -0.125146, 0, -0.436669, -17.217144, 6.700595, 114.831108)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1126" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.409931, 0, 0.375023, 0, 0.555595, 0, -0.375023, 0, -0.409931, -14.801315, 6.996875, 114.477142)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1127" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.577696, 0, 1.069666, 0, 1.215697, 0, -1.069666, 0, -0.577696, -20.550484, 6.303988, 114.233582)
+metadata/coliziune = "none"
+
+[node name="bolovanColt1128" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.371879, 0, 0.905682, 0, 0.979058, 0, -0.905682, 0, 0.371879, -6.291550, 7.626525, 130.392014)
+
+[node name="bolovanColt1129" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.561678, 0, -0.493474, 0, 0.747663, 0, 0.493474, 0, 0.561678, -27.451523, 5.386199, 114.200180)
+
+[node name="curte1130" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.717640, 0, 0.693814, 0, 0.998191, 0, -0.693814, 0, -0.717640, -18.108063, 8.300370, 122.969826)
+metadata/coliziune = "none"
+
+[node name="curte1131" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.172277, 0, 0.634070, 0, 0.657057, 0, -0.634070, 0, 0.172277, -11.351130, 8.300370, 122.429520)
+metadata/coliziune = "none"
+
+[node name="curte1132" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.523130, 0, 0.595512, 0, 0.792653, 0, -0.595512, 0, 0.523130, -23.086885, 8.300370, 118.948090)
+metadata/coliziune = "none"
+
+[node name="curte1133" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.772639, 0, 0.413505, 0, 0.876332, 0, -0.413505, 0, -0.772639, -17.997458, 8.300370, 120.952271)
+metadata/coliziune = "none"
+
+[node name="curte1134" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.504297, 0, 0.556960, 0, 0.751346, 0, -0.556960, 0, -0.504297, -15.792186, 8.300370, 127.420067)
+metadata/coliziune = "none"
+
+[node name="arbTerasa1135" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.139588, 0, -0.914502, 0, 0.925094, 0, 0.914502, 0, -0.139588, -75.921600, 4.764076, 104.378288)
+
+[node name="arbTerasa1136" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.739456, 0, -0.202937, 0, 0.766798, 0, 0.202937, 0, 0.739456, -73.832489, 4.764076, 102.122810)
+
+[node name="ferigaTerasa1137" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.540206, 0, -0.036188, 0, 0.541416, 0, 0.036188, 0, 0.540206, -60.350082, 4.804076, 103.487366)
+metadata/coliziune = "none"
+
+[node name="ferigaTerasa1138" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.169547, 0, -0.468442, 0, 0.498181, 0, 0.468442, 0, -0.169547, -61.081993, 4.804076, 108.681099)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1139" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.215270, 0, -0.378200, 0, 0.435174, 0, 0.378200, 0, -0.215270, -57.949802, 2.174335, 101.197754)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1140" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.101720, 0, 0.452686, 0, 0.463974, 0, -0.452686, 0, -0.101720, -59.802357, 1.968951, 112.812416)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1141" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.144734, 0, 1.399297, 0, 1.406762, 0, -1.399297, 0, 0.144734, -67.583496, 1.315936, 113.346535)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1142" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.925338, 0, 0.870737, 0, 1.270603, 0, -0.870737, 0, 0.925338, -68.864510, 1.216678, 113.368614)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1143" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.427772, 0, 0.496374, 0, 0.655268, 0, -0.496374, 0, -0.427772, -85.222305, 0.265613, 112.867920)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1144" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.466085, 0, -0.390165, 0, 0.607836, 0, 0.390165, 0, 0.466085, -84.960258, 0.240314, 106.278168)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1145" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-1.502002, 0, 0.164129, 0, 1.510943, 0, -0.164129, 0, -1.502002, -71.713921, 0.863269, 95.095016)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1146" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.194665, 0, 0.403588, 0, 0.448082, 0, -0.403588, 0, -0.194665, -68.025490, 1.140979, 95.313187)
+metadata/coliziune = "none"
+
+[node name="bolovanColt1147" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.834270, 0, 0.038108, 0, 0.835140, 0, -0.038108, 0, 0.834270, -59.983234, 1.848403, 114.500046)
+
+[node name="bolovanColt1148" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.901339, 0, -0.155655, 0, 0.914681, 0, 0.155655, 0, -0.901339, -82.876808, 0.062835, 93.499954)
+
+[node name="curte1149" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.944411, 0, 0.419491, 0, 1.033385, 0, -0.419491, 0, 0.944411, -77.254967, 4.824076, 103.863632)
+metadata/coliziune = "none"
+
+[node name="curte1150" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.712567, 0, 0.483790, 0, 0.861281, 0, -0.483790, 0, 0.712567, -75.422424, 4.824076, 106.656052)
+
+[node name="curte1151" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.185966, 0, -0.574557, 0, 0.603903, 0, 0.574557, 0, -0.185966, -82.118385, 4.824076, 106.154526)
+
+[node name="curte1152" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_orchid_cluster")]
+transform = Transform3D(0.796270, 0, -0.732261, 0, 1.081782, 0, 0.732261, 0, 0.796270, -77.563141, 4.824076, 102.306190)
+metadata/coliziune = "none"
+
+[node name="curte1153" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.877181, 0, -0.402669, 0, 0.965189, 0, 0.402669, 0, -0.877181, -65.804749, 4.824076, 102.736198)
+metadata/coliziune = "none"
+
+[node name="curte1154" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.001390, 0, 1.271614, 0, 1.271614, 0, -1.271614, 0, -0.001390, -66.762741, 4.824076, 102.691528)
+metadata/coliziune = "none"
+
+[node name="curte1155" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.214025, 0, 0.635279, 0, 0.670362, 0, -0.635279, 0, -0.214025, -78.225258, 4.824076, 102.715179)
+metadata/coliziune = "none"
+
+[node name="arbTerasa1156" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.538651, 0, 0.567985, 0, 0.782785, 0, -0.567985, 0, 0.538651, -48.720428, 7.289115, 103.786575)
+
+[node name="arbTerasa1157" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.949106, 0, -0.868234, 0, 1.286325, 0, 0.868234, 0, 0.949106, -36.350754, 7.289115, 106.881561)
+
+[node name="ferigaTerasa1158" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.283155, 0, -0.476126, 0, 0.553961, 0, 0.476126, 0, -0.283155, -49.573814, 7.329115, 112.287941)
+metadata/coliziune = "none"
+
+[node name="ferigaTerasa1159" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.196333, 0, 0.694513, 0, 0.721730, 0, -0.694513, 0, 0.196333, -31.096054, 7.329115, 97.847511)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1160" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.487709, 0, -0.396637, 0, 0.628635, 0, 0.396637, 0, -0.487709, -29.009720, 5.452258, 100.391197)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1161" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.464878, 0, -0.234770, 0, 0.520797, 0, 0.234770, 0, 0.464878, -27.043516, 5.562640, 111.645782)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1162" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.066267, 0, -0.976353, 0, 1.445749, 0, 0.976353, 0, 1.066267, -32.755165, 4.894687, 110.720062)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1163" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.370651, 0, -0.482196, 0, 0.608190, 0, 0.482196, 0, 0.370651, -41.639130, 3.841190, 112.774574)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1164" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.538100, 0, 0.246962, 0, 0.592066, 0, -0.246962, 0, 0.538100, -50.420631, 2.857440, 115.871422)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1165" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.795980, 0, 0.841459, 0, 1.158290, 0, -0.841459, 0, -0.795980, -52.690292, 2.691684, 106.771873)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1166" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.565106, 0, 1.011721, 0, 1.158846, 0, -1.011721, 0, 0.565106, -53.727871, 2.553058, 97.812325)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1167" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.380005, 0, 0.352600, 0, 0.518393, 0, -0.352600, 0, 0.380005, -47.129059, 3.255786, 96.006676)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1168" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.481307, 0, 0.026411, 0, 0.482031, 0, -0.026411, 0, -0.481307, -39.958027, 4.082995, 94.644295)
+metadata/coliziune = "none"
+
+[node name="tufaTalpa1169" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(-0.681672, 0, -0.872221, 0, 1.106999, 0, 0.872221, 0, -0.681672, -41.891384, 3.857639, 95.456184)
+metadata/coliziune = "none"
+
+[node name="bolovanColt1170" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.708454, 0, 0.414073, 0, 0.820587, 0, -0.414073, 0, -0.708454, -26.887045, 5.514328, 110.130615)
+
+[node name="bolovanColt1171" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.827718, 0, 0.282371, 0, 0.874558, 0, -0.282371, 0, -0.827718, -54.282574, 2.401305, 97.308563)
+
+[node name="curte1172" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(0.455192, 0, -1.431000, 0, 1.501653, 0, 1.431000, 0, 0.455192, -47.632847, 7.349115, 101.168129)
+metadata/coliziune = "none"
+
+[node name="curte1173" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.005378, 0, 0.763890, 0, 0.763909, 0, -0.763890, 0, 0.005378, -47.828465, 7.349115, 100.262680)
+metadata/coliziune = "none"
+
+[node name="curte1174" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.608947, 0, -0.410874, 0, 0.734598, 0, 0.410874, 0, -0.608947, -41.907883, 7.349115, 107.646828)
+metadata/coliziune = "none"
+
+[node name="curte1175" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.660748, 0, -0.259168, 0, 0.709758, 0, 0.259168, 0, -0.660748, -40.724739, 7.349115, 109.434128)
+metadata/coliziune = "none"
+
+[node name="curte1176" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.129810, 0, 0.643728, 0, 0.656686, 0, -0.643728, 0, 0.129810, -35.476433, 7.349115, 97.638451)
+metadata/coliziune = "none"
+
+[node name="curte1177" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_bromeliad")]
+transform = Transform3D(1.010605, 0, 0.435227, 0, 1.100339, 0, -0.435227, 0, 1.010605, -46.131336, 7.349115, 110.278290)
+metadata/coliziune = "none"
+
+[node name="curte1178" parent="DecorManual/ZoneA_PiataSacra" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.700369, 0, 0.017987, 0, 0.700600, 0, -0.017987, 0, -0.700369, -36.410477, 7.349115, 99.595573)
 
 [node name="A_PodeaTerase" type="MultiMeshInstance3D" parent="DecorManual/ZoneA_PiataSacra"]
 script = ExtResource("flock")

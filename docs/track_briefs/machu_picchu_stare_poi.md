@@ -264,6 +264,64 @@ prag ±3 %) găsește **exact una**, la frac **0.185**, amplitudine 8,3 puncte p
 fereastra scurtă. Singurul loc cu repuneri reproductibile din tot turul
 coincide cu singura coamă din tot turul — nu mai e o corelație, e mecanismul.
 
+## 3.7 Starea măsurată la 18 sep 2026 (după valul 2 și `scarp_tint`)
+
+**Decor pe zone** (numărate în `Track15.tscn`):
+
+| zonă | noduri | stare |
+|---|---:|---|
+| ZoneA_PiataSacra | 874 | construită |
+| ZoneB_DrumulIncas | **0** | **goală** — val 3 |
+| ZoneC_PoartaSoarelui | 187 | construită |
+| ZoneD_Terase | 674 | construită |
+| ZoneE_Pod | **0** | **goală** — val 3 |
+| ZoneF_MalulRaului | 92 | construită, **cea mai slabă** |
+| ZoneG_Serpentine | 440 | construită, cea mai bună |
+| ZoneH_Cornisa | 299 | construită |
+
+**Gărzi pe main:** `probe_decor --track=15` → 19 materiale (plafon 30, gardă
+38), 9312 prop-uri, 1 095 030 tri. `ProbeLaneClear` 18 (bază 20). `ProbeBuried`
+0. `ProbeRace` 0 repuneri pe seed 1 și 3; seed 2 dă **0/1/1/2 pe patru rulări**
+(coama de la 0.186, §3.6 — nereparată, decizie de gameplay).
+
+### 528 de piese plutesc sau sunt îngropate
+
+`probe_manual` ia **număr de scenă**, ca `probe_decor`. Ambele harnașamente de
+gauntlet îi spuneau constructorului `--track=8`, adică **Okinawa**. Șase
+constructori au rulat-o, toți au primit verde, și niciunul n-a măsurat pista
+la care lucra. Rulată corect: **276 plutesc, 252 îngropate** din 2550.
+
+Toate cele 276 de plutiri depășesc **2 m**, iar 111 depășesc **5 m** — nu e
+zgomot de măsură. Cele mai rele: `FCort74` **+13,4 m**, `FVers17` +12,4,
+`FRucsacGara64` +11,7 (toate pe F), `masaPiatra267` la **−42,4** pe H.
+
+Nuanță: cele 101 „îngropate" de pe **G sunt intenționate** — zidurile de
+sprijin au talpa sub cotă prin construcție. Sonda nu distinge intenția; se
+citește per caz, nu ca total.
+
+**Se repară re-rulând generatoarele** (`tools/gen_decor_mp_*.gd`), nu mutând
+noduri de mână. Raport complet: `machu_picchu_probe_manual_18sep.txt`.
+Memoria: `probe-decor-numar-de-scena` (actualizată — enumera doar `probe_decor`).
+
+### Golul lateral al lui D — singurul teren care mai lipsește
+
+Frac **0.42–0.5269 nu e atins de nicio râpă** (10,7 % din tur), exact unde
+brief-ul cere 10 terase. Prima cădere de 3 m e la **68 m** dincolo de asfalt
+(pe C e la 11 m). Detaliile și propunerea măsurată:
+`machu_picchu_teren_D.md`. **Nu s-a făcut** — ar lăsa în aer cele 674 de noduri
+ale lui D, deci ordinea e decizie → teren → re-rularea generatorului.
+
+### POI E: gorja există, și e un BAZIN
+
+Măsurat de două ori independent (lead + constructorul valului 3): sub tablier
+`TerrainBody` e la **−40,30** față de deck la **−20,00** — cei 20 m din brief.
+Podea plată pe **100 × 48 m**. În bară e o crăpătură îngustă cu râu alb, deci
+lipsește **conținutul podelei și contrastul pe pereții de 16–28°**, nu forma.
+
+O rază verticală sub tablier lovește **plăcile podului** (`Plate3`/`Plate7`,
+`AnimatableBody3D`) și raportează „gol 0". **Filtrează după corpul lovit** în
+orice sondă de gol. Prima măsurătoare a lead-ului a fost greșită exact așa.
+
 ## 4. Lecția de metodă care merită dusă mai departe
 
 **Când criticul orb repetă același verdict de două ori aproape neschimbat,

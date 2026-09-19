@@ -187,7 +187,7 @@ GARZILE (pe scena integrata din worktree-ul TAU, dupa fiecare pas):
   & $E --headless --fixed-fps 60 --path D:/GameDev/wt-mp-${p.key} res://tools/ProbeBuried.tscn -- --track=8
   & $E --headless --fixed-fps 60 --path D:/GameDev/wt-mp-${p.key} res://tools/ProbeLaneClear.tscn -- --track=8
   & $E --headless --fixed-fps 60 --path D:/GameDev/wt-mp-${p.key} res://tools/ProbeRace.tscn -- --mode=race --track=8 --seconds=150 --seed=N
-  & $E --headless --path D:/GameDev/wt-mp-${p.key} --script res://tools/probe_manual.gd -- --track=8
+  & $E --headless --path D:/GameDev/wt-mp-${p.key} --script res://tools/probe_manual.gd -- --track=15
 ATENTIE: probe_decor ia **--track=15** (numar de scena), restul iau **--track=8**
 (index). probe_decor --track=8 masoara OKINAWA si da verde.
 

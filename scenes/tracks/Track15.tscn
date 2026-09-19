@@ -10294,6 +10294,258 @@ metadata/coliziune = "none"
 transform = Transform3D(0.998669, 0.000000, -0.051578, 0.000000, 1.000000, 0.000000, 0.051578, 0.000000, 0.998669, -109.462769, -1.874889, 140.720886)
 metadata/coliziune = "none"
 
+[node name="stancaGol299" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.166795, 0.000000, 2.011986, 0.087888, 2.016961, -0.007286, -2.010066, 0.088190, 0.166636, -129.758026, -5.141644, 35.791000)
+metadata/coliziune = "none"
+
+[node name="stancaGol300" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.019002, 0.000000, 2.451943, 0.136346, 2.448222, 0.001057, -2.448149, 0.136350, -0.018973, -127.806915, -7.294340, 35.791000)
+metadata/coliziune = "none"
+
+[node name="stancaGol301" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.119939, 0.000000, 3.013295, 0.142420, 3.012311, 0.005669, -3.009928, 0.142533, -0.119805, -125.077164, -11.585443, 39.720242)
+metadata/coliziune = "none"
+
+[node name="stancaGol302" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.617937, 0.000000, 2.951692, -0.033185, 3.015491, -0.006947, -2.951506, -0.033904, -0.617898, -120.669479, -13.077982, 41.316494)
+metadata/coliziune = "none"
+
+[node name="lespedeGol303" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.060573, 0.000000, 1.352611, -0.419439, 1.287223, -0.018783, -1.285934, -0.419860, -0.057587, -131.712006, -2.482513, 35.791000)
+metadata/coliziune = "none"
+
+[node name="copacGol304" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(-0.630465, 0.000000, -1.128962, -0.097244, 1.288268, 0.054306, 1.124766, 0.111380, -0.628122, -129.257156, -4.937851, 35.791000)
+metadata/coliziune = "none"
+
+[node name="stancaGol305" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.444297, 0.000000, 1.865712, 0.067539, 1.916628, -0.016084, -1.864489, 0.069428, 0.444006, -130.541107, -4.895624, 41.316494)
+metadata/coliziune = "none"
+
+[node name="stancaGol306" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.876559, 0.000000, 2.562965, 0.054894, 2.708095, 0.018774, -2.562377, 0.058016, -0.876357, -128.184967, -7.935271, 42.807503)
+metadata/coliziune = "none"
+
+[node name="stancaGol307" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.943761, 0.000000, 2.864202, 0.184065, 3.009448, 0.060650, -2.858281, 0.193799, -0.941810, -125.291595, -11.762476, 44.298512)
+metadata/coliziune = "none"
+
+[node name="stancaGol308" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.025955, 0.000000, 2.835798, 0.055146, 3.015111, -0.019951, -2.835262, 0.058644, 1.025761, -121.802132, -13.555414, 45.894760)
+metadata/coliziune = "none"
+
+[node name="stancaGol309" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.626801, 0.000000, 2.049188, -0.190612, 2.133617, 0.058304, -2.040304, -0.199329, 0.624083, -129.810043, -5.956669, 45.894760)
+metadata/coliziune = "none"
+
+[node name="stancaGol310" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.285324, 0.000000, 2.728054, -0.286525, 2.999002, -0.134996, -2.712965, -0.316734, -1.278215, -126.752670, -10.234461, 47.701511)
+metadata/coliziune = "none"
+
+[node name="stancaGol311" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.592201, 0.000000, 2.956963, 0.152463, 3.011670, -0.030534, -2.953030, 0.155491, 0.591414, -124.188423, -13.401712, 51.946484)
+metadata/coliziune = "none"
+
+[node name="stancaGol312" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.238744, 0.000000, 3.006216, -0.315249, 2.999054, -0.025036, -2.989641, -0.316241, -0.237428, -121.974716, -13.662088, 51.946484)
+metadata/coliziune = "none"
+
+[node name="lespedeGol313" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.088667, 0.000000, 1.686452, -0.255437, 1.669298, -0.013430, -1.666995, -0.255790, -0.087644, -130.590836, -4.032532, 45.894760)
+metadata/coliziune = "none"
+
+[node name="stancaGol314" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.016611, 0.000000, 2.282097, -0.047902, 2.281654, -0.000349, -2.281594, -0.047903, -0.016607, -129.527603, -6.454537, 51.946484)
+metadata/coliziune = "none"
+
+[node name="stancaGol315" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.185868, 0.000000, 2.820290, 0.129238, 2.823439, -0.008517, -2.817327, 0.129518, 0.185673, -128.480209, -7.999141, 55.349438)
+metadata/coliziune = "none"
+
+[node name="stancaGol316" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.582680, 0.000000, 2.958854, 0.292204, 3.000940, -0.057543, -2.944391, 0.297816, 0.579831, -124.005295, -13.625711, 56.840416)
+metadata/coliziune = "none"
+
+[node name="stancaGol317" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.763222, 0.000000, 2.917504, -0.063687, 3.014963, 0.016661, -2.916808, -0.065830, 0.763040, -121.107285, -13.657602, 56.840416)
+metadata/coliziune = "none"
+
+[node name="copacGol318" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(1.243289, 0.000000, -0.132857, -0.019586, 1.236706, -0.183290, 0.131406, 0.184333, 1.229705, -126.883385, -8.957977, 53.753208)
+metadata/coliziune = "none"
+
+[node name="stancaGol319" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.500400, 0.000000, 1.864719, 0.135100, 1.925619, 0.036254, -1.859818, 0.139880, -0.499085, -130.773636, -5.057425, 73.961533)
+metadata/coliziune = "none"
+
+[node name="stancaGol320" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.930168, 0.000000, 2.868645, 0.109075, 3.013501, -0.035368, -2.866570, 0.114666, 0.929496, -127.294022, -9.763819, 77.890999)
+metadata/coliziune = "none"
+
+[node name="stancaGol321" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.229615, 0.000000, 3.006927, -0.163748, 3.011207, 0.012504, -3.002465, -0.164224, 0.229274, -123.885506, -13.649607, 81.820328)
+metadata/coliziune = "none"
+
+[node name="stancaGol322" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.893623, 0.000000, 2.880238, -0.039796, 3.015393, 0.012347, -2.879963, -0.041667, 0.893537, -120.586960, -13.648752, 83.416595)
+metadata/coliziune = "none"
+
+[node name="stancaGol323" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.098727, 0.000000, 2.364787, -0.184320, 2.599637, 0.085639, -2.357593, -0.203243, 1.095384, -129.849167, -7.329292, 83.416595)
+metadata/coliziune = "none"
+
+[node name="stancaGol324" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.865417, 0.000000, 2.888839, 0.108344, 3.013560, -0.032457, -2.886806, 0.113101, 0.864809, -127.589722, -9.987375, 84.907585)
+metadata/coliziune = "none"
+
+[node name="stancaGol325" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.306888, 0.000000, 2.717789, 0.132762, 3.012081, 0.063841, -2.714545, 0.147314, -1.305328, -125.018013, -12.596979, 84.907585)
+metadata/coliziune = "none"
+
+[node name="stancaGol326" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.670549, 0.000000, 2.940187, -0.148498, 3.011833, -0.033867, -2.936435, -0.152311, -0.669693, -120.930557, -13.647470, 87.994797)
+metadata/coliziune = "none"
+
+[node name="lespedeGol327" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.069099, 0.000000, 1.687367, -0.303588, 1.661223, 0.012432, -1.659832, -0.303843, 0.067971, -131.085892, -4.458786, 81.820328)
+metadata/coliziune = "none"
+
+[node name="stancaGol328" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.567977, 0.000000, 2.522431, -0.064973, 2.584728, 0.014630, -2.521594, -0.066600, 0.567789, -131.957916, -5.737404, 87.994797)
+metadata/coliziune = "none"
+
+[node name="stancaGol329" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.099050, 0.000000, 3.014055, 0.270496, 3.003513, -0.008889, -3.001892, 0.270642, 0.098650, -127.720375, -10.695002, 89.801521)
+metadata/coliziune = "none"
+
+[node name="stancaGol330" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.092686, 0.000000, 3.014257, 0.357932, 2.994344, -0.011006, -2.992930, 0.358101, 0.092030, -124.445351, -13.300547, 91.934181)
+metadata/coliziune = "none"
+
+[node name="stancaGol331" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.159752, 0.000000, 3.011447, -0.235603, 3.006438, 0.012498, -3.002217, -0.235934, 0.159262, -122.300735, -13.357981, 95.899796)
+metadata/coliziune = "none"
+
+[node name="copacGol332" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.255863, 0.000000, -1.029502, -0.138751, 1.051142, -0.034484, 1.020109, 0.142972, 0.253529, -130.103912, -6.696426, 87.994797)
+metadata/coliziune = "none"
+
+[node name="stancaGol333" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(1.181167, 0.000000, 2.774739, 0.029982, 3.015506, -0.012763, -2.774577, 0.032585, 1.181098, -131.086868, -8.325907, 94.063187)
+metadata/coliziune = "none"
+
+[node name="stancaGol334" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.203483, 0.000000, 3.008809, -0.227184, 3.007073, 0.015364, -3.000220, -0.227702, 0.202902, -128.003723, -10.949289, 97.480064)
+metadata/coliziune = "none"
+
+[node name="stancaGol335" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.374637, 0.000000, 2.992321, 0.277495, 3.002686, 0.034742, -2.979426, 0.279661, -0.373023, -125.472656, -12.382807, 97.486435)
+metadata/coliziune = "none"
+
+[node name="stancaGol336" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.839795, 0.000000, 2.896391, -0.125501, 3.012849, 0.036388, -2.893671, -0.130670, 0.839006, -121.489815, -12.373987, 100.425179)
+metadata/coliziune = "none"
+
+[node name="lespedeGol337" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.018251, 0.000000, 1.688683, -0.464053, 1.623765, -0.005015, -1.623670, -0.464080, -0.017549, -132.850388, -5.594147, 94.059891)
+metadata/coliziune = "none"
+
+[node name="stancaGol338" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.417418, 0.000000, 2.967590, 0.270947, 2.984286, -0.038111, -2.955195, 0.273614, 0.415674, -133.036896, -7.458630, 100.429482)
+metadata/coliziune = "none"
+
+[node name="stancaGol339" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.099014, 0.000000, 3.014056, 0.315602, 2.999104, -0.010368, -2.997487, 0.315773, 0.098470, -129.988953, -9.488169, 102.002914)
+metadata/coliziune = "none"
+
+[node name="stancaGol340" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-1.143949, 0.000000, 2.790289, -0.075697, 3.014572, -0.031034, -2.789263, -0.081811, -1.143528, -127.257614, -10.646936, 101.995995)
+metadata/coliziune = "none"
+
+[node name="stancaGol341" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.955050, 0.000000, 2.780984, 0.244373, 2.929033, -0.083923, -2.770226, 0.258382, 0.951356, -122.082375, -10.895389, 105.913330)
+metadata/coliziune = "none"
+
+[node name="stancaGol342" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.623733, 0.000000, 2.950473, -0.282954, 3.001782, -0.059817, -2.936874, -0.289208, -0.620858, -133.278168, -7.504022, 103.804054)
+metadata/coliziune = "none"
+
+[node name="stancaGol343" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.724705, 0.000000, 1.344260, 0.106993, 1.522320, -0.057681, -1.339995, 0.121551, 0.722405, -130.369553, -3.948802, 109.935997)
+metadata/coliziune = "none"
+
+[node name="stancaGol344" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.783657, 0.000000, 2.297541, -0.149459, 2.422369, 0.050978, -2.292674, -0.157914, 0.781997, -126.753784, -7.258300, 109.954689)
+metadata/coliziune = "none"
+
+[node name="stancaGol345" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.385719, 0.000000, 2.260173, 0.086287, 2.291178, 0.014726, -2.258525, 0.087535, -0.385437, -123.459473, -8.691151, 112.896797)
+metadata/coliziune = "none"
+
+[node name="lespedeGol346" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.341702, 0.000000, 1.653851, -0.410120, 1.636033, -0.084735, -1.602194, -0.418782, -0.331029, -133.499695, -4.736542, 105.941154)
+metadata/coliziune = "none"
+
+[node name="copacGol347" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_polylepis_b")]
+transform = Transform3D(0.095586, 0.000000, -0.990006, -0.077458, 0.991561, -0.007479, 0.986972, 0.077818, 0.095293, -128.466400, -6.620514, 105.928886)
+metadata/coliziune = "none"
+
+[node name="stancaGol348" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.190602, 0.000000, 1.301908, -0.075963, 1.313545, -0.011121, -1.299690, -0.076773, -0.190278, -130.960556, -3.379095, 109.932938)
+metadata/coliziune = "none"
+
+[node name="stancaGol349" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.867576, 0.000000, 1.623593, 0.087083, 1.838204, 0.046533, -1.621256, 0.098736, -0.866327, -127.768539, -5.691112, 114.270653)
+metadata/coliziune = "none"
+
+[node name="stancaGol350" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.929265, 0.000000, 1.983958, -0.023711, 2.190647, -0.011106, -1.983816, -0.026183, -0.929198, -125.313431, -7.110801, 115.647202)
+metadata/coliziune = "none"
+
+[node name="stancaGol351" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.359409, 0.000000, 1.436562, -0.108497, 1.476610, 0.027145, -1.432459, -0.111842, 0.358383, -120.546539, -7.684382, 115.513077)
+metadata/coliziune = "none"
+
+[node name="stancaGol352" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.363280, 0.000000, 1.318066, -0.015769, 1.367115, -0.004346, -1.317972, -0.016357, -0.363254, -130.050125, -3.514573, 115.780479)
+metadata/coliziune = "none"
+
+[node name="stancaGol353" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.091412, 0.000000, 1.762174, 0.027932, 1.764322, -0.001449, -1.761953, 0.027969, 0.091401, -126.033325, -6.045317, 117.317711)
+metadata/coliziune = "none"
+
+[node name="stancaGol354" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.347743, 0.000000, 1.220355, 0.084269, 1.265904, -0.024013, -1.217442, 0.087623, 0.346912, -123.585709, -5.760586, 122.227173)
+metadata/coliziune = "none"
+
+[node name="lespedeGol355" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.378630, 0.000000, 1.170128, -0.144575, 1.220438, 0.046782, -1.161162, -0.151955, 0.375729, -130.222458, -2.763306, 115.785324)
+metadata/coliziune = "none"
+
+[node name="stancaGol356" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.449604, 0.000000, 0.968131, -0.111091, 1.060386, -0.051591, -0.961736, -0.122486, -0.446634, -129.162979, -3.381566, 122.191765)
+metadata/coliziune = "none"
+
+[node name="stancaGol357" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(0.004966, 0.000000, 1.104952, 0.120057, 1.098421, -0.000540, -1.098410, 0.120059, 0.004937, -125.183586, -4.206256, 125.731247)
+metadata/coliziune = "none"
+
+[node name="copacGol358" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_polylepis_a")]
+transform = Transform3D(0.169611, 0.000000, -0.774392, -0.142570, 0.779198, -0.031226, 0.761155, 0.145949, 0.166711, -123.638527, -4.828171, 124.303452)
+metadata/coliziune = "none"
+
+[node name="stancaGol359" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.305817, 0.000000, 0.748226, 0.008011, 0.808265, 0.003274, -0.748184, 0.008655, -0.305800, -128.147385, -2.806047, 128.111435)
+metadata/coliziune = "none"
+
+[node name="stancaGol360" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.231180, 0.000000, 0.764080, 0.069681, 0.794961, 0.021083, -0.760896, 0.072800, -0.230216, -125.363258, -3.831772, 127.584290)
+metadata/coliziune = "none"
+
+[node name="lespedeGol361" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+transform = Transform3D(-0.009786, 0.000000, 0.833530, -0.114694, 0.825659, -0.001347, -0.825602, -0.114702, -0.009693, -128.095535, -2.463364, 127.442497)
+metadata/coliziune = "none"
+
 [node name="ZonePodeaVale" type="Node3D" parent="DecorManual"]
 
 [node name="Pod_moss_boulder_a_f0" type="MultiMeshInstance3D" parent="DecorManual/ZonePodeaVale"]

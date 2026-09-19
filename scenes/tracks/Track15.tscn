@@ -10167,19 +10167,19 @@ transform = Transform3D(-0.000606, 0.000000, 1.000000, 0.000000, 1.000000, 0.000
 transform = Transform3D(-0.002115, 0.000000, 0.999998, 0.000000, 1.000000, 0.000000, -0.999998, 0.000000, -0.002115, -158.316208, -0.399957, 97.403763)
 
 [node name="masaPiatra267" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(0.309417, 0.000000, 0.950927, 0.000000, 1.000000, 0.000000, -0.950927, 0.000000, 0.309417, -164.159088, -19.000000, 31.861790)
+transform = Transform3D(0.309417, 0.000000, 0.950927, 0.000000, 1.000000, 0.000000, -0.950927, 0.000000, 0.309417, -164.159088, -19.000000, 41.316494)
 metadata/coliziune = "none"
 
 [node name="masaPiatra268" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(0.715945, 0.000000, -0.698156, 0.000000, 1.000000, 0.000000, 0.698156, 0.000000, 0.715945, -164.159088, -19.000000, 65.979591)
+transform = Transform3D(0.715945, 0.000000, -0.698156, 0.000000, 1.000000, 0.000000, 0.698156, 0.000000, 0.715945, -164.159088, -19.000000, 73.961533)
 metadata/coliziune = "none"
 
 [node name="masaPiatra269" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(-0.759281, 0.000000, -0.650763, 0.000000, 1.000000, 0.000000, 0.650763, 0.000000, -0.759281, -162.745422, -19.000000, 94.004097)
+transform = Transform3D(-0.759281, 0.000000, -0.650763, 0.000000, 1.000000, 0.000000, 0.650763, 0.000000, -0.759281, -162.153824, -19.000000, 108.016594)
 metadata/coliziune = "none"
 
 [node name="masaPiatra270" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(0.680103, 0.000000, 0.733117, 0.000000, 1.000000, 0.000000, -0.733117, 0.000000, 0.680103, -164.891159, -19.000000, 118.847221)
+transform = Transform3D(0.680103, 0.000000, 0.733117, 0.000000, 1.000000, 0.000000, -0.733117, 0.000000, 0.680103, -159.655685, -19.000000, 154.545517)
 metadata/coliziune = "none"
 
 [node name="buzaTaiata271" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
@@ -10297,7 +10297,6 @@ metadata/coliziune = "none"
 [node name="buzaTaiata299" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.998669, 0.000000, -0.051578, 0.000000, 1.000000, 0.000000, 0.051578, 0.000000, 0.998669, -109.462769, -1.874889, 140.720886)
 metadata/coliziune = "none"
-
 
 [node name="ZonePodeaVale" type="Node3D" parent="DecorManual"]
 

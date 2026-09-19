@@ -1339,6 +1339,41 @@ const CLIFF_H := 33.0
 ## ca sa TAIE lumina - a doua jumatate a verdictului.
 const CLIFF_TOP_OVER_ROAD := 14.0
 
+## Pragul care decide DACA se pune o masa de piatra intr-un punct: cat trebuie
+## sa urce solul pe partea peretelui, la `CLIFF_RISE_LAT` metri lateral, ca
+## piesa sa fie "felia de jos a unei falezei" si nu un con pe pajiste.
+##
+## Cifrele masurate (vezi nota din `_cliff_mass`): pe faleza reala terenul e la
+## +19,9 .. +27,6 m la 25 m lateral; pe platoul pietei e la -0,3 m peste tot.
+## Distanta dintre cele doua regimuri e de doua ordine de marime, deci pragul nu
+## e delicat: 6 m taie curat, iar ultimul punct acceptat (0,9500, +5,2 la 25 m /
+## +14,4 la 40 m) cade chiar sub el. Se masoara la 25 m fiindca la 8 m terenul e
+## la -0,2 m si pe faleza (umarul drumului e plat pe ambele regimuri) — memoria
+## masoara-inainte-nu-langa, in varianta laterala: intrebi terenul acolo unde
+## cele doua regimuri chiar difera.
+const CLIFF_RISE_LAT := 25.0
+const CLIFF_MIN_RISE := 6.0
+
+## Pasul intre mase, in metri de traseu. Piesa are 79,5 m amprenta dar iese din
+## ea doar felia de sus (restul e ingropat cu CLIFF_SINK), iar felia vizibila la
+## cota soselei are ~2 * r * (1 - t) = ~49 m. Pasul de 34 m le lasa sa se
+## incalece cu ~15 m, deci silueta e continua si nu se vede cusatura dintre ele.
+## Cele patru pozitii vechi (offset-uri fata de poarta) dadeau un pas neuniform
+## de 34/28/26 m plus o gaura, si gaura cadea fix peste poarta.
+const CLIFF_SPACING := 34.0
+
+
+## Cat urca solul peste sosea, pe partea peretelui, la `CLIFF_RISE_LAT` lateral.
+## Raycast filtrat pe `TerrainBody` (via `_sol_real`), nu campul neted: memoria
+## terrain-mesh-y-extrapoleaza. Returneaza -1000 daca nu e sol (gol lateral).
+func _wall_rise(ff: float) -> float:
+	var n := _track.baked.size()
+	var i := int(ff * float(n)) % n
+	var p: Vector3 = _track.baked[i]
+	var side: Vector3 = _track._side_at(i) * (-_gap_side(i))
+	var q: Vector3 = p + side * CLIFF_RISE_LAT
+	return _sol_real(q.x, q.z) - p.y
+
 
 ## (A) BUZA TAIATA pe marginea dinspre gol.
 ##
@@ -1416,12 +1451,69 @@ func _cliff_mass() -> void:
 	# De la intrarea pe cornisa pana DUPA poarta. Capatul de dupa poarta e ce
 	# face poarta sa fie "taiata prin masa": daca masa s-ar opri la poarta,
 	# poarta ar fi tot capatul unui zid, nu o trecere.
-	var runs: Array = [
-		GATE_FRAC - _step(74.0),
-		GATE_FRAC - _step(40.0),
-		GATE_FRAC - _step(12.0),
-		GATE_FRAC + _step(14.0),
-	]
+	#
+	# RUNDA 14 — poarta a fost reperul GRESIT, si captura a spus-o.
+	#
+	# `H_r0_f097.png` (captura de pornire a rundei) arata o LESPEDE de piatra
+	# care umple jumatatea de jos a cadrului la frac 0,97. Vinovata e a patra
+	# masa, asezata la `GATE_FRAC + _step(14.0)` = frac 0,9703, la 31,4 m de ax,
+	# cu varful la 14 m peste sosea.
+	#
+	# Cauza nu e distanta si nu e scara: e ca ACOLO NU MAI EXISTA PERETE.
+	# `tools/SvMpHPerete.tscn` masoara solul pe partea peretelui (-X), prin
+	# raycast filtrat pe `TerrainBody`, cota relativa la sosea:
+	#
+	#     frac    +8 m   +15 m   +25 m   +40 m
+	#     0,9280  -0,2    +1,7   +27,6   +66,7   <- faleza reala
+	#     0,9400  -0,3    +1,1   +19,9   +50,2   <- faleza reala
+	#     0,9500  -0,3     nan    +5,2   +14,4   <- se stinge
+	#     0,9577   nan    -0,3    -0,2    +0,2   <- PLAT
+	#     0,9640   nan    -0,3    -0,3    -0,3   <- PLAT (poarta)
+	#     0,9703  -0,3    -0,3    -0,3    -0,3   <- PLAT (lespedea)
+	#
+	# Dupa 0,955 drumul iese din rapa si intra in platoul pietei. Un con de
+	# 33 m pus pe pajiste plata nu e "masa prin care e taiat drumul", e un
+	# bolovan cat un bloc lasat pe camp — exact tiparul "un perete de piese
+	# peste teren plat citeste a gard, nu a prapastie".
+	#
+	# Aceeasi forma ca decizia rundei 4 pentru zidul de sprijin (`F_WALL_OUT`):
+	# intrebarea nu e cu cat sa mut piesa, ci DE UNDE VINE FORMA
+	# (memoria capcana-parametrului-care-doar-aduna). Forma vine din faleza.
+	# Deci reperul nu mai e poarta, ci terenul: se asaza o masa doar acolo unde
+	# solul chiar urca. Pragul se masoara, nu se presupune.
+	# Prima incercare a rundei a fost sa se taie masele care nu stau pe faleza
+	# (pragul `CLIFF_MIN_RISE` pe `_wall_rise`). Masuratoarea era corecta —
+	# terenul de pe partea peretelui chiar se stinge dupa 0,952 — dar
+	# CONCLUZIA a fost gresita, si captura a spus-o: `r1_f0p95.png` are partea
+	# dreapta mai PROASTA decat `r0_f0p95.png`. Fara con, pe dreapta ramane un
+	# zid scund de zidarie pe pajiste, cu pana de iarba vizibila in spate;
+	# conul, chiar stand pe plat, inchidea marginea cadrului cu masa continua
+	# de piatra — adica exact ce cere brief-ul: "flancul lui Huayna Picchu in
+	# dreapta, la 40 m, umpland marginea cadrului".
+	#
+	# Deci masele NU sunt "faleza prin care e taiat drumul" (aia e teren si nu
+	# e a POI-ului); sunt SILUETA DE FUNDAL care inchide cadrul pe partea
+	# opusa golului. Pentru rolul ala terenul de sub ele nu conteaza — piesa e
+	# `coliziune = none`, nu o atinge nimeni — conteaza sa fie continue, ca sa
+	# nu ramana pana de pajiste intre doua.
+	# Memoria revenirea-e-o-mutare-valida: ma intorc la starea cea mai bine
+	# judecata (cele 4 pozitii), si pastrez masuratoarea ca sa stiu CE sunt.
+	#
+	# Ce se schimba fata de r0: pasul devine uniform si continuu pe toata
+	# cornisa, in loc de patru offset-uri ad-hoc fata de poarta. Cele patru
+	# vechi lasau o gaura de 34 m intre a treia si a patra (0,9577 -> 0,9703),
+	# exact peste poarta — de aia poarta citea ca un toc liber pe gazon.
+	var runs: Array = []
+	var ff_scan := F_IN + _step(6.0)
+	while ff_scan < F_OUT - _step(20.0):
+		runs.append(ff_scan)
+		ff_scan += _step(CLIFF_SPACING)
+	var pe_faleza := 0
+	for ff_r: float in runs:
+		if _wall_rise(ff_r) >= CLIFF_MIN_RISE:
+			pe_faleza += 1
+	print("; masa de piatra: %d pozitii la pas de %.0f m (din care %d pe faleza reala, restul silueta de fundal)" % [
+		runs.size(), CLIFF_SPACING, pe_faleza])
 	var puse := 0
 	for ff: float in runs:
 		var i := int(ff * float(n)) % n

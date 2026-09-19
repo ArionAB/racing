@@ -10490,62 +10490,6 @@ metadata/coliziune = "none"
 transform = Transform3D(0.095586, 0.000000, -0.990006, -0.077458, 0.991561, -0.007479, 0.986972, 0.077818, 0.095293, -128.466400, -6.620514, 105.928886)
 metadata/coliziune = "none"
 
-[node name="stancaGol348" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.190602, 0.000000, 1.301908, -0.075963, 1.313545, -0.011121, -1.299690, -0.076773, -0.190278, -130.960556, -3.379095, 109.932938)
-metadata/coliziune = "none"
-
-[node name="stancaGol349" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.867576, 0.000000, 1.623593, 0.087083, 1.838204, 0.046533, -1.621256, 0.098736, -0.866327, -127.768539, -5.691112, 114.270653)
-metadata/coliziune = "none"
-
-[node name="stancaGol350" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.929265, 0.000000, 1.983958, -0.023711, 2.190647, -0.011106, -1.983816, -0.026183, -0.929198, -125.313431, -7.110801, 115.647202)
-metadata/coliziune = "none"
-
-[node name="stancaGol351" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.359409, 0.000000, 1.436562, -0.108497, 1.476610, 0.027145, -1.432459, -0.111842, 0.358383, -120.546539, -7.684382, 115.513077)
-metadata/coliziune = "none"
-
-[node name="stancaGol352" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.363280, 0.000000, 1.318066, -0.015769, 1.367115, -0.004346, -1.317972, -0.016357, -0.363254, -130.050125, -3.514573, 115.780479)
-metadata/coliziune = "none"
-
-[node name="stancaGol353" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.091412, 0.000000, 1.762174, 0.027932, 1.764322, -0.001449, -1.761953, 0.027969, 0.091401, -126.033325, -6.045317, 117.317711)
-metadata/coliziune = "none"
-
-[node name="stancaGol354" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.347743, 0.000000, 1.220355, 0.084269, 1.265904, -0.024013, -1.217442, 0.087623, 0.346912, -123.585709, -5.760586, 122.227173)
-metadata/coliziune = "none"
-
-[node name="lespedeGol355" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.378630, 0.000000, 1.170128, -0.144575, 1.220438, 0.046782, -1.161162, -0.151955, 0.375729, -130.222458, -2.763306, 115.785324)
-metadata/coliziune = "none"
-
-[node name="stancaGol356" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.449604, 0.000000, 0.968131, -0.111091, 1.060386, -0.051591, -0.961736, -0.122486, -0.446634, -129.162979, -3.381566, 122.191765)
-metadata/coliziune = "none"
-
-[node name="stancaGol357" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(0.004966, 0.000000, 1.104952, 0.120057, 1.098421, -0.000540, -1.098410, 0.120059, 0.004937, -125.183586, -4.206256, 125.731247)
-metadata/coliziune = "none"
-
-[node name="copacGol358" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_polylepis_a")]
-transform = Transform3D(0.169611, 0.000000, -0.774392, -0.142570, 0.779198, -0.031226, 0.761155, 0.145949, 0.166711, -123.638527, -4.828171, 124.303452)
-metadata/coliziune = "none"
-
-[node name="stancaGol359" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.305817, 0.000000, 0.748226, 0.008011, 0.808265, 0.003274, -0.748184, 0.008655, -0.305800, -128.147385, -2.806047, 128.111435)
-metadata/coliziune = "none"
-
-[node name="stancaGol360" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.231180, 0.000000, 0.764080, 0.069681, 0.794961, 0.021083, -0.760896, 0.072800, -0.230216, -125.363258, -3.831772, 127.584290)
-metadata/coliziune = "none"
-
-[node name="lespedeGol361" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
-transform = Transform3D(-0.009786, 0.000000, 0.833530, -0.114694, 0.825659, -0.001347, -0.825602, -0.114702, -0.009693, -128.095535, -2.463364, 127.442497)
-metadata/coliziune = "none"
-
 [node name="ZonePodeaVale" type="Node3D" parent="DecorManual"]
 
 [node name="Pod_moss_boulder_a_f0" type="MultiMeshInstance3D" parent="DecorManual/ZonePodeaVale"]

@@ -1292,7 +1292,13 @@ func _gap_wall_face() -> void:
 	# deci astea dau 9,5 / 12,5 / 15,5 / 19,0 m de ax, adica exact fereastra
 	# masurata; iar pe portiunea largita se muta odata cu marginea.
 	var lats: Array[float] = [3.5, 6.5, 9.5, 13.0]
-	while f < F_OUT:
+	# Se opreste la POARTA, nu la F_OUT — acelasi motiv ca zidul de sprijin
+	# (nota de la F_WALL_OUT): dupa poarta traseul iese din rapa si intra in
+	# piata, unde terenul e PLAT. Captura `H_FINAL_f099.png` a aratat exact
+	# ce iese daca nu se opreste: lespezile stau culcate pe iarba plana si
+	# citesc a scanduri imprastiate, nu a perete. Stanca are sens doar unde
+	# exista cornisa. Memoria capcana-parametrului-care-doar-aduna.
+	while f < F_WALL_OUT:
 		var i := int(f * float(n)) % n
 		var sgn := _gap_side(i)
 		var p := _track.baked[i]

@@ -1313,13 +1313,32 @@ func _flanc() -> void:
 	# Golul pleaca de la 7 m (peste acostamentul de 4 m plus marja) si se
 	# intinde pana la 58 m — acolo unde grila de iarba arata blocurile pline.
 	for spec: Array in [
-			["moss_boulder_b", 1.4, 2.6, 7.0, 30.0, 2.2, 0.88, "inca_stone"],
-			["moss_boulder_c", 2.2, 4.0, 9.0, 40.0, 3.2, 0.82, "inca_stone"],
-			["moss_boulder_a", 0.6, 1.1, 7.0, 26.0, 1.8, 0.85, "inca_stone"],
-			["polylepis_a", 3.6, 5.4, 10.0, 56.0, 2.4, 0.90, ""],
-			["polylepis_b", 5.4, 8.2, 14.0, 70.0, 3.2, 0.86, ""],
-			["tree_fern", 2.2, 3.4, 8.0, 36.0, 2.6, 0.82, ""],
-			["bamboo_clump", 3.2, 5.4, 9.0, 46.0, 3.0, 0.80, ""],
+			# `gap_min` coboara la 2,5-4 m: PRIMUL PLAN era gaura ramasa dupa
+			# runda 1 (celula din stanga-jos la 0.71 nu se miscase deloc,
+			# 85,4 -> 85,0 %), fiindca un `gap_min` de 7 m lasa gol fix
+			# culoarul cel mai apropiat de ochi, care ocupa cei mai multi
+			# pixeli. Nu slabeste nicio garda: `_dist_to_road` scade
+			# acostamentul REAL si cere 3 m de la el, deci carosabilul e aparat
+			# de poarta aia, nu de `gap_min`.
+			["moss_boulder_b", 1.4, 2.6, 3.0, 30.0, 2.2, 0.88, "inca_stone"],
+			["moss_boulder_c", 2.2, 4.0, 4.0, 40.0, 3.2, 0.82, "inca_stone"],
+			["moss_boulder_a", 0.6, 1.1, 2.5, 26.0, 1.8, 0.85, "inca_stone"],
+			["polylepis_a", 3.6, 5.4, 4.0, 56.0, 2.4, 0.90, ""],
+			["polylepis_b", 5.4, 8.2, 6.0, 70.0, 3.2, 0.86, ""],
+			# INELUL DE FUNDAL (70-150 m) A FOST INCERCAT SI RESPINS, si merita
+			# scris ca sa nu-l reincerce altcineva. Grila 8x6 la 0.67 arata
+			# dupa runda 2 banda de orizont (randul 2) cu 37-67 % iarba pe toata
+			# latimea, deci ipoteza „mai lipseste doar departarea" parea solida.
+			# Masurat dupa: iarba a URCAT 30,4 -> 34,6 % la 0.67, si s-a inrautatit
+			# pe toate cele trei fractii. Cauza, citita pe captura: coroana lui
+			# `polylepis` e un verde DESCHIS (V > 0,42), deci la departare
+			# inlocuieste pixeli de gazon cu pixeli de aceeasi familie —
+			# silueta se schimba, materia nu. Ce lipseste in banda aia nu e
+			# vegetatie, e RELIEF care sa rupa linia; si asta e teren, nu decor
+			# (aceeasi granita ca la D si H). Starea pastrata e cea de dupa
+			# runda 2 (memoria `revenirea-e-o-mutare-valida`).
+			["tree_fern", 2.2, 3.4, 3.0, 36.0, 2.6, 0.82, ""],
+			["bamboo_clump", 3.2, 5.4, 4.0, 46.0, 3.0, 0.80, ""],
 		]:
 		var mdl: String = String(spec[0])
 		var cls: String = String(spec[7])
@@ -1936,11 +1955,25 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	# TRUNCHIULUI (~0,3 m) si esantionarea nu ajungea pe taluz. Ce conteaza
 	# aici nu e cat de gros e trunchiul, ci cat de repede coboara terenul sub
 	# el — deci raza minima e a pantei, nu a piesei.
-	var rs: float = maxf(r, 1.2)
-	var g := _sol_real(q.x, q.z)
+	# RAZA DE ESANTIONARE SE PLAFONEAZA, si asta repara „plutirile" de pe taluz.
+	# Regula de mai sus (cota cea mai MARE de pe amprenta) e corecta ca intentie
+	# — piesa sa nu intre in deal — dar raza folosita era `maxf(r, 1.2)`, adica
+	# raza de COLIZIUNE scalata. Un cort dus la 2,4 m inaltime are scara 1,71,
+	# deci r = 1,46 * 1,71 = 2,50 m: esantioneaza la doi metri si jumatate, si
+	# pe un taluz de 45 de grade asta inseamna ca ia cota de la 2,5 m mai sus pe
+	# panta. Masurat pe FCort74: amprenta reala -39,72..-36,63, dar piesa
+	# asezata la -34,95, adica 1,7 m peste MAXIMUL propriei amprente.
+	# Se plafoneaza deci la 1,2 m (raza pantei, nu a piesei) si se ia percentila
+	# 75 in loc de maxim: percentila ignora un singur colt nimerit pe un pinten,
+	# care e exact cazul de aici (memoria
+	# `impartirea-pe-jumatati-ascunde-umbrirea`, in varianta pe cote).
+	var rs: float = clampf(r, 0.6, 1.2)
+	var esant: Array[float] = [_sol_real(q.x, q.z)]
 	for ang: float in [0.0, TAU * 0.125, TAU * 0.25, TAU * 0.375, TAU * 0.5,
 			TAU * 0.625, TAU * 0.75, TAU * 0.875]:
-		g = maxf(g, _sol_real(q.x + cos(ang) * rs, q.z + sin(ang) * rs))
+		esant.append(_sol_real(q.x + cos(ang) * rs, q.z + sin(ang) * rs))
+	esant.sort()
+	var g: float = esant[int(float(esant.size() - 1) * 0.75)]
 	if d - r < half + 0.5:
 		_warn += 1
 		print("; ATENTIE %s la frac %.4f: marginea la %.2f m de ax, banda %.2f" % [

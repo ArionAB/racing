@@ -447,6 +447,7 @@ func _build() -> void:
 	_apa()
 	_lame()
 	_verde()
+	_vegetatie_in_cetate()
 
 
 ## ------------------------------------------------------------------
@@ -1454,6 +1455,140 @@ func _verde() -> void:
 	for fr: float in [-0.0070, 0.0030, 0.0130, 0.0230]:
 		var c := _pt(fr, -12.0)
 		_at("trail_marker", "borna", c.x, c.y, _yaw_at(fr), 1.0, "none", -0.05)
+
+
+## ------------------------------------------------------------------ RUNDA 15
+## VEGETATIA DIN CETATE — si de ce e ALTA AXA decat tot ce s-a incercat pana
+## acum, nu inca o rafinare a zidariei.
+##
+## Verdictul rundei 1 (critic orb): „zidurile noastre sunt o panglica continua
+## cu textura tilata si coama perfect orizontala, nu zidarie din blocuri
+## distincte". Verdictul valului 3, pe aceeasi zona: „tot construitul din cadru
+## e o balustrada — un singur profil de perete, repetat, fara colt si fara
+## interior".
+##
+## Runda 2 a atacat prima oara COLTUL (blocuri de camere, `_block`) si a doua
+## oara PODEAUA (`_platforma`). Ambele s-au facut, si se vad pe captura: exista
+## camere inchise, exista terase cu iarba la cote diferite, exista scari. Si
+## totusi criticul repeta acelasi cuvant. Memoria `criticul-cere-ce-zona-nu-
+## poate-da` spune: la a doua repetare, opreste-te si masoara stratul de
+## dedesubt, nu adauga piese pe aceeasi axa.
+##
+## Masuratoarea care arata unde e stratul (pe `zoneA.part` al rundei 2, 873 de
+## noduri):
+##
+##   inca_wall_a/b/c ........ 802 piese  (91,9 %)
+##   TOT restul ............. 71 piese   ( 8,1 %)
+##   din care vegetatie ..... 31 piese   ( 3,6 %)
+##
+## Raport zid : vegetatie = **26 : 1**. Zona nu e o cetate cu ziduri, e un
+## camp de ziduri cu cateva accente pe margine. Orice cadru din ea ARATA ca un
+## singur profil repetat fiindca in cadru nu mai intra nimic altceva — nu e o
+## problema de modulatie a zidariei, e lipsa oricarui alt material.
+##
+## Si se confirma pe bara, uitandu-ma la ea (regula zero din bara_vizuala.md):
+## in referinta NU exista o singura bucata de zid fara ceva viu lipit de ea.
+## Fiecare talpa are tufa sau bolovan, fiecare incinta are 1-3 copaci CRESCUTI
+## INAUNTRU, iar coama fiecarui zid e taisa de un coronament de frunzis. Verdele
+## nu e un inel in spatele cetatii — e IN cetate, printre pietre.
+##
+## Ce facea runda 2: tot verdele era un inel la 44-64 m de ax, adica DINCOLO de
+## ultimul rand de terase. Din masina el iese la orizont, in spatele zidariei,
+## si nu atinge niciun zid. Deci exact geometria care nu poate rupe silueta.
+##
+## Ce face runda 15, si NIMIC ALTCEVA (o singura axa pe runda, ca sa se poata
+## atribui verdictul urmator):
+##
+##  (a) COPACI PE PODEAUA TERASELOR. `_at_terasa` ii aseaza pe podea, nu pe
+##      solul de sub ea (altfel s-ar ingropa cu `lift` metri — defectul pentru
+##      care a picat runda 6, pe minus). Inaltimea 3,2-5,4 m peste o podea de
+##      1,5-4,2 m: coroana ajunge la 5-9 m, adica PESTE coronamentul zidului de
+##      camera (1,3-1,45 m peste podea) si sub plafonul de cadru (10 + 0,093*L,
+##      deci 12,4 m la 26 m si 14,8 m la 52 m). Se vad intregi, si taie coama.
+##  (b) TUFE LA TALPA ZIDURILOR. `bromeliad` si `tree_fern` lipite de fata
+##      exterioara a zidului de sprijin al fiecarei terase — acolo unde acum e
+##      o muchie geometrica curata intre piatra si iarba.
+##  (c) BOLOVANI LA COLTURILE TERASELOR, ca muchia verticala a zidariei sa nu
+##      inceapa direct din plan.
+##
+## COLIZIUNEA. Totul e la 24 m de ax sau mai departe (muchia e la 9 m), deci
+## `ProbeLaneClear` nu are ce sa vada. Piesele mici (bromelii, orhidee) primesc
+## `none` — sunt sub linia capotei si un colizor acolo ar fi doar cost. Copacii
+## si bolovanii isi pastreaza corpul: sunt la 24+ m, unde o masina ajunge doar
+## daca a parasit demult drumul, si atunci e corect sa-i opreasca ceva.
+##
+## COSTUL. Zero materiale noi: toate cele patru piese sunt deja in kit si deja
+## in zona (`polylepis_a/b`, `tree_fern`, `bromeliad`, `moss_boulder_a/b`,
+## `orchid_cluster`). Nu se cere nicio clasa noua de textura.
+func _vegetatie_in_cetate() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 150015
+	# (a) COPACI PE PODELELE TERASELOR. `_terase` e umplut de `_platforma`,
+	# deci merg pe terasele REALE, cu cotele lor masurate, nu pe cifre
+	# copiate din specificatii (memoria `terrain-mesh-y-extrapoleaza`: cota
+	# se ia de unde e, nu se reconstruieste).
+	for t in _terase:
+		var c: Vector2 = t["c"]
+		var u: Vector2 = t["u"]
+		var v: Vector2 = t["v"]
+		var hw: float = float(t["hw"])
+		var hd: float = float(t["hd"])
+		# Doi-trei copaci pe terasa, imprastiati in interior dar la cel putin
+		# 2 m de zid ca sa nu-i strapunga coroana (aranjamentul-bate-numarul:
+		# pilcuri neregulate, nu grila).
+		var n_arb := 2 if rng.randf() < 0.45 else 3
+		for k in range(n_arb):
+			var su := rng.randf_range(-hw + 2.0, hw - 2.0)
+			var sv := rng.randf_range(-hd + 2.0, hd - 2.0)
+			var q := c + u * su + v * sv
+			var mdl := "polylepis_a" if rng.randf() < 0.6 else "polylepis_b"
+			var hgt := rng.randf_range(3.2, 5.4)
+			_at_terasa(mdl, "arbTerasa", q.x, q.y,
+				rng.randf_range(0.0, TAU), _scale_for(mdl, hgt), "", -0.12)
+		# O feriga sau doua IN incinta, la baza zidului interior: verdele de
+		# sub coroana, care in bara umple coltul dintre doua laturi.
+		for k2 in range(2):
+			var su2 := rng.randf_range(-hw + 0.6, hw - 0.6)
+			var sv2: float = (hd - 0.9) * (1.0 if rng.randf() < 0.5 else -1.0)
+			if rng.randf() < 0.5:
+				var tmp := su2
+				su2 = (hw - 0.9) * (1.0 if rng.randf() < 0.5 else -1.0)
+				sv2 = tmp * hd / maxf(hw, 0.01)
+			var q2 := c + u * su2 + v * sv2
+			_at_terasa("tree_fern", "ferigaTerasa", q2.x, q2.y,
+				rng.randf_range(0.0, TAU),
+				_scale_for("tree_fern", rng.randf_range(1.6, 2.6)),
+				"none", -0.08)
+		# (b) TUFE LA TALPA ZIDULUI DE SPRIJIN, pe FATA EXTERIOARA (deci la
+		# `hd + 0.7` in afara conturului), unde acum piatra iese direct din
+		# iarba cu o muchie curata. Cota vine din `_at` (solul de jos), NU din
+		# `_at_terasa`: tufa sta la piciorul zidului, nu pe podea.
+		for e: Array in [[u, hw], [v, hd], [-u, hw], [-v, hd]]:
+			var nrm: Vector2 = e[0]
+			var half: float = float(e[1])
+			var tang := Vector2(-nrm.y, nrm.x)
+			var n_tuf := 2 + (1 if rng.randf() < 0.5 else 0)
+			for k3 in range(n_tuf):
+				var off := rng.randf_range(-half + 1.0, half - 1.0)
+				var q3 := c + nrm * (half + rng.randf_range(0.5, 1.3)) \
+					+ tang * off
+				var mdl3 := "bromeliad" if rng.randf() < 0.55 else "tree_fern"
+				var h3: float = rng.randf_range(0.40, 0.62) if mdl3 == "bromeliad" \
+					else rng.randf_range(1.4, 2.2)
+				_at(mdl3, "tufaTalpa", q3.x, q3.y,
+					rng.randf_range(0.0, TAU), _scale_for(mdl3, h3),
+					"none", -0.05)
+		# (c) BOLOVANI LA DOUA DIN CELE PATRU COLTURI: muchia verticala a
+		# zidariei nu mai incepe din plan.
+		for sgn: Vector2 in [Vector2(1, 1), Vector2(-1, -1)]:
+			if rng.randf() < 0.35:
+				continue
+			var q4 := c + u * ((hw + 1.0) * sgn.x) + v * ((hd + 1.0) * sgn.y)
+			var mdl4 := "moss_boulder_a" if rng.randf() < 0.5 else "moss_boulder_b"
+			var h4: float = rng.randf_range(0.6, 0.95) if mdl4 == "moss_boulder_a" \
+				else rng.randf_range(1.3, 2.0)
+			_at(mdl4, "bolovanColt", q4.x, q4.y, rng.randf_range(0.0, TAU),
+				_scale_for(mdl4, h4), "", -0.14)
 
 
 # ------------------------------------------------------------------ asezarea

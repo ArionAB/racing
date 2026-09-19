@@ -10167,134 +10167,130 @@ transform = Transform3D(-0.000606, 0.000000, 1.000000, 0.000000, 1.000000, 0.000
 transform = Transform3D(-0.002115, 0.000000, 0.999998, 0.000000, 1.000000, 0.000000, -0.999998, 0.000000, -0.002115, -158.316208, -0.399957, 97.403763)
 
 [node name="masaPiatra267" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(0.309417, 0.000000, 0.950927, 0.000000, 1.000000, 0.000000, -0.950927, 0.000000, 0.309417, -164.159088, -19.000000, 41.316494)
+transform = Transform3D(0.309417, 0.000000, 0.950927, 0.000000, 1.000000, 0.000000, -0.950927, 0.000000, 0.309417, -164.159088, -19.000000, 73.961533)
 metadata/coliziune = "none"
 
 [node name="masaPiatra268" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(0.715945, 0.000000, -0.698156, 0.000000, 1.000000, 0.000000, 0.698156, 0.000000, 0.715945, -164.159088, -19.000000, 73.961533)
+transform = Transform3D(0.715945, 0.000000, -0.698156, 0.000000, 1.000000, 0.000000, 0.698156, 0.000000, 0.715945, -162.153824, -19.000000, 108.016594)
 metadata/coliziune = "none"
 
 [node name="masaPiatra269" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(-0.759281, 0.000000, -0.650763, 0.000000, 1.000000, 0.000000, 0.650763, 0.000000, -0.759281, -162.153824, -19.000000, 108.016594)
+transform = Transform3D(-0.759281, 0.000000, -0.650763, 0.000000, 1.000000, 0.000000, 0.650763, 0.000000, -0.759281, -159.655685, -19.000000, 154.545517)
 metadata/coliziune = "none"
 
-[node name="masaPiatra270" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_huayna_picchu")]
-transform = Transform3D(0.680103, 0.000000, 0.733117, 0.000000, 1.000000, 0.000000, -0.733117, 0.000000, 0.680103, -159.655685, -19.000000, 154.545517)
-metadata/coliziune = "none"
-
-[node name="buzaTaiata271" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata270" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -133.570007, -1.867000, 35.791000)
 metadata/coliziune = "none"
 
-[node name="pietreBuza272" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.672987, 0.000000, -0.775704, 0.000000, 1.026951, 0.000000, 0.775704, 0.000000, 0.672987, -128.652695, -5.585779, 35.791000)
+[node name="pietreBuza271" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.941995, 0.000000, 0.508819, 0.000000, 1.070632, 0.000000, -0.508819, 0.000000, 0.941995, -128.852936, -5.400980, 35.791000)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata273" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata272" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -133.570007, -1.867000, 39.720242)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata274" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata273" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -133.570007, -1.867000, 44.298512)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata275" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata274" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -133.570007, -1.867000, 47.701511)
 metadata/coliziune = "none"
 
-[node name="pietreBuza276" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.642519, 0.000000, 0.588292, 0.000000, 0.871159, 0.000000, -0.588292, 0.000000, -0.642519, -130.173508, -5.007379, 47.701511)
+[node name="pietreBuza275" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.647361, 0.000000, -0.418922, 0.000000, 0.771085, 0.000000, 0.418922, 0.000000, 0.647361, -129.834137, -5.426706, 47.701511)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata277" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata276" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -133.570007, -1.867000, 53.753208)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata278" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata277" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -133.716034, -1.867000, 80.013557)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata279" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata278" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -133.963745, -1.867000, 83.416595)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata280" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata279" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -134.460327, -1.867000, 87.994797)
 metadata/coliziune = "none"
 
-[node name="pietreBuza281" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.454774, 0.000000, 0.658845, 0.000000, 0.800560, 0.000000, -0.658845, 0.000000, -0.454774, -130.271011, -6.626871, 87.994797)
+[node name="pietreBuza280" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.609310, 0.000000, 0.752185, 0.000000, 0.968009, 0.000000, -0.752185, 0.000000, -0.609310, -130.756607, -6.134134, 87.994797)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata282" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata281" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000606, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000606, -134.815460, -1.867000, 91.927399)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata283" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata282" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.027892, 0.000000, 0.999611, 0.000000, 1.000000, 0.000000, -0.999611, 0.000000, 0.027892, -132.683029, -1.867000, 117.579453)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata284" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata283" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(-0.000095, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000095, -131.771301, -1.867000, 124.140572)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata285" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata284" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.029342, 0.000000, 0.999569, 0.000000, 1.000000, 0.000000, -0.999569, 0.000000, 0.029342, -131.299866, -1.867000, 126.856705)
 metadata/coliziune = "none"
 
-[node name="pietreBuza286" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.641380, 0.000000, 0.452159, 0.000000, 0.784739, 0.000000, -0.452159, 0.000000, 0.641380, -126.566719, -3.379083, 126.676529)
+[node name="pietreBuza285" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.982346, 0.000000, 0.025061, 0.000000, 0.982665, 0.000000, -0.025061, 0.000000, 0.982346, -127.642548, -2.980997, 126.717484)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata287" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata286" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.219808, 0.000000, 0.975543, 0.000000, 1.000000, 0.000000, -0.975543, 0.000000, 0.219808, -130.430893, -1.867000, 129.624969)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata288" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata287" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.301896, 0.000000, 0.953341, 0.000000, 1.000000, 0.000000, -0.953341, 0.000000, 0.301896, -129.223465, -1.867000, 133.022522)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata289" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata288" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.477085, 0.000000, 0.878857, 0.000000, 1.000000, 0.000000, -0.878857, 0.000000, 0.477085, -128.296768, -1.867000, 135.693985)
 metadata/coliziune = "none"
 
-[node name="pietreBuza290" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.320421, 0.000000, -1.045519, 0.000000, 1.093517, 0.000000, 1.045519, 0.000000, 0.320421, -124.978668, -0.994684, 133.699295)
+[node name="pietreBuza289" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.230071, 0.000000, -1.059527, 0.000000, 1.084219, 0.000000, 1.059527, 0.000000, 0.230071, -124.016243, -1.172357, 133.120728)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata291" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata290" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.656154, 0.000000, 0.754627, 0.000000, 1.000000, 0.000000, -0.754627, 0.000000, 0.656154, -127.865730, -1.867000, 136.521088)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata292" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata291" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.829941, 0.000000, 0.557851, 0.000000, 1.000000, 0.000000, -0.557851, 0.000000, 0.829941, -125.608009, -1.867000, 138.636658)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata293" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata292" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.926619, 0.000000, 0.376000, 0.000000, 1.000000, 0.000000, -0.376000, 0.000000, 0.926619, -124.603531, -1.867000, 139.303528)
 metadata/coliziune = "none"
 
-[node name="pietreBuza294" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.693986, 0.000000, 0.177927, 0.000000, 0.716432, 0.000000, -0.177927, 0.000000, 0.693986, -123.571373, -0.647821, 136.198578)
+[node name="pietreBuza293" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.533438, 0.000000, -0.593814, 0.000000, 0.798230, 0.000000, 0.593814, 0.000000, 0.533438, -123.605469, -0.647913, 136.301147)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata295" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata294" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.984432, 0.000000, 0.175764, 0.000000, 1.000000, 0.000000, -0.175764, 0.000000, 0.984432, -121.523140, -1.867000, 140.068848)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata296" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata295" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.991407, 0.000000, 0.130817, 0.000000, 1.000000, 0.000000, -0.130817, 0.000000, 0.991407, -117.757477, -1.867000, 140.656662)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata297" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata296" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.999994, 0.000000, -0.003586, 0.000000, 1.000000, 0.000000, 0.003586, 0.000000, 0.999994, -114.002182, -1.871931, 141.008102)
 metadata/coliziune = "none"
 
-[node name="pietreBuza298" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.628905, 0.000000, 0.661475, 0.000000, 0.912727, 0.000000, -0.661475, 0.000000, 0.628905, -114.146103, -0.640756, 137.571152)
+[node name="pietreBuza297" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.948719, 0.000000, -0.572052, 0.000000, 1.107841, 0.000000, 0.572052, 0.000000, 0.948719, -114.182762, -0.639337, 136.695740)
 metadata/coliziune = "none"
 
-[node name="buzaTaiata299" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
+[node name="buzaTaiata298" parent="DecorManual/ZoneH_Cornisa" instance=ExtResource("s_inca_wall_b")]
 transform = Transform3D(0.998669, 0.000000, -0.051578, 0.000000, 1.000000, 0.000000, 0.051578, 0.000000, 0.998669, -109.462769, -1.874889, 140.720886)
 metadata/coliziune = "none"
 

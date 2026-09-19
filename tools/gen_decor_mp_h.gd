@@ -1362,6 +1362,16 @@ const CLIFF_MIN_RISE := 6.0
 ## de 34/28/26 m plus o gaura, si gaura cadea fix peste poarta.
 const CLIFF_SPACING := 34.0
 
+## Cat trebuie sa urce solul sub CENTRUL masei, peste cota soselei, ca piesa sa
+## fie de prisos. Peste pragul asta terenul e el insusi faleza si conul n-ar
+## face decat sa-si scoata calota prin creasta (vezi nota din `_cliff_mass`).
+## Pragul e la jumatatea inaltimii vizibile cerute (CLIFF_TOP_OVER_ROAD = 14):
+## sub 7 m terenul nu poate tine singur silueta, peste 7 m o tine.
+## Masurat: pe platou solul e la -0,3 m (deci 0 peste sosea), pe faleza la
+## +6,9 si +24,5 — cele doua regimuri sunt separate de un ordin de marime, deci
+## pragul nu e delicat.
+const CLIFF_TERRAIN_ENOUGH := 7.0
+
 
 ## Cat urca solul peste sosea, pe partea peretelui, la `CLIFF_RISE_LAT` lateral.
 ## Raycast filtrat pe `TerrainBody` (via `_sol_real`), nu campul neted: memoria
@@ -1545,10 +1555,85 @@ func _cliff_mass() -> void:
 			var t0: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
 			d = half + CLIFF_GAP + r * (1.0 - t0)
 			q = p + side * d
+		# RUNDA 15: talpa se leaga de SOLUL DE SUB PIESA cand solul e mai SUS
+		# decat soseaua, nu doar de sosea.
+		#
+		# Legarea exclusiv de sosea (`p.y - 19`) e corecta doar cat timp
+		# terenul lateral e la cota drumului. Masurat cu tools/SvMpHMase.tscn
+		# (raycast filtrat pe TerrainBody, sub centrul fiecarei piese):
+		#
+		#   piesa           talpa    sol_real   delta
+		#   masaPiatra267  -19,00     +24,52   -43,52
+		#   masaPiatra268  -19,00      +6,94   -25,94
+		#   masaPiatra269  -19,00      -0,30   -18,70
+		#   masaPiatra270  -19,00      -0,30   -18,70
+		#
+		# Adica toate patru au talpa cu 18,7-43,5 m SUB sol. Piesa e ingropata
+		# mult mai adanc decat cei 19 m proiectati, si din ea nu mai iese felia
+		# de flanc fatetat, ci doar CALOTA de varf — partea cea mai lata, cea
+		# mai uniform luminata si cea mai plata a conului. De aici venea
+		# verdictul criticului ("duna de nisip neteda, o singura nuanta"):
+		# fatetele nu lipseau, erau sub pamant.
+		#
+		# Reperul corect e maximul dintre cele doua: pe platou solul e la cota
+		# drumului si nu schimba nimic (269/270), pe faleza ridica piesa cu
+		# solul ei (267/268) si felia vizibila ramane aceeasi peste tot.
+		# Nu se scade nimic in plus: `CLIFF_TOP_OVER_ROAD` e definit ca
+		# inaltime PESTE OCHI, si ochiul e pe sosea.
+		# RUNDA 15: unde terenul face DEJA masa, nu se mai pune con.
+		#
+		# Masurat cu tools/SvMpHMase.tscn (raycast filtrat pe TerrainBody, sub
+		# centrul fiecarei piese), pe pozitiile rundei 14:
+		#
+		#   piesa           talpa    sol_real   delta
+		#   masaPiatra267  -19,00     +24,52   -43,52
+		#   masaPiatra268  -19,00      +6,94   -25,94
+		#   masaPiatra269  -19,00      -0,30   -18,70
+		#   masaPiatra270  -19,00      -0,30   -18,70
+		#
+		# Toate patru aveau talpa cu 18,7-43,5 m SUB sol — mult mai adanc decat
+		# cei 19 m proiectati. Din piesa nu mai iesea felia de flanc fatetat, ci
+		# CALOTA de varf: partea cea mai lata, cea mai uniform luminata si cea
+		# mai plata a conului. De aici venea verdictul criticului ("duna de
+		# nisip neteda, dintr-o singura nuanta"): fatetele nu lipseau, erau sub
+		# pamant.
+		#
+		# Prima reparatie incercata — legarea talpii de solul de sub piesa — se
+		# alearga pe ea insasi: talpa urcata impinge centrul mai in lateral (raza
+		# la cota soselei scade), acolo faleza e si mai sus, deci piesa iese si
+		# mai ingropata. Masurat dupa acea incercare: 267 ajunsese la -58,7.
+		# Memoria capcana-parametrului-care-doar-aduna: intrebarea nu e cu cat
+		# sa ridic piesa, ci DE UNDE VINE FORMA.
+		#
+		# Forma, pe felia 0,93-0,94, vine din TEREN: survey-ul (nota 2 din antet)
+		# da solul la +28,1 / +68,5 m la 25 / 40 m lateral pe 0,9300, si +19,9 /
+		# +50,2 pe 0,9400. Faleza e reala si e uriasa. Un con ingropat acolo nu
+		# adauga silueta, doar o calota palida peste o creasta care exista deja
+		# — exact aceeasi lectie ca la zidul de sprijin in runda 4 (`F_WALL_OUT`):
+		# unde nu mai e cornisa, un zid nu sprijina nimic.
+		#
+		# Deci masa se pune DOAR unde terenul NU face deja treaba: acolo unde
+		# solul lateral ramane la cota drumului (platoul, 269/270). Pe faleza
+		# reala se lasa terenul sa fie muntele.
+		var sol_masa: float = _sol_real(q.x, q.z)
+		if sol_masa > -900.0 and sol_masa - p.y > CLIFF_TERRAIN_ENOUGH:
+			print("; masa de piatra frac %.4f: SARITA, terenul face deja masa (sol %+.1f fata de sosea, prag %.1f)" % [
+				ff, sol_masa - p.y, CLIFF_TERRAIN_ENOUGH])
+			continue
 		# GARDA DE BANDA, de mana (memoria plafonul-buclei-orbe-pe-banda):
 		# flancul conului la cota soselei nu are voie sa intre in carosabil.
-		var t: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
-		var raza_la_drum: float = r * (1.0 - t)
+		#
+		# RUNDA 15: cazul "talpa PESTE sosea" se trateaza separat, nu prin
+		# clamp. Pe faleza (sol +24,5) talpa urca la +5,5, deci la cota soselei
+		# conul NU EXISTA — e in intregime deasupra. Formula veche calcula
+		# t = (p.y - y) / CLIFF_H = -0,167, il tundea la 0, si obtinea
+		# "raza la sosea = 40,8 m", adica raza BAZEI: garda citea o intrare in
+		# banda de -16,6 m si refuza o piesa care de fapt nici nu ajunge acolo.
+		# Doua din cele patru mase erau respinse asa.
+		var raza_la_drum: float = 0.0
+		if y <= p.y:
+			var t: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
+			raza_la_drum = r * (1.0 - t)
 		var pana_la_ax: float = d - raza_la_drum
 		if pana_la_ax < half + EDGE_KEEP:
 			_warn += 1
@@ -1558,6 +1643,6 @@ func _cliff_mass() -> void:
 		_raw("huayna_picchu", "masaPiatra", Vector3(q.x, y, q.z),
 			_rng.randf_range(0.0, TAU), scl, "none")
 		puse += 1
-		print("; masa de piatra frac %.4f: centru la %.1f m de ax, talpa %.1f (sosea %.1f), ies %.1f m, flanc la %.2f m de ax (muchia %.2f)" % [
-			ff, d, y, p.y, (y + CLIFF_H) - p.y, pana_la_ax, half])
+		print("; masa de piatra frac %.4f: centru la %.1f m de ax, talpa %.1f (sosea %.1f, sol %.1f), ies %.1f m, flanc la %.2f m de ax (muchia %.2f)" % [
+			ff, d, y, p.y, sol_masa, (y + CLIFF_H) - p.y, pana_la_ax, half])
 	print("; masa de piatra: %d bucati huayna_picchu (coliziune none, sloturi de roca - zero materiale noi)" % puse)

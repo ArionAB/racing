@@ -177,6 +177,49 @@ var _total_len := 1985.6
 ## singur `FlockProp` — un desen pentru toate, zero materiale noi.
 var _podea_pos: Array[Vector3] = []
 var _podea_scl: Array[Vector3] = []
+## RUNDA 18. Podeaua PAVATA, al doilea MultiMesh. Masurat pe capturile rundei
+## 17 fata de bara, cu drumul exclus din numaratoare (altfel bejul soselei
+## umfla „piatra" cu 27 de puncte si ascunde exact defectul):
+##
+##            piatra   iarba
+##   BARA      45,6 %   6,3 %
+##   noi f000   8,3 %  40,7 %
+##
+## Piatra e de 5,5 ori prea putina si iarba de 6,5 ori prea multa. Nu se
+## repara punand ZIDURI: un zid e o panglica verticala vazuta aproape din
+## muchie, si cele 802 ale zonei dau impreuna 8,3 %. Ce umple cadrul sunt
+## PODELELE — iar toate sunt verzi, fiindca runda 14 a ales slotul 12 dupa
+## cuvantul „iarba" din verdictul de atunci. Acela era un critic care cerea
+## PODEA (fata de zid fara nimic deasupra); slotul l-a ales adjectivul, nu
+## bara. In bara curtile sunt PAVATE, iar verdele e minoritar si INCHIS in
+## incinte — exact invers fata de noi.
+##
+## SLOTUL, ales pe CIFRA, nu pe nume — si corectat o data pe captura.
+##
+## Tinta e piatra din bara, masurata pe pixelii ei de zidarie:
+## RGB(185,161,135), H 31, **S 0,27**, V 0,73.
+##
+## Prima incercare a fost 3 ROCK_LIGHT, fiindca zidaria incasa ateriza pe
+## 55 % ROCK_LIGHT (nota din palette.gd de la `inca_stone`). Pe captura a
+## iesit OCRU APRINS: masurat pe pixelii care s-au schimbat intre runda 17 si
+## 18, RGB(172,131,59), **S 0,66** — de 2,4 ori mai saturat decat bara.
+## Nuanta (38 fata de 31) si valoarea (0,68 fata de 0,73) erau bune; tot
+## defectul era in CROMA. Citit apoi direct din atlas, slotul 3 e gresie de
+## desert, S 0,64 — pavajul iesea lut crud, nu lespede fasonata.
+##
+## Sloturile candidate, citite din `palette_atlas.png` (nu din comentarii):
+##
+##   slot  3 ROCK_LIGHT   S 0,64  V 0,81   <- prea saturat
+##   slot  8 CONCRETE     S 0,16  V 0,78   <- ALES
+##   slot 29 MARBLE_GREY  S 0,07  V 0,71   prea neutru, ar iesi beton rece
+##   slot 19 CORAL_SAND   S 0,18  V 0,96   prea deschis, ar arde ca varul
+##
+## Bara sta INTRE 3 si 8. Slotul 8 e cel mai aproape pe ansamblu (V la 0,05
+## de tinta) si e chiar slotul pe care kitul isi pune deja fundatiile incase,
+## deci pavajul cade in familia zidului fara sa aduca o culoare noua.
+## Zero materiale noi: tot `Palette.world_material()`, tot un `MultiMesh`.
+var _pavaj_pos: Array[Vector3] = []
+var _pavaj_scl: Array[Vector3] = []
 var _n_terase := 0
 ## Amprentele teraselor, ca piesele de deasupra (case, soclu) sa poata cere
 ## COTA PODELEI in loc de cota terenului. Fiecare: {c, u, v, hw, hd, top}.
@@ -746,9 +789,12 @@ func _h_of(h: float, h_var: float, rng: RandomNumberGenerator) -> float:
 ## cu podeaua ridicata `lift` metri peste solul masurat sub centrul ei.
 ## `rooms_u` x `rooms_v` camere desenate PE ea. `stair_side`: +1 scara pe
 ## latura dinspre drum, -1 pe cea opusa, 0 fara scara.
+## `pavat`: podeaua iese pe slotul 3 (piatra calda) in loc de 12 (iarba).
+## Vezi nota de la `_pavaj_pos`. Implicit ADEVARAT — in bara curtea pavata e
+## regula, iarba e exceptia; terasele care raman verzi o cer explicit.
 func _platforma(c: Vector2, w: float, dpt: float, rot: float, lift: float,
 		rooms_u: int, rooms_v: int, room_h: float, stair_side: float,
-		tag: String) -> void:
+		tag: String, pavat: bool = true) -> void:
 	_n_terase += 1
 	var u := Vector2(cos(rot), sin(rot))
 	var v := Vector2(-sin(rot), cos(rot))
@@ -827,8 +873,12 @@ func _platforma(c: Vector2, w: float, dpt: float, rot: float, lift: float,
 			var su := -span_u * 0.5 + fu * span_u
 			var sv := -span_v * 0.5 + fv * span_v
 			var q := c + u * su + v * sv
-			_podea_pos.append(Vector3(q.x, y, q.y))
-			_podea_scl.append(Vector3(1.0, 1.0, 1.0))
+			if pavat:
+				_pavaj_pos.append(Vector3(q.x, y, q.y))
+				_pavaj_scl.append(Vector3(1.0, 1.0, 1.0))
+			else:
+				_podea_pos.append(Vector3(q.x, y, q.y))
+				_podea_scl.append(Vector3(1.0, 1.0, 1.0))
 
 	# (c) SCARA intre niveluri — „o scara intre niveluri" din verdict, si
 	# singura piesa care spune ca podeaua de sus e CALCABILA, nu un capac.
@@ -1143,7 +1193,7 @@ func _camp_dreapta() -> void:
 	for sp: Array in [
 			[-0.0050, 26.0, 24.0, 17.0, 0.09, 1.50, 1, 1, 1.30, -1.0],
 			[0.0080, 27.0, 25.0, 18.0, -0.11, 2.40, 0, 0, 0.0, -1.0],
-			[0.0210, 26.0, 24.0, 17.0, 0.13, 1.80, 1, 1, 1.35, -1.0],
+			[0.0210, 26.0, 24.0, 17.0, 0.13, 1.80, 1, 1, 1.35, -1.0, 0.0],
 			[0.0345, 27.0, 25.0, 18.0, -0.08, 2.90, 0, 0, 0.0, -1.0],
 			[0.0465, 26.0, 22.0, 16.0, 0.10, 1.60, 1, 1, 1.30, -1.0]]:
 		_plt(sp, "terasaDr")
@@ -1153,7 +1203,7 @@ func _camp_dreapta() -> void:
 	# doua suprafata de iarba, nu doar capul zidului.
 	for sp: Array in [
 			[-0.0030, 52.0, 26.0, 18.0, -0.14, 3.60, 1, 1, 1.40, 0.0],
-			[0.0150, 53.0, 27.0, 19.0, 0.12, 4.20, 0, 0, 0.0, 0.0],
+			[0.0150, 53.0, 27.0, 19.0, 0.12, 4.20, 0, 0, 0.0, 0.0, 0.0],
 			[0.0335, 52.0, 26.0, 18.0, -0.10, 3.40, 1, 1, 1.45, 0.0]]:
 		_plt(sp, "terasaDrB")
 
@@ -1197,7 +1247,7 @@ func _camp_stanga() -> void:
 	# fel ar citi ca o singura terasa taiata de sosea, nu ca doua niveluri.
 	for sp: Array in [
 			[0.0070, -25.0, 24.0, 17.0, -0.12, 2.60, 1, 1, 1.30, 1.0],
-			[0.0210, -25.0, 25.0, 18.0, 0.10, 1.50, 0, 0, 0.0, 1.0],
+			[0.0210, -25.0, 25.0, 18.0, 0.10, 1.50, 0, 0, 0.0, 1.0, 0.0],
 			[0.0345, -24.0, 23.0, 16.0, -0.09, 2.20, 1, 1, 1.35, 1.0],
 			[0.0470, -25.0, 22.0, 16.0, 0.13, 1.70, 0, 0, 0.0, 1.0]]:
 		_plt(sp, "terasaStg")
@@ -1205,18 +1255,22 @@ func _camp_stanga() -> void:
 	# terasa are 18 m adancime, deci centrul ei nu poate cobori sub +0.012.
 	for sp: Array in [
 			[0.0175, -46.0, 26.0, 18.0, 0.14, 3.80, 1, 1, 1.40, 0.0],
-			[0.0355, -46.0, 25.0, 18.0, -0.11, 3.30, 0, 0, 0.0, 0.0]]:
+			[0.0355, -46.0, 25.0, 18.0, -0.11, 3.30, 0, 0, 0.0, 0.0, 0.0]]:
 		_plt(sp, "terasaStgB")
 
 
 ## Dezambalarea unei specificatii de TERASA:
 ## [frac, lat, w, dpt, rot_rel, lift, camere_u, camere_v, h_camera, scara]
+## Camp 10 optional: 0 = podea de IARBA (slot 12), lipsa/1 = PAVATA (slot 3).
 func _plt(sp: Array, tag: String) -> void:
 	var fr: float = sp[0]
 	var c := _pt(fr, float(sp[1]))
+	var pavat := true
+	if sp.size() > 10:
+		pavat = float(sp[10]) > 0.5
 	_platforma(c, float(sp[2]), float(sp[3]), _yaw_at(fr) + float(sp[4]),
 		float(sp[5]), int(sp[6]), int(sp[7]), float(sp[8]), float(sp[9]),
-		tag)
+		tag, pavat)
 
 
 ## Dezambalarea unei specificatii de BLOC:
@@ -1807,20 +1861,30 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 ## `_platforma` (1) si (2): mecanismul crustei de sare, slotul 12, materialul
 ## comun de lume. Un desen pentru toate placile din POI.
 func _emit_podea() -> void:
-	if _podea_pos.is_empty():
+	_emit_panza(_podea_pos, _podea_scl, "A_PodeaTerase", 12, 140901)
+	# Pavajul: al doilea MultiMesh, acelasi mecanism, alt slot. Doua noduri,
+	# nu unul cu doua sloturi: `disc_slot` e o proprietate a MESH-ului, deci
+	# un singur MultiMesh nu poate avea doua culori. Doua desene in plus fata
+	# de unul, si ZERO materiale in plus (amandoua pe `world_material()`).
+	_emit_panza(_pavaj_pos, _pavaj_scl, "A_PavajCurti", 8, 140902)
+
+
+func _emit_panza(a_pos: Array[Vector3], a_scl: Array[Vector3], nume: String,
+		slot: int, samanta: int) -> void:
+	if a_pos.is_empty():
 		return
 	var pos: Array[String] = []
 	var scl: Array[String] = []
-	for i in _podea_pos.size():
-		var p := _podea_pos[i]
-		var s := _podea_scl[i]
+	for i in a_pos.size():
+		var p := a_pos[i]
+		var s := a_scl[i]
 		pos.append("%f, %f, %f" % [p.x, p.y, p.z])
 		scl.append("Vector3(%f, %f, %f)" % [s.x, s.y, s.z])
-	_out.append('[node name="A_PodeaTerase" type="MultiMeshInstance3D" parent="%s"]' % ZONE)
+	_out.append('[node name="%s" type="MultiMeshInstance3D" parent="%s"]' % [nume, ZONE])
 	_out.append('script = ExtResource("flock")')
-	# 12 = CACTUS_GREEN: singurul verde din atlas mai DESCHIS decat
-	# `ground_tint` (111,8 fata de 101,2 luminanta Rec.709) — nota (2).
-	_out.append("disc_slot = 12")
+	# 12 = CACTUS_GREEN (iarba, nota (2)); 8 = CONCRETE (pavaj, nota de la
+	# `_pavaj_pos`).
+	_out.append("disc_slot = %d" % slot)
 	_out.append("disc_radius = 3.20")
 	# FUSTA — reparatia rundei 15, decisa pe CAPTURA (A_r0_f0035.png,
 	# crop_right_002.png), nu pe cifra.
@@ -1857,15 +1921,15 @@ func _emit_podea() -> void:
 	# lasa goluri intre placi prin care s-ar vedea solul de sub terasa.
 	_out.append("scale_min = 1.0")
 	_out.append("scale_max = 1.0")
-	_out.append("seed_value = 140901")
+	_out.append("seed_value = %d" % samanta)
 	# NU se reaseaza pe teren: cota lor E cota terasei, tot rostul lor.
 	# `snap_to_ground` le-ar tari la pamant si ar sterge exact platforma.
 	_out.append("snap_to_ground = false")
 	_out.append("positions = PackedVector3Array(%s)" % ", ".join(pos))
 	_out.append("scale3_list = [%s]" % ", ".join(scl))
 	_out.append("")
-	print("; podea: %d placi pe %d terase, slot 12, un singur MultiMesh" % [
-		_podea_pos.size(), _n_terase])
+	print("; %s: %d placi, slot %d (%d terase in total)" % [
+		nume, a_pos.size(), slot, _n_terase])
 
 
 func _write() -> void:

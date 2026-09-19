@@ -1139,9 +1139,14 @@ func _canyon_wall() -> void:
 	if pos.is_empty():
 		print("; ATENTIE: piciorul peretelui e gol")
 		return
+	# R4: piciorul peretelui e UD, deci e cea mai INCHISA piatra din cadru —
+	# `cut_stone`, nu `inca_stone`. In bara, contrastul cel mai puternic e
+	# exact perechea spuma alba / roca uda inchisa, iar cu bolovanii calzi
+	# (rgb 181,141,100) poalele peretelui citeau nisip, nu stanca spalata.
+	# Aceeasi dala `alpine_granite.png`, deci zero textura noua.
 	_flock_seed += 1
 	_model_flock("F_PereteCanion", RES["moss_boulder_b"], pos, yaw, sc3,
-		77400 + _flock_seed, "inca_stone")
+		77400 + _flock_seed, "cut_stone")
 	print("; picior de perete: %d bolovani la baza peretelui de gorja" % pos.size())
 
 
@@ -1443,6 +1448,72 @@ func _flanc() -> void:
 						yaw.append(_rng.randf_range(0.0, TAU))
 						sc3.append(Vector3(sc, sc, sc))
 			if pos.is_empty():
+				continue
+			# RUNDA 3 A VALULUI 4 — CULOAREA PIETREI, nu cantitatea ei.
+			# Rundele 1 si 2 au mutat RAPORTUL piatra/vegetatie (0,56 -> 1,71)
+			# si au scazut iarba de la 39 % la 21-30 %. Dar masurata pe BENZI
+			# ORIZONTALE, nu pe cadru intreg, imaginea spune altceva:
+			#
+			#   banda (sus->jos)   BARA verde   noi verde   BARA gri   noi gri
+			#   1 (mijloc sus)         3,3 %      51,8 %      29,1 %     3,1 %
+			#   2                      3,6 %      46,6 %      28,2 %     0,8 %
+			#   3                      1,1 %      43,4 %      16,7 %     2,4 %
+			#
+			# Bara are 28-29 % PIATRA CENUSIE fix in benzile de mijloc; noi
+			# aveam sub 3 %. Cauza nu e numarul de bolovani (sunt 403), ci
+			# CLASA lor: `inca_stone` are tenta (1.0, 0.8311, 0.6768) si lift
+			# 0.6704, adica iese rgb(181,141,100), S=0,447 — se clasifica
+			# „tan", si asa si arata. Piatra cenusie a barei e rgb(87,86,87),
+			# S=0,066, V=0,351 (masurat pe 13 306 pixeli din benzile 1-2).
+			#
+			# `cut_stone` foloseste ACEEASI dala (`alpine_granite.png`) cu lift
+			# 0.28 si tenta rece (0.88, 0.91, 0.97). Aceeasi textura in VRAM,
+			# doar alta instanta de material. Masurat pe captura, nu calculat
+			# (memoria `procent-de-culoare-nu-e-dovada`: aritmetica prezisese
+			# rgb(67,65,60), pe ecran a iesit piatra deschisa):
+			#
+			#   banda   verde inca -> cut   gri inca -> cut
+			#     1        51,8 -> 40,1       3,1 ->  3,7
+			#     2        46,6 -> 26,2       0,8 ->  8,5
+			#     3        43,4 -> 19,2       2,4 -> 11,4
+			#
+			# NU se pune pe tot: cu toti bolovanii cenusii, p90 al valorii sare
+			# la 1,000 (bara: 0,620), adica tot flancul citeste ca un camp de
+			# piatra alba si intra in concurenta cu lespedea drumului, care e
+			# deja cel mai luminos lucru din cadru. Se imparte deci lotul:
+			# doua treimi `cut_stone` (masa cenusie a benzilor de mijloc), o
+			# treime `inca_stone` (accentele calde pe care bara le are si ea —
+			# 38-52 % brun/tan in benzile de jos). Impartirea e DETERMINISTA
+			# pe indice, nu pe alt apel de RNG, ca regenerarea sa dea acelasi
+			# rezultat.
+			var split_cls: bool = cls == "inca_stone" and mdl.begins_with("moss_boulder")
+			if split_cls:
+				var pg: PackedVector3Array = []
+				var yg: PackedFloat32Array = []
+				var sg: Array[Vector3] = []
+				var pw: PackedVector3Array = []
+				var yw: PackedFloat32Array = []
+				var sw: Array[Vector3] = []
+				for k in pos.size():
+					if k % 3 == 2:
+						pw.append(pos[k])
+						yw.append(yaw[k])
+						sw.append(sc3[k])
+					else:
+						pg.append(pos[k])
+						yg.append(yaw[k])
+						sg.append(sc3[k])
+				if not pg.is_empty():
+					_flock_seed += 1
+					_model_flock("F_Flanc_%s_f%d_gri" % [mdl, felie], RES[mdl],
+						pg, yg, sg, 77500 + _flock_seed, "cut_stone")
+				if not pw.is_empty():
+					_flock_seed += 1
+					_model_flock("F_Flanc_%s_f%d" % [mdl, felie], RES[mdl],
+						pw, yw, sw, 77500 + _flock_seed, cls)
+				_tri += int(TRI.get(mdl, 0)) * pos.size()
+				print("; flanc %s felie %d: %d piese (%d gri + %d cald)" % [
+					mdl, felie, pos.size(), pg.size(), pw.size()])
 				continue
 			_flock_seed += 1
 			_model_flock("F_Flanc_%s_f%d" % [mdl, felie], RES[mdl], pos, yaw,

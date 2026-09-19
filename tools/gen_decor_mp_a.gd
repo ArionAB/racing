@@ -1627,30 +1627,59 @@ func _vegetatie_in_cetate() -> void:
 		# planul, nu sa-l umple. O curte plina ar acoperi podeaua care
 		# tocmai s-a castigat in runda 14 si pentru care criticul ceruse
 		# trei runde („ce se inchide are PODEA").
-		var n_curte := 4 + (rng.randi() % 4)
-		for k5 in range(n_curte):
-			var su5 := rng.randf_range(-hw + 1.5, hw - 1.5)
-			var sv5 := rng.randf_range(-hd + 1.5, hd - 1.5)
-			var q5 := c + u * su5 + v * sv5
-			var r5 := rng.randf()
-			var mdl5 := "moss_boulder_a"
-			var h5 := 0.5
-			var mode5 := "none"
-			if r5 < 0.40:
-				mdl5 = "moss_boulder_a"
-				h5 = rng.randf_range(0.45, 0.80)
-			elif r5 < 0.62:
-				mdl5 = "moss_boulder_b"
-				h5 = rng.randf_range(1.1, 1.7)
-				mode5 = ""
-			elif r5 < 0.85:
-				mdl5 = "bromeliad"
-				h5 = rng.randf_range(0.38, 0.58)
-			else:
-				mdl5 = "orchid_cluster"
-				h5 = rng.randf_range(0.36, 0.52)
-			_at_terasa(mdl5, "curte", q5.x, q5.y, rng.randf_range(0.0, TAU),
-				_scale_for(mdl5, h5), mode5, -0.06)
+		# RUNDA 16b, si e o corectie pe CAPTURA a rundei 16a (z16_drp.png).
+		# Prima versiune imprastia cele 4-7 piese uniform pe toata podeaua,
+		# la `y_off = -0.06`. Rezultatul, vazut din masina: bolovanii citesc
+		# ca niste TABLETE GRI ASEZATE PESTE iarba — la distante aproape
+		# egale, fiecare cu discul lui de contact, niciunul atins de sol.
+		# In bara, piatra de pe jos e pe jumatate INGROPATA si vine in
+		# gramajoare, nu la pas regulat (memoria `aranjamentul-bate-numarul`:
+		# aranjamentul bate numarul — 63,5 % acoperire citea mai viu decat
+		# 43,0 % tocmai fiindca era in pilcuri).
+		#
+		# Doua schimbari, amandoua masurabile pe captura:
+		#  * bolovanul se ingroapa cu 22-38 % din inaltimea lui, deci iese o
+		#    calota din iarba, nu o lespede pe iarba;
+		#  * piesele vin in 2-3 pilcuri de 1-3 bucati, cu raza de 1,8 m in
+		#    jurul unui centru, nu una cate una pe toata podeaua.
+		var n_pilc := 2 + (rng.randi() % 2)
+		for kp in range(n_pilc):
+			var cu := rng.randf_range(-hw + 2.5, hw - 2.5)
+			var cv := rng.randf_range(-hd + 2.5, hd - 2.5)
+			var n_buc := 1 + (rng.randi() % 3)
+			for k5 in range(n_buc):
+				var ang := rng.randf_range(0.0, TAU)
+				var rad := rng.randf_range(0.0, 1.8)
+				var su5: float = cu + cos(ang) * rad
+				var sv5: float = cv + sin(ang) * rad
+				su5 = clampf(su5, -hw + 1.2, hw - 1.2)
+				sv5 = clampf(sv5, -hd + 1.2, hd - 1.2)
+				var q5 := c + u * su5 + v * sv5
+				var r5 := rng.randf()
+				var mdl5 := "moss_boulder_a"
+				var h5 := 0.5
+				var mode5 := "none"
+				var sink := 0.06
+				if r5 < 0.42:
+					mdl5 = "moss_boulder_a"
+					h5 = rng.randf_range(0.45, 0.85)
+					sink = h5 * rng.randf_range(0.22, 0.38)
+				elif r5 < 0.64:
+					mdl5 = "moss_boulder_b"
+					h5 = rng.randf_range(1.1, 1.8)
+					mode5 = ""
+					sink = h5 * rng.randf_range(0.22, 0.34)
+				elif r5 < 0.86:
+					mdl5 = "bromeliad"
+					h5 = rng.randf_range(0.38, 0.62)
+					sink = 0.05
+				else:
+					mdl5 = "orchid_cluster"
+					h5 = rng.randf_range(0.36, 0.55)
+					sink = 0.04
+				_at_terasa(mdl5, "curte", q5.x, q5.y,
+					rng.randf_range(0.0, TAU), _scale_for(mdl5, h5), mode5,
+					-sink)
 
 
 # ------------------------------------------------------------------ asezarea
@@ -1758,6 +1787,17 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 	# luminanta ZERO, in timp ce terenul nu cobora sub 122. Negrul din cadru
 	# era discul, nu umbra si nu o gaura in geometrie.
 	if model.begins_with("inca_wall"):
+		_out.append('metadata/contact = "none"')
+	# RUNDA 16b. Nici piesele INGROPATE din curti nu primesc disc, si e
+	# aceeasi cauza vazuta invers: discul are raza din amprenta BAZEI, dar o
+	# piatra ingropata cu o treime nu mai ATINGE solul cu baza ei — ce se
+	# vede din ea e o calota. Discul ei ar fi un cerc intunecat mai LAT decat
+	# piatra, adica exact pata pe care ochiul o citeste ca „lespede asezata
+	# peste iarba" (memoria `caster-departat-fura-umbra`, pe cealalta fata:
+	# aici nu casterul e gresit, e discul de contact). Umbra reala o face
+	# directionala; discul n-are ce adauga sub o piatra pe jumatate in
+	# pamant.
+	if base == "curte":
 		_out.append('metadata/contact = "none"')
 	_out.append("")
 	return pos

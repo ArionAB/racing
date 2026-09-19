@@ -14,8 +14,9 @@ extends Node3D
 ## Corpul solid face aruncarea — aia E explozia vizuala — iar repunerea
 ## temporizata garanteaza ca nimeni nu ramane blocat sub tren.
 ##
-## Garnitura e un MODEL (`assets/models/vehicles/train.glb`: locomotiva cu abur, tender,
-## vagoane de lemn), nu cutiile din spike. Conteaza pentru gimmick, nu doar
+## Garnitura e un MODEL (implicit `assets/models/vehicles/train.glb`: locomotiva
+## cu abur, tender, vagoane de lemn; schimbabil din `model_path` — Machu Picchu
+## pune garnitura PeruRail), nu cutiile din spike. Conteaza pentru gimmick, nu doar
 ## pentru poza: avertizarea vizuala e silueta care intra in cadru, iar o cutie
 ## nu spune de la 100 m nici incotro merge, nici cat mai are de trecut. Cotele
 ## si coliziunile ies din AABB-ul modelului — vezi `_build_model_consist`.
@@ -33,9 +34,13 @@ const BELL_INTERVAL: float = 0.6
 ## Cand suna cornul, masurat de la inceputul ciclului.
 const HORN_AT: float = 0.4
 
-## Garnitura: locomotiva cu abur + tender + vagoane de marfa.
+## Garnitura implicita: locomotiva cu abur + tender + vagoane de marfa.
 ## Trei noduri in GLB, vezi tools/blender/build_train.py.
 const MODEL_PATH := "res://assets/models/vehicles/train.glb"
+## Numele celor trei noduri, cautate EXACT si doar printre copiii DIRECTI ai
+## scenei (vezi `_extract`). Orice garnitura alternativa trebuie sa le poarte
+## pe toate trei — daca lipseste unul, `_build_model_consist` arunca tot si
+## pista cade pe cutii, in tacere.
 const LOCO_NODE := "Train_Loco"
 const TENDER_NODE := "Train_Tender"
 const WAGON_NODE := "Train_Wagon"
@@ -106,6 +111,16 @@ const STUN_SECONDS: float = 0.9
 const RESPAWN_BACKOFF: float = 20.0
 
 @export var period: float = DEFAULT_PERIOD
+## Garnitura folosita de pista asta. Implicit trenul de marfa cu abur
+## (`MODEL_PATH`), deci Baikal si Track4 — care primesc hazardul din
+## `track.gd`, fara sa atinga campul — raman neschimbate. Machu Picchu pune
+## aici `perurail_train.glb`, garnitura turistica.
+##
+## E `String`, nu `PackedScene`: `_build_model_consist` face deja `load()` cu
+## garda `ResourceLoader.exists` (rezerva pe cutii pe o clona fara import), iar
+## o referinta de scena in .tscn ar incarca GLB-ul si pe pistele care nu-l
+## folosesc. Contractul de noduri ramane cel de mai sus.
+@export_file("*.glb", "*.tscn") var model_path: String = MODEL_PATH
 ## TREN PE SENS (Baikal, viaductul Circum-Baikal): sina merge IN LUNGUL soselei
 ## si trenul vine din fata, spre masini. Nu mai e gimmick de timing la o
 ## trecere, e de LINIE: drumul ramane deschis pe margini, moartea e pe axa.
@@ -364,9 +379,10 @@ func _build_train() -> void:
 ## gabaritul zonei de lovire ies din AABB-ul masurat pe mesh (ca la landmark-uri,
 ## track.gd:_LANDMARKS). Regenerezi GLB-ul cu alte proportii si totul urmeaza.
 func _build_model_consist() -> Vector2:
-	if not ResourceLoader.exists(MODEL_PATH):
+	var path := model_path if not model_path.is_empty() else MODEL_PATH
+	if not ResourceLoader.exists(path):
 		return Vector2.ZERO
-	var scene := load(MODEL_PATH) as PackedScene
+	var scene := load(path) as PackedScene
 	var order: Array[String] = []
 	for i in WAGON_COUNT:
 		order.append(WAGON_NODE)

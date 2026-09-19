@@ -53,6 +53,10 @@ signal blinded(car: Car, seconds: float)
 ## Carligul pentru audio si camera: cine vrea „huruitul rotilor pe piatra" se
 ## leaga aici, nu citeste suspensia. Se emite doar la tranzitie.
 signal steps_changed(car: Car, on: bool)
+## Soferul a fost ARUNCAT din masina (buggy deschis, impact dur). `ragdoll` e
+## figurina cazuta, deja in lume — camera o urmareste cat tine `eject_hold`,
+## apoi masina se repune pe pista si soferul reapare pe scaun.
+signal ejected(car: Car, ragdoll: Node3D)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -146,6 +150,35 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var spring_freq: float = 2.5
 ## Raportul de amortizare (1 = critic). 0.5-0.7 = revii asezat.
 @export var damping_ratio: float = 0.6
+
+@export_group("Ejectare (sofer)")
+## Se aplica doar masinilor cu `CarData.open_cockpit` si figurina atasata.
+## Regula de design: ejectarea e VIZUALIZAREA repunerii, nu o pedeapsa noua —
+## la capatul lui `eject_hold` masina se repune exact ca la orice ratare.
+## Si NU se ejecteaza din imbranceli intre masini: bumping-ul e mecanica
+## (principiul 1), nu accident.
+@export var eject_enabled: bool = true
+## Delta-v ORIZONTAL la un perete (m/s) peste care soferul zboara. 8 e pragul
+## la care se aude izbitura. Masurat pe Dunele cu tot garajul deschis
+## (ProbeRace, 150 s, seed 1): la 18 zburau 16 soferi in 150 s, adica o
+## ejectare pe masina la ~50 s, si cel mai rapid pierdea o jumatate de tur —
+## pragul prindea si atingerile oblice la viteza de cursa (20-25 m/s). La 26
+## ramane doar izbitura FRONTALA (de la ~19 m/s in sus, cu ricoseul inclus)
+## sau una oblica peste ~60° la viteza maxima.
+@export var eject_wall_dv: float = 26.0
+## Viteza de cadere (m/s) la aterizare peste care soferul zboara.
+## Masurat cu ProbeRace pe Alpii (garaj deschis, 150 s): SARITURA PROIECTATA
+## peste gol (frac 0.71) ateriza la 24-30 m/s, si la pragul de 24 fiecare
+## masina isi pierdea soferul pe ea, tur de tur — 11 ejectari intr-o cursa.
+## Saritura e distractia (principiul 1), nu accidentul. La 34 m/s (gravitatia
+## jocului e 28, deci o cadere de la ~20 m) ramane doar prabusirea: de pe
+## cornisa, in rapa, de pe un pasaj — nu de pe o rampa.
+@export var eject_land_speed: float = 34.0
+## Cat sta masina fara sofer (comenzi taiate, camera pe figurina) pana la
+## repunere. Referinta Ignition: ~1,5-2 s de ecran fara masina.
+@export var eject_hold: float = 1.1
+## Cu cat e repusa in spate dupa ejectare (m).
+@export var eject_backoff: float = 12.0
 
 # --- Stare de cursa (scrisa de Race) ---
 var race_active: bool = false
@@ -383,8 +416,19 @@ static var _skid_mesh: PlaneMesh
 static var _skid_mat: StandardMaterial3D
 
 var _collision_shape: CollisionShape3D
+## Soferul asezat (doar masinile deschise) si starea aruncarii lui.
+var _driver: Driver
+var is_ejected: bool = false
+var _eject_left: float = 0.0
+## Ultima ejectare, pentru sonde: ce a declansat-o ("perete" / "aterizare")
+## si cu ce marime (delta-v orizontal, respectiv viteza de cadere, m/s).
+var last_eject_cause: String = ""
+var last_eject_value: float = 0.0
 
 func _ready() -> void:
+	# Grupul e pentru cine trebuie sa stie TOATE masinile fara sa treaca prin
+	# Race (ragdoll-ul isi exclude coliziunea cu ele).
+	add_to_group(&"cars")
 	mass = 100.0 * mass_factor
 	# Gravitatia proiectului e cea implicita (9.8); jocul cade cu `gravity`.
 	var project_g: float = ProjectSettings.get_setting(
@@ -460,6 +504,20 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	if _visual != null:
 		_visual.queue_free()
 	_build_visual()
+	# GLB din pipeline-ul nostru: materialul de clasa (atlas + AO din vertex
+	# colors), ca orice alt asset al lumii. FBX-urile RgsDev raman cu ale lor.
+	if data.palette_model and _visual.get_child_count() > 0:
+		Palette.apply_world_material(_visual.get_child(0))
+	# Soferul, doar pe caroserii deschise (vezi CarData.open_cockpit).
+	_driver = null
+	is_ejected = false
+	_eject_left = 0.0
+	if data.open_cockpit and data.driver_model != null:
+		_driver = Driver.new()
+		_driver.name = "Driver"
+		_visual.add_child(_driver)
+		_driver.position = data.driver_seat
+		_driver.setup(data.driver_model, self)
 	# Colizerul, suspensia si efectele urmeaza dimensiunile vehiculului.
 	if _collision_shape != null:
 		var box := _collision_shape.shape as BoxShape3D
@@ -557,6 +615,14 @@ func _physics_process(delta: float) -> void:
 		throttle = clampf(controller.get_throttle(), -1.0, 1.0)
 		drift_pressed = controller.is_drift_pressed()
 		turbo_pressed = controller.is_turbo_pressed()
+	# Fara sofer nu conduce nimeni: comenzile se taie cat tine aruncarea, iar
+	# la capat vine repunerea. Fizica curge (masina isi continua izbitura).
+	if _eject_left > 0.0:
+		steer = 0.0
+		throttle = 0.0
+		drift_pressed = false
+		turbo_pressed = false
+		_tick_eject(delta)
 
 	_apply_suspension()
 
@@ -880,6 +946,14 @@ func _process_contacts(delta: float) -> void:
 			wall_hit.emit(self, dv_h)
 			if is_player:
 				AudioManager.play_sfx(&"wall_hit")
+		# Izbitura dura de perete arunca soferul. Directia de zbor e viteza de
+		# DINAINTE de impact: figurina continua drumul pe care masina nu l-a
+		# mai putut face, peste bariera.
+		if dv_h >= eject_wall_dv:
+			# 0.6 din viteza inainte + 7.5 m/s in sus: peste o bariera de 1,2 m
+			# trece; intr-o faleza se izbeste si cade — amandoua sunt corecte.
+			var fling := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.6
+			_eject(fling + Vector3.UP * 7.5, "perete", dv_h)
 
 	for key: int in _bump_pairs.keys():
 		var left := float(_bump_pairs[key]) - delta
@@ -1136,7 +1210,64 @@ func _detect_landing() -> void:
 			_punch_scale(Vector3(1.15, 0.8, 1.15))
 			if is_player:
 				AudioManager.play_sfx(&"land")
+			# Aterizare de la inaltime: soferul sare din scaun, drept in sus si
+			# putin inainte (masina se opreste brusc pe verticala, el nu).
+			if -_prev_velocity.y >= eject_land_speed:
+				var fwd_v := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.5
+				_eject(fwd_v + Vector3.UP * minf(-_prev_velocity.y * 0.35, 12.0),
+					"aterizare", -_prev_velocity.y)
 	_was_on_floor = is_on_floor()
+
+# ------------------------------------------------------------------ ejectare
+
+## Soferul zboara din masina. `fling` = viteza initiala a figurinei (lume).
+##
+## Ragdoll-ul se pune in PARINTELE masinii (lumea cursei), nu sub masina:
+## masina se va teleporta la repunere, iar figurina trebuie sa ramana unde a
+## cazut. Nu se ciocneste cu nicio masina (grupul "cars") — vezi ToyRagdoll.
+## Tacut cand nu are ce arunca: caroserie inchisa, deja aruncat, cursa
+## terminata sau masina scoasa din cursa de un hazard (`race_active`).
+func _eject(fling: Vector3, cause: String = "", value: float = 0.0) -> void:
+	if not eject_enabled or _driver == null or is_ejected or finished \
+			or not race_active or get_parent() == null:
+		return
+	var ragdoll := _driver.eject(fling, get_tree().get_nodes_in_group(&"cars"))
+	if ragdoll == null:
+		return
+	last_eject_cause = cause
+	last_eject_value = value
+	get_parent().add_child(ragdoll)
+	is_ejected = true
+	_eject_left = eject_hold
+	is_drifting = false
+	is_boosting = false
+	_forced_boost = 0.0
+	ejected.emit(self, ragdoll)
+
+
+## Numaratoarea fara sofer; la capat, repunerea (care il si reaseaza). Fara
+## pista (sonde) nu exista repunere, deci soferul se intoarce pur si simplu.
+func _tick_eject(delta: float) -> void:
+	_eject_left -= delta
+	if _eject_left > 0.0:
+		return
+	_eject_left = 0.0
+	if track != null and not finished:
+		_respawn_cooldown = 0.0 # aruncarea a costat deja; repunerea nu asteapta
+		respawn(eject_backoff)
+	else:
+		_reseat_driver()
+
+
+func _reseat_driver() -> void:
+	is_ejected = false
+	_eject_left = 0.0
+	if _driver != null:
+		_driver.reseat()
+
+
+func driver_seated() -> bool:
+	return _driver != null and _driver.is_seated()
 
 ## La aterizare pe ALT etaj, indexul se recauta pe toata ruta — o data.
 ##
@@ -1205,6 +1336,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	_impact_yaw = 0.0 # nici rotatia din ultima izbitura nu ne urmareste
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
 	in_water = false # repusa pe uscat; urmatoarea intrare in apa e o intrare
+	_reseat_driver() # soferul reapare pe scaun, oricare ar fi fost motivul repunerii
 	route = last_safe_route
 	road_index = track.closest_index_global(global_position, route)
 	last_safe_index = road_index

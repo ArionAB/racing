@@ -334,7 +334,24 @@ periodică la B — e sunetul-semnătură al urcării).
   (150+ piese) — sub 300 tri per zid, rosturile în textură, nu în geometrie;
   terasele sunt teren, nu asset
 - materiale: atlas + ~7 clase (§5.1) + shader-ul podului (deformare) + apă +
-  ceață locală (nor) + decal → țintă **≤ 20**
+  ceață locală (nor) + decal → plafon **≤ 30** (decizia dezvoltatorului,
+  18 sep 2026; garda propriu-zisă pică la 38)
+
+  **De ce s-a mutat de la 20.** Cifra 20 a fost pusă când se credea că fiecare
+  GLB costă un material. **E fals, măsurat:** kitul de 39 de piese costă
+  **zero** materiale (toate pe atlas); ce costă e **clasa de textură**, unu per
+  clasă indiferent de câte piese o poartă. Deci 20 nu descria ce se credea că
+  descrie. Comparația pe pistele deja livrate, măsurată cu `probe_decor` fără
+  `--track`: Track13 Cappadocia **21**, Track01 **23**, Track10 Baikal **23**,
+  Track09 **26**, Track14 Serengeti **31**, Track11 Stromboli **32**,
+  Track12 Chongqing **32**. Machu Picchu e la **19** cu cinci POI-uri
+  nefăcute — cea mai ieftină pistă din joc.
+
+  Plafonul **nu e o alocare de cheltuit**: rămâne regula că un material nou se
+  **cere explicit în raport**, cu motivul și cu ce cumpără vizual. Ce se poate
+  refolosi, se refolosește (`inca_stone` acoperă toată zidăria, `macchia`
+  verdele de pădure). Plafonul e acolo ca un POI care chiar are nevoie — apa
+  la E, ceața norului la B — să nu se blocheze, nu ca să se umple.
 - fizică: 8 plăci de pod (permanente) + autobuz + tren + 4 lame + bârne;
   ieftin față de Serengeti (fără bazin de 16 corpuri). Riscul pistei e
   **GPU pe terase**: zeci de ziduri cu umbre la 150 m de cascadă — se

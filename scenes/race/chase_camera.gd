@@ -161,6 +161,9 @@ var trauma: float = 0.0
 
 var _cam: Camera3D
 var _aim_dir: Vector3 = Vector3.FORWARD
+## Focalizarea pe soferul aruncat (vezi focus_on).
+var _focus: Node3D
+var _focus_left: float = 0.0
 ## Lungimea vehiculului curent, retinuta ca `refresh_from_settings` sa poata
 ## recalcula incadrarea fara sa mai intrebe cine e la volan.
 var _body_length: float = REFERENCE_LENGTH
@@ -411,9 +414,27 @@ func pitch_degrees() -> float:
 	return rad_to_deg(atan(_pitch_tan()))
 
 
+## Cat tine, camera STA pe loc si priveste `node` (soferul aruncat din masina),
+## in loc sa urmareasca masina. `snap_behind` (repunerea) o sterge. Nodul poate
+## disparea intre timp (ragdoll-ul se curata singur) — atunci se revine la mers.
+func focus_on(node: Node3D, seconds: float) -> void:
+	_focus = node
+	_focus_left = seconds
+
+
 func _physics_process(delta: float) -> void:
 	if target == null:
 		return
+	if _focus_left > 0.0:
+		_focus_left -= delta
+		if is_instance_valid(_focus):
+			_look_at_point(_focus.global_position)
+			trauma = maxf(trauma - 1.8 * delta, 0.0)
+			var fshake := trauma * trauma
+			_cam.h_offset = randf_range(-1.0, 1.0) * MAX_SHAKE * fshake
+			_cam.v_offset = randf_range(-1.0, 1.0) * MAX_SHAKE * fshake
+			return
+		_focus_left = 0.0
 	# Presetul de zona urca/coboara liniar, ca `blend_time` sa insemne chiar
 	# durata ceruta. Restul netezirilor camerei sunt exponentiale fiindca
 	# urmaresc o tinta care se misca; asta e o rampa cu capete, si un exp ar
@@ -481,6 +502,8 @@ func _physics_process(delta: float) -> void:
 func snap_behind() -> void:
 	if target == null:
 		return
+	_focus_left = 0.0
+	_focus = null
 	var fwd := -target.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()

@@ -138,6 +138,12 @@ var _index: int = 0
 var _frames: int = 0
 var _track: Node = null
 var _rows: Array[Dictionary] = []
+# `quit()` din `_initialize()` doar ridica un steag; `_process` ruleaza mai
+# departe, iar `_report()` pe zero randuri tiparea "VERDICT: OK" si iesea 0.
+# Adica singura garda cu drept de veto (materialele) se facea VERDE cand nu
+# masura NIMIC — un typo in numarul de pista era de ajuns. Prins de sceptic la
+# fundatia Machu Picchu, 16 sep 2026, cu `--track=99`.
+var _empty: bool = false
 
 
 func _initialize() -> void:
@@ -153,10 +159,13 @@ func _initialize() -> void:
 			_paths.append(path)
 	if _paths.is_empty():
 		push_error("probe_decor: nu am gasit nicio pista")
+		_empty = true
 		quit(1)
 
 
 func _process(_delta: float) -> bool:
+	if _empty:
+		return true # nu raporta nimic pe zero piste: verdictul ar fi fals
 	if _track == null:
 		if _index >= _paths.size():
 			return _report()
@@ -450,6 +459,41 @@ const VARIANT_SOURCE := {
 	"mountainchalet": "mountain_chalet", "mountaintunnel": "mountain_tunnel",
 	"streambridge": "stream_bridge", "jumpkicker": "jump_kicker",
 	"alpinesignpost": "alpine_signpost", "woodstack": "wood_stack",
+	# --- Machu Picchu ---
+	#
+	# Trenul PeruRail trebuie sa stea AICI, nu in KNOWN, si asta nu e o
+	# preferinta de stil. Nodurile lui din GLB se numesc `Train_Loco`,
+	# `Train_Tender` si `Train_Wagon`, iar KNOWN contine deja cheia "train"
+	# (trenul alpin) — cum potrivirea din KNOWN e `begins_with` pe o lista
+	# parcursa in ordine, toate cele trei vagoane ar fi fost raportate drept
+	# `GLB: train`, adica atribuite pistei gresite, fara niciun avertisment.
+	# VARIANT_SOURCE e consultat INAINTEA lui KNOWN, deci cheile de aici
+	# castiga. Aceeasi capcana, a treia oara, ca la palmieri si la pini.
+	"train_loco": "perurail_train", "train_tender": "perurail_train",
+	"train_wagon": "perurail_train",
+	# Casele: nodurile de mesh se numesc `House_Stone` / `House_Thatch` /
+	# `House_Ruin`, deci nu incep cu stem-ul fisierului. La paznic au si sufix
+	# (`House_Stone.001`), asa ca prefixul comun e singurul lucru stabil.
+	# Nu se poate separa guardhouse de inca_house_a pe numele nodului — au
+	# aceleasi nume — deci ambele cad pe `inca_house`, ceea ce e corect la
+	# nivel de kit: linia pe surse spune "casa incasa", nu "care casa".
+	"house_stone": "inca_house", "house_thatch": "inca_house",
+	"house_ruin": "inca_house_b",
+	# Lama: nodul de mesh e `LlamaMesh` in TOATE cele trei variante (llama,
+	# llama_b, llama_c), deci varianta nu se poate deduce din numele nodului.
+	"llamamesh": "llama",
+	# Fantana: nodurile sunt `Basin` si `Water`, niciunul nu incepe cu stem-ul.
+	# `Water` e un quad plan de 2 triunghiuri — fara cheia asta ar fi cazut in
+	# "procedural (track.gd)". Cheia NU poate fi "water" simplu: potrivirea e
+	# `begins_with`, iar dictionarul e parcurs in ordinea inserarii, deci
+	# "water" ar fi inghitit si `Water_Channel` (alta piesa din kit). Numele
+	# exact al nodului, cu terminatorul pus de Godot la dubluri, e singurul
+	# prefix care prinde luciul fantanii fara sa fure canalul. Ordinea conteaza:
+	# `water_channel` e inserat INAINTEA lui `water`, iar dictionarul se
+	# parcurge in ordinea inserarii, deci canalul e revendicat primul si abia
+	# ce ramane (nodul `Water` al fantanii) cade pe a doua cheie.
+	"basin": "fountain_basin", "water_channel": "water_channel",
+	"water": "fountain_basin",
 }
 
 
@@ -479,7 +523,23 @@ func _source_of(mi: Node, track: Node) -> String:
 		"cracked_chimney",
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "canyon_rocks", "desert_scatter", "butte",
-		"wood_fence", "train"]
+		"wood_fence", "train",
+		# Kitul Machu Picchu (assets/models/machupicchu/, PR #386). Aceeasi
+		# capcana ca la tuful Cappadociei si la pinii alpini: fara numele
+		# astea, cele 39 de piese asezate de mana intra corect in TOTALURI dar
+		# linia pe surse le arunca in "procedural (track.gd)" — si exact linia
+		# aia se citeste cand cauti cine a adus un material in plus.
+		# Piesele ale caror noduri de mesh NU incep cu stem-ul fisierului
+		# (casele, lama, fantana, trenul) sunt in VARIANT_SOURCE de mai sus,
+		# fiindca acolo potrivirea se face pe numele PROPRIU al mesh-ului.
+		"condor", "bamboo_clump", "bromeliad", "orchid_cluster", "polylepis",
+		"tree_fern", "backpack_pile", "tent_a", "tent_b",
+		"gorge_far_wall", "huayna_picchu", "machu_picchu_mountain",
+		"moss_boulder", "inca_bridge_ledge", "inca_stair", "inca_wall",
+		"inti_punku", "intihuatana", "main_gate", "rope_rail", "sun_temple",
+		"three_windows", "trail_marker", "water_channel", "consettur_bus",
+		"guardhouse", "inca_house", "fountain_basin", "perurail_train",
+		"llama"]
 	# Intai numele PROPRIU al mesh-ului: variantele sunt cheia stabila.
 	var own := String(mi.name).to_lower()
 	for prefix: String in VARIANT_SOURCE:

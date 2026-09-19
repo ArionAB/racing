@@ -43,3 +43,18 @@ extends Resource
 ## Dimensiunile vizuale DUPA scalare — dimensioneaza colizerul si efectele.
 @export var body_length: float = 3.8
 @export var body_width: float = 2.2
+## Modelul e un GLB din pipeline-ul nostru (UV pe atlasul de paleta, AO in
+## vertex colors) si primeste `Palette.world_material()` la instantiere.
+## Fals pentru FBX-urile RgsDev, care isi aduc materialele lor.
+@export var palette_model: bool = false
+
+@export_group("Sofer")
+## Masina e DESCHISA (buggy, decapotabila): soferul se vede si poate fi
+## aruncat afara la impact (vezi Car._eject). Pe o caroserie inchisa figurina
+## ar sta ascunsa in interior, deci nu se ataseaza deloc.
+@export var open_cockpit: bool = false
+## GLB-ul figurinei: 7 piese rigide ca noduri separate (vezi Driver.PART_NAMES).
+@export var driver_model: PackedScene
+## Unde se aseaza SEZUTUL figurinei, in spatiul masinii (fata = -Z, sus = +Y),
+## dupa scalarea si rotirea modelului. Cota scaunului, nu a picioarelor.
+@export var driver_seat: Vector3 = Vector3(0.0, 0.6, 0.2)

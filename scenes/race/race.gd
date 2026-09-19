@@ -101,6 +101,15 @@ func _ready() -> void:
 		camera.snap_behind()
 		camera.add_trauma(0.22)
 		hud.flash_message("RATAT — repus pe pista"))
+	# Soferul aruncat din masina (buggy, prototip): camera ramane pe loc si
+	# urmareste figurina cat tine aruncarea; repunerea de dupa trage camera
+	# inapoi prin `respawned` (snap_behind sterge focalizarea).
+	player.ejected.connect(func(c: Car, ragdoll: Node3D) -> void:
+		var rag := ragdoll as ToyRagdoll
+		camera.focus_on(rag.focus_node() if rag != null else ragdoll,
+			c.eject_hold + 0.6)
+		camera.add_trauma(0.45)
+		hud.flash_message("EJECTAT!"))
 	# Strivit / ars: shake proportional cu severitatea. Semnalul exista de la
 	# bolovani (#242), dar nu fusese legat la camera; lava il refoloseste.
 	player.crushed.connect(func(_c: Car, severity: float) -> void:
@@ -374,6 +383,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_3: _swap_player_car(2)
 		KEY_4: _swap_player_car(3)
 		KEY_5: _swap_player_car(4)
+		KEY_6: _swap_player_car(5)
 
 func _swap_player_car(index: int) -> void:
 	player.apply_data(GameState.CAR_DATA[index] as CarData)

@@ -1,7 +1,8 @@
 [gd_resource type="Resource" script_class="CarData" format=3 uid="uid://chtvtnqldaqm5"]
 
 [ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://cqc1m7hctaj32" path="res://assets/models/vehicles/taxi.fbx" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/open_taxi.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_driver_green.glb" id="3"]
 
 [resource]
 script = ExtResource("1")
@@ -14,6 +15,11 @@ spring_freq = 2.4
 damping_ratio = 0.55
 suspension_rest = 0.35
 model = ExtResource("2")
-model_scale = 0.739
-body_length = 3.864
-body_width = 2.075
+model_scale = 1.0
+model_rotation_deg = 180.0
+body_length = 3.96
+body_width = 2.05
+palette_model = true
+open_cockpit = true
+driver_model = ExtResource("3")
+driver_seat = Vector3(-0.42, 0.72, 0.15)

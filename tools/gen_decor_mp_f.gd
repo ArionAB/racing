@@ -1320,11 +1320,27 @@ func _flanc() -> void:
 			# pixeli. Nu slabeste nicio garda: `_dist_to_road` scade
 			# acostamentul REAL si cere 3 m de la el, deci carosabilul e aparat
 			# de poarta aia, nu de `gap_min`.
-			["moss_boulder_b", 1.4, 2.6, 3.0, 30.0, 2.2, 0.88, "inca_stone"],
-			["moss_boulder_c", 2.2, 4.0, 4.0, 40.0, 3.2, 0.82, "inca_stone"],
-			["moss_boulder_a", 0.6, 1.1, 2.5, 26.0, 1.8, 0.85, "inca_stone"],
-			["polylepis_a", 3.6, 5.4, 4.0, 56.0, 2.4, 0.90, ""],
-			["polylepis_b", 5.4, 8.2, 6.0, 70.0, 3.2, 0.86, ""],
+			# RUNDA 2 A VALULUI 4 — RAPORTUL PIATRA/VEGETATIE, nu numarul.
+			# Masurat pe banda, clasificand pixelii pe familii de nuanta
+			# (treimi verticale din `bara_poi_F.png`):
+			#   banda     brun/tan   gri (piatra)   verde
+			#   MIJLOC      38 %        24 %         ~0 %
+			#   JOS         52 %         9 %         ~0 %
+			# Bara e o vale de PIATRA cu vegetatie ca accent. La noi, dupa
+			# runda 1, flancul avea 373 de polylepis si 88 de tree_fern fata de
+			# 258 de bolovani — adica exact invers. Si nu e o chestiune de
+			# densitate: runda 1 a masurat deja ca a INGROSA vegetatia urca
+			# iarba (30,4 -> 34,6 %), fiindca coroana lui polylepis e un verde
+			# DESCHIS (V > 0,42) care inlocuieste gazon cu pixeli din aceeasi
+			# familie. Ce schimba MATERIA e piatra.
+			# Deci: bolovanii se indesesc si se maresc (pasul scade, h_max
+			# creste), iar copacii se raresc (pasul creste, prob scade).
+			# Piesele nu cresc mult la numar — se schimba din ce sunt facute.
+			["moss_boulder_b", 1.6, 3.4, 3.0, 34.0, 1.6, 0.92, "inca_stone"],
+			["moss_boulder_c", 2.6, 5.2, 4.0, 44.0, 2.2, 0.90, "inca_stone"],
+			["moss_boulder_a", 0.6, 1.4, 2.5, 30.0, 1.3, 0.90, "inca_stone"],
+			["polylepis_a", 3.6, 5.4, 4.0, 56.0, 4.2, 0.62, ""],
+			["polylepis_b", 5.4, 8.2, 6.0, 70.0, 5.4, 0.58, ""],
 			# INELUL DE FUNDAL (70-150 m) A FOST INCERCAT SI RESPINS, si merita
 			# scris ca sa nu-l reincerce altcineva. Grila 8x6 la 0.67 arata
 			# dupa runda 2 banda de orizont (randul 2) cu 37-67 % iarba pe toata
@@ -1337,8 +1353,8 @@ func _flanc() -> void:
 			# vegetatie, e RELIEF care sa rupa linia; si asta e teren, nu decor
 			# (aceeasi granita ca la D si H). Starea pastrata e cea de dupa
 			# runda 2 (memoria `revenirea-e-o-mutare-valida`).
-			["tree_fern", 2.2, 3.4, 3.0, 36.0, 2.6, 0.82, ""],
-			["bamboo_clump", 3.2, 5.4, 4.0, 46.0, 3.0, 0.80, ""],
+			["tree_fern", 2.2, 3.4, 3.0, 36.0, 4.4, 0.58, ""],
+			["bamboo_clump", 3.2, 5.4, 4.0, 46.0, 4.8, 0.56, ""],
 		]:
 		var mdl: String = String(spec[0])
 		var cls: String = String(spec[7])

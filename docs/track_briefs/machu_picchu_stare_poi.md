@@ -337,3 +337,78 @@ Celelalte memorii scrise în sesiunea asta:
 `probe-decor-numar-de-scena`, `garda-fara-linie-de-baza-iese-zero`,
 `garda-verde-pe-zero-masuratori`, `scala-glb-neaplicata-la-radacina`,
 `cota-de-contract-se-masoara-ca-gol`, `zero-repuneri-ascunde-blocajul`.
+
+## 5. POI F, valul 4 runda 3 (19 sep 2026) — piatra cenusie, si ce a ramas
+
+### Ce s-a schimbat
+
+`cut_stone` pe doua treimi din bolovanii flancului si pe tot piciorul
+peretelui de gorja. Aceeasi dala (`alpine_granite.png`) ca `inca_stone`, alt
+lift (0.28 fata de 0.6704) si tenta rece — deci **+1 material (19 -> 20), zero
+textura noua, zero triunghiuri, zero prop-uri**.
+
+Motivul, masurat pe benzi orizontale (nu pe cadru intreg — media ascundea
+exact defectul):
+
+| banda | BARA verde | noi verde | BARA gri | noi gri |
+|---|---:|---:|---:|---:|
+| 1 | 3,3 % | 51,8 % | 29,1 % | 3,1 % |
+| 2 | 3,6 % | 46,6 % | 28,2 % | 0,8 % |
+| 3 | 1,1 % | 43,4 % | 16,7 % | 2,4 % |
+
+Bara are 28-29 % piatra CENUSIE in benzile de mijloc. Noi aveam 403 bolovani
+acolo, dar toti pe `inca_stone` — rgb(181,141,100), S=0,447, adica piatra
+CALDA, care se clasifica si se vede ca „tan". Nu lipsea piatra ca numar,
+lipsea ca **culoare**.
+
+Rezultat (r2 -> R3): verde 33,0 -> 22,4 % la 0.67 (bara 2,6), tan
+45,5 -> 52,2 % (bara 52,5 — la 0,3 puncte), gri 8,4 -> 9,9 % (bara 15,0).
+Pe benzi, la 0.71 banda 3 ajunge la 25,9 % gri fata de 16,7 % in bara.
+
+**Nu pe toti bolovanii**, si asta e masurat: cu tot lotul cenusiu, p90 al
+valorii sare la 1,000 (bara 0,620) si flancul citeste ca un camp de piatra
+alba, in concurenta cu lespedea drumului. Impartirea 2/3 rece + 1/3 cald e
+determinista pe indice (`k % 3`), deci regenerarea da acelasi rezultat.
+
+### Ce NU poate face POI-ul, si e masurat
+
+**1. Carosabilul se arde in lumina.** Cel mai mare ecart ramas fata de bara
+nu e in decor, e in drum:
+
+| | BARA | noi 0.67 | noi 0.69 |
+|---|---:|---:|---:|
+| pixeli deschisi (V>0,78 S<0,22) | **2,4 %** | 33,4 % | 34,8 % |
+
+Si cauza NU e tintul. `DIRT_ROAD_COLOR` e rgb(204,168,110), V=0,800,
+S=0,463 — aproape de drumul barei, rgb(183,153,109), V=0,719. Dar RANDAT,
+acelasi drum masoara **rgb(241,227,198), V=0,943, S=0,179**: saturatia se
+prabuseste de la 0,463 la 0,179 si valoarea urca la 0,943. Soarele spala
+carosabilul.
+
+E o proprietate de **lumina/expunere pe toata pista**, si `DIRT_ROAD_COLOR` e
+o constanta globala in `track.gd`, folosita de Okinawa, Dune, Serengeti si
+restul pistelor de pamant. Un POI nu o poate atinge fara sa repicteze jumatate
+din joc. Nu s-a atins si nu s-a mascat cu decor.
+
+**2. Raul nu poate intra in cadru** — masurat in runda 2 si nerevizuit:
+cornisa e un slot ingust, iar fundul albiei sta cu 12-30 de grade SUB muchia
+de jos a cadrului (FOV, nu ocluzie). Detaliile in commit-ul `10f90dd`.
+
+**3. „Plutirile" de 9-15 m raportate de `probe_manual` pe F sunt ale sondei.**
+Reverificat pe asezarile de ACUM cu `tools/SvFPlut.tscn` (raycast pe
+TerrainBody vs campul neted): delta reala e **1,1-1,8 m**, si fiecare piesa
+sta inauntrul propriei amprente pe un taluz rupt. Intrarile `*_col` sunt copii
+de coliziune cu transform local identitate, citite la y=0,00.
+
+### Garzi (dupa `--import`, in worktree-ul propriu)
+
+| garda | cifra | referinta |
+|---|---|---|
+| `probe_decor --track=15` | **20 materiale**, 16 630 prop, 3 870 344 tri | era 19 / 16 630 / 3 870 344 |
+| `ProbeBuried --track=8` | 0 ingropate, 0 tavane | 0 / 0 |
+| `ProbeLaneClear --track=8` | **18**, toate la frac 0.945 (podul), zero noduri F* | baza 20 |
+| `ProbeRace seed 1/2/3` | **2/1/1**, aceleasi secunde si pozitii | identic cu main |
+
+ProbeRace a fost rulat **inainte** de constructie (memoria
+`proberace-la-inceput-nu-la-final`). Felia 0.65-0.75: 0,0 % lent, 0 pereti,
+0 repuneri pe toate trei seed-urile.

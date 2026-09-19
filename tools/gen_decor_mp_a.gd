@@ -1550,6 +1550,18 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 		% [c, s, scl, -s, c, pos.x, pos.y, pos.z])
 	if mode != "":
 		_out.append('metadata/coliziune = "%s"' % mode)
+	# ZIDURILE NU PRIMESC DISC DE CONTACT. Vezi nota lunga din
+	# `track.gd::_prop_contact_discs` — pe scurt: discul are raza din amprenta
+	# BAZEI, iar la un zid amprenta bazei e toata lungimea piesei; zidurile
+	# fiind INLANTUITE cap la cap, discurile se suprapun garantat, iar
+	# materialul lor e BLEND_MODE_MUL, deci umbrele se INMULTESC.
+	#
+	# Masurat pe cele 802 ziduri ale zonei: maxim 10 discuri peste acelasi
+	# punct, 0,74^10 = 0,049 — de aceea 38,2% din `PropContact` se randa la
+	# luminanta ZERO, in timp ce terenul nu cobora sub 122. Negrul din cadru
+	# era discul, nu umbra si nu o gaura in geometrie.
+	if model.begins_with("inca_wall"):
+		_out.append('metadata/contact = "none"')
 	_out.append("")
 	return pos
 
@@ -1573,6 +1585,37 @@ func _emit_podea() -> void:
 	# `ground_tint` (111,8 fata de 101,2 luminanta Rec.709) — nota (2).
 	_out.append("disc_slot = 12")
 	_out.append("disc_radius = 3.20")
+	# FUSTA — reparatia rundei 15, decisa pe CAPTURA (A_r0_f0035.png,
+	# crop_right_002.png), nu pe cifra.
+	#
+	# Ce se vedea: podeaua unei terase e o placa PLATA cu o singura fata, deci
+	# de la camera de joc (10 m inaltime, privire in jos-inainte) se vede fata
+	# ei de sus SI pe sub muchia ei libera — iar sub muchie nu e nimic. Pe
+	# captura, fiecare curte iese o TAVA verde care pluteste, cu negru
+	# dedesubt si cu zidul de sprijin in spatele ei, nu sub ea. Exact ce a
+	# numit criticul valului 3 „fara interior": ce se inchide nu e pamant, e
+	# o foaie suspendata.
+	#
+	# `disc_skirt` exista in flock.gd de la POI D si face fix asta — placa
+	# devine PRISMA, si prismele suprapuse dau un BLOC de pamant retinut de
+	# zid. Comentariul de langa `@export` spune chiar ca implicitul 0 s-a
+	# pastrat ca sa nu atinga „terasele lui POI A, care sunt deja acceptate
+	# asa". Nu sunt: criticul le-a respins de trei ori. Mecanismul era scris
+	# si nerulat (memoria `garda-existenta-nerulata`).
+	#
+	# CIFRA: 1,50 m = cea mai MICA ridicare din tot POI-ul (`_camp_dreapta`
+	# si `_camp_stanga`: lift merge 1,50 .. 4,20). Fusta e o proprietate a
+	# MESH-ului, deci una singura pentru toate placile; aleasa la minimul
+	# ridicarilor, nicio fusta nu coboara sub talpa zidului ei de sprijin,
+	# deci nu apare masa bruna sub piatra. Pe terasele mai inalte masa se
+	# opreste mai sus decat solul — corect si suficient: zidul de sprijin
+	# urca pana la coronament (`lift + drop`), deci acopera tot ce e sub el.
+	_out.append("disc_skirt = 1.50")
+	# 4 = ROCK_DARK (#67421F), pamantul brun. NU slotul 12: fusta cu iarba
+	# iese cutie verde si citeste a gard viu, nu a pamant taiat (masurat pe
+	# D_r14_frac0.44.png, nota de la `disc_skirt_slot`). Slot existent in
+	# atlas -> ZERO materiale noi.
+	_out.append("disc_skirt_slot = 4")
 	# Fara variatie de scara: podeaua e o SUPRAFATA, nu un stol. Variatia ar
 	# lasa goluri intre placi prin care s-ar vedea solul de sub terasa.
 	_out.append("scale_min = 1.0")

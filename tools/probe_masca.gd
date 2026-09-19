@@ -260,7 +260,7 @@ func _ready() -> void:
 		# Numele nu identifica: mesh-urile generate in cod ies @MeshInstance3D@NNN
 		# si acelasi nume apare de mai multe ori (memoria `nume-noduri-nu-sunt-unice`).
 		# Calea in scena + centrul de lume spun CARE obiect e.
-		var ab := all[k].get_aabb()
+		var ab: AABB = all[k].get_aabb()
 		var ctr: Vector3 = all[k].global_transform * ab.get_center()
 		print("  %7d px  %5.2f%%  %s  centru(%.0f,%.0f,%.0f)  %s" % [per[k],
 			100.0 * float(per[k]) / float(_w * _h), all[k].name,

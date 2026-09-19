@@ -6940,6 +6940,34 @@ func _prop_contact_discs() -> PackedVector4Array:
 		var n3 := n as Node3D
 		if n3 == null or n3 == root or not n3.visible:
 			continue
+		# PIESE INLANTUITE: fara disc de contact. Steag OPT-IN pe nod
+		# (`metadata/contact = "none"`), deci implicit nu se schimba NIMIC
+		# pe nicio pista — se aplica doar unde generatorul il scrie explicit.
+		#
+		# De ce a fost nevoie, masurat pe POI A (Machu Picchu, frac 0.035):
+		# 99,3% din pixelii complet NEGRI ai cadrului (luminanta sub 5) cadeau
+		# pe `PropContact`, si 38,2% din obiectul asta se randa la zero.
+		# Terenul, prin contrast, nu cobora niciodata sub 122 — deci nu era
+		# umbra, era discul.
+		#
+		# Mecanismul e cel pe care nota de la PROP_AO_FOOT_BAND il descrie deja
+		# pentru padure, dar reparatia de acolo nu-l acopera. Raza luata din
+		# amprenta BAZEI rezolva copacul (trunchi subtire sub coroana lata);
+		# pentru un ZID amprenta bazei E toata lungimea piesei, deci discul
+		# iese cu raza ~4,4 m la `inca_wall_b`, iar zidurile inlantuite stau la
+		# 3,7 m unul de altul PRIN CONSTRUCTIE (capete la ±2,0/±3,0/±1,0, rost
+		# 0,0000). Suprapunerea e atunci garantata, nu accidentala.
+		#
+		# Numarata pe cele 802 ziduri ale zonei A, pe 4000 de puncte: 86% din
+		# solul acoperit sta sub 2+ discuri, maximul e 10, iar BLEND_MODE_MUL
+		# inmulteste: 0,74^10 = 0,049. Inmultit apoi cu umbra dinamica
+		# (`shadow_opacity` 0,70) ajunge la zero pe intreg.
+		#
+		# Contactul zidului nu se pierde vizual: un zid sta pe o linie, nu pe
+		# un punct, iar umbra lui o face lumina directionala — care are forma
+		# si directie. Discul era menit sa lipeasca de sol o piesa IZOLATA.
+		if n3.has_meta("contact") and str(n3.get_meta("contact")) == "none":
+			continue
 		var aabb := _visual_aabb(n3)
 		if aabb.size == Vector3.ZERO:
 			continue

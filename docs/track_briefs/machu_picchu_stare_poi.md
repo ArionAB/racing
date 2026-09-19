@@ -337,3 +337,116 @@ Celelalte memorii scrise în sesiunea asta:
 `probe-decor-numar-de-scena`, `garda-fara-linie-de-baza-iese-zero`,
 `garda-verde-pe-zero-masuratori`, `scala-glb-neaplicata-la-radacina`,
 `cota-de-contract-se-masoara-ca-gol`, `zero-repuneri-ascunde-blocajul`.
+
+## 5. POI H, runda 17 (19 sep 2026): fereastra vizibila, masurata
+
+Criticul orb a dat pe H **acelasi verdict de doua ori** ("fetele verticale ale
+golului n-au material de stanca"). Lectia `criticul-cere-ce-zona-nu-poate-da`
+cere ca la al doilea verdict identic sa se verifice stratul de dedesubt
+INAINTE de a mai adauga piese. Verificat — si raspunsul are doua jumatati,
+ceea ce e util de stiut pentru orice POI de cornisa.
+
+### Ce NU poate produce zona: fata propriu-zisa e invizibila
+
+Fata EXISTA in teren, masurata: la frac 0,9400 cotele fata de sosea sunt
+−2,5 m la 8 m lateral si **−12,3 m la 16 m**, adica o cadere de 9,8 m pe 8 m
+de rulaj — **51 de grade**. Deci criticul are dreptate ca ar trebui sa fie
+stanca acolo.
+
+Dar din ochiul soferului (camera de joc, +2,6 m peste sosea, 8 m in spate)
+**nu se vede niciun punct de pe ea**. `tools/SvMpHOcluzie.tscn` plimba raza pe
+5 fractii x 8 distante laterale (6..26 m): **40 de "nu" din 40**, si corpul
+care opreste raza e de fiecare data acelasi, citit dupa nume — **`RoadTop`**,
+insasi placa soselei. Marginea deck-ului sta peste terenul care cade si face o
+buza care ascunde tot ce e dedesubt.
+
+Cat ar trebui mutat ochiul ca sa vada piciorul fetei: **+9,6 m inaltime**
+(camera e la 2,6 si e setare de joc, nu de pista) **sau 5,0 m lateral in
+afara**, adica pe langa drum. Prima asezare a rundei a pus 90 de piese de
+stanca exact pe fata; captura a iesit **practic identica** cu cea dinainte.
+
+E a treia oara pe POI-ul asta: runda 7 platise de trei ori acelasi pret cu
+terasele. Memoria `umarul-ingust-ascunde-caderea` in forma ei tare — **nu
+conteaza cat de adanca e prapastia, ci sub ce unghi o vezi**.
+
+### Ce POATE produce zona: fereastra vizibila
+
+Aceeasi sonda masoara si **cea mai joasa cota care inca se vede**, la fiecare
+distanta laterala. Asta e banda in care decorul chiar schimba captura:
+
+| lateral | 7 m | 9 m | 11 m | 13 m | 16 m | 20 m |
+|---|---:|---:|---:|---:|---:|---:|
+| cea mai joasa cota vizibila | +0,3 | −0,5 | −1,3 | −1,8 | −3,0 | −4,5 |
+
+E o pana care se adanceste cu distanta. **Terasele rundei 7 au functionat
+exact fiindca stau in ea** (sosea .. −3,6 m). Deci piatra se aseaza **in
+fereastra**, nu pe fata: blocuri care urca din terenul de departe pana in linia
+de vedere.
+
+**Reteta, pentru urmatorul POI de cornisa:** nu intreba "cat de adanca e
+prapastia" ci "care e cea mai joasa cota vizibila la distanta X" — si asaza
+acolo. Sonda e generica, se muta pe orice pista schimband fractiile.
+
+### Trei capcane de piesa, toate prinse pe captura si niciuna pe cifra
+
+1. **`moss_boulder_*` da capace VERZI.** Din fereastra asta ochiul priveste
+   mereu **in jos** (24–40 grade sub orizontala, masurat), iar muschiul e pe
+   fata de sus a piesei. Rezultatul e fix materialul reclamat de critic, in
+   relief. Runda 13 platise deja lectia ("un sir de DISCURI cu capac verde");
+   s-a regasit fiindca se schimbase **banda**, nu piesa. Piesa buna e
+   `inca_wall_b`, care isi arata fata verticala de granit.
+2. **Yaw uniform pe cerc = evantai de scanduri.** Jumatate din lespezi isi
+   arata muchia subtire catre camera. Yaw-ul se ia din **tangenta**, cu
+   imprastiere stransa (memoria `perete-paralel-nu-se-vede`).
+3. **Lespezi pe teren PLAT citesc a scanduri.** Dupa poarta traseul iese din
+   rapa si intra in piata; stanca are sens doar unde exista cornisa, deci
+   bucla se opreste la `F_WALL_OUT`, ca si zidul de sprijin.
+
+### Si o sonda care minte: `probe_manual` pe fata inclinata
+
+`probe_manual` citeste **campul neted** (`probe_manual.gd:74`,
+`_sampler.ground_y`). Pe fata asta campul si mesh-ul real **nu coincid** —
+masurat cu `tools/SvMpHSol.tscn`, la frac 0,9450:
+
+| lateral | 7 m | 9 m | 10,5 m | 12 m | 14 m | 16 m |
+|---|---:|---:|---:|---:|---:|---:|
+| camp neted | −1,28 | −5,23 | −9,51 | −12,15 | −12,30 | −12,30 |
+| raycast `TerrainBody` | −2,43 | −3,77 | −5,61 | −7,43 | −9,86 | −12,28 |
+| diferenta | +1,15 | −1,46 | **−3,90** | **−4,72** | −2,45 | −0,02 |
+
+Campul se prabuseste devreme la podeaua vaii; mesh-ul urmeaza panta de 51
+grade. **La capete se potrivesc (0,02 m la 16 m), la mijloc difera cu 4,7 m** —
+exact banda unde sonda striga PLUTESTE. Masinile si randarea folosesc mesh-ul,
+deci asezarea pe raycast e cea corecta si semnalarile de acolo sunt **fals
+pozitive**. Memoria `terrain-mesh-y-extrapoleaza`.
+
+Nuanta care merita retinuta: o prima "reparatie" a plafonat ingroparea ca sa
+impace sonda — si numarul de semnalari a **crescut** de la 6 la 10. O cifra
+care se misca in directia gresita dupa un fix e semnalul ca fix-ul trateaza
+alt mecanism. S-a revenit, si s-a masurat cauza.
+
+### Cifrele rundei
+
+| garda | comanda | cifra |
+|---|---|---|
+| probe_decor | `--script res://tools/probe_decor.gd -- --track=15` | **19 materiale** (neschimbat), 16 040 prop, 3 598 339 tri |
+| ProbeBuried | `res://tools/ProbeBuried.tscn -- --track=8` | 0 ingropate, 0 tavane |
+| ProbeLaneClear | `res://tools/ProbeLaneClear.tscn -- --track=8` | **18** (linia de baza 20) |
+| ProbeRace | `--mode=race --track=8 --seconds=150 --seed=N` | **2/1/1** pe seed 1/2/3 = **identic cu baseline** |
+
+**Zero materiale noi**: toate piesele erau deja in kit, pe clasa `inca_stone`.
+Evenimentele din ProbeRace sunt la frac 0,573 si 0,501 — in afara zonei, si
+preexistente.
+
+### Ce ramane descoperit pe H (nu s-a mascat cu decor)
+
+- **Golul din DREAPTA** — cerut de critici de cinci ori. Terenul de pe dreapta
+  **urca** (−0,4 m la 1 m, −0,0 la 4 m, +0,5 la 10 m, si nu atinge −3 m nici la
+  60 m). Nu se poate fabrica prapastie cu decor: un perete de piese peste teren
+  plat citeste a gard. **Decizie de teren, deschisa la dezvoltator.**
+- **Barnele podului mobil** — reuse-ul `LiftBridgeHazard` pune un damb de 1,6 m
+  pe cornisa si sub gol terenul ramane la −0,3 m. Cere sapatura locala de 4 m
+  (brief §3). Decorul a pus piatra pe buzele golului; restul e teren.
+- **Fata de sub fereastra** — exista, e de 51 de grade, si e invizibila din
+  masina. Ar deveni vizibila doar mutand camera sau ingustand placa soselei;
+  ambele sunt decizii de nivel de pista.

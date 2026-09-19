@@ -412,3 +412,27 @@ de coliziune cu transform local identitate, citite la y=0,00.
 ProbeRace a fost rulat **inainte** de constructie (memoria
 `proberace-la-inceput-nu-la-final`). Felia 0.65-0.75: 0,0 % lent, 0 pereti,
 0 repuneri pe toate trei seed-urile.
+
+### O SINGURA cauza pentru cele doua ecarturi ramase
+
+Dupa runda 3, fata de bara mai raman doua diferente mari. Masurate, ele au
+**acelasi mecanism**, si niciuna nu e in zona unui POI:
+
+| | sursa (tint/atlas) | RANDAT | bara |
+|---|---:|---:|---:|
+| carosabil | V=0,800 (`DIRT_ROAD_COLOR`) | **V=0,943** | V=0,719 |
+| frunzis | V=0,382 (slot 21 TROPICAL_GREEN) | **V=0,537** | V=0,294 |
+
+Amandoua urca cu **~0,15** fata de sursa lor. Nu sunt doua probleme de decor,
+e o intrebare de **expunere pe pista** — si atat `DIRT_ROAD_COLOR` cat si
+slotul 21 sunt globale: le folosesc Okinawa, Dunele, Serengeti si restul.
+
+Nuanta frunzisului nimereste deja bara (H 0,222 fata de 0,211); ce difera e
+saturatia (0,489 fata de 0,305) si valoarea. Adica vegetatia noastra are
+culoarea corecta, dar e prea aprinsa si prea luminata — exact profilul unui
+reglaj de lumina, nu al unei alegeri de piesa.
+
+**De aia runda 3 s-a oprit aici si n-a mai adaugat piese.** Axa pe care POI-ul
+putea lucra (masa de piatra cenusie) a fost mutata si masurata. Axa ramasa cere
+un reglaj de tema sau de expunere, si aia e o decizie de pista, luata cu
+capturi pe mai multe POI-uri deodata — nu ceva de strecurat dintr-o zona.

@@ -15,6 +15,7 @@ const CAR_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/taxi.tres"),
 	preload("res://scenes/cars/data/bus.tres"),
 	preload("res://scenes/cars/data/firetruck.tres"),
+	preload("res://scenes/cars/data/buggy.tres"),
 ]
 
 ## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in cursa rapida.

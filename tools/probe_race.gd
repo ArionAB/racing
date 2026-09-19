@@ -317,6 +317,7 @@ func _start_race() -> void:
 			"name": "%s (%s)" % [car.pilot_name, car.car_name],
 			"offroad_s": 0.0, "slow_s": 0.0, "reverse_s": 0.0,
 			"respawns": 0, "walls": 0, "wall_impact": 0.0,
+			"ejects_wall": 0, "ejects_land": 0, "land_max": 0.0,
 			"bumps": 0, "bump_peak": 0.0,
 			"slide_hits": 0, "carousel_hits": 0, "deflector_hits": 0,
 			"bus_hits": 0,
@@ -327,6 +328,16 @@ func _start_race() -> void:
 		})
 		car.respawned.connect(_on_respawn.bind(i))
 		car.wall_hit.connect(_on_wall.bind(i))
+		# Ejectarile soferului (masini deschise): cauza si marimea, ca pragurile
+		# din Car (eject_wall_dv / eject_land_speed) sa se tuneze pe cifre, nu pe
+		# impresii. Aterizarea maxima FARA ejectare spune cat de aproape e o
+		# saritura proiectata de prag.
+		car.ejected.connect(_on_eject.bind(i))
+		# `landed` se emite INAINTE de decizia de ejectare, deci se compara cu
+		# pragul, nu cu starea masinii.
+		car.landed.connect(func(c: Car, fall: float) -> void:
+			if fall < c.eject_land_speed:
+				_stats[i].land_max = maxf(float(_stats[i].land_max), fall))
 		# Delta-v-ul REAL al imbrancelii, direct din model. Masurat ca diferenta
 		# de viteza intre cadre ar aduna si gravitatia, aterizarile si turbo.
 		# Conditionat: pe versiunile de dinaintea modelului de masa semnalul nu
@@ -484,6 +495,18 @@ func _on_respawn(car: Car, index: int) -> void:
 		car.global_position.x, car.global_position.y, car.global_position.z])
 
 
+func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
+	if car.last_eject_cause == "perete":
+		_stats[index].ejects_wall = int(_stats[index].ejects_wall) + 1
+	else:
+		_stats[index].ejects_land = int(_stats[index].ejects_land) + 1
+	print("[ejectare] t=%5.1fs  %-18s frac=%.3f  %s %.1f m/s  poz=(%.0f,%.0f,%.0f)" % [
+		_elapsed, _stats[index].name,
+		_race.track.frac_at(car.road_index, car.route),
+		car.last_eject_cause, car.last_eject_value,
+		car.global_position.x, car.global_position.y, car.global_position.z])
+
+
 func _on_wall(car: Car, impact: float, index: int) -> void:
 	_stats[index].walls = int(_stats[index].walls) + 1
 	if _in_slice(_race.track.frac_at(car.road_index, car.route)):
@@ -500,9 +523,12 @@ func _report_race() -> void:
 	var cars: Array[Car] = _race.cars
 	print("\n=== CURSA: %s — %.0fs, %d masini ===" % [
 		track.track_name, _elapsed, cars.size()])
-	print("%-20s %6s %6s %8s %7s %7s %5s %6s %9s %6s %6s %6s" % [
+	print("%-20s %6s %6s %8s %7s %7s %5s %7s %6s %9s %6s %6s %6s" % [
 		"masina", "tururi", "v_med", "offroad", "lent", "invers",
-		"resp", "pereti", "bump/dv", "minge", "carus", "deviat"])
+		"resp", "ejec p/a", "pereti", "bump/dv", "minge", "carus", "deviat"])
+	var total_ej_wall := 0
+	var total_ej_land := 0
+	var land_max := 0.0
 	var worst_offroad := 0.0
 	var total_respawns := 0
 	var laps: Array[float] = []
@@ -514,15 +540,21 @@ func _report_race() -> void:
 		var off_pct := float(st.offroad_s) / _elapsed * 100.0
 		worst_offroad = maxf(worst_offroad, off_pct)
 		total_respawns += int(st.respawns)
-		print("%-20s %6.2f %6.1f %7.1f%% %6.1fs %6.1fs %5d %6d %4d/%4.1f %6d %6d %6d" % [
+		total_ej_wall += int(st.ejects_wall)
+		total_ej_land += int(st.ejects_land)
+		land_max = maxf(land_max, float(st.land_max))
+		print("%-20s %6.2f %6.1f %7.1f%% %6.1fs %6.1fs %5d %4d/%-2d %6d %4d/%4.1f %6d %6d %6d" % [
 			st.name, done, avg, off_pct, float(st.slow_s), float(st.reverse_s),
-			int(st.respawns), int(st.walls), int(st.bumps), float(st.bump_peak),
+			int(st.respawns), int(st.ejects_wall), int(st.ejects_land),
+			int(st.walls), int(st.bumps), float(st.bump_peak),
 			int(st.slide_hits), int(st.carousel_hits), int(st.deflector_hits)])
 	laps.sort()
 	print("--- ritm: cel mai rapid %.2f tururi, cel mai lent %.2f (ecart %.2f)" % [
 		laps[laps.size() - 1], laps[0], laps[laps.size() - 1] - laps[0]])
 	print("--- repuneri totale: %d · cel mai mult in afara soselei: %.1f%%" % [
 		total_respawns, worst_offroad])
+	print("--- ejectari: %d (perete %d, aterizare %d) · cea mai dura aterizare FARA ejectare: %.1f m/s" % [
+		total_ej_wall + total_ej_land, total_ej_wall, total_ej_land, land_max])
 	var branch_total := 0
 	var branch_line := ""
 	for i in cars.size():

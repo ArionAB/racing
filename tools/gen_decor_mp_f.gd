@@ -239,6 +239,7 @@ func _ready() -> void:
 		_banks()
 		_bank_edge()
 		_road_side()
+		_flanc()
 		_station()
 		_camp()
 		_respawn()
@@ -1259,6 +1260,165 @@ func _banks() -> void:
 ## deci la meseria lor: sa stea pe MUCHIE, in primii metri de taluz (la 1,5-4,5
 ## m lateral terenul e -27,8..-29,7, adica inca sus), ca ochiul sa aiba o
 ## treapta intre carosabil si gol.
+## FLANCUL: masa care inchide cadrul lateral, ca MultiMesh.
+##
+## DE CE EXISTA (masurat pe captura, nu pe impresie — runda 1 a valului 4).
+## Criticul valului 3 a spus „raul lipseste cu totul din zona numita malul
+## raului". Verificat inainte de a construi: raul NU lipseste. `F_Luciu` are 602
+## instante, `F_LuciuAdanc` 898, `F_Spuma` 242 — apa e acolo, cu pozitii reale,
+## si la 0.71 se si vede ca fir alb in gorja. Ce lipseste e ALTCEVA, si se
+## citeste cand clasifici pixelii pe familii de culoare (r0_*.png fata de
+## `bara_poi_F.png`):
+##
+##   sursa         iarba   piatra   drum
+##   BARA           0,7 %   24,0 %  30,6 %
+##   noi la 0.67   39,0 %   18,6 %  30,7 %
+##   noi la 0.69   10,4 %   17,2 %  42,1 %
+##   noi la 0.71   23,9 %   12,6 %  30,0 %
+##
+## In bara nu exista IZLAZ: tot ce nu e drum e piatra sau vegetatie deasa. La
+## noi, 39 % din cadrul de la 0.67 e gazon gol. Impartita pe o grila de 4x4,
+## iarba nu e imprastiata, e in BLOCURI: la 0.67 coloana din dreapta da
+## 91 / 99,5 / 81 % (exact partea dinspre rau), la 0.71 coloana din stanga da
+## 52 / 85 / 85 %. Deci „raul nu se vede" e simptomul; cauza e ca jumatate din
+## cadru e o pajiste pe care ochiul n-are ce citi, iar un fir de apa la 30 m
+## intr-un izlaz gol nu devine subiect.
+##
+## `_road_side` punea DOUA randuri pe pas de 4,5 si 8 m, adica ~25 de piese pe
+## 300 m de traseu: copaci razleti, nu mal. `_banks` cauta doar pana la
+## `half + 42 m` PE PERPENDICULARA ALBIEI, deci nu ajunge niciodata in campul
+## din dreapta de la 0.67. Flancul acopera fix golul dintre ele.
+##
+## CUM (acelasi tipar ca podeaua vaii, `gen_podea_vale.gd`):
+## - MultiMesh, nu noduri de scena: la densitatea ceruta ies ~2000 de piese, iar
+##   2000 de noduri individuale ar umfla Track15.tscn cu ~8000 de linii
+##   (podeaua a ajuns la 25 de minute de incarcare cu 5633).
+## - feliat pe fractie in 4 bucati, ca AABB-ul unui MultiMesh sa nu fie cat
+##   zona si culling-ul sa ramana util.
+## - cota din `_sol_real` (raycast filtrat pe TerrainBody), nu din campul neted.
+## - fiecare piesa trece prin `_dist_to_road`, aceeasi poarta ca malurile —
+##   loturile de MultiMesh nu trec prin `_place`, deci poarta se pune explicit.
+## - compozitia dupa `aranjamentul-bate-numarul`: pilcuri cu goluri intre ele,
+##   nu pas egal; piatra jos si deasa, copaci peste ea.
+## ZERO materiale noi: bolovanii poarta `inca_stone` (clasa deja pe pista),
+## copacii stau pe materialul de lume.
+func _flanc() -> void:
+	_fl_gol = 0
+	_fl_panta = 0
+	_fl_drum = 0
+	_fl_gap = 0
+	_fl_prob = 0
+	_fl_try = 0
+	# [model, h_min, h_max, gap_min, gap_max, pas, prob, clasa]
+	# Golul pleaca de la 7 m (peste acostamentul de 4 m plus marja) si se
+	# intinde pana la 58 m — acolo unde grila de iarba arata blocurile pline.
+	for spec: Array in [
+			["moss_boulder_b", 1.4, 2.6, 7.0, 30.0, 2.2, 0.88, "inca_stone"],
+			["moss_boulder_c", 2.2, 4.0, 9.0, 40.0, 3.2, 0.82, "inca_stone"],
+			["moss_boulder_a", 0.6, 1.1, 7.0, 26.0, 1.8, 0.85, "inca_stone"],
+			["polylepis_a", 3.6, 5.4, 10.0, 56.0, 2.4, 0.90, ""],
+			["polylepis_b", 5.4, 8.2, 14.0, 70.0, 3.2, 0.86, ""],
+			["tree_fern", 2.2, 3.4, 8.0, 36.0, 2.6, 0.82, ""],
+			["bamboo_clump", 3.2, 5.4, 9.0, 46.0, 3.0, 0.80, ""],
+		]:
+		var mdl: String = String(spec[0])
+		var cls: String = String(spec[7])
+		# Patru felii de fractie, fiecare cu lotul ei de MultiMesh, ca AABB-ul
+		# sa nu fie cat zona si culling-ul sa ramana util.
+		for felie in 4:
+			var f0: float = F_IN + (F_OUT - F_IN) * (float(felie) / 4.0)
+			var f1: float = F_IN + (F_OUT - F_IN) * (float(felie + 1) / 4.0)
+			var pos: PackedVector3Array = []
+			var yaw: PackedFloat32Array = []
+			var sc3: Array[Vector3] = []
+			for sgn: float in [-1.0, 1.0]:
+				var f := f0
+				while f < f1:
+					f += _step(float(spec[5]) + _rng.randf_range(-1.0, 1.0))
+					# UN CAMP, NU UN SIR. Prima versiune punea o singura piesa
+					# la fiecare pas longitudinal, deci iesea un RAND paralel cu
+					# drumul oricat de mare era `gap_max`: 307 de incercari pe
+					# toata zona si 90 de piese asezate, adica exact izlazul pe
+					# care trebuia sa-l acopere. Un camp lat de 50 m cere
+					# esantionare si pe LATIME — cu o banda la fiecare ~7 m de
+					# departare, fiindca aria creste cu departarea.
+					var benzi := int(maxf(1.0,
+						(float(spec[4]) - float(spec[3])) / 7.0))
+					for b in benzi:
+						if _rng.randf() > float(spec[6]):
+							_fl_prob += 1
+							continue
+						# PILCURI, NU SIR: goluri intentionate pe amandoua axele,
+						# altfel campul citeste ca gazon tuns
+						# (memoria aranjamentul-bate-numarul).
+						if sin(f * 190.0 + float(b) * 2.1) > 0.62:
+							_fl_gap += 1
+							continue
+						_fl_try += 1
+						# Banda `b` isi ia golul din felia ei, cu suprapunere
+						# de jitter intre benzi vecine.
+						var lo: float = lerpf(float(spec[3]), float(spec[4]),
+							float(b) / float(benzi))
+						var hi: float = lerpf(float(spec[3]), float(spec[4]),
+							float(b + 1) / float(benzi))
+						var gap := _rng.randf_range(lo, hi)
+						var n := _track.baked.size()
+						var i := int(f * float(n)) % n
+						var p := _track.baked[i]
+						var s := _track._side_at(i) * sgn
+						var half := _track.width_at_index(i)
+						var q := p + s * (half + gap)
+						var g := _sol_real(q.x, q.z)
+						# NU peste buza care cade in gorja: dincolo de 9 m sub
+						# drum incepe peretele, iar acolo lucreaza
+						# `_canyon_wall`, nu flancul. Fara pragul asta copacii
+						# ies pe fatada verticala.
+						if g < p.y - 9.0:
+							_fl_gol += 1
+							continue
+						# Nici pe stanca prea abrupta: panta pe patru directii,
+						# maximul nu media (un perete paralel cu o raza nu se
+						# vede altfel).
+						var panta := 0.0
+						for ang: float in [0.0, TAU * 0.25, TAU * 0.5, TAU * 0.75]:
+							var gg := _sol_real(q.x + cos(ang) * 2.5,
+								q.z + sin(ang) * 2.5)
+							panta = maxf(panta, absf(gg - g) / 2.5)
+						if panta > 0.78:
+							_fl_panta += 1
+							continue
+						# Aceeasi poarta de carosabil ca la maluri: un lot de
+						# MultiMesh nu trece prin `_place`, deci poarta se pune
+						# explicit, fata de TOT traseul (pe viraj drumul revine
+						# spre piesa cateva zeci de metri mai incolo).
+						# ACEST REFUZ E CORECT SI POARTA INFORMATIE, nu e o
+						# pierdere de randament: masurat, toate respingerile
+						# sunt pe `sgn=-1` la frac 0.665-0.690 cu `dist=0.00`,
+						# adica INTERIORUL acului, unde bratul de dus si cel de
+						# intors sunt la ~25 m. O piesa „la 25 m in stanga"
+						# bratului de dus cade pe bratul de intors. De aia
+						# campul interior ramane ingust, si de aia latimea mare
+						# se plateste pe exterior.
+						if _dist_to_road(q.x, q.z) < 3.0:
+							_fl_drum += 1
+							continue
+						var h := _rng.randf_range(float(spec[1]), float(spec[2]))
+						var sc := _scale_for(mdl, h)
+						pos.append(Vector3(q.x, g, q.z))
+						yaw.append(_rng.randf_range(0.0, TAU))
+						sc3.append(Vector3(sc, sc, sc))
+			if pos.is_empty():
+				continue
+			_flock_seed += 1
+			_model_flock("F_Flanc_%s_f%d" % [mdl, felie], RES[mdl], pos, yaw,
+				sc3, 77500 + _flock_seed, cls)
+			_tri += int(TRI.get(mdl, 0)) * pos.size()
+			print("; flanc %s felie %d: %d piese" % [mdl, felie, pos.size()])
+	print("; FLANC filtre: incercari %d, respinse gol %d, panta %d, drum %d, pilc %d, prob %d" % [
+		_fl_try, _fl_gol, _fl_panta, _fl_drum, _fl_gap, _fl_prob])
+
+
+
 func _bank_edge() -> void:
 	var f := 0.6960
 	var k := 0
@@ -1877,6 +2037,12 @@ var _sol_cache := {}
 ## Seed distinct per lot de MultiMesh: doua loturi cu acelasi seed ar avea
 ## aceeasi serie de scari, deci acelasi desen repetat.
 var _flock_seed := 0
+var _fl_gol := 0
+var _fl_panta := 0
+var _fl_drum := 0
+var _fl_gap := 0
+var _fl_prob := 0
+var _fl_try := 0
 ## Piese refuzate fiindca marginea lor ar fi intrat sub 1,5 m de carosabil, pe
 ## ORICE bucata a traseului (nu doar la fractia lor).
 var _refuzate := 0

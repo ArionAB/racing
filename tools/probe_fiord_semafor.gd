@@ -87,6 +87,7 @@ class Stats:
 	var respawns: int = 0
 	var ran_red: int = 0 # a trecut linia CAT era rosu (orice cifra ramasa)
 	var ran_red_clear: int = 0 # idem, dar cu > RED_EDGE_S de rosu ramas (nu limita)
+	var ejects: int = 0 # soferul ejectat (prototip ragdoll) -- "distrus" in joc azi
 	var bus_hits: int = 0
 	var stuck_reports: int = 0
 	## Asteptari la linie: (inceput rosu vazut, secunde de asteptare) — o
@@ -285,6 +286,11 @@ func _spawn_cars() -> void:
 		st.name = "%s(%s)" % [car.pilot_name, (GameState.CAR_DATA[data_idx] as CarData).display_name]
 		_stats.append(st)
 		car.respawned.connect(_on_respawn.bind(i))
+		# Criteriul 5 din brief: "un AI lovit frontal e impins inapoi, nu
+		# distrus, si nu ramane intepenit in nisa/perete" -- ejectarea
+		# soferului (prototipul ragdoll) e cea mai apropiata notiune de
+		# "distrus" pe care o are jocul azi.
+		car.ejected.connect(_on_eject.bind(i))
 	_signal.bus_hit.connect(_on_bus_hit)
 	# Toate masinile isi vad reciproc pentru depasire/ocolire (configure() le-a
 	# primit deja cu lista goala la constructie — se repara aici cu lista plina).
@@ -295,6 +301,14 @@ func _spawn_cars() -> void:
 
 func _on_respawn(_car: Car, index: int) -> void:
 	_stats[index].respawns += 1
+
+
+func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
+	_stats[index].ejects += 1
+	print("[ejectare] t=%6.1fs %-24s poz=(%.1f,%.1f,%.1f) cauza=%s v=%.1f" % [
+		_elapsed, _stats[index].name,
+		car.global_position.x, car.global_position.y, car.global_position.z,
+		car.last_eject_cause, car.last_eject_value])
 
 
 func _on_bus_hit(car: Car) -> void:
@@ -429,11 +443,12 @@ func _report() -> void:
 	_done = true
 	print("\n=== SEMAFORUL TUNELULUI — seed %d, %.0fs, %d masini ===" % [
 		_seed, _elapsed, _cars.size()])
-	print("%-26s %6s %6s %8s %8s %6s %6s %8s" % [
-		"masina", "tururi", "resp", "pe-rosu(clar)", "bus-hit", "blocaj", "pileup", "ast.med/max"])
+	print("%-26s %6s %6s %8s %8s %6s %6s %6s %8s" % [
+		"masina", "tururi", "resp", "pe-rosu(clar)", "bus-hit", "eject", "blocaj", "pileup", "ast.med/max"])
 	var total_red := 0
 	var total_red_clear := 0
 	var total_bus := 0
+	var total_ejects := 0
 	var total_stuck := 0
 	var total_pileup := 0
 	var total_resp := 0
@@ -446,12 +461,13 @@ func _report() -> void:
 			wmax = maxf(wmax, w)
 			all_waits.append(w)
 		var wavg := wsum / maxf(float(st.wait_times.size()), 1.0)
-		print("%-26s %6.2f %6d %5d(%d) %8d %6d %6d %5.1f/%.1f" % [
+		print("%-26s %6.2f %6d %5d(%d) %8d %6d %6d %6d %5.1f/%.1f" % [
 			st.name, st.laps, st.respawns, st.ran_red, st.ran_red_clear,
-			st.bus_hits, st.stuck_reports, st.green_stall_reports, wavg, wmax])
+			st.bus_hits, st.ejects, st.stuck_reports, st.green_stall_reports, wavg, wmax])
 		total_red += st.ran_red
 		total_red_clear += st.ran_red_clear
 		total_bus += st.bus_hits
+		total_ejects += st.ejects
 		total_stuck += st.stuck_reports
 		total_pileup += st.green_stall_reports
 		total_resp += st.respawns
@@ -461,19 +477,21 @@ func _report() -> void:
 		overall_avg += w
 		overall_max = maxf(overall_max, w)
 	overall_avg /= maxf(float(all_waits.size()), 1.0)
-	print("--- total: repuneri=%d, treceri-pe-rosu=%d (clar rosu: %d), contacte-autocar=%d, blocaje=%d, pileup=%d"
-		% [total_resp, total_red, total_red_clear, total_bus, total_stuck, total_pileup])
+	print("--- total: repuneri=%d, treceri-pe-rosu=%d (clar rosu: %d), contacte-autocar=%d, ejectari=%d, blocaje=%d, pileup=%d"
+		% [total_resp, total_red, total_red_clear, total_bus, total_ejects, total_stuck, total_pileup])
 	print("--- asteptare la rosu: medie %.2fs, maxima %.2fs, N=%d opriri" % [
 		overall_avg, overall_max, all_waits.size()])
 	# Verdict pe criteriul brief-ului: 0 AI intrate pe rosu — folosim
 	# ran_red_clear (exclude limita de esantionare la tranzitia in verde,
 	# vezi RED_EDGE_S), ca sa nu raportam fals un AI care a franat corect
 	# pana la linie si a plecat in fractiunea de secunda cand a prins verde.
-	var ok := total_red_clear == 0 and total_stuck == 0
-	print("\nVERDICT: %s (0 blocaje: %s, 0 treceri-pe-rosu CLAR: %s%s)" % [
+	# Ejectarile intra la verdict: e cea mai apropiata notiune de "distrus".
+	var ok := total_red_clear == 0 and total_stuck == 0 and total_ejects == 0
+	print("\nVERDICT: %s (0 blocaje: %s, 0 treceri-pe-rosu CLAR: %s%s, 0 ejectari: %s)" % [
 		"OK" if ok else "PROBLEMA",
 		"da" if total_stuck == 0 else "NU (%d)" % total_stuck,
 		"da" if total_red_clear == 0 else "NU (%d)" % total_red_clear,
 		"" if total_red == total_red_clear else
-			" [+%d la limita verde, vezi RED_EDGE_S]" % (total_red - total_red_clear)])
+			" [+%d la limita verde, vezi RED_EDGE_S]" % (total_red - total_red_clear),
+		"da" if total_ejects == 0 else "NU (%d)" % total_ejects])
 	get_tree().quit(0 if ok else 1)

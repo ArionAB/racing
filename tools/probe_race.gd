@@ -217,6 +217,16 @@ var _signal_left_lane_frames: int = 0
 ## "lat maxim in tunel <= 4.0".
 var _signal_lat_max: float = 0.0
 
+## Runda 3 (coordonator): "lateralul PRE-impact" — inchide intrebarea daca
+## mașinile lovite de autocar erau deja pe dreapta (regula functiona, contact
+## fizic din marja prea mica) sau inca pe axa/stanga (regula n-a apucat).
+## Buffer circular de 3 cadre pe masina (cheie: instance id), actualizat in
+## FIECARE tick din `_watch_signal_fleet` (nu doar pe rosu — o masina poate fi
+## lovita chiar la tranzitia verde->rosu). Fiecare intrare: lateral SEMNAT
+## (side_at), acelasi tipar ca `_signal_lat_max`.
+var _lateral_history: Dictionary = {}
+const LATERAL_HISTORY_LEN: int = 3
+
 ## Pista taiata in felii egale, ca sa vezi UNDE se scurge viteza.
 const BUCKETS: int = 20
 var _bucket_speed: PackedFloat32Array = PackedFloat32Array()
@@ -634,7 +644,7 @@ func _watch_signal_fleet(cars: Array[Car]) -> void:
 		# pe INDEXUL de traseu (acelasi tipar ca `ai_controller.gd`, distanta
 		# pe axa drumului, nu pe coordonate locale ale hazardului).
 		var track2: Track = _race.track
-		if red and track2 != null:
+		if track2 != null:
 			var r2 := track2.route_at(car.route)
 			if r2 != null and not r2.baked.is_empty():
 				var n2 := r2.count()
@@ -655,9 +665,18 @@ func _watch_signal_fleet(cars: Array[Car]) -> void:
 					var side2: Vector3 = r2.side_at(bidx2)
 					var lateral2: float = side2.dot(
 						car.global_position - r2.baked[r2.wrap_index(bidx2)])
-					if lateral2 < 0.0:
-						_signal_left_lane_frames += 1
-					_signal_lat_max = maxf(_signal_lat_max, absf(lateral2))
+					# Runda 3: buffer-ul de istoric se tine INDIFERENT de rosu —
+					# vezi doc la `_lateral_history`.
+					var hid := car.get_instance_id()
+					var hist: Array = _lateral_history.get(hid, [])
+					hist.append(lateral2)
+					if hist.size() > LATERAL_HISTORY_LEN:
+						hist.pop_front()
+					_lateral_history[hid] = hist
+					if red:
+						if lateral2 < 0.0:
+							_signal_left_lane_frames += 1
+						_signal_lat_max = maxf(_signal_lat_max, absf(lateral2))
 	_signal_max_queue = maxi(_signal_max_queue, queued)
 
 
@@ -768,8 +787,20 @@ func _tunnel_zone_diag(car: Car) -> String:
 		if hit is BusHazard or (hit.get_parent() is BusHazard):
 			label = "AUTOCAR"
 		touching.append(label)
-	return "  banda=%s red=%s regula_activa=%s v=%.1f atinge:%s" % [
-		side_txt, red, rule_active, speed,
+	# Runda 3 (coordonator): lateralul PRE-impact — cea mai VECHE valoare din
+	# buffer-ul circular de `LATERAL_HISTORY_LEN` cadre (vezi `_lateral_history`),
+	# adica pozitia laterala de CATEVA cadre INAINTE de acest eveniment, nu cea
+	# curenta (care poate fi deja deplasata de ghiontul autocarului). Raspunde
+	# direct la "era pe dreapta la >= +1.5 sau pe axa/stanga chiar inainte?".
+	var hid := car.get_instance_id()
+	var hist: Array = _lateral_history.get(hid, [])
+	var pre_lat_txt := "n/a"
+	if not hist.is_empty():
+		var pre_lat: float = hist[0]
+		var pre_side := "DREAPTA" if pre_lat > 0.0 else ("STANGA" if pre_lat < 0.0 else "AXA")
+		pre_lat_txt = "%.2f(%s)" % [pre_lat, pre_side]
+	return "  banda=%s red=%s regula_activa=%s v=%.1f pre_impact_lat=%s atinge:%s" % [
+		side_txt, red, rule_active, speed, pre_lat_txt,
 		", ".join(touching) if not touching.is_empty() else "-"]
 
 
@@ -832,9 +863,20 @@ func _on_signal_bus_hit(car: Car) -> void:
 		_signal_bus_hits_left += 1
 	else:
 		_signal_bus_hits_right += 1
-	print("[bus-hit] t=%5.1fs  %-18s intrata_pe=%s  banda=%s  lat=%5.2f  poz=(%.0f,%.0f,%.0f)" % [
+	# Runda 3: lateralul PRE-impact (vezi doc la `_lateral_history`) — cel mai
+	# vechi esantion din bufferul circular, cateva cadre INAINTE de acest
+	# contact, ca sa se vada daca masina era deja pe dreapta cand a lovit-o
+	# autocarul (marja prea mica) sau inca pe axa/stanga (regula n-a apucat).
+	var hid := car.get_instance_id()
+	var hist: Array = _lateral_history.get(hid, [])
+	var pre_lat_txt := "n/a"
+	if not hist.is_empty():
+		var pre_lat: float = hist[0]
+		var pre_side := "DREAPTA" if pre_lat > 0.0 else ("STANGA" if pre_lat < 0.0 else "AXA")
+		pre_lat_txt = "%.2f(%s)" % [pre_lat, pre_side]
+	print("[bus-hit] t=%5.1fs  %-18s intrata_pe=%s  banda=%s  lat=%5.2f  pre_impact_lat=%s  poz=(%.0f,%.0f,%.0f)" % [
 		_elapsed, car_name, "ROSU" if red else "VERDE",
-		"STANGA" if lateral < 0.0 else "DREAPTA", lateral,
+		"STANGA" if lateral < 0.0 else "DREAPTA", lateral, pre_lat_txt,
 		car.global_position.x, car.global_position.y, car.global_position.z])
 
 

@@ -235,6 +235,18 @@ func _build_bus() -> void:
 	_bus.body_size = Vector3(bus_width, 3.0, bus_length)
 	_bus.nose_side = nose_side
 	_bus.nose_angle_deg = 20.0
+	# BUG GASIT la montarea benzii (22 sep 2026): `BusHazard.apex_outer_m`
+	# implicit 1.0 muta autonom corpul spre EXTERIORUL oricarei curburi
+	# (gandit pentru serpentinele Machu Picchu, unde curba desenata de mana e
+	# CHIAR banda, si offsetul compenseaza un ac stramt luat "larg"). Aici
+	# curba e deja esantionata pe drumul real cu `bus_lane_offset` EXPLICIT
+	# (vezi `_rebuild_bus_curve`) — un offset suplimentar de pana la 1 m pe
+	# curbura tunelului (Track16 are un cot in prima jumatate) impingea
+	# autocarul in afara benzii lui STANGA, spre banda masinilor: contactele
+	# repetate pe rosu la frac ~0.62-0.68 (unde tunelul chiar curbeaza) nu
+	# erau AI pe banda gresita, erau autocarul insusi deviind. 0 = urmeaza
+	# curba esantionata exact.
+	_bus.apex_outer_m = 0.0
 	add_child(_bus)
 	_rebuild_bus_curve()
 	_sync_bus()
@@ -507,6 +519,10 @@ func _physics_process(delta: float) -> void:
 
 
 func _on_bus_shoved(_bus_ref: BusHazard, car: Car) -> void:
+	if OS.get_environment("SIGNAL_LANE_TRACE") == "1":
+		print("[bus-shove-debug] bus_dist=%.1f bus_pos=%s car_pos=%s" %
+			[_bus_ref.distance(), _bus_ref.body().global_transform.origin,
+				car.global_position])
 	bus_hit.emit(car)
 
 

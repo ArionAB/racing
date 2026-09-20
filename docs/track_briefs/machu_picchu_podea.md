@@ -159,3 +159,44 @@ Critica initiala avea deci **doua straturi**:
    inca deschisa pentru H.
 
 Al doilea nu s-a atins: e decizie de dezvoltator, si nu se mascheaza cu decor.
+
+## 9. Raul lui F: de ce nu se poate aseza (masurat, 20 sep 2026)
+
+Toti trei criticii valului 4 au cerut apa pe F. Zona are 132 de noduri si
+**zero apa** — au dreptate literal. Dar premisa ceruta de brief (raul la -30 m,
+cel mai jos punct al pistei) nu exista in teren.
+
+**Mecanismul, gasit in cod.** `track_side_sampler.gd`:
+`target = maxf(target, floor_y)` — podeaua declarata e un **plafon inferior**,
+nu o comanda. Rapa 9 (intervalul lui F) are podea `-42` declarata, dar sapa
+doar 14 m sub un drum aflat la -25…-29, deci fundul iese la -39…-43 si podeaua
+nu se atinge niciodata.
+
+**Doua reglaje incercate, ambele partiale:**
+
+| | latimea vaii la 0.69 | incepe la | adancime |
+|---|---:|---:|---:|
+| initial (adancime 14, podea -42) | 22 m | 49 m | 13,8 |
+| adancime 17 | 33 m | 16 m | 13,8 |
+| adancime 20 + podea -52 | **44 m** | **16 m** | 14,3 |
+
+Valea s-a **largit de doua ori** si s-a apropiat de drum de trei ori — dar
+adancimea nu se misca.
+
+**De ce.** Profilul lateral complet pe F (`SvMpProfil`, restrans la 0.66-0.74):
+
+```
+F dr | -10.3  -2.9  -2.6  -6.4   0.3   0.1  -3.5   5.9   7.4  10.1
+F st |   0.2   0.8   0.2  -5.1  -0.7  -1.0  -4.7  -0.7  -0.1  -1.5
+     |  10 m  20 m  30 m  40 m  50 m  60 m  70 m  80 m  90 m 100 m
+```
+
+Pe dreapta terenul cade -10,3 m la 10 m si **URCA inapoi la -2,9** la 20 m. Nu
+e vale, e o crestatura ingusta care se inchide imediat. Pe stanga e plat. Nu
+exista `custom_peaks` acolo — e relieful de BAZA al pistei, iar `_smin` cu
+terenul existent limiteaza cat poate sapa rapa.
+
+**S-a revenit la configuratia originala.** Ca raul sa aiba unde curge, trebuie
+redesenat relieful de baza pe intervalul lui F — ceea ce atinge terenul sub
+cele 132 de piese deja asezate si cere re-rularea generatorului. E aceeasi
+forma ca decizia inchisa pentru D: **teren, nu decor.**

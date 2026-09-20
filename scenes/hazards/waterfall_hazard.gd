@@ -115,16 +115,29 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 ## Arcul e liniar (comp_static = (gravity + force_accel) / omega^2): la 12,
 ## compresia STATICA de echilibru pentru Buggy (cea mai moale suspensie) e
 ## doar ~52% din cursa — nici macar sustinuta la nesfarsit nu atinge fundul,
-## darmite tranzitand 30 m in ~1.2-2 s. Masurat cu sonda
-## (`tools/probe_fiord_cascada.gd`, sweep 9-70): la **40**, pe uscat, Buggy
-## atinge fundul (98.9%) la ORICE viteza testata (15/25 m/s) si Politia NU
-## (71.5-84.3%) — diferentierea ceruta de brief — iar Muscle/Politia/Taxi/
-## Buggy raman toate in banda de 17-24% pierdere de viteza (tinta brief:
-## 20-25%). Autobuzul si Pompierii (cele mai grele, cu suspensia cea mai
-## moale SI motorul cel mai slab) ies din tinta chiar si la 40 (pierdere
-## 42-57%) — vezi raportul sondei: e un compromis structural al perechii
-## forta/suspensie, nu o valoare de reglat mai fin.
-@export_range(0.0, 60.0, 0.5) var force_accel: float = 40.0
+## darmite tranzitand 30 m in ~1.2-2 s.
+##
+## [b]Runda 1[/b] a gasit 40 ca punct unde Buggy atinge fundul si Politia nu,
+## dar la `force_accel` CONSTANT, Autobuzul/Pompierii intrau intr-o bucla
+## pozitiva (apasare -> compresie -> franare -> viteza mica -> mai mult timp
+## sub apasare -> compresie SI MAI mare): masurat pana la 1300+ cadre (>20 s)
+## la fund si pierderi de 40-100%.
+##
+## [b]Runda 2[/b] (coordonator): a rupt bucla scaland apasarea cu viteza
+## CURENTA (`speed_ref`/`min_speed_factor`) SI cu compresia curenta
+## (`compression_ease_start`/`compression_ease_min`), plus a scazut `drag`
+## la 0.25 (pierderea mare la Autobuz/Pompieri venea mai ales din franarea
+## ORIZONTALA in dwell time lung, nu din apasarea verticala — verificat:
+## la `force_accel=0`, Autobuzul tot pierdea ~37%). Cu toate patru
+## impreuna (`force_accel=48`, `drag=0.25`, `compression_ease_start=0.72`,
+## `compression_ease_min=0.15`), sonda (`probe_fiord_cascada.gd`, matrice
+## completa: 6 masini x 15/25 m/s x rain 1.0/1.3 x 3 repetari + 10 m/s pentru
+## Autobuz/Pompierii) trece toate cele 4 criterii ale rundei 2: nicio masina
+## nu pierde peste 35% la 25 m/s uscat (Autobuzul: 21.3%, cel mai mare),
+## niciun timp la fund peste 0.5 s (cel mai lung: EXACT 0.50 s, Autobuzul la
+## 25 m/s + ploaie — zero marja, vezi raportul sondei), Buggy atinge fundul
+## scurt (0.03 s) pe uscat la 25 m/s si Politia nu (78.4%), zero rasturnari.
+@export_range(0.0, 60.0, 0.5) var force_accel: float = 48.0
 ## Viteza orizontala (m/s) la care se aplica `force_accel` INTREG. Sub ea,
 ## apasarea scade proportional (vezi `_speed_factor`); peste ea, creste (dar
 ## plafonata la `1.5x` — vezi clamp-ul din `_speed_factor`). 25 = viteza de
@@ -139,23 +152,36 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 ## Varianta B (runda 2): apasarea slabeste SUPLIMENTAR cand arcul e aproape
 ## de fund, ca sa nu tina masina blocata la 100% timp de secunde intregi.
 ## Peste `compression_ease_start` (fractie din cursa), factorul de compresie
-## scade liniar spre `compression_ease_min` la 100%. La 0.0 (implicit)
-## varianta e OPRITA — doar scalarea cu viteza (varianta A). Testat separat
-## pe sonda (`--compression-ease=`), fiindca inca o bucla care se auto-
-## regleaza (de data asta pe compresie, nu pe viteza) merita masurata izolat
-## inainte sa se combine cu scalarea cu viteza.
-@export_range(0.0, 1.0, 0.05) var compression_ease_start: float = 0.0
+## scade liniar spre `compression_ease_min` la 100%.
+##
+## [b]Necesara impreuna cu varianta A[/b] (scalarea cu viteza): masurat ca
+## varianta A singura (force_accel constant scalat doar cu viteza) tot lasa
+## Autobuzul/Pompierii cu 3-7 s la fund — scalarea cu viteza rupe CRESTEREA
+## nelimitata a buclei, dar nu scurteaza destul timpul petrecut la fund odata
+## ce arcul a ajuns acolo. 0.72 e valoarea gasita prin sweep (0.5-0.85):
+## suficient de devreme cat sa scurteze bottom-out-ul Autobuz/Pompieri sub
+## 0.5 s, dar nu atat de devreme incat sa scada compresia Buggy sub pragul de
+## 97% la 25 m/s uscat (testat: la 0.75+ Buggy nu mai atinge fundul acolo).
+@export_range(0.0, 1.0, 0.05) var compression_ease_start: float = 0.72
 ## Cat mai ramane din acceleratie la compresie 100%, daca
-## `compression_ease_start` > 0.
-@export_range(0.0, 1.0, 0.05) var compression_ease_min: float = 0.3
+## `compression_ease_start` > 0. 0.15 gasit prin acelasi sweep ca mai sus.
+@export_range(0.0, 1.0, 0.05) var compression_ease_min: float = 0.15
 ## Franarea pe componenta ORIZONTALA a vitezei, ca fractie pe secunda
 ## (`v -= v_horiz * drag * delta`). Calibrat pe sonda (`probe_fiord_cascada.gd
-## --drag=`, sweep 0.0-0.5) sa dea ~20-25% pierdere de viteza pe 30 m la
-## 25 m/s, force_accel implicit, CU GAZUL APASAT (nu in ruliu liber — vezi
-## nota din sonda despre drag-ul intrinsec al lui Car): masurat 23.5% pentru
-## Muscle la `drag = 0.45`. Valoarea initiala (0.7) dadea 39%, mult peste
-## tinta din brief.
-@export_range(0.0, 3.0, 0.05) var drag: float = 0.45
+## --drag=`, sweep 0.0-0.5) CU GAZUL APASAT (nu in ruliu liber — vezi nota
+## din sonda despre drag-ul intrinsec al lui Car).
+##
+## [b]Runda 2:[/b] coborat de la 0.45 la 0.25. Descoperire-cheie: pierderea
+## excesiva de viteza a Autobuzului/Pompierilor (37-57% in runda 1) NU vine
+## in principal din apasarea verticala (`force_accel`) — masurat: chiar la
+## `force_accel = 0` (fara nicio forta in jos), Autobuzul tot pierdea ~37%,
+## doar din `drag`-ul orizontal al hazardului combinat cu motorul lor slab
+## (acceleration 11-12 vs 15-17 la restul garajului) si dwell time-ul mai
+## lung (mai aproape de `speed_ref`, deci factorul de viteza nu-i ajuta).
+## La 0.25, Autobuzul/Pompierii raman sub plafonul de 35% (21-22%), iar
+## Muscle/Politia/Taxi/Buggy scad si ei (2-8%) — inca sub orice plafon cerut,
+## nu sub vreo tinta minima (runda 2 n-are prag de jos, doar plafon).
+@export_range(0.0, 3.0, 0.05) var drag: float = 0.25
 ## Multiplicator din faza de ploaie (`RainCycle`, viitor): la 1.3, forta
 ## creste si zona se face cu 5 m mai lata (brief). Citit direct, hazardul nu
 ## stie cine il seteaza.

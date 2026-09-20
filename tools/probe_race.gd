@@ -173,6 +173,26 @@ var _elapsed: float = 0.0
 var _stats: Array[Dictionary] = []
 var _done: bool = false
 
+## Fiordland (Track16), verdictul de flotă pentru TunnelSignalHazard (brief
+## `docs/track_briefs/fiordland.md` §3 „Semaforul tunelului"): evenimente
+## DISCRETE, nu cadre de contact — `bus_hits` de mai sus numără CADRE cu
+## coliziunea activă (un singur ghiont poate ține 20-40 de cadre), ceea ce
+## suprapune „un contact" cu „un contact lung". Aici agățăm direct semnalele
+## proprii ale hazardului (`bus_hit`, `signal_changed`) pentru cifre pe
+## EVENIMENT, comparabile cu criteriile din brief (contacte pe verde ≤ 1/seed
+## etc.). No-op pe orice altă pistă (grupul e gol).
+var _signal_bus_hits: int = 0
+var _signal_ran_red_clear: int = 0
+var _signal_max_queue: int = 0
+## Cate masini erau "asteapta la semafor" (viteza mica, in raza semaforului)
+## in ultimul tick verificat — pentru coada maxima simultana.
+var _signal_hazards: Array[TunnelSignalHazard] = []
+var _signal_bus_hits_green: int = 0
+var _signal_bus_hits_red: int = 0
+## Ultimul local.z (fata de semafor) vazut per masina, pentru detectia
+## trecerii liniei (semnul lui local.z schimba de la - la +).
+var _signal_last_z: Dictionary = {}
+
 ## Pista taiata in felii egale, ca sa vezi UNDE se scurge viteza.
 const BUCKETS: int = 20
 var _bucket_speed: PackedFloat32Array = PackedFloat32Array()
@@ -354,6 +374,18 @@ func _start_race() -> void:
 		# "bump/dv" ramane goala acolo, restul cifrelor sunt comparabile).
 		if car.has_signal(&"bumped"):
 			car.bumped.connect(_on_bumped.bind(i))
+	_setup_signal_hazards()
+
+
+## Fiordland: agata contorul de evenimente pe orice TunnelSignalHazard din
+## grupul lui (vezi TunnelSignalHazard.AI_GROUP). Gol pe orice alta pista.
+func _setup_signal_hazards() -> void:
+	for node in get_tree().get_nodes_in_group(TunnelSignalHazard.AI_GROUP):
+		var sig := node as TunnelSignalHazard
+		if sig == null:
+			continue
+		_signal_hazards.append(sig)
+		sig.bus_hit.connect(_on_signal_bus_hit)
 
 
 func _tick_race(delta: float) -> void:
@@ -440,8 +472,40 @@ func _tick_race(delta: float) -> void:
 		if speed < 4.0:
 			_bucket_slow[b] += 1
 		_watch_stuck(car, st, speed, delta)
+	if not _signal_hazards.is_empty():
+		_watch_signal_fleet(cars)
 	if _elapsed >= _seconds:
 		_report_race()
+
+
+## Fiordland: treceri pe rosu (masina trece de linia semaforului CAT e rosu)
+## si coada maxima simultana (masini oprite in raza semaforului). Distinct de
+## `_watch_stuck` (generic, orb la asteptarea legitima): aici stim EXACT ce
+## inseamna "asteapta la semafor" — acelasi test ca AIController.SIGNAL_BRAKE_M.
+func _watch_signal_fleet(cars: Array[Car]) -> void:
+	var sig := _signal_hazards[0]
+	var red := sig.is_red()
+	var queued := 0
+	for car in cars:
+		# Pozitia masinii in coordonatele semaforului: local +Z e spre tunel (vezi
+		# antetul TunnelSignalHazard), deci local.z < 0 e pe apropiere, > 0 in tunel.
+		var local_pos: Vector3 = sig.to_local(car.global_position)
+		var id := car.get_instance_id()
+		var prev_z: float = _signal_last_z.get(id, local_pos.z)
+		# Trecere de linie: local.z trece de la negativ la pozitiv, aproape de axa
+		# (nu departe pe o nisa) -- daca semaforul e rosu chiar atunci, e o
+		# trecere pe rosu clara.
+		if prev_z < 0.0 and local_pos.z >= 0.0 and absf(local_pos.x) < 4.0 and red:
+			_signal_ran_red_clear += 1
+			print("[trecere-pe-rosu] t=%5.1fs  poz=(%.0f,%.0f,%.0f)  rosu_ramas=%.1fs" % [
+				_elapsed, car.global_position.x, car.global_position.y,
+				car.global_position.z, sig.red_seconds_left()])
+		_signal_last_z[id] = local_pos.z
+		# Coada: aproape de linie (in raza de decizie AI), viteza mica, inca de
+		# partea de apropiere (nu deja in tunel).
+		if local_pos.z < 5.0 and local_pos.z > -TunnelSignalHazard.AI_REACH_M 				and car.horizontal_speed() < 2.0:
+			queued += 1
+	_signal_max_queue = maxi(_signal_max_queue, queued)
 
 
 func _in_slice(frac: float) -> bool:
@@ -530,6 +594,28 @@ func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
 		car.global_position.x, car.global_position.y, car.global_position.z])
 
 
+## Fiordland: contact DISCRET cu autocarul (un eveniment per ghiont, nu cadre
+## de coliziune continua — vezi comentariul de la `_signal_bus_hits` mai sus).
+## Clasificat verde/rosu dupa STAREA semaforului chiar in clipa impactului:
+## un contact nu poate exista decat cat masina e in tunel, iar `is_red()`
+## acolo distinge intre "a intrat legitim pe verde si autocarul a pornit cat
+## inca era in tunel" (nu ar trebui sa se intample - vezi criteriul de verdict)
+## si "a intrat/ramas pe rosu, deci risc asumat".
+func _on_signal_bus_hit(car: Car) -> void:
+	_signal_bus_hits += 1
+	var cars: Array[Car] = _race.cars
+	var idx: int = cars.find(car)
+	var car_name: String = String(_stats[idx].name) if idx >= 0 else "?"
+	var red: bool = not _signal_hazards.is_empty() and _signal_hazards[0].is_red()
+	if red:
+		_signal_bus_hits_red += 1
+	else:
+		_signal_bus_hits_green += 1
+	print("[bus-hit] t=%5.1fs  %-18s intrata_pe=%s  poz=(%.0f,%.0f,%.0f)" % [
+		_elapsed, car_name, "ROSU" if red else "VERDE",
+		car.global_position.x, car.global_position.y, car.global_position.z])
+
+
 func _on_wall(car: Car, impact: float, index: int) -> void:
 	_stats[index].walls = int(_stats[index].walls) + 1
 	if _in_slice(_race.track.frac_at(car.road_index, car.route)):
@@ -593,6 +679,10 @@ func _report_race() -> void:
 		bus_total += int(_stats[i].bus_hits)
 	if bus_total > 0 or _slice.x >= 0.0:
 		print("--- contacte cu autobuzul (BusHazard): %d cadre" % bus_total)
+	if not _signal_hazards.is_empty():
+		print("--- semafor tunel: contacte-autocar=%d (verde: %d, rosu: %d)  treceri-pe-rosu-clare=%d  coada-maxima-simultana=%d"
+			% [_signal_bus_hits, _signal_bus_hits_green, _signal_bus_hits_red,
+				_signal_ran_red_clear, _signal_max_queue])
 	if _slice.x >= 0.0:
 		print("--- felia %.3f-%.3f: %-20s %6s %6s %7s %8s" % [_slice.x, _slice.y,
 			"masina", "v_med", "lent", "pereti", "autobuz"])

@@ -59,6 +59,11 @@ func _ready() -> void:
 	var bake_interval: float = _t.curve.bake_interval
 	const NICHE_WIDTH_M := 2.5
 	const NICHE_DEPTH_M := 4.0
+	# Buffer intre marginea nominala a soselei (hw) si INCEPUTUL cutiei nisei:
+	# banda de coridor (0.657 * hw) plus jumatate din latimea unei masini late
+	# (~1.3m) ajunge aproape de hw insusi -- fara buffer, cutia nisei devine
+	# perete in calea traficului normal, nu refugiu optional. 1.6m clearance.
+	const NICHE_CLEARANCE_M := 1.6
 	for dist in [45.0, 82.0, 119.0]:
 		var steps := int(round(dist / bake_interval))
 		var idx := route.wrap_index(stop_idx + steps)
@@ -68,8 +73,8 @@ func _ready() -> void:
 		var hw := _t.width_at_index(idx)
 		var frac := _t.frac_at(idx)
 		var yaw := atan2(dir.x, dir.z)
-		# Centrul cutiei nisei: la marginea drumului (hw) + jumatate din adancime.
-		var floor_center := p + side * (hw + NICHE_DEPTH_M * 0.5)
+		# Centrul cutiei nisei: dincolo de hw + clearance, apoi jumatate din adancime.
+		var floor_center := p + side * (hw + NICHE_CLEARANCE_M + NICHE_DEPTH_M * 0.5)
 		print("  dist=%.0fm frac=%.4f pos=(%.2f,%.2f,%.2f) side=(%.2f,%.2f,%.2f) half_width=%.2f  yaw_deg=%.2f  floor_center=(%.2f,%.2f,%.2f)"
 			% [dist, frac, p.x, p.y, p.z, side.x, side.y, side.z, hw, rad_to_deg(yaw),
 				floor_center.x, floor_center.y, floor_center.z])

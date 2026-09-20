@@ -37,7 +37,7 @@ custom_cornice_ravines = Array[int]([0, 3])
 custom_ravine_floors = Array[Vector2]([Vector2(0, -30.0), Vector2(1, 7.0), Vector2(2, -8.0), Vector2(3, -30.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 220), Vector2(1, 25), Vector2(2, 22), Vector2(3, 220)])
 custom_width_segments = Array[Vector3]([Vector3(0.011, 0.061, 8.0), Vector3(0.061, 0.273, 6.0), Vector3(0.273, 0.323, 6.0), Vector3(0.351, 0.406, 6.5), Vector3(0.406, 0.424, 5.5), Vector3(0.424, 0.612, 6.5), Vector3(0.612, 0.69, 3.5), Vector3(0.69, 0.818, 7.0), Vector3(0.846, 0.896, 6.0), Vector3(0.923, 0.999, 8.0)])
-custom_lane_corridors = Array[Vector3]([Vector3(0.58, 0.69, 0.65)])
+custom_lane_corridors = Array[Vector3]([Vector3(0.58, 0.69, 0.49)])
 terrain_pad_m = 220.0
 
 [node name="Path" type="Path3D" parent="."]
@@ -69,7 +69,7 @@ bus_speed = 12.5
 bus_lane_offset = 1.5
 
 [node name="Nisa0" type="StaticBody3D" parent="Hazarduri"]
-transform = Transform3D(0.997, 0, -0.076, 0, 1, 0, 0.076, 0, 0.997, -121.96, 41.89, -467.21)
+transform = Transform3D(0.997, 0, -0.076, 0, 1, 0, 0.076, 0, 0.997, -123.54, 41.89, -466.95)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hazarduri/Nisa0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
@@ -81,7 +81,7 @@ mesh = SubResource("BoxMesh_nisa")
 surface_material_override/0 = SubResource("StdMat_nisa")
 
 [node name="Nisa1" type="StaticBody3D" parent="Hazarduri"]
-transform = Transform3D(0.997, 0, -0.079, 0, 1, 0, 0.079, 0, 0.997, -118.02, 39.10, -443.54)
+transform = Transform3D(0.997, 0, -0.079, 0, 1, 0, 0.079, 0, 0.997, -119.60, 39.10, -443.28)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hazarduri/Nisa1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
@@ -93,7 +93,7 @@ mesh = SubResource("BoxMesh_nisa")
 surface_material_override/0 = SubResource("StdMat_nisa")
 
 [node name="Nisa2" type="StaticBody3D" parent="Hazarduri"]
-transform = Transform3D(0.995, 0, -0.1, 0, 1, 0, 0.1, 0, 0.995, -113.77, 36.01, -417.60)
+transform = Transform3D(0.995, 0, -0.1, 0, 1, 0, 0.1, 0, 0.995, -115.36, 36.01, -417.44)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hazarduri/Nisa2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)

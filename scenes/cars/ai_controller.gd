@@ -111,6 +111,60 @@ const DOOR_BRAKE_M: float = 30.0
 ## 1.5 m + o lungime de masina).
 const DOOR_STOP_M: float = 6.0
 
+## Semaforul tunelului (Fiordland, brief §3 „Regula AI onest si semaforul"):
+## AI-ul NU trece pe rosu — regula trebuie sa fie simpla si vizibil corecta,
+## nu un profil de risc. Acelasi tipar ca usa de piatra (DOOR_*), dar fara
+## ocol: singura alegere e sa astepte la linie.
+##
+## De ce nu se reutilizeaza direct `_door_closed_ahead`/`door_wait`: usa are
+## un OCOL (banda cealalta), deci pilotul care rateaza fereastra alege intre
+## „astept" si „ma duc pe alta banda" — cod care testeaza `car.route == 0` si
+## cauta pe grupul usilor. Semaforul n-are banda alternativa (brief: „poarta
+## cu decizie, nu cu orar" — decizia e a JUCATORULUI, AI-ul n-o are), deci
+## arborele de decizie e mai simplu: gaseste cel mai apropiat semafor din
+## fata, intreaba daca va fi rosu la sosire, si daca da, franeaza pana la
+## linie si asteapta. Un al doilea camp (`_signal_block_m`), nu acelasi ca
+## usa, ca cititorul sa vada dintr-o privire ca sunt DOUA mecanisme, nu unul
+## impartit prin steaguri.
+## Runda 3, punctul 2: coordonatorul a cerut sa aleg intre (a) un prag care
+## scaleaza cu numarul de masini oprite in zona, sau (b) o zona de
+## CONSTIENTIZARE mai lata (120 m) cu franare pe decelerarea normala a AI-ului.
+## Aleg (b): e mai simplu de verificat (o singura cifra, nu un numarator live
+## de masini) si mai robust — franarea proportionala de mai jos
+## (`-(speed-target)/6.0`) deja scaleaza distanta de franare cu viteza, deci o
+## zona mai lata inseamna doar ca AI-ul incepe sa reactioneze mai devreme, nu
+## ca matematica de franare se schimba. Runda 2 folosea 40 m cu `red_hold`=18s
+## (fata de 12s in runda 1) fara sa creasca — pe pista lunga (runda 3, ~2000m)
+## masinile ajung la semafor cu viteza de croaziera mult mai mare (drepte
+## lungi), deci 40 m insemna sub 2s de reactie la 25+ m/s. 120 m da ~5s la
+## aceeasi viteza, comparabil cu DOOR_REACH_M (120m) de la usa de piatra.
+const SIGNAL_BRAKE_M: float = 120.0
+## Unde se opreste botul fata de linia de oprire (TunnelSignalHazard.
+## ai_decision_point() e deja "linia, cu marja inapoi" — aici mai punem doar
+## jumatate de lungime de masina, ca botul sa nu treaca de ea).
+const SIGNAL_STOP_M: float = 2.0
+## Cat de repede pleaca dupa ce prinde verde: fara isteric la volan (accelerare
+## normala), dar fara nicio ezitare — franarea de mai sus il tine deja oprit
+## EXACT la linie, deci "plecarea" e doar gazul normal din codul de pedale.
+##
+## Marja de "scurgere" a franarii: cat de mult sub linie (m) mai conteaza
+## masina blocata de semafor, DACA e inca rosu. Franarea `target -> 0` e
+## asimptotica, nu instanta — o masina mai are 2-4 m/s de elan exact cand
+## indexul ei trece punctul de decizie. Masurat cu tools/probe_fiord_semafor.gd:
+## fara marja, 2-8 treceri-pe-rosu pe 150s cu 1-2s de rosu inca ramas (nu
+## coincidenta de esantionare — vezi RED_EDGE_S din sonda, care le desparte).
+const SIGNAL_STOP_LEAK_M: float = 4.0
+## Runda 2, punctul 3 (coada): cat spatiu se lasa fata de mașina OPRITA din
+## fata, in coada de la semafor. Coordonatorul a diagnosticat corect ca
+## presiunea de coada (nu franarea proprie) era sursa scurgerii peste linie
+## masurate mai sus — cu 8 masini pe o banda de 7 m, fara nicio notiune de
+## "cine e in fata mea si s-a oprit", fiecare AI tintea DOAR linia, iar
+## mașina din spate (care nu vede coada, doar linia) intra in cea din fata.
+const SIGNAL_QUEUE_GAP_M: float = 5.0
+## Sub cat de mare viteza se considera o masina "oprita" pentru scopul cozii
+## (nu 0 exact — fizica tremura langa zero).
+const SIGNAL_QUEUE_STOPPED_SPEED: float = 1.0
+
 var track: Track
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
 ## portiunile drepte. Peste ea se adauga tragerea spre interiorul virajului.
@@ -144,6 +198,12 @@ var _door_block_m: float = INF
 ## Indexul de traseu al fiecarei usi, pe ruta 0 — scanare completa o data,
 ## nu per cadru (cheie: instance id).
 var _door_index: Dictionary = {}
+## Metri pana la semaforul din fata care VA FI rosu cand ajungem la linia de
+## oprire. INF = niciunul in raza de decizie, sau va fi verde la sosire.
+var _signal_block_m: float = INF
+## Indexul de traseu al fiecarui semafor gasit (ca la usi: scanat o data per
+## instanta, cheie = instance id).
+var _signal_index: Dictionary = {}
 var _unstick_timer: float = 0.0
 var _unstick_reversing: bool = false
 var _unstick_steer: float = 0.0
@@ -265,6 +325,11 @@ func update(delta: float) -> void:
 	# fara asta, un AI care a decis la turul 1 "o iau pe scurta" intra in zid
 	# la turul 3.
 	_door_block_m = _door_closed_ahead(speed)
+	# Semaforul tunelului: se citeste INDEPENDENT de usa de piatra (nu e o
+	# ramura a aceleiasi decizii — sunt doua mecanisme, brief-uri diferite),
+	# dar cu ACELASI tipar: distanta pana la linie, sau INF daca drumul e
+	# liber la sosire.
+	_signal_block_m = _signal_red_ahead(speed)
 	var take_branch := prefers_shortcut and car.route == 0 and track.branch_is_open(1)
 	# Usa de piatra inchisa la sosire: ocolul nu mai e o preferinta, e singurul
 	# drum. Vezi DOOR_REACH_M.
@@ -289,6 +354,18 @@ func update(delta: float) -> void:
 	# Usa inchisa in fata, fara ocol la indemana: opreste si asteapta sa se
 	# deschida. Vezi DOOR_BRAKE_M.
 	var door_wait := _door_block_m < DOOR_BRAKE_M
+	# Rosu la sosire: franeaza si opreste EXACT la linie — brief §3, "AI
+	# onest si semaforul": niciun AI nu trece pe rosu, indiferent de cat de
+	# mult ar castiga jucatorul trecand. Vezi SIGNAL_BRAKE_M/SIGNAL_STOP_M.
+	var signal_wait := _signal_block_m < SIGNAL_BRAKE_M
+	if signal_wait:
+		var stop_m := maxf(_signal_block_m - SIGNAL_STOP_M, 0.0)
+		# Runda 2, punctul 3: coada. Fara asta fiecare AI tintea DOAR linia —
+		# cel din spate accelera spre linie exact cand cel din fata era deja
+		# oprit langa ea, si-l impingea peste ea (diagnosticul coordonatorului
+		# pentru cele 43-72 contacte/150s masurate initial).
+		stop_m = minf(stop_m, _signal_queue_gap(idx))
+		target = minf(target, stop_m * 1.2)
 	if door_wait:
 		target = minf(target, maxf(_door_block_m - DOOR_STOP_M, 0.0) * 1.2)
 	if speed > target * 1.06:
@@ -300,6 +377,10 @@ func update(delta: float) -> void:
 	# zero ar da `_throttle = -0.15` la nesfarsit si masina ar da inapoi pana
 	# in pluton.
 	if door_wait and target < 1.0 and speed < 2.0:
+		_throttle = 0.0
+	# Oprit la linia de oprire: nici gaz, nici marsarier, exact ca la usa —
+	# altfel tinta zero ar franeaza la nesfarsit spre spate in pluton.
+	if signal_wait and target < 1.0 and speed < 2.0:
 		_throttle = 0.0
 
 	# --- drift (handbrake) pe viraje sustinute: si vireaza, si umple bara ---
@@ -581,6 +662,127 @@ func _door_closed_ahead(speed: float) -> float:
 			best = along
 	return best
 
+## Metri pana la semaforul din fata care VA FI rosu cand ajungem la linia de
+## oprire, SAU pe care nu am cum sa-l traversam complet inainte sa vina rosul
+## (INF daca niciunul in raza, sau drumul e limpede — vezi runda 2, punctul 2
+## mai jos). Aceeasi forma ca `_door_closed_ahead`, dar FARA filtrul de ruta:
+## semaforul n-are un ocol pe alta banda, deci se citeste pe orice ruta pe
+## care se afla masina.
+##
+## „AI onest si semaforul" (brief §3): nu se cere niciun bit in plus fata de
+## ce vede si jucatorul — lampa (prin hazard), distanta pana la linie si
+## PROPRIA viteza (ca sa estimeze cat ii ia sa traverseze — un om ar face
+## acelasi calcul la volan).
+func _signal_red_ahead(speed: float) -> float:
+	var signals := get_tree().get_nodes_in_group(TunnelSignalHazard.AI_GROUP)
+	if signals.is_empty():
+		return INF
+	var r := track.route_at(car.route)
+	if r == null:
+		return INF
+	var n_pts := r.count()
+	var bake: float = track.curve.bake_interval
+	var best := INF
+	for node in signals:
+		var sig := node as TunnelSignalHazard
+		if sig == null:
+			continue
+		var key := sig.get_instance_id()
+		if not _signal_index.has(key):
+			_signal_index[key] = track.closest_index_global(
+				sig.ai_decision_point(), car.route)
+		var d_idx: int = int(_signal_index[key]) - car.road_index
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		# SIGNAL_STOP_LEAK_M: o masina care franeaza spre 0 nu se opreste chiar
+		# PE linie — mai are cativa metri de elan cand indexul ei trece de
+		# punctul de decizie (masurat: 2-4 m/s la 1-2s de rosu ramas, adica
+		# exact "along" trecand de 0 inainte ca viteza sa fi ajuns la zero).
+		# Fara marja, `_signal_block_m` sare la INF EXACT in clipa cand mai
+		# conteaza, gazul se elibereaza, si masina "se scurge" peste linie cat
+		# inca e rosu. Cat ramane rosu, un mic exces sub linie tot conteaza
+		# blocat — nu schimba nimic pentru masinile normale (care se opresc
+		# mult inainte de linie), doar prinde coada franarii.
+		if along < -SIGNAL_STOP_LEAK_M or along > TunnelSignalHazard.AI_REACH_M \
+				or along >= best:
+			continue
+		var eta := maxf(along, 0.0) / maxf(speed, 6.0)
+		# Aceeasi marja ca la usa: un pilot care franeaza pe viraj ajunge mai
+		# tarziu decat `along / speed` — se intreaba si peste inca o secunda.
+		var arrives_on_red := sig.blocks_in(eta) or sig.blocks_in(eta + DOOR_ETA_SLACK) \
+			or (along < 0.0 and sig.is_red())
+		# Runda 3, punctul 3: „intru doar daca pot iesi" devine CONSERVATOR.
+		# Runda 2 folosea `max(speed, 10)` — un PLAFON DE JOS, care presupunea
+		# optimist ca o masina rapida la decizie ramane rapida tot tunelul.
+		# Masurat: 7-9 contacte-pe-verde/seed (ar trebui 0) — exact simptomul
+		# unei mașini care a decis "ies la timp" pe viteza de pe apropiere
+		# (25-30+ m/s), dar incetineste real in tunel (banda uda, coridorul pe
+		# dreapta, coada) sub cat presupusese la intrare.
+		# Fix: PLAFON DE SUS la 18 m/s — viteza REALA in tunelul ud si in
+		# coridorul ingust nu trece de-atat, indiferent cat de repede vine
+		# masina pe apropiere. `min(speed, 18)`, nu `max(speed, 10)`: o masina
+		# la 30 m/s pe apropiere e tratata ca 18 in tunel (conservator), una la
+		# 8 m/s ramane la 8 (nu se umfla optimist la 10 ca inainte). Marja
+		# crescuta la 2.0 s (de la 1.0), cerut explicit.
+		# Doar la APROPIERE (along >= 0): o masina care a trecut deja linia e
+		# angajata — nu mai are sens sa "decida" ca nu poate iesi cand e deja
+		# in tunel (ar franao la mijloc, cu tunnel_length intreg in formula in
+		# loc de distanta ramasa — mult mai periculos decat orice intarziere).
+		var cant_clear := false
+		if not arrives_on_red and along >= 0.0:
+			var green_left_at_arrival := sig.green_seconds_left() - eta
+			var cross_needed := sig.tunnel_length / minf(speed, 18.0) + 2.0
+			cant_clear = green_left_at_arrival < cross_needed
+		if arrives_on_red or cant_clear:
+			best = along
+	return best
+
+## Runda 2, punctul 3: cat mai am pana la mașina OPRITA din fata mea, in coada
+## de la semafor — INF daca nu e nicio mașina oprita in fata (pe raza de
+## `SIGNAL_BRAKE_M`, aceeasi fereastra ca semaforul insusi). Aplicat DOAR cat
+## `signal_wait` e activ (vezi `update()`): tinta de frana devine
+## `min(distanta_pana_la_linie, distanta_pana_la_masina_oprita - GAP)`, ca
+## fiecare AI sa se opreasca in spatele celui dinaintea lui, nu doar in
+## spatele liniei — coada se formeaza pe randuri, in loc sa se comprime prin
+## impingere fizica (diagnosticul coordonatorului: asta era sursa reala a
+## scurgerii peste linie, nu franarea proprie).
+##
+## Masurata pe AXA DRUMULUI (ca la `_avoid_line`), nu pe distanta euclidiana:
+## intr-un tunel drept diferenta e mica, dar tiparul ramane consistent cu
+## restul fisierului.
+func _signal_queue_gap(idx: int) -> float:
+	if traffic.is_empty():
+		return INF
+	var r := track.route_at(car.route)
+	if r == null:
+		return INF
+	var n := r.count()
+	var best := INF
+	for other in traffic:
+		if other == null or other == car or not is_instance_valid(other):
+			continue
+		if other.route != car.route:
+			continue
+		if other.horizontal_speed() >= SIGNAL_QUEUE_STOPPED_SPEED:
+			continue # conteaza doar cele deja OPRITE -- o masina care inca se
+			# apropie nu e "coada", e inca in propria ei franare
+		var d := other.road_index - idx
+		if r.closed:
+			if d > n / 2:
+				d -= n
+			elif d < -n / 2:
+				d += n
+		var ahead_m := float(d) * track.curve.bake_interval
+		if ahead_m <= 0.0 or ahead_m > SIGNAL_BRAKE_M:
+			continue
+		best = minf(best, ahead_m)
+	if best == INF:
+		return INF
+	return maxf(best - SIGNAL_QUEUE_GAP_M, 0.0)
+
 func _lookahead_near(speed: float) -> float:
 	return clampf(speed * LOOKAHEAD_NEAR_FACTOR,
 		LOOKAHEAD_NEAR_MIN, LOOKAHEAD_NEAR_MAX)
@@ -608,6 +810,13 @@ func _watch_progress(delta: float, speed: float) -> void:
 	# altfel plasa de stall ar porni marsarierul dupa 0.9 s si, dupa trei
 	# incercari, repunerea — adica exact ce evita asteptarea.
 	if _door_block_m < DOOR_BRAKE_M:
+		_reset_progress()
+		return
+	# Acelasi scutire pentru asteptarea la semafor: altfel dupa 0.9 s de rosu
+	# AI-ul ar incepe manevra de deblocare (marsarier virat) STAND la linie,
+	# ar rata verdele care oricum vine, si dupa 3 incercari s-ar repune singur
+	# — exact defectul pe care semaforul cu iesire nu trebuie sa-l aiba.
+	if _signal_block_m < SIGNAL_BRAKE_M:
 		_reset_progress()
 		return
 	# Plasa rapida: izbitura frontala care opreste masina pe loc.

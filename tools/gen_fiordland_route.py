@@ -280,6 +280,26 @@ print(f"distanta E portal vest <-> F iesire portal: {math.hypot(ew[0]-fo[0], ew[
 mean_elev = sum(elevs) / len(elevs)
 print(f"cota medie sosea: {mean_elev:.1f} m")
 
+# sea_level_offset: Track.sea_y = mean_road_y() + sea_level_offset, si e
+# ACEEASI cota pentru toata harta (safety-net-ul global din
+# Track._build_sea_respawn e o cutie de 2400x2400 m intre sea_y-1,2 si
+# sea_y-60, indiferent unde esti pe traseu). Implicitul -7.0 e calibrat pentru
+# piste cu cota medie mult peste cota joasa; aici cota medie (18 m) e trasa in
+# sus de portal (+45), dar F coboara pana la ~10-12 m si H la ~0-0,5 m — cu
+# -7.0, sea_y iesea 11,1 m, adica FIX in banda joasa a coborarii F (10-12,4 m,
+# marja sub 1 m) — masurat cu un [repunere] reproductibil 100% la acelasi
+# punct (frac 0.794-0.799), pe orice seed, cu 0/1/8 masini. Nu era teren
+# ingropat (ProbeBuried verde, terenul insusi era corect) si nu era o rapa
+# declarata acolo — era cutia de mare, care nu stie de geometria locala.
+# Cerem sea_y usor SUB 0 (marea la cota absoluta ~-2, brief-ul zice cheiul la
+# 0 m si marea "la fel"): -2 in loc de 0 pastreaza citirea vizuala (cheiul
+# ramane practic la nivelul marii) si da malului H (cel mai jos punct
+# nesubmers, 0-0,5 m) o marja de 2,8-3,3 m fata de cutia de siguranta
+# (sea_y - 1,2), nu doar 1,2-1,7 m.
+SEA_LEVEL_TARGET_ABS = -2.0
+sea_offset = round(SEA_LEVEL_TARGET_ABS - mean_elev, 2)
+print(f"sea_level_offset ales: {sea_offset} (tinta mare absoluta {SEA_LEVEL_TARGET_ABS} m)")
+
 print("\nfractii waypoint:")
 for w in WPTS:
     print(f"  {frac[w[4]]:.3f}  {w[4]}  (cota {w[3]:.1f})")
@@ -337,8 +357,36 @@ if len(sys.argv) > 1:
     ew_g = godot(wpt_xy("E portal est linie oprire"), 45.0)
     ewv_g = godot(wpt_xy("E portal vest"), 27.0)
     tunnel_peak = ((ew_g[0] + ewv_g[0]) / 2.0, (ew_g[2] + ewv_g[2]) / 2.0)
+    # Mitre Peak: peste fiord, in directia MARII (ravine 0, side=-1) fata de
+    # cornisa B, la ~220 m — NU un offset fix pe axa X ca in v1 (calibrat pe
+    # orientarea veche "spike lung pe Y", a supravietuit reformei in oval si a
+    # ajuns sa cada la 3,4 m de sosea, in sectiunea F, complet neinrudita cu
+    # cornisa. Directia marii se deriva din tangenta drumului la "B S1 apex"
+    # (perpendiculara, verificata empiric cu tools/sv_frac_dump.gd: ground_y
+    # scade la offsetul NEGATIV al lui TrackRoute.side_at aici, deci marea e
+    # in directia opusa lui side_at). Clearance verificat: 220 m fata de
+    # ORICE punct al soselei (nu doar de B), pentru un varf de raza 55 m.
     b_apex = wpt_xy("B S1 apex spre mare vest")
-    mitre_map = (b_apex[0] - 190.0, b_apex[1] + 10.0)
+    b_idx = None
+    for j, p in enumerate(pts):
+        if p[2] == [w[4] for w in WPTS].index("B S1 apex spre mare vest"):
+            b_idx = j
+            break
+    pa = pts[b_idx - 1]
+    pc = pts[(b_idx + 1) % len(pts)]
+    tdx, tdy = pc[0] - pa[0], pc[1] - pa[1]
+    tlen = math.hypot(tdx, tdy)
+    tdx, tdy = tdx / tlen, tdy / tlen
+    # side_at (Godot, "dreapta") = tangent.cross(UP) in lume Godot; in coordonate
+    # de HARTA (x_map=-x_godot, y_map=-z_godot) cu tangenta (tdx,tdy) pe harta,
+    # directia "dreapta Godot" corespunde la (-tdy, tdx) pe harta. Verificat cu
+    # tools/sv_frac_dump.gd la B apex: offsetul NEGATIV pe side_at Godot are
+    # ground_y jos (marea), deci marea e la (tdy, -tdx) pe harta (opusul lui
+    # "dreapta").
+    sea_dir = (tdy, -tdx)
+    MITRE_DIST_M = 220.0
+    mitre_map = (b_apex[0] + sea_dir[0] * MITRE_DIST_M,
+                 b_apex[1] + sea_dir[1] * MITRE_DIST_M)
     mitre_g = godot(mitre_map, 60.0)
 
     peaks_txt = f"""
@@ -375,6 +423,7 @@ custom_theme = "fiordland"
 custom_half_width = 6.5
 custom_road_surface = "asphalt"
 custom_gate_model = "none"
+custom_sea_level_offset = {sea_offset}
 custom_wet_ranges = Array[Vector2]([{wet_txt}])
 custom_step_ranges = Array[Vector2]([{step_txt}])
 custom_ravines = Array[Vector4]([{rav_txt}])

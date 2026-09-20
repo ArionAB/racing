@@ -359,7 +359,21 @@ func _start_race() -> void:
 func _tick_race(delta: float) -> void:
 	_elapsed += delta
 	var cars: Array[Car] = _race.cars
-	if OS.get_environment("PROBE_RACE_TRACE") == "1" \
+	# PROBE_RACE_TRACE=2: acelasi tabel, dar la 0,1 s si doar in fereastra
+	# 60-70 s — diagnostic ad-hoc pentru un respawn reproductibil la un frac
+	# fix, fara sa umple logul pe toata cursa. Fereastra si pasul se schimba
+	# de mana cand se ancheteaza alt interval.
+	var trace_env := OS.get_environment("PROBE_RACE_TRACE")
+	if trace_env == "2" and _elapsed >= 60.0 and _elapsed <= 70.0 \
+			and int(_elapsed * 60.0) % 6 == 0:
+		for i in cars.size():
+			var c := cars[i]
+			print("FTRACE t=%6.2f car%d frac=%.4f on_road=%s v=%5.1f pos=(%.1f,%.2f,%.1f) vel=%s"
+				% [_elapsed, i, _race.track.frac_at(c.road_index, c.route),
+					_race.track.is_on_road(c.road_index, c.global_position, c.route),
+					c.horizontal_speed(), c.global_position.x, c.global_position.y,
+					c.global_position.z, c.linear_velocity])
+	if trace_env == "1" \
 			and int(_elapsed * 60.0) % 120 == 0:
 		for i in cars.size():
 			var c := cars[i]

@@ -142,6 +142,16 @@ const SIGNAL_STOP_M: float = 2.0
 ## fara marja, 2-8 treceri-pe-rosu pe 150s cu 1-2s de rosu inca ramas (nu
 ## coincidenta de esantionare — vezi RED_EDGE_S din sonda, care le desparte).
 const SIGNAL_STOP_LEAK_M: float = 4.0
+## Runda 2, punctul 3 (coada): cat spatiu se lasa fata de mașina OPRITA din
+## fata, in coada de la semafor. Coordonatorul a diagnosticat corect ca
+## presiunea de coada (nu franarea proprie) era sursa scurgerii peste linie
+## masurate mai sus — cu 8 masini pe o banda de 7 m, fara nicio notiune de
+## "cine e in fata mea si s-a oprit", fiecare AI tintea DOAR linia, iar
+## mașina din spate (care nu vede coada, doar linia) intra in cea din fata.
+const SIGNAL_QUEUE_GAP_M: float = 5.0
+## Sub cat de mare viteza se considera o masina "oprita" pentru scopul cozii
+## (nu 0 exact — fizica tremura langa zero).
+const SIGNAL_QUEUE_STOPPED_SPEED: float = 1.0
 
 var track: Track
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
@@ -337,7 +347,13 @@ func update(delta: float) -> void:
 	# mult ar castiga jucatorul trecand. Vezi SIGNAL_BRAKE_M/SIGNAL_STOP_M.
 	var signal_wait := _signal_block_m < SIGNAL_BRAKE_M
 	if signal_wait:
-		target = minf(target, maxf(_signal_block_m - SIGNAL_STOP_M, 0.0) * 1.2)
+		var stop_m := maxf(_signal_block_m - SIGNAL_STOP_M, 0.0)
+		# Runda 2, punctul 3: coada. Fara asta fiecare AI tintea DOAR linia —
+		# cel din spate accelera spre linie exact cand cel din fata era deja
+		# oprit langa ea, si-l impingea peste ea (diagnosticul coordonatorului
+		# pentru cele 43-72 contacte/150s masurate initial).
+		stop_m = minf(stop_m, _signal_queue_gap(idx))
+		target = minf(target, stop_m * 1.2)
 	if door_wait:
 		target = minf(target, maxf(_door_block_m - DOOR_STOP_M, 0.0) * 1.2)
 	if speed > target * 1.06:
@@ -706,6 +722,49 @@ func _signal_red_ahead(speed: float) -> float:
 		if arrives_on_red or cant_clear:
 			best = along
 	return best
+
+## Runda 2, punctul 3: cat mai am pana la mașina OPRITA din fata mea, in coada
+## de la semafor — INF daca nu e nicio mașina oprita in fata (pe raza de
+## `SIGNAL_BRAKE_M`, aceeasi fereastra ca semaforul insusi). Aplicat DOAR cat
+## `signal_wait` e activ (vezi `update()`): tinta de frana devine
+## `min(distanta_pana_la_linie, distanta_pana_la_masina_oprita - GAP)`, ca
+## fiecare AI sa se opreasca in spatele celui dinaintea lui, nu doar in
+## spatele liniei — coada se formeaza pe randuri, in loc sa se comprime prin
+## impingere fizica (diagnosticul coordonatorului: asta era sursa reala a
+## scurgerii peste linie, nu franarea proprie).
+##
+## Masurata pe AXA DRUMULUI (ca la `_avoid_line`), nu pe distanta euclidiana:
+## intr-un tunel drept diferenta e mica, dar tiparul ramane consistent cu
+## restul fisierului.
+func _signal_queue_gap(idx: int) -> float:
+	if traffic.is_empty():
+		return INF
+	var r := track.route_at(car.route)
+	if r == null:
+		return INF
+	var n := r.count()
+	var best := INF
+	for other in traffic:
+		if other == null or other == car or not is_instance_valid(other):
+			continue
+		if other.route != car.route:
+			continue
+		if other.horizontal_speed() >= SIGNAL_QUEUE_STOPPED_SPEED:
+			continue # conteaza doar cele deja OPRITE -- o masina care inca se
+			# apropie nu e "coada", e inca in propria ei franare
+		var d := other.road_index - idx
+		if r.closed:
+			if d > n / 2:
+				d -= n
+			elif d < -n / 2:
+				d += n
+		var ahead_m := float(d) * track.curve.bake_interval
+		if ahead_m <= 0.0 or ahead_m > SIGNAL_BRAKE_M:
+			continue
+		best = minf(best, ahead_m)
+	if best == INF:
+		return INF
+	return maxf(best - SIGNAL_QUEUE_GAP_M, 0.0)
 
 func _lookahead_near(speed: float) -> float:
 	return clampf(speed * LOOKAHEAD_NEAR_FACTOR,

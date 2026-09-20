@@ -635,12 +635,16 @@ func _door_closed_ahead(speed: float) -> float:
 	return best
 
 ## Metri pana la semaforul din fata care VA FI rosu cand ajungem la linia de
-## oprire (INF daca niciunul in raza, sau va fi verde). Aceeasi forma ca
-## `_door_closed_ahead`, dar FARA filtrul de ruta: semaforul n-are un ocol pe
-## alta banda, deci se citeste pe orice ruta pe care se afla masina.
+## oprire, SAU pe care nu am cum sa-l traversam complet inainte sa vina rosul
+## (INF daca niciunul in raza, sau drumul e limpede — vezi runda 2, punctul 2
+## mai jos). Aceeasi forma ca `_door_closed_ahead`, dar FARA filtrul de ruta:
+## semaforul n-are un ocol pe alta banda, deci se citeste pe orice ruta pe
+## care se afla masina.
 ##
 ## „AI onest si semaforul" (brief §3): nu se cere niciun bit in plus fata de
-## ce vede si jucatorul — lampa (prin hazard) si distanta pana la linie.
+## ce vede si jucatorul — lampa (prin hazard), distanta pana la linie si
+## PROPRIA viteza (ca sa estimeze cat ii ia sa traverseze — un om ar face
+## acelasi calcul la volan).
 func _signal_red_ahead(speed: float) -> float:
 	var signals := get_tree().get_nodes_in_group(TunnelSignalHazard.AI_GROUP)
 	if signals.is_empty():
@@ -680,8 +684,26 @@ func _signal_red_ahead(speed: float) -> float:
 		var eta := maxf(along, 0.0) / maxf(speed, 6.0)
 		# Aceeasi marja ca la usa: un pilot care franeaza pe viraj ajunge mai
 		# tarziu decat `along / speed` — se intreaba si peste inca o secunda.
-		if sig.blocks_in(eta) or sig.blocks_in(eta + DOOR_ETA_SLACK) \
-				or (along < 0.0 and sig.is_red()):
+		var arrives_on_red := sig.blocks_in(eta) or sig.blocks_in(eta + DOOR_ETA_SLACK) \
+			or (along < 0.0 and sig.is_red())
+		# Runda 2, punctul 2: „AI-ul nu intra daca nu poate iesi". Chiar daca
+		# ajunge pe VERDE, mai intreaba daca apuca sa traverseze tot tunelul
+		# inainte sa vina rosul — cu marja de 1 s (aceeasi idee ca DOOR_ETA_SLACK,
+		# dar aici fata de timpul de TRAVERSARE, nu de sosire). Viteza folosita e
+		# cea CURENTA, plafonata la 10 m/s: o masina care ar accelera in tunel nu
+		# poate presupune ca ajunge la asta, deci "nu pot iesi" e conservator, nu
+		# optimist — exact opusul lui `arrives_on_red`, care e deja conservator pe
+		# sosire. `sig.tunnel_length / max(speed, 10) + 1.0`, ca in contract.
+		# Doar la APROPIERE (along >= 0): o masina care a trecut deja linia e
+		# angajata — nu mai are sens sa "decida" ca nu poate iesi cand e deja
+		# in tunel (ar franao la mijloc, cu tunnel_length intreg in formula in
+		# loc de distanta ramasa — mult mai periculos decat orice intarziere).
+		var cant_clear := false
+		if not arrives_on_red and along >= 0.0:
+			var green_left_at_arrival := sig.green_seconds_left() - eta
+			var cross_needed := sig.tunnel_length / maxf(speed, 10.0) + 1.0
+			cant_clear = green_left_at_arrival < cross_needed
+		if arrives_on_red or cant_clear:
 			best = along
 	return best
 

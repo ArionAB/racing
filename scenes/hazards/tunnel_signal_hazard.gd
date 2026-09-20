@@ -7,12 +7,34 @@ extends Node3D
 ##
 ## METRONOMUL (tiparul EruptionCycle, dar mai mic si fara grup de sincronizat:
 ## aici hazardul comanda direct DOI copii ai lui, nu un grup extern): un ceas
-## `_clock` in [0, period) imparte ciclul in VERDE [0, period - red_hold) si
-## ROSU [period - red_hold, period). La intrarea in rosu se aprinde lampa
-## rosie si porneste autocarul (un [BusHazard] pe traseul liniar al tunelului,
-## in fata masinilor, deci cu curba desenata DINSPRE capatul de vest SPRE cel
-## de est — vezi `_build_bus_curve`); la intrarea in verde, lampa verde si
-## autocarul se ascunde (colizor stins, invizibil) pana la urmatorul rosu.
+## `_clock` in [0, period) imparte ciclul in trei faze:
+##   VERDE   [0, green)                              — lampa verde, tunel liber
+##   GOLIRE  [green, green + clear_hold)              — lampa rosie, tunel INCA
+##           liber (autocarul e ascuns), fereastra in care o masina intrata pe
+##           verde in ultima clipa apuca sa iasa pe partea cealalta
+##   TRANZIT [green + clear_hold, period)             — lampa rosie, autocarul
+##           traverseaza tunelul dinspre portalul opus
+## unde `green = period - red_hold` si `red_hold = clear_hold + CROSS`
+## (`CROSS = tunnel_length / bus_speed`, timpul de traversare).
+##
+## DE CE FAZA DE GOLIRE (runda 2 de tuning, dupa sonda cu 43-72 contacte pe
+## 150 s): fara ea, autocarul pornea din portalul opus CHIAR la inceputul
+## rosului — dar un AI/jucator care intrase pe verde in ultima secunda mai are
+## nevoie de `tunnel_length / viteza` (6-14 s la 25-11 m/s) ca sa strabata
+## tunelul. Cu `clear_hold` prea mic (sau zero), cele doua se intalneau
+## GARANTAT la fiecare ciclu, la mijlocul tunelului — de-aia sonda arata 5-9
+## contacte pe minut, nu evenimente rare. `clear_hold` e timpul minim in care
+## tunelul chiar se goleste inainte sa intre autocarul: cine trece pe rosu
+## IMEDIAT si e rapid (150 m in <= clear_hold s) iese pe partea opusa inainte
+## ca autocarul sa fi pornit macar. Trecerea pe rosu devine fereastra de
+## timing (cate secunde ai, nu daca ai noroc), nu pariu.
+##
+## La intrarea in ROSU (inceputul golirii) se aprinde lampa rosie; autocarul
+## ramane ASCUNS pana la inceputul tranzitului (`green + clear_hold`), cand
+## porneste (un [BusHazard] pe traseul liniar al tunelului, in fata masinilor,
+## deci cu curba desenata DINSPRE capatul de vest SPRE cel de est — vezi
+## `_build_bus_curve`); la intrarea in verde, lampa verde si autocarul se
+## ascunde (colizor stins, invizibil) pana la urmatorul ciclu.
 ##
 ## DE CE BusHazard, nu un PathMover nou: BusHazard aduce deja botul deflector
 ## oblic (`nose_angle_deg`, `nose_side`) care transforma un contact frontal in
@@ -42,23 +64,32 @@ extends Node3D
 ##   [node name="SemaforTunel" type="Node3D" parent="."]
 ##   script = ExtResource("res://scenes/hazards/tunnel_signal_hazard.gd")
 ##   transform = ...                # la linia de oprire, botul spre tunel (-Z)
-##   period = 34.0
-##   red_hold = 12.0
+##   period = 40.0
+##   clear_hold = 6.0
 ##   tunnel_length = 150.0
 ##   bus_speed = 12.5
 ## AI-ul citeste `is_red()` prin [HazardMarker] `Kind.SIGNAL` pus pe waypoint,
 ## la linia de oprire (vezi `ai_controller.gd._signal_stop_ahead`).
 
-## Ciclul complet (verde + rosu), secunde. Calibrarea brief-ului: 34 s.
-@export_range(10.0, 120.0, 0.5) var period: float = 34.0:
+## Ciclul complet (verde + rosu), secunde. Runda 2: 40 s = 22 verde + 18 rosu
+## (6 golire + 12 tranzit), fata de 34 s = 22 + 12 dinainte de faza de golire.
+@export_range(10.0, 120.0, 0.5) var period: float = 40.0:
 	set(value):
 		period = maxf(value, 4.0)
 		_sync_bus()
 
-## Cat tine rosul, la finalul ciclului. Calibrarea brief-ului: 12 s.
-@export_range(4.0, 60.0, 0.5) var red_hold: float = 12.0:
+## Cat tine faza de GOLIRE (lampa deja rosie, tunelul INCA liber, autocarul
+## inca ascuns) inainte ca autocarul sa porneasca din portalul opus. Runda 2
+## (a doua sonda, dupa 43-72 contacte/150s cu rosul = doar tranzitul): fara
+## faza asta, o masina care intra pe verde in ultima clipa si autocarul care
+## tocmai a pornit se intalneau GARANTAT la mijlocul tunelului, la fiecare
+## ciclu. Cine trece pe rosu imediat si e rapid (150 m in <= clear_hold s =
+## 25 m/s la 6 s) iese pe partea opusa inainte ca autocarul sa fi pornit
+## macar; cine ezita il intalneste si are nisele. Vezi `cross_time()` si
+## `red_hold` (calculat, nu mai e export propriu — vezi mai jos).
+@export_range(0.0, 30.0, 0.5) var clear_hold: float = 6.0:
 	set(value):
-		red_hold = value
+		clear_hold = maxf(value, 0.0)
 		_sync_bus()
 
 ## Lungimea tunelului (m), de la linia de oprire (portalul de est, +45 m in
@@ -67,11 +98,13 @@ extends Node3D
 	set(value):
 		tunnel_length = maxf(value, 5.0)
 		_rebuild_bus_curve()
+		_sync_bus()
 
-## Viteza autocarului prin tunel (m/s). Brief: 150 m in 12 s =~ 12.5 m/s —
-## SE CERE explicit sa incapa in `red_hold`, nu se deriva automat, fiindca
-## tuning-ul poate cere rosu mai lung fara sa miste viteza autocarului (sau
-## invers): vezi `arrival_margin_s` pentru avertismentul cand nu incape.
+## Viteza autocarului prin tunel (m/s). Brief: 150 m in 12 s =~ 12.5 m/s.
+## `red_hold` (mai jos) se calculeaza din asta + `clear_hold`, deci schimband
+## viteza se schimba automat si durata rosului — decizia rundei 2: rosul
+## trebuie sa acopere EXACT golirea + tranzitul, niciodata mai putin (altfel
+## verdele revine cat autocarul inca traverseaza).
 @export_range(1.0, 30.0, 0.1) var bus_speed: float = 12.5:
 	set(value):
 		bus_speed = maxf(value, 0.1)
@@ -120,7 +153,7 @@ const AI_GROUP: StringName = &"tunnel_signals"
 ## viteza cea mai mica de croaziera a AI-ului, ca decizia sa nu se rasuceasca
 ## intre "vine verde" si "vine rosu" chiar inainte de sosire. 130 m la ~11
 ## m/s (viteza minima realista intr-o urcare de 12%) = ~12 s, mai mult decat
-## orice `red_hold` rezonabil.
+## orice `red_hold` rezonabil (18 s implicit: 6 golire + 12 tranzit).
 const AI_REACH_M: float = 130.0
 ## Unde se opreste botul masinii fata de linia de oprire (originea nodului),
 ## masurat pe axa -Z (spre tunel) — inaintea axei, ca sa nu intre in cadrul
@@ -190,6 +223,27 @@ func _rebuild_bus_curve() -> void:
 	_bus.curve = curve
 
 
+## Timpul de traversare a tunelului la `bus_speed` (s). Runda 2: rosul
+## trebuie sa acopere EXACT `clear_hold + cross_time()`, nicio secunda mai
+## putin — vezi `red_hold`.
+func cross_time() -> float:
+	return tunnel_length / maxf(bus_speed, 0.1)
+
+
+## Cat tine rosul (s), CALCULAT, nu mai e export propriu (runda 2): golirea
+## plus tranzitul. Un `red_hold` scris de mana putea sa nu incapa deasupra
+## celor doua faze (rosul se termina inainte ca autocarul sa fi iesit) —
+## calculat, contractul „rosul acopera tot ciclul autocarului" nu se poate
+## rupe din Inspector.
+func red_hold() -> float:
+	return clear_hold + cross_time()
+
+
+## Cat tine verdele (s), CALCULAT: tot ce ramane din `period` dupa rosu.
+func green_hold() -> float:
+	return maxf(period - red_hold(), 1.0)
+
+
 ## Sincronizeaza ceasul lui BusHazard cu al nostru: `period` al lui = al
 ## nostru (asa `_advance` din BusHazard calculeaza corect cat sta ascuns).
 ##
@@ -204,38 +258,45 @@ func _rebuild_bus_curve() -> void:
 ##
 ## Fix: pornim explicit ASCUNS (acelasi apel pe care BusHazard si-l face
 ## singur la finalul fiecarei coborari — vezi `_hide()`), cu exact timpul
-## ramas pana la primul rosu. Ciclul se auto-intretine corect dupa aceea:
+## ramas pana la INCEPUTUL TRANZITULUI (`green_hold() + clear_hold`), nu pana
+## la inceputul rosului — runda 2: autocarul nu porneste la primul rosu, ci
+## dupa faza de golire. Ciclul se auto-intretine corect dupa aceea:
 ## `_hide(seconds)` seteaza `_hide_left`, iar `_advance` il numara la fiecare
-## tick si cheama `_show()` cand ajunge la 0 — adica exact la inceputul
-## rosului, daca `seconds` a fost calculat corect.
+## tick si cheama `_show()` cand ajunge la 0.
 func _sync_bus() -> void:
 	if _bus == null:
 		return
 	_bus.period = period
 	_bus.speed = bus_speed
 	_bus.phase = 0.0
-	# Timpul pana la PRIMUL rosu, pornind din verde la clock=0 (vezi _ready:
-	# lampa porneste verde). Daca hazardul e adaugat cu clock-ul deja avansat
-	# (nu e cazul azi, dar _force_hidden e apelata separat de aici ca sa poata
-	# fi rechemata oricand), se recalculeaza pe cererea curenta.
-	_force_hidden_until_red()
+	_force_hidden_until_transit()
 
 
 ## Forteaza autocarul in starea ASCUNS, cu timpul ramas pana la urmatorul
-## inceput de rosu — apelat o data la construire (inainte ca `_clock` sa fi
-## avansat) si e sigur de rechemat oricand (ex. dupa un reset de sonda).
-func _force_hidden_until_red() -> void:
+## inceput de TRANZIT (nu de rosu — vezi antetul `_sync_bus`) — apelat o data
+## la construire (inainte ca `_clock` sa fi avansat) si e sigur de rechemat
+## oricand (ex. dupa o schimbare de `clear_hold`/`bus_speed` din Inspector).
+func _force_hidden_until_transit() -> void:
 	if _bus == null:
 		return
-	var until_red := period - red_hold - _clock
-	if until_red < 0.0:
-		until_red = fposmod(until_red, period)
-	_bus.call("_hide", maxf(until_red, 0.05))
+	var until_transit := green_hold() + clear_hold - _clock
+	if until_transit < 0.0:
+		until_transit = fposmod(until_transit, period)
+	_bus.call("_hide", maxf(until_transit, 0.05))
 
 
-## Rosu acum? Citit de AI (HazardMarker.Kind.SIGNAL) si de sonde.
+## Rosu acum (lampa)? Citit de AI (HazardMarker.Kind.SIGNAL) si de sonde.
+## ADEVARAT pe toata durata rosului — golire SI tranzit — fiindca lampa nu
+## deosebeste cele doua faze (jucatorul nu vede „cat mai am pana pleaca
+## autocarul", vede doar rosu/verde, ca la orice semafor real).
 func is_red() -> bool:
-	return _clock >= period - red_hold
+	return _clock >= green_hold()
+
+
+## Tranzitul chiar in curs (autocarul traverseaza)? Pentru sonde/diagnostic —
+## AI-ul NU foloseste asta (ar fi un bit in plus fata de ce vede un om).
+func is_transit() -> bool:
+	return _clock >= green_hold() + clear_hold
 
 
 ## Secunde ramase pana la verde (0 daca deja verde). Pentru AI: cat sa astepte.
@@ -245,11 +306,22 @@ func red_seconds_left() -> float:
 	return period - _clock
 
 
+## Secunde ramase pana la ROSU (0 daca deja rosu). Runda 2, punctul 2: un AI
+## care e la linie PE VERDE nu intreaba doar „e liber ACUM", ci „am timp sa
+## si IES pe partea cealalta inainte sa vina rosul" — vezi
+## `ai_controller.gd._signal_red_ahead`, care compara asta cu timpul de
+## traversare la viteza proprie.
+func green_seconds_left() -> float:
+	if is_red():
+		return 0.0
+	return green_hold() - _clock
+
+
 ## Va fi ROSU peste `seconds`? Aceeasi forma ca SlidingHazard.door_blocks_in,
 ## ca AIController sa poata trata semaforul cu exact acelasi tipar de
 ## intrebare ("daca ajung acolo peste X secunde, gasesc drumul liber?").
 func blocks_in(seconds: float) -> bool:
-	return fposmod(_clock + seconds, period) >= period - red_hold
+	return fposmod(_clock + seconds, period) >= green_hold()
 
 
 ## Unde se opreste un AI care asteapta (linia de oprire, cu marja inapoi).
@@ -271,10 +343,11 @@ func _physics_process(delta: float) -> void:
 			_headlight_fired = false
 	if red and not _headlight_fired:
 		# Farurile se aprind cu `headlight_lead_s` inainte ca autocarul sa
-		# PORNEASCA (nu inainte sa treaca linia de oprire — el porneste chiar
-		# la inceputul rosului, deci practic imediat).
-		var since_red := red_hold - red_seconds_left()
-		if since_red >= 0.0:
+		# PORNEASCA — asta e inceputul TRANZITULUI (`green_hold() + clear_hold`),
+		# nu inceputul rosului (runda 2: autocarul asteapta `clear_hold` dupa
+		# ce lampa a trecut pe rosu, inainte sa porneasca).
+		var transit_start := green_hold() + clear_hold
+		if _clock >= transit_start - headlight_lead_s:
 			_headlight_fired = true
 			headlights_on.emit()
 

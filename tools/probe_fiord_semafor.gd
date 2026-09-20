@@ -210,8 +210,10 @@ func _set_curve() -> void:
 func _build_signal() -> void:
 	_signal = TunnelSignalHazard.new()
 	_signal.name = "SemaforSonda"
-	_signal.period = 34.0
-	_signal.red_hold = 12.0
+	# Runda 2: period=40 (22 verde + 18 rosu = 6 golire + 12 tranzit), NU mai
+	# scriem "red_hold" direct (e calculat din clear_hold + cross_time()).
+	_signal.period = 40.0
+	_signal.clear_hold = 6.0
 	_signal.tunnel_length = TUNNEL_LEN
 	_signal.bus_speed = TUNNEL_LEN / 12.0 # ~12.5 m/s, cf. brief
 	_track.add_child(_signal)

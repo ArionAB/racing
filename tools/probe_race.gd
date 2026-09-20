@@ -137,6 +137,11 @@ var _seed: int = SEED
 ## Masina jucatorului, index in GameState.CAR_DATA. Suprascris cu --car=N.
 ## 0 = Muscle, masina de referinta a proiectului.
 var _player_car: int = 0
+## Numarul de adversari AI. -1 = nu se atinge GameState.ai_count (implicitul
+## de joc, 5 -> 6 masini pe grila). Suprascris cu --ai=N — Fiordland cere 8
+## masini pe grila (brief §7 pasul 3: 8 masini, fara decor, pe tunelul cu
+## semafor), peste implicitul de 6.
+var _ai_count: int = -1
 ## Viteza de sosire a atacatorului in modul bump (m/s).
 const BUMP_ENTRY_SPEED: float = 26.0
 
@@ -228,6 +233,8 @@ func _ready() -> void:
 			_seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--car="):
 			_player_car = int(arg.trim_prefix("--car="))
+		elif arg.begins_with("--ai="):
+			_ai_count = int(arg.trim_prefix("--ai="))
 		elif arg.begins_with("--slice="):
 			var ab := arg.trim_prefix("--slice=").split(",")
 			_slice = Vector2(float(ab[0]), float(ab[1]))
@@ -239,6 +246,8 @@ func _ready() -> void:
 	# assets — de fapt se schimbase masina sub noi. Aceeasi capcana ca la
 	# --mode=cliff, care nu-si seta `car.track` si masura altceva decat credea.
 	GameState.selected_car = clampi(_player_car, 0, GameState.CAR_DATA.size() - 1)
+	if _ai_count >= 0:
+		GameState.ai_count = _ai_count
 	# `--track=` ia POZITIA din lista (Stromboli = 4), dar accepta si numarul
 	# scenei (--track=11). Fara verificarea asta, un index gresit nu se plangea
 	# aici, ci pica mai tarziu cu "Out of bounds" si turna zeci de mii de erori

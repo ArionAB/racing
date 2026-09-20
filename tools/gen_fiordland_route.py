@@ -12,52 +12,62 @@ import sys
 # (x, y, fillet_r, cota, eticheta). Cotele din brief paragraf 2: chei 0,
 # cornisa +30, Stirling +32, Chasm +15, portal est (cel mai inalt) +45,
 # portal vest +27, baza coborarii +3, bazinul Bowen -4, mare 0.
+## Bucla e desenata ca un OVAL inclinat, nu ca un "acolo si inapoi" lung si
+## subtire: primul plan (spike de ~845 m pe axa Y a hartii) a lovit peretele
+## invizibil al lumii (Track._build_world_bounds, half_extent 420 m fata de
+## centroidul traseului) — masurat cu sonda ad-hoc tools/sv_fiord_kicker.gd:
+## masina se opreste in zidul de granita la (x=-13, z=229), la 0,6 m de
+## bordul nordic calculat din centroid. Reforma: cornisa/Stirling merg spre
+## NORD-EST, padurea/tunelul se INTORC spre NORD-VEST fara sa mai urce in Y
+## mult peste C, iar coborarea/kickerul revin spre SUD prin vest — un oval
+## inclinat de-a curmezisul, nu o tepusa. Lungimea vine din curbe, nu din
+## intindere pe o singura axa.
 WPTS_RAW = [
-    (0,     0,   26, 0.0,  "A start chei"),
-    (20,    86,  26, 0.0,  "A iesire chei"),
+    (0,     0,   34, 0.0,  "A start chei"),
+    (36,    100, 26, 0.0,  "A iesire chei"),
 
-    (40,    150, 32, 7.0,  "B urcare 1"),
-    (86,    215, 36, 14.0, "B S1 apex spre mare vest"),
-    (48,    270, 36, 21.0, "B S1 iesire"),
-    (78,    325, 38, 26.0, "B S2 apex spre perete est"),
-    (122,   368, 32, 30.0, "B S2 iesire concav spre perete"),
+    (78,    158, 30, 7.0,  "B urcare 1"),
+    (144,   204, 34, 14.0, "B S1 apex spre mare vest"),
+    (192,   260, 32, 21.0, "B S1 iesire"),
+    (250,   298, 36, 26.0, "B S2 apex spre perete est"),
+    (312,   312, 30, 30.0, "B S2 iesire concav spre perete"),
 
-    (128,   420, 28, 31.5, "C intrare Stirling"),
-    (131,   458, 22, 32.0, "C sub perdea"),
-    (123,   496, 26, 31.0, "C iesire Stirling"),
+    (372,   326, 26, 31.5, "C intrare Stirling"),
+    (416,   350, 22, 32.0, "C sub perdea"),
+    (452,   384, 24, 31.0, "C iesire Stirling"),
 
-    (86,    540, 30, 27.0, "D intrare padure"),
-    (26,    568, 26, 22.0, "D curba padure 1"),
-    (-24,   544, 24, 18.0, "D curba padure 2"),
-    (-48,   500, 20, 16.0, "D podetul Chasm"),
-    (-38,   458, 24, 15.0, "D iesire Chasm"),
+    (486,   434, 28, 27.0, "D intrare padure"),
+    (500,   492, 24, 22.0, "D curba padure 1"),
+    (476,   544, 22, 18.0, "D podetul Chasm"),
+    (426,   568, 20, 16.0, "D iesire Chasm"),
+    (368,   558, 24, 17.0, "D spre panta"),
 
-    (-70,   424, 26, 19.5, "E intrare zona avalansa"),
-    (-122,  404, 28, 26.0, "E S avalansa apex"),
-    (-166,  360, 28, 32.5, "E spre portal"),
-    (-172,  296, 26, 39.5, "E aproape de portal"),
-    (-146,  244, 22, 45.0, "E portal est linie oprire"),
-    (-146,  164, 16, 36.0, "E in tunel 1"),
-    (-146,  84,  16, 27.0, "E portal vest"),
+    (312,   538, 24, 19.5, "E intrare zona avalansa"),
+    (254,   552, 26, 26.0, "E S avalansa apex"),
+    (196,   538, 24, 32.5, "E spre portal"),
+    (146,   500, 24, 39.5, "E aproape de portal"),
+    (112,   458, 20, 45.0, "E portal est linie oprire"),
+    (100,   386, 15, 36.0, "E in tunel 1"),
+    (100,   306, 15, 27.0, "E portal vest"),
 
-    (-136,  8,   32, 21.0, "F iesire portal fiordul in fata"),
-    (-100,  -58, 32, 15.0, "F curba 1"),
-    (-98,   -128, 30, 8.5, "F cicatricea avalansei"),
-    (-64,   -184, 28, 4.0, "F curba 2"),
+    (54,    262, 30, 21.0, "F iesire portal fiordul in fata"),
+    (-6,    236, 30, 15.0, "F curba 1"),
+    (-56,   198, 28, 8.5,  "F cicatricea avalansei"),
+    (-84,   146, 26, 4.0,  "F curba 2"),
 
-    (-12,   -206, 22, 3.0,  "G intrare kicker"),
-    (24,    -215, 17, -2.0, "G kicker peste bazin"),
-    (58,    -206, 22, 1.0,  "G aterizare pietris"),
+    (-92,   90,  22, 3.0,  "G intrare kicker"),
+    (-78,   40,  17, -2.0, "G kicker peste bazin"),
+    (-42,   8,   22, 1.0,  "G aterizare pietris"),
 
-    (100,   -180, 30, 0.5,  "H iesire din G"),
-    (70,    -116, 30, 0.2,  "H malul 1"),
-    (40,    -56,  30, 0.0,  "H malul 2 spre chei"),
+    (-2,    -30, 28, 0.5,  "H iesire din G"),
+    (32,    -70, 28, 0.2,  "H malul 1"),
+    (52,    -30, 36, 0.0,  "H malul 2 spre chei"),
 ]
-# Scalare uniforma in plan (X, Y hartii) ca lungimea totala sa intre in
-# fereastra ProbeLayout 1.950-2.250 m, fara sa schimbe cotele (elevatia nu se
-# scaleaza) si fara sa strice raportul lungime tunel / lungimi vecine — s-a
-# masurat ca micile alungiri locale nu urcau lungimea totala suficient
-# (fillet-urile absorbeau castigul), deci se scaleaza tot planul.
+# Scalare uniforma in plan: dupa reforma din oval (v. nota de mai sus),
+# marginile fata de peretele invizibil al lumii (Track._build_world_bounds,
+# half_extent 420 m fata de centroid) au ramas confortabile (masurat: cea mai
+# stransa la 347 m), deci se poate creste usor lungimea totala spre fereastra
+# ProbeLayout 1.950-2.250 m fara sa se riste zidul din nou.
 SCALE = 1.08
 WPTS = [(round(x * SCALE, 2), round(y * SCALE, 2), round(r * SCALE, 2), e, lbl)
         for x, y, r, e, lbl in WPTS_RAW]

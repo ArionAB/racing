@@ -183,6 +183,14 @@ enum Mode { STOP, LANE }
 ## La fel ca `bus_shove`, pentru acceleratia laterala SUSTINUTA cat masina
 ## sta in zona de ghiont a autocarului.
 @export_range(-1.0, 60.0, 1.0) var bus_side_accel: float = -1.0
+## Runda 2, a doua incercare (`bus_shove`/`bus_side_accel` injumatatite n-au
+## schimbat viteza de ejectare — masurat, 42-59 m/s in perete, identic
+## inainte/dupa): forta de ghiont NU e sursa, coliziunea BRUTA cu botul
+## (contact rigid, viteza de inchidere mare pe un tunel ingust) e. Un nas mai
+## putin oblic (unghi mai mare) deflecteaza mai bland, cu mai multa
+## componenta laterala si mai putina frontala — vezi bus_hazard.gd, „mai mare
+## = deflectare mai blanda, dar bot mai lung". Negativ = nu suprascrie.
+@export_range(-1.0, 45.0, 1.0) var bus_nose_angle_deg: float = -1.0
 
 ## Cat de devreme se aprind farurile pe pereti (billboard-uri emisive, brief:
 ## „3 s inainte sa apara"), fata de PORNIREA autocarului. Doar semnal —
@@ -226,14 +234,52 @@ signal headlights_on()
 ## retransmis cu semnatura simpla pentru sonde/HUD).
 signal bus_hit(car: Car)
 
+## Bonus de verde DOAR la primul ciclu (s) — runda 2 (coordonator), bug gasit
+## la verdict: TOATE ejectarile masurate pe 4 seed-uri (0, 3, 6, 14) cad in
+## fereastra t=46-47s, adica exact PRIMUL tranzit al autocarului, si NICIUNA
+## dupa t=60s. Nu e coincidenta de esantionare: la ritmul de start (rocket
+## start + croaziera ~25 m/s), plutonul ajunge la tunel exact cand se termina
+## primul ciclu — un aliniament de faza intre `period`/`bus_speed` si viteza
+## tipica de cursa, nu o eroare de regula (in fiecare caz `regula_activa`
+## era deja adevarat, AI-ul stia sa mearga dreapta, dar n-a apucat sa
+## convearga fizic — prea putin drum de cand a inceput sa citeasca hazardul,
+## fiindca hazardul insusi tocmai a "aparut" din perspectiva pistei). Pe
+## ciclurile urmatoare, plutonul e deja imprastiat si problema dispare de la
+## sine — masurat, 0 ejectari intre t=60s si t=150s pe toate cele 4 seed-uri.
+##
+## DOUA INCERCARI GRESITE, de retinut:
+##  1. Oprirea avansului lui `_clock` in `_physics_process`. `BusHazard._hide()`
+##     e un SNAPSHOT — odata chemat, `_hide_left` numara singur la fiecare
+##     tick, INDEPENDENT de `_clock`-ul semaforului. Inghetand `_clock` DUPA
+##     ce bus-ul fusese deja ascuns cu durata veche (calculata la `_ready`, cu
+##     `_clock=0`), autocarul tot aparea la t~34s (programul lui vechi), dar
+##     lampa (citita din `_clock` inghetat) inca raporta verde.
+##  2. Pornirea lui `_clock` la `fposmod(-bonus, period)`. `fposmod` INFASOARA
+##     mereu in [0, period) — un `_clock` initial de `period-bonus` inseamna
+##     ca ceasul e deja "aproape de sfarsitul ciclului", deci `green_hold()`
+##     se atinge mai REPEDE (dupa mai putin timp), nu mai tarziu: exact
+##     opusul intentiei ("bonus" devenea o PENALIZARE la ~period-bonus s).
+##
+## Fix corect: `_startup_grace_left` (secunde), un timer SEPARAT de `_clock`,
+## consumat in `_physics_process` INAINTE ca `_clock` sa avanseze deloc — deci
+## atat lampa (`is_red()` citeste `_clock`, care nu s-a miscat inca) cat si
+## ascunderea initiala a autocarului (calculata la `_ready`, cu `_clock` tot
+## 0 — `_force_hidden_until_transit` da acelasi rezultat ca fara bonus) raman
+## sincrone, doar intarziate cu exact `first_green_bonus_s` fata de pornirea
+## scenei. 0 = neschimbat (implicit, alte piste).
+@export_range(0.0, 60.0, 1.0) var first_green_bonus_s: float = 0.0
+
 var _bus: BusHazard
 var _clock: float = 0.0
 var _was_red: bool = false
 var _headlight_fired: bool = false
+## Vezi doc la `first_green_bonus_s`.
+var _startup_grace_left: float = 0.0
 
 
 func _ready() -> void:
 	add_to_group(AI_GROUP)
+	_startup_grace_left = first_green_bonus_s
 	if lamp == null:
 		lamp = HazardLamp.new()
 		lamp.name = "Lampa"
@@ -273,11 +319,31 @@ func _build_bus() -> void:
 			_bus.shove = bus_shove
 		if bus_side_accel >= 0.0:
 			_bus.side_accel = bus_side_accel
+		if bus_nose_angle_deg >= 0.0:
+			_bus.nose_angle_deg = bus_nose_angle_deg
 	add_child(_bus)
 	_rebuild_bus_curve()
 	_sync_bus()
 	_bus.shoved.connect(_on_bus_shoved)
 
+
+## Semilatimea REALA a tunelului (m) — bug gasit in runda 2 (coordonator,
+## "ejectarile in tunel = veto real"): `Track.width_at_index()` intoarce 6.5
+## (semilatimea sectorului DINAINTE, `0.424-0.612`), nu 4.0, pe primii ~14 m
+## dupa linia de oprire (pana la frac ~0.626) — `_width_blend` are o RAMPA
+## de tranzitie de 30 m (`WIDTH_RAMP_M`) care se aplica DUPA capatul unui
+## sector catre `half_width`-ul GLOBAL (tot 6.5 pe Track16), iar sectorul
+## URMATOR (0.612-0.69, 4.0) e verificat AL DOILEA in lista — rampa
+## sectorului vechi "sangereaza" peste inceputul celui nou. Consecinta reala:
+## `AIController._signal_lane_keep` calcula tinta laterala ca fractie din 6.5
+## in loc de 4.0 EXACT in zona unde autocarul incepe sa traverseze (langa
+## linie) — masurat: `hw=6.50` in tot tunelul in loc de 4.0, tinta de banda
+## dreapta ~40% mai aproape de axa decat trebuia, deci mai aproape de banda
+## autocarului. Expus aici ca sa AI-ul sa poata folosi valoarea REALA in loc
+## sa se bazeze pe `track.width_at_index()` (care ramane corect pentru
+## restul pistei — fix-ul e local, nu in `Track`, ca sa nu se atinga rampa
+## folosita corect in alta parte).
+@export_range(1.0, 10.0, 0.1) var tunnel_half_width: float = 4.0
 
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
@@ -524,6 +590,19 @@ func ai_decision_point() -> Vector3:
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
+		return
+	if _startup_grace_left > 0.0:
+		_startup_grace_left -= delta
+		# Re-pinam ascunderea autocarului la ACELASI target in fiecare tick de
+		# gratie: `_force_hidden_until_transit` calculeaza fata de `_clock`
+		# (care nu s-a miscat inca, ramane 0), deci da mereu aceeasi durata —
+		# efectiv anuleaza numaratoarea proprie a lui BusHazard
+		# (`_hide_left -= delta`, INDEPENDENTA de `_clock`-ul nostru), care
+		# altfel ajungea singura la 0 la programul vechi cat lampa (citita
+		# din `_clock` inghetat) inca arata verde — vezi „doua incercari
+		# gresite" la `first_green_bonus_s`.
+		if _bus != null and _bus.is_hidden():
+			_force_hidden_until_transit()
 		return
 	_clock = fposmod(_clock + delta, period)
 	var red := is_red()

@@ -708,6 +708,14 @@ func _signal_lane_keep(idx: int, speed: float, line: float) -> float:
 			continue
 		var hw: float = track.width_at_index(idx) if car.route == 0 \
 			else r.half_width
+		# BUG GASIT runda 2 (vezi TunnelSignalHazard.tunnel_half_width):
+		# width_at_index() poate raporta semilatimea sectorului DINAINTE
+		# (rampa de tranzitie de 30 m se aplica dupa capatul lui, catre
+		# half_width GLOBAL) chiar in interiorul tunelului declarat, langa
+		# linie -- masurat, `hw=6.5` in loc de 4.0 in tot tunelul. Plafonam
+		# cu semilatimea REALA a tunelului, cunoscuta de hazard, nu dedusa
+		# din profilul de latime (care ramane corect pentru restul pistei).
+		hw = minf(hw, sig.tunnel_half_width)
 		hw = maxf(hw, 0.001)
 		var target := clampf(SIGNAL_RIGHT_LANE_M / hw, 0.0, LINE_MAX)
 		# Tranzitie scurta la INTRAREA in zona (along aproape de

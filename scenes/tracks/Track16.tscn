@@ -110,6 +110,9 @@ clear_hold = 8.0
 tunnel_length = 169.0
 bus_speed = 12.5
 bus_lane_offset = -2.0
+bus_shove = 1.5
+bus_side_accel = 4.0
+bus_nose_angle_deg = 40.0
 
 [node name="KickerBowen" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.0, 0.2, -67.5)

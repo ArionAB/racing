@@ -387,7 +387,7 @@ func _start_race() -> void:
 			car.bumped.connect(_on_bumped.bind(i))
 	_setup_signal_hazards()
 	if _force_rain >= 0:
-		_force_rain_cycle(float(_force_rain))
+		_force_rain_cycle_deferred(float(_force_rain))
 
 
 ## `--rain=1`/`--rain=0`: gaseste orice `RainCycle` prin grupul lui
@@ -399,6 +399,38 @@ func _start_race() -> void:
 ## printr-o fereastra de ploaie in cursul unei rulari de 150s (period 95s —
 ## fara steag, o cursa "de control" nu era de fapt mereu uscata). Gol pe orice
 ## pista fara `RainCycle`.
+##
+## Runda 3, punctul 1: BUG gasit prin diagnostic (`_rain_diag`) — apelul
+## SINCRON, direct din `_start_race()`, ateriza `rain_factor=1.0` pe nodul
+## `RainCycle` insusi, dar `track.rain_wet` ramanea `false`: `RainCycle._ready`
+## isi programeaza `_collect()` (care rezolva `_track`) prin `call_deferred`,
+## deci in cadrul in care `_start_race()` ruleaza, `_track` e INCA null cand
+## `force_factor()` incearca sa scrie `_track.rain_wet` — vezi garda
+## `if _track != null` din `RainCycle._apply()`, care a esuat tacut. Si mai
+## rau: `force_factor()` cheama `set_process(false)`, deci nodul ramanea
+## INGHETAT cu `rain_factor` setat corect pe el insusi, dar fara sa mai
+## apuce vreodata sa-l aplice pe pista — de-aici "identic la bit" intre
+## --rain=0 si --rain=1 (ambele lasau `track.rain_wet=false` tot timpul).
+## `ProbeFiordPloaie` (sonda existenta, A/B pe ploaie) evita exact asta cu
+## DOUA `await get_tree().process_frame` inainte de `force_factor()` —
+## acelasi leac aici, prin `call_deferred` dublu (echivalent, fara sa fac
+## `_start_race` async).
+func _force_rain_cycle_deferred(factor: float) -> void:
+	call_deferred(&"_force_rain_cycle_step2", factor)
+
+
+func _force_rain_cycle_step2(factor: float) -> void:
+	# Un singur `call_deferred` ajunge dupa `RainCycle._collect.call_deferred()`
+	# programat in ACELASI cadru (ambele intra in coada de deferred calls a
+	# cadrului curent, in ordinea in care au fost programate — `RainCycle`
+	# insusi a fost instantiat, deci `_ready()`-ul lui a rulat, INAINTE ca
+	# `_force_rain_cycle_deferred` sa fie apelat din `_start_race()`). Al
+	# doilea pas ramane totusi separat (nu un singur `_force_rain_cycle` cu
+	# `call_deferred` in interior) ca sa se poata verifica direct, cu
+	# `_rain_diag`, ca `_track` chiar nu mai e null cand scriem.
+	_force_rain_cycle(factor)
+
+
 func _force_rain_cycle(factor: float) -> void:
 	for node in get_tree().get_nodes_in_group(&"rain_cycle"):
 		if node.has_method("force_factor"):
@@ -416,8 +448,34 @@ func _setup_signal_hazards() -> void:
 		sig.bus_hit.connect(_on_signal_bus_hit)
 
 
+## Runda 3, punctul 1: „identic la bit" intre --rain=0 si --rain=1 e exact
+## semnul de mecanism NECONECTAT (memoria `sonda-masura-alt-obiect`) — de
+## verificat direct, nu presupus. La t=10s si t=60s (o data fiecare, marcate
+## in `_rain_diag_done`) se tipareste starea REALA: `RainCycle.rain_factor`,
+## `track.rain_wet` (campul citit de `Car.is_wet_at`/`_physics_process`) si
+## `slip_time` al fiecarei masini — daca oricare ramane 0/false pe --rain=1,
+## flagul nu ajunge la pista, indiferent ce spune codul lui `force_factor`.
+var _rain_diag_done: Dictionary = {}
+func _rain_diag(t_mark: float) -> void:
+	if _elapsed < t_mark or _rain_diag_done.get(t_mark, false):
+		return
+	_rain_diag_done[t_mark] = true
+	var cycles := get_tree().get_nodes_in_group(&"rain_cycle")
+	var rf := -1.0
+	if not cycles.is_empty():
+		rf = float(cycles[0].get("rain_factor"))
+	print("[rain-diag] t=%.1f rain_factor=%s track.rain_wet=%s" % [
+		_elapsed, str(rf), str(_race.track.rain_wet)])
+	var cars: Array[Car] = _race.cars
+	for i in cars.size():
+		var c := cars[i]
+		print("    slip_time car%d (%s) = %.3f" % [i, c.pilot_name, c.slip_time])
+
+
 func _tick_race(delta: float) -> void:
 	_elapsed += delta
+	_rain_diag(10.0)
+	_rain_diag(60.0)
 	var cars: Array[Car] = _race.cars
 	# PROBE_RACE_TRACE=2: acelasi tabel, dar la 0,1 s si doar in fereastra
 	# 60-70 s — diagnostic ad-hoc pentru un respawn reproductibil la un frac

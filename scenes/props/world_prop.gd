@@ -1669,6 +1669,7 @@ func _ready() -> void:
 	_warm_tuff()
 	_strata_tuff()
 	_redden_cliff()
+	_cool_inca_cliff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
 	_fade_tuff_detail()
@@ -2836,3 +2837,106 @@ static func prop_classes() -> Dictionary:
 		if info.has("classes"):
 			out.merge(info["classes"])
 	return out
+
+
+## Masele de stanca ale cornisei incase: coborate din CLIPPING, ca fatetele sa
+## se vada din nou.
+##
+## DE CE. Criticul orb al POI-ului H a numit defectul asa: peretele „e o duna de
+## nisip neteda, dintr-o singura nuanta, in loc de masa de roca fatetata", si
+## zidaria „n-are din ce sa fie zid". Prima ipoteza — ca mesh-ul e neted, sau ca
+## n-are AO — e FALSA, masurata (tools/sv_facet.gd, pe .glb):
+##
+##   huayna_picchu: abaterea normalei de vertex fata de fata = 6,5 grade mediana
+##                  (deci e FLAT shaded, fatetele exista in geometrie)
+##                  lambert pe fata p10=0,09 p50=0,47 p90=0,94 (spread bun)
+##                  AO copt in vertecsi p10=0,23 p50=0,48 p90=0,94 (exista)
+##
+## Geometria si AO-ul sunt in regula. Ce nu e in regula se vede abia pe PIXELI
+## (memoria `procent-de-culoare-nu-e-dovada`: captura bate cifra), comparand
+## distributia de valoare cu decupajul din bara:
+##
+##   masa huayna (noi)   V: p10=0,36 p25=0,60 p50=0,88 p75=0,98 p90=1,00
+##   stanca (bara)       V: p10=0,31 p25=0,41 p50=0,69 p75=0,86 p90=0,99
+##
+## INTERVALUL e acelasi (0,64 fata de 0,67) — deci nu e „lipsa de contrast".
+## Distributia insa e imbacsita la varf: **29,4 % din pixelii masei sunt la
+## >= 250, si 44,2 % peste 240**, fata de 16,0 % / 20,4 % in referinta. Peste
+## jumatate din suprafata luminata e TAIATA la alb, si doua fatete care ies
+## amandoua din scala au exact aceeasi culoare — asa dispar muchiile si asa
+## devine roca o duna. Nu clasa e gresita (`inca_stone` e granit cald, corect
+## pentru zidarie si calculat pe masuratoare), ci faptul ca aceeasi valoare,
+## potrivita pe un zid de 2,5 m, arde pe un flanc de 79 m intors spre soare.
+##
+## CUM. Nu se schimba clasa si nu se adauga alta (ar fi +1 material pentru o
+## problema de expunere, nu de materie): se coboara ALBEDO-ul piesei din vertex
+## color, mecanismul lui `_redden_cliff` de mai sus, cu doua deosebiri.
+##
+## 1. NU e un multiplicator plat. Un ×0,78 uniform ar aseza mediana pe referinta
+##    (0,88 -> 0,69) dar ar stinge si varfurile, iar in bara varfurile TRAIESC
+##    (p90 = 0,99): creasta prinde soarele. Factorul se conduce din AO-ul copt,
+##    care e mare exact pe muchiile expuse si mic in scobituri:
+##        factor = LO + (1 - LO) * ao^K,  LO = 0,62, K = 3,0
+##    Asa fetele de mijloc (AO ~0,48) coboara la 0,66 — ies din taiere — iar
+##    muchiile (AO ~0,94) raman la 0,94. Verificat pe cifre inainte de a fi
+##    scris: V 0,88 -> 0,58, V 1,00 (AO 0,94) -> 0,94, adica exact forma
+##    distributiei din bara.
+## 2. Tenta. Masurat pe captura fata de bara, roca noastra e si prea calda si
+##    prea saturata: H 37 S 0,50 fata de H 31 S 0,30. Multiplicatorul care duce
+##    culoarea pe tinta e (0,71, 0,76, 1,00) — calculat, nu ales: raportul pe
+##    canale intre HSV(31, 0,30, 0,50) si HSV(37, 0,50, 0,70). Albastrul ramane
+##    1,0 fiindcă vertex color-ul poate doar sa INTUNECE (memoria
+##    `surfacetool-clamp-vertex-color`), deci racirea se face taind rosu si
+##    verde, nu urcand albastru.
+##
+## Se aplica DOAR pe `huayna_picchu` — masele mari, care sunt singurele ce ard.
+## `moss_boulder_*` sunt de 0,7-3 m, stau in umbra vegetatiei si masoara sub
+## prag; nu se ating, ca sa nu se strice contactul lor cu iarba.
+##
+## ZERO materiale noi: clasa ramane `inca_stone`, se schimba doar vertecsii
+## instantei.
+const CLIFF_AO_FLOOR := 0.62
+const CLIFF_AO_POW := 3.0
+const CLIFF_COOL := Color(0.71, 0.76, 1.0)
+
+
+func _cool_inca_cliff() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if model.scene_file_path.get_file().get_basename() != "huayna_picchu":
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var out := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				var arr := mi.mesh.surface_get_arrays(si)
+				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
+				var cols := PackedColorArray()
+				if raw_cols is PackedColorArray:
+					cols = raw_cols
+				if cols.size() != verts.size():
+					# Fara AO copt n-avem din ce conduce umarul, si un
+					# multiplicator plat ar stinge si muchiile. Mai bine
+					# nemodificat decat aplatizat.
+					cols = PackedColorArray()
+					cols.resize(verts.size())
+					cols.fill(Color.WHITE)
+				for i in verts.size():
+					var c := cols[i]
+					var ao := clampf(c.r, 0.0, 1.0)
+					var f: float = CLIFF_AO_FLOOR + (1.0 - CLIFF_AO_FLOOR) * pow(ao, CLIFF_AO_POW)
+					c.r *= f * CLIFF_COOL.r
+					c.g *= f * CLIFF_COOL.g
+					c.b *= f * CLIFF_COOL.b
+					cols[i] = c
+				arr[Mesh.ARRAY_COLOR] = cols
+				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			mi.mesh = out

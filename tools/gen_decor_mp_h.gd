@@ -293,6 +293,7 @@ func _ready() -> void:
 		_citadel_walls()
 		_cliff_mass()
 		_gap_rock_lip()
+		_gap_wall_face()
 		_write()
 	get_tree().quit(0)
 
@@ -1211,6 +1212,232 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 	_out.append("")
 
 
+# ------------------------------------------- RUNDA 17: fata golului e STANCA
+#
+# Criticul orb a numit ACELASI lucru de doua ori la rand:
+#   r1: "zidul cornisei n-are stanca in spate ... o suprafata continua crem,
+#        o singura tenta, zero muchii. Zidul n-are din ce sa fie zid."
+#   r2: "fetele verticale ale golului nu au material de stanca ... taluzul de
+#        sub parapet e o panta de IARBA neteda, aceeasi clasa de material ca
+#        terenul plat: o cadere de 78 m si un mal de 2 m arata identic."
+#
+# Lectia `criticul-cere-ce-zona-nu-poate-da` cere ca la al doilea verdict
+# identic sa verific stratul de dedesubt INAINTE sa mai adaug piese. Am facut-o,
+# si raspunsul are doua jumatati — una construibila, una nu.
+#
+# JUMATATEA CARE NU E A MEA (masurata, `tools/SvMpHOcluzie.tscn`).
+# Fata EXISTA in teren: `--lat` da la frac 0,9400 cote de -2,5 m la 8 m lateral
+# si -12,3 m la 16 m, adica o cadere de 9,8 m pe 8 m de rulaj => **51 grade**.
+# Dar din ochiul soferului (camera de joc, +2,6 m peste sosea, 8 m in spate) nu
+# se vede NICIUN punct de pe ea. Raza plimbata pe 5 fractii x 8 distante
+# laterale (6..26 m) da "nu" de 40 de ori din 40, si corpul care o opreste e
+# de fiecare data acelasi, citit dupa nume: **`RoadTop`** — insasi placa
+# soselei. Marginea deck-ului sta peste terenul care cade, deci face o buza
+# care ascunde tot ce e sub ea.
+#
+# Cat ar trebui mutat ochiul ca sa vada piciorul fetei (-12,3 m la 16 m):
+# **+9,6 m inaltime** (camera e la 2,6, si e setare de joc, nu de pista) SAU
+# **5,0 m lateral in afara** (adica pe langa drum). Prima incercare a rundei a
+# asezat 90 de piese de stanca exact pe fata; captura `r17a_f095.png` a iesit
+# practic identica cu `r17_pre_f095.png`. Geometria era corecta si invizibila —
+# a treia oara pe POI-ul asta (r7 a platit-o de trei ori cu terasele), deci
+# memoria `umarul-ingust-ascunde-caderea` in forma ei tare: nu conteaza cat de
+# adanca e prapastia, ci sub ce unghi o vezi.
+#
+# JUMATATEA CARE E A MEA: **fereastra vizibila**, masurata cu aceeasi sonda —
+# cea mai joasa cota care inca se vede, la fiecare distanta laterala:
+#
+#     lateral      7 m     9 m    11 m    13 m    16 m    20 m
+#     cota      +0,3    -0,5    -1,3    -1,8    -3,0    -4,5   (fata de sosea)
+#
+# Deci banda in care decorul poate schimba captura e o pana care se adanceste
+# cu distanta. Terasele rundei 7 (sosea .. -3,6 m) au functionat exact fiindca
+# stau in ea. Piatra se aseaza deci **in fereastra**, nu pe fata: blocuri care
+# URCA din terenul de departe pana in linia de vedere, asa incat ochiul sa
+# gaseasca stanca fatetata unde acum gaseste iarba neteda.
+#
+# De ce piesele astea: `moss_boulder_c`/`_b` sunt singurele mase de roca din
+# kit care citesc ca bloc fatetat la scara asta, si sunt deja in zona (clasa
+# `inca_stone`, ZERO materiale noi). `inca_wall_b` ramane pentru randul de sus,
+# unde muchia trebuie sa fie TAIATA, nu rotunjita.
+#
+# Toate `coliziune = "none"`: sunt dincolo de umar, sub cota soselei, unde nu
+# ajunge nicio masina.
+const FACE_STEP := 6.0
+
+## Fereastra vizibila, interpolata din tabelul masurat mai sus.
+func _fereastra(lat: float) -> float:
+	var xs: Array[float] = [7.0, 9.0, 11.0, 13.0, 16.0, 20.0]
+	var ys: Array[float] = [0.3, -0.5, -1.3, -1.8, -3.0, -4.5]
+	if lat <= xs[0]:
+		return ys[0]
+	for k in range(1, xs.size()):
+		if lat <= xs[k]:
+			var t := (lat - xs[k - 1]) / (xs[k] - xs[k - 1])
+			return lerpf(ys[k - 1], ys[k], t)
+	return ys[ys.size() - 1]
+
+
+func _gap_wall_face() -> void:
+	var n := _track.baked.size()
+	var f := F_IN
+	var k := 0
+	var puse := 0
+	var sarite := 0
+	var copaci := 0
+	# Patru distante, nu trei: cu pasul de 6 m pe lungime, trei lasau cer
+	# intre pilcuri la distanta mare (unde fereastra e cea mai adanca, deci
+	# unde se vede cel mai mult perete).
+	# Offset-uri fata de MARGINEA drumului (nu de ax): pe cornisa half = 6,0,
+	# deci astea dau 9,5 / 12,5 / 15,5 / 19,0 m de ax, adica exact fereastra
+	# masurata; iar pe portiunea largita se muta odata cu marginea.
+	var lats: Array[float] = [3.5, 6.5, 9.5, 13.0]
+	# Se opreste la POARTA, nu la F_OUT — acelasi motiv ca zidul de sprijin
+	# (nota de la F_WALL_OUT): dupa poarta traseul iese din rapa si intra in
+	# piata, unde terenul e PLAT. Captura `H_FINAL_f099.png` a aratat exact
+	# ce iese daca nu se opreste: lespezile stau culcate pe iarba plana si
+	# citesc a scanduri imprastiate, nu a perete. Stanca are sens doar unde
+	# exista cornisa. Memoria capcana-parametrului-care-doar-aduna.
+	while f < F_WALL_OUT:
+		var i := int(f * float(n)) % n
+		var sgn := _gap_side(i)
+		var p := _track.baked[i]
+		var side := _track._side_at(i) * sgn
+		var tang := (_track.baked[(i + 2) % n] - _track.baked[(i - 2 + n) % n])
+		tang.y = 0.0
+		if tang.length() < 0.01:
+			f += _step(FACE_STEP)
+			continue
+		tang = tang.normalized()
+		# Traveea barnelor ramane libera: acolo golul e gimmick, nu perete.
+		if absf(f - BEAM_FRAC) < BEAM_HALF_SPAN:
+			f += _step(FACE_STEP)
+			k += 1
+			continue
+		# Distantele se masoara de la MARGINEA asfaltului, nu de la ax.
+		#
+		# probe_manual (rulata cu --track=15, adica pe pista corecta — memoria
+		# probe-decor-numar-de-scena) a gasit 7 piese de-ale mele marcate
+		# "IN DRUM": toate spre F_OUT, unde semi-latimea creste de la 4,00 la
+		# 9,00 m pentru piata. Un lateral fix de 7,4-9,5 m de la AX cade in
+		# carosabil acolo, desi pe cornisa era cuminte la 3,4 m in afara.
+		# Cu referinta pe margine, oriunde se duce latimea, piesa ramane
+		# afara.
+		var half_i := _track.width_at_index(i)
+		for j in 4:
+			var lat: float = half_i + lats[j] + _rng.randf_range(-1.0, 1.0)
+			var jit := _step(float(j) * 2.1 + _rng.randf_range(-1.4, 1.4))
+			var ii := int((f + jit) * float(n)) % n
+			var pp := _track.baked[ii]
+			var ss := _track._side_at(ii) * _gap_side(ii)
+			var q := pp + ss * lat
+			var gy := _sol_real(q.x, q.z)
+			# Cota de sus a ferestrei la distanta asta: varful piesei trebuie
+			# sa AJUNGA in ea, altfel e geometrie moarta (prima incercare a
+			# rundei: 90 de piese pe fata, captura identica la ochi).
+			var vis: float = pp.y + _fereastra(lat)   # lat e deja de la ax
+			var nevoie: float = vis - gy
+			if nevoie <= 0.4:
+				# Terenul e deja in fereastra aici: nu e nimic de ridicat.
+				sarite += 1
+				continue
+			# Inaltimea piesei: cat sa treaca de linia de vedere cu o marja,
+			# plafonata ca sa nu devina turn.
+			var h: float = clampf(nevoie + _rng.randf_range(0.8, 2.0), 1.8, 7.5)
+			# PIESA: `inca_wall_b`, nu `moss_boulder_*`.
+			#
+			# Prima asezare in fereastra a folosit bolovanii, si captura
+			# `r17b_f095.png` arata de ce e gresit: din fereastra asta ochiul
+			# priveste mereu IN JOS (24-40 grade sub orizontala, masurat de
+			# sonda de ocluzie), iar `moss_boulder_*` are muschiul exact pe
+			# fata de sus. Rezultatul e un sir de capace VERZI — adica fix
+			# materialul pe care il reclama criticul, doar ca in relief.
+			# Runda 13 platise deja lectia asta ("un sir de DISCURI cu capac
+			# verde"); am regasit-o fiindca am schimbat banda, nu piesa.
+			#
+			# `inca_wall_b` isi arata FATA verticala de granit — e piesa din
+			# care sunt facute si cele 76 de terase care se citesc curat ca
+			# piatra in aceeasi captura. Rotita si inclinata variabil, un
+			# pilc de asemenea lespezi citeste ca masa de roca fatetata, nu
+			# ca zidarie regulata.
+			# ORIENTAREA: fata lespezii catre drum, nu yaw complet aleator.
+			#
+			# Captura `r17c_f095.png` a dat materia buna (piatra fatetata, nu
+			# iarba) dar aranjament gresit: cu yaw uniform pe cerc, jumatate
+			# din lespezi isi arata MUCHIA subtire catre camera, si pilcul
+			# citeste ca un evantai de scanduri imprastiate.
+			#
+			# Un perete de roca are fetele intoarse catre privitor — memoria
+			# `perete-paralel-nu-se-vede`. Deci yaw-ul se ia din tangenta (ca
+			# la terase, care se citesc corect in aceeasi captura) cu o
+			# imprastiere STRANSA, si inclinarea ramane mica: o lespede
+			# aproape verticala e bloc, una culcata e scandura.
+			var yaw_b := atan2(-tang.z, tang.x) + _rng.randf_range(-0.5, 0.5)
+			# Ingroparea ramane fractie din inaltime (o lespede mare trebuie
+			# sa intre mai adanc in panta ca sa nu para pusa pe iarba).
+			#
+			# NU se plafoneaza ca sa "impace" probe_manual: sonda aia citeste
+			# CAMPUL NETED (`_sampler.ground_y`, probe_manual.gd:74), iar pe
+			# fata asta campul si mesh-ul real NU coincid. Masurat cu
+			# `tools/SvMpHSol.tscn`, cote fata de sosea la frac 0,9450:
+			#
+			#     lateral      7 m     9 m   10,5 m   12 m    14 m    16 m
+			#     neted      -1,28   -5,23   -9,51  -12,15  -12,30  -12,30
+			#     raycast    -2,43   -3,77   -5,61   -7,43   -9,86  -12,28
+			#     diferenta  +1,15   -1,46   -3,90   -4,72   -2,45   -0,02
+			#
+			# Campul neted se prabuseste devreme la podeaua vaii; mesh-ul real
+			# urmeaza panta de 51 grade. La capete se potrivesc (0,02 m la
+			# 16 m), la mijloc difera cu 4,7 m — exact banda unde sonda striga
+			# PLUTESTE. Masinile si randarea folosesc mesh-ul, deci asezarea
+			# pe raycast e cea corecta, si cele ~8 semnalari de acolo sunt
+			# fals pozitive. Memoria: `terrain-mesh-y-extrapoleaza`.
+			var sink_m: float = 0.18 * h
+			_raw("inca_wall_b", "stancaGol", Vector3(q.x, gy - sink_m, q.z),
+				yaw_b, _scale_for("inca_wall_b", h),
+				"none", deg_to_rad(_rng.randf_range(-7.0, 7.0)))
+			puse += 1
+		# Randul de sus: muchie TAIATA pe umarul vizibil (fereastra e +0,3 la
+		# 7 m), acolo unde ochiul chiar cade. `inca_wall_b` fiindca aici se
+		# cere fateta plana, nu bolovan.
+		if k % 2 == 0:
+			var lat2: float = _track.width_at_index(i) + _rng.randf_range(2.2, 3.8)
+			var q2 := p + side * lat2
+			var g2 := _sol_real(q2.x, q2.z)
+			var vis2: float = p.y + _fereastra(lat2)
+			if vis2 - g2 > 0.5:
+				var h2: float = clampf(vis2 - g2 + 1.1, 2.0, 4.2)
+				_raw("inca_wall_b", "lespedeGol",
+					Vector3(q2.x, g2, q2.z),
+					atan2(-tang.z, tang.x) + _rng.randf_range(-0.35, 0.35),
+					_scale_for("inca_wall_b", h2), "none",
+					deg_to_rad(_rng.randf_range(6.0, 20.0)))
+				puse += 1
+		# COPACI care ies DIN stanca, nu de pe platou — cerut explicit de
+		# verdictul r2. Se pun langa masele de mai sus, la aceeasi distanta,
+		# ca sa se citeasca infipti in ea.
+		if k % 3 == 0:
+			var lat3: float = _track.width_at_index(i) + _rng.randf_range(4.0, 10.0)
+			var q3 := p + side * lat3
+			var g3 := _sol_real(q3.x, q3.z)
+			var vis3: float = p.y + _fereastra(lat3)
+			# Coroana trebuie sa ajunga in fereastra, altfel nu se vede.
+			var ht: float = clampf(vis3 - g3 + _rng.randf_range(1.5, 3.0), 3.0, 8.5)
+			if ht > 3.0:
+				var mdl2 := "polylepis_b" if ht > 5.5 else "polylepis_a"
+				# Cota se ia din raycast la punctul EXACT al trunchiului
+				# (g3), nu dintr-o medie: doi copaci pluteau 3,2-3,7 m
+				# fiindca panta de sub ei cade repede.
+				_raw(mdl2, "copacGol", Vector3(q3.x, g3 - 0.25, q3.z),
+					_rng.randf_range(0.0, TAU), _scale_for(mdl2, ht), "none",
+					deg_to_rad(_rng.randf_range(-14.0, -4.0)))
+				copaci += 1
+		f += _step(FACE_STEP)
+		k += 1
+	print("; fata golului, IN FEREASTRA VIZIBILA: %d piese de stanca, %d copaci, %d sarite (terenul era deja in fereastra)" % [
+		puse, copaci, sarite])
+
+
 func _write() -> void:
 	print("; asezate %d piese, %d refuzate, %d avertismente, ~%d triunghiuri" % [
 		_n, _skipped, _warn, _tri])
@@ -1339,6 +1566,51 @@ const CLIFF_H := 33.0
 ## ca sa TAIE lumina - a doua jumatate a verdictului.
 const CLIFF_TOP_OVER_ROAD := 14.0
 
+## Pragul care decide DACA se pune o masa de piatra intr-un punct: cat trebuie
+## sa urce solul pe partea peretelui, la `CLIFF_RISE_LAT` metri lateral, ca
+## piesa sa fie "felia de jos a unei falezei" si nu un con pe pajiste.
+##
+## Cifrele masurate (vezi nota din `_cliff_mass`): pe faleza reala terenul e la
+## +19,9 .. +27,6 m la 25 m lateral; pe platoul pietei e la -0,3 m peste tot.
+## Distanta dintre cele doua regimuri e de doua ordine de marime, deci pragul nu
+## e delicat: 6 m taie curat, iar ultimul punct acceptat (0,9500, +5,2 la 25 m /
+## +14,4 la 40 m) cade chiar sub el. Se masoara la 25 m fiindca la 8 m terenul e
+## la -0,2 m si pe faleza (umarul drumului e plat pe ambele regimuri) — memoria
+## masoara-inainte-nu-langa, in varianta laterala: intrebi terenul acolo unde
+## cele doua regimuri chiar difera.
+const CLIFF_RISE_LAT := 25.0
+const CLIFF_MIN_RISE := 6.0
+
+## Pasul intre mase, in metri de traseu. Piesa are 79,5 m amprenta dar iese din
+## ea doar felia de sus (restul e ingropat cu CLIFF_SINK), iar felia vizibila la
+## cota soselei are ~2 * r * (1 - t) = ~49 m. Pasul de 34 m le lasa sa se
+## incalece cu ~15 m, deci silueta e continua si nu se vede cusatura dintre ele.
+## Cele patru pozitii vechi (offset-uri fata de poarta) dadeau un pas neuniform
+## de 34/28/26 m plus o gaura, si gaura cadea fix peste poarta.
+const CLIFF_SPACING := 34.0
+
+## Cat trebuie sa urce solul sub CENTRUL masei, peste cota soselei, ca piesa sa
+## fie de prisos. Peste pragul asta terenul e el insusi faleza si conul n-ar
+## face decat sa-si scoata calota prin creasta (vezi nota din `_cliff_mass`).
+## Pragul e la jumatatea inaltimii vizibile cerute (CLIFF_TOP_OVER_ROAD = 14):
+## sub 7 m terenul nu poate tine singur silueta, peste 7 m o tine.
+## Masurat: pe platou solul e la -0,3 m (deci 0 peste sosea), pe faleza la
+## +6,9 si +24,5 — cele doua regimuri sunt separate de un ordin de marime, deci
+## pragul nu e delicat.
+const CLIFF_TERRAIN_ENOUGH := 7.0
+
+
+## Cat urca solul peste sosea, pe partea peretelui, la `CLIFF_RISE_LAT` lateral.
+## Raycast filtrat pe `TerrainBody` (via `_sol_real`), nu campul neted: memoria
+## terrain-mesh-y-extrapoleaza. Returneaza -1000 daca nu e sol (gol lateral).
+func _wall_rise(ff: float) -> float:
+	var n := _track.baked.size()
+	var i := int(ff * float(n)) % n
+	var p: Vector3 = _track.baked[i]
+	var side: Vector3 = _track._side_at(i) * (-_gap_side(i))
+	var q: Vector3 = p + side * CLIFF_RISE_LAT
+	return _sol_real(q.x, q.z) - p.y
+
 
 ## (A) BUZA TAIATA pe marginea dinspre gol.
 ##
@@ -1416,12 +1688,69 @@ func _cliff_mass() -> void:
 	# De la intrarea pe cornisa pana DUPA poarta. Capatul de dupa poarta e ce
 	# face poarta sa fie "taiata prin masa": daca masa s-ar opri la poarta,
 	# poarta ar fi tot capatul unui zid, nu o trecere.
-	var runs: Array = [
-		GATE_FRAC - _step(74.0),
-		GATE_FRAC - _step(40.0),
-		GATE_FRAC - _step(12.0),
-		GATE_FRAC + _step(14.0),
-	]
+	#
+	# RUNDA 14 — poarta a fost reperul GRESIT, si captura a spus-o.
+	#
+	# `H_r0_f097.png` (captura de pornire a rundei) arata o LESPEDE de piatra
+	# care umple jumatatea de jos a cadrului la frac 0,97. Vinovata e a patra
+	# masa, asezata la `GATE_FRAC + _step(14.0)` = frac 0,9703, la 31,4 m de ax,
+	# cu varful la 14 m peste sosea.
+	#
+	# Cauza nu e distanta si nu e scara: e ca ACOLO NU MAI EXISTA PERETE.
+	# `tools/SvMpHPerete.tscn` masoara solul pe partea peretelui (-X), prin
+	# raycast filtrat pe `TerrainBody`, cota relativa la sosea:
+	#
+	#     frac    +8 m   +15 m   +25 m   +40 m
+	#     0,9280  -0,2    +1,7   +27,6   +66,7   <- faleza reala
+	#     0,9400  -0,3    +1,1   +19,9   +50,2   <- faleza reala
+	#     0,9500  -0,3     nan    +5,2   +14,4   <- se stinge
+	#     0,9577   nan    -0,3    -0,2    +0,2   <- PLAT
+	#     0,9640   nan    -0,3    -0,3    -0,3   <- PLAT (poarta)
+	#     0,9703  -0,3    -0,3    -0,3    -0,3   <- PLAT (lespedea)
+	#
+	# Dupa 0,955 drumul iese din rapa si intra in platoul pietei. Un con de
+	# 33 m pus pe pajiste plata nu e "masa prin care e taiat drumul", e un
+	# bolovan cat un bloc lasat pe camp — exact tiparul "un perete de piese
+	# peste teren plat citeste a gard, nu a prapastie".
+	#
+	# Aceeasi forma ca decizia rundei 4 pentru zidul de sprijin (`F_WALL_OUT`):
+	# intrebarea nu e cu cat sa mut piesa, ci DE UNDE VINE FORMA
+	# (memoria capcana-parametrului-care-doar-aduna). Forma vine din faleza.
+	# Deci reperul nu mai e poarta, ci terenul: se asaza o masa doar acolo unde
+	# solul chiar urca. Pragul se masoara, nu se presupune.
+	# Prima incercare a rundei a fost sa se taie masele care nu stau pe faleza
+	# (pragul `CLIFF_MIN_RISE` pe `_wall_rise`). Masuratoarea era corecta —
+	# terenul de pe partea peretelui chiar se stinge dupa 0,952 — dar
+	# CONCLUZIA a fost gresita, si captura a spus-o: `r1_f0p95.png` are partea
+	# dreapta mai PROASTA decat `r0_f0p95.png`. Fara con, pe dreapta ramane un
+	# zid scund de zidarie pe pajiste, cu pana de iarba vizibila in spate;
+	# conul, chiar stand pe plat, inchidea marginea cadrului cu masa continua
+	# de piatra — adica exact ce cere brief-ul: "flancul lui Huayna Picchu in
+	# dreapta, la 40 m, umpland marginea cadrului".
+	#
+	# Deci masele NU sunt "faleza prin care e taiat drumul" (aia e teren si nu
+	# e a POI-ului); sunt SILUETA DE FUNDAL care inchide cadrul pe partea
+	# opusa golului. Pentru rolul ala terenul de sub ele nu conteaza — piesa e
+	# `coliziune = none`, nu o atinge nimeni — conteaza sa fie continue, ca sa
+	# nu ramana pana de pajiste intre doua.
+	# Memoria revenirea-e-o-mutare-valida: ma intorc la starea cea mai bine
+	# judecata (cele 4 pozitii), si pastrez masuratoarea ca sa stiu CE sunt.
+	#
+	# Ce se schimba fata de r0: pasul devine uniform si continuu pe toata
+	# cornisa, in loc de patru offset-uri ad-hoc fata de poarta. Cele patru
+	# vechi lasau o gaura de 34 m intre a treia si a patra (0,9577 -> 0,9703),
+	# exact peste poarta — de aia poarta citea ca un toc liber pe gazon.
+	var runs: Array = []
+	var ff_scan := F_IN + _step(6.0)
+	while ff_scan < F_OUT - _step(20.0):
+		runs.append(ff_scan)
+		ff_scan += _step(CLIFF_SPACING)
+	var pe_faleza := 0
+	for ff_r: float in runs:
+		if _wall_rise(ff_r) >= CLIFF_MIN_RISE:
+			pe_faleza += 1
+	print("; masa de piatra: %d pozitii la pas de %.0f m (din care %d pe faleza reala, restul silueta de fundal)" % [
+		runs.size(), CLIFF_SPACING, pe_faleza])
 	var puse := 0
 	for ff: float in runs:
 		var i := int(ff * float(n)) % n
@@ -1453,10 +1782,85 @@ func _cliff_mass() -> void:
 			var t0: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
 			d = half + CLIFF_GAP + r * (1.0 - t0)
 			q = p + side * d
+		# RUNDA 15: talpa se leaga de SOLUL DE SUB PIESA cand solul e mai SUS
+		# decat soseaua, nu doar de sosea.
+		#
+		# Legarea exclusiv de sosea (`p.y - 19`) e corecta doar cat timp
+		# terenul lateral e la cota drumului. Masurat cu tools/SvMpHMase.tscn
+		# (raycast filtrat pe TerrainBody, sub centrul fiecarei piese):
+		#
+		#   piesa           talpa    sol_real   delta
+		#   masaPiatra267  -19,00     +24,52   -43,52
+		#   masaPiatra268  -19,00      +6,94   -25,94
+		#   masaPiatra269  -19,00      -0,30   -18,70
+		#   masaPiatra270  -19,00      -0,30   -18,70
+		#
+		# Adica toate patru au talpa cu 18,7-43,5 m SUB sol. Piesa e ingropata
+		# mult mai adanc decat cei 19 m proiectati, si din ea nu mai iese felia
+		# de flanc fatetat, ci doar CALOTA de varf — partea cea mai lata, cea
+		# mai uniform luminata si cea mai plata a conului. De aici venea
+		# verdictul criticului ("duna de nisip neteda, o singura nuanta"):
+		# fatetele nu lipseau, erau sub pamant.
+		#
+		# Reperul corect e maximul dintre cele doua: pe platou solul e la cota
+		# drumului si nu schimba nimic (269/270), pe faleza ridica piesa cu
+		# solul ei (267/268) si felia vizibila ramane aceeasi peste tot.
+		# Nu se scade nimic in plus: `CLIFF_TOP_OVER_ROAD` e definit ca
+		# inaltime PESTE OCHI, si ochiul e pe sosea.
+		# RUNDA 15: unde terenul face DEJA masa, nu se mai pune con.
+		#
+		# Masurat cu tools/SvMpHMase.tscn (raycast filtrat pe TerrainBody, sub
+		# centrul fiecarei piese), pe pozitiile rundei 14:
+		#
+		#   piesa           talpa    sol_real   delta
+		#   masaPiatra267  -19,00     +24,52   -43,52
+		#   masaPiatra268  -19,00      +6,94   -25,94
+		#   masaPiatra269  -19,00      -0,30   -18,70
+		#   masaPiatra270  -19,00      -0,30   -18,70
+		#
+		# Toate patru aveau talpa cu 18,7-43,5 m SUB sol — mult mai adanc decat
+		# cei 19 m proiectati. Din piesa nu mai iesea felia de flanc fatetat, ci
+		# CALOTA de varf: partea cea mai lata, cea mai uniform luminata si cea
+		# mai plata a conului. De aici venea verdictul criticului ("duna de
+		# nisip neteda, dintr-o singura nuanta"): fatetele nu lipseau, erau sub
+		# pamant.
+		#
+		# Prima reparatie incercata — legarea talpii de solul de sub piesa — se
+		# alearga pe ea insasi: talpa urcata impinge centrul mai in lateral (raza
+		# la cota soselei scade), acolo faleza e si mai sus, deci piesa iese si
+		# mai ingropata. Masurat dupa acea incercare: 267 ajunsese la -58,7.
+		# Memoria capcana-parametrului-care-doar-aduna: intrebarea nu e cu cat
+		# sa ridic piesa, ci DE UNDE VINE FORMA.
+		#
+		# Forma, pe felia 0,93-0,94, vine din TEREN: survey-ul (nota 2 din antet)
+		# da solul la +28,1 / +68,5 m la 25 / 40 m lateral pe 0,9300, si +19,9 /
+		# +50,2 pe 0,9400. Faleza e reala si e uriasa. Un con ingropat acolo nu
+		# adauga silueta, doar o calota palida peste o creasta care exista deja
+		# — exact aceeasi lectie ca la zidul de sprijin in runda 4 (`F_WALL_OUT`):
+		# unde nu mai e cornisa, un zid nu sprijina nimic.
+		#
+		# Deci masa se pune DOAR unde terenul NU face deja treaba: acolo unde
+		# solul lateral ramane la cota drumului (platoul, 269/270). Pe faleza
+		# reala se lasa terenul sa fie muntele.
+		var sol_masa: float = _sol_real(q.x, q.z)
+		if sol_masa > -900.0 and sol_masa - p.y > CLIFF_TERRAIN_ENOUGH:
+			print("; masa de piatra frac %.4f: SARITA, terenul face deja masa (sol %+.1f fata de sosea, prag %.1f)" % [
+				ff, sol_masa - p.y, CLIFF_TERRAIN_ENOUGH])
+			continue
 		# GARDA DE BANDA, de mana (memoria plafonul-buclei-orbe-pe-banda):
 		# flancul conului la cota soselei nu are voie sa intre in carosabil.
-		var t: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
-		var raza_la_drum: float = r * (1.0 - t)
+		#
+		# RUNDA 15: cazul "talpa PESTE sosea" se trateaza separat, nu prin
+		# clamp. Pe faleza (sol +24,5) talpa urca la +5,5, deci la cota soselei
+		# conul NU EXISTA — e in intregime deasupra. Formula veche calcula
+		# t = (p.y - y) / CLIFF_H = -0,167, il tundea la 0, si obtinea
+		# "raza la sosea = 40,8 m", adica raza BAZEI: garda citea o intrare in
+		# banda de -16,6 m si refuza o piesa care de fapt nici nu ajunge acolo.
+		# Doua din cele patru mase erau respinse asa.
+		var raza_la_drum: float = 0.0
+		if y <= p.y:
+			var t: float = clampf((p.y - y) / CLIFF_H, 0.0, 1.0)
+			raza_la_drum = r * (1.0 - t)
 		var pana_la_ax: float = d - raza_la_drum
 		if pana_la_ax < half + EDGE_KEEP:
 			_warn += 1
@@ -1466,6 +1870,6 @@ func _cliff_mass() -> void:
 		_raw("huayna_picchu", "masaPiatra", Vector3(q.x, y, q.z),
 			_rng.randf_range(0.0, TAU), scl, "none")
 		puse += 1
-		print("; masa de piatra frac %.4f: centru la %.1f m de ax, talpa %.1f (sosea %.1f), ies %.1f m, flanc la %.2f m de ax (muchia %.2f)" % [
-			ff, d, y, p.y, (y + CLIFF_H) - p.y, pana_la_ax, half])
+		print("; masa de piatra frac %.4f: centru la %.1f m de ax, talpa %.1f (sosea %.1f, sol %.1f), ies %.1f m, flanc la %.2f m de ax (muchia %.2f)" % [
+			ff, d, y, p.y, sol_masa, (y + CLIFF_H) - p.y, pana_la_ax, half])
 	print("; masa de piatra: %d bucati huayna_picchu (coliziune none, sloturi de roca - zero materiale noi)" % puse)

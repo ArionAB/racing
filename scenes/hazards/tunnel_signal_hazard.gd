@@ -203,6 +203,20 @@ func _build_bus() -> void:
 	_bus.shoved.connect(_on_bus_shoved)
 
 
+## Pe ce jumatate a tunelului merge autocarul, fata de axa (m, semn local X).
+## Brief: „un singur sens" — autocarul nu merge pe axa, ocupa banda LUI, ca sa
+## existe o banda goala de partea cealalta (nisele + coridorul AI de pe
+## `custom_lane_corridors`, runda 2 punctul 4). Cu `nose_side = 1` (deflecteaza
+## spre dreapta LUI la contact), autocarul insusi calatoreste pe STANGA lui —
+## coerent cu geometria reala a unui drum cu sens unic alternant: cel care
+## vine din fata ocupa banda din stanga TA (dreapta LUI), asa ca la contact
+## fata oblica il deflecteaza inapoi spre dreapta lui, adica in AFARA benzii
+## tale, nu peste axa in banda goala.
+@export_range(-3.0, 3.0, 0.1) var bus_lane_offset: float = 1.5:
+	set(value):
+		bus_lane_offset = value
+		_rebuild_bus_curve()
+
 ## Curba pe care coboara autocarul: DINSPRE portalul de vest (capatul jos in
 ## vocabularul BusHazard, unde sta ascuns intre doua treceri) SPRE linia de
 ## oprire de la est (unde „ajunge jos" — aici, spre jucatori). Local, -Z e
@@ -212,14 +226,24 @@ func _build_bus() -> void:
 ## Primul punct (start ascuns) e pus DINCOLO de iesirea de vest, in afara
 ## drumului vizibil (memoria bus_hazard.gd: „in spatele unui perete" — aici,
 ## dincolo de portal, unde tunelul oricum il ascunde de camera).
+##
+## OFFSET LATERAL (`bus_lane_offset`): pe banda LUI, adica local +X = STANGA
+## LUI cand se uita in directia de mers (+Z local, spre linia de oprire) —
+## `nose_side = 1` deflecteaza spre dreapta lui la contact, adica INAPOI pe
+## banda lui, nu peste axa. Coordonatorul: „autocarul iese pe jumatatea
+## stanga" a masinilor care asteapta (world -Z in sonda) — semnul exact
+## (+X sau -X local) se potriveste la asezarea reala pe pista (transformul
+## nodului), aici doar OFERIM un offset nenul, ca autocarul sa nu mai
+## calatoreasca pe axa.
 func _rebuild_bus_curve() -> void:
 	if _bus == null:
 		return
 	var curve := Curve3D.new()
+	var x := bus_lane_offset
 	# +Z = spre tunel (vezi antet); 4 m rezerva dincolo de portalul de vest,
 	# ca autocarul sa dispara complet inainte sa se ascunda.
-	curve.add_point(Vector3(0.0, 0.0, tunnel_length + 4.0))
-	curve.add_point(Vector3(0.0, 0.0, 0.0))
+	curve.add_point(Vector3(x, 0.0, tunnel_length + 4.0))
+	curve.add_point(Vector3(x, 0.0, 0.0))
 	_bus.curve = curve
 
 

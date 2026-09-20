@@ -168,6 +168,20 @@ func _build_track() -> void:
 		Vector3(stop_frac, stop_frac + tunnel_frac, TUNNEL_HALF_WIDTH),
 	]
 	_track.custom_wet_ranges = [Vector2(stop_frac, stop_frac + tunnel_frac)]
+	# Runda 2, punctul 4: coridor pe DREAPTA soselei (semnul + in conventia
+	# Track._side_at: dir.cross(UP), cu dir = +X aici da side = +Z = dreapta
+	# masinilor care merg spre tunel). Autocarul vine in sens invers (-X) si
+	# ocupa jumatatea STANGA a masinilor (world -Z) — vezi antetul
+	# TunnelSignalHazard._rebuild_bus_curve si diagnosticul coordonatorului:
+	# "autocarul iese pe jumatatea stanga, exact prin coada". De la zona de
+	# oprire (90 m inainte de linie, cum cere brief-ul) pana la iesirea din
+	# tunel, ca AI-ul sa nu se mai intinda pe toata latimea de 7 m si sa lase
+	# banda din stanga liber pentru autocar.
+	var corridor_start := maxf(stop_frac - (APPROACH_LEN / total_len), 0.0)
+	var corridor_line := (TUNNEL_HALF_WIDTH - 1.2) / TUNNEL_HALF_WIDTH
+	_track.custom_lane_corridors = [
+		Vector3(corridor_start, stop_frac + tunnel_frac, corridor_line),
+	]
 	_track.rebuild()
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -216,13 +230,28 @@ func _build_signal() -> void:
 	_signal.clear_hold = 6.0
 	_signal.tunnel_length = TUNNEL_LEN
 	_signal.bus_speed = TUNNEL_LEN / 12.0 # ~12.5 m/s, cf. brief
+	# BUG gasit in runda 2 (harnas, nu hazard): cu Basis(UP, -PI/2) folosit
+	# initial, local +Z (unde sta autocarul "ascuns, dincolo de portal") se
+	# proiecta la lume -X -- adica INAPOIA liniei de oprire, pe dreapta de
+	# APROPIERE (X 0->90), nu prin tunel (X 90->240). Autocarul, odata vizibil,
+	# traversa deci zona deschisa dinaintea liniei, unde n-are nicio banda
+	# separata de a masinilor -- de-aia se lovea de coada la fracurile 0.0-0.08
+	# (langa linia de start/sosire), nu in tunel. Verificat cu un test de
+	# rotatie separat: Basis(UP, +PI/2) da local +Z -> lume +X, exact ce
+	# trebuie (autocarul "ascuns" ajunge la X ~ 244, dincolo de iesirea din
+	# tunel la 240, nu la X ~ -64 pe drumul de apropiere).
+	# Cu semnul corect, local +X -> lume -Z: masinile merg spre lume +X, deci
+	# dreapta lor e lume +Z (Track._side_at: dir.cross(UP) cu dir=+X da +Z).
+	# Coordonatorul cere autocarul pe JUMATATEA STANGA a masinilor (lume -Z)
+	# -- aici e nevoie de offset local POZITIV.
+	_signal.bus_lane_offset = 1.5
 	_track.add_child(_signal)
 	await get_tree().physics_frame
 	# Nodul semaforului sta la linia de oprire, cu +Z local spre tunel (vezi
 	# antetul TunnelSignalHazard._rebuild_bus_curve). Axa soselei aici e +X, deci
-	# rotim 90 grade in jurul lui Y (local +Z -> lume +X).
+	# rotim 90 grade in jurul lui Y (local +Z -> lume +X, semnul POZITIV).
 	_signal.global_transform = Transform3D(
-		Basis(Vector3.UP, -PI / 2.0), Vector3(_stop_line_x, 0.3, 0.0))
+		Basis(Vector3.UP, PI / 2.0), Vector3(_stop_line_x, 0.3, 0.0))
 
 
 ## Niste "pockets" statice pe peretele din dreapta al tunelului (lumea +Z e
@@ -318,9 +347,10 @@ func _on_bus_hit(car: Car) -> void:
 	if idx >= 0:
 		_stats[idx].bus_hits += 1
 		if OS.get_environment("PROBE_FIORD_TRACE") == "1":
-			print("[bus-hit] t=%6.1fs %-24s v=%.1f poz=(%.1f,%.1f,%.1f)" % [
+			print("[bus-hit] t=%6.1fs %-24s v=%.1f poz=(%.1f,%.1f,%.1f) frac=%.3f" % [
 				_elapsed, _stats[idx].name, car.horizontal_speed(),
-				car.global_position.x, car.global_position.y, car.global_position.z])
+				car.global_position.x, car.global_position.y, car.global_position.z,
+				_track.frac_at(car.road_index, car.route)])
 
 
 func _physics_process(delta: float) -> void:

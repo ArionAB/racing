@@ -97,6 +97,10 @@ const RETURN_EXTRA_STRAIGHT_M: float = 0.0
 const CAR_COUNT: int = 8
 ## Garaj repetat, ca Race.AI_CARS: 0=Muscle,1=Politie,2=Taxi,3=Autobuz,4=Pompieri,5=Buggy.
 const AI_CARS: Array[int] = [0, 1, 2, 4, 5, 3, 0]
+## Runda 3: masina i pleaca la t = i*STAGGER_S (vezi _spawn_cars). 9 s, cerut
+## de coordonator, da 8*9=72 s intre prima si ultima plecare — comparabil cu
+## un tur de ~70 s pe pista reala.
+const STAGGER_S: float = 9.0
 
 var _seconds: float = 150.0
 var _seed: int = 20260920
@@ -141,9 +145,17 @@ class Stats:
 	var bus_hits_entered_red: int = 0
 	var red_crossings_clean: int = 0 # a trecut pe rosu si N-a fost lovita pana la urmatorul verde
 	var _red_crossing_pending_clean: bool = false
+	# Runda 3: esalonarea plecarilor (STAGGER_S). `release_time` e cand ar
+	# trebui sa plece; `released` marcheaza ca a fost dezghetata deja (nu se
+	# reface la fiecare tick).
+	var release_time: float = 0.0
+	var released: bool = false
 
 
 var _stats: Array[Stats] = []
+## Runda 3, punctul 6: cele mai multe masini vazute simultan in stare
+## "asteapta la semafor" (waiting_now), in orice tick al rularii.
+var _max_queue_simultaneous: int = 0
 
 ## Prag de "oprit" la linie (m/s).
 const STOP_SPEED: float = 2.0
@@ -367,12 +379,25 @@ func _spawn_cars() -> void:
 		car.set_controller(ai)
 		ai.configure(_track, _rng, _cars)
 		car.speed_scale = _rng.randf_range(0.88, 0.97)
-		car.race_active = true
-		car.on_start_grid = false
+		# Runda 3 (coordonator): calea mai ieftina decat lungirea buclei —
+		# ESALONAREA plecarilor. Masina i sta INGHETATA (on_start_grid=true) SI
+		# cu race_active=false pana la t = i*STAGGER_S — exact tiparul
+		# countdown-ului real din race.gd (`car.race_active` incepe false,
+		# `_go()` il pune true DOAR cand se dezgheata). Fara `race_active =
+		# false` aici, `Car._physics_process` tot cheama
+		# `controller.update(delta)` cat masina e inghetata (verificat:
+		# gating-ul e `if ... and race_active and not finished`, nu si
+		# `on_start_grid`) — AIController._watch_progress vede 0 progres, 0
+		# viteza, si dupa MAX_ATTEMPTS incercari de deblocare cere
+		# `car.respawn()` SINGUR, inainte ca masina sa fi plecat vreodata
+		# (masurat: 11 repuneri in primele 30s, cu doar 1 masina activa).
+		car.race_active = false
+		car.on_start_grid = true
 		_cars.append(car)
 		_controllers.append(ai)
 		var st := Stats.new()
 		st.name = "%s(%s)" % [car.pilot_name, (GameState.CAR_DATA[data_idx] as CarData).display_name]
+		st.release_time = float(i) * STAGGER_S
 		_stats.append(st)
 		car.respawned.connect(_on_respawn.bind(i))
 		# Criteriul 5 din brief: "un AI lovit frontal e impins inapoi, nu
@@ -456,6 +481,14 @@ func _physics_process(delta: float) -> void:
 					b.body().global_position.z, b.distance()])
 	for i in _cars.size():
 		_tick_car(i, delta)
+	# Runda 3, punctul 6: "masini in coada simultan, maxim per seed" — numarate
+	# DUPA ce toate au fost actualizate in tick-ul asta, ca sa nu prindem o
+	# stare pe jumatate actualizata.
+	var queued_now := 0
+	for st: Stats in _stats:
+		if st.waiting_now:
+			queued_now += 1
+	_max_queue_simultaneous = maxi(_max_queue_simultaneous, queued_now)
 	if _elapsed >= _seconds:
 		_report()
 
@@ -465,6 +498,16 @@ func _tick_car(i: int, delta: float) -> void:
 	var st: Stats = _stats[i]
 	if not is_instance_valid(car):
 		return
+	# Runda 3: eliberarea esalonata. Cat sta inghetata (on_start_grid) SI cu
+	# race_active=false, masina nu inregistreaza nimic altceva — la fel ca la
+	# countdown-ul real (vezi race.gd._go()).
+	if not st.released:
+		if _elapsed >= st.release_time:
+			st.released = true
+			car.on_start_grid = false
+			car.race_active = true
+		else:
+			return
 	var speed := car.horizontal_speed()
 	st.laps = float(_track.frac_at(car.road_index, car.route))
 
@@ -619,25 +662,27 @@ func _report() -> void:
 		overall_avg += w
 		overall_max = maxf(overall_max, w)
 	overall_avg /= maxf(float(all_waits.size()), 1.0)
-	print("--- total: repuneri=%d, treceri-pe-rosu=%d (clar rosu: %d), contacte-autocar=%d (verde: %d, rosu: %d), treceri-pe-rosu CURATE (fara contact)=%d, ejectari=%d, blocaje=%d, pileup=%d"
+	print("--- total: repuneri=%d, treceri-pe-rosu=%d (clar rosu: %d), contacte-autocar=%d (verde: %d, rosu: %d), treceri-pe-rosu CURATE (fara contact)=%d, ejectari=%d, blocaje=%d, pileup=%d, coada-maxima-simultana=%d"
 		% [total_resp, total_red, total_red_clear, total_bus, total_bus_green,
-			total_bus_red, total_red_clean, total_ejects, total_stuck, total_pileup])
+			total_bus_red, total_red_clean, total_ejects, total_stuck, total_pileup,
+			_max_queue_simultaneous])
 	print("--- asteptare la rosu: medie %.2fs, maxima %.2fs, N=%d opriri" % [
 		overall_avg, overall_max, all_waits.size()])
-	# Criteriile RUNDA 2 (coordonator): treceri clare pe rosu <= 1/seed;
-	# contacte-autocar cu masini intrate pe VERDE = 0; contacte totale <= 3;
-	# 0 blocaje; 0 ejectari neexplicate (aici: 0, fara nicio explicatie gasita
-	# — vezi raportul); AI-ul nu porneste mai tarziu de 4s dupa verde (nu
-	# masurat direct aici — vezi ast.med/max, sub 4s pe toate rulatorile).
-	var ok := total_red_clear <= 1 and total_bus_green == 0 and total_bus <= 3 \
-		and total_stuck == 0 and total_ejects == 0
-	print("\nVERDICT RUNDA 2: %s" % ("OK" if ok else "PROBLEMA"))
+	# Criteriile RUNDA 3 (coordonator): treceri clare pe rosu <= 1/seed;
+	# contacte-autocar cu masini intrate pe VERDE <= 1; contacte totale <= 4;
+	# 0 blocaje; ejectarile EXPLICATE cu pozitie (0 in tunel/la linie — vezi
+	# [ejectare] pentru zona fiecareia); pornire <= 4s de la verde (nu masurat
+	# direct aici — vezi ast.med/max).
+	var ok := total_red_clear <= 1 and total_bus_green <= 1 and total_bus <= 4 \
+		and total_stuck == 0
+	print("\nVERDICT RUNDA 3: %s" % ("OK" if ok else "PROBLEMA"))
 	print("  treceri clare pe rosu <= 1: %s (%d)" % [
 		"da" if total_red_clear <= 1 else "NU", total_red_clear])
-	print("  contacte cu masini intrate pe VERDE = 0: %s (%d)" % [
-		"da" if total_bus_green == 0 else "NU", total_bus_green])
-	print("  contacte totale <= 3: %s (%d, din care %d pe rosu)" % [
-		"da" if total_bus <= 3 else "NU", total_bus, total_bus_red])
+	print("  contacte cu masini intrate pe VERDE <= 1: %s (%d)" % [
+		"da" if total_bus_green <= 1 else "NU", total_bus_green])
+	print("  contacte totale <= 4: %s (%d, din care %d pe rosu)" % [
+		"da" if total_bus <= 4 else "NU", total_bus, total_bus_red])
 	print("  0 blocaje: %s (%d)" % ["da" if total_stuck == 0 else "NU", total_stuck])
-	print("  0 ejectari: %s (%d)" % ["da" if total_ejects == 0 else "NU", total_ejects])
+	print("  ejectari (vezi [ejectare] pentru zona/pozitie fiecareia — 0 in tunel/la linie e criteriul): %d"
+		% total_ejects)
 	get_tree().quit(0 if ok else 1)

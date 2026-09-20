@@ -60,8 +60,15 @@ WPTS_RAW = [
     (-42,   8,   22, 1.0,  "G aterizare pietris"),
 
     (-2,    -30, 28, 0.5,  "H iesire din G"),
-    (32,    -70, 28, 0.2,  "H malul 1"),
-    (52,    -30, 36, 0.0,  "H malul 2 spre chei"),
+    # S-ul final (H1: 113 grade, H2: 87 grade — amandoua peste 90, esantionate
+    # cu puncte pe arc, nu un singur varf de fillet: un fillet simplu aici
+    # dadea raza 15,8 m masurata de ProbeLayout la frac ~0.97 si o felie cu
+    # 36% timp lent (peste pragul de 10% din brief) chiar inainte de linie.
+    (14,    -52, 30, 0.35, "H malul 1 intrare"),
+    (34,    -74, 34, 0.25, "H malul 1 apex"),
+    (56,    -66, 30, 0.15, "H malul 1 iesire"),
+    (68,    -40, 34, 0.05, "H malul 2 apex"),
+    (60,    -14, 30, 0.0,  "H malul 2 spre chei"),
 ]
 # Scalare uniforma in plan: dupa reforma din oval (v. nota de mai sus),
 # marginile fata de peretele invizibil al lumii (Track._build_world_bounds,

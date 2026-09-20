@@ -87,10 +87,10 @@ extends Node3D
 ##   script = ExtResource("res://scenes/hazards/tunnel_signal_hazard.gd")
 ##   transform = ...                # la linia de oprire, +Z local spre tunel
 ##   mode = 1                       # LANE (implicit)
-##   period = 45.5
-##   clear_hold = 6.0
+##   period = 47.5
+##   clear_hold = 8.0
 ##   tunnel_length = 169.0
-##   bus_speed = 18.0
+##   bus_speed = 12.5
 ##   bus_lane_offset = -2.0         # banda STANGA sensului de mers al masinilor
 ## AI-ul citeste `is_red()` si `mode` direct de pe grupul `AI_GROUP` (vezi
 ## `ai_controller.gd._signal_red_ahead` / `_signal_keep_right`).
@@ -135,10 +135,15 @@ enum Mode { STOP, LANE }
 		_rebuild_bus_curve()
 		_sync_bus()
 
-## Viteza autocarului prin tunel (m/s). Reproiectare (banda de autocar): 18
-## m/s pe cei 169 m ai Track16 = ~9,4 s de traversare — mai rapid decat
-## 12,5 m/s de dinainte (runda 4 a incercarii de coada: bus_speed 12.5 -> 18,
-## ca sa scurteze rosul si fereastra in care banda stanga chiar e ocupata).
+## Viteza autocarului prin tunel (m/s). Runda 2 a benzii (dupa verdictul cu
+## 18 m/s: nucleul trecea, dar contactele autocar-AI si masinile-cadre pe
+## banda stanga pe rosu nu ieseau la zero): 12,5 m/s pe cei 169 m ai Track16 =
+## ~13,5 s de traversare — mai lent inadins, ca viteza de INCHIDERE la contact
+## sa fie mai mica ("ghiont", nu izbitura) si ca AI-ul sa aiba mai mult timp sa
+## ajunga pe banda dreapta inainte sa-l prinda autocarul. Rosul creste automat
+## (`red_hold` mai jos), ceea ce e GRATIS acum ca nimeni nu mai asteapta la
+## linie — decizia rundei 2, coordonator: "acum avem o parghie noua: nimeni nu
+## mai opreste, deci rosul lung e gratis".
 ## `red_hold` (mai jos) se calculeaza din asta + `clear_hold`, deci schimband
 ## viteza se schimba automat si durata rosului — rosul trebuie sa acopere
 ## EXACT golirea + tranzitul, niciodata mai putin (altfel verdele revine cat
@@ -164,6 +169,20 @@ enum Mode { STOP, LANE }
 ## inapoi si in perete", nu o parte anume; -1 disponibil daca geometria
 ## niselor (toate pe dreapta soselei, brief §2E) cere alta parte.
 @export_enum("Dreapta:1", "Stanga:-1") var nose_side: int = 1
+
+## Runda 2 a benzii (coordonator): "ejectarile in tunel = veto real". Cand
+## ghiontul lui BusHazard (`shove` + `side_accel`, implicit 3.0 / 8.0 — vezi
+## bus_hazard.gd) arunca o masina prinsa intre autocar si peretele DREPT
+## (peretele spre care nasul oblic o si deflecteaza), impulsul complet o
+## ejecta din perete in loc s-o „impinga inapoi". Doar pentru `mode == LANE`:
+## contractul de aici e „ghiont, nu distrugere" pe o banda ingusta (4 m),
+## unde masina n-are loc de alunecare inainte sa atinga zidul — modul STOP
+## (nefolosit azi) pastreaza implicitele lui BusHazard neatinse.
+## Negativ = nu suprascrie (foloseste implicitul BusHazard).
+@export_range(-1.0, 12.0, 0.5) var bus_shove: float = -1.0
+## La fel ca `bus_shove`, pentru acceleratia laterala SUSTINUTA cat masina
+## sta in zona de ghiont a autocarului.
+@export_range(-1.0, 60.0, 1.0) var bus_side_accel: float = -1.0
 
 ## Cat de devreme se aprind farurile pe pereti (billboard-uri emisive, brief:
 ## „3 s inainte sa apara"), fata de PORNIREA autocarului. Doar semnal —
@@ -247,6 +266,13 @@ func _build_bus() -> void:
 	# erau AI pe banda gresita, erau autocarul insusi deviind. 0 = urmeaza
 	# curba esantionata exact.
 	_bus.apex_outer_m = 0.0
+	# Runda 2 a benzii: ghiont mai bland DOAR pe LANE (vezi doc la
+	# bus_shove/bus_side_accel) — modul STOP nu se atinge.
+	if mode == Mode.LANE:
+		if bus_shove >= 0.0:
+			_bus.shove = bus_shove
+		if bus_side_accel >= 0.0:
+			_bus.side_accel = bus_side_accel
 	add_child(_bus)
 	_rebuild_bus_curve()
 	_sync_bus()

@@ -198,6 +198,10 @@ var _signal_max_queue: int = 0
 var _signal_hazards: Array[TunnelSignalHazard] = []
 var _signal_bus_hits_green: int = 0
 var _signal_bus_hits_red: int = 0
+## Runda 2 a benzii: contacte impartite si pe BANDA masinii la impact (nu doar
+## rosu/verde) — coordonator: "contacte autocar-AI (rosu/verde, banda)".
+var _signal_bus_hits_left: int = 0
+var _signal_bus_hits_right: int = 0
 ## Ultimul local.z (fata de semafor) vazut per masina, pentru detectia
 ## trecerii liniei (semnul lui local.z schimba de la - la +).
 var _signal_last_z: Dictionary = {}
@@ -721,14 +725,63 @@ func _on_bumped(_car: Car, _other: Car, delta_v: float, index: int) -> void:
 	_stats[index].bump_peak = maxf(float(_stats[index].bump_peak), delta_v)
 
 
+## Runda 2 a benzii (coordonator): "ejectarile in tunel = veto real" — pentru
+## fiecare ejectare/repunere in felia 0.58-0.70, diagnostic complet: cu ce s-a
+## lovit, viteza, banda pe care era, daca era rosu, daca regula de banda era
+## activa pe ea. Gol ("") daca masina nu e in felia tunelului sau nu exista
+## semafor pe pista (no-op pe orice alta pista).
+func _tunnel_zone_diag(car: Car) -> String:
+	if _signal_hazards.is_empty() or _race.track == null:
+		return ""
+	var frac: float = _race.track.frac_at(car.road_index, car.route)
+	if frac < 0.58 or frac > 0.70:
+		return ""
+	var sig := _signal_hazards[0]
+	var track: Track = _race.track
+	var r := track.route_at(car.route)
+	var lateral := 0.0
+	var side_txt := "?"
+	if r != null and not r.baked.is_empty():
+		var bidx: int = track.closest_index_global(car.global_position, car.route)
+		var side: Vector3 = r.side_at(bidx)
+		lateral = side.dot(car.global_position - r.baked[r.wrap_index(bidx)])
+		side_txt = "DREAPTA" if lateral > 0.0 else ("STANGA" if lateral < 0.0 else "AXA")
+	var speed := car.horizontal_speed()
+	var red := sig.is_red()
+	# Regula de banda activa pe ea ACUM: acelasi test ca AIController -- rosu
+	# curent SAU va prinde-o inauntru (blocks_in cu eta pana la portalul de
+	# vest). Aproximam distanta pana la portal cu `local_pos.z` (coordonatele
+	# hazardului, +Z spre capatul opus) fata de `tunnel_length`.
+	var local_pos: Vector3 = sig.to_local(car.global_position)
+	var dist_to_west: float = sig.tunnel_length - local_pos.z
+	var eta_west: float = dist_to_west / maxf(speed, 10.0)
+	var rule_active := red or sig.blocks_in(eta_west)
+	# Ce a lovit-o: corpurile cu care era in contact (acelasi tipar ca
+	# _watch_stuck), clasificate pe nume/pozitie ca perete stanga/dreapta sau
+	# autocar.
+	var touching: Array[String] = []
+	for body in car.get_colliding_bodies():
+		var hit := body as Node3D
+		if hit == null:
+			continue
+		var label := _describe(hit)
+		if hit is BusHazard or (hit.get_parent() is BusHazard):
+			label = "AUTOCAR"
+		touching.append(label)
+	return "  banda=%s red=%s regula_activa=%s v=%.1f atinge:%s" % [
+		side_txt, red, rule_active, speed,
+		", ".join(touching) if not touching.is_empty() else "-"]
+
+
 func _on_respawn(car: Car, index: int) -> void:
 	_stats[index].respawns = int(_stats[index].respawns) + 1
 	# Unde a fost repusa: o repunere in acelasi loc, tur de tur, e o bucla
 	# (masina cade, e repusa fara elan, cade iar) — vezi CHANNEL_FALL_BACKOFF.
-	print("[repunere] t=%5.1fs  %-18s frac=%.3f  poz=(%.0f,%.0f,%.0f)" % [
+	print("[repunere] t=%5.1fs  %-18s frac=%.3f  poz=(%.0f,%.0f,%.0f)%s" % [
 		_elapsed, _stats[index].name,
 		_race.track.frac_at(car.road_index, car.route),
-		car.global_position.x, car.global_position.y, car.global_position.z])
+		car.global_position.x, car.global_position.y, car.global_position.z,
+		_tunnel_zone_diag(car)])
 
 
 func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
@@ -736,11 +789,12 @@ func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
 		_stats[index].ejects_wall = int(_stats[index].ejects_wall) + 1
 	else:
 		_stats[index].ejects_land = int(_stats[index].ejects_land) + 1
-	print("[ejectare] t=%5.1fs  %-18s frac=%.3f  %s %.1f m/s  poz=(%.0f,%.0f,%.0f)" % [
+	print("[ejectare] t=%5.1fs  %-18s frac=%.3f  %s %.1f m/s  poz=(%.0f,%.0f,%.0f)%s" % [
 		_elapsed, _stats[index].name,
 		_race.track.frac_at(car.road_index, car.route),
 		car.last_eject_cause, car.last_eject_value,
-		car.global_position.x, car.global_position.y, car.global_position.z])
+		car.global_position.x, car.global_position.y, car.global_position.z,
+		_tunnel_zone_diag(car)])
 
 
 ## Fiordland: contact DISCRET cu autocarul (un eveniment per ghiont, nu cadre
@@ -774,8 +828,13 @@ func _on_signal_bus_hit(car: Car) -> void:
 			var bidx: int = track.closest_index_global(car.global_position, car.route)
 			var side: Vector3 = r.side_at(bidx)
 			lateral = side.dot(car.global_position - r.baked[r.wrap_index(bidx)])
-	print("[bus-hit] t=%5.1fs  %-18s intrata_pe=%s  lat=%5.2f  poz=(%.0f,%.0f,%.0f)" % [
-		_elapsed, car_name, "ROSU" if red else "VERDE", lateral,
+	if lateral < 0.0:
+		_signal_bus_hits_left += 1
+	else:
+		_signal_bus_hits_right += 1
+	print("[bus-hit] t=%5.1fs  %-18s intrata_pe=%s  banda=%s  lat=%5.2f  poz=(%.0f,%.0f,%.0f)" % [
+		_elapsed, car_name, "ROSU" if red else "VERDE",
+		"STANGA" if lateral < 0.0 else "DREAPTA", lateral,
 		car.global_position.x, car.global_position.y, car.global_position.z])
 
 
@@ -846,6 +905,9 @@ func _report_race() -> void:
 		print("--- semafor tunel: contacte-autocar=%d (verde: %d, rosu: %d)  treceri-pe-rosu-clare=%d  coada-maxima-simultana=%d"
 			% [_signal_bus_hits, _signal_bus_hits_green, _signal_bus_hits_red,
 				_signal_ran_red_clear, _signal_max_queue])
+		# Runda 2: si pe BANDA masinii la impact, nu doar rosu/verde.
+		print("--- contacte-autocar pe banda: stanga=%d  dreapta=%d"
+			% [_signal_bus_hits_left, _signal_bus_hits_right])
 		# Reproiectare banda-autocar: veto "AI onest" (0 masini-cadre pe banda
 		# stanga pe rosu) si lat maxim in tunel (criteriu <= 4.0 m).
 		print("--- banda-autocar: masini-cadre pe STANGA cat e rosu=%d  lat_max_tunel=%.2f m"

@@ -264,11 +264,13 @@ func _set_curve() -> void:
 	# adaugate, adica exact coada semicercului de inchidere de mai sus. Cele 8
 	# masini se nasteau pe arc, ingramadite (blocaj PERMANENT masurat de la
 	# t=3s, pe orice lungime testata intre 0 si 500 m in plus — problema nu
-	# scala cu lungimea, era mereu acolo). O incercare de reordonare a
-	# punctelor (start la mijlocul dreptei semaforului) a fost inceputa, dar
-	# strica toate calculele de fractie/coordonata X din restul fisierului
-	# (stop_frac, zonele de ejectare, nisele) — prea riscant de terminat corect
-	# in timpul ramas. RAMANE NEREPARAT: raportat explicit, nu ascuns.
+	# scala cu lungimea, era mereu acolo). DOUA incercari de fix in timebox:
+	# (a) reordonarea punctelor curbei (start la mijlocul dreptei semaforului)
+	# — abandonata, strica stop_frac/zonele de ejectare/nisele; (b) un punct
+	# suplimentar pe axa X langa (0,0,0), ca ultimii metri sa fie dreapta, nu
+	# coarda semicercului — MASURAT ca inrautateste situatia (47 blocaje fata
+	# de 1 fara el, pe lungimea de baza) si a fost scos. RAMANE NEREPARAT:
+	# raportat explicit, nu ascuns si nu "reparat" pe ghicite.
 	var path := _track.get_node_or_null("Path") as Path3D
 	if path == null:
 		path = Path3D.new()

@@ -84,8 +84,21 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 @export_group("Forta")
 ## Acceleratia in jos (m/s2), aplicata ca `apply_central_force(DOWN * mass *
 ## force_accel * rain_factor)`. 0 = cascada de ploaie (teatru, fara forta).
-## Brief: ~12 pe uscat.
-@export_range(0.0, 30.0, 0.5) var force_accel: float = 12.0
+##
+## [b]Brief-ul cerea ~12; sonda a masurat ca 12 NU ajunge la efectul cerut.[/b]
+## Arcul e liniar (comp_static = (gravity + force_accel) / omega^2): la 12,
+## compresia STATICA de echilibru pentru Buggy (cea mai moale suspensie) e
+## doar ~52% din cursa — nici macar sustinuta la nesfarsit nu atinge fundul,
+## darmite tranzitand 30 m in ~1.2-2 s. Masurat cu sonda
+## (`tools/probe_fiord_cascada.gd`, sweep 9-70): la **40**, pe uscat, Buggy
+## atinge fundul (98.9%) la ORICE viteza testata (15/25 m/s) si Politia NU
+## (71.5-84.3%) — diferentierea ceruta de brief — iar Muscle/Politia/Taxi/
+## Buggy raman toate in banda de 17-24% pierdere de viteza (tinta brief:
+## 20-25%). Autobuzul si Pompierii (cele mai grele, cu suspensia cea mai
+## moale SI motorul cel mai slab) ies din tinta chiar si la 40 (pierdere
+## 42-57%) — vezi raportul sondei: e un compromis structural al perechii
+## forta/suspensie, nu o valoare de reglat mai fin.
+@export_range(0.0, 60.0, 0.5) var force_accel: float = 40.0
 ## Franarea pe componenta ORIZONTALA a vitezei, ca fractie pe secunda
 ## (`v -= v_horiz * drag * delta`). Calibrat pe sonda (`probe_fiord_cascada.gd
 ## --drag=`, sweep 0.0-0.5) sa dea ~20-25% pierdere de viteza pe 30 m la

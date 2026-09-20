@@ -102,13 +102,14 @@ length = 30.0
 thickness = 6.0
 
 [node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
-transform = Transform3D(0.8889, 0.0000, -0.4581, -0.0038, 1.0000, -0.0075, 0.4581, 0.0084, 0.8888, -123.34, 44.69, -497.11)
+transform = Transform3D(-0.9946, 0.0111, 0.1035, 0.0000, 0.9943, -0.1065, 0.1041, 0.1059, 0.9889, -123.3400, 44.6900, -497.1100)
 script = ExtResource("3_signal")
+mode = 1
 period = 45.5
 clear_hold = 6.0
 tunnel_length = 169.0
-bus_speed = 12.5
-bus_lane_offset = 1.5
+bus_speed = 18.0
+bus_lane_offset = -2.0
 
 [node name="KickerBowen" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.0, 0.2, -67.5)

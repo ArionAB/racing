@@ -90,3 +90,48 @@ se vede nicio muchie, oricâte ar fi. `sun_energy` 1,80 → 1,35 și
 
 Dar `blur1%` rămâne 38,7 în toate variantele de lumină testate, deci asizele
 sunt o problemă **independentă**, nu una pe care lumina o rezolvă.
+
+## 8. Optiunea 1 (normal map) — INCERCATA SI RESPINSA PE CIFRA, 20 sep 2026
+
+Decizia dezvoltatorului a fost "incearca 1 intai, avem loc de draw calls
+(19 din 38)". S-a facut, complet, si **nu functioneaza**. Scris aici ca sa nu
+se reincerce.
+
+**Ce s-a construit:** `tools/paint_inca_stone_normal.py` — normal map tileabil
+512x512, cu scara legata de `CLASS_TRIPLANAR_SCALE` (0,28 = o repetitie la
+3,57 m, deci 143 px = 1 m): 8 randuri de 0,45 m, ~5 blocuri de 0,71 m pe rand,
+decalaj de jumatate de bloc intre randuri, rost de 2,5 cm, fata bombata convex.
+Cablat prin `CLASS_NORMAL` / `CLASS_NORMAL_SCALE` in `palette.gd`.
+
+**Verificat ca mecanismul e CONECTAT** (memoria `sonda-masura-alt-obiect`:
+cifre identice la zecimala = suspiciune de mecanism mort). Sonda a aratat
+`normal_enabled = true`, textura incarcata, si **822 din 1186** de mesh-uri
+din Piata Sacra o poarta. Deci nu e neconectat.
+
+**Rezultatul, pe muchii grosiere (blur 2 px), tinta = bara 4,67:**
+
+| varianta | muchii totale | GROSIERE | % din tinta |
+|---|---:|---:|---:|
+| fara normal | 18,23 | 3,23 | 69 % |
+| normal x1 | 18,55 | **3,23** | 69 % |
+| normal **x6** (exagerat intentionat) | 20,58 | **3,34** | 71 % |
+
+La o scara de **sase ori** peste normal, muchiile grosiere urca cu **3 %**,
+cand tinta cere +45 %. Muchiile TOTALE insa cresc (18,2 -> 20,6) — adica
+normal map-ul chiar adauga detaliu, dar **detaliu FIN, care moare la blur**.
+Exact defectul pe care incerca sa-l repare.
+
+**De ce, si de ce era previzibil:** un normal map nu schimba silueta si nu
+muta niciun pixel — modifica doar cum cade lumina pe o suprafata care ramane
+plana. Umbra de rost pe care o produce are latimea rostului (2,5 cm la 3,57 m
+de textura, adica sub un pixel la distanta de condus) si dispare la primul
+mipmap. Muchiile de FORMA din bara sunt contururi de bloc care se decupeaza
+pe fundal — alea cer geometrie, nu iluminare.
+
+**S-a aruncat, nu s-a reglat mai departe** — conditia era scrisa in antetul
+generatorului inainte de masuratoare, tocmai ca sa nu se ajunga la "mai cresc
+putin contrastul pana iese ceva" (tiparul "prag mutat pana nu mai masoara
+nimic" din CLAUDE.md).
+
+**Ce ramane:** optiunea 2 (kit de zidarie cu blocuri modelate, 600-900 tri
+fata de 208 — comanda Blender) sau optiunea 3 (accept). Optiunea 1 e INCHISA.

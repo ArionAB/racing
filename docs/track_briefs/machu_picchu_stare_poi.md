@@ -450,3 +450,55 @@ preexistente.
 - **Fata de sub fereastra** — exista, e de 51 de grade, si e invizibila din
   masina. Ar deveni vizibila doar mutand camera sau ingustand placa soselei;
   ambele sunt decizii de nivel de pista.
+## 6. POI A, runda 18 — pavajul, si PLAFONUL DE CADRU (19 sep 2026)
+
+### Ce s-a reparat
+
+Verdictul valului 3 pe A („tot construitul din cadru e o balustrada — un
+singur profil de perete, repetat") a fost tratat 16 runde ca o problema de
+ZIDURI. Masurat fata de bara, cu **drumul exclus** din numaratoare:
+
+|          | piatra | iarba |
+|----------|-------:|------:|
+| BARA     | 45,6 % |  6,3 % |
+| r17 f000 |  8,3 % | 40,7 % |
+
+Zidurile nu erau problema: cele **802** ale zonei dau impreuna 8,3 % din
+cadru, fiindca un zid e o panglica verticala vazuta din muchie. Ce umple
+cadrul sunt **podelele** teraselor — si toate erau verzi, fiindca runda 14
+alesese slotul dupa cuvantul „iarba" dintr-un verdict care cerea de fapt
+*podea*. Reparatia: al doilea `MultiMesh` (`A_PavajCurti`, 317 placi pe 8
+terase, slot 8 CONCRETE), iarba pastrata minoritara (145 placi pe 4 terase).
+**Zero materiale** — acelasi `world_material()`. Garzi neschimbate: 19 / 18 /
+0 / 2-2-0.
+
+### PLAFONUL DE CADRU — de ce A nu poate castiga orb, si nu e vina decorului
+
+Masurat pe cele trei fracturi, proportia din cadru **ocupata de sosea si cer**,
+adica ce nu poate primi decor prin constructie:
+
+| cadru      | drum | cer | ramane decorului |
+|------------|-----:|----:|-----------------:|
+| r18b 0.000 | 36,8 % | 12,4 % | **50,8 %** |
+| r18b 0.020 | 38,7 % | 13,7 % | **47,6 %** |
+| r18b 0.035 | 40,1 % | 15,1 % | **44,8 %** |
+| **BARA**   | **13,0 %** | **2,2 %** | **84,7 %** |
+
+Bara e o vedere de trei sferturi, de sus, a unei cetati. Camera de joc e o
+chase cam joasa care priveste **in lungul** unui drum de 18 m latime (semi-
+latime 9 m — cel mai lat punct al pistei, ceruta de grila de start). Chiar cu
+fiecare pixel ramas umplut cu zidarie perfecta, A ajunge la ~51 % acolo unde
+bara are 85 %.
+
+Deci un critic orb care compara **cadre intregi** va gasi mereu o diferenta
+reala — dar ea e a **camerei si a latimii drumului**, nu a decorului, si
+niciuna din cele doua nu e in mana unui constructor de POI. Aceeasi forma ca
+lectia `criticul-cere-ce-zona-nu-poate-da`, pe alta axa: acolo lipsea
+*relieful*, aici lipseste *suprafata de cadru*.
+
+Ce ramane decidabil, si e decizie de dezvoltator, nu de constructor:
+- se **accepta** — A e piata de start, iar cadrul larg de drum e chiar ce cere
+  o grila de start libera; sau
+- se compara pe **decupaj lateral**, nu pe cadru intreg (bara e oricum un
+  decupaj, nu o captura din masina); sau
+- se ingusteaza drumul dupa grila (atinge traseul, deci ProbeLayout).

@@ -42,12 +42,38 @@ extends Area3D
 ## (variante cu un puf de abur care se stinge dupa iesire) si pentru sonde
 ## care vor sa citeasca "cat ar trebui sa tina" ca referinta.
 ##
+## [b]Capcana pentru orice sonda viitoare pe albire.[/b] `FogCorridorHazard`
+## (deci si `_fog` de aici) cauta un `WorldEnvironment` pe scena
+## (`_find_env`) si, daca nu gaseste unul, RENUNTA DEFINITIV — se intoarce
+## mai devreme din `_physics_process` la fiecare cadru, pentru totdeauna, nu
+## doar cadrul curent. Intr-un harnas sintetic FARA `WorldEnvironment` (cum
+## sunt sondele tehnice de teren/fizica), `fog_amount()` ramane 0.0 tot
+## timpul — nu pentru ca albirea nu functioneaza, ci pentru ca n-are ce
+## mediu sa impinga. Orice sonda care vrea sa verifice albirea (nu doar
+## forta/compresia) trebuie sa adauge un `WorldEnvironment` cu `Environment`
+## minimal in scena INAINTE de primul `_physics_process` al hazardului.
+##
 ## [b]Ploaia (`rain_factor`).[/b] `RainCycle` (nescris inca — vine dupa sonda,
 ## §7 pasul 6) va seta `rain_factor` peste 1.0 in faza de ploaie: forta si
 ## latimea perdelei cresc (brief: "in ploaie perdeaua e cu 30% mai grea si cu
 ## 5 m mai lata"). Aici `rain_factor` e doar un export citit direct — hazardul
 ## nu stie de unde vine valoarea, la fel cum `FogCorridorHazard` nu stie cine
 ## ii comanda ceata.
+##
+## [b]Runda 2 — forta se scaleaza cu viteza (`speed_ref`/`min_speed_factor`),
+## ca sa rupa o bucla pozitiva.[/b] La `force_accel` constant (runda 1: 40),
+## Autobuzul si Pompierii intrau intr-o bucla: apasare mare -> compresie mare
+## -> frecare/franare mare -> viteza mica -> RAMANE mai mult timp sub apasare
+## (aceeasi forta, dar mai multe secunde din ea) -> compresie SI MAI mare.
+## Masurat: pana la 1300+ cadre (>20 s) la fund, pierderi de 40-100%. Solutia
+## (decizia coordonatorului): apasarea nu mai e constanta, ci proportionala cu
+## viteza ORIZONTALA CURENTA a masinii — ca o lovitura de apa: masina lenta ia
+## putin, cea rapida ia mult. Factorul se recalculeaza in FIECARE tick din
+## viteza de ACUM (nu cea de la intrarea in zona), exact ca sa rupa bucla: cand
+## masina incetineste, apasarea scade odata cu ea, deci nu se mai auto-alimenteaza.
+## Efect secundar dorit, nu bug: turbo prin perdea = mai putin timp sub apasare,
+## dar apasare mai mare cat timp esti inauntru — un trade-off, nu o scapare
+## gratuita.
 ##
 ## [b]Varianta "cascada de ploaie" (teatru, cost zero).[/b] `force_accel = 0`
 ## dezactiveaza forta si franarea, dar pastreaza albirea si vizualul — exact
@@ -99,6 +125,17 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 ## 42-57%) — vezi raportul sondei: e un compromis structural al perechii
 ## forta/suspensie, nu o valoare de reglat mai fin.
 @export_range(0.0, 60.0, 0.5) var force_accel: float = 40.0
+## Viteza orizontala (m/s) la care se aplica `force_accel` INTREG. Sub ea,
+## apasarea scade proportional (vezi `_speed_factor`); peste ea, creste (dar
+## plafonata la `1.5x` — vezi clamp-ul din `_speed_factor`). 25 = viteza de
+## test standard din brief pentru „25 m/s pe uscat, fara turbo".
+@export_range(5.0, 40.0, 1.0) var speed_ref: float = 25.0
+## Podeaua factorului de viteza — cat ramane din `force_accel` la viteza
+## foarte mica (0 m/s si sub). Nu 0: o masina aproape oprita sub cascada tot
+## trebuie sa simta ceva apa, altfel bucla s-ar opri prin disparitia totala a
+## fortei (echivalent cu „ai scapat gratis daca te opresti"), nu prin
+## echilibru. 0.25 = un sfert din forta de referinta.
+@export_range(0.0, 1.0, 0.05) var min_speed_factor: float = 0.25
 ## Franarea pe componenta ORIZONTALA a vitezei, ca fractie pe secunda
 ## (`v -= v_horiz * drag * delta`). Calibrat pe sonda (`probe_fiord_cascada.gd
 ## --drag=`, sweep 0.0-0.5) sa dea ~20-25% pierdere de viteza pe 30 m la
@@ -199,7 +236,7 @@ func _build_fog() -> void:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-	var accel := force_accel * rain_factor
+	var base_accel := force_accel * rain_factor
 	var seen := {}
 	for body in get_overlapping_bodies():
 		var car := body as Car
@@ -207,7 +244,8 @@ func _physics_process(delta: float) -> void:
 			continue
 		seen[car] = true
 		_cars_inside[car] = true
-		if accel > 0.0:
+		if base_accel > 0.0:
+			var accel := base_accel * _speed_factor(car.horizontal_speed())
 			car.apply_central_force(Vector3.DOWN * car.mass * accel)
 		if drag > 0.0:
 			var v := car.velocity
@@ -218,6 +256,16 @@ func _physics_process(delta: float) -> void:
 	for car in _cars_inside.keys():
 		if not seen.has(car):
 			_cars_inside.erase(car)
+
+
+## Factorul care scaleaza `force_accel` cu viteza CURENTA (nu cea de la
+## intrare — vezi antetul, "runda 2"). Liniar pe `speed_ref`, cu podea
+## `min_speed_factor` si plafon 1.5 (o masina care intra foarte rapid, cu
+## turbo, ia mai mult decat `force_accel` nominal — trade-off-ul cerut).
+func _speed_factor(horizontal_speed: float) -> float:
+	if speed_ref <= 0.01:
+		return 1.0
+	return clampf(horizontal_speed / speed_ref, min_speed_factor, 1.5)
 
 
 # ---------------------------------------------------------------- pentru sonde

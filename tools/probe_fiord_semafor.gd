@@ -123,10 +123,13 @@ func _ready() -> void:
 			_seed = int(arg.trim_prefix("--seed="))
 	_rng.seed = _seed
 	print("probe_fiord_semafor: seed=%d seconds=%.0f" % [_seed, _seconds])
-	_build_track()
-	await get_tree().physics_frame
-	await get_tree().physics_frame
-	_build_signal()
+	# Ca la probe_hazard_marker.gd: `get_tree().root` poate fi inca ocupat
+	# instantiind arborele scenei-radacina cand `_ready()` al nostru ruleaza;
+	# un `add_child` direct pe el aici pica cu "Parent node is busy setting up
+	# children". Un process_frame in plus il lasa sa termine.
+	await get_tree().process_frame
+	await _build_track()
+	await _build_signal()
 	_spawn_cars()
 	await get_tree().physics_frame
 
@@ -296,6 +299,14 @@ func _physics_process(delta: float) -> void:
 	if _done or _signal == null or _cars.is_empty():
 		return
 	_elapsed += delta
+	if OS.get_environment("PROBE_FIORD_TRACE") == "1" and int(_elapsed * 4.0) % 4 == 0 \
+			and int(_elapsed * 60.0) % 15 == 0:
+		var b := _signal.bus()
+		if b != null:
+			print("TRACE t=%5.1f red=%s bus_hidden=%s bus_pos=(%.1f,%.1f,%.1f) bus_dist=%.1f"
+				% [_elapsed, _signal.is_red(), b.is_hidden(),
+					b.body().global_position.x, b.body().global_position.y,
+					b.body().global_position.z, b.distance()])
 	for i in _cars.size():
 		_tick_car(i, delta)
 	if _elapsed >= _seconds:

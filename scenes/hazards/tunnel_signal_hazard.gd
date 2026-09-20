@@ -191,16 +191,46 @@ func _rebuild_bus_curve() -> void:
 
 
 ## Sincronizeaza ceasul lui BusHazard cu al nostru: `period` al lui = al
-## nostru (asa `_advance` din BusHazard calculeaza corect cat sta ascuns), iar
-## `phase` il aseaza sa PORNEASCA exact la inceputul rosului (fractia
-## `(period - red_hold) / period` din propriul ciclu) — vezi comentariul din
-## EruptionCycle._resync despre "phase e fractie, cu cat e decalat ceasul".
+## nostru (asa `_advance` din BusHazard calculeaza corect cat sta ascuns).
+##
+## `phase` NU rezolva "porneste ascuns": in BusHazard, `phase` e doar punctul
+## de START pe curba DE COBORARE (`_dist = phase * length` la primul tick,
+## cu `_hidden` implicit fals) — folosit pentru figuranti care trebuie sa
+## arate "deja in tranzit" la incarcarea scenei, nu pentru un ciclu care
+## trebuie sa inceapa ASCUNS. Masurat: cu `phase = (period-red_hold)/period`
+## autocarul aparea VIZIBIL si pe jumatate de tunel de la primul cadru,
+## inainte de primul rosu (t=1-4s in sonda) — exact contactele "aparut langa
+## masina" pe care brief-ul le interzice explicit.
+##
+## Fix: pornim explicit ASCUNS (acelasi apel pe care BusHazard si-l face
+## singur la finalul fiecarei coborari — vezi `_hide()`), cu exact timpul
+## ramas pana la primul rosu. Ciclul se auto-intretine corect dupa aceea:
+## `_hide(seconds)` seteaza `_hide_left`, iar `_advance` il numara la fiecare
+## tick si cheama `_show()` cand ajunge la 0 — adica exact la inceputul
+## rosului, daca `seconds` a fost calculat corect.
 func _sync_bus() -> void:
 	if _bus == null:
 		return
 	_bus.period = period
 	_bus.speed = bus_speed
-	_bus.phase = fposmod((period - red_hold) / period, 1.0)
+	_bus.phase = 0.0
+	# Timpul pana la PRIMUL rosu, pornind din verde la clock=0 (vezi _ready:
+	# lampa porneste verde). Daca hazardul e adaugat cu clock-ul deja avansat
+	# (nu e cazul azi, dar _force_hidden e apelata separat de aici ca sa poata
+	# fi rechemata oricand), se recalculeaza pe cererea curenta.
+	_force_hidden_until_red()
+
+
+## Forteaza autocarul in starea ASCUNS, cu timpul ramas pana la urmatorul
+## inceput de rosu — apelat o data la construire (inainte ca `_clock` sa fi
+## avansat) si e sigur de rechemat oricand (ex. dupa un reset de sonda).
+func _force_hidden_until_red() -> void:
+	if _bus == null:
+		return
+	var until_red := period - red_hold - _clock
+	if until_red < 0.0:
+		until_red = fposmod(until_red, period)
+	_bus.call("_hide", maxf(until_red, 0.05))
 
 
 ## Rosu acum? Citit de AI (HazardMarker.Kind.SIGNAL) si de sonde.

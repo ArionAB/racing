@@ -105,10 +105,10 @@ thickness = 6.0
 transform = Transform3D(-0.9946, 0.0111, 0.1035, 0.0000, 0.9943, -0.1065, 0.1041, 0.1059, 0.9889, -123.3400, 44.6900, -497.1100)
 script = ExtResource("3_signal")
 mode = 1
-period = 45.5
-clear_hold = 6.0
+period = 47.5
+clear_hold = 8.0
 tunnel_length = 169.0
-bus_speed = 18.0
+bus_speed = 12.5
 bus_lane_offset = -2.0
 
 [node name="KickerBowen" type="Marker3D" parent="Hazarduri"]

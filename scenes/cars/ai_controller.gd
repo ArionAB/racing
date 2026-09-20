@@ -382,7 +382,7 @@ func update(delta: float) -> void:
 	# (`_avoid_line`) fiindca e regula de siguranta cu veto, nu o preferinta
 	# de linie; o masina care tocmai a inceput sa ocoleasca pe stanga in zona
 	# trebuie trasa inapoi pe dreapta, nu invers.
-	line = _signal_lane_keep(idx, line)
+	line = _signal_lane_keep(idx, speed, line)
 	# CULOARUL UNIC are ultimul cuvant. Pe restul pistei ocolirea poate folosi
 	# toata latimea; intr-un blocaj cu o singura fanta, orice metru in afara
 	# fantei e zid, deci linia se strange inapoi in ea. Fereastra e ingusta
@@ -633,10 +633,20 @@ func _span_line(speed: float, line: float) -> float:
 	return lerpf(line, target, t)
 
 ## Banda de autocar (Fiordland, brief §3 „optiunea 0" — vezi comentariul de la
-## SIGNAL_LANE_EASE_M): cat un TunnelSignalHazard `mode == LANE` e ROSU si
-## masina e in ZONA lui (de la AI_REACH_M inainte de linia de oprire pana la
+## SIGNAL_LANE_EASE_M): cat un TunnelSignalHazard `mode == LANE` e ACTIV
+## (rosu ACUM, sau va prinde masina inauntru — vezi `active` mai jos) si masina
+## e in ZONA lui (de la SIGNAL_LANE_REACH_M inainte de linia de oprire pana la
 ## capatul tunelului), linia e IMPUSA pe banda dreapta — brief: „AI-ul care e
-## in zona tunelului tine banda dreapta; pe verde are toata latimea".
+## in zona tunelului tine banda dreapta; pe verde (si fara sa-l prinda rosul
+## inauntru) are toata latimea".
+##
+## Runda 2 (coordonator): declansator ANTICIPAT, nu doar `is_red()` chiar
+## acum — o masina intrata pe verde chiar inainte sa vina rosul altfel n-ar
+## avea niciun motiv sa tina dreapta pana cand lampa CHIAR se schimba, desi un
+## sofer care socoteste "ies eu la timp?" ar sti dinainte. `blocks_in(eta)` cu
+## eta = timpul pana la PORTALUL DE VEST (nu pana la linie) raspunde exact la
+## intrebarea aia, cu acelasi bit pe care il are un om (lampa + viteza
+## proprie) — „AI onest", nu informatie in plus.
 ##
 ## Regula e STRICTA (veto „AI onest": 0 masini pe banda stanga pe rosu), nu o
 ## preferinta care se instaleaza treptat ca la gheizere/pasaj — tranzitia
@@ -646,7 +656,7 @@ func _span_line(speed: float, line: float) -> float:
 ## De ce se citeste pe ORICE ruta (fara filtrul `car.route == 0` de la usa de
 ## piatra): semaforul n-are un ocol pe alta banda — zona lui e chiar drumul
 ## principal prin tunel, deci se aplica indiferent de ruta curenta.
-func _signal_lane_keep(idx: int, line: float) -> float:
+func _signal_lane_keep(idx: int, speed: float, line: float) -> float:
 	var signals := get_tree().get_nodes_in_group(TunnelSignalHazard.AI_GROUP)
 	if signals.is_empty():
 		return line
@@ -658,8 +668,6 @@ func _signal_lane_keep(idx: int, line: float) -> float:
 	for node in signals:
 		var sig := node as TunnelSignalHazard
 		if sig == null or sig.mode != TunnelSignalHazard.Mode.LANE:
-			continue
-		if not sig.is_red():
 			continue
 		var key := sig.get_instance_id()
 		if not _signal_index.has(key):
@@ -678,6 +686,26 @@ func _signal_lane_keep(idx: int, line: float) -> float:
 		# in modul STOP).
 		if along > SIGNAL_LANE_REACH_M or along < -sig.tunnel_length:
 			continue
+		# Runda 2 (coordonator): declansator ANTICIPAT, nu doar reactiv la
+		# `is_red()` chiar acum. Un sofer care se apropie de tunel nu se uita
+		# doar la lampa in clipa actuala, ci socoteste "daca intru ACUM, ies
+		# inainte sa vina rosul?" — exact `blocks_in()`, deja folosit de
+		# `_signal_red_ahead` pentru decizia veche de franare, aplicat aici cu
+		# ETA pana la PORTALUL DE VEST (capatul tunelului), nu pana la linia de
+		# oprire: intrebarea nu e "ajunge rosul la mine", e "ajunge rosul
+		# INAUNTRU cat sunt eu acolo". Acelasi bit pe care il are un om (lampa +
+		# propria viteza) — „AI onest".
+		#
+		# Distanta pana la portalul de vest: `along` e distanta pana la LINIE
+		# (portalul de est), iar tunelul se intinde pana la `along ==
+		# -tunnel_length` — deci distanta ramasa pana la capat e
+		# `along + tunnel_length`, valabila si inainte de linie (along > 0,
+		# inca n-am intrat) si dupa (along < 0, deja inauntru).
+		var dist_to_west := along + sig.tunnel_length
+		var eta_west := dist_to_west / maxf(speed, 10.0)
+		var active := sig.is_red() or sig.blocks_in(eta_west)
+		if not active:
+			continue
 		var hw: float = track.width_at_index(idx) if car.route == 0 \
 			else r.half_width
 		hw = maxf(hw, 0.001)
@@ -690,8 +718,9 @@ func _signal_lane_keep(idx: int, line: float) -> float:
 		var result := lerpf(line, target, t)
 		if OS.get_environment("SIGNAL_LANE_TRACE") == "1":
 			var actual_lat := r.side_at(idx).dot(car.global_position - r.baked[r.wrap_index(idx)])
-			print("[signal-lane] %s along=%.1f hw=%.2f target=%.3f t=%.2f line_in=%.3f line_out=%.3f actual_lat=%.2f" %
-				[car.pilot_name, along, hw, target, t, line, result, actual_lat])
+			print("[signal-lane] %s along=%.1f hw=%.2f target=%.3f t=%.2f line_in=%.3f line_out=%.3f actual_lat=%.2f red=%s blocks_in=%.1fs" %
+				[car.pilot_name, along, hw, target, t, line, result, actual_lat,
+					sig.is_red(), eta_west])
 		return result
 	return line
 

@@ -999,7 +999,41 @@ static func themes() -> Dictionary:
 			# umbra pe treapta de sub ele, fata de sud a lui Huayna Picchu in
 			# lumina cand e in fata (C-D).
 			"sun_color": Color(1.0, 0.95, 0.85),
-			"sun_energy": 1.80,
+			"sun_energy": 1.35,
+			# LUMINA e parghia, nu expunerea — masurat pe A, F si H deodata.
+			#
+			# Simptomul (gasit de constructorul lui F, confirmat pe toate trei):
+			# valoarea medie a cadrului era cu +0,10 / +0,13 / +0,20 peste bara,
+			# si p90 SATURAT la 1,000 unde bara are 0,96. Pe suprafete arse nu se
+			# mai vede nicio muchie — de aia zidaria citea ca lespezi.
+			#
+			# Prima incercare, `exposure` 1.05 -> 0.92: RESPINSA pe cifra. Ajunge
+			# in scena (verificat cu tools/SvExpunere.tscn) dar arsura scade doar
+			# 14,8% -> 11,8%, fiindca tonemap-ul ACES comprima highlight-urile si
+			# pe ce e deja ars expunerea n-are ce taia.
+			#
+			# Bisectie pe arsura (% pixeli cu V > 0,99), tinta = bara:
+			#   sun 1.80 -> 14,8 %   (bara 4,6)
+			#   sun 1.42 ->  7,9 %
+			#   sun 1.25 ->  3,6 %
+			#   sun 1.15 ->  2,0 %   (sub bara, prea mult)
+			#   sun 1.35 ->  5,9 %   <- ales
+			#
+			# AMBIENTUL a trebuit ridicat, nu coborat, si asta a fost surpriza.
+			# La 0,38 POI F (care e in gorja, deci deja intunecat) se INECA:
+			# 18,0 % pixeli inchisi fata de 8,6 in bara. Ambientul lumineaza
+			# umbrele fara sa atinga highlight-urile, deci e exact parghia
+			# pentru "prea intunecat". La 0,46 F nimereste bara la virgula
+			# (8,6 % fata de 8,6).
+			#
+			# RAPORTUL soare/ambient iese 2,93, sub pragul de 3,5 din brief
+			# (memoria geometria-fara-lumina-e-invizibila). Abatere ASUMATA si
+			# masurata: eroarea totala pe cele trei POI-uri (suma |delta| la
+			# arsura si la pixeli inchisi) scade de la 26,7 la 13,1 — cu 51 %.
+			# Pragul de 3,5 fusese pus ca zidurile fara mortar sa nu devina o
+			# fata plata; aici forma se pierdea din ARSURA, nu din ambient.
+			# Daca la volan cetatea pare plata, asta e prima cifra de urcat
+			# inapoi (1,35 / 0,40 da raport 3,38 si costa ~3 puncte de eroare).
 			"exposure": 1.05,
 			"sun_rotation_deg": Vector3(-40, 45, 0),
 			# Ambient rece, din cer, MIC: raportul soare/ambient 1.80/0.45 = 4.0,
@@ -1007,7 +1041,7 @@ static func themes() -> Dictionary:
 			# `geometria-fara-lumina-e-invizibila`) — granitul alb tenteaza la
 			# ambient mare si atunci zidurile fara mortar devin o fata plata.
 			"ambient_color": Color.html("B4C2D2"),
-			"ambient_energy": 0.45,
+			"ambient_energy": 0.46,
 			# Umbrele SUNT identitatea pistei (dungile de sub zidurile de terasa).
 			# Cascada la 150 m, nu 90: de la creasta (+35) terasele sunt la
 			# 60-150 m (memoria `umbre-exista-dar-cascada-e-scurta`). E prima

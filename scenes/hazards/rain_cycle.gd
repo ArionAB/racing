@@ -186,19 +186,28 @@ func _find_track() -> Track:
 	return null
 
 
+## Cauta pornind de la RADACINA ARBORELUI (`get_tree().root`), nu de la
+## `current_scene`: o sonda care instantiaza pista direct cu
+## `get_tree().root.add_child(track)` (tiparul din probe_theme.gd/probe_wet.gd)
+## o aseaza ca SORA a lui `current_scene`, nu ca fiica — o cautare pornita de
+## la `current_scene` n-ar gasi niciodata `WorldEnvironment`-ul pistei. In
+## jocul real `track` e oricum sub `current_scene`, care e sub `root`, deci
+## acelasi punct de start functioneaza in ambele cazuri.
+func _search_root() -> Node:
+	if _track != null and _track.is_inside_tree():
+		return _track.get_tree().root
+	if get_tree() != null:
+		return get_tree().root
+	return get_parent()
+
+
 func _find_environment() -> Environment:
-	var root: Node = get_tree().current_scene if get_tree() != null else null
-	if root == null:
-		root = get_parent()
-	var we := _first_of_type(root, "WorldEnvironment") as WorldEnvironment
+	var we := _first_of_type(_search_root(), "WorldEnvironment") as WorldEnvironment
 	return we.environment if we != null else null
 
 
 func _find_sun() -> DirectionalLight3D:
-	var root: Node = get_tree().current_scene if get_tree() != null else null
-	if root == null:
-		root = get_parent()
-	return _first_of_type(root, "DirectionalLight3D") as Node3D as DirectionalLight3D
+	return _first_of_type(_search_root(), "DirectionalLight3D") as Node3D as DirectionalLight3D
 
 
 func _first_of_type(n: Node, class_name_str: String) -> Node:
@@ -280,7 +289,16 @@ func _set_node_alpha(n: Node, a: float) -> void:
 
 ## Forteaza direct un punct din ciclu (secunde de la inceputul lui), pentru
 ## sondele care vor sa verifice o faza anume fara sa astepte `_process`.
+##
+## OPRESTE ceasul automat (`set_process(false)`): altfel `_process` ar avansa
+## `_clock` chiar in cadrul URMATOR si ar suprascrie valoarea fortata — exact
+## bug-ul gasit la constructia sondei (ProbeFiordPloaie): un `force_factor(0.0)`
+## parea sa "revina" la ud pe cadrul imediat urmator, fiindca ceasul liber
+## pornea de la 0 si `_factor_at(delta)` e deja > 0 dupa un singur cadru.
+## `resume_clock()` reporneste ciclul automat, pentru cine vrea sa foloseasca
+## acelasi nod si ca metronom normal dupa un test fortat.
 func force_clock(t: float) -> void:
+	set_process(false)
 	_clock = fposmod(t, period)
 	rain_factor = _factor_at(_clock)
 	phase = _phase_at(_clock)
@@ -289,10 +307,17 @@ func force_clock(t: float) -> void:
 
 ## Forteaza `rain_factor` la o valoare arbitrara, ocolind ceasul — folosit de
 ## sonda pentru testul A/B (ploaie ON fortat, fara sa astepte telegraph-ul).
+## Vezi nota de la `force_clock` despre de ce opreste `_process`.
 func force_factor(f: float) -> void:
+	set_process(false)
 	rain_factor = clampf(f, 0.0, 1.0)
 	phase = Phase.RAIN if rain_factor > 0.0 else Phase.DRY
 	_apply(rain_factor)
+
+
+## Reporneste ceasul automat dupa un `force_factor`/`force_clock`.
+func resume_clock() -> void:
+	set_process(true)
 
 
 func environment() -> Environment:

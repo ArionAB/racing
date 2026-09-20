@@ -135,3 +135,67 @@ nimic" din CLAUDE.md).
 
 **Ce ramane:** optiunea 2 (kit de zidarie cu blocuri modelate, 600-900 tri
 fata de 208 — comanda Blender) sau optiunea 3 (accept). Optiunea 1 e INCHISA.
+
+## 9. Optiunea 2 (geometrie) — INCERCATA SI RESPINSA, 20 sep 2026
+
+Dupa ce normal map-ul a picat (§8), dezvoltatorul a cerut comanda Blender. S-a
+facut, si **nu functioneaza nici ea**. Amandoua caile din §6 sunt acum inchise
+pe masuratoare.
+
+**Ce s-a gasit deschizand codul.** `build_machupicchu_citadel.py`, functia
+`_wall_body`, avea deja o nota care spunea ca relieful de bloc in geometrie
+**fusese incercat si scos**: *"rosturile si granulatia blocurilor sunt ale
+clasei triplanare aplicate la integrare... zidul se multiplica de ~90 de ori;
+orice triunghi cheltuit pe detaliu de suprafata e platit de 90 de ori pentru
+ceva ce acopera textura."*
+
+Autorul de atunci n-avea insa masuratoarea din §8: **textura NU poate da
+muchii de forma**, fiindca nu schimba silueta.
+
+**Ce s-a construit.** Zidul avea deja **o** muchie de asiza la mijloc (doua
+benzi de cota). Parametrizata si pusa pe **trei** benzi, cu zimt mic pe fiecare
+rand. Contractele de capat au ramas intacte (±2,000 / ±3,000 / ±1,000), deci
+inlantuirea zidurilor nu s-a rupt.
+
+Costul real, mult sub estimarea initiala de +1,2M:
+
+| piesa | inainte | dupa |
+|---|---:|---:|
+| `inca_wall_a` | 208 | 256 |
+| `inca_wall_b` | 296 | 344 |
+| `inca_wall_c` | 152 | 192 |
+| **total zidarie** (1964 instante) | 480 520 | **571 376** |
+| **pista** | 4 041 327 | 4 132 183 (+2,2 %) |
+
+**Rezultatul, pe muchii grosiere (blur 2 px):**
+
+| POI | tinta (bara) | 1 banda | 3 benzi |
+|---|---:|---:|---:|
+| H | 4,67 | 3,23 (69 %) | **3,15 (67 %)** |
+| A | 4,79 | 3,38 (71 %) | **3,39 (71 %)** |
+
+Pe H **scade**, pe A ramane identic. Cost +2,2 % pentru zero castig.
+
+**De ce, vazut pe captura (frac 0.00).** Zidurile **au deja** blocuri vizibile
+cu rosturi — vin din textura triplanara, exact cum spunea nota veche. Nu
+lipsesc rosturile. Ce lipseste e **adancimea siluetei**: in bara, terasele au
+trepte adanci care se decupeaza una peste alta; la noi sunt **placi netede
+late**, indiferent cate benzi de asiza au pe fata.
+
+Adica diferenta nu e pe fata zidului — e in **cum sunt asezate zidurile unele
+fata de altele**. Asta nu e o problema de asset, e o problema de compozitie a
+POI-ului, si nu se rezolva nici din textura, nici din mesh-ul unei piese.
+
+**Revenit complet** (cod, GLB-uri, .blend). Zidurile sunt din nou la 208 / 296
+/ 152 tri.
+
+## 10. Ce ramane, dupa ce ambele cai au picat
+
+1. **Accept** — optiunea 3 din §6, acum singura ieftina.
+2. **Recompozitia teraselor**, daca se vrea urmarita: nu blocuri mai bune, ci
+   zidurile asezate in trepte care se suprapun in adancime. E treaba unui
+   constructor de POI pe A si D, nu o comanda de asset — si ar trebui pornita
+   cu contractul scris ca "adancime de siluetă", nu ca "asize".
+
+Ce **nu** merita reincercat, ambele masurate: normal map pe clasa (§8) si
+relief de bloc in geometria zidului (§9).

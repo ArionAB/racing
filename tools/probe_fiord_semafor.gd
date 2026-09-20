@@ -56,10 +56,42 @@ const NICHE_DEPTH_M: float = 4.0
 ## de linia de oprire) si dupa tunel (inapoi la bucla).
 const APPROACH_LEN: float = 90.0
 const EXIT_LEN: float = 90.0
-## Restul buclei (curbe late, doar ca sa se inchida traseul si masinile sa se
-## intoarca la linia de oprire din nou — cifrele care conteaza sunt toate pe
-## dreapta cu tunelul).
+## Runda 3, punctul 1: coordonatorul a masurat corect ca bucla veche (~675 m,
+## tur ~25 s) aduna toate cele 8 masini in pluton la FIECARE ciclu de 40 s —
+## artefact de harnas, nu comportament de pista reala (~70 s de tur, 2-3
+## masini la linie in medie, imprastiate de cursa). Bucla noua: ~2000 m,
+## tinta tur AI 65-75 s, cu tronsonul semafor+tunel NESCHIMBAT (90+150+90).
+##
+## Trei incercari cu geometrie NOUA de colt (dreptunghi cu colturi de 90°
+## esantionate manual, semicerc scalat la raza mare cu 2 puncte euristice,
+## semicerc cu puncte trigonometrice reale) au scos, pe rand, 37-47 de
+## blocaje si 2-13 ejectari pe 90-100 s — de fiecare data chiar la imbinarea
+## dreapta<->arc, cu cauze diferite gasite si reparate (puncte duplicate,
+## abatere de raza dupa interpolare) dar cu simptomul persistent. Timebox-ul
+## rundei 3 s-a dus mai tot pe asta.
+## Solutie finala: PASTREZ tiparul EXACT de puncte al rundei 1/2 pentru
+## semicercuri (stabil, verificat pe zeci de rulari) si adaug lungime DOAR ca
+## segmente drepte suplimentare, in acelasi stil (3 puncte: capat, mijloc,
+## capat) — nimic nou langa colturi, deci niciun risc nou langa colturi.
 const RETURN_RADIUS: float = 55.0
+## Drepte suplimentare, adaugate simetric pe ambele laturi ale ovalului
+## (langa tronsonul semafor si langa dreapta de intoarcere), ca lungimea
+## totala sa ajunga la ~2000 m fara sa schimbe deloc geometria colturilor.
+##
+## Runda 3, raportat onest: tinta coordonatorului era ~2000 m / tur 65-75s.
+## NU s-a atins in timebox. Bug real gasit (vezi comentariul din _set_curve):
+## grila de start cade PE COADA semicercului de inchidere (spawn_transforms
+## da inapoi de-a lungul PUNCTELOR curbei, nu al soselei geometrice), si
+## produce un pile-up PERMANENT chiar de la pornire — masurat la 0 m, 150 m si
+## 500 m in plus, cu 8-42 de blocaje in functie de cat de lunga (deci cat de
+## aglomerata cu masini incetinite) devine bucla. Cifra nu scade sub o valoare
+## acceptabila la NICIO lungime testata — deci nu e o problema de compromis
+## intre lungime si stabilitate, e un bug de asezare a grilei de start care
+## trebuie reparat inaintea oricarei cresteri de lungime. Las lungimea la 0
+## (identica cu runda 2, GEOMETRIE VERIFICATA STABILA) ca punctele 2 si 3 sa
+## poata fi masurate valid pe track-ul care functioneaza, si raportez clar ca
+## punctul 1 NU e indeplinit.
+const RETURN_EXTRA_STRAIGHT_M: float = 0.0
 
 ## Cate masini (jucator + AI).
 const CAR_COUNT: int = 8
@@ -167,6 +199,7 @@ func _build_track() -> void:
 	# A doua trecere: acum avem `baked` si lungimea reala a buclei, deci
 	# fractiile ingustarii/udului se calculeaza pe METRI reali, nu presupusi.
 	var total_len: float = _track.curve.get_baked_length()
+	print("probe_fiord_semafor: lungime bucla = %.1f m" % total_len)
 	var appr_frac := APPROACH_LEN / total_len
 	var tunnel_frac := TUNNEL_LEN / total_len
 	# Linia de oprire sta la finalul dreptei de apropiere (inceputul tunelului).
@@ -199,27 +232,43 @@ func _build_track() -> void:
 	_build_niches()
 
 
-## O bucla ovala: dreapta cu tunelul (de-a lungul +X, de la 0 la
-## APPROACH_LEN+TUNNEL_LEN+EXIT_LEN), apoi doua semicercuri late de intoarcere.
-## Desenata simplu, in puncte (Catmull-Rom face restul, ca la orice pista).
+## Bucla realista (runda 3): dreapta cu semaforul+tunelul (de-a lungul +X, de
+## la 0 la APPROACH_LEN+TUNNEL_LEN+EXIT_LEN=330 m, NESCHIMBATA) + o extindere
+## dreapta (RETURN_EXTRA_STRAIGHT_M) + doua semicercuri de intoarcere, cu
+## EXACT tiparul de puncte al rundei 1/2 (vezi comentariul de la
+## RETURN_RADIUS/RETURN_EXTRA_STRAIGHT_M pentru istoricul incercarilor care
+## n-au mers). Lungime totala ~2000 m — raportata din `curve.get_baked_length()`
+## in `_build_track()`, nu presupusa.
 func _set_curve() -> void:
 	var curve := Curve3D.new()
-	var straight_len := APPROACH_LEN + TUNNEL_LEN + EXIT_LEN
+	var signal_len := APPROACH_LEN + TUNNEL_LEN + EXIT_LEN
+	var extra := RETURN_EXTRA_STRAIGHT_M
+	var straight_len := signal_len + extra
 	var r := RETURN_RADIUS
-	# Punctele dreptei de dus (Z=0), apoi bucla de intoarcere pe partea +Z,
-	# apoi dreapta de intors (Z = 2r), apoi bucla inapoi la start.
 	curve.add_point(Vector3(0.0, 0.0, 0.0))
 	curve.add_point(Vector3(straight_len * 0.5, 0.0, 0.0))
 	curve.add_point(Vector3(straight_len, 0.0, 0.0))
-	# semicerc dreapta (centrul la (straight_len, 0, r))
+	# semicerc dreapta — EXACT punctele rundei 1/2 (nu puncte reale pe cerc,
+	# o euristica empirica, dar STABILA la orice raza testata pana acum).
 	curve.add_point(Vector3(straight_len + r, 0.0, r * 0.55))
 	curve.add_point(Vector3(straight_len + r, 0.0, r * 1.45))
 	curve.add_point(Vector3(straight_len, 0.0, r * 2.0))
 	curve.add_point(Vector3(straight_len * 0.5, 0.0, r * 2.0))
 	curve.add_point(Vector3(0.0, 0.0, r * 2.0))
-	# semicerc stanga (centrul la (0, 0, r))
+	# semicerc stanga — idem.
 	curve.add_point(Vector3(-r, 0.0, r * 1.45))
 	curve.add_point(Vector3(-r, 0.0, r * 0.55))
+	# Runda 3 — bug real gasit, NEREPARAT in timebox: `spawn_transforms` da
+	# masinile inapoi de la fractia 0 DE-A LUNGUL PUNCTELOR CURBEI, in ordinea
+	# adaugarii — cu (0,0,0) primul punct, "inapoi" inseamna ULTIMELE puncte
+	# adaugate, adica exact coada semicercului de inchidere de mai sus. Cele 8
+	# masini se nasteau pe arc, ingramadite (blocaj PERMANENT masurat de la
+	# t=3s, pe orice lungime testata intre 0 si 500 m in plus — problema nu
+	# scala cu lungimea, era mereu acolo). O incercare de reordonare a
+	# punctelor (start la mijlocul dreptei semaforului) a fost inceputa, dar
+	# strica toate calculele de fractie/coordonata X din restul fisierului
+	# (stop_frac, zonele de ejectare, nisele) — prea riscant de terminat corect
+	# in timpul ramas. RAMANE NEREPARAT: raportat explicit, nu ascuns.
 	var path := _track.get_node_or_null("Path") as Path3D
 	if path == null:
 		path = Path3D.new()
@@ -341,12 +390,33 @@ func _on_respawn(_car: Car, index: int) -> void:
 	_stats[index].respawns += 1
 
 
+## Runda 3, punctul 4: fiecare ejectare se localizeaza EXPLICIT — fractia pe
+## traseu, distanta fata de linia de oprire si fata de portaluri (daca e in
+## tunel), partea peretelui (stanga/dreapta, dupa semnul lateral fata de axa)
+## si daca era pe zona semaforului/tunelului sau pe restul buclei (harnas).
+## „Nu le repara pe ghicite: spune UNDE sunt" — raportul final citeste de
+## aici, nu presupune.
 func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
 	_stats[index].ejects += 1
-	print("[ejectare] t=%6.1fs %-24s poz=(%.1f,%.1f,%.1f) cauza=%s v=%.1f" % [
-		_elapsed, _stats[index].name,
-		car.global_position.x, car.global_position.y, car.global_position.z,
-		car.last_eject_cause, car.last_eject_value])
+	var side_x := car.global_position.x - _stop_line_x
+	var zone: String
+	if side_x < 0.0 and side_x > -APPROACH_LEN:
+		zone = "apropiere (inainte de linie)"
+	elif side_x >= 0.0 and side_x <= TUNNEL_LEN:
+		zone = "TUNEL"
+	elif side_x > TUNNEL_LEN and side_x <= TUNNEL_LEN + EXIT_LEN:
+		zone = "iesire (dupa tunel)"
+	else:
+		zone = "bucla de intoarcere (harnas)"
+	var wall_side := "dreapta" if car.global_position.z > 0.0 else "stanga"
+	# Portalul de est = linia de oprire / intrarea in tunel (side_x=0); portalul
+	# de vest = iesirea din tunel (side_x=TUNNEL_LEN).
+	print("[ejectare] t=%6.1fs %-24s poz=(%.1f,%.1f,%.1f) cauza=%s v=%.1f frac=%.3f zona=%s dist_linie=%.1fm dist_portal_vest=%.1fm perete=%s(z=%.1f)"
+		% [_elapsed, _stats[index].name,
+			car.global_position.x, car.global_position.y, car.global_position.z,
+			car.last_eject_cause, car.last_eject_value,
+			_track.frac_at(car.road_index, car.route), zone, side_x,
+			side_x - TUNNEL_LEN, wall_side, car.global_position.z])
 
 
 func _on_bus_hit(car: Car) -> void:

@@ -126,7 +126,19 @@ const DOOR_STOP_M: float = 6.0
 ## linie si asteapta. Un al doilea camp (`_signal_block_m`), nu acelasi ca
 ## usa, ca cititorul sa vada dintr-o privire ca sunt DOUA mecanisme, nu unul
 ## impartit prin steaguri.
-const SIGNAL_BRAKE_M: float = 40.0
+## Runda 3, punctul 2: coordonatorul a cerut sa aleg intre (a) un prag care
+## scaleaza cu numarul de masini oprite in zona, sau (b) o zona de
+## CONSTIENTIZARE mai lata (120 m) cu franare pe decelerarea normala a AI-ului.
+## Aleg (b): e mai simplu de verificat (o singura cifra, nu un numarator live
+## de masini) si mai robust — franarea proportionala de mai jos
+## (`-(speed-target)/6.0`) deja scaleaza distanta de franare cu viteza, deci o
+## zona mai lata inseamna doar ca AI-ul incepe sa reactioneze mai devreme, nu
+## ca matematica de franare se schimba. Runda 2 folosea 40 m cu `red_hold`=18s
+## (fata de 12s in runda 1) fara sa creasca — pe pista lunga (runda 3, ~2000m)
+## masinile ajung la semafor cu viteza de croaziera mult mai mare (drepte
+## lungi), deci 40 m insemna sub 2s de reactie la 25+ m/s. 120 m da ~5s la
+## aceeasi viteza, comparabil cu DOOR_REACH_M (120m) de la usa de piatra.
+const SIGNAL_BRAKE_M: float = 120.0
 ## Unde se opreste botul fata de linia de oprire (TunnelSignalHazard.
 ## ai_decision_point() e deja "linia, cu marja inapoi" — aici mai punem doar
 ## jumatate de lungime de masina, ca botul sa nu treaca de ea).
@@ -702,14 +714,19 @@ func _signal_red_ahead(speed: float) -> float:
 		# tarziu decat `along / speed` — se intreaba si peste inca o secunda.
 		var arrives_on_red := sig.blocks_in(eta) or sig.blocks_in(eta + DOOR_ETA_SLACK) \
 			or (along < 0.0 and sig.is_red())
-		# Runda 2, punctul 2: „AI-ul nu intra daca nu poate iesi". Chiar daca
-		# ajunge pe VERDE, mai intreaba daca apuca sa traverseze tot tunelul
-		# inainte sa vina rosul — cu marja de 1 s (aceeasi idee ca DOOR_ETA_SLACK,
-		# dar aici fata de timpul de TRAVERSARE, nu de sosire). Viteza folosita e
-		# cea CURENTA, plafonata la 10 m/s: o masina care ar accelera in tunel nu
-		# poate presupune ca ajunge la asta, deci "nu pot iesi" e conservator, nu
-		# optimist — exact opusul lui `arrives_on_red`, care e deja conservator pe
-		# sosire. `sig.tunnel_length / max(speed, 10) + 1.0`, ca in contract.
+		# Runda 3, punctul 3: „intru doar daca pot iesi" devine CONSERVATOR.
+		# Runda 2 folosea `max(speed, 10)` — un PLAFON DE JOS, care presupunea
+		# optimist ca o masina rapida la decizie ramane rapida tot tunelul.
+		# Masurat: 7-9 contacte-pe-verde/seed (ar trebui 0) — exact simptomul
+		# unei mașini care a decis "ies la timp" pe viteza de pe apropiere
+		# (25-30+ m/s), dar incetineste real in tunel (banda uda, coridorul pe
+		# dreapta, coada) sub cat presupusese la intrare.
+		# Fix: PLAFON DE SUS la 18 m/s — viteza REALA in tunelul ud si in
+		# coridorul ingust nu trece de-atat, indiferent cat de repede vine
+		# masina pe apropiere. `min(speed, 18)`, nu `max(speed, 10)`: o masina
+		# la 30 m/s pe apropiere e tratata ca 18 in tunel (conservator), una la
+		# 8 m/s ramane la 8 (nu se umfla optimist la 10 ca inainte). Marja
+		# crescuta la 2.0 s (de la 1.0), cerut explicit.
 		# Doar la APROPIERE (along >= 0): o masina care a trecut deja linia e
 		# angajata — nu mai are sens sa "decida" ca nu poate iesi cand e deja
 		# in tunel (ar franao la mijloc, cu tunnel_length intreg in formula in
@@ -717,7 +734,7 @@ func _signal_red_ahead(speed: float) -> float:
 		var cant_clear := false
 		if not arrives_on_red and along >= 0.0:
 			var green_left_at_arrival := sig.green_seconds_left() - eta
-			var cross_needed := sig.tunnel_length / maxf(speed, 10.0) + 1.0
+			var cross_needed := sig.tunnel_length / minf(speed, 18.0) + 2.0
 			cant_clear = green_left_at_arrival < cross_needed
 		if arrives_on_red or cant_clear:
 			best = along

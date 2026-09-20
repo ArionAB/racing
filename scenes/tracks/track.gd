@@ -12963,12 +12963,28 @@ func _wet_distance_inside(f: float, seg: Vector2) -> float:
 	return minf(to_start, to_end)
 
 
+## Flag global de ud, scris de [RainCycle] (Fiordland, brief §3 „Faza de
+## ploaie"). Cat timp e true, TOT drumul principal e ud — nu doar
+## `custom_wet_ranges` — exact ca faza de ploaie care uda tot turul, nu o
+## portiune declarata.
+##
+## E citit DOAR din `is_wet_at`, ca sa ramana o SINGURA cale de ud in `Car`
+## (comentariul din car.gd, langa `wet_here`, e explicit: banda uda "se
+## reinnoieste in fiecare cadru", deci un flag e suficient — un al doilea
+## mecanism de aquaplanare ar fi insemnat doua feluri de a pierde grip-ul,
+## tunate separat, care ar fi divergat). O pista fara niciun [RainCycle] in
+## scena nu scrie niciodata acest camp — ramane `false`, deci `is_wet_at` se
+## comporta identic cu inainte.
+var rain_wet: bool = false
+
 ## E uda soseaua principala la fractia asta?
 ##
 ## Se intreaba pe FRACTIE, nu pe indice de punct copt: intervalele se declara in
 ## fractii ca sa supravietuiasca unei modificari de traseu, exact ca restul
 ## reperelor.
 func is_wet_at(frac: float) -> bool:
+	if rain_wet:
+		return true
 	var f := fposmod(frac, 1.0)
 	for seg in _wet_ranges():
 		if seg.x <= seg.y:

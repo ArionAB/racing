@@ -63,6 +63,7 @@ enum Kind {
 	ICE_SLAB,   ## camp de placi crapate centrat pe nod (Baikal); vezi IceFieldHazard
 	TRAIN_ALONG, ## tren PE SENS: sina in lungul soselei, vine din fata (Baikal)
 	FUMAROLE,   ## gura de abur care sufla in rafale peste drum (Stromboli)
+	SIGNAL,     ## semafor cu oprire-cu-iesire: rosu = astepti sau treci pe risc (Fiordland)
 }
 
 @export var kind: Kind = Kind.SLIDING

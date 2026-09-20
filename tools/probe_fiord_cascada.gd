@@ -12,7 +12,8 @@ extends Node
 ##   - compresia MAXIMA a suspensiei in zona, ca fractie din cursa proprie
 ##     (`wheel_compression[i] / suspension_rest`, per roata si maximul lor —
 ##     acelasi calcul ca in `probe_car_identity.gd`);
-##   - bottom-out: da/nu (compresie >= 97% din cursa) si cate cadre;
+##   - bottom-out: da/nu (compresie >= 97% din cursa) si cat timp, in SECUNDE
+##     (runda 2: coordonatorul a cerut secunde, nu cadre — plafonul e 0.5 s);
 ##   - viteza la intrare/iesire din zona (orizontala) si procentul pierdut;
 ##   - saltul de la iesire: inaltimea maxima a CENTRULUI masinii peste linia
 ##     de rulare, dupa ce iese din zona (fereastra de 1.5 s dupa iesire);
@@ -23,6 +24,18 @@ extends Node
 ## Verifica INTAI ca forta chiar intra (memoria `sonda-masura-alt-obiect`):
 ## o rulare cu `force_accel = 0` trebuie sa dea compresie diferita de una cu
 ## `force_accel = 12`, cu ACEEASI masina si aceeasi viteza.
+##
+## RUNDA 2 (dupa raportul initial): brief-ul cerea `force_accel~12`, care nu
+## poate produce bottom-out la nicio masina (arc liniar, verificat analitic).
+## La `force_accel` constant ~40, Autobuzul/Pompierii intrau intr-o bucla
+## pozitiva (apasare -> compresie -> franare -> viteza mica -> mai mult timp
+## sub apasare -> compresie SI MAI mare), masurata cu pana la 1300+ cadre
+## (>20 s) la fund si pierderi de 40-100%. Solutia coordonatorului:
+## `WaterfallHazard.speed_ref`/`min_speed_factor` scaleaza apasarea cu
+## viteza ORIZONTALA CURENTA a masinii (nu cea de la intrare), ca sa rupa
+## bucla. Criteriile de-acum sunt (a) pierdere <= 35% la 25 m/s uscat,
+## (b) timp la fund <= 0.5 s la ORICE combinatie, (c) Buggy atinge fundul
+## SCURT pe uscat la 25 m/s si Politia nu, (d) zero rasturnari.
 ##
 ## Ruleaza CA SCENA (autoload-urile GameState/AudioManager trebuie rezolvate):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeFiordCascada.tscn
@@ -35,6 +48,11 @@ extends Node
 ##   --repeats=3
 ##   --quick            un singur set (masina 0, 25 m/s, rain 1.0, accel 12,
 ##                       1 repetare) — pentru iterare rapida
+##   --bus-slow         adauga o rulare la 10 m/s DOAR pentru Autobuzul si
+##                       Pompierii (runda 2: "intru incet si tot raman blocat?")
+##   --speed-ref=25     WaterfallHazard.speed_ref (runda 2: forta scalata cu
+##                       viteza CURENTA a masinii, nu constanta)
+##   --min-speed-factor=0.25  WaterfallHazard.min_speed_factor
 
 const STEP: float = 1.0 / 60.0
 ## Lungimea perdelei (m) — vezi WaterfallHazard.length, brief: 30.
@@ -65,6 +83,11 @@ var _dbg: bool = false
 ## din linia de comanda in loc sa se modifice default-ul de fiecare data.
 ## -1 = foloseste default-ul din WaterfallHazard.
 var _drag_override: float = -1.0
+## Override-uri runda 2 pentru scalarea cu viteza. -1 = default din hazard.
+var _speed_ref_override: float = -1.0
+var _min_speed_factor_override: float = -1.0
+## Runda 2: adauga o rulare la 10 m/s pentru Autobuz/Pompieri.
+var _bus_slow: bool = false
 
 var _ground: StaticBody3D
 var _results: Array[Dictionary] = []
@@ -130,6 +153,12 @@ func _parse_args() -> void:
 			_repeats = int(arg.trim_prefix("--repeats="))
 		elif arg.begins_with("--drag="):
 			_drag_override = float(arg.trim_prefix("--drag="))
+		elif arg.begins_with("--speed-ref="):
+			_speed_ref_override = float(arg.trim_prefix("--speed-ref="))
+		elif arg.begins_with("--min-speed-factor="):
+			_min_speed_factor_override = float(arg.trim_prefix("--min-speed-factor="))
+		elif arg == "--bus-slow":
+			_bus_slow = true
 		elif arg == "--quick":
 			_quick = true
 		elif arg == "--dbg":
@@ -167,6 +196,10 @@ func _build_curtain(force_accel: float, rain_factor: float) -> WaterfallHazard:
 	wf.rain_factor = rain_factor
 	if _drag_override >= 0.0:
 		wf.drag = _drag_override
+	if _speed_ref_override >= 0.0:
+		wf.speed_ref = _speed_ref_override
+	if _min_speed_factor_override >= 0.0:
+		wf.min_speed_factor = _min_speed_factor_override
 	add_child(wf)
 	wf.global_position = Vector3(0, 0.0, 0)
 	return wf
@@ -237,6 +270,22 @@ func _test_matrix() -> void:
 					for _rep in _repeats:
 						runs.append(await _run_once(car_idx, speed, rain, accel))
 					_results.append(_average(car_idx, speed, rain, accel, runs))
+
+	# Runda 2, cazul special cerut de coordonator: "intru incet si tot raman
+	# blocat?" — doar pentru Autobuz si Pompierii, la 10 m/s, indiferent daca
+	# sunt in _car_indices/_speeds implicite (10 m/s nu e in setul standard).
+	if _bus_slow:
+		print("-- runda 2: intrare lenta (10 m/s) pentru Autobuz/Pompierii --")
+		for i in GameState.CAR_DATA.size():
+			var nm := String(GameState.CAR_DATA[i].display_name)
+			if nm != "Autobuzul" and nm != "Pompierii":
+				continue
+			for rain in _rain_factors:
+				for accel in _accels:
+					var runs: Array[Dictionary] = []
+					for _rep in _repeats:
+						runs.append(await _run_once(i, 10.0, rain, accel))
+					_results.append(_average(i, 10.0, rain, accel, runs))
 
 
 func _average(car_idx: int, speed: float, rain: float, accel: float,
@@ -383,33 +432,40 @@ func _report_table() -> void:
 	print("")
 	print("=== TABEL (medie pe %d repetari) ===" % _repeats)
 	print("%-12s %5s %5s %6s | %6s %5s %8s | %7s %6s %6s"
-		% ["masina", "v", "rain", "accel", "comp%", "fund", "cadre_f",
+		% ["masina", "v", "rain", "accel", "comp%", "fund", "fund_s",
 			"pierd%", "salt_m", "ruliu"])
 	for r in _results:
 		if bool(r.flipped):
 			_failed_hint = true
-		print("%-12s %5.0f %5.1f %6.0f | %6.1f %5s %8.1f | %7.1f %6.2f %6.1f%s"
+		print("%-12s %5.0f %5.1f %6.0f | %6.1f %5s %8.2f | %7.1f %6.2f %6.1f%s"
 			% [String(r.name), float(r.speed), float(r.rain), float(r.accel),
 				float(r.comp_max) * 100.0, "DA" if bool(r.bottom_out) else "nu",
-				float(r.bottom_frames), float(r.speed_loss_pct),
+				float(r.bottom_frames) * STEP, float(r.speed_loss_pct),
 				float(r.exit_jump), float(r.roll_max),
 				" <-- RASTURNAT" if bool(r.flipped) else ""])
 
 
+## Runda 2 — criteriile coordonatorului:
+##   (a) nicio masina nu pierde peste 35% la 25 m/s pe uscat;
+##   (b) niciun timp la fund peste 0.5 s la nicio combinatie;
+##   (c) Buggy atinge fundul SCURT pe uscat la 25 m/s, Politia nu;
+##   (d) zero rasturnari.
 func _report_verdict() -> void:
 	print("")
-	print("=== VERDICT ===")
+	print("=== VERDICT (runda 2) ===")
 
-	# 1. nicio rasturnare la nicio combinatie
+	# (d) nicio rasturnare la nicio combinatie
 	var any_flip := false
 	for r in _results:
 		if bool(r.flipped):
 			any_flip = true
-	print("- rasturnari: %s" % ("DA (esec)" if any_flip else "niciuna"))
+	print("- (d) rasturnari: %s" % ("DA (esec)" if any_flip else "niciuna"))
 	if any_flip:
 		_failed_hint = true
 
-	# 2. diferente masurabile intre masini (aceeasi viteza/rain/accel)
+	# diferente masurabile intre masini (aceeasi viteza/rain/accel) — nu e un
+	# criteriu numerotat de coordonator, dar ramane garda impotriva unui
+	# mecanism neconectat (memoria `sonda-masura-alt-obiect`).
 	var by_key := {}
 	for r in _results:
 		var key := "%.0f|%.1f|%.0f" % [float(r.speed), float(r.rain), float(r.accel)]
@@ -436,24 +492,37 @@ func _report_verdict() -> void:
 		print("  ATENTIE: spread aproape zero — verifica daca suspensia per masina chiar e citita")
 		_failed_hint = true
 
-	# 3. pierdere de viteza 20-25% la 25 m/s pe uscat fara turbo
+	# (a) nicio masina nu pierde peste 35% la 25 m/s pe uscat
+	var any_over_35 := false
 	for r in _results:
 		if absf(float(r.speed) - 25.0) < 0.1 and absf(float(r.rain) - 1.0) < 0.01:
-			var ok := float(r.speed_loss_pct) >= 15.0 and float(r.speed_loss_pct) <= 30.0
-			print("- %s @ 25 m/s uscat accel=%.0f: pierdere %.1f%% (tinta 20-25%%) %s"
+			var ok := float(r.speed_loss_pct) <= 35.0
+			if not ok:
+				any_over_35 = true
+			print("- (a) %s @ 25 m/s uscat accel=%.0f: pierdere %.1f%% (plafon 35%%) %s"
 				% [String(r.name), float(r.accel), float(r.speed_loss_pct),
-					"OK" if ok else "<-- in afara tintei"])
-
-	# 4. saltul de iesire sub 0.4 m
-	var jump_over := 0
-	for r in _results:
-		if float(r.exit_jump) >= 0.4:
-			jump_over += 1
-	print("- combinatii cu salt de iesire >= 0.4 m: %d din %d" % [jump_over, _results.size()])
-	if jump_over > 0:
+					"OK" if ok else "<-- PESTE PLAFON"])
+	if any_over_35:
 		_failed_hint = true
 
-	# 5. bottom-out diferentiat: Buggy da, Politia nu (identitatea suspensiei)
+	# (b) niciun timp la fund peste 0.5 s la NICIO combinatie (nu doar 25/uscat)
+	var worst_bottom_s := 0.0
+	var worst_bottom_key := ""
+	var any_over_half_sec := false
+	for r in _results:
+		var bottom_s: float = float(r.bottom_frames) * STEP
+		if bottom_s > worst_bottom_s:
+			worst_bottom_s = bottom_s
+			worst_bottom_key = "%s v=%.0f rain=%.1f accel=%.0f" % [
+				String(r.name), float(r.speed), float(r.rain), float(r.accel)]
+		if bottom_s > 0.5:
+			any_over_half_sec = true
+	print("- (b) cel mai lung timp la fund: %.2f s (la %s) — plafon 0.5 s: %s"
+		% [worst_bottom_s, worst_bottom_key, "PESTE" if any_over_half_sec else "OK"])
+	if any_over_half_sec:
+		_failed_hint = true
+
+	# (c) Buggy atinge fundul SCURT pe uscat la 25 m/s, Politia nu
 	var buggy_idx := -1
 	var police_idx := -1
 	for i in GameState.CAR_DATA.size():
@@ -464,14 +533,26 @@ func _report_verdict() -> void:
 			police_idx = i
 	if buggy_idx >= 0 and police_idx >= 0:
 		var buggy_bottom := false
+		var buggy_bottom_short := true
 		var police_bottom := false
 		for r in _results:
+			var dry_25 := absf(float(r.speed) - 25.0) < 0.1 and absf(float(r.rain) - 1.0) < 0.01
+			if not dry_25:
+				continue
 			if int(r.car) == buggy_idx and bool(r.bottom_out):
 				buggy_bottom = true
+				if float(r.bottom_frames) * STEP > 0.5:
+					buggy_bottom_short = false
 			if int(r.car) == police_idx and bool(r.bottom_out):
 				police_bottom = true
-		print("- Buggy atinge fundul: %s | Politia atinge fundul: %s (asteptat: Buggy da, Politia nu)"
-			% ["da" if buggy_bottom else "nu", "da" if police_bottom else "nu"])
+		var c_ok := buggy_bottom and buggy_bottom_short and not police_bottom
+		print("- (c) @ 25 m/s uscat: Buggy atinge fundul %s (scurt: %s) | Politia atinge fundul %s -> %s"
+			% ["da" if buggy_bottom else "nu",
+				"da" if buggy_bottom_short else "NU (prea lung)",
+				"da" if police_bottom else "nu",
+				"OK" if c_ok else "<-- NU respecta diferentierea ceruta"])
+		if not c_ok:
+			_failed_hint = true
 
 	print("")
 	print("REZULTAT: ", "PICAT" if _failed_hint else "TRECUT")

@@ -493,17 +493,25 @@ func _watch_signal_fleet(cars: Array[Car]) -> void:
 		var id := car.get_instance_id()
 		var prev_z: float = _signal_last_z.get(id, local_pos.z)
 		# Trecere de linie: local.z trece de la negativ la pozitiv, aproape de axa
-		# (nu departe pe o nisa) -- daca semaforul e rosu chiar atunci, e o
-		# trecere pe rosu clara.
-		if prev_z < 0.0 and local_pos.z >= 0.0 and absf(local_pos.x) < 4.0 and red:
+		# (nu departe pe o nisa), CU VITEZA REALA de inaintare (nu jitter de coada
+		# la 0 m/s) -- daca semaforul e rosu chiar atunci, e o trecere pe rosu
+		# clara. Fara pragul de viteza, o masina oprita chiar langa linie (jitter
+		# de contact intre masini in coada) oscileaza peste z=0 la viteza ~0 si
+		# se numara gresit ca "a trecut pe rosu" -- masurat: toate cele 11
+		# raportari initiale erau la poz aproape identica (~2-5m de linie),
+		# semn de jitter de coada, nu de traversare reala a tunelului.
+		var speed := car.horizontal_speed()
+		if prev_z < 0.0 and local_pos.z >= 0.0 and absf(local_pos.x) < 4.0 \
+				and red and speed > 4.0:
 			_signal_ran_red_clear += 1
-			print("[trecere-pe-rosu] t=%5.1fs  poz=(%.0f,%.0f,%.0f)  rosu_ramas=%.1fs" % [
-				_elapsed, car.global_position.x, car.global_position.y,
+			print("[trecere-pe-rosu] t=%5.1fs  v=%4.1f  poz=(%.0f,%.0f,%.0f)  rosu_ramas=%.1fs" % [
+				_elapsed, speed, car.global_position.x, car.global_position.y,
 				car.global_position.z, sig.red_seconds_left()])
 		_signal_last_z[id] = local_pos.z
 		# Coada: aproape de linie (in raza de decizie AI), viteza mica, inca de
 		# partea de apropiere (nu deja in tunel).
-		if local_pos.z < 5.0 and local_pos.z > -TunnelSignalHazard.AI_REACH_M 				and car.horizontal_speed() < 2.0:
+		if local_pos.z < 5.0 and local_pos.z > -TunnelSignalHazard.AI_REACH_M \
+				and speed < 2.0:
 			queued += 1
 	_signal_max_queue = maxi(_signal_max_queue, queued)
 

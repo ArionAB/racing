@@ -477,12 +477,19 @@ func _tick_race(delta: float) -> void:
 	_rain_diag(10.0)
 	_rain_diag(60.0)
 	var cars: Array[Car] = _race.cars
-	# PROBE_RACE_TRACE=2: acelasi tabel, dar la 0,1 s si doar in fereastra
-	# 60-70 s — diagnostic ad-hoc pentru un respawn reproductibil la un frac
-	# fix, fara sa umple logul pe toata cursa. Fereastra si pasul se schimba
-	# de mana cand se ancheteaza alt interval.
+	# PROBE_RACE_TRACE=2: acelasi tabel, dar la 0,1 s si doar intr-o fereastra
+	# ingusta — diagnostic ad-hoc pentru un respawn reproductibil la un frac
+	# fix, fara sa umple logul pe toata cursa. Implicit 60-70s; suprascrisa cu
+	# PROBE_RACE_TRACE_WINDOW=inceput,sfarsit (runda 3: 115,140 pentru
+	# repunerile de langa semafor, care apar mult mai tarziu in cursa).
 	var trace_env := OS.get_environment("PROBE_RACE_TRACE")
-	if trace_env == "2" and _elapsed >= 60.0 and _elapsed <= 70.0 \
+	var trace_window := Vector2(60.0, 70.0)
+	var trace_window_env := OS.get_environment("PROBE_RACE_TRACE_WINDOW")
+	if not trace_window_env.is_empty():
+		var parts := trace_window_env.split(",")
+		if parts.size() == 2:
+			trace_window = Vector2(float(parts[0]), float(parts[1]))
+	if trace_env == "2" and _elapsed >= trace_window.x and _elapsed <= trace_window.y \
 			and int(_elapsed * 60.0) % 6 == 0:
 		for i in cars.size():
 			var c := cars[i]

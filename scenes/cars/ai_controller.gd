@@ -895,6 +895,27 @@ func _begin_unstick() -> void:
 		# Am incercat cinstit si tot suntem infipti — cerem repunerea.
 		_attempts = 0
 		_unstick_timer = 0.0
+		# Runda 3, punctul 2: diagnostic optional (AI_UNSTICK_TRACE=1), ca sa
+		# se poata deosebi „paznicul de progres a cerut repunerea" de o
+		# RespawnZone (cascada Stirling, canalul Bowen, mare/rau) — semnalul
+		# `respawned` nu duce cine a chemat-o. Raporteaza si starea celui mai
+		# apropiat semafor din fata: daca e rosu sau la cate secunde de la
+		# ultimul verde, ca sa se vada daca masina statea intr-o coada legitima
+		# la semafor cand paznicul a decis ca "nu progreseaza".
+		if OS.get_environment("AI_UNSTICK_TRACE") == "1":
+			var frac := track.frac_at(car.road_index, car.route) \
+				if track != null else -1.0
+			var sig_state := "fara semafor in grup"
+			for node in get_tree().get_nodes_in_group(TunnelSignalHazard.AI_GROUP):
+				var sig := node as TunnelSignalHazard
+				if sig == null:
+					continue
+				sig_state = "rosu" if sig.is_red() else \
+					"verde(%.1fs ramase)" % sig.green_seconds_left()
+				break
+			print("[unstick-respawn] %s frac=%.3f pos=(%.0f,%.0f,%.0f) semafor=%s"
+				% [car.pilot_name, frac, car.global_position.x,
+					car.global_position.y, car.global_position.z, sig_state])
 		car.respawn()
 		return
 	# Directia in care trebuie sa ajunga botul: spre centrul soselei, in fata.

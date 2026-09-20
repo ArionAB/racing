@@ -169,9 +169,13 @@ var _track_index: int = 0
 var _seconds: float = 150.0
 ## `--rain=1`: fortata ploaia peste orice `RainCycle` de pe pista, prin
 ## `force_factor(1.0)` (Fiordland, docs/track_briefs/fiordland.md §7 pasul
-## de verdict "o rulare cu ploaia fortata"). 0 = neatins, pista ramane pe
-## ciclul ei normal (uscat la start). Pistele fara `RainCycle` ignora steagul.
-var _force_rain: bool = false
+## de verdict "o rulare cu ploaia fortata"). `--rain=0`: fortat USCAT (opreste
+## ceasul cu `force_factor(0.0)`), pentru izolarea A/B — FARA steag, o cursa de
+## 150s cu `RainCycle` implicit (period 95s) trece oricum printr-o fereastra de
+## ploaie in jurul t=95-125s, deci nu era o linie de baza "mereu uscata" (runda
+## 2, diagnosticul coordonatorului). -1 (implicit) = neatins, ciclul normal.
+## Pistele fara `RainCycle` ignora ambele steaguri.
+var _force_rain: int = -1
 
 var _race: Node = null
 var _elapsed: float = 0.0
@@ -264,7 +268,7 @@ func _ready() -> void:
 			var ab := arg.trim_prefix("--slice=").split(",")
 			_slice = Vector2(float(ab[0]), float(ab[1]))
 		elif arg.begins_with("--rain="):
-			_force_rain = int(arg.trim_prefix("--rain=")) != 0
+			_force_rain = int(arg.trim_prefix("--rain="))
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -382,19 +386,23 @@ func _start_race() -> void:
 		if car.has_signal(&"bumped"):
 			car.bumped.connect(_on_bumped.bind(i))
 	_setup_signal_hazards()
-	if _force_rain:
-		_force_rain_cycle()
+	if _force_rain >= 0:
+		_force_rain_cycle(float(_force_rain))
 
 
-## `--rain=1`: gaseste orice `RainCycle` prin grupul lui (`rain_cycle`, vezi
-## RainCycle._ready) si il fixeaza in ploaie plina — acelasi apel pe care il
-## foloseste sonda A/B a ploii (`ProbeFiordPloaie`). Pista ramane astfel udata
-## din primul cadru, in loc sa astepte ~5-30s din ciclul de 95s pana la prima
-## fereastra de ploaie. Gol pe orice pista fara `RainCycle`.
-func _force_rain_cycle() -> void:
+## `--rain=1`/`--rain=0`: gaseste orice `RainCycle` prin grupul lui
+## (`rain_cycle`, vezi RainCycle._ready) si il fixeaza la `factor` (1.0 = ploaie
+## plina, 0.0 = uscat fortat, ceasul oprit in ambele cazuri) — acelasi apel pe
+## care il foloseste sonda A/B a ploii (`ProbeFiordPloaie`). Pista ramane
+## astfel la starea ceruta din primul cadru pana la ultimul, in loc sa astepte
+## ~5-30s din ciclul de 95s pana la prima fereastra, SAU (la 0) sa treaca oricum
+## printr-o fereastra de ploaie in cursul unei rulari de 150s (period 95s —
+## fara steag, o cursa "de control" nu era de fapt mereu uscata). Gol pe orice
+## pista fara `RainCycle`.
+func _force_rain_cycle(factor: float) -> void:
 	for node in get_tree().get_nodes_in_group(&"rain_cycle"):
 		if node.has_method("force_factor"):
-			node.call("force_factor", 1.0)
+			node.call("force_factor", factor)
 
 
 ## Fiordland: agata contorul de evenimente pe orice TunnelSignalHazard din

@@ -139,6 +139,21 @@ const DOOR_STOP_M: float = 6.0
 ## lungi), deci 40 m insemna sub 2s de reactie la 25+ m/s. 120 m da ~5s la
 ## aceeasi viteza, comparabil cu DOOR_REACH_M (120m) de la usa de piatra.
 const SIGNAL_BRAKE_M: float = 120.0
+## Runda 2 (Fiordland): pe asfalt UD, distanta de franare declarata mai sus
+## nu ajunge — e calibrata pe grip de uscat. Coordonatorul a diagnosticat
+## corect: `RainCycle` uda TOT drumul (`Track.is_wet_at` intoarce true peste
+## tot cat `rain_wet` e pornit), inclusiv urcarea de 7% spre linia de oprire de
+## la portalul de est, iar AI-ul franeaza cu aceeasi distanta ca pe uscat si
+## aluneca in coada — masurat: 11 repuneri langa semafor pe 16 seed-uri uscate
+## fata de 3 pe linia de baza, si 16-33 blocaje/seed cu ploaia fortata.
+## Fix: distanta de reactie se INMULTESTE cu 1.5 cand drumul de sub masina e
+## ud — `track.is_wet_at(frac)` e informatie pe care un sofer o vede (asfaltul
+## lucios, cauciucul care nu mai muscă), deci ramane "AI onest": nu i se da
+## niciun bit despre semafor sau despre ciclul ploii, doar aceeasi citire de
+## suprafata pe care o foloseste deja `route_is_wet` pentru viteza-tinta.
+## Nimic altceva nu se schimba in franare — nici franarea proportionala, nici
+## coada, nici pragurile semaforului insusi.
+const SIGNAL_BRAKE_WET_FACTOR: float = 1.5
 ## Unde se opreste botul fata de linia de oprire (TunnelSignalHazard.
 ## ai_decision_point() e deja "linia, cu marja inapoi" — aici mai punem doar
 ## jumatate de lungime de masina, ca botul sa nu treaca de ea).
@@ -357,7 +372,15 @@ func update(delta: float) -> void:
 	# Rosu la sosire: franeaza si opreste EXACT la linie — brief §3, "AI
 	# onest si semaforul": niciun AI nu trece pe rosu, indiferent de cat de
 	# mult ar castiga jucatorul trecand. Vezi SIGNAL_BRAKE_M/SIGNAL_STOP_M.
-	var signal_wait := _signal_block_m < SIGNAL_BRAKE_M
+	#
+	# Runda 2 (Fiordland): pe ud, fereastra de reactie se largeste cu
+	# SIGNAL_BRAKE_WET_FACTOR — vezi comentariul de la constanta. Se citeste
+	# UD la pozitia CURENTA a masinii (`idx`), nu la linia de oprire: un sofer
+	# simte asfaltul de sub el acum, nu ghiceste starea de la 100 m in fata.
+	var signal_brake_m := SIGNAL_BRAKE_M
+	if track.is_wet_at(track.frac_at(idx, car.route)):
+		signal_brake_m *= SIGNAL_BRAKE_WET_FACTOR
+	var signal_wait := _signal_block_m < signal_brake_m
 	if signal_wait:
 		var stop_m := maxf(_signal_block_m - SIGNAL_STOP_M, 0.0)
 		# Runda 2, punctul 3: coada. Fara asta fiecare AI tintea DOAR linia —

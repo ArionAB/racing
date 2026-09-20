@@ -153,7 +153,15 @@ enum Mode { STOP, LANE }
 		bus_speed = maxf(value, 0.1)
 		_sync_bus()
 
-## Latimea autocarului (m). Brief: 3,6 m pe un tunel de 7 m (3,5 semilatime).
+## Latimea autocarului (m) — CAT DE LAT E COLIZORUL (`body_size.x` in
+## BusHazard); mesh-ul vizual poate ramane la scara reala, se scaleaza separat
+## cand vine modelul `coach_fiordland`. Brief original: 3,6 m pe un tunel de
+## 7 m (3,5 semilatime). Runda 3 (geometrie, coordonator): pe Track16, redus
+## la 3.0 -- cu tunelul la semilatime 4.5 si banda dreapta a masinilor la
+## +2.0, un colizor de 3.6 (jumatate 1.8) la -2.4 tot lasa doar ~0.7 m fata
+## de banda masinilor la marginea ei INTERIOARA; la 3.0 (jumatate 1.5),
+## marja creste la ~1.0 m — vezi si SIGNAL_RIGHT_LANE_M in ai_controller.gd
+## pentru geometria completa a benzilor.
 @export var bus_width: float = 3.6:
 	set(value):
 		bus_width = value
@@ -342,26 +350,34 @@ func _build_bus() -> void:
 ## autocarului. Expus aici ca sa AI-ul sa poata folosi valoarea REALA in loc
 ## sa se bazeze pe `track.width_at_index()` (care ramane corect pentru
 ## restul pistei — fix-ul e local, nu in `Track`, ca sa nu se atinga rampa
-## folosita corect in alta parte).
+## folosita corect in alta parte). Runda 3: valoarea REALA pe Track16 e acum
+## 4.5 (tunelul a crescut de la semilatime 4.0 la 4.5 — vezi
+## `custom_width_segments`), suprascrisa pe nod.
 @export_range(1.0, 10.0, 0.1) var tunnel_half_width: float = 4.0
 
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
 ## POZITIV = dreapta SENSULUI de mers al masinilor, NEGATIV = stanga).
 ##
-## Reproiectare (banda de autocar, brief optiunea 0): tunelul de 8 m are banda
+## Reproiectare (banda de autocar, brief optiunea 0): tunelul are banda
 ## STANGA a autocarului (dinspre masini, adica local X NEGATIV — masurat cu o
 ## sonda dedicata pe Track16: `_side_at(idx).dot(bus_pos - baked[idx])` a iesit
 ## pozitiv pentru orice offset > 0, deci "dreapta soselei" e local +X, si
 ## "banda stanga" cere `bus_lane_offset < 0`) si banda DREAPTA a masinilor
 ## (`AIController` tinteste local X POZITIV cat e rosu — vezi
-## `_signal_keep_right` in ai_controller.gd). -2.0 m centreaza autocarul (3.6 m
-## lat) pe jumatatea stanga a unui tunel de 8 m (semilatime 4.0): de la axa,
-## banda stanga ocupa [-4.0, 0.0], centrul ei e la -2.0.
+## `SIGNAL_RIGHT_LANE_M` in ai_controller.gd).
 ##
-## Semnul vechi (+1.5, mod STOP) venea din geometria niselor (toate pe dreapta
-## soselei) si nu mai are sens in LANE: nisele s-au scos, iar acum contează
-## doar sa nu fie pe axa in banda masinilor.
+## Runda 3 (geometrie, coordonator, dupa verdictul rundei 2): tunelul a
+## crescut la semilatime 4.5 (9 m) SI autocarul s-a ingustat la `bus_width`
+## 3.0 -- pe geometria veche (tunel 4.0, autocar 3.6 la -2.0, masina la
+## +1.5), marginile lor erau la doar 0.6 m: orice clatinare pe asfalt ud
+## (custom_wet_ranges) insemna contact cu un corp CINEMATIC (masa infinita),
+## deci depenetrare violenta (42-59 m/s masurat) -- regula de banda era
+## ACTIVA in 100% din ejectari, deci fixul era marja, nu logica. -2.4 acum
+## centreaza autocarul (3.0 m, jumatate 1.5) pe [-3.9, -0.9], la 0.6 m de
+## peretele stang (la -4.5); banda dreapta a masinilor tinteste +2.0
+## (SIGNAL_RIGHT_LANE_M), ocupand [+0.9, +3.1] cu semilatimea masinii — intre
+## cele doua corpuri raman 1.8 m (de trei ori marja veche).
 @export_range(-4.0, 4.0, 0.1) var bus_lane_offset: float = -2.0:
 	set(value):
 		bus_lane_offset = value

@@ -224,19 +224,20 @@ const SIGNAL_LANE_REACH_M: float = 350.0
 ## decizie.
 const SIGNAL_LANE_EASE_M: float = 12.0
 ## Centrul benzii DREPTE (m fata de axa, semn ca `side_at`: pozitiv = dreapta
-## sensului de mers). Brief: tunel de 8 m, banda dreapta a masinilor ocupa
-## [0, +4.0], centrul geometric e la +2.0 — dar `line` e o TINTA de directie
-## pentru volan, nu o pozitie impusa: masina poate SUPRA-corecta (masurat pe
-## sonda, seed 0: convergenta de la -2.0 la mijlocul virajului dinaintea
-## tunelului trece linia si ajunge la +3.0..+3.24 chiar la intrarea in tunel).
-## La +3.24 cu semilatimea masinii ~1.1 m, botul drept atinge peretele
-## (semilatime tunel 4.0 m) — impactul cu peretele a fost cauza REALA a
-## „masinilor pe banda stanga": nu AI-ul alegea banda stanga, peretele o
-## respingea acolo dupa ce trecuse deja pe dreapta. 1.5 m lasa ~1 m de marja
-## suplimentara fata de perete la aceeasi supra-corectie, ramanand limpede in
-## banda dreapta (separatie fata de banda autocarului la -2.0: 3.5 m, tot
-## peste latimea unei masini + a autocarului).
-const SIGNAL_RIGHT_LANE_M: float = 1.5
+## sensului de mers).
+##
+## Runda 3 (geometrie, coordonator): tunelul a crescut la semilatime 4.5
+## (9 m). Citirea corecta a rundei 2 — masurat, regula de banda era ACTIVA
+## in 100% din ejectari si vitezele (42-59 m/s) sunt de coliziune bruta, nu
+## de sincronizare: cu autocarul (3.6 m) la -2.0 si masina (2.2 m) la +1.5
+## pe un tunel de 8 m, marginile lor erau la doar 0.6 m distanta — orice
+## clatinare pe asfalt ud (custom_wet_ranges) insemna contact cu un corp
+## CINEMATIC (masa infinita, memoria `corp-cinematic-aparut-in-masina`):
+## depenetrare violenta, nu o eroare de linie. Fixul e marja, nu regula.
+## +2.0 acum (ocupa +0.9..+3.1 cu semilatimea masinii ~1.1 m) fata de
+## autocarul la -2.4 (ocupa -3.9..-0.9): 1.8 m intre ele, de trei ori
+## marja veche (0.6 m).
+const SIGNAL_RIGHT_LANE_M: float = 2.0
 
 var track: Track
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe

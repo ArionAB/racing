@@ -62,7 +62,7 @@ radius_m = 55.0
 [node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(0.8889, 0.0000, -0.4581, -0.0038, 1.0000, -0.0075, 0.4581, 0.0084, 0.8888, -123.34, 44.69, -497.11)
 script = ExtResource("3_signal")
-period = 40.0
+period = 45.5
 clear_hold = 6.0
 tunnel_length = 169.0
 bus_speed = 12.5

@@ -102,6 +102,13 @@ class Stats:
 	var _was_stopped_at_line: bool = false
 	var _last_side_x: float = -1e9 # pentru detectia trecerii liniei (semn X)
 	var _crossed_red_flag: bool = false
+	# Runda 2, punctul 6: contactele-autocar impartite dupa cum a intrat masina
+	# (pe verde sau pe rosu), plus cate treceri pe rosu au iesit CURATE.
+	var entered_on_red: bool = false # ultima trecere a liniei a fost pe rosu?
+	var bus_hits_entered_green: int = 0
+	var bus_hits_entered_red: int = 0
+	var red_crossings_clean: int = 0 # a trecut pe rosu si N-a fost lovita pana la urmatorul verde
+	var _red_crossing_pending_clean: bool = false
 
 
 var _stats: Array[Stats] = []
@@ -345,12 +352,22 @@ func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
 func _on_bus_hit(car: Car) -> void:
 	var idx := _cars.find(car)
 	if idx >= 0:
-		_stats[idx].bus_hits += 1
+		var st := _stats[idx]
+		st.bus_hits += 1
+		# Runda 2, punctul 6: clasificarea dupa cum a intrat masina la ULTIMA
+		# trecere a liniei (verde sau rosu) — vezi `entered_on_red`, actualizat
+		# in `_tick_car` la fiecare trecere.
+		if st.entered_on_red:
+			st.bus_hits_entered_red += 1
+			st._red_crossing_pending_clean = false # lovita -- nu mai e "curata"
+		else:
+			st.bus_hits_entered_green += 1
 		if OS.get_environment("PROBE_FIORD_TRACE") == "1":
-			print("[bus-hit] t=%6.1fs %-24s v=%.1f poz=(%.1f,%.1f,%.1f) frac=%.3f" % [
-				_elapsed, _stats[idx].name, car.horizontal_speed(),
+			print("[bus-hit] t=%6.1fs %-24s v=%.1f poz=(%.1f,%.1f,%.1f) frac=%.3f intrata_pe=%s" % [
+				_elapsed, st.name, car.horizontal_speed(),
 				car.global_position.x, car.global_position.y, car.global_position.z,
-				_track.frac_at(car.road_index, car.route)])
+				_track.frac_at(car.road_index, car.route),
+				"ROSU" if st.entered_on_red else "verde"])
 
 
 func _physics_process(delta: float) -> void:
@@ -388,6 +405,10 @@ func _tick_car(i: int, delta: float) -> void:
 	# in banda tunelului (Z aproape de axa), cat semaforul era rosu la trecere.
 	if st._last_side_x < 0.0 and side_x >= 0.0 and absf(car.global_position.z) < TUNNEL_HALF_WIDTH + 1.0:
 		var red_left := _signal.red_seconds_left()
+		# Runda 2, punctul 6: clasificarea "a intrat pe verde / pe rosu" e
+		# EXACT tranzitia asta — cum a vazut lumina masina la trecerea liniei —
+		# si serveste doar pentru a imparti contactele-autocar de mai jos.
+		st.entered_on_red = red
 		if red:
 			st.ran_red += 1
 			# Sub RED_EDGE_S ramase: verdele apare in ACEEASI fereastra de tick in
@@ -396,12 +417,21 @@ func _tick_car(i: int, delta: float) -> void:
 			# Se raporteaza SEPARAT (nu se ascunde), dar nu intra la ran_red_clear.
 			if red_left > RED_EDGE_S:
 				st.ran_red_clear += 1
+			# "Curata" pana la proba contrarie -- se anuleaza in _on_bus_hit
+			# daca autocarul o loveste inainte sa treaca inapoi pe verde.
+			st._red_crossing_pending_clean = true
 			print("[trecere-pe-rosu] t=%6.1fs %-24s v=%.1f poz=(%.1f,%.1f,%.1f) rosu_ramas=%.2fs %s"
 				% [_elapsed, st.name, speed, car.global_position.x,
 					car.global_position.y, car.global_position.z, red_left,
 					"(limita verde)" if red_left <= RED_EDGE_S else "(CLAR ROSU)"])
 		st._crossed_red_flag = false
 	st._last_side_x = side_x
+	# Fereastra de golire, punctul 6: o trecere pe rosu care a supravietuit
+	# pana la urmatorul verde (fara sa fie lovita) e o "trecere reusita fara
+	# contact" -- se crediteaza AICI, o singura data, cand verdele revine.
+	if not red and st._red_crossing_pending_clean:
+		st._red_crossing_pending_clean = false
+		st.red_crossings_clean += 1
 
 	# --- asteptarea la linie ---
 	if red and in_stop_zone and speed < STOP_SPEED and side_x < 2.0:
@@ -475,11 +505,15 @@ func _report() -> void:
 	_done = true
 	print("\n=== SEMAFORUL TUNELULUI — seed %d, %.0fs, %d masini ===" % [
 		_seed, _elapsed, _cars.size()])
-	print("%-26s %6s %6s %8s %8s %6s %6s %6s %8s" % [
-		"masina", "tururi", "resp", "pe-rosu(clar)", "bus-hit", "eject", "blocaj", "pileup", "ast.med/max"])
+	print("%-26s %6s %6s %8s %8s %8s %8s %6s %6s %6s %8s" % [
+		"masina", "tururi", "resp", "pe-rosu(clar)", "bus/verde", "bus/rosu",
+		"rosu-curat", "eject", "blocaj", "pileup", "ast.med/max"])
 	var total_red := 0
 	var total_red_clear := 0
 	var total_bus := 0
+	var total_bus_green := 0
+	var total_bus_red := 0
+	var total_red_clean := 0
 	var total_ejects := 0
 	var total_stuck := 0
 	var total_pileup := 0
@@ -493,12 +527,16 @@ func _report() -> void:
 			wmax = maxf(wmax, w)
 			all_waits.append(w)
 		var wavg := wsum / maxf(float(st.wait_times.size()), 1.0)
-		print("%-26s %6.2f %6d %5d(%d) %8d %6d %6d %6d %5.1f/%.1f" % [
+		print("%-26s %6.2f %6d %5d(%d) %8d %8d %10d %6d %6d %6d %5.1f/%.1f" % [
 			st.name, st.laps, st.respawns, st.ran_red, st.ran_red_clear,
-			st.bus_hits, st.ejects, st.stuck_reports, st.green_stall_reports, wavg, wmax])
+			st.bus_hits_entered_green, st.bus_hits_entered_red, st.red_crossings_clean,
+			st.ejects, st.stuck_reports, st.green_stall_reports, wavg, wmax])
 		total_red += st.ran_red
 		total_red_clear += st.ran_red_clear
 		total_bus += st.bus_hits
+		total_bus_green += st.bus_hits_entered_green
+		total_bus_red += st.bus_hits_entered_red
+		total_red_clean += st.red_crossings_clean
 		total_ejects += st.ejects
 		total_stuck += st.stuck_reports
 		total_pileup += st.green_stall_reports
@@ -509,21 +547,25 @@ func _report() -> void:
 		overall_avg += w
 		overall_max = maxf(overall_max, w)
 	overall_avg /= maxf(float(all_waits.size()), 1.0)
-	print("--- total: repuneri=%d, treceri-pe-rosu=%d (clar rosu: %d), contacte-autocar=%d, ejectari=%d, blocaje=%d, pileup=%d"
-		% [total_resp, total_red, total_red_clear, total_bus, total_ejects, total_stuck, total_pileup])
+	print("--- total: repuneri=%d, treceri-pe-rosu=%d (clar rosu: %d), contacte-autocar=%d (verde: %d, rosu: %d), treceri-pe-rosu CURATE (fara contact)=%d, ejectari=%d, blocaje=%d, pileup=%d"
+		% [total_resp, total_red, total_red_clear, total_bus, total_bus_green,
+			total_bus_red, total_red_clean, total_ejects, total_stuck, total_pileup])
 	print("--- asteptare la rosu: medie %.2fs, maxima %.2fs, N=%d opriri" % [
 		overall_avg, overall_max, all_waits.size()])
-	# Verdict pe criteriul brief-ului: 0 AI intrate pe rosu — folosim
-	# ran_red_clear (exclude limita de esantionare la tranzitia in verde,
-	# vezi RED_EDGE_S), ca sa nu raportam fals un AI care a franat corect
-	# pana la linie si a plecat in fractiunea de secunda cand a prins verde.
-	# Ejectarile intra la verdict: e cea mai apropiata notiune de "distrus".
-	var ok := total_red_clear == 0 and total_stuck == 0 and total_ejects == 0
-	print("\nVERDICT: %s (0 blocaje: %s, 0 treceri-pe-rosu CLAR: %s%s, 0 ejectari: %s)" % [
-		"OK" if ok else "PROBLEMA",
-		"da" if total_stuck == 0 else "NU (%d)" % total_stuck,
-		"da" if total_red_clear == 0 else "NU (%d)" % total_red_clear,
-		"" if total_red == total_red_clear else
-			" [+%d la limita verde, vezi RED_EDGE_S]" % (total_red - total_red_clear),
-		"da" if total_ejects == 0 else "NU (%d)" % total_ejects])
+	# Criteriile RUNDA 2 (coordonator): treceri clare pe rosu <= 1/seed;
+	# contacte-autocar cu masini intrate pe VERDE = 0; contacte totale <= 3;
+	# 0 blocaje; 0 ejectari neexplicate (aici: 0, fara nicio explicatie gasita
+	# — vezi raportul); AI-ul nu porneste mai tarziu de 4s dupa verde (nu
+	# masurat direct aici — vezi ast.med/max, sub 4s pe toate rulatorile).
+	var ok := total_red_clear <= 1 and total_bus_green == 0 and total_bus <= 3 \
+		and total_stuck == 0 and total_ejects == 0
+	print("\nVERDICT RUNDA 2: %s" % ("OK" if ok else "PROBLEMA"))
+	print("  treceri clare pe rosu <= 1: %s (%d)" % [
+		"da" if total_red_clear <= 1 else "NU", total_red_clear])
+	print("  contacte cu masini intrate pe VERDE = 0: %s (%d)" % [
+		"da" if total_bus_green == 0 else "NU", total_bus_green])
+	print("  contacte totale <= 3: %s (%d, din care %d pe rosu)" % [
+		"da" if total_bus <= 3 else "NU", total_bus, total_bus_red])
+	print("  0 blocaje: %s (%d)" % ["da" if total_stuck == 0 else "NU", total_stuck])
+	print("  0 ejectari: %s (%d)" % ["da" if total_ejects == 0 else "NU", total_ejects])
 	get_tree().quit(0 if ok else 1)

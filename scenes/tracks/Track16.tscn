@@ -173,3 +173,4 @@ label = "kickerul Bowen"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.36, 15.73, -258.36)
 script = ExtResource("7_marker")
 kind = 8
+avalanche_period = 90.0

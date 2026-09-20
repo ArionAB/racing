@@ -138,6 +138,15 @@ enum Kind {
 ## drum de 9 m. Doar pentru SLIDING.
 @export_range(0.0, 30.0, 0.1) var sweep_speed: float = 0.0
 
+## Perioada ciclului (s). 0 = implicitul clasei. Doar pentru AVALANCHE — pana
+## la runda 2 (Fiordland) `_build_avalanche` nu citea NIMIC de la marker in
+## afara de pozitie/latime, deci orice avalansa plantata mostenea implicitul
+## `AvalancheHazard.DEFAULT_PERIOD` (8 s: TELEGRAPH 3.2 + SWEEP 2.6 + RETRACT
+## 2.2) — masurat si pe Track09 (Alpii), unde acelasi implicit prindea 3
+## masini diferite in ~16s (doua cicluri), nu un eveniment rar. Brief-ul
+## Fiordland cere "evenimentul rar" (~60-90s); acum se poate declara pe nod.
+@export_range(0.0, 120.0, 1.0) var avalanche_period: float = 0.0
+
 ## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
 ##
 ## O CLASA, nu o textura proprie: garda de materiale din `tools/probe_decor.gd`
@@ -228,6 +237,8 @@ func model_spec() -> Dictionary:
 		spec["motion"] = motion
 	if sweep_speed > 0.0:
 		spec["sweep_speed"] = sweep_speed
+	if avalanche_period > 0.0:
+		spec["avalanche_period"] = avalanche_period
 	if kind == Kind.ROCKFALL:
 		spec["rock_speed"] = rock_speed
 		spec["rock_pause"] = rock_pause

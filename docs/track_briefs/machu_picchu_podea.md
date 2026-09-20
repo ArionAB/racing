@@ -200,3 +200,40 @@ terenul existent limiteaza cat poate sapa rapa.
 redesenat relieful de baza pe intervalul lui F — ceea ce atinge terenul sub
 cele 132 de piese deja asezate si cere re-rularea generatorului. E aceeasi
 forma ca decizia inchisa pentru D: **teren, nu decor.**
+
+## 10. Raul lui F: reverificat de lead, constructorul avea DREPTATE (20 sep)
+
+Lead-ul a reluat problema dupa ce dezvoltatorul a cerut "fa-le pe toate", si a
+ajuns la aceeasi concluzie ca `10f90dd` — dar pe drumul lung. Scris ca sa nu se
+mai reia a treia oara.
+
+**Ce parea o contradictie.** Antetul generatorului (§9) spune "am mutat apa in
+tava vizibila de la -27,4..-28,3". Commit-ul ulterior `10f90dd` spune "raul NU
+poate intra in cadru" si a mutat-o inapoi in gorja, la -38,5..-40,3. In scena
+finala exista doar `F_Luciu` / `F_LuciuAdanc` / `F_Spuma`, toate la -38..-40.
+
+**Verificarea lead-ului.** 1742 de instante de apa, ZERO vizibile din ochi, la
+toate trei fractiunile; toate cele 1742 de raze sunt oprite de `TerrainBody`.
+Pana aici, identic cu raportul constructorului.
+
+**Unde lead-ul a gresit, si de ce conteaza.** Sonda lui folosea un ochi la
+**2,6 m** peste sosea, 8 m in spate. Camera de joc reala e la **10 m sus si
+12,5 m in spate**, cu fov 68 si `LOOK_HEIGHT 0,40` (`scenes/race/chase_camera.gd`).
+Cu ochiul prea jos, "fereastra vizibila" iesea la -40,0 de la 30 m lateral —
+adica exact unde e apa — si sugera ca ar fi de ajuns s-o muti mai in lateral.
+**Fals.** Cu camera reala, constructorul a masurat unghiul de coborare pana la
+fundul slotului: **46-64 de grade**, iar jumatatea de jos a FOV-ului vertical e
+**34°**. Deci albia e cu 12-30 de grade SUB muchia de jos a cadrului: nu e
+ocluzie, e **FOV**. Nicio mutare laterala n-o aduce in poza.
+
+Si ridicarea apei fusese deja testata de constructor: de la -38,9 la -28
+(11 m mai sus) celulele neocluzate cresc doar 7 -> 26 din 86, iar la -28 luciul
+ar fi peste fundul albiei.
+
+**Concluzie: nu se atinge.** E limita de geometrie a zonei, confirmata acum de
+doua masuratori independente. Daca raul trebuie sa se vada, se redeseneaza
+relieful de baza pe 0.66-0.74 — aceeasi decizie inchisa pentru D.
+
+**Lectia de metoda:** cand verifici concluzia altcuiva, foloseste
+**parametrii lui**, nu aproximari. Un ochi la 2,6 m in loc de 10 m raspunde la
+alta intrebare si da un "da" acolo unde raspunsul e "nu".

@@ -136,6 +136,18 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 ## fortei (echivalent cu „ai scapat gratis daca te opresti"), nu prin
 ## echilibru. 0.25 = un sfert din forta de referinta.
 @export_range(0.0, 1.0, 0.05) var min_speed_factor: float = 0.25
+## Varianta B (runda 2): apasarea slabeste SUPLIMENTAR cand arcul e aproape
+## de fund, ca sa nu tina masina blocata la 100% timp de secunde intregi.
+## Peste `compression_ease_start` (fractie din cursa), factorul de compresie
+## scade liniar spre `compression_ease_min` la 100%. La 0.0 (implicit)
+## varianta e OPRITA — doar scalarea cu viteza (varianta A). Testat separat
+## pe sonda (`--compression-ease=`), fiindca inca o bucla care se auto-
+## regleaza (de data asta pe compresie, nu pe viteza) merita masurata izolat
+## inainte sa se combine cu scalarea cu viteza.
+@export_range(0.0, 1.0, 0.05) var compression_ease_start: float = 0.0
+## Cat mai ramane din acceleratie la compresie 100%, daca
+## `compression_ease_start` > 0.
+@export_range(0.0, 1.0, 0.05) var compression_ease_min: float = 0.3
 ## Franarea pe componenta ORIZONTALA a vitezei, ca fractie pe secunda
 ## (`v -= v_horiz * drag * delta`). Calibrat pe sonda (`probe_fiord_cascada.gd
 ## --drag=`, sweep 0.0-0.5) sa dea ~20-25% pierdere de viteza pe 30 m la
@@ -246,6 +258,8 @@ func _physics_process(delta: float) -> void:
 		_cars_inside[car] = true
 		if base_accel > 0.0:
 			var accel := base_accel * _speed_factor(car.horizontal_speed())
+			if compression_ease_start > 0.0:
+				accel *= _compression_factor(car)
 			car.apply_central_force(Vector3.DOWN * car.mass * accel)
 		if drag > 0.0:
 			var v := car.velocity
@@ -266,6 +280,23 @@ func _speed_factor(horizontal_speed: float) -> float:
 	if speed_ref <= 0.01:
 		return 1.0
 	return clampf(horizontal_speed / speed_ref, min_speed_factor, 1.5)
+
+
+## Varianta B: slabeste apasarea cand arcul e deja aproape de fund — citeste
+## `wheel_compression` (acelasi camp public folosit de sonda), ia MAXIMUL
+## celor 4 roti ca fractie din cursa proprie, si scade liniar de la 1.0 (la
+## `compression_ease_start`) la `compression_ease_min` (la 100%).
+func _compression_factor(car: Car) -> float:
+	var rest := maxf(car.suspension_rest, 0.001)
+	var frac := 0.0
+	for c in car.wheel_compression:
+		frac = maxf(frac, float(c) / rest)
+	if frac <= compression_ease_start:
+		return 1.0
+	var t := clampf(
+		(frac - compression_ease_start) / maxf(1.0 - compression_ease_start, 0.001),
+		0.0, 1.0)
+	return lerpf(1.0, compression_ease_min, t)
 
 
 # ---------------------------------------------------------------- pentru sonde

@@ -53,6 +53,10 @@ extends Node
 ##   --speed-ref=25     WaterfallHazard.speed_ref (runda 2: forta scalata cu
 ##                       viteza CURENTA a masinii, nu constanta)
 ##   --min-speed-factor=0.25  WaterfallHazard.min_speed_factor
+##   --compression-ease=0.6      WaterfallHazard.compression_ease_start
+##                                (varianta B, runda 2: apasarea slabeste
+##                                suplimentar cand arcul e aproape de fund)
+##   --compression-ease-min=0.3  WaterfallHazard.compression_ease_min
 
 const STEP: float = 1.0 / 60.0
 ## Lungimea perdelei (m) — vezi WaterfallHazard.length, brief: 30.
@@ -86,6 +90,9 @@ var _drag_override: float = -1.0
 ## Override-uri runda 2 pentru scalarea cu viteza. -1 = default din hazard.
 var _speed_ref_override: float = -1.0
 var _min_speed_factor_override: float = -1.0
+## Override-uri runda 2, varianta B (easing pe compresie). -1 = default.
+var _compression_ease_override: float = -1.0
+var _compression_ease_min_override: float = -1.0
 ## Runda 2: adauga o rulare la 10 m/s pentru Autobuz/Pompieri.
 var _bus_slow: bool = false
 
@@ -157,6 +164,10 @@ func _parse_args() -> void:
 			_speed_ref_override = float(arg.trim_prefix("--speed-ref="))
 		elif arg.begins_with("--min-speed-factor="):
 			_min_speed_factor_override = float(arg.trim_prefix("--min-speed-factor="))
+		elif arg.begins_with("--compression-ease-min="):
+			_compression_ease_min_override = float(arg.trim_prefix("--compression-ease-min="))
+		elif arg.begins_with("--compression-ease="):
+			_compression_ease_override = float(arg.trim_prefix("--compression-ease="))
 		elif arg == "--bus-slow":
 			_bus_slow = true
 		elif arg == "--quick":
@@ -200,6 +211,10 @@ func _build_curtain(force_accel: float, rain_factor: float) -> WaterfallHazard:
 		wf.speed_ref = _speed_ref_override
 	if _min_speed_factor_override >= 0.0:
 		wf.min_speed_factor = _min_speed_factor_override
+	if _compression_ease_override >= 0.0:
+		wf.compression_ease_start = _compression_ease_override
+	if _compression_ease_min_override >= 0.0:
+		wf.compression_ease_min = _compression_ease_min_override
 	add_child(wf)
 	wf.global_position = Vector3(0, 0.0, 0)
 	return wf

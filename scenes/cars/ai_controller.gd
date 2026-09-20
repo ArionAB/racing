@@ -134,6 +134,14 @@ const SIGNAL_STOP_M: float = 2.0
 ## Cat de repede pleaca dupa ce prinde verde: fara isteric la volan (accelerare
 ## normala), dar fara nicio ezitare — franarea de mai sus il tine deja oprit
 ## EXACT la linie, deci "plecarea" e doar gazul normal din codul de pedale.
+##
+## Marja de "scurgere" a franarii: cat de mult sub linie (m) mai conteaza
+## masina blocata de semafor, DACA e inca rosu. Franarea `target -> 0` e
+## asimptotica, nu instanta — o masina mai are 2-4 m/s de elan exact cand
+## indexul ei trece punctul de decizie. Masurat cu tools/probe_fiord_semafor.gd:
+## fara marja, 2-8 treceri-pe-rosu pe 150s cu 1-2s de rosu inca ramas (nu
+## coincidenta de esantionare — vezi RED_EDGE_S din sonda, care le desparte).
+const SIGNAL_STOP_LEAK_M: float = 4.0
 
 var track: Track
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
@@ -657,12 +665,23 @@ func _signal_red_ahead(speed: float) -> float:
 		elif d_idx > n_pts / 2:
 			d_idx -= n_pts
 		var along := float(d_idx) * bake
-		if along < 0.0 or along > TunnelSignalHazard.AI_REACH_M or along >= best:
+		# SIGNAL_STOP_LEAK_M: o masina care franeaza spre 0 nu se opreste chiar
+		# PE linie — mai are cativa metri de elan cand indexul ei trece de
+		# punctul de decizie (masurat: 2-4 m/s la 1-2s de rosu ramas, adica
+		# exact "along" trecand de 0 inainte ca viteza sa fi ajuns la zero).
+		# Fara marja, `_signal_block_m` sare la INF EXACT in clipa cand mai
+		# conteaza, gazul se elibereaza, si masina "se scurge" peste linie cat
+		# inca e rosu. Cat ramane rosu, un mic exces sub linie tot conteaza
+		# blocat — nu schimba nimic pentru masinile normale (care se opresc
+		# mult inainte de linie), doar prinde coada franarii.
+		if along < -SIGNAL_STOP_LEAK_M or along > TunnelSignalHazard.AI_REACH_M \
+				or along >= best:
 			continue
-		var eta := along / maxf(speed, 6.0)
+		var eta := maxf(along, 0.0) / maxf(speed, 6.0)
 		# Aceeasi marja ca la usa: un pilot care franeaza pe viraj ajunge mai
 		# tarziu decat `along / speed` — se intreaba si peste inca o secunda.
-		if sig.blocks_in(eta) or sig.blocks_in(eta + DOOR_ETA_SLACK):
+		if sig.blocks_in(eta) or sig.blocks_in(eta + DOOR_ETA_SLACK) \
+				or (along < 0.0 and sig.is_red()):
 			best = along
 	return best
 

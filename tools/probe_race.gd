@@ -137,6 +137,11 @@ var _seed: int = SEED
 ## Masina jucatorului, index in GameState.CAR_DATA. Suprascris cu --car=N.
 ## 0 = Muscle, masina de referinta a proiectului.
 var _player_car: int = 0
+## Numarul de adversari AI. -1 = nu se atinge GameState.ai_count (implicitul
+## de joc, 5 -> 6 masini pe grila). Suprascris cu --ai=N — Fiordland cere 8
+## masini pe grila (brief §7 pasul 3: 8 masini, fara decor, pe tunelul cu
+## semafor), peste implicitul de 6.
+var _ai_count: int = -1
 ## Viteza de sosire a atacatorului in modul bump (m/s).
 const BUMP_ENTRY_SPEED: float = 26.0
 
@@ -228,6 +233,8 @@ func _ready() -> void:
 			_seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--car="):
 			_player_car = int(arg.trim_prefix("--car="))
+		elif arg.begins_with("--ai="):
+			_ai_count = int(arg.trim_prefix("--ai="))
 		elif arg.begins_with("--slice="):
 			var ab := arg.trim_prefix("--slice=").split(",")
 			_slice = Vector2(float(ab[0]), float(ab[1]))
@@ -239,6 +246,8 @@ func _ready() -> void:
 	# assets — de fapt se schimbase masina sub noi. Aceeasi capcana ca la
 	# --mode=cliff, care nu-si seta `car.track` si masura altceva decat credea.
 	GameState.selected_car = clampi(_player_car, 0, GameState.CAR_DATA.size() - 1)
+	if _ai_count >= 0:
+		GameState.ai_count = _ai_count
 	# `--track=` ia POZITIA din lista (Stromboli = 4), dar accepta si numarul
 	# scenei (--track=11). Fara verificarea asta, un index gresit nu se plangea
 	# aici, ci pica mai tarziu cu "Out of bounds" si turna zeci de mii de erori
@@ -350,7 +359,21 @@ func _start_race() -> void:
 func _tick_race(delta: float) -> void:
 	_elapsed += delta
 	var cars: Array[Car] = _race.cars
-	if OS.get_environment("PROBE_RACE_TRACE") == "1" \
+	# PROBE_RACE_TRACE=2: acelasi tabel, dar la 0,1 s si doar in fereastra
+	# 60-70 s — diagnostic ad-hoc pentru un respawn reproductibil la un frac
+	# fix, fara sa umple logul pe toata cursa. Fereastra si pasul se schimba
+	# de mana cand se ancheteaza alt interval.
+	var trace_env := OS.get_environment("PROBE_RACE_TRACE")
+	if trace_env == "2" and _elapsed >= 60.0 and _elapsed <= 70.0 \
+			and int(_elapsed * 60.0) % 6 == 0:
+		for i in cars.size():
+			var c := cars[i]
+			print("FTRACE t=%6.2f car%d frac=%.4f on_road=%s v=%5.1f pos=(%.1f,%.2f,%.1f) vel=%s"
+				% [_elapsed, i, _race.track.frac_at(c.road_index, c.route),
+					_race.track.is_on_road(c.road_index, c.global_position, c.route),
+					c.horizontal_speed(), c.global_position.x, c.global_position.y,
+					c.global_position.z, c.linear_velocity])
+	if trace_env == "1" \
 			and int(_elapsed * 60.0) % 120 == 0:
 		for i in cars.size():
 			var c := cars[i]

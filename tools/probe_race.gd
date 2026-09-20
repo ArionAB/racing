@@ -167,6 +167,15 @@ const CLIFF_FRACS: Array[float] = [0.12, 0.31, 0.44, 0.58, 0.73, 0.91]
 var _mode: String = "race"
 var _track_index: int = 0
 var _seconds: float = 150.0
+## `--rain=1`: fortata ploaia peste orice `RainCycle` de pe pista, prin
+## `force_factor(1.0)` (Fiordland, docs/track_briefs/fiordland.md §7 pasul
+## de verdict "o rulare cu ploaia fortata"). `--rain=0`: fortat USCAT (opreste
+## ceasul cu `force_factor(0.0)`), pentru izolarea A/B — FARA steag, o cursa de
+## 150s cu `RainCycle` implicit (period 95s) trece oricum printr-o fereastra de
+## ploaie in jurul t=95-125s, deci nu era o linie de baza "mereu uscata" (runda
+## 2, diagnosticul coordonatorului). -1 (implicit) = neatins, ciclul normal.
+## Pistele fara `RainCycle` ignora ambele steaguri.
+var _force_rain: int = -1
 
 var _race: Node = null
 var _elapsed: float = 0.0
@@ -258,6 +267,8 @@ func _ready() -> void:
 		elif arg.begins_with("--slice="):
 			var ab := arg.trim_prefix("--slice=").split(",")
 			_slice = Vector2(float(ab[0]), float(ab[1]))
+		elif arg.begins_with("--rain="):
+			_force_rain = int(arg.trim_prefix("--rain="))
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -375,6 +386,55 @@ func _start_race() -> void:
 		if car.has_signal(&"bumped"):
 			car.bumped.connect(_on_bumped.bind(i))
 	_setup_signal_hazards()
+	if _force_rain >= 0:
+		_force_rain_cycle_deferred(float(_force_rain))
+
+
+## `--rain=1`/`--rain=0`: gaseste orice `RainCycle` prin grupul lui
+## (`rain_cycle`, vezi RainCycle._ready) si il fixeaza la `factor` (1.0 = ploaie
+## plina, 0.0 = uscat fortat, ceasul oprit in ambele cazuri) — acelasi apel pe
+## care il foloseste sonda A/B a ploii (`ProbeFiordPloaie`). Pista ramane
+## astfel la starea ceruta din primul cadru pana la ultimul, in loc sa astepte
+## ~5-30s din ciclul de 95s pana la prima fereastra, SAU (la 0) sa treaca oricum
+## printr-o fereastra de ploaie in cursul unei rulari de 150s (period 95s —
+## fara steag, o cursa "de control" nu era de fapt mereu uscata). Gol pe orice
+## pista fara `RainCycle`.
+##
+## Runda 3, punctul 1: BUG gasit prin diagnostic (`_rain_diag`) — apelul
+## SINCRON, direct din `_start_race()`, ateriza `rain_factor=1.0` pe nodul
+## `RainCycle` insusi, dar `track.rain_wet` ramanea `false`: `RainCycle._ready`
+## isi programeaza `_collect()` (care rezolva `_track`) prin `call_deferred`,
+## deci in cadrul in care `_start_race()` ruleaza, `_track` e INCA null cand
+## `force_factor()` incearca sa scrie `_track.rain_wet` — vezi garda
+## `if _track != null` din `RainCycle._apply()`, care a esuat tacut. Si mai
+## rau: `force_factor()` cheama `set_process(false)`, deci nodul ramanea
+## INGHETAT cu `rain_factor` setat corect pe el insusi, dar fara sa mai
+## apuce vreodata sa-l aplice pe pista — de-aici "identic la bit" intre
+## --rain=0 si --rain=1 (ambele lasau `track.rain_wet=false` tot timpul).
+## `ProbeFiordPloaie` (sonda existenta, A/B pe ploaie) evita exact asta cu
+## DOUA `await get_tree().process_frame` inainte de `force_factor()` —
+## acelasi leac aici, prin `call_deferred` dublu (echivalent, fara sa fac
+## `_start_race` async).
+func _force_rain_cycle_deferred(factor: float) -> void:
+	call_deferred(&"_force_rain_cycle_step2", factor)
+
+
+func _force_rain_cycle_step2(factor: float) -> void:
+	# Un singur `call_deferred` ajunge dupa `RainCycle._collect.call_deferred()`
+	# programat in ACELASI cadru (ambele intra in coada de deferred calls a
+	# cadrului curent, in ordinea in care au fost programate — `RainCycle`
+	# insusi a fost instantiat, deci `_ready()`-ul lui a rulat, INAINTE ca
+	# `_force_rain_cycle_deferred` sa fie apelat din `_start_race()`). Al
+	# doilea pas ramane totusi separat (nu un singur `_force_rain_cycle` cu
+	# `call_deferred` in interior) ca sa se poata verifica direct, cu
+	# `_rain_diag`, ca `_track` chiar nu mai e null cand scriem.
+	_force_rain_cycle(factor)
+
+
+func _force_rain_cycle(factor: float) -> void:
+	for node in get_tree().get_nodes_in_group(&"rain_cycle"):
+		if node.has_method("force_factor"):
+			node.call("force_factor", factor)
 
 
 ## Fiordland: agata contorul de evenimente pe orice TunnelSignalHazard din
@@ -388,15 +448,48 @@ func _setup_signal_hazards() -> void:
 		sig.bus_hit.connect(_on_signal_bus_hit)
 
 
+## Runda 3, punctul 1: „identic la bit" intre --rain=0 si --rain=1 e exact
+## semnul de mecanism NECONECTAT (memoria `sonda-masura-alt-obiect`) — de
+## verificat direct, nu presupus. La t=10s si t=60s (o data fiecare, marcate
+## in `_rain_diag_done`) se tipareste starea REALA: `RainCycle.rain_factor`,
+## `track.rain_wet` (campul citit de `Car.is_wet_at`/`_physics_process`) si
+## `slip_time` al fiecarei masini — daca oricare ramane 0/false pe --rain=1,
+## flagul nu ajunge la pista, indiferent ce spune codul lui `force_factor`.
+var _rain_diag_done: Dictionary = {}
+func _rain_diag(t_mark: float) -> void:
+	if _elapsed < t_mark or _rain_diag_done.get(t_mark, false):
+		return
+	_rain_diag_done[t_mark] = true
+	var cycles := get_tree().get_nodes_in_group(&"rain_cycle")
+	var rf := -1.0
+	if not cycles.is_empty():
+		rf = float(cycles[0].get("rain_factor"))
+	print("[rain-diag] t=%.1f rain_factor=%s track.rain_wet=%s" % [
+		_elapsed, str(rf), str(_race.track.rain_wet)])
+	var cars: Array[Car] = _race.cars
+	for i in cars.size():
+		var c := cars[i]
+		print("    slip_time car%d (%s) = %.3f" % [i, c.pilot_name, c.slip_time])
+
+
 func _tick_race(delta: float) -> void:
 	_elapsed += delta
+	_rain_diag(10.0)
+	_rain_diag(60.0)
 	var cars: Array[Car] = _race.cars
-	# PROBE_RACE_TRACE=2: acelasi tabel, dar la 0,1 s si doar in fereastra
-	# 60-70 s — diagnostic ad-hoc pentru un respawn reproductibil la un frac
-	# fix, fara sa umple logul pe toata cursa. Fereastra si pasul se schimba
-	# de mana cand se ancheteaza alt interval.
+	# PROBE_RACE_TRACE=2: acelasi tabel, dar la 0,1 s si doar intr-o fereastra
+	# ingusta — diagnostic ad-hoc pentru un respawn reproductibil la un frac
+	# fix, fara sa umple logul pe toata cursa. Implicit 60-70s; suprascrisa cu
+	# PROBE_RACE_TRACE_WINDOW=inceput,sfarsit (runda 3: 115,140 pentru
+	# repunerile de langa semafor, care apar mult mai tarziu in cursa).
 	var trace_env := OS.get_environment("PROBE_RACE_TRACE")
-	if trace_env == "2" and _elapsed >= 60.0 and _elapsed <= 70.0 \
+	var trace_window := Vector2(60.0, 70.0)
+	var trace_window_env := OS.get_environment("PROBE_RACE_TRACE_WINDOW")
+	if not trace_window_env.is_empty():
+		var parts := trace_window_env.split(",")
+		if parts.size() == 2:
+			trace_window = Vector2(float(parts[0]), float(parts[1]))
+	if trace_env == "2" and _elapsed >= trace_window.x and _elapsed <= trace_window.y \
 			and int(_elapsed * 60.0) % 6 == 0:
 		for i in cars.size():
 			var c := cars[i]

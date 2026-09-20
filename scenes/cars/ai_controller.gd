@@ -139,6 +139,21 @@ const DOOR_STOP_M: float = 6.0
 ## lungi), deci 40 m insemna sub 2s de reactie la 25+ m/s. 120 m da ~5s la
 ## aceeasi viteza, comparabil cu DOOR_REACH_M (120m) de la usa de piatra.
 const SIGNAL_BRAKE_M: float = 120.0
+## Runda 2 (Fiordland): pe asfalt UD, distanta de franare declarata mai sus
+## nu ajunge — e calibrata pe grip de uscat. Coordonatorul a diagnosticat
+## corect: `RainCycle` uda TOT drumul (`Track.is_wet_at` intoarce true peste
+## tot cat `rain_wet` e pornit), inclusiv urcarea de 7% spre linia de oprire de
+## la portalul de est, iar AI-ul franeaza cu aceeasi distanta ca pe uscat si
+## aluneca in coada — masurat: 11 repuneri langa semafor pe 16 seed-uri uscate
+## fata de 3 pe linia de baza, si 16-33 blocaje/seed cu ploaia fortata.
+## Fix: distanta de reactie se INMULTESTE cu 1.5 cand drumul de sub masina e
+## ud — `track.is_wet_at(frac)` e informatie pe care un sofer o vede (asfaltul
+## lucios, cauciucul care nu mai muscă), deci ramane "AI onest": nu i se da
+## niciun bit despre semafor sau despre ciclul ploii, doar aceeasi citire de
+## suprafata pe care o foloseste deja `route_is_wet` pentru viteza-tinta.
+## Nimic altceva nu se schimba in franare — nici franarea proportionala, nici
+## coada, nici pragurile semaforului insusi.
+const SIGNAL_BRAKE_WET_FACTOR: float = 1.5
 ## Unde se opreste botul fata de linia de oprire (TunnelSignalHazard.
 ## ai_decision_point() e deja "linia, cu marja inapoi" — aici mai punem doar
 ## jumatate de lungime de masina, ca botul sa nu treaca de ea).
@@ -357,7 +372,15 @@ func update(delta: float) -> void:
 	# Rosu la sosire: franeaza si opreste EXACT la linie — brief §3, "AI
 	# onest si semaforul": niciun AI nu trece pe rosu, indiferent de cat de
 	# mult ar castiga jucatorul trecand. Vezi SIGNAL_BRAKE_M/SIGNAL_STOP_M.
-	var signal_wait := _signal_block_m < SIGNAL_BRAKE_M
+	#
+	# Runda 2 (Fiordland): pe ud, fereastra de reactie se largeste cu
+	# SIGNAL_BRAKE_WET_FACTOR — vezi comentariul de la constanta. Se citeste
+	# UD la pozitia CURENTA a masinii (`idx`), nu la linia de oprire: un sofer
+	# simte asfaltul de sub el acum, nu ghiceste starea de la 100 m in fata.
+	var signal_brake_m := SIGNAL_BRAKE_M
+	if track.is_wet_at(track.frac_at(idx, car.route)):
+		signal_brake_m *= SIGNAL_BRAKE_WET_FACTOR
+	var signal_wait := _signal_block_m < signal_brake_m
 	if signal_wait:
 		var stop_m := maxf(_signal_block_m - SIGNAL_STOP_M, 0.0)
 		# Runda 2, punctul 3: coada. Fara asta fiecare AI tintea DOAR linia —
@@ -872,6 +895,27 @@ func _begin_unstick() -> void:
 		# Am incercat cinstit si tot suntem infipti — cerem repunerea.
 		_attempts = 0
 		_unstick_timer = 0.0
+		# Runda 3, punctul 2: diagnostic optional (AI_UNSTICK_TRACE=1), ca sa
+		# se poata deosebi „paznicul de progres a cerut repunerea" de o
+		# RespawnZone (cascada Stirling, canalul Bowen, mare/rau) — semnalul
+		# `respawned` nu duce cine a chemat-o. Raporteaza si starea celui mai
+		# apropiat semafor din fata: daca e rosu sau la cate secunde de la
+		# ultimul verde, ca sa se vada daca masina statea intr-o coada legitima
+		# la semafor cand paznicul a decis ca "nu progreseaza".
+		if OS.get_environment("AI_UNSTICK_TRACE") == "1":
+			var frac := track.frac_at(car.road_index, car.route) \
+				if track != null else -1.0
+			var sig_state := "fara semafor in grup"
+			for node in get_tree().get_nodes_in_group(TunnelSignalHazard.AI_GROUP):
+				var sig := node as TunnelSignalHazard
+				if sig == null:
+					continue
+				sig_state = "rosu" if sig.is_red() else \
+					"verde(%.1fs ramase)" % sig.green_seconds_left()
+				break
+			print("[unstick-respawn] %s frac=%.3f pos=(%.0f,%.0f,%.0f) semafor=%s"
+				% [car.pilot_name, frac, car.global_position.x,
+					car.global_position.y, car.global_position.z, sig_state])
 		car.respawn()
 		return
 	# Directia in care trebuie sa ajunga botul: spre centrul soselei, in fata.

@@ -9669,7 +9669,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.EXCAVATOR:
 			_build_excavator(frac)
 		HazardMarker.Kind.AVALANCHE:
-			_build_avalanche(frac)
+			_build_avalanche(frac, spec)
 		HazardMarker.Kind.WAVE:
 			# Se sare singur, cu avertisment, daca tema n-are mare.
 			_build_wave_surge(frac)
@@ -9939,7 +9939,7 @@ func _within_wall(segments: Array[Vector2], at_m: float) -> bool:
 ## De aceea telegraful e de 3.2 s (vezi AvalancheHazard.TELEGRAPH) si de aceea
 ## nu se pune niciodata in apex — style_bible §7 cere sa nu blochezi citirea
 ## virajului, iar aici blocajul e total.
-func _build_avalanche(frac: float) -> void:
+func _build_avalanche(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	if n == 0:
 		return
@@ -9952,6 +9952,12 @@ func _build_avalanche(frac: float) -> void:
 	var av := AvalancheHazard.new()
 	av.road_half_width = width_at(frac_at(idx))
 	av.phase = fposmod(frac * 3.7, 1.0) # doua avalanse nu pornesc la unison
+	# Runda 2 (Fiordland, HazardMarker.avalanche_period): implicitul clasei
+	# (8s) e ciclul bolovanului de canion, nu al unui eveniment rar — vezi
+	# comentariul de pe export. Doar cand nodul cere explicit altceva.
+	var period := float(spec.get("avalanche_period", 0.0))
+	if period > 0.0:
+		av.period = period
 	# ATENTIE la ordine: transformarea INAINTE de add_child. Masa e un
 	# AnimatableBody3D cu sync_to_physics, deci transformarea o tine serverul de
 	# fizica; pusa dupa intrarea in arbore, ramane un pas fizic in origine —

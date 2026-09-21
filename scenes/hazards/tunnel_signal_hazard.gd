@@ -355,6 +355,15 @@ func _build_bus() -> void:
 ## `custom_width_segments`), suprascrisa pe nod.
 @export_range(1.0, 10.0, 0.1) var tunnel_half_width: float = 4.0
 
+## Inaltimea tavanului tubului peste asfalt (m), brief §2 E: 6,5.
+##
+## Nodul e DECLARATIA tunelului (linia de oprire = originea lui, lungimea si
+## semilatimea sunt deja aici, citite de autocar si de AI). Geometria — pereti,
+## tavan, movila, portaluri, zona de camera — o construieste [Track] din
+## aceleasi numere (`Track._build_tunnels`), ca sa nu existe doua copii ale
+## lor. Nu intra in nimic din ce face lampa sau autocarul.
+@export_range(4.0, 12.0, 0.1) var tunnel_ceiling: float = 6.5
+
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
 ## POZITIV = dreapta SENSULUI de mers al masinilor, NEGATIV = stanga).

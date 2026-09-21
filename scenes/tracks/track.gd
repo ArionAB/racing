@@ -1055,7 +1055,45 @@ static func themes() -> Dictionary:
 			"fog_end": 300.0,
 			"fog_curve": 1.6,
 			"fog_max": 0.85,
-			"horizon_model": "",
+			"horizon_model": "res://assets/models/rocks/mountain_peak.glb",
+			# MALURILE — stratul doi al criticii dezvoltatorului despre podeaua
+			# vaii ("valea e reala, dar de pe drum nu se citeste ca prapastie:
+			# vezi padure mai jos, nu o margine").
+			#
+			# Masurat cu camera de JOC reala (10 m sus, 12,5 m in spate, fov 68):
+			# podeaua se vede pana la 250 m (limita sondei) si malul opus NU se
+			# vede la NICIUNA din cele sase fractiuni verificate. Valea n-are
+			# margine, deci citeste ca o campie mai joasa.
+			#
+			# Tema avea "" = siluete de REZERVA (sfere turtite, _build_horizon_
+			# fallback), asezate la 240-480 m — adica dincolo de `fog_end` 300 si
+			# aproape de FAR_PLANE 380. Memoria `efecte-de-fundal-cote-legate`
+			# cere inel < fog_end < FAR_PLANE; aici inelul era PESTE ceata, deci
+			# cele mai multe siluete erau inghitite sau taiate.
+			#
+			# `mountain_peak` e ce folosesc deja Alpii si Stromboli, deci zero
+			# asset nou si clasa lui de textura e deja pe pista.
+			# Un singur nod in GLB, ca la Alpi: varietatea vine din scara si
+			# rotatie, nu din forme diferite.
+			"horizon_picks": [["MountainPeak"], ["MountainPeak"],
+				["MountainPeak"]],
+			# INELE CALIBRATE PE CEATA ASTEI PISTE, nu copiate de la Alpi.
+			# Alpii au fog_end 370 si inele pana la 355; aici fog_end e 300
+			# (norul care urca din defileu, brief §4), deci un inel la 355 ar fi
+			# integral inghitit. Regula: inel < fog_end < FAR_PLANE 380
+			# (memoria `efecte-de-fundal-cote-legate`).
+			#
+			# Scara creste cu distanta ca siluetele sa pastreze aceeasi
+			# inaltime unghiulara; `clear` tine muntele departe de sosea, altfel
+			# o silueta scalata intra peste drum.
+			"horizon_rings": [
+				{"near": 150.0, "far": 195.0, "count": 4, "scale": 0.85,
+					"clear": 95.0, "picks": ["MountainPeak"]},
+				{"near": 195.0, "far": 245.0, "count": 5, "scale": 1.10,
+					"clear": 120.0, "picks": ["MountainPeak"]},
+				{"near": 245.0, "far": 295.0, "count": 4, "scale": 1.40,
+					"clear": 145.0, "picks": ["MountainPeak"]},
+			],
 			"horizon_class": "",
 			"walls": false,
 			"kerbs": false,

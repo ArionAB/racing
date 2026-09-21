@@ -51,7 +51,51 @@ golf" (nodul la (-250, 70, -200), raza 44, `island = true`):
   A 0/10 in cadru, B1 0/14, F1 0/13) si TRECE pe cea noua (A 6/10, B1
   14/14, F1 9/13 in cadru / 6/13 intreg). Verificare: `git show
   e882cc62:scenes/tracks/Track16.tscn > /tmp/old.tscn` si `--tscn /tmp/old.tscn`.
-  Ce vede in plus, informativ: B2/C/F2 (lateral) si H.
+  Ce vede in plus, informativ: B2/C/F2 (lateral), H si F-iesire (0,69-0,74,
+  dupa portalul de vest — vezi mai jos de ce conteaza).
+
+OCLUZIA DE PROPRIUL RELIEF (a patra axa, adaugata 21 sep 2026 seara):
+  frustumul nu stie de teren. Un punct e „intreg" numai daca, pe langa
+  azimut si verticala, segmentul camera -> varf SI segmentul camera ->
+  (varf - 0,5 * inaltimea vizibila a insulei, adica 72 m peste apa) trec la
+  >= 2 m DEASUPRA terenului real, pe tot drumul pana la baza insulei
+  (centru - raza; insula insasi nu se numara ocluzie). Terenul vine din
+  GRILA `tools/data/fiord_varf_grid/grid.csv` (+ `baked.csv`), care e INPUT
+  al gardii, nu se calculeaza aici: ground_y traieste in TrackSideSampler.
+  Se regenereaza dupa ORICE schimbare de teren pe Track16 (traseu, rape,
+  masive, sea_level_offset), altfel garda masoara relieful vechi:
+      godot --headless --path . res://tools/SvFiordVarfGrid.tscn -- --track=16 \
+            --out=tools/data/fiord_varf_grid
+  Daca grila LIPSESTE sau nu se potriveste cu scena (prea putine puncte
+  coapte fata de punctele de control), garda PICA cu mesaj, nu trece in
+  tacere (memoria `garda-fara-linie-de-baza-iese-zero`).
+  Contractul pe F1 e „>= 60% in cadru si >= 40% intreg SI neocluzat".
+
+  STAREA CINSTITA (21 sep 2026): garda e ROSIE pe F1 si ramane asa, cu
+  motiv. F1 (0,60-0,67) din brief e, pe pista MONTATA, coridorul tunelului:
+  `SemaforTunel` sta la frac 0,612 si `tunnel_length` = 169 m, deci tunelul
+  e 0,612-0,69, iar drumul trece la 8-70 m de centrul lui `MasivTunel`
+  (raza 90, cota 70) pe 0,62-0,66. „Creasta de pe dreapta" care ascunde
+  insula la 0,63-0,64 (teren 53 m la 50 m lateral, camera la 51; raman
+  32 m din 72 vizibili la 0,63 si 1 m la 0,64) este chiar muntele
+  tunelului. Tesirea ei la <= camera - 5 m pe 50 m lateral pe 0,62-0,65 ar
+  insemna sa scoatem masivul de deasupra tunelului — o schimbare de
+  gimmick, nu de teren, si cu portalul GLB + `CameraZone` montate, din
+  0,62-0,65 oricum nu se va vedea nimic (esti sub munte). De aceea NU s-a
+  aplicat nicio taiere. Cifrele cu ocluzia (grila din 21 sep): F1 in
+  cadru 9/13, intreg geometric 6/13, dar NEOCLUZAT doar 1/13 (0,623);
+  0,629-0,651 ocluzat de MasivTunel (degajare -0,1 / -4,8 / -6,6 / -3,4 /
+  +1,0 m); 0,656-0,684 in cadru si liber (degajare 5-9 m), dar taiat de
+  marginea de sus (perete/varf trunchiat, 33-42 de grade dreapta) — si tot
+  in coridorul tunelului. DUPA portalul de vest (F-iesire 0,69-0,74) insula
+  e la 194-228 m, dar la 87-138 de grade dreapta: drumul se intoarce spre
+  G/H si golful ramane in spate. Deci „fiordul intreg in fata la iesirea
+  din tunel" NU exista pe traseul actual pentru NICIUN punct de dupa
+  portal; insula e castigata doar ca perete de pe chei si de pe prima
+  jumatate a cornisei (A, B1). Decizia ramane a dezvoltatorului: fie
+  coborarea F se redeseneaza spre golf (SV) — singura care da poza din
+  brief —, fie contractul pe F1 se scoate si se accepta ca varful e al
+  cornisei, nu al coborarii.
 
 Rulare (nu are nevoie de Godot):
     python tools/fiord_frustum_table.py [--tscn scenes/tracks/Track16.tscn]
@@ -61,6 +105,7 @@ de a edita .tscn-ul si generatorul (`tools/gen_fiordland_route.py`).
 """
 import argparse
 import math
+import os
 import re
 import sys
 
@@ -74,6 +119,9 @@ FAR_PLANE = 380.0
 HALF_HFOV = 50.0  # grade, 16:9 (20:9 -> 56)
 
 MIN_BASE_CLEAR = 40.0
+GRID_DIR = "tools/data/fiord_varf_grid"
+LOS_CLEAR_M = 2.0       # degajarea minima a liniei de vedere peste teren
+SEA_Y_DEFAULT = -1.96   # doar pentru inaltimea vizibila a insulei (varf - mare)
 # (segment, fractia minima IN CADRU, fractia minima INTREG)
 CONTRACT = {"A": (0.50, None), "B1": (0.90, None), "F1": (0.60, 0.40)}
 
@@ -88,6 +136,7 @@ SEGMENTS = {
     "C":  (0.21, 0.27),
     "F1": (0.60, 0.67),
     "F2": (0.67, 0.74),
+    "F-iesire": (0.69, 0.74),
     "H":  (0.86, 1.00),
 }
 
@@ -114,6 +163,64 @@ def read_scene(path):
     return pts, peak, radius
 
 
+class Grid:
+    """ground_y pe grila de 10 m, scrisa de SvFiordVarfGrid; biliniar."""
+
+    def __init__(self, path):
+        with open(path, encoding="utf-8") as fh:
+            hdr = fh.readline().strip("# \n").split()
+            self.meta = {k: float(v) for k, v in (h.split("=") for h in hdr)}
+            self.rows = [[float(v) for v in ln.split(",")] for ln in fh if ln.strip()]
+        self.x0, self.z0, self.cell = self.meta["x0"], self.meta["z0"], self.meta["cell"]
+        self.sea_y = self.meta.get("sea_y", SEA_Y_DEFAULT)
+
+    def y(self, x, z):
+        fx = (x - self.x0) / self.cell
+        fz = (z - self.z0) / self.cell
+        i = max(0, min(len(self.rows[0]) - 2, int(fx)))
+        j = max(0, min(len(self.rows) - 2, int(fz)))
+        tx, tz = fx - i, fz - j
+        r0, r1 = self.rows[j], self.rows[j + 1]
+        return (r0[i] * (1 - tx) + r0[i + 1] * tx) * (1 - tz) \
+            + (r1[i] * (1 - tx) + r1[i + 1] * tx) * tz
+
+
+def load_grid(grid_dir, n_control):
+    """Grila + verificarea ca e a scenei curente. Lipsa/nepotrivire = PICA."""
+    gpath = os.path.join(grid_dir, "grid.csv")
+    bpath = os.path.join(grid_dir, "baked.csv")
+    if not (os.path.isfile(gpath) and os.path.isfile(bpath)):
+        print("PICA: lipseste grila de teren %s (grid.csv + baked.csv). Regenereaza:\n"
+              "  godot --headless --path . res://tools/SvFiordVarfGrid.tscn -- --track=16 --out=%s"
+              % (grid_dir, grid_dir))
+        return None
+    grid = Grid(gpath)
+    with open(bpath, encoding="utf-8") as fh:
+        baked = [tuple(float(v) for v in ln.split(",")) for ln in fh if ln.strip()]
+    if len(baked) < 5 * n_control:
+        print("PICA: baked.csv are %d puncte pentru %d puncte de control — grila e a altei "
+              "piste sau a altui traseu; regenereaza." % (len(baked), n_control))
+        return None
+    return grid, baked
+
+
+def los_clear(grid, cam, target, stop_dist, step=4.0):
+    """Cea mai mica degajare (m) a segmentului cam->target peste teren,
+    esantionat pe orizontala pana la stop_dist (baza insulei)."""
+    dx, dz = target[0] - cam[0], target[2] - cam[2]
+    d = math.hypot(dx, dz)
+    if d <= 0.0:
+        return 1e9
+    worst = 1e9
+    s_ = 6.0
+    while s_ < min(stop_dist, d):
+        t = s_ / d
+        y_line = cam[1] + (target[1] - cam[1]) * t
+        worst = min(worst, y_line - grid.y(cam[0] + dx * t, cam[2] + dz * t))
+        s_ += step
+    return worst
+
+
 def fracs_of(pts):
     """Fractia pe lungimea de coarda (bucla inchisa) la fiecare punct."""
     n = len(pts)
@@ -135,9 +242,15 @@ def main():
     ap.add_argument("--peak", help="x,y,z (simulare, suprascrie scena)")
     ap.add_argument("--radius", type=float, help="radius_m (simulare)")
     ap.add_argument("--quiet", action="store_true", help="doar verdictele")
+    ap.add_argument("--grid", default=GRID_DIR,
+                    help="directorul cu grid.csv + baked.csv (SvFiordVarfGrid)")
     args = ap.parse_args()
 
     pts, peak, radius = read_scene(args.tscn)
+    loaded = load_grid(args.grid, len(pts))
+    if loaded is None:
+        return 1
+    grid, _baked = loaded
     if args.peak:
         peak = tuple(float(x) for x in args.peak.split(","))
     if args.radius is not None:
@@ -172,13 +285,22 @@ def main():
         yaw = math.degrees(math.acos(max(-1.0, min(1.0, (dx * tx + dz * tz) / d_cam))))
         if d_base < min_base[0]:
             min_base = (d_base, i)
+        # Ocluzia: doua segmente, varful si jumatatea inaltimii vizibile.
+        vis_h = peak[1] - grid.sea_y
+        stop = d_cam - radius
+        clear_top = los_clear(grid, cam, (peak[0], peak[1], peak[2]), stop)
+        clear_mid = los_clear(grid, cam, (peak[0], peak[1] - 0.5 * vis_h, peak[2]), stop)
+        occluded = min(clear_top, clear_mid) < LOS_CLEAR_M
         rows.append({"f": fracs[i], "d": d_cam, "db": d_base, "oc": over_cam,
-                     "ce": ceiling_road, "mg": margin, "y": p[1], "el": elev, "yaw": yaw})
+                     "ce": ceiling_road, "mg": margin, "y": p[1], "el": elev, "yaw": yaw,
+                     "occ": occluded, "clr": min(clear_top, clear_mid)})
 
     if not args.quiet:
-        print("\n  frac   d_cam  d_baza  varf>cam  plafon  marja   elev  azimut  y_drum   nota")
+        print("\n  frac   d_cam  d_baza  varf>cam  plafon  marja   elev  azimut  y_drum  degaj   nota")
         for r in rows:
             tag = ""
+            if r["occ"]:
+                tag = "OCLUZAT de teren (degajare %.1f m)" % r["clr"]
             if r["d"] > FAR_PLANE:
                 tag = "FAR_PLANE"
             elif r["d"] > FOG_END_DRY:
@@ -187,36 +309,40 @@ def main():
                 tag = "in afara cadrului (azimut)"
             elif r["mg"] < 0.0:
                 tag = "taiat sus"
-            print("  %.3f  %6.1f  %6.1f  %7.1f  %6.1f  %6.1f  %5.1f  %6.1f  %6.1f   %s"
+            print("  %.3f  %6.1f  %6.1f  %7.1f  %6.1f  %6.1f  %5.1f  %6.1f  %6.1f  %5.1f   %s"
                   % (r["f"], r["d"], r["db"], r["oc"], r["ce"], r["mg"], r["el"],
-                     r["yaw"], r["y"], tag))
+                     r["yaw"], r["y"], min(r["clr"], 99.9), tag))
 
     failed = []
-    print("\nVerdict per segment (in cadru = azimut <= %.0f si d <= fog_end; intreg = in "
-          "cadru si varful sub marginea de sus; perete = taiat sus sau nevazut):" % HALF_HFOV)
+    print("\nVerdict per segment (in cadru = azimut <= %.0f si d <= fog_end; intreg = in cadru, "
+          "varful sub marginea de sus SI linia de vedere la >= %.0f m peste teren; "
+          "perete = taiat sus sau nevazut):" % (HALF_HFOV, LOS_CLEAR_M))
     for name, (f0, f1) in SEGMENTS.items():
         sel = [r for r in rows if f0 <= r["f"] < f1]
         if not sel:
             continue
         k = len(sel)
         in_frame = [r for r in sel if r["yaw"] <= HALF_HFOV and r["d"] <= FOG_END_DRY]
-        whole = [r for r in in_frame if r["mg"] >= 0.0]
+        whole_geom = [r for r in in_frame if r["mg"] >= 0.0]
+        whole = [r for r in whole_geom if not r["occ"]]
+        occl = [r for r in in_frame if r["occ"]]
         wall = [r for r in sel if r["mg"] < 0.0 or r["d"] > FOG_END_DRY or r["yaw"] > HALF_HFOV]
-        line = ("  %-2s  d %3.0f-%3.0f m  azimut %3.0f-%3.0f  varf>cam %3.0f-%3.0f m  elev %+.1f..%+.1f"
-                "  marja %+.0f..%+.0f m  | in cadru %d/%d  intreg %d/%d  perete %d/%d"
+        line = ("  %-8s  d %3.0f-%3.0f m  azimut %3.0f-%3.0f  varf>cam %3.0f-%3.0f m  elev %+.1f..%+.1f"
+                "  marja %+.0f..%+.0f m  | in cadru %d/%d  intreg %d/%d (geometric %d, ocluzat %d)  perete %d/%d"
                 % (name, min(r["d"] for r in sel), max(r["d"] for r in sel),
                    min(r["yaw"] for r in sel), max(r["yaw"] for r in sel),
                    min(r["oc"] for r in sel), max(r["oc"] for r in sel),
                    min(r["el"] for r in sel), max(r["el"] for r in sel),
                    min(r["mg"] for r in sel), max(r["mg"] for r in sel),
-                   len(in_frame), k, len(whole), k, len(wall), k))
+                   len(in_frame), k, len(whole), k, len(whole_geom), len(occl), len(wall), k))
         if name in CONTRACT:
             need_frame, need_whole = CONTRACT[name]
             why = []
             if len(in_frame) < need_frame * k - 1e-9:
                 why.append("in cadru %d/%d < %.0f%%" % (len(in_frame), k, need_frame * 100))
             if need_whole is not None and len(whole) < need_whole * k - 1e-9:
-                why.append("intreg %d/%d < %.0f%%" % (len(whole), k, need_whole * 100))
+                why.append("intreg+neocluzat %d/%d < %.0f%% (ocluzat de teren: %d)"
+                           % (len(whole), k, need_whole * 100, len(occl)))
             if name == "A" and len(wall) < k:
                 why.append("varful intra intreg de pe chei (nu mai e perete)")
             print(line + ("  OK" if not why else "  PICA: " + ", ".join(why)))

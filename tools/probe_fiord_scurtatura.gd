@@ -159,7 +159,14 @@ func _run(data: CarData, label: String, rain: bool, via_branch: bool) -> Diction
 
 	var driver := WaypointDriver.new()
 	driver.waypoints = _waypoints(main, branch, start_i, via_branch)
-	driver.reach = 5.0
+	# Punctele rare de pe banda (stride 4 * bake_interval 3m ~= 12m intre
+	# ele) au nevoie de un reach mai mare decat implicitul de 5.0 — sub
+	# spatierea reala, soferul nu ajunge NICIODATA la "reach" de tinta,
+	# `index` nu mai avanseaza, si masina oscileaza la nesfarsit langa
+	# intrare (masurat cu --trace: v~9 m/s constant, idx sarind intre 0-16
+	# minute in sir, fara sa progreseze). Vezi si comentariul din
+	# probe_rotating_span.gd despre acelasi tipar de cifre nemonotone.
+	driver.reach = 10.0
 	driver.corner_grip = CORNER_GRIP
 	driver.target_speed = 40.0
 	driver.throttle_when_done = 1.0
@@ -169,9 +176,19 @@ func _run(data: CarData, label: String, rain: bool, via_branch: bool) -> Diction
 	var min_speed := INF
 	var off_band := false
 	var reached := false
+	var route_1_frames := 0
+	var total_frames := 0
 	while t < TIMEOUT_S:
 		await get_tree().physics_frame
 		t += 1.0 / 60.0
+		total_frames += 1
+		if car.route == 1:
+			route_1_frames += 1
+		if via_branch and OS.get_cmdline_user_args().has("--trace") and int(t * 60.0) % 15 == 0:
+			print("      [trace %s] t=%.1f pos=(%.0f,%.0f,%.0f) route=%d idx=%d frac=%.4f v=%.1f"
+				% [label, t, car.global_position.x, car.global_position.y,
+				car.global_position.z, car.route, car.road_index,
+				_track.frac_at(car.road_index, car.route), car.horizontal_speed()])
 		var sp := car.horizontal_speed()
 		if sp < min_speed:
 			min_speed = sp
@@ -186,53 +203,72 @@ func _run(data: CarData, label: String, rain: bool, via_branch: bool) -> Diction
 			break
 	car.queue_free()
 	await get_tree().physics_frame
+	var route1_pct := 100.0 * route_1_frames / maxf(total_frames, 1)
+	if via_branch:
+		# Sanitate: pe o rulare "pe scurtatura" masina TREBUIE sa treaca prin
+		# ruta 1 pentru o parte semnificativa a timpului, altfel sonda masoara
+		# bucla si o eticheteaza gresit "scurtatura" (asta a fost bug-ul din
+		# `_waypoints`, gasit prin cifra asta la 0% pe toate rularile).
+		var flag := "" if route1_pct > 20.0 else "  <-- SUSPECT: sub 20%, verifica _waypoints()"
+		print("    [sanitate %s] pe ruta 1 (banda): %.0f%% din timp%s" % [label, route1_pct, flag])
 	return {"time": t if reached else INF, "resp": resp,
 		"min_speed": min_speed if min_speed < INF else 0.0, "off_band": off_band}
 
 
 ## Punctele de urmat: cateva pe bucla pana la desprindere, apoi fie bucla mai
 ## departe, fie banda pana la revenire si inapoi pe bucla pana la tinta.
+##
+## BUG gasit si reparat: varianta veche oprea peretele "while" cu `i ==
+## target_i` (sau `entry_i`), dar `i` avanseaza cu pas 4 — pe o bucla cu
+## 1078 puncte, pasul de 4 de la start_i nu nimereste NICIODATA exact
+## entry_i (0.335*n), deci soferul ocolea toata scurtatura si mergea pe
+## bucla intreaga, in tacere (fara eroare, doar guard-ul de siguranta
+## oprea dupa n+5 pasi). Masurat: route1_frames = 0% pe toate cele 8
+## rulari "pe scurtatura". Fix: opreste cand INDEXUL A TRECUT de tinta
+## (fractie >=), nu cand il nimereste exact.
 func _waypoints(main: TrackRoute, branch: TrackRoute, start_i: int,
 		via_branch: bool) -> Array[Vector3]:
 	var n := main.baked.size()
 	var out: Array[Vector3] = []
 	var target_i := int(TARGET_FRAC * float(n)) % n
 	if not via_branch:
-		var i := start_i
-		var guard := 0
-		while true:
-			out.append(main.baked[i])
-			if i == target_i:
-				break
-			i = (i + 4) % n
-			guard += 1
-			if guard > n + 5:
-				break
+		_walk_main(main, out, start_i, target_i, n)
 		return out
 	# Pe scurtatura: bucla pana la intrarea benzii, banda intreaga, apoi bucla
 	# de la iesirea benzii pana la tinta.
 	var entry_i := int(branch.entry_frac * float(n)) % n
-	var i := start_i
-	var guard := 0
-	while true:
-		out.append(main.baked[i])
-		if i == entry_i:
-			break
-		i = (i + 4) % n
-		guard += 1
-		if guard > n + 5:
-			break
-	for bp in branch.baked:
-		out.append(bp)
+	_walk_main(main, out, start_i, entry_i, n)
+	# Rar, ca pe bucla (stride 4): punctele coapte ale benzii sunt la
+	# ~3 m (bake_interval), deci TOATE ar da soferului de sonda zeci de
+	# tinte apropiate — `index` avanseaza la fiecare "reach", iar soferul
+	# re-tinteste des in loc sa priveasca inainte pe coarda lunga a benzii.
+	var bn := branch.baked.size()
+	var bi := 0
+	while bi < bn:
+		out.append(branch.baked[bi])
+		bi += 4
+	if (bn - 1) % 4 != 0:
+		out.append(branch.baked[bn - 1])
 	var exit_i := int(branch.exit_frac * float(n)) % n
-	i = exit_i
-	guard = 0
+	_walk_main(main, out, exit_i, target_i, n)
+	return out
+
+
+## Adauga punctele coapte de pe bucla principala de la `i0` la `i1` (cu pas
+## 4), oprindu-se cand indexul a AJUNS SAU A TRECUT de `i1` — nu cand il
+## nimereste exact (vezi antetul _waypoints pentru bug-ul pe care il repara
+## asta).
+func _walk_main(main: TrackRoute, out: Array[Vector3], i0: int, i1: int,
+		n: int) -> void:
+	var span := posmod(i1 - i0, n)
+	var i := i0
+	var walked := 0
 	while true:
 		out.append(main.baked[i])
-		if i == target_i:
-			break
+		var next_walked := walked + 4
+		if next_walked >= span:
+			if i != i1:
+				out.append(main.baked[i1])
+			return
 		i = (i + 4) % n
-		guard += 1
-		if guard > n + 5:
-			break
-	return out
+		walked = next_walked

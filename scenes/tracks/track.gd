@@ -1192,6 +1192,18 @@ static func themes() -> Dictionary:
 			# atinge TerrainBody. Cu "dirt_road" banda intra in `_carve` si
 			# garda de plafon (branch_floor / branch_room) se activeaza.
 			"branch_surface": "dirt_road",
+			# Grip-ul ud INCERCAT si REVERTIT (23 sep): "wet_grip": 2.4 in
+			# incercarea de a face scurtatura uda sa piarda/repuna la >=2/4
+			# masini (sonda risc/recompensa). N-a schimbat nimic: sonda
+			# seteaza `track.rain_wet = true` pentru testul "ud", iar
+			# `is_wet_at()` intoarce true PE TOT traseul cand `rain_wet` e
+			# pornit (comportamentul de ploaie din brief: "tot drumul
+			# deschis e ud") — deci bucla SI banda devin ude deopotriva, iar
+			# `wet_grip` (o singura cheie de tema, fara hook per-banda) le
+			# incetineste la fel pe amandoua. Avantajul relativ al benzii nu
+			# se schimba, doar timpii absoluti cresc. Un grip ud SPECIFIC
+			# benzii ar cere un mecanism nou (citit din `route_is_wet` in
+			# `car.gd`, nu doar din tema) — exclus explicit din cerinta.
 			# Marea neagra-verde a fiordului (brief §4: SEA_DEEP, shader v12
 			# cu reflexii palide cenusii — memoria apa-stilizata-de-noapte,
 			# saturatia jos, variatia in reflexii).

@@ -52,6 +52,16 @@ extends Node
 ##                             `rain_falls` (cascadele de ploaie, altfel
 ##                             `visible = false`) si mediul de ploaie. Fara el,
 ##                             captura prinde mereu faza uscata.
+##   --rain-clock=2.5          la fel, dar prin CEAS (secunde de la inceputul
+##                             ciclului RainCycle): 0-5 = telegraph (cerul se
+##                             inchide, primele picaturi), 5-30 = ploaie,
+##                             30-35 = zvantare. Pentru captura de telegraph.
+##   --overdraw                randeaza cu Viewport.DEBUG_DRAW_OVERDRAW (fiecare
+##                             strat desenat pe pixel aduna aceeasi cantitate):
+##                             luminanta / luminanta unui singur strat = cate
+##                             straturi are pixelul. Sufix `_overdraw` pe fisier.
+##                             Dupa orice captura de joc se tiparesc si desenele
+##                             / primitivele din cadru (RenderingServer).
 ##   --lava-stage=1            stadiul limbii de lava (Stromboli): 0 = turul 1,
 ##                             1 = poarta, 2 = zid. Implicit 0 — adica exact
 ##                             starea in care gimmick-ul nu se vede.
@@ -152,6 +162,8 @@ func _ready() -> void:
 	var zoom_size := 60.0
 	var driver_view := false
 	var rain_force := -1.0 # >= 0: RainCycle.force_factor() dupa doua cadre
+	var rain_clock := -1.0 # >= 0: RainCycle.force_clock() dupa doua cadre
+	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
 	var cine := false
@@ -270,6 +282,10 @@ func _ready() -> void:
 			no_fog = true
 		elif arg.begins_with("--rain="):
 			rain_force = float(arg.trim_prefix("--rain="))
+		elif arg.begins_with("--rain-clock="):
+			rain_clock = float(arg.trim_prefix("--rain-clock="))
+		elif arg == "--overdraw":
+			overdraw = true
 		elif arg == "--no-terrain":
 			# Diagnostic: ascunde panza de teren, ca sa se vada ce e SUB ea.
 			# „Exista in scena" si „se vede in cadru" sunt intrebari diferite —
@@ -351,15 +367,23 @@ func _ready() -> void:
 	# `call_deferred`, deci `force_factor()` chemat in acelasi cadru ar ateriza
 	# pe un nod fara pista (acelasi bug platit de ProbeRace `--rain=`): doua
 	# cadre, apoi fortarea.
-	if rain_force >= 0.0:
+	if rain_force >= 0.0 or rain_clock >= 0.0:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		var cycles := 0
 		for node in get_tree().get_nodes_in_group(&"rain_cycle"):
-			if node.has_method("force_factor"):
+			if rain_clock >= 0.0 and node.has_method("force_clock"):
+				node.call("force_clock", rain_clock)
+				cycles += 1
+			elif node.has_method("force_factor"):
 				node.call("force_factor", rain_force)
 				cycles += 1
-		print("--rain=%.1f: %d RainCycle fortate" % [rain_force, cycles])
+		if rain_clock >= 0.0:
+			print("--rain-clock=%.2f: %d RainCycle fortate" % [rain_clock, cycles])
+		else:
+			print("--rain=%.1f: %d RainCycle fortate" % [rain_force, cycles])
+	if overdraw:
+		get_viewport().debug_draw = Viewport.DEBUG_DRAW_OVERDRAW
 	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,
 	# captura prinde mereu stadiul 1 — exact starea in care gimmick-ul nu se
 	# vede (aceeasi clasa de capcana ca la --bridge-at).
@@ -551,13 +575,15 @@ func _ready() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		await RenderingServer.frame_post_draw
+		_print_render_info()
 		var dimg := get_viewport().get_texture().get_image()
 		var ddir := ProjectSettings.globalize_path("res://snapshots")
 		DirAccess.make_dir_recursive_absolute(ddir)
-		var dout := "%s/%s_%s%s.png" % [ddir,
+		var dout := "%s/%s_%s%s%s.png" % [ddir,
 			GameState.TRACK_NAMES[track_index].to_lower(),
 			"joc" if game_cam else "sofer",
-			"" if route_idx == 0 else "_ruta%d" % route_idx]
+			"" if route_idx == 0 else "_ruta%d" % route_idx,
+			"_overdraw" if overdraw else ""]
 		dimg.save_png(dout)
 		print("SNAPSHOT: ", dout)
 		if cine:
@@ -591,6 +617,22 @@ func _ready() -> void:
 	img.save_png(out)
 	print("SNAPSHOT: ", out)
 	get_tree().quit()
+
+
+## Desenele/primitivele/obiectele din ULTIMUL cadru randat (RenderingServer
+## raporteaza cadrul precedent, de aceea se cheama dupa `frame_post_draw`).
+## Cifra de buget pe care o compara A/B-ul ploaie on/off: cate desene in plus
+## aduce un strat transparent, nu doar cate instante exista in scena.
+func _print_render_info() -> void:
+	var vp := get_viewport().get_viewport_rid()
+	var t := RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE
+	print("RENDER: obiecte %d, primitive %d, desene %d" % [
+		RenderingServer.viewport_get_render_info(vp, t,
+			RenderingServer.VIEWPORT_RENDER_INFO_OBJECTS_IN_FRAME),
+		RenderingServer.viewport_get_render_info(vp, t,
+			RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME),
+		RenderingServer.viewport_get_render_info(vp, t,
+			RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)])
 
 
 ## Un landmark anume, vazut de pe sosea (--landmark=, vezi antetul).

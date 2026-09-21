@@ -80,10 +80,20 @@ extends Area3D
 ## ce cere brief-ul §3 pentru cele 5 fire false de pe pereti. Acelasi script,
 ## alt export, zero cod nou.
 ##
-## [b]Placeholder vizual.[/b] O singura cutie verticala pe atlas
-## (`PaletteBox`, slotul `FOAM_WHITE`), intinsa pe toata zona — shaderul de
-## cadere (pânza billboard cu UV pe verticala, brief §5.1 `waterfall`) NU e
-## treaba sondei tehnice.
+## [b]Vizualul[/b] e `WaterfallVisual` (scenes/hazards/waterfall_visual.gd):
+## panze verticale incrucisate cu `waterfall.gdshader` (dungi care curg,
+## margini topite continuu), placa de spuma la sol si spray din
+## `GPUParticles3D` — O SINGURA clasa vizuala pentru Stirling, cele 5 de
+## ploaie si Bowen (brief §5.1 `waterfall`, §6: un material de shader
+## partajat + un material de spray partajat pe toata pista). A inlocuit
+## placeholder-ul din sonda (o cutie pe FOAM_WHITE — „un bloc mare alb",
+## verdictul dezvoltatorului la volan). Vizualul e construit in ACELASI reper
+## cu forma de coliziune (X grosime, Z lungime), ca ce vezi sa fie ce simti.
+##
+## [b]Fade-ul de ploaie.[/b] `RainCycle` comuta grupul `rain_falls` prin
+## `visible` si, daca nodul are proprietatea, prin `modulate.a` — `modulate`
+## de aici exista exact pentru mecanismul acela (nu un al doilea): alpha-ul
+## lui e impins in `WaterfallVisual.set_intensity()`.
 
 const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazard.gd")
 
@@ -100,8 +110,9 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 	set(value):
 		thickness = value
 		_rebuild()
-## Inaltimea vizuala a perdelei (m) — doar pentru placeholder; cascada reala
-## cade de la un surplomb, dar zona de forta nu are nevoie de inaltimea aia.
+## Inaltimea vizuala a perdelei (m) — doar vizual; cascada reala cade de la
+## un surplomb, dar zona de forta nu are nevoie de inaltimea aia. Varful se
+## topeste continuu in alpha (`top_frac` din shader), deci nu e o muchie.
 @export_range(2.0, 40.0, 0.5) var visual_height: float = 14.0:
 	set(value):
 		visual_height = value
@@ -193,6 +204,21 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 ## +5 m la perdeaua lata de ploaie). Interpolat liniar intre 1.0 si 1.3.
 @export_range(0.0, 15.0, 0.5) var rain_extra_thickness: float = 5.0
 
+@export_group("Vizual")
+## Cati stropi de spray la baza (brief §6: overdraw-ul e bugetul real). 48
+## la Stirling, 16 la o cascada de ploaie; 0 = fara spray.
+@export_range(0, 64, 1) var spray_count: int = 48:
+	set(value):
+		spray_count = value
+		_rebuild()
+## Citit/scris de `RainCycle` (`_node_alpha`/`_set_node_alpha`): alpha-ul e
+## intensitatea vizualului (0 = stins). Culoarea nu e folosita.
+@export var modulate: Color = Color.WHITE:
+	set(value):
+		modulate = value
+		if _visual != null and is_instance_valid(_visual):
+			_visual.set_intensity(value.a)
+
 @export_group("Albire")
 ## Cat ar trebui sa tina albirea vizuala (s) — vezi antetul: efectiv, albirea
 ## e ceata locala cat esti in zona, nu un ceas separat. Export pastrat pentru
@@ -203,9 +229,11 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 @export_range(0.5, 20.0, 0.5) var fog_begin_inside: float = 1.5
 @export_range(2.0, 60.0, 0.5) var fog_end_inside: float = 9.0
 
-var _visual: MeshInstance3D
+var _visual: WaterfallVisual
 var _fog: FogCorridorHazardScript
 var _cars_inside: Dictionary = {}
+## Starea de activare aplicata ultima data (vezi `_set_active`).
+var _active: bool = true
 
 
 func _ready() -> void:
@@ -229,6 +257,8 @@ func _rebuild() -> void:
 	_build_shape()
 	_build_visual()
 	_build_fog()
+	if not _active:
+		_set_active(false)
 
 
 func _build_shape() -> void:
@@ -242,15 +272,19 @@ func _build_shape() -> void:
 	add_child(shape)
 
 
-## Placeholder: o singura cutie pe FOAM_WHITE, cat toata zona. Fara shader de
-## cadere — asta ramane treaba pasului de assets (§7.7), nu al sondei tehnice.
+## Vizualul partajat (vezi antetul): aceeasi amprenta ca forma de coliziune
+## (grosimea curenta, cu ploaia inclusa, pe X; `length` pe Z), `visual_height`
+## pe Y. Intensitatea porneste din `modulate.a`, ca o pista incarcata in
+## faza uscata sa nu arate o clipa cascadele de ploaie aprinse.
 func _build_visual() -> void:
-	var t := _current_thickness()
-	_visual = PaletteBox.instance(
-		Vector3(t, visual_height, length), Palette.FOAM_WHITE,
-		Vector3(0.0, visual_height * 0.5, 0.0))
-	_visual.name = "CurtainPlaceholder"
+	_visual = WaterfallVisual.new()
+	# Nu "Curtain": numele e luat de forma de coliziune, iar la runtime un
+	# nume dublat devine "@Curtain@id" — pe care `Snapshot --hide=Curtain*`
+	# nu-l mai gaseste (masurat: A/B-ul on/off a iesit identic la bit).
+	_visual.name = "Perdea"
 	add_child(_visual)
+	_visual.build(Vector3(_current_thickness(), visual_height, length), spray_count)
+	_visual.set_intensity(modulate.a)
 
 
 ## Ceata locala = albirea. O instanta INTERNA de `FogCorridorHazard`, cu
@@ -274,6 +308,16 @@ func _build_fog() -> void:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	# Pe uscat, o cascada de ploaie e STINSA de `RainCycle` (`visible = false`,
+	# `modulate.a = 0`) — si zona ei trebuie sa fie la fel de inactiva ca
+	# vizualul: nici franare, nici albire. Inainte, un nod invizibil franea si
+	# albea in continuare (constatare de la un alt agent, 22 sep: cutiile de
+	# ploaie apareau pe uscat; iar ceata lor lucra chiar si cand nu apareau).
+	var active := is_visible_in_tree() and modulate.a > 0.001
+	if active != _active:
+		_set_active(active)
+	if not active:
+		return
 	var base_accel := force_accel * rain_factor
 	var seen := {}
 	for body in get_overlapping_bodies():
@@ -296,6 +340,19 @@ func _physics_process(delta: float) -> void:
 	for car in _cars_inside.keys():
 		if not seen.has(car):
 			_cars_inside.erase(car)
+
+
+## Aprinde/stinge ZONA odata cu vizualul: `monitoring` pe Area3D-ul propriu
+## (fara suprapuneri, deci fara forta/franare) si zona cetii interne (fara
+## albire; `FogCorridorHazard` recalculeaza cantitatea din suprapuneri la
+## fiecare cadru, deci fara suprapuneri mediul revine singur la baza).
+func _set_active(on: bool) -> void:
+	_active = on
+	monitoring = on
+	if not on:
+		_cars_inside.clear()
+	if _fog != null and is_instance_valid(_fog):
+		_fog.set_active(on)
 
 
 ## Factorul care scaleaza `force_accel` cu viteza CURENTA (nu cea de la

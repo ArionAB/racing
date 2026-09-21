@@ -47,6 +47,11 @@ extends Node
 ##                             travee sus cu corabia in gol. Fara el, captura
 ##                             prinde podul la inceputul ciclului, adica exact
 ##                             starea in care gimmick-ul nu se vede.
+##   --rain=1                  FAZA DE PLOAIE (RainCycle, Fiordland) fortata
+##                             la 1 (0 = uscat fortat): aprinde grupul
+##                             `rain_falls` (cascadele de ploaie, altfel
+##                             `visible = false`) si mediul de ploaie. Fara el,
+##                             captura prinde mereu faza uscata.
 ##   --lava-stage=1            stadiul limbii de lava (Stromboli): 0 = turul 1,
 ##                             1 = poarta, 2 = zid. Implicit 0 — adica exact
 ##                             starea in care gimmick-ul nu se vede.
@@ -146,6 +151,7 @@ func _ready() -> void:
 	var span_at := -1.0   # >= 0: faza pasajului rotativ (0 = deschis)
 	var zoom_size := 60.0
 	var driver_view := false
+	var rain_force := -1.0 # >= 0: RainCycle.force_factor() dupa doua cadre
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
 	var cine := false
@@ -262,6 +268,8 @@ func _ready() -> void:
 			# „geometria departata lipseste, sau doar e inghitita de ceata?" —
 			# doua defecte cu leacuri opuse (populare vs. reglaj de atmosfera).
 			no_fog = true
+		elif arg.begins_with("--rain="):
+			rain_force = float(arg.trim_prefix("--rain="))
 		elif arg == "--no-terrain":
 			# Diagnostic: ascunde panza de teren, ca sa se vada ce e SUB ea.
 			# „Exista in scena" si „se vede in cadru" sunt intrebari diferite —
@@ -339,6 +347,19 @@ func _ready() -> void:
 			if child is EruptionCycle:
 				(child as EruptionCycle).hazard_group = &""
 		await _set_rock_time(track, rock_at)
+	# Faza de ploaie (Fiordland). `RainCycle._collect` e amanat cu
+	# `call_deferred`, deci `force_factor()` chemat in acelasi cadru ar ateriza
+	# pe un nod fara pista (acelasi bug platit de ProbeRace `--rain=`): doua
+	# cadre, apoi fortarea.
+	if rain_force >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var cycles := 0
+		for node in get_tree().get_nodes_in_group(&"rain_cycle"):
+			if node.has_method("force_factor"):
+				node.call("force_factor", rain_force)
+				cycles += 1
+		print("--rain=%.1f: %d RainCycle fortate" % [rain_force, cycles])
 	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,
 	# captura prinde mereu stadiul 1 — exact starea in care gimmick-ul nu se
 	# vede (aceeasi clasa de capcana ca la --bridge-at).

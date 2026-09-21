@@ -4,6 +4,8 @@ extends Node
 ## (tools/fiord_varf_map.py). Doar citire din pista; scrie in --out=DIR.
 ## `--track=N` = NUMARUL scenei (implicit 16); serveste si ca test de
 ## identitate la bit pentru schimbari in sampler: dump inainte / dupa, `diff`.
+## Pistele scrise in cod (Track09) n-au `custom_sea_level_offset` — se cade
+## pe `Track.sea_level_offset`; fara asta _ready crapa si procesul NU iese.
 const TRACK_FMT := "res://scenes/tracks/Track%02d.tscn"
 
 
@@ -20,7 +22,7 @@ func _ready() -> void:
 	get_tree().root.add_child(t)
 	for i in 4:
 		await get_tree().process_frame
-	var sea_y: float = t._sampler.mean_road_y() + t.custom_sea_level_offset
+	var sea_y: float = t._sampler.mean_road_y() + float(t.get("custom_sea_level_offset") if t.get("custom_sea_level_offset") != null else t.sea_level_offset)
 	var lo := Vector3(INF, 0, INF)
 	var hi := Vector3(-INF, 0, -INF)
 	for p in t.baked:

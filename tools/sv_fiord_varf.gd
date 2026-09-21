@@ -21,7 +21,7 @@ func _ready() -> void:
 			peak = Vector2(float(s[0]), float(s[1]))
 		elif a.begins_with("--r="):
 			rad = float(a.trim_prefix("--r="))
-	var sea_y: float = _t._sampler.mean_road_y() + _t.custom_sea_level_offset
+	var sea_y: float = _t._sampler.mean_road_y() + float(_t.get("custom_sea_level_offset") if _t.get("custom_sea_level_offset") != null else _t.sea_level_offset)
 	print("mean_road_y=%.2f sea_y=%.2f" % [_t._sampler.mean_road_y(), sea_y])
 	var n := _t.baked.size()
 	# Harta: celule de 20 m, x pe coloane, z pe randuri. '~' apa, '.' uscat,

@@ -3753,18 +3753,28 @@ func _holds_declarations(node: Node) -> bool:
 ## rularea headless.
 func _node_peaks() -> Array[Vector4]:
 	var out: Array[Vector4] = []
-	_collect_peaks(self, out)
+	_island_peaks.clear()
+	_collect_peaks(self, out, _island_peaks)
 	return out
 
-func _collect_peaks(node: Node, out: Array[Vector4]) -> void:
+## Nodurile cu [member TerrainPeak.island] aprins, culese de [method _node_peaks]
+## si date samplerului DUPA constructie ([member TrackSideSampler.late_peaks]).
+var _island_peaks: Array[Vector4] = []
+
+func _collect_peaks(node: Node, out: Array[Vector4],
+		islands: Array[Vector4]) -> void:
 	for child in node.get_children():
 		if child is TerrainPeak:
 			var pk := child as TerrainPeak
 			# In coordonatele PISTEI, ca baked si ca tot ce citeste samplerul —
 			# conteaza daca varful e grupat sub un nod cu transformare proprie.
 			var p := to_local(pk.global_position)
-			out.append(Vector4(p.x, p.z, pk.radius_m, p.y))
-		_collect_peaks(child, out)
+			var spec := Vector4(p.x, p.z, pk.radius_m, p.y)
+			if pk.island:
+				islands.append(spec)
+			else:
+				out.append(spec)
+		_collect_peaks(child, out, islands)
 
 
 ## Volumele scobite plasate ca noduri [TerrainHollow] — perechea pe MINUS a lui
@@ -4116,6 +4126,10 @@ func rebuild() -> void:
 		_viaduct_ravines(), _overpass_ranges(), _ravine_floors(),
 		hollows, hollow_walls, _scarp_ravines(), _ravine_widths(),
 		_ravine_floor_slopes())
+	# Insulele (TerrainPeak.island): culese de _node_peaks() chiar mai sus, in
+	# lista de argumente, si date DUPA constructie — samplerul le ridica dupa
+	# rape. Goala pe orice pista fara noduri cu flagul.
+	_sampler.late_peaks = _island_peaks
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",

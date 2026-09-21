@@ -77,7 +77,7 @@ suprafeței (decizie de material, nu de geometrie).
 | loc real | ce luăm |
 |---|---|
 | **Milford Sound / Piopiotahi**, fiord de 15 km, pereți de 1200 m direct din mare, 6.800 mm de ploaie pe an, 180 de zile ploioase | **verticalitatea ca perete, nu ca prăpastie**: drumul e pe cornișă, marea la −30 m; și **ploaia ca regulă, nu ca excepție** — de aici faza de ploaie ciclică |
-| **Mitre Peak / Rahotu** (1692 m), vârful din orice poză, ridicat direct din apă | **vârful-flanc peste apă**: 60 m înalt, la ~200 m peste fiordul strâmt; de pe chei e un *perete* (nu-l vezi întreg), de pe cornișă e un *vârf* — dezvăluirea câștigată prin urcare (§2.0) |
+| **Mitre Peak / Rahotu** (1692 m), vârful din orice poză, ridicat direct din apă | **vârful-insulă în golf** (din 21 sep 2026, după măsurători): 70 m înalt, la (−250, −200), rază 44, la 85 m de cornișă; de pe chei și de pe prima jumătate a cornișei e un *perete* (nu-l vezi întreg), de la ieșirea din tunel (0,65–0,67) e un *vârf* peste apă, în dreapta — dezvăluirea câștigată prin tunel (§2.0). Brief-ul v0.1 îl voia pe malul opus, la 200 m, 60 m: nu era în cadru de nicăieri |
 | **Stirling Falls** (155 m), vaporașele bagă prova sub ea; **Bowen Falls** (162 m), lângă sat | **hazardul-semnătură nr. 1**: cascada care cade **peste drum** și te apasă (Stirling); **kickerul** peste bazinul de cădere (Bowen). Cele două se văd una pe alta peste apă |
 | **Cascadele efemere**: după ploaie, pereții se acoperă de sute de fire albe care dispar în câteva ore | **faza de ploaie**: 3–5 cascade noi se aprind peste drum și pe pereți timp de 25 s — teatru (cost zero), dar udă șoseaua |
 | **Homer Tunnel** (1,2 km, un singur sens pe semafor, granit nesăpat, picură, pantă 1:10 spre Milford, portaluri cu galerie de avalanșă) | **hazardul-semnătură nr. 2**: tunel de 150 m, un sens, semafor, **autocarul vine din față pe roșu**; nișe laterale ca refugiu (rețeta tunelului Baikal); pantă 12% în jos, șosea permanent udă, întuneric (`CameraZone` cu `darkness`) |
@@ -121,6 +121,85 @@ sus cel mult `10 + 0,093·d` m față de cota drumului. În jos vezi până la
   captură `--driver`, nu anticipat. Memoria `munte-flanc-nu-fundal`: vârf
   îngust și aproape, trei etaje (zăpadă sus, gneis gri, pădure neagră la
   bază, cu dunga albă a unei cascade pe flanc).
+  **Corectură măsurată (21 sep 2026, `tools/fiord_frustum_table.py` +
+  `SvFiordVarf`, camera de joc reală):** socoteala de mai sus e corectă pe
+  verticală, dar a verificat DOAR verticala. Pe pista construită, vârful
+  (nodul `Peaks/MitrePeak`, (−311, 60, −65), rază 55) nu e în cadru de
+  nicăieri: pe cornișa B2 (0,13–0,21) stă la **75–110° stânga** de direcția
+  de mers (B urcă spre NV, golful e în SV — vârful e în spate-lateral), la
+  220–253 m, cu 24–37 m peste cameră; pe C la 95–117°; pe coborârea F la
+  **332–490 m** (dincolo de `fog_end` 320, iar pe 0,60–0,66 dincolo de
+  `FAR_PLANE` 380 — nu se randează) și la 30–120° dreapta (F coboară spre
+  S/SE, golful rămâne în dreapta-spate); de pe chei A la 65–151°. Jumătatea
+  de cadru e ~50° la 16:9, deci **niciun punct din A/B/C/F nu îl are în
+  cadru** — asta e ce a văzut dezvoltatorul la volan („deloc"), nu ceața.
+  Al doilea lucru măsurat: marginea de sus a cadrului e la **+5,25°** (FOV
+  68, cameră înclinată 28,7° în jos, unghi ținut constant și la viteză;
+  +9,3° doar cu FOV-ul de viteză maximă), deci **cerul e 7,7% din ecran** și
+  un vârf se vede întreg numai dacă e la cel mult **0,092·d peste cameră**
+  (18 m la 200 m, 23 m la 250 m). „Vârf de 100 m" nu e o pârghie: la 200 m
+  ar fi tăiat la 2/3; și cerința „≥ 30 m peste cameră, întreg, sub 250 m"
+  e imposibilă geometric (cere d ≥ 326 m, dincolo de ceață). Al treilea:
+  domul real are **51,7 m**, nu 60 — centrul stă chiar pe muchia săpăturii
+  rapei 0 (lățime 220 m), iar rapa taie și prin masive; orice vârf pus „în
+  apă" e retezat la −30 m, deci baza în apă se obține doar cu centrul dincolo
+  de muchia rapei. Căutare exhaustivă pe grilă de 10 m (poziție × cotă 55–100
+  × rază 40–60 × lățimea rapei 120–220): **nicio poziție în golf nu e în
+  cadru simultan de pe B2 și F** — cele două privesc în direcții aproape
+  opuse, iar golful e lateral pentru amândouă; conurile lor se intersectează
+  pe asfaltul de la 0,21. Concluzie: nu e problemă de cotă sau de distanță,
+  ci de **orientarea traseului față de golf**.
+  **Decizia dezvoltatorului (21 sep 2026, aplicată):** vârful-insulă în
+  mijlocul golfului, la **(−250, 70, −200), rază 44**, cu flagul nou
+  `TerrainPeak.island` (masivul se ridică DUPĂ săparea rapelor, din fundul
+  apei — blend spre cota declarată, nu `smax`, altfel discul razei ieșea o
+  clătită la cota 0; opt-in, implicit fals: Track16 cu flagul stins e identic
+  la bit înainte/după). Dom real 69,4 m; linia apei la ~0,66 din rază.
+  **Contractul nou al gărzii** (`tools/fiord_frustum_table.py`, pică pe starea
+  veche, trece pe cea nouă): de pe **A** ≥ 50% din puncte cu vârful în cadru
+  pe azimut, ca perete (măsurat 6/10: 36–121°, 256–305 m, elevație 11–13°);
+  de pe **B1** (0,05–0,13) ≥ 90% în cadru (14/14: 26–43° stânga, 121–247 m,
+  perete de 14–22°); de pe **F1** (0,60–0,67) ≥ 60% în cadru și ≥ 40% întreg
+  (9/13 și 6/13: 238–342 m, 33–59° dreapta, elevație 2,7–6,7°); baza la ≥ 40 m
+  de asfalt (41,1). B2, C, F2 rămân laterale (informativ) — vârful e
+  „perete lângă roți" pe B1 și „vârf peste apă, în dreapta" la ieșirea din
+  tunel, nu „în față pe toată coborârea".
+  **Ce arată capturile `--gamecam` (nu doar tabelul):** la 0,02 se ghicește
+  un con palid în colțul stânga-sus (perete în ceață la ~300 m, azimut 44°);
+  pe B1 e perete în cadru pe stânga; la **0,63 NU se vede**: tabelul îl dă „în
+  cadru, întreg", dar linia de vedere trece peste creasta proprie a coborârii
+  F (53 m la 50 m de drum, camera la 51) — măsurat cu terenul real, doar
+  **32 m din 72** ies deasupra crestei, la 0,64 **1 m**, iar la 303 m ceața
+  (120→320, curbă 1,5, max 0,85) îl acoperă ~74%; la **0,66 se vede** ca un
+  con palid tăiat sus, la marginea dreaptă (253 m, 34°, 63 m deasupra
+  crestei, ceață ~46%). Concluzie sinceră: „poza clasică" de la ieșirea din
+  tunel există pe 0,65–0,67, nu pe 0,60–0,64, și e o siluetă în ceață, nu
+  un munte.
+  **Runda finală (21 sep 2026, seara) — ocluzia în gardă, teșirea refuzată:**
+  garda are acum a patra axă, linia de vedere prin grila reală de teren
+  (`tools/data/fiord_varf_grid/`, input regenerabil cu `SvFiordVarfGrid`;
+  lipsă = pică, nu tace): un punct e „întreg" doar dacă segmentele cameră→vârf
+  și cameră→(vârf − 36 m) trec la ≥ 2 m peste teren. Pe F1 (0,60–0,67):
+  în cadru 9/13, întreg geometric 6/13, **întreg și neocluzat 1/13** (0,623);
+  0,629–0,651 ocluzat cu −0,1 / −4,8 / −6,6 / −3,4 / +1,0 m degajare. **Garda
+  e roșie pe F1 și rămâne așa, cu motiv:** creasta care ocluzează este
+  `MasivTunel` însuși — `SemaforTunel` e la frac 0,612 cu `tunnel_length`
+  169 m, deci tunelul montat ocupă **0,612–0,69**, iar drumul trece la 8–70 m
+  de centrul masivului pe 0,62–0,66. F1 din brief e coridorul tunelului, nu
+  coborârea. Teșirea „crestei" la ≤ cameră − 5 m pe 50 m lateral ar fi scos
+  muntele de deasupra tunelului (schimbare de gimmick, nu de teren), și cu
+  portalul GLB + `CameraZone` montate din 0,62–0,65 oricum nu se vede nimic.
+  **Nu s-a tăiat nimic; nicio captură nouă.** Și partea mai grea: **după
+  portalul de vest (0,69–0,74) insula e la 194–228 m, dar la 87–138° dreapta**
+  — drumul se întoarce spre G/H și golful rămâne în spate. Singura fereastră
+  în cadru și neocluzată e 0,656–0,684 (33–42° dreapta, tăiat sus, degajare
+  5–9 m) — ultimii 40 m ai coridorului tunelului. Concluzie: pe traseul
+  actual, **„fiordul întreg în față la ieșirea din tunel" nu există pentru
+  niciun punct de după portal**; Mitre Peak e câștigat ca perete de pe chei
+  și de pe prima jumătate a cornișei (A 6/10, B1 14/14), atât. Decizie,
+  neluată aici: (a) redesenarea coborârii F spre golf (SV) — singura care
+  dă poza din §0/§2 rândul F; (b) scoaterea contractului F1 și acceptarea
+  că vârful e al cornișei, nu al coborârii.
 - **Fiordul trebuie să fie strâmt.** Lecția `world_design.md` §2: adâncimea
   se citește prin proximitate, în interiorul lui `fog_end`. Real, fiordul
   are 1–2 km; la noi **~200 m** de la cornișă la baza lui Mitre Peak, cu
@@ -172,10 +251,21 @@ cornișă** (B–C) — golul e pe stânga, peretele și cascada vin din dreapta
 deci apa Stirling te mătură *spre* margine, nu spre perete; pe coborârea F
 fiordul e în față-stânga și Mitre Peak în față. Convenția de construcție
 (orar/antiorar în sensul Track13/14) se fixează la ProbeLayout, nu aici.
+*Măsurat 21 sep 2026 pe traseul construit:* pe F fiordul e în **dreapta-spate**
+(F coboară spre S/SE; golful e în SV, la 220–440 m de 0,63), iar vârful la
+30–120° de direcția de mers — premisa „în față" nu s-a realizat în traseu;
+vezi §2.0.
 Cote: cheiul **0 m**, cornișa **+30 m**, Stirling **+32 m**, Chasm **+15 m**,
 portalul de est al tunelului **+45 m** (punctul cel mai înalt), portalul de
 vest **+27 m**, baza coborârii **+3 m**, bazinul Bowen **−4 m** (apă,
-repunere), marea **0 m**, vârful Mitre Peak **+60 m** (decor, nu se conduce).
+repunere), marea **0 m**, vârful Mitre Peak **+70 m** (decor, nu se conduce;
+*din 21 sep 2026:* **insulă în golf** la (−250, −200), rază 44, nod
+`Peaks/MitrePeak` cu `island = true` — dom real măsurat **69,4 m**, linia apei
+la ~30 m de centru, baza la 41 m de cel mai apropiat asfalt (frac 0,159).
+*Istoric:* v0.1 îl avea la +60 pe malul opus, la (−311, −65); domul real ieșea
+**51,7 m**, retezat de rapa 0, și nu era în cadru de pe niciun segment — vezi
+§2.0. Cota **nu** s-a ridicat la 100 m: cerul ocupă 7,7% din ecran și un vârf
+mai înalt e doar mai tăiat).
 Cornișa (0 → 30 pe ~340 m ≈ **8,8%**), coborârea în Chasm (32 → 15 pe 300 m
 ≈ 5,7%), urcarea la portal (15 → 45 pe 250 m ≈ **12%**), tunelul (45 → 27 pe
 150 m ≈ **12%**, în jos, ud), coborârea F (27 → 3 pe 300 m ≈ 8%).
@@ -498,6 +588,21 @@ așteptării la roșu), focile, roțile pe podeț (lemn ud).
   s-au văzut din cifre în sub trei ore de agenți. Regula rămâne: **pasul 1
   din §7 nu se sare** — și un „nu merge la valoarea din brief, merge la
   alta, măsurată" e livrarea corectă, nu un eșec.
+- **Azimutul se verifică odată cu verticala (21 sep 2026):** §2.0 a calculat
+  corect cât de sus vede camera și a uitat că vede doar ±50° lateral. Mitre
+  Peak a fost pus perpendicular pe cornișă (la 90° de direcția de mers), adică
+  pe marginea cadrului în cel mai bun caz, și în spate pe restul; de pe F era
+  dincolo de FAR_PLANE. Regula: orice reper „de fundal" se verifică pe
+  **trei** axe — distanță (față de ceață), înălțime (față de +5,25°) și
+  azimut (față de ±50°) — și pe camera de joc (`--gamecam`), nu pe poza de
+  măsurare `--driver`, care privește aproape orizontal și arată de patru ori
+  mai mult cer. Garda: `tools/fiord_frustum_table.py`. Rezolvarea (aceeași
+  zi): vârful **în mijlocul golfului**, nu pe malul opus — singura poziție
+  care servește și cheiul, și cornișa, și ieșirea din tunel; a cerut
+  `TerrainPeak.island` (masiv ridicat după rape). Și a patra axă, pe care
+  tabelul n-o vede: **ocluzia de propriul relief** — la 0,63 creasta lui F
+  ascunde 40 din 72 m; se verifică pe linia de vedere prin terenul real, nu
+  doar pe frustum.
 - **Panta se calculează înainte de a desena gimmick-ul:** 30 m pe 250 m dă
   12% la portal și 18 m pe 150 m dă 12% în tunel; dacă ProbeLayout dă peste
   13% după ce urcarea primește S-urile, se lungește urcarea sau se coboară

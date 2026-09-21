@@ -39,6 +39,10 @@ const FALL_SPEED: float = 12.0
 ## Snapshot dupa ce ploaia e fortata) picaturile vechi raman in urma in lume
 ## si cadrul ar fi gol o secunda.
 const JUMP_RESTART_M: float = 15.0
+## Dara e invizibila mai aproape de camera decat atat (m) si plina de la
+## `FAR_FADE_M`: cele de sub 1 m ies pete late, nu picaturi.
+const NEAR_FADE_M: float = 1.2
+const FAR_FADE_M: float = 4.5
 ## Textura darei: lata x inalta (pixeli). Mica: e doar un gradient de alfa.
 const TEX_W: int = 16
 const TEX_H: int = 64
@@ -65,6 +69,13 @@ static func streak_material() -> StandardMaterial3D:
 		m.vertex_color_is_srgb = true
 		m.albedo_texture = _streak_texture()
 		m.disable_fog = false
+		# Dara la 1-2 m de camera umple zeci de pixeli lati si citeste ca o
+		# pata, nu ca picatura (masurat pe captura de overdraw la Stirling):
+		# invizibila sub NEAR_FADE_M, plina de la FAR_FADE_M. Pe pixel, nu
+		# dither — dither-ul ar pune granulatie exact pe o dara moale.
+		m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
+		m.distance_fade_min_distance = NEAR_FADE_M
+		m.distance_fade_max_distance = FAR_FADE_M
 		_material = m
 	return _material
 
@@ -130,7 +141,7 @@ func _init() -> void:
 	pm.color_ramp = fade_tex
 	process_material = pm
 	var quad := QuadMesh.new()
-	quad.size = Vector2(0.06, 0.9)
+	quad.size = Vector2(0.05, 1.0)
 	quad.material = streak_material()
 	draw_pass_1 = quad
 

@@ -121,6 +121,14 @@ extends Node
 ## apoi „prime picaturi", apoi cascadele). 0.25 = la 1,25 s din telegraph.
 @export_range(0.0, 0.9, 0.01) var screen_lead: float = 0.25
 
+## De la ce `rain_factor` se aprind cascadele de ploaie (`rain_falls`): brief
+## §2.0 cere ordinea cer -> picaturi -> „prima cascada de ploaie se aprinde
+## DUPA prima picatura". 0.6 = incep la 3 s din telegraph, pline la 5 s, odata
+## cu ploaia; pe zvantare se sting primele. Zona lor (albire, frana 0) porneste
+## odata cu vizualul (`WaterfallHazard._apply_visibility`), deci intarzierea e
+## de teatru, nu de fizica a masinii. 0 = purtarea veche (fade pe tot telegraph-ul).
+@export_range(0.0, 0.9, 0.01) var falls_lead: float = 0.6
+
 ## Grupul de noduri „cascade de ploaie" (teatru, cost zero): vizibile DOAR in
 ## ploaie, cu fade pe intrare/iesire ca sa nu apara cu un pocnet.
 @export var rain_falls_group: StringName = &"rain_falls"
@@ -326,7 +334,8 @@ func _apply(amount: float) -> void:
 		var k := clampf((amount - screen_lead) / maxf(1.0 - screen_lead, 0.01),
 			0.0, 1.0)
 		_screen.call("set_intensity", k)
-	_apply_rain_falls(amount)
+	_apply_rain_falls(clampf((amount - falls_lead) / maxf(1.0 - falls_lead, 0.01),
+		0.0, 1.0))
 
 
 ## Cerul se inchide PRIMUL: la `amount` = `sky_lead` e deja complet gri. Tot ce

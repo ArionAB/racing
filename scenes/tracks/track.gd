@@ -4135,6 +4135,10 @@ func rebuild() -> void:
 	_build_branch_surfaces()
 	_build_walls()
 	_build_viaduct_nets()
+	# Tuburile de tunel DUPA sosea si ziduri (le foloseste ca reper de cota) si
+	# INAINTEA gimmickurilor: zona de camera pe care o aduc trebuie sa existe
+	# cand se monteaza restul. Vezi `_build_tunnels`.
+	_build_tunnels()
 	for frac in _ramp_fracs():
 		_build_ramp(frac)
 	for frac in _hazard_fracs():
@@ -9671,6 +9675,413 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		box.center = p
 		box.travel = side * hw * 0.9
 		box.global_position = p
+
+## ------------------------------------------------------------------ TUNELURI
+##
+## Un tunel e un TUB construit in cod pe intervalul declarat de un
+## [TunnelSignalHazard] (Fiordland, Homer): incepe la originea nodului
+## proiectata pe axa (linia de oprire — acelasi `closest_index_global` pe care
+## il foloseste si curba autocarului) si tine `tunnel_length` metri de drum
+## real, masurati pe distanta acumulata intre punctele coapte, exact ca
+## `TunnelSignalHazard._rebuild_bus_curve`. Latimea libera e
+## 2 x `tunnel_half_width`, tavanul la `tunnel_ceiling` peste asfalt.
+##
+## [b]De ce in Track si nu in hazard.[/b] Acelasi tipar ca [TerrainPeak] /
+## [TrackChannel] / [HazardMarker]: nodul e o DECLARATIE (unde, cat, ce
+## latime), iar geometria o face pista, care stie singura curba, panta,
+## latimea soselei si materialele temei. Un al doilea consumator al acelorasi
+## numere (autocarul) citeste deja din nod — daca tubul le-ar fi copiat ca
+## cifre, prima retusare a lungimii ar fi lasat unul din doi in urma (memoria
+## `hazard-dezaliniat-contamineaza-verdictul`).
+##
+## [b]De ce tubul e si MUNTELE de deasupra, nu terenul.[/b] Terenul e un camp
+## de inaltimi cu o singura cota pe celula: nu poate fi in acelasi timp SUB
+## sosea (unde il vrea samplerul, cu banda de protectie a asfaltului) si PESTE
+## ea. Iar `ProbeBuried` — pe buna dreptate — citeste orice panza de teren
+## deasupra axei drept „carosabil ingropat" (testul de interior e paritatea
+## unei raze in +Y: o singura fata deasupra = inauntru). Asa ca masivul
+## declarat ([TerrainPeak] MasivTunel) ramane transeea cu peretii care urca la
+## +23 m de la 20 m lateral (masurat cu ProbeTunel), iar tubul isi aduce
+## propriul acoperis de stanca: o movila de 40 m latime si +10 m la creasta,
+## care se infunda in peretii transeii. Din perspectiva soferului (portalul
+## din fata, movila peste el, peretii masivului in stanga si in dreapta)
+## asta e un tunel prin munte; de sus e un butoi intr-un sant, si de sus nu
+## se joaca.
+##
+## [b]Invelisul e INCHIS[/b] (tavan cu doua fete: dedesubt si creasta movilei,
+## capace la portaluri, capetele impinse cu `TUNNEL_CAP_PUSH_M` dincolo de
+## primul/ultimul punct copt). Nu e cosmetica: garda `ProbeBuried` judeca si
+## corpul `TunnelBore` cu acelasi test de paritate ca terenul — un tavan cu
+## o singura fata ar fi „inauntru" si tubul ar iesi ingropat la 6,5 m. Cu
+## doua fete raza numara par, iar inaltimea libera se citeste din fata de JOS.
+##
+## Materiale: peretii, tavanul si movila pe clasa triplanara EXISTENTA
+## `alpine_granite` (granit gri — Homer e sapat in granit nesapat, brief §2;
+## `wet_gneiss` din brief nu exista inca in `Palette`, si un tunel nu justifica
+## o clasa noua); portalurile pe CONCRETE, ca parapetul de tablier. Doua
+## materiale, amandoua deja in bugetul de clasa.
+
+## Cat trece capacul portalului dincolo de primul / ultimul punct copt al
+## intervalului (m). Punctele coapte sunt exact statiile la care ProbeBuried
+## si ProbeTunel intreaba „ce e deasupra axei?" — o raza in +Y coplanara cu
+## capacul ar numara 0, 1 sau 2 fete dupa cum cade virgula. Impins cu 30 cm,
+## punctul e limpede inauntru.
+const TUNNEL_CAP_PUSH_M: float = 0.3
+## Cat coboara piciorul peretelui sub cota asfaltului (m): umarul si racordul
+## teren-asfalt au grosime, iar un perete care porneste fix de la asfalt ar
+## lasa o fanta la baza.
+const TUNNEL_FOOT_DROP_M: float = 0.5
+## Cat iese rama de beton a portalului in afara capacului, pe axa (m).
+const TUNNEL_FRAME_DEPTH_M: float = 1.2
+## Grosimea ramei de beton, lateral si sus (m). Sta IN AFARA golului: gura
+## ramane exact 2 x tunnel_half_width pe 1 x tunnel_ceiling.
+const TUNNEL_FRAME_THICK_M: float = 0.8
+## Aripile portalului (galeria de avalansa din brief §2 E): doi pereti de
+## beton care pleaca din PERETELE INTERIOR al tubului (lateral = semilatime,
+## in planul din fata al ramei) si se deschid spre exterior, ca o palnie. NU
+## sunt decor: fara ele capacul e un zid plan de 40 m pus de-a curmezisul
+## unei sosele care abia se ingusteaza de la 13 la 9 m (rampa de latime de
+## 30 m curge INAUNTRUL tunelului), si ProbeRace a masurat 8 ejectari-perete
+## in 8 curse fix la frac 0.610, toate la intrarea de est, cu Taxiul pe banda
+## dreapta la 33-42 m/s in capac (linia de baza: 2, amandoua pe autocar).
+## Prima varianta pleca din muchia EXTERIOARA a ramei (semilatime + 0,8) si
+## n-a schimbat nimic: Taxiul intra cu `pre_impact_lat` 3,9-4,2 m, adica
+## marginea caroseriei la ~5,2 m, fix pe fata plana a inelului ramei
+## (4,5-5,3) — 8 ejectari din 10 curse, toate `atinge:TunnelPortal`.
+## Pornita din peretele interior, aripa continua peretele tubului si
+## acopera fata inelului. La ~14 grade lovitura frontala devine razanta
+## (componenta normala ~10 m/s la 40 m/s, sub pragul de 26 al ejectarii).
+const TUNNEL_WING_LEN_M: float = 14.0
+const TUNNEL_WING_SPREAD_M: float = 3.5
+## Inaltimea aripilor (m). Cat un parapet inalt, nu cat tunelul: la 7,3 m
+## (prima varianta) captura --driver de la frac 0.606 arata un culoar alb care
+## ascundea si movila, si masivul. Masina are ~1,5 m; 2,5 m o conduce la fel.
+const TUNNEL_WING_HEIGHT_M: float = 2.5
+## Tenta de vertex a betonului: slotul CONCRETE plin, in soare, iesea alb ars
+## in captura; 0,72 il tine in familia pietrei ude.
+const TUNNEL_TINT_CONCRETE: float = 0.72
+## Profilul movilei de stanca de deasupra tubului, ca (lateral, inaltime)
+## fata de axa si de cota asfaltului, DOAR jumatatea stanga — dreapta e
+## oglinda. Lateralul e RELATIV la semilatimea tubului (se aduna), inaltimea
+## e relativa la tavan (se aduna), ca aceeasi movila sa imbrace orice tub.
+## Baza la -0.6 se infige putin sub terenul transeii (-0.3), ca sa nu ramana
+## fanta de lumina la picior.
+const TUNNEL_MOUND_PROFILE: Array[Vector2] = [
+	Vector2(15.5, -7.1),   # baza, 20 m lateral pentru hw 4.5, la -0.6 sub asfalt
+	Vector2(9.0, -2.5),    # flancul de jos
+	Vector2(3.5, 2.5),     # umarul de sus
+]
+## Creasta movilei, in lateral ABSOLUT (m fata de axa) si inaltime relativa la
+## tavan. ASIMETRICA dinadins, si la fel e si impartirea tavanului
+## (`TUNNEL_CEILING_SPLIT`): sondele (ProbeBuried, ProbeTunel) trag raze in +Y
+## exact din punctele coapte ale axei, iar o raza care nimereste un vertex
+## sau diagonala unui patrulater e numarata de Jolt o data, de doua ori sau
+## deloc, dupa cum cade virgula — masurat: 3 puncte „ingropate" la +9,6 m cu
+## creasta pe axa. Sectiunile tubului stau la MIJLOCUL dintre puncte coapte,
+## deci diagonala fiecarui patrulater trece prin centrul lateral al
+## segmentului exact in dreptul punctului copt; niciun segment nu are voie sa
+## fie centrat pe 0 si niciun vertex nu sta pe 0.
+const TUNNEL_MOUND_CREST: Array[Vector2] = [Vector2(-1.5, 3.5), Vector2(2.5, 3.5)]
+## Unde se rupe tavanul in doua segmente (fractie din semilatime, pe stanga).
+const TUNNEL_CEILING_SPLIT: float = -1.0 / 3.0
+## Culorile de vertex (AO copt, memoria `surfacetool-clamp-vertex-color`:
+## doar intuneca): interiorul e mai inchis spre tavan, movila ramane deschisa.
+const TUNNEL_TINT_WALL_FOOT: float = 0.62
+const TUNNEL_TINT_CEILING: float = 0.34
+const TUNNEL_TINT_MOUND: float = 0.92
+const TUNNEL_TINT_CAP: float = 0.70
+
+
+## Tunelurile declarate in COD de o pista (frac_start, lungime_m, semilatime,
+## tavan). Implicit niciunul; pistele din scena declara prin nod.
+func _tunnel_specs() -> Array[Vector4]:
+	return []
+
+
+## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
+## numere. Cautare recursiva si manuala, ca la varfuri.
+func _node_tunnels() -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	if baked.is_empty():
+		return out
+	_collect_tunnels(self, out)
+	return out
+
+
+func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
+	for child in node.get_children():
+		if child is TunnelSignalHazard:
+			var sig := child as TunnelSignalHazard
+			var p := to_local(sig.global_position)
+			var i := _closest_baked_index(p)
+			out.append(Vector4(frac_at(i), sig.tunnel_length,
+				sig.tunnel_half_width, sig.tunnel_ceiling))
+		_collect_tunnels(child, out)
+
+
+func _build_tunnels() -> void:
+	for spec in _tunnel_specs() + _node_tunnels():
+		_build_tunnel(spec)
+
+
+## Un tub: pereti verticali + tavan (interior), movila de stanca (exterior),
+## capace si rame de beton la portaluri, zona de camera pe interval.
+func _build_tunnel(spec: Vector4) -> void:
+	var r := routes[0]
+	var n := r.count()
+	if n < 3:
+		return
+	var line_idx: int = r.wrap_index(int(round(spec.x * float(n))))
+	var length: float = spec.y
+	var hw: float = spec.z
+	var ceil_h: float = spec.w
+	# Aceeasi plimbare ca `_rebuild_bus_curve`: pe distanta acumulata.
+	var idx_west := line_idx
+	var acc := 0.0
+	while acc < length and idx_west - line_idx < n:
+		acc += r.baked[r.wrap_index(idx_west)].distance_to(
+			r.baked[r.wrap_index(idx_west + 1)])
+		idx_west += 1
+	var count := idx_west - line_idx + 1
+	if count < 2:
+		return
+
+	# Profilele, in coordonate de sectiune (lateral, inaltime). Tavanul e rupt
+	# asimetric si creasta e asimetrica — vezi TUNNEL_MOUND_CREST.
+	var inner: Array[Vector2] = [
+		Vector2(-hw, -TUNNEL_FOOT_DROP_M), Vector2(-hw, ceil_h),
+		Vector2(hw * TUNNEL_CEILING_SPLIT, ceil_h),
+		Vector2(hw, ceil_h), Vector2(hw, -TUNNEL_FOOT_DROP_M)]
+	var mound: Array[Vector2] = []
+	for q in TUNNEL_MOUND_PROFILE:
+		mound.append(Vector2(-(hw + q.x), ceil_h + q.y))
+	for q in TUNNEL_MOUND_CREST:
+		mound.append(Vector2(q.x, ceil_h + q.y))
+	for k in range(TUNNEL_MOUND_PROFILE.size() - 1, -1, -1):
+		var q := TUNNEL_MOUND_PROFILE[k]
+		mound.append(Vector2(hw + q.x, ceil_h + q.y))
+
+	# Cadrele sectiunilor: capacul de est (impins cu TUNNEL_CAP_PUSH_M in
+	# afara primului punct copt), apoi cate o sectiune la MIJLOCUL fiecarui
+	# segment copt (vezi TUNNEL_MOUND_CREST pentru de ce nu pe punctele
+	# insesi), apoi capacul de vest.
+	var centers: Array[Vector3] = []
+	var sides: Array[Vector3] = []
+	var i_east := r.wrap_index(line_idx)
+	var i_west := r.wrap_index(idx_west)
+	var t_east := (r.baked[r.wrap_index(line_idx + 1)] - r.baked[i_east]).normalized()
+	var t_west := (r.baked[i_west] - r.baked[r.wrap_index(idx_west - 1)]).normalized()
+	centers.append(r.baked[i_east] - t_east * TUNNEL_CAP_PUSH_M)
+	sides.append(r.side_at(i_east))
+	for k in count - 1:
+		var i := r.wrap_index(line_idx + k)
+		var j := r.wrap_index(line_idx + k + 1)
+		centers.append((r.baked[i] + r.baked[j]) * 0.5)
+		sides.append(r.side_at(i))
+	centers.append(r.baked[i_west] + t_west * TUNNEL_CAP_PUSH_M)
+	sides.append(r.side_at(r.wrap_index(idx_west - 1)))
+	count = centers.size()
+
+	var rock := SurfaceTool.new()
+	rock.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var concrete := SurfaceTool.new()
+	concrete.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var cm := Color(TUNNEL_TINT_MOUND, TUNNEL_TINT_MOUND, TUNNEL_TINT_MOUND)
+	for k in count - 1:
+		# Interiorul: fasii intre profilele consecutive, normale spre axa.
+		for e in inner.size() - 1:
+			var a0 := _tun_pt(centers[k], sides[k], inner[e])
+			var a1 := _tun_pt(centers[k], sides[k], inner[e + 1])
+			var b0 := _tun_pt(centers[k + 1], sides[k + 1], inner[e])
+			var b1 := _tun_pt(centers[k + 1], sides[k + 1], inner[e + 1])
+			var axis_a := centers[k] + Vector3.UP * ceil_h * 0.5
+			var ca := _tun_tint(inner[e], ceil_h)
+			var cb := _tun_tint(inner[e + 1], ceil_h)
+			_tun_quad(rock, a0, a1, b1, b0, axis_a - (a0 + a1) * 0.5, ca, cb, cb, ca)
+		# Movila: normale in sus / spre exterior.
+		for e in mound.size() - 1:
+			var a0 := _tun_pt(centers[k], sides[k], mound[e])
+			var a1 := _tun_pt(centers[k], sides[k], mound[e + 1])
+			var b0 := _tun_pt(centers[k + 1], sides[k + 1], mound[e])
+			var b1 := _tun_pt(centers[k + 1], sides[k + 1], mound[e + 1])
+			var out_dir := (a0 - centers[k]) + (a1 - centers[k]) + Vector3.UP * 4.0
+			_tun_quad(rock, a0, a1, b1, b0, out_dir, cm, cm, cm, cm)
+
+	# Capacele: inelul dintre movila si gol, la fiecare capat, normala spre
+	# exterior (inapoi la est, inainte la vest). Rama de beton pe acelasi plan.
+	for end in 2:
+		var k := 0 if end == 0 else count - 1
+		var kn := 1 if end == 0 else count - 2
+		var outward := (centers[k] - centers[kn]).normalized()
+		_tun_cap(rock, centers[k], sides[k], inner, mound, outward)
+		_tun_frame(concrete, centers[k], sides[k], hw, ceil_h, outward)
+
+	rock.generate_normals()
+	_add_mesh_with_collision(rock.commit(), Color.WHITE, null, 0.9, 0.5,
+		BaseMaterial3D.CULL_DISABLED, null, null, true,
+		Palette.triplanar_class_material("alpine_granite"), "TunnelBore")
+	concrete.generate_normals()
+	_add_mesh_with_collision(concrete.commit(), Palette.color(Palette.CONCRETE),
+		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, null, "TunnelPortal")
+
+	# Zona de camera pe EXACT intervalul tubului (brief §2.0: „tunelul e
+	# intuneric, deci camera coboara"; memoria `camera-zone-tavan-per-sala`:
+	# tavanul se declara cu cota lui, nu cu implicitul de 15 m). Mod
+	# interval-de-fractie, ca sa urmeze curba; cutia ramane simbolica.
+	var cz := CameraZone.new()
+	cz.name = "TunnelCameraZone"
+	cz.size = Vector3(2.0, 2.0, 2.0)
+	cz.frac_from = r.frac_at(line_idx)
+	cz.frac_to = r.frac_at(r.wrap_index(idx_west))
+	cz.height = 5.5
+	cz.ceiling = ceil_h
+	cz.darkness = 0.5
+	# Capatul opus trebuie sa ramana un dreptunghi de lumina (brief §2 E), nu
+	# sa se inece in ceata de caverna: ceata inauntru se opreste dincolo de
+	# lungimea tubului.
+	cz.cave_fog_end = maxf(length + 60.0, 120.0)
+	add_child(cz)
+	cz.position = centers[count / 2]
+
+
+func _tun_pt(c: Vector3, s: Vector3, q: Vector2) -> Vector3:
+	return c + s * q.x + Vector3.UP * q.y
+
+
+## Tenta interiorului: piciorul peretelui mai deschis, tavanul cel mai inchis.
+func _tun_tint(q: Vector2, ceil_h: float) -> Color:
+	var t := clampf((q.y + TUNNEL_FOOT_DROP_M) / (ceil_h + TUNNEL_FOOT_DROP_M), 0.0, 1.0)
+	var v := lerpf(TUNNEL_TINT_WALL_FOOT, TUNNEL_TINT_CEILING, t)
+	return Color(v, v, v)
+
+
+## Un patrulater ca doua triunghiuri, cu infasurarea aleasa asa incat FATA
+## sa se uite catre `want` (memoria `rotatii-in-builder-semnul`: deriva cu
+## dot, nu ghici). Godot deseneaza fetele infasurate in SENSUL ACELOR de
+## ceasornic (doc Mesh), deci produsul vectorial (b-a)x(c-a) al unei fete
+## vizibile arata DEPARTE de privitor: se pastreaza infasurarea cu
+## dot(normala, want) < 0. Prima varianta o luase invers si tubul se vedea
+## pe dos — din interior se vedea dosul movilei, peretii lipseau (captura
+## --driver la frac 0.65), iar clasa triplanara are cull pe spate.
+func _tun_quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
+		want: Vector3, ca: Color, cb: Color, cc: Color, cd: Color) -> void:
+	_tun_tri(st, a, b, c, want, ca, cb, cc)
+	_tun_tri(st, a, c, d, want, ca, cc, cd)
+
+
+func _tun_tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3,
+		want: Vector3, ca: Color, cb: Color, cc: Color) -> void:
+	var nrm := (b - a).cross(c - a)
+	if nrm.dot(want) > 0.0:
+		var tb := b
+		b = c
+		c = tb
+		var tcb := cb
+		cb = cc
+		cc = tcb
+	st.set_color(ca)
+	st.add_vertex(a)
+	st.set_color(cb)
+	st.add_vertex(b)
+	st.set_color(cc)
+	st.add_vertex(c)
+
+
+## Capacul unui portal: inelul plan dintre profilul movilei si conturul
+## golului, triangulat ca FERMOAR: fiecare punct al movilei primeste drept
+## ancora punctul golului cel mai apropiat ca UNGHI in jurul centrului
+## sectiunii (unghiul se masoara de la directia „in jos", unde inelul e
+## deschis, deci nu exista salt de 360). Ancorele sunt monotone fiindca ambele
+## contururi merg in acelasi sens, si atunci intre doua puncte vecine ale
+## movilei se pun un triunghi spre ancora si cate unul pentru fiecare pas de
+## ancora. Merge pentru orice profil de movila si orice impartire a tavanului.
+func _tun_cap(st: SurfaceTool, c: Vector3, s: Vector3, inner: Array[Vector2],
+		mound: Array[Vector2], outward: Vector3) -> void:
+	var col := Color(TUNNEL_TINT_CAP, TUNNEL_TINT_CAP, TUNNEL_TINT_CAP)
+	var vc := 0.0
+	for q in inner:
+		vc += q.y
+	vc /= float(inner.size())
+	var ang_g: Array[float] = []
+	for q in inner:
+		ang_g.append(fposmod(atan2(q.x, -(q.y - vc)), TAU))
+	var anchors: Array[int] = []
+	var prev := 0
+	for q in mound:
+		var a := fposmod(atan2(q.x, -(q.y - vc)), TAU)
+		var best := prev
+		var best_d := INF
+		for k in range(prev, inner.size()):
+			var d := absf(ang_g[k] - a)
+			if d < best_d:
+				best_d = d
+				best = k
+		anchors.append(best)
+		prev = best
+	var m: Array[Vector3] = []
+	for q in mound:
+		m.append(_tun_pt(c, s, q))
+	var g: Array[Vector3] = []
+	for q in inner:
+		g.append(_tun_pt(c, s, q))
+	for a in anchors[0]:
+		_tun_tri(st, m[0], g[a], g[a + 1], outward, col, col, col)
+	for j in mound.size() - 1:
+		_tun_tri(st, m[j], g[anchors[j]], m[j + 1], outward, col, col, col)
+		for a in range(anchors[j], anchors[j + 1]):
+			_tun_tri(st, m[j + 1], g[a], g[a + 1], outward, col, col, col)
+	for a in range(anchors[anchors.size() - 1], inner.size() - 1):
+		_tun_tri(st, m[m.size() - 1], g[a], g[a + 1], outward, col, col, col)
+
+
+## Rama de beton a portalului: un manson dreptunghiular care continua golul
+## `TUNNEL_FRAME_DEPTH_M` in afara capacului, cu peretii grosi de
+## `TUNNEL_FRAME_THICK_M` IN AFARA golului (gura ramane cea din contract).
+func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
+		ceil_h: float, outward: Vector3) -> void:
+	var th := TUNNEL_FRAME_THICK_M
+	var foot := -TUNNEL_FOOT_DROP_M
+	var inner_p: Array[Vector2] = [Vector2(-hw, foot), Vector2(-hw, ceil_h),
+		Vector2(hw, ceil_h), Vector2(hw, foot)]
+	var outer_p: Array[Vector2] = [Vector2(-hw - th, foot),
+		Vector2(-hw - th, ceil_h + th), Vector2(hw + th, ceil_h + th),
+		Vector2(hw + th, foot)]
+	var c2 := c + outward * TUNNEL_FRAME_DEPTH_M
+	var col := Color(TUNNEL_TINT_CONCRETE, TUNNEL_TINT_CONCRETE, TUNNEL_TINT_CONCRETE)
+	var axis := c + Vector3.UP * ceil_h * 0.5
+	for e in 3:
+		# Fetele interioare (continuarea golului), normale spre axa.
+		var a0 := _tun_pt(c, s, inner_p[e])
+		var a1 := _tun_pt(c, s, inner_p[e + 1])
+		var b0 := _tun_pt(c2, s, inner_p[e])
+		var b1 := _tun_pt(c2, s, inner_p[e + 1])
+		_tun_quad(st, a0, a1, b1, b0, axis - (a0 + a1) * 0.5, col, col, col, col)
+		# Fetele exterioare, normale in afara.
+		var o0 := _tun_pt(c, s, outer_p[e])
+		var o1 := _tun_pt(c, s, outer_p[e + 1])
+		var p0 := _tun_pt(c2, s, outer_p[e])
+		var p1 := _tun_pt(c2, s, outer_p[e + 1])
+		_tun_quad(st, o0, o1, p1, p0, (o0 + o1) * 0.5 - axis, col, col, col, col)
+		# Fata din fata (inelul), normala spre exterior.
+		_tun_quad(st, b0, b1, p1, p0, outward, col, col, col, col)
+	# Aripile: din peretele interior, spre exterior si in lateral.
+	for sgn: float in [-1.0, 1.0]:
+		var top := TUNNEL_WING_HEIGHT_M
+		var a_lo := _tun_pt(c2, s, Vector2(sgn * hw, foot))
+		var a_hi := _tun_pt(c2, s, Vector2(sgn * hw, top))
+		var far := c2 + outward * TUNNEL_WING_LEN_M
+		var b_lo := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), foot))
+		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), top))
+		# Fata dinspre drum (cea care conduce masina), normala spre axa.
+		_tun_quad(st, a_lo, a_hi, b_hi, b_lo, -s * sgn, col, col, col, col)
+		# Fata din spate, grosime 0.5 m, normala in afara.
+		var o := s * sgn * 0.5
+		_tun_quad(st, a_lo + o, a_hi + o, b_hi + o, b_lo + o, s * sgn, col, col, col, col)
+		_tun_quad(st, a_hi, a_hi + o, b_hi + o, b_hi, Vector3.UP, col, col, col, col)
+		_tun_quad(st, b_lo, b_hi, b_hi + o, b_lo + o, outward, col, col, col, col)
+
 
 ## Trimite un gimmick plantat ca nod ([HazardMarker]) la constructorul lui.
 ##

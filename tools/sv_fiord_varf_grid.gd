@@ -2,19 +2,24 @@ extends Node
 ## Sonda ad-hoc (Mitre Peak, Track16): scrie ground_y pe o grila de 10 m si
 ## punctele coapte cu fractia lor in CSV-uri, ca sa fie desenate cu PIL
 ## (tools/fiord_varf_map.py). Doar citire din pista; scrie in --out=DIR.
-const TRACK := "res://scenes/tracks/Track16.tscn"
+## `--track=N` = NUMARUL scenei (implicit 16); serveste si ca test de
+## identitate la bit pentru schimbari in sampler: dump inainte / dupa, `diff`.
+const TRACK_FMT := "res://scenes/tracks/Track%02d.tscn"
 
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var t := (load(TRACK) as PackedScene).instantiate() as Track
-	get_tree().root.add_child(t)
-	for i in 4:
-		await get_tree().process_frame
 	var out_dir := "user://"
+	var track_no := 16
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			out_dir = a.trim_prefix("--out=")
+		elif a.begins_with("--track="):
+			track_no = int(a.trim_prefix("--track="))
+	var t := (load(TRACK_FMT % track_no) as PackedScene).instantiate() as Track
+	get_tree().root.add_child(t)
+	for i in 4:
+		await get_tree().process_frame
 	var sea_y: float = t._sampler.mean_road_y() + t.custom_sea_level_offset
 	var lo := Vector3(INF, 0, INF)
 	var hi := Vector3(-INF, 0, -INF)

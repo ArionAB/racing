@@ -48,7 +48,7 @@ curve = SubResource("Curve3D_fiordland")
 [node name="ScurtaturaChasm" type="Path3D" parent="."]
 curve = SubResource("Curve3D_scurtatura_chasm")
 script = ExtResource("8_branch")
-branch_half_width = 2.2
+branch_half_width = 3.2
 label = "drumul vechi din padure"
 rain_wet = true
 speed_factor = 0.85

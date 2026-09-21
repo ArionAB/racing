@@ -35,14 +35,23 @@ mai e si RETEZAT de sapatura rapei 0 (latime 220 m): cota maxima masurata cu
 Ceata si FAR_PLANE NU sunt parghii aici (brief §2.0: „fiordul se stramteaza
 sau varful creste").
 
-Contract (cod de iesire 1 daca pica) — cel cerut de dezvoltator la 21 sep:
-  * B2 (frac 0,13-0,21) si TOT F (0,60-0,74): centrul varfului la <= 250 m de
-    camera (tinta <= 200), IN CADRU (|azimut| <= 50 grade fata de directia de
-    mers), varful >= 30 m peste camera si SUB marginea de sus a cadrului.
-  * A (0-0,05): varful PESTE marginea de sus — ramane „perete negru peste apa".
+Contract (cod de iesire 1 daca pica) — rescris la 21 sep 2026 pe ce e
+REALIZABIL cu camera de joc, dupa decizia dezvoltatorului „varful-insula in
+golf" (nodul la (-250, 70, -200), raza 44, `island = true`):
+  * A  (0,00-0,05): >= 50% din puncte cu varful IN CADRU pe azimut (|azimut|
+    <= 50 grade, d <= fog_end) — ca PERETE (taiat de marginea de sus).
+  * B1 (0,05-0,13): >= 90% din puncte in cadru (perete/flanc, la 120-250 m).
+  * F1 (0,60-0,67): >= 60% in cadru si >= 40% INTREG (sub marginea de sus).
   * Baza varfului (centru - radius_m) la >= 40 m de ORICE punct al drumului.
-Garda tipareste si cate puncte din segment sunt „in cadru", „intregi" si
-„perete", ca sa se vada CE anume pica: distanta, azimutul sau verticala.
+  Ce NU se mai cere: „intreg de pe B2 si pe tot F" (B2, C si F2 privesc in
+  lungul cornisei / spre G-H, golful le e lateral — nicio pozitie nu le
+  serveste pe toate, verificat exhaustiv) si „>= 30 m peste camera si intreg
+  sub 250 m" (imposibil geometric, vezi mai sus).
+  Garda PICA pe starea veche (commit e882cc62: varf la (-311, 60, -65) —
+  A 0/10 in cadru, B1 0/14, F1 0/13) si TRECE pe cea noua (A 6/10, B1
+  14/14, F1 9/13 in cadru / 6/13 intreg). Verificare: `git show
+  e882cc62:scenes/tracks/Track16.tscn > /tmp/old.tscn` si `--tscn /tmp/old.tscn`.
+  Ce vede in plus, informativ: B2/C/F2 (lateral) si H.
 
 Rulare (nu are nevoie de Godot):
     python tools/fiord_frustum_table.py [--tscn scenes/tracks/Track16.tscn]
@@ -64,10 +73,9 @@ FOG_END_DRY = 320.0
 FAR_PLANE = 380.0
 HALF_HFOV = 50.0  # grade, 16:9 (20:9 -> 56)
 
-MAX_DIST = 250.0
-TARGET_DIST = 200.0
-MIN_OVER_CAM = 30.0
 MIN_BASE_CLEAR = 40.0
+# (segment, fractia minima IN CADRU, fractia minima INTREG)
+CONTRACT = {"A": (0.50, None), "B1": (0.90, None), "F1": (0.60, 0.40)}
 
 PITCH_DEG = math.degrees(math.atan((CAM_UP - LOOK_HEIGHT) / (CAM_BACK + LOOK_AHEAD)))
 TOP_EDGE_DEG = FOV_V * 0.5 - PITCH_DEG          # +5,25
@@ -78,7 +86,9 @@ SEGMENTS = {
     "B1": (0.05, 0.13),
     "B2": (0.13, 0.21),
     "C":  (0.21, 0.27),
-    "F":  (0.60, 0.74),
+    "F1": (0.60, 0.67),
+    "F2": (0.67, 0.74),
+    "H":  (0.86, 1.00),
 }
 
 
@@ -200,28 +210,20 @@ def main():
                    min(r["el"] for r in sel), max(r["el"] for r in sel),
                    min(r["mg"] for r in sel), max(r["mg"] for r in sel),
                    len(in_frame), k, len(whole), k, len(wall), k))
-        if name in ("B2", "F"):
+        if name in CONTRACT:
+            need_frame, need_whole = CONTRACT[name]
             why = []
-            if max(r["d"] for r in sel) > MAX_DIST:
-                why.append("d > %.0f" % MAX_DIST)
-            if len(in_frame) < k:
-                why.append("in afara cadrului pe %d/%d puncte" % (k - len(in_frame), k))
-            if min(r["oc"] for r in sel) < MIN_OVER_CAM:
-                why.append("varf < %.0f m peste camera (deal)" % MIN_OVER_CAM)
-            if len(whole) < k:
-                why.append("nu e intreg pe %d/%d puncte" % (k - len(whole), k))
-            note = "  (tinta d <= %.0f: %s)" % (TARGET_DIST,
-                                                "da" if max(r["d"] for r in sel) <= TARGET_DIST else "NU")
-            print(line + ("  OK" if not why else "  PICA: " + ", ".join(why)) + note)
+            if len(in_frame) < need_frame * k - 1e-9:
+                why.append("in cadru %d/%d < %.0f%%" % (len(in_frame), k, need_frame * 100))
+            if need_whole is not None and len(whole) < need_whole * k - 1e-9:
+                why.append("intreg %d/%d < %.0f%%" % (len(whole), k, need_whole * 100))
+            if name == "A" and len(wall) < k:
+                why.append("varful intra intreg de pe chei (nu mai e perete)")
+            print(line + ("  OK" if not why else "  PICA: " + ", ".join(why)))
             if why:
                 failed.append(name)
-        elif name == "A":
-            ok = len(wall) == k
-            print(line + ("  OK (perete)" if ok else "  PICA: varful intra intreg de pe chei"))
-            if not ok:
-                failed.append("A")
         else:
-            print(line)
+            print(line + "  (informativ)")
 
     db, bi = min_base
     print("  baza varfului: cea mai apropiata sosea la %.1f m (frac %.3f)  %s"

@@ -51,6 +51,11 @@ uniform float edge_m : hint_range(0.2, 10.0) = 2.5;
 uniform float top_frac : hint_range(0.05, 0.9) = 0.4;
 // Inaltimea (m) benzii de spuma de la baza.
 uniform float foam_m : hint_range(0.0, 6.0) = 1.8;
+// Cat coboara panza sub cota drumului (`WaterfallVisual.SINK_M`), si pe cat
+// se topeste acolo: pe drum muchia de jos e ingropata in asfalt, dar unde
+// terenul de langa drum e mai jos ea ar iesi ca o LINIE dreapta in aer
+// (masurat pe captura din perdea: o dunga orizontala prin tot cadrul).
+uniform float sink_m : hint_range(0.1, 6.0) = 2.0;
 // Faza de ploaie (RainCycle) o stinge/aprinde prin `modulate` pe hazard;
 // per instanta, ca sa nu se dubleze materialul.
 instance uniform float intensity : hint_range(0.0, 1.0) = 1.0;
@@ -121,8 +126,10 @@ void fragment() {
 	//    margini de perdea — caderea ei radiala e in alpha-ul de vertex.
 	float lat = sstep(min(x, w - x) / edge_m);
 	float top = sstep(y / (h * top_frac));
+	// sub cota drumului: 1 la sol, 0 la capatul scufundat.
+	float bot = sstep((h + sink_m - y) / sink_m);
 	lat = mix(lat, 1.0, pad);
-	top = mix(top, 1.0, pad);
+	top = mix(top, 1.0, pad) * mix(bot, 1.0, pad);
 
 	// spuma: banda de la baza, sau toata placa.
 	float foam = sstep((y - (h - foam_m)) / foam_m);

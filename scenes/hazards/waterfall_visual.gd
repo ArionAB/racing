@@ -31,8 +31,10 @@ extends Node3D
 const SHADER_PATH: String = "res://assets/shaders/waterfall.gdshader"
 const SPRAY_TEX: String = "res://assets/textures/smoke_puff.png"
 ## Cat coboara panzele sub cota drumului, ca muchia lor de jos sa fie mereu
-## ascunsa in asfalt/teren, nu o linie dreapta in aer.
-const SINK_M: float = 0.6
+## ascunsa in asfalt/teren, nu o linie dreapta in aer. Trebuie sa fie egal cu
+## `sink_m` din shader, care topeste continuu portiunea scufundata (unde
+## terenul de langa drum e mai jos decat drumul, muchia ar fi iesit in aer).
+const SINK_M: float = 2.0
 ## Pasul intre panzele de-a latul (m) si plafonul lor.
 const CROSS_STEP_M: float = 10.0
 const CROSS_MAX: int = 3

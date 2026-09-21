@@ -59,6 +59,7 @@ period = 95.0
 telegraph = 5.0
 rain_hold = 25.0
 dry_out = 5.0
+start_clock = 35.0
 
 [node name="RainFallB1" type="Area3D" parent="Hazarduri" groups=["rain_falls"]]
 transform = Transform3D(0.6160, 0.0000, -0.7877, 0.0649, 0.9966, 0.0507, 0.7851, -0.0823, 0.6139, -90.480, 7.610, -174.990)

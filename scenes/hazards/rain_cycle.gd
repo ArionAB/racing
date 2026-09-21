@@ -60,6 +60,17 @@ extends Node
 	set(value):
 		dry_out = maxf(value, 0.1)
 
+## Punctul din ciclu (s) la care porneste ceasul la incarcare. Ciclul e
+## telegraph -> ploaie -> zvantare -> USCAT, deci la 0 pista porneste DIRECT
+## in telegraph: `rain_factor` > 0 din al doilea cadru, cascadele de ploaie
+## aprinse si drumul ud in primele 35 s ale cursei (constatare 22 sep: cutiile
+## de ploaie apareau „pe uscat" de la start — nu erau pe uscat, ploaia
+## incepuse la t=0). `telegraph + rain_hold + dry_out` = inceputul ferestrei
+## uscate: cursa porneste uscata si prima ploaie vine dupa `period` minus
+## suma aceea (60 s pe Fiordland). Implicitul ramane 0 pentru sondele care
+## verifica tranzitiile de la t=0 (`ProbeFiordPloaie`); pista il seteaza.
+@export_range(0.0, 600.0, 0.5) var start_clock: float = 0.0
+
 @export_group("Mediu")
 ## `fog_depth_end` pe uscat (m). Se citeste o singura data din Environment daca
 ## nu se suprascrie aici — vezi `_base_taken`.
@@ -113,6 +124,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
 		return
+	_clock = fposmod(start_clock, period)
 	# AMANAT: `track` si nodurile din `rain_falls` sunt construite de pista in
 	# `rebuild()`/`_ready()`-ul ei, care ruleaza inaintea copiilor dar dupa
 	# `_init`; cautarea in sus/jos pe arbore trebuie sa gaseasca o scena deja

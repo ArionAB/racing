@@ -232,6 +232,8 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 var _visual: WaterfallVisual
 var _fog: FogCorridorHazardScript
 var _cars_inside: Dictionary = {}
+## Starea de activare aplicata ultima data (vezi `_set_active`).
+var _active: bool = true
 
 
 func _ready() -> void:
@@ -255,6 +257,8 @@ func _rebuild() -> void:
 	_build_shape()
 	_build_visual()
 	_build_fog()
+	if not _active:
+		_set_active(false)
 
 
 func _build_shape() -> void:
@@ -274,7 +278,10 @@ func _build_shape() -> void:
 ## faza uscata sa nu arate o clipa cascadele de ploaie aprinse.
 func _build_visual() -> void:
 	_visual = WaterfallVisual.new()
-	_visual.name = "Curtain"
+	# Nu "Curtain": numele e luat de forma de coliziune, iar la runtime un
+	# nume dublat devine "@Curtain@id" — pe care `Snapshot --hide=Curtain*`
+	# nu-l mai gaseste (masurat: A/B-ul on/off a iesit identic la bit).
+	_visual.name = "Perdea"
 	add_child(_visual)
 	_visual.build(Vector3(_current_thickness(), visual_height, length), spray_count)
 	_visual.set_intensity(modulate.a)
@@ -301,6 +308,16 @@ func _build_fog() -> void:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	# Pe uscat, o cascada de ploaie e STINSA de `RainCycle` (`visible = false`,
+	# `modulate.a = 0`) — si zona ei trebuie sa fie la fel de inactiva ca
+	# vizualul: nici franare, nici albire. Inainte, un nod invizibil franea si
+	# albea in continuare (constatare de la un alt agent, 22 sep: cutiile de
+	# ploaie apareau pe uscat; iar ceata lor lucra chiar si cand nu apareau).
+	var active := is_visible_in_tree() and modulate.a > 0.001
+	if active != _active:
+		_set_active(active)
+	if not active:
+		return
 	var base_accel := force_accel * rain_factor
 	var seen := {}
 	for body in get_overlapping_bodies():
@@ -323,6 +340,19 @@ func _physics_process(delta: float) -> void:
 	for car in _cars_inside.keys():
 		if not seen.has(car):
 			_cars_inside.erase(car)
+
+
+## Aprinde/stinge ZONA odata cu vizualul: `monitoring` pe Area3D-ul propriu
+## (fara suprapuneri, deci fara forta/franare) si zona cetii interne (fara
+## albire; `FogCorridorHazard` recalculeaza cantitatea din suprapuneri la
+## fiecare cadru, deci fara suprapuneri mediul revine singur la baza).
+func _set_active(on: bool) -> void:
+	_active = on
+	monitoring = on
+	if not on:
+		_cars_inside.clear()
+	if _fog != null and is_instance_valid(_fog):
+		_fog.set_active(on)
 
 
 ## Factorul care scaleaza `force_accel` cu viteza CURENTA (nu cea de la

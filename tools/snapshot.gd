@@ -207,9 +207,20 @@ func _ready() -> void:
 	# cadrul de joc — referintele de diorama au masina in prim-plan, iar o
 	# captura fara ea compara un peisaj cu o scena. Fara fizica (on_start_grid).
 	var show_car := false
+	# --wipers-demo: instantiaza WindshieldWipers (brief Fiordland pasul 4) si
+	# il umple cu N picaturi FORTATE pentru o captura de verificare — Race nu
+	# ruleaza aici (Snapshot nu porneste o cursa), deci nu exista alt mod de-a
+	# vedea overlay-ul decat sa-l declansezi manual.
+	var wipers_demo := -1
 	for arg in OS.get_cmdline_user_args():
 		if arg == "--car":
 			show_car = true
+			continue
+		if arg.begins_with("--wipers-demo="):
+			wipers_demo = int(arg.trim_prefix("--wipers-demo="))
+			continue
+		elif arg == "--wipers-demo":
+			wipers_demo = 24
 			continue
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
@@ -560,6 +571,8 @@ func _ready() -> void:
 		cam.position = want
 		cam.look_at(focus + dir * look_ahead + Vector3.UP * look_h, Vector3.UP)
 		cam.current = true
+		if wipers_demo >= 0:
+			_show_wipers_demo(wipers_demo)
 		# DECORUL CARE SE CONSTRUIESTE SINGUR are nevoie de cadre inainte de
 		# poza. FlamingoFlock (si orice alt decor cu `_build.call_deferred()`)
 		# asteapta doua cadre de proces PLUS doua de fizica, ca terenul sa fie
@@ -693,6 +706,19 @@ func _shoot_landmark(track: Track, cam: Camera3D, track_index: int,
 ## lumina. Aici rebuild-uim normalele prin mediere pe pozitie — echivalentul
 ## la runtime al lui shade_smooth din Blender — DOAR ca sa comparam capturi.
 ## Reparatia reala, daca ipoteza tine, e in exportul Blender, nu aici.
+## Instantiaza WindshieldWipers si il umple cu `count` picaturi fortate
+## (brief Fiordland pasul 4, `--wipers-demo`). Snapshot nu porneste o cursa
+## (nu exista `Race`), deci verificarea overlay-ului n-are alt punct de
+## intrare — aici e cel mai apropiat de contractul real: acelasi CanvasLayer,
+## acelasi pool, doar cu picaturile create direct in loc de prin `configure()`
+## + starea unui `WaterfallHazard`/`RainCycle` reali.
+func _show_wipers_demo(count: int) -> void:
+	var w := WindshieldWipers.new()
+	add_child(w)
+	w.force_spawn_demo(count)
+	print("--wipers-demo=%d: WindshieldWipers instantiat, %d picaturi fortate" % [count, count])
+
+
 ## Muta ceasul trenului la o fractie din ciclul lui, ca sa apuce sa fie IN cadru
 ## cand se face poza.
 ##

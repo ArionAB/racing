@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/waterfall_hazard.gd" id="5_waterfall"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="6_channel"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="7_marker"]
+[ext_resource type="Script" uid="uid://b82usw4sot3ep" path="res://scenes/tracks/track_branch.gd" id="8_branch"]
 
 [sub_resource type="Curve3D" id="Curve3D_fiordland"]
 closed = true
@@ -15,6 +16,13 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 180
+
+[sub_resource type="Curve3D" id="Curve3D_scurtatura_chasm"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -528, 24.2, -503, 0, 0, 0, 0, 0, 0, -524.7, 23.19, -514, 0, 0, 0, 0, 0, 0, -521.3, 22.17, -525, 0, 0, 0, 0, 0, 0, -517.8, 21.15, -536, 0, 0, 0, 0, 0, 0, -514, 20.13, -547, 0, 0, 0, 0, 0, 0, -509, 19.14, -557, 0, 0, 0, 0, 0, 0, -501, 18.08, -566, 0, 0, 0, 0, 0, 0, -490, 16.93, -573, 0, 0, 0, 0, 0, 0, -478, 15.8, -577.5, 0, 0, 0, 0, 0, 0, -465, 14.6, -581.5, 0, 0, 0, 0, 0, 0, -452, 15.44, -593, 0, 0, 0, 0, 0, 0, -412, 17.4, -599),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 12
 
 [node name="Track16" type="Node3D"]
 script = ExtResource("1_track")
@@ -29,13 +37,25 @@ custom_step_ranges = Array[Vector2]([Vector2(0.406, 0.424)])
 custom_ravines = Array[Vector4]([Vector4(0.011, 0.279, 30, -1), Vector4(0.341, 0.444, 8, 1), Vector4(0.84, 0.902, 6, -1), Vector4(0.919, 0.999, 30, -1)])
 custom_cornice_ravines = Array[int]([0, 3])
 custom_ravine_floors = Array[Vector2]([Vector2(0, -30.0), Vector2(1, 7.0), Vector2(2, -8.0), Vector2(3, -30.0)])
-custom_ravine_widths = Array[Vector2]([Vector2(0, 220), Vector2(1, 25), Vector2(2, 22), Vector2(3, 220)])
+custom_ravine_widths = Array[Vector2]([Vector2(0, 220), Vector2(1, 70), Vector2(2, 22), Vector2(3, 220)])
 custom_width_segments = Array[Vector3]([Vector3(0.011, 0.061, 8.0), Vector3(0.061, 0.273, 6.0), Vector3(0.273, 0.323, 6.0), Vector3(0.351, 0.406, 6.5), Vector3(0.406, 0.424, 5.5), Vector3(0.424, 0.612, 6.5), Vector3(0.612, 0.69, 4.5), Vector3(0.69, 0.818, 7.0), Vector3(0.846, 0.896, 6.0), Vector3(0.923, 0.999, 8.0)])
 custom_lane_corridors = Array[Vector3]([])
 terrain_pad_m = 220.0
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_fiordland")
+
+[node name="ScurtaturaChasm" type="Path3D" parent="."]
+curve = SubResource("Curve3D_scurtatura_chasm")
+script = ExtResource("8_branch")
+branch_half_width = 2.2
+label = "drumul vechi din padure"
+rain_wet = true
+speed_factor = 0.85
+rut_depth = 0.05
+grass_center = 0.7
+edge_noise = 1.0
+bumpiness = 0.05
 
 [node name="Peaks" type="Node3D" parent="."]
 

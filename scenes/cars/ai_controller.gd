@@ -180,6 +180,65 @@ const SIGNAL_QUEUE_GAP_M: float = 5.0
 ## (nu 0 exact — fizica tremura langa zero).
 const SIGNAL_QUEUE_STOPPED_SPEED: float = 1.0
 
+## Reproiectare (banda de autocar, brief `docs/track_briefs/fiordland.md` §3
+## „optiunea 0", 22 sep 2026): dupa 4 runde esuate cu OPRIREA completa a unei
+## flote de 8 AI la o singura banda (coada se scurgea peste linie, 11 treceri
+## pe rosu pe 16 seed-uri — vezi istoricul in TunnelSignalHazard), gimmick-ul
+## devine banda de autocar FARA oprire. `TunnelSignalHazard.mode == LANE`
+## (implicit) inlocuieste TOT blocul SIGNAL_BRAKE_M/SIGNAL_STOP_M/coada de mai
+## sus cu o singura regula: cat lampa e rosie ("autocar in tunel sau intra in
+## <= clear_hold s"), AI-ul tine banda DREAPTA in zona tunelului — nu franeaza,
+## nu se opreste, nu face coada. `mode == STOP` (vechi) ramane pe codul de mai
+## sus, nefolosit pe pistele noi, pastrat pentru sonde de regresie.
+##
+## De ce nu se reutilizeaza `_fireball_line`/`_span_line` direct: ambele
+## intorc un OFSET FIX derivat din geometria hazardului lor (gura gheizerului,
+## poarta rotativa); aici tinta e o BANDA (jumatate de sosea), nu un punct, iar
+## decizia depinde de `is_red()`, nu de o faza calculata local — mai simplu sa
+## se scrie separat decat sa se generalizeze tiparul pentru un singur hazard.
+##
+## Zona in care se aplica REGULA: de la SIGNAL_LANE_REACH_M inainte de linia
+## de oprire (portalul de est) pana la capatul tunelului (portalul de vest,
+## `tunnel_length` mai departe) — brief: „de la AI_REACH_M inainte de
+## portalul de est pana la portalul de vest".
+##
+## NU se foloseste `TunnelSignalHazard.AI_REACH_M` (130 m) direct — mult mai
+## mare aici, dupa masuratori repetate cu sonda pe Track16 (tunelul e UD
+## permanent, `custom_wet_ranges` — grip lateral redus, acelasi motiv pentru
+## care franarea veche avea SIGNAL_BRAKE_WET_FACTOR): la 130 m, si chiar la
+## 250 m, o masina care intra in zona aproape de axa nu reuseste sa convearga
+## fizic la tinta pana la portalul de vest — masurat, acelasi seed, run
+## repetat: uneori converge curat (Kai: -2.0 -> +3.0 in 40 m), alteori ramane
+## „lipita" de axa (-0.1..+0.3 m) pe zeci de metri, cu semnul comandat corect
+## (`line_out`) dar pozitia REALA neschimbata — semn de grip limitat pe
+## asfaltul ud, nu de logica gresita (ProbeRace documenteaza chiar el
+## nedeterminismul fizicii intre rulari identice). Zona larga (350 m,
+## aproape 1/6 din pista) da orice masina destul drum sa convearga chiar si
+## in cel mai lent caz observat.
+const SIGNAL_LANE_REACH_M: float = 350.0
+## Cat de aproape de intrarea in zona se face tranzitia liniei (m): scurt
+## dinadins — regula trebuie sa fie STRICTA (veto „AI onest": 0 masini pe
+## banda stanga pe rosu), nu o preferinta care se instaleaza incet pe toata
+## zona. O tranzitie prea lunga ar lasa AI-ul in banda gresita chiar la
+## intrarea in tunel daca rosul apare chiar cand masina trece de punctul de
+## decizie.
+const SIGNAL_LANE_EASE_M: float = 12.0
+## Centrul benzii DREPTE (m fata de axa, semn ca `side_at`: pozitiv = dreapta
+## sensului de mers).
+##
+## Runda 3 (geometrie, coordonator): tunelul a crescut la semilatime 4.5
+## (9 m). Citirea corecta a rundei 2 — masurat, regula de banda era ACTIVA
+## in 100% din ejectari si vitezele (42-59 m/s) sunt de coliziune bruta, nu
+## de sincronizare: cu autocarul (3.6 m) la -2.0 si masina (2.2 m) la +1.5
+## pe un tunel de 8 m, marginile lor erau la doar 0.6 m distanta — orice
+## clatinare pe asfalt ud (custom_wet_ranges) insemna contact cu un corp
+## CINEMATIC (masa infinita, memoria `corp-cinematic-aparut-in-masina`):
+## depenetrare violenta, nu o eroare de linie. Fixul e marja, nu regula.
+## +2.0 acum (ocupa +0.9..+3.1 cu semilatimea masinii ~1.1 m) fata de
+## autocarul la -2.4 (ocupa -3.9..-0.9): 1.8 m intre ele, de trei ori
+## marja veche (0.6 m).
+const SIGNAL_RIGHT_LANE_M: float = 2.0
+
 var track: Track
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
 ## portiunile drepte. Peste ea se adauga tragerea spre interiorul virajului.
@@ -319,6 +378,12 @@ func update(delta: float) -> void:
 	line = _span_line(speed, line)
 	# Cineva mai lent pe culoarul nostru? Linia se muta pe langa el.
 	line = _avoid_line(idx, speed, line, keep_off)
+	# Banda de autocar (Fiordland, brief §3 „optiunea 0"): pe rosu, in zona
+	# tunelului, banda dreapta e IMPUSA — vine dupa ocolirea de trafic
+	# (`_avoid_line`) fiindca e regula de siguranta cu veto, nu o preferinta
+	# de linie; o masina care tocmai a inceput sa ocoleasca pe stanga in zona
+	# trebuie trasa inapoi pe dreapta, nu invers.
+	line = _signal_lane_keep(idx, speed, line)
 	# CULOARUL UNIC are ultimul cuvant. Pe restul pistei ocolirea poate folosi
 	# toata latimea; intr-un blocaj cu o singura fanta, orice metru in afara
 	# fantei e zid, deci linia se strange inapoi in ea. Fereastra e ingusta
@@ -568,6 +633,106 @@ func _span_line(speed: float, line: float) -> float:
 	var t := clampf(1.0 - best_d / RotatingSpanHazard.AI_REACH_M, 0.0, 1.0)
 	return lerpf(line, target, t)
 
+## Banda de autocar (Fiordland, brief §3 „optiunea 0" — vezi comentariul de la
+## SIGNAL_LANE_EASE_M): cat un TunnelSignalHazard `mode == LANE` e ACTIV
+## (rosu ACUM, sau va prinde masina inauntru — vezi `active` mai jos) si masina
+## e in ZONA lui (de la SIGNAL_LANE_REACH_M inainte de linia de oprire pana la
+## capatul tunelului), linia e IMPUSA pe banda dreapta — brief: „AI-ul care e
+## in zona tunelului tine banda dreapta; pe verde (si fara sa-l prinda rosul
+## inauntru) are toata latimea".
+##
+## Runda 2 (coordonator): declansator ANTICIPAT, nu doar `is_red()` chiar
+## acum — o masina intrata pe verde chiar inainte sa vina rosul altfel n-ar
+## avea niciun motiv sa tina dreapta pana cand lampa CHIAR se schimba, desi un
+## sofer care socoteste "ies eu la timp?" ar sti dinainte. `blocks_in(eta)` cu
+## eta = timpul pana la PORTALUL DE VEST (nu pana la linie) raspunde exact la
+## intrebarea aia, cu acelasi bit pe care il are un om (lampa + viteza
+## proprie) — „AI onest", nu informatie in plus.
+##
+## Regula e STRICTA (veto „AI onest": 0 masini pe banda stanga pe rosu), nu o
+## preferinta care se instaleaza treptat ca la gheizere/pasaj — tranzitia
+## (`SIGNAL_LANE_EASE_M`) e scurta, doar cat sa nu smuceasca volanul chiar la
+## intrarea in zona, nu o ezitare de zeci de metri.
+##
+## De ce se citeste pe ORICE ruta (fara filtrul `car.route == 0` de la usa de
+## piatra): semaforul n-are un ocol pe alta banda — zona lui e chiar drumul
+## principal prin tunel, deci se aplica indiferent de ruta curenta.
+func _signal_lane_keep(idx: int, speed: float, line: float) -> float:
+	var signals := get_tree().get_nodes_in_group(TunnelSignalHazard.AI_GROUP)
+	if signals.is_empty():
+		return line
+	var r := track.route_at(car.route)
+	if r == null:
+		return line
+	var n_pts := r.count()
+	var bake: float = track.curve.bake_interval
+	for node in signals:
+		var sig := node as TunnelSignalHazard
+		if sig == null or sig.mode != TunnelSignalHazard.Mode.LANE:
+			continue
+		var key := sig.get_instance_id()
+		if not _signal_index.has(key):
+			_signal_index[key] = track.closest_index_global(
+				sig.ai_decision_point(), car.route)
+		var d_idx: int = int(_signal_index[key]) - idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		# Zona: de la SIGNAL_LANE_REACH_M INAINTE de linie (along pozitiv, ne
+		# apropiem) pana la capatul tunelului (along negativ pana la
+		# -tunnel_length, deja angajati in tunel — semnul lui `along` scade pe
+		# masura ce trecem de linie, la fel ca la usa de piatra si la semafor
+		# in modul STOP).
+		if along > SIGNAL_LANE_REACH_M or along < -sig.tunnel_length:
+			continue
+		# Runda 2 (coordonator): declansator ANTICIPAT, nu doar reactiv la
+		# `is_red()` chiar acum. Un sofer care se apropie de tunel nu se uita
+		# doar la lampa in clipa actuala, ci socoteste "daca intru ACUM, ies
+		# inainte sa vina rosul?" — exact `blocks_in()`, deja folosit de
+		# `_signal_red_ahead` pentru decizia veche de franare, aplicat aici cu
+		# ETA pana la PORTALUL DE VEST (capatul tunelului), nu pana la linia de
+		# oprire: intrebarea nu e "ajunge rosul la mine", e "ajunge rosul
+		# INAUNTRU cat sunt eu acolo". Acelasi bit pe care il are un om (lampa +
+		# propria viteza) — „AI onest".
+		#
+		# Distanta pana la portalul de vest: `along` e distanta pana la LINIE
+		# (portalul de est), iar tunelul se intinde pana la `along ==
+		# -tunnel_length` — deci distanta ramasa pana la capat e
+		# `along + tunnel_length`, valabila si inainte de linie (along > 0,
+		# inca n-am intrat) si dupa (along < 0, deja inauntru).
+		var dist_to_west := along + sig.tunnel_length
+		var eta_west := dist_to_west / maxf(speed, 10.0)
+		var active := sig.is_red() or sig.blocks_in(eta_west)
+		if not active:
+			continue
+		var hw: float = track.width_at_index(idx) if car.route == 0 \
+			else r.half_width
+		# BUG GASIT runda 2 (vezi TunnelSignalHazard.tunnel_half_width):
+		# width_at_index() poate raporta semilatimea sectorului DINAINTE
+		# (rampa de tranzitie de 30 m se aplica dupa capatul lui, catre
+		# half_width GLOBAL) chiar in interiorul tunelului declarat, langa
+		# linie -- masurat, `hw=6.5` in loc de 4.0 in tot tunelul. Plafonam
+		# cu semilatimea REALA a tunelului, cunoscuta de hazard, nu dedusa
+		# din profilul de latime (care ramane corect pentru restul pistei).
+		hw = minf(hw, sig.tunnel_half_width)
+		hw = maxf(hw, 0.001)
+		var target := clampf(SIGNAL_RIGHT_LANE_M / hw, 0.0, LINE_MAX)
+		# Tranzitie scurta la INTRAREA in zona (along aproape de
+		# SIGNAL_LANE_REACH_M); in restul zonei (inclusiv tot tunelul), linia
+		# e ferm pe tinta.
+		var t := clampf(
+			(SIGNAL_LANE_REACH_M - along) / SIGNAL_LANE_EASE_M, 0.0, 1.0)
+		var result := lerpf(line, target, t)
+		if OS.get_environment("SIGNAL_LANE_TRACE") == "1":
+			var actual_lat := r.side_at(idx).dot(car.global_position - r.baked[r.wrap_index(idx)])
+			print("[signal-lane] %s along=%.1f hw=%.2f target=%.3f t=%.2f line_in=%.3f line_out=%.3f actual_lat=%.2f red=%s blocks_in=%.1fs" %
+				[car.pilot_name, along, hw, target, t, line, result, actual_lat,
+					sig.is_red(), eta_west])
+		return result
+	return line
+
 func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	if traffic.is_empty():
 		return line
@@ -709,6 +874,11 @@ func _signal_red_ahead(speed: float) -> float:
 	for node in signals:
 		var sig := node as TunnelSignalHazard
 		if sig == null:
+			continue
+		# Reproiectare (banda de autocar): franarea/coada de mai jos sunt
+		# contractul VECHI (mode STOP). Pe LANE (implicit), AI-ul nu se opreste
+		# niciodata la semafor — vezi `_signal_lane_keep` pentru regula noua.
+		if sig.mode != TunnelSignalHazard.Mode.STOP:
 			continue
 		var key := sig.get_instance_id()
 		if not _signal_index.has(key):

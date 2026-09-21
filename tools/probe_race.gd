@@ -198,9 +198,34 @@ var _signal_max_queue: int = 0
 var _signal_hazards: Array[TunnelSignalHazard] = []
 var _signal_bus_hits_green: int = 0
 var _signal_bus_hits_red: int = 0
+## Runda 2 a benzii: contacte impartite si pe BANDA masinii la impact (nu doar
+## rosu/verde) — coordonator: "contacte autocar-AI (rosu/verde, banda)".
+var _signal_bus_hits_left: int = 0
+var _signal_bus_hits_right: int = 0
 ## Ultimul local.z (fata de semafor) vazut per masina, pentru detectia
 ## trecerii liniei (semnul lui local.z schimba de la - la +).
 var _signal_last_z: Dictionary = {}
+
+## Reproiectare banda-autocar (brief §3 „optiunea 0"): masini-cadre cu
+## lateral SEMNAT < 0 (banda STANGA) in interiorul tunelului CAT semaforul e
+## rosu — veto „AI onest" al noului contract (trebuie 0). Verificat DOAR pe
+## masinile CONDUSE DE AI (jucatorul nu conteaza in sonda, dar nici n-are
+## controller AI). Distinct de `_signal_bus_hits_red` (contact fizic): asta
+## numara SIMPLA PREZENTA pe banda gresita, indiferent daca s-a lovit ceva.
+var _signal_left_lane_frames: int = 0
+## Lat maxim observat in interiorul tunelului (m, fara semn) — criteriul
+## "lat maxim in tunel <= 4.0".
+var _signal_lat_max: float = 0.0
+
+## Runda 3 (coordonator): "lateralul PRE-impact" — inchide intrebarea daca
+## mașinile lovite de autocar erau deja pe dreapta (regula functiona, contact
+## fizic din marja prea mica) sau inca pe axa/stanga (regula n-a apucat).
+## Buffer circular de 3 cadre pe masina (cheie: instance id), actualizat in
+## FIECARE tick din `_watch_signal_fleet` (nu doar pe rosu — o masina poate fi
+## lovita chiar la tranzitia verde->rosu). Fiecare intrare: lateral SEMNAT
+## (side_at), acelasi tipar ca `_signal_lat_max`.
+var _lateral_history: Dictionary = {}
+const LATERAL_HISTORY_LEN: int = 3
 
 ## Pista taiata in felii egale, ca sa vezi UNDE se scurge viteza.
 const BUCKETS: int = 20
@@ -606,6 +631,52 @@ func _watch_signal_fleet(cars: Array[Car]) -> void:
 		if local_pos.z < 5.0 and local_pos.z > -TunnelSignalHazard.AI_REACH_M \
 				and speed < 2.0:
 			queued += 1
+		# Reproiectare banda-autocar: masina IN TUNEL CAT e rosu, pe banda
+		# STANGA — veto „AI onest", trebuie 0.
+		#
+		# BUG GASIT (prima versiune folosea doar `local_pos.z/x`, coordonatele
+		# FIXE ale nodului semafor): `to_local` e un transform AFIN NECLIPIT —
+		# orice masina de pe cei 2162 m ai pistei a carei pozitie se intampla
+		# sa cada in cutia (z in [0,169], oriunde in planul XY local) e prinsa,
+		# chiar daca e la sute de metri de tunel pe alta parte a buclei.
+		# Masurat: lat_max_tunel iesea 398 m, evident absurd pentru un tunel de
+		# 8 m. Fix: se cere IN PLUS ca masina sa fie efectiv APROAPE de tunel
+		# pe INDEXUL de traseu (acelasi tipar ca `ai_controller.gd`, distanta
+		# pe axa drumului, nu pe coordonate locale ale hazardului).
+		var track2: Track = _race.track
+		if track2 != null:
+			var r2 := track2.route_at(car.route)
+			if r2 != null and not r2.baked.is_empty():
+				var n2 := r2.count()
+				var bake2: float = track2.curve.bake_interval
+				var line_idx2: int = track2.closest_index_global(
+					sig.ai_decision_point(), car.route)
+				var bidx2: int = track2.closest_index_global(car.global_position, car.route)
+				var d_idx2 := line_idx2 - bidx2
+				if d_idx2 < -n2 / 2:
+					d_idx2 += n2
+				elif d_idx2 > n2 / 2:
+					d_idx2 -= n2
+				var along2 := float(d_idx2) * bake2
+				# along2 > 0: masina inca nu a ajuns la linie. along2 < 0: masina
+				# a trecut de linie, spre tunel. "In tunel" = intre linie si
+				# capatul opus (0 .. -tunnel_length).
+				if along2 <= 0.0 and along2 >= -sig.tunnel_length:
+					var side2: Vector3 = r2.side_at(bidx2)
+					var lateral2: float = side2.dot(
+						car.global_position - r2.baked[r2.wrap_index(bidx2)])
+					# Runda 3: buffer-ul de istoric se tine INDIFERENT de rosu —
+					# vezi doc la `_lateral_history`.
+					var hid := car.get_instance_id()
+					var hist: Array = _lateral_history.get(hid, [])
+					hist.append(lateral2)
+					if hist.size() > LATERAL_HISTORY_LEN:
+						hist.pop_front()
+					_lateral_history[hid] = hist
+					if red:
+						if lateral2 < 0.0:
+							_signal_left_lane_frames += 1
+						_signal_lat_max = maxf(_signal_lat_max, absf(lateral2))
 	_signal_max_queue = maxi(_signal_max_queue, queued)
 
 
@@ -673,14 +744,75 @@ func _on_bumped(_car: Car, _other: Car, delta_v: float, index: int) -> void:
 	_stats[index].bump_peak = maxf(float(_stats[index].bump_peak), delta_v)
 
 
+## Runda 2 a benzii (coordonator): "ejectarile in tunel = veto real" — pentru
+## fiecare ejectare/repunere in felia 0.58-0.70, diagnostic complet: cu ce s-a
+## lovit, viteza, banda pe care era, daca era rosu, daca regula de banda era
+## activa pe ea. Gol ("") daca masina nu e in felia tunelului sau nu exista
+## semafor pe pista (no-op pe orice alta pista).
+func _tunnel_zone_diag(car: Car) -> String:
+	if _signal_hazards.is_empty() or _race.track == null:
+		return ""
+	var frac: float = _race.track.frac_at(car.road_index, car.route)
+	if frac < 0.58 or frac > 0.70:
+		return ""
+	var sig := _signal_hazards[0]
+	var track: Track = _race.track
+	var r := track.route_at(car.route)
+	var lateral := 0.0
+	var side_txt := "?"
+	if r != null and not r.baked.is_empty():
+		var bidx: int = track.closest_index_global(car.global_position, car.route)
+		var side: Vector3 = r.side_at(bidx)
+		lateral = side.dot(car.global_position - r.baked[r.wrap_index(bidx)])
+		side_txt = "DREAPTA" if lateral > 0.0 else ("STANGA" if lateral < 0.0 else "AXA")
+	var speed := car.horizontal_speed()
+	var red := sig.is_red()
+	# Regula de banda activa pe ea ACUM: acelasi test ca AIController -- rosu
+	# curent SAU va prinde-o inauntru (blocks_in cu eta pana la portalul de
+	# vest). Aproximam distanta pana la portal cu `local_pos.z` (coordonatele
+	# hazardului, +Z spre capatul opus) fata de `tunnel_length`.
+	var local_pos: Vector3 = sig.to_local(car.global_position)
+	var dist_to_west: float = sig.tunnel_length - local_pos.z
+	var eta_west: float = dist_to_west / maxf(speed, 10.0)
+	var rule_active := red or sig.blocks_in(eta_west)
+	# Ce a lovit-o: corpurile cu care era in contact (acelasi tipar ca
+	# _watch_stuck), clasificate pe nume/pozitie ca perete stanga/dreapta sau
+	# autocar.
+	var touching: Array[String] = []
+	for body in car.get_colliding_bodies():
+		var hit := body as Node3D
+		if hit == null:
+			continue
+		var label := _describe(hit)
+		if hit is BusHazard or (hit.get_parent() is BusHazard):
+			label = "AUTOCAR"
+		touching.append(label)
+	# Runda 3 (coordonator): lateralul PRE-impact — cea mai VECHE valoare din
+	# buffer-ul circular de `LATERAL_HISTORY_LEN` cadre (vezi `_lateral_history`),
+	# adica pozitia laterala de CATEVA cadre INAINTE de acest eveniment, nu cea
+	# curenta (care poate fi deja deplasata de ghiontul autocarului). Raspunde
+	# direct la "era pe dreapta la >= +1.5 sau pe axa/stanga chiar inainte?".
+	var hid := car.get_instance_id()
+	var hist: Array = _lateral_history.get(hid, [])
+	var pre_lat_txt := "n/a"
+	if not hist.is_empty():
+		var pre_lat: float = hist[0]
+		var pre_side := "DREAPTA" if pre_lat > 0.0 else ("STANGA" if pre_lat < 0.0 else "AXA")
+		pre_lat_txt = "%.2f(%s)" % [pre_lat, pre_side]
+	return "  banda=%s red=%s regula_activa=%s v=%.1f pre_impact_lat=%s atinge:%s" % [
+		side_txt, red, rule_active, speed, pre_lat_txt,
+		", ".join(touching) if not touching.is_empty() else "-"]
+
+
 func _on_respawn(car: Car, index: int) -> void:
 	_stats[index].respawns = int(_stats[index].respawns) + 1
 	# Unde a fost repusa: o repunere in acelasi loc, tur de tur, e o bucla
 	# (masina cade, e repusa fara elan, cade iar) — vezi CHANNEL_FALL_BACKOFF.
-	print("[repunere] t=%5.1fs  %-18s frac=%.3f  poz=(%.0f,%.0f,%.0f)" % [
+	print("[repunere] t=%5.1fs  %-18s frac=%.3f  poz=(%.0f,%.0f,%.0f)%s" % [
 		_elapsed, _stats[index].name,
 		_race.track.frac_at(car.road_index, car.route),
-		car.global_position.x, car.global_position.y, car.global_position.z])
+		car.global_position.x, car.global_position.y, car.global_position.z,
+		_tunnel_zone_diag(car)])
 
 
 func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
@@ -688,11 +820,12 @@ func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
 		_stats[index].ejects_wall = int(_stats[index].ejects_wall) + 1
 	else:
 		_stats[index].ejects_land = int(_stats[index].ejects_land) + 1
-	print("[ejectare] t=%5.1fs  %-18s frac=%.3f  %s %.1f m/s  poz=(%.0f,%.0f,%.0f)" % [
+	print("[ejectare] t=%5.1fs  %-18s frac=%.3f  %s %.1f m/s  poz=(%.0f,%.0f,%.0f)%s" % [
 		_elapsed, _stats[index].name,
 		_race.track.frac_at(car.road_index, car.route),
 		car.last_eject_cause, car.last_eject_value,
-		car.global_position.x, car.global_position.y, car.global_position.z])
+		car.global_position.x, car.global_position.y, car.global_position.z,
+		_tunnel_zone_diag(car)])
 
 
 ## Fiordland: contact DISCRET cu autocarul (un eveniment per ghiont, nu cadre
@@ -712,8 +845,38 @@ func _on_signal_bus_hit(car: Car) -> void:
 		_signal_bus_hits_red += 1
 	else:
 		_signal_bus_hits_green += 1
-	print("[bus-hit] t=%5.1fs  %-18s intrata_pe=%s  poz=(%.0f,%.0f,%.0f)" % [
+	# Banda pe care STATEA masina la impact (reproiectare banda-autocar):
+	# lateral SEMNAT fata de axa, acelasi tipar ca ai_controller.gd
+	# (_side_at.dot(pos - baked), + = dreapta sensului de mers). O masina
+	# lovita in banda DREAPTA (lateral > 0) a fost impinsa in ea de autocar
+	# insusi (geometrie/coliziune), nu de o eroare de AI; una lovita in banda
+	# STANGA (lateral < 0) e exact defectul "AI pe banda stanga pe rosu".
+	var lateral := 0.0
+	var track: Track = _race.track
+	if idx >= 0 and track != null:
+		var r: TrackRoute = track.route_at(car.route)
+		if r != null and not r.baked.is_empty():
+			var bidx: int = track.closest_index_global(car.global_position, car.route)
+			var side: Vector3 = r.side_at(bidx)
+			lateral = side.dot(car.global_position - r.baked[r.wrap_index(bidx)])
+	if lateral < 0.0:
+		_signal_bus_hits_left += 1
+	else:
+		_signal_bus_hits_right += 1
+	# Runda 3: lateralul PRE-impact (vezi doc la `_lateral_history`) — cel mai
+	# vechi esantion din bufferul circular, cateva cadre INAINTE de acest
+	# contact, ca sa se vada daca masina era deja pe dreapta cand a lovit-o
+	# autocarul (marja prea mica) sau inca pe axa/stanga (regula n-a apucat).
+	var hid := car.get_instance_id()
+	var hist: Array = _lateral_history.get(hid, [])
+	var pre_lat_txt := "n/a"
+	if not hist.is_empty():
+		var pre_lat: float = hist[0]
+		var pre_side := "DREAPTA" if pre_lat > 0.0 else ("STANGA" if pre_lat < 0.0 else "AXA")
+		pre_lat_txt = "%.2f(%s)" % [pre_lat, pre_side]
+	print("[bus-hit] t=%5.1fs  %-18s intrata_pe=%s  banda=%s  lat=%5.2f  pre_impact_lat=%s  poz=(%.0f,%.0f,%.0f)" % [
 		_elapsed, car_name, "ROSU" if red else "VERDE",
+		"STANGA" if lateral < 0.0 else "DREAPTA", lateral, pre_lat_txt,
 		car.global_position.x, car.global_position.y, car.global_position.z])
 
 
@@ -784,6 +947,13 @@ func _report_race() -> void:
 		print("--- semafor tunel: contacte-autocar=%d (verde: %d, rosu: %d)  treceri-pe-rosu-clare=%d  coada-maxima-simultana=%d"
 			% [_signal_bus_hits, _signal_bus_hits_green, _signal_bus_hits_red,
 				_signal_ran_red_clear, _signal_max_queue])
+		# Runda 2: si pe BANDA masinii la impact, nu doar rosu/verde.
+		print("--- contacte-autocar pe banda: stanga=%d  dreapta=%d"
+			% [_signal_bus_hits_left, _signal_bus_hits_right])
+		# Reproiectare banda-autocar: veto "AI onest" (0 masini-cadre pe banda
+		# stanga pe rosu) si lat maxim in tunel (criteriu <= 4.0 m).
+		print("--- banda-autocar: masini-cadre pe STANGA cat e rosu=%d  lat_max_tunel=%.2f m"
+			% [_signal_left_lane_frames, _signal_lat_max])
 	if _slice.x >= 0.0:
 		print("--- felia %.3f-%.3f: %-20s %6s %6s %7s %8s" % [_slice.x, _slice.y,
 			"masina", "v_med", "lent", "pereti", "autobuz"])

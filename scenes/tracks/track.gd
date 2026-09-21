@@ -1113,6 +1113,77 @@ static func themes() -> Dictionary:
 			"dirt_road_tint": Color.html("C9C3B8"),
 			"water": false,
 		},
+		"fiordland": {
+			# FIORD DE GRANIT UD, DIMINEATA DUPA PLOAIE (docs/track_briefs/
+			# fiordland.md §4). Pasul 2 din §7: doar lumina, cerul, ceata si
+			# solul; kitul de perete ud (`wet_gneiss`), cascadele si hazardele
+			# vin cu POI-urile. `decor` stins ca la Cappadocia / Serengeti /
+			# Machu Picchu — decorul manual se pune pe POI, nu prin scatter.
+			#
+			# Pereti de gneis ud, gri-negru cu dungi ude — MARBLE_GREY (fete
+			# in lumina) e baza solului/terenului; VOLCANIC_BLACK (dungile)
+			# vine din clasa triplanara `wet_gneiss`, nu din tema. Solul
+			# propriu-zis (iarba tussock, platoul de portal) e mai verde-oliv
+			# decat gneisul pur, ca sa nu citeasca literalmente ca stanca.
+			"ground_tint": Palette.color(Palette.MARBLE_GREY).lerp(
+				Palette.color(Palette.CACTUS_GREEN), 0.28),
+			# Cer inchis, printre nori (brief §4: sky_cover_alpha mare) —
+			# gri-albastru sus, alb-gri la orizont.
+			"sky_top": Color.html("6C7C8C"),
+			"sky_horizon": Color.html("C7D2D8"),
+			"sky_cover_alpha": 0.55,
+			# Ceata in familia apei si a peretelui (gri-verde-albastru,
+			# memoria `ceata-in-familia-solului` cu solul = marea): NU alb
+			# pur, altfel fiordul stramt (~200 m) s-ar inneca prea devreme.
+			"fog_sky_affect": 0.20,
+			"fog": Color(0.62, 0.68, 0.70),
+			# Peretele opus (fjord_far_wall, la 200-250 m): gneis + paduri
+			# negre in benzi — mai inchis decat cerul, ca sa se citeasca sub
+			# linia de orizont.
+			"hill_color": Color(0.22, 0.26, 0.28),
+			# Soare la ~30 grade (peretii tin soarele jos), dinspre larg,
+			# alb-rece — brief §4. Azimutul PROVIZORIU (Track16.tscn il
+			# suprascrie cu custom_sun_rotation_deg dupa masuratoare pe
+			# traseul real, memoria `azimutul-soarelui-fata-de-drum`): sa
+			# cada pe peretele cornisei si sa-i arunce umbra pe apa la B, si
+			# fata dinspre F a lui Mitre Peak sa fie luminata cand e in fata.
+			"sun_color": Color(0.92, 0.95, 1.0),
+			"sun_energy": 1.55,
+			"exposure": 1.0,
+			"sun_rotation_deg": Vector3(-30, 200, 0),
+			# Ambient rece si mic: raport soare/ambient ~3.4, peste pragul 3
+			# din brief (memoria geometria-fara-lumina-e-invizibila) — piatra
+			# uda tenteaza la ambient mare, si atunci dungile de scurgere
+			# dispar. De remasurat pe captura odata cu POI-urile.
+			"ambient_color": Color.html("A8B8C0"),
+			"ambient_energy": 0.45,
+			# Umbrele SUNT identitatea (umbra peretelui pe apa si pe
+			# cornisa, brief §4). shadow_distance 120 DE TESTAT (brief §6):
+			# peretele e aproape, cascada nu trebuie sa fie lunga — prima
+			# setare de scurtat/stins daca device-ul nu tine 60 fps.
+			"shadows": true,
+			"shadow_opacity": 0.70,
+			"shadow_distance": 120.0,
+			"shadow_blur": 1.0,
+			"fog_depth": true,
+			"fog_begin": 120.0,
+			"fog_end": 320.0,
+			"fog_curve": 1.5,
+			"fog_max": 0.85,
+			"horizon_model": "",
+			"horizon_class": "",
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "none",
+			"props": "forest",
+			"hazard_model": "",
+			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			# Marea neagra-verde a fiordului (brief §4: SEA_DEEP, shader v12
+			# cu reflexii palide cenusii — memoria apa-stilizata-de-noapte,
+			# saturatia jos, variatia in reflexii).
+			"water": true,
+		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
 			"sky_top": Color(0.22, 0.48, 0.9),
@@ -9636,7 +9707,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.EXCAVATOR:
 			_build_excavator(frac)
 		HazardMarker.Kind.AVALANCHE:
-			_build_avalanche(frac)
+			_build_avalanche(frac, spec)
 		HazardMarker.Kind.WAVE:
 			# Se sare singur, cu avertisment, daca tema n-are mare.
 			_build_wave_surge(frac)
@@ -9906,7 +9977,7 @@ func _within_wall(segments: Array[Vector2], at_m: float) -> bool:
 ## De aceea telegraful e de 3.2 s (vezi AvalancheHazard.TELEGRAPH) si de aceea
 ## nu se pune niciodata in apex — style_bible §7 cere sa nu blochezi citirea
 ## virajului, iar aici blocajul e total.
-func _build_avalanche(frac: float) -> void:
+func _build_avalanche(frac: float, spec: Dictionary = {}) -> void:
 	var n := baked.size()
 	if n == 0:
 		return
@@ -9919,6 +9990,12 @@ func _build_avalanche(frac: float) -> void:
 	var av := AvalancheHazard.new()
 	av.road_half_width = width_at(frac_at(idx))
 	av.phase = fposmod(frac * 3.7, 1.0) # doua avalanse nu pornesc la unison
+	# Runda 2 (Fiordland, HazardMarker.avalanche_period): implicitul clasei
+	# (8s) e ciclul bolovanului de canion, nu al unui eveniment rar — vezi
+	# comentariul de pe export. Doar cand nodul cere explicit altceva.
+	var period := float(spec.get("avalanche_period", 0.0))
+	if period > 0.0:
+		av.period = period
 	# ATENTIE la ordine: transformarea INAINTE de add_child. Masa e un
 	# AnimatableBody3D cu sync_to_physics, deci transformarea o tine serverul de
 	# fizica; pusa dupa intrarea in arbore, ramane un pas fizic in origine —
@@ -13001,12 +13078,28 @@ func _wet_distance_inside(f: float, seg: Vector2) -> float:
 	return minf(to_start, to_end)
 
 
+## Flag global de ud, scris de [RainCycle] (Fiordland, brief §3 „Faza de
+## ploaie"). Cat timp e true, TOT drumul principal e ud — nu doar
+## `custom_wet_ranges` — exact ca faza de ploaie care uda tot turul, nu o
+## portiune declarata.
+##
+## E citit DOAR din `is_wet_at`, ca sa ramana o SINGURA cale de ud in `Car`
+## (comentariul din car.gd, langa `wet_here`, e explicit: banda uda "se
+## reinnoieste in fiecare cadru", deci un flag e suficient — un al doilea
+## mecanism de aquaplanare ar fi insemnat doua feluri de a pierde grip-ul,
+## tunate separat, care ar fi divergat). O pista fara niciun [RainCycle] in
+## scena nu scrie niciodata acest camp — ramane `false`, deci `is_wet_at` se
+## comporta identic cu inainte.
+var rain_wet: bool = false
+
 ## E uda soseaua principala la fractia asta?
 ##
 ## Se intreaba pe FRACTIE, nu pe indice de punct copt: intervalele se declara in
 ## fractii ca sa supravietuiasca unei modificari de traseu, exact ca restul
 ## reperelor.
 func is_wet_at(frac: float) -> bool:
+	if rain_wet:
+		return true
 	var f := fposmod(frac, 1.0)
 	for seg in _wet_ranges():
 		if seg.x <= seg.y:

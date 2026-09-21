@@ -1013,6 +1013,44 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		wx: float, wz: float) -> float:
 	if _ravines.is_empty():
 		return y
+	# Protectia benzii: o rapa taie DE-A LUNGUL soselei principale, iar o
+	# scurtatura care traverseaza acea fasie (drumul vechi din Chasm,
+	# Fiordland) nu are cum sa se declare in `custom_ravines` — rapa nu stie
+	# de ea. Fara garda asta, `_smin` de mai jos alege mereu rapa (mai jos
+	# decat orice carare), si terenul de LANGA banda cade brusc chiar in
+	# raza ei protejata (`_carve_branches`, BRANCH_FLAT_RADIUS): masina care
+	# atinge marginea celor 2-3 m de carosabil pica intr-un perete de rapa,
+	# nu pe un taluz. Masurat pe Fiordland (ProbeRace): 13+ [blocaj] la
+	# aceeasi pozitie, viteza 0, in raza benzii.
+	#
+	# Solutia nu e sa oprim rapa (sapatura ramane reala langa banda — asta e
+	# chiar riscul crucii), ci sa nu lasam saparea sa treaca DINCOLO de cota
+	# benzii chiar sub ea insasi: `branch_floor` e un plafon inferior aplicat
+	# doar in raza platului benzii, care se stinge exact ca `_carve_branches`.
+	var branch_floor := -INF
+	var branch_room := 1.0
+	if not _carve.is_empty():
+		var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
+		var reach_sq := reach * reach
+		var near_sq := INF
+		var level := 0.0
+		var k := 0
+		var m := _carve.size()
+		while k < m:
+			var q := _carve[k]
+			var dx := q.x - wx
+			var dz := q.z - wz
+			var d_sq := dx * dx + dz * dz
+			if d_sq < near_sq:
+				near_sq = d_sq
+				level = q.y
+			k += GROUND_STRIDE
+		if near_sq <= reach_sq:
+			var d := sqrt(near_sq)
+			var t := smoothstep(0.0, 1.0,
+				clampf((d - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0))
+			branch_floor = level - BRANCH_DROP
+			branch_room = t
 	var f := _dists[near_i] / _total_len if _total_len > 0.0 else 0.0
 	for ri in _ravines.size():
 		var r: Vector4 = _ravines[ri]
@@ -1083,6 +1121,14 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		# e 1 si comportamentul e cel dinainte.
 		var carved := _smin(y, target, SMOOTH_SCARP_K if scarp else SMOOTH_RAVINE_K)
 		y = lerpf(y, carved, fade)
+	# Vezi garda de mai sus: in tot coridorul benzii (branch_room -> 0 in plat,
+	# lerp spre 1 in banda de racord), rapa nu are voie sa coboare terenul sub
+	# cota benzii insesi — pe TOATE rapele odata, nu doar pe cea curenta din
+	# bucla, ca grila de teren (~7.9 m) sa nu prinda un nod neprotejat intre
+	# doua rape care se ating. Afara din coridor (branch_room -> 1) ramane
+	# neschimbata.
+	if branch_floor > -INF and branch_room < 1.0:
+		y = lerpf(maxf(y, branch_floor), y, branch_room)
 	return y
 
 

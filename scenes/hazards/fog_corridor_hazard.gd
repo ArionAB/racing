@@ -308,6 +308,13 @@ func set_active(on: bool) -> void:
 func _depth_amount() -> float:
 	if _zone == null:
 		return 0.0
+	# Zona stinsa (`set_active(false)`) nu mai monitorizeaza — o interogare a
+	# ei umple log-ul cu "Can't find overlapping bodies when monitoring is
+	# off" in fiecare cadru, cat timp hazardul (cascada de ploaie pe uscat)
+	# ramane inactiv. `_amount` cade oricum la 0 cand se stinge (comentariul
+	# lui set_active), deci raspunsul e acelasi, doar fara interogare.
+	if not _zone.monitoring:
+		return 0.0
 	for body in _zone.get_overlapping_bodies():
 		var car := body as Car
 		if car == null or not car.is_player:

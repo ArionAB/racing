@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/waterfall_hazard.gd" id="5_waterfall"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="6_channel"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="7_marker"]
+[ext_resource type="Script" uid="uid://b82usw4sot3ep" path="res://scenes/tracks/track_branch.gd" id="8_branch"]
 
 [sub_resource type="Curve3D" id="Curve3D_fiordland"]
 closed = true
@@ -15,6 +16,13 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 180
+
+[sub_resource type="Curve3D" id="Curve3D_scurtatura_chasm"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -485.1, 28.01, -452.4, 0, 0, 0, 0, 0, 0, -465.8, 26.82, -465.9, 0, 0, 0, 0, 0, 0, -447.4, 25.63, -480.3, 0, 0, 0, 0, 0, 0, -430.1, 24.44, -495.8, 0, 0, 0, 0, 0, 0, -414.1, 23.26, -512.5, 0, 0, 0, 0, 0, 0, -399.4, 22.07, -530.4, 0, 0, 0, 0, 0, 0, -385.8, 20.88, -549.4, 0, 0, 0, 0, 0, 0, -373.1, 19.69, -569.3),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 8
 
 [node name="Track16" type="Node3D"]
 script = ExtResource("1_track")
@@ -36,6 +44,18 @@ terrain_pad_m = 220.0
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_fiordland")
+
+[node name="ScurtaturaChasm" type="Path3D" parent="."]
+curve = SubResource("Curve3D_scurtatura_chasm")
+script = ExtResource("8_branch")
+branch_half_width = 3.2
+label = "drumul vechi din padure"
+rain_wet = true
+speed_factor = 0.90
+rut_depth = 0.05
+grass_center = 0.7
+edge_noise = 1.0
+bumpiness = 0.05
 
 [node name="Peaks" type="Node3D" parent="."]
 

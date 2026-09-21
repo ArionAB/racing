@@ -38,6 +38,9 @@ var exit_frac: float = 0.0
 ## decizie de luat: il iei mereu. Cu grip-ul taiat, il iei cand ai linia curata
 ## si il eviti cand esti in trafic sau cu masina grea.
 var wet: bool = false
+## Banda devine uda doar in ploaie (`Track.rain_wet`), in loc de permanent.
+## Vezi TrackBranch.rain_wet — citit impreuna cu `wet` din Track.route_is_wet.
+var rain_sensitive: bool = false
 ## Numele afisat in sonde si in mesaje de eroare.
 var label: String = "principal"
 

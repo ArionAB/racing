@@ -38,6 +38,12 @@ var _final_order: Array = [] # sloturi in ordinea sosirii
 var _champion_shown: bool = false
 ## Cat sta fiecare masina impotmolita in afara soselei (secunde).
 var _stalled: Dictionary = {}
+## Runda 3 (Fiordland): cat sta o masina SCUTITA de plasa de siguranta fiindca
+## e intr-o coada legitima la semafor (vezi `_queue_exempt`). Separat de
+## `_stalled`, care tot creste in fundal cat scutirea e activa — daca
+## scutirea expira (QUEUE_EXEMPT_MAX_S) inainte ca masina sa mai progreseze,
+## plasa de siguranta trebuie sa apuce imediat, nu sa mai astepte alte 5s.
+var _queue_exempt_time: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -253,17 +259,109 @@ func _watch_recovery(car: Car, delta: float) -> void:
 	# iar pe creasta (drum la 19 m) n-ar prinde niciodata o cadere reala.
 	if car.global_position.y \
 			< track.point_at(car.road_index, car.route).y - 25.0:
+		if OS.get_environment("AI_UNSTICK_TRACE") == "1":
+			print("[race-respawn] %s cauza=cadere frac=%.3f pos=(%.0f,%.0f,%.0f)" % [
+				car.pilot_name, track.frac_at(car.road_index, car.route),
+				car.global_position.x, car.global_position.y, car.global_position.z])
 		car.respawn()
 		return
 	var off_road := not track.is_on_road(car.road_index, car.global_position,
 		car.route)
 	if off_road and car.horizontal_speed() < 2.5:
+		# Runda 3, punctul 2: gasit prin diagnostic (AI_UNSTICK_TRACE=1) ca
+		# fiind chiar plasa asta, nu paznicul de progres al AI-ului
+		# (AIController._begin_unstick) si nici o RespawnZone — mecanismul de
+		# aici e "off-road si sub 2.5 m/s peste 5s", fara nicio notiune de
+		# semafor sau coada. O masina impinsa in afara soselei de presiunea
+		# cozii de la semafor (lat mare, masurat in runda 2: pana la 15.3m)
+		# cade exact aici.
+		#
+		# SCUTIRE DE COADA: daca masina are in fata, la sub QUEUE_EXEMPT_REACH_M,
+		# o alta masina care e ea insasi scutita de plasa (semafor rosu SAU sub
+		# 2 m/s, in aceeasi zona) — adica o coada legitima, nu un blocaj real —
+		# ceasul de stall nu avanseaza, DAR un ceas SEPARAT (`_queue_exempt_time`)
+		# tine minte cat a durat scutirea, plafonat la QUEUE_EXEMPT_MAX_S: o
+		# coada care nu se mai misca deloc timp de 25s tot merita o repunere,
+		# altfel scutirea ar ascunde un blocaj real (exact riscul numit in
+		# cerinta rundei 3).
+		var dbg := OS.get_environment("AI_UNSTICK_TRACE") == "1"
+		var exempt := _queue_exempt(car)
+		if exempt:
+			var qt: float = float(_queue_exempt_time.get(car, 0.0)) + delta
+			_queue_exempt_time[car] = qt
+			if qt <= QUEUE_EXEMPT_MAX_S:
+				_stalled[car] = 0.0
+				return
+			# Plafonul a expirat: scutirea nu se mai aplica, plasa normala preia.
+			if dbg:
+				print("[queue-ceiling] %s a expirat scutirea dupa %.1fs" % [
+					car.pilot_name, qt])
+		else:
+			_queue_exempt_time[car] = 0.0
 		_stalled[car] = float(_stalled.get(car, 0.0)) + delta
 		if float(_stalled[car]) > 5.0:
 			_stalled[car] = 0.0
+			if dbg:
+				print("[race-respawn] %s cauza=stall_offroad frac=%.3f pos=(%.0f,%.0f,%.0f)"
+					% [car.pilot_name, track.frac_at(car.road_index, car.route),
+						car.global_position.x, car.global_position.y, car.global_position.z])
 			car.respawn()
 	else:
 		_stalled[car] = 0.0
+		_queue_exempt_time[car] = 0.0
+
+## Cat de departe INAINTE (m, de-a lungul drumului) se cauta o alta masina
+## care sa justifice o coada legitima. Coordonatorul a cerut 8m (distanta
+## tipica dintre doua masini oprite in linie la semafor); masurat cu
+## PROBE_RACE_TRACE_WINDOW=125,138 pe seed 3, un pilc de masini impinse in
+## afara soselei de presiunea cozii (nu o linie curata) sta la ~13m intre ele
+## (car0 la (-136,-500), car6 la (-141,-488), amandoua sub 1 m/s) — 8m nu
+## prindea acest caz, desi e exact "coada legitima" pe care scutirea trebuie
+## s-o acopere. Marit la 15m; QUEUE_EXEMPT_MAX_S (plafonul de 25s) ramane
+## paza impotriva mascarii unui blocaj real, indiferent de raza.
+const QUEUE_EXEMPT_REACH_M: float = 15.0
+## Sub ce viteza (m/s) o masina din fata conteaza drept "oprita in coada"
+## chiar daca nu e ea insasi semnalata ca asteptand la semafor.
+const QUEUE_EXEMPT_SPEED: float = 2.0
+## Plafon de timp (s) pentru scutirea de coada: o coada care nu se misca deloc
+## atat de mult merita totusi o repunere, ca sa nu se ascunda un blocaj real
+## sub eticheta "astepti in coada".
+const QUEUE_EXEMPT_MAX_S: float = 25.0
+
+## Adevarat daca `car` are in fata, la sub `QUEUE_EXEMPT_REACH_M`, o alta
+## masina care e ea insasi scutita de plasa de siguranta — semnalata ca
+## asteptand la un semafor rosu (`AIController._signal_block_m`) SAU sub
+## `QUEUE_EXEMPT_SPEED`. Asta e diferenta dintre „coada legitima la semafor"
+## (toata lumea in spatele primei masini merita scutire) si „blocaj real"
+## (nimeni din fata nu asteapta nimic, doar s-au impotmolit).
+func _queue_exempt(car: Car) -> bool:
+	var r := track.route_at(car.route)
+	if r == null:
+		return false
+	var n := r.count()
+	var best_d := INF
+	var ahead: Car = null
+	for other in cars:
+		if other == car or not is_instance_valid(other) or other.route != car.route:
+			continue
+		var d := other.road_index - car.road_index
+		if r.closed:
+			if d > n / 2:
+				d -= n
+			elif d < -n / 2:
+				d += n
+		var ahead_m := float(d) * track.curve.bake_interval
+		if ahead_m <= 0.0 or ahead_m > QUEUE_EXEMPT_REACH_M:
+			continue
+		if ahead_m < best_d:
+			best_d = ahead_m
+			ahead = other
+	if ahead == null:
+		return false
+	var ahead_ai := ahead.controller as AIController
+	var ahead_signal_wait := ahead_ai != null \
+		and ahead_ai._signal_block_m < AIController.SIGNAL_BRAKE_M
+	return ahead_signal_wait or ahead.horizontal_speed() < QUEUE_EXEMPT_SPEED
 
 func _on_player_lap(laps: int) -> void:
 	# Lava creste odata cu tururile. E o proprietate a LUMII, nu a cursei

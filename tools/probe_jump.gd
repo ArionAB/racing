@@ -32,6 +32,13 @@ const WATCH_SECONDS: float = 8.0
 var _track_index: int = 2
 var _car_index: int = 0
 var _speeds: Array[float] = [24.0, 30.0, 36.0, 42.0, 48.0]
+## `--offset=`: cat de lateral (m, +dreapta) porneste masina fata de axa
+## soselei la intrare — 0 (implicit) = pe axa, cum a fost dintotdeauna sonda.
+## Adaugat pentru Fiordland/Bowen: traficul real intra rareori perfect pe
+## axa (personalitatea liniei fiecarui AI, ocolirea altei masini), iar o
+## ejectare masurata in ProbeRace (39.8 m/s, frac 0.872) nu se reproducea pe
+## axa la nicio viteza pana la 50 m/s — trebuie testat off-axis.
+var _offset: float = 0.0
 var _trace: bool = false
 var _track: Track
 var _ch: Dictionary = {}
@@ -50,6 +57,8 @@ func _ready() -> void:
 			_run_up = float(arg.trim_prefix("--runup="))
 		elif arg == "--trace":
 			_trace = true
+		elif arg.begins_with("--offset="):
+			_offset = float(arg.trim_prefix("--offset="))
 		elif arg.begins_with("--speeds="):
 			_speeds.clear()
 			for s in arg.trim_prefix("--speeds=").split(","):
@@ -115,14 +124,20 @@ func _run_one(entry_speed: float) -> void:
 		back = prev
 	var start := _track.baked[back]
 	var dir := (_track.baked[(back + 1) % n] - start).normalized()
+	# `--offset=`: deplasare LATERALA (m, +dreapta) fata de axa, aplicata
+	# pe directia perpendiculara a soselei in acel punct -- simuleaza o
+	# intrare care nu e perfect pe axa (linia de personalitate a unui AI,
+	# sau o evitare chiar inainte de kicker).
+	var side := dir.cross(Vector3.UP).normalized()
+	start += side * _offset
 	car.global_transform = Transform3D(
 		Basis.looking_at(dir, Vector3.UP), start + Vector3.UP * 0.6)
 	car.velocity = dir * entry_speed
 	car.road_index = back
 	car.last_safe_index = back
 	if _trace:
-		print("    [trace] start p=%s idx=%d (near=%d) gap_axis=%.1f"
-			% [str(start), back, int(_ch["near"]), _along_gap(start)])
+		print("    [trace] start p=%s idx=%d (near=%d) gap_axis=%.1f offset=%.1f"
+			% [str(start), back, int(_ch["near"]), _along_gap(start), _offset])
 	# Cu AI la volan, ca sonda podului: pe ultimii 55 m soseaua coteste, si un
 	# volan blocat ar iesi de pe asfalt inainte sa ajunga la trambulina. AI-ul
 	# tine linia; viteza de intrare ramane cea impusa, fiindca o punem direct

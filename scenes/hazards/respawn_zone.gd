@@ -22,4 +22,13 @@ func _ready() -> void:
 func _on_body_entered(body: Node3D) -> void:
 	var car := body as Car
 	if car != null:
+		# Runda 3 (Fiordland), diagnostic optional (AI_UNSTICK_TRACE=1) —
+		# simetric cu cel din AIController._begin_unstick(): semnalul
+		# `respawned` nu spune CINE a chemat repunerea (zona vs paznicul de
+		# progres al AI-ului), iar distinctia asta era exact intrebarea de la
+		# runda 3 punctul 2 pentru repunerile de langa semafor.
+		if OS.get_environment("AI_UNSTICK_TRACE") == "1":
+			print("[zone-respawn] %s zona=%s pos=(%.0f,%.0f,%.0f)" % [
+				car.pilot_name, name, car.global_position.x,
+				car.global_position.y, car.global_position.z])
 		car.respawn(backoff_m)

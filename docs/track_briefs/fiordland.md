@@ -174,9 +174,32 @@ sus cel mult `10 + 0,093·d` m față de cota drumului. În jos vezi până la
   con palid tăiat sus, la marginea dreaptă (253 m, 34°, 63 m deasupra
   crestei, ceață ~46%). Concluzie sinceră: „poza clasică" de la ieșirea din
   tunel există pe 0,65–0,67, nu pe 0,60–0,64, și e o siluetă în ceață, nu
-  un munte. Pași posibili, neaplicați: teșirea crestei de la 0,63–0,64 pe
-  dreapta (terenul, nu ceața) și/sau `custom_fog`-ul temei — dar `fog_end`
-  nu se atinge fără decizie separată.
+  un munte.
+  **Runda finală (21 sep 2026, seara) — ocluzia în gardă, teșirea refuzată:**
+  garda are acum a patra axă, linia de vedere prin grila reală de teren
+  (`tools/data/fiord_varf_grid/`, input regenerabil cu `SvFiordVarfGrid`;
+  lipsă = pică, nu tace): un punct e „întreg" doar dacă segmentele cameră→vârf
+  și cameră→(vârf − 36 m) trec la ≥ 2 m peste teren. Pe F1 (0,60–0,67):
+  în cadru 9/13, întreg geometric 6/13, **întreg și neocluzat 1/13** (0,623);
+  0,629–0,651 ocluzat cu −0,1 / −4,8 / −6,6 / −3,4 / +1,0 m degajare. **Garda
+  e roșie pe F1 și rămâne așa, cu motiv:** creasta care ocluzează este
+  `MasivTunel` însuși — `SemaforTunel` e la frac 0,612 cu `tunnel_length`
+  169 m, deci tunelul montat ocupă **0,612–0,69**, iar drumul trece la 8–70 m
+  de centrul masivului pe 0,62–0,66. F1 din brief e coridorul tunelului, nu
+  coborârea. Teșirea „crestei" la ≤ cameră − 5 m pe 50 m lateral ar fi scos
+  muntele de deasupra tunelului (schimbare de gimmick, nu de teren), și cu
+  portalul GLB + `CameraZone` montate din 0,62–0,65 oricum nu se vede nimic.
+  **Nu s-a tăiat nimic; nicio captură nouă.** Și partea mai grea: **după
+  portalul de vest (0,69–0,74) insula e la 194–228 m, dar la 87–138° dreapta**
+  — drumul se întoarce spre G/H și golful rămâne în spate. Singura fereastră
+  în cadru și neocluzată e 0,656–0,684 (33–42° dreapta, tăiat sus, degajare
+  5–9 m) — ultimii 40 m ai coridorului tunelului. Concluzie: pe traseul
+  actual, **„fiordul întreg în față la ieșirea din tunel" nu există pentru
+  niciun punct de după portal**; Mitre Peak e câștigat ca perete de pe chei
+  și de pe prima jumătate a cornișei (A 6/10, B1 14/14), atât. Decizie,
+  neluată aici: (a) redesenarea coborârii F spre golf (SV) — singura care
+  dă poza din §0/§2 rândul F; (b) scoaterea contractului F1 și acceptarea
+  că vârful e al cornișei, nu al coborârii.
 - **Fiordul trebuie să fie strâmt.** Lecția `world_design.md` §2: adâncimea
   se citește prin proximitate, în interiorul lui `fog_end`. Real, fiordul
   are 1–2 km; la noi **~200 m** de la cornișă la baza lui Mitre Peak, cu

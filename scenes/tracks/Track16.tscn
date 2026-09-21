@@ -46,10 +46,11 @@ script = ExtResource("2_peak")
 radius_m = 90.0
 
 [node name="MitrePeak" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -311.13, 60.0, -64.8)
-gizmo_extents = 55.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -250.0, 70.0, -200.0)
+gizmo_extents = 44.0
 script = ExtResource("2_peak")
-radius_m = 55.0
+radius_m = 44.0
+island = true
 
 [node name="Hazarduri" type="Node3D" parent="."]
 

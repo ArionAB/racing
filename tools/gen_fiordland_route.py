@@ -364,37 +364,26 @@ if len(sys.argv) > 1:
     ew_g = godot(wpt_xy("E portal est linie oprire"), 45.0)
     ewv_g = godot(wpt_xy("E portal vest"), 27.0)
     tunnel_peak = ((ew_g[0] + ewv_g[0]) / 2.0, (ew_g[2] + ewv_g[2]) / 2.0)
-    # Mitre Peak: peste fiord, in directia MARII (ravine 0, side=-1) fata de
-    # cornisa B, la ~220 m — NU un offset fix pe axa X ca in v1 (calibrat pe
-    # orientarea veche "spike lung pe Y", a supravietuit reformei in oval si a
-    # ajuns sa cada la 3,4 m de sosea, in sectiunea F, complet neinrudita cu
-    # cornisa. Directia marii se deriva din tangenta drumului la "B S1 apex"
-    # (perpendiculara, verificata empiric cu tools/sv_frac_dump.gd: ground_y
-    # scade la offsetul NEGATIV al lui TrackRoute.side_at aici, deci marea e
-    # in directia opusa lui side_at). Clearance verificat: 220 m fata de
-    # ORICE punct al soselei (nu doar de B), pentru un varf de raza 55 m.
-    b_apex = wpt_xy("B S1 apex spre mare vest")
-    b_idx = None
-    for j, p in enumerate(pts):
-        if p[2] == [w[4] for w in WPTS].index("B S1 apex spre mare vest"):
-            b_idx = j
-            break
-    pa = pts[b_idx - 1]
-    pc = pts[(b_idx + 1) % len(pts)]
-    tdx, tdy = pc[0] - pa[0], pc[1] - pa[1]
-    tlen = math.hypot(tdx, tdy)
-    tdx, tdy = tdx / tlen, tdy / tlen
-    # side_at (Godot, "dreapta") = tangent.cross(UP) in lume Godot; in coordonate
-    # de HARTA (x_map=-x_godot, y_map=-z_godot) cu tangenta (tdx,tdy) pe harta,
-    # directia "dreapta Godot" corespunde la (-tdy, tdx) pe harta. Verificat cu
-    # tools/sv_frac_dump.gd la B apex: offsetul NEGATIV pe side_at Godot are
-    # ground_y jos (marea), deci marea e la (tdy, -tdx) pe harta (opusul lui
-    # "dreapta").
-    sea_dir = (tdy, -tdx)
-    MITRE_DIST_M = 220.0
-    mitre_map = (b_apex[0] + sea_dir[0] * MITRE_DIST_M,
-                 b_apex[1] + sea_dir[1] * MITRE_DIST_M)
-    mitre_g = godot(mitre_map, 60.0)
+    # Mitre Peak: INSULA in mijlocul golfului, (-250, 70, -200), raza 44,
+    # `island = true` (TerrainPeak se ridica DUPA rape). Cifre FIXE, nu
+    # derivate din tangenta la B: pozitia a fost aleasa prin cautare
+    # exhaustiva pe camera de joc (tools/fiord_frustum_table.py, 21 sep
+    # 2026), nu prin "220 m perpendicular pe cornisa" ca in v2. Istoria:
+    # v2 punea varful la (-311, 60, -65), perpendicular pe B S1 — masurat,
+    # statea la 75-110 grade STANGA de directia de mers pe B2 (in spate:
+    # B urca spre NV, golful e in SV), la 332-490 m de F (dincolo de
+    # fog_end 320 / FAR_PLANE 380) si iesea 51,7 m, nu 60, fiindca rapa 0
+    # (latime 220) taie si prin masive. Jumatatea de cadru e ~50 grade,
+    # deci nu era in cadru de NICAIERI. Nicio pozitie de pe malul golfului
+    # nu e in cadru si de pe B2 si de pe F (privesc in directii aproape
+    # opuse). Insula din mijloc: de pe B1 in cadru 100% (24-44 grade
+    # stanga, 118-256 m, perete de 13-22 grade — "peretele negru peste
+    # apa"), de pe A 60% (perete), de pe F1 in cadru ~70% si INTREG ~45%
+    # (236-343 m, 31-62 grade dreapta). Baza (raza 44) la 41 m de cel mai
+    # apropiat asfalt (frac 0,159), deci in apa. Cota 70, nu 100: marginea
+    # de sus a cadrului e la +5,25 grade (0,092*d peste camera), un varf
+    # mai inalt e doar mai taiat.
+    mitre_g = (-250.0, 70.0, -200.0)
 
     peaks_txt = f"""
 [node name="MasivTunel" type="Marker3D" parent="Peaks"]
@@ -404,10 +393,11 @@ script = ExtResource("2_peak")
 radius_m = 90.0
 
 [node name="MitrePeak" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {round(mitre_g[0], 2)}, {round(mitre_g[1], 2)}, {round(mitre_g[2], 2)})
-gizmo_extents = 55.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {mitre_g[0]}, {mitre_g[1]}, {mitre_g[2]})
+gizmo_extents = 44.0
 script = ExtResource("2_peak")
-radius_m = 55.0
+radius_m = 44.0
+island = true
 """
 
     tscn = f"""[gd_scene format=3]

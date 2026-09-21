@@ -3825,6 +3825,7 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 			var spec := {
 				"points": mid,
 				"wet": br.wet,
+				"rain_wet": br.rain_wet,
 				"label": br.label if br.label != "" else br.name,
 				# Suprafata si contragreutatea de viteza, cu aceleasi chei pe
 				# care le poate scrie si o pista din cod in `_branch_specs()`.
@@ -8224,6 +8225,7 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.entry_frac = frac_at(i_entry)
 	route.exit_frac = frac_at(i_exit)
 	route.wet = bool(spec.get("wet", false))
+	route.rain_sensitive = bool(spec.get("rain_wet", false))
 	route.label = String(spec.get("label", "scurtatura"))
 	# Suprafata: ce zice spec-ul, altfel ce zice tema, altfel nisipul de pana
 	# acum — deci o pista care n-a auzit de retete ramane cum era.
@@ -13412,9 +13414,13 @@ func route_at(route: int) -> TrackRoute:
 	return routes[0] if not routes.is_empty() else null
 
 ## Banda asta e uda? Cat timp masina e pe ea, grip-ul lateral scade.
+##
+## Permanent (`r.wet`) SAU doar in ploaie (`r.rain_sensitive`, citit din
+## flag-ul global `rain_wet` scris de RainCycle) — vezi TrackBranch.rain_wet
+## pentru o banda a carei suprafata reala se schimba cu vremea.
 func route_is_wet(route: int) -> bool:
 	var r := route_at(route)
-	return r != null and r.wet
+	return r != null and (r.wet or (r.rain_sensitive and rain_wet))
 
 
 ## Plafonul de viteza al benzii, ca fractie (1 = neatins). Ruta 0 = 1.

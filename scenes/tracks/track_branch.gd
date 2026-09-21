@@ -45,6 +45,20 @@ extends Path3D
 ## E ud, o pasune insorita de munte nu.
 @export var wet: bool = false
 
+## Banda devine uda DOAR cat timp ploua (Track.rain_wet, scris de RainCycle),
+## in loc de permanent — a treia varianta a contragreutatii `wet`, pentru o
+## banda a carei suprafata reala se schimba cu vremea (drum de tara/albie de
+## torent), nu una permanent umeda ca bancul de nisip.
+##
+## Independent de `wet`: o banda poate fi si `wet` (permanent) si `rain_wet`
+## (in plus, in ploaie) — desi in practica se alege una singura. Grip-ul
+## efectiv e `wet OR (rain_wet AND track.rain_wet)`, citit din
+## `Track.route_is_wet`, exact cum traseul principal citeste `is_wet_at`
+## (permanent + `rain_wet` global). Fara asta, o scurtatura a carei identitate
+## e „ploaia iti schimba decizia" ar fi fost mereu uscata sau mereu uda — nu
+## exista azi niciun canal prin care ploaia sa ajunga la o banda secundara.
+@export var rain_wet: bool = false
+
 ## Numele afisat in sonde si in mesaje de eroare.
 @export var label: String = ""
 

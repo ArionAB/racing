@@ -1179,6 +1179,19 @@ static func themes() -> Dictionary:
 			"props": "forest",
 			"hazard_model": "",
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			# Scurtatura Chasm (nod TrackBranch, brief §3): "drumul vechi din
+			# padure" e pamant batatorit, nu bancul de nisip implicit
+			# (`theme_flag("branch_surface", "sand")`). Fara cheia asta,
+			# `route.surface` cadea pe "sand", iar `_branch_carve_points()`
+			# exclude explicit "sand" din lista de sapat — banda ramanea doar
+			# RIDICATA (`_lift_branches`), niciodata protejata de garda de
+			# plafon din `_carve_ravines` (bad797dd). Rezultat masurat: rapa
+			# "raul D" (custom_ravines index 1) sapa liber pana la peretele de
+			# canion la 2-3 m dincolo de banda, panta transversala peste 50%,
+			# exact unde AI-ul derapeaza la bifurcatie — [blocaj] repetat,
+			# atinge TerrainBody. Cu "dirt_road" banda intra in `_carve` si
+			# garda de plafon (branch_floor / branch_room) se activeaza.
+			"branch_surface": "dirt_road",
 			# Marea neagra-verde a fiordului (brief §4: SEA_DEEP, shader v12
 			# cu reflexii palide cenusii — memoria apa-stilizata-de-noapte,
 			# saturatia jos, variatia in reflexii).

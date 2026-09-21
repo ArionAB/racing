@@ -9737,16 +9737,29 @@ const TUNNEL_FRAME_DEPTH_M: float = 1.2
 ## ramane exact 2 x tunnel_half_width pe 1 x tunnel_ceiling.
 const TUNNEL_FRAME_THICK_M: float = 0.8
 ## Aripile portalului (galeria de avalansa din brief §2 E): doi pereti de
-## beton care pleaca din muchia ramei si se deschid spre exterior, ca o
-## palnie. NU sunt decor: fara ele capacul e un zid plan de 40 m pus de-a
-## curmezisul unei sosele care abia se ingusteaza de la 13 la 9 m (rampa de
-## latime de 30 m curge INAUNTRUL tunelului), si ProbeRace a masurat 8
-## ejectari-perete in 8 curse fix la frac 0.610, toate la intrarea de est, cu
-## Taxiul pe banda dreapta la 33-42 m/s in capac (linia de baza: 2). O aripa
-## la ~14 grade transforma lovitura frontala intr-una razanta (componenta
-## normala ~10 m/s la 40 m/s) si conduce masina in gura.
+## beton care pleaca din PERETELE INTERIOR al tubului (lateral = semilatime,
+## in planul din fata al ramei) si se deschid spre exterior, ca o palnie. NU
+## sunt decor: fara ele capacul e un zid plan de 40 m pus de-a curmezisul
+## unei sosele care abia se ingusteaza de la 13 la 9 m (rampa de latime de
+## 30 m curge INAUNTRUL tunelului), si ProbeRace a masurat 8 ejectari-perete
+## in 8 curse fix la frac 0.610, toate la intrarea de est, cu Taxiul pe banda
+## dreapta la 33-42 m/s in capac (linia de baza: 2, amandoua pe autocar).
+## Prima varianta pleca din muchia EXTERIOARA a ramei (semilatime + 0,8) si
+## n-a schimbat nimic: Taxiul intra cu `pre_impact_lat` 3,9-4,2 m, adica
+## marginea caroseriei la ~5,2 m, fix pe fata plana a inelului ramei
+## (4,5-5,3) — 8 ejectari din 10 curse, toate `atinge:TunnelPortal`.
+## Pornita din peretele interior, aripa continua peretele tubului si
+## acopera fata inelului. La ~14 grade lovitura frontala devine razanta
+## (componenta normala ~10 m/s la 40 m/s, sub pragul de 26 al ejectarii).
 const TUNNEL_WING_LEN_M: float = 14.0
 const TUNNEL_WING_SPREAD_M: float = 3.5
+## Inaltimea aripilor (m). Cat un parapet inalt, nu cat tunelul: la 7,3 m
+## (prima varianta) captura --driver de la frac 0.606 arata un culoar alb care
+## ascundea si movila, si masivul. Masina are ~1,5 m; 2,5 m o conduce la fel.
+const TUNNEL_WING_HEIGHT_M: float = 2.5
+## Tenta de vertex a betonului: slotul CONCRETE plin, in soare, iesea alb ars
+## in captura; 0,72 il tine in familia pietrei ude.
+const TUNNEL_TINT_CONCRETE: float = 0.72
 ## Profilul movilei de stanca de deasupra tubului, ca (lateral, inaltime)
 ## fata de axa si de cota asfaltului, DOAR jumatatea stanga — dreapta e
 ## oglinda. Lateralul e RELATIV la semilatimea tubului (se aduna), inaltimea
@@ -10036,7 +10049,7 @@ func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
 		Vector2(-hw - th, ceil_h + th), Vector2(hw + th, ceil_h + th),
 		Vector2(hw + th, foot)]
 	var c2 := c + outward * TUNNEL_FRAME_DEPTH_M
-	var col := Color.WHITE
+	var col := Color(TUNNEL_TINT_CONCRETE, TUNNEL_TINT_CONCRETE, TUNNEL_TINT_CONCRETE)
 	var axis := c + Vector3.UP * ceil_h * 0.5
 	for e in 3:
 		# Fetele interioare (continuarea golului), normale spre axa.
@@ -10053,14 +10066,14 @@ func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
 		_tun_quad(st, o0, o1, p1, p0, (o0 + o1) * 0.5 - axis, col, col, col, col)
 		# Fata din fata (inelul), normala spre exterior.
 		_tun_quad(st, b0, b1, p1, p0, outward, col, col, col, col)
-	# Aripile: din muchia exterioara a ramei, spre exterior si in lateral.
+	# Aripile: din peretele interior, spre exterior si in lateral.
 	for sgn: float in [-1.0, 1.0]:
-		var top := ceil_h + th
-		var a_lo := _tun_pt(c2, s, Vector2(sgn * (hw + th), foot))
-		var a_hi := _tun_pt(c2, s, Vector2(sgn * (hw + th), top))
+		var top := TUNNEL_WING_HEIGHT_M
+		var a_lo := _tun_pt(c2, s, Vector2(sgn * hw, foot))
+		var a_hi := _tun_pt(c2, s, Vector2(sgn * hw, top))
 		var far := c2 + outward * TUNNEL_WING_LEN_M
-		var b_lo := _tun_pt(far, s, Vector2(sgn * (hw + th + TUNNEL_WING_SPREAD_M), foot))
-		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + th + TUNNEL_WING_SPREAD_M), top))
+		var b_lo := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), foot))
+		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), top))
 		# Fata dinspre drum (cea care conduce masina), normala spre axa.
 		_tun_quad(st, a_lo, a_hi, b_hi, b_lo, -s * sgn, col, col, col, col)
 		# Fata din spate, grosime 0.5 m, normala in afara.

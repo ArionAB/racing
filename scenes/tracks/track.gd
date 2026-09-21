@@ -9736,6 +9736,17 @@ const TUNNEL_FRAME_DEPTH_M: float = 1.2
 ## Grosimea ramei de beton, lateral si sus (m). Sta IN AFARA golului: gura
 ## ramane exact 2 x tunnel_half_width pe 1 x tunnel_ceiling.
 const TUNNEL_FRAME_THICK_M: float = 0.8
+## Aripile portalului (galeria de avalansa din brief §2 E): doi pereti de
+## beton care pleaca din muchia ramei si se deschid spre exterior, ca o
+## palnie. NU sunt decor: fara ele capacul e un zid plan de 40 m pus de-a
+## curmezisul unei sosele care abia se ingusteaza de la 13 la 9 m (rampa de
+## latime de 30 m curge INAUNTRUL tunelului), si ProbeRace a masurat 8
+## ejectari-perete in 8 curse fix la frac 0.610, toate la intrarea de est, cu
+## Taxiul pe banda dreapta la 33-42 m/s in capac (linia de baza: 2). O aripa
+## la ~14 grade transforma lovitura frontala intr-una razanta (componenta
+## normala ~10 m/s la 40 m/s) si conduce masina in gura.
+const TUNNEL_WING_LEN_M: float = 14.0
+const TUNNEL_WING_SPREAD_M: float = 3.5
 ## Profilul movilei de stanca de deasupra tubului, ca (lateral, inaltime)
 ## fata de axa si de cota asfaltului, DOAR jumatatea stanga — dreapta e
 ## oglinda. Lateralul e RELATIV la semilatimea tubului (se aduna), inaltimea
@@ -9933,9 +9944,14 @@ func _tun_tint(q: Vector2, ceil_h: float) -> Color:
 	return Color(v, v, v)
 
 
-## Un patrulater ca doua triunghiuri, cu infasurarea aleasa asa incat normala
+## Un patrulater ca doua triunghiuri, cu infasurarea aleasa asa incat FATA
 ## sa se uite catre `want` (memoria `rotatii-in-builder-semnul`: deriva cu
-## dot, nu ghici).
+## dot, nu ghici). Godot deseneaza fetele infasurate in SENSUL ACELOR de
+## ceasornic (doc Mesh), deci produsul vectorial (b-a)x(c-a) al unei fete
+## vizibile arata DEPARTE de privitor: se pastreaza infasurarea cu
+## dot(normala, want) < 0. Prima varianta o luase invers si tubul se vedea
+## pe dos — din interior se vedea dosul movilei, peretii lipseau (captura
+## --driver la frac 0.65), iar clasa triplanara are cull pe spate.
 func _tun_quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
 		want: Vector3, ca: Color, cb: Color, cc: Color, cd: Color) -> void:
 	_tun_tri(st, a, b, c, want, ca, cb, cc)
@@ -9945,7 +9961,7 @@ func _tun_quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
 func _tun_tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3,
 		want: Vector3, ca: Color, cb: Color, cc: Color) -> void:
 	var nrm := (b - a).cross(c - a)
-	if nrm.dot(want) < 0.0:
+	if nrm.dot(want) > 0.0:
 		var tb := b
 		b = c
 		c = tb
@@ -10037,6 +10053,21 @@ func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
 		_tun_quad(st, o0, o1, p1, p0, (o0 + o1) * 0.5 - axis, col, col, col, col)
 		# Fata din fata (inelul), normala spre exterior.
 		_tun_quad(st, b0, b1, p1, p0, outward, col, col, col, col)
+	# Aripile: din muchia exterioara a ramei, spre exterior si in lateral.
+	for sgn: float in [-1.0, 1.0]:
+		var top := ceil_h + th
+		var a_lo := _tun_pt(c2, s, Vector2(sgn * (hw + th), foot))
+		var a_hi := _tun_pt(c2, s, Vector2(sgn * (hw + th), top))
+		var far := c2 + outward * TUNNEL_WING_LEN_M
+		var b_lo := _tun_pt(far, s, Vector2(sgn * (hw + th + TUNNEL_WING_SPREAD_M), foot))
+		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + th + TUNNEL_WING_SPREAD_M), top))
+		# Fata dinspre drum (cea care conduce masina), normala spre axa.
+		_tun_quad(st, a_lo, a_hi, b_hi, b_lo, -s * sgn, col, col, col, col)
+		# Fata din spate, grosime 0.5 m, normala in afara.
+		var o := s * sgn * 0.5
+		_tun_quad(st, a_lo + o, a_hi + o, b_hi + o, b_lo + o, s * sgn, col, col, col, col)
+		_tun_quad(st, a_hi, a_hi + o, b_hi + o, b_hi, Vector3.UP, col, col, col, col)
+		_tun_quad(st, b_lo, b_hi, b_hi + o, b_lo + o, outward, col, col, col, col)
 
 
 ## Trimite un gimmick plantat ca nod ([HazardMarker]) la constructorul lui.

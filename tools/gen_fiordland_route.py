@@ -396,12 +396,18 @@ if len(sys.argv) > 1:
                  b_apex[1] + sea_dir[1] * MITRE_DIST_M)
     mitre_g = godot(mitre_map, 60.0)
 
+    # Raza 160 / cota 85, nu 90 / 70 (sesiunea tubului, sep 2026): domul
+    # 1 - smoothstep(d/R) moare la R, iar portalurile stau la ~85 m de mijloc —
+    # cu R = 90 masivul era zero la ambele guri si +3 m la 15 m lateral in
+    # mijloc (ProbeTunel). Cu 160 flancurile transeii urca ~40 m la portaluri.
+    # Nimic strain din traseu sub 160 m de mijloc (cel mai apropiat: 167 m,
+    # frac 0.175). Tinut sincron cu Track16.tscn, editat de mana acolo.
     peaks_txt = f"""
 [node name="MasivTunel" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {round(tunnel_peak[0], 2)}, 70.0, {round(tunnel_peak[1], 2)})
-gizmo_extents = 90.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {round(tunnel_peak[0], 2)}, 85.0, {round(tunnel_peak[1], 2)})
+gizmo_extents = 160.0
 script = ExtResource("2_peak")
-radius_m = 90.0
+radius_m = 160.0
 
 [node name="MitrePeak" type="Marker3D" parent="Peaks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {round(mitre_g[0], 2)}, {round(mitre_g[1], 2)}, {round(mitre_g[2], 2)})

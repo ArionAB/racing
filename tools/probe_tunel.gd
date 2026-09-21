@@ -175,7 +175,11 @@ func _check(idx: int) -> bool:
 				if absf(off) <= WIDTH_M * 0.5 and ty - c.y > 0.3 \
 						and ty - c.y < CEILING_M:
 					terrain_in_tube += 1
-		print("  %5.0f %6.3f | %s   @(%.1f, %.1f, %.1f)" % [d, r.frac_at(r.wrap_index(k)), " ".join(vals), c.x, c.y, c.z])
+		var far: Array[String] = []
+		for off: float in [-40.0, -30.0, -20.0, 20.0, 30.0, 40.0]:
+			var ty := _terrain_top(space, c + s * off, terrain)
+			far.append("n/a" if is_nan(ty) else "%.1f" % (ty - c.y))
+		print("  %5.0f %6.3f | %s   @(%.1f, %.1f, %.1f)  departe -40/-30/-20/+20/+30/+40: %s" % [d, r.frac_at(r.wrap_index(k)), " ".join(vals), c.x, c.y, c.z, " ".join(far)])
 
 	print("")
 	print("  --- golul tubului (m) ---")

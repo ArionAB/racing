@@ -40,16 +40,17 @@ curve = SubResource("Curve3D_fiordland")
 [node name="Peaks" type="Node3D" parent="."]
 
 [node name="MasivTunel" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -114.48, 70.0, -412.56)
-gizmo_extents = 90.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -114.48, 85.0, -412.56)
+gizmo_extents = 160.0
 script = ExtResource("2_peak")
-radius_m = 90.0
+radius_m = 160.0
 
 [node name="MitrePeak" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -311.13, 60.0, -64.8)
-gizmo_extents = 55.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -250.0, 70.0, -200.0)
+gizmo_extents = 44.0
 script = ExtResource("2_peak")
-radius_m = 55.0
+radius_m = 44.0
+island = true
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -59,6 +60,7 @@ period = 95.0
 telegraph = 5.0
 rain_hold = 25.0
 dry_out = 5.0
+start_clock = 35.0
 
 [node name="RainFallB1" type="Area3D" parent="Hazarduri" groups=["rain_falls"]]
 transform = Transform3D(0.6160, 0.0000, -0.7877, 0.0649, 0.9966, 0.0507, 0.7851, -0.0823, 0.6139, -90.480, 7.610, -174.990)
@@ -66,6 +68,7 @@ script = ExtResource("5_waterfall")
 length = 20.0
 thickness = 6.0
 force_accel = 0.0
+spray_count = 16
 
 [node name="RainFallB2" type="Area3D" parent="Hazarduri" groups=["rain_falls"]]
 transform = Transform3D(0.7560, 0.0000, -0.6546, 0.0582, 0.9960, 0.0672, 0.6520, -0.0889, 0.7530, -201.499, 20.236, -274.158)
@@ -73,6 +76,7 @@ script = ExtResource("5_waterfall")
 length = 20.0
 thickness = 6.0
 force_accel = 0.0
+spray_count = 16
 
 [node name="RainFallChasm" type="Area3D" parent="Hazarduri" groups=["rain_falls"]]
 transform = Transform3D(0.9038, -0.0000, 0.4279, 0.0280, 0.9979, -0.0592, -0.4270, 0.0655, 0.9019, -522.776, 19.329, -568.711)
@@ -80,6 +84,7 @@ script = ExtResource("5_waterfall")
 length = 20.0
 thickness = 6.5
 force_accel = 0.0
+spray_count = 16
 
 [node name="RainFallF1" type="Area3D" parent="Hazarduri" groups=["rain_falls"]]
 transform = Transform3D(-0.6299, 0.0000, 0.7767, 0.0657, 0.9964, 0.0533, -0.7739, 0.0846, -0.6276, -61.749, 21.414, -286.522)
@@ -87,6 +92,7 @@ script = ExtResource("5_waterfall")
 length = 20.0
 thickness = 7.0
 force_accel = 0.0
+spray_count = 16
 
 [node name="RainFallF2" type="Area3D" parent="Hazarduri" groups=["rain_falls"]]
 transform = Transform3D(-0.8553, 0.0000, 0.5182, 0.0379, 0.9973, 0.0625, -0.5168, 0.0731, -0.8530, 65.060, 7.820, -205.330)
@@ -94,6 +100,7 @@ script = ExtResource("5_waterfall")
 length = 20.0
 thickness = 7.0
 force_accel = 0.0
+spray_count = 16
 
 [node name="StirlingFalls" type="Area3D" parent="Hazarduri"]
 transform = Transform3D(0.6732, 0.0000, -0.7395, -0.0120, 0.9999, -0.0109, 0.7394, 0.0162, 0.6731, -451.558, 31.928, -380.310)

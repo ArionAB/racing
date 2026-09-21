@@ -30,7 +30,12 @@ extends Node
 ## 3. `visible` + fade (prin `modulate`/`transparency`, cand nodul suporta) pe
 ##    tot ce e in grupul `rain_falls`;
 ## 4. grupul propriu `rain_cycle`, ca alte hazarde (viitorul `WaterfallHazard`)
-##    sa gaseasca metronomul si sa-i citeasca `rain_factor` fara referinta directa.
+##    sa gaseasca metronomul si sa-i citeasca `rain_factor` fara referinta directa;
+## 5. TELEGRAPH-UL VIZIBIL (sep 2026, dupa „nu exista rain" la volan): cerul
+##    (`ProceduralSkyMaterial` + `fog_sky_affect` + ambient) se inchide in prima
+##    jumatate a telegraph-ului, apoi intra picaturile pe ecran ([RainScreen],
+##    particule in fata camerei active), apoi cascadele de ploaie — vezi
+##    `_apply_sky` si grupul de exporturi „Cer si ecran".
 ##
 ## Calibrare (brief §2.0 si §7): perioada ~95 s (5 s telegraph + 25 s ploaie +
 ## 5 s zvantare + restul uscat).
@@ -60,6 +65,17 @@ extends Node
 	set(value):
 		dry_out = maxf(value, 0.1)
 
+## Punctul din ciclu (s) la care porneste ceasul la incarcare. Ciclul e
+## telegraph -> ploaie -> zvantare -> USCAT, deci la 0 pista porneste DIRECT
+## in telegraph: `rain_factor` > 0 din al doilea cadru, cascadele de ploaie
+## aprinse si drumul ud in primele 35 s ale cursei (constatare 22 sep: cutiile
+## de ploaie apareau „pe uscat" de la start — nu erau pe uscat, ploaia
+## incepuse la t=0). `telegraph + rain_hold + dry_out` = inceputul ferestrei
+## uscate: cursa porneste uscata si prima ploaie vine dupa `period` minus
+## suma aceea (60 s pe Fiordland). Implicitul ramane 0 pentru sondele care
+## verifica tranzitiile de la t=0 (`ProbeFiordPloaie`); pista il seteaza.
+@export_range(0.0, 600.0, 0.5) var start_clock: float = 0.0
+
 @export_group("Mediu")
 ## `fog_depth_end` pe uscat (m). Se citeste o singura data din Environment daca
 ## nu se suprascrie aici — vezi `_base_taken`.
@@ -74,6 +90,44 @@ extends Node
 ## `sun.light_energy` in ploaie: soarele scade, dar nu dispare — e o rafala,
 ## nu o schimbare de tema (brief §4: raportul soare/ambient scade "natural").
 @export var sun_energy_rain: float = 0.7
+
+@export_group("Cer si ecran")
+## TELEGRAPH-UL PE CER (brief §2.0: „cerul se inchide" e primul semn, cu 5 s
+## inainte de prima picatura). Pe Fiordland `fog_sky_affect` e 0.20, deci
+## cerul de pe ecran e in mare parte `ProceduralSkyMaterial`-ul temei, nu
+## ceata — culorile lui se pot lerpui la runtime, fara material nou.
+## Cerul e INCHIS COMPLET la `rain_factor` = `sky_lead` (implicit la
+## jumatatea telegraph-ului), inaintea picaturilor: intai se inchide, apoi
+## ploua. Pe zvantare se deschide ultimul, simetric.
+@export_range(0.05, 1.0, 0.01) var sky_lead: float = 0.5
+## `sky_top_color` in ploaie (gri de furtuna, in familia cetii — memoria
+## `ceata-in-familia-solului`).
+@export var sky_top_rain: Color = Color.html("3E4750")
+## `sky_horizon_color` in ploaie.
+@export var sky_horizon_rain: Color = Color.html("7E888E")
+## Cat se intuneca norii (`sky_cover_modulate` e ADUNAT peste gradient, deci
+## a-l lasa alb ar tine cerul luminos oricat de inchis ar fi gradientul).
+@export_range(0.0, 1.0, 0.01) var sky_cover_dim_rain: float = 0.45
+## Cat din cer preia ceata in ploaie (`fog_sky_affect`): orizontul se topeste
+## in ceata, fiordul se inchide si pe verticala.
+@export_range(0.0, 1.0, 0.01) var fog_sky_affect_rain: float = 0.55
+## Ambientul in ploaie, ca fractie din cel de baza (cerul inchis lumineaza
+## mai putin; nu sub 0.7 — brief §4 vrea drumul citibil in ploaie).
+@export_range(0.5, 1.0, 0.01) var ambient_scale_rain: float = 0.85
+## Ploaia PE ECRAN ([RainScreen], particule in fata camerei). Stins = zero
+## noduri create; e primul strat de taiat pe device (brief §6).
+@export var screen_rain: bool = true
+## De la ce `rain_factor` apar primele picaturi (brief §2.0: cerul intai,
+## apoi „prime picaturi", apoi cascadele). 0.25 = la 1,25 s din telegraph.
+@export_range(0.0, 0.9, 0.01) var screen_lead: float = 0.25
+
+## De la ce `rain_factor` se aprind cascadele de ploaie (`rain_falls`): brief
+## §2.0 cere ordinea cer -> picaturi -> „prima cascada de ploaie se aprinde
+## DUPA prima picatura". 0.6 = incep la 3 s din telegraph, pline la 5 s, odata
+## cu ploaia; pe zvantare se sting primele. Zona lor (albire, frana 0) porneste
+## odata cu vizualul (`WaterfallHazard._apply_visibility`), deci intarzierea e
+## de teatru, nu de fizica a masinii. 0 = purtarea veche (fade pe tot telegraph-ul).
+@export_range(0.0, 0.9, 0.01) var falls_lead: float = 0.6
 
 ## Grupul de noduri „cascade de ploaie" (teatru, cost zero): vizibile DOAR in
 ## ploaie, cu fade pe intrare/iesire ca sa nu apara cu un pocnet.
@@ -102,6 +156,17 @@ var _base_taken: bool = false
 var _base_fog_end: float = 0.0
 var _base_fog_color: Color = Color.WHITE
 var _base_sun_energy: float = 1.0
+var _sky: ProceduralSkyMaterial = null
+var _base_sky_top: Color = Color.WHITE
+var _base_sky_horizon: Color = Color.WHITE
+var _base_sky_cover: Color = Color.WHITE
+var _base_fog_sky_affect: float = 1.0
+var _base_ambient_energy: float = 1.0
+## Scriptul se ia prin preload, nu prin `class_name`: cache-ul de clase globale
+## se reface doar la `--import`/editor, iar o sonda pornita intre timp ar pica
+## la parsare pe un tip necunoscut (platit: 4 seed-uri de ProbeRace fara ploaie).
+const RAIN_SCREEN_SCRIPT: GDScript = preload("res://scenes/hazards/rain_screen.gd")
+var _screen: GPUParticles3D = null
 var _fall_nodes: Array[Node] = []
 ## Modulate/transparency de baza al fiecarui nod din `rain_falls`, ca fade-ul
 ## sa poata reveni exact la ce era, nu la un implicit ghicit.
@@ -113,6 +178,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
 		return
+	_clock = fposmod(start_clock, period)
 	# AMANAT: `track` si nodurile din `rain_falls` sunt construite de pista in
 	# `rebuild()`/`_ready()`-ul ei, care ruleaza inaintea copiilor dar dupa
 	# `_init`; cautarea in sus/jos pe arbore trebuie sa gaseasca o scena deja
@@ -126,7 +192,14 @@ func _collect() -> void:
 	_track = _find_track()
 	_env = _find_environment()
 	_sun = _find_sun()
+	if _env != null and _env.sky != null:
+		_sky = _env.sky.sky_material as ProceduralSkyMaterial
 	_take_base()
+	if screen_rain and _screen == null and not Engine.is_editor_hint():
+		# Copil al metronomului (Node fara transform): RainScreen isi ia
+		# pozitia din camera activa, nu din parinte, deci ierarhia nu conteaza.
+		_screen = RAIN_SCREEN_SCRIPT.new() as GPUParticles3D
+		add_child(_screen)
 	_fall_nodes = get_tree().get_nodes_in_group(rain_falls_group)
 	_fall_base_alpha.clear()
 	for n in _fall_nodes:
@@ -228,8 +301,14 @@ func _take_base() -> void:
 	if _env != null:
 		_base_fog_end = _env.fog_depth_end
 		_base_fog_color = _env.fog_light_color
+		_base_fog_sky_affect = _env.fog_sky_affect
+		_base_ambient_energy = _env.ambient_light_energy
 	else:
 		_base_fog_end = fog_end_dry
+	if _sky != null:
+		_base_sky_top = _sky.sky_top_color
+		_base_sky_horizon = _sky.sky_horizon_color
+		_base_sky_cover = _sky.sky_cover_modulate
 	if _sun != null:
 		_base_sun_energy = _sun.light_energy
 	else:
@@ -248,7 +327,35 @@ func _apply(amount: float) -> void:
 		_env.fog_light_color = _base_fog_color.lerp(Color.WHITE, amount * fog_whiten_rain)
 	if _sun != null and _base_taken:
 		_sun.light_energy = lerpf(_base_sun_energy, sun_energy_rain, amount)
-	_apply_rain_falls(amount)
+	_apply_sky(amount)
+	if _screen != null:
+		# Picaturile intra DUPA ce cerul a inceput sa se inchida (screen_lead)
+		# si ajung la plin odata cu ploaia; pe zvantare dispar primele.
+		var k := clampf((amount - screen_lead) / maxf(1.0 - screen_lead, 0.01),
+			0.0, 1.0)
+		_screen.call("set_intensity", k)
+	_apply_rain_falls(clampf((amount - falls_lead) / maxf(1.0 - falls_lead, 0.01),
+		0.0, 1.0))
+
+
+## Cerul se inchide PRIMUL: la `amount` = `sky_lead` e deja complet gri. Tot ce
+## e aici e lerp pe proprietati existente (ProceduralSkyMaterial + Environment),
+## zero materiale noi; la 0 revine exact la valorile de baza citite o singura
+## data in `_take_base`.
+func _apply_sky(amount: float) -> void:
+	if not _base_taken:
+		return
+	var k := clampf(amount / maxf(sky_lead, 0.01), 0.0, 1.0)
+	if _sky != null:
+		_sky.sky_top_color = _base_sky_top.lerp(sky_top_rain, k)
+		_sky.sky_horizon_color = _base_sky_horizon.lerp(sky_horizon_rain, k)
+		var cover := _base_sky_cover
+		var dim := lerpf(1.0, 1.0 - sky_cover_dim_rain, k)
+		_sky.sky_cover_modulate = Color(cover.r * dim, cover.g * dim, cover.b * dim, cover.a)
+	if _env != null:
+		_env.fog_sky_affect = lerpf(_base_fog_sky_affect, fog_sky_affect_rain, k)
+		_env.ambient_light_energy = lerpf(_base_ambient_energy,
+			_base_ambient_energy * ambient_scale_rain, k)
 
 
 ## Grupul `rain_falls`: vizibil doar cand `amount` > 0, cu fade liniar pe
@@ -330,3 +437,8 @@ func sun() -> DirectionalLight3D:
 
 func track_ref() -> Track:
 	return _track
+
+
+## Ploaia de pe ecran (null cand `screen_rain` e stins sau in editor).
+func screen() -> GPUParticles3D:
+	return _screen

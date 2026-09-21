@@ -69,12 +69,21 @@ extends Node
 ## 4. Masoara MESH-ul cu coliziune, nu campul `ground_y`. Aia e si ideea: campul
 ##    e sursa, dar cu roata intri in triunghiuri. `probe_capp_bury` ramane
 ##    pentru sursa; asta e pentru rezultat.
-## 5. Ramura de „bolta" (`tavane`) e scrisa, dar azi nu o exercita nicio pista:
-##    pe toate cele 7 numaratoarea iese 0, fiindca niciuna n-are inca TEREN
-##    deasupra drumului — stanca goala chiar e goala, iar tablierele Chongqingului
-##    sunt corpuri de sosea, nu teren. Exista pentru orasul subteran din brief,
-##    si pana atunci nu e verificata pe date reale. Cine il construieste sa se
-##    uite intai la cifra asta: daca sare pe zero, regula tine.
+## 5. Ramura de „bolta" (`tavane`) a fost scrisa pentru orasul subteran si a
+##    stat neexercitata pana la tunelul Homer (Fiordland, sep 2026). Azi o
+##    exercita `TunnelBore` — vezi mai jos — si a fost ARMATA prin sabotaj:
+##    cu tavanul coborat la 2 m sonda pica (PROBLEMA, cod 1), cu tavanul la
+##    6,5 m numara ~85 de „tavane" si trece. Pe teren pur cifra ramane 0 pe
+##    toate pistele, si asa trebuie sa ramana: un camp de inaltimi deasupra
+##    axei e ingropare, nu bolta (o singura fata = paritate impara = inauntru).
+## 7. Al DOILEA corp judecat: `TunnelBore` (tubul de tunel construit de
+##    `Track._build_tunnels` din declaratia [TunnelSignalHazard]). Nu e teren,
+##    dar e din aceeasi clasa de accident pentru care exista garda — geometrie
+##    GENERATA din parametri, care poate creste peste drum fara ca cineva sa fi
+##    pus ceva acolo (un `tunnel_ceiling` gresit, o semilatime sub cea a
+##    soselei). Portalurile (`TunnelPortal`) si prop-urile raman in afara:
+##    alea sunt asezate, nu generate. Invelisul tubului e inchis (tavan cu
+##    doua fete), altfel testul de paritate l-ar citi ca ingropare.
 ## 6. Se bazeaza pe faptul ca trimesh-ul terenului raspunde la `intersect_point`
 ##    pentru puncte din interiorul lui (masurat: da, cu `backface_collision`).
 ##    Daca vreodata se schimba motorul de fizica sau se stinge backface-ul,
@@ -110,6 +119,8 @@ const PROBE_IN: float = 1.0
 ## judeca. Daca se redenumeste vreodata, garda tace in loc sa minta: de-aia
 ## `_terrain_bodies` avertizeaza cand nu gaseste nimic.
 const TERRAIN_BODY: String = "TerrainBody"
+## Al doilea prefix judecat: tubul de tunel generat (limita 7 din antet).
+const TUNNEL_BODY: String = "TunnelBore"
 
 
 func _ready() -> void:
@@ -232,7 +243,7 @@ func _check(idx: int) -> bool:
 func _terrain_bodies(track: Track) -> Array[Node]:
 	var out: Array[Node] = []
 	for node in track.find_children("*", "StaticBody3D", true, false):
-		if node.name.begins_with(TERRAIN_BODY):
+		if node.name.begins_with(TERRAIN_BODY) 				or node.name.begins_with(TUNNEL_BODY):
 			out.append(node)
 	return out
 

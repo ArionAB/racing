@@ -263,6 +263,12 @@ var _channels: Array[Dictionary] = []
 ## soseaua peste tot, deci interiorul unei bucle care URCA ramane o campie —
 ## muntele pe care pista pretinde ca se catara nu exista pana nu e declarat.
 var _peaks: Array[Vector4] = []
+## Masivele-INSULA: acelasi Vector4, dar ridicate DUPA rape, din terenul deja
+## sapat — vezi [member TerrainPeak.island] si [method _lift_island_peaks].
+## Se seteaza de Track dupa constructie (ca `shore_in`), nu prin constructor:
+## lista e goala pe orice pista fara noduri cu flagul, si atunci `ground_y` nu
+## se schimba cu nimic (verificat la bit pe Track16 si Track09, 21 sep 2026).
+var late_peaks: Array[Vector4] = []
 ## Volumele SCOBITE declarate: (x, z, raza, podea), plus grosimea peretelui in
 ## lista paralela [member _hollow_walls] — Vector4 e deja plin.
 ## Vezi [TerrainHollow] si [method _carve_hollows].
@@ -528,6 +534,9 @@ func ground_y(wx: float, wz: float) -> float:
 	y = _carve_branches(y, wx, wz, dist, near_i)
 	y = _carve_lagoon(y, dist, wx, wz, near_i)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+	# Insulele DUPA rape: un varf care trebuie sa iasa din mare nu poate sta
+	# inaintea sapaturii care face marea. Lista e goala pe pistele fara ele.
+	y = _lift_island_peaks(y, wx, wz, dist, near_i)
 	y = _carve_channel(y, wx, wz, local.x, local.y, half_width_at(near_i))
 	# ULTIMA, si un PLAFON, nu inca un camp: scobitura trebuie sa bata tot ce
 	# ridica teren (media soselei, lacatul local, masivele, benzile), altfel un
@@ -594,6 +603,37 @@ func _lift_peaks(y: float, wx: float, wz: float, dist: float,
 		return y
 	peak += _dunes(wx, wz) * 0.5
 	return lerpf(y, _smax(y, peak, SMOOTH_PEAK_K), mask)
+
+
+## Ridica masivele-INSULA ([member late_peaks]) din terenul DEJA sapat.
+##
+## Diferenta fata de [method _lift_peaks] nu e doar momentul (dupa rape), ci
+## si compunerea: acolo e `_smax(y, cota * profil)`, care merge cand terenul
+## din jur e la cota medie a soselei — profilul moare la 0 sub teren si nu se
+## vede. Pe fundul unei rape la -30 m, acelasi `_smax(-30, 0)` ar da 0 pe TOT
+## discul razei: o clatita la nivelul marii cu un dom pe ea, nu o insula.
+## Aici domul e un BLEND: la centru cota declarata, la raza terenul existent,
+## profilul acelasi smoothstep — deci linia apei se taie unde profilul
+## atinge adancimea locala (la -30 m si cota 70: la ~0,66 din raza), iar sub
+## apa flancul continua pana la fund, ca un munte adevarat. Banda de
+## protectie a asfaltului ramane (o insula la 85 m de drum n-o simte).
+func _lift_island_peaks(y: float, wx: float, wz: float, dist: float,
+		near_i: int) -> float:
+	if late_peaks.is_empty():
+		return y
+	var mask := smoothstep(PEAK_ROAD_CLEAR, PEAK_ROAD_FULL,
+		dist - half_width_at(near_i))
+	if mask <= 0.0:
+		return y
+	var out := y
+	for v in late_peaks:
+		var d := Vector2(wx - v.x, wz - v.y).length()
+		if d >= v.z:
+			continue
+		var f := 1.0 - smoothstep(0.0, 1.0, d / v.z)
+		var top := v.w + _dunes(wx, wz) * 0.5
+		out = maxf(out, lerpf(y, maxf(y, top), f))
+	return lerpf(y, out, mask)
 
 
 ## Scobeste volumele declarate — vezi [TerrainHollow].

@@ -28,6 +28,18 @@ extends Marker3D
 	set(value):
 		radius_m = maxf(value, 1.0)
 		gizmo_extents = radius_m
+## INSULA: masivul se ridica DUPA saparea rapelor, din terenul deja sapat
+## (fundul marii), nu inaintea lor. Implicit fals = comportamentul vechi,
+## in care rapele taie si prin masive (TrackSideSampler.ground_y: masivele
+## sunt inainte de benzi si de taieturi, deliberat — o scurtatura isi
+## re-aseaza terenul peste flanc). Masurat pe Fiordland (21 sep 2026): Mitre
+## Peak declarat la 60 m iesea 51,7 m fiindca centrul statea pe muchia
+## sapaturii rapei 0, iar orice varf pus IN golf era retezat la podeaua de
+## -30 m. Cu flagul, domul porneste de la fundul apei si urca la cota
+## declarata: singurul fel de a avea un varf care iese din mare. Vezi
+## TrackSideSampler._lift_island_peaks pentru profil (blend din terenul
+## existent, nu smax — altfel marginea domului ar face o clatita la cota 0).
+@export var island: bool = false
 
 
 func _ready() -> void:

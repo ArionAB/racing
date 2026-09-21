@@ -291,6 +291,15 @@ func _physics_process(_delta: float) -> void:
 	_apply(_amount)
 
 
+## Aprinde/stinge zona (`monitoring` pe Area3D-ul intern). Stinsa, nu mai
+## vede nicio masina, deci `_amount` cade la 0 si mediul revine la baza in
+## cadrul urmator — nu ramane inghetat in ceata. Folosit de `WaterfallHazard`
+## pentru cascadele de ploaie pe uscat.
+func set_active(on: bool) -> void:
+	if _zone != null and is_instance_valid(_zone):
+		_zone.monitoring = on
+
+
 ## Cat de „in ceata" e masina jucatorului, 0..1.
 ##
 ## Se masoara pe adancimea ei in culoar, nu pe timp: hazardul n-are ceas, si

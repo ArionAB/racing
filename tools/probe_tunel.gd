@@ -245,6 +245,25 @@ func _check(idx: int) -> bool:
 			% [min_w, WIDTH_M, min_c, CEILING_M])
 	var ok := tube_missing == 0 and width_bad == 0 and ceil_bad == 0 \
 		and lane_bad == 0 and terrain_in_tube == 0
+	# Zona de camera: trebuie sa acopere EXACT intervalul tubului (brief §2.0,
+	# memoria `camera-zone-tavan-per-sala`), cu tavanul declarat la cota lui.
+	var cz_ok := false
+	for node in track.find_children("*", "Area3D", true, false):
+		var cz := node as CameraZone
+		if cz == null:
+			continue
+		var f0 := r.frac_at(line_idx)
+		var f1 := r.frac_at(r.wrap_index(idx_west))
+		var covers: bool = cz.frac_to > cz.frac_from \
+			and absf(cz.frac_from - f0) < 0.002 and absf(cz.frac_to - f1) < 0.002
+		print("  CameraZone %s: frac %.3f-%.3f (tub %.3f-%.3f) ceiling %.1f height %.1f darkness %.2f -> %s"
+			% [cz.name, cz.frac_from, cz.frac_to, f0, f1, cz.ceiling, cz.height,
+				cz.darkness, "acopera tubul" if covers else "NU acopera tubul"])
+		if covers and absf(cz.ceiling - CEILING_M) < 0.01 and cz.darkness > 0.0:
+			cz_ok = true
+	if not cz_ok:
+		print("  nicio CameraZone pe intervalul tubului cu ceiling %.1f" % CEILING_M)
+	ok = ok and cz_ok
 	print("VERDICT TUNEL: %s" % ("OK" if ok else "PROBLEMA"))
 	track.queue_free()
 	await get_tree().process_frame

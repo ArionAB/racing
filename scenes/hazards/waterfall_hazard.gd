@@ -325,6 +325,14 @@ func _physics_process(delta: float) -> void:
 		if car == null:
 			continue
 		seen[car] = true
+		# SPLASH la intrare (brief pasul 3b): explozia de spray porneste o
+		# singura data, in cadrul in care masina INTRA in zona — nu la fiecare
+		# cadru cat timp ramane sub perdea (`_cars_inside` marcheaza exact
+		# membership-ul de la cadrul anterior, deci absenta lui aici = intrare
+		# noua). Doar pentru jucator sau AI, oricine declanseaza vizualul —
+		# splash-ul e al LUMII, nu al camerei (la fel ca spray-ul continuu).
+		if not _cars_inside.has(car) and _visual != null and is_instance_valid(_visual):
+			_visual.trigger_splash_burst()
 		_cars_inside[car] = true
 		if base_accel > 0.0:
 			var accel := base_accel * _speed_factor(car.horizontal_speed())

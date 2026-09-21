@@ -84,6 +84,15 @@ instance uniform float intensity : hint_range(0.0, 1.0) = 1.0;
 instance uniform vec2 sheet_m = vec2(6.0, 14.0);
 // 1 pe placa de spuma de la sol: mereu spuma, fara fade lateral/sus.
 instance uniform float pad : hint_range(0.0, 1.0) = 0.0;
+// 1 pe INELUL de spuma animat de la baza perdelei (splash, brief pasul 3a):
+// aceeasi geometrie de evantai ca placa de spuma (`pad`), dar cu turbulenta
+// de zgomot animata in loc de alba plata — bulboana unde apa loveste solul.
+// Exclusiv cu `pad`/`mist` (WaterfallVisual seteaza un singur mod per nod).
+instance uniform float ring : hint_range(0.0, 1.0) = 0.0;
+// 1 pe PANZA DE CEATA JOASA (brief pasul 3c): fasie plata, joasa, care se
+// intinde de-a lungul drumului — ceata se topeste in alpha-ul de vertex
+// (radial, ca la `pad`) si are o usoara respiratie de zgomot, nu e statica.
+instance uniform float mist : hint_range(0.0, 1.0) = 0.0;
 
 varying vec2 v_m;
 varying vec4 v_col;
@@ -198,6 +207,35 @@ void fragment() {
 	a = min(a + base_glow * 0.10, 0.95);
 	// marginile se aplica DUPA spuma: si banda de spuma se topeste lateral.
 	a *= lat * top;
-	ALBEDO = col;
-	ALPHA = a * intensity * v_col.a;
+
+	// INELUL DE SPUMA (splash, brief pasul 3a): aceeasi geometrie de evantai
+	// ca placa de spuma, dar turbulenta — zgomot 2D animat pe planul XZ local
+	// (v_m aici = (x,z) in metri, vezi WaterfallVisual._ring_mesh), plus o
+	// unda radiala care pulseaza spre exterior (bulboana care se latesc cand
+	// apa loveste solul). Alpha ramane cea din COLOR (cadere radiala, 0 pe
+	// margine — acelasi contract ca placa de spuma).
+	//
+	// Godot nu accepta `return` in fragment(): cele trei moduri (perdea,
+	// inel, ceata) se aleg prin mix()/lerp() pe rezultatul final, nu prin
+	// ramuri cu iesire timpurie.
+	float churn = vnoise2(v_m * 0.6 + vec2(0.0, TIME * 1.4)) * 0.5
+		+ vnoise2(v_m * 1.4 - vec2(TIME * 0.9, 0.0)) * 0.5;
+	float rad = length(v_m);
+	float pulse = sin(rad * 1.1 - TIME * 3.0) * 0.5 + 0.5;
+	float turb = clamp(churn * 0.7 + pulse * 0.3, 0.0, 1.0);
+	vec3 ring_col = mix(water_col, foam_col, 0.6 + 0.4 * turb);
+	float ring_a = alpha_max * (0.5 + 0.5 * turb) * intensity * v_col.a;
+
+	// CEATA JOASA (brief pasul 3c): panza plata, alpha radiala (COLOR, ca la
+	// placa de spuma) cu o respiratie lenta de zgomot — nu e o pata statica,
+	// se misca usor ca un abur care se tarage pe drum.
+	float drift = vnoise2(v_m * 0.15 + vec2(TIME * 0.25, TIME * 0.08));
+	float wisp = 0.65 + 0.35 * drift;
+	vec3 mist_col = foam_col;
+	float mist_a = alpha_max * 0.5 * wisp * intensity * v_col.a;
+
+	vec3 final_col = mix(mix(col, ring_col, step(0.5, ring)), mist_col, step(0.5, mist));
+	float final_a = mix(mix(a * intensity * v_col.a, ring_a, step(0.5, ring)), mist_a, step(0.5, mist));
+	ALBEDO = final_col;
+	ALPHA = final_a;
 }

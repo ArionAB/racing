@@ -94,6 +94,19 @@ extends Area3D
 ## `visible` si, daca nodul are proprietatea, prin `modulate.a` — `modulate`
 ## de aici exista exact pentru mecanismul acela (nu un al doilea): alpha-ul
 ## lui e impins in `WaterfallVisual.set_intensity()`.
+##
+## [b]`set_physics_enabled(on)` — comutator separat de vizibilitate
+## (Torrent, Fiordland, `torrent_cycle.gd`).[/b] `_physics_process` aplica
+## `drag`-ul (si `force_accel`, si albirea) de cate ori zona e ACTIVA
+## (`is_visible_in_tree() and modulate.a > 0.001`) — ceea ce e corect pentru
+## o cascada constanta, dar gresit pentru un puls: un fir SUBTIRE de teatru
+## (`modulate.a` mic, dar > 0, in faza de calm a torentului) e vizibil, deci
+## ar franea si ar albi masina in continuu, desi brief-ul cere fizica NUMAI
+## in puls. `set_physics_enabled(false)` lasa perdeaua monitorizata si
+## vizibila (splash-ul de intrare tot declanseaza — e teatru, nu fizica) dar
+## taie forta ORIZONTALA/verticala SI albirea (`_fog.set_active`); `true`
+## reactiveaza ambele fara sa schimbe `modulate`. Implicit `true` — orice alt
+## chemator (pista veche, sondele existente) e neschimbat.
 
 const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazard.gd")
 
@@ -234,6 +247,13 @@ var _fog: FogCorridorHazardScript
 var _cars_inside: Dictionary = {}
 ## Starea de activare aplicata ultima data (vezi `_set_active`).
 var _active: bool = true
+## Comutator SEPARAT de `_active` (Torrent, Fiordland brief „Torentul in
+## pulsuri"): `_active` e legat de VIZIBILITATE (modulate.a > 0.001) — un fir
+## subtire de teatru in faza CALM e vizibil (`modulate.a` mic, dar > 0), deci
+## `_active` ramane true, si fara comutatorul asta franarea/forta/albirea ar
+## rula in continuu cat perdeaua e vizibila, nu doar cat e PLINA. Vezi
+## `set_physics_enabled`.
+var _physics_enabled: bool = true
 
 
 func _ready() -> void:
@@ -318,7 +338,11 @@ func _physics_process(delta: float) -> void:
 		_set_active(active)
 	if not active:
 		return
-	var base_accel := force_accel * rain_factor
+	# `_physics_enabled=false` (Torrent, faza CALM/TELEGRAPH): zona ramane
+	# MONITORIZATA (splash-ul de intrare tot declanseaza — e teatru, nu
+	# fizica), dar FARA forta/franare, si albirea locala se stinge separat
+	# (vezi mai jos): un fir subtire vizibil nu trebuie sa apese sau sa
+	# franeze masina, doar cascada PLINA o face.
 	var seen := {}
 	for body in get_overlapping_bodies():
 		var car := body as Car
@@ -334,6 +358,9 @@ func _physics_process(delta: float) -> void:
 		if not _cars_inside.has(car) and _visual != null and is_instance_valid(_visual):
 			_visual.trigger_splash_burst()
 		_cars_inside[car] = true
+		if not _physics_enabled:
+			continue
+		var base_accel := force_accel * rain_factor
 		if base_accel > 0.0:
 			var accel := base_accel * _speed_factor(car.horizontal_speed())
 			if compression_ease_start > 0.0:
@@ -348,6 +375,8 @@ func _physics_process(delta: float) -> void:
 	for car in _cars_inside.keys():
 		if not seen.has(car):
 			_cars_inside.erase(car)
+	if _fog != null and is_instance_valid(_fog):
+		_fog.set_active(_physics_enabled)
 
 
 ## Aprinde/stinge ZONA odata cu vizualul: `monitoring` pe Area3D-ul propriu
@@ -360,7 +389,24 @@ func _set_active(on: bool) -> void:
 	if not on:
 		_cars_inside.clear()
 	if _fog != null and is_instance_valid(_fog):
-		_fog.set_active(on)
+		_fog.set_active(on and _physics_enabled)
+
+
+## Comutator SEPARAT de vizibilitate (Torrent, Fiordland): taie forta,
+## franarea SI albirea (`_fog.set_active`) fara sa stinga perdeaua vizual —
+## un fir subtire de teatru in CALM tot trebuie sa se VADA (altfel torentul
+## ar disparea intre pulsuri, gresit fata de brief: "fir subtire, teatru"),
+## dar nu trebuie sa apese sau sa franeze masina, si nu trebuie sa albeasca
+## ecranul pentru un fir de apa. `on=true` = comportament implicit
+## (nesetat, orice alta pista/sonda ramane neschimbata).
+func set_physics_enabled(on: bool) -> void:
+	_physics_enabled = on
+	if not on:
+		if _fog != null and is_instance_valid(_fog):
+			_fog.set_active(false)
+	elif _active:
+		if _fog != null and is_instance_valid(_fog):
+			_fog.set_active(true)
 
 
 ## Factorul care scaleaza `force_accel` cu viteza CURENTA (nu cea de la

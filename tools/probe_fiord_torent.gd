@@ -21,14 +21,37 @@ const CAR_SCENE := "res://scenes/cars/Car.tscn"
 const WaypointDriver := preload("res://tools/probe_waypoint_driver.gd")
 
 var _failed: bool = false
+## Reglaj din linia de comanda (vezi antetul): `--only=a|b|c` ruleaza o singura
+## verificare; `--drag=`, `--force=` suprascriu calibrarea perdelei in (b);
+## `--car=nume` alege presetarea din `res://scenes/cars/data/<nume>.tres`.
+var _only: String = ""
+var _drag_override: float = -1.0
+var _force_override: float = -1.0
+var _car_override: String = ""
+
+
+func _parse_args() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--only="):
+			_only = arg.trim_prefix("--only=")
+		elif arg.begins_with("--drag="):
+			_drag_override = float(arg.trim_prefix("--drag="))
+		elif arg.begins_with("--force="):
+			_force_override = float(arg.trim_prefix("--force="))
+		elif arg.begins_with("--car="):
+			_car_override = arg.trim_prefix("--car=")
 
 
 func _ready() -> void:
 	await get_tree().process_frame
+	_parse_args()
 	print("=== SONDA: Torentul in pulsuri (Track16, scurtatura Chasm) ===")
-	await _test_clock()
-	await _test_physics()
-	await _test_ai_honest()
+	if _only == "" or _only == "a":
+		await _test_clock()
+	if _only == "" or _only == "b":
+		await _test_physics()
+	if _only == "" or _only == "c":
+		await _test_ai_honest()
 	print("")
 	print("REZULTAT FINAL: %s" % ("PICAT" if _failed else "TRECUT"))
 	get_tree().quit(1 if _failed else 0)
@@ -130,7 +153,10 @@ const PHYSICS_TEST_CAR: String = "res://scenes/cars/data/firetruck.tres"
 
 func _test_physics() -> void:
 	print("")
-	print("-- (b) fizica doar in puls: Pompierii la 25 m/s, CALM vs SURGE --")
+	print("-- (b) fizica doar in puls: %s la 25 m/s, CALM vs SURGE (drag=%s force=%s) --" % [
+		_car_override if _car_override != "" else "Pompierii",
+		str(_drag_override) if _drag_override >= 0.0 else "implicit",
+		str(_force_override) if _force_override >= 0.0 else "implicit"])
 	var calm := await _run_physics_case(false)
 	var surge := await _run_physics_case(true)
 	print("  CALM : pierdere viteza=%.1f%% fog_amount=%.3f" % [calm.loss_pct, calm.fog_max])
@@ -198,6 +224,10 @@ func _run_physics_case(force_surge: bool) -> Dictionary:
 	var torrent := TorrentCycle.new()
 	torrent.length = CURTAIN_LENGTH
 	torrent.thickness = CURTAIN_THICKNESS
+	if _drag_override >= 0.0:
+		torrent.drag = _drag_override
+	if _force_override >= 0.0:
+		torrent.force_accel = _force_override
 	add_child(torrent)
 	# Fara [Track] parinte, `_place()` nu gaseste nicio ruta si nu construieste
 	# `_hazard` — aici pozitionarea nu e ce testam (vezi antetul), asa ca
@@ -208,7 +238,10 @@ func _run_physics_case(force_surge: bool) -> Dictionary:
 
 	var car := (load(CAR_SCENE) as PackedScene).instantiate() as Car
 	add_child(car)
-	car.apply_data(load(PHYSICS_TEST_CAR) as CarData)
+	var car_path := PHYSICS_TEST_CAR
+	if _car_override != "":
+		car_path = "res://scenes/cars/data/%s.tres" % _car_override
+	car.apply_data(load(car_path) as CarData)
 	var driver := StraightDriver.new()
 	driver.throttle = 1.0
 	car.set_controller(driver)
@@ -269,6 +302,7 @@ func _run_physics_case(force_surge: bool) -> Dictionary:
 	ground.queue_free()
 	world_env.queue_free()
 	await get_tree().physics_frame
+	print("    intrare %.1f m/s -> iesire %.1f m/s" % [entry_speed, exit_speed])
 	return {"loss_pct": loss_pct, "fog_max": fog_max}
 
 

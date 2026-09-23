@@ -116,8 +116,22 @@ const AI_GROUP: StringName = &"torrents"
 ## Acceleratia in jos in puls — vezi WaterfallHazard.force_accel. Brief:
 ## exact fizica lui Stirling, 48.
 @export_range(0.0, 60.0, 0.5) var force_accel: float = 48.0
-## Franarea orizontala in puls — vezi WaterfallHazard.drag. Brief: 0.25.
-@export_range(0.0, 3.0, 0.05) var drag: float = 0.25
+## Franarea orizontala in puls — vezi WaterfallHazard.drag.
+##
+## NU 0.25 ca la Stirling. Acolo drag-ul mic a fost ales fiindca masinile
+## grele stateau SECUNDE sub o perdea de 30 m cu forta constanta (bucla
+## pozitiva descrisa in WaterfallHazard). Aici perdeaua e un PULS de 20 m pe
+## care il traversezi in sub o secunda, iar rostul lui e RISCUL scurtaturii:
+## pulsul trebuie sa coste cat castiga coarda (1-3 s). Masurat cu
+## `ProbeFiordTorent --only=b --car=X --drag=D` (drum drept, 25 m/s):
+##   drag 0.25: Taxi -4%, Politia -2%, Autobuz -19%   (nu se simte)
+##   drag 0.6 : Taxi -26%, Politia -23%, Autobuz -42%
+##   drag 1.0 : Taxi -46%, Politia -44%, Autobuz -62%  <- ales
+##   drag 1.5 : Taxi -64%, Politia -62%, Autobuz -75%  (zid)
+## La 1.0 iesi din puls cu ~14 m/s (Taxi) / ~9 m/s (Autobuz): reaccelerarea
+## costa 1,5-3 s, exact ordinul de marime al recompensei. Forta in jos ramane
+## cea de la Stirling (apasarea pe suspensie e identitate per masina).
+@export_range(0.0, 3.0, 0.05) var drag: float = 1.0
 ## In ploaie, pulsul e cu atat mai GREU (brief: rain_factor al perdelei
 ## 1.3) — trecut direct catre WaterfallHazard.rain_factor in fiecare cadru.
 @export_range(1.0, 2.0, 0.01) var rain_surge_factor_force: float = 1.3

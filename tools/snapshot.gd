@@ -52,6 +52,9 @@ extends Node
 ##                             `rain_falls` (cascadele de ploaie, altfel
 ##                             `visible = false`) si mediul de ploaie. Fara el,
 ##                             captura prinde mereu faza uscata.
+##   --torrent-at=11.0         TORENTUL IN PULSURI (TorrentCycle, scurtatura
+##                             Chasm): ceasul ciclului in secunde; 0 = CALM,
+##                             7 = inceputul anuntului, 10 = inceputul pulsului
 ##   --rain-clock=2.5          la fel, dar prin CEAS (secunde de la inceputul
 ##                             ciclului RainCycle): 0-5 = telegraph (cerul se
 ##                             inchide, primele picaturi), 5-30 = ploaie,
@@ -163,6 +166,7 @@ func _ready() -> void:
 	var driver_view := false
 	var rain_force := -1.0 # >= 0: RainCycle.force_factor() dupa doua cadre
 	var rain_clock := -1.0 # >= 0: RainCycle.force_clock() dupa doua cadre
+	var torrent_at := -1.0 # >= 0: TorrentCycle.force_clock() (secunde in ciclu)
 	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
@@ -295,6 +299,8 @@ func _ready() -> void:
 			rain_force = float(arg.trim_prefix("--rain="))
 		elif arg.begins_with("--rain-clock="):
 			rain_clock = float(arg.trim_prefix("--rain-clock="))
+		elif arg.begins_with("--torrent-at="):
+			torrent_at = float(arg.trim_prefix("--torrent-at="))
 		elif arg == "--overdraw":
 			overdraw = true
 		elif arg == "--no-terrain":
@@ -393,6 +399,19 @@ func _ready() -> void:
 			print("--rain-clock=%.2f: %d RainCycle fortate" % [rain_clock, cycles])
 		else:
 			print("--rain=%.1f: %d RainCycle fortate" % [rain_force, cycles])
+	# Torentul in pulsuri (Fiordland, scurtatura Chasm): `TorrentCycle._place`
+	# e amanat si reincearca pana apar rutele, deci asteptam doua cadre si
+	# fortam ceasul pe toate torentele din grup (0 = CALM, period-telegraph-
+	# surge = inceputul anuntului, period-surge = inceputul pulsului).
+	if torrent_at >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var torrents := 0
+		for node in get_tree().get_nodes_in_group(&"torrents"):
+			if node.has_method("force_clock"):
+				node.call("force_clock", torrent_at)
+				torrents += 1
+		print("--torrent-at=%.2f: %d TorrentCycle fortate" % [torrent_at, torrents])
 	if overdraw:
 		get_viewport().debug_draw = Viewport.DEBUG_DRAW_OVERDRAW
 	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,

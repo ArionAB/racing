@@ -489,6 +489,42 @@ trosnetele avalanșei (6 s), motorul avionului trecând peste, sirena
 vaporașului (o dată pe traversare), kea (țipătul lui e sunetul-semnătură al
 așteptării la roșu), focile, roțile pe podeț (lemn ud).
 
+### 5.6 Trecerea de contracte (23 sep, din cod citit — memoria `brief-cere-glb-cod-il-face-deja`)
+
+Pe Track16 există AZI un singur mecanism de decor: **`DecorManual` + `world_prop.gd`**
+(noduri în `.tscn`, corp fizic automat din `PROP_COLLISION`: `hull` implicit /
+`trunk` / `mesh` / `none`; `apply_class_materials` obligatoriu). Plus `PathMover`
+(figurant mobil pe curbă: `model`, `model_yaw`, `animation`, `stick_to_ground`),
+`FlockProp` (MultiMesh static) și `horizon_model`/`horizon_class` (chei de TEMĂ,
+azi goale → siluete-sfere). **Nu** sunt disponibile: `TrackDecor` (tema are
+`decor: "none"`), `TrackScenography` (virtuală, `TrackFromPath` n-o suprascrie),
+`custom_landmarks` (tabel const), `TrackCliffs`.
+
+| piesă din §5 | verdict | de ce (fișier) | ce se face |
+|---|---|---|---|
+| perdelele (Stirling, Bowen, 5 de ploaie, torent), `rain_sheet` | **CONFLICT** | `WaterfallVisual` le construiește procedural, un shader static pentru toate; `WaterfallHazard`/`TorrentCycle` n-au export `model` | nu se modelează; **`stirling_ledge.glb`** (surplomb + prag uscat 3 m + buza bazinului, FĂRĂ apă) rămâne decor pur |
+| `bowen_falls.glb` kicker | **CONFLICT** | `_build_channel_kicker` din `KickerBowen` (`TrackChannel jump`), `FlyoffKicker` fără model | doar malul/bazinul ca decor, dacă nu se suprapune cu albia săpată |
+| `homer_portal_east/west.glb`, `homer_tunnel_segment.glb`, `homer_niche_segment.glb` | **CONFLICT** | `Track._build_tunnels` face tubul (9 × 6,5 m gol), capacele, ramele de beton și aripile de galerie (fără ele: 8 ejectări/8 curse) din nodul `SemaforTunel` | nu se modelează; **nișele nu există în cod** (profil constant) — cer cod, nu GLB |
+| `traffic_light.glb` | CONFLICT (lămpi) / DECOR (stâlp) | `HazardLamp` face becurile din atlas, `visible` = aprins | doar **`traffic_light_pole.glb`** (stâlp + carcasă), sub `DecorManual`, lângă nod |
+| `mitre_peak.glb`, masivul | **CONFLICT** | `TerrainPeak` = teren regenerat (`_lift_island_peaks`), zero opțiune de GLB | nu se modelează; forma vine din relief + clase |
+| `fjord_far_wall`, `snow_ridge`, `cloud_bank` | ARE CONSUMATOR, temă goală | `_build_horizon`: `horizon_model` = UN GLB cu noduri numite, `horizon_rings` proprii în temă | **`fiordland_horizon.glb`** cu nodurile `FarWall_A`, `SnowRidge_A/B`, `CloudBank_A`; tema primește `horizon_model` + inele |
+| `coach_fiordland` | **CONTRACT RUPT** | `BusHazard` are `model` (din `PathMover`), dar `TunnelSignalHazard` nu-l expune; comentariul promite `bus.model` „din pistă" — cod inexistent | cod mic: `@export var bus_model: PackedScene` → `_build_bus()`; apoi reuse `vehicles/open_bus.glb` cu clasa alb-verde |
+| `tree_avalanche.glb` | **CONTRACT RUPT** | `_build_avalanche` citește doar `avalanche_period`; `AvalancheHazard._boulder_shapes` are calea hardcodată `effects/avalanche_boulders.glb` | cod mic: `spec["model"]` → `AvalancheHazard`; GLB-ul: 9 bucăți din 4 forme (contractul `BOULDERS`), coboară pe X local |
+| `bush_plane.glb`, `cruise_boat.glb` | ARE CONSUMATOR | `PathMover` (`stick_to_ground=false`, −Z înainte, origine pe curbă / la linia de plutire, `travel_mode` buclă la barcă) | se modelează; nemontate azi |
+| `kea.glb` | ARE CONSUMATOR (modelul) | `PathMover.animation`; **comportamentul** „aterizează pe capotă la roșu" n-are consumator | se modelează cu `Idle`/`Open`; comportamentul e cod nou, post-kit |
+| `nerpa_seal`, `tree_fern`, `moss_boulder_a/b/c`, `chevron_sign`, `wooden_pier`, `fern_cluster`, `grass_tuft_*`, `ice_road_marker` | **REUSE, zero asset** | există în `baikal/`, `machupicchu/`, `signs/`, `structures/`, `plants/` | așezare + clasă (`moss_carpet` decide dacă bolovanii arată a Fiordland) |
+| `chasm_bridge.glb` | CONFLICT (tabla) / DECOR (balustrada) | `custom_step_ranges` 0,406–0,424 face vibrația și gripul; precedent `"stream_bridge": "none"` | doar **balustrada + grinzile**, `coliziune = none` |
+| `torrent_chute.glb`, `chasm_rock.glb`, `wharf/pontoon/cafe_shed`, `lodge`, `luggage_container`, `heli_pad`, `driftwood`, `snow_pole`, `beech_*`, `rata_tree`, `penguin_tawaki`, `kayak_*`, `tussock` | DECOR PUR | `world_prop.gd`; poziția torentului din `TorrentCycle.curtain_position()` după Regenerate | se modelează; **`PROP_COLLISION` primește intrări** (`beech_*: trunk`, `penguin_tawaki: none`, `heli_pad: none`, `pontoon: mesh`, `torrent_chute: none`), altfel un fag e un con solid de 14 m |
+| clasele §5.1 (`wet_gneiss`, `moss_carpet`, …) | NU SUNT GLB | `Palette.triplanar_class_material`; **`wet_gneiss` nu există** (tunelul folosește `alpine_granite`) | clase noi la integrare, garda de materiale ≤ 38 (azi 28) |
+
+**Sunet (§5.5):** din 10 cerute, 1 acoperit (`avalanche_rumble` + `avalanche_hit`),
+2 parțial prin `train_horn` la alt pitch (claxon, sirenă), 7 lipsesc; niciun hazard
+de pe pistă n-are azi `AudioStreamPlayer3D`.
+
+**Scara decorului:** 200+ fagi așezați de mână nu e realist; alternativa e
+`decor: "bands"` + un set `props: "fiordland"` în `track_decor.gd` (precedent
+Stromboli), decizie la integrare.
+
 ## 6. Bugete
 
 - triunghiuri: raportate, fără plafon; kitul de fagi se multiplică (200+
@@ -672,90 +708,175 @@ așteptării la roșu), focile, roțile pe podeț (lemn ud).
   croazieră sau de companii aeriene pe vaporaș/avion; panourile fără text
   real (regula plăcii „1904" de la Baikal).
 
-## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.2, paste-ready
 
-Se atașează o captură a planului din §2 (harta „Fiordland Recon", de făcut
-după ce traseul trece de ProbeLayout).
+**Se atașează `docs/track_briefs/img/fiordland_plan.png`** — captura REALĂ de sus
+din Godot (`Snapshot.tscn -- --track=16 --rain=0 --no-fog`, apoi
+`python tools/annotate_fiordland_plan.py`), cu legenda peste ea. Pista e sursa
+de adevăr (memoria `diorama-din-geometria-reala`): diorama trebuie să respecte
+forma buclei și pozițiile din plan, literele sunt doar legendă. Ce s-a schimbat
+față de v0.1, din verdictele la volan și din garzi: **Mitre Peak e o insulă în
+golf**, lângă chei (decizia (b) din §2.0 — nu un perete pe malul opus);
+**semaforul tunelului nu oprește pe nimeni** (roșu = autocarul e în tunel, pe
+banda stângă; mașinile trec pe dreapta); **„tot fiordul în față la ieșirea din
+tunel" nu există** pe traseul actual (după portalul de vest drumul coboară prin
+pădure spre cicatricea avalanșei); **scurtătura „drumul vechi din pădure" cu
+Torentul în pulsuri** e nouă (§3); podețul peste Chasm rămâne pe traseul
+principal. Terenul din captură e placeholder: pădurea, pereții de gneis și
+satul vin din diorama asta, apoi din assets.
 
-> Create a stylized low-poly **tabletop diorama** of a toy-car racing track
-> at **Milford Sound, Fiordland, New Zealand, on a bright morning right
-> after heavy rain** — sheer wet granite walls dropping straight into a
-> black-green fiord, moss-covered beech rainforest clinging to them, white
-> waterfalls everywhere, and a sharp snow-capped peak rising out of the
-> water. Use the attached top-down plan as the layout: same loop shape,
-> same positions of the landmarks.
+> Create a stylized low-poly **tabletop diorama** of a toy-car racing track at
+> **Milford Sound, Fiordland, New Zealand, on a bright morning right after
+> heavy rain** — sheer wet granite walls dropping into a black-green fiord,
+> moss-covered beech rainforest clinging to them, white waterfalls everywhere,
+> and a sharp snow-capped island peak standing in the bay. **Use the attached
+> top-down plan as the layout: same loop shape, same positions of every
+> landmark; the letters A–H and the text are a legend, do not draw them.**
+> The plan is the real game track seen from above: white bands are water
+> curtains over the road, the dashed yellow line is the forest shortcut, the
+> grey band is the tunnel, the big circles mark the peaks. The bare terrain
+> in the plan is a placeholder — dress it with forest, rock walls and the
+> village as described below.
 >
 > **STYLE (strict):** faceted, flat-shaded low-poly meshes like a Blender
 > viewport render — **no fine surface texture, no painterly brushwork, no
-> photorealism**. Chunky toy proportions: cars are stubby and ~1.3× wider
-> than real cars; seals and penguins are simplified into smooth blocks with
-> a few facets. Soft baked ambient occlusion under every tree, rock and
-> boat. Dark, muted environment colors (~40% saturation): wet grey-black
-> rock with darker vertical streaks, near-black greens, black-green water
-> with pale grey reflections, and **pure white only for the waterfalls,
-> spray and snow**. Only three saturated accents: the toy cars, a
-> **white-and-green tour coach**, and a **green parrot with orange
-> under-wings** on a car's bonnet. Lighting: a cool white sun low, about
-> 30° above the horizon, breaking through broken grey clouds from over the
-> sea; the near cliff casts a long shadow on the water. Wet surfaces glint.
-> Rain is still falling on the far wall of the fiord as a soft grey veil,
-> with dozens of thin white threads of ephemeral waterfalls on it. Thin
-> grey-blue haze in the distance. Show the diorama on a thin dark
-> rounded-rectangle table base, from a raised 3/4 view.
+> photorealism**. Chunky toy proportions: cars are stubby and ~1.3× wider than
+> real cars; seals, penguins and the parrot are simplified into smooth blocks
+> with a few facets. Soft baked ambient occlusion under every tree, rock and
+> boat. Dark, muted environment colors (~40% saturation): wet grey-black rock
+> with darker vertical streaks, near-black greens, black-green water with pale
+> grey reflections, and **pure white only for the waterfalls, spray and snow**.
+> Only three saturated accents: the toy cars, a **white-and-green tour coach**,
+> and a **green parrot with orange under-wings**. Lighting: a cool white sun
+> low, about 30° above the horizon, breaking through broken grey clouds, coming
+> from the **upper-left of the plan**; the near cliff casts a long shadow on
+> the water. Wet surfaces glint. Rain is still falling on the far wall of the
+> fiord as a soft grey veil, with dozens of thin white threads of ephemeral
+> waterfalls on it. Thin grey-blue haze in the distance. Show the diorama on a
+> thin dark rounded-rectangle table base, from a raised 3/4 view, **looking
+> from the bottom edge of the plan toward the top** (the wharf and the bay
+> nearest the viewer, the tunnel ridge at the back).
 >
-> **THE LAND [!]:** the diorama is a **narrow fiord**: a strip of black-green
-> sea between two near-vertical wet granite walls. On the far side a
-> **sharp pointed peak (Mitre Peak) rises straight out of the water**, snow
-> on top, grey rock in the middle, black forest at its foot, one white
-> waterfall thread on its flank. On the near side the road runs along a
-> **ledge cut into the wall** above the sea, then turns inland into a dark
-> mossy beech forest with a white river in a chasm, climbs to a
-> **concrete tunnel portal with an avalanche gallery**, goes through the
-> ridge, and comes back down to the shore beside a small village and a
-> short airstrip.
+> **THE LAND [!]:** the diorama is a **narrow bay of a fiord**: black-green
+> sea in the lower half of the plan, near-vertical wet granite walls around
+> it. A **sharp pointed island peak (Mitre Peak) rises straight out of the
+> water inside the bay**, right beside the start wharf — snow on top, grey
+> rock in the middle, black forest at its foot, one white waterfall thread
+> on its flank. The road runs along a **ledge cut into the wall** above the
+> sea, passes under a huge waterfall, turns inland into a dark mossy beech
+> forest with a white river in a chasm, climbs a scree slope to a **concrete
+> tunnel portal with an avalanche gallery**, goes through a granite ridge,
+> and comes back down through forest to the shore, the village and a short
+> airstrip.
 >
-> **THE ROUTE — a single closed loop of about 2 km, the fiord on the left
-> along the ledge [!]:**
-> 1. **Start/finish on the wharf:** wet asphalt beside a pontoon with two
+> **THE ROUTE — a single closed loop of about 2 km, counter-clockwise on the
+> plan, the sea on the LEFT of the car along the ledge and along the shore
+> [!]:**
+> 1. **A — Start/finish on the wharf:** wet asphalt beside a pontoon with two
 >    white open-deck cruise boats and colorful kayaks, a small café shed,
->    three crested penguins on the rocks; **across the water the base of
->    Mitre Peak fills the view like a black wall**.
-> 2. **The ledge:** the road climbs a shelf carved into the wet grey wall,
->    no railing, the sea 30 m below on the left; four dark fur seals on a
->    rock in the water; red-flowering rata trees in the cracks; a **thin
->    white rain-waterfall pours across the road** in a sheet of spray.
-> 3. **Stirling Falls [!] — the biggest feature:** a **45 m white
->    waterfall drops from an overhang straight onto the road** and
->    spreads across it into the sea in a cloud of mist; one car is
->    punching **through the curtain**, crouched low on its suspension with
->    spray exploding off it; another is creeping along a **narrow dry
->    rock shelf behind the curtain**, between the water and the wall.
-> 4. **The Chasm:** the road dips into black-green beech forest — thin
->    black trunks, tree ferns, boulders wrapped in thick moss — and
->    crosses a **wooden plank bridge over a white river** boiling through
->    potholes; two green parrots sit on a stump watching the cars.
-> 5. **Homer Tunnel [!] — the second biggest feature:** the road climbs
->    through a scree slope with yellow-and-black chevron avalanche signs
->    and snow poles to a **concrete tunnel portal with a traffic light
->    showing red**; cars are queued at the stop line, **a kea parrot
->    standing on the bonnet of the first one**; inside the dark wet
->    tunnel a **white-and-green coach with headlights on is coming the
->    other way**, and one toy car is tucked into a side niche letting it
->    pass.
-> 6. **The descent:** the road comes out of the tunnel's west portal high
->    above the fiord — **the whole fiord and Mitre Peak spread out ahead**
->    — and drops through open forest past a **bare scar where a slab of
->    forest has slid off the rock**, a tangle of trunks and boulders
->    tumbling across the road toward the river.
-> 7. **Bowen Falls:** a second tall white waterfall beside the village; the
->    road **jumps a stone kicker over its white plunge pool**, one car in
+>    three crested penguins on the rocks; **Mitre Peak stands in the water
+>    right across from the wharf, filling the view**.
+> 2. **B — The ledge:** the road climbs a shelf carved into the wet grey
+>    wall, no railing, the sea 30 m below on the left; four dark fur seals on
+>    a rock in the water; red-flowering rata trees in the cracks; two **thin
+>    white rain-waterfalls pour across the road** in sheets of spray.
+> 3. **C — Stirling Falls [!] — the biggest feature:** a **45 m white
+>    waterfall drops from an overhang straight onto the road** and spreads
+>    across it into the sea in a cloud of mist; one car is punching
+>    **through the curtain**, crouched low on its suspension with spray
+>    exploding off it; another is creeping along a **narrow dry rock shelf
+>    behind the curtain**, between the water and the wall.
+> 4. **D — The Chasm:** the road dips into black-green beech forest — thin
+>    black trunks, tree ferns, boulders wrapped in thick moss — and crosses a
+>    **wooden plank bridge over a white river** boiling through potholes;
+>    two green parrots sit on a stump watching the cars. **The shortcut
+>    [!]:** an old overgrown forest road forks off to the inside of the
+>    valley and rejoins after the bridge; halfway along it a **rock chute
+>    above the track spills a surge of white water across the dirt road** —
+>    a hanging tarn emptying in pulses — with one car caught in the burst and
+>    another waiting at the fork, watching it.
+> 5. **E — Homer Tunnel [!] — the second biggest feature:** the road climbs
+>    through a scree slope with yellow-and-black chevron avalanche signs and
+>    snow poles to a **concrete tunnel portal with an avalanche gallery and a
+>    traffic light showing red**; nobody is stopped: inside the dark wet
+>    tunnel a **white-and-green coach with headlights on is coming the other
+>    way on the left lane**, and the toy cars squeeze past it on the right
+>    lane; a **kea parrot stands on the portal**.
+> 6. **F — The descent:** the road comes out of the tunnel's west portal and
+>    drops through open forest past a **bare scar where a slab of forest has
+>    slid off the rock**, a tangle of trunks and boulders tumbling across the
+>    road; another thin rain-waterfall crosses the road.
+> 7. **G — Bowen Falls:** a second tall white waterfall beside the village;
+>    the road **jumps a stone kicker over its white plunge pool**, one car in
 >    the air in the spray.
-> 8. **The shore and the airstrip:** a straight along the water past a
->    lodge and luggage containers, a **small white-and-red single-engine
->    plane touching down on a short airstrip parallel to the road**, its
->    shadow crossing the cars, and back to the wharf.
+> 8. **H — The shore and the airstrip:** a straight along the water past a
+>    lodge and luggage containers and an empty helipad, a **small
+>    white-and-red single-engine plane touching down on a short airstrip
+>    parallel to the road**, its shadow crossing the cars, and back to the
+>    wharf.
 >
 > **CARS:** 6–8 chunky toy cars in saturated colors (red, blue, yellow, a
 > white police car, a big red fire truck, a long yellow bus), spread around
-> the loop, one drifting on the wet asphalt by the wharf. Nothing else on
-> the diorama is saturated except the coach and the parrot's under-wings.
+> the loop, one drifting on the wet asphalt by the wharf. Nothing else on the
+> diorama is saturated except the coach and the parrot's under-wings.
+
+### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.1, paste-ready
+
+Se dă **după** dioramă, în aceeași conversație, ca să moștenească stilul; se
+atașează diorama generată. Planșa e sursa de siluete și culori pentru
+instanța Blender (`docs/asset_briefs/fiordland_kit.md`, de scris după ce
+planșa există — tiparul `machu_picchu_kit.md`). Rândurile urmează §5 cu
+verdictul trecerii de contracte (§5.6): **nu se cer piese pe care codul le face
+deja** (perdelele de apă, kickerul, tubul și portalurile tunelului, Mitre Peak,
+pânzele de ploaie) și nici cele **reutilizate** din alte kituri (foca, feriga
+arborescentă, bolovanii cu mușchi, chevronul, pontonul, tufele).
+
+> Using the exact same low-poly, flat-shaded, faceted style, palette and
+> lighting as the diorama above, create an **asset inventory sheet**: a
+> single tall image on a neutral light-grey background, **12 rows**, each
+> item isolated in 3/4 view with soft baked ambient occlusion, drawn at a
+> consistent scale within its row (a small 1 m toy-car silhouette in the
+> corner of each row for scale), and **its file name written in small
+> monospace letters under each item**. No text other than the file names.
+> Dark muted environment colors, pure white only for snow and spray, no
+> saturated color except where stated.
+> 1. **Waterfall rock** — `stirling_ledge` (wet grey granite overhang with a
+>    dry rock shelf under it and the rim of a spray pool, ~45 m tall — the
+>    water itself NOT included), `torrent_chute` (a granite chute with the
+>    lip of a hanging tarn, ~14 m tall, water NOT included).
+> 2. **Tunnel props** — `traffic_light_pole` (grey pole and lamp housing,
+>    lamps NOT included), `snow_pole` (orange-tipped snow marker pole),
+>    `guard_rock` (low rock bollard for the ledge), `road_sign_blank` (blank
+>    green road sign on a post).
+> 3. **Horizon** — `fiordland_horizon`: three flat-backed background pieces
+>    drawn side by side — `FarWall_A` (a 250 m strip of wet granite wall with
+>    black forest bands and two white threads), `SnowRidge_A` and
+>    `SnowRidge_B` (background ridges with snow caps), `CloudBank_A` (a low
+>    flat cloud slab).
+> 4. **Wharf** — `wharf` (stone wharf edge with bollards), `cafe_shed` (small
+>    dark timber café with a corrugated roof), `heli_pad` (empty round pad
+>    with an H), `lodge` (long dark timber lodge), `luggage_container` (grey
+>    cargo container).
+> 5. **Boats** — `cruise_boat` (white open-deck cruise boat, 14 m),
+>    `kayak_a`, `kayak_b` (red and yellow kayaks — saturated accent allowed),
+>    `driftwood`.
+> 6. **Plane and coach** — `bush_plane` (white-and-red high-wing
+>    single-engine plane, 8 m span), `coach_fiordland` (white-and-green tour
+>    coach, 12 m, headlights on).
+> 7. **Beech forest** — `beech_a`, `beech_b`, `beech_c` (silver beech 8–14 m,
+>    thin black trunk, small dark crown — NOT broccoli), `beech_dead`,
+>    `rata_tree` (small tree with red flowers — accent).
+> 8. **Forest floor** — `fern_clump_a`, `fern_clump_b`, `tussock_clump`,
+>    `stump` (mossy stump for the parrots), `chasm_rock` (river potholes,
+>    marmite rock).
+> 9. **Chasm bridge** — `chasm_bridge_rail` (timber handrails and side beams
+>    of a 40 m plank bridge, wet dark wood — the deck itself NOT included).
+> 10. **Avalanche** — `tree_avalanche` (nine separate chunks in four shapes:
+>     tangles of fallen black trunks, boulders and moss, 2–4 m each),
+>     `scree_slab` (loose grey scree slab).
+> 11. **Animals** — `kea` (olive-green parrot, orange under-wings, two poses:
+>     wings closed / wings open), `penguin_tawaki` (crested penguin,
+>     standing).
+> 12. **Scale row** — the toy cars themselves are NOT needed; draw one
+>     `reference_car` silhouette 4 m long beside a `beech_a` and the
+>     `stirling_ledge` so the relative scale of every row is readable.

@@ -26,6 +26,10 @@ var player: Car
 var cars: Array[Car] = []
 var camera: ChaseCamera
 var hud: RaceHUD
+## „Parbrizul ud" (Fiordland, brief pasul 4): picaturi pe ecran cand jucatorul
+## e in perdeaua Stirling sau in ploaie. Null pe piste fara niciun
+## `WaterfallHazard`/`RainCycle` — vezi `_setup_windshield_wipers`.
+var wipers: WindshieldWipers
 
 var _progress: Array[Dictionary] = []
 var _countdown_left: float = 3.6
@@ -76,6 +80,7 @@ func _ready() -> void:
 	hud.results_primary.connect(_on_results_primary)
 	hud.setup_minimap(track, cars)
 	hud.show_countdown("READY?")
+	_setup_windshield_wipers()
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
 		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5)))
 	player.landed.connect(func(_c: Car, fall: float) -> void:
@@ -506,6 +511,38 @@ func _on_respawn_requested() -> void:
 func _fit_camera_to_player() -> void:
 	if player.data != null:
 		camera.apply_settings_for(player.data.body_length)
+
+
+## Instantiaza „parbrizul ud" (brief pasul 4) si il leaga la starea reala a
+## pistei, prin doua Callable-uri mici — nu prin referinte directe: pe o
+## pista FARA niciun `WaterfallHazard`/`RainCycle` (toate, in afara de
+## Fiordland), cele doua cautari nu gasesc nimic si funcțiile intorc
+## constant `false`/`0.0` — overlay-ul ramane instantiat dar nu are niciodata
+## motiv sa arate o picatura, exact contractul "0 noduri vizibile" de pe
+## uscat.
+##
+## Cascada reala (nu o "cascada de ploaie" decorativa) se distinge prin
+## `force_accel > 0.0` — cele 5 `RainFall*` de pe Fiordland au `force_accel =
+## 0` (teatru, brief §3), deci ele NU trebuie sa declanseze rafala de 20-30.
+func _setup_windshield_wipers() -> void:
+	wipers = WindshieldWipers.new()
+	add_child(wipers)
+	var curtain: WaterfallHazard = null
+	for node in track.find_children("*", "WaterfallHazard", true, false):
+		var wf := node as WaterfallHazard
+		if wf.force_accel > 0.0:
+			curtain = wf
+			break
+	var rain: RainCycle = null
+	var cycles := get_tree().get_nodes_in_group(&"rain_cycle")
+	if not cycles.is_empty():
+		rain = cycles[0] as RainCycle
+	var in_curtain_fn := (func() -> bool:
+		return curtain != null and is_instance_valid(curtain) \
+			and curtain.cars_inside().has(player))
+	var rain_factor_fn := (func() -> float:
+		return rain.rain_factor if rain != null and is_instance_valid(rain) else 0.0)
+	wipers.configure(in_curtain_fn, rain_factor_fn)
 
 func _update_hud() -> void:
 	hud.set_respawn_enabled(state == State.RUNNING and player.can_respawn())

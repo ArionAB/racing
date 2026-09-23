@@ -1179,6 +1179,31 @@ static func themes() -> Dictionary:
 			"props": "forest",
 			"hazard_model": "",
 			"dust_color": Palette.color(Palette.SAND_SHADOW),
+			# Scurtatura Chasm (nod TrackBranch, brief §3): "drumul vechi din
+			# padure" e pamant batatorit, nu bancul de nisip implicit
+			# (`theme_flag("branch_surface", "sand")`). Fara cheia asta,
+			# `route.surface` cadea pe "sand", iar `_branch_carve_points()`
+			# exclude explicit "sand" din lista de sapat — banda ramanea doar
+			# RIDICATA (`_lift_branches`), niciodata protejata de garda de
+			# plafon din `_carve_ravines` (bad797dd). Rezultat masurat: rapa
+			# "raul D" (custom_ravines index 1) sapa liber pana la peretele de
+			# canion la 2-3 m dincolo de banda, panta transversala peste 50%,
+			# exact unde AI-ul derapeaza la bifurcatie — [blocaj] repetat,
+			# atinge TerrainBody. Cu "dirt_road" banda intra in `_carve` si
+			# garda de plafon (branch_floor / branch_room) se activeaza.
+			"branch_surface": "dirt_road",
+			# Grip-ul ud INCERCAT si REVERTIT (23 sep): "wet_grip": 2.4 in
+			# incercarea de a face scurtatura uda sa piarda/repuna la >=2/4
+			# masini (sonda risc/recompensa). N-a schimbat nimic: sonda
+			# seteaza `track.rain_wet = true` pentru testul "ud", iar
+			# `is_wet_at()` intoarce true PE TOT traseul cand `rain_wet` e
+			# pornit (comportamentul de ploaie din brief: "tot drumul
+			# deschis e ud") — deci bucla SI banda devin ude deopotriva, iar
+			# `wet_grip` (o singura cheie de tema, fara hook per-banda) le
+			# incetineste la fel pe amandoua. Avantajul relativ al benzii nu
+			# se schimba, doar timpii absoluti cresc. Un grip ud SPECIFIC
+			# benzii ar cere un mecanism nou (citit din `route_is_wet` in
+			# `car.gd`, nu doar din tema) — exclus explicit din cerinta.
 			# Marea neagra-verde a fiordului (brief §4: SEA_DEEP, shader v12
 			# cu reflexii palide cenusii — memoria apa-stilizata-de-noapte,
 			# saturatia jos, variatia in reflexii).
@@ -3825,6 +3850,7 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 			var spec := {
 				"points": mid,
 				"wet": br.wet,
+				"rain_wet": br.rain_wet,
 				"label": br.label if br.label != "" else br.name,
 				# Suprafata si contragreutatea de viteza, cu aceleasi chei pe
 				# care le poate scrie si o pista din cod in `_branch_specs()`.
@@ -8224,6 +8250,7 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.entry_frac = frac_at(i_entry)
 	route.exit_frac = frac_at(i_exit)
 	route.wet = bool(spec.get("wet", false))
+	route.rain_sensitive = bool(spec.get("rain_wet", false))
 	route.label = String(spec.get("label", "scurtatura"))
 	# Suprafata: ce zice spec-ul, altfel ce zice tema, altfel nisipul de pana
 	# acum — deci o pista care n-a auzit de retete ramane cum era.
@@ -13412,9 +13439,13 @@ func route_at(route: int) -> TrackRoute:
 	return routes[0] if not routes.is_empty() else null
 
 ## Banda asta e uda? Cat timp masina e pe ea, grip-ul lateral scade.
+##
+## Permanent (`r.wet`) SAU doar in ploaie (`r.rain_sensitive`, citit din
+## flag-ul global `rain_wet` scris de RainCycle) — vezi TrackBranch.rain_wet
+## pentru o banda a carei suprafata reala se schimba cu vremea.
 func route_is_wet(route: int) -> bool:
 	var r := route_at(route)
-	return r != null and r.wet
+	return r != null and (r.wet or (r.rain_sensitive and rain_wet))
 
 
 ## Plafonul de viteza al benzii, ca fractie (1 = neatins). Ruta 0 = 1.
